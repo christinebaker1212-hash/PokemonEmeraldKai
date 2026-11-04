@@ -29,6 +29,7 @@ typedef struct {
     uint32_t beaten;                   // duelists beaten (bit per MtgDuelist)
     uint8_t owned[MTG_COLLECTION_CARDS];
     MtgSavedDeck decks[MTG_DECKS];
+    int16_t ace[MTG_DECKS];            // each deck's ACE CARD (a card id), -1: the game picks one (Mtg_DeckAce)
 } MtgCollection;
 
 void Mtg_CollectionInit(MtgCollection *c, uint32_t seed);
@@ -52,6 +53,10 @@ void Mtg_DeckAdd(MtgSavedDeck *d, int card);
 void Mtg_DeckRemove(MtgSavedDeck *d, int card);
 void Mtg_DeckSort(MtgSavedDeck *d);                             // lands last, then by mana value and name
 uint8_t Mtg_DeckColors(const MtgSavedDeck *d);
+// The card that stands for a deck: its ACE CARD if chosen and still in it, else its rarest, then costliest card (not a
+// basic land); -1 for an empty deck
+int Mtg_DeckAce(const MtgCollection *c, int deck);
+int Mtg_AutoAce(const uint16_t *cards, int count);
 void Mtg_DeckToDuel(const MtgSavedDeck *d, MtgDeck *out);
 
 // ---- recipes: the starters and the duelists' decks (src/mtg/mtg_decks.c)

@@ -237,7 +237,7 @@ static void ToSide(int right)
     Screen(T_CLOSED);
     Tt_ForgetTextures();
     C()->flags &= ~TT_FLAG_CASE_SIDE;
-    Tcg_OpenCaseGame(right ? (Mtg_Unlocked() ? KIT_GAME_MAGIC : KIT_GAME_POKEMON) : KIT_GAME_YUGIOH, callback, script);
+    Tcg_OpenCaseGame(right ? KIT_GAME_POKEMON : (Mtg_Unlocked() ? KIT_GAME_MAGIC : KIT_GAME_YUGIOH), callback, script);
 }
 
 /* ------------------------------------------------------------------ */

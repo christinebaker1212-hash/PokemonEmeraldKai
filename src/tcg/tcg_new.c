@@ -1,4 +1,4 @@
-/* Moemon Kai: NEW on cards in the BINDER of all three card games. "<save>.cardnew" keeps, per game, how many copies of
+/* Moemon Kai: NEW on cards in the BINDER of every card game. "<save>.cardnew" keeps, per game, how many copies of
  * each card the BINDER has shown (the cursor on it); a card owned more times than that is NEW (got from a pack, a prize,
  * a trade, a duel won: nothing needs to tell this file). The first time (no file, or another game begun on the save)
  * everything owned counts as seen. */
@@ -14,6 +14,8 @@
 #include "ygo/collection.h"
 #include "tt/card_ids.h"
 #include "tt/collection.h"
+#include "mtg/collection.h"
+#include "mtg/integration.h"
 #include "tcg_new.h"
 
 extern char gPlatformSavePath[512];
@@ -21,9 +23,11 @@ struct YgoCollection *Ygo_GetCollection(void);
 struct TtCollection *Tt_GetCollection(void);
 
 #define NEW_MAGIC 0x57454E43   /* "CNEW" */
-static const unsigned sCount[CARDNEW_GAMES] = {TCG_CARD_COUNT + 1, YGO_CARD_COUNT + 1, TT_CARD_MAX + 1};
+/* (MAGIC's cards by their place in the pack, MTG_COLLECTION_CARDS of them; a file from before MAGIC had three games) */
+static const unsigned sCount[CARDNEW_GAMES] = {TCG_CARD_COUNT + 1, YGO_CARD_COUNT + 1, TT_CARD_MAX + 1, MTG_COLLECTION_CARDS};
 static uint8_t sSeenPokemon[TCG_CARD_COUNT + 1], sSeenYugioh[YGO_CARD_COUNT + 1], sSeenTriad[TT_CARD_MAX + 1];
-static uint8_t *const sSeen[CARDNEW_GAMES] = {sSeenPokemon, sSeenYugioh, sSeenTriad};
+static uint8_t sSeenMagic[MTG_COLLECTION_CARDS];
+static uint8_t *const sSeen[CARDNEW_GAMES] = {sSeenPokemon, sSeenYugioh, sSeenTriad, sSeenMagic};
 static int sLoaded;
 static uint32_t sOwner;
 
@@ -33,6 +37,7 @@ static unsigned Owned(unsigned game, unsigned card)
     {
     case CARDNEW_POKEMON: return Tcg_GetCollection()->owned[card];
     case CARDNEW_YUGIOH:  return Ygo_GetCollection()->owned[card];
+    case CARDNEW_MAGIC:   return Mtg_GetCollection()->owned[card];
     default:              return Tt_GetCollection()->owned[card];
     }
 }
@@ -79,7 +84,16 @@ static void Load(void)
             uint32_t n = 0;
             memset(sSeen[g], 0, sCount[g]);
             if (fread(&n, 4, 1, f) != 1)
+            {
+                /* (a game the file doesn't have yet: what's owned now counts as seen) */
+                for (; g < CARDNEW_GAMES; g++)
+                    for (k = 0; k < sCount[g]; k++)
+                    {
+                        unsigned o = Owned(g, k);
+                        sSeen[g][k] = o > 255 ? 255 : (uint8_t)o;
+                    }
                 break;
+            }
             for (k = 0; k < n; k++)
             {
                 int b = fgetc(f);

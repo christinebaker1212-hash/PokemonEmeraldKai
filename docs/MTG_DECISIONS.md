@@ -65,6 +65,14 @@ Built from 2026-11-04: docs/MTG_HANDOFF.md (status and next steps), docs/MTG_SCO
   reached through the clerk (1F's own stairs are behind the counter); its stairs come up by the front door.
 - A win brings a booster of 8 (5 commons, 2 uncommons, an uncommon or one in four a rare); a loss costs nothing.
 - The table is 240x160 like the other card games' for now; the proposed 480x320 stays open.
+
+## The user's answers on the look (2026-11-04, 1.96.0)
+- Every MAGIC screen matches the other card games' in its tiny details (layout, colors, wording, keys).
+- The table plays like the POKeMON card table's: its mat, hand tray and field; no POKe BALL-like mark in the middle.
+- The opponent's cards face them (turned half round), as on the POKeMON and YU-GI-OH! tables.
+- TRIPLE TRIAD is always last on the CARD CASE's L / R round: POKeMON, YU-GI-OH!, MAGIC, TRIPLE TRIAD.
+- Card art: each card's earliest old-frame printing from 4th Edition to Scourge (the pool's years), in the game's own
+  frame; the artist credited in the card view.
 - The table passes for the player when nothing else can be done, when their own spell is on top, and outside their
   main phases, the blocks and the opponent's end step; L held stops at every chance.
 

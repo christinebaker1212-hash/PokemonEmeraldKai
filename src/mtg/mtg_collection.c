@@ -1,14 +1,14 @@
 // Moemon Kai: a save's Magic cards and decks, saved by each card's name hash (a pack rebuilt with more cards moves
 // the ids, never the names), the starter, boosters. File "<save>.mtg" (little-endian):
-//   "MTGC", u32 version (1), u32 owner, u32 rng, u8 optedIn, flags, activeDeck, starter, u16 wins, losses,
+//   "MTGC", u32 version (2; 1 is read too), u32 owner, u32 rng, u8 optedIn, flags, activeDeck, starter, u16 wins, losses,
 //   u32 beaten, u32 owned count, then {u32 hash, u8 count} each, then MTG_DECKS decks {char name[16], u16 count,
-//   then count u32 hashes}.
+//   then count u32 hashes}; from version 2, MTG_DECKS u32s: each deck's ACE CARD by its hash (0: none chosen).
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "mtg/collection.h"
 
-#define MTGC_VERSION 1
+#define MTGC_VERSION 2
 
 uint32_t Mtg_Rand(uint32_t *rng)
 {
@@ -79,8 +79,11 @@ int Mtg_CanUse(int card)
 
 void Mtg_CollectionInit(MtgCollection *c, uint32_t seed)
 {
+    int k;
     memset(c, 0, sizeof(*c));
     c->rng = seed ? seed : 1;
+    for (k = 0; k < MTG_DECKS; k++)
+        c->ace[k] = -1;
 }
 
 // ---- decks
@@ -276,6 +279,8 @@ uint32_t Mtg_CollectionWrite(const MtgCollection *c, uint8_t *out, uint32_t cap)
         for (i = 0; i < d->count; i++)
             W32(&w, Mtg_NameHash(Mtg_Card(d->cards[i])->name));
     }
+    for (k = 0; k < MTG_DECKS; k++)
+        W32(&w, c->ace[k] >= 0 && c->ace[k] < Mtg_DbCount() ? Mtg_NameHash(Mtg_Card(c->ace[k])->name) : 0);
     return w.ok ? w.n : 0;
 }
 
@@ -295,12 +300,13 @@ static uint32_t R32(Reader *r) { uint32_t a = R16(r); return a | R16(r) << 16; }
 int Mtg_CollectionRead(MtgCollection *c, const uint8_t *in, uint32_t size)
 {
     Reader r = {in, 0, size, 1};
-    uint32_t owned, i;
+    uint32_t owned, i, version;
     int k;
     if (size < 8 || memcmp(in, "MTGC", 4) != 0)
         return 0;
     r.n = 4;
-    if (R32(&r) != MTGC_VERSION)
+    version = R32(&r);
+    if (version < 1 || version > MTGC_VERSION)
         return 0;
     Mtg_CollectionInit(c, 1);
     c->owner = R32(&r);
@@ -329,6 +335,11 @@ int Mtg_CollectionRead(MtgCollection *c, const uint8_t *in, uint32_t size)
                 Mtg_DeckAdd(d, id);
         }
     }
+    if (version >= 2)
+        for (k = 0; k < MTG_DECKS && r.ok; k++) {
+            uint32_t h = R32(&r);
+            c->ace[k] = (int16_t)(h ? Mtg_CardByHash(h) : -1);
+        }
     if (c->activeDeck >= MTG_DECKS)
         c->activeDeck = 0;
     return r.ok;
@@ -336,7 +347,7 @@ int Mtg_CollectionRead(MtgCollection *c, const uint8_t *in, uint32_t size)
 
 int Mtg_CollectionSave(const MtgCollection *c, const char *path)
 {
-    uint32_t cap = 64 + MTG_COLLECTION_CARDS * 5 + MTG_DECKS * (MTG_DECK_NAME + 2 + MTG_DECK_MAX * 4), n;
+    uint32_t cap = 64 + MTG_COLLECTION_CARDS * 5 + MTG_DECKS * (MTG_DECK_NAME + 2 + MTG_DECK_MAX * 4 + 4), n;
     uint8_t *buf = malloc(cap);
     char tmp[600];
     FILE *f;
@@ -373,4 +384,27 @@ int Mtg_CollectionLoad(MtgCollection *c, const char *path)
     ok = ok && Mtg_CollectionRead(c, buf, (uint32_t)size);
     free(buf);
     return ok;
+}
+
+int Mtg_AutoAce(const uint16_t *cards, int count)
+{
+    int best = -1, i, score = -1;
+    for (i = 0; i < count; i++) {
+        const MtgCardDef *c = Mtg_Card(cards[i]);
+        int s;
+        if (Mtg_IsBasicLand(cards[i]))
+            continue;
+        s = c->rarity * 100 + Mtg_ManaCostTotal(&c->cost) * 10 + ((c->types & MTG_T_CREATURE) ? 5 : 0);
+        if (s > score)
+            score = s, best = cards[i];
+    }
+    return best >= 0 ? best : count ? cards[0] : -1;
+}
+
+int Mtg_DeckAce(const MtgCollection *c, int deck)
+{
+    const MtgSavedDeck *d = &c->decks[deck];
+    if (c->ace[deck] >= 0 && Mtg_DeckCopies(d, c->ace[deck]))
+        return c->ace[deck];
+    return Mtg_AutoAce(d->cards, d->count);
 }

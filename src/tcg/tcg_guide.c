@@ -1,4 +1,4 @@
-/* HOW TO PLAY: a short guide to each of the CARD CASE's three games (SELECT on a game's first screen).
+/* HOW TO PLAY: a short guide to each of the CARD CASE's games (SELECT on a game's first screen).
  *
  * Each page is a title, a few terse lines along the bottom strip, and a stage that acts the rule out with the games'
  * own cards (G_Card, Ygo_DrawCard, Tt_DrawCard) on a loop. LEFT / RIGHT (or A) turn the pages, B closes it. The
@@ -21,6 +21,9 @@
 #include "tt/tt.h"
 #include "../tt/tt_gfx.h"
 #include "mp.h"
+#include "mtg/mtg.h"
+#include "mtg/integration.h"
+#include "../mtg/mtg_gfx.h"
 
 /* The buttons (as the card screens number them: the GBA's) */
 enum
@@ -86,11 +89,13 @@ static unsigned Show(int t, int a, int b)
 /* ------------------------------------------------------------------ */
 static unsigned Felt(void)
 {
-    return G.game == KIT_GAME_YUGIOH ? 0x283464 : G.game == KIT_GAME_TRIAD ? 0x5a3c70 : 0x2f7a4c;
+    return G.game == KIT_GAME_YUGIOH ? 0x283464 : G.game == KIT_GAME_TRIAD ? 0x5a3c70 : G.game == KIT_GAME_MAGIC ? 0x5a3c26
+                                                                                                    : 0x2f7a4c;
 }
 static unsigned Accent(void)
 {
-    return G.game == KIT_GAME_YUGIOH ? 0x8070e8 : G.game == KIT_GAME_TRIAD ? 0xd8a838 : 0xe85048;
+    return G.game == KIT_GAME_YUGIOH ? 0x8070e8 : G.game == KIT_GAME_TRIAD ? 0xd8a838 : G.game == KIT_GAME_MAGIC ? 0xc88a38
+                                                                                                    : 0xe85048;
 }
 static void Stage(void)
 {
@@ -1169,6 +1174,194 @@ static const struct Page sTriad[] = {
     {"CONTROLS", "Choose a card from your hand, then the square to place it on.", TriadControls, 250},
 };
 
+
+/* ------------------------------------------------------------------ */
+/* MAGIC                                                                */
+/* ------------------------------------------------------------------ */
+#define MW 30
+#define MH 42
+static int MId(const char *name) { return Mtg_CardByName(name); }
+static void MCard(const char *name, float x, float y, float w, float h, double angle, unsigned alpha, unsigned flash)
+{
+    Shadow(x, y, w, h, angle, alpha);
+    MtgGfx_DrawCard(name ? MId(name) : MTG_GFX_BACK, x, y, w, h, angle, alpha, flash);
+}
+/* A creature's power / toughness under it, as the table shows them */
+static void MPt(float cx, float y, const char *pt, unsigned text)
+{
+    int w = 26;
+    G_RoundFill((int)cx - w / 2, (int)y, w, 9, 0x282828, 255);
+    G_FillA((int)cx - w / 2 + 2, (int)y + 2, w - 4, 5, 0x14203a, 255);
+    G_Digits((int)cx + w / 2 - 3 - G_DigitsWidth(pt, 0, 1), (int)y + 2, pt, 0, 1, text, 255);
+}
+/* A mana dot rising off a land as it's tapped */
+static void Mana(float x, float y, int kind, float k)
+{
+    if (k <= 0 || k >= 1)
+        return;
+    G_RoundFill((int)x - 3, (int)(y - k * 14) - 3, 7, 7, 0x202020, (unsigned)(255 * (1 - k)));
+    G_RoundFill((int)x - 2, (int)(y - k * 14) - 2, 5, 5, MtgGfx_ManaColor(kind), (unsigned)(255 * (1 - k)));
+}
+static void MtgGoal(int t)
+{
+    int hits = t < 40 ? 0 : t < 100 ? 1 : t < 160 ? 2 : 3, life = 20 - (hits == 3 ? 20 : hits * 3);
+    int h;
+    Lp(10, 24, "YOU", 20, 0x80c8ff);
+    Lp(156, 24, "RIVAL", life, 0xff9090);
+    for (h = 0; h < 3; h++)
+    {
+        float k = Seg(t, 30 + h * 60, 44 + h * 60);
+        if (t >= 30 + h * 60 && k < 1)
+            MCard("Lightning Bolt", Lerp(40, 176, InOut(k)), Lerp(58, 34, InOut(k)), 22, 31, 0, 255, 0);
+        Burst(190, 40, Seg(t, 44 + h * 60, 64 + h * 60), 0xffd080);
+    }
+    if (t < 30 || (t >= 44 && t < 90) || (t >= 104 && t < 150))
+        MCard("Lightning Bolt", 40, 58, 22, 31, 0, 255, 0);
+    if (t >= 40 && t < 160)
+        Tag(190, 64, "-3", 0xc84040, Show(t, 40 + (hits - 1) * 60, 40 + (hits - 1) * 60 + 40));
+    if (t > 170)
+        G_Banner(CX, 92, "0 LIFE: YOU WIN!", 0x283848, Out(Seg(t, 170, 186)), Show(t, 170, 280));
+}
+static void MtgLands(int t)
+{
+    float drop = Out(Seg(t, 10, 26)), tap = InOut(Seg(t, 60, 74)), untap = InOut(Seg(t, 170, 184));
+    float angle = 90 * (tap - untap);
+    Zone(40, 46, 160, 50, "");
+    MCard("Mountain", 60, Lerp(-46, 50, drop), MW, MH, angle, 255, t >= 26 && t < 32 ? 200 : 0);
+    MCard("Forest", 104, 50, MW, MH, 0, 255, 0);
+    Tag(76, 30, "ONE LAND A TURN", 0x806020, Show(t, 14, 58));
+    Mana(75, 62, MTG_R, Seg(t, 74, 100));
+    Tag(84, 30, "TAP IT: ONE RED MANA", 0xc84040, Show(t, 66, 166));
+    Tag(84, 30, "IT UNTAPS ON YOUR TURN", 0x5848c8, Show(t, 170, 250));
+    G_TextAlign(176, 60, TA_CENTER, 0xf0e0c8, G_NO_SHADOW, "Each basic land", TF_NARROW);
+    G_TextAlign(176, 70, TA_CENTER, 0xf0e0c8, G_NO_SHADOW, "makes its color.", TF_NARROW);
+}
+static void MtgCasting(int t)
+{
+    int i;
+    float tap1 = InOut(Seg(t, 50, 62)), tap2 = InOut(Seg(t, 66, 78)), tap3 = InOut(Seg(t, 82, 94));
+    float cast = InOut(Seg(t, 104, 124));
+    MCard("Mountain", 20, 50, MW, MH, 90 * tap1, 255, 0);
+    MCard("Mountain", 56, 50, MW, MH, 90 * tap2, 255, 0);
+    MCard("Mountain", 92, 50, MW, MH, 90 * tap3, 255, 0);
+    Mana(35, 62, MTG_R, Seg(t, 62, 86));
+    Mana(71, 62, MTG_R, Seg(t, 78, 102));
+    Mana(107, 62, MTG_R, Seg(t, 94, 118));
+    MCard("Gray Ogre", Lerp(176, 150, cast), Lerp(30, 46, cast), Lerp(44, MW, cast), Lerp(61, MH, cast), 0, 255,
+          t >= 124 && t < 130 ? 220 : 0);
+    if (t >= 124)
+        MPt(165, 89, "2/2", 0xc8ecff);
+    Tag(176, 26, "COST: 2 + RED", 0x806020, Show(t, 10, 100));
+    for (i = 0; i < 3; i++)
+        (void)i;
+    Tag(CX, 102, "TAP LANDS TO PAY, THEN CAST IT", 0xc84040, Show(t, 50, 200));
+}
+static void MtgCreatures(int t)
+{
+    int sick = t < 120;
+    MCard("Grizzly Bears", 60, 32, MW, MH, 0, 255, 0);
+    MPt(75, 75, "2/2", 0xc8ecff);
+    if (sick)
+        G_FillA(60, 32, MW, MH, 0xffffff, 60);
+    Tag(150, 40, "POWER / TOUGHNESS", 0x5848c8, 255);
+    G_TextAlign(150, 52, TA_CENTER, 0xf0e0c8, G_NO_SHADOW, "the damage it deals /", TF_NARROW);
+    G_TextAlign(150, 62, TA_CENTER, 0xf0e0c8, G_NO_SHADOW, "the damage it takes", TF_NARROW);
+    Tag(CX, 98, sick ? "JUST ARRIVED: IT CAN'T ATTACK YET" : "NEXT TURN: READY TO ATTACK", sick ? 0x806060 : 0xc84040,
+        sick ? Show(t, 0, 118) : Show(t, 120, 238));
+}
+static void MtgCombat(int t)
+{
+    int scene = t / 120 % 2, u = t % 120;
+    float go = InOut(Seg(u, 10, 30)), tap = 90 * InOut(Seg(u, 6, 16));
+    if (!scene)
+    {
+        MCard("Hill Giant", Lerp(40, 100, go), Lerp(56, 30, go), MW, MH, tap, 255, 0);
+        Lp(150, 24, "RIVAL", u < 40 ? 20 : 17, 0xff9090);
+        Burst(185, 40, Seg(u, 34, 54), 0xffd080);
+        Tag(CX, 100, "NOT BLOCKED: 3 DAMAGE TO THE PLAYER", 0xc84040, Show(u, 36, 118));
+    }
+    else
+    {
+        float gone = Seg(u, 50, 76);
+        MCard("Hill Giant", Lerp(40, 80, go), Lerp(56, 46, go), MW, MH, tap, 255, 0);
+        MPt(Lerp(55, 95, go), Lerp(99, 89, go), "3/3", 0xc8ecff);
+        if (gone < 1)
+            MCard("Grizzly Bears", 140, 32 + gone * 10, MW, MH, 0, (unsigned)(255 * (1 - gone)), u >= 34 && u < 44 ? 200 : 0);
+        Shatter(140, 32, MW, MH, gone, 0xffd080);
+        if (u < 50)
+            MPt(155, 75, "2/2", 0xc8ecff);
+        Tag(CX, 100, "BLOCKED: THEY FIGHT, 3 BEATS 2", 0x5848c8, Show(u, 30, 118));
+    }
+}
+static void MtgInstants(int t)
+{
+    float shock = InOut(Seg(t, 20, 40)), counter = InOut(Seg(t, 70, 90));
+    float out2 = Seg(t, 120, 136), out1 = Seg(t, 150, 166);
+    Zone(96, 26, 48, 58, "THE STACK");
+    MCard("Grizzly Bears", 190, 34, MW, MH, 0, 255, 0);
+    if (out2 < 1)
+        MCard("Shock", Lerp(20, 104, shock), Lerp(60, 34, shock), MW, MH, 0, (unsigned)(255 * (1 - out1)), 0);
+    if (t >= 70 && out2 < 1)
+        MCard("Counterspell", Lerp(210, 110, counter), Lerp(90, 40, counter), MW, MH, 0, (unsigned)(255 * (1 - out2)),
+              t >= 120 ? 220 : 0);
+    Shatter(104, 34, MW, MH, out1, 0xd0e0ff);
+    Tag(54, 30, "SHOCK THE BEARS", 0xc84040, Show(t, 22, 68));
+    Tag(186, 92, "AN ANSWER!", 0x3878f0, Show(t, 72, 118));
+    Tag(CX, 102, "THE LAST ONE CAST GOES FIRST", 0x806020, Show(t, 118, 200));
+}
+static void MtgWinning(int t)
+{
+    static const char *const pack[8] = {"Hill Giant", "Shock", "Grizzly Bears", "Giant Growth", "Storm Crow",
+                                        "Unsummon", "Bog Imp", "Serra Angel"};
+    int i;
+    for (i = 0; i < 8; i++)
+    {
+        int s = 20 + i * 8;
+        float k = Out(Seg(t, s, s + 16));
+        if (t < s)
+            continue;
+        MCard(t < s + 40 ? NULL : pack[i], Lerp(105, 14 + i * 27, k), Lerp(40, 40, k), 26, 36, 0, 255, 0);
+    }
+    Tag(CX, 92, "A WIN: A BOOSTER PACK, EIGHT CARDS", 0x806020, Show(t, 10, 300));
+}
+static void MtgControls(int t)
+{
+    static const char *const lines[] = {"{DPAD} MOVE", "{A} PLAY / USE A CARD", "{START} PASS", "{B} TURN MENU",
+                                        "{L} HOLD: STOP AT EVERY STEP", "{INSPECT} LOOK AT A CARD"};
+    int spot = t / 50 % 3;
+    MCard("Mountain", 18, 30, 26, 36, 0, 255, 0);
+    MCard("Shock", 50, 30, 26, 36, 0, 255, 0);
+    MCard(NULL, 82, 30, 26, 36, 0, 255, 0);
+    G_Focus(18 + spot * 32, 30, 26, 36, G_FOCUS_TARGET, G.frame);
+    Controls(118, 26, lines, 6, t / 50 % 6);
+}
+static const struct Page sMagic[] = {
+    {"THE GOAL", "Both players start with 20 life. Bring your opponent's to 0, or win when they have to draw from an "
+                 "empty library.",
+     MtgGoal, 280},
+    {"LANDS", "Play one land a turn. Tap a land (turn it sideways) for one mana of its color. It untaps at the start of "
+              "your turn.",
+     MtgLands, 260},
+    {"CASTING SPELLS", "A card's cost is in its corner: a colored dot for each mana of that color, a gray one for any "
+                       "mana. Tap lands to pay it.",
+     MtgCasting, 220},
+    {"CREATURES", "A creature has power (the damage it deals) and toughness (the damage it can take). It can't attack "
+                  "the turn it arrives.",
+     MtgCreatures, 240},
+    {"ATTACKING", "Attackers tap and go at the other player, who may block with their creatures. Blocked, they fight; "
+                  "unblocked, the player takes the damage.",
+     MtgCombat, 240},
+    {"INSTANTS", "Instants can be cast any time you could act, even in your opponent's turn. The last spell cast "
+                 "resolves first.",
+     MtgInstants, 220},
+    {"WINNING CARDS", "Win a duel for a booster pack: eight cards for your BINDER. A deck holds 40 cards or more, four "
+                      "of a card (but basic lands).",
+     MtgWinning, 320},
+    {"CONTROLS", "Choose a card, then what to do with it. The table passes for you when nothing can be done; hold L to "
+                 "stop at every step.",
+     MtgControls, 300},
+};
+
 /* ------------------------------------------------------------------ */
 /* The guide                                                            */
 /* ------------------------------------------------------------------ */
@@ -1179,6 +1372,8 @@ static const struct Page *Pages(unsigned game, int *count)
         return *count = (int)(sizeof(sYugioh) / sizeof(sYugioh[0])), sYugioh;
     if (game == KIT_GAME_TRIAD)
         return *count = (int)(sizeof(sTriad) / sizeof(sTriad[0])), sTriad;
+    if (game == KIT_GAME_MAGIC)
+        return *count = (int)(sizeof(sMagic) / sizeof(sMagic[0])), sMagic;
     return *count = (int)(sizeof(sPokemon) / sizeof(sPokemon[0])), sPokemon;
 }
 int TcgGuide_Pages(unsigned game)
@@ -1194,6 +1389,8 @@ void TcgGuide_Open(unsigned game)
     G.game = game;
     if (game == KIT_GAME_TRIAD)
         FindCards();
+    if (game == KIT_GAME_MAGIC)
+        Mtg_EnsureDb();
     PlaySE(SE_RG_CARD_OPEN);
     printf("[guide] HOW TO PLAY opened (game %u, %d pages)\n", game, TcgGuide_Pages(game));
     {
@@ -1260,7 +1457,8 @@ void TcgGuide_Step(unsigned pressed, unsigned keys)
 }
 static const char *GameName(void)
 {
-    return G.game == KIT_GAME_YUGIOH ? "YU-GI-OH!" : G.game == KIT_GAME_TRIAD ? "TRIPLE TRIAD" : "POKeMON CARDS";
+    return G.game == KIT_GAME_YUGIOH ? "YU-GI-OH!" : G.game == KIT_GAME_TRIAD ? "TRIPLE TRIAD"
+         : G.game == KIT_GAME_MAGIC ? "MAGIC" : "POKeMON CARDS";
 }
 void TcgGuide_Draw(void)
 {
@@ -1273,6 +1471,8 @@ void TcgGuide_Draw(void)
         Ygo_SetArtMode(gMpConfig.cardArt);
         Ygo_SetBackMode(gMpConfig.cardBack);
     }
+    if (G.game == KIT_GAME_MAGIC)
+        MtgGfx_SetModes(gMpConfig.cardArt, gMpConfig.cardBack);
     TcgUi_Background();
     /* the title: the game on a tab in its color, the page's name beside it, where you are on the right */
     G_FillA(0, 0, 240, 18, 0x203040, 235);

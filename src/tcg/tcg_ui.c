@@ -1243,14 +1243,21 @@ void TcgUi_CaseTabs(unsigned game, unsigned color)
     static const char *const shortNames[] = {"POKe", "YGO", "TRIAD", "MTG"};
     static const char *const shortNames4[] = {"POKe", "YGO", "TT", "MTG"};
     unsigned light = G_Mix(color, 0xffffff, 0.45f), dark = G_Mix(color, 0x000000, 0.35f);
-    int x = 2, i, tabs = Mtg_Unlocked() ? 4 : 3, off = tabs == 4 ? 19 : 27;
+    /* the tabs in the order L / R go round them: TRIPLE TRIAD always last (the user, 2026-11-04) */
+    static const unsigned order4[] = {KIT_GAME_POKEMON, KIT_GAME_YUGIOH, KIT_GAME_MAGIC, KIT_GAME_TRIAD};
+    static const unsigned order3[] = {KIT_GAME_POKEMON, KIT_GAME_YUGIOH, KIT_GAME_TRIAD};
+    int x = 2, k, i, tabs = Mtg_Unlocked() ? 4 : 3, off = tabs == 4 ? 19 : 27;
     G_RoundFill(0, 0, PANEL_W, STRIP_Y - 2, light, 255);
     G_RoundFrame(0, 0, PANEL_W, STRIP_Y - 2, dark, 255);
     G_FillA(1, 1, PANEL_W - 2, 1, 0xffffff, 120);
-    for (i = 0; i < tabs; i++)
+    for (k = 0; k < tabs; k++)
     {
-        int on = (unsigned)i == game, w = on ? PANEL_W - 3 - tabs - (tabs - 1) * off : off;
-        unsigned fill = on ? color : G_Mix(light, 0x808890, 0.35f);
+        int on, w;
+        unsigned fill;
+        i = (int)(tabs == 4 ? order4[k] : order3[k]);
+        on = (unsigned)i == game;
+        w = on ? PANEL_W - 3 - tabs - (tabs - 1) * off : off;
+        fill = on ? color : G_Mix(light, 0x808890, 0.35f);
         G_RoundFill(x, on ? 2 : 4, w, on ? 15 : 12, fill, 255);
         G_RoundFrame(x, on ? 2 : 4, w, on ? 15 : 12, on ? dark : G_Mix(light, 0x404850, 0.5f), 255);
         if (on)
@@ -3576,7 +3583,7 @@ int Tcg_Step(unsigned keys)
         else if (pressed & (KEY_L | KEY_R))
         {
             PlaySE(SE_SELECT);
-            ToSide(pressed & KEY_R ? KIT_GAME_YUGIOH : Mtg_Unlocked() ? KIT_GAME_MAGIC : KIT_GAME_TRIAD);
+            ToSide(pressed & KEY_R ? KIT_GAME_YUGIOH : KIT_GAME_TRIAD);   // (TRIPLE TRIAD is last: L wraps to it)
         }
         else if (pressed & KEY_B)
         {

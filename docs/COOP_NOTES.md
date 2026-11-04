@@ -2375,7 +2375,7 @@ The CARD CASE's third side. Decisions: docs/TT_DECISIONS.md.
   builder and the CARD LIST tabbed by stars (L / R), INSPECT, PACKS and the reveal, RULES OF HOENN, CHALLENGE
   (where the rules mix, announced), the table, SPOILS (the trade rule's picks), a seller's counter (SINGLES /
   PACKS / SELL), the CARD QUEEN's menu. tcg_ui.c routes Step / Draw / IsActive here like the Yu-Gi-Oh! side;
-  Tcg_OpenCaseGame opens any side; L / R go round POKeMON, YU-GI-OH!, TRIPLE TRIAD (TcgUi_CaseTabs: the chosen
+  Tcg_OpenCaseGame opens any side; L / R go round POKeMON, YU-GI-OH!, (MAGIC,) TRIPLE TRIAD, always last (TcgUi_CaseTabs: the chosen
   side's tab full width). The last side: TT_FLAG_CASE_SIDE.
 - The table (tt_board.c): XIV's layout, hands stacked bottom-up so every card's numbers show; phases DEAL, RULES,
   SPIN (who starts), PLAY, EVENTS, END. Pictures and numbers: tt_gfx.c (the plate tinted per seat once; a 5x7 pixel
@@ -4933,7 +4933,8 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   saves; Mtg_GetCollection, written from Tcg_WriteSidecar, forgotten by Tcg_ForgetSidecars). Under the test harness
   its random numbers start the same (12345), so duels are dealt the same.
 - Hidden until a deck (decisions 5, 6): TcgUi_CaseTabs shows a fourth tab (MAGIC; the others shorten to POKe / YGO /
-  TT / MTG) and the L / R round takes in MAGIC (POKeMON <- L, TRIPLE TRIAD -> R) only once Mtg_Unlocked(); the case
+  MTG / TT) and the L / R round takes in MAGIC (YU-GI-OH! <- L, TRIPLE TRIAD -> R) only once Mtg_Unlocked(): TRIPLE
+  TRIAD is always the last side, tabs and round alike (the user, 2026-11-04: POKeMON, YU-GI-OH!, MAGIC, TRIPLE TRIAD); the case
   opens on MAGIC when it was used last (MTG_FLAG_CASE_SIDE) or is the only game with cards. Before a deck the regulars
   say they're only talking.
 - MOSSDEEP's CARD SHOP (the GAME CORNER: data/scripts/mtg_shop.inc): the clerk (the counter man) gives a CARD CASE if
@@ -4943,16 +4944,51 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   AUGUST (the old man) and PIP on 1F, RHEA, MARLOW, TESS, NOLAN on B1F; specials Mtg_DuelistState /
   Mtg_DuelistChallenge. A win: a booster of 8 usable cards (5 common, 2 uncommon, an uncommon or one in four a rare),
   wins / beaten saved; a loss costs nothing.
-- Screens (src/mtg/mtg_ui.c, the card games' kit and canvas): HOME (DECKS, BINDER, HOW TO PLAY), DECKS (8 slots:
-  PLAY WITH IT, EDIT, COPY, DELETE), the builder (basic lands free, at most what's owned and 4 of a card, 40 cards at
-  least), the BINDER (rarity by color), a card's whole text, the starters, a challenge, the booster.
-- The table (src/mtg/mtg_board.c): opponent's bar, their lands (alike ones stacked, xN), their permanents, the middle
-  line (step, top of the stack, what happened), yours, your hand, your bar (the focused card's name, cost, P/T; the
-  target while choosing one). Tiles 24-40 px by how many share a row; tapped cards on their side; attackers framed
-  red, blockers blue with a line to what they block. A plays the card under the cursor (a menu when it can do more,
-  then the target cursor, which starts on the opponent's side), START passes, SELECT / INSPECT shows the whole text,
-  L held stops at every priority. It passes for the player when nothing else can be done, when their own spell is on
-  top, and outside their main phases, the blocks and the opponent's end step.
+- The look (1.96.0, the user: "not similar to Pokemon or Yugioh at all"; then "tiny details like that to be respected,
+  across all card games", and the table "more like Pokemon's ... that style of play area"): every MAGIC screen and the
+  table are laid out, worded and keyed as the POKeMON / YU-GI-OH! sides' own. When one of those changes, change MAGIC's
+  to match (and the other way round).
+- Card faces (src/mtg/mtg_gfx.c, as ygo_gfx.c): the game's own frame (never the printed one) colored by the card's
+  color (white, blue, black, red, green; gold for more than one, silver artifacts, brown lands), the mana cost as dots,
+  the printed illustration, a type bar with the rarity's dot, text lines, a P/T plate; under 22 px wide the picture
+  fills the card. CARD ART (gMpConfig.cardArt): FULL CARD shows the whole scan, the other two the illustration in the
+  frame; CARD BACKS: the printed back or the game's own. Textures cached per size (12x17 .. 72x100).
+- The printed cards: graphics/mtg/printed.bin (committed), built in by src/mtg/mtg_art_data.c (.incbin;
+  json_data_rules.mk), from tools/mtg/fetch_art.py (Scryfall: each playable card's earliest old-frame printing from
+  4th Edition to Scourge, the "normal" scan and the art crop; tools/mtg/art.json lists set / number / artist) and
+  tools/mtg/build_printed.py (JPEG 160x223, the illustration's rectangle found by matching the art crop against the
+  scan, the artist; looked up by name; cards already there kept). Rerun both as more cards play (fetch_art.py's cache
+  is ~/.cache/moemon/mtg_art). The card view and the big picture credit the artist ("Art by ..."), as Scryfall asks.
+  tools/mtg/test.sh checks every playable card has its picture.
+- Screens (src/mtg/mtg_ui.c): HOME (the active deck's ACE CARD floating; DECKS, BINDER, PRACTICE DUEL against
+  another starter, DUEL SPEED shared with the other games, CLOSE CASE; SELECT: HOW TO PLAY, tcg_guide.c's eight MAGIC
+  pages), DECKS (the 8 slots, DECK RECIPES, BACK; EMPTY SLOT faded, IN USE; menu EDIT / RENAME / ACE CARD / DUEL WITH
+  IT / COPY / DELETE, an empty slot BUILD A DECK / FROM A RECIPE; R: duel with it, START copy, SELECT delete), the
+  recipes (the five starters built again from the cards owned, what's missing), ACE CARD (MtgCollection.ace, -1: the
+  game's pick Mtg_AutoAce), the builder (POKeMON-style chips W U B R G C M L, a 5 x 2 grid with in-deck/owned, the
+  deck's list on the right), the BINDER (chips with * for all, 7 x 2, xN, SELECT: every card with the unowned faded,
+  NEW by tcg_new.c CARDNEW_MAGIC), a card's view (the face at 72x100, the words, rarity, artist, A: the big picture),
+  the starters (CHOOSE A STARTER DECK: each by its best card), the challenge (their sprite and best card, DUEL WITH a
+  deck or NOT NOW; their words first on the map: Mtg_DuelistHello -> gStringVar4), the booster (torn open, dealt out,
+  turned one by one, RARE!, NEW).
+- The save: "<save>.mtg" format 2 adds each deck's ACE CARD (format 1 still reads).
+- The table (src/mtg/mtg_board.c), the POKeMON table's way (tcg_board.c): a 240x200 cloth mat (leather brown, gold
+  lines, a soft grain) drawn once, nothing in its middle (the user: no POKe BALL-like mark), framed rows for each
+  player's lands (15x20 faces, alike ones stacked with a count tab) and creatures and other permanents (22x30, an LCD
+  plate of power / toughness under each, like the HP plates), centered; the opponent's cards (rows, graveyard, library,
+  their spells on the stack) turned half round to face them, as the other tables do (the user, 2026-11-04); the side columns: graveyard and library piles
+  (as DrawPile), the opponent's HAND, each player's LIFE plate. The hand is on the blue tray (count tab, arrow); with
+  the cursor in the hand the tray comes up and the mat slides up 37 px (BarY / Pan as tcg_board.c). The step bar (UNT
+  UPK DRW M1 CMB M2 END) and what just happened sit in the middle; the stack's cards there with a line to their target.
+  Tooltips under / over the card under the cursor (green-framed there, gold here), prompts in the yellow-framed box,
+  menus in the game's window beside the card, notes as toasts. Past a row's end the cursor goes to the piles: A on
+  your library CONCEDE (asked first), on a graveyard LOOK (a grid, INSPECT for a card). B: the turn's menu (PASS, END
+  TURN: passes until the opponent's turn, no attack). YOUR TURN / THEIR TURN sweep; the opponent's spells shown big as
+  they're cast; cards slide to their places (7 frames); DUEL SPEED FAST shortens the sweep, the big card and the
+  computer's pauses. A plays the card under the cursor (a menu when it can do more, then the target cursor, which
+  starts on the opponent's side), START passes, SELECT / INSPECT shows the whole text, L held stops at every priority.
+  It passes for the player when nothing else can be done, when their own spell is on top, and outside their main
+  phases, the blocks and the opponent's end step.
 - The computer is mtg_ai.c, a STAND-IN until forge-ai's translation (docs/MTG_HANDOFF.md).
 - Debug: `mp mtg starter N`, `mp mtg state`, `mp mtg duel N` (a regular's challenge), `mp mtg autoplay 1` (the
   computer plays your side too), `mp mtg focus NAME` (the cursor on that card), `mp mtg table`, `mp mtg win` /

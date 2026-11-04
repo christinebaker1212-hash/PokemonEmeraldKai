@@ -26,5 +26,6 @@ unsigned MtgUi_DuelingNow(void);
 void Mtg_ShopState(void);                     // VAR_RESULT: has a deck
 void Mtg_ShopStarter(void);                   // (waitstate) the starter screen
 void Mtg_DuelistState(void);                  // VAR_0x8004 the duelist: VAR_RESULT has a deck; their name in STR_VAR_1
+void Mtg_DuelistHello(void);                  // VAR_0x8004 the duelist: their words, in lines, in gStringVar4
 void Mtg_DuelistChallenge(void);              // (waitstate) their challenge
 #endif

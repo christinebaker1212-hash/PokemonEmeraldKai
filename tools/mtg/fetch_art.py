@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fetches the printed Magic cards from Scryfall (https://scryfall.com) for graphics/mtg/printed.bin
 (tools/mtg/build_printed.py): for each card the engine plays (tools/mtg/scope_dump.c says which), its earliest
-printing in the old frames (1993 / 1997, the Premodern years), the "normal" scan (488x680), and its art crop for
+printing in the old frames (1993 / 1997) from the Premodern years (4th Edition, 1995, to Scourge, 2003), the "normal" scan (488x680), and its art crop for
 measuring where the illustration sits. The card back too.
 
 Scryfall asks for a named User-Agent, an Accept header and a short pause between API requests; the scans come from
@@ -49,7 +49,7 @@ def main():
     # every old-frame printing of the pool, earliest first: the first one seen of a name is its pick
     picks = {}
     url = "https://api.scryfall.com/cards/search?" + urllib.parse.urlencode(
-        {"q": "format:premodern unique:prints (frame:1993 or frame:1997)", "order": "released", "dir": "asc"})
+        {"q": "format:premodern unique:prints (frame:1993 or frame:1997) date>=1995-04-01 date<=2003-05-26", "order": "released", "dir": "asc"})
     while url:
         d = get(url)
         for c in d["data"]:

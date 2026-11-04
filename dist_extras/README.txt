@@ -1419,8 +1419,8 @@ The Yu-Gi-Oh! cards are saved with your game (the save file's .ygo file).
 
 TRIPLE TRIAD
 ------------
-The CARD CASE's third side (L and R go round POKEMON, YU-GI-OH! and TRIPLE
-TRIAD). Five cards a hand, a 3x3 board, and a card's number takes the
+The CARD CASE's last side (L and R go round POKEMON, YU-GI-OH!, MAGIC once
+you have a MAGIC deck, and TRIPLE TRIAD). Five cards a hand, a 3x3 board, and a card's number takes the
 neighbor's number it faces when it's higher. The cards are all of FINAL
 FANTASY XIV's, with the rules of FINAL FANTASY VIII's regions.
   Getting started A TRIPLE TRIAD seller stands in the POKEMON CENTERS of

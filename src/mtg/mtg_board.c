@@ -1,11 +1,18 @@
-// Moemon Kai: the Magic duel table on the card screens' 240x160 canvas. From the top: the opponent's bar (name,
-// life, hand, library), their lands (alike ones stacked, "x3"), their creatures and other permanents, the middle line
-// (the step, the top of the stack, what just happened), yours, your lands, your hand, your bar. A tapped card lies on
-// its side. It follows the engine (mtg_game.c) by its queries and events.
-// Buttons: the d-pad moves over the cards, A plays or uses the one under the cursor (a menu when it can do more than
-// one thing, then the cursor goes round the legal targets), START passes, INSPECT (R2 / D) or SELECT shows a card's
-// whole text, L held stops at every chance to act (else the table passes for you when nothing is worth doing).
+// Moemon Kai: the Magic duel table, laid out as the POKeMON card table is (tcg_board.c): a cloth mat taller than the
+// screen, framed rows for each player's lands and creatures, the piles in the side columns (graveyard, library), the
+// opponent's HAND under theirs, the life of each in a plate like the HP plates, power / toughness plates under the
+// creatures, the hand on the blue tray at the bottom (the mat slides up while the cursor is in the hand), tooltips
+// for the card under the cursor, prompts in the yellow-framed boxes, menus in the game's window beside the card,
+// toasts. Cards are faces with their art (mtg_gfx.c): a tapped card lies on its side, alike lands stack "x3", the
+// opponent's cards face them (turned half round); the stack's cards sit in the middle with a line to their targets; YOUR TURN / THEIR TURN sweeps through; the
+// opponent's spells show big as they're cast; cards slide to their places. It follows the engine (mtg_game.c) by
+// its queries and events.
+// Buttons: the d-pad moves over the cards (past a row's end: the piles), A plays or uses the card under the cursor (a
+// menu when it can do more than one thing, then the cursor goes round the legal targets), on your library CONCEDE,
+// on a graveyard LOOK; START passes, B the turn's menu (PASS / END TURN); INSPECT (R2 / D) or SELECT shows a card's
+// whole text; L held stops at every chance to act (else the table passes for you when nothing is worth doing).
 #include <SDL2/SDL.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,9 +21,13 @@
 #include "constants/songs.h"
 #include "mp.h"
 #include "mp_kaisong_scene.h"
+#include "tcg/tcg.h"
+#include "tcg/integration.h"
 #include "mtg/integration.h"
 #include "mtg_internal.h"
 #include "mtg_board.h"
+#include "mtg_gfx.h"
+#include "../tcg/tcg_foil.h"
 #include "../tcg/tcg_gfx.h"
 #include "../tcg/tcg_ui_kit.h"
 
@@ -29,13 +40,19 @@ enum
     KEY_INSPECT = 2048
 };
 enum { ROW_OPP_LANDS, ROW_OPP_PERMS, ROW_MY_PERMS, ROW_MY_LANDS, ROW_HAND, ROW_COUNT };
-enum { MODE_NORMAL, MODE_MENU, MODE_TARGET, MODE_ATTACK, MODE_BLOCK, MODE_BLOCK_PICK, MODE_DISCARD, MODE_RESULT };
+enum { MODE_NORMAL, MODE_MENU, MODE_TARGET, MODE_ATTACK, MODE_BLOCK, MODE_BLOCK_PICK, MODE_DISCARD, MODE_RESULT,
+       MODE_TURN, MODE_CONCEDE, MODE_VIEW };
+// the piles the cursor can rest on (past a row's end)
+enum { PILE_NONE = -1, PILE_MY_GRAVE, PILE_MY_LIBRARY, PILE_OPP_LIBRARY, PILE_OPP_GRAVE };
 
 #define ME 0
 #define THEM 1
 #define ROW_ITEMS 40
 #define TICKER 6
 #define TICKER_FRAMES 50
+#define SWEEP_FRAMES (Tcg_GetCollection()->fastAnimations ? 34 : 52)   // (DUEL SPEED: FAST)
+#define BIG_FRAMES (Tcg_GetCollection()->fastAnimations ? 30 : 50)
+#define TOAST_FRAMES 90
 
 typedef struct { int16_t x, y, w, h; uint8_t on; } Rect;
 typedef struct { uint16_t obj; uint8_t count; } Item;
@@ -46,8 +63,8 @@ static struct
     MtgDuel duel;
     char opp[24];
     unsigned frame;
-    int mode, row, col[ROW_COUNT];
-    int aiWait, autoPassWait, autoplay;
+    int mode, row, col[ROW_COUNT], pile;
+    int aiWait, autoPassWait, autoplay, endTurn;
     // what the player is choosing
     uint16_t menu[8];               // MODE_MENU: action indexes, one per (kind, ability)
     int menuCount, menuCursor;
@@ -57,22 +74,33 @@ static struct
     int8_t block[MTG_MAX_COMBAT];
     int blockFrom, blockCursor;
     int inspect, inspectObj;
+    int viewPlayer, viewCursor;     // MODE_VIEW: a graveyard
+    uint16_t view[MTG_MAX_OBJS];
+    int viewCount;
     // the layout of this frame
     Item items[ROW_COUNT][ROW_ITEMS];
     int itemCount[ROW_COUNT];
     Rect rect[MTG_MAX_OBJS];
     Rect playerRect[2];
+    float tray;                     // the hand's tray: 0 down, 1 up (the mat slides up with it)
     // what happened
     char ticker[TICKER][96];
     int tickerCount, tickerAge;
     uint32_t eventSeen;
-    char hold[96];                  // a note for the player ("nothing to do with it now")
+    char hold[96];                  // a note for the player ("nothing to do with it now"), shown as a toast
     int holdAge;
     int result, resultAge, forced;
     u16 music, mapMusic;
+    // the look: cards sliding to their places, the turn's sweep, the opponent's spell shown big
+    Rect last[MTG_MAX_OBJS];
+    int16_t fromX[MTG_MAX_OBJS], fromY[MTG_MAX_OBJS];
+    uint8_t slide[MTG_MAX_OBJS];
+    int sweepAge, sweepMine, bigCard, bigAge;
 } B;
 
 static u16 sHeldMusic;
+static SDL_Texture *sMat, *sLayer;
+static SDL_Renderer *sLayerOwner;
 
 int MtgBoard_Active(void) { return B.active; }
 void MtgBoard_Autoplay(int on) { B.autoplay = on; }
@@ -116,6 +144,12 @@ void MtgBoard_Start(const MtgDeck *mine, const MtgDeck *theirs, uint32_t seed, c
 {
     memset(&B, 0, sizeof(B));
     B.active = 1;
+    B.sweepAge = SWEEP_FRAMES;
+    B.bigCard = -1;
+    B.bigAge = BIG_FRAMES;
+    B.holdAge = TOAST_FRAMES;
+    B.pile = PILE_NONE;
+    B.endTurn = -1;
     snprintf(B.opp, sizeof(B.opp), "%s", opponent);
     Mtg_DuelInit(&B.duel, mine, theirs, seed);
     B.row = ROW_HAND;
@@ -160,7 +194,65 @@ void MtgBoard_ForceEnd(int win)
     B.forced = 1;
 }
 
-// ---- the layout
+// ---- the layout, in the mat's coordinates (240 x LAYER_H; the screen shows it from Pan() down)
+#define LAYER_H 200
+#define ROW_X 34       // the rows: 34..205, the side columns beside them
+#define ROW_W 172
+#define CARD_W 22      // a creature or other permanent: 22 x 30, its plate under it
+#define CARD_H 30
+#define LAND_W 15      // a land: 15 x 20
+#define LAND_H 20
+#define HAND_W 30      // the hand: 30 x 42 on the tray
+#define HAND_H 42
+#define PILE_W 18
+#define PILE_H 25
+#define CENTER_X 120
+#define CENTER_Y 77
+#define BAR_CLOSED 152
+#define BAR_OPEN 118
+#define PAN 37
+#define SLIDE 7        // frames a card takes to move
+// the rows' frames (y, height) and where their cards stand
+static const int sFrameY[4] = {1, 26, 88, 130}, sFrameH[4] = {24, 41, 41, 24};
+static const int sCardY[4] = {3, 28, 90, 132};
+
+static Rect MakeRect(int x, int y, int w, int h)
+{
+    Rect r;
+    r.x = (int16_t)x, r.y = (int16_t)y, r.w = (int16_t)w, r.h = (int16_t)h, r.on = 1;
+    return r;
+}
+static Rect PileRect(int pile)
+{
+    switch (pile) {
+    case PILE_MY_GRAVE: return MakeRect(215, 125, PILE_W, PILE_H);
+    case PILE_MY_LIBRARY: return MakeRect(215, 96, PILE_W, PILE_H);
+    case PILE_OPP_LIBRARY: return MakeRect(7, 32, PILE_W, PILE_H);
+    default: return MakeRect(7, 3, PILE_W, PILE_H);
+    }
+}
+static const Rect sOppHand = {1, 61, 30, 27, 1};
+static Rect LifeRect(int player) { return player == ME ? MakeRect(1, 126, 30, 25) : MakeRect(209, 1, 30, 25); }
+
+static float Ease(float t)
+{
+    if (t <= 0)
+        return 0;
+    if (t >= 1)
+        return 1;
+    return 1 - (1 - t) * (1 - t) * (1 - t);
+}
+static int Fast(void) { return Tcg_GetCollection()->fastAnimations; }
+static float BarY(void) { return BAR_CLOSED + (BAR_OPEN - BAR_CLOSED) * Ease(B.tray); }
+static float Pan(void) { return Ease(B.tray) * PAN; }
+static float HandSpacing(int n)
+{
+    float space = 184.0f - HAND_W;
+    if (n <= 1)
+        return 0;
+    return space / (n - 1) > 33 ? 33 : space / (n - 1);
+}
+
 static int IsLand(int obj) { return (Def(obj)->types & MTG_T_LAND) != 0; }
 
 static void BuildRows(void)
@@ -200,62 +292,98 @@ static void BuildRows(void)
     }
 }
 
-static const int sRowY[ROW_COUNT] = {11, 26, 71, 102, 117};
-static const int sRowH[ROW_COUNT] = {14, 30, 30, 14, 30};
-#define TILE_W 24      // the narrowest a card gets (a full row); up to TILE_MAX when there's room
-#define TILE_MAX 40
-#define LAND_W 30
-#define LAND_MAX 46
-#define MID_Y 57
-#define BAR_Y 148
-
 static void Layout(void)
 {
     int r, i;
     memset(B.rect, 0, sizeof(B.rect));
     for (r = 0; r < ROW_COUNT; r++) {
         int n = B.itemCount[r], land = r == ROW_MY_LANDS || r == ROW_OPP_LANDS;
-        int w = n ? (236 - 2 * (n - 1)) / n : TILE_W, step, x;
-        if (w > (land ? LAND_MAX : TILE_MAX))
-            w = land ? LAND_MAX : TILE_MAX;
-        if (w < (land ? LAND_W : TILE_W))
-            w = land ? LAND_W : TILE_W;
-        step = w + 2;
-        if (n > 1 && n * step > 236)
-            step = (236 - w) / (n - 1);   // (overlapping when the row is full)
-        x = 2;
-        for (i = 0; i < n; i++) {
-            const MtgObj *o = &B.duel.objs[B.items[r][i].obj];
-            Rect rc;
-            rc.on = 1;
-            rc.x = (int16_t)(x + i * step);
-            rc.y = (int16_t)sRowY[r];
-            rc.w = (int16_t)w;
-            rc.h = (int16_t)sRowH[r];
-            if (!land && r != ROW_HAND && o->tapped) {   // on its side
-                rc.w = (int16_t)sRowH[r];
-                rc.h = (int16_t)w;
-                rc.y = (int16_t)(sRowY[r] + sRowH[r] - w);
+        if (r == ROW_HAND) {   // on the tray, spread as the POKeMON hand is
+            float spacing = HandSpacing(n), width = spacing * (n ? n - 1 : 0) + HAND_W;
+            for (i = 0; i < n; i++) {
+                int x = (int)(120 - width / 2 + spacing * i), y = (int)(BarY() + Pan()) + 2;
+                if (B.row == ROW_HAND && B.col[r] == i && B.pile == PILE_NONE && B.tray > 0.5f && B.mode != MODE_VIEW)
+                    y -= 4;
+                B.rect[B.items[r][i].obj] = MakeRect(x, y, HAND_W, HAND_H);
             }
-            B.rect[B.items[r][i].obj] = rc;
-            if (land) {   // every land of a stack answers to its rect
-                int k;
-                for (k = 0; k < B.duel.objCount; k++)
-                    if (B.duel.objs[k].zone == MTG_ZONE_BATTLEFIELD && B.duel.objs[k].def == o->def
-                        && B.duel.objs[k].tapped == o->tapped && B.duel.objs[k].controller == o->controller)
-                        B.rect[k] = rc;
+            continue;
+        }
+        {
+            int cw = land ? LAND_W : CARD_W, ch = land ? LAND_H : CARD_H, width[ROW_ITEMS], total = 0;
+            float squeeze = 1, fx;
+            for (i = 0; i < n; i++) {
+                const MtgObj *o = &B.duel.objs[B.items[r][i].obj];
+                width[i] = o->tapped ? ch : cw;
+                total += width[i] + (i ? 3 : 0);
+            }
+            if (total > ROW_W - 6 && n > 1)
+                squeeze = (float)(ROW_W - 6 - width[n - 1]) / (total - width[n - 1]);
+            fx = total < ROW_W - 6 ? CENTER_X - total / 2.0f : ROW_X + 3;   // (centered, as the Active Pokemon is)
+            for (i = 0; i < n; i++) {
+                const MtgObj *o = &B.duel.objs[B.items[r][i].obj];
+                Rect rc = o->tapped ? MakeRect((int)fx, sCardY[r] + ch - cw, ch, cw) : MakeRect((int)fx, sCardY[r], cw, ch);
+                if (o->attacking)   // (an attacker steps toward the other side)
+                    rc.y += o->controller == ME ? -5 : 5;
+                B.rect[B.items[r][i].obj] = rc;
+                if (land) {   // every land of a stack answers to its rect
+                    int k;
+                    for (k = 0; k < B.duel.objCount; k++)
+                        if (B.duel.objs[k].zone == MTG_ZONE_BATTLEFIELD && B.duel.objs[k].def == o->def
+                            && B.duel.objs[k].tapped == o->tapped && B.duel.objs[k].controller == o->controller)
+                            B.rect[k] = rc;
+                }
+                fx += (width[i] + 3) * squeeze;
             }
         }
     }
-    B.playerRect[THEM].x = 0, B.playerRect[THEM].y = 0, B.playerRect[THEM].w = 240, B.playerRect[THEM].h = 10;
-    B.playerRect[ME].x = 0, B.playerRect[ME].y = BAR_Y, B.playerRect[ME].w = 240, B.playerRect[ME].h = 12;
-    B.playerRect[ME].on = B.playerRect[THEM].on = 1;
+    B.playerRect[THEM] = LifeRect(THEM);
+    B.playerRect[ME] = LifeRect(ME);
+}
+
+static void Slides(void)   // (once a frame, from MtgBoard_Step)
+{
+    int i;
+    for (i = 0; i < B.duel.objCount && i < MTG_MAX_OBJS; i++) {
+        const Rect *now = &B.rect[i], *was = &B.last[i];
+        int inHand = B.duel.objs[i].zone == MTG_ZONE_HAND;
+        if (!now->on) {
+            B.slide[i] = 0;
+            continue;
+        }
+        // (the hand follows the tray as it moves: only a new card in it slides, from the library)
+        if (!was->on || (!inHand && (was->x != now->x || was->y != now->y))) {
+            Rect from = *was;
+            if (!was->on) {
+                if (inHand)
+                    from = PileRect(PILE_MY_LIBRARY);
+                else if (B.duel.objs[i].controller == THEM)
+                    from = MakeRect(105, -50, CARD_W, CARD_H);
+                else
+                    from.on = 0;
+            }
+            if (from.on) {
+                float p = B.slide[i] ? 1.0f - (float)B.slide[i] / SLIDE : 1.0f;
+                B.fromX[i] = (int16_t)(B.slide[i] ? B.fromX[i] + (was->x - B.fromX[i]) * p : from.x);
+                B.fromY[i] = (int16_t)(B.slide[i] ? B.fromY[i] + (was->y - B.fromY[i]) * p : from.y);
+                B.slide[i] = SLIDE;
+            }
+        } else if (B.slide[i])
+            B.slide[i]--;
+    }
+    memcpy(B.last, B.rect, sizeof(B.last));
+}
+static void DrawPos(int obj, const Rect *rc, float *x, float *y)
+{
+    float p = B.slide[obj] ? 1.0f - (float)B.slide[obj] / SLIDE : 1.0f;
+    p = 1 - (1 - p) * (1 - p);
+    *x = B.slide[obj] ? B.fromX[obj] + (rc->x - B.fromX[obj]) * p : rc->x;
+    *y = B.slide[obj] ? B.fromY[obj] + (rc->y - B.fromY[obj]) * p : rc->y;
 }
 
 static int Focused(void)
 {
     int r = B.row, c = B.col[r];
-    if (B.itemCount[r] == 0)
+    if (B.pile != PILE_NONE || B.itemCount[r] == 0)
         return MTG_NO_OBJ;
     if (c >= B.itemCount[r])
         c = B.col[r] = B.itemCount[r] - 1;
@@ -263,42 +391,6 @@ static int Focused(void)
 }
 
 // ---- drawing
-static unsigned BodyColor(int obj)
-{
-    const MtgCardDef *c = Def(obj);
-    uint8_t colors = c->colors;
-    if (c->types & MTG_T_LAND) {
-        uint8_t m = c->intrinsicMana;
-        return m & MTG_COLOR_BIT(MTG_W) ? 0xe8e0c0 : m & MTG_COLOR_BIT(MTG_U) ? 0x90b8e8
-             : m & MTG_COLOR_BIT(MTG_B) ? 0x9890a0 : m & MTG_COLOR_BIT(MTG_R) ? 0xe89878
-             : m & MTG_COLOR_BIT(MTG_G) ? 0x90c890 : 0xc8b090;
-    }
-    if (colors & (colors - 1))
-        return 0xe0c060;   // more than one color: gold
-    return colors & MTG_COLOR_BIT(MTG_W) ? 0xf0e8c8 : colors & MTG_COLOR_BIT(MTG_U) ? 0x70a0e0
-         : colors & MTG_COLOR_BIT(MTG_B) ? 0x706878 : colors & MTG_COLOR_BIT(MTG_R) ? 0xe07858
-         : colors & MTG_COLOR_BIT(MTG_G) ? 0x70b070 : 0xb8b8c0;
-}
-
-static int DarkBody(int obj) { return Def(obj)->colors == MTG_COLOR_BIT(MTG_B) && !IsLand(obj); }
-
-// a name in up to two lines that fit w (words kept whole when they can be)
-static void TwoLines(const char *name, int w, char *a, char *b, unsigned cap)
-{
-    const char *space;
-    snprintf(a, cap, "%s", name);
-    b[0] = 0;
-    if (G_Measure(a, TF_NARROW) <= w)
-        return;
-    space = strchr(name, ' ');
-    if (space) {
-        snprintf(a, cap, "%.*s", (int)(space - name), name);
-        snprintf(b, cap, "%s", space + 1);
-    }
-    TcgUi_FitText(a, w, TF_NARROW);
-    TcgUi_FitText(b, w, TF_NARROW);
-}
-
 static void CostText(char *out, unsigned cap, const MtgManaCost *c)
 {
     static const char sym[] = "WUBRGC";
@@ -314,59 +406,133 @@ static void CostText(char *out, unsigned cap, const MtgManaCost *c)
     out[n < cap ? n : cap - 1] = 0;
 }
 
-static void DrawTile(int obj, const Rect *rc, int count, int faceDown)
+static int HasAction(int obj)   // the player could do something with it now
+{
+    const MtgQuery *q = &B.duel.query;
+    int i;
+    if (q->kind != MTG_Q_PRIORITY || q->player != ME)
+        return 0;
+    for (i = 1; i < q->actionCount; i++) {
+        const MtgObj *o = &B.duel.objs[q->actions[i].obj];
+        if (q->actions[i].obj == obj || (IsLand(obj) && o->zone == B.duel.objs[obj].zone && o->def == B.duel.objs[obj].def
+                                          && o->tapped == B.duel.objs[obj].tapped && o->controller == B.duel.objs[obj].controller))
+            return 1;
+    }
+    return 0;
+}
+
+// the mat's colors: a warm leather cloth with gold lines (the CARD CASE's MAGIC side)
+#define MAT_BASE 0x5a3c26
+#define MAT_DARK 0x3a2414
+#define MAT_LINE 0xd8a868
+#define MAT_LABEL 0xb88a50
+
+/* A place for a card: a soft hollow in the cloth and a clean line round it (tcg_board.c CardSpot) */
+static void CardSpot(struct GSurface *s, Rect r, unsigned line, unsigned alpha)
+{
+    S_RoundFill(s, r.x, r.y, r.w, r.h, 1, ARGB(0x000000, alpha / 4));
+    S_RoundFrame(s, r.x - 1, r.y - 1, r.w + 2, r.h + 2, 2, ARGB(line, alpha));
+}
+static void BuildMat(void)
+{
+    struct GSurface s = G_SurfaceNew(240, LAYER_H);
+    int x, y, k, who;
+    if (!s.px)
+        return;
+    /* Cloth: the colour darkens towards the edges, a fine weave over it */
+    for (y = 0; y < LAYER_H; y++)
+        for (x = 0; x < 240; x++) {
+            float dx = (x - 120) / 120.0f, dy = (y - CENTER_Y) / 90.0f, d = dx * dx + dy * dy;
+            S_Px(&s, x, y, ARGB(G_Mix(MAT_BASE, MAT_DARK, d > 1 ? 0.6f : d * 0.6f), 255));
+        }
+    for (y = 0; y < LAYER_H; y++)   /* (a leather grain: soft specks, no lines) */
+        for (x = 0; x < 240; x++)
+        {
+            uint32_t h = (uint32_t)(x * 73856093u) ^ (uint32_t)(y * 19349663u);
+            h ^= h >> 13, h *= 0x5bd1e995u, h ^= h >> 15;
+            if (h % 7 == 0)
+                S_Blend(&s, x, y, G_Mix(MAT_BASE, MAT_LINE, 0.07f), 255);
+            else if (h % 11 == 0)
+                S_Blend(&s, x, y, G_Mix(MAT_BASE, 0x000000, 0.12f), 255);
+        }
+    /* The rows: a frame round each (as the Benches have), a hollow along it */
+    for (k = 0; k < 4; k++) {
+        S_RoundFrame(&s, ROW_X, sFrameY[k], ROW_W, sFrameH[k], 3, ARGB(MAT_LINE, 255));
+        S_RoundFill(&s, ROW_X + 2, sFrameY[k] + 2, ROW_W - 4, sFrameH[k] - 4, 2, ARGB(0x000000, 22));
+    }
+    /* Side columns: a spot for each pile, the life plates' frames, the opponent's hand */
+    for (who = 0; who < 4; who++) {
+        Rect p = PileRect(who);
+        S_RoundFrame(&s, p.x - 4, p.y - 2, p.w + 8, p.h + 4, 3, ARGB(MAT_LINE, 255));
+        CardSpot(&s, p, MAT_LINE, 110);
+    }
+    for (who = 0; who < 2; who++) {
+        Rect l = LifeRect(who);
+        S_RoundFrame(&s, l.x, l.y, l.w, l.h, 3, ARGB(MAT_LINE, 255));
+    }
+    S_RoundFrame(&s, sOppHand.x, sOppHand.y, sOppHand.w, sOppHand.h, 3, ARGB(MAT_LINE, 150));
+    sMat = G_SurfaceTexture(&s);
+    G_SurfaceFree(&s);
+}
+static void Labels(void)
+{
+    G_TextAlign(204, sFrameY[3] - 10, TA_RIGHT, MAT_LABEL, G_NO_SHADOW, "LANDS", TF_NARROW);
+}
+
+// A plate like the HP plates (G_HpPlate): the frame, the dark glass, digits with their unlit segments behind
+static void Plate(int x, int y, int w, int h, const char *label, const char *digits, int big, unsigned text)
+{
+    unsigned bg = 0x14203a, ink = 0x5aa8ff, ghost = 0x223456;
+    char unlit[8];
+    int n = (int)strlen(digits), i, size = big ? 1 : 0;
+    G_RoundFill(x, y, w, h, 0x282828, 255);
+    G_FillA(x + 1, y + 1, w - 2, 1, 0x9a9a9a, 255);
+    G_FillA(x + 1, y + h - 2, w - 2, 1, 0x585858, 255);
+    G_FillA(x + 2, y + 2, w - 4, h - 4, bg, 255);
+    if (label)
+        G_Text(x + 3, y + (big ? 0 : -2), ink, G_NO_SHADOW, label, 0, TF_NARROW);
+    for (i = 0; i < n && i < 7; i++)
+        unlit[i] = digits[i] >= '0' && digits[i] <= '9' ? '8' : digits[i];
+    unlit[i] = 0;
+    G_Digits(x + w - 3 - G_DigitsWidth(unlit, size, 1), y + (big ? h - 10 : 2), unlit, size, 1, ghost, 255);
+    G_Digits(x + w - 3 - G_DigitsWidth(digits, size, 1), y + (big ? h - 10 : 2), digits, size, 1, text, 255);
+}
+
+// a card on the table: its face (on its side when tapped), the plate under a creature, what it's doing
+static void DrawCard(int obj, const Rect *rc, int count, float x, float y)
 {
     const MtgObj *o = &B.duel.objs[obj];
     const MtgCardDef *c = Def(obj);
-    unsigned body = faceDown ? 0x6a4a30 : BodyColor(obj), ink = DarkBody(obj) ? G_WHITE : G_INK;
-    char name[64], a[40], b[40], pt[16];
-    int x = rc->x, y = rc->y, w = rc->w, h = rc->h;
-    G_FillA(x + 1, y + 1, w, h, 0x000000, 60);
-    G_RoundFill(x, y, w, h, o->tapped && IsLand(obj) ? G_Mix(body, 0x404040, 0.45f) : body, 255);
-    G_RoundFrame(x, y, w, h, faceDown ? 0x2a1a10 : G_Mix(body, 0x000000, 0.55f), 255);
-    if (faceDown) {
-        G_Circle(x + w / 2, y + h / 2, 6, 0xc89050, 255);
-        return;
-    }
+    int onTable = o->zone == MTG_ZONE_BATTLEFIELD, tapped = o->tapped && onTable;
+    int cw = tapped ? rc->h : rc->w, ch = tapped ? rc->w : rc->h;
+    char pt[16];
+    float cx = x + rc->w / 2.0f, cy = y + rc->h / 2.0f;
+    if (onTable)
+        G_FillA((int)x + 1, (int)y + 1, rc->w, rc->h, 0x000000, 70);
+    // (the opponent's cards face them, as on the other card tables: turned half round, tapped a quarter more)
+    MtgGfx_DrawCard(o->def, cx - cw / 2.0f, cy - ch / 2.0f, (float)cw, (float)ch,
+                    (tapped ? 90 : 0) + (onTable && o->controller == THEM ? 180 : 0), 255, 0);
     if (o->attacking)
-        G_RoundFrame(x - 1, y - 1, w + 2, h + 2, 0xe83030, 255);
+        G_RoundFrame((int)x - 1, (int)y - 1, rc->w + 2, rc->h + 2, 0xf04030, 255);
     if (o->blocking != MTG_NO_OBJ)
-        G_RoundFrame(x - 1, y - 1, w + 2, h + 2, 0x3070e8, 255);
-    Name(name, sizeof(name), obj);
-    if (IsLand(obj)) {
-        int cw = 0;
-        if (count > 1) {
-            snprintf(pt, sizeof(pt), "x%d", count);
-            cw = G_DigitsWidth(pt, 0, 1) + 2;
-            G_Digits(x + w - 1 - cw, y + h - 7, pt, 0, 1, 0x202020, 255);
-        }
-        snprintf(a, sizeof(a), "%s", name);
-        TcgUi_FitText(a, w - 4 - (cw ? cw - 2 : 0), TF_NARROW);
-        G_Text(x + 2, y + 1, ink, G_NO_SHADOW, a, 0, TF_NARROW);
+        G_RoundFrame((int)x - 1, (int)y - 1, rc->w + 2, rc->h + 2, 0x4080f0, 255);
+    if (!onTable)
         return;
-    }
-    TwoLines(name, w - 3, a, b, sizeof(a));
-    G_Text(x + 2, y + 1, ink, G_NO_SHADOW, a, 0, TF_NARROW);
-    if (b[0] && h >= 26)
-        G_Text(x + 2, y + 9, ink, G_NO_SHADOW, b, 0, TF_NARROW);
-    if (o->zone == MTG_ZONE_HAND && (w >= 34 || !(c->types & MTG_T_CREATURE))) {   // (else in the bottom bar)
-        char cost[16];
-        CostText(cost, sizeof(cost), &c->cost);
-        G_Text(x + 2, y + h - 10, ink, G_NO_SHADOW, cost, 0, TF_NARROW);
+    if (IsLand(obj) && count > 1) {   // (the count tab, as on the piles)
+        int w;
+        snprintf(pt, sizeof(pt), "%d", count);
+        w = G_DigitsWidth(pt, 0, 1) + 4;
+        G_RoundFill((int)x + rc->w - w + 3, (int)y + rc->h - 5, w, 9, 0x1c2c48, 235);
+        G_RoundFrame((int)x + rc->w - w + 3, (int)y + rc->h - 5, w, 9, 0x8ab0e0, 255);
+        G_Digits((int)x + rc->w - w + 5, (int)y + rc->h - 3, pt, 0, 1, 0xe0f0ff, 255);
     }
     if (c->types & MTG_T_CREATURE) {
-        int power = o->zone == MTG_ZONE_BATTLEFIELD ? Mtg_Power(&B.duel, obj) : c->power;
-        int tough = o->zone == MTG_ZONE_BATTLEFIELD ? Mtg_Toughness(&B.duel, obj) - o->damage : c->toughness;
-        unsigned col = o->damage ? 0xc02020 : (o->tempPower || o->tempToughness ? 0x1060c0 : 0x202020);
-        int pw;
-        snprintf(pt, sizeof(pt), "%d/%d", power, tough);
-        pw = G_DigitsWidth(pt, 0, 1);
-        G_FillA(x + w - pw - 3, y + h - 8, pw + 2, 7, 0xffffff, 170);
-        G_Digits(x + w - pw - 2, y + h - 7, pt, 0, 1, col, 255);
-        if (o->zone == MTG_ZONE_BATTLEFIELD && o->sick && !(Mtg_Keywords(&B.duel, obj) & MTG_KW_BIT(MTG_KW_HASTE)))
-            G_FillA(x + 1, y + 1, w - 2, h - 2, 0xffffff, 50);   // (can't attack yet)
-        if (Mtg_Keywords(&B.duel, obj) & MTG_KW_BIT(MTG_KW_FLYING))
-            G_Arrow(x + 2, y + h - 6, 0, 0x2050a0);              // a flier
+        int power = Mtg_Power(&B.duel, obj), tough = Mtg_Toughness(&B.duel, obj) - o->damage;
+        unsigned text = o->damage ? 0xffd860 : (power > c->power || tough > c->toughness) ? 0x9cf0b0 : 0xc8ecff;
+        snprintf(pt, sizeof(pt), "%d/%d", power < 0 ? 0 : power, tough < 0 ? 0 : tough);
+        Plate((int)cx - 13, (int)y + rc->h, 26, 9, NULL, pt, 0, text);
+        if (o->sick && !(Mtg_Keywords(&B.duel, obj) & MTG_KW_BIT(MTG_KW_HASTE)))
+            G_FillA((int)x, (int)y, rc->w, rc->h, 0xffffff, 40);   // (can't attack yet)
     }
 }
 
@@ -381,35 +547,105 @@ static int HandCount(int player)
         n += B.duel.objs[i].zone == MTG_ZONE_HAND && B.duel.objs[i].owner == player;
     return n;
 }
-
-static void PlayerBar(int player)
+static int Graveyard(int player, uint16_t *out)   // newest first; returns how many
 {
-    const Rect *r = &B.playerRect[player];
-    char line[96];
-    G_FillA(r->x, r->y, r->w, r->h, player == ME ? 0x203048 : 0x402028, 220);
-    snprintf(line, sizeof(line), "LIFE %d  HAND %d  LIBRARY %d", B.duel.players[player].life, HandCount(player),
-             B.duel.players[player].libraryCount);
-    if (player == THEM) {
-        G_Text(4, r->y + 1, G_WHITE, G_NO_SHADOW, B.opp, 0, TF_NARROW);
-        G_TextAlign(236, r->y + 1, TA_RIGHT, G_WHITE, G_NO_SHADOW, line, TF_NARROW);
-    } else {
-        int f = Focused();
-        if (f != MTG_NO_OBJ && B.mode != MODE_TARGET) {   // the card under the cursor: name, cost, power
-            char name[64], text[96], cost[16];
-            const MtgCardDef *c = Def(f);
-            Name(name, sizeof(name), f);
-            CostText(cost, sizeof(cost), &c->cost);
-            if (c->types & MTG_T_CREATURE)
-                snprintf(text, sizeof(text), "%s %s %d/%d", name, cost, c->power, c->toughness);
-            else
-                snprintf(text, sizeof(text), "%s %s", name, cost);
-            TcgUi_FitText(text, 118, TF_NARROW);
-            G_Text(4, r->y + 2, 0xf8e8a0, G_NO_SHADOW, text, 0, TF_NARROW);
+    int i, n = 0, k;
+    for (i = 0; i < B.duel.objCount; i++)
+        if (B.duel.objs[i].zone == MTG_ZONE_GRAVEYARD && B.duel.objs[i].owner == player) {
+            for (k = n; k > 0 && B.duel.objs[out[k - 1]].seq < B.duel.objs[i].seq; k--)
+                out[k] = out[k - 1];
+            out[k] = (uint16_t)i;
+            n++;
         }
-        G_TextAlign(236, r->y + 2, TA_RIGHT, G_WHITE, G_NO_SHADOW, line, TF_NARROW);
+    return n;
+}
+
+/* A pile (tcg_board.c DrawPile): the backs stacked thicker as it grows, its count in a tab */
+static void DrawPile(Rect r, int count, int deck, int top, int theirs)
+{
+    char n[8];
+    int i, layers = count > 40 ? 3 : count > 15 ? 2 : count > 1 ? 1 : 0;
+    if (!count)
+        return;
+    if (deck) {
+        for (i = layers; i > 0; i--)
+            MtgGfx_DrawCard(MTG_GFX_BACK, (float)r.x + i, (float)r.y + i, (float)r.w, (float)r.h, theirs ? 180 : 0, 255, 0);
+        MtgGfx_DrawCard(MTG_GFX_BACK, (float)r.x, (float)r.y, (float)r.w, (float)r.h, theirs ? 180 : 0, 255, 0);
+    } else
+        MtgGfx_DrawCard(B.duel.objs[top].def, (float)r.x, (float)r.y, (float)r.w, (float)r.h, theirs ? 180 : 0, 255, 0);
+    snprintf(n, sizeof(n), "%d", count);
+    {
+        int w = G_DigitsWidth(n, 0, 1) + 4, x = r.x + r.w - w + 3, y = r.y + r.h - 5;
+        G_RoundFill(x, y, w, 9, 0x1c2c48, 235);
+        G_RoundFrame(x, y, w, 9, 0x8ab0e0, 255);
+        G_Digits(x + 2, y + 2, n, 0, 1, 0xe0f0ff, 255);
     }
 }
 
+static void DrawLife(int player)
+{
+    Rect l = LifeRect(player);
+    char n[8];
+    int life = B.duel.players[player].life;
+    snprintf(n, sizeof(n), "%d", life < 0 ? 0 : life);
+    Plate(l.x + 1, l.y + 1, l.w - 2, l.h - 2, "LIFE", n, 1, life <= 0 ? 0xff3c3c : life <= 5 ? 0xffd860 : 0xc8ecff);
+}
+
+/* The opponent's hand (tcg_board.c DrawOppHand): HAND, up to three backs fanned, how many */
+static void DrawOppHand(void)
+{
+    char n[8];
+    int i, count = HandCount(THEM), shown = count > 3 ? 3 : count;
+    G_TextAlign(16, 62, TA_CENTER, MAT_LABEL, G_NO_SHADOW, "HAND", TF_NARROW);
+    for (i = 0; i < shown; i++)
+        MtgGfx_DrawCard(MTG_GFX_BACK, (float)(5 + i * 5), 73.0f - (i == 1), 10, 14, (i - 1) * 8.0, 255, 0);
+    snprintf(n, sizeof(n), "%d", count);
+    G_Digits(18 + (shown ? 4 : -6), 82, n, 0, 1, 0xf8f8f8, 255);
+}
+
+/* The hand's tray (tcg_board.c DrawHandBar): the blue bar, the count tab, the arrow */
+static void DrawHandBar(void)
+{
+    int y = (int)(BarY() + Pan());
+    char n[8];
+    G_FillA(0, y + 6, 240, 60, 0x004da7, 255);
+    G_FillA(0, y + 6, 240, 2, 0x0179d0, 255);
+    G_FillA(0, y + 8, 240, 1, 0x40a8f0, 255);
+    G_RoundFill(0, y, 26, 12, 0x303034, 255);
+    G_FillA(1, y + 1, 24, 10, 0xa8a8ac, 255);
+    G_FillA(1, y + 1, 24, 1, 0xe0e0e4, 255);
+    snprintf(n, sizeof(n), "%02d", HandCount(ME));
+    G_FillA(5, y + 2, 16, 8, 0x5a6c88, 255);
+    G_Digits(13 - G_DigitsWidth(n, 1, 1) / 2, y + 2, n, 1, 1, 0xe8f0ff, 255);
+    G_RoundFill(214, y, 26, 12, 0x303034, 255);
+    G_FillA(215, y + 1, 24, 10, 0xa8a8ac, 255);
+    G_FillA(215, y + 1, 24, 1, 0xe0e0e4, 255);
+    G_ButtonIcon(222, y + 6, B.tray > 0.5f ? 6 /* up */ : 7 /* down */);
+}
+
+// the step of the turn in the middle: UNT UPK DRW M1 CMB M2 END, the one now lit in the turn's color
+static void PhaseBar(void)
+{
+    static const char *const names[7] = {"UNT", "UPK", "DRW", "M1", "CMB", "M2", "END"};
+    static const uint8_t group[MTG_STEP_COUNT] = {0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 5, 6, 6};
+    int i, w = 0, x, on = group[B.duel.step < MTG_STEP_COUNT ? B.duel.step : 0], y = 67;
+    unsigned mine = B.duel.active == ME ? 0x3878f0 : 0xe85050;
+    for (i = 0; i < 7; i++)
+        w += G_Measure(names[i], TF_NARROW) + 4;
+    x = CENTER_X - w / 2;
+    G_RoundFill(x - 3, y + 1, w + 4, 10, 0x1c1008, 190);
+    for (i = 0; i < 7; i++) {
+        int tw = G_Measure(names[i], TF_NARROW);
+        if (i == on) {
+            G_RoundFill(x - 2, y + 1, tw + 4, 10, mine, 255);
+            G_Text(x, y, G_WHITE, G_NO_SHADOW, names[i], 0, TF_NARROW);
+        } else
+            G_Text(x, y, 0xa08a6a, G_NO_SHADOW, names[i], 0, TF_NARROW);
+        x += tw + 4;
+    }
+}
+
+// what just happened (or the top of the stack), under the step
 static void StackLine(char *out, unsigned cap)
 {
     const MtgStackEntry *e = &B.duel.stack[B.duel.stackCount - 1];
@@ -423,54 +659,176 @@ static void StackLine(char *out, unsigned cap)
         snprintf(target, sizeof(target), " > %s", Who(e->target.id));
     snprintf(out, cap, "%s: %s%s", e->controller == ME ? "YOU" : B.opp, name, target);
 }
-
-static const char *Prompt(void)
-{
-    switch (B.mode) {
-    case MODE_TARGET: return "Choose a target: {A} OK  {B} BACK";
-    case MODE_ATTACK: return "Attack with? {A} PICK  {START} DONE";
-    case MODE_BLOCK: return "Block with? {A} PICK  {START} DONE";
-    case MODE_BLOCK_PICK: return "Block which attacker? {A} OK  {B} BACK";
-    case MODE_DISCARD: return "Too many cards: {A} DISCARD ONE";
-    }
-    return NULL;
-}
-
-static void MiddleLine(void)
+static void NewsLine(void)
 {
     char line[120];
-    const char *prompt = Prompt();
-    G_FillA(0, MID_Y, 240, 13, 0x102030, 210);
-    snprintf(line, sizeof(line), "%s %s", B.duel.active == ME ? "YOUR" : "THEIR", sStepNames[B.duel.step]);
-    G_Text(3, MID_Y + 2, B.duel.active == ME ? 0xa0d0ff : 0xffb0a0, G_NO_SHADOW, line, 0, TF_NARROW);
-    if (prompt)
-        G_Hint(62, MID_Y + 6, 0xf8f070, G_NO_SHADOW, prompt, TF_NARROW, 1);
-    else if (B.holdAge < 70 && B.hold[0])
-        G_Text(62, MID_Y + 2, 0xf8f070, G_NO_SHADOW, B.hold, 0, TF_NARROW);
-    else if (B.duel.stackCount) {
+    line[0] = 0;
+    if (B.duel.stackCount)
         StackLine(line, sizeof(line));
-        TcgUi_FitText(line, 172, TF_NARROW);
-        G_Text(62, MID_Y + 2, 0xffffff, G_NO_SHADOW, line, 0, TF_NARROW);
-    } else if (B.tickerCount) {
+    else if (B.tickerCount)
         snprintf(line, sizeof(line), "%s", B.ticker[0]);
-        TcgUi_FitText(line, 172, TF_NARROW);
-        G_Text(62, MID_Y + 2, 0xe0e0e0, G_NO_SHADOW, line, 0, TF_NARROW);
-    } else if (B.duel.query.kind == MTG_Q_PRIORITY && B.duel.query.player == ME)
-        G_Hint(62, MID_Y + 6, 0xc0c8d0, G_NO_SHADOW, "{A} PLAY  {START} PASS  {L} STOP", TF_NARROW, 1);
+    if (!line[0])
+        return;
+    TcgUi_FitText(line, 168, TF_NARROW);
+    G_TextAlign(CENTER_X, 77, TA_CENTER, G_WHITE, 0x1c1008, line, TF_NARROW);
 }
 
+// the stack: its cards in the middle, the newest in front, a line to what it aims at
+static void StackCards(void)
+{
+    int i, n = B.duel.stackCount, first = n > 3 ? n - 3 : 0;
+    for (i = first; i < n; i++) {
+        const MtgStackEntry *e = &B.duel.stack[i];
+        int k = i - first, x = CENTER_X - 11 + k * 9 - (n - first - 1) * 4, y = CENTER_Y - 15 - 18 + k * 2, top = i == n - 1;
+        G_FillA(x + 2, y + 3, CARD_W, CARD_H, 0x000000, 100);
+        if (top)
+            G_FoilHalo(x, y, CARD_W, CARD_H, e->controller == ME ? 0x80b0ff : 0xff9080, B.frame, 0);
+        MtgGfx_DrawCard(B.duel.objs[e->source].def, (float)x, (float)y, CARD_W, CARD_H, e->controller == THEM ? 180 : 0,
+                        255, 0);
+        if (top && (e->target.kind == MTG_TGT_OBJ || e->target.kind == MTG_TGT_PLAYER)) {
+            Rect t = e->target.kind == MTG_TGT_PLAYER ? B.playerRect[e->target.id] : B.rect[e->target.id];
+            if (t.on) {
+                unsigned col = e->controller == ME ? 0x80b0ff : 0xff9080;
+                G_Line(x + 11, y + 15, t.x + t.w / 2, t.y + t.h / 2, col, 200);
+                G_Line(x + 12, y + 15, t.x + t.w / 2 + 1, t.y + t.h / 2, col, 120);
+                G_RoundFrame(t.x - 2, t.y - 2, t.w + 4, t.h + 4, col, 255);
+            }
+        }
+    }
+}
+
+static Rect FocusRect(void)
+{
+    int f;
+    if (B.pile != PILE_NONE)
+        return PileRect(B.pile);
+    f = Focused();
+    if (f == MTG_NO_OBJ)
+        return MakeRect(0, 0, 0, 0);
+    return B.rect[f];
+}
+
+/* What's under the cursor, in the tooltip box beside it (tcg_board.c Tooltip): what it is and what A does */
+static void Tooltip(void)
+{
+    char line[120] = "";
+    Rect r = FocusRect();
+    int w, x, y, f = Focused();
+    if (!r.w)
+        return;
+    if (B.pile == PILE_MY_LIBRARY || B.pile == PILE_OPP_LIBRARY) {
+        int p = B.pile == PILE_MY_LIBRARY ? ME : THEM;
+        uint16_t list[MTG_MAX_OBJS];
+        snprintf(line, sizeof(line), "%s LIBRARY %d  HAND %d  GRAVEYARD %d%s", p == ME ? "YOUR" : "THEIR",
+                 B.duel.players[p].libraryCount, HandCount(p), Graveyard(p, list), p == ME ? "  {A} CONCEDE" : "");
+    } else if (B.pile != PILE_NONE) {
+        uint16_t list[MTG_MAX_OBJS];
+        snprintf(line, sizeof(line), "%s GRAVEYARD: %d  {A} LOOK", B.pile == PILE_MY_GRAVE ? "YOUR" : "THEIR",
+                 Graveyard(B.pile == PILE_MY_GRAVE ? ME : THEM, list));
+    } else if (f != MTG_NO_OBJ) {
+        const MtgCardDef *c = Def(f);
+        const MtgObj *o = &B.duel.objs[f];
+        char name[64];
+        Name(name, sizeof(name), f);
+        if (c->types & MTG_T_CREATURE) {
+            if (o->zone == MTG_ZONE_BATTLEFIELD)
+                snprintf(line, sizeof(line), "%s  %d/%d", name, Mtg_Power(&B.duel, f), Mtg_Toughness(&B.duel, f));
+            else
+                snprintf(line, sizeof(line), "%s  %d/%d", name, c->power, c->toughness);
+        } else
+            snprintf(line, sizeof(line), "%s", name);
+        if (HasAction(f) && B.mode == MODE_NORMAL)
+            strncat(line, "  {A}", sizeof(line) - strlen(line) - 1);
+    }
+    if (!line[0])
+        return;
+    w = G_Hint(0, 0, 0, 0, line, TF_NARROW, 0) + 8;
+    x = r.x + r.w / 2 - w / 2;
+    y = r.y + r.h + 4;
+    if (f != MTG_NO_OBJ && (Def(f)->types & MTG_T_CREATURE) && B.duel.objs[f].zone == MTG_ZONE_BATTLEFIELD)
+        y += 9;   // (under its plate)
+    if (B.row == ROW_HAND && B.pile == PILE_NONE)
+        y = r.y - 15;
+    else if (y + 12 - Pan() > 150 || ((B.row == ROW_MY_LANDS || B.row == ROW_MY_PERMS) && B.pile == PILE_NONE))
+        y = r.y - 16;   // (your own cards: above them, as on the POKeMON Bench)
+    if (x < 1)
+        x = 1;
+    if (x + w > 239)
+        x = 239 - w;
+    if (y < 1)
+        y = r.y + r.h + 4;
+    G_RoundFill(x, y, w, 12, 0x1c1008, 215);
+    G_RoundFrame(x, y, w, 12, MAT_LINE, 255);
+    G_Hint(x + 4, y, G_WHITE, G_NO_SHADOW, line, TF_NARROW, 1);
+}
+
+/* What the player is being asked, in the yellow-framed box (tcg_board.c Prompt): at the top or the bottom */
+static void Prompt(const char *text, int top)
+{
+    int w = G_Hint(0, 0, 0, 0, text, TF_NARROW, 0) + 12, x = 120 - w / 2, y = top ? 1 : 140;
+    G_RoundFill(x, y, w, 13, 0x081830, 225);
+    G_RoundFrame(x, y, w, 13, 0xf8e070, 255);
+    G_Hint(x + 6, y + 1, 0xf8f0c0, G_NO_SHADOW, text, TF_NARROW, 1);
+}
+
+/* A menu in the game's window beside the card (tcg_board.c DrawMenu) */
+static void Menu(int x, int y, const char *const *items, int count, int cursor, unsigned disabled)
+{
+    int i, w = 0, h;
+    for (i = 0; i < count; i++) {
+        int m = G_Measure(items[i], TF_SMALL);
+        if (m > w)
+            w = m;
+    }
+    w += 24;
+    h = count * 13 + 10;
+    if (x + w > 238)
+        x = 238 - w;
+    if (x < 2)
+        x = 2;
+    if (y + h > 158)
+        y = 158 - h;
+    if (y < 2)
+        y = 2;
+    G_Window(x, y, w, h);
+    for (i = 0; i < count; i++) {
+        int off = (disabled >> i) & 1;
+        if (i == cursor)
+            G_Cursor(x + 7, y + 7 + i * 13);
+        G_Text(x + 14, y + 4 + i * 13, off ? 0xa8a8a8 : G_INK, off ? G_NO_SHADOW : G_INK_SHADOW, items[i], 0, TF_SMALL);
+    }
+}
+
+/* A note for the player (tcg_board.c's toast): the game's window over the middle a moment */
+static void Toast(void)
+{
+    int w, h = 24;
+    if (B.holdAge >= TOAST_FRAMES || !B.hold[0])
+        return;
+    w = G_Measure(B.hold, TF_SMALL) + 16;
+    if (w > 224)
+        w = 224, h = 36;
+    G_Window(120 - w / 2, 62, w, h);
+    G_Text(120 - w / 2 + 8, 66, G_INK, G_INK_SHADOW, B.hold, w - 16, TF_SMALL);
+}
+
+// a card's view over the table: its face big, its words (and how it stands now), as the card screens show one
 static void InspectWindow(int obj)
 {
     const MtgCardDef *c = Def(obj);
-    char name[64], text[700], line[96], cost[16];
+    const MtgObj *o = &B.duel.objs[obj];
+    char name[64], text[800], line[160];
     int y;
-    G_FillA(0, 0, 240, 160, 0x000000, 120);
-    G_Window(16, 10, 208, 140);
+    G_FillA(0, 0, 240, 160, 0x000000, 150);
+    G_FillA(10, 34, 72, 100, 0x000000, 90);
+    MtgGfx_DrawCard(o->def, 8, 30, 72, 100, 0, 255, 0);
+    TcgUi_ListBox(86, 4, 152, 140);
     Name(name, sizeof(name), obj);
-    G_Text(24, 15, G_INK, G_INK_SHADOW, name, 150, TF_NORMAL);
-    CostText(cost, sizeof(cost), &c->cost);
-    if (!(c->types & MTG_T_LAND))
-        G_TextAlign(216, 16, TA_RIGHT, G_INK, G_INK_SHADOW, cost, TF_NORMAL);
+    {
+        int costW = MtgGfx_Cost(o->def, 232, 12, 1, 1);
+        y = G_Text(94, 8, G_INK, G_INK_SHADOW, name, 136 - (costW ? costW + 4 : 0), TF_NORMAL);
+        y = y + 2 > 23 ? y + 2 : 23;
+    }
     {
         static const char *const sTypes[] = {"Land", "Creature", "Artifact", "Enchantment", "Instant", "Sorcery",
                                              "Planeswalker", "Tribal"};
@@ -487,32 +845,61 @@ static void InspectWindow(int obj)
             snprintf(line + n, sizeof(line) - n, "- %s", c->subtypes);
     }
     Mtg_PlainText(text, sizeof(text), line);
-    G_Text(24, 31, 0x506070, G_NO_SHADOW, text, 192, TF_NARROW);
+    y = G_Text(94, y, 0x586878, G_NO_SHADOW, text, 136, TF_NARROW) + 1;
+    G_FillA(92, y, 140, 1, 0xd8d8d0, 255);
     Mtg_PlainText(text, sizeof(text), c->oracle);
-    y = G_Text(24, 43, G_INK, G_NO_SHADOW, text, 192, TF_NARROW);
-    (void)y;
+    y = G_Text(94, y + 2, 0x404040, G_NO_SHADOW, text[0] ? text : "(No rules text.)", 136, TF_NARROW);
     if (c->types & MTG_T_CREATURE) {
-        if (B.duel.objs[obj].zone == MTG_ZONE_BATTLEFIELD)
-            snprintf(line, sizeof(line), "%d/%d (printed %d/%d)", Mtg_Power(&B.duel, obj), Mtg_Toughness(&B.duel, obj),
-                     c->power, c->toughness);
+        if (o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_Power(&B.duel, obj) != c->power
+                                                || Mtg_Toughness(&B.duel, obj) != c->toughness || o->damage))
+            snprintf(line, sizeof(line), "%d/%d now (printed %d/%d)%s", Mtg_Power(&B.duel, obj),
+                     Mtg_Toughness(&B.duel, obj), c->power, c->toughness, o->damage ? ", hurt" : "");
         else
             snprintf(line, sizeof(line), "%d/%d", c->power, c->toughness);
-        G_TextAlign(216, 136, TA_RIGHT, G_INK, G_INK_SHADOW, line, TF_NORMAL);
+        G_TextAlign(230, y + 1, TA_RIGHT, G_INK, G_INK_SHADOW, line, TF_SMALL);
+        y += 13;
     }
-    G_Hint(24, 141, 0x606870, G_NO_SHADOW, "{B} CLOSE", TF_NARROW, 1);
+    G_FillA(92, y, 140, 1, 0xd8d8d0, 255);
+    if (o->zone == MTG_ZONE_BATTLEFIELD) {
+        snprintf(line, sizeof(line), "%s%s%s", o->controller == ME ? "Yours" : "Theirs", o->tapped ? ", tapped" : "",
+                 o->sick && (c->types & MTG_T_CREATURE) ? ", arrived this turn" : "");
+        G_Text(94, y + 2, 0x707878, G_NO_SHADOW, line, 136, TF_NARROW);
+    }
+    TcgUi_Hints("{B} BACK");
+}
+
+// a graveyard, card by card (as the POKeMON table shows a discard pile)
+static void DrawView(void)
+{
+    int i, start = B.viewCursor / 14 * 14;
+    char line[96];
+    G_FillA(0, 0, 240, 160, 0x000000, 160);
+    G_RoundFill(0, 0, 240, 17, 0x203040, 230);
+    snprintf(line, sizeof(line), "%s GRAVEYARD", B.viewPlayer == ME ? "YOUR" : "THEIR");
+    G_Text(8, 1, G_WHITE, 0x101820, line, 0, TF_NORMAL);
+    snprintf(line, sizeof(line), "%d/%d", B.viewCursor + 1, B.viewCount);
+    G_TextAlign(236, 3, TA_RIGHT, G_WHITE, G_NO_SHADOW, line, TF_NARROW);
+    for (i = 0; i < 14 && start + i < B.viewCount; i++) {
+        int x = 8 + (i % 7) * 33, y = 24 + (i / 7) * 46, on = start + i == B.viewCursor;
+        if (on)
+            y -= 2;
+        MtgGfx_DrawCard(B.duel.objs[B.view[start + i]].def, (float)x, (float)y, 30, 42, 0, 255, 0);
+        if (on) {
+            int o = (B.frame / 8) % 2;
+            G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+        }
+    }
+    if (B.viewCursor < B.viewCount) {
+        char name[64];
+        Name(name, sizeof(name), B.view[B.viewCursor]);
+        TcgUi_Strip(NULL, 0, name);
+    }
+    TcgUi_Hints("{INSPECT} LOOK  {B} BACK");
 }
 
 static int sMenuLabelsInit;
 static char sMenuLabels[8][48];
-
-static void DrawMenu(void)
-{
-    const char *items[8];
-    int i;
-    for (i = 0; i < B.menuCount; i++)
-        items[i] = sMenuLabels[i];
-    TcgUi_PopMenu(70, 60, 160, items, B.menuCount, B.menuCursor, 0);
-}
+static const char *const sTurnMenu[2] = {"PASS", "END TURN"};
 
 static void DrawResult(void)
 {
@@ -524,21 +911,112 @@ static void DrawResult(void)
                    B.result == 1 ? "A booster pack for the win!" : B.result == 2 ? "Try again any time." : "");
 }
 
+// YOUR TURN / THEIR TURN: a band across the middle, the words sweeping through (the other card tables' look)
+static void DrawSweep(void)
+{
+    float t = (float)B.sweepAge / SWEEP_FRAMES, in, out;
+    int w, x, band, cy = 80;
+    unsigned color = B.sweepMine ? 0x3878f0 : 0xe85050;
+    const char *text = B.sweepMine ? "YOUR TURN" : "THEIR TURN";
+    if (B.sweepAge >= SWEEP_FRAMES)
+        return;
+    in = t * 4 > 1 ? 1 : t * 4;
+    in = 1 - (1 - in) * (1 - in);
+    out = t > 0.75f ? (t - 0.75f) * 4 : 0;
+    out = out * out;
+    w = G_Measure(text, TF_NORMAL);
+    x = (int)(-w - 20 + (120 + w / 2 + 20) * in + 300 * out) - w / 2;
+    band = (int)(22 * (t < 0.1f ? t / 0.1f : t > 0.9f ? (1 - t) / 0.1f : 1));
+    G_FillA(0, cy - band / 2, 240, band, 0x081018, 170);
+    G_FillA(0, cy - band / 2, 240, 1, color, 255);
+    G_FillA(0, cy + band / 2 - 1, 240, 1, color, 255);
+    if (band > 14)
+        G_Text(x, cy - 7, G_WHITE, color, text, 0, TF_NORMAL);
+}
+
+// the opponent's spell, shown big a moment as it's cast
+static void DrawBigCard(void)
+{
+    float t, in, w, h;
+    if (B.bigAge >= BIG_FRAMES || B.bigCard < 0)
+        return;
+    t = (float)B.bigAge / BIG_FRAMES;
+    in = t < 0.2f ? t / 0.2f : t > 0.8f ? (1 - t) / 0.2f : 1;
+    w = 44 * (0.6f + 0.4f * in);
+    h = 61 * (0.6f + 0.4f * in);
+    G_FillA(0, 0, 240, 160, 0x000000, (unsigned)(90 * in));
+    G_FillA((int)(120 - w / 2) + 2, (int)(70 - h / 2) + 3, (int)w, (int)h, 0x000000, (unsigned)(90 * in));
+    MtgGfx_DrawCard(B.bigCard, 120 - w / 2, 70 - h / 2, w, h, 0, (unsigned)(255 * in),
+                    t < 0.3f ? (unsigned)(160 * (1 - t / 0.3f)) : 0);
+    if (in > 0.98f) {
+        char name[64];
+        Mtg_PlainText(name, sizeof(name), Mtg_Card(B.bigCard)->name);
+        G_Banner(120, 70 + 30 + 10, name, 0xe85050, 1, 255);
+    }
+}
+
+static void DrawRow(int r)
+{
+    int i, lift = r == ROW_HAND;
+    for (i = 0; i < B.itemCount[r]; i++) {
+        int obj = B.items[r][i].obj;
+        float x, y;
+        DrawPos(obj, &B.rect[obj], &x, &y);
+        if (lift && B.mode == MODE_TARGET && B.targetCount && B.duel.query.actions[B.targets[0]].obj == obj)
+            continue;   // (the card being played is drawn last, held over the table)
+        DrawCard(obj, &B.rect[obj], B.items[r][i].count, x, y);
+    }
+}
+
 void MtgBoard_Draw(void)
 {
-    int r, i, f;
+    SDL_Renderer *renderer = G_R();
+    SDL_Texture *canvas = SDL_GetRenderTarget(renderer);
+    int r, i;
     if (!B.active)
         return;
     BuildRows();
     Layout();
-    G_Fill(0, 0, 240, 160, 0x2a4a3a);   // the felt
-    G_FillA(0, MID_Y - 1, 240, 1, 0x000000, 80);
-    PlayerBar(THEM);
-    for (r = 0; r < ROW_COUNT; r++)
-        for (i = 0; i < B.itemCount[r]; i++) {
-            int obj = B.items[r][i].obj;
-            DrawTile(obj, &B.rect[obj], B.items[r][i].count, 0);
+    // the mat and everything on it go into a layer taller than the screen, shown from Pan() down
+    if (sLayerOwner != renderer)
+        sLayer = NULL, sMat = NULL;
+    if (!sLayer) {
+        sLayer = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 240, LAYER_H);
+        sLayerOwner = renderer;
+        if (sLayer) {
+            SDL_SetTextureBlendMode(sLayer, SDL_BLENDMODE_BLEND);
+            SDL_SetTextureScaleMode(sLayer, SDL_ScaleModeNearest);
         }
+    }
+    if (sLayer) {
+        SDL_SetRenderTarget(renderer, sLayer);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+        SDL_RenderClear(renderer);
+    }
+    if (!sMat)
+        BuildMat();
+    if (sMat) {
+        SDL_Rect whole = {0, 0, 240, LAYER_H};
+        SDL_RenderCopy(renderer, sMat, NULL, &whole);
+    }
+    Labels();
+    // the piles, the life plates, the opponent's hand
+    {
+        uint16_t list[MTG_MAX_OBJS];
+        int n;
+        DrawPile(PileRect(PILE_OPP_LIBRARY), B.duel.players[THEM].libraryCount, 1, 0, 1);
+        DrawPile(PileRect(PILE_MY_LIBRARY), B.duel.players[ME].libraryCount, 1, 0, 0);
+        n = Graveyard(THEM, list);
+        DrawPile(PileRect(PILE_OPP_GRAVE), n, 0, n ? list[0] : 0, 1);
+        n = Graveyard(ME, list);
+        DrawPile(PileRect(PILE_MY_GRAVE), n, 0, n ? list[0] : 0, 0);
+    }
+    DrawLife(THEM);
+    DrawLife(ME);
+    DrawOppHand();
+    PhaseBar();
+    for (r = 0; r < ROW_HAND; r++)
+        DrawRow(r);
     // the attackers each blocker blocks
     for (i = 0; i < B.duel.objCount; i++) {
         const MtgObj *o = &B.duel.objs[i];
@@ -553,53 +1031,111 @@ void MtgBoard_Draw(void)
             if (B.block[i] >= 0) {
                 const Rect *a = &B.rect[q->candidates[i]], *t = &B.rect[q->attackers[(int)B.block[i]]];
                 G_Line(a->x + a->w / 2, a->y + a->h / 2, t->x + t->w / 2, t->y + t->h / 2, 0x80c0ff, 220);
-                G_RoundFrame(a->x - 1, a->y - 1, a->w + 2, a->h + 2, 0x3070e8, 255);
+                G_RoundFrame(a->x - 1, a->y - 1, a->w + 2, a->h + 2, 0x4080f0, 255);
             }
     }
-    if (B.mode == MODE_ATTACK) {
+    if (B.mode == MODE_ATTACK || B.mode == MODE_TARGET) {   // (the spaces that can be chosen: lit, as on the POKeMON table)
         const MtgQuery *q = &B.duel.query;
-        for (i = 0; i < q->candidateCount; i++) {
-            const Rect *a = &B.rect[q->candidates[i]];
-            if (B.attack & (1u << i))
-                G_RoundFrame(a->x - 1, a->y - 1, a->w + 2, a->h + 2, 0xe83030, 255);
-            else
-                G_FillA(a->x, a->y + a->h - 2, a->w, 2, 0xf8f070, 200);   // (could attack)
+        for (i = 0; i < (B.mode == MODE_ATTACK ? q->candidateCount : B.targetCount); i++) {
+            Rect a;
+            int chosen = 0;
+            if (B.mode == MODE_ATTACK) {
+                a = B.rect[q->candidates[i]];
+                chosen = (B.attack >> i) & 1;
+                if (chosen)
+                    a.y -= 5;
+            } else {
+                const MtgTarget *t = &q->actions[B.targets[i]].target;
+                if (t->kind == MTG_TGT_OBJ)
+                    a = B.rect[t->id];
+                else if (t->kind == MTG_TGT_PLAYER)
+                    a = B.playerRect[t->id];
+                else
+                    continue;
+            }
+            if (!a.on)
+                continue;
+            if (chosen)
+                G_RoundFrame(a.x - 1, a.y - 1, a.w + 2, a.h + 2, 0xf04030, 255);
+            else {
+                G_RoundFill(a.x - 1, a.y - 1, a.w + 2, a.h + 2, 0xf8f8a0, 60 + (unsigned)(40 * sinf(B.frame * 0.15f)));
+                G_RoundFrame(a.x - 2, a.y - 2, a.w + 4, a.h + 4, 0xf8f080, 255);
+            }
         }
     }
-    MiddleLine();
-    PlayerBar(ME);
-    // the cursor
+    if (B.duel.stackCount)
+        StackCards();
+    else
+        NewsLine();
+    DrawHandBar();
+    DrawRow(ROW_HAND);
+    if (B.mode == MODE_TARGET && B.targetCount) {   // the card being played, held up
+        int obj = B.duel.query.actions[B.targets[0]].obj;
+        if (B.rect[obj].on && B.duel.objs[obj].zone == MTG_ZONE_HAND)
+            DrawCard(obj, &B.rect[obj], 1, B.rect[obj].x, BarY() + Pan() - 22);
+    }
+    // the cursor and the tooltip
     if (B.mode == MODE_TARGET || B.mode == MODE_BLOCK_PICK) {
-        const Rect *t = NULL;
+        Rect t = MakeRect(0, 0, 0, 0);
         if (B.mode == MODE_TARGET) {
             const MtgAction *a = &B.duel.query.actions[B.targets[B.targetCursor]];
-            t = a->target.kind == MTG_TGT_PLAYER ? &B.playerRect[a->target.id] : &B.rect[a->target.id];
-            if (a->target.kind == MTG_TGT_STACK) {
-                static Rect stack = {60, MID_Y, 176, 13, 1};
-                t = &stack;
-            }
+            t = a->target.kind == MTG_TGT_PLAYER ? B.playerRect[a->target.id] : B.rect[a->target.id];
+            if (a->target.kind == MTG_TGT_STACK)
+                t = MakeRect(CENTER_X - 11, CENTER_Y - 33, CARD_W, CARD_H);
         } else
-            t = &B.rect[B.duel.query.attackers[B.blockCursor]];
-        if (t && t->on) {
-            if (t == &B.playerRect[ME] || t == &B.playerRect[THEM])   // a player: their whole bar lights up
-                G_FillA(t->x, t->y, t->w, t->h, G_FOCUS_TARGET, (B.frame / 8) % 2 ? 90 : 60);
-            G_Focus(t->x, t->y, t->w, t->h, G_FOCUS_TARGET, B.frame);
+            t = B.rect[B.duel.query.attackers[B.blockCursor]];
+        if (t.on && t.w)
+            G_Focus(t.x, t.y, t.w, t.h, 0xf8f070, B.frame);
+    } else if (B.mode != MODE_RESULT && B.mode != MODE_VIEW && B.mode != MODE_CONCEDE) {
+        Rect f = FocusRect();
+        if (f.w) {
+            G_Focus(f.x, f.y, f.w, f.h, G_WHITE, B.frame);
+            if (B.mode == MODE_NORMAL || B.mode == MODE_ATTACK || B.mode == MODE_BLOCK || B.mode == MODE_DISCARD)
+                Tooltip();
         }
-        if (B.mode == MODE_TARGET) {   // what the cursor is on, named in the bottom bar
-            const MtgAction *a = &B.duel.query.actions[B.targets[B.targetCursor]];
-            char name[64] = "", line[96];
-            if (a->target.kind == MTG_TGT_PLAYER)
-                snprintf(name, sizeof(name), "%s", a->target.id == ME ? "YOU" : B.opp);
-            else
-                Name(name, sizeof(name), a->target.id);
-            snprintf(line, sizeof(line), "TARGET: %s (%d/%d)", name, B.targetCursor + 1, B.targetCount);
-            TcgUi_FitText(line, 120, TF_NARROW);
-            G_Text(4, BAR_Y + 2, G_FOCUS_TARGET, G_NO_SHADOW, line, 0, TF_NARROW);
-        }
-    } else if (B.mode != MODE_RESULT && (f = Focused()) != MTG_NO_OBJ)
-        G_Focus(B.rect[f].x, B.rect[f].y, B.rect[f].w, B.rect[f].h, G_WHITE, B.frame);
-    if (B.mode == MODE_MENU)
-        DrawMenu();
+    }
+    if (sLayer) {
+        SDL_Rect dst = {0, -(int)(Pan() + 0.5f), 240, LAYER_H};
+        SDL_SetRenderTarget(renderer, canvas);
+        SDL_RenderCopy(renderer, sLayer, NULL, &dst);
+    }
+    // over the screen: the menus, what the player is asked, the sweep, the big card
+    if (B.mode == MODE_MENU) {
+        const char *items[8];
+        Rect f = FocusRect();
+        for (i = 0; i < B.menuCount; i++)
+            items[i] = sMenuLabels[i];
+        Menu(f.x + f.w + 4, f.y - (int)Pan() - 4, items, B.menuCount, B.menuCursor, 0);
+    } else if (B.mode == MODE_TURN)
+        Menu(160, 100, sTurnMenu, 2, B.menuCursor, B.duel.active == ME ? 0 : 2);
+    switch (B.mode) {
+    case MODE_TARGET: {
+        const MtgAction *a = &B.duel.query.actions[B.targets[B.targetCursor]];
+        char line[120], name[64];
+        if (a->target.kind == MTG_TGT_PLAYER)
+            snprintf(name, sizeof(name), "%s", a->target.id == ME ? "YOU" : B.opp);
+        else
+            Name(name, sizeof(name), a->target.id);
+        snprintf(line, sizeof(line), "Target: %s  {A} OK  {B}", name);
+        Prompt(line, 1);
+        break;
+    }
+    case MODE_ATTACK: Prompt("Attack with which creatures?  {A} PICK  {SELECT} ALL  {START} DONE", 1); break;
+    case MODE_BLOCK: Prompt("Block with which creatures?  {A} PICK  {START} DONE", 0); break;
+    case MODE_BLOCK_PICK: Prompt("Block which attacker?  {A} OK  {B}", 0); break;
+    case MODE_DISCARD: Prompt("Too many cards in your hand: discard one.  {A}", 1); break;
+    case MODE_CONCEDE: Prompt("Concede the duel?  {A} CONCEDE  {B} KEEP PLAYING", 0); break;
+    default:
+        if (B.mode == MODE_NORMAL && B.duel.query.kind == MTG_Q_PRIORITY && B.duel.query.player == ME && B.duel.stackCount
+            && B.duel.stack[B.duel.stackCount - 1].controller == THEM)
+            Prompt("Answer it?  {START} LET IT RESOLVE", 1);
+        break;
+    }
+    DrawSweep();
+    DrawBigCard();
+    Toast();
+    if (B.mode == MODE_VIEW)
+        DrawView();
     if (B.inspect && B.inspectObj != MTG_NO_OBJ)
         InspectWindow(B.inspectObj);
     if (B.mode == MODE_RESULT)
@@ -618,9 +1154,16 @@ static void ReadEvents(void)
         switch (e->kind) {
         case MTG_EV_TURN:
             Ticker("Turn %d: %s.", e->b, e->a == ME ? "your turn" : "their turn");
+            B.sweepAge = 0;
+            B.sweepMine = e->a == ME;
+            PlaySE(e->a == ME ? SE_BALL_TRAY_ENTER : SE_BALL_TRAY_EXIT);
             break;
         case MTG_EV_CAST:
         case MTG_EV_ACTIVATE:
+            if (e->kind == MTG_EV_CAST && d->objs[e->a].controller == THEM && !B.autoplay) {
+                B.bigCard = d->objs[e->a].def;
+                B.bigAge = 0;
+            }
             Name(a, sizeof(a), e->a);
             if (e->b == MTG_TGT_OBJ || e->b == MTG_TGT_STACK) {
                 Name(b, sizeof(b), e->c);
@@ -807,6 +1350,26 @@ static void ChooseKind(int k)
 static void MoveCursor(unsigned pressed, int onlyRow)
 {
     int r = B.row;
+    if (B.pile != PILE_NONE) {   // on a pile: back onto the table the way it came, or up and down the rows
+        int mine = B.pile == PILE_MY_GRAVE || B.pile == PILE_MY_LIBRARY;
+        if (onlyRow >= 0 || (pressed & (mine ? KEY_LEFT : KEY_RIGHT))) {
+            B.pile = PILE_NONE;
+            if (onlyRow >= 0)
+                B.row = onlyRow;
+            PlaySE(SE_SELECT);
+            return;
+        }
+        if (pressed & (KEY_UP | KEY_DOWN)) {
+            static const int above[4] = {PILE_MY_LIBRARY, PILE_MY_LIBRARY, PILE_OPP_GRAVE, PILE_OPP_GRAVE};
+            static const int below[4] = {PILE_MY_GRAVE, PILE_MY_GRAVE, PILE_OPP_LIBRARY, PILE_OPP_LIBRARY};
+            int to = pressed & KEY_UP ? above[B.pile] : below[B.pile];
+            if (to != B.pile) {
+                B.pile = to;
+                PlaySE(SE_SELECT);
+            }
+        }
+        return;
+    }
     if (onlyRow < 0 && (pressed & (KEY_UP | KEY_DOWN))) {
         int dir = pressed & KEY_UP ? -1 : 1, n;
         for (n = 0, r = B.row + dir; n < ROW_COUNT && (r < 0 || r >= ROW_COUNT || !B.itemCount[r]); n++)
@@ -819,10 +1382,25 @@ static void MoveCursor(unsigned pressed, int onlyRow)
     if (onlyRow >= 0)
         B.row = onlyRow;
     if (pressed & (KEY_LEFT | KEY_RIGHT)) {
-        int n = B.itemCount[B.row];
-        if (n) {
-            B.col[B.row] = (B.col[B.row] + (pressed & KEY_LEFT ? n - 1 : 1)) % n;
+        int n = B.itemCount[B.row], left = (pressed & KEY_LEFT) != 0;
+        if (B.row == ROW_HAND) {   // (the hand goes round)
+            if (n) {
+                B.col[B.row] = (B.col[B.row] + (left ? n - 1 : 1)) % n;
+                PlaySE(SE_SELECT);
+            }
+        } else if (onlyRow < 0 && !left && (B.row == ROW_MY_LANDS || B.row == ROW_MY_PERMS)
+                   && (!n || B.col[B.row] >= n - 1)) {
+            B.pile = B.row == ROW_MY_LANDS ? PILE_MY_GRAVE : PILE_MY_LIBRARY;   // past the row's end: the piles
             PlaySE(SE_SELECT);
+        } else if (onlyRow < 0 && left && (B.row == ROW_OPP_LANDS || B.row == ROW_OPP_PERMS) && B.col[B.row] <= 0) {
+            B.pile = B.row == ROW_OPP_LANDS ? PILE_OPP_GRAVE : PILE_OPP_LIBRARY;
+            PlaySE(SE_SELECT);
+        } else if (n) {
+            int c = B.col[B.row] + (left ? -1 : 1);
+            if (c >= 0 && c < n) {
+                B.col[B.row] = c;
+                PlaySE(SE_SELECT);
+            }
         }
     }
 }
@@ -836,6 +1414,8 @@ static int AutoPass(unsigned keys)
         return 1;
     if (keys & KEY_L)
         return 0;
+    if (B.endTurn == d->turn && d->active == ME && !d->stackCount)   // (END TURN: on to the opponent's turn)
+        return 1;
     if (d->stackCount)
         return d->stack[d->stackCount - 1].controller == ME;   // the opponent's spell: a chance to answer it
     if (d->active == ME)
@@ -850,6 +1430,30 @@ static int ObjIndex(const uint16_t *list, int n, int obj)
         if (list[i] == obj)
             return i;
     return -1;
+}
+
+// A on a pile: CONCEDE on your library, LOOK at a graveyard; 1 when the cursor was on one
+static int PileA(void)
+{
+    if (B.pile == PILE_NONE)
+        return 0;
+    if (B.pile == PILE_MY_LIBRARY) {
+        PlaySE(SE_SELECT);
+        B.mode = MODE_CONCEDE;
+    } else if (B.pile == PILE_MY_GRAVE || B.pile == PILE_OPP_GRAVE) {
+        B.viewPlayer = B.pile == PILE_MY_GRAVE ? ME : THEM;
+        B.viewCount = Graveyard(B.viewPlayer, B.view);
+        B.viewCursor = 0;
+        if (!B.viewCount) {
+            PlaySE(SE_FAILURE);
+            Hold("There's nothing in it yet.");
+        } else {
+            PlaySE(SE_SELECT);
+            B.mode = MODE_VIEW;
+        }
+    } else
+        PlaySE(SE_FAILURE);
+    return 1;
 }
 
 static void HumanPriority(unsigned pressed, unsigned keys)
@@ -881,6 +1485,22 @@ static void HumanPriority(unsigned pressed, unsigned keys)
         }
         return;
     }
+    if (B.mode == MODE_TURN) {
+        unsigned off = B.duel.active == ME ? 0 : 2;
+        B.menuCursor = TcgUi_PopMenuMove(pressed, B.menuCursor, 2, off);
+        if (pressed & KEY_B)
+            B.mode = MODE_NORMAL, PlaySE(SE_SELECT);
+        else if (pressed & KEY_A && !((off >> B.menuCursor) & 1)) {
+            PlaySE(SE_SELECT);
+            B.mode = MODE_NORMAL;
+            if (B.menuCursor == 1) {
+                B.endTurn = B.duel.turn;
+                MPNet_Log("mtg: you: end the turn");
+            }
+            Pass();
+        }
+        return;
+    }
     if (!(keys & KEY_L) && AutoPass(keys)) {
         if (++B.autoPassWait >= 3) {
             B.autoPassWait = 0;
@@ -896,7 +1516,15 @@ static void HumanPriority(unsigned pressed, unsigned keys)
         Pass();
         return;
     }
+    if (pressed & KEY_B) {   // the turn's menu: PASS, END TURN
+        PlaySE(SE_SELECT);
+        B.mode = MODE_TURN;
+        B.menuCursor = 0;
+        return;
+    }
     if (pressed & KEY_A) {
+        if (PileA())
+            return;
         f = Focused();
         if (f == MTG_NO_OBJ)
             return;
@@ -924,10 +1552,17 @@ static void HumanAttack(unsigned pressed)
     const MtgQuery *q = &B.duel.query;
     int f, i;
     YourMove("attackers");
+    if (B.endTurn == B.duel.turn) {
+        MtgAnswer a;
+        memset(&a, 0, sizeof(a));
+        Answer(&a);
+        return;
+    }
     if (B.mode != MODE_ATTACK) {
         B.mode = MODE_ATTACK;
         B.attack = 0;
         B.row = ROW_MY_PERMS;
+        B.pile = PILE_NONE;
         for (i = 0; i < B.itemCount[ROW_MY_PERMS]; i++)   // the cursor on the first who can attack
             if (ObjIndex(q->candidates, q->candidateCount, B.items[ROW_MY_PERMS][i].obj) >= 0) {
                 B.col[ROW_MY_PERMS] = i;
@@ -970,6 +1605,7 @@ static void HumanBlock(unsigned pressed)
         B.mode = MODE_BLOCK;
         memset(B.block, -1, sizeof(B.block));
         B.row = ROW_MY_PERMS;
+        B.pile = PILE_NONE;
     }
     if (B.mode == MODE_BLOCK_PICK) {
         if (pressed & (KEY_LEFT | KEY_UP))
@@ -1021,6 +1657,7 @@ static void HumanDiscard(unsigned pressed)
     const MtgQuery *q = &B.duel.query;
     int f, i;
     B.mode = MODE_DISCARD;
+    B.pile = PILE_NONE;
     MoveCursor(pressed, ROW_HAND);
     f = Focused();
     if ((pressed & KEY_A) && f != MTG_NO_OBJ && (i = ObjIndex(q->candidates, q->candidateCount, f)) >= 0) {
@@ -1039,15 +1676,69 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
         return 0;
     B.frame++;
     B.holdAge++;
+    if (B.sweepAge < SWEEP_FRAMES)
+        B.sweepAge++;
+    if (B.bigAge < BIG_FRAMES)
+        B.bigAge++;
     BuildRows();
     Layout();
+    Slides();
     ReadEvents();
     if (B.tickerCount && ++B.tickerAge >= TICKER_FRAMES) {   // the next line of what happened
         memmove(B.ticker[0], B.ticker[1], sizeof(B.ticker[0]) * (TICKER - 1));
         B.tickerCount--;
         B.tickerAge = 0;
     }
+    if (B.holdAge < TOAST_FRAMES)
+        B.holdAge++;
+    {
+        // the hand's tray: up while the cursor is in the hand (and the hand is where the player acts)
+        float want = B.row == ROW_HAND && B.pile == PILE_NONE && !B.inspect
+                     && (B.mode == MODE_NORMAL || B.mode == MODE_MENU || B.mode == MODE_DISCARD)
+                     ? 1.0f : 0.0f;
+        B.tray += (want - B.tray) * 0.3f;
+        if (fabsf(want - B.tray) < 0.01f)
+            B.tray = want;
+    }
     q = Mtg_Query(&B.duel);
+    if (B.mode == MODE_CONCEDE) {
+        if (pressed & KEY_A) {
+            PlaySE(SE_SELECT);
+            MPNet_Log("mtg: you: conceded");
+            B.mode = MODE_NORMAL;
+            MtgBoard_ForceEnd(0);
+            return 0;
+        }
+        if (pressed & KEY_B)
+            B.mode = MODE_NORMAL, PlaySE(SE_SELECT);
+        if (q->kind != MTG_Q_GAME_OVER)
+            return 0;
+    }
+    if (B.mode == MODE_VIEW) {
+        if (B.inspect) {
+            if (pressed & (KEY_B | KEY_INSPECT | KEY_SELECT))
+                B.inspect = 0, PlaySE(SE_SELECT);
+            return 0;
+        }
+        if (pressed & KEY_LEFT && B.viewCursor > 0)
+            B.viewCursor--, PlaySE(SE_SELECT);
+        if (pressed & KEY_RIGHT && B.viewCursor + 1 < B.viewCount)
+            B.viewCursor++, PlaySE(SE_SELECT);
+        if (pressed & KEY_DOWN && B.viewCursor + 7 < B.viewCount)
+            B.viewCursor += 7, PlaySE(SE_SELECT);
+        if (pressed & KEY_UP && B.viewCursor >= 7)
+            B.viewCursor -= 7, PlaySE(SE_SELECT);
+        if (pressed & (KEY_INSPECT | KEY_SELECT | KEY_A)) {
+            B.inspect = 1;
+            B.inspectObj = B.view[B.viewCursor];
+            PlaySE(SE_SELECT);
+        } else if (pressed & KEY_B) {
+            B.mode = MODE_NORMAL;
+            PlaySE(SE_SELECT);
+        }
+        if (q->kind != MTG_Q_GAME_OVER)
+            return 0;
+    }
     if (B.mode == MODE_RESULT) {
         B.resultAge++;
         if (B.resultAge >= G_RESULT_READY && (pressed & (KEY_A | KEY_B)))
@@ -1057,6 +1748,7 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
     if (q->kind == MTG_Q_GAME_OVER) {
         B.result = q->winner == ME ? 1 : q->winner == THEM ? 2 : 3;
         B.mode = MODE_RESULT;
+        B.pile = PILE_NONE;
         B.inspect = 0;
         B.resultAge = 0;
         if (B.result == 1)
@@ -1071,7 +1763,7 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
             B.inspect = 0, PlaySE(SE_SELECT);
         return 0;
     }
-    if ((pressed & (KEY_INSPECT | KEY_SELECT)) && B.mode != MODE_ATTACK) {
+    if ((pressed & (KEY_INSPECT | KEY_SELECT)) && B.mode != MODE_ATTACK && B.mode != MODE_TURN) {
         int f = Focused();
         if (B.mode == MODE_TARGET) {
             const MtgAction *a = &q->actions[B.targets[B.targetCursor]];
@@ -1092,12 +1784,14 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
         }
         if (B.tickerCount > 1 && !B.autoplay)
             return 0;
+        if (!B.autoplay && (B.bigAge < BIG_FRAMES || B.sweepAge < SWEEP_FRAMES / 2))   // (while it's shown)
+            return 0;
         {
             MtgAnswer a;
             int before = (int)B.duel.eventCount;
             MtgAi_Answer(&B.duel, &a);
             Mtg_Answer(&B.duel, &a);
-            B.aiWait = B.autoplay ? 0 : ((int)B.duel.eventCount - before > 2 ? 24 : 2);
+            B.aiWait = B.autoplay ? 0 : ((int)B.duel.eventCount - before > 2 ? (Fast() ? 10 : 24) : 2);
         }
         return 0;
     }

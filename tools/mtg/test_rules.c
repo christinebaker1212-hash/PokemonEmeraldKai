@@ -486,6 +486,7 @@ static void TestCollection(void)
     for (k = 0; k < 41; k++)
         Mtg_DeckAdd(&c.decks[3], Card("Island"));
     c.wins = 7, c.beaten = 5, c.activeDeck = 3;
+    c.ace[0] = (int16_t)Card("Llanowar Elves");
     size = Mtg_CollectionWrite(&c, buf, sizeof(buf));
     CHECK(size > 0 && Mtg_CollectionRead(&back, buf, size), "written and read back (%u bytes)", size);
     CHECK(back.owner == c.owner && back.wins == 7 && back.beaten == 5 && back.activeDeck == 3 && back.optedIn,
@@ -494,6 +495,15 @@ static void TestCollection(void)
     for (k = 0; k < MTG_DECKS; k++)
         CHECK(back.decks[k].count == c.decks[k].count && !memcmp(back.decks[k].cards, c.decks[k].cards,
               c.decks[k].count * 2) && !strcmp(back.decks[k].name, c.decks[k].name), "deck %d came back", k);
+    CHECK(back.ace[0] == c.ace[0] && back.ace[1] == -1, "the ACE CARDs came back");
+    CHECK(Mtg_DeckAce(&back, 0) == (Mtg_DeckCopies(&back.decks[0], c.ace[0]) ? c.ace[0] : Mtg_AutoAce(back.decks[0].cards,
+          back.decks[0].count)), "the ACE CARD stands for its deck");
+    {   // a format 1 file (no ACE CARDs at its end) still reads, every deck's ace picked by the game
+        buf[4] = 1;
+        CHECK(Mtg_CollectionRead(&back, buf, size - MTG_DECKS * 4) && back.ace[0] == -1 && back.decks[3].count == 41,
+              "format 1 reads");
+        buf[4] = 2;
+    }
     CHECK(!Mtg_CollectionRead(&back, buf, 3), "a cut file is refused");
 }
 

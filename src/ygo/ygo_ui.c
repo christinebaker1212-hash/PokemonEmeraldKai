@@ -23,6 +23,7 @@
 #include "ygo/card_ids.h"
 #include "ygo/duel.h"
 #include "ygo/integration.h"
+#include "mtg/integration.h"   // (Mtg_Unlocked: the CARD CASE goes round to MAGIC)
 #include "ygo/net.h"
 #include "ygo/npc.h"
 #include "../tcg/tcg_gfx.h"
@@ -2979,7 +2980,7 @@ int YgoUi_Step(unsigned keys)
         else if (pressed & (KEY_L | KEY_R))
         {
             PlaySE(SE_SELECT);
-            ToSide(pressed & KEY_R ? KIT_GAME_TRIAD : KIT_GAME_POKEMON);
+            ToSide(pressed & KEY_R ? (Mtg_Unlocked() ? KIT_GAME_MAGIC : KIT_GAME_TRIAD) : KIT_GAME_POKEMON);
         }
         else if (pressed & KEY_B)
         {

@@ -1,26 +1,41 @@
 // Moemon Kai: the CARD CASE's MAGIC side (hidden until the player has a deck: docs/MTG_DECISIONS.md) and the
-// screens around a duel: DECKS (eight slots), the deck builder (basic lands free, the owned cards, four of a card),
-// the BINDER, a card's whole text, MOSSDEEP's CARD SHOP (the starter decks), a duelist's challenge, the table
-// (mtg_board.c), the booster a win brings. Drawn with the other card games' look (src/tcg/tcg_ui_kit.h).
+// screens around a duel, each laid out, worded and keyed as the POKeMON and YU-GI-OH! sides' own (tcg_ui.c,
+// ygo_ui.c, with the kit of tcg_ui_kit.h): HOME (the deck's ACE CARD floating; SELECT: HOW TO PLAY), DECKS (the
+// slots, DECK RECIPES, BACK; EDIT / RENAME / ACE CARD / DUEL WITH IT / COPY / DELETE), the recipes (the starter decks
+// built again from the cards owned), ACE CARD, the deck builder (a grid of the basic lands and the owned cards beside
+// the deck's list), the BINDER (a grid of faces by color, SELECT: every card, NEW on new ones), a card's view (the big
+// face and its words, A for the big picture), MOSSDEEP's CARD SHOP (the starter decks), a duelist's challenge (their
+// picture, best card, DUEL WITH a deck), the table (mtg_board.c), the booster a win brings, opened card by card.
+// Faces by mtg_gfx.c.
 #include "mp_version.h"
 #include <SDL2/SDL.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "event_data.h"
+#include "event_object_movement.h"
 #include "mp.h"
 #include "sound.h"
 #include "constants/songs.h"
+#include "tcg/integration.h"
+#include "tcg/tcg.h"
 #include "mtg/integration.h"
 #include "mtg_internal.h"
 #include "mtg_board.h"
+#include "mtg_gfx.h"
 #include "../tcg/tcg_gfx.h"
+#include "../tcg/tcg_foil.h"
+#include "../tcg/tcg_guide.h"
+#include "../tcg/tcg_new.h"
 #include "../tcg/tcg_ui_kit.h"
 
 enum
 {
-    M_CLOSED, M_HOME, M_DECKS, M_BUILDER, M_BINDER, M_INSPECT, M_STARTER, M_CHALLENGE, M_DUEL, M_SPOILS
+    M_CLOSED, M_HOME, M_DECKS, M_RECIPES, M_ACE, M_BUILDER, M_BINDER, M_INSPECT, M_ART, M_STARTER, M_CHALLENGE, M_DUEL,
+    M_SPOILS
 };
 enum
 {
@@ -28,16 +43,18 @@ enum
     KEY_R = 256, KEY_L = 512,
     KEY_INSPECT = 2048
 };
-enum { ACT_NONE, ACT_CLOSE, ACT_HOME, ACT_TAKE_STARTER, ACT_DELETE, ACT_HOWTO };
+enum { ACT_NONE, ACT_CLOSE, ACT_HOME, ACT_TAKE_STARTER, ACT_CLEAR, ACT_COPY, ACT_RECIPE };
+enum { VS_NPC, VS_PRACTICE };
 
 #define PANEL_W KIT_PANEL_W
 #define STRIP_Y KIT_STRIP_Y
 #define LIST_X KIT_LIST_X
 #define LIST_W KIT_LIST_W
+#define ROW_H KIT_ROW_H
 #define MTG_THEME 0x7a4a2a         // the case's MAGIC side: warm brown, with gold
 #define MTG_GOLD 0xe0b050
-#define LIST_ROWS 7
-#define HOME_ROWS 4
+#define FILTERS 9                  // the five colors, colorless, more than one color, lands; and (the binder) all
+#define REVEAL_TEAR 26
 
 static struct
 {
@@ -48,14 +65,18 @@ static struct
     int fromScript;
     void (*returnToGame)(void);
     int menuOn, menuCursor;
-    int deck;                        // the deck being looked at or built
+    int deck, recipeSlot;            // the deck being looked at or built; where a recipe goes (-1 the first empty)
     uint16_t list[MTG_COLLECTION_CARDS];
-    int listCount;
-    int inspectCard;
-    int duelist;
+    int listCount, withBasics, filter, showAll;
+    int side, deckCursor;            // the builder: 0 the cards, 1 the deck's list
+    int inspectCard, inspectScroll, inspectMax;
+    int zoom, panX, panY;            // the big picture
+    int duelist, vs;
+    uint32_t portrait[64 * 64];      // the duelist as they faced you (their map sprite)
+    uint8_t portraitW, portraitH;
+    SDL_Texture *portraitTexture;
     uint16_t booster[MTG_BOOSTER];
-    int boosterCount;
-    int howto;
+    int boosterCount, flipped, revealAge, revealNext;
 } U;
 
 static MtgCollection *C(void) { return Mtg_GetCollection(); }
@@ -86,7 +107,7 @@ static void Ask(int action, int arg, const char *format, ...)
 }
 static void Screen(int screen)
 {
-    if (screen != M_SPOILS)
+    if (screen != M_SPOILS && screen != M_INSPECT && screen != M_ART)
         MtgBoard_ReleaseMusic();   // the victory song ends with the booster
     U.screen = screen;
     U.cursor = 0;
@@ -97,6 +118,13 @@ static void Screen(int screen)
 int MtgUi_Active(void) { return U.screen != M_CLOSED; }
 unsigned MtgUi_DuelingNow(void) { return U.screen == M_DUEL; }
 
+static void ForgetPortrait(void)
+{
+    if (U.portraitTexture)
+        SDL_DestroyTexture(U.portraitTexture);
+    U.portraitTexture = NULL;
+}
+
 static void Close(void)
 {
     void (*callback)(void) = U.returnToGame;
@@ -106,6 +134,9 @@ static void Close(void)
     U.message[0] = 0;
     U.asking = 0;
     Screen(M_CLOSED);
+    MtgBoard_ReleaseMusic();
+    ForgetPortrait();
+    MtgGfx_Forget();
     U.returnToGame = NULL;
     U.fromScript = 0;
     Tcg_CloseScreens(callback, script);
@@ -129,7 +160,7 @@ void MtgUi_OpenCase(void (*returnToGame)(void), int fromScript)
     MPNet_Log("mtg: case open");
 }
 
-// L the side before, R the one after (POKeMON, YU-GI-OH!, TRIPLE TRIAD, MAGIC)
+// L the side before, R the one after (POKeMON, YU-GI-OH!, MAGIC, TRIPLE TRIAD: TRIPLE TRIAD always last)
 static void ToSide(int right)
 {
     void (*callback)(void) = U.returnToGame;
@@ -138,29 +169,15 @@ static void ToSide(int right)
     U.fromScript = 0;
     U.message[0] = 0;
     Screen(M_CLOSED);
+    MtgGfx_Forget();
     C()->flags &= ~MTG_FLAG_CASE_SIDE;
-    Tcg_OpenCaseGame(right ? KIT_GAME_POKEMON : KIT_GAME_TRIAD, callback, script);
+    Tcg_OpenCaseGame(right ? KIT_GAME_TRIAD : KIT_GAME_YUGIOH, callback, script);
 }
 
 // ---- helpers
 static void PlainName(char *out, unsigned cap, int card)
 {
     Mtg_PlainText(out, cap, Mtg_Card(card)->name);
-}
-
-static void CostText(char *out, unsigned cap, const MtgManaCost *c)
-{
-    static const char sym[] = "WUBRGC";
-    unsigned n = 0, i, k;
-    out[0] = 0;
-    if (c->x && n + 1 < cap)
-        out[n++] = 'X';
-    if (c->generic && n + 4 < cap)
-        n += (unsigned)snprintf(out + n, cap - n, "%u", c->generic);
-    for (i = 0; i < MTG_MANA_KINDS; i++)
-        for (k = 0; k < c->pip[i] && n + 1 < cap; k++)
-            out[n++] = sym[i];
-    out[n < cap ? n : cap - 1] = 0;
 }
 
 static const char *ColorWords(uint8_t colors)
@@ -175,15 +192,113 @@ static const char *ColorWords(uint8_t colors)
     return n ? buf : "COLORLESS";
 }
 
-// the game's own card back (not the printed one): a gold ring on deep brown
-static void CardBack(int x, int y, int w, int h)
+// a mana symbol: the POKeMON side's Energy orbs' shape (G_EnergyOrb), in the mana's color
+static void ManaOrb(int x, int y, int kind)
 {
-    G_RoundFill(x, y, w, h, 0x3a2414, 255);
-    G_RoundFrame(x, y, w, h, 0x1a0c04, 255);
-    G_RoundFill(x + 3, y + 3, w - 6, h - 6, 0x5a3a20, 255);
-    G_Circle(x + w / 2, y + h / 2, (float)(w < h ? w : h) / 3.0f, MTG_GOLD, 255);
-    G_Circle(x + w / 2, y + h / 2, (float)(w < h ? w : h) / 3.0f - 2.0f, 0x5a3a20, 255);
-    G_Circle(x + w / 2, y + h / 2, 3, MTG_GOLD, 255);
+    unsigned base = MtgGfx_ManaColor(kind), light = G_Mix(base, 0xffffff, 0.5f), dark = G_Mix(base, 0x000000, 0.35f);
+    G_Fill(x + 2, y, 3, 1, 0x202020);
+    G_Fill(x + 1, y + 1, 5, 5, base);
+    G_Fill(x, y + 2, 7, 3, base);
+    G_Fill(x + 1, y + 1, 1, 1, 0x202020);
+    G_Fill(x + 5, y + 1, 1, 1, 0x202020);
+    G_Fill(x, y + 2, 1, 3, 0x202020);
+    G_Fill(x + 6, y + 2, 1, 3, 0x202020);
+    G_Fill(x + 1, y + 5, 1, 1, 0x202020);
+    G_Fill(x + 5, y + 5, 1, 1, 0x202020);
+    G_Fill(x + 2, y + 6, 3, 1, 0x202020);
+    G_Fill(x + 4, y + 4, 2, 1, dark);
+    G_Fill(x + 2, y + 2, 2, 1, light);
+    G_Fill(x + 2, y + 3, 1, 1, light);
+}
+// a deck's colors as orbs from x (as the POKeMON DECKS page shows a deck's types: TypeOrbs)
+static void ColorOrbs(int x, int y, uint8_t colors)
+{
+    int k;
+    for (k = 0; k < 5; k++)
+        if (colors & (1u << k)) {
+            ManaOrb(x, y, k);
+            x += 8;
+        }
+}
+
+static const char *RarityWord(int card)
+{
+    static const char *const words[] = {"COMMON", "UNCOMMON", "RARE"};
+    int r = Mtg_Card(card)->rarity;
+    return words[r >= 0 && r < 3 ? r : 0];
+}
+static unsigned RarityInk(int card)
+{
+    int r = Mtg_Card(card)->rarity;
+    return r == MTG_RARITY_RARE ? 0xf8d060 : r == MTG_RARITY_UNCOMMON ? 0xd0dcf0 : 0xf0f0f0;
+}
+
+static void TypeLine(char *out, unsigned cap, int card)
+{
+    static const char *const sTypes[] = {"Land", "Creature", "Artifact", "Enchantment", "Instant", "Sorcery",
+                                         "Planeswalker", "Tribal"};
+    const MtgCardDef *c = Mtg_Card(card);
+    char line[160];
+    unsigned n = 0, i;
+    line[0] = 0;
+    if (c->supertypes & MTG_ST_LEGENDARY)
+        n += (unsigned)snprintf(line + n, sizeof(line) - n, "Legendary ");
+    if (c->supertypes & MTG_ST_BASIC)
+        n += (unsigned)snprintf(line + n, sizeof(line) - n, "Basic ");
+    if (c->supertypes & MTG_ST_SNOW)
+        n += (unsigned)snprintf(line + n, sizeof(line) - n, "Snow ");
+    for (i = 0; i < 8; i++)
+        if (c->types & (1u << i))
+            n += (unsigned)snprintf(line + n, sizeof(line) - n, "%s ", sTypes[i]);
+    if (c->subtypes[0] && n < sizeof(line))
+        snprintf(line + n, sizeof(line) - n, "- %s", c->subtypes);
+    Mtg_PlainText(out, cap, line);
+}
+
+static void RecipeOf(int k, MtgSavedDeck *d)
+{
+    MtgRecipe r = gMtgStarters[k];
+    Mtg_RecipeDeck(&r, d);
+}
+static int RecipeAce(int k)
+{
+    MtgSavedDeck d;
+    RecipeOf(k, &d);
+    return Mtg_AutoAce(d.cards, d.count);
+}
+static int DuelistAce(const char *const *lines)
+{
+    MtgRecipe r;
+    MtgSavedDeck d;
+    memset(&r, 0, sizeof(r));
+    r.name = "";
+    r.about = "";
+    r.cards = lines;
+    Mtg_RecipeDeck(&r, &d);
+    return Mtg_AutoAce(d.cards, d.count);
+}
+// what of a recipe the player has (basic lands are always there); returns how many cards it holds
+static int RecipeOwned(int k, int *have)
+{
+    MtgSavedDeck d;
+    uint8_t used[MTG_COLLECTION_CARDS];
+    int i;
+    RecipeOf(k, &d);
+    memset(used, 0, sizeof(used));
+    *have = 0;
+    for (i = 0; i < d.count; i++)
+        if (Mtg_IsBasicLand(d.cards[i]) || used[d.cards[i]]++ < C()->owned[d.cards[i]])
+            ++*have;
+    return d.count;
+}
+
+static void Foil(int card, int x, int y, int w, int h, unsigned phase)
+{
+    int ax, ay, aw, ah;
+    if (card < 0 || Mtg_Card(card)->rarity != MTG_RARITY_RARE)
+        return;
+    MtgGfx_ArtRect(card, w, h, &ax, &ay, &aw, &ah);
+    G_Foil(FOIL_GLINT, x, y, w, h, x + ax, y + ay, aw, ah, (unsigned)(x * 7 + y * 13), phase);
 }
 
 static void Strip(const char *text)
@@ -191,20 +306,25 @@ static void Strip(const char *text)
     TcgUi_Strip(NULL, 0, text);
 }
 
-static void CardStrip(int card)
+static void BigCard(int card, int x, int y, int bob)
 {
-    char text[600], line[700], cost[16], name[64];
-    const MtgCardDef *c = Mtg_Card(card);
-    PlainName(name, sizeof(name), card);
-    CostText(cost, sizeof(cost), &c->cost);
-    Mtg_PlainText(text, sizeof(text), c->oracle);
-    if (c->types & MTG_T_CREATURE)
-        snprintf(line, sizeof(line), "%s %s  %d/%d\n%s", name, cost, c->power, c->toughness, text);
-    else
-        snprintf(line, sizeof(line), "%s %s\n%s", name, cost, text);
-    TcgUi_Strip(NULL, 0, line);
+    G_FillA(x + 2, y + 3, 44, 61, 0x000000, 70);
+    MtgGfx_DrawCard(card, (float)x, (float)(y - bob), 44, 61, 0, 255, 0);
+    Foil(card, x, y - bob, 44, 61, (unsigned)U.frame);
 }
 
+static int DeckValid(int k) { return C()->decks[k].count && !Mtg_DeckProblem(C(), &C()->decks[k]); }
+static int SlotEmpty(int k) { return !C()->decks[k].count; }
+static int EmptySlot(void)
+{
+    int k;
+    for (k = 0; k < MTG_DECKS; k++)
+        if (SlotEmpty(k))
+            return k;
+    return MTG_DECKS;
+}
+
+// up and down a list (with wrap, as the other games' lists); held, a page at a time is the d-pad's repeat
 static void MoveCursor(unsigned pressed, int count)
 {
     if (!count)
@@ -213,21 +333,51 @@ static void MoveCursor(unsigned pressed, int count)
         U.cursor = (U.cursor + count - 1) % count, PlaySE(SE_SELECT);
     if (pressed & KEY_DOWN)
         U.cursor = (U.cursor + 1) % count, PlaySE(SE_SELECT);
-    if (U.cursor < U.scroll)
-        U.scroll = U.cursor;
-    if (U.cursor >= U.scroll + LIST_ROWS)
-        U.scroll = U.cursor - LIST_ROWS + 1;
 }
 
-// ---- lists of cards: the binder (owned) and the builder (the five basic lands, then the owned)
+// the d-pad over a grid of cols
+static void GridMove(unsigned pressed, int count, int cols)
+{
+    int c = U.cursor;
+    if (!count)
+        return;
+    if (pressed & KEY_RIGHT && c + 1 < count)
+        c++;
+    if (pressed & KEY_LEFT && c > 0)
+        c--;
+    if (pressed & KEY_DOWN)
+        c = c + cols < count ? c + cols : count - 1;
+    if (pressed & KEY_UP)
+        c = c - cols >= 0 ? c - cols : 0;
+    if (c != U.cursor)
+        PlaySE(SE_SELECT);
+    U.cursor = c;
+}
+
+// ---- lists of cards: the binder (owned, or every card) and the builder (the five basic lands, then the owned)
+static const char *const sFilterNames[FILTERS] = {"WHITE", "BLUE", "BLACK", "RED", "GREEN", "COLORLESS", "MULTICOLOR",
+                                                  "LANDS", "ALL"};
+static int InFilter(int card)
+{
+    const MtgCardDef *c = Mtg_Card(card);
+    int land = (c->types & MTG_T_LAND) != 0;
+    switch (U.filter) {
+    case 0: case 1: case 2: case 3: case 4: return !land && c->colors == MTG_COLOR_BIT(U.filter);
+    case 5: return !land && !c->colors;
+    case 6: return !land && (c->colors & (c->colors - 1));
+    case 7: return land;
+    default: return 1;
+    }
+}
+
 static int ListOrder(const void *a, const void *b)
 {
     const MtgCardDef *x = Mtg_Card(*(const uint16_t *)a), *y = Mtg_Card(*(const uint16_t *)b);
     int bx = Mtg_IsBasicLand(*(const uint16_t *)a), by = Mtg_IsBasicLand(*(const uint16_t *)b), cx, cy;
     if (bx != by)
         return by - bx;   // the basic lands first
-    cx = x->colors ? (x->colors & (x->colors - 1) ? 6 : __builtin_ctz(x->colors)) : 5;
-    cy = y->colors ? (y->colors & (y->colors - 1) ? 6 : __builtin_ctz(y->colors)) : 5;
+    cx = x->types & MTG_T_LAND ? 8 : x->colors ? (x->colors & (x->colors - 1) ? 7 : __builtin_ctz(x->colors)) : 6;
+    cy = y->types & MTG_T_LAND ? 8 : y->colors ? (y->colors & (y->colors - 1) ? 7 : __builtin_ctz(y->colors)) : 6;
     if (cx != cy)
         return cx - cy;
     cx = Mtg_ManaCostTotal(&x->cost), cy = Mtg_ManaCostTotal(&y->cost);
@@ -240,214 +390,551 @@ static void BuildList(int withBasics)
 {
     static const char *const basics[5] = {"Plains", "Island", "Swamp", "Mountain", "Forest"};
     MtgCollection *c = C();
-    int i;
+    int i, first;
+    U.withBasics = withBasics;
     U.listCount = 0;
     if (withBasics)
         for (i = 0; i < 5; i++)
-            U.list[U.listCount++] = (uint16_t)Mtg_CardByName(basics[i]);
+            if (InFilter(Mtg_CardByName(basics[i])))
+                U.list[U.listCount++] = (uint16_t)Mtg_CardByName(basics[i]);
+    first = U.listCount;
     for (i = 0; i < Mtg_DbCount() && i < MTG_COLLECTION_CARDS; i++)
-        if (c->owned[i] && Mtg_CanUse(i) && !(withBasics && Mtg_IsBasicLand(i)))
+        if ((c->owned[i] || (U.showAll && !withBasics)) && Mtg_CanUse(i) && !(withBasics && Mtg_IsBasicLand(i))
+            && InFilter(i))
             U.list[U.listCount++] = (uint16_t)i;
-    qsort(U.list + (withBasics ? 5 : 0), (size_t)(U.listCount - (withBasics ? 5 : 0)), sizeof(U.list[0]), ListOrder);
+    qsort(U.list + first, (size_t)(U.listCount - first), sizeof(U.list[0]), ListOrder);
+    if (U.cursor >= U.listCount)
+        U.cursor = U.listCount ? U.listCount - 1 : 0;
 }
 
-static unsigned RarityColor(int card)
-{
-    int r = Mtg_Card(card)->rarity;
-    return r == MTG_RARITY_RARE ? 0xc08818 : r == MTG_RARITY_UNCOMMON ? 0x6878a0 : G_INK;
-}
-
-static void CardRows(int builder)
+static void OwnedCounts(int *have, int *total)
 {
     MtgCollection *c = C();
     int i;
-    TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
-    for (i = 0; i < LIST_ROWS && U.scroll + i < U.listCount; i++) {
-        int card = U.list[U.scroll + i];
-        char name[64], right[16];
-        PlainName(name, sizeof(name), card);
-        TcgUi_FitText(name, builder ? 84 : 96, TF_NARROW);
-        if (builder)
-            snprintf(right, sizeof(right), Mtg_IsBasicLand(card) ? "%d" : "%d/%d",
-                     Mtg_DeckCopies(&c->decks[U.deck], card), c->owned[card]);
+    *have = *total = 0;
+    for (i = 0; i < Mtg_DbCount() && i < MTG_COLLECTION_CARDS; i++)
+        if (Mtg_CanUse(i) && !Mtg_IsBasicLand(i)) {
+            ++*total;
+            *have += c->owned[i] != 0;
+        }
+}
+
+/* The chips, as the POKeMON side's (tcg_ui.c Tabs): a tab each, the chosen one white with the red frame; a mana orb
+ * in the five colors', C / M / L / * for colorless, more than one color, lands and every card */
+static void Chips(int x, int y, int count)
+{
+    static const char *const letters[FILTERS] = {"", "", "", "", "", "C", "M", "L", "*"};
+    int i;
+    for (i = 0; i < count; i++) {
+        int tx = x + i * 14, on = i == U.filter;
+        G_RoundFill(tx, y + (on ? 0 : 1), 13, on ? 13 : 12, on ? 0xf8f8f8 : 0x405060, 255);
+        G_RoundFrame(tx, y + (on ? 0 : 1), 13, on ? 13 : 12, on ? 0xe82820 : 0x202830, 255);
+        if (i < 5)
+            ManaOrb(tx + 3, y + 3, i);
         else
-            snprintf(right, sizeof(right), "x%d", c->owned[card]);
-        TcgUi_Row(LIST_X + 2, 6 + i * 14, LIST_W - 4, U.cursor == U.scroll + i, 1, "", right);
-        G_Text(LIST_X + 8, 8 + i * 14, RarityColor(card), G_NO_SHADOW, name, 0, TF_NARROW);
+            G_TextAlign(tx + 7, y, TA_CENTER, on ? G_INK : 0xe0e8f0, G_NO_SHADOW, letters[i], TF_NARROW);
     }
-    if (U.scroll > 0)
-        G_Arrow(LIST_X + LIST_W / 2 - 3, 1, 0, 0xffffff);
-    if (U.scroll + LIST_ROWS < U.listCount)
-        G_Arrow(LIST_X + LIST_W / 2 - 3, 105, 1, 0xffffff);
+}
+
+static void CursorFrame(int x, int y, int w, int h)
+{
+    int o = (U.frame / 8) % 2;
+    G_Frame(x - 2 - o, y - 2 - o, w + 4 + 2 * o, h + 4 + 2 * o, 0xe82820, 255);
 }
 
 // ---- HOME
-static const char *const sHomeRows[HOME_ROWS] = {"DECKS", "BINDER", "HOW TO PLAY", "CLOSE"};
-static const char *const sHomeHelp[HOME_ROWS] = {"Your decks: pick the one to play, or build one.",
-                                                 "Every card you have.", "How a game of MAGIC goes.",
-                                                 "Put the CARD CASE away."};
+enum { HOME_DECKS, HOME_BINDER, HOME_PRACTICE, HOME_SPEED, HOME_CLOSE, HOME_ROWS };
+static const char *const sHomeRows[HOME_ROWS] = {"DECKS", "BINDER", "PRACTICE DUEL", "DUEL SPEED", "CLOSE CASE"};
+static const char *const sHomeHelp[HOME_ROWS] = {
+    "Build decks and pick the one you duel with.", "Every card you own.",
+    "Against a starter deck. Nothing is won or lost.", "How quickly the cards move on the table.",
+    "Put the CARD CASE away."};
 
 static void HomeScreen(void)
 {
     MtgCollection *c = C();
     const MtgSavedDeck *d = &c->decks[c->activeDeck];
     char line[160];
-    int i, bob = (int)(sinf(U.frame * 0.06f) * 1.5f), owned = 0;
+    int i, bob = (int)(sinf(U.frame * 0.06f) * 1.5f), have, total;
     TcgUi_Background();
     TcgUi_CaseTabs(KIT_GAME_MAGIC, MTG_THEME);
-    G_FillA(34 + 2, 22 + 3, 36, 50, 0x000000, 70);
-    CardBack(34, 22 - bob, 36, 50);
-    snprintf(line, sizeof(line), "%s", d->count ? d->name : "No deck");
-    G_TextAlign(52, 76, TA_CENTER, G_INK, G_INK_SHADOW, line, TF_SMALL);
-    snprintf(line, sizeof(line), "%s", ColorWords(Mtg_DeckColors(d)));
-    G_TextAlign(52, 88, TA_CENTER, 0x605040, G_NO_SHADOW, line, TF_NARROW);
-    snprintf(line, sizeof(line), "WON %u  LOST %u", c->wins, c->losses);
-    G_TextAlign(52, 97, TA_CENTER, 0x605040, G_NO_SHADOW, line, TF_NARROW);
+    if (d->count)
+        BigCard(Mtg_DeckAce(c, c->activeDeck), 30, 22, bob);
+    G_TextAlign(52, 86, TA_CENTER, G_INK, G_INK_SHADOW, d->count && d->name[0] ? d->name : "No deck", TF_SMALL);
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
     for (i = 0; i < HOME_ROWS; i++)
-        TcgUi_Row(LIST_X + 2, 6 + i * 14, LIST_W - 4, U.cursor == i, 1, sHomeRows[i], NULL);
-    for (i = 0; i < Mtg_DbCount(); i++)
-        owned += c->owned[i] != 0;
-    snprintf(line, sizeof(line), "%s\nDIFFERENT CARDS %d", sHomeHelp[U.cursor], owned);
+        TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.cursor == i, 1, sHomeRows[i],
+                  i == HOME_SPEED ? (Tcg_GetCollection()->fastAnimations ? "FAST" : "NORMAL") : NULL);
+    OwnedCounts(&have, &total);
+    snprintf(line, sizeof(line), "%s\nCARDS %d/%d   WON %u  LOST %u", sHomeHelp[U.cursor], have, total, c->wins,
+             c->losses);
     Strip(line);
-    TcgUi_Hints("{L}{R} OTHER GAMES");
+    TcgUi_Hints("{SELECT} HOW TO PLAY  {L}{R} OTHER GAMES");
 }
 
-// ---- DECKS
-enum { DM_USE, DM_EDIT, DM_COPY, DM_DELETE, DM_COUNT };
-static const char *const sDeckMenu[DM_COUNT] = {"PLAY WITH IT", "EDIT", "COPY", "DELETE"};
-static const char *const sEmptyMenu[1] = {"BUILD A DECK"};
+// ---- DECKS: the slots, DECK RECIPES, BACK
+enum { DM_EDIT, DM_RENAME, DM_ACE, DM_USE, DM_COPY, DM_DELETE, DM_COUNT };
+enum { EM_NEW, EM_RECIPE, EM_COUNT };
+static const char *const sDeckMenu[DM_COUNT] = {"EDIT", "RENAME", "ACE CARD", "DUEL WITH IT", "COPY", "DELETE"};
+static const char *const sEmptyMenu[EM_COUNT] = {"BUILD A DECK", "FROM A RECIPE"};
+#define DECK_ROWS (MTG_DECKS + 2)
+#define DECK_ROW_RECIPES MTG_DECKS
+#define DECK_ROW_BACK (MTG_DECKS + 1)
+static unsigned DeckMenuOff(int d) { return d == C()->activeDeck || !DeckValid(d) ? 1u << DM_USE : 0; }
 
 static void DecksScreen(void)
 {
     MtgCollection *c = C();
-    int i;
+    int i, d = U.cursor < MTG_DECKS ? U.cursor : c->activeDeck;
     char line[96];
     TcgUi_Background();
     TcgUi_SidePanel("DECKS", MTG_THEME);
+    if (c->decks[d].count)
+        BigCard(Mtg_DeckAce(c, d), 30, 22, 0);
+    snprintf(line, sizeof(line), "%d CARDS", c->decks[d].count);
+    G_TextAlign(52, 86, TA_CENTER, DeckValid(d) ? 0x2858a8 : 0xc04040, G_NO_SHADOW, line, TF_SMALL);
+    ColorOrbs(52 - (__builtin_popcount(Mtg_DeckColors(&c->decks[d]) & 31) * 8 - 1) / 2, 99, Mtg_DeckColors(&c->decks[d]));
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
-    for (i = 0; i < MTG_DECKS; i++) {
-        const MtgSavedDeck *d = &c->decks[i];
-        char right[16];
-        snprintf(right, sizeof(right), "%s%d", i == c->activeDeck ? "* " : "", d->count);
-        TcgUi_Row(LIST_X + 2, 6 + i * 12, LIST_W - 4, U.cursor == i, 1, d->count ? d->name : "- EMPTY -",
-                  d->count ? right : NULL);
+    U.scroll = U.cursor - 3 < 0 ? 0 : U.cursor - 3 > DECK_ROWS - 6 ? DECK_ROWS - 6 : U.cursor - 3;
+    for (i = 0; i < 6; i++) {
+        int k = U.scroll + i;
+        if (k >= DECK_ROWS)
+            break;
+        if (k == DECK_ROW_BACK || k == DECK_ROW_RECIPES) {
+            TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.cursor == k, 1, k == DECK_ROW_BACK ? "BACK" : "DECK RECIPES",
+                      NULL);
+            continue;
+        }
+        snprintf(line, sizeof(line), "%s", c->decks[k].count && c->decks[k].name[0] ? c->decks[k].name : "EMPTY SLOT");
+        TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.cursor == k, c->decks[k].count != 0, line,
+                  k == c->activeDeck && c->decks[k].count ? "IN USE" : NULL);
     }
-    {
-        const MtgSavedDeck *d = &c->decks[U.cursor];
-        const char *problem = d->count ? Mtg_DeckProblem(c, d) : NULL;
-        if (!d->count)
-            snprintf(line, sizeof(line), "An empty slot: build a deck here.");
+    if (U.cursor == DECK_ROW_BACK)
+        Strip("Back to the CARD CASE.");
+    else if (U.cursor == DECK_ROW_RECIPES)
+        Strip("The starter decks, built again from the cards you have.");
+    else if (U.cursor == c->activeDeck && c->decks[U.cursor].count)
+        Strip(Mtg_DeckProblem(c, &c->decks[U.cursor]) ? Mtg_DeckProblem(c, &c->decks[U.cursor])
+                                                      : "The deck you duel with. A deck holds 40 cards or more.");
+    else
+        Strip(c->decks[U.cursor].count ? "{R} DUEL WITH THIS DECK" : "An empty slot: build a deck, or one from a recipe.");
+    if (U.menuOn && U.cursor < MTG_DECKS) {
+        if (SlotEmpty(U.cursor))
+            TcgUi_PopMenu(118, 40, 114, sEmptyMenu, EM_COUNT, U.menuCursor, 0);
         else
-            snprintf(line, sizeof(line), "%s, %d cards%s\n%s", ColorWords(Mtg_DeckColors(d)), d->count,
-                     U.cursor == c->activeDeck ? " (in play)" : "", problem ? problem : "Ready to play.");
-        Strip(line);
-    }
-    if (U.menuOn) {
-        if (c->decks[U.cursor].count)
-            TcgUi_PopMenu(118, 40, 110, sDeckMenu, DM_COUNT, U.menuCursor, 0);
-        else
-            TcgUi_PopMenu(118, 40, 110, sEmptyMenu, 1, U.menuCursor, 0);
-    }
-    TcgUi_Hints("{A} CHOOSE  {B} BACK");
+            TcgUi_PopMenu(134, 20, 98, sDeckMenu, DM_COUNT, U.menuCursor, DeckMenuOff(U.cursor));
+        TcgUi_Hints("{A} CHOOSE  {B} BACK");
+    } else
+        TcgUi_Hints("{A} MENU  {START} COPY  {SELECT} DELETE  {B} BACK");
+    TcgUi_NameDraw(MTG_THEME);
 }
 
-// ---- the builder
+// ---- DECK RECIPES: the starter decks, built again from the cards owned
+static void RecipeMissing(int k, char *out, size_t size, int *lost)
+{
+    MtgSavedDeck d;
+    uint8_t used[MTG_COLLECTION_CARDS], missing[MTG_COLLECTION_CARDS];
+    int i, n = 0;
+    size_t len;
+    RecipeOf(k, &d);
+    memset(used, 0, sizeof(used));
+    memset(missing, 0, sizeof(missing));
+    for (i = 0; i < d.count; i++)
+        if (!Mtg_IsBasicLand(d.cards[i]) && used[d.cards[i]]++ >= C()->owned[d.cards[i]])
+            missing[d.cards[i]]++, n++;
+    /* (as many as fit the strip's two lines, then how many more) */
+    snprintf(out, size, "Missing:");
+    for (i = 0; i < Mtg_DbCount() && i < MTG_COLLECTION_CARDS; i++) {
+        char more[48], name[64];
+        int left = 0, j;
+        if (!missing[i])
+            continue;
+        for (j = i + 1; j < Mtg_DbCount() && j < MTG_COLLECTION_CARDS; j++)
+            left += missing[j] != 0;
+        PlainName(name, sizeof(name), i);
+        len = strlen(out);
+        snprintf(out + len, size - len, "%s %u %s", len > 8 ? "," : "", missing[i], name);
+        snprintf(more, sizeof(more), " and %d more", left);
+        if (G_Measure(out, TF_SMALL) + (left ? G_Measure(more, TF_SMALL) : 0) > 226 * 2 - 70 || strlen(out) + 40 > size) {
+            out[len] = 0;
+            snprintf(out + len, size - len, " and %d more", left + 1);
+            break;
+        }
+    }
+    *lost = n;
+}
+static void RecipesScreen(void)
+{
+    int have, total, lost, i, top = U.cursor < 3 ? 0 : U.cursor - 3;
+    char line[200];
+    TcgUi_Background();
+    TcgUi_SidePanel("RECIPES", MTG_THEME);
+    total = RecipeOwned(U.cursor, &have);
+    BigCard(RecipeAce(U.cursor), 30, 22, 0);
+    snprintf(line, sizeof(line), "%d/%d OWNED", have, total);
+    G_TextAlign(52, 86, TA_CENTER, have == total ? 0x2858a8 : 0xc04040, G_NO_SHADOW, line, TF_SMALL);
+    TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
+    if (top > MTG_STARTERS - 6)
+        top = MTG_STARTERS > 6 ? MTG_STARTERS - 6 : 0;
+    for (i = 0; i < 6 && top + i < MTG_STARTERS; i++) {
+        int h, t = RecipeOwned(top + i, &h);
+        char right[16];
+        snprintf(right, sizeof(right), "%d/%d", h, t);
+        TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.cursor == top + i, 1, gMtgStarters[top + i].name, right);
+    }
+    RecipeMissing(U.cursor, line, sizeof(line), &lost);
+    if (!lost)
+        snprintf(line, sizeof(line), "The %s deck. You have every card.", gMtgStarters[U.cursor].name);
+    Strip(line);
+    TcgUi_Hints("{A} BUILD  {B} BACK");
+}
+
+// ---- ACE CARD: the card that stands for the deck
+static int AceList(int deck, uint16_t *out)   // the deck's cards once each, creatures first (no basic lands)
+{
+    const MtgSavedDeck *d = &C()->decks[deck];
+    int i, j, n = 0, pass;
+    for (pass = 0; pass < 2; pass++)
+        for (i = 0; i < d->count; i++) {
+            int id = d->cards[i];
+            if (Mtg_IsBasicLand(id) || ((Mtg_Card(id)->types & MTG_T_CREATURE) != 0) != (pass == 0))
+                continue;
+            for (j = 0; j < n && out[j] != id; j++)
+                ;
+            if (j == n)
+                out[n++] = (uint16_t)id;
+        }
+    return n;
+}
+#define ACE_COLS 4
+#define ACE_ROWS 2
+static void AceScreen(void)
+{
+    MtgCollection *c = C();
+    uint16_t list[MTG_DECK_MAX];
+    int n = AceList(U.deck, list), ace = Mtg_DeckAce(c, U.deck), page = ACE_COLS * ACE_ROWS, start = U.cursor / page * page;
+    int i;
+    char line[96];
+    TcgUi_Background();
+    TcgUi_SidePanel("ACE CARD", MTG_THEME);
+    if (n)
+        BigCard(list[U.cursor], 30, 22, (int)(sinf(TcgUi_Frame() * 0.06f) * 1.5f));
+    G_TextAlign(52, 86, TA_CENTER, G_INK, G_INK_SHADOW, c->decks[U.deck].name, TF_SMALL);
+    TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
+    for (i = 0; i < page && start + i < n; i++) {
+        int on = start + i == U.cursor, x = LIST_X + 4 + (i % ACE_COLS) * 31, y = 10 + (i / ACE_COLS) * 48 - on * 2;
+        MtgGfx_DrawCard(list[start + i], (float)x, (float)y, 30, 42, 0, 255, 0);
+        if (list[start + i] == ace) {
+            G_RoundFill(x + 3, y + 32, 24, 9, 0xe8a020, 240);
+            G_TextAlign(x + 15, y + 31, TA_CENTER, G_WHITE, G_NO_SHADOW, "ACE", TF_NARROW);
+        }
+        if (on) {
+            int o = (TcgUi_Frame() / 8) % 2;
+            G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+        }
+    }
+    if (n > page) {
+        snprintf(line, sizeof(line), "%d/%d", start / page + 1, (n + page - 1) / page);
+        G_TextAlign(LIST_X + LIST_W - 5, 95, TA_RIGHT, G_INK, G_NO_SHADOW, line, TF_NARROW);
+    }
+    if (n) {
+        char name[64];
+        PlainName(name, sizeof(name), list[U.cursor]);
+        snprintf(line, sizeof(line), "%s%s", name, list[U.cursor] == ace ? ": this deck's ACE CARD." : "");
+        Strip(line);
+    } else
+        Strip("This deck has no cards to choose from.");
+    TcgUi_Hints("{A} MAKE IT THE ACE  {INSPECT} LOOK  {B} BACK");
+}
+
+// ---- the builder: the cards (5 x 2 faces) and the deck's list
+#define GRID_COLS 5
+#define GRID_ROWS 2
+#define LIST_ROWS 9
+
+static int DeckUnique(const MtgSavedDeck *d, uint16_t *out)
+{
+    int n = 0, i, k;
+    for (i = 0; i < d->count; i++) {
+        for (k = 0; k < n && out[k] != d->cards[i]; k++)
+            ;
+        if (k == n)
+            out[n++] = d->cards[i];
+    }
+    qsort(out, (size_t)n, sizeof(out[0]), ListOrder);
+    return n;
+}
+
+static void CardLine(char *line, unsigned cap, int card)   // the strip's words for a card: its name, P/T, cost
+{
+    const MtgCardDef *def = Mtg_Card(card);
+    char name[64], cost[16];
+    unsigned n = 0, i, k;
+    static const char sym[] = "WUBRGC";
+    PlainName(name, sizeof(name), card);
+    cost[0] = 0;
+    if (!(def->types & MTG_T_LAND)) {
+        if (def->cost.x)
+            cost[n++] = 'X';
+        if (def->cost.generic)
+            n += (unsigned)snprintf(cost + n, sizeof(cost) - n, "%u", def->cost.generic);
+        for (i = 0; i < MTG_MANA_KINDS; i++)
+            for (k = 0; k < def->cost.pip[i] && n + 1 < sizeof(cost); k++)
+                cost[n++] = sym[i];
+        cost[n] = 0;
+    }
+    if (def->types & MTG_T_CREATURE)
+        snprintf(line, cap, "%s  %d/%d  %s", name, def->power, def->toughness, cost);
+    else
+        snprintf(line, cap, "%s  %s", name, cost);
+}
+
 static void BuilderScreen(void)
 {
     MtgCollection *c = C();
     const MtgSavedDeck *d = &c->decks[U.deck];
-    const char *problem = Mtg_DeckProblem(c, d);
+    uint16_t listed[MTG_DECK_MAX];
+    int n = U.listCount, i, page = GRID_COLS * GRID_ROWS, start = U.cursor / page * page, uniq = DeckUnique(d, listed), card;
     char line[96];
     TcgUi_Background();
-    TcgUi_SidePanel("BUILD", MTG_THEME);
-    snprintf(line, sizeof(line), "%s", d->name);
-    G_TextAlign(52, 22, TA_CENTER, G_INK, G_INK_SHADOW, line, TF_SMALL);
-    snprintf(line, sizeof(line), "%d CARDS", d->count);
-    G_TextAlign(52, 36, TA_CENTER, d->count >= MTG_DECK_MIN ? 0x306030 : 0xa03020, G_NO_SHADOW, line, TF_NORMAL);
-    G_TextAlign(52, 52, TA_CENTER, 0x605040, G_NO_SHADOW, ColorWords(Mtg_DeckColors(d)), TF_NARROW);
-    G_Text(6, 64, problem ? 0xa03020 : 0x306030, G_NO_SHADOW, problem ? problem : "Ready to play.", 92, TF_NARROW);
-    CardRows(1);
-    if (U.cursor < U.listCount)
-        CardStrip(U.list[U.cursor]);
-    TcgUi_Hints("{LEFT}{RIGHT} TAKE OUT / PUT IN  {B} DONE");
+    G_RoundFill(0, 0, 160, 17, 0x203040, 230);
+    Chips(2, 2, FILTERS - 1);
+    G_Hint(118, 3, 0xe0e0ff, G_NO_SHADOW, "{L}{R}", TF_NARROW, 1);
+    for (i = 0; i < page && start + i < n; i++) {
+        int id = U.list[start + i], x = 4 + (i % GRID_COLS) * 31, y = 20 + (i / GRID_COLS) * 46;
+        int on = U.side == 0 && start + i == U.cursor, in = Mtg_DeckCopies(d, id);
+        if (on)
+            y -= 2;
+        MtgGfx_DrawCard(id, (float)x, (float)y, 30, 42, 0, 255, 0);
+        snprintf(line, sizeof(line), Mtg_IsBasicLand(id) ? "%d" : "%d/%d", in, c->owned[id]);
+        G_RoundFill(x + 1, y + 33, 28, 9, in ? 0x2858a8 : 0x404850, 235);
+        G_Digits(x + 15 - G_DigitsWidth(line, 0, 1) / 2, y + 35, line, 0, 1, 0xf0f8ff, 255);
+        if (on) {
+            int o = (U.frame / 8) % 2;
+            G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+        }
+    }
+    if (!n)
+        G_TextAlign(80, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind.", TF_SMALL);
+    if (n > page) {
+        snprintf(line, sizeof(line), "%d/%d", start / page + 1, (n + page - 1) / page);
+        G_TextAlign(157, 3, TA_RIGHT, G_WHITE, 0x101820, line, TF_NARROW);
+    }
+    // the deck: how many, READY, then a row a card
+    TcgUi_ListBox(162, 0, 78, 110);
+    snprintf(line, sizeof(line), "%d", d->count);
+    G_Text(166, 1, d->count >= MTG_DECK_MIN ? 0x2858a8 : 0xc04040, G_NO_SHADOW, line, 0, TF_SMALL);
+    if (!Mtg_DeckProblem(c, d))
+        G_Text(206, 2, 0x2858a8, G_NO_SHADOW, "READY", 0, TF_NARROW);
+    if (U.deckCursor >= uniq)
+        U.deckCursor = uniq ? uniq - 1 : 0;
+    {
+        int top = U.deckCursor < 4 ? 0 : U.deckCursor - 4;
+        if (top > uniq - LIST_ROWS)
+            top = uniq > LIST_ROWS ? uniq - LIST_ROWS : 0;
+        for (i = 0; i < LIST_ROWS && top + i < uniq; i++) {
+            int id = listed[top + i], y = 14 + i * 10, on = U.side == 1 && top + i == U.deckCursor;
+            int short_ = !Mtg_IsBasicLand(id) && Mtg_DeckCopies(d, id) > c->owned[id];
+            char name[64];
+            if (on)
+                G_RoundFill(164, y, 74, 10, 0xf8d0c8, 255);
+            G_FillA(165, y + 2, 2, 6, MtgGfx_FrameColor(id, 0), 255);
+            PlainName(name, sizeof(name), id);
+            TcgUi_FitText(name, 52, TF_NARROW);
+            G_Text(169, y - 1, short_ ? 0xa0a0a0 : G_INK, G_NO_SHADOW, name, 0, TF_NARROW);
+            snprintf(line, sizeof(line), "x%d", Mtg_DeckCopies(d, id));
+            G_Digits(236 - G_DigitsWidth(line, 0, 1), y + 2, line, 0, 1, short_ ? 0xa0a0a0 : 0x2858a8, 255);
+        }
+    }
+    card = U.side ? (uniq ? listed[U.deckCursor] : -1) : (U.cursor < n ? U.list[U.cursor] : -1);
+    line[0] = 0;
+    if (card >= 0)
+        CardLine(line, sizeof(line), card);
+    Strip(line);
+    TcgUi_Hints(U.side ? "{A} TAKE OUT  {LEFT} CARDS  {INSPECT} LOOK  {B} DONE"
+                       : "{A} ADD  {SELECT} OUT  {INSPECT} LOOK  {B} DONE");
 }
 
-// ---- the binder
+// ---- the binder: 7 x 2 faces
 static void BinderScreen(void)
 {
-    char line[64];
+    MtgCollection *c = C();
+    int n = U.listCount, i, cols = 7, page = 14, start = U.cursor / page * page, have, total;
+    char line[128];
     TcgUi_Background();
-    TcgUi_SidePanel("BINDER", MTG_THEME);
-    snprintf(line, sizeof(line), "%d CARDS", U.listCount);
-    G_TextAlign(52, 30, TA_CENTER, G_INK, G_INK_SHADOW, line, TF_SMALL);
-    G_Text(8, 48, 0x605040, G_NO_SHADOW, "Gold names are rare, grey-blue uncommon.", 90, TF_NARROW);
-    CardRows(0);
-    if (U.cursor < U.listCount)
-        CardStrip(U.list[U.cursor]);
-    TcgUi_Hints("{A} LOOK  {B} BACK");
+    G_RoundFill(0, 0, 240, 17, 0x203040, 230);
+    Chips(2, 2, FILTERS);
+    OwnedCounts(&have, &total);
+    snprintf(line, sizeof(line), "%d/%d", have, total);
+    G_TextAlign(236, 2, TA_RIGHT, G_WHITE, G_NO_SHADOW, line, TF_SMALL);
+    for (i = 0; i < page && start + i < n; i++) {
+        int id = U.list[start + i], x = 8 + (i % cols) * 33, y = 21 + (i / cols) * 45, on = start + i == U.cursor;
+        int count = c->owned[id];
+        if (on)
+            y -= 2;
+        MtgGfx_DrawCard(id, (float)x, (float)y, 30, 42, 0, count ? 255 : 80, 0);
+        if (count)
+            Foil(id, x, y, 30, 42, (unsigned)(U.frame + i * 13));
+        if (count) {
+            snprintf(line, sizeof(line), "x%d", count);
+            G_RoundFill(x + 14, y + 33, G_DigitsWidth(line, 0, 1) + 4, 9, 0x1c2c48, 230);
+            G_Digits(x + 16, y + 35, line, 0, 1, 0xe0f0ff, 255);
+        }
+        /* NEW until the cursor has been on it (tcg_new.c) */
+        if (on && count)
+            CardNew_Saw(CARDNEW_MAGIC, (unsigned)id, (unsigned)count);
+        else if (CardNew_Is(CARDNEW_MAGIC, (unsigned)id, (unsigned)count))
+            CardNew_Badge(x - 2, y - 2, U.frame);
+        if (on) {
+            int o = (U.frame / 8) % 2;
+            G_Frame(x - 2 - o, y - 1 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+        }
+    }
+    if (!n)
+        G_TextAlign(120, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind yet.", TF_SMALL);
+    line[0] = 0;
+    if (U.cursor < n) {
+        int id = U.list[U.cursor];
+        char name[64];
+        PlainName(name, sizeof(name), id);
+        snprintf(line, sizeof(line), "%s\n%s", name, c->owned[id] ? RarityWord(id) : "Not in your collection yet.");
+    }
+    Strip(line);
+    TcgUi_Hints(U.showAll ? "{A} LOOK  {L}{R} COLOR  {SELECT} OWNED  {B} BACK" : "{A} LOOK  {L}{R} COLOR  {SELECT} ALL  {B} BACK");
 }
 
-// ---- a card's whole text
+// ---- a card's view: the big face, its words; A the big picture
 static void InspectScreen(void)
 {
     const MtgCardDef *c = Mtg_Card(U.inspectCard);
-    char name[64], text[700], line[128], cost[16];
-    static const char *const sTypes[] = {"Land", "Creature", "Artifact", "Enchantment", "Instant", "Sorcery",
-                                         "Planeswalker", "Tribal"};
-    static const char *const sRarity[] = {"COMMON", "UNCOMMON", "RARE"};
-    unsigned n = 0, i;
+    char name[64], text[800], line[200];
+    int y, bob = U.age < 12 ? (int)((12 - U.age) * 1.5f) : 0;
+    const char *artist = MtgGfx_Artist(U.inspectCard);
     TcgUi_Background();
-    G_Window(6, 4, 228, 140);
+    G_FillA(10, 34 - bob, 72, 100, 0x000000, 90);
+    MtgGfx_DrawCard(U.inspectCard, 8, (float)(30 - bob), 72, 100, 0, 255, 0);
+    if (C()->owned[U.inspectCard])
+        Foil(U.inspectCard, 8, 30 - bob, 72, 100, (unsigned)U.frame);
+    TcgUi_ListBox(86, 4, 152, 140);
+    {
+        SDL_Rect clip = {90, 8, 144, 132};
+        SDL_RenderSetClipRect(G_R(), &clip);
+    }
+    y = 8 - U.inspectScroll;
     PlainName(name, sizeof(name), U.inspectCard);
-    G_Text(14, 9, RarityColor(U.inspectCard), G_INK_SHADOW, name, 170, TF_NORMAL);
-    CostText(cost, sizeof(cost), &c->cost);
-    if (!(c->types & MTG_T_LAND))
-        G_TextAlign(226, 10, TA_RIGHT, G_INK, G_INK_SHADOW, cost, TF_NORMAL);
-    line[0] = 0;
-    if (c->supertypes & MTG_ST_LEGENDARY)
-        n += (unsigned)snprintf(line + n, sizeof(line) - n, "Legendary ");
-    if (c->supertypes & MTG_ST_BASIC)
-        n += (unsigned)snprintf(line + n, sizeof(line) - n, "Basic ");
-    for (i = 0; i < 8; i++)
-        if (c->types & (1u << i))
-            n += (unsigned)snprintf(line + n, sizeof(line) - n, "%s ", sTypes[i]);
-    if (c->subtypes[0] && n < sizeof(line))
-        snprintf(line + n, sizeof(line) - n, "- %s", c->subtypes);
-    Mtg_PlainText(text, sizeof(text), line);
-    G_Text(14, 25, 0x506070, G_NO_SHADOW, text, 210, TF_NARROW);
+    {
+        int costW = MtgGfx_Cost(U.inspectCard, 232, y + 4, 1, 1);
+        int end = G_Text(94, y, G_INK, G_INK_SHADOW, name, 136 - (costW ? costW + 4 : 0), TF_NORMAL);
+        y = end + 2 > y + 15 ? end + 2 : y + 15;
+    }
+    TypeLine(text, sizeof(text), U.inspectCard);
+    y = G_Text(94, y, 0x586878, G_NO_SHADOW, text, 136, TF_NARROW) + 1;
+    G_FillA(92, y, 140, 1, 0xd8d8d0, 255);
     Mtg_PlainText(text, sizeof(text), c->oracle);
-    G_Text(14, 38, G_INK, G_NO_SHADOW, text, 212, TF_NARROW);
-    snprintf(line, sizeof(line), "%s  OWNED %d", sRarity[c->rarity < 3 ? c->rarity : 0], C()->owned[U.inspectCard]);
-    G_Text(14, 128, 0x606870, G_NO_SHADOW, line, 0, TF_NARROW);
+    y = G_Text(94, y + 2, 0x404040, G_NO_SHADOW, text[0] ? text : "(No rules text.)", 136, TF_NARROW);
     if (c->types & MTG_T_CREATURE) {
         snprintf(line, sizeof(line), "%d/%d", c->power, c->toughness);
-        G_TextAlign(226, 126, TA_RIGHT, G_INK, G_INK_SHADOW, line, TF_NORMAL);
+        G_TextAlign(230, y + 1, TA_RIGHT, G_INK, G_INK_SHADOW, line, TF_SMALL);
+        y += 13;
     }
-    TcgUi_Hints("{B} BACK");
+    G_FillA(92, y, 140, 1, 0xd8d8d0, 255);
+    y += 2;
+    if (c->banned)
+        y = G_Text(94, y, 0xc03020, G_NO_SHADOW, "BANNED (not in decks)", 136, TF_NARROW);
+    y = G_Text(94, y, 0x707878, G_NO_SHADOW, RarityWord(U.inspectCard), 136, TF_NARROW);
+    if (artist && artist[0]) {   // (Scryfall asks that the illustration shown credit its artist)
+        char plain[96];
+        Mtg_PlainText(plain, sizeof(plain), artist);
+        snprintf(line, sizeof(line), "Art by %s", plain);
+        y = G_Text(94, y, 0x707878, G_NO_SHADOW, line, 136, TF_NARROW);
+    }
+    snprintf(line, sizeof(line), "You own %d.", C()->owned[U.inspectCard]);
+    y = G_Text(94, y, 0x707878, G_NO_SHADOW, line, 136, TF_NARROW);
+    U.inspectMax = y + U.inspectScroll - 136;
+    if (U.inspectMax < 0)
+        U.inspectMax = 0;
+    SDL_RenderSetClipRect(G_R(), NULL);
+    if (U.inspectMax > 0) {
+        if (U.inspectScroll > 0)
+            G_Arrow(226, 7, 0, 0x707070);
+        if (U.inspectScroll < U.inspectMax)
+            G_Arrow(226, 136, 1, 0x707070);
+    }
+    TcgUi_Hints(U.inspectMax ? "{A} BIG PICTURE  {UPDOWN} SCROLL  {B} BACK" : "{A} BIG PICTURE  {B} BACK");
 }
 
-// ---- the CARD SHOP's starters
+static void ArtScreen(void)
+{
+    int w, h;
+    SDL_Texture *art = MtgGfx_ArtTexture(U.inspectCard, &w, &h);
+    const char *artist = MtgGfx_Artist(U.inspectCard);
+    G_Fill(0, 0, 240, 160, 0x101418);
+    if (art) {
+        float fit = G_MinF(156.0f / h, 228.0f / w);
+        SDL_FRect dst;
+        if (U.zoom)
+            fit *= 1.8f;
+        dst.w = w * fit;
+        dst.h = h * fit;
+        dst.x = 120 - dst.w / 2 - U.panX;
+        dst.y = 80 - dst.h / 2 - U.panY;
+        SDL_RenderCopyF(G_R(), art, NULL, &dst);
+    } else {   // (a card without a printed picture: its face)
+        MtgGfx_DrawCard(U.inspectCard, 84, 30, 72, 100, 0, 255, 0);
+    }
+    if (artist && artist[0]) {   // (Scryfall asks that the illustration shown without its card credit the artist)
+        char plain[96], line[120];
+        Mtg_PlainText(plain, sizeof(plain), artist);
+        snprintf(line, sizeof(line), "Art by %s", plain);
+        G_Text(4, 1, 0xc0c4c8, 0x000000, line, 0, TF_NARROW);
+    }
+    TcgUi_Hints(U.zoom ? "{A} FIT  {DPAD} MOVE  {B} BACK" : "{A} ZOOM  {DPAD} MOVE  {B} BACK");
+}
+
+// ---- the CARD SHOP's starters: each deck by its best card, in a row (as the other games' first decks)
 static void StarterScreen(void)
 {
     int i;
     char line[200];
     TcgUi_Background();
-    TcgUi_SidePanel("STARTER", MTG_THEME);
-    CardBack(34, 30, 36, 50);
-    TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
-    for (i = 0; i < MTG_STARTERS; i++)
-        TcgUi_Row(LIST_X + 2, 6 + i * 14, LIST_W - 4, U.cursor == i, 1, gMtgStarters[i].name,
-                  ColorWords(gMtgStarters[i].colors));
-    snprintf(line, sizeof(line), "%s\n40 cards. Pick the one you like: it's yours to keep.", gMtgStarters[U.cursor].about);
+    TcgUi_TopBar("CHOOSE A STARTER DECK");
+    for (i = 0; i < MTG_STARTERS; i++) {
+        int x = 6 + i * 47, on = i == U.cursor, bob = on ? (int)(fabsf(sinf(U.frame * 0.1f)) * 3) : 0;
+        G_FillA(x + 2, 30 - bob + 3, 44, 61, 0x000000, 70);
+        MtgGfx_DrawCard(RecipeAce(i), (float)x, (float)(30 - bob), 44, 61, 0, 255, 0);
+        G_TextAlign(x + 22, 96, TA_CENTER, on ? 0xf8e070 : G_WHITE, 0x204030, gMtgStarters[i].name, TF_NARROW);
+        if (on)
+            G_Frame(x - 3, 30 - bob - 3, 50, 67, 0xe82820, 255);
+    }
+    snprintf(line, sizeof(line), "40 cards. %s", gMtgStarters[U.cursor].about);
     Strip(line);
-    TcgUi_Hints("{A} TAKE IT  {B} NOT NOW");
+    TcgUi_Hints("{LEFTRIGHT} CHOOSE  {A} TAKE  {INSPECT} LOOK  {B} NOT NOW");
 }
 
-// ---- a duelist's challenge
-static int UsableDeck(int k)
+// ---- a duelist's challenge: their picture and best card, DUEL WITH one of your decks
+static void Portrait(int x, int y)
 {
-    return C()->decks[k].count && !Mtg_DeckProblem(C(), &C()->decks[k]);
+    SDL_Rect dst;
+    if (!U.portraitW)
+        return;
+    if (!U.portraitTexture) {
+        struct GSurface s;
+        s.w = U.portraitW;
+        s.h = U.portraitH;
+        s.px = U.portrait;
+        U.portraitTexture = G_SurfaceTexture(&s);
+    }
+    if (!U.portraitTexture)
+        return;
+    if (U.portraitW == 64) {   /* a battle picture, cut to the window beside their card */
+        G_PicCut(U.portraitTexture, U.portrait, 8, 22, 48, 42);
+        return;
+    }
+    dst.x = x - U.portraitW;
+    dst.y = y - U.portraitH * 2;
+    dst.w = U.portraitW * 2;
+    dst.h = U.portraitH * 2;
+    SDL_RenderCopy(G_R(), U.portraitTexture, NULL, &dst);
 }
 
 static void ChallengeScreen(void)
@@ -455,51 +942,203 @@ static void ChallengeScreen(void)
     const MtgDuelist *who = &gMtgDuelists[U.duelist];
     MtgCollection *c = C();
     char line[200];
+    int i, y = 68;
     TcgUi_Background();
-    TcgUi_SidePanel(who->name, MTG_THEME);
-    CardBack(34, 24, 36, 50);
-    G_Text(6, 80, 0x605040, G_NO_SHADOW, who->title, 92, TF_NARROW);
+    TcgUi_SidePanel("CHALLENGE", MTG_THEME);
+    G_RoundFill(6, 20, 92, 46, 0x2c2c5c, 255);
+    G_RoundFrame(6, 20, 92, 46, 0x101030, 255);
+    Portrait(28, 62);
+    MtgGfx_DrawCard(DuelistAce(who->cards), 58, 22, 30, 42, 0, 255, 0);
+    G_Text(6, y, 0x505868, G_NO_SHADOW, who->title, 96, TF_NARROW);
+    y += G_TextHeight(who->title, 96, TF_NARROW) - 2;
+    G_Text(6, y, G_INK, G_INK_SHADOW, who->name, 96, TF_SMALL);
+    y += 12;
+    G_Text(6, y + 1, 0x505868, G_NO_SHADOW, "MAGIC  20 LIFE", 96, TF_NARROW);
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
-    G_Text(LIST_X + 6, 8, G_INK, G_NO_SHADOW, who->hello, LIST_W - 12, TF_NARROW);
-    snprintf(line, sizeof(line), "YOUR DECK: %s", UsableDeck(c->activeDeck) ? c->decks[c->activeDeck].name : "none");
-    G_Text(LIST_X + 6, 74, 0x305030, G_NO_SHADOW, line, LIST_W - 12, TF_NARROW);
-    G_Text(LIST_X + 6, 86, 0x605040, G_NO_SHADOW, ColorWords(Mtg_DeckColors(&c->decks[c->activeDeck])), LIST_W - 12,
-           TF_NARROW);
-    Strip(c->beaten & (1u << U.duelist) ? "You've beaten them before. A win brings a booster pack every time."
-                                        : "A win brings a booster pack: eight cards for your BINDER.");
-    TcgUi_Hints("{A} DUEL  {L}{R} OTHER DECK  {B} NOT NOW");
+    G_Text(LIST_X + 6, 5, 0x606878, G_NO_SHADOW, "DUEL WITH", 0, TF_NARROW);
+    U.scroll = U.cursor < 2 ? 0 : U.cursor > MTG_DECKS - 3 ? MTG_DECKS - 4 : U.cursor - 2;
+    for (i = 0; i < 5; i++) {
+        int d = U.scroll + i;
+        if (d > MTG_DECKS)
+            break;
+        if (d == MTG_DECKS) {
+            TcgUi_Row(LIST_X + 2, 18 + i * ROW_H, LIST_W - 4, U.cursor == d, 1, "NOT NOW", NULL);
+            continue;
+        }
+        snprintf(line, sizeof(line), "%s", c->decks[d].count && c->decks[d].name[0] ? c->decks[d].name : "---");
+        TcgUi_Row(LIST_X + 2, 18 + i * ROW_H, LIST_W - 4, U.cursor == d, DeckValid(d), line,
+                  d == c->activeDeck && c->decks[d].count ? "IN USE" : NULL);
+    }
+    (void)who->hello;
+    Strip(c->beaten & (1u << U.duelist) ? "WIN: a booster pack, eight cards for your BINDER. (Every time you win.)"
+                                        : "WIN: a booster pack, eight cards for your BINDER.");
 }
 
-// ---- the booster a win brought
+// ---- the booster a win brought: the pack torn open, the cards dealt out face down and turned one by one
+static void PackArt(int x, int y)
+{
+    int k;
+    G_FillA(x + 3, y + 4, 44, 62, 0x000000, 80);
+    G_RoundFill(x, y, 44, 62, 0x5a3418, 255);
+    G_RoundFrame(x, y, 44, 62, 0x1a0c04, 255);
+    G_Fill(x + 2, y + 2, 40, 6, 0xc89848);
+    G_Fill(x + 2, y + 54, 40, 6, 0xc89848);
+    for (k = 0; k < 6; k++)   // (the crimped ends)
+        G_Fill(x + 3 + k * 7, y + 3, 3, 1, 0x8a6020), G_Fill(x + 3 + k * 7, y + 58, 3, 1, 0x8a6020);
+    G_TextAlign(x + 22, y + 11, TA_CENTER, MTG_GOLD, 0x1a0c04, "MAGIC", TF_NARROW);
+    for (k = 0; k < 5; k++) {
+        float a = -1.5708f + k * 1.2566f;
+        ManaOrb(x + 19 + (int)(cosf(a) * 9), y + 34 + (int)(sinf(a) * 9), k);
+    }
+}
+
+static void BoosterSlot(int i, int *x, int *y)
+{
+    *x = 30 + (i % 4) * 46;
+    *y = i < 4 ? 6 : 55;
+}
+
 static void SpoilsScreen(void)
 {
-    int i;
+    int i, t = U.revealAge;
     TcgUi_Background();
-    TcgUi_SidePanel("BOOSTER", MTG_THEME);
-    CardBack(34, 30, 36, 50);
-    TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
-    for (i = 0; i < U.boosterCount; i++) {
-        char name[64];
-        PlainName(name, sizeof(name), U.booster[i]);
-        TcgUi_FitText(name, LIST_W - 16, TF_NARROW);
-        if (i == U.cursor)
-            G_FillA(LIST_X + 3, 6 + i * 12, LIST_W - 6, 12, 0xf8e8a0, 255);
-        G_Text(LIST_X + 6, 7 + i * 12, RarityColor(U.booster[i]), G_NO_SHADOW, name, 0, TF_NARROW);
+    if (t < REVEAL_TEAR) {
+        int shake = t < 14 ? ((t / 2) % 2 ? 2 : -2) : 0;
+        float tear = t < 14 ? 0 : 1 - (1 - (t - 14) / 12.0f) * (1 - (t - 14) / 12.0f);
+        if (tear > 1)
+            tear = 1;
+        if (tear > 0)
+            MtgGfx_DrawCard(MTG_GFX_BACK, 105, 52 - tear * 22, 30, 42, 0, 255, 0);
+        PackArt(98 + shake, 50 + (int)(tear * 30));
+        TcgUi_Hints("{A} OPEN");
+        return;
     }
-    if (U.cursor < U.boosterCount)
-        CardStrip(U.booster[U.cursor]);
-    TcgUi_Hints("{UP}{DOWN} LOOK  {A} DONE");
+    for (i = 0; i < U.boosterCount; i++) {
+        int x, y, faceUp = i < U.flipped, on = i == U.cursor && U.flipped >= U.boosterCount;
+        float in = (float)(t - REVEAL_TEAR - i * 2) / 10.0f, sx, sy;
+        int card = U.booster[i], rare = Mtg_Card(card)->rarity == MTG_RARITY_RARE;
+        BoosterSlot(i, &x, &y);
+        if (in < 0)
+            in = 0;
+        if (in > 1)
+            in = 1;
+        sx = 105 + (x - 105) * in;
+        sy = 40 + (y - 40) * in;
+        if (faceUp && rare)
+            G_FoilHalo((int)sx, (int)sy - (on ? 3 : 0), 30, 42, 0xf0c050, (unsigned)(U.frame + i * 17), 0);
+        MtgGfx_DrawCard(faceUp ? card : MTG_GFX_BACK, sx, sy - (on ? 3 : 0), 30, 42, 0, 255, 0);
+        if (faceUp)
+            Foil(card, (int)sx, (int)sy - (on ? 3 : 0), 30, 42, (unsigned)(U.frame + i * 17));
+        if (faceUp && rare) {   // (on the card's foot, as on the other sides)
+            G_RoundFill((int)sx + 1, (int)sy + 33 - (on ? 3 : 0), 28, 9, 0x101828, 210);
+            G_TextAlign((int)sx + 15, (int)sy + 32 - (on ? 3 : 0), TA_CENTER, (U.frame / 6) % 2 ? 0xf8d060 : 0xfff0b0,
+                        0x302040, "RARE!", TF_NARROW);
+        }
+        if (faceUp && CardNew_Is(CARDNEW_MAGIC, (unsigned)card, C()->owned[card]) && C()->owned[card] == 1) {
+            G_RoundFill((int)sx - 2, (int)sy - 3 - (on ? 3 : 0), 17, 8, 0xe82820, 230);
+            G_Text((int)sx, (int)sy - 3 - (on ? 3 : 0), 0xffffff, 0x801010, "NEW", 17, TF_NARROW);
+        }
+        if (on) {
+            int o = (U.frame / 8) % 2;
+            G_Frame((int)sx - 2 - o, (int)sy - 5 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+        }
+    }
+    if (U.flipped >= U.boosterCount && U.cursor < U.boosterCount) {
+        int card = U.booster[U.cursor];
+        char name[64], line[64];
+        G_FillA(0, STRIP_Y, 240, 160 - STRIP_Y, 0x5848c8, 255);
+        G_FillA(0, STRIP_Y, 240, 1, 0x9888f8, 255);
+        PlainName(name, sizeof(name), card);
+        G_Text(8, STRIP_Y + 4, RarityInk(card), 0x302878, name, 226, TF_NORMAL);
+        snprintf(line, sizeof(line), "%s%s", Mtg_Card(card)->rarity == MTG_RARITY_RARE ? "RARE"
+                                             : Mtg_Card(card)->rarity == MTG_RARITY_UNCOMMON ? "Uncommon" : "Common",
+                 C()->owned[card] == 1 ? "  NEW!" : "");
+        G_Text(8, STRIP_Y + 20, 0xd8d8f8, 0x302878, line, 226, TF_SMALL);
+        TcgUi_Hints("{A} LOOK  {DPAD} CHOOSE  {B} DONE");
+    } else
+        TcgUi_Hints("{A} NEXT CARD  {B} SHOW ALL");
+}
+
+static void Inspect(int card, int back)
+{
+    U.inspectCard = card;
+    U.inspectScroll = 0;
+    U.back = back;
+    U.screen = M_INSPECT;
+    U.age = 0;
+    PlaySE(SE_SELECT);
+}
+
+static void SpoilsStep(unsigned pressed)
+{
+    if (U.revealAge < REVEAL_TEAR) {
+        if (U.revealAge == 14)
+            PlaySE(SE_RG_CARD_FLIPPING);
+        if (pressed & KEY_A)
+            U.revealAge = REVEAL_TEAR;
+        return;
+    }
+    if (U.flipped < U.boosterCount) {
+        if (U.revealAge == REVEAL_TEAR)
+            U.revealNext = U.revealAge + 8;
+        if (pressed & KEY_B) {   // all at once
+            U.flipped = U.boosterCount;
+            U.cursor = 0;
+            PlaySE(SE_RG_CARD_FLIP);
+            return;
+        }
+        if (pressed & KEY_A)
+            U.revealNext = U.revealAge;
+        if (U.revealAge >= U.revealNext) {
+            int rare = Mtg_Card(U.booster[U.flipped])->rarity == MTG_RARITY_RARE;
+            PlaySE(rare ? SE_SHINY : SE_RG_CARD_FLIP);
+            U.flipped++;
+            U.cursor = U.flipped - 1;
+            U.revealNext = U.revealAge + (Tcg_GetCollection()->fastAnimations ? 5 : rare ? 26 : 11);
+            if (U.flipped == U.boosterCount)
+                U.cursor = 0;
+        }
+        return;
+    }
+    {
+        int c = U.cursor;
+        if (pressed & KEY_RIGHT && c + 1 < U.boosterCount)
+            c++;
+        if (pressed & KEY_LEFT && c > 0)
+            c--;
+        if (pressed & KEY_DOWN && c + 4 < U.boosterCount)
+            c += 4;
+        if (pressed & KEY_UP && c >= 4)
+            c -= 4;
+        if (c != U.cursor)
+            U.cursor = c, PlaySE(SE_SELECT);
+    }
+    if (pressed & (KEY_A | KEY_INSPECT)) {
+        int keep = U.cursor;
+        Inspect(U.booster[U.cursor], M_SPOILS);
+        U.cursor = keep;
+    } else if (pressed & KEY_B) {
+        int k;
+        PlaySE(SE_SELECT);
+        for (k = 0; k < U.boosterCount; k++)   // (seen here: no longer NEW in the BINDER)
+            CardNew_Saw(CARDNEW_MAGIC, U.booster[k], C()->owned[U.booster[k]]);
+        Close();
+    }
 }
 
 void MtgUi_Draw(void)
 {
+    MtgGfx_SetModes(gMpConfig.cardArt, gMpConfig.cardBack);
     switch (U.screen) {
     case M_HOME: TcgUi_RowDown(1), HomeScreen(), TcgUi_RowDown(0); break;
     case M_DECKS: TcgUi_RowDown(1), DecksScreen(), TcgUi_RowDown(0); break;
+    case M_RECIPES: RecipesScreen(); break;
+    case M_ACE: AceScreen(); break;
     case M_BUILDER: BuilderScreen(); break;
     case M_BINDER: BinderScreen(); break;
     case M_INSPECT: InspectScreen(); break;
-    case M_STARTER: TcgUi_RowDown(1), StarterScreen(), TcgUi_RowDown(0); break;
+    case M_ART: ArtScreen(); break;
+    case M_STARTER: StarterScreen(); break;
     case M_CHALLENGE: ChallengeScreen(); break;
     case M_DUEL: MtgBoard_Draw(); break;
     case M_SPOILS: SpoilsScreen(); break;
@@ -524,44 +1163,77 @@ void MtgUi_OpenChallenge(unsigned duelist)
     int k;
     U.returnToGame = NULL;
     U.duelist = (int)(duelist < MTG_DUELISTS ? duelist : 0);
+    U.vs = VS_NPC;
     Open(M_CHALLENGE);
     U.fromScript = 1;
-    if (!UsableDeck(c->activeDeck))
+    ForgetPortrait();
+    // (the one who asked, as they face you: their sprite on the map)
+    Tcg_PortraitOfObject(GetObjectEventIdByLocalIdAndMap((u8)gSpecialVar_LastTalked, gSaveBlock1Ptr->location.mapNum,
+                                                         gSaveBlock1Ptr->location.mapGroup),
+                         U.portrait, &U.portraitW, &U.portraitH);
+    if (!DeckValid(c->activeDeck))
         for (k = 0; k < MTG_DECKS; k++)
-            if (UsableDeck(k)) {
+            if (DeckValid(k)) {
                 c->activeDeck = (uint8_t)k;
                 break;
             }
+    U.cursor = c->activeDeck;
     MPNet_Log("mtg: challenge from %s", gMtgDuelists[U.duelist].name);
 }
 
-static void StartDuel(void)
+static void StartDuel(const char *const *theirCards, const char *name)
 {
     MtgCollection *c = C();
     MtgSavedDeck theirs;
     MtgRecipe r;
     static MtgDeck mine, them;
-    r.name = gMtgDuelists[U.duelist].name;
+    r.name = name;
     r.about = "";
     r.colors = 0;
-    r.cards = gMtgDuelists[U.duelist].cards;
+    r.cards = theirCards;
     Mtg_RecipeDeck(&r, &theirs);
     Mtg_DeckToDuel(&c->decks[c->activeDeck], &mine);
     Mtg_DeckToDuel(&theirs, &them);
     Screen(M_DUEL);
-    MtgBoard_Start(&mine, &them, Mtg_Rand(&c->rng), gMtgDuelists[U.duelist].name);
+    MtgBoard_Start(&mine, &them, Mtg_Rand(&c->rng), name);
+}
+
+static void Practice(void)   // against a starter deck that isn't yours: nothing won or lost
+{
+    MtgCollection *c = C();
+    int pick;
+    if (!DeckValid(c->activeDeck)) {
+        Say(ACT_NONE, "%s", c->decks[c->activeDeck].count ? Mtg_DeckProblem(c, &c->decks[c->activeDeck])
+                                                           : "Build a deck first.");
+        return;
+    }
+    pick = (int)(Mtg_Rand(&c->rng) % MTG_STARTERS);
+    if (pick == c->starter)
+        pick = (pick + 1) % MTG_STARTERS;
+    U.vs = VS_PRACTICE;
+    MPNet_Log("mtg: practice against %s", gMtgStarters[pick].name);
+    StartDuel(gMtgStarters[pick].cards, "PRACTICE DECK");
 }
 
 static void DuelOver(int result)
 {
     MtgCollection *c = C();
     const MtgDuelist *who = &gMtgDuelists[U.duelist];
+    if (U.vs == VS_PRACTICE) {
+        MtgBoard_End();
+        MPNet_Log("mtg: practice over: %s", result == 1 ? "won" : result == 2 ? "lost" : "a draw");
+        Screen(M_HOME);
+        U.cursor = HOME_PRACTICE;
+        return;
+    }
     if (result == 1) {
         c->wins++;
         c->beaten |= 1u << U.duelist;
         U.boosterCount = Mtg_OpenBooster(c, U.booster);
         MtgBoard_EndHoldMusic();
         Screen(M_SPOILS);
+        U.flipped = 0;
+        U.revealAge = 0;
         MPNet_Log("mtg: won against %s, booster of %d", who->name, U.boosterCount);
         Say(ACT_NONE, "%s: \"%s\"", who->name, who->lose);
     } else {
@@ -570,6 +1242,7 @@ static void DuelOver(int result)
         MtgBoard_End();
         MPNet_Log("mtg: %s against %s", result == 2 ? "lost" : "a draw", who->name);
         Screen(M_CHALLENGE);
+        U.cursor = c->activeDeck;
         Say(ACT_CLOSE, "%s: \"%s\"", who->name, result == 2 ? who->win : "A draw! Let's play again some time.");
     }
 }
@@ -594,74 +1267,157 @@ static void Act(int action)
         Say(ACT_CLOSE, "The %s deck is yours! MAGIC is on your CARD CASE now: L and R go round its games.",
             gMtgStarters[c->starter].name);
         break;
-    case ACT_DELETE:
-        memset(&c->decks[U.askArg], 0, sizeof(c->decks[0]));
-        if (c->activeDeck == U.askArg)
-            for (c->activeDeck = 0; c->activeDeck < MTG_DECKS - 1 && !c->decks[c->activeDeck].count; c->activeDeck++)
-                ;
-        break;
-    case ACT_HOWTO:
-        if (++U.howto < 5) {
-            static const char *const sPages[5] = {
-                "Each player starts with 20 life. Bring the other player's life to 0 to win (or let them run out "
-                "of cards to draw).",
-                "LANDS make mana. Play one land each turn, then tap lands to pay for spells: a spell's cost is on "
-                "its card, (R) red mana, (2) any two.",
-                "CREATURES fight. They can't attack the turn they arrive. Attack: the other player blocks with "
-                "their creatures, or takes the damage.",
-                "INSTANTS can be cast any time you could act, even in the other player's turn: answer a spell "
-                "before it happens!",
-                "{A} plays a card, {START} passes. Hold {L} to stop at every chance to act. {SELECT} shows a "
-                "card's whole text."};
-            Say(ACT_HOWTO, "%s", sPages[U.howto]);
+    case ACT_COPY: {
+        int d = EmptySlot();
+        if (d == U.askArg || d >= MTG_DECKS)
+            Say(ACT_NONE, "There's no empty slot to copy into.");
+        else {
+            c->decks[d] = c->decks[U.askArg];
+            c->ace[d] = c->ace[U.askArg];
+            snprintf(c->decks[d].name, MTG_DECK_NAME, "%.10s copy", c->decks[U.askArg].name);
+            Say(ACT_NONE, "Copied into slot %d.", d + 1);
         }
         break;
     }
+    case ACT_CLEAR:
+        memset(&c->decks[U.askArg], 0, sizeof(c->decks[0]));
+        c->ace[U.askArg] = -1;
+        if (c->activeDeck == U.askArg) {
+            int d;
+            for (d = 0; d < MTG_DECKS; d++)
+                if (DeckValid(d)) {
+                    c->activeDeck = (uint8_t)d;
+                    break;
+                }
+        }
+        break;
+    case ACT_RECIPE: {
+        int slot = U.recipeSlot >= 0 ? U.recipeSlot : EmptySlot(), i, lost;
+        MtgSavedDeck d, built;
+        uint8_t used[MTG_COLLECTION_CARDS];
+        if (U.askArg < 0 || U.askArg >= MTG_STARTERS || slot >= MTG_DECKS)
+            break;
+        RecipeOf(U.askArg, &d);
+        memset(&built, 0, sizeof(built));
+        memset(used, 0, sizeof(used));
+        for (i = 0; i < d.count; i++)   // (the cards owned; the missing ones are left out)
+            if (Mtg_IsBasicLand(d.cards[i]) || used[d.cards[i]]++ < c->owned[d.cards[i]])
+                Mtg_DeckAdd(&built, d.cards[i]);
+        lost = d.count - built.count;
+        snprintf(built.name, MTG_DECK_NAME, "%s", gMtgStarters[U.askArg].name);
+        c->decks[slot] = built;
+        c->ace[slot] = -1;
+        MPNet_Log("mtg: recipe %s into slot %d, %d missing", gMtgStarters[U.askArg].name, slot, lost);
+        Screen(M_DECKS);
+        U.cursor = slot;
+        if (lost)
+            Say(ACT_NONE, "The %s deck is in slot %d. %d of its cards are missing: add them when you have them.",
+                gMtgStarters[U.askArg].name, slot + 1, lost);
+        else
+            Say(ACT_NONE, "The %s deck is in slot %d, ready to duel.", gMtgStarters[U.askArg].name, slot + 1);
+        break;
+    }
+    }
+}
+
+static void Filter(unsigned pressed, int count)
+{
+    U.filter = (U.filter + (pressed & KEY_R ? 1 : count - 1)) % count;
+    U.cursor = 0;
+    BuildList(U.withBasics);
+    PlaySE(SE_SELECT);
 }
 
 static void StepBuilder(unsigned pressed)
 {
     MtgCollection *c = C();
     MtgSavedDeck *d = &c->decks[U.deck];
-    int card = U.cursor < U.listCount ? U.list[U.cursor] : -1;
-    MoveCursor(pressed, U.listCount);
-    if (pressed & (KEY_L | KEY_R)) {   // a page at a time
-        U.cursor = pressed & KEY_L ? (U.cursor > LIST_ROWS ? U.cursor - LIST_ROWS : 0)
-                                   : (U.cursor + LIST_ROWS < U.listCount ? U.cursor + LIST_ROWS : U.listCount - 1);
-        MoveCursor(0, U.listCount);
-        PlaySE(SE_SELECT);
-    }
-    if (card < 0)
+    uint16_t listed[MTG_DECK_MAX];
+    int uniq = DeckUnique(d, listed), page = GRID_COLS * GRID_ROWS;
+    if (pressed & (KEY_L | KEY_R)) {
+        Filter(pressed, FILTERS - 1);
         return;
-    if (pressed & (KEY_RIGHT | KEY_A)) {
-        int copies = Mtg_DeckCopies(d, card);
-        if (d->count >= MTG_DECK_MAX || (!Mtg_IsBasicLand(card) && (copies >= MTG_COPIES || copies >= c->owned[card])))
-            PlaySE(SE_FAILURE);
-        else {
-            Mtg_DeckAdd(d, card);
-            PlaySE(SE_SELECT);
-        }
-    }
-    if (pressed & KEY_LEFT) {
-        if (Mtg_DeckCopies(d, card)) {
-            Mtg_DeckRemove(d, card);
-            PlaySE(SE_SELECT);
-        } else
-            PlaySE(SE_FAILURE);
-    }
-    if (pressed & KEY_INSPECT) {
-        U.inspectCard = card;
-        U.back = M_BUILDER;
-        U.screen = M_INSPECT;
-        PlaySE(SE_SELECT);
     }
     if (pressed & KEY_B) {
         Mtg_DeckSort(d);
         PlaySE(SE_SELECT);
         Screen(M_DECKS);
         U.cursor = U.deck;
-        if (Mtg_DeckProblem(c, d))
+        if (d->count && Mtg_DeckProblem(c, d))
             Say(ACT_NONE, "This deck can't be played yet: %s", Mtg_DeckProblem(c, d));
+        return;
+    }
+    if (U.side == 1) {   // the deck's list
+        if (pressed & KEY_LEFT || !uniq) {
+            U.side = 0;
+            PlaySE(SE_SELECT);
+            return;
+        }
+        if (pressed & KEY_UP && U.deckCursor > 0)
+            U.deckCursor--, PlaySE(SE_SELECT);
+        if (pressed & KEY_DOWN && U.deckCursor + 1 < uniq)
+            U.deckCursor++, PlaySE(SE_SELECT);
+        if (U.deckCursor >= uniq)
+            U.deckCursor = uniq - 1;
+        if (pressed & KEY_A) {
+            Mtg_DeckRemove(d, listed[U.deckCursor]);
+            PlaySE(SE_SELECT);
+        } else if (pressed & KEY_INSPECT)
+            Inspect(listed[U.deckCursor], M_BUILDER);
+        return;
+    }
+    if (pressed & KEY_RIGHT && (U.cursor % GRID_COLS == GRID_COLS - 1 || U.cursor + 1 >= U.listCount) && uniq) {
+        U.side = 1;
+        PlaySE(SE_SELECT);
+        return;
+    }
+    GridMove(pressed, U.listCount, GRID_COLS);
+    (void)page;
+    if (U.cursor >= U.listCount)
+        return;
+    {
+        int card = U.list[U.cursor];
+        if (pressed & KEY_A) {
+            int copies = Mtg_DeckCopies(d, card);
+            if (d->count >= MTG_DECK_MAX || (!Mtg_IsBasicLand(card) && (copies >= MTG_COPIES || copies >= c->owned[card])))
+                PlaySE(SE_FAILURE);
+            else {
+                Mtg_DeckAdd(d, card);
+                PlaySE(SE_SELECT);
+            }
+        }
+        if (pressed & KEY_SELECT) {
+            if (Mtg_DeckCopies(d, card)) {
+                Mtg_DeckRemove(d, card);
+                PlaySE(SE_SELECT);
+            } else
+                PlaySE(SE_FAILURE);
+        }
+        if (pressed & KEY_INSPECT) {
+            int keep = U.cursor;
+            Inspect(card, M_BUILDER);
+            U.cursor = keep;
+        }
+    }
+}
+
+static void OpenBuilder(int k)
+{
+    MtgCollection *c = C();
+    U.deck = k;
+    if (!c->decks[k].name[0])
+        snprintf(c->decks[k].name, MTG_DECK_NAME, "Deck %d", k + 1);
+    U.filter = FILTERS - 1;   // (the builder's chips: the five colors, colorless, multicolor, lands; first all of them)
+    U.side = 0;
+    U.deckCursor = 0;
+    U.showAll = 0;
+    Screen(M_BUILDER);
+    U.filter = 0;
+    BuildList(1);
+    {   // start on the deck's own color, as the POKeMON builder starts on a deck's type
+        uint8_t colors = Mtg_DeckColors(&c->decks[k]);
+        if (colors && !(colors & (colors - 1)))
+            U.filter = __builtin_ctz(colors), BuildList(1);
     }
 }
 
@@ -708,7 +1464,9 @@ int MtgUi_Step(unsigned keys)
     switch (U.screen) {
     case M_HOME:
         MoveCursor(pressed, HOME_ROWS);
-        if (pressed & (KEY_L | KEY_R)) {
+        if (pressed & KEY_SELECT)
+            TcgGuide_Open(KIT_GAME_MAGIC);
+        else if (pressed & (KEY_L | KEY_R)) {
             PlaySE(SE_SELECT);
             ToSide((pressed & KEY_R) != 0);
         } else if (pressed & KEY_B) {
@@ -717,17 +1475,21 @@ int MtgUi_Step(unsigned keys)
         } else if (pressed & KEY_A) {
             PlaySE(SE_SELECT);
             switch (U.cursor) {
-            case 0:
+            case HOME_DECKS:
                 Screen(M_DECKS);
                 U.cursor = c->activeDeck;
                 break;
-            case 1:
-                BuildList(0);
+            case HOME_BINDER:
+                U.filter = FILTERS - 1;
+                U.showAll = 0;
                 Screen(M_BINDER);
+                BuildList(0);
                 break;
-            case 2:
-                U.howto = -1;
-                Act(ACT_HOWTO);
+            case HOME_PRACTICE:
+                Practice();
+                break;
+            case HOME_SPEED:
+                Tcg_GetCollection()->fastAnimations = !Tcg_GetCollection()->fastAnimations;
                 break;
             default:
                 Close();
@@ -736,86 +1498,173 @@ int MtgUi_Step(unsigned keys)
         }
         break;
     case M_DECKS:
-        if (U.menuOn) {
-            int filled = c->decks[U.cursor].count != 0, n = filled ? DM_COUNT : 1;
-            U.menuCursor = TcgUi_PopMenuMove(pressed, U.menuCursor, n, 0);
-            if (pressed & KEY_B)
-                U.menuOn = 0, PlaySE(SE_SELECT);
-            else if (pressed & KEY_A) {
-                int k = U.cursor, j;
-                U.menuOn = 0;
-                PlaySE(SE_SELECT);
-                if (!filled) {   // a new deck here
-                    snprintf(c->decks[k].name, MTG_DECK_NAME, "DECK %d", k + 1);
-                    U.deck = k;
-                    BuildList(1);
-                    Screen(M_BUILDER);
-                    break;
-                }
-                switch (U.menuCursor) {
-                case DM_USE:
-                    if (Mtg_DeckProblem(c, &c->decks[k]))
-                        Say(ACT_NONE, "%s", Mtg_DeckProblem(c, &c->decks[k]));
-                    else
-                        c->activeDeck = (uint8_t)k;
-                    break;
-                case DM_EDIT:
-                    U.deck = k;
-                    BuildList(1);
-                    Screen(M_BUILDER);
-                    break;
-                case DM_COPY:
-                    for (j = 0; j < MTG_DECKS && c->decks[j].count; j++)
-                        ;
-                    if (j == MTG_DECKS)
-                        Say(ACT_NONE, "Every deck slot is taken.");
-                    else {
-                        c->decks[j] = c->decks[k];
-                        snprintf(c->decks[j].name, MTG_DECK_NAME, "COPY %d", j + 1);
-                        U.cursor = j;
-                    }
-                    break;
-                case DM_DELETE:
-                    Ask(ACT_DELETE, k, "Delete %s? The cards stay in your BINDER.", c->decks[k].name);
-                    break;
-                }
+        if (TcgUi_NameActive()) {
+            if (TcgUi_NameStep(pressed) == 1 && U.cursor < MTG_DECKS) {
+                snprintf(c->decks[U.cursor].name, MTG_DECK_NAME, "%s", TcgUi_NameText());
+                MPNet_Log("mtg: deck %d renamed %s", U.cursor, c->decks[U.cursor].name);
             }
             break;
         }
-        MoveCursor(pressed, MTG_DECKS);
-        if (pressed & KEY_B) {
+        if (U.menuOn) {
+            int empty = SlotEmpty(U.cursor), count = empty ? EM_COUNT : DM_COUNT;
+            unsigned off = empty ? 0 : DeckMenuOff(U.cursor);
+            U.menuCursor = TcgUi_PopMenuMove(pressed, U.menuCursor, count, off);
+            if (pressed & KEY_B) {
+                PlaySE(SE_SELECT);
+                U.menuOn = 0;
+            } else if (pressed & KEY_A && !((off >> U.menuCursor) & 1)) {
+                int slot = U.cursor;
+                PlaySE(SE_SELECT);
+                U.menuOn = 0;
+                if (empty && U.menuCursor == EM_RECIPE) {
+                    Screen(M_RECIPES);
+                    U.recipeSlot = slot;
+                } else if (empty || U.menuCursor == DM_EDIT)
+                    OpenBuilder(slot);
+                else if (U.menuCursor == DM_RENAME)
+                    TcgUi_NameOpen("RENAME DECK", c->decks[slot].name);
+                else if (U.menuCursor == DM_ACE) {
+                    uint16_t list[MTG_DECK_MAX];
+                    int n = AceList(slot, list), ace = Mtg_DeckAce(c, slot), k;
+                    U.deck = slot;
+                    Screen(M_ACE);
+                    for (k = 0; k < n; k++)
+                        if (list[k] == ace)
+                            U.cursor = k;
+                } else if (U.menuCursor == DM_USE) {
+                    c->activeDeck = (uint8_t)slot;
+                    PlaySE(SE_SUCCESS);
+                } else if (U.menuCursor == DM_COPY)
+                    Ask(ACT_COPY, slot, "Copy %s into an empty slot?", c->decks[slot].name);
+                else if (U.menuCursor == DM_DELETE)
+                    Ask(ACT_CLEAR, slot, "Delete %s? Its cards stay in your collection.", c->decks[slot].name);
+            }
+            break;
+        }
+        MoveCursor(pressed, DECK_ROWS);
+        if (pressed & KEY_B || (pressed & KEY_A && U.cursor == DECK_ROW_BACK)) {
             PlaySE(SE_SELECT);
             Screen(M_HOME);
+        } else if (pressed & KEY_A && U.cursor == DECK_ROW_RECIPES) {
+            PlaySE(SE_SELECT);
+            Screen(M_RECIPES);
+            U.recipeSlot = -1;
         } else if (pressed & KEY_A) {
             PlaySE(SE_SELECT);
             U.menuOn = 1;
             U.menuCursor = 0;
+        } else if (pressed & KEY_R && U.cursor < MTG_DECKS && U.cursor != c->activeDeck && c->decks[U.cursor].count) {
+            if (DeckValid(U.cursor)) {
+                c->activeDeck = (uint8_t)U.cursor;
+                PlaySE(SE_SUCCESS);
+            } else {
+                PlaySE(SE_FAILURE);
+                Say(ACT_NONE, "%s", Mtg_DeckProblem(c, &c->decks[U.cursor]));
+            }
+        } else if (pressed & KEY_START && U.cursor < MTG_DECKS && c->decks[U.cursor].count)
+            Ask(ACT_COPY, U.cursor, "Copy %s into an empty slot?", c->decks[U.cursor].name);
+        else if (pressed & KEY_SELECT && U.cursor < MTG_DECKS && c->decks[U.cursor].count)
+            Ask(ACT_CLEAR, U.cursor, "Delete %s? Its cards stay in your collection.", c->decks[U.cursor].name);
+        break;
+    case M_RECIPES:
+        MoveCursor(pressed, MTG_STARTERS);
+        if (pressed & KEY_B) {
+            int back = U.recipeSlot >= 0 ? U.recipeSlot : DECK_ROW_RECIPES;
+            PlaySE(SE_SELECT);
+            Screen(M_DECKS);
+            U.cursor = back;
+        } else if (pressed & KEY_A) {
+            int slot = U.recipeSlot >= 0 ? U.recipeSlot : EmptySlot(), have, total = RecipeOwned(U.cursor, &have);
+            PlaySE(SE_SELECT);
+            if (slot >= MTG_DECKS)
+                Say(ACT_NONE, "There's no empty deck slot. Delete a deck first.");
+            else if (total - have)
+                Ask(ACT_RECIPE, U.cursor, "Build the %s deck in slot %d? %d of its cards are missing.",
+                    gMtgStarters[U.cursor].name, slot + 1, total - have);
+            else
+                Ask(ACT_RECIPE, U.cursor, "Build the %s deck in slot %d?", gMtgStarters[U.cursor].name, slot + 1);
         }
         break;
+    case M_ACE: {
+        uint16_t list[MTG_DECK_MAX];
+        int n = AceList(U.deck, list);
+        GridMove(pressed, n, ACE_COLS);
+        if (pressed & KEY_B) {
+            PlaySE(SE_SELECT);
+            Screen(M_DECKS);
+            U.cursor = U.deck;
+        } else if (pressed & KEY_INSPECT && n) {
+            int keep = U.cursor;
+            Inspect(list[U.cursor], M_ACE);
+            U.cursor = keep;
+        } else if (pressed & KEY_A && n) {
+            c->ace[U.deck] = (int16_t)list[U.cursor];
+            PlaySE(SE_SUCCESS);
+            MPNet_Log("mtg: deck %d ace %s", U.deck, Mtg_Card(list[U.cursor])->name);
+            Screen(M_DECKS);
+            U.cursor = U.deck;
+        }
+        break;
+    }
     case M_BUILDER:
         StepBuilder(pressed);
         break;
     case M_BINDER:
-        MoveCursor(pressed, U.listCount);
-        if ((pressed & (KEY_A | KEY_INSPECT)) && U.cursor < U.listCount) {
-            U.inspectCard = U.list[U.cursor];
-            U.back = M_BINDER;
-            U.screen = M_INSPECT;
+        if (pressed & (KEY_L | KEY_R))
+            Filter(pressed, FILTERS);
+        else if (pressed & KEY_SELECT) {   // every card, or the owned ones
+            U.showAll ^= 1;
+            U.cursor = 0;
+            BuildList(0);
             PlaySE(SE_SELECT);
+        } else if ((pressed & (KEY_A | KEY_INSPECT)) && U.cursor < U.listCount) {
+            int keep = U.cursor;
+            Inspect(U.list[U.cursor], M_BINDER);
+            U.cursor = keep;
         } else if (pressed & KEY_B) {
             PlaySE(SE_SELECT);
             Screen(M_HOME);
-            U.cursor = 1;
-        }
+            U.cursor = HOME_BINDER;
+        } else
+            GridMove(pressed, U.listCount, 7);
         break;
     case M_INSPECT:
-        if (pressed & (KEY_A | KEY_B | KEY_INSPECT)) {
+        if (pressed & KEY_UP && U.inspectScroll > 0)
+            U.inspectScroll = U.inspectScroll > 8 ? U.inspectScroll - 8 : 0;
+        if (pressed & KEY_DOWN && U.inspectScroll < U.inspectMax)
+            U.inspectScroll = U.inspectScroll + 8 < U.inspectMax ? U.inspectScroll + 8 : U.inspectMax;
+        if (pressed & KEY_A) {
+            PlaySE(SE_SELECT);
+            U.zoom = U.panX = U.panY = 0;
+            U.screen = M_ART;
+        } else if (pressed & (KEY_B | KEY_INSPECT)) {
             PlaySE(SE_SELECT);
             U.screen = U.back;
         }
         break;
+    case M_ART:
+        if (pressed & KEY_A)
+            U.zoom ^= 1, U.panX = U.panY = 0, PlaySE(SE_SELECT);
+        if (U.zoom) {
+            if (keys & KEY_LEFT && U.panX > -90)
+                U.panX -= 2;
+            if (keys & KEY_RIGHT && U.panX < 90)
+                U.panX += 2;
+            if (keys & KEY_UP && U.panY > -70)
+                U.panY -= 2;
+            if (keys & KEY_DOWN && U.panY < 70)
+                U.panY += 2;
+        }
+        if (pressed & KEY_B) {
+            PlaySE(SE_SELECT);
+            U.screen = M_INSPECT;
+        }
+        break;
     case M_STARTER:
-        MoveCursor(pressed, MTG_STARTERS);
+        if (pressed & KEY_LEFT)
+            U.cursor = (U.cursor + MTG_STARTERS - 1) % MTG_STARTERS, PlaySE(SE_SELECT);
+        if (pressed & KEY_RIGHT)
+            U.cursor = (U.cursor + 1) % MTG_STARTERS, PlaySE(SE_SELECT);
         if (pressed & KEY_B) {   // (not now: the clerk will ask again)
             PlaySE(SE_SELECT);
             Close();
@@ -823,34 +1672,32 @@ int MtgUi_Step(unsigned keys)
             PlaySE(SE_SELECT);
             Ask(ACT_TAKE_STARTER, U.cursor, "Take the %s deck? (%s)", gMtgStarters[U.cursor].name,
                 ColorWords(gMtgStarters[U.cursor].colors));
+        } else if (pressed & KEY_INSPECT) {
+            int keep = U.cursor;
+            Inspect(RecipeAce(U.cursor), M_STARTER);
+            U.cursor = keep;
         }
         break;
     case M_CHALLENGE:
-        if (pressed & (KEY_L | KEY_R)) {   // another usable deck
-            int k, step = pressed & KEY_L ? MTG_DECKS - 1 : 1;
-            for (k = (c->activeDeck + step) % MTG_DECKS; k != c->activeDeck; k = (k + step) % MTG_DECKS)
-                if (UsableDeck(k)) {
-                    c->activeDeck = (uint8_t)k;
-                    PlaySE(SE_SELECT);
-                    break;
-                }
-        } else if (pressed & KEY_B) {
+        MoveCursor(pressed, MTG_DECKS + 1);
+        if (pressed & KEY_B || (pressed & KEY_A && U.cursor == MTG_DECKS)) {
             PlaySE(SE_SELECT);
             Close();
         } else if (pressed & KEY_A) {
             PlaySE(SE_SELECT);
-            if (!UsableDeck(c->activeDeck))
-                Say(ACT_NONE, "None of your decks can be played: open MAGIC on your CARD CASE to fix one.");
-            else
-                StartDuel();
+            if (!c->decks[U.cursor].count)
+                Say(ACT_NONE, "That slot is empty.");
+            else if (!DeckValid(U.cursor))
+                Say(ACT_NONE, "%s", Mtg_DeckProblem(c, &c->decks[U.cursor]));
+            else {
+                c->activeDeck = (uint8_t)U.cursor;
+                StartDuel(gMtgDuelists[U.duelist].cards, gMtgDuelists[U.duelist].name);
+            }
         }
         break;
     case M_SPOILS:
-        MoveCursor(pressed, U.boosterCount);
-        if (pressed & (KEY_A | KEY_B)) {
-            PlaySE(SE_SELECT);
-            Close();
-        }
+        U.revealAge++;
+        SpoilsStep(pressed);
         break;
     }
     return 1;

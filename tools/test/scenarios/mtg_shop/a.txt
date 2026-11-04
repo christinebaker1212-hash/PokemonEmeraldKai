@@ -49,13 +49,108 @@ rendershot a_binder
 press A 2
 wait 10
 rendershot a_inspect
+press A 2
+wait 10
+rendershot a_bigpicture
 press B 2
 wait 6
 press B 2
 wait 6
 press R 2
+wait 6
+press R 2
+wait 6
+press R 2
+wait 6
+press R 2
+wait 6
+rendershot a_binder_red
+press SELECT 2
+wait 6
+rendershot a_binder_all
+press SELECT 2
+wait 6
+press B 2
+wait 6
+press UP 2
+wait 6
+press A 2
+wait 10
+rendershot a_decks_slots
+press A 2
+wait 6
+rendershot a_deck_menu
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press A 2
+wait 10
+rendershot a_ace
+press B 2
+wait 10
+press UP 2
+wait 4
+press UP 2
+wait 4
+rendershot a_decks_back
+press A 2
+wait 10
+rendershot a_recipes
+press B 2
+wait 10
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press A 2
+wait 6
+press A 2
 wait 20
-rendershot a_side_pokemon
+press RIGHT 2
+wait 4
+press RIGHT 2
+wait 4
+press RIGHT 2
+wait 4
+press DOWN 2
+wait 4
+rendershot a_builder
+press RIGHT 2
+wait 4
+press RIGHT 2
+wait 4
+press DOWN 2
+wait 4
+rendershot a_builder_list
+press B 2
+wait 10
+press B 2
+wait 6
+press SELECT 2
+wait 20
+rendershot a_howto
+press B 2
+wait 20
+press DOWN 2
+wait 6
+press R 2
+wait 20
+rendershot a_side_triad
+press A 2
+wait 10
 press L 2
 wait 20
 press B 2
@@ -87,7 +182,19 @@ wait 30
 rendershot a_after
 press A 2
 wait 30
+rendershot a_pack
 press A 2
+wait 40
+rendershot a_flipping
+press B 2
+wait 30
+rendershot a_booster
+press A 2
+wait 20
+rendershot a_booster_card
+press B 2
+wait 10
+press B 2
 wait 60
 mp mtg state
 mp warp 14,11,4,4

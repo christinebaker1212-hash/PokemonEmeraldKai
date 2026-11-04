@@ -78,6 +78,8 @@ EventScript_MtgDuelist::
 	faceplayer
 	special Mtg_DuelistState
 	goto_if_eq VAR_RESULT, FALSE, EventScript_MtgDuelist_NoDeck
+	special Mtg_DuelistHello
+	msgbox gStringVar4, MSGBOX_DEFAULT
 	special Mtg_DuelistChallenge
 	release
 	end

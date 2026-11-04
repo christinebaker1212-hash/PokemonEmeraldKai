@@ -9,6 +9,7 @@
 #include "global.h"
 #include "event_data.h"
 #include "string_util.h"
+#include "text.h"
 #include "mp.h"
 #include "mtg/integration.h"
 
@@ -90,6 +91,51 @@ void Mtg_DuelistState(void)
     unsigned i = gSpecialVar_0x8004;
     gSpecialVar_Result = Mtg_Unlocked();
     MP_AsciiToGame(gStringVar1, i < MTG_DUELISTS ? gMtgDuelists[i].name : "", 64);
+}
+
+// The duelist's words in gStringVar4 for the map's message box (as the other card games' duelists speak before the
+// challenge): broken into lines that fit the box, two to a page
+void Mtg_DuelistHello(void)
+{
+    unsigned i = gSpecialVar_0x8004;
+    const char *p = i < MTG_DUELISTS ? gMtgDuelists[i].hello : "";
+    u8 *out = gStringVar4, line[160], word[64];
+    int lines = 0, n = 0;
+    char plain[400];
+    Mtg_PlainText(plain, sizeof(plain), p);
+    p = plain;
+    line[0] = EOS;
+    while (*p) {
+        int len = 0;
+        u8 trial[224];
+        while (*p == ' ')
+            p++;
+        while (p[len] && p[len] != ' ' && len < 60)
+            len++;
+        if (!len)
+            break;
+        {
+            char w[64];
+            memcpy(w, p, (size_t)len);
+            w[len] = 0;
+            MP_AsciiToGame(word, w, sizeof(word));
+        }
+        p += len;
+        StringCopy(trial, line);
+        if (trial[0] != EOS)
+            StringAppend(trial, (const u8 *)"\x00\xFF");   // (a space)
+        StringAppend(trial, word);
+        if (line[0] != EOS && GetStringWidth(FONT_NORMAL, trial, 0) > 200) {
+            out = StringCopy(out, line);
+            *out++ = ++lines % 2 ? 0xFE : 0xFA;   // \n, or \p after a page's two lines
+            StringCopy(line, word);
+        } else
+            StringCopy(line, trial);
+        n++;
+    }
+    out = StringCopy(out, line);
+    *out = EOS;
+    (void)n;
 }
 
 void Mtg_DuelistChallenge(void)

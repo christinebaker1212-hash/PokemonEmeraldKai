@@ -1,0 +1,5567 @@
+{
+"Abbey Gargoyles": {
+"artist": "Christopher Rush",
+"file": "hml_1",
+"frame": "1993",
+"number": "1",
+"set": "hml"
+},
+"Abbey Matron": {
+"artist": "Mike Kimble",
+"file": "hml_2a",
+"frame": "1993",
+"number": "2a",
+"set": "hml"
+},
+"Absorb": {
+"artist": "Andrew Goldhawk",
+"file": "inv_226",
+"frame": "1997",
+"number": "226",
+"set": "inv"
+},
+"Abyssal Hunter": {
+"artist": "Steve Luke",
+"file": "mir_103",
+"frame": "1997",
+"number": "103",
+"set": "mir"
+},
+"Accelerate": {
+"artist": "Gary Ruddell",
+"file": "tor_90",
+"frame": "1997",
+"number": "90",
+"set": "tor"
+},
+"Adarkar Sentinel": {
+"artist": "Melissa A. Benson",
+"file": "ice_306",
+"frame": "1993",
+"number": "306",
+"set": "ice"
+},
+"Advance Scout": {
+"artist": "Heather Hudson",
+"file": "tmp_1",
+"frame": "1997",
+"number": "1",
+"set": "tmp"
+},
+"Aegis of the Meek": {
+"artist": "Allen Williams",
+"file": "ice_307",
+"frame": "1993",
+"number": "307",
+"set": "ice"
+},
+"Afflict": {
+"artist": "Roger Raupp",
+"file": "ody_115",
+"frame": "1997",
+"number": "115",
+"set": "ody"
+},
+"Aftershock": {
+"artist": "Hannibal King",
+"file": "tmp_160",
+"frame": "1997",
+"number": "160",
+"set": "tmp"
+},
+"Agent of Stromgald": {
+"artist": "Alan Rabinowitz",
+"file": "all_64a",
+"frame": "1993",
+"number": "64a",
+"set": "all"
+},
+"Aggressive Urge": {
+"artist": "Christopher Moeller",
+"file": "inv_181",
+"frame": "1997",
+"number": "181",
+"set": "inv"
+},
+"Air Elemental": {
+"artist": "Richard Thomas",
+"file": "4ed_59",
+"frame": "1993",
+"number": "59",
+"set": "4ed"
+},
+"Airborne Aid": {
+"artist": "Bradley Williams",
+"file": "ons_62",
+"frame": "1997",
+"number": "62",
+"set": "ons"
+},
+"Akroma, Angel of Wrath": {
+"artist": "Ron Spears",
+"file": "lgn_1",
+"frame": "1997",
+"number": "1",
+"set": "lgn"
+},
+"Aladdin's Ring": {
+"artist": "Dan Frazier",
+"file": "4ed_292",
+"frame": "1993",
+"number": "292",
+"set": "4ed"
+},
+"Ali Baba": {
+"artist": "Julie Baroh",
+"file": "4ed_175",
+"frame": "1993",
+"number": "175",
+"set": "4ed"
+},
+"Aliban's Tower": {
+"artist": "Jeff A. Menges",
+"file": "hml_61a",
+"frame": "1993",
+"number": "61a",
+"set": "hml"
+},
+"Alpha Kavu": {
+"artist": "Matt Cavotta",
+"file": "pls_77",
+"frame": "1997",
+"number": "77",
+"set": "pls"
+},
+"Ambush": {
+"artist": "Alan Rabinowitz",
+"file": "hml_62",
+"frame": "1993",
+"number": "62",
+"set": "hml"
+},
+"Ambush Party": {
+"artist": "Mark Poole",
+"file": "hml_63a",
+"frame": "1993",
+"number": "63a",
+"set": "hml"
+},
+"An-Havva Township": {
+"artist": "Liz Danforth",
+"file": "hml_111",
+"frame": "1993",
+"number": "111",
+"set": "hml"
+},
+"Ana Disciple": {
+"artist": "Darrell Riche",
+"file": "apc_73",
+"frame": "1997",
+"number": "73",
+"set": "apc"
+},
+"Anaba Ancestor": {
+"artist": "Anson Maddocks",
+"file": "hml_65",
+"frame": "1993",
+"number": "65",
+"set": "hml"
+},
+"Anaba Bodyguard": {
+"artist": "Anson Maddocks",
+"file": "hml_66a",
+"frame": "1993",
+"number": "66a",
+"set": "hml"
+},
+"Anaba Shaman": {
+"artist": "Anson Maddocks",
+"file": "hml_67a",
+"frame": "1993",
+"number": "67a",
+"set": "hml"
+},
+"Anaconda": {
+"artist": "Andrew Robinson",
+"file": "por_158",
+"frame": "1997",
+"number": "158",
+"set": "por"
+},
+"Anarchy": {
+"artist": "Phil Foglio",
+"file": "ice_170",
+"frame": "1993",
+"number": "170",
+"set": "ice"
+},
+"Ancient Spider": {
+"artist": "Greg Staples",
+"file": "pls_96",
+"frame": "1997",
+"number": "96",
+"set": "pls"
+},
+"Angel of Retribution": {
+"artist": "rk post",
+"file": "tor_1",
+"frame": "1997",
+"number": "1",
+"set": "tor"
+},
+"Angelfire Crusader": {
+"artist": "Edward P. Beard, Jr.",
+"file": "apc_1",
+"frame": "1997",
+"number": "1",
+"set": "apc"
+},
+"Angelic Blessing": {
+"artist": "DiTerlizzi",
+"file": "por_2",
+"frame": "1997",
+"number": "2",
+"set": "por"
+},
+"Angelic Page": {
+"artist": "Rebecca Guay",
+"file": "usg_4",
+"frame": "1997",
+"number": "4",
+"set": "usg"
+},
+"Angelic Wall": {
+"artist": "Rebecca Guay",
+"file": "p02_10",
+"frame": "1997",
+"number": "10",
+"set": "p02"
+},
+"Annihilate": {
+"artist": "Kev Walker",
+"file": "inv_94",
+"frame": "1997",
+"number": "94",
+"set": "inv"
+},
+"Annul": {
+"artist": "Greg Simanson",
+"file": "usg_59",
+"frame": "1997",
+"number": "59",
+"set": "usg"
+},
+"Anurid Murkdiver": {
+"artist": "Dany Orizio",
+"file": "ons_124",
+"frame": "1997",
+"number": "124",
+"set": "ons"
+},
+"Apprentice Wizard": {
+"artist": "Dan Frazier",
+"file": "4ed_61",
+"frame": "1993",
+"number": "61",
+"set": "4ed"
+},
+"Archaeological Dig": {
+"artist": "Don Hazeltine",
+"file": "inv_320",
+"frame": "1997",
+"number": "320",
+"set": "inv"
+},
+"Archangel": {
+"artist": "Christopher Rush",
+"file": "vis_1",
+"frame": "1997",
+"number": "1",
+"set": "vis"
+},
+"Archivist": {
+"artist": "Pete Venters",
+"file": "ulg_26",
+"frame": "1997",
+"number": "26",
+"set": "ulg"
+},
+"Ardent Militia": {
+"artist": "Mike Raabe",
+"file": "por_4",
+"frame": "1997",
+"number": "4",
+"set": "por"
+},
+"Argothian Swine": {
+"artist": "Randy Elliott",
+"file": "usg_235",
+"frame": "1997",
+"number": "235",
+"set": "usg"
+},
+"Ark of Blight": {
+"artist": "David Martin",
+"file": "scg_140",
+"frame": "1997",
+"number": "140",
+"set": "scg"
+},
+"Armageddon": {
+"artist": "Jesper Myrfors",
+"file": "4ed_5",
+"frame": "1993",
+"number": "5",
+"set": "4ed"
+},
+"Armored Pegasus": {
+"artist": "Andrew Robinson",
+"file": "por_6",
+"frame": "1997",
+"number": "6",
+"set": "por"
+},
+"Armorer Guildmage": {
+"artist": "Martin McKenna",
+"file": "mir_156",
+"frame": "1997",
+"number": "156",
+"set": "mir"
+},
+"Ashen Firebeast": {
+"artist": "Mark Tedin",
+"file": "ody_174",
+"frame": "1997",
+"number": "174",
+"set": "ody"
+},
+"Aura Blast": {
+"artist": "Ron Walotsky",
+"file": "pls_1",
+"frame": "1997",
+"number": "1",
+"set": "pls"
+},
+"Aven Archer": {
+"artist": "Mark Zug",
+"file": "ody_6",
+"frame": "1997",
+"number": "6",
+"set": "ody"
+},
+"Aven Envoy": {
+"artist": "Alex Horley-Orlandelli",
+"file": "lgn_30",
+"frame": "1997",
+"number": "30",
+"set": "lgn"
+},
+"Aven Flock": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "ody_8",
+"frame": "1997",
+"number": "8",
+"set": "ody"
+},
+"Aven Smokeweaver": {
+"artist": "Kev Walker",
+"file": "ody_64",
+"frame": "1997",
+"number": "64",
+"set": "ody"
+},
+"Aysen Abbey": {
+"artist": "Liz Danforth",
+"file": "hml_112",
+"frame": "1993",
+"number": "112",
+"set": "hml"
+},
+"Aysen Bureaucrats": {
+"artist": "Alan Rabinowitz",
+"file": "hml_3a",
+"frame": "1993",
+"number": "3a",
+"set": "hml"
+},
+"Azure Drake": {
+"artist": "Dan Frazier",
+"file": "bchr_15",
+"frame": "1993",
+"number": "15",
+"set": "bchr"
+},
+"Balduvian Barbarians": {
+"artist": "Mark Poole",
+"file": "ice_172",
+"frame": "1993",
+"number": "172",
+"set": "ice"
+},
+"Balduvian Bears": {
+"artist": "Quinton Hoover",
+"file": "ice_226",
+"frame": "1993",
+"number": "226",
+"set": "ice"
+},
+"Ballista Squad": {
+"artist": "Matthew D. Wilson",
+"file": "mmq_5",
+"frame": "1997",
+"number": "5",
+"set": "mmq"
+},
+"Balshan Collaborator": {
+"artist": "DiTerlizzi",
+"file": "tor_25",
+"frame": "1997",
+"number": "25",
+"set": "tor"
+},
+"Barbarian Lunatic": {
+"artist": "Ron Spears",
+"file": "ody_175",
+"frame": "1997",
+"number": "175",
+"set": "ody"
+},
+"Battle Frenzy": {
+"artist": "Brian Snõddy",
+"file": "ice_175",
+"frame": "1993",
+"number": "175",
+"set": "ice"
+},
+"Battle Rampart": {
+"artist": "Ron Spencer",
+"file": "mmq_173",
+"frame": "1997",
+"number": "173",
+"set": "mmq"
+},
+"Bay Falcon": {
+"artist": "Una Fricker",
+"file": "mir_54",
+"frame": "1997",
+"number": "54",
+"set": "mir"
+},
+"Bayou Dragonfly": {
+"artist": "DiTerlizzi",
+"file": "tmp_215",
+"frame": "1997",
+"number": "215",
+"set": "tmp"
+},
+"Befoul": {
+"artist": "Pete Venters",
+"file": "usg_116",
+"frame": "1997",
+"number": "116",
+"set": "usg"
+},
+"Belbe's Armor": {
+"artist": "D. Alexander Gregory",
+"file": "nem_126",
+"frame": "1997",
+"number": "126",
+"set": "nem"
+},
+"Benalish Heralds": {
+"artist": "Don Hazeltine",
+"file": "inv_6",
+"frame": "1997",
+"number": "6",
+"set": "inv"
+},
+"Benalish Knight": {
+"artist": "Zina Saunders",
+"file": "wth_9",
+"frame": "1997",
+"number": "9",
+"set": "wth"
+},
+"Benalish Trapper": {
+"artist": "Ken Meyer, Jr.",
+"file": "inv_8",
+"frame": "1997",
+"number": "8",
+"set": "inv"
+},
+"Benthic Behemoth": {
+"artist": "Jim Nelson",
+"file": "tmp_54",
+"frame": "1997",
+"number": "54",
+"set": "tmp"
+},
+"Bird Maiden": {
+"artist": "Kaja Foglio",
+"file": "4ed_177",
+"frame": "1993",
+"number": "177",
+"set": "4ed"
+},
+"Birds of Paradise": {
+"artist": "Mark Poole",
+"file": "4ed_234",
+"frame": "1993",
+"number": "234",
+"set": "4ed"
+},
+"Black Knight": {
+"artist": "Jeff A. Menges",
+"file": "4ed_121",
+"frame": "1993",
+"number": "121",
+"set": "4ed"
+},
+"Blanchwood Treefolk": {
+"artist": "DiTerlizzi",
+"file": "usg_238",
+"frame": "1997",
+"number": "238",
+"set": "usg"
+},
+"Blaze": {
+"artist": "Gerry Grace",
+"file": "por_118",
+"frame": "1997",
+"number": "118",
+"set": "por"
+},
+"Blistering Barrier": {
+"artist": "David Ho",
+"file": "mir_159",
+"frame": "1997",
+"number": "159",
+"set": "mir"
+},
+"Blizzard Elemental": {
+"artist": "Thomas M. Baxa",
+"file": "uds_27",
+"frame": "1997",
+"number": "27",
+"set": "uds"
+},
+"Blood Pet": {
+"artist": "Brom",
+"file": "tmp_109",
+"frame": "1997",
+"number": "109",
+"set": "tmp"
+},
+"Blood Vassal": {
+"artist": "Chippy",
+"file": "usg_118",
+"frame": "1997",
+"number": "118",
+"set": "usg"
+},
+"Bloodfire Colossus": {
+"artist": "Greg Staples",
+"file": "apc_55",
+"frame": "1997",
+"number": "55",
+"set": "apc"
+},
+"Bloodfire Dwarf": {
+"artist": "Ron Spencer",
+"file": "apc_56",
+"frame": "1997",
+"number": "56",
+"set": "apc"
+},
+"Bloodfire Kavu": {
+"artist": "Greg Staples",
+"file": "apc_58",
+"frame": "1997",
+"number": "58",
+"set": "apc"
+},
+"Bloodstone Cameo": {
+"artist": "Tony Szczudlo",
+"file": "inv_298",
+"frame": "1997",
+"number": "298",
+"set": "inv"
+},
+"Boa Constrictor": {
+"artist": "Carl Critchlow",
+"file": "mmq_231",
+"frame": "1997",
+"number": "231",
+"set": "mmq"
+},
+"Bog Imp": {
+"artist": "Ron Spencer",
+"file": "4ed_123",
+"frame": "1993",
+"number": "123",
+"set": "4ed"
+},
+"Bog Initiate": {
+"artist": "rk post",
+"file": "inv_95",
+"frame": "1997",
+"number": "95",
+"set": "inv"
+},
+"Bog Raiders": {
+"artist": "Steve Luke",
+"file": "por_82",
+"frame": "1997",
+"number": "82",
+"set": "por"
+},
+"Bog Smugglers": {
+"artist": "Mike Ploog",
+"file": "mmq_117",
+"frame": "1997",
+"number": "117",
+"set": "mmq"
+},
+"Bog Wraith": {
+"artist": "Jeff A. Menges",
+"file": "4ed_124",
+"frame": "1993",
+"number": "124",
+"set": "4ed"
+},
+"Boil": {
+"artist": "Jason Alexander Behnke",
+"file": "tmp_165",
+"frame": "1997",
+"number": "165",
+"set": "tmp"
+},
+"Boomerang": {
+"artist": "Brian Snõddy",
+"file": "bchr_16",
+"frame": "1993",
+"number": "16",
+"set": "bchr"
+},
+"Border Patrol": {
+"artist": "Roger Raupp",
+"file": "jud_6",
+"frame": "1997",
+"number": "6",
+"set": "jud"
+},
+"Bottle Gnomes": {
+"artist": "Kaja Foglio",
+"file": "tmp_278",
+"frame": "1997",
+"number": "278",
+"set": "tmp"
+},
+"Braidwood Cup": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "uds_126",
+"frame": "1997",
+"number": "126",
+"set": "uds"
+},
+"Brass Secretary": {
+"artist": "DiTerlizzi",
+"file": "uds_128",
+"frame": "1997",
+"number": "128",
+"set": "uds"
+},
+"Breach": {
+"artist": "Greg Staples",
+"file": "usg_120",
+"frame": "1997",
+"number": "120",
+"set": "usg"
+},
+"Breathstealer": {
+"artist": "Cliff Nielsen",
+"file": "mir_109",
+"frame": "1997",
+"number": "109",
+"set": "mir"
+},
+"Brightstone Ritual": {
+"artist": "Wayne England",
+"file": "ons_191",
+"frame": "1997",
+"number": "191",
+"set": "ons"
+},
+"Bull Hippo": {
+"artist": "Roger Raupp",
+"file": "por_160",
+"frame": "1997",
+"number": "160",
+"set": "por"
+},
+"Burst of Energy": {
+"artist": "Mark Brill",
+"file": "ulg_3",
+"frame": "1997",
+"number": "3",
+"set": "ulg"
+},
+"Cabal Coffers": {
+"artist": "Don Hazeltine",
+"file": "tor_139",
+"frame": "1997",
+"number": "139",
+"set": "tor"
+},
+"Cabal Trainee": {
+"artist": "Pete Venters",
+"file": "jud_63",
+"frame": "1997",
+"number": "63",
+"set": "jud"
+},
+"Canopy Spider": {
+"artist": "Christopher Rush",
+"file": "tmp_217",
+"frame": "1997",
+"number": "217",
+"set": "tmp"
+},
+"Canyon Wildcat": {
+"artist": "Gary Leach",
+"file": "tmp_167",
+"frame": "1997",
+"number": "167",
+"set": "tmp"
+},
+"Capashen Knight": {
+"artist": "Kev Walker",
+"file": "uds_3",
+"frame": "1997",
+"number": "3",
+"set": "uds"
+},
+"Capashen Templar": {
+"artist": "Todd Lockwood",
+"file": "uds_5",
+"frame": "1997",
+"number": "5",
+"set": "uds"
+},
+"Capashen Unicorn": {
+"artist": "Jerry Tiritilli",
+"file": "inv_10",
+"frame": "1997",
+"number": "10",
+"set": "inv"
+},
+"Carnivorous Plant": {
+"artist": "Quinton Hoover",
+"file": "4ed_235",
+"frame": "1993",
+"number": "235",
+"set": "4ed"
+},
+"Carrion Ants": {
+"artist": "Richard Thomas",
+"file": "4ed_125",
+"frame": "1993",
+"number": "125",
+"set": "4ed"
+},
+"Castle Sengir": {
+"artist": "Pete Venters",
+"file": "hml_113",
+"frame": "1993",
+"number": "113",
+"set": "hml"
+},
+"Cat Warriors": {
+"artist": "Melissa A. Benson",
+"file": "bchr_58",
+"frame": "1993",
+"number": "58",
+"set": "bchr"
+},
+"Cavern Crawler": {
+"artist": "Pete Venters",
+"file": "mmq_181",
+"frame": "1997",
+"number": "181",
+"set": "mmq"
+},
+"Celestial Prism": {
+"artist": "Amy Weber",
+"file": "4ed_304",
+"frame": "1993",
+"number": "304",
+"set": "4ed"
+},
+"Cemetery Gate": {
+"artist": "Melissa A. Benson",
+"file": "hml_44a",
+"frame": "1993",
+"number": "44a",
+"set": "hml"
+},
+"Centaur Archer": {
+"artist": "Melissa A. Benson",
+"file": "ice_282",
+"frame": "1993",
+"number": "282",
+"set": "ice"
+},
+"Cephalid Retainer": {
+"artist": "Tony Szczudlo",
+"file": "ody_73",
+"frame": "1997",
+"number": "73",
+"set": "ody"
+},
+"Cerulean Wyvern": {
+"artist": "Gerry Grace",
+"file": "mir_57",
+"frame": "1997",
+"number": "57",
+"set": "mir"
+},
+"Ceta Disciple": {
+"artist": "Greg Hildebrandt",
+"file": "apc_19",
+"frame": "1997",
+"number": "19",
+"set": "apc"
+},
+"Chandler": {
+"artist": "Douglas Shuler",
+"file": "hml_69",
+"frame": "1993",
+"number": "69",
+"set": "hml"
+},
+"Chastise": {
+"artist": "Carl Critchlow",
+"file": "jud_8",
+"frame": "1997",
+"number": "8",
+"set": "jud"
+},
+"Cinder Elemental": {
+"artist": "Greg Staples",
+"file": "mmq_183",
+"frame": "1997",
+"number": "183",
+"set": "mmq"
+},
+"Coast Watcher": {
+"artist": "Luca Zontini",
+"file": "scg_30",
+"frame": "1997",
+"number": "30",
+"set": "scg"
+},
+"Coastal Drake": {
+"artist": "John Gallagher",
+"file": "apc_22",
+"frame": "1997",
+"number": "22",
+"set": "apc"
+},
+"Coiled Tinviper": {
+"artist": "John Matson",
+"file": "tmp_279",
+"frame": "1997",
+"number": "279",
+"set": "tmp"
+},
+"Collective Unconscious": {
+"artist": "Andrew Goldhawk",
+"file": "mmq_236",
+"frame": "1997",
+"number": "236",
+"set": "mmq"
+},
+"Colos Yearling": {
+"artist": "Patrick Ho",
+"file": "uds_79",
+"frame": "1997",
+"number": "79",
+"set": "uds"
+},
+"Concentrate": {
+"artist": "Glen Angus & Arnie Swekel",
+"file": "ody_78",
+"frame": "1997",
+"number": "78",
+"set": "ody"
+},
+"Coral Merfolk": {
+"artist": "rk post",
+"file": "usg_67",
+"frame": "1997",
+"number": "67",
+"set": "usg"
+},
+"Counterspell": {
+"artist": "Mark Poole",
+"file": "4ed_65",
+"frame": "1993",
+"number": "65",
+"set": "4ed"
+},
+"Crash of Rhinos": {
+"artist": "Steve White",
+"file": "mir_210",
+"frame": "1997",
+"number": "210",
+"set": "mir"
+},
+"Craw Wurm": {
+"artist": "Daniel Gelon",
+"file": "4ed_238",
+"frame": "1993",
+"number": "238",
+"set": "4ed"
+},
+"Crazed Skirge": {
+"artist": "Ron Spencer",
+"file": "usg_125",
+"frame": "1997",
+"number": "125",
+"set": "usg"
+},
+"Creeping Mold": {
+"artist": "David Seeley",
+"file": "vis_103",
+"frame": "1997",
+"number": "103",
+"set": "vis"
+},
+"Crenellated Wall": {
+"artist": "Arnie Swekel",
+"file": "mmq_290",
+"frame": "1997",
+"number": "290",
+"set": "mmq"
+},
+"Crimson Manticore": {
+"artist": "Daniel Gelon",
+"file": "4ed_183",
+"frame": "1993",
+"number": "183",
+"set": "4ed"
+},
+"Crosis's Attendant": {
+"artist": "Arnie Swekel",
+"file": "inv_300",
+"frame": "1997",
+"number": "300",
+"set": "inv"
+},
+"Crossbow Ambush": {
+"artist": "Kev Walker",
+"file": "sth_105",
+"frame": "1997",
+"number": "105",
+"set": "sth"
+},
+"Crossbow Infantry": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "mmq_16",
+"frame": "1997",
+"number": "16",
+"set": "mmq"
+},
+"Crowd Favorites": {
+"artist": "Roger Raupp",
+"file": "ons_15",
+"frame": "1997",
+"number": "15",
+"set": "ons"
+},
+"Crystal Quarry": {
+"artist": "Alan Pollack",
+"file": "ody_318",
+"frame": "1997",
+"number": "318",
+"set": "ody"
+},
+"Crystal Vein": {
+"artist": "Pat Lewis",
+"file": "mir_325",
+"frame": "1997",
+"number": "325",
+"set": "mir"
+},
+"D'Avenant Archer": {
+"artist": "Douglas Shuler",
+"file": "bchr_5",
+"frame": "1993",
+"number": "5",
+"set": "bchr"
+},
+"Dancing Scimitar": {
+"artist": "Anson Maddocks",
+"file": "4ed_313",
+"frame": "1993",
+"number": "313",
+"set": "4ed"
+},
+"Daraja Griffin": {
+"artist": "Stuart Griffin",
+"file": "vis_2",
+"frame": "1997",
+"number": "2",
+"set": "vis"
+},
+"Darigaaz's Attendant": {
+"artist": "Brom",
+"file": "inv_301",
+"frame": "1997",
+"number": "301",
+"set": "inv"
+},
+"Daring Leap": {
+"artist": "Paolo Parente",
+"file": "pls_101",
+"frame": "1997",
+"number": "101",
+"set": "pls"
+},
+"Dark Banishing": {
+"artist": "Drew Tucker",
+"file": "ice_119",
+"frame": "1993",
+"number": "119",
+"set": "ice"
+},
+"Dark Ritual": {
+"artist": "Sandra Everingham",
+"file": "4ed_129",
+"frame": "1993",
+"number": "129",
+"set": "4ed"
+},
+"Darkwater Catacombs": {
+"artist": "Monte Michael Moore",
+"file": "ody_319",
+"frame": "1997",
+"number": "319",
+"set": "ody"
+},
+"Daru Encampment": {
+"artist": "Tony Szczudlo",
+"file": "ons_315",
+"frame": "1997",
+"number": "315",
+"set": "ons"
+},
+"Deadly Insect": {
+"artist": "Scott Kirschner",
+"file": "all_86a",
+"frame": "1993",
+"number": "86a",
+"set": "all"
+},
+"Death Grasp": {
+"artist": "Eric Peterson",
+"file": "apc_95",
+"frame": "1997",
+"number": "95",
+"set": "apc"
+},
+"Death Speakers": {
+"artist": "Douglas Shuler",
+"file": "hml_7",
+"frame": "1993",
+"number": "7",
+"set": "hml"
+},
+"Death Stroke": {
+"artist": "Colin MacNeil",
+"file": "sth_57",
+"frame": "1997",
+"number": "57",
+"set": "sth"
+},
+"Deathgrip": {
+"artist": "Anson Maddocks",
+"file": "4ed_130",
+"frame": "1993",
+"number": "130",
+"set": "4ed"
+},
+"Dedicated Martyr": {
+"artist": "Dave Dorman",
+"file": "ody_16",
+"frame": "1997",
+"number": "16",
+"set": "ody"
+},
+"Defender of Chaos": {
+"artist": "Carl Critchlow",
+"file": "ulg_75",
+"frame": "1997",
+"number": "75",
+"set": "ulg"
+},
+"Defender of Law": {
+"artist": "Carl Critchlow",
+"file": "ulg_5",
+"frame": "1997",
+"number": "5",
+"set": "ulg"
+},
+"Defiant Elf": {
+"artist": "Pete Venters",
+"file": "lgn_123",
+"frame": "1997",
+"number": "123",
+"set": "lgn"
+},
+"Dega Disciple": {
+"artist": "Alan Pollack",
+"file": "apc_4",
+"frame": "1997",
+"number": "4",
+"set": "apc"
+},
+"Demolish": {
+"artist": "Gary Ruddell",
+"file": "ody_183",
+"frame": "1997",
+"number": "183",
+"set": "ody"
+},
+"Demystify": {
+"artist": "Christopher Rush",
+"file": "ons_24",
+"frame": "1997",
+"number": "24",
+"set": "ons"
+},
+"Desert Twister": {
+"artist": "Susan Van Camp",
+"file": "4ed_240",
+"frame": "1993",
+"number": "240",
+"set": "4ed"
+},
+"Deserted Temple": {
+"artist": "Rob Alexander",
+"file": "ody_320",
+"frame": "1997",
+"number": "320",
+"set": "ody"
+},
+"Despoil": {
+"artist": "Scott M. Fischer",
+"file": "pcy_62",
+"frame": "1997",
+"number": "62",
+"set": "pcy"
+},
+"Despotic Scepter": {
+"artist": "Richard Thomas",
+"file": "ice_316",
+"frame": "1993",
+"number": "316",
+"set": "ice"
+},
+"Devastate": {
+"artist": "Greg Staples",
+"file": "pcy_87",
+"frame": "1997",
+"number": "87",
+"set": "pcy"
+},
+"Dirtwater Wraith": {
+"artist": "Steve Luke",
+"file": "mir_117",
+"frame": "1997",
+"number": "117",
+"set": "mir"
+},
+"Disenchant": {
+"artist": "Amy Weber",
+"file": "4ed_22",
+"frame": "1993",
+"number": "22",
+"set": "4ed"
+},
+"Dismiss": {
+"artist": "Donato Giancola",
+"file": "tmp_58",
+"frame": "1997",
+"number": "58",
+"set": "tmp"
+},
+"Dive Bomber": {
+"artist": "Randy Gallegos",
+"file": "ons_26",
+"frame": "1997",
+"number": "26",
+"set": "ons"
+},
+"Divine Retribution": {
+"artist": "Charles Gillespie",
+"file": "mir_12",
+"frame": "1997",
+"number": "12",
+"set": "mir"
+},
+"Diving Griffin": {
+"artist": "John Howe",
+"file": "pcy_6",
+"frame": "1997",
+"number": "6",
+"set": "pcy"
+},
+"Douse": {
+"artist": "Val Mayerik",
+"file": "usg_70",
+"frame": "1997",
+"number": "70",
+"set": "usg"
+},
+"Dragon Engine": {
+"artist": "Anson Maddocks",
+"file": "4ed_317",
+"frame": "1993",
+"number": "317",
+"set": "4ed"
+},
+"Drake-Skull Cameo": {
+"artist": "Dan Frazier",
+"file": "inv_302",
+"frame": "1997",
+"number": "302",
+"set": "inv"
+},
+"Dromar's Attendant": {
+"artist": "Carl Critchlow",
+"file": "inv_303",
+"frame": "1997",
+"number": "303",
+"set": "inv"
+},
+"Druid Lyrist": {
+"artist": "Mark Zug",
+"file": "ody_238",
+"frame": "1997",
+"number": "238",
+"set": "ody"
+},
+"Dry Spell": {
+"artist": "Brian Snõddy",
+"file": "hml_46a",
+"frame": "1993",
+"number": "46a",
+"set": "hml"
+},
+"Dungeon Shade": {
+"artist": "Jason Alexander Behnke",
+"file": "sth_58",
+"frame": "1997",
+"number": "58",
+"set": "sth"
+},
+"Durkwood Boars": {
+"artist": "Mike Kimble",
+"file": "4ed_241",
+"frame": "1993",
+"number": "241",
+"set": "4ed"
+},
+"Dusk Imp": {
+"artist": "Edward P. Beard, Jr.",
+"file": "ody_131",
+"frame": "1997",
+"number": "131",
+"set": "ody"
+},
+"Duskrider Falcon": {
+"artist": "Cecil Fernando",
+"file": "wth_12",
+"frame": "1997",
+"number": "12",
+"set": "wth"
+},
+"Dwarven Grunt": {
+"artist": "Mike Ploog",
+"file": "ody_185",
+"frame": "1997",
+"number": "185",
+"set": "ody"
+},
+"Dwarven Miner": {
+"artist": "Jock",
+"file": "mir_169",
+"frame": "1997",
+"number": "169",
+"set": "mir"
+},
+"Dwarven Trader": {
+"artist": "Margaret Organ-Kean",
+"file": "hml_72a",
+"frame": "1993",
+"number": "72a",
+"set": "hml"
+},
+"Eager Cadet": {
+"artist": "Scott M. Fischer",
+"file": "s99_15",
+"frame": "1997",
+"number": "15",
+"set": "s99"
+},
+"Earth Elemental": {
+"artist": "Dan Frazier",
+"file": "4ed_188",
+"frame": "1993",
+"number": "188",
+"set": "4ed"
+},
+"Earthquake": {
+"artist": "Dan Frazier",
+"file": "4ed_189",
+"frame": "1993",
+"number": "189",
+"set": "4ed"
+},
+"Eastern Paladin": {
+"artist": "Carl Critchlow",
+"file": "usg_133",
+"frame": "1997",
+"number": "133",
+"set": "usg"
+},
+"Ebony Rhino": {
+"artist": "Amy Weber",
+"file": "hml_106",
+"frame": "1993",
+"number": "106",
+"set": "hml"
+},
+"Ebony Treefolk": {
+"artist": "Matt Cavotta",
+"file": "apc_97",
+"frame": "1997",
+"number": "97",
+"set": "apc"
+},
+"Ekundu Griffin": {
+"artist": "David A. Cherry",
+"file": "mir_13",
+"frame": "1997",
+"number": "13",
+"set": "mir"
+},
+"Elite Archers": {
+"artist": "Greg Staples",
+"file": "usg_13",
+"frame": "1997",
+"number": "13",
+"set": "usg"
+},
+"Elvish Archers": {
+"artist": "Anson Maddocks",
+"file": "4ed_243",
+"frame": "1993",
+"number": "243",
+"set": "4ed"
+},
+"Elvish Herder": {
+"artist": "Tom Fleming",
+"file": "usg_247",
+"frame": "1997",
+"number": "247",
+"set": "usg"
+},
+"Elvish Lookout": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "uds_103",
+"frame": "1997",
+"number": "103",
+"set": "uds"
+},
+"Elvish Lyrist": {
+"artist": "Rebecca Guay",
+"file": "usg_248",
+"frame": "1997",
+"number": "248",
+"set": "usg"
+},
+"Elvish Ranger": {
+"artist": "Terese Nielsen",
+"file": "all_88a",
+"frame": "1993",
+"number": "88a",
+"set": "all"
+},
+"Elvish Scrapper": {
+"artist": "Edward P. Beard, Jr.",
+"file": "ons_258",
+"frame": "1997",
+"number": "258",
+"set": "ons"
+},
+"Elvish Warrior": {
+"artist": "Christopher Moeller",
+"file": "ons_260",
+"frame": "1997",
+"number": "260",
+"set": "ons"
+},
+"Ember Shot": {
+"artist": "Alan Pollack",
+"file": "jud_87",
+"frame": "1997",
+"number": "87",
+"set": "jud"
+},
+"Emerald Dragonfly": {
+"artist": "Quinton Hoover",
+"file": "bchr_63",
+"frame": "1993",
+"number": "63",
+"set": "bchr"
+},
+"Enormous Baloth": {
+"artist": "Mark Tedin",
+"file": "lgn_125",
+"frame": "1997",
+"number": "125",
+"set": "lgn"
+},
+"Enrage": {
+"artist": "Justin Sweet",
+"file": "scg_91",
+"frame": "1997",
+"number": "91",
+"set": "scg"
+},
+"Enslaved Dwarf": {
+"artist": "Terese Nielsen",
+"file": "tor_96",
+"frame": "1997",
+"number": "96",
+"set": "tor"
+},
+"Envelop": {
+"artist": "Don Hazeltine",
+"file": "jud_39",
+"frame": "1997",
+"number": "39",
+"set": "jud"
+},
+"Erase": {
+"artist": "Ron Spears",
+"file": "ulg_7",
+"frame": "1997",
+"number": "7",
+"set": "ulg"
+},
+"Ertai, Wizard Adept": {
+"artist": "Terese Nielsen",
+"file": "exo_33",
+"frame": "1997",
+"number": "33",
+"set": "exo"
+},
+"Escape Routes": {
+"artist": "Marc Fishman",
+"file": "pls_25",
+"frame": "1997",
+"number": "25",
+"set": "pls"
+},
+"Evaporate": {
+"artist": "Alan Rabinowitz",
+"file": "hml_74",
+"frame": "1993",
+"number": "74",
+"set": "hml"
+},
+"Exclude": {
+"artist": "Mark Romanoski",
+"file": "inv_56",
+"frame": "1997",
+"number": "56",
+"set": "inv"
+},
+"Execute": {
+"artist": "Gary Ruddell",
+"file": "ody_133",
+"frame": "1997",
+"number": "133",
+"set": "ody"
+},
+"Exile": {
+"artist": "Rob Alexander",
+"file": "all_3",
+"frame": "1993",
+"number": "3",
+"set": "all"
+},
+"Expendable Troops": {
+"artist": "Carl Critchlow",
+"file": "ulg_8",
+"frame": "1997",
+"number": "8",
+"set": "ulg"
+},
+"Eye of Ramos": {
+"artist": "David Martin",
+"file": "mmq_294",
+"frame": "1997",
+"number": "294",
+"set": "mmq"
+},
+"Fanatical Fever": {
+"artist": "Julie Baroh",
+"file": "ice_234",
+"frame": "1993",
+"number": "234",
+"set": "ice"
+},
+"Fault Line": {
+"artist": "Ron Spencer",
+"file": "usg_185",
+"frame": "1997",
+"number": "185",
+"set": "usg"
+},
+"Feeding Frenzy": {
+"artist": "Nelson DeCastro",
+"file": "ons_147",
+"frame": "1997",
+"number": "147",
+"set": "ons"
+},
+"Femeref Archers": {
+"artist": "William Donohoe",
+"file": "mir_215",
+"frame": "1997",
+"number": "215",
+"set": "mir"
+},
+"Femeref Scouts": {
+"artist": "Zak Plucinski",
+"file": "mir_19",
+"frame": "1997",
+"number": "19",
+"set": "mir"
+},
+"Feral Shadow": {
+"artist": "Cliff Nielsen",
+"file": "mir_122",
+"frame": "1997",
+"number": "122",
+"set": "mir"
+},
+"Fetid Horror": {
+"artist": "Gary Leach",
+"file": "mir_123",
+"frame": "1997",
+"number": "123",
+"set": "mir"
+},
+"Fighting Drake": {
+"artist": "DiTerlizzi",
+"file": "tmp_63",
+"frame": "1997",
+"number": "63",
+"set": "tmp"
+},
+"Fire Ants": {
+"artist": "Tom Fleming",
+"file": "usg_187",
+"frame": "1997",
+"number": "187",
+"set": "usg"
+},
+"Fire Elemental": {
+"artist": "Melissa A. Benson",
+"file": "4ed_191",
+"frame": "1993",
+"number": "191",
+"set": "4ed"
+},
+"Firefly": {
+"artist": "Stephen Daniele",
+"file": "tmp_172",
+"frame": "1997",
+"number": "172",
+"set": "tmp"
+},
+"Firescreamer": {
+"artist": "Alan Pollack",
+"file": "inv_106",
+"frame": "1997",
+"number": "106",
+"set": "inv"
+},
+"Fissure": {
+"artist": "Douglas Shuler",
+"file": "4ed_194",
+"frame": "1993",
+"number": "194",
+"set": "4ed"
+},
+"Fit of Rage": {
+"artist": "Douglas Shuler",
+"file": "wth_102",
+"frame": "1997",
+"number": "102",
+"set": "wth"
+},
+"Flame Rift": {
+"artist": "Ben Thompson",
+"file": "nem_80",
+"frame": "1997",
+"number": "80",
+"set": "nem"
+},
+"Flame Spirit": {
+"artist": "Justin Hampton",
+"file": "ice_184",
+"frame": "1993",
+"number": "184",
+"set": "ice"
+},
+"Flamewave Invoker": {
+"artist": "Dave Dorman",
+"file": "lgn_92",
+"frame": "1997",
+"number": "92",
+"set": "lgn"
+},
+"Flashfires": {
+"artist": "Dameon Willich",
+"file": "4ed_195",
+"frame": "1993",
+"number": "195",
+"set": "4ed"
+},
+"Flood": {
+"artist": "Dennis Detwiller",
+"file": "4ed_73",
+"frame": "1993",
+"number": "73",
+"set": "4ed"
+},
+"Flowstone Crusher": {
+"artist": "Ben Thompson",
+"file": "nem_81",
+"frame": "1997",
+"number": "81",
+"set": "nem"
+},
+"Flowstone Giant": {
+"artist": "Joel Biske",
+"file": "tmp_174",
+"frame": "1997",
+"number": "174",
+"set": "tmp"
+},
+"Flowstone Hellion": {
+"artist": "Daren Bader",
+"file": "sth_84",
+"frame": "1997",
+"number": "84",
+"set": "sth"
+},
+"Flowstone Mauler": {
+"artist": "Paolo Parente",
+"file": "sth_85",
+"frame": "1997",
+"number": "85",
+"set": "sth"
+},
+"Flowstone Overseer": {
+"artist": "Andrew Goldhawk",
+"file": "nem_82",
+"frame": "1997",
+"number": "82",
+"set": "nem"
+},
+"Flowstone Shambler": {
+"artist": "Jim Nelson",
+"file": "sth_86",
+"frame": "1997",
+"number": "86",
+"set": "sth"
+},
+"Flowstone Slide": {
+"artist": "Chippy",
+"file": "nem_83",
+"frame": "1997",
+"number": "83",
+"set": "nem"
+},
+"Flowstone Strike": {
+"artist": "Mike Ploog",
+"file": "nem_84",
+"frame": "1997",
+"number": "84",
+"set": "nem"
+},
+"Flowstone Thopter": {
+"artist": "Mike Ploog",
+"file": "nem_132",
+"frame": "1997",
+"number": "132",
+"set": "nem"
+},
+"Flowstone Wall": {
+"artist": "Jeff Miracola",
+"file": "nem_86",
+"frame": "1997",
+"number": "86",
+"set": "nem"
+},
+"Flowstone Wyvern": {
+"artist": "Stephen Daniele",
+"file": "tmp_176",
+"frame": "1997",
+"number": "176",
+"set": "tmp"
+},
+"Flying Carpet": {
+"artist": "Mark Tedin",
+"file": "4ed_320",
+"frame": "1993",
+"number": "320",
+"set": "4ed"
+},
+"Folk of the Pines": {
+"artist": "NéNé Thomas & Catherine Buck",
+"file": "ice_235",
+"frame": "1993",
+"number": "235",
+"set": "ice"
+},
+"Forest": {
+"artist": "Christopher Rush",
+"file": "4ed_376",
+"frame": "1993",
+"number": "376",
+"set": "4ed"
+},
+"Fountain of Youth": {
+"artist": "Daniel Gelon",
+"file": "bchr_98",
+"frame": "1993",
+"number": "98",
+"set": "bchr"
+},
+"Freewind Falcon": {
+"artist": "Una Fricker",
+"file": "vis_5",
+"frame": "1997",
+"number": "5",
+"set": "vis"
+},
+"Fresh Volunteers": {
+"artist": "Jeff Miracola",
+"file": "mmq_20",
+"frame": "1997",
+"number": "20",
+"set": "mmq"
+},
+"Frozen Shade": {
+"artist": "Douglas Shuler",
+"file": "4ed_138",
+"frame": "1993",
+"number": "138",
+"set": "4ed"
+},
+"Fugitive Wizard": {
+"artist": "Jim Nelson",
+"file": "lgn_38",
+"frame": "1997",
+"number": "38",
+"set": "lgn"
+},
+"Furnace Spirit": {
+"artist": "Jeff Miracola",
+"file": "sth_87",
+"frame": "1997",
+"number": "87",
+"set": "sth"
+},
+"Fyndhorn Bow": {
+"artist": "Rob Alexander",
+"file": "ice_318",
+"frame": "1993",
+"number": "318",
+"set": "ice"
+},
+"Fyndhorn Brownie": {
+"artist": "Richard Thomas",
+"file": "ice_242",
+"frame": "1993",
+"number": "242",
+"set": "ice"
+},
+"Fyndhorn Elder": {
+"artist": "Christopher Rush",
+"file": "ice_243",
+"frame": "1993",
+"number": "243",
+"set": "ice"
+},
+"Fyndhorn Elves": {
+"artist": "Justin Hampton",
+"file": "ice_244",
+"frame": "1993",
+"number": "244",
+"set": "ice"
+},
+"Gaea's Cradle": {
+"artist": "Mark Zug",
+"file": "jgp_3",
+"frame": "1997",
+"number": "3",
+"set": "jgp"
+},
+"Gaea's Skyfolk": {
+"artist": "Terese Nielsen",
+"file": "apc_101",
+"frame": "1997",
+"number": "101",
+"set": "apc"
+},
+"Gainsay": {
+"artist": "Roger Raupp",
+"file": "pls_26",
+"frame": "1997",
+"number": "26",
+"set": "pls"
+},
+"Galina's Knight": {
+"artist": "David Martin",
+"file": "inv_248",
+"frame": "1997",
+"number": "248",
+"set": "inv"
+},
+"Gallantry": {
+"artist": "Douglas Shuler",
+"file": "tmp_20",
+"frame": "1997",
+"number": "20",
+"set": "tmp"
+},
+"Gerrard's Battle Cry": {
+"artist": "Val Mayerik",
+"file": "tmp_21",
+"frame": "1997",
+"number": "21",
+"set": "tmp"
+},
+"Gerrard's Command": {
+"artist": "Roger Raupp",
+"file": "pls_109",
+"frame": "1997",
+"number": "109",
+"set": "pls"
+},
+"Gerrard's Irregulars": {
+"artist": "Eric Peterson",
+"file": "mmq_192",
+"frame": "1997",
+"number": "192",
+"set": "mmq"
+},
+"Ghitu War Cry": {
+"artist": "Douglas Shuler",
+"file": "ulg_78",
+"frame": "1997",
+"number": "78",
+"set": "ulg"
+},
+"Giant Cockroach": {
+"artist": "Heather Hudson",
+"file": "ulg_54",
+"frame": "1997",
+"number": "54",
+"set": "ulg"
+},
+"Giant Crab": {
+"artist": "Tom Kyffin",
+"file": "tmp_66",
+"frame": "1997",
+"number": "66",
+"set": "tmp"
+},
+"Giant Growth": {
+"artist": "Sandra Everingham",
+"file": "4ed_248",
+"frame": "1993",
+"number": "248",
+"set": "4ed"
+},
+"Giant Mantis": {
+"artist": "Randy Gallegos",
+"file": "mir_218",
+"frame": "1997",
+"number": "218",
+"set": "mir"
+},
+"Giant Octopus": {
+"artist": "John Matson",
+"file": "por_56",
+"frame": "1997",
+"number": "56",
+"set": "por"
+},
+"Giant Spider": {
+"artist": "Sandra Everingham",
+"file": "4ed_249",
+"frame": "1993",
+"number": "249",
+"set": "4ed"
+},
+"Giant Warthog": {
+"artist": "Kev Walker",
+"file": "jud_118",
+"frame": "1997",
+"number": "118",
+"set": "jud"
+},
+"Glacial Wall": {
+"artist": "Dameon Willich",
+"file": "ice_71",
+"frame": "1993",
+"number": "71",
+"set": "ice"
+},
+"Glimmering Angel": {
+"artist": "Ciruelo",
+"file": "inv_17",
+"frame": "1997",
+"number": "17",
+"set": "inv"
+},
+"Glintwing Invoker": {
+"artist": "Jim Nelson",
+"file": "lgn_40",
+"frame": "1997",
+"number": "40",
+"set": "lgn"
+},
+"Glory Seeker": {
+"artist": "Dave Dorman",
+"file": "ons_31",
+"frame": "1997",
+"number": "31",
+"set": "ons"
+},
+"Gluttonous Zombie": {
+"artist": "Thomas M. Baxa",
+"file": "ons_151",
+"frame": "1997",
+"number": "151",
+"set": "ons"
+},
+"Goblin Balloon Brigade": {
+"artist": "Andi Rusu",
+"file": "4ed_197",
+"frame": "1993",
+"number": "197",
+"set": "4ed"
+},
+"Goblin Berserker": {
+"artist": "Christopher Rush",
+"file": "uds_82",
+"frame": "1997",
+"number": "82",
+"set": "uds"
+},
+"Goblin Burrows": {
+"artist": "David Martin",
+"file": "ons_318",
+"frame": "1997",
+"number": "318",
+"set": "ons"
+},
+"Goblin Chariot": {
+"artist": "Pete Venters",
+"file": "s99_99",
+"frame": "1997",
+"number": "99",
+"set": "s99"
+},
+"Goblin Digging Team": {
+"artist": "Ron Spencer",
+"file": "bchr_49",
+"frame": "1993",
+"number": "49",
+"set": "bchr"
+},
+"Goblin Dynamo": {
+"artist": "Ron Spencer",
+"file": "lgn_97",
+"frame": "1997",
+"number": "97",
+"set": "lgn"
+},
+"Goblin Hero": {
+"artist": "Pete Venters",
+"file": "5ed_235",
+"frame": "1997",
+"number": "235",
+"set": "5ed"
+},
+"Goblin Sky Raider": {
+"artist": "Daren Bader",
+"file": "ons_208",
+"frame": "1997",
+"number": "208",
+"set": "ons"
+},
+"Goblin Spelunkers": {
+"artist": "DiTerlizzi",
+"file": "usg_195",
+"frame": "1997",
+"number": "195",
+"set": "usg"
+},
+"Goblin War Strike": {
+"artist": "Michael Weaver",
+"file": "p02_105",
+"frame": "1997",
+"number": "105",
+"set": "p02"
+},
+"Goliath Beetle": {
+"artist": "Don Hazeltine",
+"file": "uds_107",
+"frame": "1997",
+"number": "107",
+"set": "uds"
+},
+"Gorilla Warrior": {
+"artist": "John Matson",
+"file": "por_168",
+"frame": "1997",
+"number": "168",
+"set": "por"
+},
+"Grandmother Sengir": {
+"artist": "Pete Venters",
+"file": "hml_50",
+"frame": "1993",
+"number": "50",
+"set": "hml"
+},
+"Granger Guildmage": {
+"artist": "Dan Frazier",
+"file": "mir_220",
+"frame": "1997",
+"number": "220",
+"set": "mir"
+},
+"Grapeshot Catapult": {
+"artist": "Dan Frazier",
+"file": "4ed_322",
+"frame": "1993",
+"number": "322",
+"set": "4ed"
+},
+"Grassland Crusader": {
+"artist": "Mark Tedin",
+"file": "ons_32",
+"frame": "1997",
+"number": "32",
+"set": "ons"
+},
+"Gray Ogre": {
+"artist": "Dan Frazier",
+"file": "4ed_200",
+"frame": "1993",
+"number": "200",
+"set": "4ed"
+},
+"Griffin Canyon": {
+"artist": "Stuart Griffin",
+"file": "vis_163",
+"frame": "1997",
+"number": "163",
+"set": "vis"
+},
+"Grizzly Bears": {
+"artist": "Jeff A. Menges",
+"file": "4ed_250",
+"frame": "1993",
+"number": "250",
+"set": "4ed"
+},
+"Guided Strike": {
+"artist": "Gary Leach",
+"file": "wth_16",
+"frame": "1997",
+"number": "16",
+"set": "wth"
+},
+"Guma": {
+"artist": "Daren Bader",
+"file": "usg_197",
+"frame": "1997",
+"number": "197",
+"set": "usg"
+},
+"Hail Storm": {
+"artist": "Jeff A. Menges",
+"file": "all_95",
+"frame": "1993",
+"number": "95",
+"set": "all"
+},
+"Halberdier": {
+"artist": "Ben Thompson",
+"file": "ody_196",
+"frame": "1997",
+"number": "196",
+"set": "ody"
+},
+"Hallowed Ground": {
+"artist": "Douglas Shuler",
+"file": "ice_29",
+"frame": "1993",
+"number": "29",
+"set": "ice"
+},
+"Harmattan Efreet": {
+"artist": "Drew Tucker",
+"file": "mir_69",
+"frame": "1997",
+"number": "69",
+"set": "mir"
+},
+"Hate Weaver": {
+"artist": "Roger Raupp",
+"file": "inv_108",
+"frame": "1997",
+"number": "108",
+"set": "inv"
+},
+"Hawkeater Moth": {
+"artist": "Heather Hudson",
+"file": "usg_259",
+"frame": "1997",
+"number": "259",
+"set": "usg"
+},
+"Hazerider Drake": {
+"artist": "Zina Saunders",
+"file": "mir_268",
+"frame": "1997",
+"number": "268",
+"set": "mir"
+},
+"Headlong Rush": {
+"artist": "Dermot Power",
+"file": "usg_198",
+"frame": "1997",
+"number": "198",
+"set": "usg"
+},
+"Heart Warden": {
+"artist": "Adam Rex",
+"file": "uds_108",
+"frame": "1997",
+"number": "108",
+"set": "uds"
+},
+"Heart of Ramos": {
+"artist": "David Martin",
+"file": "mmq_296",
+"frame": "1997",
+"number": "296",
+"set": "mmq"
+},
+"Heartwood Treefolk": {
+"artist": "Daren Bader",
+"file": "tmp_233",
+"frame": "1997",
+"number": "233",
+"set": "tmp"
+},
+"Heat Ray": {
+"artist": "Brian Snõddy",
+"file": "usg_199",
+"frame": "1997",
+"number": "199",
+"set": "usg"
+},
+"Heavy Ballista": {
+"artist": "Ron Spencer",
+"file": "wth_17",
+"frame": "1997",
+"number": "17",
+"set": "wth"
+},
+"Helionaut": {
+"artist": "Franz Vohwinkel",
+"file": "apc_13",
+"frame": "1997",
+"number": "13",
+"set": "apc"
+},
+"Henge Guardian": {
+"artist": "Chippy",
+"file": "mmq_297",
+"frame": "1997",
+"number": "297",
+"set": "mmq"
+},
+"Henge of Ramos": {
+"artist": "Edward P. Beard, Jr.",
+"file": "mmq_318",
+"frame": "1997",
+"number": "318",
+"set": "mmq"
+},
+"Heroes' Reunion": {
+"artist": "Terese Nielsen",
+"file": "inv_250",
+"frame": "1997",
+"number": "250",
+"set": "inv"
+},
+"Hill Giant": {
+"artist": "Dan Frazier",
+"file": "4ed_201",
+"frame": "1993",
+"number": "201",
+"set": "4ed"
+},
+"Hoar Shade": {
+"artist": "Richard Thomas",
+"file": "ice_131",
+"frame": "1993",
+"number": "131",
+"set": "ice"
+},
+"Honor Guard": {
+"artist": "Joel Biske",
+"file": "sth_7",
+"frame": "1997",
+"number": "7",
+"set": "sth"
+},
+"Hooded Kavu": {
+"artist": "John Howe",
+"file": "inv_147",
+"frame": "1997",
+"number": "147",
+"set": "inv"
+},
+"Hoodwink": {
+"artist": "Arnie Swekel",
+"file": "mmq_84",
+"frame": "1997",
+"number": "84",
+"set": "mmq"
+},
+"Hopping Automaton": {
+"artist": "Val Mayerik",
+"file": "usg_297",
+"frame": "1997",
+"number": "297",
+"set": "usg"
+},
+"Horn of Ramos": {
+"artist": "David Martin",
+"file": "mmq_299",
+"frame": "1997",
+"number": "299",
+"set": "mmq"
+},
+"Horned Turtle": {
+"artist": "Adrian Smith",
+"file": "por_57",
+"frame": "1997",
+"number": "57",
+"set": "por"
+},
+"Horseshoe Crab": {
+"artist": "Scott Kirschner",
+"file": "usg_80",
+"frame": "1997",
+"number": "80",
+"set": "usg"
+},
+"Howl from Beyond": {
+"artist": "Mark Poole",
+"file": "4ed_141",
+"frame": "1993",
+"number": "141",
+"set": "4ed"
+},
+"Hurloon Minotaur": {
+"artist": "Anson Maddocks",
+"file": "4ed_202",
+"frame": "1993",
+"number": "202",
+"set": "4ed"
+},
+"Hurricane": {
+"artist": "Dameon Willich",
+"file": "4ed_251",
+"frame": "1993",
+"number": "251",
+"set": "4ed"
+},
+"Hyalopterous Lemure": {
+"artist": "Richard Thomas",
+"file": "ice_133",
+"frame": "1993",
+"number": "133",
+"set": "ice"
+},
+"Icatian Scout": {
+"artist": "Rob Alexander",
+"file": "5ed_37",
+"frame": "1997",
+"number": "37",
+"set": "5ed"
+},
+"Icy Manipulator": {
+"artist": "Amy Weber",
+"file": "ice_322",
+"frame": "1993",
+"number": "322",
+"set": "ice"
+},
+"Igneous Golem": {
+"artist": "Adam Rex",
+"file": "mir_305",
+"frame": "1997",
+"number": "305",
+"set": "mir"
+},
+"Ihsan's Shade": {
+"artist": "Christopher Rush",
+"file": "hml_53",
+"frame": "1993",
+"number": "53",
+"set": "hml"
+},
+"Implode": {
+"artist": "Arnie Swekel",
+"file": "pls_62",
+"frame": "1997",
+"number": "62",
+"set": "pls"
+},
+"Infantry Veteran": {
+"artist": "Christopher Rush",
+"file": "vis_9",
+"frame": "1997",
+"number": "9",
+"set": "vis"
+},
+"Inferno": {
+"artist": "Randy Asplund-Faith",
+"file": "4ed_205",
+"frame": "1993",
+"number": "205",
+"set": "4ed"
+},
+"Infest": {
+"artist": "Ben Thompson",
+"file": "ons_157",
+"frame": "1997",
+"number": "157",
+"set": "ons"
+},
+"Inspiration": {
+"artist": "Zina Saunders",
+"file": "vis_35",
+"frame": "1997",
+"number": "35",
+"set": "vis"
+},
+"Inspirit": {
+"artist": "Keith Garletts",
+"file": "ons_41",
+"frame": "1997",
+"number": "41",
+"set": "ons"
+},
+"Intrepid Hero": {
+"artist": "Brian Snõddy",
+"file": "usg_19",
+"frame": "1997",
+"number": "19",
+"set": "usg"
+},
+"Iron Lance": {
+"artist": "Scott M. Fischer",
+"file": "mmq_300",
+"frame": "1997",
+"number": "300",
+"set": "mmq"
+},
+"Iron Tusk Elephant": {
+"artist": "Tony Roberts",
+"file": "mir_22",
+"frame": "1997",
+"number": "22",
+"set": "mir"
+},
+"Ironroot Treefolk": {
+"artist": "Jesper Myrfors",
+"file": "4ed_253",
+"frame": "1993",
+"number": "253",
+"set": "4ed"
+},
+"Island": {
+"artist": "Mark Poole",
+"file": "4ed_367",
+"frame": "1993",
+"number": "367",
+"set": "4ed"
+},
+"Jandor's Saddlebags": {
+"artist": "Dameon Willich",
+"file": "4ed_330",
+"frame": "1993",
+"number": "330",
+"set": "4ed"
+},
+"Jayemdae Tome": {
+"artist": "Mark Tedin",
+"file": "4ed_331",
+"frame": "1993",
+"number": "331",
+"set": "4ed"
+},
+"Jeska, Warrior Adept": {
+"artist": "rk post",
+"file": "jud_93",
+"frame": "1997",
+"number": "93",
+"set": "jud"
+},
+"Jhovall Queen": {
+"artist": "Michael Sutfin",
+"file": "mmq_25",
+"frame": "1997",
+"number": "25",
+"set": "mmq"
+},
+"Jhovall Rider": {
+"artist": "Scott M. Fischer",
+"file": "mmq_26",
+"frame": "1997",
+"number": "26",
+"set": "mmq"
+},
+"Jokulhaups": {
+"artist": "Richard Thomas",
+"file": "ice_195",
+"frame": "1993",
+"number": "195",
+"set": "ice"
+},
+"Joven": {
+"artist": "Douglas Shuler",
+"file": "hml_77",
+"frame": "1993",
+"number": "77",
+"set": "hml"
+},
+"Jump": {
+"artist": "Mark Poole",
+"file": "4ed_79",
+"frame": "1993",
+"number": "79",
+"set": "4ed"
+},
+"Juniper Order Druid": {
+"artist": "Jeff A. Menges",
+"file": "ice_251",
+"frame": "1993",
+"number": "251",
+"set": "ice"
+},
+"Kaervek's Hex": {
+"artist": "Ian Miller",
+"file": "mir_130",
+"frame": "1997",
+"number": "130",
+"set": "mir"
+},
+"Kamahl, Pit Fighter": {
+"artist": "Kev Walker",
+"file": "ody_198",
+"frame": "1997",
+"number": "198",
+"set": "ody"
+},
+"Karoo Meerkat": {
+"artist": "Janine Johnston",
+"file": "mir_225",
+"frame": "1997",
+"number": "225",
+"set": "mir"
+},
+"Kavu Glider": {
+"artist": "Heather Hudson",
+"file": "apc_64",
+"frame": "1997",
+"number": "64",
+"set": "apc"
+},
+"Keep Watch": {
+"artist": "Fred Rahmqvist",
+"file": "jud_43",
+"frame": "1997",
+"number": "43",
+"set": "jud"
+},
+"Keepers of the Faith": {
+"artist": "Daniel Gelon",
+"file": "bchr_9",
+"frame": "1993",
+"number": "9",
+"set": "bchr"
+},
+"Kelsinko Ranger": {
+"artist": "Mark Poole",
+"file": "ice_33",
+"frame": "1993",
+"number": "33",
+"set": "ice"
+},
+"Killer Bees": {
+"artist": "Phil Foglio",
+"file": "4ed_254",
+"frame": "1993",
+"number": "254",
+"set": "4ed"
+},
+"Killer Whale": {
+"artist": "Stephen Daniele",
+"file": "exo_37",
+"frame": "1997",
+"number": "37",
+"set": "exo"
+},
+"King Cheetah": {
+"artist": "Terese Nielsen",
+"file": "mgb_10",
+"frame": "1997",
+"number": "10",
+"set": "mgb"
+},
+"Knight Errant": {
+"artist": "Dan Frazier",
+"file": "por_20",
+"frame": "1997",
+"number": "20",
+"set": "por"
+},
+"Knight of Stromgald": {
+"artist": "Mark Poole",
+"file": "ice_138",
+"frame": "1993",
+"number": "138",
+"set": "ice"
+},
+"Koskun Keep": {
+"artist": "Pat Lewis",
+"file": "hml_114",
+"frame": "1993",
+"number": "114",
+"set": "hml"
+},
+"Krosan Constrictor": {
+"artist": "Jim Nelson",
+"file": "tor_129",
+"frame": "1997",
+"number": "129",
+"set": "tor"
+},
+"Krosan Groundshaker": {
+"artist": "Wayne England",
+"file": "ons_271",
+"frame": "1997",
+"number": "271",
+"set": "ons"
+},
+"Land Leeches": {
+"artist": "Quinton Hoover",
+"file": "4ed_255",
+"frame": "1993",
+"number": "255",
+"set": "4ed"
+},
+"Last Breath": {
+"artist": "DiTerlizzi",
+"file": "mmq_27",
+"frame": "1997",
+"number": "27",
+"set": "mmq"
+},
+"Last Caress": {
+"artist": "Eric Peterson",
+"file": "apc_41",
+"frame": "1997",
+"number": "41",
+"set": "apc"
+},
+"Lava Axe": {
+"artist": "Adrian Smith",
+"file": "por_137",
+"frame": "1997",
+"number": "137",
+"set": "por"
+},
+"Lawbringer": {
+"artist": "Matt Cavotta",
+"file": "nem_10",
+"frame": "1997",
+"number": "10",
+"set": "nem"
+},
+"Leaf Dancer": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "ody_249",
+"frame": "1997",
+"number": "249",
+"set": "ody"
+},
+"Leap": {
+"artist": "Kev Walker",
+"file": "sth_35",
+"frame": "1997",
+"number": "35",
+"set": "sth"
+},
+"Leaping Lizard": {
+"artist": "Amy Weber",
+"file": "hml_90",
+"frame": "1993",
+"number": "90",
+"set": "hml"
+},
+"Ley Druid": {
+"artist": "Sandra Everingham",
+"file": "4ed_256",
+"frame": "1993",
+"number": "256",
+"set": "4ed"
+},
+"Liberated Dwarf": {
+"artist": "Greg Hildebrandt",
+"file": "jud_95",
+"frame": "1997",
+"number": "95",
+"set": "jud"
+},
+"Lieutenant Kirtar": {
+"artist": "Paolo Parente",
+"file": "ody_29",
+"frame": "1997",
+"number": "29",
+"set": "ody"
+},
+"Lifeforce": {
+"artist": "Dameon Willich",
+"file": "4ed_257",
+"frame": "1993",
+"number": "257",
+"set": "4ed"
+},
+"Lightbringer": {
+"artist": "Paolo Parente",
+"file": "nem_11",
+"frame": "1997",
+"number": "11",
+"set": "nem"
+},
+"Lightning Angel": {
+"artist": "rk post",
+"file": "apc_108",
+"frame": "1997",
+"number": "108",
+"set": "apc"
+},
+"Lightning Blast": {
+"artist": "Richard Thomas",
+"file": "tmp_185",
+"frame": "1997",
+"number": "185",
+"set": "tmp"
+},
+"Lightning Bolt": {
+"artist": "Christopher Rush",
+"file": "4ed_208",
+"frame": "1993",
+"number": "208",
+"set": "4ed"
+},
+"Lightning Elemental": {
+"artist": "D. Alexander Gregory",
+"file": "tmp_186",
+"frame": "1997",
+"number": "186",
+"set": "tmp"
+},
+"Lightning Hounds": {
+"artist": "Andrew Robinson",
+"file": "mmq_201",
+"frame": "1997",
+"number": "201",
+"set": "mmq"
+},
+"Limestone Golem": {
+"artist": "Mark Tedin",
+"file": "ody_301",
+"frame": "1997",
+"number": "301",
+"set": "ody"
+},
+"Llanowar Cavalry": {
+"artist": "Eric Peterson",
+"file": "inv_195",
+"frame": "1997",
+"number": "195",
+"set": "inv"
+},
+"Llanowar Dead": {
+"artist": "Ben Thompson",
+"file": "apc_109",
+"frame": "1997",
+"number": "109",
+"set": "apc"
+},
+"Llanowar Elves": {
+"artist": "Anson Maddocks",
+"file": "4ed_261",
+"frame": "1993",
+"number": "261",
+"set": "4ed"
+},
+"Llanowar Knight": {
+"artist": "Heather Hudson",
+"file": "inv_254",
+"frame": "1997",
+"number": "254",
+"set": "inv"
+},
+"Llanowar Vanguard": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "inv_197",
+"frame": "1997",
+"number": "197",
+"set": "inv"
+},
+"Longbow Archer": {
+"artist": "Eric Peterson",
+"file": "vis_12",
+"frame": "1997",
+"number": "12",
+"set": "vis"
+},
+"Looming Shade": {
+"artist": "Vincent Evans",
+"file": "usg_139",
+"frame": "1997",
+"number": "139",
+"set": "usg"
+},
+"Lost Soul": {
+"artist": "Randy Asplund-Faith",
+"file": "4ed_145",
+"frame": "1993",
+"number": "145",
+"set": "4ed"
+},
+"Lotus Guardian": {
+"artist": "Dana Knutson",
+"file": "inv_305",
+"frame": "1997",
+"number": "305",
+"set": "inv"
+},
+"Lotus Petal": {
+"artist": "April Lee",
+"file": "tmp_294",
+"frame": "1997",
+"number": "294",
+"set": "tmp"
+},
+"Lowland Giant": {
+"artist": "Paolo Parente",
+"file": "tmp_187",
+"frame": "1997",
+"number": "187",
+"set": "tmp"
+},
+"Magnify": {
+"artist": "Michael Sutfin",
+"file": "uds_111",
+"frame": "1997",
+"number": "111",
+"set": "uds"
+},
+"Mahamoti Djinn": {
+"artist": "Dan Frazier",
+"file": "4ed_84",
+"frame": "1993",
+"number": "84",
+"set": "4ed"
+},
+"Mana Cylix": {
+"artist": "Donato Giancola",
+"file": "pls_132",
+"frame": "1997",
+"number": "132",
+"set": "pls"
+},
+"Mana Prism": {
+"artist": "Margaret Organ-Kean",
+"file": "mir_308",
+"frame": "1997",
+"number": "308",
+"set": "mir"
+},
+"Manakin": {
+"artist": "Scott Kirschner",
+"file": "tmp_296",
+"frame": "1997",
+"number": "296",
+"set": "tmp"
+},
+"Manta Riders": {
+"artist": "Kaja Foglio",
+"file": "tmp_74",
+"frame": "1997",
+"number": "74",
+"set": "tmp"
+},
+"Mantis Engine": {
+"artist": "John Zeleznik",
+"file": "uds_133",
+"frame": "1997",
+"number": "133",
+"set": "uds"
+},
+"Marsh Boa": {
+"artist": "Heather Hudson",
+"file": "pcy_118",
+"frame": "1997",
+"number": "118",
+"set": "pcy"
+},
+"Marsh Gas": {
+"artist": "Douglas Shuler",
+"file": "4ed_146",
+"frame": "1993",
+"number": "146",
+"set": "4ed"
+},
+"Master Decoy": {
+"artist": "Phil Foglio",
+"file": "tmp_29",
+"frame": "1997",
+"number": "29",
+"set": "tmp"
+},
+"Mawcor": {
+"artist": "John Matson",
+"file": "tmp_75",
+"frame": "1997",
+"number": "75",
+"set": "tmp"
+},
+"Melesse Spirit": {
+"artist": "Gerry Grace",
+"file": "mir_27",
+"frame": "1997",
+"number": "27",
+"set": "mir"
+},
+"Merfolk of the Pearl Trident": {
+"artist": "Jeff A. Menges",
+"file": "4ed_86",
+"frame": "1993",
+"number": "86",
+"set": "4ed"
+},
+"Mesa Falcon": {
+"artist": "Mark Poole",
+"file": "hml_10a",
+"frame": "1993",
+"number": "10a",
+"set": "hml"
+},
+"Metallic Sliver": {
+"artist": "Allen Williams",
+"file": "tmp_297",
+"frame": "1997",
+"number": "297",
+"set": "tmp"
+},
+"Might Weaver": {
+"artist": "Larry Elmore",
+"file": "inv_198",
+"frame": "1997",
+"number": "198",
+"set": "inv"
+},
+"Might of Oaks": {
+"artist": "Ron Spencer",
+"file": "ulg_106",
+"frame": "1997",
+"number": "106",
+"set": "ulg"
+},
+"Mind Stone": {
+"artist": "Adam Rex",
+"file": "wth_153",
+"frame": "1997",
+"number": "153",
+"set": "wth"
+},
+"Mine Bearer": {
+"artist": "D. Alexander Gregory",
+"file": "pcy_16",
+"frame": "1997",
+"number": "16",
+"set": "pcy"
+},
+"Mirri, Cat Warrior": {
+"artist": "Daren Bader",
+"file": "exo_114",
+"frame": "1997",
+"number": "114",
+"set": "exo"
+},
+"Misshapen Fiend": {
+"artist": "Adam Rex",
+"file": "mmq_147",
+"frame": "1997",
+"number": "147",
+"set": "mmq"
+},
+"Mob Justice": {
+"artist": "Ron Spencer",
+"file": "sth_90",
+"frame": "1997",
+"number": "90",
+"set": "sth"
+},
+"Mogg Fanatic": {
+"artist": "Brom",
+"file": "tmp_190",
+"frame": "1997",
+"number": "190",
+"set": "tmp"
+},
+"Mons's Goblin Raiders": {
+"artist": "Jeff A. Menges",
+"file": "4ed_213",
+"frame": "1993",
+"number": "213",
+"set": "4ed"
+},
+"Monstrous Growth": {
+"artist": "Dan Frazier",
+"file": "por_173",
+"frame": "1997",
+"number": "173",
+"set": "por"
+},
+"Moor Fiend": {
+"artist": "Anson Maddocks",
+"file": "ice_153",
+"frame": "1993",
+"number": "153",
+"set": "ice"
+},
+"Morale": {
+"artist": "Mark Poole",
+"file": "4ed_36",
+"frame": "1993",
+"number": "36",
+"set": "4ed"
+},
+"Morgue Toad": {
+"artist": "Franz Vohwinkel",
+"file": "pls_46",
+"frame": "1997",
+"number": "46",
+"set": "pls"
+},
+"Morphling": {
+"artist": "rk post",
+"file": "usg_85",
+"frame": "1997",
+"number": "85",
+"set": "usg"
+},
+"Mossfire Valley": {
+"artist": "John Avon",
+"file": "ody_321",
+"frame": "1997",
+"number": "321",
+"set": "ody"
+},
+"Mountain": {
+"artist": "Douglas Shuler",
+"file": "4ed_373",
+"frame": "1993",
+"number": "373",
+"set": "4ed"
+},
+"Mountain Goat": {
+"artist": "Cornelius Brudi",
+"file": "ice_203",
+"frame": "1993",
+"number": "203",
+"set": "ice"
+},
+"Mountain Yeti": {
+"artist": "Dan Frazier",
+"file": "bchr_53",
+"frame": "1993",
+"number": "53",
+"set": "bchr"
+},
+"Mournful Zombie": {
+"artist": "John Matson",
+"file": "apc_43",
+"frame": "1997",
+"number": "43",
+"set": "apc"
+},
+"Mutilate": {
+"artist": "Eric Peterson",
+"file": "tor_73",
+"frame": "1997",
+"number": "73",
+"set": "tor"
+},
+"Nantuko Disciple": {
+"artist": "Justin Sweet",
+"file": "ody_253",
+"frame": "1997",
+"number": "253",
+"set": "ody"
+},
+"Nantuko Elder": {
+"artist": "Daren Bader",
+"file": "ody_254",
+"frame": "1997",
+"number": "254",
+"set": "ody"
+},
+"Nantuko Mentor": {
+"artist": "John Matson",
+"file": "ody_255",
+"frame": "1997",
+"number": "255",
+"set": "ody"
+},
+"Nantuko Shade": {
+"artist": "Brian Snõddy",
+"file": "tor_74",
+"frame": "1997",
+"number": "74",
+"set": "tor"
+},
+"Narwhal": {
+"artist": "David A. Cherry",
+"file": "hml_35",
+"frame": "1993",
+"number": "35",
+"set": "hml"
+},
+"Natural Spring": {
+"artist": "Janine Johnston",
+"file": "por_176",
+"frame": "1997",
+"number": "176",
+"set": "por"
+},
+"Naturalize": {
+"artist": "Ron Spears",
+"file": "ons_275",
+"frame": "1997",
+"number": "275",
+"set": "ons"
+},
+"Nausea": {
+"artist": "Jeff Miracola",
+"file": "exo_67",
+"frame": "1997",
+"number": "67",
+"set": "exo"
+},
+"Needle Storm": {
+"artist": "Charles Gillespie",
+"file": "por_179",
+"frame": "1997",
+"number": "179",
+"set": "por"
+},
+"Needleshot Gourna": {
+"artist": "Edward P. Beard, Jr.",
+"file": "lgn_133",
+"frame": "1997",
+"number": "133",
+"set": "lgn"
+},
+"Nightscape Master": {
+"artist": "Andrew Goldhawk",
+"file": "inv_113",
+"frame": "1997",
+"number": "113",
+"set": "inv"
+},
+"Nightwind Glider": {
+"artist": "Randy Gallegos",
+"file": "mmq_31",
+"frame": "1997",
+"number": "31",
+"set": "mmq"
+},
+"Noble Panther": {
+"artist": "Matt Cavotta",
+"file": "inv_257",
+"frame": "1997",
+"number": "257",
+"set": "inv"
+},
+"Noble Steeds": {
+"artist": "Rebecca Guay",
+"file": "all_11a",
+"frame": "1993",
+"number": "11a",
+"set": "all"
+},
+"Nocturnal Raid": {
+"artist": "John Matson",
+"file": "mir_132",
+"frame": "1997",
+"number": "132",
+"set": "mir"
+},
+"Nomadic Elf": {
+"artist": "D. J. Cleland-Hura",
+"file": "inv_200",
+"frame": "1997",
+"number": "200",
+"set": "inv"
+},
+"Northern Paladin": {
+"artist": "Douglas Shuler",
+"file": "4ed_37",
+"frame": "1993",
+"number": "37",
+"set": "4ed"
+},
+"Nova Cleric": {
+"artist": "Alan Pollack",
+"file": "ons_45",
+"frame": "1997",
+"number": "45",
+"set": "ons"
+},
+"Obelisk of Undoing": {
+"artist": "Tom Wänerstrand",
+"file": "bchr_104",
+"frame": "1993",
+"number": "104",
+"set": "bchr"
+},
+"Obsianus Golem": {
+"artist": "Jesper Myrfors",
+"file": "4ed_339",
+"frame": "1993",
+"number": "339",
+"set": "4ed"
+},
+"Opportunity": {
+"artist": "Ron Spears",
+"file": "ulg_37",
+"frame": "1997",
+"number": "37",
+"set": "ulg"
+},
+"Oraxid": {
+"artist": "Dave Dorman",
+"file": "nem_35",
+"frame": "1997",
+"number": "35",
+"set": "nem"
+},
+"Order of the White Shield": {
+"artist": "Ruth Thompson",
+"file": "ice_46",
+"frame": "1993",
+"number": "46",
+"set": "ice"
+},
+"Ornithopter": {
+"artist": "Amy Weber",
+"file": "4ed_341",
+"frame": "1993",
+"number": "341",
+"set": "4ed"
+},
+"Overrun": {
+"artist": "Jeff Miracola",
+"file": "tmp_243",
+"frame": "1997",
+"number": "243",
+"set": "tmp"
+},
+"Paladin en-Vec": {
+"artist": "Randy Elliott",
+"file": "exo_12",
+"frame": "1997",
+"number": "12",
+"set": "exo"
+},
+"Pale Bears": {
+"artist": "Anthony S. Waters",
+"file": "ice_256",
+"frame": "1993",
+"number": "256",
+"set": "ice"
+},
+"Panther Warriors": {
+"artist": "Cecil Fernando",
+"file": "vis_115",
+"frame": "1997",
+"number": "115",
+"set": "vis"
+},
+"Pardic Collaborator": {
+"artist": "Pete Venters",
+"file": "tor_106",
+"frame": "1997",
+"number": "106",
+"set": "tor"
+},
+"Patagia Golem": {
+"artist": "Scott Kirschner",
+"file": "mir_313",
+"frame": "1997",
+"number": "313",
+"set": "mir"
+},
+"Pearl Dragon": {
+"artist": "Ian Miller",
+"file": "mir_33",
+"frame": "1997",
+"number": "33",
+"set": "mir"
+},
+"Pearled Unicorn": {
+"artist": "Cornelius Brudi",
+"file": "4ed_39",
+"frame": "1993",
+"number": "39",
+"set": "4ed"
+},
+"Pegasus Charger": {
+"artist": "Val Mayerik",
+"file": "usg_30",
+"frame": "1997",
+"number": "30",
+"set": "usg"
+},
+"Perish": {
+"artist": "Rebecca Guay",
+"file": "tmp_147",
+"frame": "1997",
+"number": "147",
+"set": "tmp"
+},
+"Phantom Monster": {
+"artist": "Jesper Myrfors",
+"file": "4ed_90",
+"frame": "1993",
+"number": "90",
+"set": "4ed"
+},
+"Phyrexian Debaser": {
+"artist": "Mark Tedin",
+"file": "ulg_59",
+"frame": "1997",
+"number": "59",
+"set": "ulg"
+},
+"Phyrexian Defiler": {
+"artist": "DiTerlizzi",
+"file": "ulg_60",
+"frame": "1997",
+"number": "60",
+"set": "ulg"
+},
+"Phyrexian Denouncer": {
+"artist": "Brian Snõddy",
+"file": "ulg_61",
+"frame": "1997",
+"number": "61",
+"set": "ulg"
+},
+"Phyrexian Hulk": {
+"artist": "Matthew D. Wilson",
+"file": "tmp_302",
+"frame": "1997",
+"number": "302",
+"set": "tmp"
+},
+"Phyrexian Walker": {
+"artist": "Bryan Talbot",
+"file": "vis_152",
+"frame": "1997",
+"number": "152",
+"set": "vis"
+},
+"Piety": {
+"artist": "Mark Poole",
+"file": "4ed_41",
+"frame": "1993",
+"number": "41",
+"set": "4ed"
+},
+"Pillage": {
+"artist": "Richard Kane Ferguson",
+"file": "all_76",
+"frame": "1993",
+"number": "76",
+"set": "all"
+},
+"Pincher Beetles": {
+"artist": "Stephen Daniele",
+"file": "tmp_244",
+"frame": "1997",
+"number": "244",
+"set": "tmp"
+},
+"Pit Trap": {
+"artist": "Anson Maddocks",
+"file": "ice_333",
+"frame": "1993",
+"number": "333",
+"set": "ice"
+},
+"Plague Beetle": {
+"artist": "Tom Fleming",
+"file": "ulg_64",
+"frame": "1997",
+"number": "64",
+"set": "ulg"
+},
+"Plague Wind": {
+"artist": "Alan Pollack",
+"file": "pcy_74",
+"frame": "1997",
+"number": "74",
+"set": "pcy"
+},
+"Plains": {
+"artist": "Jesper Myrfors",
+"file": "4ed_364",
+"frame": "1993",
+"number": "364",
+"set": "4ed"
+},
+"Plated Spider": {
+"artist": "Ron Spencer",
+"file": "uds_116",
+"frame": "1997",
+"number": "116",
+"set": "uds"
+},
+"Power Matrix": {
+"artist": "Alan Pollack",
+"file": "mmq_309",
+"frame": "1997",
+"number": "309",
+"set": "mmq"
+},
+"Pradesh Gypsies": {
+"artist": "Quinton Hoover",
+"file": "4ed_265",
+"frame": "1993",
+"number": "265",
+"set": "4ed"
+},
+"Predator, Flagship": {
+"artist": "Mark Tedin",
+"file": "nem_135",
+"frame": "1997",
+"number": "135",
+"set": "nem"
+},
+"Priest of Titania": {
+"artist": "Rebecca Guay",
+"file": "usg_270",
+"frame": "1997",
+"number": "270",
+"set": "usg"
+},
+"Primeval Shambler": {
+"artist": "Chippy",
+"file": "mmq_152",
+"frame": "1997",
+"number": "152",
+"set": "mmq"
+},
+"Prodigal Sorcerer": {
+"artist": "Douglas Shuler",
+"file": "4ed_94",
+"frame": "1993",
+"number": "94",
+"set": "4ed"
+},
+"Profane Prayers": {
+"artist": "Alan Pollack",
+"file": "ons_162",
+"frame": "1997",
+"number": "162",
+"set": "ons"
+},
+"Prosperity": {
+"artist": "Dan Frazier",
+"file": "vis_40",
+"frame": "1997",
+"number": "40",
+"set": "vis"
+},
+"Purify": {
+"artist": "John Avon",
+"file": "ulg_19",
+"frame": "1997",
+"number": "19",
+"set": "ulg"
+},
+"Pygmy Allosaurus": {
+"artist": "Anson Maddocks",
+"file": "ice_257",
+"frame": "1993",
+"number": "257",
+"set": "ice"
+},
+"Pygmy Razorback": {
+"artist": "Matt Cavotta",
+"file": "pcy_120",
+"frame": "1997",
+"number": "120",
+"set": "pcy"
+},
+"Pyroclasm": {
+"artist": "Pat Lewis",
+"file": "ice_214",
+"frame": "1993",
+"number": "214",
+"set": "ice"
+},
+"Python": {
+"artist": "Steve White",
+"file": "vis_68",
+"frame": "1997",
+"number": "68",
+"set": "vis"
+},
+"Quicksand": {
+"artist": "Roger Raupp",
+"file": "vis_166",
+"frame": "1997",
+"number": "166",
+"set": "vis"
+},
+"Rabid Rats": {
+"artist": "Matthew D. Wilson",
+"file": "sth_67",
+"frame": "1997",
+"number": "67",
+"set": "sth"
+},
+"Rage Weaver": {
+"artist": "John Matson",
+"file": "inv_159",
+"frame": "1997",
+"number": "159",
+"set": "inv"
+},
+"Raging Goblin": {
+"artist": "Pete Venters",
+"file": "por_145",
+"frame": "1997",
+"number": "145",
+"set": "por"
+},
+"Raging Kavu": {
+"artist": "Arnie Swekel",
+"file": "pinv_262",
+"frame": "1997",
+"number": "262",
+"set": "pinv"
+},
+"Rain of Blades": {
+"artist": "Rob Alexander",
+"file": "scg_20",
+"frame": "1997",
+"number": "20",
+"set": "scg"
+},
+"Rain of Tears": {
+"artist": "Eric Peterson",
+"file": "por_106",
+"frame": "1997",
+"number": "106",
+"set": "por"
+},
+"Rally": {
+"artist": "Heather Hudson",
+"file": "ice_48",
+"frame": "1993",
+"number": "48",
+"set": "ice"
+},
+"Rashida Scalebane": {
+"artist": "Randy Gallegos",
+"file": "mir_35",
+"frame": "1997",
+"number": "35",
+"set": "mir"
+},
+"Rats of Rath": {
+"artist": "John Matson",
+"file": "tmp_150",
+"frame": "1997",
+"number": "150",
+"set": "tmp"
+},
+"Razorfin Hunter": {
+"artist": "Jeff Easley",
+"file": "apc_119",
+"frame": "1997",
+"number": "119",
+"set": "apc"
+},
+"Razorfoot Griffin": {
+"artist": "Ben Thompson",
+"file": "inv_29",
+"frame": "1997",
+"number": "29",
+"set": "inv"
+},
+"Razortooth Rats": {
+"artist": "Brian Horton",
+"file": "wth_78",
+"frame": "1997",
+"number": "78",
+"set": "wth"
+},
+"Redwood Treefolk": {
+"artist": "Steve Luke",
+"file": "por_183",
+"frame": "1997",
+"number": "183",
+"set": "por"
+},
+"Regal Unicorn": {
+"artist": "Zina Saunders",
+"file": "por_22",
+"frame": "1997",
+"number": "22",
+"set": "por"
+},
+"Remove Soul": {
+"artist": "Brian Snõddy",
+"file": "bchr_25",
+"frame": "1993",
+"number": "25",
+"set": "bchr"
+},
+"Repentant Blacksmith": {
+"artist": "Drew Tucker",
+"file": "bchr_11",
+"frame": "1993",
+"number": "11",
+"set": "bchr"
+},
+"Reprisal": {
+"artist": "Randy Asplund-Faith",
+"file": "all_13a",
+"frame": "1993",
+"number": "13a",
+"set": "all"
+},
+"Repulse": {
+"artist": "Aaron Boyd",
+"file": "inv_70",
+"frame": "1997",
+"number": "70",
+"set": "inv"
+},
+"Rescue": {
+"artist": "Greg Staples",
+"file": "uds_44",
+"frame": "1997",
+"number": "44",
+"set": "uds"
+},
+"Retribution of the Meek": {
+"artist": "Nathalie Hertz",
+"file": "vis_19",
+"frame": "1997",
+"number": "19",
+"set": "vis"
+},
+"Reviving Dose": {
+"artist": "D. Alexander Gregory",
+"file": "inv_31",
+"frame": "1997",
+"number": "31",
+"set": "inv"
+},
+"Rib Cage Spider": {
+"artist": "Dana Knutson",
+"file": "pcy_121",
+"frame": "1997",
+"number": "121",
+"set": "pcy"
+},
+"Ridgeline Rager": {
+"artist": "Chippy",
+"file": "pcy_100",
+"frame": "1997",
+"number": "100",
+"set": "pcy"
+},
+"Ridgetop Raptor": {
+"artist": "Daren Bader",
+"file": "lgn_108",
+"frame": "1997",
+"number": "108",
+"set": "lgn"
+},
+"Righteousness": {
+"artist": "Douglas Shuler",
+"file": "4ed_46",
+"frame": "1993",
+"number": "46",
+"set": "4ed"
+},
+"Riptide Director": {
+"artist": "Scott M. Fischer",
+"file": "lgn_50",
+"frame": "1997",
+"number": "50",
+"set": "lgn"
+},
+"Riptide Laboratory": {
+"artist": "John Avon",
+"file": "ons_322",
+"frame": "1997",
+"number": "322",
+"set": "ons"
+},
+"Rishadan Port": {
+"artist": "Jerry Tiritilli",
+"file": "mmq_324",
+"frame": "1997",
+"number": "324",
+"set": "mmq"
+},
+"Rith's Attendant": {
+"artist": "Adam Rex",
+"file": "inv_310",
+"frame": "1997",
+"number": "310",
+"set": "inv"
+},
+"Rock Badger": {
+"artist": "Heather Hudson",
+"file": "mmq_210",
+"frame": "1997",
+"number": "210",
+"set": "mmq"
+},
+"Rod of Ruin": {
+"artist": "Christopher Rush",
+"file": "4ed_344",
+"frame": "1993",
+"number": "344",
+"set": "4ed"
+},
+"Rofellos, Llanowar Emissary": {
+"artist": "Michael Sutfin",
+"file": "uds_118",
+"frame": "1997",
+"number": "118",
+"set": "uds"
+},
+"Rootbreaker Wurm": {
+"artist": "Richard Kane Ferguson",
+"file": "tmp_251",
+"frame": "1997",
+"number": "251",
+"set": "tmp"
+},
+"Rootwater Commando": {
+"artist": "Mark Tedin",
+"file": "nem_39",
+"frame": "1997",
+"number": "39",
+"set": "nem"
+},
+"Rootwater Hunter": {
+"artist": "Brom",
+"file": "tmp_82",
+"frame": "1997",
+"number": "82",
+"set": "tmp"
+},
+"Rorix Bladewing": {
+"artist": "Darrell Riche",
+"file": "ons_224",
+"frame": "1997",
+"number": "224",
+"set": "ons"
+},
+"Royal Assassin": {
+"artist": "Tom Wänerstrand",
+"file": "4ed_157",
+"frame": "1993",
+"number": "157",
+"set": "4ed"
+},
+"Ruination": {
+"artist": "Dermot Power",
+"file": "sth_95",
+"frame": "1997",
+"number": "95",
+"set": "sth"
+},
+"Rushwood Dryad": {
+"artist": "Todd Lockwood",
+"file": "mmq_263",
+"frame": "1997",
+"number": "263",
+"set": "mmq"
+},
+"Sabertooth Nishoba": {
+"artist": "Gary Ruddell",
+"file": "inv_268",
+"frame": "1997",
+"number": "268",
+"set": "inv"
+},
+"Sabertooth Wyvern": {
+"artist": "Keith Parkinson",
+"file": "exo_99",
+"frame": "1997",
+"number": "99",
+"set": "exo"
+},
+"Sabretooth Tiger": {
+"artist": "Melissa A. Benson",
+"file": "ice_215",
+"frame": "1993",
+"number": "215",
+"set": "ice"
+},
+"Sacred Nectar": {
+"artist": "Janine Johnston",
+"file": "por_25",
+"frame": "1997",
+"number": "25",
+"set": "por"
+},
+"Sandstone Warrior": {
+"artist": "Stephen Daniele",
+"file": "tmp_199",
+"frame": "1997",
+"number": "199",
+"set": "tmp"
+},
+"Sandstorm": {
+"artist": "Brian Snõddy",
+"file": "4ed_269",
+"frame": "1993",
+"number": "269",
+"set": "4ed"
+},
+"Savage Gorilla": {
+"artist": "Dave Dorman",
+"file": "apc_85",
+"frame": "1997",
+"number": "85",
+"set": "apc"
+},
+"Savage Twister": {
+"artist": "Bob Eggleton",
+"file": "mir_280",
+"frame": "1997",
+"number": "280",
+"set": "mir"
+},
+"Savannah Lions": {
+"artist": "Daniel Gelon",
+"file": "4ed_48",
+"frame": "1993",
+"number": "48",
+"set": "4ed"
+},
+"Scalebane's Elite": {
+"artist": "Steve Luke",
+"file": "vis_135",
+"frame": "1997",
+"number": "135",
+"set": "vis"
+},
+"Scaled Wurm": {
+"artist": "Daniel Gelon",
+"file": "ice_262",
+"frame": "1993",
+"number": "262",
+"set": "ice"
+},
+"Scare Tactics": {
+"artist": "DiTerlizzi",
+"file": "exo_73",
+"frame": "1997",
+"number": "73",
+"set": "exo"
+},
+"Scathe Zombies": {
+"artist": "Jesper Myrfors",
+"file": "4ed_158",
+"frame": "1993",
+"number": "158",
+"set": "4ed"
+},
+"Scavenger Folk": {
+"artist": "Dennis Detwiller",
+"file": "bchr_69",
+"frame": "1993",
+"number": "69",
+"set": "bchr"
+},
+"School of the Unseen": {
+"artist": "Pat Lewis",
+"file": "all_141",
+"frame": "1993",
+"number": "141",
+"set": "all"
+},
+"Scryb Sprites": {
+"artist": "Amy Weber",
+"file": "4ed_270",
+"frame": "1993",
+"number": "270",
+"set": "4ed"
+},
+"Sea Scryer": {
+"artist": "Martin McKenna",
+"file": "mir_90",
+"frame": "1997",
+"number": "90",
+"set": "mir"
+},
+"Sea Spirit": {
+"artist": "Rob Alexander",
+"file": "ice_95",
+"frame": "1993",
+"number": "95",
+"set": "ice"
+},
+"Sea Sprite": {
+"artist": "Susan Van Camp",
+"file": "hml_38",
+"frame": "1993",
+"number": "38",
+"set": "hml"
+},
+"Seal of Cleansing": {
+"artist": "Christopher Moeller",
+"file": "nem_18",
+"frame": "1997",
+"number": "18",
+"set": "nem"
+},
+"Seal of Doom": {
+"artist": "Christopher Moeller",
+"file": "nem_70",
+"frame": "1997",
+"number": "70",
+"set": "nem"
+},
+"Seal of Fire": {
+"artist": "Christopher Moeller",
+"file": "nem_98",
+"frame": "1997",
+"number": "98",
+"set": "nem"
+},
+"Seal of Removal": {
+"artist": "Christopher Moeller",
+"file": "nem_42",
+"frame": "1997",
+"number": "42",
+"set": "nem"
+},
+"Seal of Strength": {
+"artist": "Christopher Moeller",
+"file": "nem_115",
+"frame": "1997",
+"number": "115",
+"set": "nem"
+},
+"Searing Flesh": {
+"artist": "Pete Venters",
+"file": "ons_225",
+"frame": "1997",
+"number": "225",
+"set": "ons"
+},
+"Searing Wind": {
+"artist": "John Matson",
+"file": "pcy_103",
+"frame": "1997",
+"number": "103",
+"set": "pcy"
+},
+"Seashell Cameo": {
+"artist": "Tony Szczudlo",
+"file": "inv_311",
+"frame": "1997",
+"number": "311",
+"set": "inv"
+},
+"Second Thoughts": {
+"artist": "Ray Lago",
+"file": "ody_45",
+"frame": "1997",
+"number": "45",
+"set": "ody"
+},
+"Seeker of Skybreak": {
+"artist": "Daren Bader",
+"file": "tmp_254",
+"frame": "1997",
+"number": "254",
+"set": "tmp"
+},
+"Segovian Leviathan": {
+"artist": "Melissa A. Benson",
+"file": "4ed_99",
+"frame": "1993",
+"number": "99",
+"set": "4ed"
+},
+"Serene Heart": {
+"artist": "D. Alexander Gregory",
+"file": "mir_242",
+"frame": "1997",
+"number": "242",
+"set": "mir"
+},
+"Serpentine Kavu": {
+"artist": "Heather Hudson",
+"file": "inv_211",
+"frame": "1997",
+"number": "211",
+"set": "inv"
+},
+"Serra Advocate": {
+"artist": "Scott Hampton",
+"file": "uds_19",
+"frame": "1997",
+"number": "19",
+"set": "uds"
+},
+"Serra Angel": {
+"artist": "Douglas Shuler",
+"file": "4ed_50",
+"frame": "1993",
+"number": "50",
+"set": "4ed"
+},
+"Serra Zealot": {
+"artist": "DiTerlizzi",
+"file": "usg_46",
+"frame": "1997",
+"number": "46",
+"set": "usg"
+},
+"Serra's Sanctum": {
+"artist": "Ciruelo",
+"file": "usg_325",
+"frame": "1997",
+"number": "325",
+"set": "usg"
+},
+"Sever Soul": {
+"artist": "Jeff Easley",
+"file": "mmq_159",
+"frame": "1997",
+"number": "159",
+"set": "mmq"
+},
+"Severed Legion": {
+"artist": "Dany Orizio",
+"file": "ons_166",
+"frame": "1997",
+"number": "166",
+"set": "ons"
+},
+"Shadowblood Ridge": {
+"artist": "Glen Angus",
+"file": "ody_326",
+"frame": "1997",
+"number": "326",
+"set": "ody"
+},
+"Shambling Strider": {
+"artist": "Douglas Shuler",
+"file": "ice_263",
+"frame": "1993",
+"number": "263",
+"set": "ice"
+},
+"Shanodin Dryads": {
+"artist": "Anson Maddocks",
+"file": "4ed_271",
+"frame": "1993",
+"number": "271",
+"set": "4ed"
+},
+"Shaper Guildmage": {
+"artist": "D. Alexander Gregory",
+"file": "mir_91",
+"frame": "1997",
+"number": "91",
+"set": "mir"
+},
+"Shatter": {
+"artist": "Amy Weber",
+"file": "4ed_219",
+"frame": "1993",
+"number": "219",
+"set": "4ed"
+},
+"Shatterstorm": {
+"artist": "James Allen",
+"file": "5ed_266",
+"frame": "1997",
+"number": "266",
+"set": "5ed"
+},
+"Shauku's Minion": {
+"artist": "Greg Simanson",
+"file": "mir_283",
+"frame": "1997",
+"number": "283",
+"set": "mir"
+},
+"Shepherd of Rot": {
+"artist": "Greg Staples",
+"file": "ons_168",
+"frame": "1997",
+"number": "168",
+"set": "ons"
+},
+"Shield Mate": {
+"artist": "Randy Elliott",
+"file": "exo_19",
+"frame": "1997",
+"number": "19",
+"set": "exo"
+},
+"Shield Wall": {
+"artist": "Douglas Shuler",
+"file": "bchr_12",
+"frame": "1993",
+"number": "12",
+"set": "bchr"
+},
+"Shivan Dragon": {
+"artist": "Melissa A. Benson",
+"file": "4ed_220",
+"frame": "1993",
+"number": "220",
+"set": "4ed"
+},
+"Shivan Hellkite": {
+"artist": "Bob Eggleton",
+"file": "usg_214",
+"frame": "1997",
+"number": "214",
+"set": "usg"
+},
+"Shivan Zombie": {
+"artist": "Tony Szczudlo",
+"file": "inv_271",
+"frame": "1997",
+"number": "271",
+"set": "inv"
+},
+"Shock": {
+"artist": "Randy Gallegos",
+"file": "sth_98",
+"frame": "1997",
+"number": "98",
+"set": "sth"
+},
+"Shock Troops": {
+"artist": "Jeff Miracola",
+"file": "mmq_212",
+"frame": "1997",
+"number": "212",
+"set": "mmq"
+},
+"Shriek of Dread": {
+"artist": "Nelson DeCastro",
+"file": "pls_53",
+"frame": "1997",
+"number": "53",
+"set": "pls"
+},
+"Shrink": {
+"artist": "Liz Danforth",
+"file": "hml_97a",
+"frame": "1993",
+"number": "97a",
+"set": "hml"
+},
+"Silent Attendant": {
+"artist": "Rebecca Guay",
+"file": "usg_51",
+"frame": "1997",
+"number": "51",
+"set": "usg"
+},
+"Silk Net": {
+"artist": "Rob Alexander",
+"file": "ulg_112",
+"frame": "1997",
+"number": "112",
+"set": "ulg"
+},
+"Silklash Spider": {
+"artist": "Iain McCaig",
+"file": "ons_281",
+"frame": "1997",
+"number": "281",
+"set": "ons"
+},
+"Silver Erne": {
+"artist": "Melissa A. Benson",
+"file": "ice_98",
+"frame": "1993",
+"number": "98",
+"set": "ice"
+},
+"Silver Knight": {
+"artist": "Eric Peterson",
+"file": "scg_23",
+"frame": "1997",
+"number": "23",
+"set": "scg"
+},
+"Simoon": {
+"artist": "Randy Gallegos",
+"file": "vis_136",
+"frame": "1997",
+"number": "136",
+"set": "vis"
+},
+"Sisay's Ring": {
+"artist": "Donato Giancola",
+"file": "vis_154",
+"frame": "1997",
+"number": "154",
+"set": "vis"
+},
+"Sisters of the Flame": {
+"artist": "Jesper Myrfors",
+"file": "4ed_221",
+"frame": "1993",
+"number": "221",
+"set": "4ed"
+},
+"Sivitri Scarzam": {
+"artist": "NéNé Thomas",
+"file": "bchr_84",
+"frame": "1993",
+"number": "84",
+"set": "bchr"
+},
+"Skull of Ramos": {
+"artist": "David Martin",
+"file": "mmq_312",
+"frame": "1997",
+"number": "312",
+"set": "mmq"
+},
+"Sky Spirit": {
+"artist": "Rebecca Guay",
+"file": "tmp_271",
+"frame": "1997",
+"number": "271",
+"set": "tmp"
+},
+"Sky Weaver": {
+"artist": "Christopher Moeller",
+"file": "inv_74",
+"frame": "1997",
+"number": "74",
+"set": "inv"
+},
+"Skycloud Expanse": {
+"artist": "Rob Alexander",
+"file": "ody_327",
+"frame": "1997",
+"number": "327",
+"set": "ody"
+},
+"Skyshaper": {
+"artist": "Donato Giancola",
+"file": "exo_137",
+"frame": "1997",
+"number": "137",
+"set": "exo"
+},
+"Skyshooter": {
+"artist": "Jerry Tiritilli",
+"file": "ody_270",
+"frame": "1997",
+"number": "270",
+"set": "ody"
+},
+"Skyshroud Archer": {
+"artist": "Jeff Miracola",
+"file": "sth_114",
+"frame": "1997",
+"number": "114",
+"set": "sth"
+},
+"Skyshroud Blessing": {
+"artist": "Jerry Tiritilli",
+"file": "pls_92",
+"frame": "1997",
+"number": "92",
+"set": "pls"
+},
+"Skyshroud Elf": {
+"artist": "Jeff Miracola",
+"file": "tmp_255",
+"frame": "1997",
+"number": "255",
+"set": "tmp"
+},
+"Skyshroud Falcon": {
+"artist": "Mike Raabe",
+"file": "sth_16",
+"frame": "1997",
+"number": "16",
+"set": "sth"
+},
+"Skyshroud Troopers": {
+"artist": "DiTerlizzi",
+"file": "sth_115",
+"frame": "1997",
+"number": "115",
+"set": "sth"
+},
+"Slay": {
+"artist": "Ben Thompson",
+"file": "pls_55",
+"frame": "1997",
+"number": "55",
+"set": "pls"
+},
+"Slingshot Goblin": {
+"artist": "Jeff Easley",
+"file": "pls_72",
+"frame": "1997",
+"number": "72",
+"set": "pls"
+},
+"Slinking Serpent": {
+"artist": "Wayne England",
+"file": "inv_274",
+"frame": "1997",
+"number": "274",
+"set": "inv"
+},
+"Slinking Skirge": {
+"artist": "Ron Spencer",
+"file": "uds_71",
+"frame": "1997",
+"number": "71",
+"set": "uds"
+},
+"Smash": {
+"artist": "Pete Venters",
+"file": "apc_69",
+"frame": "1997",
+"number": "69",
+"set": "apc"
+},
+"Smokespew Invoker": {
+"artist": "Thomas M. Baxa",
+"file": "lgn_81",
+"frame": "1997",
+"number": "81",
+"set": "lgn"
+},
+"Smother": {
+"artist": "Carl Critchlow",
+"file": "ons_170",
+"frame": "1997",
+"number": "170",
+"set": "ons"
+},
+"Snow-Covered Forest": {
+"artist": "Pat Lewis",
+"file": "ice_383",
+"frame": "1993",
+"number": "383",
+"set": "ice"
+},
+"Snow-Covered Island": {
+"artist": "Anson Maddocks",
+"file": "ice_371",
+"frame": "1993",
+"number": "371",
+"set": "ice"
+},
+"Snow-Covered Mountain": {
+"artist": "Tom Wänerstrand",
+"file": "ice_379",
+"frame": "1993",
+"number": "379",
+"set": "ice"
+},
+"Snow-Covered Plains": {
+"artist": "Christopher Rush",
+"file": "ice_367",
+"frame": "1993",
+"number": "367",
+"set": "ice"
+},
+"Snow-Covered Swamp": {
+"artist": "Douglas Shuler",
+"file": "ice_372",
+"frame": "1993",
+"number": "372",
+"set": "ice"
+},
+"Solidarity": {
+"artist": "John Zeleznik",
+"file": "uds_20",
+"frame": "1997",
+"number": "20",
+"set": "uds"
+},
+"Soothing Balm": {
+"artist": "Scott M. Fischer",
+"file": "mmq_48",
+"frame": "1997",
+"number": "48",
+"set": "mmq"
+},
+"Soul Feast": {
+"artist": "Ray Lago",
+"file": "uds_72",
+"frame": "1997",
+"number": "72",
+"set": "uds"
+},
+"Southern Paladin": {
+"artist": "Douglas Shuler",
+"file": "wth_27",
+"frame": "1997",
+"number": "27",
+"set": "wth"
+},
+"Sparksmith": {
+"artist": "Jim Nelson",
+"file": "ons_235",
+"frame": "1997",
+"number": "235",
+"set": "ons"
+},
+"Specter's Wail": {
+"artist": "Randy Gallegos",
+"file": "mmq_164",
+"frame": "1997",
+"number": "164",
+"set": "mmq"
+},
+"Spined Wurm": {
+"artist": "Colin MacNeil",
+"file": "por_185",
+"frame": "1997",
+"number": "185",
+"set": "por"
+},
+"Spirit Weaver": {
+"artist": "Matthew D. Wilson",
+"file": "inv_39",
+"frame": "1997",
+"number": "39",
+"set": "inv"
+},
+"Spitting Earth": {
+"artist": "Brian Snõddy",
+"file": "mir_193",
+"frame": "1997",
+"number": "193",
+"set": "mir"
+},
+"Squall": {
+"artist": "Carl Critchlow",
+"file": "s99_143",
+"frame": "1997",
+"number": "143",
+"set": "s99"
+},
+"Squirming Mass": {
+"artist": "Ron Spencer",
+"file": "uds_73",
+"frame": "1997",
+"number": "73",
+"set": "uds"
+},
+"Stalking Assassin": {
+"artist": "Dana Knutson",
+"file": "inv_277",
+"frame": "1997",
+"number": "277",
+"set": "inv"
+},
+"Stampede": {
+"artist": "Jeff A. Menges",
+"file": "ice_265",
+"frame": "1993",
+"number": "265",
+"set": "ice"
+},
+"Standing Troops": {
+"artist": "Daren Bader",
+"file": "exo_22",
+"frame": "1997",
+"number": "22",
+"set": "exo"
+},
+"Starlight Invoker": {
+"artist": "Glen Angus",
+"file": "lgn_20",
+"frame": "1997",
+"number": "20",
+"set": "lgn"
+},
+"Steadfast Guard": {
+"artist": "Adam Rex",
+"file": "mmq_50",
+"frame": "1997",
+"number": "50",
+"set": "mmq"
+},
+"Steam Blast": {
+"artist": "Mike Raabe",
+"file": "usg_219",
+"frame": "1997",
+"number": "219",
+"set": "usg"
+},
+"Stench of Decay": {
+"artist": "Heather Hudson",
+"file": "all_61a",
+"frame": "1993",
+"number": "61a",
+"set": "all"
+},
+"Stinging Barrier": {
+"artist": "Pat Lewis",
+"file": "mmq_107",
+"frame": "1997",
+"number": "107",
+"set": "mmq"
+},
+"Stone Kavu": {
+"artist": "Adam Rex",
+"file": "pls_93",
+"frame": "1997",
+"number": "93",
+"set": "pls"
+},
+"Stone Rain": {
+"artist": "Daniel Gelon",
+"file": "4ed_224",
+"frame": "1993",
+"number": "224",
+"set": "4ed"
+},
+"Stonewood Invoker": {
+"artist": "Eric Peterson",
+"file": "lgn_139",
+"frame": "1997",
+"number": "139",
+"set": "lgn"
+},
+"Storm Crow": {
+"artist": "Sandra Everingham",
+"file": "all_36a",
+"frame": "1993",
+"number": "36a",
+"set": "all"
+},
+"Storm Front": {
+"artist": "William O'Connor",
+"file": "tmp_259",
+"frame": "1997",
+"number": "259",
+"set": "tmp"
+},
+"Storm Shaman": {
+"artist": "Carol Heyer",
+"file": "all_81a",
+"frame": "1993",
+"number": "81a",
+"set": "all"
+},
+"Storm Spirit": {
+"artist": "Pete Venters",
+"file": "ice_303",
+"frame": "1993",
+"number": "303",
+"set": "ice"
+},
+"Stormscape Apprentice": {
+"artist": "D. Alexander Gregory",
+"file": "inv_75",
+"frame": "1997",
+"number": "75",
+"set": "inv"
+},
+"Strafe": {
+"artist": "Jim Nelson",
+"file": "pls_73",
+"frame": "1997",
+"number": "73",
+"set": "pls"
+},
+"Stream of Life": {
+"artist": "Mark Poole",
+"file": "4ed_272",
+"frame": "1993",
+"number": "272",
+"set": "4ed"
+},
+"Stroke of Genius": {
+"artist": "Stephen Daniele",
+"file": "jgp_2",
+"frame": "1997",
+"number": "2",
+"set": "jgp"
+},
+"Subterranean Spirit": {
+"artist": "John Bolton",
+"file": "mir_195",
+"frame": "1997",
+"number": "195",
+"set": "mir"
+},
+"Sudden Strength": {
+"artist": "Alan Pollack",
+"file": "jud_132",
+"frame": "1997",
+"number": "132",
+"set": "jud"
+},
+"Sungrass Prairie": {
+"artist": "Ron Spencer",
+"file": "ody_328",
+"frame": "1997",
+"number": "328",
+"set": "ody"
+},
+"Sunscape Master": {
+"artist": "Alan Rabinowitz",
+"file": "inv_42",
+"frame": "1997",
+"number": "42",
+"set": "inv"
+},
+"Suntail Hawk": {
+"artist": "Heather Hudson",
+"file": "jud_28",
+"frame": "1997",
+"number": "28",
+"set": "jud"
+},
+"Swamp": {
+"artist": "Dan Frazier",
+"file": "4ed_370",
+"frame": "1993",
+"number": "370",
+"set": "4ed"
+},
+"Sword Dancer": {
+"artist": "Roger Raupp",
+"file": "pcy_25",
+"frame": "1997",
+"number": "25",
+"set": "pcy"
+},
+"Sword of the Chosen": {
+"artist": "Adam Rex",
+"file": "sth_141",
+"frame": "1997",
+"number": "141",
+"set": "sth"
+},
+"Swords to Plowshares": {
+"artist": "Jeff A. Menges",
+"file": "4ed_52",
+"frame": "1993",
+"number": "52",
+"set": "4ed"
+},
+"Talruum Minotaur": {
+"artist": "Pete Venters",
+"file": "mir_196",
+"frame": "1997",
+"number": "196",
+"set": "mir"
+},
+"Telim'Tor's Darts": {
+"artist": "Kev Walker",
+"file": "mir_321",
+"frame": "1997",
+"number": "321",
+"set": "mir"
+},
+"Tempest Drake": {
+"artist": "Gerry Grace",
+"file": "vis_139",
+"frame": "1997",
+"number": "139",
+"set": "vis"
+},
+"Temporal Adept": {
+"artist": "Heather Hudson",
+"file": "uds_48",
+"frame": "1997",
+"number": "48",
+"set": "uds"
+},
+"Terminate": {
+"artist": "DiTerlizzi",
+"file": "pls_128",
+"frame": "1997",
+"number": "128",
+"set": "pls"
+},
+"Terror": {
+"artist": "Ron Spencer",
+"file": "4ed_164",
+"frame": "1993",
+"number": "164",
+"set": "4ed"
+},
+"Theft of Dreams": {
+"artist": "Adam Rex",
+"file": "por_72",
+"frame": "1997",
+"number": "72",
+"set": "por"
+},
+"Thermal Glider": {
+"artist": "Mark Zug",
+"file": "mmq_53",
+"frame": "1997",
+"number": "53",
+"set": "mmq"
+},
+"Thornscape Apprentice": {
+"artist": "Randy Gallegos",
+"file": "inv_215",
+"frame": "1997",
+"number": "215",
+"set": "inv"
+},
+"Thornwind Faeries": {
+"artist": "Rebecca Guay",
+"file": "ulg_44",
+"frame": "1997",
+"number": "44",
+"set": "ulg"
+},
+"Thran Dynamo": {
+"artist": "Ron Spears",
+"file": "uds_139",
+"frame": "1997",
+"number": "139",
+"set": "uds"
+},
+"Thrashing Wumpus": {
+"artist": "Jeff Miracola",
+"file": "mmq_166",
+"frame": "1997",
+"number": "166",
+"set": "mmq"
+},
+"Thriss, Nantuko Primus": {
+"artist": "John Avon",
+"file": "jud_134",
+"frame": "1997",
+"number": "134",
+"set": "jud"
+},
+"Thunder Wall": {
+"artist": "Richard Thomas",
+"file": "ice_104",
+"frame": "1993",
+"number": "104",
+"set": "ice"
+},
+"Thunder of Hooves": {
+"artist": "Jim Nelson",
+"file": "ons_242",
+"frame": "1997",
+"number": "242",
+"set": "ons"
+},
+"Thundering Giant": {
+"artist": "Mark Zug",
+"file": "usg_221",
+"frame": "1997",
+"number": "221",
+"set": "usg"
+},
+"Thunderscape Apprentice": {
+"artist": "D. Alexander Gregory",
+"file": "inv_174",
+"frame": "1997",
+"number": "174",
+"set": "inv"
+},
+"Thunderscape Master": {
+"artist": "Scott M. Fischer",
+"file": "inv_175",
+"frame": "1997",
+"number": "175",
+"set": "inv"
+},
+"Tigereye Cameo": {
+"artist": "Donato Giancola",
+"file": "inv_314",
+"frame": "1997",
+"number": "314",
+"set": "inv"
+},
+"Timberwatch Elf": {
+"artist": "Dave Dorman",
+"file": "lgn_140",
+"frame": "1997",
+"number": "140",
+"set": "lgn"
+},
+"Tobias Andrion": {
+"artist": "Andi Rusu",
+"file": "bchr_87",
+"frame": "1993",
+"number": "87",
+"set": "bchr"
+},
+"Tooth of Ramos": {
+"artist": "David Martin",
+"file": "mmq_313",
+"frame": "1997",
+"number": "313",
+"set": "mmq"
+},
+"Tor Giant": {
+"artist": "Douglas Shuler",
+"file": "ice_220",
+"frame": "1993",
+"number": "220",
+"set": "ice"
+},
+"Tor Wauki": {
+"artist": "Randy Asplund-Faith",
+"file": "bchr_88",
+"frame": "1993",
+"number": "88",
+"set": "bchr"
+},
+"Tormented Angel": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "uds_22",
+"frame": "1997",
+"number": "22",
+"set": "uds"
+},
+"Touchstone": {
+"artist": "George Pratt",
+"file": "wth_161",
+"frame": "1997",
+"number": "161",
+"set": "wth"
+},
+"Tower Drake": {
+"artist": "Carl Critchlow",
+"file": "inv_82",
+"frame": "1997",
+"number": "82",
+"set": "inv"
+},
+"Trained Armodon": {
+"artist": "Gary Leach",
+"file": "tmp_260",
+"frame": "1997",
+"number": "260",
+"set": "tmp"
+},
+"Trained Orgg": {
+"artist": "Eric Peterson",
+"file": "s99_120",
+"frame": "1997",
+"number": "120",
+"set": "s99"
+},
+"Tranquil Domain": {
+"artist": "D. Alexander Gregory",
+"file": "mir_245",
+"frame": "1997",
+"number": "245",
+"set": "mir"
+},
+"Tranquil Grove": {
+"artist": "Dylan Martens",
+"file": "wth_142",
+"frame": "1997",
+"number": "142",
+"set": "wth"
+},
+"Tranquil Path": {
+"artist": "John Avon",
+"file": "apc_89",
+"frame": "1997",
+"number": "89",
+"set": "apc"
+},
+"Tranquility": {
+"artist": "Douglas Shuler",
+"file": "4ed_277",
+"frame": "1993",
+"number": "277",
+"set": "4ed"
+},
+"Treasure Trove": {
+"artist": "Michael Sutfin",
+"file": "exo_50",
+"frame": "1997",
+"number": "50",
+"set": "exo"
+},
+"Treetop Sentinel": {
+"artist": "Carl Critchlow",
+"file": "ody_111",
+"frame": "1997",
+"number": "111",
+"set": "ody"
+},
+"Tremor": {
+"artist": "Michael Danza",
+"file": "vis_99",
+"frame": "1997",
+"number": "99",
+"set": "vis"
+},
+"Trench Wurm": {
+"artist": "Wayne England",
+"file": "inv_127",
+"frame": "1997",
+"number": "127",
+"set": "inv"
+},
+"Treva's Attendant": {
+"artist": "Christopher Moeller",
+"file": "inv_315",
+"frame": "1997",
+"number": "315",
+"set": "inv"
+},
+"Troll-Horn Cameo": {
+"artist": "Donato Giancola",
+"file": "inv_316",
+"frame": "1997",
+"number": "316",
+"set": "inv"
+},
+"Tropical Storm": {
+"artist": "Richard Kane Ferguson",
+"file": "mir_246",
+"frame": "1997",
+"number": "246",
+"set": "mir"
+},
+"Trumpet Blast": {
+"artist": "Carl Critchlow",
+"file": "uds_98",
+"frame": "1997",
+"number": "98",
+"set": "uds"
+},
+"Tsunami": {
+"artist": "Richard Thomas",
+"file": "4ed_278",
+"frame": "1993",
+"number": "278",
+"set": "4ed"
+},
+"Tundra Wolves": {
+"artist": "Quinton Hoover",
+"file": "4ed_53",
+"frame": "1993",
+"number": "53",
+"set": "4ed"
+},
+"Tunnel": {
+"artist": "Dan Frazier",
+"file": "4ed_227",
+"frame": "1993",
+"number": "227",
+"set": "4ed"
+},
+"Uktabi Faerie": {
+"artist": "Junior Tomlin",
+"file": "mir_247",
+"frame": "1997",
+"number": "247",
+"set": "mir"
+},
+"Unsummon": {
+"artist": "Douglas Shuler",
+"file": "4ed_111",
+"frame": "1993",
+"number": "111",
+"set": "4ed"
+},
+"Unyaro Bee Sting": {
+"artist": "Pat Lewis",
+"file": "mir_250",
+"frame": "1997",
+"number": "250",
+"set": "mir"
+},
+"Unyaro Griffin": {
+"artist": "Al Davidson",
+"file": "mir_44",
+"frame": "1997",
+"number": "44",
+"set": "mir"
+},
+"Urborg Elf": {
+"artist": "Bob Petillo",
+"file": "apc_90",
+"frame": "1997",
+"number": "90",
+"set": "apc"
+},
+"Utopia Tree": {
+"artist": "Gary Ruddell",
+"file": "inv_219",
+"frame": "1997",
+"number": "219",
+"set": "inv"
+},
+"Vendetta": {
+"artist": "Dan Frazier",
+"file": "mmq_170",
+"frame": "1997",
+"number": "170",
+"set": "mmq"
+},
+"Vengeance": {
+"artist": "Andrew Robinson",
+"file": "por_36",
+"frame": "1997",
+"number": "36",
+"set": "por"
+},
+"Verdigris": {
+"artist": "Zina Saunders",
+"file": "tmp_264",
+"frame": "1997",
+"number": "264",
+"set": "tmp"
+},
+"Viashino Grappler": {
+"artist": "Mark Romanoski",
+"file": "inv_179",
+"frame": "1997",
+"number": "179",
+"set": "inv"
+},
+"Viashino Warrior": {
+"artist": "Roger Raupp",
+"file": "mir_200",
+"frame": "1997",
+"number": "200",
+"set": "mir"
+},
+"Viashivan Dragon": {
+"artist": "Ian Miller",
+"file": "vis_140",
+"frame": "1997",
+"number": "140",
+"set": "vis"
+},
+"Vicious Hunger": {
+"artist": "Massimiliano Frezzato",
+"file": "nem_74",
+"frame": "1997",
+"number": "74",
+"set": "nem"
+},
+"Vigilant Drake": {
+"artist": "Greg Staples",
+"file": "ulg_46",
+"frame": "1997",
+"number": "46",
+"set": "ulg"
+},
+"Vindicate": {
+"artist": "Brian Snõddy",
+"file": "apc_126",
+"frame": "1997",
+"number": "126",
+"set": "apc"
+},
+"Vine Trellis": {
+"artist": "DiTerlizzi",
+"file": "mmq_285",
+"frame": "1997",
+"number": "285",
+"set": "mmq"
+},
+"Visara the Dreadful": {
+"artist": "Kev Walker",
+"file": "ons_179",
+"frame": "1997",
+"number": "179",
+"set": "ons"
+},
+"Vitalizing Wind": {
+"artist": "Jeff Easley",
+"file": "pcy_133",
+"frame": "1997",
+"number": "133",
+"set": "pcy"
+},
+"Vizzerdrix": {
+"artist": "Eric Peterson",
+"file": "s99_59",
+"frame": "1997",
+"number": "59",
+"set": "s99"
+},
+"Vodalian Soldiers": {
+"artist": "Melissa A. Benson",
+"file": "5ed_134",
+"frame": "1997",
+"number": "134",
+"set": "5ed"
+},
+"Vodalian Zombie": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "inv_286",
+"frame": "1997",
+"number": "286",
+"set": "inv"
+},
+"Voice of Duty": {
+"artist": "Mark Zug",
+"file": "uds_23",
+"frame": "1997",
+"number": "23",
+"set": "uds"
+},
+"Voice of Grace": {
+"artist": "Jeff Miracola",
+"file": "usg_54",
+"frame": "1997",
+"number": "54",
+"set": "usg"
+},
+"Voice of Law": {
+"artist": "Mark Zug",
+"file": "usg_55",
+"frame": "1997",
+"number": "55",
+"set": "usg"
+},
+"Voice of Reason": {
+"artist": "Ray Lago",
+"file": "uds_24",
+"frame": "1997",
+"number": "24",
+"set": "uds"
+},
+"Voice of Truth": {
+"artist": "rk post",
+"file": "nem_25",
+"frame": "1997",
+"number": "25",
+"set": "nem"
+},
+"Volcanic Dragon": {
+"artist": "Janine Johnston",
+"file": "mir_201",
+"frame": "1997",
+"number": "201",
+"set": "mir"
+},
+"Volcanic Geyser": {
+"artist": "David O'Connor",
+"file": "mir_202",
+"frame": "1997",
+"number": "202",
+"set": "mir"
+},
+"Volcanic Hammer": {
+"artist": "Christopher Rush",
+"file": "por_154",
+"frame": "1997",
+"number": "154",
+"set": "por"
+},
+"Volcano Imp": {
+"artist": "Thomas M. Baxa",
+"file": "pls_56",
+"frame": "1997",
+"number": "56",
+"set": "pls"
+},
+"Voltaic Key": {
+"artist": "Henry G. Higginbotham",
+"file": "usg_314",
+"frame": "1997",
+"number": "314",
+"set": "usg"
+},
+"Wall of Air": {
+"artist": "Richard Thomas",
+"file": "4ed_113",
+"frame": "1993",
+"number": "113",
+"set": "4ed"
+},
+"Wall of Fire": {
+"artist": "Richard Thomas",
+"file": "4ed_230",
+"frame": "1993",
+"number": "230",
+"set": "4ed"
+},
+"Wall of Heat": {
+"artist": "Richard Thomas",
+"file": "bchr_55",
+"frame": "1993",
+"number": "55",
+"set": "bchr"
+},
+"Wall of Ice": {
+"artist": "Richard Thomas",
+"file": "4ed_283",
+"frame": "1993",
+"number": "283",
+"set": "4ed"
+},
+"Wall of Lava": {
+"artist": "Pete Venters",
+"file": "ice_223",
+"frame": "1993",
+"number": "223",
+"set": "ice"
+},
+"Wall of Opposition": {
+"artist": "Harold McNeill",
+"file": "bchr_56",
+"frame": "1993",
+"number": "56",
+"set": "bchr"
+},
+"Wall of Razors": {
+"artist": "Michael Sutfin",
+"file": "sth_100",
+"frame": "1997",
+"number": "100",
+"set": "sth"
+},
+"Wall of Spears": {
+"artist": "Sandra Everingham",
+"file": "4ed_356",
+"frame": "1993",
+"number": "356",
+"set": "4ed"
+},
+"Wall of Stone": {
+"artist": "Dan Frazier",
+"file": "4ed_231",
+"frame": "1993",
+"number": "231",
+"set": "4ed"
+},
+"Wall of Swords": {
+"artist": "Mark Tedin",
+"file": "4ed_55",
+"frame": "1993",
+"number": "55",
+"set": "4ed"
+},
+"Wall of Water": {
+"artist": "Richard Thomas",
+"file": "4ed_114",
+"frame": "1993",
+"number": "114",
+"set": "4ed"
+},
+"Wall of Wood": {
+"artist": "Mark Tedin",
+"file": "4ed_284",
+"frame": "1993",
+"number": "284",
+"set": "4ed"
+},
+"Wallop": {
+"artist": "Mike Ploog",
+"file": "inv_223",
+"frame": "1997",
+"number": "223",
+"set": "inv"
+},
+"War Chariot": {
+"artist": "Dameon Willich",
+"file": "ice_348",
+"frame": "1993",
+"number": "348",
+"set": "ice"
+},
+"War Mammoth": {
+"artist": "Jeff A. Menges",
+"file": "4ed_286",
+"frame": "1993",
+"number": "286",
+"set": "4ed"
+},
+"Warrior's Honor": {
+"artist": "D. Alexander Gregory",
+"file": "vis_24",
+"frame": "1997",
+"number": "24",
+"set": "vis"
+},
+"Warthog": {
+"artist": "Steve White",
+"file": "vis_124",
+"frame": "1997",
+"number": "124",
+"set": "vis"
+},
+"Wasteland": {
+"artist": "Una Fricker",
+"file": "tmp_330",
+"frame": "1997",
+"number": "330",
+"set": "tmp"
+},
+"Water Elemental": {
+"artist": "Jeff A. Menges",
+"file": "4ed_115",
+"frame": "1993",
+"number": "115",
+"set": "4ed"
+},
+"Weatherseed Faeries": {
+"artist": "Don Hazeltine",
+"file": "ulg_48",
+"frame": "1997",
+"number": "48",
+"set": "ulg"
+},
+"Wellwisher": {
+"artist": "Christopher Rush",
+"file": "ons_300",
+"frame": "1997",
+"number": "300",
+"set": "ons"
+},
+"Western Paladin": {
+"artist": "Carl Critchlow",
+"file": "usg_168",
+"frame": "1997",
+"number": "168",
+"set": "usg"
+},
+"Whalebone Glider": {
+"artist": "Amy Weber",
+"file": "ice_349",
+"frame": "1993",
+"number": "349",
+"set": "ice"
+},
+"Whip Sergeant": {
+"artist": "Paolo Parente",
+"file": "pcy_107",
+"frame": "1997",
+"number": "107",
+"set": "pcy"
+},
+"Whiptongue Frog": {
+"artist": "Jeff Miracola",
+"file": "exo_52",
+"frame": "1997",
+"number": "52",
+"set": "exo"
+},
+"Whirlwind": {
+"artist": "John Matson",
+"file": "usg_283",
+"frame": "1997",
+"number": "283",
+"set": "usg"
+},
+"Whispering Shade": {
+"artist": "Daren Bader",
+"file": "ody_167",
+"frame": "1997",
+"number": "167",
+"set": "ody"
+},
+"White Knight": {
+"artist": "Daniel Gelon",
+"file": "4ed_56",
+"frame": "1993",
+"number": "56",
+"set": "4ed"
+},
+"Wild Colos": {
+"artist": "Marc Fishman",
+"file": "uds_100",
+"frame": "1997",
+"number": "100",
+"set": "uds"
+},
+"Wild Elephant": {
+"artist": "Junior Tomlin",
+"file": "mir_254",
+"frame": "1997",
+"number": "254",
+"set": "mir"
+},
+"Wild Jhovall": {
+"artist": "Daren Bader",
+"file": "mmq_227",
+"frame": "1997",
+"number": "227",
+"set": "mmq"
+},
+"Wildfire Emissary": {
+"artist": "Richard Kane Ferguson",
+"file": "mir_203",
+"frame": "1997",
+"number": "203",
+"set": "mir"
+},
+"Willow Faerie": {
+"artist": "Susan Van Camp",
+"file": "hml_99a",
+"frame": "1993",
+"number": "99a",
+"set": "hml"
+},
+"Wind Dancer": {
+"artist": "Susan Van Camp",
+"file": "tmp_104",
+"frame": "1997",
+"number": "104",
+"set": "tmp"
+},
+"Wind Drake": {
+"artist": "Zina Saunders",
+"file": "por_77",
+"frame": "1997",
+"number": "77",
+"set": "por"
+},
+"Windreaper Falcon": {
+"artist": "Tony Roberts",
+"file": "mir_289",
+"frame": "1997",
+"number": "289",
+"set": "mir"
+},
+"Wing Snare": {
+"artist": "Henry Van Der Linde",
+"file": "ulg_117",
+"frame": "1997",
+"number": "117",
+"set": "ulg"
+},
+"Winter's Grasp": {
+"artist": "Paolo Parente",
+"file": "por_194",
+"frame": "1997",
+"number": "194",
+"set": "por"
+},
+"Wirewood Channeler": {
+"artist": "Alan Pollack",
+"file": "lgn_144",
+"frame": "1997",
+"number": "144",
+"set": "lgn"
+},
+"Wirewood Elf": {
+"artist": "Jerry Tiritilli",
+"file": "ons_301",
+"frame": "1997",
+"number": "301",
+"set": "ons"
+},
+"Wirewood Lodge": {
+"artist": "Anthony S. Waters",
+"file": "ons_329",
+"frame": "1997",
+"number": "329",
+"set": "ons"
+},
+"Wirewood Pride": {
+"artist": "Dave Dorman",
+"file": "ons_303",
+"frame": "1997",
+"number": "303",
+"set": "ons"
+},
+"Witch Hunter": {
+"artist": "Jesper Myrfors",
+"file": "bchr_14",
+"frame": "1993",
+"number": "14",
+"set": "bchr"
+},
+"Wizards' School": {
+"artist": "Pat Lewis",
+"file": "hml_115",
+"frame": "1993",
+"number": "115",
+"set": "hml"
+},
+"Woodland Druid": {
+"artist": "Rick Farrell",
+"file": "ody_284",
+"frame": "1997",
+"number": "284",
+"set": "ody"
+},
+"Wrath of God": {
+"artist": "Quinton Hoover",
+"file": "4ed_58",
+"frame": "1993",
+"number": "58",
+"set": "4ed"
+},
+"Wyluli Wolf": {
+"artist": "Susan Van Camp",
+"file": "5ed_345",
+"frame": "1997",
+"number": "345",
+"set": "5ed"
+},
+"Xira Arien": {
+"artist": "Melissa A. Benson",
+"file": "bchr_90",
+"frame": "1993",
+"number": "90",
+"set": "bchr"
+},
+"Yavimaya Ancients": {
+"artist": "Quinton Hoover",
+"file": "all_104a",
+"frame": "1993",
+"number": "104a",
+"set": "all"
+},
+"Yavimaya Barbarian": {
+"artist": "Don Hazeltine",
+"file": "inv_290",
+"frame": "1997",
+"number": "290",
+"set": "inv"
+},
+"Yavimaya Wurm": {
+"artist": "Melissa A. Benson",
+"file": "ulg_120",
+"frame": "1997",
+"number": "120",
+"set": "ulg"
+},
+"Yotian Soldier": {
+"artist": "Christopher Rush",
+"file": "4ed_360",
+"frame": "1993",
+"number": "360",
+"set": "4ed"
+},
+"Youthful Knight": {
+"artist": "Rebecca Guay",
+"file": "sth_25",
+"frame": "1997",
+"number": "25",
+"set": "sth"
+},
+"Zap": {
+"artist": "John Matson",
+"file": "inv_180",
+"frame": "1997",
+"number": "180",
+"set": "inv"
+},
+"Zephid": {
+"artist": "Daren Bader",
+"file": "usg_113",
+"frame": "1997",
+"number": "113",
+"set": "usg"
+},
+"Zephyr Falcon": {
+"artist": "Heather Hudson",
+"file": "4ed_116",
+"frame": "1993",
+"number": "116",
+"set": "4ed"
+},
+"Zuran Spellcaster": {
+"artist": "Edward P. Beard, Jr.",
+"file": "ice_112",
+"frame": "1993",
+"number": "112",
+"set": "ice"
+}
+}
