@@ -13,8 +13,8 @@ what was proposed and not yet confirmed, then what is still open.
      Adapter minigames (POKéMON JUMP, DODRIO BERRY PICKING: cable_club.inc MossdeepCity_GameCorner_1F_EventScript_InfoMan2)
      and Kai never brought those two online, so the building is free. It already looks like a card shop.
    - JOHTO: a copy of MOSSDEEP's Game Corner in CIANWOOD.
-   - KANTO: another copy of MOSSDEEP's Game Corner (the user, 2026-11-04; not Two Island's Joyful Game Corner, which
-     keeps FireRed's story). Which town holds it is still to be chosen.
+   - KANTO: another copy of MOSSDEEP's Game Corner in SAFFRON (the user, 2026-11-04; not Two Island's Joyful Game
+     Corner, which keeps FireRed's story).
    - SINNOH: the PAL PARK on ROUTE 221 reopens as a card hall where all four games are played (POKéMON cards,
      Yu-Gi-Oh!, Triple Triad, Magic). The user accepts original dialogue and scripts there: an exception to "SINNOH's
      words and scripts are Platinum's own", for the PAL PARK only. Its catching show stays closed. Today it is left out
@@ -48,7 +48,6 @@ what was proposed and not yet confirmed, then what is still open.
   EDOPro (a bundled Java runtime, roughly 50 MB), or an engine of our own in C for the fixed pool, built in stages.
 - Who gives the starter deck, and where (MOSSDEEP's shop is the natural place).
 - Which NPCs play Magic, and how many.
-- Which late-game KANTO town holds its copy of MOSSDEEP's Game Corner.
 
 ## Card art: Scryfall
 - api.scryfall.com has every printing of every card (checked 2026-11-03 with 4th Edition's Lightning Bolt):
