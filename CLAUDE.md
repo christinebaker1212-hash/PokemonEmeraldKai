@@ -60,7 +60,7 @@ ocgcore + src/ygo through cpp/ygo_jni.c (Ygo.java; the engine's pack an asset: Y
 snapshot "ygo", orders ygodeck / ygoduel / ygoopen; PHONE_LINK.md "YU-GI-OH! on the phone"; tests coretest YgoCoreTest,
 YgoFriendsTest (ONLY=ygo). The app's sounds (1.81.0): the game's own, recorded from its sound engine at APK build time
 (src/mp/mp_export_sound.c -> assets game/sounds.bin; Sound.java, MENU > SOUND; the card tables play their boards'
-sounds and scenes' songs); PHONE_LINK.md "The app's sounds"; tests tools/phone/sounds_test.py, SoundTest. The POKéMON and YU-GI-OH! tables turn the
+sounds and scenes' songs); PHONE_LINK.md "The app's sounds"; tests tools/phone/sounds_test.py, SoundTest. The POKéDEX's details, the type chart (TypeChartPage) and MENU > LOOK (themes, window frames, animations, start page: Look.java) (1.84.0): PHONE_LINK.md "The POKéDEX's details, the type chart, LOOK". The POKéMON and YU-GI-OH! tables turn the
 opponent's cards to face them; TRIPLE TRIAD stays as it is (never turn its cards: the user, 2026-11-03). The user asked
 (2026-11-03) for all four phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era
 graphics, 2026 usability".

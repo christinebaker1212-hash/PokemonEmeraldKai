@@ -497,4 +497,25 @@ for the app and nothing is committed.
   species, loops inside their songs with a crossfade tail, nothing silent or clipped), SoundTest (`./gradlew
   testDebugUnitTest`: the ADPCM decodes, songs go round their loops with no jump at the seam).
 
+### The POKéDEX's details, the type chart, LOOK (1.84.0)
+
+- **The export** (mp_export.c, data.json per species): `"ab"` abilities, `"eg"` egg groups, `"ey"` base EXP., `"evy"`
+  the effort it gives (HP, ATK, DEF, SP. ATK, SP. DEF, SPEED), `"it"` held items (common, rare), `"ec"` egg cycles,
+  `"fr"` base friendship, `"evo"` [method, param, target] from gEvolutionTable, `"lv"` [level, move] and `"tm"` a hex
+  mask of TM / HM indexes; top level `"tms"` the move of each TM / HM index.
+- **DexEntryPage**: chips that jump to ENTRY / STATS / TYPES / EVOLVES / MOVES / MORE (sectionY); ABILITY; TYPE MATCHUPS
+  (x4 / x2 / x1/2 / x1/4 / x0 rows, "TYPE CHART >"); EVOLUTION (the family walked from its first stage, each with its
+  method; a tap opens that stage's entry); MOVES BY LEVEL / TM & HM (a tap: the move's card, moveInfo); BREEDING;
+  TRAINING. **DexPage**: SORTS No. / ABC / TOTAL, a type filter with its own picker, CHART; filter, order and type kept
+  in the app's settings.
+- **TypeChartPage**: CHART (18 x 18, the game's type order), DEFENSE (one or two types), ATTACK (one type); the
+  numbers from the game's own gTypeEffectiveness through data.json.
+- **Look.java** (MENU > LOOK): THEMES (Page.SKY / SKY2 / BANNER / BANNER_DARK), the window frame (GameArt.userFrame:
+  frame 0 drawn as the chosen one), ANIMATIONS (GameView: pages slide in over SLIDE_MS, the tab plate over TAB_MS,
+  menus grow in, all through GameView.eased; off, everything is at once: the tests run with them off), OPEN ON (a
+  page, or LAST). Settings look_theme / look_frame / look_start / look_anim / look_last.
+- SUMMARY: the friendship rater's words under FRIENDSHIP, POKéDEX ENTRY; a move's PHYSICAL / SPECIAL / STATUS.
+  POKéGEAR RADIO: < > under the dial step half a frequency (DevicePage.step).
+- Tests: ScreensTest shots dex_entry_more1-5, dex_types, dex_fire, types_*, look_menu, look_night.
+
 Next: the rest of the pass.
