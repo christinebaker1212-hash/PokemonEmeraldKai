@@ -42,6 +42,8 @@ def crystal_text(asm, label):
                                       or not any(c.islower() for c in cur)):
             pars.append(cur)   # (a new page where a sentence or a heading such as TRAINER TIPS ends; others flow on)
             cur = ''
+        if cur.endswith('- '):
+            cur = cur[:-1]   # ("cam- " / "paign": a split word with a space after its hyphen)
         if cur.endswith('-') and arg and arg.split()[0].lower().strip('.,!?') in KEEP_HYPHEN:
             cur = cur + arg   # (fire-type: a hyphenated word at the line's end)
         elif cur.endswith('-') and arg and (arg[0].islower() or cur.endswith('#-')):

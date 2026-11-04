@@ -599,3 +599,9 @@ static const struct MenuAction sKaiMulti_ACADEMY_BLACKBOARD[] = {
     {(const u8 []) _("FRZ")},
     {(const u8 []) _("QUIT")},
 };
+static const struct MenuAction sKaiMulti_GOLDENROD_TUTOR[] = {
+    {(const u8 []) _("FLAMETHROWER")},
+    {(const u8 []) _("THUNDERBOLT")},
+    {(const u8 []) _("ICE BEAM")},
+    {(const u8 []) _("CANCEL")},
+};

@@ -4875,3 +4875,11 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
     of our own start at KAI_FIRST 240 (gen_multichoice.py checks the stock ids; touch src/script_menu.c after).
   - POKéMON in houses are OBJ_EVENT_GFX_MON_FIRST + dex objects with their cry and Crystal's line (KURT's and AZALEA's
     SLOWPOKE on FLAG_QZ_0x1085, until the WELL is saved).
+- 1.93.0 (the audit's batch E, JOHTO, third part):
+  - GOLDENROD's move tutor (Crystal's MoveTutorScript): FLAG_JOHTO_HIDE_GOLDENROD_TUTOR (LEAGUE + COIN CASE +
+    Wednesday / Saturday, mp_region.c MP_JohtoWeekdayPeople), FLAG_DAILY_JOHTO_TUTOR 0x928, MULTI_KAI_GOLDENROD_TUTOR;
+    the moves are TUTOR_MOVE_TM_FLAMETHROWER / THUNDERBOLT / ICE_BEAM (40-42, past TUTOR_MOVE_COUNT): party_menu.c
+    GetTutorMove / CanLearnTutorMove use the TM's list, as Crystal did. Test johto_goldenrod_tutor.
+  - Qz{Johto,Kanto}TravelingEventCheck run in every JOHTO / KANTO map's ON_RESUME and no longer write VAR_RESULT: a
+    script back from the party menu (a tutor after the POKéMON forgot a move) read 0 there and took the "no" branch.
+  - fix_johto_tms.crystal_text joins Crystal's "cam- " / "paign" (a split word with a space after its hyphen).

@@ -168,7 +168,8 @@ Johto_GoldenrodCity_EventScript_83D24E1::
 Johto_GoldenrodCity_EventScript_83D24EE::
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x1016, Johto_GoldenrodCity_EventScript_83D2504
+	@ Moemon Kai: Crystal's RADIO CARD woman (pokecrystal GoldenrodCity.asm CooltrainerF2Script, docs/REGIONS_AUDIT.md 144)
+	goto_if_set FLAG_JOHTO_RADIO_CARD, Johto_GoldenrodCity_EventScript_83D2504
 	msgbox Johto_GoldenrodCity_Text_83D262B, MSGBOX_DEFAULT
 	closemessage
 	release
@@ -266,14 +267,16 @@ Johto_GoldenrodCity_Text_83D25E2::
 	.string "headache.$"
 
 Johto_GoldenrodCity_Text_83D262B::
-	.string "When I went into the GAME CORNER\n"
-	.string "it was night time... How long was I\l"
-	.string "in there?!$"
+	.string "The RADIO TOWER in GOLDENROD CITY\n"
+	.string "is a landmark.\p"
+	.string "They’re running a promotional\n"
+	.string "campaign right now.\p"
+	.string "They’ll modify your POKéGEAR, so\n"
+	.string "it can also serve as a radio.$"
 
 Johto_GoldenrodCity_Text_83D267B::
-	.string "When I went into the GAME CORNER\n"
-	.string "it was day time... How long was I\l"
-	.string "in there?!$"
+	.string "Oh, your POKéGEAR works as a\n"
+	.string "radio!$"
 
 Johto_GoldenrodCity_Text_83D26FE::
 	.string "They built the new RADIO TOWER\n"
@@ -303,8 +306,8 @@ Johto_GoldenrodCity_Text_83D2901::
 	.string "He can even rename them.$"
 
 Johto_GoldenrodCity_Text_83D2948::
-	.string "Whew! This town is so big,\n"
-	.string "I can’t find anything at all.$"
+	.string "Whew! This is one big town. I\n"
+	.string "don’t know where anything is.$"
 
 Johto_GoldenrodCity_Text_83D2981::
 	.string "So this is the RADIO TOWER…$"
@@ -370,3 +373,133 @@ Johto_GoldenrodCity_Text_83D2C68::
 Johto_GoldenrodCity_Text_83D2C7D::
 	.string "Blooming Beautiful FLOWER SHOP$"
 
+
+@ Moemon Kai: Crystal's GOLDENROD CITY sign (docs/REGIONS_AUDIT.md 144)
+Johto_GoldenrodCity_EventScript_CitySign::
+	msgbox Johto_GoldenrodCity_Text_CitySign, MSGBOX_SIGN
+	end
+
+@ Moemon Kai: Crystal's move tutor (pokecrystal GoldenrodCity.asm MoveTutorScript, docs/REGIONS_AUDIT.md 144): after the
+@ LEAGUE, with a COIN CASE, Wednesdays and Saturdays (FLAG_JOHTO_HIDE_GOLDENROD_TUTOR, mp_region.c
+@ MP_JohtoWeekdayPeople); FLAMETHROWER, THUNDERBOLT or ICE BEAM for 4000 coins to a POKéMON that learns the TM, then he
+@ goes into the GAME CORNER for the day (FLAG_DAILY_JOHTO_TUTOR)
+Johto_GoldenrodCity_EventScript_MoveTutor::
+	lock
+	faceplayer
+	msgbox Johto_GoldenrodCity_Text_TutorAsk, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Johto_GoldenrodCity_EventScript_TutorRefused
+	showcoinsbox 0, 0
+	msgbox Johto_GoldenrodCity_Text_TutorCost, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Johto_GoldenrodCity_EventScript_TutorRefused2
+	checkcoins VAR_TEMP_1
+	goto_if_lt VAR_TEMP_1, 4000, Johto_GoldenrodCity_EventScript_TutorNoCoins
+	msgbox Johto_GoldenrodCity_Text_TutorWhich, MSGBOX_DEFAULT
+	multichoice 0, 0, MULTI_KAI_GOLDENROD_TUTOR, FALSE
+	switch VAR_RESULT
+	case 0, Johto_GoldenrodCity_EventScript_TutorFlamethrower
+	case 1, Johto_GoldenrodCity_EventScript_TutorThunderbolt
+	case 2, Johto_GoldenrodCity_EventScript_TutorIceBeam
+	goto Johto_GoldenrodCity_EventScript_TutorBBut
+Johto_GoldenrodCity_EventScript_TutorFlamethrower::
+	setvar VAR_0x8005, TUTOR_MOVE_TM_FLAMETHROWER
+	goto Johto_GoldenrodCity_EventScript_TutorTeach
+Johto_GoldenrodCity_EventScript_TutorThunderbolt::
+	setvar VAR_0x8005, TUTOR_MOVE_TM_THUNDERBOLT
+	goto Johto_GoldenrodCity_EventScript_TutorTeach
+Johto_GoldenrodCity_EventScript_TutorIceBeam::
+	setvar VAR_0x8005, TUTOR_MOVE_TM_ICE_BEAM
+Johto_GoldenrodCity_EventScript_TutorTeach::
+	hidecoinsbox 0, 0
+	call MoveTutor_EventScript_OpenPartyMenu
+	goto_if_eq VAR_RESULT, 0, Johto_GoldenrodCity_EventScript_TutorBBut
+	msgbox Johto_GoldenrodCity_Text_TutorMadeIt, MSGBOX_DEFAULT
+	removecoins 4000
+	showcoinsbox 0, 0
+	playse SE_SHOP
+	waitse
+	msgbox Johto_GoldenrodCity_Text_TutorFarewell, MSGBOX_DEFAULT
+	hidecoinsbox 0, 0
+	closemessage
+	setflag FLAG_DAILY_JOHTO_TUTOR
+	goto_if_eq VAR_FACING, DIR_WEST, Johto_GoldenrodCity_EventScript_TutorAround
+	applymovement VAR_LAST_TALKED, Johto_GoldenrodCity_Movement_TutorToGameCorner
+	goto Johto_GoldenrodCity_EventScript_TutorInside
+Johto_GoldenrodCity_EventScript_TutorAround::
+	applymovement VAR_LAST_TALKED, Johto_GoldenrodCity_Movement_TutorAroundToGameCorner
+Johto_GoldenrodCity_EventScript_TutorInside::
+	waitmovement 0
+	playse SE_EXIT
+	removeobject VAR_LAST_TALKED
+	setflag FLAG_JOHTO_HIDE_GOLDENROD_TUTOR
+	release
+	end
+Johto_GoldenrodCity_EventScript_TutorRefused::
+	msgbox Johto_GoldenrodCity_Text_TutorAww, MSGBOX_DEFAULT
+	release
+	end
+Johto_GoldenrodCity_EventScript_TutorRefused2::
+	hidecoinsbox 0, 0
+	msgbox Johto_GoldenrodCity_Text_TutorTooBad, MSGBOX_DEFAULT
+	release
+	end
+Johto_GoldenrodCity_EventScript_TutorNoCoins::
+	hidecoinsbox 0, 0
+	msgbox Johto_GoldenrodCity_Text_TutorNoCoins, MSGBOX_DEFAULT
+	release
+	end
+Johto_GoldenrodCity_EventScript_TutorBBut::
+	hidecoinsbox 0, 0
+	msgbox Johto_GoldenrodCity_Text_TutorBBut, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_GoldenrodCity_Movement_TutorToGameCorner:
+	walk_right
+	walk_right
+	walk_up
+	step_end
+
+Johto_GoldenrodCity_Movement_TutorAroundToGameCorner:
+	walk_down
+	walk_right
+	walk_right
+	walk_up
+	walk_up
+	step_end
+
+Johto_GoldenrodCity_Text_CitySign::
+	.string "GOLDENROD CITY\p"
+	.string "The Festive City of Opulent Charm$"
+
+Johto_GoldenrodCity_Text_TutorAsk::
+	.string "I can teach your MOéMON amazing\n"
+	.string "moves if you’d like.\p"
+	.string "Should I teach a new move?$"
+
+Johto_GoldenrodCity_Text_TutorCost::
+	.string "It will cost you 4000 coins. Okay?$"
+
+Johto_GoldenrodCity_Text_TutorWhich::
+	.string "Wahahah! You won’t regret it!\p"
+	.string "Which move should I teach?$"
+
+Johto_GoldenrodCity_Text_TutorAww::
+	.string "Aww… But they’re amazing…$"
+
+Johto_GoldenrodCity_Text_TutorTooBad::
+	.string "Hm, too bad. I’ll have to get some\n"
+	.string "cash from home…$"
+
+Johto_GoldenrodCity_Text_TutorMadeIt::
+	.string "If you understand what’s so\n"
+	.string "amazing about this move, you’ve\l"
+	.string "made it as a trainer.$"
+
+Johto_GoldenrodCity_Text_TutorFarewell::
+	.string "Wahahah! Farewell, kid!$"
+
+Johto_GoldenrodCity_Text_TutorBBut::
+	.string "B-but…$"
+
+Johto_GoldenrodCity_Text_TutorNoCoins::
+	.string "…You don’t have enough coins here…$"

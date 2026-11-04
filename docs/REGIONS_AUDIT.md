@@ -2,7 +2,7 @@
 
 The audit compared every KANTO map with FireRed and every JOHTO map with Crystal (findings, with the original's and the
 game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided each of the 157 cases below (158 was added by the user later). Status:
-[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04); 1.92.0: cases 52, 63, 91-95, 131-134, 136, 143 and 148, and the first part of 138 (POKéMON in houses, ELM's lab signs, small lines)). Rules the user set with these decisions:
+[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04); 1.92.0: cases 52, 63, 91-95, 131-134, 136, 143 and 148, and the first part of 138 (POKéMON in houses, ELM's lab signs, small lines); 1.93.0: case 144). Rules the user set with these decisions:
 
 - **JOHTO is strictly Crystal** (case 116): HGSS-flavoured events Quetzal added are removed; where this file or
   docs/REGIONS_TODO.md said "HGSS ranks above Quetzal", Crystal alone is the reference now.
@@ -158,7 +158,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **141. [J2-16]** BUENA's PASSWORD show can't be played (no BLUE CARD, no points, no prize desk): **RESTORE the original**
 - [ ] **142. [J2-17]** GAME CORNER's TM prize counter is missing: **RESTORE the original**
 - [x] **143. [J2-18]** DEPT. STORE 5F's Sunday RETURN / FRUSTRATION lady is missing, though a shopper still talks about her: **RESTORE the original**
-- [ ] **144. [J2-24]** Crystal's GOLDENROD move tutor, city sign and RADIO CARD lady are missing: **RESTORE the original**
+- [x] **144. [J2-24]** Crystal's GOLDENROD move tutor, city sign and RADIO CARD lady are missing: **RESTORE the original**
 - [ ] **145. [J2-25]** GOLDENROD UNDERGROUND: haircut brothers and the bargain merchant missing; Quetzal shops and a KIMONO GIRL scene added: **RESTORE the original**
 - [ ] **146. [J2-30]** CIANWOOD's PHOTO STUDIO and POKé SEER are missing; an HGSS-style bells lady in their place: **RESTORE the original**
 - [x] **147. [J3-21]** MOVE DELETER missing in BLACKTHORN ("MOVE BROS' HOUSE" is empty): **RESTORE the original**

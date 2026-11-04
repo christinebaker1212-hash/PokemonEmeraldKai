@@ -2169,4 +2169,11 @@ void MP_JohtoWeekdayPeople(void)
         FlagClear(FLAG_JOHTO_HIDE_DEPT_LADY);
     else
         FlagSet(FLAG_JOHTO_HIDE_DEPT_LADY);
+    // GOLDENROD's move tutor (Crystal's GoldenrodCityMoveTutorCallback): the LEAGUE beaten, a COIN CASE, Wednesdays
+    // and Saturdays, until he has taught that day
+    if (MP_Region_Cleared(REGION_JOHTO) && CheckBagHasItem(ITEM_COIN_CASE, 1) && (today == 3 || today == 6)
+     && !FlagGet(FLAG_DAILY_JOHTO_TUTOR))
+        FlagClear(FLAG_JOHTO_HIDE_GOLDENROD_TUTOR);
+    else
+        FlagSet(FLAG_JOHTO_HIDE_GOLDENROD_TUTOR);
 }

@@ -37,6 +37,8 @@ KAI_FIRST = 240   # past Kai's own menus
 KAI_MENUS = [
     # EARL's ACADEMY blackboard (pokecrystal maps/EarlsPokemonAcademy.asm BlackboardMenuHeader)
     ('ACADEMY_BLACKBOARD', ['PSN', 'PAR', 'SLP', 'BRN', 'FRZ', 'QUIT']),
+    # GOLDENROD's move tutor (pokecrystal maps/GoldenrodCity.asm MoveTutorScript .MenuData)
+    ('GOLDENROD_TUTOR', ['FLAMETHROWER', 'THUNDERBOLT', 'ICE BEAM', 'CANCEL']),
 ]
 
 

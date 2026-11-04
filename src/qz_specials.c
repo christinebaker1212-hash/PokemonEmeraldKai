@@ -1119,8 +1119,10 @@ u16 QzSetIcefallCaveCrackedIceMetatiles(void)
     MP_SetIcefallCaveCrackedIceMetatiles();
     return 0;
 }
-u16 QzJohtoTravelingEventCheck(void) { return gSpecialVar_Result = QzJohtoTravelingEventCheck_(); }
-u16 QzKantoTravelingEventCheck(void) { return gSpecialVar_Result = QzKantoTravelingEventCheck_(); }
+// (These two run in every JOHTO / KANTO map's ON_RESUME script: they leave VAR_RESULT alone, or a script coming back
+// from a menu, such as a move tutor's party menu, would lose what the menu answered; specialvar still gets the value)
+u16 QzJohtoTravelingEventCheck(void) { return QzJohtoTravelingEventCheck_(); }
+u16 QzKantoTravelingEventCheck(void) { return QzKantoTravelingEventCheck_(); }
 u16 QzPlayerNotAtTrainerHillEntrance(void) { return gSpecialVar_Result = QzPlayerNotAtTrainerHillEntrance_(); }
 u16 QzPickNpcFlavourLine(void) { return gSpecialVar_Result = QzPickNpcFlavourLine_(); }
 u16 QzBufferLabQuestChecklist(void) { return gSpecialVar_Result = QzBufferLabQuestChecklist_(); }
