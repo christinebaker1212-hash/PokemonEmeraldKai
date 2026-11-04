@@ -2,7 +2,7 @@
 
 The audit compared every KANTO map with FireRed and every JOHTO map with Crystal (findings, with the original's and the
 game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided each of the 157 cases below. Status:
-[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port). Rules the user set with these decisions:
+[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER)). Rules the user set with these decisions:
 
 - **JOHTO is strictly Crystal** (case 116): HGSS-flavoured events Quetzal added are removed; where this file or
   docs/REGIONS_TODO.md said "HGSS ranks above Quetzal", Crystal alone is the reference now.
@@ -62,15 +62,15 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **45. [J2-12, J3-8, J3-9]** JOHTO's leaders promise rematches at a FIGHTING DOJO that has none: **RESTORE the original**
 - [ ] **46. [K2-18, K3-11, K4-14]** POKéMON CENTER 2F attendants explain Quetzal's MPLAYER, cheats and NUZLOCKE: **RESTORE the original**
 - [ ] **47. [K1-20, K3-9, J2-3, J3-36]** DAY-CARE "through the PC": KANTO's two are incense shops, JOHTO has none: **RESTORE the original**
-- [ ] **48. [K1-19, J2-9]** BIKE SHOPs talk about MACH / ACRO modes: **RESTORE the original**
+- [x] **48. [K1-19, J2-9]** BIKE SHOPs talk about MACH / ACRO modes: **RESTORE the original**
 - [ ] **49. [K1-14, K2-10, K3-12, K4-4, K4-13, J1-8, J3-37]** "Moves are managed from the team menu / summary" lines (Quetzal's tutors, Kai can't): **RESTORE the original**
 - [ ] **50. [J1-4, J2-10, J2-11, J3-38]** Words about travel between regions that don't match Kai's: **RESTORE the original**
-- [ ] **51. [K1-12]** DAISY: Quetzal's "no friendship" line, a TOWN MAP she never gives, no grooming: **RESTORE the original**
+- [x] **51. [K1-12]** DAISY: Quetzal's "no friendship" line, a TOWN MAP she never gives, no grooming: **RESTORE the original**
 - [ ] **52. [J1-5]** EARL's ACADEMY teaches Quetzal's rules; Crystal's lessons are gone: **RESTORE the original**
 - [ ] **53. [J1-6]** KURT's first gift is a FAST BALL with "I make BALLS from BERRIES ... batches of 5": **RESTORE the original**
 - [ ] **54. [J1-7]** AZALEA GYM's words describe Quetzal's CUT-as-BUG move and a different team: **RESTORE the original**
 - [ ] **55. [J2-7]** The HAPPINESS RATER is replaced by Quetzal's rules text, which is false in Kai: **RESTORE the original**
-- [ ] **56. [K1-17, K2-13, K3-20, K4-18]** Hidden and ball PP UPs / PP MAXes turned into NUGGETs: **RESTORE the original**
+- [x] **56. [K1-17, K2-13, K3-20, K4-18]** Hidden and ball PP UPs / PP MAXes turned into NUGGETs: **RESTORE the original**
 - [ ] **57. [K4-12, J1-22, J3-24]** Trainers' teams (leaders, ELITE FOUR, CHAMPION, routes) are Quetzal's: **RESTORE the original**
 - [ ] **58. [K1-16, K2-14, K4-9, J1-15, J2-19, J3-17]** In-game trades are Quetzal's, not FireRed's / Crystal's: **RESTORE the original**
 - [ ] **59. [K1-8, K4-15, J3-12, J1-31]** Marts sell by badge count (Quetzal's lists), not each town's own stock: **RESTORE the original**
@@ -81,27 +81,27 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **64. [K1-9, K1-10, K2-15]** OAK's POKéDEX rating and the NATIONAL DEX come Quetzal's way: **RESTORE the original**
 - [ ] **65. [J2-13, J1-21]** The legendary story is Quetzal's HGSS-style KIMONO GIRL chain: **RESTORE the original**
 - [ ] **66. [K1-7]** Quetzal's empty "MT. MOON ROUTE 4 cave": **RESTORE the original**
-- [ ] **67. [K1-15]** GIOVANNI stays in his GYM after the battle: **RESTORE the original**
-- [ ] **68. [K1-23]** CERULEAN rival gives a LUCKY EGG with Quetzal's lines: **RESTORE the original**
-- [ ] **69. [K1-24]** Small Quetzal rewrites of FireRed's words: **RESTORE the original**
-- [ ] **70. [K1-26]** ROUTE 22's gate north to JOHTO (Quetzal's) - consistent with Gen 2 geography: **FIX it, keep the idea** - _Crossing regions must match Kai implementation._
+- [x] **67. [K1-15]** GIOVANNI stays in his GYM after the battle: **RESTORE the original**
+- [x] **68. [K1-23]** CERULEAN rival gives a LUCKY EGG with Quetzal's lines: **RESTORE the original**
+- [x] **69. [K1-24]** Small Quetzal rewrites of FireRed's words: **RESTORE the original**
+- [x] **70. [K1-26]** ROUTE 22's gate north to JOHTO (Quetzal's) - consistent with Gen 2 geography: **FIX it, keep the idea** - _Crossing regions must match Kai implementation._
 - [ ] **71. [K2-5]** CELADON DEPT. STORE: Quetzal's floors, signs, clerks' words and menus over FireRed's shop lists: **RESTORE the original**
-- [ ] **72. [K2-9]** The CELADON game designer's diploma words are Quetzal's (and don't match the check): **RESTORE the original**
-- [ ] **73. [K2-16]** ROUTE 12 FISHING HOUSE: MAGIKARP size record replaced by "show me one": **RESTORE the original**
+- [x] **72. [K2-9]** The CELADON game designer's diploma words are Quetzal's (and don't match the check): **RESTORE the original**
+- [x] **73. [K2-16]** ROUTE 12 FISHING HOUSE: MAGIKARP size record replaced by "show me one": **RESTORE the original**
 - [ ] **74. [K2-17]** CYCLING ROAD words rewritten (get off the bike, SURF, DexNav), FRLG's slope missing: **RESTORE the original**
-- [ ] **75. [K2-20]** S.S. ANNE 1F ROOM 6: Quetzal's bed, DARKRAI dream and "leave the ship" shortcut: **RESTORE the original**
-- [ ] **76. [K2-25]** ROCKET HIDEOUT B2F item balls moved: **RESTORE the original**
-- [ ] **77. [K3-13]** WATER LABYRINTH's TOGEPI egg is a hatched Lv. 5 TOGEPI; the friendship check and DAISY lines are gone: **RESTORE the original**
-- [ ] **78. [K3-14]** TWO ISLAND's shop sells AURORA / MYSTIC TICKETs instead of FireRed's growing shop: **RESTORE the original**
-- [ ] **79. [K3-15]** BILL's METEORITE became a "rock sample": **RESTORE the original**
-- [ ] **80. [K3-17]** SIX ISLAND's HERACROSS size contest became "show one, get a gift": **RESTORE the original**
-- [ ] **81. [K3-18]** SEVEN ISLAND's old man hands out BERRIES; FireRed's man and his box are gone: **RESTORE the original**
-- [ ] **82. [K3-19]** MELOETTA joins the CHANSEY Dance: **RESTORE the original**
-- [ ] **83. [K3-25]** The SEAGALLOP uses Quetzal's destination picker and gates: **RESTORE the original**
-- [ ] **84. [K3-27]** MOLTRES's cry line: **RESTORE the original**
-- [ ] **85. [K3-29]** SIX ISLAND mart's woman wants REPELS, not MAIL: **RESTORE the original**
-- [ ] **86. [K3-30]** RUIN VALLEY's braille door asks "Use CUT on the door?": **RESTORE the original**
-- [ ] **87. [K3-32]** kanto_shared.inc: the other Quetzal-only shared pieces: **RESTORE the original**
+- [x] **75. [K2-20]** S.S. ANNE 1F ROOM 6: Quetzal's bed, DARKRAI dream and "leave the ship" shortcut: **RESTORE the original**
+- [x] **76. [K2-25]** ROCKET HIDEOUT B2F item balls moved: **RESTORE the original**
+- [x] **77. [K3-13]** WATER LABYRINTH's TOGEPI egg is a hatched Lv. 5 TOGEPI; the friendship check and DAISY lines are gone: **RESTORE the original**
+- [x] **78. [K3-14]** TWO ISLAND's shop sells AURORA / MYSTIC TICKETs instead of FireRed's growing shop: **RESTORE the original**
+- [x] **79. [K3-15]** BILL's METEORITE became a "rock sample": **RESTORE the original**
+- [x] **80. [K3-17]** SIX ISLAND's HERACROSS size contest became "show one, get a gift": **RESTORE the original**
+- [x] **81. [K3-18]** SEVEN ISLAND's old man hands out BERRIES; FireRed's man and his box are gone: **RESTORE the original**
+- [x] **82. [K3-19]** MELOETTA joins the CHANSEY Dance: **RESTORE the original**
+- [x] **83. [K3-25]** The SEAGALLOP uses Quetzal's destination picker and gates: **RESTORE the original**
+- [x] **84. [K3-27]** MOLTRES's cry line: **RESTORE the original**
+- [x] **85. [K3-29]** SIX ISLAND mart's woman wants REPELS, not MAIL: **RESTORE the original**
+- [x] **86. [K3-30]** RUIN VALLEY's braille door asks "Use CUT on the door?": **RESTORE the original**
+- [x] **87. [K3-32]** kanto_shared.inc: the other Quetzal-only shared pieces: **RESTORE the original**
 - [ ] **88. [K4-6]** The POKéMON TRAINER FAN CLUB is Quetzal's "KANTO EXPLORERS' CLUB" of hint people, some describing things Kai doesn't have: **RESTORE the original**
 - [ ] **89. [K4-20]** A few trainers' lines rewritten by Quetzal: **RESTORE the original**
 - [ ] **90. [J1-11]** ROUTE 32's guard demands Elder LI; Crystal only wants the ZEPHYRBADGE: **RESTORE the original**
@@ -133,17 +133,17 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **116. [J3-35]** HGSS-flavoured events kept from Quetzal (for the record: HGSS ranks above Quetzal): **REMOVE it** - _We must stick to strictly Crystal._
 - [ ] **117. [J3-39]** Shared-script inventory (what is Quetzal-only and its state): **RESTORE the original**
 - [ ] **118. [K2-11, J2-8]** The NAME RATER doesn't rate or rename (KANTO's removed, JOHTO's talks about RADIANT): **RESTORE the original**
-- [ ] **119. [K1-2]** ROCK TUNNEL isn't dark: **RESTORE the original**
+- [x] **119. [K1-2]** ROCK TUNNEL isn't dark: **RESTORE the original**
 - [ ] **120. [K1-13]** VIRIDIAN's old man never shows how to catch a POKéMON: **RESTORE the original**
 - [ ] **121. [K1-25]** OAK's first-battle advice is missing from the lab battle: **KEEP as it is** - _A bit annoying. Don't restore it._
 - [ ] **122. [K2-2]** VERMILION's construction man and his MACHOP are missing: **RESTORE the original**
-- [ ] **123. [K2-7]** The COUNTER move tutor (Dept. Store 3F) is missing: **RESTORE the original**
+- [x] **123. [K2-7]** The COUNTER move tutor (Dept. Store 3F) is missing: **RESTORE the original**
 - [ ] **124. [K2-23]** GAME CORNER photo printer "out of service": **RESTORE the original**
 - [ ] **125. [K3-16]** The JOYFUL GAME CORNER's games are gone (a rest area now): **RESTORE the original**
 - [ ] **126. [K3-21]** FOUR ISLAND's STICKER MAN is gone: **RESTORE the original**
 - [ ] **127. [K3-23]** The first SEVII trip doesn't disable the PC: **KEEP as it is**
 - [ ] **128. [K3-24]** No roaming beast after the SAPPHIRE: **KEEP as it is**
-- [ ] **129. [K3-28]** FIVE / SEVEN ISLAND's POKéMON JOURNALs are missing: **RESTORE the original**
+- [x] **129. [K3-28]** FIVE / SEVEN ISLAND's POKéMON JOURNALs are missing: **RESTORE the original**
 - [ ] **130. [K4-11]** ELITE FOUR rematches: the rematch words come right after the first win, FireRed's stronger rematch teams are missing: **RESTORE the original**
 - [ ] **131. [J1-12]** JOHTO has no hidden items at all: **RESTORE the original**
 - [ ] **132. [J1-14]** Rival battles in CHERRYGROVE and AZALEA can't be lost without whiting out; his "loss" line is gone: **RESTORE the original**
@@ -164,11 +164,11 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **147. [J3-21]** MOVE DELETER missing in BLACKTHORN ("MOVE BROS' HOUSE" is empty): **RESTORE the original**
 - [ ] **148. [J3-27]** HALL OF FAME doesn't send PROF. ELM's S.S. TICKET call: **RESTORE the original**
 - [ ] **149. [J1-32, J2-36]** Dead NUZLOCKE branches in gift scripts: **REMOVE it**
-- [ ] **150. [K1-18]** CERULEAN's BERRY POWDER man gives a NUGGET while saying "BERRY SWEET": **RESTORE the original**
-- [ ] **151. [K2-24]** Leftover Quetzal words no script uses: **RESTORE the original**
-- [ ] **152. [K3-31]** "Your BERRY POUCH is full.": **FIX it, keep the idea**
-- [ ] **153. [K4-8]** Gym leaders' words around FireRed's TMs still describe Quetzal's held items: **FIX it, keep the idea**
-- [ ] **154. [K4-19]** CINNABAR GYM's last quiz question is reworded: **RESTORE the original**
-- [ ] **155. [K4-22]** Dead Quetzal leftovers (no effect in game, clean-up): **RESTORE the original**
+- [x] **150. [K1-18]** CERULEAN's BERRY POWDER man gives a NUGGET while saying "BERRY SWEET": **RESTORE the original**
+- [x] **151. [K2-24]** Leftover Quetzal words no script uses: **RESTORE the original**
+- [x] **152. [K3-31]** "Your BERRY POUCH is full.": **FIX it, keep the idea**
+- [x] **153. [K4-8]** Gym leaders' words around FireRed's TMs still describe Quetzal's held items: **FIX it, keep the idea**
+- [x] **154. [K4-19]** CINNABAR GYM's last quiz question is reworded: **RESTORE the original**
+- [x] **155. [K4-22]** Dead Quetzal leftovers (no effect in game, clean-up): **RESTORE the original**
 - [ ] **156. [J3-31]** Small text bugs in J3 maps and shared scripts: **FIX it, keep the idea**
 - [ ] **157. [J3-32]** RAGECANDYBAR seller and ROUTE 43's MAHOGANY gate officer follow the RADIO TOWER instead of the hideout: **FIX it, keep the idea**

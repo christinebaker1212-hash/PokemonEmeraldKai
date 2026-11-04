@@ -4819,3 +4819,23 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
     DRAGON'S DEN B1F on Tuesdays / Thursdays (FLAG_JOHTO_HIDE_DEN_RIVAL); special MP_JohtoWeekday. Test johto_rival_days.
   - Also: LAKE OF RAGE's RED GYARADOS shiny (script_pokemon_util.c MP_MakeScriptedWildShiny), Quetzal's viewpoint pans
     gone, MAHOGANY's old man by VAR_QZ_0x500C, BAOBA (Quetzal's SAFARI quest) gone until case 62's SAFARI ZONE.
+- 1.90.0 (the audit's batch C, KANTO):
+  - tools/quetzal_port/firered_words.py MAP LABEL [OURS] (FireRed's text, POKéMON as MOéMON, POKéDEX as MOéDEX, ' as
+    ’; a local pokefirered under POKEFIRERED_DIR or GitHub) and restore_words.py with its list restore_words.txt
+    (OUR_MAP / data path, OUR_LABEL, fr|gsc, THEIR_MAP, THEIR_LABEL): every text put back is listed there, by case.
+  - FireRed's move people on Emerald's specials: FUCHSIA's MOVE DELETER, the COPYCAT's MIMIC (a POKé DOLL), TWO
+    ISLAND's MOVE MANIAC (MULTI_QZ_0x6D mushroom menu), CAPE BRINK's starter tutor (TUTOR_MOVE_FRENZY_PLANT /
+    BLAST_BURN / HYDRO_CANNON 30-32: party_menu.c CanLearnTutorMove gives them to VENUSAUR / CHARIZARD / BLASTOISE
+    only; qz_specials.c MP_CapeBrinkLeadMove / MP_CapeBrinkTaught, flags 0x2226-0x2229), CELADON 3F's COUNTER.
+    Tests kanto_move_people, kanto_cape_brink.
+  - DAISY: the TOWN MAP (item_use.c ItemUseOutOfBattle_TownMap: the region map from the BAG or registered), her rest
+    line, grooming after KANTO's LEAGUE every 500 steps (VAR_KANTO_MASSAGE_STEPS, MP_DaisyMassage) and her
+    friendship reading. CERULEAN's BIKE SHOP (MULTI_QZ_0x57 is FireRed's BICYCLE ¥1,000,000 row). Test kanto_daisy_bike.
+  - Size records on Emerald's code: pokemon_size_record.c Get/CompareMagikarpSize, Get/CompareHeracrossSize (vars
+    VAR_KANTO_MAGIKARP_SIZE / VAR_KANTO_HERACROSS_SIZE). Tests kanto_size_records, kanto_size_heracross.
+  - RUIN VALLEY: fldeff_cut.c SetUpFieldMove_Cut asks qz_specials.c MP_RuinValleyCutCheck first; CUT from the party
+    menu below the door opens it (debug `mp usecut`; test kanto_ruin_valley_cut). ROCK TUNNEL requires FLASH.
+  - GIOVANNI leaves VIRIDIAN's GYM after his farewell (FLAG_KANTO_HIDE_GYM_GIOVANNI; debug `mp beattrainer ID`; test
+    kanto_giovanni_leaves, with FIVE ISLAND's POKéMON JOURNAL). The WATER LABYRINTH's TOGEPI EGG (test
+    kanto_togepi_egg). The SEAGALLOP: FireRed's prompt, VERMILION once BILL's first trip is over, ISLANDS 4-7 by the
+    RAINBOW PASS alone. TWO ISLAND's growing shop (the tickets in its last list). MELOETTA out of the CHANSEY dance.
