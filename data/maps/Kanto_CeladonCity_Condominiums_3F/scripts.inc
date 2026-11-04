@@ -79,18 +79,17 @@ Kanto_CeladonCity_Condominiums_3F_Text_84463C7::
 	.string "Oh, and SABRINA, I like her!$"
 
 Kanto_CeladonCity_Condominiums_3F_Text_8446422::
+	.string "Is that right?\p"
 	.string "I’m the game designer!\p"
-	.string "Register every NATIONAL MOéDEX\n"
-	.string "species as caught in KANTO.\p"
-	.string "Catches from other regions don’t\n"
-	.string "count toward this diploma.\p"
-	.string "Come see me when you’re done!$"
+	.string "Filling up your MOéDEX is tough,\n"
+	.string "but don’t quit!\p"
+	.string "When you finish, come tell me!$"
 
 Kanto_CeladonCity_Condominiums_3F_Text_84464CF::
-	.string "You’ve completed the NATIONAL\n"
-	.string "MOéDEX with your KANTO catches!\p"
-	.string "Congratulations!\n"
-	.string "This diploma is for you!$"
+	.string "Wow! Excellent!\n"
+	.string "You completed your MOéDEX!\l"
+	.string "Congratulations!\l"
+	.string "…$"
 
 Kanto_CeladonCity_Condominiums_3F_Text_8446538::
 	.string "It’s the game program! Messing with\n"

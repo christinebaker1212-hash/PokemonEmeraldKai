@@ -931,7 +931,7 @@ Kanto_CinnabarIsland_Gym_Text_8449D48::
 	.string "are not identical?$"
 
 Kanto_CinnabarIsland_Gym_Text_8449D7E::
-	.string "The move TOMBSTONY exists?$"
+	.string "TM28 contains TOMBSTONY?$"
 
 Kanto_CinnabarIsland_Gym_Text_8449D99::
 	.string "You’re absolutely correct!\p"

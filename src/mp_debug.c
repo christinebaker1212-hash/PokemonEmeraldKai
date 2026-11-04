@@ -1714,6 +1714,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 SetMonMoveSlot(&gPlayerParty[slot], m[i], i);
             printf("[test] moves: slot %d = %d %d %d %d\n", slot, m[0], m[1], m[2], m[3]);
         }
+        else if (n == 1 && slot >= 0 && slot < PARTY_SIZE)   // (no moves: the ones it knows)
+            printf("[test] knows: slot %d = %d %d %d %d\n", slot, (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1),
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE2), (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE3),
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE4));
     }
     else if (strcmp(cmd, "battlerhp") == 0)
     {

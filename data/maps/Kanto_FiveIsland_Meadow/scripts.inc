@@ -64,7 +64,7 @@ Kanto_FiveIsland_Meadow_EventScript_846C14F::
 
 @ Kanto_FiveIsland_Meadow object 7 (local id 7, gfx 0x3F0E) at 3,22
 Kanto_FiveIsland_Meadow_EventScript_846C15C::
-	setorcopyvar VAR_0x8000, ITEM_NUGGET
+	setorcopyvar VAR_0x8000, ITEM_PP_UP
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

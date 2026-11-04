@@ -241,7 +241,7 @@ static const struct MenuAction sQzMulti_56[] = {
     {(const u8 []) _("EXIT")},
 };
 static const struct MenuAction sQzMulti_57[] = {
-    {(const u8 []) _("BICYCLE 1000000")},
+    {(const u8 []) _("BICYCLE{CLEAR_TO 0x49}{FONT_SMALL}¥1,000,000")},
     {(const u8 []) _("NO THANKS")},
 };
 static const struct MenuAction sQzMulti_58[] = {

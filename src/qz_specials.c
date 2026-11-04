@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "global.h"
 #include "constants/moves.h"
+#include "constants/party_menu.h"
 #include "credits.h"
 #include "event_data.h"
 #include "load_save.h"
@@ -2090,4 +2091,62 @@ void MP_ResortGorgeousStep(void)
         steps = 0;
     }
     VarSet(VAR_KANTO_RESORT_STEPS, steps);
+}
+
+// FireRed's IncrementMassageCooldownStepCounter / DaisyMassageServices: after KANTO's LEAGUE DAISY grooms a POKéMON
+// (friendship +3, FRIENDSHIP_EVENT_MASSAGE) once every 500 steps (walked in KANTO)
+void MP_KantoMassageStep(void)
+{
+    u16 n = VarGet(VAR_KANTO_MASSAGE_STEPS);
+    if (MP_Region_Current() == REGION_KANTO && n < 500)
+        VarSet(VAR_KANTO_MASSAGE_STEPS, n + 1);
+}
+
+void MP_DaisyMassage(void)
+{
+    struct Pokemon *mon = &gPlayerParty[gSpecialVar_0x8004];
+    u16 f = GetMonData(mon, MON_DATA_FRIENDSHIP) + 3;
+    if (f > MAX_FRIENDSHIP)
+        f = MAX_FRIENDSHIP;
+    SetMonData(mon, MON_DATA_FRIENDSHIP, &f);
+    VarSet(VAR_KANTO_MASSAGE_STEPS, 0);
+}
+
+// ---------------------------------------------------------------------------------------------------- CAPE BRINK
+// FireRed's starter tutor (pokefirered field_specials.c CapeBrinkGetMoveToTeachLeadPokemon /
+// HasLearnedAllMovesFromCapeBrinkTutor): the lead VENUSAUR / CHARIZARD / BLASTOISE at full friendship learns its
+// ultimate move once. 0x8005 = the tutor move, STR_VAR_2 its name; the taught flags are KANTO's (0x2226-0x2229).
+#define FLAG_KANTO_TUTOR_FRENZY_PLANT 0x2226
+#define FLAG_KANTO_CAPE_BRINK_ALL     0x2229
+static const u16 sCapeBrinkSpecies[] = {SPECIES_VENUSAUR, SPECIES_CHARIZARD, SPECIES_BLASTOISE};
+static const u16 sCapeBrinkMoves[] = {MOVE_FRENZY_PLANT, MOVE_BLAST_BURN, MOVE_HYDRO_CANNON};
+
+u16 MP_CapeBrinkLeadMove(void)
+{
+    u8 lead = GetLeadMonIndex(), i;
+    u16 species = GetMonData(&gPlayerParty[lead], MON_DATA_SPECIES_OR_EGG);
+    gSpecialVar_0x8007 = lead;
+    for (i = 0; i < ARRAY_COUNT(sCapeBrinkSpecies); i++)
+        if (species == sCapeBrinkSpecies[i])
+            break;
+    if (i == ARRAY_COUNT(sCapeBrinkSpecies) || GetMonData(&gPlayerParty[lead], MON_DATA_FRIENDSHIP) != 255)
+        return gSpecialVar_Result = FALSE;
+    StringCopy(gStringVar2, gMoveNames[sCapeBrinkMoves[i]]);
+    gSpecialVar_0x8005 = TUTOR_MOVE_FRENZY_PLANT + i;
+    if (FlagGet(FLAG_KANTO_TUTOR_FRENZY_PLANT + i))
+        return gSpecialVar_Result = FALSE;
+    return gSpecialVar_Result = TRUE;
+}
+
+// the move in 0x8005 taught: TRUE once all three are
+u16 MP_CapeBrinkTaught(void)
+{
+    u8 i, n = 0;
+    if (gSpecialVar_0x8005 >= TUTOR_MOVE_FRENZY_PLANT && gSpecialVar_0x8005 <= TUTOR_MOVE_HYDRO_CANNON)
+        FlagSet(FLAG_KANTO_TUTOR_FRENZY_PLANT + gSpecialVar_0x8005 - TUTOR_MOVE_FRENZY_PLANT);
+    for (i = 0; i < 3; i++)
+        n += FlagGet(FLAG_KANTO_TUTOR_FRENZY_PLANT + i);
+    if (n == 3)
+        FlagSet(FLAG_KANTO_CAPE_BRINK_ALL);
+    return gSpecialVar_Result = (n == 3);
 }

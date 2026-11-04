@@ -182,8 +182,8 @@ Kanto_SaffronCity_Gym_Text_844B8A0::
 	.string "I never foresaw this!$"
 
 Kanto_SaffronCity_Gym_Text_844B8B6::
-	.string "BUG, GHOST, and DARK moves can\n"
-	.string "threaten PSYCHIC MOéMON.$"
+	.string "PSYCHIC MOéMON fear only ghosts\n"
+	.string "and bugs!$"
 
 Kanto_SaffronCity_Gym_Text_844B8EF::
 	.string "MOéMON take on the appearance of\n"

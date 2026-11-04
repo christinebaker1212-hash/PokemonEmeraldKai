@@ -66,5 +66,5 @@ Kanto_Route2_EastBuilding_Text_844DC8E::
 	.string "of caves and dungeons.$"
 
 Kanto_Route2_EastBuilding_Text_844DCC1::
-	.string "ROCK TUNNEL is very dark.\n"
-	.string "Prepare carefully before entering.$"
+	.string "Once a MOéMON learns FLASH, you\n"
+	.string "can get through ROCK TUNNEL.$"

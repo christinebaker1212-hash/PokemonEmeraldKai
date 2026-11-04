@@ -196,7 +196,9 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
         IncrementBirthIslandRockStepCount();
         {
             void MP_ResortGorgeousStep(void);
+            void MP_KantoMassageStep(void);
             MP_ResortGorgeousStep();   // Moemon Kai: FireRed's SELPHY wish timer (qz_specials.c)
+            MP_KantoMassageStep();     // and DAISY's grooming
         }
         if (TryStartStepBasedScript(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;

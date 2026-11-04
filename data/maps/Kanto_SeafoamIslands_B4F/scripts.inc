@@ -218,4 +218,4 @@ Kanto_SeafoamIslands_B4F_Text_842A228::
 	.string "Fast current!$"
 
 Kanto_SeafoamIslands_B4F_Text_84568B9::
-	.string "Articuno!$"
+	.string "Gyaoo!$"

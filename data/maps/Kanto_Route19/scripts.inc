@@ -272,9 +272,10 @@ Kanto_Route19_Text_8437E93::
 	.string "I’m exhausted…$"
 
 Kanto_Route19_Text_8437EA2::
-	.string "When I get tired, I ride LAPRAS.\p"
-	.string "It’s so big that I can cross the\n"
-	.string "sea without getting wet.$"
+	.string "If I were to ride a MOéMON on\n"
+	.string "the sea, I’d like a LAPRAS.\p"
+	.string "LAPRAS is so big, I bet it\n"
+	.string "would keep me dry on water.$"
 
 Kanto_Route19_Text_8437EFD::
 	.string "SEA ROUTE 19\n"

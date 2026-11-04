@@ -331,16 +331,12 @@ Kanto_PewterCity_Museum_1F_Text_8440C66::
 	.string "AMBER in a clear gold color.$"
 
 Kanto_PewterCity_Museum_1F_Text_8440CA1::
-	.string "A reconstruction of Aerodactyl’s\n"
-	.string "skeleton.\p"
-	.string "This MOéMON soared through the skies\n"
-	.string "long before our cities existed.$"
+	.string "AERODACTYL Fossil\n"
+	.string "A primitive and rare MOéMON.$"
 
 Kanto_PewterCity_Museum_1F_Text_8440D12::
-	.string "A reconstruction of Kabutops’s\n"
-	.string "skeleton.\p"
-	.string "Its sharp limbs reveal the\n"
-	.string "adaptations of an ancient predator.$"
+	.string "KABUTOPS Fossil\n"
+	.string "A primitive and rare MOéMON.$"
 
 Kanto_PewterCity_Museum_1F_Text_8461841::
 	.string "MOéMON JOURNAL\p"

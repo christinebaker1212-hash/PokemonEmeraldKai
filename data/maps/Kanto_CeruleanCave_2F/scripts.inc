@@ -17,7 +17,7 @@ Kanto_CeruleanCave_2F_EventScript_846BF47::
 
 @ Kanto_CeruleanCave_2F object 1 (local id 1, gfx 0x3F0E) at 9,18
 Kanto_CeruleanCave_2F_EventScript_846BF54::
-	setorcopyvar VAR_0x8000, ITEM_NUGGET
+	setorcopyvar VAR_0x8000, ITEM_PP_UP
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

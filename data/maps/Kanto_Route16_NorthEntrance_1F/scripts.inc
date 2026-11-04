@@ -122,13 +122,12 @@ Kanto_Route16_NorthEntrance_1F_Movement_8420354:
 	step_end
 
 Kanto_Route16_NorthEntrance_1F_Text_844FDC1::
-	.string "You need a BICYCLE to enter\n"
-	.string "CYCLING ROAD.$"
+	.string "No pedestrians are allowed on\n"
+	.string "CYCLING ROAD!$"
 
 Kanto_Route16_NorthEntrance_1F_Text_844FDEB::
-	.string "You need a BICYCLE to enter.\p"
-	.string "Once inside, you can get off\n"
-	.string "your bike and explore on foot.$"
+	.string "CYCLING ROAD is a downhill course\n"
+	.string "by the sea. It’s a great ride.$"
 
 Kanto_Route16_NorthEntrance_1F_Text_844FE44::
 	.string "Excuse me!\n"

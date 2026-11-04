@@ -65,4 +65,4 @@ Kanto_MtEmber_Summit_EventScript_8413942::
 	goto Quetzal_EventScript_845951C
 
 Kanto_MtEmber_Summit_Text_84568CB::
-	.string "Moltres!$"
+	.string "Gyaoo!$"

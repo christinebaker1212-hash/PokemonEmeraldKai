@@ -1,0 +1,7 @@
+# FireRed's move people in KANTO: FUCHSIA's MOVE DELETER (THUNDERSHOCK forgotten), SAFFRON's COPYCAT teaches MIMIC
+# for a POKé DOLL, TWO ISLAND's MOVE MANIAC remembers a move for two TINYMUSHROOMS
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("[test] knows: slot 0 = 45 0 0 0" "[test] flag 8737 = 1" "[test] item 80: 0" "[test] knows: slot 0 = 84 102 0 0" "[test] item 103: 0" "[test] knows: slot 0 = 84 45 0 0")
+UNEXPECT_A=("[crash]")

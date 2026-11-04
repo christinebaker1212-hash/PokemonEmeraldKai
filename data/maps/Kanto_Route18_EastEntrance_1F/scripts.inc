@@ -117,13 +117,12 @@ Kanto_Route18_EastEntrance_1F_Movement_8420539:
 	step_end
 
 Kanto_Route18_EastEntrance_1F_Text_8450184::
-	.string "You need a BICYCLE to enter\n"
-	.string "CYCLING ROAD.$"
+	.string "You need a BICYCLE to go out on\n"
+	.string "CYCLING ROAD!$"
 
 Kanto_Route18_EastEntrance_1F_Text_84501AE::
-	.string "You need a BICYCLE to enter.\p"
-	.string "If you can use SURF, you can also\n"
-	.string "explore the water along the route.$"
+	.string "CYCLING ROAD is all uphill from\n"
+	.string "here.$"
 
 Kanto_Route18_EastEntrance_1F_Text_8450210::
 	.string "Excuse me!$"

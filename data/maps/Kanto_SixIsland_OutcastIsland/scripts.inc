@@ -74,7 +74,7 @@ Kanto_SixIsland_OutcastIsland_EventScript_845C8CD::
 
 @ Kanto_SixIsland_OutcastIsland object 7 (local id 7, gfx 0x3F0E) at 11,16
 Kanto_SixIsland_OutcastIsland_EventScript_846C176::
-	setorcopyvar VAR_0x8000, ITEM_NUGGET
+	setorcopyvar VAR_0x8000, ITEM_PP_UP
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

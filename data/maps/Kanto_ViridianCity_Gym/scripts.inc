@@ -159,8 +159,9 @@ Kanto_ViridianCity_Gym_Text_843F93A::
 	.string "a MOéMON TRAINER.\p"
 	.string "With it, you can challenge the\n"
 	.string "MOéMON LEAGUE.\p"
-	.string "Also, take this gift for\n"
-	.string "your LEAGUE challenge.$"
+	.string "Also, take this TM.\p"
+	.string "Consider it a gift for your MOéMON\n"
+	.string "LEAGUE challenge.$"
 
 Kanto_ViridianCity_Gym_Text_843FA0F::
 	.string "{PLAYER} received\n"

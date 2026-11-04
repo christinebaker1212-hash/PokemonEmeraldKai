@@ -684,3 +684,6 @@ gSpecials::
 	def_special QzNameKantoRival   @ Moemon Kai: FireRed names KANTO's rival at OAK's (qz_specials.c)
 	def_special MP_JohtoWeekday
 	def_special MP_JohtoGsBallReady
+	def_special MP_CapeBrinkLeadMove
+	def_special MP_CapeBrinkTaught
+	def_special MP_DaisyMassage

@@ -1,0 +1,6 @@
+# TWO ISLAND's CAPE BRINK: FireRed's starter tutor teaches a lead VENUSAUR at full friendship FRENZY PLANT, once
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=3:50"
+EXPECT_A=("[test] knows: slot 0 = 33 338 0 0" "[test] flag 8742 = 1")
+UNEXPECT_A=("[crash]")
