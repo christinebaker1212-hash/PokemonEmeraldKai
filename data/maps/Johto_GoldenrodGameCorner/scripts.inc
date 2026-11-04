@@ -302,8 +302,6 @@ Johto_GoldenrodGameCorner_EventScript_83D5322::
 	message Johto_GoldenrodGameCorner_Text_83D54B7
 	waitmessage
 	waitfanfare
-	specialvar VAR_RESULT, QzIsNuzlockeOption2D4Bit6
-	goto_if_eq VAR_RESULT, 1, Johto_GoldenrodGameCorner_EventScript_83D52EA
 	msgbox Johto_GoldenrodGameCorner_Text_83D54C2, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 1, Johto_GoldenrodGameCorner_EventScript_83D52CF
 	goto Johto_GoldenrodGameCorner_EventScript_83D5297

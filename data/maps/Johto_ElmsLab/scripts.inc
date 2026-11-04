@@ -256,8 +256,6 @@ Johto_ElmsLab_EventScript_83E1EFC::
 	setflag FLAG_QZ_0x149B
 	specialvar VAR_RESULT, QzBufferLastReceivedMonForNickname
 	goto_if_eq VAR_RESULT, 0, Johto_ElmsLab_EventScript_83E1F70
-	specialvar VAR_RESULT, QzIsNuzlockeOption2D4Bit6
-	goto_if_eq VAR_RESULT, 1, Johto_ElmsLab_EventScript_83E1FBC
 	msgbox Johto_ElmsLab_Text_83E2909, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 1, Johto_ElmsLab_EventScript_83E1FB2
 
