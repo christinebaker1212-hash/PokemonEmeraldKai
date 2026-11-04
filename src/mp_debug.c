@@ -2255,6 +2255,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         MP_Lobby_Disconnect();
         printf("[test] offline\n");
     }
+    else if (strcmp(cmd, "newday") == 0)
+    {
+        // newday - a new day for the daily events (daily flags, KURT's work...) without touching the clock
+        void DoTimeBasedEvents(void);
+        VarSet(VAR_DAYS, VarGet(VAR_DAYS) - 1);
+        DoTimeBasedEvents();
+        printf("[test] newday\n");
+    }
     else if (strcmp(cmd, "weekday") == 0)
     {
         // weekday [D]: Crystal's weekday on the game clock (SUNDAY 0); D: the game clock moved to that weekday

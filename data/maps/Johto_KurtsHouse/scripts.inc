@@ -116,8 +116,29 @@ Johto_KurtsHouse_EventScript_83C5B77::
 	goto_if_eq VAR_QZ_0x5009, 3, Johto_KurtsHouse_EventScript_83C5B33
 	goto_if_eq VAR_QZ_0x5009, 8, Johto_KurtsHouse_EventScript_83C5C6D
 	goto_if_eq VAR_QZ_0x5009, 9, Johto_KurtsHouse_EventScript_83C5C7D
+	goto_if_set FLAG_JOHTO_GAVE_GS_BALL, Johto_KurtsHouse_EventScript_GsBallChecking
 	call_if_unset FLAG_QZ_0x1150, Johto_KurtsHouse_EventScript_83C5B66
 	goto Johto_KurtsHouse_EventScript_83C5BA8
+
+@ Moemon Kai: Crystal's KURT keeps the GS BALL a day (KurtsHouse.asm .CanGiveGSBallToKurt / .GaveGSBallToKurt)
+Johto_KurtsHouse_EventScript_GsBallChecking::
+	goto_if_unset FLAG_DAILY_JOHTO_KURT_GS_BALL, Johto_KurtsHouse_EventScript_GsBallShakes
+	msgbox Johto_KurtsHouse_Text_GsBallCheckingNow, MSGBOX_DEFAULT
+	msgbox Johto_KurtsHouse_Text_GsBallAhHa, MSGBOX_DEFAULT
+	closemessage
+	release
+	end
+
+Johto_KurtsHouse_EventScript_GsBallShakes::
+	clearflag FLAG_JOHTO_GAVE_GS_BALL
+	playse SE_BANG
+	applymovement 3, Johto_KurtsHouse_Movement_83C5CDA
+	waitmovement 0
+	playse SE_BANG
+	applymovement 3, Johto_KurtsHouse_Movement_83C5CDA
+	waitmovement 0
+	faceplayer
+	goto Johto_KurtsHouse_EventScript_83C5C0A_Shake
 
 @ Moemon Kai: Crystal's KURT makes BALLS of APRICORNS (a day's wait; src/mp/mp_apricorn.c) where Quetzal's sold them
 Johto_KurtsHouse_EventScript_83C5BA8::
@@ -207,16 +228,19 @@ Johto_KurtsHouse_Text_KurtNoRoom:
 	.string "come back for it!$"
 
 Johto_KurtsHouse_EventScript_83C5C0A::
+	goto_if_ge VAR_QZ_0x5009, 8, Johto_KurtsHouse_EventScript_GsBallNot
 	msgbox Johto_KurtsHouse_Text_83C60AE, MSGBOX_DEFAULT
 	closemessage
 	removeitem ITEM_GS_BALL, 1
-	playse SE_BANG
-	applymovement 3, Johto_KurtsHouse_Movement_83C5CDA
-	waitmovement 0
-	playse SE_BANG
-	applymovement 3, Johto_KurtsHouse_Movement_83C5CDA
-	waitmovement 0
-	faceplayer
+	setflag FLAG_JOHTO_GAVE_GS_BALL
+	setflag FLAG_DAILY_JOHTO_KURT_GS_BALL
+	release
+	end
+
+Johto_KurtsHouse_EventScript_GsBallNot::
+	return
+
+Johto_KurtsHouse_EventScript_83C5C0A_Shake::
 	msgbox Johto_KurtsHouse_Text_83C615D, MSGBOX_DEFAULT
 	closemessage
 	playse SE_M_PETAL_DANCE
@@ -355,8 +379,8 @@ Johto_KurtsHouse_Text_83C5F6D::
 Johto_KurtsHouse_Text_83C60AE::
 	.string "Wh-what is that?\p"
 	.string "I’ve never seen one before.\p"
-	.string "It looks a like a POKé BALL, but\n"
-	.string "it appears to be something else.\p"
+	.string "It looks a lot like a POKé BALL,\n"
+	.string "but it appears to be something else.\p"
 	.string "Let me check it for you.$"
 
 Johto_KurtsHouse_Text_83C615D::
@@ -400,3 +424,9 @@ Johto_KurtsHouse_Text_83C63C1::
 Johto_KurtsHouse_Text_83C63D5::
 	.string "It’s a statue of the forest’s\n"
 	.string "protector.$"
+
+Johto_KurtsHouse_Text_GsBallCheckingNow::
+	.string "I’m checking it now.$"
+
+Johto_KurtsHouse_Text_GsBallAhHa::
+	.string "Ah-ha! I see! So…$"

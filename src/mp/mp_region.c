@@ -2126,6 +2126,12 @@ u16 MP_HiddenCoinsFit(void)
     return GetCoins() + gSpecialVar_0x8006 <= MAX_COINS;
 }
 
+// Crystal's GS BALL: GOLDENROD's POKéMON CENTER brings it once JOHTO's LEAGUE is beaten (GoldenrodPokecenter1F.asm)
+u16 MP_JohtoGsBallReady(void)
+{
+    return gSpecialVar_Result = MP_Region_Cleared(REGION_JOHTO) && !FlagGet(FLAG_JOHTO_GOT_GS_BALL);
+}
+
 // Crystal's VAR_WEEKDAY (SUNDAY 0 .. SATURDAY 6) on the game clock, as JOHTO's phone reads it (mp_qzphone.c)
 u16 MP_JohtoWeekday(void)
 {
