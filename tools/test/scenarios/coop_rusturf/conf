@@ -1,0 +1,13 @@
+# RUSTURF TUNNEL at NA-JP lag: ALICE smashes both boulders while BOB stands on the other side. The rocks go on BOB's
+# game too (mp_world.c), and his own tunnel story catches up (mp_hmrescue.c TunnelCatchUp): Wanda's boyfriend's scene
+# plays for him, he gets HM04 STRENGTH, the tunnel is open in his story (state 6). Before 1.87.1 it stayed shut for him.
+MODE=2
+WARP=24,4,21,4
+WARP_B=24,4,27,5
+DELAY=250
+JIT=80
+FPS=60
+TMO=500
+EXPECT_A=("[test] var 0x409A = 4")
+EXPECT_B=("world: 1 change(s) from player 1 (live)" "hms: RUSTURF TUNNEL's boulder went with a friend" "[test] flag 106 = 1" "[test] var 0x409A = 6" "[test] flag 199 = 1")
+UNEXPECT_B=("[crash]")

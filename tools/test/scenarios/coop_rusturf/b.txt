@@ -1,0 +1,19 @@
+pressuntil A field 5000
+mp setvar 0x409A 3
+mp clearflag 0x327
+mp clearflag 0x3D7
+mp warp 24,4,27,5
+waitfor online 6000
+wait 400
+barrier ready 2
+waitlog 3000 (live)
+wait 200
+shot scene
+mash A 90 20
+wait 200
+shot after
+mp getflag 0x6A
+mp getvar 0x409A
+mp getflag 0xC7
+wait 100
+quit

@@ -4462,6 +4462,11 @@ rival beaten; DIVE: STEVEN's house empty and the 7th badge; WATERFALL: the 8th b
 HM is in neither the BAG, the PC nor held by a POKéMON in the party or the boxes, the giver walks up on the map (never on
 the scene's own map) and hands it over, setting the flag; the walk-up is mp_tmrefund.c's. CUT, ROCK SMASH, FLASH and SURF
 have givers who stay. Debug `mp hmrescue`; tests hm_rescue, hm_rescue_carried.
+A friend's smash of RUSTURF TUNNEL's boulder while the player is on the map (mp_world.c WC_OBJ_GONE) sets the rock's
+flag for good but never ran TryUpdateRusturfTunnelState on the player's game (only the smasher's EventScript_SmashRock
+does): the tunnel stayed shut in their story and Wanda's boyfriend kept waiting (1.87.1). TunnelCatchUp (every half
+second on that map) does it once the player's own story is at state 3 (the AQUA grunt's scene done), a rock is gone and
+they're in sight of the spot: the map's ON_FRAME scene plays and hands STRENGTH over. Test coop_rusturf.
 
 ## Platinum's time of day in the 2D regions (1.67.0)
 - src/mp/mp_daytint.c: on an outdoor map outside SINNOH (IsMapTypeOutdoors; SINNOH's 3D maps light themselves), the

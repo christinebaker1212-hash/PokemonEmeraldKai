@@ -64,6 +64,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `card_friends` | two clients: a friend's card with its add-on, as they styled it: their BADGES & STARS, their BADGE CASE on JOHTO, YOU AND BOB; then the album card on MY CARD > FRIENDS' CARDS |
 | `spec_card` | two clients: BOB's SPECTATE panel shows ALICE's TRAINER CARD and her BADGE CASE up close |
 | `hm_rescue` / `hm_rescue_carried` | HM04 STRENGTH's scene gone (RUSTURF TUNNEL open) without it: Wanda's boyfriend walks up and hands it over; nobody comes when it's already carried |
+| `coop_rusturf` | NA-JP lag: ALICE smashes RUSTURF TUNNEL's boulders while BOB stands across them: the tunnel scene plays on BOB's game too and he gets HM04 STRENGTH (his story had stayed shut) |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |
 | `pmd_scale_hop` | a scaled PMD follower (PIKACHU, FOLLOWERS: PMD everywhere) mid-hop is drawn whole: check.py counts its rows and pixels (its lower part was cut off) |
