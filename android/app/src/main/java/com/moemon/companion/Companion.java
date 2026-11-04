@@ -57,6 +57,9 @@ public final class Companion implements LinkClient.Listener {
     public JSONObject call;                                       // the last call's words ("call")
     public long callAt;                                           // (when it came)
     public JSONObject gear;                                       // the POKéGEAR's last answer ("gear")
+    public JSONObject ach, gatcha;                                // the ME page's: achievements, MOEGATCHA banners
+    public JSONObject lastPull;                                   // the last MOEGATCHA pull's answer (its prizes)
+    public long lastPullAt;
     public long gearAt;                                           // (when it came)
     public volatile JSONObject battle;                            // the battle as the player sees it ("battle")
     public final java.util.Map<Long, JSONObject> journals = new java.util.HashMap<>();   // personality -> "journal"
@@ -1052,6 +1055,10 @@ public final class Companion implements LinkClient.Listener {
             case "bagfull": return "The BAG is full.";
             case "nothing": return "It isn't holding anything.";
             case "locked": return "Your game hasn't earned that piece yet.";
+            case "nopulls": return "No pulls left. Daily goals and achievements give more!";
+            case "nojar": return "You don't have the CANDY JAR yet: release a POKéMON in the PC and PROF. BIRCH brings it.";
+            case "fewcandy": return "Ten CANDIES of a kind make a RARE CANDY.";
+            case "badname": return "That name has letters the game can't use.";
             case "busy": return "The game is busy. Try again.";
             case "crashed": return "The game closed while doing this, so it was stopped.";
             case "walking": return "Another POKéMON is already out on a walk.";
@@ -1164,6 +1171,18 @@ public final class Companion implements LinkClient.Listener {
                     : why(w);
             toastGood = false;
             toastAt = System.currentTimeMillis();
+        } else if (order != null && "pull".equals(order.optString("op")) && done.has("prizes")) {
+            lastPull = done;
+            lastPullAt = System.currentTimeMillis();
+        } else if (order != null && "candy".equals(order.optString("op"))) {
+            int made = done.optInt("made");
+            toast = made == 1 ? "The candies became a RARE CANDY!" : "The candies became " + made + " RARE CANDIES!";
+            toastGood = true;
+            toastAt = System.currentTimeMillis();
+        } else if (order != null && "rename".equals(order.optString("op"))) {
+            toast = "Its new name is in your game.";
+            toastGood = true;
+            toastAt = System.currentTimeMillis();
         } else if (order != null && "walk".equals(order.optString("op")) && done.has("walk")) {
             walkFromGame(null, done.optJSONObject("walk"));
             toast = "Off on a walk! Your steps count from now.";
@@ -1268,6 +1287,10 @@ public final class Companion implements LinkClient.Listener {
         } else if (t.equals("call")) {
             call = m;
             callAt = System.currentTimeMillis();
+        } else if (t.equals("ach")) {
+            ach = m;
+        } else if (t.equals("gatcha")) {
+            gatcha = m;
         } else if (t.equals("gear")) {
             gear = m;
             gearAt = System.currentTimeMillis();

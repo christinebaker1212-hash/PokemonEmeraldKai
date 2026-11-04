@@ -24,6 +24,7 @@ public final class SummaryPage extends Page {
     private final List<JSONObject> places;
     private final BoxesPage boxes;   // for MOVE (null from the party)
     private int index, tab, move = -1;
+    private String renaming;   // the new name being typed (null: not renaming)
     private final Paint fill = new Paint();
 
     public SummaryPage(GameView v, List<JSONObject> places, int index, BoxesPage boxes) {
@@ -128,7 +129,22 @@ public final class SummaryPage extends Page {
             art.front(c, species, mon.optString("pal", null), 14, 28, false);
         }
         int x = 86, y = 22;
-        int nw = art.textHex(c, mon.optString("n"), x, y, GameArt.TEXT, GameArt.SHADOW);
+        int nw;
+        if (renaming != null) {
+            // the new name as it's typed, in a box with a cursor
+            fill.setColor(0xFFFFFFFF);
+            c.drawRect(x - 2, y + 2, x + 84, y + 16, fill);
+            fill.setColor(0xFF5878E0);
+            c.drawRect(x - 2, y + 15, x + 84, y + 16, fill);
+            nw = art.text(c, renaming, x, y);
+            if ((System.currentTimeMillis() / 400) % 2 == 0) {
+                fill.setColor(GameArt.TEXT);
+                c.drawRect(x + nw + 1, y + 4, x + nw + 2, y + 14, fill);
+            }
+            v.postInvalidateDelayed(400);
+        } else {
+            nw = art.textHex(c, mon.optString("n"), x, y, GameArt.TEXT, GameArt.SHADOW);
+        }
         if (!egg) {
             int g = mon.optInt("g");
             if (g == 0) {
@@ -154,6 +170,9 @@ public final class SummaryPage extends Page {
             if (mon.has("hp")) {
                 MonCard.hp(c, art, x, y + 72, mon.optInt("hp"), mon.optInt("mhp"));
             }
+            // RENAME (the game's SELECT on the summary's INFO): its name typed on the phone
+            String rn = renaming != null ? "DONE" : "RENAME";
+            chip(c, rn, w - 16 - art.width(rn) - 6, y + 50, renaming != null ? 0xFF38A858 : 0xFF5878E0);
         }
     }
 
@@ -438,6 +457,18 @@ public final class SummaryPage extends Page {
         if (mon == null) {
             return;
         }
+        if (mon.optInt("e") == 0 && y >= 22 + 48 && y < 22 + 64 && x >= w - 70) {
+            if (renaming != null) {
+                finishRename(mon);
+            } else {
+                startRename(mon);
+            }
+            return;
+        }
+        if (mon.optInt("e") == 0 && renaming == null && y >= 22 && y < 40 && x >= 86 && x < w - 20) {
+            startRename(mon);
+            return;
+        }
         if (y >= TAB_Y && y < TAB_Y + 22 && mon.optInt("e") == 0) {
             int t = Math.min(TABS.length - 1, Math.max(0, (x - 8) / ((w - 16) / TABS.length)));
             if (t == 3) {
@@ -462,6 +493,67 @@ public final class SummaryPage extends Page {
         }
         if (tab == 2 && y >= BODY_Y + 4 && y < BODY_Y + 4 + 4 * 32) {
             move = (y - BODY_Y - 4) / 32;
+        }
+    }
+
+    private void startRename(JSONObject mon) {
+        if (v.app.client == null || v.app.locked()) {
+            v.message(v.app.client == null ? "Link with your game to rename it." : Companion.LOCKED);
+            return;
+        }
+        renaming = art.plain(GameArt.hexText(mon.optString("n")));
+        v.keyboard(true);
+        v.sound.play("se_select");
+    }
+
+    private void finishRename(JSONObject mon) {
+        String name = renaming == null ? "" : renaming.trim();
+        renaming = null;
+        v.keyboard(false);
+        if (name.isEmpty() || mon == null || name.equals(art.plain(GameArt.hexText(mon.optString("n"))))) {
+            return;
+        }
+        try {
+            v.app.client.order(new JSONObject().put("op", "rename").put("at", place()).put("p", mon.optLong("p"))
+                    .put("o", mon.optLong("o")).put("name", art.toHex(name)));
+        } catch (org.json.JSONException ignored) {
+        }
+        v.buzz(false);
+    }
+
+    @Override
+    public void typed(String text) {
+        if (renaming == null) {
+            return;
+        }
+        StringBuilder b = new StringBuilder(renaming);
+        for (char ch : text.toCharArray()) {
+            if (b.length() < 10 && art.hasLetter(ch) && ch != '\n') {
+                b.append(ch);
+            }
+        }
+        renaming = b.toString();
+    }
+
+    @Override
+    public void backspace() {
+        if (renaming != null && !renaming.isEmpty()) {
+            renaming = renaming.substring(0, renaming.length() - 1);
+        }
+    }
+
+    @Override
+    public void typingDone() {
+        if (renaming != null) {
+            finishRename(mon());
+        }
+    }
+
+    @Override
+    public void hidden() {
+        if (renaming != null) {
+            renaming = null;
+            v.keyboard(false);
         }
     }
 

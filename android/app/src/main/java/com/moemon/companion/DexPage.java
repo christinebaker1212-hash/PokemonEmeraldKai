@@ -63,6 +63,15 @@ public final class DexPage extends Page {
         return t;
     }
 
+    /** How many bits a POKéDEX hex string has set (seen / caught) */
+    static int count(String hex) {
+        int n = 0;
+        for (int i = 0; hex != null && i < hex.length(); i++) {
+            n += Integer.bitCount(Character.digit(hex.charAt(i), 16) & 15);
+        }
+        return n;
+    }
+
     static boolean bit(String hex, int dex) {
         int i = (dex - 1) / 4;
         if (hex == null || i >= hex.length()) {

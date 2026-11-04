@@ -66,6 +66,7 @@ public final class GameView extends View {
         pages.add(new WalkPage(this));
         pages.add(new FriendsPage(this));
         pages.add(new CardsPage(this));
+        pages.add(new MePage(this));
         Look.ensure(c);
         int start = Look.startPage(c);
         page = start >= 0 && start < pages.size() ? start : 0;
@@ -388,9 +389,9 @@ public final class GameView extends View {
     }
 
     // the tabs and the pages they open (SPAWNS, page 4, opens from the POKéDEX: its tab is DEX's)
-    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "DEVICE", "WALK", "CARDS", "FRIENDS"};
-    private static final String[] TAB_SHORT = {"BOX", "TEAM", "BAG", "DEX", "DEV", "WALK", "CARD", "PALS"};
-    private static final int[] TAB_PAGES = {0, 1, 2, 3, 5, 6, 8, 7};
+    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "DEVICE", "WALK", "CARDS", "FRIENDS", "ME"};
+    private static final String[] TAB_SHORT = {"BOX", "TEAM", "BAG", "DEX", "DEV", "WALK", "CARD", "PALS", "ME"};
+    private static final int[] TAB_PAGES = {0, 1, 2, 3, 5, 6, 8, 7, 9};
 
     private int tabOf(int p) {
         for (int i = 0; i < TAB_PAGES.length; i++) {
@@ -460,6 +461,8 @@ public final class GameView extends View {
          "..kbbbbbkrk.", "..kkkkkkkrk.", "....krrrrrk.", "....krrrrrk.", "....kkkkkkk.", "............"},
         {"..kkk.......", ".kpppk..kkk.", ".kpppk.kbbbk", ".kpppk.kbbbk", "..kkk...kkk.", ".kkkkk.kkkkk",
          "kpppppkbbbbb", "kpppppkbbbbb", "kpppppkbbbbb", "kkkkkkkkkkkk", "............", "............"},
+        {"............", "....kkkk....", "..kkrrrrkk..", ".krrrwwrrrk.", ".krrwwwwrrk.", "krrrrwwrrrrk",
+         "kkkkkkkkkkkk", "kwwwwwwwwwwk", "kkkkkkkkwwwk", "........kkk.", "............", "............"},
     };
     private static final int[] ICON_COLORS = new int[128];
     static {

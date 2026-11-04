@@ -137,10 +137,16 @@ public final class GameArt {
     }
 
     /** The app's own words in the game's letters (charmap.txt); letters the font lacks become spaces */
+    /** Whether the game's font has this letter (names typed on the phone) */
+    public boolean hasLetter(char ch) {
+        return ch != '$' && charmap.get(ch) != null;
+    }
+
     public byte[] encode(String s) {
         byte[] b = new byte[s.length()];
         for (int i = 0; i < s.length(); i++) {
-            Integer c = charmap.get(s.charAt(i));
+            // ('$' is the end of a string in the game's text; its money sign is the letter '¥' stands for)
+            Integer c = charmap.get(s.charAt(i) == '$' ? '\u00a5' : s.charAt(i));
             b[i] = (byte) (c != null ? c : 0);
         }
         return b;

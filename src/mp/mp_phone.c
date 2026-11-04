@@ -524,6 +524,8 @@ u32 Rev(void)
     h = Fnv(h, &v, 4);
     v = PhoneBall_Hash();    // (ball pieces earned, MY PRESETs)
     h = Fnv(h, &v, 4);
+    v = PhoneKai_Hash();     // (achievements, MOEGATCHA pulls, candies)
+    h = Fnv(h, &v, 4);
     return h;
 }
 
@@ -600,6 +602,7 @@ static void BufSnapshot(struct Buf *b)
     PhoneTrade_Snapshot(b);
     PhoneCards_Snapshot(b);
     PhoneBall_Snapshot(b);
+    PhoneKai_Snapshot(b);
     // The POKeDEX: a bit per national number (1 first), as hex: seen, then caught
     {
         static const char *const sWhat[] = {"seen", "caught"};
@@ -1348,6 +1351,9 @@ static const char *Apply(const char *json)
         const char *why = PhoneBall_Apply(op, json);
         if (why != (const char *)-1)
             return why;
+        why = PhoneKai_Apply(op, json);
+        if (why != (const char *)-1)
+            return why;
     }
     return PhoneWalk_Apply(op, json);
 }
@@ -1506,7 +1512,7 @@ static void OnSealed(int c, const char *json)
     char t[16];
     if (!JsonStr(json, "t", t, sizeof(t)))
         return;
-    if (PhoneDev_OnSealed(c, t, json) || PhoneWalk_OnSealed(c, t, json))
+    if (PhoneDev_OnSealed(c, t, json) || PhoneWalk_OnSealed(c, t, json) || PhoneKai_OnSealed(c, t, json))
         return;
     if (strcmp(t, "snap") == 0)
         SendSnapshot(c);

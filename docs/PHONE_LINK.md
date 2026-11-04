@@ -550,4 +550,29 @@ The SUMMARY's BALL tab (BallPage.java): the game's POKé BALL page and ball effe
 - Tests: tools/phone/ball_test.py (the orders against a headless game), ScreensTest ball_page / ball_list /
   ball_locked.
 
+### The ME page (1.85.0)
+
+The ninth tab, ME (MePage.java): Kai's own things (src/mp/mp_phone_kai.c).
+- **The snapshot's "kai"**: "ach" [done, all], "pulls", "tickets", "free" (MP_Gatcha_FreeWaiting), "jar" (the CANDY JAR
+  in the BAG), "candy" (gMpCandies, a count per type number), "time" [hours, minutes], "farm" (the save's own GARDEN
+  BERRY farm, its open plots: [berry item, stage, minutes to the next, yield, times watered]; a friend's farm online
+  isn't sent). PhoneKai_Hash is in the rev.
+- **Asked for**: {"t":"ach"} -> "cats" and "list" ([category, name, words, status, reward, done]: mp_achieve.c
+  MP_Achieve_Info, the menu's order); {"t":"gatcha"} -> "pulls", "tickets", "banners" ([name, tagline, free 1, free
+  10]).
+- **Orders**: "pull" {banner, how: 0 free 10, 1 free 1, 2 TICKET, 3 one, 4 ten} -> mp_gatcha.c MP_Gatcha_PhonePull:
+  the reel's own RollPrizes (pity, the 10-pull's R or better, random Moemon and ball pieces, achievements, the save
+  after), friends told of a UR / EX; the answer's "prizes" [{r rarity, k kind, id (a Moemon's species, an item; a set's
+  first item, a ball piece as a POKé BALL), sh, amt, n (game text), note}]; "nopulls". "candy" {type: -1 every kind}
+  (MP_Candy_Convert / ConvertType; "nojar", "fewcandy", "bagfull"; the answer's "made"). "rename" {at, p, o, name: game
+  text as hex, 1-10 letters, no control codes ("badname"); any POKéMON but an EGG, as the summary's SELECT}.
+- **The pages**: MePage (the TRAINER CARD drawn in the app: name, ID, money, POKéDEX, time, each region's BADGES;
+  ACHIEVEMENTS with SEE ALL; MOEGATCHA with PULL; the CANDY JAR's kinds and CONVERT; the farm's plots, a ripe one's
+  yield, a growing one's time left), AchievementsPage (ALL / TO DO / DONE, < category >), GatchaPage (banners < >, the
+  pulls the banner can take now, a reel of its own that races while the game answers, slows onto the best prize and
+  flashes for SUPER RARE and up, then the pull's prizes; AGAIN / BACK). The SUMMARY: RENAME by the name (the phone's
+  keyboard; letters the game's font has; DONE sends it). "$" in the app's words is the game's money sign (GameArt
+  encode: the game's "$" ends a string, which hid the BAG's money).
+- Tests: tools/phone/kai_test.py, ScreensTest me / achievements / gatcha / gatcha_prizes.
+
 Next: the rest of the pass.

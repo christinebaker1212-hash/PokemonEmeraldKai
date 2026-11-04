@@ -88,6 +88,10 @@ public class ScreensTest {
                     .put("bst", 0x15);
             snap.put("fxu", new org.json.JSONArray("[\"FF7\",\"FFF\",\"FFFF\",\"7F\"]"));
             snap.put("fxp", new org.json.JSONArray("[[27354,5],0,0,0,0,0]"));
+            // the ME page: achievements, MOEGATCHA, a CANDY JAR, the GARDEN farm
+            snap.put("kai", new JSONObject("{\"ach\":[37,314],\"pulls\":23,\"tickets\":2,\"free\":3,\"jar\":1,"
+                    + "\"candy\":[12,3,0,25,0,0,9,0,0,0,31,4,0,0,0,0,0,0,0],\"time\":[42,17],"
+                    + "\"farm\":[[133,5,0,6,4],[134,3,95,0,2],[0,0,0,0,0],[140,1,200,0,0],[136,4,30,0,1],[0,0,0,0,0]]}"));
             write(new File(dir, "model_" + id + ".json"), file.toString());
         }
         // a POKéMON out walking (for WALK's pictures): the snapshot's first box POKéMON
@@ -154,6 +158,27 @@ public class ScreensTest {
         bp.pickForTest(4, 20);
         bp.openList(-1);
         shot(v, "ball_locked");
+        v.showOver(null);
+        // ME: the card, achievements, MOEGATCHA (a pull's prizes), the CANDY JAR, the farm
+        v.select(9);
+        shot(v, "me");
+        app.ach = new JSONObject("{\"t\":\"ach\",\"cats\":[\"STORY\",\"BATTLE\",\"CO-OP\"],\"list\":["
+                + "[0,\"FIRST PARTNER\",\"Get your first POK\u00e9MON.\",\"DONE\",\"+3 MOEGATCHA pulls\",1],"
+                + "[0,\"BADGE COLLECTOR\",\"Earn four BADGES in any region.\",\"2/4\",\"+5 MOEGATCHA pulls, BALL COLOR: MINT\",0],"
+                + "[1,\"WIN STREAK\",\"Win 10 battles in a row.\",\"3/10\",\"+3 MOEGATCHA pulls\",0],"
+                + "[2,\"BEST FRIENDS\",\"Battle together with a friend 25 times.\",\"DONE\",\"+5 MOEGATCHA pulls, SEND-OUT: PRISM\",1]]}");
+        v.showOver(new AchievementsPage(v, null));
+        shot(v, "achievements");
+        app.gatcha = new JSONObject("{\"t\":\"gatcha\",\"pulls\":23,\"tickets\":2,\"banners\":[[\"STANDARD\","
+                + "\"Event Moemon, items and money!\",1,1],[\"PICKUP\",\"This week's featured Moemon!\",1,0],"
+                + "[\"TRAINING\",\"Candies and vitamins\",0,0],[\"POKE BALLS\",\"Balls and ball effects\",1,0]]}");
+        GatchaPage gp = new GatchaPage(v, null);
+        v.showOver(gp);
+        shot(v, "gatcha");
+        gp.showForTest(new JSONObject("{\"prizes\":[{\"r\":3,\"k\":0,\"id\":1,\"sh\":0,\"amt\":1,\"n\":\"C7BBCDCEBFCC00BCBBC6C6\","
+                + "\"note\":\"\"},{\"r\":0,\"k\":0,\"id\":13,\"sh\":0,\"amt\":3,\"n\":\"CAC9CEC3C9C8\",\"note\":\"\"},"
+                + "{\"r\":2,\"k\":2,\"id\":25,\"sh\":0,\"amt\":1,\"n\":\"CAC3C5BBBDC2CF\",\"note\":\"It joined your party!\"}]}"));
+        shot(v, "gatcha_prizes");
         v.showOver(null);
         v.showOver(null);
         // the shiny in the party, its summary

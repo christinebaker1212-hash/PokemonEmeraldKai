@@ -20,8 +20,8 @@ public final class Look {
             {"NIGHT", 0xFF485068, 0xFF404860, 0xFF283048, 0xFF181E30},
     };
     static final int FRAMES = 29;
-    static final String[] START = {"BOXES", "PARTY", "BAG", "DEX", "DEVICE", "WALK", "CARDS", "FRIENDS", "LAST"};
-    static final int[] START_PAGES = {0, 1, 2, 3, 5, 6, 8, 7, -1};
+    static final String[] START = {"BOXES", "PARTY", "BAG", "DEX", "DEVICE", "WALK", "CARDS", "FRIENDS", "LAST", "ME"};
+    static final int[] START_PAGES = {0, 1, 2, 3, 5, 6, 8, 7, -1, 9};   // (ME after LAST: a saved choice keeps its number)
 
     static int theme, frame, start;
     static boolean animations = true;

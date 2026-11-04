@@ -57,6 +57,12 @@ void PhoneBall_Snapshot(struct Buf *b);                          // the snapshot
 u32 PhoneBall_Hash(void);
 const char *PhoneBall_Apply(const char *op, const char *json);   // "ballstyle", "ballfx", "fxparty", "fxpreset"; -1: not these
 
+// mp_phone_kai.c: the ME page (achievements, MOEGATCHA, the CANDY JAR) and renaming
+void PhoneKai_Snapshot(struct Buf *b);                           // the snapshot's "kai"
+u32 PhoneKai_Hash(void);
+bool8 PhoneKai_OnSealed(int c, const char *t, const char *json);  // "ach", "gatcha"
+const char *PhoneKai_Apply(const char *op, const char *json);    // "rename", "candy", "pull"; -1: not these
+
 // mp_phone_dev.c: the device's apps: the live map, MOENAV calls, the battle feed, the POKéGEAR)
 #ifndef GUARD_MP_PHONE_INT_H
 #define GUARD_MP_PHONE_INT_H
