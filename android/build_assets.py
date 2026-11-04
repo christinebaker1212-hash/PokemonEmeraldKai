@@ -256,6 +256,7 @@ def main():
     write_png(os.path.join(OUT, 'wallpapers.png'), *sheet(load_dir(os.path.join(exp, 'wallpapers')), 160, 144, 4))
     write_png(os.path.join(OUT, 'frames.png'), *sheet(load_dir(os.path.join(exp, 'frames')), 24, 24, 32))
     write_png(os.path.join(OUT, 'font.png'), *read_png(os.path.join(exp, 'font.png')))
+    write_png(os.path.join(OUT, 'font_small.png'), *read_png(os.path.join(exp, 'font_small.png')))
     write_png(os.path.join(OUT, 'types.png'), *read_png(os.path.join(exp, 'types.png')))
     for name in ('dex_info.png', 'dex_list.png', 'dex_list_p.png', 'footprints.png', 'ribbons.png', 'trainers.png'):
         write_png(os.path.join(OUT, name), *read_png(os.path.join(exp, name)))

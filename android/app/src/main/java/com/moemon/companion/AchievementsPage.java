@@ -93,10 +93,7 @@ public class AchievementsPage extends Page {
                     art.text(c, d, 32, ty, GameArt.GRAY_TEXT, GameArt.SHADOW);
                     ty += 12;
                 }
-                c.save();
-                c.scale(0.75f, 0.75f, 32, ty + 6);
-                art.text(c, a.optString(4), 32, ty, 0xFFC07818, GameArt.SHADOW);
-                c.restore();
+                art.small(c, a.optString(4), 32, ty, 0xFFC07818, GameArt.SHADOW);
             }
             y += rh + ROW_GAP;
         }

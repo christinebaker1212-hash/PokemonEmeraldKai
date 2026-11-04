@@ -47,4 +47,9 @@ public final class TtCardPage extends Page {
     public void tap(int x, int y) {
         v.showOver(null);
     }
+
+    @Override
+    public boolean swapsWords() {
+        return false;   // (the card games' own words: the POKéMON card game is the POKéMON card game)
+    }
 }

@@ -80,4 +80,9 @@ public final class TcgBinderPage extends Page {
             }
         }
     }
+
+    @Override
+    public boolean swapsWords() {
+        return false;   // (the card games' own words: the POKéMON card game is the POKéMON card game)
+    }
 }

@@ -259,10 +259,7 @@ public class GatchaPage extends Page {
             art.textHex(c, o.optString("n"), 54 + art.width(RARITY[r]) + 12, ry + 2, GameArt.TEXT, GameArt.SHADOW);
             String note = o.optString("note");
             if (!note.isEmpty()) {
-                c.save();
-                c.scale(0.75f, 0.75f, 54, ry + 22);
-                art.text(c, note, 54, ry + 16, GameArt.GRAY_TEXT, GameArt.SHADOW);
-                c.restore();
+                art.small(c, note, 54, ry + 17, GameArt.GRAY_TEXT, GameArt.SHADOW);
             }
             ry += 36;
         }

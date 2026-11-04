@@ -1408,4 +1408,9 @@ public final class YgoDuelPage extends Page {
         }
         v.showOver(null);
     }
+
+    @Override
+    public boolean swapsWords() {
+        return false;   // (the card games' own words: the POKéMON card game is the POKéMON card game)
+    }
 }

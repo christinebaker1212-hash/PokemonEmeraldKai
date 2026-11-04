@@ -125,4 +125,9 @@ public final class TcgCardPage extends Page {
     public void back() {
         v.showOver(back);
     }
+
+    @Override
+    public boolean swapsWords() {
+        return false;   // (the card games' own words: the POKéMON card game is the POKéMON card game)
+    }
 }

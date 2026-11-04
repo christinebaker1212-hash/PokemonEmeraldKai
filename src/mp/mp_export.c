@@ -50,6 +50,7 @@ extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
 #endif
 
 void MP_ExportGlyph(u16 glyphId, u8 out[16][16], u8 *width);   // text.c
+void MP_ExportGlyphSmall(u16 glyphId, u8 out[16][16], u8 *width);
 const u32 *MP_SpeciesFrontPal(u16 species);   // pokemon.c
 u8 MP_PhoneItemUse(u16 item);                  // party_menu.c
 u8 MP_TypeIconPal(u8 type);                    // pokemon_summary_screen.c
@@ -534,6 +535,21 @@ static void ExportFont(const char *dir, FILE *json)
     }
     fprintf(json, "]");
     snprintf(path, sizeof(path), "%s/font.png", dir);
+    WritePng(path, sRgba, 256, 256);
+    // the small font too (the app's second size of words, crisp at the same scale)
+    memset(sRgba, 0, sizeof(sRgba));
+    fprintf(json, ",\"fontSmallWidths\":[");
+    for (g = 0; g < 256; g++)
+    {
+        u8 cell[16][16], width;
+        MP_ExportGlyphSmall(g, cell, &width);
+        fprintf(json, "%s%u", g ? "," : "", width);
+        for (r = 0; r < 16; r++)
+            for (c = 0; c < 16; c++)
+                memcpy(sRgba + (((g / 16) * 16 + r) * 256 + (g % 16) * 16 + c) * 4, sColors[cell[r][c] & 3], 4);
+    }
+    fprintf(json, "]");
+    snprintf(path, sizeof(path), "%s/font_small.png", dir);
     WritePng(path, sRgba, 256, 256);
 }
 

@@ -36,7 +36,8 @@ public final class GameArt {
     private final int[] widths = new int[256];
     private final Map<Character, Integer> charmap = new HashMap<>();
     private final char[] letters = new char[256];
-    private final Bitmap fontMain, fontShadow;
+    private final Bitmap fontMain, fontShadow, smallMain, smallShadow;
+    private final int[] smallWidths = new int[256];
     private Bitmap icons, items, wallpapers, frames, types;
     private final Bitmap[] fronts = new Bitmap[8], frontsP = new Bitmap[8];
     private final Map<Integer, Integer> dexToSpecies = new HashMap<>();
@@ -63,21 +64,17 @@ public final class GameArt {
             }
         }
         // the font's two colors (text, shadow) as white masks, tinted when drawn
-        Bitmap f = bitmap("game/font.png");
-        int n = f.getWidth() * f.getHeight();
-        int[] px = new int[n], main = new int[n], shadow = new int[n];
-        f.getPixels(px, 0, f.getWidth(), 0, 0, f.getWidth(), f.getHeight());
-        for (int i = 0; i < n; i++) {
-            if (Color.alpha(px[i]) != 0) {
-                if (Color.red(px[i]) < 128) {
-                    main[i] = 0xFFFFFFFF;
-                } else {
-                    shadow[i] = 0xFFFFFFFF;
-                }
-            }
+        Bitmap[] big = masks("game/font.png");
+        fontMain = big[0];
+        fontShadow = big[1];
+        // the game's small font: the second size of words (crisp, never a scaled-down big one)
+        Bitmap[] small = masks("game/font_small.png");
+        smallMain = small != null ? small[0] : fontMain;
+        smallShadow = small != null ? small[1] : fontShadow;
+        JSONArray sw = data.optJSONArray("fontSmallWidths");
+        for (int i = 0; i < 256; i++) {
+            smallWidths[i] = sw != null ? sw.optInt(i, 5) : widths[i];
         }
-        fontMain = Bitmap.createBitmap(main, f.getWidth(), f.getHeight(), Bitmap.Config.ARGB_8888);
-        fontShadow = Bitmap.createBitmap(shadow, f.getWidth(), f.getHeight(), Bitmap.Config.ARGB_8888);
         JSONArray sp = data.getJSONArray("species");
         for (int s = sp.length() - 1; s > 0; s--) {
             int dex = sp.getJSONObject(s).optInt("dex");
@@ -96,6 +93,28 @@ public final class GameArt {
         gray.setFilterBitmap(false);
         gray.setColorFilter(new ColorMatrixColorFilter(cm2));
         gray.setAlpha(140);
+    }
+
+    /** A font sheet's text and shadow pixels as two white masks (null: no such sheet) */
+    private Bitmap[] masks(String path) {
+        Bitmap f = bitmap(path);
+        if (f == null) {
+            return null;
+        }
+        int n = f.getWidth() * f.getHeight();
+        int[] px = new int[n], main = new int[n], shadow = new int[n];
+        f.getPixels(px, 0, f.getWidth(), 0, 0, f.getWidth(), f.getHeight());
+        for (int i = 0; i < n; i++) {
+            if (Color.alpha(px[i]) != 0) {
+                if (Color.red(px[i]) < 128) {
+                    main[i] = 0xFFFFFFFF;
+                } else {
+                    shadow[i] = 0xFFFFFFFF;
+                }
+            }
+        }
+        return new Bitmap[]{Bitmap.createBitmap(main, f.getWidth(), f.getHeight(), Bitmap.Config.ARGB_8888),
+                Bitmap.createBitmap(shadow, f.getWidth(), f.getHeight(), Bitmap.Config.ARGB_8888)};
     }
 
     private String readText(String path) throws Exception {
@@ -177,6 +196,8 @@ public final class GameArt {
 
     /** The pictures and words shown: the original POKéMON's (true) or Kai's MOéMON (Look.creatures, as the game) */
     public static boolean pokemonArt;
+    /** Whether the words are swapped at all (off on the card games' pages: Page.swapsWords) */
+    public static boolean swapWords = true;
     private byte[][][][] swaps;   // [mode][pair][from, to]
 
     /**
@@ -185,6 +206,9 @@ public final class GameArt {
      * (POKé BALL stays: Kai kept it)
      */
     private byte[] words(byte[] t) {
+        if (!swapWords) {
+            return t;
+        }
         if (swaps == null) {
             String[][][] w = {
                     {{"POK\u00e9MON", "MO\u00e9MON"}, {"POK\u00e9DEX", "MO\u00e9DEX"}, {"POK\u00e9NAV", "MO\u00e9NAV"},
@@ -305,6 +329,62 @@ public final class GameArt {
 
     public int text(Canvas c, String s, int x, int y, int color, int shadow) {
         return text(c, encode(s), x, y, color, shadow);
+    }
+
+    /** The small font (the game's FONT_SMALL): secondary words, notes, labels; y is its cell's top as with text() */
+    public int small(Canvas c, String s, int x, int y, int color, int shadow) {
+        return small(c, encode(s), x, y, color, shadow);
+    }
+
+    public int small(Canvas c, byte[] t, int x, int y, int color, int shadow) {
+        t = words(t);
+        int x0 = x;
+        for (byte ch : t) {
+            int g = ch & 255;
+            if (g == 0xFF) {
+                break;
+            }
+            int gw = Math.max(1, Math.min(16, smallWidths[g]));
+            src.set((g % 16) * 16, (g / 16) * 16, (g % 16) * 16 + gw, (g / 16) * 16 + 16);
+            dst.set(x, y, x + gw, y + 16);
+            if (shadow != 0) {
+                tint.setColorFilter(filter(shadow));
+                c.drawBitmap(smallShadow, src, dst, tint);
+            }
+            tint.setColorFilter(filter(color));
+            c.drawBitmap(smallMain, src, dst, tint);
+            x += smallWidths[g];
+        }
+        return x - x0;
+    }
+
+    public int smallWidth(String s) {
+        byte[] t = words(encode(s));
+        int w = 0;
+        for (byte b : t) {
+            if ((b & 255) == 0xFF) {
+                break;
+            }
+            w += smallWidths[b & 255];
+        }
+        return w;
+    }
+
+    /** Words wrapped to max pixels in the small font */
+    public java.util.List<String> wrapSmall(String text, int max) {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        StringBuilder line = new StringBuilder();
+        for (String word : text.split(" ")) {
+            String next = line.length() == 0 ? word : line + " " + word;
+            if (smallWidth(next) > max && line.length() > 0) {
+                out.add(line.toString());
+                line = new StringBuilder(word);
+            } else {
+                line = new StringBuilder(next);
+            }
+        }
+        out.add(line.toString());
+        return out;
     }
 
     public int textHex(Canvas c, String hex, int x, int y, int color, int shadow) {

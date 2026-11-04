@@ -30,6 +30,8 @@ public abstract class Page {
     public void swipe(int dir) {}
     public void back() { v.showOver(null); }
     public boolean fullScreen() { return false; }
+    /** Whether the MOéMON / POKéMON words are swapped on this page (the card games keep their own words) */
+    public boolean swapsWords() { return true; }
 
     // vertical scrolling: pages with lists say how far they go
     public int scrollMax() { return 0; }
@@ -79,11 +81,43 @@ public abstract class Page {
         art.text(c, text, x + 3, y - 3, GameArt.WHITE_TEXT, 0);
     }
 
-    /** A button in the game's look: a small window with a word in it */
+    /** Whether the finger is (or just was) on this rectangle of the page */
+    protected static boolean pressed(int x, int y, int w, int h) {
+        return System.currentTimeMillis() < GameView.pressUntil && GameView.pressX >= x && GameView.pressX < x + w
+                && GameView.pressY >= y && GameView.pressY < y + h;
+    }
+
+    /**
+     * A button (the touch screens' raised key of the DS era): a rounded white key with a dark outline and a lip
+     * under it; pressed, it sinks onto the lip and darkens; disabled, it's flat and grey. (x, y, w) as before: the key
+     * sits in the 24-pixel-tall slot at (x, y)
+     */
     protected void button(Canvas c, String label, int x, int y, int w, boolean enabled) {
-        art.window(c, 0, x + 4, y + 4, w - 8, 16);
+        int bx = x + 3, by = y + 3, bw = w - 6, bh = 18;
+        boolean down = enabled && pressed(x, y, w, 24);
+        int sink = down ? 2 : 0;
+        // the lip (its shadow on the page)
+        if (!down) {
+            sFill.setColor(enabled ? 0xFF4A5868 : 0x60404850);
+            c.drawRect(bx + 1, by + 2, bx + bw - 1, by + bh + 2, sFill);
+        }
+        // the outline, corners cut
+        sFill.setColor(enabled ? 0xFF283848 : 0xFF8890A0);
+        c.drawRect(bx + 1, by + sink, bx + bw - 1, by + bh + sink, sFill);
+        c.drawRect(bx, by + 1 + sink, bx + bw, by + bh - 1 + sink, sFill);
+        // the face: white with a light top, grey-blue when pressed, flat grey when it can't be used
+        int face = !enabled ? 0xFFD8DCE0 : down ? 0xFFC8D8F0 : 0xFFF8F8F8;
+        sFill.setColor(face);
+        c.drawRect(bx + 1, by + 1 + sink, bx + bw - 1, by + bh - 1 + sink, sFill);
+        if (enabled && !down) {
+            sFill.setColor(0xFFE0E6EE);   // (the face's lower half a shade darker: a soft bevel)
+            c.drawRect(bx + 1, by + bh / 2 + 1, bx + bw - 1, by + bh - 1, sFill);
+            sFill.setColor(0xFFFFFFFF);
+            c.drawRect(bx + 2, by + 1, bx + bw - 2, by + 2, sFill);
+        }
         int tw = art.width(label);
-        art.text(c, label, x + (w - tw) / 2, y + 4, enabled ? GameArt.TEXT : GameArt.GRAY_TEXT, GameArt.SHADOW);
+        art.text(c, label, x + (w - tw) / 2, by + 1 + sink, enabled ? GameArt.TEXT : 0xFF9098A0,
+                enabled ? GameArt.SHADOW : 0);
     }
 
     /** Words in lines no wider than max */

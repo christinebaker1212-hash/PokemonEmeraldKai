@@ -191,7 +191,9 @@ public class ScreensTest {
         v.showOver(null);
         // the shiny in the party, its summary
         v.select(1);
-        tap(v, 60, GameView.TOP + 24 + 3 * 50 + 20);
+        // (the fourth card: the second column's second row)
+        int pch = Math.max(96, Math.min(132, (v.contentHeight() - 24 - 26 - 12) / 3));
+        tap(v, v.width() * 3 / 4, GameView.TOP + 24 + 4 + pch + 6 + pch / 2);
         shot(v, "party_summary");
         v.showOver(null);
         // the BAG with an item chosen, the BALLS

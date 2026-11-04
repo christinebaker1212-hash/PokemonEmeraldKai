@@ -21,6 +21,11 @@ import java.util.List;
  */
 public final class GameView extends View {
     public static final int TOP = 20, TABS = 30;
+    // the finger's press, in page coordinates: buttons under it draw pressed (Page.pressed)
+    static int pressX = -1000, pressY = -1000;
+    static long pressUntil;
+    private static final long TOAST_MS = 3600;
+    private int toastTop = -1;   // (the toast's top while it shows: a tap there closes it)
 
     public final Companion app;
     public final GameArt art;
@@ -289,7 +294,9 @@ public final class GameView extends View {
             c.saveLayerAlpha(0, 0, w, h, (int) (90 + 165 * e));
             postInvalidateOnAnimation();
         }
+        GameArt.swapWords = p.swapsWords();
         p.draw(c, w, h - TOP - (over != null && over.fullScreen() ? 0 : TABS));
+        GameArt.swapWords = true;
         c.restore();
         drawTop(c);
         if (over == null || !over.fullScreen()) {
@@ -303,12 +310,14 @@ public final class GameView extends View {
             toastHeard = app.toastAt;
             sound.play(app.toastGood ? "se_success" : "se_failure");
         }
-        if (!app.toast.isEmpty() && System.currentTimeMillis() - app.toastAt < 5000) {
+        // the toast: a dark card that rises above the tabs, stays a moment and sinks away (a tap on it closes it)
+        long age = System.currentTimeMillis() - app.toastAt;
+        if (!app.toast.isEmpty() && age < TOAST_MS) {
             java.util.List<String> lines = new java.util.ArrayList<>();
             StringBuilder line = new StringBuilder();
             for (String word : app.toast.split(" ")) {
                 String next = line.length() == 0 ? word : line + " " + word;
-                if (art.width(next) > w - 40 && line.length() > 0) {
+                if (art.width(next) > w - 52 && line.length() > 0) {
                     lines.add(line.toString());
                     line = new StringBuilder(word);
                 } else {
@@ -316,61 +325,111 @@ public final class GameView extends View {
                 }
             }
             lines.add(line.toString());
-            int th = lines.size() * 16, ty = h - TABS - 18 - th;
-            art.window(c, 0, 16, ty, w - 32, th);
+            float in = Look.animations ? Math.min(1f, age / 180f) : 1f;
+            float out = Look.animations ? Math.min(1f, (TOAST_MS - age) / 220f) : 1f;
+            float k = Math.min(in, out);
+            k = 1f - (1f - k) * (1f - k);
+            int th = lines.size() * 14 + 8;
+            float ty = h - TABS - 6 - th + (1f - k) * (th + 12);
+            int alpha = (int) (255 * Math.min(1f, k * 1.4f));
+            c.save();
+            c.saveLayerAlpha(0, 0, w, h, alpha);
+            pill.set(10, ty, w - 10, ty + th);
+            fill.setColor(0x60000000);
+            c.drawRoundRect(pill.left + 1, pill.top + 2, pill.right + 1, pill.bottom + 2, 6, 6, fill);
+            fill.setColor(0xF0202C3C);
+            c.drawRoundRect(pill, 6, 6, fill);
+            fill.setColor(app.toastGood ? 0xFF58E070 : 0xFFF86060);
+            c.drawRoundRect(14, ty + 4, 17, ty + th - 4, 2, 2, fill);
             for (int i = 0; i < lines.size(); i++) {
-                art.text(c, lines.get(i), 20, ty + i * 16, app.toastGood ? GameArt.TEXT : GameArt.RED_TEXT, GameArt.SHADOW);
+                art.text(c, lines.get(i), 24, (int) ty + 1 + i * 14, 0xFFF0F4F8, 0xFF0C1420);
             }
-            postInvalidateDelayed(500);
+            c.restore();
+            c.restore();
+            if (Look.animations) {
+                postInvalidateOnAnimation();
+            } else {
+                postInvalidateDelayed(500);
+            }
+            toastTop = (int) ty;
+        } else {
+            toastTop = -1;
         }
         c.restore();
     }
 
+    private final android.graphics.RectF pill = new android.graphics.RectF();
+
+    /**
+     * The top bar: whose game it is, the link as a pill (a colored light and a word: LINKED, IN BATTLE, AWAY and how
+     * long ago the game was last heard from, NOT LINKED), the orders still to reach the game as a badge, and the
+     * menu's key
+     */
     private void drawTop(Canvas c) {
-        fill.setColor(0xFF283848);
+        fill.setColor(0xFF1C2838);
         c.drawRect(0, 0, w, TOP, fill);
+        fill.setColor(0xFF2E4058);
+        c.drawRect(0, TOP - 1, w, TOP, fill);
         Model m = app.model();
         LinkClient cl = app.client;
-        int x = 4;
         if (m != null) {
-            x += art.textHex(c, m.playerName(), x, 2, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW) + 6;
-        } else if (cl == null) {
-            art.text(c, "MOEMON COMPANION", x, 2, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
+            art.textHex(c, m.playerName(), 6, 2, GameArt.WHITE_TEXT, 0xFF0C1420);
+        } else {
+            art.text(c, "MOEMON COMPANION", 6, 2, GameArt.WHITE_TEXT, 0xFF0C1420);
+        }
+        // the menu's key: three bars, lit while pressed
+        boolean menuDown = System.currentTimeMillis() < pressUntil && pressY < 0 && pressX >= w - 26;
+        if (menuDown) {
+            fill.setColor(0xFF3A5070);
+            c.drawRect(w - 24, 1, w - 1, TOP - 2, fill);
+        }
+        fill.setColor(0xFFF0F4F8);
+        for (int i = 0; i < 3; i++) {
+            c.drawRect(w - 18, 5 + i * 4, w - 7, 7 + i * 4, fill);
+        }
+        if (cl == null) {
+            return;
         }
         String s;
-        int color;
-        if (cl == null) {
-            s = "";
-            color = GameArt.WHITE_TEXT;
-        } else {
-            switch (cl.status()) {
-                case LINKED:
-                    s = app.locked() ? "IN BATTLE" : cl.viaServer() ? "LINKED (AWAY)" : "LINKED";
-                    color = app.locked() ? 0xFFF8A050 : 0xFF88F888;
-                    break;
-                case LINKING:
-                    s = m == null ? "LINKING..." : "AWAY " + ago(m.asOf);
-                    color = 0xFFF8E070;
-                    break;
-                case REFUSED:
-                    s = "NOT LINKED";
-                    color = 0xFFF87070;
-                    break;
-                default:
-                    s = m == null ? "AWAY" : "AWAY " + ago(m.asOf);
-                    color = 0xFFF8E070;
-            }
-            int waiting = cl.orders.pending().size();
-            if (waiting > 0) {
-                s += "  " + waiting + " WAITING";
-            }
+        int light;
+        switch (cl.status()) {
+            case LINKED:
+                s = app.locked() ? "IN BATTLE" : cl.viaServer() ? "LINKED FROM AWAY" : "LINKED";
+                light = app.locked() ? 0xFFF8A040 : 0xFF58E070;
+                break;
+            case LINKING:
+                s = m == null ? "LINKING" : "AWAY " + ago(m.asOf);
+                light = 0xFFF8D040;
+                break;
+            case REFUSED:
+                s = "NOT LINKED";
+                light = 0xFFF85858;
+                break;
+            default:
+                s = m == null ? "AWAY" : "AWAY " + ago(m.asOf);
+                light = 0xFFF8D040;
         }
-        int sw = art.width(s);
-        art.text(c, s, w - sw - 16, 2, color, GameArt.WHITE_SHADOW);
-        // the menu's dots
-        fill.setColor(0xFFF8F8F8);
-        for (int i = 0; i < 3; i++) {
-            c.drawRect(w - 8, 5 + i * 4, w - 6, 7 + i * 4, fill);
+        int x1 = w - 30;
+        // the orders on their way: a round badge left of the pill
+        int waiting = cl.orders.pending().size();
+        int sw = art.smallWidth(s), pw = sw + 16;
+        int px = x1 - pw;
+        pill.set(px, 3, x1, TOP - 4);
+        fill.setColor(0xFF2A3A50);
+        c.drawRoundRect(pill, 6, 6, fill);
+        fill.setColor(light);
+        c.drawCircle(px + 6.5f, TOP / 2f - 0.5f, 2.5f, fill);
+        art.small(c, s, px + 11, 1, 0xFFE8F0F8, 0);
+        if (waiting > 0) {
+            String n = waiting > 99 ? "99" : String.valueOf(waiting);
+            int bw = Math.max(13, art.smallWidth(n) + 7);
+            pill.set(px - bw - 3, 3, px - 3, TOP - 4);
+            fill.setColor(0xFFF8A040);
+            c.drawRoundRect(pill, 6, 6, fill);
+            art.small(c, n, px - 3 - bw + (bw - art.smallWidth(n)) / 2, 1, 0xFF202020, 0);
+        }
+        if (cl.status() != LinkClient.Status.LINKED) {
+            postInvalidateDelayed(30000);   // (the "how long ago" moves on)
         }
     }
 
@@ -433,13 +492,12 @@ public final class GameView extends View {
             int x = i * tw;
             boolean on = i == tabOf(page) && over == null;
             drawTabIcon(c, i, x + (tw - 12) / 2, y + 3, !on);
-            String name = TAB_SHORT[i];
+            // (the whole name where it fits under the icon, else its short one)
+            String name = art.smallWidth(TAB_NAMES[i]) <= tw - 3 ? TAB_NAMES[i] : TAB_SHORT[i];
             int nw = art.width(name);
-            c.save();
-            c.scale(0.75f, 0.75f, x + tw / 2f, y + 16);
-            art.text(c, name, x + (tw - nw) / 2, y + 12, on ? GameArt.TEXT : 0xFFC8D8E8,
+            nw = art.smallWidth(name);
+            art.small(c, name, x + (tw - nw) / 2, y + 15, on ? GameArt.TEXT : 0xFFC8D8E8,
                     on ? GameArt.SHADOW : 0xFF101820);
-            c.restore();
         }
     }
 
@@ -500,6 +558,9 @@ public final class GameView extends View {
         switch (e.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 scroller.forceFinished(true);
+                pressX = (int) x;   // (a finger on a button: Page.button draws it pressed)
+                pressY = (int) y - TOP;
+                pressUntil = Long.MAX_VALUE;
                 downX = lastX = x;
                 downY = lastY = y;
                 downAt = System.currentTimeMillis();
@@ -512,6 +573,7 @@ public final class GameView extends View {
             case MotionEvent.ACTION_MOVE:
                 if (!moved && Math.hypot(x - downX, y - downY) > 4) {
                     moved = true;
+                    pressUntil = 0;
                     removeCallbacks(longPress);
                     if (menu == null && downY >= TOP && downY < h - TABS && !longDone) {
                         dragging = active().dragStart((int) downX, (int) downY - TOP);
@@ -531,6 +593,10 @@ public final class GameView extends View {
                 return true;
             case MotionEvent.ACTION_UP:
                 removeCallbacks(longPress);
+                if (pressUntil != 0) {
+                    pressUntil = System.currentTimeMillis() + 90;   // (the press shows a moment after the finger lifts)
+                    postInvalidateDelayed(100);
+                }
                 velocity.computeCurrentVelocity(1000);
                 float vx = velocity.getXVelocity() / scale, vy = velocity.getYVelocity() / scale;
                 velocity.recycle();
@@ -555,6 +621,7 @@ public final class GameView extends View {
                 return true;
             case MotionEvent.ACTION_CANCEL:
                 removeCallbacks(longPress);
+                pressUntil = 0;
                 if (dragging || longDone) {
                     active().dragEnd(-1000, -1000);
                 }
@@ -571,6 +638,11 @@ public final class GameView extends View {
     }
 
     private void tap(int x, int y) {
+        if (toastTop >= 0 && y >= toastTop && y < h - TABS && menu == null) {
+            app.toastAt = 0;   // (a tap on the toast closes it)
+            invalidate();
+            return;
+        }
         if (y < TOP) {
             if (x >= w - 60) {
                 sound.play("se_win_open");   // (the game's START menu)

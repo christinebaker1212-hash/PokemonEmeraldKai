@@ -228,11 +228,8 @@ public class MePage extends Page {
                 }
             }
             String label = item == 0 ? "EMPTY" : stage >= 5 ? "x" + p.optInt(3) : minutes(p.optInt(2));
-            c.save();
-            c.scale(0.75f, 0.75f, x + cw / 2f, py + 36);
-            art.text(c, label, x + (cw - art.width(label)) / 2, py + 28, stage >= 5 ? 0xFF208830 : GameArt.GRAY_TEXT,
+            art.small(c, label, x + (cw - art.smallWidth(label)) / 2, py + 30, stage >= 5 ? 0xFF208830 : GameArt.GRAY_TEXT,
                     GameArt.SHADOW);
-            c.restore();
         }
         return y + rows * 46 + 8;
     }
