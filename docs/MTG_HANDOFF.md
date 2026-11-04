@@ -3,17 +3,21 @@
 The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the pool plays: `docs/MTG_SCOPE.md`
 (generated: `tools/mtg/scope.py`). This file: what is built, how it is built, what comes next.
 
-## Status (2026-11-04: the first pass)
+## Status (2026-11-04: in the game, 1.95.0)
+- **Playable in the game at MOSSDEEP's CARD SHOP** (COOP_NOTES "MAGIC"): the clerk's starter decks, six regulars
+  upstairs and down, the CARD CASE's MAGIC side (hidden until a deck), decks and the builder, the BINDER, boosters
+  for wins, the duel table. Scenarios mtg_shop, mtg_play. Not yet: the other venues (CIANWOOD, SAFFRON, SINNOH's
+  PAL PARK), Magic players out in the world, booster drafts with friends, online duels, card art, HOW TO PLAY pages
+  in tcg_guide.c, the phone app.
+
+## The first pass (2026-11-04)
 - **The engine is Forge translated into C** (the user: "the best of both worlds", Forge's AI too). No Java.
   It reads Forge's own card scripts for the pool only (Premodern: 5408 cards with the 33 banned ones).
 - **798 of the 5408 cards play**, by the rules below. A card the engine doesn't fully understand is marked
   unsupported (with the first missing piece) and is never put in a duel, so nothing plays wrong.
 - Tests: `tools/mtg/test.sh` (132 checks: set-up tables for each rule, and 40 whole duels between the stand-in AIs:
   every one ends, and a memcpy copy taken mid-duel plays exactly the same duel as the original).
-- Built into the game already (every `.c` under src/ is): src/mtg compiles with the game's own flags and
-  preprocessor (checked with `make PORTABLE=1 TARGET_OS=LINUX build/pc64/src/mtg/*.o`). Nothing calls it yet, the
-  pack isn't embedded yet, and nothing in the game shows Magic (it stays hidden until a starter deck, by decision).
-- Not built yet: everything a player sees (the CARD CASE's fourth side, the table, the venues, the art).
+- (Since 1.95.0 the game around it is built: see Status above and COOP_NOTES "MAGIC".)
 
 ## Files
 - `tools/mtg/fetch_pool.py` -> `tools/mtg/pool.json`: the pool from Scryfall (`format:premodern`, plus
@@ -31,6 +35,12 @@ The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the po
   MagicStack, GameAction, Combat, CombatUtil).
 - `src/mtg/mtg_effects.c`: the effects (forge/game/ability/effects) and what each understands.
 - `src/mtg/mtg_ai.c`: the STAND-IN AI, only until forge-ai is translated.
+- `include/mtg/collection.h`, `src/mtg/mtg_collection.c`: the save's cards and decks ("<save>.mtg"), boosters.
+- `src/mtg/mtg_decks.c`: the five starters and the six MOSSDEEP regulars' decks (tools/mtg/test.sh checks every
+  card is playable).
+- `include/mtg/integration.h`, `src/mtg/mtg_integration.c` (the pack, the sidecar, specials, `mp mtg`),
+  `src/mtg/mtg_pak.c` (the .incbin), `src/mtg/mtg_text.c` (card words in the font's letters), `src/mtg/mtg_ui.c`
+  (the screens), `src/mtg/mtg_board.c` (the table), `data/scripts/mtg_shop.inc` (MOSSDEEP).
 - `tools/mtg/test_rules.c`, `tools/mtg/test.sh`; `tools/mtg/scope_dump.c`, `tools/mtg/scope.py`.
 - `dist_extras/FORGE_CREDITS.txt`: GPL-3 credits and Wizards' Fan Content Policy line (ships next to the exe).
 
@@ -77,10 +87,11 @@ The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the po
 7. Mulligans (London), a player's own X, multiple blockers' damage order chosen, split / flip cards (ALTERNATE),
    planeswalkers (none in the pool), hybrid mana (none in the pool).
 
-Then the game around it (docs/MTG_DECISIONS.md): the pack embedded (`src/mtg/mtg_pak.c` with .incbin and a
-json_data_rules.mk dependency, as ygo_edo_pak.c), the CARD CASE's fourth side hidden until a starter deck, the
-480x320 table, the venues (MOSSDEEP, CIANWOOD, SAFFRON, SINNOH's PAL PARK), Scryfall art (tools/mtg/fetch_art.py),
-online duels by answers, booster drafts with friends, the phone app through JNI like tt / tcg / ygo.
+Then more of the game around it (docs/MTG_DECISIONS.md): the venues still to build (CIANWOOD and SAFFRON each a
+copy of MOSSDEEP's CARD SHOP, SINNOH's PAL PARK as a hall for all four games), a few Magic players out in the world
+(tcg_field.c's which-game menu, once the player has a deck), new regulars' decks as more cards play, Scryfall art
+(tools/mtg/fetch_art.py), HOW TO PLAY pages (tcg_guide.c), the 480x320 table if 240x160 grows too tight, online
+duels by answers, booster drafts with friends, the phone app through JNI like tt / tcg / ygo.
 
 ## Translating a piece
 1. Find it in docs/MTG_SCOPE.md; read the Java (fetch_forge.sh): `forge/game/ability/effects/<X>Effect.java`,

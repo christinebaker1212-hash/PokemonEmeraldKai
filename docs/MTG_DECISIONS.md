@@ -56,9 +56,20 @@ what was proposed and not yet confirmed, then what is still open.
 
 Built from 2026-11-04: docs/MTG_HANDOFF.md (status and next steps), docs/MTG_SCOPE.md (how many cards play).
 
+## Choices made while building (1.95.0; the user can change any)
+- The starter comes from MOSSDEEP's clerk (the counter man): a CARD CASE first if needed, then one of five 40-card
+  single-color starters of the game's own (EMBER, TIDEWATER, NIGHTFALL, WILDWOOD, DAYBREAK), built from the cards
+  the engine plays. The proposed Portal / Starter decks wait until enough of their cards play.
+- Decks of 40 cards at least (the starters' size, quicker duels), four of a card but basic lands, which are free.
+- The regulars: six at MOSSDEEP with names, words and decks of their own (two upstairs, four in the play room). B1F is
+  reached through the clerk (1F's own stairs are behind the counter); its stairs come up by the front door.
+- A win brings a booster of 8 (5 commons, 2 uncommons, an uncommon or one in four a rare); a loss costs nothing.
+- The table is 240x160 like the other card games' for now; the proposed 480x320 stays open.
+- The table passes for the player when nothing else can be done, when their own spell is on top, and outside their
+  main phases, the blocks and the opponent's end step; L held stops at every chance.
+
 ## Open
-- Who gives the starter deck, and where (MOSSDEEP's shop is the natural place).
-- Which NPCs play Magic, and how many.
+- Which NPCs out in the world play Magic, and how many (only MOSSDEEP's regulars so far).
 
 ## Card art: Scryfall
 - api.scryfall.com has every printing of every card (checked 2026-11-03 with 4th Edition's Lightning Bolt):

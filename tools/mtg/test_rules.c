@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "mtg_internal.h"
+#include "mtg/collection.h"
 
 static int sFails, sChecks;
 #define CHECK(cond, ...) do { sChecks++; if (!(cond)) { sFails++; printf("  FAIL %s:%d: ", __FILE__, __LINE__); \
@@ -445,6 +446,57 @@ static void TestDb(void)
     }
 }
 
+// ---- the collection, the decks, boosters, the file
+static void TestCollection(void)
+{
+    static MtgCollection c, back;
+    static uint8_t buf[200000];
+    uint16_t booster[MTG_BOOSTER];
+    MtgSavedDeck d;
+    int i, k, n;
+    uint32_t size;
+    printf("collection, starters, duelists, boosters\n");
+    for (i = 0; i < MTG_STARTERS; i++) {
+        int missing = Mtg_RecipeDeck(&gMtgStarters[i], &d);
+        CHECK(missing == 0 && d.count == 40, "starter %s: %d cards, %d missing", gMtgStarters[i].name, d.count, missing);
+        CHECK(Mtg_DeckProblem(NULL, &d) == NULL, "starter %s plays: %s", gMtgStarters[i].name, Mtg_DeckProblem(NULL, &d));
+    }
+    for (i = 0; i < MTG_DUELISTS; i++) {
+        MtgRecipe r = {gMtgDuelists[i].name, "", 0, gMtgDuelists[i].cards};
+        int missing = Mtg_RecipeDeck(&r, &d);
+        CHECK(missing == 0 && d.count == 40, "duelist %s: %d cards, %d missing", r.name, d.count, missing);
+        CHECK(Mtg_DeckProblem(NULL, &d) == NULL, "duelist %s's deck plays: %s", r.name, Mtg_DeckProblem(NULL, &d));
+    }
+    Mtg_CollectionInit(&c, 99);
+    c.owner = 0x12345678;
+    Mtg_GiveStarter(&c, 3);
+    CHECK(c.optedIn && c.decks[0].count == 40 && !strcmp(c.decks[0].name, "WILDWOOD"), "the starter is deck 0");
+    CHECK(Mtg_DeckProblem(&c, &c.decks[0]) == NULL, "the starter is owned: %s", Mtg_DeckProblem(&c, &c.decks[0]));
+    CHECK(c.owned[Card("Llanowar Elves")] == 2 && c.owned[Card("Forest")] == 0, "owned: 2 elves, forests free");
+    n = Mtg_OpenBooster(&c, booster);
+    CHECK(n == MTG_BOOSTER, "a booster of %d", n);
+    for (i = 0; i < n; i++)
+        CHECK(Mtg_CanUse(booster[i]) && !Mtg_IsBasicLand(booster[i]) && c.owned[booster[i]] > 0, "booster card usable");
+    d = c.decks[0];
+    Mtg_DeckAdd(&d, Card("Llanowar Elves"));
+    Mtg_DeckAdd(&d, Card("Llanowar Elves"));
+    Mtg_DeckAdd(&d, Card("Llanowar Elves"));
+    CHECK(Mtg_DeckProblem(&c, &d) != NULL, "five elves (two owned) refused");
+    strcpy(c.decks[3].name, "TEST");
+    for (k = 0; k < 41; k++)
+        Mtg_DeckAdd(&c.decks[3], Card("Island"));
+    c.wins = 7, c.beaten = 5, c.activeDeck = 3;
+    size = Mtg_CollectionWrite(&c, buf, sizeof(buf));
+    CHECK(size > 0 && Mtg_CollectionRead(&back, buf, size), "written and read back (%u bytes)", size);
+    CHECK(back.owner == c.owner && back.wins == 7 && back.beaten == 5 && back.activeDeck == 3 && back.optedIn,
+          "the record came back");
+    CHECK(!memcmp(back.owned, c.owned, sizeof(c.owned)), "the cards came back");
+    for (k = 0; k < MTG_DECKS; k++)
+        CHECK(back.decks[k].count == c.decks[k].count && !memcmp(back.decks[k].cards, c.decks[k].cards,
+              c.decks[k].count * 2) && !strcmp(back.decks[k].name, c.decks[k].name), "deck %d came back", k);
+    CHECK(!Mtg_CollectionRead(&back, buf, 3), "a cut file is refused");
+}
+
 int main(int argc, char **argv)
 {
     uint32_t size;
@@ -455,6 +507,7 @@ int main(int argc, char **argv)
     }
     free(pak);
     TestDb();
+    TestCollection();
     TestBolt();
     TestResponse();
     TestPlowshares();

@@ -37,6 +37,7 @@
 #include "tcg_structure_decks.h"
 #include "ygo/integration.h"
 #include "tt/integration.h"
+#include "mtg/integration.h"
 #include "../ygo/ygo_gfx.h"
 int Tcg_GrantCase(void);
 void Tcg_ResumeGame(void (*callback)(void));
@@ -204,7 +205,7 @@ static void Screen(int screen)
     U.scroll = 0;
     U.age = 0;
 }
-int Tcg_IsActive(void) { return U.screen != UI_CLOSED || YgoUi_Active() || TtUi_Active(); }
+int Tcg_IsActive(void) { return U.screen != UI_CLOSED || YgoUi_Active() || TtUi_Active() || MtgUi_Active(); }
 int Tcg_OnlineWilling(void) { return 0; }
 unsigned Tcg_HiddenFrom(void)
 {
@@ -213,7 +214,8 @@ unsigned Tcg_HiddenFrom(void)
 }
 unsigned Tcg_DuelingNow(void)
 {
-    return U.screen == UI_DUEL || (U.screen == UI_INSPECT && U.back == UI_DUEL) || YgoUi_DuelingNow() || TtUi_DuelingNow();
+    return U.screen == UI_DUEL || (U.screen == UI_INSPECT && U.back == UI_DUEL) || YgoUi_DuelingNow() || TtUi_DuelingNow()
+           || MtgUi_DuelingNow();
 }
 
 /* The local player is always player 0 on screen: the friend who accepted
@@ -283,6 +285,12 @@ void Tcg_OpenCase(void (*returnToGame)(void))
     struct YgoCollection *y = Ygo_GetCollection();
     struct TtCollection *t = Tt_GetCollection();
     /* The side used last (another game's when it's the only one with cards) */
+    if (Mtg_Unlocked() && (Mtg_GetCollection()->flags & MTG_FLAG_CASE_SIDE
+                           || (!Tcg_GetCollection()->optedIn && !y->optedIn && !t->optedIn)))
+    {
+        MtgUi_OpenCase(returnToGame, 0);
+        return;
+    }
     if (t->optedIn && (t->flags & TT_FLAG_CASE_SIDE || (!Tcg_GetCollection()->optedIn && !y->optedIn)))
     {
         TtUi_OpenCase(returnToGame, 0);
@@ -303,6 +311,12 @@ void Tcg_OpenCaseGame(unsigned game, void (*returnToGame)(void), int fromScript)
 {
     Ygo_GetCollection()->flags &= ~YGO_FLAG_CASE_SIDE;
     Tt_GetCollection()->flags &= ~TT_FLAG_CASE_SIDE;
+    Mtg_GetCollection()->flags &= ~MTG_FLAG_CASE_SIDE;
+    if (game == KIT_GAME_MAGIC && Mtg_Unlocked())
+    {
+        MtgUi_OpenCase(returnToGame, fromScript);
+        return;
+    }
     if (game == KIT_GAME_YUGIOH)
     {
         Ygo_GetCollection()->flags |= YGO_FLAG_CASE_SIDE;
@@ -321,6 +335,7 @@ void Tcg_OpenCaseSide(void (*returnToGame)(void), int fromScript)
 {
     Ygo_GetCollection()->flags &= ~YGO_FLAG_CASE_SIDE;
     Tt_GetCollection()->flags &= ~TT_FLAG_CASE_SIDE;
+    Mtg_GetCollection()->flags &= ~MTG_FLAG_CASE_SIDE;
     U.returnToGame = returnToGame;
     Open(UI_HOME);
     U.fromScript = fromScript;
@@ -1223,23 +1238,25 @@ void TcgUi_Match(int x, int y, int w, unsigned chance, int cards, int level, int
 void TcgUi_CaseTabs(unsigned game, unsigned color)
 {
     /* the chosen side's tab is wide enough for its whole name; the others show a short one */
-    static const char *const names[] = {"POKeMON", "YU-GI-OH!", "TRIAD"};
-    static const char *const shortNames[] = {"POKe", "YGO", "TRIAD"};
+    /* (MAGIC's tab only once the player has a Magic deck: then four narrower tabs) */
+    static const char *const names[] = {"POKeMON", "YU-GI-OH!", "TRIAD", "MAGIC"};
+    static const char *const shortNames[] = {"POKe", "YGO", "TRIAD", "MTG"};
+    static const char *const shortNames4[] = {"POKe", "YGO", "TT", "MTG"};
     unsigned light = G_Mix(color, 0xffffff, 0.45f), dark = G_Mix(color, 0x000000, 0.35f);
-    int x = 2, i;
+    int x = 2, i, tabs = Mtg_Unlocked() ? 4 : 3, off = tabs == 4 ? 19 : 27;
     G_RoundFill(0, 0, PANEL_W, STRIP_Y - 2, light, 255);
     G_RoundFrame(0, 0, PANEL_W, STRIP_Y - 2, dark, 255);
     G_FillA(1, 1, PANEL_W - 2, 1, 0xffffff, 120);
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < tabs; i++)
     {
-        int on = (unsigned)i == game, w = on ? PANEL_W - 6 - 2 * 27 : 27;
+        int on = (unsigned)i == game, w = on ? PANEL_W - 3 - tabs - (tabs - 1) * off : off;
         unsigned fill = on ? color : G_Mix(light, 0x808890, 0.35f);
         G_RoundFill(x, on ? 2 : 4, w, on ? 15 : 12, fill, 255);
         G_RoundFrame(x, on ? 2 : 4, w, on ? 15 : 12, on ? dark : G_Mix(light, 0x404850, 0.5f), 255);
         if (on)
             G_FillA(x + 1, 3, w - 2, 1, G_Mix(color, 0xffffff, 0.5f), 255);
         G_TextAlign(x + w / 2, on ? 3 : 4, TA_CENTER, on ? G_WHITE : 0x505860, on ? dark : G_NO_SHADOW,
-                    on ? names[i] : shortNames[i], TF_NARROW);
+                    on ? names[i] : tabs == 4 ? shortNames4[i] : shortNames[i], TF_NARROW);
         x += w + 1;
     }
 }
@@ -3479,6 +3496,7 @@ int Tcg_Step(unsigned keys)
         U.frame++;
         MP_Sound_TickFanfare();
         TtUi_Step(keys);
+        MtgUi_Step(keys);
         return YgoUi_Step(keys);
     }
     if (TtUi_Active())
@@ -3486,12 +3504,22 @@ int Tcg_Step(unsigned keys)
         U.frame++;
         MP_Sound_TickFanfare();
         YgoUi_Step(keys);
+        MtgUi_Step(keys);
         return TtUi_Step(keys);
+    }
+    if (MtgUi_Active())
+    {
+        U.frame++;
+        MP_Sound_TickFanfare();
+        YgoUi_Step(keys);
+        TtUi_Step(keys);
+        return MtgUi_Step(keys);
     }
     /* (closed, the other games' screens only note the buttons held: one still down from the message that opened
      * them isn't a new press, as here) */
     YgoUi_Step(keys);
     TtUi_Step(keys);
+    MtgUi_Step(keys);
     if (!Tcg_IsActive())
         return 0;
     MP_Sound_TickFanfare(); /* (the game's tasks don't run while the cards are open) */
@@ -3548,7 +3576,7 @@ int Tcg_Step(unsigned keys)
         else if (pressed & (KEY_L | KEY_R))
         {
             PlaySE(SE_SELECT);
-            ToSide(pressed & KEY_R ? KIT_GAME_YUGIOH : KIT_GAME_TRIAD);
+            ToSide(pressed & KEY_R ? KIT_GAME_YUGIOH : Mtg_Unlocked() ? KIT_GAME_MAGIC : KIT_GAME_TRIAD);
         }
         else if (pressed & KEY_B)
         {
@@ -4230,6 +4258,8 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
             YgoUi_Draw();
         else if (TtUi_Active())
             TtUi_Draw();
+        else if (MtgUi_Active())
+            MtgUi_Draw();
         break;
     }
     if (TcgSearch_Active() && Searchable() && !TcgGuide_Active())

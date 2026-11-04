@@ -1,0 +1,50 @@
+pressuntil A field 5000
+wait 60
+mp mtg starter 0
+mp mtg duel 1
+wait 30
+press A 2
+waitlog 3000 mtg: your move: priority
+wait 10
+mp mtg focus Mountain
+press A 2
+wait 20
+mp mtg focus Raging Goblin
+press A 2
+waitlog 600 mtg: your move: attackers
+wait 10
+rendershot p_goblin
+mp mtg focus Raging Goblin
+press A 2
+wait 10
+rendershot p_attack
+press START 2
+wait 200
+mp mtg table
+waitlog 6000 mtg: your move: priority, turn 4
+wait 30
+mp mtg focus Mountain
+press A 2
+wait 20
+mp mtg focus Shock
+press A 2
+wait 10
+rendershot p_target
+press A 2
+wait 120
+rendershot p_after_shock
+press SELECT 2
+wait 10
+rendershot p_inspect
+press B 2
+wait 10
+mp mtg table
+mp mtg lose
+waitlog 300 mtg: duel over
+wait 120
+press A 2
+wait 30
+rendershot p_lost
+press A 2
+wait 60
+quit

@@ -478,14 +478,15 @@ static void ParseCard(int id, char *text)
 int Mtg_DbLoad(const void *pak, uint32_t size)
 {
     const uint8_t *p = pak;
-    uint32_t count, i, textOff;
+    uint32_t count, version, i, textOff;
     if (sCards)
         return sCardCount;
     if (size < 12 || memcmp(p, "MTGF", 4) != 0)
         return 0;
+    memcpy(&version, p + 4, 4);
     memcpy(&count, p + 8, 4);
-    textOff = 12 + 12 * count;
-    if (textOff > size)
+    textOff = 12 + 16 * count;
+    if (version != 2 || textOff > size)
         return 0;
     sText = malloc(size - textOff + 1);
     memcpy(sText, p + textOff, size - textOff);
@@ -493,10 +494,12 @@ int Mtg_DbLoad(const void *pak, uint32_t size)
     sCards = calloc(count, sizeof(MtgCardDef));
     sCardCount = (int)count;
     for (i = 0; i < count; i++) {
-        uint32_t e[3];
-        memcpy(e, p + 12 + 12 * i, 12);
+        uint32_t e[4];
+        memcpy(e, p + 12 + 16 * i, 16);
         ParseCard((int)i, sText + e[1]);
         sCards[i].name = sText + e[0];   // (the pack's own name, the one it is sorted by)
+        sCards[i].rarity = (uint8_t)(e[3] & 3);
+        sCards[i].banned = (uint8_t)((e[3] >> 2) & 1);
     }
     return sCardCount;
 }

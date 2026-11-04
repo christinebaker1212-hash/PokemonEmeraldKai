@@ -4924,3 +4924,37 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
     HERB), each on a FLAG_JOHTO_HIDE_* set by MP_JohtoWeekdayPeople, in the alcoves of Quetzal's flute / METEORITE /
     empty clerks; KUNI's scene gone, its triggers only move VAR_QZ_0x500A to 8. `mp hour H` sets the game clock's hour.
     crystal_words.py puts in {d:NAME} numbers from the map's DEFs. Tests johto_haircut, johto_bargain.
+
+## MAGIC (1.95.0: docs/MTG_DECISIONS.md, docs/MTG_HANDOFF.md)
+- The rules are Forge's translated into C (src/mtg/mtg_game.c etc., include/mtg/mtg.h), reading Forge's own card
+  scripts for the Premodern pool (graphics/mtg/forge.pak, built in by src/mtg/mtg_pak.c with .incbin; read once by
+  mtg_integration.c Mtg_EnsureDb, ~10 ms). A card plays only when every piece of it is translated (docs/MTG_SCOPE.md).
+- The collection is "<save>.mtg" (src/mtg/mtg_collection.c: cards and decks by name hash, so a rebuilt pack keeps
+  saves; Mtg_GetCollection, written from Tcg_WriteSidecar, forgotten by Tcg_ForgetSidecars). Under the test harness
+  its random numbers start the same (12345), so duels are dealt the same.
+- Hidden until a deck (decisions 5, 6): TcgUi_CaseTabs shows a fourth tab (MAGIC; the others shorten to POKe / YGO /
+  TT / MTG) and the L / R round takes in MAGIC (POKeMON <- L, TRIPLE TRIAD -> R) only once Mtg_Unlocked(); the case
+  opens on MAGIC when it was used last (MTG_FLAG_CASE_SIDE) or is the only game with cards. Before a deck the regulars
+  say they're only talking.
+- MOSSDEEP's CARD SHOP (the GAME CORNER: data/scripts/mtg_shop.inc): the clerk (the counter man) gives a CARD CASE if
+  needed and a starter (src/mtg/mtg_decks.c gMtgStarters: EMBER red, TIDEWATER blue, NIGHTFALL black, WILDWOOD green,
+  DAYBREAK white; 40 cards, 17 lands), then offers the way down to the play room (warp to B1F 3,2: 1F's own stairs are
+  behind the counter). B1F's stairs come back up by the front door (warp 0). Regulars (gMtgDuelists, by VAR_0x8004):
+  AUGUST (the old man) and PIP on 1F, RHEA, MARLOW, TESS, NOLAN on B1F; specials Mtg_DuelistState /
+  Mtg_DuelistChallenge. A win: a booster of 8 usable cards (5 common, 2 uncommon, an uncommon or one in four a rare),
+  wins / beaten saved; a loss costs nothing.
+- Screens (src/mtg/mtg_ui.c, the card games' kit and canvas): HOME (DECKS, BINDER, HOW TO PLAY), DECKS (8 slots:
+  PLAY WITH IT, EDIT, COPY, DELETE), the builder (basic lands free, at most what's owned and 4 of a card, 40 cards at
+  least), the BINDER (rarity by color), a card's whole text, the starters, a challenge, the booster.
+- The table (src/mtg/mtg_board.c): opponent's bar, their lands (alike ones stacked, xN), their permanents, the middle
+  line (step, top of the stack, what happened), yours, your hand, your bar (the focused card's name, cost, P/T; the
+  target while choosing one). Tiles 24-40 px by how many share a row; tapped cards on their side; attackers framed
+  red, blockers blue with a line to what they block. A plays the card under the cursor (a menu when it can do more,
+  then the target cursor, which starts on the opponent's side), START passes, SELECT / INSPECT shows the whole text,
+  L held stops at every priority. It passes for the player when nothing else can be done, when their own spell is on
+  top, and outside their main phases, the blocks and the opponent's end step.
+- The computer is mtg_ai.c, a STAND-IN until forge-ai's translation (docs/MTG_HANDOFF.md).
+- Debug: `mp mtg starter N`, `mp mtg state`, `mp mtg duel N` (a regular's challenge), `mp mtg autoplay 1` (the
+  computer plays your side too), `mp mtg focus NAME` (the cursor on that card), `mp mtg table`, `mp mtg win` /
+  `lose`, `mp mtg save`. Logs: "mtg: your move: ...", "mtg: you: played / cast / used ...", "mtg: duel over: ...".
+- Tests: tools/mtg/test.sh (the rules, the collection, the decks), scenarios mtg_shop and mtg_play.

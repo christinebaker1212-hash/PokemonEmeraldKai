@@ -2,8 +2,9 @@
 """Builds graphics/mtg/forge.pak: Forge's card script for every card of the pool (tools/mtg/pool.json), the text the
 C engine (src/mtg/mtg_script.c) reads. Forge at the pinned commit: tools/mtg/fetch_forge.sh.
 
-Pack format (little-endian): "MTGF", u32 version (1), u32 count, then count entries sorted by name (bytes)
-{u32 name, u32 script, u32 size} (offsets into the text block, each string 0-terminated), then the text block.
+Pack format (little-endian): "MTGF", u32 version (2), u32 count, then count entries sorted by name (bytes)
+{u32 name, u32 script, u32 size, u32 info} (offsets into the text block, each string 0-terminated; info: bits 0-1
+the rarity from pool.json, 0 common 1 uncommon 2 rare, bit 2 on Premodern's banned list), then the text block.
 
 usage: build_pack.py FORGE_DIR [OUT]   (default graphics/mtg/forge.pak)"""
 import json, os, re, struct, subprocess, sys
@@ -37,20 +38,21 @@ def main():
             missing.append(name)
             continue
         t = "\n".join(l.rstrip() for l in t.replace("\r", "").splitlines() if l.strip()) + "\n"
-        cards.append((name.encode("utf-8"), t.encode("utf-8")))
+        info = {"common": 0, "uncommon": 1, "rare": 2}.get(c.get("rarity"), 0) | (4 if c["banned"] else 0)
+        cards.append((name.encode("utf-8"), t.encode("utf-8"), info))
     if missing:
         sys.exit("no Forge script for %d cards: %s" % (len(missing), ", ".join(missing[:20])))
     cards.sort()
     text, index = bytearray(), []
-    for name, t in cards:
+    for name, t, info in cards:
         n = len(text); text += name + b"\0"
         s = len(text); text += t + b"\0"
-        index.append((n, s, len(t)))
+        index.append((n, s, len(t), info))
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "wb") as f:
-        f.write(b"MTGF" + struct.pack("<II", 1, len(cards)))
+        f.write(b"MTGF" + struct.pack("<II", 2, len(cards)))
         for e in index:
-            f.write(struct.pack("<III", *e))
+            f.write(struct.pack("<IIII", *e))
         f.write(text)
     print("%d cards, %d bytes -> %s" % (len(cards), os.path.getsize(out), out))
 

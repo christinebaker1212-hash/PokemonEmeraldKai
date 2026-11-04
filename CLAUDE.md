@@ -87,7 +87,9 @@ AllowSmallTweaks only unlocks the small tweaks, and no dev updates are pushed.
 `docs/MTG_HANDOFF.md`**. Forge translated into C (src/mtg/, include/mtg/mtg.h; its AI too, later), reading Forge's own
 card scripts for the Premodern pool (graphics/mtg/forge.pak from tools/mtg/build_pack.py at the pinned Forge commit;
 pool tools/mtg/pool.json from Scryfall). A card plays only once every piece of it is translated; how many do:
-docs/MTG_SCOPE.md (tools/mtg/scope.py, rerun after translating). Tests tools/mtg/test.sh. Not shown in the game yet.
+docs/MTG_SCOPE.md (tools/mtg/scope.py, rerun after translating). Tests tools/mtg/test.sh. In the game since 1.95.0 at
+MOSSDEEP's CARD SHOP (the GAME CORNER, data/scripts/mtg_shop.inc), the CARD CASE's MAGIC side hidden until a deck
+(src/mtg/mtg_ui.c, mtg_board.c, "<save>.mtg"): COOP_NOTES "MAGIC"; scenarios mtg_shop, mtg_play.
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

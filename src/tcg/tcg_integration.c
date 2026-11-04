@@ -14,6 +14,7 @@
 #include "tcg/online.h"
 #include "ygo/integration.h"
 #include "tt/integration.h"
+#include "mtg/integration.h"
 #include "ygo/net.h"
 #include "tt/net.h"
 #include <stdlib.h>
@@ -51,6 +52,7 @@ void Tcg_WriteSidecar(void)
     char path[600];
     Ygo_WriteSidecar();   /* the Yu-Gi-Oh! cards: "<save>.ygo" */
     Tt_WriteSidecar();    /* the Triple Triad cards: "<save>.tt" */
+    Mtg_WriteSidecar();   /* the Magic cards: "<save>.mtg" */
     if (!sLoaded || sLoadedFor != SaveOwner())
         return;
     /* (the records against card players of the other two games live here too) */
@@ -186,11 +188,13 @@ void Tcg_ForgetSidecars(void)
 {
     void Ygo_ForgetSidecar(void);
     void Tt_ForgetSidecar(void);
+    void Mtg_ForgetSidecar(void);
     void TcgSearch_Forget(void);
     void CardNew_Forget(void);
     sLoaded = 0;
     CardNew_Forget();
     Ygo_ForgetSidecar();
     Tt_ForgetSidecar();
+    Mtg_ForgetSidecar();
     TcgSearch_Forget();
 }

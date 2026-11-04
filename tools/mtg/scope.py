@@ -15,9 +15,9 @@ PAK = os.path.join(ROOT, "graphics", "mtg", "forge.pak")
 def scripts():
     b = open(PAK, "rb").read()
     n = struct.unpack_from("<I", b, 8)[0]
-    base = 12 + 12 * n
+    base = 12 + 16 * n
     for i in range(n):
-        no, so, sz = struct.unpack_from("<III", b, 12 + 12 * i)
+        no, so, sz, _ = struct.unpack_from("<IIII", b, 12 + 16 * i)
         yield b[base + no:b.index(b"\0", base + no)].decode(), b[base + so:base + so + sz].decode()
 
 
@@ -25,7 +25,8 @@ def main():
     exe = "/tmp/mtg-tests/scope_dump"
     os.makedirs(os.path.dirname(exe), exist_ok=True)
     subprocess.run(["gcc", "-std=gnu99", "-O1", "-iquote", "include", "-iquote", "src/mtg", "tools/mtg/scope_dump.c"]
-                   + sorted("src/mtg/" + f for f in os.listdir(os.path.join(ROOT, "src/mtg")) if f.endswith(".c"))
+                   + ["src/mtg/%s.c" % f for f in ("mtg_script", "mtg_valid", "mtg_mana", "mtg_game", "mtg_effects",
+                                                   "mtg_ai")]
                    + ["-o", exe], cwd=ROOT, check=True)
     out = subprocess.run([exe, PAK], capture_output=True, text=True, cwd=ROOT, check=True).stdout
     status = dict(l.split("\t", 1) for l in out.splitlines())

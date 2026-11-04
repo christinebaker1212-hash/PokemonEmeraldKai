@@ -1,0 +1,122 @@
+pressuntil A field 5000
+wait 60
+mp textspeed 2
+mp warp 14,11,5,6
+wait 90
+mp face left
+wait 4
+press A 2
+wait 60
+shot a_nodeck
+mash B 4 20
+wait 30
+mp warp 14,11,4,4
+wait 60
+mp face up
+wait 4
+press A 2
+wait 40
+pressuntillog A 900 mtg: starter screen
+wait 30
+rendershot a_starter
+press DOWN 2
+wait 6
+press UP 2
+wait 6
+press A 2
+wait 20
+rendershot a_ask
+press A 2
+wait 20
+press A 2
+wait 40
+mash A 8 20
+wait 60
+mp mtg state
+mp cards case
+wait 30
+rendershot a_case
+press A 2
+wait 20
+rendershot a_decks
+press B 2
+wait 10
+press DOWN 2
+wait 6
+press A 2
+wait 20
+rendershot a_binder
+press A 2
+wait 10
+rendershot a_inspect
+press B 2
+wait 6
+press B 2
+wait 6
+press R 2
+wait 20
+rendershot a_side_pokemon
+press L 2
+wait 20
+press B 2
+wait 60
+mp warp 14,11,5,6
+wait 90
+mp face left
+wait 4
+pressuntillog A 600 mtg: challenge from PIP
+wait 30
+rendershot a_challenge
+press A 2
+wait 240
+rendershot a_table
+press SELECT 2
+wait 10
+rendershot a_table_inspect
+press B 2
+wait 10
+mp mtg autoplay 1
+wait 120
+rendershot a_midgame
+mp mtg win
+pressuntillog START 600 mtg: duel over
+wait 120
+rendershot a_result
+press A 2
+wait 30
+rendershot a_after
+press A 2
+wait 30
+press A 2
+wait 60
+mp mtg state
+mp warp 14,11,4,4
+wait 60
+mp face up
+wait 4
+press A 2
+wait 40
+press A 2
+wait 30
+press A 2
+wait 30
+press A 2
+wait 200
+mp where
+mp warp 14,12,6,5
+wait 90
+mp face left
+wait 4
+pressuntillog A 600 mtg: challenge from RHEA
+wait 30
+rendershot a_rhea
+press B 2
+wait 60
+mp warp 14,12,3,2
+wait 60
+mp face up
+wait 4
+press UP 6
+wait 120
+mp where
+quit

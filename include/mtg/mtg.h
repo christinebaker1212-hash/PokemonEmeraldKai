@@ -40,6 +40,7 @@ typedef struct {
 } MtgManaCost;
 
 int Mtg_ManaCostTotal(const MtgManaCost *c);   // mana value with X = 0
+enum { MTG_RARITY_COMMON, MTG_RARITY_UNCOMMON, MTG_RARITY_RARE };
 
 typedef struct MtgCardDef {
     const char *name, *oracle, *subtypes;    // subtypes: the Types line's words after the card types, space-separated
@@ -52,6 +53,7 @@ typedef struct MtgCardDef {
     uint8_t abilityCount;
     uint16_t abilities[8];                   // indexes into the ability table (A: lines)
     uint16_t svarFirst, svarCount;           // the card's SVar: lines
+    uint8_t rarity, banned;                  // MTG_RARITY_*; on Premodern's banned list (tools/mtg/pool.json)
     uint8_t supported;                       // every line understood by the engine
     const char *unsupported;                 // else the first thing it doesn't know (for docs/MTG_SCOPE.md)
 } MtgCardDef;

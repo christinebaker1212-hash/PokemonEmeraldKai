@@ -1,0 +1,7 @@
+# A MAGIC duel played by hand (EMBER against PIP, the same deal every time under the harness): a Mountain played,
+# RAGING GOBLIN cast and attacking the turn it arrives (haste: PIP's elves block it), the next turn a land and SHOCK
+# through the target cursor (it starts on the opponent: PIP down to 18), a card's whole text (SELECT); then a loss (mp mtg lose) and its words.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: your move: priority, turn 2, MAIN 1" "mtg: you: played Mountain" "mtg: you: cast Raging Goblin" "mtg: your move: attackers, turn 2" "mtg: you: attack with 1" "mtg: you: cast Shock on PIP" "life you 20 them 18" "mtg: duel over: lost" "mtg: lost against PIP")
+UNEXPECT_A=("[crash]" "mtg: no Mountain to focus" "mtg: no Raging Goblin to focus" "mtg: no Shock to focus")

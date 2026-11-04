@@ -3,7 +3,7 @@
 
 The pool is Premodern's (docs/MTG_DECISIONS.md): every card legal in it, and its banned cards kept apart
 ("banned": true) so the game's own list can follow Premodern's. One entry per card name, sorted by name:
-  {"name", "type", "cmc", "colors", "banned"}
+  {"name", "type", "cmc", "colors", "rarity", "banned"}   (rarity: common / uncommon / rare, of its first printing)
 Scryfall asks for a named User-Agent, an Accept header and a short pause between requests.
 
 usage: fetch_pool.py [OUT]   (default tools/mtg/pool.json)"""
@@ -25,11 +25,19 @@ def search(q):
 
 def entry(c, banned):
     return {"name": c["name"], "type": c.get("type_line", ""), "cmc": c.get("cmc", 0),
-            "colors": "".join(c.get("colors", c.get("card_faces", [{}])[0].get("colors", []))), "banned": banned}
+            "colors": "".join(c.get("colors", c.get("card_faces", [{}])[0].get("colors", []))),
+            "rarity": first.get(c["name"]) or ("rare" if c.get("rarity") == "mythic" else c.get("rarity", "common")),
+            "banned": banned}
+
+
+first = {}   # name -> the rarity of its earliest printing in the pool's years (a land "special" / "bonus" -> common)
 
 
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "pool.json")
+    for c in search("format:premodern date<=2003-07-01 unique:prints order:released direction:asc"):
+        r = c.get("rarity", "common")
+        first.setdefault(c["name"], r if r in ("common", "uncommon", "rare") else "common")
     cards = {c["name"]: entry(c, False) for c in search("format:premodern")}
     for c in search("banned:premodern"):
         cards[c["name"]] = entry(c, True)

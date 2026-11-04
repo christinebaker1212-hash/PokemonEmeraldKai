@@ -12,13 +12,14 @@ enum
 {
     KIT_GAME_POKEMON,
     KIT_GAME_YUGIOH,
-    KIT_GAME_TRIAD
+    KIT_GAME_TRIAD,
+    KIT_GAME_MAGIC   /* only once the player has a Magic deck (Mtg_Unlocked): hidden from the tabs and L / R before */
 };
 unsigned TcgUi_Frame(void);   /* counts up while the card screens are open (the row frame's pulse) */
 unsigned TcgUi_Theme(void);
 void TcgUi_Background(void);
 void TcgUi_SidePanel(const char *title, unsigned color);
-/* The CARD CASE's three sides on the side panel's tabs: POKeMON | YU-GI-OH! | TRIPLE TRIAD */
+/* The CARD CASE's sides on the side panel's tabs: POKeMON | YU-GI-OH! | TRIPLE TRIAD (| MAGIC once unlocked) */
 void TcgUi_CaseTabs(unsigned game, unsigned color);
 void TcgUi_ListBox(int x, int y, int w, int h);
 void TcgUi_Row(int x, int y, int w, int on, int enabled, const char *label, const char *right);

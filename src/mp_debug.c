@@ -436,6 +436,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         Tt_Debug(arg);
         return;
     }
+    if (strcmp(cmd, "mtg") == 0)
+    {
+        void Mtg_Debug(const char *command);
+        Mtg_Debug(arg);
+        return;
+    }
     if (strcmp(cmd, "export") == 0)
     {
         char path[200];
