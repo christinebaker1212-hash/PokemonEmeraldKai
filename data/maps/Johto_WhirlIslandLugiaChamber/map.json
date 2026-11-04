@@ -129,7 +129,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_WhirlIslandLugiaChamber_EventScript_840EC7C",
-      "flag": "FLAG_QZ_0x1315"
+      "flag": "FLAG_KAI_GONE"
     }
   ],
   "warp_events": [

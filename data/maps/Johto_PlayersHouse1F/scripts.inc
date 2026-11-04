@@ -344,7 +344,7 @@ Johto_PlayersHouse1F_EventScript_8401A37::
 	turnobject 3, 3
 	msgbox Johto_PlayersHouse1F_Text_84026AE, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x5076, 4
-	cleartrainerflag 0x137B
+	cleartrainerflag TRAINER_QZ_4987
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4987, 0, Johto_PlayersHouse1F_Text_840270C
 	fadedefaultbgm
 	specialvar VAR_RESULT, GetBattleOutcome

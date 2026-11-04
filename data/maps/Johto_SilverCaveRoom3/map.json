@@ -25,7 +25,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_SilverCaveRoom3_EventScript_83E03AC",
-      "flag": "FLAG_QZ_0x1423"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_642",
@@ -38,7 +38,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_840EA6A",
-      "flag": "FLAG_QZ_0x1217"
+      "flag": "FLAG_KAI_GONE"
     }
   ],
   "warp_events": [

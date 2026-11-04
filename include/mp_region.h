@@ -1,5 +1,6 @@
 #ifndef GUARD_MP_REGION_H
 #define GUARD_MP_REGION_H
+#include "constants/kai_regions.h"   // (JOHTO / KANTO flags this game added)
 // Moemon Kai: HOENN, JOHTO and KANTO (src/mp/mp_region.c, docs/REGIONS_PLAN.md)
 
 #define REGION_HOENN 0

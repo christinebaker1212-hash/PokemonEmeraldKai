@@ -2,7 +2,7 @@
 
 The audit compared every KANTO map with FireRed and every JOHTO map with Crystal (findings, with the original's and the
 game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided each of the 157 cases below. Status:
-[ ] to do, [x] done (with the release). Rules the user set with these decisions:
+[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports). Rules the user set with these decisions:
 
 - **JOHTO is strictly Crystal** (case 116): HGSS-flavoured events Quetzal added are removed; where this file or
   docs/REGIONS_TODO.md said "HGSS ranks above Quetzal", Crystal alone is the reference now.
@@ -15,50 +15,50 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
   TM gifts the restorations need.
 - **BATTLE TOWER** (case 37): build Crystal's real BATTLE TOWER north of ROUTE 40.
 
-- [ ] **1. [J2-1, J3-1]** Gym wins write to the wrong memory (every JOHTO and KANTO gym): **FIX it, keep the idea**
-- [ ] **2. [K3-1]** Delivering the SAPPHIRE clears KANTO's GAME CLEAR and CHAMPION flags: **FIX it, keep the idea**
-- [ ] **3. [J2-2]** BURNED TOWER B1F calls Emerald's InitRoamer: a Lv 40 LATIOS starts roaming HOENN; JOHTO's beasts don't roam: **RESTORE the original**
-- [ ] **4. [K4-1]** Boulders can't fall through holes, so SEAFOAM's currents can never be stopped (and VICTORY ROAD's 3F->2F boulder never drops): **RESTORE the original**
-- [ ] **5. [K3-2, K3-3]** BIRTH ISLAND soft-locks, shares HOENN's DEOXYS flag, and says "The VOLBEAT flew away!": **RESTORE the original**
-- [ ] **6. [J1-1]** NEW BARK's first visit plants Quetzal's BERRIES into JOHTO's patches 90-99 and the GARDEN farm's plots 100-109: **FIX it, keep the idea**
-- [ ] **7. [J1-2]** The CHARCOAL KILN apprentice never gives CHARCOAL any more (flag shared with the HM01 gift): **RESTORE the original**
-- [ ] **8. [J1-10, J3-13]** The ROUTE 27 crossing and the VICTORY ROAD gate wait for Quetzal's LUGIA / KIMONO GIRL chain: **RESTORE the original**
-- [ ] **9. [K4-2]** Quetzal's PRIMAL CHAMBER still runs: MAXIE / ARCHIE at Lv 70, then GROUDON / KYOGRE appear and can be battled in KANTO: **REMOVE it**
+- [x] **1. [J2-1, J3-1]** Gym wins write to the wrong memory (every JOHTO and KANTO gym): **FIX it, keep the idea**
+- [x] **2. [K3-1]** Delivering the SAPPHIRE clears KANTO's GAME CLEAR and CHAMPION flags: **FIX it, keep the idea**
+- [x] **3. [J2-2]** BURNED TOWER B1F calls Emerald's InitRoamer: a Lv 40 LATIOS starts roaming HOENN; JOHTO's beasts don't roam: **RESTORE the original**
+- [x] **4. [K4-1]** Boulders can't fall through holes, so SEAFOAM's currents can never be stopped (and VICTORY ROAD's 3F->2F boulder never drops): **RESTORE the original**
+- [x] **5. [K3-2, K3-3]** BIRTH ISLAND soft-locks, shares HOENN's DEOXYS flag, and says "The VOLBEAT flew away!": **RESTORE the original**
+- [x] **6. [J1-1]** NEW BARK's first visit plants Quetzal's BERRIES into JOHTO's patches 90-99 and the GARDEN farm's plots 100-109: **FIX it, keep the idea**
+- [x] **7. [J1-2]** The CHARCOAL KILN apprentice never gives CHARCOAL any more (flag shared with the HM01 gift): **RESTORE the original**
+- [x] **8. [J1-10, J3-13]** The ROUTE 27 crossing and the VICTORY ROAD gate wait for Quetzal's LUGIA / KIMONO GIRL chain: **RESTORE the original**
+- [x] **9. [K4-2]** Quetzal's PRIMAL CHAMBER still runs: MAXIE / ARCHIE at Lv 70, then GROUDON / KYOGRE appear and can be battled in KANTO: **REMOVE it**
 - [ ] **10. [K3-10]** The TRAINER TOWER can't be entered: no door, a blocker, and the tower maps unreachable: **RESTORE the original**
-- [ ] **11. [J2-5]** WHITNEY's quiz at the RADIO TOWER gates the GOLDENROD GYM; two answers are wrong in Kai; Crystal's RADIO CARD quiz is gone: **RESTORE the original**
-- [ ] **12. [J2-6]** MAXIE (TIN TOWER roof) and ARCHIE (WHIRL ISLANDS) stand there from the first visit, and their ORBs lead nowhere: **REMOVE it**
-- [ ] **13. [J2-4]** GOLDENROD FLOWER SHOP girl hands out Gen 8 items (TEACUPs, SCROLLs, armor, WHIPPED DREAM) instead of BERRIES: **RESTORE the original**
-- [ ] **14. [J3-2]** ICE PATH's SWINUB can never be fed: the script compares the berry with Quetzal's item number 518: **REMOVE it**
+- [x] **11. [J2-5]** WHITNEY's quiz at the RADIO TOWER gates the GOLDENROD GYM; two answers are wrong in Kai; Crystal's RADIO CARD quiz is gone: **RESTORE the original**
+- [x] **12. [J2-6]** MAXIE (TIN TOWER roof) and ARCHIE (WHIRL ISLANDS) stand there from the first visit, and their ORBs lead nowhere: **REMOVE it**
+- [x] **13. [J2-4]** GOLDENROD FLOWER SHOP girl hands out Gen 8 items (TEACUPs, SCROLLs, armor, WHIPPED DREAM) instead of BERRIES: **RESTORE the original**
+- [x] **14. [J3-2]** ICE PATH's SWINUB can never be fed: the script compares the berry with Quetzal's item number 518: **REMOVE it**
 - [ ] **15. [J3-4]** LANCE says he hands over WHIRLPOOL in the ROCKET HIDEOUT but gives nothing: **RESTORE the original**
-- [ ] **16. [K1-3, K2-21, K3-4, K4-3, J1-3, J3-7]** JESSIE & JAMES's travelling battle (Quetzal's), and its reward is an empty POKéMON: **REMOVE it**
+- [x] **16. [K1-3, K2-21, K3-4, K4-3, J1-3, J3-7]** JESSIE & JAMES's travelling battle (Quetzal's), and its reward is an empty POKéMON: **REMOVE it**
 - [ ] **17. [K1-1, K2-4]** KANTO trainer rematches can never happen (no VS SEEKER, dead rematch branches): **RESTORE the original**
 - [ ] **18. [K1-11, K2-22, K3-26, K4-17]** The KANTO rival is always "BLUE" (FireRed lets you name him): **RESTORE the original**
-- [ ] **19. [K1-4]** ARCEUS still visits the PALLET bedroom although every ARCEUS trial in KANTO is hidden: **REMOVE it**
-- [ ] **20. [K1-6]** CERULEAN CAVE's added RAYQUAZA chamber is now an empty room: **RESTORE the original**
-- [ ] **21. [K1-21]** Gift POKéMON sent to the PC name the wrong BOX: **RESTORE the original**
-- [ ] **22. [K1-22]** PALLET's sign girl never moves to the ROUTE 1 exit (FLAG_OPENED_START_MENU is never set): **RESTORE the original**
-- [ ] **23. [K2-1]** The S.S. ANNE "comes back": Quetzal's harbor words and pier check outlive the ship's departure: **RESTORE the original**
+- [x] **19. [K1-4]** ARCEUS still visits the PALLET bedroom although every ARCEUS trial in KANTO is hidden: **REMOVE it**
+- [x] **20. [K1-6]** CERULEAN CAVE's added RAYQUAZA chamber is now an empty room: **RESTORE the original**
+- [x] **21. [K1-21]** Gift POKéMON sent to the PC name the wrong BOX: **RESTORE the original**
+- [x] **22. [K1-22]** PALLET's sign girl never moves to the ROUTE 1 exit (FLAG_OPENED_START_MENU is never set): **RESTORE the original**
+- [x] **23. [K2-1]** The S.S. ANNE "comes back": Quetzal's harbor words and pier check outlive the ship's departure: **RESTORE the original**
 - [ ] **24. [K2-3]** VERMILION POKéMON CENTER: the VS SEEKER woman gives a PP MAX while talking about an ABILITY PATCH: **RESTORE the original**
 - [ ] **25. [K2-6]** Empty or misleading sections inside the Dept. Store menus: **RESTORE the original**
-- [ ] **26. [K2-8]** GAME CORNER hidden coins give nothing: **RESTORE the original**
+- [x] **26. [K2-8]** GAME CORNER hidden coins give nothing: **RESTORE the original**
 - [ ] **27. [K2-12]** POKéMON TOWER 6F MAROWAK: no ghost battle without the SILPH SCOPE, and the MAROWAK can be caught: **RESTORE the original**
-- [ ] **28. [K3-5]** TANOBY's seven chambers each stand six overlapping REGI objects; only one chamber works: **REMOVE it**
-- [ ] **29. [K3-6]** The three GALARIAN birds stand at every GENERATION and only say "...": **REMOVE it**
+- [x] **28. [K3-5]** TANOBY's seven chambers each stand six overlapping REGI objects; only one chamber works: **REMOVE it**
+- [x] **29. [K3-6]** The three GALARIAN birds stand at every GENERATION and only say "...": **REMOVE it**
 - [ ] **30. [K3-8]** SELPHY's daily request never resets, and FireRed's wish scene is gone: **RESTORE the original**
 - [ ] **31. [K3-22]** ICEFALL CAVE 1F's thin ice never cracks: **RESTORE the original**
-- [ ] **32. [K4-7]** SILPH CO. 1F receptionist opens an empty shop after GIOVANNI is beaten: **RESTORE the original**
-- [ ] **33. [K4-21]** SEAFOAM B4F's current doesn't take the player off their POKéMON: **RESTORE the original**
-- [ ] **34. [J1-16]** RUINS OF ALPH: DUDUNSPARCE tunnel and ARCEUS chamber (Quetzal); its battle is now an UNOWN that keeps coming back: **REMOVE it**
+- [x] **32. [K4-7]** SILPH CO. 1F receptionist opens an empty shop after GIOVANNI is beaten: **RESTORE the original**
+- [x] **33. [K4-21]** SEAFOAM B4F's current doesn't take the player off their POKéMON: **RESTORE the original**
+- [x] **34. [J1-16]** RUINS OF ALPH: DUDUNSPARCE tunnel and ARCEUS chamber (Quetzal); its battle is now an UNOWN that keeps coming back: **REMOVE it**
 - [ ] **35. [J1-17]** The GS BALL lies in the RUINS before the LEAGUE; CELEBI can be called again and again: **RESTORE the original**
 - [ ] **36. [J1-23]** Quetzal "viewpoint" camera pans fire on every step onto their tiles: **RESTORE the original**
 - [ ] **37. [J2-33]** TRAINER HILL / BATTLE TENT signs north of ROUTE 40 lead to an empty room; Crystal's BATTLE TOWER area is gone: **RESTORE the original** - _Create the real BATTLE TOWER._
 - [ ] **38. [J3-3]** LAKE OF RAGE's RED GYARADOS is not shiny: **RESTORE the original**
 - [ ] **39. [J3-5]** MAHOGANY's old man says the MAGIKARP are back only while the player is inside the hideout: **RESTORE the original**
-- [ ] **40. [J3-6]** MT. SILVER's "bag" starts a repeatable COSMOG battle with no gating: **REMOVE it**
+- [x] **40. [J3-6]** MT. SILVER's "bag" starts a repeatable COSMOG battle with no gating: **REMOVE it**
 - [ ] **41. [J3-10]** INDIGO PLATEAU's postgame SILVER: one battle, "challenge me anytime"; Crystal's weekly rival battles missing: **RESTORE the original**
 - [ ] **42. [J3-11]** BAOBA's "SAFARI LEVEL" quest can never start: **RESTORE the original**
 - [ ] **43. [J3-14]** VICTORY ROAD gate's east door walks the whole party into KANTO, skipping Kai's customs: **RESTORE the original** - _Do not allow region walking - customs must apply._
-- [ ] **44. [J3-33]** MT. SILVER ROOM 3's triangular rock (DEOXYS) is a dead prop: **REMOVE it**
+- [x] **44. [J3-33]** MT. SILVER ROOM 3's triangular rock (DEOXYS) is a dead prop: **REMOVE it**
 - [ ] **45. [J2-12, J3-8, J3-9]** JOHTO's leaders promise rematches at a FIGHTING DOJO that has none: **RESTORE the original**
 - [ ] **46. [K2-18, K3-11, K4-14]** POKéMON CENTER 2F attendants explain Quetzal's MPLAYER, cheats and NUZLOCKE: **RESTORE the original**
 - [ ] **47. [K1-20, K3-9, J2-3, J3-36]** DAY-CARE "through the PC": KANTO's two are incense shops, JOHTO has none: **RESTORE the original**

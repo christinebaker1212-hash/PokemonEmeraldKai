@@ -55,26 +55,8 @@ Johto_NewBarkTown_EventScript_83E1420::
 
 Johto_NewBarkTown_EventScript_83E1426::
 	goto_if_set FLAG_QZ_0x11D0, Johto_NewBarkTown_EventScript_83E1482
-	setberrytree 0x5A, 1, 1
-	setberrytree 0x5B, 1, 1
-	setberrytree 0x5C, 2, 1
-	setberrytree 0x5D, 2, 1
-	setberrytree 0x5E, 3, 1
-	setberrytree 0x5F, 3, 1
-	setberrytree 0x60, 4, 1
-	setberrytree 0x61, 4, 1
-	setberrytree 0x62, 5, 1
-	setberrytree 0x63, 5, 1
-	setberrytree 0x64, 6, 1
-	setberrytree 0x65, 6, 1
-	setberrytree 0x66, 7, 1
-	setberrytree 0x67, 7, 1
-	setberrytree 0x68, 8, 1
-	setberrytree 0x69, 8, 1
-	setberrytree 0x6A, 9, 1
-	setberrytree 0x6B, 7, 1
-	setberrytree 0x6C, 0xA, 1
-	setberrytree 0x6D, 0xA, 1
+	@ Moemon Kai: Quetzal planted BERRIES here into tree ids 90-109 (JOHTO\'s own patches, mp_apricorn.c, and the
+	@ GARDEN farm\'s plots): they\'re Kai\'s and planted by their own code
 	setflag FLAG_QZ_0x11D0
 
 Johto_NewBarkTown_EventScript_83E1482::
@@ -291,7 +273,7 @@ Johto_NewBarkTown_EventScript_84039BE::
 	special QzObjectFaceObject
 	msgbox Johto_NewBarkTown_Text_8403CE8, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x5076, 7
-	cleartrainerflag 0x137C
+	cleartrainerflag TRAINER_QZ_4988
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4988, 0, Johto_NewBarkTown_Text_8403DB2
 	fadedefaultbgm
 	specialvar VAR_RESULT, GetBattleOutcome

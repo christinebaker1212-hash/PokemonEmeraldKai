@@ -524,9 +524,9 @@ Quetzal_EventScript_84569D3::
 	clearflag FLAG_QZ_0x2119
 	clearflag FLAG_QZ_0x211F
 	clearflag FLAG_QZ_0x2109
-	cleartrainerflag 0x21B6
-	cleartrainerflag 0x21B7
-	cleartrainerflag 0x21B8
+	cleartrainerflag TRAINER_QZ_8630
+	cleartrainerflag TRAINER_QZ_8631
+	cleartrainerflag TRAINER_QZ_8632
 	setvar VAR_QZ_0x5120, 0
 	return
 
@@ -596,68 +596,68 @@ Quetzal_EventScript_8456FD2::
 	end
 
 Quetzal_EventScript_8457030::
-	settrainerflag 0x208E
+	settrainerflag TRAINER_QZ_8334
 	return
 
 Quetzal_EventScript_8457034::
-	settrainerflag 0x2096
-	settrainerflag 0x20EA
+	settrainerflag TRAINER_QZ_8342
+	settrainerflag TRAINER_QZ_8426
 	return
 
 Quetzal_EventScript_845703B::
-	settrainerflag 0x208D
-	settrainerflag 0x20DC
-	settrainerflag 0x21A7
+	settrainerflag TRAINER_QZ_8333
+	settrainerflag TRAINER_QZ_8412
+	settrainerflag TRAINER_QZ_8615
 	return
 
 Quetzal_EventScript_8457045::
-	settrainerflag 0x2084
-	settrainerflag 0x2085
-	settrainerflag 0x20A0
-	settrainerflag 0x2109
-	settrainerflag 0x210A
-	settrainerflag 0x210B
-	settrainerflag 0x2192
+	settrainerflag TRAINER_QZ_8324
+	settrainerflag TRAINER_QZ_8325
+	settrainerflag TRAINER_QZ_8352
+	settrainerflag TRAINER_QZ_8457
+	settrainerflag TRAINER_QZ_8458
+	settrainerflag TRAINER_QZ_8459
+	settrainerflag TRAINER_QZ_8594
 	return
 
 Quetzal_EventScript_845705B::
-	settrainerflag 0x2126
-	settrainerflag 0x2127
-	settrainerflag 0x2120
-	settrainerflag 0x2121
-	settrainerflag 0x2124
-	settrainerflag 0x2125
+	settrainerflag TRAINER_QZ_8486
+	settrainerflag TRAINER_QZ_8487
+	settrainerflag TRAINER_QZ_8480
+	settrainerflag TRAINER_QZ_8481
+	settrainerflag TRAINER_QZ_8484
+	settrainerflag TRAINER_QZ_8485
 	return
 
 Quetzal_EventScript_845706E::
-	settrainerflag 0x2118
-	settrainerflag 0x2119
-	settrainerflag 0x211A
-	settrainerflag 0x211B
-	settrainerflag 0x21CE
-	settrainerflag 0x21CF
-	settrainerflag 0x21D0
+	settrainerflag TRAINER_QZ_8472
+	settrainerflag TRAINER_QZ_8473
+	settrainerflag TRAINER_QZ_8474
+	settrainerflag TRAINER_QZ_8475
+	settrainerflag TRAINER_QZ_8654
+	settrainerflag TRAINER_QZ_8655
+	settrainerflag TRAINER_QZ_8656
 	return
 
 Quetzal_EventScript_8457084::
-	settrainerflag 0x20B1
-	settrainerflag 0x20B2
-	settrainerflag 0x20B3
-	settrainerflag 0x20B4
-	settrainerflag 0x20D5
-	settrainerflag 0x20D6
-	settrainerflag 0x20D7
+	settrainerflag TRAINER_QZ_8369
+	settrainerflag TRAINER_QZ_8370
+	settrainerflag TRAINER_QZ_8371
+	settrainerflag TRAINER_QZ_8372
+	settrainerflag TRAINER_QZ_8405
+	settrainerflag TRAINER_QZ_8406
+	settrainerflag TRAINER_QZ_8407
 	return
 
 Quetzal_EventScript_845709A::
-	settrainerflag 0x2128
-	settrainerflag 0x2129
-	settrainerflag 0x2142
-	settrainerflag 0x2143
-	settrainerflag 0x2144
-	settrainerflag 0x2188
-	settrainerflag 0x2190
-	settrainerflag 0x2191
+	settrainerflag TRAINER_QZ_8488
+	settrainerflag TRAINER_QZ_8489
+	settrainerflag TRAINER_QZ_8514
+	settrainerflag TRAINER_QZ_8515
+	settrainerflag TRAINER_QZ_8516
+	settrainerflag TRAINER_QZ_8584
+	settrainerflag TRAINER_QZ_8592
+	settrainerflag TRAINER_QZ_8593
 	return
 
 Quetzal_EventScript_84570B3::
@@ -1356,7 +1356,7 @@ Quetzal_EventScript_84590F6::
 	return
 
 Quetzal_EventScript_84590FF::
-	bufferboxname 0, VAR_QZ_0x513F
+	bufferboxname STR_VAR_1, VAR_PC_BOX_TO_SEND_MON   @ Moemon Kai: the box the game just used (FireRed's; 0x513F was never set)
 	bufferspeciesname 1, VAR_TEMP_1
 	call_if_unset FLAG_QZ_0x220F, Quetzal_EventScript_845911A
 	call_if_set FLAG_QZ_0x220F, Quetzal_EventScript_8459145

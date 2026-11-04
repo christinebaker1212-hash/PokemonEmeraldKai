@@ -4767,3 +4767,33 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
   trade's masks use MP_SPRITE_PAL_BIT (palette.h: 0 for slots 16-63, no fade rather than the wrong palette's).
   Test catch_yesno_frame (tools/test/check_yesno_frame.py); `mp dumppltt FILE` / `mp dumpvram FILE` write into the
   test's picture folder for a relative FILE.
+
+## KANTO / JOHTO restored toward FireRed / Crystal (1.88.0, the audit: docs/REGIONS_AUDIT.md)
+The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's decision per case in docs/REGIONS_AUDIT.md
+(JOHTO strictly Crystal; Gen 5+ legendaries only from MOEGATCHA). Tools and conventions for the work:
+- `FLAG_KAI_GONE` (include/constants/kai_regions.h, always set by mp_region.c on load / new game): a Quetzal person or
+  thing taken out wears it as its object flag, so the map's local ids stay as they are. New JOHTO / KANTO flags of
+  this game's own go in kai_regions.h (free numbers in Quetzal's ranges; the map scripts, map events and C see it).
+- tools/quetzal_port/crystal_words.py MAP LABEL [OURS]: Crystal's text from pret/pokecrystal as `.string` lines.
+- Raw Quetzal trainer numbers in settrainerflag / cleartrainerflag are TRAINER_QZ_<n> now (raw ones went through
+  TRAINER_FLAG into the special flags and past them: memory corruption on every gym win).
+- qz_specials.c QzClearSeagallopRestrictions does nothing (it cleared KANTO's GAME CLEAR / CHAMPION flags);
+  mp_region.c KantoLeagueFlags gives them back to saves with KANTO's LEAGUE on record.
+- JOHTO's roaming RAIKOU / ENTEI: src/mp/mp_johto_roamer.c (Crystal's rules and RoamMaps; chunk JRMS; the BURNED TOWER's
+  special MP_JohtoRoamer_Init; saves past the scene get them on load: MP_JohtoRoamer_CatchUp); their static objects are
+  hidden (RefreshStatics); roamer.c's HOENN roamer only roams HOENN. Debug `mp jroamers [init|SLOT|meet]`; test johto_roamer.
+- FireRed's boulders that fall through holes: field_player_avatar.c MP_BoulderFallThroughHole (the reveal flag in the
+  template's trainer type; holes are non-animated door warps here), mp_world.c for friends' pushes; SEAFOAM B4F's
+  current QzSeafoamCurrentEffect = FireRed's stop-surfing north. Test kanto_boulder_hole.
+- KANTO's BIRTH ISLAND: field_specials.c's DEOXYS rock code takes FireRed's vars there (0x5101 level, 0x5102 steps,
+  0x220B done) and moves the rock on the current map. Test kanto_birth_island.
+- RADIO TOWER 1F: Crystal's RADIO CARD quiz (FLAG_JOHTO_RADIO_CARD gates the POKéGEAR's RADIO card; saves past
+  Quetzal's WHITNEY quiz get it); WHITNEY's door guard and quiz gone. Test johto_radio_card.
+- CHARCOAL KILN: FLAG_JOHTO_GOT_KILN_CHARCOAL, FARFETCH'D shown once HM01 is given (test johto_kiln). PRIMAL CHAMBER walled up
+  (Mansion B1F's warp out, setmetatile 31,2). MAXIE / ARCHIE, ICE PATH's SWINUB, the FLOWER SHOP's gift girl and stalls,
+  NEW BARK's ROUTE 27 guard: FLAG_KAI_GONE. Quetzal's NEW BARK berry planting removed.
+- Also in 1.88.0: FireRed's hidden COINS (obtain_item.inc EventScript_MpHiddenCoins: a hidden spot with ITEM_NONE holds
+  COINS by its flag, mp_region.c MP_HiddenCoinsAmount; test kanto_hidden_coins); VERMILION's pier after the S.S. ANNE
+  sails ("The ship set sail.", FireRed's harbor words); start_menu.c sets FireRed's FLAG_OPENED_START_MENU (0x21E7);
+  JESSIE & JAMES retired (qz_specials.c TravelingEvent hides them always); tools/quetzal_port/kai_gone.py takes a map's
+  Quetzal objects / last warp / signs / triggers out; CERULEAN CAVE 2F's ladder to Quetzal's RAYQUAZA room drawn over.

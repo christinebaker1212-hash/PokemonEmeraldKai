@@ -1,5 +1,5 @@
 # JOHTO's POKéGEAR (src/mp/mp_pokegear.c): in the BAG once MOM's scene is behind (item 693), on START in JOHTO; its
-# CLOCK, MAP, PHONE (MOM: her savings question, YES starts her saving) and RADIO (OAK's POKéMON TALK) cards
+# CLOCK, MAP, PHONE (MOM: her savings question, YES starts her saving) and RADIO (OAK's POKéMON TALK) cards (with the RADIO CARD, 0x1064: RADIO TOWER 1F's quiz)
 MODE=1
 TMO=120
 HOUR=14

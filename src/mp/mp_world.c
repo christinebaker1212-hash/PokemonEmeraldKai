@@ -263,6 +263,8 @@ static bool8 FindObject(u8 localId, u8 *objId)
     return !TryGetObjectEventIdByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, objId);
 }
 
+bool8 MP_BoulderFallThroughHole(struct ObjectEvent *boulder);   // (field_player_avatar.c)
+
 static void Apply(struct WorldChange *c)
 {
     u8 objId;
@@ -336,6 +338,7 @@ static void Apply(struct WorldChange *c)
         else
         {
             MoveObjectEventToMapCoords(obj, c->x, c->y);
+            MP_BoulderFallThroughHole(obj);
             c->state = APPLIED;
         }
         break;
@@ -356,6 +359,8 @@ static void Animate(struct WorldChange *c)
         return;   // still going
     if (c->type == WC_OBJ_GONE)
         RemoveObjectEventByLocalIdAndMap(c->localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+    else if (c->type == WC_BOULDER)
+        MP_BoulderFallThroughHole(&gObjectEvents[objId]);   // (a friend pushed it into a hole: field_player_avatar.c)
     c->state = APPLIED;
 }
 

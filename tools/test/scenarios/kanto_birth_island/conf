@@ -1,0 +1,8 @@
+# KANTO's BIRTH ISLAND (field_specials.c, FireRed's DoDeoxysTriangleInteraction progress): touching the triangle at
+# (15,12) moves it to (11,14) and the player is free again (it froze before: the move was HOENN's map's); its level
+# is KANTO's own var 0x5101, not HOENN's.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("[test] var 0x5101 = 1" "[test] objat 11,14: local 1")
+UNEXPECT_A=("[crash]")

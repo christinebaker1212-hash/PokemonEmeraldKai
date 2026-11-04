@@ -323,12 +323,18 @@ Kanto_VermilionCity_EventScript_8416875::
 	applymovement 4, Quetzal_Movement_8457AAA
 	applymovement LOCALID_PLAYER, Quetzal_Movement_8457AAE
 	waitmovement 0
+	goto_if_eq VAR_QZ_0x5135, 3, Kanto_VermilionCity_EventScript_ShipSetSail   @ Moemon Kai: FireRed's, once the S.S. ANNE has sailed
 	msgbox Kanto_VermilionCity_Text_842FBC1, MSGBOX_DEFAULT
 	goto_if_unset FLAG_QZ_0x2162, Kanto_VermilionCity_EventScript_84168A8
 	msgbox Kanto_VermilionCity_Text_842FBFC, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x5145, 1
 	releaseall
 	end
+
+Kanto_VermilionCity_EventScript_ShipSetSail::
+	msgbox Kanto_VermilionCity_Text_842FC89, MSGBOX_DEFAULT
+	closemessage
+	goto Quetzal_EventScript_84594A5
 
 Kanto_VermilionCity_EventScript_84168A8::
 	msgbox Kanto_VermilionCity_Text_842FC39, MSGBOX_DEFAULT
@@ -491,14 +497,14 @@ Kanto_VermilionCity_Text_842F84A::
 	.string "in the harbor?$"
 
 Kanto_VermilionCity_Text_842F87A::
-	.string "The S.S. ANNE returns to this pier.\n"
-	.string "You can visit with your TICKET.$"
+	.string "So, the S.S. ANNE has departed?\p"
+	.string "She’ll be back in VERMILION about\n"
+	.string "this time next year.$"
 
 Kanto_VermilionCity_Text_842F96D::
 	.string "The S.S. ANNE is a famous luxury\n"
 	.string "cruise ship.\p"
-	.string "Even after its voyages, you can\n"
-	.string "always come back for a visit.$"
+	.string "It visits VERMILION once a year.$"
 
 Kanto_VermilionCity_Text_842F9D9::
 	.string "VERMILION CITY\n"
@@ -522,15 +528,10 @@ Kanto_VermilionCity_Text_842FAAA::
 	.string "The Lightning American!$"
 
 Kanto_VermilionCity_Text_842FAEF::
-	.string "VERMILION HARBOR\n"
-	.string "S.S. ANNE: at the end of the pier.\p"
-	.string "Island ferry: speak to the sailor\n"
-	.string "at the harbor entrance.$"
+	.string "VERMILION HARBOR$"
 
 Kanto_VermilionCity_Text_842FB5D::
-	.string "The S.S. ANNE is at the end of the pier.\p"
-	.string "To travel to the islands, talk to me\n"
-	.string "once you have a pass.$"
+	.string "Welcome to the S.S. ANNE!$"
 
 Kanto_VermilionCity_Text_842FBC1::
 	.string "Welcome to the S.S. ANNE!\p"
@@ -548,19 +549,17 @@ Kanto_VermilionCity_Text_842FC39::
 	.string "You need a ticket to get aboard.$"
 
 Kanto_VermilionCity_Text_842FC89::
-	.string "There is no ferry available yet.\p"
-	.string "You can visit the S.S. ANNE at the\n"
-	.string "end of the pier with your TICKET.$"
+	.string "The ship set sail.$"
 
 Kanto_VermilionCity_Text_842FCEF::
 	.string "Ah, you have a TRI-PASS.\p"
-	.string "Choose a destination (up/down).\n"
-	.string "A: Sail  B: Cancel$"
+	.string "Would you like to board\n"
+	.string "a SEAGALLOP ferry?$"
 
 Kanto_VermilionCity_Text_842FD8C::
 	.string "Ah, you have a RAINBOW PASS.\p"
-	.string "Choose a destination (up/down).\n"
-	.string "A: Sail  B: Cancel$"
+	.string "Would you like to board\n"
+	.string "a SEAGALLOP ferry?$"
 
 Kanto_VermilionCity_Text_842FDDC::
 	.string "Oh! That’s a MYSTICTICKET!\n"

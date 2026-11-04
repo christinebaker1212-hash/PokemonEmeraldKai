@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 30
+mp warp 35,45,10,10
+wait 200
+mp jroamers init
+mp jroamers 1
+mp jroamers meet
+pressuntil A action 3000
+mp foehp 50
+shot j_battle
+press A 2
+wait 20
+press A 2
+pressuntil A field 9000
+wait 30
+mp jroamers
+mp warp 35,52,10,10
+wait 200
+mp warp 35,45,10,10
+wait 200
+mp jroamers
+quit

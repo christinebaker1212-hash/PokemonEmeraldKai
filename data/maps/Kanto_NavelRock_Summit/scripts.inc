@@ -82,11 +82,11 @@ Kanto_NavelRock_Summit_EventScript_8414DDA::
 
 Kanto_NavelRock_Summit_EventScript_8414EB1::
 	setflag FLAG_QZ_0x21DB
-	setvar VAR_0x8004, 0xFA
+	setvar VAR_0x8004, SPECIES_HO_OH
 	goto Quetzal_EventScript_845951C
 
 Kanto_NavelRock_Summit_EventScript_8414EBF::
-	setvar VAR_0x8004, 0xFA
+	setvar VAR_0x8004, SPECIES_HO_OH
 	goto Quetzal_EventScript_845951C
 
 Kanto_NavelRock_Summit_Movement_8414ECA:

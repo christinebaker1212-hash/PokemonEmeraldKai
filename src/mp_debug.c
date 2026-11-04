@@ -3297,6 +3297,30 @@ void MP_TestCommand(const char *cmd, const char *arg)
             Sinnoh_RoamerHere(atoi(arg));
         Sinnoh_RoamerDebug();
     }
+    else if (strcmp(cmd, "jroamers") == 0)
+    {
+        // jroamers [init | SLOT | meet]: JOHTO's beasts (mp_johto_roamer.c): set going / SLOT to this map / a wild
+        // encounter here until it's one of them, its battle
+        void MP_JohtoRoamer_Debug(void);
+        void MP_JohtoRoamer_Here(u8 slot);
+        void MP_JohtoRoamer_Init(void);
+        if (arg && strncmp(arg, "init", 4) == 0)
+            MP_JohtoRoamer_Init();
+        else if (arg && strncmp(arg, "meet", 4) == 0)
+        {
+            int tries;
+            for (tries = 0; tries < 256; tries++)
+                if (TryStartRoamerEncounter())
+                {
+                    BattleSetup_StartRoamerBattle();
+                    break;
+                }
+            printf("[test] roamer met: %d\n", tries < 256);
+        }
+        else if (arg && *arg)
+            MP_JohtoRoamer_Here(atoi(arg));
+        MP_JohtoRoamer_Debug();
+    }
     else if (strcmp(cmd, "tram") == 0)
     {
         // tram: the GREAT MARSH's tram (s3d_tram.c: its stop, where the car is, moving)

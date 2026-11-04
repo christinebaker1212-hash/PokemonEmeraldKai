@@ -676,3 +676,6 @@ gSpecials::
 	def_special MP_Region_BufferGameCorner
 	def_special MP_JohtoBerries_NotRipe   @ Moemon Kai: JOHTO's BERRY patches (src/mp/mp_apricorn.c)
 	def_special MP_MagnetTrainOpen   @ Moemon Kai: GOLDENROD <-> SAFFRON (src/mp/mp_region.c)
+	def_special MP_JohtoRoamer_Init
+	def_special MP_HiddenCoinsAmount
+	def_special MP_HiddenCoinsFit

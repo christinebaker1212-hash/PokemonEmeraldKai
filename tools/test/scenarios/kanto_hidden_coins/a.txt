@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 30
+mp additem 260 1
+mp coins 0
+mp warp 38,49,2,5
+wait 150
+mp where
+mp face up
+wait 10
+shot hc_before
+press A 2
+wait 20
+shot hc_after
+wait 30
+mash A 12 20
+wait 40
+mp coins
+mp getflag 0x2B33
+quit

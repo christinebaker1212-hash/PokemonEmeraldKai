@@ -65,6 +65,11 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `spec_card` | two clients: BOB's SPECTATE panel shows ALICE's TRAINER CARD and her BADGE CASE up close |
 | `hm_rescue` / `hm_rescue_carried` | HM04 STRENGTH's scene gone (RUSTURF TUNNEL open) without it: Wanda's boyfriend walks up and hands it over; nobody comes when it's already carried |
 | `coop_rusturf` | NA-JP lag: ALICE smashes RUSTURF TUNNEL's boulders while BOB stands across them: the tunnel scene plays on BOB's game too and he gets HM04 STRENGTH (his story had stayed shut) |
+| `johto_roamer` | JOHTO's RAIKOU / ENTEI set going (Crystal's rules): ENTEI met on ROUTE 37, flees keeping its HP, both move on |
+| `kanto_boulder_hole` | SEAFOAM 1F: a STRENGTH boulder pushed into the hole falls (gone, B1F's twin shown) |
+| `kanto_birth_island` | KANTO's BIRTH ISLAND: touching the triangle moves it on its own progress, no freeze |
+| `johto_kiln` | CHARCOAL KILN: the apprentice's CHARCOAL with Crystal's words and its own flag; FARFETCH'D home |
+| `johto_radio_card` | RADIO TOWER 1F: Crystal's RADIO CARD quiz, YES YES NO YES NO gives the RADIO CARD |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |
 | `pmd_scale_hop` | a scaled PMD follower (PIKACHU, FOLLOWERS: PMD everywhere) mid-hop is drawn whole: check.py counts its rows and pixels (its lower part was cut off) |

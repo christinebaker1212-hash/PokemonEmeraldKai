@@ -1,0 +1,8 @@
+# JOHTO's roaming beasts (src/mp/mp_johto_roamer.c, Crystal's rules): set going (the BURNED TOWER's special), ENTEI
+# brought to ROUTE 37 is met in a wild encounter there (Lv. 40), flees keeping its HP (50); both move on as the
+# player changes maps (still roaming).
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=150:100"
+EXPECT_A=("johto roamers: RAIKOU and ENTEI set going" "[test] roamer met: 1" "johto roamer: 244 met" "roaming on" "(hp 50)")
+UNEXPECT_A=("[crash]" "[test] roamer met: 0")

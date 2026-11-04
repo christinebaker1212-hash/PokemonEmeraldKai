@@ -269,6 +269,8 @@ static void DrawStatus(void)
     for (i = 0; i < CARD_COUNT; i++)   // the cards, the open one inverted
     {
         u8 x = 64 + i * 24;
+        if (i == CARD_RADIO && !FlagGet(FLAG_JOHTO_RADIO_CARD))
+            continue;   // (Crystal's RADIO CARD: the RADIO TOWER's quiz)
         if (i == sG->card)
         {
             Rect(WIN_STATUS, C_DARK, x - 2, 3, 18, 13);
@@ -1172,6 +1174,8 @@ static void Task_Pokegear(u8 taskId)
     {
         PlaySE(SE_SELECT);
         sG->card = (sG->card + (JOY_NEW(DPAD_RIGHT) ? 1 : CARD_COUNT - 1)) % CARD_COUNT;
+        if (sG->card == CARD_RADIO && !FlagGet(FLAG_JOHTO_RADIO_CARD))   // (no RADIO CARD yet: Crystal's)
+            sG->card = (sG->card + (JOY_NEW(DPAD_RIGHT) ? 1 : CARD_COUNT - 1)) % CARD_COUNT;
         sG->cursor = sG->top = 0;
         PhoneBook();
         sG->phone = PHONE_LIST;
@@ -1256,6 +1260,8 @@ static void OpenPokegear(u8 card)
     SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
     sG = AllocZeroed(sizeof(*sG));
     sG->card = card;
+    if (sG->card == CARD_RADIO && !FlagGet(FLAG_JOHTO_RADIO_CARD))
+        sG->card = CARD_CLOCK;
     PhoneBook();
     sG->song = GetCurrentMapMusic();
     {

@@ -17,6 +17,10 @@ const void *Sinnoh_UnownData(u32 *size);   // (the UNOWN letters seen: chunk UNO
 void Sinnoh_UnownLoad(const void *data, u32 size);
 void Sinnoh_UnownReset(void);
 const void *Sinnoh_RoamerData(u32 *size);   // (the roaming POKéMON: chunk ROAM, s3d_roamer.c)
+const void *MP_JohtoRoamer_Data(u32 *size);   // (JOHTO's beasts: chunk JRMS, mp_johto_roamer.c)
+void MP_JohtoRoamer_Load(const void *data, u32 size);
+void MP_JohtoRoamer_Reset(void);
+void MP_JohtoRoamer_CatchUp(void);
 void Sinnoh_RoamerLoad(const void *data, u32 size);
 void Sinnoh_RoamerReset(void);
 const void *MP_RegionBerryTrees_Data(u32 *size);   // (the BERRY trees past the save's 128: chunk BTRE, mp_berrytrees.c)
@@ -42,6 +46,8 @@ void Sinnoh_PlatinumStoryBegin(void);   // (src/sinnoh/s3d_scrcmd.c)
 #include "overworld.h"
 #include "constants/flags.h"
 #include "constants/qz_port.h"
+#include "coins.h"
+#include "constants/coins.h"
 #include "constants/items.h"
 #include "item.h"
 #include "constants/moves.h"
@@ -230,6 +236,7 @@ void MP_Region_NewGame(void)
 {
     memset(sFlags, 0, sizeof(sFlags));
     memset(sVars, 0, sizeof(sVars));
+    FlagSet(FLAG_KAI_GONE);   // (always: Quetzal's things taken out wear it)
     memset(&gRegionState, 0, sizeof(gRegionState));
     sAwayValid = 0;
     sGlobalValid = FALSE;
@@ -341,6 +348,7 @@ void MP_Region_StartNewGame(void)
     Sinnoh_UndergroundReset();
     Sinnoh_UnownReset();
     Sinnoh_RoamerReset();
+    MP_JohtoRoamer_Reset();
     MP_RegionBerryTrees_Reset();
     Sinnoh_MiscReset();
     MP_Region_Arrive(sStartRegion);
@@ -540,6 +548,15 @@ void MP_Region_WriteSidecar(void)
             fwrite(ro, size, 1, f);
         }
         {
+            // JOHTO's roaming beasts (src/mp/mp_johto_roamer.c)
+            u32 size;
+            const void *jr = MP_JohtoRoamer_Data(&size);
+            c[0] = CHUNK('J', 'R', 'M', 'S');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(jr, size, 1, f);
+        }
+        {
             // the BERRY trees past the save's 128 (src/mp/mp_berrytrees.c)
             u32 size;
             const void *bt = MP_RegionBerryTrees_Data(&size);
@@ -697,6 +714,12 @@ static bool8 LoadFrom(const char *path)
                 if (fread(buf, c[1], 1, f) == 1)
                     MP_RegionBerryTrees_Load(buf, c[1]);
             }
+            else if (c[0] == CHUNK('J', 'R', 'M', 'S') && c[1] <= 256)
+            {
+                u8 buf[256];
+                if (fread(buf, c[1], 1, f) == 1)
+                    MP_JohtoRoamer_Load(buf, c[1]);
+            }
             else if (c[0] == CHUNK('R', 'O', 'A', 'M') && c[1] <= 512)
             {
                 u8 buf[512];
@@ -793,6 +816,18 @@ static void GiveNationalDex(void)
     }
 }
 
+// Before 1.88.0 CELIO's SAPPHIRE cleared KANTO's GAME CLEAR / CHAMPION flags (qz_specials.c
+// QzClearSeagallopRestrictions): a save whose KANTO LEAGUE is on record gets them back
+static void KantoLeagueFlags(void)
+{
+    if ((gRegionState.cleared & (1 << REGION_KANTO)) && !FlagGet(FLAG_QZ_0x2108))
+    {
+        FlagSet(FLAG_QZ_0x2108);
+        FlagSet(FLAG_QZ_0x2109);
+        MPNet_Log("region: KANTO's LEAGUE flags set again (cleared by the SAPPHIRE before 1.88.0)");
+    }
+}
+
 void MP_Region_LoadFromSave(void)
 {
     char path[600];
@@ -812,6 +847,7 @@ void MP_Region_LoadFromSave(void)
     Sinnoh_UndergroundReset();
     Sinnoh_UnownReset();
     Sinnoh_RoamerReset();
+    MP_JohtoRoamer_Reset();
     MP_RegionBerryTrees_Reset();
     Sinnoh_MiscReset();
     for (i = 0; i <= 3; i++)
@@ -834,6 +870,11 @@ void MP_Region_LoadFromSave(void)
                     FlagClear(TRAINER_FLAG(sMoved[k][0]));
                 }
             MoveQuetzalSystemFlags();
+            KantoLeagueFlags();
+            FlagSet(FLAG_KAI_GONE);
+            if (FlagGet(FLAG_QZ_0x10A2))
+                FlagSet(FLAG_JOHTO_RADIO_CARD);   // (before 1.88.0 WHITNEY's quiz stood in for the RADIO CARD's)
+            MP_JohtoRoamer_CatchUp();
             MP_SaveFix_Migrate(sSaveFormat);
             GiveNationalDex();
             SinnohStarterMenuFlag();
@@ -2068,4 +2109,19 @@ void MP_Region_OnMapLoaded(void)
     }
     if (cur != gRegionState.current && gRegionState.current < REGION_COUNT)
         MP_Region_Travel(gRegionState.current, cur);
+}
+
+// FireRed's hidden COINS (CELADON's GAME CORNER, CeladonCity_GameCorner/map.json's quantities), by the spot's hidden
+// flag in VAR_0x8004 (data/scripts/obtain_item.inc EventScript_MpHiddenCoins); 0: not a COINS spot
+u16 MP_HiddenCoinsAmount(void)
+{
+    static const u8 sCoins[12] = {10, 10, 20, 10, 10, 20, 10, 10, 10, 40, 100, 10};
+    if (gSpecialVar_0x8004 >= FLAG_QZ_KANTO_HIDDEN_ITEM_51 && gSpecialVar_0x8004 <= FLAG_QZ_KANTO_HIDDEN_ITEM_62)
+        return sCoins[gSpecialVar_0x8004 - FLAG_QZ_KANTO_HIDDEN_ITEM_51];
+    return 0;
+}
+
+u16 MP_HiddenCoinsFit(void)
+{
+    return GetCoins() + gSpecialVar_0x8006 <= MAX_COINS;
 }

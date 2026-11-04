@@ -282,10 +282,12 @@ u16 QzClearRadioTowerFlag14A3(void)
     return 0;
 }
 
+// Quetzal's C cleared its own flags 0x2108 / 0x2109 here; in this port they're KANTO's FLAG_SYS_GAME_CLEAR and
+// FLAG_DEFEATED_CHAMP, so CELIO taking the SAPPHIRE undid the LEAGUE (ferry to ISLANDS 4-7, MT. EMBER, the ELITE
+// FOUR's rematch teams...). FireRed's SetPostgameFlags only sets flags, which the script does itself: nothing to do.
+// (Saves it already hit get them back on load: mp_region.c KantoLeagueFlags.)
 u16 QzClearSeagallopRestrictions(void)
 {
-    FlagClear(FLAG_QZ_0x2108);
-    FlagClear(FLAG_QZ_0x2109);
     return 0;
 }
 
@@ -499,6 +501,7 @@ static u16 RefreshStatics(void)
             continue;
         if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species) || MP_Gen_Cap(e->region) < e->gen   // (a form: GALARIAN ARTICUNO...)
          || HiddenForeignLegend(e)
+         || (e->region == REGION_JOHTO && (e->species == SPECIES_RAIKOU || e->species == SPECIES_ENTEI))   // (they roam: mp_johto_roamer.c)
          || (!MP_Region_Cleared(e->region) && !PreLeagueLegend(e))
          || (e->region == 2 && e->species == SPECIES_MELOETTA && !FlagGet(FLAG_QZ_0x2924))   // after the CHANSEY Dance
          || (e->species == SPECIES_DARKRAI && !FlagGet(e->region == 1 ? FLAG_QZ_0x1425 : FLAG_QZ_0x292B))   // in a dream
@@ -1041,23 +1044,11 @@ static const u16 sKantoTowns[] = {MAP_KANTO_PALLET_TOWN, MAP_KANTO_VIRIDIAN_CITY
     MAP_KANTO_CINNABAR_ISLAND, MAP_KANTO_ONE_ISLAND, MAP_KANTO_TWO_ISLAND, MAP_KANTO_THREE_ISLAND, MAP_KANTO_FOUR_ISLAND,
     MAP_KANTO_FIVE_ISLAND, MAP_KANTO_SIX_ISLAND, MAP_KANTO_SEVEN_ISLAND};
 
+// Quetzal's JESSIE & JAMES travelling battle (a town a day after the LEAGUE) is gone (docs/REGIONS_AUDIT.md case 16:
+// FireRed / Crystal have no such event, and its PIKACHU reward was an empty POKéMON): their objects stay hidden
 static u16 TravelingEvent(const u16 *towns, u8 count, u16 flag, u16 salt)
 {
-    u16 here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
-    u32 day;
-    // a challenge for champions (a Lv. 50 battle): not before the region's League is beaten
-    if (!MP_Region_Cleared(MP_Region_Current()))
-    {
-        FlagSet(flag);
-        return FALSE;
-    }
-    RtcCalcLocalTime();
-    day = (u32)gLocalTime.days * 2654435761u + salt;
-    if (towns[(day >> 16) % count] == here)
-    {
-        FlagClear(flag);
-        return TRUE;
-    }
+    (void)towns, (void)count, (void)salt;
     FlagSet(flag);
     return FALSE;
 }
@@ -1081,7 +1072,13 @@ static u16 QzBufferLabQuestChecklist_(void)
     return 0;
 }
 
-u16 QzSeafoamCurrentEffect(void) { return 0; }
+// FireRed's SeafoamIslandsB4F_CurrentDumpsPlayerOnLand: the current sweeps the player off their POKéMON onto land, north
+u16 QzSeafoamCurrentEffect(void)
+{
+    void MP_StopSurfingNorth(void);   // (field_player_avatar.c)
+    MP_StopSurfingNorth();
+    return 0;
+}
 u16 QzSetDeoxysRockPaletteVar5071(void) { return 0; }
 u16 QzDoDeoxysRockInteractionAlt(void) { ScriptContext_Enable(); return 0; }
 
