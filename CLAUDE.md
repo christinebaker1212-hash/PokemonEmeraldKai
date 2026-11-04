@@ -351,6 +351,8 @@ Elite Four's and the Champion's can be joined (MP_Coop_JoinTrainerOk; test join_
 
 Also JOHTO and KANTO (1.60.0, Moemon Quetzal's regions capped to Gen 4: docs/REGIONS_PLAN.md, COOP_NOTES "JOHTO and
 KANTO"; src/mp/mp_region.c and "<save>.region", src/qz_specials.c, tools/quetzal_port/; tests region_*).
+The KANTO vs FireRed / JOHTO vs Crystal script audit and the user's 157 decisions (2026-11-04: JOHTO strictly Crystal,
+Gen 5+ legendaries MOEGATCHA only): docs/REGIONS_AUDIT.md (work list), findings in docs/regions_audit/.
 JOHTO's phone, Crystal's 28 trainer contacts (numbers, calls, rematches, gifts: tools/quetzal_port/gen_phone.py ->
 src/data/qz_phone.h, src/mp/mp_qzphone.c, data/scripts/qz_phone.inc; COOP_NOTES "JOHTO's phone, Crystal's").
 The voyage between regions and the SEAGALLOP ferries: FireRed's ferry scene, src/mp/mp_voyage.c; the first boat to

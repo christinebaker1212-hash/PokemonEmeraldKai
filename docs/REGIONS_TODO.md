@@ -4,6 +4,11 @@ To do once SINNOH is finished, pushed, built and released, without stopping to a
 here ("Decisions" below). Priority when sources disagree: Kai > FireRed (KANTO) / Crystal + HGSS (JOHTO) > Quetzal.
 Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [ ] to do, [~] begun, [x] done.
 
+**2026-11-04, the user's audit decisions (docs/REGIONS_AUDIT.md) override this file where they differ:** JOHTO is
+strictly Crystal (HGSS no longer ranks above Quetzal: Quetzal's HGSS-style events go); legendaries and mythicals that
+belong to the original games' regions stay (up to SINNOH), Quetzal's placements go, and Gen 5+ legendaries leave the
+overworld (MOEGATCHA pulls only). The audit's findings: docs/regions_audit/.
+
 ## KANTO
 - [ ] FireRed's decomp settles any behavior question (Kai > FireRed > Quetzal)
 - [x] KANTO's legendaries only in KANTO (exclusives: qz_specials.c MP_LegendForeign / MP_HideForeignLegends; test
@@ -194,6 +199,7 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
   their home Quetzal's static encounters of them are hidden. The original games' own island events stay (the user,
   later the same day): FireRed's NAVEL ROCK and BIRTH ISLAND, Emerald's NAVEL ROCK and FARAWAY ISLAND. JIRACHI, MANAPHY and PHIONE have no encounter in their home region, so they keep
   their places (else they couldn't be caught at all). Gens 5-9 legendaries have no home region here and stay.
+  (Overridden 2026-11-04, docs/REGIONS_AUDIT.md case 60: Gen 5+ legendaries leave the overworld, MOEGATCHA only.)
 - Time of day outside SINNOH: Platinum's mechanism (grass slots 2 and 3; morning 4:00-9:59, night 20:00-3:59). JOHTO's
   and KANTO's morning / night POKéMON are Crystal's (the ones its tables show then and not by day, heaviest slot first;
   79 maps; Crystal's DIGLETT'S CAVE, ROUTE 10 NORTH, 21, 26, TIN TOWER 2F, SILVER CAVE's item rooms and the WHIRL
