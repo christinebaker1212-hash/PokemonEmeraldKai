@@ -366,6 +366,20 @@ void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
             BufAdd(b, "\"");
         }
     }
+    {
+        // (its POKé BALL page: the ball style and the entrance / recall effect, when not the plain ones)
+        u16 style = MP_BallStyle_OfBoxMon(box);
+        struct MpBallFx fx;
+        u32 pack;
+        MP_BallFx_OfBoxMon(box, &fx);
+        pack = MP_BallFx_Pack(&fx);
+        if (style)
+            BufAdd(b, ",\"bst\":%u", style);
+        if (pack)
+            BufAdd(b, ",\"fx\":%u", (unsigned)pack);
+        if (fx.sound)
+            BufAdd(b, ",\"fxs\":%u", fx.sound);
+    }
     if (MP_Phone_OnOffer(pid, ot))
         BufAdd(b, ",\"off\":1");   // (ON OFFER for a trade by mail: mp_phone_trade.c)
     BufAdd(b, ",\"m\":[");
@@ -508,6 +522,8 @@ u32 Rev(void)
     h = Fnv(h, &v, 4);
     v = PhoneCards_Hash();   // (the card collection, decks, packs, today's prizes)
     h = Fnv(h, &v, 4);
+    v = PhoneBall_Hash();    // (ball pieces earned, MY PRESETs)
+    h = Fnv(h, &v, 4);
     return h;
 }
 
@@ -583,6 +599,7 @@ static void BufSnapshot(struct Buf *b)
     PhoneFriends_Snapshot(b);
     PhoneTrade_Snapshot(b);
     PhoneCards_Snapshot(b);
+    PhoneBall_Snapshot(b);
     // The POKeDEX: a bit per national number (1 first), as hex: seen, then caught
     {
         static const char *const sWhat[] = {"seen", "caught"};
@@ -1327,6 +1344,11 @@ static const char *Apply(const char *json)
         return DoItem(json, FALSE);
     if (strcmp(op, "use") == 0)
         return DoUse(json);
+    {
+        const char *why = PhoneBall_Apply(op, json);
+        if (why != (const char *)-1)
+            return why;
+    }
     return PhoneWalk_Apply(op, json);
 }
 

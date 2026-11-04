@@ -13,6 +13,8 @@
 // the item icon used as a preview). A decoration (POKé BALLS only) is a small
 // emblem drawn into the ball's own pixels: on the item icon (summary POKé BALL
 // page) and on the resting and spinning frames of the battle / summary ball. Art: tools/moemon_balls/decorations.py.
+#include <stdio.h>
+#include <string.h>
 #include "global.h"
 #include "mp.h"
 #include "decompress.h"
@@ -688,4 +690,60 @@ void MP_BallStyle_ApplyToIconPalette(u8 paletteNum, u8 ballId, u16 style)
         gPlttBufferUnfaded[OBJ_PLTT_ID(paletteNum) + sIdx[i]] = c;
         gPlttBufferFaded[OBJ_PLTT_ID(paletteNum) + sIdx[i]] = c;
     }
+}
+
+// ---------------------------------------------------------------------------
+// The phone app's POKé BALL page (mp_export.c, data.json "balls"): the colors (names, the five shades, the item
+// icon's slots they fill), the POKé BALL icon's own palette, the decorations (names, the 5x5 icon art and its colors,
+// where it goes) and the special balls' items
+
+static u32 Rgb24(u16 c)
+{
+    u32 r = c & 31, g = (c >> 5) & 31, b = (c >> 10) & 31;   // (as mp_export.c writes the item icons)
+    return ((r * 255 / 31) << 16) | ((g * 255 / 31) << 8) | (b * 255 / 31);
+}
+
+void MP_BallStyle_ExportJson(FILE *f)
+{
+    static const u8 sIdx[5] = {7, 8, 9, 10, 11}, sShade[5] = {0, 1, 1, 2, 4};
+    static u16 sPal[512];
+    const u32 *lz = GetItemIconPicOrPalette(ITEM_POKE_BALL, 1);
+    u32 i, k, x, y;
+    fprintf(f, "\"balls\":{\"colors\":[");
+    for (i = 0; i < MP_BALL_COLORS; i++)
+    {
+        char name[16];
+        MP_GameToAscii(name, sColorNames[i], sizeof(name) - 1);
+        fprintf(f, "%s[\"%s\",[", i ? "," : "", name);
+        for (k = 0; k < 5; k++)
+            fprintf(f, "%s%u", k ? "," : "", i == MP_BALL_RED ? 0 : (unsigned)Rgb24(sRamps[i][k]));
+        fprintf(f, "]]");
+    }
+    fprintf(f, "],\"firstEarned\":%u,\"iconIdx\":[%u,%u,%u,%u,%u],\"iconShade\":[%u,%u,%u,%u,%u],\"iconPal\":[",
+            MP_BALL_FIRST_EARNED, sIdx[0], sIdx[1], sIdx[2], sIdx[3], sIdx[4], sShade[0], sShade[1], sShade[2],
+            sShade[3], sShade[4]);
+    memset(sPal, 0, sizeof(sPal));
+    if (lz != NULL)
+        LZDecompressWram(lz, sPal);
+    for (i = 0; i < 16; i++)
+        fprintf(f, "%s%u", i ? "," : "", (unsigned)Rgb24(sPal[i]));
+    fprintf(f, "],\"decoXY\":[%u,%u],\"decoGroups\":[", DECO_ICON_X, DECO_ICON_Y);
+    for (i = 0; i < ARRAY_COUNT(sDecoGroupStart); i++)
+        fprintf(f, "%s%u", i ? "," : "", sDecoGroupStart[i]);
+    fprintf(f, "],\"decos\":[");
+    for (i = 0; i < MP_DECO_COUNT; i++)
+    {
+        fprintf(f, "%s[\"%s\",\"", i ? "," : "", sDecoNames[i]);
+        for (y = 0; y < MP_DECO_ICON_SIZE; y++)
+            for (x = 0; x < MP_DECO_ICON_SIZE; x++)
+                fputc('0' + sDecoArt[i].icon[y][x], f);
+        fprintf(f, "\",[");
+        for (k = 0; k < 4; k++)
+            fprintf(f, "%s%u", k ? "," : "", (unsigned)Rgb24(sDecoArt[i].iconColors[k]));
+        fprintf(f, "]]");
+    }
+    fprintf(f, "],\"special\":[");
+    for (i = 0; i < MP_SPECIAL_COUNT; i++)
+        fprintf(f, "%s%u", i ? "," : "", sSpecialItems[i]);
+    fprintf(f, "]}");
 }

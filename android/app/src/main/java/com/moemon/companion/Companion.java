@@ -1051,6 +1051,7 @@ public final class Companion implements LinkClient.Listener {
             case "cantheld": return "That item can't be held.";
             case "bagfull": return "The BAG is full.";
             case "nothing": return "It isn't holding anything.";
+            case "locked": return "Your game hasn't earned that piece yet.";
             case "busy": return "The game is busy. Try again.";
             case "crashed": return "The game closed while doing this, so it was stopped.";
             case "walking": return "Another POKéMON is already out on a walk.";

@@ -929,6 +929,10 @@ void VDraw(void)
         MP_Poketch_Composite(image);     // Moemon Kai: the POKéTCH while it's open (src/sinnoh/poketch.c)
     }
     MP_BattleOverlay_Composite(image);   // ... and the battle emotes over everything
+    {
+        void MP_FxClip_Frame(const u16 *frame);
+        MP_FxClip_Frame(image);          // ... (MOEMON_EXPORT_FXCLIPS: the ball effects recorded for the phone app)
+    }
     MP_Spectate_PanelSync();             // ... friends' screens in the panel under ours (CO-OP > SPECTATE)
     if (!sTestMode)
         Display_UploadFrame(image);

@@ -529,6 +529,20 @@ public final class GameArt {
         cell(c, items, item, 24, 24, 32, x, y, pix);
     }
 
+    /** A BAG icon's 24x24 pixels (ARGB), for drawing it changed (the POKé BALL page's colors and decorations) */
+    public int[] itemPixels(int item) {
+        if (items == null) {
+            items = bitmap("game/items.png");
+        }
+        int[] px = new int[24 * 24];
+        int sx = (item % 32) * 24, sy = (item / 32) * 24;
+        if (items == null || sy + 24 > items.getHeight()) {
+            return px;
+        }
+        items.getPixels(px, 0, 24, sx, sy, 24, 24);
+        return px;
+    }
+
     /** A PC box's wallpaper (160x144); Walda's (16) shows as PLAIN */
     public void wallpaper(Canvas c, int id, int x, int y) {
         if (wallpapers == null) {

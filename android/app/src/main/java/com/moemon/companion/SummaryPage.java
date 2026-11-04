@@ -17,7 +17,7 @@ import java.util.List;
  * for the next one in the same box or party; GIVE / TAKE / MOVE from here.
  */
 public final class SummaryPage extends Page {
-    private static final String[] TABS = {"INFO", "SKILLS", "MOVES"};
+    private static final String[] TABS = {"INFO", "SKILLS", "MOVES", "BALL"};
     private static final String[] STAT_NAMES = {"HP", "ATTACK", "DEFENSE", "SP. ATK", "SP. DEF", "SPEED"};
     // natureStats order (gNatureStatTable): ATTACK, DEFENSE, SPEED, SP. ATK, SP. DEF -> the summary's rows 1-5
     private static final int[] NATURE_ROW = {1, 2, 5, 3, 4};
@@ -84,8 +84,8 @@ public final class SummaryPage extends Page {
             art.text(c, "It's still an EGG. Sounds can", 16, BODY_Y + 22);
             art.text(c, "be heard from inside!", 16, BODY_Y + 38);
         } else {
-            int tw = (w - 16) / 3;
-            for (int i = 0; i < 3; i++) {
+            int tw = (w - 16) / TABS.length;
+            for (int i = 0; i < TABS.length; i++) {
                 boolean on = i == tab;
                 if (on) {
                     art.window(c, 0, 8 + i * tw + 4, TAB_Y + 4, tw - 8, 14);
@@ -439,7 +439,12 @@ public final class SummaryPage extends Page {
             return;
         }
         if (y >= TAB_Y && y < TAB_Y + 22 && mon.optInt("e") == 0) {
-            int t = Math.min(2, Math.max(0, (x - 8) / ((w - 16) / 3)));
+            int t = Math.min(TABS.length - 1, Math.max(0, (x - 8) / ((w - 16) / TABS.length)));
+            if (t == 3) {
+                v.buzz(false);
+                v.showOver(new BallPage(v, place(), this));   // (its POKé BALL: a page of its own)
+                return;
+            }
             if (t != tab) {
                 v.sound.play("se_select");
             }

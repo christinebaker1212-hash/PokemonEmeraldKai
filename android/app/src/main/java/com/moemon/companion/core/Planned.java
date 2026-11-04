@@ -88,6 +88,21 @@ public final class Planned {
         return mon != null && mon.optLong("p") == p && mon.optLong("o") == o;
     }
 
+    /** A copy with the order's ball style or effect (as the snapshot will show it) */
+    private static JSONObject restyled(JSONObject mon, JSONObject o) throws org.json.JSONException {
+        JSONObject copy = new JSONObject(mon.toString());
+        if (o.optString("op").equals("ballstyle")) {
+            // ("special": the special ball's number, which the app sends along for this; the game works it out itself)
+            int special = o.optInt("special");
+            copy.put("ball", o.optInt("item"));
+            copy.put("bst", BallFx.makeStyle(special > 0 ? 0 : o.optInt("color"), special > 0 ? 0 : o.optInt("deco"), special));
+        } else {
+            copy.put("fx", o.optLong("fx"));
+            copy.put("fxs", o.optInt("fxs"));
+        }
+        return copy;
+    }
+
     private void play(JSONObject o) {
         String op = o.optString("op");
         try {
@@ -134,6 +149,20 @@ public final class Planned {
                 copy.put("i", op.equals("give") ? o.optInt("item") : 0);
                 put(at, copy);
                 heldItemChanges.add(key(at));
+            } else if (op.equals("ballstyle") || op.equals("ballfx")) {
+                JSONObject at = o.getJSONObject("at");
+                JSONObject mon = at(at);
+                if (!same(mon, o.optLong("p"), o.optLong("o"))) {
+                    return;
+                }
+                put(at, restyled(mon, o));
+            } else if (op.equals("fxparty")) {
+                for (int i = 0; i < party.size(); i++) {
+                    JSONObject mon = party.get(i);
+                    if (mon != null && mon.optInt("e") == 0) {
+                        party.set(i, restyled(mon, o));
+                    }
+                }
             }
         } catch (Exception ignored) {
         }

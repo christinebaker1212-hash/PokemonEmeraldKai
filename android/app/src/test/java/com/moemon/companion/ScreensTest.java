@@ -81,6 +81,15 @@ public class ScreensTest {
                 + "\",\"phone\":\"00112233445566778899AABBCCDDEEFF\",\"key\":\"" + "00".repeat(32)
                 + "\",\"name\":\"\",\"host\":\"\",\"port\":47610}]}");
 
+        // the POKé BALL page: the second box POKéMON in the HAUNTED mix, a save with only the first pieces earned
+        {
+            JSONObject snap = file.getJSONObject("snap");
+            snap.getJSONArray("boxes").getJSONObject(0).getJSONArray("m").getJSONObject(1).put("fx", 17813).put("fxs", 7)
+                    .put("bst", 0x15);
+            snap.put("fxu", new org.json.JSONArray("[\"FF7\",\"FFF\",\"FFFF\",\"7F\"]"));
+            snap.put("fxp", new org.json.JSONArray("[[27354,5],0,0,0,0,0]"));
+            write(new File(dir, "model_" + id + ".json"), file.toString());
+        }
         // a POKéMON out walking (for WALK's pictures): the snapshot's first box POKéMON
         JSONObject walkMon = file.getJSONObject("snap").getJSONArray("boxes").getJSONObject(0).getJSONArray("m").getJSONObject(0);
         java.time.LocalDate today = java.time.LocalDate.now();
@@ -132,9 +141,20 @@ public class ScreensTest {
         shot(v, "summary_info");
         tap(v, v.width() / 2, GameView.TOP + 112 + 8);
         shot(v, "summary_skills");
-        tap(v, v.width() - 30, GameView.TOP + 112 + 8);
+        int tw = (v.width() - 16) / 4;
+        tap(v, 8 + 2 * tw + tw / 2, GameView.TOP + 112 + 8);
         tap(v, 60, GameView.TOP + 136 + 4 + 12);
         shot(v, "summary_moves");
+        // its POKé BALL: the page, then the SEND-OUT list open, then a locked piece picked
+        tap(v, 8 + 3 * tw + tw / 2, GameView.TOP + 112 + 8);
+        shot(v, "ball_page");
+        BallPage bp = (BallPage) v.overPage();
+        bp.openList(4);
+        shot(v, "ball_list");
+        bp.pickForTest(4, 20);
+        bp.openList(-1);
+        shot(v, "ball_locked");
+        v.showOver(null);
         v.showOver(null);
         // the shiny in the party, its summary
         v.select(1);

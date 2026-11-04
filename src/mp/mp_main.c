@@ -2186,6 +2186,10 @@ void MP_FrameUpdate(void)
         void MP_Phone_Update(void);
         void MP_Export_IfAsked(void);
         MP_Export_IfAsked();   // MOEMON_EXPORT_APP: the phone app's art and tables, then quit (mp_export.c)
+        {
+            void MP_FxClip_IfAsked(void);
+            MP_FxClip_IfAsked();   // MOEMON_EXPORT_FXCLIPS: the ball effects for the phone app (mp_fxclip.c)
+        }
         MP_Phone_Update();   // the phone link (mp_phone.c)
     }
     MP_TCard_Update();   // the TRAINER CARD's badge records and the BADGE CASE's fading (mp_tcard.c)

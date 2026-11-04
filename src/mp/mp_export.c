@@ -509,6 +509,81 @@ static void ExportFont(const char *dir, FILE *json)
     WritePng(path, sRgba, 256, 256);
 }
 
+// The POKé BALL page's pieces (mp_ballstyle.c MP_BallStyle_ExportJson; the effects' names, the editor's words for
+// each, where an earned one comes from, the ready-made presets as [name, pack, sound])
+static void JsonAscii(FILE *f, const char *s)
+{
+    fputc('"', f);
+    for (; *s; s++)
+    {
+        if (*s == '~')
+            fputs("\\u00e9", f);   // (the game's é in ASCII text)
+        else if (*s == '"' || *s == '\\')
+            fprintf(f, "\\%c", *s);
+        else if ((u8)*s >= 0x20)
+            fputc(*s, f);
+    }
+    fputc('"', f);
+}
+
+static void ExportBallFx(FILE *f)
+{
+    void MP_BallStyle_ExportJson(FILE *f);
+    const char *MP_BallFxEditor_Info(u8 kind, u8 i);
+    static const u8 sKinds[] = {MPFX_PIECE_FORM, MPFX_PIECE_PART, MPFX_PIECE_RECALL};
+    static const char *const sKeys[] = {"forms", "parts", "recalls"};
+    u32 k, i;
+    char how[96];
+    MP_BallStyle_ExportJson(f);
+    fprintf(f, ",\"ballfx\":{");
+    for (k = 0; k < 3; k++)
+    {
+        fprintf(f, "%s\"%s\":[", k ? "," : "", sKeys[k]);
+        for (i = 0; i < MP_BallUnlock_Count(sKinds[k]); i++)
+        {
+            fprintf(f, "%s[", i ? "," : "");
+            JsonAscii(f, k == 0 ? MP_BallFx_FormName(i) : k == 1 ? MP_BallFx_PartName(i) : MP_BallFx_RecallName(i));
+            fputc(',', f);
+            JsonAscii(f, MP_BallFxEditor_Info(sKinds[k], i));
+            how[0] = '\0';
+            if (i >= MP_BallUnlock_First(sKinds[k]))
+                MP_BallUnlock_HowTo(sKinds[k], i, how, sizeof(how));
+            fputc(',', f);
+            JsonAscii(f, how);
+            fputc(']', f);
+        }
+        fprintf(f, "]");
+    }
+    fprintf(f, ",\"colorHow\":[");
+    for (i = 0; i < MP_BALL_COLORS; i++)
+    {
+        how[0] = '\0';
+        if (i >= MP_BallUnlock_First(MPFX_PIECE_COLOR))
+            MP_BallUnlock_HowTo(MPFX_PIECE_COLOR, i, how, sizeof(how));
+        fprintf(f, "%s", i ? "," : "");
+        JsonAscii(f, how);
+    }
+    fprintf(f, "],\"sounds\":[");
+    for (i = 0; i < MPFX_SOUND_COUNT; i++)
+    {
+        fprintf(f, "%s[", i ? "," : "");
+        JsonAscii(f, MP_BallFx_SoundName(i));
+        fputc(',', f);
+        JsonAscii(f, MP_BallFxEditor_Info(MPFX_PIECE_KINDS, i));
+        fputc(']', f);
+    }
+    fprintf(f, "],\"presets\":[");
+    for (i = 0; i < MP_BallFx_PresetCount(); i++)
+    {
+        struct MpBallFx fx;
+        MP_BallFx_Preset(i, &fx);
+        fprintf(f, "%s[", i ? "," : "");
+        JsonAscii(f, MP_BallFx_PresetName(i));
+        fprintf(f, ",%u,%u]", (unsigned)MP_BallFx_Pack(&fx), fx.sound);
+    }
+    fprintf(f, "]},");
+}
+
 static void ExportData(const char *dir)
 {
     char path[600];
@@ -723,6 +798,7 @@ static void ExportData(const char *dir)
         fprintf(f, "]");
     }
     fprintf(f, "],");
+    ExportBallFx(f);
     ExportFont(dir, f);
     fprintf(f, "}\n");
     fclose(f);

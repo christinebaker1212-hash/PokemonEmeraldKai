@@ -518,4 +518,36 @@ for the app and nothing is committed.
   POKéGEAR RADIO: < > under the dial step half a frequency (DevicePage.step).
 - Tests: ScreensTest shots dex_entry_more1-5, dex_types, dex_fire, types_*, look_menu, look_night.
 
+### The POKé BALL page (1.85.0)
+
+The SUMMARY's BALL tab (BallPage.java): the game's POKé BALL page and ball effect editor on the phone.
+- **The clips** (src/mp/mp_fxclip.c, MOEMON_EXPORT_FXCLIPS=DIR; android/build_assets.py runs it after the export,
+  unthrottled through the test harness, about 13 s; MOEMON_EXPORT_NO_FXCLIPS skips it): the game opens its own ball
+  effect editor (mp_ballfx_editor.c, MP_FxClip_Active: the preview's pieces set by MP_FxClip_Next, the Moemon seen from
+  the front, a shorter pause) on a PIKACHU and plays every SEND-OUT, PARTICLES and RETURN once with the rest DEFAULT and
+  RED energy (a first loop unrecorded: the fade-in); sdl2.c hands each finished frame (effects composited) to
+  MP_FxClip_Frame, which keeps the battle field (112 x 112) XORed with the frame before, as runs. build_assets.py packs
+  them into fxclips.bin ("MFXA": 95 clips at 30 frames a second, each frame XORed with the one before, zlib; about
+  3.5 MB). FxClips.java unpacks one clip at a time.
+- **The data** (data.json): "balls" (mp_ballstyle.c MP_BallStyle_ExportJson: the 41 colors with their five shades,
+  the POKé BALL icon's palette and the slots 7-11 a color fills, the 68 decorations' 5x5 icon art, colors and place,
+  their groups, the special balls' items) and "ballfx" (each piece's name, the editor's words for it, where an earned
+  one comes from; the sounds; the ready-made presets as [name, pack, sound]).
+- **The snapshot**: each POKéMON's "bst" (ball style), "fx" (MP_BallFx_Pack) and "fxs" (sound) when not 0; the save's
+  "fxu" (per kind COLOR, SEND-OUT, PARTICLES, RETURN: the pieces it may pick, a bit each in hex, the first first) and
+  "fxp" (MY PRESET 1-6: [pack, sound] or 0). PhoneBall_Hash is in the rev.
+- **The orders** (src/mp/mp_phone_ball.c, as the game's own page and editor allow): "ballstyle" {at, p, o, item,
+  color, deco} (another kind of ball costs one from the BAG: "noitem"; a color not earned: "locked"; a special ball
+  is a POKé BALL underneath with its number in the style), "ballfx" {at, p, o, fx, fxs} (each piece earned or the one
+  it carries, else "locked"), "fxparty" {fx, fxs} (every POKéMON in the party but EGGs), "fxpreset" {slot, fx, fxs}.
+  The app sends "special" with "ballstyle" for Planned's preview; the game works it out itself.
+- **The page**: the stage plays the piece of the row last touched (the effect's most telling part at first; a tap
+  plays it again), the ball's icon in its corner drawn as the game draws it (the red top's shades, the emblem); the
+  info box tells of the piece, or where a piece not earned comes from. Rows THE BALL (BALL, COLOR, DECOR) and
+  SEND-OUT & RETURN (PRESET, SEND-OUT, PARTICLES, ENERGY, RETURN, SOUND): < > step, the middle opens the row's list
+  (every choice, LOCKED ones marked). SAVE (a ball from the BAG asks first), PRESETS (use or save MY PRESET 1-6), PARTY,
+  UNDO / BACK. Pieces not earned can be looked at, never kept.
+- Tests: tools/phone/ball_test.py (the orders against a headless game), ScreensTest ball_page / ball_list /
+  ball_locked.
+
 Next: the rest of the pass.
