@@ -1,0 +1,7 @@
+# Crystal's WEEKDAY siblings (docs/REGIONS_AUDIT.md 63): ROUTE 29's TUSCANY is out only on Tuesdays and gives her
+# SILK SCARF (Crystal's PINK BOW) there; on a Wednesday she is gone.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("[test] npc local 4 gfx" "[test] item 217: 1" "[test] flag 5426 = 1" "[test] npc local 4 gfx 17 xy 25,12 invisible 0")
+UNEXPECT_A=("[crash]")

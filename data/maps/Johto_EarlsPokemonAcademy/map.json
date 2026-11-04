@@ -90,7 +90,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_EarlsPokemonAcademy_EventScript_8400303",
-      "flag": "0"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_6",
@@ -103,7 +103,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_EarlsPokemonAcademy_EventScript_8400344",
-      "flag": "0"
+      "flag": "FLAG_KAI_GONE"
     }
   ],
   "warp_events": [
@@ -148,6 +148,14 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Quetzal_EventScript_8360850"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 6,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_EarlsPokemonAcademy_EventScript_Notebook"
     }
   ]
 }

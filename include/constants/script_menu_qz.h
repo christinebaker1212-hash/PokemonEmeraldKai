@@ -109,4 +109,5 @@
 #define MULTI_QZ_0x94 221
 #define MULTI_QZ_0x95 222
 #define MULTI_QZ_0x96 223
+#define MULTI_KAI_ACADEMY_BLACKBOARD 240
 #endif

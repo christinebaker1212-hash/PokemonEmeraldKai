@@ -960,16 +960,21 @@ Johto_ElmsLab_Text_83E3485::
 	.string "Once there, go straight north!$"
 
 Johto_ElmsLab_Text_83E360F::
-	.string "ELM: {PLAYER}! I have a gift\n"
-	.string "to celebrate your victory.\p"
-	.string "It’s an S.S. Ticket!$"
+	.string "ELM: {PLAYER}! There you are!\p"
+	.string "I called because I have something\n"
+	.string "for you.\p"
+	.string "See? It’s an S.S.TICKET.\p"
+	.string "Now you can catch MOéMON in KANTO.$"
 
 Johto_ElmsLab_Text_83E3656::
-	.string "Keep it to sail from OLIVINE to\n"
-	.string "regions where you have already\l"
-	.string "won the League.\p"
-	.string "To begin another adventure, use\n"
-	.string "New region in the START menu.$"
+	.string "The ship departs from OLIVINE\n"
+	.string "CITY.\p"
+	.string "But you knew that already,\n"
+	.string "{PLAYER}.\p"
+	.string "After all, you’ve traveled all\n"
+	.string "over with your MOéMON.\p"
+	.string "Give my regards to PROF.OAK in\n"
+	.string "KANTO!$"
 
 Johto_ElmsLab_Text_83E3713::
 	.string "{PLAYER}, I want you to have\n"

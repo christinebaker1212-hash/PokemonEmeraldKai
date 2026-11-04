@@ -46,53 +46,34 @@ Johto_Route36_EventScript_83F1A2C::
 
 @ Johto_Route36 object 2 (local id 2, gfx 0x3E87) at 47,16
 Johto_Route36_EventScript_83F1A37::
+	@ Moemon Kai: Crystal's WEEKDAY sibling (pokecrystal Route36.asm ArthurScript; tools/quetzal_port/fix_siblings.py):
+	@ only on THURSDAY (FLAG_JOHTO_HIDE_ARTHUR), once met they give the gift
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x102C, Johto_Route36_EventScript_83F1AF7
-	msgbox Johto_Route36_Text_83F1FD3, MSGBOX_DEFAULT
-	closemessage
-	multichoice 0x14, 0, MULTI_QZ_0x4A, 1
-	nop
-	copyvar VAR_0x8000, VAR_RESULT
-	goto_if_eq VAR_0x8000, 0, Johto_Route36_EventScript_83F1AE9
-	goto_if_eq VAR_0x8000, 1, Johto_Route36_EventScript_83F1AE9
-	goto_if_eq VAR_0x8000, 2, Johto_Route36_EventScript_83F1AE9
-	goto_if_eq VAR_0x8000, 3, Johto_Route36_EventScript_83F1AE9
-	goto_if_eq VAR_0x8000, 4, Johto_Route36_EventScript_83F1ABC
-	goto_if_eq VAR_0x8000, 5, Johto_Route36_EventScript_83F1AE9
-	goto_if_eq VAR_0x8000, 6, Johto_Route36_EventScript_83F1AE9
-	goto_if_eq VAR_0x8000, 7, Johto_Route36_EventScript_83F1AF4
-	goto_if_eq VAR_0x8000, 127, Johto_Route36_EventScript_83F1AF4
-	closemessage
-	release
-	end
-
-Johto_Route36_EventScript_83F1ABC::
-	msgbox Johto_Route36_Text_83F204F, MSGBOX_DEFAULT
+	goto_if_set FLAG_QZ_0x102C, Johto_Route36_EventScript_ArthurDay
+	specialvar VAR_RESULT, MP_JohtoWeekday
+	goto_if_ne VAR_RESULT, 4, Johto_Route36_EventScript_ArthurNotDay
+	goto_if_set FLAG_JOHTO_MET_ARTHUR, Johto_Route36_EventScript_ArthurMet
+	msgbox Johto_Route36_Text_ArthurMeet, MSGBOX_DEFAULT
+	setflag FLAG_JOHTO_MET_ARTHUR
+Johto_Route36_EventScript_ArthurMet::
+	msgbox Johto_Route36_Text_ArthurGivesGift, MSGBOX_DEFAULT
 	setorcopyvar VAR_0x8000, ITEM_HARD_STONE
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
 	setflag FLAG_QZ_0x102C
-	msgbox Johto_Route36_Text_83F2068, MSGBOX_DEFAULT
-	closemessage
+	msgbox Johto_Route36_Text_ArthurGaveGift, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route36_EventScript_83F1AE9::
-	msgbox Johto_Route36_Text_83F2044, MSGBOX_DEFAULT
-	closemessage
+Johto_Route36_EventScript_ArthurDay::
+	msgbox Johto_Route36_Text_ArthurThursday, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route36_EventScript_83F1AF4::
-	closemessage
-	release
-	end
-
-Johto_Route36_EventScript_83F1AF7::
-	msgbox Johto_Route36_Text_83F20CC, MSGBOX_DEFAULT
-	closemessage
+Johto_Route36_EventScript_ArthurNotDay::
+	msgbox Johto_Route36_Text_ArthurNotThursday, MSGBOX_DEFAULT
 	release
 	end
 
@@ -323,3 +304,25 @@ Johto_Route36_Text_83F2132::
 	.string "Their stats may be similar at first.\p"
 	.string "However, differences will become\n"
 	.string "pronounced as the MOéMON grow.$"
+
+Johto_Route36_Text_ArthurMeet::
+	.string "ARTHUR: Who are you?\p"
+	.string "I’m ARTHUR of Thursday.$"
+
+Johto_Route36_Text_ArthurGaveGift::
+	.string "ARTHUR: A MOéMON that uses\n"
+	.string "rock-type moves should hold on to\l"
+	.string "that.\p"
+	.string "It pumps up rock-type attacks.$"
+
+Johto_Route36_Text_ArthurThursday::
+	.string "ARTHUR: I’m ARTHUR of Thursday.\n"
+	.string "I’m the second son out of seven\l"
+	.string "children.$"
+
+Johto_Route36_Text_ArthurNotThursday::
+	.string "ARTHUR: Today’s not Thursday. How\n"
+	.string "disappointing.$"
+
+Johto_Route36_Text_ArthurGivesGift::
+	.string "Here. You can have this.$"

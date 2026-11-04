@@ -36,53 +36,40 @@ Johto_Route37_EventScript_83F2293::
 
 @ Johto_Route37 object 4 (local id 4, gfx 0xB) at 20,26
 Johto_Route37_EventScript_83F22AA::
+	@ Moemon Kai: Crystal's WEEKDAY sibling (pokecrystal Route37.asm SunnyScript; tools/quetzal_port/fix_siblings.py):
+	@ only on SUNDAY (FLAG_JOHTO_HIDE_SUNNY), once met they give the gift
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x1044, Johto_Route37_EventScript_83F236A
-	msgbox Johto_Route37_Text_83F2539, MSGBOX_DEFAULT
-	closemessage
-	multichoice 0x14, 0, MULTI_QZ_0x4A, 1
-	nop
-	copyvar VAR_0x8000, VAR_RESULT
-	goto_if_eq VAR_0x8000, 0, Johto_Route37_EventScript_83F232F
-	goto_if_eq VAR_0x8000, 1, Johto_Route37_EventScript_83F235C
-	goto_if_eq VAR_0x8000, 2, Johto_Route37_EventScript_83F235C
-	goto_if_eq VAR_0x8000, 3, Johto_Route37_EventScript_83F235C
-	goto_if_eq VAR_0x8000, 4, Johto_Route37_EventScript_83F235C
-	goto_if_eq VAR_0x8000, 5, Johto_Route37_EventScript_83F235C
-	goto_if_eq VAR_0x8000, 6, Johto_Route37_EventScript_83F235C
-	goto_if_eq VAR_0x8000, 7, Johto_Route37_EventScript_83F2367
-	goto_if_eq VAR_0x8000, 127, Johto_Route37_EventScript_83F2367
-	closemessage
-	release
-	end
-
-Johto_Route37_EventScript_83F232F::
-	msgbox Johto_Route37_Text_83F25C9, MSGBOX_DEFAULT
+	goto_if_set FLAG_QZ_0x1044, Johto_Route37_EventScript_SunnyDay
+	specialvar VAR_RESULT, MP_JohtoWeekday
+	goto_if_ne VAR_RESULT, 0, Johto_Route37_EventScript_SunnyNotDay
+	goto_if_set FLAG_JOHTO_MET_SUNNY, Johto_Route37_EventScript_SunnyMet
+	msgbox Johto_Route37_Text_SunnyMeet, MSGBOX_DEFAULT
+	setflag FLAG_JOHTO_MET_SUNNY
+Johto_Route37_EventScript_SunnyMet::
+	checkplayergender
+	goto_if_eq VAR_RESULT, FEMALE, Johto_Route37_EventScript_SunnyKris
+	msgbox Johto_Route37_Text_SunnyGivesGift1, MSGBOX_DEFAULT
+	goto Johto_Route37_EventScript_SunnyGift
+Johto_Route37_EventScript_SunnyKris::
+	msgbox Johto_Route37_Text_SunnyGivesGift2, MSGBOX_DEFAULT
+Johto_Route37_EventScript_SunnyGift::
 	setorcopyvar VAR_0x8000, ITEM_MAGNET
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
 	setflag FLAG_QZ_0x1044
-	msgbox Johto_Route37_Text_83F25F3, MSGBOX_DEFAULT
-	closemessage
+	msgbox Johto_Route37_Text_SunnyGaveGift, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route37_EventScript_83F235C::
-	msgbox Quetzal_Text_83ED204, MSGBOX_DEFAULT
-	closemessage
+Johto_Route37_EventScript_SunnyDay::
+	msgbox Johto_Route37_Text_SunnySunday, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route37_EventScript_83F2367::
-	closemessage
-	release
-	end
-
-Johto_Route37_EventScript_83F236A::
-	msgbox Johto_Route37_Text_83F2697, MSGBOX_DEFAULT
-	closemessage
+Johto_Route37_EventScript_SunnyNotDay::
+	msgbox Johto_Route37_Text_SunnyNotSunday, MSGBOX_DEFAULT
 	release
 	end
 
@@ -160,3 +147,37 @@ Johto_Route37_Text_83F2697::
 Johto_Route37_Text_83F2732::
 	.string "ROUTE 37\n"
 	.string "ECRUTEAK CITY AHEAD$"
+
+Johto_Route37_Text_SunnyMeet::
+	.string "SUNNY: Hi!\p"
+	.string "I’m SUNNY of Sunday, meaning it’s\n"
+	.string "Sunday today!$"
+
+Johto_Route37_Text_SunnyGaveGift::
+	.string "SUNNY: That thing…\p"
+	.string "Um…\p"
+	.string "… What was it now…\p"
+	.string "…\p"
+	.string "Oh! I remember now!\p"
+	.string "A MOéMON that knows electric moves\n"
+	.string "should hold it.\p"
+	.string "My sis MONICA said it powers up\n"
+	.string "electric moves!$"
+
+Johto_Route37_Text_SunnySunday::
+	.string "SUNNY: My sisters and brothers are\n"
+	.string "MONICA, TUSCANY, WESLEY, ARTHUR,\l"
+	.string "FRIEDA and SANTOS.\p"
+	.string "They’re all older than me!$"
+
+Johto_Route37_Text_SunnyNotSunday::
+	.string "SUNNY: Isn’t today Sunday? Um… I\n"
+	.string "forgot!$"
+
+Johto_Route37_Text_SunnyGivesGift1::
+	.string "I was told to give you this if I\n"
+	.string "saw you!$"
+
+Johto_Route37_Text_SunnyGivesGift2::
+	.string "I was told to give you this if I\n"
+	.string "saw you!$"

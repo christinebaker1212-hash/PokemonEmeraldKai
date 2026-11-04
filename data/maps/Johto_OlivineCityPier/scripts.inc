@@ -21,10 +21,10 @@ Johto_OlivineCityPier_EventScript_83E6F98::
 	end
 
 Johto_OlivineCityPier_Text_83E6FA5::
-	.string "From OLIVINE, you can visit\n"
-	.string "VERMILION and LILYCOVE any day.\p"
-	.string "You need an S.S. Ticket and must\n"
-	.string "have won both regions’ Leagues.$"
+	.string "From OLIVINE, ships sail to the\n"
+	.string "other regions.\p"
+	.string "You need an S.S.TICKET, and you\n"
+	.string "must have won this region’s LEAGUE.$"
 
 Johto_OlivineCityPier_Text_83E7022::
 	.string "Aw yeah, I’m fishin’.$"

@@ -74,53 +74,34 @@ Johto_Route29_EventScript_83ECC73::
 
 @ Johto_Route29 object 4 (local id 4, gfx 0x11) at 25,12
 Johto_Route29_EventScript_83ECC80::
+	@ Moemon Kai: Crystal's WEEKDAY sibling (pokecrystal Route29.asm TuscanyScript; tools/quetzal_port/fix_siblings.py):
+	@ only on TUESDAY (FLAG_JOHTO_HIDE_TUSCANY), once met they give the gift
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x1022, Johto_Route29_EventScript_83ECD40
-	msgbox Johto_Route29_Text_83ED16A, MSGBOX_DEFAULT
-	closemessage
-	multichoice 0x14, 0, MULTI_QZ_0x4A, 1
-	nop
-	copyvar VAR_0x8000, VAR_RESULT
-	goto_if_eq VAR_0x8000, 0, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 1, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 2, Johto_Route29_EventScript_83ECD05
-	goto_if_eq VAR_0x8000, 3, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 4, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 5, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 6, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 7, Johto_Route29_EventScript_83ECD3D
-	goto_if_eq VAR_0x8000, 127, Johto_Route29_EventScript_83ECD3D
-	closemessage
-	release
-	end
-
-Johto_Route29_EventScript_83ECD05::
-	msgbox Johto_Route29_Text_83ED20F, MSGBOX_DEFAULT
+	goto_if_set FLAG_QZ_0x1022, Johto_Route29_EventScript_TuscanyDay
+	specialvar VAR_RESULT, MP_JohtoWeekday
+	goto_if_ne VAR_RESULT, 2, Johto_Route29_EventScript_TuscanyNotDay
+	goto_if_set FLAG_JOHTO_MET_TUSCANY, Johto_Route29_EventScript_TuscanyMet
+	msgbox Johto_Route29_Text_TuscanyMeet, MSGBOX_DEFAULT
+	setflag FLAG_JOHTO_MET_TUSCANY
+Johto_Route29_EventScript_TuscanyMet::
+	msgbox Johto_Route29_Text_TuscanyGivesGift, MSGBOX_DEFAULT
 	setorcopyvar VAR_0x8000, ITEM_SILK_SCARF
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
 	setflag FLAG_QZ_0x1022
-	msgbox Johto_Route29_Text_83ED253, MSGBOX_DEFAULT
-	closemessage
+	msgbox Johto_Route29_Text_TuscanyGaveGift, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route29_EventScript_83ECD32::
-	msgbox Quetzal_Text_83ED204, MSGBOX_DEFAULT
-	closemessage
+Johto_Route29_EventScript_TuscanyDay::
+	msgbox Johto_Route29_Text_TuscanyTuesday, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route29_EventScript_83ECD3D::
-	closemessage
-	release
-	end
-
-Johto_Route29_EventScript_83ECD40::
-	msgbox Johto_Route29_Text_83ED2CB, MSGBOX_DEFAULT
-	closemessage
+Johto_Route29_EventScript_TuscanyNotDay::
+	msgbox Johto_Route29_Text_TuscanyNotTuesday, MSGBOX_DEFAULT
 	release
 	end
 
@@ -248,3 +229,30 @@ Johto_Route29_Text_83ED2CB::
 Johto_Route29_Text_83ED33B::
 	.string "ROUTE 29\p"
 	.string "CHERRYGROVE CITY - NEW BARK TOWN$"
+
+Johto_Route29_Text_TuscanyMeet::
+	.string "TUSCANY: I do believe that this is\n"
+	.string "the first time we’ve met?\p"
+	.string "Please allow me to introduce\n"
+	.string "myself.\p"
+	.string "I am TUSCANY of Tuesday.$"
+
+Johto_Route29_Text_TuscanyGaveGift::
+	.string "TUSCANY: Wouldn’t you agree that\n"
+	.string "it is most adorable?\p"
+	.string "It strengthens normal-type moves.\p"
+	.string "I am certain it will be of use.$"
+
+Johto_Route29_Text_TuscanyTuesday::
+	.string "TUSCANY: Have you met MONICA, my\n"
+	.string "older sister?\p"
+	.string "Or my younger brother, WESLEY?\p"
+	.string "I am the second of seven children.$"
+
+Johto_Route29_Text_TuscanyNotTuesday::
+	.string "TUSCANY: Today is not Tuesday.\n"
+	.string "That is unfortunate…$"
+
+Johto_Route29_Text_TuscanyGivesGift::
+	.string "By way of introduction, please\n"
+	.string "accept this gift, a PINK BOW.$"

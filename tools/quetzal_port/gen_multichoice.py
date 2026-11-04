@@ -31,6 +31,14 @@ PRIZE_MENUS = {
            'YELLOW FLUTE{CLEAR_TO 0x50}{FONT_SMALL}1,600 COINS'],
 }
 
+KAI_FIRST = 240   # past Kai's own menus
+
+# Menus Crystal / FireRed have that Quetzal dropped (docs/REGIONS_AUDIT.md), numbered after Quetzal's: MULTI_KAI_<NAME>
+KAI_MENUS = [
+    # EARL's ACADEMY blackboard (pokecrystal maps/EarlsPokemonAcademy.asm BlackboardMenuHeader)
+    ('ACADEMY_BLACKBOARD', ['PSN', 'PAR', 'SLP', 'BRN', 'FRZ', 'QUIT']),
+]
+
 
 def main():
     d = json.load(open(os.path.join(REPO, 'quetzal_rip/data/multichoice.json')))
@@ -49,6 +57,19 @@ def main():
         lists.append('static const struct MenuAction sQzMulti_%02X[] = {\n%s};' % (
             m['id'], ''.join('    {(const u8 []) _("%s")},\n' % t.replace('"', '\\"') for t in m['items'])))
         rows.append('    [MULTI_QZ_0x%02X] = MULTICHOICE(sQzMulti_%02X),' % (m['id'], m['id']))
+    # after Kai's own (include/constants/script_menu.h ends at MULTI_MOM_BANK 229): from KAI_FIRST up
+    import re
+    used = [int(v) for v in re.findall(r'^#define MULTI_(?!B_PRESSED)\w+\s+(\d+)', open(os.path.join(
+        REPO, 'include/constants/script_menu.h')).read(), re.M)]
+    assert FIRST + len(menus) <= min(v for v in used if v >= FIRST), 'Quetzal\'s menus run into Kai\'s'
+    assert KAI_FIRST > max(used)
+    for k, (name, items) in enumerate(KAI_MENUS):
+        num = KAI_FIRST + k
+        assert num < 256
+        head.append('#define MULTI_KAI_%s %d' % (name, num))
+        lists.append('static const struct MenuAction sKaiMulti_%s[] = {\n%s};' % (
+            name, ''.join('    {(const u8 []) _("%s")},\n' % t for t in items)))
+        rows.append('    [MULTI_KAI_%s] = MULTICHOICE(sKaiMulti_%s),' % (name, name))
     head += ['#endif', '']
     open(os.path.join(REPO, 'include/constants/script_menu_qz.h'), 'w').write('\n'.join(head))
     open(os.path.join(REPO, 'src/data/script_menu_qz.h'), 'w').write('\n'.join(lists) + '\n')

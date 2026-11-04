@@ -838,6 +838,7 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     RunOnTransitionMapScript();
     MP_HideForeignLegends();   // Moemon Kai: each region's legendaries only there (qz_specials.c)
     MP_JohtoBerries_Init();   // Moemon Kai: JOHTO's BERRY patches start with Crystal's BERRIES (mp_apricorn.c)
+    MP_JohtoWeekdayPeople();   // Moemon Kai: Crystal's WEEKDAY siblings out on their day (mp_region.c)
     MP_Region_GiveDevices();   // Moemon Kai: the MOéNAV key item (mp_region.c)
     InitMap();
     S3D_Gyms_MapLoaded();   // Moemon Kai (src/sinnoh/s3d_gyms.c)
@@ -899,6 +900,7 @@ static void LoadMapFromWarp(bool32 a1)
     RunOnTransitionMapScript();
     MP_HideForeignLegends();   // Moemon Kai: each region's legendaries only there (qz_specials.c)
     MP_JohtoBerries_Init();   // Moemon Kai: JOHTO's BERRY patches start with Crystal's BERRIES (mp_apricorn.c)
+    MP_JohtoWeekdayPeople();   // Moemon Kai: Crystal's WEEKDAY siblings out on their day (mp_region.c)
     MP_Region_GiveDevices();   // Moemon Kai: the MOéNAV key item (mp_region.c)
     UpdateLocationHistoryForRoamer();
     RoamerMoveToOtherLocationSet();

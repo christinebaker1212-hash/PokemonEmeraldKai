@@ -591,3 +591,11 @@ static const struct MenuAction sQzMulti_96[] = {
     {(const u8 []) _("Rotom")},
     {(const u8 []) _("EXIT")},
 };
+static const struct MenuAction sKaiMulti_ACADEMY_BLACKBOARD[] = {
+    {(const u8 []) _("PSN")},
+    {(const u8 []) _("PAR")},
+    {(const u8 []) _("SLP")},
+    {(const u8 []) _("BRN")},
+    {(const u8 []) _("FRZ")},
+    {(const u8 []) _("QUIT")},
+};

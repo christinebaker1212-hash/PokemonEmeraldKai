@@ -42,16 +42,17 @@ Johto_GoldenrodMagnetTrainStation_EventScript_83D9A43::
 	end
 
 Johto_GoldenrodMagnetTrainStation_Text_83D9A4F::
-	.string "The MAGNET TRAIN has broken down.\p"
-	.string "Service is suspended indefinitely.\n"
-	.string "We’re sorry.$"
+	.string "The train hasn’t come in…\p"
+	.string "I know! I’ll carry the passengers\n"
+	.string "on my back!\p"
+	.string "That won’t work.$"
 
 Johto_GoldenrodMagnetTrainStation_Text_83D9AA1::
 	.string "I’m the PRESIDENT.\p"
-	.string "My dream was to link JOHTO and KANTO\n"
-	.string "with a train faster than a MOéMON.\p"
-	.string "But the service has been suspended\n"
-	.string "indefinitely.$"
+	.string "My dream was to build a train that\n"
+	.string "is faster than any MOéMON.\p"
+	.string "It really brings JOHTO much closer\n"
+	.string "to KANTO.$"
 
 Johto_GoldenrodMagnetTrainStation_Text_83D9B2E::
 	.string "I wanted to see the MAGNET TRAIN go!\n"

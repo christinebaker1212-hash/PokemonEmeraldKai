@@ -37,4 +37,21 @@
 #define FLAG_JOHTO_GOT_ITEMFINDER      0x10A3   // Crystal's EVENT_GOT_ITEMFINDER (ECRUTEAK)
 #define FLAG_JOHTO_GOT_SOFT_SAND       0x10B2   // Crystal's EVENT_GOT_SOFT_SAND_FROM_KATE (ROUTE 34)
 
+// JOHTO flags the audit adds, from the free run 0x152A-0x1558 (docs/REGIONS_AUDIT.md)
+// Crystal's WEEKDAY siblings (case 63, tools/quetzal_port/fix_siblings.py): met them, and hidden off their day
+#define FLAG_JOHTO_MET_MONICA     0x152A
+#define FLAG_JOHTO_MET_TUSCANY    0x152B
+#define FLAG_JOHTO_MET_WESLEY     0x152C
+#define FLAG_JOHTO_MET_ARTHUR     0x152D
+#define FLAG_JOHTO_MET_FRIEDA     0x152E
+#define FLAG_JOHTO_MET_SANTOS     0x152F
+#define FLAG_JOHTO_MET_SUNNY      0x1530
+#define FLAG_JOHTO_HIDE_MONICA    0x1531
+#define FLAG_JOHTO_HIDE_TUSCANY   0x1532
+#define FLAG_JOHTO_HIDE_WESLEY    0x1533
+#define FLAG_JOHTO_HIDE_ARTHUR    0x1534
+#define FLAG_JOHTO_HIDE_FRIEDA    0x1535
+#define FLAG_JOHTO_HIDE_SANTOS    0x1536
+#define FLAG_JOHTO_HIDE_SUNNY     0x1537
+
 #endif // GUARD_CONSTANTS_KAI_REGIONS_H

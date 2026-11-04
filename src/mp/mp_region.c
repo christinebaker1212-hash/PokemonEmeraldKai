@@ -2138,3 +2138,25 @@ u16 MP_JohtoWeekday(void)
     RtcCalcLocalTime();
     return gSpecialVar_Result = gLocalTime.days % 7;
 }
+
+// Crystal's people who come out on one weekday (their maps' MAPCALLBACK_OBJECTS): after a JOHTO map's transition
+// scripts (overworld.c), each one's hide flag is set but on their day. The WEEKDAY siblings (docs/REGIONS_AUDIT.md
+// case 63, tools/quetzal_port/fix_siblings.py)
+void MP_JohtoWeekdayPeople(void)
+{
+    static const u16 sHide[7] = {   // SUNDAY .. SATURDAY
+        FLAG_JOHTO_HIDE_SUNNY, FLAG_JOHTO_HIDE_MONICA, FLAG_JOHTO_HIDE_TUSCANY, FLAG_JOHTO_HIDE_WESLEY,
+        FLAG_JOHTO_HIDE_ARTHUR, FLAG_JOHTO_HIDE_FRIEDA, FLAG_JOHTO_HIDE_SANTOS,
+    };
+    u16 today, i;
+    if (MP_Region_Current() != REGION_JOHTO)
+        return;
+    today = MP_JohtoWeekday();
+    for (i = 0; i < 7; i++)
+    {
+        if (i == today)
+            FlagClear(sHide[i]);
+        else
+            FlagSet(sHide[i]);
+    }
+}
