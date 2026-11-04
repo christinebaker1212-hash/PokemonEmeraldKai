@@ -17,6 +17,7 @@ extern const struct RematchTrainer gRematchTable[REMATCH_TABLE_ENTRIES];
 extern u16 gTrainerBattleOpponent_A;
 extern u16 gTrainerBattleOpponent_B;
 extern u16 gPartnerTrainerId;
+extern bool8 gWallyTutorialThrowFirst;   // Moemon Kai: no moves first, the ball at once (Crystal's DUDE)
 extern u16 gWallyTutorialBackPic;   // Moemon Kai: the catching tutorial's trainer (WALLY, or SINNOH's DAWN / LUCAS)
 extern const u8 *gWallyTutorialName;
 void MP_StartTwoTrainerBattle(u16 a, u16 b, const u8 *defeatA, const u8 *defeatB);   // Moemon Kai: SINNOH's scripted two-trainer battles

@@ -2606,6 +2606,10 @@ void BufferStringBattle(u16 stringID)
     case STRINGID_PLAYERGOTMONEY:   // Moemon Kai: "Sent some to MOM!" when she kept a share (mp_mombank.c)
         stringPtr = gMpMomShared ? sText_PlayerGotMoneySentSomeToMom : sText_PlayerGotMoney;
         break;
+    case STRINGID_YOUTHROWABALLNOWRIGHT:
+        // Moemon Kai: WALLY's line; Crystal's DUDE throws without a word (battle_setup.c MP_JohtoCatchingTutorial)
+        stringPtr = gWallyTutorialThrowFirst ? gText_EmptyString2 : gBattleStringsTable[stringID - BATTLESTRINGS_TABLE_START];
+        break;
     case STRINGID_PKMNBROKEFREE:
     case STRINGID_ITAPPEAREDCAUGHT:
     case STRINGID_AARGHALMOSTHADIT:

@@ -570,11 +570,13 @@ static void DoBattlePyramidTrainerHillBattle(void)
 // Initiates battle where Wally catches Ralts
 // Moemon Kai: the catching tutorial's trainer, WALLY's unless SINNOH's (Sinnoh_CatchingTutorial below)
 u16 gWallyTutorialBackPic = TRAINER_BACK_PIC_WALLY;
+bool8 gWallyTutorialThrowFirst;
 const u8 *gWallyTutorialName = NULL;
 void MP_WallyTutorialSetName(const u8 *name);   // (battle_message.c)
 
 void StartWallyTutorialBattle(void)
 {
+    gWallyTutorialThrowFirst = FALSE;
     gWallyTutorialBackPic = TRAINER_BACK_PIC_WALLY;
     gWallyTutorialName = NULL;
     MP_WallyTutorialSetName(NULL);
@@ -600,9 +602,30 @@ void Sinnoh_CatchingTutorial(void)
     CalculatePlayerPartyCount();
     ZeroEnemyPartyMons();
     CreateMon(&gEnemyParty[0], SPECIES_BIDOOF, 2, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    gWallyTutorialThrowFirst = FALSE;
     pic = MP_Avatar_NamedBackPic(girl ? "kai_dawn" : "kai_lucas");
     gWallyTutorialBackPic = pic != 0xFFFF ? pic : TRAINER_BACK_PIC_WALLY;
     gWallyTutorialName = girl ? sDawn : sLucas;
+    MP_WallyTutorialSetName(gWallyTutorialName);
+    LockPlayerFieldControls();
+    gMain.savedCallback = CB2_ReturnToFieldContinueScriptPlayMapMusic;
+    gBattleTypeFlags = BATTLE_TYPE_WALLY_TUTORIAL;
+    CreateBattleStartTask(B_TRANSITION_SLICE, 0);
+}
+
+// Moemon Kai: Crystal's ROUTE 29 catching demonstration (pokecrystal engine/events/catch_tutorial.asm; docs/REGIONS_AUDIT.md
+// 133): the DUDE, with the player's own POKéMON, throws a POKé BALL at once at a wild Lv. 5 RATTATA. His back picture
+// is Crystal's (tools/quetzal_port/gen_dude_back.py). The script saves the party before and loads it after
+static const u8 sDudeBack[] __attribute__((aligned(4))) = INCBIN_U8("graphics/moemon/dude_back.bin");
+void MP_JohtoCatchingTutorial(void)
+{
+    static const u8 sDude[] = _("DUDE");
+    u16 MP_Avatar_TilesBackPic(const u8 *tiles, const u16 *pal);
+    ZeroEnemyPartyMons();
+    CreateMon(&gEnemyParty[0], SPECIES_RATTATA, 5, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    gWallyTutorialBackPic = MP_Avatar_TilesBackPic(sDudeBack, (const u16 *)(sDudeBack + 4 * TRAINER_PIC_SIZE));
+    gWallyTutorialName = sDude;
+    gWallyTutorialThrowFirst = TRUE;
     MP_WallyTutorialSetName(gWallyTutorialName);
     LockPlayerFieldControls();
     gMain.savedCallback = CB2_ReturnToFieldContinueScriptPlayMapMusic;

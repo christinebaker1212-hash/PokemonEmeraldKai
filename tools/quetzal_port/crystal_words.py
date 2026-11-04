@@ -35,7 +35,7 @@ def asm(mapname):
 def words(mapname, label, our_label=None):
     """`OUR_LABEL::` and its .string lines"""
     text = asm(mapname)
-    text = text.replace('<PLAYER>', '{PLAYER}').replace('<PLAY_G>', '{PLAYER}').replace('<RIVAL>', '{RIVAL}').replace('<PK><MN>', '#MON')
+    text = text.replace('<PLAYER>', '{PLAYER}').replace('<PLAY_G>', '{PLAYER}').replace('<RIVAL>', '{RIVAL}').replace('<PK><MN>', '#MON').replace('<……>', '……')
     # a name put in by the script (text_ram): the buffers as this game's string vars
     rams = {'wStringBuffer3': '{STR_VAR_1}', 'wStringBuffer4': '{STR_VAR_2}', 'wStringBuffer5': '{STR_VAR_3}',
             'wPlayerName': '{PLAYER}', 'wRivalName': '{RIVAL}'}

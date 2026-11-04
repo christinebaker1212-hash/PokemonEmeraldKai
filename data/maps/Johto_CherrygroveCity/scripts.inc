@@ -202,7 +202,8 @@ Johto_CherrygroveCity_EventScript_83C8FCD::
 	waitmovement 0
 	msgbox Johto_CherrygroveCity_Text_83C933A, MSGBOX_DEFAULT
 	closemessage
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4701, 0, Johto_CherrygroveCity_Text_83C93F3
+	@ Moemon Kai: Crystal's BATTLETYPE_CANLOSE: a loss doesn't black out, the story goes on (docs/REGIONS_AUDIT.md 132)
+	qz_trainerbattle_13 TRAINER_QZ_4701, 1, Johto_CherrygroveCity_Text_83C93F3, Johto_CherrygroveCity_Text_RivalWins
 	goto Johto_CherrygroveCity_EventScript_83C8FF4
 
 Johto_CherrygroveCity_EventScript_83C8FF4::
@@ -473,8 +474,8 @@ Johto_CherrygroveCity_Text_83C93F3::
 	.string "Humph. Are you happy you won?$"
 
 Johto_CherrygroveCity_Text_83C9411::
-	.string "… … … … … … … …\p"
-	.string "Do you want to know who I am?\p"
+	.string "…… …… ……\p"
+	.string "My name’s ???.\p"
 	.string "I’m going to be the world’s\n"
 	.string "greatest MOéMON trainer.$"
 
@@ -513,3 +514,6 @@ Johto_CherrygroveCity_Text_83C95FD::
 	.string "CHERRYGROVE CITY\p"
 	.string "The City of Cute, Fragrant\n"
 	.string "Flowers$"
+
+Johto_CherrygroveCity_Text_RivalWins::
+	.string "Humph. That was a waste of time.$"

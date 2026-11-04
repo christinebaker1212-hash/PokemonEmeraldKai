@@ -695,3 +695,4 @@ gSpecials::
 	def_special MP_ReturnShuckie
 	def_special GetJohtoMagikarpSizeRecordInfo
 	def_special CompareJohtoMagikarpSize
+	def_special MP_JohtoCatchingTutorial
