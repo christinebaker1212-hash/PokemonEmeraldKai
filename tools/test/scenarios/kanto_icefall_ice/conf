@@ -1,0 +1,5 @@
+# FireRed's ICEFALL CAVE thin ice: a step cracks it, a second breaks it and the player drops to B1F
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("tile 8,3 = 858" "where map 36.112")

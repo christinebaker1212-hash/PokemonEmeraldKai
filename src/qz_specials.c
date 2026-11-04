@@ -1110,7 +1110,12 @@ u16 QzSetDeoxysRockPaletteVar5071(void) { return 0; }
 u16 QzDoDeoxysRockInteractionAlt(void) { ScriptContext_Enable(); return 0; }
 
 // Icefall Cave's cracked ice: the tiles of floor already cracked (var 0x4001's bits), as FireRed
-u16 QzSetIcefallCaveCrackedIceMetatiles(void) { return 0; }
+u16 QzSetIcefallCaveCrackedIceMetatiles(void)
+{
+    void MP_SetIcefallCaveCrackedIceMetatiles(void);   // (field_tasks.c, FireRed's)
+    MP_SetIcefallCaveCrackedIceMetatiles();
+    return 0;
+}
 u16 QzJohtoTravelingEventCheck(void) { return gSpecialVar_Result = QzJohtoTravelingEventCheck_(); }
 u16 QzKantoTravelingEventCheck(void) { return gSpecialVar_Result = QzKantoTravelingEventCheck_(); }
 u16 QzPlayerNotAtTrainerHillEntrance(void) { return gSpecialVar_Result = QzPlayerNotAtTrainerHillEntrance_(); }
