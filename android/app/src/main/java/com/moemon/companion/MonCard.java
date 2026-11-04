@@ -25,7 +25,7 @@ public final class MonCard {
         if (egg) {
             art.icon(c, eggSpecies(art), x + 18, y + 18, GameArt.ICON_PLAIN);   // (the EGG has no front picture)
         } else {
-            art.front(c, species, mon.optString("pal", null), x + 2, y + 2, false);
+            art.front(c, species, art.monPal(mon), x + 2, y + 2, false);
         }
         int tx = x + 70;
         art.textHex(c, mon.optString("n"), tx, y, GameArt.TEXT, GameArt.SHADOW);

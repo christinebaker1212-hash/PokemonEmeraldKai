@@ -575,4 +575,19 @@ The ninth tab, ME (MePage.java): Kai's own things (src/mp/mp_phone_kai.c).
   encode: the game's "$" ends a string, which hid the BAG's money).
 - Tests: tools/phone/kai_test.py, ScreensTest me / achievements / gatcha / gatcha_prizes.
 
+### MOéMON or POKéMON (1.86.0)
+
+The app follows the game's OPTIONS > CREATURES, or its own MENU > LOOK > CREATURES (AS THE GAME / MOéMON / POKéMON;
+Look.creatures, "look_art"; Look.pokemonArt sets GameArt.pokemonArt every frame, the widget too).
+- **Pictures**: mp_export.c exports both sets (ExportMonsArt: front/ and front_p/ by MP_MONART with the option set; the
+  party icons are the same in both, so once), each species' "pal" (Kai's) and "ppal" (the original's), and the POKéDEX
+  list's header both ways (dex_list.png, dex_list_p.png). The snapshot: each POKéMON's "pal" and "ppal" when not its
+  species' (shiny, a Stadium hue: MP_BoxMonFrontPal for Kai's, GetMonSpritePalFromSpeciesAndPersonality with the
+  option set for the original's), and the save's "art" (the game's setting). GameArt.front draws from front_N or
+  front_p_N with "pal" or "ppal"; GameArt.monPal(mon) picks a POKéMON's own.
+- **Words** (GameArt.words, on every string drawn or measured): with POKéMON, the game's own swap (mp_textopts.c:
+  MOé -> POKé in any case, MOEMON -> POKéMON); with MOéMON, the app's POKéMON / POKéDEX / POKéNAV become Kai's MOéMON /
+  MOéDEX / MOéNAV (Kai kept POKé BALL, POKéGEAR...).
+- Tests: ScreensTest party_pokemon, dex_pokemon.
+
 Next: the rest of the pass.

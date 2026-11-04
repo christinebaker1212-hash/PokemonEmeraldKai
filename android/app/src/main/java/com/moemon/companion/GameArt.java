@@ -38,7 +38,7 @@ public final class GameArt {
     private final char[] letters = new char[256];
     private final Bitmap fontMain, fontShadow;
     private Bitmap icons, items, wallpapers, frames, types;
-    private final Bitmap[] fronts = new Bitmap[8];
+    private final Bitmap[] fronts = new Bitmap[8], frontsP = new Bitmap[8];
     private final Map<Integer, Integer> dexToSpecies = new HashMap<>();
     private final Paint pix = new Paint(), tint = new Paint(), silhouette = new Paint(), gray = new Paint();
     private final Rect src = new Rect(), dst = new Rect();
@@ -173,7 +173,78 @@ public final class GameArt {
         return s.toString();
     }
 
+    // ---------------------------------------------------------------------------- MOéMON or POKéMON (CREATURES)
+
+    /** The pictures and words shown: the original POKéMON's (true) or Kai's MOéMON (Look.creatures, as the game) */
+    public static boolean pokemonArt;
+    private byte[][][][] swaps;   // [mode][pair][from, to]
+
+    /**
+     * The words swapped as the game's OPTIONS > CREATURES swaps them (mp_textopts.c): with POKéMON, Kai's MOé becomes
+     * POKé (MOéMON, MOéDEX...) and MOEMON POKéMON; with MOéMON, the app's own POKéMON, POKéDEX and POKéNAV become Kai's
+     * (POKé BALL stays: Kai kept it)
+     */
+    private byte[] words(byte[] t) {
+        if (swaps == null) {
+            String[][][] w = {
+                    {{"POK\u00e9MON", "MO\u00e9MON"}, {"POK\u00e9DEX", "MO\u00e9DEX"}, {"POK\u00e9NAV", "MO\u00e9NAV"},
+                     {"Pok\u00e9mon", "Mo\u00e9mon"}},
+                    {{"MO\u00e9", "POK\u00e9"}, {"Mo\u00e9", "Pok\u00e9"}, {"MOEMON", "POK\u00e9MON"}, {"Moemon", "Pok\u00e9mon"}}};
+            swaps = new byte[2][][][];
+            for (int m = 0; m < 2; m++) {
+                swaps[m] = new byte[w[m].length][][];
+                for (int i = 0; i < w[m].length; i++) {
+                    swaps[m][i] = new byte[][]{encode(w[m][i][0]), encode(w[m][i][1])};
+                }
+            }
+        }
+        byte[][][] pairs = swaps[pokemonArt ? 1 : 0];
+        java.io.ByteArrayOutputStream out = null;
+        for (int i = 0; i < t.length; ) {
+            byte[][] hit = null;
+            for (byte[][] pair : pairs) {
+                if (startsAt(t, i, pair[0])) {
+                    hit = pair;
+                    break;
+                }
+            }
+            if (hit != null) {
+                if (out == null) {
+                    out = new java.io.ByteArrayOutputStream(t.length + 4);
+                    out.write(t, 0, i);
+                }
+                out.write(hit[1], 0, hit[1].length);
+                i += hit[0].length;
+            } else {
+                if ((t[i] & 255) == 0xFF) {
+                    if (out != null) {
+                        out.write(t, i, t.length - i);
+                    }
+                    break;
+                }
+                if (out != null) {
+                    out.write(t[i]);
+                }
+                i++;
+            }
+        }
+        return out == null ? t : out.toByteArray();
+    }
+
+    private static boolean startsAt(byte[] t, int at, byte[] p) {
+        if (at + p.length > t.length) {
+            return false;
+        }
+        for (int k = 0; k < p.length; k++) {
+            if (t[at + k] != p[k]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public int width(byte[] t) {
+        t = words(t);
         int w = 0;
         for (byte c : t) {
             if ((c & 255) == 0xFF) {
@@ -190,6 +261,7 @@ public final class GameArt {
 
     /** Text at (x, y) (its 16-pixel cell's top), in a color and its shadow; returns the width */
     public int text(Canvas c, byte[] t, int x, int y, int color, int shadow) {
+        t = words(t);
         int x0 = x;
         for (byte ch : t) {
             int g = ch & 255;
@@ -328,6 +400,11 @@ public final class GameArt {
         return p;
     }
 
+    /** A POKéMON's own colors in the set shown (the snapshot's "pal" / "ppal": shiny, a Stadium hue), or null */
+    public String monPal(org.json.JSONObject mon) {
+        return mon == null ? null : mon.optString(pokemonArt ? "ppal" : "pal", null);
+    }
+
     /** A front picture colored by pal (a POKeMON's own palette, the snapshot's "pal"), or its species' when null */
     public void front(Canvas c, int species, String pal, int x, int y, boolean silhouetted) {
         front(c, species, pal, x, y, 64, silhouetted);
@@ -339,20 +416,23 @@ public final class GameArt {
         if (k >= fronts.length) {
             return;
         }
+        boolean po = pokemonArt;
+        String palKey = po ? "ppal" : "pal";
         if (pal == null || pal.isEmpty()) {
-            pal = species(species).optString("pal", null);
+            pal = species(species).optString(palKey, null);
             if (pal == null) {
                 // (UNOWN's letters past the EGG: UNOWN's colors)
-                pal = species(201).optString("pal", "");
+                pal = species(201).optString(palKey, "");
             }
         }
-        String key = species + ":" + pal;
+        String key = (po ? "p" : "") + species + ":" + pal;
         Bitmap b = colored.get(key);
         if (b == null) {
-            if (fronts[k] == null) {
-                fronts[k] = bitmap("game/front_" + k + ".png");
+            Bitmap[] set = po ? frontsP : fronts;
+            if (set[k] == null) {
+                set[k] = bitmap(po ? "game/front_p_" + k + ".png" : "game/front_" + k + ".png");
             }
-            Bitmap sheet = fronts[k];
+            Bitmap sheet = set[k];
             int i = species % 256, sx = (i % 16) * 64, sy = (i / 16) * 64;
             if (sheet == null || sy + 64 > sheet.getHeight()) {
                 return;

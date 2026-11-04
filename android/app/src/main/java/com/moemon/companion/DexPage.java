@@ -177,9 +177,13 @@ public final class DexPage extends Page {
         return bw;
     }
 
+    private boolean screenPokemon;
+
     private Bitmap screen() {
-        if (screen == null) {
-            try (InputStream in = v.getContext().getAssets().open("game/dex_list.png")) {
+        if (screen == null || screenPokemon != GameArt.pokemonArt) {
+            screenPokemon = GameArt.pokemonArt;   // (CREATURES: its header says POKéDEX or MOéDEX)
+            String name = screenPokemon ? "game/dex_list_p.png" : "game/dex_list.png";
+            try (InputStream in = v.getContext().getAssets().open(name)) {
                 BitmapFactory.Options o = new BitmapFactory.Options();
                 o.inScaled = false;
                 screen = BitmapFactory.decodeStream(in, null, o);

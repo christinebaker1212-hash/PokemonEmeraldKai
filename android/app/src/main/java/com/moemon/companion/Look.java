@@ -24,6 +24,9 @@ public final class Look {
     static final int[] START_PAGES = {0, 1, 2, 3, 5, 6, 8, 7, -1, 9};   // (ME after LAST: a saved choice keeps its number)
 
     static int theme, frame, start;
+    /** CREATURES: 0 as the game's OPTIONS > CREATURES says, 1 Kai's MOéMON, 2 the original POKéMON */
+    static int creatures;
+    static final String[] CREATURES = {"AS THE GAME", "MOéMON", "POKéMON"};
     static boolean animations = true;
     private static boolean loaded;
 
@@ -37,6 +40,7 @@ public final class Look {
         frame = clamp(p.getInt("look_frame", 0), FRAMES);
         start = clamp(p.getInt("look_start", 0), START.length);
         animations = p.getBoolean("look_anim", true);
+        creatures = clamp(p.getInt("look_art", 0), CREATURES.length);
         loaded = true;
         apply();
     }
@@ -53,7 +57,8 @@ public final class Look {
 
     static void save(Context c) {
         prefs(c).edit().putInt("look_theme", theme).putInt("look_frame", frame).putInt("look_start", start)
-                .putBoolean("look_anim", animations).apply();
+                .putBoolean("look_anim", animations)
+                .putInt("look_art", creatures).apply();
         apply();
     }
 
@@ -64,6 +69,15 @@ public final class Look {
         Page.BANNER = (Integer) t[3];
         Page.BANNER_DARK = (Integer) t[4];
         GameArt.userFrame = frame;
+    }
+
+    /** Whether the original POKéMON are shown (pictures and words): the swap, or the game's own setting */
+    static boolean pokemonArt(Companion app) {
+        if (creatures != 0) {
+            return creatures == 2;
+        }
+        com.moemon.companion.core.Model m = app == null ? null : app.model();
+        return m != null && m.save() != null && m.save().optInt("art") == 1;
     }
 
     /** The page the app opens on (LAST: the one it was on) */
@@ -97,13 +111,19 @@ public final class Look {
             save(c);
             v.showMenu(menu(v));
         });
+        m.add("CREATURES: " + CREATURES[creatures], () -> {
+            creatures = (creatures + 1) % CREATURES.length;
+            save(c);
+            GameArt.pokemonArt = pokemonArt(v.app);
+            v.showMenu(menu(v));
+        });
         m.add("OPEN ON: " + START[start], () -> {
             start = (start + 1) % START.length;
             save(c);
             v.showMenu(menu(v));
         });
         m.add("DEFAULTS", () -> {
-            theme = frame = start = 0;
+            theme = frame = start = creatures = 0;
             animations = true;
             save(c);
             v.showMenu(menu(v));

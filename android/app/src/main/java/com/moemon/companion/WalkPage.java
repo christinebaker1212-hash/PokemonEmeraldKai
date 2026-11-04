@@ -175,7 +175,7 @@ public final class WalkPage extends Page {
         if (egg) {
             art.icon(c, art.data.optInt("egg"), w / 2 - 16, y + 52 - bob, GameArt.ICON_PLAIN);
         } else {
-            art.front(c, species, mon.optString("pal", null), px, y + 22 - bob, 64, false);
+            art.front(c, species, art.monPal(mon), px, y + 22 - bob, 64, false);
         }
         // now and then a bubble: the Garden's round pink ones
         if ((t / 3000) % 3 == 0) {

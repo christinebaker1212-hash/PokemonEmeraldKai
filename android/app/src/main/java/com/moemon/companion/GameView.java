@@ -271,6 +271,7 @@ public final class GameView extends View {
 
     @Override
     protected void onDraw(Canvas c) {
+        GameArt.pokemonArt = Look.pokemonArt(app);   // (MENU > LOOK > CREATURES, or the game's own)
         if (scroller.computeScrollOffset()) {
             active().scrollTo(scroller.getCurrY());
             postInvalidateOnAnimation();

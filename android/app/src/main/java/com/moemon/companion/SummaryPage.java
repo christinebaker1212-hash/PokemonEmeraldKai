@@ -126,7 +126,7 @@ public final class SummaryPage extends Page {
         if (egg) {
             art.icon(c, MonCard.eggSpecies(art), 30, 44, GameArt.ICON_PLAIN);
         } else {
-            art.front(c, species, mon.optString("pal", null), 14, 28, false);
+            art.front(c, species, art.monPal(mon), 14, 28, false);
         }
         int x = 86, y = 22;
         int nw;

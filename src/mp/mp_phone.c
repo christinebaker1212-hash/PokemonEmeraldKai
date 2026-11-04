@@ -10,6 +10,7 @@
 #include <string.h>
 #include <time.h>
 #include "global.h"
+#include "data.h"
 #include "mp.h"
 #include "mp_region.h"
 #include "battle.h"
@@ -356,15 +357,24 @@ void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
     if (!GetBoxMonData(box, MON_DATA_IS_EGG) && species < NUM_SPECIES)
     {
         // (shiny, or its Stadium hue: the front picture's 16 colors as the game shows them, when not the species')
+        // (both art sets, OPTIONS > CREATURES: "pal" Kai's MOéMON, "ppal" the original POKéMON; the app shows either)
         u16 pal[16], own[16];
-        if (FirstColors(MP_BoxMonFrontPal(box), pal) && FirstColors(MP_SpeciesFrontPal(species), own)
-         && memcmp(pal, own, sizeof(pal)) != 0)
+        bool8 was = gSaveBlock2Ptr->optionsPokemonArt;
+        u8 set;
+        for (set = 0; set < 2; set++)
         {
-            BufAdd(b, ",\"pal\":\"");
-            for (i = 0; i < 16; i++)
-                BufAdd(b, "%04X", pal[i]);
-            BufAdd(b, "\"");
+            gSaveBlock2Ptr->optionsPokemonArt = set;
+            if (FirstColors(set ? GetMonSpritePalFromSpeciesAndPersonality(species, ot, pid) : MP_BoxMonFrontPal(box), pal)
+             && FirstColors(set ? gMonPaletteTable_Pokemon[species].data : MP_SpeciesFrontPal(species), own)
+             && memcmp(pal, own, sizeof(pal)) != 0)
+            {
+                BufAdd(b, set ? ",\"ppal\":\"" : ",\"pal\":\"");
+                for (i = 0; i < 16; i++)
+                    BufAdd(b, "%04X", pal[i]);
+                BufAdd(b, "\"");
+            }
         }
+        gSaveBlock2Ptr->optionsPokemonArt = was;
     }
     {
         // (its POKé BALL page: the ball style and the entrance / recall effect, when not the plain ones)
@@ -569,6 +579,7 @@ static void BufSnapshot(struct Buf *b)
     for (i = 0; i < ARRAY_COUNT(gSaveBlock1Ptr->giftRibbons); i++)
         BufAdd(b, "%s%u", i ? "," : "", gSaveBlock1Ptr->giftRibbons[i]);
     BufAdd(b, "]");
+    BufAdd(b, ",\"art\":%u", gSaveBlock2Ptr->optionsPokemonArt);   // (OPTIONS > CREATURES: 1 the original POKéMON)
     BufAdd(b, ",\"tid\":%u,\"gender\":%u,\"region\":%u,\"gen\":%u,\"badges\":%u,\"money\":%u,\"coins\":%u,\"game\":\"%s\"},",
            (unsigned)(gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8)),
            gSaveBlock2Ptr->playerGender, MP_Region_Current(), MP_Generation(), MP_Region_TotalBadges(),

@@ -180,6 +180,14 @@ public class ScreensTest {
                 + "{\"r\":2,\"k\":2,\"id\":25,\"sh\":0,\"amt\":1,\"n\":\"CAC3C5BBBDC2CF\",\"note\":\"It joined your party!\"}]}"));
         shot(v, "gatcha_prizes");
         v.showOver(null);
+        // CREATURES: the original POKéMON (pictures and words), then back to the game's own
+        Look.creatures = 2;
+        v.select(1);
+        shot(v, "party_pokemon");
+        v.select(3);
+        shot(v, "dex_pokemon");
+        Look.creatures = 0;
+        v.showOver(null);
         v.showOver(null);
         // the shiny in the party, its summary
         v.select(1);

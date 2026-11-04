@@ -241,18 +241,23 @@ def main():
     data['sheets'] = {'icons': [32, 32, 32], 'front': [64, 64, 16, 256], 'items': [24, 24, 32], 'wallpapers': [160, 144, 4],
                       'frames': [24, 24, 32]}
     json.dump(data, open(os.path.join(OUT, 'data.json'), 'w'), separators=(',', ':'))
+    # both art sets (OPTIONS > CREATURES): Kai's MOéMON, and the original POKéMON as front_p_N (the party icons are the
+    # same in both)
     write_png(os.path.join(OUT, 'icons.png'), *sheet(load_dir(os.path.join(exp, 'icons')), 32, 32, 32))
-    front = load_dir(os.path.join(exp, 'front'))
-    for k in range(0, max(front) + 1, 256):
-        part = {i - k: v for i, v in front.items() if k <= i < k + 256}
-        if part:
-            write_png(os.path.join(OUT, 'front_%d.png' % (k // 256)), *sheet(part, 64, 64, 16))
+    for suffix in ('', '_p'):
+        if not os.path.isdir(os.path.join(exp, 'front' + suffix)):
+            continue
+        front = load_dir(os.path.join(exp, 'front' + suffix))
+        for k in range(0, max(front) + 1, 256):
+            part = {i - k: v for i, v in front.items() if k <= i < k + 256}
+            if part:
+                write_png(os.path.join(OUT, 'front%s_%d.png' % (suffix, k // 256)), *sheet(part, 64, 64, 16))
     write_png(os.path.join(OUT, 'items.png'), *sheet(load_dir(os.path.join(exp, 'items')), 24, 24, 32))
     write_png(os.path.join(OUT, 'wallpapers.png'), *sheet(load_dir(os.path.join(exp, 'wallpapers')), 160, 144, 4))
     write_png(os.path.join(OUT, 'frames.png'), *sheet(load_dir(os.path.join(exp, 'frames')), 24, 24, 32))
     write_png(os.path.join(OUT, 'font.png'), *read_png(os.path.join(exp, 'font.png')))
     write_png(os.path.join(OUT, 'types.png'), *read_png(os.path.join(exp, 'types.png')))
-    for name in ('dex_info.png', 'dex_list.png', 'footprints.png', 'ribbons.png', 'trainers.png'):
+    for name in ('dex_info.png', 'dex_list.png', 'dex_list_p.png', 'footprints.png', 'ribbons.png', 'trainers.png'):
         write_png(os.path.join(OUT, name), *read_png(os.path.join(exp, name)))
     # the game's sounds, recorded from its own sound engine (src/mp/mp_export_sound.c; Sound.java plays them)
     if os.path.exists(os.path.join(exp, 'sounds.bin')):
