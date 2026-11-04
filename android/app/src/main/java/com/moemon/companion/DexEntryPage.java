@@ -172,7 +172,17 @@ public final class DexEntryPage extends Page {
             }
         }
         DexPage.chip(c, art, fill, caught ? "OWNED" : seen ? "SEEN" : "NOT SEEN", hx + 6, hy + 175, caught);
-        int y = hy + hh + 8;
+        int y = hy + hh + 6;
+        // a chip for each part below, to jump to it
+        jumpsY = y;
+        if (seen) {
+            int jx = 6;
+            for (int k = 0; k < JUMPS.length; k++) {
+                jx += DexPage.chip(c, art, fill, JUMPS[k], jx, y, false) + 3;
+            }
+            y += 20;
+        }
+        y += 2;
         // its entry, from each game that has one
         if (caught && tx != null && !tx.isNull(game)) {
             java.util.List<byte[]> lines = art.wrap(GameArt.hexText(tx.optString(game)), w - 32);
@@ -191,11 +201,13 @@ public final class DexEntryPage extends Page {
                 ly += 15;
             }
             gamesY = top;
+            sectionY[0] = y;
             y += bh + 8;
         } else {
             int top = panel(c, 6, y, w - 12, 40, "ENTRY");
             art.text(c, seen ? "Catch it to read its entry." : "Not seen yet.", 14, top, GameArt.GRAY_TEXT, GameArt.SHADOW);
             gamesY = -100;
+            sectionY[0] = y;
             y += 48;
         }
         // its size
@@ -217,6 +229,7 @@ public final class DexEntryPage extends Page {
         }
         // base stats
         JSONArray bs = art.species(sp).optJSONArray("bs");
+        sectionY[1] = y;
         if (seen && bs != null) {
             int top = panel(c, 6, y, w - 12, 6 * 15 + 26, "BASE STATS");
             int total = 0, bw = w - 12 - 120;
@@ -236,11 +249,388 @@ public final class DexEntryPage extends Page {
             art.text(c, tot, w - 12 - art.width(tot), y - 1, GameArt.GRAY_TEXT, GameArt.SHADOW);
             y += 6 * 15 + 34;
         }
+        if (seen) {
+            JSONObject info = art.species(sp);
+            y = drawAbilities(c, w, y, info);
+            sectionY[2] = y;
+            y = drawMatchups(c, w, y, info);
+            sectionY[3] = y;
+            y = drawEvolution(c, w, y, sp);
+            sectionY[4] = y;
+            y = drawMoves(c, w, y, info);
+            sectionY[5] = y;
+            y = drawBreeding(c, w, y, info);
+            y = drawTraining(c, w, y, info);
+        }
         height = y + 8;
         c.restore();
     }
 
     private int gamesY = -100;
+
+    // ------------------------------------------------------------------------------------------------- the details
+    private static final String[] JUMPS = {"ENTRY", "STATS", "TYPES", "EVOLVES", "MOVES", "MORE"};
+    private final int[] sectionY = new int[JUMPS.length];
+    private int jumpsY = -100, matchupY = -100, movesTabY = -100;
+    private boolean tmTab;
+    private final java.util.List<int[]> evoRows = new java.util.ArrayList<>();    // {top, bottom, species}
+    private final java.util.List<int[]> moveRows = new java.util.ArrayList<>();   // {top, bottom, move}
+    static final String[] EGG_GROUPS = {"-", "MONSTER", "WATER 1", "BUG", "FLYING", "FIELD", "FAIRY", "GRASS",
+            "HUMAN-LIKE", "WATER 3", "MINERAL", "AMORPHOUS", "WATER 2", "DITTO", "DRAGON", "UNDISCOVERED"};
+    static final String[] GROWTH = {"MEDIUM FAST", "ERRATIC", "FLUCTUATING", "MEDIUM SLOW", "FAST", "SLOW"};
+    private static final String[] EV_NAMES = {"HP", "ATTACK", "DEFENSE", "SP. ATK", "SP. DEF", "SPEED"};
+
+    private int drawAbilities(Canvas c, int w, int y, JSONObject info) {
+        JSONArray ab = info.optJSONArray("ab");
+        if (ab == null) {
+            return y;
+        }
+        JSONArray desc = art.data.optJSONArray("abilityDesc");
+        java.util.List<Object[]> rows = new java.util.ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            int a = ab.optInt(i);
+            if (a == 0 || (i == 1 && a == ab.optInt(0))) {
+                continue;
+            }
+            java.util.List<byte[]> lines = desc == null ? new java.util.ArrayList<>()
+                    : art.wrap(GameArt.clean(GameArt.hexText(desc.optString(a))), w - 40);
+            rows.add(new Object[]{a, lines});
+        }
+        if (rows.isEmpty()) {
+            return y;
+        }
+        int bh = 22;
+        for (Object[] r : rows) {
+            bh += 16 + ((java.util.List<?>) r[1]).size() * 14 + 4;
+        }
+        int top = panel(c, 6, y, w - 12, bh, rows.size() > 1 ? "ABILITIES" : "ABILITY");
+        for (Object[] r : rows) {
+            art.text(c, art.name("abilities", (Integer) r[0]), 14, top, GameArt.BLUE_TEXT, GameArt.SHADOW);
+            top += 16;
+            for (Object l : (java.util.List<?>) r[1]) {
+                art.text(c, (byte[]) l, 22, top, GameArt.TEXT, GameArt.SHADOW);
+                top += 14;
+            }
+            top += 4;
+        }
+        return y + bh + 8;
+    }
+
+    /** Its weaknesses and resistances (the game's type chart), a row for each multiplier; tap for the TYPE CHART */
+    private int drawMatchups(Canvas c, int w, int y, JSONObject info) {
+        JSONArray t = info.optJSONArray("t");
+        if (t == null) {
+            return y;
+        }
+        int t0 = t.optInt(0), t1 = t.optInt(1);
+        String[] titles = {"×4", "×2", "×1/2", "×1/4", "×0"};
+        int[] colors = {0xFF208820, TypeChartPage.SUPER, TypeChartPage.HALF, 0xFFB03828, TypeChartPage.NONE};
+        java.util.List<java.util.List<Integer>> groups = new java.util.ArrayList<>();
+        for (int k = 0; k < titles.length; k++) {
+            groups.add(new java.util.ArrayList<>());
+        }
+        for (int a : TypeChartPage.ORDER) {
+            int m = art.effectiveness(a, t0, t1);
+            int k = m >= 40 ? 0 : m > 10 ? 1 : m == 0 ? 4 : m <= 3 ? 3 : m < 10 ? 2 : -1;
+            if (k >= 0) {
+                groups.get(k).add(a);
+            }
+        }
+        int per = Math.max(3, (w - 74) / 36);
+        int bh = 22;
+        for (java.util.List<Integer> g : groups) {
+            if (!g.isEmpty()) {
+                bh += ((g.size() + per - 1) / per) * 19 + 3;
+            }
+        }
+        matchupY = y;
+        int top = panel(c, 6, y, w - 12, bh, "TYPE MATCHUPS");
+        art.text(c, "TYPE CHART >", w - 12 - art.width("TYPE CHART >"), y - 1, GameArt.BLUE_TEXT, GameArt.SHADOW);
+        for (int k = 0; k < titles.length; k++) {
+            java.util.List<Integer> g = groups.get(k);
+            if (g.isEmpty()) {
+                continue;
+            }
+            // the multiplier in its color, then the types
+            fill.setColor(colors[k]);
+            c.drawRect(12, top + 2, 50, top + 16, fill);
+            art.text(c, titles[k], 31 - art.width(titles[k]) / 2, top - 1, 0xFFFFFFFF, 0xFF000000);
+            for (int i = 0; i < g.size(); i++) {
+                art.typeIcon(c, g.get(i), 56 + (i % per) * 36, top + 1 + (i / per) * 19);
+            }
+            top += ((g.size() + per - 1) / per) * 19 + 3;
+        }
+        return y + bh + 8;
+    }
+
+    /** What it evolves from and into, all the way: each stage's icon, name and how; tap one for its entry */
+    private int drawEvolution(Canvas c, int w, int y, int sp) {
+        evoRows.clear();
+        JSONArray all = art.data.optJSONArray("species");
+        if (all == null) {
+            return y;
+        }
+        int root = sp;
+        for (int guard = 0; guard < 8; guard++) {
+            int pre = preEvolution(all, root);
+            if (pre <= 0) {
+                break;
+            }
+            root = pre;
+        }
+        java.util.List<int[]> chain = new java.util.ArrayList<>();   // {species, depth, method index into evo list, from}
+        walk(all, root, 0, -1, -1, chain, 0);
+        if (chain.size() <= 1) {
+            int top = panel(c, 6, y, w - 12, 40, "EVOLUTION");
+            art.text(c, "It doesn't evolve.", 14, top, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            return y + 48;
+        }
+        JSONObject dexBits = dex();
+        String seenBits = dexBits.optString("seen");
+        int bh = 22 + chain.size() * 34;
+        int top = panel(c, 6, y, w - 12, bh, "EVOLUTION");
+        for (int[] st : chain) {
+            int s = st[0], depth = st[1], ry = top + chain.indexOf(st) * 34 - 2;
+            int x = 12 + depth * 18;
+            boolean known = DexPage.bit(seenBits, art.species(s).optInt("dex"));
+            if (s == sp) {
+                fill.setColor(0xFFF8F0B0);
+                c.drawRect(7, ry, w - 7, ry + 33, fill);
+            }
+            if (depth > 0) {
+                art.text(c, "▶", x - 12, ry + 8, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            }
+            art.icon(c, s, x, ry, known ? GameArt.ICON_PLAIN : GameArt.ICON_SILHOUETTE);
+            art.text(c, known ? art.speciesName(s) : art.encode("?????"), x + 34, ry + 1, GameArt.TEXT, GameArt.SHADOW);
+            if (depth > 0) {
+                JSONArray evo = art.species(st[3]).optJSONArray("evo");
+                JSONArray how = evo == null ? null : evo.optJSONArray(st[2]);
+                if (how != null) {
+                    art.text(c, method(how.optInt(0), how.optInt(1)), x + 34, ry + 15, GameArt.GRAY_TEXT, GameArt.SHADOW);
+                }
+            }
+            if (s != sp && known) {
+                art.text(c, ">", w - 18, ry + 8, GameArt.BLUE_TEXT, GameArt.SHADOW);
+            }
+            evoRows.add(new int[]{ry, ry + 34, s});
+        }
+        return y + bh + 8;
+    }
+
+    private static int preEvolution(JSONArray all, int sp) {
+        for (int i = 1; i < all.length(); i++) {
+            JSONArray evo = all.optJSONObject(i) == null ? null : all.optJSONObject(i).optJSONArray("evo");
+            for (int k = 0; evo != null && k < evo.length(); k++) {
+                if (evo.optJSONArray(k).optInt(2) == sp && i != sp) {
+                    return i;
+                }
+            }
+        }
+        return 0;
+    }
+
+    private void walk(JSONArray all, int s, int depth, int how, int from, java.util.List<int[]> out, int guard) {
+        if (guard > 6 || out.size() > 24) {
+            return;
+        }
+        for (int[] seen : out) {
+            if (seen[0] == s) {
+                return;   // (a loop: drawn once)
+            }
+        }
+        out.add(new int[]{s, depth, how, from});
+        JSONArray evo = art.species(s).optJSONArray("evo");
+        for (int k = 0; evo != null && k < evo.length(); k++) {
+            walk(all, evo.optJSONArray(k).optInt(2), depth + 1, k, s, out, guard + 1);
+        }
+    }
+
+    /** How an evolution happens, in a few words (the game's evolution methods) */
+    String method(int m, int p) {
+        String item = art.plain(art.name("items", p)), move = art.plain(art.name("moves", p));
+        switch (m) {
+            case 1: return "High friendship";
+            case 2: return "High friendship, day";
+            case 3: return "High friendship, night";
+            case 4: case 13: return "Lv. " + p;
+            case 5: return "Trade";
+            case 6: return "Trade holding " + item;
+            case 7: return "Use " + item;
+            case 8: return "Lv. " + p + ", ATK > DEF";
+            case 9: return "Lv. " + p + ", ATK = DEF";
+            case 10: return "Lv. " + p + ", ATK < DEF";
+            case 11: case 12: return "Lv. " + p + ", by personality";
+            case 14: return "Lv. " + p + ", a free slot";
+            case 15: return "High beauty";
+            case 16: return "Level up holding " + item + ", day";
+            case 17: return "Level up holding " + item + ", night";
+            case 18: return "Level up holding " + item;
+            case 19: return "Level up knowing " + move;
+            case 20: return "Use " + item + " (male)";
+            case 21: return "Use " + item + " (female)";
+            case 22: return "Lv. " + p + " (male)";
+            case 23: return "Lv. " + p + " (female)";
+            case 24: return "Level up with " + art.plain(art.speciesName(p)) + " in the party";
+            default: return "?";
+        }
+    }
+
+    private static String tmName(int i) {
+        return i < 50 ? String.format(java.util.Locale.US, "TM%02d", i + 1)
+                : i < 58 ? String.format(java.util.Locale.US, "HM%02d", i - 49)
+                : String.format(java.util.Locale.US, "TM%02d", i - 58 + 51);
+    }
+
+    /** The moves it learns: by level, or by TM / HM (tabs); tap one to read about it */
+    private int drawMoves(Canvas c, int w, int y, JSONObject info) {
+        moveRows.clear();
+        java.util.List<int[]> list = new java.util.ArrayList<>();   // {label number (-1: none), move}
+        java.util.List<String> labels = new java.util.ArrayList<>();
+        if (!tmTab) {
+            JSONArray lv = info.optJSONArray("lv");
+            for (int i = 0; lv != null && i < lv.length(); i++) {
+                JSONArray r = lv.optJSONArray(i);
+                list.add(new int[]{r.optInt(0), r.optInt(1)});
+                labels.add(r.optInt(0) <= 1 ? "-" : String.valueOf(r.optInt(0)));
+            }
+        } else {
+            String tm = info.optString("tm");
+            JSONArray tms = art.data.optJSONArray("tms");
+            for (int i = 0; tms != null && i < tms.length(); i++) {
+                int nib = i / 4 < tm.length() ? Character.digit(tm.charAt(i / 4), 16) : 0;
+                if ((nib & (8 >> (i % 4))) != 0) {
+                    list.add(new int[]{i, tms.optInt(i)});
+                    labels.add(tmName(i));
+                }
+            }
+        }
+        int rows = Math.max(1, list.size()), bh = 42 + rows * 18;
+        int top = panel(c, 6, y, w - 12, bh, "MOVES");
+        movesTabY = top;
+        int tx = 12;
+        tx += DexPage.chip(c, art, fill, "BY LEVEL", tx, top, !tmTab) + 4;
+        DexPage.chip(c, art, fill, "TM & HM", tx, top, tmTab);
+        String count = list.size() + (list.size() == 1 ? " MOVE" : " MOVES");
+        art.text(c, count, w - 14 - art.width(count), top - 1, GameArt.GRAY_TEXT, GameArt.SHADOW);
+        int ry = top + 20;
+        if (list.isEmpty()) {
+            art.text(c, tmTab ? "It can't learn any TM or HM." : "None.", 14, ry, GameArt.GRAY_TEXT, GameArt.SHADOW);
+        }
+        for (int i = 0; i < list.size(); i++) {
+            int mv = list.get(i)[1];
+            JSONObject mo = art.move(mv);
+            if (i % 2 == 1) {
+                fill.setColor(0xFFF0F0E0);
+                c.drawRect(7, ry, w - 7, ry + 18, fill);
+            }
+            art.text(c, labels.get(i), 14, ry, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            art.typeIcon(c, mo.optInt("t"), 46, ry + 1);
+            art.text(c, art.name("moves", mv), 82, ry, GameArt.TEXT, GameArt.SHADOW);
+            int pw = mo.optInt("p");
+            String pwr = pw > 1 ? String.valueOf(pw) : "-";
+            art.text(c, pwr, w - 14 - art.width(pwr), ry, GameArt.TEXT, GameArt.SHADOW);
+            moveRows.add(new int[]{ry, ry + 18, mv});
+            ry += 18;
+        }
+        return y + bh + 8;
+    }
+
+    private int drawBreeding(Canvas c, int w, int y, JSONObject info) {
+        JSONArray eg = info.optJSONArray("eg");
+        int g = info.optInt("g", 127);
+        int top = panel(c, 6, y, w - 12, g == 255 ? 76 : 92, "BREEDING");
+        String groups = "-";
+        if (eg != null) {
+            int a = eg.optInt(0), b = eg.optInt(1);
+            groups = name(EGG_GROUPS, a) + (b != a ? ", " + name(EGG_GROUPS, b) : "");
+        }
+        art.text(c, "EGG GROUPS", 14, top);
+        art.text(c, groups, 100, top, GameArt.BLUE_TEXT, GameArt.SHADOW);
+        art.text(c, "HATCHES", 14, top + 16);
+        art.text(c, "about " + (info.optInt("ec") * 256) + " steps", 100, top + 16);
+        art.text(c, "GENDER", 14, top + 32);
+        if (g == 255) {
+            art.text(c, "Unknown", 100, top + 32);
+        } else {
+            int female = g == 254 ? 100 : g == 0 ? 0 : Math.round(g * 100f / 256);
+            int bx = 100, bw = w - 12 - 100 - 8;
+            fill.setColor(0xFF5878E0);
+            c.drawRect(bx, top + 36, bx + bw * (100 - female) / 100, top + 44, fill);
+            fill.setColor(0xFFF07898);
+            c.drawRect(bx + bw * (100 - female) / 100, top + 36, bx + bw, top + 44, fill);
+            String words = (100 - female) + "% ♂  " + female + "% ♀";
+            art.text(c, words, bx, top + 46, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            return y + 92 + 8;
+        }
+        return y + 76 + 8;
+    }
+
+    private static String name(String[] names, int i) {
+        return i >= 0 && i < names.length ? names[i] : "?";
+    }
+
+    private int drawTraining(Canvas c, int w, int y, JSONObject info) {
+        StringBuilder evs = new StringBuilder();
+        JSONArray ev = info.optJSONArray("evy");
+        for (int i = 0; ev != null && i < 6; i++) {
+            if (ev.optInt(i) > 0) {
+                evs.append(evs.length() > 0 ? ", " : "").append(ev.optInt(i)).append(" ").append(EV_NAMES[i]);
+            }
+        }
+        JSONArray it = info.optJSONArray("it");
+        int common = it == null ? 0 : it.optInt(0), rare = it == null ? 0 : it.optInt(1);
+        java.util.List<String> held = new java.util.ArrayList<>();
+        if (common != 0 && common == rare) {
+            held.add(art.plain(art.name("items", common)) + " (always)");
+        } else {
+            if (common != 0) {
+                held.add(art.plain(art.name("items", common)) + " (50%)");
+            }
+            if (rare != 0) {
+                held.add(art.plain(art.name("items", rare)) + " (5%)");
+            }
+        }
+        int rows = 5 + Math.max(1, held.size());
+        int bh = 22 + rows * 16;
+        int top = panel(c, 6, y, w - 12, bh, "TRAINING");
+        String[][] lines = {
+                {"CATCH RATE", info.optInt("cr") + " / 255"},
+                {"BASE EXP.", String.valueOf(info.optInt("ey"))},
+                {"EV YIELD", evs.length() > 0 ? evs.toString() : "-"},
+                {"GROWTH", name(GROWTH, info.optInt("gr"))},
+                {"FRIENDSHIP", String.valueOf(info.optInt("fr"))},
+        };
+        for (String[] l : lines) {
+            art.text(c, l[0], 14, top);
+            art.text(c, l[1], 100, top, GameArt.BLUE_TEXT, GameArt.SHADOW);
+            top += 16;
+        }
+        art.text(c, "WILD ITEMS", 14, top);
+        if (held.isEmpty()) {
+            art.text(c, "None", 100, top, GameArt.BLUE_TEXT, GameArt.SHADOW);
+        }
+        for (String h : held) {
+            art.text(c, h, 100, top, GameArt.BLUE_TEXT, GameArt.SHADOW);
+            top += 16;
+        }
+        return y + bh + 8;
+    }
+
+    /** Another entry: the one for that species, among this list if it's there (else on its own) */
+    private void open(int species) {
+        int dexNum = art.species(species).optInt("dex");
+        int i = nums.indexOf(dexNum);
+        if (i >= 0) {
+            index = i;
+        } else {
+            nums.add(index + 1, dexNum);
+            index++;
+        }
+        scroll = 0;
+        game = -1;
+        v.sound.play("se_dex_page");
+        cry();
+    }
 
     private void footprint(Canvas c, int species, int x, int y) {
         footprint(c, species, x, y, 16);
@@ -349,6 +739,48 @@ public final class DexEntryPage extends Page {
             }
             return;
         }
+        // the jump chips
+        if (cy >= jumpsY && cy < jumpsY + 16) {
+            int jx = 6;
+            for (int k = 0; k < JUMPS.length; k++) {
+                int bw = art.width(JUMPS[k]) + 12;
+                if (x >= jx && x < jx + bw + 3) {
+                    v.buzz(false);
+                    scrollTo(Math.max(0, sectionY[k] - 4));
+                    return;
+                }
+                jx += bw + 3;
+            }
+            return;
+        }
+        if (cy >= matchupY && cy < matchupY + 18) {
+            JSONArray tt = art.species(art.speciesOfDex(nums.get(index))).optJSONArray("t");
+            if (tt != null) {
+                v.showOver(new TypeChartPage(v).defending(tt.optInt(0), tt.optInt(1)));
+            }
+            return;
+        }
+        if (cy >= movesTabY && cy < movesTabY + 16) {
+            boolean tm = x >= 12 + art.width("BY LEVEL") + 16;
+            if (tm != tmTab && x < 12 + art.width("BY LEVEL") + art.width("TM & HM") + 32) {
+                tmTab = tm;
+                v.buzz(false);
+            }
+            return;
+        }
+        for (int[] r : moveRows) {
+            if (cy >= r[0] && cy < r[1]) {
+                moveInfo(r[2]);
+                return;
+            }
+        }
+        for (int[] r : evoRows) {
+            if (cy >= r[0] && cy < r[1] && r[2] != art.speciesOfDex(nums.get(index))
+                    && DexPage.bit(dex().optString("seen"), art.species(r[2]).optInt("dex"))) {
+                open(r[2]);
+                return;
+            }
+        }
         // the games' chips on the ENTRY card
         int n = nums.get(index);
         JSONArray entries = art.data.optJSONArray("dex");
@@ -379,6 +811,18 @@ public final class DexEntryPage extends Page {
         }
     }
 
+    /** A move's card: its type, category, power, accuracy, PP and what it does */
+    private void moveInfo(int mv) {
+        JSONObject mo = art.move(mv);
+        String[] cats = {"PHYSICAL", "SPECIAL", "STATUS"};
+        int cat = mo.optInt("c");
+        String head = art.plain(art.name("moves", mv)) + "\n" + art.plain(art.name("types", mo.optInt("t"))) + " / "
+                + (cat >= 0 && cat < 3 ? cats[cat] : "?") + "\nPOWER " + (mo.optInt("p") > 1 ? mo.optInt("p") : "-")
+                + "   ACC. " + (mo.optInt("a") > 0 ? mo.optInt("a") : "-") + "   PP " + mo.optInt("pp") + "\n"
+                + art.plain(GameArt.clean(GameArt.hexText(mo.optString("d"))));
+        v.showMenu(Menu.message(v, head));
+    }
+
     @Override
     public void swipe(int dir) {
         int i = index + dir;
@@ -386,6 +830,7 @@ public final class DexEntryPage extends Page {
             index = i;
             scroll = 0;
             game = -1;
+            tmTab = false;
             v.buzz(false);
             v.sound.play("se_dex_page");
             cry();

@@ -72,8 +72,28 @@ public final class Menu {
         return m;
     }
 
+    private final long born = System.currentTimeMillis();
+    /** (replacing a menu on screen, as a setting's row reopens its menu: no opening again) */
+    boolean still;
+
     public void draw(Canvas c, int w, int h) {
+        // (a menu opening: the dim fades in, the window grows from a little smaller)
+        float e = still ? 1f : GameView.eased(born, 140);
+        int dimAlpha = dim.getAlpha();
+        dim.setAlpha((int) (dimAlpha * e));
         c.drawRect(0, 0, w, h, dim);
+        dim.setAlpha(dimAlpha);
+        if (e < 1f) {
+            v.postInvalidateOnAnimation();
+        }
+        c.save();
+        float k = 0.92f + 0.08f * e;
+        c.scale(k, k, w / 2f, h / 2f);
+        drawWindow(c, w, h);
+        c.restore();
+    }
+
+    private void drawWindow(Canvas c, int w, int h) {
         int widest = title == null ? 0 : art.width(title);
         for (String r : rows) {
             widest = Math.max(widest, art.width(r) + 12);
@@ -212,6 +232,7 @@ public final class Menu {
             }
             v.showMenu(t);
         });
+        m.add("LOOK", () -> v.showMenu(Look.menu(v)));
         m.add("NOTIFICATIONS", () -> v.showMenu(notifications(v)));
         m.add("SOUND", () -> v.showMenu(sound(v)));
         m.add("UPDATE", () -> Updater.check(v, true));

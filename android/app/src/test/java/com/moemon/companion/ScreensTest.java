@@ -96,6 +96,7 @@ public class ScreensTest {
         JSONObject spawns = new JSONObject(res("spawns.json"));
         app.spawns.put("0,16", spawns);
         GameView v = new GameView(ctx, app);
+        Look.animations = false;   // (the pictures at once, not mid-slide)
         shot(v, "boxes");
         assertTrue(v.width() >= 240);
 
@@ -154,7 +155,39 @@ public class ScreensTest {
         shot(v, "dex_entry");
         v.overPage().scrollTo(320);
         shot(v, "dex_entry_lower");
+        for (int k = 1; k <= 5; k++) {   // (its new parts: abilities, matchups, evolution, moves, breeding, training)
+            v.overPage().scrollTo(320 + k * 480);
+            shot(v, "dex_entry_more" + k);
+        }
+        v.overPage().scrollTo(0);
+        v.showOver(new TypeChartPage(v));
+        shot(v, "types_chart");
+        v.overPage().tap(100, 26 + 14 + 12 + 2 + 16 * 4 + 6);
+        shot(v, "types_chart_pick");
+        v.showOver(new TypeChartPage(v).defending(12, 3));
+        shot(v, "types_defense");
+        v.showOver(new TypeChartPage(v).attacking(10));
+        shot(v, "types_attack");
         v.showOver(null);
+        v.showMenu(Look.menu(v));
+        shot(v, "look_menu");
+        for (int k = 0; k < 6; k++) {   // (NIGHT, and frame 2)
+            Look.theme = (Look.theme + 1) % Look.THEMES.length;
+        }
+        Look.frame = 1;
+        Look.apply();
+        v.showMenu(Menu.message(v, "A window in frame 2, on the NIGHT theme."));
+        shot(v, "look_night");
+        Look.theme = 0;
+        Look.frame = 0;
+        Look.apply();
+        v.showMenu(null);
+        tap(v, 200, GameView.TOP + 72 + 8);   // (the type filter's picker)
+        shot(v, "dex_types");
+        tap(v, 14 + 38 + 4, GameView.TOP + 96 + 22 + 4);   // (FIRE)
+        shot(v, "dex_fire");
+        tap(v, 200, GameView.TOP + 72 + 8);
+        tap(v, 20, GameView.TOP + 96 + 6);   // (ALL TYPES)
         tap(v, 60, GameView.TOP + 30);
         v.overPage();
         v.page(3).typed("PIKA");

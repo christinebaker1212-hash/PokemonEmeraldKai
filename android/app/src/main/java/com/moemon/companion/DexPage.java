@@ -27,8 +27,9 @@ public final class DexPage extends Page {
             BORDER = 0xFF293941, BORDER_LIGHT = 0xFF626273, GOLD = 0xFFBD9C5A, MAGENTA = 0xFFFF00BD;
     private static final String[] FILTERS = {"ALL", "SEEN", "OWNED", "MISSING"};
     private static final int HEAD = 96, CARD_H = 98, GAP = 6;
-    private int filter;
-    private boolean byName;
+    private static final String[] SORTS = {"No.", "ABC", "TOTAL"};
+    private int filter, sort, typeFilter = -1;   // (remembered: the app's settings)
+    private boolean picking;                      // (the type picker open)
     private String search = "";
     private boolean typing;
     private final Paint fill = new Paint(), pix = new Paint();
@@ -39,6 +40,27 @@ public final class DexPage extends Page {
     public DexPage(GameView v) {
         super(v);
         pix.setFilterBitmap(false);
+        android.content.SharedPreferences p = prefs();
+        filter = Math.max(0, Math.min(FILTERS.length - 1, p.getInt("dex_filter", 0)));
+        sort = Math.max(0, Math.min(SORTS.length - 1, p.getInt("dex_sort", 0)));
+        typeFilter = p.getInt("dex_type", -1);
+    }
+
+    private android.content.SharedPreferences prefs() {
+        return v.getContext().getSharedPreferences("moemon", 0);
+    }
+
+    private void remember() {
+        prefs().edit().putInt("dex_filter", filter).putInt("dex_sort", sort).putInt("dex_type", typeFilter).apply();
+    }
+
+    private int total(int dex) {
+        JSONArray bs = art.species(art.speciesOfDex(dex)).optJSONArray("bs");
+        int t = 0;
+        for (int i = 0; bs != null && i < bs.length(); i++) {
+            t += bs.optInt(i);
+        }
+        return t;
     }
 
     static boolean bit(String hex, int dex) {
@@ -74,6 +96,12 @@ public final class DexPage extends Page {
             if (filter == 1 && !s || filter == 2 && !c || filter == 3 && c) {
                 continue;
             }
+            if (typeFilter >= 0) {   // (a type: only the ones seen, as their types are known then)
+                JSONArray t = s ? art.species(art.speciesOfDex(n)).optJSONArray("t") : null;
+                if (t == null || t.optInt(0) != typeFilter && t.optInt(1) != typeFilter) {
+                    continue;
+                }
+            }
             if (!q.isEmpty()) {
                 boolean num = q.matches("[0-9]+") && String.valueOf(n).startsWith(q.replaceFirst("^0+(?=.)", ""));
                 boolean name = s && art.plain(art.speciesName(art.speciesOfDex(n))).toUpperCase(java.util.Locale.US).contains(q);
@@ -83,14 +111,20 @@ public final class DexPage extends Page {
             }
             out.add(n);
         }
-        if (byName) {
+        if (sort > 0) {
             Collections.sort(out, (a, b) -> {
                 boolean sa = bit(seen, a), sb = bit(seen, b);
                 if (sa != sb) {
                     return sa ? -1 : 1;
                 }
-                return !sa ? a - b
-                        : art.plain(art.speciesName(art.speciesOfDex(a))).compareTo(art.plain(art.speciesName(art.speciesOfDex(b))));
+                if (!sa) {
+                    return a - b;
+                }
+                if (sort == 2) {   // (TOTAL: the strongest first)
+                    int diff = total(b) - total(a);
+                    return diff != 0 ? diff : a - b;
+                }
+                return art.plain(art.speciesName(art.speciesOfDex(a))).compareTo(art.plain(art.speciesName(art.speciesOfDex(b))));
             });
         }
         return out;
@@ -225,11 +259,55 @@ public final class DexPage extends Page {
         for (int i = 0; i < FILTERS.length; i++) {
             fx += chip(c, art, fill, FILTERS[i], fx, 50, i == filter) + 4;
         }
-        String order = byName ? "ABC" : "No.";
+        String order = SORTS[sort];
         chip(c, art, fill, order, w - 6 - art.width(order) - 12, 50, true);
         String found = shown.size() + " POKéMON";
-        art.text(c, found, 8, 70, 0xFFFFFFFF, 0xFF000000);
-        art.text(c, "Tap for its entry", w - 6 - art.width("Tap for its entry"), 70, 0xFFE0F8E0, 0xFF000000);
+        art.text(c, found, 8, 72, 0xFFFFFFFF, 0xFF000000);
+        // the TYPE CHART, and the type filter (its icon when one is chosen)
+        int cx = w - 6 - art.width("CHART") - 12;
+        chip(c, art, fill, "CHART", cx, 72, false);
+        if (typeFilter >= 0) {
+            fill.setColor(0xFFFFFFFF);
+            c.drawRect(cx - 40, 71, cx - 4, 89, fill);
+            art.typeIcon(c, typeFilter, cx - 38, 72);
+        } else {
+            chip(c, art, fill, "TYPE", cx - 4 - art.width("TYPE") - 12, 72, picking);
+        }
+        if (picking) {
+            typePicker(c, w);
+        }
+    }
+
+    /** The type filter's choices: ALL, then each type's icon, in a window under the header */
+    private void typePicker(Canvas c, int w) {
+        int per = Math.max(4, (w - 24) / 38), rows = (TypeChartPage.ORDER.length + per - 1) / per;
+        int ph = 26 + rows * 20 + 6;
+        art.window(c, 0, 8, HEAD, w - 16, ph - 8);
+        chip(c, art, fill, "ALL TYPES", 14, HEAD + 2, typeFilter < 0);
+        for (int i = 0; i < TypeChartPage.ORDER.length; i++) {
+            int t = TypeChartPage.ORDER[i], x = 14 + (i % per) * 38, y = HEAD + 22 + (i / per) * 20;
+            if (t == typeFilter) {
+                fill.setColor(DexPage.MAGENTA);
+                c.drawRect(x - 2, y - 2, x + 34, y + 18, fill);
+            }
+            art.typeIcon(c, t, x, y);
+        }
+    }
+
+    private boolean pickerTap(int x, int y) {
+        int w = v.width(), per = Math.max(4, (w - 24) / 38);
+        if (y >= HEAD && y < HEAD + 18 && x < 14 + art.width("ALL TYPES") + 12) {
+            typeFilter = -1;
+            return true;
+        }
+        for (int i = 0; i < TypeChartPage.ORDER.length; i++) {
+            int tx = 14 + (i % per) * 38, ty = HEAD + 22 + (i / per) * 20;
+            if (in(x, y, tx - 2, ty - 2, 36, 20)) {
+                typeFilter = TypeChartPage.ORDER[i];
+                return true;
+            }
+        }
+        return false;
     }
 
     /** One card: the picture on white, the number, the name, its types' colors along its foot */
@@ -277,7 +355,32 @@ public final class DexPage extends Page {
     @Override
     public void tap(int x, int y) {
         int w = v.width();
+        if (picking) {   // (the type picker: a choice, or a tap anywhere else closes it)
+            picking = false;
+            if (pickerTap(x, y)) {
+                scroll = 0;
+                remember();
+                v.buzz(false);
+            }
+            return;
+        }
         if (y < HEAD) {
+            if (y >= 70 && y < 90) {
+                int cx = w - 6 - art.width("CHART") - 12;
+                if (x >= cx) {
+                    v.showOver(new TypeChartPage(v));
+                } else if (x >= cx - 4 - Math.max(40, art.width("TYPE") + 12)) {
+                    if (typeFilter >= 0 && x >= cx - 40) {
+                        typeFilter = -1;   // (the chosen type's icon: tap again for all of them)
+                        scroll = 0;
+                        remember();
+                    } else {
+                        picking = true;
+                    }
+                    v.buzz(false);
+                }
+                return;
+            }
             if (y >= 20 && y < 44) {
                 if (x > w - 68) {
                     typing = false;
@@ -297,10 +400,11 @@ public final class DexPage extends Page {
             if (y >= 48 && y < 68) {
                 typing = false;
                 v.keyboard(false);
-                String order = byName ? "ABC" : "No.";
+                String order = SORTS[sort];
                 if (x > w - 6 - art.width(order) - 12) {
-                    byName = !byName;
+                    sort = (sort + 1) % SORTS.length;
                     scroll = 0;
+                    remember();
                     return;
                 }
                 int fx = 6;
@@ -309,6 +413,7 @@ public final class DexPage extends Page {
                     if (x >= fx && x < fx + bw + 4) {
                         filter = i;
                         scroll = 0;
+                        remember();
                         return;
                     }
                     fx += bw + 4;
@@ -362,5 +467,6 @@ public final class DexPage extends Page {
     public void swipe(int dir) {
         filter = (filter + dir + FILTERS.length) % FILTERS.length;
         scroll = 0;
+        remember();
     }
 }

@@ -38,8 +38,9 @@ public abstract class Page {
     public void scrollBy(int dy) { scrollTo(scroll + dy); }
 
     // ------------------------------------------------------------------------------------- the app's look
-    public static final int INK = 0xFF283848, SKY = 0xFF70B8C8, SKY2 = 0xFF68B0C0, BANNER = 0xFF3868A8,
-            BANNER_DARK = 0xFF284878, GOLD = 0xFFF8E070;
+    public static final int INK = 0xFF283848, GOLD = 0xFFF8E070;
+    /** The theme's colors (MENU > LOOK: Look.apply sets them) */
+    public static int SKY = 0xFF70B8C8, SKY2 = 0xFF68B0C0, BANNER = 0xFF3868A8, BANNER_DARK = 0xFF284878;
     private static final android.graphics.Paint sFill = new android.graphics.Paint();
 
     /** The pages' background: the PC's sky blue in soft diagonal stripes */

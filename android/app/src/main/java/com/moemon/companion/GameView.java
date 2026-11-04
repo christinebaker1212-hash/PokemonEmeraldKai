@@ -27,6 +27,11 @@ public final class GameView extends View {
     private int scale = 4, w = 240, h = 400;
     private final List<Page> pages = new ArrayList<>();
     private int page;
+    // the animations (MENU > LOOK > ANIMATIONS): a page sliding in, the tabs' plate sliding to its tab
+    private long transAt, tabAt;
+    private int transDir;
+    private float tabFrom = -1;
+    static final int SLIDE_MS = 220, TAB_MS = 160;
     private Page over;                       // a page over the tabs (pairing, an entry, a box list)
     private Menu menu;                       // a menu or message on top of everything
     private final Paint fill = new Paint();
@@ -61,6 +66,19 @@ public final class GameView extends View {
         pages.add(new WalkPage(this));
         pages.add(new FriendsPage(this));
         pages.add(new CardsPage(this));
+        Look.ensure(c);
+        int start = Look.startPage(c);
+        page = start >= 0 && start < pages.size() ? start : 0;
+    }
+
+    /** 0 to 1 over ms since t, eased out (1 at once without animations) */
+    static float eased(long t, int ms) {
+        if (!Look.animations) {
+            return 1f;
+        }
+        float k = Math.min(1f, (System.currentTimeMillis() - t) / (float) ms);
+        float u = 1f - k;
+        return 1f - u * u * u;
     }
 
     @Override
@@ -116,6 +134,8 @@ public final class GameView extends View {
     public void showOver(Page p) {
         if (p != over) {
             sound.play("se_select");   // (a page opened or closed: the game's A and B)
+            transAt = System.currentTimeMillis();
+            transDir = p != null ? 1 : -1;
         }
         if (over == null && p != null) {
             pages.get(page).hidden();
@@ -144,6 +164,9 @@ public final class GameView extends View {
     }
 
     public void showMenu(Menu m) {
+        if (m != null && menu != null) {
+            m.still = true;
+        }
         menu = m;
         invalidate();
     }
@@ -159,6 +182,10 @@ public final class GameView extends View {
         }
         if (i != page) {
             pages.get(page).hidden();
+            tabFrom = plateX(tabOf(page));
+            tabAt = transAt = System.currentTimeMillis();
+            transDir = tabOf(i) >= tabOf(page) ? 1 : -1;
+            Look.rememberPage(getContext(), i);
         }
         page = i;
         pages.get(i).shown();
@@ -254,6 +281,12 @@ public final class GameView extends View {
         c.save();
         c.translate(0, TOP);
         c.clipRect(0, 0, w, h - TOP - (over != null && over.fullScreen() ? 0 : TABS));
+        float e = eased(transAt, SLIDE_MS);
+        if (e < 1f) {   // (the page coming in: a short slide and a fade)
+            c.translate(transDir * (1f - e) * w * 0.3f, 0);
+            c.saveLayerAlpha(0, 0, w, h, (int) (90 + 165 * e));
+            postInvalidateOnAnimation();
+        }
         p.draw(c, w, h - TOP - (over != null && over.fullScreen() ? 0 : TABS));
         c.restore();
         drawTop(c);
@@ -368,22 +401,35 @@ public final class GameView extends View {
         return 3;   // (SPAWNS: under DEX)
     }
 
+    private float plateX(int tab) {
+        return tab * (w / (float) TAB_NAMES.length);
+    }
+
+    private final android.graphics.RectF plate = new android.graphics.RectF();
+
     private void drawTabs(Canvas c) {
         int y = h - TABS, tw = w / TAB_NAMES.length;
         fill.setColor(0xFF283848);
         c.drawRect(0, y, w, h, fill);
         fill.setColor(0xFF3A5068);
         c.drawRect(0, y, w, y + 1, fill);
+        if (over == null) {
+            // the chosen one: a raised white plate, as the DS's touch menus, sliding over from the last tab
+            float to = tabOf(page) * tw, e = tabFrom < 0 ? 1f : eased(tabAt, TAB_MS);
+            float px = tabFrom < 0 ? to : tabFrom + (to - tabFrom) * e;
+            if (e < 1f) {
+                postInvalidateOnAnimation();
+            }
+            fill.setColor(0xFF98A8B8);
+            plate.set(px + 1, y + 2, px + tw - 1, h - 1);
+            c.drawRoundRect(plate, 3, 3, fill);
+            fill.setColor(0xFFF8F8F8);
+            plate.set(px + 1, y + 2, px + tw - 1, h - 3);
+            c.drawRoundRect(plate, 3, 3, fill);
+        }
         for (int i = 0; i < TAB_NAMES.length; i++) {
             int x = i * tw;
             boolean on = i == tabOf(page) && over == null;
-            if (on) {
-                // the chosen one: a raised white plate, as the DS's touch menus
-                fill.setColor(0xFF98A8B8);
-                c.drawRoundRect(new android.graphics.RectF(x + 1, y + 2, x + tw - 1, h - 1), 3, 3, fill);
-                fill.setColor(0xFFF8F8F8);
-                c.drawRoundRect(new android.graphics.RectF(x + 1, y + 2, x + tw - 1, h - 3), 3, 3, fill);
-            }
             drawTabIcon(c, i, x + (tw - 12) / 2, y + 3, !on);
             String name = TAB_SHORT[i];
             int nw = art.width(name);

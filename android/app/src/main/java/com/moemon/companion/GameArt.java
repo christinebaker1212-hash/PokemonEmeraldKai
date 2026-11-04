@@ -568,7 +568,13 @@ public final class GameArt {
     }
 
     /** A window: OPTIONS > FRAME's frame (its 8-pixel tiles) around x, y, w, h, filled with the window's white */
+    /** The player's window frame (MENU > LOOK), for the windows drawn with frame 0 */
+    public static int userFrame;
+
     public void window(Canvas c, int frame, int x, int y, int w, int h) {
+        if (frame == 0) {
+            frame = userFrame;
+        }
         if (frames == null) {
             frames = bitmap("game/frames.png");
         }

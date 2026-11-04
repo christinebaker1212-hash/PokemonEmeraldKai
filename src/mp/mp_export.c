@@ -39,6 +39,8 @@
 #include "constants/species.h"
 #include "constants/trainers.h"
 #include "constants/pokemon.h"
+#include "party_menu.h"
+extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
 
 #ifdef _WIN32
 #include <direct.h>
@@ -535,6 +537,35 @@ static void ExportData(const char *dir)
                     gSpeciesInfo[base].types[1], gSpeciesInfo[base].genderRatio, gSpeciesInfo[base].baseHP,
                     gSpeciesInfo[base].baseAttack, gSpeciesInfo[base].baseDefense, gSpeciesInfo[base].baseSpAttack,
                     gSpeciesInfo[base].baseSpDefense, gSpeciesInfo[base].baseSpeed);
+            // (the POKéDEX's details: abilities, egg groups, EXP and EV yields, held items, egg cycles, friendship,
+            // evolutions [method, param, into], level-up moves [level, move], the TMs / HMs it learns as a hex mask)
+            {
+                const struct SpeciesInfo *si = &gSpeciesInfo[base];
+                u32 e, tm, nib;
+                fprintf(f, ",\"ab\":[%u,%u],\"eg\":[%u,%u],\"ey\":%u,\"evy\":[%u,%u,%u,%u,%u,%u],\"it\":[%u,%u]"
+                        ",\"ec\":%u,\"fr\":%u", si->abilities[0], si->abilities[1], si->eggGroups[0], si->eggGroups[1],
+                        si->expYield, si->evYield_HP, si->evYield_Attack, si->evYield_Defense, si->evYield_SpAttack,
+                        si->evYield_SpDefense, si->evYield_Speed, si->itemCommon, si->itemRare, si->eggCycles,
+                        si->friendship);
+                fprintf(f, ",\"evo\":[");
+                for (e = 0, k = 0; e < EVOS_PER_MON; e++)
+                    if (gEvolutionTable[base][e].method != 0 && gEvolutionTable[base][e].targetSpecies != SPECIES_NONE)
+                        fprintf(f, "%s[%u,%u,%u]", k++ ? "," : "", gEvolutionTable[base][e].method,
+                                gEvolutionTable[base][e].param, gEvolutionTable[base][e].targetSpecies);
+                fprintf(f, "],\"lv\":[");
+                for (e = 0; gLevelUpLearnsets[base] != NULL && gLevelUpLearnsets[base][e] != LEVEL_UP_END && e < 128; e++)
+                    fprintf(f, "%s[%u,%u]", e ? "," : "", (gLevelUpLearnsets[base][e] & LEVEL_UP_MOVE_LV) >> 16,
+                            gLevelUpLearnsets[base][e] & LEVEL_UP_MOVE_ID);
+                fprintf(f, "],\"tm\":\"");
+                for (tm = 0; tm < NUM_TMHMS; tm += 4)
+                {
+                    for (nib = 0, k = 0; k < 4; k++)
+                        if (tm + k < NUM_TMHMS && CanSpeciesLearnTMHM(base, tm + k))
+                            nib |= 8 >> k;
+                    fprintf(f, "%X", nib);
+                }
+                fprintf(f, "\"");
+            }
             LZDecompressWram(MP_SpeciesFrontPal(base), pal);
             fprintf(f, ",\"pal\":\"");
             for (k = 0; k < 16; k++)
@@ -569,6 +600,9 @@ static void ExportData(const char *dir)
         Json(f, GetItemDescription(i), 300);
         fprintf(f, "}");
     }
+    fprintf(f, "],\"tms\":[");   // (each TM / HM index's move: TM01-TM50, HM01-HM08, TM51-TM92)
+    for (i = 0; i < NUM_TMHMS; i++)
+        fprintf(f, "%s%u", i ? "," : "", ItemIdToBattleMoveId(TMHM_ITEM(i)));
     fprintf(f, "],\"abilities\":[");
     for (i = 0; i < ABILITIES_COUNT; i++)
     {
