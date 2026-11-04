@@ -1,9 +1,20 @@
 # Yu-Gi-Oh! card duels: handoff
 
-Trigger: when the user says **"Continue Yugioh"**, read this file and pick up at "Next: every card playable".
+Trigger: when the user says **"Continue Yugioh"**, read this file and pick up at "What's left (2026-11-04)".
 Also read docs/YGO_DECISIONS.md (the user's 30 answers and the choices since) and COOP_NOTES "Yu-Gi-Oh! card duels".
 
-## Where things stand (2026-10-28)
+## What's left (2026-11-04)
+Since 1.48.0 (2026-10-29) the duels run on EDOPro's engine (edopro/ocgcore with every card's script in
+graphics/ygo/edo.pak; COOP_NOTES "Yu-Gi-Oh! on EDOPro"): every card works with every effect. The card-writing plan
+below ("every card playable", stage tables in ygo_fx_*.c, progress.sh counts) describes the engine before that and
+is history: don't write card effects. What remains:
+- **Yu-Gi-Oh! (and TRIPLE TRIAD) card TOURNAMENTs**: CO-OP > TOURNAMENT plays the POKéMON cards only (mp_tourney.c
+  TK_CARDS).
+- **A look at the table at real speed**: chain badges, the big-card timing, Tribute / target / grid picks with real
+  keys.
+- Anything the user asks for next; decisions and ground rules below still hold.
+
+## Where things stood (2026-10-28, before EDOPro)
 Released on the default branch `claude/clever-clarke-hqati2` (the release workflow builds, tags and publishes on push):
 - **1.35.0 "It's Time to Duel!"**: Yu-Gi-Oh! offline. The CARD CASE's YU-GI-OH! side, the rules engine, the
   Starter Decks + LOB + MRD with every effect, boosters with real pull rates, NPCs by trainer class, special
@@ -17,7 +28,7 @@ Released on the default branch `claude/clever-clarke-hqati2` (the release workfl
 The working branch of the last session was `claude/dreamy-archimedes-az1gbz` (same commit as the default branch
 after 1.37.0). A new session gets its own branch name; start it from the default branch.
 
-## Next: every card playable (the user's request, not started)
+## (History) every card playable, before EDOPro: done by the switch to EDOPro in 1.48.0
 "Every card available in Stairway to the Destined Duel must be playable, with full functionality." Measure it with
 `tools/ygo/progress.sh` (and `tools/ygo/progress.sh todo` for the list by set). At the handoff:
 
