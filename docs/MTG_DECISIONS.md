@@ -33,6 +33,8 @@ what was proposed and not yet confirmed, then what is still open.
   Ravnica) were a weaker time for the game (Mirrodin's Affinity bans, Kamigawa).
 - Starter decks: Portal / Starter 1999 / Starter 2000, made for teaching (the four Starter Decks' place). The
   1997-2003 theme decks (precons) are the Structure Decks' counterpart at the shops.
+  (Premodern has only the cards Portal / Starter reprinted from other sets: 91 of Portal's are in the pool. Portal-only
+  cards, like Alaborn Grenadier, would join the pool for those decks, as the Yu-Gi-Oh! side took in SDD's cards.)
 - Today's card wording and rules (Oracle, today's mulligan), as the Yu-Gi-Oh! side uses today's rulings.
 - Opponents in the spirit of Shandalar (MicroProse, 1997): a handful of named players around each region, a color and
   a signature card each, special duelists rather than whole trainer classes. The five colors map onto types (red Fire,
@@ -43,9 +45,18 @@ what was proposed and not yet confirmed, then what is still open.
 - The board drawn at 480x320 like a VS fight or the BADGE CASE: a Magic table has no zone limit.
 - An auto-pass stronger than the Yu-Gi-Oh! table's quiet chain windows: Magic offers priority at almost every step.
 
+## The rules engine (the user, 2026-11-04)
+- Forge translated into C: "the best of both worlds". No Java runtime: Forge's rules (forge-game) written as C in
+  src/mtg/, reading Forge's own card scripts (cardsfolder, its text language: `A:SP$ DealDamage | ValidTgts$ Any |
+  NumDmg$ 3`) for the cards of our pool only ("I don't need every card ever made, just our selection"). Forge is
+  GPL-3: credits in dist_extras/, as EDOPro's AGPL ones.
+- Forge's AI too (forge-ai, the user 2026-11-04), translated the same way, under the shared AI levels.
+- Built to fit the other three: deterministic from the answers (online duels by answers, like Yu-Gi-Oh!'s), the
+  shared AI levels, presentation events for the table, and the phone app through JNI like tt / tcg / ygo.
+
+Built from 2026-11-04: docs/MTG_HANDOFF.md (status and next steps), docs/MTG_SCOPE.md (how many cards play).
+
 ## Open
-- The rules engine, decided first: Forge (Java, GPL) or XMage (Java, MIT) run beside the game the way ygo_edo.c drives
-  EDOPro (a bundled Java runtime, roughly 50 MB), or an engine of our own in C for the fixed pool, built in stages.
 - Who gives the starter deck, and where (MOSSDEEP's shop is the natural place).
 - Which NPCs play Magic, and how many.
 

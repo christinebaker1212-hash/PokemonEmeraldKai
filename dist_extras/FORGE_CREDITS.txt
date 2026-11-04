@@ -1,0 +1,16 @@
+Magic: The Gathering duels in Moemon Emerald Kai Co-op are played by a C translation of Forge's rules engine,
+reading Forge's own card scripts.
+
+  Forge (rules engine, AI, card scripts)   Card-Forge contributors  https://github.com/Card-Forge/forge
+                                           (commit f0419fb769672e74f8e037fe428e300a32a585c1)
+
+Forge is free software under the GNU General Public License, version 3. The game's translation of it (src/mtg/,
+include/mtg/) and the card scripts it reads (graphics/mtg/forge.pak, built by tools/mtg/build_pack.py) are published
+with the game's source at https://github.com/christinebaker1212-hash/PokemonEmeraldKai under the same terms.
+A copy of the license: https://www.gnu.org/licenses/gpl-3.0.txt
+
+Card data and pictures: Scryfall (https://scryfall.com).
+
+Magic: The Gathering is a trademark of Wizards of the Coast. This is unofficial Fan Content permitted under the
+Fan Content Policy. Not approved or endorsed by Wizards. Portions of the materials used are property of Wizards of
+the Coast. (c) Wizards of the Coast LLC.

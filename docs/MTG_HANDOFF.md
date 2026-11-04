@@ -1,0 +1,91 @@
+# Magic: The Gathering: handoff
+
+The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the pool plays: `docs/MTG_SCOPE.md`
+(generated: `tools/mtg/scope.py`). This file: what is built, how it is built, what comes next.
+
+## Status (2026-11-04: the first pass)
+- **The engine is Forge translated into C** (the user: "the best of both worlds", Forge's AI too). No Java.
+  It reads Forge's own card scripts for the pool only (Premodern: 5408 cards with the 33 banned ones).
+- **798 of the 5408 cards play**, by the rules below. A card the engine doesn't fully understand is marked
+  unsupported (with the first missing piece) and is never put in a duel, so nothing plays wrong.
+- Tests: `tools/mtg/test.sh` (132 checks: set-up tables for each rule, and 40 whole duels between the stand-in AIs:
+  every one ends, and a memcpy copy taken mid-duel plays exactly the same duel as the original).
+- Built into the game already (every `.c` under src/ is): src/mtg compiles with the game's own flags and
+  preprocessor (checked with `make PORTABLE=1 TARGET_OS=LINUX build/pc64/src/mtg/*.o`). Nothing calls it yet, the
+  pack isn't embedded yet, and nothing in the game shows Magic (it stays hidden until a starter deck, by decision).
+- Not built yet: everything a player sees (the CARD CASE's fourth side, the table, the venues, the art).
+
+## Files
+- `tools/mtg/fetch_pool.py` -> `tools/mtg/pool.json`: the pool from Scryfall (`format:premodern`, plus
+  `banned:premodern` marked `"banned": true`).
+- `tools/mtg/fetch_forge.sh [DIR]`: Card-Forge/forge at the pin (`tools/mtg/forge_commit.txt`), sparse: the card
+  scripts (forge-gui/res/cardsfolder) and the Java to translate (forge-game, forge-ai, forge-core). Default
+  ~/.cache/moemon/forge.
+- `tools/mtg/build_pack.py FORGE_DIR` -> `graphics/mtg/forge.pak` (committed, 3.1 MB, like edo.pak): every pool card's
+  script, sorted by name. Format in the script's docstring. Refuses a Forge that isn't at the pin.
+- `include/mtg/mtg.h`: the public API. `src/mtg/mtg_internal.h`: the engine's own.
+- `src/mtg/mtg_script.c`: the scripts into card definitions (CardRules / CardFactory / AbilityFactory).
+- `src/mtg/mtg_valid.c`: "Valid" text (CardProperty / PlayerProperty).
+- `src/mtg/mtg_mana.c`: mana sources and auto-payment (ManaPool, ComputerUtilMana).
+- `src/mtg/mtg_game.c`: the turn, priority, the stack, zones, state-based actions, combat (PhaseHandler,
+  MagicStack, GameAction, Combat, CombatUtil).
+- `src/mtg/mtg_effects.c`: the effects (forge/game/ability/effects) and what each understands.
+- `src/mtg/mtg_ai.c`: the STAND-IN AI, only until forge-ai is translated.
+- `tools/mtg/test_rules.c`, `tools/mtg/test.sh`; `tools/mtg/scope_dump.c`, `tools/mtg/scope.py`.
+- `dist_extras/FORGE_CREDITS.txt`: GPL-3 credits and Wizards' Fan Content Policy line (ships next to the exe).
+
+## How the engine works
+- **A duel is one plain struct** (`MtgDuel`, no pointers, objects by index): memcpy copies the whole game, for the
+  AI looking ahead and for rewinds. Card definitions are read-only and shared (`Mtg_DbLoad` once).
+- **Decisions**: the duel runs until it needs one (`Mtg_Query`: PRIORITY, ATTACKERS, BLOCKERS, DISCARD, GAME_OVER)
+  and goes on with the answer (`Mtg_Answer`). PRIORITY lists every legal action fully formed (card, ability,
+  target, X), so an answer is an index: the same for a player, the AI and a friend online (answers over the relay,
+  as the Yu-Gi-Oh! side sends them). Same seed + same answers = the same duel (`MtgDuel.hash`, events).
+- **Events** (`MtgEvent`, a ring of the last 128 plus a running count): what the table will animate.
+- **Strict support**: each script line, keyword, cost, parameter, Defined$, amount and Valid text is either
+  translated or makes the card unsupported (`MtgCardDef.unsupported` says what). Adding a translation = making a
+  piece known and doing what Forge's class does; the scope report shows how many cards it unlocks.
+
+## Rules translated so far
+- Turn structure with every step; priority passing; the stack (LIFO, resolution, targets checked again: fizzle);
+  last known information for "its power" / "its controller" (Swords to Plowshares).
+- Casting (sorcery / instant timing, Flash), X (the most that can be paid, for now), activated abilities ({T},
+  mana, sacrificing itself), summoning sickness, Haste.
+- Mana: basic land types' intrinsic abilities, `AB$ Mana` ({T} only: one color, `Combo`, `Any`, `Amount$`), mana
+  spells (Dark Ritual), the floating pool emptying each step, auto-payment that never wastes a dual land.
+- Combat: attackers / blockers, Flying / Reach, Fear, landwalk, Defender, Vigilance, protection (blocking, damage,
+  targeting), First Strike / Double Strike steps, Trample, Lifelink, damage assignment in order.
+- State-based actions: life 0, drawing from an empty library, toughness 0, lethal damage; draws by both losing.
+- Effects: DealDamage, DamageAll, Draw, Destroy, DestroyAll, GainLife, LoseLife, Pump, PumpAll (until end of turn,
+  keywords too), ChangeZone (targeted from the battlefield), Mana, Discard (at random), Tap, Untap, Counter.
+- Shroud. Discard to seven at cleanup.
+
+## Next (in order of what unlocks the most: docs/MTG_SCOPE.md)
+1. **Triggers** (1042 cards first blocked; TriggerHandler and TriggerType: ChangesZone, Phase, DamageDone,
+   SpellCast, Attacks, blocks...), with mid-resolution choices (a query kind for "choose a card / a player / yes or
+   no" during resolution: the engine must stop inside a resolve and go on with the answer; ChooseCard, Dig...).
+2. **Static abilities** (507: StaticAbilityContinuous above all, the layer order of StaticEffects; CantBlock,
+   CantAttack, cost changes).
+3. **Costs** (295: Sac<1/Creature>, Discard<1/Card>, PayLife, untap symbol...) and **Auras** (Enchant: 312).
+4. **Replacement effects** (182: Moved, Untap, DamageDone), then Effect, ChangeType, multiple targets
+   (TargetMin / TargetMax), Regenerate, Animate, PreventDamage, Tokens (Forge's tokenscripts too), counters,
+   Charm, ChangeZoneAll, the rest by the report.
+5. Keywords by the report: Cycling, Morph, Kicker, Echo, Flashback, Cumulative upkeep, Shadow, Banding...
+6. **forge-ai** (AiController, AiAttackController, AiBlockController, ComputerUtil*, and each effect's Ai class
+   in forge/ai/ability, ~45k lines for the pool's effects) in place of mtg_ai.c, under the three card games'
+   shared AI levels (they slip like people). The scripts' `AI*` parameters and `AI:` / `SVar:AI...` lines are for it.
+7. Mulligans (London), a player's own X, multiple blockers' damage order chosen, split / flip cards (ALTERNATE),
+   planeswalkers (none in the pool), hybrid mana (none in the pool).
+
+Then the game around it (docs/MTG_DECISIONS.md): the pack embedded (`src/mtg/mtg_pak.c` with .incbin and a
+json_data_rules.mk dependency, as ygo_edo_pak.c), the CARD CASE's fourth side hidden until a starter deck, the
+480x320 table, the venues (MOSSDEEP, CIANWOOD, SAFFRON, SINNOH's PAL PARK), Scryfall art (tools/mtg/fetch_art.py),
+online duels by answers, booster drafts with friends, the phone app through JNI like tt / tcg / ygo.
+
+## Translating a piece
+1. Find it in docs/MTG_SCOPE.md; read the Java (fetch_forge.sh): `forge/game/ability/effects/<X>Effect.java`,
+   `forge/game/trigger/Trigger<X>.java`, `forge/game/staticability/StaticAbility<X>.java`...
+2. Write it in the matching src/mtg file, keeping Forge's names so it can be checked against the class.
+3. Make it known to the parser (the API table and its parameters in mtg_effects.c, keywords in mtg_script.c...),
+   only for the forms fully handled.
+4. Add set-up tables to tools/mtg/test_rules.c with real cards; run tools/mtg/test.sh; rerun tools/mtg/scope.py.
