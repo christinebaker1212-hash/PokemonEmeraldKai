@@ -41,6 +41,8 @@
 #include "sound.h"
 #include "string_util.h"
 #include "constants/flags.h"
+#include "region_map.h"
+#include "constants/region_map_sections.h"
 #include "constants/heal_locations.h"
 #include "constants/items.h"
 #include "constants/qz_port.h"
@@ -2216,4 +2218,65 @@ u16 MP_ReturnShuckie(void)
         return gSpecialVar_Result = 1;
     }
     return gSpecialVar_Result = 0;
+}
+
+// Moemon Kai: Crystal's POKé SEER (pokecrystal engine/events/poke_seer.asm, CIANWOOD; docs/REGIONS_AUDIT.md 146), on
+// what this game keeps of a POKéMON's meeting (where, at what level, who caught it; no time of day). VAR_0x8004 is
+// the party slot ChoosePartyMon picked. RESULT: 0 nothing picked, 1 an EGG, 2 met by the player, 3 traded from
+// someone, 4 can't tell (an in-game trade's gift), 5 the level only (an event). STR_VAR_1 the nickname, STR_VAR_2 the
+// place, STR_VAR_3 the level (MP_PokeSeerOT puts the OT's name there for the trade line).
+static u8 SeerMetLevel(struct Pokemon *mon)
+{
+    u8 lvl = GetMonData(mon, MON_DATA_MET_LEVEL);
+    return lvl ? lvl : 5;   // (hatched: met at level 0 in this game, Crystal's EGG_LEVEL)
+}
+
+u16 MP_PokeSeer(void)
+{
+    struct Pokemon *mon;
+    u8 loc;
+    u32 otId, myId;
+    if (gSpecialVar_0x8004 >= PARTY_SIZE)
+        return gSpecialVar_Result = 0;
+    mon = &gPlayerParty[gSpecialVar_0x8004];
+    if (GetMonData(mon, MON_DATA_IS_EGG))
+        return gSpecialVar_Result = 1;
+    GetMonData(mon, MON_DATA_NICKNAME, gStringVar1);
+    StringGet_Nickname(gStringVar1);
+    ConvertIntToDecimalStringN(gStringVar3, SeerMetLevel(mon), STR_CONV_MODE_LEFT_ALIGN, 3);
+    loc = GetMonData(mon, MON_DATA_MET_LOCATION);
+    if (loc == METLOC_FATEFUL_ENCOUNTER)
+        return gSpecialVar_Result = 5;
+    if (loc == METLOC_IN_GAME_TRADE)
+        return gSpecialVar_Result = 4;
+    GetMapNameGeneric(gStringVar2, loc);
+    otId = GetMonData(mon, MON_DATA_OT_ID);
+    myId = (gSaveBlock2Ptr->playerTrainerId[0]) | (gSaveBlock2Ptr->playerTrainerId[1] << 8)
+         | (gSaveBlock2Ptr->playerTrainerId[2] << 16) | (gSaveBlock2Ptr->playerTrainerId[3] << 24);
+    printf("[mp] seer: slot %u met at %u level %u, %s\n", gSpecialVar_0x8004, loc, SeerMetLevel(mon),
+           otId == myId ? "own" : "traded");
+    return gSpecialVar_Result = (otId == myId) ? 2 : 3;
+}
+
+// The OT's name in STR_VAR_3 (Crystal's SeerTradeText), then MP_PokeSeerLevel puts the level back
+u16 MP_PokeSeerOT(void)
+{
+    GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_OT_NAME, gStringVar3);
+    gStringVar3[PLAYER_NAME_LENGTH] = EOS;
+    return 0;
+}
+
+u16 MP_PokeSeerLevel(void)
+{
+    ConvertIntToDecimalStringN(gStringVar3, SeerMetLevel(&gPlayerParty[gSpecialVar_0x8004]), STR_CONV_MODE_LEFT_ALIGN, 3);
+    return 0;
+}
+
+// Crystal's SeerAdvice: how far it has grown since they met. RESULT 0 more care (up to 9 levels), 1 more confident
+// (to 29), 2 much strength (to 59), 3 mighty (to 89), 4 impressed (more)
+u16 MP_PokeSeerAdvice(void)
+{
+    struct Pokemon *mon = &gPlayerParty[gSpecialVar_0x8004];
+    int grown = (int)GetMonData(mon, MON_DATA_LEVEL) - SeerMetLevel(mon);
+    return gSpecialVar_Result = grown <= 9 ? 0 : grown <= 29 ? 1 : grown <= 59 ? 2 : grown <= 89 ? 3 : 4;
 }

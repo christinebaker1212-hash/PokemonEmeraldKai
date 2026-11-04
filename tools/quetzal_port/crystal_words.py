@@ -38,9 +38,15 @@ def words(mapname, label, our_label=None):
     text = text.replace('<PLAYER>', '{PLAYER}').replace('<PLAY_G>', '{PLAYER}').replace('<RIVAL>', '{RIVAL}').replace('<PK><MN>', '#MON').replace('<……>', '……')
     # a name put in by the script (text_ram): the buffers as this game's string vars
     rams = {'wStringBuffer3': '{STR_VAR_1}', 'wStringBuffer4': '{STR_VAR_2}', 'wStringBuffer5': '{STR_VAR_3}',
-            'wPlayerName': '{PLAYER}', 'wRivalName': '{RIVAL}'}
+            'wPlayerName': '{PLAYER}', 'wRivalName': '{RIVAL}',
+            # (the POKé SEER's: qz_specials.c MP_PokeSeer fills them)
+            'wSeerNickname': '{STR_VAR_1}', 'wSeerCaughtLocation': '{STR_VAR_2}', 'wSeerCaughtLevelString': '{STR_VAR_3}',
+            'wSeerOT': '{STR_VAR_3}'}
     text = re.sub(r'@"\s*\n\s*text_ram (\w+)\s*\n\s*text "',
                   lambda m: rams.get(m.group(1), '{STR_VAR_1}'), text)
+    # (text_start: the buffer ends the line, the next line command goes on)
+    text = re.sub(r'@"\s*\n\s*text_ram (\w+)\s*\n\s*text_start\s*\n',
+                  lambda m: rams.get(m.group(1), '{STR_VAR_1}') + '"\n', text)
     pars = crystal_text(text, label)
     body = gba_text(pars)
     return ('%s::\n' % our_label if our_label else '') + body

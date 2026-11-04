@@ -4883,3 +4883,7 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   - Qz{Johto,Kanto}TravelingEventCheck run in every JOHTO / KANTO map's ON_RESUME and no longer write VAR_RESULT: a
     script back from the party menu (a tutor after the POKéMON forgot a move) read 0 there and took the "no" branch.
   - fix_johto_tms.crystal_text joins Crystal's "cam- " / "paign" (a split word with a space after its hyphen).
+  - CIANWOOD's POKé SEER (the old woman's house; Crystal's engine/events/poke_seer.asm): qz_specials.c MP_PokeSeer
+    (+ MP_PokeSeerOT / Level / Advice) on the met location and level (hatched: level 5, Crystal's EGG_LEVEL), own or
+    traded by OT ID, METLOC_FATEFUL_ENCOUNTER = level only, METLOC_IN_GAME_TRADE = can't tell; no time of day (this game
+    keeps none). crystal_words.py knows the wSeer* buffers and text_ram ... text_start. Test johto_poke_seer.

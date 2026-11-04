@@ -692,6 +692,10 @@ gSpecials::
 	def_special GetHeracrossSizeRecordInfo
 	def_special CompareHeracrossSize
 	def_special MP_LeadFriendship
+	def_special MP_PokeSeer
+	def_special MP_PokeSeerOT
+	def_special MP_PokeSeerLevel
+	def_special MP_PokeSeerAdvice
 	def_special MP_ReturnShuckie
 	def_special GetJohtoMagikarpSizeRecordInfo
 	def_special CompareJohtoMagikarpSize

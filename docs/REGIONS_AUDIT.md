@@ -160,7 +160,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **143. [J2-18]** DEPT. STORE 5F's Sunday RETURN / FRUSTRATION lady is missing, though a shopper still talks about her: **RESTORE the original**
 - [x] **144. [J2-24]** Crystal's GOLDENROD move tutor, city sign and RADIO CARD lady are missing: **RESTORE the original**
 - [ ] **145. [J2-25]** GOLDENROD UNDERGROUND: haircut brothers and the bargain merchant missing; Quetzal shops and a KIMONO GIRL scene added: **RESTORE the original**
-- [ ] **146. [J2-30]** CIANWOOD's PHOTO STUDIO and POKé SEER are missing; an HGSS-style bells lady in their place: **RESTORE the original**
+- [ ] **146. [J2-30]** CIANWOOD's PHOTO STUDIO and POKé SEER are missing; an HGSS-style bells lady in their place: **RESTORE the original** - _the POKé SEER is back (1.93.0); the PHOTO STUDIO's door is Quetzal's CLIFF EDGE CAVE to its JOHTO SAFARI ZONE, so the studio comes back with case 62._
 - [x] **147. [J3-21]** MOVE DELETER missing in BLACKTHORN ("MOVE BROS' HOUSE" is empty): **RESTORE the original**
 - [x] **148. [J3-27]** HALL OF FAME doesn't send PROF. ELM's S.S. TICKET call: **RESTORE the original**
 - [x] **149. [J1-32, J2-36]** Dead NUZLOCKE branches in gift scripts: **REMOVE it**
