@@ -62,7 +62,8 @@ opponent's cards to face them; TRIPLE TRIAD stays as it is (never turn its cards
 (2026-11-03) for all four phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era
 graphics, 2026 usability".
 
-**Moemon Maker** (the user's own MZ-like editor, built into the game; design and every decision in `docs/MOEMON_MAKER.md`;
+**Moemon Maker** (the user's own MZ-like editor, built into the game; **start at `docs/MAKER_HANDOFF.md`** (status, the
+full plan M1-M5, next steps: M2 waits for the user's go and four open questions); design and every decision in `docs/MOEMON_MAKER.md`;
 M1 built 2026-11-03: COOP_NOTES "Moemon Maker, M1"): C++ in maker/ (Dear ImGui) reaching the game only through
 include/maker_api.h (src/maker/*.c); hidden until `AllowSmallTweaks = 1` and "maker" typed (never in PATCH NOTES or the
 README). The user's edits are MoemonMaker/base/MAP_X.txt (each line keeps the value it replaced; format at the top of
