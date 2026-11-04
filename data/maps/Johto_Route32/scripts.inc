@@ -276,14 +276,14 @@ Johto_Route32_EventScript_83EEDB0::
 
 @ Johto_Route32 object 5 (local id 5, gfx 0x3A9E) at 16,59
 Johto_Route32_EventScript_83EEDCD::
-	setorcopyvar VAR_0x8000, ITEM_POTION
+	setorcopyvar VAR_0x8000, ITEM_GREAT_BALL   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_Route32 object 4 (local id 4, gfx 0x3A9E) at 10,30
 Johto_Route32_EventScript_83EEDDA::
-	setorcopyvar VAR_0x8000, ITEM_GREAT_BALL
+	setorcopyvar VAR_0x8000, ITEM_REPEL   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

@@ -96,14 +96,14 @@ Johto_Route31_EventScript_83EE592::
 
 @ Johto_Route31 object 5 (local id 5, gfx 0x3A9E) at 44,8
 Johto_Route31_EventScript_83EE59E::
-	setorcopyvar VAR_0x8000, ITEM_POKE_BALL
+	setorcopyvar VAR_0x8000, ITEM_POTION   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_Route31 object 6 (local id 6, gfx 0x3A9E) at 13,17
 Johto_Route31_EventScript_83EE5AB::
-	setorcopyvar VAR_0x8000, ITEM_ANTIDOTE
+	setorcopyvar VAR_0x8000, ITEM_POKE_BALL   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

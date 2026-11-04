@@ -160,14 +160,14 @@ Johto_VioletCity_EventScript_83FEA06::
 
 @ Johto_VioletCity object 10 (local id 10, gfx 0x3A9E) at 46,33
 Johto_VioletCity_EventScript_83FEA7F::
-	setorcopyvar VAR_0x8000, ITEM_RARE_CANDY
+	setorcopyvar VAR_0x8000, ITEM_PP_UP   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_VioletCity object 6 (local id 6, gfx 0x3A9E) at 34,12
 Johto_VioletCity_EventScript_83FEA8C::
-	setorcopyvar VAR_0x8000, ITEM_PECHA_BERRY
+	setorcopyvar VAR_0x8000, ITEM_RARE_CANDY   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

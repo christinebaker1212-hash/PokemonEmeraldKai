@@ -22,14 +22,14 @@ Johto_UnionCaveB2F_EventScript_83FE28E::
 
 @ Johto_UnionCaveB2F object 1 (local id 1, gfx 0x3A9E) at 23,2
 Johto_UnionCaveB2F_EventScript_83FE2A5::
-	setorcopyvar VAR_0x8000, ITEM_ETHER
+	setorcopyvar VAR_0x8000, ITEM_ELIXIR   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_UnionCaveB2F object 6 (local id 6, gfx 0x3A9E) at 3,12
 Johto_UnionCaveB2F_EventScript_83FE2B2::
-	setorcopyvar VAR_0x8000, ITEM_HYPER_POTION
+	setorcopyvar VAR_0x8000, ITEM_HYPER_POTION   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

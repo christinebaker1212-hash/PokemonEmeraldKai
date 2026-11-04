@@ -185,3 +185,10 @@ Johto_Route30_Text_83ED8CA::
 	.string "{PLAYER}, it’s a disaster!\p"
 	.string "Something terrible happened at\n"
 	.string "the LAB. Please come back now!$"
+
+@ Moemon Kai: Crystal's item ball (fix_item_balls.py)
+Johto_Route30_EventScript_CrystalBall_20_36::
+	setorcopyvar VAR_0x8000, ITEM_ANTIDOTE
+	setorcopyvar VAR_0x8001, 1
+	callstd STD_FIND_ITEM
+	end

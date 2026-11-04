@@ -53,5 +53,8 @@
 #define FLAG_JOHTO_HIDE_FRIEDA    0x1535
 #define FLAG_JOHTO_HIDE_SANTOS    0x1536
 #define FLAG_JOHTO_HIDE_SUNNY     0x1537
+// Crystal's item balls Quetzal's maps lack (case 91, tools/quetzal_port/fix_item_balls.py)
+#define FLAG_JOHTO_ITEM_ROUTE30       0x1538
+#define FLAG_JOHTO_ITEM_ROUTE26       0x1539
 
 #endif // GUARD_CONSTANTS_KAI_REGIONS_H

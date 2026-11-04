@@ -67,7 +67,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_Route32_EventScript_83EEDF4",
-      "flag": "FLAG_QZ_0x116B"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
@@ -223,7 +223,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_Route32_EventScript_83EEDE7",
-      "flag": "FLAG_QZ_0x1169"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16046",

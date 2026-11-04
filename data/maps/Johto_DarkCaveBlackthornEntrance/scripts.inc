@@ -8,7 +8,7 @@ Johto_DarkCaveBlackthornEntrance_EventScript_83CBD37::
 
 @ Johto_DarkCaveBlackthornEntrance object 1 (local id 1, gfx 0x3A9E) at 13,33
 Johto_DarkCaveBlackthornEntrance_EventScript_83CBD3D::
-	setorcopyvar VAR_0x8000, ITEM_BLACK_FLUTE
+	setorcopyvar VAR_0x8000, ITEM_REVIVE   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

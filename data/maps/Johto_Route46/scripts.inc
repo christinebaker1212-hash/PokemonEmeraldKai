@@ -30,7 +30,7 @@ Johto_Route46_EventScript_83F63FE::
 
 @ Johto_Route46 object 1 (local id 1, gfx 0x3A9E) at 2,21
 Johto_Route46_EventScript_83F640A::
-	setorcopyvar VAR_0x8000, ITEM_REVIVE
+	setorcopyvar VAR_0x8000, ITEM_X_SPEED   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

@@ -26,3 +26,10 @@ Johto_Route26_Text_83EBFD9::
 Johto_Route26_Text_83EBFF6::
 	.string "MOéMON are in-valuable, lifelong\n"
 	.string "partners.$"
+
+@ Moemon Kai: Crystal's item ball (fix_item_balls.py)
+Johto_Route26_EventScript_CrystalBall_15_15::
+	setorcopyvar VAR_0x8000, ITEM_MAX_ELIXIR
+	setorcopyvar VAR_0x8001, 1
+	callstd STD_FIND_ITEM
+	end

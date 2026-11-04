@@ -28,7 +28,7 @@ Johto_UnionCaveB1F_EventScript_83FDFB3::
 
 @ Johto_UnionCaveB1F object 3 (local id 3, gfx 0x3A9E) at 14,3
 Johto_UnionCaveB1F_EventScript_83FDFCA::
-	setorcopyvar VAR_0x8000, ITEM_NUGGET
+	setorcopyvar VAR_0x8000, ITEM_X_DEFEND   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

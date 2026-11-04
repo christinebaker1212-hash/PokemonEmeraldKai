@@ -411,28 +411,28 @@ Johto_IlexForest_EventScript_83DC433::
 
 @ Johto_IlexForest object 12 (local id 12, gfx 0x3B) at 50,48
 Johto_IlexForest_EventScript_83DC4BC::
-	setorcopyvar VAR_0x8000, ITEM_SUPER_POTION
+	setorcopyvar VAR_0x8000, ITEM_REVIVE   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_IlexForest object 11 (local id 11, gfx 0x3B) at 34,28
 Johto_IlexForest_EventScript_83DC4C9::
-	setorcopyvar VAR_0x8000, ITEM_ETHER
+	setorcopyvar VAR_0x8000, ITEM_X_ATTACK   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_IlexForest object 10 (local id 10, gfx 0x3B) at 45,16
 Johto_IlexForest_EventScript_83DC4D6::
-	setorcopyvar VAR_0x8000, ITEM_FULL_HEAL
+	setorcopyvar VAR_0x8000, ITEM_ANTIDOTE   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_IlexForest object 9 (local id 9, gfx 0x3B) at 71,42
 Johto_IlexForest_EventScript_83DC4E3::
-	setorcopyvar VAR_0x8000, ITEM_SUN_STONE
+	setorcopyvar VAR_0x8000, ITEM_ETHER   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

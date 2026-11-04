@@ -20,7 +20,7 @@ Johto_SproutTower2F_EventScript_83FA5F8::
 
 @ Johto_SproutTower2F object 3 (local id 3, gfx 0x3A9E) at 1,2
 Johto_SproutTower2F_EventScript_83FA61A::
-	setorcopyvar VAR_0x8000, ITEM_X_DEFEND
+	setorcopyvar VAR_0x8000, ITEM_X_ACCURACY   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
