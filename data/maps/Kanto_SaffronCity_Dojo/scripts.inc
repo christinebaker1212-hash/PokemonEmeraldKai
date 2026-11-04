@@ -25,7 +25,6 @@ Kanto_SaffronCity_Dojo_EventScript_841EC89::
 	lock
 	faceplayer
 	goto_if_set FLAG_QZ_0x214D, Kanto_SaffronCity_Dojo_EventScript_841ECCA
-	call Quetzal_EventScript_8361A4D
 	showmonpic SPECIES_HITMONLEE, 0xA, 3
 	setvar VAR_TEMP_1, 0x6A
 	applymovement 5, Quetzal_Movement_8457AAC
@@ -48,7 +47,6 @@ Kanto_SaffronCity_Dojo_EventScript_841ECD4::
 	lock
 	faceplayer
 	goto_if_set FLAG_QZ_0x214D, Kanto_SaffronCity_Dojo_EventScript_841ECCA
-	call Quetzal_EventScript_8361A4D
 	showmonpic SPECIES_HITMONCHAN, 0xA, 3
 	setvar VAR_TEMP_1, 0x6B
 	applymovement 5, Quetzal_Movement_8457AAC

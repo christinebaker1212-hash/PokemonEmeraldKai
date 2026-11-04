@@ -187,7 +187,6 @@ Johto_GoldenrodGameCorner_EventScript_83D5181::
 Johto_GoldenrodGameCorner_EventScript_83D518E::
 	lock
 	faceplayer
-	call Quetzal_EventScript_8361A4D
 	checkitem ITEM_COIN_CASE, 1
 	goto_if_eq VAR_RESULT, 0, Johto_GoldenrodGameCorner_EventScript_83D530A
 	msgbox Johto_GoldenrodGameCorner_Text_83D54CF, MSGBOX_DEFAULT

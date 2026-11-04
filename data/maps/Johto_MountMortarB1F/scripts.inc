@@ -55,7 +55,6 @@ Johto_MountMortarB1F_EventScript_83E0004::
 Johto_MountMortarB1F_EventScript_83E003D::
 	msgbox Johto_MountMortarB1F_Text_83E0178, MSGBOX_DEFAULT
 	setvar VAR_TEMP_1, SPECIES_TYROGUE
-	call Quetzal_EventScript_8361A4D
 	bufferspeciesname 0, SPECIES_TYROGUE
 	qz_givemon_ex SPECIES_TYROGUE, 10, ITEM_NONE, 1, 2, 3
 	call Quetzal_EventScript_840181E

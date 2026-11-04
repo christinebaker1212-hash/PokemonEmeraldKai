@@ -84,7 +84,6 @@ Kanto_SilphCo_7F_EventScript_8411802::
 	lock
 	faceplayer
 	goto_if_set FLAG_QZ_0x2155, Kanto_SilphCo_7F_EventScript_84118CC
-	call Quetzal_EventScript_8361A4D
 	msgbox Kanto_SilphCo_7F_Text_8426947, MSGBOX_DEFAULT
 	setvar VAR_TEMP_1, 0x83
 	givemon SPECIES_LAPRAS, 0x19, ITEM_NONE

@@ -15,7 +15,6 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CE91::
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CE9A::
 	lock
 	faceplayer
-	call Quetzal_EventScript_8361A4D
 	checkitem ITEM_COIN_CASE, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CFFE
 	specialvar VAR_RESULT, QzReturnZero

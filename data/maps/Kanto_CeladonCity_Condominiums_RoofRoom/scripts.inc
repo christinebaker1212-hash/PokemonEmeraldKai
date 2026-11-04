@@ -11,7 +11,6 @@ Kanto_CeladonCity_Condominiums_RoofRoom_EventScript_841C743::
 	lock
 	faceplayer
 	setvar VAR_TEMP_1, 0x85
-	call Quetzal_EventScript_8361A4D
 	qz_givemon_ex SPECIES_EEVEE, 0x19, ITEM_NONE, 1, 2, 3
 	goto_if_eq VAR_RESULT, 0, Kanto_CeladonCity_Condominiums_RoofRoom_EventScript_841C781
 	goto_if_eq VAR_RESULT, 1, Kanto_CeladonCity_Condominiums_RoofRoom_EventScript_841C7B5

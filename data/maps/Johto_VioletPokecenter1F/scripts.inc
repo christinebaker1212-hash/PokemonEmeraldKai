@@ -33,7 +33,6 @@ Johto_VioletPokecenter1F_EventScript_83FFD78::
 	end
 
 Johto_VioletPokecenter1F_EventScript_83FFD98::
-	call Quetzal_EventScript_8361A4D
 	special QzIsCurrentPcBoxFull
 	goto_if_eq VAR_RESULT, 1, Johto_VioletPokecenter1F_EventScript_83FFD6D
 	giveegg SPECIES_TOGEPI

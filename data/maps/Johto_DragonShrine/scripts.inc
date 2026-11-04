@@ -240,7 +240,6 @@ Johto_DragonShrine_EventScript_83CCFD5::
 
 Johto_DragonShrine_EventScript_83CCFE5::
 	goto_if_set FLAG_QZ_0x105A, Johto_DragonShrine_EventScript_83CD059
-	call Quetzal_EventScript_8361A4D
 	msgbox Johto_DragonShrine_Text_83CD063, MSGBOX_DEFAULT
 	setvar VAR_TEMP_1, 0x93
 	bufferspeciesname 0, SPECIES_DRATINI
@@ -253,7 +252,6 @@ Johto_DragonShrine_EventScript_83CCFE5::
 
 Johto_DragonShrine_EventScript_83CD025::
 	goto_if_set FLAG_QZ_0x105A, Johto_DragonShrine_EventScript_83CD059
-	call Quetzal_EventScript_8361A4D
 	msgbox Johto_DragonShrine_Text_83CD063, MSGBOX_DEFAULT
 	setvar VAR_TEMP_1, 0x93
 	bufferspeciesname 0, SPECIES_DRATINI
