@@ -26,10 +26,9 @@ Johto_Route31VioletGate_EventScript_83FE8CE::
 	end
 
 Johto_Route31VioletGate_Text_83D1E9C::
-	.string "Hi there! Did you visit\n"
-	.string "SPROUT TOWER?$"
+	.string "Hi there! Did you visit SPROUT\n"
+	.string "TOWER?$"
 
 Johto_Route31VioletGate_Text_83D1EC2::
-	.string "I saw the cutest MOéMON out\n"
-	.string "there.\p"
-	.string "It looked a lot like PIKACHU!$"
+	.string "I came too far out. I’d better\n"
+	.string "phone home!$"

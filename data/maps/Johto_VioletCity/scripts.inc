@@ -334,29 +334,26 @@ Johto_VioletCity_Text_83FEC2E::
 	.string "Good it is you study here!$"
 
 Johto_VioletCity_Text_83FEC5D::
-	.string "Ghosts are rumored to appear\n"
-	.string "in SPROUT TOWER.\p"
-	.string "They say that GHOST-type\n"
-	.string "moves can bypass the defenses\p"
-	.string "of tough MOéMON like ONIX\n"
-	.string "and GEODUDE.$"
+	.string "Ghosts are rumored to appear in\n"
+	.string "SPROUT TOWER.\p"
+	.string "They said normal-type MOéMON moves\n"
+	.string "had no effect on ghosts.$"
 
 Johto_VioletCity_Text_83FECEA::
 	.string "Hey, you’re a MOéMON trainer?\p"
-	.string "If you head to the ACADEMY,\n"
-	.string "you might learn something new!$"
+	.string "If you beat the GYM LEADER here,\n"
+	.string "you’ll be ready for prime time!$"
 
 Johto_VioletCity_Text_83FED44::
-	.string "FALKNER, from the VIOLET\n"
-	.string "MOéMON GYM, is a fine trainer!\p"
-	.string "He inherited his father’s gym\n"
-	.string "and has done a great job with\l"
-	.string "it.$"
+	.string "FALKNER, from the VIOLET MOéMON\n"
+	.string "GYM, is a fine trainer!\p"
+	.string "He inherited his father’s gym and\n"
+	.string "has done a great job with it.$"
 
 Johto_VioletCity_Text_83FEDBD::
 	.string "I saw a wiggly tree up ahead!\p"
-	.string "If you touch it, it squirms\n"
-	.string "and dances! Cool!$"
+	.string "If you touch it, it squirms and\n"
+	.string "dances! Cool!$"
 
 Johto_VioletCity_Text_83FEE32::
 	.string "VIOLET CITY MOéMON GYM\p"

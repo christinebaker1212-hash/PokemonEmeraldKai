@@ -430,3 +430,16 @@ Johto_KurtsHouse_Text_GsBallCheckingNow::
 
 Johto_KurtsHouse_Text_GsBallAhHa::
 	.string "Ah-ha! I see! So…$"
+
+@ Moemon Kai: Crystal's SLOWPOKE (pokecrystal KurtsHouse.asm; docs/REGIONS_AUDIT.md 138)
+Johto_KurtsHouse_EventScript_Slowpoke::
+	lock
+	faceplayer
+	playmoncry SPECIES_SLOWPOKE, CRY_MODE_NORMAL
+	msgbox Johto_KurtsHouse_Text_Slowpoke, MSGBOX_DEFAULT
+	waitmoncry
+	release
+	end
+
+Johto_KurtsHouse_Text_Slowpoke::
+	.string "SLOWPOKE: … Yawn?$"

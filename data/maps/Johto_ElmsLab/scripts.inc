@@ -709,8 +709,8 @@ Johto_ElmsLab_Movement_83E2390:
 	step_end
 
 Johto_ElmsLab_Text_82E0C31::
-	.string "It’s a PC used for research.\n"
-	.string "Better not mess around with it.$"
+	.string "OBSERVATIONS ON MOéMON EVOLUTION\p"
+	.string "…It says on the screen…$"
 
 Johto_ElmsLab_Text_82E0C6E::
 	.string "It’s crammed with books on MOéMON.$"
@@ -719,7 +719,7 @@ Johto_ElmsLab_Text_83E1D2E::
 	.string "{PLAYER}!\p"
 	.string "What are you doing here?\p"
 	.string "My aide is still waiting for you\n"
-	.string "In VIOLET CITY!$"
+	.string "in VIOLET CITY!$"
 
 Johto_ElmsLab_Text_83E2392::
 	.string "Probably shouldn’t touch!$"
@@ -1042,3 +1042,49 @@ Johto_ElmsLab_Text_8401E3B::
 Johto_ElmsLab_Text_8401E64::
 	.string "ELM: Good heavens!\n"
 	.string "That MOéMON... is ARCEUS!$"
+
+@ Moemon Kai: Crystal's TRAVEL TIPS and trash can (pokecrystal ElmsLab.asm; docs/REGIONS_AUDIT.md 138)
+Johto_ElmsLab_EventScript_TravelTip1::
+	msgbox Johto_ElmsLab_Text_TravelTip1, MSGBOX_SIGN
+	end
+
+Johto_ElmsLab_EventScript_TravelTip2::
+	msgbox Johto_ElmsLab_Text_TravelTip2, MSGBOX_SIGN
+	end
+
+Johto_ElmsLab_EventScript_TravelTip3::
+	msgbox Johto_ElmsLab_Text_TravelTip3, MSGBOX_SIGN
+	end
+
+Johto_ElmsLab_EventScript_TravelTip4::
+	msgbox Johto_ElmsLab_Text_TravelTip4, MSGBOX_SIGN
+	end
+
+Johto_ElmsLab_EventScript_Trashcan::
+	msgbox Johto_ElmsLab_Text_Trashcan, MSGBOX_SIGN
+	end
+
+Johto_ElmsLab_Text_TravelTip1::
+	.string "{PLAYER} opened a book.\p"
+	.string "Travel Tip 1: Press START to open\n"
+	.string "the MENU.$"
+
+Johto_ElmsLab_Text_TravelTip2::
+	.string "{PLAYER} opened a book.\p"
+	.string "Travel Tip 2: Record your trip\n"
+	.string "with SAVE!$"
+
+Johto_ElmsLab_Text_TravelTip3::
+	.string "{PLAYER} opened a book.\p"
+	.string "Travel Tip 3: Open your PACK and\n"
+	.string "press SELECT to move items.$"
+
+Johto_ElmsLab_Text_TravelTip4::
+	.string "{PLAYER} opened a book.\p"
+	.string "Travel Tip 4: Check your MOéMON\n"
+	.string "moves. Press the A Button to\l"
+	.string "switch moves.$"
+
+Johto_ElmsLab_Text_Trashcan::
+	.string "The wrapper from the snack\n"
+	.string "PROF.ELM ate is in there…$"

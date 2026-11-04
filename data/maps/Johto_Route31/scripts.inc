@@ -36,12 +36,15 @@ Johto_Route31_EventScript_83EE4ED::
 Johto_Route31_EventScript_83EE4F8::
 	msgbox Johto_Route31_Text_83EE728, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 1, Johto_Route31_EventScript_83EE516
-	msgbox Johto_Route31_Text_83EE757, MSGBOX_DEFAULT
+	@ Moemon Kai: Crystal's sleepy man's other lines (docs/REGIONS_AUDIT.md 138)
+	msgbox Johto_Route31_Text_Declined, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
 
 Johto_Route31_EventScript_83EE516::
+	getpartysize
+	goto_if_lt VAR_RESULT, 2, Johto_Route31_EventScript_CantTakeLastMon
 	qz_takebackstorymon 1
 	goto_if_eq VAR_RESULT, 2, Johto_Route31_EventScript_83EE56F
 	setvar VAR_QZ_0x5018, 2
@@ -65,7 +68,12 @@ Johto_Route31_EventScript_83EE561::
 	goto Johto_Route31_EventScript_83EE4ED
 
 Johto_Route31_EventScript_83EE56F::
-	msgbox Johto_Route31_Text_83EE757, MSGBOX_DEFAULT
+	msgbox Johto_Route31_Text_MissingMail, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_Route31_EventScript_CantTakeLastMon::
+	msgbox Johto_Route31_Text_CantTakeLastMon, MSGBOX_DEFAULT
 	release
 	end
 
@@ -176,3 +184,15 @@ Johto_Route31_Text_83EE99C::
 
 Johto_Route31_Text_83EE9C4::
 	.string "DARK CAVE$"
+
+Johto_Route31_Text_Declined::
+	.string "What? You don’t want anything?$"
+
+Johto_Route31_Text_MissingMail::
+	.string "Why is this MOéMON so special?\p"
+	.string "It doesn’t have any MAIL.$"
+
+Johto_Route31_Text_CantTakeLastMon::
+	.string "If I take that MOéMON from you,\n"
+	.string "what are you going to use in\l"
+	.string "battle?$"

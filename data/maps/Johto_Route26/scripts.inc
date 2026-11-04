@@ -24,7 +24,7 @@ Johto_Route26_Text_83EBFD9::
 	.string "MOéMON aren’t tools of war.$"
 
 Johto_Route26_Text_83EBFF6::
-	.string "MOéMON are in-valuable, lifelong\n"
+	.string "MOéMON are invaluable, lifelong\n"
 	.string "partners.$"
 
 @ Moemon Kai: Crystal's item ball (fix_item_balls.py)

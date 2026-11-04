@@ -113,7 +113,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **96. [J2-20]** GOLDENROD DEPT. STORE floors and directory are Quetzal's: **RESTORE the original**
 - [ ] **97. [J2-22]** Bug-Catching Contest uses Quetzal's rules, and its rules text promises RADIANT scoring: **RESTORE the original**
 - [x] **98. [J2-23]** GOLDENROD GYM guide talks about FAIRY types; gym statues read "TOWN" / "CERTIFIED TRAINERS": **RESTORE the original**
-- [ ] **99. [J2-26]** ROUTE 34 / its gate: KATE's SOFT SAND is a ball; Trainer Tips say berries regrow "several times a day"; SWEET SCENT teacher gone: **RESTORE the original**
+- [x] **99. [J2-26]** ROUTE 34 / its gate: KATE's SOFT SAND is a ball; Trainer Tips say berries regrow "several times a day"; SWEET SCENT teacher gone: **RESTORE the original**
 - [ ] **100. [J2-27]** ROUTE 36: FLORIA isn't at the odd tree; SQUIRTBOTTLE needs only the badge; a Hisuian GROWLITHE warning: **RESTORE the original**
 - [ ] **101. [J2-28]** NATIONAL PARK / ROUTE 35 people rewritten or added: **RESTORE the original**
 - [x] **102. [J2-29]** MANIA's SHUCKLE is a gift to keep, not a loan: **RESTORE the original**
@@ -135,14 +135,14 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **118. [K2-11, J2-8]** The NAME RATER doesn't rate or rename (KANTO's removed, JOHTO's talks about RADIANT): **RESTORE the original**
 - [x] **119. [K1-2]** ROCK TUNNEL isn't dark: **RESTORE the original**
 - [ ] **120. [K1-13]** VIRIDIAN's old man never shows how to catch a POKéMON: **RESTORE the original**
-- [ ] **121. [K1-25]** OAK's first-battle advice is missing from the lab battle: **KEEP as it is** - _A bit annoying. Don't restore it._
+- [x] **121. [K1-25]** OAK's first-battle advice is missing from the lab battle: **KEEP as it is** - _A bit annoying. Don't restore it._
 - [ ] **122. [K2-2]** VERMILION's construction man and his MACHOP are missing: **RESTORE the original**
 - [x] **123. [K2-7]** The COUNTER move tutor (Dept. Store 3F) is missing: **RESTORE the original**
 - [ ] **124. [K2-23]** GAME CORNER photo printer "out of service": **RESTORE the original**
 - [ ] **125. [K3-16]** The JOYFUL GAME CORNER's games are gone (a rest area now): **RESTORE the original**
 - [ ] **126. [K3-21]** FOUR ISLAND's STICKER MAN is gone: **RESTORE the original**
-- [ ] **127. [K3-23]** The first SEVII trip doesn't disable the PC: **KEEP as it is**
-- [ ] **128. [K3-24]** No roaming beast after the SAPPHIRE: **KEEP as it is**
+- [x] **127. [K3-23]** The first SEVII trip doesn't disable the PC: **KEEP as it is**
+- [x] **128. [K3-24]** No roaming beast after the SAPPHIRE: **KEEP as it is**
 - [x] **129. [K3-28]** FIVE / SEVEN ISLAND's POKéMON JOURNALs are missing: **RESTORE the original**
 - [ ] **130. [K4-11]** ELITE FOUR rematches: the rematch words come right after the first win, FireRed's stronger rematch teams are missing: **RESTORE the original**
 - [ ] **131. [J1-12]** JOHTO has no hidden items at all: **RESTORE the original**
@@ -163,7 +163,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **146. [J2-30]** CIANWOOD's PHOTO STUDIO and POKé SEER are missing; an HGSS-style bells lady in their place: **RESTORE the original**
 - [x] **147. [J3-21]** MOVE DELETER missing in BLACKTHORN ("MOVE BROS' HOUSE" is empty): **RESTORE the original**
 - [ ] **148. [J3-27]** HALL OF FAME doesn't send PROF. ELM's S.S. TICKET call: **RESTORE the original**
-- [ ] **149. [J1-32, J2-36]** Dead NUZLOCKE branches in gift scripts: **REMOVE it**
+- [x] **149. [J1-32, J2-36]** Dead NUZLOCKE branches in gift scripts: **REMOVE it**
 - [x] **150. [K1-18]** CERULEAN's BERRY POWDER man gives a NUGGET while saying "BERRY SWEET": **RESTORE the original**
 - [x] **151. [K2-24]** Leftover Quetzal words no script uses: **RESTORE the original**
 - [x] **152. [K3-31]** "Your BERRY POUCH is full.": **FIX it, keep the idea**

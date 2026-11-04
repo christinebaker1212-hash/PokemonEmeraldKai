@@ -51,7 +51,8 @@ Johto_Route33_Text_83EFB26::
 
 Johto_Route33_Text_83EFBB9::
 	.string "Pant, pant…\p"
-	.string "That cave was bigger than\n"
-	.string "I’d expected.\p"
-	.string "I got too tired exploring\n"
-	.string "for MARILL, so I came outside.$"
+	.string "I finally got through that cave.\p"
+	.string "It was much bigger than I’d\n"
+	.string "expected.\p"
+	.string "I got too tired to explore the\n"
+	.string "whole thing, so I came outside.$"
