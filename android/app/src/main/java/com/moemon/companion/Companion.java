@@ -59,6 +59,8 @@ public final class Companion implements LinkClient.Listener {
     public JSONObject gear;                                       // the POKéGEAR's last answer ("gear")
     public JSONObject ach, gatcha;                                // the ME page's: achievements, MOEGATCHA banners
     public JSONObject lastPull;                                   // the last MOEGATCHA pull's answer (its prizes)
+    public JSONObject lastGift;                                   // the last MYSTERY GIFT's answer (its item)
+    public long lastGiftAt;
     public long lastPullAt;
     public long gearAt;                                           // (when it came)
     public volatile JSONObject battle;                            // the battle as the player sees it ("battle")
@@ -1056,6 +1058,8 @@ public final class Companion implements LinkClient.Listener {
             case "nothing": return "It isn't holding anything.";
             case "locked": return "Your game hasn't earned that piece yet.";
             case "nopulls": return "No pulls left. Daily goals and achievements give more!";
+            case "giftdone": return "That's all twelve MYSTERY GIFTS for today. More tomorrow!";
+            case "giftsame": return "That code already gave its gift today. Try another one!";
             case "nojar": return "You don't have the CANDY JAR yet: release a POKéMON in the PC and PROF. BIRCH brings it.";
             case "fewcandy": return "Ten CANDIES of a kind make a RARE CANDY.";
             case "badname": return "That name has letters the game can't use.";
@@ -1171,6 +1175,9 @@ public final class Companion implements LinkClient.Listener {
                     : why(w);
             toastGood = false;
             toastAt = System.currentTimeMillis();
+        } else if (order != null && "mgift".equals(order.optString("op")) && done.has("item")) {
+            lastGift = done;
+            lastGiftAt = System.currentTimeMillis();
         } else if (order != null && "pull".equals(order.optString("op")) && done.has("prizes")) {
             lastPull = done;
             lastPullAt = System.currentTimeMillis();

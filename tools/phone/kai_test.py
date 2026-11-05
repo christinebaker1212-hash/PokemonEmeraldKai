@@ -4,6 +4,7 @@ headless game through the phone link:
   - the snapshot's "kai": achievements done of all, MOEGATCHA pulls, tickets and free ones, the CANDY JAR, play time
   - {"t":"ach"}: every achievement in its category with its words, progress and reward
   - {"t":"gatcha"}: the banners and their free pulls
+  - "mgift": MYSTERY GIFT, twelve a day, the same code twice refused
   - "pull": ten pulls (rigged: an SR among them) with the prizes in the answer and the pulls gone; with none left,
     refused ("nopulls")
   - "candy": with the jar, 25 FIRE candies -> 2 RARE CANDIES (5 left); fewer than 10 refused
@@ -118,6 +119,30 @@ def main():
         if d['ok'] or d.get('why') != 'badname':
             fail('a name with a control code: %s' % d)
         print('rename: kept; a control code refused')
+
+        # MYSTERY GIFT: twelve scans a day, each code once a day, the gift in the bag and the answer
+        if snap['kai'].get('gift') != 12:
+            fail('gifts left at the start: %s' % snap['kai'].get('gift'))
+        d = link.order(op='mgift', code='4006381333931')
+        if not d['ok'] or d.get('left') != 11 or not d.get('item') or d.get('tier') not in range(5):
+            fail('a gift: %s' % d)
+        snap = link.snap()
+        if bag_count(snap, d['item']) < d['qty'] or snap['kai']['gift'] != 11:
+            fail('the gift after: %d of item %d, %s left' % (bag_count(snap, d['item']), d['item'], snap['kai']['gift']))
+        again = link.order(op='mgift', code='4006381333931')
+        if again['ok'] or again.get('why') != 'giftsame':
+            fail('the same code again: %s' % again)
+        tiers = [0] * 5
+        tiers[d['tier']] += 1
+        for k in range(11):
+            g = link.order(op='mgift', code='https://example.com/%d' % k)
+            if not g['ok']:
+                fail('gift %d: %s' % (k + 2, g))
+            tiers[g['tier']] += 1
+        d = link.order(op='mgift', code='0123456789012')
+        if d['ok'] or d.get('why') != 'giftdone':
+            fail('a thirteenth gift: %s' % d)
+        print('mystery gift: 12 a day (tiers %s), the same code refused, the 13th refused' % tiers)
     finally:
         game.kill()
     print('KAI TEST PASSED')

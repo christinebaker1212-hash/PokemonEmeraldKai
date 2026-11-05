@@ -127,6 +127,8 @@ public class MainActivity extends Activity {
             PairPage p = over instanceof PairPage ? (PairPage) over : new PairPage(view);
             view.showOver(p);
             p.start(text, null);
+        } else if (request == 2 && result == RESULT_OK && data != null && view != null) {
+            MysteryGiftPage.scanned(view, data.getStringExtra("qr"));
         }
     }
 }

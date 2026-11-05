@@ -89,7 +89,7 @@ public class ScreensTest {
             snap.put("fxu", new org.json.JSONArray("[\"FF7\",\"FFF\",\"FFFF\",\"7F\"]"));
             snap.put("fxp", new org.json.JSONArray("[[27354,5],0,0,0,0,0]"));
             // the ME page: achievements, MOEGATCHA, a CANDY JAR, the GARDEN farm
-            snap.put("kai", new JSONObject("{\"ach\":[37,314],\"pulls\":23,\"tickets\":2,\"free\":3,\"jar\":1,"
+            snap.put("kai", new JSONObject("{\"ach\":[37,314],\"pulls\":23,\"tickets\":2,\"free\":3,\"jar\":1,\"gift\":11,"
                     + "\"candy\":[12,3,0,25,0,0,9,0,0,0,31,4,0,0,0,0,0,0,0],\"time\":[42,17],"
                     + "\"farm\":[[133,5,0,6,4],[134,3,95,0,2],[0,0,0,0,0],[140,1,200,0,0],[136,4,30,0,1],[0,0,0,0,0]]}"));
             write(new File(dir, "model_" + id + ".json"), file.toString());
@@ -162,6 +162,17 @@ public class ScreensTest {
         // ME: the card, achievements, MOEGATCHA (a pull's prizes), the CANDY JAR, the farm
         v.select(9);
         shot(v, "me");
+        // MYSTERY GIFT: the box opening on an amazing one
+        app.lastGift = new JSONObject().put("item", 1).put("qty", 1).put("tier", 4).put("left", 10)
+                .put("n", "C7BBCDCEBFCC00BCBBC6C6");
+        MysteryGiftPage gift = new MysteryGiftPage(v);
+        app.lastGiftAt = System.currentTimeMillis() + 5;
+        v.showOver(gift);
+        Thread.sleep(30);
+        shot(v, "gift_wrapped");
+        Thread.sleep(2200);
+        shot(v, "gift_open");
+        v.showOver(null);
         app.ach = new JSONObject("{\"t\":\"ach\",\"cats\":[\"STORY\",\"BATTLE\",\"CO-OP\"],\"list\":["
                 + "[0,\"FIRST PARTNER\",\"Get your first POK\u00e9MON.\",\"DONE\",\"+3 MOEGATCHA pulls\",1],"
                 + "[0,\"BADGE COLLECTOR\",\"Earn four BADGES in any region.\",\"2/4\",\"+5 MOEGATCHA pulls, BALL COLOR: MINT\",0],"

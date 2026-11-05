@@ -38,7 +38,10 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 
-/** Reads the PHONE LINK screen's QR code with the camera (camera2 + ZXing); returns its text as "qr" */
+/**
+ * Reads the PHONE LINK screen's QR code with the camera (camera2 + ZXing); returns its text as "qr". With the extra
+ * "gift": any QR code or a product's bar code (UPC / EAN / CODE 128 / CODE 39) for a MYSTERY GIFT, its text as "qr".
+ */
 public class ScanActivity extends Activity {
     private TextureView preview;
     private CameraDevice camera;
@@ -48,19 +51,25 @@ public class ScanActivity extends Activity {
     private Handler handler;
     private final MultiFormatReader zxing = new MultiFormatReader();
     private volatile boolean done;
+    private boolean gift;
 
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         Map<DecodeHintType, Object> hints = new EnumMap<>(DecodeHintType.class);
-        hints.put(DecodeHintType.POSSIBLE_FORMATS, Arrays.asList(BarcodeFormat.QR_CODE));
+        gift = getIntent().getBooleanExtra("gift", false);
+        hints.put(DecodeHintType.POSSIBLE_FORMATS, gift
+                ? Arrays.asList(BarcodeFormat.QR_CODE, BarcodeFormat.UPC_A, BarcodeFormat.UPC_E, BarcodeFormat.EAN_13,
+                        BarcodeFormat.EAN_8, BarcodeFormat.CODE_128, BarcodeFormat.CODE_39)
+                : Arrays.asList(BarcodeFormat.QR_CODE));
         hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
         zxing.setHints(hints);
         FrameLayout root = new FrameLayout(this);
         preview = new TextureView(this);
         root.addView(preview);
         TextView hint = new TextView(this);
-        hint.setText("Point the camera at the code on the game's PHONE LINK screen.");
+        hint.setText(gift ? "MYSTERY GIFT: point the camera at any QR code, or the bar code on something from a store."
+                : "Point the camera at the code on the game's PHONE LINK screen.");
         hint.setTextColor(0xFFFFFFFF);
         hint.setBackgroundColor(0x80000000);
         hint.setPadding(24, 24, 24, 24);
@@ -205,7 +214,7 @@ public class ScanActivity extends Activity {
             PlanarYUVLuminanceSource src = new PlanarYUVLuminanceSource(data, w, h, 0, 0, w, h, false);
             Result res = zxing.decodeWithState(new BinaryBitmap(new HybridBinarizer(src)));
             String text = res.getText();
-            if (text != null && text.startsWith("MOEPHONE:")) {
+            if (text != null && (gift ? !text.isEmpty() && !text.startsWith("MOEPHONE:") : text.startsWith("MOEPHONE:"))) {
                 done = true;
                 runOnUiThread(() -> {
                     setResult(RESULT_OK, new Intent().putExtra("qr", text));

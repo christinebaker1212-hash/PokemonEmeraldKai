@@ -602,4 +602,18 @@ Look.creatures, "look_art"; Look.pokemonArt sets GameArt.pokemonArt every frame,
   chips sharing the page's width, the BAG's chosen pocket inside its strip, names under an opened pack in the small
   font rather than cut, NEW! on the card, the walk's count clear of its bar, COULDN'T DO only when something waits.
 
-Next: MYSTERY GIFT by scanning (#291), the card games up to the game's (#292).
+- MYSTERY GIFT (the user: "up to 12 times a day, the user should be able to scan a QR code or a store's UPC bar code,
+  and receive a MYSTERY GIFT item. The items range from useless to amazing"): ME > MYSTERY GIFT > SCAN opens the camera
+  (ScanActivity with "gift": QR, UPC-A / UPC-E, EAN-13 / EAN-8, CODE 128, CODE 39); the code's SHA-256 (its first 16
+  bytes, the code itself never leaves the phone) goes to the game as {"op":"mgift","code"} and MysteryGiftPage shakes a
+  wrapped box until the answer, then opens it on the item (tier words and colors, sparkles, the game's sounds).
+  The game decides (mp_phone_kai.c DoGift): twelve a day on the player's own clock, a code once a day ("giftsame"),
+  the thirteenth refused ("giftdone"); the item from the code, the day and the Trainer ID (the same code: the same gift
+  that day, another tomorrow), a tier by 40 / 30 / 18 / 9 / 3 out of 100 (useless: shards, a POKé DOLL, a TINY
+  MUSHROOM... common: POTIONS, GREAT BALLS... good: ULTRA BALLS, REVIVES... great: RARE CANDY, vitamins, PP UP...
+  amazing: MASTER BALL, PP MAX, LUCKY EGG, LEFTOVERS, CHOICE BAND...), into the BAG ("bagfull" otherwise, not
+  counted). Days in mp_savedata.c ("gift:<YYYYMMDD>:n" and ":h<k>", dated so old days are dropped); the snapshot's
+  kai.gift says how many are left. Tests tools/phone/kai_test.py (twelve, the same code, a thirteenth), ScreensTest
+  gift_wrapped / gift_open / me.
+
+Next: the card games up to the game's (#292).
