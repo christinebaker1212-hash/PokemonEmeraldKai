@@ -221,7 +221,7 @@ static void SetNote(const char *ascii)
 
 static bool8 IsHM(u16 item)
 {
-    return item >= ITEM_HM01 && item <= ITEM_HM08;
+    return IS_ITEM_HM(item);
 }
 
 static void RequestItems(void)

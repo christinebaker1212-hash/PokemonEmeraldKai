@@ -1,4 +1,5 @@
 #include "global.h"
+#include "constants/metatile_behaviors.h"
 #include "s3d_underground.h"
 #include "s3d.h"   // Moemon Kai
 #include "mp_region.h"
@@ -439,6 +440,12 @@ static const u8 *GetInteractedMetatileScript(struct MapPosition *position, u8 me
         const u8 *villa = S3D_Gyms_VillaScript(position->x, position->y, direction);
         if (villa)
             return villa;   // Moemon Kai: the VILLA's furniture (src/sinnoh/s3d_gyms.c)
+    }
+    if ((metatileBehavior == MB_UNUSED_4B || metatileBehavior == MB_UNUSED_4C)
+     && S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+    {
+        extern const u8 EventScript_SinnohRockClimb[];
+        return EventScript_SinnohRockClimb;   // Moemon Kai: SINNOH's rock walls (src/sinnoh/s3d_misc.c S3D_RockClimb*)
     }
     if (MetatileBehavior_IsPlayerFacingTVScreen(metatileBehavior, direction) == TRUE)
     {

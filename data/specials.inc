@@ -590,6 +590,9 @@ gSpecials::
 	def_special Mtg_DuelistState
 	def_special Mtg_DuelistChallenge, waitstate=1
 	def_special Tcg_FrontierSetup
+	def_special S3D_RockClimbSlot
+	def_special S3D_RockClimbStart, waitstate=1
+	def_special S3D_DefogClear
 	def_special MP_Fight_StartCpu, waitstate=1
 	def_special MP_Fight_Result
 	def_special MP_Fight_SeatCheck

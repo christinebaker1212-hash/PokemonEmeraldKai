@@ -148,11 +148,11 @@ Sinnoh_EventScript_Hm02::
 	end
 
 Sinnoh_EventScript_Hm05::
-	finditem ITEM_HM05, 1
+	finditem ITEM_HM_DEFOG, 1
 	end
 
 Sinnoh_EventScript_Hm08::
-	finditem ITEM_HM08, 1
+	finditem ITEM_HM_ROCK_CLIMB, 1
 	end
 
 Sinnoh_EventScript_HpUp::

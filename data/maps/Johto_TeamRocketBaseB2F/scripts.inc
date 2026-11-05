@@ -316,6 +316,8 @@ Johto_TeamRocketBaseB2F_EventScript_83EA14E::
 	turnobject LOCALID_PLAYER, 4
 	delay 0x1E
 	msgbox Johto_TeamRocketBaseB2F_Text_83EA59D, MSGBOX_DEFAULT
+	giveitem ITEM_HM_WHIRLPOOL   @ Moemon Kai: Crystal's HM06 WHIRLPOOL from LANCE (the audit's case 15)
+	setflag FLAG_RECEIVED_HM_WHIRLPOOL
 	msgbox Johto_TeamRocketBaseB2F_Text_83EA67E, MSGBOX_DEFAULT
 	closemessage
 	turnobject 7, 1

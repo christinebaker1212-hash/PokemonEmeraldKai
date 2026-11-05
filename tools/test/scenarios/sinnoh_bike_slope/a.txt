@@ -1,0 +1,21 @@
+pressuntil A field 5000
+mp textspeed 2
+mp warp 40,27,18,17
+wait 200
+waitfor field 1000
+mp face up
+press UP 30
+wait 30
+press UP 30
+wait 30
+mp where
+mp bike
+wait 30
+press UP 30
+wait 30
+press UP 30
+wait 30
+press UP 30
+wait 30
+mp where
+quit

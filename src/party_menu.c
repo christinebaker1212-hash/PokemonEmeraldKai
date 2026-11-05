@@ -135,6 +135,8 @@ enum {
     FIELD_MOVE_MILK_DRINK,
     FIELD_MOVE_SOFT_BOILED,
     FIELD_MOVE_SWEET_SCENT,
+    FIELD_MOVE_ROCK_CLIMB,  // Moemon Kai: SINNOH's (src/sinnoh/s3d_misc.c)
+    FIELD_MOVE_DEFOG,
     FIELD_MOVES_COUNT
 };
 

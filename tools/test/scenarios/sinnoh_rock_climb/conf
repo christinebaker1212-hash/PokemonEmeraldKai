@@ -1,0 +1,8 @@
+# SINNOH's rock walls (src/sinnoh/s3d_misc.c S3D_RockClimb*): MT. CORONET 4F's wall at 7,13-16 stops a walker at 7,17;
+# without ROCK CLIMB A gives Platinum's "Will a POKeMON's move scale it?"; with a POKeMON that knows it (or holds HM ROCK
+# CLIMB) and the ICICLE BADGE (0x3326) A asks Platinum's question and YES climbs to 7,12.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=66:30"
+EXPECT_A=("where map 42.54 xy 7,17" "where map 42.54 xy 7,12")
+UNEXPECT_A=("[crash]" "TIMEOUT")

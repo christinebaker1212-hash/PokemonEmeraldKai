@@ -63,6 +63,22 @@ TMS = [
 ]
 assert len(TMS) == 42
 
+# The other regions' own HMs (items ITEM_HM_ROCK_CLIMB on, TM/HM index 100 on, gTm2Learnsets bits 42 on), for parity
+# with their games: (move, disc type, description, who learns it: Platinum's HM number for the species to 493, or None)
+HMS2 = [
+    ('ROCK_CLIMB', 'Normal', "A charging attack that may confuse the target. Out of battle, it climbs rocky walls.", 'HM08'),
+    ('DEFOG', 'Flying', "A wind that blows away the foe's barriers and lowers its evasion. Out of battle, it clears deep fog.", 'HM05'),
+    ('WHIRLPOOL', 'Water', "Traps the target in a raging whirlpool for several turns. Out of battle, it crosses whirlpools.", None),
+]
+# WHIRLPOOL's learners to 493 (national numbers): Crystal's HM06 and HeartGold / SoulSilver's HM05 (PokeAPI's
+# pokemon_moves.csv: move 250, method 4 (machine), version groups 4 and 10)
+WHIRLPOOL_LEARNERS = {7, 8, 9, 31, 34, 54, 55, 60, 61, 62, 72, 73, 79, 80, 86, 87, 90, 91, 98, 99, 108, 112, 115, 116, 117,
+                      118, 119, 120, 121, 128, 130, 131, 134, 138, 139, 140, 141, 143, 147, 148, 149, 151, 158, 159, 160,
+                      161, 162, 170, 171, 183, 184, 186, 194, 195, 199, 211, 215, 222, 223, 224, 226, 230, 241, 245, 248,
+                      249, 258, 259, 260, 263, 264, 270, 271, 272, 279, 295, 296, 297, 298, 306, 318, 319, 320, 321, 339,
+                      340, 341, 342, 349, 350, 363, 364, 365, 366, 367, 368, 369, 370, 380, 381, 382, 384, 393, 394, 395,
+                      400, 409, 418, 419, 422, 423, 445, 446, 456, 457, 458, 461, 463, 464, 484, 489, 490, 493}
+
 
 def camel(name):
     return ''.join(p.capitalize() for p in name.split('_'))
@@ -82,19 +98,25 @@ def main():
         for tm in e['learnset']['tm']:
             if tm.startswith('TM') and 51 <= int(tm[2:]) <= 92:
                 b |= 1 << (int(tm[2:]) - 51)
+        for k, (m, _, _, hm) in enumerate(HMS2):
+            if (hm and hm in e['learnset']['tm']) or (m == 'WHIRLPOOL' and e['national'] in WHIRLPOOL_LEARNERS):
+                b |= 1 << (len(TMS) + k)
         bits[e['const']] = b
     g59 = json.load(open(os.path.join(REPO, 'tools/moemon_gen59/species.json')))
     for e in list(g59.values())[0]:
         teach = set(e['teach'])
-        bits[e['const']] = sum(1 << k for k, mv in enumerate(moves) if mv in teach)
+        bits[e['const']] = sum(1 << k for k, mv in enumerate(moves + ['MOVE_' + m for m, _, _, _ in HMS2]) if mv in teach)
     known = set(l.split()[1] for l in open(os.path.join(REPO, 'include/constants/species.h')) if l.startswith('#define SPECIES_'))
     rows = ''.join('    [%s] = 0x%011XULL,\n' % (c, b) for c, b in bits.items() if b and c in known)
     write('src/data/pokemon/tm2_learnsets.h', head +
-          '// Which species learn TM51-TM92: bit k = TM(51 + k) (pokemon.c CanSpeciesLearnTMHM, TM/HM index 58 on)\n'
+          '// Which species learn TM51-TM92 (bit k = TM(51 + k), TM/HM index 58 on) and the other regions\' HMs (bits 42 on: ROCK\n'
+          '// CLIMB, DEFOG, WHIRLPOOL; TM/HM index 100 on) (pokemon.c CanSpeciesLearnTMHM)\n'
           'const u64 gTm2Learnsets[NUM_SPECIES] =\n{\n' + rows + '};\n')
     # the TM/HM index of each (include/constants/tms_hms.h FOREACH_TM2) and the items
     write('include/constants/tms_hms_tm2.h', head +
-          '#define FOREACH_TM2(F) \\\n' + ' \\\n'.join('    F(%s)' % m for m, _, _, _ in TMS) + '\n')
+          '#define FOREACH_TM2(F) \\\n' + ' \\\n'.join('    F(%s)' % m for m, _, _, _ in TMS) + '\n'
+          + '// the other regions\' own HMs (ITEM_HM_ROCK_CLIMB on): TM/HM index 100 on\n'
+          + '#define FOREACH_HM2(F) \\\n' + ' \\\n'.join('    F(%s)' % m for m, _, _, _ in HMS2) + '\n')
     items, descs, icons = [head], [head], [head + '#define ITEM_ICONS_TM2 \\\n']
     for k, (m, typ, price, desc) in enumerate(TMS):
         n = 51 + k
@@ -104,6 +126,15 @@ def main():
                      % (n, n, n, price, n))
         descs.append('static const u8 sTM%dDesc[] = _(\n    "%s");\n\n' % (n, desc))
         icons.append('    [ITEM_TM%d] = {gItemIcon_TM, gItemIconPalette_%sTMHM}, \\\n' % (n, typ))
+    for m, typ, desc, _ in HMS2:
+        name = 'HM ' + m.replace('_', ' ')
+        assert len(name) <= 13, name
+        items.append('    [ITEM_HM_%s] =\n    {\n        .name = _("%s"),\n        .itemId = ITEM_HM_%s,\n'
+                     '        .price = 0,\n        .description = sHm%sDesc,\n        .importance = 1,\n'
+                     '        .pocket = POCKET_TM_HM,\n        .type = ITEM_USE_PARTY_MENU,\n'
+                     '        .fieldUseFunc = ItemUseOutOfBattle_TMHM,\n    },\n\n' % (m, name, m, camel(m)))
+        descs.append('static const u8 sHm%sDesc[] = _(\n    "%s");\n\n' % (camel(m), desc))
+        icons.append('    [ITEM_HM_%s] = {gItemIcon_HM, gItemIconPalette_%sTMHM}, \\\n' % (m, typ))
     write('src/data/items_tm2.h', ''.join(items))
     write('src/data/text/item_descriptions_tm2.h', ''.join(descs))
     write('src/data/item_icons_tm2.h', ''.join(icons).rstrip(' \\\n') + '\n')

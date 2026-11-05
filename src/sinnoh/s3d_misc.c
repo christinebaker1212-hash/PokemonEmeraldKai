@@ -30,6 +30,8 @@
 //   17 GetCurrentBGM A: the song playing (the VILLA's music box keeps it), 18 SetFieldScene A: that song again
 //   14 CheckAmitySquareManGiftIsAccessory: A the gift's number, B the answer; 15 GetAmitySquareBerryOrAccessoryIDFromMan:
 //      A the gift's number, B its item or accessory
+#include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
@@ -430,4 +432,159 @@ void Sinnoh_AmityDebug(const char *arg)
     if (arg != NULL && *arg >= '0' && *arg <= '9')
         sM.amitySteps = atoi(arg);
     MPNet_Log("amity: walking %u steps %u slot %u", sM.amityWalking, sM.amitySteps, MP_Follower_LocalPartySlot());
+}
+
+// ---------------------------------------------------------------------------------------------------- ROCK CLIMB
+// SINNOH's rock walls (Platinum's ROCK_CLIMB_N_S / E_W behaviors kept as the game's unused 0x4B / 0x4C, solid in the
+// pack: tools/sinnoh/build_pack.py): A in front of one asks Platinum's question (data/scripts/sinnoh_rock_climb.inc)
+// when a party POKeMON knows ROCK CLIMB or holds HM ROCK CLIMB (or a friend lends it: MP_PartyCanUseFieldMove) and the
+// ICICLE BADGE is the player's (Platinum's FieldMoves_RockyWall); the player then goes up or down the wall the way they
+// face, one step past it.
+#include "event_object_movement.h"
+#include "field_player_avatar.h"
+#include "fieldmap.h"
+#include "script.h"
+#include "string_util.h"
+#include "task.h"
+#include "constants/metatile_behaviors.h"
+#include "constants/moves.h"
+#include "constants/songs.h"
+#include "s3d.h"
+#include "party_menu.h"
+#include "mp.h"
+#include "mp_region.h"
+
+bool8 MP_PartyCanUseFieldMove(u16 move);   // (mp_region.c)
+
+// (special) VAR_RESULT: the party slot of the POKeMON that climbs (PARTY_SIZE: none, or no ICICLE BADGE); its
+// nickname in gStringVar1
+void S3D_RockClimbSlot(void)
+{
+    u32 i, slot = PARTY_SIZE;
+    if (FlagGet(MP_Region_BadgeFlag(REGION_SINNOH, 6)) && MP_PartyCanUseFieldMove(MOVE_ROCK_CLIMB))
+    {
+        for (i = 0; i < PARTY_SIZE && slot == PARTY_SIZE; i++)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
+             && (MonKnowsMove(&gPlayerParty[i], MOVE_ROCK_CLIMB) || MP_HeldHmMove(&gPlayerParty[i]) == MOVE_ROCK_CLIMB))
+                slot = i;
+        if (slot == PARTY_SIZE)
+            slot = 0;   // (a friend's, lent: the first POKeMON climbs with it)
+        GetMonData(&gPlayerParty[slot], MON_DATA_NICKNAME, gStringVar1);
+        StringGet_Nickname(gStringVar1);
+    }
+    gSpecialVar_Result = slot;
+}
+
+static bool8 IsRockWall(s16 x, s16 y)
+{
+    u8 b = MapGridGetMetatileBehaviorAt(x, y);
+    return b == MB_UNUSED_4B || b == MB_UNUSED_4C;
+}
+
+static void Task_RockClimb(u8 taskId)
+{
+    struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s16 *data = gTasks[taskId].data;   // 0: direction, 1: steps taken, 2: the step past the wall taken
+    s16 x, y;
+    if (!ObjectEventClearHeldMovementIfFinished(player) && data[1] > 0)
+        return;
+    if (data[2])
+    {
+        DestroyTask(taskId);
+        ScriptContext_Enable();
+        return;
+    }
+    x = player->currentCoords.x, y = player->currentCoords.y;
+    MoveCoords(data[0], &x, &y);
+    if (!IsRockWall(x, y))
+        data[2] = 1;   // (off the wall: this is the last step)
+    else if (data[1] % 2 == 0)
+        PlaySE(SE_M_ROCK_THROW);
+    ObjectEventSetHeldMovement(player, GetWalkNormalMovementAction(data[0]));
+    data[1]++;
+    if (data[1] > 64)   // (never stuck on a wall that doesn't end)
+        data[2] = 1;
+}
+
+// (special, waitstate) climbs the wall in front of the player, the way they face
+void S3D_RockClimbStart(void)
+{
+    u8 taskId = CreateTask(Task_RockClimb, 80);
+    gTasks[taskId].data[0] = GetPlayerFacingDirection();
+    gTasks[taskId].data[1] = 0;
+    gTasks[taskId].data[2] = 0;
+}
+
+// A step onto Platinum's bike slopes (0xD9 its top, 0xDA its bottom: the pack keeps the numbers, the game's unused ones)
+// uphill: only on a bike (Platinum: walking up slides back down). Downhill and across are free.
+bool8 S3D_BikeSlopeBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
+{
+    u8 b = MapGridGetMetatileBehaviorAt(toX, toY);
+    float h, f;
+    if (b != MB_UNUSED_D9 && b != MB_UNUSED_DA)
+        return FALSE;
+    if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE))
+        return FALSE;
+    h = S3D_PlayerHeight();
+    f = S3D_TileFloor(toX - MAP_OFFSET, toY - MAP_OFFSET, isnan(h) ? 0.0f : h);
+    if (getenv("MOEMON_GYM_TRACE"))
+        printf("[gym] bike slope: avatar 0x%X, player at %.1f, slope at %.1f\n", gPlayerAvatar.flags, h, f);
+    if (isnan(h) || isnan(f))
+        return TRUE;
+    return f > h + 2.0f;
+}
+
+// ROCK CLIMB and DEFOG from the party menu (Platinum's FieldMoves_UseRockClimbFromMenu / UseDefogFromMenu): ROCK CLIMB
+// facing one of SINNOH's rock walls; DEFOG where a deep fog lies (the map's fog weather; it clears until the map changes)
+#include "field_weather.h"
+#include "constants/weather.h"
+extern const u8 EventScript_SinnohRockClimbFromMenu[];
+extern const u8 EventScript_SinnohDefog[];
+
+static void BufferMenuMon(void)
+{
+    gSpecialVar_0x8004 = GetCursorSelectionMonId();
+    GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_NICKNAME, gStringVar1);
+    StringGet_Nickname(gStringVar1);
+}
+
+static void FieldCallback_RockClimb(void)
+{
+    BufferMenuMon();
+    ScriptContext_SetupScript(EventScript_SinnohRockClimbFromMenu);
+}
+
+bool8 SetUpFieldMove_RockClimb(void)
+{
+    s16 x, y;
+    if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) || !FlagGet(MP_Region_BadgeFlag(REGION_SINNOH, 6)))
+        return FALSE;
+    GetXYCoordsOneStepInFrontOfPlayer(&x, &y);
+    if (!IsRockWall(x, y))
+        return FALSE;
+    gFieldCallback2 = FieldCallback_PrepareFadeInFromMenu;
+    gPostMenuFieldCallback = FieldCallback_RockClimb;
+    return TRUE;
+}
+
+static void FieldCallback_Defog(void)
+{
+    BufferMenuMon();
+    ScriptContext_SetupScript(EventScript_SinnohDefog);
+}
+
+bool8 SetUpFieldMove_Defog(void)
+{
+    u8 w = GetCurrentWeather();
+    if (w != WEATHER_FOG_HORIZONTAL && w != WEATHER_FOG_DIAGONAL)
+        return FALSE;
+    gFieldCallback2 = FieldCallback_PrepareFadeInFromMenu;
+    gPostMenuFieldCallback = FieldCallback_Defog;
+    return TRUE;
+}
+
+// (special) DEFOG blows the fog away: clear skies until the map changes
+void S3D_DefogClear(void)
+{
+    SetWeather(WEATHER_NONE);
 }

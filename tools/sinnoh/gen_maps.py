@@ -248,12 +248,15 @@ def people(p, root, have):
             continue
         obstacle = OBSTACLES.get(o['graphics_id'])
         if obstacle and gfx and inside(p, o['x'], o['z']):
-            # a CUT tree, a ROCK SMASH rock or a STRENGTH boulder: the game's own script; no flag, so it's back each
-            # time the map loads (as Platinum's and the game's own)
+            # a CUT tree, a ROCK SMASH rock or a STRENGTH boulder: the game's own script; a temporary flag (FLAG_TEMP_1
+            # on, one each: cleared each time the map loads), so it's back each time the map loads (as Platinum's and
+            # the game's own) but stays gone while the player walks about (without one it came back as soon as it
+            # scrolled out of view and in again)
+            temp = sum(1 for e in out if e['script'] in OBSTACLES.values()) + 1
             out.append({'graphics_id': gfx, 'x': o['x'] - p['x0'] * 32, 'y': o['z'] - p['z0'] * 32, 'elevation': 3,
                         'movement_type': 'MOVEMENT_TYPE_NONE', 'movement_range_x': 0, 'movement_range_y': 0,
                         'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
-                        'script': obstacle, 'flag': '0'})
+                        'script': obstacle, 'flag': '0x%X' % temp if temp <= 0x1F else '0'})
             continue
         legend = legends.scripts().get((p['name'], i + 1))
         if legend and (p['name'], i + 1) in legends.platinum_people() and label in have:

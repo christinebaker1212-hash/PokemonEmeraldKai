@@ -105,8 +105,6 @@ static u16 QzHasBadgeForFieldMove_(void)
     }
     if (!MP_Region_HasFieldMoveBadge(hm))
         return FALSE;
-    if (move == MOVE_WHIRLPOOL)   // (no HM for it yet: SURF does, until one is added; docs/REGIONS_TODO.md)
-        return MP_PartyCanUseFieldMove(MOVE_WHIRLPOOL) || MP_PartyCanUseFieldMove(MOVE_SURF);
     return MP_PartyCanUseFieldMove(move);
 }
 

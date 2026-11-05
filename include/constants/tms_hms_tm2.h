@@ -42,3 +42,8 @@
     F(SUBSTITUTE) \
     F(FLASH_CANNON) \
     F(TRICK_ROOM)
+// the other regions' own HMs (ITEM_HM_ROCK_CLIMB on): TM/HM index 100 on
+#define FOREACH_HM2(F) \
+    F(ROCK_CLIMB) \
+    F(DEFOG) \
+    F(WHIRLPOOL)

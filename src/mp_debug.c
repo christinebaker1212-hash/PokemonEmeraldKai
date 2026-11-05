@@ -1121,6 +1121,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] tile %d,%d = %d behavior 0x%X\n", x, y, MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET),
                MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET));
     }
+    else if (strcmp(cmd, "findmb") == 0)
+    {
+        // findmb BEHAVIOR - the first tiles of the current map with that behavior (map coords without the offset)
+        int b = (int)strtol(arg, NULL, 0), x, y, n = 0;
+        for (y = 0; y < gBackupMapLayout.height - 2 * MAP_OFFSET && n < 8; y++)
+            for (x = 0; x < gBackupMapLayout.width - 2 * MAP_OFFSET && n < 8; x++)
+                if (MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET) == b)
+                    printf("[test] findmb 0x%X at %d,%d\n", b, x, y), n++;
+        if (n == 0)
+            printf("[test] findmb 0x%X: none\n", b);
+    }
     else if (strcmp(cmd, "lights") == 0)
     {
         // lights - friends' lights in a dark cave, as last drawn (mp_world.c)

@@ -461,3 +461,39 @@
         .fieldUseFunc = ItemUseOutOfBattle_TMHM,
     },
 
+    [ITEM_HM_ROCK_CLIMB] =
+    {
+        .name = _("HM ROCK CLIMB"),
+        .itemId = ITEM_HM_ROCK_CLIMB,
+        .price = 0,
+        .description = sHmRockClimbDesc,
+        .importance = 1,
+        .pocket = POCKET_TM_HM,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_TMHM,
+    },
+
+    [ITEM_HM_DEFOG] =
+    {
+        .name = _("HM DEFOG"),
+        .itemId = ITEM_HM_DEFOG,
+        .price = 0,
+        .description = sHmDefogDesc,
+        .importance = 1,
+        .pocket = POCKET_TM_HM,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_TMHM,
+    },
+
+    [ITEM_HM_WHIRLPOOL] =
+    {
+        .name = _("HM WHIRLPOOL"),
+        .itemId = ITEM_HM_WHIRLPOOL,
+        .price = 0,
+        .description = sHmWhirlpoolDesc,
+        .importance = 1,
+        .pocket = POCKET_TM_HM,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_TMHM,
+    },
+

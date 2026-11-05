@@ -153,7 +153,7 @@ static void BuildBag(void)
         {
             u16 item = BagGetItemIdByPocketPosition(pockets[p] + 1, i);
             u16 qty = BagGetQuantityByPocketPosition(pockets[p] + 1, i);
-            if (item == ITEM_NONE || qty == 0 || (item >= ITEM_HM01 && item <= ITEM_HM08))
+            if (item == ITEM_NONE || qty == 0 || IS_ITEM_HM(item))
                 continue;
             sTrade.bag[sTrade.bagCount].item = item;
             sTrade.bag[sTrade.bagCount].qty = qty;

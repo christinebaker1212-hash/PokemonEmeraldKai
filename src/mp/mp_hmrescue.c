@@ -34,12 +34,13 @@
 #include "constants/opponents.h"
 #include "constants/songs.h"
 #include "constants/vars.h"
+#include "constants/qz_port.h"
 
 #define LOCALID_COURIER 0xDC
 
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 
-enum { OWED_STRENGTH, OWED_FLY, OWED_DIVE, OWED_WATERFALL, OWED_COUNT };
+enum { OWED_STRENGTH, OWED_FLY, OWED_DIVE, OWED_WATERFALL, OWED_WHIRLPOOL, OWED_COUNT };
 
 struct OwedHm
 {
@@ -65,6 +66,12 @@ static const struct OwedHm sOwed[OWED_COUNT] = {
                         "@, a moment of your time.\f"
                         "In all the commotion in SOOTOPOLIS,\nthis never reached you.\f"
                         "You'll need it on the way to the\nPOKeMON LEAGUE. Take it, please."},
+    // (JOHTO: LANCE's, from TEAM ROCKET's HIDEOUT; saves from before the HM existed got only his words)
+    [OWED_WHIRLPOOL] = {ITEM_HM_WHIRLPOOL, FLAG_RECEIVED_HM_WHIRLPOOL, MAP_GROUP(MAP_JOHTO_TEAM_ROCKET_BASE_B2F),
+                        MAP_NUM(MAP_JOHTO_TEAM_ROCKET_BASE_B2F), "HM WHIRLPOOL",
+                        "@! I've been looking for you.\f"
+                        "In TEAM ROCKET's HIDEOUT I meant to\ngive you this, but it slipped my mind.\f"
+                        "Teach it to a POKeMON to get across\nwild water."},
 };
 
 static EWRAM_DATA struct
@@ -108,6 +115,8 @@ static bool8 SceneOver(u8 which)
         return FlagGet(FLAG_HIDE_MOSSDEEP_CITY_STEVENS_HOUSE_STEVEN) && FlagGet(FLAG_BADGE07_GET);
     case OWED_WATERFALL:
         return FlagGet(FLAG_BADGE08_GET);   // past SOOTOPOLIS's gym: WALLACE is long gone
+    case OWED_WHIRLPOOL:
+        return FlagGet(FLAG_QZ_0x10C1);   // the HIDEOUT cleared: LANCE has left
     }
     return FALSE;
 }
@@ -125,6 +134,7 @@ static u16 CourierGfx(u8 which)
     case OWED_STRENGTH:  return OBJ_EVENT_GFX_BLACK_BELT;
     case OWED_FLY:       return gSaveBlock2Ptr->playerGender == MALE ? OBJ_EVENT_GFX_RIVAL_MAY_NORMAL : OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL;
     case OWED_DIVE:      return OBJ_EVENT_GFX_STEVEN;
+    case OWED_WHIRLPOOL: return OBJ_EVENT_GFX_QZ_16032;   // (LANCE)
     default:             return OBJ_EVENT_GFX_WALLACE;
     }
 }
@@ -293,9 +303,10 @@ void MP_HmRescue_Update(void)
     if (++sC.check < 30)
         return;
     sC.check = 0;
-    if (MP_Region_Current() != REGION_HOENN)
+    if (MP_Region_Current() != REGION_HOENN && MP_Region_Current() != REGION_JOHTO)
         return;
-    TunnelCatchUp();
+    if (MP_Region_Current() == REGION_HOENN)
+        TunnelCatchUp();
     if (++sC.slow < 4)
         return;   // (the couriers: every 2 seconds)
     sC.slow = 0;
@@ -303,8 +314,8 @@ void MP_HmRescue_Update(void)
     {
         if (gSaveBlock1Ptr->location.mapGroup == sOwed[i].giverMapGroup && gSaveBlock1Ptr->location.mapNum == sOwed[i].giverMapNum)
             continue;
-        if (!Owed(i))
-            continue;
+        if (!Owed(i) || (i == OWED_WHIRLPOOL) != (MP_Region_Current() == REGION_JOHTO))
+            continue;   // (each region's own givers come in their region)
         memset(&sC, 0, sizeof(sC));
         sC.which = i;
         LockPlayerFieldControls();

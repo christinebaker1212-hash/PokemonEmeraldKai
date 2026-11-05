@@ -1390,6 +1390,12 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
         if (!isnan(h) && (isnan(f) || h - f > 12))
             blocked = TRUE;
     }
+    if (!blocked && fromX == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x
+     && fromY == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y)
+    {
+        bool8 S3D_BikeSlopeBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY);
+        blocked = S3D_BikeSlopeBlocked(fromX, fromY, toX, toY);   // (Platinum's bike slopes: s3d_misc.c)
+    }
     if (getenv("MOEMON_GYM_TRACE"))
         printf("[gym] step %d,%d -> %d,%d: %s (player at %.0f)\n", fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET,
                toY - MAP_OFFSET, blocked ? "blocked" : "free", S3D_PlayerHeight());

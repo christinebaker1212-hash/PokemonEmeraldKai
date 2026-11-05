@@ -645,7 +645,7 @@ endif
 
 # Moemon Kai: SINNOH's scripts, Platinum's own converted when the game is built (tools/sinnoh/gen_scripts.py, from the
 # decomp tools/sinnoh/make_pack.sh fetched; stubs without it); never committed
-sinnoh/platinum_scripts.inc: $(wildcard data/maps/Sinnoh_*/scripts.inc) $(wildcard tools/sinnoh/*.py)
+sinnoh/platinum_scripts.inc: $(wildcard data/maps/Sinnoh_*/scripts.inc) $(wildcard data/scripts/sinnoh_*.inc) $(wildcard tools/sinnoh/*.py)
 	@mkdir -p sinnoh
 	python3 -I tools/sinnoh/gen_scripts.py --auto $@
 $(DATA_ASM_BUILDDIR)/event_scripts_sinnoh.o: sinnoh/platinum_scripts.inc

@@ -800,7 +800,13 @@
 #define LAST_APRICORN ITEM_PNK_APRICORN
 #define ITEM_POKEGEAR 693   // Moemon Kai: JOHTO's POKéGEAR (src/mp/mp_pokegear.c): on START there, a key item elsewhere
 
-#define ITEMS_COUNT 694
+// Moemon Kai: the other regions' own HMs, for parity with their games (tools/moemon_tms/gen_tm2.py: FOREACH_HM2, TM/HM
+// index 100 on, learnsets as gTm2Learnsets bits 42 on): SINNOH's ROCK CLIMB (Platinum's HM08) and DEFOG (HM05), JOHTO's
+// WHIRLPOOL (Crystal's HM06)
+#define ITEM_HM_ROCK_CLIMB 694
+#define ITEM_HM_DEFOG 695
+#define ITEM_HM_WHIRLPOOL 696
+#define ITEMS_COUNT 697
 // end of Gen 5-9 items
 #define FIRST_PLATINUM_KEY_ITEM ITEM_GALACTIC_KEY
 #define LAST_PLATINUM_ITEM ITEM_GOOEY_MULCH
@@ -852,11 +858,17 @@
 #define NUM_TECHNICAL_MACHINES 50
 #define NUM_HIDDEN_MACHINES     8
 #define NUM_TECHNICAL_MACHINES_2 42   // Moemon Kai: TM51-TM92
-#define NUM_TMHMS (NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2)
+#define NUM_HIDDEN_MACHINES_2    3   // Moemon Kai: ROCK CLIMB, DEFOG, WHIRLPOOL (ITEM_HM_ROCK_CLIMB on)
+#define NUM_TMHMS (NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2 + NUM_HIDDEN_MACHINES_2)
 // a TM / HM item <-> its index (TM01-TM50 0-49, HM01-HM08 50-57, TM51-TM92 58-99: the learnset bits and sTMHMMoves)
-#define IS_ITEM_TMHM(item) (((item) >= ITEM_TM01 && (item) <= ITEM_HM08) || ((item) >= ITEM_TM51 && (item) <= ITEM_TM92))
-#define TMHM_INDEX(item) ((item) >= ITEM_TM51 ? (item) - ITEM_TM51 + NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES : (item) - ITEM_TM01)
-#define TMHM_ITEM(index) ((index) >= NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES ? (index) - NUM_TECHNICAL_MACHINES - NUM_HIDDEN_MACHINES + ITEM_TM51 : (index) + ITEM_TM01)
+#define IS_ITEM_HM(item) (((item) >= ITEM_HM01 && (item) <= ITEM_HM08) || ((item) >= ITEM_HM_ROCK_CLIMB && (item) <= ITEM_HM_WHIRLPOOL))
+#define IS_ITEM_TMHM(item) (((item) >= ITEM_TM01 && (item) <= ITEM_HM08) || ((item) >= ITEM_TM51 && (item) <= ITEM_TM92) \
+                            || ((item) >= ITEM_HM_ROCK_CLIMB && (item) <= ITEM_HM_WHIRLPOOL))
+#define TMHM_INDEX(item) ((item) >= ITEM_HM_ROCK_CLIMB ? (item) - ITEM_HM_ROCK_CLIMB + NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2 \
+                         : (item) >= ITEM_TM51 ? (item) - ITEM_TM51 + NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES : (item) - ITEM_TM01)
+#define TMHM_ITEM(index) ((index) >= NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2 \
+                          ? (index) - NUM_TECHNICAL_MACHINES - NUM_HIDDEN_MACHINES - NUM_TECHNICAL_MACHINES_2 + ITEM_HM_ROCK_CLIMB \
+                          : (index) >= NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES ? (index) - NUM_TECHNICAL_MACHINES - NUM_HIDDEN_MACHINES + ITEM_TM51 : (index) + ITEM_TM01)
 
 #define MAX_BAG_ITEM_CAPACITY  99
 #define MAX_PC_ITEM_CAPACITY   999

@@ -41,4 +41,7 @@
     [ITEM_TM89] = {gItemIcon_TM, gItemIconPalette_BugTMHM}, \
     [ITEM_TM90] = {gItemIcon_TM, gItemIconPalette_NormalTMHM}, \
     [ITEM_TM91] = {gItemIcon_TM, gItemIconPalette_SteelTMHM}, \
-    [ITEM_TM92] = {gItemIcon_TM, gItemIconPalette_PsychicTMHM},
+    [ITEM_TM92] = {gItemIcon_TM, gItemIconPalette_PsychicTMHM}, \
+    [ITEM_HM_ROCK_CLIMB] = {gItemIcon_HM, gItemIconPalette_NormalTMHM}, \
+    [ITEM_HM_DEFOG] = {gItemIcon_HM, gItemIconPalette_FlyingTMHM}, \
+    [ITEM_HM_WHIRLPOOL] = {gItemIcon_HM, gItemIconPalette_WaterTMHM},

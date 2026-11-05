@@ -238,7 +238,7 @@ bool8 CheckBagHasSpace(u16 itemId, u16 count)
 bool8 MP_PlayerHasHm(u16 itemId)
 {
     u8 i;
-    if (itemId < ITEM_HM01 || itemId > ITEM_HM08)
+    if (!IS_ITEM_HM(itemId))
         return FALSE;
     if (CheckBagHasItem(itemId, 1) || CheckPCHasItem(itemId, 1))
         return TRUE;
@@ -641,6 +641,8 @@ u16 MP_ItemNumberOrder(u16 item)
         return ITEM_TM50 + 1 + item - ITEM_TM51;
     if (item >= ITEM_HM01 && item <= ITEM_HM08)
         return ITEM_TM50 + 1 + NUM_TECHNICAL_MACHINES_2 + item - ITEM_HM01;
+    if (item >= ITEM_HM_ROCK_CLIMB && item <= ITEM_HM_WHIRLPOOL)   // (after HM08)
+        return ITEM_TM50 + 1 + NUM_TECHNICAL_MACHINES_2 + NUM_HIDDEN_MACHINES + item - ITEM_HM_ROCK_CLIMB;
     return item;
 }
 

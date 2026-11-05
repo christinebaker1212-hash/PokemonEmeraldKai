@@ -700,7 +700,7 @@ s8 MP_Battle_PeerId(void);
 u8 MP_AllocCoopPalette(u16 tag, const u16 *colors);
 bool8 MP_IsCoopPaletteTag(u16 tag);
 // Held HMs (Moemon Kai): a Pokemon holding an HM can use its field move; HMs never leave the player
-#define MP_IS_ITEM_HM(item) ((item) >= ITEM_HM01 && (item) <= ITEM_HM08)
+#define MP_IS_ITEM_HM(item) IS_ITEM_HM(item)   // (the other regions' own HMs too: ITEM_HM_ROCK_CLIMB on)
 u16 MP_HeldHmMove(struct Pokemon *mon);          // the field move a held HM gives, MOVE_NONE if none
 bool8 MP_ReturnHeldHm(struct Pokemon *mon);      // a held HM back to the BAG (the Pokemon leaves us)
 bool8 MP_StripHeldHm(struct Pokemon *mon);       // a held HM removed (a copy that leaves us / arrives)

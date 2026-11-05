@@ -61,6 +61,7 @@
 #define FLAG_UNUSED_0x028    0x28 // Unused Flag
 #define FLAG_FRONTIER_CARDS_LUCY     FLAG_UNUSED_0x028 // Moemon Kai: set while this Frontier Brain is not out playing cards (tcg_field.c Tcg_FrontierSetup)
 #define FLAG_UNUSED_0x029    0x29 // Unused Flag
+#define FLAG_RECEIVED_HM_WHIRLPOOL FLAG_UNUSED_0x029 // Moemon Kai: JOHTO's HM WHIRLPOOL from LANCE (mp_hmrescue.c)
 #define FLAG_UNUSED_0x02A    0x2A // Unused Flag
 #define FLAG_UNUSED_0x02B    0x2B // Unused Flag
 #define FLAG_UNUSED_0x02C    0x2C // Unused Flag

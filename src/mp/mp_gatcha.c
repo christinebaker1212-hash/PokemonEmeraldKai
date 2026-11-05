@@ -910,7 +910,7 @@ void MP_GatchaTicketForItem(void)
     extern u16 gMpLastScriptItem;
     u16 item = gMpLastScriptItem;   // the giveitem's additem
     char key[24];
-    bool8 important = GetItemPocket(item) == POCKET_KEY_ITEMS || (item >= ITEM_HM01 && item <= ITEM_HM08);
+    bool8 important = GetItemPocket(item) == POCKET_KEY_ITEMS || IS_ITEM_HM(item);
     u8 i;
     gSpecialVar_Result = FALSE;
     for (i = 0; i < ARRAY_COUNT(sStoryItems) && !important; i++)

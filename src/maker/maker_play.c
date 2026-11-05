@@ -227,6 +227,8 @@ bool8 Maker_PlayNewGame(void)
         GiveMon(2, SPECIES_SWAMPERT, 75);
         for (f = ITEM_HM01; f <= ITEM_HM08; f++)
             AddBagItem(f, 1);
+        for (f = ITEM_HM_ROCK_CLIMB; f <= ITEM_HM_WHIRLPOOL; f++)
+            AddBagItem(f, 1);
         AddBagItem(ITEM_FULL_RESTORE, 50);
         AddBagItem(ITEM_MAX_REPEL, 20);
         break;

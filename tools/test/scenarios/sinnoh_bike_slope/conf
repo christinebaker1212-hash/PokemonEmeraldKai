@@ -1,0 +1,7 @@
+# Platinum's bike slopes (behaviors 0xD9 / 0xDA, src/sinnoh/s3d_misc.c S3D_BikeSlopeBlocked): ROUTE 207's slope at 18,14-15
+# stops a walker going up at 18,16; on a bike the player rides up it, on north into ROUTE 206.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=66:30"
+EXPECT_A=("where map 40.27 xy 18,16" "where map 40.26")
+UNEXPECT_A=("[crash]" "TIMEOUT")

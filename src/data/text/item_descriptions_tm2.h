@@ -125,3 +125,12 @@ static const u8 sTM91Desc[] = _(
 static const u8 sTM92Desc[] = _(
     "A strange room where slower POKéMON move first, for five turns.");
 
+static const u8 sHmRockClimbDesc[] = _(
+    "A charging attack that may confuse the target. Out of battle, it climbs rocky walls.");
+
+static const u8 sHmDefogDesc[] = _(
+    "A wind that blows away the foe's barriers and lowers its evasion. Out of battle, it clears deep fog.");
+
+static const u8 sHmWhirlpoolDesc[] = _(
+    "Traps the target in a raging whirlpool for several turns. Out of battle, it crosses whirlpools.");
+

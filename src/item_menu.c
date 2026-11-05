@@ -1102,7 +1102,7 @@ static void BagMenu_ItemPrintCallback(u8 windowId, u32 itemIndex, u8 y)
         itemQuantity = ViewQuantity(itemIndex);
 
         // Draw HM icon
-        if (itemId >= ITEM_HM01 && itemId <= ITEM_HM08)
+        if (IS_ITEM_HM(itemId))
             BlitBitmapRectToWindow(windowId, gBagMenuHMIcon_Gfx, 0, 1, 16, 16, 0, y, 16, 13);   // (inside the row's frame)
 
         if (GetItemPocket(itemId) == POCKET_BERRIES)
