@@ -4447,6 +4447,25 @@ follow_behind, follow_ground.
   (item.c MP_ItemNumberOrder, also mp_bag.c's tie-break) and holds 128 kinds (MP_BAG_TMHM_COUNT; the slots past the
   save block's 64 are in "<save>.bag"). MP_Gen_OfItem: 4. Test tm_new.
 
+## The audit's batch H (1.107.0)
+- Case 46: KANTO's 19 POKéMON CENTER 2Fs have the game's own attendants (Common_EventScript_UnionRoomAttendant etc.),
+  Quetzal's MPLAYER talk is gone. 66: ROUTE 4's door into Quetzal's empty cave is FireRed's cliff again (the cave map stays,
+  unreachable). 89: ROUTE 21's WADE fights FireRed's four Lv 27 MAGIKARP at every GENERATION (mp_region.c sFireRedTeams,
+  ahead of the generation tables: case 57 can add every KANTO trainer there) and says FireRed's lines; test kanto_wade
+  (`mp foeparty`). 115: INDIGO PLATEAU without its never-shown people, the ABRA teleport man gone after the HALL OF FAME
+  (FLAG_QZ_0x11B1), statues readable only in the RUINS as in Crystal, no ICE PATH warning sign. 117: the 7th badge's
+  RADIO TOWER news is PROF. ELM's Crystal call (ring, ElmPhoneRadioTowerRocketTakeoverText) instead of a public radio
+  alert. 122: VERMILION's construction man and MACHOP on FireRed's dirt lot (171 tiles of Quetzal's market back to
+  FireRed's, the MART's door at 29,17 again).
+- Cases 124 and 126, on Kai's TRAINER CARD (mp_tcard.c, mp_cardscreen.c): CELADON GAME CORNER's POKéMON printer (¥50,
+  NORMAL / BLACK / PINK / SEPIA: MP_TCard_PrintPhoto puts the party on the card's TEAM page, MpCardStyle.tint tints the
+  icons as trainer_card.c's LoadMonIconGfx) and FOUR ISLAND's STICKER MAN (MP_TCard_StickerBragFlags /
+  StickerManMet / StickerBrag: FireRed's levels for HALL OF FAME, EGGS hatched and link VICTORIES, the same story
+  again gets "Hmm..."). The stickers are FireRed's art (graphics/trainer_card/frlg/stickers.png, mp_cardstickers.c) at
+  the end of the TEAM page's row; MpCardView.stickers sits in what was padding (the album's records keep their size),
+  "<save>.card" format 4 keeps them, friends get them as 2 bytes after the signature (older games ignore them). Test
+  kanto_card_photo (`mp tcard info` prints the tint and stickers).
+
 ## TM93-TM139 (1.106.0: RED / BLUE's and Crystal's TMs)
 - The user's rule: a TM number keeps its Emerald / Platinum move; a RED / BLUE or Crystal TM with another move on the
   same number gets a new slot after the last TM; a move that is a TM or HM here already (on any number: SWORDS DANCE,

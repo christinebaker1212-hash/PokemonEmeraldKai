@@ -18,6 +18,8 @@
 #include "data.h"
 #include "pokemon.h"
 #include "pokemon_icon.h"
+#include "palette.h"
+#include "trainer_card.h"   // (MON_ICON_TINT_*: the GAME CORNER photo)
 #include "graphics.h"
 #include "constants/songs.h"
 #include "mp.h"
@@ -109,6 +111,8 @@ static struct
     SDL_Texture *canvas, *card, *text, *art, *frame, *holo, *streak, *star, *pic, *mon, *sigTex;
     SDL_Texture *icon[PARTY_SIZE];
     u16 iconSpecies[PARTY_SIZE];
+    u8 iconTint[PARTY_SIZE];
+    SDL_Texture *sticker[TCARD_STICKERS][4];
     int artDesign, artHue, frameDesign, frameStyle;
     u32 monKey;
     u8 sigShown[TCARD_SIG_BYTES];
@@ -437,22 +441,30 @@ static u32 Rgb555(u16 c)
     return 0xFF000000 | ((c & 31) * 255 / 31) << 16 | (((c >> 5) & 31) * 255 / 31) << 8 | (((c >> 10) & 31) * 255 / 31);
 }
 
-// a POKéMON's menu icon (its first frame)
-static SDL_Texture *IconTexture(SDL_Renderer *r, u8 slot, u16 species)
+// a POKéMON's menu icon (its first frame), in the card's print (the GAME CORNER photo: trainer_card.c LoadMonIconGfx)
+static SDL_Texture *IconTexture(SDL_Renderer *r, u8 slot, u16 species, u8 tint)
 {
     static u32 px[32 * 32];
+    u16 pal[16];
     const u8 *tiles;
-    const u16 *pal;
+    const u16 *src;
     int t, i;
-    if (C.icon[slot] && C.iconSpecies[slot] == species)
+    if (C.icon[slot] && C.iconSpecies[slot] == species && C.iconTint[slot] == tint)
         return C.icon[slot];
     if (C.icon[slot])
         SDL_DestroyTexture(C.icon[slot]);
     C.icon[slot] = NULL;
     tiles = GetMonIconTiles(species, 0);
-    pal = gMonIconPalettes[GetMonIconPaletteIndexFromSpecies(species)];
-    if (tiles == NULL || pal == NULL)
+    src = gMonIconPalettes[GetMonIconPaletteIndexFromSpecies(species)];
+    if (tiles == NULL || src == NULL)
         return NULL;
+    memcpy(pal, src, sizeof(pal));
+    switch (tint)
+    {
+    case MON_ICON_TINT_BLACK: TintPalette_CustomTone(pal, 16, 0, 0, 0); break;
+    case MON_ICON_TINT_PINK: TintPalette_CustomTone(pal, 16, 500, 330, 310); break;
+    case MON_ICON_TINT_SEPIA: TintPalette_SepiaTone(pal, 16); break;
+    }
     for (t = 0; t < 16; t++)
         for (i = 0; i < 64; i++)
         {
@@ -466,7 +478,39 @@ static SDL_Texture *IconTexture(SDL_Renderer *r, u8 slot, u16 species)
         SDL_SetTextureBlendMode(C.icon[slot], SDL_BLENDMODE_BLEND);
     }
     C.iconSpecies[slot] = species;
+    C.iconTint[slot] = tint;
     return C.icon[slot];
+}
+
+// FireRed's card stickers (graphics/trainer_card/frlg/stickers.png: HALL OF FAME, EGGS, VICTORIES, 16x16 each, in the
+// palette of their level 1-4)
+extern const u32 gMpCardStickerTiles[];   // (mp_cardstickers.c: the asset macros need a file without SDL's headers)
+extern const u16 gMpCardStickerPal1[], gMpCardStickerPal2[], gMpCardStickerPal3[], gMpCardStickerPal4[];
+static SDL_Texture *StickerTexture(SDL_Renderer *r, u8 kind, u8 level)
+{
+    static const u16 *const sPals[] = {gMpCardStickerPal1, gMpCardStickerPal2, gMpCardStickerPal3, gMpCardStickerPal4};
+    u32 px[16 * 16];
+    const u8 *tiles = (const u8 *)gMpCardStickerTiles;
+    int y, x;
+    if (kind >= TCARD_STICKERS || level < 1 || level > 4)
+        return NULL;
+    if (C.sticker[kind][level - 1])
+        return C.sticker[kind][level - 1];
+    for (y = 0; y < 16; y++)
+        for (x = 0; x < 16; x++)
+        {
+            // (the sheet is 2 tiles wide: a sticker is rows 2 * kind and 2 * kind + 1 of 8x8 tiles)
+            int tile = (kind * 2 + y / 8) * 2 + x / 8;
+            u8 b = tiles[tile * 32 + (y % 8) * 4 + (x % 8) / 2], v = (x & 1) ? b >> 4 : b & 15;
+            px[y * 16 + x] = v ? Rgb555(sPals[level - 1][v]) : 0;
+        }
+    C.sticker[kind][level - 1] = SDL_CreateTexture(r, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, 16, 16);
+    if (C.sticker[kind][level - 1])
+    {
+        SDL_UpdateTexture(C.sticker[kind][level - 1], NULL, px, 16 * 4);
+        SDL_SetTextureBlendMode(C.sticker[kind][level - 1], SDL_BLENDMODE_BLEND);
+    }
+    return C.sticker[kind][level - 1];
 }
 
 // the showcase POKéMON's battle picture (its own palette: shiny, the Stadium hue of a nickname)
@@ -965,7 +1009,7 @@ static void DrawTeam(SDL_Renderer *r)
     for (i = 0; i < v->teamCount && i < PARTY_SIZE; i++)
     {
         int x = GRID_L + i * step + (step - 32) / 2;
-        Picture(IconTexture(r, i, v->team[i]), x, GRID_TOP + 1, 32, 32);
+        Picture(IconTexture(r, i, v->team[i], v->style.tint), x, GRID_TOP + 1, 32, 32);
         if ((v->teamShiny >> i) & 1)
             Star(x + 25, GRID_TOP + 3, 7, TRUE);
     }
@@ -992,8 +1036,15 @@ static void DrawTeam(SDL_Renderer *r)
     EmblemRow();
     {
         char buf[32];
+        u8 k, n = 0;
+        for (k = 0; k < TCARD_STICKERS; k++)
+            n += TCARD_STICKER(v->stickers, k) != 0;
         snprintf(buf, sizeof(buf), "%u", v->teamCount);
-        Row(GRID_ROW_X + 5, GRID_ROW_Y + 4, GRID_R - GRID_ROW_X - 10, "POKéMON ON THE CARD", buf, TF_SMALL);
+        Row(GRID_ROW_X + 5, GRID_ROW_Y + 4, GRID_R - GRID_ROW_X - 10 - n * 18, "POKéMON ON THE CARD", buf, TF_SMALL);
+        // FOUR ISLAND's stickers at the row's end
+        for (k = 0, n = 0; k < TCARD_STICKERS; k++)
+            if (TCARD_STICKER(v->stickers, k))
+                Picture(StickerTexture(r, k, TCARD_STICKER(v->stickers, k)), GRID_R - 5 - 16 - 18 * n++, GRID_ROW_Y + 2, 16, 16);
     }
 }
 

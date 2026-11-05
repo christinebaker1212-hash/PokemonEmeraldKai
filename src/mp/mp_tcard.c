@@ -26,7 +26,8 @@
 extern char gPlatformSavePath[512];
 
 #define TCARD_MAGIC 0x44524354   // "TCRD"
-#define TCARD_VERSION 3   // 2: friends (what was done together, the album); 3: the card's look, showcase, signature, time per region
+#define TCARD_VERSION 4   // 2: friends (what was done together, the album); 3: the card's look, showcase, signature, time per region;
+                          // 4: FOUR ISLAND's stickers
 #define NUM_TCARD_BADGES (REGION_COUNT * TCARD_BADGES_PER_REGION)
 // a badge counts the co-op battle that ended this many frames before it (time for the leader's words and the badge)
 #define PARTNER_FRAMES (60 * 60 * 10)
@@ -55,6 +56,7 @@ static struct
     bool8 hasSig;
     u8 sig[TCARD_SIG_BYTES];
     u32 regionSeconds[REGION_COUNT];
+    u16 stickers;                       // FOUR ISLAND's STICKER MAN (TCARD_STICKER)
     // not kept
     u16 secondFrames, saveSeconds;
     u8 metChecked;
@@ -151,6 +153,7 @@ static void Save(void)
     Put(f, &sT.hasSig, 1);
     Put(f, sT.sig, sizeof(sT.sig));
     Put(f, sT.regionSeconds, sizeof(sT.regionSeconds));
+    Put(f, &sT.stickers, 2);
     fclose(f);
 }
 
@@ -207,6 +210,8 @@ static bool8 Read(FILE *f)
         if (!Get(f, &sT.style, sizeof(sT.style)) || !Get(f, &sT.showcase, sizeof(sT.showcase)) || !Get(f, &sT.hasSig, 1)
          || !Get(f, sT.sig, sizeof(sT.sig)) || !Get(f, sT.regionSeconds, sizeof(sT.regionSeconds)))
             DefaultStyle();
+        if (head[1] >= 4 && !Get(f, &sT.stickers, 2))
+            sT.stickers = 0;
     }
     else
         DefaultStyle();   // (an older card file: friends' records were in the old form, kept from now on)
@@ -637,6 +642,7 @@ void MP_CardView_FillOwn(struct MpCardView *v)
     }
     memcpy(v->regionSeconds, sT.regionSeconds, sizeof(v->regionSeconds));
     v->hasSig = sT.hasSig;
+    v->stickers = sT.stickers & 0x1FF;
     memcpy(v->sig, sT.sig, sizeof(v->sig));
     {
         static const u8 sStat[TCARD_STAT_COUNT] = {
@@ -916,6 +922,7 @@ u16 MP_TCard_PackAddon(u8 *out)
         memcpy(p, v->sig, sizeof(v->sig));
         p += sizeof(v->sig);
     }
+    *p++ = v->stickers, *p++ = v->stickers >> 8;   // (1.107.0: older games stop at the signature)
     return p - out;
 }
 
@@ -961,9 +968,13 @@ bool8 MP_TCard_UnpackAddon(const u8 *in, u16 len, struct MpCardView *v)
         v->profile[i][sizeof(v->profile[i]) - 1] = 0;
     v->hasSig = *p++ != 0;
     if (v->hasSig && p + sizeof(v->sig) <= in + len)
+    {
         memcpy(v->sig, p, sizeof(v->sig));
+        p += sizeof(v->sig);
+    }
     else
         v->hasSig = FALSE;
+    v->stickers = p + 2 <= in + len ? (p[0] | (p[1] << 8)) & 0x1FF : 0;
     if (v->showcase.species >= NUM_SPECIES)
         v->showcase.species = SPECIES_NONE;
     v->showcase.nickname[POKEMON_NAME_LENGTH] = EOS;
@@ -971,4 +982,74 @@ bool8 MP_TCard_UnpackAddon(const u8 *in, u16 len, struct MpCardView *v)
         if (v->polish[i] > TCARD_POLISH_MAX)
             v->polish[i] = TCARD_POLISH_MAX;
     return TRUE;
+}
+
+// ------------------------------------------------------------------ FireRed's photo printer and STICKER MAN (specials)
+// pokefirered data/scripts/trainer_card.inc: the CELADON GAME CORNER's POKéMON printer puts the party's icons on the
+// card in one of four prints, and FOUR ISLAND's STICKER MAN puts a sticker on it for a HALL OF FAME, EGGS hatched or
+// link VICTORIES story, bigger as the numbers grow (docs/REGIONS_AUDIT.md 124, 126)
+u16 MP_TCard_PrintPhoto(void)
+{
+    u8 slots[PARTY_SIZE], i;
+    for (i = 0; i < PARTY_SIZE; i++)
+        slots[i] = i;
+    Check();
+    sT.style.tint = gSpecialVar_0x8004 < 4 ? gSpecialVar_0x8004 : 0;
+    MP_TCard_SetTeamFromParty(slots, PARTY_SIZE);   // (saves)
+    return 0;
+}
+
+static u32 BragCount(u8 kind)
+{
+    static const u8 sStats[TCARD_STICKERS] = {GAME_STAT_ENTERED_HOF, GAME_STAT_HATCHED_EGGS, GAME_STAT_LINK_BATTLE_WINS};
+    return GetGameStat(sStats[kind]);
+}
+
+u16 MP_TCard_StickerBragFlags(void)
+{
+    u16 flags = 0;
+    u8 k;
+    for (k = 0; k < TCARD_STICKERS; k++)
+    {
+        u32 n = BragCount(k);
+        (&gSpecialVar_0x8004)[k] = n > 0xFFFF ? 0xFFFF : n;
+        if (n)
+            flags |= 1 << k;
+    }
+    return flags;
+}
+
+u16 MP_TCard_StickerBrag(void)
+{
+    // FireRed's levels: HALL OF FAME 1-39 / -99 / -199 / 200+, EGGS 1-99 / -199 / -299 / 300+, VICTORIES 1-19 / -49 /
+    // -99 / 100+
+    static const u16 sTops[TCARD_STICKERS][3] = {{39, 99, 199}, {99, 199, 299}, {19, 49, 99}};
+    u8 kind = gSpecialVar_0x8009 < TCARD_STICKERS ? gSpecialVar_0x8009 : 0, level = 4, k;
+    u32 n = BragCount(kind);
+    Check();
+    for (k = 0; k < 3; k++)
+        if (n <= sTops[kind][k])
+        {
+            level = k + 1;
+            break;
+        }
+    if (TCARD_STICKER(sT.stickers, kind) == level)
+        return level == 4 ? 5 : 0;
+    sT.stickers = (sT.stickers & ~(7 << (kind * 3))) | (level << (kind * 3));
+    Save();
+    return level;
+}
+
+// FireRed's FLAG_MET_STICKER_MAN, kept on the card (bit 15 of the stickers; friends' cards never carry it)
+u16 MP_TCard_StickerManMet(void)
+{
+    bool8 met;
+    Check();
+    met = (sT.stickers >> 15) & 1;
+    if (!met)
+    {
+        sT.stickers |= 1 << 15;
+        Save();
+    }
+    return met;
 }

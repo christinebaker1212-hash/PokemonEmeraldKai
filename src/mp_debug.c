@@ -821,6 +821,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 }
                 printf("\n");
             }
+            {
+                struct MpCardView *v = malloc(sizeof(*v));
+                if (v)
+                {
+                    MP_CardView_FillOwn(v);
+                    printf("[test] tcard photo: tint %u team %u stickers %u %u %u\n", v->style.tint, v->teamCount,
+                           TCARD_STICKER(v->stickers, 0), TCARD_STICKER(v->stickers, 1), TCARD_STICKER(v->stickers, 2));
+                    free(v);
+                }
+            }
         }
     }
     else if (strcmp(cmd, "coopegg") == 0)

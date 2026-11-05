@@ -357,8 +357,66 @@ Kanto_CeladonCity_GameCorner_EventScript_841CE70::
 
 @ Kanto_CeladonCity_GameCorner sign / bg event at 17,13
 Kanto_CeladonCity_GameCorner_EventScript_8462B2D::
-	msgbox Kanto_CeladonCity_GameCorner_Text_8462156, MSGBOX_SIGN
+	@ Moemon Kai: FireRed's POKéMON printer (pokefirered data/scripts/trainer_card.inc; docs/REGIONS_AUDIT.md 124): the
+	@ party's icons on the TRAINER CARD's TEAM page in the print chosen (mp_tcard.c MP_TCard_PrintPhoto)
+	lockall
+	showmoneybox 0, 0, 0
+	msgbox Kanto_CeladonCity_GameCorner_Text_TryPokemonPrinter, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_CeladonCity_GameCorner_EventScript_DeclinePhoto
+	checkmoney 50, 0
+	goto_if_eq VAR_RESULT, FALSE, Kanto_CeladonCity_GameCorner_EventScript_NotEnoughMoneyForPhoto
+	playse SE_SHOP
+	removemoney 50, 0
+	updatemoneybox 0
+	waitse
+	message Kanto_CeladonCity_GameCorner_Text_ChoosePrintType
+	waitmessage
+	multichoice 21, 0, MULTI_TRAINER_CARD_ICON_TINT, TRUE
+	copyvar VAR_0x8004, VAR_RESULT
+	message Kanto_CeladonCity_GameCorner_Text_BigSmileForPhoto
+	waitmessage
+	playse SE_CLICK
+	fadescreenspeed FADE_TO_WHITE, 0
+	fadescreenspeed FADE_FROM_WHITE, 0
+	delay 30
+	special MP_TCard_PrintPhoto
+	msgbox Kanto_CeladonCity_GameCorner_Text_PrintIsReadyCheckTrainerCard
+	hidemoneybox
+	releaseall
 	end
+
+Kanto_CeladonCity_GameCorner_EventScript_DeclinePhoto::
+	hidemoneybox
+	releaseall
+	end
+
+Kanto_CeladonCity_GameCorner_EventScript_NotEnoughMoneyForPhoto::
+	msgbox Kanto_CeladonCity_GameCorner_Text_DontHaveEnoughMoney
+	hidemoneybox
+	releaseall
+	end
+
+Kanto_CeladonCity_GameCorner_Text_TryPokemonPrinter::
+	.string "It’s a MOéMON PRINTER!\p"
+	.string "It can put a print of your MOéMON\n"
+	.string "on the back of your TRAINER CARD.\p"
+	.string "It costs only ¥50.\n"
+	.string "Would you like to try it?$"
+
+Kanto_CeladonCity_GameCorner_Text_DontHaveEnoughMoney::
+	.string "You don’t have enough money.$"
+
+Kanto_CeladonCity_GameCorner_Text_ChoosePrintType::
+	.string "Please choose the print type.$"
+
+Kanto_CeladonCity_GameCorner_Text_BigSmileForPhoto::
+	.string "A big smile for the photo, please!\n"
+	.string "Three… Two… One…\p"
+	.string "Flash!$"
+
+Kanto_CeladonCity_GameCorner_Text_PrintIsReadyCheckTrainerCard::
+	.string "Your MOéMON print is ready!\n"
+	.string "Check your TRAINER CARD.$"
 
 Kanto_CeladonCity_GameCorner_Movement_841CE4E:
 	walk_down
@@ -509,6 +567,3 @@ Kanto_CeladonCity_GameCorner_Text_8447140::
 	.string "Someone’s keys!\n"
 	.string "They’ll be back.$"
 
-Kanto_CeladonCity_GameCorner_Text_8462156::
-	.string "The photo booth is\n"
-	.string "out of service.$"

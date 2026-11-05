@@ -718,3 +718,7 @@ gSpecials::
 	def_special QzRuinsWallsOpen
 	def_special QzAllUnownCaught
 	def_special QzShowUnownWord, waitstate=1
+	def_special MP_TCard_PrintPhoto
+	def_special MP_TCard_StickerBragFlags
+	def_special MP_TCard_StickerManMet
+	def_special MP_TCard_StickerBrag

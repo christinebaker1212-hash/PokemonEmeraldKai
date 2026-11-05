@@ -1,0 +1,8 @@
+# FireRed's CELADON GAME CORNER printer (¥50, the party on the TRAINER CARD in the print chosen: PINK here) and FOUR
+# ISLAND's STICKER MAN (a HALL OF FAME sticker for 45 entries, level 2; the same story again gets no new one)
+# (docs/REGIONS_AUDIT.md 124, 126; mp_tcard.c)
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_MONEY=1000"
+EXPECT_A=("[test] tcard photo: tint 2 team 2 stickers 0 0 0" "[test] tcard photo: tint 2 team 2 stickers 2 0 0")
+UNEXPECT_A=("[crash]")

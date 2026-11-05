@@ -793,6 +793,24 @@ static const u8 sMomBankChange[] = _("CHANGE");
 static const u8 sMomBankCancel[] = _("CANCEL");
 static const struct MenuAction MultichoiceList_MomBank[] = {{sMomBankGet}, {sMomBankSave}, {sMomBankChange}, {sMomBankCancel}};
 
+// Moemon Kai: FireRed's GAME CORNER photo printer and FOUR ISLAND STICKER MAN (pokefirered src/data/script_menu.h)
+static const u8 sTintNormal[] = _("NORMAL");
+static const u8 sTintBlack[] = _("BLACK");
+static const u8 sTintPink[] = _("PINK");
+static const u8 sTintSepia[] = _("SEPIA");
+static const u8 sBragHof[] = _("HALL OF FAME");
+static const u8 sBragEggs[] = _("EGGS");
+static const u8 sBragVictories[] = _("VICTORIES");
+static const u8 sBragQuit[] = _("QUIT");
+static const struct MenuAction MultichoiceList_TrainerCardIconTint[] = {{sTintNormal}, {sTintBlack}, {sTintPink}, {sTintSepia}};
+static const struct MenuAction MultichoiceList_HofQuit[] = {{sBragHof}, {sBragQuit}};
+static const struct MenuAction MultichoiceList_EggsQuit[] = {{sBragEggs}, {sBragQuit}};
+static const struct MenuAction MultichoiceList_VictoriesQuit[] = {{sBragVictories}, {sBragQuit}};
+static const struct MenuAction MultichoiceList_HofEggsQuit[] = {{sBragHof}, {sBragEggs}, {sBragQuit}};
+static const struct MenuAction MultichoiceList_HofVictoriesQuit[] = {{sBragHof}, {sBragVictories}, {sBragQuit}};
+static const struct MenuAction MultichoiceList_EggsVictoriesQuit[] = {{sBragEggs}, {sBragVictories}, {sBragQuit}};
+static const struct MenuAction MultichoiceList_HofEggsVictoriesQuit[] = {{sBragHof}, {sBragEggs}, {sBragVictories}, {sBragQuit}};
+
 static const struct MenuAction MultichoiceList_ArcadeCabinet[] =
 {
     {gText_MpFightWait2P},
@@ -964,6 +982,14 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_REGIONS_FROM_KANTO]         = MULTICHOICE(MultichoiceList_RegionsFromKanto),
     [MULTI_REGIONS_FROM_SINNOH]        = MULTICHOICE(MultichoiceList_RegionsFromSinnoh),
     [MULTI_MOM_BANK]                   = MULTICHOICE(MultichoiceList_MomBank),
+    [MULTI_TRAINER_CARD_ICON_TINT]     = MULTICHOICE(MultichoiceList_TrainerCardIconTint),
+    [MULTI_HOF_QUIT]                   = MULTICHOICE(MultichoiceList_HofQuit),
+    [MULTI_EGGS_QUIT]                  = MULTICHOICE(MultichoiceList_EggsQuit),
+    [MULTI_VICTORIES_QUIT]             = MULTICHOICE(MultichoiceList_VictoriesQuit),
+    [MULTI_HOF_EGGS_QUIT]              = MULTICHOICE(MultichoiceList_HofEggsQuit),
+    [MULTI_HOF_VICTORIES_QUIT]         = MULTICHOICE(MultichoiceList_HofVictoriesQuit),
+    [MULTI_EGGS_VICTORIES_QUIT]        = MULTICHOICE(MultichoiceList_EggsVictoriesQuit),
+    [MULTI_HOF_EGGS_VICTORIES_QUIT]    = MULTICHOICE(MultichoiceList_HofEggsVictoriesQuit),
 };
 
 static const u8 sText_QzStd_1E[] = _("MEDICINE");

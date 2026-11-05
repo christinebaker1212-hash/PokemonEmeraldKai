@@ -1,0 +1,50 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp warp 38,49,16,13
+wait 150
+mp face right
+press A 2
+pressuntil A yesno 900
+wait 20
+press A 2
+wait 120
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+shot print_type
+press A 2
+wait 200
+shot printed
+mash B 6 30
+mp tcard info
+mp gamestat 10 45
+mp gamestat 13 3
+mp warp 39,16,4,5
+wait 150
+mp face up
+press A 2
+wait 200
+shot sticker_man
+pressuntil A multichoice 900
+wait 20
+shot brag_menu
+press A 2
+wait 300
+shot sticker
+mash B 6 30
+press A 2
+pressuntil A multichoice 900
+wait 20
+press A 2
+wait 200
+shot again
+mash B 6 30
+mp tcard info
+mp card
+wait 40
+mp cardscreen 0 3
+wait 6
+rendershot team_page
+quit

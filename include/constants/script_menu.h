@@ -133,6 +133,14 @@
 #define MULTI_REGIONS_FROM_KANTO           227
 #define MULTI_REGIONS_FROM_SINNOH          228
 #define MULTI_MOM_BANK                     229   // Moemon Kai: Crystal's BANK OF MOM (mp_mombank.c)
+#define MULTI_TRAINER_CARD_ICON_TINT       230   // Moemon Kai: FireRed's GAME CORNER photo printer (NORMAL / BLACK / PINK / SEPIA)
+#define MULTI_HOF_QUIT                     231   // Moemon Kai: FireRed's FOUR ISLAND STICKER MAN (what to brag about)
+#define MULTI_EGGS_QUIT                    232
+#define MULTI_VICTORIES_QUIT               233
+#define MULTI_HOF_EGGS_QUIT                234
+#define MULTI_HOF_VICTORIES_QUIT           235
+#define MULTI_EGGS_VICTORIES_QUIT          236
+#define MULTI_HOF_EGGS_VICTORIES_QUIT      237
 
 // Lilycove SS Tidal Multichoice Selections
 #define SSTIDAL_SELECTION_SLATEPORT        0

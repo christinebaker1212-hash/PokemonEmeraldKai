@@ -82,7 +82,7 @@ struct MpCardStyle
 {
     u8 design, accent, frame, panel;
     u16 hue;                                    // 0-359 (recolorable designs)
-    u8 holo, pad;
+    u8 holo, tint;                              // tint: the GAME CORNER photo's print (MON_ICON_TINT_*, trainer_card.h)
 };
 
 // The POKéMON shown big on the card
@@ -109,6 +109,8 @@ enum {
 // A card as the TRAINER CARD and the BADGE CASE show it: the player's own (live records) or a friend's (from their
 // card and its co-op add-on, mp_linkx.c)
 #define TCARD_TITLE_LEN 24
+#define TCARD_STICKERS 3
+#define TCARD_STICKER(bits, kind) (((bits) >> ((kind) * 3)) & 7)
 struct MpCardView
 {
     bool8 own;
@@ -135,6 +137,8 @@ struct MpCardView
     bool8 hasSig;
     u8 sig[TCARD_SIG_BYTES];
     bool8 hasPic;
+    u16 stickers;                               // FOUR ISLAND's STICKER MAN: 3 bits each, HALL OF FAME, EGGS, VICTORIES
+                                                // (0-4; in what was padding: the album's records keep their size)
     u32 pic[64 * 64];                           // the card's picture of them (0xAARRGGBB)
 };
 
@@ -162,7 +166,7 @@ void MP_TCard_KeepFriendCard(const struct MpCardView *v);
 const struct MpTCardFriend *MP_TCard_FriendByName(const char *asciiName);
 u16 MP_TCard_PackAddon(u8 *out);               // the card's co-op add-on (mp_linkx.c), at most TCARD_ADDON_MAX bytes
 bool8 MP_TCard_UnpackAddon(const u8 *in, u16 len, struct MpCardView *v);
-#define TCARD_ADDON_MAX 1800
+#define TCARD_ADDON_MAX 1810
 const struct MpCardStyle *MP_TCard_Style(void);
 void MP_TCard_SetStyle(const struct MpCardStyle *style);
 const struct MpCardShowcase *MP_TCard_Showcase(void);
@@ -171,5 +175,11 @@ const u8 *MP_TCard_Signature(bool8 *has);
 void MP_TCard_SetSignature(const u8 *sig, bool8 has);
 u8 MP_TCard_AlbumCount(void);
 const struct MpTCardFriend *MP_TCard_AlbumFriend(u8 i);   // the friends with a card, the latest first
+
+// FireRed's GAME CORNER photo printer and FOUR ISLAND STICKER MAN on the card (docs/REGIONS_AUDIT.md 124, 126; specials)
+u16 MP_TCard_PrintPhoto(void);          // VAR_0x8004 the print (MON_ICON_TINT_*): the party on the card's TEAM page
+u16 MP_TCard_StickerBragFlags(void);    // bit 0 HALL OF FAME, 1 EGGS, 2 VICTORIES to brag about; VAR_0x8004-6 the counts
+u16 MP_TCard_StickerManMet(void);      // FALSE the first time (FireRed's FLAG_MET_STICKER_MAN)
+u16 MP_TCard_StickerBrag(void);         // VAR_0x8009 the kind: its level 1-4 newly stuck on, 0 the same as before, 5 the top one again
 
 #endif // GUARD_MP_TCARD_H
