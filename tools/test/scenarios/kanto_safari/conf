@@ -1,0 +1,8 @@
+# KANTO's SAFARI ZONE as FireRed's (audit case 62): the entrance's trigger asks FireRed's "For just ¥500..." (YES),
+# ¥500 paid, 30 SAFARI BALLS and FireRed's 600 steps, walking counts down; START > RETIRE (YES) ends the game at
+# FUCHSIA's gate with FireRed's "Did you catch your fair share?" and the walk out
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:20 MOEMON_DEBUG_MONEY=3000"
+EXPECT_A=("safari: mode 1 balls 30 steps 600" "money 2500" "safari: mode 1 balls 30 steps 59" "safari: mode 0" "var 0x515A = 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

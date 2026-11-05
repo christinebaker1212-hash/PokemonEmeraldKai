@@ -1,0 +1,41 @@
+pressuntil A field 5000
+wait 60
+mp warp 38,55,4,5
+wait 150
+press UP 16
+wait 20
+press UP 16
+wait 10
+pressuntil A yesno 1500
+wait 20
+shot pay
+press A 1
+pressuntil A field 3000
+wait 60
+mp safari info
+mp money
+shot center
+press LEFT 16
+wait 30
+press LEFT 16
+wait 30
+press RIGHT 16
+wait 30
+mp safari info
+shot walked
+press START 2
+wait 40
+mp startmenu
+shot startmenu
+press A 2
+pressuntil B yesno 600
+wait 20
+press A 1
+pressuntil A field 2000
+wait 90
+shot out
+pressuntil A field 2000
+wait 90
+mp safari info
+mp getvar 0x515A
+quit

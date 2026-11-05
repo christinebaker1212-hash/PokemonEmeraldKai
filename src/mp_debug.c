@@ -1959,9 +1959,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "safari") == 0)
     {
-        // safari - Safari Zone mode on (balls and steps), so the next wild battle is a Safari battle
+        // safari [info] - Safari Zone mode on (balls and steps), so the next wild battle is a Safari battle; info: the
+        // SAFARI GAME's state
         void EnterSafariMode(void);
-        EnterSafariMode();
+        u16 SafariZone_StepsLeft(void);
+        extern u8 gNumSafariBalls;
+        if (strncmp(arg, "info", 4) == 0)
+            printf("[test] safari: mode %d balls %d steps %d\n", FlagGet(FLAG_SYS_SAFARI_MODE), gNumSafariBalls,
+                   SafariZone_StepsLeft());
+        else
+            EnterSafariMode();
     }
     else if (strcmp(cmd, "bmons") == 0)
     {

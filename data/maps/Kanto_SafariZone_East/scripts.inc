@@ -51,8 +51,8 @@ Kanto_SafariZone_East_Text_8427F30::
 
 Kanto_SafariZone_East_Text_8427F3B::
 	.string "TRAINER TIPS\p"
-	.string "Bring your own POKé BALLS. There\n"
-	.string "is no time or step limit.$"
+	.string "The remaining time declines only\n"
+	.string "while you walk.$"
 
 Kanto_SafariZone_East_Text_8427F83::
 	.string "AREA 1\n"

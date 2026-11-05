@@ -33,8 +33,8 @@ Kanto_SafariZone_Center_Text_8427ED9::
 
 Kanto_SafariZone_Center_Text_8427EE4::
 	.string "TRAINER TIPS\p"
-	.string "Wild MOéMON battles here follow\n"
-	.string "the normal rules.$"
+	.string "Press START to check\n"
+	.string "remaining time.$"
 
 Kanto_SafariZone_Center_Text_8427F24::
 	.string "CENTER AREA$"

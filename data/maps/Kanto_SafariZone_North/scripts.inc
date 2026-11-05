@@ -67,5 +67,5 @@ Kanto_SafariZone_North_Text_8427FDC::
 
 Kanto_SafariZone_North_Text_8428034::
 	.string "TRAINER TIPS\p"
-	.string "Find the SECRET HOUSE to win a\n"
-	.string "special prize.$"
+	.string "Win a free HM for finding the\n"
+	.string "SECRET HOUSE.$"

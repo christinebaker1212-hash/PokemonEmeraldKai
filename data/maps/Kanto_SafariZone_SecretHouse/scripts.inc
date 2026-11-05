@@ -26,7 +26,7 @@ Kanto_SafariZone_SecretHouse_EventScript_8412202::
 
 Kanto_SafariZone_SecretHouse_Text_84284C2::
 	.string "Ah! Finally!\p"
-	.string "You're the first person to reach\n"
+	.string "You’re the first person to reach\n"
 	.string "the SECRET HOUSE!\p"
 	.string "Although I made a campaign\n"
 	.string "for our grand opening,\p"
@@ -39,9 +39,9 @@ Kanto_SafariZone_SecretHouse_Text_84285C1::
 	.string "HM03 is SURF.\p"
 	.string "MOéMON will be able to ferry you\n"
 	.string "across water using it.\p"
-	.string "And, this HM isn't disposable, so\n"
+	.string "And, this HM isn’t disposable, so\n"
 	.string "you can use it over and over.\p"
-	.string "You're super lucky for winning this\n"
+	.string "You’re super lucky for winning this\n"
 	.string "fabulous prize!$"
 
 Kanto_SafariZone_SecretHouse_Text_8428629::

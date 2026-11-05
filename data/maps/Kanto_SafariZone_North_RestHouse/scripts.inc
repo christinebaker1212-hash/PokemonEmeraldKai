@@ -30,8 +30,8 @@ Kanto_SafariZone_North_RestHouse_EventScript_845D2A4::
 Kanto_SafariZone_North_RestHouse_Text_8428239::
 	.string "You can keep any item you find in\n"
 	.string "the SAFARI ZONE.\p"
-	.string "There is no time limit, so explore\n"
-	.string "every area at your own pace.$"
+	.string "But, you’ll run out of time if you\n"
+	.string "try for all of them at once.$"
 
 Kanto_SafariZone_North_RestHouse_Text_84282AC::
 	.string "Go to the deepest part of the\n"

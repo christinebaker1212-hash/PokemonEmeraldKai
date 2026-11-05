@@ -1,4 +1,6 @@
 SafariZone_EventScript_OutOfBallsMidBattle::
+	specialvar VAR_RESULT, SafariZone_InKanto   @ Moemon Kai: KANTO's ends at FUCHSIA's gate (FireRed's)
+	goto_if_eq VAR_RESULT, TRUE, SafariZone_EventScript_OutOfBallsMidBattleKanto
 	setvar VAR_SAFARI_ZONE_STATE, 1
 	special ExitSafariMode
 	specialvar VAR_RESULT, Sinnoh_InGreatMarsh   @ Moemon Kai: SINNOH's GREAT MARSH ends at PASTORIA's gate
@@ -6,16 +8,31 @@ SafariZone_EventScript_OutOfBallsMidBattle::
 	setwarp MAP_ROUTE121_SAFARI_ZONE_ENTRANCE, 2, 5
 	end
 
+SafariZone_EventScript_OutOfBallsMidBattleKanto::
+	setvar VAR_KANTO_SAFARI_SCENE, 3
+	special ExitSafariMode
+	setwarp MAP_KANTO_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE, 4, 1
+	end
+
 SafariZone_EventScript_OutOfBallsMidBattleMarsh::
 	setwarp MAP_SINNOH_PASTORIA_CITY_OBSERVATORY_GATE1F, 5, 3
 	end
 
 SafariZone_EventScript_Exit::
+	specialvar VAR_RESULT, SafariZone_InKanto
+	goto_if_eq VAR_RESULT, TRUE, SafariZone_EventScript_ExitKanto
 	setvar VAR_SAFARI_ZONE_STATE, 1
 	special ExitSafariMode
 	specialvar VAR_RESULT, Sinnoh_InGreatMarsh
 	goto_if_eq VAR_RESULT, TRUE, SafariZone_EventScript_ExitMarsh
 	warp MAP_ROUTE121_SAFARI_ZONE_ENTRANCE, 2, 5
+	waitstate
+	end
+
+SafariZone_EventScript_ExitKanto::
+	setvar VAR_KANTO_SAFARI_SCENE, 1
+	special ExitSafariMode
+	warp MAP_KANTO_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE, 4, 1
 	waitstate
 	end
 
@@ -44,6 +61,8 @@ SafariZone_EventScript_Retire::
 SafariZone_EventScript_TimesUp::
 	lockall
 	playse SE_DING_DONG
+	specialvar VAR_RESULT, SafariZone_InKanto
+	goto_if_eq VAR_RESULT, TRUE, SafariZone_EventScript_TimesUpKanto
 	message SafariZone_Text_TimesUp
 	waitmessage
 	waitbuttonpress
@@ -53,11 +72,36 @@ SafariZone_EventScript_TimesUp::
 SafariZone_EventScript_OutOfBalls::
 	lockall
 	playse SE_DING_DONG
+	specialvar VAR_RESULT, SafariZone_InKanto
+	goto_if_eq VAR_RESULT, TRUE, SafariZone_EventScript_OutOfBallsKanto
 	message SafariZone_Text_OutOfBalls
 	waitmessage
 	waitbuttonpress
 	releaseall
 	goto SafariZone_EventScript_Exit
+
+@ (FireRed's PA lines: pokefirered data/text/safari_zone.inc)
+SafariZone_EventScript_TimesUpKanto::
+	msgbox SafariZone_Text_TimesUpKanto, MSGBOX_DEFAULT
+	goto SafariZone_EventScript_Exit
+
+SafariZone_EventScript_OutOfBallsKanto::
+	msgbox SafariZone_Text_OutOfBallsKanto, MSGBOX_DEFAULT
+	goto SafariZone_EventScript_Exit
+
+SafariZone_Text_TimesUpKanto:
+	.string "PA: Ding-dong!\p"
+	.string "Time’s up!\p"
+	.string "PA: Your SAFARI GAME is over!$"
+
+SafariZone_Text_OutOfBallsKanto:
+	.string "PA: Ding-dong!\p"
+	.string "You are out of SAFARI BALLS!\p"
+	.string "PA: Your SAFARI GAME is over!$"
+
+SafariZone_Text_ExcuseMeYourPCBoxIsFullKanto::
+	.string "Excuse me!\n"
+	.string "Your PC BOX is full.$"
 
 EventScript_PokeBlockFeeder::
 	lockall

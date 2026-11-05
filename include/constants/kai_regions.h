@@ -35,6 +35,7 @@
 #define VAR_KANTO_FANCLUB_FANS        0x5153   // FireRed's VAR_FANCLUB_FAN_COUNTER: SAFFRON's TRAINER FAN CLUB (src/mp/mp_fanclub.c)
 #define VAR_KANTO_FANCLUB_TIMER       0x5154   // FireRed's VAR_FANCLUB_LOSE_FAN_TIMER
 #define VAR_KANTO_FANCLUB_SCENE       0x5155   // FireRed's VAR_MAP_SCENE_SAFFRON_CITY_POKEMON_TRAINER_FAN_CLUB
+#define VAR_KANTO_SAFARI_SCENE        0x515A   // FireRed's VAR_MAP_SCENE_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE (case 62)
 #define VAR_JOHTO_BUG_CONTEST_DAY     0x5156   // the day (RTC days + 1) the last Bug-Catching Contest was entered: Crystal's ENGINE_DAILY_BUG_CONTEST (case 97)
 #define VAR_JOHTO_BUENA_POINTS        0x5158   // Crystal's wBlueCardBalance: the BLUE CARD's points (up to 30; mp_buena.c)
 #define VAR_JOHTO_BUENA_PASSWORD      0x5159   // Crystal's wBuenasPassword: category << 4 | the right one of three

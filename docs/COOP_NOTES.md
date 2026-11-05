@@ -4553,6 +4553,14 @@ follow_behind, follow_ground.
   Not carried over: BUENA's phone number and calls (BUENA isn't on this game's POKéGEAR phone). On the way: FireRed's
   fossil menus (case 61) had taken menu numbers 240-242 from Crystal's EARL / tutor / bargain menus; Crystal's start at
   248 now and a repeated number in sMultichoiceLists is a compile error. Test johto_buena (waitfor scrollmenu).
+- **Case 62, KANTO's SAFARI ZONE as FireRed's** (pokefirered data/maps/FuchsiaCity_SafariZone_Entrance, data/scripts and
+  data/text safari_zone.inc): the entrance is FireRed's script on the game's own SAFARI engine: the three triggers in
+  front of the counter, "For just ¥500..." with the money box, 30 SAFARI BALLS, the walk in, and FireRed's 600 steps
+  (safari_zone.c EnterSafariMode: 600 in KANTO, 500 elsewhere). VAR_KANTO_SAFARI_SCENE 0x515A is FireRed's
+  VAR_MAP_SCENE_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE: 1 walked out after time / balls ran out, 2 in the park ("leave
+  early?" on coming back), 3 out of balls mid-battle. data/scripts/safari_zone.inc branches on SafariZone_InKanto: the
+  game ends at FUCHSIA's gate with FireRed's PA lines. Every sign and rest-house line in the four areas and the SECRET
+  HOUSE is FireRed's again (restore_words, by position: the maps are FireRed's). Test kanto_safari (mp safari info).
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).

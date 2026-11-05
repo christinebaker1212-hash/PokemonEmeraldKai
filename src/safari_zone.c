@@ -12,6 +12,7 @@
 #include "tv.h"
 #include "constants/game_stat.h"
 #include "field_screen_effect.h"
+#include "mp_region.h"
 
 struct PokeblockFeeder
 {
@@ -38,6 +39,17 @@ EWRAM_DATA static struct PokeblockFeeder sPokeblockFeeders[NUM_POKEBLOCK_FEEDERS
 static void ClearAllPokeblockFeeders(void);
 static void DecrementFeederStepCounters(void);
 
+// Moemon Kai: KANTO's SAFARI ZONE (FireRed's) ends at FUCHSIA's gate (data/scripts/safari_zone.inc, audit case 62)
+u16 SafariZone_InKanto(void)
+{
+    return MP_Region_Current() == REGION_KANTO;
+}
+
+u16 SafariZone_StepsLeft(void)   // (tests: mp safari info)
+{
+    return sSafariZoneStepCounter;
+}
+
 bool32 GetSafariZoneFlag(void)
 {
     return FlagGet(FLAG_SYS_SAFARI_MODE);
@@ -59,7 +71,7 @@ void EnterSafariMode(void)
     SetSafariZoneFlag();
     ClearAllPokeblockFeeders();
     gNumSafariBalls = 30;
-    sSafariZoneStepCounter = 500;
+    sSafariZoneStepCounter = MP_Region_Current() == REGION_KANTO ? 600 : 500;   // Moemon Kai: FireRed's 600 in KANTO
     sSafariZoneCaughtMons = 0;
     sSafariZonePkblkUses = 0;
     if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))

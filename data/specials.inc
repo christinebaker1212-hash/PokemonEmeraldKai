@@ -763,3 +763,4 @@ gSpecials::
 	def_special MP_Buena_BufferPrize
 	def_special MP_Buena_Pay
 	def_special MP_Buena_CanAfford
+	def_special SafariZone_InKanto   @ Moemon Kai: KANTO's SAFARI ZONE as FireRed's (src/safari_zone.c, audit case 62)
