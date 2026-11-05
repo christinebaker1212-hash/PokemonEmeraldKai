@@ -4495,6 +4495,11 @@ follow_behind, follow_ground.
     Test johto_daycare.
   - money.c IsEnoughForCostInVar0x8005 returns u16: specialvar reads 16 bits and a bool8 left the upper byte unset on
     PC, so a DAY CARE could say "not enough money" with plenty (ROUTE 117's too).
+- **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
+  mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).
+  RED (Johto_SilverCaveSummit_EventScript_Red, both SUMMIT maps) says Crystal's words, fights Crystal's team
+  (sCrystalTeams, custom moves, every GENERATION), gives nothing, leaves, and the credits roll (QzAfterCreditsReset);
+  he's back on the next climb, as in Crystal. MT. SILVER's POKéMON CENTER has Crystal's granny again. Test johto_red.
 - **Case 112**: the ELITE FOUR, LANCE (with MARY and OAK), the HALL OF FAME and CLAIR say Crystal's words on every run:
   Quetzal's "welcome back" branches on FLAG_QZ_0x11CA are gone, and their scripts with them
   (tools/quetzal_port/drop_dead_labels.py MAP: drops blocks nothing names and nothing falls into).

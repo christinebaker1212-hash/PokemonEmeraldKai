@@ -741,3 +741,4 @@ gSpecials::
 	def_special MP_JohtoDaycare_Flags
 	def_special MP_JohtoDaycare_YardMon
 	def_special MP_JohtoDaycare_YardOther
+	def_special MP_MtSilverOpen

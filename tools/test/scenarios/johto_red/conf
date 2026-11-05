@@ -1,0 +1,8 @@
+# MT. SILVER as Crystal has it (audit case 106): the VICTORY ROAD gate's BLACK BELT keeps the way shut until JOHTO's
+# and KANTO's 16 BADGES (8 JOHTO ones aren't enough), and RED fights with Crystal's team (PIKACHU 81, ESPEON 73,
+# SNORLAX 75, VENUSAUR, CHARIZARD, BLASTOISE 77: mp_region.c sCrystalTeams). Level scaling is off for the check.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("objat 7,7: local 2" "objat 7,7: none" "[test] foeparty: 25:81 196:73 143:75 3:77 6:77 9:77")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -1210,56 +1210,6 @@ Quetzal_EventScript_83DF6B4::
 
 @ Johto_SilverCaveSummit object 1 (local id 1, gfx 0x272B) at 10,6
 @ Johto_SilverCaveSummitAlt object 1 (local id 1, gfx 0x272B) at 10,6
-Quetzal_EventScript_83E05E8::
-	lock
-	faceplayer
-	msgbox Quetzal_Text_83E0706, MSGBOX_DEFAULT
-	closemessage
-	goto_if_unset FLAG_QZ_0x11B0, Quetzal_EventScript_83E0605
-	goto_if_unset FLAG_QZ_0x149E, Quetzal_EventScript_83E0644
-
-Quetzal_EventScript_83E0605::
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4327, 0, Quetzal_Text_83E073A
-	setflag FLAG_QZ_0x11B0
-	call_if_unset FLAG_QZ_0x149E, Quetzal_EventScript_83E064C
-	closemessage
-	playse SE_M_BLIZZARD
-	setrespawn 0x17
-	msgbox Quetzal_Text_83E0706, MSGBOX_DEFAULT
-	closemessage
-	fadescreenswapbuffers 1
-	setflag FLAG_QZ_0x1063
-	removeobject 1
-	fadescreenswapbuffers 0
-	delay 0xB4
-	fadescreenspeed 1, 0x18
-	clearflag FLAG_QZ_0x1063
-	special QzAfterCreditsReset
-	waitstate
-	releaseall
-	end
-
-Quetzal_EventScript_83E0644::
-	call Quetzal_EventScript_83E064C
-	closemessage
-	releaseall
-	end
-
-Quetzal_EventScript_83E064C::
-	msgbox Quetzal_Text_83E0685, MSGBOX_DEFAULT
-	setvar VAR_0x8000, ITEM_LIGHT_BALL   @ Moemon Kai: Quetzal's PIKASHUNIUM Z (0x186, a number: not translated)
-	setvar VAR_0x8001, 1
-	additem VAR_0x8000, VAR_0x8001
-	copyvar VAR_0x8007, VAR_RESULT
-	call Quetzal_EventScript_835FB62
-	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83E067C
-	setflag FLAG_QZ_0x149E
-	return
-
-Quetzal_EventScript_83E067C::
-	msgbox Quetzal_Text_83E06B6, MSGBOX_DEFAULT
-	return
-
 @ Johto_NationalParkBugContest sign / bg event at 16,45
 @ Johto_NationalPark sign / bg event at 16,45
 Quetzal_EventScript_83E07FC::
@@ -2849,22 +2799,6 @@ Quetzal_Text_83DFBD4::
 	.string "Maybe TEAM ROCKET has returned.\n"
 	.string "No, that just can’t be true.\p"
 	.string "Sorry to bug you. Take care!$"
-
-Quetzal_Text_83E0685::
-	.string "RED offers you a LIGHT BALL\n"
-	.string "as a sign of respect.$"
-
-Quetzal_Text_83E06B6::
-	.string "There is no room in the BAG.\p"
-	.string "RED will keep the LIGHT BALL\n"
-	.string "until you return for it.$"
-
-Quetzal_Text_83E0706::
-	.string ".........................\n"
-	.string ".........................$"
-
-Quetzal_Text_83E073A::
-	.string "...!$"
 
 Quetzal_Text_83E091E::
 	.string "Nothing here.$"

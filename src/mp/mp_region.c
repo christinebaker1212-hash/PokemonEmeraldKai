@@ -2252,6 +2252,26 @@ static const struct { u16 trainerNum; struct TrainerMonNoItemDefaultMoves const 
     {TRAINER_QZ_8423, sFrWade, ARRAY_COUNT(sFrWade)},
 };
 
+// JOHTO trainers with Crystal's own team at every GENERATION (pokecrystal data/trainers/parties.asm): RED on MT.
+// SILVER (audit case 106)
+static const struct TrainerMonNoItemCustomMoves sCrRed[] = {
+    {.iv = 150, .lvl = 81, .species = SPECIES_PIKACHU, .moves = {MOVE_CHARM, MOVE_QUICK_ATTACK, MOVE_THUNDERBOLT, MOVE_THUNDER}},
+    {.iv = 150, .lvl = 73, .species = SPECIES_ESPEON, .moves = {MOVE_MUD_SLAP, MOVE_REFLECT, MOVE_SWIFT, MOVE_PSYCHIC}},
+    {.iv = 150, .lvl = 75, .species = SPECIES_SNORLAX, .moves = {MOVE_AMNESIA, MOVE_SNORE, MOVE_REST, MOVE_BODY_SLAM}},
+    {.iv = 150, .lvl = 77, .species = SPECIES_VENUSAUR, .moves = {MOVE_SUNNY_DAY, MOVE_GIGA_DRAIN, MOVE_SYNTHESIS, MOVE_SOLAR_BEAM}},
+    {.iv = 150, .lvl = 77, .species = SPECIES_CHARIZARD, .moves = {MOVE_FLAMETHROWER, MOVE_WING_ATTACK, MOVE_SLASH, MOVE_FIRE_SPIN}},
+    {.iv = 150, .lvl = 77, .species = SPECIES_BLASTOISE, .moves = {MOVE_RAIN_DANCE, MOVE_SURF, MOVE_BLIZZARD, MOVE_WHIRLPOOL}},
+};
+static const struct { u16 trainerNum; struct TrainerMonNoItemCustomMoves const *party; u8 count; } sCrystalTeams[] = {
+    {TRAINER_QZ_4327, sCrRed, ARRAY_COUNT(sCrRed)},
+};
+
+// MT. SILVER's way at the VICTORY ROAD gate: open with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER)
+u16 MP_MtSilverOpen(void)
+{
+    return MP_Region_BadgeCount(REGION_JOHTO) >= 8 && MP_Region_BadgeCount(REGION_KANTO) >= 8;
+}
+
 static const struct Trainer *TrainerDataFor(u16 trainerNum)
 {
     static struct Trainer sCopy;
@@ -2260,6 +2280,17 @@ static const struct Trainer *TrainerDataFor(u16 trainerNum)
     u16 blue = QzKantoRivalTrainer(trainerNum, &isBlue);
     if (isBlue)   // BLUE: FireRed's team for the player's starter, at every GENERATION (qz_specials.c)
         return &gTrainers[blue];
+    for (i = 0; i < ARRAY_COUNT(sCrystalTeams); i++)
+    {
+        if (sCrystalTeams[i].trainerNum == trainerNum)
+        {
+            sCopy = gTrainers[trainerNum];
+            sCopy.partyFlags = F_TRAINER_PARTY_CUSTOM_MOVESET;
+            sCopy.partySize = sCrystalTeams[i].count;
+            sCopy.party.NoItemCustomMoves = sCrystalTeams[i].party;
+            return &sCopy;
+        }
+    }
     for (i = 0; i < ARRAY_COUNT(sFireRedTeams); i++)
     {
         if (sFireRedTeams[i].trainerNum == trainerNum)

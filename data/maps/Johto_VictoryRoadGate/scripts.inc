@@ -7,8 +7,11 @@ Johto_VictoryRoadGate_MapScripts::
 
 Johto_VictoryRoadGate_EventScript_83E8DCD::
 	call Johto_VictoryRoadGate_EventScript_83E8DEE
-	goto_if_set FLAG_QZ_0x105E, Johto_VictoryRoadGate_EventScript_83E8DE7
-	goto_if_unset FLAG_QZ_0x11B1, Johto_VictoryRoadGate_EventScript_83E8DE7
+	@ the BLACK BELT lets trainers to MT. SILVER once they have JOHTO's and KANTO's 16 BADGES (Crystal's
+	@ EVENT_OPENED_MT_SILVER, which PROF. OAK sets then; audit case 106)
+	clearflag FLAG_QZ_0x105E
+	specialvar VAR_RESULT, MP_MtSilverOpen
+	goto_if_eq VAR_RESULT, FALSE, Johto_VictoryRoadGate_EventScript_83E8DE7
 	setflag FLAG_QZ_0x105E
 
 Johto_VictoryRoadGate_EventScript_83E8DE7::

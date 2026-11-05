@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 60
+mp givebadges 1
+mp warp 35,20,7,9
+wait 150
+mp objat 7 7
+mp givebadges 2
+mp warp 35,20,7,9
+wait 150
+mp objat 7 7
+mp trainer 948
+waitfor battle 600
+wait 300
+mp foeparty
+quit

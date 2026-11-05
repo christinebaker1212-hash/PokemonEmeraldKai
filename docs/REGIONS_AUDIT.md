@@ -120,7 +120,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **103. [J2-31]** MARY gives BRIGHT POWDER (Crystal: PINK BOW): **RESTORE the original**
 - [x] **104. [J2-32]** MOOMOO needs five ORAN BERRIES (Crystal: seven), the farm gives LEFTOVERS (Crystal: TM13 SNORE): **RESTORE the original** - _Re-add and implement new Crystal and Kanto specific TMs to fix TM issues._
 - [x] **105. [J2-35]** Small Quetzal rewrites and additions (pattern): **RESTORE the original**
-- [ ] **106. [J3-15]** MT. SILVER and RED open right after the JOHTO LEAGUE; RED stands outdoors, gives a LIGHT BALL and can be re-fought: **RESTORE the original**
+- [x] **106. [J3-15]** MT. SILVER and RED open right after the JOHTO LEAGUE; RED stands outdoors, gives a LIGHT BALL and can be re-fought: **RESTORE the original**
 - [x] **107. [J3-16]** DRAGON SHRINE's DRATINI is Lv35 with an EVERSTONE; Crystal's Lv15 EXTREMESPEED reward is gone: **RESTORE the original**
 - [x] **108. [J3-19]** LAKE OF RAGE's FISHING GURU buys MAGIKARP instead of rating their length: **RESTORE the original**
 - [x] **109. [J3-20]** ROUTE 43 toll: ¥500 and free for the broke; charged only before LANCE: **RESTORE the original**
