@@ -38,7 +38,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_OlivineGym_EventScript_83E4BEA",
-      "flag": "FLAG_QZ_0x10B6"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_48",
@@ -51,7 +51,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_OlivineGym_EventScript_83E4A0B",
-      "flag": "FLAG_QZ_0x10B6"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16024",
@@ -76,98 +76,7 @@
       "dest_warp_id": "1"
     }
   ],
-  "coord_events": [
-    {
-      "type": "trigger",
-      "x": 6,
-      "y": 14,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500D",
-      "var_value": "5",
-      "script": "Johto_OlivineGym_EventScript_83E4A2C"
-    },
-    {
-      "type": "trigger",
-      "x": 6,
-      "y": 10,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500D",
-      "var_value": "6",
-      "script": "Johto_OlivineGym_EventScript_83E4C0B"
-    },
-    {
-      "type": "trigger",
-      "x": 7,
-      "y": 14,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500D",
-      "var_value": "5",
-      "script": "Johto_OlivineGym_EventScript_83E4A2C"
-    },
-    {
-      "type": "trigger",
-      "x": 8,
-      "y": 14,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500D",
-      "var_value": "5",
-      "script": "Johto_OlivineGym_EventScript_83E4A2C"
-    },
-    {
-      "type": "trigger",
-      "x": 9,
-      "y": 14,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500D",
-      "var_value": "5",
-      "script": "Johto_OlivineGym_EventScript_83E4A2C"
-    },
-    {
-      "type": "trigger",
-      "x": 10,
-      "y": 14,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500D",
-      "var_value": "5",
-      "script": "Johto_OlivineGym_EventScript_83E4A2C"
-    },
-    {
-      "type": "trigger",
-      "x": 7,
-      "y": 10,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500D",
-      "var_value": "6",
-      "script": "Johto_OlivineGym_EventScript_83E4C0B"
-    },
-    {
-      "type": "trigger",
-      "x": 8,
-      "y": 10,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500D",
-      "var_value": "6",
-      "script": "Johto_OlivineGym_EventScript_83E4C0B"
-    },
-    {
-      "type": "trigger",
-      "x": 9,
-      "y": 10,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500D",
-      "var_value": "6",
-      "script": "Johto_OlivineGym_EventScript_83E4C0B"
-    },
-    {
-      "type": "trigger",
-      "x": 10,
-      "y": 10,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500D",
-      "var_value": "6",
-      "script": "Johto_OlivineGym_EventScript_83E4C0B"
-    }
-  ],
+  "coord_events": [],
   "bg_events": [
     {
       "type": "sign",

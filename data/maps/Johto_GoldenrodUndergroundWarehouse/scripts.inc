@@ -89,15 +89,11 @@ Johto_GoldenrodUndergroundWarehouse_Text_83D9E50::
 	.string "Please forgive me, GIOVANNI!$"
 
 Johto_GoldenrodUndergroundWarehouse_Text_83D9E75::
-	.string "Hyuck-hyuck-hyuck! Look who it is!\p"
-	.string "Ready? I’m really tough now!$"
+	.string "Hyuck-hyuck-hyuck! I remember you!\p"
+	.string "You got me good at our hideout!$"
 
 Johto_GoldenrodUndergroundWarehouse_Text_83D9EB5::
-	.string "Hyuck-hyuck-hyuck! You’re so good!\p"
-	.string "This TEAM ROCKET thing is just\n"
-	.string "a job, but I can see it hurts others.\p"
-	.string "That’s it, I’m leaving.\p"
-	.string "Thank you so much. Sorry GIOVANNI!$"
+	.string "Hyuck-hyuck-hyuck! So, that’s how?$"
 
 Johto_GoldenrodUndergroundWarehouse_Text_83D9F58::
 	.string "Hyuck-hyuck-hyuck! That was a blast!\n"

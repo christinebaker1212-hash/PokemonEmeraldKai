@@ -5002,6 +5002,16 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
       on VAR_TEMP_3). Reading a closed wall shows its word (ESCAPE / LIGHT / WATER / HO-OH) spelled with UNOWN icons
       (QzShowUnownWord, Crystal's DisplayUnownWords). `mp ruinsmark` acts as both used where the player stands.
       Tests johto_ruins_walls, johto_ruins_word, johto_elm_lab.
+- 1.106.0 (the audit's batch G, JOHTO):
+  - Case 105, Quetzal's small rewrites: no CHANSEY beside JOHTO's nurses (13 centers); GOLDENROD's center without
+    the two "gold roof" people, its old woman Crystal's POKéFAN asking for EON MAIL (the game has none, so she always
+    ends on Crystal's "Too bad"); ECRUTEAK's BILL gives Crystal's TIME CAPSULE speech; OLIVINE without the SAFARI ZONE
+    news (JOHTO's SAFARI ZONE is case 62's) or the MARY fan, its sailor and boy Crystal's (POKéGEAR or POKéDEX line by
+    ITEM_POKEGEAR); ROUTE 39 without BAOBA's HO-OH shadow scene or the "giant PIDGEY" man; ROUTE 38's TRAINER TIPS
+    sign (stopping an evolution with B) where Quetzal had "NO SWIMMING"; OLIVINE GYM without the two cheering people
+    and their triggers (nothing read VAR_QZ_0x500D 6 / 7), the MINERALBADGE raising DEFENSE; the warehouse grunt's
+    Crystal lines; BURNED TOWER without the FIREBREATHER and BURGLAR; OLIVINE CAFE without JASMINE's dishes, its
+    FISHING GURU and STRENGTH sailor in Crystal's words. Test johto_crystal_lines.
 
 ## MAGIC (1.95.0: docs/MTG_DECISIONS.md, docs/MTG_HANDOFF.md)
 - The rules are Forge's translated into C (src/mtg/mtg_game.c etc., include/mtg/mtg.h), reading Forge's own card

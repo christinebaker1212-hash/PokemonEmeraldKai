@@ -77,9 +77,13 @@ Johto_GoldenrodPokecenter1F_EventScript_83D6898::
 
 @ Johto_GoldenrodPokecenter1F object 5 (local id 5, gfx 0x1E) at 14,6
 Johto_GoldenrodPokecenter1F_EventScript_83D68A5::
+	@ Moemon Kai: Crystal's POKéFAN asking for EON MAIL (GoldenrodPokecenter1FPokefanF, docs/REGIONS_AUDIT.md 105):
+	@ this game has no EON MAIL, so whatever the answer it's Crystal's "Too bad" (as for anyone without one there)
 	lock
 	faceplayer
-	msgbox Johto_GoldenrodPokecenter1F_Text_83D68BF, MSGBOX_DEFAULT
+	msgbox Johto_GoldenrodPokecenter1F_Text_PokefanEonMail, MSGBOX_DEFAULT
+	msgbox Johto_GoldenrodPokecenter1F_Text_PokefanGiveAway, MSGBOX_YESNO
+	msgbox Johto_GoldenrodPokecenter1F_Text_PokefanTooBad, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
@@ -114,3 +118,16 @@ Johto_GoldenrodPokecenter1F_Text_83D69A0::
 	.string "disadvantage.\p"
 	.string "I don’t think there is a single\n"
 	.string "MOéMON that is the toughest.$"
+
+Johto_GoldenrodPokecenter1F_Text_PokefanEonMail::
+	.string "Oh my, your pack looks so heavy!\p"
+	.string "Oh! Do you happen to have\n"
+	.string "something named EON MAIL?\p"
+	.string "My daughter is after one.\p"
+	.string "You can part with one, can’t you?$"
+
+Johto_GoldenrodPokecenter1F_Text_PokefanGiveAway::
+	.string "Give away an EON MAIL?$"
+
+Johto_GoldenrodPokecenter1F_Text_PokefanTooBad::
+	.string "Oh? You don’t have one? Too bad.$"

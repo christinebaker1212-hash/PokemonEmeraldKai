@@ -1,0 +1,8 @@
+# Quetzal's small rewrites back to Crystal (docs/REGIONS_AUDIT.md 105): no CHANSEY beside the nurse, GOLDENROD's EON
+# MAIL lady instead of the "gold roof" people, ROUTE 38's TRAINER TIPS sign, no cheering crowd in OLIVINE's GYM,
+# ROUTE 39 without BAOBA's HO-OH scene.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("eon_mail" "route38_tips" "[test] warp: 35,47")
+UNEXPECT_A=("[crash]" "gfx 16037 xy 8,2" "gfx 16022 xy 2,5" "gfx 16015" "BAOBA")

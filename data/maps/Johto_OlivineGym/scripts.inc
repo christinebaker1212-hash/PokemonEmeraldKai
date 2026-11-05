@@ -328,8 +328,8 @@ Johto_OlivineGym_Text_83E52BB::
 	.string "{PLAYER} received MINERALBADGE.$"
 
 Johto_OlivineGym_Text_83E52D5::
-	.string "MINERALBADGE raises MOéMON’s \n"
-	.string "SPECIAL DEFENSE.\p"
+	.string "MINERALBADGE raises MOéMON’s\n"
+	.string "DEFENSE.\p"
 	.string "…Um… Please take this too…$"
 
 Johto_OlivineGym_Text_83E5320::

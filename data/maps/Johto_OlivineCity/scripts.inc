@@ -6,7 +6,6 @@ Johto_OlivineCity_MapScripts::
 	.byte 0
 
 Johto_OlivineCity_OnFrame_83E3F8F:
-	map_script_2 VAR_QZ_0x500F, 1, Johto_OlivineCity_EventScript_83E3FA1
 	map_script_2 VAR_QZ_0x500C, 15, Quetzal_EventScript_83DF6B4
 	.2byte 0
 
@@ -91,10 +90,17 @@ Johto_OlivineCity_EventScript_83E4285::
 
 @ Johto_OlivineCity object 1 (local id 1, gfx 0x23) at 21,28
 Johto_OlivineCity_EventScript_83E4292::
+	@ Moemon Kai: Crystal's boy (OlivineCityStandingYoungsterScript, docs/REGIONS_AUDIT.md 105): the POKéGEAR if you
+	@ have one, else the POKéDEX
 	lock
 	faceplayer
+	checkitem ITEM_POKEGEAR
+	goto_if_eq VAR_RESULT, FALSE, Johto_OlivineCity_EventScript_YoungsterDex
+	msgbox Johto_OlivineCity_Text_YoungsterGear, MSGBOX_DEFAULT
+	release
+	end
+Johto_OlivineCity_EventScript_YoungsterDex::
 	msgbox Johto_OlivineCity_Text_83E44D3, MSGBOX_DEFAULT
-	closemessage
 	release
 	end
 
@@ -233,20 +239,14 @@ Johto_OlivineCity_Text_83E4429::
 	.string "no ship can sail.$"
 
 Johto_OlivineCity_Text_83E44D3::
-	.string "Wow, you have a MOéDEX!\n"
-	.string "That’s really cool!$"
+	.string "Wow, you have a POKéDEX!\p"
+	.string "That is just so awesome.$"
 
 Johto_OlivineCity_Text_83E4532::
-	.string "The league has JASMINE\n"
-	.string "pegged as the sixth\l"
-	.string "strongest GYM LEADER!\p"
-	.string "Hah! That’s a load of crud.\p"
-	.string "There’s no way PRYCE could\n"
-	.string "hurt JASMINE’s STEEL-type\l"
-	.string "MOéMON!\p"
-	.string "Bureaucracy if you ask me.\p"
-	.string "She’s something to be feared,\n"
-	.string "that’s for sure!$"
+	.string "The sea is sweet!\p"
+	.string "Sunsets on the sea are marvelous!\p"
+	.string "Sing with me! Yo-ho! Blow the man\n"
+	.string "down!…$"
 
 Johto_OlivineCity_Text_83E4617::
 	.string "OLIVINE CITY\p"
@@ -265,3 +265,7 @@ Johto_OlivineCity_Text_83E46A7::
 	.string "OLIVINE LIGHTHOUSE\n"
 	.string "Also known as the GLITTER\l"
 	.string "LIGHTHOUSE$"
+
+Johto_OlivineCity_Text_YoungsterGear::
+	.string "That thing you have--it’s a\n"
+	.string "POKéGEAR, right? Wow, that’s cool.$"

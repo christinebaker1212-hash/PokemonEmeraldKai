@@ -64,7 +64,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_OlivineCafe_EventScript_83E4720",
-      "flag": "FLAG_QZ_0x101C"
+      "flag": "FLAG_KAI_GONE"
     }
   ],
   "warp_events": [

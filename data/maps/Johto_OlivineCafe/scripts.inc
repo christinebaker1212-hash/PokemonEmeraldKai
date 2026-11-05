@@ -64,15 +64,13 @@ Johto_OlivineCafe_Text_83E483D::
 	.string "STRENGTH!$"
 
 Johto_OlivineCafe_Text_83E48C6::
-	.string "On the sea, the only thing you\n"
-	.string "can count on is your own self!\p"
-	.string "I’m so proud of my buff bod!\n"
-	.string "You should train like me!$"
+	.string "On the sea, the only thing you can\n"
+	.string "count on is your own good self!\p"
+	.string "I’m so proud of my buff bod!$"
 
 Johto_OlivineCafe_Text_83E493B::
-	.string "OLIVINE CAFE’s menu is packed\n"
-	.string "with hearty fare for beefy\l"
-	.string "SAILORS like me!$"
+	.string "OLIVINE CAFE’s menu is chock full\n"
+	.string "of hearty fare for beefy SAILORS!$"
 
 Johto_OlivineCafe_Text_83E4985::
 	.string "Whenever I roll into this town,\n"

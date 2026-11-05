@@ -1,0 +1,28 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp warp 34,78,14,7
+wait 150
+mp npcs
+mp face up
+press A 2
+wait 60
+shot eon_mail
+mash A 6 20
+mash B 4 20
+mp warp 35,46,15,28
+wait 150
+mp face up
+press A 2
+wait 60
+shot route38_tips
+mash B 6 20
+mp warp 35,5,8,15
+wait 150
+mp npcs
+mp warp 35,47,34,21
+wait 120
+press RIGHT 30
+wait 120
+shot route39
+quit

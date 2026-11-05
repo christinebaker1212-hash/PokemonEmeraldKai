@@ -38,7 +38,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_83C9AC2",
-      "flag": "0"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_47",
@@ -64,10 +64,10 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_GoldenrodPokecenter1F_EventScript_83D688B",
-      "flag": "0"
+      "flag": "FLAG_KAI_GONE"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_30",
+      "graphics_id": "OBJ_EVENT_GFX_POKEFAN_F",
       "x": 14,
       "y": 6,
       "elevation": 0,
@@ -90,7 +90,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_GoldenrodPokecenter1F_EventScript_83D6898",
-      "flag": "0"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MANIAC",

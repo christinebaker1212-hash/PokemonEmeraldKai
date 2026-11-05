@@ -151,6 +151,10 @@ Johto_Route38_Text_83F2BDA::
 	.string "OLIVINE CITY - ECRUTEAK CITY$"
 
 Johto_Route38_Text_83F2CA5::
-	.string "NO SWIMMING OR FISHING.\n"
-	.string "WATER FOR FARMING ONLY.\p"
-	.string "-ECRUTEAK COUNCIL$"
+	.string "TRAINER TIPS\p"
+	.string "If a MOéMON is trying to evolve,\n"
+	.string "you can stop it.\p"
+	.string "Press the B Button during\n"
+	.string "evolution.\p"
+	.string "That startles the MOéMON and stops\n"
+	.string "its evolution.$"

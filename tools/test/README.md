@@ -88,6 +88,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `johto_ruins_walls` | The RUINS OF ALPH walls open as Crystal's: HO-OH leading, a WATER STONE, an ESCAPE ROPE / FLASH in the chamber |
 | `johto_ruins_word` | A closed RUINS wall shows its UNOWN word in UNOWN pictures |
 | `johto_elm_lab` | ELM's lab window (open / broken into), the aide by stage, ELM's research-paper PC at home |
+| `johto_crystal_lines` | Quetzal's small rewrites back to Crystal: no CHANSEY, the EON MAIL lady, ROUTE 38's TRAINER TIPS, no cheering crowd |
 | `johto_weekday_siblings` | Crystal's WEEKDAY siblings stand there only on their day, meet you once and give their gift |
 | `johto_friday_lapras` | UNION CAVE B2F's LAPRAS is there on Fridays only, until it's fought that day |
 | `johto_catch_tutorial` | ROUTE 29's DUDE shows how to catch a RATTATA (his own back picture, throw first) |
