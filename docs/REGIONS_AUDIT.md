@@ -78,7 +78,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **61. [K4-10, J1-18]** Fossils revived Quetzal's way (any region's fossil, at once, Lv 20): **RESTORE the original**
 - [ ] **62. [K4-5, J3-30]** Both SAFARI ZONEs are Quetzal's (free, no SAFARI BALLS, no steps): **RESTORE the original** - _JOHTO's half done with case 116 (its SAFARI ZONE unreachable: Crystal has none); KANTO's FireRed SAFARI ZONE is left._
 - [x] **63. [J1-9, J2-21, J3-18]** The WEEKDAY siblings stand there every day with a guess-the-day game: **RESTORE the original**
-- [ ] **64. [K1-9, K1-10, K2-15]** OAK's POKéDEX rating and the NATIONAL DEX come Quetzal's way: **RESTORE the original**
+- [x] **64. [K1-9, K1-10, K2-15]** OAK's POKéDEX rating and the NATIONAL DEX come Quetzal's way: **RESTORE the original**
 - [ ] **65. [J2-13, J1-21]** The legendary story is Quetzal's HGSS-style KIMONO GIRL chain: **RESTORE the original**
 - [x] **66. [K1-7]** Quetzal's empty "MT. MOON ROUTE 4 cave": **RESTORE the original**
 - [x] **67. [K1-15]** GIOVANNI stays in his GYM after the battle: **RESTORE the original**

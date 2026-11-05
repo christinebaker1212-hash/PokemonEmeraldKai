@@ -744,3 +744,4 @@ gSpecials::
 	def_special MP_MtSilverOpen
 	def_special MP_StartLinkMinigame, waitstate=1
 	def_special MP_Minigame_HostJoyful
+	def_special HasAllMons   @ Moemon Kai: FireRed's NATIONAL DEX completion (OAK's rating in KANTO, audit case 64)

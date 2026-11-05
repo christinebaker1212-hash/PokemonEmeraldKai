@@ -51,7 +51,7 @@ Kanto_PalletTown_EventScript_8415341::
 	waitmovement 0
 	goto_if_unset FLAG_QZ_0x2244, Kanto_PalletTown_EventScript_8415420
 	msgbox Kanto_PalletTown_Text_842DF5F, MSGBOX_DEFAULT
-	setvar VAR_0x8004, 1
+	setvar VAR_0x8004, 0   @ (KANTO\'s count, as FireRed: audit case 64)
 	specialvar VAR_RESULT, QzGetPokedexCount
 	copyvar VAR_0x8008, VAR_0x8005
 	copyvar VAR_0x8009, VAR_0x8006

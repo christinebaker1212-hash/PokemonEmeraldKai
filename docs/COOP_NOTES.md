@@ -4514,6 +4514,14 @@ follow_behind, follow_ground.
   after a NO (FLAG_JOHTO_REFUSED_TOGEPI_EGG 0x155C); Quetzal's reader there wears FLAG_KAI_GONE. CHERRYGROVE CENTER's
   teacher keeps a line that doesn't promise a COMMUNICATION CENTER (Kai's upstairs is the GARDEN). Test
   johto_mahogany_mart (shop_lists_gen3 / gen9 check the lists).
+- **Case 64, OAK's POKéDEX rating and the AIDES**: OAK rates as FireRed (PalletTown_ProfessorOaksLab
+  _EventScript_84578D0, from pokefirered data/scripts/pokedex_rating.inc and prof_pc.c): KANTO's seen / owned
+  (QzGetPokedexCount with VAR_0x8004 0), FireRed's graded line for every 10 caught (16 texts through restore_words from
+  data/text/pokedex_rating.inc), the complete line with MUS_EVOLVED at 150 without MEW (QzIsRegionalDexComplete), then
+  the NATIONAL count and HasAllMons (now a special) for FireRed's completion words. The lab's scene, PALLET's NATIONAL
+  DEX check and OAK's AIDES (ROUTE 2, 10, 11, 15, 16) count KANTO's dex (VAR_0x8004 0), as FireRed. The POKéDEX
+  hand-over says FireRed's "Take these with you." / "received the POKéDEX from PROF. OAK."; Kai still makes it the
+  NATIONAL DEX from the start (hoenn_national_dex). Test kanto_oak_rating.
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).

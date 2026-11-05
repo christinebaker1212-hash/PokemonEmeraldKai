@@ -1,0 +1,80 @@
+pressuntil A field 5000
+wait 400
+mp startmenu
+mp setvar 0x511A 7
+mp warp 37,122,6,11
+wait 120
+pressuntil A field 12000
+mash A 100 10
+pressuntil A field 12000
+mp getvar 0x511A
+mp dexcatch 1
+mp dexcatch 2
+mp dexcatch 3
+mp dexcatch 4
+mp dexcatch 5
+mp dexcatch 6
+mp dexcatch 7
+mp dexcatch 8
+mp dexcatch 9
+mp dexcatch 10
+mp dexcatch 11
+mp dexcatch 12
+mp dexcatch 13
+mp dexcatch 14
+mp dexcatch 15
+mp dexcatch 16
+mp dexcatch 17
+mp dexcatch 18
+mp dexcatch 19
+mp dexcatch 20
+mp dexcatch 21
+mp dexcatch 22
+mp dexcatch 23
+mp dexcatch 24
+mp dexcatch 25
+mp warp 37,122,6,5
+wait 150
+press UP 16
+wait 30
+shot near
+press A 4
+wait 60
+shot talk1
+press A 4
+wait 60
+shot talk2
+press A 4
+wait 120
+shot rating
+press A 4
+wait 120
+shot national
+mash B 10 30
+wait 60
+press A 4
+wait 80
+shot r1
+press A 4
+wait 80
+shot r2
+press A 4
+wait 120
+shot r3
+press A 4
+wait 160
+shot r4
+press A 4
+wait 120
+shot r5
+press A 4
+wait 200
+shot r6
+press A 4
+wait 200
+shot r7
+press A 4
+wait 200
+shot r8
+mash B 10 30
+quit

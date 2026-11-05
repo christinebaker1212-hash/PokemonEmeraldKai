@@ -587,7 +587,7 @@ Kanto_PalletTown_ProfessorOaksLab_EventScript_84197CE::
 	return
 
 Kanto_PalletTown_ProfessorOaksLab_EventScript_84197EC::
-	setvar VAR_0x8004, 1
+	setvar VAR_0x8004, 0   @ (KANTO's count, as FireRed: audit case 64)
 	specialvar VAR_RESULT, QzGetPokedexCount
 	copyvar VAR_0x8008, VAR_0x8005
 	copyvar VAR_0x8009, VAR_0x8006
@@ -830,7 +830,7 @@ Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C3F::
 	return
 
 Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C51::
-	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F5D6, MSGBOX_DEFAULT
+	@ Moemon Kai: FireRed's words (audit case 64); Kai's POKeDEX is the NATIONAL one from the start
 	textcolor 3
 	playfanfare MUS_RG_OBTAIN_KEY_ITEM
 	message Kanto_PalletTown_ProfessorOaksLab_Text_843E930
@@ -1055,37 +1055,121 @@ Kanto_PalletTown_ProfessorOaksLab_EventScript_84578CC::
 	return
 
 Kanto_PalletTown_ProfessorOaksLab_EventScript_84578D0::
-	setvar VAR_0x8004, 0x1F
-	special QzQuestLogNop
-	special QzQuestLogNop
-	call_if_unset FLAG_QZ_0x21E3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8457924
-	setvar VAR_0x8004, 1
+	@ Moemon Kai: FireRed's PokedexRating_EventScript_Rate (pokefirered data/scripts/pokedex_rating.inc, prof_pc.c;
+	@ audit case 64): KANTO's count first, graded every 10, then the NATIONAL count
+	setvar VAR_0x8004, 0
 	specialvar VAR_RESULT, QzGetPokedexCount
 	copyvar VAR_0x8008, VAR_0x8005
 	copyvar VAR_0x8009, VAR_0x8006
+	copyvar VAR_0x800A, VAR_RESULT
 	buffernumberstring 0, VAR_0x8008
 	buffernumberstring 1, VAR_0x8009
 	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_8457663, MSGBOX_DEFAULT
-	specialvar VAR_RESULT, QzIsRegionalDexComplete
-	goto_if_eq VAR_RESULT, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_8457927
-	goto_if_eq VAR_RESULT, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_845793B
-	end
+	goto_if_lt VAR_0x8009, 10, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate10
+	goto_if_lt VAR_0x8009, 20, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate20
+	goto_if_lt VAR_0x8009, 30, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate30
+	goto_if_lt VAR_0x8009, 40, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate40
+	goto_if_lt VAR_0x8009, 50, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate50
+	goto_if_lt VAR_0x8009, 60, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate60
+	goto_if_lt VAR_0x8009, 70, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate70
+	goto_if_lt VAR_0x8009, 80, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate80
+	goto_if_lt VAR_0x8009, 90, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate90
+	goto_if_lt VAR_0x8009, 100, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate100
+	goto_if_lt VAR_0x8009, 110, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate110
+	goto_if_lt VAR_0x8009, 120, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate120
+	goto_if_lt VAR_0x8009, 130, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate130
+	goto_if_lt VAR_0x8009, 140, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate140
+	goto_if_lt VAR_0x8009, 150, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate150
+	specialvar VAR_RESULT, QzIsRegionalDexComplete   @ (150 caught, MEW not needed)
+	goto_if_eq VAR_RESULT, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate150
+	message Kanto_PalletTown_ProfessorOaksLab_Text_RateComplete
+	waitmessage
+	playfanfare MUS_EVOLVED
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateNational
 
-Kanto_PalletTown_ProfessorOaksLab_EventScript_8457924::
-	textcolor 0
-	return
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate10::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate10
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate20::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate20
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate30::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate30
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate40::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate40
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate50::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate50
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate60::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate60
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate70::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate70
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate80::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate80
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate90::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate90
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate100::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate100
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate110::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate110
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate120::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate120
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate130::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate130
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate140::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate140
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_Rate150::
+	message Kanto_PalletTown_ProfessorOaksLab_Text_Rate150
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_RateFanfare::
+	waitmessage
+	playfanfare MUS_RG_DEX_RATING
+Kanto_PalletTown_ProfessorOaksLab_EventScript_RateNational::
+	waitfanfare
+	waitbuttonpress
+	goto_if_eq VAR_0x800A, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_8457952
+	setvar VAR_0x8004, 1
+	specialvar VAR_RESULT, QzGetPokedexCount
+	buffernumberstring 0, VAR_0x8005
+	buffernumberstring 1, VAR_0x8006
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_NationalSeenOwned, MSGBOX_DEFAULT
+	specialvar VAR_RESULT, HasAllMons
+	goto_if_eq VAR_RESULT, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_8457927
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_845793B
 
 Kanto_PalletTown_ProfessorOaksLab_EventScript_8457927::
 	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_84576C8, MSGBOX_DEFAULT
-	call Kanto_PalletTown_ProfessorOaksLab_EventScript_84578C8
-	waitfanfare
 	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8457952
 
 Kanto_PalletTown_ProfessorOaksLab_EventScript_845793B::
 	setflag FLAG_QZ_0x21E4
 	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_8457726, MSGBOX_DEFAULT
-	call Kanto_PalletTown_ProfessorOaksLab_EventScript_84578CC
-	waitfanfare
 	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8457952
 
 Kanto_PalletTown_ProfessorOaksLab_EventScript_8457952::
@@ -1549,11 +1633,11 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E86C::
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E8FB::
 	.string "OAK: {PLAYER} and {RIVAL}.\n"
-	.string "Take your MOéDEX on your travels.$"
+	.string "Take these with you.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E930::
-	.string "{PLAYER} received from OAK\n"
-	.string "the NATIONAL MOéDEX!$"
+	.string "{PLAYER} received the MOéDEX\n"
+	.string "from PROF. OAK.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E95B::
 	.string "OAK: You can’t get detailed data\n"
@@ -1735,31 +1819,26 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843F51D::
 	.string "ONE ISLAND first…\p"
 	.string "Anyways, I’m outta here!$"
 
-Kanto_PalletTown_ProfessorOaksLab_Text_843F5D6::
-	.string "OAK: It’s the NATIONAL MOéDEX:\n"
-	.string "it records MOéMON of every region.\p"
-	.string "Go and catch some new partners!$"
-
 Kanto_PalletTown_ProfessorOaksLab_Text_845710D::
 	.string "OAK: Good to see you!\n"
 	.string "How is your MOéDEX coming along?\p"
 	.string "Here, let me take a look.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_8457663::
-	.string "Your NATIONAL MOéDEX:\n"
-	.string "{STR_VAR_1} species seen in total.\p"
-	.string "In KANTO, you have registered\n"
-	.string "{STR_VAR_2} species as caught.$"
+	.string "The amount of progress you’ve made\n"
+	.string "on your MOéDEX is:\p"
+	.string "{STR_VAR_1} MOéMON seen and\n"
+	.string "{STR_VAR_2} MOéMON owned.\p"
+	.string "{FONT_NORMAL}PROF. OAK’s rating:$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_84576C8::
-	.string "Keep registering species in KANTO!\p"
-	.string "I look forward to a full NATIONAL\n"
-	.string "MOéDEX for this region!$"
+	.string "I’ll be looking forward to seeing\n"
+	.string "you fill the NATIONAL MOéDEX!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_8457726::
 	.string "Finally…\p"
-	.string "You’ve completed the NATIONAL\n"
-	.string "MOéDEX with your KANTO catches!\p"
+	.string "You’ve finally completed the\n"
+	.string "MOéDEX!\p"
 	.string "It’s magnificent!\n"
 	.string "Truly, this is a fantastic feat!$"
 
@@ -1789,3 +1868,84 @@ Kanto_PalletTown_ProfessorOaksLab_Text_WhatWasHisName::
 	.string "He’s been your rival since you both\n"
 	.string "were babies.\p"
 	.string "…Erm, what was his name now?$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate10::
+	.string "You still have lots to do.\p"
+	.string "Go into every patch of grass you\n"
+	.string "see and look for MOéMON!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate20::
+	.string "It looks as if you’re getting on\n"
+	.string "the right track!\p"
+	.string "I’ve given one of my AIDES a FLASH\n"
+	.string "HM. Make sure you go get it!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate30::
+	.string "Your MOéDEX could use a bit more\n"
+	.string "volume still!\p"
+	.string "Try to catch other species of\n"
+	.string "MOéMON!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate40::
+	.string "Good, it’s apparent that you’re\n"
+	.string "trying hard!\p"
+	.string "I’ve given one of my AIDES an\n"
+	.string "ITEMFINDER. Be sure to collect it!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate50::
+	.string "Your MOéDEX is coming along quite\n"
+	.string "well!\p"
+	.string "I’ve given one of my AIDES an\n"
+	.string "AMULET COIN. Be sure to get it!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate60::
+	.string "Ah, you’ve finally topped 50\n"
+	.string "species!\p"
+	.string "I’ve given one of my AIDES an EXP.\n"
+	.string "SHARE. Be sure to go get it!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate70::
+	.string "Hoho! This is turning into quite the\n"
+	.string "respectable MOéDEX!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate80::
+	.string "Very good!\p"
+	.string "I think you’ll collect even more\n"
+	.string "MOéMON by going fishing!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate90::
+	.string "Wonderful! Let me guess… You\n"
+	.string "like to collect things, don’t you?$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate100::
+	.string "I’m impressed!\n"
+	.string "It must have been difficult to do!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate110::
+	.string "You’ve finally hit 100 species!\n"
+	.string "I can’t believe how good you are!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate120::
+	.string "You even have the evolved forms\n"
+	.string "of MOéMON! Super!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate130::
+	.string "Excellent! Trade with friends to\n"
+	.string "get some more!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate140::
+	.string "Outstanding!\n"
+	.string "You’ve become a real pro at this!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_Rate150::
+	.string "I have nothing left to say!\n"
+	.string "You’re the MOéMON PROFESSOR now!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_RateComplete::
+	.string "Your MOéDEX is entirely complete!\n"
+	.string "Congratulations!!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_NationalSeenOwned::
+	.string "And your NATIONAL MOéDEX is:\p"
+	.string "{STR_VAR_1} MOéMON seen and\n"
+	.string "{STR_VAR_2} MOéMON owned.$"

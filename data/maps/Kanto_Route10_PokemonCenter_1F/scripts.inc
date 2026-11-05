@@ -39,7 +39,7 @@ Kanto_Route10_PokemonCenter_1F_EventScript_841FBD9::
 	goto_if_set FLAG_QZ_0x2146, Kanto_Route10_PokemonCenter_1F_EventScript_841FC5E
 	msgbox Kanto_Route10_PokemonCenter_1F_Text_844EA9D, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_8457F94
-	setvar VAR_0x8004, 1
+	setvar VAR_0x8004, 0   @ (KANTO\'s count, as FireRed: audit case 64)
 	specialvar VAR_RESULT, QzGetPokedexCount
 	buffernumberstring 2, VAR_0x8006
 	call Kanto_Route10_PokemonCenter_1F_EventScript_841FC68

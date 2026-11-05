@@ -27,7 +27,7 @@ Kanto_Route15_WestEntrance_2F_EventScript_842011D::
 	goto_if_set FLAG_QZ_0x2147, Kanto_Route15_WestEntrance_2F_EventScript_84201AD
 	msgbox Kanto_Route15_WestEntrance_2F_Text_844FA45, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_8457F94
-	setvar VAR_0x8004, 1
+	setvar VAR_0x8004, 0   @ (KANTO\'s count, as FireRed: audit case 64)
 	specialvar VAR_RESULT, QzGetPokedexCount
 	buffernumberstring 2, VAR_0x8006
 	call Kanto_Route15_WestEntrance_2F_EventScript_84201B7
