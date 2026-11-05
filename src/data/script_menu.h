@@ -865,6 +865,10 @@ struct MultichoiceListStruct
 
 #include "script_menu_qz.h"   // Moemon Kai
 
+// Moemon Kai: two menus on one number would silently replace each other (FireRed's fossil menus once hid three of
+// Crystal's): a repeated index here is an error
+#pragma GCC diagnostic push
+#pragma GCC diagnostic error "-Woverride-init"
 static const struct MultichoiceListStruct sMultichoiceLists[] =
 {
     [MULTI_BRINEY_ON_DEWFORD]          = MULTICHOICE(MultichoiceList_BrineyOnDewford),
@@ -1005,6 +1009,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_FR_HELIX_AMBER]             = MULTICHOICE(MultichoiceList_FrHelixAmber),
     [MULTI_FR_DOME_AMBER]              = MULTICHOICE(MultichoiceList_FrDomeAmber),
 };
+#pragma GCC diagnostic pop
 
 static const u8 sText_QzStd_1E[] = _("MEDICINE");
 static const u8 sText_QzStd_1F[] = _("TRAINING");

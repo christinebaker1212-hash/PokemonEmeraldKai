@@ -31,7 +31,7 @@ PRIZE_MENUS = {
            'YELLOW FLUTE{CLEAR_TO 0x50}{FONT_SMALL}1,600 COINS'],
 }
 
-KAI_FIRST = 240   # past Kai's own menus
+KAI_FIRST = 248   # past Kai's own menus (include/constants/script_menu.h: up to MULTI_FR_DOME_AMBER 242, BUENA's 243-244)
 
 # Menus Crystal / FireRed have that Quetzal dropped (docs/REGIONS_AUDIT.md), numbered after Quetzal's: MULTI_KAI_<NAME>
 KAI_MENUS = [
