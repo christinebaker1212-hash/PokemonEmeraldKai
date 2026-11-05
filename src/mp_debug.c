@@ -154,8 +154,13 @@ void MP_Debug_PinHpFrame(void)
     {
         if (GetBattlerSide(i) == B_SIDE_OPPONENT && sPinFoeHp && gBattleMons[i].hp > sPinFoeHp)
             gBattleMons[i].hp = sPinFoeHp;
-        else if (i == 0 && sPinMyHp && gBattleMons[i].hp && gBattleMons[i].hp < sPinMyHp)
+        else if (GetBattlerSide(i) == B_SIDE_PLAYER && sPinMyHp && gBattleMons[i].hp && gBattleMons[i].hp < sPinMyHp)
+        {
+            // (past its max HP too: a one-hit Knock Out can't get through)
+            if (gBattleMons[i].maxHP < sPinMyHp)
+                gBattleMons[i].maxHP = sPinMyHp;
             gBattleMons[i].hp = sPinMyHp;
+        }
     }
 }
 
@@ -1859,10 +1864,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "pinhp") == 0)
     {
-        // pinhp FOE MINE - every frame of a battle, the foes out at FOE HP and battler 0 at MINE (0 0: off), for tests
+        // pinhp FOE MINE - every frame of a battle, the foes out at FOE HP at most and ours at MINE at least (their max
+        // HP raised to it if need be; 0 0: off), for tests
         // whose battles must end one way whatever the moves do
         sscanf(arg, "%d %d", &sPinFoeHp, &sPinMyHp);
-        printf("[test] pinhp: foes %d, battler 0 %d\n", sPinFoeHp, sPinMyHp);
+        printf("[test] pinhp: foes %d, ours %d\n", sPinFoeHp, sPinMyHp);
     }
     else if (strcmp(cmd, "foehp") == 0)
     {

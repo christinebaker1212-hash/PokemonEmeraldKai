@@ -1,6 +1,7 @@
 pressuntil A field 5000
 wait 30
 mp textspeed 2
+mp pinhp 1 999
 mp teach 0 242
 mp teach 1 242
 mp teach 2 242

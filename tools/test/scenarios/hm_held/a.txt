@@ -24,8 +24,8 @@ wait 6
 shot give
 press A 2
 pressuntil A partymenu 900
-wait 10
-press A 2
+wait 60
+press A 4
 wait 90
 shot given
 pressuntil B field 1500

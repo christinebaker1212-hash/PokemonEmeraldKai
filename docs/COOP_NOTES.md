@@ -3323,7 +3323,7 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
 - tools/test/map_sweep.sh [G0 G1]: every map started on directly, A mashed through its arrival scripts, a few steps;
   a crash, a hang or a full heap fails (the end of regress.sh runs groups 0-39). It found TRAINER TOWER's placeholder
   (Quetzal_EventScript_84736F6, from the rip) opening a message box in an ON_RESUME script, which hangs: the tower is
-  closed now (receptionist and gate say so, the rest ends quietly; test region_closed_tower).
+  closed then (receptionist and gate said so); since 1.111.0 it is FireRed's again (audit case 10, test kanto_trainer_tower).
 
 ## Crash hunts and the region openings (1.60.2)
 - tools/test/trainer_sweep.sh [IDS]: every trainer battle (HOENN 1-854, JOHTO / KANTO 864-1660), two Lv. 100 MEWTWO

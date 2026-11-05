@@ -1,6 +1,7 @@
 # Crystal's DANCE THEATER (audit case 65): the old man gives no SURF before the five KIMONO GIRLS are beaten; NAOKO
 # battles with Crystal's Lv 17 FLAREON (species 136); with all five beaten he gives HM03 (341)
 MODE=1
+GEN=3
 TMO=200
 ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=285:60"
 EXPECT_A=("item 341: 0" "species 136" "trainerflag 938 = 1" "item 341: 1" "flag 4102 = 1")
