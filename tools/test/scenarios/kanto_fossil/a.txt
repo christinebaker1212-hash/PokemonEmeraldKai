@@ -1,0 +1,39 @@
+pressuntil A field 5000
+wait 60
+mp warp 38,69,12,4
+wait 150
+mp item 357 1
+mp item 354 1
+press UP 16
+wait 20
+press A 2
+pressuntil A multichoice 900
+wait 20
+shot menu
+press A 4
+pressuntil A yesno 900
+wait 20
+shot yesno
+press A 4
+wait 40
+shot after1
+mash A 30 30
+wait 60
+shot after2
+mp getvar 0x510C
+mp warp 38,66,5,5
+wait 150
+mp getvar 0x510C
+mp warp 38,69,12,4
+wait 150
+press UP 16
+wait 20
+press A 2
+pressuntil A yesno 1500
+press B 4
+mash B 30 30
+wait 60
+mp party
+mp getvar 0x510C
+shot end
+quit

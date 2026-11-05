@@ -39,123 +39,148 @@ Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E774::
 	end
 
 @ Kanto_CinnabarIsland_PokemonLab_ExperimentRoom object 2 (local id 2, gfx 0x3F43) at 12,3
+@ Moemon Kai: FireRed's fossil scientist (pokefirered CinnabarIsland_PokemonLab_ExperimentRoom; audit case 61): HELIX
+@ FOSSIL, DOME FOSSIL and OLD AMBER only, the POKéMON back after a walk out of the building (the lab's entrance sets
+@ VAR_QZ_0x510C 1 -> 2), at Lv 5. VAR_QZ_0x510D is the fossil left with him (1 HELIX, 2 DOME, 3 AMBER).
 Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E77E::
 	lock
 	faceplayer
-	goto_if_ne VAR_QZ_0x510C, 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E8CD
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E790::
+	goto_if_eq VAR_QZ_0x510C, 2, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_GiveRevivedMon
+	goto_if_eq VAR_QZ_0x510C, 1, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_FossilStillReviving
+	checkitem ITEM_HELIX_FOSSIL
+	goto_if_eq VAR_RESULT, TRUE, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ChooseFossilHelix
+	checkitem ITEM_DOME_FOSSIL
+	goto_if_eq VAR_RESULT, TRUE, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ChooseFossilDome
+	checkitem ITEM_OLD_AMBER
+	goto_if_eq VAR_RESULT, TRUE, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ChooseFossilAmber
 	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A22D, MSGBOX_DEFAULT
-	special QzBagHasFossil
-	goto_if_eq VAR_RESULT, 1, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E7A8
-	release
-	end
+	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_DontShowFossil
 
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E7A8::
-	closemessage
-	playse SE_PIN
-	applymovement VAR_LAST_TALKED, Quetzal_Movement_83607F9
-	waitmovement 0
-	applymovement VAR_LAST_TALKED, Quetzal_Movement_83607FB
-	waitmovement 0
-	msgbox Quetzal_Text_83F760D, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E960
-	special QzChooseItemFromBagForFossil
-	waitstate
-	goto_if_eq VAR_ITEM_ID, 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E960
-	special QzIsSelectedItemFossil
-	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E960
-	special QzIsSelectedItemFossilHalf
-	goto_if_eq VAR_RESULT, 1, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E804
-	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E850
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E804::
-	msgbox Quetzal_Text_82F8280, MSGBOX_DEFAULT
-	special QzChooseItemFromBagForFossil
-	waitstate
-	goto_if_eq VAR_ITEM_ID, 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E960
-	special QzIsSelectedItemFossil
-	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E842
-	special QzAreFossilHalvesCompatible
-	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E83D
-	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E86F
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E83D::
-	copyvar VAR_0x800B, VAR_ITEM_ID
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E842::
-	msgbox Quetzal_Text_83F721C, MSGBOX_DEFAULT
-	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E804
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E850::
-	special QzGiveRevivedFossilMon
-	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E88E
-	goto_if_eq VAR_RESULT, 1, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E88E
-	goto Quetzal_EventScript_8361BCF
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E86F::
-	special QzGiveRevivedFossilMon
-	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E8A5
-	goto_if_eq VAR_RESULT, 1, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E8A5
-	goto Quetzal_EventScript_8361BCF
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E88E::
-	bufferitemname 1, VAR_ITEM_ID
-	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A3E1, MSGBOX_DEFAULT
-	removeitem VAR_ITEM_ID, 1
-	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E93E
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E8A5::
-	bufferitemname 1, VAR_ITEM_ID
-	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A3E1, MSGBOX_DEFAULT
-	removeitem VAR_ITEM_ID, 1
-	bufferitemname 1, VAR_0x800B
-	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A3E1, MSGBOX_DEFAULT
-	removeitem VAR_0x800B, 1
-	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E93E
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E8CD::
-	goto_if_eq VAR_QZ_0x510D, 1, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E8FE
-	goto_if_eq VAR_QZ_0x510D, 2, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E909
-	goto_if_eq VAR_QZ_0x510D, 3, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E914
-	setvar VAR_QZ_0x510C, 0
-	setvar VAR_QZ_0x510D, 0
-	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E790
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E8FE::
-	setvar VAR_ITEM_ID, ITEM_HELIX_FOSSIL
-	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E91F
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E909::
-	setvar VAR_ITEM_ID, ITEM_DOME_FOSSIL
-	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E91F
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E914::
-	setvar VAR_ITEM_ID, ITEM_OLD_AMBER
-	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E91F
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E91F::
-	special QzGiveRevivedFossilMon
-	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E93E
-	goto_if_eq VAR_RESULT, 1, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E93E
-	goto Quetzal_EventScript_8361BCF
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E93E::
-	setvar VAR_QZ_0x510C, 0
-	setvar VAR_QZ_0x510D, 0
-	bufferspeciesname 0, VAR_0x800A
-	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A2FA, MSGBOX_DEFAULT
-	playfanfare MUS_OBTAIN_ITEM
-	message Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A322
-	waitmessage
-	waitfanfare
-	release
-	end
-
-Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E960::
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_DontShowFossil::
 	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A2BF, MSGBOX_DEFAULT
 	release
 	end
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ChooseFossilHelix::
+	message Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A22D
+	waitmessage
+	checkitem ITEM_OLD_AMBER
+	goto_if_eq VAR_RESULT, TRUE, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ChooseFossilHelixAmber
+	multichoice 0, 0, MULTI_FR_HELIX, FALSE
+	switch VAR_RESULT
+	case 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowHelixFossil
+	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_DontShowFossil
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ChooseFossilDome::
+	message Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A22D
+	waitmessage
+	checkitem ITEM_OLD_AMBER
+	goto_if_eq VAR_RESULT, TRUE, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ChooseFossilDomeAmber
+	multichoice 0, 0, MULTI_FR_DOME, FALSE
+	switch VAR_RESULT
+	case 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowDomeFossil
+	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_DontShowFossil
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ChooseFossilAmber::
+	message Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A22D
+	waitmessage
+	multichoice 0, 0, MULTI_FR_AMBER, FALSE
+	switch VAR_RESULT
+	case 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowOldAmber
+	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_DontShowFossil
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ChooseFossilHelixAmber::
+	multichoice 0, 0, MULTI_FR_HELIX_AMBER, FALSE
+	switch VAR_RESULT
+	case 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowHelixFossil
+	case 1, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowOldAmber
+	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_DontShowFossil
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ChooseFossilDomeAmber::
+	multichoice 0, 0, MULTI_FR_DOME_AMBER, FALSE
+	switch VAR_RESULT
+	case 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowDomeFossil
+	case 1, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowOldAmber
+	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_DontShowFossil
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowHelixFossil::
+	bufferspeciesname STR_VAR_1, SPECIES_OMANYTE
+	bufferitemname STR_VAR_2, ITEM_HELIX_FOSSIL
+	setvar VAR_0x8004, ITEM_HELIX_FOSSIL
+	setvar VAR_0x8005, 1
+	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowFossil
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowDomeFossil::
+	bufferspeciesname STR_VAR_1, SPECIES_KABUTO
+	bufferitemname STR_VAR_2, ITEM_DOME_FOSSIL
+	setvar VAR_0x8004, ITEM_DOME_FOSSIL
+	setvar VAR_0x8005, 2
+	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowFossil
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowOldAmber::
+	bufferspeciesname STR_VAR_1, SPECIES_AERODACTYL
+	bufferitemname STR_VAR_2, ITEM_OLD_AMBER
+	setvar VAR_0x8004, ITEM_OLD_AMBER
+	setvar VAR_0x8005, 3
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_ShowFossil::
+	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_ThatFossilIsOfMon, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_DeclineReviveFossil
+	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A3E1, MSGBOX_DEFAULT
+	removeitem VAR_0x8004
+	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_TakesTimeGoForWalk, MSGBOX_DEFAULT
+	setvar VAR_QZ_0x510C, 1
+	copyvar VAR_QZ_0x510D, VAR_0x8005
+	release
+	end
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_DeclineReviveFossil::
+	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_YouComeAgain, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_FossilStillReviving::
+	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_TakesTimeGoForWalk, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_GiveRevivedMon::
+	setvar VAR_TEMP_1, SPECIES_OMANYTE
+	call_if_eq VAR_QZ_0x510D, 2, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_SetKabuto
+	call_if_eq VAR_QZ_0x510D, 3, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_SetAerodactyl
+	bufferspeciesname STR_VAR_1, VAR_TEMP_1
+	msgbox Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A2FA, MSGBOX_DEFAULT
+	givemon VAR_TEMP_1, 5, ITEM_NONE
+	goto_if_eq VAR_RESULT, 2, Common_EventScript_NoMoreRoomForPokemon
+	setvar VAR_QZ_0x510C, 0
+	setvar VAR_QZ_0x510D, 0
+	playfanfare MUS_LEVEL_UP
+	message Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A322
+	waitmessage
+	waitfanfare
+	goto_if_eq VAR_RESULT, 1, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_NicknameMonPC
+	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_EndGiveMon
+	call Common_EventScript_GetGiftMonPartySlot
+	call Common_EventScript_NameReceivedPartyMon
+	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_EndGiveMon
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_NicknameMonPC::
+	msgbox gText_NicknameThisPokemon, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_MonSentToPC
+	call Common_EventScript_NameReceivedBoxMon
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_MonSentToPC::
+	call Common_EventScript_TransferredToPC
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_EndGiveMon::
+	release
+	end
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_SetKabuto::
+	setvar VAR_TEMP_1, SPECIES_KABUTO
+	return
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_SetAerodactyl::
+	setvar VAR_TEMP_1, SPECIES_AERODACTYL
+	return
 
 Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A22D::
 	.string "Hiya!\p"
@@ -171,13 +196,33 @@ Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A2BF::
 	.string "Is too bad!$"
 
 Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A2FA::
-	.string "Your fossil is back to life!\p"
-	.string "It was {STR_VAR_1}!$"
+	.string "You late.\n"
+	.string "Where were you?\p"
+	.string "Your fossil is back to life!\n"
+	.string "It was {STR_VAR_1} like I think!$"
 
 Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A322::
 	.string "{PLAYER} received the {STR_VAR_1}\n"
 	.string "from the doctor.$"
 
 Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A3E1::
-	.string "{PLAYER} handed over the\n"
-	.string "{STR_VAR_2} to the doctor.$"
+	.string "So!\n"
+	.string "You hurry and give me that!\p"
+	.string "{FONT_NORMAL}{PLAYER} handed over the\n"
+	.string "{STR_VAR_2} to the weird doctor.$"
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_ThatFossilIsOfMon::
+	.string "Oh!\n"
+	.string "That is {STR_VAR_2}, it is!\p"
+	.string "It is fossil of {STR_VAR_1},\n"
+	.string "a MOéMON that is already extinct!\p"
+	.string "My Resurrection Machine will make\n"
+	.string "that MOéMON live again!$"
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_TakesTimeGoForWalk::
+	.string "I take a little time!\n"
+	.string "You go for walk a little while!$"
+
+Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_YouComeAgain::
+	.string "Aiyah!\n"
+	.string "You come again!$"

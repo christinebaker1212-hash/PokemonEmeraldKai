@@ -141,6 +141,11 @@
 #define MULTI_HOF_VICTORIES_QUIT           235
 #define MULTI_EGGS_VICTORIES_QUIT          236
 #define MULTI_HOF_EGGS_VICTORIES_QUIT      237
+#define MULTI_FR_HELIX                     238   // Moemon Kai: FireRed's CINNABAR fossil scientist (audit case 61)
+#define MULTI_FR_DOME                      239
+#define MULTI_FR_AMBER                     240
+#define MULTI_FR_HELIX_AMBER               241
+#define MULTI_FR_DOME_AMBER                242
 
 // Lilycove SS Tidal Multichoice Selections
 #define SSTIDAL_SELECTION_SLATEPORT        0

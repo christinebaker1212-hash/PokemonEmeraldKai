@@ -1,0 +1,8 @@
+# CINNABAR's fossil scientist as FireRed has him (audit case 61): HELIX FOSSIL, DOME FOSSIL and OLD AMBER only (the
+# HELIX / AMBER menu here), the fossil handed over, the POKéMON back after a walk out of the lab (the entrance sets VAR
+# 0x510C 1 -> 2), OMANYTE at Lv 5.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("var 0x510C = 1" "var 0x510C = 2" "[test] party: 25(" ") 138(" "var 0x510C = 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -40,24 +40,15 @@ Johto_RuinsOfAlphInnerChamber_EventScript_83F6D47::
 	end
 
 @ Johto_RuinsOfAlphInnerChamber object 6 (local id 6, gfx 0xC7) at 5,21
-Johto_RuinsOfAlphInnerChamber_EventScript_83F6D53::
-	setorcopyvar VAR_0x8000, ITEM_HELIX_FOSSIL
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_FIND_ITEM
+Johto_RuinsOfAlphInnerChamber_EventScript_83F6D53::   @ Moemon Kai: Quetzal's fossil ball, gone (FLAG_KAI_GONE; Crystal has none: audit case 61)
 	end
 
 @ Johto_RuinsOfAlphInnerChamber object 4 (local id 4, gfx 0xC7) at 21,4
-Johto_RuinsOfAlphInnerChamber_EventScript_83F6D60::
-	setorcopyvar VAR_0x8000, ITEM_DOME_FOSSIL
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_FIND_ITEM
+Johto_RuinsOfAlphInnerChamber_EventScript_83F6D60::   @ Moemon Kai: Quetzal's fossil ball, gone (FLAG_KAI_GONE; Crystal has none: audit case 61)
 	end
 
 @ Johto_RuinsOfAlphInnerChamber object 5 (local id 5, gfx 0xC7) at 21,21
-Johto_RuinsOfAlphInnerChamber_EventScript_83F6D6D::
-	setorcopyvar VAR_0x8000, ITEM_OLD_AMBER
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_FIND_ITEM
+Johto_RuinsOfAlphInnerChamber_EventScript_83F6D6D::   @ Moemon Kai: Quetzal's fossil ball, gone (FLAG_KAI_GONE; Crystal has none: audit case 61)
 	end
 
 @ Johto_RuinsOfAlphInnerChamber object 7 (local id 7, gfx 0x3A9E) at 5,4

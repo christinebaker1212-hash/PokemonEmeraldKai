@@ -4483,6 +4483,14 @@ follow_behind, follow_ground.
   print), Crystal's words. Tests johto_hideout_studio, story_rocket_lance (rewritten for Crystal's battle).
 - crystal_words keeps "mean-looking" whole across a line break (fix_johto_tms.py KEEP_HYPHEN).
 
+- **Case 61, fossils the original way**: CINNABAR's scientist is FireRed's (ExperimentRoom object 2): HELIX FOSSIL,
+  DOME FOSSIL and OLD AMBER only, chosen from FireRed's menus (MULTI_FR_HELIX... 238-242, script_menu.h), handed over,
+  then "You go for walk a little while!": the lab's entrance moves VAR_QZ_0x510C 1 -> 2 on the way out, VAR_QZ_0x510D
+  keeps which fossil (1 HELIX, 2 DOME, 3 AMBER), and the POKéMON comes back at Lv 5 (givemon, the common nickname / PC
+  scripts). Which fossils show is what the BAG holds (no FireRed GOT / REVIVED flags: KANTO's fossils come from MT. MOON
+  and PEWTER as there). JOHTO's RUINS RESEARCH CENTER has no fossil regenerator: its third scientist and the bookshelf
+  say Crystal's words, the fossils on show and the INNER CHAMBER's three fossil balls wear FLAG_KAI_GONE (local ids kept).
+  HOENN's and SINNOH's revivers are their own. Test kanto_fossil.
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).

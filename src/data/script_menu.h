@@ -810,6 +810,15 @@ static const struct MenuAction MultichoiceList_HofEggsQuit[] = {{sBragHof}, {sBr
 static const struct MenuAction MultichoiceList_HofVictoriesQuit[] = {{sBragHof}, {sBragVictories}, {sBragQuit}};
 static const struct MenuAction MultichoiceList_EggsVictoriesQuit[] = {{sBragEggs}, {sBragVictories}, {sBragQuit}};
 static const struct MenuAction MultichoiceList_HofEggsVictoriesQuit[] = {{sBragHof}, {sBragEggs}, {sBragVictories}, {sBragQuit}};
+// Moemon Kai: FireRed's CINNABAR fossil scientist (pokefirered src/script_menu.c sMultichoiceList_Helix...; audit case 61)
+static const u8 sFrHelixFossil[] = _("HELIX FOSSIL");
+static const u8 sFrDomeFossil[] = _("DOME FOSSIL");
+static const u8 sFrOldAmber[] = _("OLD AMBER");
+static const struct MenuAction MultichoiceList_FrHelix[] = {{sFrHelixFossil}, {gText_Exit}};
+static const struct MenuAction MultichoiceList_FrDome[] = {{sFrDomeFossil}, {gText_Exit}};
+static const struct MenuAction MultichoiceList_FrAmber[] = {{sFrOldAmber}, {gText_Exit}};
+static const struct MenuAction MultichoiceList_FrHelixAmber[] = {{sFrHelixFossil}, {sFrOldAmber}, {gText_Exit}};
+static const struct MenuAction MultichoiceList_FrDomeAmber[] = {{sFrDomeFossil}, {sFrOldAmber}, {gText_Exit}};
 
 static const struct MenuAction MultichoiceList_ArcadeCabinet[] =
 {
@@ -990,6 +999,11 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_HOF_VICTORIES_QUIT]         = MULTICHOICE(MultichoiceList_HofVictoriesQuit),
     [MULTI_EGGS_VICTORIES_QUIT]        = MULTICHOICE(MultichoiceList_EggsVictoriesQuit),
     [MULTI_HOF_EGGS_VICTORIES_QUIT]    = MULTICHOICE(MultichoiceList_HofEggsVictoriesQuit),
+    [MULTI_FR_HELIX]                   = MULTICHOICE(MultichoiceList_FrHelix),
+    [MULTI_FR_DOME]                    = MULTICHOICE(MultichoiceList_FrDome),
+    [MULTI_FR_AMBER]                   = MULTICHOICE(MultichoiceList_FrAmber),
+    [MULTI_FR_HELIX_AMBER]             = MULTICHOICE(MultichoiceList_FrHelixAmber),
+    [MULTI_FR_DOME_AMBER]              = MULTICHOICE(MultichoiceList_FrDomeAmber),
 };
 
 static const u8 sText_QzStd_1E[] = _("MEDICINE");
