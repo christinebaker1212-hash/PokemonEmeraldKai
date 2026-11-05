@@ -1,0 +1,7 @@
+# ROUTE 21's WADE fights with FireRed's team, four MAGIKARP at Lv 27, at every GENERATION (mp_region.c sFireRedTeams;
+# docs/REGIONS_AUDIT.md 89: "I seem to only catch MAGIKARP!"). Level scaling is off for the check.
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("[test] foeparty: 129:27 129:27 129:27 129:27")
+UNEXPECT_A=("[crash]")

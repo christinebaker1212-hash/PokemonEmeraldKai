@@ -83,10 +83,11 @@ Kanto_Route21_North_Text_84386BD::
 	.string "Wanna go for it?$"
 
 Kanto_Route21_North_Text_84386E0::
-	.string "A big haul isn’t everything!$"
+	.string "Heheh, MAGIKARP just don’t make\n"
+	.string "the grade, do they?$"
 
 Kanto_Route21_North_Text_84386FD::
-	.string "I keep catching different fish!$"
+	.string "I seem to only catch MAGIKARP!$"
 
 Kanto_Route21_North_Text_843871D::
 	.string "The sea cleanses my body and soul!$"

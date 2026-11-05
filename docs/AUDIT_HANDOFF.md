@@ -8,16 +8,18 @@ then `docs/REGIONS_AUDIT.md` (the decisions and the rules at its top), then the 
 
 ## Where it stands
 
-- **117 of 158 cases are ticked** (1.105.0 added 100, 101 and 138; 1.106.0 105, 15, 49 and 104, the user's rule since 2026-11-05: no case is left half done) (`- [x]` in REGIONS_AUDIT.md; its status line says which release did which).
+- **124 of 158 cases are ticked** (1.105.0 added 100, 101 and 138; 1.106.0 105, 15, 49 and 104, the user's rule since 2026-11-05: no case is left half done) (`- [x]` in REGIONS_AUDIT.md; its status line says which release did which).
 - Released: 1.88.0 (batch A), 1.89.0 (B), 1.90.0 (C, KANTO), 1.91.0 (D, JOHTO), 1.92.0 (E part 1: hidden items,
   weekday siblings, the Sunday lady...), **1.93.0** (E part 2: GOLDENROD's tutor, GAME CORNER TM prizes, NAME RATER,
   UNDERGROUND, CIANWOOD's SEER, the tutor / VAR_RESULT fix): pushed when the session paused; check its release run
   (Actions, "Release") went green, and re-queue it (workflow_dispatch) if not.
 - Case 100 ran (tools/quetzal_port/fix_floria.py), 101 too (fix_park.py); 138 is finished (COOP_NOTES 1.105.0).
 
-## The 41 cases left (`grep "^- \[ \]" docs/REGIONS_AUDIT.md`)
+## The 34 cases left (`grep "^- \[ \]" docs/REGIONS_AUDIT.md`)
 
-Small (a person, a sign, some lines): 46, 50, 66, 89, 115, 117, 122, 124, 126.
+Small (a person, a sign, some lines): 124 (the GAME CORNER photo printer) and 126 (FOUR ISLAND's STICKER MAN), both on
+Kai's TRAINER CARD. Done after 1.106.0: 46, 50, 66, 89 (mp_region.c sFireRedTeams: FireRed's team for a trainer, at
+every GENERATION; case 57 can fill it), 115, 117, 122.
 
 Medium: 25 + 71 (CELADON DEPT. STORE), 45 (leaders' rematches / DOJO), 47 (DAY-CARE through the PC), 74 (CYCLING
 ROAD slope), 88 (FAN CLUB), 96 (GOLDENROD DEPT. STORE; 5F still has Quetzal's MEGA STONE / Z-CRYSTAL clerks: keep

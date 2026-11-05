@@ -1190,7 +1190,13 @@ Quetzal_EventScript_83DF6A9::
 	return
 
 Quetzal_EventScript_83DF6B4::
+	@ Moemon Kai: PROF. ELM calls about the RADIO TOWER, as in Crystal (SPECIALCALL_WEIRDBROADCAST after the 7th badge;
+	@ Quetzal had a "public RADIO alert" here: docs/REGIONS_AUDIT.md 117)
 	lock
+	playse SE_POKENAV_CALL
+	waitse
+	playse SE_POKENAV_CALL
+	waitse
 	msgbox Quetzal_Text_83DFBD4, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x500A, 6
 	clearflag FLAG_QZ_0x1097
@@ -2832,11 +2838,17 @@ Quetzal_Text_83DC904::
 	.string "POKEMON summary screen.$"
 
 Quetzal_Text_83DFBD4::
-	.string "A public RADIO alert interrupts\n"
-	.string "the usual broadcast:\p"
-	.string "TEAM ROCKET has taken over the\n"
-	.string "GOLDENROD RADIO TOWER!\p"
-	.string "Someone must stop them!$"
+	.string "{PLAYER}, how are things going?\p"
+	.string "I called because something weird\n"
+	.string "is happening with the radio\l"
+	.string "broadcasts.\p"
+	.string "They were talking about TEAM\n"
+	.string "ROCKET.\p"
+	.string "{PLAYER}, do you know anything\n"
+	.string "about it?\p"
+	.string "Maybe TEAM ROCKET has returned.\n"
+	.string "No, that just can’t be true.\p"
+	.string "Sorry to bug you. Take care!$"
 
 Quetzal_Text_83E0685::
 	.string "RED offers you a LIGHT BALL\n"

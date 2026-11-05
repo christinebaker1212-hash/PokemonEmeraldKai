@@ -24,7 +24,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Quetzal_EventScript_83661FF",
+      "script": "Common_EventScript_UnionRoomAttendant",
       "flag": "0"
     },
     {
@@ -37,7 +37,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Quetzal_EventScript_8366208",
+      "script": "Common_EventScript_WirelessClubAttendant",
       "flag": "0"
     },
     {
@@ -50,7 +50,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Quetzal_EventScript_8366211",
+      "script": "Common_EventScript_DirectCornerAttendant",
       "flag": "0"
     }
   ],

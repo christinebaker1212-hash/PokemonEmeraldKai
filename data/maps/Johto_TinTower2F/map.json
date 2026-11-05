@@ -45,22 +45,5 @@
     }
   ],
   "coord_events": [],
-  "bg_events": [
-    {
-      "type": "sign",
-      "x": 12,
-      "y": 3,
-      "elevation": 0,
-      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Quetzal_EventScript_83F804F"
-    },
-    {
-      "type": "sign",
-      "x": 6,
-      "y": 3,
-      "elevation": 0,
-      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Quetzal_EventScript_83F804F"
-    }
-  ]
+  "bg_events": []
 }

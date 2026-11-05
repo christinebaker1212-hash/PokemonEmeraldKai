@@ -436,3 +436,13 @@ Johto_Route31 Johto_Route31_Text_83EE78B gsc Route31 Text_Route31ReadingMail
 Johto_Route31 Johto_Route31_Text_83EE832 gsc Route31 Text_Route31DescribeNightmare
 Johto_Route39Farmhouse Johto_Route39Farmhouse_Text_83F3CB2 gsc Route39Farmhouse FarmerFText_SnoreSpeech
 Johto_DragonShrine Johto_DragonShrine_Text_83CC9B2 gsc DragonsDenB1F ClairText_DescribeDragonbreathDragonDen
+# case 89 [K4-20]: ROUTE 21's WADE (FireRed's MAGIKARP team: mp_region.c sFireRedTeams)
+Kanto_Route21_North Kanto_Route21_North_Text_84386BD fr Route21_North Route21_North_Text_WadeIntro
+Kanto_Route21_North Kanto_Route21_North_Text_84386E0 fr Route21_North Route21_North_Text_WadeDefeat
+Kanto_Route21_North Kanto_Route21_North_Text_84386FD fr Route21_North Route21_North_Text_WadePostBattle
+# case 117 [J3-39]: the 7th badge's RADIO TOWER news is PROF. ELM's call, as in Crystal
+data/scripts/qz/johto_shared.inc Quetzal_Text_83DFBD4 gsc data/phone/text/elm ElmPhoneRadioTowerRocketTakeoverText
+# case 122 [K2-2]: VERMILION's construction man and his MACHOP
+Kanto_VermilionCity Kanto_VermilionCity_Text_BuildingOnThisLand fr VermilionCity VermilionCity_Text_BuildingOnThisLand
+Kanto_VermilionCity Kanto_VermilionCity_Text_Machop fr VermilionCity VermilionCity_Text_Machop
+Kanto_VermilionCity Kanto_VermilionCity_Text_MachopStompingLandFlat fr VermilionCity VermilionCity_Text_MachopStompingLandFlat

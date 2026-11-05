@@ -2217,6 +2217,16 @@ const struct Trainer *MP_Region_TrainerData(u16 trainerNum)
     return &sRival;
 }
 
+// KANTO trainers with FireRed's own team at every GENERATION, where their words need it (docs/REGIONS_AUDIT.md 89;
+// case 57 moves every KANTO trainer to FireRed's teams). ROUTE 21's WADE: "I seem to only catch MAGIKARP!"
+static const struct TrainerMonNoItemDefaultMoves sFrWade[] = {
+    {.iv = 0, .lvl = 27, .species = SPECIES_MAGIKARP}, {.iv = 0, .lvl = 27, .species = SPECIES_MAGIKARP},
+    {.iv = 0, .lvl = 27, .species = SPECIES_MAGIKARP}, {.iv = 0, .lvl = 27, .species = SPECIES_MAGIKARP},
+};
+static const struct { u16 trainerNum; struct TrainerMonNoItemDefaultMoves const *party; u8 count; } sFireRedTeams[] = {
+    {TRAINER_QZ_8423, sFrWade, ARRAY_COUNT(sFrWade)},
+};
+
 static const struct Trainer *TrainerDataFor(u16 trainerNum)
 {
     static struct Trainer sCopy;
@@ -2225,6 +2235,17 @@ static const struct Trainer *TrainerDataFor(u16 trainerNum)
     u16 blue = QzKantoRivalTrainer(trainerNum, &isBlue);
     if (isBlue)   // BLUE: FireRed's team for the player's starter, at every GENERATION (qz_specials.c)
         return &gTrainers[blue];
+    for (i = 0; i < ARRAY_COUNT(sFireRedTeams); i++)
+    {
+        if (sFireRedTeams[i].trainerNum == trainerNum)
+        {
+            sCopy = gTrainers[trainerNum];
+            sCopy.partyFlags = 0;
+            sCopy.partySize = sFireRedTeams[i].count;
+            sCopy.party.NoItemDefaultMoves = sFireRedTeams[i].party;
+            return &sCopy;
+        }
+    }
     if (trainerNum < MAX_TRAINERS_COUNT && MP_Region_Current() == REGION_HOENN && MP_Gen_Cap(REGION_HOENN) >= 4)
         return HoennModernTeam(trainerNum, sHoennModernTrainers, ARRAY_COUNT(sHoennModernTrainers), REGION_HOENN);
     if (trainerNum >= FIRST_SINNOH_TRAINER && trainerNum < FIRST_SINNOH_TRAINER + SINNOH_TRAINERS_COUNT)

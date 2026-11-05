@@ -297,6 +297,32 @@
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_83C303A",
       "flag": "FLAG_QZ_0x2EAB"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16173",
+      "x": 36,
+      "y": 10,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_AND_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_OldMan2",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_MON_MACHOP",
+      "x": 35,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 2,
+      "movement_range_y": 2,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_VermilionCity_EventScript_Machop",
+      "flag": "0"
     }
   ],
   "warp_events": [
@@ -350,7 +376,7 @@
       "dest_warp_id": "1"
     },
     {
-      "x": 28,
+      "x": 29,
       "y": 17,
       "elevation": 0,
       "dest_map": "MAP_KANTO_VERMILION_CITY_MART",

@@ -600,3 +600,31 @@ Kanto_VermilionCity_Text_842FFAE::
 	.string "ROUTE 2, {PLAYER}.\p"
 	.string "If you’re in the ROUTE 2 area,\n"
 	.string "please look for him.$"
+
+@ Moemon Kai: FireRed's construction man and his MACHOP (docs/REGIONS_AUDIT.md 122)
+Kanto_VermilionCity_EventScript_OldMan2::
+	msgbox Kanto_VermilionCity_Text_BuildingOnThisLand, MSGBOX_NPC
+	end
+
+Kanto_VermilionCity_EventScript_Machop::
+	lock
+	faceplayer
+	waitse
+	playmoncry SPECIES_MACHOP, CRY_MODE_NORMAL
+	msgbox Kanto_VermilionCity_Text_Machop
+	waitmoncry
+	msgbox Kanto_VermilionCity_Text_MachopStompingLandFlat
+	release
+	end
+
+Kanto_VermilionCity_Text_BuildingOnThisLand::
+	.string "I’m putting up a building on this\n"
+	.string "plot of land. I own it all.\p"
+	.string "My MOéMON is tamping the land\n"
+	.string "to lay the foundation.$"
+
+Kanto_VermilionCity_Text_Machop::
+	.string "MACHOP: Guoh! Gogogoh!$"
+
+Kanto_VermilionCity_Text_MachopStompingLandFlat::
+	.string "A MACHOP is stomping the land flat.$"

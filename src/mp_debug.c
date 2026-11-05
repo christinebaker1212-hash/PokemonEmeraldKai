@@ -1774,6 +1774,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] battlerhp: battler %d = %d\n", b, v);
         }
     }
+    else if (strcmp(cmd, "foeparty") == 0)
+    {
+        // foeparty - the foes' team in the running battle (species:level each)
+        int i;
+        printf("[test] foeparty:");
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES))
+                printf(" %u:%u", (unsigned)GetMonData(&gEnemyParty[i], MON_DATA_SPECIES),
+                       (unsigned)GetMonData(&gEnemyParty[i], MON_DATA_LEVEL));
+        printf("\n");
+    }
     else if (strcmp(cmd, "foehp") == 0)
     {
         // foehp HP - every foe's HP in the running battle (its party and the ones out), for tests of long battles

@@ -60,11 +60,11 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **43. [J3-14]** VICTORY ROAD gate's east door walks the whole party into KANTO, skipping Kai's customs: **RESTORE the original** - _Do not allow region walking - customs must apply._
 - [x] **44. [J3-33]** MT. SILVER ROOM 3's triangular rock (DEOXYS) is a dead prop: **REMOVE it**
 - [ ] **45. [J2-12, J3-8, J3-9]** JOHTO's leaders promise rematches at a FIGHTING DOJO that has none: **RESTORE the original**
-- [ ] **46. [K2-18, K3-11, K4-14]** POKéMON CENTER 2F attendants explain Quetzal's MPLAYER, cheats and NUZLOCKE: **RESTORE the original**
+- [x] **46. [K2-18, K3-11, K4-14]** POKéMON CENTER 2F attendants explain Quetzal's MPLAYER, cheats and NUZLOCKE: **RESTORE the original**
 - [ ] **47. [K1-20, K3-9, J2-3, J3-36]** DAY-CARE "through the PC": KANTO's two are incense shops, JOHTO has none: **RESTORE the original**
 - [x] **48. [K1-19, J2-9]** BIKE SHOPs talk about MACH / ACRO modes: **RESTORE the original**
 - [x] **49. [K1-14, K2-10, K3-12, K4-4, K4-13, J1-8, J3-37]** "Moves are managed from the team menu / summary" lines (Quetzal's tutors, Kai can't): **RESTORE the original**
-- [ ] **50. [J1-4, J2-10, J2-11, J3-38]** Words about travel between regions that don't match Kai's: **RESTORE the original**
+- [x] **50. [J1-4, J2-10, J2-11, J3-38]** Words about travel between regions that don't match Kai's: **RESTORE the original**
 - [x] **51. [K1-12]** DAISY: Quetzal's "no friendship" line, a TOWN MAP she never gives, no grooming: **RESTORE the original**
 - [x] **52. [J1-5]** EARL's ACADEMY teaches Quetzal's rules; Crystal's lessons are gone: **RESTORE the original**
 - [x] **53. [J1-6]** KURT's first gift is a FAST BALL with "I make BALLS from BERRIES ... batches of 5": **RESTORE the original**
@@ -80,7 +80,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **63. [J1-9, J2-21, J3-18]** The WEEKDAY siblings stand there every day with a guess-the-day game: **RESTORE the original**
 - [ ] **64. [K1-9, K1-10, K2-15]** OAK's POKéDEX rating and the NATIONAL DEX come Quetzal's way: **RESTORE the original**
 - [ ] **65. [J2-13, J1-21]** The legendary story is Quetzal's HGSS-style KIMONO GIRL chain: **RESTORE the original**
-- [ ] **66. [K1-7]** Quetzal's empty "MT. MOON ROUTE 4 cave": **RESTORE the original**
+- [x] **66. [K1-7]** Quetzal's empty "MT. MOON ROUTE 4 cave": **RESTORE the original**
 - [x] **67. [K1-15]** GIOVANNI stays in his GYM after the battle: **RESTORE the original**
 - [x] **68. [K1-23]** CERULEAN rival gives a LUCKY EGG with Quetzal's lines: **RESTORE the original**
 - [x] **69. [K1-24]** Small Quetzal rewrites of FireRed's words: **RESTORE the original**
@@ -103,7 +103,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **86. [K3-30]** RUIN VALLEY's braille door asks "Use CUT on the door?": **RESTORE the original**
 - [x] **87. [K3-32]** kanto_shared.inc: the other Quetzal-only shared pieces: **RESTORE the original**
 - [ ] **88. [K4-6]** The POKéMON TRAINER FAN CLUB is Quetzal's "KANTO EXPLORERS' CLUB" of hint people, some describing things Kai doesn't have: **RESTORE the original**
-- [ ] **89. [K4-20]** A few trainers' lines rewritten by Quetzal: **RESTORE the original**
+- [x] **89. [K4-20]** A few trainers' lines rewritten by Quetzal: **RESTORE the original**
 - [x] **90. [J1-11]** ROUTE 32's guard demands Elder LI; Crystal only wants the ZEPHYRBADGE: **RESTORE the original**
 - [x] **91. [J1-13]** Item balls are Quetzal's, not Crystal's (non-TM ones too): **RESTORE the original**
 - [x] **92. [J1-19]** SLOWPOKE WELL B2F: Quetzal's SLOWKING / DAMP ROCK instead of Crystal's KING'S ROCK man; B1F's SLOWPOKE with MAIL missing: **RESTORE the original**
@@ -129,14 +129,14 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **112. [J3-26]** "Welcome back" rematch intros for the ELITE FOUR, LANCE and the HALL OF FAME: **RESTORE the original**
 - [ ] **113. [J3-28]** LAKE OF RAGE's LANCE scene and ROUTE 42's EUSINE scene are rewritten: **RESTORE the original**
 - [x] **114. [J3-29]** TOHJO FALLS gives a SUPER ROD and a HEART SCALE: **RESTORE the original**
-- [ ] **115. [J3-34]** Mahogany / Blackthorn / Indigo dead or Quetzal-only bits (low): **RESTORE the original**
+- [x] **115. [J3-34]** Mahogany / Blackthorn / Indigo dead or Quetzal-only bits (low): **RESTORE the original**
 - [ ] **116. [J3-35]** HGSS-flavoured events kept from Quetzal (for the record: HGSS ranks above Quetzal): **REMOVE it** - _We must stick to strictly Crystal._
-- [ ] **117. [J3-39]** Shared-script inventory (what is Quetzal-only and its state): **RESTORE the original**
+- [x] **117. [J3-39]** Shared-script inventory (what is Quetzal-only and its state): **RESTORE the original**
 - [x] **118. [K2-11, J2-8]** The NAME RATER doesn't rate or rename (KANTO's removed, JOHTO's talks about RADIANT): **RESTORE the original**
 - [x] **119. [K1-2]** ROCK TUNNEL isn't dark: **RESTORE the original**
 - [ ] **120. [K1-13]** VIRIDIAN's old man never shows how to catch a POKéMON: **RESTORE the original**
 - [x] **121. [K1-25]** OAK's first-battle advice is missing from the lab battle: **KEEP as it is** - _A bit annoying. Don't restore it._
-- [ ] **122. [K2-2]** VERMILION's construction man and his MACHOP are missing: **RESTORE the original**
+- [x] **122. [K2-2]** VERMILION's construction man and his MACHOP are missing: **RESTORE the original**
 - [x] **123. [K2-7]** The COUNTER move tutor (Dept. Store 3F) is missing: **RESTORE the original**
 - [ ] **124. [K2-23]** GAME CORNER photo printer "out of service": **RESTORE the original**
 - [ ] **125. [K3-16]** The JOYFUL GAME CORNER's games are gone (a rest area now): **RESTORE the original**

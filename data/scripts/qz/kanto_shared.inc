@@ -8,74 +8,7 @@ Quetzal_EventScript_83661F3::
 	removeobject 5
 	goto Quetzal_EventScript_83661E8
 
-@ Kanto_ViridianCity_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_PewterCity_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_CeruleanCity_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_LavenderTown_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_VermilionCity_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_CeladonCity_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_FuchsiaCity_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_CinnabarIsland_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_IndigoPlateau_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_SaffronCity_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_Route4_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_Route10_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_SevenIsland_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_OneIsland_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_TwoIsland_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_ThreeIsland_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_FourIsland_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_FiveIsland_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-@ Kanto_SixIsland_PokemonCenter_2F object 1 (local id 1, gfx 0x3EF2) at 6,2
-Quetzal_EventScript_83661FF::
-	msgbox Quetzal_Text_836622C, MSGBOX_NPC
-	end
-
-@ Kanto_ViridianCity_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_PewterCity_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_CeruleanCity_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_LavenderTown_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_VermilionCity_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_CeladonCity_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_FuchsiaCity_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_CinnabarIsland_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_IndigoPlateau_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_SaffronCity_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_Route4_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_Route10_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_SevenIsland_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_OneIsland_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_TwoIsland_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_ThreeIsland_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_FourIsland_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_FiveIsland_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-@ Kanto_SixIsland_PokemonCenter_2F object 2 (local id 2, gfx 0x3EF2) at 2,2
-Quetzal_EventScript_8366208::
-	msgbox Quetzal_Text_8366334, MSGBOX_NPC
-	end
-
-@ Kanto_ViridianCity_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_PewterCity_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_CeruleanCity_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_LavenderTown_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_VermilionCity_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_CeladonCity_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_FuchsiaCity_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_CinnabarIsland_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_IndigoPlateau_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_SaffronCity_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_Route4_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_Route10_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_SevenIsland_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_OneIsland_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_TwoIsland_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_ThreeIsland_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_FourIsland_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_FiveIsland_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-@ Kanto_SixIsland_PokemonCenter_2F object 3 (local id 3, gfx 0x3EF2) at 10,2
-Quetzal_EventScript_8366211::
-	msgbox Quetzal_Text_8366445, MSGBOX_NPC
-	end
+@ (KANTO's POKéMON CENTER 2F attendants are HOENN's again, Common_EventScript_UnionRoomAttendant etc.: docs/REGIONS_AUDIT.md 46)
 
 Quetzal_EventScript_83C3036::
 	special QzKantoTravelingEventCheck
@@ -2057,44 +1990,6 @@ Quetzal_Movement_846B46B:
 Quetzal_Movement_846B55B:
 	rock_smash_break
 	step_end
-
-Quetzal_Text_836622C::
-	.string "Start multiplayer from the\n"
-	.string "START menu! Choose MPLAYER.\p"
-	.string "Two to four players can connect.\n"
-	.string "Choose the same player count\l"
-	.string "and follow the connection prompts.\p"
-	.string "Once connected, open MPLAYER\n"
-	.string "again to see its features.\p"
-	.string "When you finish, choose DISCONNECT\n"
-	.string "from that same menu.$"
-
-Quetzal_Text_8366334::
-	.string "To trade, connect two players\n"
-	.string "and open MPLAYER from\l"
-	.string "the START menu.\p"
-	.string "Choose the trade option.\n"
-	.string "Each player needs at least\l"
-	.string "two MOéMON in their party.\p"
-	.string "Your game and cheat modes must\n"
-	.string "match. Challenges may prevent\l"
-	.string "some trades.\p"
-	.string "In Nuzlocke, your trade clause\n"
-	.string "must allow trading.$"
-
-Quetzal_Text_8366445::
-	.string "To battle other players, open\n"
-	.string "MPLAYER from the START menu\l"
-	.string "and choose the battle option.\p"
-	.string "Two players can choose\n"
-	.string "Single or Double Battles.\l"
-	.string "Multi Battles need four players.\p"
-	.string "You can also team up against\n"
-	.string "adventure trainers when the game\l"
-	.string "allows a COOP battle.\p"
-	.string "Check its settings in OPTIONS:\n"
-	.string "you can enable COOP battles\l"
-	.string "and adjust their experience.$"
 
 Quetzal_Text_840FC22::
 	.string "...$"

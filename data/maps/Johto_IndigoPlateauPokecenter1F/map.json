@@ -77,7 +77,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_IndigoPlateauPokecenter1F_EventScript_83DD156",
-      "flag": "0"
+      "flag": "FLAG_QZ_0x11B1"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_319",
@@ -90,7 +90,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_IndigoPlateauPokecenter1F_EventScript_83DD1A8",
-      "flag": "0"
+      "flag": "FLAG_QZ_0x11B1"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16053",
@@ -116,7 +116,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_IndigoPlateauPokecenter1F_EventScript_83DCEC6",
-      "flag": "FLAG_QZ_0x1061"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16016",
@@ -129,7 +129,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_IndigoPlateauPokecenter1F_EventScript_83DCECF",
-      "flag": "0"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16048",
@@ -142,7 +142,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_IndigoPlateauPokecenter1F_EventScript_8401C96",
-      "flag": "FLAG_QZ_0x1321"
+      "flag": "FLAG_KAI_GONE"
     }
   ],
   "warp_events": [
@@ -170,54 +170,6 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Quetzal_EventScript_84017BA"
-    },
-    {
-      "type": "sign",
-      "x": 5,
-      "y": 12,
-      "elevation": 0,
-      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Quetzal_EventScript_83F804F"
-    },
-    {
-      "type": "sign",
-      "x": 5,
-      "y": 15,
-      "elevation": 0,
-      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Quetzal_EventScript_83F804F"
-    },
-    {
-      "type": "sign",
-      "x": 30,
-      "y": 9,
-      "elevation": 0,
-      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Quetzal_EventScript_83F804F"
-    },
-    {
-      "type": "sign",
-      "x": 30,
-      "y": 6,
-      "elevation": 0,
-      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Quetzal_EventScript_83F804F"
-    },
-    {
-      "type": "sign",
-      "x": 34,
-      "y": 6,
-      "elevation": 0,
-      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Quetzal_EventScript_83F804F"
-    },
-    {
-      "type": "sign",
-      "x": 34,
-      "y": 9,
-      "elevation": 0,
-      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Quetzal_EventScript_83F804F"
     }
   ]
 }

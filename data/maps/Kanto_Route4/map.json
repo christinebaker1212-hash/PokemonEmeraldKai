@@ -151,13 +151,6 @@
       "elevation": 0,
       "dest_map": "MAP_KANTO_ROUTE4_POKEMON_CENTER_1F",
       "dest_warp_id": "1"
-    },
-    {
-      "x": 58,
-      "y": 2,
-      "elevation": 3,
-      "dest_map": "MAP_KANTO_MT_MOON_ROUTE4_CAVE",
-      "dest_warp_id": "0"
     }
   ],
   "coord_events": [],
