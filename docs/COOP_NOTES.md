@@ -4953,8 +4953,8 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   DAYBREAK white; 40 cards, 17 lands), then offers the way down to the play room (warp to B1F 3,2: 1F's own stairs are
   behind the counter). B1F's stairs come back up by the front door (warp 0). Regulars (gMtgDuelists, by VAR_0x8004):
   AUGUST (the old man) and PIP on 1F, RHEA, MARLOW, TESS, NOLAN on B1F; specials Mtg_DuelistState /
-  Mtg_DuelistChallenge. A win: a booster of 8 usable cards (5 common, 2 uncommon, an uncommon or one in four a rare),
-  wins / beaten saved; a loss costs nothing.
+  Mtg_DuelistChallenge. A win: a booster of a set into the CARD CASE (below), wins / beaten saved; a loss costs nothing.
+  Once the player has a deck the clerk opens the counter (Mtg_ShopBoosters, waitstate) before offering the way down.
 - The look (1.96.0, the user: "not similar to Pokemon or Yugioh at all"; then "tiny details like that to be respected,
   across all card games", and the table "more like Pokemon's ... that style of play area"): every MAGIC screen and the
   table are laid out, worded and keyed as the POKeMON / YU-GI-OH! sides' own. When one of those changes, change MAGIC's
@@ -5036,8 +5036,43 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   on one that can't says why (tapped, arrived this turn, DEFENDER); B clears the attackers; when picking which attacker
   to block, the ones it can block are lit. Prompts wrap to two lines as tcg_board.c's.
 - The regulars have only their names (no descriptions: the user, 2026-11-05).
+- Booster packs (1.100.0, the user: "a true Booster Pack implementation, the same as Pokemon and Yugioh"): the sets are
+  gMtgSets (src/mtg/mtg_sets_data.c, generated with tools/mtg/sets.json by tools/mtg/fetch_sets.py from Scryfall: the 28
+  core sets and expansions from Fourth Edition to Scourge, no Chronicles, each with the pool's cards printed in it and
+  their rarity there; rerun it with --offline to only regenerate the C file), src/mtg/mtg_sets.c draws a booster from a
+  set's cards the game plays (Mtg_CanUse), slot by slot by the set's rarity (most sets 11 commons, 3 uncommons, a rare;
+  Homelands 6/1/1, Alliances 8/3/1; a rarity with none playable takes the next down), no card twice in a pack while it
+  can help it. A set is on offer (Mtg_SetAvailable) once enough of it plays (23 of 28 now; more open as cards are
+  translated). Held per set in MtgCollection.packs, opened counts in .opened / .packsOpened ("<save>.mtg" format 4: the
+  sets by code). The CARD CASE's HOME has BOOSTER PACKS between BINDER and PRACTICE DUEL (the YU-GI-OH! side's row and
+  words), a carousel of the packs (the set's colors, its rare with the highest mana value as the picture
+  Mtg_SetMascot, its code, xN; the strip: the set's name and year, owned / playable cards of it), A opens one: torn,
+  dealt out face down (15 in rows of eight and seven, 27x38), turned one by one, RARE! and NEW, the strip naming the
+  card's rarity in that set; B goes back to the packs on the same set. A win against a regular puts a random available
+  set's booster into the CASE; the MOSSDEEP clerk's counter (M_SHOP, the YU-GI-OH! counter's look with one BOOSTERS tab)
+  sells any available set's for MTG_PACK_COST (12) CARD POINTS, the shared TcgCollection.dust.
+- The result screen (1.100.0, the user: "the win message should be in the card game itself, just like Pokemon"): when
+  the duel ends mtg_ui.c DuelEnded counts it (record, booster, achievements) and gives the table its words
+  (MtgBoard_Result, as TcgBoard_Result): the regular's quote, then "A PLS booster went into your CARD CASE."; leaving it
+  goes back to the map (a practice: to the case's HOME).
+- Achievements (1.100.0): a MAGIC tab (C_MAGIC, between YU-GI-OH! and TRIPLE TRIAD) in src/mp/mp_achieve.c: mtgstart,
+  mtgwin1 / mtgwin100 (counter mtgwin), mtgregulars6 (each regular's first defeat), mtgpack50, mtgsets5, mtgkinds250,
+  mtgflawless (20 life or more), mtgfast (by the duel's 10th turn), mtgdecked, mtgcounter (the table, on their spell
+  countered), mtgmono, mtgdomain.
+- Triggered abilities (1.100.0): src/mtg/mtg_trigger.c (T: lines; ChangesZone, Phase, SpellCast, DamageDone, Attacks,
+  AttackerBlocked, AttackerBlockedByCreature, Blocks, AttackerUnblocked; IsPresent; OptionalDecider$ You). On the table
+  a trigger lights its card and flies to the stack (theirs shown big first, as their spells are); a trigger with more
+  than one target asks for it (MODE_TARGET, no B; a graveyard card shown big over the middle); "you may" asks YES / NO
+  and an unless cost PAY / DON'T PAY beside the card asking, its words (the trigger's description) in the prompt, which
+  wraps to as many lines as it needs; a sacrifice of your choice lights the permanents (MODE_PICK), a discard of your
+  choice uses the hand as at the end of the turn; +1/+1 and -1/-1 counters float their number.
+- The cursor and its tooltip show only once the table has been still for 8 frames with the player to act (B.still,
+  ShowFocus): never on and off through the opponent's turn (the user, 2026-11-05).
 - The computer is mtg_ai.c, a STAND-IN until forge-ai's translation (docs/MTG_HANDOFF.md).
 - Debug: `mp mtg starter N`, `mp mtg state`, `mp mtg duel N` (a regular's challenge), `mp mtg autoplay 1` (the
-  computer plays your side too), `mp mtg focus NAME` (the cursor on that card), `mp mtg table`, `mp mtg win` /
-  `lose`, `mp mtg save`. Logs: "mtg: your move: ...", "mtg: you: played / cast / used ...", "mtg: duel over: ...".
-- Tests: tools/mtg/test.sh (the rules, the collection, the decks), scenarios mtg_shop and mtg_play.
+  computer plays your side too), `mp mtg focus NAME` (the cursor on that card), `mp mtg put PLAYER hand|field|grave
+  NAME` (a card put on the table), `mp mtg points N` (CARD POINTS), `mp mtg pack CODE N` (boosters held), `mp mtg
+  table`, `mp mtg win` / `lose`, `mp mtg save`. Logs: "mtg: your move: ...", "mtg: you: played / cast / used ...",
+  "mtg: duel over: ...", "mtg: opened a CODE booster", "mtg: bought a CODE booster".
+- Tests: tools/mtg/test.sh (the rules, triggers, the collection, boosters, the decks), scenarios mtg_shop, mtg_play,
+  mtg_show, mtg_triggers.

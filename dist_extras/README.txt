@@ -1420,6 +1420,26 @@ those of the Starter Decks and the English boosters up to the end of 2003.
   Achievements    A YU-GI-OH! tab of their own.
 The Yu-Gi-Oh! cards are saved with your game (the save file's .ygo file).
 
+MAGIC
+-----
+MAGIC: THE GATHERING's cards from Fourth Edition to Scourge, on the CARD
+CASE's third side once you have a MAGIC deck (L and R).
+  Getting started MOSSDEEP's CARD SHOP: the clerk gives you a CARD CASE if
+                  you have none and one of five starter decks. The regulars
+                  upstairs and down in the play room play once you have a deck.
+  The table       A plays or uses the card under the cursor, START passes, B
+                  the turn's menu (PASS, END TURN), L held stops at every
+                  chance to act, SELECT or R2 shows a card's whole text.
+                  Abilities that trigger light up their card and go on the
+                  stack; you're asked for a target, YES / NO or to pay when
+                  it's yours to say.
+  Boosters        A win puts a booster of one of the sets into your CARD
+                  CASE; the CARD SHOP's clerk sells them for CARD POINTS.
+                  CARD CASE > BOOSTER PACKS opens them: most have 15 cards,
+                  11 commons, 3 uncommons and a rare, all from that set.
+  Achievements    A MAGIC tab of their own.
+The MAGIC cards are saved with your game (the save file's .mtg file).
+
 TRIPLE TRIAD
 ------------
 The CARD CASE's last side (L and R go round POKEMON, YU-GI-OH!, MAGIC once

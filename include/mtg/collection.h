@@ -11,7 +11,10 @@
 #define MTG_DECK_MIN 40                // the game's decks: 40 cards at least (the starters' size)
 #define MTG_COPIES 4                   // copies of a card in a deck, but for basic lands
 #define MTG_OWNED_MAX 99
-#define MTG_BOOSTER 8                  // a won duel's booster: five commons, two uncommons, an uncommon or rare
+#define MTG_PACK_MAX 15                // a booster's cards at most (most sets: 11 commons, 3 uncommons, a rare)
+#define MTG_SETS 28                    // the booster sets (src/mtg/mtg_sets_data.c, tools/mtg/fetch_sets.py)
+#define MTG_PACK_COST 12               // CARD POINTS for a booster at the CARD SHOP (the YU-GI-OH! side's price)
+#define MTG_PACKS_MAX 99               // boosters of a set held at most
 
 #define MTG_FLAG_CASE_SIDE 1           // the CARD CASE opens on its MAGIC side
 
@@ -31,7 +34,33 @@ typedef struct {
     MtgSavedDeck decks[MTG_DECKS];
     int16_t ace[MTG_DECKS];            // each deck's ACE CARD (a card id), -1: the game picks one (Mtg_DeckAce)
     uint8_t tray[MTG_DECKS];           // each deck's hand tray color (TCG_TRAY_* of include/tcg/tcg.h: 0 the deck's own)
+    uint8_t packs[MTG_SETS];           // unopened boosters of each set (gMtgSets' order; saved by the set's code)
+    uint8_t opened[MTG_SETS];          // boosters of each set opened (up to 255)
+    uint16_t packsOpened;              // every booster opened
 } MtgCollection;
+
+// ---- the booster sets (src/mtg/mtg_sets.c), Fourth Edition to Scourge, each with the pool's cards printed in it
+typedef struct { uint32_t hash; uint8_t rarity; } MtgSetCard;    // a card by Mtg_NameHash, its rarity in the set
+typedef struct {
+    const char *code, *name;
+    uint16_t year;
+    uint32_t top, bottom;              // the pack's colors
+    uint8_t commons, uncommons, rares; // a booster's slots
+    uint16_t first, count;             // its cards in gMtgSetCards
+} MtgSet;
+extern const MtgSet gMtgSets[MTG_SETS];
+extern const MtgSetCard gMtgSetCards[];
+// a set's cards (ids) the game can use, and their rarity there; returns how many
+int Mtg_SetCards(int set, uint16_t *out, uint8_t *rarity);
+int Mtg_SetAvailable(int set);                                  // enough of it plays to fill its boosters
+int Mtg_RandomSet(uint32_t *rng);                               // one of the available sets
+int Mtg_SetMascot(int set);                                     // the card on its pack (a rare with art)
+int Mtg_SetOwned(const MtgCollection *c, int set, int *total);  // its usable cards owned / all of them
+int Mtg_SetByCode(const char *code);                            // -1 if none
+int Mtg_AwardPack(MtgCollection *c, int set);                   // a booster into the CARD CASE (0: full)
+// a booster of the set opened (one of those held): its cards into the collection, in slot order (commons first,
+// the rare last); rarity[i] each one's rarity in the set. Returns how many (0: none held).
+int Mtg_OpenPack(MtgCollection *c, int set, uint16_t out[MTG_PACK_MAX], uint8_t rarity[MTG_PACK_MAX]);
 
 void Mtg_CollectionInit(MtgCollection *c, uint32_t seed);
 int Mtg_CollectionSave(const MtgCollection *c, const char *path);
@@ -81,7 +110,5 @@ extern const MtgDuelist gMtgDuelists[MTG_DUELISTS];
 
 // The first deck: the chosen starter in deck slot 0, its cards owned; optedIn from now on
 void Mtg_GiveStarter(MtgCollection *c, unsigned starter);
-// A won duel's booster: MTG_BOOSTER usable cards (no basic lands) into the collection; returns how many
-int Mtg_OpenBooster(MtgCollection *c, uint16_t out[MTG_BOOSTER]);
 
 #endif

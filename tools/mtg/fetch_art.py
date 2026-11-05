@@ -32,7 +32,8 @@ def get(url, binary=False):
 def playable():
     exe = "/tmp/mtg-tests/scope_dump"
     os.makedirs(os.path.dirname(exe), exist_ok=True)
-    src = ["src/mtg/%s.c" % f for f in ("mtg_script", "mtg_valid", "mtg_mana", "mtg_game", "mtg_effects", "mtg_ai")]
+    src = ["src/mtg/%s.c" % f for f in ("mtg_script", "mtg_valid", "mtg_mana", "mtg_game", "mtg_effects", "mtg_trigger",
+                                                   "mtg_ai")]
     subprocess.run(["gcc", "-std=gnu99", "-O1", "-iquote", "include", "-iquote", "src/mtg", "tools/mtg/scope_dump.c"]
                    + src + ["-o", exe], cwd=ROOT, check=True)
     out = subprocess.run([exe, os.path.join(ROOT, "graphics/mtg/forge.pak")], capture_output=True, text=True,

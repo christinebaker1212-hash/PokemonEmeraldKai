@@ -3,13 +3,14 @@
 //   "MTGC", u32 version (3; 1 and 2 are read too), u32 owner, u32 rng, u8 optedIn, flags, activeDeck, starter, u16 wins, losses,
 //   u32 beaten, u32 owned count, then {u32 hash, u8 count} each, then MTG_DECKS decks {char name[16], u16 count,
 //   then count u32 hashes}; from version 2, MTG_DECKS u32s: each deck's ACE CARD by its hash (0: none chosen);
-//   from version 3, MTG_DECKS u8s: each deck's hand tray color (TCG_TRAY_*).
+//   from version 3, MTG_DECKS u8s: each deck's hand tray color (TCG_TRAY_*); from version 4, u16 boosters opened,
+//   u8 set count, then {char code[4], u8 held, u8 opened} each (the booster sets by their codes: src/mtg/mtg_sets.c).
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "mtg/collection.h"
 
-#define MTGC_VERSION 3
+#define MTGC_VERSION 4
 
 uint32_t Mtg_Rand(uint32_t *rng)
 {
@@ -206,38 +207,6 @@ void Mtg_GiveStarter(MtgCollection *c, unsigned starter)
     c->activeDeck = 0;
 }
 
-// ---- boosters
-static int PickOfRarity(MtgCollection *c, int rarity)
-{
-    int n = Mtg_DbCount(), tries;
-    for (tries = 0; tries < 4000; tries++) {
-        int id = (int)(Mtg_Rand(&c->rng) % (uint32_t)n);
-        const MtgCardDef *d = Mtg_Card(id);
-        if (Mtg_CanUse(id) && !Mtg_IsBasicLand(id) && d->rarity == rarity)
-            return id;
-    }
-    return -1;
-}
-
-int Mtg_OpenBooster(MtgCollection *c, uint16_t out[MTG_BOOSTER])
-{
-    static const uint8_t sSlots[MTG_BOOSTER] = {MTG_RARITY_COMMON, MTG_RARITY_COMMON, MTG_RARITY_COMMON,
-        MTG_RARITY_COMMON, MTG_RARITY_COMMON, MTG_RARITY_UNCOMMON, MTG_RARITY_UNCOMMON, MTG_RARITY_RARE};
-    int i, n = 0;
-    for (i = 0; i < MTG_BOOSTER; i++) {
-        int rarity = sSlots[i], id;
-        if (rarity == MTG_RARITY_RARE && Mtg_Rand(&c->rng) % 4 != 0)
-            rarity = MTG_RARITY_UNCOMMON;   // (the last slot: a rare one pack in four)
-        id = PickOfRarity(c, rarity);
-        if (id < 0)
-            continue;
-        if (c->owned[id] < MTG_OWNED_MAX)
-            c->owned[id]++;
-        out[n++] = (uint16_t)id;
-    }
-    return n;
-}
-
 // ---- the file
 typedef struct { uint8_t *p; uint32_t n, cap; int ok; } Writer;
 
@@ -284,6 +253,22 @@ uint32_t Mtg_CollectionWrite(const MtgCollection *c, uint8_t *out, uint32_t cap)
         W32(&w, c->ace[k] >= 0 && c->ace[k] < Mtg_DbCount() ? Mtg_NameHash(Mtg_Card(c->ace[k])->name) : 0);
     for (k = 0; k < MTG_DECKS; k++)
         W8(&w, c->tray[k]);
+    W16(&w, c->packsOpened);
+    {
+        int sets = 0;
+        for (k = 0; k < MTG_SETS; k++)
+            sets += c->packs[k] || c->opened[k];
+        W8(&w, (uint32_t)sets);
+        for (k = 0; k < MTG_SETS; k++)
+            if (c->packs[k] || c->opened[k]) {
+                char code[4] = {0, 0, 0, 0};   // (three letters, the fourth 0)
+                strncpy(code, gMtgSets[k].code, 3);
+                for (i = 0; i < 4; i++)
+                    W8(&w, (uint8_t)code[i]);
+                W8(&w, c->packs[k]);
+                W8(&w, c->opened[k]);
+            }
+    }
     return w.ok ? w.n : 0;
 }
 
@@ -346,6 +331,25 @@ int Mtg_CollectionRead(MtgCollection *c, const uint8_t *in, uint32_t size)
     if (version >= 3)
         for (k = 0; k < MTG_DECKS && r.ok; k++)
             c->tray[k] = (uint8_t)R8(&r);
+    if (version >= 4 && r.ok) {
+        uint32_t sets;
+        c->packsOpened = (uint16_t)R16(&r);
+        sets = R8(&r);
+        for (i = 0; i < sets && r.ok; i++) {
+            char code[5];
+            int s, j;
+            for (j = 0; j < 4; j++)
+                code[j] = (char)R8(&r);
+            code[4] = 0;
+            s = Mtg_SetByCode(code);
+            j = (int)R8(&r);
+            k = (int)R8(&r);
+            if (s >= 0) {   // (a set the game no longer has: its boosters dropped)
+                c->packs[s] = (uint8_t)(j > MTG_PACKS_MAX ? MTG_PACKS_MAX : j);
+                c->opened[s] = (uint8_t)k;
+            }
+        }
+    }
     if (c->activeDeck >= MTG_DECKS)
         c->activeDeck = 0;
     return r.ok;
@@ -353,7 +357,8 @@ int Mtg_CollectionRead(MtgCollection *c, const uint8_t *in, uint32_t size)
 
 int Mtg_CollectionSave(const MtgCollection *c, const char *path)
 {
-    uint32_t cap = 64 + MTG_COLLECTION_CARDS * 5 + MTG_DECKS * (MTG_DECK_NAME + 2 + MTG_DECK_MAX * 4 + 5), n;
+    uint32_t cap = 64 + MTG_COLLECTION_CARDS * 5 + MTG_DECKS * (MTG_DECK_NAME + 2 + MTG_DECK_MAX * 4 + 5) + MTG_SETS * 6,
+             n;
     uint8_t *buf = malloc(cap);
     char tmp[600];
     FILE *f;

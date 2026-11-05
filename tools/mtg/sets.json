@@ -1,0 +1,25962 @@
+[
+{
+"code": "4ED",
+"name": "Fourth Edition",
+"released": "1995-04-01",
+"cards": [
+[
+"Abomination",
+1
+],
+[
+"Air Elemental",
+1
+],
+[
+"Alabaster Potion",
+0
+],
+[
+"Aladdin's Lamp",
+2
+],
+[
+"Aladdin's Ring",
+2
+],
+[
+"Ali Baba",
+1
+],
+[
+"Amrou Kithkin",
+0
+],
+[
+"Amulet of Kroog",
+0
+],
+[
+"Angry Mob",
+1
+],
+[
+"Animate Artifact",
+1
+],
+[
+"Animate Dead",
+1
+],
+[
+"Animate Wall",
+2
+],
+[
+"Ankh of Mishra",
+2
+],
+[
+"Apprentice Wizard",
+0
+],
+[
+"Armageddon",
+2
+],
+[
+"Armageddon Clock",
+2
+],
+[
+"Ashes to Ashes",
+1
+],
+[
+"Ashnod's Battle Gear",
+1
+],
+[
+"Aspect of Wolf",
+2
+],
+[
+"Backfire",
+1
+],
+[
+"Bad Moon",
+2
+],
+[
+"Balance",
+2
+],
+[
+"Ball Lightning",
+2
+],
+[
+"Battering Ram",
+0
+],
+[
+"Benalish Hero",
+0
+],
+[
+"Bird Maiden",
+0
+],
+[
+"Birds of Paradise",
+2
+],
+[
+"Black Knight",
+1
+],
+[
+"Black Mana Battery",
+2
+],
+[
+"Black Vise",
+1
+],
+[
+"Black Ward",
+1
+],
+[
+"Blessing",
+2
+],
+[
+"Blight",
+1
+],
+[
+"Blood Lust",
+0
+],
+[
+"Blue Elemental Blast",
+0
+],
+[
+"Blue Mana Battery",
+2
+],
+[
+"Blue Ward",
+1
+],
+[
+"Bog Imp",
+0
+],
+[
+"Bog Wraith",
+1
+],
+[
+"Bottle of Suleiman",
+2
+],
+[
+"Brainwash",
+0
+],
+[
+"Brass Man",
+1
+],
+[
+"Bronze Tablet",
+2
+],
+[
+"Brothers of Fire",
+0
+],
+[
+"Burrowing",
+1
+],
+[
+"Carnivorous Plant",
+0
+],
+[
+"Carrion Ants",
+1
+],
+[
+"Castle",
+1
+],
+[
+"Cave People",
+1
+],
+[
+"Celestial Prism",
+1
+],
+[
+"Channel",
+1
+],
+[
+"Chaoslace",
+2
+],
+[
+"Circle of Protection: Artifacts",
+1
+],
+[
+"Circle of Protection: Black",
+0
+],
+[
+"Circle of Protection: Blue",
+0
+],
+[
+"Circle of Protection: Green",
+0
+],
+[
+"Circle of Protection: Red",
+0
+],
+[
+"Circle of Protection: White",
+0
+],
+[
+"Clay Statue",
+0
+],
+[
+"Clockwork Avian",
+2
+],
+[
+"Clockwork Beast",
+2
+],
+[
+"Cockatrice",
+2
+],
+[
+"Colossus of Sardia",
+2
+],
+[
+"Conservator",
+1
+],
+[
+"Control Magic",
+1
+],
+[
+"Conversion",
+1
+],
+[
+"Coral Helm",
+2
+],
+[
+"Cosmic Horror",
+2
+],
+[
+"Counterspell",
+1
+],
+[
+"Craw Wurm",
+0
+],
+[
+"Creature Bond",
+0
+],
+[
+"Crimson Manticore",
+2
+],
+[
+"Crumble",
+1
+],
+[
+"Crusade",
+2
+],
+[
+"Crystal Rod",
+1
+],
+[
+"Cursed Land",
+1
+],
+[
+"Cursed Rack",
+1
+],
+[
+"Cyclopean Mummy",
+0
+],
+[
+"Dancing Scimitar",
+2
+],
+[
+"Dark Ritual",
+0
+],
+[
+"Death Ward",
+0
+],
+[
+"Deathgrip",
+1
+],
+[
+"Deathlace",
+2
+],
+[
+"Desert Twister",
+1
+],
+[
+"Detonate",
+1
+],
+[
+"Diabolic Machine",
+1
+],
+[
+"Dingus Egg",
+2
+],
+[
+"Disenchant",
+0
+],
+[
+"Disintegrate",
+0
+],
+[
+"Disrupting Scepter",
+2
+],
+[
+"Divine Transformation",
+1
+],
+[
+"Dragon Engine",
+2
+],
+[
+"Dragon Whelp",
+1
+],
+[
+"Drain Life",
+0
+],
+[
+"Drain Power",
+2
+],
+[
+"Drudge Skeletons",
+0
+],
+[
+"Durkwood Boars",
+0
+],
+[
+"Dwarven Warriors",
+0
+],
+[
+"Earth Elemental",
+1
+],
+[
+"Earthquake",
+2
+],
+[
+"Ebony Horse",
+2
+],
+[
+"El-Hajj\u00e2j",
+2
+],
+[
+"Elder Land Wurm",
+2
+],
+[
+"Elven Riders",
+1
+],
+[
+"Elvish Archers",
+2
+],
+[
+"Energy Flux",
+1
+],
+[
+"Energy Tap",
+0
+],
+[
+"Erg Raiders",
+0
+],
+[
+"Erosion",
+0
+],
+[
+"Eternal Warrior",
+0
+],
+[
+"Evil Presence",
+1
+],
+[
+"Eye for an Eye",
+2
+],
+[
+"Fear",
+0
+],
+[
+"Feedback",
+1
+],
+[
+"Fellwar Stone",
+1
+],
+[
+"Fire Elemental",
+1
+],
+[
+"Fireball",
+0
+],
+[
+"Firebreathing",
+0
+],
+[
+"Fissure",
+0
+],
+[
+"Flashfires",
+1
+],
+[
+"Flight",
+0
+],
+[
+"Flood",
+0
+],
+[
+"Flying Carpet",
+2
+],
+[
+"Fog",
+0
+],
+[
+"Force of Nature",
+2
+],
+[
+"Fortified Area",
+0
+],
+[
+"Frozen Shade",
+0
+],
+[
+"Fungusaur",
+2
+],
+[
+"Gaea's Liege",
+2
+],
+[
+"Gaseous Form",
+0
+],
+[
+"Ghost Ship",
+1
+],
+[
+"Giant Growth",
+0
+],
+[
+"Giant Spider",
+0
+],
+[
+"Giant Strength",
+0
+],
+[
+"Giant Tortoise",
+0
+],
+[
+"Glasses of Urza",
+1
+],
+[
+"Gloom",
+1
+],
+[
+"Goblin Balloon Brigade",
+1
+],
+[
+"Goblin King",
+2
+],
+[
+"Goblin Rock Sled",
+0
+],
+[
+"Grapeshot Catapult",
+0
+],
+[
+"Gray Ogre",
+0
+],
+[
+"Greed",
+2
+],
+[
+"Green Mana Battery",
+2
+],
+[
+"Green Ward",
+1
+],
+[
+"Grizzly Bears",
+0
+],
+[
+"Healing Salve",
+0
+],
+[
+"Helm of Chatzuk",
+2
+],
+[
+"Hill Giant",
+0
+],
+[
+"Holy Armor",
+0
+],
+[
+"Holy Strength",
+0
+],
+[
+"Howl from Beyond",
+0
+],
+[
+"Howling Mine",
+2
+],
+[
+"Hurkyl's Recall",
+2
+],
+[
+"Hurloon Minotaur",
+0
+],
+[
+"Hurr Jackal",
+2
+],
+[
+"Hurricane",
+1
+],
+[
+"Hypnotic Specter",
+1
+],
+[
+"Immolation",
+0
+],
+[
+"Inferno",
+2
+],
+[
+"Instill Energy",
+1
+],
+[
+"Iron Star",
+1
+],
+[
+"Ironclaw Orcs",
+0
+],
+[
+"Ironroot Treefolk",
+0
+],
+[
+"Island Fish Jasconius",
+2
+],
+[
+"Island Sanctuary",
+2
+],
+[
+"Ivory Cup",
+1
+],
+[
+"Ivory Tower",
+2
+],
+[
+"Jade Monolith",
+2
+],
+[
+"Jandor's Saddlebags",
+2
+],
+[
+"Jayemdae Tome",
+2
+],
+[
+"Jump",
+0
+],
+[
+"Jun\u00fan Efreet",
+1
+],
+[
+"Karma",
+1
+],
+[
+"Keldon Warlord",
+1
+],
+[
+"Killer Bees",
+1
+],
+[
+"Kismet",
+1
+],
+[
+"Kormus Bell",
+2
+],
+[
+"Land Leeches",
+0
+],
+[
+"Land Tax",
+2
+],
+[
+"Leviathan",
+2
+],
+[
+"Ley Druid",
+1
+],
+[
+"Library of Leng",
+1
+],
+[
+"Lifeforce",
+1
+],
+[
+"Lifelace",
+2
+],
+[
+"Lifetap",
+1
+],
+[
+"Lightning Bolt",
+0
+],
+[
+"Living Artifact",
+2
+],
+[
+"Living Lands",
+2
+],
+[
+"Llanowar Elves",
+0
+],
+[
+"Lord of Atlantis",
+2
+],
+[
+"Lord of the Pit",
+2
+],
+[
+"Lost Soul",
+0
+],
+[
+"Lure",
+1
+],
+[
+"Magical Hack",
+2
+],
+[
+"Magnetic Mountain",
+2
+],
+[
+"Mahamoti Djinn",
+2
+],
+[
+"Mana Clash",
+2
+],
+[
+"Mana Flare",
+2
+],
+[
+"Mana Short",
+2
+],
+[
+"Mana Vault",
+2
+],
+[
+"Manabarbs",
+2
+],
+[
+"Marsh Gas",
+0
+],
+[
+"Marsh Viper",
+0
+],
+[
+"Meekstone",
+2
+],
+[
+"Merfolk of the Pearl Trident",
+0
+],
+[
+"Mesa Pegasus",
+0
+],
+[
+"Millstone",
+2
+],
+[
+"Mind Bomb",
+1
+],
+[
+"Mind Twist",
+2
+],
+[
+"Mishra's Factory",
+1
+],
+[
+"Mishra's War Machine",
+2
+],
+[
+"Mons's Goblin Raiders",
+0
+],
+[
+"Morale",
+0
+],
+[
+"Murk Dwellers",
+0
+],
+[
+"Nafs Asp",
+0
+],
+[
+"Nether Shadow",
+2
+],
+[
+"Nevinyrral's Disk",
+2
+],
+[
+"Nightmare",
+2
+],
+[
+"Northern Paladin",
+2
+],
+[
+"Oasis",
+1
+],
+[
+"Obsianus Golem",
+1
+],
+[
+"Onulet",
+2
+],
+[
+"Orcish Artillery",
+1
+],
+[
+"Orcish Oriflamme",
+1
+],
+[
+"Ornithopter",
+1
+],
+[
+"Osai Vultures",
+1
+],
+[
+"Paralyze",
+0
+],
+[
+"Pearled Unicorn",
+0
+],
+[
+"Personal Incarnation",
+2
+],
+[
+"Pestilence",
+0
+],
+[
+"Phantasmal Forces",
+1
+],
+[
+"Phantasmal Terrain",
+0
+],
+[
+"Phantom Monster",
+1
+],
+[
+"Piety",
+0
+],
+[
+"Pikemen",
+0
+],
+[
+"Pirate Ship",
+2
+],
+[
+"Pit Scorpion",
+0
+],
+[
+"Plague Rats",
+0
+],
+[
+"Power Leak",
+0
+],
+[
+"Power Sink",
+0
+],
+[
+"Power Surge",
+2
+],
+[
+"Pradesh Gypsies",
+0
+],
+[
+"Primal Clay",
+2
+],
+[
+"Prodigal Sorcerer",
+0
+],
+[
+"Psionic Entity",
+2
+],
+[
+"Psychic Venom",
+0
+],
+[
+"Purelace",
+2
+],
+[
+"Pyrotechnics",
+1
+],
+[
+"Radjan Spirit",
+1
+],
+[
+"Rag Man",
+2
+],
+[
+"Raise Dead",
+0
+],
+[
+"Rebirth",
+2
+],
+[
+"Red Elemental Blast",
+0
+],
+[
+"Red Mana Battery",
+2
+],
+[
+"Red Ward",
+1
+],
+[
+"Regeneration",
+0
+],
+[
+"Relic Bind",
+2
+],
+[
+"Reverse Damage",
+2
+],
+[
+"Righteousness",
+2
+],
+[
+"Rod of Ruin",
+1
+],
+[
+"Royal Assassin",
+2
+],
+[
+"Samite Healer",
+0
+],
+[
+"Sandstorm",
+0
+],
+[
+"Savannah Lions",
+2
+],
+[
+"Scathe Zombies",
+0
+],
+[
+"Scavenging Ghoul",
+1
+],
+[
+"Scryb Sprites",
+0
+],
+[
+"Sea Serpent",
+0
+],
+[
+"Seeker",
+0
+],
+[
+"Segovian Leviathan",
+1
+],
+[
+"Sengir Vampire",
+1
+],
+[
+"Serra Angel",
+1
+],
+[
+"Shanodin Dryads",
+0
+],
+[
+"Shapeshifter",
+1
+],
+[
+"Shatter",
+0
+],
+[
+"Shivan Dragon",
+2
+],
+[
+"Simulacrum",
+1
+],
+[
+"Sindbad",
+1
+],
+[
+"Siren's Call",
+1
+],
+[
+"Sisters of the Flame",
+0
+],
+[
+"Sleight of Mind",
+2
+],
+[
+"Smoke",
+2
+],
+[
+"Sorceress Queen",
+2
+],
+[
+"Soul Net",
+1
+],
+[
+"Spell Blast",
+0
+],
+[
+"Spirit Link",
+1
+],
+[
+"Spirit Shackle",
+1
+],
+[
+"Stasis",
+2
+],
+[
+"Steal Artifact",
+1
+],
+[
+"Stone Giant",
+1
+],
+[
+"Stone Rain",
+0
+],
+[
+"Stream of Life",
+0
+],
+[
+"Strip Mine",
+1
+],
+[
+"Sunglasses of Urza",
+2
+],
+[
+"Sunken City",
+0
+],
+[
+"Swords to Plowshares",
+1
+],
+[
+"Sylvan Library",
+2
+],
+[
+"Tawnos's Wand",
+1
+],
+[
+"Tawnos's Weaponry",
+1
+],
+[
+"Tempest Efreet",
+2
+],
+[
+"Terror",
+0
+],
+[
+"Tetravus",
+2
+],
+[
+"The Brute",
+0
+],
+[
+"The Hive",
+2
+],
+[
+"The Rack",
+1
+],
+[
+"Thicket Basilisk",
+1
+],
+[
+"Thoughtlace",
+2
+],
+[
+"Throne of Bone",
+1
+],
+[
+"Timber Wolves",
+2
+],
+[
+"Time Elemental",
+2
+],
+[
+"Titania's Song",
+2
+],
+[
+"Tranquility",
+0
+],
+[
+"Triskelion",
+2
+],
+[
+"Tsunami",
+1
+],
+[
+"Tundra Wolves",
+0
+],
+[
+"Tunnel",
+1
+],
+[
+"Twiddle",
+0
+],
+[
+"Uncle Istvan",
+1
+],
+[
+"Unholy Strength",
+0
+],
+[
+"Unstable Mutation",
+0
+],
+[
+"Unsummon",
+0
+],
+[
+"Untamed Wilds",
+1
+],
+[
+"Urza's Avenger",
+2
+],
+[
+"Uthden Troll",
+1
+],
+[
+"Vampire Bats",
+0
+],
+[
+"Venom",
+0
+],
+[
+"Verduran Enchantress",
+2
+],
+[
+"Visions",
+1
+],
+[
+"Volcanic Eruption",
+2
+],
+[
+"Wall of Air",
+1
+],
+[
+"Wall of Bone",
+1
+],
+[
+"Wall of Brambles",
+1
+],
+[
+"Wall of Dust",
+1
+],
+[
+"Wall of Fire",
+1
+],
+[
+"Wall of Ice",
+1
+],
+[
+"Wall of Spears",
+0
+],
+[
+"Wall of Stone",
+1
+],
+[
+"Wall of Swords",
+1
+],
+[
+"Wall of Water",
+1
+],
+[
+"Wall of Wood",
+0
+],
+[
+"Wanderlust",
+1
+],
+[
+"War Mammoth",
+0
+],
+[
+"Warp Artifact",
+2
+],
+[
+"Water Elemental",
+1
+],
+[
+"Weakness",
+0
+],
+[
+"Web",
+2
+],
+[
+"Whirling Dervish",
+1
+],
+[
+"White Knight",
+1
+],
+[
+"White Mana Battery",
+2
+],
+[
+"White Ward",
+1
+],
+[
+"Wild Growth",
+0
+],
+[
+"Will-o'-the-Wisp",
+2
+],
+[
+"Winds of Change",
+2
+],
+[
+"Winter Blast",
+1
+],
+[
+"Winter Orb",
+2
+],
+[
+"Wooden Sphere",
+1
+],
+[
+"Word of Binding",
+0
+],
+[
+"Wrath of God",
+2
+],
+[
+"Xenic Poltergeist",
+2
+],
+[
+"Yotian Soldier",
+0
+],
+[
+"Zephyr Falcon",
+0
+],
+[
+"Zombie Master",
+2
+]
+]
+},
+{
+"code": "ICE",
+"name": "Ice Age",
+"released": "1995-06-03",
+"cards": [
+[
+"Abyssal Specter",
+1
+],
+[
+"Adarkar Sentinel",
+1
+],
+[
+"Adarkar Unicorn",
+0
+],
+[
+"Adarkar Wastes",
+2
+],
+[
+"Aegis of the Meek",
+2
+],
+[
+"Aggression",
+1
+],
+[
+"Altar of Bone",
+2
+],
+[
+"Amulet of Quoz",
+2
+],
+[
+"Anarchy",
+1
+],
+[
+"Arctic Foxes",
+0
+],
+[
+"Arcum's Sleigh",
+1
+],
+[
+"Arcum's Weathervane",
+1
+],
+[
+"Arcum's Whistle",
+1
+],
+[
+"Arenson's Aura",
+0
+],
+[
+"Armor of Faith",
+0
+],
+[
+"Arnjlot's Ascent",
+0
+],
+[
+"Ashen Ghoul",
+1
+],
+[
+"Aurochs",
+0
+],
+[
+"Avalanche",
+1
+],
+[
+"Balduvian Barbarians",
+0
+],
+[
+"Balduvian Bears",
+0
+],
+[
+"Balduvian Conjurer",
+1
+],
+[
+"Balduvian Hydra",
+2
+],
+[
+"Balduvian Shaman",
+0
+],
+[
+"Barbarian Guides",
+0
+],
+[
+"Barbed Sextant",
+0
+],
+[
+"Baton of Morale",
+1
+],
+[
+"Battle Cry",
+1
+],
+[
+"Battle Frenzy",
+0
+],
+[
+"Binding Grasp",
+1
+],
+[
+"Black Scarab",
+1
+],
+[
+"Blessed Wine",
+0
+],
+[
+"Blinking Spirit",
+2
+],
+[
+"Blizzard",
+2
+],
+[
+"Blue Scarab",
+1
+],
+[
+"Bone Shaman",
+0
+],
+[
+"Brainstorm",
+0
+],
+[
+"Brand of Ill Omen",
+2
+],
+[
+"Breath of Dreams",
+1
+],
+[
+"Brine Shaman",
+0
+],
+[
+"Brown Ouphe",
+0
+],
+[
+"Brushland",
+2
+],
+[
+"Burnt Offering",
+0
+],
+[
+"Call to Arms",
+2
+],
+[
+"Caribou Range",
+2
+],
+[
+"Celestial Sword",
+2
+],
+[
+"Centaur Archer",
+1
+],
+[
+"Chaos Lord",
+2
+],
+[
+"Chaos Moon",
+2
+],
+[
+"Chromatic Armor",
+2
+],
+[
+"Chub Toad",
+0
+],
+[
+"Circle of Protection: Black",
+0
+],
+[
+"Circle of Protection: Blue",
+0
+],
+[
+"Circle of Protection: Green",
+0
+],
+[
+"Circle of Protection: Red",
+0
+],
+[
+"Circle of Protection: White",
+0
+],
+[
+"Clairvoyance",
+0
+],
+[
+"Cloak of Confusion",
+0
+],
+[
+"Cold Snap",
+1
+],
+[
+"Conquer",
+1
+],
+[
+"Cooperation",
+0
+],
+[
+"Counterspell",
+0
+],
+[
+"Crown of the Ages",
+2
+],
+[
+"Curse of Marit Lage",
+2
+],
+[
+"Dance of the Dead",
+1
+],
+[
+"Dark Banishing",
+0
+],
+[
+"Dark Ritual",
+0
+],
+[
+"Death Ward",
+0
+],
+[
+"Deflection",
+2
+],
+[
+"Demonic Consultation",
+1
+],
+[
+"Despotic Scepter",
+2
+],
+[
+"Diabolic Vision",
+1
+],
+[
+"Dire Wolves",
+0
+],
+[
+"Disenchant",
+0
+],
+[
+"Dread Wight",
+2
+],
+[
+"Dreams of the Dead",
+1
+],
+[
+"Drift of the Dead",
+1
+],
+[
+"Drought",
+1
+],
+[
+"Dwarven Armory",
+2
+],
+[
+"Earthlink",
+2
+],
+[
+"Earthlore",
+0
+],
+[
+"Elder Druid",
+2
+],
+[
+"Elemental Augury",
+2
+],
+[
+"Elkin Bottle",
+2
+],
+[
+"Elvish Healer",
+0
+],
+[
+"Enduring Renewal",
+2
+],
+[
+"Energy Storm",
+2
+],
+[
+"Enervate",
+0
+],
+[
+"Errant Minion",
+0
+],
+[
+"Errantry",
+0
+],
+[
+"Essence Filter",
+0
+],
+[
+"Essence Flare",
+0
+],
+[
+"Essence Vortex",
+1
+],
+[
+"Fanatical Fever",
+1
+],
+[
+"Fear",
+0
+],
+[
+"Fiery Justice",
+2
+],
+[
+"Fire Covenant",
+1
+],
+[
+"Flame Spirit",
+1
+],
+[
+"Flare",
+0
+],
+[
+"Flooded Woodlands",
+2
+],
+[
+"Flow of Maggots",
+2
+],
+[
+"Folk of the Pines",
+0
+],
+[
+"Forbidden Lore",
+2
+],
+[
+"Force Void",
+1
+],
+[
+"Forgotten Lore",
+1
+],
+[
+"Formation",
+2
+],
+[
+"Foul Familiar",
+0
+],
+[
+"Foxfire",
+0
+],
+[
+"Freyalise Supplicant",
+1
+],
+[
+"Freyalise's Charm",
+1
+],
+[
+"Freyalise's Winds",
+2
+],
+[
+"Fumarole",
+1
+],
+[
+"Fylgja",
+0
+],
+[
+"Fyndhorn Bow",
+1
+],
+[
+"Fyndhorn Brownie",
+0
+],
+[
+"Fyndhorn Elder",
+1
+],
+[
+"Fyndhorn Elves",
+0
+],
+[
+"Fyndhorn Pollen",
+2
+],
+[
+"Game of Chaos",
+2
+],
+[
+"Gangrenous Zombies",
+0
+],
+[
+"Gaze of Pain",
+0
+],
+[
+"General Jarkeld",
+2
+],
+[
+"Ghostly Flame",
+2
+],
+[
+"Giant Growth",
+0
+],
+[
+"Giant Trap Door Spider",
+1
+],
+[
+"Glacial Chasm",
+1
+],
+[
+"Glacial Crevasses",
+2
+],
+[
+"Glacial Wall",
+1
+],
+[
+"Glaciers",
+2
+],
+[
+"Goblin Lyre",
+2
+],
+[
+"Goblin Mutant",
+1
+],
+[
+"Goblin Sappers",
+0
+],
+[
+"Goblin Ski Patrol",
+0
+],
+[
+"Goblin Snowman",
+1
+],
+[
+"Gorilla Pack",
+0
+],
+[
+"Gravebind",
+2
+],
+[
+"Green Scarab",
+1
+],
+[
+"Grizzled Wolverine",
+0
+],
+[
+"Hallowed Ground",
+1
+],
+[
+"Halls of Mist",
+2
+],
+[
+"Heal",
+0
+],
+[
+"Hecatomb",
+2
+],
+[
+"Hematite Talisman",
+1
+],
+[
+"Hipparion",
+1
+],
+[
+"Hoar Shade",
+0
+],
+[
+"Hot Springs",
+2
+],
+[
+"Howl from Beyond",
+0
+],
+[
+"Hurricane",
+1
+],
+[
+"Hyalopterous Lemure",
+1
+],
+[
+"Hydroblast",
+0
+],
+[
+"Hymn of Rebirth",
+1
+],
+[
+"Ice Cauldron",
+2
+],
+[
+"Ice Floe",
+1
+],
+[
+"Iceberg",
+1
+],
+[
+"Icequake",
+1
+],
+[
+"Icy Manipulator",
+1
+],
+[
+"Icy Prison",
+2
+],
+[
+"Illusionary Forces",
+0
+],
+[
+"Illusionary Presence",
+2
+],
+[
+"Illusionary Terrain",
+1
+],
+[
+"Illusionary Wall",
+0
+],
+[
+"Illusions of Grandeur",
+2
+],
+[
+"Imposing Visage",
+0
+],
+[
+"Incinerate",
+0
+],
+[
+"Infernal Darkness",
+2
+],
+[
+"Infernal Denizen",
+2
+],
+[
+"Infinite Hourglass",
+2
+],
+[
+"Infuse",
+0
+],
+[
+"Jester's Cap",
+2
+],
+[
+"Jester's Mask",
+2
+],
+[
+"Jeweled Amulet",
+1
+],
+[
+"Johtull Wurm",
+1
+],
+[
+"Jokulhaups",
+2
+],
+[
+"Juniper Order Druid",
+0
+],
+[
+"Justice",
+1
+],
+[
+"Karplusan Forest",
+2
+],
+[
+"Karplusan Giant",
+1
+],
+[
+"Karplusan Yeti",
+2
+],
+[
+"Kelsinko Ranger",
+0
+],
+[
+"Kjeldoran Dead",
+0
+],
+[
+"Kjeldoran Elite Guard",
+1
+],
+[
+"Kjeldoran Frostbeast",
+1
+],
+[
+"Kjeldoran Guard",
+0
+],
+[
+"Kjeldoran Knight",
+2
+],
+[
+"Kjeldoran Phalanx",
+2
+],
+[
+"Kjeldoran Royal Guard",
+2
+],
+[
+"Kjeldoran Skycaptain",
+1
+],
+[
+"Kjeldoran Skyknight",
+0
+],
+[
+"Kjeldoran Warrior",
+0
+],
+[
+"Knight of Stromgald",
+1
+],
+[
+"Krovikan Elementalist",
+1
+],
+[
+"Krovikan Fetish",
+0
+],
+[
+"Krovikan Sorcerer",
+0
+],
+[
+"Krovikan Vampire",
+1
+],
+[
+"Land Cap",
+2
+],
+[
+"Lapis Lazuli Talisman",
+1
+],
+[
+"Lava Burst",
+0
+],
+[
+"Lava Tubes",
+2
+],
+[
+"Legions of Lim-D\u00fbl",
+0
+],
+[
+"Leshrac's Rite",
+1
+],
+[
+"Leshrac's Sigil",
+1
+],
+[
+"Lhurgoyf",
+2
+],
+[
+"Lightning Blow",
+2
+],
+[
+"Lim-D\u00fbl's Cohort",
+0
+],
+[
+"Lim-D\u00fbl's Hex",
+1
+],
+[
+"Lost Order of Jarkeld",
+2
+],
+[
+"Lure",
+1
+],
+[
+"Maddening Wind",
+1
+],
+[
+"Magus of the Unseen",
+2
+],
+[
+"Malachite Talisman",
+1
+],
+[
+"Melee",
+1
+],
+[
+"Melting",
+1
+],
+[
+"Mercenaries",
+2
+],
+[
+"Merieke Ri Berit",
+2
+],
+[
+"Mesmeric Trance",
+2
+],
+[
+"Meteor Shower",
+0
+],
+[
+"Mind Ravel",
+0
+],
+[
+"Mind Warp",
+1
+],
+[
+"Mind Whip",
+2
+],
+[
+"Minion of Leshrac",
+2
+],
+[
+"Minion of Tevesh Szat",
+2
+],
+[
+"Mistfolk",
+0
+],
+[
+"Mole Worms",
+1
+],
+[
+"Monsoon",
+2
+],
+[
+"Moor Fiend",
+0
+],
+[
+"Mountain Goat",
+0
+],
+[
+"Mountain Titan",
+2
+],
+[
+"Mudslide",
+2
+],
+[
+"Musician",
+2
+],
+[
+"Mystic Might",
+2
+],
+[
+"Mystic Remora",
+0
+],
+[
+"M\u00e1rton Stromgald",
+2
+],
+[
+"Nacre Talisman",
+1
+],
+[
+"Naked Singularity",
+2
+],
+[
+"Nature's Lore",
+1
+],
+[
+"Necropotence",
+2
+],
+[
+"Norritt",
+0
+],
+[
+"Oath of Lim-D\u00fbl",
+2
+],
+[
+"Onyx Talisman",
+1
+],
+[
+"Orcish Cannoneers",
+1
+],
+[
+"Orcish Conscripts",
+0
+],
+[
+"Orcish Farmer",
+0
+],
+[
+"Orcish Healer",
+1
+],
+[
+"Orcish Librarian",
+2
+],
+[
+"Orcish Lumberjack",
+0
+],
+[
+"Orcish Squatters",
+2
+],
+[
+"Order of the Sacred Torch",
+2
+],
+[
+"Order of the White Shield",
+1
+],
+[
+"Pale Bears",
+2
+],
+[
+"Panic",
+0
+],
+[
+"Pentagram of the Ages",
+2
+],
+[
+"Pestilence Rats",
+0
+],
+[
+"Phantasmal Mount",
+1
+],
+[
+"Pit Trap",
+1
+],
+[
+"Polar Kraken",
+2
+],
+[
+"Portent",
+0
+],
+[
+"Power Sink",
+0
+],
+[
+"Pox",
+2
+],
+[
+"Prismatic Ward",
+0
+],
+[
+"Pygmy Allosaurus",
+2
+],
+[
+"Pyknite",
+0
+],
+[
+"Pyroblast",
+0
+],
+[
+"Pyroclasm",
+1
+],
+[
+"Rally",
+0
+],
+[
+"Ray of Command",
+0
+],
+[
+"Ray of Erasure",
+0
+],
+[
+"Reality Twist",
+2
+],
+[
+"Reclamation",
+2
+],
+[
+"Red Scarab",
+1
+],
+[
+"Regeneration",
+0
+],
+[
+"Rime Dryad",
+0
+],
+[
+"Ritual of Subdual",
+2
+],
+[
+"River Delta",
+2
+],
+[
+"Runed Arch",
+2
+],
+[
+"Sabretooth Tiger",
+0
+],
+[
+"Sacred Boon",
+1
+],
+[
+"Scaled Wurm",
+0
+],
+[
+"Sea Spirit",
+1
+],
+[
+"Seizures",
+0
+],
+[
+"Seraph",
+2
+],
+[
+"Shambling Strider",
+0
+],
+[
+"Shatter",
+0
+],
+[
+"Shield Bearer",
+0
+],
+[
+"Shield of the Ages",
+1
+],
+[
+"Shyft",
+2
+],
+[
+"Sibilant Spirit",
+2
+],
+[
+"Silver Erne",
+1
+],
+[
+"Skeleton Ship",
+2
+],
+[
+"Skull Catapult",
+1
+],
+[
+"Sleight of Mind",
+1
+],
+[
+"Snow Devil",
+0
+],
+[
+"Snow Fortress",
+2
+],
+[
+"Snow Hound",
+1
+],
+[
+"Snow-Covered Forest",
+0
+],
+[
+"Snow-Covered Island",
+0
+],
+[
+"Snow-Covered Mountain",
+0
+],
+[
+"Snow-Covered Plains",
+0
+],
+[
+"Snow-Covered Swamp",
+0
+],
+[
+"Snowblind",
+2
+],
+[
+"Snowfall",
+0
+],
+[
+"Soldevi Golem",
+2
+],
+[
+"Soldevi Machinist",
+1
+],
+[
+"Soldevi Simulacrum",
+1
+],
+[
+"Songs of the Damned",
+0
+],
+[
+"Soul Barrier",
+1
+],
+[
+"Soul Burn",
+0
+],
+[
+"Soul Kiss",
+0
+],
+[
+"Spectral Shield",
+1
+],
+[
+"Spoils of Evil",
+2
+],
+[
+"Spoils of War",
+2
+],
+[
+"Staff of the Ages",
+2
+],
+[
+"Stampede",
+2
+],
+[
+"Stench of Evil",
+1
+],
+[
+"Stone Rain",
+0
+],
+[
+"Stone Spirit",
+1
+],
+[
+"Stonehands",
+0
+],
+[
+"Storm Spirit",
+2
+],
+[
+"Stormbind",
+2
+],
+[
+"Stromgald Cabal",
+2
+],
+[
+"Stunted Growth",
+2
+],
+[
+"Sulfurous Springs",
+2
+],
+[
+"Sunstone",
+1
+],
+[
+"Swords to Plowshares",
+1
+],
+[
+"Tarpan",
+0
+],
+[
+"Thermokarst",
+1
+],
+[
+"Thoughtleech",
+1
+],
+[
+"Thunder Wall",
+1
+],
+[
+"Timberline Ridge",
+2
+],
+[
+"Time Bomb",
+2
+],
+[
+"Tinder Wall",
+0
+],
+[
+"Tor Giant",
+0
+],
+[
+"Total War",
+2
+],
+[
+"Touch of Death",
+0
+],
+[
+"Touch of Vitae",
+1
+],
+[
+"Trailblazer",
+2
+],
+[
+"Underground River",
+2
+],
+[
+"Updraft",
+1
+],
+[
+"Urza's Bauble",
+1
+],
+[
+"Veldt",
+2
+],
+[
+"Venomous Breath",
+1
+],
+[
+"Vertigo",
+1
+],
+[
+"Vexing Arcanix",
+2
+],
+[
+"Vibrating Sphere",
+2
+],
+[
+"Walking Wall",
+1
+],
+[
+"Wall of Lava",
+1
+],
+[
+"Wall of Pine Needles",
+1
+],
+[
+"Wall of Shields",
+1
+],
+[
+"War Chariot",
+1
+],
+[
+"Warning",
+0
+],
+[
+"Whalebone Glider",
+1
+],
+[
+"White Scarab",
+1
+],
+[
+"Whiteout",
+1
+],
+[
+"Wiitigo",
+2
+],
+[
+"Wild Growth",
+0
+],
+[
+"Wind Spirit",
+1
+],
+[
+"Wings of Aesthir",
+1
+],
+[
+"Winter's Chill",
+2
+],
+[
+"Withering Wisps",
+1
+],
+[
+"Woolly Mammoths",
+0
+],
+[
+"Woolly Spider",
+0
+],
+[
+"Word of Blasting",
+1
+],
+[
+"Word of Undoing",
+0
+],
+[
+"Wrath of Marit Lage",
+2
+],
+[
+"Yavimaya Gnats",
+1
+],
+[
+"Zur's Weirding",
+2
+],
+[
+"Zuran Enchanter",
+0
+],
+[
+"Zuran Orb",
+1
+],
+[
+"Zuran Spellcaster",
+0
+]
+]
+},
+{
+"code": "HML",
+"name": "Homelands",
+"released": "1995-10-01",
+"cards": [
+[
+"Abbey Gargoyles",
+1
+],
+[
+"Abbey Matron",
+0
+],
+[
+"Aether Storm",
+1
+],
+[
+"Aliban's Tower",
+0
+],
+[
+"Ambush",
+0
+],
+[
+"Ambush Party",
+0
+],
+[
+"An-Havva Constable",
+2
+],
+[
+"An-Havva Inn",
+1
+],
+[
+"An-Havva Township",
+1
+],
+[
+"An-Zerrin Ruins",
+2
+],
+[
+"Anaba Ancestor",
+2
+],
+[
+"Anaba Bodyguard",
+0
+],
+[
+"Anaba Shaman",
+0
+],
+[
+"Anaba Spirit Crafter",
+2
+],
+[
+"Apocalypse Chime",
+2
+],
+[
+"Autumn Willow",
+2
+],
+[
+"Aysen Abbey",
+1
+],
+[
+"Aysen Bureaucrats",
+0
+],
+[
+"Aysen Crusader",
+2
+],
+[
+"Aysen Highway",
+2
+],
+[
+"Baki's Curse",
+2
+],
+[
+"Baron Sengir",
+2
+],
+[
+"Beast Walkers",
+2
+],
+[
+"Black Carriage",
+2
+],
+[
+"Broken Visage",
+2
+],
+[
+"Carapace",
+0
+],
+[
+"Castle Sengir",
+1
+],
+[
+"Cemetery Gate",
+0
+],
+[
+"Chain Stasis",
+2
+],
+[
+"Chandler",
+0
+],
+[
+"Clockwork Gnomes",
+0
+],
+[
+"Clockwork Steed",
+0
+],
+[
+"Clockwork Swarm",
+0
+],
+[
+"Coral Reef",
+0
+],
+[
+"Dark Maze",
+0
+],
+[
+"Daughter of Autumn",
+2
+],
+[
+"Death Speakers",
+1
+],
+[
+"Didgeridoo",
+2
+],
+[
+"Drudge Spell",
+1
+],
+[
+"Dry Spell",
+0
+],
+[
+"Dwarven Pony",
+2
+],
+[
+"Dwarven Sea Clan",
+2
+],
+[
+"Dwarven Trader",
+0
+],
+[
+"Ebony Rhino",
+0
+],
+[
+"Eron the Relentless",
+1
+],
+[
+"Evaporate",
+1
+],
+[
+"Faerie Noble",
+2
+],
+[
+"Feast of the Unicorn",
+0
+],
+[
+"Feroz's Ban",
+2
+],
+[
+"Folk of An-Havva",
+0
+],
+[
+"Forget",
+2
+],
+[
+"Funeral March",
+0
+],
+[
+"Ghost Hounds",
+1
+],
+[
+"Giant Albatross",
+0
+],
+[
+"Giant Oyster",
+1
+],
+[
+"Grandmother Sengir",
+2
+],
+[
+"Greater Werewolf",
+0
+],
+[
+"Hazduhr the Abbot",
+2
+],
+[
+"Headstone",
+0
+],
+[
+"Heart Wolf",
+2
+],
+[
+"Hungry Mist",
+0
+],
+[
+"Ihsan's Shade",
+1
+],
+[
+"Irini Sengir",
+1
+],
+[
+"Ironclaw Curse",
+2
+],
+[
+"Jinx",
+0
+],
+[
+"Joven",
+0
+],
+[
+"Joven's Ferrets",
+0
+],
+[
+"Joven's Tools",
+1
+],
+[
+"Koskun Falls",
+2
+],
+[
+"Koskun Keep",
+1
+],
+[
+"Labyrinth Minotaur",
+0
+],
+[
+"Leaping Lizard",
+0
+],
+[
+"Leeches",
+2
+],
+[
+"Mammoth Harness",
+2
+],
+[
+"Marjhan",
+2
+],
+[
+"Memory Lapse",
+0
+],
+[
+"Merchant Scroll",
+0
+],
+[
+"Mesa Falcon",
+0
+],
+[
+"Mystic Decree",
+2
+],
+[
+"Narwhal",
+2
+],
+[
+"Orcish Mine",
+1
+],
+[
+"Primal Order",
+2
+],
+[
+"Prophecy",
+0
+],
+[
+"Rashka the Slayer",
+1
+],
+[
+"Reef Pirates",
+0
+],
+[
+"Renewal",
+0
+],
+[
+"Retribution",
+1
+],
+[
+"Reveka, Wizard Savant",
+2
+],
+[
+"Root Spider",
+1
+],
+[
+"Roots",
+1
+],
+[
+"Roterothopter",
+0
+],
+[
+"Rysorian Badger",
+2
+],
+[
+"Samite Alchemist",
+0
+],
+[
+"Sea Sprite",
+1
+],
+[
+"Sea Troll",
+1
+],
+[
+"Sengir Autocrat",
+1
+],
+[
+"Sengir Bats",
+0
+],
+[
+"Serra Aviary",
+2
+],
+[
+"Serra Bestiary",
+0
+],
+[
+"Serra Inquisitors",
+1
+],
+[
+"Serra Paladin",
+0
+],
+[
+"Serrated Arrows",
+0
+],
+[
+"Shrink",
+0
+],
+[
+"Soraya the Falconer",
+2
+],
+[
+"Spectral Bears",
+1
+],
+[
+"Timmerian Fiends",
+2
+],
+[
+"Torture",
+0
+],
+[
+"Trade Caravan",
+0
+],
+[
+"Truce",
+2
+],
+[
+"Veldrane of Sengir",
+2
+],
+[
+"Wall of Kelp",
+2
+],
+[
+"Willow Faerie",
+0
+],
+[
+"Willow Priestess",
+2
+],
+[
+"Winter Sky",
+2
+],
+[
+"Wizards' School",
+1
+]
+]
+},
+{
+"code": "ALL",
+"name": "Alliances",
+"released": "1996-06-10",
+"cards": [
+[
+"Aesthir Glider",
+0
+],
+[
+"Agent of Stromgald",
+0
+],
+[
+"Arcane Denial",
+0
+],
+[
+"Ashnod's Cylix",
+2
+],
+[
+"Astrolabe",
+0
+],
+[
+"Awesome Presence",
+0
+],
+[
+"Balduvian Dead",
+1
+],
+[
+"Balduvian Horde",
+2
+],
+[
+"Balduvian Trading Post",
+2
+],
+[
+"Balduvian War-Makers",
+0
+],
+[
+"Benthic Explorers",
+0
+],
+[
+"Bestial Fury",
+0
+],
+[
+"Bounty of the Hunt",
+1
+],
+[
+"Browse",
+1
+],
+[
+"Burnout",
+1
+],
+[
+"Carrier Pigeons",
+0
+],
+[
+"Casting of Bones",
+0
+],
+[
+"Chaos Harlequin",
+2
+],
+[
+"Contagion",
+1
+],
+[
+"Deadly Insect",
+0
+],
+[
+"Death Spark",
+1
+],
+[
+"Diminishing Returns",
+2
+],
+[
+"Diseased Vermin",
+1
+],
+[
+"Dystopia",
+2
+],
+[
+"Elvish Bard",
+1
+],
+[
+"Elvish Ranger",
+0
+],
+[
+"Elvish Spirit Guide",
+1
+],
+[
+"Energy Arc",
+1
+],
+[
+"Enslaved Scout",
+0
+],
+[
+"Errand of Duty",
+0
+],
+[
+"Exile",
+2
+],
+[
+"False Demise",
+0
+],
+[
+"Fatal Lore",
+2
+],
+[
+"Feast or Famine",
+0
+],
+[
+"Fevered Strength",
+0
+],
+[
+"Floodwater Dam",
+2
+],
+[
+"Force of Will",
+1
+],
+[
+"Foresight",
+0
+],
+[
+"Fyndhorn Druid",
+0
+],
+[
+"Gargantuan Gorilla",
+2
+],
+[
+"Gift of the Woods",
+0
+],
+[
+"Gorilla Berserkers",
+0
+],
+[
+"Gorilla Chieftain",
+0
+],
+[
+"Gorilla Shaman",
+0
+],
+[
+"Gorilla War Cry",
+0
+],
+[
+"Guerrilla Tactics",
+0
+],
+[
+"Gustha's Scepter",
+2
+],
+[
+"Hail Storm",
+1
+],
+[
+"Heart of Yavimaya",
+2
+],
+[
+"Helm of Obedience",
+2
+],
+[
+"Inheritance",
+1
+],
+[
+"Insidious Bookworms",
+0
+],
+[
+"Ivory Gargoyle",
+2
+],
+[
+"Juniper Order Advocate",
+1
+],
+[
+"Kaysa",
+2
+],
+[
+"Keeper of Tresserhorn",
+2
+],
+[
+"Kjeldoran Escort",
+0
+],
+[
+"Kjeldoran Home Guard",
+1
+],
+[
+"Kjeldoran Outpost",
+2
+],
+[
+"Kjeldoran Pride",
+0
+],
+[
+"Krovikan Horror",
+2
+],
+[
+"Krovikan Plague",
+1
+],
+[
+"Lake of the Dead",
+2
+],
+[
+"Lat-Nam's Legacy",
+0
+],
+[
+"Library of Lat-Nam",
+2
+],
+[
+"Lim-D\u00fbl's High Guard",
+0
+],
+[
+"Lim-D\u00fbl's Paladin",
+1
+],
+[
+"Lim-D\u00fbl's Vault",
+1
+],
+[
+"Lodestone Bauble",
+2
+],
+[
+"Lord of Tresserhorn",
+2
+],
+[
+"Martyrdom",
+0
+],
+[
+"Misfortune",
+2
+],
+[
+"Mishra's Groundbreaker",
+1
+],
+[
+"Misinformation",
+1
+],
+[
+"Mystic Compass",
+1
+],
+[
+"Nature's Blessing",
+1
+],
+[
+"Nature's Chosen",
+1
+],
+[
+"Nature's Wrath",
+2
+],
+[
+"Noble Steeds",
+0
+],
+[
+"Omen of Fire",
+2
+],
+[
+"Phantasmal Fiend",
+0
+],
+[
+"Phantasmal Sphere",
+2
+],
+[
+"Phelddagrif",
+2
+],
+[
+"Phyrexian Boon",
+0
+],
+[
+"Phyrexian Devourer",
+2
+],
+[
+"Phyrexian Portal",
+2
+],
+[
+"Phyrexian War Beast",
+0
+],
+[
+"Pillage",
+1
+],
+[
+"Primitive Justice",
+1
+],
+[
+"Pyrokinesis",
+1
+],
+[
+"Reinforcements",
+0
+],
+[
+"Reprisal",
+0
+],
+[
+"Ritual of the Machine",
+2
+],
+[
+"Rogue Skycaptain",
+2
+],
+[
+"Royal Decree",
+2
+],
+[
+"Royal Herbalist",
+0
+],
+[
+"Scarab of the Unseen",
+1
+],
+[
+"Scars of the Veteran",
+1
+],
+[
+"School of the Unseen",
+1
+],
+[
+"Seasoned Tactician",
+1
+],
+[
+"Sheltered Valley",
+2
+],
+[
+"Shield Sphere",
+1
+],
+[
+"Sol Grail",
+1
+],
+[
+"Soldevi Adnate",
+0
+],
+[
+"Soldevi Digger",
+2
+],
+[
+"Soldevi Excavations",
+2
+],
+[
+"Soldevi Heretic",
+0
+],
+[
+"Soldevi Sage",
+0
+],
+[
+"Soldevi Sentry",
+0
+],
+[
+"Soldevi Steam Beast",
+0
+],
+[
+"Soldier of Fortune",
+1
+],
+[
+"Spiny Starfish",
+1
+],
+[
+"Splintering Wind",
+2
+],
+[
+"Stench of Decay",
+0
+],
+[
+"Storm Cauldron",
+2
+],
+[
+"Storm Crow",
+0
+],
+[
+"Storm Elemental",
+1
+],
+[
+"Storm Shaman",
+0
+],
+[
+"Stromgald Spy",
+1
+],
+[
+"Suffocation",
+1
+],
+[
+"Surge of Strength",
+1
+],
+[
+"Sustaining Spirit",
+2
+],
+[
+"Swamp Mosquito",
+0
+],
+[
+"Sworn Defender",
+2
+],
+[
+"Taste of Paradise",
+0
+],
+[
+"Thawing Glaciers",
+2
+],
+[
+"Thought Lash",
+2
+],
+[
+"Tidal Control",
+2
+],
+[
+"Tornado",
+2
+],
+[
+"Undergrowth",
+0
+],
+[
+"Unlikely Alliance",
+1
+],
+[
+"Urza's Engine",
+1
+],
+[
+"Varchild's Crusader",
+0
+],
+[
+"Varchild's War-Riders",
+2
+],
+[
+"Veteran's Voice",
+0
+],
+[
+"Viscerid Armor",
+0
+],
+[
+"Viscerid Drone",
+1
+],
+[
+"Wandering Mage",
+2
+],
+[
+"Whip Vine",
+0
+],
+[
+"Whirling Catapult",
+1
+],
+[
+"Wild Aesthir",
+0
+],
+[
+"Winter's Night",
+2
+],
+[
+"Yavimaya Ancients",
+0
+],
+[
+"Yavimaya Ants",
+1
+]
+]
+},
+{
+"code": "MIR",
+"name": "Mirage",
+"released": "1996-10-08",
+"cards": [
+[
+"Abyssal Hunter",
+2
+],
+[
+"Acidic Dagger",
+2
+],
+[
+"Afiya Grove",
+2
+],
+[
+"Afterlife",
+1
+],
+[
+"Agility",
+0
+],
+[
+"Alarum",
+0
+],
+[
+"Aleatory",
+1
+],
+[
+"Amber Prison",
+2
+],
+[
+"Amulet of Unmaking",
+2
+],
+[
+"Ancestral Memories",
+2
+],
+[
+"Armor of Thorns",
+0
+],
+[
+"Armorer Guildmage",
+0
+],
+[
+"Ashen Powder",
+2
+],
+[
+"Asmira, Holy Avenger",
+2
+],
+[
+"Auspicious Ancestor",
+2
+],
+[
+"Azimaet Drake",
+0
+],
+[
+"Bad River",
+1
+],
+[
+"Barbed Foliage",
+1
+],
+[
+"Barbed-Back Wurm",
+1
+],
+[
+"Barreling Attack",
+2
+],
+[
+"Basalt Golem",
+1
+],
+[
+"Bay Falcon",
+0
+],
+[
+"Bazaar of Wonders",
+2
+],
+[
+"Benevolent Unicorn",
+0
+],
+[
+"Benthic Djinn",
+2
+],
+[
+"Binding Agony",
+0
+],
+[
+"Blighted Shaman",
+1
+],
+[
+"Blind Fury",
+1
+],
+[
+"Blinding Light",
+1
+],
+[
+"Blistering Barrier",
+0
+],
+[
+"Bone Harvest",
+0
+],
+[
+"Bone Mask",
+2
+],
+[
+"Boomerang",
+0
+],
+[
+"Breathstealer",
+0
+],
+[
+"Brushwagg",
+2
+],
+[
+"Builder's Bane",
+0
+],
+[
+"Burning Palm Efreet",
+1
+],
+[
+"Burning Shield Askari",
+0
+],
+[
+"Cadaverous Bloom",
+2
+],
+[
+"Cadaverous Knight",
+0
+],
+[
+"Canopy Dragon",
+2
+],
+[
+"Carrion",
+2
+],
+[
+"Catacomb Dragon",
+2
+],
+[
+"Celestial Dawn",
+2
+],
+[
+"Cerulean Wyvern",
+1
+],
+[
+"Chaos Charm",
+0
+],
+[
+"Chaosphere",
+2
+],
+[
+"Charcoal Diamond",
+1
+],
+[
+"Chariot of the Sun",
+1
+],
+[
+"Choking Sands",
+0
+],
+[
+"Cinder Cloud",
+1
+],
+[
+"Circle of Despair",
+2
+],
+[
+"Civic Guildmage",
+0
+],
+[
+"Cloak of Invisibility",
+0
+],
+[
+"Consuming Ferocity",
+1
+],
+[
+"Coral Fighters",
+1
+],
+[
+"Crash of Rhinos",
+0
+],
+[
+"Crimson Hellkite",
+2
+],
+[
+"Crimson Roc",
+1
+],
+[
+"Crypt Cobra",
+1
+],
+[
+"Crystal Golem",
+1
+],
+[
+"Crystal Vein",
+1
+],
+[
+"Cursed Totem",
+2
+],
+[
+"Cycle of Life",
+2
+],
+[
+"Daring Apprentice",
+2
+],
+[
+"Dark Banishing",
+0
+],
+[
+"Dark Ritual",
+0
+],
+[
+"Dazzling Beauty",
+0
+],
+[
+"Decomposition",
+1
+],
+[
+"Delirium",
+1
+],
+[
+"Dirtwater Wraith",
+0
+],
+[
+"Discordant Spirit",
+2
+],
+[
+"Disempower",
+0
+],
+[
+"Disenchant",
+0
+],
+[
+"Dissipate",
+1
+],
+[
+"Divine Offering",
+0
+],
+[
+"Divine Retribution",
+2
+],
+[
+"Drain Life",
+0
+],
+[
+"Dread Specter",
+1
+],
+[
+"Dream Cache",
+0
+],
+[
+"Dream Fighter",
+0
+],
+[
+"Dwarven Miner",
+1
+],
+[
+"Dwarven Nomad",
+0
+],
+[
+"Early Harvest",
+2
+],
+[
+"Ebony Charm",
+0
+],
+[
+"Ekundu Cyclops",
+0
+],
+[
+"Ekundu Griffin",
+0
+],
+[
+"Elixir of Vitality",
+1
+],
+[
+"Emberwilde Caliph",
+2
+],
+[
+"Emberwilde Djinn",
+2
+],
+[
+"Energy Bolt",
+2
+],
+[
+"Energy Vortex",
+2
+],
+[
+"Enfeeblement",
+0
+],
+[
+"Enlightened Tutor",
+1
+],
+[
+"Ersatz Gnomes",
+1
+],
+[
+"Ether Well",
+1
+],
+[
+"Ethereal Champion",
+2
+],
+[
+"Fallow Earth",
+1
+],
+[
+"Favorable Destiny",
+1
+],
+[
+"Femeref Archers",
+1
+],
+[
+"Femeref Healer",
+0
+],
+[
+"Femeref Knight",
+0
+],
+[
+"Femeref Scouts",
+0
+],
+[
+"Feral Shadow",
+0
+],
+[
+"Fetid Horror",
+0
+],
+[
+"Final Fortune",
+2
+],
+[
+"Fire Diamond",
+1
+],
+[
+"Firebreathing",
+0
+],
+[
+"Flame Elemental",
+1
+],
+[
+"Flare",
+0
+],
+[
+"Flash",
+2
+],
+[
+"Flood Plain",
+1
+],
+[
+"Floodgate",
+1
+],
+[
+"Fog",
+0
+],
+[
+"Foratog",
+1
+],
+[
+"Forbidden Crypt",
+2
+],
+[
+"Forsaken Wastes",
+2
+],
+[
+"Frenetic Efreet",
+2
+],
+[
+"Giant Mantis",
+0
+],
+[
+"Gibbering Hyenas",
+0
+],
+[
+"Goblin Elite Infantry",
+0
+],
+[
+"Goblin Scouts",
+1
+],
+[
+"Goblin Soothsayer",
+1
+],
+[
+"Goblin Tinkerer",
+0
+],
+[
+"Granger Guildmage",
+0
+],
+[
+"Grasslands",
+1
+],
+[
+"Grave Servitude",
+0
+],
+[
+"Gravebane Zombie",
+0
+],
+[
+"Grim Feast",
+2
+],
+[
+"Grinning Totem",
+2
+],
+[
+"Hakim, Loreweaver",
+2
+],
+[
+"Hall of Gemstone",
+2
+],
+[
+"Hammer of Bogardan",
+2
+],
+[
+"Harbinger of Night",
+2
+],
+[
+"Harbor Guardian",
+1
+],
+[
+"Harmattan Efreet",
+1
+],
+[
+"Haunting Apparition",
+1
+],
+[
+"Hazerider Drake",
+1
+],
+[
+"Healing Salve",
+0
+],
+[
+"Hivis of the Scale",
+2
+],
+[
+"Horrible Hordes",
+1
+],
+[
+"Igneous Golem",
+1
+],
+[
+"Illicit Auction",
+2
+],
+[
+"Illumination",
+1
+],
+[
+"Incinerate",
+0
+],
+[
+"Infernal Contract",
+2
+],
+[
+"Iron Tusk Elephant",
+1
+],
+[
+"Ivory Charm",
+0
+],
+[
+"Jabari's Influence",
+2
+],
+[
+"Jolrael's Centaur",
+0
+],
+[
+"Jolt",
+0
+],
+[
+"Jungle Patrol",
+2
+],
+[
+"Jungle Troll",
+1
+],
+[
+"Jungle Wurm",
+0
+],
+[
+"Kaervek's Hex",
+1
+],
+[
+"Kaervek's Purge",
+1
+],
+[
+"Kaervek's Torch",
+0
+],
+[
+"Karoo Meerkat",
+1
+],
+[
+"Kukemssa Pirates",
+2
+],
+[
+"Kukemssa Serpent",
+0
+],
+[
+"Lead Golem",
+1
+],
+[
+"Leering Gargoyle",
+2
+],
+[
+"Lightning Reflexes",
+0
+],
+[
+"Lion's Eye Diamond",
+2
+],
+[
+"Locust Swarm",
+1
+],
+[
+"Lure of Prey",
+2
+],
+[
+"Malignant Growth",
+2
+],
+[
+"Mana Prism",
+1
+],
+[
+"Mangara's Blessing",
+1
+],
+[
+"Mangara's Equity",
+1
+],
+[
+"Mangara's Tome",
+2
+],
+[
+"Marble Diamond",
+1
+],
+[
+"Maro",
+2
+],
+[
+"Meddle",
+1
+],
+[
+"Melesse Spirit",
+1
+],
+[
+"Memory Lapse",
+0
+],
+[
+"Merfolk Raiders",
+0
+],
+[
+"Merfolk Seer",
+0
+],
+[
+"Mind Bend",
+1
+],
+[
+"Mind Harness",
+1
+],
+[
+"Mindbender Spores",
+2
+],
+[
+"Mire Shade",
+1
+],
+[
+"Misers' Cage",
+2
+],
+[
+"Mist Dragon",
+2
+],
+[
+"Moss Diamond",
+1
+],
+[
+"Mountain Valley",
+1
+],
+[
+"Mtenda Griffin",
+1
+],
+[
+"Mtenda Herder",
+0
+],
+[
+"Mtenda Lion",
+0
+],
+[
+"Mystical Tutor",
+1
+],
+[
+"Natural Balance",
+2
+],
+[
+"Nettletooth Djinn",
+1
+],
+[
+"Noble Elephant",
+0
+],
+[
+"Nocturnal Raid",
+1
+],
+[
+"Null Chamber",
+2
+],
+[
+"Pacifism",
+0
+],
+[
+"Painful Memories",
+1
+],
+[
+"Patagia Golem",
+1
+],
+[
+"Paupers' Cage",
+2
+],
+[
+"Pearl Dragon",
+2
+],
+[
+"Phyrexian Dreadnought",
+2
+],
+[
+"Phyrexian Purge",
+2
+],
+[
+"Phyrexian Tribute",
+2
+],
+[
+"Phyrexian Vault",
+1
+],
+[
+"Political Trickery",
+2
+],
+[
+"Polymorph",
+2
+],
+[
+"Power Sink",
+0
+],
+[
+"Preferred Selection",
+2
+],
+[
+"Prismatic Boon",
+1
+],
+[
+"Prismatic Circle",
+0
+],
+[
+"Prismatic Lace",
+2
+],
+[
+"Psychic Transfer",
+2
+],
+[
+"Purgatory",
+2
+],
+[
+"Purraj of Urborg",
+2
+],
+[
+"Pyric Salamander",
+0
+],
+[
+"Quirion Elves",
+0
+],
+[
+"Radiant Essence",
+1
+],
+[
+"Raging Spirit",
+0
+],
+[
+"Rampant Growth",
+0
+],
+[
+"Rashida Scalebane",
+2
+],
+[
+"Ravenous Vampire",
+1
+],
+[
+"Ray of Command",
+0
+],
+[
+"Razor Pendulum",
+2
+],
+[
+"Reality Ripple",
+0
+],
+[
+"Reckless Embermage",
+2
+],
+[
+"Reflect Damage",
+2
+],
+[
+"Regeneration",
+0
+],
+[
+"Reign of Chaos",
+1
+],
+[
+"Reign of Terror",
+1
+],
+[
+"Reparations",
+2
+],
+[
+"Restless Dead",
+0
+],
+[
+"Ritual of Steel",
+0
+],
+[
+"Rock Basilisk",
+2
+],
+[
+"Rocky Tar Pit",
+1
+],
+[
+"Roots of Life",
+1
+],
+[
+"Sabertooth Cobra",
+0
+],
+[
+"Sacred Mesa",
+2
+],
+[
+"Sand Golem",
+1
+],
+[
+"Sandbar Crocodile",
+0
+],
+[
+"Sandstorm",
+0
+],
+[
+"Sapphire Charm",
+0
+],
+[
+"Savage Twister",
+1
+],
+[
+"Sawback Manticore",
+2
+],
+[
+"Sea Scryer",
+0
+],
+[
+"Sealed Fate",
+1
+],
+[
+"Searing Spear Askari",
+0
+],
+[
+"Seedling Charm",
+0
+],
+[
+"Seeds of Innocence",
+2
+],
+[
+"Serene Heart",
+0
+],
+[
+"Sewer Rats",
+0
+],
+[
+"Shadow Guildmage",
+0
+],
+[
+"Shadowbane",
+1
+],
+[
+"Shallow Grave",
+2
+],
+[
+"Shaper Guildmage",
+0
+],
+[
+"Shauku's Minion",
+1
+],
+[
+"Shauku, Endbringer",
+2
+],
+[
+"Shimmer",
+2
+],
+[
+"Sidar Jabari",
+2
+],
+[
+"Sirocco",
+1
+],
+[
+"Skulking Ghost",
+0
+],
+[
+"Sky Diamond",
+1
+],
+[
+"Soar",
+0
+],
+[
+"Soul Echo",
+2
+],
+[
+"Soul Rend",
+1
+],
+[
+"Soulshriek",
+0
+],
+[
+"Spatial Binding",
+1
+],
+[
+"Spectral Guardian",
+2
+],
+[
+"Spirit of the Night",
+2
+],
+[
+"Spitting Earth",
+0
+],
+[
+"Stalking Tiger",
+0
+],
+[
+"Stone Rain",
+0
+],
+[
+"Stupor",
+1
+],
+[
+"Subterranean Spirit",
+2
+],
+[
+"Sunweb",
+2
+],
+[
+"Superior Numbers",
+1
+],
+[
+"Suq'Ata Firewalker",
+1
+],
+[
+"Tainted Specter",
+2
+],
+[
+"Talruum Minotaur",
+0
+],
+[
+"Taniwha",
+2
+],
+[
+"Teeka's Dragon",
+2
+],
+[
+"Teferi's Curse",
+0
+],
+[
+"Teferi's Drake",
+0
+],
+[
+"Teferi's Imp",
+2
+],
+[
+"Teferi's Isle",
+2
+],
+[
+"Telim'Tor",
+2
+],
+[
+"Telim'Tor's Darts",
+1
+],
+[
+"Telim'Tor's Edict",
+2
+],
+[
+"Teremko Griffin",
+0
+],
+[
+"Thirst",
+0
+],
+[
+"Tidal Wave",
+1
+],
+[
+"Tombstone Stairwell",
+2
+],
+[
+"Torrent of Lava",
+2
+],
+[
+"Tranquil Domain",
+0
+],
+[
+"Tropical Storm",
+1
+],
+[
+"Uktabi Faerie",
+0
+],
+[
+"Uktabi Wildcats",
+2
+],
+[
+"Unerring Sling",
+1
+],
+[
+"Unfulfilled Desires",
+2
+],
+[
+"Unseen Walker",
+1
+],
+[
+"Unyaro Bee Sting",
+1
+],
+[
+"Unyaro Griffin",
+1
+],
+[
+"Urborg Panther",
+0
+],
+[
+"Vaporous Djinn",
+1
+],
+[
+"Ventifact Bottle",
+2
+],
+[
+"Viashino Warrior",
+0
+],
+[
+"Vigilant Martyr",
+1
+],
+[
+"Village Elder",
+0
+],
+[
+"Vitalizing Cascade",
+1
+],
+[
+"Volcanic Dragon",
+2
+],
+[
+"Volcanic Geyser",
+1
+],
+[
+"Waiting in the Weeds",
+2
+],
+[
+"Wall of Corpses",
+0
+],
+[
+"Wall of Resistance",
+0
+],
+[
+"Wall of Roots",
+0
+],
+[
+"Ward of Lights",
+0
+],
+[
+"Warping Wurm",
+2
+],
+[
+"Wave Elemental",
+1
+],
+[
+"Wellspring",
+2
+],
+[
+"Wild Elephant",
+0
+],
+[
+"Wildfire Emissary",
+1
+],
+[
+"Windreaper Falcon",
+1
+],
+[
+"Withering Boon",
+1
+],
+[
+"Worldly Tutor",
+1
+],
+[
+"Yare",
+2
+],
+[
+"Zebra Unicorn",
+1
+],
+[
+"Zhalfirin Commander",
+1
+],
+[
+"Zhalfirin Knight",
+0
+],
+[
+"Zirilan of the Claw",
+2
+],
+[
+"Zombie Mob",
+1
+],
+[
+"Zuberi, Golden Feather",
+2
+]
+]
+},
+{
+"code": "VIS",
+"name": "Visions",
+"released": "1997-02-03",
+"cards": [
+[
+"Aku Djinn",
+2
+],
+[
+"Anvil of Bogardan",
+2
+],
+[
+"Archangel",
+2
+],
+[
+"Army Ants",
+1
+],
+[
+"Betrayal",
+0
+],
+[
+"Blanket of Night",
+1
+],
+[
+"Bogardan Phoenix",
+2
+],
+[
+"Brass-Talon Chimera",
+1
+],
+[
+"Breathstealer's Crypt",
+2
+],
+[
+"Breezekeeper",
+0
+],
+[
+"Brood of Cockroaches",
+1
+],
+[
+"Bull Elephant",
+0
+],
+[
+"Chronatog",
+2
+],
+[
+"City of Solitude",
+2
+],
+[
+"Cloud Elemental",
+0
+],
+[
+"Coercion",
+0
+],
+[
+"Coral Atoll",
+1
+],
+[
+"Corrosion",
+2
+],
+[
+"Creeping Mold",
+1
+],
+[
+"Crypt Rats",
+0
+],
+[
+"Daraja Griffin",
+1
+],
+[
+"Dark Privilege",
+0
+],
+[
+"Death Watch",
+0
+],
+[
+"Desertion",
+2
+],
+[
+"Desolation",
+1
+],
+[
+"Diamond Kaleidoscope",
+2
+],
+[
+"Dormant Volcano",
+1
+],
+[
+"Dragon Mask",
+1
+],
+[
+"Dream Tides",
+1
+],
+[
+"Dwarven Vigilantes",
+0
+],
+[
+"Elephant Grass",
+1
+],
+[
+"Elkin Lair",
+2
+],
+[
+"Elven Cache",
+0
+],
+[
+"Emerald Charm",
+0
+],
+[
+"Equipoise",
+2
+],
+[
+"Everglades",
+1
+],
+[
+"Eye of Singularity",
+2
+],
+[
+"Fallen Askari",
+0
+],
+[
+"Femeref Enchantress",
+2
+],
+[
+"Feral Instinct",
+0
+],
+[
+"Fireblast",
+0
+],
+[
+"Firestorm Hellkite",
+2
+],
+[
+"Flooded Shoreline",
+2
+],
+[
+"Forbidden Ritual",
+2
+],
+[
+"Foreshadow",
+1
+],
+[
+"Freewind Falcon",
+0
+],
+[
+"Funeral Charm",
+0
+],
+[
+"Giant Caterpillar",
+0
+],
+[
+"Goblin Recruiter",
+1
+],
+[
+"Goblin Swine-Rider",
+0
+],
+[
+"Gossamer Chains",
+0
+],
+[
+"Griffin Canyon",
+2
+],
+[
+"Guiding Spirit",
+2
+],
+[
+"Hearth Charm",
+0
+],
+[
+"Heat Wave",
+1
+],
+[
+"Helm of Awakening",
+1
+],
+[
+"Honorable Passage",
+1
+],
+[
+"Hope Charm",
+0
+],
+[
+"Hulking Cyclops",
+1
+],
+[
+"Impulse",
+0
+],
+[
+"Infantry Veteran",
+0
+],
+[
+"Infernal Harvest",
+0
+],
+[
+"Inspiration",
+0
+],
+[
+"Iron-Heart Chimera",
+1
+],
+[
+"Jamuraan Lion",
+0
+],
+[
+"Juju Bubble",
+1
+],
+[
+"Jungle Basin",
+1
+],
+[
+"Kaervek's Spite",
+2
+],
+[
+"Karoo",
+1
+],
+[
+"Katabatic Winds",
+2
+],
+[
+"Keeper of Kookus",
+0
+],
+[
+"King Cheetah",
+0
+],
+[
+"Knight of Valor",
+0
+],
+[
+"Knight of the Mists",
+0
+],
+[
+"Kookus",
+2
+],
+[
+"Kyscu Drake",
+1
+],
+[
+"Lead-Belly Chimera",
+1
+],
+[
+"Lichenthrope",
+2
+],
+[
+"Lightning Cloud",
+2
+],
+[
+"Longbow Archer",
+1
+],
+[
+"Magma Mine",
+1
+],
+[
+"Man-o'-War",
+0
+],
+[
+"Matopi Golem",
+1
+],
+[
+"Miraculous Recovery",
+1
+],
+[
+"Mob Mentality",
+1
+],
+[
+"Mortal Wound",
+0
+],
+[
+"Mundungu",
+1
+],
+[
+"Mystic Veil",
+0
+],
+[
+"Natural Order",
+2
+],
+[
+"Necromancy",
+1
+],
+[
+"Necrosavant",
+2
+],
+[
+"Nekrataal",
+1
+],
+[
+"Ogre Enforcer",
+2
+],
+[
+"Ovinomancer",
+1
+],
+[
+"Panther Warriors",
+0
+],
+[
+"Parapet",
+0
+],
+[
+"Peace Talks",
+1
+],
+[
+"Phyrexian Marauder",
+2
+],
+[
+"Phyrexian Walker",
+0
+],
+[
+"Pillar Tombs of Aku",
+2
+],
+[
+"Prosperity",
+1
+],
+[
+"Pygmy Hippo",
+2
+],
+[
+"Python",
+0
+],
+[
+"Quicksand",
+1
+],
+[
+"Quirion Druid",
+2
+],
+[
+"Quirion Ranger",
+0
+],
+[
+"Raging Gorilla",
+0
+],
+[
+"Rainbow Efreet",
+2
+],
+[
+"Relentless Assault",
+2
+],
+[
+"Relic Ward",
+1
+],
+[
+"Remedy",
+0
+],
+[
+"Resistance Fighter",
+0
+],
+[
+"Retribution of the Meek",
+2
+],
+[
+"Righteous Aura",
+0
+],
+[
+"Righteous War",
+2
+],
+[
+"River Boa",
+0
+],
+[
+"Rock Slide",
+0
+],
+[
+"Rowen",
+2
+],
+[
+"Sands of Time",
+2
+],
+[
+"Scalebane's Elite",
+1
+],
+[
+"Shimmering Efreet",
+1
+],
+[
+"Shrieking Drake",
+0
+],
+[
+"Simoon",
+1
+],
+[
+"Sisay's Ring",
+0
+],
+[
+"Snake Basket",
+2
+],
+[
+"Solfatara",
+0
+],
+[
+"Song of Blood",
+0
+],
+[
+"Spider Climb",
+0
+],
+[
+"Spitting Drake",
+1
+],
+[
+"Squandered Resources",
+2
+],
+[
+"Stampeding Wildebeests",
+1
+],
+[
+"Suleiman's Legacy",
+2
+],
+[
+"Summer Bloom",
+1
+],
+[
+"Sun Clasp",
+0
+],
+[
+"Suq'Ata Assassin",
+1
+],
+[
+"Suq'Ata Lancer",
+0
+],
+[
+"Talruum Champion",
+0
+],
+[
+"Talruum Piper",
+1
+],
+[
+"Tar Pit Warrior",
+0
+],
+[
+"Teferi's Honor Guard",
+1
+],
+[
+"Teferi's Puzzle Box",
+2
+],
+[
+"Teferi's Realm",
+2
+],
+[
+"Tempest Drake",
+1
+],
+[
+"Three Wishes",
+2
+],
+[
+"Time and Tide",
+1
+],
+[
+"Tin-Wing Chimera",
+1
+],
+[
+"Tithe",
+2
+],
+[
+"Tremor",
+0
+],
+[
+"Triangle of War",
+2
+],
+[
+"Uktabi Orangutan",
+1
+],
+[
+"Undiscovered Paradise",
+2
+],
+[
+"Undo",
+0
+],
+[
+"Urborg Mindsucker",
+0
+],
+[
+"Vampiric Tutor",
+2
+],
+[
+"Vampirism",
+1
+],
+[
+"Vanishing",
+0
+],
+[
+"Viashino Sandstalker",
+1
+],
+[
+"Viashivan Dragon",
+2
+],
+[
+"Vision Charm",
+0
+],
+[
+"Wake of Vultures",
+0
+],
+[
+"Wand of Denial",
+2
+],
+[
+"Warrior's Honor",
+0
+],
+[
+"Warthog",
+0
+],
+[
+"Waterspout Djinn",
+1
+],
+[
+"Wicked Reward",
+0
+],
+[
+"Wind Shear",
+1
+],
+[
+"Zhalfirin Crusader",
+2
+]
+]
+},
+{
+"code": "5ED",
+"name": "Fifth Edition",
+"released": "1997-03-24",
+"cards": [
+[
+"Abbey Gargoyles",
+1
+],
+[
+"Abyssal Specter",
+1
+],
+[
+"Adarkar Wastes",
+2
+],
+[
+"Aether Storm",
+1
+],
+[
+"Air Elemental",
+1
+],
+[
+"Akron Legionnaire",
+2
+],
+[
+"Alabaster Potion",
+0
+],
+[
+"Aladdin's Ring",
+2
+],
+[
+"Ambush Party",
+0
+],
+[
+"Amulet of Kroog",
+0
+],
+[
+"An-Havva Constable",
+2
+],
+[
+"Angry Mob",
+1
+],
+[
+"Animate Dead",
+1
+],
+[
+"Animate Wall",
+2
+],
+[
+"Ankh of Mishra",
+2
+],
+[
+"Anti-Magic Aura",
+1
+],
+[
+"Arenson's Aura",
+1
+],
+[
+"Armageddon",
+2
+],
+[
+"Armor of Faith",
+0
+],
+[
+"Ashes to Ashes",
+1
+],
+[
+"Ashnod's Altar",
+1
+],
+[
+"Ashnod's Transmogrant",
+0
+],
+[
+"Aspect of Wolf",
+2
+],
+[
+"Atog",
+1
+],
+[
+"Aurochs",
+0
+],
+[
+"Aysen Bureaucrats",
+0
+],
+[
+"Azure Drake",
+1
+],
+[
+"Bad Moon",
+2
+],
+[
+"Ball Lightning",
+2
+],
+[
+"Barbed Sextant",
+0
+],
+[
+"Barl's Cage",
+2
+],
+[
+"Battering Ram",
+0
+],
+[
+"Benalish Hero",
+0
+],
+[
+"Binding Grasp",
+1
+],
+[
+"Bird Maiden",
+0
+],
+[
+"Birds of Paradise",
+2
+],
+[
+"Black Knight",
+1
+],
+[
+"Blessed Wine",
+0
+],
+[
+"Blight",
+1
+],
+[
+"Blinking Spirit",
+2
+],
+[
+"Blood Lust",
+0
+],
+[
+"Bog Imp",
+0
+],
+[
+"Bog Rats",
+0
+],
+[
+"Bog Wraith",
+1
+],
+[
+"Boomerang",
+0
+],
+[
+"Bottle of Suleiman",
+2
+],
+[
+"Bottomless Vault",
+2
+],
+[
+"Brainstorm",
+0
+],
+[
+"Brainwash",
+0
+],
+[
+"Brassclaw Orcs",
+0
+],
+[
+"Breeding Pit",
+1
+],
+[
+"Broken Visage",
+2
+],
+[
+"Brothers of Fire",
+0
+],
+[
+"Brushland",
+2
+],
+[
+"Carapace",
+0
+],
+[
+"Caribou Range",
+2
+],
+[
+"Carrion Ants",
+1
+],
+[
+"Castle",
+1
+],
+[
+"Cat Warriors",
+0
+],
+[
+"Cave People",
+1
+],
+[
+"Chub Toad",
+0
+],
+[
+"Circle of Protection: Artifacts",
+1
+],
+[
+"Circle of Protection: Black",
+0
+],
+[
+"Circle of Protection: Blue",
+0
+],
+[
+"Circle of Protection: Green",
+0
+],
+[
+"Circle of Protection: Red",
+0
+],
+[
+"Circle of Protection: White",
+0
+],
+[
+"City of Brass",
+2
+],
+[
+"Clay Statue",
+0
+],
+[
+"Cloak of Confusion",
+0
+],
+[
+"Clockwork Beast",
+2
+],
+[
+"Clockwork Steed",
+1
+],
+[
+"Cockatrice",
+2
+],
+[
+"Colossus of Sardia",
+2
+],
+[
+"Conquer",
+1
+],
+[
+"Coral Helm",
+2
+],
+[
+"Counterspell",
+0
+],
+[
+"Craw Giant",
+1
+],
+[
+"Craw Wurm",
+0
+],
+[
+"Crimson Manticore",
+2
+],
+[
+"Crown of the Ages",
+2
+],
+[
+"Crumble",
+1
+],
+[
+"Crusade",
+2
+],
+[
+"Crystal Rod",
+1
+],
+[
+"Cursed Land",
+1
+],
+[
+"D'Avenant Archer",
+0
+],
+[
+"Dance of Many",
+2
+],
+[
+"Dancing Scimitar",
+2
+],
+[
+"Dand\u00e2n",
+0
+],
+[
+"Dark Maze",
+0
+],
+[
+"Dark Ritual",
+0
+],
+[
+"Death Speakers",
+0
+],
+[
+"Death Ward",
+0
+],
+[
+"Deathgrip",
+1
+],
+[
+"Deflection",
+2
+],
+[
+"Derelor",
+2
+],
+[
+"Desert Twister",
+1
+],
+[
+"Detonate",
+1
+],
+[
+"Diabolic Machine",
+1
+],
+[
+"Dingus Egg",
+2
+],
+[
+"Disenchant",
+0
+],
+[
+"Disintegrate",
+0
+],
+[
+"Disrupting Scepter",
+2
+],
+[
+"Divine Offering",
+0
+],
+[
+"Divine Transformation",
+1
+],
+[
+"Dragon Engine",
+2
+],
+[
+"Drain Life",
+0
+],
+[
+"Drain Power",
+2
+],
+[
+"Drudge Skeletons",
+0
+],
+[
+"Durkwood Boars",
+0
+],
+[
+"Dust to Dust",
+1
+],
+[
+"Dwarven Catapult",
+1
+],
+[
+"Dwarven Hold",
+2
+],
+[
+"Dwarven Ruins",
+1
+],
+[
+"Dwarven Soldier",
+0
+],
+[
+"Dwarven Warriors",
+0
+],
+[
+"Earthquake",
+2
+],
+[
+"Ebon Stronghold",
+1
+],
+[
+"Elder Druid",
+2
+],
+[
+"Elkin Bottle",
+2
+],
+[
+"Elven Riders",
+1
+],
+[
+"Elvish Archers",
+2
+],
+[
+"Energy Flux",
+1
+],
+[
+"Enervate",
+0
+],
+[
+"Erg Raiders",
+0
+],
+[
+"Errantry",
+0
+],
+[
+"Eternal Warrior",
+0
+],
+[
+"Evil Eye of Orms-by-Gore",
+1
+],
+[
+"Evil Presence",
+1
+],
+[
+"Eye for an Eye",
+2
+],
+[
+"Fallen Angel",
+1
+],
+[
+"Fear",
+0
+],
+[
+"Feedback",
+1
+],
+[
+"Feldon's Cane",
+1
+],
+[
+"Fellwar Stone",
+1
+],
+[
+"Feroz's Ban",
+2
+],
+[
+"Fire Drake",
+1
+],
+[
+"Fireball",
+0
+],
+[
+"Firebreathing",
+0
+],
+[
+"Flame Spirit",
+1
+],
+[
+"Flare",
+0
+],
+[
+"Flashfires",
+1
+],
+[
+"Flight",
+0
+],
+[
+"Flood",
+0
+],
+[
+"Flying Carpet",
+2
+],
+[
+"Fog",
+0
+],
+[
+"Force Spike",
+0
+],
+[
+"Force of Nature",
+2
+],
+[
+"Forget",
+2
+],
+[
+"Fountain of Youth",
+1
+],
+[
+"Foxfire",
+0
+],
+[
+"Frozen Shade",
+0
+],
+[
+"Funeral March",
+0
+],
+[
+"Fungusaur",
+2
+],
+[
+"Fyndhorn Elder",
+1
+],
+[
+"Game of Chaos",
+2
+],
+[
+"Gaseous Form",
+0
+],
+[
+"Gauntlets of Chaos",
+2
+],
+[
+"Ghazb\u00e1n Ogre",
+0
+],
+[
+"Giant Growth",
+0
+],
+[
+"Giant Spider",
+0
+],
+[
+"Giant Strength",
+0
+],
+[
+"Glacial Wall",
+1
+],
+[
+"Glasses of Urza",
+1
+],
+[
+"Gloom",
+1
+],
+[
+"Goblin Digging Team",
+0
+],
+[
+"Goblin Hero",
+0
+],
+[
+"Goblin King",
+2
+],
+[
+"Goblin War Drums",
+0
+],
+[
+"Goblin Warrens",
+2
+],
+[
+"Grapeshot Catapult",
+0
+],
+[
+"Greater Realm of Preservation",
+1
+],
+[
+"Greater Werewolf",
+1
+],
+[
+"Grizzly Bears",
+0
+],
+[
+"Havenwood Battleground",
+1
+],
+[
+"Heal",
+0
+],
+[
+"Healing Salve",
+0
+],
+[
+"Hecatomb",
+2
+],
+[
+"Helm of Chatzuk",
+2
+],
+[
+"Hill Giant",
+0
+],
+[
+"Hipparion",
+0
+],
+[
+"Hollow Trees",
+2
+],
+[
+"Holy Strength",
+0
+],
+[
+"Homarid Warrior",
+0
+],
+[
+"Howl from Beyond",
+0
+],
+[
+"Howling Mine",
+2
+],
+[
+"Hungry Mist",
+0
+],
+[
+"Hurkyl's Recall",
+2
+],
+[
+"Hurloon Minotaur",
+0
+],
+[
+"Hurricane",
+1
+],
+[
+"Hydroblast",
+1
+],
+[
+"Icatian Phalanx",
+1
+],
+[
+"Icatian Scout",
+0
+],
+[
+"Icatian Store",
+2
+],
+[
+"Icatian Town",
+2
+],
+[
+"Ice Floe",
+1
+],
+[
+"Imposing Visage",
+0
+],
+[
+"Incinerate",
+0
+],
+[
+"Inferno",
+2
+],
+[
+"Infinite Hourglass",
+2
+],
+[
+"Initiates of the Ebon Hand",
+0
+],
+[
+"Instill Energy",
+1
+],
+[
+"Iron Star",
+1
+],
+[
+"Ironclaw Curse",
+2
+],
+[
+"Ironclaw Orcs",
+0
+],
+[
+"Ironroot Treefolk",
+0
+],
+[
+"Island Sanctuary",
+2
+],
+[
+"Ivory Cup",
+1
+],
+[
+"Ivory Guardians",
+1
+],
+[
+"Jade Monolith",
+2
+],
+[
+"Jalum Tome",
+2
+],
+[
+"Jandor's Saddlebags",
+2
+],
+[
+"Jayemdae Tome",
+2
+],
+[
+"Jester's Cap",
+2
+],
+[
+"Johtull Wurm",
+1
+],
+[
+"Jokulhaups",
+2
+],
+[
+"Joven's Tools",
+1
+],
+[
+"Justice",
+1
+],
+[
+"Juxtapose",
+2
+],
+[
+"Karma",
+1
+],
+[
+"Karplusan Forest",
+2
+],
+[
+"Keldon Warlord",
+1
+],
+[
+"Killer Bees",
+1
+],
+[
+"Kismet",
+1
+],
+[
+"Kjeldoran Dead",
+0
+],
+[
+"Kjeldoran Royal Guard",
+2
+],
+[
+"Kjeldoran Skycaptain",
+1
+],
+[
+"Knight of Stromgald",
+1
+],
+[
+"Krovikan Fetish",
+0
+],
+[
+"Krovikan Sorcerer",
+0
+],
+[
+"Labyrinth Minotaur",
+0
+],
+[
+"Leshrac's Rite",
+1
+],
+[
+"Leviathan",
+2
+],
+[
+"Ley Druid",
+0
+],
+[
+"Lhurgoyf",
+2
+],
+[
+"Library of Leng",
+1
+],
+[
+"Lifeforce",
+1
+],
+[
+"Lifetap",
+1
+],
+[
+"Living Artifact",
+2
+],
+[
+"Living Lands",
+2
+],
+[
+"Llanowar Elves",
+0
+],
+[
+"Lord of Atlantis",
+2
+],
+[
+"Lord of the Pit",
+2
+],
+[
+"Lost Soul",
+0
+],
+[
+"Lure",
+1
+],
+[
+"Magical Hack",
+2
+],
+[
+"Magus of the Unseen",
+2
+],
+[
+"Mana Clash",
+2
+],
+[
+"Mana Flare",
+2
+],
+[
+"Mana Vault",
+2
+],
+[
+"Manabarbs",
+2
+],
+[
+"Marsh Viper",
+0
+],
+[
+"Meekstone",
+2
+],
+[
+"Memory Lapse",
+0
+],
+[
+"Merfolk of the Pearl Trident",
+0
+],
+[
+"Mesa Falcon",
+0
+],
+[
+"Mesa Pegasus",
+0
+],
+[
+"Millstone",
+2
+],
+[
+"Mind Bomb",
+1
+],
+[
+"Mind Ravel",
+0
+],
+[
+"Mind Warp",
+1
+],
+[
+"Mindstab Thrull",
+0
+],
+[
+"Mole Worms",
+1
+],
+[
+"Mons's Goblin Raiders",
+0
+],
+[
+"Mountain Goat",
+0
+],
+[
+"Murk Dwellers",
+0
+],
+[
+"Nature's Lore",
+0
+],
+[
+"Necrite",
+0
+],
+[
+"Necropotence",
+2
+],
+[
+"Nether Shadow",
+2
+],
+[
+"Nevinyrral's Disk",
+2
+],
+[
+"Nightmare",
+2
+],
+[
+"Obelisk of Undoing",
+2
+],
+[
+"Orcish Artillery",
+1
+],
+[
+"Orcish Captain",
+1
+],
+[
+"Orcish Conscripts",
+0
+],
+[
+"Orcish Farmer",
+0
+],
+[
+"Orcish Oriflamme",
+1
+],
+[
+"Orcish Squatters",
+2
+],
+[
+"Order of the Sacred Torch",
+2
+],
+[
+"Order of the White Shield",
+1
+],
+[
+"Orgg",
+2
+],
+[
+"Ornithopter",
+1
+],
+[
+"Panic",
+0
+],
+[
+"Paralyze",
+0
+],
+[
+"Pearled Unicorn",
+0
+],
+[
+"Pentagram of the Ages",
+2
+],
+[
+"Personal Incarnation",
+2
+],
+[
+"Pestilence",
+0
+],
+[
+"Phantasmal Forces",
+1
+],
+[
+"Phantasmal Terrain",
+0
+],
+[
+"Phantom Monster",
+1
+],
+[
+"Pikemen",
+0
+],
+[
+"Pirate Ship",
+2
+],
+[
+"Pit Scorpion",
+0
+],
+[
+"Plague Rats",
+0
+],
+[
+"Portent",
+0
+],
+[
+"Power Sink",
+1
+],
+[
+"Pox",
+2
+],
+[
+"Pradesh Gypsies",
+0
+],
+[
+"Primal Clay",
+2
+],
+[
+"Primal Order",
+2
+],
+[
+"Primordial Ooze",
+1
+],
+[
+"Prismatic Ward",
+0
+],
+[
+"Prodigal Sorcerer",
+0
+],
+[
+"Psychic Venom",
+0
+],
+[
+"Pyroblast",
+1
+],
+[
+"Pyrotechnics",
+1
+],
+[
+"Rabid Wombat",
+1
+],
+[
+"Radjan Spirit",
+1
+],
+[
+"Rag Man",
+2
+],
+[
+"Raise Dead",
+0
+],
+[
+"Ray of Command",
+0
+],
+[
+"Recall",
+2
+],
+[
+"Reef Pirates",
+0
+],
+[
+"Regeneration",
+0
+],
+[
+"Remove Soul",
+0
+],
+[
+"Repentant Blacksmith",
+0
+],
+[
+"Reverse Damage",
+2
+],
+[
+"Righteousness",
+2
+],
+[
+"Rod of Ruin",
+1
+],
+[
+"Ruins of Trokair",
+1
+],
+[
+"Sabretooth Tiger",
+0
+],
+[
+"Sacred Boon",
+1
+],
+[
+"Samite Healer",
+0
+],
+[
+"Sand Silos",
+2
+],
+[
+"Scaled Wurm",
+0
+],
+[
+"Scathe Zombies",
+0
+],
+[
+"Scavenger Folk",
+0
+],
+[
+"Scryb Sprites",
+0
+],
+[
+"Sea Serpent",
+0
+],
+[
+"Sea Spirit",
+1
+],
+[
+"Sea Sprite",
+1
+],
+[
+"Seasinger",
+1
+],
+[
+"Segovian Leviathan",
+1
+],
+[
+"Sengir Autocrat",
+2
+],
+[
+"Seraph",
+2
+],
+[
+"Serpent Generator",
+2
+],
+[
+"Serra Bestiary",
+1
+],
+[
+"Serra Paladin",
+1
+],
+[
+"Shanodin Dryads",
+0
+],
+[
+"Shapeshifter",
+1
+],
+[
+"Shatter",
+0
+],
+[
+"Shatterstorm",
+1
+],
+[
+"Shield Bearer",
+0
+],
+[
+"Shield Wall",
+0
+],
+[
+"Shivan Dragon",
+2
+],
+[
+"Shrink",
+0
+],
+[
+"Sibilant Spirit",
+2
+],
+[
+"Skull Catapult",
+1
+],
+[
+"Sleight of Mind",
+2
+],
+[
+"Smoke",
+2
+],
+[
+"Sorceress Queen",
+2
+],
+[
+"Soul Barrier",
+0
+],
+[
+"Soul Net",
+1
+],
+[
+"Spell Blast",
+0
+],
+[
+"Spirit Link",
+1
+],
+[
+"Stampede",
+2
+],
+[
+"Stasis",
+2
+],
+[
+"Steal Artifact",
+1
+],
+[
+"Stone Giant",
+1
+],
+[
+"Stone Rain",
+0
+],
+[
+"Stone Spirit",
+1
+],
+[
+"Stream of Life",
+0
+],
+[
+"Stromgald Cabal",
+2
+],
+[
+"Sulfurous Springs",
+2
+],
+[
+"Svyelunite Temple",
+1
+],
+[
+"Sylvan Library",
+2
+],
+[
+"Tarpan",
+0
+],
+[
+"Tawnos's Weaponry",
+1
+],
+[
+"Terror",
+0
+],
+[
+"The Brute",
+0
+],
+[
+"The Hive",
+2
+],
+[
+"The Wretched",
+2
+],
+[
+"Thicket Basilisk",
+1
+],
+[
+"Throne of Bone",
+1
+],
+[
+"Thrull Retainer",
+1
+],
+[
+"Time Bomb",
+2
+],
+[
+"Time Elemental",
+2
+],
+[
+"Titania's Song",
+2
+],
+[
+"Torture",
+0
+],
+[
+"Touch of Death",
+0
+],
+[
+"Tranquility",
+0
+],
+[
+"Truce",
+2
+],
+[
+"Tsunami",
+1
+],
+[
+"Tundra Wolves",
+0
+],
+[
+"Twiddle",
+0
+],
+[
+"Underground River",
+2
+],
+[
+"Unholy Strength",
+0
+],
+[
+"Unstable Mutation",
+0
+],
+[
+"Unsummon",
+0
+],
+[
+"Untamed Wilds",
+1
+],
+[
+"Updraft",
+0
+],
+[
+"Urza's Avenger",
+2
+],
+[
+"Urza's Bauble",
+1
+],
+[
+"Urza's Mine",
+0
+],
+[
+"Urza's Power Plant",
+0
+],
+[
+"Urza's Tower",
+0
+],
+[
+"Vampire Bats",
+0
+],
+[
+"Venom",
+0
+],
+[
+"Verduran Enchantress",
+2
+],
+[
+"Vodalian Soldiers",
+0
+],
+[
+"Wall of Air",
+1
+],
+[
+"Wall of Bone",
+1
+],
+[
+"Wall of Brambles",
+1
+],
+[
+"Wall of Fire",
+1
+],
+[
+"Wall of Spears",
+0
+],
+[
+"Wall of Stone",
+1
+],
+[
+"Wall of Swords",
+1
+],
+[
+"Wanderlust",
+1
+],
+[
+"War Mammoth",
+0
+],
+[
+"Warp Artifact",
+2
+],
+[
+"Weakness",
+0
+],
+[
+"Whirling Dervish",
+1
+],
+[
+"White Knight",
+1
+],
+[
+"Wild Growth",
+0
+],
+[
+"Wind Spirit",
+1
+],
+[
+"Winds of Change",
+2
+],
+[
+"Winter Blast",
+1
+],
+[
+"Winter Orb",
+2
+],
+[
+"Wolverine Pack",
+1
+],
+[
+"Wooden Sphere",
+1
+],
+[
+"Word of Blasting",
+1
+],
+[
+"Wrath of God",
+2
+],
+[
+"Wyluli Wolf",
+2
+],
+[
+"Xenic Poltergeist",
+2
+],
+[
+"Zephyr Falcon",
+0
+],
+[
+"Zombie Master",
+2
+],
+[
+"Zur's Weirding",
+2
+]
+]
+},
+{
+"code": "WTH",
+"name": "Weatherlight",
+"released": "1997-06-09",
+"cards": [
+[
+"Abduction",
+1
+],
+[
+"Abeyance",
+2
+],
+[
+"Abjure",
+0
+],
+[
+"Aboroth",
+2
+],
+[
+"Abyssal Gatekeeper",
+0
+],
+[
+"Aether Flash",
+1
+],
+[
+"Agonizing Memories",
+1
+],
+[
+"Alabaster Dragon",
+2
+],
+[
+"Alms",
+0
+],
+[
+"Ancestral Knowledge",
+2
+],
+[
+"Angelic Renewal",
+0
+],
+[
+"Apathy",
+0
+],
+[
+"Arctic Wolves",
+1
+],
+[
+"Ardent Militia",
+0
+],
+[
+"Argivian Find",
+1
+],
+[
+"Argivian Restoration",
+1
+],
+[
+"Aura of Silence",
+1
+],
+[
+"Avizoa",
+2
+],
+[
+"Barishi",
+1
+],
+[
+"Barrow Ghoul",
+0
+],
+[
+"Benalish Infantry",
+0
+],
+[
+"Benalish Knight",
+0
+],
+[
+"Benalish Missionary",
+0
+],
+[
+"Betrothed of Fire",
+0
+],
+[
+"Bloodrock Cyclops",
+0
+],
+[
+"Blossoming Wreath",
+0
+],
+[
+"Bogardan Firefiend",
+0
+],
+[
+"Boiling Blood",
+0
+],
+[
+"Bone Dancer",
+2
+],
+[
+"Briar Shield",
+0
+],
+[
+"Bubble Matrix",
+2
+],
+[
+"Buried Alive",
+1
+],
+[
+"B\u00f6sium Strip",
+2
+],
+[
+"Call of the Wild",
+2
+],
+[
+"Chimeric Sphere",
+1
+],
+[
+"Choking Vines",
+0
+],
+[
+"Cinder Giant",
+1
+],
+[
+"Cinder Wall",
+0
+],
+[
+"Circling Vultures",
+1
+],
+[
+"Cloud Djinn",
+1
+],
+[
+"Coils of the Medusa",
+0
+],
+[
+"Cone of Flame",
+1
+],
+[
+"Debt of Loyalty",
+2
+],
+[
+"Dense Foliage",
+2
+],
+[
+"Desperate Gambit",
+1
+],
+[
+"Dingus Staff",
+1
+],
+[
+"Disrupt",
+0
+],
+[
+"Doomsday",
+2
+],
+[
+"Downdraft",
+1
+],
+[
+"Duskrider Falcon",
+0
+],
+[
+"Dwarven Berserker",
+0
+],
+[
+"Dwarven Thaumaturgist",
+2
+],
+[
+"Empyrial Armor",
+0
+],
+[
+"Ertai's Familiar",
+2
+],
+[
+"Fallow Wurm",
+1
+],
+[
+"Familiar Ground",
+1
+],
+[
+"Fatal Blow",
+0
+],
+[
+"Fervor",
+2
+],
+[
+"Festering Evil",
+1
+],
+[
+"Fire Whip",
+0
+],
+[
+"Firestorm",
+2
+],
+[
+"Fit of Rage",
+0
+],
+[
+"Fledgling Djinn",
+0
+],
+[
+"Flux",
+0
+],
+[
+"Fog Elemental",
+0
+],
+[
+"Foriysian Brigade",
+1
+],
+[
+"Fungus Elemental",
+2
+],
+[
+"Gaea's Blessing",
+1
+],
+[
+"Gallowbraid",
+2
+],
+[
+"Gemstone Mine",
+1
+],
+[
+"Gerrard's Wisdom",
+1
+],
+[
+"Goblin Bomb",
+2
+],
+[
+"Goblin Grenadiers",
+1
+],
+[
+"Goblin Vandal",
+0
+],
+[
+"Guided Strike",
+0
+],
+[
+"Harvest Wurm",
+0
+],
+[
+"Haunting Misery",
+0
+],
+[
+"Heart of Bogardan",
+2
+],
+[
+"Heat Stroke",
+2
+],
+[
+"Heavy Ballista",
+0
+],
+[
+"Hidden Horror",
+1
+],
+[
+"Hurloon Shaman",
+1
+],
+[
+"Infernal Tribute",
+2
+],
+[
+"Inner Sanctum",
+2
+],
+[
+"Jabari's Banner",
+1
+],
+[
+"Jangling Automaton",
+0
+],
+[
+"Kithkin Armor",
+0
+],
+[
+"Lava Hounds",
+1
+],
+[
+"Lava Storm",
+0
+],
+[
+"Liege of the Hollows",
+2
+],
+[
+"Llanowar Behemoth",
+1
+],
+[
+"Llanowar Druid",
+0
+],
+[
+"Llanowar Sentinel",
+0
+],
+[
+"Lotus Vale",
+2
+],
+[
+"Mana Chains",
+0
+],
+[
+"Mana Web",
+2
+],
+[
+"Manta Ray",
+0
+],
+[
+"Maraxus of Keld",
+2
+],
+[
+"Master of Arms",
+1
+],
+[
+"Merfolk Traders",
+0
+],
+[
+"Mind Stone",
+0
+],
+[
+"Mischievous Poltergeist",
+1
+],
+[
+"Mistmoon Griffin",
+1
+],
+[
+"Morinfen",
+2
+],
+[
+"Mwonvuli Ooze",
+2
+],
+[
+"Nature's Kiss",
+0
+],
+[
+"Nature's Resurgence",
+2
+],
+[
+"Necratog",
+1
+],
+[
+"Noble Benefactor",
+1
+],
+[
+"Null Rod",
+2
+],
+[
+"Odylic Wraith",
+1
+],
+[
+"Ophidian",
+0
+],
+[
+"Orcish Settlers",
+1
+],
+[
+"Paradigm Shift",
+2
+],
+[
+"Peacekeeper",
+2
+],
+[
+"Pendrell Mists",
+2
+],
+[
+"Phantom Warrior",
+1
+],
+[
+"Phantom Wings",
+0
+],
+[
+"Phyrexian Furnace",
+1
+],
+[
+"Psychic Vortex",
+2
+],
+[
+"Razortooth Rats",
+0
+],
+[
+"Redwood Treefolk",
+0
+],
+[
+"Relearn",
+1
+],
+[
+"Revered Unicorn",
+1
+],
+[
+"Roc Hatchling",
+1
+],
+[
+"Rogue Elephant",
+0
+],
+[
+"Sage Owl",
+0
+],
+[
+"Sawtooth Ogre",
+0
+],
+[
+"Scorched Ruins",
+2
+],
+[
+"Serenity",
+2
+],
+[
+"Serra's Blessing",
+1
+],
+[
+"Serrated Biskelion",
+1
+],
+[
+"Shadow Rider",
+0
+],
+[
+"Shattered Crypt",
+0
+],
+[
+"Soul Shepherd",
+0
+],
+[
+"Southern Paladin",
+2
+],
+[
+"Spinning Darkness",
+0
+],
+[
+"Steel Golem",
+1
+],
+[
+"Strands of Night",
+1
+],
+[
+"Straw Golem",
+1
+],
+[
+"Striped Bears",
+0
+],
+[
+"Sylvan Hierophant",
+1
+],
+[
+"Tariff",
+2
+],
+[
+"Teferi's Veil",
+1
+],
+[
+"Tendrils of Despair",
+0
+],
+[
+"Thran Forge",
+1
+],
+[
+"Thran Tome",
+2
+],
+[
+"Thunderbolt",
+0
+],
+[
+"Thundermare",
+2
+],
+[
+"Timid Drake",
+1
+],
+[
+"Tolarian Drake",
+0
+],
+[
+"Tolarian Entrancer",
+2
+],
+[
+"Tolarian Serpent",
+2
+],
+[
+"Touchstone",
+1
+],
+[
+"Tranquil Grove",
+2
+],
+[
+"Uktabi Efreet",
+0
+],
+[
+"Urborg Justice",
+2
+],
+[
+"Urborg Stalker",
+2
+],
+[
+"Veteran Explorer",
+1
+],
+[
+"Vitalize",
+0
+],
+[
+"Vodalian Illusionist",
+1
+],
+[
+"Volunteer Reserves",
+1
+],
+[
+"Wave of Terror",
+2
+],
+[
+"Well of Knowledge",
+2
+],
+[
+"Winding Canyons",
+2
+],
+[
+"Xanthic Statue",
+2
+],
+[
+"Zombie Scavengers",
+0
+]
+]
+},
+{
+"code": "TMP",
+"name": "Tempest",
+"released": "1997-10-14",
+"cards": [
+[
+"Abandon Hope",
+1
+],
+[
+"Advance Scout",
+0
+],
+[
+"Aftershock",
+0
+],
+[
+"Altar of Dementia",
+2
+],
+[
+"Aluren",
+2
+],
+[
+"Ancient Runes",
+1
+],
+[
+"Ancient Tomb",
+1
+],
+[
+"Angelic Protector",
+1
+],
+[
+"Anoint",
+0
+],
+[
+"Apes of Rath",
+1
+],
+[
+"Apocalypse",
+2
+],
+[
+"Armor Sliver",
+1
+],
+[
+"Armored Pegasus",
+0
+],
+[
+"Auratog",
+2
+],
+[
+"Avenging Angel",
+2
+],
+[
+"Barbed Sliver",
+1
+],
+[
+"Bayou Dragonfly",
+0
+],
+[
+"Bellowing Fiend",
+2
+],
+[
+"Benthic Behemoth",
+2
+],
+[
+"Blood Frenzy",
+0
+],
+[
+"Blood Pet",
+0
+],
+[
+"Boil",
+1
+],
+[
+"Booby Trap",
+2
+],
+[
+"Bottle Gnomes",
+1
+],
+[
+"Bounty Hunter",
+2
+],
+[
+"Broken Fall",
+0
+],
+[
+"Caldera Lake",
+2
+],
+[
+"Canopy Spider",
+0
+],
+[
+"Canyon Drake",
+2
+],
+[
+"Canyon Wildcat",
+0
+],
+[
+"Capsize",
+0
+],
+[
+"Carrionette",
+2
+],
+[
+"Chaotic Goo",
+2
+],
+[
+"Charging Rhino",
+1
+],
+[
+"Chill",
+1
+],
+[
+"Choke",
+1
+],
+[
+"Cinder Marsh",
+1
+],
+[
+"Circle of Protection: Black",
+0
+],
+[
+"Circle of Protection: Blue",
+0
+],
+[
+"Circle of Protection: Green",
+0
+],
+[
+"Circle of Protection: Red",
+0
+],
+[
+"Circle of Protection: Shadow",
+0
+],
+[
+"Circle of Protection: White",
+0
+],
+[
+"Clergy en-Vec",
+0
+],
+[
+"Clot Sliver",
+0
+],
+[
+"Cloudchaser Eagle",
+0
+],
+[
+"Coercion",
+0
+],
+[
+"Coffin Queen",
+2
+],
+[
+"Coiled Tinviper",
+0
+],
+[
+"Cold Storage",
+2
+],
+[
+"Commander Greven il-Vec",
+2
+],
+[
+"Corpse Dance",
+2
+],
+[
+"Counterspell",
+0
+],
+[
+"Crazed Armodon",
+2
+],
+[
+"Crown of Flames",
+0
+],
+[
+"Cursed Scroll",
+2
+],
+[
+"Dark Banishing",
+0
+],
+[
+"Dark Ritual",
+0
+],
+[
+"Darkling Stalker",
+0
+],
+[
+"Dauthi Embrace",
+1
+],
+[
+"Dauthi Ghoul",
+1
+],
+[
+"Dauthi Horror",
+0
+],
+[
+"Dauthi Marauder",
+0
+],
+[
+"Dauthi Mercenary",
+1
+],
+[
+"Dauthi Mindripper",
+1
+],
+[
+"Dauthi Slayer",
+0
+],
+[
+"Deadshot",
+2
+],
+[
+"Death Pits of Rath",
+2
+],
+[
+"Diabolic Edict",
+0
+],
+[
+"Dirtcowl Wurm",
+2
+],
+[
+"Disenchant",
+0
+],
+[
+"Dismiss",
+1
+],
+[
+"Disturbed Burial",
+0
+],
+[
+"Dracoplasm",
+2
+],
+[
+"Dread of Night",
+1
+],
+[
+"Dream Cache",
+0
+],
+[
+"Dregs of Sorrow",
+2
+],
+[
+"Duplicity",
+2
+],
+[
+"Earthcraft",
+2
+],
+[
+"Echo Chamber",
+2
+],
+[
+"Eladamri's Vineyard",
+2
+],
+[
+"Eladamri, Lord of Leaves",
+2
+],
+[
+"Elite Javelineer",
+0
+],
+[
+"Elven Warhounds",
+2
+],
+[
+"Elvish Fury",
+0
+],
+[
+"Emerald Medallion",
+2
+],
+[
+"Emmessi Tome",
+2
+],
+[
+"Endless Scream",
+0
+],
+[
+"Energizer",
+2
+],
+[
+"Enfeeblement",
+0
+],
+[
+"Enraging Licid",
+1
+],
+[
+"Ertai's Meddling",
+2
+],
+[
+"Escaped Shapeshifter",
+2
+],
+[
+"Essence Bottle",
+1
+],
+[
+"Evincar's Justice",
+0
+],
+[
+"Excavator",
+1
+],
+[
+"Extinction",
+2
+],
+[
+"Fevered Convulsions",
+2
+],
+[
+"Field of Souls",
+2
+],
+[
+"Fighting Drake",
+1
+],
+[
+"Firefly",
+1
+],
+[
+"Fireslinger",
+0
+],
+[
+"Flailing Drake",
+1
+],
+[
+"Flickering Ward",
+1
+],
+[
+"Flowstone Giant",
+0
+],
+[
+"Flowstone Salamander",
+1
+],
+[
+"Flowstone Sculpture",
+2
+],
+[
+"Flowstone Wyvern",
+2
+],
+[
+"Fool's Tome",
+2
+],
+[
+"Frog Tongue",
+0
+],
+[
+"Fugitive Druid",
+2
+],
+[
+"Furnace of Rath",
+2
+],
+[
+"Fylamarid",
+1
+],
+[
+"Gallantry",
+1
+],
+[
+"Gaseous Form",
+0
+],
+[
+"Gerrard's Battle Cry",
+2
+],
+[
+"Ghost Town",
+1
+],
+[
+"Giant Crab",
+0
+],
+[
+"Giant Strength",
+0
+],
+[
+"Goblin Bombardment",
+1
+],
+[
+"Gravedigger",
+0
+],
+[
+"Grindstone",
+2
+],
+[
+"Hand to Hand",
+2
+],
+[
+"Hanna's Custody",
+2
+],
+[
+"Harrow",
+1
+],
+[
+"Havoc",
+1
+],
+[
+"Heart Sliver",
+0
+],
+[
+"Heartwood Dryad",
+0
+],
+[
+"Heartwood Giant",
+2
+],
+[
+"Heartwood Treefolk",
+1
+],
+[
+"Helm of Possession",
+2
+],
+[
+"Hero's Resolve",
+0
+],
+[
+"Horned Sliver",
+1
+],
+[
+"Horned Turtle",
+0
+],
+[
+"Humility",
+2
+],
+[
+"Imps' Taunt",
+1
+],
+[
+"Insight",
+1
+],
+[
+"Interdict",
+1
+],
+[
+"Intuition",
+2
+],
+[
+"Invulnerability",
+1
+],
+[
+"Jackal Pup",
+1
+],
+[
+"Jet Medallion",
+2
+],
+[
+"Jinxed Idol",
+2
+],
+[
+"Kezzerdrix",
+2
+],
+[
+"Kindle",
+0
+],
+[
+"Knight of Dawn",
+1
+],
+[
+"Knight of Dusk",
+1
+],
+[
+"Krakilin",
+1
+],
+[
+"Leeching Licid",
+1
+],
+[
+"Legacy's Allure",
+1
+],
+[
+"Legerdemain",
+1
+],
+[
+"Light of Day",
+1
+],
+[
+"Lightning Blast",
+0
+],
+[
+"Lightning Elemental",
+0
+],
+[
+"Living Death",
+2
+],
+[
+"Lobotomy",
+1
+],
+[
+"Lotus Petal",
+0
+],
+[
+"Lowland Giant",
+0
+],
+[
+"Maddening Imp",
+2
+],
+[
+"Magmasaur",
+2
+],
+[
+"Magnetic Web",
+2
+],
+[
+"Mana Severance",
+2
+],
+[
+"Manakin",
+0
+],
+[
+"Manta Riders",
+0
+],
+[
+"Marble Titan",
+2
+],
+[
+"Marsh Lurker",
+0
+],
+[
+"Master Decoy",
+0
+],
+[
+"Mawcor",
+2
+],
+[
+"Maze of Shadows",
+1
+],
+[
+"Meditate",
+2
+],
+[
+"Metallic Sliver",
+0
+],
+[
+"Mindwhip Sliver",
+1
+],
+[
+"Minion of the Wastes",
+2
+],
+[
+"Mirri's Guile",
+2
+],
+[
+"Mnemonic Sliver",
+1
+],
+[
+"Mogg Cannon",
+1
+],
+[
+"Mogg Conscripts",
+0
+],
+[
+"Mogg Fanatic",
+0
+],
+[
+"Mogg Hollows",
+1
+],
+[
+"Mogg Raider",
+0
+],
+[
+"Mogg Squad",
+1
+],
+[
+"Mongrel Pack",
+2
+],
+[
+"Mounted Archers",
+0
+],
+[
+"Muscle Sliver",
+0
+],
+[
+"Natural Spring",
+0
+],
+[
+"Nature's Revolt",
+2
+],
+[
+"Needle Storm",
+1
+],
+[
+"No Quarter",
+2
+],
+[
+"Nurturing Licid",
+1
+],
+[
+"Opportunist",
+1
+],
+[
+"Oracle en-Vec",
+2
+],
+[
+"Orim's Prayer",
+1
+],
+[
+"Orim, Samite Healer",
+2
+],
+[
+"Overrun",
+1
+],
+[
+"Pacifism",
+0
+],
+[
+"Pallimud",
+2
+],
+[
+"Patchwork Gnomes",
+1
+],
+[
+"Pearl Medallion",
+2
+],
+[
+"Pegasus Refuge",
+2
+],
+[
+"Perish",
+1
+],
+[
+"Phyrexian Grimoire",
+2
+],
+[
+"Phyrexian Hulk",
+1
+],
+[
+"Phyrexian Splicer",
+1
+],
+[
+"Pincher Beetles",
+0
+],
+[
+"Pine Barrens",
+2
+],
+[
+"Pit Imp",
+0
+],
+[
+"Power Sink",
+0
+],
+[
+"Precognition",
+2
+],
+[
+"Propaganda",
+1
+],
+[
+"Puppet Strings",
+1
+],
+[
+"Quickening Licid",
+1
+],
+[
+"Rain of Tears",
+1
+],
+[
+"Rampant Growth",
+0
+],
+[
+"Ranger en-Vec",
+1
+],
+[
+"Rathi Dragon",
+2
+],
+[
+"Rats of Rath",
+0
+],
+[
+"Reality Anchor",
+0
+],
+[
+"Reanimate",
+1
+],
+[
+"Reap",
+1
+],
+[
+"Reckless Spite",
+1
+],
+[
+"Recycle",
+2
+],
+[
+"Reflecting Pool",
+2
+],
+[
+"Renegade Warlord",
+1
+],
+[
+"Repentance",
+1
+],
+[
+"Respite",
+0
+],
+[
+"Rolling Thunder",
+0
+],
+[
+"Root Maze",
+2
+],
+[
+"Rootbreaker Wurm",
+0
+],
+[
+"Rootwalla",
+0
+],
+[
+"Rootwater Depths",
+1
+],
+[
+"Rootwater Diver",
+1
+],
+[
+"Rootwater Hunter",
+0
+],
+[
+"Rootwater Matriarch",
+2
+],
+[
+"Rootwater Shaman",
+2
+],
+[
+"Ruby Medallion",
+2
+],
+[
+"Sacred Guide",
+2
+],
+[
+"Sadistic Glee",
+0
+],
+[
+"Safeguard",
+2
+],
+[
+"Salt Flats",
+2
+],
+[
+"Sandstone Warrior",
+0
+],
+[
+"Sapphire Medallion",
+2
+],
+[
+"Sarcomancy",
+2
+],
+[
+"Scabland",
+2
+],
+[
+"Scalding Tongs",
+2
+],
+[
+"Scorched Earth",
+2
+],
+[
+"Scragnoth",
+1
+],
+[
+"Screeching Harpy",
+1
+],
+[
+"Scroll Rack",
+2
+],
+[
+"Sea Monster",
+0
+],
+[
+"Searing Touch",
+1
+],
+[
+"Seeker of Skybreak",
+0
+],
+[
+"Segmented Wurm",
+1
+],
+[
+"Selenia, Dark Angel",
+2
+],
+[
+"Serene Offering",
+1
+],
+[
+"Servant of Volrath",
+0
+],
+[
+"Shadow Rift",
+0
+],
+[
+"Shadowstorm",
+1
+],
+[
+"Shatter",
+0
+],
+[
+"Shimmering Wings",
+0
+],
+[
+"Shocker",
+2
+],
+[
+"Sky Spirit",
+1
+],
+[
+"Skyshroud Condor",
+1
+],
+[
+"Skyshroud Elf",
+0
+],
+[
+"Skyshroud Forest",
+2
+],
+[
+"Skyshroud Ranger",
+0
+],
+[
+"Skyshroud Troll",
+0
+],
+[
+"Skyshroud Vampire",
+1
+],
+[
+"Soltari Crusader",
+1
+],
+[
+"Soltari Emissary",
+2
+],
+[
+"Soltari Foot Soldier",
+0
+],
+[
+"Soltari Guerrillas",
+2
+],
+[
+"Soltari Lancer",
+0
+],
+[
+"Soltari Monk",
+1
+],
+[
+"Soltari Priest",
+1
+],
+[
+"Soltari Trooper",
+0
+],
+[
+"Souldrinker",
+1
+],
+[
+"Spell Blast",
+0
+],
+[
+"Spike Drone",
+0
+],
+[
+"Spinal Graft",
+0
+],
+[
+"Spirit Mirror",
+2
+],
+[
+"Spontaneous Combustion",
+1
+],
+[
+"Squee's Toy",
+0
+],
+[
+"Stalking Stones",
+1
+],
+[
+"Starke of Rath",
+2
+],
+[
+"Static Orb",
+2
+],
+[
+"Staunch Defenders",
+1
+],
+[
+"Steal Enchantment",
+1
+],
+[
+"Stinging Licid",
+1
+],
+[
+"Stone Rain",
+0
+],
+[
+"Storm Front",
+1
+],
+[
+"Stun",
+0
+],
+[
+"Sudden Impact",
+1
+],
+[
+"Tahngarth's Rage",
+1
+],
+[
+"Talon Sliver",
+0
+],
+[
+"Telethopter",
+1
+],
+[
+"Thalakos Dreamsower",
+1
+],
+[
+"Thalakos Lowlands",
+1
+],
+[
+"Thalakos Mistfolk",
+0
+],
+[
+"Thalakos Seer",
+0
+],
+[
+"Thalakos Sentry",
+0
+],
+[
+"Thumbscrews",
+2
+],
+[
+"Time Ebb",
+0
+],
+[
+"Time Warp",
+2
+],
+[
+"Tooth and Claw",
+2
+],
+[
+"Torture Chamber",
+2
+],
+[
+"Tradewind Rider",
+2
+],
+[
+"Trained Armodon",
+0
+],
+[
+"Tranquility",
+0
+],
+[
+"Trumpeting Armodon",
+1
+],
+[
+"Twitch",
+0
+],
+[
+"Unstable Shapeshifter",
+2
+],
+[
+"Vec Townships",
+1
+],
+[
+"Verdant Force",
+2
+],
+[
+"Verdigris",
+1
+],
+[
+"Vhati il-Dal",
+2
+],
+[
+"Volrath's Curse",
+0
+],
+[
+"Wall of Diffusion",
+0
+],
+[
+"Warmth",
+1
+],
+[
+"Wasteland",
+1
+],
+[
+"Watchdog",
+1
+],
+[
+"Whim of Volrath",
+2
+],
+[
+"Whispers of the Muse",
+1
+],
+[
+"Wild Wurm",
+1
+],
+[
+"Wind Dancer",
+1
+],
+[
+"Wind Drake",
+0
+],
+[
+"Winds of Rath",
+2
+],
+[
+"Winged Sliver",
+0
+],
+[
+"Winter's Grasp",
+1
+],
+[
+"Wood Sage",
+2
+],
+[
+"Worthy Cause",
+1
+]
+]
+},
+{
+"code": "STH",
+"name": "Stronghold",
+"released": "1998-03-02",
+"cards": [
+[
+"Acidic Sliver",
+1
+],
+[
+"Amok",
+2
+],
+[
+"Awakening",
+2
+],
+[
+"Bandage",
+0
+],
+[
+"Bottomless Pit",
+1
+],
+[
+"Brush with Death",
+0
+],
+[
+"Bullwhip",
+1
+],
+[
+"Burgeoning",
+2
+],
+[
+"Calming Licid",
+1
+],
+[
+"Cannibalize",
+0
+],
+[
+"Carnassid",
+2
+],
+[
+"Change of Heart",
+0
+],
+[
+"Cloud Spirit",
+0
+],
+[
+"Constant Mists",
+1
+],
+[
+"Contemplation",
+1
+],
+[
+"Contempt",
+0
+],
+[
+"Conviction",
+0
+],
+[
+"Convulsing Licid",
+1
+],
+[
+"Corrupting Licid",
+1
+],
+[
+"Craven Giant",
+0
+],
+[
+"Crossbow Ambush",
+0
+],
+[
+"Crovax the Cursed",
+2
+],
+[
+"Crystalline Sliver",
+1
+],
+[
+"Dauthi Trapper",
+1
+],
+[
+"Death Stroke",
+0
+],
+[
+"Dream Halls",
+2
+],
+[
+"Dream Prowler",
+0
+],
+[
+"Duct Crawler",
+0
+],
+[
+"Dungeon Shade",
+0
+],
+[
+"Elven Rite",
+1
+],
+[
+"Endangered Armodon",
+0
+],
+[
+"Ensnaring Bridge",
+2
+],
+[
+"Evacuation",
+2
+],
+[
+"Fanning the Flames",
+1
+],
+[
+"Flame Wave",
+1
+],
+[
+"Fling",
+0
+],
+[
+"Flowstone Blade",
+0
+],
+[
+"Flowstone Hellion",
+1
+],
+[
+"Flowstone Mauler",
+2
+],
+[
+"Flowstone Shambler",
+0
+],
+[
+"Foul Imp",
+0
+],
+[
+"Furnace Spirit",
+0
+],
+[
+"Gliding Licid",
+1
+],
+[
+"Grave Pact",
+2
+],
+[
+"Hammerhead Shark",
+0
+],
+[
+"Heartstone",
+1
+],
+[
+"Heat of Battle",
+1
+],
+[
+"Hermit Druid",
+2
+],
+[
+"Hesitation",
+1
+],
+[
+"Hibernation Sliver",
+1
+],
+[
+"Hidden Retreat",
+2
+],
+[
+"Honor Guard",
+0
+],
+[
+"Horn of Greed",
+2
+],
+[
+"Hornet Cannon",
+1
+],
+[
+"Intruder Alarm",
+2
+],
+[
+"Invasion Plans",
+2
+],
+[
+"Jinxed Ring",
+2
+],
+[
+"Lab Rats",
+0
+],
+[
+"Lancers en-Kor",
+1
+],
+[
+"Leap",
+0
+],
+[
+"Lowland Basilisk",
+0
+],
+[
+"Mana Leak",
+0
+],
+[
+"Mask of the Mimic",
+1
+],
+[
+"Megrim",
+1
+],
+[
+"Mind Games",
+0
+],
+[
+"Mind Peel",
+1
+],
+[
+"Mindwarper",
+2
+],
+[
+"Mob Justice",
+0
+],
+[
+"Mogg Bombers",
+0
+],
+[
+"Mogg Flunkies",
+0
+],
+[
+"Mogg Infestation",
+2
+],
+[
+"Mogg Maniac",
+1
+],
+[
+"Morgue Thrull",
+0
+],
+[
+"Mortuary",
+2
+],
+[
+"Mox Diamond",
+2
+],
+[
+"Mulch",
+0
+],
+[
+"Nomads en-Kor",
+0
+],
+[
+"Overgrowth",
+0
+],
+[
+"Portcullis",
+2
+],
+[
+"Primal Rage",
+1
+],
+[
+"Provoke",
+0
+],
+[
+"Pursuit of Knowledge",
+2
+],
+[
+"Rabid Rats",
+0
+],
+[
+"Ransack",
+1
+],
+[
+"Rebound",
+1
+],
+[
+"Reins of Power",
+2
+],
+[
+"Revenant",
+2
+],
+[
+"Rolling Stones",
+2
+],
+[
+"Ruination",
+2
+],
+[
+"Sacred Ground",
+2
+],
+[
+"Samite Blessing",
+0
+],
+[
+"Scapegoat",
+1
+],
+[
+"Seething Anger",
+0
+],
+[
+"Serpent Warrior",
+0
+],
+[
+"Shaman en-Kor",
+2
+],
+[
+"Shard Phoenix",
+2
+],
+[
+"Shifting Wall",
+1
+],
+[
+"Shock",
+0
+],
+[
+"Sift",
+0
+],
+[
+"Silver Wyvern",
+2
+],
+[
+"Skeleton Scavengers",
+2
+],
+[
+"Skyshroud Archer",
+0
+],
+[
+"Skyshroud Falcon",
+0
+],
+[
+"Skyshroud Troopers",
+0
+],
+[
+"Sliver Queen",
+2
+],
+[
+"Smite",
+0
+],
+[
+"Soltari Champion",
+2
+],
+[
+"Spike Breeder",
+2
+],
+[
+"Spike Colony",
+0
+],
+[
+"Spike Feeder",
+1
+],
+[
+"Spike Soldier",
+1
+],
+[
+"Spike Worker",
+0
+],
+[
+"Spindrift Drake",
+0
+],
+[
+"Spined Sliver",
+1
+],
+[
+"Spined Wurm",
+0
+],
+[
+"Spirit en-Kor",
+0
+],
+[
+"Spitting Hydra",
+2
+],
+[
+"Stronghold Assassin",
+2
+],
+[
+"Stronghold Taskmaster",
+1
+],
+[
+"Sword of the Chosen",
+2
+],
+[
+"Temper",
+1
+],
+[
+"Tempting Licid",
+1
+],
+[
+"Thalakos Deceiver",
+2
+],
+[
+"Tidal Surge",
+0
+],
+[
+"Tidal Warrior",
+0
+],
+[
+"Torment",
+0
+],
+[
+"Tortured Existence",
+0
+],
+[
+"Venerable Monk",
+0
+],
+[
+"Verdant Touch",
+2
+],
+[
+"Victual Sliver",
+1
+],
+[
+"Volrath's Gardens",
+2
+],
+[
+"Volrath's Laboratory",
+2
+],
+[
+"Volrath's Shapeshifter",
+2
+],
+[
+"Volrath's Stronghold",
+2
+],
+[
+"Walking Dream",
+1
+],
+[
+"Wall of Blossoms",
+1
+],
+[
+"Wall of Essence",
+1
+],
+[
+"Wall of Razors",
+1
+],
+[
+"Wall of Souls",
+1
+],
+[
+"Wall of Tears",
+1
+],
+[
+"Warrior Angel",
+2
+],
+[
+"Warrior en-Kor",
+1
+],
+[
+"Youthful Knight",
+0
+]
+]
+},
+{
+"code": "EXO",
+"name": "Exodus",
+"released": "1998-06-15",
+"cards": [
+[
+"Aether Tide",
+0
+],
+[
+"Allay",
+0
+],
+[
+"Anarchist",
+0
+],
+[
+"Angelic Blessing",
+0
+],
+[
+"Avenging Druid",
+0
+],
+[
+"Bequeathal",
+0
+],
+[
+"Carnophage",
+0
+],
+[
+"Cartographer",
+1
+],
+[
+"Cat Burglar",
+0
+],
+[
+"Cataclysm",
+2
+],
+[
+"Charging Paladin",
+0
+],
+[
+"Cinder Crawler",
+0
+],
+[
+"City of Traitors",
+2
+],
+[
+"Coat of Arms",
+2
+],
+[
+"Convalescence",
+2
+],
+[
+"Crashing Boars",
+1
+],
+[
+"Culling the Weak",
+0
+],
+[
+"Cunning",
+0
+],
+[
+"Curiosity",
+1
+],
+[
+"Cursed Flesh",
+0
+],
+[
+"Dauthi Cutthroat",
+1
+],
+[
+"Dauthi Jackal",
+0
+],
+[
+"Dauthi Warlord",
+1
+],
+[
+"Death's Duet",
+0
+],
+[
+"Dizzying Gaze",
+0
+],
+[
+"Dominating Licid",
+2
+],
+[
+"Elven Palisade",
+1
+],
+[
+"Elvish Berserker",
+0
+],
+[
+"Entropic Specter",
+2
+],
+[
+"Ephemeron",
+2
+],
+[
+"Equilibrium",
+2
+],
+[
+"Erratic Portal",
+2
+],
+[
+"Ertai, Wizard Adept",
+2
+],
+[
+"Exalted Dragon",
+2
+],
+[
+"Fade Away",
+0
+],
+[
+"Fighting Chance",
+2
+],
+[
+"Flowstone Flood",
+1
+],
+[
+"Forbid",
+1
+],
+[
+"Fugue",
+1
+],
+[
+"Furnace Brood",
+0
+],
+[
+"Grollub",
+0
+],
+[
+"Hatred",
+2
+],
+[
+"High Ground",
+1
+],
+[
+"Jackalope Herd",
+0
+],
+[
+"Keeper of the Beasts",
+1
+],
+[
+"Keeper of the Dead",
+1
+],
+[
+"Keeper of the Flame",
+1
+],
+[
+"Keeper of the Light",
+1
+],
+[
+"Keeper of the Mind",
+1
+],
+[
+"Killer Whale",
+1
+],
+[
+"Kor Chant",
+0
+],
+[
+"Limited Resources",
+2
+],
+[
+"Mage il-Vec",
+0
+],
+[
+"Mana Breach",
+1
+],
+[
+"Manabond",
+2
+],
+[
+"Maniacal Rage",
+0
+],
+[
+"Medicine Bag",
+1
+],
+[
+"Memory Crystal",
+2
+],
+[
+"Merfolk Looter",
+0
+],
+[
+"Mind Maggots",
+1
+],
+[
+"Mind Over Matter",
+2
+],
+[
+"Mindless Automaton",
+2
+],
+[
+"Mirozel",
+1
+],
+[
+"Mirri, Cat Warrior",
+2
+],
+[
+"Mogg Assassin",
+1
+],
+[
+"Monstrous Hound",
+2
+],
+[
+"Nausea",
+0
+],
+[
+"Necrologia",
+1
+],
+[
+"Null Brooch",
+2
+],
+[
+"Oath of Druids",
+2
+],
+[
+"Oath of Ghouls",
+2
+],
+[
+"Oath of Lieges",
+2
+],
+[
+"Oath of Mages",
+2
+],
+[
+"Oath of Scholars",
+2
+],
+[
+"Ogre Shaman",
+2
+],
+[
+"Onslaught",
+0
+],
+[
+"Paladin en-Vec",
+2
+],
+[
+"Pandemonium",
+2
+],
+[
+"Paroxysm",
+1
+],
+[
+"Peace of Mind",
+1
+],
+[
+"Pegasus Stampede",
+1
+],
+[
+"Penance",
+1
+],
+[
+"Pit Spawn",
+2
+],
+[
+"Plaguebearer",
+2
+],
+[
+"Plated Rootwalla",
+0
+],
+[
+"Predatory Hunger",
+0
+],
+[
+"Price of Progress",
+1
+],
+[
+"Pygmy Troll",
+0
+],
+[
+"Rabid Wolverines",
+0
+],
+[
+"Raging Goblin",
+0
+],
+[
+"Ravenous Baboons",
+2
+],
+[
+"Reaping the Rewards",
+0
+],
+[
+"Reckless Ogre",
+0
+],
+[
+"Reclaim",
+0
+],
+[
+"Reconnaissance",
+1
+],
+[
+"Recurring Nightmare",
+2
+],
+[
+"Resuscitate",
+1
+],
+[
+"Robe of Mirrors",
+0
+],
+[
+"Rootwater Alligator",
+0
+],
+[
+"Rootwater Mystic",
+0
+],
+[
+"Sabertooth Wyvern",
+1
+],
+[
+"Scalding Salamander",
+1
+],
+[
+"Scare Tactics",
+0
+],
+[
+"School of Piranha",
+0
+],
+[
+"Scrivener",
+1
+],
+[
+"Seismic Assault",
+2
+],
+[
+"Shackles",
+0
+],
+[
+"Shattering Pulse",
+0
+],
+[
+"Shield Mate",
+0
+],
+[
+"Skyshaper",
+1
+],
+[
+"Skyshroud Elite",
+1
+],
+[
+"Skyshroud War Beast",
+2
+],
+[
+"Slaughter",
+1
+],
+[
+"Soltari Visionary",
+0
+],
+[
+"Song of Serenity",
+1
+],
+[
+"Sonic Burst",
+0
+],
+[
+"Soul Warden",
+0
+],
+[
+"Spellbook",
+1
+],
+[
+"Spellshock",
+1
+],
+[
+"Sphere of Resistance",
+2
+],
+[
+"Spike Cannibal",
+1
+],
+[
+"Spike Hatcher",
+2
+],
+[
+"Spike Rogue",
+1
+],
+[
+"Spike Weaver",
+2
+],
+[
+"Standing Troops",
+0
+],
+[
+"Survival of the Fittest",
+2
+],
+[
+"Thalakos Drifters",
+2
+],
+[
+"Thalakos Scout",
+0
+],
+[
+"Theft of Dreams",
+0
+],
+[
+"Thopter Squadron",
+2
+],
+[
+"Thrull Surgeon",
+0
+],
+[
+"Transmogrifying Licid",
+1
+],
+[
+"Treasure Hunter",
+1
+],
+[
+"Treasure Trove",
+1
+],
+[
+"Vampire Hounds",
+0
+],
+[
+"Volrath's Dungeon",
+2
+],
+[
+"Wall of Nets",
+2
+],
+[
+"Wayward Soul",
+0
+],
+[
+"Welkin Hawk",
+0
+],
+[
+"Whiptongue Frog",
+0
+],
+[
+"Wood Elves",
+0
+],
+[
+"Workhorse",
+2
+],
+[
+"Zealots en-Dal",
+1
+]
+]
+},
+{
+"code": "USG",
+"name": "Urza's Saga",
+"released": "1998-10-12",
+"cards": [
+[
+"Absolute Grace",
+1
+],
+[
+"Absolute Law",
+1
+],
+[
+"Abundance",
+2
+],
+[
+"Abyssal Horror",
+2
+],
+[
+"Academy Researchers",
+1
+],
+[
+"Acidic Soil",
+1
+],
+[
+"Acridian",
+0
+],
+[
+"Albino Troll",
+1
+],
+[
+"Anaconda",
+1
+],
+[
+"Angelic Chorus",
+2
+],
+[
+"Angelic Page",
+0
+],
+[
+"Annul",
+0
+],
+[
+"Antagonism",
+2
+],
+[
+"Arc Lightning",
+0
+],
+[
+"Arcane Laboratory",
+1
+],
+[
+"Argothian Elder",
+1
+],
+[
+"Argothian Enchantress",
+2
+],
+[
+"Argothian Swine",
+0
+],
+[
+"Argothian Wurm",
+2
+],
+[
+"Attunement",
+2
+],
+[
+"Back to Basics",
+2
+],
+[
+"Barrin's Codex",
+2
+],
+[
+"Barrin, Master Wizard",
+2
+],
+[
+"Bedlam",
+2
+],
+[
+"Befoul",
+0
+],
+[
+"Bereavement",
+1
+],
+[
+"Blanchwood Armor",
+1
+],
+[
+"Blanchwood Treefolk",
+0
+],
+[
+"Blasted Landscape",
+1
+],
+[
+"Blood Vassal",
+0
+],
+[
+"Bog Raiders",
+0
+],
+[
+"Brand",
+2
+],
+[
+"Bravado",
+0
+],
+[
+"Breach",
+0
+],
+[
+"Brilliant Halo",
+0
+],
+[
+"Bull Hippo",
+1
+],
+[
+"Bulwark",
+2
+],
+[
+"Cackling Fiend",
+0
+],
+[
+"Carpet of Flowers",
+1
+],
+[
+"Carrion Beetles",
+0
+],
+[
+"Catalog",
+0
+],
+[
+"Catastrophe",
+2
+],
+[
+"Cathodion",
+1
+],
+[
+"Cave Tiger",
+0
+],
+[
+"Child of Gaea",
+2
+],
+[
+"Chimeric Staff",
+2
+],
+[
+"Citanul Centaurs",
+2
+],
+[
+"Citanul Flute",
+2
+],
+[
+"Citanul Hierophants",
+2
+],
+[
+"Claws of Gix",
+1
+],
+[
+"Clear",
+1
+],
+[
+"Cloak of Mists",
+0
+],
+[
+"Confiscate",
+1
+],
+[
+"Congregate",
+0
+],
+[
+"Contamination",
+2
+],
+[
+"Copper Gnomes",
+2
+],
+[
+"Coral Merfolk",
+0
+],
+[
+"Corrupt",
+0
+],
+[
+"Cradle Guard",
+1
+],
+[
+"Crater Hellion",
+2
+],
+[
+"Crazed Skirge",
+1
+],
+[
+"Crosswinds",
+1
+],
+[
+"Crystal Chimes",
+1
+],
+[
+"Curfew",
+0
+],
+[
+"Dark Hatchling",
+2
+],
+[
+"Dark Ritual",
+0
+],
+[
+"Darkest Hour",
+2
+],
+[
+"Defensive Formation",
+1
+],
+[
+"Despondency",
+0
+],
+[
+"Destructive Urge",
+1
+],
+[
+"Diabolic Servitude",
+1
+],
+[
+"Disciple of Grace",
+0
+],
+[
+"Disciple of Law",
+0
+],
+[
+"Discordant Dirge",
+2
+],
+[
+"Disenchant",
+0
+],
+[
+"Disorder",
+1
+],
+[
+"Disruptive Student",
+0
+],
+[
+"Douse",
+1
+],
+[
+"Dragon Blood",
+1
+],
+[
+"Drifting Djinn",
+2
+],
+[
+"Drifting Meadow",
+0
+],
+[
+"Dromosaur",
+0
+],
+[
+"Duress",
+0
+],
+[
+"Eastern Paladin",
+2
+],
+[
+"Electryte",
+2
+],
+[
+"Elite Archers",
+2
+],
+[
+"Elvish Herder",
+0
+],
+[
+"Elvish Lyrist",
+0
+],
+[
+"Enchantment Alteration",
+1
+],
+[
+"Endless Wurm",
+2
+],
+[
+"Endoskeleton",
+1
+],
+[
+"Energy Field",
+2
+],
+[
+"Exhaustion",
+1
+],
+[
+"Exhume",
+0
+],
+[
+"Exploration",
+2
+],
+[
+"Expunge",
+0
+],
+[
+"Faith Healer",
+2
+],
+[
+"Falter",
+0
+],
+[
+"Fault Line",
+2
+],
+[
+"Fecundity",
+1
+],
+[
+"Fertile Ground",
+0
+],
+[
+"Fiery Mantle",
+0
+],
+[
+"Fire Ants",
+1
+],
+[
+"Flesh Reaver",
+1
+],
+[
+"Fluctuator",
+2
+],
+[
+"Fog Bank",
+1
+],
+[
+"Fortitude",
+0
+],
+[
+"Gaea's Bounty",
+0
+],
+[
+"Gaea's Cradle",
+2
+],
+[
+"Gaea's Embrace",
+1
+],
+[
+"Gamble",
+2
+],
+[
+"Gilded Drake",
+2
+],
+[
+"Glorious Anthem",
+2
+],
+[
+"Goblin Cadets",
+1
+],
+[
+"Goblin Lackey",
+1
+],
+[
+"Goblin Matron",
+0
+],
+[
+"Goblin Offensive",
+1
+],
+[
+"Goblin Patrol",
+0
+],
+[
+"Goblin Raider",
+0
+],
+[
+"Goblin Spelunkers",
+0
+],
+[
+"Goblin War Buggy",
+0
+],
+[
+"Gorilla Warrior",
+0
+],
+[
+"Grafted Skullcap",
+2
+],
+[
+"Great Whale",
+2
+],
+[
+"Greater Good",
+2
+],
+[
+"Greener Pastures",
+2
+],
+[
+"Guma",
+1
+],
+[
+"Hawkeater Moth",
+1
+],
+[
+"Headlong Rush",
+0
+],
+[
+"Healing Salve",
+0
+],
+[
+"Heat Ray",
+0
+],
+[
+"Herald of Serra",
+2
+],
+[
+"Hermetic Study",
+0
+],
+[
+"Hibernation",
+1
+],
+[
+"Hidden Ancients",
+1
+],
+[
+"Hidden Guerrillas",
+1
+],
+[
+"Hidden Herd",
+2
+],
+[
+"Hidden Predators",
+2
+],
+[
+"Hidden Spider",
+0
+],
+[
+"Hidden Stag",
+2
+],
+[
+"Hollow Dogs",
+0
+],
+[
+"Hopping Automaton",
+1
+],
+[
+"Horseshoe Crab",
+0
+],
+[
+"Humble",
+1
+],
+[
+"Hush",
+0
+],
+[
+"Ill-Gotten Gains",
+2
+],
+[
+"Imaginary Pet",
+2
+],
+[
+"Intrepid Hero",
+2
+],
+[
+"Jagged Lightning",
+1
+],
+[
+"Karn, Silver Golem",
+2
+],
+[
+"Launch",
+0
+],
+[
+"Lay Waste",
+0
+],
+[
+"Lifeline",
+2
+],
+[
+"Lightning Dragon",
+2
+],
+[
+"Lilting Refrain",
+1
+],
+[
+"Lingering Mirage",
+1
+],
+[
+"Looming Shade",
+0
+],
+[
+"Lotus Blossom",
+2
+],
+[
+"Lull",
+0
+],
+[
+"Lurking Evil",
+2
+],
+[
+"Mana Leech",
+1
+],
+[
+"Meltdown",
+1
+],
+[
+"Metrognome",
+2
+],
+[
+"Midsummer Revel",
+2
+],
+[
+"Mishra's Helix",
+2
+],
+[
+"Mobile Fort",
+1
+],
+[
+"Monk Idealist",
+1
+],
+[
+"Monk Realist",
+0
+],
+[
+"Morphling",
+2
+],
+[
+"No Rest for the Wicked",
+1
+],
+[
+"Noetic Scales",
+2
+],
+[
+"Okk",
+2
+],
+[
+"Opal Acrolith",
+1
+],
+[
+"Opal Archangel",
+2
+],
+[
+"Opal Caryatid",
+0
+],
+[
+"Opal Gargoyle",
+0
+],
+[
+"Opal Titan",
+2
+],
+[
+"Oppression",
+2
+],
+[
+"Order of Yawgmoth",
+1
+],
+[
+"Outmaneuver",
+1
+],
+[
+"Pacifism",
+0
+],
+[
+"Parasitic Bond",
+1
+],
+[
+"Pariah",
+2
+],
+[
+"Path of Peace",
+0
+],
+[
+"Pegasus Charger",
+0
+],
+[
+"Pendrell Drake",
+0
+],
+[
+"Pendrell Flux",
+0
+],
+[
+"Peregrine Drake",
+1
+],
+[
+"Persecute",
+2
+],
+[
+"Pestilence",
+0
+],
+[
+"Phyrexian Colossus",
+2
+],
+[
+"Phyrexian Ghoul",
+0
+],
+[
+"Phyrexian Processor",
+2
+],
+[
+"Phyrexian Tower",
+2
+],
+[
+"Pit Trap",
+1
+],
+[
+"Planar Birth",
+2
+],
+[
+"Planar Void",
+1
+],
+[
+"Polluted Mire",
+0
+],
+[
+"Pouncing Jaguar",
+0
+],
+[
+"Power Sink",
+0
+],
+[
+"Power Taint",
+0
+],
+[
+"Presence of the Master",
+1
+],
+[
+"Priest of Gix",
+1
+],
+[
+"Priest of Titania",
+0
+],
+[
+"Purging Scythe",
+2
+],
+[
+"Rain of Filth",
+1
+],
+[
+"Rain of Salt",
+1
+],
+[
+"Ravenous Skirge",
+0
+],
+[
+"Raze",
+0
+],
+[
+"Recantation",
+2
+],
+[
+"Reclusive Wight",
+1
+],
+[
+"Redeem",
+1
+],
+[
+"Reflexes",
+0
+],
+[
+"Rejuvenate",
+0
+],
+[
+"Remembrance",
+2
+],
+[
+"Remote Isle",
+0
+],
+[
+"Reprocess",
+2
+],
+[
+"Rescind",
+0
+],
+[
+"Retaliation",
+1
+],
+[
+"Retromancer",
+0
+],
+[
+"Rewind",
+0
+],
+[
+"Rumbling Crescendo",
+2
+],
+[
+"Rune of Protection: Artifacts",
+1
+],
+[
+"Rune of Protection: Black",
+0
+],
+[
+"Rune of Protection: Blue",
+0
+],
+[
+"Rune of Protection: Green",
+0
+],
+[
+"Rune of Protection: Lands",
+2
+],
+[
+"Rune of Protection: Red",
+0
+],
+[
+"Rune of Protection: White",
+0
+],
+[
+"Sanctum Custodian",
+0
+],
+[
+"Sanctum Guardian",
+1
+],
+[
+"Sandbar Merfolk",
+0
+],
+[
+"Sandbar Serpent",
+1
+],
+[
+"Sanguine Guard",
+1
+],
+[
+"Scald",
+1
+],
+[
+"Scoria Wurm",
+2
+],
+[
+"Scrap",
+0
+],
+[
+"Seasoned Marshal",
+1
+],
+[
+"Serra Avatar",
+2
+],
+[
+"Serra Zealot",
+0
+],
+[
+"Serra's Embrace",
+1
+],
+[
+"Serra's Hymn",
+1
+],
+[
+"Serra's Liturgy",
+2
+],
+[
+"Serra's Sanctum",
+2
+],
+[
+"Shimmering Barrier",
+1
+],
+[
+"Shiv's Embrace",
+1
+],
+[
+"Shivan Gorge",
+2
+],
+[
+"Shivan Hellkite",
+2
+],
+[
+"Shivan Raptor",
+1
+],
+[
+"Show and Tell",
+2
+],
+[
+"Shower of Sparks",
+0
+],
+[
+"Sicken",
+0
+],
+[
+"Silent Attendant",
+0
+],
+[
+"Skirge Familiar",
+1
+],
+[
+"Skittering Skirge",
+0
+],
+[
+"Sleeper Agent",
+2
+],
+[
+"Slippery Karst",
+0
+],
+[
+"Smokestack",
+2
+],
+[
+"Smoldering Crater",
+0
+],
+[
+"Sneak Attack",
+2
+],
+[
+"Somnophore",
+2
+],
+[
+"Songstitcher",
+1
+],
+[
+"Soul Sculptor",
+2
+],
+[
+"Spined Fluke",
+1
+],
+[
+"Spire Owl",
+0
+],
+[
+"Sporogenesis",
+2
+],
+[
+"Spreading Algae",
+1
+],
+[
+"Steam Blast",
+1
+],
+[
+"Stern Proctor",
+1
+],
+[
+"Stroke of Genius",
+2
+],
+[
+"Sulfuric Vapors",
+2
+],
+[
+"Sunder",
+2
+],
+[
+"Symbiosis",
+0
+],
+[
+"Tainted Aether",
+2
+],
+[
+"Telepathy",
+1
+],
+[
+"Temporal Aperture",
+2
+],
+[
+"Thran Quarry",
+2
+],
+[
+"Thran Turbine",
+1
+],
+[
+"Thundering Giant",
+1
+],
+[
+"Time Spiral",
+2
+],
+[
+"Titania's Boon",
+1
+],
+[
+"Titania's Chosen",
+1
+],
+[
+"Tolarian Academy",
+2
+],
+[
+"Tolarian Winds",
+0
+],
+[
+"Torch Song",
+1
+],
+[
+"Treefolk Seedlings",
+1
+],
+[
+"Treetop Rangers",
+0
+],
+[
+"Turnabout",
+1
+],
+[
+"Umbilicus",
+2
+],
+[
+"Unnerve",
+0
+],
+[
+"Unworthy Dead",
+0
+],
+[
+"Urza's Armor",
+1
+],
+[
+"Vampiric Embrace",
+1
+],
+[
+"Vebulid",
+2
+],
+[
+"Veil of Birds",
+0
+],
+[
+"Veiled Apparition",
+1
+],
+[
+"Veiled Crocodile",
+2
+],
+[
+"Veiled Sentry",
+1
+],
+[
+"Veiled Serpent",
+0
+],
+[
+"Venomous Fangs",
+0
+],
+[
+"Vernal Bloom",
+2
+],
+[
+"Viashino Outrider",
+0
+],
+[
+"Viashino Runner",
+0
+],
+[
+"Viashino Sandswimmer",
+2
+],
+[
+"Viashino Weaponsmith",
+0
+],
+[
+"Victimize",
+1
+],
+[
+"Vile Requiem",
+1
+],
+[
+"Voice of Grace",
+1
+],
+[
+"Voice of Law",
+1
+],
+[
+"Voltaic Key",
+1
+],
+[
+"Vug Lizard",
+1
+],
+[
+"Wall of Junk",
+1
+],
+[
+"War Dance",
+1
+],
+[
+"Waylay",
+1
+],
+[
+"Western Paladin",
+2
+],
+[
+"Whetstone",
+2
+],
+[
+"Whirlwind",
+2
+],
+[
+"Wild Dogs",
+0
+],
+[
+"Wildfire",
+2
+],
+[
+"Windfall",
+1
+],
+[
+"Winding Wurm",
+0
+],
+[
+"Wirecat",
+1
+],
+[
+"Witch Engine",
+2
+],
+[
+"Wizard Mentor",
+0
+],
+[
+"Worn Powerstone",
+1
+],
+[
+"Worship",
+2
+],
+[
+"Yawgmoth's Edict",
+1
+],
+[
+"Yawgmoth's Will",
+2
+],
+[
+"Zephid",
+2
+],
+[
+"Zephid's Embrace",
+1
+]
+]
+},
+{
+"code": "ULG",
+"name": "Urza's Legacy",
+"released": "1999-02-15",
+"cards": [
+[
+"About Face",
+0
+],
+[
+"Angel's Trumpet",
+1
+],
+[
+"Angelic Curator",
+0
+],
+[
+"Anthroplasm",
+2
+],
+[
+"Archivist",
+2
+],
+[
+"Aura Flux",
+0
+],
+[
+"Avalanche Riders",
+1
+],
+[
+"Beast of Burden",
+2
+],
+[
+"Blessed Reversal",
+2
+],
+[
+"Bloated Toad",
+1
+],
+[
+"Bone Shredder",
+1
+],
+[
+"Bouncing Beebles",
+0
+],
+[
+"Brink of Madness",
+2
+],
+[
+"Burst of Energy",
+0
+],
+[
+"Cessation",
+0
+],
+[
+"Cloud of Faeries",
+0
+],
+[
+"Crawlspace",
+2
+],
+[
+"Crop Rotation",
+0
+],
+[
+"Damping Engine",
+2
+],
+[
+"Darkwatch Elves",
+1
+],
+[
+"Defender of Chaos",
+0
+],
+[
+"Defender of Law",
+0
+],
+[
+"Defense Grid",
+2
+],
+[
+"Defense of the Heart",
+2
+],
+[
+"Delusions of Mediocrity",
+2
+],
+[
+"Deranged Hermit",
+2
+],
+[
+"Devout Harpist",
+0
+],
+[
+"Engineered Plague",
+1
+],
+[
+"Erase",
+0
+],
+[
+"Eviscerator",
+2
+],
+[
+"Expendable Troops",
+0
+],
+[
+"Faerie Conclave",
+1
+],
+[
+"Fleeting Image",
+2
+],
+[
+"Fog of Gnats",
+0
+],
+[
+"Forbidding Watchtower",
+1
+],
+[
+"Frantic Search",
+0
+],
+[
+"Gang of Elk",
+1
+],
+[
+"Ghitu Encampment",
+1
+],
+[
+"Ghitu Fire-Eater",
+1
+],
+[
+"Ghitu Slinger",
+0
+],
+[
+"Ghitu War Cry",
+1
+],
+[
+"Giant Cockroach",
+0
+],
+[
+"Goblin Medics",
+0
+],
+[
+"Goblin Welder",
+2
+],
+[
+"Granite Grip",
+0
+],
+[
+"Grim Monolith",
+2
+],
+[
+"Harmonic Convergence",
+1
+],
+[
+"Hidden Gibbons",
+2
+],
+[
+"Hope and Glory",
+1
+],
+[
+"Impending Disaster",
+2
+],
+[
+"Intervene",
+0
+],
+[
+"Iron Maiden",
+2
+],
+[
+"Iron Will",
+0
+],
+[
+"Jhoira's Toolbox",
+1
+],
+[
+"Karmic Guide",
+2
+],
+[
+"King Crab",
+1
+],
+[
+"Knighthood",
+1
+],
+[
+"Last-Ditch Effort",
+1
+],
+[
+"Lava Axe",
+0
+],
+[
+"Levitation",
+1
+],
+[
+"Lone Wolf",
+1
+],
+[
+"Lurking Skirge",
+2
+],
+[
+"Martyr's Cause",
+1
+],
+[
+"Memory Jar",
+2
+],
+[
+"Might of Oaks",
+2
+],
+[
+"Miscalculation",
+0
+],
+[
+"Molten Hydra",
+2
+],
+[
+"Mother of Runes",
+1
+],
+[
+"Multani's Acolyte",
+0
+],
+[
+"Multani's Presence",
+1
+],
+[
+"Multani, Maro-Sorcerer",
+2
+],
+[
+"No Mercy",
+2
+],
+[
+"Opal Avenger",
+2
+],
+[
+"Opal Champion",
+0
+],
+[
+"Opportunity",
+1
+],
+[
+"Ostracize",
+0
+],
+[
+"Palinchron",
+2
+],
+[
+"Parch",
+0
+],
+[
+"Peace and Quiet",
+1
+],
+[
+"Phyrexian Broodlings",
+0
+],
+[
+"Phyrexian Debaser",
+0
+],
+[
+"Phyrexian Defiler",
+1
+],
+[
+"Phyrexian Denouncer",
+0
+],
+[
+"Phyrexian Plaguelord",
+2
+],
+[
+"Phyrexian Reclamation",
+1
+],
+[
+"Plague Beetle",
+0
+],
+[
+"Planar Collapse",
+2
+],
+[
+"Purify",
+2
+],
+[
+"Pygmy Pyrosaur",
+0
+],
+[
+"Pyromancy",
+2
+],
+[
+"Quicksilver Amulet",
+2
+],
+[
+"Rack and Ruin",
+1
+],
+[
+"Radiant's Dragoons",
+1
+],
+[
+"Radiant's Judgment",
+0
+],
+[
+"Radiant, Archangel",
+2
+],
+[
+"Rancor",
+0
+],
+[
+"Rank and File",
+1
+],
+[
+"Raven Familiar",
+1
+],
+[
+"Rebuild",
+1
+],
+[
+"Repopulate",
+0
+],
+[
+"Ring of Gix",
+2
+],
+[
+"Rivalry",
+2
+],
+[
+"Scrapheap",
+2
+],
+[
+"Second Chance",
+2
+],
+[
+"Shivan Phoenix",
+2
+],
+[
+"Sick and Tired",
+0
+],
+[
+"Silk Net",
+0
+],
+[
+"Simian Grunts",
+0
+],
+[
+"Sleeper's Guile",
+0
+],
+[
+"Slow Motion",
+0
+],
+[
+"Sluggishness",
+0
+],
+[
+"Snap",
+0
+],
+[
+"Spawning Pool",
+1
+],
+[
+"Subversion",
+2
+],
+[
+"Sustainer of the Realm",
+1
+],
+[
+"Swat",
+0
+],
+[
+"Tethered Skirge",
+1
+],
+[
+"Thornwind Faeries",
+0
+],
+[
+"Thran Lens",
+2
+],
+[
+"Thran War Machine",
+1
+],
+[
+"Thran Weaponry",
+2
+],
+[
+"Ticking Gnomes",
+1
+],
+[
+"Tinker",
+1
+],
+[
+"Tragic Poet",
+0
+],
+[
+"Treacherous Link",
+1
+],
+[
+"Treefolk Mystic",
+0
+],
+[
+"Treetop Village",
+1
+],
+[
+"Unearth",
+0
+],
+[
+"Urza's Blueprints",
+2
+],
+[
+"Viashino Bey",
+0
+],
+[
+"Viashino Cutthroat",
+1
+],
+[
+"Viashino Heretic",
+1
+],
+[
+"Viashino Sandscout",
+0
+],
+[
+"Vigilant Drake",
+0
+],
+[
+"Walking Sponge",
+1
+],
+[
+"Weatherseed Elf",
+0
+],
+[
+"Weatherseed Faeries",
+0
+],
+[
+"Weatherseed Treefolk",
+2
+],
+[
+"Wheel of Torture",
+2
+],
+[
+"Wing Snare",
+1
+],
+[
+"Yavimaya Granger",
+0
+],
+[
+"Yavimaya Scion",
+0
+],
+[
+"Yavimaya Wurm",
+0
+]
+]
+},
+{
+"code": "6ED",
+"name": "Classic Sixth Edition",
+"released": "1999-04-21",
+"cards": [
+[
+"Abduction",
+1
+],
+[
+"Abyssal Hunter",
+2
+],
+[
+"Abyssal Specter",
+1
+],
+[
+"Adarkar Wastes",
+2
+],
+[
+"Aether Flash",
+1
+],
+[
+"Agonizing Memories",
+1
+],
+[
+"Air Elemental",
+1
+],
+[
+"Aladdin's Ring",
+2
+],
+[
+"Amber Prison",
+2
+],
+[
+"Anaba Bodyguard",
+0
+],
+[
+"Anaba Shaman",
+0
+],
+[
+"Ancestral Memories",
+2
+],
+[
+"Animate Wall",
+2
+],
+[
+"Ankh of Mishra",
+2
+],
+[
+"Archangel",
+2
+],
+[
+"Ardent Militia",
+1
+],
+[
+"Armageddon",
+2
+],
+[
+"Armored Pegasus",
+0
+],
+[
+"Ashen Powder",
+2
+],
+[
+"Ashnod's Altar",
+1
+],
+[
+"Balduvian Barbarians",
+0
+],
+[
+"Balduvian Horde",
+2
+],
+[
+"Birds of Paradise",
+2
+],
+[
+"Blaze",
+1
+],
+[
+"Blight",
+1
+],
+[
+"Blighted Shaman",
+1
+],
+[
+"Blood Pet",
+0
+],
+[
+"Bog Imp",
+0
+],
+[
+"Bog Rats",
+0
+],
+[
+"Bog Wraith",
+1
+],
+[
+"Boil",
+1
+],
+[
+"Boomerang",
+0
+],
+[
+"Bottle of Suleiman",
+2
+],
+[
+"Browse",
+1
+],
+[
+"Brushland",
+2
+],
+[
+"Burrowing",
+1
+],
+[
+"Call of the Wild",
+2
+],
+[
+"Castle",
+1
+],
+[
+"Cat Warriors",
+0
+],
+[
+"Celestial Dawn",
+2
+],
+[
+"Charcoal Diamond",
+1
+],
+[
+"Chill",
+1
+],
+[
+"Circle of Protection: Black",
+0
+],
+[
+"Circle of Protection: Blue",
+0
+],
+[
+"Circle of Protection: Green",
+0
+],
+[
+"Circle of Protection: Red",
+0
+],
+[
+"Circle of Protection: White",
+0
+],
+[
+"City of Brass",
+2
+],
+[
+"Coercion",
+0
+],
+[
+"Conquer",
+1
+],
+[
+"Counterspell",
+0
+],
+[
+"Creeping Mold",
+1
+],
+[
+"Crimson Hellkite",
+2
+],
+[
+"Crusade",
+2
+],
+[
+"Crystal Rod",
+1
+],
+[
+"Crystal Vein",
+1
+],
+[
+"Cursed Totem",
+2
+],
+[
+"D'Avenant Archer",
+0
+],
+[
+"Dancing Scimitar",
+2
+],
+[
+"Daraja Griffin",
+1
+],
+[
+"Daring Apprentice",
+2
+],
+[
+"Deflection",
+2
+],
+[
+"Dense Foliage",
+2
+],
+[
+"Derelor",
+2
+],
+[
+"Desertion",
+2
+],
+[
+"Diminishing Returns",
+2
+],
+[
+"Dingus Egg",
+2
+],
+[
+"Disenchant",
+0
+],
+[
+"Disrupting Scepter",
+2
+],
+[
+"Divine Transformation",
+1
+],
+[
+"Doomsday",
+2
+],
+[
+"Dragon Engine",
+2
+],
+[
+"Dragon Mask",
+1
+],
+[
+"Dread of Night",
+1
+],
+[
+"Dream Cache",
+0
+],
+[
+"Drudge Skeletons",
+0
+],
+[
+"Dry Spell",
+0
+],
+[
+"Dwarven Ruins",
+1
+],
+[
+"Early Harvest",
+2
+],
+[
+"Earthquake",
+2
+],
+[
+"Ebon Stronghold",
+1
+],
+[
+"Ekundu Griffin",
+0
+],
+[
+"Elder Druid",
+2
+],
+[
+"Elven Cache",
+0
+],
+[
+"Elven Riders",
+1
+],
+[
+"Elvish Archers",
+2
+],
+[
+"Enfeeblement",
+0
+],
+[
+"Enlightened Tutor",
+1
+],
+[
+"Ethereal Champion",
+2
+],
+[
+"Evil Eye of Orms-by-Gore",
+1
+],
+[
+"Exile",
+2
+],
+[
+"Fallen Angel",
+2
+],
+[
+"Fallow Earth",
+1
+],
+[
+"Familiar Ground",
+1
+],
+[
+"Fatal Blow",
+0
+],
+[
+"Fear",
+0
+],
+[
+"Feast of the Unicorn",
+0
+],
+[
+"Femeref Archers",
+1
+],
+[
+"Feral Shadow",
+0
+],
+[
+"Fervor",
+2
+],
+[
+"Final Fortune",
+2
+],
+[
+"Fire Diamond",
+1
+],
+[
+"Fire Elemental",
+1
+],
+[
+"Firebreathing",
+0
+],
+[
+"Fit of Rage",
+0
+],
+[
+"Flame Spirit",
+0
+],
+[
+"Flash",
+2
+],
+[
+"Flashfires",
+1
+],
+[
+"Flight",
+0
+],
+[
+"Flying Carpet",
+2
+],
+[
+"Fog",
+0
+],
+[
+"Fog Elemental",
+0
+],
+[
+"Forbidden Crypt",
+2
+],
+[
+"Forget",
+2
+],
+[
+"Fountain of Youth",
+1
+],
+[
+"Fyndhorn Brownie",
+0
+],
+[
+"Fyndhorn Elder",
+1
+],
+[
+"Gaseous Form",
+0
+],
+[
+"Giant Growth",
+0
+],
+[
+"Giant Spider",
+0
+],
+[
+"Giant Strength",
+0
+],
+[
+"Glacial Wall",
+1
+],
+[
+"Glasses of Urza",
+1
+],
+[
+"Goblin Digging Team",
+0
+],
+[
+"Goblin Elite Infantry",
+0
+],
+[
+"Goblin Hero",
+0
+],
+[
+"Goblin King",
+2
+],
+[
+"Goblin Recruiter",
+1
+],
+[
+"Goblin Warrens",
+2
+],
+[
+"Gorilla Chieftain",
+0
+],
+[
+"Gravebane Zombie",
+1
+],
+[
+"Gravedigger",
+0
+],
+[
+"Greed",
+2
+],
+[
+"Grinning Totem",
+2
+],
+[
+"Grizzly Bears",
+0
+],
+[
+"Hammer of Bogardan",
+2
+],
+[
+"Harmattan Efreet",
+1
+],
+[
+"Havenwood Battleground",
+1
+],
+[
+"Healing Salve",
+0
+],
+[
+"Heavy Ballista",
+1
+],
+[
+"Hecatomb",
+2
+],
+[
+"Hero's Resolve",
+0
+],
+[
+"Hidden Horror",
+1
+],
+[
+"Horned Turtle",
+0
+],
+[
+"Howl from Beyond",
+0
+],
+[
+"Howling Mine",
+2
+],
+[
+"Hulking Cyclops",
+1
+],
+[
+"Hurricane",
+2
+],
+[
+"Icatian Town",
+2
+],
+[
+"Illicit Auction",
+2
+],
+[
+"Infantry Veteran",
+0
+],
+[
+"Infernal Contract",
+2
+],
+[
+"Inferno",
+2
+],
+[
+"Insight",
+1
+],
+[
+"Inspiration",
+0
+],
+[
+"Iron Star",
+1
+],
+[
+"Ivory Cup",
+1
+],
+[
+"Jade Monolith",
+2
+],
+[
+"Jalum Tome",
+2
+],
+[
+"Jayemdae Tome",
+2
+],
+[
+"Jokulhaups",
+2
+],
+[
+"Juxtapose",
+2
+],
+[
+"Karplusan Forest",
+2
+],
+[
+"Kismet",
+1
+],
+[
+"Kjeldoran Dead",
+0
+],
+[
+"Kjeldoran Royal Guard",
+2
+],
+[
+"Lead Golem",
+1
+],
+[
+"Leshrac's Rite",
+1
+],
+[
+"Library of Lat-Nam",
+2
+],
+[
+"Light of Day",
+1
+],
+[
+"Lightning Blast",
+0
+],
+[
+"Living Lands",
+2
+],
+[
+"Llanowar Elves",
+0
+],
+[
+"Longbow Archer",
+1
+],
+[
+"Lord of Atlantis",
+2
+],
+[
+"Lost Soul",
+0
+],
+[
+"Lure",
+1
+],
+[
+"Mana Prism",
+1
+],
+[
+"Mana Short",
+2
+],
+[
+"Manabarbs",
+2
+],
+[
+"Marble Diamond",
+1
+],
+[
+"Maro",
+2
+],
+[
+"Meekstone",
+2
+],
+[
+"Memory Lapse",
+0
+],
+[
+"Merfolk of the Pearl Trident",
+0
+],
+[
+"Mesa Falcon",
+0
+],
+[
+"Millstone",
+2
+],
+[
+"Mind Warp",
+1
+],
+[
+"Mischievous Poltergeist",
+1
+],
+[
+"Moss Diamond",
+1
+],
+[
+"Mountain Goat",
+0
+],
+[
+"Mystic Compass",
+1
+],
+[
+"Mystical Tutor",
+1
+],
+[
+"Nature's Resurgence",
+2
+],
+[
+"Necrosavant",
+2
+],
+[
+"Nightmare",
+2
+],
+[
+"Obsianus Golem",
+1
+],
+[
+"Orcish Artillery",
+1
+],
+[
+"Orcish Oriflamme",
+1
+],
+[
+"Order of the Sacred Torch",
+2
+],
+[
+"Ornithopter",
+1
+],
+[
+"Pacifism",
+0
+],
+[
+"Painful Memories",
+0
+],
+[
+"Panther Warriors",
+0
+],
+[
+"Patagia Golem",
+1
+],
+[
+"Pearl Dragon",
+2
+],
+[
+"Pentagram of the Ages",
+2
+],
+[
+"Perish",
+1
+],
+[
+"Pestilence",
+1
+],
+[
+"Phantasmal Terrain",
+0
+],
+[
+"Phantom Warrior",
+1
+],
+[
+"Phyrexian Vault",
+1
+],
+[
+"Pillage",
+1
+],
+[
+"Polymorph",
+2
+],
+[
+"Power Sink",
+1
+],
+[
+"Pradesh Gypsies",
+0
+],
+[
+"Primal Clay",
+2
+],
+[
+"Prodigal Sorcerer",
+0
+],
+[
+"Prosperity",
+1
+],
+[
+"Psychic Transfer",
+2
+],
+[
+"Psychic Venom",
+0
+],
+[
+"Pyrotechnics",
+0
+],
+[
+"Python",
+0
+],
+[
+"Radjan Spirit",
+1
+],
+[
+"Rag Man",
+2
+],
+[
+"Raging Goblin",
+0
+],
+[
+"Raise Dead",
+0
+],
+[
+"Rampant Growth",
+0
+],
+[
+"Razortooth Rats",
+0
+],
+[
+"Recall",
+2
+],
+[
+"Reckless Embermage",
+2
+],
+[
+"Redwood Treefolk",
+0
+],
+[
+"Regal Unicorn",
+0
+],
+[
+"Regeneration",
+0
+],
+[
+"Relearn",
+1
+],
+[
+"Relentless Assault",
+2
+],
+[
+"Remedy",
+0
+],
+[
+"Remove Soul",
+0
+],
+[
+"Reprisal",
+1
+],
+[
+"Resistance Fighter",
+0
+],
+[
+"Reverse Damage",
+2
+],
+[
+"River Boa",
+1
+],
+[
+"Rod of Ruin",
+1
+],
+[
+"Rowen",
+2
+],
+[
+"Ruins of Trokair",
+1
+],
+[
+"Sabretooth Tiger",
+0
+],
+[
+"Sage Owl",
+0
+],
+[
+"Samite Healer",
+0
+],
+[
+"Scaled Wurm",
+0
+],
+[
+"Scathe Zombies",
+0
+],
+[
+"Sea Monster",
+0
+],
+[
+"Segovian Leviathan",
+1
+],
+[
+"Sengir Autocrat",
+2
+],
+[
+"Serenity",
+2
+],
+[
+"Serra's Blessing",
+1
+],
+[
+"Shanodin Dryads",
+0
+],
+[
+"Shatter",
+0
+],
+[
+"Shatterstorm",
+2
+],
+[
+"Shock",
+0
+],
+[
+"Sibilant Spirit",
+2
+],
+[
+"Skull Catapult",
+1
+],
+[
+"Sky Diamond",
+1
+],
+[
+"Snake Basket",
+2
+],
+[
+"Soldevi Sage",
+1
+],
+[
+"Soul Net",
+1
+],
+[
+"Spell Blast",
+0
+],
+[
+"Spirit Link",
+1
+],
+[
+"Spitting Drake",
+1
+],
+[
+"Spitting Earth",
+0
+],
+[
+"Stalking Tiger",
+0
+],
+[
+"Standing Troops",
+0
+],
+[
+"Staunch Defenders",
+1
+],
+[
+"Stone Rain",
+0
+],
+[
+"Storm Cauldron",
+2
+],
+[
+"Storm Crow",
+0
+],
+[
+"Strands of Night",
+1
+],
+[
+"Stream of Life",
+0
+],
+[
+"Stromgald Cabal",
+2
+],
+[
+"Stupor",
+1
+],
+[
+"Sulfurous Springs",
+2
+],
+[
+"Summer Bloom",
+1
+],
+[
+"Sunweb",
+2
+],
+[
+"Svyelunite Temple",
+1
+],
+[
+"Syphon Soul",
+0
+],
+[
+"Talruum Minotaur",
+0
+],
+[
+"Tariff",
+2
+],
+[
+"Teferi's Puzzle Box",
+2
+],
+[
+"Terror",
+0
+],
+[
+"The Hive",
+2
+],
+[
+"Thicket Basilisk",
+1
+],
+[
+"Throne of Bone",
+1
+],
+[
+"Tidal Surge",
+0
+],
+[
+"Trained Armodon",
+0
+],
+[
+"Tranquil Grove",
+2
+],
+[
+"Tranquility",
+0
+],
+[
+"Tremor",
+0
+],
+[
+"Tundra Wolves",
+0
+],
+[
+"Uktabi Orangutan",
+1
+],
+[
+"Uktabi Wildcats",
+2
+],
+[
+"Underground River",
+2
+],
+[
+"Unseen Walker",
+1
+],
+[
+"Unsummon",
+0
+],
+[
+"Untamed Wilds",
+1
+],
+[
+"Unyaro Griffin",
+1
+],
+[
+"Vampiric Tutor",
+2
+],
+[
+"Venerable Monk",
+0
+],
+[
+"Verduran Enchantress",
+2
+],
+[
+"Vertigo",
+1
+],
+[
+"Viashino Warrior",
+0
+],
+[
+"Vitalize",
+0
+],
+[
+"Vodalian Soldiers",
+0
+],
+[
+"Volcanic Dragon",
+2
+],
+[
+"Volcanic Geyser",
+1
+],
+[
+"Waiting in the Weeds",
+2
+],
+[
+"Wall of Air",
+1
+],
+[
+"Wall of Fire",
+1
+],
+[
+"Wall of Swords",
+1
+],
+[
+"Wand of Denial",
+2
+],
+[
+"Warmth",
+1
+],
+[
+"Warrior's Honor",
+0
+],
+[
+"Warthog",
+1
+],
+[
+"Wild Growth",
+0
+],
+[
+"Wind Drake",
+0
+],
+[
+"Wind Spirit",
+1
+],
+[
+"Wooden Sphere",
+1
+],
+[
+"Worldly Tutor",
+1
+],
+[
+"Wrath of God",
+2
+],
+[
+"Wyluli Wolf",
+2
+],
+[
+"Zombie Master",
+2
+],
+[
+"Zur's Weirding",
+2
+]
+]
+},
+{
+"code": "UDS",
+"name": "Urza's Destiny",
+"released": "1999-06-07",
+"cards": [
+[
+"Academy Rector",
+2
+],
+[
+"Aether Sting",
+1
+],
+[
+"Ancient Silverback",
+2
+],
+[
+"Apprentice Necromancer",
+2
+],
+[
+"Archery Training",
+1
+],
+[
+"Attrition",
+2
+],
+[
+"Aura Thief",
+2
+],
+[
+"Blizzard Elemental",
+2
+],
+[
+"Bloodshot Cyclops",
+2
+],
+[
+"Body Snatcher",
+2
+],
+[
+"Braidwood Cup",
+1
+],
+[
+"Braidwood Sextant",
+1
+],
+[
+"Brass Secretary",
+1
+],
+[
+"Brine Seer",
+1
+],
+[
+"Bubbling Beebles",
+0
+],
+[
+"Bubbling Muck",
+0
+],
+[
+"Caltrops",
+1
+],
+[
+"Capashen Knight",
+0
+],
+[
+"Capashen Standard",
+0
+],
+[
+"Capashen Templar",
+0
+],
+[
+"Carnival of Souls",
+2
+],
+[
+"Chime of Night",
+0
+],
+[
+"Cinder Seer",
+1
+],
+[
+"Colos Yearling",
+0
+],
+[
+"Compost",
+1
+],
+[
+"Covetous Dragon",
+2
+],
+[
+"Disappear",
+1
+],
+[
+"Disease Carriers",
+0
+],
+[
+"Donate",
+2
+],
+[
+"Dying Wail",
+0
+],
+[
+"Elvish Lookout",
+0
+],
+[
+"Elvish Piper",
+2
+],
+[
+"Emperor Crocodile",
+2
+],
+[
+"Encroach",
+1
+],
+[
+"Eradicate",
+1
+],
+[
+"Extruder",
+1
+],
+[
+"False Prophet",
+2
+],
+[
+"Fatigue",
+0
+],
+[
+"Fend Off",
+0
+],
+[
+"Festering Wound",
+1
+],
+[
+"Field Surgeon",
+0
+],
+[
+"Flame Jet",
+0
+],
+[
+"Fledgling Osprey",
+0
+],
+[
+"Flicker",
+2
+],
+[
+"Fodder Cannon",
+1
+],
+[
+"Gamekeeper",
+1
+],
+[
+"Goblin Berserker",
+1
+],
+[
+"Goblin Festival",
+2
+],
+[
+"Goblin Gardener",
+0
+],
+[
+"Goblin Marshal",
+2
+],
+[
+"Goblin Masons",
+0
+],
+[
+"Goliath Beetle",
+0
+],
+[
+"Heart Warden",
+0
+],
+[
+"Hulking Ogre",
+0
+],
+[
+"Hunting Moa",
+1
+],
+[
+"Illuminated Wings",
+0
+],
+[
+"Impatience",
+2
+],
+[
+"Incendiary",
+1
+],
+[
+"Iridescent Drake",
+1
+],
+[
+"Ivy Seer",
+1
+],
+[
+"Jasmine Seer",
+1
+],
+[
+"Junk Diver",
+2
+],
+[
+"Keldon Champion",
+1
+],
+[
+"Keldon Vandals",
+0
+],
+[
+"Kingfisher",
+0
+],
+[
+"Landslide",
+1
+],
+[
+"Lurking Jackals",
+1
+],
+[
+"Magnify",
+0
+],
+[
+"Mantis Engine",
+1
+],
+[
+"Mark of Fury",
+0
+],
+[
+"Marker Beetles",
+0
+],
+[
+"Mask of Law and Grace",
+0
+],
+[
+"Master Healer",
+2
+],
+[
+"Masticore",
+2
+],
+[
+"Mental Discipline",
+0
+],
+[
+"Metalworker",
+2
+],
+[
+"Metathran Elite",
+1
+],
+[
+"Metathran Soldier",
+0
+],
+[
+"Momentum",
+1
+],
+[
+"Multani's Decree",
+0
+],
+[
+"Nightshade Seer",
+1
+],
+[
+"Opalescence",
+2
+],
+[
+"Opposition",
+2
+],
+[
+"Pattern of Rebirth",
+2
+],
+[
+"Phyrexian Monitor",
+0
+],
+[
+"Phyrexian Negator",
+2
+],
+[
+"Plague Dogs",
+1
+],
+[
+"Plated Spider",
+0
+],
+[
+"Plow Under",
+2
+],
+[
+"Powder Keg",
+2
+],
+[
+"Private Research",
+1
+],
+[
+"Quash",
+1
+],
+[
+"Rapid Decay",
+2
+],
+[
+"Ravenous Rats",
+0
+],
+[
+"Rayne, Academy Chancellor",
+2
+],
+[
+"Reckless Abandon",
+0
+],
+[
+"Reliquary Monk",
+0
+],
+[
+"Repercussion",
+2
+],
+[
+"Replenish",
+2
+],
+[
+"Rescue",
+0
+],
+[
+"Rofellos's Gift",
+0
+],
+[
+"Rofellos, Llanowar Emissary",
+2
+],
+[
+"Sanctimony",
+1
+],
+[
+"Scent of Brine",
+0
+],
+[
+"Scent of Cinder",
+0
+],
+[
+"Scent of Ivy",
+0
+],
+[
+"Scent of Jasmine",
+0
+],
+[
+"Scent of Nightshade",
+0
+],
+[
+"Scour",
+1
+],
+[
+"Scrying Glass",
+2
+],
+[
+"Serra Advocate",
+1
+],
+[
+"Sigil of Sleep",
+0
+],
+[
+"Skittering Horror",
+0
+],
+[
+"Slinking Skirge",
+0
+],
+[
+"Solidarity",
+0
+],
+[
+"Soul Feast",
+1
+],
+[
+"Sowing Salt",
+1
+],
+[
+"Splinter",
+1
+],
+[
+"Squirming Mass",
+0
+],
+[
+"Storage Matrix",
+2
+],
+[
+"Taunting Elf",
+0
+],
+[
+"Telepathic Spies",
+0
+],
+[
+"Temporal Adept",
+2
+],
+[
+"Tethered Griffin",
+2
+],
+[
+"Thieving Magpie",
+1
+],
+[
+"Thorn Elemental",
+2
+],
+[
+"Thran Dynamo",
+1
+],
+[
+"Thran Foundry",
+1
+],
+[
+"Thran Golem",
+2
+],
+[
+"Tormented Angel",
+0
+],
+[
+"Treachery",
+2
+],
+[
+"Trumpet Blast",
+0
+],
+[
+"Twisted Experiment",
+0
+],
+[
+"Urza's Incubator",
+2
+],
+[
+"Voice of Duty",
+1
+],
+[
+"Voice of Reason",
+1
+],
+[
+"Wake of Destruction",
+2
+],
+[
+"Wall of Glare",
+0
+],
+[
+"Wild Colos",
+0
+],
+[
+"Yavimaya Elder",
+0
+],
+[
+"Yavimaya Enchantress",
+1
+],
+[
+"Yavimaya Hollow",
+2
+],
+[
+"Yawgmoth's Bargain",
+2
+]
+]
+},
+{
+"code": "MMQ",
+"name": "Mercadian Masques",
+"released": "1999-10-04",
+"cards": [
+[
+"Aerial Caravan",
+2
+],
+[
+"Afterlife",
+1
+],
+[
+"Alabaster Wall",
+0
+],
+[
+"Alley Grifters",
+0
+],
+[
+"Ancestral Mask",
+0
+],
+[
+"Armistice",
+2
+],
+[
+"Arms Dealer",
+1
+],
+[
+"Arrest",
+1
+],
+[
+"Assembly Hall",
+2
+],
+[
+"Ballista Squad",
+1
+],
+[
+"Balloon Peddler",
+0
+],
+[
+"Barbed Wire",
+1
+],
+[
+"Bargaining Table",
+2
+],
+[
+"Battle Rampart",
+0
+],
+[
+"Battle Squadron",
+2
+],
+[
+"Bifurcate",
+2
+],
+[
+"Black Market",
+2
+],
+[
+"Blaster Mage",
+0
+],
+[
+"Blockade Runner",
+0
+],
+[
+"Blood Hound",
+2
+],
+[
+"Blood Oath",
+2
+],
+[
+"Boa Constrictor",
+1
+],
+[
+"Bog Smugglers",
+0
+],
+[
+"Bog Witch",
+0
+],
+[
+"Brainstorm",
+0
+],
+[
+"Brawl",
+2
+],
+[
+"Briar Patch",
+1
+],
+[
+"Bribery",
+2
+],
+[
+"Buoyancy",
+0
+],
+[
+"Cackling Witch",
+1
+],
+[
+"Caller of the Hunt",
+2
+],
+[
+"Cateran Brute",
+0
+],
+[
+"Cateran Enforcer",
+1
+],
+[
+"Cateran Kidnappers",
+1
+],
+[
+"Cateran Overlord",
+2
+],
+[
+"Cateran Persuader",
+0
+],
+[
+"Cateran Slaver",
+2
+],
+[
+"Cateran Summons",
+1
+],
+[
+"Caustic Wasps",
+1
+],
+[
+"Cave Sense",
+0
+],
+[
+"Cave-In",
+2
+],
+[
+"Cavern Crawler",
+0
+],
+[
+"Ceremonial Guard",
+0
+],
+[
+"Chambered Nautilus",
+1
+],
+[
+"Chameleon Spirit",
+1
+],
+[
+"Charisma",
+2
+],
+[
+"Charm Peddler",
+0
+],
+[
+"Charmed Griffin",
+1
+],
+[
+"Cho-Arrim Alchemist",
+2
+],
+[
+"Cho-Arrim Bruiser",
+2
+],
+[
+"Cho-Arrim Legate",
+1
+],
+[
+"Cho-Manno's Blessing",
+0
+],
+[
+"Cho-Manno, Revolutionary",
+2
+],
+[
+"Cinder Elemental",
+1
+],
+[
+"Clear the Land",
+2
+],
+[
+"Close Quarters",
+1
+],
+[
+"Cloud Sprite",
+0
+],
+[
+"Coastal Piracy",
+1
+],
+[
+"Collective Unconscious",
+2
+],
+[
+"Common Cause",
+2
+],
+[
+"Conspiracy",
+2
+],
+[
+"Cornered Market",
+2
+],
+[
+"Corrupt Official",
+2
+],
+[
+"Counterspell",
+0
+],
+[
+"Cowardice",
+2
+],
+[
+"Crackdown",
+2
+],
+[
+"Crag Saurian",
+2
+],
+[
+"Crash",
+0
+],
+[
+"Credit Voucher",
+1
+],
+[
+"Crenellated Wall",
+1
+],
+[
+"Crooked Scales",
+2
+],
+[
+"Crossbow Infantry",
+0
+],
+[
+"Crumbling Sanctuary",
+2
+],
+[
+"Customs Depot",
+1
+],
+[
+"Dark Ritual",
+0
+],
+[
+"Darting Merfolk",
+0
+],
+[
+"Dawnstrider",
+2
+],
+[
+"Deadly Insect",
+0
+],
+[
+"Deathgazer",
+1
+],
+[
+"Deepwood Drummer",
+0
+],
+[
+"Deepwood Elder",
+2
+],
+[
+"Deepwood Ghoul",
+0
+],
+[
+"Deepwood Legate",
+1
+],
+[
+"Deepwood Tantiv",
+1
+],
+[
+"Deepwood Wolverine",
+0
+],
+[
+"Dehydration",
+0
+],
+[
+"Delraich",
+2
+],
+[
+"Desert Twister",
+1
+],
+[
+"Devout Witness",
+0
+],
+[
+"Diplomatic Escort",
+1
+],
+[
+"Diplomatic Immunity",
+0
+],
+[
+"Disenchant",
+0
+],
+[
+"Distorting Lens",
+2
+],
+[
+"Drake Hatchling",
+0
+],
+[
+"Dust Bowl",
+2
+],
+[
+"Embargo",
+2
+],
+[
+"Energy Flux",
+1
+],
+[
+"Enslaved Horror",
+1
+],
+[
+"Erithizon",
+2
+],
+[
+"Extortion",
+2
+],
+[
+"Extravagant Spirit",
+2
+],
+[
+"Eye of Ramos",
+2
+],
+[
+"False Demise",
+1
+],
+[
+"Ferocity",
+0
+],
+[
+"Flailing Manticore",
+2
+],
+[
+"Flailing Ogre",
+1
+],
+[
+"Flailing Soldier",
+0
+],
+[
+"Flaming Sword",
+0
+],
+[
+"Food Chain",
+2
+],
+[
+"Forced March",
+2
+],
+[
+"Foster",
+2
+],
+[
+"Fountain Watch",
+2
+],
+[
+"Fountain of Cho",
+1
+],
+[
+"Fresh Volunteers",
+0
+],
+[
+"Furious Assault",
+0
+],
+[
+"Game Preserve",
+2
+],
+[
+"General's Regalia",
+2
+],
+[
+"Gerrard's Irregulars",
+0
+],
+[
+"Ghoul's Feast",
+1
+],
+[
+"Giant Caterpillar",
+0
+],
+[
+"Glowing Anemone",
+1
+],
+[
+"Groundskeeper",
+1
+],
+[
+"Gush",
+0
+],
+[
+"Hammer Mage",
+1
+],
+[
+"Haunted Crossroads",
+1
+],
+[
+"Heart of Ramos",
+2
+],
+[
+"Henge Guardian",
+1
+],
+[
+"Henge of Ramos",
+1
+],
+[
+"Hickory Woodlot",
+0
+],
+[
+"High Market",
+2
+],
+[
+"High Seas",
+1
+],
+[
+"Highway Robber",
+0
+],
+[
+"Hired Giant",
+1
+],
+[
+"Honor the Fallen",
+2
+],
+[
+"Hoodwink",
+0
+],
+[
+"Horn of Plenty",
+2
+],
+[
+"Horn of Ramos",
+2
+],
+[
+"Horned Troll",
+0
+],
+[
+"Howling Wolf",
+0
+],
+[
+"Hunted Wumpus",
+1
+],
+[
+"Ignoble Soldier",
+1
+],
+[
+"Indentured Djinn",
+1
+],
+[
+"Instigator",
+2
+],
+[
+"Insubordination",
+0
+],
+[
+"Intimidation",
+1
+],
+[
+"Invigorate",
+0
+],
+[
+"Inviolability",
+0
+],
+[
+"Iron Lance",
+1
+],
+[
+"Ivory Mask",
+2
+],
+[
+"Jeweled Torque",
+1
+],
+[
+"Jhovall Queen",
+2
+],
+[
+"Jhovall Rider",
+1
+],
+[
+"Karn's Touch",
+2
+],
+[
+"Kris Mage",
+0
+],
+[
+"Kyren Archive",
+2
+],
+[
+"Kyren Glider",
+0
+],
+[
+"Kyren Legate",
+1
+],
+[
+"Kyren Negotiations",
+1
+],
+[
+"Kyren Sniper",
+0
+],
+[
+"Kyren Toy",
+2
+],
+[
+"Land Grant",
+0
+],
+[
+"Larceny",
+1
+],
+[
+"Last Breath",
+1
+],
+[
+"Lava Runner",
+2
+],
+[
+"Ley Line",
+1
+],
+[
+"Liability",
+2
+],
+[
+"Lightning Hounds",
+0
+],
+[
+"Lithophage",
+2
+],
+[
+"Lumbering Satyr",
+1
+],
+[
+"Lunge",
+0
+],
+[
+"Lure",
+1
+],
+[
+"Maggot Therapy",
+0
+],
+[
+"Magistrate's Scepter",
+2
+],
+[
+"Magistrate's Veto",
+1
+],
+[
+"Megatherium",
+2
+],
+[
+"Mercadia's Downfall",
+1
+],
+[
+"Mercadian Atlas",
+2
+],
+[
+"Mercadian Bazaar",
+1
+],
+[
+"Mercadian Lift",
+2
+],
+[
+"Midnight Ritual",
+2
+],
+[
+"Misdirection",
+2
+],
+[
+"Misshapen Fiend",
+0
+],
+[
+"Misstep",
+0
+],
+[
+"Molting Harpy",
+1
+],
+[
+"Moment of Silence",
+0
+],
+[
+"Monkey Cage",
+2
+],
+[
+"Moonlit Wake",
+1
+],
+[
+"Muzzle",
+0
+],
+[
+"Natural Affinity",
+2
+],
+[
+"Nether Spirit",
+2
+],
+[
+"Nightwind Glider",
+0
+],
+[
+"Noble Purpose",
+1
+],
+[
+"Notorious Assassin",
+2
+],
+[
+"Ogre Taskmaster",
+1
+],
+[
+"Orim's Cure",
+0
+],
+[
+"Overtaker",
+2
+],
+[
+"Panacea",
+1
+],
+[
+"Pangosaur",
+2
+],
+[
+"Peat Bog",
+0
+],
+[
+"Pious Warrior",
+0
+],
+[
+"Port Inspector",
+0
+],
+[
+"Power Matrix",
+2
+],
+[
+"Pretender's Claim",
+1
+],
+[
+"Primeval Shambler",
+1
+],
+[
+"Puffer Extract",
+1
+],
+[
+"Pulverize",
+2
+],
+[
+"Puppet's Verdict",
+2
+],
+[
+"Putrefaction",
+1
+],
+[
+"Quagmire Lamprey",
+1
+],
+[
+"Rain of Tears",
+1
+],
+[
+"Ramosian Captain",
+1
+],
+[
+"Ramosian Commander",
+1
+],
+[
+"Ramosian Lieutenant",
+0
+],
+[
+"Ramosian Rally",
+0
+],
+[
+"Ramosian Sergeant",
+0
+],
+[
+"Ramosian Sky Marshal",
+2
+],
+[
+"Rampart Crawler",
+0
+],
+[
+"Rappelling Scouts",
+2
+],
+[
+"Remote Farm",
+0
+],
+[
+"Renounce",
+1
+],
+[
+"Revered Elder",
+0
+],
+[
+"Reverent Mantra",
+2
+],
+[
+"Revive",
+1
+],
+[
+"Righteous Aura",
+1
+],
+[
+"Righteous Indignation",
+1
+],
+[
+"Rishadan Airship",
+0
+],
+[
+"Rishadan Brigand",
+2
+],
+[
+"Rishadan Cutpurse",
+0
+],
+[
+"Rishadan Footpad",
+1
+],
+[
+"Rishadan Pawnshop",
+2
+],
+[
+"Rishadan Port",
+2
+],
+[
+"Robber Fly",
+1
+],
+[
+"Rock Badger",
+1
+],
+[
+"Rouse",
+0
+],
+[
+"Rushwood Dryad",
+0
+],
+[
+"Rushwood Elemental",
+2
+],
+[
+"Rushwood Grove",
+1
+],
+[
+"Rushwood Herbalist",
+0
+],
+[
+"Rushwood Legate",
+1
+],
+[
+"Saber Ants",
+1
+],
+[
+"Sacred Prey",
+0
+],
+[
+"Sailmonger",
+1
+],
+[
+"Sand Squid",
+2
+],
+[
+"Sandstone Needle",
+0
+],
+[
+"Saprazzan Bailiff",
+2
+],
+[
+"Saprazzan Breaker",
+1
+],
+[
+"Saprazzan Cove",
+1
+],
+[
+"Saprazzan Heir",
+2
+],
+[
+"Saprazzan Legate",
+1
+],
+[
+"Saprazzan Outrigger",
+0
+],
+[
+"Saprazzan Raider",
+0
+],
+[
+"Saprazzan Skerry",
+0
+],
+[
+"Scandalmonger",
+1
+],
+[
+"Security Detail",
+2
+],
+[
+"Seismic Mage",
+2
+],
+[
+"Sever Soul",
+0
+],
+[
+"Shock Troops",
+0
+],
+[
+"Shoving Match",
+1
+],
+[
+"Silent Assassin",
+2
+],
+[
+"Silverglade Elemental",
+0
+],
+[
+"Silverglade Pathfinder",
+1
+],
+[
+"Sizzle",
+0
+],
+[
+"Skulking Fugitive",
+0
+],
+[
+"Skull of Ramos",
+2
+],
+[
+"Snake Pit",
+1
+],
+[
+"Snorting Gahr",
+0
+],
+[
+"Snuff Out",
+0
+],
+[
+"Soothing Balm",
+0
+],
+[
+"Soothsaying",
+1
+],
+[
+"Soul Channeling",
+0
+],
+[
+"Specter's Wail",
+0
+],
+[
+"Spidersilk Armor",
+0
+],
+[
+"Spiritual Focus",
+2
+],
+[
+"Spontaneous Generation",
+2
+],
+[
+"Squall",
+0
+],
+[
+"Squallmonger",
+1
+],
+[
+"Squee, Goblin Nabob",
+2
+],
+[
+"Squeeze",
+2
+],
+[
+"Stamina",
+1
+],
+[
+"Statecraft",
+2
+],
+[
+"Steadfast Guard",
+0
+],
+[
+"Stinging Barrier",
+0
+],
+[
+"Stone Rain",
+0
+],
+[
+"Story Circle",
+1
+],
+[
+"Strongarm Thug",
+1
+],
+[
+"Subterranean Hangar",
+1
+],
+[
+"Sustenance",
+1
+],
+[
+"Task Force",
+0
+],
+[
+"Tectonic Break",
+2
+],
+[
+"Territorial Dispute",
+2
+],
+[
+"Thermal Glider",
+0
+],
+[
+"Thieves' Auction",
+2
+],
+[
+"Thrashing Wumpus",
+2
+],
+[
+"Thunderclap",
+0
+],
+[
+"Thwart",
+1
+],
+[
+"Tidal Bore",
+0
+],
+[
+"Tidal Kraken",
+2
+],
+[
+"Tiger Claws",
+0
+],
+[
+"Timid Drake",
+1
+],
+[
+"Tonic Peddler",
+1
+],
+[
+"Tooth of Ramos",
+2
+],
+[
+"Tower of the Magistrate",
+2
+],
+[
+"Toymaker",
+1
+],
+[
+"Trade Routes",
+2
+],
+[
+"Tranquility",
+0
+],
+[
+"Trap Runner",
+1
+],
+[
+"Tremor",
+0
+],
+[
+"Two-Headed Dragon",
+2
+],
+[
+"Undertaker",
+0
+],
+[
+"Unmask",
+2
+],
+[
+"Unnatural Hunger",
+2
+],
+[
+"Uphill Battle",
+1
+],
+[
+"Vendetta",
+0
+],
+[
+"Venomous Breath",
+1
+],
+[
+"Venomous Dragonfly",
+0
+],
+[
+"Vernal Equinox",
+2
+],
+[
+"Vine Dryad",
+2
+],
+[
+"Vine Trellis",
+0
+],
+[
+"Volcanic Wind",
+1
+],
+[
+"Wall of Distortion",
+0
+],
+[
+"War Cadence",
+1
+],
+[
+"War Tax",
+1
+],
+[
+"Warmonger",
+1
+],
+[
+"Warpath",
+1
+],
+[
+"Waterfront Bouncer",
+0
+],
+[
+"Wave of Reckoning",
+2
+],
+[
+"Wild Jhovall",
+0
+],
+[
+"Wishmonger",
+1
+],
+[
+"Word of Blasting",
+1
+],
+[
+"Worry Beads",
+2
+]
+]
+},
+{
+"code": "NEM",
+"name": "Nemesis",
+"released": "2000-02-14",
+"cards": [
+[
+"Accumulated Knowledge",
+0
+],
+[
+"Aether Barrier",
+2
+],
+[
+"Air Bladder",
+0
+],
+[
+"Ancient Hydra",
+1
+],
+[
+"Angelic Favor",
+1
+],
+[
+"Animate Land",
+1
+],
+[
+"Arc Mage",
+1
+],
+[
+"Ascendant Evincar",
+2
+],
+[
+"Avenger en-Dal",
+2
+],
+[
+"Battlefield Percher",
+1
+],
+[
+"Belbe's Armor",
+1
+],
+[
+"Belbe's Percher",
+0
+],
+[
+"Belbe's Portal",
+2
+],
+[
+"Blastoderm",
+0
+],
+[
+"Blinding Angel",
+2
+],
+[
+"Bola Warrior",
+0
+],
+[
+"Carrion Wall",
+1
+],
+[
+"Chieftain en-Dal",
+1
+],
+[
+"Cloudskate",
+0
+],
+[
+"Coiling Woodworm",
+1
+],
+[
+"Complex Automaton",
+2
+],
+[
+"Dark Triumph",
+1
+],
+[
+"Daze",
+0
+],
+[
+"Death Pit Offering",
+2
+],
+[
+"Defender en-Vec",
+0
+],
+[
+"Defiant Falcon",
+0
+],
+[
+"Defiant Vanguard",
+1
+],
+[
+"Divining Witch",
+2
+],
+[
+"Dominate",
+1
+],
+[
+"Downhill Charge",
+0
+],
+[
+"Ensnare",
+1
+],
+[
+"Eye of Yawgmoth",
+2
+],
+[
+"Fanatical Devotion",
+0
+],
+[
+"Flame Rift",
+0
+],
+[
+"Flint Golem",
+1
+],
+[
+"Flowstone Armor",
+1
+],
+[
+"Flowstone Crusher",
+0
+],
+[
+"Flowstone Overseer",
+2
+],
+[
+"Flowstone Slide",
+2
+],
+[
+"Flowstone Strike",
+0
+],
+[
+"Flowstone Surge",
+1
+],
+[
+"Flowstone Thopter",
+1
+],
+[
+"Flowstone Wall",
+0
+],
+[
+"Fog Patch",
+0
+],
+[
+"Harvest Mage",
+0
+],
+[
+"Infiltrate",
+0
+],
+[
+"Jolting Merfolk",
+1
+],
+[
+"Kill Switch",
+2
+],
+[
+"Kor Haven",
+2
+],
+[
+"Laccolith Grunt",
+0
+],
+[
+"Laccolith Rig",
+0
+],
+[
+"Laccolith Titan",
+2
+],
+[
+"Laccolith Warrior",
+1
+],
+[
+"Laccolith Whelp",
+0
+],
+[
+"Lashknife",
+0
+],
+[
+"Lawbringer",
+0
+],
+[
+"Lightbringer",
+0
+],
+[
+"Lin Sivvi, Defiant Hero",
+2
+],
+[
+"Mana Cache",
+2
+],
+[
+"Massacre",
+1
+],
+[
+"Mind Slash",
+1
+],
+[
+"Mind Swords",
+0
+],
+[
+"Mogg Alarm",
+1
+],
+[
+"Mogg Salvage",
+1
+],
+[
+"Mogg Toady",
+0
+],
+[
+"Moggcatcher",
+2
+],
+[
+"Mossdog",
+0
+],
+[
+"Murderous Betrayal",
+2
+],
+[
+"Nesting Wurm",
+1
+],
+[
+"Netter en-Dal",
+0
+],
+[
+"Noble Stand",
+1
+],
+[
+"Off Balance",
+0
+],
+[
+"Oracle's Attendants",
+2
+],
+[
+"Oraxid",
+0
+],
+[
+"Overlaid Terrain",
+2
+],
+[
+"Pack Hunt",
+2
+],
+[
+"Pale Moon",
+2
+],
+[
+"Parallax Dementia",
+0
+],
+[
+"Parallax Inhibitor",
+2
+],
+[
+"Parallax Nexus",
+2
+],
+[
+"Parallax Tide",
+2
+],
+[
+"Parallax Wave",
+2
+],
+[
+"Phyrexian Driver",
+0
+],
+[
+"Phyrexian Prowler",
+1
+],
+[
+"Plague Witch",
+0
+],
+[
+"Predator, Flagship",
+2
+],
+[
+"Rackling",
+1
+],
+[
+"Rath's Edge",
+2
+],
+[
+"Rathi Assassin",
+2
+],
+[
+"Rathi Fiend",
+1
+],
+[
+"Rathi Intimidator",
+0
+],
+[
+"Refreshing Rain",
+1
+],
+[
+"Rejuvenation Chamber",
+1
+],
+[
+"Reverent Silence",
+0
+],
+[
+"Rhox",
+2
+],
+[
+"Rising Waters",
+2
+],
+[
+"Rootwater Commando",
+0
+],
+[
+"Rootwater Thief",
+2
+],
+[
+"Rupture",
+1
+],
+[
+"Rusting Golem",
+1
+],
+[
+"Saproling Burst",
+2
+],
+[
+"Saproling Cluster",
+2
+],
+[
+"Seahunter",
+2
+],
+[
+"Seal of Cleansing",
+0
+],
+[
+"Seal of Doom",
+0
+],
+[
+"Seal of Fire",
+0
+],
+[
+"Seal of Removal",
+0
+],
+[
+"Seal of Strength",
+0
+],
+[
+"Shrieking Mogg",
+2
+],
+[
+"Silkenfist Fighter",
+0
+],
+[
+"Silkenfist Order",
+1
+],
+[
+"Sivvi's Ruse",
+1
+],
+[
+"Sivvi's Valor",
+2
+],
+[
+"Skyshroud Behemoth",
+2
+],
+[
+"Skyshroud Claim",
+0
+],
+[
+"Skyshroud Cutter",
+0
+],
+[
+"Skyshroud Poacher",
+2
+],
+[
+"Skyshroud Ridgeback",
+0
+],
+[
+"Skyshroud Sentinel",
+0
+],
+[
+"Sliptide Serpent",
+2
+],
+[
+"Sneaky Homunculus",
+0
+],
+[
+"Spineless Thug",
+0
+],
+[
+"Spiritual Asylum",
+2
+],
+[
+"Spiteful Bully",
+0
+],
+[
+"Stampede Driver",
+1
+],
+[
+"Stronghold Biologist",
+1
+],
+[
+"Stronghold Discipline",
+0
+],
+[
+"Stronghold Gambit",
+2
+],
+[
+"Stronghold Machinist",
+1
+],
+[
+"Stronghold Zeppelin",
+1
+],
+[
+"Submerge",
+1
+],
+[
+"Tangle Wire",
+2
+],
+[
+"Terrain Generator",
+1
+],
+[
+"Topple",
+0
+],
+[
+"Treetop Bracers",
+0
+],
+[
+"Trickster Mage",
+0
+],
+[
+"Vicious Hunger",
+0
+],
+[
+"Viseling",
+1
+],
+[
+"Voice of Truth",
+1
+],
+[
+"Volrath the Fallen",
+2
+],
+[
+"Wandering Eye",
+0
+],
+[
+"Wild Mammoth",
+1
+],
+[
+"Woodripper",
+1
+]
+]
+},
+{
+"code": "PCY",
+"name": "Prophecy",
+"released": "2000-06-05",
+"cards": [
+[
+"Abolish",
+1
+],
+[
+"Agent of Shauku",
+0
+],
+[
+"Alexi's Cloak",
+0
+],
+[
+"Alexi, Zephyr Mage",
+2
+],
+[
+"Aura Fracture",
+0
+],
+[
+"Avatar of Fury",
+2
+],
+[
+"Avatar of Hope",
+2
+],
+[
+"Avatar of Might",
+2
+],
+[
+"Avatar of Will",
+2
+],
+[
+"Avatar of Woe",
+2
+],
+[
+"Barbed Field",
+1
+],
+[
+"Blessed Wind",
+2
+],
+[
+"Bog Elemental",
+2
+],
+[
+"Bog Glider",
+0
+],
+[
+"Branded Brawlers",
+0
+],
+[
+"Brutal Suppression",
+1
+],
+[
+"Calming Verse",
+0
+],
+[
+"Celestial Convergence",
+2
+],
+[
+"Chilling Apparition",
+1
+],
+[
+"Chimeric Idol",
+1
+],
+[
+"Citadel of Pain",
+1
+],
+[
+"Coastal Hornclaw",
+0
+],
+[
+"Coffin Puppets",
+2
+],
+[
+"Copper-Leaf Angel",
+2
+],
+[
+"Darba",
+1
+],
+[
+"Death Charmer",
+0
+],
+[
+"Denying Wind",
+2
+],
+[
+"Despoil",
+0
+],
+[
+"Devastate",
+0
+],
+[
+"Diving Griffin",
+0
+],
+[
+"Dual Nature",
+2
+],
+[
+"Elephant Resurgence",
+2
+],
+[
+"Endbringer's Revel",
+1
+],
+[
+"Entangler",
+1
+],
+[
+"Excavation",
+1
+],
+[
+"Excise",
+0
+],
+[
+"Fault Riders",
+0
+],
+[
+"Fen Stalker",
+0
+],
+[
+"Fickle Efreet",
+2
+],
+[
+"Flameshot",
+1
+],
+[
+"Flay",
+0
+],
+[
+"Flowering Field",
+1
+],
+[
+"Foil",
+1
+],
+[
+"Forgotten Harvest",
+2
+],
+[
+"Glittering Lion",
+1
+],
+[
+"Glittering Lynx",
+0
+],
+[
+"Greel's Caress",
+0
+],
+[
+"Greel, Mind Raker",
+2
+],
+[
+"Gulf Squid",
+0
+],
+[
+"Hazy Homunculus",
+0
+],
+[
+"Heightened Awareness",
+2
+],
+[
+"Hollow Warrior",
+1
+],
+[
+"Infernal Genesis",
+2
+],
+[
+"Inflame",
+0
+],
+[
+"Jeweled Spirit",
+2
+],
+[
+"Jolrael's Favor",
+0
+],
+[
+"Jolrael, Empress of Beasts",
+2
+],
+[
+"Keldon Arsonist",
+1
+],
+[
+"Keldon Battlewagon",
+2
+],
+[
+"Keldon Berserker",
+0
+],
+[
+"Keldon Firebombers",
+2
+],
+[
+"Latulla's Orders",
+0
+],
+[
+"Latulla, Keldon Overseer",
+2
+],
+[
+"Lesser Gargadon",
+1
+],
+[
+"Living Terrain",
+1
+],
+[
+"Mageta the Lion",
+2
+],
+[
+"Mageta's Boon",
+0
+],
+[
+"Mana Vapors",
+1
+],
+[
+"Marsh Boa",
+0
+],
+[
+"Mercenary Informer",
+2
+],
+[
+"Mine Bearer",
+0
+],
+[
+"Mirror Strike",
+1
+],
+[
+"Mungha Wurm",
+2
+],
+[
+"Nakaya Shade",
+1
+],
+[
+"Noxious Field",
+1
+],
+[
+"Outbreak",
+1
+],
+[
+"Overburden",
+2
+],
+[
+"Panic Attack",
+0
+],
+[
+"Pit Raptor",
+1
+],
+[
+"Plague Fiend",
+0
+],
+[
+"Plague Wind",
+2
+],
+[
+"Psychic Theft",
+2
+],
+[
+"Pygmy Razorback",
+0
+],
+[
+"Quicksilver Wall",
+1
+],
+[
+"Rebel Informer",
+2
+],
+[
+"Rethink",
+0
+],
+[
+"Reveille Squad",
+1
+],
+[
+"Rhystic Cave",
+1
+],
+[
+"Rhystic Circle",
+0
+],
+[
+"Rhystic Deluge",
+0
+],
+[
+"Rhystic Lightning",
+0
+],
+[
+"Rhystic Scrying",
+1
+],
+[
+"Rhystic Shield",
+0
+],
+[
+"Rhystic Study",
+0
+],
+[
+"Rhystic Syphon",
+1
+],
+[
+"Rhystic Tutor",
+2
+],
+[
+"Rib Cage Spider",
+0
+],
+[
+"Ribbon Snake",
+0
+],
+[
+"Ridgeline Rager",
+0
+],
+[
+"Root Cage",
+1
+],
+[
+"Samite Sanctuary",
+2
+],
+[
+"Scoria Cat",
+1
+],
+[
+"Search for Survivors",
+2
+],
+[
+"Searing Wind",
+2
+],
+[
+"Sheltering Prayers",
+2
+],
+[
+"Shield Dancer",
+1
+],
+[
+"Shrouded Serpent",
+2
+],
+[
+"Silt Crawler",
+0
+],
+[
+"Snag",
+1
+],
+[
+"Soul Charmer",
+0
+],
+[
+"Soul Strings",
+0
+],
+[
+"Spiketail Drake",
+1
+],
+[
+"Spiketail Hatchling",
+0
+],
+[
+"Spitting Spider",
+1
+],
+[
+"Spore Frog",
+0
+],
+[
+"Spur Grappler",
+0
+],
+[
+"Squirrel Wrangler",
+2
+],
+[
+"Steal Strength",
+0
+],
+[
+"Stormwatch Eagle",
+0
+],
+[
+"Sunken Field",
+1
+],
+[
+"Sword Dancer",
+1
+],
+[
+"Task Mage Assembly",
+2
+],
+[
+"Thresher Beast",
+0
+],
+[
+"Thrive",
+0
+],
+[
+"Trenching Steed",
+0
+],
+[
+"Troubled Healer",
+0
+],
+[
+"Troublesome Spirit",
+2
+],
+[
+"Verdant Field",
+1
+],
+[
+"Veteran Brawlers",
+2
+],
+[
+"Vintara Elephant",
+0
+],
+[
+"Vintara Snapper",
+1
+],
+[
+"Vitalizing Wind",
+2
+],
+[
+"Wall of Vipers",
+1
+],
+[
+"Well of Discovery",
+2
+],
+[
+"Well of Life",
+1
+],
+[
+"Whip Sergeant",
+1
+],
+[
+"Whipstitched Zombie",
+0
+],
+[
+"Wild Might",
+0
+],
+[
+"Windscouter",
+1
+],
+[
+"Wing Storm",
+1
+],
+[
+"Wintermoon Mesa",
+2
+],
+[
+"Withdraw",
+0
+],
+[
+"Zerapa Minotaur",
+0
+]
+]
+},
+{
+"code": "INV",
+"name": "Invasion",
+"released": "2000-10-02",
+"cards": [
+[
+"Absorb",
+2
+],
+[
+"Addle",
+1
+],
+[
+"Aether Rift",
+2
+],
+[
+"Aggressive Urge",
+0
+],
+[
+"Agonizing Demise",
+0
+],
+[
+"Alabaster Leech",
+2
+],
+[
+"Alloy Golem",
+1
+],
+[
+"Ancient Kavu",
+0
+],
+[
+"Ancient Spring",
+0
+],
+[
+"Andradite Leech",
+2
+],
+[
+"Angel of Mercy",
+1
+],
+[
+"Angelic Shield",
+1
+],
+[
+"Annihilate",
+1
+],
+[
+"Archaeological Dig",
+1
+],
+[
+"Ardent Soldier",
+0
+],
+[
+"Armadillo Cloak",
+0
+],
+[
+"Armored Guardian",
+2
+],
+[
+"Artifact Mutation",
+2
+],
+[
+"Assault // Battery",
+1
+],
+[
+"Atalya, Samite Master",
+2
+],
+[
+"Aura Mutation",
+2
+],
+[
+"Aura Shards",
+1
+],
+[
+"Backlash",
+1
+],
+[
+"Barrin's Spite",
+2
+],
+[
+"Barrin's Unmaking",
+0
+],
+[
+"Benalish Emissary",
+1
+],
+[
+"Benalish Heralds",
+1
+],
+[
+"Benalish Lancer",
+0
+],
+[
+"Benalish Trapper",
+0
+],
+[
+"Bend or Break",
+2
+],
+[
+"Bind",
+2
+],
+[
+"Blazing Specter",
+2
+],
+[
+"Blind Seer",
+2
+],
+[
+"Blinding Light",
+1
+],
+[
+"Bloodstone Cameo",
+1
+],
+[
+"Blurred Mongoose",
+2
+],
+[
+"Bog Initiate",
+0
+],
+[
+"Breaking Wave",
+2
+],
+[
+"Breath of Darigaaz",
+1
+],
+[
+"Callous Giant",
+2
+],
+[
+"Canopy Surge",
+1
+],
+[
+"Capashen Unicorn",
+0
+],
+[
+"Captain Sisay",
+2
+],
+[
+"Cauldron Dance",
+1
+],
+[
+"Chaotic Strike",
+1
+],
+[
+"Charging Troll",
+1
+],
+[
+"Chromatic Sphere",
+1
+],
+[
+"Cinder Shade",
+1
+],
+[
+"Coalition Victory",
+2
+],
+[
+"Coastal Tower",
+1
+],
+[
+"Collapsing Borders",
+2
+],
+[
+"Collective Restraint",
+2
+],
+[
+"Cremate",
+1
+],
+[
+"Crimson Acolyte",
+0
+],
+[
+"Crosis's Attendant",
+1
+],
+[
+"Crosis, the Purger",
+2
+],
+[
+"Crown of Flames",
+0
+],
+[
+"Crusading Knight",
+2
+],
+[
+"Crypt Angel",
+2
+],
+[
+"Crystal Spray",
+2
+],
+[
+"Cursed Flesh",
+0
+],
+[
+"Darigaaz's Attendant",
+1
+],
+[
+"Darigaaz, the Igniter",
+2
+],
+[
+"Death or Glory",
+2
+],
+[
+"Defiling Tears",
+1
+],
+[
+"Desperate Research",
+2
+],
+[
+"Devouring Strossus",
+2
+],
+[
+"Dismantling Blow",
+0
+],
+[
+"Disrupt",
+1
+],
+[
+"Distorting Wake",
+2
+],
+[
+"Divine Presence",
+2
+],
+[
+"Do or Die",
+2
+],
+[
+"Drake-Skull Cameo",
+1
+],
+[
+"Dream Thrush",
+0
+],
+[
+"Dredge",
+1
+],
+[
+"Dromar's Attendant",
+1
+],
+[
+"Dromar, the Banisher",
+2
+],
+[
+"Dueling Grounds",
+2
+],
+[
+"Duskwalker",
+0
+],
+[
+"Elfhame Palace",
+1
+],
+[
+"Elfhame Sanctuary",
+1
+],
+[
+"Elvish Champion",
+2
+],
+[
+"Empress Galina",
+2
+],
+[
+"Essence Leak",
+1
+],
+[
+"Exclude",
+0
+],
+[
+"Exotic Curse",
+0
+],
+[
+"Explosive Growth",
+0
+],
+[
+"Fact or Fiction",
+1
+],
+[
+"Faerie Squadron",
+0
+],
+[
+"Fertile Ground",
+0
+],
+[
+"Fight or Flight",
+2
+],
+[
+"Firebrand Ranger",
+1
+],
+[
+"Fires of Yavimaya",
+1
+],
+[
+"Firescreamer",
+0
+],
+[
+"Frenzied Tilling",
+0
+],
+[
+"Galina's Knight",
+0
+],
+[
+"Geothermal Crevice",
+0
+],
+[
+"Ghitu Fire",
+2
+],
+[
+"Glimmering Angel",
+0
+],
+[
+"Global Ruin",
+2
+],
+[
+"Goblin Spy",
+1
+],
+[
+"Goham Djinn",
+1
+],
+[
+"Halam Djinn",
+1
+],
+[
+"Hanna, Ship's Navigator",
+2
+],
+[
+"Harrow",
+0
+],
+[
+"Harsh Judgment",
+2
+],
+[
+"Hate Weaver",
+1
+],
+[
+"Heroes' Reunion",
+1
+],
+[
+"Holy Day",
+0
+],
+[
+"Hooded Kavu",
+0
+],
+[
+"Horned Cheetah",
+1
+],
+[
+"Hunting Kavu",
+1
+],
+[
+"Hypnotic Cloud",
+0
+],
+[
+"Irrigation Ditch",
+0
+],
+[
+"Jade Leech",
+2
+],
+[
+"Juntu Stakes",
+2
+],
+[
+"Kangee, Aerie Keeper",
+2
+],
+[
+"Kavu Aggressor",
+0
+],
+[
+"Kavu Chameleon",
+1
+],
+[
+"Kavu Climber",
+0
+],
+[
+"Kavu Lair",
+2
+],
+[
+"Kavu Monarch",
+2
+],
+[
+"Kavu Runner",
+1
+],
+[
+"Kavu Scout",
+0
+],
+[
+"Kavu Titan",
+2
+],
+[
+"Keldon Necropolis",
+2
+],
+[
+"Liberate",
+1
+],
+[
+"Lightning Dart",
+1
+],
+[
+"Llanowar Cavalry",
+0
+],
+[
+"Llanowar Elite",
+0
+],
+[
+"Llanowar Knight",
+0
+],
+[
+"Llanowar Vanguard",
+0
+],
+[
+"Loafing Giant",
+2
+],
+[
+"Lobotomy",
+1
+],
+[
+"Lotus Guardian",
+2
+],
+[
+"Mages' Contest",
+2
+],
+[
+"Mana Maze",
+2
+],
+[
+"Maniacal Rage",
+0
+],
+[
+"Manipulate Fate",
+1
+],
+[
+"Marauding Knight",
+2
+],
+[
+"Metathran Aerostat",
+2
+],
+[
+"Metathran Transport",
+1
+],
+[
+"Metathran Zombie",
+0
+],
+[
+"Meteor Storm",
+2
+],
+[
+"Might Weaver",
+1
+],
+[
+"Molimo, Maro-Sorcerer",
+2
+],
+[
+"Mourning",
+0
+],
+[
+"Nightscape Apprentice",
+0
+],
+[
+"Nightscape Master",
+2
+],
+[
+"Noble Panther",
+2
+],
+[
+"Nomadic Elf",
+0
+],
+[
+"Obliterate",
+2
+],
+[
+"Obsidian Acolyte",
+0
+],
+[
+"Opt",
+0
+],
+[
+"Ordered Migration",
+1
+],
+[
+"Orim's Touch",
+0
+],
+[
+"Overabundance",
+2
+],
+[
+"Overload",
+0
+],
+[
+"Pain // Suffering",
+1
+],
+[
+"Phantasmal Terrain",
+0
+],
+[
+"Phyrexian Altar",
+2
+],
+[
+"Phyrexian Battleflies",
+0
+],
+[
+"Phyrexian Delver",
+2
+],
+[
+"Phyrexian Infiltrator",
+2
+],
+[
+"Phyrexian Lens",
+2
+],
+[
+"Phyrexian Reaper",
+0
+],
+[
+"Phyrexian Slayer",
+0
+],
+[
+"Pincer Spider",
+0
+],
+[
+"Plague Spitter",
+1
+],
+[
+"Plague Spores",
+0
+],
+[
+"Planar Portal",
+2
+],
+[
+"Pledge of Loyalty",
+1
+],
+[
+"Pouncing Kavu",
+0
+],
+[
+"Power Armor",
+1
+],
+[
+"Prison Barricade",
+0
+],
+[
+"Probe",
+0
+],
+[
+"Prohibit",
+0
+],
+[
+"Protective Sphere",
+0
+],
+[
+"Psychic Battle",
+2
+],
+[
+"Pulse of Llanowar",
+1
+],
+[
+"Pure Reflection",
+2
+],
+[
+"Pyre Zombie",
+2
+],
+[
+"Quirion Elves",
+0
+],
+[
+"Quirion Sentinel",
+0
+],
+[
+"Quirion Trailblazer",
+0
+],
+[
+"Rage Weaver",
+1
+],
+[
+"Raging Kavu",
+2
+],
+[
+"Rainbow Crow",
+1
+],
+[
+"Rampant Elephant",
+0
+],
+[
+"Ravenous Rats",
+0
+],
+[
+"Razorfoot Griffin",
+0
+],
+[
+"Reckless Assault",
+2
+],
+[
+"Reckless Spite",
+1
+],
+[
+"Recoil",
+0
+],
+[
+"Recover",
+0
+],
+[
+"Repulse",
+0
+],
+[
+"Restock",
+2
+],
+[
+"Restrain",
+0
+],
+[
+"Reviving Dose",
+0
+],
+[
+"Reviving Vapors",
+1
+],
+[
+"Rewards of Diversity",
+1
+],
+[
+"Reya Dawnbringer",
+2
+],
+[
+"Riptide Crab",
+1
+],
+[
+"Rith's Attendant",
+1
+],
+[
+"Rith, the Awakener",
+2
+],
+[
+"Rogue Kavu",
+0
+],
+[
+"Rooting Kavu",
+1
+],
+[
+"Rout",
+2
+],
+[
+"Ruby Leech",
+2
+],
+[
+"Ruham Djinn",
+1
+],
+[
+"Sabertooth Nishoba",
+2
+],
+[
+"Salt Marsh",
+1
+],
+[
+"Samite Archer",
+1
+],
+[
+"Samite Ministration",
+1
+],
+[
+"Sapphire Leech",
+2
+],
+[
+"Saproling Infestation",
+2
+],
+[
+"Saproling Symbiosis",
+2
+],
+[
+"Savage Offensive",
+0
+],
+[
+"Scarred Puma",
+0
+],
+[
+"Scavenged Weaponry",
+0
+],
+[
+"Scorching Lava",
+0
+],
+[
+"Scouting Trek",
+1
+],
+[
+"Searing Rays",
+1
+],
+[
+"Seashell Cameo",
+1
+],
+[
+"Seer's Vision",
+1
+],
+[
+"Serpentine Kavu",
+0
+],
+[
+"Shackles",
+0
+],
+[
+"Shimmering Wings",
+0
+],
+[
+"Shivan Emissary",
+1
+],
+[
+"Shivan Harvest",
+1
+],
+[
+"Shivan Oasis",
+1
+],
+[
+"Shivan Zombie",
+0
+],
+[
+"Shoreline Raider",
+0
+],
+[
+"Simoon",
+1
+],
+[
+"Skittish Kavu",
+1
+],
+[
+"Skizzik",
+2
+],
+[
+"Sky Weaver",
+1
+],
+[
+"Sleeper's Robe",
+1
+],
+[
+"Slimy Kavu",
+0
+],
+[
+"Slinking Serpent",
+1
+],
+[
+"Smoldering Tar",
+1
+],
+[
+"Soul Burn",
+0
+],
+[
+"Sparring Golem",
+1
+],
+[
+"Spinal Embrace",
+2
+],
+[
+"Spirit Weaver",
+1
+],
+[
+"Spirit of Resistance",
+2
+],
+[
+"Spite // Malice",
+1
+],
+[
+"Spreading Plague",
+2
+],
+[
+"Stalking Assassin",
+2
+],
+[
+"Stand // Deliver",
+1
+],
+[
+"Stand or Fall",
+2
+],
+[
+"Sterling Grove",
+1
+],
+[
+"Stormscape Apprentice",
+0
+],
+[
+"Stormscape Master",
+2
+],
+[
+"Strength of Unity",
+0
+],
+[
+"Stun",
+0
+],
+[
+"Sulam Djinn",
+1
+],
+[
+"Sulfur Vent",
+0
+],
+[
+"Sunscape Apprentice",
+0
+],
+[
+"Sunscape Master",
+2
+],
+[
+"Sway of Illusion",
+1
+],
+[
+"Tainted Well",
+0
+],
+[
+"Tangle",
+1
+],
+[
+"Tectonic Instability",
+2
+],
+[
+"Teferi's Care",
+1
+],
+[
+"Teferi's Moat",
+2
+],
+[
+"Teferi's Response",
+2
+],
+[
+"Tek",
+2
+],
+[
+"Temporal Distortion",
+2
+],
+[
+"Thicket Elemental",
+2
+],
+[
+"Thornscape Apprentice",
+0
+],
+[
+"Thornscape Master",
+2
+],
+[
+"Thunderscape Apprentice",
+0
+],
+[
+"Thunderscape Master",
+2
+],
+[
+"Tidal Visionary",
+0
+],
+[
+"Tigereye Cameo",
+1
+],
+[
+"Tinder Farm",
+0
+],
+[
+"Tolarian Emissary",
+1
+],
+[
+"Tower Drake",
+0
+],
+[
+"Tranquility",
+0
+],
+[
+"Traveler's Cloak",
+0
+],
+[
+"Treefolk Healer",
+1
+],
+[
+"Trench Wurm",
+1
+],
+[
+"Treva's Attendant",
+1
+],
+[
+"Treva, the Renewer",
+2
+],
+[
+"Tribal Flames",
+0
+],
+[
+"Troll-Horn Cameo",
+1
+],
+[
+"Tsabo Tavoc",
+2
+],
+[
+"Tsabo's Assassin",
+2
+],
+[
+"Tsabo's Decree",
+2
+],
+[
+"Tsabo's Web",
+2
+],
+[
+"Turf Wound",
+0
+],
+[
+"Twilight's Call",
+2
+],
+[
+"Undermine",
+2
+],
+[
+"Urborg Drake",
+1
+],
+[
+"Urborg Emissary",
+1
+],
+[
+"Urborg Phantom",
+0
+],
+[
+"Urborg Shambler",
+1
+],
+[
+"Urborg Skeleton",
+0
+],
+[
+"Urborg Volcano",
+1
+],
+[
+"Urza's Filter",
+2
+],
+[
+"Urza's Rage",
+2
+],
+[
+"Utopia Tree",
+2
+],
+[
+"Verdeloth the Ancient",
+2
+],
+[
+"Verduran Emissary",
+1
+],
+[
+"Viashino Grappler",
+0
+],
+[
+"Vicious Kavu",
+1
+],
+[
+"Vigorous Charge",
+0
+],
+[
+"Vile Consumption",
+2
+],
+[
+"Vodalian Hypnotist",
+1
+],
+[
+"Vodalian Merchant",
+0
+],
+[
+"Vodalian Serpent",
+0
+],
+[
+"Vodalian Zombie",
+0
+],
+[
+"Void",
+2
+],
+[
+"Voracious Cobra",
+1
+],
+[
+"Wallop",
+1
+],
+[
+"Wandering Stream",
+0
+],
+[
+"Wash Out",
+1
+],
+[
+"Wax // Wane",
+1
+],
+[
+"Wayfaring Giant",
+1
+],
+[
+"Well-Laid Plans",
+2
+],
+[
+"Whip Silk",
+0
+],
+[
+"Wings of Hope",
+0
+],
+[
+"Winnow",
+2
+],
+[
+"Worldly Counsel",
+0
+],
+[
+"Yavimaya Barbarian",
+0
+],
+[
+"Yavimaya Kavu",
+1
+],
+[
+"Yawgmoth's Agenda",
+2
+],
+[
+"Zanam Djinn",
+1
+],
+[
+"Zap",
+0
+]
+]
+},
+{
+"code": "PLS",
+"name": "Planeshift",
+"released": "2001-02-05",
+"cards": [
+[
+"Allied Strategies",
+1
+],
+[
+"Alpha Kavu",
+1
+],
+[
+"Amphibious Kavu",
+0
+],
+[
+"Ancient Spider",
+2
+],
+[
+"Arctic Merfolk",
+0
+],
+[
+"Aura Blast",
+0
+],
+[
+"Aurora Griffin",
+0
+],
+[
+"Bog Down",
+0
+],
+[
+"Caldera Kavu",
+0
+],
+[
+"Cavern Harpy",
+0
+],
+[
+"Cloud Cover",
+2
+],
+[
+"Confound",
+0
+],
+[
+"Crosis's Catacombs",
+1
+],
+[
+"Crosis's Charm",
+1
+],
+[
+"Darigaaz's Caldera",
+1
+],
+[
+"Darigaaz's Charm",
+1
+],
+[
+"Daring Leap",
+0
+],
+[
+"Dark Suspicions",
+2
+],
+[
+"Deadapult",
+2
+],
+[
+"Death Bomb",
+0
+],
+[
+"Destructive Flow",
+2
+],
+[
+"Diabolic Intent",
+2
+],
+[
+"Disciple of Kangee",
+0
+],
+[
+"Dominaria's Judgment",
+2
+],
+[
+"Doomsday Specter",
+2
+],
+[
+"Draco",
+2
+],
+[
+"Dralnu's Crusade",
+2
+],
+[
+"Dralnu's Pet",
+2
+],
+[
+"Dromar's Cavern",
+1
+],
+[
+"Dromar's Charm",
+1
+],
+[
+"Eladamri's Call",
+2
+],
+[
+"Ertai's Trickery",
+1
+],
+[
+"Ertai, the Corrupted",
+2
+],
+[
+"Escape Routes",
+0
+],
+[
+"Exotic Disease",
+1
+],
+[
+"Falling Timber",
+0
+],
+[
+"Flametongue Kavu",
+1
+],
+[
+"Fleetfoot Panther",
+1
+],
+[
+"Forsaken City",
+2
+],
+[
+"Gaea's Herald",
+2
+],
+[
+"Gaea's Might",
+0
+],
+[
+"Gainsay",
+1
+],
+[
+"Gerrard's Command",
+0
+],
+[
+"Goblin Game",
+2
+],
+[
+"Guard Dogs",
+1
+],
+[
+"Heroic Defiance",
+0
+],
+[
+"Hobble",
+0
+],
+[
+"Honorable Scout",
+0
+],
+[
+"Horned Kavu",
+0
+],
+[
+"Hull Breach",
+0
+],
+[
+"Hunting Drake",
+0
+],
+[
+"Implode",
+1
+],
+[
+"Insolence",
+0
+],
+[
+"Kavu Recluse",
+0
+],
+[
+"Keldon Mantle",
+0
+],
+[
+"Keldon Twilight",
+2
+],
+[
+"Lashknife Barrier",
+1
+],
+[
+"Lava Zombie",
+0
+],
+[
+"Lord of the Undead",
+2
+],
+[
+"Maggot Carrier",
+0
+],
+[
+"Magma Burst",
+0
+],
+[
+"Magnigoth Treefolk",
+2
+],
+[
+"Malicious Advice",
+0
+],
+[
+"Mana Cylix",
+1
+],
+[
+"March of Souls",
+2
+],
+[
+"Marsh Crocodile",
+1
+],
+[
+"Meddling Mage",
+2
+],
+[
+"Meteor Crater",
+2
+],
+[
+"Mire Kavu",
+0
+],
+[
+"Mirrorwood Treefolk",
+1
+],
+[
+"Mogg Jailer",
+1
+],
+[
+"Mogg Sentry",
+2
+],
+[
+"Morgue Toad",
+0
+],
+[
+"Multani's Harmony",
+1
+],
+[
+"Natural Emergence",
+2
+],
+[
+"Nemata, Grove Guardian",
+2
+],
+[
+"Nightscape Battlemage",
+1
+],
+[
+"Nightscape Familiar",
+0
+],
+[
+"Noxious Vapors",
+1
+],
+[
+"Orim's Chant",
+2
+],
+[
+"Phyrexian Bloodstock",
+0
+],
+[
+"Phyrexian Scuta",
+2
+],
+[
+"Phyrexian Tyranny",
+2
+],
+[
+"Planar Overlay",
+2
+],
+[
+"Planeswalker's Favor",
+2
+],
+[
+"Planeswalker's Fury",
+2
+],
+[
+"Planeswalker's Mirth",
+2
+],
+[
+"Planeswalker's Mischief",
+2
+],
+[
+"Planeswalker's Scorn",
+2
+],
+[
+"Pollen Remedy",
+0
+],
+[
+"Primal Growth",
+0
+],
+[
+"Pygmy Kavu",
+0
+],
+[
+"Questing Phelddagrif",
+2
+],
+[
+"Quirion Dryad",
+2
+],
+[
+"Quirion Explorer",
+0
+],
+[
+"Radiant Kavu",
+2
+],
+[
+"Razing Snidd",
+1
+],
+[
+"Rith's Charm",
+1
+],
+[
+"Rith's Grove",
+1
+],
+[
+"Root Greevil",
+0
+],
+[
+"Rushing River",
+0
+],
+[
+"Samite Elder",
+2
+],
+[
+"Samite Pilgrim",
+0
+],
+[
+"Sawtooth Loon",
+1
+],
+[
+"Sea Snidd",
+0
+],
+[
+"Shifting Sky",
+1
+],
+[
+"Shivan Wurm",
+2
+],
+[
+"Shriek of Dread",
+0
+],
+[
+"Silver Drake",
+0
+],
+[
+"Singe",
+0
+],
+[
+"Sinister Strength",
+0
+],
+[
+"Sisay's Ingenuity",
+0
+],
+[
+"Skyship Weatherlight",
+2
+],
+[
+"Skyshroud Blessing",
+1
+],
+[
+"Slay",
+1
+],
+[
+"Sleeping Potion",
+0
+],
+[
+"Slingshot Goblin",
+0
+],
+[
+"Sparkcaster",
+1
+],
+[
+"Star Compass",
+1
+],
+[
+"Steel Leaf Paladin",
+0
+],
+[
+"Stone Kavu",
+0
+],
+[
+"Stormscape Battlemage",
+1
+],
+[
+"Stormscape Familiar",
+0
+],
+[
+"Strafe",
+1
+],
+[
+"Stratadon",
+1
+],
+[
+"Sunken Hope",
+2
+],
+[
+"Sunscape Battlemage",
+1
+],
+[
+"Sunscape Familiar",
+0
+],
+[
+"Surprise Deployment",
+1
+],
+[
+"Tahngarth, Talruum Hero",
+2
+],
+[
+"Terminal Moraine",
+1
+],
+[
+"Terminate",
+0
+],
+[
+"Thornscape Battlemage",
+1
+],
+[
+"Thornscape Familiar",
+0
+],
+[
+"Thunderscape Battlemage",
+1
+],
+[
+"Thunderscape Familiar",
+0
+],
+[
+"Treva's Charm",
+1
+],
+[
+"Treva's Ruins",
+1
+],
+[
+"Urza's Guilt",
+2
+],
+[
+"Voice of All",
+1
+],
+[
+"Volcano Imp",
+0
+],
+[
+"Warped Devotion",
+1
+],
+[
+"Waterspout Elemental",
+2
+]
+]
+},
+{
+"code": "7ED",
+"name": "Seventh Edition",
+"released": "2001-04-11",
+"cards": [
+[
+"Abyssal Horror",
+2
+],
+[
+"Abyssal Specter",
+1
+],
+[
+"Adarkar Wastes",
+2
+],
+[
+"Aether Flash",
+1
+],
+[
+"Agonizing Memories",
+1
+],
+[
+"Air Elemental",
+1
+],
+[
+"Aladdin's Ring",
+2
+],
+[
+"Anaconda",
+1
+],
+[
+"Ancestral Memories",
+2
+],
+[
+"Ancient Silverback",
+2
+],
+[
+"Angelic Page",
+0
+],
+[
+"Arcane Laboratory",
+1
+],
+[
+"Archivist",
+2
+],
+[
+"Ardent Militia",
+1
+],
+[
+"Balduvian Barbarians",
+0
+],
+[
+"Baleful Stare",
+1
+],
+[
+"Beast of Burden",
+2
+],
+[
+"Bedlam",
+2
+],
+[
+"Befoul",
+1
+],
+[
+"Bellowing Fiend",
+2
+],
+[
+"Benthic Behemoth",
+2
+],
+[
+"Bereavement",
+1
+],
+[
+"Birds of Paradise",
+2
+],
+[
+"Blanchwood Armor",
+1
+],
+[
+"Blaze",
+1
+],
+[
+"Blessed Reversal",
+2
+],
+[
+"Blood Pet",
+0
+],
+[
+"Bloodshot Cyclops",
+2
+],
+[
+"Bog Imp",
+0
+],
+[
+"Bog Wraith",
+1
+],
+[
+"Boil",
+1
+],
+[
+"Boomerang",
+0
+],
+[
+"Breath of Life",
+1
+],
+[
+"Brushland",
+2
+],
+[
+"Bull Hippo",
+1
+],
+[
+"Caltrops",
+1
+],
+[
+"Canopy Spider",
+0
+],
+[
+"Castle",
+1
+],
+[
+"Charcoal Diamond",
+1
+],
+[
+"Circle of Protection: Black",
+0
+],
+[
+"Circle of Protection: Blue",
+0
+],
+[
+"Circle of Protection: Green",
+0
+],
+[
+"Circle of Protection: Red",
+0
+],
+[
+"Circle of Protection: White",
+0
+],
+[
+"City of Brass",
+2
+],
+[
+"Cloudchaser Eagle",
+0
+],
+[
+"Coat of Arms",
+2
+],
+[
+"Compost",
+1
+],
+[
+"Confiscate",
+1
+],
+[
+"Coral Merfolk",
+0
+],
+[
+"Corrupt",
+0
+],
+[
+"Counterspell",
+0
+],
+[
+"Creeping Mold",
+1
+],
+[
+"Crimson Hellkite",
+2
+],
+[
+"Crossbow Infantry",
+0
+],
+[
+"Crypt Rats",
+1
+],
+[
+"Crystal Rod",
+1
+],
+[
+"Dakmor Lancer",
+1
+],
+[
+"Daring Apprentice",
+2
+],
+[
+"Dark Banishing",
+0
+],
+[
+"Darkest Hour",
+2
+],
+[
+"Deflection",
+2
+],
+[
+"Delusions of Mediocrity",
+2
+],
+[
+"Dingus Egg",
+2
+],
+[
+"Disenchant",
+0
+],
+[
+"Disorder",
+1
+],
+[
+"Disrupting Scepter",
+2
+],
+[
+"Dregs of Sorrow",
+2
+],
+[
+"Drudge Skeletons",
+0
+],
+[
+"Duress",
+0
+],
+[
+"Eager Cadet",
+0
+],
+[
+"Early Harvest",
+2
+],
+[
+"Earthquake",
+2
+],
+[
+"Eastern Paladin",
+2
+],
+[
+"Elder Druid",
+2
+],
+[
+"Elite Archers",
+2
+],
+[
+"Elvish Archers",
+2
+],
+[
+"Elvish Champion",
+2
+],
+[
+"Elvish Lyrist",
+1
+],
+[
+"Elvish Piper",
+2
+],
+[
+"Engineered Plague",
+1
+],
+[
+"Ensnaring Bridge",
+2
+],
+[
+"Equilibrium",
+2
+],
+[
+"Evacuation",
+2
+],
+[
+"Fallen Angel",
+2
+],
+[
+"Familiar Ground",
+1
+],
+[
+"Fear",
+0
+],
+[
+"Femeref Archers",
+1
+],
+[
+"Feroz's Ban",
+2
+],
+[
+"Fervor",
+2
+],
+[
+"Fighting Drake",
+1
+],
+[
+"Final Fortune",
+2
+],
+[
+"Fire Diamond",
+1
+],
+[
+"Fire Elemental",
+1
+],
+[
+"Fleeting Image",
+2
+],
+[
+"Flight",
+0
+],
+[
+"Flying Carpet",
+2
+],
+[
+"Fog",
+0
+],
+[
+"Force Spike",
+0
+],
+[
+"Foul Imp",
+1
+],
+[
+"Fugue",
+1
+],
+[
+"Fyndhorn Elder",
+1
+],
+[
+"Gang of Elk",
+1
+],
+[
+"Gerrard's Wisdom",
+1
+],
+[
+"Ghitu Fire-Eater",
+1
+],
+[
+"Giant Cockroach",
+0
+],
+[
+"Giant Growth",
+0
+],
+[
+"Giant Octopus",
+0
+],
+[
+"Giant Spider",
+0
+],
+[
+"Glacial Wall",
+1
+],
+[
+"Glorious Anthem",
+2
+],
+[
+"Goblin Chariot",
+0
+],
+[
+"Goblin Digging Team",
+0
+],
+[
+"Goblin Elite Infantry",
+0
+],
+[
+"Goblin Gardener",
+0
+],
+[
+"Goblin Glider",
+1
+],
+[
+"Goblin King",
+2
+],
+[
+"Goblin Matron",
+1
+],
+[
+"Goblin Raider",
+0
+],
+[
+"Goblin Spelunkers",
+0
+],
+[
+"Goblin War Drums",
+1
+],
+[
+"Gorilla Chieftain",
+0
+],
+[
+"Grafted Skullcap",
+2
+],
+[
+"Granite Grip",
+0
+],
+[
+"Grapeshot Catapult",
+1
+],
+[
+"Gravedigger",
+0
+],
+[
+"Greed",
+2
+],
+[
+"Grizzly Bears",
+0
+],
+[
+"Healing Salve",
+0
+],
+[
+"Heavy Ballista",
+1
+],
+[
+"Hibernation",
+1
+],
+[
+"Hill Giant",
+0
+],
+[
+"Hollow Dogs",
+0
+],
+[
+"Holy Strength",
+0
+],
+[
+"Honor Guard",
+0
+],
+[
+"Horned Turtle",
+0
+],
+[
+"Howl from Beyond",
+0
+],
+[
+"Howling Mine",
+2
+],
+[
+"Hurricane",
+2
+],
+[
+"Impatience",
+2
+],
+[
+"Infernal Contract",
+2
+],
+[
+"Inferno",
+2
+],
+[
+"Inspiration",
+0
+],
+[
+"Intrepid Hero",
+2
+],
+[
+"Iron Star",
+1
+],
+[
+"Ivory Cup",
+1
+],
+[
+"Jalum Tome",
+2
+],
+[
+"Jandor's Saddlebags",
+2
+],
+[
+"Jayemdae Tome",
+2
+],
+[
+"Karplusan Forest",
+2
+],
+[
+"Kjeldoran Royal Guard",
+2
+],
+[
+"Knight Errant",
+0
+],
+[
+"Knighthood",
+1
+],
+[
+"Lava Axe",
+0
+],
+[
+"Leshrac's Rite",
+1
+],
+[
+"Levitation",
+1
+],
+[
+"Lightning Blast",
+0
+],
+[
+"Lightning Elemental",
+0
+],
+[
+"Llanowar Elves",
+0
+],
+[
+"Lone Wolf",
+0
+],
+[
+"Longbow Archer",
+1
+],
+[
+"Looming Shade",
+0
+],
+[
+"Lord of Atlantis",
+2
+],
+[
+"Lure",
+1
+],
+[
+"Mahamoti Djinn",
+2
+],
+[
+"Mana Breach",
+1
+],
+[
+"Mana Clash",
+2
+],
+[
+"Mana Short",
+2
+],
+[
+"Marble Diamond",
+1
+],
+[
+"Maro",
+2
+],
+[
+"Master Healer",
+2
+],
+[
+"Mawcor",
+2
+],
+[
+"Meekstone",
+2
+],
+[
+"Megrim",
+1
+],
+[
+"Memory Lapse",
+0
+],
+[
+"Merfolk Looter",
+1
+],
+[
+"Merfolk of the Pearl Trident",
+0
+],
+[
+"Might of Oaks",
+2
+],
+[
+"Millstone",
+2
+],
+[
+"Mind Rot",
+0
+],
+[
+"Monstrous Growth",
+0
+],
+[
+"Moss Diamond",
+1
+],
+[
+"Nature's Resurgence",
+2
+],
+[
+"Nature's Revolt",
+2
+],
+[
+"Nausea",
+0
+],
+[
+"Necrologia",
+1
+],
+[
+"Nightmare",
+2
+],
+[
+"Nocturnal Raid",
+1
+],
+[
+"Northern Paladin",
+2
+],
+[
+"Ogre Taskmaster",
+1
+],
+[
+"Okk",
+2
+],
+[
+"Opportunity",
+1
+],
+[
+"Opposition",
+2
+],
+[
+"Oppression",
+2
+],
+[
+"Orcish Artillery",
+1
+],
+[
+"Orcish Oriflamme",
+1
+],
+[
+"Ostracize",
+0
+],
+[
+"Pacifism",
+0
+],
+[
+"Pariah",
+2
+],
+[
+"Patagia Golem",
+1
+],
+[
+"Persecute",
+2
+],
+[
+"Phantom Warrior",
+1
+],
+[
+"Phyrexian Colossus",
+2
+],
+[
+"Phyrexian Hulk",
+1
+],
+[
+"Pillage",
+1
+],
+[
+"Pit Trap",
+1
+],
+[
+"Plague Beetle",
+0
+],
+[
+"Pride of Lions",
+1
+],
+[
+"Prodigal Sorcerer",
+0
+],
+[
+"Purify",
+2
+],
+[
+"Pygmy Pyrosaur",
+0
+],
+[
+"Pyroclasm",
+1
+],
+[
+"Pyrotechnics",
+1
+],
+[
+"Rag Man",
+2
+],
+[
+"Raging Goblin",
+0
+],
+[
+"Raise Dead",
+0
+],
+[
+"Rampant Growth",
+0
+],
+[
+"Razorfoot Griffin",
+0
+],
+[
+"Razortooth Rats",
+0
+],
+[
+"Reckless Embermage",
+2
+],
+[
+"Reclaim",
+0
+],
+[
+"Redwood Treefolk",
+0
+],
+[
+"Reflexes",
+0
+],
+[
+"Regeneration",
+0
+],
+[
+"Relentless Assault",
+2
+],
+[
+"Remove Soul",
+0
+],
+[
+"Reprisal",
+1
+],
+[
+"Reprocess",
+2
+],
+[
+"Revenant",
+2
+],
+[
+"Reverse Damage",
+2
+],
+[
+"Rod of Ruin",
+1
+],
+[
+"Rolling Stones",
+2
+],
+[
+"Rowen",
+2
+],
+[
+"Sabretooth Tiger",
+0
+],
+[
+"Sacred Ground",
+2
+],
+[
+"Sacred Nectar",
+0
+],
+[
+"Sage Owl",
+0
+],
+[
+"Samite Healer",
+0
+],
+[
+"Sanctimony",
+1
+],
+[
+"Scathe Zombies",
+0
+],
+[
+"Scavenger Folk",
+1
+],
+[
+"Sea Monster",
+0
+],
+[
+"Seasoned Marshal",
+1
+],
+[
+"Seeker of Skybreak",
+0
+],
+[
+"Seismic Assault",
+2
+],
+[
+"Serpent Warrior",
+0
+],
+[
+"Serra Advocate",
+1
+],
+[
+"Serra Angel",
+2
+],
+[
+"Serra's Embrace",
+1
+],
+[
+"Shanodin Dryads",
+0
+],
+[
+"Shatter",
+0
+],
+[
+"Shield Wall",
+0
+],
+[
+"Shivan Dragon",
+2
+],
+[
+"Shock",
+0
+],
+[
+"Sisay's Ring",
+1
+],
+[
+"Sky Diamond",
+1
+],
+[
+"Skyshroud Falcon",
+0
+],
+[
+"Sleight of Hand",
+0
+],
+[
+"Soul Feast",
+1
+],
+[
+"Soul Net",
+1
+],
+[
+"Southern Paladin",
+2
+],
+[
+"Spellbook",
+1
+],
+[
+"Spined Wurm",
+0
+],
+[
+"Spineless Thug",
+0
+],
+[
+"Spirit Link",
+1
+],
+[
+"Spitting Earth",
+0
+],
+[
+"Squall",
+0
+],
+[
+"Standing Troops",
+0
+],
+[
+"Starlight",
+1
+],
+[
+"Static Orb",
+2
+],
+[
+"Staunch Defenders",
+1
+],
+[
+"Steal Artifact",
+1
+],
+[
+"Stone Rain",
+0
+],
+[
+"Storm Cauldron",
+2
+],
+[
+"Storm Crow",
+0
+],
+[
+"Storm Shaman",
+1
+],
+[
+"Strands of Night",
+1
+],
+[
+"Stream of Life",
+0
+],
+[
+"Stronghold Assassin",
+2
+],
+[
+"Sudden Impact",
+1
+],
+[
+"Sulfurous Springs",
+2
+],
+[
+"Sunweb",
+2
+],
+[
+"Sustainer of the Realm",
+1
+],
+[
+"Tainted Aether",
+2
+],
+[
+"Teferi's Puzzle Box",
+2
+],
+[
+"Telepathic Spies",
+0
+],
+[
+"Telepathy",
+1
+],
+[
+"Temporal Adept",
+2
+],
+[
+"Thieving Magpie",
+1
+],
+[
+"Thorn Elemental",
+2
+],
+[
+"Thoughtleech",
+1
+],
+[
+"Throne of Bone",
+1
+],
+[
+"Tolarian Winds",
+0
+],
+[
+"Trained Armodon",
+0
+],
+[
+"Trained Orgg",
+2
+],
+[
+"Tranquility",
+0
+],
+[
+"Treasure Trove",
+1
+],
+[
+"Treefolk Seedlings",
+1
+],
+[
+"Tremor",
+0
+],
+[
+"Twiddle",
+0
+],
+[
+"Uktabi Wildcats",
+2
+],
+[
+"Underground River",
+2
+],
+[
+"Unholy Strength",
+0
+],
+[
+"Unsummon",
+0
+],
+[
+"Untamed Wilds",
+1
+],
+[
+"Venerable Monk",
+0
+],
+[
+"Vengeance",
+1
+],
+[
+"Verduran Enchantress",
+2
+],
+[
+"Vernal Bloom",
+2
+],
+[
+"Vigilant Drake",
+0
+],
+[
+"Vizzerdrix",
+2
+],
+[
+"Volcanic Hammer",
+0
+],
+[
+"Wall of Air",
+1
+],
+[
+"Wall of Bone",
+1
+],
+[
+"Wall of Fire",
+1
+],
+[
+"Wall of Spears",
+1
+],
+[
+"Wall of Swords",
+1
+],
+[
+"Wall of Wonder",
+2
+],
+[
+"Western Paladin",
+2
+],
+[
+"Wild Growth",
+0
+],
+[
+"Wildfire",
+2
+],
+[
+"Wind Dancer",
+1
+],
+[
+"Wind Drake",
+0
+],
+[
+"Wing Snare",
+1
+],
+[
+"Wood Elves",
+0
+],
+[
+"Wooden Sphere",
+1
+],
+[
+"Worship",
+2
+],
+[
+"Wrath of God",
+2
+],
+[
+"Yavimaya Enchantress",
+1
+],
+[
+"Yawgmoth's Edict",
+1
+]
+]
+},
+{
+"code": "APC",
+"name": "Apocalypse",
+"released": "2001-06-04",
+"cards": [
+[
+"Aether Mutation",
+1
+],
+[
+"Ana Disciple",
+0
+],
+[
+"Ana Sanctuary",
+1
+],
+[
+"Anavolver",
+2
+],
+[
+"Angelfire Crusader",
+0
+],
+[
+"Battlefield Forge",
+2
+],
+[
+"Bloodfire Colossus",
+2
+],
+[
+"Bloodfire Dwarf",
+0
+],
+[
+"Bloodfire Infusion",
+0
+],
+[
+"Bloodfire Kavu",
+1
+],
+[
+"Bog Gnarr",
+0
+],
+[
+"Brass Herald",
+1
+],
+[
+"Captain's Maneuver",
+1
+],
+[
+"Caves of Koilos",
+2
+],
+[
+"Ceta Disciple",
+0
+],
+[
+"Ceta Sanctuary",
+1
+],
+[
+"Cetavolver",
+2
+],
+[
+"Coalition Flag",
+1
+],
+[
+"Coalition Honor Guard",
+0
+],
+[
+"Coastal Drake",
+0
+],
+[
+"Consume Strength",
+0
+],
+[
+"Cromat",
+2
+],
+[
+"Dead Ringers",
+0
+],
+[
+"Death Grasp",
+2
+],
+[
+"Death Mutation",
+1
+],
+[
+"Dega Disciple",
+0
+],
+[
+"Dega Sanctuary",
+1
+],
+[
+"Degavolver",
+2
+],
+[
+"Desolation Angel",
+2
+],
+[
+"Desolation Giant",
+2
+],
+[
+"Diversionary Tactics",
+1
+],
+[
+"Divine Light",
+0
+],
+[
+"Dodecapod",
+1
+],
+[
+"Dragon Arch",
+1
+],
+[
+"Dwarven Landslide",
+0
+],
+[
+"Dwarven Patrol",
+1
+],
+[
+"Ebony Treefolk",
+1
+],
+[
+"Emblazoned Golem",
+1
+],
+[
+"Enlistment Officer",
+1
+],
+[
+"Evasive Action",
+1
+],
+[
+"False Dawn",
+2
+],
+[
+"Fervent Charge",
+2
+],
+[
+"Fire // Ice",
+1
+],
+[
+"Flowstone Charger",
+1
+],
+[
+"Foul Presence",
+1
+],
+[
+"Fungal Shambler",
+2
+],
+[
+"Gaea's Balance",
+1
+],
+[
+"Gaea's Skyfolk",
+0
+],
+[
+"Gerrard Capashen",
+2
+],
+[
+"Gerrard's Verdict",
+1
+],
+[
+"Glade Gnarr",
+0
+],
+[
+"Goblin Legionnaire",
+0
+],
+[
+"Goblin Ringleader",
+1
+],
+[
+"Goblin Trenches",
+2
+],
+[
+"Grave Defiler",
+1
+],
+[
+"Guided Passage",
+2
+],
+[
+"Haunted Angel",
+1
+],
+[
+"Helionaut",
+0
+],
+[
+"Ice Cave",
+2
+],
+[
+"Illuminate",
+1
+],
+[
+"Illusion // Reality",
+1
+],
+[
+"Index",
+0
+],
+[
+"Jaded Response",
+0
+],
+[
+"Jilt",
+0
+],
+[
+"Jungle Barrier",
+1
+],
+[
+"Kavu Glider",
+0
+],
+[
+"Kavu Howler",
+1
+],
+[
+"Kavu Mauler",
+2
+],
+[
+"Last Caress",
+0
+],
+[
+"Last Stand",
+2
+],
+[
+"Lay of the Land",
+0
+],
+[
+"Legacy Weapon",
+2
+],
+[
+"Life // Death",
+1
+],
+[
+"Lightning Angel",
+2
+],
+[
+"Living Airship",
+0
+],
+[
+"Llanowar Dead",
+0
+],
+[
+"Llanowar Wastes",
+2
+],
+[
+"Manacles of Decay",
+0
+],
+[
+"Martyrs' Tomb",
+1
+],
+[
+"Mask of Intolerance",
+2
+],
+[
+"Mind Extraction",
+0
+],
+[
+"Minotaur Illusionist",
+1
+],
+[
+"Minotaur Tactician",
+0
+],
+[
+"Mournful Zombie",
+0
+],
+[
+"Mystic Snake",
+2
+],
+[
+"Necra Disciple",
+0
+],
+[
+"Necra Sanctuary",
+1
+],
+[
+"Necravolver",
+2
+],
+[
+"Night // Day",
+1
+],
+[
+"Order // Chaos",
+1
+],
+[
+"Orim's Thunder",
+0
+],
+[
+"Overgrown Estate",
+2
+],
+[
+"Penumbra Bobcat",
+0
+],
+[
+"Penumbra Kavu",
+1
+],
+[
+"Penumbra Wurm",
+2
+],
+[
+"Pernicious Deed",
+2
+],
+[
+"Phyrexian Arena",
+2
+],
+[
+"Phyrexian Gargantua",
+1
+],
+[
+"Phyrexian Rager",
+0
+],
+[
+"Planar Despair",
+2
+],
+[
+"Powerstone Minefield",
+2
+],
+[
+"Prophetic Bolt",
+2
+],
+[
+"Putrid Warrior",
+0
+],
+[
+"Quagmire Druid",
+0
+],
+[
+"Quicksilver Dagger",
+0
+],
+[
+"Raka Disciple",
+0
+],
+[
+"Raka Sanctuary",
+1
+],
+[
+"Rakavolver",
+2
+],
+[
+"Razorfin Hunter",
+0
+],
+[
+"Reef Shaman",
+0
+],
+[
+"Savage Gorilla",
+0
+],
+[
+"Shield of Duty and Reason",
+0
+],
+[
+"Shimmering Mirage",
+0
+],
+[
+"Shivan Reef",
+2
+],
+[
+"Smash",
+0
+],
+[
+"Soul Link",
+0
+],
+[
+"Spectral Lynx",
+2
+],
+[
+"Spiritmonger",
+2
+],
+[
+"Squee's Embrace",
+0
+],
+[
+"Squee's Revenge",
+1
+],
+[
+"Standard Bearer",
+0
+],
+[
+"Strength of Night",
+0
+],
+[
+"Suffocating Blast",
+2
+],
+[
+"Suppress",
+1
+],
+[
+"Sylvan Messenger",
+1
+],
+[
+"Symbiotic Deployment",
+2
+],
+[
+"Tahngarth's Glare",
+0
+],
+[
+"Temporal Spring",
+0
+],
+[
+"Tidal Courier",
+1
+],
+[
+"Tranquil Path",
+0
+],
+[
+"Tundra Kavu",
+0
+],
+[
+"Unnatural Selection",
+2
+],
+[
+"Urborg Elf",
+0
+],
+[
+"Urborg Uprising",
+0
+],
+[
+"Vindicate",
+2
+],
+[
+"Vodalian Mystic",
+1
+],
+[
+"Whirlpool Drake",
+1
+],
+[
+"Whirlpool Rider",
+0
+],
+[
+"Whirlpool Warrior",
+2
+],
+[
+"Wild Research",
+2
+],
+[
+"Yavimaya Coast",
+2
+],
+[
+"Yavimaya's Embrace",
+2
+],
+[
+"Zombie Boa",
+0
+]
+]
+},
+{
+"code": "ODY",
+"name": "Odyssey",
+"released": "2001-10-01",
+"cards": [
+[
+"Abandoned Outpost",
+0
+],
+[
+"Aboshan's Desire",
+0
+],
+[
+"Aboshan, Cephalid Emperor",
+2
+],
+[
+"Acceptable Losses",
+0
+],
+[
+"Aegis of Honor",
+2
+],
+[
+"Aether Burst",
+0
+],
+[
+"Afflict",
+0
+],
+[
+"Amugaba",
+2
+],
+[
+"Anarchist",
+0
+],
+[
+"Ancestral Tribute",
+2
+],
+[
+"Angelic Wall",
+0
+],
+[
+"Animal Boneyard",
+1
+],
+[
+"Ashen Firebeast",
+2
+],
+[
+"Atogatog",
+2
+],
+[
+"Aura Graft",
+1
+],
+[
+"Auramancer",
+0
+],
+[
+"Aven Archer",
+1
+],
+[
+"Aven Cloudchaser",
+0
+],
+[
+"Aven Fisher",
+0
+],
+[
+"Aven Flock",
+0
+],
+[
+"Aven Shrine",
+2
+],
+[
+"Aven Smokeweaver",
+1
+],
+[
+"Aven Windreader",
+0
+],
+[
+"Balancing Act",
+2
+],
+[
+"Balshan Beguiler",
+1
+],
+[
+"Balshan Griffin",
+1
+],
+[
+"Bamboozle",
+1
+],
+[
+"Barbarian Lunatic",
+0
+],
+[
+"Barbarian Ring",
+1
+],
+[
+"Bash to Bits",
+1
+],
+[
+"Battle Strain",
+1
+],
+[
+"Battle of Wits",
+2
+],
+[
+"Bearscape",
+2
+],
+[
+"Beast Attack",
+1
+],
+[
+"Beloved Chaplain",
+1
+],
+[
+"Blazing Salvo",
+0
+],
+[
+"Blessed Orator",
+1
+],
+[
+"Bloodcurdler",
+2
+],
+[
+"Bog Wreckage",
+0
+],
+[
+"Bomb Squad",
+2
+],
+[
+"Braids, Cabal Minion",
+2
+],
+[
+"Buried Alive",
+1
+],
+[
+"Burning Sands",
+2
+],
+[
+"Cabal Inquisitor",
+0
+],
+[
+"Cabal Patriarch",
+2
+],
+[
+"Cabal Pit",
+1
+],
+[
+"Cabal Shrine",
+2
+],
+[
+"Call of the Herd",
+2
+],
+[
+"Cantivore",
+2
+],
+[
+"Careful Study",
+0
+],
+[
+"Cartographer",
+0
+],
+[
+"Catalyst Stone",
+2
+],
+[
+"Caustic Tar",
+1
+],
+[
+"Cease-Fire",
+0
+],
+[
+"Centaur Garden",
+1
+],
+[
+"Cephalid Broker",
+1
+],
+[
+"Cephalid Coliseum",
+1
+],
+[
+"Cephalid Looter",
+0
+],
+[
+"Cephalid Retainer",
+2
+],
+[
+"Cephalid Scout",
+0
+],
+[
+"Cephalid Shrine",
+2
+],
+[
+"Chainflinger",
+0
+],
+[
+"Chamber of Manipulation",
+1
+],
+[
+"Chance Encounter",
+2
+],
+[
+"Charmed Pendant",
+2
+],
+[
+"Chatter of the Squirrel",
+0
+],
+[
+"Childhood Horror",
+1
+],
+[
+"Chlorophant",
+2
+],
+[
+"Coffin Purge",
+0
+],
+[
+"Cognivore",
+2
+],
+[
+"Concentrate",
+1
+],
+[
+"Confessor",
+0
+],
+[
+"Crashing Centaur",
+1
+],
+[
+"Crypt Creeper",
+0
+],
+[
+"Crystal Quarry",
+2
+],
+[
+"Cultural Exchange",
+2
+],
+[
+"Cursed Monstrosity",
+2
+],
+[
+"Darkwater Catacombs",
+2
+],
+[
+"Darkwater Egg",
+1
+],
+[
+"Decaying Soil",
+2
+],
+[
+"Decimate",
+2
+],
+[
+"Decompose",
+1
+],
+[
+"Dedicated Martyr",
+0
+],
+[
+"Deep Reconnaissance",
+1
+],
+[
+"Delaying Shield",
+2
+],
+[
+"Deluge",
+1
+],
+[
+"Dematerialize",
+0
+],
+[
+"Demolish",
+1
+],
+[
+"Demoralize",
+0
+],
+[
+"Deserted Temple",
+2
+],
+[
+"Devoted Caretaker",
+2
+],
+[
+"Diabolic Tutor",
+1
+],
+[
+"Diligent Farmhand",
+0
+],
+[
+"Dirty Wererat",
+0
+],
+[
+"Divert",
+2
+],
+[
+"Divine Sacrament",
+2
+],
+[
+"Dogged Hunter",
+2
+],
+[
+"Dreamwinder",
+0
+],
+[
+"Druid Lyrist",
+0
+],
+[
+"Druid's Call",
+1
+],
+[
+"Dusk Imp",
+0
+],
+[
+"Dwarven Grunt",
+0
+],
+[
+"Dwarven Recruiter",
+1
+],
+[
+"Dwarven Shrine",
+2
+],
+[
+"Dwarven Strike Force",
+1
+],
+[
+"Earnest Fellowship",
+2
+],
+[
+"Earth Rift",
+0
+],
+[
+"Elephant Ambush",
+0
+],
+[
+"Ember Beast",
+0
+],
+[
+"Embolden",
+0
+],
+[
+"Engulfing Flames",
+1
+],
+[
+"Entomb",
+2
+],
+[
+"Epicenter",
+2
+],
+[
+"Escape Artist",
+0
+],
+[
+"Execute",
+1
+],
+[
+"Extract",
+2
+],
+[
+"Face of Fear",
+1
+],
+[
+"Famished Ghoul",
+1
+],
+[
+"Fervent Denial",
+1
+],
+[
+"Filthy Cur",
+0
+],
+[
+"Firebolt",
+0
+],
+[
+"Flame Burst",
+0
+],
+[
+"Fledgling Imp",
+0
+],
+[
+"Frenetic Ogre",
+1
+],
+[
+"Frightcrawler",
+0
+],
+[
+"Gallantry",
+1
+],
+[
+"Ghastly Demise",
+0
+],
+[
+"Gorilla Titan",
+1
+],
+[
+"Graceful Antelope",
+2
+],
+[
+"Gravedigger",
+0
+],
+[
+"Gravestorm",
+2
+],
+[
+"Ground Seal",
+2
+],
+[
+"Halberdier",
+0
+],
+[
+"Hallowed Healer",
+0
+],
+[
+"Haunting Echoes",
+2
+],
+[
+"Hint of Insanity",
+2
+],
+[
+"Holistic Wisdom",
+2
+],
+[
+"Howling Gale",
+1
+],
+[
+"Immobilizing Ink",
+0
+],
+[
+"Impulsive Maneuvers",
+2
+],
+[
+"Infected Vermin",
+1
+],
+[
+"Innocent Blood",
+0
+],
+[
+"Iridescent Angel",
+2
+],
+[
+"Ivy Elemental",
+2
+],
+[
+"Junk Golem",
+2
+],
+[
+"Kamahl's Desire",
+0
+],
+[
+"Kamahl, Pit Fighter",
+2
+],
+[
+"Karmic Justice",
+2
+],
+[
+"Kirtar's Desire",
+0
+],
+[
+"Kirtar's Wrath",
+2
+],
+[
+"Krosan Archer",
+0
+],
+[
+"Krosan Avenger",
+0
+],
+[
+"Krosan Beast",
+2
+],
+[
+"Laquatus's Creativity",
+1
+],
+[
+"Last Rites",
+0
+],
+[
+"Lava Blister",
+1
+],
+[
+"Leaf Dancer",
+0
+],
+[
+"Lieutenant Kirtar",
+2
+],
+[
+"Life Burst",
+0
+],
+[
+"Limestone Golem",
+1
+],
+[
+"Liquid Fire",
+1
+],
+[
+"Lithatog",
+1
+],
+[
+"Luminous Guardian",
+1
+],
+[
+"Mad Dog",
+0
+],
+[
+"Magma Vein",
+1
+],
+[
+"Magnivore",
+2
+],
+[
+"Malevolent Awakening",
+1
+],
+[
+"Master Apothecary",
+2
+],
+[
+"Metamorphic Wurm",
+1
+],
+[
+"Millikin",
+1
+],
+[
+"Mind Burst",
+0
+],
+[
+"Mindslicer",
+2
+],
+[
+"Mine Layer",
+2
+],
+[
+"Minotaur Explorer",
+1
+],
+[
+"Mirari",
+2
+],
+[
+"Molten Influence",
+2
+],
+[
+"Moment's Peace",
+0
+],
+[
+"Morbid Hunger",
+0
+],
+[
+"Morgue Theft",
+0
+],
+[
+"Mortivore",
+2
+],
+[
+"Mossfire Egg",
+1
+],
+[
+"Mossfire Valley",
+2
+],
+[
+"Mudhole",
+2
+],
+[
+"Muscle Burst",
+0
+],
+[
+"Mystic Crusader",
+2
+],
+[
+"Mystic Enforcer",
+2
+],
+[
+"Mystic Penitent",
+1
+],
+[
+"Mystic Visionary",
+0
+],
+[
+"Mystic Zealot",
+0
+],
+[
+"Nantuko Disciple",
+0
+],
+[
+"Nantuko Elder",
+1
+],
+[
+"Nantuko Mentor",
+2
+],
+[
+"Nantuko Shrine",
+2
+],
+[
+"Need for Speed",
+2
+],
+[
+"Nefarious Lich",
+2
+],
+[
+"New Frontiers",
+2
+],
+[
+"Nimble Mongoose",
+1
+],
+[
+"Nomad Decoy",
+1
+],
+[
+"Nomad Stadium",
+1
+],
+[
+"Nut Collector",
+2
+],
+[
+"Obstinate Familiar",
+2
+],
+[
+"Otarian Juggernaut",
+2
+],
+[
+"Overeager Apprentice",
+0
+],
+[
+"Overrun",
+1
+],
+[
+"Painbringer",
+1
+],
+[
+"Pardic Firecat",
+0
+],
+[
+"Pardic Miner",
+2
+],
+[
+"Pardic Swordsmith",
+0
+],
+[
+"Patchwork Gnomes",
+1
+],
+[
+"Patriarch's Desire",
+0
+],
+[
+"Patrol Hound",
+0
+],
+[
+"Patron Wizard",
+2
+],
+[
+"Pedantic Learning",
+2
+],
+[
+"Peek",
+0
+],
+[
+"Persuasion",
+2
+],
+[
+"Petrified Field",
+2
+],
+[
+"Phantatog",
+1
+],
+[
+"Phantom Whelp",
+0
+],
+[
+"Pianna, Nomad Captain",
+2
+],
+[
+"Pilgrim of Justice",
+0
+],
+[
+"Pilgrim of Virtue",
+0
+],
+[
+"Piper's Melody",
+1
+],
+[
+"Predict",
+1
+],
+[
+"Price of Glory",
+1
+],
+[
+"Primal Frenzy",
+0
+],
+[
+"Psionic Gift",
+0
+],
+[
+"Psychatog",
+1
+],
+[
+"Pulsating Illusion",
+1
+],
+[
+"Puppeteer",
+1
+],
+[
+"Rabid Elephant",
+0
+],
+[
+"Ravaged Highlands",
+0
+],
+[
+"Ray of Distortion",
+0
+],
+[
+"Reckless Charge",
+0
+],
+[
+"Recoup",
+1
+],
+[
+"Refresh",
+0
+],
+[
+"Repel",
+0
+],
+[
+"Repentant Vampire",
+2
+],
+[
+"Resilient Wanderer",
+1
+],
+[
+"Rites of Initiation",
+0
+],
+[
+"Rites of Refusal",
+0
+],
+[
+"Rites of Spring",
+0
+],
+[
+"Roar of the Wurm",
+1
+],
+[
+"Rotting Giant",
+1
+],
+[
+"Sacred Rites",
+0
+],
+[
+"Sadistic Hypnotist",
+1
+],
+[
+"Sandstone Deadfall",
+1
+],
+[
+"Sarcatog",
+1
+],
+[
+"Savage Firecat",
+2
+],
+[
+"Scorching Missile",
+0
+],
+[
+"Screams of the Damned",
+1
+],
+[
+"Scrivener",
+0
+],
+[
+"Seafloor Debris",
+0
+],
+[
+"Second Thoughts",
+0
+],
+[
+"Seize the Day",
+2
+],
+[
+"Seton's Desire",
+0
+],
+[
+"Seton, Krosan Protector",
+2
+],
+[
+"Shadowblood Egg",
+1
+],
+[
+"Shadowblood Ridge",
+2
+],
+[
+"Shadowmage Infiltrator",
+2
+],
+[
+"Shelter",
+0
+],
+[
+"Shifty Doppelganger",
+2
+],
+[
+"Shower of Coals",
+1
+],
+[
+"Simplify",
+0
+],
+[
+"Skeletal Scrying",
+1
+],
+[
+"Skull Fracture",
+1
+],
+[
+"Skycloud Egg",
+1
+],
+[
+"Skycloud Expanse",
+2
+],
+[
+"Skyshooter",
+1
+],
+[
+"Soulcatcher",
+1
+],
+[
+"Spark Mage",
+1
+],
+[
+"Spellbane Centaur",
+2
+],
+[
+"Sphere of Duty",
+1
+],
+[
+"Sphere of Grace",
+1
+],
+[
+"Sphere of Law",
+1
+],
+[
+"Sphere of Reason",
+1
+],
+[
+"Sphere of Truth",
+1
+],
+[
+"Spiritualize",
+1
+],
+[
+"Springing Tiger",
+0
+],
+[
+"Squirrel Mob",
+2
+],
+[
+"Squirrel Nest",
+1
+],
+[
+"Stalking Bloodsucker",
+2
+],
+[
+"Standstill",
+1
+],
+[
+"Steam Vines",
+1
+],
+[
+"Steamclaw",
+1
+],
+[
+"Still Life",
+1
+],
+[
+"Stone-Tongue Basilisk",
+2
+],
+[
+"Sungrass Egg",
+1
+],
+[
+"Sungrass Prairie",
+2
+],
+[
+"Sylvan Might",
+1
+],
+[
+"Syncopate",
+0
+],
+[
+"Tainted Pact",
+2
+],
+[
+"Tarnished Citadel",
+2
+],
+[
+"Tattoo Ward",
+1
+],
+[
+"Terravore",
+2
+],
+[
+"Testament of Faith",
+1
+],
+[
+"Thaumatog",
+1
+],
+[
+"Thermal Blast",
+0
+],
+[
+"Think Tank",
+1
+],
+[
+"Thought Devourer",
+2
+],
+[
+"Thought Eater",
+1
+],
+[
+"Thought Nibbler",
+0
+],
+[
+"Timberland Ruins",
+0
+],
+[
+"Time Stretch",
+2
+],
+[
+"Tireless Tribe",
+0
+],
+[
+"Tombfire",
+2
+],
+[
+"Touch of Invisibility",
+0
+],
+[
+"Traumatize",
+2
+],
+[
+"Traveling Plague",
+2
+],
+[
+"Treetop Sentinel",
+1
+],
+[
+"Tremble",
+0
+],
+[
+"Twigwalker",
+1
+],
+[
+"Unifying Theory",
+2
+],
+[
+"Upheaval",
+2
+],
+[
+"Vampiric Dragon",
+2
+],
+[
+"Verdant Succession",
+2
+],
+[
+"Vivify",
+1
+],
+[
+"Volcanic Spray",
+1
+],
+[
+"Volley of Boulders",
+2
+],
+[
+"Wayward Angel",
+2
+],
+[
+"Werebear",
+0
+],
+[
+"Whipkeeper",
+1
+],
+[
+"Whispering Shade",
+0
+],
+[
+"Wild Mongrel",
+0
+],
+[
+"Woodland Druid",
+0
+],
+[
+"Words of Wisdom",
+0
+],
+[
+"Zombie Assassin",
+0
+],
+[
+"Zombie Cannibal",
+0
+],
+[
+"Zombie Infestation",
+1
+],
+[
+"Zombify",
+1
+],
+[
+"Zoologist",
+2
+]
+]
+},
+{
+"code": "TOR",
+"name": "Torment",
+"released": "2002-02-04",
+"cards": [
+[
+"Accelerate",
+0
+],
+[
+"Acorn Harvest",
+0
+],
+[
+"Alter Reality",
+2
+],
+[
+"Ambassador Laquatus",
+2
+],
+[
+"Angel of Retribution",
+2
+],
+[
+"Anurid Scavenger",
+1
+],
+[
+"Aquamoeba",
+0
+],
+[
+"Arrogant Wurm",
+1
+],
+[
+"Aven Trooper",
+0
+],
+[
+"Balshan Collaborator",
+1
+],
+[
+"Balthor the Stout",
+2
+],
+[
+"Barbarian Outcast",
+0
+],
+[
+"Basking Rootwalla",
+0
+],
+[
+"Boneshard Slasher",
+1
+],
+[
+"Breakthrough",
+1
+],
+[
+"Cabal Coffers",
+1
+],
+[
+"Cabal Ritual",
+0
+],
+[
+"Cabal Surgeon",
+0
+],
+[
+"Cabal Torturer",
+0
+],
+[
+"Carrion Rats",
+0
+],
+[
+"Carrion Wurm",
+1
+],
+[
+"Centaur Chieftain",
+1
+],
+[
+"Centaur Veteran",
+0
+],
+[
+"Cephalid Aristocrat",
+0
+],
+[
+"Cephalid Illusionist",
+1
+],
+[
+"Cephalid Sage",
+1
+],
+[
+"Cephalid Snitch",
+0
+],
+[
+"Cephalid Vandal",
+2
+],
+[
+"Chainer's Edict",
+1
+],
+[
+"Chainer, Dementia Master",
+2
+],
+[
+"Churning Eddy",
+0
+],
+[
+"Circular Logic",
+1
+],
+[
+"Cleansing Meditation",
+1
+],
+[
+"Compulsion",
+1
+],
+[
+"Coral Net",
+0
+],
+[
+"Crackling Club",
+0
+],
+[
+"Crazed Firecat",
+1
+],
+[
+"Crippling Fatigue",
+0
+],
+[
+"Dawn of the Dead",
+2
+],
+[
+"Deep Analysis",
+0
+],
+[
+"Devastating Dreams",
+2
+],
+[
+"Dwell on the Past",
+1
+],
+[
+"Enslaved Dwarf",
+0
+],
+[
+"Equal Treatment",
+1
+],
+[
+"Faceless Butcher",
+0
+],
+[
+"False Memories",
+2
+],
+[
+"Far Wanderings",
+0
+],
+[
+"Fiery Temper",
+0
+],
+[
+"Flaming Gambit",
+1
+],
+[
+"Flash of Defiance",
+0
+],
+[
+"Floating Shield",
+0
+],
+[
+"Frantic Purification",
+0
+],
+[
+"Ghostly Wings",
+0
+],
+[
+"Gloomdrifter",
+1
+],
+[
+"Gravegouger",
+0
+],
+[
+"Grim Lavamancer",
+2
+],
+[
+"Grotesque Hybrid",
+1
+],
+[
+"Gurzigost",
+2
+],
+[
+"Hell-Bent Raider",
+2
+],
+[
+"Hydromorph Guardian",
+0
+],
+[
+"Hydromorph Gull",
+1
+],
+[
+"Hypnox",
+2
+],
+[
+"Hypochondria",
+1
+],
+[
+"Ichorid",
+2
+],
+[
+"Insidious Dreams",
+2
+],
+[
+"Insist",
+2
+],
+[
+"Invigorating Falls",
+0
+],
+[
+"Kamahl's Sledge",
+0
+],
+[
+"Krosan Constrictor",
+0
+],
+[
+"Krosan Restorer",
+0
+],
+[
+"Laquatus's Champion",
+2
+],
+[
+"Last Laugh",
+2
+],
+[
+"Liquify",
+0
+],
+[
+"Llawan, Cephalid Empress",
+2
+],
+[
+"Longhorn Firebeast",
+0
+],
+[
+"Major Teroh",
+2
+],
+[
+"Mesmeric Fiend",
+0
+],
+[
+"Militant Monk",
+0
+],
+[
+"Mind Sludge",
+1
+],
+[
+"Morningtide",
+2
+],
+[
+"Mortal Combat",
+2
+],
+[
+"Mortiphobia",
+1
+],
+[
+"Mutilate",
+2
+],
+[
+"Mystic Familiar",
+0
+],
+[
+"Nantuko Blightcutter",
+2
+],
+[
+"Nantuko Calmer",
+0
+],
+[
+"Nantuko Cultivator",
+2
+],
+[
+"Nantuko Shade",
+2
+],
+[
+"Narcissism",
+1
+],
+[
+"Nostalgic Dreams",
+2
+],
+[
+"Obsessive Search",
+0
+],
+[
+"Organ Grinder",
+0
+],
+[
+"Overmaster",
+2
+],
+[
+"Parallel Evolution",
+2
+],
+[
+"Pardic Arsonist",
+1
+],
+[
+"Pardic Collaborator",
+1
+],
+[
+"Pardic Lancer",
+0
+],
+[
+"Pay No Heed",
+0
+],
+[
+"Petradon",
+2
+],
+[
+"Petravark",
+0
+],
+[
+"Pitchstone Wall",
+1
+],
+[
+"Plagiarize",
+2
+],
+[
+"Possessed Aven",
+2
+],
+[
+"Possessed Barbarian",
+2
+],
+[
+"Possessed Centaur",
+2
+],
+[
+"Possessed Nomad",
+2
+],
+[
+"Psychotic Haze",
+0
+],
+[
+"Putrid Imp",
+0
+],
+[
+"Pyromania",
+1
+],
+[
+"Radiate",
+2
+],
+[
+"Rancid Earth",
+0
+],
+[
+"Reborn Hero",
+2
+],
+[
+"Restless Dreams",
+0
+],
+[
+"Retraced Image",
+2
+],
+[
+"Sengir Vampire",
+2
+],
+[
+"Seton's Scout",
+1
+],
+[
+"Shade's Form",
+0
+],
+[
+"Shambling Swarm",
+2
+],
+[
+"Sickening Dreams",
+1
+],
+[
+"Skullscorch",
+2
+],
+[
+"Skywing Aven",
+0
+],
+[
+"Slithery Stalker",
+1
+],
+[
+"Sonic Seizure",
+0
+],
+[
+"Soul Scourge",
+0
+],
+[
+"Spirit Flare",
+0
+],
+[
+"Stern Judge",
+1
+],
+[
+"Strength of Isolation",
+1
+],
+[
+"Strength of Lunacy",
+1
+],
+[
+"Stupefying Touch",
+1
+],
+[
+"Tainted Field",
+1
+],
+[
+"Tainted Isle",
+1
+],
+[
+"Tainted Peak",
+1
+],
+[
+"Tainted Wood",
+1
+],
+[
+"Temporary Insanity",
+1
+],
+[
+"Teroh's Faithful",
+0
+],
+[
+"Teroh's Vanguard",
+1
+],
+[
+"Transcendence",
+2
+],
+[
+"Turbulent Dreams",
+2
+],
+[
+"Unhinge",
+0
+],
+[
+"Vengeful Dreams",
+2
+],
+[
+"Violent Eruption",
+1
+],
+[
+"Waste Away",
+0
+],
+[
+"Zombie Trailblazer",
+1
+]
+]
+},
+{
+"code": "JUD",
+"name": "Judgment",
+"released": "2002-05-27",
+"cards": [
+[
+"Ancestor's Chosen",
+1
+],
+[
+"Anger",
+1
+],
+[
+"Anurid Barkripper",
+0
+],
+[
+"Anurid Brushhopper",
+2
+],
+[
+"Anurid Swarmsnapper",
+1
+],
+[
+"Arcane Teachings",
+0
+],
+[
+"Aven Fogbringer",
+0
+],
+[
+"Aven Warcraft",
+1
+],
+[
+"Balthor the Defiled",
+2
+],
+[
+"Barbarian Bully",
+0
+],
+[
+"Battle Screech",
+1
+],
+[
+"Battlefield Scrounger",
+0
+],
+[
+"Battlewise Aven",
+0
+],
+[
+"Benevolent Bodyguard",
+0
+],
+[
+"Book Burning",
+0
+],
+[
+"Border Patrol",
+0
+],
+[
+"Brawn",
+1
+],
+[
+"Breaking Point",
+2
+],
+[
+"Browbeat",
+1
+],
+[
+"Burning Wish",
+2
+],
+[
+"Cabal Therapy",
+1
+],
+[
+"Cabal Trainee",
+0
+],
+[
+"Cagemail",
+0
+],
+[
+"Canopy Claws",
+0
+],
+[
+"Centaur Rootcaster",
+0
+],
+[
+"Cephalid Constable",
+2
+],
+[
+"Cephalid Inkshrouder",
+1
+],
+[
+"Chastise",
+1
+],
+[
+"Commander Eesha",
+2
+],
+[
+"Crush of Wurms",
+2
+],
+[
+"Cunning Wish",
+2
+],
+[
+"Death Wish",
+2
+],
+[
+"Defy Gravity",
+0
+],
+[
+"Dwarven Bloodboiler",
+2
+],
+[
+"Dwarven Driller",
+1
+],
+[
+"Dwarven Scorcher",
+0
+],
+[
+"Earsplitting Rats",
+0
+],
+[
+"Elephant Guide",
+1
+],
+[
+"Ember Shot",
+0
+],
+[
+"Envelop",
+0
+],
+[
+"Epic Struggle",
+2
+],
+[
+"Erhnam Djinn",
+2
+],
+[
+"Exoskeletal Armor",
+1
+],
+[
+"Filth",
+1
+],
+[
+"Firecat Blitz",
+1
+],
+[
+"Flaring Pain",
+0
+],
+[
+"Flash of Insight",
+1
+],
+[
+"Fledgling Dragon",
+2
+],
+[
+"Folk Medicine",
+0
+],
+[
+"Forcemage Advocate",
+1
+],
+[
+"Funeral Pyre",
+0
+],
+[
+"Genesis",
+2
+],
+[
+"Giant Warthog",
+0
+],
+[
+"Glory",
+2
+],
+[
+"Golden Wish",
+2
+],
+[
+"Goretusk Firebeast",
+0
+],
+[
+"Grave Consequences",
+1
+],
+[
+"Grip of Amnesia",
+0
+],
+[
+"Grizzly Fate",
+1
+],
+[
+"Guided Strike",
+0
+],
+[
+"Guiltfeeder",
+2
+],
+[
+"Hapless Researcher",
+0
+],
+[
+"Harvester Druid",
+0
+],
+[
+"Hunting Grounds",
+2
+],
+[
+"Infectious Rage",
+1
+],
+[
+"Ironshell Beetle",
+0
+],
+[
+"Jeska, Warrior Adept",
+2
+],
+[
+"Keep Watch",
+0
+],
+[
+"Krosan Reclamation",
+1
+],
+[
+"Krosan Verge",
+1
+],
+[
+"Krosan Wayfarer",
+0
+],
+[
+"Laquatus's Disdain",
+1
+],
+[
+"Lava Dart",
+0
+],
+[
+"Lead Astray",
+0
+],
+[
+"Liberated Dwarf",
+0
+],
+[
+"Lightning Surge",
+2
+],
+[
+"Living Wish",
+2
+],
+[
+"Lost in Thought",
+0
+],
+[
+"Masked Gorgon",
+2
+],
+[
+"Mental Note",
+0
+],
+[
+"Mirari's Wake",
+2
+],
+[
+"Mirror Wall",
+0
+],
+[
+"Mist of Stagnation",
+2
+],
+[
+"Morality Shift",
+2
+],
+[
+"Nantuko Monastery",
+1
+],
+[
+"Nantuko Tracer",
+0
+],
+[
+"Nomad Mythmaker",
+2
+],
+[
+"Nullmage Advocate",
+0
+],
+[
+"Phantom Centaur",
+1
+],
+[
+"Phantom Flock",
+1
+],
+[
+"Phantom Nantuko",
+2
+],
+[
+"Phantom Nishoba",
+2
+],
+[
+"Phantom Nomad",
+0
+],
+[
+"Phantom Tiger",
+0
+],
+[
+"Planar Chaos",
+1
+],
+[
+"Prismatic Strands",
+0
+],
+[
+"Pulsemage Advocate",
+2
+],
+[
+"Quiet Speculation",
+1
+],
+[
+"Rats' Feast",
+0
+],
+[
+"Ray of Revelation",
+0
+],
+[
+"Riftstone Portal",
+1
+],
+[
+"Scalpelexis",
+2
+],
+[
+"Seedtime",
+2
+],
+[
+"Selfless Exorcist",
+2
+],
+[
+"Serene Sunset",
+1
+],
+[
+"Shaman's Trance",
+2
+],
+[
+"Shieldmage Advocate",
+0
+],
+[
+"Silver Seraph",
+2
+],
+[
+"Solitary Confinement",
+2
+],
+[
+"Soulcatchers' Aerie",
+1
+],
+[
+"Soulgorger Orgg",
+1
+],
+[
+"Spellgorger Barbarian",
+0
+],
+[
+"Spelljack",
+2
+],
+[
+"Spirit Cairn",
+1
+],
+[
+"Spurnmage Advocate",
+1
+],
+[
+"Stitch Together",
+1
+],
+[
+"Sudden Strength",
+0
+],
+[
+"Suntail Hawk",
+0
+],
+[
+"Sutured Ghoul",
+2
+],
+[
+"Swelter",
+1
+],
+[
+"Swirling Sandstorm",
+0
+],
+[
+"Sylvan Safekeeper",
+2
+],
+[
+"Telekinetic Bonds",
+2
+],
+[
+"Test of Endurance",
+2
+],
+[
+"Thriss, Nantuko Primus",
+2
+],
+[
+"Toxic Stench",
+0
+],
+[
+"Trained Pronghorn",
+0
+],
+[
+"Treacherous Vampire",
+1
+],
+[
+"Treacherous Werewolf",
+0
+],
+[
+"Tunneler Wurm",
+1
+],
+[
+"Unquestioned Authority",
+1
+],
+[
+"Valor",
+1
+],
+[
+"Venomous Vines",
+0
+],
+[
+"Vigilant Sentry",
+0
+],
+[
+"Web of Inertia",
+1
+],
+[
+"Wonder",
+1
+],
+[
+"Worldgorger Dragon",
+2
+],
+[
+"Wormfang Behemoth",
+2
+],
+[
+"Wormfang Crab",
+1
+],
+[
+"Wormfang Drake",
+0
+],
+[
+"Wormfang Manta",
+2
+],
+[
+"Wormfang Newt",
+0
+],
+[
+"Wormfang Turtle",
+1
+]
+]
+},
+{
+"code": "ONS",
+"name": "Onslaught",
+"released": "2002-10-07",
+"cards": [
+[
+"Accursed Centaur",
+0
+],
+[
+"Aether Charge",
+1
+],
+[
+"Aggravated Assault",
+2
+],
+[
+"Airborne Aid",
+0
+],
+[
+"Airdrop Condor",
+1
+],
+[
+"Akroma's Blessing",
+1
+],
+[
+"Akroma's Vengeance",
+2
+],
+[
+"Ancestor's Prophet",
+2
+],
+[
+"Animal Magnetism",
+2
+],
+[
+"Annex",
+1
+],
+[
+"Anurid Murkdiver",
+0
+],
+[
+"Aphetto Alchemist",
+1
+],
+[
+"Aphetto Dredging",
+0
+],
+[
+"Aphetto Grifter",
+1
+],
+[
+"Aphetto Vulture",
+1
+],
+[
+"Arcanis the Omnipotent",
+2
+],
+[
+"Artificial Evolution",
+2
+],
+[
+"Ascending Aven",
+0
+],
+[
+"Astral Slide",
+1
+],
+[
+"Aura Extraction",
+1
+],
+[
+"Aurification",
+2
+],
+[
+"Avarax",
+1
+],
+[
+"Aven Brigadier",
+2
+],
+[
+"Aven Fateshaper",
+1
+],
+[
+"Aven Soulgazer",
+1
+],
+[
+"Backslide",
+0
+],
+[
+"Barkhide Mauler",
+0
+],
+[
+"Barren Moor",
+0
+],
+[
+"Battering Craghorn",
+0
+],
+[
+"Battlefield Medic",
+0
+],
+[
+"Biorhythm",
+2
+],
+[
+"Birchlore Rangers",
+0
+],
+[
+"Blackmail",
+1
+],
+[
+"Blatant Thievery",
+2
+],
+[
+"Blistering Firecat",
+2
+],
+[
+"Bloodline Shaman",
+1
+],
+[
+"Bloodstained Mire",
+2
+],
+[
+"Boneknitter",
+1
+],
+[
+"Break Open",
+0
+],
+[
+"Brightstone Ritual",
+0
+],
+[
+"Broodhatch Nantuko",
+1
+],
+[
+"Butcher Orgg",
+2
+],
+[
+"Cabal Archon",
+1
+],
+[
+"Cabal Executioner",
+1
+],
+[
+"Cabal Slaver",
+1
+],
+[
+"Callous Oppressor",
+2
+],
+[
+"Catapult Master",
+2
+],
+[
+"Catapult Squad",
+1
+],
+[
+"Centaur Glade",
+1
+],
+[
+"Chain of Acid",
+1
+],
+[
+"Chain of Plasma",
+1
+],
+[
+"Chain of Silence",
+1
+],
+[
+"Chain of Smog",
+1
+],
+[
+"Chain of Vapor",
+1
+],
+[
+"Charging Slateback",
+0
+],
+[
+"Choking Tethers",
+0
+],
+[
+"Circle of Solace",
+2
+],
+[
+"Clone",
+2
+],
+[
+"Commando Raid",
+1
+],
+[
+"Complicate",
+1
+],
+[
+"Contested Cliffs",
+2
+],
+[
+"Convalescent Care",
+2
+],
+[
+"Cover of Darkness",
+2
+],
+[
+"Crafty Pathmage",
+0
+],
+[
+"Crowd Favorites",
+1
+],
+[
+"Crown of Ascension",
+0
+],
+[
+"Crown of Awe",
+0
+],
+[
+"Crown of Fury",
+0
+],
+[
+"Crown of Suspicion",
+0
+],
+[
+"Crown of Vigor",
+0
+],
+[
+"Crude Rampart",
+1
+],
+[
+"Cruel Revival",
+0
+],
+[
+"Cryptic Gateway",
+2
+],
+[
+"Custody Battle",
+1
+],
+[
+"Daru Cavalier",
+0
+],
+[
+"Daru Encampment",
+1
+],
+[
+"Daru Healer",
+0
+],
+[
+"Daru Lancer",
+0
+],
+[
+"Daunting Defender",
+0
+],
+[
+"Dawning Purist",
+1
+],
+[
+"Death Match",
+2
+],
+[
+"Death Pulse",
+1
+],
+[
+"Defensive Maneuvers",
+0
+],
+[
+"Demystify",
+0
+],
+[
+"Dirge of Dread",
+0
+],
+[
+"Disciple of Grace",
+0
+],
+[
+"Disciple of Malice",
+0
+],
+[
+"Discombobulate",
+1
+],
+[
+"Dispersing Orb",
+1
+],
+[
+"Disruptive Pitmage",
+0
+],
+[
+"Dive Bomber",
+0
+],
+[
+"Doom Cannon",
+2
+],
+[
+"Doomed Necromancer",
+2
+],
+[
+"Doubtless One",
+1
+],
+[
+"Dragon Roost",
+2
+],
+[
+"Dream Chisel",
+2
+],
+[
+"Dwarven Blastminer",
+1
+],
+[
+"Ebonblade Reaper",
+2
+],
+[
+"Elven Riders",
+1
+],
+[
+"Elvish Guidance",
+0
+],
+[
+"Elvish Pathcutter",
+0
+],
+[
+"Elvish Pioneer",
+0
+],
+[
+"Elvish Scrapper",
+1
+],
+[
+"Elvish Vanguard",
+2
+],
+[
+"Elvish Warrior",
+0
+],
+[
+"Embermage Goblin",
+1
+],
+[
+"Enchantress's Presence",
+2
+],
+[
+"Endemic Plague",
+2
+],
+[
+"Entrails Feaster",
+2
+],
+[
+"Erratic Explosion",
+0
+],
+[
+"Essence Fracture",
+1
+],
+[
+"Everglove Courier",
+1
+],
+[
+"Exalted Angel",
+2
+],
+[
+"Explosive Vegetation",
+1
+],
+[
+"Fade from Memory",
+1
+],
+[
+"Fallen Cleric",
+0
+],
+[
+"False Cure",
+2
+],
+[
+"Feeding Frenzy",
+1
+],
+[
+"Festering Goblin",
+0
+],
+[
+"Fever Charm",
+0
+],
+[
+"Flamestick Courier",
+1
+],
+[
+"Fleeting Aven",
+1
+],
+[
+"Flooded Strand",
+2
+],
+[
+"Foothill Guide",
+0
+],
+[
+"Forgotten Cave",
+0
+],
+[
+"Frightshroud Courier",
+1
+],
+[
+"Future Sight",
+2
+],
+[
+"Gangrenous Goliath",
+2
+],
+[
+"Ghosthelm Courier",
+1
+],
+[
+"Gigapede",
+2
+],
+[
+"Glarecaster",
+2
+],
+[
+"Glory Seeker",
+0
+],
+[
+"Gluttonous Zombie",
+1
+],
+[
+"Goblin Burrows",
+1
+],
+[
+"Goblin Machinist",
+1
+],
+[
+"Goblin Piledriver",
+2
+],
+[
+"Goblin Pyromancer",
+2
+],
+[
+"Goblin Sharpshooter",
+2
+],
+[
+"Goblin Sky Raider",
+0
+],
+[
+"Goblin Sledder",
+0
+],
+[
+"Goblin Taskmaster",
+0
+],
+[
+"Grand Coliseum",
+2
+],
+[
+"Grand Melee",
+2
+],
+[
+"Grassland Crusader",
+0
+],
+[
+"Gratuitous Violence",
+2
+],
+[
+"Gravel Slinger",
+0
+],
+[
+"Gravespawn Sovereign",
+2
+],
+[
+"Graxiplon",
+1
+],
+[
+"Grinning Demon",
+2
+],
+[
+"Gustcloak Harrier",
+0
+],
+[
+"Gustcloak Runner",
+0
+],
+[
+"Gustcloak Savior",
+2
+],
+[
+"Gustcloak Sentinel",
+1
+],
+[
+"Gustcloak Skirmisher",
+1
+],
+[
+"Harsh Mercy",
+2
+],
+[
+"Haunted Cadaver",
+0
+],
+[
+"Head Games",
+2
+],
+[
+"Headhunter",
+1
+],
+[
+"Heedless One",
+1
+],
+[
+"Hystrodon",
+2
+],
+[
+"Imagecrafter",
+0
+],
+[
+"Improvised Armor",
+1
+],
+[
+"Infest",
+1
+],
+[
+"Information Dealer",
+0
+],
+[
+"Inspirit",
+1
+],
+[
+"Insurrection",
+2
+],
+[
+"Invigorating Boon",
+1
+],
+[
+"Ironfist Crusher",
+1
+],
+[
+"Ixidor's Will",
+0
+],
+[
+"Ixidor, Reality Sculptor",
+2
+],
+[
+"Jareth, Leonine Titan",
+2
+],
+[
+"Kaboom!",
+2
+],
+[
+"Kamahl's Summons",
+1
+],
+[
+"Kamahl, Fist of Krosa",
+2
+],
+[
+"Krosan Colossus",
+2
+],
+[
+"Krosan Groundshaker",
+1
+],
+[
+"Krosan Tusker",
+0
+],
+[
+"Lavamancer's Skill",
+0
+],
+[
+"Lay Waste",
+0
+],
+[
+"Leery Fogbeast",
+0
+],
+[
+"Lightning Rift",
+1
+],
+[
+"Lonely Sandbar",
+0
+],
+[
+"Mage's Guile",
+0
+],
+[
+"Mana Echoes",
+2
+],
+[
+"Meddle",
+1
+],
+[
+"Menacing Ogre",
+2
+],
+[
+"Misery Charm",
+0
+],
+[
+"Mistform Dreamer",
+0
+],
+[
+"Mistform Mask",
+0
+],
+[
+"Mistform Mutant",
+1
+],
+[
+"Mistform Shrieker",
+1
+],
+[
+"Mistform Skyreaver",
+2
+],
+[
+"Mistform Stalker",
+1
+],
+[
+"Mistform Wall",
+0
+],
+[
+"Mobilization",
+2
+],
+[
+"Mythic Proportions",
+2
+],
+[
+"Nameless One",
+1
+],
+[
+"Nantuko Husk",
+0
+],
+[
+"Naturalize",
+0
+],
+[
+"Nosy Goblin",
+0
+],
+[
+"Nova Cleric",
+1
+],
+[
+"Oblation",
+2
+],
+[
+"Oversold Cemetery",
+2
+],
+[
+"Overwhelming Instinct",
+1
+],
+[
+"Pacifism",
+0
+],
+[
+"Patriarch's Bidding",
+2
+],
+[
+"Pearlspear Courier",
+1
+],
+[
+"Peer Pressure",
+2
+],
+[
+"Piety Charm",
+0
+],
+[
+"Pinpoint Avalanche",
+0
+],
+[
+"Polluted Delta",
+2
+],
+[
+"Primal Boost",
+1
+],
+[
+"Profane Prayers",
+0
+],
+[
+"Prowling Pangolin",
+1
+],
+[
+"Psychic Trance",
+2
+],
+[
+"Quicksilver Dragon",
+2
+],
+[
+"Ravenous Baloth",
+2
+],
+[
+"Read the Runes",
+2
+],
+[
+"Reckless One",
+1
+],
+[
+"Reminisce",
+1
+],
+[
+"Renewed Faith",
+0
+],
+[
+"Righteous Cause",
+1
+],
+[
+"Riptide Biologist",
+0
+],
+[
+"Riptide Chronologist",
+1
+],
+[
+"Riptide Entrancer",
+2
+],
+[
+"Riptide Laboratory",
+2
+],
+[
+"Riptide Replicator",
+2
+],
+[
+"Riptide Shapeshifter",
+1
+],
+[
+"Risky Move",
+2
+],
+[
+"Rorix Bladewing",
+2
+],
+[
+"Rotlung Reanimator",
+2
+],
+[
+"Rummaging Wizard",
+1
+],
+[
+"Run Wild",
+1
+],
+[
+"Sage Aven",
+0
+],
+[
+"Sandskin",
+0
+],
+[
+"Screaming Seahawk",
+0
+],
+[
+"Screeching Buzzard",
+0
+],
+[
+"Sea's Claim",
+0
+],
+[
+"Searing Flesh",
+1
+],
+[
+"Seaside Haven",
+1
+],
+[
+"Secluded Steppe",
+0
+],
+[
+"Serpentine Basilisk",
+1
+],
+[
+"Severed Legion",
+0
+],
+[
+"Shade's Breath",
+1
+],
+[
+"Shaleskin Bruiser",
+1
+],
+[
+"Shared Triumph",
+2
+],
+[
+"Shepherd of Rot",
+0
+],
+[
+"Shieldmage Elder",
+1
+],
+[
+"Shock",
+0
+],
+[
+"Sigil of the New Dawn",
+2
+],
+[
+"Silent Specter",
+2
+],
+[
+"Silklash Spider",
+2
+],
+[
+"Silvos, Rogue Elemental",
+2
+],
+[
+"Skirk Commando",
+0
+],
+[
+"Skirk Fire Marshal",
+2
+],
+[
+"Skirk Prospector",
+0
+],
+[
+"Skittish Valesk",
+1
+],
+[
+"Slate of Ancestry",
+2
+],
+[
+"Slice and Dice",
+1
+],
+[
+"Slipstream Eel",
+0
+],
+[
+"Smother",
+1
+],
+[
+"Snapping Thragg",
+1
+],
+[
+"Snarling Undorak",
+0
+],
+[
+"Solar Blast",
+0
+],
+[
+"Soulless One",
+1
+],
+[
+"Sparksmith",
+0
+],
+[
+"Spined Basher",
+0
+],
+[
+"Spitfire Handler",
+1
+],
+[
+"Spitting Gourna",
+0
+],
+[
+"Spurred Wolverine",
+0
+],
+[
+"Spy Network",
+0
+],
+[
+"Stag Beetle",
+2
+],
+[
+"Standardize",
+2
+],
+[
+"Starlit Sanctum",
+1
+],
+[
+"Starstorm",
+2
+],
+[
+"Steely Resolve",
+2
+],
+[
+"Strongarm Tactics",
+2
+],
+[
+"Sunfire Balm",
+1
+],
+[
+"Supreme Inquisitor",
+2
+],
+[
+"Swat",
+0
+],
+[
+"Symbiotic Beast",
+1
+],
+[
+"Symbiotic Elf",
+0
+],
+[
+"Symbiotic Wurm",
+2
+],
+[
+"Syphon Mind",
+0
+],
+[
+"Syphon Soul",
+0
+],
+[
+"Taunting Elf",
+0
+],
+[
+"Tempting Wurm",
+2
+],
+[
+"Tephraderm",
+2
+],
+[
+"Thoughtbound Primoc",
+1
+],
+[
+"Thrashing Mudspawn",
+1
+],
+[
+"Threaten",
+1
+],
+[
+"Thunder of Hooves",
+1
+],
+[
+"Towering Baloth",
+1
+],
+[
+"Trade Secrets",
+2
+],
+[
+"Tranquil Thicket",
+0
+],
+[
+"Treespring Lorian",
+0
+],
+[
+"Tribal Golem",
+2
+],
+[
+"Tribal Unity",
+1
+],
+[
+"Trickery Charm",
+0
+],
+[
+"True Believer",
+2
+],
+[
+"Undead Gladiator",
+2
+],
+[
+"Unholy Grotto",
+2
+],
+[
+"Unified Strike",
+0
+],
+[
+"Venomspout Brackus",
+1
+],
+[
+"Visara the Dreadful",
+2
+],
+[
+"Vitality Charm",
+0
+],
+[
+"Voice of the Woods",
+2
+],
+[
+"Voidmage Prodigy",
+2
+],
+[
+"Walking Desecration",
+1
+],
+[
+"Wall of Mulch",
+1
+],
+[
+"Wave of Indifference",
+0
+],
+[
+"Weathered Wayfarer",
+2
+],
+[
+"Weird Harvest",
+2
+],
+[
+"Wellwisher",
+0
+],
+[
+"Wheel and Deal",
+2
+],
+[
+"Whipcorder",
+1
+],
+[
+"Windswept Heath",
+2
+],
+[
+"Wirewood Elf",
+0
+],
+[
+"Wirewood Herald",
+0
+],
+[
+"Wirewood Lodge",
+1
+],
+[
+"Wirewood Pride",
+0
+],
+[
+"Wirewood Savage",
+0
+],
+[
+"Withering Hex",
+1
+],
+[
+"Wooded Foothills",
+2
+],
+[
+"Words of War",
+2
+],
+[
+"Words of Waste",
+2
+],
+[
+"Words of Wilding",
+2
+],
+[
+"Words of Wind",
+2
+],
+[
+"Words of Worship",
+2
+],
+[
+"Wretched Anurid",
+0
+]
+]
+},
+{
+"code": "LGN",
+"name": "Legions",
+"released": "2003-02-03",
+"cards": [
+[
+"Akroma's Devoted",
+1
+],
+[
+"Akroma, Angel of Wrath",
+2
+],
+[
+"Aphetto Exterminator",
+1
+],
+[
+"Aven Envoy",
+0
+],
+[
+"Aven Redeemer",
+0
+],
+[
+"Aven Warhawk",
+1
+],
+[
+"Bane of the Living",
+2
+],
+[
+"Beacon of Destiny",
+2
+],
+[
+"Berserk Murlodont",
+0
+],
+[
+"Blade Sliver",
+1
+],
+[
+"Blood Celebrant",
+0
+],
+[
+"Bloodstoke Howler",
+0
+],
+[
+"Branchsnap Lorian",
+1
+],
+[
+"Brontotherium",
+1
+],
+[
+"Brood Sliver",
+2
+],
+[
+"Caller of the Claw",
+2
+],
+[
+"Canopy Crawler",
+1
+],
+[
+"Celestial Gatekeeper",
+2
+],
+[
+"Cephalid Pathmage",
+0
+],
+[
+"Chromeshell Crab",
+2
+],
+[
+"Clickslither",
+2
+],
+[
+"Cloudreach Cavalry",
+1
+],
+[
+"Corpse Harvester",
+1
+],
+[
+"Covert Operative",
+0
+],
+[
+"Crested Craghorn",
+0
+],
+[
+"Crookclaw Elder",
+1
+],
+[
+"Crypt Sliver",
+0
+],
+[
+"Dark Supplicant",
+1
+],
+[
+"Daru Mender",
+1
+],
+[
+"Daru Sanctifier",
+0
+],
+[
+"Daru Stinger",
+0
+],
+[
+"Deathmark Prelate",
+1
+],
+[
+"Defender of the Order",
+2
+],
+[
+"Defiant Elf",
+0
+],
+[
+"Deftblade Elite",
+0
+],
+[
+"Dermoplasm",
+2
+],
+[
+"Dreamborn Muse",
+2
+],
+[
+"Drinker of Sorrow",
+2
+],
+[
+"Dripping Dead",
+0
+],
+[
+"Earthblighter",
+1
+],
+[
+"Echo Tracer",
+0
+],
+[
+"Elvish Soultiller",
+2
+],
+[
+"Embalmed Brawler",
+0
+],
+[
+"Enormous Baloth",
+1
+],
+[
+"Essence Sliver",
+2
+],
+[
+"Feral Throwback",
+2
+],
+[
+"Flamewave Invoker",
+0
+],
+[
+"Frenetic Raptor",
+1
+],
+[
+"Fugitive Wizard",
+0
+],
+[
+"Gempalm Avenger",
+0
+],
+[
+"Gempalm Incinerator",
+1
+],
+[
+"Gempalm Polluter",
+0
+],
+[
+"Gempalm Sorcerer",
+1
+],
+[
+"Gempalm Strider",
+1
+],
+[
+"Ghastly Remains",
+2
+],
+[
+"Glintwing Invoker",
+0
+],
+[
+"Glowering Rogon",
+0
+],
+[
+"Glowrider",
+2
+],
+[
+"Goblin Assassin",
+1
+],
+[
+"Goblin Clearcutter",
+1
+],
+[
+"Goblin Dynamo",
+1
+],
+[
+"Goblin Firebug",
+0
+],
+[
+"Goblin Goon",
+2
+],
+[
+"Goblin Grappler",
+0
+],
+[
+"Goblin Lookout",
+0
+],
+[
+"Goblin Turncoat",
+0
+],
+[
+"Graveborn Muse",
+2
+],
+[
+"Havoc Demon",
+2
+],
+[
+"Hollow Specter",
+2
+],
+[
+"Hundroog",
+0
+],
+[
+"Hunter Sliver",
+0
+],
+[
+"Imperial Hellkite",
+2
+],
+[
+"Infernal Caretaker",
+0
+],
+[
+"Keeneye Aven",
+0
+],
+[
+"Keeper of the Nine Gales",
+2
+],
+[
+"Kilnmouth Dragon",
+2
+],
+[
+"Krosan Cloudscraper",
+2
+],
+[
+"Krosan Vorine",
+0
+],
+[
+"Lavaborn Muse",
+2
+],
+[
+"Liege of the Axe",
+1
+],
+[
+"Lowland Tracker",
+0
+],
+[
+"Macetail Hystrodon",
+0
+],
+[
+"Magma Sliver",
+2
+],
+[
+"Master of the Veil",
+1
+],
+[
+"Merchant of Secrets",
+0
+],
+[
+"Mistform Seaswift",
+0
+],
+[
+"Mistform Sliver",
+0
+],
+[
+"Mistform Ultimus",
+2
+],
+[
+"Mistform Wakecaster",
+1
+],
+[
+"Nantuko Vigilante",
+0
+],
+[
+"Needleshot Gourna",
+0
+],
+[
+"Noxious Ghoul",
+1
+],
+[
+"Patron of the Wild",
+0
+],
+[
+"Phage the Untouchable",
+2
+],
+[
+"Planar Guide",
+2
+],
+[
+"Plated Sliver",
+0
+],
+[
+"Primal Whisperer",
+2
+],
+[
+"Primoc Escapee",
+1
+],
+[
+"Quick Sliver",
+0
+],
+[
+"Ridgetop Raptor",
+1
+],
+[
+"Riptide Director",
+2
+],
+[
+"Riptide Mangler",
+2
+],
+[
+"Rockshard Elemental",
+2
+],
+[
+"Root Sliver",
+1
+],
+[
+"Scion of Darkness",
+2
+],
+[
+"Seedborn Muse",
+2
+],
+[
+"Shaleskin Plower",
+0
+],
+[
+"Shifting Sliver",
+1
+],
+[
+"Skinthinner",
+0
+],
+[
+"Skirk Alarmist",
+2
+],
+[
+"Skirk Drill Sergeant",
+1
+],
+[
+"Skirk Marauder",
+0
+],
+[
+"Skirk Outrider",
+0
+],
+[
+"Smokespew Invoker",
+0
+],
+[
+"Sootfeather Flock",
+0
+],
+[
+"Spectral Sliver",
+1
+],
+[
+"Starlight Invoker",
+0
+],
+[
+"Stoic Champion",
+1
+],
+[
+"Stonewood Invoker",
+0
+],
+[
+"Sunstrike Legionnaire",
+2
+],
+[
+"Swooping Talon",
+1
+],
+[
+"Synapse Sliver",
+2
+],
+[
+"Timberwatch Elf",
+0
+],
+[
+"Totem Speaker",
+1
+],
+[
+"Toxin Sliver",
+2
+],
+[
+"Tribal Forcemage",
+2
+],
+[
+"Unstable Hulk",
+2
+],
+[
+"Vexing Beetle",
+2
+],
+[
+"Vile Deacon",
+0
+],
+[
+"Voidmage Apprentice",
+0
+],
+[
+"Wall of Deceit",
+1
+],
+[
+"Wall of Hope",
+0
+],
+[
+"Warbreak Trumpeter",
+1
+],
+[
+"Ward Sliver",
+1
+],
+[
+"Warped Researcher",
+1
+],
+[
+"Weaver of Lies",
+2
+],
+[
+"Whipgrass Entangler",
+0
+],
+[
+"White Knight",
+1
+],
+[
+"Willbender",
+1
+],
+[
+"Windborn Muse",
+2
+],
+[
+"Wingbeat Warrior",
+0
+],
+[
+"Wirewood Channeler",
+1
+],
+[
+"Wirewood Hivemaster",
+1
+],
+[
+"Withered Wretch",
+1
+],
+[
+"Zombie Brute",
+1
+]
+]
+},
+{
+"code": "SCG",
+"name": "Scourge",
+"released": "2003-05-26",
+"cards": [
+[
+"Accelerated Mutation",
+0
+],
+[
+"Ageless Sentinels",
+2
+],
+[
+"Alpha Status",
+1
+],
+[
+"Ambush Commander",
+2
+],
+[
+"Ancient Ooze",
+2
+],
+[
+"Aphetto Runecaster",
+1
+],
+[
+"Ark of Blight",
+1
+],
+[
+"Astral Steel",
+0
+],
+[
+"Aven Farseer",
+0
+],
+[
+"Aven Liberator",
+0
+],
+[
+"Bladewing the Risen",
+2
+],
+[
+"Bladewing's Thrall",
+1
+],
+[
+"Bonethorn Valesk",
+0
+],
+[
+"Brain Freeze",
+1
+],
+[
+"Break Asunder",
+0
+],
+[
+"Cabal Conditioning",
+2
+],
+[
+"Cabal Interrogator",
+1
+],
+[
+"Call to the Grave",
+2
+],
+[
+"Carbonize",
+1
+],
+[
+"Carrion Feeder",
+0
+],
+[
+"Chartooth Cougar",
+0
+],
+[
+"Chill Haunting",
+1
+],
+[
+"Claws of Wirewood",
+1
+],
+[
+"Clutch of Undeath",
+0
+],
+[
+"Coast Watcher",
+0
+],
+[
+"Consumptive Goo",
+2
+],
+[
+"Daru Spiritualist",
+0
+],
+[
+"Daru Warchief",
+1
+],
+[
+"Dawn Elemental",
+2
+],
+[
+"Day of the Dragons",
+2
+],
+[
+"Death's-Head Buzzard",
+0
+],
+[
+"Decree of Annihilation",
+2
+],
+[
+"Decree of Justice",
+2
+],
+[
+"Decree of Pain",
+2
+],
+[
+"Decree of Savagery",
+2
+],
+[
+"Decree of Silence",
+2
+],
+[
+"Dimensional Breach",
+2
+],
+[
+"Dispersal Shield",
+0
+],
+[
+"Divergent Growth",
+0
+],
+[
+"Dragon Breath",
+0
+],
+[
+"Dragon Fangs",
+0
+],
+[
+"Dragon Mage",
+2
+],
+[
+"Dragon Scales",
+0
+],
+[
+"Dragon Shadow",
+0
+],
+[
+"Dragon Tyrant",
+2
+],
+[
+"Dragon Wings",
+0
+],
+[
+"Dragonspeaker Shaman",
+1
+],
+[
+"Dragonstalker",
+1
+],
+[
+"Dragonstorm",
+2
+],
+[
+"Edgewalker",
+1
+],
+[
+"Elvish Aberration",
+1
+],
+[
+"Enrage",
+1
+],
+[
+"Eternal Dragon",
+2
+],
+[
+"Exiled Doomsayer",
+2
+],
+[
+"Extra Arms",
+1
+],
+[
+"Faces of the Past",
+2
+],
+[
+"Fatal Mutation",
+1
+],
+[
+"Fierce Empath",
+0
+],
+[
+"Final Punishment",
+2
+],
+[
+"Force Bubble",
+2
+],
+[
+"Forgotten Ancient",
+2
+],
+[
+"Form of the Dragon",
+2
+],
+[
+"Frontline Strategist",
+0
+],
+[
+"Frozen Solid",
+0
+],
+[
+"Gilded Light",
+1
+],
+[
+"Goblin Brigand",
+0
+],
+[
+"Goblin Psychopath",
+1
+],
+[
+"Goblin War Strike",
+0
+],
+[
+"Goblin Warchief",
+1
+],
+[
+"Grip of Chaos",
+2
+],
+[
+"Guilty Conscience",
+0
+],
+[
+"Hindering Touch",
+0
+],
+[
+"Hunting Pack",
+1
+],
+[
+"Karona's Zealot",
+1
+],
+[
+"Karona, False God",
+2
+],
+[
+"Krosan Drover",
+0
+],
+[
+"Krosan Warchief",
+1
+],
+[
+"Kurgadon",
+1
+],
+[
+"Lethal Vapors",
+2
+],
+[
+"Lingering Death",
+0
+],
+[
+"Long-Term Plans",
+1
+],
+[
+"Mercurial Kite",
+0
+],
+[
+"Metamorphose",
+1
+],
+[
+"Mind's Desire",
+2
+],
+[
+"Mischievous Quanar",
+2
+],
+[
+"Misguided Rage",
+0
+],
+[
+"Mistform Warchief",
+1
+],
+[
+"Nefashu",
+2
+],
+[
+"Noble Templar",
+0
+],
+[
+"One with Nature",
+1
+],
+[
+"Parallel Thoughts",
+2
+],
+[
+"Pemmin's Aura",
+1
+],
+[
+"Primitive Etchings",
+2
+],
+[
+"Proteus Machine",
+1
+],
+[
+"Putrid Raptor",
+1
+],
+[
+"Pyrostatic Pillar",
+1
+],
+[
+"Rain of Blades",
+1
+],
+[
+"Raven Guild Initiate",
+0
+],
+[
+"Raven Guild Master",
+2
+],
+[
+"Reaping the Graves",
+0
+],
+[
+"Recuperate",
+0
+],
+[
+"Reward the Faithful",
+1
+],
+[
+"Riptide Survivor",
+1
+],
+[
+"Rock Jockey",
+0
+],
+[
+"Root Elemental",
+2
+],
+[
+"Rush of Knowledge",
+0
+],
+[
+"Scattershot",
+0
+],
+[
+"Scornful Egotist",
+0
+],
+[
+"Shoreline Ranger",
+0
+],
+[
+"Siege-Gang Commander",
+2
+],
+[
+"Silver Knight",
+1
+],
+[
+"Skirk Volcanist",
+1
+],
+[
+"Skulltap",
+0
+],
+[
+"Sliver Overlord",
+2
+],
+[
+"Soul Collector",
+2
+],
+[
+"Spark Spray",
+0
+],
+[
+"Sprouting Vines",
+0
+],
+[
+"Stabilizer",
+2
+],
+[
+"Stifle",
+2
+],
+[
+"Sulfuric Vortex",
+2
+],
+[
+"Temple of the False God",
+1
+],
+[
+"Temporal Fissure",
+0
+],
+[
+"Tendrils of Agony",
+1
+],
+[
+"Thundercloud Elemental",
+1
+],
+[
+"Titanic Bulvox",
+0
+],
+[
+"Torrent of Fire",
+0
+],
+[
+"Trap Digger",
+2
+],
+[
+"Treetop Scout",
+0
+],
+[
+"Twisted Abomination",
+0
+],
+[
+"Unburden",
+0
+],
+[
+"Uncontrolled Infestation",
+0
+],
+[
+"Undead Warchief",
+1
+],
+[
+"Unspeakable Symbol",
+1
+],
+[
+"Upwelling",
+2
+],
+[
+"Vengeful Dead",
+0
+],
+[
+"Wing Shards",
+1
+],
+[
+"Wipe Clean",
+0
+],
+[
+"Wirewood Guardian",
+0
+],
+[
+"Wirewood Symbiote",
+1
+],
+[
+"Woodcloaker",
+0
+],
+[
+"Xantid Swarm",
+2
+],
+[
+"Zealous Inquisitor",
+0
+],
+[
+"Zombie Cutthroat",
+0
+]
+]
+}
+]

@@ -3,7 +3,8 @@
 The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the pool plays: `docs/MTG_SCOPE.md`
 (generated: `tools/mtg/scope.py`). This file: what is built, how it is built, what comes next.
 
-## Status (2026-11-04: in the game, 1.95.0)
+## Status (2026-11-05: in the game, 1.100.0)
+- **1.100.0: triggered abilities, booster packs by set, achievements** (COOP_NOTES "MAGIC"): 1136 of 5408 cards play.
 - **1.96.0: the presentation pass** (below): printed art, faces, every screen and the table like the other games'.
 - **Playable in the game at MOSSDEEP's CARD SHOP** (COOP_NOTES "MAGIC"): the clerk's starter decks, six regulars
   upstairs and down, the CARD CASE's MAGIC side (hidden until a deck), decks and the builder, the BINDER, boosters
@@ -70,11 +71,23 @@ The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the po
 - Effects: DealDamage, DamageAll, Draw, Destroy, DestroyAll, GainLife, LoseLife, Pump, PumpAll (until end of turn,
   keywords too), ChangeZone (targeted from the battlefield), Mana, Discard (at random), Tap, Untap, Counter.
 - Shroud. Discard to seven at cleanup.
+- Triggered abilities (mtg_trigger.c, TriggerHandler / Trigger<Mode>): ChangesZone (leaving the battlefield looked
+  at before the move, 603.10a; arriving after), Phase (the beginning of upkeep, draw, main 1, combat, end of combat,
+  main 2, the end step), SpellCast, DamageDone (combat or not), Attacks, AttackerBlocked, AttackerBlockedByCreature,
+  Blocks, AttackerUnblocked; TriggerZones (else correctZones' rule, else the battlefield), IsPresent / PresentCompare
+  / PresentZone (checked again as it resolves), OptionalDecider$ You. Waiting triggers (d->pending) go on the stack
+  when a player would get priority, the active player's first; no legal target: gone; one: taken; more: asked
+  (MTG_Q_TRIGGER_TARGET). Defined$ Triggered<Card|NewCard|Player|Activator|Source|Target|Attacker|Blocker|Defender|
+  DefendingPlayer|Attackers>[LKICopy][Controller|Owner], by mode (mtg_effects.c sTriggered).
+- Resolution that stops for a choice (MTG_Q_CHOOSE: YESNO, PAY, PICK): d->res / resAbility / resStage / resPicks /
+  resChoice hold where it is, Mtg_ResolveStep returns 0 while it waits. UnlessCost$ (mana or an amount SVar) with
+  UnlessPayer$ (default TargetedController: Mana Leak), Sacrifice (Self, or SacValid$ chosen by each Defined$ player),
+  Discard Mode$ TgtChoose / Hand (DiscardValid$), PutCounter (P1P1 / M1M1), ChangeZone from a graveyard (targets
+  there: MtgAbility.tgtZone; to the hand, library, exile or the battlefield, GainControl$).
 
 ## Next (in order of what unlocks the most: docs/MTG_SCOPE.md)
-1. **Triggers** (1042 cards first blocked; TriggerHandler and TriggerType: ChangesZone, Phase, DamageDone,
-   SpellCast, Attacks, blocks...), with mid-resolution choices (a query kind for "choose a card / a player / yes or
-   no" during resolution: the engine must stop inside a resolve and go on with the answer; ChooseCard, Dig...).
+1. Triggers: done in 1.100.0 for the modes above; the rest by the report (BecomesTarget, TurnFaceUp, Cycled,
+   DamageDoneOnce, Taps, Drawn, LandPlayed...) and their Execute$ effects (Effect, DelayedTrigger, Token...).
 2. **Static abilities** (507: StaticAbilityContinuous above all, the layer order of StaticEffects; CantBlock,
    CantAttack, cost changes).
 3. **Costs** (295: Sac<1/Creature>, Discard<1/Card>, PayLife, untap symbol...) and **Auras** (Enchant: 312).

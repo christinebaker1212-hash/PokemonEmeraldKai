@@ -120,8 +120,10 @@ static void Unsupported(MtgCardDef *c, const char *why)
     }
 }
 
+void Mtg_Unsupported(MtgCardDef *c, const char *why) { Unsupported(c, why); }
+
 // "SP$ DealDamage | ValidTgts$ Any | NumDmg$ 3" -> params (the first is the API: key "SP" / "AB" / "DB")
-static int ParseParams(char *s, int *first)
+int Mtg_ParseParams(char *s, int *first)
 {
     int n = 0;
     char *part = s;
@@ -216,7 +218,7 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     int first, n, idx;
     MtgAbility *ab;
     const char *sub, *v;
-    n = ParseParams(text, &first);
+    n = Mtg_ParseParams(text, &first);
     gMtgAbilities = Grow(gMtgAbilities, &sAbilityCap, sAbilityCount + 1, sizeof(MtgAbility));
     idx = sAbilityCount++;
     ab = &gMtgAbilities[idx];
@@ -239,6 +241,8 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         Unsupported(c, "cost");
     if (kind == MTG_AB_ACTIVATED && !Mtg_Param(ab, "Cost"))
         Unsupported(c, "cost");
+    if (kind != MTG_AB_SPELL && kind != MTG_AB_ACTIVATED && Mtg_Param(ab, "Cost"))
+        Unsupported(c, "optional cost");   // (a trigger's "you may pay ...": not yet)
     ab->tgt = Mtg_Param(ab, "ValidTgts");
     v = Mtg_Param(ab, "TargetType");
     if (v) {
@@ -249,6 +253,9 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     }
     if (ab->tgt && !Mtg_ValidSpecKnown(ab->tgt))
         Unsupported(c, "ValidTgts");
+    ab->tgtZone = MTG_ZONE_BATTLEFIELD;   // (ChangeZone targets cards where they come from: a graveyard)
+    if (ab->api == MTG_API_CHANGE_ZONE && (v = Mtg_Param(ab, "Origin")) && strcmp(v, "Graveyard") == 0)
+        ab->tgtZone = MTG_ZONE_GRAVEYARD;
     {
         const char *why;
         if (!Mtg_ApiParamsKnown(ab, &why))
@@ -262,6 +269,11 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         gMtgAbilities[idx].sub = s < 0 ? 0xFFFF : s;   // (the table may have moved)
     }
     return idx;
+}
+
+int Mtg_ParseAbilityText(MtgCardDef *c, int cardId, char *text, int kind)
+{
+    return ParseAbility(c, cardId, text, kind, 0);
 }
 
 static const struct { const char *name; int kw; } sKeywords[] = {
@@ -363,8 +375,8 @@ static int HasWordI(const char *s, const char *word)   // (case-insensitive: For
 static void ParseCard(int id, char *text)
 {
     MtgCardDef *c = &sCards[id];
-    char *lines[MTG_SCRIPT_LINES], *abilityLines[8], *line, *next;
-    int nLines = 0, nAbil = 0, i, k;
+    char *lines[MTG_SCRIPT_LINES], *abilityLines[8], *triggerLines[8], *line, *next;
+    int nLines = 0, nAbil = 0, nTrig = 0, i, k;
     memset(c, 0, sizeof(*c));
     c->supported = 1;
     c->oracle = "";
@@ -438,8 +450,12 @@ static void ParseCard(int id, char *text)
                 Unsupported(c, "too many abilities");
         } else if (strcmp(line, "Oracle") == 0)
             c->oracle = val;
-        else if (strcmp(line, "T") == 0)
-            Unsupported(c, "trigger");
+        else if (strcmp(line, "T") == 0) {
+            if (nTrig < 8)
+                triggerLines[nTrig++] = val;
+            else
+                Unsupported(c, "too many triggers");
+        }
         else if (strcmp(line, "S") == 0)
             Unsupported(c, "static ability");
         else if (strcmp(line, "R") == 0)
@@ -464,6 +480,8 @@ static void ParseCard(int id, char *text)
         }
         c->abilities[c->abilityCount++] = (uint16_t)ParseAbility(c, id, abilityLines[i], kind, 0);
     }
+    for (i = 0; i < nTrig; i++)
+        Mtg_ParseTrigger(c, id, triggerLines[i]);
     if ((c->types & (MTG_T_INSTANT | MTG_T_SORCERY))) {
         int spells = 0;
         for (i = 0; i < c->abilityCount; i++)

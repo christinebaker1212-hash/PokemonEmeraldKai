@@ -706,3 +706,4 @@ gSpecials::
 	def_special CompareJohtoMagikarpSize
 	def_special MP_JohtoCatchingTutorial
 	def_special Mtg_DuelistHello
+	def_special Mtg_ShopBoosters, waitstate=1

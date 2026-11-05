@@ -52,6 +52,8 @@ typedef struct MtgCardDef {
     uint8_t intrinsicMana;                   // basic land types' {T}: add one (MTG_COLOR_BIT), Forge's intrinsic abilities
     uint8_t abilityCount;
     uint16_t abilities[8];                   // indexes into the ability table (A: lines)
+    uint8_t triggerCount;
+    uint16_t triggers[6];                    // indexes into the trigger table (T: lines; mtg_trigger.c)
     uint16_t svarFirst, svarCount;           // the card's SVar: lines
     uint8_t rarity, banned;                  // MTG_RARITY_*; on Premodern's banned list (tools/mtg/pool.json)
     uint8_t supported;                       // every line understood by the engine
@@ -114,7 +116,21 @@ typedef struct {
     // last known information about the target as it resolves (Forge's LKI copies)
     int16_t lkiPower, lkiToughness;
     uint8_t lkiController;
+    // a triggered ability (TriggerHandler / WrappedAbility): its trigger, what set it off ("TriggeredCard"...), and
+    // whether its controller may choose not to (OptionalDecider$ You: asked as it resolves)
+    uint16_t trigger;             // trigger table index (0xFFFF: not a triggered ability)
+    uint16_t trigObj, trigObj2;   // the card that triggered it; the other card involved (a blocker, a damaged creature)
+    uint8_t trigPlayer, trigCtrl, optional;   // the player involved (by mode, mtg_trigger.c); trigObj's controller then
+    int16_t trigAmount;           // DamageDone: how much
 } MtgStackEntry;
+
+// a trigger waiting to go on the stack (the next time a player would get priority, in APNAP order)
+typedef struct {
+    uint16_t source, trigger, trigObj, trigObj2;
+    uint8_t controller, trigPlayer, trigCtrl;
+    int16_t trigAmount;
+} MtgPending;
+#define MTG_MAX_PENDING 24
 
 typedef struct {
     int16_t life;
@@ -125,7 +141,12 @@ typedef struct {
 } MtgPlayer;
 
 // what the duel waits for
-enum { MTG_Q_NONE, MTG_Q_PRIORITY, MTG_Q_ATTACKERS, MTG_Q_BLOCKERS, MTG_Q_DISCARD, MTG_Q_GAME_OVER };
+enum { MTG_Q_NONE, MTG_Q_PRIORITY, MTG_Q_ATTACKERS, MTG_Q_BLOCKERS, MTG_Q_DISCARD, MTG_Q_GAME_OVER,
+       MTG_Q_TRIGGER_TARGET,   // a triggered ability going on the stack: actions[] are its legal targets (no pass)
+       MTG_Q_CHOOSE };         // a choice while something resolves (choice: MTG_CHOICE_*)
+// MTG_Q_CHOOSE: answer.card is 1 yes / 0 no (YESNO, PAY: 1 pays), or the index into candidates (PICK: a card to
+// sacrifice or discard). MTG_Q_TRIGGER_TARGET: answer.action is the index into actions.
+enum { MTG_CHOICE_YESNO, MTG_CHOICE_PAY, MTG_CHOICE_PICK };
 enum { MTG_ACT_PASS, MTG_ACT_LAND, MTG_ACT_CAST, MTG_ACT_ACTIVATE };
 
 typedef struct {
@@ -145,19 +166,25 @@ typedef struct {
     uint16_t attackers[MTG_MAX_COMBAT];              // BLOCKERS: the attacking creatures
     uint8_t discard;                                 // DISCARD: how many to discard
     int8_t winner;                                   // GAME_OVER: 0/1, -1 a draw
+    // TRIGGER_TARGET / CHOOSE: the ability asking (its source and ability), the choice, the mana to pay (PAY)
+    uint16_t source, ability;
+    uint8_t choice;
+    MtgManaCost pay;
 } MtgQuery;
 
 typedef struct {
     uint16_t action;                                 // PRIORITY: index into actions
     uint32_t attack;                                 // ATTACKERS: bit i = candidates[i] attacks
     int8_t block[MTG_MAX_COMBAT];                    // BLOCKERS: candidate i blocks attackers[block[i]] or -1
-    uint8_t card;                                    // DISCARD: index into candidates
+    uint8_t card;                                    // DISCARD / CHOOSE: index into candidates (CHOOSE: or 1 / 0)
 } MtgAnswer;
 
 enum {
     MTG_EV_NONE, MTG_EV_TURN, MTG_EV_STEP, MTG_EV_DRAW, MTG_EV_LAND, MTG_EV_CAST, MTG_EV_ACTIVATE, MTG_EV_RESOLVE,
     MTG_EV_ZONE, MTG_EV_DAMAGE, MTG_EV_LIFE, MTG_EV_ATTACK, MTG_EV_BLOCK, MTG_EV_TAP, MTG_EV_COUNTERED,
-    MTG_EV_FIZZLE, MTG_EV_LOSE
+    MTG_EV_FIZZLE, MTG_EV_LOSE,
+    MTG_EV_TRIGGER,   // a triggered ability went on the stack: a = its source, b / c = its target (kind, id)
+    MTG_EV_COUNTERS   // a = the object, b = +1/+1 counters added (negative: -1/-1), c = its counters now
 };
 typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;   // a, b, c by kind (mtg_game.c Mtg_Event)
 
@@ -174,6 +201,15 @@ typedef struct MtgDuel {
     MtgObj objs[MTG_MAX_OBJS];
     uint8_t stackCount;
     MtgStackEntry stack[MTG_MAX_STACK];
+    // triggered abilities waiting to go on the stack
+    uint8_t pendingCount;
+    MtgPending pending[MTG_MAX_PENDING];
+    // what is resolving, when it stopped for a choice (MTG_Q_CHOOSE): the entry, the ability of its chain it's at,
+    // how far that ability got (resStage: its UnlessCost asked; resPicks: cards chosen so far)
+    uint8_t resolving, resStage, resPicks;
+    MtgStackEntry res;
+    uint16_t resAbility;
+    int16_t resChoice;                               // the answer: 1 / 0, or the object picked (-1: not asked yet)
     MtgQuery query;
     uint32_t eventCount;                             // every event so far (the ring keeps the last MTG_EVENT_RING)
     MtgEvent events[MTG_EVENT_RING];

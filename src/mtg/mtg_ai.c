@@ -194,6 +194,68 @@ static void Discard(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
     out->card = (uint8_t)best;
 }
 
+// a triggered ability's target: the opponent's best for what harms, its own best for what helps
+static int Helps(const MtgAbility *ab)
+{
+    const char *v;
+    switch (ab->api) {
+    case MTG_API_PUMP: case MTG_API_PUMP_ALL: case MTG_API_GAIN_LIFE: case MTG_API_DRAW: case MTG_API_UNTAP:
+        return !Mtg_Param(ab, "IsCurse");
+    case MTG_API_PUT_COUNTER:
+        return (v = Mtg_Param(ab, "CounterType")) && strcmp(v, "P1P1") == 0;
+    case MTG_API_CHANGE_ZONE:
+        return (v = Mtg_Param(ab, "Origin")) && strcmp(v, "Graveyard") == 0
+            && (v = Mtg_Param(ab, "Destination")) && strcmp(v, "Exile") != 0;
+    }
+    return 0;
+}
+
+static void TriggerTarget(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
+{
+    const MtgAbility *ab = &gMtgAbilities[q->ability];
+    int i, best = 0, bestScore = -1000, helps = Helps(ab);
+    for (i = 0; i < q->actionCount; i++) {
+        const MtgTarget *t = &q->actions[i].target;
+        int mine, worth, s;
+        if (t->kind == MTG_TGT_PLAYER) {
+            mine = t->id == q->player;
+            worth = 5;
+        } else {
+            const MtgObj *o = &d->objs[t->id];
+            mine = (o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner) == q->player;
+            worth = (Mtg_Card(o->def)->types & MTG_T_CREATURE) ? Mtg_Card(o->def)->power * 2 + Mtg_Card(o->def)->toughness
+                                                                : Mtg_ManaCostTotal(&Mtg_Card(o->def)->cost);
+        }
+        s = (mine == helps ? 100 : 0) + (mine == helps ? worth : -worth);
+        if (s > bestScore) {
+            bestScore = s;
+            best = i;
+        }
+    }
+    out->action = (uint16_t)best;
+}
+
+// a choice while resolving: "you may" yes, pay to keep its own things or to save its spell, the least to lose
+static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
+{
+    int i, best = 0, bestV = 1 << 30;
+    if (q->choice != MTG_CHOICE_PICK) {
+        out->card = 1;
+        return;
+    }
+    for (i = 0; i < q->candidateCount; i++) {
+        const MtgObj *o = &d->objs[q->candidates[i]];
+        const MtgCardDef *c = Mtg_Card(o->def);
+        int v = o->zone == MTG_ZONE_BATTLEFIELD && (c->types & MTG_T_CREATURE) ? Value(d, q->candidates[i])
+              : Mtg_ManaCostTotal(&c->cost) + ((c->types & MTG_T_LAND) ? 2 : 0);
+        if (v < bestV) {
+            bestV = v;
+            best = i;
+        }
+    }
+    out->card = (uint8_t)best;
+}
+
 void MtgAi_Answer(const MtgDuel *d, MtgAnswer *out)
 {
     const MtgQuery *q = Mtg_Query(d);
@@ -210,6 +272,12 @@ void MtgAi_Answer(const MtgDuel *d, MtgAnswer *out)
         break;
     case MTG_Q_DISCARD:
         Discard(d, q, out);
+        break;
+    case MTG_Q_TRIGGER_TARGET:
+        TriggerTarget(d, q, out);
+        break;
+    case MTG_Q_CHOOSE:
+        Choose(d, q, out);
         break;
     }
 }

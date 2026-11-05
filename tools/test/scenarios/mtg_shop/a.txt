@@ -30,7 +30,7 @@ press A 2
 wait 20
 press A 2
 wait 40
-mash A 8 20
+mash B 8 20
 wait 60
 mp mtg state
 mp cards case
@@ -206,10 +206,21 @@ pressuntillog START 600 mtg: duel over
 wait 120
 rendershot a_result
 press A 2
-wait 30
+wait 40
 rendershot a_after
-press A 2
+mp mtg state
+mp cards case
 wait 30
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+rendershot a_home_packs
+press A 2
+wait 20
+rendershot a_packs
+press A 2
+wait 8
 rendershot a_pack
 press A 2
 wait 40
@@ -223,13 +234,31 @@ rendershot a_booster_card
 press B 2
 wait 10
 press B 2
+wait 10
+rendershot a_packs_after
+press B 2
+wait 10
+press B 2
 wait 60
+mp mtg points 30
 mp mtg state
 mp warp 14,11,4,4
 wait 60
 mp face up
 wait 4
 press A 2
+wait 40
+pressuntillog A 600 mtg: card shop
+wait 20
+rendershot a_shop
+press A 2
+wait 10
+rendershot a_shop_ask
+press A 2
+wait 10
+press A 2
+wait 10
+press B 2
 wait 40
 press A 2
 wait 30

@@ -357,6 +357,149 @@ static void TestSpells(void)
 }
 
 // ---- whole duels between the stand-in AIs
+
+// a choice while something resolves (MTG_Q_CHOOSE): card = 1 / 0, or the candidate holding obj
+static void Choose(int card)
+{
+    MtgAnswer a;
+    memset(&a, 0, sizeof(a));
+    a.card = (uint8_t)card;
+    Answer(&a);
+}
+
+static void ChoosePick(int obj)
+{
+    const MtgQuery *q = Mtg_Query(&sD);
+    int i;
+    for (i = 0; i < q->candidateCount && q->candidates[i] != obj; i++)
+        ;
+    CHECK(i < q->candidateCount, "%s can be picked", Mtg_Card(sD.objs[obj].def)->name);
+    Choose(i);
+}
+
+static int HandCount(int player)
+{
+    int i, n = 0;
+    for (i = 0; i < sD.objCount; i++)
+        n += sD.objs[i].zone == MTG_ZONE_HAND && sD.objs[i].owner == player;
+    return n;
+}
+
+static void TestTriggers(void)
+{
+    const MtgQuery *q;
+    MtgAnswer a;
+    int nek, bears, angel, digger, dead, warden, specter, leak, wurm, braids, land, i;
+    printf("triggers: enters, dies, upkeep, damage, unless, sacrifice\n");
+
+    Table();   // Nekrataal: two legal targets, its controller chooses
+    Lands(0, "Swamp", 4);
+    nek = Put(0, "Nekrataal", MTG_ZONE_HAND);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    angel = Put(1, "Serra Angel", MTG_ZONE_BATTLEFIELD);
+    Put(1, "Dark Ritual", MTG_ZONE_EXILE);
+    Do(MTG_ACT_CAST, nek, -1, 0);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_TRIGGER_TARGET && q->player == 0 && q->actionCount == 2, "nekrataal asks for a target (%d, %d)",
+          q->kind, q->actionCount);
+    memset(&a, 0, sizeof(a));
+    for (i = 0; i < q->actionCount; i++)
+        if (q->actions[i].target.id == angel)
+            a.action = (uint16_t)i;
+    Answer(&a);
+    CHECK(sD.stackCount == 1 && sD.stack[0].trigger != 0xFFFF, "the trigger is on the stack");
+    PassBoth();
+    CHECK(Zone(angel) == MTG_ZONE_GRAVEYARD && Zone(bears) == MTG_ZONE_BATTLEFIELD, "the angel destroyed");
+
+    Table();   // Gravedigger: one target (chosen by itself), "you may" asked as it resolves
+    Lands(0, "Swamp", 4);
+    digger = Put(0, "Gravedigger", MTG_ZONE_HAND);
+    dead = Put(0, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+    Put(1, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+    Do(MTG_ACT_CAST, digger, -1, 0);
+    PassBoth();
+    CHECK(sD.stackCount == 1 && sD.stack[0].target.kind == MTG_TGT_OBJ && sD.stack[0].target.id == dead,
+          "gravedigger targets the only creature card in its graveyard");
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_YESNO && q->player == 0, "you may: asked (%d)", q->kind);
+    Choose(1);
+    CHECK(Zone(dead) == MTG_ZONE_HAND, "the bears back in hand");
+
+    Table();   // Soul Warden: another creature enters
+    Lands(0, "Forest", 2);
+    warden = Put(0, "Soul Warden", MTG_ZONE_BATTLEFIELD);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bears, -1, 0);
+    PassBoth();
+    PassBoth();
+    CHECK(sD.players[0].life == 21, "soul warden: %d", sD.players[0].life);
+    (void)warden;
+
+    Table();   // Hypnotic Specter's combat damage: a discard at random; Abyssal Specter's: of the player's choice
+    specter = Put(0, "Hypnotic Specter", MTG_ZONE_BATTLEFIELD);
+    Put(1, "Grizzly Bears", MTG_ZONE_HAND);
+    Put(1, "Giant Growth", MTG_ZONE_HAND);
+    Attack(1);
+    GoTo(0, MTG_STEP_COMBAT_END);
+    CHECK(sD.players[1].life == 18 && HandCount(1) == 1, "specter hit: %d life, %d cards", sD.players[1].life, HandCount(1));
+    (void)specter;
+
+    Table();
+    specter = Put(0, "Abyssal Specter", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_HAND);
+    wurm = Put(1, "Craw Wurm", MTG_ZONE_HAND);
+    Attack(1);
+    for (i = 0; i < 40 && Mtg_Query(&sD)->kind != MTG_Q_CHOOSE; i++)
+        Pass();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_PICK && q->player == 1 && q->candidateCount == 2,
+          "the damaged player picks the discard");
+    ChoosePick(wurm);
+    CHECK(Zone(wurm) == MTG_ZONE_GRAVEYARD && Zone(bears) == MTG_ZONE_HAND, "the wurm discarded");
+
+    Table();   // Mana Leak: paid, then not payable
+    Lands(0, "Forest", 9);
+    Lands(1, "Island", 2);
+    wurm = Put(0, "Craw Wurm", MTG_ZONE_HAND);
+    leak = Put(1, "Mana Leak", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, wurm, -1, 0);
+    Pass();
+    Do(MTG_ACT_CAST, leak, MTG_TGT_STACK, wurm);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_PAY && q->player == 0 && q->pay.generic == 3,
+          "the wurm's controller may pay 3");
+    Choose(1);
+    PassBoth();
+    CHECK(Zone(wurm) == MTG_ZONE_BATTLEFIELD, "paid: the wurm resolves");
+
+    Table();
+    Lands(0, "Forest", 6);
+    Lands(1, "Island", 2);
+    wurm = Put(0, "Craw Wurm", MTG_ZONE_HAND);
+    leak = Put(1, "Mana Leak", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, wurm, -1, 0);
+    Pass();
+    Do(MTG_ACT_CAST, leak, MTG_TGT_STACK, wurm);
+    PassBoth();
+    CHECK(Zone(wurm) == MTG_ZONE_GRAVEYARD, "no mana left: countered without asking");
+
+    Table();   // Braids: each upkeep, that player sacrifices an artifact, creature or land of their choice
+    braids = Put(0, "Braids, Cabal Minion", MTG_ZONE_BATTLEFIELD);
+    land = Put(1, "Island", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    for (i = 0; i < 60 && Mtg_Query(&sD)->kind != MTG_Q_CHOOSE; i++)
+        Pass();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->player == 1 && sD.step == MTG_STEP_UPKEEP && sD.active == 1,
+          "the opponent sacrifices in their upkeep");
+    ChoosePick(land);
+    CHECK(Zone(land) == MTG_ZONE_GRAVEYARD && Zone(bears) == MTG_ZONE_BATTLEFIELD, "the island sacrificed");
+    (void)braids;
+}
+
 static void Deck(MtgDeck *d, const char *land, const char *const *cards)
 {
     int i;
@@ -451,7 +594,8 @@ static void TestCollection(void)
 {
     static MtgCollection c, back;
     static uint8_t buf[200000];
-    uint16_t booster[MTG_BOOSTER];
+    uint16_t booster[MTG_PACK_MAX];
+    uint8_t rarity[MTG_PACK_MAX];
     MtgSavedDeck d;
     int i, k, n;
     uint32_t size;
@@ -473,10 +617,36 @@ static void TestCollection(void)
     CHECK(c.optedIn && c.decks[0].count == 40 && !strcmp(c.decks[0].name, "WILDWOOD"), "the starter is deck 0");
     CHECK(Mtg_DeckProblem(&c, &c.decks[0]) == NULL, "the starter is owned: %s", Mtg_DeckProblem(&c, &c.decks[0]));
     CHECK(c.owned[Card("Llanowar Elves")] == 2 && c.owned[Card("Forest")] == 0, "owned: 2 elves, forests free");
-    n = Mtg_OpenBooster(&c, booster);
-    CHECK(n == MTG_BOOSTER, "a booster of %d", n);
-    for (i = 0; i < n; i++)
-        CHECK(Mtg_CanUse(booster[i]) && !Mtg_IsBasicLand(booster[i]) && c.owned[booster[i]] > 0, "booster card usable");
+    {   // boosters: by set, held, then opened (11 commons, 3 uncommons, a rare in most sets)
+        int set = -1, avail = 0, j, rares = 0, dups = 0;
+        for (i = 0; i < MTG_SETS; i++)
+            if (Mtg_SetAvailable(i)) {
+                avail++;
+                if (set < 0 && gMtgSets[i].commons == 11)
+                    set = i;
+            }
+        printf("  %d of %d booster sets open\n", avail, MTG_SETS);
+        CHECK(avail >= 8 && set >= 0, "enough booster sets play (%d)", avail);
+        CHECK(Mtg_OpenPack(&c, set, booster, rarity) == 0, "no booster held: nothing opens");
+        CHECK(Mtg_AwardPack(&c, set) && Mtg_AwardPack(&c, set) && c.packs[set] == 2, "two boosters held");
+        n = Mtg_OpenPack(&c, set, booster, rarity);
+        CHECK(n == 15 && c.packs[set] == 1 && c.opened[set] == 1 && c.packsOpened == 1, "a booster of %d", n);
+        for (i = 0; i < n; i++) {
+            uint16_t ids[512];
+            uint8_t rs[512];
+            int m = Mtg_SetCards(set, ids, rs), in = 0;
+            for (j = 0; j < m; j++)
+                in |= ids[j] == booster[i];
+            CHECK(in && Mtg_CanUse(booster[i]) && !Mtg_IsBasicLand(booster[i]) && c.owned[booster[i]] > 0,
+                  "booster card %d from the set, usable", i);
+            for (j = 0; j < i; j++)
+                dups += booster[j] == booster[i];
+            rares += rarity[i] == MTG_RARITY_RARE;
+        }
+        CHECK(rarity[0] == MTG_RARITY_COMMON && rarity[n - 1] == MTG_RARITY_RARE && rares == 1 && !dups,
+              "commons first, one rare last, no card twice (%d rares, %d twice)", rares, dups);
+        CHECK(Mtg_SetMascot(set) >= 0, "the set's pack has a card on it");
+    }
     d = c.decks[0];
     Mtg_DeckAdd(&d, Card("Llanowar Elves"));
     Mtg_DeckAdd(&d, Card("Llanowar Elves"));
@@ -498,16 +668,21 @@ static void TestCollection(void)
               c.decks[k].count * 2) && !strcmp(back.decks[k].name, c.decks[k].name), "deck %d came back", k);
     CHECK(back.ace[0] == c.ace[0] && back.ace[1] == -1, "the ACE CARDs came back");
     CHECK(back.tray[2] == 0x41 && back.tray[0] == 0, "the tray colors came back");
+    CHECK(!memcmp(back.packs, c.packs, sizeof(c.packs)) && !memcmp(back.opened, c.opened, sizeof(c.opened))
+          && back.packsOpened == 1, "the boosters came back");
     CHECK(Mtg_DeckAce(&back, 0) == (Mtg_DeckCopies(&back.decks[0], c.ace[0]) ? c.ace[0] : Mtg_AutoAce(back.decks[0].cards,
           back.decks[0].count)), "the ACE CARD stands for its deck");
     {   // a format 1 file (no ACE CARDs at its end) still reads, every deck's ace picked by the game
+        uint32_t v4 = 3 + 6;   // (format 4's boosters: one set's)
         buf[4] = 1;
-        CHECK(Mtg_CollectionRead(&back, buf, size - MTG_DECKS * 5) && back.ace[0] == -1 && back.decks[3].count == 41
-              && !back.tray[2], "format 1 reads");
+        CHECK(Mtg_CollectionRead(&back, buf, size - v4 - MTG_DECKS * 5) && back.ace[0] == -1
+              && back.decks[3].count == 41 && !back.tray[2], "format 1 reads");
         buf[4] = 2;
-        CHECK(Mtg_CollectionRead(&back, buf, size - MTG_DECKS) && back.ace[0] == c.ace[0] && !back.tray[2],
+        CHECK(Mtg_CollectionRead(&back, buf, size - v4 - MTG_DECKS) && back.ace[0] == c.ace[0] && !back.tray[2],
               "format 2 reads");
         buf[4] = 3;
+        CHECK(Mtg_CollectionRead(&back, buf, size - v4) && back.tray[2] == 0x41 && !back.packsOpened, "format 3 reads");
+        buf[4] = 4;
     }
     CHECK(!Mtg_CollectionRead(&back, buf, 3), "a cut file is refused");
 }
@@ -529,6 +704,7 @@ int main(int argc, char **argv)
     TestCombat();
     TestMana();
     TestSpells();
+    TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

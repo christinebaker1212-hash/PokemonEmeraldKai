@@ -12,6 +12,8 @@
 #include "text.h"
 #include "mp.h"
 #include "mtg/integration.h"
+#include "tcg/integration.h"
+#include "tcg/tcg.h"
 
 extern char gPlatformSavePath[512];
 extern const uint8_t gMtgForgePak[], gMtgForgePakEnd[];
@@ -84,6 +86,11 @@ void Mtg_ShopState(void)
 void Mtg_ShopStarter(void)
 {
     MtgUi_OpenStarter();
+}
+
+void Mtg_ShopBoosters(void)
+{
+    MtgUi_OpenShop();
 }
 
 void Mtg_DuelistState(void)
@@ -167,6 +174,25 @@ void Mtg_Debug(const char *command)
     else if (strncmp(command, "focus ", 6) == 0) {
         void MtgBoard_DebugFocus(const char *name);
         MtgBoard_DebugFocus(command + 6);
+    } else if (sscanf(command, "points %u", &n) == 1) {
+        Tcg_GetCollection()->dust = n;
+        MPNet_Log("mtg: %u card points", n);
+    } else if (strncmp(command, "pack ", 5) == 0) {
+        char code[8];
+        int set;
+        if (sscanf(command + 5, "%7s %u", code, &n) == 2 && (set = Mtg_SetByCode(code)) >= 0) {
+            c->packs[set] = (uint8_t)(n > MTG_PACKS_MAX ? MTG_PACKS_MAX : n);
+            MPNet_Log("mtg: %u %s boosters", n, code);
+        } else
+            MPNet_Log("mtg: pack CODE COUNT");
+    } else if (strncmp(command, "put ", 4) == 0) {
+        void MtgBoard_DebugPut(int player, const char *zone, const char *name);
+        char zone[16];
+        int at = 0;
+        if (sscanf(command + 4, "%u %15s %n", &n, zone, &at) == 2 && at)
+            MtgBoard_DebugPut((int)n, zone, command + 4 + at);
+        else
+            MPNet_Log("mtg: put PLAYER hand|field|grave NAME");
     } else if (strncmp(command, "table", 5) == 0) {
         void MtgBoard_DebugState(void);
         MtgBoard_DebugState();
