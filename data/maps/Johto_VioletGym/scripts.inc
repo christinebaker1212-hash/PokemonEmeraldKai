@@ -174,27 +174,18 @@ Johto_VioletGym_Text_83FF6AF::
 	.string "rookie trainer…$"
 
 Johto_VioletGym_Text_83FF6E0::
-	.string "Hey! What’s up? I’m no trainer,\n"
-	.string "but I can give some advice!\p"
+	.string "Hey! I’m no trainer but I can give\n"
+	.string "some advice!\p"
 	.string "Believe me! If you believe, a\n"
 	.string "championship dream can come true.\p"
 	.string "You believe? Then listen.\p"
-	.string "FALKNER’s ace is a bulky owl\n"
-	.string "that loves to eat BERRIES.\p"
-	.string "While it’s not the strongest,\n"
-	.string "it can take a lot of hits.\p"
-	.string "You can hurt it with ELECTRIC \n"
-	.string "and ROCK-type moves, but watch out\l"
-	.string "for MUD-SLAP!\p"
-	.string "If you want more help, go visit the\n"
-	.string "MOéMON ACADEMY.\p"
-	.string "The students there really know\n"
-	.string "their stuff!$"
+	.string "The grass-type is weak against the\n"
+	.string "flying-type. Keep this in mind.$"
 
 Johto_VioletGym_Text_83FF898::
-	.string "Nice battle! Keep it up,\n"
-	.string "and you’ll be the CHAMP in no\l"
-	.string "time at all!$"
+	.string "Nice battle! Keep it up, and\n"
+	.string "you’ll be the CHAMP in no time at\l"
+	.string "all!$"
 
 Johto_VioletGym_Text_83FF8FC::
 	.string "VIOLET CITY MOéMON GYM$"

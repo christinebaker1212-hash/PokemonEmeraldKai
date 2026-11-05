@@ -4590,6 +4590,17 @@ follow_behind, follow_ground.
   ROUTE 36 (new sighting, FLAG_TEMP_11), CIANWOOD again... until TIN TOWER (VAR_QZ_0x502D 1/2/3, 9 = over). Not
   carried over: the DANCE THEATER's RHYDON (no sprite). Tests johto_dance_theater, johto_wise_trio, johto_wings,
   johto_suicune_chase.
+- **Case 57, the original games' trainer teams**: KANTO's trainers fight FireRed's teams, JOHTO's Crystal's, unless the
+  GENERATION's modern teams are on (5+): src/data/qz_original_teams.h from tools/quetzal_port/gen_original_teams.py
+  (pokefirered trainers.h / trainer_parties.h, pokecrystal parties.asm + dvs.asm: each class's DVs as the trainer IV),
+  read by mp_region.c TrainerDataFor (OriginalTeam, a binary search by trainer number) after RED / BLUE / the ELITE FOUR
+  rematch and before the GENERATION's teams. Pairing: KANTO's maps are FireRed's, so a trainer object is FireRed's on the
+  same cell (443); one fought from a script only (ELITE FOUR, GIOVANNI, grunts) is FireRed's of the same name in the
+  same map's scripts. JOHTO by name on the same map (MAP_ALIAS joins Quetzal's merged maps: the LIGHTHOUSE's floors,
+  BLACKTHORN's GYM...), Quetzal's QzUseAltGymLeaderTeam copies take the same team, SILVER is Crystal's RIVAL with
+  TOTODILE (MP_Region_TrainerData swaps the line), the ROCKET executives by EXECUTIVES, then a name only one Crystal
+  trainer has (251). Unpaired (Quetzal's or HGSS's own: ROUTE 47, ETO, MAXIE / ARCHIE...) keep Quetzal's. VIOLET's and
+  ECRUTEAK's GYM guides say Crystal's words again. Tests johto_crystal_teams, kanto_firered_teams (GEN 3).
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).

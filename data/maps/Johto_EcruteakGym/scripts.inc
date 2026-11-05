@@ -216,15 +216,10 @@ Johto_EcruteakGym_Text_83CE471::
 	.string "your eyes!$"
 
 Johto_EcruteakGym_Text_83CE4C9::
-	.string "Hey, CHAMP! You’re almost\n"
-	.string "halfway there!\p"
-	.string "Everyone here uses GHOST-type\n"
-	.string "MOéMON.\p"
-	.string "NORMAL- and FIGHTING-type hits\n"
-	.string "usually can’t hurt them.\p"
-	.string "Watch out for MORTY’s illusions\n"
-	.string "and his powerful GENGAR!\p"
-	.string "Don’t trust appearances!$"
+	.string "The trainers here have secret\n"
+	.string "motives.\p"
+	.string "If you win, they may tell you some\n"
+	.string "deep secrets about ECRUTEAK.$"
 
 Johto_EcruteakGym_Text_83CE5A3::
 	.string "Whew, {PLAYER}. You did great!\p"

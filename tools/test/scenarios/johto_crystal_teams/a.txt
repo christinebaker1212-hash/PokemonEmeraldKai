@@ -1,0 +1,8 @@
+pressuntil A field 5000
+wait 30
+mp trainer 1145
+waitfor battle 1200
+wait 120
+mp bmons
+mp foeparty
+quit

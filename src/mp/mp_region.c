@@ -2267,17 +2267,24 @@ static const struct TrainerMonNoItemCustomMoves sCrRed[] = {
 static const struct { u16 trainerNum; struct TrainerMonNoItemCustomMoves const *party; u8 count; } sCrystalTeams[] = {
     {TRAINER_QZ_4327, sCrRed, ARRAY_COUNT(sCrRed)},
 };
-// ...and with their level-up moves: the DANCE THEATER's five KIMONO GIRLS (audit case 65; Quetzal's were its Lv 48
-// story rematches)
-static const struct TrainerMonNoItemDefaultMoves sCrNaoko[] = {{.iv = 0, .lvl = 17, .species = SPECIES_FLAREON}};
-static const struct TrainerMonNoItemDefaultMoves sCrSayo[] = {{.iv = 0, .lvl = 17, .species = SPECIES_ESPEON}};
-static const struct TrainerMonNoItemDefaultMoves sCrZuki[] = {{.iv = 0, .lvl = 17, .species = SPECIES_UMBREON}};
-static const struct TrainerMonNoItemDefaultMoves sCrKuni[] = {{.iv = 0, .lvl = 17, .species = SPECIES_VAPOREON}};
-static const struct TrainerMonNoItemDefaultMoves sCrMiki[] = {{.iv = 0, .lvl = 17, .species = SPECIES_JOLTEON}};
-static const struct { u16 trainerNum; struct TrainerMonNoItemDefaultMoves const *party; u8 count; } sCrystalPlainTeams[] = {
-    {TRAINER_QZ_4312, sCrNaoko, 1}, {TRAINER_QZ_4098, sCrSayo, 1}, {TRAINER_QZ_4114, sCrZuki, 1},
-    {TRAINER_QZ_4143, sCrKuni, 1}, {TRAINER_QZ_4594, sCrMiki, 1},
-};
+
+#include "../data/qz_original_teams.h"
+
+static const struct QzOriginalTeam *OriginalTeam(u16 trainerNum)
+{
+    s32 lo = 0, hi = ARRAY_COUNT(sQzOriginalTeams) - 1;
+    while (lo <= hi)
+    {
+        s32 mid = (lo + hi) / 2;
+        if (sQzOriginalTeams[mid].trainerNum == trainerNum)
+            return &sQzOriginalTeams[mid];
+        if (sQzOriginalTeams[mid].trainerNum < trainerNum)
+            lo = mid + 1;
+        else
+            hi = mid - 1;
+    }
+    return NULL;
+}
 
 // MT. SILVER's way at the VICTORY ROAD gate: open with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER)
 u16 MP_MtSilverOpen(void)
@@ -2328,17 +2335,6 @@ static const struct Trainer *TrainerDataFor(u16 trainerNum)
             return &sCopy;
         }
     }
-    for (i = 0; i < ARRAY_COUNT(sCrystalPlainTeams); i++)
-    {
-        if (sCrystalPlainTeams[i].trainerNum == trainerNum)
-        {
-            sCopy = gTrainers[trainerNum];
-            sCopy.partyFlags = 0;
-            sCopy.partySize = sCrystalPlainTeams[i].count;
-            sCopy.party.NoItemDefaultMoves = sCrystalPlainTeams[i].party;
-            return &sCopy;
-        }
-    }
     for (i = 0; i < ARRAY_COUNT(sFireRedTeams); i++)
     {
         if (sFireRedTeams[i].trainerNum == trainerNum)
@@ -2347,6 +2343,20 @@ static const struct Trainer *TrainerDataFor(u16 trainerNum)
             sCopy.partyFlags = 0;
             sCopy.partySize = sFireRedTeams[i].count;
             sCopy.party.NoItemDefaultMoves = sFireRedTeams[i].party;
+            return &sCopy;
+        }
+    }
+    // KANTO's trainers on FireRed's teams, JOHTO's on Crystal's (audit case 57), unless the GENERATION's modern teams
+    // are on (5+)
+    if (trainerNum >= FIRST_QZ_TRAINER && trainerNum < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT && !RegionUsesModern())
+    {
+        const struct QzOriginalTeam *o = OriginalTeam(trainerNum);
+        if (o != NULL)
+        {
+            sCopy = gTrainers[trainerNum];
+            sCopy.partyFlags = o->partyFlags;
+            sCopy.partySize = o->partySize;
+            sCopy.party.NoItemDefaultMoves = o->party;
             return &sCopy;
         }
     }

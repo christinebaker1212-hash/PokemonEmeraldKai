@@ -1,0 +1,8 @@
+# JOHTO's trainers on Crystal's teams (audit case 57): FALKNER (Quetzal's alt-team copy too) brings Crystal's PIDGEY
+# (16) with TACKLE / MUD-SLAP (33 / 189)
+MODE=1
+GEN=3
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("bmon 1: species 16 moves 33 189 0 0" "foeparty: 16:7 17:9")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -120,6 +120,8 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `johto_wise_trio` | The WISE TRIO: turned back without the CLEAR BELL, KOJI battles and steps aside, TIN TOWER 1F's SUICUNE battle ends the chase |
 | `johto_wings` | The RAINBOW WING after the LEAGUE with the three beasts (the stairs appear), HO-OH and LUGIA only with their wings, PEWTER's SILVER WING |
 | `johto_suicune_chase` | SUICUNE's chase: not at CIANWOOD before the BURNED TOWER, then CIANWOOD, ROUTE 36, back to CIANWOOD |
+| `johto_crystal_teams` | JOHTO's trainers on Crystal's teams at GEN 3: FALKNER's PIDGEY Lv 7 with TACKLE / MUD-SLAP, PIDGEOTTO Lv 9 |
+| `kanto_firered_teams` | KANTO's trainers on FireRed's teams at GEN 3: ROUTE 3's BEN with RATTATA and EKANS Lv 11 |
 | `johto_bugcontest_crystal` | the Bug-Catching Contest on a THURSDAY: five of Crystal's contestants in the park, a second catch asks to switch, "finish now?" at the way out, the judging in a line, the catch joins the party and the lead keeps its EXP |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |

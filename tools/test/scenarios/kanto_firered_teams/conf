@@ -1,0 +1,7 @@
+# KANTO's trainers on FireRed's teams (audit case 57): ROUTE 3's YOUNGSTER BEN brings FireRed's RATTATA (19)
+MODE=1
+GEN=3
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("foeparty: 19:11 23:11")
+UNEXPECT_A=("[crash]" "TIMEOUT")
