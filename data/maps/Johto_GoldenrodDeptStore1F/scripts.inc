@@ -73,11 +73,10 @@ Johto_GoldenrodDeptStore1F_Text_83D3AB5::
 	.string "prices.$"
 
 Johto_GoldenrodDeptStore1F_Text_83D3AFB::
-	.string "1F SERVICE COUNTER\n"
-	.string "YOU ARE HERE.\p"
-	.string "2F ITEMS & BATTLE TOOLS\p"
-	.string "3F TRAINING & MINTS\p"
-	.string "4F EVOLUTION & FORMS\p"
-	.string "5F MEGA, Z & TERA\p"
+	.string "1F SERVICE COUNTER\p"
+	.string "2F TRAINER’S MARKET\p"
+	.string "3F BATTLE COLLECTION\p"
+	.string "4F MEDICINE BOX\p"
+	.string "5F TM CORNER\p"
 	.string "6F TRANQUIL SQUARE\p"
 	.string "ROOFTOP LOOKOUT$"

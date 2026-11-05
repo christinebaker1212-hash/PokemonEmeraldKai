@@ -640,6 +640,26 @@ void MP_JohtoCatchingTutorial(void)
     CreateBattleStartTask(B_TRANSITION_SLICE, 0);
 }
 
+// Moemon Kai: FireRed's VIRIDIAN OLD MAN catches a wild Lv. 5 WEEDLE to show how (pokefirered
+// StartOldManTutorialBattle; docs/REGIONS_AUDIT.md 120), with FireRed's back picture of him
+// (tools/quetzal_port/gen_oldman_back.py), as the DUDE above
+static const u8 sOldManBack[] __attribute__((aligned(4))) = INCBIN_U8("graphics/moemon/oldman_back.bin");
+void MP_KantoCatchingTutorial(void)
+{
+    static const u8 sOldMan[] = _("OLD MAN");
+    u16 MP_Avatar_TilesBackPic(const u8 *tiles, const u16 *pal);
+    ZeroEnemyPartyMons();
+    CreateMon(&gEnemyParty[0], SPECIES_WEEDLE, 5, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    gWallyTutorialBackPic = MP_Avatar_TilesBackPic(sOldManBack, (const u16 *)(sOldManBack + 4 * TRAINER_PIC_SIZE));
+    gWallyTutorialName = sOldMan;
+    gWallyTutorialThrowFirst = TRUE;
+    MP_WallyTutorialSetName(gWallyTutorialName);
+    LockPlayerFieldControls();
+    gMain.savedCallback = CB2_ReturnToFieldContinueScriptPlayMapMusic;
+    gBattleTypeFlags = BATTLE_TYPE_WALLY_TUTORIAL;
+    CreateBattleStartTask(B_TRANSITION_SLICE, 0);
+}
+
 void BattleSetup_StartScriptedWildBattle(void)
 {
     LockPlayerFieldControls();

@@ -4,7 +4,7 @@ Kanto_CeladonCity_DepartmentStore_3F_MapScripts::
 @ Kanto_CeladonCity_DepartmentStore_3F object 1 (local id 1, gfx 0x3EFA) at 10,9
 Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BBC1::
 	@ Moemon Kai: FireRed's COUNTER tutor (pokefirered data/scripts/move_tutors.inc EventScript_CounterTutor), on Kai's
-	@ move tutors; Quetzal's battle-supplies counter below is no longer reached
+	@ move tutors (Quetzal's battle-supplies counter is gone)
 	lock
 	faceplayer
 	goto_if_set 0x221C, Kanto_CeladonCity_DepartmentStore_3F_EventScript_CounterTaught
@@ -29,50 +29,6 @@ Kanto_CeladonCity_DepartmentStore_3F_EventScript_CounterTaught::
 	msgbox Kanto_CeladonCity_DepartmentStore_3F_Text_CounterTaught, MSGBOX_DEFAULT
 	release
 	end
-
-Kanto_CeladonCity_DepartmentStore_3F_EventScript_QuetzalShop::
-	lock
-	faceplayer
-
-Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BBD3::
-	message Kanto_CeladonCity_DepartmentStore_3F_Text_8445A81
-	waitmessage
-	multichoice 0, 0, MULTI_QZ_0x8B, 1
-	nop
-	copyvar VAR_0x8000, VAR_RESULT
-	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BC25
-	goto_if_eq VAR_0x8000, 1, Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BC30
-	goto_if_eq VAR_0x8000, 2, Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BC3B
-	goto_if_eq VAR_0x8000, 3, Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BC46
-	goto_if_eq VAR_0x8000, 4, Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BC51
-	msgbox Quetzal_Text_84565DA, MSGBOX_DEFAULT
-	release
-	end
-
-Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BC25::
-	closemessage
-	pokemart Kanto_CeladonCity_DepartmentStore_3F_Mart_841BCC0
-	goto Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BBD3
-
-Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BC30::
-	closemessage
-	pokemart Kanto_CeladonCity_DepartmentStore_3F_Mart_841BD34
-	goto Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BBD3
-
-Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BC3B::
-	closemessage
-	pokemart Kanto_CeladonCity_DepartmentStore_3F_Mart_841BD58
-	goto Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BBD3
-
-Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BC46::
-	closemessage
-	pokemart Kanto_CeladonCity_DepartmentStore_3F_Mart_841BD78
-	goto Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BBD3
-
-Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BC51::
-	closemessage
-	pokemart Kanto_CeladonCity_DepartmentStore_3F_Mart_841BDA0
-	goto Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BBD3
 
 @ Kanto_CeladonCity_DepartmentStore_3F object 2 (local id 2, gfx 0x3F08) at 11,6
 Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BC5C::
@@ -133,81 +89,6 @@ Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BCB6::
 	msgbox Kanto_CeladonCity_DepartmentStore_3F_Text_8445ABF, MSGBOX_SIGN
 	end
 
-Kanto_CeladonCity_DepartmentStore_3F_Mart_841BCC0:
-	.2byte ITEM_LEFTOVERS
-	.2byte ITEM_BRIGHT_POWDER
-	.2byte ITEM_WHITE_HERB
-	.2byte ITEM_QUICK_CLAW
-	.2byte ITEM_MENTAL_HERB
-	.2byte ITEM_FOCUS_BAND
-	.2byte ITEM_SCOPE_LENS
-	.2byte ITEM_CHOICE_BAND
-	.2byte ITEM_CHOICE_SPECS
-	.2byte ITEM_CHOICE_SCARF
-	.2byte ITEM_SHELL_BELL
-	.2byte ITEM_WIDE_LENS
-	.2byte ITEM_MUSCLE_BAND
-	.2byte ITEM_WISE_GLASSES
-	.2byte ITEM_EXPERT_BELT
-	.2byte ITEM_LIGHT_CLAY
-	.2byte ITEM_LIFE_ORB
-	.2byte ITEM_POWER_HERB
-	.2byte ITEM_FOCUS_SASH
-	.2byte ITEM_ZOOM_LENS
-	.2byte ITEM_METRONOME
-	.2byte ITEM_IRON_BALL
-	.2byte ITEM_LAGGING_TAIL
-	.2byte ITEM_DESTINY_KNOT
-	.2byte ITEM_BLACK_SLUDGE
-	.2byte ITEM_GRIP_CLAW
-	.2byte ITEM_STICKY_BARB
-	.2byte ITEM_SHED_SHELL
-	.2byte ITEM_BIG_ROOT
-	.2byte ITEM_EVIOLITE
-	.2byte ITEM_NONE
-
-Kanto_CeladonCity_DepartmentStore_3F_Mart_841BD34:
-	.2byte ITEM_SILK_SCARF
-	.2byte ITEM_CHARCOAL
-	.2byte ITEM_MYSTIC_WATER
-	.2byte ITEM_MAGNET
-	.2byte ITEM_MIRACLE_SEED
-	.2byte ITEM_NEVER_MELT_ICE
-	.2byte ITEM_BLACK_BELT
-	.2byte ITEM_POISON_BARB
-	.2byte ITEM_SOFT_SAND
-	.2byte ITEM_SHARP_BEAK
-	.2byte ITEM_TWISTED_SPOON
-	.2byte ITEM_SILVER_POWDER
-	.2byte ITEM_HARD_STONE
-	.2byte ITEM_SPELL_TAG
-	.2byte ITEM_DRAGON_FANG
-	.2byte ITEM_BLACK_GLASSES
-	.2byte ITEM_NONE
-
-Kanto_CeladonCity_DepartmentStore_3F_Mart_841BD58:
-	.2byte ITEM_FLAME_ORB
-	.2byte ITEM_TOXIC_ORB
-	.2byte ITEM_DAMP_ROCK
-	.2byte ITEM_HEAT_ROCK
-	.2byte ITEM_SMOOTH_ROCK
-	.2byte ITEM_ICY_ROCK
-	.2byte ITEM_NONE
-
-Kanto_CeladonCity_DepartmentStore_3F_Mart_841BD78:
-	.2byte ITEM_NONE
-
-Kanto_CeladonCity_DepartmentStore_3F_Mart_841BDA0:
-	.2byte ITEM_X_SPEED
-	.2byte ITEM_X_SPECIAL
-	.2byte ITEM_X_ATTACK
-	.2byte ITEM_X_DEFEND
-	.2byte ITEM_X_SP_DEF
-	.2byte ITEM_DIRE_HIT
-	.2byte ITEM_GUARD_SPEC
-	.2byte ITEM_X_ACCURACY
-	.2byte ITEM_NONE
-
 Kanto_CeladonCity_DepartmentStore_3F_Text_844582E::
 	.string "Captured MOéMON are registered\n"
 	.string "with an ID No. and the OT.\p"
@@ -251,9 +132,7 @@ Kanto_CeladonCity_DepartmentStore_3F_Text_8445A1D::
 	.string "Looks tough!$"
 
 Kanto_CeladonCity_DepartmentStore_3F_Text_8445A3B::
-	.string "3F: BATTLE SUPPLIES\p"
-	.string "Held, type, and weather items,\n"
-	.string "gems, and X items.$"
+	.string "3F: TV GAME SHOP$"
 
 Kanto_CeladonCity_DepartmentStore_3F_Text_8445A81::
 	.string "Get your team ready for battle.\n"

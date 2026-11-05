@@ -4466,6 +4466,24 @@ follow_behind, follow_ground.
   "<save>.card" format 4 keeps them, friends get them as 2 bytes after the signature (older games ignore them). Test
   kanto_card_photo (`mp tcard info` prints the tint and stickers).
 
+## The audit's batch I (1.108.0)
+- Cases 25 / 71: CELADON DEPT. STORE is FireRed's: the directory, floor signs and people's lines (restore_words), one
+  list per clerk with "May I help you?" (2F items + TMs, 4F POKé DOLL / mail / stones, 5F X items + vitamins) and
+  no section menus; Kai's newer items ride on those lists in src/shop.c (HGSS balls at the 2F items clerk, battle and
+  gimmick items at 5F's, training items and curios at the vitamins clerk); Quetzal's 3F shop and berry / herb lists are
+  gone (every item still somewhere: item_audit.py).
+- Case 74: FireRed's CYCLING ROAD slope (bike.c CyclingRoadSlope): on CELADON's metatiles 800-850 (FireRed's
+  MB_CYCLING_ROAD_PULL_DOWN, lost in the port's behaviors) the bike rolls south unless B is held; any other way is
+  ridden slowly. Test kanto_cycling_slope.
+- Case 96: GOLDENROD DEPT. STORE's directory and floor signs are Crystal's, its shoppers too (2F youngster and
+  gentleman, 3F super nerd and rocker, 4F bug catcher added; 4F GAMEBOY KID and 5F lass in Crystal's words), B1F's
+  BURN HEAL. The roof keeps Quetzal's drawing (no binocular or doll machine art to hang Crystal's lines on).
+- Case 120: VIRIDIAN's OLD MAN catches a WEEDLE to show how (battle_setup.c MP_KantoCatchingTutorial, FireRed's back
+  picture from tools/quetzal_port/gen_oldman_back.py -> graphics/moemon/oldman_back.bin), then FireRed's advice; no
+  TEACHY TV (the user's call). Test kanto_oldman_catch.
+- Case 156: JOHTO's SAFARI ZONE gate clerks: the weather clerk sells the terrain seeds he talks about; the modern items
+  clerk has GENERATION 5's held items and sells nothing below GENERATION 5 (special MP_Gen_CapNow).
+
 ## TM93-TM139 (1.106.0: RED / BLUE's and Crystal's TMs)
 - The user's rule: a TM number keeps its Emerald / Platinum move; a RED / BLUE or Crystal TM with another move on the
   same number gets a new slot after the last TM; a move that is a TM or HM here already (on any number: SWORDS DANCE,

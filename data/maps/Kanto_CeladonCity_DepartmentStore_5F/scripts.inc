@@ -22,7 +22,7 @@ Kanto_CeladonCity_DepartmentStore_5F_EventScript_841BEF6::
 	goto_if_eq VAR_RESULT, 2, Quetzal_EventScript_8457FA3
 	lock
 	faceplayer
-	message Kanto_CeladonCity_DepartmentStore_5F_Text_8445E1F
+	message Quetzal_Text_84563A6
 	waitmessage
 	pokemart Kanto_CeladonCity_DepartmentStore_5F_Mart_841BF20
 	msgbox Quetzal_Text_84565DA, MSGBOX_DEFAULT
@@ -35,7 +35,7 @@ Kanto_CeladonCity_DepartmentStore_5F_EventScript_841BF38::
 	goto_if_eq VAR_RESULT, 2, Quetzal_EventScript_8457FA3
 	lock
 	faceplayer
-	message Kanto_CeladonCity_DepartmentStore_5F_Text_8445E46
+	message Quetzal_Text_84563A6
 	waitmessage
 	pokemart Kanto_CeladonCity_DepartmentStore_5F_Mart_841BF60
 	msgbox Quetzal_Text_84565DA, MSGBOX_DEFAULT
@@ -47,36 +47,29 @@ Kanto_CeladonCity_DepartmentStore_5F_Mart_841BF20:
 	.2byte ITEM_NONE
 
 Kanto_CeladonCity_DepartmentStore_5F_Mart_841BF60:
-	.2byte ITEM_PEWTER_CRUNCHIES
-	.2byte ITEM_RAGE_CANDY_BAR
-	.2byte ITEM_LAVA_COOKIE
-	.2byte ITEM_OLD_GATEAU
-	.2byte ITEM_CASTELIACONE
-	.2byte ITEM_LUMIOSE_GALETTE
-	.2byte ITEM_SHALOUR_SABLE
-	.2byte ITEM_BIG_MALASADA
+	.2byte ITEM_HP_UP   @ (FireRed\'s vitamins clerk: src/shop.c)
 	.2byte ITEM_NONE
 
 Kanto_CeladonCity_DepartmentStore_5F_Text_8445D31::
-	.string "They sell items that change\n"
-	.string "the forms of certain MOéMON.\p"
-	.string "Each item works with specific\n"
-	.string "species.$"
+	.string "MOéMON stat enhancers can be\n"
+	.string "bought only here.\p"
+	.string "HP UP increases the base HP of a\n"
+	.string "MOéMON.\p"
+	.string "CALCIUM raises the base SP. ATK\n"
+	.string "stat of one MOéMON.\p"
+	.string "ZINC boosts the base SP. DEF stat\n"
+	.string "of one MOéMON.\p"
+	.string "CARBOS enhances the base SPEED\n"
+	.string "stat.$"
 
 Kanto_CeladonCity_DepartmentStore_5F_Text_8445D92::
-	.string "There are treats from many regions!\p"
-	.string "They also sell nectars\n"
-	.string "for ORICORIO’s forms.$"
+	.string "I’m here for MOéMON stat\n"
+	.string "enhancers.\p"
+	.string "PROTEIN increases the base ATTACK\n"
+	.string "power.\p"
+	.string "IRON increases the base DEFENSE\n"
+	.string "stat.$"
 
 Kanto_CeladonCity_DepartmentStore_5F_Text_8445DE3::
-	.string "5F: FORMS & TREATS\p"
-	.string "Form-changing items.\n"
-	.string "Treats and nectars.$"
+	.string "5F: DRUGSTORE$"
 
-Kanto_CeladonCity_DepartmentStore_5F_Text_8445E1F::
-	.string "Form-changing items.\n"
-	.string "What do you need?$"
-
-Kanto_CeladonCity_DepartmentStore_5F_Text_8445E46::
-	.string "Treats and nectars.\n"
-	.string "What would you like?$"

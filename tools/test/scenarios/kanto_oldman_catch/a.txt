@@ -1,0 +1,17 @@
+pressuntil A field 5000
+mp textspeed 2
+mp setvar 0x513C 1
+wait 30
+mp warp 37,58,21,7
+wait 150
+mp face down
+press A 2
+wait 60
+pressuntil A battle 2400
+wait 240
+shot oldman_throw
+pressuntil B field 4000
+mash B 10 30
+mp getvar 0x513C
+mp partyids
+quit

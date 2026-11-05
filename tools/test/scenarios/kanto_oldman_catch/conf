@@ -1,0 +1,7 @@
+# FireRed's VIRIDIAN OLD MAN shows how to catch: his picture throws a POKé BALL at a wild WEEDLE, then his advice
+# (docs/REGIONS_AUDIT.md 120; battle_setup.c MP_KantoCatchingTutorial). The party is the player's own after.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("[test] var 0x513C = 2")
+UNEXPECT_A=("[crash]" "TIMEOUT" "partyids: 13:")

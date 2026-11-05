@@ -722,3 +722,5 @@ gSpecials::
 	def_special MP_TCard_StickerBragFlags
 	def_special MP_TCard_StickerManMet
 	def_special MP_TCard_StickerBrag
+	def_special MP_Gen_CapNow
+	def_special MP_KantoCatchingTutorial

@@ -1,0 +1,7 @@
+# FireRed's CYCLING ROAD slope on ROUTE 17 (bike.c CyclingRoadSlope; docs/REGIONS_AUDIT.md 74): on the bike the player
+# rolls south on their own, holding B stops, riding up is slow but works.
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("[test] where map 37.92 xy 4,52" "[test] where map 37.92 xy 4,47")
+UNEXPECT_A=("[crash]")

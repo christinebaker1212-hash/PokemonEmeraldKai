@@ -82,6 +82,27 @@ Johto_GoldenrodDeptStore2F_Text_83D3C24::
 	.string "Now it’s my best partner.$"
 
 Johto_GoldenrodDeptStore2F_Text_83D3CCE::
-	.string "Items, battle boosts and\n"
-	.string "upgrades.\p"
-	.string "2F ITEMS & BATTLE TOOLS$"
+	.string "Your Travel Companion 2F TRAINER’S\n"
+	.string "MARKET$"
+
+@ Moemon Kai: Crystal's shopper (docs/REGIONS_AUDIT.md 96)
+Johto_GoldenrodDeptStore2F_EventScript_Youngster::
+	msgbox Johto_GoldenrodDeptStore2F_Text_Youngster, MSGBOX_NPC
+	end
+
+Johto_GoldenrodDeptStore2F_Text_Youngster::
+	.string "POKéGEAR can store up to ten phone\n"
+	.string "numbers.\p"
+	.string "It’s hard to decide which numbers\n"
+	.string "to keep.$"
+
+@ Moemon Kai: Crystal's shopper (docs/REGIONS_AUDIT.md 96)
+Johto_GoldenrodDeptStore2F_EventScript_Gentleman::
+	msgbox Johto_GoldenrodDeptStore2F_Text_Gentleman, MSGBOX_NPC
+	end
+
+Johto_GoldenrodDeptStore2F_Text_Gentleman::
+	.string "This DEPT.STORE makes me realize\n"
+	.string "that GOLDENROD is a big city.\p"
+	.string "The selection here is unmatched\n"
+	.string "anywhere else.$"

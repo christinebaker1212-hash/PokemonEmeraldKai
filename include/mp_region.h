@@ -140,6 +140,7 @@ u8 MP_Gen_MoveType(u8 type);                       // FAIRY moves are NORMAL bef
 void MP_Gen_FitBattler(u8 battler);
 u8 MP_Gen_OfItem(u16 item);                        // 0 = always there (Kai's own, story items)
 bool8 MP_Gen_ItemAllowed(u16 item);                // past the GENERATION: kept in the bag, can't be used or held
+u16 MP_Gen_CapNow(void);                           // (special) the GENERATION in play here
 void MP_Gen_ReturnHeldItems(void);                 // held items past it go back to the bag
 bool8 MP_Gen_SealedSpecies(u16 species);           // past the GENERATION: kept, but can't battle
 bool8 MP_Gen_SealedMon(struct Pokemon *mon);       // species, a move or the ability past it (never an EGG)

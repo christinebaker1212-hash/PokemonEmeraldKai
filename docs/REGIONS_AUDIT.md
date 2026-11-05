@@ -2,7 +2,7 @@
 
 The audit compared every KANTO map with FireRed and every JOHTO map with Crystal (findings, with the original's and the
 game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided each of the 157 cases below (158 was added by the user later). Status:
-[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04); 1.92.0: cases 52, 63, 91-95, 131-134, 136, 143 and 148, and the first part of 138 (POKéMON in houses, ELM's lab signs, small lines); 1.93.0: cases 142, 144, 145, the SEER of 146 and GOLDENROD's NAME RATER (118); 1.105.0: cases 100, 101 and the rest of 138; 1.106.0: cases 105, 15 (LANCE's HM WHIRLPOOL, given since 1.101.0's HM items), 49 (JOHTO's HEADBUTT man) and 104 (MOOMOO, with the TM93-TM139 TMs); CLAIR's Crystal TM24 DRAGONBREATH is in too, 110's gating waits; 1.107.0: cases 46, 50, 66, 89, 115, 117, 122, 124 and 126). Rules the user set with these decisions:
+[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04); 1.92.0: cases 52, 63, 91-95, 131-134, 136, 143 and 148, and the first part of 138 (POKéMON in houses, ELM's lab signs, small lines); 1.93.0: cases 142, 144, 145, the SEER of 146 and GOLDENROD's NAME RATER (118); 1.105.0: cases 100, 101 and the rest of 138; 1.106.0: cases 105, 15 (LANCE's HM WHIRLPOOL, given since 1.101.0's HM items), 49 (JOHTO's HEADBUTT man) and 104 (MOOMOO, with the TM93-TM139 TMs); CLAIR's Crystal TM24 DRAGONBREATH is in too, 110's gating waits; 1.107.0: cases 46, 50, 66, 89, 115, 117, 122, 124 and 126; 1.108.0: cases 25, 71, 74, 96, 120 and 156). Rules the user set with these decisions:
 
 - **JOHTO is strictly Crystal** (case 116): HGSS-flavoured events Quetzal added are removed; where this file or
   docs/REGIONS_TODO.md said "HGSS ranks above Quetzal", Crystal alone is the reference now.
@@ -39,7 +39,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **22. [K1-22]** PALLET's sign girl never moves to the ROUTE 1 exit (FLAG_OPENED_START_MENU is never set): **RESTORE the original**
 - [x] **23. [K2-1]** The S.S. ANNE "comes back": Quetzal's harbor words and pier check outlive the ship's departure: **RESTORE the original**
 - [ ] **24. [K2-3]** VERMILION POKéMON CENTER: the VS SEEKER woman gives a PP MAX while talking about an ABILITY PATCH: **RESTORE the original**
-- [ ] **25. [K2-6]** Empty or misleading sections inside the Dept. Store menus: **RESTORE the original**
+- [x] **25. [K2-6]** Empty or misleading sections inside the Dept. Store menus: **RESTORE the original**
 - [x] **26. [K2-8]** GAME CORNER hidden coins give nothing: **RESTORE the original**
 - [x] **27. [K2-12]** POKéMON TOWER 6F MAROWAK: no ghost battle without the SILPH SCOPE, and the MAROWAK can be caught: **RESTORE the original**
 - [x] **28. [K3-5]** TANOBY's seven chambers each stand six overlapping REGI objects; only one chamber works: **REMOVE it**
@@ -85,10 +85,10 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **68. [K1-23]** CERULEAN rival gives a LUCKY EGG with Quetzal's lines: **RESTORE the original**
 - [x] **69. [K1-24]** Small Quetzal rewrites of FireRed's words: **RESTORE the original**
 - [x] **70. [K1-26]** ROUTE 22's gate north to JOHTO (Quetzal's) - consistent with Gen 2 geography: **FIX it, keep the idea** - _Crossing regions must match Kai implementation._
-- [ ] **71. [K2-5]** CELADON DEPT. STORE: Quetzal's floors, signs, clerks' words and menus over FireRed's shop lists: **RESTORE the original**
+- [x] **71. [K2-5]** CELADON DEPT. STORE: Quetzal's floors, signs, clerks' words and menus over FireRed's shop lists: **RESTORE the original**
 - [x] **72. [K2-9]** The CELADON game designer's diploma words are Quetzal's (and don't match the check): **RESTORE the original**
 - [x] **73. [K2-16]** ROUTE 12 FISHING HOUSE: MAGIKARP size record replaced by "show me one": **RESTORE the original**
-- [ ] **74. [K2-17]** CYCLING ROAD words rewritten (get off the bike, SURF, DexNav), FRLG's slope missing: **RESTORE the original**
+- [x] **74. [K2-17]** CYCLING ROAD words rewritten (get off the bike, SURF, DexNav), FRLG's slope missing: **RESTORE the original**
 - [x] **75. [K2-20]** S.S. ANNE 1F ROOM 6: Quetzal's bed, DARKRAI dream and "leave the ship" shortcut: **RESTORE the original**
 - [x] **76. [K2-25]** ROCKET HIDEOUT B2F item balls moved: **RESTORE the original**
 - [x] **77. [K3-13]** WATER LABYRINTH's TOGEPI egg is a hatched Lv. 5 TOGEPI; the friendship check and DAISY lines are gone: **RESTORE the original**
@@ -110,7 +110,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **93. [J1-24]** GIOVANNI's alternate-past remnants (dead since 1.68.1) still sit in these maps: **REMOVE it**
 - [x] **94. [J1-27]** ELM's phone calls arrive as on-screen "A message from PROF. ELM arrived" texts: **RESTORE the original**
 - [x] **95. [J1-30]** CHERRYGROVE: the rival's "That's my TRAINER CARD! You saw my name..." line and the guide's MAP gift words: **RESTORE the original**
-- [ ] **96. [J2-20]** GOLDENROD DEPT. STORE floors and directory are Quetzal's: **RESTORE the original**
+- [x] **96. [J2-20]** GOLDENROD DEPT. STORE floors and directory are Quetzal's: **RESTORE the original**
 - [ ] **97. [J2-22]** Bug-Catching Contest uses Quetzal's rules, and its rules text promises RADIANT scoring: **RESTORE the original**
 - [x] **98. [J2-23]** GOLDENROD GYM guide talks about FAIRY types; gym statues read "TOWN" / "CERTIFIED TRAINERS": **RESTORE the original**
 - [x] **99. [J2-26]** ROUTE 34 / its gate: KATE's SOFT SAND is a ball; Trainer Tips say berries regrow "several times a day"; SWEET SCENT teacher gone: **RESTORE the original**
@@ -134,7 +134,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **117. [J3-39]** Shared-script inventory (what is Quetzal-only and its state): **RESTORE the original**
 - [x] **118. [K2-11, J2-8]** The NAME RATER doesn't rate or rename (KANTO's removed, JOHTO's talks about RADIANT): **RESTORE the original**
 - [x] **119. [K1-2]** ROCK TUNNEL isn't dark: **RESTORE the original**
-- [ ] **120. [K1-13]** VIRIDIAN's old man never shows how to catch a POKéMON: **RESTORE the original**
+- [x] **120. [K1-13]** VIRIDIAN's old man never shows how to catch a POKéMON: **RESTORE the original**
 - [x] **121. [K1-25]** OAK's first-battle advice is missing from the lab battle: **KEEP as it is** - _A bit annoying. Don't restore it._
 - [x] **122. [K2-2]** VERMILION's construction man and his MACHOP are missing: **RESTORE the original**
 - [x] **123. [K2-7]** The COUNTER move tutor (Dept. Store 3F) is missing: **RESTORE the original**
@@ -170,6 +170,6 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **153. [K4-8]** Gym leaders' words around FireRed's TMs still describe Quetzal's held items: **FIX it, keep the idea**
 - [x] **154. [K4-19]** CINNABAR GYM's last quiz question is reworded: **RESTORE the original**
 - [x] **155. [K4-22]** Dead Quetzal leftovers (no effect in game, clean-up): **RESTORE the original**
-- [ ] **156. [J3-31]** Small text bugs in J3 maps and shared scripts: **FIX it, keep the idea**
+- [x] **156. [J3-31]** Small text bugs in J3 maps and shared scripts: **FIX it, keep the idea**
 - [x] **157. [J3-32]** RAGECANDYBAR seller and ROUTE 43's MAHOGANY gate officer follow the RADIO TOWER instead of the hideout: **FIX it, keep the idea**
 - [x] **158. [user, 2026-11-04]** JOHTO's BERRY patches: the ripe BERRY tree's sprite still draws over the map's fruit tree (seen in 1.89.0): **FIX it** - _the tree stays Crystal's, ripe or not._

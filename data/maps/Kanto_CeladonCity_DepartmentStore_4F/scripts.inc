@@ -18,44 +18,15 @@ Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BDC5::
 
 @ Kanto_CeladonCity_DepartmentStore_4F object 3 (local id 3, gfx 0x3EFA) at 3,13
 Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BDCE::
-	specialvar VAR_RESULT, QzReturnZero
-	goto_if_eq VAR_RESULT, 2, Quetzal_EventScript_8457FA3
+	@ Moemon Kai: FireRed's clerk, one list (docs/REGIONS_AUDIT.md 71; src/shop.c gives FireRed's list and Kai's newer items)
 	lock
 	faceplayer
-
-Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BDE0::
-	message Kanto_CeladonCity_DepartmentStore_4F_Text_8445CF3
+	message Quetzal_Text_84563A6
 	waitmessage
-	multichoice 0, 0, MULTI_QZ_0x8C, 1
-	nop
-	copyvar VAR_0x8000, VAR_RESULT
-	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BE27
-	goto_if_eq VAR_0x8000, 1, Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BE32
-	goto_if_eq VAR_0x8000, 2, Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BE3D
-	goto_if_eq VAR_0x8000, 3, Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BE48
+	pokemart Kanto_CeladonCity_DepartmentStore_4F_Mart_841BE54
 	msgbox Quetzal_Text_84565DA, MSGBOX_DEFAULT
 	release
 	end
-
-Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BE27::
-	closemessage
-	pokemart Kanto_CeladonCity_DepartmentStore_4F_Mart_841BE54
-	goto Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BDE0
-
-Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BE32::
-	closemessage
-	pokemart Kanto_CeladonCity_DepartmentStore_4F_Mart_841BE94
-	goto Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BDE0
-
-Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BE3D::
-	closemessage
-	pokemart Kanto_CeladonCity_DepartmentStore_4F_Mart_841BEBC
-	goto Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BDE0
-
-Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BE48::
-	closemessage
-	pokemart Kanto_CeladonCity_DepartmentStore_4F_Mart_841BECC
-	goto Kanto_CeladonCity_DepartmentStore_4F_EventScript_841BDE0
 
 Kanto_CeladonCity_DepartmentStore_4F_Mart_841BE54:
 	.2byte ITEM_CHERI_BERRY
@@ -88,55 +59,22 @@ Kanto_CeladonCity_DepartmentStore_4F_Mart_841BE54:
 	.2byte ITEM_GRACIDEA
 	.2byte ITEM_NONE
 
-Kanto_CeladonCity_DepartmentStore_4F_Mart_841BE94:
-	.2byte ITEM_CHILAN_BERRY
-	.2byte ITEM_OCCA_BERRY
-	.2byte ITEM_PASSHO_BERRY
-	.2byte ITEM_WACAN_BERRY
-	.2byte ITEM_RINDO_BERRY
-	.2byte ITEM_YACHE_BERRY
-	.2byte ITEM_CHOPLE_BERRY
-	.2byte ITEM_KEBIA_BERRY
-	.2byte ITEM_SHUCA_BERRY
-	.2byte ITEM_COBA_BERRY
-	.2byte ITEM_PAYAPA_BERRY
-	.2byte ITEM_TANGA_BERRY
-	.2byte ITEM_CHARTI_BERRY
-	.2byte ITEM_KASIB_BERRY
-	.2byte ITEM_HABAN_BERRY
-	.2byte ITEM_COLBUR_BERRY
-	.2byte ITEM_BABIRI_BERRY
-	.2byte ITEM_NONE
-
-Kanto_CeladonCity_DepartmentStore_4F_Mart_841BEBC:
-	.2byte ITEM_ENERGY_POWDER
-	.2byte ITEM_ENERGY_ROOT
-	.2byte ITEM_HEAL_POWDER
-	.2byte ITEM_NONE
-
-Kanto_CeladonCity_DepartmentStore_4F_Mart_841BECC:
-	.2byte ITEM_HP_UP
-	.2byte ITEM_PROTEIN
-	.2byte ITEM_IRON
-	.2byte ITEM_CALCIUM
-	.2byte ITEM_ZINC
-	.2byte ITEM_CARBOS
-	.2byte ITEM_NONE
-
 Kanto_CeladonCity_DepartmentStore_4F_Text_8445C20::
-	.string "I was looking for vitamins.\n"
-	.string "They’re by the berries and remedies!$"
+	.string "I’m getting a present for my\n"
+	.string "girlfriend.\p"
+	.string "I guess a POKé DOLL will be it.\n"
+	.string "It’s the popular thing.$"
 
 Kanto_CeladonCity_DepartmentStore_4F_Text_8445C61::
-	.string "A held berry can help your MOéMON\n"
-	.string "during battle.\p"
-	.string "Pick one that suits your partner!$"
+	.string "I heard something useful.\p"
+	.string "If a wild MOéMON appears, you can\n"
+	.string "distract it with a POKé DOLL.\p"
+	.string "You can run away while the wild\n"
+	.string "MOéMON is distracted.$"
 
 Kanto_CeladonCity_DepartmentStore_4F_Text_8445CB5::
-	.string "4F: BERRIES & CARE\p"
-	.string "Berries, Gracidea, remedies,\n"
-	.string "and vitamins.$"
+	.string "Express yourself with gifts!\n"
+	.string "4F: WISE MAN GIFTS\p"
+	.string "Evolution Special!\n"
+	.string "Element STONES on sale now!$"
 
-Kanto_CeladonCity_DepartmentStore_4F_Text_8445CF3::
-	.string "Take good care of your MOéMON.\n"
-	.string "Which section would you like?$"

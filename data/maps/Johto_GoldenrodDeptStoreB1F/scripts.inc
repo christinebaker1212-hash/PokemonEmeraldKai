@@ -152,7 +152,7 @@ Johto_GoldenrodDeptStoreB1F_EventScript_83D3693::
 
 @ Johto_GoldenrodDeptStoreB1F object 6 (local id 6, gfx 0x3A9E) at 17,19
 Johto_GoldenrodDeptStoreB1F_EventScript_83D36A0::
-	setorcopyvar VAR_0x8000, ITEM_RARE_CANDY
+	setorcopyvar VAR_0x8000, ITEM_BURN_HEAL   @ Moemon Kai: Crystal's (docs/REGIONS_AUDIT.md 96)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

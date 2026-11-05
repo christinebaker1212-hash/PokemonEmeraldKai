@@ -24,14 +24,10 @@ Kanto_CeladonCity_DepartmentStore_1F_Text_844553F::
 
 Kanto_CeladonCity_DepartmentStore_1F_Text_8445599::
 	.string "1F: SERVICE COUNTER\p"
-	.string "2F: CATCHING & TRAVEL\n"
-	.string "General items, Balls, and flutes.\p"
-	.string "3F: BATTLE SUPPLIES\n"
-	.string "Held items, gems, and X items.\p"
-	.string "4F: BERRIES & CARE\n"
-	.string "Berries, remedies, and vitamins.\p"
-	.string "5F: FORMS & TREATS\n"
-	.string "Form items and treats.\p"
+	.string "2F: TRAINER’S MARKET\p"
+	.string "3F: TV GAME SHOP\p"
+	.string "4F: WISE MAN GIFTS\p"
+	.string "5F: DRUGSTORE\p"
 	.string "ROOFTOP SQUARE: VENDING MACHINES$"
 
 Kanto_CeladonCity_DepartmentStore_1F_Text_8445697::

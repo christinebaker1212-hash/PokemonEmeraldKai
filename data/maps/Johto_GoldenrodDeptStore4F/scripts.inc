@@ -93,19 +93,21 @@ Johto_GoldenrodDeptStore4F_Text_83D40A8::
 	.string "their ATTACK.$"
 
 Johto_GoldenrodDeptStore4F_Text_83D4117::
-	.string "There were rumours that some\n"
-	.string "MOéMON evolve only by\l"
-	.string "being traded via a Game Link\l"
-	.string "cable.\p"
-	.string "Pfft...\p"
-	.string "Such misinformation.\p"
-	.string "I know some of the rumoured\n"
-	.string "MOéMON:\l"
-	.string "MACHOKE, KADABRA, HAUNTER and,\l"
-	.string "um, GRAVELER,\l"
-	.string "but they all evolve through\l"
-	.string "level up.$"
+	.string "Some MOéMON evolve only by being\n"
+	.string "traded via a Game Link cable.\p"
+	.string "I know of four: MACHOKE, KADABRA,\n"
+	.string "HAUNTER and, um, GRAVELER.\p"
+	.string "I heard there are others too.$"
 
 Johto_GoldenrodDeptStore4F_Text_83D4204::
-	.string "Evolution and form-change items.\p"
-	.string "4F EVOLUTION & FORMS$"
+	.string "Let Us Pump Up Your MOéMON!\p"
+	.string "4F MEDICINE BOX$"
+
+@ Moemon Kai: Crystal's shopper (docs/REGIONS_AUDIT.md 96)
+Johto_GoldenrodDeptStore4F_EventScript_BugCatcher::
+	msgbox Johto_GoldenrodDeptStore4F_Text_BugCatcher, MSGBOX_NPC
+	end
+
+Johto_GoldenrodDeptStore4F_Text_BugCatcher::
+	.string "IRON adds to your MOéMON’s\n"
+	.string "DEFENSE.$"

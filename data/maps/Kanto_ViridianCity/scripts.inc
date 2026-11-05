@@ -201,9 +201,36 @@ Kanto_ViridianCity_EventScript_8415961::
 	end
 
 Kanto_ViridianCity_EventScript_841597F::
+	@ Moemon Kai: FireRed's catching demonstration (pokefirered ViridianCity DoTutorialBattle; docs/REGIONS_AUDIT.md 120):
+	@ the OLD MAN catches a WEEDLE (battle_setup.c MP_KantoCatchingTutorial); no TEACHY TV (the user's decision)
+	msgbox Kanto_ViridianCity_Text_ShowYouHowToCatchMons, MSGBOX_DEFAULT
+	closemessage
+	special SavePlayerParty
+	special MP_KantoCatchingTutorial
+	waitstate
+	special LoadPlayerParty
+	lock
+	faceplayer
 	msgbox Kanto_ViridianCity_Text_842E3EE, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x513C, 2
 	return
+
+Kanto_ViridianCity_Text_ShowYouHowToCatchMons::
+	.string "Well, now, I’ve had my coffee, and\n"
+	.string "that’s what I need to get going!\p"
+	.string "Hm?\n"
+	.string "What is that red box you have?\p"
+	.string "Ah, so you’re working on your\n"
+	.string "MOéDEX.\p"
+	.string "Then let me give you a word of\n"
+	.string "advice.\p"
+	.string "Whenever you catch a MOéMON,\n"
+	.string "the MOéDEX automatically updates\l"
+	.string "its data.\p"
+	.string "…You don’t know how to catch\n"
+	.string "a MOéMON?\p"
+	.string "I suppose I had better show you\n"
+	.string "then!$"
 
 @ Kanto_ViridianCity object 9 (local id 9, gfx 0x3F0E) at 17,5
 Kanto_ViridianCity_EventScript_846C072::

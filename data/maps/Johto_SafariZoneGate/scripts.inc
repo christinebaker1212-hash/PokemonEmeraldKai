@@ -79,7 +79,10 @@ Johto_SafariZoneGate_EventScript_83F8C05::
 	faceplayer
 	message Johto_SafariZoneGate_Text_83F8CCA
 	waitmessage
+	specialvar VAR_RESULT, MP_Gen_CapNow   @ Moemon Kai: nothing of his before GENERATION 5 (docs/REGIONS_AUDIT.md 156)
+	goto_if_lt VAR_RESULT, 5, Johto_SafariZoneGate_EventScript_NoModernStock
 	pokemart Johto_SafariZoneGate_Mart_834CDC8
+Johto_SafariZoneGate_EventScript_NoModernStock:
 	msgbox Quetzal_Text_8360D20, MSGBOX_DEFAULT
 	release
 	end
@@ -110,6 +113,10 @@ Johto_SafariZoneGate_Mart_834CADC:
 	.2byte ITEM_HEAT_ROCK
 	.2byte ITEM_SMOOTH_ROCK
 	.2byte ITEM_ICY_ROCK
+	.2byte ITEM_ELECTRIC_SEED   @ Moemon Kai: the terrain items the clerk talks about (docs/REGIONS_AUDIT.md 156)
+	.2byte ITEM_PSYCHIC_SEED
+	.2byte ITEM_MISTY_SEED
+	.2byte ITEM_GRASSY_SEED
 	.2byte ITEM_NONE
 
 Johto_SafariZoneGate_Mart_834CC2C:
@@ -145,7 +152,16 @@ Johto_SafariZoneGate_Mart_834CC2C:
 	.2byte ITEM_NONE
 
 Johto_SafariZoneGate_Mart_834CDC8:
+	@ Moemon Kai: more than the EVIOLITE (each from its GENERATION: docs/REGIONS_AUDIT.md 156)
 	.2byte ITEM_EVIOLITE
+	.2byte ITEM_AIR_BALLOON
+	.2byte ITEM_ROCKY_HELMET
+	.2byte ITEM_ABSORB_BULB
+	.2byte ITEM_CELL_BATTERY
+	.2byte ITEM_WEAKNESS_POLICY
+	.2byte ITEM_ASSAULT_VEST
+	.2byte ITEM_HEAVY_DUTY_BOOTS
+	.2byte ITEM_BOOSTER_ENERGY
 	.2byte ITEM_NONE
 
 Johto_SafariZoneGate_Text_83F8863::

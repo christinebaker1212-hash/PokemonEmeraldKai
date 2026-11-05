@@ -126,8 +126,58 @@ static const struct BikeHistoryInputInfo sAcroBikeTricksList[] =
 };
 
 // code
+
+// Moemon Kai: FireRed's CYCLING ROAD slope (pokefirered bike.c BikeInputHandler_Normal; docs/REGIONS_AUDIT.md 74): on its
+// pull-down metatiles (FireRed's CELADON CITY tiles 800-850, MB_CYCLING_ROAD_PULL_DOWN there; lost in the port's
+// behaviors) the bike rolls downhill unless B is held, and any other way is ridden slowly uphill
+extern const struct Tileset gTileset_Kanto_CeladonCity;
+static bool8 OnCyclingRoadSlope(void)
+{
+    struct ObjectEvent *obj = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u16 metatile;
+    if (gMapHeader.mapLayout == NULL || gMapHeader.mapLayout->secondaryTileset != &gTileset_Kanto_CeladonCity)
+        return FALSE;
+    metatile = MapGridGetMetatileIdAt(obj->currentCoords.x, obj->currentCoords.y);
+    return metatile >= 800 && metatile <= 850;
+}
+
+static bool8 CyclingRoadSlope(u8 direction, u16 heldKeys)
+{
+    u8 collision;
+    if (!OnCyclingRoadSlope())
+        return FALSE;
+    if (!(heldKeys & B_BUTTON) && (direction == DIR_NONE || direction == DIR_SOUTH))
+    {
+        collision = GetBikeCollision(DIR_SOUTH);
+        if (collision == COLLISION_NONE)
+            PlayerWalkFast(DIR_SOUTH);
+        else if (collision == COLLISION_LEDGE_JUMP)
+            PlayerJumpLedge(DIR_SOUTH);
+        else
+            return FALSE;
+        return TRUE;
+    }
+    if (direction != DIR_NONE)
+    {
+        collision = GetBikeCollision(direction);
+        if (collision == COLLISION_NONE)
+            PlayerWalkNormal(direction);
+        else if (collision == COLLISION_LEDGE_JUMP)
+            PlayerJumpLedge(direction);
+        else
+            return FALSE;
+        return TRUE;
+    }
+    return FALSE;   // (B held: stays put)
+}
+
 void MovePlayerOnBike(u8 direction, u16 newKeys, u16 heldKeys)
 {
+    if (CyclingRoadSlope(direction, heldKeys))
+    {
+        gPlayerAvatar.bikeSpeed = PLAYER_SPEED_STANDING;
+        return;
+    }
     if (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_MACH_BIKE)
         MovePlayerOnMachBike(direction, newKeys, heldKeys);
     else

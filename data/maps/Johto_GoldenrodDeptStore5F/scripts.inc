@@ -77,7 +77,7 @@ Johto_GoldenrodDeptStore5F_Mart_83D3ED4:
 	.2byte ITEM_NONE
 
 Johto_GoldenrodDeptStore5F_Text_83D445B::
-	.string "During the day, a lady comes to check\n"
+	.string "On Sundays, a lady comes to check\n"
 	.string "out MOéMON.\p"
 	.string "She even gives away TMs!$"
 
@@ -88,9 +88,7 @@ Johto_GoldenrodDeptStore5F_Text_83D44A7::
 	.string "original trainer’s feelings for it.$"
 
 Johto_GoldenrodDeptStore5F_Text_83D4553::
-	.string "Mega Stones, Z-Moves and\n"
-	.string "Tera Shards.\p"
-	.string "5F MEGA, Z & TERA$"
+	.string "Customize Your MOéMON 5F TM CORNER$"
 
 @ Moemon Kai: Crystal's Sunday receptionist (pokecrystal GoldenrodDeptStore5F.asm ReceptionistScript, docs/REGIONS_AUDIT.md
 @ 143): she rates the lead's friendship once a day (Sundays only) and gives TM27 RETURN or TM21 FRUSTRATION

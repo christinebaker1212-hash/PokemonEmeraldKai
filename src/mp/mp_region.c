@@ -1582,6 +1582,12 @@ static u8 UseCap(void)
     return cap < 3 ? 3 : cap;
 }
 
+// (special) the GENERATION in play here, for scripts
+u16 MP_Gen_CapNow(void)
+{
+    return UseCap();
+}
+
 bool8 MP_Gen_MoveAllowed(u16 move)
 {
     return MP_Gen_OfMove(move) <= UseCap();

@@ -83,5 +83,26 @@ Johto_GoldenrodDeptStore3F_Mart_83D3E08:
 	.2byte ITEM_NONE
 
 Johto_GoldenrodDeptStore3F_Text_83D401D::
-	.string "Vitamins, Power Items and Mints.\p"
-	.string "3F TRAINING & MINTS$"
+	.string "For Victory Seekers 3F BATTLE\n"
+	.string "COLLECTION$"
+
+@ Moemon Kai: Crystal's shopper (docs/REGIONS_AUDIT.md 96)
+Johto_GoldenrodDeptStore3F_EventScript_SuperNerd::
+	msgbox Johto_GoldenrodDeptStore3F_Text_SuperNerd, MSGBOX_NPC
+	end
+
+Johto_GoldenrodDeptStore3F_Text_SuperNerd::
+	.string "I, I, I’m really impatient!\p"
+	.string "I use X SPEED in battle to speed\n"
+	.string "up my MOéMON.$"
+
+@ Moemon Kai: Crystal's shopper (docs/REGIONS_AUDIT.md 96)
+Johto_GoldenrodDeptStore3F_EventScript_Rocker::
+	msgbox Johto_GoldenrodDeptStore3F_Text_Rocker, MSGBOX_NPC
+	end
+
+Johto_GoldenrodDeptStore3F_Text_Rocker::
+	.string "Hey! When you battle, do you use X\n"
+	.string "SPECIAL?\p"
+	.string "It’s awesome. It really jacks up\n"
+	.string "SPECIAL ATTACK!$"

@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 30
+mp warp 37,92,4,40
+wait 150
+mp mountbike 1
+wait 30
+mp where
+wait 60
+mp where
+press B 60
+mp where
+press B+UP 70
+mp where
+quit
