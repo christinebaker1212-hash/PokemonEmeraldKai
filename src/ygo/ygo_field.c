@@ -449,11 +449,87 @@ static const u8 *const sDuelLines[] = {sText_Duel1, sText_Duel2, sText_Duel3};
 
 static u8 ThemeAt(u8 theme, u8 alt, u32 h) { return (h >> 9) % 3 == 0 ? alt : theme; }
 
+// The Game Boy Advance decks the player met lately (Ygo_NoteDeckMet, as a duel starts): passed over while others fit
+#define RECENT_DECKS 12
+static s16 sRecentDecks[RECENT_DECKS] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+static u8 sRecentAt;
+static s16 sLastGameDeck = -1;   // the last one GameDeckAt made
+
+static bool8 MetLately(unsigned index)
+{
+    unsigned i;
+    for (i = 0; i < RECENT_DECKS; i++)
+        if (sRecentDecks[i] == (s16)index)
+            return TRUE;
+    return FALSE;
+}
+
+void Ygo_NoteDeckMet(const struct YgoOpponent *o)
+{
+    if (!o->gba || sLastGameDeck < 0 || MetLately((unsigned)sLastGameDeck))
+        return;
+    sRecentDecks[sRecentAt] = sLastGameDeck;
+    sRecentAt = (sRecentAt + 1) % RECENT_DECKS;
+}
+
+// How likely a deck is to be picked: World Championship 2006's (the most interesting lists) three times as likely as
+// the other Game Boy Advance games'; goatformat.com's only for the skilled and named duelists (sGoat), the stronger
+// their guide says they are the likelier
+enum { GOAT_NO, GOAT_TOO, GOAT_ONLY };
+static u8 sGoat;
+static unsigned GameWeight(unsigned index)
+{
+    if (!strcmp(gYgoNpcDecks[index].game, "GOAT"))
+        return sGoat != GOAT_NO ? 1 + gYgoNpcDecks[index].strength : 0;
+    if (sGoat == GOAT_ONLY)
+        return 0;
+    return !strcmp(gYgoNpcDecks[index].game, "WC6") ? 3 : 1;
+}
+
+// A deck from lo..hi-1 (weakest first) near the target (target < 0: any of them), by the person's own number: the
+// nearer the likelier, weighted by game, the ones met lately only when nothing else fits; -1 when there's none
+static int PickGameDeck(unsigned lo, unsigned hi, int target, u32 seed)
+{
+    unsigned i, best = ~0u, window, fresh = 0;
+    u32 total = 0, w;
+    for (i = lo; i < hi && target >= 0; i++)
+    {
+        unsigned off = (unsigned)abs((int)gYgoNpcDecks[i].rating - target);
+        if (GameWeight(i))
+            best = off < best ? off : best;
+    }
+    window = target < 0 ? ~0u : best + 60 > 90 ? best + 60 : 90;
+    for (i = lo; i < hi; i++)
+        fresh += GameWeight(i) && (target < 0 || (unsigned)abs((int)gYgoNpcDecks[i].rating - target) <= window) && !MetLately(i);
+    for (i = lo; i < hi; i++)
+    {
+        unsigned off = target < 0 ? 0 : (unsigned)abs((int)gYgoNpcDecks[i].rating - target);
+        if (off > window || (fresh && MetLately(i)))
+            continue;
+        total += (target < 0 ? 1 : window + 1 - off) * GameWeight(i);
+    }
+    if (!total)
+        return -1;
+    seed = (seed * 2654435761u) % total;
+    for (i = lo; i < hi; i++)
+    {
+        unsigned off = target < 0 ? 0 : (unsigned)abs((int)gYgoNpcDecks[i].rating - target);
+        if (off > window || (fresh && MetLately(i)))
+            continue;
+        w = (target < 0 ? 1 : window + 1 - off) * GameWeight(i);
+        if (seed < w)
+            return (int)i;
+        seed -= w;
+    }
+    return -1;
+}
+
 // One of the Game Boy Advance games' opponents' decks (ygo_npc_decks.c, weakest first) into o; 0 when it can't make one
 static int GameDeckAt(struct YgoOpponent *o, unsigned index)
 {
     if (!Ygo_NpcDeckCards(index, o->main, o->extra))
         return 0;
+    sLastGameDeck = (s16)index;
     printf("[ygo] %s plays %s's deck from %s (rating %u)\n", o->name, gYgoNpcDecks[index].name,
            gYgoNpcDecks[index].gameName, gYgoNpcDecks[index].rating);
     return 1;
@@ -466,7 +542,11 @@ static int GameDeck(struct YgoOpponent *o, unsigned tier, u32 seed)
         return 0;
     lo = n * tier / 4;
     hi = n * (tier + 1) / 4;
-    return GameDeckAt(o, lo + seed % (hi - lo));
+    sGoat = tier >= 2 ? GOAT_TOO : GOAT_NO;   // (goatformat.com's decks: the skilled duelists, from the fourth badge)
+    {
+        int i = PickGameDeck(lo, hi, -1, seed);
+        return GameDeckAt(o, i >= 0 ? (unsigned)i : lo + seed % (hi - lo));
+    }
 }
 static int sThemedOnly;   // (the special duelists: their own type always)
 static void Fill(struct YgoOpponent *o, const char *name, const char *title, unsigned theme, unsigned tier, u32 key,
@@ -737,22 +817,32 @@ int Ygo_OpponentFavor(const struct YgoOpponent *o)
 static unsigned Off(int a, int b) { return (unsigned)(a > b ? a - b : b - a); }
 static void FitOnce(struct YgoOpponent *o, int target)
 {
-    unsigned cap = o->tier > 3 ? 3 : o->tier, i, best = ~0u, near = 0, pick;
+    unsigned cap = o->tier > 3 ? 3 : o->tier, i, best = ~0u;
     if (o->gba && gYgoNpcDeckCount >= 4)
     {
         // the Game Boy decks up to the badges' quarter (weakest first), the closest; among those nearly as close,
         // their own pick
         unsigned hi = gYgoNpcDeckCount * (cap + 1) / 4;
-        for (i = 0; i < hi; i++)
-            best = Off(gYgoNpcDecks[i].rating, target) < best ? Off(gYgoNpcDecks[i].rating, target) : best;
-        for (i = 0; i < hi; i++)
-            near += Off(gYgoNpcDecks[i].rating, target) <= best + 25;
-        pick = (o->seed >> 3) % (near ? near : 1);
-        for (i = 0; i < hi; i++)
-            if (Off(gYgoNpcDecks[i].rating, target) <= best + 25 && !pick--)
-                break;
+        int at;
+        sGoat = o->level >= 2 ? GOAT_TOO : GOAT_NO;   // (the skilled ones may bring a goatformat.com deck)
+        at = PickGameDeck(0, hi, target, o->seed >> 3);
+        i = at >= 0 ? (unsigned)at : hi;
         if (i < hi && GameDeckAt(o, i))
         {
+            o->rating = (s16)Ygo_DeckRating(o->main);
+            return;
+        }
+    }
+    if (o->special != YGO_SPECIAL_NONE && (o->seed >> 5) % 3 == 0 && gYgoNpcDeckCount >= 4)
+    {
+        // a third of the named duelists play one of goatformat.com's decks (the one their number picks near the target)
+        int at;
+        sGoat = GOAT_ONLY;
+        at = PickGameDeck(0, gYgoNpcDeckCount, target, o->seed >> 7);
+        sGoat = GOAT_NO;
+        if (at >= 0 && GameDeckAt(o, (unsigned)at))
+        {
+            o->gba = 1;
             o->rating = (s16)Ygo_DeckRating(o->main);
             return;
         }

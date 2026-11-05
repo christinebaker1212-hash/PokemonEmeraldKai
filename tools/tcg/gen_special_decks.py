@@ -17,6 +17,9 @@ CAT = json.loads((ROOT / 'tools/tcg/catalog.json').read_text())
 CARDS = {c['id']: c for c in CAT['cards']}
 BY_SYMBOL = {c['symbol']: c['id'] for c in CAT['cards']}
 DECKS = {d['name']: d['cards'] for d in CAT['decks']}
+# Pokemon Card GB2's decks too (as gTcgDeckDefinitions names them: "GB2 " + the label's words)
+GB2_DECKS = {'GB2 ' + d['name']: d['cards'] for d in CAT.get('gb2_decks', [])}
+DECKS.update(GB2_DECKS)
 TYPES = ['FIRE', 'GRASS', 'LIGHTNING', 'WATER', 'FIGHTING', 'PSYCHIC', 'COLORLESS']
 ENERGY = {'GRASS': 1, 'FIRE': 2, 'WATER': 3, 'LIGHTNING': 4, 'FIGHTING': 5, 'PSYCHIC': 6}
 
@@ -197,6 +200,15 @@ def main_type(cards):
 
 # Game Boy decks that are not a card player's: never a base for a variant.
 NOT_BASES = {'Unnamed', 'PracticePlayer', 'SamsPractice'}
+# GB2's practice, starter and copied first-game decks aren't either
+GB2_NOT_BASES = ('Starter', 'Practice', 'Unknown', 'GB1 ', 'Colorless Energy', 'Texture Tuner')
+# At most this many GB2 variants a special trainer (the ones sharing the most of their Pokemon first): with the first
+# game's, CARD SCALING has both games' decks to pick from, and two trainers of a type rarely end up with the same one
+GB2_VARIANTS = 6
+
+
+def gb2_base_ok(name):
+    return name.startswith('GB2 ') and not any(w in name for w in GB2_NOT_BASES)
 
 
 def listing(counts):
@@ -204,6 +216,18 @@ def listing(counts):
     for i in sorted(counts):
         cards += [i] * counts[i]
     return ','.join(map(str, cards))
+
+
+def variant(other, adds, promo, enum):
+    """The trainer's Pokemon and promo on another deck, or None where they don't fit"""
+    try:
+        v = build(other, adds, promo)
+        check(enum, v)
+    except (AssertionError, SystemExit, IndexError, KeyError):
+        return None
+    if promo and v[BY_SYMBOL[promo]] != 1:
+        return None
+    return v
 
 
 def main():
@@ -221,16 +245,23 @@ def main():
         # weaker and stronger versions for CARD SCALING (tools/tcg/rate_decks.sh rates them).
         kind = main_type(DECKS[base])
         for other in sorted(DECKS):
-            if other == base or other in NOT_BASES or main_type(DECKS[other]) != kind:
+            if other == base or other in NOT_BASES or other.startswith('GB2 ') or main_type(DECKS[other]) != kind:
                 continue
-            try:
-                v = build(other, adds, promo)
-                check(enum, v)
-            except (AssertionError, SystemExit):
-                continue
-            if promo and v[BY_SYMBOL[promo]] != 1:
-                continue
-            variants.append((n, '%s/%s' % (enum, other), v))
+            v = variant(other, adds, promo, enum)
+            if v:
+                variants.append((n, '%s/%s' % (enum, other), v))
+        # GB2's decks of their type, the ones with most of their own Pokemon first
+        theirs = {name_of(BY_SYMBOL[sym]) for sym, _ in adds}
+        gb2 = [o for o in sorted(DECKS) if gb2_base_ok(o) and main_type(DECKS[o]) == kind]
+        gb2.sort(key=lambda o: (-len(theirs & {name_of(i) for i in DECKS[o]}), o))
+        picked = 0
+        for other in gb2:
+            if picked >= GB2_VARIANTS:
+                break
+            v = variant(other, adds, promo, enum)
+            if v:
+                variants.append((n, '%s/%s' % (enum, other), v))
+                picked += 1
     out += ['};', 'const unsigned gTcgSpecialDeckCount = sizeof(gTcgSpecialDecks) / sizeof(gTcgSpecialDecks[0]);',
             '/* The promo card a first win over each hands over (0: none). */',
             'const uint16_t gTcgSpecialPromos[] = {' + ', '.join(str(BY_SYMBOL[p]) if p else '0' for _, _, _, _, p in SPECIAL) + '};',

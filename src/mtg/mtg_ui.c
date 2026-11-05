@@ -1299,6 +1299,11 @@ static void SpoilsStep(unsigned pressed)
         for (k = 0; k < n; k++)
             if (sets[k] == U.pack)
                 at = k;
+        for (k = 0; k < n && !C()->packs[U.pack]; k++)   // (none of that set left: the first set with one)
+            if (C()->packs[sets[k]]) {
+                at = k;
+                break;
+            }
         Screen(M_PACKS);   // (back to the boosters, on the same set)
         U.cursor = at;
     }

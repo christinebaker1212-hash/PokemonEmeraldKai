@@ -617,6 +617,10 @@ void Platform_QueueAudio(float *audioBuffer, s32 samplesPerFrame)
             return;
         }
     }
+    // OPTIONS > GAME > MUTE IN BACKGROUND: silence (still queued, so the timing stays) while none of the game's
+    // windows (the game, a spectate pop-out) has the keyboard focus
+    if (gMpConfig.muteInBackground && SDL_GetKeyboardFocus() == NULL)
+        memset(audioBuffer, 0, samplesPerFrame);
     SDL_QueueAudio(1, audioBuffer, samplesPerFrame);
     {
         // Tests (MOEMON_AUDIO_DUMP=file): everything sent to the sound device, raw stereo float32 at 42048 Hz
@@ -897,6 +901,15 @@ u16 Platform_GetKeyInput(void)
         sPadFastForward = ff;
         UpdateTimeScale();
     }
+    // Moemon Kai: in the PC's boxes Q / E are L2 / R2 (F is TAG there): they go round the boxes (mp_boxgrid.c)
+    if (Platform_InputContext() == INPUT_CONTEXT_PC_STORAGE && !(SDL_GetModState() & (KMOD_CTRL | KMOD_ALT | KMOD_GUI)))
+    {
+        const Uint8 *state = SDL_GetKeyboardState(NULL);
+        if (state[SDL_SCANCODE_Q])
+            padKeys |= PLATFORM_KEY_SEARCH;
+        if (state[SDL_SCANCODE_E])
+            padKeys |= PLATFORM_KEY_INSPECT;
+    }
     return keys | padKeys;
 }
 
@@ -931,6 +944,12 @@ void VDraw(void)
         MP_Poketch_Composite(image);     // Moemon Kai: the POKéTCH while it's open (src/sinnoh/poketch.c)
     }
     MP_BattleOverlay_Composite(image);   // ... and the battle emotes over everything
+    {
+        void MP_Credits_Composite(u16 *frame);
+        void MP_BoxGrid_Composite(u16 *frame);
+        MP_BoxGrid_Composite(image);     // Moemon Kai: the PC boxes' 3x3 grid (mp_boxgrid.c)
+        MP_Credits_Composite(image);     // Moemon Kai: the credits' "Skip the credits?" bar (credits.c)
+    }
     {
         void MP_FxClip_Frame(const u16 *frame);
         MP_FxClip_Frame(image);          // ... (MOEMON_EXPORT_FXCLIPS: the ball effects recorded for the phone app)

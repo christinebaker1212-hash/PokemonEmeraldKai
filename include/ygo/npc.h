@@ -31,6 +31,8 @@ struct YgoOpponent
  * duelists; a Game Boy deck up to what the badges allow, or their own type's at the tier that comes closest. An
  * ordinary duelist whose decks fall well short plays a level better instead. Sets o->main/extra/rating/level. */
 void Ygo_FitOpponent(struct YgoOpponent *o, int mine);
+/* The duelist's Game Boy Advance deck about to be dueled: passed over for a while where others fit as well */
+void Ygo_NoteDeckMet(const struct YgoOpponent *o);
 int Ygo_OpponentFavor(const struct YgoOpponent *o);
 /* DECK RECIPES: the special duelists (YgoOpponent.special, bits of specialBeaten), each one's deck at their best */
 unsigned Ygo_SpecialCount(void);

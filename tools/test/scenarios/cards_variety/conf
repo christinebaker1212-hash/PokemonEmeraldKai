@@ -1,0 +1,6 @@
+# POKéMON card players' decks: 20 of each kind (fitted to the starter deck's strength, each met once) bring many
+# different decks, the first game's and GB2's mixed; the special trainers vary between their own decks too (check.py)
+MODE=1
+EXPECT_A=("tcgvariety: ")
+UNEXPECT_A=("[crash]")
+CHECK="python3 tools/test/scenarios/cards_variety/check.py"

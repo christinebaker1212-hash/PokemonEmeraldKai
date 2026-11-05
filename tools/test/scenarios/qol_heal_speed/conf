@@ -1,0 +1,5 @@
+# A POTION from the BAG on a POKéMON at 5 HP: the 20 HP come back 30% quicker at BATTLE SPEED +30% (16 frames, not 20)
+MODE=1
+ENV_A="MOEMON_DEBUG_PARTY=280:15 MOEMON_ANIM_SPEED=30"
+EXPECT_A=("party hp: +20 in 16 frames" "partyhp 0: hp 25")
+UNEXPECT_A=("[crash]" "TIMEOUT")

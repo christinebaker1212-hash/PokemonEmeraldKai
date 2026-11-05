@@ -2045,7 +2045,11 @@ static void BufferBagFullCantTakeItemMessage(u16 itemUnused)
 #define tPartyId      data[4]
 #define tStartHP      data[5]
 
-static void Task_PartyMenuModifyHP(u8 taskId)
+static u16 sMpHpFrames;   // Moemon Co-op: frames the HP change took (logged for tests)
+static u8 sMpHpAcc;      // ... and its BATTLE SPEED steps so far (out of 20)
+
+// One HP step; TRUE once it's done
+static bool8 PartyMenuModifyHPStep(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
 
@@ -2059,8 +2063,29 @@ static void Task_PartyMenuModifyHP(u8 taskId)
         // If HP was recovered, buffer the amount recovered
         if (tHP > tStartHP)
             ConvertIntToDecimalStringN(gStringVar2, tHP - tStartHP, STR_CONV_MODE_LEFT_ALIGN, 3);
+        MPNet_Log("party hp: %+d in %u frames", tHP - tStartHP, sMpHpFrames);
 
         SwitchTaskToFollowupFunc(taskId);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static void Task_PartyMenuModifyHP(u8 taskId)
+{
+    // Moemon Co-op: HP coming back (potions, FULL RESTORE, REVIVE) fills as much quicker as the BATTLE SPEED
+    // (+30%: one more step every 20 frames x 6)
+    sMpHpFrames++;
+    if (PartyMenuModifyHPStep(taskId))
+        return;
+    if (gTasks[taskId].tHPIncrement > 0)
+    {
+        sMpHpAcc += MP_BattleAnimSpeed() / 5;
+        if (sMpHpAcc >= 20)
+        {
+            sMpHpAcc -= 20;
+            PartyMenuModifyHPStep(taskId);
+        }
     }
 }
 
@@ -2075,6 +2100,8 @@ void PartyMenuModifyHP(u8 taskId, u8 slot, s8 hpIncrement, s16 hpDifference, Tas
     tHPToAdd = hpDifference;
     tPartyId = slot;
     tStartHP = tHP;
+    sMpHpFrames = 0;
+    sMpHpAcc = 0;
     SetTaskFuncWithFollowupFunc(taskId, Task_PartyMenuModifyHP, task);
 }
 

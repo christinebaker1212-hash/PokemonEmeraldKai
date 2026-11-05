@@ -196,6 +196,16 @@ static void Ask(int action, int arg, const char *format, ...)
     U.askArg = arg;
     U.messageThen = ACT_NONE;
 }
+/* The BOOSTER PACKS page's first kind with an unopened pack (none: `fallback`) */
+static int FirstPack(const struct TcgCollection *c, int fallback)
+{
+    int i;
+    for (i = 0; i < TCG_PACK_TYPES; i++)
+        if (c->packs[i])
+            return i;
+    return fallback;
+}
+
 static void Screen(int screen)
 {
     if (screen != UI_SPOILS && screen != UI_INSPECT)
@@ -3457,7 +3467,10 @@ static void ChooseDeck(void)
     }
     /* CARD SCALING: the deck they bring fits the one you picked */
     if (U.vs == VS_NPC)
+    {
         Tcg_FitOpponent(&U.opp, c->decks[U.cursor].cards);
+        Tcg_NoteDeckMet(U.opp.deck);   // (the next card players reach for other decks first)
+    }
     StartDuel(c->decks[U.cursor].cards, U.opp.deck);
 }
 static void MoveCursor(unsigned pressed, int count, int step)
@@ -3805,6 +3818,7 @@ int Tcg_Step(unsigned keys)
                 break;
             case 2:
                 Screen(UI_PACKS);
+                U.cursor = FirstPack(c, 0);   // (on the first booster there is to open)
                 break;
             case 3:
             {
@@ -4291,7 +4305,7 @@ int Tcg_Step(unsigned keys)
         {
             PlaySE(SE_SELECT);
             Screen(UI_PACKS);
-            U.cursor = U.pack;
+            U.cursor = c->packs[U.pack] ? U.pack : FirstPack(c, U.pack);   // (the same kind while any are left)
         }
         break;
     case UI_SPOILS:
@@ -4696,6 +4710,7 @@ void Tcg_Debug(const char *command)
             if (U.screen == UI_CLOSED)
                 Open(UI_HOME);
             Screen(UI_PACKS);
+            U.cursor = FirstPack(c, 0);
         }
         return;
     }

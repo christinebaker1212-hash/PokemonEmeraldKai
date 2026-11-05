@@ -5,378 +5,522 @@
 /* By gTcgDeckDefinitions index */
 const int16_t gTcgDeckRating[] = {
     1500, /* Unnamed */
-    1424, /* PracticePlayer */
-    1461, /* SamsPractice */
-    1312, /* CharmanderAndFriends */
-    1360, /* CharmanderExtra */
-    1348, /* SquirtleAndFriends */
-    1377, /* SquirtleExtra */
-    1370, /* BulbasaurAndFriends */
-    1219, /* BulbasaurExtra */
-    1450, /* LightningAndFire */
-    1504, /* WaterAndFighting */
-    1558, /* LegendaryMoltres */
-    1596, /* LegendaryZapdos */
-    1525, /* LegendaryArticuno */
-    1563, /* LegendaryDragonite */
-    1576, /* FirstStrike */
-    1431, /* RockCrusher */
-    1625, /* GoGoRainDance */
-    1549, /* ZappingSelfdestruct */
-    1527, /* FlowerPower */
-    1479, /* StrangePsyshock */
-    1411, /* WondersofScience */
-    1530, /* FireCharge */
-    1453, /* ImRonald */
-    1661, /* PowerfulRonald */
-    1621, /* InvincibleRonald */
-    1694, /* LegendaryRonald */
-    1635, /* MusclesforBrains */
-    1578, /* HeatedBattle */
-    1535, /* LovetoBattle */
-    1434, /* Excavation */
-    1417, /* BlisteringPokemon */
-    1390, /* HardPokemon */
-    1426, /* WaterfrontPokemon */
-    1514, /* LonelyFriends */
-    1477, /* SoundoftheWaves */
-    1444, /* Pikachu */
-    1243, /* BoomBoomSelfdestruct */
-    1420, /* PowerGenerator */
-    1358, /* Etcetera */
-    1526, /* FlowerGarden */
-    1346, /* Kaleidoscope */
-    1403, /* Ghost */
-    1427, /* NapTime */
-    1604, /* StrangePower */
-    1451, /* FlyinPokemon */
-    1454, /* LovelyNidoran */
-    1483, /* Poison */
-    1541, /* Anger */
-    1574, /* Flamethrower */
-    1435, /* Imakuni */
-    1647, /* GB2 Unknown Poison Storm */
-    1506, /* GB2 GB1 Strange Psyshock */
-    1390, /* GB2 Starter */
-    1405, /* GB2 Sweat Anti GR1 */
-    1528, /* GB2 Give In Anti GR2 */
-    1460, /* GB2 Vengeful Anti GR3 */
-    1409, /* GB2 Unforgiving Anti GR4 */
-    1391, /* GB2 Player Practice */
-    1424, /* GB2 Aarons Step3 */
-    1573, /* GB2 Brick Walk */
-    1567, /* GB2 Bench Trap */
-    1580, /* GB2 Sky Spark */
-    1550, /* GB2 Electric Selfdestruct */
-    1509, /* GB2 Overflow */
-    1542, /* GB2 Triple Zapdos */
-    1501, /* GB2 I Love Pikachu */
-    1499, /* GB2 Ten Thousand Volts */
-    1519, /* GB2 Hand Over GR */
-    1433, /* GB2 Psychic Elite */
-    1483, /* GB2 Psychokinesis */
-    1551, /* GB2 Phantom */
-    1531, /* GB2 Puppet Master */
-    1444, /* GB2 Even3 Years On A Rock */
-    1443, /* GB2 Rolling Stone */
-    1476, /* GB2 Great Earthquake */
-    1534, /* GB2 Awesome Fossil */
-    1653, /* GB2 Raging Billow Of Fists */
+    1459, /* PracticePlayer */
+    1497, /* SamsPractice */
+    1345, /* CharmanderAndFriends */
+    1372, /* CharmanderExtra */
+    1374, /* SquirtleAndFriends */
+    1406, /* SquirtleExtra */
+    1359, /* BulbasaurAndFriends */
+    1213, /* BulbasaurExtra */
+    1479, /* LightningAndFire */
+    1514, /* WaterAndFighting */
+    1597, /* LegendaryMoltres */
+    1631, /* LegendaryZapdos */
+    1546, /* LegendaryArticuno */
+    1539, /* LegendaryDragonite */
+    1556, /* FirstStrike */
+    1402, /* RockCrusher */
+    1606, /* GoGoRainDance */
+    1565, /* ZappingSelfdestruct */
+    1477, /* FlowerPower */
+    1491, /* StrangePsyshock */
+    1388, /* WondersofScience */
+    1524, /* FireCharge */
+    1451, /* ImRonald */
+    1690, /* PowerfulRonald */
+    1596, /* InvincibleRonald */
+    1661, /* LegendaryRonald */
+    1633, /* MusclesforBrains */
+    1564, /* HeatedBattle */
+    1537, /* LovetoBattle */
+    1412, /* Excavation */
+    1397, /* BlisteringPokemon */
+    1369, /* HardPokemon */
+    1412, /* WaterfrontPokemon */
+    1506, /* LonelyFriends */
+    1480, /* SoundoftheWaves */
+    1441, /* Pikachu */
+    1246, /* BoomBoomSelfdestruct */
+    1424, /* PowerGenerator */
+    1433, /* Etcetera */
+    1482, /* FlowerGarden */
+    1325, /* Kaleidoscope */
+    1409, /* Ghost */
+    1399, /* NapTime */
+    1595, /* StrangePower */
+    1439, /* FlyinPokemon */
+    1432, /* LovelyNidoran */
+    1453, /* Poison */
+    1585, /* Anger */
+    1559, /* Flamethrower */
+    1410, /* Imakuni */
+    1618, /* GB2 Unknown Poison Storm */
+    1480, /* GB2 GB1 Strange Psyshock */
+    1444, /* GB2 Starter */
+    1382, /* GB2 Sweat Anti GR1 */
+    1525, /* GB2 Give In Anti GR2 */
+    1473, /* GB2 Vengeful Anti GR3 */
+    1432, /* GB2 Unforgiving Anti GR4 */
+    1405, /* GB2 Player Practice */
+    1474, /* GB2 Aarons Step3 */
+    1533, /* GB2 Brick Walk */
+    1580, /* GB2 Bench Trap */
+    1581, /* GB2 Sky Spark */
+    1580, /* GB2 Electric Selfdestruct */
+    1530, /* GB2 Overflow */
+    1584, /* GB2 Triple Zapdos */
+    1496, /* GB2 I Love Pikachu */
+    1497, /* GB2 Ten Thousand Volts */
+    1472, /* GB2 Hand Over GR */
+    1461, /* GB2 Psychic Elite */
+    1482, /* GB2 Psychokinesis */
+    1556, /* GB2 Phantom */
+    1533, /* GB2 Puppet Master */
+    1434, /* GB2 Even3 Years On A Rock */
+    1432, /* GB2 Rolling Stone */
+    1447, /* GB2 Great Earthquake */
+    1495, /* GB2 Awesome Fossil */
+    1643, /* GB2 Raging Billow Of Fists */
     1459, /* GB2 You Can Do It Machop */
-    1558, /* GB2 New Machoke */
-    1535, /* GB2 Skilled Warrior */
-    1597, /* GB2 I Love To Fight */
-    1654, /* GB2 Max Energy */
-    1621, /* GB2 Remaining Green */
-    1632, /* GB2 Poison Curse */
-    1582, /* GB2 Glittering Scales */
-    1583, /* GB2 Steady Increase */
-    1498, /* GB2 Dark Science */
-    1450, /* GB2 Natural Science */
-    1597, /* GB2 Poisonous Swamp */
-    1563, /* GB2 Gathering Nidoran */
-    1633, /* GB2 Rain Dance Confusion */
-    1511, /* GB2 Conserving Water */
-    1629, /* GB2 Energy Removal */
-    1600, /* GB2 Splashing About */
-    1457, /* GB2 Beach */
-    1625, /* GB2 Go Arcanine */
-    1627, /* GB2 Flame Festival */
-    1475, /* GB2 Immortal Flame */
-    1455, /* GB2 Electric Current Shock */
-    1478, /* GB2 Great Rocket4 */
-    1501, /* GB2 Great Rocket1 */
-    1491, /* GB2 Great Rocket2 */
-    1492, /* GB2 Great Rocket3 */
-    1600, /* GB2 Grand Fire */
-    1621, /* GB2 Legendary Fossil */
-    1592, /* GB2 Water Legend */
-    1551, /* GB2 Great Dragon */
-    1567, /* GB2 Bug Collecting */
-    1548, /* GB2 Demonic Forest */
-    1471, /* GB2 Sticky Poison Gas */
-    1416, /* GB2 Mad Petals */
-    1597, /* GB2 Dangerous Bench */
-    1561, /* GB2 Chain Lightning By Pikachu */
-    1496, /* GB2 This Is The Power Of Electricity */
-    1670, /* GB2 Quick Attack */
-    1475, /* GB2 Complete Combustion */
-    1415, /* GB2 Fireball */
-    1688, /* GB2 Eevee Showdown */
-    1369, /* GB2 Gaze Upon The Power Of Fire */
-    1535, /* GB2 Whirlpool Shower */
-    1654, /* GB2 Paralyzed Paralyzed */
-    1600, /* GB2 Bench Call */
-    1563, /* GB2 Water Stream */
-    1483, /* GB2 Rock Blast */
-    1539, /* GB2 Full Strength */
-    1511, /* GB2 Running Wild */
-    1206, /* GB2 Direct Hit */
-    1491, /* GB2 Superdestructive Power */
-    1361, /* GB2 Bad Dream */
-    1507, /* GB2 Pokemon Power */
-    1120, /* GB2 Spirited Away */
-    1336, /* GB2 Snorlax Guard */
-    1537, /* GB2 Eye Of The Storm */
-    1516, /* GB2 Sudden Growth */
-    1537, /* GB2 Very Rare Card */
-    1213, /* GB2 Bad Guys */
-    1620, /* GB2 Poison Mist */
-    1429, /* GB2 Ultra Removal */
-    1669, /* GB2 Psychic Battle */
-    1518, /* GB2 Stop Life */
-    1441, /* GB2 Scorcher */
-    1479, /* GB2 Tsunami Starter */
-    1429, /* GB2 Smash To Mincemeat */
-    1607, /* GB2 Test Your Luck */
-    1461, /* GB2 Protohistoric */
-    1465, /* GB2 Texture Tuner7 */
-    1621, /* GB2 Colorless Energy */
-    1577, /* GB2 Powerful Pokemon */
-    1472, /* GB2 Weird */
-    1295, /* GB2 Strange */
-    1464, /* GB2 Ronalds Uncool */
-    1575, /* GB2 Ronalds GRX */
-    1549, /* GB2 Ronalds Power */
-    1408, /* GB2 Ronalds Psychic */
-    1534, /* GB2 Ronalds Ultra */
-    1638, /* GB2 Everybodys Friend */
-    1453, /* GB2 Immortal Pokemon */
-    1746, /* GB2 Torrential Flood */
-    1389, /* GB2 Trainer Imprison */
-    1581, /* GB2 Blazing Flame */
-    1441, /* GB2 Damage Chaos */
-    1505, /* GB2 Big Thunder */
-    1476, /* GB2 Power Of Darkness */
+    1552, /* GB2 New Machoke */
+    1530, /* GB2 Skilled Warrior */
+    1585, /* GB2 I Love To Fight */
+    1607, /* GB2 Max Energy */
+    1613, /* GB2 Remaining Green */
+    1635, /* GB2 Poison Curse */
+    1630, /* GB2 Glittering Scales */
+    1563, /* GB2 Steady Increase */
+    1540, /* GB2 Dark Science */
+    1488, /* GB2 Natural Science */
+    1602, /* GB2 Poisonous Swamp */
+    1551, /* GB2 Gathering Nidoran */
+    1617, /* GB2 Rain Dance Confusion */
+    1510, /* GB2 Conserving Water */
+    1605, /* GB2 Energy Removal */
+    1563, /* GB2 Splashing About */
+    1436, /* GB2 Beach */
+    1669, /* GB2 Go Arcanine */
+    1595, /* GB2 Flame Festival */
+    1474, /* GB2 Immortal Flame */
+    1448, /* GB2 Electric Current Shock */
+    1496, /* GB2 Great Rocket4 */
+    1516, /* GB2 Great Rocket1 */
+    1478, /* GB2 Great Rocket2 */
+    1526, /* GB2 Great Rocket3 */
+    1610, /* GB2 Grand Fire */
+    1642, /* GB2 Legendary Fossil */
+    1548, /* GB2 Water Legend */
+    1521, /* GB2 Great Dragon */
+    1568, /* GB2 Bug Collecting */
+    1532, /* GB2 Demonic Forest */
+    1446, /* GB2 Sticky Poison Gas */
+    1394, /* GB2 Mad Petals */
+    1585, /* GB2 Dangerous Bench */
+    1558, /* GB2 Chain Lightning By Pikachu */
+    1521, /* GB2 This Is The Power Of Electricity */
+    1655, /* GB2 Quick Attack */
+    1473, /* GB2 Complete Combustion */
+    1495, /* GB2 Fireball */
+    1723, /* GB2 Eevee Showdown */
+    1456, /* GB2 Gaze Upon The Power Of Fire */
+    1506, /* GB2 Whirlpool Shower */
+    1611, /* GB2 Paralyzed Paralyzed */
+    1557, /* GB2 Bench Call */
+    1541, /* GB2 Water Stream */
+    1477, /* GB2 Rock Blast */
+    1544, /* GB2 Full Strength */
+    1531, /* GB2 Running Wild */
+    1198, /* GB2 Direct Hit */
+    1518, /* GB2 Superdestructive Power */
+    1353, /* GB2 Bad Dream */
+    1514, /* GB2 Pokemon Power */
+    1143, /* GB2 Spirited Away */
+    1285, /* GB2 Snorlax Guard */
+    1526, /* GB2 Eye Of The Storm */
+    1485, /* GB2 Sudden Growth */
+    1509, /* GB2 Very Rare Card */
+    1272, /* GB2 Bad Guys */
+    1672, /* GB2 Poison Mist */
+    1421, /* GB2 Ultra Removal */
+    1667, /* GB2 Psychic Battle */
+    1457, /* GB2 Stop Life */
+    1463, /* GB2 Scorcher */
+    1486, /* GB2 Tsunami Starter */
+    1442, /* GB2 Smash To Mincemeat */
+    1631, /* GB2 Test Your Luck */
+    1455, /* GB2 Protohistoric */
+    1508, /* GB2 Texture Tuner7 */
+    1593, /* GB2 Colorless Energy */
+    1663, /* GB2 Powerful Pokemon */
+    1443, /* GB2 Weird */
+    1270, /* GB2 Strange */
+    1503, /* GB2 Ronalds Uncool */
+    1559, /* GB2 Ronalds GRX */
+    1553, /* GB2 Ronalds Power */
+    1407, /* GB2 Ronalds Psychic */
+    1503, /* GB2 Ronalds Ultra */
+    1616, /* GB2 Everybodys Friend */
+    1507, /* GB2 Immortal Pokemon */
+    1703, /* GB2 Torrential Flood */
+    1400, /* GB2 Trainer Imprison */
+    1619, /* GB2 Blazing Flame */
+    1503, /* GB2 Damage Chaos */
+    1446, /* GB2 Big Thunder */
+    1485, /* GB2 Power Of Darkness */
 };
 /* Each special trainer's own deck */
 const int16_t gTcgSpecialRating[] = {
-    1445, /* ROXANNE */
-    1557, /* BRAWLY */
-    1541, /* WATTSON */
-    1509, /* FLANNERY */
-    1443, /* NORMAN */
-    1423, /* WINONA */
-    1454, /* TATE_LIZA */
-    1545, /* JUAN */
-    1521, /* SIDNEY */
-    1367, /* PHOEBE */
-    1534, /* GLACIA */
-    1507, /* DRAKE */
-    1487, /* WALLACE */
-    1535, /* STEVEN */
-    1353, /* RIVAL */
-    1406, /* WALLY */
-    1561, /* MAXIE */
-    1372, /* ARCHIE */
-    1536, /* ANABEL */
-    1599, /* TUCKER */
-    1527, /* SPENSER */
-    1661, /* GRETA */
-    1340, /* NOLAND */
-    1489, /* LUCY */
+    1391, /* ROXANNE */
+    1531, /* BRAWLY */
+    1567, /* WATTSON */
+    1544, /* FLANNERY */
+    1494, /* NORMAN */
+    1407, /* WINONA */
+    1468, /* TATE_LIZA */
+    1529, /* JUAN */
+    1513, /* SIDNEY */
+    1382, /* PHOEBE */
+    1548, /* GLACIA */
+    1486, /* DRAKE */
+    1488, /* WALLACE */
+    1544, /* STEVEN */
+    1352, /* RIVAL */
+    1411, /* WALLY */
+    1593, /* MAXIE */
+    1359, /* ARCHIE */
+    1524, /* ANABEL */
+    1632, /* TUCKER */
+    1483, /* SPENSER */
+    1658, /* GRETA */
+    1325, /* NOLAND */
+    1461, /* LUCY */
 };
 /* Their variants (gTcgSpecialVariants), each against all of the above 6 times */
 const int16_t gTcgVariantRating[] = {
-    1400, /* ROXANNE/BlisteringPokemon */
-    1423, /* ROXANNE/Excavation */
-    1496, /* ROXANNE/FirstStrike */
-    1365, /* ROXANNE/HardPokemon */
-    1471, /* ROXANNE/HeatedBattle */
-    1485, /* ROXANNE/LovetoBattle */
-    1542, /* ROXANNE/MusclesforBrains */
-    1568, /* ROXANNE/PowerfulRonald */
-    1369, /* BRAWLY/BlisteringPokemon */
-    1388, /* BRAWLY/Excavation */
-    1431, /* BRAWLY/HardPokemon */
-    1450, /* BRAWLY/HeatedBattle */
-    1583, /* BRAWLY/LovetoBattle */
-    1613, /* BRAWLY/MusclesforBrains */
-    1535, /* BRAWLY/PowerfulRonald */
-    1457, /* BRAWLY/RockCrusher */
-    1279, /* WATTSON/BoomBoomSelfdestruct */
-    1452, /* WATTSON/LegendaryZapdos */
-    1331, /* WATTSON/Pikachu */
-    1364, /* WATTSON/PowerGenerator */
-    1589, /* FLANNERY/Anger */
-    1333, /* FLANNERY/CharmanderAndFriends */
-    1551, /* FLANNERY/Flamethrower */
-    1523, /* FLANNERY/LegendaryMoltres */
-    1531, /* FLANNERY/LegendaryRonald */
-    1474, /* FLANNERY/LightningAndFire */
-    1269, /* NORMAN/CharmanderAndFriends */
-    1533, /* NORMAN/FireCharge */
-    1516, /* NORMAN/Flamethrower */
-    1470, /* NORMAN/LegendaryMoltres */
-    1506, /* NORMAN/LegendaryRonald */
-    1463, /* NORMAN/LightningAndFire */
-    1344, /* WINONA/BulbasaurAndFriends */
-    1405, /* WINONA/BulbasaurExtra */
-    1398, /* WINONA/CharmanderExtra */
-    1321, /* WINONA/Etcetera */
-    1432, /* WINONA/FlowerGarden */
-    1386, /* WINONA/FlowerPower */
-    1538, /* WINONA/InvincibleRonald */
-    1283, /* WINONA/Kaleidoscope */
-    1362, /* WINONA/LovelyNidoran */
-    1394, /* WINONA/Poison */
-    1409, /* WINONA/SquirtleExtra */
-    1375, /* WINONA/WondersofScience */
-    1372, /* TATE_LIZA/Ghost */
-    1448, /* TATE_LIZA/Imakuni */
-    1403, /* TATE_LIZA/NapTime */
-    1600, /* TATE_LIZA/StrangePower */
-    1315, /* JUAN/ImRonald */
-    1491, /* JUAN/LegendaryArticuno */
-    1476, /* JUAN/LegendaryDragonite */
-    1466, /* JUAN/LonelyFriends */
-    1428, /* JUAN/SoundoftheWaves */
-    1288, /* JUAN/SquirtleAndFriends */
-    1461, /* JUAN/WaterAndFighting */
-    1397, /* JUAN/WaterfrontPokemon */
-    1380, /* SIDNEY/Ghost */
-    1375, /* SIDNEY/Imakuni */
-    1450, /* SIDNEY/NapTime */
-    1468, /* SIDNEY/StrangePsyshock */
-    1368, /* PHOEBE/Imakuni */
-    1443, /* PHOEBE/NapTime */
-    1564, /* PHOEBE/StrangePower */
-    1473, /* PHOEBE/StrangePsyshock */
-    1544, /* GLACIA/GoGoRainDance */
-    1405, /* GLACIA/ImRonald */
-    1510, /* GLACIA/LegendaryDragonite */
-    1502, /* GLACIA/LonelyFriends */
-    1472, /* GLACIA/SoundoftheWaves */
-    1307, /* GLACIA/SquirtleAndFriends */
-    1461, /* GLACIA/WaterAndFighting */
-    1408, /* GLACIA/WaterfrontPokemon */
-    1514, /* DRAKE/GoGoRainDance */
-    1363, /* DRAKE/ImRonald */
-    1521, /* DRAKE/LegendaryArticuno */
-    1519, /* DRAKE/LonelyFriends */
-    1442, /* DRAKE/SoundoftheWaves */
-    1309, /* DRAKE/SquirtleAndFriends */
-    1458, /* DRAKE/WaterAndFighting */
-    1412, /* DRAKE/WaterfrontPokemon */
-    1607, /* WALLACE/GoGoRainDance */
-    1324, /* WALLACE/ImRonald */
-    1497, /* WALLACE/LegendaryArticuno */
-    1491, /* WALLACE/LegendaryDragonite */
-    1515, /* WALLACE/LonelyFriends */
-    1309, /* WALLACE/SquirtleAndFriends */
-    1489, /* WALLACE/WaterAndFighting */
-    1436, /* WALLACE/WaterfrontPokemon */
-    1348, /* STEVEN/BlisteringPokemon */
-    1359, /* STEVEN/Excavation */
-    1469, /* STEVEN/FirstStrike */
-    1397, /* STEVEN/HardPokemon */
-    1410, /* STEVEN/HeatedBattle */
-    1406, /* STEVEN/LovetoBattle */
-    1503, /* STEVEN/MusclesforBrains */
-    1394, /* STEVEN/RockCrusher */
-    1366, /* RIVAL/BulbasaurExtra */
-    1401, /* RIVAL/CharmanderExtra */
-    1292, /* RIVAL/Etcetera */
-    1519, /* RIVAL/FlowerGarden */
-    1509, /* RIVAL/FlowerPower */
-    1372, /* RIVAL/FlyinPokemon */
-    1546, /* RIVAL/InvincibleRonald */
-    1288, /* RIVAL/Kaleidoscope */
-    1388, /* RIVAL/LovelyNidoran */
-    1406, /* RIVAL/Poison */
-    1425, /* RIVAL/SquirtleExtra */
-    1401, /* RIVAL/WondersofScience */
-    1199, /* WALLY/BoomBoomSelfdestruct */
-    1496, /* WALLY/LegendaryZapdos */
-    1332, /* WALLY/PowerGenerator */
-    1462, /* WALLY/ZappingSelfdestruct */
-    1492, /* MAXIE/Anger */
-    1272, /* MAXIE/CharmanderAndFriends */
-    1493, /* MAXIE/FireCharge */
-    1569, /* MAXIE/Flamethrower */
-    1497, /* MAXIE/LegendaryRonald */
-    1415, /* MAXIE/LightningAndFire */
-    1499, /* ARCHIE/GoGoRainDance */
-    1352, /* ARCHIE/ImRonald */
-    1478, /* ARCHIE/LegendaryArticuno */
-    1475, /* ARCHIE/LegendaryDragonite */
-    1497, /* ARCHIE/LonelyFriends */
-    1493, /* ARCHIE/SoundoftheWaves */
-    1283, /* ARCHIE/SquirtleAndFriends */
-    1457, /* ARCHIE/WaterAndFighting */
-    1329, /* ANABEL/Ghost */
-    1376, /* ANABEL/Imakuni */
-    1352, /* ANABEL/NapTime */
-    1496, /* ANABEL/StrangePsyshock */
-    1374, /* TUCKER/BoomBoomSelfdestruct */
-    1495, /* TUCKER/Pikachu */
-    1453, /* TUCKER/PowerGenerator */
-    1556, /* TUCKER/ZappingSelfdestruct */
-    1335, /* SPENSER/BulbasaurAndFriends */
-    1357, /* SPENSER/BulbasaurExtra */
-    1396, /* SPENSER/CharmanderExtra */
-    1359, /* SPENSER/Etcetera */
-    1485, /* SPENSER/FlowerGarden */
-    1385, /* SPENSER/FlyinPokemon */
-    1572, /* SPENSER/InvincibleRonald */
-    1287, /* SPENSER/Kaleidoscope */
-    1407, /* SPENSER/LovelyNidoran */
-    1410, /* SPENSER/Poison */
-    1399, /* SPENSER/SquirtleExtra */
-    1408, /* SPENSER/WondersofScience */
-    1390, /* GRETA/BlisteringPokemon */
-    1439, /* GRETA/Excavation */
-    1577, /* GRETA/FirstStrike */
-    1429, /* GRETA/HardPokemon */
-    1593, /* GRETA/HeatedBattle */
-    1588, /* GRETA/LovetoBattle */
-    1650, /* GRETA/PowerfulRonald */
-    1427, /* GRETA/RockCrusher */
-    1304, /* NOLAND/BulbasaurAndFriends */
-    1309, /* NOLAND/BulbasaurExtra */
-    1344, /* NOLAND/CharmanderExtra */
-    1320, /* NOLAND/Etcetera */
-    1477, /* NOLAND/FlowerGarden */
-    1473, /* NOLAND/FlowerPower */
-    1348, /* NOLAND/FlyinPokemon */
-    1515, /* NOLAND/InvincibleRonald */
-    1390, /* NOLAND/LovelyNidoran */
-    1407, /* NOLAND/Poison */
-    1368, /* NOLAND/SquirtleExtra */
-    1406, /* NOLAND/WondersofScience */
-    1359, /* LUCY/BulbasaurAndFriends */
-    1415, /* LUCY/BulbasaurExtra */
-    1425, /* LUCY/CharmanderExtra */
-    1329, /* LUCY/Etcetera */
-    1475, /* LUCY/FlowerGarden */
-    1446, /* LUCY/FlowerPower */
-    1380, /* LUCY/FlyinPokemon */
-    1583, /* LUCY/InvincibleRonald */
-    1317, /* LUCY/Kaleidoscope */
-    1368, /* LUCY/LovelyNidoran */
-    1433, /* LUCY/SquirtleExtra */
-    1424, /* LUCY/WondersofScience */
+    1385, /* ROXANNE/BlisteringPokemon */
+    1404, /* ROXANNE/Excavation */
+    1491, /* ROXANNE/FirstStrike */
+    1345, /* ROXANNE/HardPokemon */
+    1488, /* ROXANNE/HeatedBattle */
+    1493, /* ROXANNE/LovetoBattle */
+    1539, /* ROXANNE/MusclesforBrains */
+    1585, /* ROXANNE/PowerfulRonald */
+    1505, /* ROXANNE/GB2 Awesome Fossil */
+    1457, /* ROXANNE/GB2 Protohistoric */
+    1376, /* ROXANNE/GB2 Even3 Years On A Rock */
+    1474, /* ROXANNE/GB2 Full Strength */
+    1422, /* ROXANNE/GB2 Great Rocket2 */
+    1352, /* ROXANNE/GB2 Sudden Growth */
+    1374, /* BRAWLY/BlisteringPokemon */
+    1383, /* BRAWLY/Excavation */
+    1413, /* BRAWLY/HardPokemon */
+    1457, /* BRAWLY/HeatedBattle */
+    1595, /* BRAWLY/LovetoBattle */
+    1616, /* BRAWLY/MusclesforBrains */
+    1584, /* BRAWLY/PowerfulRonald */
+    1411, /* BRAWLY/RockCrusher */
+    1555, /* BRAWLY/GB2 I Love To Fight */
+    1533, /* BRAWLY/GB2 New Machoke */
+    1609, /* BRAWLY/GB2 Raging Billow Of Fists */
+    1539, /* BRAWLY/GB2 Skilled Warrior */
+    1496, /* BRAWLY/GB2 You Can Do It Machop */
+    1572, /* BRAWLY/GB2 Everybodys Friend */
+    1295, /* WATTSON/BoomBoomSelfdestruct */
+    1526, /* WATTSON/LegendaryZapdos */
+    1353, /* WATTSON/Pikachu */
+    1359, /* WATTSON/PowerGenerator */
+    1547, /* WATTSON/GB2 Electric Selfdestruct */
+    1483, /* WATTSON/GB2 Overflow */
+    1462, /* WATTSON/GB2 This Is The Power Of Electricity */
+    1457, /* WATTSON/GB2 Bench Trap */
+    1511, /* WATTSON/GB2 Legendary Fossil */
+    1535, /* WATTSON/GB2 Quick Attack */
+    1620, /* FLANNERY/Anger */
+    1365, /* FLANNERY/CharmanderAndFriends */
+    1566, /* FLANNERY/Flamethrower */
+    1553, /* FLANNERY/LegendaryMoltres */
+    1515, /* FLANNERY/LegendaryRonald */
+    1481, /* FLANNERY/LightningAndFire */
+    1586, /* FLANNERY/GB2 Flame Festival */
+    1529, /* FLANNERY/GB2 Complete Combustion */
+    1415, /* FLANNERY/GB2 Gaze Upon The Power Of Fire */
+    1653, /* FLANNERY/GB2 Grand Fire */
+    1590, /* FLANNERY/GB2 Blazing Flame */
+    1449, /* FLANNERY/GB2 Electric Current Shock */
+    1302, /* NORMAN/CharmanderAndFriends */
+    1530, /* NORMAN/FireCharge */
+    1521, /* NORMAN/Flamethrower */
+    1517, /* NORMAN/LegendaryMoltres */
+    1507, /* NORMAN/LegendaryRonald */
+    1478, /* NORMAN/LightningAndFire */
+    1555, /* NORMAN/GB2 Test Your Luck */
+    1388, /* NORMAN/GB2 Complete Combustion */
+    1465, /* NORMAN/GB2 Great Dragon */
+    1383, /* NORMAN/GB2 Immortal Flame */
+    1463, /* NORMAN/GB2 Scorcher */
+    1296, /* NORMAN/GB2 Bad Guys */
+    1346, /* WINONA/BulbasaurAndFriends */
+    1387, /* WINONA/BulbasaurExtra */
+    1412, /* WINONA/CharmanderExtra */
+    1396, /* WINONA/Etcetera */
+    1421, /* WINONA/FlowerGarden */
+    1391, /* WINONA/FlowerPower */
+    1521, /* WINONA/InvincibleRonald */
+    1296, /* WINONA/Kaleidoscope */
+    1354, /* WINONA/LovelyNidoran */
+    1403, /* WINONA/Poison */
+    1448, /* WINONA/SquirtleExtra */
+    1359, /* WINONA/WondersofScience */
+    1406, /* WINONA/GB2 Give In Anti GR2 */
+    1410, /* WINONA/GB2 Brick Walk */
+    1457, /* WINONA/GB2 Bug Collecting */
+    1469, /* WINONA/GB2 Dark Science */
+    1396, /* WINONA/GB2 Demonic Forest */
+    1481, /* WINONA/GB2 Gathering Nidoran */
+    1385, /* TATE_LIZA/Ghost */
+    1418, /* TATE_LIZA/Imakuni */
+    1377, /* TATE_LIZA/NapTime */
+    1595, /* TATE_LIZA/StrangePower */
+    1563, /* TATE_LIZA/GB2 Phantom */
+    1491, /* TATE_LIZA/GB2 Puppet Master */
+    1405, /* TATE_LIZA/GB2 Weird */
+    1421, /* TATE_LIZA/GB2 Hand Over GR */
+    1315, /* TATE_LIZA/GB2 Strange */
+    1453, /* TATE_LIZA/GB2 Aarons Step3 */
+    1332, /* JUAN/ImRonald */
+    1502, /* JUAN/LegendaryArticuno */
+    1451, /* JUAN/LegendaryDragonite */
+    1478, /* JUAN/LonelyFriends */
+    1422, /* JUAN/SoundoftheWaves */
+    1317, /* JUAN/SquirtleAndFriends */
+    1475, /* JUAN/WaterAndFighting */
+    1382, /* JUAN/WaterfrontPokemon */
+    1372, /* JUAN/GB2 Beach */
+    1419, /* JUAN/GB2 Conserving Water */
+    1415, /* JUAN/GB2 Great Rocket4 */
+    1543, /* JUAN/GB2 Splashing About */
+    1372, /* JUAN/GB2 Vengeful Anti GR3 */
+    1481, /* JUAN/GB2 Water Stream */
+    1386, /* SIDNEY/Ghost */
+    1340, /* SIDNEY/Imakuni */
+    1418, /* SIDNEY/NapTime */
+    1455, /* SIDNEY/StrangePsyshock */
+    1428, /* SIDNEY/GB2 Aarons Step3 */
+    1365, /* SIDNEY/GB2 Bad Dream */
+    1552, /* SIDNEY/GB2 Phantom */
+    1442, /* SIDNEY/GB2 Psychokinesis */
+    1372, /* SIDNEY/GB2 Ronalds Psychic */
+    1446, /* SIDNEY/GB2 Psychic Elite */
+    1363, /* PHOEBE/Imakuni */
+    1408, /* PHOEBE/NapTime */
+    1537, /* PHOEBE/StrangePower */
+    1489, /* PHOEBE/StrangePsyshock */
+    1478, /* PHOEBE/GB2 Aarons Step3 */
+    1366, /* PHOEBE/GB2 Bad Dream */
+    1534, /* PHOEBE/GB2 Phantom */
+    1453, /* PHOEBE/GB2 Psychokinesis */
+    1388, /* PHOEBE/GB2 Ronalds Psychic */
+    1461, /* PHOEBE/GB2 Psychic Elite */
+    1489, /* GLACIA/GoGoRainDance */
+    1390, /* GLACIA/ImRonald */
+    1480, /* GLACIA/LegendaryDragonite */
+    1518, /* GLACIA/LonelyFriends */
+    1465, /* GLACIA/SoundoftheWaves */
+    1334, /* GLACIA/SquirtleAndFriends */
+    1489, /* GLACIA/WaterAndFighting */
+    1384, /* GLACIA/WaterfrontPokemon */
+    1408, /* GLACIA/GB2 Great Rocket1 */
+    1559, /* GLACIA/GB2 Rain Dance Confusion */
+    1528, /* GLACIA/GB2 Bench Call */
+    1480, /* GLACIA/GB2 Conserving Water */
+    1435, /* GLACIA/GB2 Ronalds Uncool */
+    1478, /* GLACIA/GB2 Splashing About */
+    1499, /* DRAKE/GoGoRainDance */
+    1373, /* DRAKE/ImRonald */
+    1502, /* DRAKE/LegendaryArticuno */
+    1480, /* DRAKE/LonelyFriends */
+    1415, /* DRAKE/SoundoftheWaves */
+    1367, /* DRAKE/SquirtleAndFriends */
+    1475, /* DRAKE/WaterAndFighting */
+    1372, /* DRAKE/WaterfrontPokemon */
+    1535, /* DRAKE/GB2 Energy Removal */
+    1339, /* DRAKE/GB2 Beach */
+    1511, /* DRAKE/GB2 Bench Call */
+    1427, /* DRAKE/GB2 Conserving Water */
+    1465, /* DRAKE/GB2 Great Rocket1 */
+    1424, /* DRAKE/GB2 Great Rocket4 */
+    1579, /* WALLACE/GoGoRainDance */
+    1341, /* WALLACE/ImRonald */
+    1529, /* WALLACE/LegendaryArticuno */
+    1470, /* WALLACE/LegendaryDragonite */
+    1489, /* WALLACE/LonelyFriends */
+    1356, /* WALLACE/SquirtleAndFriends */
+    1517, /* WALLACE/WaterAndFighting */
+    1440, /* WALLACE/WaterfrontPokemon */
+    1473, /* WALLACE/GB2 Ronalds Uncool */
+    1496, /* WALLACE/GB2 Beach */
+    1516, /* WALLACE/GB2 Conserving Water */
+    1421, /* WALLACE/GB2 Vengeful Anti GR3 */
+    1533, /* WALLACE/GB2 Very Rare Card */
+    1608, /* WALLACE/GB2 Water Legend */
+    1306, /* STEVEN/BlisteringPokemon */
+    1336, /* STEVEN/Excavation */
+    1431, /* STEVEN/FirstStrike */
+    1357, /* STEVEN/HardPokemon */
+    1388, /* STEVEN/HeatedBattle */
+    1428, /* STEVEN/LovetoBattle */
+    1466, /* STEVEN/MusclesforBrains */
+    1353, /* STEVEN/RockCrusher */
+    1360, /* STEVEN/GB2 Even3 Years On A Rock */
+    1434, /* STEVEN/GB2 Rock Blast */
+    1346, /* STEVEN/GB2 Rolling Stone */
+    1319, /* STEVEN/GB2 Sweat Anti GR1 */
+    1345, /* STEVEN/GB2 Awesome Fossil */
+    1366, /* STEVEN/GB2 Great Earthquake */
+    1373, /* RIVAL/BulbasaurExtra */
+    1407, /* RIVAL/CharmanderExtra */
+    1362, /* RIVAL/Etcetera */
+    1485, /* RIVAL/FlowerGarden */
+    1484, /* RIVAL/FlowerPower */
+    1371, /* RIVAL/FlyinPokemon */
+    1547, /* RIVAL/InvincibleRonald */
+    1264, /* RIVAL/Kaleidoscope */
+    1374, /* RIVAL/LovelyNidoran */
+    1393, /* RIVAL/Poison */
+    1446, /* RIVAL/SquirtleExtra */
+    1375, /* RIVAL/WondersofScience */
+    1446, /* RIVAL/GB2 Give In Anti GR2 */
+    1549, /* RIVAL/GB2 Glittering Scales */
+    1529, /* RIVAL/GB2 Max Energy */
+    1588, /* RIVAL/GB2 Remaining Green */
+    1425, /* RIVAL/GB2 Brick Walk */
+    1508, /* RIVAL/GB2 Bug Collecting */
+    1215, /* WALLY/BoomBoomSelfdestruct */
+    1505, /* WALLY/LegendaryZapdos */
+    1356, /* WALLY/PowerGenerator */
+    1471, /* WALLY/ZappingSelfdestruct */
+    1369, /* WALLY/GB2 Unforgiving Anti GR4 */
+    1448, /* WALLY/GB2 Bench Trap */
+    1406, /* WALLY/GB2 Big Thunder */
+    1477, /* WALLY/GB2 Chain Lightning By Pikachu */
+    1500, /* WALLY/GB2 Dangerous Bench */
+    1451, /* WALLY/GB2 Electric Selfdestruct */
+    1552, /* MAXIE/Anger */
+    1324, /* MAXIE/CharmanderAndFriends */
+    1515, /* MAXIE/FireCharge */
+    1558, /* MAXIE/Flamethrower */
+    1482, /* MAXIE/LegendaryRonald */
+    1449, /* MAXIE/LightningAndFire */
+    1585, /* MAXIE/GB2 Blazing Flame */
+    1640, /* MAXIE/GB2 Flame Festival */
+    1583, /* MAXIE/GB2 Grand Fire */
+    1426, /* MAXIE/GB2 Electric Current Shock */
+    1389, /* MAXIE/GB2 Gaze Upon The Power Of Fire */
+    1487, /* MAXIE/GB2 Complete Combustion */
+    1493, /* ARCHIE/GoGoRainDance */
+    1356, /* ARCHIE/ImRonald */
+    1471, /* ARCHIE/LegendaryArticuno */
+    1484, /* ARCHIE/LegendaryDragonite */
+    1472, /* ARCHIE/LonelyFriends */
+    1486, /* ARCHIE/SoundoftheWaves */
+    1337, /* ARCHIE/SquirtleAndFriends */
+    1471, /* ARCHIE/WaterAndFighting */
+    1419, /* ARCHIE/GB2 Beach */
+    1474, /* ARCHIE/GB2 Conserving Water */
+    1436, /* ARCHIE/GB2 Great Rocket4 */
+    1463, /* ARCHIE/GB2 Ronalds Uncool */
+    1519, /* ARCHIE/GB2 Water Legend */
+    1527, /* ARCHIE/GB2 Bench Call */
+    1377, /* ANABEL/Ghost */
+    1353, /* ANABEL/Imakuni */
+    1338, /* ANABEL/NapTime */
+    1486, /* ANABEL/StrangePsyshock */
+    1463, /* ANABEL/GB2 Aarons Step3 */
+    1450, /* ANABEL/GB2 Immortal Pokemon */
+    1521, /* ANABEL/GB2 Pokemon Power */
+    1461, /* ANABEL/GB2 Psychic Elite */
+    1477, /* ANABEL/GB2 Psychokinesis */
+    1423, /* ANABEL/GB2 Hand Over GR */
+    1377, /* TUCKER/BoomBoomSelfdestruct */
+    1509, /* TUCKER/Pikachu */
+    1432, /* TUCKER/PowerGenerator */
+    1574, /* TUCKER/ZappingSelfdestruct */
+    1543, /* TUCKER/GB2 Chain Lightning By Pikachu */
+    1581, /* TUCKER/GB2 Electric Selfdestruct */
+    1650, /* TUCKER/GB2 Legendary Fossil */
+    1529, /* TUCKER/GB2 Ten Thousand Volts */
+    1529, /* TUCKER/GB2 This Is The Power Of Electricity */
+    1589, /* TUCKER/GB2 Triple Zapdos */
+    1312, /* SPENSER/BulbasaurAndFriends */
+    1351, /* SPENSER/BulbasaurExtra */
+    1415, /* SPENSER/CharmanderExtra */
+    1411, /* SPENSER/Etcetera */
+    1446, /* SPENSER/FlowerGarden */
+    1393, /* SPENSER/FlyinPokemon */
+    1559, /* SPENSER/InvincibleRonald */
+    1275, /* SPENSER/Kaleidoscope */
+    1383, /* SPENSER/LovelyNidoran */
+    1404, /* SPENSER/Poison */
+    1471, /* SPENSER/SquirtleExtra */
+    1397, /* SPENSER/WondersofScience */
+    1510, /* SPENSER/GB2 Great Rocket3 */
+    1581, /* SPENSER/GB2 Max Energy */
+    1462, /* SPENSER/GB2 Brick Walk */
+    1507, /* SPENSER/GB2 Bug Collecting */
+    1457, /* SPENSER/GB2 Dark Science */
+    1505, /* SPENSER/GB2 Demonic Forest */
+    1365, /* GRETA/BlisteringPokemon */
+    1425, /* GRETA/Excavation */
+    1551, /* GRETA/FirstStrike */
+    1432, /* GRETA/HardPokemon */
+    1595, /* GRETA/HeatedBattle */
+    1606, /* GRETA/LovetoBattle */
+    1695, /* GRETA/PowerfulRonald */
+    1411, /* GRETA/RockCrusher */
+    1613, /* GRETA/GB2 I Love To Fight */
+    1574, /* GRETA/GB2 New Machoke */
+    1638, /* GRETA/GB2 Raging Billow Of Fists */
+    1529, /* GRETA/GB2 Ronalds Power */
+    1542, /* GRETA/GB2 Skilled Warrior */
+    1595, /* GRETA/GB2 Everybodys Friend */
+    1312, /* NOLAND/BulbasaurAndFriends */
+    1272, /* NOLAND/BulbasaurExtra */
+    1390, /* NOLAND/CharmanderExtra */
+    1364, /* NOLAND/Etcetera */
+    1412, /* NOLAND/FlowerGarden */
+    1451, /* NOLAND/FlowerPower */
+    1369, /* NOLAND/FlyinPokemon */
+    1525, /* NOLAND/InvincibleRonald */
+    1359, /* NOLAND/LovelyNidoran */
+    1376, /* NOLAND/Poison */
+    1407, /* NOLAND/SquirtleExtra */
+    1378, /* NOLAND/WondersofScience */
+    1603, /* NOLAND/GB2 Glittering Scales */
+    1456, /* NOLAND/GB2 Natural Science */
+    1458, /* NOLAND/GB2 Brick Walk */
+    1491, /* NOLAND/GB2 Bug Collecting */
+    1466, /* NOLAND/GB2 Dark Science */
+    1463, /* NOLAND/GB2 Demonic Forest */
+    1343, /* LUCY/BulbasaurAndFriends */
+    1408, /* LUCY/BulbasaurExtra */
+    1444, /* LUCY/CharmanderExtra */
+    1393, /* LUCY/Etcetera */
+    1413, /* LUCY/FlowerGarden */
+    1401, /* LUCY/FlowerPower */
+    1379, /* LUCY/FlyinPokemon */
+    1566, /* LUCY/InvincibleRonald */
+    1290, /* LUCY/Kaleidoscope */
+    1364, /* LUCY/LovelyNidoran */
+    1440, /* LUCY/SquirtleExtra */
+    1385, /* LUCY/WondersofScience */
+    1410, /* LUCY/GB2 Dark Science */
+    1583, /* LUCY/GB2 Poisonous Swamp */
+    1339, /* LUCY/GB2 Sticky Poison Gas */
+    1412, /* LUCY/GB2 Brick Walk */
+    1503, /* LUCY/GB2 Bug Collecting */
+    1473, /* LUCY/GB2 Demonic Forest */
 };
 /* The decks a player's deck is measured against in the game */
-const uint8_t gTcgRatingReferences[] = {131, 7, 59, 88, 110, 103, 140, 125, 14, 112, 97, 158};
+const uint8_t gTcgRatingReferences[] = {131, 54, 38, 99, 98, 117, 130, 29, 49, 44, 85, 118};
 const unsigned gTcgRatingReferenceCount = 12;

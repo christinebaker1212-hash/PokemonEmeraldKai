@@ -110,6 +110,7 @@ enum
     OPT_FB_DEFAULTS,
     OPT_FB_BACK,
     OPT_SHADOWS,      // Moemon Kai: DISPLAY > SHADOWS ON / OFF (mp_shadow.c)
+    OPT_BGMUTE,       // Moemon Co-op: GAME > MUTE IN BACKGROUND (sdl2.c Platform_QueueAudio)
     OPT_BADGEFADE,    // Moemon Co-op: GAME > BADGE FADING (the BADGE CASE: mp_tcard.c, per save)
     OPT_CARDTITLE,    // Moemon Co-op: GAME > CARD TITLE ON / OFF (the TRAINER CARD's title)
     OPT_SPRITESCALE,  // Moemon Co-op: DISPLAY > SPRITE SCALING (A: its page)
@@ -276,6 +277,7 @@ static const u8 sText_Size[] = _("SIZE");
 static const u8 sText_Back[] = _("BACK");
 static const u8 sText_SpriteScale[] = _("SPRITE SCALING");
 static const u8 sText_Shadows[] = _("SHADOWS");
+static const u8 sText_BgMute[] = _("MUTE IN BACKGROUND");
 static const u8 sText_SsFollowers[] = _("FOLLOWERS");
 static const u8 sText_SsGarden[] = _("GARDEN MOéMON");
 static const u8 sText_Close[] = _("CLOSE");
@@ -430,6 +432,7 @@ static void BuildRows(void)
         AddRow(OPT_CREATURES, 0);
         AddRow(OPT_BUTTONMODE, 0);
         AddRow(OPT_SOUND, 0);
+        AddRow(OPT_BGMUTE, 0);
         AddRow(OPT_BIKEMUSIC, 0);
         AddRow(OPT_SURFMUSIC, 0);
         AddRow(OPT_BADGEFADE, 0);
@@ -539,7 +542,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = gText_ButtonTypeNormal, names[1] = gText_ButtonTypeLR, names[2] = gText_ButtonTypeLEqualsA;
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
-    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SHADOWS: case OPT_CARDTITLE:
+    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SHADOWS: case OPT_CARDTITLE: case OPT_BGMUTE:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_BADGEFADE:
@@ -807,6 +810,7 @@ static u8 Current(u8 row)
     case OPT_FOLLOWSPRITES: return gMpConfig.followerSprites % MP_FOLLOW_SPRITES_COUNT;
     case OPT_SINNOHSPRITES: return 2 - gMpConfig.sinnohSprites % 3;
     case OPT_SHADOWS:     return !gMpConfig.noShadows;
+    case OPT_BGMUTE:      return gMpConfig.muteInBackground != 0;
     case OPT_BADGEFADE:   return MP_TCard_Fade();
     case OPT_CARDTITLE:   return MP_TCard_ShowTitle() != 0;
     }
@@ -888,6 +892,10 @@ static void Change(u8 row, int dir)
     case OPT_FOLLOWSPRITES:
         gMpConfig.followerSprites = Wrap(gMpConfig.followerSprites + dir, MP_FOLLOW_SPRITES_COUNT);
         MPNet_Log("follower sprites: %d", gMpConfig.followerSprites);
+        break;
+    case OPT_BGMUTE:
+        gMpConfig.muteInBackground = !gMpConfig.muteInBackground;
+        MPNet_Log("mute in background: %d", gMpConfig.muteInBackground);
         break;
     case OPT_SHADOWS:
         gMpConfig.noShadows = !gMpConfig.noShadows;
@@ -1015,6 +1023,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_FOLLOWSPRITES: return sText_Followers;
     case OPT_SINNOHSPRITES: return sText_SinnohPeople;
     case OPT_SHADOWS: return sText_Shadows;
+    case OPT_BGMUTE:  return sText_BgMute;
     case OPT_BADGEFADE:   return sText_BadgeFade;
     case OPT_CARDTITLE:   return sText_CardTitle;
     case OPT_SC_ON:       return sText_LevelScale;
@@ -1200,6 +1209,9 @@ static void DrawHint(void)
         else
             snprintf(ascii, sizeof(ascii), "A: ON/OFF  LEFT/RIGHT: %d%% TO TRUE SIZE", pct);
     }
+    else if (opt == OPT_BGMUTE)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.muteInBackground ? "SILENT WHILE ANOTHER WINDOW IS IN FRONT"
+                                                                        : "SOUND PLAYS EVEN WHEN NOT IN FOCUS");
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
     else if (opt == OPT_BADGEFADE)

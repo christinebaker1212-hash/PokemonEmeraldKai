@@ -2650,6 +2650,8 @@ static void ChooseDeck(void)
         memcpy(o->extra, fitted.extra, sizeof(o->extra));
         o->rating = fitted.rating;
         o->level = fitted.level;
+        o->gba = fitted.gba;
+        Ygo_NoteDeckMet(o);   // (the next duelists reach for other decks first)
     }
     StartDuel(Deck(c->activeDeck)->main, Deck(c->activeDeck)->extra, Y.opp.main, Y.opp.extra);
 }
@@ -3503,6 +3505,12 @@ int YgoUi_Step(unsigned keys)
                 for (i = 0; i < n; i++)
                     if (sets[i] == Y.pack)
                         Y.cursor = (int)i;
+                for (i = 0; i < n && !c->packs[Y.pack]; i++)   // (none of that set left: the first set with one)
+                    if (c->packs[sets[i]])
+                    {
+                        Y.cursor = (int)i;
+                        break;
+                    }
             }
         }
         break;

@@ -7,7 +7,7 @@
 #include <math.h>
 #include "../../src/ygo/ygo_internal.h"
 
-#define MAX_DECKS 400
+#define MAX_DECKS 640
 static uint16_t sMain[MAX_DECKS][YGO_DECK_MAX], sExtra[MAX_DECKS][YGO_FUSION_MAX];
 static double sElo[MAX_DECKS];
 static unsigned sWins[MAX_DECKS], sGames[MAX_DECKS];

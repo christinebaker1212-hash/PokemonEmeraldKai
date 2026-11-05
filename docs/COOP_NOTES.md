@@ -5519,3 +5519,65 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   now. Saves holding the WORKS KEY get Platinum's "has the key" flag (0x3564) on arriving (the map's own transition
   script). Test sinnoh_works_key.
 
+
+## Small touches of 1.112.0 (the user, 2026-11-05)
+- **MUTE IN BACKGROUND** (OPTIONS > GAME, under SOUND; gMpConfig.muteInBackground, ini `mute_in_background`): while none
+  of the game's windows has the keyboard focus (SDL_GetKeyboardFocus() is NULL: a spectate pop-out counts as the game),
+  sdl2.c Platform_QueueAudio queues silence instead of the mix (still queued, so the timing stays). Test qol_bgmute.
+- **Healing at BATTLE SPEED**: an HP bar that fills (receivedValue < 0: potions, FULL RESTORE, REVIVE, healing moves) takes
+  one more step every 20 frames x (ANIM SPEED / 5), the room host's MP_BattleAnimSpeed (+30%: 6, 30% quicker; NORMAL:
+  none). In battle every controller's CompleteOnHealthbarDone calls battle_interface.c MP_MoveHealthBar; outside it
+  party_menu.c Task_PartyMenuModifyHP (logs "party hp: +N in F frames"). Test qol_heal_speed.
+- **EGGS hatch in half the time**: daycare.c TryProduceOrHatchEgg counts an egg cycle every 128 steps (was 256), so every
+  EGG, carried ones too, needs half the steps; FLAME BODY / MAGMA ARMOR still take two cycles a time on top. Test
+  qol_egg_hatch (`mp giveegg SPECIES`, `mp eggsteps N`).
+- **Skipping the credits**: START during the credits puts "Skip the credits?   START: skip" over the picture for 4 s
+  (credits.c MP_Credits_Composite, drawn in VDraw); START again fades out and goes on from the HALL OF FAME's save
+  (Task_CreditsSoftReset). THE END already takes any button. Test qol_credits_skip (`mp credits`).
+- **The booster pages open on a pack**: the POKéMON side's BOOSTER PACKS page starts on the first kind with an unopened
+  pack (tcg_ui.c FirstPack), as YU-GI-OH!'s and MAGIC's did; after a pack, all three stay on its kind while any are left,
+  else the first kind that has one.
+- **PC boxes: L2 / R2 and the grid of every box** (src/mp/mp_boxgrid.c): in the box screen's input state
+  (pokemon_storage_system.c Task_PokeStorageMain, not over the party) MP_BoxGrid_Input reads L2 / R2
+  (PLATFORM_KEY_SEARCH / _INSPECT: the controller's LT / RT in the PC's context, gamepad.c; Q / E on the keyboard there,
+  sdl2.c, since F is TAG; main.c ReadKeys keeps them in gMpExtraHeld). A tap under 15 frames scrolls a box (as L / R's
+  INPUT_SCROLL_*); a hold zooms the box (the frame from the last held frame) into its cell of a 3x3 grid of all 40
+  boxes. The user's rule: the PC's own screen stays (the PKMN DATA panel, the buttons, the arrows): the grid lives only
+  in the box's place (the wallpaper at 80,16, its inside 82,42 156x116), each cell the box as the PC draws it made
+  48x36 (MP_Storage_BoxWallpaper renders its wallpaper, Walda's too, the icons where CreateBoxMonIconAtPos puts them,
+  mean-of-pixels shrinking with icons kept crisp), the title plate and name above in the PC's own art and title colors
+  (MP_Storage_BoxTitle) for the box under the PC's own hand (its live palette). While the grid is up MpBoxGridHide
+  (CB2_PokeStorage, before the OAM is built) turns BG2 off and hides the sprites on the box (arrows kept), so the
+  PC's backdrop shows between the cells; they come back as they were. D-pad moves, A or L2 / R2 picks
+  (INPUT_MP_JUMP_BOX: the stock scroll to that box runs hidden behind the grid, then the live box grows back from its
+  cell over the backdrop kept from the grid), B goes back to the box it came from. Drawn over the frame
+  (MP_BoxGrid_Composite; every pixel with bit 15 set: the frame is ABGR1555 and a clear bit is see-through black).
+  Test qol_box_grid.
+
+## Card players' decks: variety (1.112.0, the user, 2026-11-05: "the same two decks over and over")
+- **POKéMON** (src/tcg/tcg_field.c Tcg_FitOpponent): the candidates are as before (their kind's Game Boy decks of every
+  tier up to the badges' cap, GB2's of their kind, GB2's practice / starter / copied decks left out: Gb2Plays), but the
+  pick (Pick) is no longer "the closest, or one within 30": any deck within max(best + 60, 90) of the target counts,
+  weighted by closeness and by game (KANTO 3:2 for the first game's, JOHTO 2:3 for GB2's, elsewhere even), drawn by the
+  person's own number (o->pick: the same person brings the same deck while nothing changes), and the last 12 decks the
+  player dueled (Tcg_NoteDeckMet at the duel's start) are passed over while others fit. CARD SCALING off: their tier's
+  decks by their number, the ones met lately skipped. Special trainers: gen_special_decks.py also builds up to six GB2
+  variants each (the GB2 decks of their type sharing most of their Pokemon first): 322 variants (178 + 144), rated in
+  tcg_ratings.c (rate_decks.sh). Test cards_variety (`mp tcgvariety`: 20 players of each kind, 5 of each special).
+- **YU-GI-OH!** (src/ygo/ygo_field.c PickGameDeck): the Game Boy Advance decks are picked the same way (window, closeness,
+  the duelist's number, the last 12 met passed over: Ygo_NoteDeckMet), World Championship 2006's three times as likely
+  (GameWeight). goatformat.com's deck guides (tools/ygo/fetch_goat_decks.py: 160 lists from 110 guides, cached outside
+  the repository; strength 1-4 from the guide's Overview words) are in tools/ygo/npc_decks.json as game "GOAT", rated by
+  rate_npc_decks.sh with the rest: only skilled duelists (level 2+, or the fourth badge on with CARD SCALING off) may
+  bring them (weight 1 + strength), and a third of the named duelists (by their number) bring one instead of their own
+  type's deck.
+- **POKéMON card AI: retreating, as the Game Boy game does** (src/tcg/tcg_ai.c, from pret/poketcg engine/duel/ai/retreat.asm;
+  poketcg2's AI is only partly taken apart, its retreat the first game's): WantRetreat scores from 128 (poisoned +2,
+  confused +1, the Active can knock out the other one -5 (-35 on its last Prizes), the other can knock it out +2, weakness
+  and resistance both ways, a Bench Pokemon that can knock it out +2 (+40 on the last Prize), retreat cost 2 / 3+ -1 / -2,
+  no Bench Pokemon that would survive -20...) and retreats at 131, before the turn's Energy, paying with what its attacks
+  need least (RetreatEnergy); a Doll or Fossil steps back for anyone who can hurt the other Active and survive it. Who
+  goes in, on a retreat and on a Knock Out's promotion, is AIDecideBenchPokemonToSwitchTo's score (SwitchScore). Attacks
+  that discard their own Energy or hurt their user count for less unless they knock out (ExpectedDamage). Levels below
+  3 sometimes don't retreat (sHoldRetreat). Against the old AI over 3456 duels of the Game Boy decks it wins 54.6%.
+  Test tools/tcg/test_ai.c (WeakCharmander).

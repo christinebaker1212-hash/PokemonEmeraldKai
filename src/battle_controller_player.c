@@ -1534,7 +1534,7 @@ void Task_PlayerController_RestoreBgmAfterCry(u8 taskId)
 
 static void CompleteOnHealthbarDone(void)
 {
-    s16 hpValue = MoveBattleBar(gActiveBattler, gHealthboxSpriteIds[gActiveBattler], HEALTH_BAR, 0);
+    s16 hpValue = MP_MoveHealthBar(gActiveBattler, gHealthboxSpriteIds[gActiveBattler]);
 
     SetHealthboxSpriteVisible(gHealthboxSpriteIds[gActiveBattler]);
 

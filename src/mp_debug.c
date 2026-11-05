@@ -894,6 +894,44 @@ void MP_TestCommand(const char *cmd, const char *arg)
         }
         printf("[test] coopegg after %d tries: pending %d\n", i, gSaveBlock1Ptr->daycare.offspringPersonality != 0);
     }
+    else if (strcmp(cmd, "tcgvariety") == 0)
+    {
+        // tcgvariety - how many different decks card players bring (tcg_field.c Tcg_DebugVariety)
+        void Tcg_DebugVariety(void);
+        Tcg_DebugVariety();
+    }
+    else if (strcmp(cmd, "giveegg") == 0)
+    {
+        // giveegg SPECIES - an EGG of it in the party (as a gift EGG is: its species' egg cycles left)
+        u8 ScriptGiveEgg(u16 species);
+        u8 r = ScriptGiveEgg((u16)atoi(arg));
+        printf("[test] giveegg %d: %d\n", atoi(arg), r);
+    }
+    else if (strcmp(cmd, "eggsteps") == 0)
+    {
+        // eggsteps N - N steps of the day care's step counter (daycare.c ShouldEggHatch), then each party EGG's cycles
+        bool8 ShouldEggHatch(void);
+        int n = atoi(arg), i, hatch = 0;
+        for (i = 0; i < n && !hatch; i++)
+            hatch = ShouldEggHatch();
+        for (i = 0; i < gPlayerPartyCount; i++)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+                printf("[test] egg slot %d: %u cycles left after %d steps%s\n", i,
+                       (unsigned)GetMonData(&gPlayerParty[i], MON_DATA_FRIENDSHIP), n, hatch ? " (hatching)" : "");
+    }
+    else if (strcmp(cmd, "credits") == 0)
+    {
+        // credits - straight into the credits (as after the HALL OF FAME)
+        void CB2_StartCreditsSequence(void);
+        SetMainCallback2(CB2_StartCreditsSequence);
+        printf("[test] credits\n");
+    }
+    else if (strcmp(cmd, "box") == 0)
+    {
+        // box - the PC's box in use
+        u8 StorageGetCurrentBox(void);
+        printf("[test] box %d\n", StorageGetCurrentBox() + 1);
+    }
     else if (strcmp(cmd, "takeegg") == 0)
     {
         void GiveEggFromDaycare(void);

@@ -645,8 +645,10 @@ u16 Gamepad_Poll(int *fastForward)
             if (buttons & west)  keys |= B_BUTTON;       // backspace
             break;
         case INPUT_CONTEXT_PC_STORAGE:
-            // The PC's boxes: west = TAG (pokemon_storage_system.c)
+            // The PC's boxes: west = TAG (pokemon_storage_system.c); LT / RT go round the boxes (mp_boxgrid.c)
             if (pressed & west)  Platform_ContextAction(INPUT_ACTION_PC_TAG);
+            if (lt > TRIGGER_ON) keys |= PLATFORM_KEY_SEARCH;
+            if (rt > TRIGGER_ON) keys |= PLATFORM_KEY_INSPECT;
             break;
         case INPUT_CONTEXT_QUICKPICK:
             // The emote / phrase pick: west = swap / pin a ready-made phrase, north = edit (mp_menu.c)

@@ -28,6 +28,9 @@
 #include "overworld.h"
 #include "sprite.h"
 #include "mp.h"
+#include "constants/characters.h"
+
+u8 MP_RenderSmallGlyph(u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor);   // text.c
 
 #define COLOR_DARK_GREEN RGB(7, 11, 6)
 #define COLOR_LIGHT_GREEN RGB(13, 20, 12)
@@ -347,10 +350,96 @@ static void VBlankCB_Credits(void)
     TransferPlttBuffer();
 }
 
+// Moemon Kai: START asks to skip the credits (a bar over the picture for a few seconds); START again skips them,
+// fading out to where the game goes on from the HALL OF FAME's save (Task_CreditsSoftReset)
+#define CREDITS_SKIP_ASK_FRAMES 240
+static u16 sCreditsSkipAsk;   // frames the question stays up
+static bool8 sCreditsSkipping;
+
+static void Task_CreditsSkipFade(u8 taskId)
+{
+    if (!gPaletteFade.active)
+        gTasks[taskId].func = Task_CreditsSoftReset;
+}
+
+static void CreditsSkipInput(void)
+{
+    if (sCreditsSkipping)
+        return;
+    // (THE END on screen already takes any button)
+    if (gTasks[sSavedTaskId].func == Task_CreditsTheEnd6 || gTasks[sSavedTaskId].func == Task_CreditsSoftReset)
+    {
+        sCreditsSkipAsk = 0;
+        return;
+    }
+    if (sCreditsSkipAsk)
+        sCreditsSkipAsk--;
+    if (!JOY_NEW(START_BUTTON))
+        return;
+    if (!sCreditsSkipAsk)
+    {
+        sCreditsSkipAsk = CREDITS_SKIP_ASK_FRAMES;
+        PlaySE(SE_SELECT);
+        MPNet_Log("credits: skip?");
+        return;
+    }
+    sCreditsSkipAsk = 0;
+    sCreditsSkipping = TRUE;
+    MPNet_Log("credits: skipped");
+    ResetTasks();
+    FadeOutBGM(4);
+    BeginNormalPaletteFade(PALETTES_ALL, 4, 0, 16, RGB_BLACK);
+    CreateTask(Task_CreditsSkipFade, 0);
+}
+
+// The question, over the frame (src/platform/sdl2.c VDraw)
+void MP_Credits_Composite(u16 *frame)
+{
+    static const char sAsk[] = "Skip the credits?   START: skip";
+    u8 text[40];
+    int i, x, y0 = DISPLAY_HEIGHT - 18, w = 0;
+    if (!sCreditsSkipAsk || sCreditsSkipping)
+        return;
+    MP_AsciiToGame(text, sAsk, sizeof(text));
+    for (i = 0; text[i] != EOS; i++)
+        w += text[i] == CHAR_SPACE ? 3 : MP_RenderSmallGlyph(text[i], 1, 0, 2);
+    // a darkened bar, then the words centered on it
+    for (i = y0; i < DISPLAY_HEIGHT - 2; i++)
+        for (x = 0; x < DISPLAY_WIDTH; x++)
+        {
+            u16 c = frame[i * DISPLAY_WIDTH + x];
+            frame[i * DISPLAY_WIDTH + x] = ((c >> 2) & 0x1CE7) | 0x8000;   // (bit 15: opaque)
+        }
+    x = (DISPLAY_WIDTH - w) / 2;
+    for (i = 0; text[i] != EOS; i++)
+    {
+        int gw, gx, gy;
+        if (text[i] == CHAR_SPACE)
+        {
+            x += 3;
+            continue;
+        }
+        gw = MP_RenderSmallGlyph(text[i], 1, 0, 2);
+        for (gy = 0; gy < 16; gy++)
+        {
+            const u32 *rows = gy < 8 ? gCurGlyph.gfxBufferTop : gCurGlyph.gfxBufferBottom;
+            for (gx = 0; gx < gw && gx < 16; gx++)
+            {
+                u8 c = (rows[(gx < 8 ? 0 : 8) + (gy % 8)] >> ((gx % 8) * 4)) & 0xF;
+                int px = x + gx, py = y0 + gy - 1;
+                if ((c == 1 || c == 2) && px >= 0 && px < DISPLAY_WIDTH && py >= 0 && py < DISPLAY_HEIGHT)
+                    frame[py * DISPLAY_WIDTH + px] = (c == 1 ? RGB_WHITE : RGB(6, 6, 8)) | 0x8000;
+            }
+        }
+        x += gw;
+    }
+}
+
 static void CB2_Credits(void)
 {
     RunTasks();
     AnimateSprites();
+    CreditsSkipInput();
 
     if ((JOY_HELD(B_BUTTON))
      && gHasHallOfFameRecords
@@ -414,6 +503,8 @@ static void PrintCreditsText(const u8 *string, u8 y, bool8 isTitle)
 
 void CB2_StartCreditsSequence(void)
 {
+    sCreditsSkipAsk = 0;
+    sCreditsSkipping = FALSE;
     u8 taskId;
     s16 bikeTaskId;
     u8 pageTaskId;

@@ -72,6 +72,8 @@ extern const uint8_t gTcgSpecialVariantOwner[];
  * deck): OPTIONS > GAME > CARD SCALING on, the one whose rating fits the player's; off, by
  * badges. Sets deck, rating and deckRating. */
 void Tcg_FitOpponent(struct TcgOpponent *o, const uint16_t *mine);
+/* The card player's deck about to be dueled: passed over for a while where other decks fit as well */
+void Tcg_NoteDeckMet(const uint16_t *deck);
 
 /* The card screens' side of a challenge (tcg_ui.c). */
 void Tcg_OpenNpcChallenge(const struct TcgOpponent *opponent);

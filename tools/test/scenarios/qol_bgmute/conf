@@ -1,0 +1,5 @@
+# OPTIONS > GAME > MUTE IN BACKGROUND (under SOUND): RIGHT turns it on (shots off / on) and it's saved to a.ini
+MODE=1
+EXPECT_A=("mute in background: 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="bash tools/test/scenarios/qol_bgmute/check.sh"

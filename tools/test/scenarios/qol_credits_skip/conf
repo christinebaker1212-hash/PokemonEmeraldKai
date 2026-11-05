@@ -1,0 +1,5 @@
+# The credits: START asks "Skip the credits?" (shot ask), the question goes after a few seconds (shot gone); START
+# twice skips them and the game goes on from the save (as after the HALL OF FAME's credits)
+MODE=1
+EXPECT_A=("credits: skip?" "credits: skipped" "credits: over, the game goes on from the save" "where map")
+UNEXPECT_A=("[crash]" "TIMEOUT")

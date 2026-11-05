@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 100
+mp item 13 1
+mp hp 0 5
+wait 10
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+press A 2
+wait 30
+press A 2
+wait 60
+shot party
+press A 2
+wait 120
+shot healed
+mp partyhp
+pressuntil B field 900
+quit

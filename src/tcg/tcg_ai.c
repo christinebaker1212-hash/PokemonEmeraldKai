@@ -38,7 +38,8 @@ static void Seed(const struct TcgDuel *g)
 /* a slip by level (percent; never at the best level) */
 static int Slip(const uint8_t *byLevel) { return sLevel < 3 && Next() % 100 < byLevel[sLevel]; }
 static const uint8_t sPromoteOdd[3] = {50, 30, 16}, sHoldEvolve[3] = {45, 30, 16}, sHoldBench[3] = {35, 20, 9},
-                     sEnergyOff[3] = {55, 36, 20}, sHoldTrainer[3] = {45, 30, 16}, sWeakAttack[3] = {45, 28, 14};
+                     sEnergyOff[3] = {55, 36, 20}, sHoldTrainer[3] = {45, 30, 16}, sWeakAttack[3] = {45, 28, 14},
+                     sHoldRetreat[3] = {55, 35, 18};
 static int Legal(const struct TcgDuel *g, const struct TcgAction *a)
 {
     struct TcgDuel next = *g;
@@ -453,8 +454,17 @@ static unsigned ExpectedDamage(const struct TcgDuel *g, const struct TcgCard *c,
     left = (foe->kind == TCG_TRAINER ? 10 : foe->hp) - f->damage;
     if (damage >= left)
         return 1000 + damage;
-    /* Effects (status, coins) give a non-damaging attack some value. */
-    return damage * 4 + (strcmp(c->attacks[attack].effect, "NONE") ? 3 : 0) + 1;
+    {
+        /* Effects (status, coins) give a non-damaging attack some value; what it costs its user (attacks.asm): the
+         * Energy it discards and the damage it does to itself, worth it only for a Knock Out */
+        const char *d = c->attacks[attack].description;
+        int score = (int)damage * 4 + (strcmp(c->attacks[attack].effect, "NONE") ? 3 : 0) + 1;
+        if (d && strstr(d, "Discard") && strstr(d, "Energy") && strstr(d, "attached to"))
+            score -= 30;
+        if (d && (strstr(d, "damage to itself") || strstr(d, "damage to itself.")))
+            score -= 20;
+        return score > 1 ? (unsigned)score : 1;
+    }
 }
 /* HP left on one of a player's Pokemon */
 static unsigned Left(const struct TcgDuel *g, unsigned who, unsigned slot)
@@ -543,6 +553,263 @@ static int EnergyHelps(const struct TcgDuel *g, unsigned who, unsigned slot, con
     }
     return 0;
 }
+/* ---------------------------------------------------------------------------------------------------------------
+ * Retreating, as the Game Boy game's AI does it (pret/poketcg engine/duel/ai/retreat.asm: AIDecideWhetherToRetreat,
+ * AIDecideBenchPokemonToSwitchTo), on what both players can see: a score from 128 nudged up and down, a retreat at 131 */
+
+/* Damage one of `who`'s Pokemon (slot) would do with an attack to the other player's Active: weakness doubles,
+ * resistance takes 30 (as the cards say) */
+static unsigned DamageTo(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned attack)
+{
+    const struct TcgCard *c = TcgDuel_Field(g, who, slot);
+    unsigned damage, type;
+    if (!c || c->kind != TCG_POKEMON || !c->attacks[attack].name[0] || c->attacks[attack].category == TCG_POKEMON_POWER)
+        return 0;
+    damage = c->attacks[attack].damage;
+    type = TcgDuel_Type(g, who, slot);
+    if (damage && TcgDuel_Field(g, who ^ 1, 0))
+    {
+        if (TcgDuel_Weakness(g, who ^ 1, 0) == type)
+            damage *= 2;
+        if (TcgDuel_Resistance(g, who ^ 1, 0) == type)
+            damage = damage > 30 ? damage - 30 : 0;
+    }
+    return damage;
+}
+/* Has it the Energy for that attack now (or, with `extra`, after one more of the Energy in the hand)? */
+static int Ready(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned attack, int extra)
+{
+    const struct TcgCard *c = TcgDuel_Field(g, who, slot);
+    const struct TcgPlayer *p = &g->players[who];
+    unsigned i;
+    if (!c || c->kind != TCG_POKEMON || !c->attacks[attack].name[0] || c->attacks[attack].category == TCG_POKEMON_POWER)
+        return 0;
+    if (!Unmet(g, who, slot, &c->attacks[attack], TCG_NONE, 0))
+        return 1;
+    if (!extra || p->energyPlayed)
+        return 0;
+    for (i = 0; i < p->handSize; i++)
+    {
+        const struct TcgCard *e = Tcg_Card(p->cards[p->hand[i]]);
+        if (e->kind == TCG_ENERGY &&
+            !Unmet(g, who, slot, &c->attacks[attack], e->type, e->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY ? 2 : 1))
+            return 1;
+    }
+    return 0;
+}
+/* The most damage it can do to the other Active with an attack it has the Energy for (extra: or one more from hand) */
+static unsigned BestDamage(const struct TcgDuel *g, unsigned who, unsigned slot, int extra)
+{
+    unsigned k, best = 0;
+    for (k = 0; k < 2; k++)
+        if (Ready(g, who, slot, k, extra) && DamageTo(g, who, slot, k) > best)
+            best = DamageTo(g, who, slot, k);
+    return best;
+}
+static int CanKnockOut(const struct TcgDuel *g, unsigned who, unsigned slot, int extra)
+{
+    unsigned best = BestDamage(g, who, slot, extra);
+    return best && best >= Left(g, who ^ 1, 0);
+}
+/* Could the other player's Active knock out this one of ours if it were Active (its Energy as it is)? */
+static int TheyKnockOut(const struct TcgDuel *g, unsigned who, unsigned slot)
+{
+    const struct TcgCard *foe = TcgDuel_Field(g, who ^ 1, 0), *c = TcgDuel_Field(g, who, slot);
+    unsigned k, left = Left(g, who, slot);
+    if (!foe || !c || foe->kind != TCG_POKEMON)
+        return 0;
+    for (k = 0; k < 2; k++)
+    {
+        const struct TcgAttack *m = &foe->attacks[k];
+        unsigned damage;
+        if (!m->name[0] || m->category == TCG_POKEMON_POWER || Unmet(g, who ^ 1, 0, m, TCG_NONE, 0))
+            continue;
+        damage = m->damage;
+        if (damage && c->weakness == TcgDuel_Type(g, who ^ 1, 0))
+            damage *= 2;
+        if (damage && c->resistance == TcgDuel_Type(g, who ^ 1, 0))
+            damage = damage > 30 ? damage - 30 : 0;
+        if (damage >= left)
+            return 1;
+    }
+    return 0;
+}
+static int IsDollOrFossil(const struct TcgCard *c)
+{
+    return c && (c->id == TCG_CARD_CLEFAIRY_DOLL || c->id == TCG_CARD_MYSTERIOUS_FOSSIL);
+}
+/* How good a Benched Pokemon is to send in against the other Active (AIDecideBenchPokemonToSwitchTo) */
+static int SwitchScore(const struct TcgDuel *g, unsigned who, unsigned slot)
+{
+    const struct TcgCard *c = TcgDuel_Field(g, who, slot), *foe = TcgDuel_Field(g, who ^ 1, 0);
+    int score = 128;
+    unsigned damage, type;
+    if (!c)
+        return -1000;
+    if (IsDollOrFossil(c))
+        return 0;
+    type = TcgDuel_Type(g, who, slot);
+    if (CanKnockOut(g, who, slot, 0))
+        score += g->players[who].prizeSize <= 1 ? 30 : 20;
+    damage = BestDamage(g, who, slot, 0);
+    if (damage)
+        score += damage / 10 + 1;
+    else if ((damage = BestDamage(g, who, slot, 1)))
+        score += damage / 20;
+    if (!TcgDuel_Energy(g, who, slot, TCG_NONE))
+        score -= 1;
+    if (foe && foe->kind == TCG_POKEMON)
+    {
+        if (TcgDuel_Weakness(g, who ^ 1, 0) == type)
+            score += 3;
+        if (TcgDuel_Resistance(g, who ^ 1, 0) == type)
+            score -= 2;
+        if (c->resistance == TcgDuel_Type(g, who ^ 1, 0))
+            score += 2;
+        if (c->weakness == TcgDuel_Type(g, who ^ 1, 0))
+            score -= 3;
+        if (TheyKnockOut(g, who, slot))
+            score -= g->players[who ^ 1].prizeSize <= 1 ? 10 : 3;
+    }
+    score += c->retreat < 2 ? 1 : c->retreat > 2 ? -1 : 0;
+    score += Left(g, who, slot) / 40;
+    return score;
+}
+static unsigned BestSwitch(const struct TcgDuel *g, unsigned who)
+{
+    unsigned s, best = TCG_NONE;
+    int bestScore = -1000;
+    for (s = 1; s < TCG_FIELD_SIZE; s++)
+        if (TcgDuel_Field(g, who, s) && SwitchScore(g, who, s) > bestScore)
+        {
+            bestScore = SwitchScore(g, who, s);
+            best = s;
+        }
+    return best;
+}
+/* Should the Active retreat now (AIDecideWhetherToRetreat)? */
+static int WantRetreat(const struct TcgDuel *g)
+{
+    unsigned who = g->current, s, bench = 0;
+    const struct TcgPlayer *p = &g->players[who];
+    const struct TcgFieldCard *f = &p->field[0];
+    const struct TcgCard *c = TcgDuel_Field(g, who, 0), *foe = TcgDuel_Field(g, who ^ 1, 0);
+    int score = 128, any;
+    unsigned type, foeType;
+    if (!c || !foe || p->retreated || p->confusionRetreatFailed)
+        return 0;
+    for (s = 1; s < TCG_FIELD_SIZE; s++)
+        bench += TcgDuel_Field(g, who, s) != NULL;
+    if (!bench)
+        return 0;
+    if (IsDollOrFossil(c))
+    {
+        /* a Doll / Fossil steps back for anyone the other Active can't knock out who can hurt it */
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+            if (TcgDuel_Field(g, who, s) && !TheyKnockOut(g, who, s) && BestDamage(g, who, s, 1))
+                return 1;
+        return 0;
+    }
+    type = TcgDuel_Type(g, who, 0);
+    foeType = TcgDuel_Type(g, who ^ 1, 0);
+    if (f->poison)
+        score += 2;
+    if (f->condition == TCG_CONFUSED)
+        score += 1;
+    if (CanKnockOut(g, who, 0, 1))
+    {
+        score -= 5;
+        if (p->prizeSize < 2)
+            score -= 35;
+    }
+    if (TheyKnockOut(g, who, 0))
+        score += 2;
+    if (p->prizeSize < 2)
+        score -= 2;
+    if (TcgDuel_Resistance(g, who ^ 1, 0) == type)
+    {
+        score += 1;
+        for (s = 1, any = 0; s < TCG_FIELD_SIZE; s++)
+            any |= TcgDuel_Field(g, who, s) && TcgDuel_Resistance(g, who ^ 1, 0) != TcgDuel_Type(g, who, s);
+        if (!any)
+            score -= 2;
+    }
+    if (c->weakness == foeType)
+    {
+        score += 2;
+        for (s = 1, any = 0; s < TCG_FIELD_SIZE; s++)
+            any |= TcgDuel_Field(g, who, s) && TcgDuel_Field(g, who, s)->weakness != foeType;
+        if (!any)
+            score -= 3;
+    }
+    if (c->resistance == foeType)
+        score -= 3;
+    if (TcgDuel_Weakness(g, who ^ 1, 0) == type)
+        score -= 3;
+    else
+    {
+        for (s = 1, any = 0; s < TCG_FIELD_SIZE; s++)
+            any |= TcgDuel_Field(g, who, s) && TcgDuel_Weakness(g, who ^ 1, 0) == TcgDuel_Type(g, who, s);
+        if (any)
+            score += 2;
+    }
+    for (s = 1, any = 0; s < TCG_FIELD_SIZE; s++)
+        any |= TcgDuel_Field(g, who, s) && TcgDuel_Field(g, who, s)->resistance == foeType;
+    if (any)
+        score += 1;
+    for (s = 1, any = 0; s < TCG_FIELD_SIZE; s++)
+        any |= TcgDuel_Field(g, who, s) && CanKnockOut(g, who, s, 0);
+    if (any)
+    {
+        score += 2;
+        if (p->prizeSize <= 1 && !CanKnockOut(g, who, 0, 1))
+            score += 40;
+    }
+    /* the Active can't hurt the other one at all (Mr. Mime's Invisible Wall and the like), someone on the Bench can */
+    if (!BestDamage(g, who, 0, 1))
+    {
+        for (s = 1, any = 0; s < TCG_FIELD_SIZE; s++)
+            any |= TcgDuel_Field(g, who, s) && BestDamage(g, who, s, 1);
+        if (any)
+            score += 5;
+    }
+    if (TcgDuel_RetreatCost(g, who) == 2)
+        score -= 1;
+    else if (TcgDuel_RetreatCost(g, who) >= 3)
+        score -= 2;
+    for (s = 1, any = 0; s < TCG_FIELD_SIZE; s++)
+        any |= TcgDuel_Field(g, who, s) && !IsDollOrFossil(TcgDuel_Field(g, who, s)) && !TheyKnockOut(g, who, s);
+    if (!any)
+        score -= 20;
+    return score >= 131;
+}
+/* The Energy that pays the Active's retreat: what its attacks need least first (a Double Colorless only where it
+ * doesn't overpay); 0 when it hasn't enough */
+static int RetreatEnergy(const struct TcgDuel *g, struct TcgAction *a)
+{
+    const struct TcgPlayer *p = &g->players[g->current];
+    const struct TcgFieldCard *f = &p->field[0];
+    const struct TcgCard *c = TcgDuel_Field(g, g->current, 0);
+    unsigned cost = TcgDuel_RetreatCost(g, g->current), paid = 0, pass, i;
+    uint8_t used[TCG_DECK_SIZE] = {0};
+    a->selectionCount = 0;
+    for (pass = 0; pass < 3 && paid < cost; pass++)
+        for (i = 0; i < f->attachedSize && paid < cost; i++)
+        {
+            const struct TcgCard *e = Tcg_Card(p->cards[f->attached[i]]);
+            int dce = e->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY, needed = NeedMost(c, e->type) > 0 && e->type != TCG_COLORLESS;
+            if (used[i] || e->kind != TCG_ENERGY)
+                continue;
+            /* pass 0: Energy its attacks don't ask for by type; 1: any single Energy; 2: a Double Colorless */
+            if ((pass == 0 && (needed || dce)) || (pass == 1 && dce) || (pass == 2 && !dce))
+                continue;
+            used[i] = 1;
+            a->selections[a->selectionCount++] = f->attached[i];
+            paid += dce ? 2 : 1;
+        }
+    return paid >= cost;
+}
+
 /* A Pokemon Power worth using now: one action at a time, each a plain gain (Shift, Peek
  * and Cowardice are left to people). */
 static int PowerAction(const struct TcgDuel *g, struct TcgAction *a)
@@ -743,7 +1010,8 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
     if (g->phase == TCG_PROMOTION)
     {
         a->type = TCG_PROMOTE;
-        a->slot = BestPokemon(g, g->promotePlayer);
+        a->slot = TcgDuel_Field(g, g->promotePlayer ^ 1, 0) ? BestSwitch(g, g->promotePlayer)
+                                                             : BestPokemon(g, g->promotePlayer);
         if (a->slot != TCG_NONE && Slip(sPromoteOdd))
         {
             /* (another one of the Bench) */
@@ -818,6 +1086,15 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
     {
         a->type = TCG_FINISH_SETUP;
         return 1;
+    }
+    /* Retreat when it's worth it (the Game Boy game's way, WantRetreat), to the best Pokemon to send in */
+    if (g->phase == TCG_TURN && WantRetreat(g) && !Slip(sHoldRetreat))
+    {
+        a->type = TCG_RETREAT;
+        a->slot = (uint8_t)BestSwitch(g, g->current);
+        if (a->slot != TCG_NONE && RetreatEnergy(g, a) && Legal(g, a))
+            return 1;
+        memset(a, 0, sizeof(*a));
     }
     if (!p->energyPlayed)
     {

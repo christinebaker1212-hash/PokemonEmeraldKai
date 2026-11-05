@@ -1093,7 +1093,9 @@ static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
         MP_Daycare_TryCoopEgg(daycare);
 
     // Try to hatch Egg
-    if (++daycare->stepCounter == 255)
+    // Moemon Kai: an egg cycle every 128 steps, not every 256: every EGG hatches in half the time (FLAME BODY and
+    // MAGMA ARMOR still take two cycles at once on top of that)
+    if ((++daycare->stepCounter & 0x7F) == 0x7F)
     {
         u32 eggCycles;
         u8 toSub = GetEggCyclesToSubtract();

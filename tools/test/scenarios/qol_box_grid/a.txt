@@ -1,0 +1,54 @@
+pressuntil A field 5000
+wait 60
+mp boxput 1 0 1 5
+mp boxput 1 7 4 5
+mp boxput 1 14 7 5
+mp boxput 2 3 25 5
+mp boxput 4 0 133 5
+mp boxput 5 0 152 5
+mp boxput 5 1 155 5
+mp boxput 5 2 158 5
+mp boxput 5 29 172 5
+mp pc
+wait 120
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 240
+mp box
+press SEARCH 4
+wait 60
+mp box
+press INSPECT 4
+wait 60
+mp box
+press INSPECT 4
+wait 60
+mp box
+press SEARCH 4
+wait 60
+shotburst zoomout 30 1
+press INSPECT 30
+wait 30
+shot grid
+press DOWN 2
+wait 10
+press RIGHT 2
+wait 20
+shot grid_box5
+press A 2
+shotburst zoomin 40 3
+wait 150
+mp box
+shot box5
+press SEARCH 30
+wait 30
+press RIGHT 2
+wait 10
+press B 2
+wait 60
+mp box
+wait 30
+quit

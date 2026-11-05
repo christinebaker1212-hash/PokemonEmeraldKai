@@ -2249,6 +2249,27 @@ void UpdateHealthboxAttribute(u8 healthboxSpriteId, struct Pokemon *mon, u8 elem
 #define B_EXPBAR_PIXELS 64
 #define B_HEALTHBAR_PIXELS 48
 
+// Moemon Co-op: an HP bar that fills (potions, FULL RESTORE, REVIVE, healing moves) moves as much quicker as the
+// host's BATTLE SPEED (ANIM SPEED: +30% -> one more step every 20 frames x 6); a falling bar keeps its pace
+s32 MP_MoveHealthBar(u8 battler, u8 healthboxSpriteId)
+{
+    static u8 sAcc;
+    s32 v = MoveBattleBar(battler, healthboxSpriteId, HEALTH_BAR, 0);
+    if (v != -1 && gBattleSpritesDataPtr->battleBars[battler].receivedValue < 0)
+    {
+        sAcc += MP_BattleAnimSpeed() / 5;
+        if (sAcc >= 20)
+        {
+            s32 w;
+            sAcc -= 20;
+            w = MoveBattleBar(battler, healthboxSpriteId, HEALTH_BAR, 0);
+            if (w != -1)   // (-1: the first step already reached the end)
+                v = w;
+        }
+    }
+    return v;
+}
+
 s32 MoveBattleBar(u8 battler, u8 healthboxSpriteId, u8 whichBar, u8 unused)
 {
     s32 currentBarValue;

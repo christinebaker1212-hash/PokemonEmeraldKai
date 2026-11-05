@@ -219,6 +219,33 @@ static int FaceUpMonster(const struct YgoState *s, unsigned p)
             return 1;
     return 0;
 }
+/* Its deck's game plan, read from its own cards' words (all of them are its own to know): how many of them want to
+ * go to the Graveyard ("sent to the GY": Sangan, Shaddolls, Mystic Tomato...) and how many are FLIP monsters. A deck
+ * full of either plays to it: it sends cards to the Graveyard and discards gladly, it Sets its FLIP monsters and flips
+ * them when it can. */
+enum { PLAN_GRAVE = 1, PLAN_FLIP = 2 };
+static unsigned Plan(const struct YgoState *s, unsigned me)
+{
+    unsigned o, grave = 0, flip = 0, total = 0;
+    for (o = 0; o < s->objCount; o++)
+    {
+        const struct YgoCard *c;
+        if (s->objs[o].owner != me || !(c = Ygo_Card(s->objs[o].card)))
+            continue;
+        total++;
+        if (Says(c, "sent to the graveyard") || Says(c, "sent to the gy") || Says(c, "is in your graveyard"))
+            grave++;
+        if (Ygo_IsMonster(c) && (c->abilities & YGO_ABILITY_FLIP))
+            flip++;
+    }
+    return (total && grave * 6 >= total ? PLAN_GRAVE : 0) | (total && flip * 6 >= total ? PLAN_FLIP : 0);
+}
+/* A card that sends its own cards to the Graveyard: from the Deck, or by discarding */
+static int FillsGrave(const struct YgoCard *c)
+{
+    return Says(c, "from your deck to the graveyard") || Says(c, "from your deck to the gy") ||
+           Says(c, "send 1") || Says(c, "discard");
+}
 /* Is playing this Spell or Trap now a waste, or worse? (each check is a card's own words: a mistake no player
  * would make) */
 static int Pointless(const struct YgoState *s, unsigned me, unsigned o, const struct YgoCard *c, int myTurn)
@@ -326,7 +353,7 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
     unsigned me = q->player, i;
     int theirMonsters, theirBest = TheirBest(s, me, &theirMonsters), myBest = MyBest(s, me);
     int best = -1, bestScore = 0, moveOn = -1, toBattle = -1, scores[YGO_QUERY_MAX + 1], items[YGO_QUERY_MAX + 1];
-    unsigned n = 0;
+    unsigned n = 0, plan = Plan(s, me);
     for (i = 0; i < q->count; i++)
     {
         const struct YgoChoice *c = &q->items[i];
@@ -340,6 +367,8 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
             score = 900;
             if (Pointless(s, me, c->obj, card, 1))
                 score = 0;
+            else if ((plan & PLAN_GRAVE) && FillsGrave(card))
+                score = 950;   /* (its plan: the Graveyard) */
             break;
         case YGO_ACT_SPECIAL:
             score = 800;
@@ -354,11 +383,17 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
             if ((card->abilities & YGO_ABILITY_FLIP) ||
                 (card->atk != YGO_STAT_UNKNOWN && card->atk < theirBest && card->def > card->atk))
                 score = 0;   /* (Set it instead) */
+            /* a monster that would just be run over in Attack Position, with no effect for being Summoned: Set it */
+            else if (card->atk != YGO_STAT_UNKNOWN && theirMonsters && card->atk < theirBest &&
+                     !Says(card, "summoned") && !Says(card, "when this card is normal summoned"))
+                score = 0;
             break;
         case YGO_ACT_SET_MONSTER:
             if (!card)
                 break;
             score = 400 + (card->def == YGO_STAT_UNKNOWN ? 1000 : card->def) / 20;
+            if ((plan & PLAN_FLIP) && (card->abilities & YGO_ABILITY_FLIP))
+                score = 560;   /* (its plan: FLIP effects) */
             if (card->level >= 5)
                 score = 0;
             break;
@@ -377,7 +412,7 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
             {
                 int needsTheirs = Says(card, "destroy") || Says(card, "return") || Says(card, "banish") ||
                                   Says(card, "control");
-                score = !needsTheirs || theirMonsters || CardsOn(s, me ^ 1) ? 380 : 0;
+                score = !needsTheirs || theirMonsters || CardsOn(s, me ^ 1) ? ((plan & PLAN_FLIP) ? 600 : 380) : 0;
             }
             break;
         case YGO_ACT_POSITION:
@@ -440,7 +475,12 @@ static void Battle(const struct YgoDuel *d, struct YgoAnswer *out)
     unsigned me = q->player, i;
     static const uint8_t sRash[4] = {40, 20, 6, 0};   /* an attack into a monster it can't beat */
     int scores[YGO_QUERY_MAX + 1], items[YGO_QUERY_MAX + 1], moveOn = -1;
-    unsigned n = 0, k;
+    unsigned n = 0, k, setBack = 0;
+    for (i = 0; i < YGO_FIELD_ZONE; i++)
+    {
+        unsigned st = s->players[me ^ 1].spells[i];
+        setBack += st && !s->objs[st - 1].faceUp;
+    }
     for (i = 0; i < q->count; i++)
     {
         const struct YgoChoice *c = &q->items[i];
@@ -448,7 +488,9 @@ static void Battle(const struct YgoDuel *d, struct YgoAnswer *out)
         {
             if (BestTarget(s, me, c->obj, c->flags & 1) == -1 && !Chance(sRash))
                 continue;
-            scores[n] = 400 + Atk(s, c->obj) / 10;
+            /* with face-down Spells and Traps waiting (Mirror Force, Sakuretsu Armor...), the monster it can best
+               spare attacks first to draw them out; otherwise the strongest */
+            scores[n] = setBack ? 400 + (4000 - Atk(s, c->obj)) / 10 : 400 + Atk(s, c->obj) / 10;
             items[n++] = (int)i;
         }
         else if (c->kind == YGO_ACT_TO_MAIN2 || (c->kind == YGO_ACT_END_TURN && moveOn < 0))

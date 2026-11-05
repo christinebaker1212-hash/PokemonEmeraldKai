@@ -263,6 +263,7 @@ struct MpConfig
     u8 noShadows;             // OPTIONS > DISPLAY > SHADOWS: 0 ON (shadows under people and POKeMON: mp_shadow.c), 1 OFF
     u8 scaleFollowersPct;     // SPRITE SCALING (1.63.14): how far toward their POKeDEX height while on, 5-100% (A turns it
     u8 scaleGardenPct;        // on and off, LEFT / RIGHT change it): followers 100 and the GARDEN 50 unless changed
+    u8 muteInBackground;      // OPTIONS > GAME > MUTE IN BACKGROUND: 1 = no sound while none of the game's windows has focus
 };
 // SPRITE SCALING's percent now (0: off)
 #define MP_SCALE_FOLLOWERS_NOW() (gMpConfig.scaleFollowers ? gMpConfig.scaleFollowersPct : 0)
@@ -782,6 +783,12 @@ bool8 MP_Friends_GoTo(u8 id);
 bool8 MP_IsValidMap(u8 mapGroup, u8 mapNum);
 u16 MP_BuddyBonusPercent(void);
 void MP_Toast(const u8 *text);
+// Moemon Kai: the PC boxes' L2 / R2 and their 3x3 grid of every box (mp_boxgrid.c)
+enum { MP_BOXGRID_NONE, MP_BOXGRID_BUSY, MP_BOXGRID_LEFT, MP_BOXGRID_RIGHT, MP_BOXGRID_JUMP };
+int MP_BoxGrid_Input(u8 currentBox, u8 *box);
+bool8 MP_BoxGrid_Active(void);
+void MP_BoxGrid_Reset(void);
+bool8 MP_BoxGrid_HideBox(void);   // (the box under the grid hidden: pokemon_storage_system.c)
 enum { MP_BST_NONE, MP_BST_ACTION, MP_BST_MOVE, MP_BST_BAG, MP_BST_PARTY, MP_BST_DONE };
 // What a co-op player chose this turn, shown to their partner ("BOB: EMBER -> ZIGZAGOON")
 enum { MP_INTENT_NONE, MP_INTENT_MOVE, MP_INTENT_ITEM, MP_INTENT_BALL, MP_INTENT_SWITCH, MP_INTENT_RUN };

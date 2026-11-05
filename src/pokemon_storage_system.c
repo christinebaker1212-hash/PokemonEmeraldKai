@@ -172,6 +172,7 @@ enum {
     INPUT_IN_MENU,
     INPUT_SCROLL_RIGHT,
     INPUT_SCROLL_LEFT,
+    INPUT_MP_JUMP_BOX,  // Moemon Kai: the box grid picked a box (mp_boxgrid.c)
     INPUT_DEPOSIT,
     INPUT_WITHDRAW,
     INPUT_MOVE_MON,
@@ -1786,6 +1787,7 @@ static void CreateMainMenu(u8 whichMenu, s16 *windowIdPtr)
 
 static void CB2_ExitPokeStorage(void)
 {
+    MP_BoxGrid_Reset();
     if (MpOnExit())   // Moemon Co-op: the shared PC's box screen goes back to its own menu
         return;
     sPreviousBoxOption = GetCurrentBoxOption();
@@ -2083,6 +2085,7 @@ static void VBlankCB_PokeStorage(void)
     SetGpuReg(REG_OFFSET_BG2HOFS, sStorage->bg2_X);
 }
 
+static void MpBoxGridHide(void);
 static void CB2_PokeStorage(void)
 {
     RunTasks();
@@ -2090,6 +2093,7 @@ static void CB2_PokeStorage(void)
     ScrollBackground();
     UpdateCloseBoxButtonFlash();
     AnimateSprites();
+    MpBoxGridHide();         // Moemon Kai: the box hidden under the box grid (mp_boxgrid.c)
     BuildOamBuffer();
     gMpPcTagPressed = FALSE; // Moemon Co-op: a TAG press only counts the frame it comes
     MpPcFrame();             // Moemon Co-op: the shared PC
@@ -2097,6 +2101,7 @@ static void CB2_PokeStorage(void)
 
 static void EnterPokeStorage(u8 boxOption)
 {
+    MP_BoxGrid_Reset();   // Moemon Kai: (the box grid starts closed)
     ResetTasks();
     sCurrentBoxOption = boxOption;
     sStorage = Alloc(sizeof(*sStorage));
@@ -2374,8 +2379,30 @@ static void Task_PokeStorageMain(u8 taskId)
     switch (sStorage->state)
     {
     case MSTATE_HANDLE_INPUT:
-        switch (HandleInput())
+    {
+        // Moemon Kai: L2 / R2 go round the boxes; held, the grid of every box (mp_boxgrid.c)
+        u8 jump = 0;
+        int grid = sInPartyMenu ? MP_BOXGRID_NONE : MP_BoxGrid_Input(StorageGetCurrentBox(), &jump);
+        int input;
+        if (grid == MP_BOXGRID_BUSY)
+            break;
+        input = grid == MP_BOXGRID_LEFT ? INPUT_SCROLL_LEFT : grid == MP_BOXGRID_RIGHT ? INPUT_SCROLL_RIGHT
+              : grid == MP_BOXGRID_JUMP ? INPUT_MP_JUMP_BOX : HandleInput();
+        switch (input)
         {
+        case INPUT_MP_JUMP_BOX:
+            sStorage->newCurrBoxId = jump;
+            if (sStorage->boxOption != OPTION_MOVE_ITEMS)
+            {
+                SetUpScrollToBox(sStorage->newCurrBoxId);
+                sStorage->state = MSTATE_SCROLL_BOX;
+            }
+            else
+            {
+                TryHideItemAtCursor();
+                sStorage->state = MSTATE_SCROLL_BOX_ITEM;
+            }
+            break;
         case INPUT_MOVE_CURSOR:
             PlaySE(SE_SELECT);
             sStorage->state = MSTATE_MOVE_CURSOR;
@@ -2591,6 +2618,7 @@ static void Task_PokeStorageMain(u8 taskId)
             break;
         }
         break;
+    }
     case MSTATE_MOVE_CURSOR:
         if (!UpdateCursorPos())
         {
@@ -3916,6 +3944,7 @@ static void Task_OnBPressed(u8 taskId)
 
 static void Task_ChangeScreen(u8 taskId)
 {
+    MP_BoxGrid_Reset();
     struct BoxPokemon *boxMons;
     u8 mode, monIndex, maxMonIndex;
     u8 screenChangeType = sStorage->screenChangeType;
@@ -12099,4 +12128,130 @@ bool8 MP_WallpaperArt(u8 id, const u32 **tiles, const u32 **tilemap, const u16 *
     *tilemap = sWallpapers[id].tilemap;
     *palettes = sWallpapers[id].palettes;
     return TRUE;
+}
+
+// Moemon Kai: the box grid (mp_boxgrid.c) shows every box in the PC's own art. A box's wallpaper as the PC draws it,
+// 160x144, opaque pixels with bit 15 set and its clear ones 0 (Walda's FRIENDS pattern too, as LoadWallpaperGfx)
+bool8 MP_Storage_BoxWallpaper(u8 boxId, u16 *out)
+{
+    static u8 sGfx[0x2000];
+    u16 map[20 * 18], pal[32];
+    const struct Wallpaper *w;
+    u32 size, x, y;
+    u8 *gfx;
+    u8 id = GetBoxWallpaper(boxId);
+
+    w = id != WALLPAPER_FRIENDS ? &sWallpapers[id % (WALLPAPER_COUNT - 1)] : &sWaldaWallpapers[GetWaldaWallpaperPatternId()];
+    memcpy(pal, w->palettes, sizeof(pal));
+    gfx = malloc_and_decompress(w->tiles, &size);
+    if (gfx == NULL)
+        return FALSE;
+    memset(sGfx, 0, sizeof(sGfx));
+    memcpy(sGfx, gfx, size < sizeof(sGfx) ? size : sizeof(sGfx));
+    Free(gfx);
+    if (id == WALLPAPER_FRIENDS)
+    {
+        u8 *icon = malloc_and_decompress(sWaldaWallpaperIcons[GetWaldaWallpaperIconId()], &size);
+        memcpy(&pal[1], GetWaldaWallpaperColorsPtr(), 4);
+        memcpy(&pal[17], GetWaldaWallpaperColorsPtr(), 4);
+        if (icon != NULL)
+        {
+            memcpy(sGfx + 0x800, icon, size < sizeof(sGfx) - 0x800 ? size : sizeof(sGfx) - 0x800);
+            Free(icon);
+        }
+    }
+    LZ77UnCompWram(w->tilemap, map);
+    for (y = 0; y < 144; y++)
+        for (x = 0; x < 160; x++)
+        {
+            u16 e = map[(y / 8) * 20 + x / 8];
+            u32 t = e & 0x3FF, px = x & 7, py = y & 7, p = (e >> 12) & 0xF, at, v;
+            if (e & 0x400)
+                px = 7 - px;
+            if (e & 0x800)
+                py = 7 - py;
+            at = t * 32 + py * 4 + px / 2;
+            v = at < sizeof(sGfx) ? (sGfx[at] >> ((px & 1) * 4)) & 0xF : 0;
+            // (DrawWallpaper: the map's palettes 1-2 are the wallpaper's two)
+            p = p >= 1 && p <= 2 ? p - 1 : 0;
+            out[y * 160 + x] = v ? (pal[p * 16 + v] | 0x8000) : 0;
+        }
+    return TRUE;
+}
+
+// ... and its name as the box title shows it (the title sprites' 64x16 picture: 15 the text, 14 its shadow, 0 clear),
+// where it sits (its left edge; its top is y 20) and its two colors (shadow, text)
+void MP_Storage_BoxTitle(u8 boxId, u8 *pix, s16 *left, u16 *colors)
+{
+    static u8 sTiles[0x200];
+    u8 text[BOX_NAME_LENGTH + 1];
+    int x, y;
+    StringCopyPadded(text, GetBoxNamePtr(boxId), 0, BOX_NAME_LENGTH);
+    DrawTextWindowAndBufferTiles(text, sTiles, 0, 0, 2);
+    // (two 32x16 sprites, tiles 0-7 and 8-15, four tiles a row)
+    for (y = 0; y < 16; y++)
+        for (x = 0; x < 64; x++)
+        {
+            int t = (x / 32) * 8 + (y / 8) * 4 + (x % 32) / 8;
+            u8 b = sTiles[t * 32 + (y % 8) * 4 + (x % 8) / 2];
+            pix[y * 64 + x] = (x & 1) ? b >> 4 : b & 0xF;
+        }
+    *left = GetBoxTitleBaseX(GetBoxNamePtr(boxId)) - 16;
+    colors[0] = sBoxTitleColors[GetBoxWallpaper(boxId)][0];
+    colors[1] = sBoxTitleColors[GetBoxWallpaper(boxId)][1];
+}
+
+// ... and while the grid is over the box, the box itself (its wallpaper layer and every sprite on it: the POKéMON,
+// the title, the hand) is hidden, so the PC's own backdrop shows between the grid's boxes. Called every frame from
+// CB2_PokeStorage before the sprites are built; the sprites it hid come back as they were.
+static void MpBoxGridHide(void)
+{
+    static u16 sHidden[MAX_SPRITES];  // (the hidden sprite's first tile + 1, 0 = not hidden by us)
+    static bool8 sBgOff;
+    bool8 hide = MP_BoxGrid_HideBox();
+    u16 i;
+    for (i = 0; i < MAX_SPRITES; i++)
+    {
+        struct Sprite *s = &gSprites[i];
+        if (hide)
+        {
+            s16 x = s->x + s->x2, y = s->y + s->y2;
+            if (!s->inUse || s->invisible || sHidden[i])
+                continue;
+            if (s == sStorage->arrowSprites[0] || s == sStorage->arrowSprites[1])
+                continue;
+            if (x >= 80 && x < DISPLAY_WIDTH + 16 && y >= 12 && y < DISPLAY_HEIGHT + 16)
+            {
+                s->invisible = TRUE;
+                sHidden[i] = s->sheetTileStart + 1;
+            }
+        }
+        else if (sHidden[i])
+        {
+            if (s->inUse && sHidden[i] == s->sheetTileStart + 1)
+                s->invisible = FALSE;
+            sHidden[i] = 0;
+        }
+    }
+    if (hide && !sBgOff)
+    {
+        ClearGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_BG2_ON);
+        sBgOff = TRUE;
+    }
+    else if (!hide && sBgOff)
+    {
+        SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_BG2_ON);
+        sBgOff = FALSE;
+    }
+}
+
+// ... and the PC's hand cursor (its sheet, frame 0 first) for the grid's hand
+const u8 *MP_Storage_HandCursor(const u16 **pal)
+{
+    // (in the colors the PC's own hand has now: its sprite's palette, not the sheet's)
+    if (sStorage != NULL && sStorage->cursorSprite != NULL && sStorage->cursorSprite->inUse)
+        *pal = &gPlttBufferFaded[OBJ_PLTT_ID(sStorage->cursorSprite->oam.paletteNum)];
+    else
+        *pal = sHandCursor_Pal;
+    return sHandCursor_Gfx;
 }

@@ -52,6 +52,43 @@ static void LoneCharmander(struct TcgDuel *g, int evolution)
     }
     assert(TcgDuel_Conserved(g));
 }
+/* An Active Charmander one hit from a Knock Out by the other Active, a Squirtle (Water: Charmander's weakness) ready
+ * to Bubble; a fresh Bulbasaur on the Bench; a Fire Energy to pay Charmander's retreat */
+static void WeakCharmander(struct TcgDuel *g)
+{
+    unsigned who, i;
+    memset(g, 0, sizeof(*g));
+    g->rng = 99;
+    g->phase = TCG_TURN;
+    g->turn = 5;
+    g->winner = TCG_NONE;
+    g->prizeCount = 6;
+    for (who = 0; who < 2; who++)
+    {
+        struct TcgPlayer *p = &g->players[who];
+        p->turnsTaken = 3;
+        for (i = 0; i < 60; i++)
+        {
+            p->deck[p->deckSize++] = i;
+            p->cards[i] = who ? TCG_CARD_WATER_ENERGY : TCG_CARD_FIRE_ENERGY;
+        }
+        p->cards[0] = who ? TCG_CARD_SQUIRTLE : TCG_CARD_CHARMANDER;
+        p->cards[1] = TCG_CARD_BULBASAUR;
+        p->field[0].stack[p->field[0].stackSize++] = Take(p, 0);
+        p->field[0].enteredTurn = 1;
+        p->field[0].attached[p->field[0].attachedSize++] = Take(p, 10);
+        for (i = 50; i < 56; i++)
+            p->prizes[p->prizeSize++] = Take(p, i);
+        if (who == 0)
+        {
+            p->field[0].damage = 40;
+            p->field[1].stack[p->field[1].stackSize++] = Take(p, 1);
+            p->field[1].enteredTurn = 1;
+            p->energyPlayed = 1;
+        }
+    }
+    assert(TcgDuel_Conserved(g));
+}
 int main(void)
 {
     struct TcgDuel g,hidden,unchanged;struct TcgAction a,b;uint16_t cards[60];unsigned seed,steps;
@@ -89,6 +126,14 @@ int main(void)
     }
     assert(a.type == TCG_ATTACH);
     puts("PASS energy kept back when no attack needs it, attached for the Evolution in the hand");
+    /* The Game Boy game's retreat (retreat.asm): weak to the other Active and about to be knocked out, Charmander
+     * steps back for the Bulbasaur, paying with its Fire Energy */
+    WeakCharmander(&g);
+    assert(TcgDuel_AiAction(&g, &a));
+    assert(a.type == TCG_RETREAT && a.slot == 1 && a.selectionCount == 1);
+    assert(TcgDuel_Apply(&g, &a) == TCG_OK);
+    assert(TcgDuel_Field(&g, 0, 0)->id == TCG_CARD_BULBASAUR);
+    puts("PASS a Pokemon about to be knocked out by its weakness retreats for a Benched one (the Game Boy game's way)");
     puts("PASS 20 complete AI duels, action legality, immutable decisions and hidden-information isolation");
     return 0;
 }

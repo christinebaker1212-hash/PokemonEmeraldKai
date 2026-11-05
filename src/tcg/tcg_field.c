@@ -517,6 +517,17 @@ static int Gb2Kind(const struct TcgDeckDefinition *def)
     // (TCG_FIRE.. TCG_PSYCHIC, TCG_COLORLESS line up with DECK_FIRE.. DECK_COLORLESS)
     return (int)best;
 }
+// GB2's practice, starter and copied first-game decks are nobody's own
+static bool8 Gb2Plays(const struct TcgDeckDefinition *def)
+{
+    static const char *const sNot[] = {"Starter", "Practice", "Unknown", "GB1 ", "Colorless Energy", "Texture Tuner"};
+    unsigned i;
+    for (i = 0; i < ARRAY_COUNT(sNot); i++)
+        if (strstr(def->name, sNot[i]))
+            return FALSE;
+    return TRUE;
+}
+
 static int Gb2Tier(const struct TcgDeckDefinition *def)
 {
     int rating = gTcgDeckRating[def - gTcgDeckDefinitions], t, kind, k;
@@ -604,24 +615,75 @@ struct Candidate
 {
     const uint16_t *deck;
     int rating;
+    u8 gb2;   // a Pokemon Card GB2 deck (or a special trainer's on one)
 };
-static const struct Candidate *Closest(const struct Candidate *list, unsigned count, int target, u32 pick)
+// The decks the player met lately (Tcg_NoteDeckMet, at each duel's start): passed over while others fit as well
+#define RECENT_DECKS 12
+static const uint16_t *sRecentDecks[RECENT_DECKS];
+static u8 sRecentAt;
+
+void Tcg_NoteDeckMet(const uint16_t *deck)
 {
-    unsigned i, near = 0, best = 0xFFFF;
-    const struct Candidate *chosen = NULL;
+    unsigned i;
+    for (i = 0; i < RECENT_DECKS; i++)
+        if (sRecentDecks[i] == deck)
+            return;
+    sRecentDecks[sRecentAt] = deck;
+    sRecentAt = (sRecentAt + 1) % RECENT_DECKS;
+}
+
+static bool8 MetLately(const uint16_t *deck)
+{
+    unsigned i;
+    for (i = 0; i < RECENT_DECKS; i++)
+        if (sRecentDecks[i] == deck)
+            return TRUE;
+    return FALSE;
+}
+
+// A deck near the target, picked by the person's own number (the same person brings the same deck while nothing
+// changes): any deck within the window counts, the nearer the likelier, decks met lately only when nothing else fits,
+// and the two Game Boy games' decks mixed by region (KANTO leans to the first game's, JOHTO to GB2's)
+static const struct Candidate *Pick(const struct Candidate *list, unsigned count, int target, u32 pick)
+{
+    unsigned i, best = 0xFFFF, window, total = 0, fresh = 0;
+    u32 weights[96];
+    u8 w1 = 1, w2 = 1;
+    switch (MP_Region_Current())
+    {
+    case REGION_KANTO: w1 = 3, w2 = 2; break;
+    case REGION_JOHTO: w1 = 2, w2 = 3; break;
+    }
+    if (!count)
+        return NULL;
     for (i = 0; i < count; i++)
     {
         unsigned d = (unsigned)abs(list[i].rating - target);
         if (d < best)
             best = d;
     }
-    for (i = 0; i < count; i++)
-        near += (unsigned)abs(list[i].rating - target) <= best + 30;
-    pick %= near ? near : 1;
-    for (i = 0; i < count; i++)
-        if ((unsigned)abs(list[i].rating - target) <= best + 30 && !pick--)
-            chosen = &list[i];
-    return chosen;
+    window = best + 60 > 90 ? best + 60 : 90;
+    for (i = 0; i < count && i < ARRAY_COUNT(weights); i++)
+        fresh += (unsigned)abs(list[i].rating - target) <= window && !MetLately(list[i].deck);
+    for (i = 0; i < count && i < ARRAY_COUNT(weights); i++)
+    {
+        unsigned d = (unsigned)abs(list[i].rating - target);
+        weights[i] = 0;
+        if (d > window || (fresh && MetLately(list[i].deck)))
+            continue;
+        weights[i] = (window + 1 - d) * (list[i].gb2 ? w2 : w1);
+        total += weights[i];
+    }
+    if (!total)
+        return &list[0];
+    pick = (pick * 2654435761u) % total;
+    for (i = 0; i < count && i < ARRAY_COUNT(weights); i++)
+    {
+        if (pick < weights[i])
+            return &list[i];
+        pick -= weights[i];
+    }
+    return &list[0];
 }
 
 void Tcg_FitOpponent(struct TcgOpponent *o, const uint16_t *mine)
@@ -642,12 +704,14 @@ again:
     if (o->pool == TCG_SCALE_POOL_SPECIAL)
     {
         list[n].deck = gTcgSpecialDecks[o->special].cards;
+        list[n].gb2 = 0;
         list[n++].rating = gTcgSpecialRating[o->special];
         // (off: their own deck, as it always was)
         for (i = 0; gMpConfig.cardScaling && i < gTcgSpecialVariantCount && n < ARRAY_COUNT(list); i++)
             if (gTcgSpecialVariantOwner[i] == o->special)
             {
                 list[n].deck = gTcgSpecialVariants[i].cards;
+                list[n].gb2 = strstr(gTcgSpecialVariants[i].name, "/GB2 ") != NULL;
                 list[n++].rating = gTcgVariantRating[i];
             }
         target = you - SCALE_BOSS_FAVOR - TcgScale_LevelRating(o->level);
@@ -668,14 +732,17 @@ again:
                 if (!seen && n < ARRAY_COUNT(list))
                 {
                     list[n].deck = def->cards;
+                    list[n].gb2 = 0;
                     list[n++].rating = gTcgDeckRating[def - gTcgDeckDefinitions];
                 }
             }
         // (and GB2's decks of their kind)
         for (i = 0; i < gTcgDeckDefinitionCount && n < ARRAY_COUNT(list); i++)
-            if (!strncmp(gTcgDeckDefinitions[i].name, "GB2 ", 4) && Gb2Kind(&gTcgDeckDefinitions[i]) == o->pool)
+            if (!strncmp(gTcgDeckDefinitions[i].name, "GB2 ", 4) && Gb2Kind(&gTcgDeckDefinitions[i]) == o->pool
+             && Gb2Plays(&gTcgDeckDefinitions[i]))
             {
                 list[n].deck = gTcgDeckDefinitions[i].cards;
+                list[n].gb2 = 1;
                 list[n++].rating = gTcgDeckRating[i];
             }
         target = you - SCALE_FAVOR - TcgScale_LevelRating(o->level);
@@ -702,15 +769,17 @@ again:
             if (def)
             {
                 list[n].deck = def->cards;
+                list[n].gb2 = 0;
                 list[n++].rating = gTcgDeckRating[def - gTcgDeckDefinitions];
             }
         }
         // (and GB2's decks of their kind and tier)
         for (i = 0; i < gTcgDeckDefinitionCount && n < ARRAY_COUNT(list); i++)
             if (!strncmp(gTcgDeckDefinitions[i].name, "GB2 ", 4) && Gb2Kind(&gTcgDeckDefinitions[i]) == o->pool &&
-                Gb2Tier(&gTcgDeckDefinitions[i]) == tier)
+                Gb2Tier(&gTcgDeckDefinitions[i]) == tier && Gb2Plays(&gTcgDeckDefinitions[i]))
             {
                 list[n].deck = gTcgDeckDefinitions[i].cards;
+                list[n].gb2 = 1;
                 list[n++].rating = gTcgDeckRating[i];
             }
         target = 0;
@@ -719,14 +788,21 @@ again:
     {
         const struct TcgDeckDefinition *def = DeckNamed("CharmanderAndFriends");
         list[n].deck = def->cards;
+        list[n].gb2 = 0;
         list[n++].rating = gTcgDeckRating[def - gTcgDeckDefinitions];
     }
     if (o->pool == TCG_SCALE_POOL_SPECIAL && !gMpConfig.cardScaling)
         chosen = &list[0];
     else if (gMpConfig.cardScaling)
-        chosen = Closest(list, n, target, o->pick);
+        chosen = Pick(list, n, target, o->pick);
     else
-        chosen = &list[(o->pick >> 12) % n];
+    {
+        // (by badges: any of their tier's decks, the ones met lately passed over while there are others)
+        unsigned k = (o->pick >> 12) % n, tries;
+        for (tries = 0; tries < n && MetLately(list[k].deck); tries++)
+            k = (k + 1) % n;
+        chosen = &list[k];
+    }
     o->deck = chosen->deck;
     o->rating = (s16)chosen->rating;
     printf("[tcg] scaling %s: you %d (deck %d, skill %d), target %d, %s %d of %u decks, level %u\n",
@@ -1449,4 +1525,73 @@ void Tcg_ClubGiveGift(void)
         c->flags |= TCG_FLAG_FULL_GIFT;
         Tcg_WriteSidecar();
     }
+}
+
+// Test harness (mp tcgvariety): 20 card players of each kind fitted to the active deck, then how many different decks
+// they brought and how many of them were GB2's (each played once, so the "met lately" rule takes part)
+static const char *DeckNameOf(const uint16_t *deck)
+{
+    unsigned i;
+    for (i = 0; i < gTcgDeckDefinitionCount; i++)
+        if (gTcgDeckDefinitions[i].cards == deck)
+            return gTcgDeckDefinitions[i].name;
+    for (i = 0; i < gTcgSpecialVariantCount; i++)
+        if (gTcgSpecialVariants[i].cards == deck)
+            return gTcgSpecialVariants[i].name;
+    for (i = 0; i < gTcgSpecialDeckCount; i++)
+        if (gTcgSpecialDecks[i].cards == deck)
+            return gTcgSpecialDecks[i].name;
+    return "?";
+}
+void Tcg_DebugVariety(void)
+{
+    static struct TcgOpponent o;
+    unsigned pool, k, j, total = 0, gb2 = 0;
+    for (pool = 0; pool < DECK_MIXED; pool++)
+    {
+        const uint16_t *seen[20];
+        unsigned distinct = 0, g = 0;
+        for (k = 0; k < 20; k++)
+        {
+            bool8 dup = FALSE;
+            memset(&o, 0, sizeof(o) - sizeof(o.portrait));
+            o.special = TCG_SPECIAL_NONE;
+            o.pool = pool;
+            o.pick = (k + 1) * 2654435761u ^ (pool * 40503u);
+            Tcg_FitOpponent(&o, NULL);
+            Tcg_NoteDeckMet(o.deck);
+            for (j = 0; j < distinct; j++)
+                dup |= seen[j] == o.deck;
+            if (!dup)
+            {
+                seen[distinct++] = o.deck;
+                g += !strncmp(DeckNameOf(o.deck), "GB2 ", 4);
+            }
+        }
+        printf("[test] tcgvariety kind %u: %u different decks of 20 (%u GB2)\n", pool, distinct, g);
+        total += distinct, gb2 += g;
+    }
+    // the special trainers: one each, five times
+    for (k = 0; k < TCG_SPECIAL_COUNT; k++)
+    {
+        const uint16_t *seen[5];
+        unsigned distinct = 0;
+        for (j = 0; j < 5; j++)
+        {
+            unsigned m;
+            bool8 dup = FALSE;
+            memset(&o, 0, sizeof(o) - sizeof(o.portrait));
+            o.special = k;
+            o.pool = TCG_SCALE_POOL_SPECIAL;
+            o.pick = (j + 7) * 2246822519u;
+            Tcg_FitOpponent(&o, NULL);
+            Tcg_NoteDeckMet(o.deck);
+            for (m = 0; m < distinct; m++)
+                dup |= seen[m] == o.deck;
+            if (!dup)
+                seen[distinct++] = o.deck;
+        }
+        printf("[test] tcgvariety special %u: %u different decks of 5\n", k, distinct);
+    }
+    printf("[test] tcgvariety: %u different decks for 140 card players, %u of them GB2's\n", total, gb2);
 }
