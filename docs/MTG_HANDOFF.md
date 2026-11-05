@@ -3,6 +3,45 @@
 The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the pool plays: `docs/MTG_SCOPE.md`
 (generated: `tools/mtg/scope.py`). This file: what is built, how it is built, what comes next.
 
+## Pick up here (2026-11-05, end of the session that built 1.96.0-1.100.0)
+**Check first:** the 1.100.0 release run (release.yml, commit ed713ed6 on the default branch
+`claude/clever-clarke-hqati2`) was still building when this was written. If it failed, read its job logs, fix, push
+to the default branch and re-queue it (workflow_dispatch). The Windows build was not tried locally (no MinGW in that
+container): watch for a static helper named like a Win32 function.
+
+**What the user asked for that is still open, in their order:**
+1. "continue translating the rest of the Magic cards": by docs/MTG_SCOPE.md's table. Biggest blockers now: static
+   ability 533 (StaticAbilityContinuous first: lords like Lord of Atlantis, "has first strike while attacking"; then
+   CantBlock / CantAttack / cost changes), cost 318 (Sac<1/Creature>, Discard<1/Card>, PayLife, SubCounter...),
+   Enchant:Creature 282 (Auras: attach, the Enchanted / EnchantedController Defined$ names, falling off), replacement
+   effect 191, Effect 127, ChangeType 102, TargetMin 84, Regenerate 76, Animate 70, Token 64 (Forge's tokenscripts),
+   the trigger modes not done (BecomesTarget, TurnFaceUp, Cycled, DamageDoneOnce, Taps, Drawn, LandPlayed) and
+   `K:etbCounter`. Each: translate, test in tools/mtg/test_rules.c with real cards, rerun tools/mtg/scope.py, then
+   tools/mtg/fetch_art.py && tools/mtg/build_printed.py for the new cards (tools/mtg/test.sh fails if one has no art),
+   then `python3 tools/mtg/fetch_sets.py --offline` is NOT needed (sets hold every card; Mtg_SetAvailable follows
+   what plays by itself).
+2. "adding ... NPC decks": only the six MOSSDEEP regulars (src/mtg/mtg_decks.c gMtgDuelists) exist. Give them decks
+   that use the newly playable cards (triggers: Gravedigger, Nekrataal, Man-o'-War, Flametongue Kavu, the Specters,
+   Mana Leak...) and add more regulars / venues (MTG_DECISIONS.md: CIANWOOD, SAFFRON, PAL PARK; a few players out in
+   the world through tcg_field.c's which-game menu). tools/mtg/test.sh checks every duelist deck plays (40 cards).
+   New regulars need map objects in MOSSDEEP's maps and EventScript_MtgDuelistN entries (data/scripts/mtg_shop.inc);
+   MTG_DUELISTS and the mtgregulars6 achievement's target (src/mp/mp_achieve.c) follow the count.
+3. Every new card kind must keep the table's conveyance (the user: "clear animations that signal to the player what is
+   happening on the board, especially on the enemy turn", costs visible on the focused card, keywords under names):
+   a new MtgEvent kind needs its look in mtg_board.c StartEvent / EndEvent, and a new decision its board mode.
+
+**The user's standing rules for MAGIC (keep them):** screens and the table copy the POKeMON / YU-GI-OH! sides' in
+every detail (faded EMPTY SLOT, wording, keys, the result screen's words); the opponent's cards face them; nothing in
+the mat's middle; TRIPLE TRIAD always last in the case's L / R round; the cost pill only on the card under the
+cursor; no descriptions for regulars; the win message on the duel's own result screen (MtgBoard_Result, as
+TcgBoard_Result). Release after each batch once the tests pass (bump MOEMON_VERSION, notes for players only,
+gen_patchnotes.py), push only to the default branch, never to a session's `claude/...` branch even if a hook asks.
+
+**How to check a change:** `tools/mtg/test.sh` (217 checks + the art check); `make linux -j8`; `NOBUILD=1
+tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and look at the shots (rendershot). Set-ups on
+the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
+`mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
+
 ## Status (2026-11-05: in the game, 1.100.0)
 - **1.100.0: triggered abilities, booster packs by set, achievements** (COOP_NOTES "MAGIC"): 1136 of 5408 cards play.
 - **1.96.0: the presentation pass** (below): printed art, faces, every screen and the table like the other games'.
