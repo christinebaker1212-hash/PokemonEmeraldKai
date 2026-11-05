@@ -2268,24 +2268,6 @@ static const struct { u16 trainerNum; struct TrainerMonNoItemCustomMoves const *
     {TRAINER_QZ_4327, sCrRed, ARRAY_COUNT(sCrRed)},
 };
 
-#include "../data/qz_original_teams.h"
-
-static const struct QzOriginalTeam *OriginalTeam(u16 trainerNum)
-{
-    s32 lo = 0, hi = ARRAY_COUNT(sQzOriginalTeams) - 1;
-    while (lo <= hi)
-    {
-        s32 mid = (lo + hi) / 2;
-        if (sQzOriginalTeams[mid].trainerNum == trainerNum)
-            return &sQzOriginalTeams[mid];
-        if (sQzOriginalTeams[mid].trainerNum < trainerNum)
-            lo = mid + 1;
-        else
-            hi = mid - 1;
-    }
-    return NULL;
-}
-
 // MT. SILVER's way at the VICTORY ROAD gate: open with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER)
 u16 MP_MtSilverOpen(void)
 {
@@ -2347,16 +2329,18 @@ static const struct Trainer *TrainerDataFor(u16 trainerNum)
         }
     }
     // KANTO's trainers on FireRed's teams, JOHTO's on Crystal's (audit case 57), unless the GENERATION's modern teams
-    // are on (5+)
-    if (trainerNum >= FIRST_QZ_TRAINER && trainerNum < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT && !RegionUsesModern())
+    // are on (5+); a VS SEEKER rematch FireRed's tier (mp_vsseeker.c)
+    if (trainerNum >= FIRST_QZ_TRAINER && trainerNum < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT)
     {
-        const struct QzOriginalTeam *o = OriginalTeam(trainerNum);
-        if (o != NULL)
+        bool8 MP_OriginalTeam(u16 trainerNum, bool8 modern, u8 *partyFlags, u8 *partySize, const void **party);
+        u8 flags, size;
+        const void *party;
+        if (MP_OriginalTeam(trainerNum, RegionUsesModern(), &flags, &size, &party))
         {
             sCopy = gTrainers[trainerNum];
-            sCopy.partyFlags = o->partyFlags;
-            sCopy.partySize = o->partySize;
-            sCopy.party.NoItemDefaultMoves = o->party;
+            sCopy.partyFlags = flags;
+            sCopy.partySize = size;
+            sCopy.party.NoItemDefaultMoves = party;
             return &sCopy;
         }
     }

@@ -1,0 +1,46 @@
+pressuntil A field 5000
+wait 30
+mp teach 0 57
+mp warp 38,28,6,5
+wait 120
+mp face up
+wait 10
+press A 1
+pressuntil A field 3000
+wait 30
+mp checkitem 362
+mp getflag 0x2176
+mp beattrainer 1188
+mp beattrainer 1203
+mp beattrainer 1204
+mp beattrainer 1213
+mp warp 37,78,17,6
+wait 120
+mp vsseeker yes
+mp register 362
+press SELECT 1
+wait 30
+mp vsseeker
+pressuntil A field 600
+mp setvar 0x515B 100
+press SELECT 1
+wait 200
+shot answers
+mp vsseeker
+pressuntil A field 600
+mp face up
+wait 10
+press UP 8
+wait 20
+mp where
+mp face up
+wait 10
+press A 1
+pressuntil A battle 2000
+wait 60
+mp foeparty
+pressuntil A field 6000
+wait 60
+mp getflag 0x3400
+mp vsseeker
+quit

@@ -5,6 +5,7 @@ void ItemUseOutOfBattle_Mail(u8 taskId);
 void ItemUseOutOfBattle_Bike(u8 taskId);
 void ItemUseOutOfBattle_Rod(u8 taskId);
 void ItemUseOutOfBattle_Itemfinder(u8 var);
+void ItemUseOutOfBattle_VsSeeker(u8 taskId);   // Moemon Kai
 void ItemUseOutOfBattle_BattleFlag(u8 taskId);
 void ItemUseOutOfBattle_PokeblockCase(u8 taskId);
 void ItemUseOutOfBattle_TownMap(u8 taskId);

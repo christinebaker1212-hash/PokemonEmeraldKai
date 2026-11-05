@@ -8147,6 +8147,2018 @@ static const struct TrainerMonNoItemDefaultMoves sOrig_Cr_GRUNTM_GRUNTM_14[] = {
     {.iv = 160, .lvl = 24, .species = SPECIES_RATICATE},
     {.iv = 160, .lvl = 24, .species = SPECIES_GOLBAT},
 };
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterBen2[] = {
+    {
+        .iv = 20,
+        .lvl = 17,
+        .species = SPECIES_RATTATA,
+    },
+    {
+        .iv = 20,
+        .lvl = 17,
+        .species = SPECIES_EKANS,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterBen3[] = {
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_EKANS,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterBen4[] = {
+    {
+        .iv = 120,
+        .lvl = 48,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 120,
+        .lvl = 48,
+        .species = SPECIES_ARBOK,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBugCatcherColton2[] = {
+    {
+        .iv = 20,
+        .lvl = 19,
+        .species = SPECIES_METAPOD,
+    },
+    {
+        .iv = 20,
+        .lvl = 19,
+        .species = SPECIES_WEEDLE,
+    },
+    {
+        .iv = 20,
+        .lvl = 19,
+        .species = SPECIES_METAPOD,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBugCatcherColton3[] = {
+    {
+        .iv = 60,
+        .lvl = 27,
+        .species = SPECIES_BUTTERFREE,
+    },
+    {
+        .iv = 60,
+        .lvl = 27,
+        .species = SPECIES_KAKUNA,
+    },
+    {
+        .iv = 60,
+        .lvl = 27,
+        .species = SPECIES_BUTTERFREE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBugCatcherColton4[] = {
+    {
+        .iv = 120,
+        .lvl = 51,
+        .species = SPECIES_BUTTERFREE,
+    },
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_BEEDRILL,
+    },
+    {
+        .iv = 120,
+        .lvl = 51,
+        .species = SPECIES_BUTTERFREE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrLassJanice2[] = {
+    {
+        .iv = 20,
+        .lvl = 20,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 20,
+        .lvl = 20,
+        .species = SPECIES_PIDGEOTTO,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrLassJanice3[] = {
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_PIDGEOTTO,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterTimmy2[] = {
+    {
+        .iv = 20,
+        .lvl = 19,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 20,
+        .lvl = 19,
+        .species = SPECIES_EKANS,
+    },
+    {
+        .iv = 20,
+        .lvl = 19,
+        .species = SPECIES_ZUBAT,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterTimmy3[] = {
+    {
+        .iv = 60,
+        .lvl = 27,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 60,
+        .lvl = 27,
+        .species = SPECIES_EKANS,
+    },
+    {
+        .iv = 60,
+        .lvl = 27,
+        .species = SPECIES_GOLBAT,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterTimmy4[] = {
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_ARBOK,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_GOLBAT,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrLassReli2[] = {
+    {
+        .iv = 20,
+        .lvl = 20,
+        .species = SPECIES_PIDGEY,
+    },
+    {
+        .iv = 20,
+        .lvl = 20,
+        .species = SPECIES_NIDORAN_F,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrLassReli3[] = {
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_NIDORINA,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterChad2[] = {
+    {
+        .iv = 20,
+        .lvl = 20,
+        .species = SPECIES_EKANS,
+    },
+    {
+        .iv = 20,
+        .lvl = 20,
+        .species = SPECIES_SANDSHREW,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterChad3[] = {
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_ARBOK,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_SANDSHREW,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterChad4[] = {
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_ARBOK,
+    },
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_SANDSLASH,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerKelsey2[] = {
+    {
+        .iv = 20,
+        .lvl = 21,
+        .species = SPECIES_NIDORAN_M,
+    },
+    {
+        .iv = 20,
+        .lvl = 21,
+        .species = SPECIES_NIDORAN_F,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerKelsey3[] = {
+    {
+        .iv = 60,
+        .lvl = 29,
+        .species = SPECIES_NIDORINO,
+    },
+    {
+        .iv = 60,
+        .lvl = 29,
+        .species = SPECIES_NIDORINA,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerKelsey4[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_NIDORINO,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_NIDORINA,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrHikerFranklin2[] = {
+    {
+        .iv = 40,
+        .lvl = 25,
+        .species = SPECIES_MACHOKE,
+    },
+    {
+        .iv = 40,
+        .lvl = 25,
+        .species = SPECIES_GRAVELER,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCamperRicky2[] = {
+    {
+        .iv = 20,
+        .lvl = 22,
+        .species = SPECIES_SQUIRTLE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCamperRicky3[] = {
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_WARTORTLE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCamperRicky4[] = {
+    {
+        .iv = 120,
+        .lvl = 55,
+        .species = SPECIES_WARTORTLE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCamperJeff2[] = {
+    {
+        .iv = 20,
+        .lvl = 21,
+        .species = SPECIES_SPEAROW,
+    },
+    {
+        .iv = 20,
+        .lvl = 21,
+        .species = SPECIES_RATICATE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCamperJeff3[] = {
+    {
+        .iv = 60,
+        .lvl = 29,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 60,
+        .lvl = 29,
+        .species = SPECIES_RATICATE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCamperJeff4[] = {
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_RATICATE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerIsabelle2[] = {
+    {
+        .iv = 20,
+        .lvl = 21,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 20,
+        .lvl = 21,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 20,
+        .lvl = 18,
+        .species = SPECIES_PIDGEY,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerIsabelle3[] = {
+    {
+        .iv = 60,
+        .lvl = 29,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 60,
+        .lvl = 29,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 60,
+        .lvl = 26,
+        .species = SPECIES_PIDGEOTTO,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerIsabelle4[] = {
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 80,
+        .lvl = 50,
+        .species = SPECIES_PIDGEOT,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterYasu2[] = {
+    {
+        .iv = 40,
+        .lvl = 22,
+        .species = SPECIES_RATTATA,
+    },
+    {
+        .iv = 40,
+        .lvl = 22,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 40,
+        .lvl = 22,
+        .species = SPECIES_RATICATE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterYasu3[] = {
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_RATICATE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrEngineerBernie2[] = {
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_MAGNETON,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_MAGNETON,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_MAGNETON,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrGamerDarian2[] = {
+    {
+        .iv = 60,
+        .lvl = 29,
+        .species = SPECIES_GROWLITHE,
+    },
+    {
+        .iv = 60,
+        .lvl = 29,
+        .species = SPECIES_VULPIX,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCamperChris2[] = {
+    {
+        .iv = 40,
+        .lvl = 24,
+        .species = SPECIES_GROWLITHE,
+    },
+    {
+        .iv = 40,
+        .lvl = 24,
+        .species = SPECIES_CHARMANDER,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCamperChris3[] = {
+    {
+        .iv = 60,
+        .lvl = 29,
+        .species = SPECIES_GROWLITHE,
+    },
+    {
+        .iv = 60,
+        .lvl = 29,
+        .species = SPECIES_CHARMELEON,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCamperChris4[] = {
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_ARCANINE,
+    },
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_CHARMELEON,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerAlicia2[] = {
+    {
+        .iv = 40,
+        .lvl = 25,
+        .species = SPECIES_MEOWTH,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerAlicia3[] = {
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_PERSIAN,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerAlicia4[] = {
+    {
+        .iv = 120,
+        .lvl = 55,
+        .species = SPECIES_PERSIAN,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrHikerJeremy2[] = {
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_MACHOKE,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_ONIX,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPokemaniacMark2[] = {
+    {
+        .iv = 90,
+        .lvl = 33,
+        .species = SPECIES_RHYHORN,
+    },
+    {
+        .iv = 90,
+        .lvl = 33,
+        .species = SPECIES_LICKITUNG,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPokemaniacMark3[] = {
+    {
+        .iv = 150,
+        .lvl = 54,
+        .species = SPECIES_RHYDON,
+    },
+    {
+        .iv = 150,
+        .lvl = 54,
+        .species = SPECIES_LICKITUNG,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPokemaniacHerman2[] = {
+    {
+        .iv = 90,
+        .lvl = 29,
+        .species = SPECIES_MAROWAK,
+    },
+    {
+        .iv = 90,
+        .lvl = 29,
+        .species = SPECIES_SLOWBRO,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPokemaniacHerman3[] = {
+    {
+        .iv = 150,
+        .lvl = 54,
+        .species = SPECIES_MAROWAK,
+    },
+    {
+        .iv = 150,
+        .lvl = 54,
+        .species = SPECIES_SLOWBRO,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrHikerTrent2[] = {
+    {
+        .iv = 60,
+        .lvl = 31,
+        .species = SPECIES_ONIX,
+    },
+    {
+        .iv = 60,
+        .lvl = 31,
+        .species = SPECIES_GRAVELER,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrLassMegan2[] = {
+    {
+        .iv = 40,
+        .lvl = 22,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 40,
+        .lvl = 22,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 40,
+        .lvl = 23,
+        .species = SPECIES_NIDORAN_M,
+    },
+    {
+        .iv = 40,
+        .lvl = 21,
+        .species = SPECIES_MEOWTH,
+    },
+    {
+        .iv = 40,
+        .lvl = 22,
+        .species = SPECIES_PIKACHU,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrLassMegan3[] = {
+    {
+        .iv = 80,
+        .lvl = 46,
+        .species = SPECIES_PIDGEOT,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_NIDORINO,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_PERSIAN,
+    },
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_RAICHU,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSuperNerdGlenn2[] = {
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_MUK,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_MUK,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_MUK,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrGamerRich2[] = {
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_GROWLITHE,
+    },
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_VULPIX,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrTwinsEliAnne2[] = {
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_CLEFAIRY,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_JIGGLYPUFF,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBikerJaren2[] = {
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_MUK,
+    },
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_MUK,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrFishermanElliot2[] = {
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_POLIWHIRL,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_CLOYSTER,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_SEAKING,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_SEADRA,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrRockerLuca2[] = {
+    {
+        .iv = 60,
+        .lvl = 33,
+        .species = SPECIES_ELECTRODE,
+    },
+    {
+        .iv = 60,
+        .lvl = 33,
+        .species = SPECIES_ELECTRODE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungCoupleGiaJes2[] = {
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_NIDORINA,
+    },
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_NIDORINO,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungCoupleGiaJes3[] = {
+    {
+        .iv = 120,
+        .lvl = 55,
+        .species = SPECIES_NIDOKING,
+    },
+    {
+        .iv = 120,
+        .lvl = 55,
+        .species = SPECIES_NIDOQUEEN,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBeautySheila2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_CLEFAIRY,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_PERSIAN,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperRobert2[] = {
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_FEAROW,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperRobert3[] = {
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_PIDGEOT,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_PIDGEOT,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_FEAROW,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerSusie2[] = {
+    {
+        .iv = 60,
+        .lvl = 27,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 60,
+        .lvl = 27,
+        .species = SPECIES_MEOWTH,
+    },
+    {
+        .iv = 60,
+        .lvl = 27,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 60,
+        .lvl = 27,
+        .species = SPECIES_PIKACHU,
+    },
+    {
+        .iv = 60,
+        .lvl = 27,
+        .species = SPECIES_MEOWTH,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerSusie3[] = {
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_PERSIAN,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_PIKACHU,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_PERSIAN,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerSusie4[] = {
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_PIDGEOT,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_PERSIAN,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_RAICHU,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_PERSIAN,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBikerLukas2[] = {
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_KOFFING,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_KOFFING,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_MUK,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_WEEZING,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperBenny2[] = {
+    {
+        .iv = 60,
+        .lvl = 32,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 60,
+        .lvl = 32,
+        .species = SPECIES_FEAROW,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperBenny3[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_FEAROW,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperMarlon2[] = {
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_DODUO,
+    },
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_FEAROW,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperMarlon3[] = {
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_DODRIO,
+    },
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_FEAROW,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBeautyGrace2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_PIDGEOT,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_WIGGLYTUFF,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperChester2[] = {
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_DODRIO,
+    },
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_DODRIO,
+    },
+    {
+        .iv = 60,
+        .lvl = 30,
+        .species = SPECIES_DODUO,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperChester3[] = {
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_DODRIO,
+    },
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_DODRIO,
+    },
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_DODRIO,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerBecky2[] = {
+    {
+        .iv = 60,
+        .lvl = 32,
+        .species = SPECIES_PIKACHU,
+    },
+    {
+        .iv = 60,
+        .lvl = 32,
+        .species = SPECIES_RAICHU,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerBecky3[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_PIKACHU,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_RAICHU,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerBecky4[] = {
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_RAICHU,
+    },
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_RAICHU,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrCrushKinRonMya2[] = {
+    {
+        .iv = 110,
+        .lvl = 33,
+        .species = SPECIES_HITMONCHAN,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 110,
+        .lvl = 33,
+        .species = SPECIES_HITMONLEE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrCrushKinRonMya3[] = {
+    {
+        .iv = 130,
+        .lvl = 51,
+        .species = SPECIES_HITMONCHAN,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 130,
+        .lvl = 51,
+        .species = SPECIES_HITMONLEE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrCrushKinRonMya4[] = {
+    {
+        .iv = 170,
+        .lvl = 56,
+        .species = SPECIES_HITMONCHAN,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 170,
+        .lvl = 56,
+        .species = SPECIES_HITMONLEE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBikerRuben2[] = {
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_WEEZING,
+    },
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_WEEZING,
+    },
+    {
+        .iv = 80,
+        .lvl = 48,
+        .species = SPECIES_WEEZING,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCueBallCamron2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_PRIMEAPE,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_MACHOKE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBikerJaxon2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_WEEZING,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_MUK,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCueBallIsaiah2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_MACHOKE,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_MACHAMP,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrCueBallCorey2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_PRIMEAPE,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_MACHAMP,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperJacob2[] = {
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_SPEAROW,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 60,
+        .lvl = 28,
+        .species = SPECIES_SPEAROW,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperJacob3[] = {
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_FEAROW,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSwimmerMaleMatthew2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_POLIWHIRL,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_POLIWRATH,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSwimmerMaleTony2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_SEADRA,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_SEADRA,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSwimmerFemaleAlice2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_SEAKING,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_SEAKING,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSwimmerMaleDarrin2[] = {
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_SEADRA,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_SEADRA,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_SEADRA,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_SEADRA,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSwimmerFemaleMelissa2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_POLIWHIRL,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_SEAKING,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerMissy2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_SEAKING,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_SEAKING,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPicnickerMissy3[] = {
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_SEAKING,
+    },
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_SEAKING,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrFishermanWade2[] = {
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_MAGIKARP,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_MAGIKARP,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_MAGIKARP,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_MAGIKARP,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_MAGIKARP,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_MAGIKARP,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSwimmerMaleJack2[] = {
+    {
+        .iv = 80,
+        .lvl = 50,
+        .species = SPECIES_STARMIE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSisAndBroLilIan2[] = {
+    {
+        .iv = 80,
+        .lvl = 50,
+        .species = SPECIES_SEADRA,
+    },
+    {
+        .iv = 80,
+        .lvl = 50,
+        .species = SPECIES_STARMIE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSisAndBroLilIan3[] = {
+    {
+        .iv = 120,
+        .lvl = 55,
+        .species = SPECIES_SEADRA,
+    },
+    {
+        .iv = 120,
+        .lvl = 55,
+        .species = SPECIES_STARMIE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSwimmerMaleFinn2[] = {
+    {
+        .iv = 80,
+        .lvl = 50,
+        .species = SPECIES_STARMIE,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrCrushGirlSharon2[] = {
+    {
+        .iv = 130,
+        .lvl = 50,
+        .species = SPECIES_MANKEY,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 130,
+        .lvl = 50,
+        .species = SPECIES_PRIMEAPE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrCrushGirlSharon3[] = {
+    {
+        .iv = 170,
+        .lvl = 55,
+        .species = SPECIES_PRIMEAPE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 170,
+        .lvl = 55,
+        .species = SPECIES_PRIMEAPE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrCrushGirlTanya2[] = {
+    {
+        .iv = 130,
+        .lvl = 50,
+        .species = SPECIES_HITMONLEE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 130,
+        .lvl = 50,
+        .species = SPECIES_HITMONCHAN,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrCrushGirlTanya3[] = {
+    {
+        .iv = 170,
+        .lvl = 55,
+        .species = SPECIES_HITMONLEE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 170,
+        .lvl = 55,
+        .species = SPECIES_HITMONCHAN,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrBlackBeltShea2[] = {
+    {
+        .iv = 180,
+        .lvl = 50,
+        .species = SPECIES_MACHOKE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 180,
+        .lvl = 50,
+        .species = SPECIES_MACHOKE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrBlackBeltShea3[] = {
+    {
+        .iv = 220,
+        .lvl = 55,
+        .species = SPECIES_MACHOKE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 220,
+        .lvl = 55,
+        .species = SPECIES_MACHAMP,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrBlackBeltHugh2[] = {
+    {
+        .iv = 180,
+        .lvl = 50,
+        .species = SPECIES_MACHOKE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 180,
+        .lvl = 50,
+        .species = SPECIES_MACHOKE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrBlackBeltHugh3[] = {
+    {
+        .iv = 220,
+        .lvl = 55,
+        .species = SPECIES_MACHOKE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 220,
+        .lvl = 55,
+        .species = SPECIES_MACHAMP,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrCrushKinMikKia2[] = {
+    {
+        .iv = 130,
+        .lvl = 51,
+        .species = SPECIES_MACHOKE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 130,
+        .lvl = 51,
+        .species = SPECIES_PRIMEAPE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrCrushKinMikKia3[] = {
+    {
+        .iv = 170,
+        .lvl = 56,
+        .species = SPECIES_MACHAMP,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 170,
+        .lvl = 56,
+        .species = SPECIES_PRIMEAPE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrTuberAmira2[] = {
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_POLIWHIRL,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_POLIWHIRL,
+    },
+    {
+        .iv = 80,
+        .lvl = 47,
+        .species = SPECIES_POLIWHIRL,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrTwinsJoyMeg2[] = {
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_CLEFAIRY,
+    },
+    {
+        .iv = 80,
+        .lvl = 49,
+        .species = SPECIES_CLEFAIRY,
+    },
+
+};
+static const struct TrainerMonNoItemCustomMoves sOrig_FrPainterRayna2[] = {
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_SMEARGLE,
+        .moves = {MOVE_CROSS_CHOP, MOVE_MEGAHORN, MOVE_DOUBLE_EDGE, MOVE_SELF_DESTRUCT},
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrYoungsterDestin2[] = {
+    {
+        .iv = 120,
+        .lvl = 53,
+        .species = SPECIES_RATICATE,
+    },
+    {
+        .iv = 120,
+        .lvl = 53,
+        .species = SPECIES_PIDGEOT,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPkmnBreederAlize2[] = {
+    {
+        .iv = 150,
+        .lvl = 53,
+        .species = SPECIES_PIKACHU,
+    },
+    {
+        .iv = 150,
+        .lvl = 53,
+        .species = SPECIES_CLEFAIRY,
+    },
+    {
+        .iv = 150,
+        .lvl = 53,
+        .species = SPECIES_MARILL,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperMilo2[] = {
+    {
+        .iv = 120,
+        .lvl = 53,
+        .species = SPECIES_PIDGEOTTO,
+    },
+    {
+        .iv = 120,
+        .lvl = 55,
+        .species = SPECIES_PIDGEOT,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperChaz2[] = {
+    {
+        .iv = 120,
+        .lvl = 53,
+        .species = SPECIES_FEAROW,
+    },
+    {
+        .iv = 120,
+        .lvl = 55,
+        .species = SPECIES_FEAROW,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrBirdKeeperHarold2[] = {
+    {
+        .iv = 120,
+        .lvl = 53,
+        .species = SPECIES_NOCTOWL,
+    },
+    {
+        .iv = 120,
+        .lvl = 55,
+        .species = SPECIES_NOCTOWL,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSwimmerFemaleNicole2[] = {
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_MARILL,
+    },
+
+};
+static const struct TrainerMonNoItemCustomMoves sOrig_FrPsychicJaclyn2[] = {
+    {
+        .iv = 220,
+        .lvl = 52,
+        .species = SPECIES_NATU,
+        .moves = {MOVE_PSYCHIC, MOVE_CONFUSE_RAY, MOVE_FUTURE_SIGHT, MOVE_WISH},
+    },
+    {
+        .iv = 220,
+        .lvl = 52,
+        .species = SPECIES_SLOWBRO,
+        .moves = {MOVE_PSYCHIC, MOVE_HEADBUTT, MOVE_AMNESIA, MOVE_YAWN},
+    },
+    {
+        .iv = 220,
+        .lvl = 54,
+        .species = SPECIES_KADABRA,
+        .moves = {MOVE_PSYCHIC, MOVE_FUTURE_SIGHT, MOVE_RECOVER, MOVE_REFLECT},
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrSwimmerMaleSamir2[] = {
+    {
+        .iv = 120,
+        .lvl = 55,
+        .species = SPECIES_GYARADOS,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrHikerEarl2[] = {
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_ONIX,
+    },
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_MACHAMP,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrRuinManiacLarry2[] = {
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_MACHOKE,
+    },
+    {
+        .iv = 120,
+        .lvl = 54,
+        .species = SPECIES_MACHOKE,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrPokemaniacHector2[] = {
+    {
+        .iv = 150,
+        .lvl = 55,
+        .species = SPECIES_RHYDON,
+    },
+    {
+        .iv = 150,
+        .lvl = 55,
+        .species = SPECIES_KANGASKHAN,
+    },
+
+};
+static const struct TrainerMonNoItemCustomMoves sOrig_FrPsychicDario2[] = {
+    {
+        .iv = 220,
+        .lvl = 56,
+        .species = SPECIES_GIRAFARIG,
+        .moves = {MOVE_CRUNCH, MOVE_PSYBEAM, MOVE_ODOR_SLEUTH, MOVE_AGILITY},
+    },
+
+};
+static const struct TrainerMonNoItemCustomMoves sOrig_FrPsychicRodette2[] = {
+    {
+        .iv = 220,
+        .lvl = 53,
+        .species = SPECIES_NATU,
+        .moves = {MOVE_PSYCHIC, MOVE_CONFUSE_RAY, MOVE_WISH, MOVE_FUTURE_SIGHT},
+    },
+    {
+        .iv = 220,
+        .lvl = 53,
+        .species = SPECIES_HYPNO,
+        .moves = {MOVE_PSYCHIC, MOVE_DISABLE, MOVE_PSYCH_UP, MOVE_FUTURE_SIGHT},
+    },
+    {
+        .iv = 220,
+        .lvl = 53,
+        .species = SPECIES_HYPNO,
+        .moves = {MOVE_PSYCHIC, MOVE_HYPNOSIS, MOVE_PSYCH_UP, MOVE_FUTURE_SIGHT},
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrJugglerMason2[] = {
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_ELECTRODE,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_PINECO,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_ELECTRODE,
+    },
+    {
+        .iv = 120,
+        .lvl = 52,
+        .species = SPECIES_PINECO,
+    },
+
+};
+static const struct TrainerMonNoItemCustomMoves sOrig_FrPkmnRangerNicolas2[] = {
+    {
+        .iv = 220,
+        .lvl = 55,
+        .species = SPECIES_VICTREEBEL,
+        .moves = {MOVE_RAZOR_LEAF, MOVE_ACID, MOVE_STUN_SPORE, MOVE_WRAP},
+    },
+    {
+        .iv = 220,
+        .lvl = 55,
+        .species = SPECIES_VICTREEBEL,
+        .moves = {MOVE_RAZOR_LEAF, MOVE_ACID, MOVE_SLEEP_POWDER, MOVE_SLAM},
+    },
+
+};
+static const struct TrainerMonNoItemCustomMoves sOrig_FrPkmnRangerMadeline2[] = {
+    {
+        .iv = 220,
+        .lvl = 55,
+        .species = SPECIES_VILEPLUME,
+        .moves = {MOVE_PETAL_DANCE, MOVE_MOONLIGHT, MOVE_ACID, MOVE_SLEEP_POWDER},
+    },
+    {
+        .iv = 220,
+        .lvl = 55,
+        .species = SPECIES_VILEPLUME,
+        .moves = {MOVE_PETAL_DANCE, MOVE_MOONLIGHT, MOVE_ACID, MOVE_STUN_SPORE},
+    },
+
+};
+static const struct TrainerMonItemDefaultMoves sOrig_FrCrushGirlCyndy2[] = {
+    {
+        .iv = 170,
+        .lvl = 54,
+        .species = SPECIES_PRIMEAPE,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 170,
+        .lvl = 54,
+        .species = SPECIES_HITMONTOP,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+    {
+        .iv = 170,
+        .lvl = 54,
+        .species = SPECIES_MACHAMP,
+        .heldItem = ITEM_BLACK_BELT,
+    },
+
+};
+static const struct TrainerMonNoItemDefaultMoves sOrig_FrTamerEvan2[] = {
+    {
+        .iv = 160,
+        .lvl = 52,
+        .species = SPECIES_SANDSLASH,
+    },
+    {
+        .iv = 160,
+        .lvl = 52,
+        .species = SPECIES_LICKITUNG,
+    },
+    {
+        .iv = 160,
+        .lvl = 55,
+        .species = SPECIES_URSARING,
+    },
+
+};
+static const struct TrainerMonNoItemCustomMoves sOrig_FrPkmnRangerJackson2[] = {
+    {
+        .iv = 220,
+        .lvl = 53,
+        .species = SPECIES_TANGELA,
+        .moves = {MOVE_SLAM, MOVE_MEGA_DRAIN, MOVE_BIND, MOVE_INGRAIN},
+    },
+    {
+        .iv = 220,
+        .lvl = 54,
+        .species = SPECIES_EXEGGUTOR,
+        .moves = {MOVE_CONFUSION, MOVE_EGG_BOMB, MOVE_STUN_SPORE, MOVE_REFLECT},
+    },
+    {
+        .iv = 220,
+        .lvl = 55,
+        .species = SPECIES_EXEGGUTOR,
+        .moves = {MOVE_CONFUSION, MOVE_EGG_BOMB, MOVE_SLEEP_POWDER, MOVE_STOMP},
+    },
+
+};
+static const struct TrainerMonNoItemCustomMoves sOrig_FrPkmnRangerKatelyn2[] = {
+    {
+        .iv = 220,
+        .lvl = 56,
+        .species = SPECIES_CHANSEY,
+        .moves = {MOVE_EGG_BOMB, MOVE_DEFENSE_CURL, MOVE_MINIMIZE, MOVE_SOFT_BOILED},
+    },
+
+};
+static const struct TrainerMonNoItemCustomMoves sOrig_FrCooltrainerLeroy2[] = {
+    {
+        .iv = 220,
+        .lvl = 52,
+        .species = SPECIES_RHYDON,
+        .moves = {MOVE_EARTHQUAKE, MOVE_HORN_DRILL, MOVE_ROCK_BLAST, MOVE_SCARY_FACE},
+    },
+    {
+        .iv = 220,
+        .lvl = 54,
+        .species = SPECIES_SLOWBRO,
+        .moves = {MOVE_PSYCHIC, MOVE_HEADBUTT, MOVE_AMNESIA, MOVE_DISABLE},
+    },
+    {
+        .iv = 220,
+        .lvl = 52,
+        .species = SPECIES_KANGASKHAN,
+        .moves = {MOVE_DIZZY_PUNCH, MOVE_BITE, MOVE_ENDURE, MOVE_REVERSAL},
+    },
+    {
+        .iv = 220,
+        .lvl = 52,
+        .species = SPECIES_MACHAMP,
+        .moves = {MOVE_CROSS_CHOP, MOVE_VITAL_THROW, MOVE_REVENGE, MOVE_SEISMIC_TOSS},
+    },
+    {
+        .iv = 220,
+        .lvl = 55,
+        .species = SPECIES_URSARING,
+        .moves = {MOVE_SLASH, MOVE_FAINT_ATTACK, MOVE_SNORE, MOVE_REST},
+    },
+
+};
+static const struct TrainerMonNoItemCustomMoves sOrig_FrCooltrainerMichelle2[] = {
+    {
+        .iv = 220,
+        .lvl = 53,
+        .species = SPECIES_PERSIAN,
+        .moves = {MOVE_SLASH, MOVE_SCREECH, MOVE_FAINT_ATTACK, MOVE_BITE},
+    },
+    {
+        .iv = 220,
+        .lvl = 53,
+        .species = SPECIES_DEWGONG,
+        .moves = {MOVE_ICE_BEAM, MOVE_TAKE_DOWN, MOVE_ICY_WIND, MOVE_SHEER_COLD},
+    },
+    {
+        .iv = 220,
+        .lvl = 54,
+        .species = SPECIES_NINETALES,
+        .moves = {MOVE_FLAMETHROWER, MOVE_CONFUSE_RAY, MOVE_WILL_O_WISP, MOVE_GRUDGE},
+    },
+    {
+        .iv = 220,
+        .lvl = 54,
+        .species = SPECIES_RAPIDASH,
+        .moves = {MOVE_BOUNCE, MOVE_AGILITY, MOVE_FIRE_SPIN, MOVE_TAKE_DOWN},
+    },
+    {
+        .iv = 220,
+        .lvl = 56,
+        .species = SPECIES_GIRAFARIG,
+        .moves = {MOVE_CRUNCH, MOVE_PSYBEAM, MOVE_STOMP, MOVE_ODOR_SLEUTH},
+    },
+
+};
+static const struct TrainerMonNoItemCustomMoves sOrig_FrCoolCoupleLexNya2[] = {
+    {
+        .iv = 220,
+        .lvl = 57,
+        .species = SPECIES_MILTANK,
+        .moves = {MOVE_BODY_SLAM, MOVE_MILK_DRINK, MOVE_GROWL, MOVE_DEFENSE_CURL},
+    },
+    {
+        .iv = 220,
+        .lvl = 57,
+        .species = SPECIES_TAUROS,
+        .moves = {MOVE_TAKE_DOWN, MOVE_SCARY_FACE, MOVE_PURSUIT, MOVE_SWAGGER},
+    },
+
+};
 
 static const struct QzOriginalTeam { u16 trainerNum; u8 partyFlags; u8 partySize; const void *party; } sQzOriginalTeams[] = {   // (by trainer number)
     {TRAINER_QZ_4098, 0, 1, sOrig_Cr_KIMONO_GIRL_SAYO},   // Johto_DanceTheater: Crystal KIMONO_GIRL SAYO
@@ -8288,9 +10300,6 @@ static const struct QzOriginalTeam { u16 trainerNum; u8 partyFlags; u8 partySize
     {TRAINER_QZ_4553, 0, 2, sOrig_Cr_SWIMMERF_KARA},   // Johto_Route41: Crystal SWIMMERF KARA
     {TRAINER_QZ_4554, F_TRAINER_PARTY_CUSTOM_MOVESET, 2, sOrig_Cr_LASS_DANA1},   // Johto_Route38: Crystal LASS DANA1
     {TRAINER_QZ_4558, 0, 3, sOrig_Cr_SWIMMERF_KAYLEE},   // Johto_Route41: Crystal SWIMMERF KAYLEE
-    {TRAINER_QZ_4563, 0, 3, sOrig_Cr_EXECUTIVEM_EXECUTIVEM_4},   // Johto_TeamRocketBaseB3F: Crystal EXECUTIVEM EXECUTIVEM_4
-    {TRAINER_QZ_4564, F_TRAINER_PARTY_CUSTOM_MOVESET, 3, sOrig_Cr_EXECUTIVEM_EXECUTIVEM_1},   // Johto_RadioTower5F: Crystal EXECUTIVEM EXECUTIVEM_1
-    {TRAINER_QZ_4566, F_TRAINER_PARTY_CUSTOM_MOVESET, 1, sOrig_Cr_COOLTRAINERM_DARIN},   // Johto_DragonsDenB1F: Crystal COOLTRAINERM DARIN
     {TRAINER_QZ_4569, 0, 3, sOrig_Cr_MEDIUM_MARTHA},   // Johto_EcruteakGym: Crystal MEDIUM MARTHA
     {TRAINER_QZ_4571, 0, 2, sOrig_Cr_GRUNTM_GRUNTM_9},   // Johto_RadioTower3F: Crystal GRUNTM GRUNTM_9
     {TRAINER_QZ_4572, 0, 2, sOrig_Cr_COOLTRAINERF_IRENE},   // Johto_Route34: Crystal COOLTRAINERF IRENE
@@ -8843,4 +10852,236 @@ static const struct QzOriginalTeam { u16 trainerNum; u8 partyFlags; u8 partySize
     {TRAINER_QZ_8811, 0, 3, sOrig_FrPicnickerMarcy},   // Kanto_SixIsland_PatternBush: FireRed TRAINER_PICNICKER_MARCY
     {TRAINER_QZ_8812, 0, 3, sOrig_FrRuinManiacLayton},   // Kanto_SixIsland_PatternBush: FireRed TRAINER_RUIN_MANIAC_LAYTON
     {TRAINER_QZ_8934, 0, 2, sOrig_FrCueBallPaxton},   // Kanto_ThreeIsland: FireRed TRAINER_CUE_BALL_PAXTON
+    {TRAINER_QZ_4563, 0, 3, sOrig_Cr_EXECUTIVEM_EXECUTIVEM_4},   // Johto_TeamRocketBaseB3F: Crystal EXECUTIVEM EXECUTIVEM_4
+    {TRAINER_QZ_4564, F_TRAINER_PARTY_CUSTOM_MOVESET, 3, sOrig_Cr_EXECUTIVEM_EXECUTIVEM_1},   // Johto_RadioTower5F: Crystal EXECUTIVEM EXECUTIVEM_1
+    {TRAINER_QZ_4566, F_TRAINER_PARTY_CUSTOM_MOVESET, 1, sOrig_Cr_COOLTRAINERM_DARIN},   // Johto_DragonsDenB1F: Crystal COOLTRAINERM DARIN
+};
+
+// FireRed's VS SEEKER rematches (src/vs_seeker.c sRematches): tiers 1-5, NULL a SKIP; each tier's "beaten"
+// flag (0xFFFF: the trainer's own). src/mp/mp_vsseeker.c
+#define KANTO_VS_TIER_FLAGS_START 0x3400
+#define KANTO_VS_TIER_FLAGS_END 0x3482
+struct KantoRematchTier { const void *party; u8 partyFlags; u8 partySize; u16 beatenFlag; };
+static const struct KantoRematch { u16 trainerNum; u8 count; struct KantoRematchTier tier[5]; } sKantoRematches[] = {
+    {TRAINER_QZ_8281, 4, {{sOrig_FrYoungsterBen2, 0, 2, 0x3400}, {NULL, 0, 0, 0}, {sOrig_FrYoungsterBen3, 0, 2, 0x3401}, {sOrig_FrYoungsterBen4, 0, 2, 0x3402}}},   // FireRed TRAINER_YOUNGSTER_BEN
+    {TRAINER_QZ_8282, 1, {{sOrig_FrYoungsterCalvin, 0, 1, 0xFFFF}}},   // FireRed TRAINER_YOUNGSTER_CALVIN
+    {TRAINER_QZ_8284, 5, {{sOrig_FrYoungsterTimmy2, 0, 3, 0x3408}, {NULL, 0, 0, 0}, {sOrig_FrYoungsterTimmy3, 0, 3, 0x3409}, {NULL, 0, 0, 0}, {sOrig_FrYoungsterTimmy4, 0, 3, 0x340A}}},   // FireRed TRAINER_YOUNGSTER_TIMMY
+    {TRAINER_QZ_8285, 1, {{sOrig_FrYoungsterJoey, 0, 2, 0xFFFF}}},   // FireRed TRAINER_YOUNGSTER_JOEY
+    {TRAINER_QZ_8286, 1, {{sOrig_FrYoungsterDan, 0, 1, 0xFFFF}}},   // FireRed TRAINER_YOUNGSTER_DAN
+    {TRAINER_QZ_8287, 4, {{sOrig_FrYoungsterChad2, 0, 2, 0x340D}, {NULL, 0, 0, 0}, {sOrig_FrYoungsterChad3, 0, 2, 0x340E}, {sOrig_FrYoungsterChad4, 0, 2, 0x340F}}},   // FireRed TRAINER_YOUNGSTER_CHAD
+    {TRAINER_QZ_8289, 1, {{sOrig_FrYoungsterEddie, 0, 1, 0xFFFF}}},   // FireRed TRAINER_YOUNGSTER_EDDIE
+    {TRAINER_QZ_8290, 1, {{sOrig_FrYoungsterDillon, 0, 2, 0xFFFF}}},   // FireRed TRAINER_YOUNGSTER_DILLON
+    {TRAINER_QZ_8291, 4, {{NULL, 0, 0, 0}, {sOrig_FrYoungsterYasu2, 0, 3, 0x341D}, {NULL, 0, 0, 0}, {sOrig_FrYoungsterYasu3, 0, 3, 0x341E}}},   // FireRed TRAINER_YOUNGSTER_YASU
+    {TRAINER_QZ_8292, 1, {{sOrig_FrYoungsterDave, 0, 2, 0xFFFF}}},   // FireRed TRAINER_YOUNGSTER_DAVE
+    {TRAINER_QZ_8297, 5, {{sOrig_FrBugCatcherColton2, 0, 3, 0x3403}, {NULL, 0, 0, 0}, {sOrig_FrBugCatcherColton3, 0, 3, 0x3404}, {NULL, 0, 0, 0}, {sOrig_FrBugCatcherColton4, 0, 3, 0x3405}}},   // FireRed TRAINER_BUG_CATCHER_COLTON
+    {TRAINER_QZ_8298, 1, {{sOrig_FrBugCatcherGreg, 0, 4, 0xFFFF}}},   // FireRed TRAINER_BUG_CATCHER_GREG
+    {TRAINER_QZ_8299, 1, {{sOrig_FrBugCatcherJames, 0, 2, 0xFFFF}}},   // FireRed TRAINER_BUG_CATCHER_JAMES
+    {TRAINER_QZ_8302, 1, {{sOrig_FrBugCatcherCale, 0, 4, 0xFFFF}}},   // FireRed TRAINER_BUG_CATCHER_CALE
+    {TRAINER_QZ_8303, 1, {{sOrig_FrBugCatcherKeigo, 0, 3, 0xFFFF}}},   // FireRed TRAINER_BUG_CATCHER_KEIGO
+    {TRAINER_QZ_8304, 1, {{sOrig_FrBugCatcherElijah, 0, 1, 0xFFFF}}},   // FireRed TRAINER_BUG_CATCHER_ELIJAH
+    {TRAINER_QZ_8306, 1, {{sOrig_FrBugCatcherBrent, 0, 2, 0xFFFF}}},   // FireRed TRAINER_BUG_CATCHER_BRENT
+    {TRAINER_QZ_8307, 1, {{sOrig_FrBugCatcherConner, 0, 3, 0xFFFF}}},   // FireRed TRAINER_BUG_CATCHER_CONNER
+    {TRAINER_QZ_8308, 3, {{sOrig_FrLassJanice2, 0, 2, 0x3406}, {NULL, 0, 0, 0}, {sOrig_FrLassJanice3, 0, 2, 0x3407}}},   // FireRed TRAINER_LASS_JANICE
+    {TRAINER_QZ_8309, 1, {{sOrig_FrLassSally, 0, 2, 0xFFFF}}},   // FireRed TRAINER_LASS_SALLY
+    {TRAINER_QZ_8310, 1, {{sOrig_FrLassRobin, 0, 1, 0xFFFF}}},   // FireRed TRAINER_LASS_ROBIN
+    {TRAINER_QZ_8311, 1, {{sOrig_FrLassCrissy, 0, 3, 0xFFFF}}},   // FireRed TRAINER_LASS_CRISSY
+    {TRAINER_QZ_8314, 3, {{sOrig_FrLassReli2, 0, 2, 0x340B}, {NULL, 0, 0, 0}, {sOrig_FrLassReli3, 0, 2, 0x340C}}},   // FireRed TRAINER_LASS_RELI
+    {TRAINER_QZ_8315, 1, {{sOrig_FrLassAli, 0, 3, 0xFFFF}}},   // FireRed TRAINER_LASS_ALI
+    {TRAINER_QZ_8317, 1, {{sOrig_FrLassHaley, 0, 3, 0xFFFF}}},   // FireRed TRAINER_LASS_HALEY
+    {TRAINER_QZ_8320, 1, {{sOrig_FrLassPaige, 0, 2, 0xFFFF}}},   // FireRed TRAINER_LASS_PAIGE
+    {TRAINER_QZ_8321, 1, {{sOrig_FrLassAndrea, 0, 3, 0xFFFF}}},   // FireRed TRAINER_LASS_ANDREA
+    {TRAINER_QZ_8322, 4, {{NULL, 0, 0, 0}, {sOrig_FrLassMegan2, 0, 5, 0x342D}, {NULL, 0, 0, 0}, {sOrig_FrLassMegan3, 0, 5, 0x342E}}},   // FireRed TRAINER_LASS_MEGAN
+    {TRAINER_QZ_8323, 1, {{sOrig_FrLassJulia, 0, 2, 0xFFFF}}},   // FireRed TRAINER_LASS_JULIA
+    {TRAINER_QZ_8335, 1, {{sOrig_FrCamperShane, 0, 2, 0xFFFF}}},   // FireRed TRAINER_CAMPER_SHANE
+    {TRAINER_QZ_8336, 1, {{sOrig_FrCamperEthan, 0, 1, 0xFFFF}}},   // FireRed TRAINER_CAMPER_ETHAN
+    {TRAINER_QZ_8337, 5, {{sOrig_FrCamperRicky2, 0, 1, 0x3414}, {NULL, 0, 0, 0}, {sOrig_FrCamperRicky3, 0, 1, 0x3415}, {NULL, 0, 0, 0}, {sOrig_FrCamperRicky4, 0, 1, 0x3416}}},   // FireRed TRAINER_CAMPER_RICKY
+    {TRAINER_QZ_8338, 5, {{sOrig_FrCamperJeff2, 0, 2, 0x3417}, {NULL, 0, 0, 0}, {sOrig_FrCamperJeff3, 0, 2, 0x3418}, {NULL, 0, 0, 0}, {sOrig_FrCamperJeff4, 0, 2, 0x3419}}},   // FireRed TRAINER_CAMPER_JEFF
+    {TRAINER_QZ_8340, 5, {{NULL, 0, 0, 0}, {sOrig_FrCamperChris2, 0, 2, 0x3421}, {sOrig_FrCamperChris3, 0, 2, 0x3422}, {NULL, 0, 0, 0}, {sOrig_FrCamperChris4, 0, 2, 0x3423}}},   // FireRed TRAINER_CAMPER_CHRIS
+    {TRAINER_QZ_8341, 1, {{sOrig_FrCamperDrew, 0, 4, 0xFFFF}}},   // FireRed TRAINER_CAMPER_DREW
+    {TRAINER_QZ_8343, 1, {{sOrig_FrPicnickerNancy, 0, 2, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_NANCY
+    {TRAINER_QZ_8344, 4, {{sOrig_FrPicnickerIsabelle2, 0, 3, 0x341A}, {NULL, 0, 0, 0}, {sOrig_FrPicnickerIsabelle3, 0, 3, 0x341B}, {sOrig_FrPicnickerIsabelle4, 0, 3, 0x341C}}},   // FireRed TRAINER_PICNICKER_ISABELLE
+    {TRAINER_QZ_8345, 4, {{sOrig_FrPicnickerKelsey2, 0, 2, 0x3410}, {NULL, 0, 0, 0}, {sOrig_FrPicnickerKelsey3, 0, 2, 0x3411}, {sOrig_FrPicnickerKelsey4, 0, 2, 0x3412}}},   // FireRed TRAINER_PICNICKER_KELSEY
+    {TRAINER_QZ_8346, 5, {{NULL, 0, 0, 0}, {sOrig_FrPicnickerAlicia2, 0, 1, 0x3424}, {sOrig_FrPicnickerAlicia3, 0, 1, 0x3425}, {NULL, 0, 0, 0}, {sOrig_FrPicnickerAlicia4, 0, 1, 0x3426}}},   // FireRed TRAINER_PICNICKER_ALICIA
+    {TRAINER_QZ_8347, 1, {{sOrig_FrPicnickerCaitlin, 0, 1, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_CAITLIN
+    {TRAINER_QZ_8348, 1, {{sOrig_FrPicnickerHeidi, 0, 2, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_HEIDI
+    {TRAINER_QZ_8349, 1, {{sOrig_FrPicnickerCarol, 0, 2, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_CAROL
+    {TRAINER_QZ_8354, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPokemaniacMark2, 0, 2, 0x3428}, {NULL, 0, 0, 0}, {sOrig_FrPokemaniacMark3, 0, 2, 0x3429}}},   // FireRed TRAINER_POKEMANIAC_MARK
+    {TRAINER_QZ_8355, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPokemaniacHerman2, 0, 2, 0x342A}, {NULL, 0, 0, 0}, {sOrig_FrPokemaniacHerman3, 0, 2, 0x342B}}},   // FireRed TRAINER_POKEMANIAC_HERMAN
+    {TRAINER_QZ_8363, 1, {{sOrig_FrSuperNerdAidan, F_TRAINER_PARTY_CUSTOM_MOVESET, 4, 0xFFFF}}},   // FireRed TRAINER_SUPER_NERD_AIDAN
+    {TRAINER_QZ_8364, 3, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrSuperNerdGlenn2, 0, 3, 0x342F}}},   // FireRed TRAINER_SUPER_NERD_GLENN
+    {TRAINER_QZ_8365, 1, {{sOrig_FrSuperNerdLeslie, F_TRAINER_PARTY_CUSTOM_MOVESET, 1, 0xFFFF}}},   // FireRed TRAINER_SUPER_NERD_LESLIE
+    {TRAINER_QZ_8374, 2, {{NULL, 0, 0, 0}, {sOrig_FrHikerFranklin2, 0, 2, 0x3413}}},   // FireRed TRAINER_HIKER_FRANKLIN
+    {TRAINER_QZ_8375, 1, {{sOrig_FrHikerNob, 0, 4, 0xFFFF}}},   // FireRed TRAINER_HIKER_NOB
+    {TRAINER_QZ_8376, 1, {{sOrig_FrHikerWayne, 0, 1, 0xFFFF}}},   // FireRed TRAINER_HIKER_WAYNE
+    {TRAINER_QZ_8377, 1, {{sOrig_FrHikerAlan, F_TRAINER_PARTY_CUSTOM_MOVESET, 2, 0xFFFF}}},   // FireRed TRAINER_HIKER_ALAN
+    {TRAINER_QZ_8378, 1, {{sOrig_FrHikerBrice, 0, 3, 0xFFFF}}},   // FireRed TRAINER_HIKER_BRICE
+    {TRAINER_QZ_8379, 1, {{sOrig_FrHikerClark, F_TRAINER_PARTY_CUSTOM_MOVESET, 2, 0xFFFF}}},   // FireRed TRAINER_HIKER_CLARK
+    {TRAINER_QZ_8380, 3, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrHikerTrent2, 0, 2, 0x342C}}},   // FireRed TRAINER_HIKER_TRENT
+    {TRAINER_QZ_8387, 1, {{sOrig_FrBikerJared, F_TRAINER_PARTY_CUSTOM_MOVESET, 3, 0xFFFF}}},   // FireRed TRAINER_BIKER_JARED
+    {TRAINER_QZ_8388, 1, {{sOrig_FrBikerMalik, F_TRAINER_PARTY_CUSTOM_MOVESET, 2, 0xFFFF}}},   // FireRed TRAINER_BIKER_MALIK
+    {TRAINER_QZ_8389, 1, {{sOrig_FrBikerErnest, F_TRAINER_PARTY_CUSTOM_MOVESET, 5, 0xFFFF}}},   // FireRed TRAINER_BIKER_ERNEST
+    {TRAINER_QZ_8390, 1, {{sOrig_FrBikerAlex, F_TRAINER_PARTY_CUSTOM_MOVESET, 3, 0xFFFF}}},   // FireRed TRAINER_BIKER_ALEX
+    {TRAINER_QZ_8391, 1, {{sOrig_FrBikerLao, F_TRAINER_PARTY_CUSTOM_MOVESET, 2, 0xFFFF}}},   // FireRed TRAINER_BIKER_LAO
+    {TRAINER_QZ_8393, 1, {{sOrig_FrBikerHideo, 0, 1, 0xFFFF}}},   // FireRed TRAINER_BIKER_HIDEO
+    {TRAINER_QZ_8394, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBikerRuben2, 0, 3, 0x344B}}},   // FireRed TRAINER_BIKER_RUBEN
+    {TRAINER_QZ_8395, 1, {{sOrig_FrBikerBilly, 0, 1, 0xFFFF}}},   // FireRed TRAINER_BIKER_BILLY
+    {TRAINER_QZ_8396, 1, {{sOrig_FrBikerNikolas, F_TRAINER_PARTY_CUSTOM_MOVESET, 2, 0xFFFF}}},   // FireRed TRAINER_BIKER_NIKOLAS
+    {TRAINER_QZ_8397, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBikerJaxon2, 0, 2, 0x344D}}},   // FireRed TRAINER_BIKER_JAXON
+    {TRAINER_QZ_8398, 1, {{sOrig_FrBikerWilliam, F_TRAINER_PARTY_CUSTOM_MOVESET, 5, 0xFFFF}}},   // FireRed TRAINER_BIKER_WILLIAM
+    {TRAINER_QZ_8399, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBikerLukas2, 0, 4, 0x343D}}},   // FireRed TRAINER_BIKER_LUKAS
+    {TRAINER_QZ_8400, 1, {{sOrig_FrBikerIsaac, F_TRAINER_PARTY_CUSTOM_MOVESET, 3, 0xFFFF}}},   // FireRed TRAINER_BIKER_ISAAC
+    {TRAINER_QZ_8401, 1, {{sOrig_FrBikerGerald, F_TRAINER_PARTY_CUSTOM_MOVESET, 2, 0xFFFF}}},   // FireRed TRAINER_BIKER_GERALD
+    {TRAINER_QZ_8413, 1, {{sOrig_FrEngineerBraxton, 0, 1, 0xFFFF}}},   // FireRed TRAINER_ENGINEER_BRAXTON
+    {TRAINER_QZ_8414, 3, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrEngineerBernie2, 0, 3, 0x341F}}},   // FireRed TRAINER_ENGINEER_BERNIE
+    {TRAINER_QZ_8417, 1, {{sOrig_FrFishermanNed, 0, 3, 0xFFFF}}},   // FireRed TRAINER_FISHERMAN_NED
+    {TRAINER_QZ_8418, 1, {{sOrig_FrFishermanChip, 0, 2, 0xFFFF}}},   // FireRed TRAINER_FISHERMAN_CHIP
+    {TRAINER_QZ_8419, 1, {{sOrig_FrFishermanHank, 0, 1, 0xFFFF}}},   // FireRed TRAINER_FISHERMAN_HANK
+    {TRAINER_QZ_8420, 3, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrFishermanElliot2, 0, 4, 0x3433}}},   // FireRed TRAINER_FISHERMAN_ELLIOT
+    {TRAINER_QZ_8421, 1, {{sOrig_FrFishermanRonald, 0, 4, 0xFFFF}}},   // FireRed TRAINER_FISHERMAN_RONALD
+    {TRAINER_QZ_8422, 1, {{sOrig_FrFishermanClaude, 0, 2, 0xFFFF}}},   // FireRed TRAINER_FISHERMAN_CLAUDE
+    {TRAINER_QZ_8423, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrFishermanWade2, 0, 6, 0x3459}}},   // FireRed TRAINER_FISHERMAN_WADE
+    {TRAINER_QZ_8424, 1, {{sOrig_FrFishermanNolan, 0, 2, 0xFFFF}}},   // FireRed TRAINER_FISHERMAN_NOLAN
+    {TRAINER_QZ_8425, 1, {{sOrig_FrFishermanAndrew, 0, 2, 0xFFFF}}},   // FireRed TRAINER_FISHERMAN_ANDREW
+    {TRAINER_QZ_8427, 1, {{sOrig_FrSwimmerMaleRichard, 0, 2, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_RICHARD
+    {TRAINER_QZ_8428, 1, {{sOrig_FrSwimmerMaleReece, 0, 3, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_REECE
+    {TRAINER_QZ_8429, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrSwimmerMaleMatthew2, 0, 2, 0x3452}}},   // FireRed TRAINER_SWIMMER_MALE_MATTHEW
+    {TRAINER_QZ_8430, 1, {{sOrig_FrSwimmerMaleDouglas, 0, 4, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_DOUGLAS
+    {TRAINER_QZ_8431, 1, {{sOrig_FrSwimmerMaleDavid, 0, 3, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_DAVID
+    {TRAINER_QZ_8432, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrSwimmerMaleTony2, 0, 2, 0x3453}}},   // FireRed TRAINER_SWIMMER_MALE_TONY
+    {TRAINER_QZ_8433, 1, {{sOrig_FrSwimmerMaleAxle, 0, 5, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_AXLE
+    {TRAINER_QZ_8434, 1, {{sOrig_FrSwimmerMaleBarry, 0, 2, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_BARRY
+    {TRAINER_QZ_8435, 1, {{sOrig_FrSwimmerMaleDean, 0, 1, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_DEAN
+    {TRAINER_QZ_8436, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrSwimmerMaleDarrin2, 0, 4, 0x3455}}},   // FireRed TRAINER_SWIMMER_MALE_DARRIN
+    {TRAINER_QZ_8437, 1, {{sOrig_FrSwimmerMaleSpencer, 0, 2, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_SPENCER
+    {TRAINER_QZ_8438, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrSwimmerMaleJack2, 0, 1, 0x345A}}},   // FireRed TRAINER_SWIMMER_MALE_JACK
+    {TRAINER_QZ_8439, 1, {{sOrig_FrSwimmerMaleJerome, 0, 2, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_JEROME
+    {TRAINER_QZ_8440, 1, {{sOrig_FrSwimmerMaleRoland, 0, 3, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_ROLAND
+    {TRAINER_QZ_8441, 1, {{sOrig_FrCueBallKoji, 0, 3, 0xFFFF}}},   // FireRed TRAINER_CUE_BALL_KOJI
+    {TRAINER_QZ_8442, 1, {{sOrig_FrCueBallLuke, 0, 2, 0xFFFF}}},   // FireRed TRAINER_CUE_BALL_LUKE
+    {TRAINER_QZ_8443, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrCueBallCamron2, 0, 2, 0x344C}}},   // FireRed TRAINER_CUE_BALL_CAMRON
+    {TRAINER_QZ_8444, 1, {{sOrig_FrCueBallRaul, 0, 2, 0xFFFF}}},   // FireRed TRAINER_CUE_BALL_RAUL
+    {TRAINER_QZ_8445, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrCueBallIsaiah2, 0, 2, 0x344E}}},   // FireRed TRAINER_CUE_BALL_ISAIAH
+    {TRAINER_QZ_8446, 1, {{sOrig_FrCueBallZeek, 0, 1, 0xFFFF}}},   // FireRed TRAINER_CUE_BALL_ZEEK
+    {TRAINER_QZ_8447, 1, {{sOrig_FrCueBallJamal, 0, 4, 0xFFFF}}},   // FireRed TRAINER_CUE_BALL_JAMAL
+    {TRAINER_QZ_8448, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrCueBallCorey2, 0, 2, 0x344F}}},   // FireRed TRAINER_CUE_BALL_COREY
+    {TRAINER_QZ_8450, 1, {{sOrig_FrGamerHugo, 0, 2, 0xFFFF}}},   // FireRed TRAINER_GAMER_HUGO
+    {TRAINER_QZ_8451, 1, {{sOrig_FrGamerJasper, 0, 2, 0xFFFF}}},   // FireRed TRAINER_GAMER_JASPER
+    {TRAINER_QZ_8452, 1, {{sOrig_FrGamerDirk, 0, 2, 0xFFFF}}},   // FireRed TRAINER_GAMER_DIRK
+    {TRAINER_QZ_8453, 3, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrGamerDarian2, 0, 2, 0x3420}}},   // FireRed TRAINER_GAMER_DARIAN
+    {TRAINER_QZ_8454, 1, {{sOrig_FrGamerStan, 0, 3, 0xFFFF}}},   // FireRed TRAINER_GAMER_STAN
+    {TRAINER_QZ_8456, 3, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrGamerRich2, 0, 2, 0x3430}}},   // FireRed TRAINER_GAMER_RICH
+    {TRAINER_QZ_8460, 1, {{sOrig_FrBeautyLola, 0, 3, 0xFFFF}}},   // FireRed TRAINER_BEAUTY_LOLA
+    {TRAINER_QZ_8461, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBeautySheila2, 0, 2, 0x3437}}},   // FireRed TRAINER_BEAUTY_SHEILA
+    {TRAINER_QZ_8462, 1, {{sOrig_FrSwimmerFemaleTiffany, 0, 1, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_FEMALE_TIFFANY
+    {TRAINER_QZ_8463, 1, {{sOrig_FrSwimmerFemaleNora, 0, 3, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_FEMALE_NORA
+    {TRAINER_QZ_8464, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrSwimmerFemaleMelissa2, 0, 2, 0x3456}}},   // FireRed TRAINER_SWIMMER_FEMALE_MELISSA
+    {TRAINER_QZ_8465, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBeautyGrace2, 0, 2, 0x3442}}},   // FireRed TRAINER_BEAUTY_GRACE
+    {TRAINER_QZ_8466, 1, {{sOrig_FrBeautyOlivia, 0, 2, 0xFFFF}}},   // FireRed TRAINER_BEAUTY_OLIVIA
+    {TRAINER_QZ_8468, 1, {{sOrig_FrSwimmerFemaleAnya, 0, 5, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_FEMALE_ANYA
+    {TRAINER_QZ_8469, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrSwimmerFemaleAlice2, 0, 2, 0x3454}}},   // FireRed TRAINER_SWIMMER_FEMALE_ALICE
+    {TRAINER_QZ_8470, 1, {{sOrig_FrSwimmerFemaleConnie, 0, 3, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_FEMALE_CONNIE
+    {TRAINER_QZ_8471, 1, {{sOrig_FrSwimmerFemaleShirley, 0, 3, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_FEMALE_SHIRLEY
+    {TRAINER_QZ_8477, 3, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrRockerLuca2, 0, 2, 0x3434}}},   // FireRed TRAINER_ROCKER_LUCA
+    {TRAINER_QZ_8483, 1, {{sOrig_FrJugglerEdward, F_TRAINER_PARTY_CUSTOM_MOVESET, 4, 0xFFFF}}},   // FireRed TRAINER_JUGGLER_EDWARD
+    {TRAINER_QZ_8492, 1, {{sOrig_FrBirdKeeperSebastian, 0, 2, 0xFFFF}}},   // FireRed TRAINER_BIRD_KEEPER_SEBASTIAN
+    {TRAINER_QZ_8493, 1, {{sOrig_FrBirdKeeperPerry, 0, 5, 0xFFFF}}},   // FireRed TRAINER_BIRD_KEEPER_PERRY
+    {TRAINER_QZ_8494, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBirdKeeperRobert2, 0, 4, 0x3438}, {sOrig_FrBirdKeeperRobert3, 0, 4, 0x3439}}},   // FireRed TRAINER_BIRD_KEEPER_ROBERT
+    {TRAINER_QZ_8495, 1, {{sOrig_FrBirdKeeperDonald, 0, 1, 0xFFFF}}},   // FireRed TRAINER_BIRD_KEEPER_DONALD
+    {TRAINER_QZ_8496, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBirdKeeperBenny2, 0, 2, 0x343E}, {sOrig_FrBirdKeeperBenny3, 0, 2, 0x343F}}},   // FireRed TRAINER_BIRD_KEEPER_BENNY
+    {TRAINER_QZ_8497, 1, {{sOrig_FrBirdKeeperEdwin, 0, 4, 0xFFFF}}},   // FireRed TRAINER_BIRD_KEEPER_EDWIN
+    {TRAINER_QZ_8498, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBirdKeeperChester2, 0, 3, 0x3443}, {sOrig_FrBirdKeeperChester3, 0, 3, 0x3444}}},   // FireRed TRAINER_BIRD_KEEPER_CHESTER
+    {TRAINER_QZ_8499, 1, {{sOrig_FrBirdKeeperWilton, 0, 2, 0xFFFF}}},   // FireRed TRAINER_BIRD_KEEPER_WILTON
+    {TRAINER_QZ_8500, 1, {{sOrig_FrBirdKeeperRamiro, 0, 1, 0xFFFF}}},   // FireRed TRAINER_BIRD_KEEPER_RAMIRO
+    {TRAINER_QZ_8501, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBirdKeeperJacob2, 0, 4, 0x3450}, {sOrig_FrBirdKeeperJacob3, 0, 4, 0x3451}}},   // FireRed TRAINER_BIRD_KEEPER_JACOB
+    {TRAINER_QZ_8502, 1, {{sOrig_FrBirdKeeperRoger, 0, 3, 0xFFFF}}},   // FireRed TRAINER_BIRD_KEEPER_ROGER
+    {TRAINER_QZ_8505, 1, {{sOrig_FrBirdKeeperCarter, 0, 3, 0xFFFF}}},   // FireRed TRAINER_BIRD_KEEPER_CARTER
+    {TRAINER_QZ_8506, 1, {{sOrig_FrBirdKeeperMitch, 0, 4, 0xFFFF}}},   // FireRed TRAINER_BIRD_KEEPER_MITCH
+    {TRAINER_QZ_8507, 1, {{sOrig_FrBirdKeeperBeck, 0, 2, 0xFFFF}}},   // FireRed TRAINER_BIRD_KEEPER_BECK
+    {TRAINER_QZ_8508, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBirdKeeperMarlon2, 0, 3, 0x3440}, {sOrig_FrBirdKeeperMarlon3, 0, 3, 0x3441}}},   // FireRed TRAINER_BIRD_KEEPER_MARLON
+    {TRAINER_QZ_8657, 3, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrHikerJeremy2, 0, 2, 0x3427}}},   // FireRed TRAINER_HIKER_JEREMY
+    {TRAINER_QZ_8658, 1, {{sOrig_FrPicnickerAlma, 0, 3, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_ALMA
+    {TRAINER_QZ_8659, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPicnickerSusie2, 0, 5, 0x343A}, {sOrig_FrPicnickerSusie3, 0, 5, 0x343B}, {sOrig_FrPicnickerSusie4, 0, 5, 0x343C}}},   // FireRed TRAINER_PICNICKER_SUSIE
+    {TRAINER_QZ_8660, 1, {{sOrig_FrPicnickerValerie, 0, 2, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_VALERIE
+    {TRAINER_QZ_8661, 1, {{sOrig_FrPicnickerGwen, 0, 4, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_GWEN
+    {TRAINER_QZ_8662, 1, {{sOrig_FrBikerVirgil, F_TRAINER_PARTY_CUSTOM_MOVESET, 3, 0xFFFF}}},   // FireRed TRAINER_BIKER_VIRGIL
+    {TRAINER_QZ_8663, 1, {{sOrig_FrCamperFlint, 0, 2, 0xFFFF}}},   // FireRed TRAINER_CAMPER_FLINT
+    {TRAINER_QZ_8664, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPicnickerMissy2, 0, 2, 0x3457}, {sOrig_FrPicnickerMissy3, 0, 2, 0x3458}}},   // FireRed TRAINER_PICNICKER_MISSY
+    {TRAINER_QZ_8665, 1, {{sOrig_FrPicnickerIrene, 0, 3, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_IRENE
+    {TRAINER_QZ_8669, 1, {{sOrig_FrCamperJustin, 0, 2, 0xFFFF}}},   // FireRed TRAINER_CAMPER_JUSTIN
+    {TRAINER_QZ_8670, 1, {{sOrig_FrPicnickerYazmin, 0, 3, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_YAZMIN
+    {TRAINER_QZ_8671, 1, {{sOrig_FrPicnickerKindra, 0, 3, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_KINDRA
+    {TRAINER_QZ_8672, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPicnickerBecky2, 0, 2, 0x3445}, {sOrig_FrPicnickerBecky3, 0, 2, 0x3446}, {sOrig_FrPicnickerBecky4, 0, 2, 0x3447}}},   // FireRed TRAINER_PICNICKER_BECKY
+    {TRAINER_QZ_8673, 1, {{sOrig_FrPicnickerCelia, 0, 1, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_CELIA
+    {TRAINER_QZ_8676, 3, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrTwinsEliAnne2, 0, 2, 0x3431}}},   // FireRed TRAINER_TWINS_ELI_ANNE
+    {TRAINER_QZ_8678, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrYoungCoupleGiaJes2, 0, 2, 0x3435}, {NULL, 0, 0, 0}, {sOrig_FrYoungCoupleGiaJes3, 0, 2, 0x3436}}},   // FireRed TRAINER_YOUNG_COUPLE_GIA_JES
+    {TRAINER_QZ_8679, 1, {{sOrig_FrTwinsKiriJan, 0, 2, 0xFFFF}}},   // FireRed TRAINER_TWINS_KIRI_JAN
+    {TRAINER_QZ_8680, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrCrushKinRonMya2, F_TRAINER_PARTY_HELD_ITEM, 2, 0x3448}, {sOrig_FrCrushKinRonMya3, F_TRAINER_PARTY_HELD_ITEM, 2, 0x3449}, {sOrig_FrCrushKinRonMya4, F_TRAINER_PARTY_HELD_ITEM, 2, 0x344A}}},   // FireRed TRAINER_CRUSH_KIN_RON_MYA
+    {TRAINER_QZ_8681, 1, {{sOrig_FrYoungCoupleLeaJed, 0, 2, 0xFFFF}}},   // FireRed TRAINER_YOUNG_COUPLE_LEA_JED
+    {TRAINER_QZ_8682, 1, {{sOrig_FrSisAndBroLiaLuc, 0, 2, 0xFFFF}}},   // FireRed TRAINER_SIS_AND_BRO_LIA_LUC
+    {TRAINER_QZ_8683, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrSisAndBroLilIan2, 0, 2, 0x345B}, {sOrig_FrSisAndBroLilIan3, 0, 2, 0x345C}}},   // FireRed TRAINER_SIS_AND_BRO_LIL_IAN
+    {TRAINER_QZ_8709, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPsychicJaclyn2, F_TRAINER_PARTY_CUSTOM_MOVESET, 3, 0x3471}}},   // FireRed TRAINER_PSYCHIC_JACLYN
+    {TRAINER_QZ_8710, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrCrushGirlSharon2, F_TRAINER_PARTY_HELD_ITEM, 2, 0x345E}, {sOrig_FrCrushGirlSharon3, F_TRAINER_PARTY_HELD_ITEM, 2, 0x345F}}},   // FireRed TRAINER_CRUSH_GIRL_SHARON
+    {TRAINER_QZ_8711, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrTuberAmira2, 0, 3, 0x3468}}},   // FireRed TRAINER_TUBER_AMIRA
+    {TRAINER_QZ_8712, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPkmnBreederAlize2, 0, 3, 0x346C}}},   // FireRed TRAINER_PKMN_BREEDER_ALIZE
+    {TRAINER_QZ_8713, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPkmnRangerNicolas2, F_TRAINER_PARTY_CUSTOM_MOVESET, 2, 0x3479}}},   // FireRed TRAINER_PKMN_RANGER_NICOLAS
+    {TRAINER_QZ_8714, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPkmnRangerMadeline2, F_TRAINER_PARTY_CUSTOM_MOVESET, 2, 0x347A}}},   // FireRed TRAINER_PKMN_RANGER_MADELINE
+    {TRAINER_QZ_8715, 1, {{sOrig_FrAromaLadyNikki, 0, 2, 0xFFFF}}},   // FireRed TRAINER_AROMA_LADY_NIKKI
+    {TRAINER_QZ_8716, 1, {{sOrig_FrRuinManiacStanly, 0, 3, 0xFFFF}}},   // FireRed TRAINER_RUIN_MANIAC_STANLY
+    {TRAINER_QZ_8717, 1, {{sOrig_FrLadyJacki, F_TRAINER_PARTY_HELD_ITEM, 2, 0xFFFF}}},   // FireRed TRAINER_LADY_JACKI
+    {TRAINER_QZ_8718, 1, {{sOrig_FrPainterDaisy, F_TRAINER_PARTY_CUSTOM_MOVESET, 1, 0xFFFF}}},   // FireRed TRAINER_PAINTER_DAISY
+    {TRAINER_QZ_8727, 1, {{sOrig_FrBikerRicardo, F_TRAINER_PARTY_CUSTOM_MOVESET, 3, 0xFFFF}}},   // FireRed TRAINER_BIKER_RICARDO
+    {TRAINER_QZ_8728, 3, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBikerJaren2, 0, 2, 0x3432}}},   // FireRed TRAINER_BIKER_JAREN
+    {TRAINER_QZ_8738, 1, {{sOrig_FrSwimmerFemaleAmara, 0, 3, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_FEMALE_AMARA
+    {TRAINER_QZ_8739, 1, {{sOrig_FrSwimmerFemaleMaria, 0, 2, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_FEMALE_MARIA
+    {TRAINER_QZ_8740, 1, {{sOrig_FrSwimmerFemaleAbigail, 0, 3, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_FEMALE_ABIGAIL
+    {TRAINER_QZ_8741, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrSwimmerMaleFinn2, 0, 1, 0x345D}}},   // FireRed TRAINER_SWIMMER_MALE_FINN
+    {TRAINER_QZ_8742, 1, {{sOrig_FrSwimmerMaleGarrett, 0, 3, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_GARRETT
+    {TRAINER_QZ_8743, 1, {{sOrig_FrFishermanTommy, 0, 5, 0xFFFF}}},   // FireRed TRAINER_FISHERMAN_TOMMY
+    {TRAINER_QZ_8744, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrCrushGirlTanya2, F_TRAINER_PARTY_HELD_ITEM, 2, 0x3460}, {sOrig_FrCrushGirlTanya3, F_TRAINER_PARTY_HELD_ITEM, 2, 0x3461}}},   // FireRed TRAINER_CRUSH_GIRL_TANYA
+    {TRAINER_QZ_8745, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBlackBeltShea2, F_TRAINER_PARTY_HELD_ITEM, 2, 0x3462}, {sOrig_FrBlackBeltShea3, F_TRAINER_PARTY_HELD_ITEM, 2, 0x3463}}},   // FireRed TRAINER_BLACK_BELT_SHEA
+    {TRAINER_QZ_8746, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBlackBeltHugh2, F_TRAINER_PARTY_HELD_ITEM, 2, 0x3464}, {sOrig_FrBlackBeltHugh3, F_TRAINER_PARTY_HELD_ITEM, 2, 0x3465}}},   // FireRed TRAINER_BLACK_BELT_HUGH
+    {TRAINER_QZ_8747, 1, {{sOrig_FrCamperBryce, 0, 3, 0xFFFF}}},   // FireRed TRAINER_CAMPER_BRYCE
+    {TRAINER_QZ_8748, 1, {{sOrig_FrPicnickerClaire, 0, 4, 0xFFFF}}},   // FireRed TRAINER_PICNICKER_CLAIRE
+    {TRAINER_QZ_8749, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrCrushKinMikKia2, F_TRAINER_PARTY_HELD_ITEM, 2, 0x3466}, {sOrig_FrCrushKinMikKia3, F_TRAINER_PARTY_HELD_ITEM, 2, 0x3467}}},   // FireRed TRAINER_CRUSH_KIN_MIK_KIA
+    {TRAINER_QZ_8750, 1, {{sOrig_FrAromaLadyViolet, 0, 3, 0xFFFF}}},   // FireRed TRAINER_AROMA_LADY_VIOLET
+    {TRAINER_QZ_8751, 1, {{sOrig_FrTuberAlexis, 0, 4, 0xFFFF}}},   // FireRed TRAINER_TUBER_ALEXIS
+    {TRAINER_QZ_8752, 4, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrTwinsJoyMeg2, 0, 2, 0x3469}}},   // FireRed TRAINER_TWINS_JOY_MEG
+    {TRAINER_QZ_8753, 1, {{sOrig_FrSwimmerFemaleTisha, 0, 1, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_FEMALE_TISHA
+    {TRAINER_QZ_8754, 1, {{sOrig_FrPainterCelina, F_TRAINER_PARTY_CUSTOM_MOVESET, 1, 0xFFFF}}},   // FireRed TRAINER_PAINTER_CELINA
+    {TRAINER_QZ_8755, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPainterRayna2, F_TRAINER_PARTY_CUSTOM_MOVESET, 1, 0x346A}}},   // FireRed TRAINER_PAINTER_RAYNA
+    {TRAINER_QZ_8756, 1, {{sOrig_FrLadyGillian, F_TRAINER_PARTY_HELD_ITEM, 3, 0xFFFF}}},   // FireRed TRAINER_LADY_GILLIAN
+    {TRAINER_QZ_8757, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrYoungsterDestin2, 0, 2, 0x346B}}},   // FireRed TRAINER_YOUNGSTER_DESTIN
+    {TRAINER_QZ_8758, 1, {{sOrig_FrSwimmerMaleToby, 0, 3, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_TOBY
+    {TRAINER_QZ_8762, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBirdKeeperMilo2, 0, 2, 0x346D}}},   // FireRed TRAINER_BIRD_KEEPER_MILO
+    {TRAINER_QZ_8763, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBirdKeeperChaz2, 0, 2, 0x346E}}},   // FireRed TRAINER_BIRD_KEEPER_CHAZ
+    {TRAINER_QZ_8764, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrBirdKeeperHarold2, 0, 2, 0x346F}}},   // FireRed TRAINER_BIRD_KEEPER_HAROLD
+    {TRAINER_QZ_8765, 1, {{sOrig_FrFishermanTylor, 0, 2, 0xFFFF}}},   // FireRed TRAINER_FISHERMAN_TYLOR
+    {TRAINER_QZ_8766, 1, {{sOrig_FrSwimmerMaleMymo, 0, 2, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_MALE_MYMO
+    {TRAINER_QZ_8767, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrSwimmerFemaleNicole2, 0, 1, 0x3470}}},   // FireRed TRAINER_SWIMMER_FEMALE_NICOLE
+    {TRAINER_QZ_8768, 1, {{sOrig_FrSisAndBroAvaGeb, 0, 2, 0xFFFF}}},   // FireRed TRAINER_SIS_AND_BRO_AVA_GEB
+    {TRAINER_QZ_8769, 1, {{sOrig_FrAromaLadyRose, 0, 2, 0xFFFF}}},   // FireRed TRAINER_AROMA_LADY_ROSE
+    {TRAINER_QZ_8770, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrSwimmerMaleSamir2, 0, 1, 0x3472}}},   // FireRed TRAINER_SWIMMER_MALE_SAMIR
+    {TRAINER_QZ_8771, 1, {{sOrig_FrSwimmerFemaleDenise, 0, 2, 0xFFFF}}},   // FireRed TRAINER_SWIMMER_FEMALE_DENISE
+    {TRAINER_QZ_8772, 1, {{sOrig_FrTwinsMiuMia, 0, 2, 0xFFFF}}},   // FireRed TRAINER_TWINS_MIU_MIA
+    {TRAINER_QZ_8773, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrHikerEarl2, 0, 2, 0x3473}}},   // FireRed TRAINER_HIKER_EARL
+    {TRAINER_QZ_8774, 1, {{sOrig_FrRuinManiacFoster, 0, 1, 0xFFFF}}},   // FireRed TRAINER_RUIN_MANIAC_FOSTER
+    {TRAINER_QZ_8775, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrRuinManiacLarry2, 0, 2, 0x3474}}},   // FireRed TRAINER_RUIN_MANIAC_LARRY
+    {TRAINER_QZ_8776, 1, {{sOrig_FrHikerDaryl, 0, 1, 0xFFFF}}},   // FireRed TRAINER_HIKER_DARYL
+    {TRAINER_QZ_8777, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPokemaniacHector2, 0, 2, 0x3475}}},   // FireRed TRAINER_POKEMANIAC_HECTOR
+    {TRAINER_QZ_8778, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPsychicDario2, F_TRAINER_PARTY_CUSTOM_MOVESET, 1, 0x3476}}},   // FireRed TRAINER_PSYCHIC_DARIO
+    {TRAINER_QZ_8779, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPsychicRodette2, F_TRAINER_PARTY_CUSTOM_MOVESET, 3, 0x3477}}},   // FireRed TRAINER_PSYCHIC_RODETTE
+    {TRAINER_QZ_8780, 1, {{sOrig_FrAromaLadyMiah, 0, 2, 0xFFFF}}},   // FireRed TRAINER_AROMA_LADY_MIAH
+    {TRAINER_QZ_8781, 1, {{sOrig_FrYoungCoupleEveJon, 0, 2, 0xFFFF}}},   // FireRed TRAINER_YOUNG_COUPLE_EVE_JON
+    {TRAINER_QZ_8782, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrJugglerMason2, 0, 4, 0x3478}}},   // FireRed TRAINER_JUGGLER_MASON
+    {TRAINER_QZ_8783, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrCrushGirlCyndy2, F_TRAINER_PARTY_HELD_ITEM, 3, 0x347B}}},   // FireRed TRAINER_CRUSH_GIRL_CYNDY
+    {TRAINER_QZ_8785, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrTamerEvan2, 0, 3, 0x347C}}},   // FireRed TRAINER_TAMER_EVAN
+    {TRAINER_QZ_8788, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPkmnRangerJackson2, F_TRAINER_PARTY_CUSTOM_MOVESET, 3, 0x347D}}},   // FireRed TRAINER_PKMN_RANGER_JACKSON
+    {TRAINER_QZ_8790, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrPkmnRangerKatelyn2, F_TRAINER_PARTY_CUSTOM_MOVESET, 1, 0x347E}}},   // FireRed TRAINER_PKMN_RANGER_KATELYN
+    {TRAINER_QZ_8791, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrCooltrainerLeroy2, F_TRAINER_PARTY_CUSTOM_MOVESET, 5, 0x347F}}},   // FireRed TRAINER_COOLTRAINER_LEROY
+    {TRAINER_QZ_8792, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrCooltrainerMichelle2, F_TRAINER_PARTY_CUSTOM_MOVESET, 5, 0x3480}}},   // FireRed TRAINER_COOLTRAINER_MICHELLE
+    {TRAINER_QZ_8793, 5, {{NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {NULL, 0, 0, 0}, {sOrig_FrCoolCoupleLexNya2, F_TRAINER_PARTY_CUSTOM_MOVESET, 2, 0x3481}}},   // FireRed TRAINER_COOL_COUPLE_LEX_NYA
+    {TRAINER_QZ_8794, 1, {{sOrig_FrRuinManiacBrandon, 0, 1, 0xFFFF}}},   // FireRed TRAINER_RUIN_MANIAC_BRANDON
+    {TRAINER_QZ_8795, 1, {{sOrig_FrRuinManiacBenjamin, F_TRAINER_PARTY_CUSTOM_MOVESET, 3, 0xFFFF}}},   // FireRed TRAINER_RUIN_MANIAC_BENJAMIN
+    {TRAINER_QZ_8796, 1, {{sOrig_FrPainterEdna, F_TRAINER_PARTY_CUSTOM_MOVESET, 1, 0xFFFF}}},   // FireRed TRAINER_PAINTER_EDNA
+    {TRAINER_QZ_8797, 1, {{sOrig_FrGentlemanClifford, 0, 2, 0xFFFF}}},   // FireRed TRAINER_GENTLEMAN_CLIFFORD
 };

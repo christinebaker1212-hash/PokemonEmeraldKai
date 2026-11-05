@@ -47,6 +47,22 @@ def read(path):
     return open(path, encoding='utf-8').read()
 
 
+def trainer_numbers():
+    """TRAINER_QZ_* -> the game's trainer number (the tables are sorted by it: mp_region.c searches them)"""
+    src = read(os.path.join(REPO, 'include/constants/qz_port.h')) + read(os.path.join(REPO, 'include/constants/trainers.h'))
+    return {m.group(1): int(m.group(2)) for m in re.finditer(r'#define (TRAINER_QZ_\d+)\s+(\d+)', src)}
+
+
+NUM = None
+
+
+def num_of(qz):
+    global NUM
+    if NUM is None:
+        NUM = trainer_numbers()
+    return NUM[qz]
+
+
 def consts(path, prefix):
     return set(re.findall(r'#define (%s\w+)' % prefix, read(os.path.join(REPO, path))))
 
@@ -309,6 +325,60 @@ def johto_pairs(pc, names, party):
     return pairs
 
 
+TIER_FLAGS_START = 0x3400   # (free region flags between JOHTO's / KANTO's trainers and SINNOH's: include/constants/flags.h)
+
+
+def fr_rematches(kp, fr, fr_parties, done_fr, out):
+    """FireRed's VS SEEKER rematch table (src/vs_seeker.c sRematches) for the paired KANTO trainers: each tier's party,
+    and a flag of its own for "beaten" (FireRed's tier trainers each have one; a tier that is the first team again
+    reads the trainer's own flag)"""
+    src = fetch('src/vs_seeker.c').replace('\r', '')
+    by_fr = {ft: qz for qz, (mp, ft) in kp.items()}
+    rows, flag = [], TIER_FLAGS_START
+    tier_flag = {}
+    for m in re.finditer(r'\{ \{([^}]*)\}', src[src.index('sRematches[]'):src.index('sMovementScript_Wait48')]):
+        ids = [x.strip() for x in m.group(1).split(',') if x.strip()]
+        base = ids[0]
+        if base not in by_fr:
+            continue
+        tiers = []
+        for t in ids[1:]:
+            if t == 'SKIP':
+                tiers.append(None)
+                continue
+            if t not in fr:
+                raise SystemExit('rematch tier %s has no party' % t)
+            pname = fr[t]['party']
+            if pname not in done_fr:
+                struct, body = fr_parties[pname]
+                body, n = fr_party_c(struct, body)
+                cname = 'sOrig_Fr' + pname[len('sParty_'):]
+                out.append('static const struct %s %s[] = {%s\n};' % (struct, cname, body))
+                done_fr[pname] = (struct, cname, n)
+            struct, cname, n = done_fr[pname]
+            if t == base:
+                fl = '0xFFFF'
+            else:
+                if t not in tier_flag:
+                    tier_flag[t] = flag
+                    flag += 1
+                fl = '0x%X' % tier_flag[t]
+            tiers.append('{%s, %s, %d, %s}' % (cname, FLAGS[struct], n, fl))
+        rows.append((num_of(by_fr[base]), by_fr[base], base, tiers))
+    rows.sort()
+    lines = ['', '// FireRed\'s VS SEEKER rematches (src/vs_seeker.c sRematches): tiers 1-5, NULL a SKIP; each tier\'s "beaten"',
+             '// flag (0xFFFF: the trainer\'s own). src/mp/mp_vsseeker.c',
+             '#define KANTO_VS_TIER_FLAGS_START 0x%X' % TIER_FLAGS_START,
+             '#define KANTO_VS_TIER_FLAGS_END 0x%X' % flag,
+             'struct KantoRematchTier { const void *party; u8 partyFlags; u8 partySize; u16 beatenFlag; };',
+             'static const struct KantoRematch { u16 trainerNum; u8 count; struct KantoRematchTier tier[5]; } sKantoRematches[] = {']
+    for _, qz, base, tiers in rows:
+        lines.append('    {%s, %d, {%s}},   // FireRed %s' % (qz, len(tiers), ', '.join(t or '{NULL, 0, 0, 0}' for t in tiers), base))
+    lines.append('};')
+    print('VS SEEKER: %d trainers, tier flags 0x%X-0x%X' % (len(rows), TIER_FLAGS_START, flag - 1))
+    return lines
+
+
 def main():
     pc = sys.argv[1] if len(sys.argv) > 1 else os.environ.get('POKECRYSTAL_DIR', '/tmp/claude-0/frlg/pokecrystal')
     names = qz_names()
@@ -342,13 +412,15 @@ def main():
             done_cr[(cls, tid)] = (struct, cname, n)
         struct, cname, n = done_cr[(cls, tid)]
         table.append((qz, FLAGS[struct], n, cname, '%s: Crystal %s %s' % (mp, cls, tid)))
-    table.sort(key=lambda r: int(r[0].split('_')[-1]))
+    table.sort(key=lambda r: num_of(r[0]))
+    rematch_lines = fr_rematches(kp, fr, fr_parties, done_fr, out)
     out.append('')
     out.append('static const struct QzOriginalTeam { u16 trainerNum; u8 partyFlags; u8 partySize; const void *party; } '
                'sQzOriginalTeams[] = {   // (by trainer number)')
     for qz, flags, n, cname, note in table:
         out.append('    {%s, %s, %d, %s},   // %s' % (qz, flags, n, cname, note))
     out.append('};')
+    out.extend(rematch_lines)
     open(OUT, 'w').write('\n'.join(out) + '\n')
     print('KANTO %d, JOHTO %d paired' % (len(kp), len(jp)))
     if warn:

@@ -1,0 +1,9 @@
+# FireRed's VS SEEKER (audit cases 17, 24): the VERMILION woman gives it (362); used before its battery is charged it
+# says so; charged, the trainers in view answer and ROUTE 3's BEN (beaten) fights FireRed's second team (RATTATA and
+# EKANS Lv 17); the win marks that tier beaten (flag 0x3400 = 13312)
+MODE=1
+GEN=3
+TMO=240
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=285:60"
+EXPECT_A=("item 362: 1" "flag 8566 = 1" "vsseeker battery 0" "foeparty: 19:17 23:17" "flag 13312 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -106,6 +106,14 @@ static void HandleRematchVarsOnBattleEnd(void);
 static const u8 *GetIntroSpeechOfApproachingTrainer(void);
 static const u8 *GetTrainerCantBattleSpeech(void);
 
+// Moemon Kai: FireRed's VS SEEKER (src/mp/mp_vsseeker.c)
+bool8 MP_VsSeeker_IsKantoTrainer(u16 trainerNum);
+void MP_VsSeeker_PrepareRematch(u16 trainerNum);
+bool8 MP_VsSeeker_ShouldTry(u16 trainerNum);
+bool8 MP_VsSeeker_Ready(void);
+void MP_VsSeeker_RematchWon(void);
+void MP_VsSeeker_Step(void);
+
 EWRAM_DATA static u16 sTrainerBattleMode = 0;
 EWRAM_DATA u16 gTrainerBattleOpponent_A = 0;
 EWRAM_DATA u16 gTrainerBattleOpponent_B = 0;
@@ -1423,7 +1431,10 @@ static const u8 *ConfigureTrainerBattle(const u8 *data)
     case TRAINER_BATTLE_REMATCH:
         TrainerBattleLoadArgs(sOrdinaryBattleParams, data);
         SetMapVarsToTrainer();
-        gTrainerBattleOpponent_A = GetRematchTrainerId(gTrainerBattleOpponent_A);
+        if (MP_VsSeeker_IsKantoTrainer(gTrainerBattleOpponent_A))
+            MP_VsSeeker_PrepareRematch(gTrainerBattleOpponent_A);   // Moemon Kai: FireRed's VS SEEKER tiers (mp_vsseeker.c)
+        else
+            gTrainerBattleOpponent_A = GetRematchTrainerId(gTrainerBattleOpponent_A);
         return EventScript_TryDoRematchBattle;
     case TRAINER_BATTLE_PYRAMID:
         if (gApproachingTrainerId == 0)
@@ -1721,6 +1732,9 @@ static void CB2_EndTrainerBattle(void)
 
 static void CB2_EndRematchBattle(void)
 {
+    void MP_VsSeeker_BattleEnded(void);
+    if (IsPlayerDefeated(gBattleOutcome) == TRUE)
+        MP_VsSeeker_BattleEnded();   // Moemon Kai: (a win counts the tier first: HandleRematchVarsOnBattleEnd)
     if (gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)
     {
         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
@@ -2226,6 +2240,7 @@ static bool32 HasAtLeastFiveBadges(void)
 
 void IncrementRematchStepCounter(void)
 {
+    MP_VsSeeker_Step();   // Moemon Kai: FireRed's VS SEEKER charges as the player walks
     if (HasAtLeastFiveBadges())
     {
         if (gSaveBlock1Ptr->trainerRematchStepCounter >= STEP_COUNTER_MAX)
@@ -2271,6 +2286,8 @@ u16 GetLastBeatenRematchTrainerId(u16 trainerId)
 
 bool8 ShouldTryRematchBattle(void)
 {
+    if (MP_VsSeeker_IsKantoTrainer(gTrainerBattleOpponent_A))
+        return MP_VsSeeker_ShouldTry(gTrainerBattleOpponent_A);   // Moemon Kai: FireRed's VS SEEKER (mp_vsseeker.c)
     if (IsFirstTrainerIdReadyForRematch(gRematchTable, gTrainerBattleOpponent_A))
         return TRUE;
 
@@ -2279,11 +2296,19 @@ bool8 ShouldTryRematchBattle(void)
 
 bool8 IsTrainerReadyForRematch(void)
 {
+    if (MP_VsSeeker_IsKantoTrainer(gTrainerBattleOpponent_A))
+        return MP_VsSeeker_Ready();   // Moemon Kai
     return IsTrainerReadyForRematch_(gRematchTable, gTrainerBattleOpponent_A);
 }
 
 static void HandleRematchVarsOnBattleEnd(void)
 {
+    if (MP_VsSeeker_IsKantoTrainer(gTrainerBattleOpponent_A))
+    {
+        MP_VsSeeker_RematchWon();   // Moemon Kai
+        SetBattledTrainersFlags();
+        return;
+    }
     ClearTrainerWantRematchState(gRematchTable, gTrainerBattleOpponent_A);
     SetBattledTrainersFlags();
 }

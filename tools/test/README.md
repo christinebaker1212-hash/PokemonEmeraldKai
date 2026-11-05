@@ -122,6 +122,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `johto_suicune_chase` | SUICUNE's chase: not at CIANWOOD before the BURNED TOWER, then CIANWOOD, ROUTE 36, back to CIANWOOD |
 | `johto_crystal_teams` | JOHTO's trainers on Crystal's teams at GEN 3: FALKNER's PIDGEY Lv 7 with TACKLE / MUD-SLAP, PIDGEOTTO Lv 9 |
 | `kanto_firered_teams` | KANTO's trainers on FireRed's teams at GEN 3: ROUTE 3's BEN with RATTATA and EKANS Lv 11 |
+| `kanto_vs_seeker` | FireRed's VS SEEKER: the VERMILION woman gives it, an uncharged battery says so, charged the trainers in view answer and ROUTE 3's BEN fights FireRed's second team; the win marks the tier beaten |
 | `johto_bugcontest_crystal` | the Bug-Catching Contest on a THURSDAY: five of Crystal's contestants in the park, a second catch asks to switch, "finish now?" at the way out, the judging in a line, the catch joins the party and the lead keeps its EXP |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |

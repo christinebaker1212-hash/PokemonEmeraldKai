@@ -324,6 +324,14 @@ static void ItemUseOnFieldCB_Rod(u8 taskId)
     DestroyTask(taskId);
 }
 
+// Moemon Kai: FireRed's VS SEEKER (src/mp/mp_vsseeker.c)
+void ItemUseOutOfBattle_VsSeeker(u8 taskId)
+{
+    void MP_VsSeeker_Use(u8 taskId);
+    sItemUseOnFieldCB = MP_VsSeeker_Use;
+    SetUpItemUseOnFieldCallback(taskId);
+}
+
 void ItemUseOutOfBattle_Itemfinder(u8 var)
 {
     IncrementGameStat(GAME_STAT_USED_ITEMFINDER);

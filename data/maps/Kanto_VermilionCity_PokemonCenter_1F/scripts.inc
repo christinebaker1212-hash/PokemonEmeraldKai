@@ -32,14 +32,14 @@ Kanto_VermilionCity_PokemonCenter_1F_EventScript_841B430::
 
 @ Kanto_VermilionCity_PokemonCenter_1F object 5 (local id 5, gfx 0x3EFC) at 6,4
 Kanto_VermilionCity_PokemonCenter_1F_EventScript_84591CB::
+	@ Moemon Kai: FireRed's VS SEEKER woman (pokefirered data/event_scripts.s VermilionCity_PokemonCenter_1F_EventScript_
+	@ VSSeekerWoman; docs/REGIONS_AUDIT.md 24): Quetzal's ABILITY PATCH lines over a PP MAX are gone (src/mp/mp_vsseeker.c)
 	lock
 	faceplayer
 	goto_if_set FLAG_QZ_0x2176, Kanto_VermilionCity_PokemonCenter_1F_EventScript_8459202
 	msgbox Kanto_VermilionCity_PokemonCenter_1F_Text_84443A0, MSGBOX_DEFAULT
-	setorcopyvar VAR_0x8000, ITEM_PP_MAX
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_OBTAIN_ITEM
-	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_84570B3
+	giveitem ITEM_VS_SEEKER
+	goto_if_eq VAR_RESULT, FALSE, Quetzal_EventScript_84570B3
 	setflag FLAG_QZ_0x2176
 	msgbox Kanto_VermilionCity_PokemonCenter_1F_Text_8444410, MSGBOX_DEFAULT
 	release
@@ -70,17 +70,27 @@ Kanto_VermilionCity_PokemonCenter_1F_Text_84442EC::
 	.string "universally strong MOéMON.$"
 
 Kanto_VermilionCity_PokemonCenter_1F_Text_84443A0::
-	.string "I collect useful training items.\p"
-	.string "This ABILITY PATCH is rare, but\n"
-	.string "you look like you can use it.\p"
-	.string "Please, take it!$"
+	.string "The urge to battle with someone\n"
+	.string "you’ve tangled with before…\p"
+	.string "Have you ever had that urge?\n"
+	.string "I’m sure you have.\p"
+	.string "I wanted to battle certain people\n"
+	.string "again over and over, too.\p"
+	.string "So, I’ve been giving these away.\n"
+	.string "Please, take one!$"
 
 Kanto_VermilionCity_PokemonCenter_1F_Text_8444410::
-	.string "An ABILITY PATCH can change a\n"
-	.string "MOéMON to its Hidden Ability.\p"
-	.string "Choose carefully when you use it!$"
+	.string "Use that device and you’ll find\n"
+	.string "TRAINERS looking for a rematch.\p"
+	.string "You have to charge its battery to\n"
+	.string "use it, though.$"
 
 Kanto_VermilionCity_PokemonCenter_1F_Text_844446F::
-	.string "That ABILITY PATCH can reveal a\n"
-	.string "MOéMON’s Hidden Ability.\p"
-	.string "It’s rare, so use it wisely.$"
+	.string "How do you use the VS SEEKER?\n"
+	.string "There’s nothing to it.\p"
+	.string "Use it like beep-beep-beep, and\n"
+	.string "TRAINERS around you will notice.\p"
+	.string "If any TRAINER wants a rematch,\n"
+	.string "it will let you know immediately.\p"
+	.string "Charge its battery and use it\n"
+	.string "while you’re on a road.$"

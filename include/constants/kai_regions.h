@@ -188,4 +188,8 @@
 #define FLAG_JOHTO_HIDDEN_ITEM_56          0x1638   // WhirlIslandB1F ULTRA_BALL (EVENT_WHIRL_ISLAND_B1F_HIDDEN_ULTRA_BALL)
 #define FLAG_JOHTO_HIDDEN_ITEM_57          0x1639   // WhirlIslandB1F FULL_RESTORE (EVENT_WHIRL_ISLAND_B1F_HIDDEN_FULL_RESTORE)
 
+
+// FireRed's VS SEEKER (src/mp/mp_vsseeker.c): steps the battery has charged in the BAG (to 100)
+#define VAR_KANTO_VS_SEEKER                0x515B
+
 #endif // GUARD_CONSTANTS_KAI_REGIONS_H

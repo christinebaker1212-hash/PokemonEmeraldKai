@@ -1673,6 +1673,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // tourney - CO-OP > TOURNAMENT
         MP_Tourney_OpenMenu();
     }
+    else if (strcmp(cmd, "vsseeker") == 0)
+    {
+        // vsseeker [yes]: FireRed's VS SEEKER battery and ready trainers (yes: every rematch is wanted, no 30% refusal)
+        void MP_VsSeeker_Debug(bool8 alwaysYes);
+        MP_VsSeeker_Debug(arg != NULL && strcmp(arg, "yes") == 0);
+    }
     else if (strcmp(cmd, "register") == 0)
     {
         // mp register ITEM: adds it and registers it to SELECT

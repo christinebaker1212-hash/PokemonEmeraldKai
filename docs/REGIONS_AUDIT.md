@@ -2,7 +2,7 @@
 
 The audit compared every KANTO map with FireRed and every JOHTO map with Crystal (findings, with the original's and the
 game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided each of the 157 cases below (158 was added by the user later). Status:
-[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04); 1.92.0: cases 52, 63, 91-95, 131-134, 136, 143 and 148, and the first part of 138 (POKéMON in houses, ELM's lab signs, small lines); 1.93.0: cases 142, 144, 145, the SEER of 146 and GOLDENROD's NAME RATER (118); 1.105.0: cases 100, 101 and the rest of 138; 1.106.0: cases 105, 15 (LANCE's HM WHIRLPOOL, given since 1.101.0's HM items), 49 (JOHTO's HEADBUTT man) and 104 (MOOMOO, with the TM93-TM139 TMs); CLAIR's Crystal TM24 DRAGONBREATH is in too, 110's gating waits; 1.107.0: cases 46, 50, 66, 89, 115, 117, 122, 124 and 126; 1.108.0: cases 25, 71, 74, 96, 120 and 156; 1.109.0: cases 45, 47, 88 and 112; 1.110.0: cases 106, 110, 113, 125 and 130; 1.111.0: cases 116, 146, 61, 58, 59, 64, 97, 141, 62, 60, 65 and 139). Rules the user set with these decisions:
+[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04); 1.92.0: cases 52, 63, 91-95, 131-134, 136, 143 and 148, and the first part of 138 (POKéMON in houses, ELM's lab signs, small lines); 1.93.0: cases 142, 144, 145, the SEER of 146 and GOLDENROD's NAME RATER (118); 1.105.0: cases 100, 101 and the rest of 138; 1.106.0: cases 105, 15 (LANCE's HM WHIRLPOOL, given since 1.101.0's HM items), 49 (JOHTO's HEADBUTT man) and 104 (MOOMOO, with the TM93-TM139 TMs); CLAIR's Crystal TM24 DRAGONBREATH is in too, 110's gating waits; 1.107.0: cases 46, 50, 66, 89, 115, 117, 122, 124 and 126; 1.108.0: cases 25, 71, 74, 96, 120 and 156; 1.109.0: cases 45, 47, 88 and 112; 1.110.0: cases 106, 110, 113, 125 and 130; 1.111.0: cases 116, 146, 61, 58, 59, 64, 97, 141, 62, 60, 65, 139, 57, 17 and 24). Rules the user set with these decisions:
 
 - **JOHTO is strictly Crystal** (case 116): HGSS-flavoured events Quetzal added are removed; where this file or
   docs/REGIONS_TODO.md said "HGSS ranks above Quetzal", Crystal alone is the reference now.
@@ -31,14 +31,14 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **14. [J3-2]** ICE PATH's SWINUB can never be fed: the script compares the berry with Quetzal's item number 518: **REMOVE it**
 - [x] **15. [J3-4]** LANCE says he hands over WHIRLPOOL in the ROCKET HIDEOUT but gives nothing: **RESTORE the original**
 - [x] **16. [K1-3, K2-21, K3-4, K4-3, J1-3, J3-7]** JESSIE & JAMES's travelling battle (Quetzal's), and its reward is an empty POKéMON: **REMOVE it**
-- [ ] **17. [K1-1, K2-4]** KANTO trainer rematches can never happen (no VS SEEKER, dead rematch branches): **RESTORE the original**
+- [x] **17. [K1-1, K2-4]** KANTO trainer rematches can never happen (no VS SEEKER, dead rematch branches): **RESTORE the original**
 - [x] **18. [K1-11, K2-22, K3-26, K4-17]** The KANTO rival is always "BLUE" (FireRed lets you name him): **RESTORE the original**
 - [x] **19. [K1-4]** ARCEUS still visits the PALLET bedroom although every ARCEUS trial in KANTO is hidden: **REMOVE it**
 - [x] **20. [K1-6]** CERULEAN CAVE's added RAYQUAZA chamber is now an empty room: **RESTORE the original**
 - [x] **21. [K1-21]** Gift POKéMON sent to the PC name the wrong BOX: **RESTORE the original**
 - [x] **22. [K1-22]** PALLET's sign girl never moves to the ROUTE 1 exit (FLAG_OPENED_START_MENU is never set): **RESTORE the original**
 - [x] **23. [K2-1]** The S.S. ANNE "comes back": Quetzal's harbor words and pier check outlive the ship's departure: **RESTORE the original**
-- [ ] **24. [K2-3]** VERMILION POKéMON CENTER: the VS SEEKER woman gives a PP MAX while talking about an ABILITY PATCH: **RESTORE the original**
+- [x] **24. [K2-3]** VERMILION POKéMON CENTER: the VS SEEKER woman gives a PP MAX while talking about an ABILITY PATCH: **RESTORE the original**
 - [x] **25. [K2-6]** Empty or misleading sections inside the Dept. Store menus: **RESTORE the original**
 - [x] **26. [K2-8]** GAME CORNER hidden coins give nothing: **RESTORE the original**
 - [x] **27. [K2-12]** POKéMON TOWER 6F MAROWAK: no ghost battle without the SILPH SCOPE, and the MAROWAK can be caught: **RESTORE the original**
@@ -71,7 +71,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **54. [J1-7]** AZALEA GYM's words describe Quetzal's CUT-as-BUG move and a different team: **RESTORE the original**
 - [x] **55. [J2-7]** The HAPPINESS RATER is replaced by Quetzal's rules text, which is false in Kai: **RESTORE the original**
 - [x] **56. [K1-17, K2-13, K3-20, K4-18]** Hidden and ball PP UPs / PP MAXes turned into NUGGETs: **RESTORE the original**
-- [ ] **57. [K4-12, J1-22, J3-24]** Trainers' teams (leaders, ELITE FOUR, CHAMPION, routes) are Quetzal's: **RESTORE the original**
+- [x] **57. [K4-12, J1-22, J3-24]** Trainers' teams (leaders, ELITE FOUR, CHAMPION, routes) are Quetzal's: **RESTORE the original**
 - [x] **58. [K1-16, K2-14, K4-9, J1-15, J2-19, J3-17]** In-game trades are Quetzal's, not FireRed's / Crystal's: **RESTORE the original**
 - [x] **59. [K1-8, K4-15, J3-12, J1-31]** Marts sell by badge count (Quetzal's lists), not each town's own stock: **RESTORE the original**
 - [x] **60. [K1-5, K2-19, K3-7, K4-16, J1-25, J2-34, J3-23]** Quetzal's overworld legendaries and mythicals: **RESTORE the original** - _Mythicals that belong in the original games' Region must stay. This covers up to Sinnoh. Quetzel's additions must be removed. Legendaries Gen 5 and beyond must be removed and delegated only to Moegatcha pulls. Override REGIONS_TODO.md decisions. Quetzal's fan additions aren't wanted, this still stands._

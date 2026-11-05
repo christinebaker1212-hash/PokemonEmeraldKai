@@ -4601,6 +4601,22 @@ follow_behind, follow_ground.
   TOTODILE (MP_Region_TrainerData swaps the line), the ROCKET executives by EXECUTIVES, then a name only one Crystal
   trainer has (251). Unpaired (Quetzal's or HGSS's own: ROUTE 47, ETO, MAXIE / ARCHIE...) keep Quetzal's. VIOLET's and
   ECRUTEAK's GYM guides say Crystal's words again. Tests johto_crystal_teams, kanto_firered_teams (GEN 3).
+- **Cases 17 and 24, FireRed's VS SEEKER** (pokefirered src/vs_seeker.c; src/mp/mp_vsseeker.c): the VERMILION POKéMON
+  CENTER woman gives it with FireRed's words (FLAG_QZ_0x2176; Quetzal's ABILITY PATCH lines over a PP MAX are gone).
+  Its battery charges over 100 steps in the BAG (VAR_KANTO_VS_SEEKER 0x515B, battle_setup.c IncrementRematchStepCounter);
+  used (BAG or registered: item_use.c ItemUseOutOfBattle_VsSeeker) it beeps three times and every trainer in view
+  (FireRed's 7 x 5 cells around the player) answers: FireRed's "!" not battled yet, "X" not now, "!!" with a walk in
+  place for a rematch (70%, the same answer for a trainer's second object). The "X" and "!!" bubbles are FireRed's
+  emoticons drawn in the game's bubble style (graphics/field_effects/pics/emotion_x.png, emotion_double_exclamation.png;
+  trainer_see.c MP_StartVsSeekerIcon). Answers last 100 steps or until the map changes (RAM only, as FireRed clears them
+  on every map load). The trainers' scripts were FireRed's already: battle_setup.c asks mp_vsseeker.c for KANTO's
+  trainers in ShouldTryRematchBattle, TRAINER_BATTLE_REMATCH (the tier: FireRed's GetNextAvailableRematchTrainer +
+  TryGetRematchTrainerIdGivenGameState, gated by the VS SEEKER, CELADON's and FUCHSIA's fly points 0x2234 / 0x223E, the
+  LEAGUE and SEVII's network machine), IsTrainerReadyForRematch and the win (the tier's own "beaten" flag, 0x3400-0x3481,
+  as FireRed's tier trainers have; a tier that repeats the first team reads the trainer's flag). The 221 trainers' tiers
+  are sKantoRematches in src/data/qz_original_teams.h (gen_original_teams.py). Ready trainers wait to be talked to (in
+  FireRed they raise a hand; no such frames here, so they stand as they were). Not carried over: the player's
+  holding-up-the-device animation (the beeps play instead). Test kanto_vs_seeker (mp vsseeker [yes]).
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).
