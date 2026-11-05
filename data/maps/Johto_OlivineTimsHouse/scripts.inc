@@ -46,26 +46,29 @@ Johto_OlivineTimsHouse_EventScript_83E55AB::
 	end
 
 Johto_OlivineTimsHouse_EventScript_83E55B9::
+	setvar VAR_0x8004, 6
+	specialvar VAR_RESULT, GetInGameTradeSpeciesInfo   @ (the names Crystal's words use: audit case 58)
 	msgbox Johto_OlivineTimsHouse_Text_83E5678, MSGBOX_DEFAULT
 	release
 	end
 
 Johto_OlivineTimsHouse_Text_83E55C3::
-	.string "I collect MOéMON!\n"
-	.string "Do you have a {STR_VAR_1}?\p"
-	.string "Want to trade it for my\n"
-	.string "{STR_VAR_2}?$"
+	.string "Hi, I’m looking for this MOéMON.\p"
+	.string "If you have {STR_VAR_1}, would you\n"
+	.string "trade it for my {STR_VAR_2}?$"
 
 Johto_OlivineTimsHouse_Text_83E5604::
-	.string "Yay! I got myself {STR_VAR_1}!\p"
-	.string "{STR_VAR_2}, you take care!$"
+	.string "Great! Thank you!\p"
+	.string "I finally got {STR_VAR_1}.$"
 
 Johto_OlivineTimsHouse_Text_83E562D::
-	.string "Uh, no, I don’t think so.\n"
-	.string "That isn’t a {STR_VAR_1}.$"
+	.string "You don’t have {STR_VAR_1}? That’s\n"
+	.string "too bad, then.$"
 
 Johto_OlivineTimsHouse_Text_83E5658::
-	.string "You don’t want to trade? Aww...$"
+	.string "You don’t have one either?\p"
+	.string "Gee, that’s really disappointing…$"
 
 Johto_OlivineTimsHouse_Text_83E5678::
-	.string "Hi, how’s my HELIOPTILE doing?$"
+	.string "Hi! The {STR_VAR_1} you traded me\n"
+	.string "is doing great!$"

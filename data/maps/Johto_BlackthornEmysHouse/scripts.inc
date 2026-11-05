@@ -46,26 +46,31 @@ Johto_BlackthornEmysHouse_EventScript_83C80A1::
 	end
 
 Johto_BlackthornEmysHouse_EventScript_83C80AF::
+	setvar VAR_0x8004, 7
+	specialvar VAR_RESULT, GetInGameTradeSpeciesInfo   @ (the names Crystal's words use: audit case 58)
 	msgbox Johto_BlackthornEmysHouse_Text_83C816E, MSGBOX_DEFAULT
 	release
 	end
 
 Johto_BlackthornEmysHouse_Text_83C80B9::
-	.string "I collect MOéMON!\n"
-	.string "Do you have a {STR_VAR_1}?\p"
+	.string "{STR_VAR_1}’s cute, but I don’t\n"
+	.string "have it. Do you have {STR_VAR_1}?\p"
 	.string "Want to trade it for my\n"
 	.string "{STR_VAR_2}?$"
 
 Johto_BlackthornEmysHouse_Text_83C80FA::
-	.string "Yay! I got myself {STR_VAR_1}!\p"
-	.string "{STR_VAR_2}, you take care!$"
+	.string "Wow! Thank you! I always wanted\n"
+	.string "{STR_VAR_1}!$"
 
 Johto_BlackthornEmysHouse_Text_83C8123::
-	.string "Uh, no, I don’t think so.\n"
-	.string "That isn’t a {STR_VAR_1}.$"
+	.string "That’s not {STR_VAR_1}.\p"
+	.string "Please trade with me if you get\n"
+	.string "one.$"
 
 Johto_BlackthornEmysHouse_Text_83C814E::
-	.string "You don’t want to trade? Aww...$"
+	.string "You don’t want to trade? Oh, darn…$"
 
 Johto_BlackthornEmysHouse_Text_83C816E::
-	.string "Hi, how’s my SLIGGOO doing?$"
+	.string "How is that {STR_VAR_2} I traded\n"
+	.string "you doing?\p"
+	.string "Your {STR_VAR_1}’s so cute!$"

@@ -4491,6 +4491,16 @@ follow_behind, follow_ground.
   and PEWTER as there). JOHTO's RUINS RESEARCH CENTER has no fossil regenerator: its third scientist and the bookshelf
   say Crystal's words, the fossils on show and the INNER CHAMBER's three fossil balls wear FLAG_KAI_GONE (local ids kept).
   HOENN's and SINNOH's revivers are their own. Test kanto_fossil.
+- **Case 58, the in-game trades** (src/data/qz_ingame_trades.h, written by tools/quetzal_port/gen_trades.py ORIGINALS
+  over Quetzal's 17 slots; slots 0-3 no map uses): KANTO's nine are FireRed's own (ROUTE 2 MIMIEN, CERULEAN ZYNX with
+  FireRed's FAB MAIL as trade.c sIngameTradeMail[3], UNDERGROUND PATH MS. NIDO, VERMILION CH'DING, ROUTE 11 NINA,
+  ROUTE 18 MARC, CINNABAR ESPHERE / TANGENY / SEELOR: species, wants, IVs, personality, OTs, items, contest stats);
+  JOHTO's four are Crystal's (KYLE's ONIX ROCKY, MIKE's MACHOP MUSCLE, TIM's VOLTORB VOLTY, EMY's DODRIO DORIS for a
+  DRAGONAIR; Crystal's DVs as IVs DV * 2 + 1, GOLD / BITTER / PRZCURE BERRY as SITRUS / PERSIM / CHERI) and say
+  Crystal's words by dialogue set (data/text/common_1.asm _NPCTrade*: crystal_words maps wStringBuffer1 /
+  wMonOrItemNameBuffer to STR_VAR_1, the POKéMON asked for, and wStringBuffer2 to STR_VAR_2, the one offered, which the
+  scripts buffer through GetInGameTradeSpeciesInfo before every line). Crystal's EMY only takes a female DRAGONAIR; the
+  game doesn't check that. MIKE stays on the DEPT. STORE's 6F. Tests johto_trade_kyle, kanto_trade_zynx.
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).

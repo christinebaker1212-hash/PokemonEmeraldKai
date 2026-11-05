@@ -1,0 +1,30 @@
+pressuntil A field 5000
+wait 60
+mp warp 35,104,7,6
+wait 150
+press UP 16
+wait 20
+press A 2
+pressuntil A yesno 900
+wait 20
+shot intro
+press A 4
+waitfor partymenu 900
+wait 40
+press A 4
+wait 30
+shot pick
+press A 4
+wait 600
+mash A 40 30
+mash B 10 30
+pressuntil B field 3000
+wait 100
+shot done
+mp party
+mp getflag 0x1027
+press A 2
+wait 120
+shot after
+mash B 6 30
+quit

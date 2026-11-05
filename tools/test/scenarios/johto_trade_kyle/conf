@@ -1,0 +1,7 @@
+# JOHTO's in-game trades are Crystal's (audit case 58): VIOLET's KYLE takes a BELLSPROUT for his ONIX "ROCKY" (OT KYLE,
+# holding a PERSIM BERRY for Crystal's BITTER BERRY), with Crystal's collector words.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=69:12,25:20"
+EXPECT_A=("[test] party: 95(" "flag 4135 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

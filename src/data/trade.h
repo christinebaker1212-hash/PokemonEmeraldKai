@@ -1082,6 +1082,17 @@ static const u16 sIngameTradeMail[][MAIL_WORDS_COUNT + 1] =
         EC_WORD_A,
         EC_WORD_CUTE,
         EC_WORD_WAY
+    }, {
+        // Moemon Kai: FireRed's ZYNX mail (CERULEAN's trade in KANTO, audit case 58: mailNum 3)
+        EC_WORD_THAT_S,
+        EC_WORD_A,
+        EC_WORD_HEALTHY,
+        EC_POKEMON(JYNX),
+        EC_WORD_EXCL,
+        EC_WORD_BE,
+        EC_WORD_KIND,
+        EC_WORD_TO,
+        EC_WORD_IT
     }
 };
 

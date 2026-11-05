@@ -1,0 +1,7 @@
+# KANTO's in-game trades are FireRed's (audit case 58): CERULEAN's DONTAE gives JYNX "ZYNX" for a POLIWHIRL, holding
+# FireRed's FAB MAIL ("THAT'S A HEALTHY JYNX! BE KIND TO IT": trade.c sIngameTradeMail[3]).
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=61:20,25:20"
+EXPECT_A=("[test] party: 124(")
+UNEXPECT_A=("[crash]" "TIMEOUT")

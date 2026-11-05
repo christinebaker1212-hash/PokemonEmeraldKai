@@ -56,6 +56,8 @@ Johto_GoldenrodDeptStore6F_EventScript_83D46B6::
 	end
 
 Johto_GoldenrodDeptStore6F_EventScript_83D46C4::
+	setvar VAR_0x8004, 5
+	specialvar VAR_RESULT, GetInGameTradeSpeciesInfo   @ (the names Crystal's words use: audit case 58)
 	msgbox Johto_GoldenrodDeptStore6F_Text_83D4783, MSGBOX_DEFAULT
 	release
 	end
@@ -88,24 +90,25 @@ Johto_GoldenrodDeptStore6F_EventScript_83D47B9::
 	end
 
 Johto_GoldenrodDeptStore6F_Text_83D46CE::
-	.string "I collect MOéMON!\n"
-	.string "Do you have a {STR_VAR_1}?\p"
+	.string "I collect MOéMON. Do you have\n"
+	.string "{STR_VAR_1}?\p"
 	.string "Want to trade it for my\n"
 	.string "{STR_VAR_2}?$"
 
 Johto_GoldenrodDeptStore6F_Text_83D470F::
-	.string "Yay! I got myself {STR_VAR_1}!\p"
-	.string "{STR_VAR_2}, you take care!$"
+	.string "Yay! I got myself {STR_VAR_1}!\n"
+	.string "Thanks!$"
 
 Johto_GoldenrodDeptStore6F_Text_83D4738::
-	.string "Uh, no, I don’t think so.\n"
-	.string "That isn’t a {STR_VAR_1}.$"
+	.string "Huh? That’s not {STR_VAR_1}. What\n"
+	.string "a letdown…$"
 
 Johto_GoldenrodDeptStore6F_Text_83D4763::
-	.string "You don’t want to trade? Aww...$"
+	.string "You don’t want to trade? Aww…$"
 
 Johto_GoldenrodDeptStore6F_Text_83D4783::
-	.string "Hi, how’s my PANCHAM doing?$"
+	.string "Hi, how’s my old {STR_VAR_2}\n"
+	.string "doing?$"
 
 Johto_GoldenrodDeptStore6F_Text_83D47C6::
 	.string "Do you listen to LUCKY CHANNEL?\p"

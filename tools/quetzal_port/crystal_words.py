@@ -71,6 +71,11 @@ def words(mapname, label, our_label=None):
             # (the POKé SEER's: qz_specials.c MP_PokeSeer fills them)
             'wSeerNickname': '{STR_VAR_1}', 'wSeerCaughtLocation': '{STR_VAR_2}', 'wSeerCaughtLevelString': '{STR_VAR_3}',
             'wSeerOT': '{STR_VAR_3}'}
+    if label.startswith('_NPCTrade'):
+        # (the JOHTO traders' words, data/text/common_1.asm: the POKéMON asked for and the one offered as the trade
+        # scripts buffer them through GetInGameTradeSpeciesInfo)
+        rams.update({'wStringBuffer1': '{STR_VAR_1}', 'wMonOrItemNameBuffer': '{STR_VAR_1}', 'wStringBuffer2': '{STR_VAR_2}'})
+        text = re.sub(r'(::\n)\s*text_ram (\w+)\s*\n\s*text "', lambda m: m.group(1) + '\ttext "' + rams.get(m.group(2), '{STR_VAR_1}'), text)
     text = re.sub(r'@"\s*\n\s*text_ram (\w+)\s*\n\s*text "',
                   lambda m: rams.get(m.group(1), '{STR_VAR_1}'), text)
     # (text_start: the buffer ends the line, the next line command goes on)

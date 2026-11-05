@@ -55,29 +55,32 @@ Johto_VioletKylesHouse_EventScript_83FF9F3::
 	end
 
 Johto_VioletKylesHouse_EventScript_83FFA01::
+	setvar VAR_0x8004, 4
+	specialvar VAR_RESULT, GetInGameTradeSpeciesInfo   @ (the names Crystal's words use: audit case 58)
 	msgbox Johto_VioletKylesHouse_Text_83FFAC0, MSGBOX_DEFAULT
 	release
 	end
 
 Johto_VioletKylesHouse_Text_83FFA0B::
-	.string "I collect MOéMON!\n"
-	.string "Do you have a {STR_VAR_1}?\p"
+	.string "I collect MOéMON. Do you have\n"
+	.string "{STR_VAR_1}?\p"
 	.string "Want to trade it for my\n"
 	.string "{STR_VAR_2}?$"
 
 Johto_VioletKylesHouse_Text_83FFA4C::
-	.string "Yay! I got myself {STR_VAR_1}!\p"
-	.string "{STR_VAR_2}, you take care!$"
+	.string "Yay! I got myself {STR_VAR_1}!\n"
+	.string "Thanks!$"
 
 Johto_VioletKylesHouse_Text_83FFA75::
-	.string "Uh, no, I don’t think so.\n"
-	.string "That isn’t a {STR_VAR_1}.$"
+	.string "Huh? That’s not {STR_VAR_1}. What\n"
+	.string "a letdown…$"
 
 Johto_VioletKylesHouse_Text_83FFAA0::
-	.string "You don’t want to trade? Aww...$"
+	.string "You don’t want to trade? Aww…$"
 
 Johto_VioletKylesHouse_Text_83FFAC0::
-	.string "Hi, how’s my SPHEAL doing?$"
+	.string "Hi, how’s my old {STR_VAR_2}\n"
+	.string "doing?$"
 
 Johto_VioletKylesHouse_Text_83FFADB::
 	.string "A MOéMON you get in a trade\n"

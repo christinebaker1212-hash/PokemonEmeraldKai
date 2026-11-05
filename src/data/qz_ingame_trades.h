@@ -21,69 +21,69 @@ static const struct InGameTrade sQzIngameTrades[] =
         .conditions = {0, 0, 0, 0, 0}, .personality = 0x8B, .heldItem = ITEM_NONE, .mailNum = -1,
         .otName = _("QUETZAL"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_PERSIAN,
     },
-    [4] = {
-        .nickname = _("SPHEAL"), .species = SPECIES_SPHEAL, .ivs = {31, 20, 20, 20, 31, 31}, .abilityNum = 0, .otId = 0,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0xF, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("QUETZAL"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_BELLSPROUT,
+    [4] = {   // Crystal's own
+        .nickname = _("ROCKY"), .species = SPECIES_ONIX, .ivs = {17, 19, 13, 13, 13, 13}, .abilityNum = 0, .otId = 48926,
+        .conditions = {0, 0, 0, 0, 0}, .personality = 0xF, .heldItem = ITEM_PERSIM_BERRY, .mailNum = -1,
+        .otName = _("KYLE"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_BELLSPROUT,
     },
-    [5] = {
-        .nickname = _("MACHOP"), .species = SPECIES_MACHOP, .ivs = {31, 31, 20, 31, 20, 20}, .abilityNum = 0, .otId = 0,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0x3, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("QUETZAL"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_ABRA,
+    [5] = {   // Crystal's own
+        .nickname = _("MUSCLE"), .species = SPECIES_MACHOP, .ivs = {25, 7, 15, 13, 13, 13}, .abilityNum = 0, .otId = 37460,
+        .conditions = {0, 0, 0, 0, 0}, .personality = 0x3, .heldItem = ITEM_SITRUS_BERRY, .mailNum = -1,
+        .otName = _("MIKE"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_ABRA,
     },
-    [6] = {
-        .nickname = _("VOLTORB"), .species = SPECIES_VOLTORB, .ivs = {31, 20, 20, 31, 31, 20}, .abilityNum = 0, .otId = 0,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0xA, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("QUETZAL"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_KRABBY,
+    [6] = {   // Crystal's own
+        .nickname = _("VOLTY"), .species = SPECIES_VOLTORB, .ivs = {17, 19, 17, 17, 17, 17}, .abilityNum = 0, .otId = 29189,
+        .conditions = {0, 0, 0, 0, 0}, .personality = 0xA, .heldItem = ITEM_CHERI_BERRY, .mailNum = -1,
+        .otName = _("TIM"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_KRABBY,
     },
-    [7] = {
-        .nickname = _("DRAGONAIR"), .species = SPECIES_DRAGONAIR, .ivs = {31, 31, 31, 31, 31, 31}, .abilityNum = 0, .otId = 0,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0xF, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("QUETZAL"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_DODRIO,
+    [7] = {   // Crystal's own
+        .nickname = _("DORIS"), .species = SPECIES_DODRIO, .ivs = {25, 15, 15, 13, 13, 13}, .abilityNum = 0, .otId = 283,
+        .conditions = {0, 0, 0, 0, 0}, .personality = 0xF, .heldItem = ITEM_SMOKE_BALL, .mailNum = -1,
+        .otName = _("EMY"), .otGender = FEMALE, .sheen = 0, .requestedSpecies = SPECIES_DRAGONAIR,
     },
-    [8] = {
-        .nickname = _("ZYNX"), .species = SPECIES_JYNX, .ivs = {31, 20, 20, 31, 31, 20}, .abilityNum = 2, .otId = 36728,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0xA, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("DONTAE"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_PSYDUCK,
+    [8] = {   // FireRed's own
+        .nickname = _("ZYNX"), .species = SPECIES_JYNX, .ivs = {18, 17, 18, 22, 25, 21}, .abilityNum = 0, .otId = 36728,
+        .conditions = {5, 30, 5, 5, 5}, .personality = 0x498A2E1D, .heldItem = ITEM_FAB_MAIL, .mailNum = 3,
+        .otName = _("DONTAE"), .otGender = MALE, .sheen = 10, .requestedSpecies = SPECIES_POLIWHIRL,
     },
-    [9] = {
-        .nickname = _("PONYTA"), .species = SPECIES_PONYTA, .ivs = {31, 31, 20, 31, 20, 20}, .abilityNum = 1, .otId = 63184,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0xD, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("SAIGE"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_NIDORAN_F,
+    [9] = {   // FireRed's own
+        .nickname = _("MS. NIDO"), .species = SPECIES_NIDORAN_F, .ivs = {22, 18, 25, 19, 15, 22}, .abilityNum = 0, .otId = 63184,
+        .conditions = {5, 5, 5, 5, 30}, .personality = 0x4C970B89, .heldItem = ITEM_TINY_MUSHROOM, .mailNum = -1,
+        .otName = _("SAIGE"), .otGender = FEMALE, .sheen = 10, .requestedSpecies = SPECIES_NIDORAN_M,
     },
-    [10] = {
-        .nickname = _("FARFETCH’D"), .species = SPECIES_FARFETCHD, .ivs = {31, 31, 20, 31, 20, 20}, .abilityNum = 2, .otId = 8810,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0x3, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("ELYSSA"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_TAILLOW,
+    [10] = {   // FireRed's own
+        .nickname = _("CH'DING"), .species = SPECIES_FARFETCHD, .ivs = {20, 25, 21, 24, 15, 20}, .abilityNum = 0, .otId = 8810,
+        .conditions = {30, 5, 5, 5, 5}, .personality = 0x151943D7, .heldItem = ITEM_STICK, .mailNum = -1,
+        .otName = _("ELYSSA"), .otGender = MALE, .sheen = 10, .requestedSpecies = SPECIES_SPEAROW,
     },
-    [11] = {
-        .nickname = _("NIDORINA"), .species = SPECIES_NIDORINA, .ivs = {31, 31, 20, 31, 20, 20}, .abilityNum = 0, .otId = 13637,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0xD, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("TURNER"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_NIDORINO,
+    [11] = {   // FireRed's own
+        .nickname = _("NINA"), .species = SPECIES_NIDORINA, .ivs = {22, 25, 18, 19, 22, 15}, .abilityNum = 0, .otId = 13637,
+        .conditions = {5, 5, 30, 5, 5}, .personality = 0xEECA15, .heldItem = ITEM_NONE, .mailNum = -1,
+        .otName = _("TURNER"), .otGender = MALE, .sheen = 10, .requestedSpecies = SPECIES_NIDORINO,
     },
-    [12] = {
-        .nickname = _("LICKILICKY"), .species = SPECIES_LICKILICKY, .ivs = {31, 31, 31, 31, 31, 31}, .abilityNum = 2, .otId = 1239,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0x17, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("HADEN"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_GOLDUCK,
+    [12] = {   // FireRed's own
+        .nickname = _("MARC"), .species = SPECIES_LICKITUNG, .ivs = {24, 19, 21, 15, 23, 21}, .abilityNum = 0, .otId = 1239,
+        .conditions = {5, 5, 5, 5, 30}, .personality = 0x451308AB, .heldItem = ITEM_NONE, .mailNum = -1,
+        .otName = _("HADEN"), .otGender = MALE, .sheen = 10, .requestedSpecies = SPECIES_GOLDUCK,
     },
-    [13] = {
-        .nickname = _("PORYGON2"), .species = SPECIES_PORYGON2, .ivs = {31, 31, 31, 31, 31, 31}, .abilityNum = 1, .otId = 50298,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0xF, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("CLIFTON"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_RAICHU,
+    [13] = {   // FireRed's own
+        .nickname = _("ESPHERE"), .species = SPECIES_ELECTRODE, .ivs = {19, 16, 18, 25, 25, 19}, .abilityNum = 1, .otId = 50298,
+        .conditions = {30, 5, 5, 5, 5}, .personality = 0x6341016, .heldItem = ITEM_NONE, .mailNum = -1,
+        .otName = _("CLIFTON"), .otGender = MALE, .sheen = 10, .requestedSpecies = SPECIES_RAICHU,
     },
-    [14] = {
-        .nickname = _("SCIZOR"), .species = SPECIES_SCIZOR, .ivs = {31, 31, 31, 31, 31, 31}, .abilityNum = 2, .otId = 60042,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0x3, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("NORMA"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_HERACROSS,
+    [14] = {   // FireRed's own
+        .nickname = _("TANGENY"), .species = SPECIES_TANGELA, .ivs = {22, 17, 25, 16, 23, 20}, .abilityNum = 0, .otId = 60042,
+        .conditions = {5, 5, 30, 5, 5}, .personality = 0x5C77ECFA, .heldItem = ITEM_STARDUST, .mailNum = -1,
+        .otName = _("NORMA"), .otGender = FEMALE, .sheen = 10, .requestedSpecies = SPECIES_VENONAT,
     },
-    [15] = {
-        .nickname = _("KINGDRA"), .species = SPECIES_KINGDRA, .ivs = {31, 31, 31, 31, 31, 31}, .abilityNum = 1, .otId = 9853,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0xF, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("GARETT"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_RAPIDASH,
+    [15] = {   // FireRed's own
+        .nickname = _("SEELOR"), .species = SPECIES_SEEL, .ivs = {24, 15, 22, 16, 23, 22}, .abilityNum = 0, .otId = 9853,
+        .conditions = {5, 5, 5, 5, 30}, .personality = 0x482CAC89, .heldItem = ITEM_NONE, .mailNum = -1,
+        .otName = _("GARETT"), .otGender = MALE, .sheen = 10, .requestedSpecies = SPECIES_PONYTA,
     },
-    [16] = {
-        .nickname = _("MR. MIME"), .species = SPECIES_MR_MIME, .ivs = {31, 20, 20, 31, 31, 20}, .abilityNum = 1, .otId = 10283,
-        .conditions = {0, 0, 0, 0, 0}, .personality = 0xA, .heldItem = ITEM_NONE, .mailNum = -1,
-        .otName = _("REYLEY"), .otGender = MALE, .sheen = 0, .requestedSpecies = SPECIES_DROWZEE,
+    [16] = {   // FireRed's own
+        .nickname = _("MIMIEN"), .species = SPECIES_MR_MIME, .ivs = {20, 15, 17, 24, 23, 22}, .abilityNum = 0, .otId = 1985,
+        .conditions = {5, 5, 5, 30, 5}, .personality = 0x9CAE, .heldItem = ITEM_NONE, .mailNum = -1,
+        .otName = _("REYLEY"), .otGender = MALE, .sheen = 10, .requestedSpecies = SPECIES_ABRA,
     },
 };
