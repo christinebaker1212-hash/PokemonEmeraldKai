@@ -65,6 +65,14 @@ public final class YgoDuelPage extends Page {
     private final List<Runnable> actions = new ArrayList<>();
     private final float[] objX = new float[200], objY = new float[200], objW = new float[200], objH = new float[200];
     private float scale = 1, lpY;
+    // the motion (CardFx; places by object number): the table shows the state before an answer while its events play
+    private final CardFx fx = new CardFx();
+    private JSONObject shownSt;
+    private JSONArray shownObjs;
+    private final RectF[][][] zoneR = new RectF[2][2][6];
+    private final RectF[] deckR = new RectF[2], graveR = new RectF[2], handR = new RectF[2];
+    private int coin = -1;
+    private long coinAt;
 
     public YgoDuelPage(GameView v, Setup setup) {
         super(v);
@@ -78,6 +86,8 @@ public final class YgoDuelPage extends Page {
             duel = Ygo.start(s.main0, s.extra0, s.main1, s.extra1, s.seed, s.first);
         }
         refresh();
+        shownSt = st;
+        shownObjs = objs;
         lastSeq = st.optInt("seq");
         busyUntil = System.currentTimeMillis() + 500;
     }
@@ -350,8 +360,14 @@ public final class YgoDuelPage extends Page {
                 case "float":
                     floats.add(new Object[]{now, b[4], b[2], b[5]});
                     break;
+                case "fx":
+                    startFx((String) b[2], (int) b[3], (int) b[4], (int) b[5], (int) b[6], now);
+                    break;
                 case "end":
                     busyUntil = now + 200;
+                    shownSt = st;   // (the table catches up with the duel)
+                    shownObjs = objs;
+                    fx.settle();
                     break;
                 default:
                     break;
@@ -429,7 +445,15 @@ public final class YgoDuelPage extends Page {
             se(t, sound(type, me, e.optInt(6), value));
             switch (type) {
                 case Ygo.EV_TURN:
-                    t = beat(t, "say", me ? "YOUR TURN" : theirName() + "'S TURN", who, -1, 0, 0, 800);
+                    fxBeat(t, "turn", who, -1, 0, 0);
+                    t = beat(t, "say", me ? "YOUR TURN" : theirName() + "'S TURN", who, -1, 0, 0, 900);
+                    break;
+                case Ygo.EV_DRAW:
+                    fxBeat(t, "draw", who, o, 0, card);
+                    t += draws++ < 6 ? 150 : 40;
+                    break;
+                case Ygo.EV_TO_GRAVE:
+                    fxBeat(t, "grave", who, o, 0, card);
                     break;
                 case Ygo.EV_PHASE:
                     if (value == 3) {
@@ -437,36 +461,48 @@ public final class YgoDuelPage extends Page {
                     }
                     break;
                 case Ygo.EV_SUMMON:
+                    fxBeat(t, "summon", who, o, value, card);
                     t = beat(t, "say", cardName(card) + (value >= 4 ? " is Special Summoned!" : " is summoned!"), who, o, 0, card, 800);
                     break;
                 case Ygo.EV_SET:
+                    fxBeat(t, "set", who, o, 0, card);
+                    if (me) {
+                        t += 380;
+                    }
                     if (!me) {
                         t = beat(t, "say", theirName() + " sets a card.", who, o, 0, 0, 500);
                     }
                     break;
                 case Ygo.EV_FLIP:
+                    fxBeat(t, "flip", who, o, 0, card);
                     t = beat(t, "say", cardName(card) + " is flipped face-up!", who, o, 0, card, 700);
                     break;
                 case Ygo.EV_ACTIVATE:
+                    fxBeat(t, "activate", who, o, value, card);
                     t = beat(t, "say", cardName(card) + (value > 1 ? " (Chain " + value + ")" : "") + "!", who, o, 0, card, 1000);
                     break;
                 case Ygo.EV_NEGATE:
+                    fxBeat(t, "negate", who, o, 0, card);
                     t = beat(t, "say", cardName(card) + " is negated!", who, o, 0, card, 800);
                     break;
                 case Ygo.EV_ATTACK:
+                    fxBeat(t + 150, "attack", who, o, target, card);
                     t = beat(t, "say", cardName(card) + (target < 0 ? " attacks directly!" : " attacks " + cardName(cardOfObj(target)) + "!"),
                             who, o, 0, 0, 900);
                     break;
                 case Ygo.EV_DESTROY:
+                    fxBeat(t, "destroy", who, o, 0, card);
                     t = beat(t, "say", cardName(card) + " is destroyed!", who, o, 0, card, 700);
                     break;
                 case Ygo.EV_DAMAGE:
+                    fxBeat(t, "damage", who, o, value, 0);
                     t = beat(t, "float", "-" + value, who, -1 - who, 0xFFF86030, 0, 700);
                     break;
                 case Ygo.EV_RECOVER:
                     t = beat(t, "float", "+" + value, who, -1 - who, 0xFF60D860, 0, 600);
                     break;
                 case Ygo.EV_COIN:
+                    fxBeat(t, "coin", who, -1, value, 0);
                     t = beat(t, "say", value == 1 ? "HEADS!" : "TAILS!", who, -1, 0, 0, 700);
                     break;
                 case Ygo.EV_DICE:
@@ -478,6 +514,7 @@ public final class YgoDuelPage extends Page {
                     }
                     break;
                 case Ygo.EV_WIN:
+                    fxBeat(t, "win", who, -1, me ? 1 : 0, 0);
                     t = beat(t, "say", (me ? "YOU WIN!" : theirName() + " WINS") + new String[]{"  Life Points: 0.", "  A Deck ran out.",
                             "  EXODIA!", "  A concession.", ""}[Math.min(4, Math.max(0, value))], who, -1, 0, 0, 1400);
                     break;
@@ -486,6 +523,107 @@ public final class YgoDuelPage extends Page {
             }
         }
         beats.add(new Object[]{t, "end", "", 0, -1, 0, 0});
+        draws = 0;
+    }
+
+    private int draws;   // (a run of draws: quick after the first few)
+
+    private void fxBeat(long at, String kind, int who, int o, int value, int card) {
+        beats.add(new Object[]{at, "fx", kind, who, o, value, card});
+    }
+
+    // where object O is drawn now (CardFx's places: who 0, slot = the object)
+    private RectF objRect(int who, int o) {
+        if (o < 0 || o >= objX.length || objW[o] <= 0) {
+            return null;
+        }
+        return new RectF(objX[o], objY[o], objX[o] + objW[o], objY[o] + objH[o]);
+    }
+
+    // where object O will be once the table catches up (its zone in the duel as it is now)
+    private RectF destOf(int o) {
+        JSONObject x = obj(o);
+        if (x == null) {
+            return null;
+        }
+        int loc = x.optInt("loc"), ctl = x.optInt("ctl"), sq = x.optInt("seq");
+        if ((loc == Ygo.LOC_MZONE || loc == Ygo.LOC_SZONE) && ctl >= 0 && ctl < 2 && sq >= 0 && sq < 6) {
+            return zoneR[ctl][loc == Ygo.LOC_MZONE ? 1 : 0][sq];
+        }
+        if (loc == Ygo.LOC_GRAVE && ctl >= 0 && ctl < 2) {
+            return graveR[ctl];
+        }
+        return null;
+    }
+
+    private void startFx(String kind, int who, int o, int value, int card, long now) {
+        boolean me = who == seat;
+        int w = Math.max(0, Math.min(1, who));
+        RectF at = objRect(0, o), hand = handR[w], deck = deckR[w], grave = graveR[w], dest = destOf(o);
+        switch (kind) {
+            case "turn":
+                fx.banner(now, 1000, me ? "YOUR TURN" : theirName() + "'S TURN", me ? 0x3048B0 : 0xB03048);
+                break;
+            case "draw":
+                if (deck != null && hand != null) {
+                    fx.fly(now, 340, card, !me || card == 0, false, deck, hand, false);
+                }
+                break;
+            case "summon":
+            case "set": {
+                RectF from = at != null ? at : hand;
+                if (from != null && dest != null) {
+                    boolean down = kind.equals("set");
+                    fx.fly(now, 380, card, down || card == 0, !me, from, dest, true);
+                    if (!down) {
+                        fx.flash(now + 360, 160, value >= 4 ? 0xF8E0F8 : 0xFFFFFF);
+                        fx.sparkle(now + 360, 500, 0, o, value >= 4 ? 0xD890F8 : 0xF8F0B0);
+                    }
+                }
+                break;
+            }
+            case "flip":
+                fx.pop(now, 320, 0, o);
+                fx.glow(now, 500, 0, o, 0xFFFFFF);
+                break;
+            case "activate":
+                fx.glow(now, 800, 0, o, 0xF8D050);
+                fx.ring(now, 700, 0, o, 0xF8D050);
+                break;
+            case "negate":
+                fx.shake(now, 420, 0, o, 0x404060);
+                fx.ring(now, 500, 0, o, 0xF84848);
+                break;
+            case "attack":
+                fx.lunge(now, 500, 0, o, me ? -1 : 1);
+                if (value >= 0) {
+                    fx.shake(now + 220, 380, 0, value, 0xF83020);
+                }
+                break;
+            case "destroy":
+                fx.shake(now, 300, 0, o, 0xF83020);
+                fx.fade(now + 200, 600, 0, o);
+                break;
+            case "grave":
+                if (at != null && grave != null && !at.equals(grave)) {
+                    fx.fly(now, 360, card, card == 0, false, at, grave, false);
+                }
+                break;
+            case "damage":
+                if (value >= 1500) {
+                    fx.flash(now, 160, 0xF84020);   // (a heavy blow only: small ones say so with their number)
+                }
+                break;
+            case "coin":
+                coin = value;
+                coinAt = now;
+                break;
+            case "win":
+                fx.flash(now, 400, value == 1 ? 0xFFF8C0 : 0x400000);
+                break;
+            default:
+                break;
+        }
     }
 
     private boolean turnMine;
@@ -591,10 +729,26 @@ public final class YgoDuelPage extends Page {
     @Override
     public void draw(Canvas c, int w, int h) {
         runBeats();
+        JSONObject truthSt = st;
+        JSONArray truthObjs = objs;
+        if (shownSt != null) {
+            st = shownSt;   // (the table as shown: an answer's events play on the state before it)
+            objs = shownObjs;
+        }
+        try {
+            drawTable(c, w, h);
+        } finally {
+            st = truthSt;
+            objs = truthObjs;
+        }
+    }
+
+    private void drawTable(Canvas c, int w, int h) {
         hits.clear();
         actions.clear();
         long now = System.currentTimeMillis();
         scale = v.pixelScale();
+        fill.setColor(0xFF000000);   // (opaque: a faded card's alpha would wash the mat)
         // the table: a deep blue-violet duel mat, a line between the sides
         fill.setShader(new LinearGradient(0, 0, 0, h, new int[]{0xFF1A1838, 0xFF2A2858, 0xFF1A1838}, null, Shader.TileMode.CLAMP));
         c.drawRect(0, 0, w, h, fill);
@@ -624,6 +778,12 @@ public final class YgoDuelPage extends Page {
         zoneRow(c, w, seat, false, y, cw, chh, false);
         drawHand(c, w, Math.max(y + chh + 6, handY), hw, hh);
         drawBar(c, w, h);
+        handR[1 - seat] = new RectF(w - hw - 6, -hh * 0.6f, w - 6, hh * 0.4f);
+        fx.drawOver(c, w, h, now, this::objRect, (cc, id, down, turned, x, yy, cw2, ch2, al) ->
+                cardAt(cc, down ? 0 : id, x, yy, cw2, ch2, turned, al, false), art);
+        if (coin >= 0 && now - coinAt < 1100) {
+            fx.drawCoin(c, w / 2f, lpY + 10, now - coinAt, coin == 1, art);
+        }
         drawFloats(c, now);
         if (sheetObj >= 0) {
             drawSheet(c, w, h);
@@ -635,7 +795,7 @@ public final class YgoDuelPage extends Page {
         if (ended && idle()) {
             drawEnd(c, w, h);
         }
-        if (!beats.isEmpty() || aiAt > 0 || now < busyUntil || now < captionUntil || !floats.isEmpty()) {
+        if (!beats.isEmpty() || aiAt > 0 || now < busyUntil || now < captionUntil || !floats.isEmpty() || fx.moving(now)) {
             v.postInvalidateOnAnimation();
         } else if (s.mode == MODE_FRIEND && !ended && q.optInt("player") != seat) {
             v.postInvalidateDelayed(1000);
@@ -667,12 +827,14 @@ public final class YgoDuelPage extends Page {
             int z = turned ? 4 - i : i;
             float x = x0 + i * (cw + 3);
             int o = zones == null ? -1 : zones.optInt(z, -1);
+            zoneR[who][monsters ? 1 : 0][z] = new RectF(x, y, x + cw, y + ch);
             slot(c, o, x, y, cw, ch, turned);
         }
         float px = turned ? x0 - cw - 3 : x0 + 5 * (cw + 3), ox = turned ? x0 + 5 * (cw + 3) : x0 - cw - 3;
         if (monsters) {
             // the Graveyard beside the monsters, the Extra Deck on the other side
             JSONArray grave = p.optJSONArray("grave");
+            graveR[who] = new RectF(px, y, px + cw, y + ch);
             pileSpot(c, grave, px, y, cw, ch, turned, who == seat ? "YOUR GRAVEYARD" : "THEIR GRAVEYARD", "GY");
             int extra = p.optInt("extraCount");
             if (extra > 0) {
@@ -689,6 +851,8 @@ public final class YgoDuelPage extends Page {
         } else {
             // the Field Spell zone and the Deck
             int field = zones == null ? -1 : zones.optInt(5, -1);
+            zoneR[who][0][5] = new RectF(ox, y, ox + cw, y + ch);
+            deckR[who] = new RectF(px, y, px + cw, y + ch);
             slot(c, field, ox, y, cw, ch, turned);
             if (p.optInt("deck") > 0) {
                 cardAt(c, 0, px, y, cw, ch, turned, 255, false);
@@ -755,7 +919,21 @@ public final class YgoDuelPage extends Page {
         objH[o] = ch;
         boolean up = x0.optInt("up") == 1, defense = x0.optInt("loc") == Ygo.LOC_MZONE && x0.optInt("ap") == 0;
         int card = up ? x0.optInt("c") : 0;
-        cardAt(c, card, x, y, cw, ch, turned, 255, defense);
+        long now = System.currentTimeMillis();
+        int falpha = fx.slotAlpha(0, o, now), ftint = fx.slotTint(0, o, now);
+        float fsc = fx.slotScale(0, o, now);
+        c.save();
+        c.translate(fx.slotDx(0, o, now, cw), fx.slotDy(0, o, now, ch));
+        c.scale(fsc, fsc, x + cw / 2, y + ch / 2);
+        cardAt(c, card, x, y, cw, ch, turned, falpha, defense);
+        if (ftint != 0) {
+            fill.setColor(ftint);
+            c.drawRoundRect(new RectF(x, y, x + cw, y + ch), 3, 3, fill);
+        }
+        c.restore();
+        if (falpha == 0) {
+            return;
+        }
         if (!up && x0.optInt("c") != 0) {
             // your own face-down card: its name faintly over the back
             fill.setColor(0x90000000);
@@ -851,6 +1029,8 @@ public final class YgoDuelPage extends Page {
         int n = hand.length();
         float step = n <= 1 ? 0 : Math.min(hw + 3, (w - 8 - hw) / (float) (n - 1));
         float x0 = (w - (step * (n - 1) + hw)) / 2f;
+        float ex = n == 0 ? (w - hw) / 2f : Math.min(x0 + step * n, w - hw - 4);
+        handR[seat] = new RectF(ex, y, ex + hw, y + hh);
         for (int i = 0; i < n; i++) {
             int o = hand.optInt(i);
             boolean can = !actionsOf(o).isEmpty() || (picking && mine() && q.optInt("type") == Ygo.Q_CARDS && isItem(o));
@@ -1344,6 +1524,23 @@ public final class YgoDuelPage extends Page {
         floats.clear();
         busyUntil = 0;
         captionUntil = 0;
+        shownSt = st;
+        shownObjs = objs;
+        fx.clear();
+    }
+
+    /** Tests: one answer by the AI for whoever is asked, its events played in real time */
+    void aiMoveNow() {
+        try {
+            JSONObject o = new JSONObject(Ygo.ai(duel, 3));
+            answer(ints(o.optJSONArray("p")), o.optInt("z"));
+        } catch (Exception ignored) {
+        }
+    }
+
+    /** Tests: the motion and beats still going */
+    boolean animating() {
+        return !beats.isEmpty() || fx.moving(System.currentTimeMillis());
     }
 
     void inspect(int obj) {

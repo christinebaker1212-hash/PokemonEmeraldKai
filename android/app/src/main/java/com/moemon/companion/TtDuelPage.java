@@ -1,6 +1,7 @@
 package com.moemon.companion;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -40,6 +41,11 @@ public final class TtDuelPage extends Page {
     private final int[] showCard = new int[9], showSeat = new int[9];
     private final long[] flipAt = new long[9];
     private final int[] flipFrom = new int[9];
+    // a card going down flies there from its hand (where it was, as x, y, w, h), then lands with a glint
+    private final long[] placeAt = new long[9];
+    private final float[][] placeFrom = new float[9][];
+    private float[] playFrom, dropRect;
+    private static final int FLY_MS = 200, GLINT_MS = 180, FLIP_MS = 320;
     private final List<Object[]> queue = new ArrayList<>();   // [due ms, kind, ...]
     private long animEnd;
     private String banner = "";
@@ -128,6 +134,7 @@ public final class TtDuelPage extends Page {
         if (duel == 0) {
             return false;
         }
+        playFrom = handRect(st.optInt("toMove"), slot);
         String ev = Tt.play(duel, slot, cell);
         if (ev == null) {
             v.buzz(false);
@@ -150,7 +157,7 @@ public final class TtDuelPage extends Page {
                 switch (e.optInt("k")) {
                     case Tt.EV_PLACE:
                         queue.add(new Object[]{t, "se", "se_rg_card_flipping"});
-                        queue.add(new Object[]{t, "place", e.optInt("cell"), e.optInt("card"), e.optInt("seat")});
+                        queue.add(new Object[]{t, "place", e.optInt("cell"), e.optInt("card"), e.optInt("seat"), playFrom});
                         queue.add(new Object[]{t + 200, "se", "se_rg_card_open"});   // (it lands)
                         t += 260;
                         break;
@@ -219,6 +226,8 @@ public final class TtDuelPage extends Page {
                     showCard[(int) q[2]] = (int) q[3];
                     showSeat[(int) q[2]] = (int) q[4];
                     flipAt[(int) q[2]] = 0;
+                    placeAt[(int) q[2]] = now;
+                    placeFrom[(int) q[2]] = q.length > 5 ? (float[]) q[5] : null;
                     break;
                 case "flip": {
                     int cell = (int) q[2];
@@ -333,6 +342,7 @@ public final class TtDuelPage extends Page {
         long now = System.currentTimeMillis();
         TtArt tt = v.app.ttArt;
         // the table: deep blue felt with a soft light in the middle, as on the DS
+        fill.setColor(0xFF000000);   // (opaque: a glint's alpha would wash the table)
         fill.setShader(new LinearGradient(0, 0, 0, h, 0xFF14284A, 0xFF0A1428, Shader.TileMode.CLAMP));
         c.drawRect(0, 0, w, h, fill);
         fill.setShader(null);
@@ -384,17 +394,31 @@ public final class TtDuelPage extends Page {
                 art.text(c, tt.words == null ? "" : tt.words.optJSONArray("types").optString(tile), (int) x + 4, (int) (y + ch / 2 - 6),
                         0xFF6890C8, 0xFF000000);
             }
-            if (showCard[i] != 0) {
-                float flip = 1;
+            boolean flying = showCard[i] != 0 && placeFrom[i] != null && now - placeAt[i] < FLY_MS;
+            if (showCard[i] != 0 && !flying) {
+                float flip = 1, pop = 1;
                 int seat = showSeat[i];
-                if (flipAt[i] > 0 && now - flipAt[i] < 320) {
-                    float k = (now - flipAt[i]) / 320f;
+                float k = flipAt[i] > 0 && now - flipAt[i] < FLIP_MS ? (now - flipAt[i]) / (float) FLIP_MS : -1;
+                if (k >= 0) {
                     flip = (float) Math.abs(Math.cos(k * Math.PI));
                     seat = k < 0.5f ? flipFrom[i] : showSeat[i];
+                    pop = 1 + 0.08f * (float) Math.sin(k * Math.PI);   // (it lifts off the table as it turns)
                 }
                 int elem = cells == null ? 0 : cells.optJSONArray(i).optInt(4);
                 int[] mods = elem == 0 ? null : new int[]{elem, elem, elem, elem};
-                tt.draw(c, showCard[i], seat, mods, x, y, cw, ch, Math.max(0.04f, flip), 255);
+                float pw = cw * pop, ph = ch * pop;
+                tt.draw(c, showCard[i], seat, mods, x - (pw - cw) / 2, y - (ph - ch) / 2, pw, ph, Math.max(0.04f, flip), 255);
+                // light on it: as it lands, and as a captured card shows its new side
+                long since = placeFrom[i] != null ? now - placeAt[i] - FLY_MS : Long.MAX_VALUE;
+                float glow = since >= 0 && since < GLINT_MS ? 1 - since / (float) GLINT_MS : 0;
+                if (k >= 0.5f) {
+                    glow = Math.max(glow, (1 - k) * 2 * 0.8f);
+                }
+                if (glow > 0) {
+                    float gw = pw * Math.max(0.04f, flip);
+                    fill.setColor(Color.argb((int) (glow * 140), 255, 255, 255));
+                    c.drawRoundRect(new RectF(x + (cw - gw) / 2, y - (ph - ch) / 2, x + (cw + gw) / 2, y + (ph + ch) / 2), 4, 4, fill);
+                }
             } else if (myTurn() && (selected >= 0 || dragSlot >= 0)) {
                 line.setColor(0x8098C0FF);
                 c.drawRoundRect(new RectF(x + 2, y + 2, x + cw - 2, y + ch - 2), 4, 4, line);
@@ -455,6 +479,23 @@ public final class TtDuelPage extends Page {
             tt.draw(c, mine.optJSONArray(dragSlot).optInt(0), TtArt.SEAT_PLAYER, null, dragX - hw * 0.6f, dragY - hh * 0.6f,
                     hw * 1.2f, hh * 1.2f, 1, 235);
         }
+        // cards on their way to the board
+        for (int i = 0; i < 9; i++) {
+            if (showCard[i] == 0 || placeFrom[i] == null || now - placeAt[i] >= FLY_MS) {
+                continue;
+            }
+            float k = (now - placeAt[i]) / (float) FLY_MS;
+            k = 1 - (1 - k) * (1 - k);   // (fast off the hand, settling onto the cell)
+            float[] f = placeFrom[i];
+            float tx = bx + (i % 3) * (cw + 4), ty = by + (i / 3) * (ch + 4);
+            float arc = (float) Math.sin(k * Math.PI) * ch * 0.18f;   // (a little lift on the way)
+            float fw = f[2] + (cw - f[2]) * k, fh = f[3] + (ch - f[3]) * k;
+            float lift = 1 + 0.12f * (float) Math.sin(k * Math.PI);
+            float fx = f[0] + (tx - f[0]) * k, fy = f[1] + (ty - f[1]) * k - arc;
+            fill.setColor(0x60000000);   // (its shadow on the table)
+            c.drawRoundRect(new RectF(fx + 3, fy + 4 + arc, fx + fw + 3, fy + fh + 4 + arc), 4, 4, fill);
+            tt.draw(c, showCard[i], showSeat[i], null, fx - fw * (lift - 1) / 2, fy - fh * (lift - 1) / 2, fw * lift, fh * lift, 1, 255);
+        }
         // the call-outs and the end
         if (!banner.isEmpty() && (now - bannerAt < 700 || bannerAt > now)) {
             drawBanner(c, w, by + ch * 1.5f, banner);
@@ -469,13 +510,58 @@ public final class TtDuelPage extends Page {
         }
     }
 
+    /** Tests: your move now, by the first card you can play onto the first empty cell (false: not your turn) */
+    boolean playFirstNow() {
+        if (!myTurn()) {
+            return false;
+        }
+        int can = Tt.playable(duel);
+        for (int slot = 0; slot < 5; slot++) {
+            for (int cell = 0; cell < 9 && (can >> slot & 1) != 0; cell++) {
+                if (showCard[cell] == 0) {
+                    myPlay(slot, cell);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /** Tests: anything still moving */
+    boolean animating() {
+        long now = System.currentTimeMillis();
+        return now < animEnd || aiAt > 0 || !queue.isEmpty() || anyFlipping(now);
+    }
+
     private boolean anyFlipping(long now) {
-        for (long f : flipAt) {
-            if (f > 0 && now - f < 320) {
+        for (int i = 0; i < 9; i++) {
+            if (flipAt[i] > 0 && now - flipAt[i] < FLIP_MS || placeFrom[i] != null && now - placeAt[i] < FLY_MS + GLINT_MS) {
                 return true;
             }
         }
         return false;
+    }
+
+    // where a hand's card sits now (the layout of the last frame drawn): the place a played card flies from
+    private float[] handRect(int seat, int slot) {
+        JSONArray hands = st.optJSONArray("hands");
+        JSONArray hand = hands == null ? null : hands.optJSONArray(seat);
+        if (hand == null || slot < 0 || slot >= 5 || hw <= 0) {
+            return null;
+        }
+        if (seat == 0 && dropRect != null) {
+            float[] r = dropRect;
+            dropRect = null;
+            return r;
+        }
+        if (seat == 0) {
+            return new float[]{handX[slot], hy - (slot == selected ? 10 : 0), hw, hh};
+        }
+        int n = 0;
+        for (int i = 0; i < slot; i++) {
+            n += hand.optJSONArray(i).optInt(1) == 1 ? 0 : 1;
+        }
+        return new float[]{ox + n * (ow + 2), oy, ow, oh};
     }
 
     private void drawScore(Canvas c, float x, float y, int n, int seat) {
@@ -579,6 +665,7 @@ public final class TtDuelPage extends Page {
     public void dragEnd(int x, int y) {
         int slot = dragSlot;
         dragSlot = -1;
+        dropRect = new float[]{dragX - hw * 0.6f, dragY - hh * 0.6f, hw * 1.2f, hh * 1.2f};   // (it goes on from the finger)
         for (int i = 0; i < 9; i++) {
             float cx = bx + (i % 3) * (cw + 4), cy = by + (i / 3) * (ch + 4);
             if (x >= cx && x < cx + cw && y >= cy && y < cy + ch && showCard[i] == 0) {
@@ -586,6 +673,7 @@ public final class TtDuelPage extends Page {
                 return;
             }
         }
+        dropRect = null;
         v.invalidate();
     }
 

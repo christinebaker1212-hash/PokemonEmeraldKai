@@ -59,6 +59,10 @@ public final class TcgDuelPage extends Page {
     // layout (each draw): where each player's six spaces are
     private final float[][] slotX = new float[2][6], slotY = new float[2][6], slotW = new float[2][6], slotH = new float[2][6];
     private float scale = 1;
+    // the motion (CardFx): the table shows the state before a move while that move's events play, as the game's does
+    private final CardFx fx = new CardFx();
+    private JSONObject shown;
+    private final RectF[] deckR = new RectF[2], prizeR = new RectF[2], handR = new RectF[2];
 
     public TcgDuelPage(GameView v, Setup setup) {
         super(v);
@@ -72,6 +76,7 @@ public final class TcgDuelPage extends Page {
         }
         flow = Tcg.flowNew();
         refresh();
+        shown = st;
         lastSeq = st.optInt("seq");
         busyUntil = System.currentTimeMillis() + 500;
         say(seat == st.optInt("actor") ? (st.optInt("phase") == Tcg.SETUP ? "Place your POKéMON!" : "YOUR TURN")
@@ -258,12 +263,18 @@ public final class TcgDuelPage extends Page {
             se(t, sound(type, mine, flags, value, card, slot));
             switch (type) {
                 case Tcg.EV_TURN:
-                    t = beat(t, "say", mine ? "YOUR TURN" : theirName() + "'S TURN", who, 0, 0, 0, 800);
+                    fxBeat(t, "turn", who, 0, 0, 0);
+                    t = beat(t, "say", mine ? "YOUR TURN" : theirName() + "'S TURN", who, 0, 0, 0, 900);
+                    break;
+                case Tcg.EV_DRAW:
+                    fxBeat(t, "draw", who, 0, value, card);
+                    t += draws++ < 8 ? 160 : 40;
                     break;
                 case Tcg.EV_ATTACK: {
                     JSONObject c = a.card(card);
                     JSONArray atk = c == null ? null : c.optJSONArray("a");
                     String an = atk == null || slot >= atk.length() ? "" : atk.optJSONObject(slot).optString("n");
+                    fxBeat(t + 250, "attack", who, 0, 0, card);
                     t = beat(t, "say", a.name(card) + ": " + an + "!", who, 0, 0, card, 1000);
                     break;
                 }
@@ -271,27 +282,33 @@ public final class TcgDuelPage extends Page {
                     t = beat(t, "coin", value == 1 ? "HEADS!" : "TAILS!", who, 0, value, 0, 750);
                     break;
                 case Tcg.EV_DAMAGE:
+                    fxBeat(t, (flags & Tcg.DMG_WEAK) != 0 ? "weak" : "damage", who, slot, value, 0);
                     t = beat(t, "float", "-" + value + ((flags & Tcg.DMG_WEAK) != 0 ? "!" : ""), who, slot,
                             (flags & Tcg.DMG_WEAK) != 0 ? 0xFFFF5040 : 0xFFF86830, 0, 420);
                     break;
                 case Tcg.EV_HEAL:
+                    fxBeat(t, "heal", who, slot, value, 0);
                     t = beat(t, "float", "+" + value, who, slot, 0xFF60D860, 0, 380);
                     break;
                 case Tcg.EV_NO_DAMAGE:
+                    fxBeat(t, "shield", who, slot, 0, 0);
                     t = beat(t, "float", "NO DAMAGE", who, slot, 0xFFB8C8E8, 0, 450);
                     break;
                 case Tcg.EV_STATUS: {
                     String c = value == Tcg.ASLEEP ? "Asleep" : value == Tcg.PARALYZED ? "Paralyzed"
                             : value == Tcg.CONFUSED ? "Confused" : flags > 0 ? "Poisoned" : "";
                     if (!c.isEmpty()) {
+                        fxBeat(t, "status", who, slot, value, 0);
                         t = beat(t, "float", c.toUpperCase() + "!", who, slot, 0xFFC890F8, 0, 500);
                     }
                     break;
                 }
                 case Tcg.EV_KO:
+                    fxBeat(t, "ko", who, slot, 0, card);
                     t = beat(t, "say", name + " is Knocked Out!", who, slot, 0, card, 1000);
                     break;
                 case Tcg.EV_PRIZE:
+                    fxBeat(t, "prize", who, 0, 0, 0);
                     t = beat(t, "say", mine ? "You take a Prize card." : theirName() + " takes a Prize card.", who, 0, 0, 0, 650);
                     break;
                 case Tcg.EV_TRAINER:
@@ -300,14 +317,25 @@ public final class TcgDuelPage extends Page {
                     }
                     break;
                 case Tcg.EV_PLAY:
+                    if (st.optInt("phase") != Tcg.SETUP || mine) {
+                        fxBeat(t, "play", who, slot, 0, card);
+                        if (mine) {
+                            t += 380;
+                        }
+                    }
                     if (!mine && st.optInt("phase") != Tcg.SETUP) {
                         t = beat(t, "say", a.name(card) + " comes onto the Bench.", who, slot, 0, 0, 600);
                     }
                     break;
                 case Tcg.EV_EVOLVE:
+                    fxBeat(t, "evolve", who, slot, 0, card);
                     t = beat(t, "say", "It evolved into " + a.name(card) + "!", who, slot, 0, card, 900);
                     break;
                 case Tcg.EV_ATTACH:
+                    fxBeat(t, "attach", who, slot, 0, card);
+                    if (mine) {
+                        t += 420;
+                    }
                     if (!mine) {
                         t = beat(t, "say", a.name(card) + " is attached to " + nameAt(who, slot) + ".", who, slot, 0, 0, 650);
                     }
@@ -315,12 +343,14 @@ public final class TcgDuelPage extends Page {
                 case Tcg.EV_RETREAT:
                 case Tcg.EV_SWITCH:
                 case Tcg.EV_PROMOTE:
+                    fxBeat(t, "switch", who, 0, 0, 0);
                     t = beat(t, "say", nameAt(who, 0) + " is now Active.", who, 0, 0, 0, 600);
                     break;
                 case Tcg.EV_RETREAT_FAIL:
                     t = beat(t, "say", "It's Confused and couldn't retreat!", who, 0, 0, 0, 800);
                     break;
                 case Tcg.EV_POWER:
+                    fxBeat(t, "power", who, slot, 0, card);
                     t = beat(t, "say", nameAt(who, slot) + "'s Pokémon Power!", who, slot, 0, card, 800);
                     break;
                 case Tcg.EV_PEEK:
@@ -338,6 +368,7 @@ public final class TcgDuelPage extends Page {
                     t = beat(t, "say", "SUDDEN DEATH! One Prize card each.", who, 0, 0, 0, 1400);
                     break;
                 case Tcg.EV_WIN:
+                    fxBeat(t, "win", who, 0, mine ? 1 : 0, 0);
                     t = beat(t, "say", (mine ? "YOU WIN!" : theirName() + " WINS") + "  " + new String[]{"",
                             mine ? "No POKéMON left on their side." : "No POKéMON left on your side.",
                             mine ? "Their deck ran out." : "Your deck ran out.",
@@ -348,6 +379,98 @@ public final class TcgDuelPage extends Page {
             }
         }
         beats.add(new Object[]{t, "end", "", 0, 0, 0, 0});
+        draws = 0;
+    }
+
+    private int draws;   // (a run of draws: quick after the first few)
+
+    // a motion at AT (no time of its own: it plays alongside the beat it belongs to)
+    private void fxBeat(long at, String kind, int who, int slot, int value, int card) {
+        beats.add(new Object[]{at, "fx", kind, who, slot, value, card});
+    }
+
+    private RectF slotRect(int who, int slot) {
+        if (who < 0 || who > 1 || slot < 0 || slot > 5 || slotW[who][slot] <= 0) {
+            return null;
+        }
+        return new RectF(slotX[who][slot], slotY[who][slot], slotX[who][slot] + slotW[who][slot], slotY[who][slot] + slotH[who][slot]);
+    }
+
+    private static RectF shrink(RectF r, float k) {
+        float w = r.width() * k, h = r.height() * k;
+        return new RectF(r.centerX() - w / 2, r.centerY() - h / 2, r.centerX() + w / 2, r.centerY() + h / 2);
+    }
+
+    // a motion beat: what it moves, from where to where (the places as last drawn)
+    private void startFx(String kind, int who, int slot, int value, int card, long now) {
+        boolean mine = who == seat;
+        RectF at = slotRect(who, slot), hand = handR[who], deck = deckR[who], prize = prizeR[who];
+        switch (kind) {
+            case "turn":
+                fx.banner(now, 1000, mine ? "YOUR TURN" : theirName() + "'S TURN", mine ? 0x2858B8 : 0xB83838);
+                break;
+            case "draw":
+                if (deck != null && hand != null) {
+                    fx.fly(now, 360, card, !mine || card == 0, !mine, deck, hand, false);
+                }
+                break;
+            case "play":
+                if (hand != null && at != null) {
+                    fx.fly(now, 380, card, false, !mine, hand, at, true);
+                    fx.pop(now + 380, 260, who, slot);
+                }
+                break;
+            case "attach":
+                if (hand != null && at != null) {
+                    fx.fly(now, 400, card, false, !mine, hand, shrink(at, 0.55f), false);
+                    fx.sparkle(now + 380, 500, who, slot, 0xF8E070);
+                }
+                break;
+            case "evolve":
+                fx.glow(now, 800, who, slot, 0xFFFFFF);
+                fx.sparkle(now + 200, 700, who, slot, 0xF8F8F8);
+                fx.pop(now + 400, 300, who, slot);
+                break;
+            case "attack":
+                fx.lunge(now, 480, who, slot, mine ? -1 : 1);
+                break;
+            case "damage":
+                fx.shake(now, 420, who, slot, 0xF83020);
+                break;
+            case "weak":
+                fx.shake(now, 520, who, slot, 0xF83020);
+                fx.flash(now, 180, 0xFFF0F0);
+                break;
+            case "heal":
+                fx.sparkle(now, 600, who, slot, 0x60E060);
+                break;
+            case "shield":
+                fx.glow(now, 500, who, slot, 0x88B0F8);
+                break;
+            case "status":
+                fx.ring(now, 600, who, slot, value == Tcg.ASLEEP ? 0x8890F8 : value == Tcg.PARALYZED ? 0xF8E040
+                        : value == Tcg.CONFUSED ? 0xF890D0 : 0xB060E0);
+                break;
+            case "ko":
+                fx.fade(now, 750, who, slot);
+                break;
+            case "prize":
+                if (prize != null && hand != null) {
+                    fx.fly(now, 450, 0, true, !mine, prize, hand, false);
+                }
+                break;
+            case "switch":
+                fx.pop(now, 300, who, 0);
+                break;
+            case "power":
+                fx.glow(now, 650, who, slot, 0xF8E070);
+                break;
+            case "win":
+                fx.flash(now, 400, value == 1 ? 0xFFF8C0 : 0x400000);
+                break;
+            default:
+                break;
+        }
     }
 
     /** The sound the game's duel board plays for an event (tcg_board.c BoardEvent), null for none */
@@ -459,8 +582,13 @@ public final class TcgDuelPage extends Page {
                 case "float":
                     floats.add(new Object[]{now, b[3], b[4], b[2], b[5]});
                     break;
+                case "fx":
+                    startFx((String) b[2], (int) b[3], (int) b[4], (int) b[5], (int) b[6], now);
+                    break;
                 case "end":
                     busyUntil = now + 250;
+                    shown = st;   // (the table catches up with the rules)
+                    fx.settle();
                     break;
                 default:
                     break;
@@ -537,11 +665,24 @@ public final class TcgDuelPage extends Page {
     @Override
     public void draw(Canvas c, int w, int h) {
         runBeats();
+        JSONObject truth = st;
+        if (shown != null) {
+            st = shown;   // (the table as shown: a move's events play on the state before it)
+        }
+        try {
+            drawTable(c, w, h);
+        } finally {
+            st = truth;
+        }
+    }
+
+    private void drawTable(Canvas c, int w, int h) {
         hits.clear();
         actions.clear();
         long now = System.currentTimeMillis();
         TcgArt a = ta();
         scale = v.pixelScale();
+        fill.setColor(0xFF000000);   // (opaque: a faded card's alpha would wash the mat)
         // the mat: a deep green felt, lighter in the middle, a line between the sides
         fill.setShader(new LinearGradient(0, 0, 0, h, new int[]{0xFF173E2A, 0xFF22583A, 0xFF173E2A}, null,
                 Shader.TileMode.CLAMP));
@@ -574,8 +715,15 @@ public final class TcgDuelPage extends Page {
         // the line between the sides: what's happening, or what to do
         drawMiddle(c, w, mid);
         drawFloats(c, now);
-        if (coin >= 0 && now - coinAt < 900) {
-            drawCoin(c, w / 2f, mid - 10, now - coinAt);
+        fx.drawOver(c, w, h, now, this::slotRect, (cc, id, down, turned, x, yy, cw, ch, al) -> {
+            if (down) {
+                ta().draw(cc, 0, x, yy, cw, ch, scale, al);   // (a card's back)
+            } else {
+                card(cc, id, x, yy, cw, ch, turned, al);
+            }
+        }, art);
+        if (coin >= 0 && now - coinAt < 1100) {
+            fx.drawCoin(c, w / 2f, mid - 10, now - coinAt, coin == 1, art);
         }
         if (q != null && "pick".equals(q.optString("q"))) {
             drawPick(c, w, h);
@@ -585,7 +733,7 @@ public final class TcgDuelPage extends Page {
         if (ended && idle()) {
             drawEnd(c, w, h);
         }
-        if (!beats.isEmpty() || aiAt > 0 || now < busyUntil || now < captionUntil || !floats.isEmpty()
+        if (!beats.isEmpty() || aiAt > 0 || now < busyUntil || now < captionUntil || !floats.isEmpty() || fx.moving(now)
                 || (q != null && "slot".equals(q.optString("q")))) {
             v.postInvalidateOnAnimation();
         } else if (s.mode == MODE_FRIEND && !ended && st.optInt("actor") != seat) {
@@ -629,6 +777,7 @@ public final class TcgDuelPage extends Page {
         for (int i = Math.min(prizes, 6) - 1; i >= 0; i--) {
             card(c, 0, px + (i % 2) * 5, py + (i / 2) * 4, pw, ph, turned);
         }
+        prizeR[who] = new RectF(px, py, px + pw, py + ph);
         tag(c, "PRIZES " + prizes, px - 4, py + ph + 22);
         float dx = turned ? left : right, near = y + ah - ph - 10, far = y + 2;
         float deckY, pileY;
@@ -643,6 +792,7 @@ public final class TcgDuelPage extends Page {
         }
         // the counts beside the piles, on the outer side
         float countX = turned ? dx - 4 : dx + pw + 3;
+        deckR[who] = new RectF(dx, deckY, dx + pw, deckY + ph);
         if (p.optInt("deck") > 0) {
             card(c, 0, dx, deckY, pw, ph, turned);
         } else {
@@ -669,10 +819,14 @@ public final class TcgDuelPage extends Page {
 
     // a card on the table: the other side's turned to face them
     private void card(Canvas c, int id, float x, float y, float w, float h, boolean turned) {
+        card(c, id, x, y, w, h, turned, 255);
+    }
+
+    private void card(Canvas c, int id, float x, float y, float w, float h, boolean turned, int alpha) {
         if (turned) {
-            ta().drawTurned(c, id, x, y, w, h, scale, 255);
+            ta().drawTurned(c, id, x, y, w, h, scale, alpha);
         } else {
-            ta().draw(c, id, x, y, w, h, scale, 255);
+            ta().draw(c, id, x, y, w, h, scale, alpha);
         }
     }
 
@@ -696,11 +850,21 @@ public final class TcgDuelPage extends Page {
         JSONObject f = field(who, slot);
         boolean choosable = q != null && "slot".equals(q.optString("q")) && q.optInt("who") == who
                 && (q.optInt("mask") >> slot & 1) != 0;
+        long now = System.currentTimeMillis();
+        float fdx = fx.slotDx(who, slot, now, w), fdy = fx.slotDy(who, slot, now, h), fsc = fx.slotScale(who, slot, now);
+        int falpha = fx.slotAlpha(who, slot, now), ftint = fx.slotTint(who, slot, now);
         if (f == null) {
             empty(c, x, y, w, h);
-        } else {
+        } else if (falpha > 0) {
             int id = f.optInt("id");
-            card(c, id, x, y, w, h, who != seat);
+            c.save();
+            c.translate(fdx, fdy);
+            c.scale(fsc, fsc, x + w / 2, y + h / 2);
+            card(c, id, x, y, w, h, who != seat, falpha);
+            if (ftint != 0) {
+                fill.setColor(ftint);
+                c.drawRoundRect(new RectF(x, y, x + w, y + h), 3, 3, fill);
+            }
             int dmg = f.optInt("dmg"), hp = f.optInt("hp");
             if (dmg > 0) {
                 // damage counters as the game shows them: a red badge with the damage
@@ -743,6 +907,7 @@ public final class TcgDuelPage extends Page {
             if (!cond.isEmpty()) {
                 chip(c, cond, (int) x, (int) (y - 6), 0xFF8040B0);
             }
+            c.restore();
         }
         if (choosable) {
             float pulse = (float) (0.5 + 0.5 * Math.sin(System.currentTimeMillis() / 160.0));
@@ -786,6 +951,10 @@ public final class TcgDuelPage extends Page {
         int n = hand.length();
         float step = n <= 1 ? 0 : Math.min(hw + 3, (w - 8 - hw) / (float) (n - 1));
         float x0 = (w - (step * (n - 1) + hw)) / 2f;
+        // (where cards fly to and from: the hand's end; theirs, the corner their hand is counted in)
+        float ex = n == 0 ? (w - hw) / 2f : x0 + step * n;
+        handR[seat] = new RectF(Math.min(ex, w - hw - 4), y, Math.min(ex, w - hw - 4) + hw, y + hh);
+        handR[1 - seat] = new RectF(w - hw - 6, -hh * 0.6f, w - 6, hh * 0.4f);
         for (int i = 0; i < n; i++) {
             int id = hand.optJSONArray(i).optInt(1);
             JSONObject o = ho == null ? null : ho.optJSONObject(i);
@@ -1283,6 +1452,21 @@ public final class TcgDuelPage extends Page {
         floats.clear();
         busyUntil = 0;
         captionUntil = 0;
+        shown = st;
+        fx.clear();
+    }
+
+    /** Tests: one move by the AI for whoever is to move, its events played in real time */
+    void aiMoveNow() {
+        try {
+            act(new JSONObject(Tcg.ai(duel, 3)));
+        } catch (Exception ignored) {
+        }
+    }
+
+    /** Tests: the motion and beats still going */
+    boolean animating() {
+        return !beats.isEmpty() || fx.moving(System.currentTimeMillis());
     }
 
     /** A card in play up close (WHO 0: this phone's side) */

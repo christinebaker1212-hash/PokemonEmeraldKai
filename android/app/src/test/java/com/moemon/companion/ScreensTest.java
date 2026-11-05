@@ -347,6 +347,19 @@ public class ScreensTest {
         v.showOver(duelPage);
         duelPage.tap(0, 0);
         shot(v, "cards_duel");
+        // the motion: their move, then yours, filmed (a card flying down, the captures turning)
+        int tf = 0;
+        for (int move = 0; move < 4 && tf < 60; move++) {
+            for (int k = 0; k < 60 && tf < 60 && (k < 4 || duelPage.animating()); k++) {
+                if (k % 2 == 0) {
+                    shot(v, String.format("film_tt_%02d", tf++));
+                } else {
+                    v.draw(new Canvas(Bitmap.createBitmap(4, 4, Bitmap.Config.ARGB_8888)));
+                }
+                Thread.sleep(40);
+            }
+            duelPage.playFirstNow();
+        }
         v.showOver(new TtDeckPage(v, 0));
         shot(v, "cards_deck");
         TtPackPage pack = new TtPackPage(v, 1, new int[]{11, 61, 25});
@@ -419,6 +432,20 @@ public class ScreensTest {
         if (duel.beginHand("ATTACH") || duel.beginHand("PLAY")) {
             shot(v, "tcg_duel_target");
         }
+        duel.back();
+        // the motion: moves by the AI on both sides, filmed (cards flying, an attack, the hits, the turn's banner)
+        int frame = 0;
+        for (int move = 0; move < 14 && frame < 90; move++) {
+            duel.aiMoveNow();
+            for (int k = 0; k < 40 && duel.animating() && frame < 90; k++) {
+                if (k % 2 == 0) {
+                    shot(v, String.format("film_tcg_%02d", frame++));
+                } else {
+                    v.draw(new Canvas(Bitmap.createBitmap(4, 4, Bitmap.Config.ARGB_8888)));
+                }
+                Thread.sleep(70);
+            }
+        }
         v.showOver(new TcgDeckPage(v, 0));
         shot(v, "tcg_deck");
         TcgPackPage pack = new TcgPackPage(v, 2, new int[]{8, 20, 33, 41, 50, 60, 77, 90, 3, 37}, 1 << 9 | 1 << 2);
@@ -490,6 +517,19 @@ public class ScreensTest {
             shot(v, "ygo_duel_card");
         }
         duel.inspect(-1);
+        // the motion: answers by the AI on both sides, filmed (summons, attacks, destroyed cards, the turn's banner)
+        int frame = 0;
+        for (int move = 0; move < 30 && frame < 40; move++) {
+            duel.aiMoveNow();
+            for (int k = 0; k < 40 && duel.animating() && frame < 40; k++) {
+                if (k % 2 == 0) {
+                    shot(v, String.format("film_ygo_%02d", frame++));
+                } else {
+                    v.draw(new Canvas(Bitmap.createBitmap(4, 4, Bitmap.Config.ARGB_8888)));
+                }
+                Thread.sleep(70);
+            }
+        }
         v.showOver(new YgoDeckPage(v, 0));
         shot(v, "ygo_deck");
         int[] pack = new int[9];

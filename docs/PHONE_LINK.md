@@ -616,4 +616,21 @@ Look.creatures, "look_art"; Look.pokemonArt sets GameArt.pokemonArt every frame,
   kai.gift says how many are left. Tests tools/phone/kai_test.py (twelve, the same code, a thirteenth), ScreensTest
   gift_wrapped / gift_open / me.
 
-Next: the card games up to the game's (#292).
+- The card tables in motion (the user: "the card games have 5% of the quality of the card games in the actual game.
+  Animations are completely missing", then "I don't want to emulate the card engines the game runs, I want to animate
+  the app similarly to the card engines. I don't want a handheld style, I just want a polished version of the app"):
+  the app's own pages, drawn as before, with the game's tables' beats. CardFx.java is the shared piece: a list of
+  timed effects keyed by a slot (FLY from one rectangle to another, parked until the state catches up; LUNGE; SHAKE;
+  FADE; GLOW; POP; SPARKLE; RING; FLASH; BANNER; the coin), asked by the page for each slot's offset, scale, alpha and
+  tint while it draws, and drawing what goes over the table. The POKéMON and YU-GI-OH! pages keep a *shown* state that
+  lags the engine's: each event becomes an "fx" beat beside the say / float / sound beats already timed in callOut,
+  and the "end" beat makes the truth shown (TcgDuelPage fxBeat / startFx: draws fly from the deck to the hand, Energy
+  and Trainers from the hand, an attacker lunges, the hit card shakes red, weakness flashes, a KO'd card fades and its
+  Prize flies, the coin spins, YOUR TURN / their turn banners; YgoDuelPage the same for summons, sets, flips, activations
+  (a glow), negations, attacks, destruction, damage (a red wash only for a blow of 1500 or more), the coin and the win).
+  TRIPLE TRIAD (TtDuelPage: its timed queue already turned captures) gained the card flying from the hand, or from the
+  finger after a drag, to its cell with a lift and a shadow, a glint as it lands, and captured cards lifting with a
+  light as they turn. Every page paints its table opaque first (a faded card's alpha left in the shared Paint washed
+  the next frame). Tests ScreensTest film_tcg_*, film_ygo_*, film_tt_* (frames of AI moves on both sides).
+
+Next: T11, the KANTO / JOHTO audit.
