@@ -12255,3 +12255,11 @@ const u8 *MP_Storage_HandCursor(const u16 **pal)
         *pal = sHandCursor_Pal;
     return sHandCursor_Gfx;
 }
+
+// ... and whether the PC has finished going to a box (back in its box screen's input, no scroll running): the grid
+// zooms back in only then
+bool8 MP_Storage_BoxSettled(void)
+{
+    return sStorage != NULL && gMain.callback2 == CB2_PokeStorage && gTasks[sStorage->taskId].func == Task_PokeStorageMain
+        && sStorage->state == MSTATE_HANDLE_INPUT;
+}

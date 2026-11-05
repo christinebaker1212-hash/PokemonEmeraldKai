@@ -5542,15 +5542,16 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   (PLATFORM_KEY_SEARCH / _INSPECT: the controller's LT / RT in the PC's context, gamepad.c; Q / E on the keyboard there,
   sdl2.c, since F is TAG; main.c ReadKeys keeps them in gMpExtraHeld). A tap under 15 frames scrolls a box (as L / R's
   INPUT_SCROLL_*); a hold zooms the box (the frame from the last held frame) into its cell of a 3x3 grid of all 40
-  boxes. The user's rule: the PC's own screen stays (the PKMN DATA panel, the buttons, the arrows): the grid lives only
+  boxes, in pages of nine: box N always has place N mod 9 (the user's rule: each of the nine places has its own zoom
+  out and in), the grid scrolling a page at a time (WantScroll), the last page's empty places left empty. The user's rule: the PC's own screen stays (the PKMN DATA panel, the buttons, the arrows): the grid lives only
   in the box's place (the wallpaper at 80,16, its inside 82,42 156x116), each cell the box as the PC draws it made
   48x36 (MP_Storage_BoxWallpaper renders its wallpaper, Walda's too, the icons where CreateBoxMonIconAtPos puts them,
   mean-of-pixels shrinking with icons kept crisp), the title plate and name above in the PC's own art and title colors
   (MP_Storage_BoxTitle) for the box under the PC's own hand (its live palette). While the grid is up MpBoxGridHide
   (CB2_PokeStorage, before the OAM is built) turns BG2 off and hides the sprites on the box (arrows kept), so the
   PC's backdrop shows between the cells; they come back as they were. D-pad moves, A or L2 / R2 picks
-  (INPUT_MP_JUMP_BOX: the stock scroll to that box runs hidden behind the grid, then the live box grows back from its
-  cell over the backdrop kept from the grid), B goes back to the box it came from. Drawn over the frame
+  (INPUT_MP_JUMP_BOX: the stock scroll to that box runs hidden behind the grid; once the PC is back in its input state,
+  MP_Storage_BoxSettled, the live box grows back from its cell over the backdrop kept from the grid), B goes back to the box it came from. Drawn over the frame
   (MP_BoxGrid_Composite; every pixel with bit 15 set: the frame is ABGR1555 and a clear bit is see-through black).
   Test qol_box_grid.
 

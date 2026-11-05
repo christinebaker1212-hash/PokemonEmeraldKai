@@ -48,6 +48,7 @@ u8 MP_RenderSmallGlyph(u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor);   /
 bool8 MP_Storage_BoxWallpaper(u8 boxId, u16 *out);                        // pokemon_storage_system.c
 void MP_Storage_BoxTitle(u8 boxId, u8 *pix, s16 *left, u16 *colors);
 const u8 *MP_Storage_HandCursor(const u16 **pal);
+bool8 MP_Storage_BoxSettled(void);
 
 enum { PHASE_NONE, PHASE_ZOOM_OUT, PHASE_GRID, PHASE_SCROLLING, PHASE_ZOOM_IN };
 
@@ -84,15 +85,12 @@ static s16 RowTop(u8 row)
     return row * (CELL_H + GAP_Y);
 }
 
-// The first row to show so the cursor's row is in view (the middle one where it can be)
+// The first row to show for a box: the boxes come in pages of nine, so every box has its own place of the nine
+// (box N in slot N mod 9, the user's rule: each box zooms out to and back from where it sits) and the grid
+// scrolls a page at a time (the last page's empty places left empty)
 static s16 WantScroll(u8 box)
 {
-    s16 row = box / COLS, top = row - 1, maxTop = Rows() - ROWS_SHOWN;
-    if (top > maxTop)
-        top = maxTop;
-    if (top < 0)
-        top = 0;
-    return RowTop(top);
+    return RowTop((box / (COLS * ROWS_SHOWN)) * ROWS_SHOWN);
 }
 
 static void CellRect(u8 box, s16 scroll, s16 *x, s16 *y)
@@ -440,7 +438,7 @@ void MP_BoxGrid_Composite(u16 *frame)
     }
     // the hand's row eases into view
     want = WantScroll(sG.sel);
-    if (sG.phase == PHASE_GRID && sG.scroll != want)
+    if ((sG.phase == PHASE_GRID || sG.phase == PHASE_SCROLLING) && sG.scroll != want)
         sG.scroll += (want - sG.scroll) / 3 ? (want - sG.scroll) / 3 : (want > sG.scroll ? 1 : -1);
     switch (sG.phase)
     {
@@ -460,7 +458,7 @@ void MP_BoxGrid_Composite(u16 *frame)
         DrawHead(frame);
         DrawCells(frame, -1);
         DrawHand(frame);
-        if (sG.phase == PHASE_SCROLLING && StorageGetCurrentBox() == sG.target)
+        if (sG.phase == PHASE_SCROLLING && StorageGetCurrentBox() == sG.target && MP_Storage_BoxSettled())
         {
             sG.t = 0;
             sG.phase = PHASE_ZOOM_IN;
@@ -468,7 +466,8 @@ void MP_BoxGrid_Composite(u16 *frame)
         break;
     case PHASE_ZOOM_IN:
         // the box as it is now (on the picked box, shown again), growing from its cell back to its place, over
-        // the backdrop kept from the grid
+        // the backdrop kept from the grid (its page in place)
+        sG.scroll = WantScroll(sG.target);
         for (y = 0; y < BOX_H; y++)
         {
             memcpy(&sLive[y * BOX_W], &frame[(BOX_Y + y) * DISPLAY_WIDTH + BOX_X], BOX_W * 2);

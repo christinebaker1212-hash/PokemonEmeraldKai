@@ -1,9 +1,10 @@
 # The PC boxes' L2 / R2 (MOVE POKéMON): a tap of L2 from BOX 1 goes round to BOX 40, R2 back to 1 and on to 2, L2 to 1;
 # R2 held opens the 3x3 grid on BOX 1 (shots zoomout_*), DOWN + RIGHT to BOX 5 (its name at the top: grid_box5), A
 # picks it: the PC scrolls there behind the grid and the grid zooms back in (zoomin_*, box5). L2 held, RIGHT, then B
-# stays on BOX 5.
+# stays on BOX 5 (it zooms out to the middle place: zoom5_*). Five taps of L2 to BOX 40, R2 held (BOX 40 sits on page 5 at
+# the middle left: zoom40_*), UP + RIGHT to BOX 38 (page 5, top middle), A: it zooms back from there (zoomin38_*).
 MODE=1
 TMO=200
 EXPECT_A=("[test] box 1" "[test] box 40" "[test] box 2" "box grid: open on box 1" "box grid: on box 5" "box grid: picked box 5"
-          "box grid: closed on box 5" "[test] box 5" "box grid: open on box 5")
+          "box grid: closed on box 5" "[test] box 5" "box grid: open on box 5" "[test] box 40" "box grid: open on box 40" "box grid: picked box 38" "[test] box 38")
 UNEXPECT_A=("[crash]" "TIMEOUT" "picked box 6")

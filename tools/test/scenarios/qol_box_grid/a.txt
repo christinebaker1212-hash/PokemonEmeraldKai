@@ -43,12 +43,36 @@ shotburst zoomin 40 3
 wait 150
 mp box
 shot box5
+shotburst zoom5_ 30 1
 press SEARCH 30
 wait 30
+shot grid5
 press RIGHT 2
 wait 10
 press B 2
 wait 60
 mp box
+press SEARCH 4
+wait 40
+press SEARCH 4
+wait 40
+press SEARCH 4
+wait 40
+press SEARCH 4
+wait 40
+press SEARCH 4
+wait 60
+mp box
+shotburst zoom40_ 30 1
+press INSPECT 30
 wait 30
+shot grid40
+press UP 2
+wait 10
+press RIGHT 2
+wait 10
+press A 2
+shotburst zoomin38_ 60 2
+wait 160
+mp box
 quit
