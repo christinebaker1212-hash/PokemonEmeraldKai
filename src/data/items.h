@@ -800,7 +800,7 @@ const struct Item gItems[] =
     {
         .name = _("HEAL BALL"),
         .itemId = ITEM_HEAL_BALL,
-        .price = 0,
+        .price = 300,   // Moemon Kai: Platinum's price (special balls sell for half like any other)
         .description = sHealBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -813,7 +813,7 @@ const struct Item gItems[] =
     {
         .name = _("DUSK BALL"),
         .itemId = ITEM_DUSK_BALL,
-        .price = 0,
+        .price = 1000,   // Moemon Kai: Platinum's price (special balls sell for half like any other)
         .description = sDuskBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -927,7 +927,7 @@ const struct Item gItems[] =
     {
         .name = _("QUICK BALL"),
         .itemId = ITEM_QUICK_BALL,
-        .price = 0,
+        .price = 1000,   // Moemon Kai: Platinum's price (special balls sell for half like any other)
         .description = sQuickBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -1059,7 +1059,7 @@ const struct Item gItems[] =
     {
         .name = _("GENESIS BALL"),
         .itemId = ITEM_GENESIS_BALL,
-        .price = 0,
+        .price = 200,   // Moemon Kai: sells for half like any other ball
         .description = sGenesisBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -1121,7 +1121,7 @@ const struct Item gItems[] =
     {
         .name = _("EPOCH BALL"),
         .itemId = ITEM_EPOCH_BALL,
-        .price = 0,
+        .price = 300,   // Moemon Kai: sells for half like any other ball
         .description = sEpochBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -1134,7 +1134,7 @@ const struct Item gItems[] =
     {
         .name = _("ASTRAL BALL"),
         .itemId = ITEM_ASTRAL_BALL,
-        .price = 0,
+        .price = 10000,   // Moemon Kai: sells for half like any other ball
         .description = sAstralBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -4213,9 +4213,9 @@ const struct Item gItems[] =
 
 // FireRed/LeafGreen key items
 
-    [ITEM_OAKS_PARCEL] =
+    [ITEM_OAKS_PARCEL] =   // Moemon Kai: SINNOH's PARCEL (KANTO's OAK'S PARCEL is item 503, ITEM_PARCEL)
     {
-        .name = _("OAK'S PARCEL"),
+        .name = _("PARCEL"),
         .itemId = ITEM_OAKS_PARCEL,
         .price = 0,
         .description = sOaksParcelDesc,

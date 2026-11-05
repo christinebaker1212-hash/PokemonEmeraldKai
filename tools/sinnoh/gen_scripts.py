@@ -443,7 +443,8 @@ class FileConverter:
             x = RENAME.get(x, x)
             x = {'ITEM_SECRETPOTION': 'ITEM_SECRET_POTION', 'ITEM_BLACKGLASSES': 'ITEM_BLACK_GLASSES',
                  'ITEM_SILVERPOWDER': 'ITEM_SILVER_POWDER', 'ITEM_NEVERMELTICE': 'ITEM_NEVER_MELT_ICE',
-                 'ITEM_THUNDERSTONE': 'ITEM_THUNDER_STONE'}.get(x, x)
+                 'ITEM_THUNDERSTONE': 'ITEM_THUNDER_STONE',
+                 'ITEM_PARCEL': 'ITEM_SINNOH_PARCEL'}.get(x, x)   # (ITEM_PARCEL here is KANTO's OAK'S PARCEL)
             if x in self.dec.ours:
                 return x
             raise Unsupported('value %s (not in this game)' % x)
@@ -1031,14 +1032,15 @@ class FileConverter:
             return [self.sinnoh(SINNOH_BATTLE_WON, self.var(a[0]), 1 if cmd == 'CheckLostBattle' else 0)]
         if cmd == 'StartFirstBattle':
             # BARRY's first battle: Kai's early rival battle (Quetzal's trainerbattle 13: a loss doesn't white out,
-            # the party is healed after), Platinum's defeat line
+            # the party is healed after), Platinum's defeat line; no line when he wins (Platinum has none: his
+            # defeat line there had him talk about losing when the player lost)
             where = build_text.trainer_message(self.root, a[0], 'TRMSG_DEFEAT')
             if where is None:
                 raise Unsupported('trainer %s has no defeat line' % a[0])
             lab = '%sT_%d_%d' % (PREFIX, where[0], where[1])
             self.texts[lab] = where
             return ['.byte SCR_OP_TRAINERBATTLE, 13', '.2byte %s, 1' % self.value(a[0]), 'ptrvalue %s' % lab,
-                    'ptrvalue %s' % lab]
+                    'ptrvalue 0']
         if cmd == 'BlackOutFromBattle':
             return ['special SetCB2WhiteOut', 'waitstate']   # (the game's own whiteout)
         if cmd in ('CheckTrainerFlag', 'SetTrainerFlag', 'ClearTrainerFlag'):

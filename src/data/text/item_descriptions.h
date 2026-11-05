@@ -907,7 +907,7 @@ static const u8 sHM08Desc[] = _(
 
 // FireRed/LeafGreen key items
 static const u8 sOaksParcelDesc[] = _(
-    "A parcel for PROF. OAK from a MOéMON MART's clerk.");
+    "A parcel to be delivered to your friend from his home.");   // Moemon Kai: SINNOH's PARCEL (Platinum's words)
 
 static const u8 sPokeFluteDesc[] = _(
     "A sweet-sounding flute that awakens MOéMON.");

@@ -209,6 +209,13 @@ bool8 MP_QzEarlyRivalBattle(void)
     return sTrainerBattleMode == TRAINER_BATTLE_QZ_EARLY_RIVAL && (gBattleTypeFlags & BATTLE_TYPE_TRAINER);
 }
 
+// (an early rival battle whose script gives the rival no line for winning, like SINNOH's first BARRY battle: the battle
+// just ends, Platinum's way)
+bool8 MP_QzEarlyRivalHasWinText(void)
+{
+    return sTrainerVictorySpeech != NULL;
+}
+
 static const struct TrainerBattleParameter sContinueScriptBattleParams[] =
 {
     {&sTrainerBattleMode,           TRAINER_PARAM_LOAD_VAL_8BIT},
