@@ -71,6 +71,33 @@ printf 'hifi=0\n' > "$T/hifi.ini"
 MMS_DEFAULTS="$T/hifi.ini" "$B" --save "$T/tiny.gbs" "$T/tiny_lofi.mmsproj"
 grep -q '^hifi=0$' "$T/tiny_lofi.mmsproj"
 
+echo "== Sega Genesis: FM, DAC, PSG tone and noise at the emulator's levels; DAC hits that start without a seek (a VGM made here)"
+python3 test/make_test_vgm.py "$T/parts.vgm"
+"$B" --original "$T/parts.vgm" "$T/parts_orig.wav"
+"$B" --render "$T/parts.vgm" "$T/parts_conv.wav" 7
+python3 - "$T/parts_orig.wav" "$T/parts_conv.wav" <<'PY'
+import sys, wave, struct, math
+def load(f):
+    w = wave.open(f); sr = w.getframerate(); n = w.getnframes(); ch = w.getnchannels()
+    d = struct.unpack('<%dh' % (n * ch), w.readframes(n))
+    return [(d[i] + d[i + 1]) / 2 for i in range(0, len(d), 2)] if ch == 2 else list(d), sr
+def rms(a, sr, t0, t1):
+    x = a[int(t0 * sr):int(t1 * sr)]
+    return math.sqrt(sum(v * v for v in x) / max(1, len(x)))
+def parts(f):
+    a, sr = load(f)
+    lv = [rms(a, sr, t0, t1) for t0, t1 in ((0.2, 0.8), (1.2, 1.8), (2.2, 2.8), (3.2, 3.8), (4.0, 6.0))]
+    hop = int(sr * 0.005); e = [sum(abs(v) for v in a[i:i + hop]) / hop for i in range(int(3.9 * sr), int(6.1 * sr), hop)]
+    hits = sum(1 for i in range(1, len(e)) if e[i] > 150 and e[i - 1] <= 150)
+    return lv, hits
+(o, ho), (c, hc) = parts(sys.argv[1]), parts(sys.argv[2])
+assert min(c) > 0, ('a part is silent', c)
+for k, name in enumerate(('DAC', 'PSG tone', 'PSG noise', 'DAC hits'), 1):
+    ro, rc = o[k] / o[0], c[k] / c[0]
+    assert abs(20 * math.log10(rc / ro)) < 2.5, (name, 'against FM: %.2f, the emulator %.2f' % (rc, ro))
+assert hc == ho, ('DAC hits', hc, ho)
+PY
+
 echo "== GB > GBA: an arpeggio becomes its chord, a buzz of retriggers one note, duty switches one instrument (a Game Boy song made here)"
 python3 test/make_test_gbs_arp.py "$T/arp.gbs"
 "$B" --save "$T/arp.gbs" "$T/arp_gb.mmsproj"

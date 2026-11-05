@@ -9,7 +9,7 @@
 #include "sf.h"
 #include "inst.h"
 
-#define STUDIO_VERSION "1.2"
+#define STUDIO_VERSION "1.3"
 
 typedef struct {
     char path[1024];          // project file ("" until saved)
