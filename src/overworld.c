@@ -1571,6 +1571,8 @@ void CB1_Overworld(void)
         DoCB1_Overworld(gMain.newKeys, gMain.heldKeys);
 }
 
+void MP_DaycareYard_Update(void);
+
 static void OverworldBasic(void)
 {
     MP_Overworld_Update();
@@ -1582,6 +1584,7 @@ static void OverworldBasic(void)
     UpdateCameraPanning();
     Sinnoh_PartnerUpdate(); // Moemon Kai: SINNOH's walking partner across maps (src/sinnoh/s3d_scrcmd.c)
     MP_Follower_Update(); // Moemon Co-op: after the camera, so it lines up with its owner
+    MP_DaycareYard_Update(); // Moemon Kai: ROUTE 34's DAY-CARE yard (mp_daycareyard.c)
     MP_Compass_Update();  // Moemon Co-op: arrows toward friends off screen
     MP_MapPic_Update();   // ... full-color map pictures in view (mp_mappic.c: the GAME CENTER)
     S3D_Update();         // Moemon Kai: SINNOH's maps drawn in 3D (src/sinnoh/s3d.c)

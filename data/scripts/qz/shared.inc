@@ -204,25 +204,6 @@ Quetzal_EventScript_83C2D35::
 	bufferspeciesname 0, SPECIES_PIKACHU
 	return
 
-@ Johto_Route34 object 12 (local id 12, gfx 0x3EA6) at 31,34
-Quetzal_EventScript_83F08A1::
-	lock
-	faceplayer
-	msgbox Quetzal_Text_83F0C34, MSGBOX_DEFAULT
-	release
-	end
-
-@ Johto_DayCare object 1 (local id 1, gfx 0x1E) at 3,8
-Quetzal_EventScript_83F0976::
-	lock
-	faceplayer
-	message Quetzal_Text_83F09A4
-	waitmessage
-	pokemart Quetzal_Mart_83F0990
-	msgbox Quetzal_Text_8360D20, MSGBOX_DEFAULT
-	release
-	end
-
 Quetzal_EventScript_840F954::
 	setvar VAR_0x8001, 0xFE   @ Moemon Kai: with SINNOH on the list (or leaving it), the menus that have it
 	specialvar VAR_RESULT, MP_RegionBoatAsk
@@ -410,18 +391,6 @@ Quetzal_Movement_83607FB:
 	delay_16
 	step_end
 
-Quetzal_Mart_83F0990:
-	.2byte ITEM_SEA_INCENSE
-	.2byte ITEM_LAX_INCENSE
-	.2byte ITEM_ODD_INCENSE
-	.2byte ITEM_ROCK_INCENSE
-	.2byte ITEM_FULL_INCENSE
-	.2byte ITEM_WAVE_INCENSE
-	.2byte ITEM_ROSE_INCENSE
-	.2byte ITEM_LUCK_INCENSE
-	.2byte ITEM_PURE_INCENSE
-	.2byte ITEM_NONE
-
 Quetzal_Text_82F8280::
 	.string "Oh, now that’s a surprise!\n"
 	.string "You need one more fossil!\p"
@@ -528,16 +497,6 @@ Quetzal_Text_83E90EF::
 	.string "This passage links JOHTO and KANTO.\p"
 	.string "Only the champions of both MOéMON\n"
 	.string "LEAGUES may cross.$"
-
-Quetzal_Text_83F09A4::
-	.string "The DAY CARE is now managed\n"
-	.string "through the PC.\p"
-	.string "We sell special INCENSES here\n"
-	.string "for breeding.$"
-
-Quetzal_Text_83F0C34::
-	.string "The DAY-CARE service is now\n"
-	.string "available from any PC.$"
 
 Quetzal_Text_83F721C::
 	.string "Those fossils aren’t compatible.\p"

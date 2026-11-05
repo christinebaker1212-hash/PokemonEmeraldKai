@@ -54,12 +54,6 @@ Kanto_FourIsland_EventScript_841799D::
 	releaseall
 	end
 
-@ Kanto_FourIsland object 1 (local id 1, gfx 0x3F2C) at 16,13
-Kanto_FourIsland_EventScript_8417A06::
-	specialvar VAR_RESULT, QzReturnZero
-	goto_if_eq VAR_RESULT, 2, Quetzal_EventScript_8457FA3
-	goto Quetzal_EventScript_83F08A1
-
 @ Kanto_FourIsland object 6 (local id 6, gfx 0x3F2F) at 26,19
 Kanto_FourIsland_EventScript_8417AAF::
 	lock
@@ -190,3 +184,106 @@ Kanto_FourIsland_Text_8433055::
 
 Kanto_FourIsland_Text_84330B2::
 	.string "LORELEI’S HOUSE$"
+
+@ Moemon Kai: FireRed's DAY CARE man (audit case 47), on the game's DAY CARE
+Kanto_FourIsland_EventScript_DCDaycareMan::
+	lock
+	faceplayer
+	special GetDaycareMonNicknames
+	specialvar VAR_RESULT, GetDaycareState
+	goto_if_eq VAR_RESULT, DAYCARE_EGG_WAITING, Kanto_FourIsland_EventScript_DCDaycareEggWaiting
+	goto_if_eq VAR_RESULT, DAYCARE_ONE_MON, Kanto_FourIsland_EventScript_DCCheckOnOneMon
+	goto_if_eq VAR_RESULT, DAYCARE_TWO_MONS, Kanto_FourIsland_EventScript_DCCheckOnTwoMons
+	msgbox Kanto_FourIsland_Text_DCImDaycareManSpeakToMyWife, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_FourIsland_EventScript_DCDaycareEggWaiting::
+	msgbox Kanto_FourIsland_Text_DCDoYouWantEgg, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, Kanto_FourIsland_EventScript_DCDaycareAcceptEgg
+	msgbox Kanto_FourIsland_Text_DCIWillKeepDoYouWantIt, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, Kanto_FourIsland_EventScript_DCDaycareAcceptEgg
+	msgbox Kanto_FourIsland_Text_DCIllKeepIt, MSGBOX_DEFAULT
+	clearflag FLAG_PENDING_DAYCARE_EGG
+	special RejectEggFromDayCare
+	release
+	end
+
+Kanto_FourIsland_EventScript_DCDaycareAcceptEgg::
+	specialvar VAR_RESULT, CalculatePlayerPartyCount
+	goto_if_ne VAR_RESULT, PARTY_SIZE, Kanto_FourIsland_EventScript_DCDaycareReceivedEgg
+	msgbox Kanto_FourIsland_Text_DCYouHaveNoRoomForIt, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_FourIsland_EventScript_DCDaycareReceivedEgg::
+	textcolor 3
+	message Kanto_FourIsland_Text_DCReceivedEgg
+	textcolor 0
+	playfanfare MUS_LEVEL_UP
+	waitfanfare
+	waitbuttonpress
+	msgbox Kanto_FourIsland_Text_DCTakeGoodCareOfIt, MSGBOX_DEFAULT
+	special GiveEggFromDaycare
+	clearflag FLAG_PENDING_DAYCARE_EGG
+	release
+	end
+
+Kanto_FourIsland_EventScript_DCCheckOnOneMon::
+	special GetDaycareMonNicknames
+	msgbox Kanto_FourIsland_Text_DCYourMonIsDoingFine, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_FourIsland_EventScript_DCCheckOnTwoMons::
+	special GetDaycareMonNicknames
+	msgbox Kanto_FourIsland_Text_DCYourMonsAreDoingFine, MSGBOX_DEFAULT
+	special SetDaycareCompatibilityString
+	special ShowFieldMessageStringVar4
+	waitmessage
+	waitbuttonpress
+	release
+	end
+
+Kanto_FourIsland_Text_DCImDaycareManSpeakToMyWife::
+	.string "I’m the DAY-CARE MAN.\p"
+	.string "I help take care of the precious\n"
+	.string "MOéMON of TRAINERS.\p"
+	.string "If you’d like me to raise your\n"
+	.string "MOéMON, have a word with my wife.$"
+
+Kanto_FourIsland_Text_DCDoYouWantEgg::
+	.string "Ah, it’s you!\p"
+	.string "We were raising your MOéMON, and\n"
+	.string "my goodness, were we surprised!\p"
+	.string "Your MOéMON had an EGG!\p"
+	.string "We don’t know how it got there,\n"
+	.string "but your MOéMON had it.\p"
+	.string "You do want it, yes?$"
+
+Kanto_FourIsland_Text_DCIWillKeepDoYouWantIt::
+	.string "I really will keep it.\n"
+	.string "You do want this, yes?$"
+
+Kanto_FourIsland_Text_DCIllKeepIt::
+	.string "Well then, I’ll keep it.\n"
+	.string "Thanks!$"
+
+Kanto_FourIsland_Text_DCYouHaveNoRoomForIt::
+	.string "You have no room for it…\n"
+	.string "Come back when you’ve made room.$"
+
+Kanto_FourIsland_Text_DCReceivedEgg::
+	.string "{PLAYER} received the EGG from\n"
+	.string "the DAY-CARE MAN.$"
+
+Kanto_FourIsland_Text_DCTakeGoodCareOfIt::
+	.string "Take good care of it.$"
+
+Kanto_FourIsland_Text_DCYourMonIsDoingFine::
+	.string "Ah, it’s you! Good to see you.\n"
+	.string "Your {STR_VAR_1}’s doing fine.$"
+
+Kanto_FourIsland_Text_DCYourMonsAreDoingFine::
+	.string "Ah, it’s you! Your {STR_VAR_1} and\n"
+	.string "{STR_VAR_2} are doing fine.$"

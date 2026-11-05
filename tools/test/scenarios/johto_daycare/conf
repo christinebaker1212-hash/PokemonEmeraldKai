@@ -1,0 +1,8 @@
+# JOHTO's DAY-CARE is Crystal's (audit case 47; daycare.c MP_JohtoDaycare_*): the MAN takes DITTO and the LADY PIKACHU
+# (each one POKéMON, on the game's DAY CARE pair: owners bit 0 = the MAN's slot), an EGG brings the MAN out to ROUTE 34
+# by the door, he hands it over and goes back in, and the LADY gives PIKACHU back (the MAN keeps DITTO, now slot 0).
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=132:20,25:20,1:20 MOEMON_DEBUG_MONEY=5000"
+EXPECT_A=("daycare: 132/0 0/0 owners 1 state 2" "daycare: 132/0 25/0 owners 1 state 3" "objat 30,31: local 12" "objat 30,31: none" "daycare: 132/0 25/0 owners 1 state 3" "daycare: 132/0 0/0 owners 1 state 2")
+UNEXPECT_A=("[crash]" "TIMEOUT")

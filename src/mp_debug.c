@@ -773,6 +773,28 @@ void MP_TestCommand(const char *cmd, const char *arg)
         StoreSelectedPokemonInDaycare();
         printf("[test] daycare: %d in it\n", CountPokemonInDaycare(&gSaveBlock1Ptr->daycare));
     }
+    else if (strcmp(cmd, "daycarestate") == 0)
+    {
+        // daycarestate [STEPS] - the DAY CARE pair (species, steps), JOHTO's owners (bit: the MAN's slot), KANTO's
+        // ROUTE 5 one; STEPS adds steps to all three first (daycare.c)
+        void *MP_Route5Daycare_Data(u32 *size);
+        u32 size, add = 0;
+        struct DaycareMon *r5 = MP_Route5Daycare_Data(&size);
+        int i;
+        if (strncmp(arg, "egg", 3) == 0)
+            TriggerPendingDaycareEgg();   // (daycarestate egg: an EGG waiting now)
+        else
+            sscanf(arg, "%u", &add);
+        for (i = 0; i < DAYCARE_MON_COUNT; i++)
+            if (GetBoxMonData(&gSaveBlock1Ptr->daycare.mons[i].mon, MON_DATA_SPECIES))
+                gSaveBlock1Ptr->daycare.mons[i].steps += add;
+        if (GetBoxMonData(&r5->mon, MON_DATA_SPECIES))
+            r5->steps += add;
+        printf("[test] daycare: %d/%u %d/%u owners %d state %d route5 %d/%u\n",
+               (int)GetBoxMonData(&gSaveBlock1Ptr->daycare.mons[0].mon, MON_DATA_SPECIES), (unsigned)gSaveBlock1Ptr->daycare.mons[0].steps,
+               (int)GetBoxMonData(&gSaveBlock1Ptr->daycare.mons[1].mon, MON_DATA_SPECIES), (unsigned)gSaveBlock1Ptr->daycare.mons[1].steps,
+               VarGet(0x5041), GetDaycareState(), (int)GetBoxMonData(&r5->mon, MON_DATA_SPECIES), (unsigned)r5->steps);
+    }
     else if (strcmp(cmd, "hmrescue") == 0)
     {
         // hmrescue - the HMs a friend's progress made impossible to get, owed now (mp_hmrescue.c)

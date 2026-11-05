@@ -13,6 +13,7 @@ Johto_Route34_EventScript_83D23DB::
 	end
 
 Johto_Route34_EventScript_83EFC2C::
+	special MP_JohtoDaycare_Flags   @ (Crystal's Route34EggCheckCallback: the DAY-CARE MAN out here with an EGG)
 	end
 
 @ Johto_Route34 object 1 (local id 1, gfx 0x23) at 34,59
@@ -244,3 +245,160 @@ Johto_Route34_Text_KateOffer::
 	.string "KATE: You’re too strong. I didn’t\n"
 	.string "stand a chance.\p"
 	.string "Here. You deserve this.$"
+
+@ Moemon Kai: Crystal's DAY-CARE MAN outside (pokecrystal maps/Route34.asm DayCareManScript_Outside, engine/events/
+@ daycare.asm DayCareManOutside; audit case 47), here when the game's DAY CARE has an EGG
+Johto_Route34_EventScript_DCManOutside::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, GetDaycareState
+	goto_if_ne VAR_RESULT, DAYCARE_EGG_WAITING, Johto_Route34_EventScript_DCNotYet
+	msgbox Johto_Route34_Text_DCFoundAnEggText, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Johto_Route34_EventScript_DCDeclined
+	getpartysize
+	goto_if_eq VAR_RESULT, PARTY_SIZE, Johto_Route34_EventScript_DCNoRoom
+	special GiveEggFromDaycare
+	clearflag FLAG_PENDING_DAYCARE_EGG
+	textcolor 3
+	message Johto_Route34_Text_DCReceivedEggText
+	waitmessage
+	playfanfare MUS_LEVEL_UP
+	waitfanfare
+	waitbuttonpress
+	textcolor 0
+	msgbox Johto_Route34_Text_DCTakeGoodCareOfEggText, MSGBOX_DEFAULT
+	goto Johto_Route34_EventScript_DCWalkInside
+
+Johto_Route34_EventScript_DCDeclined::
+	msgbox Johto_Route34_Text_DCIllKeepItThanksText, MSGBOX_DEFAULT
+	clearflag FLAG_PENDING_DAYCARE_EGG
+	special RejectEggFromDayCare
+Johto_Route34_EventScript_DCWalkInside::
+	closemessage
+	setflag FLAG_JOHTO_HIDE_DAYCARE_MAN_OUT
+	goto_if_eq VAR_FACING, DIR_WEST, Johto_Route34_EventScript_DCWalkAroundPlayer
+	applymovement 12, Johto_Route34_EventScript_DCMovement_WalkInside
+	waitmovement 0
+	goto Johto_Route34_EventScript_DCGoneInside
+
+Johto_Route34_EventScript_DCWalkAroundPlayer::
+	applymovement 12, Johto_Route34_EventScript_DCMovement_WalkInsideAround
+	waitmovement 0
+Johto_Route34_EventScript_DCGoneInside::
+	playse SE_DOOR
+	removeobject 12
+	release
+	end
+
+Johto_Route34_EventScript_DCNotYet::
+	msgbox Johto_Route34_Text_DCNotYetText, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_Route34_EventScript_DCNoRoom::
+	msgbox Johto_Route34_Text_DCNoRoomForEggText, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_Route34_EventScript_DCMovement_WalkInside:
+	walk_right
+	walk_up
+	step_end
+
+Johto_Route34_EventScript_DCMovement_WalkInsideAround:
+	walk_up
+	walk_right
+	step_end
+
+Johto_Route34_Text_DCNotYetText::
+	.string "Not yet…$"
+
+Johto_Route34_Text_DCFoundAnEggText::
+	.string "Ah, it’s you!\p"
+	.string "We were raising your MOéMON, and\n"
+	.string "my goodness, were we surprised!\p"
+	.string "Your MOéMON had an EGG!\p"
+	.string "We don’t know how it got there,\n"
+	.string "but your MOéMON had it. You want\l"
+	.string "it?$"
+
+Johto_Route34_Text_DCReceivedEggText::
+	.string "{PLAYER} received the EGG!$"
+
+Johto_Route34_Text_DCTakeGoodCareOfEggText::
+	.string "Take good care of it.$"
+
+Johto_Route34_Text_DCIllKeepItThanksText::
+	.string "Well then, I’ll keep it. Thanks!$"
+
+Johto_Route34_Text_DCNoRoomForEggText::
+	.string "You have no room in your party.\n"
+	.string "Come back later.$"
+
+@ Crystal's DayCareMon1Script / DayCareMon2Script: the POKéMON in the yard (mp_daycareyard.c draws them)
+Johto_Route34_EventScript_DCMon1::
+	lock
+	setvar VAR_0x8009, 1
+	specialvar VAR_0x8005, MP_JohtoDaycare_YardMon
+	message Johto_Route34_Text_DCLeftWithDayCareManText
+	goto Johto_Route34_EventScript_DCMonCry
+
+Johto_Route34_EventScript_DCMon2::
+	lock
+	setvar VAR_0x8009, 0
+	specialvar VAR_0x8005, MP_JohtoDaycare_YardMon
+	message Johto_Route34_Text_DCLeftWithDayCareLadyText
+Johto_Route34_EventScript_DCMonCry::
+	waitmessage
+	playmoncry VAR_0x8005, CRY_MODE_NORMAL
+	waitbuttonpress
+	waitmoncry
+	specialvar VAR_RESULT, MP_JohtoDaycare_YardOther
+	goto_if_eq VAR_RESULT, 1, Johto_Route34_EventScript_DCNoInterest
+	goto_if_eq VAR_RESULT, 2, Johto_Route34_EventScript_DCShowsInterest
+	goto_if_eq VAR_RESULT, 3, Johto_Route34_EventScript_DCFriendly
+	goto_if_eq VAR_RESULT, 4, Johto_Route34_EventScript_DCCaresFor
+	closemessage
+	release
+	end
+
+Johto_Route34_EventScript_DCNoInterest::
+	msgbox Johto_Route34_Text_DCBreedNoInterestText, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_Route34_EventScript_DCShowsInterest::
+	msgbox Johto_Route34_Text_DCBreedShowsInterestText, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_Route34_EventScript_DCFriendly::
+	msgbox Johto_Route34_Text_DCBreedFriendlyText, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_Route34_EventScript_DCCaresFor::
+	msgbox Johto_Route34_Text_DCBreedAppearsToCareForText, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_Route34_Text_DCLeftWithDayCareManText::
+	.string "It’s {STR_VAR_1} that was left\n"
+	.string "with the DAY-CARE MAN.$"
+
+Johto_Route34_Text_DCLeftWithDayCareLadyText::
+	.string "It’s {STR_VAR_1} that was left\n"
+	.string "with the DAY-CARE LADY.$"
+
+Johto_Route34_Text_DCBreedNoInterestText::
+	.string "It has no interest in {STR_VAR_1}.$"
+
+Johto_Route34_Text_DCBreedShowsInterestText::
+	.string "It shows interest in {STR_VAR_1}.$"
+
+Johto_Route34_Text_DCBreedFriendlyText::
+	.string "It’s friendly with {STR_VAR_1}.$"
+
+Johto_Route34_Text_DCBreedAppearsToCareForText::
+	.string "It appears to care for\n"
+	.string "{STR_VAR_1}.$"

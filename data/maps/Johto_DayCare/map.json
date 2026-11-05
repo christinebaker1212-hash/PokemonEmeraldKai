@@ -16,29 +16,29 @@
   "object_events": [
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_30",
-      "x": 3,
-      "y": 8,
-      "elevation": 0,
-      "movement_type": "MOVEMENT_TYPE_FACE_UP",
-      "movement_range_x": 0,
-      "movement_range_y": 0,
-      "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "0",
-      "script": "Quetzal_EventScript_83F0976",
-      "flag": "0"
-    },
-    {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_16014",
       "x": 10,
       "y": 3,
       "elevation": 0,
-      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_LEFT_AND_RIGHT",
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Johto_DayCare_EventScript_83F0695",
+      "script": "Johto_DayCare_EventScript_Lady",
       "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16172",
+      "x": 8,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DayCare_EventScript_Man",
+      "flag": "FLAG_JOHTO_HIDE_DAYCARE_MAN_IN"
     }
   ],
   "warp_events": [
@@ -58,7 +58,7 @@
       "y": 1,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Johto_DayCare_EventScript_83F03DC"
+      "script": "Johto_DayCare_EventScript_Bookshelf"
     },
     {
       "type": "sign",
@@ -66,7 +66,7 @@
       "y": 1,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Johto_DayCare_EventScript_83F03E5"
+      "script": "Johto_DayCare_EventScript_Bookshelf"
     },
     {
       "type": "sign",
@@ -74,7 +74,7 @@
       "y": 1,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Johto_DayCare_EventScript_83F03F7"
+      "script": "Johto_DayCare_EventScript_Bookshelf"
     },
     {
       "type": "sign",
@@ -82,7 +82,7 @@
       "y": 1,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Johto_DayCare_EventScript_83F03EE"
+      "script": "Johto_DayCare_EventScript_Bookshelf"
     }
   ]
 }

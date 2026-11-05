@@ -1,0 +1,29 @@
+pressuntil A field 5000
+wait 60
+mp warp 39,10,2,3
+wait 120
+mp face up
+pressuntil A yesno 2000
+wait 20
+press A 2
+pressuntil A partymenu 1000
+wait 30
+press A 2
+pressuntil A yesno 2000
+wait 20
+press B 2
+pressuntil A field 3000
+wait 30
+mp daycarestate egg
+mp setvar 0x5110 1
+mp warp 37,72,16,14
+wait 150
+mp face up
+pressuntil A yesno 2000
+wait 20
+press A 2
+pressuntil A field 3000
+wait 30
+mp party
+mp daycarestate
+quit

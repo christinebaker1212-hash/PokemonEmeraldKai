@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mp_region.h"
+#include "constants/kai_regions.h"
 #include "mp.h"
 #include "mp_life.h"   // Moemon Co-op
 #include "pokemon.h"
@@ -187,6 +188,8 @@ static void StorePokemonInDaycare(struct Pokemon *mon, struct DaycareMon *daycar
 static void StorePokemonInEmptyDaycareSlot(struct Pokemon *mon, struct DayCare *daycare)
 {
     s8 slotId = Daycare_FindEmptySpot(daycare);
+    if (daycare == &gSaveBlock1Ptr->daycare)
+        VarSet(VAR_JOHTO_DAYCARE_OWNERS, VarGet(VAR_JOHTO_DAYCARE_OWNERS) & ~(1 << slotId));   // (Moemon Kai: JOHTO's DAY-CARE)
     StorePokemonInDaycare(mon, &daycare->mons[slotId]);
 }
 
@@ -203,6 +206,8 @@ static void ShiftDaycareSlots(struct DayCare *daycare)
     if (GetBoxMonData(&daycare->mons[1].mon, MON_DATA_SPECIES) != SPECIES_NONE
         && GetBoxMonData(&daycare->mons[0].mon, MON_DATA_SPECIES) == SPECIES_NONE)
     {
+        if (daycare == &gSaveBlock1Ptr->daycare)
+            VarSet(VAR_JOHTO_DAYCARE_OWNERS, VarGet(VAR_JOHTO_DAYCARE_OWNERS) >> 1);   // (Moemon Kai: JOHTO's DAY-CARE)
         daycare->mons[0].mon = daycare->mons[1].mon;
         ZeroBoxMonData(&daycare->mons[1].mon);
 
@@ -332,6 +337,142 @@ static u16 PrepareDaycareCostStringForMon(struct DayCare *daycare, u8 slotId)
 void GetDaycareCostAndPrepareString(void)
 {
     gSpecialVar_0x8005 = PrepareDaycareCostStringForMon(&gSaveBlock1Ptr->daycare, gSpecialVar_0x8004);
+}
+
+// Moemon Kai: KANTO's ROUTE 5 DAY-CARE, FireRed's one-POKéMON day care (pokefirered src/daycare.c, audit case 47):
+// its own slot, kept in "<save>.region" (mp_region.c chunk R5DC), growing by a step for each of the player's
+static struct DaycareMon sRoute5DayCareMon;
+
+void *MP_Route5Daycare_Data(u32 *size)
+{
+    *size = sizeof(sRoute5DayCareMon);
+    return &sRoute5DayCareMon;
+}
+
+void MP_Route5Daycare_Clear(void)
+{
+    memset(&sRoute5DayCareMon, 0, sizeof(sRoute5DayCareMon));
+}
+
+void PutMonInRoute5Daycare(void)
+{
+    u8 monIdx = GetCursorSelectionMonId();
+    StorePokemonInDaycare(&gPlayerParty[monIdx], &sRoute5DayCareMon);
+}
+
+void GetCostToWithdrawRoute5DaycareMon(void)
+{
+    gSpecialVar_0x8005 = PrepareDaycareCostStringForSelectedMon(&sRoute5DayCareMon);
+}
+
+bool8 IsThereMonInRoute5Daycare(void)
+{
+    return GetBoxMonData(&sRoute5DayCareMon.mon, MON_DATA_SPECIES) != SPECIES_NONE;
+}
+
+u8 GetNumLevelsGainedForRoute5DaycareMon(void)
+{
+    return GetNumLevelsGainedForDaycareMon(&sRoute5DayCareMon);
+}
+
+u16 TakePokemonFromRoute5Daycare(void)
+{
+    return TakeSelectedPokemonFromDaycare(&sRoute5DayCareMon);
+}
+
+// Moemon Kai: JOHTO's DAY-CARE, Crystal's (pokecrystal engine/events/daycare.asm, audit case 47): the MAN and the
+// LADY each raise one POKéMON. They're the game's DAY CARE pair (ROUTE 117's, FOUR ISLAND's): the slot each of them
+// holds is a bit in VAR_JOHTO_DAYCARE_OWNERS. Person in VAR_0x8009: 0 the LADY, 1 the MAN.
+static s8 JohtoSlot(u8 man)
+{
+    u16 owners = VarGet(VAR_JOHTO_DAYCARE_OWNERS);
+    u32 i;
+    for (i = 0; i < DAYCARE_MON_COUNT; i++)
+        if (GetBoxMonData(&gSaveBlock1Ptr->daycare.mons[i].mon, MON_DATA_SPECIES) != SPECIES_NONE
+         && ((owners >> i) & 1) == man)
+            return i;
+    return -1;
+}
+
+// The POKéMON this person holds: VAR_RESULT its slot (0xFF none); its nickname in STR_VAR_1, the levels it grew in
+// STR_VAR_2 and VAR_0x8006, the price (100 + 100 a level) in STR_VAR_3 and VAR_0x8005
+u16 MP_JohtoDaycare_Slot(void)
+{
+    s8 slot = JohtoSlot(gSpecialVar_0x8009 != 0);
+    struct DaycareMon *dm;
+    u8 levels;
+    if (slot < 0)
+        return 0xFF;
+    dm = &gSaveBlock1Ptr->daycare.mons[slot];
+    levels = GetNumLevelsGainedFromSteps(dm);
+    GetBoxMonNickname(&dm->mon, gStringVar1);
+    ConvertIntToDecimalStringN(gStringVar2, levels, STR_CONV_MODE_LEFT_ALIGN, 3);
+    gSpecialVar_0x8005 = 100 + 100 * levels;
+    gSpecialVar_0x8006 = levels;
+    ConvertIntToDecimalStringN(gStringVar3, gSpecialVar_0x8005, STR_CONV_MODE_LEFT_ALIGN, 5);
+    return slot;
+}
+
+// Crystal's DayCareAskDepositPokemon checks on the POKéMON chosen (VAR_0x8004): 0 fine, 1 an EGG, 2 the last one
+// that can battle, 3 holding MAIL
+u16 MP_JohtoDaycare_CheckPick(void)
+{
+    struct Pokemon *mon = &gPlayerParty[gSpecialVar_0x8004];
+    if (GetMonData(mon, MON_DATA_IS_EGG))
+        return 1;
+    if (CountPartyAliveNonEggMons_IgnoreVar0x8004Slot() == 0)
+        return 2;
+    if (MonHasMail(mon))
+        return 3;
+    return 0;
+}
+
+void MP_JohtoDaycare_Deposit(void)
+{
+    s8 slot = Daycare_FindEmptySpot(&gSaveBlock1Ptr->daycare);
+    if (slot < 0)
+        return;
+    StorePokemonInEmptyDaycareSlot(&gPlayerParty[gSpecialVar_0x8004], &gSaveBlock1Ptr->daycare);
+    if (gSpecialVar_0x8009)
+        VarSet(VAR_JOHTO_DAYCARE_OWNERS, VarGet(VAR_JOHTO_DAYCARE_OWNERS) | (1 << slot));
+}
+
+// The POKéMON back (its species in VAR_RESULT, its nickname in STR_VAR_1)
+u16 MP_JohtoDaycare_Withdraw(void)
+{
+    s8 slot = JohtoSlot(gSpecialVar_0x8009 != 0);
+    if (slot < 0)
+        return SPECIES_NONE;
+    return TakeSelectedPokemonMonFromDaycareShiftSlots(&gSaveBlock1Ptr->daycare, slot);
+}
+
+// Who stands where (the DAY-CARE's and ROUTE 34's ON_TRANSITION): the MAN waits outside with an EGG
+void MP_JohtoDaycare_Flags(void)
+{
+    u16 owners = VarGet(VAR_JOHTO_DAYCARE_OWNERS);
+    bool8 has[2] = {FALSE, FALSE};   // (the MAN's, the LADY's: Crystal's Route34EggCheckCallback .CheckMon1 / 2)
+    u32 i;
+    for (i = 0; i < DAYCARE_MON_COUNT; i++)
+        if (GetBoxMonData(&gSaveBlock1Ptr->daycare.mons[i].mon, MON_DATA_SPECIES) != SPECIES_NONE)
+            has[((owners >> i) & 1) ? 0 : 1] = TRUE;
+    if (has[0])
+        FlagClear(FLAG_JOHTO_HIDE_DAYCARE_MON_1);
+    else
+        FlagSet(FLAG_JOHTO_HIDE_DAYCARE_MON_1);
+    if (has[1])
+        FlagClear(FLAG_JOHTO_HIDE_DAYCARE_MON_2);
+    else
+        FlagSet(FLAG_JOHTO_HIDE_DAYCARE_MON_2);
+    if (GetDaycareState() == DAYCARE_EGG_WAITING)
+    {
+        FlagSet(FLAG_JOHTO_HIDE_DAYCARE_MAN_IN);
+        FlagClear(FLAG_JOHTO_HIDE_DAYCARE_MAN_OUT);
+    }
+    else
+    {
+        FlagClear(FLAG_JOHTO_HIDE_DAYCARE_MAN_IN);
+        FlagSet(FLAG_JOHTO_HIDE_DAYCARE_MAN_OUT);
+    }
 }
 
 static void UNUSED Debug_AddDaycareSteps(u16 numSteps)
@@ -987,6 +1128,8 @@ static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
 
 bool8 ShouldEggHatch(void)
 {
+    if (GetBoxMonData(&sRoute5DayCareMon.mon, MON_DATA_SANITY_HAS_SPECIES))
+        sRoute5DayCareMon.steps++;   // (Moemon Kai: KANTO's ROUTE 5 DAY-CARE, as FireRed's)
     return TryProduceOrHatchEgg(&gSaveBlock1Ptr->daycare);
 }
 

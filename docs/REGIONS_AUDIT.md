@@ -61,7 +61,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **44. [J3-33]** MT. SILVER ROOM 3's triangular rock (DEOXYS) is a dead prop: **REMOVE it**
 - [x] **45. [J2-12, J3-8, J3-9]** JOHTO's leaders promise rematches at a FIGHTING DOJO that has none: **RESTORE the original**
 - [x] **46. [K2-18, K3-11, K4-14]** POKéMON CENTER 2F attendants explain Quetzal's MPLAYER, cheats and NUZLOCKE: **RESTORE the original**
-- [ ] **47. [K1-20, K3-9, J2-3, J3-36]** DAY-CARE "through the PC": KANTO's two are incense shops, JOHTO has none: **RESTORE the original**
+- [x] **47. [K1-20, K3-9, J2-3, J3-36]** DAY-CARE "through the PC": KANTO's two are incense shops, JOHTO has none: **RESTORE the original**
 - [x] **48. [K1-19, J2-9]** BIKE SHOPs talk about MACH / ACRO modes: **RESTORE the original**
 - [x] **49. [K1-14, K2-10, K3-12, K4-4, K4-13, J1-8, J3-37]** "Moves are managed from the team menu / summary" lines (Quetzal's tutors, Kai can't): **RESTORE the original**
 - [x] **50. [J1-4, J2-10, J2-11, J3-38]** Words about travel between regions that don't match Kai's: **RESTORE the original**

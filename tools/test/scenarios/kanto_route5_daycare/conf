@@ -1,0 +1,8 @@
+# ROUTE 5's DAY-CARE is FireRed's one-POKéMON one again (audit case 47; daycare.c sRoute5DayCareMon, saved in the region
+# file): PIKACHU left with the man grows with the steps (3000 more here) and comes back for 100 + 100 a level, apart from
+# the game's DAY CARE pair.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:10,1:10 MOEMON_DEBUG_MONEY=5000"
+EXPECT_A=("daycare: 0/0 0/0 owners 0 state 0 route5 25/3000" "[test] party: 1(" "[test] party: 1(29/29 ball 4 style 0000 fx 0000/0 friend 70) 25(" "daycare: 0/0 0/0 owners 0 state 0 route5 0/0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

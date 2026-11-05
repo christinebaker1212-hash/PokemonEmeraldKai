@@ -249,6 +249,7 @@ void MP_Region_NewGame(void)
     memset(sFlags, 0, sizeof(sFlags));
     memset(sVars, 0, sizeof(sVars));
     FlagSet(FLAG_KAI_GONE);   // (always: Quetzal's things taken out wear it)
+    MP_Route5Daycare_Clear();
     memset(&gRegionState, 0, sizeof(gRegionState));
     sAwayValid = 0;
     sGlobalValid = FALSE;
@@ -519,6 +520,15 @@ void MP_Region_WriteSidecar(void)
             fwrite(rib, size, 1, f);
         }
         {
+            // KANTO's ROUTE 5 DAY-CARE: FireRed's one-POKéMON day care (daycare.c)
+            u32 size;
+            const void *dc = MP_Route5Daycare_Data(&size);
+            c[0] = CHUNK('R', '5', 'D', 'C');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(dc, size, 1, f);
+        }
+        {
             // JUBILIFE TV's rankings (src/sinnoh/s3d_rankings.c)
             u32 size;
             const void *Sinnoh_RankingsData(u32 *size);
@@ -649,6 +659,7 @@ static bool8 LoadFrom(const char *path)
     if (!f)
         return FALSE;
     memset(&gRegionState, 0, sizeof(gRegionState));
+    MP_Route5Daycare_Clear();
     sSaveFormat = 1;   // a side file without the format: 1.60.0
     sAwayValid = 0;
     sGlobalValid = FALSE;
@@ -715,6 +726,13 @@ static bool8 LoadFrom(const char *path)
                 u8 buf[1024];
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_HallLoad(buf, c[1]);
+            }
+            else if (c[0] == CHUNK('R', '5', 'D', 'C'))
+            {
+                u32 size;
+                void *dc = MP_Route5Daycare_Data(&size);
+                if (c[1] == size && fread(dc, size, 1, f) != 1)
+                    MP_Route5Daycare_Clear();
             }
             else if (c[0] == CHUNK('T', 'O', 'W', 'R') && c[1] <= 1024)
             {
@@ -2015,6 +2033,7 @@ static const struct Trainer *ModernTeam(u16 trainerNum)
 // the slots of generations not on yet go to those that are). SINNOH the same with generations 5-9 (sinnoh_modern.h).
 #include "../data/hoenn_modern.h"
 #include "../data/sinnoh_modern.h"
+
 
 static const struct WildPokemonInfo *ModernWild(const struct WildPokemonInfo *info, const struct HoennModernWild *table,
                                                 u32 count, u8 region)

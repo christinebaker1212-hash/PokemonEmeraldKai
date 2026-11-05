@@ -120,7 +120,7 @@ void RemoveMoney(u32 *moneyPtr, u32 toSub)
     SetMoney(moneyPtr, toSet);
 }
 
-bool8 IsEnoughForCostInVar0x8005(void)
+u16 IsEnoughForCostInVar0x8005(void)   // (Moemon Kai: u16, as specialvar reads it; a bool8 left the upper byte unset on PC)
 {
     return IsEnoughMoney(&gSaveBlock1Ptr->money, gSpecialVar_0x8005);
 }

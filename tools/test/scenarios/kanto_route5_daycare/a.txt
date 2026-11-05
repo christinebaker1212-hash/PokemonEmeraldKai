@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 60
+mp warp 38,91,4,5
+wait 120
+mp face up
+pressuntil A yesno 600
+wait 20
+press A 2
+pressuntil A partymenu 600
+wait 30
+press A 2
+pressuntil A field 3000
+wait 30
+mp daycarestate 3000
+mp party
+mp face up
+pressuntil A yesno 1200
+wait 20
+shot cost
+press A 2
+wait 120
+pressuntil A field 3000
+wait 30
+mp party
+mp daycarestate
+quit

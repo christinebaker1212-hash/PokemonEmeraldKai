@@ -729,3 +729,15 @@ gSpecials::
 	def_special MP_FanClub_NumFans
 	def_special MP_FanClub_IsFan
 	def_special MP_FanClub_BufferTrainerName
+	def_special PutMonInRoute5Daycare
+	def_special GetCostToWithdrawRoute5DaycareMon
+	def_special IsThereMonInRoute5Daycare
+	def_special GetNumLevelsGainedForRoute5DaycareMon
+	def_special TakePokemonFromRoute5Daycare
+	def_special MP_JohtoDaycare_Slot
+	def_special MP_JohtoDaycare_CheckPick
+	def_special MP_JohtoDaycare_Deposit
+	def_special MP_JohtoDaycare_Withdraw
+	def_special MP_JohtoDaycare_Flags
+	def_special MP_JohtoDaycare_YardMon
+	def_special MP_JohtoDaycare_YardOther

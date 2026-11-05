@@ -85,6 +85,8 @@ bool8 MP_Region_WarpClosed(u8 destGroup, u8 destNum);   // field_control_avatar.
 u8 *MP_Region_FlagPointer(u16 id);   // NULL outside REGION_FLAGS_START..END
 u16 *MP_Region_VarPointer(u16 id);
 void MP_Region_NewGame(void);
+void *MP_Route5Daycare_Data(u32 *size);   // KANTO's ROUTE 5 DAY-CARE, FireRed's one-POKéMON one (daycare.c)
+void MP_Route5Daycare_Clear(void);
 void MP_Region_SetStartRegion(u8 region);   // a new game's region (PROF. BIRCH's question)
 void MP_Region_StartNewGame(void);
 void MP_Region_FirstBoatIn(u8 region);    // the first boat to a region: in at its port, where a guide meets the player

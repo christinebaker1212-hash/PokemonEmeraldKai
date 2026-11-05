@@ -1,0 +1,54 @@
+pressuntil A field 5000
+wait 60
+mp setflag 0x1069
+mp warp 35,42,8,4
+wait 120
+mp face up
+pressuntil A yesno 2000
+wait 20
+press A 2
+pressuntil A partymenu 600
+wait 30
+press A 2
+pressuntil A field 3000
+wait 30
+mp daycarestate
+mp warp 35,42,10,4
+wait 120
+mp face up
+pressuntil A yesno 2000
+wait 20
+shot lady
+press A 2
+pressuntil A partymenu 600
+wait 30
+press A 2
+pressuntil A field 3000
+wait 30
+mp warp 35,41,31,33
+wait 200
+shot yard
+mp daycarestate egg
+mp warp 35,41,29,31
+wait 150
+mp objat 30 31
+mp face right
+pressuntil A yesno 2000
+wait 20
+press A 2
+pressuntil A field 3000
+wait 60
+mp objat 30 31
+mp party
+mp daycarestate
+mp warp 35,42,10,4
+wait 120
+mp face up
+pressuntil A yesno 2000
+wait 20
+press A 2
+pressuntil A field 3000
+wait 30
+mp daycarestate
+mp party
+quit

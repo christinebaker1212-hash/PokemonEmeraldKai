@@ -4478,6 +4478,23 @@ follow_behind, follow_ground.
   about are the friends battled most (mp_tcard.c MP_TCard_PvpRival, FireRed's link records), else the rival, LT. SURGE
   and KOGA. FireRed's POKéMON JOURNAL (BRUNO) on the rack after the League. Quetzal's hint people are gone (some
   described things Kai hasn't got: DexNav, PRIMEAPE's evolution). Test kanto_fanclub.
+- **Case 47, the DAY-CAREs** (Quetzal's "DAY CARE through the PC" and its incense shop are gone):
+  - ROUTE 5's is FireRed's one-POKéMON DAY-CARE (its scripts and words): its own slot, daycare.c sRoute5DayCareMon,
+    a step for each of the player's (ShouldEggHatch), kept in "<save>.region" as chunk R5DC; specials
+    PutMonInRoute5Daycare etc. as FireRed names them. Test kanto_route5_daycare.
+  - FOUR ISLAND's lady and the old man outside are FireRed's, on the game's DAY CARE pair (ROUTE 117's: one pair seen
+    from every DAY CARE). Test kanto_fourisland_daycare.
+  - JOHTO's is Crystal's (engine/events/daycare.asm turned into scripts, its words from common_1 / common_2): the MAN
+    (who gives the ODD EGG first) and the LADY each raise one POKéMON of the pair; which slot is whose is a bit in
+    VAR_JOHTO_DAYCARE_OWNERS (0x5041), kept right when slots are filled or shifted (StorePokemonInEmptyDaycareSlot,
+    ShiftDaycareSlots). With an EGG the MAN waits on ROUTE 34 by the side door (MP_JohtoDaycare_Flags on both maps'
+    ON_TRANSITION) and walks back in after. The two POKéMON walk in ROUTE 34's yard as Crystal's do: invisible map
+    people 21 / 22 (FLAG_JOHTO_HIDE_DAYCARE_MON_1 / _2) with the POKéMON's follower picture on them
+    (src/mp/mp_daycareyard.c, after the camera in overworld.c), and Crystal's lines when talked to (how they get on,
+    from the game's compatibility). The couple stand facing each other in the house, Crystal's bookshelves too.
+    Test johto_daycare.
+  - money.c IsEnoughForCostInVar0x8005 returns u16: specialvar reads 16 bits and a bool8 left the upper byte unset on
+    PC, so a DAY CARE could say "not enough money" with plenty (ROUTE 117's too).
 
 ## The audit's batch I (1.108.0)
 - Cases 25 / 71: CELADON DEPT. STORE is FireRed's: the directory, floor signs and people's lines (restore_words), one

@@ -27,6 +27,7 @@
 #define VAR_KANTO_RIVAL_NAME          0x514C   // ..0x514F: the rival's name as the player gave it (8 bytes; none: BLUE)
 #define VAR_KANTO_MAGIKARP_SIZE       0x5151   // ROUTE 12 FISHING HOUSE's MAGIKARP record (FireRed's VAR_MAGIKARP_SIZE_RECORD)
 #define VAR_JOHTO_MAGIKARP_SIZE       0x5040   // LAKE OF RAGE's MAGIKARP record (Crystal's wBestMagikarpLength)
+#define VAR_JOHTO_DAYCARE_OWNERS      0x5041   // JOHTO's DAY-CARE: bit N = the game's DAY CARE slot N is the MAN's (daycare.c)
 #define VAR_KANTO_HERACROSS_SIZE      0x5152   // SIX ISLAND's HERACROSS record (FireRed's VAR_HERACROSS_SIZE_RECORD)
 #define VAR_KANTO_MASSAGE_STEPS       0x5150   // FireRed's VAR_MASSAGE_COOLDOWN_STEP_COUNTER: DAISY grooms again after 500 steps
 #define VAR_KANTO_FANCLUB_FANS        0x5153   // FireRed's VAR_FANCLUB_FAN_COUNTER: SAFFRON's TRAINER FAN CLUB (src/mp/mp_fanclub.c)
@@ -40,6 +41,12 @@
 #define FLAG_KANTO_HIDE_FANCLUB_ROCKER      0x1552
 #define FLAG_KANTO_HIDE_FANCLUB_WOMAN       0x1553
 #define FLAG_KANTO_HIDE_FANCLUB_BEAUTY      0x1554
+// JOHTO's DAY-CARE, Crystal's (case 47): the LADY's first words; the MAN inside, or outside on ROUTE 34 with an EGG
+#define FLAG_JOHTO_DAYCARE_LADY_MET      0x1555   // Crystal's DAYCARELADY_ACTIVE_F
+#define FLAG_JOHTO_HIDE_DAYCARE_MAN_IN   0x1556   // Crystal's EVENT_DAY_CARE_MAN_IN_DAY_CARE
+#define FLAG_JOHTO_HIDE_DAYCARE_MAN_OUT  0x1557   // Crystal's EVENT_DAY_CARE_MAN_ON_ROUTE_34
+#define FLAG_JOHTO_HIDE_DAYCARE_MON_1    0x1558   // Crystal's EVENT_DAY_CARE_MON_1: the MAN's POKéMON in ROUTE 34's yard
+#define FLAG_JOHTO_HIDE_DAYCARE_MON_2    0x155A   // Crystal's EVENT_DAY_CARE_MON_2: the LADY's (0x1559 Quetzal's)
 
 // JOHTO (0x1000-0x1FFF)
 #define FLAG_JOHTO_GOT_KILN_CHARCOAL  0x1021   // Crystal's EVENT_GOT_CHARCOAL_IN_CHARCOAL_KILN (0x1030 is HM01 CUT's)

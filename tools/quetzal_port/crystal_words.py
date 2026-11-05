@@ -76,6 +76,10 @@ def words(mapname, label, our_label=None):
     # (text_start: the buffer ends the line, the next line command goes on)
     text = re.sub(r'@"\s*\n\s*text_ram (\w+)\s*\n\s*text_start\s*\n',
                   lambda m: rams.get(m.group(1), '{STR_VAR_1}') + '"\n', text)
+    # a number put in by the script (text_decimal): the DAY-CARE's levels and price (daycare.c MP_JohtoDaycare_Slot)
+    decs = {'wStringBuffer2 + 1': '{STR_VAR_2}', 'wStringBuffer2 + 2': '{STR_VAR_3}'}
+    text = re.sub(r'@"\s*\n\s*text_decimal ([^,\n]+),[^\n]*\n\s*text "',
+                  lambda m: decs.get(m.group(1).strip(), '{STR_VAR_2}'), text)
     # ({d:NAME}: a number the map DEFs, as the haircut prices)
     defs = dict(re.findall(r'^DEF (\w+)\s+EQU (\d+)', text, re.M))
     text = re.sub(r'\{d:(\w+)\}', lambda m: defs.get(m.group(1), m.group(0)), text)
