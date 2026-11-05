@@ -62,7 +62,7 @@
 #define MP_BAG_ITEMS_COUNT 224   // (room for every item of the ITEMS pocket)
 #define MP_BAG_KEYITEMS_COUNT 64
 #define MP_BAG_POKEBALLS_COUNT 64
-#define MP_BAG_TMHM_COUNT 128   // (TM01-TM92 and the HMs)
+#define MP_BAG_TMHM_COUNT 160   // (TM01-TM139 and the HMs)
 #define MP_BAG_BERRIES_COUNT 64
 #define OBJECT_EVENT_TEMPLATES_COUNT 64
 #define DECOR_MAX_SECRET_BASE 16

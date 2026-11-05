@@ -1190,5 +1190,6 @@ static const u16 sTMHMMoves[] =
     FOREACH_TMHM(TMHM_MOVE)
     FOREACH_TM2(TMHM_MOVE)   // Moemon Kai: TM51-TM92
     FOREACH_HM2(TMHM_MOVE)   // Moemon Kai: the other regions' own HMs (index 100 on)
+    FOREACH_TM3(TMHM_MOVE)   // Moemon Kai: TM93 on (index 103 on)
 };
 #undef TMHM_MOVE

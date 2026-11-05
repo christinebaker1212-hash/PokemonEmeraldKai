@@ -57,8 +57,8 @@ Johto_VioletGym_EventScript_83FF117::
 	setrespawn 0x19
 
 Johto_VioletGym_EventScript_83FF150::
-	@ Moemon Kai: HeartGold / SoulSilver's TM from the leader (Quetzal gave ITEM_LEFTOVERS)
-	setorcopyvar VAR_0x8000, ITEM_TM51
+	@ Moemon Kai: Crystal's TM from the leader (MUD-SLAP: TM93 on, tools/moemon_tms/gen_tm3.py)
+	setorcopyvar VAR_0x8000, ITEM_TM122
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -134,8 +134,11 @@ Johto_VioletGym_Text_83FF3B7::
 	.string "instantly learn a new move.\p"
 	.string "Think before you act--a TM can be\n"
 	.string "used only once.\p"
-	.string "TM51 contains ROOST. It restores\n"
-	.string "half the max HP.$"
+	.string "TM122 contains MUD-SLAP.\p"
+	.string "It reduces the enemy’s accuracy\n"
+	.string "while it causes damage.\p"
+	.string "In other words, it is both\n"
+	.string "defensive and offensive.$"
 
 Johto_VioletGym_Text_83FF42E::
 	.string "There are MOéMON GYMS in cities\n"

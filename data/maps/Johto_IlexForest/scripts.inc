@@ -807,3 +807,30 @@ Johto_IlexForest_Text_83DCDAD::
 
 Johto_IlexForest_Text_83DCDF9::
 	.string "See you.$"
+
+@ Moemon Kai: Crystal's HEADBUTT man (docs/REGIONS_AUDIT.md 49; TM96 HEADBUTT, TM93 on)
+Johto_IlexForest_EventScript_HeadbuttGuy::
+	lock
+	faceplayer
+	goto_if_set FLAG_JOHTO_GOT_TM_HEADBUTT, Johto_IlexForest_EventScript_HeadbuttOutro
+	msgbox Johto_IlexForest_Text_HeadbuttIntro, MSGBOX_DEFAULT
+	setorcopyvar VAR_0x8000, ITEM_TM96
+	setorcopyvar VAR_0x8001, 1
+	callstd STD_OBTAIN_ITEM
+	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
+	setflag FLAG_JOHTO_GOT_TM_HEADBUTT
+Johto_IlexForest_EventScript_HeadbuttOutro::
+	msgbox Johto_IlexForest_Text_HeadbuttOutro, MSGBOX_DEFAULT
+	closemessage
+	release
+	end
+
+Johto_IlexForest_Text_HeadbuttIntro::
+	.string "What am I doing?\p"
+	.string "I’m shaking trees using HEADBUTT.\p"
+	.string "It’s fun. Here, you try it too!$"
+
+Johto_IlexForest_Text_HeadbuttOutro::
+	.string "Rattle trees with HEADBUTT.\n"
+	.string "Sometimes, sleeping MOéMON fall\l"
+	.string "out.$"

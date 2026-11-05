@@ -4447,6 +4447,31 @@ follow_behind, follow_ground.
   (item.c MP_ItemNumberOrder, also mp_bag.c's tie-break) and holds 128 kinds (MP_BAG_TMHM_COUNT; the slots past the
   save block's 64 are in "<save>.bag"). MP_Gen_OfItem: 4. Test tm_new.
 
+## TM93-TM139 (1.106.0: RED / BLUE's and Crystal's TMs)
+- The user's rule: a TM number keeps its Emerald / Platinum move; a RED / BLUE or Crystal TM with another move on the
+  same number gets a new slot after the last TM; a move that is a TM or HM here already (on any number: SWORDS DANCE,
+  ROCK SMASH = HM06, PSYCH UP, ENDURE, SWAGGER, SLEEP TALK, DREAM EATER, THUNDER WAVE, EXPLOSION, ROCK SLIDE,
+  SUBSTITUTE) gets none. 47 new TMs, items 697-743 (ITEM_TM93..ITEM_TM139), in Gen 1 then Gen 2 order by number:
+  tools/moemon_tms/gen_tm3.py (`python3 -I tools/moemon_tms/gen_tm3.py POKEAPI_CSV_DIR POKERED_DIR POKECRYSTAL_DIR`)
+  writes include/constants/tms_hms_tm3.h (FOREACH_TM3), src/data/items_tm3.h, item_descriptions_tm3.h, item_icons_tm3.h
+  (CURSE's disc in GHOST's colors: the ??? type has none) and src/data/pokemon/tm3_learnsets.h (gTm3Learnsets, u64,
+  bit k = TM(93 + k): RED / BLUE / Crystal's TM lists, Emerald's tutor lists and PokeAPI's teachable moves).
+- The index: TM93-TM139 are 103-149 after ROCK CLIMB / DEFOG / WHIRLPOOL (TMHM_INDEX_TM3); TMHM_INDEX / TMHM_ITEM /
+  IS_ITEM_TMHM take the new range first; the BAG shows three digits from 100; the TM pocket holds 160 kinds
+  (MP_BAG_TMHM_COUNT) and sorts TM93 on after TM92, the HMs last. MP_Gen_OfItem: 0 (every GENERATION).
+- Where (items stay in their region, so each region has its own): JOHTO, Crystal's places: the leaders (FALKNER TM122
+  MUD-SLAP, BUGSY TM138 FURY CUTTER, CHUCK TM94 DYNAMICPUNCH, PRYCE TM111 ICY WIND, CLAIR TM118 DRAGONBREATH at the
+  DRAGON SHRINE; their words name the new numbers: crystal_words.py renumber_tms), ILEX FOREST's HEADBUTT man (TM96,
+  FLAG_JOHTO_GOT_TM_HEADBUTT; then GOLDENROD 5F sells it too), ROUTE 34's ILEX gate teacher (TM108 SWEET SCENT), ROUTE
+  31's sleepy man for KENYA's MAIL (TM139 NIGHTMARE), MOOMOO FARM for healing MILTANK with seven BERRIES (TM109 SNORE;
+  VAR_QZ_0x501B counts 0-4, 6, 7 and 5 is healed, so Quetzal-era saves stay healed), GOLDENROD DEPT. STORE 5F (TM132,
+  TM136, TM123; shop.c sMpBaseLists, HEADBUTT added in MP_ShopItems), balls (ROUTE 35 TM99 ROLLOUT, UNION CAVE B1F TM128
+  SWIFT, MT. MORTAR 2F TM130 DEFENSE CURL with Crystal's other five balls, LAKE OF RAGE TM134 DETECT, DARK CAVE TM109
+  SNORE). KANTO: CELADON DEPT. STORE 2F's TMs clerk sells every RED / BLUE TM that got a slot plus Crystal's two KANTO
+  ones, CURSE and ZAP CANNON (sMpKantoOldTms). fix_item_balls.py leaves TM balls alone.
+- Tests tm_gen12 (the pocket, teaching), johto_tm_gifts, shop_lists_gen3 / gen9 (tools/test/check_shop_lists.py);
+  tools/moemon_gen59/item_audit.py counts them.
+
 ## The TRAINER CARD, the BADGE CASE (1.65.0; one card for every region since 1.66.0)
 
 - **Records** (`src/mp/mp_tcard.c`, `include/mp_tcard.h`): "<save>.card" (format 3; MP_TCard_Forget on a save file
@@ -5012,6 +5037,10 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
     and their triggers (nothing read VAR_QZ_0x500D 6 / 7), the MINERALBADGE raising DEFENSE; the warehouse grunt's
     Crystal lines; BURNED TOWER without the FIREBREATHER and BURGLAR; OLIVINE CAFE without JASMINE's dishes, its
     FISHING GURU and STRENGTH sailor in Crystal's words. Test johto_crystal_lines.
+  - Case 49's JOHTO half: ILEX FOREST's HEADBUTT man (object 18) gives TM96 HEADBUTT with Crystal's words; the
+    other copy (object 6) and OLIVINE's "manage moves from the summary screen" man are gone (kai_gone). Case 104: MOOMOO
+    takes seven BERRIES and the farm gives TM109 SNORE. Case 15: LANCE's HM WHIRLPOOL (given since 1.101.0). The TMs
+    themselves: "TM93-TM139". Test johto_tm_gifts.
 
 ## MAGIC (1.95.0: docs/MTG_DECISIONS.md, docs/MTG_HANDOFF.md)
 - The rules are Forge's translated into C (src/mtg/mtg_game.c etc., include/mtg/mtg.h), reading Forge's own card

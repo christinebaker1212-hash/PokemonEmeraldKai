@@ -1,0 +1,7 @@
+# Crystal's TM gifts in JOHTO (TM93 on): ILEX FOREST's HEADBUTT man (TM96), ROUTE 34's gate teacher (SWEET SCENT,
+# TM108), MOOMOO healed by seven BERRIES (5 at the end) and the farm's SNORE (TM109).
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("[test] flag 5453 = 1" "[test] flag 5454 = 1" "[test] bagqty 700: 1" "[test] bagqty 712: 1" "[test] var 0x501B = 1" "[test] var 0x501B = 6" "[test] var 0x501B = 5" "[test] bagqty 713: 1")
+UNEXPECT_A=("[crash]")

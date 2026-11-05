@@ -1,0 +1,40 @@
+pressuntil A field 5000
+wait 200
+mp additem 726 1
+mp additem 743 1
+mp additem 339 1
+mp additem 659 1
+mp moves 0 10 45
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press DOWN 2
+wait 20
+shot tmpocket
+press A 2
+wait 30
+pressuntil A yesno 900
+wait 10
+press A 2
+wait 90
+shot party
+press A 2
+wait 120
+shot learned
+pressuntil B field 1500
+wait 30
+mp monmoves 0
+mp bagview 3
+mp bagqty 726
+quit

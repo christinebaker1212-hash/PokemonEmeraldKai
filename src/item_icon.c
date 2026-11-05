@@ -16,6 +16,7 @@ EWRAM_DATA u8 *gItemIcon4x4Buffer = NULL;
 #include "data/item_icons_qz.h"   // Moemon Kai: Johto / Kanto items
 #include "data/item_icons_gen59.h"   // Moemon Kai: Gen 5-9 items
 #include "data/item_icons_tm2.h"   // Moemon Kai: TM51-TM92
+#include "data/item_icons_tm3.h"   // Moemon Kai: TM93 on
 #include "data/berries_gen4.h"   // Moemon Kai: Gen 4 berries
 #include "data/item_icon_table.h"
 

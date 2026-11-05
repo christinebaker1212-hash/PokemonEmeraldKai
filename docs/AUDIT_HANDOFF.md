@@ -8,28 +8,27 @@ then `docs/REGIONS_AUDIT.md` (the decisions and the rules at its top), then the 
 
 ## Where it stands
 
-- **113 of 158 cases are ticked** (1.105.0 added 100, 101 and 138, the user's rule since 2026-11-05: no case is left half done) (`- [x]` in REGIONS_AUDIT.md; its status line says which release did which).
+- **117 of 158 cases are ticked** (1.105.0 added 100, 101 and 138; 1.106.0 105, 15, 49 and 104, the user's rule since 2026-11-05: no case is left half done) (`- [x]` in REGIONS_AUDIT.md; its status line says which release did which).
 - Released: 1.88.0 (batch A), 1.89.0 (B), 1.90.0 (C, KANTO), 1.91.0 (D, JOHTO), 1.92.0 (E part 1: hidden items,
   weekday siblings, the Sunday lady...), **1.93.0** (E part 2: GOLDENROD's tutor, GAME CORNER TM prizes, NAME RATER,
   UNDERGROUND, CIANWOOD's SEER, the tutor / VAR_RESULT fix): pushed when the session paused; check its release run
   (Actions, "Release") went green, and re-queue it (workflow_dispatch) if not.
 - Case 100 ran (tools/quetzal_port/fix_floria.py), 101 too (fix_park.py); 138 is finished (COOP_NOTES 1.105.0).
 
-## The 48 cases left (`grep "^- \[ \]" docs/REGIONS_AUDIT.md`)
+## The 41 cases left (`grep "^- \[ \]" docs/REGIONS_AUDIT.md`)
 
-Small (a person, a sign, some lines): 46, 49 (JOHTO's HEADBUTT man on the tutor flow), 50, 66, 89, 105, 115, 117,
-122, 124, 126.
+Small (a person, a sign, some lines): 46, 50, 66, 89, 115, 117, 122, 124, 126.
 
 Medium: 25 + 71 (CELADON DEPT. STORE), 45 (leaders' rematches / DOJO), 47 (DAY-CARE through the PC), 74 (CYCLING
 ROAD slope), 88 (FAN CLUB), 96 (GOLDENROD DEPT. STORE; 5F still has Quetzal's MEGA STONE / Z-CRYSTAL clerks: keep
 every item obtainable, `python3 tools/moemon_gen59/item_audit.py`), 106 (MT. SILVER / RED), 110 (BLACKTHORN / DRAGON'S
-DEN gating), 116 (remove HGSS events), 120 (VIRIDIAN's catching demo: reuse 133's MP_JohtoCatchingTutorial pattern).
+DEN gating; CLAIR already gives Crystal's TM118 DRAGONBREATH at the DRAGON SHRINE), 116 (remove HGSS events), 120 (VIRIDIAN's catching demo: reuse 133's MP_JohtoCatchingTutorial pattern).
 
 Large: 10 (TRAINER TOWER port), 37 (Crystal's BATTLE TOWER), 57 (FireRed / Crystal trainer teams; 17, 24, 112, 130
 depend on it), 58 (trades), 59 (marts by town), 60 (legendaries; the user's rule at the top of REGIONS_AUDIT), 61
 (fossils), 62 (both SAFARI ZONEs; 146's PHOTO STUDIO door is Quetzal's CLIFF EDGE CAVE to the JOHTO SAFARI ZONE, and
 156's SAFARI part go with it), 64 (POKéDEX rating / NATIONAL DEX), 65 (legendary story; with 139 WISE TRIO / SUICUNE
-and 113 LANCE / EUSINE scenes), 15 + 104 (Crystal / KANTO TMs, WHIRLPOOL), 97 (Bug-Catching Contest), 125 (KANTO
+and 113 LANCE / EUSINE scenes), 97 (Bug-Catching Contest), 125 (KANTO
 GAME CORNER games), 141 (BUENA's PASSWORD).
 
 ## How each case is done (the loop)

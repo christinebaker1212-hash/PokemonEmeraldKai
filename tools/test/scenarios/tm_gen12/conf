@@ -1,0 +1,8 @@
+# TM93 on (Red / Blue and Crystal's TMs whose moves aren't on that number here, items 697 on): the TM pocket lists them
+# after TM92 and before the HMs (TM92, TM122, TM139, HM01), with three-digit numbers, and TM122 (MUD-SLAP, which
+# TORCHIC learns by Emerald's tutor list) is taught from the BAG and stays there.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("[test] bagview 3: 659 726 743 339" "[test] monmoves: slot 0 species 280 moves 10 45 189 0" "[test] bagqty 726: 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

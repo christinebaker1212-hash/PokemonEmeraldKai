@@ -806,7 +806,9 @@
 #define ITEM_HM_ROCK_CLIMB 694
 #define ITEM_HM_DEFOG 695
 #define ITEM_HM_WHIRLPOOL 696
-#define ITEMS_COUNT 697
+// Moemon Kai: TM93 on (Red / Blue and Crystal's TMs whose moves aren't on that number here): items 697 on
+#include "constants/tms_hms_tm3.h"
+#define ITEMS_COUNT (ITEM_TM139 + 1)
 // end of Gen 5-9 items
 #define FIRST_PLATINUM_KEY_ITEM ITEM_GALACTIC_KEY
 #define LAST_PLATINUM_ITEM ITEM_GOOEY_MULCH
@@ -859,14 +861,16 @@
 #define NUM_HIDDEN_MACHINES     8
 #define NUM_TECHNICAL_MACHINES_2 42   // Moemon Kai: TM51-TM92
 #define NUM_HIDDEN_MACHINES_2    3   // Moemon Kai: ROCK CLIMB, DEFOG, WHIRLPOOL (ITEM_HM_ROCK_CLIMB on)
-#define NUM_TMHMS (NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2 + NUM_HIDDEN_MACHINES_2)
+#define NUM_TMHMS (NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2 + NUM_HIDDEN_MACHINES_2 + NUM_TECHNICAL_MACHINES_3)
+#define TMHM_INDEX_TM3 (NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2 + NUM_HIDDEN_MACHINES_2)   // (TM93 on: 103)
 // a TM / HM item <-> its index (TM01-TM50 0-49, HM01-HM08 50-57, TM51-TM92 58-99: the learnset bits and sTMHMMoves)
 #define IS_ITEM_HM(item) (((item) >= ITEM_HM01 && (item) <= ITEM_HM08) || ((item) >= ITEM_HM_ROCK_CLIMB && (item) <= ITEM_HM_WHIRLPOOL))
 #define IS_ITEM_TMHM(item) (((item) >= ITEM_TM01 && (item) <= ITEM_HM08) || ((item) >= ITEM_TM51 && (item) <= ITEM_TM92) \
-                            || ((item) >= ITEM_HM_ROCK_CLIMB && (item) <= ITEM_HM_WHIRLPOOL))
-#define TMHM_INDEX(item) ((item) >= ITEM_HM_ROCK_CLIMB ? (item) - ITEM_HM_ROCK_CLIMB + NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2 \
+                            || ((item) >= ITEM_HM_ROCK_CLIMB && (item) <= ITEM_HM_WHIRLPOOL) || ((item) >= ITEM_TM93 && (item) <= ITEM_TM139))
+#define TMHM_INDEX(item) ((item) >= ITEM_TM93 ? (item) - ITEM_TM93 + TMHM_INDEX_TM3 : (item) >= ITEM_HM_ROCK_CLIMB ? (item) - ITEM_HM_ROCK_CLIMB + NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2 \
                          : (item) >= ITEM_TM51 ? (item) - ITEM_TM51 + NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES : (item) - ITEM_TM01)
-#define TMHM_ITEM(index) ((index) >= NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2 \
+#define TMHM_ITEM(index) ((index) >= TMHM_INDEX_TM3 ? (index) - TMHM_INDEX_TM3 + ITEM_TM93 \
+                          : (index) >= NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2 \
                           ? (index) - NUM_TECHNICAL_MACHINES - NUM_HIDDEN_MACHINES - NUM_TECHNICAL_MACHINES_2 + ITEM_HM_ROCK_CLIMB \
                           : (index) >= NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES ? (index) - NUM_TECHNICAL_MACHINES - NUM_HIDDEN_MACHINES + ITEM_TM51 : (index) + ITEM_TM01)
 

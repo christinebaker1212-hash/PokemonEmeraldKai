@@ -122,7 +122,7 @@ Johto_LakeOfRage_EventScript_83DD47A::
 
 @ Johto_LakeOfRage object 11 (local id 11, gfx 0x3A9E) at 37,1
 Johto_LakeOfRage_EventScript_83DD487::
-	setorcopyvar VAR_0x8000, ITEM_MAX_REVIVE
+	setorcopyvar VAR_0x8000, ITEM_TM134   @ Moemon Kai: Crystal's TM DETECT (T11b)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

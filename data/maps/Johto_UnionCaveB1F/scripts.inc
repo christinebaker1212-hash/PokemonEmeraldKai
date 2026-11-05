@@ -35,7 +35,7 @@ Johto_UnionCaveB1F_EventScript_83FDFCA::
 
 @ Johto_UnionCaveB1F object 5 (local id 5, gfx 0x3A9E) at 2,18
 Johto_UnionCaveB1F_EventScript_83FDFD7::
-	setorcopyvar VAR_0x8000, ITEM_X_DEFEND
+	setorcopyvar VAR_0x8000, ITEM_TM128   @ Moemon Kai: Crystal's TM SWIFT (T11b)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

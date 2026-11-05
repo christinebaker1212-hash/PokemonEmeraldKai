@@ -207,8 +207,9 @@ Johto_DragonShrine_EventScript_83CC90C::
 	end
 
 Johto_DragonShrine_EventScript_83CC91B::
-	@ Moemon Kai: HeartGold / SoulSilver's TM from the leader (Quetzal gave ITEM_DRAGON_SCALE)
-	setorcopyvar VAR_0x8000, ITEM_TM59
+	@ Moemon Kai: Crystal's TM from the leader (DRAGONBREATH: TM93 on, tools/moemon_tms/gen_tm3.py; Quetzal gave
+	@ ITEM_DRAGON_SCALE)
+	setorcopyvar VAR_0x8000, ITEM_TM118
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Johto_DragonShrine_EventScript_83CC93E
@@ -416,11 +417,10 @@ Johto_DragonShrine_Text_83CC950::
 	.string "I want you to have something else.$"
 
 Johto_DragonShrine_Text_83CC9B2::
-	.string "That contains DRAGON PULSE.\p"
-	.string "Well, DRAGON PULSE is a kind\n"
-	.string "of...umm... Never mind!\p"
-	.string "It’s a huge energy of some kind.\n"
-	.string "If you don’t want it, you don’t\l"
+	.string "That contains DRAGONBREATH.\p"
+	.string "No, it doesn’t have anything to do\n"
+	.string "with my breath.\p"
+	.string "If you don’t want it, you don’t\n"
 	.string "have to take it.$"
 
 Johto_DragonShrine_Text_83CC9FC::

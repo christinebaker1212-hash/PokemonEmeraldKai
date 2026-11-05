@@ -67,8 +67,8 @@ Johto_CianwoodGym_EventScript_83CA5A7::
 	end
 
 Johto_CianwoodGym_EventScript_83CA5AE::
-	@ Moemon Kai: HeartGold / SoulSilver's TM from the leader (Quetzal gave ITEM_LIFE_ORB)
-	setorcopyvar VAR_0x8000, ITEM_TM01
+	@ Moemon Kai: Crystal's TM from the leader (DYNAMICPUNCH: TM93 on, tools/moemon_tms/gen_tm3.py)
+	setorcopyvar VAR_0x8000, ITEM_TM94
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602B4
@@ -173,11 +173,9 @@ Johto_CianwoodGym_Text_83CA853::
 	.string "Here, take this too!$"
 
 Johto_CianwoodGym_Text_83CA8E6::
-	.string "That is FOCUS PUNCH.\p"
-	.string "It doesn’t land if the foe you’re\n"
-	.string "attacking hits you first, but it’s\l"
-	.string "very powerful if it manages to\l"
-	.string "hit!$"
+	.string "That is DYNAMICPUNCH.\p"
+	.string "It doesn’t always hit, but when it\n"
+	.string "does, it causes confusion!$"
 
 Johto_CianwoodGym_Text_83CA930::
 	.string "WAHAHAH! I enjoyed battling you!\p"

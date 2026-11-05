@@ -3,21 +3,19 @@ Johto_Route39Barn_MapScripts::
 
 @ Johto_Route39Barn object 1 (local id 1, gfx 0x1F1) at 13,5
 Johto_Route39Barn_EventScript_83F3580::
+	@ Moemon Kai: seven BERRIES as Crystal's (docs/REGIONS_AUDIT.md 104). VAR_QZ_0x501B counts them 0-4, then 6, 7;
+	@ 5 is healed (as before, so a save that healed MILTANK on Quetzal's five stays healed)
 	lock
 	faceplayer
 	waitse
 	playmoncry SPECIES_MILTANK, 0
-	goto_if_eq VAR_QZ_0x501B, 0, Johto_Route39Barn_EventScript_83F35CA
-	goto_if_eq VAR_QZ_0x501B, 1, Johto_Route39Barn_EventScript_83F361B
-	goto_if_eq VAR_QZ_0x501B, 2, Johto_Route39Barn_EventScript_83F366C
-	goto_if_eq VAR_QZ_0x501B, 3, Johto_Route39Barn_EventScript_83F36BD
-	goto_if_eq VAR_QZ_0x501B, 4, Johto_Route39Barn_EventScript_83F370E
+	goto_if_ne VAR_QZ_0x501B, 5, Johto_Route39Barn_EventScript_Weak
 	msgbox Johto_Route39Barn_Text_83F382B, MSGBOX_DEFAULT
 	waitmoncry
 	release
 	end
 
-Johto_Route39Barn_EventScript_83F35CA::
+Johto_Route39Barn_EventScript_Weak::
 	msgbox Johto_Route39Barn_Text_83F37EC, MSGBOX_DEFAULT
 	waitmoncry
 	closemessage
@@ -30,87 +28,33 @@ Johto_Route39Barn_EventScript_83F35CA::
 	playse SE_USE_ITEM
 	msgbox Johto_Route39Barn_Text_83F383A, MSGBOX_AUTOCLOSE
 	waitse
-	msgbox Johto_Route39Barn_Text_83F385C, MSGBOX_DEFAULT
-	closemessage
-	setvar VAR_QZ_0x501B, 1
+	goto_if_eq VAR_QZ_0x501B, 2, Johto_Route39Barn_EventScript_Third
+	goto_if_eq VAR_QZ_0x501B, 4, Johto_Route39Barn_EventScript_Fifth
+	goto_if_eq VAR_QZ_0x501B, 7, Johto_Route39Barn_EventScript_Seventh
+	addvar VAR_QZ_0x501B, 1
 	release
 	end
 
-Johto_Route39Barn_EventScript_83F361B::
-	msgbox Johto_Route39Barn_Text_83F37EC, MSGBOX_DEFAULT
-	waitmoncry
-	closemessage
-	delay 0xA
-	msgbox Johto_Route39Barn_Text_83F37FB, MSGBOX_YESNO
-	call_if_eq VAR_RESULT, 0, Johto_Route39Barn_EventScript_83F3763
-	checkitem ITEM_ORAN_BERRY, 1
-	goto_if_eq VAR_RESULT, 0, Johto_Route39Barn_EventScript_83F376E
-	removeitem ITEM_ORAN_BERRY, 1
-	playse SE_USE_ITEM
-	msgbox Johto_Route39Barn_Text_83F383A, MSGBOX_AUTOCLOSE
-	waitse
-	msgbox Johto_Route39Barn_Text_83F385C, MSGBOX_DEFAULT
-	closemessage
-	setvar VAR_QZ_0x501B, 2
-	release
-	end
-
-Johto_Route39Barn_EventScript_83F366C::
-	msgbox Johto_Route39Barn_Text_83F37EC, MSGBOX_DEFAULT
-	waitmoncry
-	closemessage
-	delay 0xA
-	msgbox Johto_Route39Barn_Text_83F37FB, MSGBOX_YESNO
-	call_if_eq VAR_RESULT, 0, Johto_Route39Barn_EventScript_83F3763
-	checkitem ITEM_ORAN_BERRY, 1
-	goto_if_eq VAR_RESULT, 0, Johto_Route39Barn_EventScript_83F376E
-	removeitem ITEM_ORAN_BERRY, 1
-	playse SE_USE_ITEM
-	msgbox Johto_Route39Barn_Text_83F383A, MSGBOX_AUTOCLOSE
-	waitse
-	msgbox Johto_Route39Barn_Text_83F387F, MSGBOX_DEFAULT
-	closemessage
+Johto_Route39Barn_EventScript_Third::
 	setvar VAR_QZ_0x501B, 3
+	msgbox Johto_Route39Barn_Text_83F385C, MSGBOX_DEFAULT
+	closemessage
 	release
 	end
 
-Johto_Route39Barn_EventScript_83F36BD::
-	msgbox Johto_Route39Barn_Text_83F37EC, MSGBOX_DEFAULT
-	waitmoncry
-	closemessage
-	delay 0xA
-	msgbox Johto_Route39Barn_Text_83F37FB, MSGBOX_YESNO
-	call_if_eq VAR_RESULT, 0, Johto_Route39Barn_EventScript_83F3763
-	checkitem ITEM_ORAN_BERRY, 1
-	goto_if_eq VAR_RESULT, 0, Johto_Route39Barn_EventScript_83F376E
-	removeitem ITEM_ORAN_BERRY, 1
-	playse SE_USE_ITEM
-	msgbox Johto_Route39Barn_Text_83F383A, MSGBOX_AUTOCLOSE
-	waitse
+Johto_Route39Barn_EventScript_Fifth::
+	setvar VAR_QZ_0x501B, 6
 	msgbox Johto_Route39Barn_Text_83F387F, MSGBOX_DEFAULT
 	closemessage
-	setvar VAR_QZ_0x501B, 4
 	release
 	end
 
-Johto_Route39Barn_EventScript_83F370E::
-	msgbox Johto_Route39Barn_Text_83F37EC, MSGBOX_DEFAULT
-	waitmoncry
-	closemessage
-	delay 0xA
-	msgbox Johto_Route39Barn_Text_83F37FB, MSGBOX_YESNO
-	call_if_eq VAR_RESULT, 0, Johto_Route39Barn_EventScript_83F3763
-	checkitem ITEM_ORAN_BERRY, 1
-	goto_if_eq VAR_RESULT, 0, Johto_Route39Barn_EventScript_83F376E
-	removeitem ITEM_ORAN_BERRY, 1
-	playse SE_USE_ITEM
-	msgbox Johto_Route39Barn_Text_83F383A, MSGBOX_AUTOCLOSE
-	waitse
+Johto_Route39Barn_EventScript_Seventh::
+	setvar VAR_QZ_0x501B, 5
 	msgbox Johto_Route39Barn_Text_83F389D, MSGBOX_DEFAULT
 	playfanfare MUS_OBTAIN_BADGE
 	waitfanfare
 	closemessage
-	setvar VAR_QZ_0x501B, 5
 	release
 	end
 

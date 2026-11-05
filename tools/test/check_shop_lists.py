@@ -10,8 +10,8 @@ import sys
 
 gen, d = int(sys.argv[1]), sys.argv[2]
 names = {}
-for line in open('include/constants/items.h'):
-    m = re.match(r'#define ITEM_(\w+) (\d+)$', line.strip())
+for line in open('include/constants/items.h').readlines() + open('include/constants/tms_hms_tm3.h').readlines():
+    m = re.match(r'#define ITEM_(\w+) (\d+)\s*(?://.*)?$', line.strip())
     if m and int(m.group(2)) not in names:
         names[int(m.group(2))] = m.group(1)
 maps = {}
@@ -46,14 +46,16 @@ k = ('KANTO_VIRIDIAN_CITY_MART', 'REGION')
 want(k, lists[k] == 'POKE_BALL POTION ANTIDOTE PARALYZE_HEAL'.split(), "FRLG's Viridian")
 k = ('KANTO_CELADON_CITY_DEPARTMENT_STORE_2F', 'BLUE_FLUTE')
 want(k, lists[k][:6] == 'TM05 TM15 TM28 TM31 TM43 TM45'.split(), "FRLG's Celadon 2F TMs")
+want(k, lists[k][6:9] == 'TM93 TM95 TM97'.split() and 'TM137' in lists[k], "then RED / BLUE's TMs (TM93 on)")
 older = ('QUICK_CLAW', 'KINGS_ROCK', 'SHELL_BELL', 'MENTAL_HERB', 'WHITE_HERB', 'MACHO_BRACE', 'RARE_CANDY')
 for key, items in lists.items():
     if key[0].startswith(('JOHTO_GOLDENROD', 'KANTO_CELADON')):
         want(key, not set(items) & set(older), 'no older item those games didn\'t sell')
 if gen == 3:
-    for key in [('JOHTO_GOLDENROD_DEPT_STORE3F', 'MACHO_BRACE'), ('JOHTO_GOLDENROD_DEPT_STORE4F', 'WATER_STONE'),
-                ('JOHTO_GOLDENROD_DEPT_STORE5F', 'NONE')]:
+    for key in [('JOHTO_GOLDENROD_DEPT_STORE3F', 'MACHO_BRACE'), ('JOHTO_GOLDENROD_DEPT_STORE4F', 'WATER_STONE')]:
         want(key, lists[key] == [], "nothing at GEN 3 (Quetzal's own clerk)")
+    k = ('JOHTO_GOLDENROD_DEPT_STORE5F', 'NONE')
+    want(k, lists[k] == 'TM132 TM136 TM123'.split(), "Crystal's 5F TMs (THUNDERPUNCH, FIRE PUNCH, ICE PUNCH) at GEN 3")
     k = ('JOHTO_GOLDENROD_DEPT_STORE2F', 'X_SPEED')
     want(k, lists[k] == CRYSTAL_X, "only Crystal's at GEN 3")
 else:

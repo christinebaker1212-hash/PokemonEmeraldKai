@@ -1032,8 +1032,8 @@ static void GetItemNameFromPocket(u8 *dest, u16 itemId)
         else
         {
             // Get TM number
-            ConvertIntToDecimalStringN(gStringVar1, itemId >= ITEM_TM51 ? itemId - ITEM_TM51 + 51 : itemId - ITEM_TM01 + 1,
-                                       STR_CONV_MODE_LEADING_ZEROS, 2);
+            u16 tmNum = itemId >= ITEM_TM93 ? itemId - ITEM_TM93 + 93 : itemId >= ITEM_TM51 ? itemId - ITEM_TM51 + 51 : itemId - ITEM_TM01 + 1;
+            ConvertIntToDecimalStringN(gStringVar1, tmNum, STR_CONV_MODE_LEADING_ZEROS, tmNum >= 100 ? 3 : 2);
             StringExpandPlaceholders(dest, gText_NumberItem_TMBerry);
         }
         break;

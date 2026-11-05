@@ -32,6 +32,35 @@ def asm(mapname):
     return _cache[mapname]
 
 
+_tm_numbers = None
+
+
+def renumber_tms(par):
+    """Crystal's "TMnn" as this game's number for the same move (T11b: Crystal's TMs whose moves are on another number
+    here, tools/moemon_tms/gen_tm3.py; the words stay Crystal's), and DYNAMICPUNCH whole across a line break"""
+    global _tm_numbers
+    if _tm_numbers is None:
+        repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        crys = [m for m in re.findall(r'^\s*add_tm (\w+)', asm('constants/item_constants'), re.M)]
+        alias = {'DYNAMICPUNCH': 'DYNAMIC_PUNCH', 'DRAGONBREATH': 'DRAGON_BREATH', 'THUNDERPUNCH': 'THUNDER_PUNCH',
+                 'PSYCHIC_M': 'PSYCHIC', 'SOLARBEAM': 'SOLAR_BEAM'}
+        hdr = open(os.path.join(repo, 'include/constants/tms_hms.h')).read()
+        ours = re.findall(r'F\((\w+)\)', hdr.split('FOREACH_HM')[0])
+        tm2 = re.findall(r'F\((\w+)\)', open(os.path.join(repo, 'include/constants/tms_hms_tm2.h')).read())
+        tm3 = re.findall(r'F\((\w+)\)', open(os.path.join(repo, 'include/constants/tms_hms_tm3.h')).read())
+        where = {m: k + 1 for k, m in enumerate(ours)}
+        where.update({m: k + 51 for k, m in enumerate(tm2)})
+        where.update({m: k + 93 for k, m in enumerate(tm3)})
+        _tm_numbers = {}
+        for k, m in enumerate(crys):
+            m = alias.get(m, m)
+            if m in where and where[m] != k + 1:
+                _tm_numbers[k + 1] = where[m]
+    par = re.sub(r'\bTM0?(\d+)\b', lambda x: 'TM%02d' % _tm_numbers.get(int(x.group(1)), int(x.group(1)))
+                 if int(x.group(1)) < 10 and int(x.group(1)) not in _tm_numbers else 'TM%d' % _tm_numbers.get(int(x.group(1)), int(x.group(1))), par)
+    return par.replace('DYNAMIC- PUNCH', 'DYNAMICPUNCH')
+
+
 def words(mapname, label, our_label=None):
     """`OUR_LABEL::` and its .string lines"""
     text = asm(mapname)
@@ -50,7 +79,7 @@ def words(mapname, label, our_label=None):
     # ({d:NAME}: a number the map DEFs, as the haircut prices)
     defs = dict(re.findall(r'^DEF (\w+)\s+EQU (\d+)', text, re.M))
     text = re.sub(r'\{d:(\w+)\}', lambda m: defs.get(m.group(1), m.group(0)), text)
-    pars = crystal_text(text, label)
+    pars = [renumber_tms(p) for p in crystal_text(text, label)]
     body = gba_text(pars)
     return ('%s::\n' % our_label if our_label else '') + body
 

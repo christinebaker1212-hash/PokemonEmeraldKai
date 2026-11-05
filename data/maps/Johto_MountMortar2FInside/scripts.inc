@@ -8,42 +8,42 @@ Johto_MountMortar2FInside_EventScript_83DFEA5::
 
 @ Johto_MountMortar2FInside object 1 (local id 1, gfx 0x3A9E) at 16,9
 Johto_MountMortar2FInside_EventScript_83DFEAB::
-	setorcopyvar VAR_0x8000, ITEM_IRON
+	setorcopyvar VAR_0x8000, ITEM_DRAGON_SCALE   @ Moemon Kai: Crystal's (T11b)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_MountMortar2FInside object 2 (local id 2, gfx 0x3A9E) at 29,9
 Johto_MountMortar2FInside_EventScript_83DFEB8::
-	setorcopyvar VAR_0x8000, ITEM_MAX_REVIVE
+	setorcopyvar VAR_0x8000, ITEM_ESCAPE_ROPE   @ Moemon Kai: Crystal's (T11b)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_MountMortar2FInside object 3 (local id 3, gfx 0x3A9E) at 9,15
 Johto_MountMortar2FInside_EventScript_83DFEC5::
-	setorcopyvar VAR_0x8000, ITEM_ETHER
+	setorcopyvar VAR_0x8000, ITEM_ELIXIR   @ Moemon Kai: Crystal's (T11b)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_MountMortar2FInside object 4 (local id 4, gfx 0x3A9E) at 19,21
 Johto_MountMortar2FInside_EventScript_83DFED2::
-	setorcopyvar VAR_0x8000, ITEM_RARE_CANDY
+	setorcopyvar VAR_0x8000, ITEM_TM130   @ Moemon Kai: Crystal's (T11b)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_MountMortar2FInside object 5 (local id 5, gfx 0x3A9E) at 28,26
 Johto_MountMortar2FInside_EventScript_83DFEDF::
-	setorcopyvar VAR_0x8000, ITEM_DRAGON_SCALE
+	setorcopyvar VAR_0x8000, ITEM_MAX_POTION   @ Moemon Kai: Crystal's (T11b)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_MountMortar2FInside object 6 (local id 6, gfx 0x3A9E) at 2,37
 Johto_MountMortar2FInside_EventScript_83DFEEC::
-	setorcopyvar VAR_0x8000, ITEM_ELIXIR
+	setorcopyvar VAR_0x8000, ITEM_RARE_CANDY   @ Moemon Kai: Crystal's (T11b)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

@@ -33,7 +33,8 @@ EXEMPT = {   # never meant to be had (removed from the games, or a game's machin
 
 def items():
     out = {}
-    for m in re.finditer(r'#define (ITEM_\w+) (\d+)\b', oa.rd('include/constants/items.h')):
+    for m in re.finditer(r'#define (ITEM_\w+) (\d+)\b', oa.rd('include/constants/items.h')
+                         + oa.rd('include/constants/tms_hms_tm3.h')):
         out.setdefault(m.group(1), int(m.group(2)))
     # ITEM_TM_<MOVE> / ITEM_HM_<MOVE>: tms_hms.h's order from ITEM_TM01 / ITEM_HM01
     t = oa.rd('include/constants/tms_hms.h')
@@ -47,7 +48,7 @@ def items():
 def names():
     """items with a real name (unused slots are '????????')"""
     ok = set()
-    for f in ('items.h', 'items_gen4.h', 'items_gen4_berries.h', 'items_qz.h', 'items_gen59.h'):
+    for f in ('items.h', 'items_gen4.h', 'items_gen4_berries.h', 'items_qz.h', 'items_gen59.h', 'items_tm3.h'):
         p = os.path.join(REPO, 'src/data', f)
         if not os.path.exists(p):
             continue

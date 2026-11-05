@@ -85,8 +85,8 @@ Johto_MahoganyGym_EventScript_83DE683::
 	setrespawn 0x20
 
 Johto_MahoganyGym_EventScript_83DE6BC::
-	@ Moemon Kai: HeartGold / SoulSilver's TM from the leader (Quetzal gave ITEM_FOCUS_SASH)
-	setorcopyvar VAR_0x8000, ITEM_TM07
+	@ Moemon Kai: Crystal's TM from the leader (ICY WIND: TM93 on, tools/moemon_tms/gen_tm3.py)
+	setorcopyvar VAR_0x8000, ITEM_TM111
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -163,10 +163,11 @@ Johto_MahoganyGym_Text_83DE927::
 	.string "And this… This is a gift from me!$"
 
 Johto_MahoganyGym_Text_83DE9C5::
-	.string "That TM contains HAIL.\p"
-	.string "It summons a hailstorm that lasts\n"
-	.string "for five turns. The hailstorm\l"
-	.string "damages all types except Ice.$"
+	.string "That TM contains ICY WIND.\p"
+	.string "It inflicts damage and lowers\n"
+	.string "speed.\p"
+	.string "It demonstrates the harshness of\n"
+	.string "winter.$"
 
 Johto_MahoganyGym_Text_83DEA4F::
 	.string "When the ice and snow melt,\n"

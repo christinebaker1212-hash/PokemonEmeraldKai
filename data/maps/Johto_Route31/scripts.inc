@@ -53,7 +53,7 @@ Johto_Route31_EventScript_83EE516::
 	msgbox Johto_Route31_Text_83EE78B, MSGBOX_DEFAULT
 
 Johto_Route31_EventScript_83EE53C::
-	setorcopyvar VAR_0x8000, ITEM_EVIOLITE
+	setorcopyvar VAR_0x8000, ITEM_TM139   @ Moemon Kai: Crystal's NIGHTMARE (T11b)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -157,18 +157,21 @@ Johto_Route31_Text_83EE75E::
 
 Johto_Route31_Text_83EE78B::
 	.string "Let’s see…\p"
-	.string "Thanks for bringing this to\n"
-	.string "me.\p"
-	.string "My friend’s a good guy, and\n"
-	.string "you’re swell too!\p"
-	.string "I’d like to do something good\n"
-	.string "in return too!\p"
-	.string "I know! I want you to have\n"
-	.string "this!$"
+	.string "…DARK CAVE leads to another road…\p"
+	.string "That’s good to know.\p"
+	.string "Thanks for bringing this to me.\p"
+	.string "My friend’s a good guy, and you’re\n"
+	.string "swell too!\p"
+	.string "I’d like to do something good in\n"
+	.string "return too!\p"
+	.string "I know! I want you to have this!$"
 
 Johto_Route31_Text_83EE832::
-	.string "EVIOLITE boosts both defenses\n"
-	.string "if its holder can still evolve.$"
+	.string "TM139 is NIGHTMARE.\p"
+	.string "It’s a wicked move that steadily\n"
+	.string "cuts the HP of a sleeping enemy.\p"
+	.string "Ooooh… That’s scary…\p"
+	.string "I don’t want to have bad dreams.$"
 
 Johto_Route31_Text_83EE927::
 	.string "I found a good MOéMON in DARK\n"

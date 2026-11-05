@@ -4862,6 +4862,7 @@ const struct Item gItems[] =
 #include "items_qz.h"   // Moemon Kai: Johto / Kanto items
 #include "items_gen59.h"   // Moemon Kai: Gen 5-9 items
 #include "items_tm2.h"   // Moemon Kai: TM51-TM92
+#include "items_tm3.h"   // Moemon Kai: TM93 on
     [ITEM_POKETCH] =
     {
         .name = _("POKéTCH"),

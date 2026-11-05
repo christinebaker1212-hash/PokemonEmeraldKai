@@ -2,7 +2,7 @@
 
 The audit compared every KANTO map with FireRed and every JOHTO map with Crystal (findings, with the original's and the
 game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided each of the 157 cases below (158 was added by the user later). Status:
-[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04); 1.92.0: cases 52, 63, 91-95, 131-134, 136, 143 and 148, and the first part of 138 (POKéMON in houses, ELM's lab signs, small lines); 1.93.0: cases 142, 144, 145, the SEER of 146 and GOLDENROD's NAME RATER (118); 1.105.0: cases 100, 101 and the rest of 138; 1.106.0: case 105). Rules the user set with these decisions:
+[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04); 1.92.0: cases 52, 63, 91-95, 131-134, 136, 143 and 148, and the first part of 138 (POKéMON in houses, ELM's lab signs, small lines); 1.93.0: cases 142, 144, 145, the SEER of 146 and GOLDENROD's NAME RATER (118); 1.105.0: cases 100, 101 and the rest of 138; 1.106.0: cases 105, 15 (LANCE's HM WHIRLPOOL, given since 1.101.0's HM items), 49 (JOHTO's HEADBUTT man) and 104 (MOOMOO, with the TM93-TM139 TMs); CLAIR's Crystal TM24 DRAGONBREATH is in too, 110's gating waits). Rules the user set with these decisions:
 
 - **JOHTO is strictly Crystal** (case 116): HGSS-flavoured events Quetzal added are removed; where this file or
   docs/REGIONS_TODO.md said "HGSS ranks above Quetzal", Crystal alone is the reference now.
@@ -29,7 +29,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **12. [J2-6]** MAXIE (TIN TOWER roof) and ARCHIE (WHIRL ISLANDS) stand there from the first visit, and their ORBs lead nowhere: **REMOVE it**
 - [x] **13. [J2-4]** GOLDENROD FLOWER SHOP girl hands out Gen 8 items (TEACUPs, SCROLLs, armor, WHIPPED DREAM) instead of BERRIES: **RESTORE the original**
 - [x] **14. [J3-2]** ICE PATH's SWINUB can never be fed: the script compares the berry with Quetzal's item number 518: **REMOVE it**
-- [ ] **15. [J3-4]** LANCE says he hands over WHIRLPOOL in the ROCKET HIDEOUT but gives nothing: **RESTORE the original**
+- [x] **15. [J3-4]** LANCE says he hands over WHIRLPOOL in the ROCKET HIDEOUT but gives nothing: **RESTORE the original**
 - [x] **16. [K1-3, K2-21, K3-4, K4-3, J1-3, J3-7]** JESSIE & JAMES's travelling battle (Quetzal's), and its reward is an empty POKéMON: **REMOVE it**
 - [ ] **17. [K1-1, K2-4]** KANTO trainer rematches can never happen (no VS SEEKER, dead rematch branches): **RESTORE the original**
 - [x] **18. [K1-11, K2-22, K3-26, K4-17]** The KANTO rival is always "BLUE" (FireRed lets you name him): **RESTORE the original**
@@ -63,7 +63,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **46. [K2-18, K3-11, K4-14]** POKéMON CENTER 2F attendants explain Quetzal's MPLAYER, cheats and NUZLOCKE: **RESTORE the original**
 - [ ] **47. [K1-20, K3-9, J2-3, J3-36]** DAY-CARE "through the PC": KANTO's two are incense shops, JOHTO has none: **RESTORE the original**
 - [x] **48. [K1-19, J2-9]** BIKE SHOPs talk about MACH / ACRO modes: **RESTORE the original**
-- [ ] **49. [K1-14, K2-10, K3-12, K4-4, K4-13, J1-8, J3-37]** "Moves are managed from the team menu / summary" lines (Quetzal's tutors, Kai can't): **RESTORE the original**
+- [x] **49. [K1-14, K2-10, K3-12, K4-4, K4-13, J1-8, J3-37]** "Moves are managed from the team menu / summary" lines (Quetzal's tutors, Kai can't): **RESTORE the original**
 - [ ] **50. [J1-4, J2-10, J2-11, J3-38]** Words about travel between regions that don't match Kai's: **RESTORE the original**
 - [x] **51. [K1-12]** DAISY: Quetzal's "no friendship" line, a TOWN MAP she never gives, no grooming: **RESTORE the original**
 - [x] **52. [J1-5]** EARL's ACADEMY teaches Quetzal's rules; Crystal's lessons are gone: **RESTORE the original**
@@ -118,7 +118,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **101. [J2-28]** NATIONAL PARK / ROUTE 35 people rewritten or added: **RESTORE the original**
 - [x] **102. [J2-29]** MANIA's SHUCKLE is a gift to keep, not a loan: **RESTORE the original**
 - [x] **103. [J2-31]** MARY gives BRIGHT POWDER (Crystal: PINK BOW): **RESTORE the original**
-- [ ] **104. [J2-32]** MOOMOO needs five ORAN BERRIES (Crystal: seven), the farm gives LEFTOVERS (Crystal: TM13 SNORE): **RESTORE the original** - _Re-add and implement new Crystal and Kanto specific TMs to fix TM issues._
+- [x] **104. [J2-32]** MOOMOO needs five ORAN BERRIES (Crystal: seven), the farm gives LEFTOVERS (Crystal: TM13 SNORE): **RESTORE the original** - _Re-add and implement new Crystal and Kanto specific TMs to fix TM issues._
 - [x] **105. [J2-35]** Small Quetzal rewrites and additions (pattern): **RESTORE the original**
 - [ ] **106. [J3-15]** MT. SILVER and RED open right after the JOHTO LEAGUE; RED stands outdoors, gives a LIGHT BALL and can be re-fought: **RESTORE the original**
 - [x] **107. [J3-16]** DRAGON SHRINE's DRATINI is Lv35 with an EVERSTONE; Crystal's Lv15 EXTREMESPEED reward is gone: **RESTORE the original**

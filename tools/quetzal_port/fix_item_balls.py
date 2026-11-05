@@ -52,7 +52,8 @@ def main():
         path = os.path.join(REPO, 'data/maps/Johto_%s/scripts.inc' % name)
         mj = json.load(open(os.path.join(REPO, 'data/maps/Johto_%s/map.json' % name)))
         text = open(path).read()
-        found = [b for b in balls(text) if mj['object_events'][b[0] - 1]['flag'] != 'FLAG_KAI_GONE']
+        found = [b for b in balls(text) if mj['object_events'][b[0] - 1]['flag'] != 'FLAG_KAI_GONE'
+                 and not b[2].startswith('ITEM_TM')]   # (Crystal's TM balls: T11b, set by hand)
         gone = []
         for k, (lid, label, item) in enumerate(found):
             if k < len(items):

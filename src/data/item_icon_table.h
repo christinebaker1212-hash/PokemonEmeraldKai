@@ -432,6 +432,7 @@ const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
     ITEM_ICONS_QZ
     ITEM_ICONS_GEN59
     ITEM_ICONS_TM2   // Moemon Kai: TM51-TM92
+    ITEM_ICONS_TM3   // Moemon Kai: TM93 on
     [ITEM_POKETCH] = {gItemIcon_Itemfinder, gItemIconPalette_Itemfinder},   // Moemon Kai
     [ITEM_POKE_RADAR] = {gItemIcon_DevonScope, gItemIconPalette_DevonScope},   // Moemon Kai
     [ITEM_GALACTIC_KEY] = {gItemIcon_CardKey, gItemIconPalette_CardKey},   // Moemon Kai: a stand-in

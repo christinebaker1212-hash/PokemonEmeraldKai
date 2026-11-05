@@ -100,7 +100,7 @@ Johto_Route35_EventScript_83F148E::
 
 @ Johto_Route35 object 13 (local id 13, gfx 0x3A9E) at 27,17
 Johto_Route35_EventScript_83F149B::
-	setorcopyvar VAR_0x8000, ITEM_PARALYZE_HEAL
+	setorcopyvar VAR_0x8000, ITEM_TM99   @ Moemon Kai: Crystal's TM ROLLOUT (T11b)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

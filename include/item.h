@@ -97,6 +97,9 @@ enum
 
     ENUM_TM2_START_ = ITEM_TM51 - 1,   // Moemon Kai
     FOREACH_TM2(ENUM_TM)
+
+    ENUM_TM3_START_ = ITEM_TM93 - 1,   // Moemon Kai: TM93 on
+    FOREACH_TM3(ENUM_TM)
 };
 #undef ENUM_TM
 #undef ENUM_HM

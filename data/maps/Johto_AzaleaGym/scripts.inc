@@ -566,8 +566,8 @@ Johto_AzaleaGym_EventScript_83C4C67::
 	end
 
 Johto_AzaleaGym_EventScript_83C4C6E::
-	@ Moemon Kai: HeartGold / SoulSilver's TM from the leader (Quetzal gave ITEM_NUGGET)
-	setorcopyvar VAR_0x8000, ITEM_TM89
+	@ Moemon Kai: Crystal's TM from the leader (FURY CUTTER: TM93 on, tools/moemon_tms/gen_tm3.py)
+	setorcopyvar VAR_0x8000, ITEM_TM138
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602B4
@@ -744,11 +744,12 @@ Johto_AzaleaGym_Text_83C4EFC::
 	.string "have this.$"
 
 Johto_AzaleaGym_Text_83C4FCE::
-	.string "TM89 contains U-TURN.\p"
-	.string "It lets your MOéMON attack, then\n"
-	.string "switch with the next MOéMON in\l"
-	.string "your party.\p"
-	.string "Isn’t that great?$"
+	.string "TM138 contains FURY CUTTER.\p"
+	.string "If you don’t miss, it gets\n"
+	.string "stronger every turn.\p"
+	.string "The longer your battle goes, the\n"
+	.string "better it gets.\p"
+	.string "Isn’t that great? I discovered it!$"
 
 Johto_AzaleaGym_Text_83C5047::
 	.string "Bug MOéMON are deep. There are\n"

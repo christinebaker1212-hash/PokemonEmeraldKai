@@ -14,7 +14,7 @@ Johto_Route39Farmhouse_EventScript_83F3909::
 Johto_Route39Farmhouse_EventScript_83F3921::
 	goto_if_set FLAG_QZ_0x1045, Johto_Route39Farmhouse_EventScript_83F394C
 	msgbox Johto_Route39Farmhouse_Text_83F3C53, MSGBOX_DEFAULT
-	setorcopyvar VAR_0x8000, ITEM_LEFTOVERS
+	setorcopyvar VAR_0x8000, ITEM_TM109   @ Moemon Kai: Crystal's SNORE (docs/REGIONS_AUDIT.md 104)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -30,7 +30,7 @@ Johto_Route39Farmhouse_EventScript_83F394C::
 Johto_Route39Farmhouse_EventScript_83F3957::
 	lock
 	faceplayer
-	goto_if_lt VAR_QZ_0x501B, 5, Johto_Route39Farmhouse_EventScript_83F39E1
+	goto_if_ne VAR_QZ_0x501B, 5, Johto_Route39Farmhouse_EventScript_83F39E1   @ Moemon Kai: 5 is healed (Route39Barn)
 	showmoneybox 0, 0, 0
 	msgbox Johto_Route39Farmhouse_Text_83F3AB5, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 1, Johto_Route39Farmhouse_EventScript_83F3989
@@ -127,7 +127,8 @@ Johto_Route39Farmhouse_Text_83F3C53::
 	.string "Here’s somethin’ fer your trouble.$"
 
 Johto_Route39Farmhouse_Text_83F3CB2::
-	.string "A MOéMON holding LEFTOVERS\n"
-	.string "regains a little HP every turn.\p"
-	.string "That’ll help it keep its strength\n"
-	.string "up in battle, hon!$"
+	.string "That there’s SNORE.\p"
+	.string "It’s a rare move that only works\n"
+	.string "while the MOéMON is asleep.\p"
+	.string "You best think how you ought to\n"
+	.string "use it, hon.$"

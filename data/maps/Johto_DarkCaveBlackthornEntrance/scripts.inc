@@ -15,7 +15,7 @@ Johto_DarkCaveBlackthornEntrance_EventScript_83CBD3D::
 
 @ Johto_DarkCaveBlackthornEntrance object 2 (local id 2, gfx 0x3A9E) at 31,31
 Johto_DarkCaveBlackthornEntrance_EventScript_83CBD4A::
-	setorcopyvar VAR_0x8000, ITEM_STAR_PIECE
+	setorcopyvar VAR_0x8000, ITEM_TM109   @ Moemon Kai: Crystal's TM SNORE (T11b)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

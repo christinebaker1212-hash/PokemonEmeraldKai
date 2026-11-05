@@ -1,7 +1,8 @@
 # JOHTO's gym leaders out and about once its League is beaten (qz_specials.c QzGiovanniStoryUpdateFlags: JOHTO's setup
-# hides them and no script shows them): JASMINE at OLIVINE's cafe (flag 0x101C), hidden before, there after
+# hides them and no script shows them): WHITNEY at the DEPT. STORE's 6F (flag 0x1017), hidden before, there after.
+# (JASMINE's OLIVINE CAFE visit was Quetzal's: gone since case 105)
 MODE=1
 TMO=90
-ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_WARP=35,4,5,7"
-EXPECT_A=("flag 4124 = 1" "objat 5,4: none" "flag 4124 = 0" "objat 5,4: local 4")
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("flag 4119 = 1" "objat 20,9: none" "flag 4119 = 0" "objat 20,9: local 4")
 UNEXPECT_A=("[crash]" "TIMEOUT")

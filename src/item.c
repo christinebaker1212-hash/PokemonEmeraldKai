@@ -26,6 +26,7 @@ EWRAM_DATA struct BagPocket gBagPockets[POCKETS_COUNT] = {0};
 #include "data/text/item_descriptions_gen4_berries.h"   // Moemon Kai: Gen 4 berries
 #include "data/text/item_descriptions_gen59.h"   // Moemon Kai: Gen 5-9 items
 #include "data/text/item_descriptions_tm2.h"   // Moemon Kai: TM51-TM92
+#include "data/text/item_descriptions_tm3.h"   // Moemon Kai: TM93 on
 #include "data/text/item_descriptions_qz.h"   // Moemon Kai: Johto / Kanto items
 #include "data/items.h"
 
@@ -639,10 +640,12 @@ u16 MP_ItemNumberOrder(u16 item)
 {
     if (item >= ITEM_TM51 && item <= ITEM_TM92)
         return ITEM_TM50 + 1 + item - ITEM_TM51;
+    if (item >= ITEM_TM93 && item <= ITEM_TM139)   // (TM93 on after TM92)
+        return ITEM_TM50 + 1 + NUM_TECHNICAL_MACHINES_2 + item - ITEM_TM93;
     if (item >= ITEM_HM01 && item <= ITEM_HM08)
-        return ITEM_TM50 + 1 + NUM_TECHNICAL_MACHINES_2 + item - ITEM_HM01;
+        return ITEM_TM50 + 1 + NUM_TECHNICAL_MACHINES_2 + NUM_TECHNICAL_MACHINES_3 + item - ITEM_HM01;
     if (item >= ITEM_HM_ROCK_CLIMB && item <= ITEM_HM_WHIRLPOOL)   // (after HM08)
-        return ITEM_TM50 + 1 + NUM_TECHNICAL_MACHINES_2 + NUM_HIDDEN_MACHINES + item - ITEM_HM_ROCK_CLIMB;
+        return ITEM_TM50 + 1 + NUM_TECHNICAL_MACHINES_2 + NUM_TECHNICAL_MACHINES_3 + NUM_HIDDEN_MACHINES + item - ITEM_HM_ROCK_CLIMB;
     return item;
 }
 

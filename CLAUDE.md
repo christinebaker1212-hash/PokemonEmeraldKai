@@ -408,7 +408,9 @@ the end of battle_gen59.c, src/battle_gimmick.c; START in the move list; one a b
 the host's online; MEGA forms aren't species: src/data/mp_megas.h from tools/moemon_gimmicks/gen_megas.py, pictures through
 B_ANIM_MP_GIMMICK on every screen; items 553-617): COOP_NOTES "The battle GIMMICKS"; tests gimmick_*.
 Also TM51-TM92 (items 618-659, after the HMs; TMHM_INDEX / TMHM_ITEM, gTm2Learnsets; tools/moemon_tms/gen_tm2.py; COOP_NOTES
-"TM51-TM92"; test tm_new).
+"TM51-TM92"; test tm_new). Also TM93-TM139 (1.106.0, items 697-743: RED / BLUE / Crystal TMs whose number has another move here;
+gTm3Learnsets, tools/moemon_tms/gen_tm3.py; JOHTO's from Crystal's places, KANTO's at CELADON 2F: COOP_NOTES "TM93-TM139";
+tests tm_gen12, johto_tm_gifts).
 Also the TRAINER CARD and the BADGE CASE (1.65.0: src/mp/mp_tcard.c "<save>.card" records, Platinum's
 polish and fading; mp_badgecase.c, 480x320 like a VS fight, PokeAPI's badge art in graphics/moemon/badges/badges.bin,
 A chimes by polish, A held + the stick going round polishes; 1.66.0: mp_cardscreen.c, one card for every region over

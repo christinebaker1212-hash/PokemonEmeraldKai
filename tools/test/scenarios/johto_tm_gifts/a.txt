@@ -1,0 +1,95 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp warp 34,94,24,15
+wait 150
+mp face up
+press A 2
+wait 60
+shot headbutt_man
+mash A 12 30
+mash B 6 30
+mp getflag 0x154D
+mp bagqty 700
+mp warp 34,50,6,4
+wait 150
+mp face left
+press A 2
+wait 60
+shot sweet_scent
+mash A 12 30
+mash B 6 30
+mp getflag 0x154E
+mp bagqty 712
+mp warp 35,48,13,6
+wait 150
+mp item 139 7
+mp face up
+press A 2
+pressuntil A yesno 900
+wait 20
+press A 2
+wait 30
+mash B 10 30
+wait 30
+mp getvar 0x501B
+press A 2
+pressuntil A yesno 900
+wait 20
+press A 2
+wait 30
+mash B 10 30
+wait 30
+press A 2
+pressuntil A yesno 900
+wait 20
+press A 2
+wait 30
+mash B 10 30
+wait 30
+press A 2
+pressuntil A yesno 900
+wait 20
+press A 2
+wait 30
+mash B 10 30
+wait 30
+press A 2
+pressuntil A yesno 900
+wait 20
+press A 2
+wait 30
+mash B 10 30
+wait 30
+mp getvar 0x501B
+press A 2
+pressuntil A yesno 900
+wait 20
+press A 2
+wait 30
+mash B 10 30
+wait 30
+press A 2
+pressuntil A yesno 900
+wait 20
+press A 2
+wait 30
+mash B 10 30
+wait 30
+mash A 6 30
+mash B 6 30
+mp getvar 0x501B
+mp item 139 1
+press A 2
+wait 60
+shot healed
+mash B 6 30
+mp warp 35,49,7,6
+wait 150
+mp face up
+press A 2
+wait 60
+mash A 12 30
+mash B 6 30
+mp bagqty 713
+quit
