@@ -1,0 +1,8 @@
+# The summary screen with status conditions and POKeMON past 386: the INFO page's SELECT RENAME hint steps aside for the
+# game's own STATUS label and icon (they shared the strip under the portrait), and a POKeMON outside the HOENN dex shows
+# its national number (No423 GASTRODON, No900 KLEAVOR; four digits in the narrow font). Look at the shots.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=448:40,925:30,1000:10"
+EXPECT_A=("status: slot 0 = 64" "status: slot 1 = 8")
+UNEXPECT_A=("[crash]" "TIMEOUT")

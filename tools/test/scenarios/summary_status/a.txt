@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 60
+mp status 0 64
+mp status 1 8
+mp summary
+waitfor summary 300
+wait 60
+rendershot par
+press DOWN 2
+wait 60
+rendershot psn
+press UP 2
+wait 60
+rendershot psn_skills
+press UP 2
+wait 60
+rendershot psn_moves
+quit

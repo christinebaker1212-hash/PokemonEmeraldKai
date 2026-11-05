@@ -1756,6 +1756,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] foehp: %d\n", v);
         }
     }
+    else if (strcmp(cmd, "status") == 0)
+    {
+        // mp status SLOT VALUE: the status word (8 poison, 16 burn, 32 freeze, 64 paralysis, 1-7 sleep turns, 128 bad poison)
+        int slot = atoi(arg);
+        u32 v = 0;
+        const char *sp = strchr(arg, ' ');
+        if (sp)
+            v = (u32)strtoul(sp + 1, NULL, 0);
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            SetMonData(&gPlayerParty[slot], MON_DATA_STATUS, &v);
+            printf("[test] status: slot %d = %u\n", slot, (unsigned)v);
+        }
+    }
     else if (strcmp(cmd, "hp") == 0)
     {
         // mp hp SLOT VALUE (0: it fainted now, for REVIVE's cursor); mp partyhp: every slot's HP and status

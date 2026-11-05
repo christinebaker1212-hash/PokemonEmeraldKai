@@ -3032,7 +3032,8 @@ static void MpDrawInfoPrompts(void)
     if (sMpPromptWindow == WINDOW_NONE)
         return;
     FillWindowPixelBuffer(sMpPromptWindow, PIXEL_FILL(0));
-    if (MpCanRename())
+    // (a status condition takes the strip: the game's own STATUS label and icon slide in there; SELECT still renames)
+    if (MpCanRename() && sMonSummaryScreen->summary.ailment == AILMENT_NONE)
     {
         MP_AsciiToGame(text, "{SELECT} RENAME", sizeof(text) - 1);
         AddTextPrinterParameterized4(sMpPromptWindow, FONT_NORMAL, (10 * 8 - GetStringWidth(FONT_NORMAL, text, 0)) / 2, 1,
@@ -3872,21 +3873,22 @@ static void PrintNotEggInfo(void)
     struct PokeSummary *summary = &sMonSummaryScreen->summary;
     u16 dexNum = SpeciesToPokedexNum(summary->species);
 
+    // Moemon Kai: a POKeMON outside the HOENN dex (every one past 386 among them) shows its national number
+    if (dexNum == 0xFFFF && summary->species != SPECIES_NONE && summary->species < NUM_SPECIES)
+    {
+        dexNum = SpeciesToNationalPokedexNum(summary->species);
+        if (dexNum == 0)
+            dexNum = 0xFFFF;
+    }
     if (dexNum != 0xFFFF)
     {
         StringCopy(gStringVar1, &gText_NumberClear01[0]);
-        ConvertIntToDecimalStringN(gStringVar2, dexNum, STR_CONV_MODE_LEADING_ZEROS, 3);
+        ConvertIntToDecimalStringN(gStringVar2, dexNum, STR_CONV_MODE_LEADING_ZEROS, dexNum > 999 ? 4 : 3);
         StringAppend(gStringVar1, gStringVar2);
-        if (!IsMonShiny(mon))
-        {
-            PrintTextOnWindow(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, gStringVar1, 0, 1, 0, 1);
-            SetMonPicBackgroundPalette(FALSE);
-        }
-        else
-        {
-            PrintTextOnWindow(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, gStringVar1, 0, 1, 0, 7);
-            SetMonPicBackgroundPalette(TRUE);
-        }
+        // (four digits in the narrow font: the window is 32 pixels wide)
+        AddTextPrinterParameterized4(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, dexNum > 999 ? FONT_NARROW : FONT_NORMAL, 0, 1, 0, 0,
+                                     sTextColors[IsMonShiny(mon) ? 7 : 1], 0, gStringVar1);
+        SetMonPicBackgroundPalette(IsMonShiny(mon) ? TRUE : FALSE);
         PutWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER);
     }
     else
