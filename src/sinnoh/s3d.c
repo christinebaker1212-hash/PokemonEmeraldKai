@@ -1100,6 +1100,21 @@ bool8 S3D_DoorRunning(void)
     return FindTaskIdByFunc(Task_S3dDoor) != TASK_NONE;
 }
 
+// A locked door: a door tile with no warp on it (Platinum's scripts move a door's warp away until it opens, as at the
+// VALLEY WINDWORKS before the WORKS KEY) is a wall, so the player stands in front of it and its sign is the tile they
+// face; walked onto, the sign was under their feet and A did nothing. (X, Y: the field's coordinates, MAP_OFFSET in)
+bool8 S3D_DoorLocked(s16 x, s16 y)
+{
+    const struct MapEvents *ev = gMapHeader.events;
+    u8 i;
+    if (!S3D_Active() || ev == NULL || !MetatileBehavior_IsWarpDoor(MapGridGetMetatileBehaviorAt(x, y)))
+        return FALSE;
+    for (i = 0; i < ev->warpCount; i++)
+        if (ev->warps[i].x == x - MAP_OFFSET && ev->warps[i].y == y - MAP_OFFSET)
+            return FALSE;
+    return TRUE;
+}
+
 static void DrawProp(const S3dProp *pr, float ox, float oy, float oz, u32 pass)
 {
     const float *m = pr->m;

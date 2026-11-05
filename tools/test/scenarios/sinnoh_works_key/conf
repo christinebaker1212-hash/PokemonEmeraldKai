@@ -1,0 +1,10 @@
+# The VALLEY WINDWORKS door with the WORKS KEY (Platinum's script: YES opens it, the warp moves onto the door). A save
+# holding the key but not Platinum's "has the key" flag gets it on arriving; the locked door is a wall (walked onto,
+# its sign was under the player and A did nothing), so walking up stops in front of it; YES opens it and the player
+# walks in. The door grunt is taken as beaten. Needs the 3D pack.
+MODE=1
+TMO=90
+GEN=4
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("where map 40.62 xy 19,15" "flag 13668 = 1" "flag 14141 = 1" "where map 44.42")
+UNEXPECT_A=("[crash]" "TIMEOUT")

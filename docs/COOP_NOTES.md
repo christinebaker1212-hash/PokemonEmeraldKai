@@ -5144,4 +5144,9 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   month in "<save>.poketch" (version 4: calMarks). Its days are the cursor's targets (the targets' array is 40 now: a
   month has 31). The other apps were checked touch by touch (tools: `mp poketch N`, `mp poketchtap X,Y`). Test
   poketch_calendar.
+- SINNOH's locked doors (s3d.c S3D_DoorLocked, event_object_movement.c GetCollisionAtCoords): Platinum's scripts keep
+  a door shut by moving its warp off it (the VALLEY WINDWORKS until the WORKS KEY); its door tile was still walkable,
+  and standing on it the door's sign was under the player, so A did nothing. A door tile with no warp on it is a wall
+  now. Saves holding the WORKS KEY get Platinum's "has the key" flag (0x3564) on arriving (the map's own transition
+  script). Test sinnoh_works_key.
 

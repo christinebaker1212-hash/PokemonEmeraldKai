@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 30
+mp item 664 1
+mp setflag 0x34FE
+mp clearflag 0x3564
+mp warp 40,62,19,17
+wait 60
+waitfor field 1000
+press UP 12
+wait 30
+press UP 12
+wait 30
+press UP 12
+wait 30
+mp where
+mp getflag 0x3564
+mp face up
+press A 1
+wait 90
+shot ask
+press A 1
+wait 40
+press A 1
+wait 90
+shot opened
+mp getflag 0x373D
+pressuntil A field 900
+press UP 16
+wait 150
+shot inside
+mp where
+quit
