@@ -865,6 +865,13 @@ struct MultichoiceListStruct
 
 #include "script_menu_qz.h"   // Moemon Kai
 
+static const struct MenuAction MultichoiceList_BuenaPassword[] =   // Moemon Kai: filled by MP_Buena_BufferChoices
+{
+    {gStringVar1},
+    {gStringVar2},
+    {gStringVar3},
+};
+
 // Moemon Kai: two menus on one number would silently replace each other (FireRed's fossil menus once hid three of
 // Crystal's): a repeated index here is an error
 #pragma GCC diagnostic push
@@ -1008,6 +1015,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_FR_AMBER]                   = MULTICHOICE(MultichoiceList_FrAmber),
     [MULTI_FR_HELIX_AMBER]             = MULTICHOICE(MultichoiceList_FrHelixAmber),
     [MULTI_FR_DOME_AMBER]              = MULTICHOICE(MultichoiceList_FrDomeAmber),
+    [MULTI_BUENA_PASSWORD]             = MULTICHOICE(MultichoiceList_BuenaPassword),
 };
 #pragma GCC diagnostic pop
 

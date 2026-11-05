@@ -113,6 +113,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `johto_trade_kyle` / `kanto_trade_zynx` | Crystal's KYLE trade (ONIX ROCKY), FireRed's ZYNX trade with her letter |
 | `johto_mahogany_mart` | MAHOGANY's shop run by TEAM ROCKET, then the old woman's stock once the RADIO TOWER is freed |
 | `kanto_oak_rating` | OAK rates KANTO's POKéDEX with FireRed's words for every ten caught |
+| `johto_buena` | BUENA's PASSWORD: the radio says the day's password, BUENA gives the BLUE CARD and takes the right answer for a point, the prize desk trades points for an ULTRA BALL |
 | `johto_bugcontest_crystal` | the Bug-Catching Contest on a THURSDAY: five of Crystal's contestants in the park, a second catch asks to switch, "finish now?" at the way out, the judging in a line, the catch joins the party and the lead keeps its EXP |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |

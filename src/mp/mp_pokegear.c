@@ -759,7 +759,7 @@ static const u8 sLucky[][24] = {
 static const u8 sLuckyDrag[][24] = {_("…Repeating myself"), _("gets to be a drag…")};
 static const u8 sBuena[][24] = {
     _("BUENA: BUENA here!"), _("Today’s password!"),
-    _("Let me think… It’s"), _("HELP!"),   // (the password BUENA asks for, RADIO TOWER 2F)
+    _("Let me think… It’s"), _("{STR_VAR_1}!"),   // (today's password, mp_buena.c: BUENA asks for it on RADIO TOWER 2F)
     _("Don’t forget it!"), _("I’m in GOLDENROD’s"),
     _("RADIO TOWER!"),
 };
@@ -984,6 +984,11 @@ static bool8 ShowLine(void)
                 return FALSE;
             Say(sBuenaMidnight[sG->midnight++]);
             return TRUE;
+        }
+        if (step % ARRAY_COUNT(sBuena) == 3)
+        {
+            void MP_Buena_TodaysPassword(u8 *dest);
+            MP_Buena_TodaysPassword(gStringVar1);   // (Crystal's BuenasPassword4: picked once a day)
         }
         Say(sBuena[step % ARRAY_COUNT(sBuena)]);
         return TRUE;

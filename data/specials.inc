@@ -754,3 +754,12 @@ gSpecials::
 	def_special QzBugContestHeldPrize
 	def_special QzBugContestClearPrize
 	def_special QzBugContestSetupPark
+	def_special MP_Buena_BufferChoices   @ Moemon Kai: Crystal's BUENA's PASSWORD (src/mp/mp_buena.c, audit case 141)
+	def_special MP_Buena_CheckAnswer
+	def_special MP_Buena_CardFull
+	def_special MP_Buena_ShowPoints
+	def_special MP_Buena_HidePoints
+	def_special MP_Buena_PrizeMenu, waitstate=1
+	def_special MP_Buena_BufferPrize
+	def_special MP_Buena_Pay
+	def_special MP_Buena_CanAfford

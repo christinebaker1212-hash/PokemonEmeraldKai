@@ -4540,6 +4540,19 @@ follow_behind, follow_ground.
   the PC (Crystal's party-full line); the lead keeps its EXP. Crystal's explanation sign on the ROUTE 35 room's poster.
   Not carried over: the START menu's PARK BALL / timer box, and the contestants' after-contest lines in ROUTE 36's
   gate (the judging is in the park here). Tests qz_bugcontest, johto_bugcontest_crystal.
+- **Case 141, BUENA's PASSWORD** (src/mp/mp_buena.c; Crystal's maps/RadioTower2F.asm, engine/events/buena.asm,
+  buena_menu.asm, data/radio/buenas_passwords.asm, data/items/buena_prizes.asm): the radio's BUENA (10.5, 6 PM to
+  midnight) picks the day's password from Crystal's eleven groups of three when she says it (VAR_JOHTO_BUENA_PASSWORD
+  0x5159, FLAG_DAILY_JOHTO_BUENA_PASSWORD 0x93A: Crystal's DAILYFLAGS2_BUENAS_PASSWORD_F, which is also "you heard the
+  show today"). BUENA on RADIO TOWER 2F: the BLUE CARD (key item 744, ITEM_BLUE_CARD; FLAG_JOHTO_MET_BUENA 0x155D) the
+  first time; after 6 PM, once the show was heard, she asks (her song plays), the player steps to the microphone and
+  picks from the group's three (MULTI_BUENA_PASSWORD 243, STR_VAR_1..3); right is one point (VAR_JOHTO_BUENA_POINTS
+  0x5158, up to 30), once a day either way (FLAG_DAILY_JOHTO_BUENA_PLAYED 0x93B); "HELP" during the takeover. The
+  receptionist beside her (object 9, FLAG_QZ_0x1098 like the tower's other civilians) is Crystal's prize desk: a points
+  box, the nine prizes in a scrolling list (SCROLL_MULTI_QZ_DYNAMIC), "Is that right?", not enough points / no room.
+  Not carried over: BUENA's phone number and calls (BUENA isn't on this game's POKéGEAR phone). On the way: FireRed's
+  fossil menus (case 61) had taken menu numbers 240-242 from Crystal's EARL / tutor / bargain menus; Crystal's start at
+  248 now and a repeated number in sMultichoiceLists is a compile error. Test johto_buena (waitfor scrollmenu).
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).
@@ -4785,8 +4798,8 @@ and words, a line every 100 frames scrolling up the message box as Crystal's (Sh
 (MARY and OAK, _OPT_ words, a POKéMON of the region's grass tables as the GENERATION has them; 4-10 AM the POKéDEX SHOW:
 a caught POKéMON's name, then its POKéDEX entry line by line), 7.5 POKéMON MUSIC (DJ BEN; the MARCH on Sundays,
 Tuesdays, Thursdays, Saturdays, the LULLABY on the other days: gLocalTime.days % 7), 8.5 the LUCKY CHANNEL (REED; the
-number is the LOTTERY CORNER's, GetLotteryNumber), 10.5 BUENA's PASSWORD (6 PM to midnight; the password is HELP, what
-BUENA asks for on RADIO TOWER 2F; at midnight her goodbye, then off the air), 13.5 the UNOWN at the RUINS OF ALPH, 20.5
+number is the LOTTERY CORNER's, GetLotteryNumber), 10.5 BUENA's PASSWORD (6 PM to midnight; the day's password, picked
+by mp_buena.c when the show says it: "The audit's batch L"; at midnight her goodbye, then off the air), 13.5 the UNOWN at the RUINS OF ALPH, 20.5
 the EVOLUTION radio at MAHOGANY / ROUTE 43 / the LAKE OF RAGE from the red GYARADOS (VAR_QZ_0x500C >= 2) until TEAM
 ROCKET takes the RADIO TOWER (VAR_QZ_0x500A 6); while they hold it (0x500A 6-9) TEAM ROCKET's broadcast is on every
 JOHTO station (show ST_ROCKET under the station's name). Out of JOHTO: 16.5 PLACES AND PEOPLE (DJ LILY on a JOHTO /

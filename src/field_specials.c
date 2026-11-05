@@ -4386,3 +4386,9 @@ u8 Script_TryGainNewFanFromCounter(void)
 {
     return TryGainNewFanFromCounter(gSpecialVar_0x8004);
 }
+
+// Moemon Co-op: tests (mp_debug.c waitfor scrollmenu): a scrollable multichoice is taking input
+bool8 MP_ScrollMultichoiceOpen(void)
+{
+    return FuncIsActiveTask(ScrollableMultichoice_ProcessInput);
+}

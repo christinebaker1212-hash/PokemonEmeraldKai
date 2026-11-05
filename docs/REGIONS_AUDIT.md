@@ -155,7 +155,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **138. [J1-34]** Small missing people, signs and lines (Crystal has them, the game doesn't): **RESTORE the original**
 - [ ] **139. [J2-14]** The WISE TRIO, SUICUNE at TIN TOWER 1F and the sage's RAINBOW WING are missing: **RESTORE the original**
 - [x] **140. [J2-15]** ECRUTEAK's ITEMFINDER gift is missing: **RESTORE the original**
-- [ ] **141. [J2-16]** BUENA's PASSWORD show can't be played (no BLUE CARD, no points, no prize desk): **RESTORE the original**
+- [x] **141. [J2-16]** BUENA's PASSWORD show can't be played (no BLUE CARD, no points, no prize desk): **RESTORE the original**
 - [x] **142. [J2-17]** GAME CORNER's TM prize counter is missing: **RESTORE the original**
 - [x] **143. [J2-18]** DEPT. STORE 5F's Sunday RETURN / FRUSTRATION lady is missing, though a shopper still talks about her: **RESTORE the original**
 - [x] **144. [J2-24]** Crystal's GOLDENROD move tutor, city sign and RADIO CARD lady are missing: **RESTORE the original**

@@ -21,6 +21,8 @@
 #define FLAG_DAILY_JOHTO_BARGAIN_STAR_PIECE 0x939
 #define FLAG_DAILY_JOHTO_TUTOR          0x928   // Crystal's ENGINE_DAILY_MOVE_TUTOR: GOLDENROD's tutor taught today
 #define FLAG_DAILY_JOHTO_DEPT_TM        0x927   // Crystal's ENGINE_GOLDENROD_DEPT_STORE_TM27_RETURN: the Sunday lady's TM given today
+#define FLAG_DAILY_JOHTO_BUENA_PASSWORD 0x93A   // Crystal's ENGINE_BUENAS_PASSWORD: today's password picked (heard on the radio)
+#define FLAG_DAILY_JOHTO_BUENA_PLAYED   0x93B   // Crystal's ENGINE_BUENAS_PASSWORD_2: BUENA asked for it today
 
 // KANTO vars
 #define VAR_KANTO_RESORT_STEPS        0x514B   // FireRed's VAR_RESORT_GOREGEOUS_STEP_COUNTER (SELPHY's wish lasts 250 steps)
@@ -34,6 +36,8 @@
 #define VAR_KANTO_FANCLUB_TIMER       0x5154   // FireRed's VAR_FANCLUB_LOSE_FAN_TIMER
 #define VAR_KANTO_FANCLUB_SCENE       0x5155   // FireRed's VAR_MAP_SCENE_SAFFRON_CITY_POKEMON_TRAINER_FAN_CLUB
 #define VAR_JOHTO_BUG_CONTEST_DAY     0x5156   // the day (RTC days + 1) the last Bug-Catching Contest was entered: Crystal's ENGINE_DAILY_BUG_CONTEST (case 97)
+#define VAR_JOHTO_BUENA_POINTS        0x5158   // Crystal's wBlueCardBalance: the BLUE CARD's points (up to 30; mp_buena.c)
+#define VAR_JOHTO_BUENA_PASSWORD      0x5159   // Crystal's wBuenasPassword: category << 4 | the right one of three
 #define VAR_JOHTO_BUG_CONTEST_PRIZE   0x5157   // the prize the officer keeps for today when the BAG was full (Crystal's EVENT_CONTEST_OFFICER_HAS_*)
 
 // KANTO flags
@@ -50,6 +54,7 @@
 #define FLAG_JOHTO_HIDE_DAYCARE_MON_1    0x1558   // Crystal's EVENT_DAY_CARE_MON_1: the MAN's POKéMON in ROUTE 34's yard
 #define FLAG_JOHTO_HIDE_DAYCARE_MON_2    0x155A   // Crystal's EVENT_DAY_CARE_MON_2: the LADY's (0x1559 Quetzal's)
 #define FLAG_JOHTO_HIDE_LAKE_CIVILIANS   0x155B   // Crystal's EVENT_LAKE_OF_RAGE_CIVILIANS: LAKE OF RAGE's trainers, there after the hideout (case 113)
+#define FLAG_JOHTO_MET_BUENA             0x155D   // Crystal's EVENT_MET_BUENA: she gave the BLUE CARD (case 141)
 #define FLAG_JOHTO_REFUSED_TOGEPI_EGG    0x155C   // Crystal's EVENT_REFUSED_TO_TAKE_EGG_FROM_ELMS_AIDE (VIOLET's aide asks again: case 59)
 
 // JOHTO (0x1000-0x1FFF)

@@ -1,0 +1,9 @@
+# Crystal's BUENA's PASSWORD: at 8 PM the radio's BUENA says today's password (picked once a day); BUENA on
+# RADIO TOWER 2F gives the BLUE CARD, then asks for the password (YES, the right one of three): one point; the
+# receptionist trades 2 of 5 points for an ULTRA BALL
+MODE=1
+TMO=200
+HOUR=20
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("freq 21 station 5 show 5" "flag 2362 = 1" "item 744: 1" "var 0x5158 = 1" "flag 2363 = 1" "var 0x5158 = 3" "item 2: 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

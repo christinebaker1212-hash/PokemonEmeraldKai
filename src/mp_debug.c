@@ -333,6 +333,11 @@ int MP_TestCondition(const char *name)
         return MP_IsLocalFree();
     if (strcmp(name, "surfing") == 0)   // surfing and free to move
         return (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING) && MP_IsLocalFree();
+    if (strcmp(name, "scrollmenu") == 0)   // a scrollable multichoice is up (field_specials.c)
+    {
+        bool8 MP_ScrollMultichoiceOpen(void);
+        return MP_ScrollMultichoiceOpen();
+    }
     if (strcmp(name, "multichoice") == 0)   // a script's multichoice menu is up
     {
         bool8 MP_ScriptMultichoiceOpen(void);

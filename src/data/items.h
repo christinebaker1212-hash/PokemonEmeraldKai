@@ -5264,4 +5264,16 @@ const struct Item gItems[] =
         .type = ITEM_USE_FIELD,
         .fieldUseFunc = ItemUseOutOfBattle_Pokegear,
     },
+
+    [ITEM_BLUE_CARD] =   // Moemon Kai: Crystal's (BUENA's PASSWORD, RADIO TOWER 2F)
+    {
+        .name = _("BLUE CARD"),
+        .itemId = ITEM_BLUE_CARD,
+        .price = 0,
+        .description = sBlueCardDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
 };

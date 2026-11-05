@@ -808,7 +808,8 @@
 #define ITEM_HM_WHIRLPOOL 696
 // Moemon Kai: TM93 on (Red / Blue and Crystal's TMs whose moves aren't on that number here): items 697 on
 #include "constants/tms_hms_tm3.h"
-#define ITEMS_COUNT (ITEM_TM139 + 1)
+#define ITEM_BLUE_CARD 744   // Moemon Kai: Crystal's BLUE CARD, BUENA's PASSWORD points (mp_buena.c; the points in VAR_JOHTO_BUENA_POINTS)
+#define ITEMS_COUNT (ITEM_BLUE_CARD + 1)
 // end of Gen 5-9 items
 #define FIRST_PLATINUM_KEY_ITEM ITEM_GALACTIC_KEY
 #define LAST_PLATINUM_ITEM ITEM_GOOEY_MULCH

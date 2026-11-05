@@ -146,6 +146,7 @@
 #define MULTI_FR_AMBER                     240
 #define MULTI_FR_HELIX_AMBER               241
 #define MULTI_FR_DOME_AMBER                242
+#define MULTI_BUENA_PASSWORD               243   // Moemon Kai: BUENA's three choices, STR_VAR_1..3 (mp_buena.c, case 141)
 
 // Lilycove SS Tidal Multichoice Selections
 #define SSTIDAL_SELECTION_SLATEPORT        0
