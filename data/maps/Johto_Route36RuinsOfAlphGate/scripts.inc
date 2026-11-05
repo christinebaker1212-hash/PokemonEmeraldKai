@@ -29,13 +29,14 @@ Johto_Route36RuinsOfAlphGate_EventScript_83D22C9::
 	end
 
 Johto_Route36RuinsOfAlphGate_Text_83D22D6::
-	.string "RUINS OF ALPH\p"
-	.string "A Look-and-Touch Tourist Site\p"
-	.string "Try the sliding stone panels!$"
+	.string "Don’t you wonder who’d make\n"
+	.string "something like this? And why?$"
 
 Johto_Route36RuinsOfAlphGate_Text_83D2320::
-	.string "You’re studying the RUINS?\p"
-	.string "I see a scientist in the making.$"
+	.string "Did you see that strange tree in\n"
+	.string "the road?\p"
+	.string "That may explain why fewer people\n"
+	.string "are visiting the RUINS OF ALPH.$"
 
 Johto_Route36RuinsOfAlphGate_Text_83D235C::
 	.string "There are drawings on stone\n"

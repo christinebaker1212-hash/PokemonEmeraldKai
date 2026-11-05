@@ -1,0 +1,42 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp warp 34,122,33,43
+wait 150
+mp npcs
+mp face up
+press A 2
+wait 40
+shot persian
+mash A 6 20
+wait 60
+mp warp 34,122,26,7
+wait 150
+mp npcs
+mp face up
+press A 2
+wait 40
+shot gameboy_kid
+mash A 10 20
+wait 60
+mp warp 34,122,16,45
+wait 150
+mp npcs
+mp hour 12
+mp warp 35,43,20,7
+wait 150
+mp face up
+press A 2
+wait 40
+shot dirk_day
+mash A 10 20
+wait 90
+mp hour 22
+mp warp 35,43,20,7
+wait 150
+mp face up
+press A 2
+mash A 10 20
+waitfor battle 600
+shot dirk_night
+quit

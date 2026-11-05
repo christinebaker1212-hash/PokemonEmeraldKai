@@ -713,3 +713,8 @@ gSpecials::
 	def_special MP_JohtoCatchingTutorial
 	def_special Mtg_DuelistHello
 	def_special Mtg_ShopBoosters, waitstate=1
+	def_special QzIsNight   @ Moemon Kai: Crystal's checktime NITE (qz_specials.c; docs/REGIONS_AUDIT.md 101)
+	def_special QzRuinsWallsCheck   @ Moemon Kai: the RUINS OF ALPH's walls as Crystal's (qz_specials.c; docs/REGIONS_AUDIT.md 138)
+	def_special QzRuinsWallsOpen
+	def_special QzAllUnownCaught
+	def_special QzShowUnownWord, waitstate=1

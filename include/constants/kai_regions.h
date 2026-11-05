@@ -73,6 +73,20 @@
 #define FLAG_JOHTO_HIDE_OLDER_CUT     0x153F   // the older HAIRCUT BROTHER (Tuesdays, Thursdays, Saturdays)
 #define FLAG_JOHTO_HIDE_YOUNGER_CUT   0x1540   // the younger (Sundays, Wednesdays, Fridays)
 #define FLAG_JOHTO_HIDE_HERB_LADY     0x1541   // the herb lady (Saturdays, Sundays)
+#define FLAG_JOHTO_MET_FLORIA         0x1542   // Crystal's EVENT_MET_FLORIA (ROUTE 36, case 100)
+#define FLAG_JOHTO_TALKED_FLORIA      0x1543   // Crystal's EVENT_TALKED_TO_FLORIA_AT_FLOWER_SHOP
+#define FLAG_JOHTO_HIDE_FLORIA_ROUTE  0x1544   // FLORIA by the odd tree: there until met (MP_JohtoWeekdayPeople)
+#define FLAG_JOHTO_HIDE_FLORIA_SHOP   0x1545   // FLORIA in the FLOWER SHOP: there once met
+// the RUINS OF ALPH's hidden walls, opened on the next visit as Crystal's (docs/REGIONS_AUDIT.md 138; qz_specials.c
+// QzRuinsWallsCheck): an ESCAPE ROPE used in the KABUTO chamber, FLASH in the AERODACTYL chamber, a WATER STONE
+// carried, HO-OH leading
+#define FLAG_JOHTO_RUINS_WALL_HOOH    0x1546
+#define FLAG_JOHTO_RUINS_WALL_KABUTO  0x1547
+#define FLAG_JOHTO_RUINS_WALL_OMANYTE 0x1548
+#define FLAG_JOHTO_RUINS_WALL_AERO    0x1549
+#define FLAG_JOHTO_VISITED_VIOLET     0x154A   // Crystal's ENGINE_FLYPOINT_VIOLET (ELM's lab window, case 138)
+#define FLAG_JOHTO_TOGEPI_HATCHED     0x154B   // Crystal's EVENT_TOGEPI_HATCHED (egg_hatch.c)
+#define FLAG_JOHTO_TOLD_ELM_TOGEPI    0x154C   // Crystal's EVENT_TOLD_ELM_ABOUT_TOGEPI_OVER_THE_PHONE (mp_pokegear.c CallElm)
 #define FLAG_JOHTO_HIDE_GOLDENROD_TUTOR 0x153D // GOLDENROD's move tutor: Wednesdays and Saturdays after the LEAGUE (case 144)
 // Crystal's hidden items (case 131, tools/quetzal_port/gen_hidden_items.py)
 #define FLAG_JOHTO_HIDDEN_ITEM_1           0x1601   // AzaleaTown FULL_HEAL (EVENT_AZALEA_TOWN_HIDDEN_FULL_HEAL)

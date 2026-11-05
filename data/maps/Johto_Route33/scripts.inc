@@ -56,3 +56,11 @@ Johto_Route33_Text_83EFBB9::
 	.string "expected.\p"
 	.string "I got too tired to explore the\n"
 	.string "whole thing, so I came outside.$"
+
+@ Moemon Kai: Crystal's ROUTE 33 sign (docs/REGIONS_AUDIT.md 138)
+Johto_Route33_EventScript_Sign::
+	msgbox Johto_Route33_Text_Sign, MSGBOX_SIGN
+	end
+
+Johto_Route33_Text_Sign::
+	.string "ROUTE 33$"

@@ -96,14 +96,14 @@ Johto_NationalPark_EventScript_83E100F::
 
 @ Johto_NationalPark object 11 (local id 11, gfx 0x3A9E) at 3,43
 Johto_NationalPark_EventScript_83E1026::
-	setorcopyvar VAR_0x8000, ITEM_MOON_STONE
+	setorcopyvar VAR_0x8000, ITEM_PARALYZE_HEAL
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_NationalPark object 12 (local id 12, gfx 0x3A9E) at 39,15
 Johto_NationalPark_EventScript_83E1033::
-	setorcopyvar VAR_0x8000, ITEM_SOOTHE_BELL
+	setorcopyvar VAR_0x8000, ITEM_TM28
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
@@ -195,3 +195,52 @@ Johto_NationalPark_Text_83E1288::
 Johto_NationalPark_Text_83E128F::
 	.string "I thought you were staring at me\n"
 	.string "because I’m cute!$"
+
+@ Moemon Kai: Crystal's NATIONAL PARK people (NationalPark.asm, docs/REGIONS_AUDIT.md 101)
+Johto_NationalPark_EventScript_Persian::
+	lock
+	faceplayer
+	playmoncry SPECIES_PERSIAN, CRY_MODE_NORMAL
+	msgbox Johto_NationalPark_Text_Persian, MSGBOX_DEFAULT
+	waitmoncry
+	release
+	end
+
+Johto_NationalPark_EventScript_PokefanF::
+	msgbox Johto_NationalPark_Text_PokefanF, MSGBOX_NPC
+	end
+
+Johto_NationalPark_EventScript_Teacher2::
+	msgbox Johto_NationalPark_Text_Teacher2, MSGBOX_NPC
+	end
+
+Johto_NationalPark_EventScript_GameboyKid::
+	lock
+	faceplayer
+	msgbox Johto_NationalPark_Text_GameboyKid, MSGBOX_DEFAULT
+	closemessage
+	applymovement VAR_LAST_TALKED, Johto_NationalPark_Movement_FaceDown
+	waitmovement 0
+	release
+	end
+
+Johto_NationalPark_Movement_FaceDown:
+	face_down
+	step_end
+
+Johto_NationalPark_Text_Persian::
+	.string "PERSIAN: Fufushaa!$"
+
+Johto_NationalPark_Text_PokefanF::
+	.string "This is MAIL I got from my\n"
+	.string "daughter. It cheers me up.$"
+
+Johto_NationalPark_Text_Teacher2::
+	.string "I take walks in the PARK, but I\n"
+	.string "never go into the grass.\p"
+	.string "Trainers always want to battle…$"
+
+Johto_NationalPark_Text_GameboyKid::
+	.string "I’m printing out my POKéDEX.\p"
+	.string "You can also print out stuff like\n"
+	.string "MAIL and your PC BOXES.$"

@@ -1,0 +1,8 @@
+# Crystal's NATIONAL PARK and ROUTE 35 (docs/REGIONS_AUDIT.md 101): the PERSIAN by the QUICK CLAW teacher (its cry),
+# the mail mother, the teacher by the sticker boys, the boy printing his POKéDEX; ROUTE 35's OFFICER DIRK only talks
+# by day and battles at night.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=280:30"
+EXPECT_A=("[test] npc local 37 gfx 2613" "[test] npc local 9 gfx 18" "[test] npc local 38 gfx" "[test] npc local 39 gfx 189" "[test] frame" "reached state")
+UNEXPECT_A=("[crash]" "TIMEOUT")

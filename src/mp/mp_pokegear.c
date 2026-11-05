@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "constants/kai_regions.h"
+#include "constants/maps.h"
 #include "bg.h"
 #include "event_data.h"
 #include "field_weather.h"
@@ -585,17 +587,60 @@ static void MomAnswer(bool8 yes)
     sG->phone = PHONE_CALL;
 }
 
+// PROF. ELM's words as Crystal's (engine/phone/scripts/elm.asm, data/phone/text/elm.asm; docs/REGIONS_AUDIT.md 138):
+// by where the story stands, the EGG's turns included (the aide's TOGEPI EGG, its hatching, showing it to him)
+static const u8 sElm_Mr1[] = _("Hello, {PLAYER}?");
+static const u8 sElm_Mr2[] = _("Did you meet MR.MOéMON? Great!");
+static const u8 sElm_Mr3[] = _("Come back safely!");
+static const u8 sElm_Stolen1[] = _("{PLAYER}? I’m very upset now.");
+static const u8 sElm_Stolen2[] = _("We had a MOéMON stolen from here.");
+static const u8 sElm_Stolen3[] = _("How could anyone do that?");
+static const u8 sElm_Check1[] = _("Hello, {PLAYER}?");
+static const u8 sElm_Check2[] = _("We’re checking the EGG now.");
+static const u8 sElm_Check3[] = _("It does appear to be a MOéMON EGG.");
+static const u8 sElm_Aide1[] = _("Hello, {PLAYER}? Did you see my");
+static const u8 sElm_Aide2[] = _("assistant? He’s at the MOéMON");
+static const u8 sElm_Aide3[] = _("CENTER in VIOLET CITY.");
+static const u8 sElm_How1[] = _("Hello, {PLAYER}? How’s the EGG?");
+static const u8 sElm_How2[] = _("Has anything changed?");
+static const u8 sElm_How3[] = _("If anything happens, please call.");
+static const u8 sElm_Hatched1[] = _("Hello, {PLAYER}? How is the EGG?");
+static const u8 sElm_Hatched2[] = _("What? It hatched?");
+static const u8 sElm_Hatched3[] = _("Wow! What kind of MOéMON is it?");
+static const u8 sElm_Hatched4[] = _("Please come show me now!");
+
 static void CallElm(void)
 {
     static const u8 *const heal[] = {sElm_Heal1, sElm_Heal2, sElm_Heal3, sElm_Heal4};
     static const u8 *const hatch[] = {sElm_Hatch1, sElm_Hatch2, sElm_Hatch3, sElm_Hatch4};
     static const u8 *const moves[] = {sElm_Moves1, sElm_Moves2, sElm_Moves3, sElm_Moves4};
-    // Crystal’s ELM talks about the EGG he studies once you’ve shown him what hatched; here, once JOHTO’s second
-    // BADGE is won (Quetzal’s story has no TOGEPI EGG)
-    if (MP_Region_BadgeCount(REGION_JOHTO) < 2)
-        SetLines(heal, 4);
-    else
+    static const u8 *const mr[] = {sElm_Mr1, sElm_Mr2, sElm_Mr3};
+    static const u8 *const stolen[] = {sElm_Stolen1, sElm_Stolen2, sElm_Stolen3};
+    static const u8 *const check[] = {sElm_Check1, sElm_Check2, sElm_Check3};
+    static const u8 *const aide[] = {sElm_Aide1, sElm_Aide2, sElm_Aide3};
+    static const u8 *const how[] = {sElm_How1, sElm_How2, sElm_How3};
+    static const u8 *const hatched[] = {sElm_Hatched1, sElm_Hatched2, sElm_Hatched3, sElm_Hatched4};
+    u16 story = VarGet(0x5004);   // (VAR_QZ_0x5004: 4 the EGG from MR. POKéMON, 5 given to ELM)
+    if (FlagGet(0x1034))                                              // shown him TOGEPI (the EVERSTONE given)
         SetLines(Random() % 2 ? hatch : moves, 4);
+    else if (FlagGet(0x1080) && FlagGet(FLAG_JOHTO_TOGEPI_HATCHED))   // the aide's EGG, hatched
+    {
+        SetLines(hatched, 4);
+        FlagSet(FLAG_JOHTO_TOLD_ELM_TOGEPI);
+    }
+    else if (FlagGet(0x1080))                                         // the aide's EGG, not yet
+        SetLines(how, 3);
+    else if (story >= 5 && FlagGet(0x11B2))                           // the ZEPHYRBADGE: the aide waits in VIOLET
+        SetLines(aide, 3);
+    else if (story >= 5 && story < 0xA)                               // the MYSTERY EGG given to ELM
+        SetLines(check, 3);
+    else if (story == 4 && gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_JOHTO_MR_POKEMONS_HOUSE)
+             && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_JOHTO_MR_POKEMONS_HOUSE))
+        SetLines(mr, 3);
+    else if (story == 4)                                              // the theft (Crystal's call on ROUTE 30)
+        SetLines(stolen, 3);
+    else
+        SetLines(heal, 4);
     sG->phone = PHONE_CALL;
 }
 

@@ -1,0 +1,8 @@
+# Crystal's RUINS OF ALPH walls (docs/REGIONS_AUDIT.md 138): a closed wall shows its UNOWN word; HO-OH leading and a
+# WATER STONE in the BAG open theirs on arrival, an ESCAPE ROPE used in the KABUTO chamber and FLASH in the AERODACTYL
+# chamber mark theirs for the next visit (each with Crystal's tremor).
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=250:40"
+EXPECT_A=("johto: RUINS wall 0 opened" "johto: RUINS wall 2 opened" "[test] ruinsmark: flash 0" "johto: RUINS wall 1 opened" "[test] ruinsmark: flash 1" "johto: RUINS wall 3 opened" "[test] flag 4136 = 1" "[test] flag 4137 = 1" "[test] flag 4138 = 1" "[test] flag 4139 = 1")
+UNEXPECT_A=("[crash]")

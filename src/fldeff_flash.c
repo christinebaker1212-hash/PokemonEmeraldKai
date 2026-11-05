@@ -25,6 +25,9 @@ struct FlashStruct
     void (*func)(void);
 };
 
+static void FieldCallback_RuinsFlash(void);
+bool8 QzRuinsFlash(void);
+extern const u8 EventScript_RuinsFlash[];
 static void FieldCallback_Flash(void);
 static void FldEff_UseFlash(void);
 static bool8 TryDoMapTransition(void);
@@ -86,6 +89,14 @@ bool8 SetUpFieldMove_Flash(void)
         gPostMenuFieldCallback = FieldCallback_Flash;
         return TRUE;
     }
+    else if (QzRuinsFlash())
+    {
+        // Moemon Kai: the RUINS OF ALPH's AERODACTYL chamber takes FLASH lit as it is (Crystal's
+        // SpecialAerodactylChamber, docs/REGIONS_AUDIT.md 138): a flash of light, its wall marked
+        gFieldCallback2 = FieldCallback_PrepareFadeInFromMenu;
+        gPostMenuFieldCallback = FieldCallback_RuinsFlash;
+        return TRUE;
+    }
 
     return FALSE;
 }
@@ -95,6 +106,19 @@ static void FieldCallback_Flash(void)
     u8 taskId = CreateFieldMoveTask();
     gFieldEffectArguments[0] = GetCursorSelectionMonId();
     gTasks[taskId].ptr.funcPtr = FldEff_UseFlash;
+}
+
+static void FldEff_RuinsFlash(void)
+{
+    PlaySE(SE_M_REFLECT);
+    ScriptContext_SetupScript(EventScript_RuinsFlash);
+}
+
+static void FieldCallback_RuinsFlash(void)
+{
+    u8 taskId = CreateFieldMoveTask();
+    gFieldEffectArguments[0] = GetCursorSelectionMonId();
+    gTasks[taskId].ptr.funcPtr = FldEff_RuinsFlash;
 }
 
 static void FldEff_UseFlash(void)

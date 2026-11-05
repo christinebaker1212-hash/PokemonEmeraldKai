@@ -7405,6 +7405,11 @@ void HandleSetPokedexFlag(u16 nationalNum, u8 caseId, u32 personality)
     {
         void Sinnoh_UnownSeen(u32 personality);
         Sinnoh_UnownSeen(personality);   // Moemon Kai: the UNOWN letters seen (Platinum's GetUnownFormsSeenCount)
+        if (caseId == FLAG_SET_CAUGHT)
+        {
+            void MP_JohtoUnownCaught(u32 personality);
+            MP_JohtoUnownCaught(personality);   // Moemon Kai: Crystal's UNOWN dex (the RUINS scientist)
+        }
     }
     if (!GetSetPokedexFlag(nationalNum, getFlagCaseId)) // don't set if it's already set
     {

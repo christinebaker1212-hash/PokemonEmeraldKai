@@ -57,8 +57,15 @@ Johto_Route35_EventScript_83F143B::
 
 @ Johto_Route35 object 8 (local id 8, gfx 0x3EA9) at 20,6
 Johto_Route35_EventScript_83F1452::
+	@ Moemon Kai: Crystal's OFFICER DIRK (TrainerOfficerDirk, docs/REGIONS_AUDIT.md 101): he battles only at night,
+	@ when talked to
+	specialvar VAR_RESULT, QzIsNight
+	goto_if_eq VAR_RESULT, 0, Johto_Route35_EventScript_DirkDay
 	trainerbattle TRAINER_BATTLE_SINGLE, TRAINER_QZ_4870, 0, Johto_Route35_Text_83F191F, Johto_Route35_Text_83F1945
 	msgbox Johto_Route35_Text_83F194D, MSGBOX_AUTOCLOSE
+	end
+Johto_Route35_EventScript_DirkDay::
+	msgbox Johto_Route35_Text_DirkPrettyTough, MSGBOX_NPC
 	end
 
 @ Johto_Route35 sign / bg event at 11,46
@@ -188,18 +195,22 @@ Johto_Route35_Text_83F18EC::
 	.string "lures wild MOéMON.$"
 
 Johto_Route35_Text_83F191F::
-	.string "I’m always alert while\n"
-	.string "I’m on patrol!$"
+	.string "Danger lurks in the night!$"
 
 Johto_Route35_Text_83F1945::
 	.string "Whoops!$"
 
 Johto_Route35_Text_83F194D::
-	.string "Exploring these routes is fun.\p"
-	.string "But stay alert, OK?$"
+	.string "You know, nighttime is fun in its\n"
+	.string "own ways.\p"
+	.string "But don’t overdo it, OK?$"
 
 Johto_Route35_Text_83F19BE::
 	.string "ROUTE 35$"
 
 Johto_Route35_Text_83F19C7::
 	.string "NATIONAL PARK GATE$"
+
+Johto_Route35_Text_DirkPrettyTough::
+	.string "Your MOéMON look pretty tough.\p"
+	.string "You could go anywhere safely.$"

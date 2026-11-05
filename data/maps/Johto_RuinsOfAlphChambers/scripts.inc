@@ -1,7 +1,49 @@
 Johto_RuinsOfAlphChambers_MapScripts::
-	map_script MAP_SCRIPT_ON_TRANSITION, Quetzal_EventScript_840EA66
+	map_script MAP_SCRIPT_ON_TRANSITION, Johto_RuinsOfAlphChambers_OnTransition
 	map_script MAP_SCRIPT_ON_LOAD, Quetzal_EventScript_83F7F66
+	map_script MAP_SCRIPT_ON_FRAME_TABLE, Johto_RuinsOfAlphChambers_OnFrame
 	.byte 0
+
+@ Moemon Kai: the hidden walls as Crystal's (docs/REGIONS_AUDIT.md 138; qz_specials.c QzRuinsWallsCheck): a wall
+@ marked by an ESCAPE ROPE / FLASH used in its chamber, a WATER STONE carried or HO-OH leading opens on arrival, with
+@ Crystal's tremor (RuinsOfAlph*ChamberWallOpenScript)
+Johto_RuinsOfAlphChambers_OnTransition::
+	special QzRuinsWallsCheck
+	copyvar VAR_TEMP_3, VAR_RESULT
+	goto Quetzal_EventScript_840EA66
+
+Johto_RuinsOfAlphChambers_OnFrame:
+	map_script_2 VAR_TEMP_3, 1, Johto_RuinsOfAlphChambers_EventScript_WallOpens
+	.2byte 0
+
+Johto_RuinsOfAlphChambers_EventScript_WallOpens::
+	lockall
+	delay 30
+	setvar VAR_0x8004, 1
+	setvar VAR_0x8005, 1
+	setvar VAR_0x8006, 0x14
+	setvar VAR_0x8007, 6
+	special ShakeCamera
+	waitstate
+	applymovement OBJ_EVENT_ID_PLAYER, Johto_RuinsOfAlphChambers_Movement_Shock
+	waitmovement 0
+	delay 30
+	playse SE_M_STRENGTH
+	special QzRuinsWallsOpen
+	special DrawWholeMapView
+	setvar VAR_0x8004, 1
+	setvar VAR_0x8005, 1
+	setvar VAR_0x8006, 0x20
+	setvar VAR_0x8007, 6
+	special ShakeCamera
+	waitstate
+	setvar VAR_TEMP_3, 0
+	releaseall
+	end
+
+Johto_RuinsOfAlphChambers_Movement_Shock:
+	emote_exclamation_mark
+	step_end
 
 @ Johto_RuinsOfAlphChambers sign / bg event at 20,4
 Johto_RuinsOfAlphChambers_EventScript_83F8023::
@@ -33,18 +75,21 @@ Johto_RuinsOfAlphChambers_EventScript_83F8044::
 
 @ Johto_RuinsOfAlphChambers object 1 (local id 1, gfx 0x3E82) at 24,5
 Johto_RuinsOfAlphChambers_EventScript_83F8065::
+	@ Moemon Kai: Crystal's chamber scientist (RuinsOfAlphKabutoChamberScientistScript, docs/REGIONS_AUDIT.md 138):
+	@ the cryptic patterns, the tremor once the panels are solved (FLAG_QZ_0x1076), the hole once the wall is open
+	@ (FLAG_QZ_0x102A)
 	lock
 	faceplayer
+	specialvar VAR_RESULT, QzAllUnownCaught
+	goto_if_eq VAR_RESULT, 1, Johto_RuinsOfAlphChambers_EventScript_ScientistAllUnown
 	goto_if_set FLAG_QZ_0x102A, Johto_RuinsOfAlphChambers_EventScript_83F808F
-	goto_if_set FLAG_QZ_0x1076, Johto_RuinsOfAlphChambers_EventScript_83F8084
+	goto_if_unset FLAG_QZ_0x1076, Johto_RuinsOfAlphChambers_EventScript_ScientistCryptic
+	msgbox Johto_RuinsOfAlphChambers_Text_83F8571, MSGBOX_DEFAULT
+Johto_RuinsOfAlphChambers_EventScript_ScientistCryptic::
 	msgbox Johto_RuinsOfAlphChambers_Text_83F8476, MSGBOX_DEFAULT
 	closemessage
-	release
-	end
-
-Johto_RuinsOfAlphChambers_EventScript_83F8084::
-	msgbox Johto_RuinsOfAlphChambers_Text_83F8571, MSGBOX_DEFAULT
-	closemessage
+	applymovement VAR_LAST_TALKED, Johto_RuinsOfAlphChambers_Movement_FaceUp
+	waitmovement 0
 	release
 	end
 
@@ -53,6 +98,16 @@ Johto_RuinsOfAlphChambers_EventScript_83F808F::
 	closemessage
 	release
 	end
+
+Johto_RuinsOfAlphChambers_EventScript_ScientistAllUnown::
+	msgbox Johto_RuinsOfAlphChambers_Text_GotAllUnown, MSGBOX_DEFAULT
+	closemessage
+	release
+	end
+
+Johto_RuinsOfAlphChambers_Movement_FaceUp:
+	face_up
+	step_end
 
 @ Johto_RuinsOfAlphChambers sign / bg event at 21,4
 Johto_RuinsOfAlphChambers_EventScript_83F809A::
@@ -213,11 +268,12 @@ Johto_RuinsOfAlphChambers_EventScript_83F824A::
 
 @ Johto_RuinsOfAlphChambers sign / bg event at 4,1
 Johto_RuinsOfAlphChambers_EventScript_83F8298::
+	@ Moemon Kai: Crystal's wall pattern (RuinsOfAlph*ChamberWallPattern*): its UNOWN word until the wall opens
 	lock
-	goto_if_set FLAG_QZ_0x1028, Johto_RuinsOfAlphChambers_EventScript_83F8400
-	specialvar VAR_RESULT, QzIsLeadMonHoOh
-	goto_if_eq VAR_RESULT, 1, Johto_RuinsOfAlphChambers_EventScript_83F82BD
-	msgbox Johto_RuinsOfAlphChambers_Text_83F8430, MSGBOX_SIGN
+	goto_if_set FLAG_QZ_0x1028, Johto_RuinsOfAlphChambers_EventScript_WallHole
+	msgbox Johto_RuinsOfAlphChambers_Text_WallPatterns, MSGBOX_DEFAULT
+	setvar VAR_0x8004, 3
+	special QzShowUnownWord
 	closemessage
 	release
 	end
@@ -240,11 +296,12 @@ Johto_RuinsOfAlphChambers_EventScript_83F82BD::
 
 @ Johto_RuinsOfAlphChambers sign / bg event at 20,18
 Johto_RuinsOfAlphChambers_EventScript_83F82F2::
+	@ Moemon Kai: Crystal's wall pattern (RuinsOfAlph*ChamberWallPattern*): its UNOWN word until the wall opens
 	lock
-	goto_if_set FLAG_QZ_0x1029, Johto_RuinsOfAlphChambers_EventScript_83F8400
-	specialvar VAR_RESULT, QzIsLeadMonAerodactyl
-	goto_if_eq VAR_RESULT, 1, Johto_RuinsOfAlphChambers_EventScript_83F8317
-	msgbox Johto_RuinsOfAlphChambers_Text_83F8430, MSGBOX_SIGN
+	goto_if_set FLAG_QZ_0x1029, Johto_RuinsOfAlphChambers_EventScript_WallHole
+	msgbox Johto_RuinsOfAlphChambers_Text_WallPatterns, MSGBOX_DEFAULT
+	setvar VAR_0x8004, 1
+	special QzShowUnownWord
 	closemessage
 	release
 	end
@@ -267,11 +324,12 @@ Johto_RuinsOfAlphChambers_EventScript_83F8317::
 
 @ Johto_RuinsOfAlphChambers sign / bg event at 20,1
 Johto_RuinsOfAlphChambers_EventScript_83F834C::
+	@ Moemon Kai: Crystal's wall pattern (RuinsOfAlph*ChamberWallPattern*): its UNOWN word until the wall opens
 	lock
-	goto_if_set FLAG_QZ_0x102A, Johto_RuinsOfAlphChambers_EventScript_83F8400
-	specialvar VAR_RESULT, QzIsLeadMonKabuto
-	goto_if_eq VAR_RESULT, 1, Johto_RuinsOfAlphChambers_EventScript_83F8371
-	msgbox Johto_RuinsOfAlphChambers_Text_83F8430, MSGBOX_SIGN
+	goto_if_set FLAG_QZ_0x102A, Johto_RuinsOfAlphChambers_EventScript_WallHole
+	msgbox Johto_RuinsOfAlphChambers_Text_WallPatterns, MSGBOX_DEFAULT
+	setvar VAR_0x8004, 0
+	special QzShowUnownWord
 	closemessage
 	release
 	end
@@ -294,11 +352,12 @@ Johto_RuinsOfAlphChambers_EventScript_83F8371::
 
 @ Johto_RuinsOfAlphChambers sign / bg event at 4,18
 Johto_RuinsOfAlphChambers_EventScript_83F83A6::
+	@ Moemon Kai: Crystal's wall pattern (RuinsOfAlph*ChamberWallPattern*): its UNOWN word until the wall opens
 	lock
-	goto_if_set FLAG_QZ_0x102B, Johto_RuinsOfAlphChambers_EventScript_83F8400
-	specialvar VAR_RESULT, QzIsLeadMonOmanyte
-	goto_if_eq VAR_RESULT, 1, Johto_RuinsOfAlphChambers_EventScript_83F83CB
-	msgbox Johto_RuinsOfAlphChambers_Text_83F8430, MSGBOX_SIGN
+	goto_if_set FLAG_QZ_0x102B, Johto_RuinsOfAlphChambers_EventScript_WallHole
+	msgbox Johto_RuinsOfAlphChambers_Text_WallPatterns, MSGBOX_DEFAULT
+	setvar VAR_0x8004, 2
+	special QzShowUnownWord
 	closemessage
 	release
 	end
@@ -456,23 +515,21 @@ Johto_RuinsOfAlphChambers_Text_83F8465::
 	.string "The way is open.$"
 
 Johto_RuinsOfAlphChambers_Text_83F8476::
-	.string "Welcome to this chamber.\p"
-	.string "There are sliding panels that depict\n"
-	.string "a MOéMON drawn by the ancients.\p"
-	.string "Slide the panels around to form\n"
-	.string "the picture.\p"
-	.string "To the left is a description of\n"
-	.string "the MOéMON.\p"
-	.string "Scientists in the lab are examin-\n"
-	.string "-ing some newly found patterns.$"
+	.string "Recently, strange, cryptic\n"
+	.string "patterns have appeared.\p"
+	.string "It’s odd. They weren’t here a\n"
+	.string "little while ago…\p"
+	.string "You should take a look at the\n"
+	.string "walls.$"
 
 Johto_RuinsOfAlphChambers_Text_83F8571::
-	.string "A hole just opened up in the floor!\n"
-	.string "I’d better tell the others.$"
+	.string "That tremor was pretty scary!\p"
+	.string "But I’m more concerned about this\n"
+	.string "wall here…$"
 
 Johto_RuinsOfAlphChambers_Text_83F85B1::
-	.string "Now a hole in the wall too?!\n"
-	.string "This is getting spooky.$"
+	.string "Ah! Here’s another huge hole!\p"
+	.string "It’s big enough to go through!$"
 
 Johto_RuinsOfAlphChambers_Text_83F85E6::
 	.string "A MOéMON that hid on the sea floor.\n"
@@ -489,3 +546,22 @@ Johto_RuinsOfAlphChambers_Text_83F86A0::
 Johto_RuinsOfAlphChambers_Text_83F86DF::
 	.string "A MOéMON that flew gracefully on\n"
 	.string "rainbow-colored wings.$"
+
+Johto_RuinsOfAlphChambers_EventScript_WallHole::
+	msgbox Johto_RuinsOfAlphChambers_Text_WallHole, MSGBOX_DEFAULT
+	closemessage
+	release
+	end
+
+Johto_RuinsOfAlphChambers_Text_WallPatterns::
+	.string "Patterns appeared on the walls…$"
+
+Johto_RuinsOfAlphChambers_Text_WallHole::
+	.string "There’s a big hole in the wall!$"
+
+Johto_RuinsOfAlphChambers_Text_GotAllUnown::
+	.string "Our investigation, with your help,\n"
+	.string "is giving us insight into the\l"
+	.string "RUINS.\p"
+	.string "The RUINS appear to have been\n"
+	.string "built as a habitat for MOéMON.$"

@@ -157,4 +157,6 @@ u16 MP_WildSlotSpecies(const struct WildPokemonInfo *info, u8 index);   // the s
 const struct WildPokemonInfo *MP_Region_WildInfoIn(const struct WildPokemonInfo *info, u8 region);   // as seen in REGION
 u16 MP_Gen_StandInIn(u16 species, u8 region);
 const struct Trainer *MP_Region_TrainerData(u16 trainerNum);                            // the Gen 3 team before it
+void MP_JohtoUnownCaught(u32 personality);   // Crystal's UNOWN dex (pokemon.c HandleSetPokedexFlag)
+bool8 MP_JohtoAllUnownCaught(void);
 #endif

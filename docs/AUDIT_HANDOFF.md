@@ -8,23 +8,17 @@ then `docs/REGIONS_AUDIT.md` (the decisions and the rules at its top), then the 
 
 ## Where it stands
 
-- **110 of 158 cases are ticked** (`- [x]` in REGIONS_AUDIT.md; its status line says which release did which).
+- **113 of 158 cases are ticked** (1.105.0 added 100, 101 and 138, the user's rule since 2026-11-05: no case is left half done) (`- [x]` in REGIONS_AUDIT.md; its status line says which release did which).
 - Released: 1.88.0 (batch A), 1.89.0 (B), 1.90.0 (C, KANTO), 1.91.0 (D, JOHTO), 1.92.0 (E part 1: hidden items,
   weekday siblings, the Sunday lady...), **1.93.0** (E part 2: GOLDENROD's tutor, GAME CORNER TM prizes, NAME RATER,
   UNDERGROUND, CIANWOOD's SEER, the tutor / VAR_RESULT fix): pushed when the session paused; check its release run
   (Actions, "Release") went green, and re-queue it (workflow_dispatch) if not.
-- **Prepared, not run:** `tools/quetzal_port/fix_floria.py` (case 100: ROUTE 36's FLORIA by the odd tree, the FLOWER
-  SHOP's teacher and FLORIA on Crystal's conditions, the lass, new flags 0x1542-0x1545 and their MP_JohtoWeekdayPeople
-  lines). Read it, run it once, then `python3 tools/quetzal_port/restore_words.py`, build, and write a test. Its last
-  line in restore_words (the RUINS gate's "gramps") points Crystal's gramps words at obj 1 (3,5) of
-  Johto_Route36RuinsOfAlphGate, which may be the wrong person: check the gate's three people against Crystal's
-  (officer + wandering gramps) first.
+- Case 100 ran (tools/quetzal_port/fix_floria.py), 101 too (fix_park.py); 138 is finished (COOP_NOTES 1.105.0).
 
 ## The 48 cases left (`grep "^- \[ \]" docs/REGIONS_AUDIT.md`)
 
-Small (a person, a sign, some lines): 46, 49 (JOHTO's HEADBUTT man on the tutor flow), 50, 66, 89, 100 (prepared),
-101, 105, 115, 117, 122, 124, 126, 138 (rest: VIOLET's signs, ELM's window and house PC, the RUINS chamber scientists,
-the RUINS gate officer / POKéFAN, ROUTE 33's sign).
+Small (a person, a sign, some lines): 46, 49 (JOHTO's HEADBUTT man on the tutor flow), 50, 66, 89, 105, 115, 117,
+122, 124, 126.
 
 Medium: 25 + 71 (CELADON DEPT. STORE), 45 (leaders' rematches / DOJO), 47 (DAY-CARE through the PC), 74 (CYCLING
 ROAD slope), 88 (FAN CLUB), 96 (GOLDENROD DEPT. STORE; 5F still has Quetzal's MEGA STONE / Z-CRYSTAL clerks: keep
@@ -73,5 +67,9 @@ GAME CORNER games), 141 (BUENA's PASSWORD).
 - Talking across a counter needs the counter metatile's behavior: Quetzal's maps have plain counter tiles beside the
   clerks' (GOLDENROD DEPT. STORE 5F needed one tile swapped to the clerks' 726).
 - The harness's `typetext` doesn't reach the naming screen; test the NO branch instead.
+- Free JOHTO flags now start at 0x154D (0x1542-0x154C: FLORIA, the RUINS walls, VIOLET visited, TOGEPI).
+- A sign where Quetzal left none: primary metatile 3 (a wooden post) | collision 1 in the layout, plus a bg event.
+- New graphics from existing tiles: metatiles are two layers (background, object); append a metatile to the
+  secondary tileset with one map's background and another's object (ELM's house PC: 856-860).
 - Hidden items: elevation 0 (matches any height); spots chosen by eye against Crystal's maps (gen_hidden_items.py
   SPOTS); its preview script lived in the scratchpad (render Crystal's .blk with its tileset png beside ours).

@@ -30,11 +30,15 @@ Johto_Route36_EventScript_83F1A0B::
 
 @ Johto_Route36 object 1 (local id 1, gfx 0x3E85) at 57,20
 Johto_Route36_EventScript_83F1A16::
+	@ Moemon Kai: Crystal's lass (Route36LassScript, docs/REGIONS_AUDIT.md 100)
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x102E, Johto_Route36_EventScript_83F1A2C
-	msgbox Johto_Route36_Text_83F1E04, MSGBOX_DEFAULT
-	closemessage
+	goto_if_set FLAG_QZ_0x102E, Johto_Route36_EventScript_LassCleared
+	msgbox Johto_Route36_Text_Lass, MSGBOX_DEFAULT
+	release
+	end
+Johto_Route36_EventScript_LassCleared::
+	msgbox Johto_Route36_Text_LassCleared, MSGBOX_DEFAULT
 	release
 	end
 
@@ -238,12 +242,6 @@ Johto_Route36_Text_83F1D57::
 Johto_Route36_Text_83F1DE2::
 	.string "A weird tree is blocking the way.$"
 
-Johto_Route36_Text_83F1E04::
-	.string "Be careful at night on this route!\p"
-	.string "I saw a MOéMON that looked like\n"
-	.string "GROWLITHE, but it had a scary aura\l"
-	.string "to it.$"
-
 Johto_Route36_Text_83F1E72::
 	.string "That odd tree disappeared without\n"
 	.string "a trace.\p"
@@ -326,3 +324,83 @@ Johto_Route36_Text_ArthurNotThursday::
 
 Johto_Route36_Text_ArthurGivesGift::
 	.string "Here. You can have this.$"
+
+@ Moemon Kai: Crystal's FLORIA by the odd tree (Route36FloriaScript, docs/REGIONS_AUDIT.md 100): met once, she goes to
+@ ask her sister for the water bottle (then she is in the FLOWER SHOP: MP_JohtoWeekdayPeople)
+Johto_Route36_EventScript_Floria::
+	lock
+	faceplayer
+	goto_if_set FLAG_JOHTO_TALKED_FLORIA, Johto_Route36_EventScript_FloriaAgain
+	setflag FLAG_JOHTO_MET_FLORIA
+	msgbox Johto_Route36_Text_Floria1, MSGBOX_DEFAULT
+	closemessage
+	goto_if_eq VAR_FACING, DIR_NORTH, Johto_Route36_EventScript_FloriaUp
+	applymovement VAR_LAST_TALKED, Johto_Route36_Movement_Floria1
+	goto Johto_Route36_EventScript_FloriaGone
+Johto_Route36_EventScript_FloriaUp::
+	applymovement VAR_LAST_TALKED, Johto_Route36_Movement_Floria2
+Johto_Route36_EventScript_FloriaGone::
+	waitmovement 0
+	removeobject VAR_LAST_TALKED
+	setflag FLAG_JOHTO_HIDE_FLORIA_ROUTE
+	release
+	end
+Johto_Route36_EventScript_FloriaAgain::
+	msgbox Johto_Route36_Text_Floria2, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_Route36_Movement_Floria1:
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	step_end
+
+Johto_Route36_Movement_Floria2:
+	walk_right
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	step_end
+
+Johto_Route36_Text_Lass::
+	.string "An odd tree is blocking the way to\n"
+	.string "GOLDENROD CITY.\p"
+	.string "It’s preventing me from shopping.\p"
+	.string "Something should be done about it.$"
+
+Johto_Route36_Text_LassCleared::
+	.string "That odd tree disappeared without\n"
+	.string "a trace.\p"
+	.string "Oh! That tree was really a MOéMON?$"
+
+Johto_Route36_Text_Floria1::
+	.string "I’m the FLOWER SHOP’s FLORIA!\p"
+	.string "Listen, listen!\p"
+	.string "When I sprinkled water on that\n"
+	.string "wiggly tree, it jumped right up!\p"
+	.string "It just has to be a MOéMON.\p"
+	.string "I bet it would be shocked out of\n"
+	.string "its disguise if you soaked it!\p"
+	.string "I know! I’ll tell my sis and\n"
+	.string "borrow her water bottle!$"
+
+Johto_Route36_Text_Floria2::
+	.string "When I told my sis about the\n"
+	.string "jiggly tree, she said it’s\l"
+	.string "dangerous.\p"
+	.string "If I beat WHITNEY, I wonder if\n"
+	.string "she’ll lend me her water bottle…$"

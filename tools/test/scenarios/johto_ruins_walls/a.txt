@@ -1,0 +1,31 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp warp 35,62,20,2
+wait 150
+mp face up
+press A 2
+wait 60
+mash A 2 20
+wait 20
+shot unown_word
+press A 2
+wait 40
+mp item 97 1
+mp warp 35,62,20,4
+wait 400
+shot opened
+mp ruinsmark
+mp warp 35,62,20,20
+wait 120
+mp ruinsmark
+mp warp 35,62,20,4
+wait 400
+mp getflag 0x1028
+mp getflag 0x1029
+mp getflag 0x102A
+mp getflag 0x102B
+mp warp 35,62,21,3
+wait 120
+shot kabuto_open
+quit

@@ -371,6 +371,8 @@ static void AddHatchedMonToParty(u8 id)
     SetMonData(mon, MON_DATA_IS_EGG, &isEgg);
 
     species = GetMonData(mon, MON_DATA_SPECIES);
+    if (species == SPECIES_TOGEPI)
+        FlagSet(FLAG_JOHTO_TOGEPI_HATCHED);   // Moemon Kai: Crystal's EVENT_TOGEPI_HATCHED (ELM's calls, docs/REGIONS_AUDIT.md 138)
     GetSpeciesName(name, species);
     SetMonData(mon, MON_DATA_NICKNAME, name);
 

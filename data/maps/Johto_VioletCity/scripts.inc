@@ -11,6 +11,7 @@ Johto_VioletCity_OnFrame_83FE8B8:
 	.2byte 0
 
 Johto_VioletCity_EventScript_83FE8CA::
+	setflag FLAG_JOHTO_VISITED_VIOLET   @ Moemon Kai: Crystal's ENGINE_FLYPOINT_VIOLET (ELM's lab window)
 	special QzJohtoTravelingEventCheck
 	end
 
@@ -385,3 +386,29 @@ Johto_VioletCity_Text_83FF017::
 
 Johto_VioletCity_Text_83FF076::
 	.string "I am counting on you.$"
+
+@ Moemon Kai: Crystal's VIOLET CITY, SPROUT TOWER and ACADEMY signs (docs/REGIONS_AUDIT.md 138; the posts are
+@ primary metatile 3 placed in the layout)
+Johto_VioletCity_EventScript_TownSign::
+	msgbox Johto_VioletCity_Text_TownSign, MSGBOX_SIGN
+	end
+
+Johto_VioletCity_EventScript_SproutTowerSign::
+	msgbox Johto_VioletCity_Text_SproutTowerSign, MSGBOX_SIGN
+	end
+
+Johto_VioletCity_EventScript_AcademySign::
+	msgbox Johto_VioletCity_Text_AcademySign, MSGBOX_SIGN
+	end
+
+Johto_VioletCity_Text_TownSign::
+	.string "VIOLET CITY\p"
+	.string "The City of Nostalgic Scents$"
+
+Johto_VioletCity_Text_SproutTowerSign::
+	.string "SPROUT TOWER\p"
+	.string "Experience the Way of MOéMON$"
+
+Johto_VioletCity_Text_AcademySign::
+	.string "EARL’S MOéMON ACADEMY$"
+

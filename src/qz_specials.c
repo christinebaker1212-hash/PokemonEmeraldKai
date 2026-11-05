@@ -2366,3 +2366,179 @@ u16 MP_HaircutBrother(void)
            gSpecialVar_0x8004, tier, f);
     return gSpecialVar_Result = 2 + tier;
 }
+
+// Crystal's `checktime NITE` for a script (ROUTE 35's OFFICER DIRK, docs/REGIONS_AUDIT.md 101): 1 at night, by the
+// same hours as JOHTO's night POKéMON (mp_region.c: 20:00-3:59)
+u16 QzIsNight(void)
+{
+    RtcCalcLocalTime();
+    return gSpecialVar_Result = (gLocalTime.hours >= 20 || gLocalTime.hours < 4);
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// The RUINS OF ALPH's hidden walls as Crystal's (engine/events/unown_walls.asm, docs/REGIONS_AUDIT.md 138). This
+// map holds all four chambers: HO-OH top left, KABUTO top right, OMANYTE bottom left, AERODACTYL bottom right (the
+// walls Quetzal opened by the POKéMON leading). An ESCAPE ROPE used in the KABUTO chamber or FLASH in the AERODACTYL
+// chamber marks its wall; a WATER STONE carried (BAG or held) and HO-OH leading are checked on arrival; a marked
+// wall opens with a tremor the next time the player comes in (the map's ON_FRAME QzRuinsWallsOpen).
+#include "pokemon_icon.h"
+#include "window.h"
+#include "menu.h"
+#include "text_window.h"
+#include "sound.h"
+#include "constants/items.h"
+#include "constants/species.h"
+
+enum { RUINS_HOOH, RUINS_KABUTO, RUINS_OMANYTE, RUINS_AERODACTYL };
+static const struct { u16 open, mark; u8 x, y; } sRuinsWalls[4] = {
+    [RUINS_HOOH]       = {FLAG_QZ_0x1028, FLAG_JOHTO_RUINS_WALL_HOOH,     5,  1},
+    [RUINS_KABUTO]     = {FLAG_QZ_0x102A, FLAG_JOHTO_RUINS_WALL_KABUTO,  21,  1},
+    [RUINS_OMANYTE]    = {FLAG_QZ_0x102B, FLAG_JOHTO_RUINS_WALL_OMANYTE,  5, 18},
+    [RUINS_AERODACTYL] = {FLAG_QZ_0x1029, FLAG_JOHTO_RUINS_WALL_AERO,    21, 18},
+};
+
+// which chamber the player stands in (-1: elsewhere)
+static int RuinsChamber(void)
+{
+    s16 x, y;
+    if (gSaveBlock1Ptr->location.mapGroup != MAP_GROUP(MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS)
+     || gSaveBlock1Ptr->location.mapNum != MAP_NUM(MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS))
+        return -1;
+    PlayerGetDestCoords(&x, &y);
+    x -= MAP_OFFSET;
+    y -= MAP_OFFSET;
+    if (y < 0 || y >= 34)
+        return -1;
+    return (y < 17 ? RUINS_HOOH : RUINS_OMANYTE) + (x >= 13 ? 1 : 0);
+}
+
+// FLASH (fldeff_flash.c SetUpFieldMove_Flash): usable in the AERODACTYL chamber, lit or not (Crystal's
+// SpecialAerodactylChamber), marking its wall
+bool8 QzRuinsFlash(void)
+{
+    if (RuinsChamber() != RUINS_AERODACTYL)
+        return FALSE;
+    if (!FlagGet(sRuinsWalls[RUINS_AERODACTYL].open))
+        FlagSet(sRuinsWalls[RUINS_AERODACTYL].mark);
+    return TRUE;
+}
+
+// an ESCAPE ROPE (item_use.c; not DIG, as Crystal's SpecialKabutoChamber) in the KABUTO chamber marks its wall
+void QzRuinsEscapeRope(void)
+{
+    if (RuinsChamber() == RUINS_KABUTO && !FlagGet(sRuinsWalls[RUINS_KABUTO].open))
+        FlagSet(sRuinsWalls[RUINS_KABUTO].mark);
+}
+
+// on arrival (ON_TRANSITION): HO-OH leading (Crystal's HoOhChamber), a WATER STONE in the BAG or held
+// (OmanyteChamber); VAR_RESULT 1 when a marked wall waits to open
+u16 QzRuinsWallsCheck(void)
+{
+    int i;
+    u16 any = 0;
+    if (GetMonData(&gPlayerParty[0], MON_DATA_SPECIES_OR_EGG) == SPECIES_HO_OH)
+        FlagSet(sRuinsWalls[RUINS_HOOH].mark);
+    if (!FlagGet(sRuinsWalls[RUINS_OMANYTE].open))
+    {
+        bool8 stone = CheckBagHasItem(ITEM_WATER_STONE, 1);
+        for (i = 0; i < PARTY_SIZE && !stone; i++)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE
+             && GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM) == ITEM_WATER_STONE)
+                stone = TRUE;
+        if (stone)
+            FlagSet(sRuinsWalls[RUINS_OMANYTE].mark);
+    }
+    for (i = 0; i < 4; i++)
+    {
+        if (FlagGet(sRuinsWalls[i].open))
+            FlagClear(sRuinsWalls[i].mark);
+        else if (FlagGet(sRuinsWalls[i].mark))
+            any = 1;
+    }
+    return gSpecialVar_Result = any;
+}
+
+// the tremor's middle: every marked wall opens (the map's ON_FRAME script shakes, then this, then draws)
+void QzRuinsWallsOpen(void)
+{
+    int i;
+    for (i = 0; i < 4; i++)
+    {
+        if (FlagGet(sRuinsWalls[i].mark) && !FlagGet(sRuinsWalls[i].open))
+        {
+            MapGridSetMetatileIdAt(sRuinsWalls[i].x + MAP_OFFSET, sRuinsWalls[i].y + MAP_OFFSET, 0x308);
+            FlagSet(sRuinsWalls[i].open);
+            MPNet_Log("johto: RUINS wall %d opened", i);
+        }
+        FlagClear(sRuinsWalls[i].mark);
+    }
+}
+
+// the scientist's "you caught them all" (Crystal's VAR_UNOWNCOUNT == NUM_UNOWN)
+u16 QzAllUnownCaught(void)
+{
+    return gSpecialVar_Result = MP_JohtoAllUnownCaught();
+}
+
+// A wall's pattern: Crystal's DisplayUnownWords, the word spelled in UNOWN (their icons, one a letter, a "-" as
+// text) in a box until A or B. VAR_0x8004: 0 ESCAPE, 1 LIGHT, 2 WATER, 3 HO-OH (Crystal's UNOWNWORDS_*).
+static const char *const sUnownWords[] = {"ESCAPE", "LIGHT", "WATER", "HO-OH"};
+static const struct WindowTemplate sUnownWordWindow = {
+    .bg = 0, .tilemapLeft = 3, .tilemapTop = 3, .width = 24, .height = 6, .paletteNum = 15, .baseBlock = 8,
+};
+#define tWindow data[0]
+#define tCount  data[1]
+#define tSprite(i) data[2 + (i)]
+
+static void Task_UnownWord(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    int i;
+    if (!(JOY_NEW(A_BUTTON | B_BUTTON)))
+        return;
+    PlaySE(SE_SELECT);
+    for (i = 0; i < tCount; i++)
+        if (tSprite(i) != MAX_SPRITES)
+            FreeAndDestroyMonIconSprite(&gSprites[tSprite(i)]);
+    FreeMonIconPalettes();
+    ClearStdWindowAndFrameToTransparent(tWindow, TRUE);
+    RemoveWindow(tWindow);
+    DestroyTask(taskId);
+    ScriptContext_Enable();
+}
+
+void QzShowUnownWord(void)
+{
+    const char *word = sUnownWords[gSpecialVar_0x8004 < ARRAY_COUNT(sUnownWords) ? gSpecialVar_0x8004 : 0];
+    u8 taskId = CreateTask(Task_UnownWord, 80);
+    s16 *data = gTasks[taskId].data;
+    int i, n = strlen(word), x0 = (240 - n * 32) / 2 + 16;
+    static const u8 sDash[] = {CHAR_HYPHEN, EOS};
+    tWindow = AddWindow(&sUnownWordWindow);
+    LoadMessageBoxAndBorderGfx();
+    DrawStdWindowFrame(tWindow, FALSE);
+    FillWindowPixelBuffer(tWindow, PIXEL_FILL(1));
+    LoadMonIconPalettes();
+    tCount = n;
+    for (i = 0; i < n; i++)
+    {
+        if (word[i] == '-')
+        {
+            AddTextPrinterParameterized(tWindow, FONT_NORMAL, sDash, x0 + i * 32 - 3 - 24, 14, TEXT_SKIP_DRAW, NULL);
+            tSprite(i) = MAX_SPRITES;
+        }
+        else
+        {
+            u32 l = word[i] - 'A';   // (the letter's personality: GET_UNOWN_LETTER reads two bits of each byte)
+            u32 personality = (l & 3) | (((l >> 2) & 3) << 8) | (((l >> 4) & 3) << 16);
+            tSprite(i) = CreateMonIcon(SPECIES_UNOWN, SpriteCB_MonIcon, x0 + i * 32, 46, 0, personality, FALSE);
+            if (tSprite(i) != MAX_SPRITES)
+                gSprites[tSprite(i)].oam.priority = 0;   // (over the box, which is on BG 0)
+        }
+    }
+    PutWindowTilemap(tWindow);
+    CopyWindowToVram(tWindow, COPYWIN_FULL);
+}
+#undef tWindow
+#undef tCount
+#undef tSprite

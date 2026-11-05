@@ -31,3 +31,20 @@ Johto_ElmsHouse_Text_83E1B6E::
 	.string "help my dad!\p"
 	.string "I’m going to be a great\n"
 	.string "MOéMON professor!$"
+
+@ Moemon Kai: Crystal's PC with ELM's research papers (ElmsHousePC, docs/REGIONS_AUDIT.md 138; the desk computer
+@ from ELM's lab placed where Quetzal had a bookshelf)
+Johto_ElmsHouse_EventScript_PC::
+	msgbox Johto_ElmsHouse_Text_PC, MSGBOX_SIGN
+	end
+
+Johto_ElmsHouse_Text_PC::
+	.string "MOéMON. Where do they come from?\n"
+	.string "Where are they going?\p"
+	.string "Why has no one ever witnessed a\n"
+	.string "MOéMON’s birth?\p"
+	.string "I want to know! I will dedicate my\n"
+	.string "life to the study of MOéMON!\p"
+	.string "…\p"
+	.string "It’s a part of PROF.ELM’s research\n"
+	.string "papers.$"

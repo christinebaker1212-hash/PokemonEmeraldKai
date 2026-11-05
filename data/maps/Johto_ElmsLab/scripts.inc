@@ -79,17 +79,26 @@ Johto_ElmsLab_EventScript_83E1C3E::
 
 @ Johto_ElmsLab object 3 (local id 3, gfx 0x3EB3) at 9,9
 Johto_ElmsLab_EventScript_83E1C4B::
+	@ Moemon Kai: Crystal's aide (ElmsAideScript, docs/REGIONS_AUDIT.md 138): busy, then the theft, then the POKé BALLS,
+	@ then the stolen POKéMON once the TOGEPI EGG is had
 	lock
 	faceplayer
-	goto_if_eq VAR_QZ_0x5004, 5, Johto_ElmsLab_EventScript_83E1C63
-	msgbox Johto_ElmsLab_Text_83E3772, MSGBOX_DEFAULT
-	closemessage
+	goto_if_set FLAG_QZ_0x1080, Johto_ElmsLab_EventScript_AideAfterTheft
+	goto_if_ge VAR_QZ_0x5004, 5, Johto_ElmsLab_EventScript_AideExplainBalls
+	goto_if_ge VAR_QZ_0x5004, 4, Johto_ElmsLab_EventScript_AideTheft
+	msgbox Johto_ElmsLab_Text_AideBusy, MSGBOX_DEFAULT
 	release
 	end
-
-Johto_ElmsLab_EventScript_83E1C63::
-	msgbox Johto_ElmsLab_Text_83E37C8, MSGBOX_DEFAULT
-	closemessage
+Johto_ElmsLab_EventScript_AideTheft::
+	msgbox Johto_ElmsLab_Text_AideTheft, MSGBOX_DEFAULT
+	release
+	end
+Johto_ElmsLab_EventScript_AideExplainBalls::
+	msgbox Johto_ElmsLab_Text_AideBalls, MSGBOX_DEFAULT
+	release
+	end
+Johto_ElmsLab_EventScript_AideAfterTheft::
+	msgbox Johto_ElmsLab_Text_AideAfterTheft, MSGBOX_DEFAULT
 	release
 	end
 
@@ -108,6 +117,7 @@ Johto_ElmsLab_EventScript_83E1C6E::
 	goto_if_unset FLAG_QZ_0x1080, Johto_ElmsLab_EventScript_83E1CE2
 	goto_if_set FLAG_QZ_0x1034, Johto_ElmsLab_EventScript_83E233E
 	call_if_unset FLAG_QZ_0x1034, Johto_ElmsLab_EventScript_83E22E4
+	goto_if_set FLAG_JOHTO_TOLD_ELM_TOGEPI, Johto_ElmsLab_EventScript_ThoughtEggHatched   @ Moemon Kai: Crystal's (case 138)
 	goto_if_ge VAR_QZ_0x500A, 1, Johto_ElmsLab_EventScript_83E22D9
 
 Johto_ElmsLab_EventScript_83E1CE2::
@@ -1088,3 +1098,64 @@ Johto_ElmsLab_Text_TravelTip4::
 Johto_ElmsLab_Text_Trashcan::
 	.string "The wrapper from the snack\n"
 	.string "PROF.ELM ate is in there…$"
+
+@ Moemon Kai: Crystal's window (ElmsLabWindow, docs/REGIONS_AUDIT.md 138): "He broke in through here!" from the
+@ theft (ELM's call on the way back from MR. POKéMON: VAR_QZ_0x5004 4) until VIOLET CITY is reached
+Johto_ElmsLab_EventScript_Window::
+	lock
+	goto_if_set FLAG_JOHTO_VISITED_VIOLET, Johto_ElmsLab_EventScript_WindowOpen
+	goto_if_lt VAR_QZ_0x5004, 4, Johto_ElmsLab_EventScript_WindowOpen
+	msgbox Johto_ElmsLab_Text_WindowBrokeIn, MSGBOX_DEFAULT
+	release
+	end
+Johto_ElmsLab_EventScript_WindowOpen::
+	msgbox Johto_ElmsLab_Text_WindowOpen, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_ElmsLab_Text_WindowOpen::
+	.string "The window’s open.\p"
+	.string "A pleasant breeze is blowing in.$"
+
+Johto_ElmsLab_Text_WindowBrokeIn::
+	.string "He broke in through here!$"
+
+@ Moemon Kai: Crystal's ELM when told on the phone the EGG hatched, without TOGEPI along (ElmThoughtEggHatchedText,
+@ docs/REGIONS_AUDIT.md 138)
+Johto_ElmsLab_EventScript_ThoughtEggHatched::
+	msgbox Johto_ElmsLab_Text_ThoughtEggHatched, MSGBOX_DEFAULT
+	closemessage
+	release
+	end
+
+Johto_ElmsLab_Text_ThoughtEggHatched::
+	.string "{PLAYER}? I thought the EGG\n"
+	.string "hatched.\p"
+	.string "Where is the MOéMON?$"
+
+Johto_ElmsLab_Text_AideBusy::
+	.string "There are only two of us, so we’re\n"
+	.string "always busy.$"
+
+Johto_ElmsLab_Text_AideTheft::
+	.string "There was a loud noise outside…\p"
+	.string "When we went to look, someone\n"
+	.string "stole a MOéMON.\p"
+	.string "It’s unbelievable that anyone\n"
+	.string "would do that!\p"
+	.string "…sigh… That stolen MOéMON.\p"
+	.string "I wonder how it’s doing.\p"
+	.string "They say a MOéMON raised by a bad\n"
+	.string "person turns bad itself.$"
+
+Johto_ElmsLab_Text_AideBalls::
+	.string "To add to your POKéDEX, you have\n"
+	.string "to catch MOéMON.\p"
+	.string "Throw POKé BALLS at wild MOéMON to\n"
+	.string "get them.$"
+
+Johto_ElmsLab_Text_AideAfterTheft::
+	.string "…sigh… That stolen MOéMON.\p"
+	.string "I wonder how it’s doing.\p"
+	.string "They say a MOéMON raised by a bad\n"
+	.string "person turns bad itself.$"

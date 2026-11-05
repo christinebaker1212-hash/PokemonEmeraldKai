@@ -1,0 +1,7 @@
+# Crystal's FLORIA (docs/REGIONS_AUDIT.md 100): by ROUTE 36's odd tree until met, then in the FLOWER SHOP; talked to
+# there, back at the tree; the teacher gives the SQUIRTBOTTLE only after both talks and with the PLAINBADGE.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("[test] flag 5442 = 1" "[test] flag 5443 = 1" "[test] item 504: 0" "[test] item 504: 1" "[test] npc local 8 gfx")
+UNEXPECT_A=("[crash]")

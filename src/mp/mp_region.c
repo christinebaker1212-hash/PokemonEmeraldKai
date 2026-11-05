@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "global.h"
+#include "pokemon_icon.h"   // (GetUnownLetterByPersonality: Crystal's UNOWN dex)
 #include "fieldmap.h"
 #include "metatile_behavior.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's map groups
@@ -16,6 +17,9 @@
 const void *Sinnoh_UnownData(u32 *size);   // (the UNOWN letters seen: chunk UNOF, s3d_legends.c)
 void Sinnoh_UnownLoad(const void *data, u32 size);
 void Sinnoh_UnownReset(void);
+// Moemon Kai: the UNOWN letters caught (Crystal's UNOWN dex, wUnownDex: the RUINS chamber scientist's
+// "you caught them all", docs/REGIONS_AUDIT.md 138); "<save>.region" chunk UNOC
+static u32 sJohtoUnownCaught;
 const void *Sinnoh_RoamerData(u32 *size);   // (the roaming POKéMON: chunk ROAM, s3d_roamer.c)
 const void *MP_JohtoRoamer_Data(u32 *size);   // (JOHTO's beasts: chunk JRMS, mp_johto_roamer.c)
 void MP_JohtoRoamer_Load(const void *data, u32 size);
@@ -357,6 +361,7 @@ void MP_Region_StartNewGame(void)
     Sinnoh_FashionReset();
     Sinnoh_UndergroundReset();
     Sinnoh_UnownReset();
+    sJohtoUnownCaught = 0;
     Sinnoh_RoamerReset();
     MP_JohtoRoamer_Reset();
     MP_RegionBerryTrees_Reset();
@@ -563,6 +568,13 @@ void MP_Region_WriteSidecar(void)
             c[1] = size;
             fwrite(c, sizeof(c), 1, f);
             fwrite(un, size, 1, f);
+        }
+        {
+            // the UNOWN letters caught (Crystal's UNOWN dex)
+            c[0] = CHUNK('U', 'N', 'O', 'C');
+            c[1] = sizeof(sJohtoUnownCaught);
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(&sJohtoUnownCaught, sizeof(sJohtoUnownCaught), 1, f);
         }
         {
             // the roaming POKéMON (src/sinnoh/s3d_roamer.c)
@@ -773,6 +785,11 @@ static bool8 LoadFrom(const char *path)
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_UnownLoad(buf, c[1]);
             }
+            else if (c[0] == CHUNK('U', 'N', 'O', 'C') && c[1] == sizeof(sJohtoUnownCaught))
+            {
+                if (fread(&sJohtoUnownCaught, sizeof(sJohtoUnownCaught), 1, f) != 1)
+                    sJohtoUnownCaught = 0;
+            }
             else if (c[0] == CHUNK('U', 'N', 'D', 'G') && c[1] <= 1024)
             {
                 u8 buf[1024];
@@ -887,6 +904,7 @@ void MP_Region_LoadFromSave(void)
     Sinnoh_FashionReset();
     Sinnoh_UndergroundReset();
     Sinnoh_UnownReset();
+    sJohtoUnownCaught = 0;
     Sinnoh_RoamerReset();
     MP_JohtoRoamer_Reset();
     MP_RegionBerryTrees_Reset();
@@ -2338,6 +2356,23 @@ void MP_JohtoWeekdayPeople(void)
         FlagClear(FLAG_JOHTO_HIDE_GOLDENROD_TUTOR);
     else
         FlagSet(FLAG_JOHTO_HIDE_GOLDENROD_TUTOR);
+    // ROUTE 36's FLORIA (Crystal's EVENT_FLORIA_AT_SUDOWOODO / _AT_FLOWER_SHOP as its scripts move her): by the odd
+    // tree until met, then in the FLOWER SHOP; talked to there, back at the tree waiting; with the SQUIRTBOTTLE given
+    // (or the tree fought: a save from before has met her), in the shop for good
+    {
+        bool8 done = FlagGet(FLAG_QZ_0x1099) || FlagGet(FLAG_QZ_0x102E);
+        bool8 inShop = done || (FlagGet(FLAG_JOHTO_MET_FLORIA) && !FlagGet(FLAG_JOHTO_TALKED_FLORIA));
+        if (inShop)
+        {
+            FlagSet(FLAG_JOHTO_HIDE_FLORIA_ROUTE);
+            FlagClear(FLAG_JOHTO_HIDE_FLORIA_SHOP);
+        }
+        else
+        {
+            FlagClear(FLAG_JOHTO_HIDE_FLORIA_ROUTE);
+            FlagSet(FLAG_JOHTO_HIDE_FLORIA_SHOP);
+        }
+    }
     // GOLDENROD UNDERGROUND (Crystal's GoldenrodUndergroundCheckDayOfWeekCallback): the bargain merchant on Monday
     // mornings, the older HAIRCUT BROTHER on Tuesdays / Thursdays / Saturdays, the younger on Sundays / Wednesdays /
     // Fridays, the herb lady at weekends
@@ -2358,4 +2393,21 @@ void MP_JohtoWeekdayPeople(void)
                 FlagSet(sFlags[i]);
         }
     }
+}
+
+// Crystal's UNOWN dex: a letter caught (pokemon.c HandleSetPokedexFlag), and whether all 26 are (Crystal's
+// NUM_UNOWN: A-Z, the ! and ? came later)
+void MP_JohtoUnownCaught(u32 personality)
+{
+    u16 letter = GetUnownLetterByPersonality(personality);
+    if (letter < 28 && !(sJohtoUnownCaught & (1u << letter)))
+    {
+        sJohtoUnownCaught |= 1u << letter;
+        MPNet_Log("johto: UNOWN %u caught", letter);
+    }
+}
+
+bool8 MP_JohtoAllUnownCaught(void)
+{
+    return (sJohtoUnownCaught & ((1u << 26) - 1)) == (1u << 26) - 1;
 }

@@ -2,7 +2,7 @@
 
 The audit compared every KANTO map with FireRed and every JOHTO map with Crystal (findings, with the original's and the
 game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided each of the 157 cases below (158 was added by the user later). Status:
-[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04); 1.92.0: cases 52, 63, 91-95, 131-134, 136, 143 and 148, and the first part of 138 (POKéMON in houses, ELM's lab signs, small lines); 1.93.0: cases 142, 144, 145, the SEER of 146 and GOLDENROD's NAME RATER (118)). Rules the user set with these decisions:
+[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04); 1.92.0: cases 52, 63, 91-95, 131-134, 136, 143 and 148, and the first part of 138 (POKéMON in houses, ELM's lab signs, small lines); 1.93.0: cases 142, 144, 145, the SEER of 146 and GOLDENROD's NAME RATER (118); 1.105.0: cases 100, 101 and the rest of 138). Rules the user set with these decisions:
 
 - **JOHTO is strictly Crystal** (case 116): HGSS-flavoured events Quetzal added are removed; where this file or
   docs/REGIONS_TODO.md said "HGSS ranks above Quetzal", Crystal alone is the reference now.
@@ -114,8 +114,8 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **97. [J2-22]** Bug-Catching Contest uses Quetzal's rules, and its rules text promises RADIANT scoring: **RESTORE the original**
 - [x] **98. [J2-23]** GOLDENROD GYM guide talks about FAIRY types; gym statues read "TOWN" / "CERTIFIED TRAINERS": **RESTORE the original**
 - [x] **99. [J2-26]** ROUTE 34 / its gate: KATE's SOFT SAND is a ball; Trainer Tips say berries regrow "several times a day"; SWEET SCENT teacher gone: **RESTORE the original**
-- [ ] **100. [J2-27]** ROUTE 36: FLORIA isn't at the odd tree; SQUIRTBOTTLE needs only the badge; a Hisuian GROWLITHE warning: **RESTORE the original**
-- [ ] **101. [J2-28]** NATIONAL PARK / ROUTE 35 people rewritten or added: **RESTORE the original**
+- [x] **100. [J2-27]** ROUTE 36: FLORIA isn't at the odd tree; SQUIRTBOTTLE needs only the badge; a Hisuian GROWLITHE warning: **RESTORE the original**
+- [x] **101. [J2-28]** NATIONAL PARK / ROUTE 35 people rewritten or added: **RESTORE the original**
 - [x] **102. [J2-29]** MANIA's SHUCKLE is a gift to keep, not a loan: **RESTORE the original**
 - [x] **103. [J2-31]** MARY gives BRIGHT POWDER (Crystal: PINK BOW): **RESTORE the original**
 - [ ] **104. [J2-32]** MOOMOO needs five ORAN BERRIES (Crystal: seven), the farm gives LEFTOVERS (Crystal: TM13 SNORE): **RESTORE the original** - _Re-add and implement new Crystal and Kanto specific TMs to fix TM issues._
@@ -152,7 +152,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **135. [J1-28]** ROUTE 27 SANDSTORM house gives TM37 without Crystal's friendship check: **RESTORE the original**
 - [x] **136. [J1-29]** UNION CAVE B2F's Friday LAPRAS is missing: **RESTORE the original**
 - [x] **137. [J1-33]** SPROUT TOWER's ELDER LI gives HM05 with Quetzal's words: **RESTORE the original**
-- [ ] **138. [J1-34]** Small missing people, signs and lines (Crystal has them, the game doesn't): **RESTORE the original**
+- [x] **138. [J1-34]** Small missing people, signs and lines (Crystal has them, the game doesn't): **RESTORE the original**
 - [ ] **139. [J2-14]** The WISE TRIO, SUICUNE at TIN TOWER 1F and the sage's RAINBOW WING are missing: **RESTORE the original**
 - [x] **140. [J2-15]** ECRUTEAK's ITEMFINDER gift is missing: **RESTORE the original**
 - [ ] **141. [J2-16]** BUENA's PASSWORD show can't be played (no BLUE CARD, no points, no prize desk): **RESTORE the original**

@@ -1,0 +1,7 @@
+# A closed RUINS OF ALPH wall shows its UNOWN word as Crystal's DisplayUnownWords (docs/REGIONS_AUDIT.md 138): the
+# KABUTO chamber's ESCAPE in UNOWN pictures, gone on A.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("unown_word")
+UNEXPECT_A=("[crash]" "RUINS wall")

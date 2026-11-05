@@ -4966,6 +4966,42 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
     HERB), each on a FLAG_JOHTO_HIDE_* set by MP_JohtoWeekdayPeople, in the alcoves of Quetzal's flute / METEORITE /
     empty clerks; KUNI's scene gone, its triggers only move VAR_QZ_0x500A to 8. `mp hour H` sets the game clock's hour.
     crystal_words.py puts in {d:NAME} numbers from the map's DEFs. Tests johto_haircut, johto_bargain.
+- 1.105.0 (the audit's batch F, JOHTO):
+  - ROUTE 36's FLORIA (case 100, tools/quetzal_port/fix_floria.py, run once): by the odd tree (39,21, facing it) until
+    met (FLAG_JOHTO_MET_FLORIA 0x1542), then in the FLOWER SHOP; talked to there (FLAG_JOHTO_TALKED_FLORIA 0x1543), back
+    at the tree with her second line; with the SQUIRTBOTTLE (or the tree fought) in the shop for good. Her two places
+    are FLAG_JOHTO_HIDE_FLORIA_ROUTE / _SHOP (0x1544 / 0x1545), set by MP_JohtoWeekdayPeople as Crystal's scripts move
+    EVENT_FLORIA_AT_SUDOWOODO / _AT_FLOWER_SHOP. The teacher gives the bottle on Crystal's conditions (met, talked to in
+    the shop, PLAINBADGE FLAG_QZ_0x11B4). Crystal's lines for both, ROUTE 36's lass (the GROWLITHE line gone), and the
+    RUINS gate's gramps (obj 2) and officer (obj 1). Test johto_floria.
+  - NATIONAL PARK and ROUTE 35 (case 101, tools/quetzal_port/fix_park.py, run once): Quetzal's man "with her by my
+    side" is Crystal's PERSIAN again (OBJ_EVENT_GFX_MON_PERSIAN, its cry), the healer the mail mother (POKEFAN F, no
+    healing), and the teacher walking by the sticker boys and the boy printing his POKéDEX are back; the balls are
+    Crystal's PARLYZ HEAL and TM28 DIG (MOON STONE / SOOTHE BELL gone). ROUTE 35's OFFICER DIRK is no longer a
+    trainer who spots you: talked to by day he only says your POKéMON look tough, at night he battles (QzIsNight, a
+    special: 20:00-3:59 like JOHTO's night POKéMON). The GOLDENROD gate's fisher says Crystal's "150 kinds". Test
+    johto_national_park.
+  - The rest of case 138 (Crystal's small people, signs and lines):
+    - ROUTE 32's RUINS gate: Crystal's officer and POKéFAN added (Quetzal kept only the boy).
+    - Signs placed as primary metatile 3 (a wooden post every JOHTO map can use) with bg events: VIOLET CITY's town
+      sign, SPROUT TOWER and EARL'S ACADEMY; ROUTE 33's by UNION CAVE.
+    - ELM's lab window (bg 5-7,1): "He broke in through here!" from the theft (VAR_QZ_0x5004 >= 4) until VIOLET CITY
+      (FLAG_JOHTO_VISITED_VIOLET 0x154A, set by VIOLET's ON_TRANSITION). ELM's house PC: five new metatiles at the end
+      of johto_blackthorn_dragon_speech_house (856-860: the lab's desk computer over the house's wall and floor)
+      where Quetzal had a bookshelf, with Crystal's research-paper words. The aide's four lines by stage.
+    - ELM's calls follow Crystal's elm.asm by stage (mp_pokegear.c CallElm: MR. POKéMON, the theft, the EGG checked,
+      the aide in VIOLET, the TOGEPI EGG, hatched: FLAG_JOHTO_TOGEPI_HATCHED 0x154B from egg_hatch.c, then
+      FLAG_JOHTO_TOLD_ELM_TOGEPI 0x154C), so the lab has "I thought the EGG hatched. Where is the POKéMON?".
+    - The RUINS OF ALPH chambers: the scientist's lines on Crystal's conditions (cryptic patterns, the tremor, the hole,
+      every UNOWN caught: a JOHTO UNOWN dex, "<save>.region" chunk UNOC, mp_region.c MP_JohtoUnownCaught from
+      HandleSetPokedexFlag). The four hidden walls as Crystal's unown_walls.asm (qz_specials.c QzRuinsWalls*): this
+      one map holds all four chambers (HO-OH top left, KABUTO top right, OMANYTE bottom left, AERODACTYL bottom
+      right); HO-OH leading or a WATER STONE carried open theirs on arrival, an ESCAPE ROPE used in the KABUTO chamber
+      (item_use.c) or FLASH in the AERODACTYL chamber (fldeff_flash.c: usable there lit, a white flash) mark theirs
+      (FLAG_JOHTO_RUINS_WALL_* 0x1546-0x1549) for the next visit; a marked wall opens with Crystal's tremor (ON_FRAME
+      on VAR_TEMP_3). Reading a closed wall shows its word (ESCAPE / LIGHT / WATER / HO-OH) spelled with UNOWN icons
+      (QzShowUnownWord, Crystal's DisplayUnownWords). `mp ruinsmark` acts as both used where the player stands.
+      Tests johto_ruins_walls, johto_ruins_word, johto_elm_lab.
 
 ## MAGIC (1.95.0: docs/MTG_DECISIONS.md, docs/MTG_HANDOFF.md)
 - The rules are Forge's translated into C (src/mtg/mtg_game.c etc., include/mtg/mtg.h), reading Forge's own card

@@ -3085,6 +3085,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] evotarget %d item %d: %u\n", slot, item, GetEvolutionTargetSpecies(&gPlayerParty[slot],
                    item ? EVO_MODE_ITEM_CHECK : EVO_MODE_NORMAL, item));
     }
+    else if (strcmp(cmd, "ruinsmark") == 0)
+    {
+        // ruinsmark - as an ESCAPE ROPE and FLASH used where the player stands (the RUINS OF ALPH's walls, qz_specials.c)
+        bool8 QzRuinsFlash(void);
+        void QzRuinsEscapeRope(void);
+        QzRuinsEscapeRope();
+        printf("[test] ruinsmark: flash %d\n", QzRuinsFlash());
+    }
     else if (strcmp(cmd, "item") == 0)
     {
         // item ID QTY - put items in the bag

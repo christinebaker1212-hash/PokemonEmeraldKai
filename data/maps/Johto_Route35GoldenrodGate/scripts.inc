@@ -123,7 +123,6 @@ Johto_Route35GoldenrodGate_Text_83D11CF::
 Johto_Route35GoldenrodGate_Text_83D1202::
 	.string "I wonder how many kinds of MOéMON\n"
 	.string "there are in the world.\p"
-	.string "Three years ago, PROF.OAK said that\n"
-	.string "there were 150 different kinds.\p"
-	.string "But recently I heard there’s\n"
-	.string "over 400!$"
+	.string "Three years ago, PROF.OAK said\n"
+	.string "that there were 150 different\l"
+	.string "kinds.$"

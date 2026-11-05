@@ -1,0 +1,7 @@
+# Crystal's ELM's lab and house (docs/REGIONS_AUDIT.md 138): the open window, "He broke in through here!" after the
+# theft until VIOLET CITY, the aide explaining POKé BALLS, ELM's research-paper PC at home.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("window_open" "window_broke_in" "aide_balls" "house_pc")
+UNEXPECT_A=("[crash]")

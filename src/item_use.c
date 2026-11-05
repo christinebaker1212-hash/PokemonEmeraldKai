@@ -1195,6 +1195,8 @@ void ItemUseOutOfBattle_EscapeRope(u8 taskId)
 {
     if (CanUseDigOrEscapeRopeOnCurMap() == TRUE)
     {
+        void QzRuinsEscapeRope(void);
+        QzRuinsEscapeRope();   // Moemon Kai: the RUINS OF ALPH's KABUTO chamber wall (docs/REGIONS_AUDIT.md 138)
         sItemUseOnFieldCB = ItemUseOnFieldCB_EscapeRope;
         SetUpItemUseOnFieldCallback(taskId);
     }

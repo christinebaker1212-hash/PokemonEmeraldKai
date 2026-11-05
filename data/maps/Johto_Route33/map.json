@@ -125,5 +125,14 @@
       "script": "Johto_Route33_EventScript_83C3B76"
     }
   ],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 25,
+      "y": 18,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_Route33_EventScript_Sign"
+    }
+  ]
 }

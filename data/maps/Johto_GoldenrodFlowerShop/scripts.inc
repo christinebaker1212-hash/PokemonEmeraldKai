@@ -24,64 +24,56 @@ Johto_GoldenrodFlowerShop_EventScript_83D4BEA::
 
 @ Johto_GoldenrodFlowerShop object 1 (local id 1, gfx 0x8) at 2,4
 Johto_GoldenrodFlowerShop_EventScript_83D4C26::
+	@ Moemon Kai: Crystal's teacher (FlowerShopTeacherScript, docs/REGIONS_AUDIT.md 100): the SQUIRTBOTTLE once FLORIA
+	@ was met by the tree, talked to here, and the PLAINBADGE won
 	lock
+	goto_if_set FLAG_QZ_0x102E, Johto_GoldenrodFlowerShop_EventScript_Lalala
 	faceplayer
-	goto_if_set FLAG_QZ_0x102E, Johto_GoldenrodFlowerShop_EventScript_83D4C77
-	goto_if_set FLAG_QZ_0x1099, Johto_GoldenrodFlowerShop_EventScript_83D4C6A
-	goto_if_set FLAG_QZ_0x11B4, Johto_GoldenrodFlowerShop_EventScript_83D4C4E
-	msgbox Johto_GoldenrodFlowerShop_Text_83D4D3C, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
-Johto_GoldenrodFlowerShop_EventScript_83D4C4E::
-	lock
-	faceplayer
-	msgbox Johto_GoldenrodFlowerShop_Text_83D4E58, MSGBOX_DEFAULT
+	goto_if_set FLAG_QZ_0x1099, Johto_GoldenrodFlowerShop_EventScript_TeacherGot
+	goto_if_unset FLAG_JOHTO_MET_FLORIA, Johto_GoldenrodFlowerShop_EventScript_TeacherNotMet
+	goto_if_unset FLAG_JOHTO_TALKED_FLORIA, Johto_GoldenrodFlowerShop_EventScript_Lalala
+	goto_if_unset FLAG_QZ_0x11B4, Johto_GoldenrodFlowerShop_EventScript_TeacherNoBadge
+	msgbox Johto_GoldenrodFlowerShop_Text_TeacherHere, MSGBOX_DEFAULT
 	setorcopyvar VAR_0x8000, ITEM_SQUIRTBOTTLE
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	setflag FLAG_QZ_0x1099
-	closemessage
 	release
 	end
-
-Johto_GoldenrodFlowerShop_EventScript_83D4C6A::
-	lock
-	faceplayer
-	msgbox Johto_GoldenrodFlowerShop_Text_83D4F7E, MSGBOX_DEFAULT
-	closemessage
+Johto_GoldenrodFlowerShop_EventScript_Lalala::
+	msgbox Johto_GoldenrodFlowerShop_Text_TeacherLalala, MSGBOX_DEFAULT
 	release
 	end
-
-Johto_GoldenrodFlowerShop_EventScript_83D4C77::
-	lock
-	faceplayer
-	msgbox Johto_GoldenrodFlowerShop_Text_83D4FAE, MSGBOX_DEFAULT
-	closemessage
+Johto_GoldenrodFlowerShop_EventScript_TeacherGot::
+	msgbox Johto_GoldenrodFlowerShop_Text_TeacherDanger, MSGBOX_DEFAULT
+	release
+	end
+Johto_GoldenrodFlowerShop_EventScript_TeacherNoBadge::
+	msgbox Johto_GoldenrodFlowerShop_Text_TeacherBorrow, MSGBOX_DEFAULT
+	release
+	end
+Johto_GoldenrodFlowerShop_EventScript_TeacherNotMet::
+	msgbox Johto_GoldenrodFlowerShop_Text_TeacherSister, MSGBOX_DEFAULT
 	release
 	end
 
 @ Johto_GoldenrodFlowerShop object 4 (local id 4, gfx 0x6) at 11,5
 Johto_GoldenrodFlowerShop_EventScript_83D4C84::
+	@ Moemon Kai: Crystal's FLORIA in the shop (FlowerShopFloriaScript)
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x102E, Johto_GoldenrodFlowerShop_EventScript_83D4CAE
-	goto_if_set FLAG_QZ_0x11B4, Johto_GoldenrodFlowerShop_EventScript_83D4CA3
-	msgbox Johto_GoldenrodFlowerShop_Text_83D4CB9, MSGBOX_DEFAULT
-	closemessage
+	goto_if_set FLAG_QZ_0x102E, Johto_GoldenrodFlowerShop_EventScript_FloriaFought
+	goto_if_set FLAG_QZ_0x1099, Johto_GoldenrodFlowerShop_EventScript_FloriaGot
+	msgbox Johto_GoldenrodFlowerShop_Text_FloriaWonder, MSGBOX_DEFAULT
+	setflag FLAG_JOHTO_TALKED_FLORIA
 	release
 	end
-
-Johto_GoldenrodFlowerShop_EventScript_83D4CA3::
-	msgbox Johto_GoldenrodFlowerShop_Text_83D4FE0, MSGBOX_DEFAULT
-	closemessage
+Johto_GoldenrodFlowerShop_EventScript_FloriaGot::
+	msgbox Johto_GoldenrodFlowerShop_Text_FloriaWhitney, MSGBOX_DEFAULT
 	release
 	end
-
-Johto_GoldenrodFlowerShop_EventScript_83D4CAE::
-	msgbox Johto_GoldenrodFlowerShop_Text_83D4FFD, MSGBOX_DEFAULT
-	closemessage
+Johto_GoldenrodFlowerShop_EventScript_FloriaFought::
+	msgbox Johto_GoldenrodFlowerShop_Text_FloriaWasAMon, MSGBOX_DEFAULT
 	release
 	end
 
@@ -230,3 +222,40 @@ Johto_GoldenrodFlowerShop_Text_83D5056::
 Johto_GoldenrodFlowerShop_Text_83D5136::
 	.string "We sell all kinds of BERRIES.\n"
 	.string "Have a look.$"
+
+Johto_GoldenrodFlowerShop_Text_TeacherHere::
+	.string "Oh, you’re better than WHITNEY…\p"
+	.string "You’ll be OK, then. Here’s the\n"
+	.string "SQUIRTBOTTLE!$"
+
+Johto_GoldenrodFlowerShop_Text_TeacherLalala::
+	.string "Lalala lalalala. Have plenty of\n"
+	.string "water, my lovely!$"
+
+Johto_GoldenrodFlowerShop_Text_TeacherDanger::
+	.string "Don’t do anything too dangerous!$"
+
+Johto_GoldenrodFlowerShop_Text_TeacherBorrow::
+	.string "Do you want to borrow the water\n"
+	.string "bottle too? I don’t want you doing\l"
+	.string "anything dangerous with it.$"
+
+Johto_GoldenrodFlowerShop_Text_TeacherSister::
+	.string "Have you seen that wiggly tree\n"
+	.string "that’s growing on ROUTE 36?\p"
+	.string "My little sister got all excited\n"
+	.string "and went to see it…\p"
+	.string "I’m worried… Isn’t it dangerous?$"
+
+Johto_GoldenrodFlowerShop_Text_FloriaWonder::
+	.string "When I told my sis about the\n"
+	.string "jiggly tree, she told me it’s\l"
+	.string "dangerous.\p"
+	.string "If I beat WHITNEY, I wonder if\n"
+	.string "she’ll lend me her water bottle…$"
+
+Johto_GoldenrodFlowerShop_Text_FloriaWhitney::
+	.string "Wow, you beat WHITNEY? Cool!$"
+
+Johto_GoldenrodFlowerShop_Text_FloriaWasAMon::
+	.string "So it really was a MOéMON!$"

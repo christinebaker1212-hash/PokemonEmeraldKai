@@ -1,0 +1,36 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp warp 35,0,6,2
+wait 150
+mp face up
+press A 2
+wait 60
+shot window_open
+mash B 4 20
+wait 30
+mp setvar 0x5004 5
+mp setflag 0x1074
+mp warp 35,0,6,2
+wait 150
+mp face up
+press A 2
+wait 60
+shot window_broke_in
+mash B 4 20
+wait 30
+mp warp 35,0,9,10
+wait 150
+mp npcs
+mp face up
+press A 2
+wait 60
+shot aide_balls
+mash B 6 20
+mp warp 34,125,1,2
+wait 150
+mp face up
+press A 2
+wait 60
+shot house_pc
+quit

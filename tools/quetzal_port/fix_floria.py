@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-# NOT RUN YET (written 2026-11-04, paused before testing): see docs/AUDIT_HANDOFF.md "Next steps". Run once from the
-# repo root, then restore_words.py, build, and test (a scenario talking to FLORIA by the tree, then the FLOWER SHOP).
+# Run once (2026-11-05, audit case 100); kept as the record of what it changed.
 # case 100: ROUTE 36's FLORIA by the odd tree, the FLOWER SHOP's teacher on Crystal's conditions, the lass and gramps
 import json, re, os
 os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -18,12 +17,13 @@ sub('include/constants/kai_regions.h',
     "#define FLAG_JOHTO_HIDE_FLORIA_ROUTE  0x1544   // FLORIA by the odd tree: there until met (MP_JohtoWeekdayPeople)\n"
     "#define FLAG_JOHTO_HIDE_FLORIA_SHOP   0x1545   // FLORIA in the FLOWER SHOP: there once met\n"
     "#define FLAG_JOHTO_HIDE_GOLDENROD_TUTOR 0x153D")
-sub('src/mp/mp_region.c', """    // GOLDENROD UNDERGROUND (Crystal's""", """    // ROUTE 36's FLORIA (Crystal's GoldenrodCityFlypointAndFloriaCallback, EVENT_FLORIA_AT_SUDOWOODO /
-    // _AT_FLOWER_SHOP): by the odd tree until met, then in the FLOWER SHOP (a save that already has the SQUIRTBOTTLE or
-    // fought the tree has met her)
+sub('src/mp/mp_region.c', """    // GOLDENROD UNDERGROUND (Crystal's""", """    // ROUTE 36's FLORIA (Crystal's EVENT_FLORIA_AT_SUDOWOODO / _AT_FLOWER_SHOP as its scripts move her): by the odd
+    // tree until met, then in the FLOWER SHOP; talked to there, back at the tree waiting; with the SQUIRTBOTTLE given
+    // (or the tree fought: a save from before has met her), in the shop for good
     {
-        bool8 met = FlagGet(FLAG_JOHTO_MET_FLORIA) || FlagGet(FLAG_QZ_0x1099) || FlagGet(FLAG_QZ_0x102E);
-        if (met)
+        bool8 done = FlagGet(FLAG_QZ_0x1099) || FlagGet(FLAG_QZ_0x102E);
+        bool8 inShop = done || (FlagGet(FLAG_JOHTO_MET_FLORIA) && !FlagGet(FLAG_JOHTO_TALKED_FLORIA));
+        if (inShop)
         {
             FlagSet(FLAG_JOHTO_HIDE_FLORIA_ROUTE);
             FlagClear(FLAG_JOHTO_HIDE_FLORIA_SHOP);
@@ -199,7 +199,7 @@ for t in ['TeacherHere', 'TeacherLalala', 'TeacherDanger', 'TeacherBorrow', 'Tea
         s += f'\n{F}Text_{t}::\n\t.string "x$"\n'
 open(p, 'w').write(s)
 
-# the RUINS gate's gramps (Quetzal's sign-reading man at 3,5: Crystal's gramps words)
+# the RUINS gate's gramps and officer: Crystal's words
 lines = ['# case 100: ROUTE 36 FLORIA, the lass, the FLOWER SHOP teacher and FLORIA, the RUINS gate gramps']
 lines += [f'Johto_Route36 {P}Text_{a} gsc Route36 {b}' for a, b in
           [('Lass', 'Route36LassText'), ('LassCleared', 'Route36LassText_ClearedSudowoodo'), ('Floria1', 'FloriaText1'),
@@ -213,7 +213,9 @@ lines += [f'Johto_GoldenrodFlowerShop {F}Text_{a} gsc GoldenrodFlowerShop {b}' f
            ('FloriaWonder', 'GoldenrodFlowerShopFloriaWonderIfSisWillLendWaterBottleText'),
            ('FloriaWhitney', 'GoldenrodFlowerShopFloriaYouBeatWhitneyText'),
            ('FloriaWasAMon', 'GoldenrodFlowerShopFloriaItReallyWasAMonText')]]
-lines += ['Johto_Route36RuinsOfAlphGate Johto_Route36RuinsOfAlphGate_Text_83D22D6 gsc Route36RuinsOfAlphGate Route36RuinsOfAlphGateGrampsText']
+# (obj 2 at 9,4 is the gate's gramps, wandering as Crystal's; obj 1 at 3,5 its officer, who read a sign's words)
+lines += ['Johto_Route36RuinsOfAlphGate Johto_Route36RuinsOfAlphGate_Text_83D2320 gsc Route36RuinsOfAlphGate Route36RuinsOfAlphGateGrampsText',
+          'Johto_Route36RuinsOfAlphGate Johto_Route36RuinsOfAlphGate_Text_83D22D6 gsc Route36RuinsOfAlphGate Route36RuinsOfAlphGateOfficerText']
 lst = 'tools/quetzal_port/restore_words.txt'
 t = open(lst).read()
 if lines[1] not in t:

@@ -1,0 +1,42 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp warp 35,44,40,21
+wait 150
+mp npcs
+shot route_floria
+mp face left
+press A 2
+mash A 30 20
+wait 150
+mp getflag 0x1542
+shot route_after
+mp warp 34,72,2,5
+wait 150
+mp npcs
+mp face up
+press A 2
+mash A 10 20
+wait 60
+mp checkitem 504
+mp warp 34,72,11,6
+wait 150
+shot shop_floria
+mp face up
+press A 2
+mash A 20 20
+wait 60
+mp getflag 0x1543
+mp warp 35,44,40,21
+wait 150
+mp npcs
+shot route_back
+mp setflag 0x11B4
+mp warp 34,72,2,5
+wait 150
+mp face up
+press A 2
+mash A 30 20
+wait 60
+mp checkitem 504
+quit
