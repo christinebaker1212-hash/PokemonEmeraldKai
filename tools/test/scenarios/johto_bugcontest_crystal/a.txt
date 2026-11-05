@@ -1,0 +1,49 @@
+pressuntil A field 5000
+wait 60
+mp weekday 4
+wait 5
+mp face up
+wait 10
+pressuntillog A 3000 bug contest: started
+pressuntil A field 3000
+wait 120
+mp warp 34,121,20,30
+wait 120
+shot park
+mp savedata ball:last 5
+mp moves 0 33
+mp wild 13:15 81
+pressuntil A action 4000
+mp bstatus 1 0 1
+wait 10
+press L 2
+waitlog 3000 Gotcha
+pressuntil B field 4000
+wait 60
+mp wild 10:15 81
+pressuntil A action 4000
+mp bstatus 1 0 1
+wait 10
+press L 2
+waitlog 3000 Gotcha
+pressuntil B yesno 4000
+wait 30
+shot switch
+press A 1
+pressuntil B field 3000
+wait 30
+mp party
+mp warp 34,121,12,48
+wait 120
+press DOWN 1
+pressuntil B yesno 2000
+wait 30
+shot finish
+press A 1
+pressuntillog A 3000 bug contest: judged
+shot judging
+pressuntillog A 8000 bug contest: over
+pressuntil A field 6000
+wait 60
+mp party
+quit

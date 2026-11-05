@@ -2985,9 +2985,9 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
 - Harness: mp gensetting N / regioninfo / regionclear R / regionreload / wildroll N / pcmenu / setvar ID V; waitfor multichoice.
 - Tests: region_walk, region_fly, region_travel, region_globalpc, region_gens, region_starter, region_newgame,
   region_train, region_coop.
-- Bug-Catching Contest (1.61.1): src/qz_bugcontest.c (the lead alone, 30 SAFARI BALLS, 8 minutes or
-  MOEMON_BUGCONTEST_FRAMES, up to five catches, all kept; judged against four contestants; SAVE and autosave off while
-  it runs; QzBugContest_FieldCheck in DoCB1_Overworld ends it). Test qz_bugcontest.
+- Bug-Catching Contest (1.61.1, Crystal's rules since 1.111.0: "The audit's batch L"): src/qz_bugcontest.c (SAVE and
+  autosave off while it runs; QzBugContest_FieldCheck in DoCB1_Overworld ends it). Tests qz_bugcontest,
+  johto_bugcontest_crystal.
 - RUINS OF ALPH puzzles (1.61.1): src/qz_alphpuzzle.c (6x6 board, 16 pieces cut from the species' front picture;
   MOEMON_ALPH_EASY). Test qz_alph_puzzle.
 - LEAGUE credits (1.61.1): QzDoCredits / QzAfterCreditsReset; post_battle_event_funcs.c GameClear is region-aware
@@ -4522,6 +4522,24 @@ follow_behind, follow_ground.
   DEX check and OAK's AIDES (ROUTE 2, 10, 11, 15, 16) count KANTO's dex (VAR_0x8004 0), as FireRed. The POKéDEX
   hand-over says FireRed's "Take these with you." / "received the POKéDEX from PROF. OAK."; Kai still makes it the
   NATIONAL DEX from the start (hoenn_national_dex). Test kanto_oak_rating.
+- **Case 97, the Bug-Catching Contest on Crystal's rules** (src/qz_bugcontest.c; Crystal's engine/events/bug_contest
+  and the two gates' scripts): TUESDAY, THURSDAY and SATURDAY (MP_JohtoWeekday), once a day (VAR_JOHTO_BUG_CONTEST_DAY
+  0x5156 = RTC days + 1); the gate officers ask in Crystal's order (the day, YES, a full party and PC, an EGG first,
+  "You'll have to use ..., the first POKéMON", fainted), keep the rest of the party with the CONTEST HELPER, give 20
+  SAFARI BALLS for Crystal's PARK BALLS (crystal_words.py says SAFARI BALL in the gates' words; the player's own are
+  kept aside) and 20 minutes (MOEMON_BUGCONTEST_FRAMES in tests). One catch is kept: a second asks Crystal's "You
+  already caught a .... Switch POKéMON?" (EventScript_QzBugContestSwitch, QzBugContestSwitch). The time up and the
+  last SAFARI BALL each have Crystal's ANNOUNCER line. The officers at the park's two ways out stand in for the gates'
+  "You still have N minute(s) left. Do you want to finish now?" (QzBugContestMinutesLeft). Five of Crystal's ten
+  contestants come each day (PickContestants), shown in the park (map.json objects 29-38, FLAG_TEMP_11 + n set by
+  QzBugContestSetupPark for the absent) with Crystal's lines, and stand in a line at the judging; each brings one of
+  their three catches with its base score + 0-7, the player's catch scored by Crystal's ContestScore (4 x max HP, the
+  other stats, DV bits from the IVs, HP / 8, a held item). Crystal's results words; SUN STONE / EVERSTONE / SITRUS
+  BERRY (GOLD BERRY) / ORAN BERRY (BERRY); a prize that doesn't fit is kept by ROUTE 36's officer for today
+  (VAR_JOHTO_BUG_CONTEST_PRIZE 0x5157, Crystal's EVENT_CONTEST_OFFICER_HAS_*). The catch joins the party or goes to
+  the PC (Crystal's party-full line); the lead keeps its EXP. Crystal's explanation sign on the ROUTE 35 room's poster.
+  Not carried over: the START menu's PARK BALL / timer box, and the contestants' after-contest lines in ROUTE 36's
+  gate (the judging is in the park here). Tests qz_bugcontest, johto_bugcontest_crystal.
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).

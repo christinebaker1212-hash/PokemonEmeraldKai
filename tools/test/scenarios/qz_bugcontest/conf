@@ -1,9 +1,10 @@
-# JOHTO's Bug-Catching Contest: the gate's attendant (YES, YES) keeps only the lead and gives 30 SAFARI BALLS; in
-# the park a WEEDLE is caught with one (L throws it again); time runs out (a short contest here), the judging ranks the
-# catch against four contestants with a prize, the catch goes to the PC and the party of three comes back
+# JOHTO's Bug-Catching Contest on Crystal's rules: a TUESDAY; the gate's officer (YES, YES) keeps all but the lead
+# and gives 20 SAFARI BALLS; in the park a WEEDLE is caught with one (L throws it again); time runs out (a short
+# contest here), the judging ranks the catch against five of Crystal's contestants with a prize, the party of three
+# comes back with the WEEDLE as the fourth; the officer then says today's contest is over
 MODE=1
 WARP=34,52,3,3
 TMO=300
-ENV_A="MOEMON_DEBUG_PARTY=158:30,161:20,163:20 MOEMON_BATTLETEXT=1 MOEMON_BUGCONTEST_FRAMES=900"
-EXPECT_A=("bug contest: started" "bug contest: time up" "bug contest: judged" "bug contest: over" "[test] party: 158(" "savesum")
+ENV_A="MOEMON_DEBUG_PARTY=158:30,161:20,163:20 MOEMON_BATTLETEXT=1 MOEMON_BUGCONTEST_FRAMES=3600"
+EXPECT_A=("bug contest: started" "bug contest: time up" "bug contest: judged" "bug contest: over" "[test] party: 158(" "13(" "savesum")
 UNEXPECT_A=("[crash]")

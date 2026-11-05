@@ -205,32 +205,55 @@ gText_MagnetTrainDeparts::
 	.string "The MAGNET TRAIN for SAFFRON CITY\n"
 	.string "is now departing!$"
 
-@ Moemon Kai: the Bug-Catching Contest's end by time, the fifth catch or the last SAFARI BALL (src/qz_bugcontest.c):
-@ on to the judging (Quetzal's own script from here)
+@ Moemon Kai: the Bug-Catching Contest's end by time or the last SAFARI BALL (src/qz_bugcontest.c; Crystal's
+@ BugCatchingContestOverScript / OutOfBallsScript), on to the judging
 EventScript_QzBugContestOver::
 	lockall
 	playse SE_DING_DONG
-	msgbox gText_QzBugContestOver, MSGBOX_DEFAULT
+	msgbox gText_QzBugContestTimeUp, MSGBOX_DEFAULT
 	closemessage
 	goto Johto_NationalParkBugContest_EventScript_83C33FA
 
-@ ...and leaving the park during it (the catches went to the PC, the party is back)
+EventScript_QzBugContestNoBalls::
+	lockall
+	playse SE_DING_DONG
+	msgbox gText_QzBugContestIsOver, MSGBOX_DEFAULT
+	closemessage
+	goto Johto_NationalParkBugContest_EventScript_83C33FA
+
+@ ...a second catch: Crystal's BugContest_SetCaughtContestMon ("You already caught a ... Switch POKeMON?")
+EventScript_QzBugContestSwitch::
+	lockall
+	msgbox gText_QzBugContestAlreadyCaught, MSGBOX_DEFAULT
+	msgbox gText_QzBugContestAskSwitch, MSGBOX_YESNO
+	special QzBugContestSwitch
+	releaseall
+	end
+
+@ ...and leaving the park during it (the catch to the party or the PC, the party back)
 EventScript_QzBugContestLeft::
 	lockall
 	msgbox gText_QzBugContestLeft, MSGBOX_DEFAULT
 	releaseall
 	end
 
-gText_QzBugContestOver::
+gText_QzBugContestTimeUp::
 	.string "ANNOUNCER: BEEEP!\p"
-	.string "The Bug-Catching Contest is over!\n"
-	.string "Please return to the judges.$"
+	.string "Time’s up!$"
+
+gText_QzBugContestIsOver::
+	.string "ANNOUNCER: The Contest is over!$"
+
+gText_QzBugContestAlreadyCaught::
+	.string "You already caught a {STR_VAR_2}.$"
+
+gText_QzBugContestAskSwitch::
+	.string "Switch MOéMON?$"
 
 gText_QzBugContestLeft::
 	.string "You left the NATIONAL PARK, so the\n"
 	.string "Bug-Catching Contest is over.\p"
-	.string "Your catches are in the PC and your\n"
-	.string "party is back with you.$"
+	.string "Your party is back with you.$"
 
 @ Moemon Kai: HEADBUTT on JOHTO's / KANTO's trees (field_control_avatar.c, wild_encounter.c MP_Headbutt_IsTree): a
 @ POKeMON may fall out (the map's tree table)

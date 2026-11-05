@@ -745,3 +745,12 @@ gSpecials::
 	def_special MP_StartLinkMinigame, waitstate=1
 	def_special MP_Minigame_HostJoyful
 	def_special HasAllMons   @ Moemon Kai: FireRed's NATIONAL DEX completion (OAK's rating in KANTO, audit case 64)
+	def_special QzBugContestSwitch   @ Moemon Kai: Crystal's Bug-Catching Contest (src/qz_bugcontest.c, audit case 97)
+	def_special QzBugContestDay
+	def_special QzBugContestBufferLead
+	def_special QzBugContestCanEnter
+	def_special QzBugContestMinutesLeft
+	def_special QzBugContestHoldPrize
+	def_special QzBugContestHeldPrize
+	def_special QzBugContestClearPrize
+	def_special QzBugContestSetupPark

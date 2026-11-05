@@ -76,6 +76,15 @@ def words(mapname, label, our_label=None):
         # scripts buffer them through GetInGameTradeSpeciesInfo)
         rams.update({'wStringBuffer1': '{STR_VAR_1}', 'wMonOrItemNameBuffer': '{STR_VAR_1}', 'wStringBuffer2': '{STR_VAR_2}'})
         text = re.sub(r'(::\n)\s*text_ram (\w+)\s*\n\s*text "', lambda m: m.group(1) + '\ttext "' + rams.get(m.group(2), '{STR_VAR_1}'), text)
+    if label.startswith(('_ContestJudging', '_ContestAlreadyCaught', '_ContestCaughtMon')):
+        # (the Bug-Catching Contest's: qz_bugcontest.c QzBugContestBufferPlaceWinner fills them: STR_VAR_1 the
+        # contestant, STR_VAR_2 the POKéMON, STR_VAR_3 the score)
+        rams.update({'wBugContestWinnerName': '{STR_VAR_1}', 'wStringBuffer1': '{STR_VAR_2}'})
+        text = re.sub(r'@"\s*\n\s*text_pause\s*\n\s*text "', '', text)
+        text = re.sub(r'\n\s*text_start\s*\n', '\n', text)
+        text = re.sub(r'@"\s*\n\s*text_end\s*\n', '"\n\tdone\n', text)
+        text = re.sub(r'(\w+_ContestJudging_\w*ScoreText::)\n\s*\n\s*para ', r'\1\n\ttext ', text)
+        text = re.sub(r'@"\s*\n\s*text_decimal wBugContest\w+Score[^\n]*\n\s*text "', '{STR_VAR_3}', text)
     text = re.sub(r'@"\s*\n\s*text_ram (\w+)\s*\n\s*text "',
                   lambda m: rams.get(m.group(1), '{STR_VAR_1}'), text)
     # (text_start: the buffer ends the line, the next line command goes on)
@@ -87,6 +96,11 @@ def words(mapname, label, our_label=None):
                   lambda m: decs.get(m.group(1).strip(), '{STR_VAR_2}'), text)
     # ({d:NAME}: a number the map DEFs, as the haircut prices)
     defs = dict(re.findall(r'^DEF (\w+)\s+EQU (\d+)', text, re.M))
+    # (the Bug-Catching Contest's numbers, constants/misc_constants.asm; and its PARK BALLS are this game's SAFARI
+    # BALLS: qz_bugcontest.c)
+    defs.update({'BUG_CONTEST_BALLS': '20', 'BUG_CONTEST_MINUTES': '20'})
+    if 'NationalParkGate' in mapname:
+        text = text.replace('PARK BALL', 'SAFARI BALL').replace('PARK"\n\tline "BALL', 'SAFARI"\n\tline "BALL')
     text = re.sub(r'\{d:(\w+)\}', lambda m: defs.get(m.group(1), m.group(0)), text)
     pars = [renumber_tms(p) for p in crystal_text(text, label)]
     body = gba_text(pars)

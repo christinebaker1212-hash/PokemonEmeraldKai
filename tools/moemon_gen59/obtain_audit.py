@@ -204,7 +204,7 @@ for m in re.finditer(r'\.species = SPECIES_(\w+)', rd('src/data/trade.h')):
 for m in re.finditer(r'\.species = SPECIES_(\w+)', rd('src/data/qz_ingame_trades.h')):
     TRADES.append((JOHTO, m.group(1)))   # (JOHTO's and KANTO's: the same cap)
 
-CONTEST = [(JOHTO, s) for s in re.findall(r'SPECIES_(\w+)', re.search(r'sBugs\[\] = \{(.*?)\};', rd('src/qz_bugcontest.c'), re.S).group(1))]
+CONTEST = [(JOHTO, s) for s in re.findall(r'SPECIES_(\w+)', re.search(r'sContestants\[10\] = \{(.*?)\n\};', rd('src/qz_bugcontest.c'), re.S).group(1))]
 
 GATCHA = []   # region-free: the fixed prizes (EV_RANDOM* aside)
 for m in re.finditer(r'\[EV_\w+\]\s*=\s*\{[^,]+, SPECIES_(\w+),', rd('src/mp/mp_gatcha.c')):

@@ -111,7 +111,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **94. [J1-27]** ELM's phone calls arrive as on-screen "A message from PROF. ELM arrived" texts: **RESTORE the original**
 - [x] **95. [J1-30]** CHERRYGROVE: the rival's "That's my TRAINER CARD! You saw my name..." line and the guide's MAP gift words: **RESTORE the original**
 - [x] **96. [J2-20]** GOLDENROD DEPT. STORE floors and directory are Quetzal's: **RESTORE the original**
-- [ ] **97. [J2-22]** Bug-Catching Contest uses Quetzal's rules, and its rules text promises RADIANT scoring: **RESTORE the original**
+- [x] **97. [J2-22]** Bug-Catching Contest uses Quetzal's rules, and its rules text promises RADIANT scoring: **RESTORE the original**
 - [x] **98. [J2-23]** GOLDENROD GYM guide talks about FAIRY types; gym statues read "TOWN" / "CERTIFIED TRAINERS": **RESTORE the original**
 - [x] **99. [J2-26]** ROUTE 34 / its gate: KATE's SOFT SAND is a ball; Trainer Tips say berries regrow "several times a day"; SWEET SCENT teacher gone: **RESTORE the original**
 - [x] **100. [J2-27]** ROUTE 36: FLORIA isn't at the odd tree; SQUIRTBOTTLE needs only the badge; a Hisuian GROWLITHE warning: **RESTORE the original**

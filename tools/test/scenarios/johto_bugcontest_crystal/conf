@@ -1,0 +1,10 @@
+# JOHTO's Bug-Catching Contest, Crystal's way: a THURSDAY; today's five of Crystal's ten contestants stand in the
+# park; a WEEDLE caught, then a CATERPIE asks "You already caught a WEEDLE. Switch MOéMON?" (YES keeps the
+# CATERPIE); the officer at the south way out asks "You still have N minute(s) left. Do you want to finish now?"
+# (YES); the judging with the five in a line; the CATERPIE joins the party, the lead keeps its EXP
+MODE=1
+WARP=34,52,3,3
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=158:30,161:20 MOEMON_BATTLETEXT=1"
+EXPECT_A=("bug contest: started" "bug contest: judged" "bug contest: over" "[test] party: 158(26/26" "161(" " 10(")
+UNEXPECT_A=("[crash]" "time up" " 13(")

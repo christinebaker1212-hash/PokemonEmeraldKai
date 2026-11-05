@@ -108,6 +108,12 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `kanto_giovanni_leaves` | GIOVANNI's farewell in VIRIDIAN's GYM, then he's gone; FIVE ISLAND's POKéMON JOURNAL after the LEAGUE |
 | `kanto_ruin_valley_cut` | RUIN VALLEY: CUT used from the party menu below the braille door opens it |
 | `kanto_togepi_egg` | the WATER LABYRINTH's gentleman gives a TOGEPI EGG for a lead POKéMON at full friendship |
+| `johto_hideout_studio` | MAHOGANY's hideout plays as Crystal's (LANCE, the EXECUTIVE); CIANWOOD's PHOTO STUDIO is back beside the GYM |
+| `kanto_fossil` | CINNABAR's fossil doctor as FireRed's: a HELIX FOSSIL, a walk outside, a Lv 5 OMANYTE |
+| `johto_trade_kyle` / `kanto_trade_zynx` | Crystal's KYLE trade (ONIX ROCKY), FireRed's ZYNX trade with her letter |
+| `johto_mahogany_mart` | MAHOGANY's shop run by TEAM ROCKET, then the old woman's stock once the RADIO TOWER is freed |
+| `kanto_oak_rating` | OAK rates KANTO's POKéDEX with FireRed's words for every ten caught |
+| `johto_bugcontest_crystal` | the Bug-Catching Contest on a THURSDAY: five of Crystal's contestants in the park, a second catch asks to switch, "finish now?" at the way out, the judging in a line, the catch joins the party and the lead keeps its EXP |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |
 | `pmd_scale_hop` | a scaled PMD follower (PIKACHU, FOLLOWERS: PMD everywhere) mid-hop is drawn whole: check.py counts its rows and pixels (its lower part was cut off) |

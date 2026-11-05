@@ -1,6 +1,9 @@
+@ Moemon Kai: the NATIONAL PARK during Crystal's Bug-Catching Contest (audit case 97; maps/NationalParkBugContest.asm,
+@ engine/events/std_scripts.asm BugContestResultsScript; the rules in src/qz_bugcontest.c). Crystal's ten
+@ contestants are objects 29-38, today's five shown (QzBugContestSetupPark); the judging is here, the officer
+@ (object 3) facing the player and the five in a line.
 Johto_NationalParkBugContest_MapScripts::
 	map_script MAP_SCRIPT_ON_TRANSITION, Johto_NationalParkBugContest_EventScript_83E0755
-	map_script MAP_SCRIPT_ON_RESUME, Johto_NationalParkBugContest_EventScript_83E0792
 	map_script MAP_SCRIPT_ON_FRAME_TABLE, Johto_NationalParkBugContest_OnFrame_83E07AE
 	.byte 0
 
@@ -10,152 +13,186 @@ Johto_NationalParkBugContest_OnFrame_83E07AE:
 	map_script_2 VAR_QZ_0x5019, 3, Johto_NationalParkBugContest_EventScript_83E085D
 	.2byte 0
 
-Johto_NationalParkBugContest_EventScript_835FB5E::
-	special QzRandomizeItemInVar8000
-	return
+Johto_NationalParkBugContest_EventScript_83E0755::
+	special QzBugContestSetupPark
+	goto_if_eq VAR_QZ_0x5019, 3, Johto_NationalParkBugContest_EventScript_83E082C
+	setobjectxyperm 3, 10, 49
+	setobjectmovementtype 3, MOVEMENT_TYPE_FACE_RIGHT
+	end
 
-Johto_NationalParkBugContest_EventScript_83C339A::
-	lockall
-	special QzBugContestClearFlag1
-	msgbox Quetzal_Text_83C36A1, MSGBOX_DEFAULT
-	closemessage
-	goto Johto_NationalParkBugContest_EventScript_83C359B
+Johto_NationalParkBugContest_EventScript_83E082C::
+	setobjectxyperm 3, 20, 26
+	setobjectmovementtype 3, MOVEMENT_TYPE_FACE_DOWN
+	setobjectmovementtype LOCALID_PLAYER, MOVEMENT_TYPE_FACE_UP
+	end
 
-Johto_NationalParkBugContest_EventScript_83C33D1::
+@ in from ROUTE 35's gate (south) / ROUTE 36's (east)
+Johto_NationalParkBugContest_EventScript_83E0878::
 	lockall
-	special QzBugContestClearFlag1
-	msgbox Johto_NationalParkBugContest_Text_83C3765, MSGBOX_DEFAULT
+	applymovement LOCALID_PLAYER, Quetzal_Movement_8360837
+	waitmovement 0
+	setvar VAR_QZ_0x5019, 2
+	releaseall
+	end
+
+Johto_NationalParkBugContest_EventScript_83E0893::
+	lockall
+	turnobject LOCALID_PLAYER, DIR_WEST
+	applymovement LOCALID_PLAYER, Quetzal_Movement_836083D
+	waitmovement 0
+	applymovement LOCALID_PLAYER, Quetzal_Movement_836083D
+	waitmovement 0
+	delay 20
+	clearflag FLAG_QZ_0x1042
+	addobject 6
+	setvar VAR_TEMP_1, 1
+	setvar VAR_QZ_0x5019, 2
+	releaseall
+	end
+
+@ Leaving early: Crystal's gate officers (Route35NationalParkGateLeavingContestEarlyScript and ROUTE 36's), here
+@ the officers at the park's two ways out. VAR_0x8009: 0 the south (ROUTE 35) one, 1 the east (ROUTE 36) one
+@ Johto_NationalParkBugContest trigger at 11..14,49 (VAR_TEMP_0 == 0)
+Johto_NationalParkBugContest_EventScript_83E08CA::
+	lock
+	turnobject 3, DIR_EAST
+	setvar VAR_0x800A, 1
+	goto Johto_NationalParkBugContest_EventScript_LeaveEarly
+
+@ Johto_NationalParkBugContest object 3 (local id 3) at 10,49 and object 6 (local id 6) at 40,19
+Johto_NationalParkBugContest_EventScript_83E08D4::
+	lock
+	faceplayer
+	setvar VAR_0x800A, 0
+Johto_NationalParkBugContest_EventScript_LeaveEarly::
+	getplayerxy VAR_0x8008, VAR_0x8009
+	setvar VAR_0x8009, 0
+	call_if_gt VAR_0x8008, 30, Johto_NationalParkBugContest_EventScript_EastSide
+	special QzBugContestMinutesLeft
+	msgbox Johto_NationalParkBugContest_Text_WantToFinish, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Johto_NationalParkBugContest_EventScript_GoBackToContest
+	call_if_eq VAR_0x8009, 0, Johto_NationalParkBugContest_EventScript_WaitAtNorthGate
+	call_if_eq VAR_0x8009, 1, Johto_NationalParkBugContest_EventScript_WaitHere
 	closemessage
 	goto Johto_NationalParkBugContest_EventScript_83C33FA
 
+Johto_NationalParkBugContest_EventScript_EastSide::
+	setvar VAR_0x8009, 1
+	return
+
+Johto_NationalParkBugContest_EventScript_WaitAtNorthGate::
+	msgbox Johto_NationalParkBugContest_Text_WaitAtNorthGate, MSGBOX_DEFAULT
+	return
+
+Johto_NationalParkBugContest_EventScript_WaitHere::
+	msgbox Johto_NationalParkBugContest_Text_WaitHereForAnnouncement, MSGBOX_DEFAULT
+	return
+
+Johto_NationalParkBugContest_EventScript_GoBackToContest::
+	call_if_eq VAR_0x8009, 0, Johto_NationalParkBugContest_EventScript_OkGoFinish35
+	call_if_eq VAR_0x8009, 1, Johto_NationalParkBugContest_EventScript_OkGoFinish36
+	closemessage
+	goto_if_eq VAR_0x800A, 0, Johto_NationalParkBugContest_EventScript_Release
+	applymovement LOCALID_PLAYER, Quetzal_Movement_8360837
+	waitmovement 0
+Johto_NationalParkBugContest_EventScript_Release::
+	release
+	end
+
+Johto_NationalParkBugContest_EventScript_OkGoFinish35::
+	msgbox Johto_NationalParkBugContest_Text_OkGoFinish35, MSGBOX_DEFAULT
+	return
+
+Johto_NationalParkBugContest_EventScript_OkGoFinish36::
+	msgbox Johto_NationalParkBugContest_Text_OkGoFinish36, MSGBOX_DEFAULT
+	return
+
+@ To the judging (Crystal's BugContestResultsWarpScript): the time up, the last SAFARI BALL (mp_region.inc), or
+@ finishing early
 Johto_NationalParkBugContest_EventScript_83C33FA::
-	special QzBugContestClearFlag1
-	special QzBugContestGetCaughtCount
-	goto_if_eq VAR_RESULT, 0, Johto_NationalParkBugContest_EventScript_83C341C
-	fadescreen 1
+	fadescreen FADE_TO_BLACK
 	setvar VAR_QZ_0x5019, 3
 	warp MAP_JOHTO_NATIONAL_PARK_BUG_CONTEST, 5, -1, -1
 	waitstate
 	end
 
-Johto_NationalParkBugContest_EventScript_83C341C::
-	msgbox Johto_NationalParkBugContest_Text_83C37DF, MSGBOX_DEFAULT
-	closemessage
-	goto Johto_NationalParkBugContest_EventScript_83C3570
-
-Johto_NationalParkBugContest_EventScript_83C342B::
-	msgbox Johto_NationalParkBugContest_Text_83C381A, MSGBOX_DEFAULT
-	closemessage
+@ Crystal's BugContestResultsScript
+Johto_NationalParkBugContest_EventScript_83E085D::
+	lockall
+	turnobject LOCALID_PLAYER, DIR_NORTH
+	msgbox Johto_NationalParkBugContest_Text_ReadyToJudge, MSGBOX_DEFAULT
 	special QzBugContestJudge
 	setvar VAR_0x8004, 3
 	special QzBugContestBufferPlaceWinner
-	msgbox Johto_NationalParkBugContest_Text_83C388E, MSGBOX_DEFAULT
+	message Johto_NationalParkBugContest_Text_ThirdPlace
+	waitmessage
 	playfanfare MUS_OBTAIN_ITEM
 	waitfanfare
+	waitbuttonpress
+	msgbox Johto_NationalParkBugContest_Text_ThirdPlaceScore, MSGBOX_DEFAULT
 	setvar VAR_0x8004, 2
 	special QzBugContestBufferPlaceWinner
-	msgbox Johto_NationalParkBugContest_Text_83C38AD, MSGBOX_DEFAULT
+	message Johto_NationalParkBugContest_Text_SecondPlace
+	waitmessage
 	playfanfare MUS_OBTAIN_ITEM
 	waitfanfare
+	waitbuttonpress
+	msgbox Johto_NationalParkBugContest_Text_SecondPlaceScore, MSGBOX_DEFAULT
 	setvar VAR_0x8004, 1
 	special QzBugContestBufferPlaceWinner
-	msgbox Johto_NationalParkBugContest_Text_83C38CD, MSGBOX_DEFAULT
+	message Johto_NationalParkBugContest_Text_FirstPlace
+	waitmessage
 	playfanfare MUS_OBTAIN_ITEM
 	waitfanfare
+	waitbuttonpress
+	msgbox Johto_NationalParkBugContest_Text_FirstPlaceScore, MSGBOX_DEFAULT
 	special QzBugContestGetPlayerPlace
-	copyvar VAR_0x800A, VAR_RESULT
-	copyvar VAR_0x8004, VAR_RESULT
-	special QzBugContestBufferPlaceWinner
-	goto_if_eq VAR_0x800A, 4, Johto_NationalParkBugContest_EventScript_83C349D
-	msgbox Johto_NationalParkBugContest_Text_83C38ED, MSGBOX_DEFAULT
-	closemessage
-	goto Johto_NationalParkBugContest_EventScript_83C34A6
+	goto_if_eq VAR_RESULT, 4, Johto_NationalParkBugContest_EventScript_Consolation
+	msgbox Johto_NationalParkBugContest_Text_PlayerWonAPrize, MSGBOX_DEFAULT
+	giveitem VAR_0x8005
+	call_if_eq VAR_RESULT, FALSE, Johto_NationalParkBugContest_EventScript_PrizeNoRoom
+	msgbox Johto_NationalParkBugContest_Text_JoinUsNextTime, MSGBOX_DEFAULT
+	goto Johto_NationalParkBugContest_EventScript_FinishUp
 
-Johto_NationalParkBugContest_EventScript_83C349D::
-	msgbox Johto_NationalParkBugContest_Text_83C391D, MSGBOX_DEFAULT
-	closemessage
+Johto_NationalParkBugContest_EventScript_Consolation::
+	msgbox Johto_NationalParkBugContest_Text_ConsolationPrize, MSGBOX_DEFAULT
+	setvar VAR_0x8005, ITEM_ORAN_BERRY
+	giveitem ITEM_ORAN_BERRY
+	call_if_eq VAR_RESULT, FALSE, Johto_NationalParkBugContest_EventScript_PrizeNoRoom
+	msgbox Johto_NationalParkBugContest_Text_DidNotWin, MSGBOX_DEFAULT
+	goto Johto_NationalParkBugContest_EventScript_FinishUp
 
-Johto_NationalParkBugContest_EventScript_83C34A6::
-	special QzBugContestGetFlag2
-	goto_if_eq VAR_RESULT, 1, Johto_NationalParkBugContest_EventScript_83C34C8
-	call Johto_NationalParkBugContest_EventScript_83C3552
-	msgbox Johto_NationalParkBugContest_Text_83C395A, MSGBOX_DEFAULT
-	closemessage
-	goto Johto_NationalParkBugContest_EventScript_83C34D1
-
-Johto_NationalParkBugContest_EventScript_83C34C8::
-	msgbox Johto_NationalParkBugContest_Text_83C39B1, MSGBOX_DEFAULT
-	closemessage
-
-Johto_NationalParkBugContest_EventScript_83C34D1::
-	copyvar VAR_0x8000, VAR_0x8005
-	specialvar VAR_RESULT, QzIsItemRandomizerOn
-	call_if_eq VAR_RESULT, 1, Johto_NationalParkBugContest_EventScript_835FB5E
-	copyvar VAR_0x800A, VAR_0x8000
-
-Johto_NationalParkBugContest_EventScript_83C34EB::
-	special QzBugContestCheckState
-	goto_if_eq VAR_RESULT, 0, Johto_NationalParkBugContest_EventScript_83C352C
-
-Johto_NationalParkBugContest_EventScript_83C34F9::
-	copyvar VAR_0x8000, VAR_0x800A
-	setvar VAR_0x8001, 1
-	additem VAR_0x8000, VAR_0x8001
-	copyvar VAR_0x8007, VAR_RESULT
-	call Quetzal_EventScript_835FB62
-	goto_if_eq VAR_RESULT, 0, Johto_NationalParkBugContest_EventScript_83C353F
-	msgbox Johto_NationalParkBugContest_Text_83C3AC4, MSGBOX_DEFAULT
-	closemessage
-	goto Johto_NationalParkBugContest_EventScript_83C359B
-
-Johto_NationalParkBugContest_EventScript_83C352C::
-	msgbox Johto_NationalParkBugContest_Text_83C35EB, MSGBOX_DEFAULT
-	closemessage
-	special QzBugContestChooseFromBag
-	waitstate
-	goto Johto_NationalParkBugContest_EventScript_83C34EB
-
-Johto_NationalParkBugContest_EventScript_83C353F::
-	msgbox Johto_NationalParkBugContest_Text_83C3647, MSGBOX_DEFAULT
-	closemessage
-	special QzBugContestChooseFromBag
-	waitstate
-	goto Johto_NationalParkBugContest_EventScript_83C34F9
-
-Johto_NationalParkBugContest_EventScript_83C3552::
-	special QzBugContestReleaseCaught
-	goto_if_eq VAR_RESULT, 0, Johto_NationalParkBugContest_EventScript_83C3561
+@ (the officer keeps it for today: ROUTE 36's gate officer gives it)
+Johto_NationalParkBugContest_EventScript_PrizeNoRoom::
+	msgbox Johto_NationalParkBugContest_Text_PrizeNoRoom, MSGBOX_DEFAULT
+	special QzBugContestHoldPrize
 	return
 
-Johto_NationalParkBugContest_EventScript_83C3561::
-	msgbox Johto_NationalParkBugContest_Text_83C3A2E, MSGBOX_DEFAULT
-	closemessage
-	goto Johto_NationalParkBugContest_EventScript_83C3552
-
-Johto_NationalParkBugContest_EventScript_83C3570::
-	special QzBugContestGetCaughtCount
-	goto_if_eq VAR_RESULT, 0, Johto_NationalParkBugContest_EventScript_83C3592
-	call Johto_NationalParkBugContest_EventScript_83C3552
-	msgbox Johto_NationalParkBugContest_Text_83C395A, MSGBOX_DEFAULT
-	closemessage
-	goto Johto_NationalParkBugContest_EventScript_83C359B
-
-Johto_NationalParkBugContest_EventScript_83C3592::
-	msgbox Johto_NationalParkBugContest_Text_83C3A9A, MSGBOX_DEFAULT
-	closemessage
-
+Johto_NationalParkBugContest_EventScript_FinishUp::
+	specialvar VAR_RESULT, QzBugContestGetFlag2
+	call_if_eq VAR_RESULT, 1, Johto_NationalParkBugContest_EventScript_ReturnParty
 Johto_NationalParkBugContest_EventScript_83C359B::
-	special QzBugContestClearFlag1
 	special QzBugContestGetFlag3
 	copyvar VAR_0x800B, VAR_RESULT
 	special QzBugContestEnd
 	goto_if_eq VAR_RESULT, 0, Johto_NationalParkBugContest_EventScript_83C35CE
+	call_if_eq VAR_RESULT, 2, Johto_NationalParkBugContest_EventScript_PartyFull
+	closemessage
 	setvar VAR_QZ_0x5019, 0
 	goto_if_eq VAR_0x800B, 1, Johto_NationalParkBugContest_EventScript_83C35E1
 	warp MAP_JOHTO_ROUTE35_NATIONAL_PARK_GATE, 255, 7, 2
 	waitstate
 	end
 
+Johto_NationalParkBugContest_EventScript_ReturnParty::
+	msgbox Johto_NationalParkBugContest_Text_ReturnParty, MSGBOX_DEFAULT
+	return
+
+Johto_NationalParkBugContest_EventScript_PartyFull::
+	msgbox Johto_NationalParkBugContest_Text_PartyFull, MSGBOX_DEFAULT
+	return
+
+@ (the BAG can't take the player's own SAFARI BALLS back: this game's own case)
 Johto_NationalParkBugContest_EventScript_83C35CE::
 	msgbox Johto_NationalParkBugContest_Text_83C35EB, MSGBOX_DEFAULT
 	closemessage
@@ -168,139 +205,52 @@ Johto_NationalParkBugContest_EventScript_83C35E1::
 	waitstate
 	end
 
-Johto_NationalParkBugContest_EventScript_83E0755::
-	call Johto_NationalParkBugContest_EventScript_83E0798
-	goto_if_eq VAR_QZ_0x5019, 3, Johto_NationalParkBugContest_EventScript_83E082C
-	setobjectxyperm 3, 0xA, 0x31
-	setobjectmovementtype 3, 0xA
-	setobjectxyperm 5, 0xE, 0x1C
-	setobjectmovementtype 5, 0
-	setobjectxyperm 1, 0xB, 0xD
-	setobjectmovementtype 1, 2
-	setobjectxyperm 2, 0x1A, 9
-	setobjectmovementtype 2, 2
-	end
-
-Johto_NationalParkBugContest_EventScript_83E0792::
-	call Johto_NationalParkBugContest_EventScript_83E0798
-	end
-
-Johto_NationalParkBugContest_EventScript_83E0798::
-	goto Johto_NationalParkBugContest_EventScript_83E07AD
-	setvar VAR_QZ_0x5019, 3
-
-Johto_NationalParkBugContest_EventScript_83E07AD::
-	return
-
-@ Johto_NationalParkBugContest object 2 (local id 2, gfx 0x24) at 26,9
+@ Quetzal's four people (objects 1, 2, 4, 5: FLAG_KAI_GONE)
 Johto_NationalParkBugContest_EventScript_83E07C8::
-	lock
-	faceplayer
-	msgbox Johto_NationalParkBugContest_Text_83E09D6, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
-@ Johto_NationalParkBugContest object 1 (local id 1, gfx 0x24) at 11,13
 Johto_NationalParkBugContest_EventScript_83E07D5::
-	lock
-	faceplayer
-	msgbox Johto_NationalParkBugContest_Text_83E09A4, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
-@ Johto_NationalParkBugContest object 5 (local id 5, gfx 0x3E8F) at 14,28
 Johto_NationalParkBugContest_EventScript_83E07E2::
-	lock
-	faceplayer
-	msgbox Johto_NationalParkBugContest_Text_83E0978, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
-@ Johto_NationalParkBugContest object 4 (local id 4, gfx 0xB) at 29,27
 Johto_NationalParkBugContest_EventScript_83E07EF::
-	lock
-	faceplayer
-	msgbox Johto_NationalParkBugContest_Text_83E0A21, MSGBOX_DEFAULT
-	closemessage
-	release
 	end
 
-Johto_NationalParkBugContest_EventScript_83E082C::
-	setobjectxyperm 3, 0x14, 0x1A
-	setobjectmovementtype 3, 8
-	setobjectxyperm 5, 0x12, 0x1C
-	setobjectmovementtype 5, 7
-	setobjectxyperm 2, 0x16, 0x1C
-	setobjectmovementtype 2, 7
-	setobjectxyperm 1, 0x18, 0x1C
-	setobjectmovementtype 1, 7
-	setobjectmovementtype LOCALID_PLAYER, 7
+@ Crystal's contestants (BugCatchingContestant1AScript...)
+Johto_NationalParkBugContest_EventScript_Contestant1::
+	msgbox Johto_NationalParkBugContest_Text_Contestant1, MSGBOX_NPC
 	end
 
-Johto_NationalParkBugContest_EventScript_83E085D::
-	lockall
-	turnobject LOCALID_PLAYER, 2
-	goto Johto_NationalParkBugContest_EventScript_83C342B
-
-Johto_NationalParkBugContest_EventScript_83E0878::
-	lockall
-	applymovement LOCALID_PLAYER, Quetzal_Movement_8360837
-	waitmovement 0
-	setvar VAR_QZ_0x5019, 2
-	msgbox Johto_NationalParkBugContest_Text_83E092C, MSGBOX_DEFAULT
-	closemessage
-	releaseall
+Johto_NationalParkBugContest_EventScript_Contestant2::
+	msgbox Johto_NationalParkBugContest_Text_Contestant2, MSGBOX_NPC
 	end
 
-Johto_NationalParkBugContest_EventScript_83E0893::
-	lockall
-	turnobject LOCALID_PLAYER, 3
-	applymovement LOCALID_PLAYER, Quetzal_Movement_836083D
-	waitmovement 0
-	applymovement LOCALID_PLAYER, Quetzal_Movement_836083D
-	waitmovement 0
-	delay 0x14
-	clearflag FLAG_QZ_0x1042
-	addobject 6
-	setvar VAR_TEMP_1, 1
-	setvar VAR_QZ_0x5019, 2
-	msgbox Johto_NationalParkBugContest_Text_83E092C, MSGBOX_DEFAULT
-	closemessage
-	releaseall
+Johto_NationalParkBugContest_EventScript_Contestant3::
+	msgbox Johto_NationalParkBugContest_Text_Contestant3, MSGBOX_NPC
 	end
 
-@ Johto_NationalParkBugContest trigger at 11,49 (VAR_TEMP_0 == 0)
-@ Johto_NationalParkBugContest trigger at 12,49 (VAR_TEMP_0 == 0)
-@ Johto_NationalParkBugContest trigger at 13,49 (VAR_TEMP_0 == 0)
-@ Johto_NationalParkBugContest trigger at 14,49 (VAR_TEMP_0 == 0)
-Johto_NationalParkBugContest_EventScript_83E08CA::
-	lock
-	turnobject 3, 4
-	goto Johto_NationalParkBugContest_EventScript_83E08F4
-
-@ Johto_NationalParkBugContest object 3 (local id 3, gfx 0xDF) at 10,49
-@ Johto_NationalParkBugContest object 6 (local id 6, gfx 0xDF) at 40,19
-Johto_NationalParkBugContest_EventScript_83E08D4::
-	lock
-	faceplayer
-	msgbox Johto_NationalParkBugContest_Text_83E094A, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 1, Johto_NationalParkBugContest_EventScript_83C33D1
-	msgbox Johto_NationalParkBugContest_Text_83E092C, MSGBOX_DEFAULT
-	closemessage
-	release
+Johto_NationalParkBugContest_EventScript_Contestant4::
+	msgbox Johto_NationalParkBugContest_Text_Contestant4, MSGBOX_NPC
 	end
 
-Johto_NationalParkBugContest_EventScript_83E08F4::
-	msgbox Johto_NationalParkBugContest_Text_83E094A, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 1, Johto_NationalParkBugContest_EventScript_83C33D1
-	msgbox Johto_NationalParkBugContest_Text_83E092C, MSGBOX_DEFAULT
-	closemessage
-	applymovement LOCALID_PLAYER, Quetzal_Movement_8360837
-	waitmovement 0
-	release
+Johto_NationalParkBugContest_EventScript_Contestant5::
+	msgbox Johto_NationalParkBugContest_Text_Contestant5, MSGBOX_NPC
+	end
+
+Johto_NationalParkBugContest_EventScript_Contestant6::
+	msgbox Johto_NationalParkBugContest_Text_Contestant6, MSGBOX_NPC
+	end
+
+Johto_NationalParkBugContest_EventScript_Contestant7::
+	msgbox Johto_NationalParkBugContest_Text_Contestant7, MSGBOX_NPC
+	end
+
+Johto_NationalParkBugContest_EventScript_Contestant8::
+	msgbox Johto_NationalParkBugContest_Text_Contestant8, MSGBOX_NPC
+	end
+
+Johto_NationalParkBugContest_EventScript_Contestant9::
+	msgbox Johto_NationalParkBugContest_Text_Contestant9, MSGBOX_NPC
+	end
+
+Johto_NationalParkBugContest_EventScript_Contestant10::
+	msgbox Johto_NationalParkBugContest_Text_Contestant10, MSGBOX_NPC
 	end
 
 Johto_NationalParkBugContest_Text_83C35EB::
@@ -309,97 +259,128 @@ Johto_NationalParkBugContest_Text_83C35EB::
 	.string "Make room in your Bag, then\n"
 	.string "close it to continue.$"
 
-Johto_NationalParkBugContest_Text_83C3647::
-	.string "Your prize is still reserved.\p"
-	.string "Make room in your Bag, then\n"
-	.string "close it to receive your prize.$"
+Johto_NationalParkBugContest_Text_WantToFinish::
+	.string "You still have {STR_VAR_1}\n"
+	.string "minute(s) left.\p"
+	.string "Do you want to finish now?$"
 
-Johto_NationalParkBugContest_Text_83C3765::
-	.string "You have chosen to end your run.\p"
-	.string "It is time for the judging!$"
+Johto_NationalParkBugContest_Text_WaitAtNorthGate::
+	.string "OK. Please wait at the North Gate\n"
+	.string "for the announcement of the\l"
+	.string "winners.$"
 
-Johto_NationalParkBugContest_Text_83C37DF::
-	.string "You did not catch a MOéMON, so\n"
-	.string "there is nothing to judge.$"
+Johto_NationalParkBugContest_Text_WaitHereForAnnouncement::
+	.string "OK. Please wait here for the\n"
+	.string "announcement of the winners.$"
 
-Johto_NationalParkBugContest_Text_83C381A::
-	.string "We will judge the best of the\n"
-	.string "MOéMON you caught.\p"
-	.string "The other contestants caught new\n"
-	.string "MOéMON during this contest too.$"
+Johto_NationalParkBugContest_Text_OkGoFinish35::
+	.string "OK. Please get back outside and\n"
+	.string "finish up.$"
 
-Johto_NationalParkBugContest_Text_83C388E::
-	.string "Third place: {STR_VAR_1}!\p"
-	.string "{STR_VAR_2}\n"
-	.string "Score: {STR_VAR_3}.$"
+Johto_NationalParkBugContest_Text_OkGoFinish36::
+	.string "OK. Please go back outside and\n"
+	.string "finish up.$"
 
-Johto_NationalParkBugContest_Text_83C38AD::
-	.string "Second place: {STR_VAR_1}!\p"
-	.string "{STR_VAR_2}\n"
-	.string "Score: {STR_VAR_3}.$"
+Johto_NationalParkBugContest_Text_ReadyToJudge::
+	.string "We will now judge the MOéMON\n"
+	.string "you’ve caught.\p"
+	.string "…… ……\p"
+	.string "We have chosen the winners!\p"
+	.string "Are you ready for this?$"
 
-Johto_NationalParkBugContest_Text_83C38CD::
-	.string "The winner is {STR_VAR_1}!\p"
-	.string "{STR_VAR_2}\n"
-	.string "Score: {STR_VAR_3}.$"
+Johto_NationalParkBugContest_Text_ThirdPlace::
+	.string "Placing third was {STR_VAR_1}, who\n"
+	.string "caught a {STR_VAR_2}!$"
 
-Johto_NationalParkBugContest_Text_83C38ED::
-	.string "Your best catch was {STR_VAR_2}.\p"
-	.string "Its final score was {STR_VAR_3}.$"
+Johto_NationalParkBugContest_Text_ThirdPlaceScore::
+	.string "The score was {STR_VAR_3} points!$"
 
-Johto_NationalParkBugContest_Text_83C391D::
-	.string "Your best catch was {STR_VAR_2}.\p"
-	.string "It placed fourth with a score of\n"
-	.string "{STR_VAR_3}.$"
+Johto_NationalParkBugContest_Text_SecondPlace::
+	.string "Placing second was {STR_VAR_1},\n"
+	.string "who caught a {STR_VAR_2}!$"
 
-Johto_NationalParkBugContest_Text_83C395A::
-	.string "All your catches have been\n"
-	.string "stored in the PC.\p"
-	.string "Your original party will now\n"
-	.string "be returned.$"
+Johto_NationalParkBugContest_Text_SecondPlaceScore::
+	.string "The score was {STR_VAR_3} points!$"
 
-Johto_NationalParkBugContest_Text_83C39B1::
-	.string "Because Nuzlocke is active, this was\n"
-	.string "an exhibition run.\p"
-	.string "All contest captures were released,\n"
-	.string "but you still earned your prize.$"
+Johto_NationalParkBugContest_Text_FirstPlace::
+	.string "This Bug-Catching Contest winner\n"
+	.string "is…\p"
+	.string "{STR_VAR_1}, who caught a\n"
+	.string "{STR_VAR_2}!$"
 
-Johto_NationalParkBugContest_Text_83C3A2E::
-	.string "Not all your catches could\n"
-	.string "be stored in the PC.\p"
-	.string "They are still reserved.\n"
-	.string "Press A to try sending them again.$"
+Johto_NationalParkBugContest_Text_FirstPlaceScore::
+	.string "The winning score was {STR_VAR_3}\n"
+	.string "points!$"
 
-Johto_NationalParkBugContest_Text_83C3A9A::
-	.string "Your original party will now be\n"
-	.string "returned.$"
+Johto_NationalParkBugContest_Text_PlayerWonAPrize::
+	.string "{PLAYER}, the No.{STR_VAR_1}\n"
+	.string "finisher, wins {STR_VAR_2}!$"
 
-Johto_NationalParkBugContest_Text_83C3AC4::
-	.string "Thank you for participating!\p"
-	.string "You may enter again whenever you\n"
-	.string "like.$"
+Johto_NationalParkBugContest_Text_JoinUsNextTime::
+	.string "Please join us for the next\n"
+	.string "Contest!$"
 
-Johto_NationalParkBugContest_Text_83E092C::
-	.string "ATTENDANT: Enjoy the Contest!$"
+Johto_NationalParkBugContest_Text_ConsolationPrize::
+	.string "Everyone else gets a BERRY as a\n"
+	.string "consolation prize!$"
 
-Johto_NationalParkBugContest_Text_83E094A::
-	.string "ATTENDANT: Would you like to end\n"
-	.string "the contest?$"
+Johto_NationalParkBugContest_Text_DidNotWin::
+	.string "We hope you do better next time.$"
 
-Johto_NationalParkBugContest_Text_83E0978::
-	.string "BELINDA: I’m going to win!\n"
-	.string "Don’t bother me.$"
+Johto_NationalParkBugContest_Text_PrizeNoRoom::
+	.string "Oh? Your PACK is full.\p"
+	.string "We’ll keep this for you today, so\n"
+	.string "come back when you make room for\l"
+	.string "it.$"
 
-Johto_NationalParkBugContest_Text_83E09A4::
+Johto_NationalParkBugContest_Text_ReturnParty::
+	.string "We’ll return the MOéMON we kept\n"
+	.string "for you. Here you go!$"
+
+Johto_NationalParkBugContest_Text_PartyFull::
+	.string "Your party’s full, so the MOéMON\n"
+	.string "was sent to your BOX in BILL’s PC.$"
+
+Johto_NationalParkBugContest_Text_Contestant1::
+	.string "DON: I’m going to win! Don’t\n"
+	.string "bother me.$"
+
+Johto_NationalParkBugContest_Text_Contestant2::
 	.string "ED: My PARASECT puts MOéMON to\n"
 	.string "sleep with SPORE.$"
 
-Johto_NationalParkBugContest_Text_83E09D6::
-	.string "SHAUN: I’m not concerned about\n"
+Johto_NationalParkBugContest_Text_Contestant3::
+	.string "NICK: I’m raising fast MOéMON for\n"
+	.string "battles.$"
+
+Johto_NationalParkBugContest_Text_Contestant4::
+	.string "WILLIAM: I’m not concerned about\n"
 	.string "winning.\p"
 	.string "I’m just looking for rare MOéMON.$"
 
-Johto_NationalParkBugContest_Text_83E0A21::
+Johto_NationalParkBugContest_Text_Contestant5::
+	.string "BENNY: Ssh! You’ll scare off\n"
+	.string "SCYTHER.\p"
+	.string "I’ll talk to you later.$"
+
+Johto_NationalParkBugContest_Text_Contestant6::
 	.string "BARRY: You should weaken bug\n"
-	.string "MOéMON first,\p"
-	.string "then throw a BALL.$"
+	.string "MOéMON first, then throw a BALL.$"
+
+Johto_NationalParkBugContest_Text_Contestant7::
+	.string "CINDY: I love bug MOéMON.\p"
+	.string "I guess you must like them too.$"
+
+Johto_NationalParkBugContest_Text_Contestant8::
+	.string "JOSH: I’ve been collecting bug\n"
+	.string "MOéMON since I was just a baby.\p"
+	.string "There’s no way I’m going to lose!$"
+
+Johto_NationalParkBugContest_Text_Contestant9::
+	.string "SAMUEL: If you’ve got the time to\n"
+	.string "chat, go find some bug MOéMON.$"
+
+Johto_NationalParkBugContest_Text_Contestant10::
+	.string "KIPP: I’ve studied about bug\n"
+	.string "MOéMON a lot.\p"
+	.string "I’m going to win for sure.$"
