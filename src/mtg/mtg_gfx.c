@@ -687,3 +687,28 @@ int MtgGfx_Cost(int card, int x, int y, int right, int big)
             Symbol(x, y, MtgGfx_ManaColor(k), NULL, big);
     return w;
 }
+
+void MtgGfx_KeywordLine(int card, uint32_t kw, char *out, unsigned cap)
+{
+    static const char *const words[MTG_KW_COUNT] = {"FLYING", "REACH", "HASTE", "VIGILANCE", "DEFENDER", "FIRST STRIKE",
+                                                    "DOUBLE STRIKE", "TRAMPLE", "SHROUD", "FEAR", "FLASH", "LIFELINK"};
+    static const char *const walks[5] = {"PLAINSWALK", "ISLANDWALK", "SWAMPWALK", "MOUNTAINWALK", "FORESTWALK"};
+    static const char *const colors[5] = {"WHITE", "BLUE", "BLACK", "RED", "GREEN"};
+    const MtgCardDef *c = card >= 0 && card < Mtg_DbCount() ? Mtg_Card(card) : NULL;
+    unsigned n = 0;
+    int k;
+    if (!cap)
+        return;
+    out[0] = 0;
+    if (!c)
+        return;
+    for (k = 0; k < MTG_KW_COUNT; k++)
+        if (kw & MTG_KW_BIT(k) && n + 1 < cap)
+            n += (unsigned)snprintf(out + n, cap - n, "%s%s", n ? "  " : "", words[k]);
+    for (k = 0; k < 5; k++)
+        if (c->landwalk & (1u << k) && n + 1 < cap)
+            n += (unsigned)snprintf(out + n, cap - n, "%s%s", n ? "  " : "", walks[k]);
+    for (k = 0; k < 5; k++)
+        if (c->protection & MTG_COLOR_BIT(k) && n + 1 < cap)
+            n += (unsigned)snprintf(out + n, cap - n, "%sPROTECTION FROM %s", n ? "  " : "", colors[k]);
+}

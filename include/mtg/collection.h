@@ -71,7 +71,7 @@ extern const MtgRecipe gMtgStarters[MTG_STARTERS];
 int Mtg_RecipeDeck(const MtgRecipe *r, MtgSavedDeck *out);     // the number of cards it couldn't find (0)
 
 typedef struct {
-    const char *name, *title;          // "AUGUST", "the CARD SHOP's oldest regular"
+    const char *name;                  // "AUGUST" (no description: the user, 2026-11-05)
     const char *const *cards;          // a recipe as above
     const char *hello, *win, *lose;    // their words: offering a duel, when they win, when they lose
     uint8_t level;                     // 0-3 (the shared AI levels, once forge-ai's translation is in)

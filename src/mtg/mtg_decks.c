@@ -58,22 +58,22 @@ static const char *const sNolan[] = {
 
 // MOSSDEEP's CARD SHOP: AUGUST and PIP upstairs, the others in the room below
 const MtgDuelist gMtgDuelists[MTG_DUELISTS] = {
-    {"AUGUST", "the shop's oldest regular", sAugust,
+    {"AUGUST", sAugust,
      "You've a deck at last! Sit down, young one. I've been playing this game since before you were born.",
      "Patience wins in the end. Come back and try me again.", "Ha! Splendid. You learn quickly.", 2},
-    {"PIP", "a young regular", sPip,
+    {"PIP", sPip,
      "You got a deck? Cool! Wanna play? My elves are really fast!", "My elves did it!",
      "Aw... next time my big wurms will get you!", 0},
-    {"RHEA", "a regular who hits hard", sRhea,
+    {"RHEA", sRhea,
      "New face! Let's see what that deck can do. I don't hold back.", "Too slow! Build something faster.",
      "Hah! Good game. You earned that one.", 1},
-    {"MARLOW", "a regular who plays dark cards", sMarlow,
+    {"MARLOW", sMarlow,
      "Every creature you play is one I get to destroy. Shall we?", "Nothing on your side survived. As planned.",
      "Hmph. Your creatures were tougher than they looked.", 2},
-    {"TESS", "a regular who counters everything", sTess,
+    {"TESS", sTess,
      "Go ahead, cast your spells. I'll be waiting with an answer.", "Countered, and countered again.",
      "You got the spells I couldn't answer. Nice.", 3},
-    {"NOLAN", "a regular with a white knight deck", sNolan,
+    {"NOLAN", sNolan,
      "My knights are ready for anyone. Draw your cards!", "First strike wins again!",
      "My knights fell... but they'll be back.", 1},
 };

@@ -849,7 +849,11 @@ static void InspectScreen(void)
     {
         int costW = MtgGfx_Cost(U.inspectCard, 232, y + 4, 1, 1);
         int end = G_Text(94, y, G_INK, G_INK_SHADOW, name, 136 - (costW ? costW + 4 : 0), TF_NORMAL);
+        char keys[120];
         y = end + 2 > y + 15 ? end + 2 : y + 15;
+        MtgGfx_KeywordLine(U.inspectCard, c->keywords, keys, sizeof(keys));
+        if (keys[0])   // (its keywords under its name)
+            y = G_Text(94, y - 2, 0xb07818, G_NO_SHADOW, keys, 136, TF_NARROW) + 1;
     }
     TypeLine(text, sizeof(text), U.inspectCard);
     y = G_Text(94, y, 0x586878, G_NO_SHADOW, text, 136, TF_NARROW) + 1;
@@ -973,8 +977,6 @@ static void ChallengeScreen(void)
     G_RoundFrame(6, 20, 92, 46, 0x101030, 255);
     Portrait(28, 62);
     MtgGfx_DrawCard(DuelistAce(who->cards), 58, 22, 30, 42, 0, 255, 0);
-    G_Text(6, y, 0x505868, G_NO_SHADOW, who->title, 96, TF_NARROW);
-    y += G_TextHeight(who->title, 96, TF_NARROW) - 2;
     G_Text(6, y, G_INK, G_INK_SHADOW, who->name, 96, TF_SMALL);
     y += 12;
     G_Text(6, y + 1, 0x505868, G_NO_SHADOW, "MAGIC  20 LIFE", 96, TF_NARROW);

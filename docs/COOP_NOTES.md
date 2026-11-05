@@ -5020,6 +5020,22 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   player has (the first 11 everyone's, the rest by MP_BallUnlock_Has). Shared kit: tcg_ui.c TcgUi_TrayRgb / DrawTray /
   TrayOpen / TrayStep / TrayDraw; TCG_TRAY_AUTO / GAME + n / BALL + n; saved per deck (TcgCollection.tray: "<save>.cards"
   format 10; MtgCollection.tray: "<save>.mtg" format 3); MP_BallStyle_Rgb gives the ball colors' shades.
+- The tray by context (1.99.0, the user: "Pokemon's systems that automatically raise or lower the tray based on context"):
+  mtg_board.c Refocus, once the table is still and the player may act: your turn starts -> the cursor in the hand on a
+  card you can play, the tray up; their turn -> the cursor on your field, the tray down; a card played from the hand ->
+  the next playable card (on your turn), else "nothing left to play" -> the field, the tray down; their spell on the
+  stack and an answer in the hand -> the tray up on it; your draw shows the hand a moment (showHand); B in the hand ->
+  down to the field (elsewhere B is the turn's menu); B out of a target -> back to the card in the hand; moving the
+  cursor into / out of the hand raises / lowers it; DISCARD raises it. Logged "mtg: refocus: ...".
+- Keywords under the name (the user): the table's tooltip has a second line with what the card has now (Mtg_Keywords:
+  a pump's too; landwalk, protection), and the card views show them under the name (MtgGfx_KeywordLine).
+- Choosing attackers and blockers (the user: "a little confusing"): who can't be chosen is dimmed, who can is lit; a
+  chosen attacker steps forward framed red with ATTACK over it and a line to the opponent's LIFE; the prompt counts
+  ("2 attacking: 5 damage if not blocked  START ATTACK!" / "NO ATTACK"; blocks: "5 damage coming! ... NO BLOCK", "2
+  blocking: 1 damage still coming"); the tooltip says what A does there (ATTACK / HOLD BACK, BLOCK / DON'T BLOCK); A
+  on one that can't says why (tapped, arrived this turn, DEFENDER); B clears the attackers; when picking which attacker
+  to block, the ones it can block are lit. Prompts wrap to two lines as tcg_board.c's.
+- The regulars have only their names (no descriptions: the user, 2026-11-05).
 - The computer is mtg_ai.c, a STAND-IN until forge-ai's translation (docs/MTG_HANDOFF.md).
 - Debug: `mp mtg starter N`, `mp mtg state`, `mp mtg duel N` (a regular's challenge), `mp mtg autoplay 1` (the
   computer plays your side too), `mp mtg focus NAME` (the cursor on that card), `mp mtg table`, `mp mtg win` /

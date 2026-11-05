@@ -79,6 +79,10 @@ Built from 2026-11-04: docs/MTG_HANDOFF.md (status and next steps), docs/MTG_SCO
   set its own: one of the game's colors or any POKe BALL color the player has unlocked (both card games).
 - Every action on the table is shown with clear animations, the opponent's turn above all; text alone is not enough.
 - A card's cost to cast, tap or activate shows on the table without zooming in: on the card under the cursor only.
+- The tray rises and falls by context, as the POKeMON table's does.
+- Keywords show under a card's name.
+- Choosing attackers (and blockers) is shown plainly.
+- The MAGIC regulars have no descriptions, only their names.
 - Keep all of this in mind as more cards are translated for the full release.
 - The table passes for the player when nothing else can be done, when their own spell is on top, and outside their
   main phases, the blocks and the opponent's end step; L held stops at every chance.
