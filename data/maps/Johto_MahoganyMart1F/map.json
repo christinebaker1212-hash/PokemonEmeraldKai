@@ -25,10 +25,10 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_MahoganyMart1F_EventScript_83DF41E",
-      "flag": "0"
+      "flag": "FLAG_TEMP_1"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_16048",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16007",
       "x": 6,
       "y": 8,
       "elevation": 0,
@@ -37,8 +37,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "FLAG_QZ_0x104F"
+      "script": "Johto_MahoganyMart1F_EventScript_BlackBelt",
+      "flag": "FLAG_TEMP_2"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16032",
@@ -78,6 +78,19 @@
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_840EA6A",
       "flag": "FLAG_QZ_0x130D"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16003",
+      "x": 2,
+      "y": 5,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_MahoganyMart1F_EventScript_Pharmacist",
+      "flag": "FLAG_TEMP_2"
     }
   ],
   "warp_events": [

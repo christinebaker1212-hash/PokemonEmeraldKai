@@ -20,16 +20,13 @@ Johto_AzaleaMart_EventScript_83C640C::
 	end
 
 Johto_AzaleaMart_Text_83C6419::
-	.string "Are you able to buy a GREAT BALL?\n"
-	.string "All I can buy are POKé BALLS.\p"
-	.string "I heard that more items become\n"
-	.string "available to buy when you earn\l"
-	.string "GYM BADGES!\p"
-	.string "I wish KURT would make me some\n"
-	.string "of his custom BALLS.$"
+	.string "There’s no GREAT BALL here. POKé\n"
+	.string "BALLS will have to do.\p"
+	.string "I wish KURT would make me some of\n"
+	.string "his custom BALLS.$"
 
 Johto_AzaleaMart_Text_83C64D7::
-	.string "A GREAT BALL is better for catch-\n"
-	.string "ing MOéMON than a POKé BALL.\p"
-	.string "But KURT’s might be better some-\n"
-	.string "times.$"
+	.string "A GREAT BALL is better for\n"
+	.string "catching MOéMON than a POKé BALL.\p"
+	.string "But KURT’s might be better\n"
+	.string "sometimes.$"

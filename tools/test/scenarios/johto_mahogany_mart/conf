@@ -1,0 +1,7 @@
+# MAHOGANY MART as Crystal has it (audit case 59): the ROCKETS' pharmacist (local 6) and the BLACK BELT (2) until the
+# hideout is cleared (VAR 0x500C 14), nobody at the counter until the RADIO TOWER is freed (17), then the GRANNY (1).
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("objat 2,5: local 6" "objat 6,8: local 2" "objat 2,5: none" "objat 2,5: local 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

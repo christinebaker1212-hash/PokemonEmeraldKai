@@ -5,6 +5,8 @@ Johto_CherrygroveMart_MapScripts::
 Johto_CherrygroveMart_EventScript_83C9947::
 	lock
 	faceplayer
+	@ Moemon Kai: Crystal's lines (audit case 59): POKe BALLS come in with the POKeDEX, as the clerk's list does
+	goto_if_set FLAG_SYS_POKEDEX_GET, Johto_CherrygroveMart_EventScript_PokeBallsInStock
 	msgbox Johto_CherrygroveMart_Text_83C99F7, MSGBOX_DEFAULT
 	closemessage
 	release
@@ -20,13 +22,23 @@ Johto_CherrygroveMart_EventScript_83C9954::
 	end
 
 Johto_CherrygroveMart_Text_83C9988::
-	.string "You can buy POKé BALLS even before\n"
-	.string "earning your first Badge.$"
-
-Johto_CherrygroveMart_Text_83C99F7::
 	.string "When I was walking in the grass, a\n"
 	.string "bug MOéMON poisoned my MOéMON!\p"
 	.string "I just kept going, but then my\n"
 	.string "MOéMON fainted.\p"
-	.string "You should keep an ANTIDOTE\n"
-	.string "with you.$"
+	.string "You should keep an ANTIDOTE with\n"
+	.string "you.$"
+
+Johto_CherrygroveMart_Text_83C99F7::
+	.string "They’re fresh out of POKé BALLS!\p"
+	.string "When will they get more of them?$"
+
+Johto_CherrygroveMart_EventScript_PokeBallsInStock::
+	msgbox Johto_CherrygroveMart_Text_PokeBallsInStock, MSGBOX_DEFAULT
+	closemessage
+	release
+	end
+
+Johto_CherrygroveMart_Text_PokeBallsInStock::
+	.string "POKé BALLS are in stock! Now I can\n"
+	.string "catch MOéMON!$"

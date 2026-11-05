@@ -1,8 +1,60 @@
 Johto_MahoganyMart1F_MapScripts::
-	map_script MAP_SCRIPT_ON_TRANSITION, Quetzal_EventScript_840EA66
+	map_script MAP_SCRIPT_ON_TRANSITION, Johto_MahoganyMart1F_OnTransition
 	map_script MAP_SCRIPT_ON_LOAD, Johto_MahoganyMart1F_EventScript_83DF27C
 	map_script MAP_SCRIPT_ON_FRAME_TABLE, Johto_MahoganyMart1F_OnFrame_83DF292
 	.byte 0
+
+@ Moemon Kai: Crystal's MAHOGANY MART (pokecrystal maps/MahoganyMart1F.asm; audit case 59): the ROCKETS' pharmacist
+@ (local id 6) sells MART_MAHOGANY_1 and the BLACK BELT (2) stands guard until the hideout is cleared (VAR_QZ_0x500C
+@ 14); the GRANNY (1) sells MART_MAHOGANY_2 once the RADIO TOWER is freed (17)
+Johto_MahoganyMart1F_OnTransition::
+	call_if_lt VAR_QZ_0x500C, 17, Johto_MahoganyMart1F_EventScript_HideGranny
+	call_if_ge VAR_QZ_0x500C, 14, Johto_MahoganyMart1F_EventScript_HideRockets
+	goto Quetzal_EventScript_840EA66
+
+Johto_MahoganyMart1F_EventScript_HideGranny::
+	setflag FLAG_TEMP_1
+	return
+
+Johto_MahoganyMart1F_EventScript_HideRockets::
+	setflag FLAG_TEMP_2
+	return
+
+Johto_MahoganyMart1F_EventScript_Pharmacist::
+	lock
+	faceplayer
+	goto_if_ge VAR_QZ_0x500C, 4, Johto_MahoganyMart1F_EventScript_PharmacistLanceEntered
+	message Quetzal_Text_8360D02
+	waitmessage
+	pokemart Johto_MahoganyMart1F_Mart_Rockets
+	msgbox Quetzal_Text_8360D20, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_MahoganyMart1F_EventScript_PharmacistLanceEntered::
+	msgbox Johto_MahoganyMart1F_Text_PharmacistLanceEntered, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_MahoganyMart1F_EventScript_BlackBelt::
+	lock
+	faceplayer
+	goto_if_ge VAR_QZ_0x500C, 4, Johto_MahoganyMart1F_EventScript_BlackBeltLanceEntered
+	msgbox Johto_MahoganyMart1F_Text_BlackBelt, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_MahoganyMart1F_EventScript_BlackBeltLanceEntered::
+	msgbox Johto_MahoganyMart1F_Text_BlackBeltLanceEntered, MSGBOX_DEFAULT
+	release
+	end
+
+	.align 2
+Johto_MahoganyMart1F_Mart_Rockets:
+	.2byte ITEM_TINY_MUSHROOM
+	.2byte ITEM_POKE_BALL
+	.2byte ITEM_POTION
+	.2byte ITEM_NONE
 
 Johto_MahoganyMart1F_OnFrame_83DF292:
 	map_script_2 VAR_QZ_0x500C, 4, Johto_MahoganyMart1F_EventScript_83DF29C
@@ -82,14 +134,6 @@ Johto_MahoganyMart1F_EventScript_83DF29C::
 	waitmovement 0
 	removeobject 3
 	playse SE_EXIT
-	delay 0x32
-	playse SE_PIN
-	applymovement 2, Quetzal_Movement_83607F9
-	delay 0x14
-	applymovement 2, Johto_MahoganyMart1F_Movement_83DF3E8
-	waitmovement 0
-	removeobject 2
-	playse SE_EXIT
 	setflag FLAG_QZ_0x104F
 	setvar VAR_QZ_0x500C, 5
 	release
@@ -99,18 +143,6 @@ Johto_MahoganyMart1F_EventScript_83DF29C::
 Johto_MahoganyMart1F_EventScript_83DF41E::
 	lock
 	faceplayer
-	goto_if_eq VAR_QZ_0x500C, 5, Johto_MahoganyMart1F_EventScript_83DF440
-	goto_if_ge VAR_QZ_0x500C, 14, Johto_MahoganyMart1F_EventScript_83DF44B
-	msgbox Johto_MahoganyMart1F_Text_83DF47E, MSGBOX_NPC
-	release
-	end
-
-Johto_MahoganyMart1F_EventScript_83DF440::
-	msgbox Johto_MahoganyMart1F_Text_83DF4BF, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
 Johto_MahoganyMart1F_EventScript_83DF44B::
 	message Quetzal_Text_8360D02
 	waitmessage
@@ -200,27 +232,33 @@ Johto_MahoganyMart1F_Mart_83DF460:
 	.2byte ITEM_BIG_MALASADA
 	.2byte ITEM_NONE
 
-Johto_MahoganyMart1F_Text_83DF47E::
-	.string "Please come back another time.\n"
-	.string "The store is... closed\l"
-	.string "right now.$"
-
-Johto_MahoganyMart1F_Text_83DF4BF::
-	.string "ROCKETS have hijacked my basement!$"
-
 Johto_MahoganyMart1F_Text_83DF573::
 	.string "LANCE: DRAGONITE, HYPER BEAM.$"
 
 Johto_MahoganyMart1F_Text_83DF591::
 	.string "What took you, {PLAYER}?\p"
-	.string "Just as we thought, that strange\n"
+	.string "Just as I thought, that strange\n"
 	.string "radio signal is coming from here.$"
 
 Johto_MahoganyMart1F_Text_83DF5E7::
-	.string "Excellent work finding the stairs,\n"
-	.string "DRAGONITE!$"
+	.string "The stairs are right here.$"
 
 Johto_MahoganyMart1F_Text_83DF615::
-	.string "LANCE: {PLAYER}, we should split up\n"
-	.string "to check this place.\p"
-	.string "I’ll go first.$"
+	.string "LANCE: {PLAYER}, we should split\n"
+	.string "up to check this place. I’ll go\l"
+	.string "first.$"
+
+Johto_MahoganyMart1F_Text_PharmacistLanceEntered::
+	.string "Arrgh… You found the secret\n"
+	.string "stairway…$"
+
+Johto_MahoganyMart1F_Text_BlackBelt::
+	.string "Heheh! The experiment worked like\n"
+	.string "a charm.\p"
+	.string "MAGIKARP are just worthless, but\n"
+	.string "GYARADOS are big moneymakers.$"
+
+Johto_MahoganyMart1F_Text_BlackBeltLanceEntered::
+	.string "Urrgh…\p"
+	.string "That guy’s dragon MOéMON are\n"
+	.string "tough…$"

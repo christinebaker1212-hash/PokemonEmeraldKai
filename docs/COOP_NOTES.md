@@ -4501,6 +4501,19 @@ follow_behind, follow_ground.
   wMonOrItemNameBuffer to STR_VAR_1, the POKéMON asked for, and wStringBuffer2 to STR_VAR_2, the one offered, which the
   scripts buffer through GetInGameTradeSpeciesInfo before every line). Crystal's EMY only takes a female DRAGONAIR; the
   game doesn't check that. MIKE stays on the DEPT. STORE's 6F. Tests johto_trade_kyle, kanto_trade_zynx.
+- **Case 59, the marts**: KANTO's and JOHTO's marts sell their own town's stock (shop.c sMpBaseLists: FireRed's /
+  Crystal's) and Kai's own extras by badges (sMpShopExtras, as in every region); Quetzal's badge-count list
+  (qz_badge_marts.h) no longer adds its Gen 4+ items on top (it still feeds a clerk Quetzal added, who has no original
+  list). MAHOGANY MART is Crystal's: the ROCKETS' pharmacist (local 6, a new object at the counter) sells
+  MART_MAHOGANY_1 (TINY MUSHROOM, POKé BALL, POTION) and says "Arrgh… You found the secret stairway…" once LANCE has
+  asked for help (VAR_QZ_0x500C 4), the BLACK BELT (2, the grunt Quetzal's scene knocks back: he stays) guards with
+  Crystal's words, both gone once the hideout is cleared (14: FLAG_TEMP_2 on transition); the GRANNY (1) sells
+  MART_MAHOGANY_2 once the RADIO TOWER is freed (17: FLAG_TEMP_1 until then); LANCE's lines in the scene are Crystal's.
+  CHERRYGROVE MART's and AZALEA MART's people say Crystal's lines (POKé BALLS in stock with the POKéDEX, as the
+  clerk's list); VIOLET's ELM aide checks the party, not the PC box, says Crystal's full-party line, and asks again
+  after a NO (FLAG_JOHTO_REFUSED_TOGEPI_EGG 0x155C); Quetzal's reader there wears FLAG_KAI_GONE. CHERRYGROVE CENTER's
+  teacher keeps a line that doesn't promise a COMMUNICATION CENTER (Kai's upstairs is the GARDEN). Test
+  johto_mahogany_mart (shop_lists_gen3 / gen9 check the lists).
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).

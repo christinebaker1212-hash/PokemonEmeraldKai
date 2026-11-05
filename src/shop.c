@@ -1487,16 +1487,17 @@ static const struct { u16 map; u16 firstItem; u8 badges; const u16 *items; u8 co
 
 // JOHTO and KANTO sell what Pokemon Crystal (JOHTO: pret/pokecrystal data/items/marts.asm) and FireRed / LeafGreen
 // (KANTO and the SEVII ISLANDS: pret/pokefirered's marts) sold, as Kai's items (no item those games had and Kai
-// doesn't: Crystal's mail, SLOWPOKETAIL, RAGECANDYBAR, its punch TMs), plus only the items of Quetzal's own list
-// from GEN 4 on (MP_Gen_OfItem; GENERATION decides). A clerk Quetzal added sells only those. Clerks are known by the
+// doesn't: Crystal's mail, SLOWPOKETAIL, RAGECANDYBAR, its punch TMs) and Kai's own extras by badges (sMpShopExtras),
+// never Quetzal's badge-count lists (audit case 59). A clerk Quetzal added sells his own list. Clerks are known by the
 // first item of their Quetzal list (MP_REGION_LIST: a `pokemart 0` clerk).
 #define MP_LIST(...) ((const u16[]){__VA_ARGS__, ITEM_NONE})
 #define MP_BASE(m, first, ...) {MAP_##m, first, 0, MP_LIST(__VA_ARGS__)}
 #define MP_BASE_BADGES(m, first, badges, ...) {MAP_##m, first, badges, MP_LIST(__VA_ARGS__)}
 #define MP_ONLY_LATER(m, first) {MAP_##m, first, 0, (const u16[]){ITEM_NONE}}
 static const struct { u16 map; u16 firstItem; u8 badges; const u16 *items; } sMpBaseLists[] = {
-    // JOHTO (Crystal). CHERRYGROVE adds POKe BALLS with the POKeDEX (MP_ShopItems); MAHOGANY's second list once the
-    // 7th badge is won (in Crystal: once TEAM ROCKET's hideout is cleared)
+    // JOHTO (Crystal). CHERRYGROVE adds POKe BALLS with the POKeDEX (MP_ShopItems); MAHOGANY: the ROCKETS'
+    // pharmacist's list (MART_MAHOGANY_1) until LANCE comes, GRANNY's (MART_MAHOGANY_2) once the RADIO TOWER is freed
+    // (their clerks' own lists: data/maps/Johto_MahoganyMart1F)
     MP_BASE(JOHTO_CHERRYGROVE_MART, MP_REGION_LIST, ITEM_POTION, ITEM_ANTIDOTE, ITEM_PARALYZE_HEAL, ITEM_AWAKENING),
     MP_BASE(JOHTO_VIOLET_MART, MP_REGION_LIST, ITEM_POKE_BALL, ITEM_POTION, ITEM_ESCAPE_ROPE, ITEM_ANTIDOTE,
             ITEM_PARALYZE_HEAL, ITEM_AWAKENING, ITEM_X_DEFEND, ITEM_X_ATTACK, ITEM_X_SPEED),
@@ -1506,9 +1507,9 @@ static const struct { u16 map; u16 firstItem; u8 badges; const u16 *items; } sMp
             ITEM_PARALYZE_HEAL, ITEM_AWAKENING, ITEM_ICE_HEAL, ITEM_SUPER_REPEL),
     MP_BASE(JOHTO_ECRUTEAK_MART, MP_REGION_LIST, ITEM_POKE_BALL, ITEM_GREAT_BALL, ITEM_POTION, ITEM_SUPER_POTION,
             ITEM_ANTIDOTE, ITEM_PARALYZE_HEAL, ITEM_AWAKENING, ITEM_BURN_HEAL, ITEM_ICE_HEAL, ITEM_REVIVE),
-    MP_BASE_BADGES(JOHTO_MAHOGANY_MART1F, ITEM_PEWTER_CRUNCHIES, 7, ITEM_GREAT_BALL, ITEM_SUPER_POTION,
-                   ITEM_HYPER_POTION, ITEM_ANTIDOTE, ITEM_PARALYZE_HEAL, ITEM_SUPER_REPEL, ITEM_REVIVE),
-    MP_BASE(JOHTO_MAHOGANY_MART1F, ITEM_PEWTER_CRUNCHIES, ITEM_TINY_MUSHROOM, ITEM_POKE_BALL, ITEM_POTION),
+    MP_BASE(JOHTO_MAHOGANY_MART1F, ITEM_PEWTER_CRUNCHIES, ITEM_GREAT_BALL, ITEM_SUPER_POTION,
+            ITEM_HYPER_POTION, ITEM_ANTIDOTE, ITEM_PARALYZE_HEAL, ITEM_SUPER_REPEL, ITEM_REVIVE),
+    MP_BASE(JOHTO_MAHOGANY_MART1F, ITEM_TINY_MUSHROOM, ITEM_TINY_MUSHROOM, ITEM_POKE_BALL, ITEM_POTION),
     MP_BASE(JOHTO_BLACKTHORN_MART, MP_REGION_LIST, ITEM_GREAT_BALL, ITEM_ULTRA_BALL, ITEM_HYPER_POTION,
             ITEM_MAX_POTION, ITEM_FULL_HEAL, ITEM_REVIVE, ITEM_MAX_REPEL, ITEM_X_DEFEND, ITEM_X_ATTACK),
     MP_BASE(JOHTO_INDIGO_PLATEAU_POKECENTER1F, MP_REGION_LIST, ITEM_ULTRA_BALL, ITEM_MAX_REPEL, ITEM_HYPER_POTION,
@@ -1620,9 +1621,8 @@ static const u16 *MP_ShopItems(const u16 *items)
             MP_ShopAdd(sItems, &n, cap, base[i]);
         if (here == MAP_JOHTO_GOLDENROD_DEPT_STORE5F && FlagGet(FLAG_JOHTO_GOT_TM_HEADBUTT))
             MP_ShopAdd(sItems, &n, cap, ITEM_TM96);   // (Crystal's MART_GOLDENROD_5F_2)
-        for (i = 0; items[i] != ITEM_NONE; i++)
-            if (MP_Gen_OfItem(items[i]) >= 4)
-                MP_ShopAdd(sItems, &n, cap, items[i]);
+        // (no more of Quetzal's badge-count list on top: each mart sells its own town's stock, audit case 59; Kai's
+        // own extras below still come with badges, as in every region)
     }
     else
     {
