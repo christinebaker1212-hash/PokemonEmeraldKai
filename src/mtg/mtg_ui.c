@@ -35,7 +35,7 @@
 enum
 {
     M_CLOSED, M_HOME, M_DECKS, M_RECIPES, M_ACE, M_BUILDER, M_BINDER, M_INSPECT, M_ART, M_STARTER, M_CHALLENGE, M_DUEL,
-    M_SPOILS
+    M_SPOILS, M_PACKS, M_SHOP
 };
 enum
 {
@@ -43,7 +43,7 @@ enum
     KEY_R = 256, KEY_L = 512,
     KEY_INSPECT = 2048
 };
-enum { ACT_NONE, ACT_CLOSE, ACT_HOME, ACT_TAKE_STARTER, ACT_CLEAR, ACT_COPY, ACT_RECIPE };
+enum { ACT_NONE, ACT_CLOSE, ACT_HOME, ACT_TAKE_STARTER, ACT_CLEAR, ACT_COPY, ACT_RECIPE, ACT_BUY_PACK };
 enum { VS_NPC, VS_PRACTICE };
 
 #define PANEL_W KIT_PANEL_W
@@ -75,8 +75,10 @@ static struct
     uint32_t portrait[64 * 64];      // the duelist as they faced you (their map sprite)
     uint8_t portraitW, portraitH;
     SDL_Texture *portraitTexture;
-    uint16_t booster[MTG_BOOSTER];
-    int boosterCount, flipped, revealAge, revealNext;
+    uint16_t booster[MTG_PACK_MAX];
+    uint8_t boosterRarity[MTG_PACK_MAX];   // each card's rarity in its set
+    int boosterCount, flipped, revealAge, revealNext, pack;   // pack: the set being opened
+    int rewarded;                    // the duel's end counted (its words on the result screen)
 } U;
 
 static MtgCollection *C(void) { return Mtg_GetCollection(); }
@@ -107,8 +109,8 @@ static void Ask(int action, int arg, const char *format, ...)
 }
 static void Screen(int screen)
 {
-    if (screen != M_SPOILS && screen != M_INSPECT && screen != M_ART)
-        MtgBoard_ReleaseMusic();   // the victory song ends with the booster
+    if (screen != M_INSPECT && screen != M_ART)
+        MtgBoard_ReleaseMusic();   // the victory song ends with the result
     U.screen = screen;
     U.cursor = 0;
     U.scroll = 0;
@@ -443,10 +445,11 @@ static void CursorFrame(int x, int y, int w, int h)
 }
 
 // ---- HOME
-enum { HOME_DECKS, HOME_BINDER, HOME_PRACTICE, HOME_SPEED, HOME_CLOSE, HOME_ROWS };
-static const char *const sHomeRows[HOME_ROWS] = {"DECKS", "BINDER", "PRACTICE DUEL", "DUEL SPEED", "CLOSE CASE"};
+enum { HOME_DECKS, HOME_BINDER, HOME_PACKS, HOME_PRACTICE, HOME_SPEED, HOME_CLOSE, HOME_ROWS };
+static const char *const sHomeRows[HOME_ROWS] = {"DECKS", "BINDER", "BOOSTER PACKS", "PRACTICE DUEL", "DUEL SPEED",
+                                                 "CLOSE CASE"};
 static const char *const sHomeHelp[HOME_ROWS] = {
-    "Build decks and pick the one you duel with.", "Every card you own.",
+    "Build decks and pick the one you duel with.", "Every card you own.", "Open the boosters you won.",
     "Against a starter deck. Nothing is won or lost.", "How quickly the cards move on the table.",
     "Put the CARD CASE away."};
 
@@ -1000,28 +1003,102 @@ static void ChallengeScreen(void)
                                         : "WIN: a booster pack, eight cards for your BINDER.");
 }
 
-// ---- the booster a win brought: the pack torn open, the cards dealt out face down and turned one by one
-static void PackArt(int x, int y)
+// ---- BOOSTER PACKS (the YU-GI-OH! side's screen): the boosters held by set, the chosen one in the middle; one opened:
+// the pack torn open, the cards dealt out face down and turned one by one
+// a booster: the set's colors, its card (Mtg_SetMascot), its code
+static void PackArt(int x, int y, int set, int focus)
 {
-    int k;
-    G_FillA(x + 3, y + 4, 44, 62, 0x000000, 80);
-    G_RoundFill(x, y, 44, 62, 0x5a3418, 255);
-    G_RoundFrame(x, y, 44, 62, 0x1a0c04, 255);
-    G_Fill(x + 2, y + 2, 40, 6, 0xc89848);
-    G_Fill(x + 2, y + 54, 40, 6, 0xc89848);
-    for (k = 0; k < 6; k++)   // (the crimped ends)
-        G_Fill(x + 3 + k * 7, y + 3, 3, 1, 0x8a6020), G_Fill(x + 3 + k * 7, y + 58, 3, 1, 0x8a6020);
-    G_TextAlign(x + 22, y + 11, TA_CENTER, MTG_GOLD, 0x1a0c04, "MAGIC", TF_NARROW);
-    for (k = 0; k < 5; k++) {
-        float a = -1.5708f + k * 1.2566f;
-        ManaOrb(x + 19 + (int)(cosf(a) * 9), y + 34 + (int)(sinf(a) * 9), k);
+    const MtgSet *s = &gMtgSets[set];
+    int w = 44, h = 58, i, mascot = Mtg_SetMascot(set);
+    G_FillA(x + 2, y + 3, w, h, 0x000000, 80);
+    for (i = 0; i < h; i++)
+        G_FillA(x, y + i, w, 1, G_Mix(s->top, s->bottom, i / (float)h), 255);
+    for (i = 0; i < w; i += 2) {   // (the crimped ends)
+        G_FillA(x + i, y, 1, 3, 0xd8d8e0, 255);
+        G_FillA(x + i, y + h - 3, 1, 3, 0xd8d8e0, 255);
+    }
+    if (mascot >= 0)
+        MtgGfx_DrawCard(mascot, (float)x + 7, (float)y + 5, 30, 42, 0, 255, 0);
+    G_FillA(x, y + 47, w, 8, 0x101010, 150);
+    G_TextAlign(x + w / 2, y + 45, TA_CENTER, MTG_GOLD, G_NO_SHADOW, s->code, TF_NARROW);
+    if (focus) {
+        int k = (int)(U.frame % 60) - 10;
+        if (k >= 0 && k < w + 8)
+            G_FillA(x + k - 8, y + 3, 3, h - 6, 0xffffff, 70);
     }
 }
 
-static void BoosterSlot(int i, int *x, int *y)
+// the boosters held, and every set that can be had, in release order
+static int PackSets(uint8_t *out)
 {
-    *x = 30 + (i % 4) * 46;
-    *y = i < 4 ? 6 : 55;
+    int i, n = 0;
+    for (i = 0; i < MTG_SETS; i++)
+        if (C()->packs[i] || Mtg_SetAvailable(i))
+            out[n++] = (uint8_t)i;
+    return n;
+}
+
+static void PacksScreen(void)
+{
+    uint8_t sets[MTG_SETS];
+    int n = PackSets(sets);
+    char line[128];
+    TcgUi_Background();
+    TcgUi_TopBar("BOOSTER PACKS");
+    {   // the chosen pack in the middle, the others on both sides, gliding over as the cursor moves
+        static float sPos;
+        static int sLast;
+        int k, base;
+        if (U.frame != sLast + 1)
+            sPos = (float)U.cursor;   // (the screen just opened: no glide in)
+        sLast = U.frame;
+        sPos += ((float)U.cursor - sPos) * 0.35f;
+        if (fabsf((float)U.cursor - sPos) < 0.02f)
+            sPos = (float)U.cursor;
+        base = (int)floorf(sPos);
+        for (k = base - 3; k <= base + 3; k++) {
+            int set, x = 120 - 22 + (int)lroundf(((float)k - sPos) * 57), on = k == U.cursor, bob;
+            if (k < 0 || k >= n || x < -50 || x > 240)
+                continue;
+            set = sets[k];
+            bob = on ? (int)(fabsf(sinf(U.frame * 0.1f)) * 3) : 0;
+            PackArt(x, 26 - bob, set, on);
+            snprintf(line, sizeof(line), "x%u", C()->packs[set]);
+            G_TextAlign(x + 22, 88, TA_CENTER, C()->packs[set] ? G_WHITE : 0xc0d8c8, 0x204030, line, TF_SMALL);
+            if (on)
+                G_Frame(x - 3, 26 - bob - 2, 50, 64, 0xe82820, 255);
+        }
+        if (U.cursor > 0)
+            G_TextAlign(4, 50, TA_CENTER, G_WHITE, 0x204030, "<", TF_SMALL);
+        if (U.cursor < n - 1)
+            G_TextAlign(236, 50, TA_CENTER, G_WHITE, 0x204030, ">", TF_SMALL);
+    }
+    if (n) {
+        int set = sets[U.cursor < n ? U.cursor : 0], total, have = Mtg_SetOwned(C(), set, &total);
+        snprintf(line, sizeof(line), "%s (%u)\n%s  (%d/%d)", gMtgSets[set].name, gMtgSets[set].year,
+                 C()->packs[set] ? "Open this pack!" : "Win duels to earn boosters.", have, total);
+        Strip(line);
+    }
+    TcgUi_Hints("{LEFTRIGHT} CHOOSE  {A} OPEN  {B} BACK");
+}
+
+// where card i of n goes: up to 8 in two rows of four; more (15) in rows of eight and seven, a little smaller
+static void BoosterSlot(int i, int n, int *x, int *y, int *w, int *h)
+{
+    if (n <= 8) {
+        *w = 30, *h = 42;
+        *x = 30 + (i % 4) * 46;
+        *y = i < 4 ? 6 : 55;
+        return;
+    }
+    *w = 27, *h = 38;
+    *x = i < 8 ? 5 + i * 29 : 19 + (i - 8) * 29;
+    *y = i < 8 ? 8 : 56;
+}
+
+static const char *SetRarityWord(int r)
+{
+    return r == MTG_RARITY_RARE ? "RARE" : r == MTG_RARITY_UNCOMMON ? "Uncommon" : "Common";
 }
 
 static void SpoilsScreen(void)
@@ -1035,15 +1112,15 @@ static void SpoilsScreen(void)
             tear = 1;
         if (tear > 0)
             MtgGfx_DrawCard(MTG_GFX_BACK, 105, 52 - tear * 22, 30, 42, 0, 255, 0);
-        PackArt(98 + shake, 50 + (int)(tear * 30));
+        PackArt(98 + shake, 50 + (int)(tear * 30), U.pack, 0);
         TcgUi_Hints("{A} OPEN");
         return;
     }
     for (i = 0; i < U.boosterCount; i++) {
-        int x, y, faceUp = i < U.flipped, on = i == U.cursor && U.flipped >= U.boosterCount;
+        int x, y, w, h, faceUp = i < U.flipped, on = i == U.cursor && U.flipped >= U.boosterCount;
         float in = (float)(t - REVEAL_TEAR - i * 2) / 10.0f, sx, sy;
-        int card = U.booster[i], rare = Mtg_Card(card)->rarity == MTG_RARITY_RARE;
-        BoosterSlot(i, &x, &y);
+        int card = U.booster[i], rare = U.boosterRarity[i] == MTG_RARITY_RARE;
+        BoosterSlot(i, U.boosterCount, &x, &y, &w, &h);
         if (in < 0)
             in = 0;
         if (in > 1)
@@ -1051,13 +1128,13 @@ static void SpoilsScreen(void)
         sx = 105 + (x - 105) * in;
         sy = 40 + (y - 40) * in;
         if (faceUp && rare)
-            G_FoilHalo((int)sx, (int)sy - (on ? 3 : 0), 30, 42, 0xf0c050, (unsigned)(U.frame + i * 17), 0);
-        MtgGfx_DrawCard(faceUp ? card : MTG_GFX_BACK, sx, sy - (on ? 3 : 0), 30, 42, 0, 255, 0);
+            G_FoilHalo((int)sx, (int)sy - (on ? 3 : 0), w, h, 0xf0c050, (unsigned)(U.frame + i * 17), 0);
+        MtgGfx_DrawCard(faceUp ? card : MTG_GFX_BACK, sx, sy - (on ? 3 : 0), (float)w, (float)h, 0, 255, 0);
         if (faceUp)
-            Foil(card, (int)sx, (int)sy - (on ? 3 : 0), 30, 42, (unsigned)(U.frame + i * 17));
+            Foil(card, (int)sx, (int)sy - (on ? 3 : 0), w, h, (unsigned)(U.frame + i * 17));
         if (faceUp && rare) {   // (on the card's foot, as on the other sides)
-            G_RoundFill((int)sx + 1, (int)sy + 33 - (on ? 3 : 0), 28, 9, 0x101828, 210);
-            G_TextAlign((int)sx + 15, (int)sy + 32 - (on ? 3 : 0), TA_CENTER, (U.frame / 6) % 2 ? 0xf8d060 : 0xfff0b0,
+            G_RoundFill((int)sx + 1, (int)sy + h - 9 - (on ? 3 : 0), w - 2, 9, 0x101828, 210);
+            G_TextAlign((int)sx + w / 2, (int)sy + h - 10 - (on ? 3 : 0), TA_CENTER, (U.frame / 6) % 2 ? 0xf8d060 : 0xfff0b0,
                         0x302040, "RARE!", TF_NARROW);
         }
         if (faceUp && CardNew_Is(CARDNEW_MAGIC, (unsigned)card, C()->owned[card]) && C()->owned[card] == 1) {
@@ -1066,23 +1143,87 @@ static void SpoilsScreen(void)
         }
         if (on) {
             int o = (U.frame / 8) % 2;
-            G_Frame((int)sx - 2 - o, (int)sy - 5 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
+            G_Frame((int)sx - 2 - o, (int)sy - 5 - o, w + 4 + 2 * o, h + 4 + 2 * o, 0xe82820, 255);
         }
     }
     if (U.flipped >= U.boosterCount && U.cursor < U.boosterCount) {
         int card = U.booster[U.cursor];
-        char name[64], line[64];
+        char name[64], line[96];
         G_FillA(0, STRIP_Y, 240, 160 - STRIP_Y, 0x5848c8, 255);
         G_FillA(0, STRIP_Y, 240, 1, 0x9888f8, 255);
         PlainName(name, sizeof(name), card);
-        G_Text(8, STRIP_Y + 4, RarityInk(card), 0x302878, name, 226, TF_NORMAL);
-        snprintf(line, sizeof(line), "%s%s", Mtg_Card(card)->rarity == MTG_RARITY_RARE ? "RARE"
-                                             : Mtg_Card(card)->rarity == MTG_RARITY_UNCOMMON ? "Uncommon" : "Common",
+        G_Text(8, STRIP_Y + 4, U.boosterRarity[U.cursor] == MTG_RARITY_RARE ? 0xf8d060
+                               : U.boosterRarity[U.cursor] == MTG_RARITY_UNCOMMON ? 0xd0dcf0 : 0xf0f0f0,
+               0x302878, name, 226, TF_NORMAL);
+        snprintf(line, sizeof(line), "%s, %s%s", SetRarityWord(U.boosterRarity[U.cursor]), gMtgSets[U.pack].name,
                  C()->owned[card] == 1 ? "  NEW!" : "");
         G_Text(8, STRIP_Y + 20, 0xd8d8f8, 0x302878, line, 226, TF_SMALL);
         TcgUi_Hints("{A} LOOK  {DPAD} CHOOSE  {B} DONE");
     } else
         TcgUi_Hints("{A} NEXT CARD  {B} SHOW ALL");
+}
+
+// a booster of the set opened: the reveal starts (the achievements counted)
+static void OpenPack(int set)
+{
+    MtgCollection *c = C();
+    int k, sets = 0, kinds = 0;
+    U.boosterCount = Mtg_OpenPack(c, set, U.booster, U.boosterRarity);
+    if (!U.boosterCount)
+        return;
+    U.pack = set;
+    Screen(M_SPOILS);
+    U.flipped = 0;
+    U.revealAge = 0;
+    MP_Achieve_Count("mtgpack", 1);
+    for (k = 0; k < MTG_SETS; k++)
+        sets += c->opened[k] != 0;
+    if (sets >= 5)
+        MP_Achieve_Unlock("mtgsets5");
+    for (k = 0; k < Mtg_DbCount() && k < MTG_COLLECTION_CARDS; k++)
+        kinds += c->owned[k] != 0;
+    if (kinds >= 250)
+        MP_Achieve_Unlock("mtgkinds250");
+    MPNet_Log("mtg: opened a %s booster: %d cards, %d %s booster%s left", gMtgSets[set].code, U.boosterCount,
+              c->packs[set], gMtgSets[set].code, c->packs[set] == 1 ? "" : "s");
+}
+
+// ---- the CARD SHOP's counter (the YU-GI-OH! side's): boosters for CARD POINTS
+static unsigned Points(void) { return Tcg_GetCollection()->dust; }
+static int ShopRows(uint8_t *sets)
+{
+    int i, n = 0;
+    for (i = 0; i < MTG_SETS; i++)
+        if (Mtg_SetAvailable(i))
+            sets[n++] = (uint8_t)i;
+    return n;
+}
+static void ShopScreen(void)
+{
+    static const char *const sTabs[] = {"BOOSTERS"};
+    uint8_t sets[MTG_SETS];
+    int n = ShopRows(sets), k, top = U.cursor < 3 ? 0 : U.cursor - 3;
+    char line[128];
+    TcgUi_Background();
+    TcgUi_SidePanel("CARD SHOP", MTG_THEME);
+    snprintf(line, sizeof(line), "%u CP", Points());
+    TcgUi_ShopTabs(sTabs, 1, 0, 0xe8c898, 0x7a4a2a, 0x4a2a10, line, "CARD POINTS", 0x2858a8);
+    TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
+    if (top > n - 6)
+        top = n > 6 ? n - 6 : 0;
+    for (k = 0; k < 6 && top + k < n; k++) {
+        int row = top + k;
+        snprintf(line, sizeof(line), "%u", MTG_PACK_COST);
+        TcgUi_Row(LIST_X + 2, 8 + k * ROW_H, LIST_W - 4, U.cursor == row, Points() >= MTG_PACK_COST,
+                  gMtgSets[sets[row]].name, line);
+    }
+    if (U.cursor < n) {
+        const MtgSet *st = &gMtgSets[sets[U.cursor]];
+        snprintf(line, sizeof(line), "A %s booster: %d cards, a rare in each. You have %u.", st->code,
+                 st->commons + st->uncommons + st->rares, C()->packs[sets[U.cursor]]);
+        Strip(line);
+    }
+    TcgUi_Hints("{A} BUY  {B} LEAVE");
 }
 
 static void Inspect(int card, int back)
@@ -1116,7 +1257,7 @@ static void SpoilsStep(unsigned pressed)
         if (pressed & KEY_A)
             U.revealNext = U.revealAge;
         if (U.revealAge >= U.revealNext) {
-            int rare = Mtg_Card(U.booster[U.flipped])->rarity == MTG_RARITY_RARE;
+            int rare = U.boosterRarity[U.flipped] == MTG_RARITY_RARE;
             PlaySE(rare ? SE_SHINY : SE_RG_CARD_FLIP);
             U.flipped++;
             U.cursor = U.flipped - 1;
@@ -1132,10 +1273,15 @@ static void SpoilsStep(unsigned pressed)
             c++;
         if (pressed & KEY_LEFT && c > 0)
             c--;
-        if (pressed & KEY_DOWN && c + 4 < U.boosterCount)
-            c += 4;
-        if (pressed & KEY_UP && c >= 4)
-            c -= 4;
+        {
+            int row = U.boosterCount <= 8 ? 4 : 8;   // (the rows of BoosterSlot)
+            if (pressed & KEY_DOWN && c + row < U.boosterCount)
+                c += row;
+            else if (pressed & KEY_DOWN && c < row && U.boosterCount > row)
+                c = U.boosterCount - 1;
+            if (pressed & KEY_UP && c >= row)
+                c -= row;
+        }
         if (c != U.cursor)
             U.cursor = c, PlaySE(SE_SELECT);
     }
@@ -1144,11 +1290,17 @@ static void SpoilsStep(unsigned pressed)
         Inspect(U.booster[U.cursor], M_SPOILS);
         U.cursor = keep;
     } else if (pressed & KEY_B) {
-        int k;
+        int k, at = 0;
+        uint8_t sets[MTG_SETS];
+        int n = PackSets(sets);
         PlaySE(SE_SELECT);
         for (k = 0; k < U.boosterCount; k++)   // (seen here: no longer NEW in the BINDER)
             CardNew_Saw(CARDNEW_MAGIC, U.booster[k], C()->owned[U.booster[k]]);
-        Close();
+        for (k = 0; k < n; k++)
+            if (sets[k] == U.pack)
+                at = k;
+        Screen(M_PACKS);   // (back to the boosters, on the same set)
+        U.cursor = at;
     }
 }
 
@@ -1168,6 +1320,8 @@ void MtgUi_Draw(void)
     case M_CHALLENGE: ChallengeScreen(); break;
     case M_DUEL: MtgBoard_Draw(); break;
     case M_SPOILS: SpoilsScreen(); break;
+    case M_PACKS: PacksScreen(); break;
+    case M_SHOP: ShopScreen(); break;
     default: break;
     }
     TcgUi_MessageBox(U.message, U.asking, U.askYes);
@@ -1181,6 +1335,15 @@ void MtgUi_OpenStarter(void)
     Open(M_STARTER);
     U.fromScript = 1;
     MPNet_Log("mtg: starter screen");
+}
+
+void MtgUi_OpenShop(void)   // the CARD SHOP's clerk: boosters for CARD POINTS
+{
+    Mtg_EnsureDb();
+    U.returnToGame = NULL;
+    Open(M_SHOP);
+    U.fromScript = 1;
+    MPNet_Log("mtg: card shop");
 }
 
 void MtgUi_OpenChallenge(unsigned duelist)
@@ -1223,6 +1386,7 @@ static void StartDuel(const char *const *theirCards, const char *name)
     MtgBoard_SetTray(DeckTrayRgb(c->activeDeck));
     Screen(M_DUEL);
     MtgBoard_Start(&mine, &them, Mtg_Rand(&c->rng), name);
+    U.rewarded = 0;
 }
 
 static void Practice(void)   // against a starter deck that isn't yours: nothing won or lost
@@ -1242,36 +1406,64 @@ static void Practice(void)   // against a starter deck that isn't yours: nothing
     StartDuel(gMtgStarters[pick].cards, "PRACTICE DECK");
 }
 
-static void DuelOver(int result)
+// the duel is over (its result screen just came up): the record, the booster a win brings, the achievements, and the
+// words for the result screen (the POKeMON table's way: the opponent's quote, then what you got)
+static void DuelEnded(int result)
 {
     MtgCollection *c = C();
     const MtgDuelist *who = &gMtgDuelists[U.duelist];
+    char line[320];
     if (U.vs == VS_PRACTICE) {
-        MtgBoard_End();
         MPNet_Log("mtg: practice over: %s", result == 1 ? "won" : result == 2 ? "lost" : "a draw");
+        MtgBoard_Result("A practice duel: nothing is won or lost.");
+        return;
+    }
+    if (result == 1) {
+        const MtgDuel *d = MtgBoard_Duel();
+        uint8_t colors = Mtg_DeckColors(&c->decks[c->activeDeck]);
+        int set = Mtg_RandomSet(&c->rng), got = Mtg_AwardPack(c, set);
+        c->wins++;
+        MP_Achieve_Count("mtgwin", 1);
+        if (!(c->beaten & (1u << U.duelist)))
+            MP_Achieve_Count("mtgregulars", 1);
+        c->beaten |= 1u << U.duelist;
+        if (d->players[0].life >= 20)
+            MP_Achieve_Unlock("mtgflawless");
+        if (d->players[1].drewFromEmpty && d->players[1].life > 0)
+            MP_Achieve_Unlock("mtgdecked");
+        if (d->turn <= 10)   // (five turns of yours at most)
+            MP_Achieve_Unlock("mtgfast");
+        if (__builtin_popcount(colors) == 1)
+            MP_Achieve_Unlock("mtgmono");
+        if (colors == 0x1F)
+            MP_Achieve_Unlock("mtgdomain");
+        MPNet_Log("mtg: won against %s, a %s booster", who->name, gMtgSets[set].code);
+        if (got)
+            snprintf(line, sizeof(line), "%s: \"%s\"\nA %s booster went into your CARD CASE.", who->name, who->lose,
+                     gMtgSets[set].code);
+        else
+            snprintf(line, sizeof(line), "%s: \"%s\"\nYour CARD CASE can't hold more %s boosters.", who->name, who->lose,
+                     gMtgSets[set].code);
+    } else {
+        if (result == 2)
+            c->losses++;
+        MPNet_Log("mtg: %s against %s", result == 2 ? "lost" : "a draw", who->name);
+        snprintf(line, sizeof(line), "%s: \"%s\"", who->name, result == 2 ? who->win : "A draw! Let's play again some time.");
+    }
+    MtgBoard_Result(line);
+}
+
+// the result screen left: back to the map (a practice: to the case)
+static void DuelOver(int result)
+{
+    (void)result;
+    MtgBoard_End();
+    if (U.vs == VS_PRACTICE) {
         Screen(M_HOME);
         U.cursor = HOME_PRACTICE;
         return;
     }
-    if (result == 1) {
-        c->wins++;
-        c->beaten |= 1u << U.duelist;
-        U.boosterCount = Mtg_OpenBooster(c, U.booster);
-        MtgBoard_EndHoldMusic();
-        Screen(M_SPOILS);
-        U.flipped = 0;
-        U.revealAge = 0;
-        MPNet_Log("mtg: won against %s, booster of %d", who->name, U.boosterCount);
-        Say(ACT_NONE, "%s: \"%s\"", who->name, who->lose);
-    } else {
-        if (result == 2)
-            c->losses++;
-        MtgBoard_End();
-        MPNet_Log("mtg: %s against %s", result == 2 ? "lost" : "a draw", who->name);
-        Screen(M_CHALLENGE);
-        U.cursor = c->activeDeck;
-        Say(ACT_CLOSE, "%s: \"%s\"", who->name, result == 2 ? who->win : "A draw! Let's play again some time.");
-    }
+    Close();
 }
 
 void MtgUi_DebugAutoplay(int on) { MtgBoard_Autoplay(on); }
@@ -1290,9 +1482,19 @@ static void Act(int action)
     case ACT_TAKE_STARTER:
         Mtg_GiveStarter(c, (unsigned)U.askArg);
         Tcg_GrantCase();
+        MP_Achieve_Unlock("mtgstart");
         MPNet_Log("mtg: starter %s chosen", gMtgStarters[c->starter].name);
         Say(ACT_CLOSE, "The %s deck is yours! MAGIC is on your CARD CASE now: L and R go round its games.",
             gMtgStarters[c->starter].name);
+        break;
+    case ACT_BUY_PACK:
+        if (Points() >= MTG_PACK_COST && Mtg_AwardPack(c, U.askArg)) {
+            Tcg_GetCollection()->dust -= MTG_PACK_COST;
+            PlaySE(SE_SHOP);
+            MPNet_Log("mtg: bought a %s booster", gMtgSets[U.askArg].code);
+            Say(ACT_NONE, "A %s booster went into your CARD CASE.", gMtgSets[U.askArg].code);
+        } else
+            Say(ACT_NONE, "You can't carry more %s boosters.", gMtgSets[U.askArg].code);
         break;
     case ACT_COPY: {
         int d = EmptySlot();
@@ -1467,6 +1669,10 @@ int MtgUi_Step(unsigned keys)
         U.held = 0;
     if (U.screen == M_DUEL && !U.message[0]) {
         int result = MtgBoard_Step(pressed, keys);
+        if (!U.rewarded && MtgBoard_Over()) {
+            U.rewarded = 1;
+            DuelEnded(MtgBoard_Over());
+        }
         if (result)
             DuelOver(result);
         return 1;
@@ -1515,6 +1721,17 @@ int MtgUi_Step(unsigned keys)
                 Screen(M_BINDER);
                 BuildList(0);
                 break;
+            case HOME_PACKS: {
+                uint8_t sets[MTG_SETS];
+                int n = PackSets(sets), k;
+                Screen(M_PACKS);
+                for (k = 0; k < n; k++)   // (on the first set with a booster to open)
+                    if (c->packs[sets[k]]) {
+                        U.cursor = k;
+                        break;
+                    }
+                break;
+            }
             case HOME_PRACTICE:
                 Practice();
                 break;
@@ -1738,6 +1955,47 @@ int MtgUi_Step(unsigned keys)
         U.revealAge++;
         SpoilsStep(pressed);
         break;
+    case M_PACKS: {
+        uint8_t sets[MTG_SETS];
+        int n = PackSets(sets);
+        if (pressed & KEY_LEFT && U.cursor > 0)
+            U.cursor--, PlaySE(SE_SELECT);
+        if (pressed & KEY_RIGHT && U.cursor + 1 < n)
+            U.cursor++, PlaySE(SE_SELECT);
+        if (pressed & KEY_B) {
+            PlaySE(SE_SELECT);
+            Screen(M_HOME);
+            U.cursor = HOME_PACKS;
+        } else if (pressed & KEY_A && n) {
+            int set = sets[U.cursor];
+            if (c->packs[set]) {
+                PlaySE(SE_SELECT);
+                OpenPack(set);
+            } else {
+                PlaySE(SE_FAILURE);
+                Say(ACT_NONE, "No %s boosters yet: win duels to earn them, or buy them at MOSSDEEP's CARD SHOP.",
+                    gMtgSets[set].code);
+            }
+        }
+        break;
+    }
+    case M_SHOP: {
+        uint8_t sets[MTG_SETS];
+        int n = ShopRows(sets);
+        MoveCursor(pressed, n);
+        if (pressed & KEY_B) {
+            PlaySE(SE_SELECT);
+            Close();
+        } else if (pressed & KEY_A && n) {
+            PlaySE(SE_SELECT);
+            if (Points() >= MTG_PACK_COST)
+                Ask(ACT_BUY_PACK, sets[U.cursor], "A %s booster for %u CARD POINTS?", gMtgSets[sets[U.cursor]].code,
+                    MTG_PACK_COST);
+            else
+                Say(ACT_NONE, "A booster takes %u CARD POINTS. You have %u.", MTG_PACK_COST, Points());
+        }
+        break;
+    }
     }
     return 1;
 }

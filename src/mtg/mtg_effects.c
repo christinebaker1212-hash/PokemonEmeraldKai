@@ -11,11 +11,12 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"LoseLife", MTG_API_LOSE_LIFE}, {"Pump", MTG_API_PUMP}, {"PumpAll", MTG_API_PUMP_ALL},
     {"ChangeZone", MTG_API_CHANGE_ZONE}, {"Mana", MTG_API_MANA}, {"Discard", MTG_API_DISCARD},
     {"Tap", MTG_API_TAP}, {"Untap", MTG_API_UNTAP}, {"Counter", MTG_API_COUNTER},
+    {"Sacrifice", MTG_API_SACRIFICE}, {"PutCounter", MTG_API_PUT_COUNTER},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
-    "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter",
+    "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -60,6 +61,8 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
         return d ? Mtg_Power(d, ctx->source) : 0;
     if (strcmp(sv, "Count$CardToughness") == 0)
         return d ? Mtg_Toughness(d, ctx->source) : 0;
+    if (strcmp(sv, "TriggerCount$DamageAmount") == 0)   // (a DamageDone trigger's)
+        return d ? ctx->e->trigAmount : 0;
     if (strncmp(sv, "Number$", 7) == 0) {
         n = strtol(sv + 7, &end, 10);
         if (*end) {
@@ -93,6 +96,56 @@ static const char *const sDefinedKnown[] = {
     "You", "Opponent", "Player", "Self", "Targeted", "ParentTarget", "TargetedController", "TargetedPlayer",
 };
 
+// what set a triggered ability off (SpellAbility.getTriggeringObject: "Triggered" + the AbilityKey's name, its
+// "LKICopy" the same here, "Controller" / "Owner" its player), by trigger mode
+enum { TW_OBJ, TW_OBJ2, TW_PLAYER, TW_TARGET };
+static const struct { const char *name; uint8_t mode, what; } sTriggered[] = {
+    {"Card", MTG_TRIG_CHANGES_ZONE, TW_OBJ}, {"NewCard", MTG_TRIG_CHANGES_ZONE, TW_OBJ},
+    {"Player", MTG_TRIG_PHASE, TW_PLAYER},
+    {"Card", MTG_TRIG_SPELL_CAST, TW_OBJ}, {"Activator", MTG_TRIG_SPELL_CAST, TW_PLAYER},
+    {"Source", MTG_TRIG_DAMAGE_DONE, TW_OBJ}, {"Target", MTG_TRIG_DAMAGE_DONE, TW_TARGET},
+    {"Attacker", MTG_TRIG_ATTACKS, TW_OBJ}, {"Defender", MTG_TRIG_ATTACKS, TW_PLAYER},
+    {"DefendingPlayer", MTG_TRIG_ATTACKS, TW_PLAYER},
+    {"Attacker", MTG_TRIG_ATTACKER_BLOCKED, TW_OBJ}, {"Defender", MTG_TRIG_ATTACKER_BLOCKED, TW_PLAYER},
+    {"DefendingPlayer", MTG_TRIG_ATTACKER_BLOCKED, TW_PLAYER},
+    {"Attacker", MTG_TRIG_ATTACKER_BLOCKED_BY, TW_OBJ}, {"Blocker", MTG_TRIG_ATTACKER_BLOCKED_BY, TW_OBJ2},
+    {"Blocker", MTG_TRIG_BLOCKS, TW_OBJ}, {"Attackers", MTG_TRIG_BLOCKS, TW_OBJ2},
+    {"Attacker", MTG_TRIG_ATTACKER_UNBLOCKED, TW_OBJ}, {"Defender", MTG_TRIG_ATTACKER_UNBLOCKED, TW_PLAYER},
+    {"DefendingPlayer", MTG_TRIG_ATTACKER_UNBLOCKED, TW_PLAYER},
+};
+enum { TS_NONE, TS_CONTROLLER, TS_OWNER };
+
+// "TriggeredCardLKICopy" -> what, suffix; mode 0: any mode's
+static int TriggeredName(int mode, const char *name, int *what, int *suffix)
+{
+    char buf[48];
+    size_t n;
+    unsigned i;
+    if (strncmp(name, "Triggered", 9) != 0 || strlen(name + 9) >= sizeof(buf))
+        return 0;
+    strcpy(buf, name + 9);
+    n = strlen(buf);
+    *suffix = TS_NONE;
+    if (n > 10 && strcmp(buf + n - 10, "Controller") == 0)
+        buf[n -= 10] = 0, *suffix = TS_CONTROLLER;
+    else if (n > 5 && strcmp(buf + n - 5, "Owner") == 0)
+        buf[n -= 5] = 0, *suffix = TS_OWNER;
+    if (n > 7 && strcmp(buf + n - 7, "LKICopy") == 0)
+        buf[n -= 7] = 0;
+    for (i = 0; i < sizeof(sTriggered) / sizeof(sTriggered[0]); i++)
+        if ((mode == 0 || sTriggered[i].mode == mode) && strcmp(buf, sTriggered[i].name) == 0) {
+            *what = sTriggered[i].what;
+            return 1;
+        }
+    return 0;
+}
+
+int Mtg_TriggeredDefinedKnown(int mode, const char *name)
+{
+    int what, suffix;
+    return TriggeredName(mode, name, &what, &suffix);
+}
+
 static void Add(Defined *out, int kind, int id)
 {
     if (out->n < MTG_MAX_DEFINED) {
@@ -103,6 +156,34 @@ static void Add(Defined *out, int kind, int id)
 }
 
 enum { DEF_PLAYER, DEF_CARD };   // what the effect acts on when nothing is targeted or Defined$
+
+static void Triggered(const MtgDuel *d, const MtgResolveCtx *ctx, const char *def, Defined *out)
+{
+    const MtgStackEntry *e = ctx->e;
+    int what, suffix, obj = MTG_NO_OBJ, player = 0xFF;
+    if (e->trigger == 0xFFFF || !TriggeredName(gMtgTriggers[e->trigger].mode, def, &what, &suffix))
+        return;
+    if (what == TW_OBJ)
+        obj = e->trigObj;
+    else if (what == TW_OBJ2)
+        obj = e->trigObj2;
+    else if (what == TW_PLAYER)
+        player = e->trigPlayer;
+    else if (e->trigPlayer < MTG_PLAYERS)
+        player = e->trigPlayer;
+    else
+        obj = e->trigObj2;
+    if (suffix != TS_NONE && obj != MTG_NO_OBJ) {   // (its controller as it happened: the last known information)
+        player = suffix == TS_OWNER ? d->objs[obj].owner : what == TW_OBJ ? e->trigCtrl : d->objs[obj].controller;
+        obj = MTG_NO_OBJ;
+    }
+    if (obj != MTG_NO_OBJ)
+        Add(out, MTG_TGT_OBJ, obj);
+    else if (player < MTG_PLAYERS)
+        Add(out, MTG_TGT_PLAYER, player);
+}
+
+static void DefinedBy(const MtgDuel *d, const MtgResolveCtx *ctx, const char *def, Defined *out);
 
 static void Targets(const MtgDuel *d, const MtgResolveCtx *ctx, const MtgAbility *ab, int deflt, Defined *out)
 {
@@ -116,7 +197,16 @@ static void Targets(const MtgDuel *d, const MtgResolveCtx *ctx, const MtgAbility
     }
     if (!def)
         def = deflt == DEF_PLAYER ? "You" : "Self";
-    if (strcmp(def, "You") == 0)
+    DefinedBy(d, ctx, def, out);
+}
+
+static void DefinedBy(const MtgDuel *d, const MtgResolveCtx *ctx, const char *def, Defined *out)
+{
+    const MtgTarget *t = &ctx->e->target;
+    out->n = 0;
+    if (strncmp(def, "Triggered", 9) == 0)
+        Triggered(d, ctx, def, out);
+    else if (strcmp(def, "You") == 0)
         Add(out, MTG_TGT_PLAYER, ctx->controller);
     else if (strcmp(def, "Opponent") == 0)
         Add(out, MTG_TGT_PLAYER, ctx->controller ^ 1);
@@ -141,6 +231,77 @@ static int OnBattlefield(const MtgDuel *d, const MtgTarget *t)
 {
     return t->kind == MTG_TGT_OBJ && d->objs[t->id].zone == MTG_ZONE_BATTLEFIELD;
 }
+
+void Mtg_AddCounters(MtgDuel *d, int obj, int n)
+{
+    MtgObj *o = &d->objs[obj];
+    if (!n)
+        return;
+    o->counters11 = (int16_t)(o->counters11 + n);
+    Mtg_Event(d, MTG_EV_COUNTERS, obj, n, o->counters11);
+}
+
+void Mtg_Sacrifice(MtgDuel *d, int obj)
+{
+    if (d->objs[obj].zone == MTG_ZONE_BATTLEFIELD)
+        Mtg_MoveTo(d, obj, MTG_ZONE_GRAVEYARD);
+}
+
+static int AskPick(MtgDuel *d, int player, const uint16_t *list, int n)
+{
+    int i;
+    Mtg_AskChoice(d, player, MTG_CHOICE_PICK, NULL);
+    for (i = 0; i < n && i < MTG_MAX_COMBAT; i++)
+        d->query.candidates[i] = list[i];
+    d->query.candidateCount = (uint8_t)(n < MTG_MAX_COMBAT ? n : MTG_MAX_COMBAT);
+    return 0;
+}
+
+// each player of who chooses `amount` of their cards in `zone` matching spec (all of them when they have no more),
+// one MTG_CHOICE_PICK at a time; d->resPicks counts the picks so far (player = resPicks / amount). done(d, obj) is
+// what happens to each. Returns 1 when every one is done, 0 while it waits.
+static int EachChooses(MtgDuel *d, const MtgResolveCtx *ctx, const Defined *who, int amount, int zone,
+                       const char *spec, void (*done)(MtgDuel *, int))
+{
+    if (amount <= 0)
+        return 1;
+    for (;;) {
+        uint16_t list[MTG_MAX_COMBAT];
+        int pi = d->resPicks / amount, left, n = 0, p, i;
+        if (pi >= who->n)
+            return 1;
+        p = who->t[pi].id;
+        left = amount - d->resPicks % amount;
+        for (i = 0; i < d->objCount && n < MTG_MAX_COMBAT; i++) {
+            const MtgObj *o = &d->objs[i];
+            if (o->zone != zone || (zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner) != p)
+                continue;
+            if (spec && !Mtg_ValidObj(d, i, spec, ctx->source, ctx->controller))
+                continue;
+            list[n++] = (uint16_t)i;
+        }
+        if (who->t[pi].kind != MTG_TGT_PLAYER || n == 0) {
+            d->resPicks = (uint8_t)((pi + 1) * amount);
+            continue;
+        }
+        if (n <= left) {   // (no choice: all of them)
+            for (i = 0; i < n; i++)
+                done(d, list[i]);
+            d->resPicks = (uint8_t)((pi + 1) * amount);
+            continue;
+        }
+        if (d->resChoice < 0)
+            return AskPick(d, p, list, n);
+        for (i = 0; i < n && list[i] != d->resChoice; i++)
+            ;
+        if (i < n)
+            done(d, list[i]);
+        d->resChoice = -1;
+        d->resPicks++;
+    }
+}
+
+static void DiscardOne(MtgDuel *d, int obj) { Mtg_MoveTo(d, obj, MTG_ZONE_GRAVEYARD); }
 
 static uint32_t KeywordList(const char *s, int *ok)   // "Flying & First Strike"
 {
@@ -190,7 +351,7 @@ static void CounterSpell(MtgDuel *d, int sourceObj)
         }
 }
 
-static void Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
+static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
 {
     Defined who;
     int i, ok, card = ab->card;
@@ -283,11 +444,18 @@ static void Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
     case MTG_API_CHANGE_ZONE: {
         const char *dest = Mtg_Param(ab, "Destination");
         int zone = strcmp(dest, "Exile") == 0 ? MTG_ZONE_EXILE : strcmp(dest, "Hand") == 0 ? MTG_ZONE_HAND
-                 : strcmp(dest, "Library") == 0 ? MTG_ZONE_LIBRARY : MTG_ZONE_GRAVEYARD;
+                 : strcmp(dest, "Library") == 0 ? MTG_ZONE_LIBRARY
+                 : strcmp(dest, "Battlefield") == 0 ? MTG_ZONE_BATTLEFIELD : MTG_ZONE_GRAVEYARD;
+        int from = strcmp(Mtg_Param(ab, "Origin"), "Graveyard") == 0 ? MTG_ZONE_GRAVEYARD : MTG_ZONE_BATTLEFIELD;
         Targets(d, ctx, ab, DEF_CARD, &who);
-        for (i = 0; i < who.n; i++)
-            if (OnBattlefield(d, &who.t[i]))
-                Mtg_MoveTo(d, who.t[i].id, zone);
+        for (i = 0; i < who.n; i++) {
+            int obj = who.t[i].id;
+            if (who.t[i].kind != MTG_TGT_OBJ || d->objs[obj].zone != from)
+                continue;
+            if (zone == MTG_ZONE_BATTLEFIELD)   // (onto the battlefield under its owner's control, or GainControl$)
+                d->objs[obj].controller = Mtg_Param(ab, "GainControl") ? (uint8_t)ctx->controller : d->objs[obj].owner;
+            Mtg_MoveTo(d, obj, zone);
+        }
         break;
     }
     case MTG_API_MANA: {
@@ -301,10 +469,23 @@ static void Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
             }
         break;
     }
-    case MTG_API_DISCARD: {   // Mode$ Random
-        const char *nc = Mtg_Param(ab, "NumCards");
+    case MTG_API_DISCARD: {   // Mode$ Random, TgtChoose (the player chooses), Hand
+        const char *nc = Mtg_Param(ab, "NumCards"), *mode = Mtg_Param(ab, "Mode");
         int n = nc ? Mtg_Amount(d, ctx, card, nc, &ok) : 1;
         Targets(d, ctx, ab, DEF_PLAYER, &who);
+        if (strcmp(mode, "TgtChoose") == 0)
+            return EachChooses(d, ctx, &who, n, MTG_ZONE_HAND, Mtg_Param(ab, "DiscardValid"), DiscardOne);
+        if (strcmp(mode, "Hand") == 0) {
+            for (i = 0; i < who.n; i++) {
+                int j;
+                if (who.t[i].kind != MTG_TGT_PLAYER)
+                    continue;
+                for (j = 0; j < d->objCount; j++)
+                    if (d->objs[j].zone == MTG_ZONE_HAND && d->objs[j].owner == who.t[i].id)
+                        Mtg_MoveTo(d, j, MTG_ZONE_GRAVEYARD);
+            }
+            break;
+        }
         for (i = 0; i < who.n; i++) {
             int p = who.t[i].id, k;
             if (who.t[i].kind != MTG_TGT_PLAYER)
@@ -335,23 +516,92 @@ static void Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
             if (who.t[i].kind == MTG_TGT_STACK)
                 CounterSpell(d, who.t[i].id);
         break;
+    case MTG_API_SACRIFICE: {   // SacrificeEffect: SacValid$ Self (its source), or each Defined$ player chooses
+        const char *valid = Mtg_Param(ab, "SacValid"), *amt = Mtg_Param(ab, "Amount");
+        if (!valid || strcmp(valid, "Self") == 0) {
+            if (strcmp(Mtg_Param(ab, "Defined") ? Mtg_Param(ab, "Defined") : "Self", "Self") == 0
+                && d->objs[ctx->source].controller == ctx->controller)
+                Mtg_Sacrifice(d, ctx->source);
+            break;
+        }
+        Targets(d, ctx, ab, DEF_PLAYER, &who);
+        return EachChooses(d, ctx, &who, amt ? Mtg_Amount(d, ctx, card, amt, &ok) : 1, MTG_ZONE_BATTLEFIELD, valid,
+                           Mtg_Sacrifice);
     }
+    case MTG_API_PUT_COUNTER: {   // CountersPutEffect: +1/+1 and -1/-1 counters
+        int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "CounterNum"), &ok);
+        if (strcmp(Mtg_Param(ab, "CounterType"), "M1M1") == 0)
+            n = -n;
+        Targets(d, ctx, ab, DEF_CARD, &who);
+        for (i = 0; i < who.n; i++)
+            if (OnBattlefield(d, &who.t[i]))
+                Mtg_AddCounters(d, who.t[i].id, n);
+        break;
+    }
+    }
+    return 1;
 }
 
-void Mtg_ResolveAbility(MtgDuel *d, MtgResolveCtx *ctx, int ability)
+// UnlessCost$ (AbilityUtils.handleUnlessCost): a mana cost, or an SVar counting the generic mana
+static int UnlessCost(const MtgDuel *d, const MtgResolveCtx *ctx, const MtgAbility *ab, MtgManaCost *out)
 {
-    int guard = 0;
-    while (ability != 0xFFFF && guard++ < 16 && !d->over) {
-        const MtgAbility *ab = &gMtgAbilities[ability];
-        Resolve(d, ctx, ab);
-        ability = ab->sub;
+    const char *v = Mtg_Param(ab, "UnlessCost");
+    int ok;
+    if (!v)
+        return 0;
+    if (strcmp(v, "X") != 0 && Mtg_Svar(ab->card, v)) {
+        memset(out, 0, sizeof(*out));
+        out->generic = (uint8_t)Mtg_Amount(d, ctx, ab->card, v, &ok);
+        return ok;
     }
+    return Mtg_ParseManaCost(v, out) && !out->x;
+}
+
+// one ability of a chain. Its UnlessCost$ first: each payer in turn may pay it, and if one does the ability does
+// nothing (its sub-abilities still resolve). resStage: bit 7 settled, bit 6 paid, the rest the payer asked next.
+int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
+{
+    const MtgAbility *ab = &gMtgAbilities[ability];
+    MtgManaCost cost;
+    if (Mtg_Param(ab, "UnlessCost") && !(d->resStage & 0x80)) {
+        Defined payers;
+        const char *who = Mtg_Param(ab, "UnlessPayer");
+        DefinedBy(d, ctx, who ? who : "TargetedController", &payers);
+        UnlessCost(d, ctx, ab, &cost);
+        for (;;) {
+            int pi = d->resStage & 0x3F, p;
+            if (pi >= payers.n) {
+                d->resStage = 0x80;
+                break;
+            }
+            p = payers.t[pi].id;
+            if (payers.t[pi].kind != MTG_TGT_PLAYER || !Mtg_CanPay(d, p, &cost, 0, MTG_NO_OBJ)) {
+                d->resStage++;
+                continue;
+            }
+            if (d->resChoice < 0) {
+                Mtg_AskChoice(d, p, MTG_CHOICE_PAY, &cost);
+                return 0;
+            }
+            if (d->resChoice == 1) {
+                Mtg_Pay(d, p, &cost, 0, MTG_NO_OBJ);
+                d->resStage = 0xC0;
+                d->resChoice = -1;
+                break;
+            }
+            d->resChoice = -1;
+            d->resStage++;
+        }
+    }
+    if (d->resStage & 0x40)
+        return 1;
+    return Resolve(d, ctx, ab);
 }
 
 // ---- what a translation understands (else the card stays unsupported)
 static const char *const sCommon[] = {
     "SP", "AB", "DB", "Cost", "ValidTgts", "TgtPrompt", "SubAbility", "SpellDescription", "StackDescription",
-    "IsCurse", "PrecostDesc", "CostDesc", "TargetType", "Defined",
+    "IsCurse", "PrecostDesc", "CostDesc", "TargetType", "Defined", "UnlessCost", "UnlessPayer",
 };
 static const char *const sApiParams[MTG_API_COUNT][5] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},
@@ -363,9 +613,14 @@ static const char *const sApiParams[MTG_API_COUNT][5] = {
     [MTG_API_LOSE_LIFE] = {"LifeAmount"},
     [MTG_API_PUMP] = {"NumAtt", "NumDef", "KW"},
     [MTG_API_PUMP_ALL] = {"NumAtt", "NumDef", "KW", "ValidCards"},
-    [MTG_API_CHANGE_ZONE] = {"Origin", "Destination"},
+    [MTG_API_CHANGE_ZONE] = {"Origin", "Destination", "GainControl"},
     [MTG_API_MANA] = {"Produced", "Amount"},
-    [MTG_API_DISCARD] = {"NumCards", "Mode"},
+    [MTG_API_DISCARD] = {"NumCards", "Mode", "DiscardValid"},
+    [MTG_API_SACRIFICE] = {"SacValid", "Amount", "SacMessage"},
+    [MTG_API_PUT_COUNTER] = {"CounterType", "CounterNum"},
+};
+static const char *const sPayersKnown[] = {
+    "You", "Opponent", "Player", "Targeted", "TargetedController", "TargetedPlayer",
 };
 
 static int InList(const char *key, const char *const *list, int n)
@@ -402,8 +657,25 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         }
     }
     v = Mtg_Param(ab, "Defined");
-    if (v && !InList(v, sDefinedKnown, (int)(sizeof(sDefinedKnown) / sizeof(sDefinedKnown[0])))) {
+    if (v && !InList(v, sDefinedKnown, (int)(sizeof(sDefinedKnown) / sizeof(sDefinedKnown[0])))
+        && !(ab->kind != MTG_AB_SPELL && ab->kind != MTG_AB_ACTIVATED && Mtg_TriggeredDefinedKnown(0, v))) {
         *why = "Defined";
+        return 0;
+    }
+    if (Mtg_Param(ab, "UnlessCost")) {
+        MtgManaCost cost;
+        v = Mtg_Param(ab, "UnlessPayer");
+        if (!UnlessCost(NULL, NULL, ab, &cost)) {
+            *why = "UnlessCost";
+            return 0;
+        }
+        if (v && !InList(v, sPayersKnown, (int)(sizeof(sPayersKnown) / sizeof(sPayersKnown[0])))
+            && !(ab->kind != MTG_AB_SPELL && ab->kind != MTG_AB_ACTIVATED && Mtg_TriggeredDefinedKnown(0, v))) {
+            *why = "UnlessPayer";
+            return 0;
+        }
+    } else if (Mtg_Param(ab, "UnlessPayer")) {
+        *why = "UnlessPayer";
         return 0;
     }
     if (ab->kind == MTG_AB_SUB && ab->tgt) {
@@ -425,8 +697,13 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     case MTG_API_DISCARD:
         if (!AmountKnown(ab, "NumCards", 0))
             return 0;
-        if (ab->api == MTG_API_DISCARD && !((v = Mtg_Param(ab, "Mode")) && strcmp(v, "Random") == 0))
-            return 0;
+        if (ab->api == MTG_API_DISCARD) {
+            v = Mtg_Param(ab, "Mode");
+            if (!v || (strcmp(v, "Random") && strcmp(v, "TgtChoose") && strcmp(v, "Hand")))
+                return 0;
+            if ((v = Mtg_Param(ab, "DiscardValid")) && (strcmp(Mtg_Param(ab, "Mode"), "TgtChoose") || !Mtg_ValidSpecKnown(v)))
+                return 0;
+        }
         return 1;
     case MTG_API_DESTROY_ALL:
         return (v = Mtg_Param(ab, "ValidCards")) && Mtg_ValidSpecKnown(v);
@@ -443,12 +720,25 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return 1;
     case MTG_API_CHANGE_ZONE: {
         const char *o = Mtg_Param(ab, "Origin"), *dz = Mtg_Param(ab, "Destination");
-        if (!o || strcmp(o, "Battlefield") != 0 || !dz)
+        int grave = o && strcmp(o, "Graveyard") == 0;
+        if (!o || (strcmp(o, "Battlefield") != 0 && !grave) || !dz || strcmp(o, dz) == 0)
             return 0;
-        if (strcmp(dz, "Exile") && strcmp(dz, "Hand") && strcmp(dz, "Graveyard") && strcmp(dz, "Library"))
+        if (strcmp(dz, "Exile") && strcmp(dz, "Hand") && strcmp(dz, "Graveyard") && strcmp(dz, "Library")
+            && !(grave && strcmp(dz, "Battlefield") == 0))
+            return 0;
+        if (Mtg_Param(ab, "GainControl") && strcmp(dz, "Battlefield"))
             return 0;
         return ab->tgt || Mtg_Param(ab, "Defined");
     }
+    case MTG_API_SACRIFICE:
+        if ((v = Mtg_Param(ab, "SacValid")) && strcmp(v, "Self") && !Mtg_ValidSpecKnown(v))
+            return 0;
+        if ((!v || strcmp(v, "Self") == 0) && (v = Mtg_Param(ab, "Defined")) && strcmp(v, "Self"))
+            return 0;   // (Defined$ cards to sacrifice: not yet)
+        return AmountKnown(ab, "Amount", 0) && !ab->tgt;
+    case MTG_API_PUT_COUNTER:
+        v = Mtg_Param(ab, "CounterType");
+        return v && (strcmp(v, "P1P1") == 0 || strcmp(v, "M1M1") == 0) && AmountKnown(ab, "CounterNum", 1);
     case MTG_API_MANA:
         if (Mtg_Param(ab, "SubAbility") || !AmountKnown(ab, "Amount", 0))
             return 0;

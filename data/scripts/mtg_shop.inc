@@ -25,6 +25,9 @@ EventScript_MtgClerk_HasCase::
 	end
 
 EventScript_MtgClerk_Regular::
+	msgbox MtgClerk_Text_Boosters, MSGBOX_DEFAULT
+	closemessage
+	special Mtg_ShopBoosters
 	msgbox MtgClerk_Text_Downstairs, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_MtgClerk_Bye
 	msgbox MtgClerk_Text_ThisWay, MSGBOX_DEFAULT
@@ -111,9 +114,13 @@ MtgClerk_Text_Welcome:
 	.string "Talk to anyone here to play. There's\n"
 	.string "a play room downstairs, too.$"
 
+MtgClerk_Text_Boosters:
+	.string "Welcome back! Boosters of every set\n"
+	.string "are on the counter, for CARD POINTS.$"
+
 MtgClerk_Text_Downstairs:
-	.string "Welcome back! Would you like to go\n"
-	.string "down to the play room?$"
+	.string "Would you like to go down to the\n"
+	.string "play room?$"
 
 MtgClerk_Text_ThisWay:
 	.string "Right this way. Have fun!$"

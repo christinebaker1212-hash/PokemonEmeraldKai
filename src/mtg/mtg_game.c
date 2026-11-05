@@ -83,6 +83,17 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
 {
     MtgObj *o = &d->objs[obj];
     int from = o->zone, i;
+    MtgTrigEvent ev;
+    memset(&ev, 0, sizeof(ev));
+    ev.mode = MTG_TRIG_CHANGES_ZONE;
+    ev.obj = (uint16_t)obj;
+    ev.obj2 = MTG_NO_OBJ;
+    ev.player = 0xFF;
+    ev.from = (uint8_t)from;
+    ev.to = (uint8_t)zone;
+    ev.objCtrl = o->controller;
+    if (from == MTG_ZONE_BATTLEFIELD)   // leaving the battlefield: the triggers look back at it as it was (603.10a)
+        Mtg_CheckTriggers(d, &ev);
     if (from == MTG_ZONE_LIBRARY) {
         MtgPlayer *p = &d->players[o->owner];
         for (i = 0; i < p->libraryCount; i++)
@@ -98,6 +109,7 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
             if (d->objs[i].blocking == obj)
                 d->objs[i].blocking = MTG_NO_OBJ;
         ResetPermanentState(o);
+        o->sick = zone == MTG_ZONE_BATTLEFIELD;   // (a permanent arriving: under its controller since this turn)
     }
     if (zone != MTG_ZONE_BATTLEFIELD)
         o->controller = o->owner;
@@ -108,6 +120,21 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
         p->library[p->libraryCount++] = (uint16_t)obj;
     }
     Mtg_Event(d, MTG_EV_ZONE, obj, from, zone);
+    if (from != MTG_ZONE_BATTLEFIELD)
+        Mtg_CheckTriggers(d, &ev);
+}
+
+static void TrigEvent(MtgDuel *d, int mode, int obj, int obj2, int player)
+{
+    MtgTrigEvent ev;
+    memset(&ev, 0, sizeof(ev));
+    ev.mode = (uint8_t)mode;
+    ev.obj = (uint16_t)obj;
+    ev.obj2 = (uint16_t)obj2;
+    ev.player = (uint8_t)player;
+    ev.step = d->step;
+    ev.objCtrl = obj != MTG_NO_OBJ ? d->objs[obj].controller : 0xFF;
+    Mtg_CheckTriggers(d, &ev);
 }
 
 void Mtg_Draw(MtgDuel *d, int player, int count)
@@ -157,9 +184,20 @@ void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int com
         Mtg_Event(d, MTG_EV_LIFE, to.id, -amount, d->players[to.id].life);
     } else
         return;
-    (void)combat;
     if (sourceObj != MTG_NO_OBJ && (Mtg_Keywords(d, sourceObj) & MTG_KW_BIT(MTG_KW_LIFELINK)))
         Mtg_GainLife(d, d->objs[sourceObj].controller, amount);
+    {
+        MtgTrigEvent ev;
+        memset(&ev, 0, sizeof(ev));
+        ev.mode = MTG_TRIG_DAMAGE_DONE;
+        ev.obj = (uint16_t)sourceObj;
+        ev.obj2 = to.kind == MTG_TGT_OBJ ? to.id : MTG_NO_OBJ;
+        ev.player = to.kind == MTG_TGT_PLAYER ? (uint8_t)to.id : 0xFF;
+        ev.combat = (uint8_t)combat;
+        ev.amount = (int16_t)amount;
+        ev.objCtrl = sourceObj != MTG_NO_OBJ ? d->objs[sourceObj].controller : 0xFF;
+        Mtg_CheckTriggers(d, &ev);
+    }
 }
 
 void Mtg_Destroy(MtgDuel *d, int obj)
@@ -253,9 +291,9 @@ static int TargetStillLegal(const MtgDuel *d, const MtgStackEntry *e, const MtgA
                 return Mtg_ValidObj(d, e->target.id, ab->tgt, e->source, e->controller);
         return 0;
     }
-    return d->objs[e->target.id].zone == MTG_ZONE_BATTLEFIELD
-        && Mtg_ValidObj(d, e->target.id, ab->tgt, e->source, e->controller)
-        && Mtg_CanTarget(d, e->target.id, e->source);
+    if (d->objs[e->target.id].zone != ab->tgtZone || !Mtg_ValidObj(d, e->target.id, ab->tgt, e->source, e->controller))
+        return 0;
+    return ab->tgtZone != MTG_ZONE_BATTLEFIELD || Mtg_CanTarget(d, e->target.id, e->source);
 }
 
 static int MainAbility(const MtgCardDef *c)
@@ -267,16 +305,71 @@ static int MainAbility(const MtgCardDef *c)
     return 0xFFFF;
 }
 
-static void ResolveTop(MtgDuel *d)
+void Mtg_AskChoice(MtgDuel *d, int player, int choice, const MtgManaCost *pay)
+{
+    MtgQuery *q = &d->query;
+    memset(q, 0, sizeof(*q));
+    q->kind = MTG_Q_CHOOSE;
+    q->player = (uint8_t)player;
+    q->choice = (uint8_t)choice;
+    q->source = d->res.source;
+    q->ability = d->resAbility;
+    if (pay)
+        q->pay = *pay;
+}
+
+static void FinishResolve(MtgDuel *d)
+{
+    const MtgStackEntry *e = &d->res;
+    const MtgCardDef *c = Mtg_Card(d->objs[e->source].def);
+    d->resolving = 0;
+    if (e->isSpell && d->objs[e->source].zone == MTG_ZONE_STACK) {
+        if (c->types & (MTG_T_INSTANT | MTG_T_SORCERY))
+            Mtg_MoveTo(d, e->source, MTG_ZONE_GRAVEYARD);
+        else {
+            d->objs[e->source].controller = e->controller;
+            Mtg_MoveTo(d, e->source, MTG_ZONE_BATTLEFIELD);
+        }
+    }
+}
+
+// the resolving entry's chain, from where it stopped; 1 while it waits for a choice (d->query is MTG_Q_CHOOSE)
+static int ContinueResolve(MtgDuel *d)
+{
+    MtgResolveCtx ctx;
+    ctx.e = &d->res;
+    ctx.controller = d->res.controller;
+    ctx.source = d->res.source;
+    if (d->res.optional == 1) {   // "you may" (OptionalDecider$ You): asked as it resolves
+        if (d->resChoice < 0) {
+            Mtg_AskChoice(d, d->res.controller, MTG_CHOICE_YESNO, NULL);
+            return 1;
+        }
+        if (d->resChoice == 0)
+            d->resAbility = 0xFFFF;
+        d->res.optional = 2;
+        d->resChoice = -1;
+    }
+    while (d->resAbility != 0xFFFF && !d->over) {
+        if (!Mtg_ResolveStep(d, &ctx, d->resAbility))
+            return 1;
+        d->resAbility = gMtgAbilities[d->resAbility].sub;
+        d->resStage = d->resPicks = 0;
+        d->resChoice = -1;
+    }
+    FinishResolve(d);
+    return 0;
+}
+
+static int ResolveTop(MtgDuel *d)
 {
     MtgStackEntry e = d->stack[--d->stackCount];
-    const MtgCardDef *c = Mtg_Card(d->objs[e.source].def);
     const MtgAbility *ab = e.ability != 0xFFFF ? &gMtgAbilities[e.ability] : NULL;
-    if (ab && ab->tgt && !TargetStillLegal(d, &e, ab)) {
+    if ((ab && ab->tgt && !TargetStillLegal(d, &e, ab)) || !Mtg_TriggerStillTrue(d, &e)) {
         Mtg_Event(d, MTG_EV_FIZZLE, e.source, e.ability, 0);
         if (e.isSpell)
             Mtg_MoveTo(d, e.source, MTG_ZONE_GRAVEYARD);
-        return;
+        return 0;
     }
     if (e.target.kind == MTG_TGT_OBJ || e.target.kind == MTG_TGT_STACK) {   // last known information
         e.lkiPower = (int16_t)Mtg_Power(d, e.target.id);
@@ -284,22 +377,12 @@ static void ResolveTop(MtgDuel *d)
         e.lkiController = d->objs[e.target.id].controller;
     }
     Mtg_Event(d, MTG_EV_RESOLVE, e.source, e.ability, e.isSpell);
-    if (ab) {
-        MtgResolveCtx ctx;
-        ctx.e = &e;
-        ctx.controller = e.controller;
-        ctx.source = e.source;
-        Mtg_ResolveAbility(d, &ctx, e.ability);
-    }
-    if (e.isSpell && d->objs[e.source].zone == MTG_ZONE_STACK) {
-        if (c->types & (MTG_T_INSTANT | MTG_T_SORCERY))
-            Mtg_MoveTo(d, e.source, MTG_ZONE_GRAVEYARD);
-        else {
-            Mtg_MoveTo(d, e.source, MTG_ZONE_BATTLEFIELD);
-            d->objs[e.source].controller = e.controller;
-            d->objs[e.source].sick = 1;
-        }
-    }
+    d->res = e;
+    d->resolving = 1;
+    d->resAbility = e.ability;
+    d->resStage = d->resPicks = 0;
+    d->resChoice = -1;
+    return ContinueResolve(d);
 }
 
 // ---- priority: the legal actions (what PlayerControllerHuman / AiController choose from) ----
@@ -323,6 +406,15 @@ static void AddWithTargets(const MtgDuel *d, MtgQuery *q, int kind, int obj, int
     int i;
     if (!ab || !ab->tgt) {
         AddAction(q, kind, obj, ability, x, t);
+        return;
+    }
+    if (ab->tgtZone != MTG_ZONE_BATTLEFIELD) {   // (cards in a graveyard)
+        for (i = 0; i < d->objCount; i++)
+            if (d->objs[i].zone == ab->tgtZone && Mtg_ValidObj(d, i, ab->tgt, obj, player)) {
+                t.kind = MTG_TGT_OBJ;
+                t.id = (uint16_t)i;
+                AddAction(q, kind, obj, ability, x, t);
+            }
         return;
     }
     if (ab->tgtStack) {
@@ -440,7 +532,10 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
     e->ability = a->ability;
     e->x = a->x;
     e->target = a->target;
+    e->trigger = 0xFFFF;
     Mtg_Event(d, e->isSpell ? MTG_EV_CAST : MTG_EV_ACTIVATE, a->obj, a->target.kind, a->target.id);
+    if (e->isSpell)
+        TrigEvent(d, MTG_TRIG_SPELL_CAST, a->obj, MTG_NO_OBJ, p);
     if (!e->isSpell && gMtgAbilities[a->ability].cost.sacSelf)
         Mtg_MoveTo(d, a->obj, MTG_ZONE_GRAVEYARD);   // (the ability keeps its source's last known state)
 }
@@ -658,6 +753,31 @@ static void BuildDiscard(MtgDuel *d)
             q->candidates[q->candidateCount++] = (uint16_t)i;
 }
 
+// blocks are declared: Blocks, AttackerBlocked, AttackerBlockedByCreature, AttackerUnblocked
+static void BlocksDeclared(MtgDuel *d)
+{
+    int i, j, def = Defender(d);
+    for (i = 0; i < d->objCount; i++)
+        if (d->objs[i].blocking != MTG_NO_OBJ && d->objs[i].zone == MTG_ZONE_BATTLEFIELD)
+            TrigEvent(d, MTG_TRIG_BLOCKS, i, d->objs[i].blocking, def);
+    for (i = 0; i < d->objCount; i++) {
+        int first = MTG_NO_OBJ;
+        if (!d->objs[i].attacking || d->objs[i].zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        if (!d->objs[i].blocked) {
+            TrigEvent(d, MTG_TRIG_ATTACKER_UNBLOCKED, i, MTG_NO_OBJ, def);
+            continue;
+        }
+        for (j = 0; j < d->objCount; j++)
+            if (d->objs[j].blocking == i) {
+                if (first == MTG_NO_OBJ)
+                    first = j;
+                TrigEvent(d, MTG_TRIG_ATTACKER_BLOCKED_BY, i, j, def);
+            }
+        TrigEvent(d, MTG_TRIG_ATTACKER_BLOCKED, i, first, def);
+    }
+}
+
 // the step's turn-based actions; returns 1 if it is waiting for a decision (the query is set)
 static int StartStep(MtgDuel *d)
 {
@@ -690,6 +810,7 @@ static int StartStep(MtgDuel *d)
             d->stepStarted = 2;
             return 1;
         }
+        BlocksDeclared(d);   // (nobody could block)
         break;
     case MTG_STEP_COMBAT_FIRST_STRIKE:
         d->combatHadFirstStrike = (uint8_t)AnyFirstStrike(d);
@@ -714,6 +835,79 @@ static int StartStep(MtgDuel *d)
         d->stepStarted = 3;
         break;
     }
+    switch (d->step) {   // "at the beginning of ..." (TriggerPhase), after the step's own actions
+    case MTG_STEP_UPKEEP: case MTG_STEP_DRAW: case MTG_STEP_MAIN1: case MTG_STEP_COMBAT_BEGIN:
+    case MTG_STEP_COMBAT_END: case MTG_STEP_MAIN2: case MTG_STEP_END:
+        TrigEvent(d, MTG_TRIG_PHASE, MTG_NO_OBJ, MTG_NO_OBJ, d->active);
+        break;
+    }
+    return 0;
+}
+
+// a trigger waiting goes on the stack with its target (TriggerHandler.runWaitingTrigger, WrappedAbility)
+static void PushTrigger(MtgDuel *d, int i, MtgTarget target)
+{
+    MtgPending pd = d->pending[i];
+    const MtgTrigger *t = &gMtgTriggers[pd.trigger];
+    MtgStackEntry *e;
+    memmove(&d->pending[i], &d->pending[i + 1], (d->pendingCount - i - 1) * sizeof(d->pending[0]));
+    d->pendingCount--;
+    if (d->stackCount >= MTG_MAX_STACK)
+        return;
+    e = &d->stack[d->stackCount++];
+    memset(e, 0, sizeof(*e));
+    e->controller = pd.controller;
+    e->source = pd.source;
+    e->ability = t->execute;
+    e->target = target;
+    e->trigger = pd.trigger;
+    e->trigObj = pd.trigObj;
+    e->trigObj2 = pd.trigObj2;
+    e->trigPlayer = pd.trigPlayer;
+    e->trigCtrl = pd.trigCtrl;
+    e->trigAmount = pd.trigAmount;
+    e->optional = t->optional;
+    d->passes = 0;
+    Mtg_Event(d, MTG_EV_TRIGGER, pd.source, target.kind, target.id);
+}
+
+static int NextPending(const MtgDuel *d)   // the active player's first (101.4: APNAP), in the order they happened
+{
+    int i;
+    for (i = 0; i < d->pendingCount; i++)
+        if (d->pending[i].controller == d->active)
+            return i;
+    return 0;
+}
+
+// the waiting triggers onto the stack; 1 while one waits for its target to be chosen (MTG_Q_TRIGGER_TARGET)
+static int PlacePending(MtgDuel *d)
+{
+    while (d->pendingCount && !d->over) {
+        int i = NextPending(d);
+        const MtgPending *pd = &d->pending[i];
+        const MtgTrigger *t = &gMtgTriggers[pd->trigger];
+        MtgTarget target = {MTG_TGT_NONE, 0};
+        if (gMtgAbilities[t->execute].tgt) {
+            MtgQuery *q = &d->query;
+            memset(q, 0, sizeof(*q));
+            AddWithTargets(d, q, MTG_ACT_ACTIVATE, pd->source, t->execute, 0, pd->controller);
+            if (q->actionCount == 0) {   // no legal target: it does nothing (603.3d)
+                memmove(&d->pending[i], &d->pending[i + 1], (d->pendingCount - i - 1) * sizeof(d->pending[0]));
+                d->pendingCount--;
+                continue;
+            }
+            if (q->actionCount > 1) {
+                q->kind = MTG_Q_TRIGGER_TARGET;
+                q->player = pd->controller;
+                q->source = pd->source;
+                q->ability = t->execute;
+                return 1;
+            }
+            target = q->actions[0].target;
+        }
+        PushTrigger(d, i, target);
+    }
     return 0;
 }
 
@@ -734,6 +928,10 @@ static void Run(MtgDuel *d)
             continue;
         }
         StateBasedActions(d);
+        if (d->over)
+            continue;
+        if (d->pendingCount && PlacePending(d))
+            return;
         if (d->over)
             continue;
         BuildPriority(d);
@@ -770,8 +968,9 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             if (++d->passes >= MTG_PLAYERS) {
                 d->passes = 0;
                 if (d->stackCount) {
-                    ResolveTop(d);
                     d->priority = d->active;
+                    if (ResolveTop(d))
+                        return 1;   // (it asks something as it resolves)
                 } else
                     NextStep(d);
             } else
@@ -791,6 +990,9 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
                     Mtg_Tap(d, o, 1);
                 Mtg_Event(d, MTG_EV_ATTACK, o, 0, 0);
             }
+        for (i = 0; i < q->candidateCount; i++)
+            if (a->attack & (1u << i))
+                TrigEvent(d, MTG_TRIG_ATTACKS, q->candidates[i], MTG_NO_OBJ, Defender(d));
         d->stepStarted = 1;
         if (!(a->attack & ((q->candidateCount >= 32 ? 0u : (1u << q->candidateCount)) - 1u))) {
             d->step = MTG_STEP_COMBAT_END - 1;   // no attackers: straight to the end of combat
@@ -813,6 +1015,7 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             d->objs[q->attackers[k]].blocked = 1;
             Mtg_Event(d, MTG_EV_BLOCK, b, q->attackers[k], 0);
         }
+        BlocksDeclared(d);
         d->stepStarted = 1;
         break;
     case MTG_Q_DISCARD:
@@ -820,6 +1023,23 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             return 0;
         Mtg_MoveTo(d, q->candidates[a->card], MTG_ZONE_GRAVEYARD);
         d->stepStarted = 0;   // (again: still too many, or the rest of the cleanup)
+        break;
+    case MTG_Q_TRIGGER_TARGET:
+        if (a->action >= q->actionCount)
+            return 0;
+        PushTrigger(d, NextPending(d), q->actions[a->action].target);
+        break;
+    case MTG_Q_CHOOSE:
+        if (q->choice == MTG_CHOICE_PICK) {
+            if (a->card >= q->candidateCount)
+                return 0;
+            d->resChoice = (int16_t)q->candidates[a->card];
+        } else
+            d->resChoice = a->card ? 1 : 0;
+        if (ContinueResolve(d))
+            return 1;
+        d->priority = d->active;
+        d->passes = 0;
         break;
     default:
         return 0;

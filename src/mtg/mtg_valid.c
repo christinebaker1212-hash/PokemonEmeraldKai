@@ -97,6 +97,8 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         return !d || o->owner == controller;
     if (n == 5 && strncmp(p, "Other", 5) == 0)
         return !d || obj != src;
+    if (n == 4 && strncmp(p, "Self", 4) == 0)   // (the card the ability or trigger belongs to)
+        return !d || obj == src;
     if (n == 6 && strncmp(p, "tapped", 6) == 0)
         return !d || o->tapped;
     if (n == 8 && strncmp(p, "untapped", 8) == 0)

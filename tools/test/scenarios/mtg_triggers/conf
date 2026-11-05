@@ -1,0 +1,6 @@
+# MAGIC's triggered abilities on the table: Nekrataal asks for its target (two to choose from), the trigger goes on the
+# stack and destroys it; Gravedigger's "you may" asks YES / NO as it resolves and brings a creature card back.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: a trigger's target" "mtg: you: yes" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Nekrataal to focus" "mtg: no Gravedigger to focus")

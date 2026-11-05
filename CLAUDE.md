@@ -100,7 +100,8 @@ MOSSDEEP's CARD SHOP (the GAME CORNER, data/scripts/mtg_shop.inc), the CARD CASE
 (src/mtg/mtg_ui.c, mtg_board.c, "<save>.mtg"): COOP_NOTES "MAGIC"; scenarios mtg_shop, mtg_play. Since 1.96.0 its
 screens copy the POKeMON / YU-GI-OH! sides' in every detail and its table is the POKeMON table's style (the user: keep
 them so), faces src/mtg/mtg_gfx.c with Scryfall's art (graphics/mtg/printed.bin: tools/mtg/fetch_art.py,
-build_printed.py). The CARD CASE's L / R round: POKeMON, YU-GI-OH!, MAGIC, TRIPLE TRIAD (always last).
+build_printed.py). Boosters by set (1.100.0: src/mtg/mtg_sets.c, data src/mtg/mtg_sets_data.c from tools/mtg/fetch_sets.py),
+triggers src/mtg/mtg_trigger.c, MAGIC achievements (mp_achieve.c C_MAGIC). The CARD CASE's L / R round: POKeMON, YU-GI-OH!, MAGIC, TRIPLE TRIAD (always last).
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

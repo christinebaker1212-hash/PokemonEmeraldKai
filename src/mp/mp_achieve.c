@@ -48,8 +48,8 @@ enum {
 };
 
 // The menu's tabs
-enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_TRIAD, C_DANCE, C_JOHTO, C_KANTO, C_SINNOH, NUM_ACH_CATS };
-static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "TRIPLE TRIAD", "DANCE", "JOHTO", "KANTO", "SINNOH"};
+enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_MAGIC, C_TRIAD, C_DANCE, C_JOHTO, C_KANTO, C_SINNOH, NUM_ACH_CATS };
+static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "MAGIC", "TRIPLE TRIAD", "DANCE", "JOHTO", "KANTO", "SINNOH"};
 
 enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD, FL_JOHTO_BEASTS, FL_KANTO_BIRDS, FL_JOHTO_BADGES, FL_KANTO_BADGES,
        FL_ALPH, FL_ARCEUS_TRIALS, FL_SINNOH_BADGES, FL_SINNOH_LAKES, FL_SINNOH_CREATION };
@@ -372,6 +372,20 @@ static const struct Achievement sAch[] = {
     {"ygosecret", "SECRET RARE", "Pull a Secret Rare from a booster pack.", AK_EVENT, 0, 1, 1, C_YUGIOH},
     {"ygoflawless", "UNTOUCHED", "Win a Yu-Gi-Oh! duel without losing any Life Points.", AK_EVENT, 0, 1, 1, C_YUGIOH},
     {"ygoexodia", "OBLITERATE!", "Win a duel with all five pieces of Exodia.", AK_EVENT, 0, 1, 2, C_YUGIOH},
+    // MAGIC duels (src/mtg): counted and unlocked by the card screens (mtg_ui.c) and the table (mtg_board.c)
+    {"mtgstart", "THE GATHERING", "Get a MAGIC starter deck.", AK_EVENT, 0, 1, 0, C_MAGIC},
+    {"mtgwin1", "UNTAP, UPKEEP, DRAW", "Win your first MAGIC duel.", AK_COUNT, 0, 1, 0, C_MAGIC},
+    {"mtgwin100", "PLANESWALKER", "Win 100 MAGIC duels.", AK_COUNT, 0, 100, 2, C_MAGIC},
+    {"mtgregulars6", "MOSSDEEP REGULAR", "Beat all 6 regulars at MOSSDEEP's CARD SHOP.", AK_COUNT, 0, 6, 1, C_MAGIC},
+    {"mtgpack50", "BOOSTER DRAFT", "Open 50 MAGIC booster packs.", AK_COUNT, 0, 50, 1, C_MAGIC},
+    {"mtgsets5", "SET HOPPER", "Open boosters of 5 different MAGIC sets.", AK_EVENT, 0, 1, 1, C_MAGIC},
+    {"mtgkinds250", "THE LIBRARY", "Own 250 different MAGIC cards.", AK_EVENT, 0, 1, 2, C_MAGIC},
+    {"mtgflawless", "NOT A SCRATCH", "Win a MAGIC duel at 20 life or more.", AK_EVENT, 0, 1, 1, C_MAGIC},
+    {"mtgfast", "QUICK DRAW", "Win a MAGIC duel within your first five turns.", AK_EVENT, 0, 1, 1, C_MAGIC},
+    {"mtgdecked", "DECKED", "Win as your opponent runs out of cards to draw.", AK_EVENT, 0, 1, 1, C_MAGIC},
+    {"mtgcounter", "NOT SO FAST", "Counter one of your opponent's spells.", AK_EVENT, 0, 1, 0, C_MAGIC},
+    {"mtgmono", "TRUE COLORS", "Win a MAGIC duel with a deck of one color.", AK_EVENT, 0, 1, 0, C_MAGIC},
+    {"mtgdomain", "ALL FIVE", "Win a MAGIC duel with a deck of all five colors.", AK_EVENT, 0, 1, 2, C_MAGIC},
     // Triple Triad (src/tt): counted and unlocked by the card screens
     {"ttstart", "FIRST HAND", "Get your first TRIPLE TRIAD cards.", AK_EVENT, 0, 1, 0, C_TRIAD},
     {"ttwin1", "OPEN RULES", "Win a game of TRIPLE TRIAD.", AK_COUNT, 0, 1, 0, C_TRIAD},

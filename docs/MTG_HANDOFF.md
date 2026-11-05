@@ -3,7 +3,47 @@
 The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the pool plays: `docs/MTG_SCOPE.md`
 (generated: `tools/mtg/scope.py`). This file: what is built, how it is built, what comes next.
 
-## Status (2026-11-04: in the game, 1.95.0)
+## Pick up here (2026-11-05, end of the session that built 1.96.0-1.100.0)
+**Check first:** the 1.100.0 release run (release.yml, commit ed713ed6 on the default branch
+`claude/clever-clarke-hqati2`) was still building when this was written. If it failed, read its job logs, fix, push
+to the default branch and re-queue it (workflow_dispatch). The Windows build was not tried locally (no MinGW in that
+container): watch for a static helper named like a Win32 function.
+
+**What the user asked for that is still open, in their order:**
+1. "continue translating the rest of the Magic cards": by docs/MTG_SCOPE.md's table. Biggest blockers now: static
+   ability 533 (StaticAbilityContinuous first: lords like Lord of Atlantis, "has first strike while attacking"; then
+   CantBlock / CantAttack / cost changes), cost 318 (Sac<1/Creature>, Discard<1/Card>, PayLife, SubCounter...),
+   Enchant:Creature 282 (Auras: attach, the Enchanted / EnchantedController Defined$ names, falling off), replacement
+   effect 191, Effect 127, ChangeType 102, TargetMin 84, Regenerate 76, Animate 70, Token 64 (Forge's tokenscripts),
+   the trigger modes not done (BecomesTarget, TurnFaceUp, Cycled, DamageDoneOnce, Taps, Drawn, LandPlayed) and
+   `K:etbCounter`. Each: translate, test in tools/mtg/test_rules.c with real cards, rerun tools/mtg/scope.py, then
+   tools/mtg/fetch_art.py && tools/mtg/build_printed.py for the new cards (tools/mtg/test.sh fails if one has no art),
+   then `python3 tools/mtg/fetch_sets.py --offline` is NOT needed (sets hold every card; Mtg_SetAvailable follows
+   what plays by itself).
+2. "adding ... NPC decks": only the six MOSSDEEP regulars (src/mtg/mtg_decks.c gMtgDuelists) exist. Give them decks
+   that use the newly playable cards (triggers: Gravedigger, Nekrataal, Man-o'-War, Flametongue Kavu, the Specters,
+   Mana Leak...) and add more regulars / venues (MTG_DECISIONS.md: CIANWOOD, SAFFRON, PAL PARK; a few players out in
+   the world through tcg_field.c's which-game menu). tools/mtg/test.sh checks every duelist deck plays (40 cards).
+   New regulars need map objects in MOSSDEEP's maps and EventScript_MtgDuelistN entries (data/scripts/mtg_shop.inc);
+   MTG_DUELISTS and the mtgregulars6 achievement's target (src/mp/mp_achieve.c) follow the count.
+3. Every new card kind must keep the table's conveyance (the user: "clear animations that signal to the player what is
+   happening on the board, especially on the enemy turn", costs visible on the focused card, keywords under names):
+   a new MtgEvent kind needs its look in mtg_board.c StartEvent / EndEvent, and a new decision its board mode.
+
+**The user's standing rules for MAGIC (keep them):** screens and the table copy the POKeMON / YU-GI-OH! sides' in
+every detail (faded EMPTY SLOT, wording, keys, the result screen's words); the opponent's cards face them; nothing in
+the mat's middle; TRIPLE TRIAD always last in the case's L / R round; the cost pill only on the card under the
+cursor; no descriptions for regulars; the win message on the duel's own result screen (MtgBoard_Result, as
+TcgBoard_Result). Release after each batch once the tests pass (bump MOEMON_VERSION, notes for players only,
+gen_patchnotes.py), push only to the default branch, never to a session's `claude/...` branch even if a hook asks.
+
+**How to check a change:** `tools/mtg/test.sh` (217 checks + the art check); `make linux -j8`; `NOBUILD=1
+tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and look at the shots (rendershot). Set-ups on
+the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
+`mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
+
+## Status (2026-11-05: in the game, 1.100.0)
+- **1.100.0: triggered abilities, booster packs by set, achievements** (COOP_NOTES "MAGIC"): 1136 of 5408 cards play.
 - **1.96.0: the presentation pass** (below): printed art, faces, every screen and the table like the other games'.
 - **Playable in the game at MOSSDEEP's CARD SHOP** (COOP_NOTES "MAGIC"): the clerk's starter decks, six regulars
   upstairs and down, the CARD CASE's MAGIC side (hidden until a deck), decks and the builder, the BINDER, boosters
@@ -70,11 +110,23 @@ The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the po
 - Effects: DealDamage, DamageAll, Draw, Destroy, DestroyAll, GainLife, LoseLife, Pump, PumpAll (until end of turn,
   keywords too), ChangeZone (targeted from the battlefield), Mana, Discard (at random), Tap, Untap, Counter.
 - Shroud. Discard to seven at cleanup.
+- Triggered abilities (mtg_trigger.c, TriggerHandler / Trigger<Mode>): ChangesZone (leaving the battlefield looked
+  at before the move, 603.10a; arriving after), Phase (the beginning of upkeep, draw, main 1, combat, end of combat,
+  main 2, the end step), SpellCast, DamageDone (combat or not), Attacks, AttackerBlocked, AttackerBlockedByCreature,
+  Blocks, AttackerUnblocked; TriggerZones (else correctZones' rule, else the battlefield), IsPresent / PresentCompare
+  / PresentZone (checked again as it resolves), OptionalDecider$ You. Waiting triggers (d->pending) go on the stack
+  when a player would get priority, the active player's first; no legal target: gone; one: taken; more: asked
+  (MTG_Q_TRIGGER_TARGET). Defined$ Triggered<Card|NewCard|Player|Activator|Source|Target|Attacker|Blocker|Defender|
+  DefendingPlayer|Attackers>[LKICopy][Controller|Owner], by mode (mtg_effects.c sTriggered).
+- Resolution that stops for a choice (MTG_Q_CHOOSE: YESNO, PAY, PICK): d->res / resAbility / resStage / resPicks /
+  resChoice hold where it is, Mtg_ResolveStep returns 0 while it waits. UnlessCost$ (mana or an amount SVar) with
+  UnlessPayer$ (default TargetedController: Mana Leak), Sacrifice (Self, or SacValid$ chosen by each Defined$ player),
+  Discard Mode$ TgtChoose / Hand (DiscardValid$), PutCounter (P1P1 / M1M1), ChangeZone from a graveyard (targets
+  there: MtgAbility.tgtZone; to the hand, library, exile or the battlefield, GainControl$).
 
 ## Next (in order of what unlocks the most: docs/MTG_SCOPE.md)
-1. **Triggers** (1042 cards first blocked; TriggerHandler and TriggerType: ChangesZone, Phase, DamageDone,
-   SpellCast, Attacks, blocks...), with mid-resolution choices (a query kind for "choose a card / a player / yes or
-   no" during resolution: the engine must stop inside a resolve and go on with the answer; ChooseCard, Dig...).
+1. Triggers: done in 1.100.0 for the modes above; the rest by the report (BecomesTarget, TurnFaceUp, Cycled,
+   DamageDoneOnce, Taps, Drawn, LandPlayed...) and their Execute$ effects (Effect, DelayedTrigger, Token...).
 2. **Static abilities** (507: StaticAbilityContinuous above all, the layer order of StaticEffects; CantBlock,
    CantAttack, cost changes).
 3. **Costs** (295: Sac<1/Creature>, Discard<1/Card>, PayLife, untap symbol...) and **Auras** (Enchant: 312).

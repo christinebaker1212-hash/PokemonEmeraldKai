@@ -23,10 +23,13 @@ enum {
     MTG_API_TAP,              // TapEffect
     MTG_API_UNTAP,            // UntapEffect
     MTG_API_COUNTER,          // CounterEffect
+    MTG_API_SACRIFICE,        // SacrificeEffect (Defined$ Self, or one SacValid$ permanent the player chooses)
+    MTG_API_PUT_COUNTER,      // CountersPutEffect (P1P1 / M1M1)
     MTG_API_COUNT
 };
 
-enum { MTG_AB_SPELL, MTG_AB_ACTIVATED, MTG_AB_SUB };     // A:SP$, A:AB$, SVar:...:DB$
+enum { MTG_AB_SPELL, MTG_AB_ACTIVATED, MTG_AB_SUB,      // A:SP$, A:AB$, SVar:...:DB$
+       MTG_AB_TRIGGERED };                                // a trigger's Execute$ (it may target, as its root)
 
 typedef struct { const char *key, *value; } MtgParam;
 
@@ -44,6 +47,7 @@ typedef struct {
     MtgCost cost;
     const char *tgt;                // ValidTgts$ (NULL: no target)
     uint8_t tgtStack;               // TargetType$ Spell: targets a spell on the stack
+    uint8_t tgtZone;                // where its targets are (MTG_ZONE_*: the battlefield, or ChangeZone's Origin$)
 } MtgAbility;
 
 // mtg_script.c
@@ -53,9 +57,43 @@ extern MtgParam *gMtgSvars;
 const char *Mtg_Param(const MtgAbility *ab, const char *key);   // NULL if absent
 const char *Mtg_Svar(int card, const char *name);
 int Mtg_ParseManaCost(const char *s, MtgManaCost *out);         // 0 if it has symbols the engine doesn't know
-int Mtg_KeywordByName(const char *name);
-char *Mtg_Token(char **p, char sep);                            // splits text in place, like strtok_r                         // MTG_KW_* or -1
+int Mtg_KeywordByName(const char *name);                        // MTG_KW_* or -1
+char *Mtg_Token(char **p, char sep);                            // splits text in place, like strtok_r
+int Mtg_ParseParams(char *s, int *first);                       // "K$ V | K$ V" -> gMtgParams; returns the count
 extern const char *const gMtgApiNames[MTG_API_COUNT];
+
+// mtg_trigger.c: triggered abilities (TriggerHandler.java, TriggerType and each Trigger<Mode>.java)
+enum {
+    MTG_TRIG_NONE, MTG_TRIG_CHANGES_ZONE, MTG_TRIG_PHASE, MTG_TRIG_SPELL_CAST, MTG_TRIG_DAMAGE_DONE, MTG_TRIG_ATTACKS,
+    MTG_TRIG_ATTACKER_BLOCKED, MTG_TRIG_ATTACKER_BLOCKED_BY, MTG_TRIG_BLOCKS, MTG_TRIG_ATTACKER_UNBLOCKED,
+    MTG_TRIG_COUNT
+};
+typedef struct {
+    uint8_t mode, optional, zones;  // zones: where its card must be (bits 1 << MTG_ZONE_*)
+    uint16_t card, execute;         // its card; the ability it puts on the stack
+    uint16_t paramFirst, paramCount;
+} MtgTrigger;
+extern MtgTrigger *gMtgTriggers;
+extern const char *const gMtgTriggerModes[MTG_TRIG_COUNT];
+// what happened, for the triggers to look at
+typedef struct {
+    uint8_t mode;
+    uint16_t obj, obj2;             // the card it is about (moved, cast, attacking, blocking, the damage's source);
+                                    // obj2: the other one (the blocker, the attacker blocked, the damaged creature)
+    uint8_t player;                 // Phase: the active player; SpellCast: the caster; DamageDone: the damaged player
+                                    // (0xFF: a creature); combat: the defending player
+    uint8_t from, to, step, combat; // ChangesZone's zones; Phase's step; DamageDone: combat damage
+    uint8_t objCtrl;                // obj's controller as it happened
+    int16_t amount;                 // DamageDone: how much
+} MtgTrigEvent;
+// T: line text -> a trigger of card c (its Execute$ parsed as an MTG_AB_TRIGGERED ability); a part it doesn't
+// translate makes the card unsupported
+void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text);
+void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev);     // the triggers it sets off join d->pending
+int Mtg_TriggerStillTrue(const MtgDuel *d, const MtgStackEntry *e);   // an intervening "if" (IsPresent$) on resolving
+const char *Mtg_TriggerParam(const MtgTrigger *t, const char *key);
+int Mtg_ParseAbilityText(MtgCardDef *c, int cardId, char *text, int kind);   // (mtg_script.c, for the triggers)
+void Mtg_Unsupported(MtgCardDef *c, const char *why);
 
 // mtg_valid.c: Forge's "Valid" properties (CardProperty.java, PlayerProperty.java)
 int Mtg_ValidObj(const MtgDuel *d, int obj, const char *spec, int sourceObj, int controller);
@@ -83,13 +121,20 @@ uint32_t Mtg_Random(MtgDuel *d, uint32_t n);
 int Mtg_TopOfLibrary(const MtgDuel *d, int player);
 void Mtg_RefreshQuery(MtgDuel *d);
 int Mtg_CanBlock(const MtgDuel *d, int blocker, int attacker);   // CombatUtil.canBlock
+// a choice while resolving (d->query becomes MTG_Q_CHOOSE for player)
+void Mtg_AskChoice(MtgDuel *d, int player, int choice, const MtgManaCost *pay);
 
 // mtg_effects.c: one resolve per API (forge/game/ability/effects)
 typedef struct {
     MtgStackEntry *e;
     int controller, source;
 } MtgResolveCtx;
-void Mtg_ResolveAbility(MtgDuel *d, MtgResolveCtx *ctx, int ability);
+// one ability of a resolving chain: 1 done, 0 waiting for a choice (d->query is set; d->resChoice will hold it)
+int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability);
+void Mtg_AddCounters(MtgDuel *d, int obj, int n);
+// a Defined$ name of a triggered ability ("TriggeredCard", "TriggeredTargetController"...) understood for this mode
+int Mtg_TriggeredDefinedKnown(int mode, const char *name);
+void Mtg_Sacrifice(MtgDuel *d, int obj);
 int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char *value, int *ok);
 int Mtg_ApiKnown(const char *name);           // MTG_API_* or 0
 int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why);   // 0: something it doesn't handle yet (*why)
