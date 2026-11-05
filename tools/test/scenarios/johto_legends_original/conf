@@ -1,0 +1,8 @@
+# JOHTO's legendaries as Crystal has them (audit case 60): Quetzal's SUICUNE by the LAKE OF RAGE stays hidden before
+# and after the LEAGUE (Crystal's waits at TIN TOWER)
+MODE=1
+GEN=9
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("flag 4592 = 1")
+UNEXPECT_A=("[crash]" "flag 4592 = 0")

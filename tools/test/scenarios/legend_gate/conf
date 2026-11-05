@@ -1,9 +1,9 @@
-# Before a region's LEAGUE only the legendaries its own games give then are out: KANTO's ARTICUNO (SEAFOAM) is there,
-# the GALARIAN ARTICUNO is hidden until the LEAGUE is beaten, then shown; the ENTEI of KANTO (JOHTO's) stays hidden
-# (each region's legendaries only there: qz_specials.c MP_LegendForeign)
+# Before a region's LEAGUE only the legendaries its own games give then are out: KANTO's ARTICUNO (SEAFOAM) is there;
+# the GALARIAN ARTICUNO (a later form: Quetzal's) stays hidden before and after the LEAGUE (audit case 60); the ENTEI
+# of KANTO (JOHTO's) stays hidden (each region's legendaries only there: qz_specials.c MP_LegendForeign)
 MODE=1
 GEN=9
 TMO=90
 ENV_A="MOEMON_DEBUG_REGION=2"
-EXPECT_A=("flag 8568 = 0" "flag 9057 = 1" "flag 9018 = 1" "flag 9057 = 0")
-UNEXPECT_A=("[crash]" "flag 8568 = 1" "flag 9018 = 0")
+EXPECT_A=("flag 8568 = 0" "flag 9057 = 1" "flag 9018 = 1")
+UNEXPECT_A=("[crash]" "flag 8568 = 1" "flag 9018 = 0" "flag 9057 = 0")

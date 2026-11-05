@@ -1763,7 +1763,7 @@ bool8 MP_Gen_Allowed(u16 species)
 #include "../data/qz_later_objects.h"
 
 // JOHTO's / KANTO's overworld POKéMON of a later generation (legendaries standing on the map, MAGEARNA...) stay out
-// of sight while the GENERATION doesn't allow them (event_object_movement.c, with the object's own flag)
+// of sight (event_object_movement.c, with the object's own flag): Quetzal's additions, gone for good (audit case 60)
 bool8 MP_Gen_ObjectHidden(u8 localId)
 {
     u32 i;
@@ -1772,7 +1772,7 @@ bool8 MP_Gen_ObjectHidden(u8 localId)
         return FALSE;
     for (i = 0; i < ARRAY_COUNT(sQzLaterObjects); i++)
         if (sQzLaterObjects[i].group == group && sQzLaterObjects[i].num == num && sQzLaterObjects[i].localId == localId)
-            return !MP_Gen_Allowed(sQzLaterObjects[i].species);
+            return TRUE;   // (audit case 60: Gens 5-9's legendaries never stand in JOHTO / KANTO; MOEGATCHA has them)
     return FALSE;
 }
 

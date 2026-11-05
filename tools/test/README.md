@@ -114,6 +114,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `johto_mahogany_mart` | MAHOGANY's shop run by TEAM ROCKET, then the old woman's stock once the RADIO TOWER is freed |
 | `kanto_safari` | FUCHSIA's SAFARI ZONE as FireRed's: ¥500, 30 SAFARI BALLS, 600 steps that count down, RETIRE ends it at the gate |
 | `kanto_oak_rating` | OAK rates KANTO's POKéDEX with FireRed's words for every ten caught |
+| `johto_legends_original` | Quetzal's SUICUNE by the LAKE OF RAGE stays hidden before and after the LEAGUE (only the original games' legendaries) |
 | `johto_buena` | BUENA's PASSWORD: the radio says the day's password, BUENA gives the BLUE CARD and takes the right answer for a point, the prize desk trades points for an ULTRA BALL |
 | `johto_bugcontest_crystal` | the Bug-Catching Contest on a THURSDAY: five of Crystal's contestants in the park, a second catch asks to switch, "finish now?" at the way out, the judging in a line, the catch joins the party and the lead keeps its EXP |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |

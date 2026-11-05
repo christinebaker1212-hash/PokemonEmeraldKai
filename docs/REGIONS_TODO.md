@@ -199,7 +199,9 @@ overworld (MOEGATCHA pulls only). The audit's findings: docs/regions_audit/.
   their home Quetzal's static encounters of them are hidden. The original games' own island events stay (the user,
   later the same day): FireRed's NAVEL ROCK and BIRTH ISLAND, Emerald's NAVEL ROCK and FARAWAY ISLAND. JIRACHI, MANAPHY and PHIONE have no encounter in their home region, so they keep
   their places (else they couldn't be caught at all). Gens 5-9 legendaries have no home region here and stay.
-  (Overridden 2026-11-04, docs/REGIONS_AUDIT.md case 60: Gen 5+ legendaries leave the overworld, MOEGATCHA only.)
+  (Overridden 2026-11-04, docs/REGIONS_AUDIT.md case 60, done in 1.111.0: Gen 5+ legendaries leave the overworld,
+  MOEGATCHA only; JIRACHI, MANAPHY and PHIONE are HOENN's / SINNOH's and hidden here too; Quetzal's SUICUNE by the LAKE
+  OF RAGE goes.)
 - Time of day outside SINNOH: Platinum's mechanism (grass slots 2 and 3; morning 4:00-9:59, night 20:00-3:59). JOHTO's
   and KANTO's morning / night POKéMON are Crystal's (the ones its tables show then and not by day, heaviest slot first;
   79 maps; Crystal's DIGLETT'S CAVE, ROUTE 10 NORTH, 21, 26, TIN TOWER 2F, SILVER CAVE's item rooms and the WHIRL

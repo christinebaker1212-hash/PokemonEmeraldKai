@@ -1,8 +1,8 @@
-# JOHTO / KANTO's POKéMON of later generations standing on the map show from their GENERATION on: MELOETTA in the
-# DANCE THEATER (after the LEAGUE) is hidden at GEN 3 and a static battle at GEN 9
+# Gens 5-9's legendaries never stand on JOHTO's / KANTO's maps (audit case 60: MOEGATCHA has them): MELOETTA in the
+# DANCE THEATER stays hidden at GEN 3 and GEN 9, after the LEAGUE too, so A there starts no battle
 MODE=1
 GEN=3
 TMO=120
 ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=6:60"
-EXPECT_A=("life battle: begin")
-UNEXPECT_A=("[crash]")
+EXPECT_A=("[test] party: 6(")
+UNEXPECT_A=("[crash]" "life battle: begin")

@@ -456,7 +456,7 @@ static bool8 ArceusTrialWaits(const struct QzStatic *e)
 static bool8 PreLeagueLegend(const struct QzStatic *e)
 {
     if (e->region == REGION_JOHTO)
-        return e->species == SPECIES_RAIKOU || e->species == SPECIES_ENTEI || e->species == SPECIES_SUICUNE;
+        return e->species == SPECIES_RAIKOU || e->species == SPECIES_ENTEI;
     if (e->region == REGION_KANTO)
         return e->gen == 0 && (e->species == SPECIES_ARTICUNO || e->species == SPECIES_ZAPDOS || e->species == SPECIES_MOLTRES);
     return FALSE;
@@ -464,7 +464,8 @@ static bool8 PreLeagueLegend(const struct QzStatic *e)
 
 // Moemon Kai: each region's legendaries only in their own region (the user, 2026-11-02: Quetzal put every
 // generation's in JOHTO and KANTO, FireRed's Sevii islands and Emerald's event islands borrow other regions' too).
-// A legendary that has no encounter in its home region (JIRACHI, MANAPHY, PHIONE) keeps the places it has.
+// JIRACHI, MANAPHY and PHIONE are HOENN's / SINNOH's too (audit case 60, the user 2026-11-04: Quetzal's additions go;
+// they once kept their places here for having no encounter at home).
 static const u16 sLegendHome[][2] = {
     {SPECIES_ARTICUNO, REGION_KANTO}, {SPECIES_ZAPDOS, REGION_KANTO}, {SPECIES_MOLTRES, REGION_KANTO},
     {SPECIES_MEWTWO, REGION_KANTO}, {SPECIES_MEW, REGION_KANTO},
@@ -473,6 +474,7 @@ static const u16 sLegendHome[][2] = {
     {SPECIES_REGIROCK, REGION_HOENN}, {SPECIES_REGICE, REGION_HOENN}, {SPECIES_REGISTEEL, REGION_HOENN},
     {SPECIES_LATIAS, REGION_HOENN}, {SPECIES_LATIOS, REGION_HOENN}, {SPECIES_KYOGRE, REGION_HOENN},
     {SPECIES_GROUDON, REGION_HOENN}, {SPECIES_RAYQUAZA, REGION_HOENN}, {SPECIES_DEOXYS, REGION_HOENN},
+    {SPECIES_JIRACHI, REGION_HOENN}, {SPECIES_MANAPHY, REGION_SINNOH}, {SPECIES_PHIONE, REGION_SINNOH},
     {SPECIES_UXIE, REGION_SINNOH}, {SPECIES_MESPRIT, REGION_SINNOH}, {SPECIES_AZELF, REGION_SINNOH},
     {SPECIES_DIALGA, REGION_SINNOH}, {SPECIES_PALKIA, REGION_SINNOH}, {SPECIES_HEATRAN, REGION_SINNOH},
     {SPECIES_REGIGIGAS, REGION_SINNOH}, {SPECIES_GIRATINA, REGION_SINNOH}, {SPECIES_CRESSELIA, REGION_SINNOH},
@@ -497,9 +499,20 @@ static bool8 OriginalGameEvent(const struct QzStatic *e)
     return map == MAP_KANTO_NAVEL_ROCK_BASE || map == MAP_KANTO_NAVEL_ROCK_SUMMIT || map == MAP_KANTO_BIRTH_ISLAND_EXTERIOR;
 }
 
+// Audit case 60 (the user, 2026-11-04): Gens 5-9's legendaries and mythicals (and later forms of older ones) leave
+// JOHTO's and KANTO's maps: MOEGATCHA pulls are their only source. SUICUNE by the LAKE OF RAGE is Quetzal's too
+// (Crystal's waits at TIN TOWER).
+static bool8 NotOriginalLegend(const struct QzStatic *e)
+{
+    if (e->species >= FIRST_GEN59_SPECIES || e->gen >= 5)
+        return TRUE;
+    return e->species == SPECIES_SUICUNE && e->region == REGION_JOHTO
+        && ((e->group << 8) | e->num) == MAP_JOHTO_LAKE_OF_RAGE;
+}
+
 static bool8 HiddenForeignLegend(const struct QzStatic *e)
 {
-    return MP_LegendForeign(e->species, e->region) && !OriginalGameEvent(e);
+    return (MP_LegendForeign(e->species, e->region) && !OriginalGameEvent(e)) || NotOriginalLegend(e);
 }
 
 // After a map's transition scripts (overworld.c): a legendary from another region that Quetzal placed stays hidden,

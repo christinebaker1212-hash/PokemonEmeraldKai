@@ -4561,6 +4561,13 @@ follow_behind, follow_ground.
   early?" on coming back), 3 out of balls mid-battle. data/scripts/safari_zone.inc branches on SafariZone_InKanto: the
   game ends at FUCHSIA's gate with FireRed's PA lines. Every sign and rest-house line in the four areas and the SECRET
   HOUSE is FireRed's again (restore_words, by position: the maps are FireRed's). Test kanto_safari (mp safari info).
+- **Case 60, the original games' legendaries only** (the user's rule, 2026-11-04): in JOHTO and KANTO, Gens 5-9's
+  legendaries and mythicals (and later forms of older ones) never stand on the maps: qz_specials.c NotOriginalLegend
+  hides their sQzStatics entries for good, mp_region.c MP_Gen_ObjectHidden every sQzLaterObjects one; MOEGATCHA
+  pulls are their only source. JIRACHI (HOENN's), MANAPHY and PHIONE (SINNOH's) joined sLegendHome, so they are
+  foreign here; Quetzal's SUICUNE by the LAKE OF RAGE is hidden (Crystal's waits at TIN TOWER: case 139). Kept: the
+  originals (FireRed's birds, MEWTWO, NAVEL ROCK, BIRTH ISLAND; Crystal's LUGIA, HO-OH, CELEBI, the roaming beasts)
+  and MEW, KANTO's own mythical. Tests legend_gate, region_later_mons (rewritten for the rule), johto_legends_original.
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).
