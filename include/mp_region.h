@@ -116,6 +116,10 @@ struct Pokemon;
 struct PokemonStorage *MP_Region_GlobalPC(void);   // the GLOBAL PC's boxes (made on first use)
 bool8 MP_Region_DepositGlobal(const struct BoxPokemon *mon);
 u16 MP_Region_GlobalFree(void);
+u16 MP_Region_SendLuggage(void);          // customs: the BAG but its KEY ITEMS into the GLOBAL PC (1.101.0)
+u16 MP_Region_DeliverGlobalItems(void);   // the item PC: what the GLOBAL PC holds, in a region whose LEAGUE is beaten
+u16 MP_Region_GlobalItemCount(void);
+u16 MP_RegionHasLuggage(void);
 bool8 MP_Region_FitBoxMon(struct BoxPokemon *b, u8 region);   // its EXP for that region (Lv 5 the first time)
 void MP_Region_FitMon(struct Pokemon *mon, u8 region);
 void MP_Region_LeagueLevels(u8 region);              // a League beaten: its Pokemon at their best level everywhere

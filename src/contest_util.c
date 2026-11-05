@@ -555,11 +555,19 @@ static void CB2_StartShowContestResults(void)
     SetVBlankCallback(VBlankCB_ShowContestResults);
 }
 
+// Moemon Co-op: the results at the host's ANIM SPEED too (contest.c); the A press waiting runs once a frame
+void MP_ContestTurbo(bool8 (*skip)(TaskFunc func));
+static bool8 MpResultsNoTurbo(TaskFunc func)
+{
+    return func == Task_SetSeenWinnerMon || func == Task_TryDisconnectLinkPartners || func == Task_LinkContest_Disconnect;
+}
+
 static void CB2_ShowContestResults(void)
 {
     AnimateSprites();
     BuildOamBuffer();
     RunTasks();
+    MP_ContestTurbo(MpResultsNoTurbo);
     UpdatePaletteFade();
     CopyBgTilemapBufferToVram(1);
     CopyBgTilemapBufferToVram(2);

@@ -7,6 +7,7 @@ Kanto_SSAnne_1F_Room6_MapScripts::
 @ "leave the ship" offer are gone (the woman is back for saves that slept in the bed)
 Kanto_SSAnne_1F_Room6_EventScript_8410976::
 	clearflag FLAG_QZ_0x292D
+	clearflag FLAG_QZ_0x292B   @ (a save that slept in the bed wakes from the dream)
 	end
 
 @ Kanto_SSAnne_1F_Room6 object 1 (local id 1, gfx 0x3F58) at 3,5

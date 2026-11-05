@@ -1,10 +1,11 @@
-# The host's trip takes the room along: ALICE (host) travels to JOHTO; BOB, in the room, follows (his first POKeMON
-# comes, the rest wait in the GLOBAL PC) instead of leaving
+# The host's trip takes the room along: ALICE (host) travels to JOHTO; BOB, in the room, may not lead a trip himself
+# ("trip allowed 0"), follows instead of leaving: told where the host sails, picks the one POKeMON who comes along
+# (his second, PIKACHU; the rest wait in the GLOBAL PC) and takes the same boat
 MODE=2
-TMO=200
+TMO=300
 ENV_A="MOEMON_DEBUG_PARTY=6:50,9:50"
 ENV_B="MOEMON_DEBUG_PARTY=3:50,25:50"
-EXPECT_A=("travel 1: 1")
-EXPECT_B=("region: following the host to JOHTO")
+EXPECT_A=("trip allowed 1" "travel 1: 1")
+EXPECT_B=("trip allowed 0" "region: the host set off for JOHTO" "region: following the host to region 1 with party slot 1" "voyage: arrived")
 UNEXPECT_B=("[crash]" "leaving")
 UNEXPECT_A=("[crash]")

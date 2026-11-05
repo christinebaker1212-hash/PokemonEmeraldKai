@@ -371,7 +371,8 @@ const u8 *MP_TextOpts_Filter(const u8 *str, u8 windowId)
     u16 i = 0, o = 0;
     bool8 prevWord = FALSE;
 
-    if (str == NULL || gMpTextFilterOff || (mode == MP_NAMECASE_AS_TYPED && !swap) || NamingScreen_IsActive())
+    bool8 streamer = MP_Streamer_On();
+    if (str == NULL || gMpTextFilterOff || (mode == MP_NAMECASE_AS_TYPED && !swap && !streamer) || NamingScreen_IsActive())
         return str;
     out = sFiltered[windowId < WINDOWS_MAX ? windowId : WINDOWS_MAX];
     if (str >= &sFiltered[0][0] && str < &sFiltered[WINDOWS_MAX + 1][0])
@@ -382,6 +383,8 @@ const u8 *MP_TextOpts_Filter(const u8 *str, u8 windowId)
             BuildStatic();
         BuildDynamic();
     }
+    if (streamer)
+        MP_Streamer_Build();   // STREAMER MODE: the names on screen and their stand-ins (mp_streamer.c)
     while (str[i] != EOS)
     {
         u16 code = CodeLength(&str[i]), used;
@@ -394,6 +397,13 @@ const u8 *MP_TextOpts_Filter(const u8 *str, u8 windowId)
             for (k = 0; k < code && str[i] != EOS; k++)
                 out[o++] = str[i++];
             prevWord = FALSE;
+            continue;
+        }
+        if (streamer && !prevWord && (n = MP_Streamer_At(&str[i], &out[o], &used)) != 0)
+        {
+            o += n;
+            i += used;
+            prevWord = TRUE;
             continue;
         }
         if (swap && (n = WordSwapAt(&str[i], &out[o], &used)) != 0)

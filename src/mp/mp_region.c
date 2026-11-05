@@ -68,6 +68,14 @@ struct RegionState gRegionState;   // per-region progress (mp_region.h)
 // region). The GLOBAL PC is one more set of boxes, shared by every region.
 static struct PokemonStorage sAwayPC[REGION_COUNT];
 static u8 sAwayValid;
+// Moemon Kai (1.101.0): items stay in their region too. Each region's PC items (the save's are the region the player is
+// in; the others wait here, chunks "PI0 ".. ), and the GLOBAL PC's items: what customs takes from the BAG (everything
+// but the KEY ITEMS), handed to the item PC in a region whose LEAGUE is beaten (chunk "GITM")
+#define GLOBAL_ITEM_SLOTS 512
+static struct ItemSlot sAwayItems[REGION_COUNT][PC_ITEMS_COUNT];
+static u8 sAwayItemsValid;
+static struct ItemSlot sGlobalItems[GLOBAL_ITEM_SLOTS];
+static u16 sGlobalItemCount;
 static struct PokemonStorage sGlobalPC;
 static bool8 sGlobalValid;
 
@@ -241,6 +249,8 @@ void MP_Region_NewGame(void)
     sAwayValid = 0;
     sGlobalValid = FALSE;
     sLevelCount = 0;
+    sAwayItemsValid = 0;
+    sGlobalItemCount = 0;
 }
 
 // The region a new game starts in (PROF. BIRCH asks, main_menu.c), applied by MP_Region_StartNewGame
@@ -437,6 +447,22 @@ void MP_Region_WriteSidecar(void)
             fwrite(c, sizeof(c), 1, f);
             fwrite(&sGlobalPC, sizeof(sGlobalPC), 1, f);
         }
+        for (r = 0; r < REGION_COUNT; r++)
+        {
+            if (!(sAwayItemsValid & (1 << r)))
+                continue;
+            c[0] = CHUNK('P', 'I', '0' + r, ' ');
+            c[1] = sizeof(sAwayItems[r]);
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(sAwayItems[r], sizeof(sAwayItems[r]), 1, f);
+        }
+        if (sGlobalItemCount)
+        {
+            c[0] = CHUNK('G', 'I', 'T', 'M');
+            c[1] = sGlobalItemCount * sizeof(struct ItemSlot);
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(sGlobalItems, sizeof(struct ItemSlot), sGlobalItemCount, f);
+        }
         c[0] = CHUNK('L', 'V', 'L', '4');   // (LVLS before SINNOH: 3 regions' EXP a record, read and converted)
         c[1] = sLevelCount * sizeof(sLevels[0]);
         fwrite(c, sizeof(c), 1, f);
@@ -606,6 +632,8 @@ static bool8 LoadFrom(const char *path)
     FILE *f = fopen(path, "rb");
     u32 header[4];
     bool8 ok = FALSE;
+    sAwayItemsValid = 0;
+    sGlobalItemCount = 0;
     if (!f)
         return FALSE;
     memset(&gRegionState, 0, sizeof(gRegionState));
@@ -639,6 +667,19 @@ static bool8 LoadFrom(const char *path)
                 u8 r = ((c[0] >> 16) & 0xFF) - '0';
                 if (ReadStorage(f, c[1], &sAwayPC[r], NULL))
                     sAwayValid |= 1 << r;
+            }
+            else if (c[0] >= CHUNK('P', 'I', '0', ' ') && c[0] < CHUNK('P', 'I', '0' + REGION_COUNT, ' ')
+                  && (c[0] & 0xFF00FFFF) == CHUNK('P', 'I', 0, ' ') && c[1] == sizeof(sAwayItems[0]))
+            {
+                u8 r = ((c[0] >> 16) & 0xFF) - '0';
+                if (fread(sAwayItems[r], sizeof(sAwayItems[r]), 1, f) == 1)
+                    sAwayItemsValid |= 1 << r;
+            }
+            else if (c[0] == CHUNK('G', 'I', 'T', 'M') && c[1] % sizeof(struct ItemSlot) == 0
+                  && c[1] <= sizeof(sGlobalItems))
+            {
+                if (fread(sGlobalItems, c[1], 1, f) == 1)
+                    sGlobalItemCount = c[1] / sizeof(struct ItemSlot);
             }
             else if (c[0] == CHUNK('G', 'L', 'P', 'C')
                   && (c[1] == sizeof(sGlobalPC) || c[1] == sizeof(struct PokemonStorageLegacy)))
@@ -1296,6 +1337,18 @@ void MP_Region_Travel(u8 from, u8 to)
     {
         ResetStorage(own, sBox);
     }
+    // ... and the PC's items (1.101.0)
+    memcpy(sAwayItems[from], gSaveBlock1Ptr->pcItems, sizeof(sAwayItems[from]));
+    sAwayItemsValid |= 1 << from;
+    if (sAwayItemsValid & (1 << to))
+    {
+        memcpy(gSaveBlock1Ptr->pcItems, sAwayItems[to], sizeof(sAwayItems[to]));
+        sAwayItemsValid &= ~(1 << to);
+    }
+    else
+    {
+        ClearItemSlots(gSaveBlock1Ptr->pcItems, PC_ITEMS_COUNT);
+    }
     for (i = 0; i < PARTY_SIZE; i++)
         MP_Region_FitMon(&gPlayerParty[i], to);
     gRegionState.current = to;
@@ -1318,6 +1371,115 @@ u16 MP_MagnetTrainOpen(void)
 u16 MP_GlobalPcLinked(void)
 {
     return gSpecialVar_Result = MP_Region_Cleared(MP_Region_Current());
+}
+
+// ---------------------------------------------------------------------------------------------------- the GLOBAL PC's items
+// Customs (1.101.0, the user: "players cannot take items to other regions EXCEPT for items designated as being able to
+// be brought, such as the Devices"): the KEY ITEMS pocket boards (each region's devices, bikes, tickets, and its story
+// items for the way back); everything else waits in the GLOBAL PC. Items that can't fit stay in the BAG.
+static bool8 AddGlobalItem(u16 item, u16 qty)
+{
+    u32 i;
+    for (i = 0; i < sGlobalItemCount && qty; i++)
+        if (sGlobalItems[i].itemId == item && sGlobalItems[i].quantity < MAX_PC_ITEM_CAPACITY)
+        {
+            u16 room = MAX_PC_ITEM_CAPACITY - sGlobalItems[i].quantity, n = qty < room ? qty : room;
+            sGlobalItems[i].quantity += n;
+            qty -= n;
+        }
+    while (qty && sGlobalItemCount < GLOBAL_ITEM_SLOTS)
+    {
+        u16 n = qty < MAX_PC_ITEM_CAPACITY ? qty : MAX_PC_ITEM_CAPACITY;
+        sGlobalItems[sGlobalItemCount].itemId = item;
+        sGlobalItems[sGlobalItemCount].quantity = n;
+        sGlobalItemCount++;
+        qty -= n;
+    }
+    return qty == 0;
+}
+
+static bool8 StaysWithPlayer(u16 item)
+{
+    return GetItemPocket(item) == POCKET_KEY_ITEMS;
+}
+
+// The BAG has something customs keeps (EventScript_RegionCustoms' luggage line)
+u16 MP_RegionHasLuggage(void)
+{
+    u8 p;
+    u32 i;
+    for (p = 0; p < POCKETS_COUNT; p++)
+        for (i = 0; i < gBagPockets[p].capacity; i++)
+        {
+            u16 item = gBagPockets[p].itemSlots[i].itemId;
+            if (item != ITEM_NONE && !StaysWithPlayer(item))
+                return gSpecialVar_Result = TRUE;
+        }
+    return gSpecialVar_Result = FALSE;
+}
+
+// At customs (qz_specials.c TravelNow, MP_RegionGateCross): the luggage into the GLOBAL PC. The kinds of items moved
+u16 MP_Region_SendLuggage(void)
+{
+    static u16 items[1024];
+    u32 n = 0, i, j, moved = 0;
+    u8 p;
+    for (p = 0; p < POCKETS_COUNT; p++)
+        for (i = 0; i < gBagPockets[p].capacity; i++)
+        {
+            u16 item = gBagPockets[p].itemSlots[i].itemId;
+            if (item == ITEM_NONE || StaysWithPlayer(item))
+                continue;
+            for (j = 0; j < n && items[j] != item; j++)
+                ;
+            if (j == n && n < ARRAY_COUNT(items))
+                items[n++] = item;
+        }
+    for (i = 0; i < n; i++)
+    {
+        u16 qty = CountTotalItemQuantityInBag(items[i]);
+        struct ItemSlot save[GLOBAL_ITEM_SLOTS];
+        u16 count = sGlobalItemCount;
+        memcpy(save, sGlobalItems, sizeof(save));
+        if (qty == 0)
+            continue;
+        if (!AddGlobalItem(items[i], qty))
+        {
+            memcpy(sGlobalItems, save, sizeof(save));   // (no room: it stays in the BAG)
+            sGlobalItemCount = count;
+            continue;
+        }
+        RemoveBagItem(items[i], qty);
+        moved++;
+    }
+    if (moved)
+        MPNet_Log("region: customs: %u kinds of items to the GLOBAL PC (%u slots there)", moved, sGlobalItemCount);
+    return moved;
+}
+
+// The item PC opens (player_pc.c): in a region whose LEAGUE is beaten the GLOBAL PC hands over what it holds, as much as
+// fits. The kinds of items handed over
+u16 MP_Region_DeliverGlobalItems(void)
+{
+    u32 i, kept = 0, given = 0;
+    if (sGlobalItemCount == 0 || !MP_Region_Cleared(MP_Region_Current()))
+        return 0;
+    for (i = 0; i < sGlobalItemCount; i++)
+    {
+        if (AddPCItem(sGlobalItems[i].itemId, sGlobalItems[i].quantity))
+            given++;
+        else
+            sGlobalItems[kept++] = sGlobalItems[i];
+    }
+    sGlobalItemCount = kept;
+    if (given)
+        MPNet_Log("region: the GLOBAL PC handed %u kinds of items to the item PC (%u left)", given, kept);
+    return given;
+}
+
+u16 MP_Region_GlobalItemCount(void)
+{
+    return sGlobalItemCount;
 }
 
 u16 MP_RegionPartyCount(void)

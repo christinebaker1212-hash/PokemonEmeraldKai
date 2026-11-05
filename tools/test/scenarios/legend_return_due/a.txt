@@ -1,0 +1,8 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x1BC
+mp legendko 0x1BC
+mp warp 0,3,10,10
+wait 120
+mp getflag 0x1BC
+quit

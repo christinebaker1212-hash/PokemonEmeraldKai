@@ -1,8 +1,18 @@
 pressuntil A field 5000
 waitfor online 6000
 wait 300
+mp tripok
 barrier ready 2
-wait 900
+waitlog 900 customs, then the boat
+pressuntil A partymenu 900
+wait 60
+shot pick
+press DOWN 4
+wait 20
+press A 4
+wait 30
+pressuntil A field 3000
+wait 600
 mp regioninfo
 mp where
 quit

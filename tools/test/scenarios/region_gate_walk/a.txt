@@ -25,7 +25,7 @@ press A 2
 wait 40
 shot g4
 
-mash A 60 20
+mash A 100 20
 wait 400
 mp where
 mp regioninfo

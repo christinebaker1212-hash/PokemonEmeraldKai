@@ -66,7 +66,7 @@ typedef struct
     s32 litFor;
 } S3dGroup;
 typedef struct { float c[3], r; u32 ngroups; S3dGroup *g; } S3dMesh;
-typedef struct { u16 w, h; u32 *px; } S3dTex;   // r | g << 8 | b << 16 | a << 24
+typedef struct { u16 w, h; u32 *px; bool8 soft; } S3dTex;   // r | g << 8 | b << 16 | a << 24; soft: texels part see-through
 typedef struct { u8 on, r, g, b; float d[3]; } S3dLight;
 typedef struct { u32 start; S3dLight l[4]; u8 col[4][3]; } S3dLightBlock;   // start: its END time (2-second units); diffuse, ambient, specular, emission
 typedef struct { u32 count; S3dLightBlock *b; } S3dLightSet;
@@ -197,6 +197,13 @@ static void LoadPack(void)
         sPack.tex[i].h = TakeU16(&r);
         sPack.tex[i].px = malloc(4 * sPack.tex[i].w * sPack.tex[i].h);
         Take(&r, sPack.tex[i].px, 4 * sPack.tex[i].w * sPack.tex[i].h);
+        {
+            // (A3I5 / A5I3 textures: shadows, glass, soft leaf edges; the DS draws them after the solid ones)
+            u32 k, n = sPack.tex[i].w * sPack.tex[i].h;
+            for (k = 0; k < n && !sPack.tex[i].soft; k++)
+                if ((sPack.tex[i].px[k] >> 24) != 0 && (sPack.tex[i].px[k] >> 24) != 0xFF)
+                    sPack.tex[i].soft = TRUE;
+        }
     }
     sPack.nmesh = TakeU32(&r);
     sPack.mesh = calloc(sPack.nmesh, sizeof(S3dMesh));
@@ -811,7 +818,7 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const S3dG
             float w0 = ((b->x - px) * (c->y - py) - (c->x - px) * (b->y - py)) / area;
             float w1 = ((c->x - px) * (a->y - py) - (a->x - px) * (c->y - py)) / area;
             float w2 = 1.0f - w0 - w1, iz, z, col[3], out[3], al = 1.0f;
-            u32 ch;
+            u32 ch, ta = 0xFF;
             if (w0 < 0.0f || w1 < 0.0f || w2 < 0.0f)
                 continue;
             iz = w0 * a->iz + w1 * b->iz + w2 * c->iz;
@@ -825,7 +832,7 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const S3dG
                 s32 tu = Wrap((s32)floorf((w0 * a->u + w1 * b->u + w2 * c->u) * z), t->w, g->rs, g->fs);
                 s32 tv = Wrap((s32)floorf((w0 * a->v + w1 * b->v + w2 * c->v) * z), t->h, g->rt, g->ft);
                 u32 texel = t->px[tv * t->w + tu];
-                u32 ta = texel >> 24;
+                ta = texel >> 24;
                 if (ta == 0)
                     continue;
                 for (ch = 0; ch < 3; ch++)
@@ -857,6 +864,10 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const S3dG
             {
                 sIds[y][x] = g->pid;
             }
+            else if (ta != 0xFF)
+            {
+                // a see-through texel of a solid polygon (a shadow's): what's behind it stays drawable
+            }
             else
             {
                 sDepth[y][x] = z;
@@ -871,7 +882,7 @@ static u32 sScratchSize;
 static u8 *sScratchOk;
 
 // One mesh placed at (ox, oy, oz) with a 3x3 (rows) transform m (NULL: none); pass 0 draws the opaque groups, 1 the
-// translucent ones
+// translucent ones (see-through polygons, or textures with part see-through texels, as the DS sorts them)
 static void DrawMesh(const S3dMesh *mesh, const float *m, float ox, float oy, float oz, int pass)
 {
     u32 gi, i;
@@ -893,7 +904,8 @@ static void DrawMesh(const S3dMesh *mesh, const float *m, float ox, float oy, fl
     for (gi = 0; gi < mesh->ngroups; gi++)
     {
         S3dGroup *g = &mesh->g[gi];
-        if ((g->alpha < 31) != pass)
+        bool8 soft = g->alpha < 31 || (g->tex >= 0 && (u32)g->tex < sPack.ntex && sPack.tex[sPack.shown[g->tex]].soft);
+        if (soft != pass)
             continue;
         if (g->count > sScratchSize)
         {
@@ -1121,7 +1133,7 @@ static void Render(void)
             for (cx = bx - 1; cx <= bx + 1; cx++)
             {
                 const S3dCell *c = Cell(cx, cz);
-                float ox = cx * BLOCK + BLOCK / 2, oy = c ? c->alt * 16.0f : 0.0f, oz = cz * BLOCK + BLOCK / 2;
+                float ox = cx * BLOCK + BLOCK / 2, oy = c ? c->alt * 8.0f : 0.0f, oz = cz * BLOCK + BLOCK / 2;
                 if (c == NULL || c->mesh < 0 || (u32)c->mesh >= sPack.nmesh)
                     continue;
                 DrawMesh(&sPack.mesh[c->mesh], NULL, ox, oy, oz, pass);

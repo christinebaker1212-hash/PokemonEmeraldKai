@@ -69,9 +69,19 @@ def frontier_trainers(root):
     return out
 
 
+# A script's line is a bank and a message number of 14 bits each (sinnoh_text_bytes): the trainers' lines go in as many
+# banks as their 18 a trainer need, TRAINERS_PER_BANK trainers each (928 trainers ran past 16383 in one bank: the last
+# ones, YOUNGSTERs most of all, said "Message missing")
+TRAINERS_PER_BANK = 16383 // len(TRAINER_TYPES)
+
+
+def trainer_banks(root):
+    return (len(trainer_files(root)) + TRAINERS_PER_BANK - 1) // TRAINERS_PER_BANK
+
+
 def frontier_bank(root):
-    """the frontier trainers' bank number (after the message banks and the trainers')"""
-    return len(bank_numbers(root)) + 1
+    """the frontier trainers' bank number (after the message banks and the trainers': always the last)"""
+    return len(bank_numbers(root)) + trainer_banks(root)
 
 
 def trainer_files(root):
@@ -89,7 +99,9 @@ def trainer_message(root, const, kind):
     d = json.load(open(os.path.join(root, 'res/trainers/data', name + '.json'), encoding='utf-8'))
     if not any(m.get('type') == kind for m in d.get('messages', [])):
         return None
-    return len(bank_numbers(root)), files.index(name) * len(TRAINER_TYPES) + TRAINER_TYPES.index(kind)
+    i = files.index(name)
+    return (len(bank_numbers(root)) + i // TRAINERS_PER_BANK,
+            (i % TRAINERS_PER_BANK) * len(TRAINER_TYPES) + TRAINER_TYPES.index(kind))
 
 
 def sinnoh_text_bytes(bank, msg):
@@ -162,15 +174,17 @@ def main():
         msgs = data.get('messages', []) if isinstance(data, dict) else []
         banks[n] = [convert(moe(text(m.get('en_US'))), cmap) if text(m.get('en_US')) is not None else None
                     for m in msgs]
-    # the trainers' own lines (trainer_message())
+    # the trainers' own lines (trainer_message()), TRAINERS_PER_BANK trainers a bank
     tr = []
-    for name in trainer_files(root):
+    for i, name in enumerate(trainer_files(root)):
+        if i % TRAINERS_PER_BANK == 0:
+            tr = []
+            banks.append(tr)
         d = json.load(open(os.path.join(root, 'res/trainers/data', name + '.json'), encoding='utf-8'))
         by = {m.get('type'): m.get('en_US') for m in d.get('messages', [])}
         for kind in TRAINER_TYPES:
             t = text(by.get(kind)) if kind in by else None
             tr.append(convert(moe(t), cmap, wait_at_end=False) if t is not None else None)
-    banks.append(tr)
     # the frontier trainers' names and lines (frontier_bank())
     fr = []
     if os.path.isdir(os.path.join(root, 'res/trainers/frontier/data')):

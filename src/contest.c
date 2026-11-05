@@ -42,6 +42,16 @@
 #include "constants/moves.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
+#include "mp.h"
+
+// Moemon Co-op: CONCEDE (START on the move list). A conceded contestant sits out the rest (no more turns) and takes
+// last place; a solo contest ends there and then. In a link contest the choice goes to everyone as this move, so all
+// the games agree on the standings.
+#define MP_CONTEST_CONCEDE 0xFFFF
+static u8 sMpConcededMask;
+static void Task_MpConcedeAsk(u8 taskId);
+static void MpContestTakeConcessions(void);
+static const u8 sText_MpConcedeAsk[] = _("CONCEDE this contest?\nA: Yes, last place    B: No");
 
 // This file's functions.
 static void LoadContestPalettes(void);
@@ -1210,6 +1220,7 @@ void CB2_StartContest(void)
         gPaletteFade.bufferTransferDisabled = FALSE;
         SetVBlankCallback(VBlankCB_Contest);
         eContest.mainTaskId = CreateTask(Task_StartContestWaitFade, 10);
+        sMpConcededMask = 0;
         SetMainCallback2(CB2_ContestMain);
         if (gLinkContestFlags & LINK_CONTEST_FLAG_IS_WIRELESS)
         {
@@ -1430,12 +1441,51 @@ static void Task_RaiseCurtainAtStart(u8 taskId)
     }
 }
 
+// Moemon Co-op: the room host's ANIM SPEED runs the whole contest that much faster (like a battle: on some frames
+// sprites, tasks and fades get one more step; input and the link exchange still run once a frame)
+bool8 IsContestLinkTaskFunc(TaskFunc func);   // contest_link.c
+static void MpContestSoundTempo(struct MusicPlayerInfo *mplay, u16 tempo)
+{
+    if (mplay->tempoU == tempo)
+        return;
+    mplay->tempoU = tempo;
+    mplay->tempoI = (mplay->tempoD * tempo) >> 8;
+}
+
+void MP_ContestTurbo(bool8 (*skip)(TaskFunc func))
+{
+    static u8 sAcc;
+    u8 speed = MP_BattleAnimSpeed(), rate = speed / 5;   // extra steps per 20 frames: 25% -> 5, 30% -> 6
+    if (rate == 0)
+        return;
+    if (gAnimScriptActive)
+    {
+        u16 tempo = 256 * (100 + speed) / 100;
+        MpContestSoundTempo(&gMPlayInfo_SE1, tempo);
+        MpContestSoundTempo(&gMPlayInfo_SE2, tempo);
+    }
+    sAcc += rate;
+    if (sAcc < 20)
+        return;
+    sAcc -= 20;
+    AnimateSprites();
+    RunTasksExcept(skip);
+    UpdatePaletteFade();
+}
+
+static bool8 MpContestNoTurbo(TaskFunc func)
+{
+    return func == Task_HandleMoveSelectInput || func == Task_TryShowMoveSelectScreen || func == Task_MpConcedeAsk
+        || IsContestLinkTaskFunc(func);
+}
+
 static void CB2_ContestMain(void)
 {
     s32 i;
 
     AnimateSprites();
     RunTasks();
+    MP_ContestTurbo(MpContestNoTurbo);
     BuildOamBuffer();
     UpdatePaletteFade();
 
@@ -1498,9 +1548,10 @@ static void Task_DisplayAppealNumberText(u8 taskId)
 static void Task_TryShowMoveSelectScreen(u8 taskId)
 {
     // Wait for button press to show move select screen
-    if ((JOY_NEW(A_BUTTON)) || (gMain.newKeys == B_BUTTON))
+    if ((JOY_NEW(A_BUTTON)) || (gMain.newKeys == B_BUTTON) || (sMpConcededMask & (1 << gContestPlayerMonIndex)))
     {
-        PlaySE(SE_SELECT);
+        if (!(sMpConcededMask & (1 << gContestPlayerMonIndex)))
+            PlaySE(SE_SELECT);
         if (!Contest_IsMonsTurnDisabled(gContestPlayerMonIndex))
         {
             SetBottomSliderHeartsInvisibility(TRUE);
@@ -1518,6 +1569,8 @@ static void Task_ShowMoveSelectScreen(u8 taskId)
 {
     u8 i;
     u8 moveName[32];
+
+    MPNet_Log("contest: move select (appeal %d)", eContest.appealNumber + 1);
 
     gBattle_BG0_Y = DISPLAY_HEIGHT;
     gBattle_BG2_Y = DISPLAY_HEIGHT;
@@ -1569,6 +1622,13 @@ static void Task_HandleMoveSelectInput(u8 taskId)
         PlaySE(SE_SELECT);
         gTasks[taskId].func = Task_SelectedMove;
     }
+    else if (JOY_NEW(START_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        FillWindowPixelBuffer(WIN_MOVE_DESCRIPTION, PIXEL_FILL(0));
+        Contest_PrintTextToBg0WindowStd(WIN_MOVE_DESCRIPTION, sText_MpConcedeAsk);
+        gTasks[taskId].func = Task_MpConcedeAsk;
+    }
     else
     {
         switch (gMain.newAndRepeatedKeys)
@@ -1618,6 +1678,55 @@ static void Task_HandleMoveSelectInput(u8 taskId)
     }
 }
 
+// Moemon Co-op: CONCEDE? A gives up (solo: the contest ends now; link: the rest sat out), B / START go back
+static void Task_MpConcedeAsk(u8 taskId)
+{
+    s32 i;
+
+    if (JOY_NEW(A_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        sMpConcededMask |= 1 << gContestPlayerMonIndex;
+        MPNet_Log("contest: the player conceded (appeal %d)", eContest.appealNumber + 1);
+        if (gLinkContestFlags & LINK_CONTEST_FLAG_IS_LINK)
+        {
+            gTasks[taskId].func = Task_SelectedMove;
+        }
+        else
+        {
+            for (i = 0; i < CONTESTANT_COUNT; i++)
+                gContestMonAppealPointTotals[i] = eContestantStatus[i].pointTotal;
+            CalculateFinalScores();
+            gContestRngValue = gRngValue;
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+            gTasks[taskId].func = Task_ContestReturnToField;
+        }
+    }
+    else if (JOY_NEW(B_BUTTON | START_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        PrintContestMoveDescription(gContestMons[gContestPlayerMonIndex].moves[eContest.playerMoveChoice]);
+        gTasks[taskId].func = Task_HandleMoveSelectInput;
+    }
+}
+
+// Every game reads a conceded contestant's choice the same way: no more turns, last place
+static void MpContestTakeConcessions(void)
+{
+    s32 i;
+
+    for (i = 0; i < CONTESTANT_COUNT; i++)
+    {
+        if (eContestantStatus[i].currMove == MP_CONTEST_CONCEDE)
+        {
+            eContestantStatus[i].currMove = MOVE_NONE;
+            eContestantStatus[i].noMoreTurns = TRUE;
+            sMpConcededMask |= 1 << i;
+            MPNet_Log("contest: contestant %d conceded", (int)i);
+        }
+    }
+}
+
 static void DrawMoveSelectArrow(s8 moveIndex)
 {
     ContestBG_FillBoxWithIncrementingTile(2, 55, 0, 31 + moveIndex * 2, 2, 2, 17, 1);
@@ -1636,6 +1745,8 @@ static void Task_SelectedMove(u8 taskId)
         u16 move = GetChosenMove(gContestPlayerMonIndex);
         u8 taskId2;
 
+        if ((sMpConcededMask & (1 << gContestPlayerMonIndex)) && !Contest_IsMonsTurnDisabled(gContestPlayerMonIndex))
+            move = MP_CONTEST_CONCEDE;   // (everyone's game learns of it with the moves)
         eContestantStatus[gContestPlayerMonIndex].currMove = move;
         taskId2 = CreateTask(Task_LinkContest_CommunicateMoveSelections, 0);
         SetTaskFuncWithFollowupFunc(taskId2, Task_LinkContest_CommunicateMoveSelections, Task_EndCommunicateMoveSelections);
@@ -1660,6 +1771,7 @@ static void Task_HideMoveSelectScreen(u8 taskId)
 {
     s32 i;
 
+    MpContestTakeConcessions();
     ContestClearGeneralTextWindow();
     gBattle_BG0_Y = 0;
     gBattle_BG2_Y = 0;
@@ -3630,6 +3742,19 @@ static void DetermineFinalStandings(void)
     // Assign placements. i is the placing (0 is 1st, 1 is 2nd...)
     for (i = 0; i < CONTESTANT_COUNT; i++)
         gContestFinalStandings[standings[i].contestant] = i;
+
+    // Moemon Co-op: whoever conceded comes after everyone who didn't (in their own order)
+    if (sMpConcededMask != 0)
+    {
+        s32 place = 0, pass;
+        for (pass = 0; pass < 2; pass++)
+            for (i = 0; i < CONTESTANT_COUNT; i++)
+                if (((sMpConcededMask >> standings[i].contestant) & 1) == pass)
+                    gContestFinalStandings[standings[i].contestant] = place++;
+    }
+    MPNet_Log("contest: standings %d %d %d %d (the player: contestant %d, placed %d)", gContestFinalStandings[0],
+              gContestFinalStandings[1], gContestFinalStandings[2], gContestFinalStandings[3], gContestPlayerMonIndex,
+              gContestFinalStandings[gContestPlayerMonIndex] + 1);
 }
 
 void SaveLinkContestResults(void)

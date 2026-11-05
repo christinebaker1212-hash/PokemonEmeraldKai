@@ -192,6 +192,22 @@ static void ScriptMovement_UnfreezeActiveObjects(u8 taskId)
     }
 }
 
+// Moemon Kai: an object removed while a script movement still runs on it frees that movement's slot. Without this the
+// next object put in the same object slot took the old movement on (JUBILIFE's collector walked off with DAWN's walk
+// away, out of sight, instead of coming to the player)
+void ScriptMovement_ForgetObject(u8 objEventId)
+{
+    u8 taskId = GetMoveObjectsTaskId(), moveScrId;
+    if (taskId == TASK_NONE)
+        return;
+    moveScrId = GetMovementScriptIdFromObjectEventId(taskId, objEventId);
+    if (moveScrId == OBJECT_EVENTS_COUNT)
+        return;
+    SetObjectEventIdAtMovementScript(taskId, moveScrId, 0xFF);
+    SetMovementScriptFinished(taskId, moveScrId);
+    SetMovementScript(moveScrId, NULL);
+}
+
 static void ScriptMovement_MoveObjects(u8 taskId)
 {
     u8 i;

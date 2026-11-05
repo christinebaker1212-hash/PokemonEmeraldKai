@@ -474,10 +474,21 @@ static void PlayerPC_MpGarden(u8 taskId)
     DestroyTask(taskId);
 }
 
-static void PlayerPC_ItemStorage(u8 taskId)
+static void PlayerPC_ItemStorageOpen(u8 taskId)
 {
     InitItemStorageMenu(taskId, MENU_WITHDRAW);
     gTasks[taskId].func = ItemStorageMenuProcessInput;
+}
+
+// Moemon Kai (1.101.0): in a region whose LEAGUE is beaten the GLOBAL PC hands its items over first (mp_region.c)
+static const u8 sText_MpGlobalItems[] = _("The GLOBAL PC sent over the items\nthat waited there!");
+static void PlayerPC_ItemStorage(u8 taskId)
+{
+    u16 MP_Region_DeliverGlobalItems(void);
+    if (MP_Region_DeliverGlobalItems())
+        DisplayItemMessageOnField(taskId, sText_MpGlobalItems, PlayerPC_ItemStorageOpen);
+    else
+        PlayerPC_ItemStorageOpen(taskId);
 }
 
 static void PlayerPC_Mailbox(u8 taskId)

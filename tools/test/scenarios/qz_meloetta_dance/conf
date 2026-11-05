@@ -1,8 +1,8 @@
-# SEVAULT CANYON's house (KANTO): MELOETTA joins the CHANSEY Dance for a CHANSEY with a LUCKY PUNCH and SING leading five
-# dancers of different families, then stays to be battled
+# SEVAULT CANYON's house (KANTO): the CHANSEY Dance as FireRed has it: MELOETTA no longer joins it (the audit, case
+# K3-19: Quetzal's MELOETTA branch and object removed), even for a CHANSEY with a LUCKY PUNCH and SING leading five
+# dancers of different families
 MODE=1
 GEN=9
 TMO=150
 ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=113:50,6:50,9:50,3:50,25:50,150:50"
-EXPECT_A=("life battle: begin")
-UNEXPECT_A=("[crash]" "not ported")
+UNEXPECT_A=("[crash]" "not ported" "life battle: begin")

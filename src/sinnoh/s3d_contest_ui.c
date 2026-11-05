@@ -73,6 +73,7 @@ static struct
     u8 playerSteps;
     // acting
     u8 menu, move, judge, place, noteShown;
+    bool8 concedeAsk;   // (START on the move list: CONCEDE?)
     // results
     u8 resultStep;
     // textures
@@ -538,6 +539,17 @@ static void DrawActing(void)
         else
             for (i = 0; i < 3; i++)
                 G_Focus(8 + U.judge * 78, 4, 70, 16, 0xf8d038, U.t);
+    }
+    if (U.scene == SC_ACT_MOVE)
+    {
+        if (U.concedeAsk)
+        {
+            G_RoundFill(48, 60, 144, 30, 0x181828, 240);
+            G_TextAlign(120, 62, TA_CENTER, G_WHITE, G_NO_SHADOW, "CONCEDE? Last place.", TF_SMALL);
+            G_TextAlign(120, 75, TA_CENTER, 0xf8d038, G_NO_SHADOW, "A: YES     B: NO", TF_SMALL);
+        }
+        else
+            G_TextAlign(8, 90, TA_LEFT, 0xc0c0d0, G_NO_SHADOW, "START: CONCEDE", TF_SMALL);
     }
     snprintf(s, sizeof(s), "%d/%d", C.act.turn < CONTEST_TURNS ? C.act.turn + 1 : CONTEST_TURNS, CONTEST_TURNS);
     G_TextAlign(232, 90, TA_RIGHT, G_WHITE, G_NO_SHADOW, s, TF_SMALL);
@@ -1152,6 +1164,35 @@ static void StepActing(u16 pressed)
     switch (U.scene)
     {
     case SC_ACT_MOVE:
+        // Moemon Co-op: CONCEDE (START): the rest is skipped and the player takes last place
+        if (U.concedeAsk)
+        {
+            if (pressed & A_BUTTON)
+            {
+                PlaySE(SE_SELECT);
+                U.concedeAsk = FALSE;
+                C.conceded = TRUE;
+                MPNet_Log("sinnoh contest: the player conceded (turn %d)", C.act.turn + 1);
+                C.act.turn = CONTEST_TURNS;
+                for (pressed = 0; pressed < CONTEST_ENTRANTS; pressed++)
+                    C.e[pressed].acting = C.act.total[pressed];
+                U.scene = SC_RESULTS;
+                U.resultStep = 0;
+            }
+            else if (pressed & (B_BUTTON | START_BUTTON))
+            {
+                PlaySE(SE_SELECT);
+                U.concedeAsk = FALSE;
+            }
+            break;
+        }
+        if (pressed & START_BUTTON)
+        {
+            PlaySE(SE_SELECT);
+            U.concedeAsk = TRUE;
+            MPNet_Log("sinnoh contest: CONCEDE?");
+            break;
+        }
         if (pressed & DPAD_UP && U.move > 0)
             U.move--;
         if (pressed & DPAD_DOWN && U.move < MAX_MON_MOVES - 1 && C.e[0].moves[U.move + 1] != MOVE_NONE)
@@ -1239,6 +1280,7 @@ static void BeginActing(void)
                                          "Contest_Text_TimeForSmartActingCompetition",
                                          "Contest_Text_TimeForToughActingCompetition"};
     Contest_BeginActing();
+    MPNet_Log("sinnoh contest: acting begins");
     SayName(Contest_IsPractice() ? "Contest_Text_BeginPracticeActingCompetition" : sTime[C.type]);
     U.move = 0;
     U.judge = 1;
@@ -1303,6 +1345,7 @@ void Contest_RunScenes(void)
     U.active = TRUE;
     U.enableScript = TRUE;
     U.prevKeys = 0xFFFF;
+    U.concedeAsk = FALSE;
     U.t = 0;
     U.pageCount = U.page = 0;
     U.held = 0xFF;
@@ -1363,13 +1406,33 @@ bool8 Sinnoh_Contest_IsActive(void)
     return U.active;
 }
 
+static void StepScene(u16 keys, u16 pressed);
+
+// Moemon Co-op: the host's ANIM SPEED hurries the contest's own scenes (words, the acting, the results) by an extra
+// step on some frames, with no buttons on it; the dance and the dressing keep the music's time
 bool8 Sinnoh_Contest_Step(u16 keys)
 {
+    static u8 sAcc;
     u16 pressed;
     if (!U.active)
         return FALSE;
     pressed = keys & ~U.prevKeys;
     U.prevKeys = keys;
+    StepScene(keys, pressed);
+    if (U.active && U.scene != SC_DRESS && U.scene != SC_DANCE && U.scene != SC_PHOTO && U.scene != SC_DONE)
+    {
+        sAcc += MP_BattleAnimSpeed() / 5;   // (extra steps per 20 frames)
+        if (sAcc >= 20)
+        {
+            sAcc -= 20;
+            StepScene(keys, 0);
+        }
+    }
+    return TRUE;
+}
+
+static void StepScene(u16 keys, u16 pressed)
+{
     U.t++;
     switch (U.scene)
     {
@@ -1427,5 +1490,4 @@ bool8 Sinnoh_Contest_Step(u16 keys)
         Close();
         break;
     }
-    return TRUE;
 }

@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "global.h"
 #include "constants/event_object_movement.h"
 #include "mp.h"
@@ -1120,11 +1122,44 @@ bool8 ScrCmd_removeobjectat(struct ScriptContext *ctx)
     return FALSE;
 }
 
+// Moemon Kai: every object event slot taken (a busy map, SINNOH's JUBILIFE with its crowds): the map's own person
+// farthest from the player, not in a script's movement, makes room (they come back as the camera returns to them), so
+// a scene's person always appears
+void MP_RemoveObjectEvent(struct ObjectEvent *objectEvent);   // (event_object_movement.c)
+static void MakeRoomForObject(void)
+{
+    u8 i, best = OBJECT_EVENTS_COUNT;
+    s32 bestDist = -1;
+    struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
+    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+    {
+        struct ObjectEvent *o = &gObjectEvents[i];
+        s32 d;
+        if (!o->active || o->isPlayer || o->localId == 0 || o->localId >= LOCALID_CAMERA || o->heldMovementActive
+         || o->mapNum != gSaveBlock1Ptr->location.mapNum || o->mapGroup != gSaveBlock1Ptr->location.mapGroup)
+            continue;
+        d = abs(o->currentCoords.x - player->currentCoords.x) + abs(o->currentCoords.y - player->currentCoords.y);
+        if (d > bestDist)
+            bestDist = d, best = i;
+    }
+    if (best < OBJECT_EVENTS_COUNT)
+        MP_RemoveObjectEvent(&gObjectEvents[best]);
+}
+
 bool8 ScrCmd_addobject(struct ScriptContext *ctx)
 {
     u16 objectId = VarGet(ScriptReadHalfword(ctx));
+    u8 mapNum = gSaveBlock1Ptr->location.mapNum, mapGroup = gSaveBlock1Ptr->location.mapGroup;
+    u8 id;
 
-    TrySpawnObjectEvent(objectId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+    // (TryGetObjectEventIdByLocalIdAndMap: TRUE when it isn't there)
+    if (TrySpawnObjectEvent(objectId, mapNum, mapGroup) == OBJECT_EVENTS_COUNT
+     && TryGetObjectEventIdByLocalIdAndMap(objectId, mapNum, mapGroup, &id)
+     && GetObjectEventTemplateByLocalIdAndMap(objectId, mapNum, mapGroup) != NULL)
+    {
+        MakeRoomForObject();
+        TrySpawnObjectEvent(objectId, mapNum, mapGroup);
+    }
     return FALSE;
 }
 

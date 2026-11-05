@@ -1,0 +1,9 @@
+# Solo NORMAL CONTEST at the host's ANIM SPEED 30%: the whole contest runs faster (contest.c MP_ContestTurbo) and still
+# plays through to the standings and back to the field
+MODE=1
+WARP=13,4,14,4
+TMO=600
+FPS=300
+ENV_A="MOEMON_DEBUG_PARTY=279:40 MOEMON_ANIM_SPEED=30"
+EXPECT_A=("where map 13.4" "contest: move select (appeal 5)" "contest: standings")
+UNEXPECT_A=("[crash]")

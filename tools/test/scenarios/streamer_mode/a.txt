@@ -1,0 +1,12 @@
+pressuntil A field 5000
+wait 30
+mp nick 1 Spud
+mp namefilter KIRA met Spud and RALTS.
+mp streamer 1
+mp namefilter KIRA met Spud and RALTS.
+mp streamer 2
+mp namefilter KIRA met Spud and RALTS.
+mp streamer 3
+mp namefilter KIRA met Spud and RALTS.
+mp streamer 0
+quit

@@ -362,6 +362,7 @@ void RunOnLoadMapScript(void)
 
 void RunOnTransitionMapScript(void)
 {
+    MP_Legend_Tick();   // Moemon Kai: one-time legendaries beaten a day ago come back (mp_legends.c)
     MapHeaderRunScriptType(MAP_SCRIPT_ON_TRANSITION);
 }
 

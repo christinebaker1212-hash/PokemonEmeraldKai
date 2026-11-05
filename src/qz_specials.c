@@ -374,6 +374,12 @@ u16 QzKantoStaticEncounterPrepareMon(void)
     return 0;
 }
 
+// JOHTO's RAIKOU and ENTEI roam (mp_johto_roamer.c): their statics never show
+static bool8 QzRoams(const struct QzStatic *e)
+{
+    return e->region == REGION_JOHTO && (e->species == SPECIES_RAIKOU || e->species == SPECIES_ENTEI);
+}
+
 // After the battle: caught or beaten, the Pokémon stays gone (its object's flag) and its entry is done
 static u16 AfterStatic(u16 entryVar)
 {
@@ -386,7 +392,24 @@ static u16 AfterStatic(u16 entryVar)
         return FALSE;
     FlagSet(e->objFlag);
     FlagSet(e->doneFlag);
+    // Moemon Kai: a legendary beaten (not caught) comes back in a day (mp_legends.c)
+    if (gBattleOutcome == B_OUTCOME_WON && MP_IsLegendSpecies(e->species) && !QzRoams(e))
+        MP_Legend_Beaten(e->doneFlag);
     return TRUE;
+}
+
+// mp_legends.c's retroactive pass: every legendary's done flag and species (not JOHTO's roamers)
+u32 MP_Qz_LegendStatics(u16 *flags, u16 *species, u32 max)
+{
+    u32 i, n = 0;
+    for (i = 0; i < ARRAY_COUNT(sQzStatics) && n < max; i++)
+        if (MP_IsLegendSpecies(sQzStatics[i].species) && !QzRoams(&sQzStatics[i]))
+        {
+            flags[n] = sQzStatics[i].doneFlag;
+            species[n] = sQzStatics[i].species;
+            n++;
+        }
+    return n;
 }
 
 static u16 QzJohtoStaticEncounterAfterBattle_(void) { return AfterStatic(QZ_VAR_STATIC_ENTRY); }
@@ -574,7 +597,7 @@ u16 QzVictoryRoadGateCheck(void) { return gSpecialVar_Result = QzVictoryRoadGate
 u16 MP_RegionGateCross(void)
 {
     u8 to = gSpecialVar_0x8004, from = MP_Region_Current(), keep = gSpecialVar_0x8005, i;
-    if (to >= REGION_COUNT || to == from || !QzVictoryRoadGateCheck_())
+    if (to >= REGION_COUNT || to == from || !QzVictoryRoadGateCheck_() || !MP_RegionTripAllowed())
         return gSpecialVar_Result = 0;
     if (keep >= PARTY_SIZE || !GetMonData(&gPlayerParty[keep], MON_DATA_SANITY_HAS_SPECIES))
         keep = 0;
@@ -588,6 +611,7 @@ u16 MP_RegionGateCross(void)
         ZeroMonData(&gPlayerParty[i]);
     }
     CompactPartySlots();
+    MP_Region_SendLuggage();   // only the KEY ITEMS cross (1.101.0)
     MP_Region_Travel(from, to);
     return gSpecialVar_Result = 1;
 }
@@ -1176,11 +1200,18 @@ static u16 QzTravelToRegion_(void)
     u8 to = gSpecialVar_0x8004, from = MP_Region_Current(), keep = gSpecialVar_0x8005;
     bool8 train = gSpecialVar_0x8007 == TRIP_TRAIN;
     gSpecialVar_0x8007 = 0;
-    if (to >= REGION_COUNT || to == from)
+    if (to >= REGION_COUNT || to == from || !MP_RegionTripAllowed())
         return 0;
     if (train ? !MP_MagnetTrainOpen() : !(QzGetReachableRegionsMask_() & (1 << to)))
         return 0;
     return TravelNow(to, keep, train);
+}
+
+// Moemon Kai: online, only the room's host leads the way to another region (the user, 2026-11-05: "only the host can
+// change regions; everyone is warped to the host, picks one Pokémon, and boards the ship"): RESULT FALSE for a friend
+u16 MP_RegionTripAllowed(void)
+{
+    return gSpecialVar_Result = !(MP_IsConnected() && !MP_Lobby_IsCreator());
 }
 
 // Online, a friend in the room follows the host's trip (mp_main.c): customs keeps their first POKeMON, the rest go to
@@ -1190,6 +1221,23 @@ bool8 MP_Region_FollowHost(u8 to)
     if (to >= REGION_COUNT || to == MP_Region_Current())
         return FALSE;
     return TravelNow(to, 0, FALSE);
+}
+
+// EventScript_RegionFollowHost: VAR_0x8004 = the host's region, VAR_0x8005 = the one who comes. RESULT 0: no room in
+// the GLOBAL PC (we stay, and leave the room: mp_main.c)
+u16 MP_RegionFollowNow(void)
+{
+    void MP_Region_FollowFailed(u8 to);
+    u8 to = gSpecialVar_0x8004;
+    if (to >= REGION_COUNT || to == MP_Region_Current())
+        return gSpecialVar_Result = 0;
+    if (!TravelNow(to, gSpecialVar_0x8005, FALSE))
+    {
+        MP_Region_FollowFailed(to);
+        return gSpecialVar_Result = 0;
+    }
+    MPNet_Log("region: following the host to region %d with party slot %d", to, gSpecialVar_0x8005);
+    return gSpecialVar_Result = 1;
 }
 
 static u16 TravelNow(u8 to, u8 keep, bool8 train)
@@ -1208,6 +1256,7 @@ static u16 TravelNow(u8 to, u8 keep, bool8 train)
         ZeroMonData(&gPlayerParty[i]);
     }
     CompactPartySlots();
+    MP_Region_SendLuggage();   // only the KEY ITEMS board (1.101.0)
     first = !(gRegionState.started & (1 << to)) && to != REGION_HOENN;
     MP_Region_Travel(from, to);
     HealPlayerParty();

@@ -1,8 +1,9 @@
 pressuntil A field 5000
 waitfor online 6000
 wait 300
+mp tripok
 barrier ready 2
 mp travel 1
-wait 900
+wait 1200
 mp where
 quit

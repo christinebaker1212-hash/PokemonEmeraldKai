@@ -94,6 +94,7 @@ enum
     OPT_FLAGRANGE,
     OPT_MOENAV,
     OPT_FINDER,
+    OPT_STREAMER,     // Moemon Kai: CO-OP > STREAMER MODE (mp_streamer.c)
     OPT_FR_SHOW,      // a friend's page
     OPT_FR_PLACE,
     OPT_FR_SIZE,
@@ -258,6 +259,11 @@ static const u8 *const sFightButtonNames[FIGHT_BIND_COUNT] = {
 };
 static const u8 sText_MoeNav[] = _("MOENAV CALLS");
 static const u8 sText_Finder[] = _("FRIEND FINDER");
+static const u8 sText_Streamer[] = _("STREAMER MODE");
+static const u8 sText_StreamerOff[] = _("OFF");
+static const u8 sText_StreamerGame[] = _("GAME");
+static const u8 sText_StreamerAnime[] = _("ANIME");
+static const u8 sText_StreamerOriginal[] = _("ORIGINAL");
 static const u8 sText_Phone[] = _("PHONE LINK");
 static const u8 sText_NoPhone[] = _("NONE");
 static const u8 sText_Phones[] = _(" PHONE");
@@ -476,6 +482,7 @@ static void BuildRows(void)
         AddRow(OPT_FLAGRANGE, 0);
         AddRow(OPT_MOENAV, 0);
         AddRow(OPT_FINDER, 0);
+        AddRow(OPT_STREAMER, 0);
         AddRow(OPT_PHONE, 0);
         break;
     }
@@ -586,6 +593,10 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_FINDER:
         names[0] = sText_FinderBoth, names[1] = sText_FinderArrows, names[2] = sText_FinderRadar;
         return 3;
+    case OPT_STREAMER:
+        names[0] = sText_StreamerOff, names[1] = sText_StreamerGame, names[2] = sText_StreamerAnime;
+        names[3] = sText_StreamerOriginal;
+        return 4;
     case OPT_FOLLOWSPRITES:
         names[0] = sText_FollowDefault, names[1] = sText_FollowPmd, names[2] = sText_FollowOriginal;
         return 3;
@@ -792,6 +803,7 @@ static u8 Current(u8 row)
     case OPT_BUTTONICONS: return Gamepad_GetIconSet();
     case OPT_MOENAV:      return gMpConfig.moenavCalls != 0;
     case OPT_FINDER:      return gMpConfig.finderStyle % MP_FINDER_COUNT;
+    case OPT_STREAMER:    return gMpConfig.streamer % MP_STREAMER_COUNT;
     case OPT_FOLLOWSPRITES: return gMpConfig.followerSprites % MP_FOLLOW_SPRITES_COUNT;
     case OPT_SINNOHSPRITES: return 2 - gMpConfig.sinnohSprites % 3;
     case OPT_SHADOWS:     return !gMpConfig.noShadows;
@@ -932,6 +944,10 @@ static void Change(u8 row, int dir)
         gMpConfig.finderStyle = Wrap(gMpConfig.finderStyle + dir, MP_FINDER_COUNT);
         MPNet_Log("friend finder: style %d", gMpConfig.finderStyle);
         break;
+    case OPT_STREAMER:
+        gMpConfig.streamer = Wrap(gMpConfig.streamer + dir, MP_STREAMER_COUNT);
+        MPNet_Log("streamer mode: %d", gMpConfig.streamer);
+        break;
     case OPT_FR_SHOW:
         {
             struct MpSpecFriend *fr = MP_Spectate_Friend(arg, TRUE);
@@ -1028,6 +1044,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_SS_BACK:     return sText_Back;
     case OPT_MOENAV:      return sText_MoeNav;
     case OPT_FINDER:      return sText_Finder;
+    case OPT_STREAMER:    return sText_Streamer;
     case OPT_PHONE:       return sText_Phone;
     case OPT_FR_SHOW:     return sText_Show;
     case OPT_FR_PLACE:    return sText_Place;
@@ -1232,6 +1249,9 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "BATTLES: ONLY CALLS ASKING FOR A BATTLE");
     else if (opt == OPT_FINDER)
         snprintf(ascii, sizeof(ascii), "RIGHT STICK CLICK / G: SHOW OR HIDE IT");
+    else if (opt == OPT_STREAMER)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.streamer ? "TRAINERS' NAMES AND NICKNAMES SHOWN AS OTHERS"
+                                                                : "NAMES SHOWN AS THEY ARE");
     else if (opt == OPT_FR_PLACE)
         snprintf(ascii, sizeof(ascii), "%s", MP_Spectate_Friend(arg, FALSE)->popout ? "CLOSING ITS WINDOW HIDES IT" : "WHICH SIDE OF YOUR SCREEN");
     else if (opt == OPT_FR_SIZE)

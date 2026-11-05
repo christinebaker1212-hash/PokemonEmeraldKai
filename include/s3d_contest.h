@@ -184,7 +184,7 @@ struct ContestSong
 
 struct SinnohContest
 {
-    bool8 made, scored;
+    bool8 made, scored, conceded;   // (conceded: the player gave up: last place, Moemon Co-op)
     u8 rank, type, mode, slot, theme, newRank, newType;
     u8 judge[3];
     u8 order[CONTEST_ENTRANTS], ranking[CONTEST_ENTRANTS];

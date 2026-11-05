@@ -1,0 +1,10 @@
+# Link CONTEST: the second player CONCEDEs on the first move list; both games agree: that contestant sits out the rest
+# and is placed last on both, the contest still ends for both (contest.c MP_CONTEST_CONCEDE through the move exchange)
+MODE=2
+WARP=13,4,15,4
+TMO=900
+FPS=300
+EXPECT_A=("group link: 2 players" "conceded" "contest: standings" "group link closed")
+EXPECT_B=("group link: 2 players" "contest: the player conceded (appeal 1)" "placed 4)" "group link closed")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]")

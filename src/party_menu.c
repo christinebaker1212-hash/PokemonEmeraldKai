@@ -559,6 +559,12 @@ static void CB2_UpdatePartyMenu(void)
     UpdatePaletteFade();
 }
 
+// Moemon Co-op: the party menu is up (test harness "waitfor partymenu")
+bool8 MP_PartyMenuOpen(void)
+{
+    return gMain.callback2 == CB2_UpdatePartyMenu;
+}
+
 // Moemon Co-op: test harness condition "partymenu"
 bool8 MP_PartyMenu_IsOpen(void)
 {

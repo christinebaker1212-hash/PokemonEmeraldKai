@@ -1,0 +1,23 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+press UP 4
+wait 20
+press UP 4
+wait 20
+watchlog group link closed
+pressuntillog A 4000 group link: 2 players
+pressuntillog A 30000 contest: move select
+wait 40
+press START 4
+wait 30
+shot ask
+press A 4
+mash A 1500 5
+mash A 1500 5
+mash A 1500 5
+mash A 1500 5
+mash A 1500 5
+waitlog 9000
+wait 300
+quit

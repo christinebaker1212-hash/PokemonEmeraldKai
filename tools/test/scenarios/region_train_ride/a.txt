@@ -9,8 +9,7 @@ press UP 3
 wait 10
 pressuntil A yesno 3000
 press A 3
-mash A 6 20
-mash A 6 20
+pressuntillog A 4000 region: customs
 wait 100
 shotburst ride_s 2
 wait 4

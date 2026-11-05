@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 100
+mp item 266 1
+mp teach 0 210
+press UP 4
+wait 20
+press UP 4
+wait 20
+pressuntillog A 20000 contest: move select
+wait 40
+press START 4
+wait 30
+shot ask
+press A 4
+wait 10
+shot after
+mash A 1500 5
+mash A 1500 5
+waitfor field 6000
+wait 100
+mp where
+quit

@@ -1,0 +1,7 @@
+# The same with the wait at 0 seconds (MOEMON_LEGEND_RETURN): a legendary beaten just now (REGICE) is back on the next
+# map change, and its time is forgotten
+MODE=1
+TMO=200
+ENV_A="MOEMON_LEGEND_RETURN=0"
+EXPECT_A=("legends: flag 01bc beaten" "legends: flag 01bc back" "flag 444 = 0")
+UNEXPECT_A=("[crash]")

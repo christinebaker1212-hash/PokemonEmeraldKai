@@ -1,0 +1,51 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp additem 670 1
+mp warp 44,73,16,12
+wait 90
+mash A 60 10
+pressuntil B field 2000
+wait 30
+press UP 120
+wait 10
+mash A 12 20
+pressuntil B field 2000
+wait 30
+press UP 60
+wait 10
+shot c_counter
+press A 1
+wait 60
+shot c_welcome
+mash A 6 20
+shot c_menu
+mash A 30 20
+shot c_party
+mash A 30 20
+shot c_entered
+mash A 60 20
+shot c_stage
+mash A 60 20
+rendershot c_dress
+press START 1
+wait 30
+mash A 60 20
+rendershot c_visual
+watchlog sinnoh contest: acting begins
+mash A 60 20
+rendershot c_dance
+pressuntillog B 9000
+mash B 40 6
+rendershot c_acting
+press START 1
+wait 20
+rendershot c_ask
+press A 1
+wait 20
+rendershot c_results
+mash B 300 10
+shot c_back
+pressuntil B field 3000
+quit

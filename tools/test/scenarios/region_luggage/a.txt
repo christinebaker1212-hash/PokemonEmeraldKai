@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 30
+mp item 13 5
+mp item 4 3
+mp item 259 1
+mp pcadd 14 2
+mp travel 1
+wait 300
+mp bagqty 13
+mp bagqty 4
+mp bagqty 259
+mp pcqty 14
+mp globalitems
+mp globalitems deliver
+mp regionclear 1
+mp globalitems deliver
+mp pcqty 13
+mp pcqty 4
+mp travel 0
+wait 300
+mp pcqty 14
+quit

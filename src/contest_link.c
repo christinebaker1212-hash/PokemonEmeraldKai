@@ -561,3 +561,15 @@ void Task_LinkContest_CommunicateTurnOrder(u8 taskId)
         break;
     }
 }
+
+// Moemon Co-op: the link exchange tasks run once a frame even while the host's ANIM SPEED hurries the contest
+// (contest.c MP_ContestTurbo)
+bool8 IsContestLinkTaskFunc(TaskFunc func)
+{
+    return func == Task_LinkContest_Init || func == Task_LinkContest_StartInitFlags || func == Task_LinkContest_InitFlags
+        || func == Task_LinkContest_CommunicateMonsRS || func == Task_LinkContest_CommunicateRngRS
+        || func == Task_LinkContest_CommunicateCategoryRS || func == Task_LinkContest_CommunicateMonIdxs
+        || func == Task_LinkContest_CommunicateMoveSelections || func == Task_LinkContest_CommunicateFinalStandings
+        || func == Task_LinkContest_CommunicateAppealsState || func == Task_LinkContest_CommunicateLeaderIdsRS
+        || func == Task_LinkContest_CommunicateRound1Points || func == Task_LinkContest_CommunicateTurnOrder;
+}

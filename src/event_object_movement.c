@@ -1411,6 +1411,10 @@ void MP_RemoveObjectEvent(struct ObjectEvent *objectEvent)
 
 static void RemoveObjectEvent(struct ObjectEvent *objectEvent)
 {
+    {
+        void ScriptMovement_ForgetObject(u8 objEventId);   // Moemon Kai: (script_movement.c)
+        ScriptMovement_ForgetObject(objectEvent - gObjectEvents);
+    }
     objectEvent->active = FALSE;
     RemoveObjectEventInternal(objectEvent);
 }

@@ -1,0 +1,9 @@
+# STREAMER MODE (mp_streamer.c): the player's name and a nickname shown as stand-ins in printed text: GAME style
+# gives a game hero's name, ANIME an anime character's, ORIGINAL a common first name; the nickname "Spud" becomes one of
+# its species' three; the species' own name and other words stay; OFF shows them as they are
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_NAME=KIRA MOEMON_DEBUG_PARTY=280:10"
+EXPECT_A=("namefilter <KIRA met Spud and RALTS.>" "streamer 1" "streamer 2" "streamer 3")
+UNEXPECT_A=("[crash]")
+CHECK="python3 tools/test/check_streamer.py"

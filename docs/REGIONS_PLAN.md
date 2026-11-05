@@ -11,7 +11,7 @@ card games). Quetzal's region system is documented in `docs/quetzal/REGIONS.md`;
   New Bark, Kanto in Pallet: in the house the player stays in (a visitor's room, "your host" instead of "Mom"), with the
   region's professor giving the starter and the region's dex.
 - Every region keeps its own progress in the save: started, Elite Four beaten, badges, last heal spot, fly spots,
-  trainers beaten, its personal PC boxes. The party, the bag (minus region-only key items) and money travel with you.
+  trainers beaten, its personal PC boxes. One Pokémon, the KEY ITEMS and money travel with you; the rest of the BAG waits in the GLOBAL PC (1.101.0), and each region keeps its own item PC.
 
 ## Travel (a commitment)
 - After a region's Elite Four you get its ticket: HOENN = the S.S. TICKET from Dad (Emerald's own), JOHTO = Elm's,
@@ -26,6 +26,8 @@ card games). Quetzal's region system is documented in `docs/quetzal/REGIONS.md`;
 
 ## Customs (every port and station)
 - Before boarding: everything but one Pokémon is deposited into the GLOBAL PC. The player picks the one who comes.
+- The BAG too (1.101.0, the user): only the KEY ITEMS board (each region's devices, bikes, tickets, story items); the
+  rest goes to the GLOBAL PC, with the customs agent's "luggage is far too heavy" line.
 
 ## PCs
 | PC | Holds | Open |
@@ -33,6 +35,8 @@ card games). Quetzal's region system is documented in `docs/quetzal/REGIONS.md`;
 | Personal PC | this region's boxes | always, in its region |
 | Co-op shared PC | the room's boxes for this region | online, in its region |
 | GLOBAL PC | what customs deposits, and anything moved in | after the first Elite Four, from any region whose Elite Four you've beaten |
+| Item PC | this region's PC items (each region its own since 1.101.0) | always, in its region |
+| GLOBAL PC items | the BAG customs kept | handed to the item PC when it opens in a region whose Elite Four you've beaten |
 - In a region whose Elite Four isn't beaten the GLOBAL PC shows "link not established" (Celio's Network Machine is the
   story's reason: its link levels connect the regions).
 

@@ -199,8 +199,13 @@ BerryTree_EventScript_FarmNoAnswer::
 	return
 
 BerryTree_EventScript_WantToWater::
+	bufferitemname STR_VAR_2, ITEM_WAILMER_PAIL
 	checkitem ITEM_WAILMER_PAIL
+	goto_if_eq VAR_RESULT, TRUE, BerryTree_EventScript_HasCan
+	bufferitemname STR_VAR_2, ITEM_SPRAYDUCK
+	checkitem ITEM_SPRAYDUCK   @ Moemon Kai: SINNOH's watering can
 	goto_if_eq VAR_RESULT, FALSE, BerryTree_EventScript_DontWater
+BerryTree_EventScript_HasCan:
 	special ObjectEventInteractionGetBerryName
 	msgbox BerryTree_Text_WantToWater, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, YES, BerryTree_EventScript_WaterBerry
@@ -292,7 +297,7 @@ BerryTree_Text_BerryLeftUnpicked:
 
 BerryTree_Text_WantToWater:
 	.string "Want to water the {STR_VAR_1} with the\n"
-	.string "WAILMER PAIL?$"
+	.string "{STR_VAR_2}?$"
 
 BerryTree_Text_WateredTheBerry:
 	.string "{PLAYER} watered the {STR_VAR_1}.$"

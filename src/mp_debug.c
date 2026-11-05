@@ -316,7 +316,12 @@ int MP_TestCondition(const char *name)
         bool8 MP_EasyChatOpen(void);
         return MP_EasyChatOpen();
     }
-    if (strcmp(name, "yesno") == 0)   // a script's YES / NO box is up, or a menu's (menu_helpers.c)
+    if (strcmp(name, "partymenu") == 0)   // the party menu is up (party_menu.c)
+    {
+        bool8 MP_PartyMenuOpen(void);
+        return MP_PartyMenuOpen();
+    }
+        if (strcmp(name, "yesno") == 0)   // a script's YES / NO box is up, or a menu's (menu_helpers.c)
     {
         bool8 MP_ScriptYesNoOpen(void);
         bool8 MP_MenuYesNoOpen(void);
@@ -1121,6 +1126,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] tile %d,%d = %d behavior 0x%X\n", x, y, MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET),
                MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET));
     }
+    else if (strcmp(cmd, "objid") == 0)
+    {
+        // objid LOCALID - a map object's tile (map coords without the offset), its sprite's screen place, movement type
+        u8 id;
+        if (TryGetObjectEventIdByLocalIdAndMap(atoi(arg), gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &id))
+            printf("[test] objid %d: none\n", atoi(arg));
+        else
+            printf("[test] objid %d: at %d,%d facing %d type %d sprite %d,%d invisible %d\n", atoi(arg),
+                   gObjectEvents[id].currentCoords.x - MAP_OFFSET, gObjectEvents[id].currentCoords.y - MAP_OFFSET,
+                   gObjectEvents[id].facingDirection, gObjectEvents[id].movementType,
+                   gSprites[gObjectEvents[id].spriteId].x, gSprites[gObjectEvents[id].spriteId].y,
+                   gObjectEvents[id].invisible);
+    }
     else if (strcmp(cmd, "findmb") == 0)
     {
         // findmb BEHAVIOR - the first tiles of the current map with that behavior (map coords without the offset)
@@ -1382,6 +1400,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "getvar") == 0)
         printf("[test] var 0x%X = %d\n", (unsigned)strtol(arg, NULL, 0), VarGet((u16)strtol(arg, NULL, 0)));   // getvar ID
+    else if (strcmp(cmd, "legendko") == 0)
+    {
+        // legendko FLAG - as if the legendary with that done flag was just beaten (mp_legends.c)
+        MP_Legend_Beaten((u16)strtol(arg, NULL, 0));
+    }
     else if (strcmp(cmd, "getflag") == 0)
     {
         // getflag N - whether an event flag is set (2151 = FLAG_BADGE01_GET)
@@ -1838,6 +1861,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             gSaveBlock2Ptr->optionsNameCase = atoi(arg) % MP_NAMECASE_COUNT;
         printf("[test] creatures %d namecase %d\n", gSaveBlock2Ptr->optionsPokemonArt, gSaveBlock2Ptr->optionsNameCase);
+    }
+    else if (strcmp(cmd, "streamer") == 0)
+    {
+        // streamer N - OPTIONS > CO-OP > STREAMER MODE (0 off, 1 game, 2 anime, 3 original)
+        gMpConfig.streamer = atoi(arg) % MP_STREAMER_COUNT;
+        printf("[test] streamer %d\n", gMpConfig.streamer);
     }
     else if (strcmp(cmd, "namefilter") == 0)
     {
@@ -2557,6 +2586,29 @@ void MP_TestCommand(const char *cmd, const char *arg)
                    (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1), (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE2),
                    (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE3), (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE4),
                    (int)GetMonData(&gPlayerParty[slot], MON_DATA_HELD_ITEM));
+    }
+    else if (strcmp(cmd, "pcadd") == 0)
+    {
+        // pcadd ITEM QTY - into the item PC
+        int item = 0, qty = 1;
+        sscanf(arg, "%i %i", &item, &qty);
+        printf("[test] pcadd %d x%d: %d\n", item, qty, AddPCItem(item, qty));
+    }
+    else if (strcmp(cmd, "pcqty") == 0)
+    {
+        // pcqty ITEM - how many the item PC holds
+        int item = (int)strtol(arg, NULL, 0), i, n = 0;
+        for (i = 0; i < PC_ITEMS_COUNT; i++)
+            if (gSaveBlock1Ptr->pcItems[i].itemId == item)
+                n += gSaveBlock1Ptr->pcItems[i].quantity;
+        printf("[test] pc item %d x%d\n", item, n);
+    }
+    else if (strcmp(cmd, "globalitems") == 0)
+    {
+        // globalitems [deliver] - the GLOBAL PC's item slots (deliver: hand them to the item PC, as opening it does)
+        if (strcmp(arg, "deliver") == 0)
+            printf("[test] global items delivered %d\n", MP_Region_DeliverGlobalItems());
+        printf("[test] global item slots %d\n", MP_Region_GlobalItemCount());
     }
     else if (strcmp(cmd, "bagqty") == 0)
     {
@@ -3622,6 +3674,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         // gensetting N: the GENERATION setting (3 = vanilla: HOENN Gen 1-3, JOHTO / KANTO Gen 1-2)
         gMpGenSetting = atoi(arg);
+    }
+    else if (strcmp(cmd, "tripok") == 0)
+    {
+        // tripok - whether this game may lead the way to another region (online: the room's host only)
+        printf("[test] trip allowed %d\n", MP_RegionTripAllowed());
     }
     else if (strcmp(cmd, "travel") == 0)
     {

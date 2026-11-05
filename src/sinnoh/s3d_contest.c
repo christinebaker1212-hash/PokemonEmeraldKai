@@ -1157,6 +1157,16 @@ void Contest_ScoreAll(void)
                 id[k] = id[k - 1];
                 id[k - 1] = u;
             }
+    if (C.conceded)
+    {
+        // Moemon Co-op: the player conceded: after everyone else
+        for (i = 0; i < CONTEST_ENTRANTS - 1; i++)
+            if (id[i] == 0)
+            {
+                id[i] = id[i + 1];
+                id[i + 1] = 0;
+            }
+    }
     for (i = 0; i < CONTEST_ENTRANTS; i++)
     {
         C.ranking[i] = id[i];

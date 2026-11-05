@@ -140,7 +140,7 @@ def render(src, out, matrix_id=0, tile_x=None, tile_z=None, hour=12):
                 continue
             tex0, bm_tex0, _ = sc.area(header)
             land = Land(src.land(lid))
-            centre = np.array([bx * BLOCK + 256.0, alt * 16.0, bz * BLOCK + 256.0])
+            centre = np.array([bx * BLOCK + 256.0, alt * 8.0, bz * BLOCK + 256.0])
             for model in nitro.Bmd0(land.model).models:
                 for mi, ts in model.draw().items():
                     mat = model.materials[mi]

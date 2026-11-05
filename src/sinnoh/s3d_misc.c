@@ -527,8 +527,6 @@ bool8 S3D_BikeSlopeBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
         return FALSE;
     h = S3D_PlayerHeight();
     f = S3D_TileFloor(toX - MAP_OFFSET, toY - MAP_OFFSET, isnan(h) ? 0.0f : h);
-    if (getenv("MOEMON_GYM_TRACE"))
-        printf("[gym] bike slope: avatar 0x%X, player at %.1f, slope at %.1f\n", gPlayerAvatar.flags, h, f);
     if (isnan(h) || isnan(f))
         return TRUE;
     return f > h + 2.0f;

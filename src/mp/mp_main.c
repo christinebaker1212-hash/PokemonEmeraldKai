@@ -22,6 +22,7 @@
 #include "overworld.h"
 #include "pokemon.h"
 #include "script.h"
+#include "event_data.h"
 #include "palette.h"
 #include "field_player_avatar.h"
 #include "event_object_movement.h"
@@ -477,6 +478,9 @@ static void LoadConfig(void)
             gMpConfig.finderStyle = strcmp(val, "arrows") == 0 ? MP_FINDER_ARROWS
                                   : strcmp(val, "radar") == 0  ? MP_FINDER_RADAR : MP_FINDER_BOTH;
         else if (strcmp(key, "friend_finder_shown") == 0) gMpConfig.finderOn = atoi(val) != 0;
+        else if (strcmp(key, "streamer_mode") == 0)   // Moemon Kai: OPTIONS > CO-OP > STREAMER MODE (mp_streamer.c)
+            gMpConfig.streamer = strcmp(val, "game") == 0 ? MP_STREAMER_GAME : strcmp(val, "anime") == 0 ? MP_STREAMER_ANIME
+                               : strcmp(val, "original") == 0 ? MP_STREAMER_ORIGINAL : MP_STREAMER_OFF;
         else if (strcmp(key, "follower_sprites") == 0)
             gMpConfig.followerSprites = strcmp(val, "pmd") == 0 ? MP_FOLLOW_SPRITES_PMD
                                       : strcmp(val, "original") == 0 ? MP_FOLLOW_SPRITES_ORIGINAL : MP_FOLLOW_SPRITES_DEFAULT;
@@ -615,6 +619,8 @@ void MP_SaveConfig(void)
         "; OPTIONS > CO-OP > FRIEND FINDER: both, arrows (at the edge of the screen) or radar (in the corner);\n"
         "; shown = 1 while it's on (the right stick click / G)\n"
         "friend_finder = %s\nfriend_finder_shown = %d\n"
+        "; OPTIONS > CO-OP > STREAMER MODE: off, game, anime or original (trainer names and nicknames shown as others)\n"
+        "streamer_mode = %s\n"
         "; OPTIONS > GAME > FOLLOWERS: default (the original sprites on the map, PMD in the MOEMON GARDEN), pmd or original\n"
         "follower_sprites = %s\n"
         "; OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: gen4 (Platinum's sprites), mixed (Gen 3 ones where there's the same one,\n"
@@ -646,6 +652,8 @@ void MP_SaveConfig(void)
         gMpConfig.moenavCalls ? "battles" : "all",
         gMpConfig.finderStyle == MP_FINDER_ARROWS ? "arrows" : gMpConfig.finderStyle == MP_FINDER_RADAR ? "radar" : "both",
         gMpConfig.finderOn,
+        gMpConfig.streamer == MP_STREAMER_GAME ? "game" : gMpConfig.streamer == MP_STREAMER_ANIME ? "anime"
+            : gMpConfig.streamer == MP_STREAMER_ORIGINAL ? "original" : "off",
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
         gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_GEN3 ? "gen3" : gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_MIXED ? "mixed" : "gen4",
         gMpConfig.scaleFollowers, gMpConfig.scaleGarden, gMpConfig.scaleFollowersPct, gMpConfig.scaleGardenPct,
@@ -1178,6 +1186,12 @@ u8 MP_ConnectedCount(void)
         if (gMpPlayers[i].present)
             n++;
     return n;
+}
+
+// qz_specials.c MP_RegionFollowNow: no room in the GLOBAL PC to follow the host: we stay, and leave the room
+void MP_Region_FollowFailed(u8 to)
+{
+    sLeaveForRegion = 1 + to;
 }
 
 bool8 MP_IsConnected(void)
@@ -2220,21 +2234,19 @@ void MP_FrameUpdate(void)
     {
         // Moemon Kai: the host's trip: everyone in the room follows (docs/REGIONS_PLAN.md "Co-op")
         static const char *const sNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
-        bool8 MP_Region_FollowHost(u8 to);
         u8 to = sFollowRegion - 1;
-        char msg[128];
         sFollowRegion = 0;
         if (to != MP_Region_Current())
         {
-            if (MP_Region_FollowHost(to))
-            {
-                snprintf(msg, sizeof(msg), "Your host set off for %s, and you follow!\fYour first POK~MON comes along; "
-                         "the others wait in the GLOBAL PC.", sNames[to]);
-                MPNet_Log("region: following the host to %s", sNames[to]);
-                MP_ShowNotice(msg);
-            }
-            else
-                sLeaveForRegion = 1 + to;   // no room in the GLOBAL PC: we stay, and leave the room
+            // the customs pick and the same voyage (data/scripts/mp_region.inc EventScript_RegionFollowHost)
+            extern const u8 EventScript_RegionFollowHost[];
+            u8 i;
+            gSpecialVar_0x8004 = to;
+            for (i = 0; sNames[to][i] && i < 15; i++)
+                gStringVar1[i] = sNames[to][i] - 'A' + CHAR_A;
+            gStringVar1[i] = EOS;
+            MPNet_Log("region: the host set off for %s: customs, then the boat", sNames[to]);
+            ScriptContext_SetupScript(EventScript_RegionFollowHost);
         }
     }
     if (sLeaveForRegion)

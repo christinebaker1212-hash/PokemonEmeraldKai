@@ -1,0 +1,8 @@
+# Solo NORMAL CONTEST: START on the first move list, CONCEDE? A: the contest ends there and the player takes last place
+MODE=1
+WARP=13,4,14,4
+TMO=600
+FPS=300
+ENV_A="MOEMON_DEBUG_PARTY=279:40"
+EXPECT_A=("contest: move select (appeal 1)" "contest: the player conceded (appeal 1)" "placed 4)" "where map 13.4")
+UNEXPECT_A=("[crash]" "contest: move select (appeal 2)")

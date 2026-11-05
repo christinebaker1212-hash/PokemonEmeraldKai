@@ -249,6 +249,7 @@ struct MpConfig
     u8 surfMusic;             // OPTIONS > GAME > SURF MUSIC: the surfing / underwater songs (1) or the map's (0)
     u8 moenavCalls;           // OPTIONS > CO-OP > MOENAV CALLS: 0 all, 1 only trainers asking for a battle
     u8 finderStyle;           // OPTIONS > CO-OP > FRIEND FINDER: MP_FINDER_* (mp_compass.c)
+    u8 streamer;              // OPTIONS > CO-OP > STREAMER MODE: MP_STREAMER_* (mp_streamer.c)
     u8 finderOn;              // ... shown (the right stick click / G shows and hides it)
     u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
     u8 sinnohSprites;         // Moemon Kai: OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: MP_SINNOH_SPRITES_* (event_object_movement.c)
@@ -361,6 +362,17 @@ void MP_AutoSession_Update(void);
 // mp_main.c
 // "[mp] ..." line on stdout (log.txt); harness waitlog/watchlog match these
 void MPNet_Log(const char *fmt, ...);
+// One-time legendaries back a day after a KO (mp_legends.c)
+bool8 MP_IsLegendSpecies(u16 species);
+void MP_Legend_Beaten(u16 flag);
+void MP_Legend_BattleEnded(void);
+void MP_Legend_Tick(void);
+// STREAMER MODE (mp_streamer.c): trainer names and POKéMON nicknames shown as others, by TID / SID (and nature)
+enum { MP_STREAMER_OFF, MP_STREAMER_GAME, MP_STREAMER_ANIME, MP_STREAMER_ORIGINAL, MP_STREAMER_COUNT };
+bool8 MP_Streamer_On(void);
+void MP_Streamer_Build(void);
+u8 MP_Streamer_At(const u8 *s, u8 *out, u16 *used);
+u16 MP_RegionTripAllowed(void);   // online, only the room's host leads the way to another region (qz_specials.c)
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 // pokemon_storage_system.c: TAG mode in the PC boxes (the west button / F while the PC is open)
 extern bool8 gMpPcTagPressed;

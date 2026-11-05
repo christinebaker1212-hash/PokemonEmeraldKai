@@ -362,7 +362,15 @@ Harness states `yesno` (a script YES/NO box) and `easychat` (the word screen); `
 Minigames (mp_minigame.c): BERRY BLENDER (berry_blender.c NPC mode with friends in the seats, leader syncs
 arrow/speed/progress and final numbers) and BERRY CRUSH (a relay stand-in for the RFU calls via macros at the top
 of berry_crush.c). Debug: `mp blender`, `mp crush`, `mp pokeblocks`, condition `crushask`. Link CONTESTS
-(mp_grouplink.c): a 2-4 player link behind the NetLink_* calls (link.c) + matchmaking in TryContestEModeLinkup.
+(mp_grouplink.c): a 2-4 player link behind the NetLink_* calls (link.c) + matchmaking in TryContestEModeLinkup. Contests
+at the room host's ANIM SPEED (1.101.0): contest.c MP_ContestTurbo gives sprites, tasks and fades an extra step on 5 (25%)
+or 6 (30%) frames in 20, the results screen too (contest_util.c); the move list's input and contest_link.c's exchange
+tasks run once a frame (IsContestLinkTaskFunc). CONCEDE: START on the move list asks; solo, the contest ends there in
+last place; in a link contest the choice goes out as move 0xFFFF (MP_CONTEST_CONCEDE) in the move exchange, every game
+gives that contestant noMoreTurns and puts it last in DetermineFinalStandings. Super Contests: START on the ACTING move
+list (C.conceded: straight to the results, last place); their words, acting and results take the extra steps, the
+dance and the dressing keep the music's time. Tests contest_fast, contest_concede, contest_concede_link,
+sinnoh_contest_concede.
 Test: MOEMON_DEBUG_WARP=13,4,15,4 on both, UP UP, mash A. All verified with two clients.
 
 LOOK (mp_avatar.c, mp_menu.c): FRLG overworld sprites are catalog-only ids (MP_GFX_EXT_FIRST + n, mp_ext_gfx.h);
@@ -2958,6 +2966,22 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
 - Town map / Fly: region_map.c sShownMap (QZMAP_*), data src/data/region_map/qz_region_maps.h.
 - Card games: Tcg_LookGfx (Quetzal sprites -> Kai look-alikes), TT_REGION_JOHTO / KANTO, KAI_PEOPLE in import.py.
 - Co-op: MPR_RULES' last byte is the host's region; a player elsewhere leaves (protocol 66).
+- Items stay in their region (1.101.0, the user: "players cannot take items to other regions EXCEPT for items
+  designated as being able to be brought, such as the Devices"): customs (qz_specials.c TravelNow, MP_RegionGateCross)
+  calls mp_region.c MP_Region_SendLuggage: every BAG item outside the KEY ITEMS pocket goes to the GLOBAL PC's items
+  (chunk "GITM", 512 slots of up to 999; what can't fit stays in the BAG), with EventScript_RegionLuggage's "luggage is
+  far too heavy" line when there is any. Each region keeps its own item PC (pcItems swapped in MP_Region_Travel like
+  the PC boxes, chunks "PI0 ".. "PI3 "). Opening the item PC (player_pc.c PlayerPC_ItemStorage) in a region whose
+  LEAGUE is beaten hands the GLOBAL PC's items over, as many as fit (MP_Region_DeliverGlobalItems). Test
+  region_luggage (harness `mp pcadd`, `mp pcqty`, `mp globalitems [deliver]`).
+- Only the host leads the way (1.101.0, the user: "only the host can change regions; everyone is warped to the host,
+  picks one Pokémon, and boards the ship"): qz_specials.c MP_RegionTripAllowed (FALSE for a friend in someone's room)
+  stops the boats, the MAGNET TRAIN (EventScript_RegionCustoms) and the VICTORY ROAD gates (a step back, as when
+  closed), and QzTravelToRegion / MP_RegionGateCross refuse too. When the host travels, each friend runs
+  EventScript_RegionFollowHost (mp_main.c): where the host sails, the customs pick of the one POKéMON who comes (B: the
+  first), then MP_RegionFollowNow: the same voyage to the same port. No room in the GLOBAL PC: they stay and leave the
+  room (MP_Region_FollowFailed). The customs pick waits for the party menu now (`waitstate`; before, the region's
+  number was taken as the party slot). Tests region_coop_follow (harness `mp tripok`, `waitfor partymenu`).
 - Harness: mp gensetting N / regioninfo / regionclear R / regionreload / wildroll N / pcmenu / setvar ID V; waitfor multichoice.
 - Tests: region_walk, region_fly, region_travel, region_globalpc, region_gens, region_starter, region_newgame,
   region_train, region_coop.
@@ -4366,6 +4390,13 @@ follow_behind, follow_ground.
   2026-10-31: the earlier text pack built from the decomp's message banks is gone).
 - Not yet: animated textures (prop animations are linked to models in Platinum's code, not its data), billboard props, Platinum's door
   animations, the buildings' people and signs (step 4), speed (about 6 ms a frame), Windows not built with it yet.
+- Map edges (1.101.0, the user: raised trees, a black void and white under the trees at every boundary): a matrix
+  cell's altitude raises its block by altitude x 8 units (Platinum's land_data.c: MAP_OBJECT_TILE_SIZE / 2), not 16;
+  the filler blocks between the maps (header EVERYWHERE: trees, sea, cliffs) take the area (textures, props, lights) of
+  their nearest real map (build_pack.py filler_header), since Platinum dresses every block on screen in the area of the
+  map the player stands in (EVERYWHERE's own set 0 gave other trees and a white ground). Textures with part see-through
+  texels (A3I5 / A5I3: shadows, glass) are drawn after the solid groups like the DS sorts them, and a see-through texel
+  of a solid polygon never writes depth (S3dTex.soft): the black ground under FLOAROMA's arch was a shadow drawn first.
 - Test: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM] (the 3D picture against render_ref.py: mean under 8 of 765 a
   pixel, now 2.9; a house's wall; TWINLEAF to ROUTE 201; the ground's heights; with a ROM, its pack the same as the
   decomp's).
@@ -5076,3 +5107,31 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   "mtg: duel over: ...", "mtg: opened a CODE booster", "mtg: bought a CODE booster".
 - Tests: tools/mtg/test.sh (the rules, triggers, the collection, boosters, the decks), scenarios mtg_shop, mtg_play,
   mtg_show, mtg_triggers.
+
+## One-time legendaries come back (1.101.0)
+- The user (2026-11-05): "One-time legendaries (Birth Island, Faraday, etc.): return 24 h after a KO, retroactively".
+  src/mp/mp_legends.c keeps each KO's time in "<save>.legends" (lines `FLAG UNIXTIME`, the PC's own clock) and on every
+  map entry (script.c RunOnTransitionMapScript, before the map's scripts) clears the done flag of each KO a day old, so
+  the map's own scripts show the legendary again. HOENN: sHoenn (Emerald's DEFEATED flags: BIRTH ISLAND, FARAWAY,
+  NAVEL ROCK, SOUTHERN ISLAND, the REGIs, MARINE / TERRA CAVE, SKY PILLAR), recorded by battle_setup.c
+  CB2_EndScriptedWildBattle on B_OUTCOME_WON. JOHTO / KANTO: every legendary of qz_static_encounters.h (qz_specials.c
+  AfterStatic; JOHTO's roaming RAIKOU / ENTEI left out). SINNOH keeps Platinum's own rule.
+- Retroactive: a done flag with no time kept whose POKéMON was never caught (its own CAUGHT flag, or the POKéDEX
+  where caught and beaten set the same flag) comes back on the next map change. A clock turned back skips the wait.
+- Tests legend_return (an old KO back, a fresh one stays, KANTO's MOLTRES back), legend_return_due
+  (MOEMON_LEGEND_RETURN=0); harness `mp legendko FLAG`.
+
+## STREAMER MODE (1.101.0)
+- The user (2026-11-05): "Streamer Mode in the options menu that obfuscates TRAINER names based on Gender to one of 3
+  styles ... Game Style ..., Anime Style ..., Original Style ..., as well as obfuscation of POKEMON NICKNAMES to a
+  selection of 3 nicknames per-species. The name you, other players, and Pokemon receive is decided via TID and SID per
+  save file, as well as NATURE for Pokémon."
+- OPTIONS > CO-OP > STREAMER MODE: OFF / GAME / ANIME / ORIGINAL (gMpConfig.streamer, ini `streamer_mode`).
+  src/mp/mp_streamer.c: MP_Streamer_Build lists the names on screen (the player's, friends' in the room, link players'
+  in a battle; nicknames that aren't the species' own name in the party, the foe's party and the PC's open box) with
+  their stand-ins; mp_textopts.c MP_TextOpts_Filter (every string the text printer gets) swaps each whole word found.
+  A trainer: the style's list for their gender (16 / 16 / 20 names a gender) by TID / SID; a POKéMON: one of three made
+  from its species' name ("Torcy", "Lil Torch", "Torster") by its OT's TID / SID ^ nature. Only this screen's text
+  changes; the naming screen shows what is typed. Test streamer_mode (`mp streamer N`, `mp namefilter`,
+  tools/test/check_streamer.py).
+

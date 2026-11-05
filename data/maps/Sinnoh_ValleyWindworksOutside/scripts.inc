@@ -4,7 +4,13 @@ Sinnoh_ValleyWindworksOutside_MapScripts::
 
 Sinnoh_ValleyWindworksOutside_OnTransition:
 	special Sinnoh_LegendsRefresh
+	checkitem ITEM_WORKS_KEY   @ Moemon Kai: a WORKS KEY held opens the door (Platinum's flag for having it,
+	call_if_eq VAR_RESULT, TRUE, Sinnoh_ValleyWindworksOutside_EventScript_HasWorksKey   @ missing on some saves)
 	end
+
+Sinnoh_ValleyWindworksOutside_EventScript_HasWorksKey:
+	setflag 0x3564
+	return
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_ValleyWindworksOutside_EventScript_Bg2::

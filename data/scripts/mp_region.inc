@@ -2,6 +2,7 @@
 @ the others wait in the GLOBAL PC. Called by the ports right before QzTravelToRegion (VAR_0x8004 = the region):
 @ VAR_0x8005 = the party slot of the one who comes. B / cancel ends the script.
 EventScript_RegionCustoms::
+	call EventScript_RegionHostOnly
 	specialvar VAR_RESULT, MP_RegionFirstVisit
 	call_if_eq VAR_RESULT, TRUE, EventScript_RegionFirstVisit
 EventScript_RegionCustomsPick::   @ (the gates between JOHTO and KANTO: customs without the boats' first-visit greeting)
@@ -11,12 +12,85 @@ EventScript_RegionCustomsPick::   @ (the gates between JOHTO and KANTO: customs 
 	copyvar VAR_0x8006, VAR_0x8004
 	msgbox gText_RegionCustoms, MSGBOX_DEFAULT
 	special ChoosePartyMon
+	waitstate   @ (1.101.0: without it the region's number was taken as the party slot)
 	copyvar VAR_0x8005, VAR_0x8004
 	copyvar VAR_0x8004, VAR_0x8006
 	goto_if_eq VAR_0x8005, PARTY_NOTHING_CHOSEN, EventScript_RegionCustoms_Cancel
 	msgbox gText_RegionCustomsSent, MSGBOX_DEFAULT
 EventScript_RegionCustoms_Done::
+	call EventScript_RegionLuggage
 	return
+
+@ Moemon Kai (1.101.0): only the KEY ITEMS board; customs sends the rest of the BAG to the GLOBAL PC (qz_specials.c
+@ TravelNow, mp_region.c MP_Region_SendLuggage)
+EventScript_RegionLuggage::
+	specialvar VAR_RESULT, MP_RegionHasLuggage
+	goto_if_eq VAR_RESULT, FALSE, EventScript_RegionLuggage_None
+	msgbox gText_RegionLuggage, MSGBOX_DEFAULT
+EventScript_RegionLuggage_None::
+	return
+
+gText_RegionLuggage::
+	.string "CUSTOMS: Oof! Your luggage is far\n"
+	.string "too heavy to take aboard!\p"
+	.string "Everything but your KEY ITEMS will\n"
+	.string "wait for you in the GLOBAL PC.\p"
+	.string "It reaches any PC in a region whose\n"
+	.string "POKéMON LEAGUE you've beaten.$"
+
+@ Moemon Kai: online, only the room's host leads the way to another region (the user, 2026-11-05); everyone follows
+EventScript_RegionHostOnly::
+	specialvar VAR_RESULT, MP_RegionTripAllowed
+	goto_if_eq VAR_RESULT, FALSE, EventScript_RegionHostOnly_No
+	return
+
+EventScript_RegionHostOnly_No::
+	msgbox gText_RegionHostOnly, MSGBOX_DEFAULT
+	releaseall
+	end
+
+gText_RegionHostOnly::
+	.string "You're in a friend's room: only its\n"
+	.string "host can lead the way to another\l"
+	.string "region. Everyone sails together!$"
+
+@ ...and when the host sets sail, each friend in the room (mp_main.c): VAR_0x8004 = the region, STR_VAR_1 its name.
+@ The one POKéMON that comes along is picked as at customs (B: the first), then the same voyage to the same port.
+EventScript_RegionFollowHost::
+	lockall
+	msgbox gText_RegionFollowHost, MSGBOX_DEFAULT
+	setvar VAR_0x8005, 0
+	specialvar VAR_RESULT, MP_RegionPartyCount
+	goto_if_le VAR_RESULT, 1, EventScript_RegionFollowHost_Go
+	copyvar VAR_0x8006, VAR_0x8004
+	msgbox gText_RegionCustoms, MSGBOX_DEFAULT
+	special ChoosePartyMon
+	waitstate
+	copyvar VAR_0x8005, VAR_0x8004
+	copyvar VAR_0x8004, VAR_0x8006
+	call_if_eq VAR_0x8005, PARTY_NOTHING_CHOSEN, EventScript_RegionFollowHost_First
+	msgbox gText_RegionCustomsSent, MSGBOX_DEFAULT
+EventScript_RegionFollowHost_Go::
+	call EventScript_RegionLuggage
+	closemessage
+	specialvar VAR_RESULT, MP_RegionFollowNow
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionFollowHost_NoRoom
+	waitstate
+	releaseall
+	end
+
+EventScript_RegionFollowHost_First::
+	setvar VAR_0x8005, 0
+	return
+
+EventScript_RegionFollowHost_NoRoom::
+	releaseall
+	end
+
+gText_RegionFollowHost::
+	.string "Your host is setting sail for\n"
+	.string "{STR_VAR_1}! Everyone in the room\l"
+	.string "boards the same boat.$"
 
 EventScript_RegionFirstVisit::
 	msgbox gStringVar4, MSGBOX_DEFAULT
@@ -549,6 +623,8 @@ EventScript_RegionGateToKanto::
 	setvar VAR_0x8004, 2   @ REGION_KANTO
 	specialvar VAR_RESULT, QzVictoryRoadGateCheck
 	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateClosedJohto
+	specialvar VAR_RESULT, MP_RegionTripAllowed
+	goto_if_eq VAR_RESULT, FALSE, EventScript_RegionGateHostOnlyJohto
 	call EventScript_RegionCustomsPick
 	specialvar VAR_RESULT, MP_RegionGateCross
 	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateRefusedJohto
@@ -562,6 +638,8 @@ EventScript_RegionGateToJohto::
 	setvar VAR_0x8004, 1   @ REGION_JOHTO
 	specialvar VAR_RESULT, QzVictoryRoadGateCheck
 	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateClosedKanto
+	specialvar VAR_RESULT, MP_RegionTripAllowed
+	goto_if_eq VAR_RESULT, FALSE, EventScript_RegionGateHostOnlyKanto
 	call EventScript_RegionCustomsPick
 	specialvar VAR_RESULT, MP_RegionGateCross
 	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateRefusedKanto
@@ -584,6 +662,22 @@ EventScript_RegionGateRefusedKanto::
 	msgbox Quetzal_Text_840FB2D, MSGBOX_DEFAULT
 EventScript_RegionGateClosedKanto::
 	msgbox Quetzal_Text_83E90EF, MSGBOX_DEFAULT
+	closemessage
+	applymovement LOCALID_PLAYER, Common_Movement_WalkDown
+	waitmovement 0
+	releaseall
+	end
+
+EventScript_RegionGateHostOnlyJohto::
+	msgbox gText_RegionHostOnly, MSGBOX_DEFAULT
+	closemessage
+	applymovement LOCALID_PLAYER, Common_Movement_WalkLeft
+	waitmovement 0
+	releaseall
+	end
+
+EventScript_RegionGateHostOnlyKanto::
+	msgbox gText_RegionHostOnly, MSGBOX_DEFAULT
 	closemessage
 	applymovement LOCALID_PLAYER, Common_Movement_WalkDown
 	waitmovement 0

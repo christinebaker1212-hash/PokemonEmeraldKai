@@ -517,7 +517,25 @@ def main():
 
     matrices = []
     x0, z0, x1, z1 = window
-    matrices.append((0, (x0, z0, x1, z1), [cell(*mx.cell(x, z), where=(0, x, z))
+    # The filler blocks between the maps (trees, sea, cliffs: header EVERYWHERE) have no textures of their own:
+    # Platinum draws every block on screen with the area of the map the player stands in, so a filler block is
+    # dressed in its nearest map's textures (EVERYWHERE's own set gives other trees and a white ground under them)
+    near = {}
+    real = [(x, z, mx.cell(x, z)[1]) for z in range(mx.height) for x in range(mx.width)
+            if mx.cell(x, z)[1] not in (None, 'MAP_HEADER_EVERYWHERE') and mx.cell(x, z)[0] != NONE]
+
+    def filler_header(x, z, header):
+        if header != 'MAP_HEADER_EVERYWHERE' or not real:
+            return header
+        if (x, z) not in near:
+            near[(x, z)] = min(real, key=lambda r: (max(abs(r[0] - x), abs(r[1] - z)),
+                                                    abs(r[0] - x) + abs(r[1] - z), r[1], r[0]))[2]
+        return near[(x, z)]
+
+    def matrix0_cell(x, z):
+        lid, header, alt = mx.cell(x, z)
+        return cell(lid, filler_header(x, z, header), alt, where=(0, x, z))
+    matrices.append((0, (x0, z0, x1, z1), [matrix0_cell(x, z)
                                            for z in range(z0, z1 + 1) for x in range(x0, x1 + 1)]))
     # the buildings: each matrix once, its area from the first kept place that uses it (shared ones look alike)
     owner = {}

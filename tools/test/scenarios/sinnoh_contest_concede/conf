@@ -1,0 +1,6 @@
+# SUPER CONTESTS: START on the ACTING round's move list, CONCEDE? A: straight to the results, the player last
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_TEST_CONTEST_SEED=7"
+EXPECT_A=("sinnoh contest: CONCEDE?" "sinnoh contest: the player conceded (turn 1)" "the player 4" "sinnoh contest: ended")
+UNEXPECT_A=("[crash]" "TIMEOUT")

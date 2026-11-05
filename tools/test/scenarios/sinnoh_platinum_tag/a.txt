@@ -41,6 +41,8 @@ mash A 30 15
 wait 120
 shot after
 mp getvar 0x51D9
+mp getflag 0x36A8
+mp bagqty 680
 mp party
 mp ctx
 quit
