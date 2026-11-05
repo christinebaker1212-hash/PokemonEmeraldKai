@@ -164,13 +164,8 @@ Johto_CianwoodCity_EventScript_83C9FC4::
 	setvar VAR_QZ_0x502D, 2
 	setvar VAR_QZ_0x500E, 2
 	fadedefaultbgm
-	call_if_set FLAG_QZ_0x10B9, Johto_CianwoodCity_EventScript_83CA0A7
 	release
 	end
-
-Johto_CianwoodCity_EventScript_83CA0A7::
-	setvar VAR_QZ_0x502D, 3
-	return
 
 @ Johto_CianwoodCity sign / bg event at 33,48
 Johto_CianwoodCity_EventScript_83CA308::

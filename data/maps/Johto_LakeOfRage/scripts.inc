@@ -11,18 +11,17 @@ Johto_LakeOfRage_EventScript_83DD2C9::
 Johto_LakeOfRage_EventScript_83DD2E3::
 	call_if_lt VAR_QZ_0x500C, 2, Johto_LakeOfRage_EventScript_83DD30B
 	setmaplayoutindex LAYOUT_JOHTO_LAKE_OF_RAGE   @ (Quetzal's layout 0x21B)
-	goto_if_lt VAR_QZ_0x500C, 14, Johto_LakeOfRage_EventScript_83DD30F
-	random 2
-	goto_if_eq VAR_RESULT, 1, Johto_LakeOfRage_EventScript_83DD30F
+	@ Moemon Kai: no rain (Crystal has none here), and the trainers come once the ROCKETS' hideout is cleared
+	@ (Crystal's EVENT_LAKE_OF_RAGE_CIVILIANS; audit case 113)
+	setflag FLAG_JOHTO_HIDE_LAKE_CIVILIANS
+	goto_if_lt VAR_QZ_0x500C, 14, Johto_LakeOfRage_EventScript_CiviliansAway
+	clearflag FLAG_JOHTO_HIDE_LAKE_CIVILIANS
+Johto_LakeOfRage_EventScript_CiviliansAway::
 	end
 
 Johto_LakeOfRage_EventScript_83DD30B::
 	setflag FLAG_TEMP_1
 	return
-
-Johto_LakeOfRage_EventScript_83DD30F::
-	setweather 5
-	end
 
 @ Johto_LakeOfRage object 4 (local id 4, gfx 0x3EA6) at 32,35
 Johto_LakeOfRage_EventScript_83DD380::
@@ -91,7 +90,6 @@ Johto_LakeOfRage_EventScript_83DD44C::
 	removeobject 8
 	clearflag FLAG_QZ_0x104D
 	addobject 3
-	addobject 14
 	setorcopyvar VAR_0x8000, ITEM_RED_SCALE
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
@@ -139,43 +137,32 @@ Johto_LakeOfRage_EventScript_83DD4A1::
 
 @ Johto_LakeOfRage object 3 (local id 3, gfx 0x3EA0) at 30,37
 Johto_LakeOfRage_EventScript_83DD4B8::
+	@ Moemon Kai: Crystal's LakeOfRageLanceScript (audit case 113): he asks for help himself and, agreed, flies off
 	lock
 	goto_if_eq VAR_QZ_0x500C, 3, Johto_LakeOfRage_EventScript_83DD531
 	msgbox Johto_LakeOfRage_Text_83DD5B5, MSGBOX_DEFAULT
-	closemessage
-	delay 0x14
 	faceplayer
-	turnobject 4, 3
-	msgbox Johto_LakeOfRage_Text_83DD664, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x500C, 3
 	msgbox Johto_LakeOfRage_Text_83DD6A9, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 0, Johto_LakeOfRage_EventScript_83DD551
 
 Johto_LakeOfRage_EventScript_83DD4F5::
-	lock
 	msgbox Johto_LakeOfRage_Text_83DD73C, MSGBOX_DEFAULT
 	closemessage
-	goto_if_eq VAR_FACING, 2, Johto_LakeOfRage_EventScript_83DD55C
-	applymovement 3, Johto_LakeOfRage_Movement_83DD58B
-	applymovement 14, Johto_LakeOfRage_Movement_83DD595
-	waitmovement 3
-	waitmovement 14
-
-Johto_LakeOfRage_EventScript_83DD51E::
+	playse SE_M_TELEPORT
+	applymovement 3, Johto_LakeOfRage_Movement_LanceTeleport
+	waitmovement 0
 	setflag FLAG_QZ_0x104D
 	removeobject 3
-	removeobject 14
 	setvar VAR_QZ_0x500C, 4
 	clearflag FLAG_QZ_0x104F
 	release
 	end
 
 Johto_LakeOfRage_EventScript_83DD531::
-	lock
 	faceplayer
 	msgbox Johto_LakeOfRage_Text_83DD81D, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 1, Johto_LakeOfRage_EventScript_83DD4F5
-	goto_if_eq VAR_RESULT, 0, Johto_LakeOfRage_EventScript_83DD551
 
 Johto_LakeOfRage_EventScript_83DD551::
 	msgbox Johto_LakeOfRage_Text_83DD7EA, MSGBOX_DEFAULT
@@ -183,12 +170,9 @@ Johto_LakeOfRage_EventScript_83DD551::
 	release
 	end
 
-Johto_LakeOfRage_EventScript_83DD55C::
-	applymovement 3, Johto_LakeOfRage_Movement_83DD575
-	applymovement 14, Johto_LakeOfRage_Movement_83DD57F
-	waitmovement 3
-	waitmovement 14
-	goto Johto_LakeOfRage_EventScript_83DD51E
+Johto_LakeOfRage_Movement_LanceTeleport:
+	fly_up
+	step_end
 
 @ Johto_LakeOfRage object 6 (local id 6, gfx 0x2C) at 55,15
 Johto_LakeOfRage_EventScript_83DDBDC::
@@ -233,78 +217,28 @@ Johto_LakeOfRage_EventScript_83DDDEF::
 	msgbox Johto_LakeOfRage_Text_83DDE23, MSGBOX_SIGN
 	end
 
-Johto_LakeOfRage_Movement_83DD575:
-	walk_left
-	walk_down
-	delay_8
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	step_end
-
-Johto_LakeOfRage_Movement_83DD57F:
-	delay_16
-	delay_16
-	walk_left
-	walk_left
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	step_end
-
-Johto_LakeOfRage_Movement_83DD58B:
-	walk_down
-	delay_8
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	step_end
-
-Johto_LakeOfRage_Movement_83DD595:
-	delay_16
-	delay_16
-	walk_left
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	walk_down
-	step_end
-
 Johto_LakeOfRage_Text_83DD5A0::
 	.string "DRAGONITE: Gyafooha!$"
 
 Johto_LakeOfRage_Text_83DD5B5::
-	.string "This lake is full of GYARADOS\n"
-	.string "but nothing else…\p"
+	.string "This lake is full of GYARADOS but\n"
+	.string "nothing else…\p"
 	.string "So the MAGIKARP are being forced\n"
 	.string "to evolve…$"
 
-Johto_LakeOfRage_Text_83DD664::
-	.string "This man here informed me of\n"
-	.string "some rumors.\p"
-	.string "So we came to investigate…$"
-
 Johto_LakeOfRage_Text_83DD6A9::
-	.string "I saw the way you battled\n"
-	.string "earlier, {PLAYER}.\p"
+	.string "Did you come here because of the\n"
+	.string "rumors?\p"
+	.string "You’re {PLAYER}? I’m LANCE, a\n"
+	.string "trainer like you.\p"
+	.string "I heard some rumors, so I came to\n"
+	.string "investigate…\p"
+	.string "I saw the way you battled earlier,\n"
+	.string "{PLAYER}.\p"
 	.string "I can tell that you’re a trainer\n"
 	.string "with considerable skill.\p"
 	.string "If you don’t mind, could you help\n"
-	.string "us investigate?$"
+	.string "me investigate?$"
 
 Johto_LakeOfRage_Text_83DD73C::
 	.string "LANCE: Excellent!\p"
@@ -312,16 +246,15 @@ Johto_LakeOfRage_Text_83DD73C::
 	.string "are being forced to evolve.\p"
 	.string "A mysterious radio broadcast\n"
 	.string "coming from MAHOGANY is the cause.\p"
-	.string "We’ll be waiting for you,\n"
-	.string "{PLAYER}.$"
+	.string "I’ll be waiting for you, {PLAYER}.$"
 
 Johto_LakeOfRage_Text_83DD7EA::
 	.string "Oh… Well, if you change your mind,\n"
-	.string "please help us.$"
+	.string "please help me.$"
 
 Johto_LakeOfRage_Text_83DD81D::
 	.string "LANCE: Hm? Are you going to help\n"
-	.string "us?$"
+	.string "me?$"
 
 Johto_LakeOfRage_Text_83DD842::
 	.string "GYARADOS: Gyashaa!$"
@@ -395,28 +328,6 @@ Johto_LakeOfRage_Text_83DDB9E::
 Johto_LakeOfRage_Text_83DDBAA::
 	.string "Come to think of it, I’ve seen a\n"
 	.string "pink BUTTERFREE.$"
-
-Johto_LakeOfRage_Text_83DDCA7::
-	.string "WESLEY: Well, how do you do?\p"
-	.string "I’m a member of the WEEKDAY family!\n"
-	.string "Can you guess my favorite day?$"
-
-Johto_LakeOfRage_Text_83DDD07::
-	.string "Pleased to meet you. Please take a\n"
-	.string "souvenir.$"
-
-Johto_LakeOfRage_Text_83DDD34::
-	.string "WESLEY: BLACK BELT beefs up the\n"
-	.string "power of fighting moves.$"
-
-Johto_LakeOfRage_Text_83DDD6D::
-	.string "WESLEY: Since you found me, you\n"
-	.string "must have met my brothers and\l"
-	.string "sisters.\p"
-	.string "Or did you just get lucky?$"
-
-Johto_LakeOfRage_Text_83DDDCF::
-	.string "WESLEY: Not exactly...$"
 
 Johto_LakeOfRage_Text_83DDDF8::
 	.string "LAKE OF RAGE,\n"

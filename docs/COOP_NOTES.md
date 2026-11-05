@@ -4500,6 +4500,11 @@ follow_behind, follow_ground.
   RED (Johto_SilverCaveSummit_EventScript_Red, both SUMMIT maps) says Crystal's words, fights Crystal's team
   (sCrystalTeams, custom moves, every GENERATION), gives nothing, leaves, and the credits roll (QzAfterCreditsReset);
   he's back on the next climb, as in Crystal. MT. SILVER's POKéMON CENTER has Crystal's granny again. Test johto_red.
+- **Case 113, LAKE OF RAGE and ROUTE 42**: LANCE says Crystal's words (he asks for help himself, no "this man here",
+  no DRAGONITE) and flies off when you agree; no rain at the lake; its four trainers come once the ROCKETS' hideout is
+  cleared (FLAG_JOHTO_HIDE_LAKE_CIVILIANS 0x155B, worked out on entering from VAR_QZ_0x500C >= 14). ROUTE 42's SUICUNE
+  waits only after the CIANWOOD sighting (VAR_QZ_0x502D 2; FLAG_QZ_0x10B9 set / cleared on entering) and just flees:
+  EUSINE's three lines there were Quetzal's. Test johto_lake_lance.
 - **Case 112**: the ELITE FOUR, LANCE (with MARY and OAK), the HALL OF FAME and CLAIR say Crystal's words on every run:
   Quetzal's "welcome back" branches on FLAG_QZ_0x11CA are gone, and their scripts with them
   (tools/quetzal_port/drop_dead_labels.py MAP: drops blocks nothing names and nothing falls into).

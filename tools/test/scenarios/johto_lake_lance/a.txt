@@ -1,0 +1,27 @@
+pressuntil A field 5000
+wait 60
+mp warp 35,52,40,15
+wait 150
+mp objat 42 18
+mp setvar 0x502D 2
+mp warp 35,52,40,15
+wait 150
+mp objat 42 18
+mp setvar 0x500C 2
+mp clearflag 0x104D
+mp warp 34,97,30,38
+wait 150
+mp objat 25 38
+mp face up
+pressuntil A yesno 3000
+wait 20
+press A 2
+pressuntil A field 3000
+wait 60
+mp getvar 0x500C
+mp objat 30 37
+mp setvar 0x500C 14
+mp warp 34,97,30,38
+wait 150
+mp objat 25 38
+quit

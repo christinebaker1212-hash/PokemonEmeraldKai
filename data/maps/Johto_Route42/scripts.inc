@@ -12,7 +12,14 @@ Johto_Route42_EventScript_83DF6D8::
 	end
 
 Johto_Route42_EventScript_83F4ACD::
-	call_if_set FLAG_QZ_0x10B9, Quetzal_EventScript_83F4AD7
+	@ Moemon Kai: SUICUNE waits here only after the CIANWOOD sighting (VAR_QZ_0x502D 2), as in Crystal (audit case 113)
+	goto_if_eq VAR_QZ_0x502D, 2, Johto_Route42_EventScript_SuicuneHere
+	setflag FLAG_QZ_0x10B9
+	setvar VAR_TEMP_0, 1
+	end
+
+Johto_Route42_EventScript_SuicuneHere::
+	clearflag FLAG_QZ_0x10B9
 	end
 
 @ Johto_Route42 trigger at 36,15 (VAR_TEMP_0 == 0)
@@ -58,31 +65,10 @@ Johto_Route42_EventScript_83F4ADD::
 	delay 0x3C
 	removeobject 8
 	setflag FLAG_QZ_0x10B9
-	clearflag FLAG_QZ_0x10B8
-	addobject 10
-	playse SE_EXIT
-	turnobject LOCALID_PLAYER, 4
-	applymovement 10, Johto_Route42_Movement_83F4BE0
-	waitmovement 0
-	msgbox Johto_Route42_Text_83F4BEF, MSGBOX_DEFAULT
-	closemessage
-	turnobject 10, 3
-	msgbox Johto_Route42_Text_83F4C58, MSGBOX_DEFAULT
-	turnobject 10, 4
-	msgbox Johto_Route42_Text_83F4D2D, MSGBOX_DEFAULT
-	closemessage
-	applymovement 10, Johto_Route42_Movement_83F4BE5
-	waitmovement 0
-	setflag FLAG_QZ_0x10B8
-	removeobject 10
 	setvar VAR_TEMP_0, 1
-	call_if_eq VAR_QZ_0x502D, 2, Johto_Route42_EventScript_83F4BC3
+	setvar VAR_QZ_0x502D, 3
 	release
 	end
-
-Johto_Route42_EventScript_83F4BC3::
-	setvar VAR_QZ_0x502D, 3
-	return
 
 @ Johto_Route42 object 4 (local id 4, gfx 0x3E95) at 32,12
 Johto_Route42_EventScript_83F4D8A::
@@ -171,51 +157,6 @@ Johto_Route42_Movement_83F4BDB:
 	jump_2_up
 	unlock_facing_direction
 	step_end
-
-Johto_Route42_Movement_83F4BE0:
-	walk_down
-	walk_down
-	walk_left
-	face_right
-	step_end
-
-Johto_Route42_Movement_83F4BE5:
-	walk_fast_right
-	walk_fast_right
-	walk_fast_right
-	walk_fast_right
-	walk_fast_right
-	walk_fast_right
-	walk_fast_right
-	walk_fast_right
-	walk_fast_right
-	step_end
-
-Johto_Route42_Text_83F4BEF::
-	.string "EUSINE: SUICUNE...\n"
-	.string "How brave it is!\p"
-	.string "How refreshing it is!\n"
-	.string "How beautiful it is!\p"
-	.string "And how quickly it moves!$"
-
-Johto_Route42_Text_83F4C58::
-	.string "{PLAYER}!\p"
-	.string "You seem to be around where\n"
-	.string "SUICUNE would appear.\p"
-	.string "Well, that’s OK.\l"
-	.string "My desire to search for\n"
-	.string "SUICUNE is far beyond yours...\p"
-	.string "My grandpa was... quite into\n"
-	.string "myths.\p"
-	.string "I’ve heard so many stories\n"
-	.string "about SUICUNE from him.$"
-
-Johto_Route42_Text_83F4D2D::
-	.string "SUICUNE...\n"
-	.string "I won’t stop following you\l"
-	.string "until I’ve found out what\l"
-	.string "you’re after...\p"
-	.string "You hear me!$"
 
 Johto_Route42_Text_83F4E0E::
 	.string "Let me demonstrate the power\n"

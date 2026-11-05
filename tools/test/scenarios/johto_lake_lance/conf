@@ -1,0 +1,8 @@
+# Crystal's LAKE OF RAGE and ROUTE 42 (audit case 113): ROUTE 42's SUICUNE only after the CIANWOOD sighting (VAR
+# 0x502D 2), LANCE asks for help himself and flies off (VAR 0x500C 3 -> 4), and the lake's trainers come after the
+# ROCKETS' hideout (0x500C 14).
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("objat 42,18: none" "objat 42,18: local 8" "objat 25,38: none" "var 0x500C = 4" "objat 30,37: none" "objat 25,38: local 2")
+UNEXPECT_A=("[crash]" "TIMEOUT")

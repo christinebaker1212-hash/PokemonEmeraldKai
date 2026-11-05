@@ -44,7 +44,7 @@
       "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_LakeOfRage_EventScript_83DD3AF",
-      "flag": "0"
+      "flag": "FLAG_JOHTO_HIDE_LAKE_CIVILIANS"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16032",
@@ -83,7 +83,7 @@
       "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "6",
       "script": "Johto_LakeOfRage_EventScript_83DD3C6",
-      "flag": "0"
+      "flag": "FLAG_JOHTO_HIDE_LAKE_CIVILIANS"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_44",
@@ -109,7 +109,7 @@
       "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "6",
       "script": "Johto_LakeOfRage_EventScript_83DD3F4",
-      "flag": "FLAG_TEMP_1"
+      "flag": "FLAG_JOHTO_HIDE_LAKE_CIVILIANS"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16064",
@@ -135,7 +135,7 @@
       "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "4",
       "script": "Johto_LakeOfRage_EventScript_83DD3DD",
-      "flag": "0"
+      "flag": "FLAG_JOHTO_HIDE_LAKE_CIVILIANS"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
@@ -200,7 +200,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_LakeOfRage_EventScript_83DD4A1",
-      "flag": "FLAG_QZ_0x104D"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16045",
