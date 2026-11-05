@@ -4505,6 +4505,11 @@ follow_behind, follow_ground.
   cleared (FLAG_JOHTO_HIDE_LAKE_CIVILIANS 0x155B, worked out on entering from VAR_QZ_0x500C >= 14). ROUTE 42's SUICUNE
   waits only after the CIANWOOD sighting (VAR_QZ_0x502D 2; FLAG_QZ_0x10B9 set / cleared on entering) and just flees:
   EUSINE's three lines there were Quetzal's. Test johto_lake_lance.
+- **Case 110, BLACKTHORN's gates**: the SUPER NERD stands in the GYM's door until the RADIO TOWER is freed (VAR_QZ_0x500C
+  17, RadioTower5F) instead of until 7 badges, with Crystal's three lines; the DRAGON'S DEN elder refuses until CLAIR is
+  beaten (VAR_QZ_0x5010 0: the refusal and its trigger waited for a 1 nothing set, so the DEN was open from the start);
+  the black belt's "weird radio" line before the RADIO TOWER; the GYM guide's Crystal words (no FAIRY talk).
+  Test johto_blackthorn_gates.
 - **Case 112**: the ELITE FOUR, LANCE (with MARY and OAK), the HALL OF FAME and CLAIR say Crystal's words on every run:
   Quetzal's "welcome back" branches on FLAG_QZ_0x11CA are gone, and their scripts with them
   (tools/quetzal_port/drop_dead_labels.py MAP: drops blocks nothing names and nothing falls into).

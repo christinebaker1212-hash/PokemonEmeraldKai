@@ -1,0 +1,12 @@
+pressuntil A field 5000
+wait 60
+mp warp 34,7,25,30
+wait 150
+mp objat 24 27
+mp objat 25 27
+mp setvar 0x500C 17
+mp warp 34,7,25,30
+wait 150
+mp objat 24 27
+mp objat 25 27
+quit

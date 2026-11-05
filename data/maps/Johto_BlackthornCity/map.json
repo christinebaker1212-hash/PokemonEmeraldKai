@@ -351,7 +351,7 @@
       "y": 13,
       "elevation": 0,
       "var": "VAR_QZ_0x5010",
-      "var_value": "1",
+      "var_value": "0",
       "script": "Johto_BlackthornCity_EventScript_83C6970"
     }
   ],

@@ -11,9 +11,9 @@ Johto_BlackthornCity_OnFrame_83C6860:
 
 Johto_BlackthornCity_EventScript_83C6839::
 	special QzJohtoTravelingEventCheck
-	goto_if_unset FLAG_QZ_0x11B6, Johto_BlackthornCity_EventScript_83C6858
-	goto_if_unset FLAG_QZ_0x11B7, Johto_BlackthornCity_EventScript_83C6858
-	goto_if_unset FLAG_QZ_0x11B8, Johto_BlackthornCity_EventScript_83C6858
+	@ Moemon Kai: the SUPER NERD keeps the GYM shut until the RADIO TOWER is freed (VAR_QZ_0x500C 17), as in Crystal
+	@ (EVENT_CLEARED_RADIO_TOWER; audit case 110)
+	goto_if_lt VAR_QZ_0x500C, 17, Johto_BlackthornCity_EventScript_83C6858
 	end
 
 Johto_BlackthornCity_EventScript_83C6858::
@@ -47,7 +47,7 @@ Johto_BlackthornCity_EventScript_83C6888::
 Johto_BlackthornCity_EventScript_83C694D::
 	lock
 	faceplayer
-	goto_if_eq VAR_QZ_0x5010, 1, Johto_BlackthornCity_EventScript_83C6965
+	goto_if_eq VAR_QZ_0x5010, 0, Johto_BlackthornCity_EventScript_83C6965   @ (Crystal: until CLAIR is beaten)
 	msgbox Johto_BlackthornCity_Text_83C6C68, MSGBOX_DEFAULT
 	closemessage
 	release
@@ -59,7 +59,7 @@ Johto_BlackthornCity_EventScript_83C6965::
 	release
 	end
 
-@ Johto_BlackthornCity trigger at 26,13 (VAR_QZ_0x5010 == 1)
+@ Johto_BlackthornCity trigger at 26,13 (VAR_QZ_0x5010 == 0)
 Johto_BlackthornCity_EventScript_83C6970::
 	lock
 	turnobject 7, 4
@@ -73,19 +73,18 @@ Johto_BlackthornCity_EventScript_83C6970::
 
 @ Johto_BlackthornCity object 2 (local id 2, gfx 0x3E87) at 25,27
 Johto_BlackthornCity_EventScript_83C698E::
+	@ Crystal's BlackthornSuperNerdScript
 	lock
 	faceplayer
-	goto_if_unset FLAG_QZ_0x11B6, Johto_BlackthornCity_EventScript_83C69C1
-	goto_if_unset FLAG_QZ_0x11B7, Johto_BlackthornCity_EventScript_83C69C1
-	goto_if_unset FLAG_QZ_0x11B8, Johto_BlackthornCity_EventScript_83C69C1
-	goto_if_eq VAR_QZ_0x5010, 1, Johto_BlackthornCity_EventScript_83C69CC
-	msgbox Johto_BlackthornCity_Text_83C6BD2, MSGBOX_DEFAULT
+	goto_if_ge VAR_QZ_0x5010, 2, Johto_BlackthornCity_EventScript_83C6BeatClair
+	goto_if_ge VAR_QZ_0x500C, 17, Johto_BlackthornCity_EventScript_83C69CC
+	msgbox Johto_BlackthornCity_Text_83C6AEA, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
 
-Johto_BlackthornCity_EventScript_83C69C1::
-	msgbox Johto_BlackthornCity_Text_83C6AEA, MSGBOX_DEFAULT
+Johto_BlackthornCity_EventScript_83C6BeatClair::
+	msgbox Johto_BlackthornCity_Text_83C6BD2, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
@@ -98,7 +97,16 @@ Johto_BlackthornCity_EventScript_83C69CC::
 
 @ Johto_BlackthornCity object 6 (local id 6, gfx 0x2C) at 33,44
 Johto_BlackthornCity_EventScript_83C69D7::
-	msgbox Johto_BlackthornCity_Text_83C6CB5, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_ge VAR_QZ_0x500C, 17, Johto_BlackthornCity_EventScript_VoicesInMyHead
+	msgbox Johto_BlackthornCity_Text_WeirdRadio, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_BlackthornCity_EventScript_VoicesInMyHead::
+	msgbox Johto_BlackthornCity_Text_83C6CB5, MSGBOX_DEFAULT
+	release
 	end
 
 @ Johto_BlackthornCity object 5 (local id 5, gfx 0x3E85) at 12,40
@@ -176,16 +184,18 @@ Johto_BlackthornCity_Text_83C68ED::
 	.string "See you later!$"
 
 Johto_BlackthornCity_Text_83C6AEA::
-	.string "CLAIR, our GYM LEADER, has been\n"
-	.string "following your progress.\p"
-	.string "However, she only battles trainers\n"
-	.string "who already have 7 badges.$"
+	.string "I am sorry.\p"
+	.string "CLAIR, our GYM LEADER, entered the\n"
+	.string "DRAGON’S DEN behind the GYM.\p"
+	.string "I have no idea when our LEADER\n"
+	.string "will return.$"
 
 Johto_BlackthornCity_Text_83C6B61::
 	.string "CLAIR, our GYM LEADER, is waiting\n"
 	.string "for you.\p"
-	.string "However, it would be impossible for\n"
-	.string "a run-of-the-mill trainer to win.$"
+	.string "However, it would be impossible\n"
+	.string "for a run-of-the-mill trainer to\l"
+	.string "win.$"
 
 Johto_BlackthornCity_Text_83C6BD2::
 	.string "You defeated CLAIR?\p"
@@ -195,12 +205,12 @@ Johto_BlackthornCity_Text_83C6BD2::
 
 Johto_BlackthornCity_Text_83C6C31::
 	.string "No. Only chosen trainers may train\n"
-	.string "here.\p"
-	.string "Please leave.$"
+	.string "here. Please leave.$"
 
 Johto_BlackthornCity_Text_83C6C68::
-	.string "If CLAIR allows it, her grand-\n"
-	.string "father--our MASTER--will also.\p"
+	.string "If CLAIR allows it, her\n"
+	.string "grandfather--our MASTER --will\l"
+	.string "also.\p"
 	.string "You may enter.$"
 
 Johto_BlackthornCity_Text_83C6CB5::
@@ -277,3 +287,7 @@ Johto_BlackthornCity_Text_SantosNotSaturday::
 
 Johto_BlackthornCity_Text_SantosGivesGift::
 	.string "You can have this…$"
+
+Johto_BlackthornCity_Text_WeirdRadio::
+	.string "My radio’s busted? Lately, I only\n"
+	.string "get this weird signal.$"
