@@ -183,6 +183,7 @@ int main(int argc, char **argv)
     c.gcSingles[3] = 0x41;
     c.ace[0] = TCG_CARD_SQUIRTLE; /* format 7: a deck's ACE CARD */
     c.rewards = 0x10005; /* format 9: milestone promo cards claimed */
+    c.tray[1] = TCG_TRAY_BALL + 12; /* format 10: a deck's tray color */
     Tcg_RecordResult(&c, 0x01020301u, 1, 9000);
     Tcg_RecordResult(&c, 0x01020301u, 0, 9001);
     Tcg_RecordResult(&c, 0xFF000002u, 0, 9001);
@@ -258,12 +259,12 @@ int main(int argc, char **argv)
         assert(Tcg_CollectionLoad(&other, path));
         assert(other.optedIn && other.packs[2] == 3 && other.wins == 7 && other.owned[TCG_CARD_SQUIRTLE] == old.owned[TCG_CARD_SQUIRTLE]);
         assert(other.flags == (TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET) && !other.specialBeaten && !other.daily[0].key);
-        assert(!other.skill && !other.rated && !other.gcDecks && !other.rewards && !Tcg_Record(&other, 0x01020301u));
+        assert(!other.skill && !other.rated && !other.gcDecks && !other.rewards && !other.tray[1] && !Tcg_Record(&other, 0x01020301u));
         /* ... and saved again as the current format */
         assert(Tcg_CollectionSave(&other, path));
         Tcg_CollectionInit(&before, 3);
         assert(Tcg_CollectionLoad(&before, path) && !memcmp(&before, &other, sizeof(other)));
-        puts("PASS a 1.27 collection (format 2) loads and saves as format 9");
+        puts("PASS a 1.27 collection (format 2) loads and saves as format 10");
     }
 #endif
     {

@@ -8,7 +8,8 @@ waitlog 3000 mtg: your move: priority
 wait 10
 mp mtg focus Mountain
 press A 2
-wait 20
+waitlog 600 mtg: ready
+wait 4
 mp mtg focus Raging Goblin
 press A 2
 waitlog 600 mtg: your move: attackers
@@ -25,13 +26,19 @@ waitlog 6000 mtg: your move: priority, turn 4
 wait 30
 mp mtg focus Mountain
 press A 2
-wait 20
+waitlog 600 mtg: ready
+wait 4
 mp mtg focus Shock
 press A 2
 wait 10
 rendershot p_target
 press A 2
-wait 120
+wait 30
+rendershot p_shock_flies
+wait 16
+rendershot p_shock_hits
+waitlog 900 mtg: ready
+wait 10
 rendershot p_after_shock
 press SELECT 2
 wait 10

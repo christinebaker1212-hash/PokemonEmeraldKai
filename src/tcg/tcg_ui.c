@@ -706,6 +706,7 @@ static void Apply(const struct TcgAction *a)
         TcgBoard_Reject(U.duel.error[0] ? U.duel.error : "Choose the required cards and targets.");
     U.aiDelay = 12;
 }
+unsigned Tcg_TrayRgbFor(int deck, const uint16_t *cards, unsigned n);
 static void BeginBoard(void)
 {
     U.rewarded = 0;
@@ -713,6 +714,9 @@ static void BeginBoard(void)
     TcgBoard_SetMat(U.opp.mat, U.opp.matType);
     TcgBoard_SetMusic(U.opp.music);
     TcgBoard_Tutorial(U.vs == VS_LESSON);
+    /* the hand tray: the deck's own color, or the one chosen for it (a lent or lesson deck: its own) */
+    TcgBoard_SetTray(Tcg_TrayRgbFor(U.vs == VS_LESSON ? -1 : (int)Tcg_GetCollection()->activeDeck,
+                                    U.duel.players[0].cards, TCG_DECK_SIZE));
     Screen(UI_DUEL);
     TcgBoard_Begin(&U.duel, U.opp.name, U.vs == VS_FRIEND);
     U.aiDelay = 20;
@@ -1350,6 +1354,164 @@ static int NameTypable(int c)
             return 1;
     return 0;
 }
+/* ---- The hand tray's color (TcgUi_Tray*): shared by the POKeMON and MAGIC sides */
+unsigned TcgUi_TrayRgb(unsigned setting, const unsigned *gameRgb, int gameCount, unsigned autoRgb)
+{
+    if (setting >= TCG_TRAY_BALL && setting - TCG_TRAY_BALL < MP_BALL_COLORS)
+        return MP_BallStyle_Rgb((u8)(setting - TCG_TRAY_BALL), 2);
+    if (setting >= TCG_TRAY_GAME && (int)(setting - TCG_TRAY_GAME) < gameCount)
+        return gameRgb[setting - TCG_TRAY_GAME];
+    return autoRgb;
+}
+void TcgUi_DrawTray(int y, unsigned rgb, unsigned count, int up)
+{
+    /* (the POKeMON table's blue bar, 0x004da7 / 0x0179d0 / 0x40a8f0, made from any color) */
+    unsigned body = G_Mix(rgb, 0x000000, 0.4f), edge = G_Mix(rgb, 0x000000, 0.1f), lit = G_Mix(rgb, 0xffffff, 0.3f);
+    char n[8];
+    G_FillA(0, y + 6, 240, 60, body, 255);
+    G_FillA(0, y + 6, 240, 2, edge, 255);
+    G_FillA(0, y + 8, 240, 1, lit, 255);
+    G_RoundFill(0, y, 26, 12, 0x303034, 255);
+    G_FillA(1, y + 1, 24, 10, 0xa8a8ac, 255);
+    G_FillA(1, y + 1, 24, 1, 0xe0e0e4, 255);
+    snprintf(n, sizeof(n), "%02u", count > 99 ? 99 : count);
+    G_FillA(5, y + 2, 16, 8, G_Mix(body, 0x8090a8, 0.55f), 255);
+    G_Digits(13 - G_DigitsWidth(n, 1, 1) / 2, y + 2, n, 1, 1, 0xe8f0ff, 255);
+    G_RoundFill(214, y, 26, 12, 0x303034, 255);
+    G_FillA(215, y + 1, 24, 10, 0xa8a8ac, 255);
+    G_FillA(215, y + 1, 24, 1, 0xe0e0e4, 255);
+    G_ButtonIcon(222, y + 6, up ? 6 /* up */ : 7 /* down */);
+}
+#define TRAY_MAX (1 + 16 + MP_BALL_COLORS)
+#define TRAY_COLS 16
+static struct
+{
+    int on, cursor, count, gameCount;
+    unsigned values[TRAY_MAX], chosen, autoRgb;
+    unsigned gameRgb[16];
+    char gameNames[16][16], gameWord[24];
+} sTray;
+void TcgUi_TrayOpen(unsigned setting, const unsigned *gameRgb, const char *const *gameNames, int gameCount,
+                    unsigned autoRgb, const char *gameWord)
+{
+    int i;
+    memset(&sTray, 0, sizeof(sTray));
+    sTray.on = 1;
+    sTray.autoRgb = autoRgb;
+    sTray.gameCount = gameCount > 16 ? 16 : gameCount;
+    snprintf(sTray.gameWord, sizeof(sTray.gameWord), "%s", gameWord);
+    sTray.values[sTray.count++] = TCG_TRAY_AUTO;
+    for (i = 0; i < sTray.gameCount; i++)
+    {
+        sTray.gameRgb[i] = gameRgb[i];
+        snprintf(sTray.gameNames[i], sizeof(sTray.gameNames[i]), "%s", gameNames[i]);
+        sTray.values[sTray.count++] = TCG_TRAY_GAME + (unsigned)i;
+    }
+    /* (the POKe BALL colors: the first ones everyone's, the rest once earned) */
+    for (i = 0; i < MP_BALL_COLORS; i++)
+        if (i < MP_BALL_FIRST_EARNED || MP_BallUnlock_Has(MPFX_PIECE_COLOR, (u8)i))
+            sTray.values[sTray.count++] = TCG_TRAY_BALL + (unsigned)i;
+    for (i = 0; i < sTray.count; i++)
+        if (sTray.values[i] == setting)
+            sTray.cursor = i;
+    sTray.chosen = setting;
+}
+int TcgUi_TrayActive(void) { return sTray.on; }
+unsigned TcgUi_TrayValue(void) { return sTray.chosen; }
+int TcgUi_TrayStep(unsigned pressed)
+{
+    int c = sTray.cursor;
+    if (!sTray.on)
+        return -1;
+    if (pressed & 16 && c + 1 < sTray.count) /* RIGHT */
+        c++;
+    if (pressed & 32 && c > 0) /* LEFT */
+        c--;
+    if (pressed & 128) /* DOWN */
+        c = c + TRAY_COLS < sTray.count ? c + TRAY_COLS : sTray.count - 1;
+    if (pressed & 64) /* UP */
+        c = c - TRAY_COLS >= 0 ? c - TRAY_COLS : 0;
+    if (c != sTray.cursor)
+    {
+        sTray.cursor = c;
+        PlaySE(SE_SELECT);
+    }
+    if (pressed & 1) /* A */
+    {
+        sTray.chosen = sTray.values[sTray.cursor];
+        sTray.on = 0;
+        PlaySE(SE_SUCCESS);
+        return 1;
+    }
+    if (pressed & 2) /* B */
+    {
+        sTray.on = 0;
+        PlaySE(SE_SELECT);
+        return -1;
+    }
+    return 0;
+}
+static unsigned TrayOptionRgb(unsigned value)
+{
+    return TcgUi_TrayRgb(value, sTray.gameRgb, sTray.gameCount, sTray.autoRgb);
+}
+void TcgUi_TrayDraw(void)
+{
+    unsigned value, rgb;
+    char line[96], name[24];
+    int i;
+    if (!sTray.on)
+        return;
+    value = sTray.values[sTray.cursor];
+    rgb = TrayOptionRgb(value);
+    Background();
+    TcgUi_TopBar("TRAY COLOR");
+    /* how the tray looks on the table, a hand of cards on it */
+    {
+        SDL_Rect clip = {0, 19, 240, 30};
+        SDL_RenderSetClipRect(G_R(), &clip);
+        G_FillA(0, 19, 240, 30, 0x203028, 255);
+        TcgUi_DrawTray(26, rgb, 6, 1);
+        for (i = 0; i < 6; i++)
+        {
+            G_RoundFill(46 + i * 26, 34, 22, 30, 0xf0ece0, 255);
+            G_RoundFrame(46 + i * 26, 34, 22, 30, 0x484440, 255);
+            G_FillA(49 + i * 26, 37, 16, 11, G_Mix(rgb, 0xffffff, 0.45f), 255);
+        }
+        SDL_RenderSetClipRect(G_R(), NULL);
+    }
+    /* the colors: AUTO, the game's, the POKe BALL ones */
+    for (i = 0; i < sTray.count; i++)
+    {
+        int x = 8 + (i % TRAY_COLS) * 14, y = 54 + (i / TRAY_COLS) * 14, on = i == sTray.cursor;
+        unsigned c = TrayOptionRgb(sTray.values[i]);
+        G_RoundFill(x, y, 12, 11, c, 255);
+        G_FillA(x + 1, y + 1, 10, 1, G_Mix(c, 0xffffff, 0.45f), 255);
+        G_RoundFrame(x, y, 12, 11, G_Mix(c, 0x000000, 0.5f), 255);
+        if (sTray.values[i] == TCG_TRAY_AUTO)
+            G_TextAlign(x + 6, y - 1, TA_CENTER, G_WHITE, 0x101010, "A", TF_NARROW);
+        if (sTray.values[i] == sTray.chosen)
+            G_Fill(x + 5, y + 4, 2, 2, G_WHITE);
+        if (on)
+        {
+            int o = (U.frame / 8) % 2;
+            G_Frame(x - 2 - o, y - 2 - o, 16 + 2 * o, 15 + 2 * o, 0xe82820, 255);
+        }
+    }
+    if (value == TCG_TRAY_AUTO)
+        snprintf(line, sizeof(line), "AUTO\nThe deck's own main color.");
+    else if (value >= TCG_TRAY_BALL)
+    {
+        MP_GameToAscii(name, MP_BallStyle_ColorName((u8)(value - TCG_TRAY_BALL)), sizeof(name));
+        snprintf(line, sizeof(line), "%s\nA POKe BALL color.", name);
+    }
+    else
+        snprintf(line, sizeof(line), "%s\nA %s color, whatever the deck's.", sTray.gameNames[value - TCG_TRAY_GAME],
+                 sTray.gameWord);
+    StripWith(NULL, 0, line);
+    Hints("{DPAD} CHOOSE  {A} OK  {B} BACK");
+}
+
 void TcgUi_NameOpen(const char *title, const char *name)
 {
     memset(&sName, 0, sizeof(sName));
@@ -1761,9 +1923,44 @@ static unsigned EmptySlot(void)
     return TCG_SAVED_DECKS;
 }
 /* A slot's menu (A on it) */
-enum { DM_EDIT, DM_RENAME, DM_ACE, DM_USE, DM_COPY, DM_DELETE, DM_COUNT };
+enum { DM_EDIT, DM_RENAME, DM_ACE, DM_USE, DM_COPY, DM_DELETE, DM_TRAY, DM_COUNT };
 enum { EM_NEW, EM_RECIPE, EM_COUNT };
-static const char *const sDeckMenu[DM_COUNT] = {"EDIT", "RENAME", "ACE CARD", "DUEL WITH IT", "COPY", "DELETE"};
+static const char *const sDeckMenu[DM_COUNT] = {"EDIT", "RENAME", "ACE CARD", "DUEL WITH IT", "COPY", "DELETE",
+                                                 "TRAY COLOR"};
+/* The hand tray's colors: the deck's main type by its Pokemon's types and its Energy cards (TcgUi_Tray*) */
+static const unsigned sTrayTypes[7] = {TCG_GRASS, TCG_FIRE, TCG_WATER, TCG_LIGHTNING, TCG_FIGHTING, TCG_PSYCHIC,
+                                       TCG_COLORLESS};
+static unsigned TrayTypeRgb(unsigned type) { return G_TypeColor(type, 0); }
+static unsigned DeckMainType(const uint16_t *cards, unsigned n)
+{
+    unsigned count[TCG_TYPES] = {0}, i, best = TCG_WATER, top = 0;
+    for (i = 0; i < n; i++)
+    {
+        const struct TcgCard *k = cards[i] ? Tcg_Card(cards[i]) : NULL;
+        if (k && (k->kind == TCG_POKEMON || k->kind == TCG_ENERGY) && k->type < TCG_TYPES)
+            count[k->type]++;
+    }
+    for (i = 0; i < 7; i++)   /* (the most; a tie goes to the first in the BINDER's order; none: WATER, the old blue) */
+        if (count[sTrayTypes[i]] > top)
+            top = count[sTrayTypes[i]], best = sTrayTypes[i];
+    return best;
+}
+static void TrayGame(unsigned *rgb, const char **names)
+{
+    unsigned i;
+    for (i = 0; i < 7; i++)
+        rgb[i] = TrayTypeRgb(sTrayTypes[i]), names[i] = G_TypeName(sTrayTypes[i]);
+}
+/* A saved deck's tray color, or (deck -1) the duel's own deck by its cards */
+unsigned Tcg_TrayRgbFor(int deck, const uint16_t *cards, unsigned n)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned rgb[7];
+    const char *names[7];
+    TrayGame(rgb, names);
+    return TcgUi_TrayRgb(deck >= 0 && deck < TCG_SAVED_DECKS ? c->tray[deck] : TCG_TRAY_AUTO, rgb, 7,
+                         TrayTypeRgb(DeckMainType(cards, n)));
+}
 static const char *const sEmptyMenu[EM_COUNT] = {"BUILD A DECK", "FROM A RECIPE"};
 static int SlotEmpty(unsigned d) { return !DeckCount(d, 0); }
 static unsigned DeckMenuOff(unsigned d)
@@ -1824,6 +2021,7 @@ static void DecksScreen(void)
     else
         Hints("{A} MENU  {START} COPY  {SELECT} DELETE  {B} BACK");
     TcgUi_NameDraw(Theme());
+    TcgUi_TrayDraw();
 }
 /* What a recipe lacks, by name ("Missing: 2 Charmander, 1 Potion"); the count in *lost */
 static void RecipeMissing(const uint16_t *cards, char *out, size_t size, unsigned *lost)
@@ -3083,6 +3281,7 @@ static void Act(int action)
         unsigned d, before = c->activeDeck;
         memset(c->decks[U.askArg].cards, 0, sizeof(c->decks[U.askArg].cards));
         c->ace[U.askArg] = 0;
+        c->tray[U.askArg] = 0;
         if ((unsigned)U.askArg == c->activeDeck)
         {
             /* The deck you duel with: the next one that can be played takes over */
@@ -3647,6 +3846,15 @@ int Tcg_Step(unsigned keys)
         }
         break;
     case UI_DECKS:
+        if (TcgUi_TrayActive())
+        {
+            if (TcgUi_TrayStep(pressed) == 1 && U.cursor < TCG_SAVED_DECKS)
+            {
+                c->tray[U.cursor] = (uint8_t)TcgUi_TrayValue();
+                printf("[tcg] deck %d tray %u\n", U.cursor, c->tray[U.cursor]);
+            }
+            break;
+        }
         if (TcgUi_NameActive())
         {
             if (TcgUi_NameStep(pressed) == 1 && U.cursor < TCG_SAVED_DECKS)
@@ -3707,6 +3915,14 @@ int Tcg_Step(unsigned keys)
                     Ask(ACT_COPY, slot, "Copy %s into an empty slot?", c->decks[slot].name);
                 else if (U.menuCursor == DM_DELETE)
                     Ask(ACT_CLEAR, slot, "Delete %s? Its cards stay in your collection.", c->decks[slot].name);
+                else if (U.menuCursor == DM_TRAY)
+                {
+                    unsigned rgb[7];
+                    const char *names[7];
+                    TrayGame(rgb, names);
+                    TcgUi_TrayOpen(c->tray[slot], rgb, names, 7, TrayTypeRgb(DeckMainType(c->decks[slot].cards, TCG_DECK_SIZE)),
+                                   "type");
+                }
             }
             break;
         }

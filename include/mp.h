@@ -939,6 +939,7 @@ u16 MP_BallStyle_Make(u8 color, u8 decoration);
 u16 MP_BallStyle_OfMon(struct Pokemon *mon);
 u16 MP_BallStyle_OfBoxMon(struct BoxPokemon *mon);
 const u8 *MP_BallStyle_ColorName(u8 color);
+unsigned MP_BallStyle_Rgb(u8 color, int shade);   // shade 0 dark .. 4 light, as 0xRRGGBB (the card tables' trays)
 u8 MP_BallStyle_DecorationCount(void);
 const u8 *MP_BallStyle_DecorationName(u8 decoration);
 bool8 MP_BallStyle_CanColor(u8 ballId);

@@ -89,6 +89,22 @@ wait 10
 rendershot a_ace
 press B 2
 wait 10
+press A 2
+wait 6
+press UP 2
+wait 4
+press A 2
+wait 10
+rendershot a_tray
+press RIGHT 2
+wait 4
+press RIGHT 2
+wait 4
+press RIGHT 2
+wait 4
+rendershot a_tray_black
+press A 2
+wait 10
 press UP 2
 wait 4
 press UP 2

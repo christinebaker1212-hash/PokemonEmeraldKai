@@ -53,6 +53,7 @@ enum { PILE_NONE = -1, PILE_MY_GRAVE, PILE_MY_LIBRARY, PILE_OPP_LIBRARY, PILE_OP
 #define SWEEP_FRAMES (Tcg_GetCollection()->fastAnimations ? 34 : 52)   // (DUEL SPEED: FAST)
 #define BIG_FRAMES (Tcg_GetCollection()->fastAnimations ? 30 : 50)
 #define TOAST_FRAMES 90
+#define FLOATERS 8
 
 typedef struct { int16_t x, y, w, h; uint8_t on; } Rect;
 typedef struct { uint16_t obj; uint8_t count; } Item;
@@ -60,7 +61,8 @@ typedef struct { uint16_t obj; uint8_t count; } Item;
 static struct
 {
     int active;
-    MtgDuel duel;
+    MtgDuel duel;                   // the truth: the rules' own duel
+    MtgDuel view;                   // what the table shows: the truth as of the last event played out (Play)
     char opp[24];
     unsigned frame;
     int mode, row, col[ROW_COUNT], pile;
@@ -75,7 +77,7 @@ static struct
     int blockFrom, blockCursor;
     int inspect, inspectObj;
     int viewPlayer, viewCursor;     // MODE_VIEW: a graveyard
-    uint16_t view[MTG_MAX_OBJS];
+    uint16_t viewList[MTG_MAX_OBJS];
     int viewCount;
     // the layout of this frame
     Item items[ROW_COUNT][ROW_ITEMS];
@@ -86,7 +88,20 @@ static struct
     // what happened
     char ticker[TICKER][96];
     int tickerCount, tickerAge;
-    uint32_t eventSeen;
+    // the play (Play): the event under way and its looks
+    uint32_t evShown;               // events of B.duel played out on B.view
+    MtgEvent ev;
+    int evOn, evLeft, wasBusy;
+    unsigned pendingKeys;
+    int pendingAge;
+    Rect spawn[MTG_MAX_OBJS];       // where a card that shows up comes from
+    uint8_t tapT[MTG_MAX_OBJS], lunge[MTG_MAX_OBJS], flash[MTG_MAX_OBJS];
+    Rect castFrom, leaveRect, flyFrom, flyTo;
+    int castT, castLife, resolveT, resolveLife, flyT, flyLife, flyBall, lifeFlash[2];
+    unsigned leaveColor, flyColor;
+    int16_t floatX[FLOATERS], floatY[FLOATERS], floatValue[FLOATERS];
+    uint8_t floatAge[FLOATERS];
+    unsigned floatColor[FLOATERS];
     char hold[96];                  // a note for the player ("nothing to do with it now"), shown as a toast
     int holdAge;
     int result, resultAge, forced;
@@ -99,13 +114,15 @@ static struct
 } B;
 
 static u16 sHeldMusic;
+static unsigned sTrayRgb = 0x3888e8;
+void MtgBoard_SetTray(unsigned rgb) { sTrayRgb = rgb; }
 static SDL_Texture *sMat, *sLayer;
 static SDL_Renderer *sLayerOwner;
 
 int MtgBoard_Active(void) { return B.active; }
 void MtgBoard_Autoplay(int on) { B.autoplay = on; }
 
-static const MtgCardDef *Def(int obj) { return Mtg_Card(B.duel.objs[obj].def); }
+static const MtgCardDef *Def(int obj) { return Mtg_Card(B.view.objs[obj].def); }
 
 static void CostText(char *out, unsigned cap, const MtgManaCost *c);
 static void Name(char *out, unsigned cap, int obj)
@@ -152,6 +169,13 @@ void MtgBoard_Start(const MtgDeck *mine, const MtgDeck *theirs, uint32_t seed, c
     B.endTurn = -1;
     snprintf(B.opp, sizeof(B.opp), "%s", opponent);
     Mtg_DuelInit(&B.duel, mine, theirs, seed);
+    memcpy(&B.view, &B.duel, sizeof(B.view));
+    B.evShown = B.duel.eventCount;   // (the opening hands: dealt before the table shows)
+    {
+        int i;
+        for (i = 0; i < FLOATERS; i++)
+            B.floatAge[i] = 40;
+    }
     B.row = ROW_HAND;
     B.mapMusic = GetCurrentMapMusic();
     B.music = MUS_RG_VS_TRAINER;
@@ -211,11 +235,15 @@ void MtgBoard_ForceEnd(int win)
 #define BAR_CLOSED 152
 #define BAR_OPEN 118
 #define PAN 37
-#define SLIDE 7        // frames a card takes to move
+#define SLIDE 10       // frames a card takes to move
 // the rows' frames (y, height) and where their cards stand
 static const int sFrameY[4] = {1, 26, 88, 130}, sFrameH[4] = {24, 41, 41, 24};
 static const int sCardY[4] = {3, 28, 90, 132};
 
+static void Play(void);
+static void DrawPlay(void);
+static int Frames(int n);
+int MtgBoard_Busy(void);
 static Rect MakeRect(int x, int y, int w, int h)
 {
     Rect r;
@@ -257,7 +285,7 @@ static int IsLand(int obj) { return (Def(obj)->types & MTG_T_LAND) != 0; }
 
 static void BuildRows(void)
 {
-    const MtgDuel *d = &B.duel;
+    const MtgDuel *d = &B.view;
     int i, r;
     for (r = 0; r < ROW_COUNT; r++)
         B.itemCount[r] = 0;
@@ -312,7 +340,7 @@ static void Layout(void)
             int cw = land ? LAND_W : CARD_W, ch = land ? LAND_H : CARD_H, width[ROW_ITEMS], total = 0;
             float squeeze = 1, fx;
             for (i = 0; i < n; i++) {
-                const MtgObj *o = &B.duel.objs[B.items[r][i].obj];
+                const MtgObj *o = &B.view.objs[B.items[r][i].obj];
                 width[i] = o->tapped ? ch : cw;
                 total += width[i] + (i ? 3 : 0);
             }
@@ -320,16 +348,16 @@ static void Layout(void)
                 squeeze = (float)(ROW_W - 6 - width[n - 1]) / (total - width[n - 1]);
             fx = total < ROW_W - 6 ? CENTER_X - total / 2.0f : ROW_X + 3;   // (centered, as the Active Pokemon is)
             for (i = 0; i < n; i++) {
-                const MtgObj *o = &B.duel.objs[B.items[r][i].obj];
+                const MtgObj *o = &B.view.objs[B.items[r][i].obj];
                 Rect rc = o->tapped ? MakeRect((int)fx, sCardY[r] + ch - cw, ch, cw) : MakeRect((int)fx, sCardY[r], cw, ch);
                 if (o->attacking)   // (an attacker steps toward the other side)
                     rc.y += o->controller == ME ? -5 : 5;
                 B.rect[B.items[r][i].obj] = rc;
                 if (land) {   // every land of a stack answers to its rect
                     int k;
-                    for (k = 0; k < B.duel.objCount; k++)
-                        if (B.duel.objs[k].zone == MTG_ZONE_BATTLEFIELD && B.duel.objs[k].def == o->def
-                            && B.duel.objs[k].tapped == o->tapped && B.duel.objs[k].controller == o->controller)
+                    for (k = 0; k < B.view.objCount; k++)
+                        if (B.view.objs[k].zone == MTG_ZONE_BATTLEFIELD && B.view.objs[k].def == o->def
+                            && B.view.objs[k].tapped == o->tapped && B.view.objs[k].controller == o->controller)
                             B.rect[k] = rc;
                 }
                 fx += (width[i] + 3) * squeeze;
@@ -343,9 +371,9 @@ static void Layout(void)
 static void Slides(void)   // (once a frame, from MtgBoard_Step)
 {
     int i;
-    for (i = 0; i < B.duel.objCount && i < MTG_MAX_OBJS; i++) {
+    for (i = 0; i < B.view.objCount && i < MTG_MAX_OBJS; i++) {
         const Rect *now = &B.rect[i], *was = &B.last[i];
-        int inHand = B.duel.objs[i].zone == MTG_ZONE_HAND;
+        int inHand = B.view.objs[i].zone == MTG_ZONE_HAND;
         if (!now->on) {
             B.slide[i] = 0;
             continue;
@@ -354,9 +382,11 @@ static void Slides(void)   // (once a frame, from MtgBoard_Step)
         if (!was->on || (!inHand && (was->x != now->x || was->y != now->y))) {
             Rect from = *was;
             if (!was->on) {
-                if (inHand)
+                if (B.spawn[i].on)
+                    from = B.spawn[i];
+                else if (inHand)
                     from = PileRect(PILE_MY_LIBRARY);
-                else if (B.duel.objs[i].controller == THEM)
+                else if (B.view.objs[i].controller == THEM)
                     from = MakeRect(105, -50, CARD_W, CARD_H);
                 else
                     from.on = 0;
@@ -369,6 +399,7 @@ static void Slides(void)   // (once a frame, from MtgBoard_Step)
             }
         } else if (B.slide[i])
             B.slide[i]--;
+        B.spawn[i].on = 0;
     }
     memcpy(B.last, B.rect, sizeof(B.last));
 }
@@ -413,9 +444,9 @@ static int HasAction(int obj)   // the player could do something with it now
     if (q->kind != MTG_Q_PRIORITY || q->player != ME)
         return 0;
     for (i = 1; i < q->actionCount; i++) {
-        const MtgObj *o = &B.duel.objs[q->actions[i].obj];
-        if (q->actions[i].obj == obj || (IsLand(obj) && o->zone == B.duel.objs[obj].zone && o->def == B.duel.objs[obj].def
-                                          && o->tapped == B.duel.objs[obj].tapped && o->controller == B.duel.objs[obj].controller))
+        const MtgObj *o = &B.view.objs[q->actions[i].obj];
+        if (q->actions[i].obj == obj || (IsLand(obj) && o->zone == B.view.objs[obj].zone && o->def == B.view.objs[obj].def
+                                          && o->tapped == B.view.objs[obj].tapped && o->controller == B.view.objs[obj].controller))
             return 1;
     }
     return 0;
@@ -498,24 +529,105 @@ static void Plate(int x, int y, int w, int h, const char *label, const char *dig
     G_Digits(x + w - 3 - G_DigitsWidth(digits, size, 1), y + (big ? h - 10 : 2), digits, size, 1, text, 255);
 }
 
+// A cost at a glance, centered on cx with its top at y: the generic amount in a grey orb with its number, a dot for
+// each colored mana, X; a {T} first when it taps (tap)
+static void TapIcon(int x, int y)
+{
+    G_RoundFill(x, y, 7, 7, 0x202020, 255);
+    G_RoundFill(x + 1, y + 1, 5, 5, 0xe8e4dc, 255);
+    G_Fill(x + 2, y + 2, 3, 1, 0x202020);   // (a curved arrow: the tap symbol)
+    G_Fill(x + 2, y + 2, 1, 3, 0x202020);
+    G_Fill(x + 3, y + 4, 2, 1, 0x202020);
+    G_Fill(x + 4, y + 1, 1, 2, 0x202020);
+}
+static int CompactCostWidth(const MtgManaCost *m, int tap)
+{
+    int w = tap ? 8 : 0, k;
+    if (m->generic || m->x)
+        w += 8 * ((m->generic ? 1 : 0) + m->x);
+    for (k = 0; k < MTG_MANA_KINDS; k++)
+        w += m->pip[k] * 6;
+    return w ? w + 3 : 0;
+}
+static void CompactCost(int cx, int y, const MtgManaCost *m, int tap)
+{
+    int w = CompactCostWidth(m, tap), x, k, i;
+    char n[8];
+    if (!w)
+        return;
+    x = cx - w / 2;
+    G_RoundFill(x, y, w, 9, 0x101418, 225);   // (the pill)
+    x += 2;
+    if (tap)
+        TapIcon(x, y + 1), x += 8;
+    for (i = 0; i < m->x; i++, x += 8) {
+        G_RoundFill(x, y + 1, 7, 7, 0xc8c4bc, 255);
+        G_Text(x + 1, y - 2, 0x202020, G_NO_SHADOW, "X", 0, TF_NARROW);
+    }
+    if (m->generic) {
+        snprintf(n, sizeof(n), "%u", m->generic > 9 ? 9 : m->generic);
+        G_RoundFill(x, y + 1, 7, 7, 0xc8c4bc, 255);
+        G_Digits(x + 2, y + 2, n, 0, 1, 0x202020, 255);
+        x += 8;
+    }
+    for (k = 0; k < MTG_MANA_KINDS; k++)
+        for (i = 0; i < m->pip[k]; i++, x += 6) {
+            G_RoundFill(x, y + 2, 5, 5, 0x202020, 255);
+            G_Fill(x + 1, y + 3, 3, 3, MtgGfx_ManaColor(k));
+        }
+}
+// what using a permanent costs: its first activated ability's cost (not a land's mana)
+static const MtgCost *ActivatedCost(int obj)
+{
+    const MtgCardDef *c = Def(obj);
+    int k;
+    if (c->types & MTG_T_LAND)
+        return NULL;
+    for (k = 0; k < c->abilityCount; k++)
+        if (gMtgAbilities[c->abilities[k]].kind == MTG_AB_ACTIVATED)
+            return &gMtgAbilities[c->abilities[k]].cost;
+    return NULL;
+}
+
 // a card on the table: its face (on its side when tapped), the plate under a creature, what it's doing
 static void DrawCard(int obj, const Rect *rc, int count, float x, float y)
 {
-    const MtgObj *o = &B.duel.objs[obj];
+    const MtgObj *o = &B.view.objs[obj];
     const MtgCardDef *c = Def(obj);
     int onTable = o->zone == MTG_ZONE_BATTLEFIELD, tapped = o->tapped && onTable;
     int cw = tapped ? rc->h : rc->w, ch = tapped ? rc->w : rc->h;
     char pt[16];
-    float cx = x + rc->w / 2.0f, cy = y + rc->h / 2.0f;
+    float cx, cy, turn = tapped ? 90.0f : 0.0f;
+    if (B.lunge[obj]) {   // attacking or striking: a lunge toward the other side
+        float k = (float)B.lunge[obj] / (float)Frames(14);
+        y += (o->controller == ME ? -1 : 1) * sinf((1 - (k > 1 ? 1 : k)) * 3.14159f) * 7;
+    }
+    if (B.tapT[obj] && onTable) {   // tapping or untapping: it turns
+        float k = (float)B.tapT[obj] / (float)Frames(6);
+        turn = o->tapped ? 90 * (1 - k) : 90 * k;
+    }
+    cx = x + rc->w / 2.0f, cy = y + rc->h / 2.0f;
     if (onTable)
         G_FillA((int)x + 1, (int)y + 1, rc->w, rc->h, 0x000000, 70);
     // (the opponent's cards face them, as on the other card tables: turned half round, tapped a quarter more)
     MtgGfx_DrawCard(o->def, cx - cw / 2.0f, cy - ch / 2.0f, (float)cw, (float)ch,
-                    (tapped ? 90 : 0) + (onTable && o->controller == THEM ? 180 : 0), 255, 0);
+                    turn + (onTable && o->controller == THEM ? 180 : 0), 255,
+                    B.flash[obj] ? (unsigned)(B.flash[obj] * 14) : 0);
     if (o->attacking)
         G_RoundFrame((int)x - 1, (int)y - 1, rc->w + 2, rc->h + 2, 0xf04030, 255);
     if (o->blocking != MTG_NO_OBJ)
         G_RoundFrame((int)x - 1, (int)y - 1, rc->w + 2, rc->h + 2, 0x4080f0, 255);
+    // what it costs to cast (in the hand) or to use (on the table), on its top edge: the card under the cursor only
+    // (the user: for the table's looks)
+    if (Focused() == obj && !MtgBoard_Busy() && B.mode != MODE_RESULT && B.mode != MODE_VIEW) {
+        if (o->zone == MTG_ZONE_HAND && !(c->types & MTG_T_LAND))
+            CompactCost((int)cx, (int)y - 4, &c->cost, 0);
+        else if (onTable) {
+            const MtgCost *k = ActivatedCost(obj);
+            if (k)
+                CompactCost((int)cx, (int)y - 4, &k->mana, k->tap);
+        }
+    }
     if (!onTable)
         return;
     if (IsLand(obj) && count > 1) {   // (the count tab, as on the piles)
@@ -527,11 +639,11 @@ static void DrawCard(int obj, const Rect *rc, int count, float x, float y)
         G_Digits((int)x + rc->w - w + 5, (int)y + rc->h - 3, pt, 0, 1, 0xe0f0ff, 255);
     }
     if (c->types & MTG_T_CREATURE) {
-        int power = Mtg_Power(&B.duel, obj), tough = Mtg_Toughness(&B.duel, obj) - o->damage;
+        int power = Mtg_Power(&B.view, obj), tough = Mtg_Toughness(&B.view, obj) - o->damage;
         unsigned text = o->damage ? 0xffd860 : (power > c->power || tough > c->toughness) ? 0x9cf0b0 : 0xc8ecff;
         snprintf(pt, sizeof(pt), "%d/%d", power < 0 ? 0 : power, tough < 0 ? 0 : tough);
         Plate((int)cx - 13, (int)y + rc->h, 26, 9, NULL, pt, 0, text);
-        if (o->sick && !(Mtg_Keywords(&B.duel, obj) & MTG_KW_BIT(MTG_KW_HASTE)))
+        if (o->sick && !(Mtg_Keywords(&B.view, obj) & MTG_KW_BIT(MTG_KW_HASTE)))
             G_FillA((int)x, (int)y, rc->w, rc->h, 0xffffff, 40);   // (can't attack yet)
     }
 }
@@ -543,16 +655,16 @@ static const char *const sStepNames[MTG_STEP_COUNT] = {
 static int HandCount(int player)
 {
     int i, n = 0;
-    for (i = 0; i < B.duel.objCount; i++)
-        n += B.duel.objs[i].zone == MTG_ZONE_HAND && B.duel.objs[i].owner == player;
+    for (i = 0; i < B.view.objCount; i++)
+        n += B.view.objs[i].zone == MTG_ZONE_HAND && B.view.objs[i].owner == player;
     return n;
 }
 static int Graveyard(int player, uint16_t *out)   // newest first; returns how many
 {
     int i, n = 0, k;
-    for (i = 0; i < B.duel.objCount; i++)
-        if (B.duel.objs[i].zone == MTG_ZONE_GRAVEYARD && B.duel.objs[i].owner == player) {
-            for (k = n; k > 0 && B.duel.objs[out[k - 1]].seq < B.duel.objs[i].seq; k--)
+    for (i = 0; i < B.view.objCount; i++)
+        if (B.view.objs[i].zone == MTG_ZONE_GRAVEYARD && B.view.objs[i].owner == player) {
+            for (k = n; k > 0 && B.view.objs[out[k - 1]].seq < B.view.objs[i].seq; k--)
                 out[k] = out[k - 1];
             out[k] = (uint16_t)i;
             n++;
@@ -572,7 +684,7 @@ static void DrawPile(Rect r, int count, int deck, int top, int theirs)
             MtgGfx_DrawCard(MTG_GFX_BACK, (float)r.x + i, (float)r.y + i, (float)r.w, (float)r.h, theirs ? 180 : 0, 255, 0);
         MtgGfx_DrawCard(MTG_GFX_BACK, (float)r.x, (float)r.y, (float)r.w, (float)r.h, theirs ? 180 : 0, 255, 0);
     } else
-        MtgGfx_DrawCard(B.duel.objs[top].def, (float)r.x, (float)r.y, (float)r.w, (float)r.h, theirs ? 180 : 0, 255, 0);
+        MtgGfx_DrawCard(B.view.objs[top].def, (float)r.x, (float)r.y, (float)r.w, (float)r.h, theirs ? 180 : 0, 255, 0);
     snprintf(n, sizeof(n), "%d", count);
     {
         int w = G_DigitsWidth(n, 0, 1) + 4, x = r.x + r.w - w + 3, y = r.y + r.h - 5;
@@ -586,9 +698,13 @@ static void DrawLife(int player)
 {
     Rect l = LifeRect(player);
     char n[8];
-    int life = B.duel.players[player].life;
+    int life = B.view.players[player].life;
     snprintf(n, sizeof(n), "%d", life < 0 ? 0 : life);
     Plate(l.x + 1, l.y + 1, l.w - 2, l.h - 2, "LIFE", n, 1, life <= 0 ? 0xff3c3c : life <= 5 ? 0xffd860 : 0xc8ecff);
+    if (B.lifeFlash[player]) {   // (it just changed: lit, a little shake)
+        G_FillAdd(l.x + 1, l.y + 1, l.w - 2, l.h - 2, 0xffffff, (unsigned)(B.lifeFlash[player] * 10));
+        G_RoundFrame(l.x + (B.lifeFlash[player] & 2 ? 1 : -1), l.y, l.w, l.h, 0xffffff, 200);
+    }
 }
 
 /* The opponent's hand (tcg_board.c DrawOppHand): HAND, up to three backs fanned, how many */
@@ -603,24 +719,10 @@ static void DrawOppHand(void)
     G_Digits(18 + (shown ? 4 : -6), 82, n, 0, 1, 0xf8f8f8, 255);
 }
 
-/* The hand's tray (tcg_board.c DrawHandBar): the blue bar, the count tab, the arrow */
+/* The hand's tray, as every card table's (TcgUi_DrawTray), in the deck's color (MtgBoard_SetTray) */
 static void DrawHandBar(void)
 {
-    int y = (int)(BarY() + Pan());
-    char n[8];
-    G_FillA(0, y + 6, 240, 60, 0x004da7, 255);
-    G_FillA(0, y + 6, 240, 2, 0x0179d0, 255);
-    G_FillA(0, y + 8, 240, 1, 0x40a8f0, 255);
-    G_RoundFill(0, y, 26, 12, 0x303034, 255);
-    G_FillA(1, y + 1, 24, 10, 0xa8a8ac, 255);
-    G_FillA(1, y + 1, 24, 1, 0xe0e0e4, 255);
-    snprintf(n, sizeof(n), "%02d", HandCount(ME));
-    G_FillA(5, y + 2, 16, 8, 0x5a6c88, 255);
-    G_Digits(13 - G_DigitsWidth(n, 1, 1) / 2, y + 2, n, 1, 1, 0xe8f0ff, 255);
-    G_RoundFill(214, y, 26, 12, 0x303034, 255);
-    G_FillA(215, y + 1, 24, 10, 0xa8a8ac, 255);
-    G_FillA(215, y + 1, 24, 1, 0xe0e0e4, 255);
-    G_ButtonIcon(222, y + 6, B.tray > 0.5f ? 6 /* up */ : 7 /* down */);
+    TcgUi_DrawTray((int)(BarY() + Pan()), sTrayRgb, (unsigned)HandCount(ME), B.tray > 0.5f);
 }
 
 // the step of the turn in the middle: UNT UPK DRW M1 CMB M2 END, the one now lit in the turn's color
@@ -628,8 +730,8 @@ static void PhaseBar(void)
 {
     static const char *const names[7] = {"UNT", "UPK", "DRW", "M1", "CMB", "M2", "END"};
     static const uint8_t group[MTG_STEP_COUNT] = {0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 5, 6, 6};
-    int i, w = 0, x, on = group[B.duel.step < MTG_STEP_COUNT ? B.duel.step : 0], y = 67;
-    unsigned mine = B.duel.active == ME ? 0x3878f0 : 0xe85050;
+    int i, w = 0, x, on = group[B.view.step < MTG_STEP_COUNT ? B.view.step : 0], y = 67;
+    unsigned mine = B.view.active == ME ? 0x3878f0 : 0xe85050;
     for (i = 0; i < 7; i++)
         w += G_Measure(names[i], TF_NARROW) + 4;
     x = CENTER_X - w / 2;
@@ -648,7 +750,7 @@ static void PhaseBar(void)
 // what just happened (or the top of the stack), under the step
 static void StackLine(char *out, unsigned cap)
 {
-    const MtgStackEntry *e = &B.duel.stack[B.duel.stackCount - 1];
+    const MtgStackEntry *e = &B.view.stack[B.view.stackCount - 1];
     char name[64], target[64] = "";
     Name(name, sizeof(name), e->source);
     if (e->target.kind == MTG_TGT_OBJ || e->target.kind == MTG_TGT_STACK) {
@@ -662,11 +764,13 @@ static void StackLine(char *out, unsigned cap)
 static void NewsLine(void)
 {
     char line[120];
+    if (!MtgBoard_Busy() && B.row == ROW_MY_PERMS && B.pile == PILE_NONE && B.itemCount[ROW_MY_PERMS])
+        return;   // (the tooltip over your creatures sits here)
     line[0] = 0;
-    if (B.duel.stackCount)
+    if (B.view.stackCount)
         StackLine(line, sizeof(line));
     else if (B.tickerCount)
-        snprintf(line, sizeof(line), "%s", B.ticker[0]);
+        snprintf(line, sizeof(line), "%s", B.ticker[B.tickerCount - 1]);
     if (!line[0])
         return;
     TcgUi_FitText(line, 168, TF_NARROW);
@@ -676,15 +780,24 @@ static void NewsLine(void)
 // the stack: its cards in the middle, the newest in front, a line to what it aims at
 static void StackCards(void)
 {
-    int i, n = B.duel.stackCount, first = n > 3 ? n - 3 : 0;
+    int i, n = B.view.stackCount, first = n > 3 ? n - 3 : 0;
     for (i = first; i < n; i++) {
-        const MtgStackEntry *e = &B.duel.stack[i];
+        const MtgStackEntry *e = &B.view.stack[i];
         int k = i - first, x = CENTER_X - 11 + k * 9 - (n - first - 1) * 4, y = CENTER_Y - 15 - 18 + k * 2, top = i == n - 1;
+        unsigned glow = 0;
+        if (top && B.castT && B.castLife) {   // (just put on the stack: on its way from where it was)
+            float t = 1.0f - (float)B.castT / (float)B.castLife;
+            t = t * t * (3 - 2 * t);
+            x = (int)(B.castFrom.x + (x - B.castFrom.x) * t);
+            y = (int)(B.castFrom.y + (y - B.castFrom.y) * t);
+        }
+        if (top && B.resolveT && B.resolveLife)   // (resolving: it lights up)
+            glow = (unsigned)(220 * sinf((1.0f - (float)B.resolveT / (float)B.resolveLife) * 3.14159f));
         G_FillA(x + 2, y + 3, CARD_W, CARD_H, 0x000000, 100);
         if (top)
             G_FoilHalo(x, y, CARD_W, CARD_H, e->controller == ME ? 0x80b0ff : 0xff9080, B.frame, 0);
-        MtgGfx_DrawCard(B.duel.objs[e->source].def, (float)x, (float)y, CARD_W, CARD_H, e->controller == THEM ? 180 : 0,
-                        255, 0);
+        MtgGfx_DrawCard(B.view.objs[e->source].def, (float)x, (float)y, CARD_W, CARD_H, e->controller == THEM ? 180 : 0,
+                        255, glow);
         if (top && (e->target.kind == MTG_TGT_OBJ || e->target.kind == MTG_TGT_PLAYER)) {
             Rect t = e->target.kind == MTG_TGT_PLAYER ? B.playerRect[e->target.id] : B.rect[e->target.id];
             if (t.on) {
@@ -720,19 +833,19 @@ static void Tooltip(void)
         int p = B.pile == PILE_MY_LIBRARY ? ME : THEM;
         uint16_t list[MTG_MAX_OBJS];
         snprintf(line, sizeof(line), "%s LIBRARY %d  HAND %d  GRAVEYARD %d%s", p == ME ? "YOUR" : "THEIR",
-                 B.duel.players[p].libraryCount, HandCount(p), Graveyard(p, list), p == ME ? "  {A} CONCEDE" : "");
+                 B.view.players[p].libraryCount, HandCount(p), Graveyard(p, list), p == ME ? "  {A} CONCEDE" : "");
     } else if (B.pile != PILE_NONE) {
         uint16_t list[MTG_MAX_OBJS];
         snprintf(line, sizeof(line), "%s GRAVEYARD: %d  {A} LOOK", B.pile == PILE_MY_GRAVE ? "YOUR" : "THEIR",
                  Graveyard(B.pile == PILE_MY_GRAVE ? ME : THEM, list));
     } else if (f != MTG_NO_OBJ) {
         const MtgCardDef *c = Def(f);
-        const MtgObj *o = &B.duel.objs[f];
+        const MtgObj *o = &B.view.objs[f];
         char name[64];
         Name(name, sizeof(name), f);
         if (c->types & MTG_T_CREATURE) {
             if (o->zone == MTG_ZONE_BATTLEFIELD)
-                snprintf(line, sizeof(line), "%s  %d/%d", name, Mtg_Power(&B.duel, f), Mtg_Toughness(&B.duel, f));
+                snprintf(line, sizeof(line), "%s  %d/%d", name, Mtg_Power(&B.view, f), Mtg_Toughness(&B.view, f));
             else
                 snprintf(line, sizeof(line), "%s  %d/%d", name, c->power, c->toughness);
         } else
@@ -745,7 +858,7 @@ static void Tooltip(void)
     w = G_Hint(0, 0, 0, 0, line, TF_NARROW, 0) + 8;
     x = r.x + r.w / 2 - w / 2;
     y = r.y + r.h + 4;
-    if (f != MTG_NO_OBJ && (Def(f)->types & MTG_T_CREATURE) && B.duel.objs[f].zone == MTG_ZONE_BATTLEFIELD)
+    if (f != MTG_NO_OBJ && (Def(f)->types & MTG_T_CREATURE) && B.view.objs[f].zone == MTG_ZONE_BATTLEFIELD)
         y += 9;   // (under its plate)
     if (B.row == ROW_HAND && B.pile == PILE_NONE)
         y = r.y - 15;
@@ -816,7 +929,7 @@ static void Toast(void)
 static void InspectWindow(int obj)
 {
     const MtgCardDef *c = Def(obj);
-    const MtgObj *o = &B.duel.objs[obj];
+    const MtgObj *o = &B.view.objs[obj];
     char name[64], text[800], line[160];
     int y;
     G_FillA(0, 0, 240, 160, 0x000000, 150);
@@ -850,10 +963,10 @@ static void InspectWindow(int obj)
     Mtg_PlainText(text, sizeof(text), c->oracle);
     y = G_Text(94, y + 2, 0x404040, G_NO_SHADOW, text[0] ? text : "(No rules text.)", 136, TF_NARROW);
     if (c->types & MTG_T_CREATURE) {
-        if (o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_Power(&B.duel, obj) != c->power
-                                                || Mtg_Toughness(&B.duel, obj) != c->toughness || o->damage))
-            snprintf(line, sizeof(line), "%d/%d now (printed %d/%d)%s", Mtg_Power(&B.duel, obj),
-                     Mtg_Toughness(&B.duel, obj), c->power, c->toughness, o->damage ? ", hurt" : "");
+        if (o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_Power(&B.view, obj) != c->power
+                                                || Mtg_Toughness(&B.view, obj) != c->toughness || o->damage))
+            snprintf(line, sizeof(line), "%d/%d now (printed %d/%d)%s", Mtg_Power(&B.view, obj),
+                     Mtg_Toughness(&B.view, obj), c->power, c->toughness, o->damage ? ", hurt" : "");
         else
             snprintf(line, sizeof(line), "%d/%d", c->power, c->toughness);
         G_TextAlign(230, y + 1, TA_RIGHT, G_INK, G_INK_SHADOW, line, TF_SMALL);
@@ -883,7 +996,7 @@ static void DrawView(void)
         int x = 8 + (i % 7) * 33, y = 24 + (i / 7) * 46, on = start + i == B.viewCursor;
         if (on)
             y -= 2;
-        MtgGfx_DrawCard(B.duel.objs[B.view[start + i]].def, (float)x, (float)y, 30, 42, 0, 255, 0);
+        MtgGfx_DrawCard(B.view.objs[B.viewList[start + i]].def, (float)x, (float)y, 30, 42, 0, 255, 0);
         if (on) {
             int o = (B.frame / 8) % 2;
             G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
@@ -891,7 +1004,7 @@ static void DrawView(void)
     }
     if (B.viewCursor < B.viewCount) {
         char name[64];
-        Name(name, sizeof(name), B.view[B.viewCursor]);
+        Name(name, sizeof(name), B.viewList[B.viewCursor]);
         TcgUi_Strip(NULL, 0, name);
     }
     TcgUi_Hints("{INSPECT} LOOK  {B} BACK");
@@ -903,7 +1016,7 @@ static const char *const sTurnMenu[2] = {"PASS", "END TURN"};
 
 static void DrawResult(void)
 {
-    const char *reason = B.duel.players[B.result == 1 ? THEM : ME].drewFromEmpty ? "No cards left to draw."
+    const char *reason = B.view.players[B.result == 1 ? THEM : ME].drewFromEmpty ? "No cards left to draw."
                        : B.forced ? "" : "Life down to 0.";
     if (B.result == 3)
         reason = "Neither of you won.";
@@ -1004,8 +1117,8 @@ void MtgBoard_Draw(void)
     {
         uint16_t list[MTG_MAX_OBJS];
         int n;
-        DrawPile(PileRect(PILE_OPP_LIBRARY), B.duel.players[THEM].libraryCount, 1, 0, 1);
-        DrawPile(PileRect(PILE_MY_LIBRARY), B.duel.players[ME].libraryCount, 1, 0, 0);
+        DrawPile(PileRect(PILE_OPP_LIBRARY), B.view.players[THEM].libraryCount, 1, 0, 1);
+        DrawPile(PileRect(PILE_MY_LIBRARY), B.view.players[ME].libraryCount, 1, 0, 0);
         n = Graveyard(THEM, list);
         DrawPile(PileRect(PILE_OPP_GRAVE), n, 0, n ? list[0] : 0, 1);
         n = Graveyard(ME, list);
@@ -1018,8 +1131,8 @@ void MtgBoard_Draw(void)
     for (r = 0; r < ROW_HAND; r++)
         DrawRow(r);
     // the attackers each blocker blocks
-    for (i = 0; i < B.duel.objCount; i++) {
-        const MtgObj *o = &B.duel.objs[i];
+    for (i = 0; i < B.view.objCount; i++) {
+        const MtgObj *o = &B.view.objs[i];
         if (o->zone == MTG_ZONE_BATTLEFIELD && o->blocking != MTG_NO_OBJ && B.rect[i].on && B.rect[o->blocking].on) {
             const Rect *a = &B.rect[i], *t = &B.rect[o->blocking];
             G_Line(a->x + a->w / 2, a->y + a->h / 2, t->x + t->w / 2, t->y + t->h / 2, 0x80c0ff, 220);
@@ -1063,15 +1176,16 @@ void MtgBoard_Draw(void)
             }
         }
     }
-    if (B.duel.stackCount)
+    if (B.view.stackCount)
         StackCards();
     else
         NewsLine();
+    DrawPlay();
     DrawHandBar();
     DrawRow(ROW_HAND);
     if (B.mode == MODE_TARGET && B.targetCount) {   // the card being played, held up
         int obj = B.duel.query.actions[B.targets[0]].obj;
-        if (B.rect[obj].on && B.duel.objs[obj].zone == MTG_ZONE_HAND)
+        if (B.rect[obj].on && B.view.objs[obj].zone == MTG_ZONE_HAND)
             DrawCard(obj, &B.rect[obj], 1, B.rect[obj].x, BarY() + Pan() - 22);
     }
     // the cursor and the tooltip
@@ -1086,7 +1200,7 @@ void MtgBoard_Draw(void)
             t = B.rect[B.duel.query.attackers[B.blockCursor]];
         if (t.on && t.w)
             G_Focus(t.x, t.y, t.w, t.h, 0xf8f070, B.frame);
-    } else if (B.mode != MODE_RESULT && B.mode != MODE_VIEW && B.mode != MODE_CONCEDE) {
+    } else if (B.mode != MODE_RESULT && B.mode != MODE_VIEW && B.mode != MODE_CONCEDE && !MtgBoard_Busy()) {
         Rect f = FocusRect();
         if (f.w) {
             G_Focus(f.x, f.y, f.w, f.h, G_WHITE, B.frame);
@@ -1107,7 +1221,7 @@ void MtgBoard_Draw(void)
             items[i] = sMenuLabels[i];
         Menu(f.x + f.w + 4, f.y - (int)Pan() - 4, items, B.menuCount, B.menuCursor, 0);
     } else if (B.mode == MODE_TURN)
-        Menu(160, 100, sTurnMenu, 2, B.menuCursor, B.duel.active == ME ? 0 : 2);
+        Menu(160, 100, sTurnMenu, 2, B.menuCursor, B.view.active == ME ? 0 : 2);
     switch (B.mode) {
     case MODE_TARGET: {
         const MtgAction *a = &B.duel.query.actions[B.targets[B.targetCursor]];
@@ -1126,8 +1240,8 @@ void MtgBoard_Draw(void)
     case MODE_DISCARD: Prompt("Too many cards in your hand: discard one.  {A}", 1); break;
     case MODE_CONCEDE: Prompt("Concede the duel?  {A} CONCEDE  {B} KEEP PLAYING", 0); break;
     default:
-        if (B.mode == MODE_NORMAL && B.duel.query.kind == MTG_Q_PRIORITY && B.duel.query.player == ME && B.duel.stackCount
-            && B.duel.stack[B.duel.stackCount - 1].controller == THEM)
+        if (B.mode == MODE_NORMAL && B.duel.query.kind == MTG_Q_PRIORITY && B.duel.query.player == ME && B.view.stackCount
+            && B.view.stack[B.view.stackCount - 1].controller == THEM)
             Prompt("Answer it?  {START} LET IT RESOLVE", 1);
         break;
     }
@@ -1142,74 +1256,355 @@ void MtgBoard_Draw(void)
         DrawResult();
 }
 
-// ---- what happened, in words
-static void ReadEvents(void)
+// ---- what happened, played out: the table shows B.view, which trails the rules' duel by one event at a time. Each
+// event is acted out on the table (a card flying from the hand or the library, a tap turning, an attacker lunging,
+// damage flying to its target with its number, a card shattering as it dies, life ticking, the stack resolving) and
+// told in the middle line; nothing else happens (the computer waits, the buttons wait) until it's over. Once every
+// event has played, the view is the truth again.
+static Rect StackSpot(void) { return MakeRect(CENTER_X - 11, CENTER_Y - 33, CARD_W, CARD_H); }
+static int Frames(int n) { return Fast() ? (n * 3 + 4) / 5 : n; }
+int MtgBoard_Busy(void) { return B.active && (B.evOn || B.evShown < B.duel.eventCount); }
+
+static void Floater(int x, int y, int value, unsigned color)
 {
-    const MtgDuel *d = &B.duel;
-    for (; B.eventSeen < d->eventCount; B.eventSeen++) {
-        const MtgEvent *e = Mtg_EventAt(d, B.eventSeen);
-        char a[64], b[64];
-        if (!e)
-            continue;
-        switch (e->kind) {
-        case MTG_EV_TURN:
-            Ticker("Turn %d: %s.", e->b, e->a == ME ? "your turn" : "their turn");
-            B.sweepAge = 0;
-            B.sweepMine = e->a == ME;
-            PlaySE(e->a == ME ? SE_BALL_TRAY_ENTER : SE_BALL_TRAY_EXIT);
+    int i, best = 0;
+    for (i = 0; i < FLOATERS; i++)
+        if (B.floatAge[i] >= 40) {
+            best = i;
             break;
-        case MTG_EV_CAST:
-        case MTG_EV_ACTIVATE:
-            if (e->kind == MTG_EV_CAST && d->objs[e->a].controller == THEM && !B.autoplay) {
-                B.bigCard = d->objs[e->a].def;
-                B.bigAge = 0;
+        } else if (B.floatAge[i] > B.floatAge[best])
+            best = i;
+    B.floatX[best] = (int16_t)x, B.floatY[best] = (int16_t)y, B.floatValue[best] = (int16_t)value;
+    B.floatColor[best] = color, B.floatAge[best] = 0;
+}
+static Rect ObjRect(int obj)   // where an object is drawn now: its card on the table, the stack's spot, or none
+{
+    if (obj >= 0 && obj < MTG_MAX_OBJS && B.rect[obj].on)
+        return B.rect[obj];
+    if (obj >= 0 && obj < MTG_MAX_OBJS && B.view.objs[obj].zone == MTG_ZONE_STACK)
+        return StackSpot();
+    return MakeRect(0, 0, 0, 0);
+}
+static void ViewCopyObj(int obj, int zone)
+{
+    if (obj < 0 || obj >= MTG_MAX_OBJS)
+        return;
+    B.view.objs[obj] = B.duel.objs[obj];
+    B.view.objs[obj].zone = (uint8_t)zone;
+    if (obj >= B.view.objCount)
+        B.view.objCount = obj + 1;
+}
+static void StackRemove(int source)
+{
+    int i;
+    for (i = B.view.stackCount - 1; i >= 0; i--)
+        if (B.view.stack[i].source == source) {
+            memmove(&B.view.stack[i], &B.view.stack[i + 1], sizeof(B.view.stack[0]) * (size_t)(B.view.stackCount - 1 - i));
+            B.view.stackCount--;
+            return;
+        }
+}
+
+// an event begins: the view takes what can change at once, the look starts; returns its frames
+static int StartEvent(const MtgEvent *e)
+{
+    MtgDuel *v = &B.view;
+    char a[64], b[64];
+    int obj = e->a;
+    switch (e->kind) {
+    case MTG_EV_TURN:
+        v->active = (uint8_t)e->a, v->turn = (uint16_t)e->b;
+        Ticker("Turn %d: %s.", e->b, e->a == ME ? "your turn" : "their turn");
+        B.sweepAge = 0;
+        B.sweepMine = e->a == ME;
+        PlaySE(e->a == ME ? SE_BALL_TRAY_ENTER : SE_BALL_TRAY_EXIT);
+        return SWEEP_FRAMES * 3 / 4;
+    case MTG_EV_STEP:
+        v->step = (uint8_t)e->a, v->active = (uint8_t)e->b;
+        return Frames(3);   // (the step bar ticks along)
+    case MTG_EV_ZONE:
+        if (e->b == MTG_ZONE_BATTLEFIELD) {   // leaving the table: it breaks up (or fades) where it stands, then goes
+            Rect r = ObjRect(obj);
+            B.leaveRect = r;
+            B.leaveColor = MtgGfx_FrameColor(v->objs[obj].def, 0);
+            Name(a, sizeof(a), obj);
+            Ticker("%s %s.", a, e->c == MTG_ZONE_GRAVEYARD ? ((Def(obj)->types & MTG_T_CREATURE) ? "died" : "was destroyed")
+                                : e->c == MTG_ZONE_EXILE ? "was exiled" : e->c == MTG_ZONE_HAND ? "went back to a hand"
+                                : "left");
+            if (e->c == MTG_ZONE_GRAVEYARD)
+                PlaySE(SE_FAINT);
+            return Frames(20);
+        }
+        if (e->b == MTG_ZONE_LIBRARY && v->players[v->objs[obj].owner].libraryCount)
+            v->players[v->objs[obj].owner].libraryCount--;
+        // where it comes from when it shows up: the opponent's hand, the stack, their library
+        if (B.duel.objs[obj].controller == THEM && e->b == MTG_ZONE_HAND)
+            B.spawn[obj] = sOppHand;
+        else if (e->b == MTG_ZONE_STACK)
+            B.spawn[obj] = StackSpot();
+        else
+            B.spawn[obj] = PileRect(B.duel.objs[obj].owner == ME ? PILE_MY_LIBRARY : PILE_OPP_LIBRARY);
+        if (e->b == MTG_ZONE_HAND && e->c == MTG_ZONE_STACK) {   // a spell cast: CAST flies it
+            ViewCopyObj(obj, e->c);
+            return 0;
+        }
+        if (e->b == MTG_ZONE_LIBRARY && e->c == MTG_ZONE_HAND) {
+            ViewCopyObj(obj, e->c);
+            if (B.duel.objs[obj].owner == THEM) {   // their draw: a card back flies to their hand
+                B.flyFrom = PileRect(PILE_OPP_LIBRARY), B.flyTo = sOppHand, B.flyT = B.flyLife = Frames(12);
+                return Frames(12);
             }
-            Name(a, sizeof(a), e->a);
-            if (e->b == MTG_TGT_OBJ || e->b == MTG_TGT_STACK) {
-                Name(b, sizeof(b), e->c);
-                Ticker("%s %s %s on %s.", Who(d->objs[e->a].controller), e->kind == MTG_EV_CAST ? "cast" : "used", a, b);
-            } else if (e->b == MTG_TGT_PLAYER)
-                Ticker("%s %s %s on %s.", Who(d->objs[e->a].controller), e->kind == MTG_EV_CAST ? "cast" : "used", a,
-                       e->c == ME ? "you" : B.opp);
-            else
-                Ticker("%s %s %s.", Who(d->objs[e->a].controller), e->kind == MTG_EV_CAST ? "cast" : "used", a);
-            break;
-        case MTG_EV_LAND:
-            if (e->b == THEM) {
-                Name(a, sizeof(a), e->a);
-                Ticker("%s played %s.", B.opp, a);
+            PlaySE(SE_RG_CARD_FLIP);
+            return Frames(10);
+        }
+        ViewCopyObj(obj, e->c);
+        return e->c == MTG_ZONE_BATTLEFIELD ? Frames(12) : Frames(6);
+    case MTG_EV_DRAW:
+        return 0;
+    case MTG_EV_LAND:
+        Name(a, sizeof(a), obj);
+        Ticker("%s played %s.", Who(e->b), a);
+        B.flash[obj] = 14;
+        PlaySE(SE_RG_CARD_FLIP);
+        return Frames(14);
+    case MTG_EV_CAST:
+    case MTG_EV_ACTIVATE: {
+        MtgStackEntry s;
+        int theirs = B.duel.objs[obj].controller == THEM;
+        memset(&s, 0, sizeof(s));
+        s.isSpell = e->kind == MTG_EV_CAST;
+        s.controller = B.duel.objs[obj].controller;
+        s.source = (uint16_t)obj;
+        s.target.kind = (uint8_t)e->b, s.target.id = (uint16_t)e->c;
+        if (v->stackCount < MTG_MAX_STACK)
+            v->stack[v->stackCount++] = s;
+        Name(a, sizeof(a), obj);
+        if (e->b == MTG_TGT_OBJ || e->b == MTG_TGT_STACK) {
+            Name(b, sizeof(b), e->c);
+            Ticker("%s %s %s on %s.", Who(s.controller), s.isSpell ? "cast" : "used", a, b);
+        } else if (e->b == MTG_TGT_PLAYER)
+            Ticker("%s %s %s on %s.", Who(s.controller), s.isSpell ? "cast" : "used", a, e->c == ME ? "you" : B.opp);
+        else
+            Ticker("%s %s %s.", Who(s.controller), s.isSpell ? "cast" : "used", a);
+        // it flies from where it was to the stack's spot (an ability: a flash on its card, then the flight)
+        B.castFrom = s.isSpell ? (B.last[obj].on ? B.last[obj] : sOppHand) : ObjRect(obj);
+        if (!s.isSpell)
+            B.flash[obj] = 12;
+        PlaySE(SE_RG_CARD_FLIPPING);
+        if (s.isSpell && theirs && !B.autoplay) {   // their spell: shown big first
+            B.bigCard = v->objs[obj].def;
+            B.bigAge = 0;
+            B.castT = B.castLife = Frames(14);
+            return BIG_FRAMES + Frames(14);
+        }
+        B.castT = B.castLife = Frames(14);
+        return Frames(16);
+    }
+    case MTG_EV_RESOLVE:
+        B.resolveT = B.resolveLife = Frames(14);
+        return Frames(14);
+    case MTG_EV_COUNTERED:
+    case MTG_EV_FIZZLE:
+        Name(a, sizeof(a), obj);
+        Ticker(e->kind == MTG_EV_COUNTERED ? "%s was countered." : "%s lost its target.", a);
+        B.leaveRect = StackSpot();
+        B.leaveColor = MtgGfx_FrameColor(v->objs[obj].def, 0);
+        PlaySE(SE_BALL_OPEN);
+        return Frames(18);
+    case MTG_EV_TAP:
+        if (obj >= 0 && obj < MTG_MAX_OBJS) {
+            v->objs[obj].tapped = (uint8_t)e->b;
+            B.tapT[obj] = (uint8_t)Frames(6);
+        }
+        return Frames(5);
+    case MTG_EV_ATTACK:
+        if (obj >= 0 && obj < MTG_MAX_OBJS) {
+            v->objs[obj].attacking = 1;
+            B.lunge[obj] = (uint8_t)Frames(14);
+        }
+        Name(a, sizeof(a), obj);
+        Ticker("%s attacks!", a);
+        PlaySE(SE_M_TAKE_DOWN);
+        return Frames(14);
+    case MTG_EV_BLOCK:
+        if (obj >= 0 && obj < MTG_MAX_OBJS) {
+            v->objs[obj].blocking = (uint16_t)e->b;
+            B.flash[obj] = 12;
+        }
+        Name(a, sizeof(a), obj);
+        Name(b, sizeof(b), e->b);
+        Ticker("%s blocks %s.", a, b);
+        PlaySE(SE_M_DETECT);
+        return Frames(16);
+    case MTG_EV_DAMAGE: {
+        Rect from = ObjRect(obj), to = e->b < 0 ? LifeRect(-1 - e->b) : ObjRect(e->b);
+        if (!from.w)
+            from = StackSpot();
+        B.flyFrom = from, B.flyTo = to, B.flyT = B.flyLife = Frames(14), B.flyBall = 1;
+        B.flyColor = obj >= 0 && obj < MTG_MAX_OBJS ? MtgGfx_FrameColor(v->objs[obj].def, 1) : 0xffe080;
+        if (obj >= 0 && obj < MTG_MAX_OBJS && B.rect[obj].on)
+            B.lunge[obj] = (uint8_t)Frames(12);
+        if (obj >= 0 && obj < MTG_MAX_OBJS && e->b < 0 && e->c >= 3) {
+            Name(a, sizeof(a), obj);
+            Ticker("%s: %d damage to %s!", a, e->c, e->b == -1 - ME ? "you" : B.opp);
+        }
+        return Frames(16);
+    }
+    case MTG_EV_LIFE:
+        return Frames(12);
+    }
+    return 0;
+}
+
+// an event ends: the rest of what it changes
+static void EndEvent(const MtgEvent *e)
+{
+    MtgDuel *v = &B.view;
+    int obj = e->a;
+    switch (e->kind) {
+    case MTG_EV_ZONE:
+        if (e->b == MTG_ZONE_BATTLEFIELD) {
+            ViewCopyObj(obj, e->c);
+            B.leaveRect.w = 0;
+        }
+        break;
+    case MTG_EV_RESOLVE:
+        if (v->stackCount)
+            v->stackCount--;
+        break;
+    case MTG_EV_COUNTERED:
+    case MTG_EV_FIZZLE:
+        StackRemove(obj);
+        B.leaveRect.w = 0;
+        break;
+    case MTG_EV_DAMAGE: {
+        Rect to = e->b < 0 ? LifeRect(-1 - e->b) : ObjRect(e->b);
+        if (e->b >= 0 && e->b < MTG_MAX_OBJS) {
+            v->objs[e->b].damage += e->c;
+            B.flash[e->b] = 10;
+            Floater(to.x + to.w / 2, to.y, -e->c, 0xff5040);
+        }
+        B.flyBall = 0;
+        PlaySE(SE_EFFECTIVE);
+        break;
+    }
+    case MTG_EV_LIFE: {
+        Rect l = LifeRect(e->a);
+        v->players[e->a].life = e->c;
+        B.lifeFlash[e->a] = 16;
+        Floater(l.x + l.w / 2, l.y + (e->a == ME ? -2 : l.h + 2), e->b, e->b > 0 ? 0x60e070 : 0xff5040);
+        if (e->b > 0)
+            PlaySE(SE_USE_ITEM);
+        break;
+    }
+    }
+}
+
+// a frame of the play: the event under way goes on, ends, or the next one starts
+static void Play(void)
+{
+    int i;
+    for (i = 0; i < MTG_MAX_OBJS; i++) {
+        if (B.tapT[i])
+            B.tapT[i]--;
+        if (B.lunge[i])
+            B.lunge[i]--;
+        if (B.flash[i])
+            B.flash[i]--;
+    }
+    for (i = 0; i < FLOATERS; i++)
+        if (B.floatAge[i] < 40)
+            B.floatAge[i]++;
+    for (i = 0; i < 2; i++)
+        if (B.lifeFlash[i])
+            B.lifeFlash[i]--;
+    if (B.castT)
+        B.castT--;
+    if (B.resolveT)
+        B.resolveT--;
+    if (B.flyT)
+        B.flyT--;
+    if (B.autoplay) {   // (the test harness at speed: no show)
+        B.evShown = B.duel.eventCount;
+        B.evOn = 0;
+    }
+    for (;;) {
+        if (B.evOn) {
+            if (--B.evLeft > 0)
+                return;
+            EndEvent(&B.ev);
+            B.evOn = 0;
+            B.evShown++;
+        }
+        if (B.evShown >= B.duel.eventCount) {
+            memcpy(&B.view, &B.duel, sizeof(B.view));   // caught up: the view is the truth again
+            return;
+        }
+        {
+            const MtgEvent *e = Mtg_EventAt(&B.duel, B.evShown);
+            if (!e) {   // (too far behind for the ring: catch up at once)
+                B.evShown = B.duel.eventCount;
+                continue;
             }
-            break;
-        case MTG_EV_ZONE:
-            if (e->b == MTG_ZONE_BATTLEFIELD && e->c != MTG_ZONE_BATTLEFIELD) {
-                Name(a, sizeof(a), e->a);
-                Ticker("%s %s.", a, e->c == MTG_ZONE_GRAVEYARD ? ((Mtg_Card(d->objs[e->a].def)->types & MTG_T_CREATURE)
-                                                                      ? "died" : "was destroyed")
-                                    : e->c == MTG_ZONE_EXILE ? "was exiled" : e->c == MTG_ZONE_HAND ? "went back to a hand"
-                                    : "left");
-            }
-            break;
-        case MTG_EV_BLOCK:
-            Name(a, sizeof(a), e->a);
-            Name(b, sizeof(b), e->b);
-            Ticker("%s blocks %s.", a, b);
-            break;
-        case MTG_EV_COUNTERED:
-            Name(a, sizeof(a), e->a);
-            Ticker("%s was countered.", a);
-            break;
-        case MTG_EV_FIZZLE:
-            Name(a, sizeof(a), e->a);
-            Ticker("%s lost its target.", a);
-            break;
-        case MTG_EV_DAMAGE:
-            if (e->a != MTG_NO_OBJ && e->b < 0 && e->c >= 3) {   // (big hits to a player)
-                Name(a, sizeof(a), e->a);
-                Ticker("%s: %d damage to %s!", a, e->c, e->b == -1 - ME ? "you" : B.opp);
-            }
-            break;
+            B.ev = *e;
+            B.evOn = 1;
+            B.evLeft = StartEvent(&B.ev);
+            if (B.evLeft > 0)
+                return;   // (it shows: one at a time)
         }
     }
+}
+
+// the play's looks, drawn on the layer: the card that leaves, the flight, the numbers
+static void DrawPlay(void)
+{
+    int i;
+    if (B.evOn && B.leaveRect.w && (B.ev.kind == MTG_EV_ZONE || B.ev.kind == MTG_EV_COUNTERED
+                                    || B.ev.kind == MTG_EV_FIZZLE)) {
+        int life = B.ev.kind == MTG_EV_ZONE ? Frames(20) : Frames(18);
+        float k = 1.0f - (float)B.evLeft / (float)(life > 0 ? life : 1);
+        Rect r = B.leaveRect;
+        for (i = 0; i < 12; i++) {   // pieces falling away
+            int px = r.x + (i % 3) * r.w / 3, py = r.y + (i / 3) * r.h / 4;
+            float dx = ((i % 3) - 1) * 12 * k + (i & 1 ? 2 : -2) * k, dy = k * k * 26 - 6 * k;
+            G_FillA(px + (int)dx, py + (int)dy, r.w / 3 + 1, r.h / 4 + 1, i & 1 ? B.leaveColor : G_Mix(B.leaveColor, 0xffffff, 0.4f),
+                    (unsigned)(240 * (1 - k)));
+        }
+        if (k < 0.3f)
+            G_FillAdd(r.x, r.y, r.w, r.h, 0xffffff, (unsigned)(200 * (1 - k / 0.3f)));
+    }
+    if (B.flyT && B.flyLife) {
+        float k = 1.0f - (float)B.flyT / (float)B.flyLife, x, y;
+        float x0 = B.flyFrom.x + B.flyFrom.w / 2.0f, y0 = B.flyFrom.y + B.flyFrom.h / 2.0f;
+        float x1 = B.flyTo.x + B.flyTo.w / 2.0f, y1 = B.flyTo.y + B.flyTo.h / 2.0f;
+        k = k * k * (3 - 2 * k);
+        x = x0 + (x1 - x0) * k;
+        y = y0 + (y1 - y0) * k - sinf(k * 3.14159f) * 10;
+        if (B.flyBall) {   // damage: a glowing shot with a trail
+            int t;
+            for (t = 4; t >= 0; t--) {
+                float kk = k - t * 0.05f, tx, ty;
+                if (kk < 0)
+                    continue;
+                tx = x0 + (x1 - x0) * kk;
+                ty = y0 + (y1 - y0) * kk - sinf(kk * 3.14159f) * 10;
+                G_FillAdd((int)tx - 2, (int)ty - 2, 5, 5, B.flyColor, (unsigned)(160 - t * 30));
+            }
+            G_Circle((int)x, (int)y, 4, 0xffffff, 230);
+            G_FillAdd((int)x - 3, (int)y - 3, 7, 7, B.flyColor, 255);
+            G_Fill((int)x - 1, (int)y - 1, 3, 3, 0xffffff);
+        } else   // their draw: a card back on its way to their hand
+            MtgGfx_DrawCard(MTG_GFX_BACK, x - 6, y - 8, 12, 17, 180, 255, 0);
+    }
+    for (i = 0; i < FLOATERS; i++)   // the numbers: up and away
+        if (B.floatAge[i] < 40) {
+            char n[12];
+            int age = B.floatAge[i];
+            unsigned alpha = age < 28 ? 255 : (unsigned)(255 * (40 - age) / 12);
+            snprintf(n, sizeof(n), "%+d", B.floatValue[i]);
+            G_DigitsOutlined(B.floatX[i] - G_DigitsWidth(n, 1, 1) / 2, B.floatY[i] - 4 - (age < 10 ? age : 10 + (age - 10) / 3),
+                             n, 1, 1, B.floatColor[i], 0x101010, alpha);
+        }
 }
 
 // ---- answering
@@ -1442,7 +1837,7 @@ static int PileA(void)
         B.mode = MODE_CONCEDE;
     } else if (B.pile == PILE_MY_GRAVE || B.pile == PILE_OPP_GRAVE) {
         B.viewPlayer = B.pile == PILE_MY_GRAVE ? ME : THEM;
-        B.viewCount = Graveyard(B.viewPlayer, B.view);
+        B.viewCount = Graveyard(B.viewPlayer, B.viewList);
         B.viewCursor = 0;
         if (!B.viewCount) {
             PlaySE(SE_FAILURE);
@@ -1683,7 +2078,7 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
     BuildRows();
     Layout();
     Slides();
-    ReadEvents();
+    Play();
     if (B.tickerCount && ++B.tickerAge >= TICKER_FRAMES) {   // the next line of what happened
         memmove(B.ticker[0], B.ticker[1], sizeof(B.ticker[0]) * (TICKER - 1));
         B.tickerCount--;
@@ -1699,6 +2094,26 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
         B.tray += (want - B.tray) * 0.3f;
         if (fabsf(want - B.tray) < 0.01f)
             B.tray = want;
+    }
+    if (MtgBoard_Busy() && B.mode != MODE_RESULT) {   // what happened is still being shown: everyone waits
+        B.aiWait = Frames(12);   // (and the computer takes a breath after it)
+        B.autoPassWait = 0;
+        if (pressed)   // (a button pressed as the last move plays out: kept a moment, used once it's over)
+            B.pendingKeys = pressed, B.pendingAge = 0;
+        else if (B.pendingAge < 60)
+            B.pendingAge++;
+        B.wasBusy = 1;
+        return 0;
+    }
+    if (B.pendingKeys) {
+        if (B.pendingAge < 45)
+            pressed |= B.pendingKeys;
+        B.pendingKeys = 0;
+    }
+    if (B.wasBusy) {
+        B.wasBusy = 0;
+        if (Mtg_Query(&B.duel)->player == ME && Mtg_Query(&B.duel)->kind != MTG_Q_GAME_OVER && !B.autoplay)
+            MPNet_Log("mtg: ready");   // (the test harness: the table is still, the player's turn to act)
     }
     q = Mtg_Query(&B.duel);
     if (B.mode == MODE_CONCEDE) {
@@ -1730,7 +2145,7 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
             B.viewCursor -= 7, PlaySE(SE_SELECT);
         if (pressed & (KEY_INSPECT | KEY_SELECT | KEY_A)) {
             B.inspect = 1;
-            B.inspectObj = B.view[B.viewCursor];
+            B.inspectObj = B.viewList[B.viewCursor];
             PlaySE(SE_SELECT);
         } else if (pressed & KEY_B) {
             B.mode = MODE_NORMAL;
@@ -1782,16 +2197,11 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
             B.aiWait--;
             return 0;
         }
-        if (B.tickerCount > 1 && !B.autoplay)
-            return 0;
-        if (!B.autoplay && (B.bigAge < BIG_FRAMES || B.sweepAge < SWEEP_FRAMES / 2))   // (while it's shown)
-            return 0;
         {
             MtgAnswer a;
-            int before = (int)B.duel.eventCount;
             MtgAi_Answer(&B.duel, &a);
             Mtg_Answer(&B.duel, &a);
-            B.aiWait = B.autoplay ? 0 : ((int)B.duel.eventCount - before > 2 ? (Fast() ? 10 : 24) : 2);
+            B.aiWait = B.autoplay ? 0 : 2;
         }
         return 0;
     }

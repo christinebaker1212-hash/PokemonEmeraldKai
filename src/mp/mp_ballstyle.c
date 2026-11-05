@@ -366,6 +366,19 @@ u8 MP_SpecialBall_Multiplier(u16 item, u8 attacker, u8 target, u8 *catchRate)
     }
 }
 
+// A color's shade (0 dark .. 4 light) as 0xRRGGBB, for the card tables' hand trays
+unsigned MP_BallStyle_Rgb(u8 color, int shade)
+{
+    static const u16 sRed[5] = {RGB(14, 2, 2), RGB(20, 3, 3), RGB(28, 5, 4), RGB(31, 14, 12), RGB(31, 24, 22)};
+    u16 c;
+    if (shade < 0)
+        shade = 0;
+    if (shade > 4)
+        shade = 4;
+    c = color == MP_BALL_RED || color >= MP_BALL_COLORS ? sRed[shade] : sRamps[color][shade];
+    return ((c & 31) * 255 / 31) << 16 | (((c >> 5) & 31) * 255 / 31) << 8 | ((c >> 10) & 31) * 255 / 31;
+}
+
 const u8 *MP_BallStyle_ColorName(u8 color)
 {
     return sColorNames[color < MP_BALL_COLORS ? color : 0];

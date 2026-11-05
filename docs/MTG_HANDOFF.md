@@ -114,6 +114,10 @@ in layout, colors, wording and keys; when theirs change, change MAGIC's too.
 - Faces: src/mtg/mtg_gfx.c. Screens: src/mtg/mtg_ui.c. Table: src/mtg/mtg_board.c (tcg_board.c's mat, tray and pan,
   piles, plates, tooltips, prompts). HOW TO PLAY: eight MAGIC pages in src/tcg/tcg_guide.c. NEW: tcg_new.c
   CARDNEW_MAGIC. The save: "<save>.mtg" format 2 (each deck's ACE CARD).
+- 1.98.0 (the user's feedback on 1.96): the table plays every event out before the next (B.view trailing B.duel),
+  costs on the cards, tray colors per deck: COOP_NOTES "MAGIC". When translating more cards, give any new event kind
+  its look in StartEvent / EndEvent (mtg_board.c) and its line in the middle; a new ability kind's cost shows by
+  ActivatedCost.
 - Still not like the others (open): SEARCH & SORT (tcg_search.c has no MAGIC game yet), the BINDER's sets / rarity
   views, CARD SCALING and the match line on the challenge (no ratings for Magic decks yet: forge-ai first), a
   registered CARD CASE challenge out in the world (tcg_field.c's which-game menu), card foil beyond the rares' glint,

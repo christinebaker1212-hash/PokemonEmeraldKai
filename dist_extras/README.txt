@@ -1260,9 +1260,12 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
                   the card, SELECT takes one out; or RIGHT over to the deck's
                   list, where A takes out), RENAME (the keys on screen or your
                   keyboard), ACE CARD (the card shown for the deck), DUEL WITH
-                  IT, COPY and DELETE (the cards stay in your collection).
+                  IT, COPY, DELETE (the cards stay in your collection) and
+                  TRAY COLOR (the hand's tray on the table: AUTO is the
+                  deck's main color, or pick a type color or any POKE BALL
+                  color you have unlocked; POKEMON and MAGIC decks).
                   START copies, SELECT deletes and R picks the deck you duel
-                  with straight from the list. Both card games work the same.
+                  with straight from the list. The card games work the same.
   Recipes         DECKS > DECK RECIPES (or FROM A RECIPE on an empty slot):
                   the starter and structure decks rebuilt from your cards; the
                   list says what you're missing.

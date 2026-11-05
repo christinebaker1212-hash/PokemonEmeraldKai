@@ -30,6 +30,7 @@ typedef struct {
     uint8_t owned[MTG_COLLECTION_CARDS];
     MtgSavedDeck decks[MTG_DECKS];
     int16_t ace[MTG_DECKS];            // each deck's ACE CARD (a card id), -1: the game picks one (Mtg_DeckAce)
+    uint8_t tray[MTG_DECKS];           // each deck's hand tray color (TCG_TRAY_* of include/tcg/tcg.h: 0 the deck's own)
 } MtgCollection;
 
 void Mtg_CollectionInit(MtgCollection *c, uint32_t seed);

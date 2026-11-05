@@ -473,9 +473,32 @@ static void HomeScreen(void)
 }
 
 // ---- DECKS: the slots, DECK RECIPES, BACK
-enum { DM_EDIT, DM_RENAME, DM_ACE, DM_USE, DM_COPY, DM_DELETE, DM_COUNT };
+enum { DM_EDIT, DM_RENAME, DM_ACE, DM_USE, DM_COPY, DM_DELETE, DM_TRAY, DM_COUNT };
 enum { EM_NEW, EM_RECIPE, EM_COUNT };
-static const char *const sDeckMenu[DM_COUNT] = {"EDIT", "RENAME", "ACE CARD", "DUEL WITH IT", "COPY", "DELETE"};
+static const char *const sDeckMenu[DM_COUNT] = {"EDIT", "RENAME", "ACE CARD", "DUEL WITH IT", "COPY", "DELETE",
+                                                 "TRAY COLOR"};
+/* The hand tray's colors (TcgUi_Tray*): the deck's main color counts its cards' colors and its lands' mana */
+static const unsigned sTrayRgb[6] = {0xd8c890, 0x3878d0, 0x5a5266, 0xd04830, 0x3a9a4a, 0x9aa4ac};
+static const char *const sTrayNames[6] = {"WHITE", "BLUE", "BLACK", "RED", "GREEN", "COLORLESS"};
+static unsigned DeckMainRgb(const MtgSavedDeck *d)
+{
+    int count[5] = {0, 0, 0, 0, 0}, i, k, best = -1, top = 0;
+    for (i = 0; i < d->count; i++) {
+        const MtgCardDef *c = Mtg_Card(d->cards[i]);
+        uint8_t colors = c->types & MTG_T_LAND ? c->intrinsicMana : c->colors;
+        for (k = 0; k < 5; k++)
+            if (colors & MTG_COLOR_BIT(k))
+                count[k]++;
+    }
+    for (k = 0; k < 5; k++)   // (the most; a tie goes to the first in W U B R G)
+        if (count[k] > top)
+            top = count[k], best = k;
+    return sTrayRgb[best < 0 ? 5 : best];
+}
+static unsigned DeckTrayRgb(int k)
+{
+    return TcgUi_TrayRgb(C()->tray[k], sTrayRgb, 6, DeckMainRgb(&C()->decks[k]));
+}
 static const char *const sEmptyMenu[EM_COUNT] = {"BUILD A DECK", "FROM A RECIPE"};
 #define DECK_ROWS (MTG_DECKS + 2)
 #define DECK_ROW_RECIPES MTG_DECKS
@@ -527,6 +550,7 @@ static void DecksScreen(void)
     } else
         TcgUi_Hints("{A} MENU  {START} COPY  {SELECT} DELETE  {B} BACK");
     TcgUi_NameDraw(MTG_THEME);
+    TcgUi_TrayDraw();
 }
 
 // ---- DECK RECIPES: the starter decks, built again from the cards owned
@@ -1194,6 +1218,7 @@ static void StartDuel(const char *const *theirCards, const char *name)
     Mtg_RecipeDeck(&r, &theirs);
     Mtg_DeckToDuel(&c->decks[c->activeDeck], &mine);
     Mtg_DeckToDuel(&theirs, &them);
+    MtgBoard_SetTray(DeckTrayRgb(c->activeDeck));
     Screen(M_DUEL);
     MtgBoard_Start(&mine, &them, Mtg_Rand(&c->rng), name);
 }
@@ -1274,6 +1299,7 @@ static void Act(int action)
         else {
             c->decks[d] = c->decks[U.askArg];
             c->ace[d] = c->ace[U.askArg];
+            c->tray[d] = c->tray[U.askArg];
             snprintf(c->decks[d].name, MTG_DECK_NAME, "%.10s copy", c->decks[U.askArg].name);
             Say(ACT_NONE, "Copied into slot %d.", d + 1);
         }
@@ -1282,6 +1308,7 @@ static void Act(int action)
     case ACT_CLEAR:
         memset(&c->decks[U.askArg], 0, sizeof(c->decks[0]));
         c->ace[U.askArg] = -1;
+        c->tray[U.askArg] = 0;
         if (c->activeDeck == U.askArg) {
             int d;
             for (d = 0; d < MTG_DECKS; d++)
@@ -1307,6 +1334,7 @@ static void Act(int action)
         snprintf(built.name, MTG_DECK_NAME, "%s", gMtgStarters[U.askArg].name);
         c->decks[slot] = built;
         c->ace[slot] = -1;
+        c->tray[slot] = 0;
         MPNet_Log("mtg: recipe %s into slot %d, %d missing", gMtgStarters[U.askArg].name, slot, lost);
         Screen(M_DECKS);
         U.cursor = slot;
@@ -1498,6 +1526,13 @@ int MtgUi_Step(unsigned keys)
         }
         break;
     case M_DECKS:
+        if (TcgUi_TrayActive()) {
+            if (TcgUi_TrayStep(pressed) == 1 && U.cursor < MTG_DECKS) {
+                c->tray[U.cursor] = (uint8_t)TcgUi_TrayValue();
+                MPNet_Log("mtg: deck %d tray %u", U.cursor, c->tray[U.cursor]);
+            }
+            break;
+        }
         if (TcgUi_NameActive()) {
             if (TcgUi_NameStep(pressed) == 1 && U.cursor < MTG_DECKS) {
                 snprintf(c->decks[U.cursor].name, MTG_DECK_NAME, "%s", TcgUi_NameText());
@@ -1538,6 +1573,8 @@ int MtgUi_Step(unsigned keys)
                     Ask(ACT_COPY, slot, "Copy %s into an empty slot?", c->decks[slot].name);
                 else if (U.menuCursor == DM_DELETE)
                     Ask(ACT_CLEAR, slot, "Delete %s? Its cards stay in your collection.", c->decks[slot].name);
+                else if (U.menuCursor == DM_TRAY)
+                    TcgUi_TrayOpen(c->tray[slot], sTrayRgb, sTrayNames, 6, DeckMainRgb(&c->decks[slot]), "MAGIC");
             }
             break;
         }

@@ -1,14 +1,15 @@
 // Moemon Kai: a save's Magic cards and decks, saved by each card's name hash (a pack rebuilt with more cards moves
 // the ids, never the names), the starter, boosters. File "<save>.mtg" (little-endian):
-//   "MTGC", u32 version (2; 1 is read too), u32 owner, u32 rng, u8 optedIn, flags, activeDeck, starter, u16 wins, losses,
+//   "MTGC", u32 version (3; 1 and 2 are read too), u32 owner, u32 rng, u8 optedIn, flags, activeDeck, starter, u16 wins, losses,
 //   u32 beaten, u32 owned count, then {u32 hash, u8 count} each, then MTG_DECKS decks {char name[16], u16 count,
-//   then count u32 hashes}; from version 2, MTG_DECKS u32s: each deck's ACE CARD by its hash (0: none chosen).
+//   then count u32 hashes}; from version 2, MTG_DECKS u32s: each deck's ACE CARD by its hash (0: none chosen);
+//   from version 3, MTG_DECKS u8s: each deck's hand tray color (TCG_TRAY_*).
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "mtg/collection.h"
 
-#define MTGC_VERSION 2
+#define MTGC_VERSION 3
 
 uint32_t Mtg_Rand(uint32_t *rng)
 {
@@ -281,6 +282,8 @@ uint32_t Mtg_CollectionWrite(const MtgCollection *c, uint8_t *out, uint32_t cap)
     }
     for (k = 0; k < MTG_DECKS; k++)
         W32(&w, c->ace[k] >= 0 && c->ace[k] < Mtg_DbCount() ? Mtg_NameHash(Mtg_Card(c->ace[k])->name) : 0);
+    for (k = 0; k < MTG_DECKS; k++)
+        W8(&w, c->tray[k]);
     return w.ok ? w.n : 0;
 }
 
@@ -340,6 +343,9 @@ int Mtg_CollectionRead(MtgCollection *c, const uint8_t *in, uint32_t size)
             uint32_t h = R32(&r);
             c->ace[k] = (int16_t)(h ? Mtg_CardByHash(h) : -1);
         }
+    if (version >= 3)
+        for (k = 0; k < MTG_DECKS && r.ok; k++)
+            c->tray[k] = (uint8_t)R8(&r);
     if (c->activeDeck >= MTG_DECKS)
         c->activeDeck = 0;
     return r.ok;
@@ -347,7 +353,7 @@ int Mtg_CollectionRead(MtgCollection *c, const uint8_t *in, uint32_t size)
 
 int Mtg_CollectionSave(const MtgCollection *c, const char *path)
 {
-    uint32_t cap = 64 + MTG_COLLECTION_CARDS * 5 + MTG_DECKS * (MTG_DECK_NAME + 2 + MTG_DECK_MAX * 4 + 4), n;
+    uint32_t cap = 64 + MTG_COLLECTION_CARDS * 5 + MTG_DECKS * (MTG_DECK_NAME + 2 + MTG_DECK_MAX * 4 + 5), n;
     uint8_t *buf = malloc(cap);
     char tmp[600];
     FILE *f;

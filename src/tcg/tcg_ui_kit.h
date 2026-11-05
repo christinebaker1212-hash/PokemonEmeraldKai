@@ -49,6 +49,19 @@ int TcgUi_NameActive(void);
 int TcgUi_NameStep(unsigned pressed);
 const char *TcgUi_NameText(void);
 void TcgUi_NameDraw(unsigned color);
+/* The hand tray on the POKeMON and MAGIC tables: its color for a deck's setting (TCG_TRAY_* of tcg/tcg.h: AUTO the
+ * deck's own main color autoRgb, one of the game's colors gameRgb[n], or a POKe BALL color), and the tray drawn in it
+ * (the blue bar's look: its body, the lit edge, the count tab, the arrow) with its top at y */
+unsigned TcgUi_TrayRgb(unsigned setting, const unsigned *gameRgb, int gameCount, unsigned autoRgb);
+void TcgUi_DrawTray(int y, unsigned rgb, unsigned count, int up);
+/* TRAY COLOR (a deck's menu): AUTO, the game's colors, the POKe BALL colors the player has. Step: 0 choosing, 1 chosen
+ * (TcgUi_TrayValue), -1 left as it was. Draw over the screen it was opened on. */
+void TcgUi_TrayOpen(unsigned setting, const unsigned *gameRgb, const char *const *gameNames, int gameCount,
+                    unsigned autoRgb, const char *gameWord);
+int TcgUi_TrayActive(void);
+int TcgUi_TrayStep(unsigned pressed);
+unsigned TcgUi_TrayValue(void);
+void TcgUi_TrayDraw(void);
 /* The CARD CASE on its POKeMON side again (from the YU-GI-OH! side's tabs) */
 void Tcg_OpenCaseSide(void (*returnToGame)(void), int fromScript);
 /* The CARD CASE on any side (KIT_GAME_*): L and R on a side's first screen go round them */

@@ -5,6 +5,7 @@
 
 #include "mtg/mtg.h"
 
+void MtgBoard_SetTray(unsigned rgb);   // the hand tray's color (the deck's: TcgUi_TrayRgb), before MtgBoard_Start
 void MtgBoard_Start(const MtgDeck *mine, const MtgDeck *theirs, uint32_t seed, const char *opponent);
 // a frame of the duel: 0 while it goes on, then 1 won / 2 lost / 3 a draw once the result screen is left
 int MtgBoard_Step(unsigned pressed, unsigned keys);

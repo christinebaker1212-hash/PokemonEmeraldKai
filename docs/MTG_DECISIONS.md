@@ -73,6 +73,13 @@ Built from 2026-11-04: docs/MTG_HANDOFF.md (status and next steps), docs/MTG_SCO
 - TRIPLE TRIAD is always last on the CARD CASE's L / R round: POKeMON, YU-GI-OH!, MAGIC, TRIPLE TRIAD.
 - Card art: each card's earliest old-frame printing from 4th Edition to Scourge (the pool's years), in the game's own
   frame; the artist credited in the card view.
+
+## The user's answers (2026-11-05, 1.98.0)
+- The hand tray is the deck's main color (by card and land count; POKeMON: by card type and Energy), and each deck can
+  set its own: one of the game's colors or any POKe BALL color the player has unlocked (both card games).
+- Every action on the table is shown with clear animations, the opponent's turn above all; text alone is not enough.
+- A card's cost to cast, tap or activate shows on the table without zooming in: on the card under the cursor only.
+- Keep all of this in mind as more cards are translated for the full release.
 - The table passes for the player when nothing else can be done, when their own spell is on top, and outside their
   main phases, the blocks and the opponent's end step; L held stops at every chance.
 

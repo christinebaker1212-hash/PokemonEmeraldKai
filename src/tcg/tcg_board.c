@@ -12,6 +12,7 @@
 #include "tcg/integration.h"
 #include "tcg_board.h"
 #include "tcg_gfx.h"
+#include "tcg_ui_kit.h"
 
 enum
 {
@@ -1148,6 +1149,8 @@ void TcgBoard_TestFx(unsigned kind)
         f->color = 0xf8f0a0, f->value = 12345, f->player = 1;
 }
 void TcgBoard_Tutorial(int on) { sNextTutorial = on; }
+static unsigned sTrayRgb = 0x3888e8;   /* (the old blue: TcgUi_DrawTray makes 0x004da7's body of it) */
+void TcgBoard_SetTray(unsigned rgb) { sTrayRgb = rgb; }
 void TcgBoard_Begin(const struct TcgDuel *truth, const char *opponent, int online)
 {
     unsigned who, i;
@@ -3150,24 +3153,8 @@ static void DrawSprites(int moving)
 }
 static void DrawHandBar(void)
 {
-    const struct TcgPlayer *me = &B.view.players[0];
-    int y = (int)(BarY() + Pan()), i;
-    char n[8];
-    G_FillA(0, y + 6, 240, 60, 0x004da7, 255);
-    G_FillA(0, y + 6, 240, 2, 0x0179d0, 255);
-    G_FillA(0, y + 8, 240, 1, 0x40a8f0, 255);
-    (void)i;
-    /* Count tab and the arrow button. */
-    G_RoundFill(0, y, 26, 12, 0x303034, 255);
-    G_FillA(1, y + 1, 24, 10, 0xa8a8ac, 255);
-    G_FillA(1, y + 1, 24, 1, 0xe0e0e4, 255);
-    snprintf(n, sizeof(n), "%02u", B.intro > 0 ? 0 : me->handSize);
-    G_FillA(5, y + 2, 16, 8, 0x5a6c88, 255);
-    G_Digits(13 - G_DigitsWidth(n, 1, 1) / 2, y + 2, n, 1, 1, 0xe8f0ff, 255);
-    G_RoundFill(214, y, 26, 12, 0x303034, 255);
-    G_FillA(215, y + 1, 24, 10, 0xa8a8ac, 255);
-    G_FillA(215, y + 1, 24, 1, 0xe0e0e4, 255);
-    G_ButtonIcon(222, y + 6, B.tray > 0.5f ? 6 /* up */ : 7 /* down */);
+    /* the tray in the deck's color (TcgBoard_SetTray), drawn as every card table's tray (TcgUi_DrawTray) */
+    TcgUi_DrawTray((int)(BarY() + Pan()), sTrayRgb, B.intro > 0 ? 0 : B.view.players[0].handSize, B.tray > 0.5f);
 }
 static void DrawOppHand(void)
 {

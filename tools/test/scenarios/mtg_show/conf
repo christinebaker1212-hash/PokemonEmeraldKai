@@ -1,0 +1,6 @@
+# The MAGIC table shows what happens: a land played, a spell flying to the stack and resolving, an attack, the
+# opponent's turn played out card by card (bursts of shots to look at), and the table waits for each before the next.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: played Mountain" "mtg: ready" "mtg: you: cast Raging Goblin" "mtg: you: attack with 1" "mtg: your move: priority, turn 4")
+UNEXPECT_A=("[crash]" "mtg: no Mountain to focus" "mtg: no Raging Goblin to focus")

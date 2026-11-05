@@ -133,7 +133,15 @@ struct TcgCollection
     uint32_t milestonesHi;
     /* Format 9: the promo cards claimed for card milestones (duels won, packs opened...: tcg_ui.c sMilestonePromos) */
     uint32_t rewards;
+    /* Format 10: each saved deck's hand tray color on the duel table (TCG_TRAY_*: the deck's main type, one type, or
+     * a POKe BALL color) */
+    uint8_t tray[TCG_SAVED_DECKS];
 };
+/* A deck's tray color (TcgCollection.tray, MtgCollection.tray): the deck's own main color, one of the game's colors
+ * (TCG_TRAY_GAME + n), or a POKe BALL color (TCG_TRAY_BALL + n) */
+#define TCG_TRAY_AUTO 0
+#define TCG_TRAY_GAME 1
+#define TCG_TRAY_BALL 0x40
 void Tcg_CollectionInit(struct TcgCollection *c, uint32_t seed);
 int Tcg_ChooseStarter(struct TcgCollection *c, unsigned starter);
 /* A pack: 5 commons, 3 uncommons, a rare (a holo one pack in TCG_HOLO_ODDS, a plain rare

@@ -5000,6 +5000,26 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   starts on the opponent's side), START passes, SELECT / INSPECT shows the whole text, L held stops at every priority.
   It passes for the player when nothing else can be done, when their own spell is on top, and outside their main
   phases, the blocks and the opponent's end step.
+- What happens is played out (1.98.0, the user: "actions queue up immediately without animations ... text conveyance is
+  not enough, there must be clear animations ... especially on the enemy turn"): mtg_board.c draws B.view, a copy of the
+  duel that trails the rules' B.duel by one event at a time (Play / StartEvent / EndEvent): each MtgEvent is acted out
+  (a card from the hand or library flying to its place, a back flying to the opponent's hand as they draw, the cast spell
+  flying to the stack, their spells shown big first, taps turning, attackers lunging, blocks lit with a line, damage as
+  a glowing shot to its target and a number, deaths shattering into the graveyard, life plates lit with +N / -N, the
+  stack's card lighting as it resolves, the step bar ticking) and told in the middle line; while it plays nobody acts
+  (the computer waits, then pauses a moment), a button pressed in the last 45 frames of it is kept and used once it's
+  over, and the log says "mtg: ready" when the player may act again (the test harness waits for it). Durations shorten
+  with DUEL SPEED FAST (Frames). When every event has played, view = duel.
+- Costs at a glance (the user): the card under the cursor shows, on its top edge, what it costs (in the hand: its mana
+  cost, the generic amount numbered in a grey orb, a dot per colored mana) or what using it costs (on the table: its
+  activated ability's, {T} first when it taps; lands' mana is left to their faces). Only that card, for the table's
+  looks (the user, 2026-11-05).
+- Tray colors (1.98.0): the hand tray on the MAGIC and POKeMON tables is in the deck's own main color (MAGIC: its cards'
+  colors and its lands' mana counted; POKeMON: its Pokemon's types and its Energy cards), or what the deck's menu's TRAY
+  COLOR sets (the last item, so older menu positions stay): AUTO, one of the game's colors, or any POKe BALL color the
+  player has (the first 11 everyone's, the rest by MP_BallUnlock_Has). Shared kit: tcg_ui.c TcgUi_TrayRgb / DrawTray /
+  TrayOpen / TrayStep / TrayDraw; TCG_TRAY_AUTO / GAME + n / BALL + n; saved per deck (TcgCollection.tray: "<save>.cards"
+  format 10; MtgCollection.tray: "<save>.mtg" format 3); MP_BallStyle_Rgb gives the ball colors' shades.
 - The computer is mtg_ai.c, a STAND-IN until forge-ai's translation (docs/MTG_HANDOFF.md).
 - Debug: `mp mtg starter N`, `mp mtg state`, `mp mtg duel N` (a regular's challenge), `mp mtg autoplay 1` (the
   computer plays your side too), `mp mtg focus NAME` (the cursor on that card), `mp mtg table`, `mp mtg win` /

@@ -4,5 +4,5 @@
 # play room's stairs come up by the front door.
 MODE=1
 TMO=300
-EXPECT_A=("mtg: starter screen" "mtg: starter EMBER chosen" "optedIn 1 deck 0 (EMBER, 40 cards)" "mtg: case open" "mtg: challenge from PIP" "mtg: table: you vs PIP" "mtg: duel over: won" "mtg: won against PIP, booster of 8" "wins 1 losses 0 beaten 2" "where map 14.12 xy 3,2" "mtg: challenge from RHEA" "where map 14.11 xy 5,9")
+EXPECT_A=("mtg: starter screen" "mtg: starter EMBER chosen" "optedIn 1 deck 0 (EMBER, 40 cards)" "mtg: case open" "mtg: deck 0 tray 3" "mtg: challenge from PIP" "mtg: table: you vs PIP" "mtg: duel over: won" "mtg: won against PIP, booster of 8" "wins 1 losses 0 beaten 2" "where map 14.12 xy 3,2" "mtg: challenge from RHEA" "where map 14.11 xy 5,9")
 UNEXPECT_A=("[crash]" "mtg: couldn't write")
