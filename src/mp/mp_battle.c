@@ -527,6 +527,8 @@ static void FinishBattle(void)
     sNet.sCount = 0;
 }
 
+void MP_FanClub_AfterPvp(u8 outcome);
+
 static void CB2_MpReturnFromBattle(void)
 {
     u8 outcome = gBattleOutcome;
@@ -560,6 +562,7 @@ static void CB2_MpReturnFromBattle(void)
     }
 
     MP_TCard_NotePvp(sNet.oppName, outcome);   // the TRAINER CARD's record against them
+    MP_FanClub_AfterPvp(outcome);               // KANTO's TRAINER FAN CLUB (mp_fanclub.c)
     MP_Events_Did(MP_DID_PVP);
     if (outcome == B_OUTCOME_WON)
         MP_Events_Did(MP_DID_PVPWIN);

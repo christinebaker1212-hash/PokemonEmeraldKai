@@ -1,0 +1,20 @@
+pressuntil A field 5000
+wait 60
+mp warp 38,84,5,14
+wait 150
+mp getvar 0x5155
+mp objat 9 6
+mp objat 5 11
+mp regionclear 2
+mp warp 38,84,5,14
+wait 200
+shot meet
+pressuntil A field 6000
+wait 100
+mp getvar 0x5155
+mp getvar 0x5153
+mp warp 38,84,6,5
+wait 100
+mp objat 9 6
+shot after
+quit

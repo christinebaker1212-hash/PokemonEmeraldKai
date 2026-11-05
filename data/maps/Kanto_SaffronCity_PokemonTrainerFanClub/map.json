@@ -24,7 +24,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_841F31C",
+      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_CrushGirl",
       "flag": "0"
     },
     {
@@ -37,7 +37,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_841F360",
+      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_LittleGirl",
       "flag": "0"
     },
     {
@@ -50,7 +50,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_841F3B7",
+      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_Youngster",
       "flag": "0"
     },
     {
@@ -63,7 +63,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_841F3FB",
+      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_Gentleman",
       "flag": "0"
     },
     {
@@ -76,8 +76,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_841F43F",
-      "flag": "0"
+      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_Woman",
+      "flag": "FLAG_KANTO_HIDE_FANCLUB_WOMAN"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16187",
@@ -89,8 +89,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_841F479",
-      "flag": "0"
+      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_Rocker",
+      "flag": "FLAG_KANTO_HIDE_FANCLUB_ROCKER"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16104",
@@ -102,8 +102,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_841F4C6",
-      "flag": "0"
+      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_Beauty",
+      "flag": "FLAG_KANTO_HIDE_FANCLUB_BEAUTY"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16107",
@@ -115,8 +115,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_841F513",
-      "flag": "0"
+      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_BlackBelt",
+      "flag": "FLAG_KANTO_HIDE_FANCLUB_BLACK_BELT"
     }
   ],
   "warp_events": [
@@ -129,5 +129,22 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 2,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_PokemonJournal"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_PokemonJournal"
+    }
+  ]
 }

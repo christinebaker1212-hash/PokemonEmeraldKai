@@ -724,3 +724,8 @@ gSpecials::
 	def_special MP_TCard_StickerBrag
 	def_special MP_Gen_CapNow
 	def_special MP_KantoCatchingTutorial
+	def_special MP_FanClub_Enter
+	def_special MP_FanClub_TryLoseFansFromPlayTime
+	def_special MP_FanClub_NumFans
+	def_special MP_FanClub_IsFan
+	def_special MP_FanClub_BufferTrainerName

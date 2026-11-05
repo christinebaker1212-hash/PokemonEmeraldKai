@@ -434,8 +434,6 @@ Johto_DragonShrine_Text_83CCA59::
 	.string "CLAIR: You have all eight BADGES.\p"
 	.string "The way to the LEAGUE starts east\n"
 	.string "of NEW BARK TOWN. Use SURF there.\p"
-	.string "Once you become CHAMPION, you can\n"
-	.string "challenge the GYM LEADERS again.\p"
 	.string "When you reach the MOéMON LEAGUE,\n"
 	.string "don’t you dare lose!\p"
 	.string "If you do, I’ll feel even worse\n"

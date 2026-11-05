@@ -11,15 +11,6 @@ Johto_GoldenrodDeptStore6F_OnWarp_83D383A:
 	map_script_2 VAR_QZ_0x5015, 1, Quetzal_EventScript_83D3844
 	.2byte 0
 
-@ Johto_GoldenrodDeptStore6F object 4 (local id 4, gfx 0x3EBC) at 20,9
-Johto_GoldenrodDeptStore6F_EventScript_83D4596::
-	lock
-	faceplayer
-	msgbox Johto_GoldenrodDeptStore6F_Text_83D45A3, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
 @ Johto_GoldenrodDeptStore6F object 3 (local id 3, gfx 0x11) at 13,10
 Johto_GoldenrodDeptStore6F_EventScript_83D461E::
 	lock
@@ -95,13 +86,6 @@ Johto_GoldenrodDeptStore6F_EventScript_83D47B9::
 	closemessage
 	release
 	end
-
-Johto_GoldenrodDeptStore6F_Text_83D45A3::
-	.string "{PLAYER}! Fancy seeing you here!\p"
-	.string "I’m picking up something for\n"
-	.string "my MILTANK.\p"
-	.string "If you want another battle, come to\n"
-	.string "the FIGHTING DOJO!$"
 
 Johto_GoldenrodDeptStore6F_Text_83D46CE::
 	.string "I collect MOéMON!\n"

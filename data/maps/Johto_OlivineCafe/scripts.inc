@@ -1,15 +1,6 @@
 Johto_OlivineCafe_MapScripts::
 	.byte 0
 
-@ Johto_OlivineCafe object 4 (local id 4, gfx 0x3E9A) at 5,4
-Johto_OlivineCafe_EventScript_83E4720::
-	lock
-	faceplayer
-	msgbox Johto_OlivineCafe_Text_83E472D, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
 @ Johto_OlivineCafe object 2 (local id 2, gfx 0x31) at 4,3
 Johto_OlivineCafe_EventScript_83E4802::
 	lock
@@ -43,17 +34,6 @@ Johto_OlivineCafe_EventScript_83E4830::
 	closemessage
 	release
 	end
-
-Johto_OlivineCafe_Text_83E472D::
-	.string "Oh... Hello, {PLAYER}.\p"
-	.string "These dishes in front of me are\n"
-	.string "not all mine...\p"
-	.string "Uh...\p"
-	.string "Actually, the person who sat here\n"
-	.string "before me ate a lot...\p"
-	.string "If you’d like to battle again,\n"
-	.string "please visit me at the FIGHTING\l"
-	.string "DOJO in SAFFRON CITY.$"
 
 Johto_OlivineCafe_Text_83E483D::
 	.string "Hah! Your MOéMON sure look like\n"

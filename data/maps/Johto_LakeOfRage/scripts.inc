@@ -24,15 +24,6 @@ Johto_LakeOfRage_EventScript_83DD30F::
 	setweather 5
 	end
 
-@ Johto_LakeOfRage object 15 (local id 15, gfx 0x3EAD) at 9,38
-Johto_LakeOfRage_EventScript_83DD313::
-	lock
-	faceplayer
-	msgbox Johto_LakeOfRage_Text_83DD320, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
 @ Johto_LakeOfRage object 4 (local id 4, gfx 0x3EA6) at 32,35
 Johto_LakeOfRage_EventScript_83DD380::
 	goto_if_ge VAR_QZ_0x500C, 14, Johto_LakeOfRage_EventScript_83DD394
@@ -292,12 +283,6 @@ Johto_LakeOfRage_Movement_83DD595:
 	walk_down
 	walk_down
 	step_end
-
-Johto_LakeOfRage_Text_83DD320::
-	.string "{PLAYER}.\p"
-	.string "Even here, the cold keeps me sharp.\p"
-	.string "If you wish to battle again, come\n"
-	.string "to the FIGHTING DOJO.$"
 
 Johto_LakeOfRage_Text_83DD5A0::
 	.string "DRAGONITE: Gyafooha!$"

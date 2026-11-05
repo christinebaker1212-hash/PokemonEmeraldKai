@@ -284,8 +284,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Johto_DragonsDenB1F_EventScript_83CBECF",
-      "flag": "FLAG_QZ_0x1020"
+      "script": "0x0",
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_738",

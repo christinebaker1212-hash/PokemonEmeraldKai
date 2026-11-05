@@ -1,8 +1,8 @@
-# JOHTO's gym leaders out and about once its League is beaten (qz_specials.c QzGiovanniStoryUpdateFlags: JOHTO's setup
-# hides them and no script shows them): WHITNEY at the DEPT. STORE's 6F (flag 0x1017), hidden before, there after.
-# (JASMINE's OLIVINE CAFE visit was Quetzal's: gone since case 105)
+# JOHTO's gym leaders stay in their gyms after its League, as in Crystal (case 45): Quetzal's postgame MORTY, WHITNEY,
+# PRYCE, JASMINE and CLAIR (who promised rematches at a FIGHTING DOJO that has none) are gone. WHITNEY's old spot on
+# the DEPT. STORE's 6F is empty before and after the League.
 MODE=1
 TMO=90
 ENV_A="MOEMON_DEBUG_REGION=1"
-EXPECT_A=("flag 4119 = 1" "objat 20,9: none" "flag 4119 = 0" "objat 20,9: local 4")
-UNEXPECT_A=("[crash]" "TIMEOUT")
+EXPECT_A=("objat 20,9: none")
+UNEXPECT_A=("[crash]" "TIMEOUT" "objat 20,9: local")

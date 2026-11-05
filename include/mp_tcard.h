@@ -162,6 +162,7 @@ struct MpTCardFriend
 void MP_TCard_NoteCoopWin(const u8 *seatPlayers, u8 count, u8 ownSeat);
 void MP_TCard_NotePvp(const u8 *oppName, u8 outcome);
 void MP_TCard_NoteTrade(u8 playerId);
+bool8 MP_TCard_PvpRival(u8 which, u8 *out);   // the friends battled most (0, 1): KANTO's TRAINER FAN CLUB
 void MP_TCard_KeepFriendCard(const struct MpCardView *v);
 const struct MpTCardFriend *MP_TCard_FriendByName(const char *asciiName);
 u16 MP_TCard_PackAddon(u8 *out);               // the card's co-op add-on (mp_linkx.c), at most TCARD_ADDON_MAX bytes

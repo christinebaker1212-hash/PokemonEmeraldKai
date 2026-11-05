@@ -7,15 +7,6 @@ Johto_DragonsDenB1F_EventScript_83CBEC5::
 	call Quetzal_EventScript_83CC300
 	goto Quetzal_EventScript_840EA66
 
-@ Johto_DragonsDenB1F object 21 (local id 21, gfx 0x3E8D) at 31,19
-Johto_DragonsDenB1F_EventScript_83CBECF::
-	lock
-	faceplayer
-	msgbox Johto_DragonsDenB1F_Text_83CBEDC, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
 @ Johto_DragonsDenB1F object 1 (local id 1, gfx 0x3E90) at 36,13
 Johto_DragonsDenB1F_EventScript_83CBF3D::
 	trainerbattle TRAINER_BATTLE_SINGLE, TRAINER_QZ_4566, 0, Johto_DragonsDenB1F_Text_83CC0FB, Johto_DragonsDenB1F_Text_83CC11E
@@ -64,12 +55,6 @@ Johto_DragonsDenB1F_EventScript_83CBFC3::
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
-
-Johto_DragonsDenB1F_Text_83CBEDC::
-	.string "{PLAYER}… So you’re here.\p"
-	.string "If you think you can keep up,\n"
-	.string "with me, come to the FIGHTING\l"
-	.string "DOJO in SAFFRON.$"
 
 Johto_DragonsDenB1F_Text_83CC0FB::
 	.string "You! How dare you enter\n"

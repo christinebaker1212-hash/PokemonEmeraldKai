@@ -2,13 +2,9 @@ pressuntil A field 5000
 wait 200
 mp warp 34,69,20,11
 wait 150
-mp getflag 4119
 mp objat 20 9
 mp regionclear 1
 mp warp 34,69,20,11
 wait 150
-mp getflag 4119
 mp objat 20 9
-mp face up
-shot roof
 quit

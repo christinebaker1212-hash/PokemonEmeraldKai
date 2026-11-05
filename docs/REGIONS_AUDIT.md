@@ -59,7 +59,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **42. [J3-11]** BAOBA's "SAFARI LEVEL" quest can never start: **RESTORE the original**
 - [x] **43. [J3-14]** VICTORY ROAD gate's east door walks the whole party into KANTO, skipping Kai's customs: **RESTORE the original** - _Do not allow region walking - customs must apply._
 - [x] **44. [J3-33]** MT. SILVER ROOM 3's triangular rock (DEOXYS) is a dead prop: **REMOVE it**
-- [ ] **45. [J2-12, J3-8, J3-9]** JOHTO's leaders promise rematches at a FIGHTING DOJO that has none: **RESTORE the original**
+- [x] **45. [J2-12, J3-8, J3-9]** JOHTO's leaders promise rematches at a FIGHTING DOJO that has none: **RESTORE the original**
 - [x] **46. [K2-18, K3-11, K4-14]** POKéMON CENTER 2F attendants explain Quetzal's MPLAYER, cheats and NUZLOCKE: **RESTORE the original**
 - [ ] **47. [K1-20, K3-9, J2-3, J3-36]** DAY-CARE "through the PC": KANTO's two are incense shops, JOHTO has none: **RESTORE the original**
 - [x] **48. [K1-19, J2-9]** BIKE SHOPs talk about MACH / ACRO modes: **RESTORE the original**
@@ -102,7 +102,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **85. [K3-29]** SIX ISLAND mart's woman wants REPELS, not MAIL: **RESTORE the original**
 - [x] **86. [K3-30]** RUIN VALLEY's braille door asks "Use CUT on the door?": **RESTORE the original**
 - [x] **87. [K3-32]** kanto_shared.inc: the other Quetzal-only shared pieces: **RESTORE the original**
-- [ ] **88. [K4-6]** The POKéMON TRAINER FAN CLUB is Quetzal's "KANTO EXPLORERS' CLUB" of hint people, some describing things Kai doesn't have: **RESTORE the original**
+- [x] **88. [K4-6]** The POKéMON TRAINER FAN CLUB is Quetzal's "KANTO EXPLORERS' CLUB" of hint people, some describing things Kai doesn't have: **RESTORE the original**
 - [x] **89. [K4-20]** A few trainers' lines rewritten by Quetzal: **RESTORE the original**
 - [x] **90. [J1-11]** ROUTE 32's guard demands Elder LI; Crystal only wants the ZEPHYRBADGE: **RESTORE the original**
 - [x] **91. [J1-13]** Item balls are Quetzal's, not Crystal's (non-TM ones too): **RESTORE the original**

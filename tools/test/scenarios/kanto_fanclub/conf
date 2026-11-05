@@ -1,0 +1,8 @@
+# SAFFRON's POKéMON TRAINER FAN CLUB is FireRed's again (audit case 88; src/mp/mp_fanclub.c): before KANTO's League the
+# four later members stay away and nobody's a fan; once it's beaten, the first meeting plays (scene 1 -> 2), the player
+# has three fans (0x80 "got first fans" | members 1-3 << 8 = 0x780 = 1920) and the BLACK BELT sits at the far table (9,6).
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("var 0x5155 = 0" "objat 9,6: none" "objat 5,11: none" "var 0x5155 = 2" "var 0x5153 = 1920" "objat 9,6: local 8")
+UNEXPECT_A=("[crash]" "TIMEOUT")

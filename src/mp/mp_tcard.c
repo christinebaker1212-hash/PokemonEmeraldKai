@@ -826,6 +826,34 @@ void MP_TCard_NotePvp(const u8 *oppName, u8 outcome)
     Save();
 }
 
+// The friends this player battled most (FireRed's link battle records, read by KANTO's TRAINER FAN CLUB): which = 0
+// the most, 1 the next; FALSE when there's none
+bool8 MP_TCard_PvpRival(u8 which, u8 *out)
+{
+    u8 i, best[2] = {0xFF, 0xFF};
+    u32 n[2] = {0, 0};
+    Check();
+    for (i = 0; i < sT.friendCount; i++)
+    {
+        u32 c = sT.friends[i].vsWins + sT.friends[i].vsLosses;
+        if (c == 0)
+            continue;
+        if (c > n[0])
+        {
+            best[1] = best[0], n[1] = n[0];
+            best[0] = i, n[0] = c;
+        }
+        else if (c > n[1])
+        {
+            best[1] = i, n[1] = c;
+        }
+    }
+    if (which > 1 || best[which] == 0xFF)
+        return FALSE;
+    StringCopy(out, sT.friends[best[which]].name);
+    return TRUE;
+}
+
 void MP_TCard_NoteTrade(u8 playerId)
 {
     struct MpTCardFriend *f;

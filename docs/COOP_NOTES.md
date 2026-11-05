@@ -4466,6 +4466,19 @@ follow_behind, follow_ground.
   "<save>.card" format 4 keeps them, friends get them as 2 bytes after the signature (older games ignore them). Test
   kanto_card_photo (`mp tcard info` prints the tint and stickers).
 
+## The audit's batch J (1.109.0)
+- **Case 45, JOHTO's leaders after the League**: see "JOHTO's gym leaders after the League" (they stay in their gyms).
+- **Case 88, SAFFRON's POKéMON TRAINER FAN CLUB** is FireRed's (its scripts and 39 lines through restore_words,
+  FireRed's sign): src/mp/mp_fanclub.c is FireRed's trainer_fan_club.c with its record in KANTO's vars
+  (VAR_KANTO_FANCLUB_FANS = FireRed's struct: bit 7 "got first fans", fans in the high byte; _TIMER, _SCENE) and the
+  four later members' flags FLAG_KANTO_HIDE_FANCLUB_* (0x1551-0x1554). The club's ON_TRANSITION calls MP_FanClub_Enter:
+  before KANTO's League the four stay away; after it, FireRed's game clear (three fans, the first meeting), so saves
+  past the League get it on their first visit. Fans come from battles against friends (mp_battle.c
+  MP_FanClub_AfterPvp: FireRed's link battles) and leave with play time at five or more. The trainers the members talk
+  about are the friends battled most (mp_tcard.c MP_TCard_PvpRival, FireRed's link records), else the rival, LT. SURGE
+  and KOGA. FireRed's POKéMON JOURNAL (BRUNO) on the rack after the League. Quetzal's hint people are gone (some
+  described things Kai hasn't got: DexNav, PRIMEAPE's evolution). Test kanto_fanclub.
+
 ## The audit's batch I (1.108.0)
 - Cases 25 / 71: CELADON DEPT. STORE is FireRed's: the directory, floor signs and people's lines (restore_words), one
   list per clerk with "May I help you?" (2F items + TMs, 4F POKé DOLL / mail / stones, 5F X items + vitamins) and
@@ -4689,10 +4702,9 @@ holds dolls and cushions (MP_RoomFloorHoldsDecor). Test johto_my_room.
 - **Reflections in SINNOH** (s3d.c OverReflectiveCell): a reflection pixel shows only where its ray from the eye meets
   the ground's level on a reflective / ice cell (no land tiles' top layer hides it in 3D); SINNOH checks only the next
   tile south, as Platinum. `mp shorespots` finds test spots. Test sinnoh_reflection.
-- **JOHTO's gym leaders after the League** (MORTY, WHITNEY, PRYCE, JASMINE: flags 0x1017-0x101E): JOHTO's setup hides
-  them and Quetzal's code that shows them wasn't ported; QzGiovanniStoryUpdateFlags shows them once JOHTO is cleared.
-  An audit of people hidden at a region's start and never shown found only them (the others are addobject scenes or
-  Quetzal's leftovers). Test johto_leaders_after.
+- **JOHTO's gym leaders after the League** stay in their gyms, as in Crystal (audit case 45): Quetzal's postgame MORTY,
+  WHITNEY, PRYCE, JASMINE and CLAIR, who promised rematches at a FIGHTING DOJO that has none, are gone (FLAG_KAI_GONE),
+  and CLAIR's "challenge the GYM LEADERS again" line with them. Test johto_leaders_after.
 - **DAWN / LUCAS looks' actions** (mp_avatar.c ACT_PLATINUM): surfing, field moves and fishing use Platinum's own
   player_f / player_m sheets from the SINNOH graphics pack ("PACT", build_gfx.py player_actions(): one palette per player,
   the sheets' differently ordered colors joined), mapped onto Brendan's / May's frame layout (PlatinumFrameOf); the

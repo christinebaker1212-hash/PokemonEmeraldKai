@@ -265,9 +265,9 @@ Kanto_SaffronCity_Text_84316C3::
 	.string "Release to be determined…$"
 
 Kanto_SaffronCity_Text_84316F5::
-	.string "KANTO EXPLORERS’ CLUB\p"
-	.string "Sharing tips, discoveries and\n"
-	.string "rumors from across our region.$"
+	.string "MOéMON TRAINER FAN CLUB\p"
+	.string "Many TRAINERS have scribbled their\n"
+	.string "names on this sign.$"
 
 Kanto_SaffronCity_Text_8431748::
 	.string "This FAN CLUB…\n"
