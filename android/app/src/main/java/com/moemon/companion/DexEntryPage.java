@@ -177,8 +177,9 @@ public final class DexEntryPage extends Page {
         jumpsY = y;
         if (seen) {
             int jx = 6;
+            int[] jw = jumpWidths(w);
             for (int k = 0; k < JUMPS.length; k++) {
-                jx += DexPage.chip(c, art, fill, JUMPS[k], jx, y, false) + 3;
+                jx += DexPage.chip(c, art, fill, JUMPS[k], jx, y, false, jw[k]) + 3;
             }
             y += 20;
         }
@@ -271,6 +272,24 @@ public final class DexEntryPage extends Page {
     // ------------------------------------------------------------------------------------------------- the details
     private static final String[] JUMPS = {"ENTRY", "STATS", "TYPES", "EVOLVES", "MOVES", "MORE"};
     private final int[] sectionY = new int[JUMPS.length];
+
+    /** The jump chips' widths: the row fills the page's width and never runs off it */
+    private int[] jumpWidths(int w) {
+        int n = JUMPS.length, text = 0;
+        int[] tw = new int[n], out = new int[n];
+        for (int k = 0; k < n; k++) {
+            tw[k] = art.width(JUMPS[k]);
+            text += tw[k];
+        }
+        int room = w - 12 - 3 * (n - 1), pad = Math.max(4, (room - text) / n), used = 0;
+        for (int k = 0; k < n; k++) {
+            out[k] = tw[k] + pad;
+            used += out[k];
+        }
+        if (used < room)   // (the pixels left over go to the last one, so the row ends at the margin)
+            out[n - 1] += Math.min(room - used, pad);
+        return out;
+    }
     private int jumpsY = -100, matchupY = -100, movesTabY = -100;
     private boolean tmTab;
     private final java.util.List<int[]> evoRows = new java.util.ArrayList<>();    // {top, bottom, species}
@@ -607,7 +626,7 @@ public final class DexEntryPage extends Page {
         }
         art.text(c, "WILD ITEMS", 14, top);
         if (held.isEmpty()) {
-            art.text(c, "None", 100, top, GameArt.BLUE_TEXT, GameArt.SHADOW);
+            art.text(c, "NONE", 100, top, GameArt.BLUE_TEXT, GameArt.SHADOW);
         }
         for (String h : held) {
             art.text(c, h, 100, top, GameArt.BLUE_TEXT, GameArt.SHADOW);
@@ -742,8 +761,9 @@ public final class DexEntryPage extends Page {
         // the jump chips
         if (cy >= jumpsY && cy < jumpsY + 16) {
             int jx = 6;
+            int[] jw = jumpWidths(v.width());
             for (int k = 0; k < JUMPS.length; k++) {
-                int bw = art.width(JUMPS[k]) + 12;
+                int bw = jw[k];
                 if (x >= jx && x < jx + bw + 3) {
                     v.buzz(false);
                     scrollTo(Math.max(0, sectionY[k] - 4));

@@ -143,9 +143,9 @@ public class ScreensTest {
         tap(v, x0 + cl + cl / 2, y0 + cl / 2);
         tap(v, 60, GameView.TOP + 4 + wpH + 6 + 36 + 22 + 20);
         shot(v, "summary_info");
-        tap(v, v.width() / 2, GameView.TOP + 112 + 8);
-        shot(v, "summary_skills");
         int tw = (v.width() - 16) / 4;
+        tap(v, 8 + tw + tw / 2, GameView.TOP + 112 + 8);   // (SKILLS, the second of four tabs)
+        shot(v, "summary_skills");
         tap(v, 8 + 2 * tw + tw / 2, GameView.TOP + 112 + 8);
         tap(v, 60, GameView.TOP + 136 + 4 + 12);
         shot(v, "summary_moves");

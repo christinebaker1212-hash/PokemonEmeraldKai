@@ -192,9 +192,10 @@ public final class WalkPage extends Page {
         String total = steps + " STEPS";
         art.text(c, total, w - 16 - art.width(total), sy, GameArt.BLUE_TEXT, GameArt.SHADOW);
         art.text(c, "TODAY", 16, sy + 14, GameArt.GRAY_TEXT, GameArt.SHADOW);
-        bar(c, 56, sy + 20, w - 120, today, walk.stepsADay(), 0xFF58B8F8);
         String td = today + "/" + walk.stepsADay();
-        art.text(c, td, w - 16 - art.width(td), sy + 14);
+        int tdx = w - 16 - art.width(td);
+        bar(c, 56, sy + 20, Math.max(16, tdx - 6 - 56), today, walk.stepsADay(), 0xFF58B8F8);   // (it ends before the count)
+        art.text(c, td, tdx, sy + 14);
         if (!egg && mon != null) {
             // its level when it comes home (EXP a step, to the BADGE cap)
             int[] lv = levelAfter(mon, steps, walk.game.optInt("cap", 100));

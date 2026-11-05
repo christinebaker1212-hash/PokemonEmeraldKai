@@ -166,14 +166,18 @@ public final class DexPage extends Page {
 
     /** A chip that's on (magenta, white letters, as the game's badges) or off (white, ink letters); returns its width */
     static int chip(Canvas c, GameArt art, Paint fill, String word, int x, int y, boolean on) {
-        int bw = art.width(word) + 12;
+        return chip(c, art, fill, word, x, y, on, art.width(word) + 12);
+    }
+
+    /** A chip BW wide, its word in the middle */
+    static int chip(Canvas c, GameArt art, Paint fill, String word, int x, int y, boolean on, int bw) {
         fill.setColor(0xFF000000);
         c.drawRect(x + 2, y, x + bw - 2, y + 15, fill);
         c.drawRect(x, y + 2, x + bw, y + 13, fill);
         fill.setColor(on ? MAGENTA : 0xFFFFFFFF);
         c.drawRect(x + 2, y + 1, x + bw - 2, y + 14, fill);
         c.drawRect(x + 1, y + 2, x + bw - 1, y + 13, fill);
-        art.text(c, word, x + 6, y - 1, on ? 0xFFFFFFFF : GameArt.TEXT, on ? 0xFF900060 : GameArt.SHADOW);
+        art.text(c, word, x + (bw - art.width(word)) / 2, y - 1, on ? 0xFFFFFFFF : GameArt.TEXT, on ? 0xFF900060 : GameArt.SHADOW);
         return bw;
     }
 
@@ -230,7 +234,7 @@ public final class DexPage extends Page {
         c.drawRect(0, HEAD - 4, w, HEAD - 2, fill);
         Bitmap s = screen();
         if (s != null) {
-            src.set(0, 0, 132, 14);
+            src.set(0, 4, 132, 18);   // (the logo's bar is rows 8-16 of the game's screen)
             dst.set(4, 2, 136, 16);
             c.drawBitmap(s, src, dst, pix);
         }

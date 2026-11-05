@@ -72,7 +72,7 @@ public final class BagPage extends Page {
             int nw = art.width(POCKETS[i]);
             boolean on = i == pocket;
             if (on) {
-                art.window(c, 0, i * tw + 4, 24, tw - 8, 12);
+                art.window(c, 0, i * tw + 8, 25, tw - 16, 10);   // (its frame inside the strip and the screen)
             }
             art.text(c, POCKETS[i], i * tw + (tw - nw) / 2, 22, on ? GameArt.TEXT : GameArt.WHITE_TEXT,
                     on ? GameArt.SHADOW : 0xFF202850);

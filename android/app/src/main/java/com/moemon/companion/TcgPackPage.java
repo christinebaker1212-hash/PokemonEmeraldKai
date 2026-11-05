@@ -87,15 +87,20 @@ public final class TcgPackPage extends Page {
             }
             if (front && t > at + 240 && (fresh >> i & 1) != 0) {
                 fill.setColor(0xFFE83838);
-                c.drawRoundRect(new RectF(x + cw / 2 - 14, y - 7, x + cw / 2 + 14, y + 5), 3, 3, fill);
-                art.text(c, "NEW!", (int) (x + cw / 2 - art.width("NEW!") / 2f), (int) y - 9, GameArt.WHITE_TEXT, 0xFF801010);
+                c.drawRoundRect(new RectF(x + cw / 2 - 14, y - 1, x + cw / 2 + 14, y + 11), 3, 3, fill);   // (on the card's top: above it, it sat on the row above's names)
+                art.text(c, "NEW!", (int) (x + cw / 2 - art.width("NEW!") / 2f), (int) y - 3, GameArt.WHITE_TEXT, 0xFF801010);
             }
             if (front && t > at + 240 && k != null) {
                 String n = k.optString("n");
-                while (art.width(n) > cw + 2 && n.length() > 3) {
-                    n = n.substring(0, n.length() - 1);
+                // the name whole: the small font when the card is too narrow for it, cut only past that
+                if (art.width(n) <= cw + 2) {
+                    art.text(c, n, (int) (x + cw / 2 - art.width(n) / 2f), (int) (y + ch + 1), GameArt.WHITE_TEXT, 0xFF000000);
+                } else {
+                    while (art.smallWidth(n) > cw + 4 && n.length() > 3) {
+                        n = n.substring(0, n.length() - 1);
+                    }
+                    art.small(c, n, (int) (x + cw / 2 - art.smallWidth(n) / 2f), (int) (y + ch + 2), GameArt.WHITE_TEXT, 0xFF000000);
                 }
-                art.text(c, n, (int) (x + cw / 2 - art.width(n) / 2f), (int) (y + ch + 1), GameArt.WHITE_TEXT, 0xFF000000);
             }
         }
         if (done()) {

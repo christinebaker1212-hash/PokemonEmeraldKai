@@ -217,7 +217,8 @@ public final class Menu {
         });
         if (app.client != null) {
             int n = app.client.orders.failed().size();
-            m.add("COULDN'T DO (" + n + ")", () -> v.showMenu(failed(v)));
+            if (n > 0)   // (only when something the game couldn't do is waiting to be read)
+                m.add("COULDN'T DO (" + n + ")", () -> v.showMenu(failed(v)));
             m.add("LINK AGAIN", () -> app.client.kick());
         }
         m.add("TEXT SIZE", () -> {
