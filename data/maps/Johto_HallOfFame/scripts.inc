@@ -8,7 +8,6 @@ Johto_HallOfFame_OnFrame_83E7E03:
 
 Johto_HallOfFame_EventScript_83E7E0D::
 	lock
-	goto_if_set FLAG_QZ_0x11CA, Johto_HallOfFame_EventScript_83E7E65
 	applymovement 1, Johto_HallOfFame_Movement_83E7EDB
 	applymovement LOCALID_PLAYER, Johto_HallOfFame_Movement_83E7EE5
 	waitmovement LOCALID_PLAYER
@@ -31,29 +30,6 @@ Johto_HallOfFame_EventScript_83E7E0D::
 	releaseall
 	end
 
-Johto_HallOfFame_EventScript_83E7E65::
-	applymovement 1, Johto_HallOfFame_Movement_83E7EDB
-	applymovement LOCALID_PLAYER, Johto_HallOfFame_Movement_83E7EE5
-	waitmovement LOCALID_PLAYER
-	waitmovement 1
-	msgbox Johto_HallOfFame_Text_83E80C8, MSGBOX_DEFAULT
-	closemessage
-	applymovement LOCALID_PLAYER, Quetzal_Movement_8360831
-	waitmovement 0
-	delay 0x14
-	dofieldeffect 0x3E
-	waitfieldeffect 0x3E
-	delay 0x28
-	call Quetzal_EventScript_835F6E4
-	setvar VAR_TEMP_1, 1
-	call Johto_HallOfFame_EventScript_83E7ECF
-	setrespawn 0x17
-	fadescreenspeed 1, 0x18
-	special GameClear
-	waitstate
-	releaseall
-	end
-
 Johto_HallOfFame_EventScript_83E7EB3::
 	setflag FLAG_QZ_0x1061
 	setflag FLAG_QZ_0x11B1
@@ -62,12 +38,6 @@ Johto_HallOfFame_EventScript_83E7EB3::
 	setvar VAR_QZ_0x502A, 1
 	setvar VAR_QZ_0x5003, 6
 	setvar VAR_QZ_0x502C, 0
-	return
-
-Johto_HallOfFame_EventScript_83E7ECF::
-	setflag FLAG_QZ_0x11B1
-	setflag FLAG_QZ_0x11CA
-	setvar VAR_QZ_0x502A, 1
 	return
 
 Johto_HallOfFame_Movement_83E7EDB:
@@ -111,11 +81,3 @@ Johto_HallOfFame_Text_83E7EEF::
 	.string "all the makings of greatness!\p"
 	.string "{PLAYER}, allow me to register you\n"
 	.string "and your partners as CHAMPIONS!$"
-
-Johto_HallOfFame_Text_83E80C8::
-	.string "LANCE: Once again, you have bested\n"
-	.string "JOHTO’s finest trainers.\p"
-	.string "The bond with your MOéMON remains\n"
-	.string "the foundation of every victory.\p"
-	.string "{PLAYER}, it is my honor to register\n"
-	.string "you as CHAMPIONS once again.$"

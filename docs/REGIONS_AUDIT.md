@@ -126,7 +126,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **109. [J3-20]** ROUTE 43 toll: ¥500 and free for the broke; charged only before LANCE: **RESTORE the original**
 - [ ] **110. [J3-22]** BLACKTHORN's gym and DRAGON'S DEN gating are Quetzal's: **RESTORE the original**
 - [x] **111. [J3-25]** MAHOGANY gym guide rewritten for Quetzal's PRYCE: **RESTORE the original**
-- [ ] **112. [J3-26]** "Welcome back" rematch intros for the ELITE FOUR, LANCE and the HALL OF FAME: **RESTORE the original**
+- [x] **112. [J3-26]** "Welcome back" rematch intros for the ELITE FOUR, LANCE and the HALL OF FAME: **RESTORE the original**
 - [ ] **113. [J3-28]** LAKE OF RAGE's LANCE scene and ROUTE 42's EUSINE scene are rewritten: **RESTORE the original**
 - [x] **114. [J3-29]** TOHJO FALLS gives a SUPER ROD and a HEART SCALE: **RESTORE the original**
 - [x] **115. [J3-34]** Mahogany / Blackthorn / Indigo dead or Quetzal-only bits (low): **RESTORE the original**

@@ -22,7 +22,6 @@ Johto_KarensRoom_EventScript_83E81AD::
 	lock
 	faceplayer
 	goto_if_ge VAR_QZ_0x502A, 5, Johto_KarensRoom_EventScript_83E8281
-	goto_if_set FLAG_QZ_0x11CA, Johto_KarensRoom_EventScript_83E81FF
 	msgbox Johto_KarensRoom_Text_83E83B7, MSGBOX_DEFAULT
 	setflag FLAG_TEMP_3
 	setflag FLAG_TEMP_5
@@ -32,19 +31,6 @@ Johto_KarensRoom_EventScript_83E81AD::
 	goto Johto_KarensRoom_EventScript_83E823B
 
 Johto_KarensRoom_EventScript_83E81F0::
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4983, 0, Johto_KarensRoom_Text_83E848E
-	goto Johto_KarensRoom_EventScript_83E823B
-
-Johto_KarensRoom_EventScript_83E81FF::
-	msgbox Johto_KarensRoom_Text_83E828C, MSGBOX_DEFAULT
-	setflag FLAG_TEMP_3
-	setflag FLAG_TEMP_5
-	specialvar VAR_RESULT, QzUseAltGymLeaderTeam
-	goto_if_eq VAR_RESULT, 1, Johto_KarensRoom_EventScript_83E822C
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4477, 0, Johto_KarensRoom_Text_83E848E
-	goto Johto_KarensRoom_EventScript_83E823B
-
-Johto_KarensRoom_EventScript_83E822C::
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4983, 0, Johto_KarensRoom_Text_83E848E
 	goto Johto_KarensRoom_EventScript_83E823B
 
@@ -72,20 +58,6 @@ Johto_KarensRoom_EventScript_83E8281::
 	closemessage
 	release
 	end
-
-Johto_KarensRoom_Text_83E828C::
-	.string "KAREN: Ah, it’s you again.\p"
-	.string "I trust you haven’t forgotten\n"
-	.string "my belief:\p"
-	.string "True strength arises from trust\n"
-	.string "in one’s MOéMON.\p"
-	.string "Since our last encounter, my\n"
-	.string "bond with my MOéMON has\l"
-	.string "deepened further.\p"
-	.string "Are you ready to face a team\n"
-	.string "united by an unbreakable bond?\p"
-	.string "Show me the power of the bond\n"
-	.string "with your MOéMON.$"
 
 Johto_KarensRoom_Text_83E83B7::
 	.string "I am KAREN of the ELITE FOUR.\p"

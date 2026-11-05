@@ -107,7 +107,6 @@ Johto_BlackthornGym1F_EventScript_83C73B8::
 	faceplayer
 	call Quetzal_EventScript_83CC300
 	goto_if_set FLAG_QZ_0x11B9, Johto_BlackthornGym1F_EventScript_83C7453
-	goto_if_set FLAG_QZ_0x11CA, Johto_BlackthornGym1F_EventScript_83C7448
 	goto_if_ge VAR_QZ_0x5010, 4, Johto_BlackthornGym1F_EventScript_83C743D
 	goto_if_eq VAR_QZ_0x5010, 2, Johto_BlackthornGym1F_EventScript_83C7432
 	msgbox Johto_BlackthornGym1F_Text_83C749A, MSGBOX_DEFAULT
@@ -140,12 +139,6 @@ Johto_BlackthornGym1F_EventScript_83C743D::
 	release
 	end
 
-Johto_BlackthornGym1F_EventScript_83C7448::
-	msgbox Johto_BlackthornGym1F_Text_83C78D1, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
 Johto_BlackthornGym1F_EventScript_83C7453::
 	specialvar VAR_RESULT, QzUseAltGymLeaderTeam
 	goto_if_eq VAR_RESULT, 1, Johto_BlackthornGym1F_EventScript_83C747A
@@ -156,7 +149,6 @@ Johto_BlackthornGym1F_EventScript_83C747A::
 	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC, TRAINER_QZ_4976, 0, Johto_BlackthornGym1F_Text_83C749A, Johto_BlackthornGym1F_Text_83C757B, Johto_BlackthornGym1F_EventScript_83C748C
 
 Johto_BlackthornGym1F_EventScript_83C748C::
-	goto_if_set FLAG_QZ_0x11CA, Johto_BlackthornGym1F_EventScript_83C7448
 	goto Johto_BlackthornGym1F_EventScript_83C743D
 
 @ Johto_BlackthornGym1F object 5 (local id 5, gfx 0x3E98) at 22,55
@@ -237,10 +229,6 @@ Johto_BlackthornGym1F_Text_83C77A6::
 	.string "If you do, I’ll feel even worse\n"
 	.string "about having lost to you!\p"
 	.string "Give it everything you’ve got.$"
-
-Johto_BlackthornGym1F_Text_83C78D1::
-	.string "You did it, huh?\p"
-	.string "You are now the JOHTO CHAMP.$"
 
 Johto_BlackthornGym1F_Text_83C79FB::
 	.string "I just got access to use DRAGON-\n"

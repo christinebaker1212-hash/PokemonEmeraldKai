@@ -22,7 +22,6 @@ Johto_WillsRoom_EventScript_83E8A2B::
 	lock
 	faceplayer
 	goto_if_ge VAR_QZ_0x502A, 2, Johto_WillsRoom_EventScript_83E8AFF
-	goto_if_set FLAG_QZ_0x11CA, Johto_WillsRoom_EventScript_83E8A7D
 	msgbox Johto_WillsRoom_Text_83E8B0A, MSGBOX_DEFAULT
 	setflag FLAG_TEMP_3
 	setflag FLAG_TEMP_5
@@ -32,19 +31,6 @@ Johto_WillsRoom_EventScript_83E8A2B::
 	goto Johto_WillsRoom_EventScript_83E8AB9
 
 Johto_WillsRoom_EventScript_83E8A6E::
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4977, 0, Johto_WillsRoom_Text_83E8C0A
-	goto Johto_WillsRoom_EventScript_83E8AB9
-
-Johto_WillsRoom_EventScript_83E8A7D::
-	msgbox Johto_WillsRoom_Text_83E8CD8, MSGBOX_DEFAULT
-	setflag FLAG_TEMP_3
-	setflag FLAG_TEMP_5
-	specialvar VAR_RESULT, QzUseAltGymLeaderTeam
-	goto_if_eq VAR_RESULT, 1, Johto_WillsRoom_EventScript_83E8AAA
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4832, 0, Johto_WillsRoom_Text_83E8C0A
-	goto Johto_WillsRoom_EventScript_83E8AB9
-
-Johto_WillsRoom_EventScript_83E8AAA::
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4977, 0, Johto_WillsRoom_Text_83E8C0A
 	goto Johto_WillsRoom_EventScript_83E8AB9
 
@@ -97,14 +83,3 @@ Johto_WillsRoom_Text_83E8C22::
 	.string "Now, {PLAYER}, move on and\n"
 	.string "experience the true ferocity of\l"
 	.string "the ELITE FOUR.$"
-
-Johto_WillsRoom_Text_83E8CD8::
-	.string "WILL: Ah, welcome back.\p"
-	.string "I have foreseen this encounter.\p"
-	.string "My psychic MOéMON and\n"
-	.string "I have evolved, developing\l"
-	.string "new tactics.\p"
-	.string "Prepare yourself for a battle of\n"
-	.string "enhanced strategy and might.\p"
-	.string "Let us see if your foresight\n"
-	.string "matches mine.$"

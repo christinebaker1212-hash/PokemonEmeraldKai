@@ -4495,6 +4495,9 @@ follow_behind, follow_ground.
     Test johto_daycare.
   - money.c IsEnoughForCostInVar0x8005 returns u16: specialvar reads 16 bits and a bool8 left the upper byte unset on
     PC, so a DAY CARE could say "not enough money" with plenty (ROUTE 117's too).
+- **Case 112**: the ELITE FOUR, LANCE (with MARY and OAK), the HALL OF FAME and CLAIR say Crystal's words on every run:
+  Quetzal's "welcome back" branches on FLAG_QZ_0x11CA are gone, and their scripts with them
+  (tools/quetzal_port/drop_dead_labels.py MAP: drops blocks nothing names and nothing falls into).
 
 ## The audit's batch I (1.108.0)
 - Cases 25 / 71: CELADON DEPT. STORE is FireRed's: the directory, floor signs and people's lines (restore_words), one

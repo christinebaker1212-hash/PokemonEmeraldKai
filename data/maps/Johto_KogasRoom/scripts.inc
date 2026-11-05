@@ -22,7 +22,6 @@ Johto_KogasRoom_EventScript_83E85C8::
 	lock
 	faceplayer
 	goto_if_ge VAR_QZ_0x502A, 3, Johto_KogasRoom_EventScript_83E869C
-	goto_if_set FLAG_QZ_0x11CA, Johto_KogasRoom_EventScript_83E861A
 	msgbox Johto_KogasRoom_Text_83E8762, MSGBOX_DEFAULT
 	setflag FLAG_TEMP_3
 	setflag FLAG_TEMP_5
@@ -32,19 +31,6 @@ Johto_KogasRoom_EventScript_83E85C8::
 	goto Johto_KogasRoom_EventScript_83E8656
 
 Johto_KogasRoom_EventScript_83E860B::
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4979, 0, Johto_KogasRoom_Text_83E8878
-	goto Johto_KogasRoom_EventScript_83E8656
-
-Johto_KogasRoom_EventScript_83E861A::
-	msgbox Johto_KogasRoom_Text_83E86A7, MSGBOX_DEFAULT
-	setflag FLAG_TEMP_3
-	setflag FLAG_TEMP_5
-	specialvar VAR_RESULT, QzUseAltGymLeaderTeam
-	goto_if_eq VAR_RESULT, 1, Johto_KogasRoom_EventScript_83E8647
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4479, 0, Johto_KogasRoom_Text_83E8878
-	goto Johto_KogasRoom_EventScript_83E8656
-
-Johto_KogasRoom_EventScript_83E8647::
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4979, 0, Johto_KogasRoom_Text_83E8878
 	goto Johto_KogasRoom_EventScript_83E8656
 
@@ -72,16 +58,6 @@ Johto_KogasRoom_EventScript_83E869C::
 	closemessage
 	release
 	end
-
-Johto_KogasRoom_Text_83E86A7::
-	.string "KOGA: Fwahahahaha!\p"
-	.string "You return, brave challenger.\p"
-	.string "My ninja skills have sharpened.\p"
-	.string "New sinister traps await you.\p"
-	.string "Poison, sleep, and more...\n"
-	.string "Be ready!\p"
-	.string "Fwahahahaha!\p"
-	.string "Show me how you’ve grown!$"
 
 Johto_KogasRoom_Text_83E8762::
 	.string "Fwahahahaha!\p"

@@ -22,7 +22,6 @@ Johto_BrunosRoom_EventScript_83E7061::
 	lock
 	faceplayer
 	goto_if_ge VAR_QZ_0x502A, 4, Johto_BrunosRoom_EventScript_83E7135
-	goto_if_set FLAG_QZ_0x11CA, Johto_BrunosRoom_EventScript_83E70B3
 	msgbox Johto_BrunosRoom_Text_83E722E, MSGBOX_DEFAULT
 	setflag FLAG_TEMP_3
 	setflag FLAG_TEMP_5
@@ -32,19 +31,6 @@ Johto_BrunosRoom_EventScript_83E7061::
 	goto Johto_BrunosRoom_EventScript_83E70EF
 
 Johto_BrunosRoom_EventScript_83E70A4::
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4981, 0, Johto_BrunosRoom_Text_83E734F
-	goto Johto_BrunosRoom_EventScript_83E70EF
-
-Johto_BrunosRoom_EventScript_83E70B3::
-	msgbox Johto_BrunosRoom_Text_83E7140, MSGBOX_DEFAULT
-	setflag FLAG_TEMP_3
-	setflag FLAG_TEMP_5
-	specialvar VAR_RESULT, QzUseAltGymLeaderTeam
-	goto_if_eq VAR_RESULT, 1, Johto_BrunosRoom_EventScript_83E70E0
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4475, 0, Johto_BrunosRoom_Text_83E734F
-	goto Johto_BrunosRoom_EventScript_83E70EF
-
-Johto_BrunosRoom_EventScript_83E70E0::
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4981, 0, Johto_BrunosRoom_Text_83E734F
 	goto Johto_BrunosRoom_EventScript_83E70EF
 
@@ -72,19 +58,6 @@ Johto_BrunosRoom_EventScript_83E7135::
 	closemessage
 	release
 	end
-
-Johto_BrunosRoom_Text_83E7140::
-	.string "BRUNO: Welcome back, young\n"
-	.string "warrior.\p"
-	.string "Through rigorous training, we have\n"
-	.string "grown stronger.\p"
-	.string "My rock-hard will is even more firm\n"
-	.string "and unyielding.\p"
-	.string "Are you prepared to face an even\n"
-	.string "greater challenge?\p"
-	.string "Show me the results of your\n"
-	.string "training.\p"
-	.string "Hoo hah!$"
 
 Johto_BrunosRoom_Text_83E722E::
 	.string "I am BRUNO of the ELITE FOUR.\p"
