@@ -1,0 +1,12 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 3000 invites us to POKEMON JUMP
+wait 60
+press A 2
+waitlog 3000 POKEMON JUMP with 2 players
+wait 1500
+watchlog crush: finished
+mash B 60 20
+waitlog 4000
+wait 200
+quit

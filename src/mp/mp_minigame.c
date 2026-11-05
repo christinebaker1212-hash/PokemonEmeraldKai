@@ -42,6 +42,10 @@ void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void MP_Linkx_OpenUnion(void);
 extern const u8 EventScript_MpBerryBlender[];
 extern const u8 EventScript_MpBerryCrush[];
+extern const u8 EventScript_MpLinkMinigame[];
+void StartPokemonJump(u16 partyId, MainCallback exitCallback);
+void StartDodrioBerryPicking(u16 partyId, MainCallback exitCallback);
+bool32 IsSpeciesAllowedInPokemonJump(u16 species);
 void StartBerryCrush(MainCallback exitCallback);
 
 enum {
@@ -61,9 +65,9 @@ enum {
     // up to MPR_MINIGAME_FIRST + 13; mp_grouplink.c has the rest
 };
 
-enum { GAME_BLENDER, GAME_CRUSH };
+enum { GAME_BLENDER, GAME_CRUSH, GAME_JUMP, GAME_DODRIO };   // (JUMP / DODRIO: the JOYFUL GAME CORNER, audit 125)
 
-enum { ANS_NONE, ANS_ASKING, ANS_YES, ANS_NO, ANS_BUSY, ANS_NOCASE, ANS_NOBERRY, ANS_FULL, ANS_NOJAR };
+enum { ANS_NONE, ANS_ASKING, ANS_YES, ANS_NO, ANS_BUSY, ANS_NOCASE, ANS_NOBERRY, ANS_FULL, ANS_NOJAR, ANS_NOMON };
 enum { ROLE_NONE, ROLE_HOST, ROLE_INVITED, ROLE_GUEST, ROLE_PLAYING };
 enum { SC_LOBBY, SC_ASKED, SC_WAITING };
 
@@ -89,6 +93,7 @@ static EWRAM_DATA struct
     bool8 pending;
     bool8 broken;
     bool8 savedAutoScroll;
+    bool8 closed;   // (POKEMON JUMP / DODRIO: the game closed its "link")
 } sCrush;
 
 static struct
@@ -162,12 +167,35 @@ static bool8 SeatHere(u8 slot)
 
 static const char *GameTitle(u8 game)
 {
-    return game == GAME_CRUSH ? "BERRY CRUSH" : "BERRY BLENDER";
+    switch (game)
+    {
+    case GAME_CRUSH:  return "BERRY CRUSH";
+    case GAME_JUMP:   return "POKEMON JUMP";
+    case GAME_DODRIO: return "DODRIO BERRY PICKING";
+    }
+    return "BERRY BLENDER";
+}
+
+// The JOYFUL GAME CORNER's games are played with a party POKEMON: the first that can (POKEMON JUMP's list, a DODRIO)
+static s8 MinigameMon(u8 game)
+{
+    u8 i;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        u16 species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);
+        if (species == SPECIES_NONE || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+            continue;
+        if (game == GAME_JUMP ? IsSpeciesAllowedInPokemonJump(species) : species == SPECIES_DODRIO)
+            return i;
+    }
+    return -1;
 }
 
 // Can we play right now? (same checks as the game's own NPCs)
 static u8 GameCheck(u8 game)
 {
+    if (game == GAME_JUMP || game == GAME_DODRIO)
+        return MinigameMon(game) < 0 ? ANS_NOMON : ANS_YES;
     if (game == GAME_CRUSH)
     {
         if (!CheckBagHasItem(ITEM_POWDER_JAR, 1))
@@ -193,6 +221,7 @@ static const char *WhyText(u8 ans)
     case ANS_NOBERRY: return "You don't have any BERRIES.";
     case ANS_FULL:    return "Your POKEBLOCK CASE is full.";
     case ANS_NOJAR:   return "You need the POWDER JAR (Slateport MARKET).";
+    case ANS_NOMON:   return sMg.game == GAME_DODRIO ? "You need a DODRIO in your party." : "None of your POKEMON can play POKEMON JUMP.";
     default:          return "";
     }
 }
@@ -390,7 +419,7 @@ void MP_Blender_Finish(void)
 
 bool8 MP_Crush_Active(void)
 {
-    return sMg.role == ROLE_PLAYING && sMg.game == GAME_CRUSH;
+    return sMg.role == ROLE_PLAYING && (sMg.game == GAME_CRUSH || sMg.game == GAME_JUMP || sMg.game == GAME_DODRIO);
 }
 
 u8 MP_Crush_NumPlayers(void)
@@ -567,10 +596,42 @@ static void PumpPackets(void)
 // The special in EventScript_MpBerryCrush
 void MP_StartBerryCrush(void)
 {
-    memset(&sCrush, 0, sizeof(sCrush));
     sCrush.savedAutoScroll = gTextFlags.autoScroll;
     FillNames();
     StartBerryCrush(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+}
+
+// The specials in EventScript_MpPokemonJump / EventScript_MpDodrio: the game with the first POKEMON that can play
+// (pokemon_jump.c / dodrio_berry_picking.c talk to friends through the same MP_Crush_* stand-in as BERRY CRUSH)
+static void CB2_MpMinigameDone(void)
+{
+    MP_Crush_Finish();
+    SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+}
+
+void MP_StartLinkMinigame(void)
+{
+    s8 mon = MinigameMon(sMg.game);
+    sCrush.savedAutoScroll = gTextFlags.autoScroll;
+    FillNames();
+    if (mon < 0)
+        mon = 0;
+    if (sMg.game == GAME_DODRIO)
+        StartDodrioBerryPicking(mon, CB2_MpMinigameDone);
+    else
+        StartPokemonJump(mon, CB2_MpMinigameDone);
+}
+
+// POKEMON JUMP / DODRIO BERRY PICKING wait for the link to close after SetCloseLinkCallback
+void MP_Crush_Close(void)
+{
+    MP_Crush_Standby();
+    sCrush.closed = TRUE;
+}
+
+u8 MP_Crush_LinkUp(void)
+{
+    return !sCrush.closed;
 }
 
 void MP_Crush_Finish(void)
@@ -580,7 +641,7 @@ void MP_Crush_Finish(void)
     gTextFlags.autoScroll = sCrush.savedAutoScroll;
     MPNet_Log("crush: finished%s", sCrush.broken ? " (a friend left)" : "");
     if (sCrush.broken)
-        ToastAscii("A friend left, so BERRY CRUSH ended.");
+        ToastAscii(sMg.game == GAME_CRUSH ? "A friend left, so BERRY CRUSH ended." : "A friend left, so the game ended.");
     ResetSession();
 }
 
@@ -689,16 +750,30 @@ void MP_Minigame_HostCrush(void)
     HostGame(GAME_CRUSH);
 }
 
+// TWO ISLAND's JOYFUL GAME CORNER (FireRed's MINIGAME attendant): VAR_RESULT 0 POKEMON JUMP, 1 DODRIO BERRY PICKING
+void MP_Minigame_HostJoyful(void)
+{
+    HostGame(gSpecialVar_Result == 1 ? GAME_DODRIO : GAME_JUMP);
+}
+
 static void Launch(void)
 {
     CloseUi();
-    MPNet_Log("minigame: %s with %d players", sMg.game == GAME_CRUSH ? "BERRY CRUSH" : "BERRY BLENDER", sMg.n);
+    MPNet_Log("minigame: %s with %d players", GameTitle(sMg.game), sMg.n);
+    // The link stand-in starts empty now, not when the game's screen opens: a friend's game can start a frame
+    // sooner and its first block must not be wiped
+    memset(&sCrush, 0, sizeof(sCrush));
     sMg.role = ROLE_PLAYING;
     sMg.berryMask = 0;
     sMg.go = FALSE;
     if (sMg.game == GAME_CRUSH)
     {
         ScriptContext_SetupScript(EventScript_MpBerryCrush);
+        return;
+    }
+    if (sMg.game == GAME_JUMP || sMg.game == GAME_DODRIO)
+    {
+        ScriptContext_SetupScript(EventScript_MpLinkMinigame);
         return;
     }
     gSpecialVar_0x8004 = sMg.n - 1;
@@ -758,7 +833,7 @@ static void Draw(void)
         }
         for (i = 0; i < MP_MAX_PLAYERS && row < MPUI_ROWS - 2; i++)
         {
-            static const char *const sAns[] = {"", "ASKING", "JOINED", "NO THANKS", "BUSY", "NO CASE", "NO BERRIES", "CASE FULL", "NO JAR"};
+            static const char *const sAns[] = {"", "ASKING", "JOINED", "NO THANKS", "BUSY", "NO CASE", "NO BERRIES", "CASE FULL", "NO JAR", "NO MOEMON"};
             if (i == gMpLocalId || sMg.answer[i] == ANS_NONE)
                 continue;
             Name(i, name);
@@ -774,18 +849,25 @@ static void Draw(void)
         else if (JoinedCount() == 0)
             MpUi_HelpAscii("Asking your friends... {START} when someone joins.");
         else
-            MpUi_HelpAscii(sMg.game == GAME_CRUSH ? "Everyone picks a BERRY, then crush it together!" : "Everyone picks a BERRY, then blend together!");
+            MpUi_HelpAscii(sMg.game == GAME_CRUSH ? "Everyone picks a BERRY, then crush it together!"
+                           : sMg.game == GAME_JUMP ? "Jump together with your POKEMON!"
+                           : sMg.game == GAME_DODRIO ? "Pick BERRIES together with your DODRIO!"
+                           : "Everyone picks a BERRY, then blend together!");
         break;
     }
     case SC_ASKED:
         Name(sMg.inviteFrom, name);
         MpUi_Begin(GameTitle(sMg.game));
-        snprintf(line, sizeof(line), sMg.game == GAME_CRUSH ? "%s wants to play BERRY CRUSH!" : "%s wants to blend BERRIES!", name);
+        if (sMg.game == GAME_JUMP || sMg.game == GAME_DODRIO)
+            snprintf(line, sizeof(line), "%s wants to play %s!", name, GameTitle(sMg.game));
+        else
+            snprintf(line, sizeof(line), sMg.game == GAME_CRUSH ? "%s wants to play BERRY CRUSH!" : "%s wants to blend BERRIES!", name);
         MpUi_TextAscii(0, line);
         MpUi_RowAscii(2, sMg.cursor == 0, "JOIN", NULL);
         MpUi_RowAscii(3, sMg.cursor == 1, "NO THANKS", NULL);
         MpUi_End();
-        MpUi_HelpAscii("You'll pick a BERRY from your BAG.");
+        MpUi_HelpAscii(sMg.game == GAME_JUMP || sMg.game == GAME_DODRIO ? "You'll play with a POKEMON from your party."
+                                                                       : "You'll pick a BERRY from your BAG.");
         break;
     case SC_WAITING:
         Name(sMg.host, name);
@@ -913,9 +995,9 @@ void MP_Minigame_OnRelay(u8 from, const u8 *data, u16 len)
             sMg.invitePending = TRUE;
             sMg.inviteFrom = from;
             sMg.inviteSession = data[1];
-            sMg.inviteGame = len >= 3 && data[2] == GAME_CRUSH ? GAME_CRUSH : GAME_BLENDER;
+            sMg.inviteGame = len >= 3 && data[2] <= GAME_DODRIO ? data[2] : GAME_BLENDER;
             sMg.askedAt = sMg.frame;
-            MPNet_Log("minigame: player %d invites us to %s", from + 1, sMg.inviteGame == GAME_CRUSH ? "BERRY CRUSH" : "the BERRY BLENDER");
+            MPNet_Log("minigame: player %d invites us to %s", from + 1, sMg.inviteGame == GAME_BLENDER ? "the BERRY BLENDER" : GameTitle(sMg.inviteGame));
         }
         else
         {
@@ -1102,7 +1184,7 @@ void MP_Minigame_Update(void)
     sMg.frame++;
     if (sMg.role == ROLE_PLAYING)
     {
-        if (sMg.game == GAME_CRUSH)
+        if (MP_Crush_Active())   // (BERRY CRUSH, POKEMON JUMP, DODRIO BERRY PICKING)
         {
             if (!MP_IsConnected())
                 sCrush.broken = TRUE;

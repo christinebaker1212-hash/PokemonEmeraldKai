@@ -742,3 +742,5 @@ gSpecials::
 	def_special MP_JohtoDaycare_YardMon
 	def_special MP_JohtoDaycare_YardOther
 	def_special MP_MtSilverOpen
+	def_special MP_StartLinkMinigame, waitstate=1
+	def_special MP_Minigame_HostJoyful

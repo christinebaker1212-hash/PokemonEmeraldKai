@@ -1,0 +1,17 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 3000 invites us to DODRIO BERRY PICKING
+wait 60
+press A 2
+waitlog 3000 DODRIO BERRY PICKING with 2 players
+wait 2500
+watchlog crush: finished
+press A 2
+wait 90
+press A 2
+wait 90
+shot replay
+mash B 60 20
+waitlog 4000
+wait 200
+quit

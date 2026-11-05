@@ -197,7 +197,7 @@ Kanto_TwoIsland_JoyfulGameCorner_EventScript_8421361::
 Kanto_TwoIsland_JoyfulGameCorner_EventScript_8421437::
 	lock
 	faceplayer
-	goto_if_eq VAR_QZ_0x5134, 4, Kanto_TwoIsland_JoyfulGameCorner_EventScript_8473750
+	goto_if_eq VAR_QZ_0x5134, 4, Kanto_TwoIsland_JoyfulGameCorner_EventScript_InfoMan2
 	goto_if_set FLAG_QZ_0x21EC, Kanto_TwoIsland_JoyfulGameCorner_EventScript_8421457
 	msgbox Kanto_TwoIsland_JoyfulGameCorner_Text_8452DF8, MSGBOX_DEFAULT
 	release
@@ -212,7 +212,7 @@ Kanto_TwoIsland_JoyfulGameCorner_EventScript_8421457::
 Kanto_TwoIsland_JoyfulGameCorner_EventScript_8421461::
 	lock
 	faceplayer
-	goto_if_eq VAR_QZ_0x5134, 4, Kanto_TwoIsland_JoyfulGameCorner_EventScript_8473750
+	goto_if_eq VAR_QZ_0x5134, 4, Kanto_TwoIsland_JoyfulGameCorner_EventScript_MinigameAttendant
 	goto_if_set FLAG_QZ_0x2157, Kanto_TwoIsland_JoyfulGameCorner_EventScript_84214F5
 	goto_if_eq VAR_QZ_0x5134, 3, Kanto_TwoIsland_JoyfulGameCorner_EventScript_842148C
 	msgbox Kanto_TwoIsland_JoyfulGameCorner_Text_8452CDF, MSGBOX_DEFAULT
@@ -264,12 +264,6 @@ Kanto_TwoIsland_JoyfulGameCorner_EventScript_842150C::
 	release
 	end
 
-Kanto_TwoIsland_JoyfulGameCorner_EventScript_8473750::
-	lockall
-	msgbox Kanto_TwoIsland_JoyfulGameCorner_Text_8368568, MSGBOX_DEFAULT
-	releaseall
-	end
-
 Kanto_TwoIsland_JoyfulGameCorner_Movement_8365589:
 	face_down
 	step_end
@@ -311,10 +305,6 @@ Kanto_TwoIsland_JoyfulGameCorner_Movement_8421431:
 	delay_8
 	walk_in_place_faster_up
 	step_end
-
-Kanto_TwoIsland_JoyfulGameCorner_Text_8368568::
-	.string "You can rest here and share stories\n"
-	.string "with other TRAINERS.$"
 
 Kanto_TwoIsland_JoyfulGameCorner_Text_84529A4::
 	.string "Now, where’s LOSTELLE gotten to\n"
@@ -374,12 +364,12 @@ Kanto_TwoIsland_JoyfulGameCorner_Text_8452CDF::
 	.string "me this big favor.$"
 
 Kanto_TwoIsland_JoyfulGameCorner_Text_8452DF8::
-	.string "There is much to discover on these\n"
-	.string "islands. You can rest here first.$"
+	.string "I’m sorry.\n"
+	.string "We’re not running any games today.$"
 
 Kanto_TwoIsland_JoyfulGameCorner_Text_8452E3D::
-	.string "I am glad LOSTELLE is safe!\n"
-	.string "Now we can all relax.$"
+	.string "We’ll get the games going soon\n"
+	.string "for you!$"
 
 Kanto_TwoIsland_JoyfulGameCorner_Text_8452E6F::
 	.string "So you rescued LOSTELLE?\n"
@@ -426,3 +416,88 @@ Kanto_TwoIsland_JoyfulGameCorner_Text_84530EB::
 	.string "Listen, listen!\p"
 	.string "Please show me you being cool\n"
 	.string "again!$"
+
+@ Moemon Kai: FireRed's JOYFUL GAME CORNER games (pokefirered data/scripts/cable_club.inc
+@ JoyfulGameCorner_EventScript_MinigameAttendant / InfoMan2; audit case 125): POKEMON JUMP and DODRIO BERRY PICKING
+@ with friends online, through the co-op minigame lobby (mp_minigame.c MP_Minigame_HostJoyful)
+Kanto_TwoIsland_JoyfulGameCorner_EventScript_MinigameAttendant::
+	message Kanto_TwoIsland_JoyfulGameCorner_Text_WelcomeCanYouWait
+	waitmessage
+	delay 60
+	message Kanto_TwoIsland_JoyfulGameCorner_Text_PlayWhichGame
+	waitmessage
+	multichoice 0, 0, MULTI_WIRELESS_MINIGAME, FALSE
+	goto_if_ge VAR_RESULT, 2, Kanto_TwoIsland_JoyfulGameCorner_EventScript_AbortMinigame
+	closemessage
+	special MP_Minigame_HostJoyful
+	release
+	end
+
+Kanto_TwoIsland_JoyfulGameCorner_EventScript_AbortMinigame::
+	msgbox Kanto_TwoIsland_JoyfulGameCorner_Text_ComeAgain, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_TwoIsland_JoyfulGameCorner_EventScript_InfoMan2::
+	message Kanto_TwoIsland_JoyfulGameCorner_Text_DescribeWhichGame
+	waitmessage
+	multichoice 0, 0, MULTI_WIRELESS_MINIGAME, FALSE
+	goto_if_eq VAR_RESULT, 0, Kanto_TwoIsland_JoyfulGameCorner_EventScript_PokemonJumpInfo
+	goto_if_eq VAR_RESULT, 1, Kanto_TwoIsland_JoyfulGameCorner_EventScript_DodrioInfo
+	msgbox Kanto_TwoIsland_JoyfulGameCorner_Text_TalkToManToPlay, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_TwoIsland_JoyfulGameCorner_EventScript_PokemonJumpInfo::
+	msgbox Kanto_TwoIsland_JoyfulGameCorner_Text_PokemonJumpInfo, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_TwoIsland_JoyfulGameCorner_EventScript_DodrioInfo::
+	msgbox Kanto_TwoIsland_JoyfulGameCorner_Text_DodrioBerryPickingInfo, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_TwoIsland_JoyfulGameCorner_Text_WelcomeCanYouWait::
+	.string "Hi, welcome!\n"
+	.string "You can play games over the\l"
+	.string "Wireless Communication System.\p"
+	.string "Can you wait just a little bit?$"
+
+Kanto_TwoIsland_JoyfulGameCorner_Text_PlayWhichGame::
+	.string "All right, which game did you want\n"
+	.string "to play?$"
+
+Kanto_TwoIsland_JoyfulGameCorner_Text_ComeAgain::
+	.string "All right, come again!$"
+
+Kanto_TwoIsland_JoyfulGameCorner_Text_DescribeWhichGame::
+	.string "I can explain game rules to you,\n"
+	.string "if you’d like.\p"
+	.string "Which game should I describe?$"
+
+Kanto_TwoIsland_JoyfulGameCorner_Text_TalkToManToPlay::
+	.string "If you want to play a game,\n"
+	.string "please tell the man beside me.$"
+
+Kanto_TwoIsland_JoyfulGameCorner_Text_PokemonJumpInfo::
+	.string "“MOéMON JUMP”\p"
+	.string "Make your MOéMON skip the\n"
+	.string "VINE WHIP rope with the A Button.\p"
+	.string "Only mini MOéMON around 28 inches\n"
+	.string "or less may participate.\p"
+	.string "MOéMON that only swim, burrow, or\n"
+	.string "fly are not good at jumping.\p"
+	.string "As a result, those MOéMON may not\n"
+	.string "participate.\p"
+	.string "Good things happen if everyone\n"
+	.string "jumps in time.$"
+
+Kanto_TwoIsland_JoyfulGameCorner_Text_DodrioBerryPickingInfo::
+	.string "“DODRIO BERRY-PICKING”\p"
+	.string "Command DODRIO’s three heads to\n"
+	.string "catch falling BERRIES.\p"
+	.string "Press right, up, or left on the\n"
+	.string "{PLUS} Control Pad to move the heads.\p"
+	.string "To play this game, you must have\n"
+	.string "a DODRIO.$"

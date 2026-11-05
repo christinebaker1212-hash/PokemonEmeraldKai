@@ -139,7 +139,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **122. [K2-2]** VERMILION's construction man and his MACHOP are missing: **RESTORE the original**
 - [x] **123. [K2-7]** The COUNTER move tutor (Dept. Store 3F) is missing: **RESTORE the original**
 - [x] **124. [K2-23]** GAME CORNER photo printer "out of service": **RESTORE the original**
-- [ ] **125. [K3-16]** The JOYFUL GAME CORNER's games are gone (a rest area now): **RESTORE the original**
+- [x] **125. [K3-16]** The JOYFUL GAME CORNER's games are gone (a rest area now): **RESTORE the original**
 - [x] **126. [K3-21]** FOUR ISLAND's STICKER MAN is gone: **RESTORE the original**
 - [x] **127. [K3-23]** The first SEVII trip doesn't disable the PC: **KEEP as it is**
 - [x] **128. [K3-24]** No roaming beast after the SAPPHIRE: **KEEP as it is**

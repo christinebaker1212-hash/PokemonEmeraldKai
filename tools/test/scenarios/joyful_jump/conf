@@ -1,0 +1,11 @@
+# TWO ISLAND's JOYFUL GAME CORNER (audit case 125): POKEMON JUMP with a friend online through the co-op minigame lobby
+# and the BERRY CRUSH link stand-in (mp_minigame.c MP_StartLinkMinigame). ALICE invites, BOB joins, they play a round
+# with their PIKACHU and leave (B to "play again?").
+MODE=2
+TMO=240
+ENV_A="MOEMON_DEBUG_PARTY=25:20"
+ENV_B="MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("player 2 answered 2" "POKEMON JUMP with 2 players" "crush: finished")
+EXPECT_B=("invites us to POKEMON JUMP" "POKEMON JUMP with 2 players" "crush: finished")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]")

@@ -1336,6 +1336,8 @@ u8 MP_Crush_BlockStatus(void);
 void MP_Crush_ResetBlocks(void);
 void MP_Crush_SendPacket(void *data);
 void MP_Crush_Finish(void);
+void MP_Crush_Close(void);   // POKEMON JUMP / DODRIO BERRY PICKING (mp_minigame.c)
+u8 MP_Crush_LinkUp(void);
 void MP_StartBerryCrush(void);
 
 // mp_grouplink.c: 2-4 player link over the relay (link CONTESTS)

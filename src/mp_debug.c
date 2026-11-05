@@ -2560,6 +2560,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // crush - invite everyone online to BERRY CRUSH
         MP_Minigame_HostCrush();
     }
+    else if (strcmp(cmd, "joyful") == 0)
+    {
+        // joyful N - invite everyone online to POKEMON JUMP (0) or DODRIO BERRY PICKING (1), as TWO ISLAND's attendant
+        void MP_Minigame_HostJoyful(void);
+        gSpecialVar_Result = atoi(arg);
+        MP_Minigame_HostJoyful();
+    }
     else if (strcmp(cmd, "pokeblocks") == 0)
     {
         int i;

@@ -23,6 +23,23 @@
 #include "window.h"
 #include "constants/items.h"
 #include "constants/songs.h"
+#include "mp.h"
+
+// Moemon Kai: played with friends online at TWO ISLAND's JOYFUL GAME CORNER (audit case 125). These link calls go to
+// the relay stand-in in mp_minigame.c (the same as BERRY CRUSH's) while a co-op game is on.
+#define GetLinkPlayerCount()         (MP_Crush_Active() ? MP_Crush_NumPlayers() : GetLinkPlayerCount())
+#define GetMultiplayerId()           (MP_Crush_Active() ? MP_Crush_LocalSlot() : GetMultiplayerId())
+#define Rfu_SetLinkStandbyCallback() (MP_Crush_Active() ? MP_Crush_Standby() : Rfu_SetLinkStandbyCallback())
+#define SetCloseLinkCallback()       (MP_Crush_Active() ? MP_Crush_Close() : SetCloseLinkCallback())
+#define gReceivedRemoteLinkPlayers   (MP_Crush_Active() ? MP_Crush_LinkUp() : gReceivedRemoteLinkPlayers)
+#define LoadWirelessStatusIndicatorSpriteGfx()  do { if (!MP_Crush_Active()) LoadWirelessStatusIndicatorSpriteGfx(); } while (0)   // (no Wireless Adapter)
+#define CreateWirelessStatusIndicatorSprite(x, y) do { if (!MP_Crush_Active()) CreateWirelessStatusIndicatorSprite((x), (y)); } while (0)
+#define IsLinkTaskFinished()         (MP_Crush_Active() ? MP_Crush_TaskFinished() : IsLinkTaskFinished())
+#define SendBlock(a, b, c)           (MP_Crush_Active() ? MP_Crush_SendBlock((b), (c)) : SendBlock((a), (b), (c)))
+#define GetBlockReceivedStatus()     (MP_Crush_Active() ? MP_Crush_BlockStatus() : GetBlockReceivedStatus())
+#define ResetBlockReceivedFlags()    (MP_Crush_Active() ? MP_Crush_ResetBlocks() : ResetBlockReceivedFlags())
+#define Rfu_SendPacket(p)            (MP_Crush_Active() ? MP_Crush_SendPacket(p) : Rfu_SendPacket(p))
+#define GetLinkPlayerCountAsBitFlags() (MP_Crush_Active() ? (u8)((1 << MP_Crush_NumPlayers()) - 1) : GetLinkPlayerCountAsBitFlags())
 
 // Note that in this file 'Dodrio Berry Picking' is often
 // shortened to DodrioGame or just Game for convenience
@@ -4566,6 +4583,8 @@ struct
 static void SetGfxFuncById(u8 funcId)
 {
     u8 i;
+    if (sGfx == NULL)   // Moemon Kai: not made yet (on the GBA this write went nowhere; on PC it would crash)
+        return;
     for (i = 0; i < ARRAY_COUNT(sGfxFuncs); i++)
     {
         if (sGfxFuncs[i].id == funcId)

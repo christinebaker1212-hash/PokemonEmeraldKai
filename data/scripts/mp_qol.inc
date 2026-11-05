@@ -74,3 +74,11 @@ EventScript_MpBerryCrush::
 	special MP_StartBerryCrush
 	releaseall
 	end
+
+@ Moemon Kai: POKEMON JUMP / DODRIO BERRY PICKING with friends (mp_minigame.c MP_StartLinkMinigame; audit case 125)
+EventScript_MpLinkMinigame::
+	lockall
+	fadescreen FADE_TO_BLACK
+	special MP_StartLinkMinigame
+	releaseall
+	end

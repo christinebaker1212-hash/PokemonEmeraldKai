@@ -1,0 +1,17 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 300
+watchlog answered 2
+mp joyful 0
+waitlog 3000
+wait 30
+watchlog POKEMON JUMP with 2 players
+press A 2
+waitlog 600
+wait 1500
+shot jump
+watchlog crush: finished
+mash B 60 20
+waitlog 4000
+wait 200
+quit

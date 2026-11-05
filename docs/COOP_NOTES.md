@@ -4466,6 +4466,38 @@ follow_behind, follow_ground.
   "<save>.card" format 4 keeps them, friends get them as 2 bytes after the signature (older games ignore them). Test
   kanto_card_photo (`mp tcard info` prints the tint and stickers).
 
+## The audit's batch K (1.110.0)
+- **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
+  mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).
+  RED (Johto_SilverCaveSummit_EventScript_Red, both SUMMIT maps) says Crystal's words, fights Crystal's team
+  (sCrystalTeams, custom moves, every GENERATION), gives nothing, leaves, and the credits roll (QzAfterCreditsReset);
+  he's back on the next climb, as in Crystal. MT. SILVER's POKéMON CENTER has Crystal's granny again. Test johto_red.
+- **Case 113, LAKE OF RAGE and ROUTE 42**: LANCE says Crystal's words (he asks for help himself, no "this man here",
+  no DRAGONITE) and flies off when you agree; no rain at the lake; its four trainers come once the ROCKETS' hideout is
+  cleared (FLAG_JOHTO_HIDE_LAKE_CIVILIANS 0x155B, worked out on entering from VAR_QZ_0x500C >= 14). ROUTE 42's SUICUNE
+  waits only after the CIANWOOD sighting (VAR_QZ_0x502D 2; FLAG_QZ_0x10B9 set / cleared on entering) and just flees:
+  EUSINE's three lines there were Quetzal's. Test johto_lake_lance.
+- **Case 110, BLACKTHORN's gates**: the SUPER NERD stands in the GYM's door until the RADIO TOWER is freed (VAR_QZ_0x500C
+  17, RadioTower5F) instead of until 7 badges, with Crystal's three lines; the DRAGON'S DEN elder refuses until CLAIR is
+  beaten (VAR_QZ_0x5010 0: the refusal and its trigger waited for a 1 nothing set, so the DEN was open from the start);
+  the black belt's "weird radio" line before the RADIO TOWER; the GYM guide's Crystal words (no FAIRY talk).
+  Test johto_blackthorn_gates.
+- **Case 130, KANTO's ELITE FOUR rematches**: the rooms' rematch words and FireRed's stronger teams come once SEVII's
+  network machine is fixed (FLAG_QZ_0x220A, FireRed's FLAG_SYS_CAN_LINK_WITH_RS), not right after the first HALL OF
+  FAME. The teams are FireRed's sParty_EliteFour*2 / sParty_ChampionRematch* (src/data/mp_frlg_rematch.h from
+  tools/moemon_starters/frlg_rematch.py), read by mp_region.c TrainerDataFor for 8602-8605 and BLUE's three CHAMPION
+  versions 8630-8632. Test kanto_e4_rematch.
+- **Case 125, TWO ISLAND's JOYFUL GAME CORNER** runs FireRed's games again: the attendant (FireRed's
+  JoyfulGameCorner_EventScript_MinigameAttendant, multichoice MULTI_WIRELESS_MINIGAME) asks POKéMON JUMP or DODRIO BERRY
+  PICKING and opens the co-op minigame lobby for it (mp_minigame.c MP_Minigame_HostJoyful: GAME_JUMP / GAME_DODRIO);
+  the man beside him explains the rules (InfoMan2), FireRed's words. The games are Emerald's own pokemon_jump.c and
+  dodrio_berry_picking.c talking to friends through BERRY CRUSH's MP_Crush_* stand-in (macro block after the includes,
+  as in berry_crush.c; no Wireless Adapter sprite); each player plays with the first POKéMON in the party that the game
+  allows (MinigameMon; none: the lobby answers ANS_NOMON). The stand-in's queues are emptied when the lobby launches the
+  game (Launch), never when the game's screen opens: a friend's game can start a frame sooner and its first block came
+  in before the old clear wiped it (DODRIO waited forever on a black screen). DODRIO also needed a NULL guard in
+  SetGfxFuncById. `mp joyful N` hosts one from the debug console. Tests joyful_jump, joyful_dodrio.
+
 ## The audit's batch J (1.109.0)
 - **Case 45, JOHTO's leaders after the League**: see "JOHTO's gym leaders after the League" (they stay in their gyms).
 - **Case 88, SAFFRON's POKéMON TRAINER FAN CLUB** is FireRed's (its scripts and 39 lines through restore_words,
@@ -4495,26 +4527,6 @@ follow_behind, follow_ground.
     Test johto_daycare.
   - money.c IsEnoughForCostInVar0x8005 returns u16: specialvar reads 16 bits and a bool8 left the upper byte unset on
     PC, so a DAY CARE could say "not enough money" with plenty (ROUTE 117's too).
-- **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
-  mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).
-  RED (Johto_SilverCaveSummit_EventScript_Red, both SUMMIT maps) says Crystal's words, fights Crystal's team
-  (sCrystalTeams, custom moves, every GENERATION), gives nothing, leaves, and the credits roll (QzAfterCreditsReset);
-  he's back on the next climb, as in Crystal. MT. SILVER's POKéMON CENTER has Crystal's granny again. Test johto_red.
-- **Case 113, LAKE OF RAGE and ROUTE 42**: LANCE says Crystal's words (he asks for help himself, no "this man here",
-  no DRAGONITE) and flies off when you agree; no rain at the lake; its four trainers come once the ROCKETS' hideout is
-  cleared (FLAG_JOHTO_HIDE_LAKE_CIVILIANS 0x155B, worked out on entering from VAR_QZ_0x500C >= 14). ROUTE 42's SUICUNE
-  waits only after the CIANWOOD sighting (VAR_QZ_0x502D 2; FLAG_QZ_0x10B9 set / cleared on entering) and just flees:
-  EUSINE's three lines there were Quetzal's. Test johto_lake_lance.
-- **Case 110, BLACKTHORN's gates**: the SUPER NERD stands in the GYM's door until the RADIO TOWER is freed (VAR_QZ_0x500C
-  17, RadioTower5F) instead of until 7 badges, with Crystal's three lines; the DRAGON'S DEN elder refuses until CLAIR is
-  beaten (VAR_QZ_0x5010 0: the refusal and its trigger waited for a 1 nothing set, so the DEN was open from the start);
-  the black belt's "weird radio" line before the RADIO TOWER; the GYM guide's Crystal words (no FAIRY talk).
-  Test johto_blackthorn_gates.
-- **Case 130, KANTO's ELITE FOUR rematches**: the rooms' rematch words and FireRed's stronger teams come once SEVII's
-  network machine is fixed (FLAG_QZ_0x220A, FireRed's FLAG_SYS_CAN_LINK_WITH_RS), not right after the first HALL OF
-  FAME. The teams are FireRed's sParty_EliteFour*2 / sParty_ChampionRematch* (src/data/mp_frlg_rematch.h from
-  tools/moemon_starters/frlg_rematch.py), read by mp_region.c TrainerDataFor for 8602-8605 and BLUE's three CHAMPION
-  versions 8630-8632. Test kanto_e4_rematch.
 - **Case 112**: the ELITE FOUR, LANCE (with MARY and OAK), the HALL OF FAME and CLAIR say Crystal's words on every run:
   Quetzal's "welcome back" branches on FLAG_QZ_0x11CA are gone, and their scripts with them
   (tools/quetzal_port/drop_dead_labels.py MAP: drops blocks nothing names and nothing falls into).
