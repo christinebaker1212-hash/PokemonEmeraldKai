@@ -38,8 +38,8 @@ Kanto_PokemonLeague_ChampionsRoom_EventScript_841288D::
 	applymovement LOCALID_PLAYER, Kanto_PokemonLeague_ChampionsRoom_Movement_84129B4
 	waitmovement 0
 	delay 0x14
-	call_if_unset FLAG_QZ_0x2108, Kanto_PokemonLeague_ChampionsRoom_EventScript_8412981
-	call_if_set FLAG_QZ_0x2108, Kanto_PokemonLeague_ChampionsRoom_EventScript_841298A
+	call_if_unset FLAG_QZ_0x220A, Kanto_PokemonLeague_ChampionsRoom_EventScript_8412981
+	call_if_set FLAG_QZ_0x220A, Kanto_PokemonLeague_ChampionsRoom_EventScript_841298A
 	specialvar VAR_RESULT, QzReturnZero
 	goto_if_eq VAR_RESULT, 2, Kanto_PokemonLeague_ChampionsRoom_EventScript_8412974
 	setflag FLAG_TEMP_3

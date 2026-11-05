@@ -144,7 +144,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **127. [K3-23]** The first SEVII trip doesn't disable the PC: **KEEP as it is**
 - [x] **128. [K3-24]** No roaming beast after the SAPPHIRE: **KEEP as it is**
 - [x] **129. [K3-28]** FIVE / SEVEN ISLAND's POKéMON JOURNALs are missing: **RESTORE the original**
-- [ ] **130. [K4-11]** ELITE FOUR rematches: the rematch words come right after the first win, FireRed's stronger rematch teams are missing: **RESTORE the original**
+- [x] **130. [K4-11]** ELITE FOUR rematches: the rematch words come right after the first win, FireRed's stronger rematch teams are missing: **RESTORE the original**
 - [x] **131. [J1-12]** JOHTO has no hidden items at all: **RESTORE the original**
 - [x] **132. [J1-14]** Rival battles in CHERRYGROVE and AZALEA can't be lost without whiting out; his "loss" line is gone: **RESTORE the original**
 - [x] **133. [J1-20]** ROUTE 29's catching demonstration is a text plug for the ACADEMY; its night line can never show: **RESTORE the original**

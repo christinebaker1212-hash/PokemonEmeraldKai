@@ -67,8 +67,8 @@ Kanto_PokemonLeague_LoreleisRoom_EventScript_841238A::
 	setvar VAR_0x8004, 9
 	setvar VAR_0x8005, 1
 	special QzQuestLogNop
-	call_if_unset FLAG_QZ_0x2108, Kanto_PokemonLeague_LoreleisRoom_EventScript_84123E2
-	call_if_set FLAG_QZ_0x2108, Kanto_PokemonLeague_LoreleisRoom_EventScript_84123EB
+	call_if_unset FLAG_QZ_0x220A, Kanto_PokemonLeague_LoreleisRoom_EventScript_84123E2
+	call_if_set FLAG_QZ_0x220A, Kanto_PokemonLeague_LoreleisRoom_EventScript_84123EB
 	setflag FLAG_TEMP_3
 	setflag FLAG_TEMP_5
 	call Kanto_PokemonLeague_LoreleisRoom_EventScript_84123F4

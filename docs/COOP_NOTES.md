@@ -4510,6 +4510,11 @@ follow_behind, follow_ground.
   beaten (VAR_QZ_0x5010 0: the refusal and its trigger waited for a 1 nothing set, so the DEN was open from the start);
   the black belt's "weird radio" line before the RADIO TOWER; the GYM guide's Crystal words (no FAIRY talk).
   Test johto_blackthorn_gates.
+- **Case 130, KANTO's ELITE FOUR rematches**: the rooms' rematch words and FireRed's stronger teams come once SEVII's
+  network machine is fixed (FLAG_QZ_0x220A, FireRed's FLAG_SYS_CAN_LINK_WITH_RS), not right after the first HALL OF
+  FAME. The teams are FireRed's sParty_EliteFour*2 / sParty_ChampionRematch* (src/data/mp_frlg_rematch.h from
+  tools/moemon_starters/frlg_rematch.py), read by mp_region.c TrainerDataFor for 8602-8605 and BLUE's three CHAMPION
+  versions 8630-8632. Test kanto_e4_rematch.
 - **Case 112**: the ELITE FOUR, LANCE (with MARY and OAK), the HALL OF FAME and CLAIR say Crystal's words on every run:
   Quetzal's "welcome back" branches on FLAG_QZ_0x11CA are gone, and their scripts with them
   (tools/quetzal_port/drop_dead_labels.py MAP: drops blocks nothing names and nothing falls into).

@@ -59,8 +59,8 @@ Kanto_PokemonLeague_AgathasRoom_EventScript_84125F5::
 	setvar VAR_0x8004, 0
 	setvar VAR_0x8005, 4
 	special QzQuestLogNop
-	call_if_unset FLAG_QZ_0x2108, Kanto_PokemonLeague_AgathasRoom_EventScript_841265A
-	call_if_set FLAG_QZ_0x2108, Kanto_PokemonLeague_AgathasRoom_EventScript_8412663
+	call_if_unset FLAG_QZ_0x220A, Kanto_PokemonLeague_AgathasRoom_EventScript_841265A
+	call_if_set FLAG_QZ_0x220A, Kanto_PokemonLeague_AgathasRoom_EventScript_8412663
 	setflag FLAG_TEMP_3
 	setflag FLAG_TEMP_5
 	call Kanto_PokemonLeague_AgathasRoom_EventScript_841266C

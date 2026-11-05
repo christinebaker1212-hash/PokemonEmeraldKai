@@ -1,0 +1,8 @@
+# KANTO's ELITE FOUR rematch FireRed's stronger teams once SEVII's network machine is fixed (FLAG_QZ_0x220A, FireRed's
+# FLAG_SYS_CAN_LINK_WITH_RS; audit case 130): LORELEI's rematch is DEWGONG 64, CLOYSTER 63, PILOSWINE 63, JYNX 66,
+# LAPRAS 66 (src/data/mp_frlg_rematch.h). Level scaling is off for the check.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("[test] foeparty: 87:64 91:63 221:63 124:66 131:66")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -2252,6 +2252,8 @@ static const struct { u16 trainerNum; struct TrainerMonNoItemDefaultMoves const 
     {TRAINER_QZ_8423, sFrWade, ARRAY_COUNT(sFrWade)},
 };
 
+#include "../data/mp_frlg_rematch.h"
+
 // JOHTO trainers with Crystal's own team at every GENERATION (pokecrystal data/trainers/parties.asm): RED on MT.
 // SILVER (audit case 106)
 static const struct TrainerMonNoItemCustomMoves sCrRed[] = {
@@ -2278,6 +2280,30 @@ static const struct Trainer *TrainerDataFor(u16 trainerNum)
     u32 i;
     bool8 isBlue;
     u16 blue = QzKantoRivalTrainer(trainerNum, &isBlue);
+    // KANTO's ELITE FOUR and CHAMPION rematch FireRed's stronger teams once SEVII's network machine is fixed
+    // (FLAG_QZ_0x220A, FireRed's FLAG_SYS_CAN_LINK_WITH_RS; audit case 130)
+    if (FlagGet(FLAG_QZ_0x220A))
+    {
+        static const struct { u16 trainerNum; const struct TrainerMonItemCustomMoves *party; u8 count; } sRematch[] = {
+            {TRAINER_QZ_8602, sFrParty_EliteFourLorelei2, ARRAY_COUNT(sFrParty_EliteFourLorelei2)},
+            {TRAINER_QZ_8603, sFrParty_EliteFourBruno2, ARRAY_COUNT(sFrParty_EliteFourBruno2)},
+            {TRAINER_QZ_8604, sFrParty_EliteFourAgatha2, ARRAY_COUNT(sFrParty_EliteFourAgatha2)},
+            {TRAINER_QZ_8605, sFrParty_EliteFourLance2, ARRAY_COUNT(sFrParty_EliteFourLance2)},
+            {TRAINER_QZ_8630, sFrParty_ChampionRematchSquirtle, ARRAY_COUNT(sFrParty_ChampionRematchSquirtle)},
+            {TRAINER_QZ_8631, sFrParty_ChampionRematchBulbasaur, ARRAY_COUNT(sFrParty_ChampionRematchBulbasaur)},
+            {TRAINER_QZ_8632, sFrParty_ChampionRematchCharmander, ARRAY_COUNT(sFrParty_ChampionRematchCharmander)},
+        };
+        u16 which = isBlue ? blue : trainerNum;
+        for (i = 0; i < ARRAY_COUNT(sRematch); i++)
+            if (sRematch[i].trainerNum == which)
+            {
+                sCopy = gTrainers[which];
+                sCopy.partyFlags = F_TRAINER_PARTY_CUSTOM_MOVESET | F_TRAINER_PARTY_HELD_ITEM;
+                sCopy.partySize = sRematch[i].count;
+                sCopy.party.ItemCustomMoves = sRematch[i].party;
+                return &sCopy;
+            }
+    }
     if (isBlue)   // BLUE: FireRed's team for the player's starter, at every GENERATION (qz_specials.c)
         return &gTrainers[blue];
     for (i = 0; i < ARRAY_COUNT(sCrystalTeams); i++)

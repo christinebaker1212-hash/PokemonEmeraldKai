@@ -73,8 +73,8 @@ Kanto_PokemonLeague_LancesRoom_EventScript_841277A::
 	setvar VAR_0x8004, 0xC
 	setvar VAR_0x8005, 1
 	special QzQuestLogNop
-	call_if_unset FLAG_QZ_0x2108, Kanto_PokemonLeague_LancesRoom_EventScript_84127D2
-	call_if_set FLAG_QZ_0x2108, Kanto_PokemonLeague_LancesRoom_EventScript_84127DB
+	call_if_unset FLAG_QZ_0x220A, Kanto_PokemonLeague_LancesRoom_EventScript_84127D2
+	call_if_set FLAG_QZ_0x220A, Kanto_PokemonLeague_LancesRoom_EventScript_84127DB
 	setflag FLAG_TEMP_3
 	setflag FLAG_TEMP_5
 	call Kanto_PokemonLeague_LancesRoom_EventScript_84127E4
