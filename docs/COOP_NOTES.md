@@ -5135,3 +5135,13 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   changes; the naming screen shows what is typed. Test streamer_mode (`mp streamer N`, `mp namefilter`,
   tools/test/check_streamer.py).
 
+## TRAINER HILL's floors and the POKéTCH CALENDAR (1.102.0)
+- TRAINER HILL (trainer_hill.c SetUpDataStruct): the GBA copied a challenge's header and "the floors after it" in one
+  CpuCopy32 (struct TrainerHillChallenge.floors[0] read out of bounds); on the PC sFloors_* aren't laid out after
+  sChallenge_*, so the floors' tiles and trainers came from whatever followed: sFloorData copies each challenge's
+  floors on their own. Test trainer_hill_floors.
+- POKéTCH CALENDAR (poketch.c Calendar): a touch on a day rings it, another takes the ring off, as Platinum's; marks by
+  month in "<save>.poketch" (version 4: calMarks). Its days are the cursor's targets (the targets' array is 40 now: a
+  month has 31). The other apps were checked touch by touch (tools: `mp poketch N`, `mp poketchtap X,Y`). Test
+  poketch_calendar.
+

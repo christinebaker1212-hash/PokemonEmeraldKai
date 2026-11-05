@@ -1,0 +1,7 @@
+# TRAINER HILL's floors are built from each challenge's floor data (trainer_hill.c): on the PC the floors aren't stored
+# right after the challenge's header, so copying both in one go filled the floors with whatever came next (garbage
+# tiles, no way to see the path). 1F's tiles are the NORMAL challenge's floor 0 (graphics/trainer_hill/maps_normal)
+MODE=1
+TMO=120
+EXPECT_A=("metatile 0,5 = 0x231" "metatile 6,5 = 0x21B" "metatile 0,8 = 0x233" "metatile 15,8 = 0x208")
+UNEXPECT_A=("[crash]")

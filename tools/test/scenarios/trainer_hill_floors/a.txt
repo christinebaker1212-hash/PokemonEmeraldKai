@@ -1,0 +1,10 @@
+pressuntil A field 5000
+wait 60
+mp warp 26,61,7,19
+wait 150
+mp metatileat 0,5
+mp metatileat 6,5
+mp metatileat 0,8
+mp metatileat 15,8
+shot floor1
+quit

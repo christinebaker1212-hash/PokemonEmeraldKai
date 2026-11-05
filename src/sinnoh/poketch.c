@@ -94,6 +94,7 @@ static struct
     u8 dots[24 * 20 / 4];              // the DOT ARTIST's 24x20 dots, 2 bits each
     u8 markX[6], markY[6];             // the MARKING MAP's markers
     u16 histSpecies[12];               // POKéMON HISTORY: the last caught / hatched, newest first
+    u32 calMarks[12];                  // CALENDAR: the days marked, a bit a day, by month
     u32 histPersonality[12];
     u16 radarSpecies[3], radarChain[3];   // the TRAINER COUNTER's best three POKé RADAR chains
     u8 alarmH, alarmM, alarmOn, backlight;
@@ -137,6 +138,8 @@ struct SaveFile
     u8 alarmH, alarmM, alarmOn, backlight;
     // version 3
     u16 radarSpecies[3], radarChain[3];
+    // version 4
+    u32 calMarks[12];
 };
 #define SAVE_V1_SIZE offsetof(struct SaveFile, dots)
 
@@ -163,8 +166,10 @@ static void LoadState(void)
     if ((fp = fopen(path, "rb")) == NULL)
         return;
     memset(&f, 0, sizeof(f));
-    if (fread(&f, 1, sizeof(f), fp) >= SAVE_V1_SIZE && f.magic == SAVE_MAGIC && f.version >= 1 && f.version <= 3)
+    if (fread(&f, 1, sizeof(f), fp) >= SAVE_V1_SIZE && f.magic == SAVE_MAGIC && f.version >= 1 && f.version <= 4)
     {
+        if (f.version >= 4)
+            memcpy(sP.calMarks, f.calMarks, sizeof(sP.calMarks));
         if (f.version >= 3)
         {
             memcpy(sP.radarSpecies, f.radarSpecies, sizeof(sP.radarSpecies));
@@ -189,7 +194,7 @@ static void LoadState(void)
 
 static void SaveState(void)
 {
-    struct SaveFile f = {SAVE_MAGIC, 3, sP.color, sP.app, sP.stepBase, sP.counter, 0};
+    struct SaveFile f = {SAVE_MAGIC, 4, sP.color, sP.app, sP.stepBase, sP.counter, 0};
     FILE *fp;
     memcpy(f.memo, sP.memo, sizeof(f.memo));
     memcpy(f.dots, sP.dots, sizeof(f.dots));
@@ -199,6 +204,7 @@ static void SaveState(void)
     f.alarmH = sP.alarmH, f.alarmM = sP.alarmM, f.alarmOn = sP.alarmOn, f.backlight = sP.backlight;
     memcpy(f.radarSpecies, sP.radarSpecies, sizeof(f.radarSpecies));
     memcpy(f.radarChain, sP.radarChain, sizeof(f.radarChain));
+    memcpy(f.calMarks, sP.calMarks, sizeof(f.calMarks));
     if ((fp = fopen(sP.path, "wb")) != NULL)
     {
         fwrite(&f, sizeof(f), 1, fp);
@@ -700,11 +706,31 @@ static void Calendar(void)
     first = (t->tm_wday - (t->tm_mday - 1) % 7 + 7) % 7;
     snprintf(buf, sizeof(buf), "%d", t->tm_mon + 1);
     Text(PW / 2 - (s32)strlen(buf) * 6, 4, buf, 3, 3);
+    // Platinum's marks: a touch on a day rings it, another takes the ring off (kept by month)
+    if (sP.touchNew)
+        for (d = 1; d <= days; d++)
+        {
+            s32 cell = first + d - 1;
+            x = 12 + (cell % 7) * 24, y = 30 + (cell / 7) * 21;
+            if (TouchIn(x - 2, y - 2, 22, 15))
+            {
+                sP.calMarks[t->tm_mon] ^= 1u << d;
+                MPNet_Log("poketch: calendar day %d %s", (int)d, (sP.calMarks[t->tm_mon] >> d) & 1 ? "marked" : "unmarked");
+                PlaySE(SE_SELECT);
+                SaveState();
+                break;
+            }
+        }
     for (d = 1; d <= days; d++)
     {
         s32 cell = first + d - 1;
         x = 12 + (cell % 7) * 24, y = 30 + (cell / 7) * 21;
         snprintf(buf, sizeof(buf), "%d", (int)d);
+        if (sP.calMarks[t->tm_mon] & (1u << d))
+        {
+            Fill(x - 3, y - 3, 24, 1, 3), Fill(x - 3, y + 13, 24, 1, 3);
+            Fill(x - 3, y - 3, 1, 17, 3), Fill(x + 20, y - 3, 1, 17, 3);
+        }
         if (d == t->tm_mday)
         {
             Fill(x - 2, y - 2, 22, 15, 3);
@@ -1406,6 +1432,16 @@ static u8 Targets(struct Target *t)
                                              (c == 3 && sCalcKeys[r][3] == sCalcKeys[r][4]) || (c == 0 && r == 3) ? 62 : 30, 30};
         break;
     case APP_PEDOMETER: t[n++] = (struct Target){66, 80, 64, 64}; break;
+    case APP_CALENDAR:
+    {
+        time_t now = time(NULL);
+        struct tm *tm = localtime(&now);
+        static const u8 sDays[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+        s32 first = (tm->tm_wday - (tm->tm_mday - 1) % 7 + 7) % 7, d;
+        for (d = 1; d <= sDays[tm->tm_mon] + (tm->tm_mon == 1); d++)
+            t[n++] = (struct Target){10 + ((first + d - 1) % 7) * 24, 28 + ((first + d - 1) / 7) * 21, 22, 15};
+        break;
+    }
     case APP_COUNTER: t[n++] = (struct Target){66, 80, 64, 64}; break;
     case APP_COIN: t[n++] = (struct Target){56, 96, 80, 56}; break;
     case APP_STOPWATCH: t[n++] = (struct Target){56, 48, 80, 80}; break;
@@ -1593,7 +1629,7 @@ void MP_Poketch_FilterKeys(void)
 {
     s32 mx, my, lx, ly, scale;
     bool8 down, wasTouch, mouseMoved;
-    struct Target t[24];
+    struct Target t[40];
     u8 n;
     if (sP.loaded && gMain.callback2 == CB2_Overworld)
         CheckRinging();
@@ -1693,7 +1729,7 @@ void MP_Poketch_Composite(u16 *frame)
 {
     s32 x, y, lx, ly, scale, lw, lh, cx0, cy0, cx1, cy1, side, n;
     u32 alpha, lcdR[4], lcdG[4], lcdB[4];
-    struct Target t[24];
+    struct Target t[40];
     if (!Shown())
         return;
     DrawApp();

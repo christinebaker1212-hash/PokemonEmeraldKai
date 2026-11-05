@@ -208,6 +208,16 @@ static const struct TrainerHillChallenge *const sChallengeData[NUM_TRAINER_HILL_
     [HILL_MODE_EXPERT]  = &sChallenge_Expert,
 };
 
+// Moemon PC: each challenge's floors (on the GBA they followed its header in ROM, which the copy below relied on; on the
+// PC the arrays aren't side by side, so the floors were read from whatever came after: the floors' tiles were garbage)
+static const struct TrainerHillFloor *const sFloorData[NUM_TRAINER_HILL_MODES] =
+{
+    [HILL_MODE_NORMAL]  = sFloors_Normal,
+    [HILL_MODE_VARIETY] = sFloors_Variety,
+    [HILL_MODE_UNIQUE]  = sFloors_Unique,
+    [HILL_MODE_EXPERT]  = sFloors_Expert,
+};
+
 // Unused.
 static const u8 *const sFloorStrings[] =
 {
@@ -356,7 +366,11 @@ static void SetUpDataStruct(void)
         // after the field 'challenge'.
         // e.g. for HILL_MODE_NORMAL, it will copy sChallenge_Normal to sHillData->challenge and
         // it will copy sFloors_Normal to sHillData->floors
-        CpuCopy32(sChallengeData[gSaveBlock1Ptr->trainerHill.mode], &sHillData->challenge, sizeof(sHillData->challenge) + sizeof(sHillData->floors));
+        {
+            u8 mode = gSaveBlock1Ptr->trainerHill.mode < NUM_TRAINER_HILL_MODES ? gSaveBlock1Ptr->trainerHill.mode : HILL_MODE_NORMAL;
+            memcpy(&sHillData->challenge, sChallengeData[mode], sizeof(sHillData->challenge));
+            memcpy(sHillData->floors, sFloorData[mode], sizeof(sHillData->floors));
+        }
         TrainerHillDummy();
     }
 }
