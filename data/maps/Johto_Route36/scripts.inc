@@ -3,7 +3,43 @@ Johto_Route36_MapScripts::
 	.byte 0
 
 Johto_Route36_EventScript_83F19E0::
+	@ Moemon Kai: SUICUNE runs past here after ROUTE 42, then on to CIANWOOD again (pokecrystal Route36.asm
+	@ Route36SuicuneScript; docs/REGIONS_AUDIT.md 65)
+	goto_if_eq VAR_QZ_0x502D, 3, Johto_Route36_EventScript_SuicuneHere
+	setflag FLAG_TEMP_11
 	end
+
+Johto_Route36_EventScript_SuicuneHere::
+	setvar VAR_TEMP_1, 1
+	end
+
+@ Johto_Route36 triggers at 21,18-22 (VAR_TEMP_1 == 1)
+Johto_Route36_EventScript_Suicune::
+	lockall
+	playse SE_PIN
+	applymovement LOCALID_PLAYER, Quetzal_Movement_83607F9
+	waitmovement 0
+	delay 15
+	playse SE_WARP_OUT
+	turnobject LOCALID_PLAYER, DIR_NORTH
+	applymovement 9, Johto_Route36_Movement_Suicune
+	waitmovement 0
+	removeobject 9
+	setflag FLAG_TEMP_11
+	turnobject LOCALID_PLAYER, DIR_EAST
+	delay 10
+	setvar VAR_TEMP_1, 0
+	setvar VAR_QZ_0x502D, 1
+	releaseall
+	end
+
+Johto_Route36_Movement_Suicune:
+	jump_2_down
+	jump_2_down
+	jump_2_down
+	jump_2_right
+	jump_2_right
+	step_end
 
 @ Johto_Route36 object 3 (local id 3, gfx 0x2C) at 46,20
 Johto_Route36_EventScript_83F19E1::

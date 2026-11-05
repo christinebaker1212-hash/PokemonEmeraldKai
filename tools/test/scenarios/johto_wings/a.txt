@@ -1,0 +1,42 @@
+pressuntil A field 5000
+wait 30
+mp regionclear 1
+mp setflag 0x1560
+mp warp 35,91,10,13
+wait 120
+mp getflag 0x11F6
+mp warp 35,115,29,34
+wait 120
+mp getflag 0x11F3
+mp warp 35,82,10,3
+wait 120
+mp metatileat 9,4
+mp face left
+wait 10
+press A 1
+pressuntil A field 3000
+wait 30
+mp checkitem 499
+shot afterwing
+mp getflag 0x1561
+mp metatileat 9,4
+press DOWN 16
+wait 30
+press LEFT 16
+wait 200
+mp where
+mp warp 35,91,10,13
+wait 120
+mp getflag 0x11F6
+mp warp 37,59,25,20
+wait 120
+mp objlist
+mp face up
+mash A 60 4
+pressuntil A field 3000
+wait 30
+mp checkitem 498
+mp warp 35,115,29,34
+wait 120
+mp getflag 0x11F3
+quit

@@ -370,7 +370,7 @@ Johto_IlexForest_EventScript_83DC427::
 	release
 	end
 
-@ Johto_IlexForest trigger at 55,11 (VAR_QZ_0x5014 == 3)
+@ Moemon Kai: unused, no KIMONO GIRL NAOKO in ILEX (HGSS's, not Crystal's: docs/REGIONS_AUDIT.md 65)
 Johto_IlexForest_EventScript_83DC433::
 	lock
 	playbgm MUS_QZ_655, 1

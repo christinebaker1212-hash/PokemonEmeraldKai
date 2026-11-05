@@ -239,7 +239,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "FLAG_QZ_0x1095"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_11",
@@ -335,15 +335,6 @@
       "var": "VAR_QZ_0x5014",
       "var_value": "2",
       "script": "Johto_IlexForest_EventScript_83DC1CF"
-    },
-    {
-      "type": "trigger",
-      "x": 55,
-      "y": 11,
-      "elevation": 0,
-      "var": "VAR_QZ_0x5014",
-      "var_value": "3",
-      "script": "Johto_IlexForest_EventScript_83DC433"
     }
   ],
   "bg_events": [

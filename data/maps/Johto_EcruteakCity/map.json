@@ -163,7 +163,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "FLAG_QZ_0x10D5"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16034",
@@ -572,17 +572,7 @@
       "dest_warp_id": "0"
     }
   ],
-  "coord_events": [
-    {
-      "type": "trigger",
-      "x": 39,
-      "y": 41,
-      "elevation": 0,
-      "var": "VAR_QZ_0x501A",
-      "var_value": "4",
-      "script": "Johto_EcruteakCity_EventScript_83CD1E9"
-    }
-  ],
+  "coord_events": [],
   "bg_events": [
     {
       "type": "sign",

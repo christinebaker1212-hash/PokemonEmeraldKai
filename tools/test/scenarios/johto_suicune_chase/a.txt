@@ -1,0 +1,34 @@
+pressuntil A field 5000
+wait 30
+mp warp 34,22,18,23
+wait 120
+mp getflag 0x10BE
+mp getvar 0x4001
+mp setflag 0x10A9
+mp beattrainer 1061
+mp warp 34,22,18,23
+wait 120
+mp getflag 0x10BE
+mp getvar 0x4001
+press UP 16
+wait 30
+pressuntil A field 3000
+wait 30
+mp getvar 0x502D
+mp setvar 0x502D 3
+mp warp 35,44,20,20
+wait 120
+mp getflag 0x11
+mp face right
+wait 10
+press RIGHT 8
+wait 20
+shot r36
+wait 30
+pressuntil A field 3000
+wait 30
+mp getvar 0x502D
+mp warp 34,22,18,23
+wait 120
+mp getflag 0x10BE
+quit

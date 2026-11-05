@@ -4568,6 +4568,28 @@ follow_behind, follow_ground.
   foreign here; Quetzal's SUICUNE by the LAKE OF RAGE is hidden (Crystal's waits at TIN TOWER: case 139). Kept: the
   originals (FireRed's birds, MEWTWO, NAVEL ROCK, BIRTH ISLAND; Crystal's LUGIA, HO-OH, CELEBI, the roaming beasts)
   and MEW, KANTO's own mythical. Tests legend_gate, region_later_mons (rewritten for the rule), johto_legends_original.
+- **Cases 65 and 139, JOHTO's legendary story as Crystal's** (pokecrystal maps DanceTheater, WiseTriosRoom,
+  EcruteakTinTowerEntrance, TinTower1F, TinTowerRoof, WhirlIslandLugiaChamber, RadioTower5F, PewterCity, Route36):
+  Quetzal's HGSS-style KIMONO GIRL chain is gone (the ROCKET at the theater and the GYM's wait for it, the rival's scene
+  in ECRUTEAK, ZUKI in VIOLET and NAOKO in ILEX, ELM's errands, the Lv 48 rematches, the girls' dances, the TIDAL BELL).
+  The DANCE THEATER: five ordinary KIMONO GIRLS (Crystal's Lv 17 Eeveelutions: mp_region.c sCrystalPlainTeams, default
+  moves) and the old man's HM03 once all five are beaten (EventScript_GiveHmOnce, FLAG_QZ_0x1006). The RADIO TOWER's
+  director gives the CLEAR BELL. ECRUTEAK's GYM opens once the beasts are released (FLAG_QZ_0x10A9 only). Quetzal's
+  geography is HGSS's (entrance, WISE TRIO's room, the way north to TIN TOWER), so Crystal's gates sit on it: the
+  entrance sage lets FOG BADGE holders by until the RADIO TOWER falls, then wants the CLEAR BELL
+  (FLAG_JOHTO_RANG_CLEAR_BELL); in the WISE TRIO's room (three trainers TRAINER_JOHTO_SAGE_GAKU / MASA / KOJI 1661-1663,
+  src/data/trainers_kai_johto.h, KAI_SAGE in trainers.h) the sage turns players without the bell back, KOJI battles
+  and steps aside (FLAG_JOHTO_KOJI_ALLOWS_PASSAGE). TIN TOWER 1F (VAR_TEMP_1 on frame): the player walks in, RAIKOU and
+  ENTEI (if not caught) jump away, SUICUNE Lv 40 battles (FLAG_JOHTO_FOUGHT_SUICUNE; beaten, it stands there again a
+  day later: src/mp/mp_johto_legend.c MP_JohtoLegendAfterBattle, FLAG_JOHTO_TIN_SUICUNE_GONE), EUSINE and the trio come
+  in. After the LEAGUE, with all three beasts owned (MP_JohtoBeastsCheck, party or PC), the sage by the stairs gives the
+  RAINBOW WING and the stairs appear (setmetatile 9,4 0x238 / 0x320). HO-OH (roof) and LUGIA (WHIRL ISLANDS) are the
+  static encounters' objects (FLAG_JOHTO_HO_OH_OBJ / LUGIA_OBJ), out only with their wing, Lv 60. PEWTER's old man
+  (Crystal's, added to FireRed's PEWTER) gives the SILVER WING once JOHTO's LEAGUE is beaten (a key item: it travels).
+  SUICUNE's chase is Crystal's loop: CIANWOOD (after the BURNED TOWER; EUSINE's battle the first time only), ROUTE 42,
+  ROUTE 36 (new sighting, FLAG_TEMP_11), CIANWOOD again... until TIN TOWER (VAR_QZ_0x502D 1/2/3, 9 = over). Not
+  carried over: the DANCE THEATER's RHYDON (no sprite). Tests johto_dance_theater, johto_wise_trio, johto_wings,
+  johto_suicune_chase.
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).

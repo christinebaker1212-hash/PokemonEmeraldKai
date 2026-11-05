@@ -467,38 +467,16 @@ Johto_ElmsLab_EventScript_83E21B8::
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
 	msgbox Johto_ElmsLab_Text_83E31B5, MSGBOX_DEFAULT
 	closemessage
-	delay 0x14
-	playse SE_PIN
-	applymovement 2, Quetzal_Movement_83607F9
-	delay 0x3C
-	msgbox Johto_ElmsLab_Text_83E327E, MSGBOX_DEFAULT
-	closemessage
+	@ Moemon Kai: no word of the KIMONO GIRLS (Quetzal's chain; docs/REGIONS_AUDIT.md 65)
 	setvar VAR_QZ_0x5004, 8
-	setvar VAR_QZ_0x501A, 4
-	setflag FLAG_QZ_0x10D5
-	setflag FLAG_QZ_0x10D6
-	clearflag FLAG_QZ_0x10AD
 	release
 	end
 
 Johto_ElmsLab_EventScript_83E2210::
 	lock
 	faceplayer
-	goto_if_eq VAR_QZ_0x5006, 2, Johto_ElmsLab_EventScript_83E223E
-	goto_if_eq VAR_QZ_0x5007, 2, Johto_ElmsLab_EventScript_83E2233
-	msgbox Johto_ElmsLab_Text_83E337F, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
-Johto_ElmsLab_EventScript_83E2233::
-	msgbox Johto_ElmsLab_Text_83E33CD, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
-
-Johto_ElmsLab_EventScript_83E223E::
-	msgbox Johto_ElmsLab_Text_83E3428, MSGBOX_DEFAULT
+	@ Moemon Kai: Crystal's ElmScript_CallYou (pokecrystal ElmsLab.asm)
+	msgbox Johto_ElmsLab_Text_CallYou, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
@@ -1159,3 +1137,7 @@ Johto_ElmsLab_Text_AideAfterTheft::
 	.string "I wonder how it’s doing.\p"
 	.string "They say a MOéMON raised by a bad\n"
 	.string "person turns bad itself.$"
+
+Johto_ElmsLab_Text_CallYou::
+	.string "ELM: {PLAYER}, I’ll call you if\n"
+	.string "anything comes up.$"

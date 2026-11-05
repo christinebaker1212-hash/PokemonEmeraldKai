@@ -1,0 +1,34 @@
+pressuntil A field 5000
+wait 30
+mp teach 0 57
+mp warp 34,44,13,12
+wait 120
+mp face up
+wait 10
+press A 1
+pressuntil A field 2000
+mp checkitem 341
+mp warp 34,44,5,4
+wait 120
+mp face up
+wait 10
+press A 1
+pressuntil A battle 1500
+wait 60
+mp bmons
+pressuntil A field 6000
+wait 30
+mp trainerflag 938
+mp beattrainer 864
+mp beattrainer 871
+mp beattrainer 883
+mp beattrainer 1041
+mp warp 34,44,13,12
+wait 120
+mp face up
+wait 10
+press A 1
+pressuntil A field 3000
+mp checkitem 341
+mp getflag 0x1006
+quit

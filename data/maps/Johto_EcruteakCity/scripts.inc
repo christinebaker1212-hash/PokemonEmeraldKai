@@ -7,48 +7,14 @@ Johto_EcruteakCity_MapScripts::
 Johto_EcruteakCity_EventScript_83CD1BE::
 	special QzJohtoTravelingEventCheck
 	call Quetzal_EventScript_840EA62
+	@ Moemon Kai: the GYM opens once the beasts are released, as in Crystal (EVENT_ECRUTEAK_GYM_GRAMPS); no ROCKET at
+	@ the DANCE THEATER to wait for (docs/REGIONS_AUDIT.md 65)
 	goto_if_unset FLAG_QZ_0x10A9, Johto_EcruteakCity_EventScript_83CD1DC
-	goto_if_unset FLAG_QZ_0x10AC, Johto_EcruteakCity_EventScript_83CD1DC
 	setflag FLAG_QZ_0x10B1
 	end
 
 Johto_EcruteakCity_EventScript_83CD1DC::
 	clearflag FLAG_QZ_0x10B1
-	end
-
-@ Johto_EcruteakCity trigger at 39,41 (VAR_QZ_0x501A == 4)
-Johto_EcruteakCity_EventScript_83CD1E9::
-	lockall
-	opendoor 0x27, 0x28
-	waitdooranim
-	delay 0xA
-	clearflag FLAG_QZ_0x10D5
-	addobject 10
-	playbgm MUS_QZ_648, 1
-	playse SE_BANG
-	applymovement 10, Johto_EcruteakCity_Movement_83CD25E
-	applymovement LOCALID_PLAYER, Johto_EcruteakCity_Movement_83CD25E
-	message Johto_EcruteakCity_Text_83CD26D
-	waitmovement LOCALID_PLAYER
-	waitmovement 10
-	turnobject LOCALID_PLAYER, 2
-	closedoor 0x27, 0x28
-	waitdooranim
-	msgbox Johto_EcruteakCity_Text_83CD274, MSGBOX_DEFAULT
-	closemessage
-	playse SE_PIN
-	applymovement 10, Quetzal_Movement_83607F9
-	delay 0x3C
-	turnobject 10, 1
-	msgbox Johto_EcruteakCity_Text_83CD2C2, MSGBOX_DEFAULT
-	closemessage
-	applymovement 10, Johto_EcruteakCity_Movement_83CD263
-	waitmovement 10
-	setflag FLAG_QZ_0x10D5
-	removeobject 10
-	fadedefaultbgm
-	setvar VAR_QZ_0x501A, 5
-	releaseall
 	end
 
 @ Johto_EcruteakCity object 4 (local id 4, gfx 0x3EA6) at 36,32
@@ -190,51 +156,6 @@ Johto_EcruteakCity_EventScript_83CD51E::
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
-
-Johto_EcruteakCity_Movement_83CD25E:
-	delay_16
-	lock_facing_direction
-	walk_down
-	unlock_facing_direction
-	step_end
-
-Johto_EcruteakCity_Movement_83CD263:
-	walk_left
-	walk_left
-	walk_left
-	walk_left
-	walk_left
-	walk_left
-	walk_left
-	walk_left
-	walk_left
-	step_end
-
-Johto_EcruteakCity_Text_83CD26D::
-	.string "THUD!!$"
-
-Johto_EcruteakCity_Text_83CD274::
-	.string "{RIVAL}: How...? How is this\n"
-	.string "possible? How can I lose to mere\l"
-	.string "KIMONO GIRLS...?$"
-
-Johto_EcruteakCity_Text_83CD2C2::
-	.string "{RIVAL}: You were watching me,\n"
-	.string "{PLAYER}...\p"
-	.string "Yeah, that’s right!\p"
-	.string "I never thought defeating five\n"
-	.string "KIMONO GIRLS would be so hard...\p"
-	.string "I got beaten to a pulp...\p"
-	.string "...\p"
-	.string "You must have come here for the\n"
-	.string "same reason, right?\p"
-	.string "Don’t get cocky just because you\n"
-	.string "defeated TEAM ROCKET!\p"
-	.string "These KIMONO GIRLS are insanely\n"
-	.string "strong.\p"
-	.string "See if you can defeat them.\p"
-	.string "But I’m not going back, I don’t\n"
-	.string "want to see you win.$"
 
 Johto_EcruteakCity_Text_83CD5F9::
 	.string "ECRUTEAK used to have two towers:\n"

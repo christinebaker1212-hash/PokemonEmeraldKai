@@ -1,0 +1,38 @@
+pressuntil A field 5000
+wait 30
+mp teach 0 85
+mp warp 34,43,6,5
+wait 120
+mp face right
+wait 10
+press RIGHT 8
+wait 30
+pressuntil A field 2000
+wait 30
+mp where
+mp additem 495 1
+mp warp 34,43,6,5
+wait 120
+mp face right
+wait 10
+press RIGHT 8
+pressuntil A battle 1500
+pressuntil A field 6000
+wait 60
+pressuntil A field 2000
+mp getflag 0x155F
+mp trainerflag 1663
+mp warp 35,82,9,17
+wait 60
+pressuntil A battle 3000
+wait 60
+mp bmons
+pressuntil A field 9000
+wait 60
+mp getflag 0x1560
+mp getflag 0x1562
+mp getvar 0x502D
+mp warp 34,43,6,5
+wait 120
+mp objat 8 4
+quit

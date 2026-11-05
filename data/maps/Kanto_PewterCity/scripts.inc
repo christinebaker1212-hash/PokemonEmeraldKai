@@ -6,6 +6,7 @@ Kanto_PewterCity_MapScripts::
 
 Kanto_PewterCity_EventScript_841599D::
 	call Kanto_PewterCity_EventScript_AideShow   @ Moemon Kai: FireRed's RUNNING SHOES aide
+	call Kanto_PewterCity_EventScript_SilverWingGrampsShow
 	special QzKantoTravelingEventCheck
 	setflag FLAG_QZ_0x2246
 	setvar VAR_QZ_0x511E, 0
@@ -1387,3 +1388,45 @@ Kanto_PewterCity_Text_AideHadShoes:
 	.string "of RUNNING SHOES!\p"
 	.string "Then I've come all this way for\n"
 	.string "nothing. Well, keep up the running!$"
+
+@ Moemon Kai: Crystal's old man with the SILVER WING (pokecrystal maps/PewterCity.asm PewterCityGrampsScript; audit case
+@ 65): JOHTO's LUGIA needs it, so he's here for players who came from JOHTO (its LEAGUE beaten)
+Kanto_PewterCity_EventScript_SilverWingGrampsShow::
+	specialvar VAR_RESULT, MP_JohtoLeagueBeaten
+	goto_if_eq VAR_RESULT, TRUE, Kanto_PewterCity_EventScript_SilverWingGrampsHere
+	setflag FLAG_TEMP_1F
+Kanto_PewterCity_EventScript_SilverWingGrampsHere::
+	return
+
+Kanto_PewterCity_EventScript_SilverWingGramps::
+	lock
+	faceplayer
+	goto_if_set FLAG_JOHTO_GOT_SILVER_WING, Kanto_PewterCity_EventScript_GotSilverWing
+	msgbox Kanto_PewterCity_Text_SilverWingGramps, MSGBOX_DEFAULT
+	giveitem ITEM_SILVER_WING
+	goto_if_eq VAR_RESULT, FALSE, Kanto_PewterCity_EventScript_SilverWingEnd
+	setflag FLAG_JOHTO_GOT_SILVER_WING
+Kanto_PewterCity_EventScript_SilverWingEnd::
+	release
+	end
+
+Kanto_PewterCity_EventScript_GotSilverWing::
+	msgbox Kanto_PewterCity_Text_GotSilverWing, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PewterCity_Text_SilverWingGramps::
+	.string "Ah, you came all the way out here\n"
+	.string "from JOHTO?\p"
+	.string "That brings back memories. When I\n"
+	.string "was young, I went to JOHTO to\l"
+	.string "train.\p"
+	.string "You remind me so much of what I\n"
+	.string "was like as a young man.\p"
+	.string "Here. I want you to have this item\n"
+	.string "I found in JOHTO.$"
+
+Kanto_PewterCity_Text_GotSilverWing::
+	.string "Going to new, unknown places and\n"
+	.string "seeing new people…\p"
+	.string "Those are the joys of travel.$"

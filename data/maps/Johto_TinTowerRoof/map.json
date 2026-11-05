@@ -25,7 +25,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "FLAG_QZ_0x1060"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
@@ -38,7 +38,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_83FBA14",
-      "flag": "FLAG_QZ_0x1014"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
@@ -51,7 +51,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_83FB9F7",
-      "flag": "FLAG_QZ_0x1014"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
@@ -64,7 +64,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_83FB9AB",
-      "flag": "FLAG_QZ_0x1014"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
@@ -77,7 +77,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_83FB9DA",
-      "flag": "FLAG_QZ_0x1014"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
@@ -90,7 +90,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_83FBA14",
-      "flag": "FLAG_QZ_0x1014"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
@@ -103,7 +103,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_83FBA31",
-      "flag": "FLAG_QZ_0x1014"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_506",
@@ -115,8 +115,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Quetzal_EventScript_83FB8BE",
-      "flag": "FLAG_QZ_0x1060"
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_JOHTO_HO_OH_OBJ"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_10414",
@@ -141,16 +141,6 @@
       "dest_warp_id": "7"
     }
   ],
-  "coord_events": [
-    {
-      "type": "trigger",
-      "x": 10,
-      "y": 13,
-      "elevation": 0,
-      "var": "VAR_QZ_0x5007",
-      "var_value": "2",
-      "script": "Quetzal_EventScript_83FB64A"
-    }
-  ],
+  "coord_events": [],
   "bg_events": []
 }

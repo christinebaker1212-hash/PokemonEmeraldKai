@@ -128,16 +128,6 @@
       "dest_warp_id": "7"
     }
   ],
-  "coord_events": [
-    {
-      "type": "trigger",
-      "x": 10,
-      "y": 13,
-      "elevation": 0,
-      "var": "VAR_QZ_0x5007",
-      "var_value": "2",
-      "script": "Quetzal_EventScript_83FB64A"
-    }
-  ],
+  "coord_events": [],
   "bg_events": []
 }

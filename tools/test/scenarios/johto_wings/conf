@@ -1,0 +1,8 @@
+# Crystal's wings (audit case 65 / 139): after the LEAGUE, with RAIKOU, ENTEI and SUICUNE caught, TIN TOWER 1F's sage
+# gives the RAINBOW WING (499) and the stairs appear; HO-OH waits on the roof only then; PEWTER's old man gives the
+# SILVER WING (498) once JOHTO's LEAGUE is beaten, and LUGIA waits in the WHIRL ISLANDS only then
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=243:50,244:50,245:50"
+EXPECT_A=("flag 4598 = 1" "flag 4595 = 1" "metatile 9,4 = 0x238" "item 499: 1" "flag 5473 = 1" "metatile 9,4 = 0x320" "where map 35.83" "flag 4598 = 0" "item 498: 1" "flag 4595 = 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -334,6 +334,9 @@ static u16 SetUpStatic(const struct QzStatic *e)
         return FALSE;
     gSpecialVar_0x8004 = e->species;
     gSpecialVar_0x8005 = e->level;
+    // JOHTO's LUGIA and HO-OH at Crystal's Lv 60 (audit case 65; Quetzal's are 70)
+    if (e->region == REGION_JOHTO && (e->species == SPECIES_LUGIA || e->species == SPECIES_HO_OH))
+        gSpecialVar_0x8005 = 60;
     gSpecialVar_0x8006 = e->item;
     VarSet(QZ_VAR_STATIC_ENTRY, (e - sQzStatics) + 1);
     PlayCry_Normal(e->species, 0);

@@ -312,7 +312,7 @@
       "x": 18,
       "y": 22,
       "elevation": 0,
-      "var": "VAR_QZ_0x502D",
+      "var": "VAR_TEMP_1",
       "var_value": "1",
       "script": "Johto_CianwoodCity_EventScript_83C9FC4"
     }

@@ -144,30 +144,15 @@ Johto_RadioTower5F_EventScript_83D91DA::
 	waitmovement 0
 	goto Johto_RadioTower5F_EventScript_83D921D
 
+@ Moemon Kai: Crystal's CLEAR BELL (maps/RadioTower5F.asm; audit case 65): the TIN TOWER's sage asks for it
 Johto_RadioTower5F_EventScript_83D9206::
-	setorcopyvar VAR_0x8000, ITEM_RAINBOW_WING
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_OBTAIN_ITEM
+	giveitem ITEM_CLEAR_BELL
 	msgbox Johto_RadioTower5F_Text_83D965C, MSGBOX_DEFAULT
 	closemessage
 	release
 	return
 
 Johto_RadioTower5F_EventScript_83D921D::
-	playse SE_PIN
-	applymovement 5, Quetzal_Movement_83607F9
-	delay 0x3C
-	turnobject 5, 3
-	msgbox Johto_RadioTower5F_Text_83D97A9, MSGBOX_DEFAULT
-	closemessage
-	applymovement 5, Johto_RadioTower5F_Movement_83D92A6
-	waitmovement 0
-	playse SE_PIN
-	applymovement 5, Quetzal_Movement_83607F9
-	delay 0x3C
-	turnobject 5, 1
-	msgbox Johto_RadioTower5F_Text_83D98B5, MSGBOX_DEFAULT
-	closemessage
 	applymovement 5, Johto_RadioTower5F_Movement_83D92A9
 	waitmovement 0
 	setflag FLAG_QZ_0x10A8
@@ -631,18 +616,26 @@ Johto_RadioTower5F_Text_83D95E0::
 	.string "take this.$"
 
 Johto_RadioTower5F_Text_83D965C::
-	.string "There used to be a tower right here\n"
-	.string "in GOLDENROD CITY.\p"
+	.string "There used to be a tower right\n"
+	.string "here in GOLDENROD CITY.\p"
 	.string "But it was old and creaky.\p"
 	.string "So we replaced it with our RADIO\n"
 	.string "TOWER.\p"
-	.string "We dug up that wing during\n"
+	.string "We dug up that bell during\n"
 	.string "construction.\p"
 	.string "I heard that all sorts of MOéMON\n"
 	.string "lived in GOLDENROD in the past.\p"
 	.string "Perhaps…\p"
-	.string "That wing has some connection to the\n"
-	.string "TIN TOWER in ECRUTEAK CITY…\p"
+	.string "That bell has some connection to\n"
+	.string "the TIN TOWER in ECRUTEAK CITY…\p"
+	.string "Ah!\p"
+	.string "That reminds me…\p"
+	.string "I overheard TEAM ROCKET\n"
+	.string "whispering.\p"
+	.string "Apparently, something is going on\n"
+	.string "at the TIN TOWER.\p"
+	.string "I have no idea what is happening,\n"
+	.string "but you might look into it.\p"
 	.string "OK, I better go to my OFFICE.$"
 
 Johto_RadioTower5F_Text_83D97A9::

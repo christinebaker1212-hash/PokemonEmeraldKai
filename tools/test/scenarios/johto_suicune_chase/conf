@@ -1,0 +1,8 @@
+# Crystal's SUICUNE chase (audit case 65): not at CIANWOOD before the BURNED TOWER's beasts are out; then CIANWOOD
+# (EUSINE already met: SUICUNE alone) hands on to ROUTE 42 (VAR 0x502D 2), ROUTE 42 to ROUTE 36 (3), ROUTE 36 back to
+# CIANWOOD (1), where it waits again
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("flag 4286 = 1" "var 0x4001 = 0" "flag 4286 = 0" "var 0x4001 = 1" "var 0x502D = 2" "flag 17 = 0" "var 0x502D = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

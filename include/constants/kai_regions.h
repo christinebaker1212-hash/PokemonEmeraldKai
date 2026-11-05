@@ -55,7 +55,18 @@
 #define FLAG_JOHTO_HIDE_DAYCARE_MON_1    0x1558   // Crystal's EVENT_DAY_CARE_MON_1: the MAN's POKéMON in ROUTE 34's yard
 #define FLAG_JOHTO_HIDE_DAYCARE_MON_2    0x155A   // Crystal's EVENT_DAY_CARE_MON_2: the LADY's (0x1559 Quetzal's)
 #define FLAG_JOHTO_HIDE_LAKE_CIVILIANS   0x155B   // Crystal's EVENT_LAKE_OF_RAGE_CIVILIANS: LAKE OF RAGE's trainers, there after the hideout (case 113)
-#define FLAG_JOHTO_MET_BUENA             0x155D   // Crystal's EVENT_MET_BUENA: she gave the BLUE CARD (case 141)
+#define FLAG_JOHTO_MET_BUENA             0x155D
+// Crystal's legendary story (cases 65 / 139)
+#define FLAG_JOHTO_RANG_CLEAR_BELL       0x155E   // the TIN TOWER entrance's sage heard the CLEAR BELL and stepped aside
+#define FLAG_JOHTO_KOJI_ALLOWS_PASSAGE   0x155F   // Crystal's EVENT_KOJI_ALLOWS_YOU_PASSAGE_TO_TIN_TOWER
+#define FLAG_JOHTO_FOUGHT_SUICUNE        0x1560   // Crystal's EVENT_FOUGHT_SUICUNE (TIN TOWER 1F's scene)
+#define FLAG_JOHTO_GOT_RAINBOW_WING      0x1561   // Crystal's EVENT_GOT_RAINBOW_WING
+#define FLAG_JOHTO_TIN_SUICUNE_GONE      0x1562   // TIN TOWER's SUICUNE caught, or beaten (back in a day: mp_legends.c)
+#define FLAG_JOHTO_GOT_SILVER_WING       0x1563
+#define FLAG_JOHTO_HO_OH_DONE            0x11F7   // HO-OH's static encounter done (qz_static_encounters.h): Crystal's EVENT_FOUGHT_HO_OH
+#define FLAG_JOHTO_LUGIA_DONE            0x11F4   // LUGIA's (Crystal's EVENT_FOUGHT_LUGIA)
+#define FLAG_JOHTO_HO_OH_OBJ             0x11F6   // the flags that hide them (their objects on the roof / in the chamber)
+#define FLAG_JOHTO_LUGIA_OBJ             0x11F3   // Crystal's EVENT_GOT_SILVER_WING (PEWTER's old man)   // Crystal's EVENT_MET_BUENA: she gave the BLUE CARD (case 141)
 #define FLAG_JOHTO_REFUSED_TOGEPI_EGG    0x155C   // Crystal's EVENT_REFUSED_TO_TAKE_EGG_FROM_ELMS_AIDE (VIOLET's aide asks again: case 59)
 
 // JOHTO (0x1000-0x1FFF)

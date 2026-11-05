@@ -10261,5 +10261,13 @@ const struct Trainer gTrainers[] = {
         .party = NO_ITEM_DEFAULT_MOVES(sParty_MayLinkPlaceholder),
     },
 #include "trainers_qz.h"   // Moemon Kai: Johto / Kanto trainers (tools/quetzal_port/gen_trainers.py)
+#define KAI_SAGE(id_, name_, party_)                                                                                      \
+    [id_] = {.trainerClass = TRAINER_CLASS_QZ_SAGE, .encounterMusic_gender = 23, .trainerPic = 96,       \
+             .trainerName = _(name_), .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE}, .doubleBattle = FALSE,       \
+             .aiFlags = 0x1, .party = NO_ITEM_DEFAULT_MOVES(party_)},
+    KAI_SAGE(TRAINER_JOHTO_SAGE_GAKU, "GAKU", sParty_JohtoSageGaku)   // Moemon Kai: Crystal's WISE TRIO (trainers_kai_johto.h)
+    KAI_SAGE(TRAINER_JOHTO_SAGE_MASA, "MASA", sParty_JohtoSageMasa)
+    KAI_SAGE(TRAINER_JOHTO_SAGE_KOJI, "KOJI", sParty_JohtoSageKoji)
+#undef KAI_SAGE
 #include "trainers_sinnoh.h"   // Moemon Kai: SINNOH's trainers (tools/sinnoh/gen_trainers.py)
 };

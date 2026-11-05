@@ -1,0 +1,8 @@
+# Crystal's WISE TRIO and SUICUNE at TIN TOWER (audit case 139): without the CLEAR BELL the sage turns the player back
+# from the way north; with it KOJI battles and lets the player pass; TIN TOWER 1F's SUICUNE (245) battles, the chase
+# ends (VAR 0x502D 9) and, beaten, SUICUNE is gone for a day; then the trio has left the room
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=145:80"
+EXPECT_A=("where map 34.43 xy 5,5" "flag 5471 = 1" "trainerflag 1663 = 1" "species 245" "flag 5472 = 1" "flag 5474 = 1" "var 0x502D = 9" "objat 8,4: none")
+UNEXPECT_A=("[crash]" "TIMEOUT")

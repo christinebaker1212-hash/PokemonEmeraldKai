@@ -2,12 +2,16 @@ Johto_TinTowerRoof_MapScripts::
 	map_script MAP_SCRIPT_ON_TRANSITION, Johto_TinTowerRoof_EventScript_83FB60B
 	.byte 0
 
+@ Moemon Kai: Crystal's HO-OH (pokecrystal maps/TinTowerRoof.asm; audit case 65): out only with the RAINBOW WING, Lv 60
+@ (the static encounter's object, qz_specials.c; Quetzal's KIMONO GIRLS' dance is gone)
 Johto_TinTowerRoof_EventScript_83FB60B::
 	special QzJohtoStaticEncountersRefresh
 	call_if_set FLAG_QZ_0x1016, Johto_TinTowerRoof_EventScript_83FB637
 	call_if_unset FLAG_QZ_0x1016, Johto_TinTowerRoof_EventScript_83FB63B
-	goto_if_eq VAR_QZ_0x5007, 2, Johto_TinTowerRoof_EventScript_83FB63F
-	goto_if_eq VAR_QZ_0x5007, 3, Johto_TinTowerRoof_EventScript_83FB643
+	checkitem ITEM_RAINBOW_WING
+	goto_if_eq VAR_RESULT, TRUE, Johto_TinTowerRoof_EventScript_HoOhHere
+	setflag FLAG_JOHTO_HO_OH_OBJ
+Johto_TinTowerRoof_EventScript_HoOhHere::
 	end
 
 Johto_TinTowerRoof_EventScript_83FB637::

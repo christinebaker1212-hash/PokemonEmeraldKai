@@ -2,10 +2,14 @@ Johto_WhirlIslandLugiaChamber_MapScripts::
 	map_script MAP_SCRIPT_ON_TRANSITION, Johto_WhirlIslandLugiaChamber_EventScript_8400EB3
 	.byte 0
 
+@ Moemon Kai: Crystal's LUGIA (pokecrystal maps/WhirlIslandLugiaChamber.asm; audit case 65): out only with the SILVER WING,
+@ Lv 60 (the static encounter's object; Quetzal's KIMONO GIRLS and TIDAL BELL are gone)
 Johto_WhirlIslandLugiaChamber_EventScript_8400EB3::
 	special QzJohtoStaticEncountersRefresh
-	goto_if_eq VAR_QZ_0x5006, 2, Johto_WhirlIslandLugiaChamber_EventScript_8400ECD
-	goto_if_eq VAR_QZ_0x5006, 3, Johto_WhirlIslandLugiaChamber_EventScript_8400ED1
+	checkitem ITEM_SILVER_WING
+	goto_if_eq VAR_RESULT, TRUE, Johto_WhirlIslandLugiaChamber_EventScript_LugiaHere
+	setflag FLAG_JOHTO_LUGIA_OBJ
+Johto_WhirlIslandLugiaChamber_EventScript_LugiaHere::
 	end
 
 Johto_WhirlIslandLugiaChamber_EventScript_8400ECD::

@@ -764,3 +764,7 @@ gSpecials::
 	def_special MP_Buena_Pay
 	def_special MP_Buena_CanAfford
 	def_special SafariZone_InKanto   @ Moemon Kai: KANTO's SAFARI ZONE as FireRed's (src/safari_zone.c, audit case 62)
+	def_special MP_JohtoMonCheck   @ Moemon Kai: Crystal's legendary story (src/mp/mp_johto_legend.c, audit cases 65 / 139)
+	def_special MP_JohtoBeastsCheck
+	def_special MP_JohtoLegendAfterBattle
+	def_special MP_JohtoLeagueBeaten

@@ -24,12 +24,17 @@ Johto_CianwoodCity_EventScript_83C9BFC::
 
 Johto_CianwoodCity_EventScript_83C9C08::
 	special QzJohtoTravelingEventCheck
-	goto_if_ge VAR_QZ_0x502D, 2, Johto_CianwoodCity_EventScript_83C9C22
+	@ Moemon Kai: SUICUNE comes here once the BURNED TOWER's beasts are released, and again each time round its chase
+	@ (CIANWOOD, ROUTE 42, ROUTE 36) until TIN TOWER, as in Crystal (docs/REGIONS_AUDIT.md 65)
+	goto_if_unset FLAG_QZ_0x10A9, Johto_CianwoodCity_EventScript_NoSuicune
+	goto_if_ne VAR_QZ_0x502D, 1, Johto_CianwoodCity_EventScript_NoSuicune
 	clearflag FLAG_QZ_0x10BE
 	setflag FLAG_QZ_0x10BD
-	setvar VAR_TEMP_0, 1
+	setvar VAR_TEMP_1, 1   @ (the trigger at 18,22)
 	end
 
+Johto_CianwoodCity_EventScript_NoSuicune::
+	setflag FLAG_QZ_0x10BE
 Johto_CianwoodCity_EventScript_83C9C22::
 	setvar VAR_TEMP_0, 1
 	end
@@ -105,7 +110,7 @@ Johto_CianwoodCity_EventScript_83C9F7F::
 	release
 	end
 
-@ Johto_CianwoodCity trigger at 18,22 (VAR_QZ_0x502D == 1)
+@ Johto_CianwoodCity trigger at 18,22 (VAR_TEMP_1 == 1)
 Johto_CianwoodCity_EventScript_83C9FC4::
 	lock
 	playmoncry SPECIES_SUICUNE, 0
@@ -143,6 +148,7 @@ Johto_CianwoodCity_EventScript_83C9FC4::
 	delay 0x1E
 	waitmovement 0
 	delay 0x1E
+	goto_if_defeated TRAINER_QZ_4656, Johto_CianwoodCity_EventScript_SuicuneOnly
 	playbgm MUS_QZ_651, 1
 	clearflag FLAG_QZ_0x10BD
 	addobject 2
@@ -162,9 +168,19 @@ Johto_CianwoodCity_EventScript_83C9FC4::
 	setflag FLAG_QZ_0x10BE
 	removeobject 1
 	removeobject 2
+	setvar VAR_TEMP_1, 0
 	setvar VAR_QZ_0x502D, 2
 	setvar VAR_QZ_0x500E, 2
 	fadedefaultbgm
+	release
+	end
+
+@ Moemon Kai: round the chase again, EUSINE already met (Crystal's EVENT_FOUGHT_EUSINE)
+Johto_CianwoodCity_EventScript_SuicuneOnly::
+	setflag FLAG_QZ_0x10BE
+	removeobject 1
+	setvar VAR_TEMP_1, 0
+	setvar VAR_QZ_0x502D, 2
 	release
 	end
 

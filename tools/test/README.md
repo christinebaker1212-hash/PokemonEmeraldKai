@@ -116,6 +116,10 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `kanto_oak_rating` | OAK rates KANTO's POKéDEX with FireRed's words for every ten caught |
 | `johto_legends_original` | Quetzal's SUICUNE by the LAKE OF RAGE stays hidden before and after the LEAGUE (only the original games' legendaries) |
 | `johto_buena` | BUENA's PASSWORD: the radio says the day's password, BUENA gives the BLUE CARD and takes the right answer for a point, the prize desk trades points for an ULTRA BALL |
+| `johto_dance_theater` | Crystal's DANCE THEATER: no SURF before the five KIMONO GIRLS are beaten, NAOKO's Lv 17 FLAREON, HM03 once all five are |
+| `johto_wise_trio` | The WISE TRIO: turned back without the CLEAR BELL, KOJI battles and steps aside, TIN TOWER 1F's SUICUNE battle ends the chase |
+| `johto_wings` | The RAINBOW WING after the LEAGUE with the three beasts (the stairs appear), HO-OH and LUGIA only with their wings, PEWTER's SILVER WING |
+| `johto_suicune_chase` | SUICUNE's chase: not at CIANWOOD before the BURNED TOWER, then CIANWOOD, ROUTE 36, back to CIANWOOD |
 | `johto_bugcontest_crystal` | the Bug-Catching Contest on a THURSDAY: five of Crystal's contestants in the park, a second catch asks to switch, "finish now?" at the way out, the judging in a line, the catch joins the party and the lead keeps its EXP |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |

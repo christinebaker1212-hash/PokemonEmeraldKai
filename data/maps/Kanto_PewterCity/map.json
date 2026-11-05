@@ -180,6 +180,19 @@
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Kanto_PewterCity_EventScript_RunningShoesAide",
       "flag": "0x2224"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16158",
+      "x": 25,
+      "y": 19,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WALK_LEFT_AND_RIGHT",
+      "movement_range_x": 2,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_EventScript_SilverWingGramps",
+      "flag": "FLAG_TEMP_1F"
     }
   ],
   "warp_events": [

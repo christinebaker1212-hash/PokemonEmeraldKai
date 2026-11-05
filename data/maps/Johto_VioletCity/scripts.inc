@@ -6,7 +6,7 @@ Johto_VioletCity_MapScripts::
 	.byte 0
 
 Johto_VioletCity_OnFrame_83FE8B8:
-	map_script_2 VAR_QZ_0x5012, 1, Johto_VioletCity_EventScript_83FEA06
+	@ Moemon Kai: no KIMONO GIRL ZUKI watching the EGG (HGSS's, not Crystal's: docs/REGIONS_AUDIT.md 65)
 	map_script_2 VAR_QZ_0x5008, 3, Johto_VioletCity_EventScript_83FE9F0
 	.2byte 0
 
