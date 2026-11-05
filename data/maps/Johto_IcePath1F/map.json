@@ -39,19 +39,6 @@
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_IcePath1F_EventScript_83DB635",
       "flag": "FLAG_QZ_0x112B"
-    },
-    {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
-      "x": 49,
-      "y": 25,
-      "elevation": 0,
-      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
-      "movement_range_x": 0,
-      "movement_range_y": 0,
-      "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "0",
-      "script": "Johto_IcePath1F_EventScript_83DB642",
-      "flag": "FLAG_QZ_0x10D2"
     }
   ],
   "warp_events": [
@@ -84,16 +71,6 @@
       "dest_warp_id": "0"
     }
   ],
-  "coord_events": [
-    {
-      "type": "trigger",
-      "x": 49,
-      "y": 29,
-      "elevation": 0,
-      "var": "VAR_QZ_0x502B",
-      "var_value": "0",
-      "script": "Johto_IcePath1F_EventScript_83DB65E"
-    }
-  ],
+  "coord_events": [],
   "bg_events": []
 }

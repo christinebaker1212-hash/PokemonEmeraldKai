@@ -4466,6 +4466,23 @@ follow_behind, follow_ground.
   "<save>.card" format 4 keeps them, friends get them as 2 bytes after the signature (older games ignore them). Test
   kanto_card_photo (`mp tcard info` prints the tint and stickers).
 
+## The audit's batch L (1.111.0)
+- **Case 116, Quetzal's HGSS events gone from JOHTO** (strictly Crystal): MAHOGANY's hideout plays Crystal's scenes
+  and says Crystal's words (61 lines through restore_words): on B2F the EXECUTIVE and a grunt stop the player, LANCE's
+  DRAGONITE breaks in, LANCE takes the grunt and the player battles the EXECUTIVE alone with the whole party
+  (`trainerbattle_no_intro` TRAINER_QZ_4223; Quetzal's two-on-two multi battle, QzBackupPartyForOptionBattle and
+  special battle 12, is no longer used there); on B3F the EXECUTIVE guards the office in his own uniform (no GIOVANNI
+  disguise: object 16 is the EXECUTIVE). ICE PATH has no KIMONO GIRL stuck on the ice (object and trigger removed from
+  map.json). HGSS's ROUTE 47 / 48, CLIFF CAVE and the JOHTO SAFARI ZONE were only reachable through CLIFF EDGE CAVE in
+  CIANWOOD, whose mouth is walled up (map.bin) and whose FLY spot is gone (qz_region_maps.h); the cave's sign and
+  "path under construction" man went with it (the man hidden by FLAG_TEMP_7, set on transition, so no local id
+  moves). Hiding a person never removes them from map.json when later local ids are named by scripts.
+- **Case 146, CIANWOOD's PHOTO STUDIO** (Crystal's CianwoodPhotoStudio.asm): the doorless house by the GYM has its door
+  again (13,51), its sign beside it, and inside (Johto_CianwoodPhotoStudio, group 34 map 126, the OLD WOMAN's house
+  layout) the FISHING GURU takes a free photo: the party on the TRAINER CARD's TEAM page (MP_TCard_PrintPhoto, NORMAL
+  print), Crystal's words. Tests johto_hideout_studio, story_rocket_lance (rewritten for Crystal's battle).
+- crystal_words keeps "mean-looking" whole across a line break (fix_johto_tms.py KEEP_HYPHEN).
+
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).

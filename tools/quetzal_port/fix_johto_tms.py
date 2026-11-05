@@ -18,7 +18,7 @@ import urllib.request
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 RAW = 'https://raw.githubusercontent.com/pret/pokecrystal/master/maps/%s.asm'
 WIDTH = 34
-KEEP_HYPHEN = {'type', 'types', 'up', 'out'}
+KEEP_HYPHEN = {'type', 'types', 'up', 'out', 'looking'}
 
 GIFTS = {   # JOHTO map (also Crystal's): (Quetzal's item, Crystal's TM, this game's TM)
     'LakeOfRageHiddenPowerHouse': ('ITEM_DAWN_STONE', 'TM_HIDDEN_POWER', 'ITEM_TM10'),

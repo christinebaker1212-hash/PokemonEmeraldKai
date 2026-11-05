@@ -1,0 +1,8 @@
+# Crystal's MAHOGANY hideout and CIANWOOD PHOTO STUDIO (audit cases 116 / 146): the studio stands where Quetzal's CLIFF
+# EDGE CAVE was (its photo goes on the TRAINER CARD's TEAM page, free); on the hideout's B2F LANCE's DRAGONITE breaks in
+# and the player battles the EXECUTIVE alone (ARIANA's own three POKéMON, no multi battle with a grunt).
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("[test] tcard photo: tint 0 team" "[test] foeparty: 24:31 455:30 45:30")
+UNEXPECT_A=("[crash]" "TIMEOUT")

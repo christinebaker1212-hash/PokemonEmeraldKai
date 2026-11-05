@@ -365,8 +365,7 @@ Johto_TeamRocketBaseB1F_Movement_83E9471:
 	step_end
 
 Johto_TeamRocketBaseB1F_Text_83E947A::
-	.string "Hey!\n"
-	.string "Intruder alert!$"
+	.string "Hey! Intruder alert!$"
 
 Johto_TeamRocketBaseB1F_Text_83E948F::
 	.string "Dang… I failed…$"
@@ -397,7 +396,9 @@ Johto_TeamRocketBaseB1F_Text_83E9593::
 	.string "warped back to the entrance.$"
 
 Johto_TeamRocketBaseB1F_Text_83E9633::
-	.string "Heheh. Feeling lucky, punk?$"
+	.string "Heheh. Feeling lucky, punk?\p"
+	.string "Go ahead, take another step.\p"
+	.string "We’ve got traps set in the floor!$"
 
 Johto_TeamRocketBaseB1F_Text_83E964F::
 	.string "Kaboom!$"
@@ -409,7 +410,8 @@ Johto_TeamRocketBaseB1F_Text_83E9657::
 	.string "courage and walk.$"
 
 Johto_TeamRocketBaseB1F_Text_83E9700::
-	.string "It’s a PERSIAN statue…$"
+	.string "It’s a PERSIAN statue…\p"
+	.string "Its eyes are oddly shiny.$"
 
 Johto_TeamRocketBaseB1F_Text_83E97D6::
 	.string "A strange panel... Nothing here.$"

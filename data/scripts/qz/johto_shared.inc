@@ -2818,7 +2818,8 @@ Quetzal_Text_83E0BFA::
 	.string "CONTEST.$"
 
 Quetzal_Text_83EB7ED::
-	.string "MURKROW: Hail GIOVANNI.$"
+	.string "MURKROW: The password is…\p"
+	.string "HAIL GIOVANNI.$"
 
 Quetzal_Text_83EBCD7::
 	.string "I’m making my final preparations\n"

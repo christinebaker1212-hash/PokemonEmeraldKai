@@ -9,21 +9,7 @@ wait 20
 waitfor field 900
 mp setvar 0x500C 12
 mp steptrigger 15 18
-pressuntil A partymenu 6000
-wait 30
-press A 4
-wait 20
-press A 4
-wait 30
-press DOWN 4
-wait 10
-press DOWN 4
-wait 10
-press DOWN 4
-wait 10
-shot pick
-press A 4
-waitfor battle 3000
+pressuntil A battle 6000
 wait 200
 mp party
 shot battle

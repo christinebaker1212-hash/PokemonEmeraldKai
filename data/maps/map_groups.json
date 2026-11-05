@@ -831,7 +831,8 @@
     "Johto_NationalPark",
     "Johto_NewBarkTown",
     "Johto_PlayersNeighborsHouse",
-    "Johto_ElmsHouse"
+    "Johto_ElmsHouse",
+    "Johto_CianwoodPhotoStudio"
   ],
   "gMapGroup_Johto2": [
     "Johto_ElmsLab",

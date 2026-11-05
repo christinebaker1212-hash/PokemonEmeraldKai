@@ -187,7 +187,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_CianwoodCity_EventScript_83CA3FD",
-      "flag": "FLAG_QZ_0x10AA"
+      "flag": "FLAG_TEMP_7"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_1044",
@@ -264,10 +264,10 @@
       "dest_warp_id": "0"
     },
     {
-      "x": 14,
-      "y": 36,
+      "x": 13,
+      "y": 51,
       "elevation": 0,
-      "dest_map": "MAP_JOHTO_CLIFF_EDGE_CAVE",
+      "dest_map": "MAP_JOHTO_CIANWOOD_PHOTO_STUDIO",
       "dest_warp_id": "0"
     },
     {
@@ -344,8 +344,8 @@
     },
     {
       "type": "sign",
-      "x": 14,
-      "y": 33,
+      "x": 16,
+      "y": 51,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Johto_CianwoodCity_EventScript_83CA3F1"

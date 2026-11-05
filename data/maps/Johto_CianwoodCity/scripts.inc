@@ -11,6 +11,7 @@ Johto_CianwoodCity_OnFrame_83C9BCD:
 	.2byte 0
 
 Johto_CianwoodCity_EventScript_83C9BDF::
+	setflag FLAG_TEMP_7   @ Moemon Kai: no "path under construction" man (Quetzal's SAFARI ZONE road; audit case 116)
 	special QzJohtoTravelingEventCheck
 	call Quetzal_EventScript_840EA62
 	goto_if_set FLAG_QZ_0x1318, Johto_CianwoodCity_EventScript_83C9BFC
@@ -167,6 +168,10 @@ Johto_CianwoodCity_EventScript_83C9FC4::
 	release
 	end
 
+@ Johto_CianwoodCity object 13 (local id 13, gfx 0x3E91) at 0,34: hidden (FLAG_TEMP_7)
+Johto_CianwoodCity_EventScript_83CA3FD::
+	end
+
 @ Johto_CianwoodCity sign / bg event at 33,48
 Johto_CianwoodCity_EventScript_83CA308::
 	lock
@@ -195,15 +200,6 @@ Johto_CianwoodCity_EventScript_83CA397::
 Johto_CianwoodCity_EventScript_83CA3F1::
 	lock
 	msgbox Johto_CianwoodCity_Text_83CA40A, MSGBOX_SIGN
-	closemessage
-	release
-	end
-
-@ Johto_CianwoodCity object 13 (local id 13, gfx 0x3E91) at 0,34
-Johto_CianwoodCity_EventScript_83CA3FD::
-	lock
-	faceplayer
-	msgbox Johto_CianwoodCity_Text_83CA433, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
@@ -349,10 +345,6 @@ Johto_CianwoodCity_Text_83CA3A3::
 	.string "We Await Your Medicinal Queries$"
 
 Johto_CianwoodCity_Text_83CA40A::
-	.string "CLIFF EDGE CAVE\n"
-	.string "Road to the SAFARI ZONE.$"
+	.string "CIANWOOD CITY PHOTO STUDIO\p"
+	.string "Take a Snapshot as a Keepsake!$"
 
-Johto_CianwoodCity_Text_83CA433::
-	.string "This path is under construction.\n"
-	.string "We’re getting the new SAFARI ZONE\l"
-	.string "up and running!$"

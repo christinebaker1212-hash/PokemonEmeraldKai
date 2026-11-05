@@ -96,6 +96,7 @@
 	.include "data/maps/Johto_CianwoodGym/scripts.inc"
 	.include "data/maps/Johto_CianwoodOldWomansHouse/scripts.inc"
 	.include "data/maps/Johto_CianwoodLugiaSpeechHouse/scripts.inc"
+	.include "data/maps/Johto_CianwoodPhotoStudio/scripts.inc"
 	.include "data/maps/Johto_ManiasHouse/scripts.inc"
 	.include "data/maps/Johto_CianwoodPokecenter1F/scripts.inc"
 	.include "data/maps/Johto_CianwoodPharmacy/scripts.inc"

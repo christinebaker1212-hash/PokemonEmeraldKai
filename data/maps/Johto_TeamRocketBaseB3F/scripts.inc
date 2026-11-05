@@ -193,21 +193,11 @@ Johto_TeamRocketBaseB3F_EventScript_83EAFC7::
 
 @ Johto_TeamRocketBaseB3F object 16 (local id 16, gfx 0x3E97) at 10,3
 Johto_TeamRocketBaseB3F_EventScript_83EB218::
+	@ Moemon Kai: Crystal's EXECUTIVE guards the office in his own uniform (audit case 116: no GIOVANNI disguise)
 	lock
 	faceplayer
-	msgbox Johto_TeamRocketBaseB3F_Text_83EB404, MSGBOX_DEFAULT
 	playse SE_PIN
 	applymovement 16, Quetzal_Movement_83607F7
-	delay 0x3C
-	msgbox Johto_TeamRocketBaseB3F_Text_83EB496, MSGBOX_DEFAULT
-	closemessage
-	applymovement 16, Johto_TeamRocketBaseB3F_Movement_83EB3E4
-	waitmovement 0
-	setflag FLAG_QZ_0x10CC
-	removeobject 16
-	clearflag FLAG_QZ_0x10CB
-	addobject 15
-	applymovement 15, Johto_TeamRocketBaseB3F_Movement_83EB3FC
 	waitmovement 0
 	call_if_eq VAR_FACING, 4, Johto_TeamRocketBaseB3F_EventScript_83EB345
 	call_if_eq VAR_FACING, 3, Johto_TeamRocketBaseB3F_EventScript_83EB34A
@@ -218,9 +208,9 @@ Johto_TeamRocketBaseB3F_EventScript_83EB218::
 	call_if_eq VAR_FACING, 4, Johto_TeamRocketBaseB3F_EventScript_83EB354
 	call_if_eq VAR_FACING, 3, Johto_TeamRocketBaseB3F_EventScript_83EB35F
 	call_if_eq VAR_FACING, 2, Johto_TeamRocketBaseB3F_EventScript_83EB354
-	setflag FLAG_QZ_0x10CB
+	setflag FLAG_QZ_0x10CC
 	playse SE_EXIT
-	removeobject 15
+	removeobject 16
 	applymovement 14, Johto_TeamRocketBaseB3F_Movement_83EB36A
 	delay 0x78
 	call_if_eq VAR_FACING, 4, Johto_TeamRocketBaseB3F_EventScript_83EB31B
@@ -229,7 +219,6 @@ Johto_TeamRocketBaseB3F_EventScript_83EB218::
 	waitmovement 14
 	playmoncry SPECIES_MURKROW, 0
 	msgbox Quetzal_Text_83EB7ED, MSGBOX_DEFAULT
-	msgbox Johto_TeamRocketBaseB3F_Text_83EB805, MSGBOX_DEFAULT
 	closemessage
 	applymovement 14, Johto_TeamRocketBaseB3F_Movement_83EB377
 	waitmovement 14
@@ -260,20 +249,20 @@ Johto_TeamRocketBaseB3F_EventScript_83EB330::
 	return
 
 Johto_TeamRocketBaseB3F_EventScript_83EB345::
-	turnobject 15, 3
+	turnobject 16, 3
 	return
 
 Johto_TeamRocketBaseB3F_EventScript_83EB34A::
-	turnobject 15, 4
+	turnobject 16, 4
 	return
 
 Johto_TeamRocketBaseB3F_EventScript_83EB354::
-	applymovement 15, Johto_TeamRocketBaseB3F_Movement_83EB398
+	applymovement 16, Johto_TeamRocketBaseB3F_Movement_83EB398
 	waitmovement 0
 	return
 
 Johto_TeamRocketBaseB3F_EventScript_83EB35F::
-	applymovement 15, Johto_TeamRocketBaseB3F_Movement_83EB3BC
+	applymovement 16, Johto_TeamRocketBaseB3F_Movement_83EB3BC
 	waitmovement 0
 	return
 
@@ -530,10 +519,10 @@ Johto_TeamRocketBaseB3F_Movement_83EB3FC:
 	step_end
 
 Johto_TeamRocketBaseB3F_Text_83EAD16::
-	.string "LANCE: It takes two passwords\n"
-	.string "to get into the boss’ quarters.\p"
-	.string "Those passwords are known only\n"
-	.string "to a few ROCKETS.\p"
+	.string "LANCE: It takes two passwords to\n"
+	.string "get into the boss’s quarters.\p"
+	.string "Those passwords are known only to\n"
+	.string "a few ROCKETS.\p"
 	.string "That ROCKET there very graciously\n"
 	.string "told me so.\p"
 	.string "{PLAYER}, let’s go get the\n"
@@ -549,115 +538,77 @@ Johto_TeamRocketBaseB3F_Text_83EAFD4::
 
 Johto_TeamRocketBaseB3F_Text_83EB007::
 	.string "The door’s closed…\p"
-	.string "{PLAYER} entered the two passwords.\p"
+	.string "{PLAYER} entered the two\n"
+	.string "passwords.\p"
 	.string "The door opened!$"
 
 Johto_TeamRocketBaseB3F_Text_83EB049::
 	.string "…\p"
-	.string "Didn’t I tell you that I was\n"
-	.string "going to destroy TEAM ROCKET?\p"
+	.string "Didn’t I tell you that I was going\n"
+	.string "to destroy TEAM ROCKET?\p"
 	.string "…Tell me, who was the guy in the\n"
 	.string "cape who used dragon MOéMON?\p"
 	.string "My MOéMON were no match at all.\p"
-	.string "It’s what he said that bothers\n"
-	.string "me…\p"
+	.string "I don’t care that I lost. I can\n"
+	.string "beat him by getting stronger\l"
+	.string "MOéMON.\p"
+	.string "It’s what he said that bothers me…\p"
 	.string "He told me that I don’t love and\n"
 	.string "trust my MOéMON enough.\p"
-	.string "It’s not my fault my team is so\n"
-	.string "useless.\p"
 	.string "I’m furious that I lost to a\n"
 	.string "bleeding heart like him.\p"
-	.string "But it makes me question myself.\p"
-	.string "Is there something I’m doing\n"
-	.string "wrong?\p"
-	.string "Could it be that love made his\n"
-	.string "team so powerful?$"
-
-Johto_TeamRocketBaseB3F_Text_83EB404::
-	.string "Muhahaha, we’ve been waiting\n"
-	.string "for you. So, you are {PLAYER}...\p"
-	.string "Me? You don’t know who I am?\n"
-	.string "It is me, GIOVANNI.\p"
-	.string "The majestic GIOVANNI himself!\n"
-	.string "Wahahaha!$"
-
-Johto_TeamRocketBaseB3F_Text_83EB496::
-	.string "...Huh?\n"
-	.string "I don’t sound anything like\l"
-	.string "GIOVANNI?\p"
-	.string "I don’t even look like GIOVANNI?\n"
-	.string "How come? I’ve worked so hard\l"
-	.string "to mimic him!$"
+	.string "…Humph! I don’t have the time for\n"
+	.string "the likes of you!$"
 
 Johto_TeamRocketBaseB3F_Text_83EB511::
-	.string "PETREL: I am a Team Rocket\n"
-	.string "Executive!\p"
-	.string "You must be trying to sneak into\n"
-	.string "the radio-transmitter room.\p"
-	.string "Well, that’s not going to happen.\n"
-	.string "That room is protected with a\l"
-	.string "special password.\p"
-	.string "The password is ’Hail GIOVANNI.’\n"
-	.string "Surprised to hear it from me?\p"
-	.string "Knowing the password won’t help\n"
-	.string "you though.\p"
-	.string "The door won’t open unless I say\n"
-	.string "the password. It only reacts to\l"
-	.string "my voice.$"
+	.string "What? Who are you? This is the\n"
+	.string "office of our leader, GIOVANNI.\p"
+	.string "Since disbanding TEAM ROCKET three\n"
+	.string "years ago, he has been in\l"
+	.string "training.\p"
+	.string "But we’re certain he will be back\n"
+	.string "some day to assume command again.\p"
+	.string "That’s why we’re standing guard.\p"
+	.string "I won’t let anyone disturb this\n"
+	.string "place!$"
 
 Johto_TeamRocketBaseB3F_Text_83EB67C::
 	.string "I… I couldn’t do a thing…\p"
 	.string "GIOVANNI, please forgive me…$"
 
 Johto_TeamRocketBaseB3F_Text_83EB6B3::
-	.string "PETREL: Since disbanding Team\n"
-	.string "Rocket three years ago, our\l"
-	.string "GIOVANNI has been missing.\p"
-	.string "But we’re certain he’s been\n"
-	.string "waiting for the right time for\l"
-	.string "our revival... Wahahaha!\p"
-	.string "Losing to you won’t change the\n"
-	.string "fact that you are unable to get\l"
-	.string "in the radio-transmitter room!\p"
-	.string "You need my voice to unlock it!$"
-
-Johto_TeamRocketBaseB3F_Text_83EB805::
-	.string "MURKROW is mimicking\n"
-	.string "the voice of PETREL!\p"
-	.string "You may be able to...!?$"
+	.string "No, I can’t let this affect me.\p"
+	.string "I have to inform the others…$"
 
 Johto_TeamRocketBaseB3F_Text_83EB870::
 	.string "Do I know the password?\p"
 	.string "Maybe.\p"
-	.string "But no weakling’s going to get\n"
-	.string "it!$"
+	.string "But no weakling’s going to get it!$"
 
 Johto_TeamRocketBaseB3F_Text_83EB8B2::
 	.string "All right. Stop. I’ll tell you.$"
 
 Johto_TeamRocketBaseB3F_Text_83EB8D2::
-	.string "The password to the boss’ room\n"
-	.string "is SLOWPOKETAIL.\p"
+	.string "The password to the boss’s room is\n"
+	.string "SLOWPOKETAIL.\p"
 	.string "But it’s useless unless you have\n"
 	.string "two passwords.$"
 
 Johto_TeamRocketBaseB3F_Text_83EB932::
 	.string "Hyuck-hyuck-hyuck!\p"
-	.string "I remember you from the well!\p"
-	.string "You’re challenging me again?\p"
+	.string "You’re challenging me to a battle?\p"
 	.string "Hah! You’re nuts, but you have\n"
 	.string "guts!\p"
-	.string "I’ll warn you, I got better!\p"
-	.string "If you can beat me, I’ll tell\l"
-	.string "you a password to the boss’\n"
-	.string "room!$"
+	.string "I like that!\p"
+	.string "If you can beat me, I’ll tell you\n"
+	.string "a password to the boss’s room!$"
 
 Johto_TeamRocketBaseB3F_Text_83EBA02::
 	.string "Hyuck-hyuck-hyuck! You’re good!$"
 
 Johto_TeamRocketBaseB3F_Text_83EBA22::
 	.string "Hyuck-hyuck-hyuck!\p"
-	.string "The password to the boss’ room…\p"
+	.string "The password to the boss’s room…\p"
 	.string "Uh…, I think it is RATICATE TAIL.$"
 
 Johto_TeamRocketBaseB3F_Text_83EBA77::
@@ -670,12 +621,12 @@ Johto_TeamRocketBaseB3F_Text_83EBAEB::
 	.string "A mere tactical error cost me…$"
 
 Johto_TeamRocketBaseB3F_Text_83EBB0A::
-	.string "A radio signal that drives\n"
-	.string "MOéMON mad…\p"
+	.string "A radio signal that drives MOéMON\n"
+	.string "mad…\p"
 	.string "My experiment is a complete\n"
 	.string "success.\p"
-	.string "My promotion is assured. This\n"
-	.string "loss means absolutely nothing.$"
+	.string "My promotion is assured. This loss\n"
+	.string "means absolutely nothing.$"
 
 Johto_TeamRocketBaseB3F_Text_83EBB94::
 	.string "I don’t care that MOéMON are hurt\n"

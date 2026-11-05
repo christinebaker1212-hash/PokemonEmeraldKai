@@ -76,7 +76,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **59. [K1-8, K4-15, J3-12, J1-31]** Marts sell by badge count (Quetzal's lists), not each town's own stock: **RESTORE the original**
 - [ ] **60. [K1-5, K2-19, K3-7, K4-16, J1-25, J2-34, J3-23]** Quetzal's overworld legendaries and mythicals: **RESTORE the original** - _Mythicals that belong in the original games' Region must stay. This covers up to Sinnoh. Quetzel's additions must be removed. Legendaries Gen 5 and beyond must be removed and delegated only to Moegatcha pulls. Override REGIONS_TODO.md decisions. Quetzal's fan additions aren't wanted, this still stands._
 - [ ] **61. [K4-10, J1-18]** Fossils revived Quetzal's way (any region's fossil, at once, Lv 20): **RESTORE the original**
-- [ ] **62. [K4-5, J3-30]** Both SAFARI ZONEs are Quetzal's (free, no SAFARI BALLS, no steps): **RESTORE the original**
+- [ ] **62. [K4-5, J3-30]** Both SAFARI ZONEs are Quetzal's (free, no SAFARI BALLS, no steps): **RESTORE the original** - _JOHTO's half done with case 116 (its SAFARI ZONE unreachable: Crystal has none); KANTO's FireRed SAFARI ZONE is left._
 - [x] **63. [J1-9, J2-21, J3-18]** The WEEKDAY siblings stand there every day with a guess-the-day game: **RESTORE the original**
 - [ ] **64. [K1-9, K1-10, K2-15]** OAK's POKéDEX rating and the NATIONAL DEX come Quetzal's way: **RESTORE the original**
 - [ ] **65. [J2-13, J1-21]** The legendary story is Quetzal's HGSS-style KIMONO GIRL chain: **RESTORE the original**
@@ -130,7 +130,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **113. [J3-28]** LAKE OF RAGE's LANCE scene and ROUTE 42's EUSINE scene are rewritten: **RESTORE the original**
 - [x] **114. [J3-29]** TOHJO FALLS gives a SUPER ROD and a HEART SCALE: **RESTORE the original**
 - [x] **115. [J3-34]** Mahogany / Blackthorn / Indigo dead or Quetzal-only bits (low): **RESTORE the original**
-- [ ] **116. [J3-35]** HGSS-flavoured events kept from Quetzal (for the record: HGSS ranks above Quetzal): **REMOVE it** - _We must stick to strictly Crystal._
+- [x] **116. [J3-35]** HGSS-flavoured events kept from Quetzal (for the record: HGSS ranks above Quetzal): **REMOVE it** - _We must stick to strictly Crystal._
 - [x] **117. [J3-39]** Shared-script inventory (what is Quetzal-only and its state): **RESTORE the original**
 - [x] **118. [K2-11, J2-8]** The NAME RATER doesn't rate or rename (KANTO's removed, JOHTO's talks about RADIANT): **RESTORE the original**
 - [x] **119. [K1-2]** ROCK TUNNEL isn't dark: **RESTORE the original**
@@ -160,7 +160,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **143. [J2-18]** DEPT. STORE 5F's Sunday RETURN / FRUSTRATION lady is missing, though a shopper still talks about her: **RESTORE the original**
 - [x] **144. [J2-24]** Crystal's GOLDENROD move tutor, city sign and RADIO CARD lady are missing: **RESTORE the original**
 - [x] **145. [J2-25]** GOLDENROD UNDERGROUND: haircut brothers and the bargain merchant missing; Quetzal shops and a KIMONO GIRL scene added: **RESTORE the original**
-- [ ] **146. [J2-30]** CIANWOOD's PHOTO STUDIO and POKé SEER are missing; an HGSS-style bells lady in their place: **RESTORE the original** - _the POKé SEER is back (1.93.0); the PHOTO STUDIO's door is Quetzal's CLIFF EDGE CAVE to its JOHTO SAFARI ZONE, so the studio comes back with case 62._
+- [x] **146. [J2-30]** CIANWOOD's PHOTO STUDIO and POKé SEER are missing; an HGSS-style bells lady in their place: **RESTORE the original** - _the POKé SEER is back (1.93.0); the PHOTO STUDIO's door is Quetzal's CLIFF EDGE CAVE to its JOHTO SAFARI ZONE, so the studio comes back with case 62._
 - [x] **147. [J3-21]** MOVE DELETER missing in BLACKTHORN ("MOVE BROS' HOUSE" is empty): **RESTORE the original**
 - [x] **148. [J3-27]** HALL OF FAME doesn't send PROF. ELM's S.S. TICKET call: **RESTORE the original**
 - [x] **149. [J1-32, J2-36]** Dead NUZLOCKE branches in gift scripts: **REMOVE it**
