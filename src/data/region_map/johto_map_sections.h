@@ -58,7 +58,7 @@ const u8 *const gJohtoMapSectionNames[] =
     (const u8 []) _("INDIGO PLATEAU"),
     (const u8 []) _("ROUTE 26"),
     (const u8 []) _("ROCKET HIDEOUT"),
-    (const u8 []) _("TRAINER HILL"),
+    (const u8 []) _("BATTLE TOWER"),
 };
 
 const struct { u8 x, y, width, height; } gJohtoMapSectionPlaces[] =

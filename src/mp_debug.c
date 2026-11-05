@@ -142,6 +142,23 @@ static void SetAsciiName(u8 *dst, const char *src, int maxLen)
     dst[i] = EOS;
 }
 
+static int sPinFoeHp, sPinMyHp;   // mp pinhp
+
+// mp pinhp, each frame (mp_main.c MP_FrameUpdate)
+void MP_Debug_PinHpFrame(void)
+{
+    int i;
+    if (!gMain.inBattle || (!sPinFoeHp && !sPinMyHp))
+        return;
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (GetBattlerSide(i) == B_SIDE_OPPONENT && sPinFoeHp && gBattleMons[i].hp > sPinFoeHp)
+            gBattleMons[i].hp = sPinFoeHp;
+        else if (i == 0 && sPinMyHp && gBattleMons[i].hp && gBattleMons[i].hp < sPinMyHp)
+            gBattleMons[i].hp = sPinMyHp;
+    }
+}
+
 void MP_DebugSetupNameAndGender(void)
 {
     const char *name = getenv("MOEMON_DEBUG_NAME");
@@ -1685,6 +1702,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_TrainerTower_Log(void);
         MP_TrainerTower_Log();
     }
+    else if (strcmp(cmd, "jtower") == 0)
+    {
+        // jtower: JOHTO's BATTLE TOWER state (src/mp/mp_johto_tower.c)
+        void MP_JohtoTower_Log(void);
+        MP_JohtoTower_Log();
+    }
     else if (strcmp(cmd, "register") == 0)
     {
         // mp register ITEM: adds it and registers it to SELECT
@@ -1833,6 +1856,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 printf(" %u:%u", (unsigned)GetMonData(&gEnemyParty[i], MON_DATA_SPECIES),
                        (unsigned)GetMonData(&gEnemyParty[i], MON_DATA_LEVEL));
         printf("\n");
+    }
+    else if (strcmp(cmd, "pinhp") == 0)
+    {
+        // pinhp FOE MINE - every frame of a battle, the foes out at FOE HP and battler 0 at MINE (0 0: off), for tests
+        // whose battles must end one way whatever the moves do
+        sscanf(arg, "%d %d", &sPinFoeHp, &sPinMyHp);
+        printf("[test] pinhp: foes %d, battler 0 %d\n", sPinFoeHp, sPinMyHp);
     }
     else if (strcmp(cmd, "foehp") == 0)
     {

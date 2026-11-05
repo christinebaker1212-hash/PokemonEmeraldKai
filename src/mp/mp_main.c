@@ -2212,6 +2212,10 @@ void MP_FrameEnd(void)
 void MP_FrameUpdate(void)
 {
     {
+        void MP_Debug_PinHpFrame(void);
+        MP_Debug_PinHpFrame();   // the test command mp pinhp (mp_debug.c)
+    }
+    {
         void Maker_FrameUpdate(void);
         Maker_FrameUpdate();   // Moemon Maker: the chime when "maker" is typed (src/maker/maker_gate.c)
     }

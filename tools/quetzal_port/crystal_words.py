@@ -85,6 +85,12 @@ def words(mapname, label, our_label=None):
         text = re.sub(r'@"\s*\n\s*text_end\s*\n', '"\n\tdone\n', text)
         text = re.sub(r'(\w+_ContestJudging_\w*ScoreText::)\n\s*\n\s*para ', r'\1\n\ttext ', text)
         text = re.sub(r'@"\s*\n\s*text_decimal wBugContest\w+Score[^\n]*\n\s*text "', '{STR_VAR_3}', text)
+    if mapname in ('BattleTower1F', 'data/text/common_3') and label.startswith(('Text_', '_TheMon')):
+        # (the BATTLE TOWER's, audit case 37: src/mp/mp_johto_tower.c fills them: STR_VAR_1 the POKéMON that may not
+        # enter (wcd49) or the next opponent's number, STR_VAR_2 the "3" of the rules, the level, the prize)
+        rams.update({'wcd49': '{STR_VAR_1}', 'wStringBuffer2': '{STR_VAR_2}'})
+        text = re.sub(r'(:+\n)\s*text_ram (\w+)\s*\n\s*text "', lambda m: m.group(1) + '\ttext "' + rams.get(m.group(2), '{STR_VAR_1}'), text)
+        text = re.sub(r'@"\s*\n\s*sound_item\s*\n\s*text_promptbutton\s*\n\s*text_end', '"\n\tdone', text)
     text = re.sub(r'@"\s*\n\s*text_ram (\w+)\s*\n\s*text "',
                   lambda m: rams.get(m.group(1), '{STR_VAR_1}'), text)
     # (text_start: the buffer ends the line, the next line command goes on)

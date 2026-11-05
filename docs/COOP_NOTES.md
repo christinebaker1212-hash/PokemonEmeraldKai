@@ -4639,6 +4639,26 @@ follow_behind, follow_ground.
   Time Board shows the four (FireRed's results window). Words: restore_words.txt (21 lines). Test kanto_trainer_tower
   (`mp ttower`): the door, both menus, a won floor, the OWNER's prize and record, the board, a DOUBLE and a KNOCKOUT
   floor.
+- **Case 37, JOHTO's BATTLE TOWER as Crystal's** (pokecrystal engine/events/battle_tower/, maps/BattleTower*.asm;
+  src/mp/mp_johto_tower.c, data/scripts/johto_battle_tower.inc). ROUTE 40's north gate (Johto_Route40TrainerHillGate,
+  Crystal's ROCKER and TWIN in it) leads to the tower's grounds (Johto_BattleTowerOutside 35.123: a 20x23 crop of the
+  BATTLE FRONTIER's east side, LAYOUT_JOHTO_BATTLE_TOWER_OUTSIDE; Crystal's people and sign), then the 1F (35.124),
+  the ELEVATOR, the HALLWAY and the BATTLE ROOM (35.125-127: Emerald's own BATTLE TOWER layouts, no warp events: the
+  scripts warp). The map section is BATTLE TOWER (johto_map_sections.h; import.py). The receptionist asks Challenge /
+  Explanation / Cancel (MULTI_KAI_BATTLE_TOWER), checks Crystal's rules (three POKéMON, all different, no EGGS, no two
+  holding the same item: VAR_TEMP_2-5 say which failed), saves, offers the level groups (L:10-L:40, L:10-L:100 once
+  the JOHTO LEAGUE is beaten: gQzScroll's dynamic menu) and checks the levels and Crystal's ubers under L:70 (MEWTWO,
+  MEW, LUGIA, HO-OH, CELEBI). Seven opponents in a row: Crystal's 70 BATTLE TOWER trainers and its ten groups of 21
+  POKéMON (src/data/johto_battle_tower.h, tools/quetzal_port/gen_battle_tower_gsc.py: DVs as IVs, stat experience as
+  EVs; Crystal's classes as JOHTO trainers of the class, BIKER and GUITARIST from KANTO's, TEACHER as a BEAUTY), three
+  each, none repeated in a run; their greeting / loss / win lines are Crystal's 25 men's and 15 women's sets. The
+  battles are the TRAINER HILL type through trainer_hill.c's MP_JohtoTower_InBattle (SET style, JOHTO's trainer
+  music); the party is healed after each. Between battles: Next / SAVE and end the session (a save and a reset, as
+  Crystal) / Cancel. Seven wins give Crystal's prize: five of HP UP, PROTEIN, IRON, CARBOS or CALCIUM. State in
+  VAR_JOHTO_BT_STATE 0x5168 (Crystal's BATTLETOWER_* states, group, beaten, explained) and 0x5169-0x516C (trainers
+  met this run). Words: restore_words.txt (39 lines; crystal_words.py now maps wcd49 / wStringBuffer2 to STR_VAR_1 /
+  STR_VAR_2). Test johto_battle_tower (`mp jtower`; the harness's `mp pinhp FOE MINE` holds HP every frame): the gate,
+  the grounds, the receptionist's flows, L:10, the elevator to the BATTLE ROOM, a won battle, the challenge cancelled.
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).

@@ -15730,6 +15730,16 @@
       "secondary_tileset": "gTileset_Kanto_TrainerTower",
       "border_filepath": "data/layouts/Kanto_TrainerTower_8F_Knockout/border.bin",
       "blockdata_filepath": "data/layouts/Kanto_TrainerTower_8F_Knockout/map.bin"
+    },
+    {
+      "id": "LAYOUT_JOHTO_BATTLE_TOWER_OUTSIDE",
+      "name": "Johto_BattleTowerOutside_Layout",
+      "width": 20,
+      "height": 23,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_BattleFrontierOutsideEast",
+      "border_filepath": "data/layouts/Johto_BattleTowerOutside/border.bin",
+      "blockdata_filepath": "data/layouts/Johto_BattleTowerOutside/map.bin"
     }
   ]
 }

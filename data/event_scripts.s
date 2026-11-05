@@ -58,6 +58,7 @@
 #include "constants/weather.h"
 #include "constants/kai_regions.h"
 #include "constants/kanto_trainer_tower.h"
+#include "constants/johto_battle_tower.h"
 	.include "asm/macros.inc"
 	.include "asm/macros/event.inc"
 	.include "constants/constants.inc"
@@ -669,6 +670,12 @@ EventScript_SetBrineyLocation_Route109::
 	.include "data/scripts/mp_region.inc"
 	.include "data/scripts/qz_phone.inc"
 	.include "data/scripts/kanto_trainer_tower.inc"
+	.include "data/scripts/johto_battle_tower.inc"
+	.include "data/maps/Johto_BattleTowerOutside/scripts.inc"
+	.include "data/maps/Johto_BattleTower1F/scripts.inc"
+	.include "data/maps/Johto_BattleTowerElevator/scripts.inc"
+	.include "data/maps/Johto_BattleTowerHallway/scripts.inc"
+	.include "data/maps/Johto_BattleTowerBattleRoom/scripts.inc"
 
 /* scripts/notices.inc? signs.inc? See comment about text/notices.inc*/
 Common_EventScript_ShowPokemartSign::

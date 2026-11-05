@@ -1,0 +1,79 @@
+pressuntil A field 5000
+wait 30
+mp battlestyle 1
+mp teach 0 70
+mp warp 34,55,7,2
+wait 120
+mp face up
+press UP 16
+wait 150
+mp where
+shot outside
+mp warp 35,123,10,15
+wait 120
+mp face up
+press UP 16
+wait 150
+mp where
+shot lobby
+mp warp 35,124,6,6
+wait 120
+mp face up
+wait 10
+press A 1
+pressuntil A yesno 3000
+shot hear
+press B 1
+wait 300
+shot menu
+press A 1
+pressuntil A yesno 3000
+shot save
+press A 1
+wait 900
+shot levels
+press A 1
+wait 60
+mp jtower
+pressuntil A field 900
+shot w1
+wait 150
+shot w2
+mp where
+wait 150
+shot w3
+mp where
+wait 150
+shot w4
+mp where
+pressuntil A battle 4000
+wait 200
+shot battle
+mp partyhp
+mp foeparty
+mp jtower
+mp pinhp 1 30
+pressuntillog A 6000 life battle: end
+mp pinhp 0 0
+pressuntil A yesno 6000
+mp jtower
+shot next
+wait 30
+press B 4
+wait 60
+pressuntil A yesno 3000
+shot save
+wait 30
+press B 4
+wait 60
+pressuntil A yesno 3000
+shot cancel
+wait 30
+press A 4
+wait 300
+mp where
+mp jtower
+pressuntil A field 900
+wait 30
+mp jtower
+quit

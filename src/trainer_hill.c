@@ -87,6 +87,13 @@ u16 MP_TrainerTower_FrontSpriteId(u16 trainerId);
 u8 MP_TrainerTower_EncounterMusicId(u16 trainerId);
 void MP_TrainerTower_TrainerText(u8 which, u16 trainerId);
 void MP_TrainerTower_BattleClock(void);
+// ... and JOHTO's BATTLE TOWER's (src/mp/mp_johto_tower.c)
+bool8 MP_JohtoTower_InBattle(void);
+u8 MP_JohtoTower_OpponentClass(void);
+void MP_JohtoTower_OpponentName(u8 *dst);
+u16 MP_JohtoTower_FrontSpriteId(void);
+u8 MP_JohtoTower_EncounterMusicId(void);
+void MP_JohtoTower_TrainerText(u8 which);
 
 struct
 {
@@ -316,6 +323,8 @@ u8 GetTrainerHillOpponentClass(u16 trainerId)
 {
     if (MP_TrainerTower_InBattle())   // Moemon Kai: KANTO's TRAINER TOWER (src/mp/mp_trainer_tower.c)
         return MP_TrainerTower_OpponentClass(trainerId);
+    if (MP_JohtoTower_InBattle())   // Moemon Kai: JOHTO's BATTLE TOWER
+        return MP_JohtoTower_OpponentClass();
     u8 id = trainerId - 1;
 
     return gFacilityClassToTrainerClass[sFloorTrainers->facilityClass[id]];
@@ -326,6 +335,11 @@ void GetTrainerHillTrainerName(u8 *dst, u16 trainerId)
     if (MP_TrainerTower_InBattle())   // Moemon Kai: KANTO's TRAINER TOWER
     {
         MP_TrainerTower_OpponentName(dst, trainerId);
+        return;
+    }
+    if (MP_JohtoTower_InBattle())   // Moemon Kai: JOHTO's BATTLE TOWER
+    {
+        MP_JohtoTower_OpponentName(dst);
         return;
     }
     s32 i;
@@ -339,6 +353,8 @@ u8 GetTrainerHillTrainerFrontSpriteId(u16 trainerId)
 {
     if (MP_TrainerTower_InBattle())   // Moemon Kai: KANTO's TRAINER TOWER
         return MP_TrainerTower_FrontSpriteId(trainerId);
+    if (MP_JohtoTower_InBattle())   // Moemon Kai: JOHTO's BATTLE TOWER
+        return MP_JohtoTower_FrontSpriteId();
     u8 id, facilityClass;
 
     SetUpDataStruct();
@@ -356,6 +372,8 @@ void InitTrainerHillBattleStruct(void)
         MP_TrainerTower_BattleClock();
         return;
     }
+    if (MP_JohtoTower_InBattle())   // Moemon Kai: JOHTO's BATTLE TOWER keeps no battle struct either
+        return;
     s32 i, j;
 
     SetUpDataStruct();
@@ -408,6 +426,11 @@ void CopyTrainerHillTrainerText(u8 which, u16 localId)
     if (MP_TrainerTower_InBattle())   // Moemon Kai: KANTO's TRAINER TOWER (the same TEXT_* meanings)
     {
         MP_TrainerTower_TrainerText(which, localId);
+        return;
+    }
+    if (MP_JohtoTower_InBattle())   // Moemon Kai: JOHTO's BATTLE TOWER
+    {
+        MP_JohtoTower_TrainerText(which);
         return;
     }
     u8 id, floorId;
@@ -948,6 +971,8 @@ u8 GetTrainerEncounterMusicIdInTrainerHill(u16 trainerId)
 {
     if (MP_TrainerTower_InBattle())   // Moemon Kai: KANTO's TRAINER TOWER
         return MP_TrainerTower_EncounterMusicId(trainerId);
+    if (MP_JohtoTower_InBattle())   // Moemon Kai: JOHTO's BATTLE TOWER
+        return MP_JohtoTower_EncounterMusicId();
     s32 i;
     u8 trId, facilityClass;
 

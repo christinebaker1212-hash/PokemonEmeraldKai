@@ -6829,11 +6829,14 @@ static u16 MpSinnohBattleBGM(void)
 }
 
 bool8 MP_TrainerTower_InBattle(void);   // (src/mp/mp_trainer_tower.c)
+bool8 MP_JohtoTower_InBattle(void);    // (src/mp/mp_johto_tower.c)
 
 u16 GetBattleBGM(void)
 {
     if (MP_TrainerTower_InBattle())
         return MUS_RG_VS_TRAINER;   // Moemon Kai: KANTO's TRAINER TOWER, as FireRed's (its trainers are all plain classes)
+    if (MP_JohtoTower_InBattle())
+        return MUS_JOHTO_VS_TRAINER;   // Moemon Kai: JOHTO's BATTLE TOWER (Crystal's trainer battle theme)
     if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)
      && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL))
      && (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)) || gMpCoopBattle))

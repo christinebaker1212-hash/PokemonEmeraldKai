@@ -957,7 +957,12 @@
     "Johto_Route34IlexForestGate_Copy",
     "Johto_Route34_Copy",
     "Johto_GoldenrodCity_Copy",
-    "Johto_GoldenrodPokecenter1F_Copy"
+    "Johto_GoldenrodPokecenter1F_Copy",
+    "Johto_BattleTowerOutside",
+    "Johto_BattleTower1F",
+    "Johto_BattleTowerElevator",
+    "Johto_BattleTowerHallway",
+    "Johto_BattleTowerBattleRoom"
   ],
   "gMapGroup_Kanto1": [
     "Kanto_ViridianForest",

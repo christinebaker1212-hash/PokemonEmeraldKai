@@ -44,10 +44,16 @@ static const struct FrlgDoorFrame sCloseLarge[] = {{4, 16 * TILE_SIZE_4BPP}, {4,
 
 #define DOOR_TILE_START (NUM_TILES_TOTAL - 8)
 
-// a KANTO map (its tilesets FireRed's) or a JOHTO one (Quetzal's door table)
+// a KANTO map (its tilesets FireRed's) or a JOHTO one (Quetzal's door table); not one built on Emerald's own tilesets
+// (JOHTO's BATTLE TOWER: the game's BATTLE TOWER rooms and grounds, Emerald's doors)
+extern const struct Tileset gTileset_General;
+extern const struct Tileset gTileset_Building;
 bool8 MP_FrlgDoor_Here(void)
 {
     u8 region = MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup);
+    if (gMapHeader.mapLayout != NULL && (gMapHeader.mapLayout->primaryTileset == &gTileset_General
+                                      || gMapHeader.mapLayout->primaryTileset == &gTileset_Building))
+        return FALSE;
     return region == REGION_KANTO || region == REGION_JOHTO;
 }
 

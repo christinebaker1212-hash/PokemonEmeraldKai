@@ -770,3 +770,4 @@ gSpecials::
 	def_special MP_JohtoLeagueBeaten
 	def_special CallKantoTrainerTowerFunc   @ Moemon Kai: KANTO's TRAINER TOWER as FireRed's (src/mp/mp_trainer_tower.c, audit case 10)
 	def_special MP_TrainerTower_Leave
+	def_special CallJohtoBattleTowerFunc   @ Moemon Kai: JOHTO's BATTLE TOWER as Crystal's (src/mp/mp_johto_tower.c, audit case 37)

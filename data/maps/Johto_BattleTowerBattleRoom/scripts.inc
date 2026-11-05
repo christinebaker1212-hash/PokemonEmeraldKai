@@ -1,0 +1,4 @@
+Johto_BattleTowerBattleRoom_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, JohtoBT_Room_OnTransition
+	map_script MAP_SCRIPT_ON_FRAME_TABLE, JohtoBT_Room_OnFrame
+	.byte 0

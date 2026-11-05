@@ -619,3 +619,8 @@ static const struct MenuAction sKaiMulti_GOLDENROD_TM_PRIZES[] = {
     {(const u8 []) _("TM38    5500")},
     {(const u8 []) _("CANCEL")},
 };
+static const struct MenuAction sKaiMulti_BATTLE_TOWER[] = {
+    {(const u8 []) _("Challenge")},
+    {(const u8 []) _("Explanation")},
+    {(const u8 []) _("Cancel")},
+};

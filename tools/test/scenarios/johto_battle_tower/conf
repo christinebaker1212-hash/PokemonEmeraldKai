@@ -1,0 +1,10 @@
+# JOHTO's BATTLE TOWER as Crystal's (audit case 37): ROUTE 40's gate leads to the tower's grounds, the door to the 1F;
+# the receptionist's Challenge (three POKéMON, all different), a save, L:10; the elevator and hallway to the BATTLE
+# ROOM, Crystal's trainer with three of the L:10 group's POKéMON; the win (state 2, one beaten); then the challenge
+# cancelled back at the 1F (state 0)
+MODE=1
+GEN=3
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=248:10,406:10,405:10"
+EXPECT_A=("where map 35.123" "where map 35.124" "jtower state 2 group 1 beaten 0" "jtower state 2 group 1 beaten 1" "where map 35.124 xy 6,6" "jtower state 0 group 1 beaten 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

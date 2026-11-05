@@ -43,6 +43,8 @@ KAI_MENUS = [
     # GOLDENROD UNDERGROUND's bargain merchant (pokecrystal data/items/bargain_shop.asm)
     ('GOLDENROD_BARGAIN', ['NUGGET', 'PEARL', 'BIG PEARL', 'STARDUST', 'STAR PIECE', 'CANCEL']),
     ('GOLDENROD_TM_PRIZES', ['TM25    5500', 'TM14    5500', 'TM38    5500', 'CANCEL']),
+    # the BATTLE TOWER's receptionist (pokecrystal mobile/mobile_5f.asm MenuData_ChallengeExplanationCancel, audit case 37)
+    ('BATTLE_TOWER', ['Challenge', 'Explanation', 'Cancel']),
 ]
 
 
