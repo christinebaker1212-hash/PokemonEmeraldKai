@@ -1,0 +1,10 @@
+# KANTO's TRAINER TOWER as FireRed's (audit case 10): SEVEN ISLAND's door opens into the LOBBY; the receptionist's
+# YES / NO / INFO and the four challenges start the clock (SINGLE: challenge 0); 1F's singles trainer (FireRed's,
+# two of the team at the party's top level) battles at the trigger; the win clears the floor; the OWNER on the roof gives
+# the challenge's prize (FireRed's SINGLE set: UP-GRADE, item 218) and records the time; the Time Board shows it
+MODE=1
+GEN=3
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=150:60,150:60"
+EXPECT_A=("ttower challenge 0 floors 0" "ttower challenge 0 floors 1" "item 218: 1" "state 0x002C")
+UNEXPECT_A=("[crash]" "TIMEOUT")

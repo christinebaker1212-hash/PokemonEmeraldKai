@@ -1679,6 +1679,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_VsSeeker_Debug(bool8 alwaysYes);
         MP_VsSeeker_Debug(arg != NULL && strcmp(arg, "yes") == 0);
     }
+    else if (strcmp(cmd, "ttower") == 0)
+    {
+        // ttower: KANTO's TRAINER TOWER state (src/mp/mp_trainer_tower.c): challenge, floors cleared, clock, best times
+        void MP_TrainerTower_Log(void);
+        MP_TrainerTower_Log();
+    }
     else if (strcmp(cmd, "register") == 0)
     {
         // mp register ITEM: adds it and registers it to SELECT

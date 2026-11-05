@@ -45,22 +45,17 @@
       "trainer_sight_or_berry_tree_id": "1",
       "script": "Kanto_SevenIsland_TrainerTower_EventScript_845CC5C",
       "flag": "0"
-    },
-    {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_324",
-      "x": 58,
-      "y": 8,
-      "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
-      "movement_range_x": 0,
-      "movement_range_y": 0,
-      "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "0",
-      "script": "Kanto_SevenIsland_TrainerTower_EventScript_8366160",
-      "flag": "0"
     }
   ],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 58,
+      "y": 7,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_TRAINER_TOWER_LOBBY",
+      "dest_warp_id": "1"
+    }
+  ],
   "coord_events": [],
   "bg_events": [
     {

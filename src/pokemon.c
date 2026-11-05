@@ -6828,8 +6828,12 @@ static u16 MpSinnohBattleBGM(void)
     }
 }
 
+bool8 MP_TrainerTower_InBattle(void);   // (src/mp/mp_trainer_tower.c)
+
 u16 GetBattleBGM(void)
 {
+    if (MP_TrainerTower_InBattle())
+        return MUS_RG_VS_TRAINER;   // Moemon Kai: KANTO's TRAINER TOWER, as FireRed's (its trainers are all plain classes)
     if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)
      && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL))
      && (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)) || gMpCoopBattle))

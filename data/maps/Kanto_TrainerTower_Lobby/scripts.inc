@@ -12,9 +12,7 @@ Kanto_TrainerTower_Lobby_OnFrame_8414663:
 	.2byte 0
 
 Kanto_TrainerTower_Lobby_EventScript_84145FC::
-	setvar VAR_TEMP_2, 0
-	setvar VAR_0x8004, 0xA
-	goto Quetzal_EventScript_84736F6
+	goto KantoTT_Lobby_OnResume   @ Moemon Kai: FireRed's TRAINER TOWER (data/scripts/kanto_trainer_tower.inc, audit case 10)
 
 Kanto_TrainerTower_Lobby_EventScript_8414634::
 	addobject 1
@@ -50,9 +48,7 @@ Kanto_TrainerTower_Lobby_EventScript_8414675::
 	end
 
 Kanto_TrainerTower_Lobby_EventScript_841469A::
-	setvar VAR_TEMP_0, 1
-	setvar VAR_0x8004, 0xC
-	goto Quetzal_EventScript_84736F6
+	goto KantoTT_Lobby_EventScript_Enter
 
 @ Kanto_TrainerTower_Lobby object 1 (local id 1, gfx 0x3F2A) at 4,9
 Kanto_TrainerTower_Lobby_EventScript_841470C::
@@ -64,10 +60,7 @@ Kanto_TrainerTower_Lobby_EventScript_841470C::
 
 @ Kanto_TrainerTower_Lobby object 3 (local id 3, gfx 0x3F54) at 11,7
 Kanto_TrainerTower_Lobby_EventScript_8414715::
-	lock
-	faceplayer
-	setvar VAR_0x8004, 0x14
-	goto Quetzal_EventScript_84736F6
+	goto KantoTT_Lobby_EventScript_Receptionist
 
 @ Kanto_TrainerTower_Lobby object 2 (local id 2, gfx 0x3F54) at 14,9
 Kanto_TrainerTower_Lobby_EventScript_8414743::
@@ -84,22 +77,11 @@ Kanto_TrainerTower_Lobby_EventScript_8414743::
 
 @ Kanto_TrainerTower_Lobby trigger at 9,7 (VAR_QZ_0x5132 == 0)
 Kanto_TrainerTower_Lobby_EventScript_8414782::
-	lockall
-	applymovement LOCALID_PLAYER, Kanto_TrainerTower_Lobby_Movement_841488E
-	textcolor 1
-	msgbox Kanto_TrainerTower_Lobby_Text_842CE9D, MSGBOX_DEFAULT
-	setvar VAR_0x8004, 0x11
-	goto Quetzal_EventScript_84736F6
+	goto KantoTT_Lobby_EventScript_EntryTrigger
 
 @ Kanto_TrainerTower_Lobby sign / bg event at 8,10
 Kanto_TrainerTower_Lobby_EventScript_8414892::
-	lockall
-	fadescreen 1
-	setvar VAR_0x8004, 1
-	special ShowLinkBattleRecords
-	waitstate
-	releaseall
-	end
+	goto KantoTT_Lobby_EventScript_ShowRecords
 
 @ Kanto_TrainerTower_Lobby object 4 (local id 4, gfx 0x3EFC) at 12,13
 Kanto_TrainerTower_Lobby_EventScript_84148A0::
@@ -127,15 +109,6 @@ Kanto_TrainerTower_Lobby_Mart_841476C:
 	.2byte ITEM_ESCAPE_ROPE
 	.2byte ITEM_MAX_REPEL
 	.2byte ITEM_NONE
-
-Kanto_TrainerTower_Lobby_Movement_841488E:
-	face_right
-	step_end
-
-Kanto_TrainerTower_Lobby_Text_842CE9D::
-	.string "Hello!\p"
-	.string "Welcome to TRAINER TOWER where\n"
-	.string "TRAINERS gather from all over!$"
 
 Kanto_TrainerTower_Lobby_Text_842D541::
 	.string "I’m here to see how good I am.\p"

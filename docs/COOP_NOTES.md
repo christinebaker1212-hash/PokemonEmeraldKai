@@ -4617,6 +4617,28 @@ follow_behind, follow_ground.
   are sKantoRematches in src/data/qz_original_teams.h (gen_original_teams.py). Ready trainers wait to be talked to (in
   FireRed they raise a hand; no such frames here, so they stand as they were). Not carried over: the player's
   holding-up-the-device animation (the beeps play instead). Test kanto_vs_seeker (mp vsseeker [yes]).
+- **Case 10, KANTO's TRAINER TOWER as FireRed's** (pokefirered src/trainer_tower.c, data/scripts/trainer_tower.inc and
+  the TRAINER TOWER maps' scripts; src/mp/mp_trainer_tower.c, data/scripts/kanto_trainer_tower.inc). SEVEN ISLAND's
+  door opens again (FireRed's warp at 58,7; Quetzal's "Under construction" blocker removed). The LOBBY receptionist
+  asks YES / NO / INFO and SINGLE / DOUBLE / KNOCKOUT / MIXED (Quetzal's menus MULTI_QZ_0x84 / 0x81, FireRed's own),
+  heals the party and starts the TIME ATTACK clock. FireRed's four e-Reader-free challenges of eight floors are
+  src/data/kanto_trainer_tower.h (tools/quetzal_port/gen_trainer_tower.py from trainer_tower_sets.c): its trainers'
+  names, easy chat words and teams (built at the party's top level, two or one of each pool by floor, as FireRed's
+  BuildEnemyParty). FireRed's facility classes become KANTO trainers of the same class (picture first: PSYCHIC_F,
+  SWIMMER_M...) for the class, picture, encounter music and the overworld sprite they stand as (a pair's second
+  sprite from the pair's second object). Each floor swaps in its challenge's layout on transition (FireRed's 16
+  DOUBLES / KNOCKOUT layouts imported: LAYOUT_KANTO_TRAINER_TOWER_nF_DOUBLES / _KNOCKOUT, the same tilesets; the floor
+  index comes from the map, never the layout). The battles are Emerald's TRAINER HILL type, whose trainer_hill.c
+  hooks ask MP_TrainerTower_InBattle first (class, name, picture, words, music; no EXP, money or stolen items, as
+  FireRed's TRAINER TOWER type); a forfeit counts as a loss. What FireRed keeps in SaveBlock1 lives in vars:
+  VAR_KANTO_TT_STATE 0x515C (challenge, spoke to the OWNER, time checked, lost, a prize bit per challenge),
+  VAR_KANTO_TT_FLOORS 0x515D, the clock 0x515E-F (the VBlank counter points straight at it; re-armed after a battle
+  moves the save, as FireRed's InitTrainerTowerBattleStruct does, and stopped on SEVEN ISLAND's grounds:
+  MP_TrainerTower_Leave) and the four best times 0x5160-0x5167 (0 reads as 59:59.99). The OWNER on the roof gives the
+  challenge's prize once (FireRed's put-away line names the BAG's own pocket) and records a new best time; the LOBBY's
+  Time Board shows the four (FireRed's results window). Words: restore_words.txt (21 lines). Test kanto_trainer_tower
+  (`mp ttower`): the door, both menus, a won floor, the OWNER's prize and record, the board, a DOUBLE and a KNOCKOUT
+  floor.
 ## The audit's batch K (1.110.0)
 - **Case 106, MT. SILVER and RED**: the VICTORY ROAD gate's BLACK BELT (FLAG_QZ_0x105E, worked out on every visit by
   mp_region.c MP_MtSilverOpen) lets trainers by only with JOHTO's and KANTO's 16 BADGES (Crystal's EVENT_OPENED_MT_SILVER).

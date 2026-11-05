@@ -15570,6 +15570,166 @@
       "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
       "border_filepath": "data/layouts/Orre_OutskirtStand/border.bin",
       "blockdata_filepath": "data/layouts/Orre_OutskirtStand/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_1F_DOUBLES",
+      "name": "Kanto_TrainerTower_1F_Doubles_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_1F_Doubles/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_1F_Doubles/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_2F_DOUBLES",
+      "name": "Kanto_TrainerTower_2F_Doubles_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_2F_Doubles/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_2F_Doubles/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_3F_DOUBLES",
+      "name": "Kanto_TrainerTower_3F_Doubles_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_3F_Doubles/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_3F_Doubles/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_4F_DOUBLES",
+      "name": "Kanto_TrainerTower_4F_Doubles_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_4F_Doubles/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_4F_Doubles/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_5F_DOUBLES",
+      "name": "Kanto_TrainerTower_5F_Doubles_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_5F_Doubles/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_5F_Doubles/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_6F_DOUBLES",
+      "name": "Kanto_TrainerTower_6F_Doubles_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_6F_Doubles/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_6F_Doubles/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_7F_DOUBLES",
+      "name": "Kanto_TrainerTower_7F_Doubles_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_7F_Doubles/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_7F_Doubles/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_8F_DOUBLES",
+      "name": "Kanto_TrainerTower_8F_Doubles_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_8F_Doubles/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_8F_Doubles/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_1F_KNOCKOUT",
+      "name": "Kanto_TrainerTower_1F_Knockout_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_1F_Knockout/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_1F_Knockout/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_2F_KNOCKOUT",
+      "name": "Kanto_TrainerTower_2F_Knockout_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_2F_Knockout/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_2F_Knockout/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_3F_KNOCKOUT",
+      "name": "Kanto_TrainerTower_3F_Knockout_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_3F_Knockout/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_3F_Knockout/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_4F_KNOCKOUT",
+      "name": "Kanto_TrainerTower_4F_Knockout_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_4F_Knockout/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_4F_Knockout/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_5F_KNOCKOUT",
+      "name": "Kanto_TrainerTower_5F_Knockout_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_5F_Knockout/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_5F_Knockout/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_6F_KNOCKOUT",
+      "name": "Kanto_TrainerTower_6F_Knockout_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_6F_Knockout/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_6F_Knockout/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_7F_KNOCKOUT",
+      "name": "Kanto_TrainerTower_7F_Knockout_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_7F_Knockout/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_7F_Knockout/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_TRAINER_TOWER_8F_KNOCKOUT",
+      "name": "Kanto_TrainerTower_8F_Knockout_Layout",
+      "width": 18,
+      "height": 17,
+      "primary_tileset": "gTileset_Kanto_Primary7",
+      "secondary_tileset": "gTileset_Kanto_TrainerTower",
+      "border_filepath": "data/layouts/Kanto_TrainerTower_8F_Knockout/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_TrainerTower_8F_Knockout/map.bin"
     }
   ]
 }

@@ -24,7 +24,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Quetzal_EventScript_8414489",
+      "script": "KantoTT_EventScript_Owner",
       "flag": "FLAG_TEMP_6"
     },
     {
@@ -37,7 +37,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Quetzal_EventScript_8414471",
+      "script": "KantoTT_EventScript_DoublesTrainer1",
       "flag": "FLAG_TEMP_2"
     },
     {
@@ -50,7 +50,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Quetzal_EventScript_8414477",
+      "script": "KantoTT_EventScript_SinglesTrainer",
       "flag": "FLAG_TEMP_3"
     },
     {
@@ -63,7 +63,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Quetzal_EventScript_841447D",
+      "script": "KantoTT_EventScript_KnockoutTrainer",
       "flag": "FLAG_TEMP_4"
     },
     {
@@ -76,7 +76,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Quetzal_EventScript_8414483",
+      "script": "KantoTT_EventScript_DoublesTrainer2",
       "flag": "FLAG_TEMP_5"
     }
   ],
@@ -111,7 +111,7 @@
       "elevation": 3,
       "var": "VAR_TEMP_E",
       "var_value": "0",
-      "script": "Quetzal_EventScript_84722B0"
+      "script": "KantoTT_EventScript_SingleBattleTrigger"
     },
     {
       "type": "trigger",
@@ -120,7 +120,7 @@
       "elevation": 3,
       "var": "VAR_TEMP_F",
       "var_value": "0",
-      "script": "Quetzal_EventScript_84722B5"
+      "script": "KantoTT_EventScript_DoubleBattleTriggerTop"
     },
     {
       "type": "trigger",
@@ -129,7 +129,7 @@
       "elevation": 3,
       "var": "VAR_TEMP_F",
       "var_value": "0",
-      "script": "Quetzal_EventScript_84722EF"
+      "script": "KantoTT_EventScript_DoubleBattleTriggerBottom"
     }
   ],
   "bg_events": []

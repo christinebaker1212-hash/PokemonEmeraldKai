@@ -2,15 +2,9 @@ Kanto_SevenIsland_TrainerTower_MapScripts::
 	map_script MAP_SCRIPT_ON_TRANSITION, Kanto_SevenIsland_TrainerTower_EventScript_84189DA
 	.byte 0
 
-@ Kanto_SevenIsland_TrainerTower object 3 (local id 3, gfx 0x144) at 58,8
-Kanto_SevenIsland_TrainerTower_EventScript_8366160::
-	lockall
-	msgbox Kanto_SevenIsland_TrainerTower_Text_83684BF, MSGBOX_DEFAULT
-	releaseall
-	end
-
 Kanto_SevenIsland_TrainerTower_EventScript_84189DA::
 	setvar VAR_QZ_0x5132, 0
+	special MP_TrainerTower_Leave   @ Moemon Kai: the TRAINER TOWER's clock stops outside (src/mp/mp_trainer_tower.c)
 	end
 
 @ Kanto_SevenIsland_TrainerTower sign / bg event at 56,8
@@ -48,9 +42,6 @@ Kanto_SevenIsland_TrainerTower_EventScript_845CC83::
 	trainerbattle TRAINER_BATTLE_REMATCH, TRAINER_QZ_8779, 0, Kanto_SevenIsland_TrainerTower_Text_8471794, Kanto_SevenIsland_TrainerTower_Text_843C5D4
 	msgbox Kanto_SevenIsland_TrainerTower_Text_843C5ED, MSGBOX_AUTOCLOSE
 	end
-
-Kanto_SevenIsland_TrainerTower_Text_83684BF::
-	.string "Under construction...$"
 
 Kanto_SevenIsland_TrainerTower_Text_843C505::
 	.string "I sensed your approach.$"

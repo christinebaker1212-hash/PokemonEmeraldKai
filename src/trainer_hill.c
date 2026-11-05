@@ -79,6 +79,15 @@ static u16 GetPrizeItemId(void);
 // const data
 #include "data/battle_frontier/trainer_hill.h"
 
+// Moemon Kai: KANTO's TRAINER TOWER battles run as TRAINER HILL ones (src/mp/mp_trainer_tower.c)
+bool8 MP_TrainerTower_InBattle(void);
+u8 MP_TrainerTower_OpponentClass(u16 trainerId);
+void MP_TrainerTower_OpponentName(u8 *dst, u16 trainerId);
+u16 MP_TrainerTower_FrontSpriteId(u16 trainerId);
+u8 MP_TrainerTower_EncounterMusicId(u16 trainerId);
+void MP_TrainerTower_TrainerText(u8 which, u16 trainerId);
+void MP_TrainerTower_BattleClock(void);
+
 struct
 {
     u8 trainerClass;
@@ -305,6 +314,8 @@ static u8 GetFloorId(void)
 
 u8 GetTrainerHillOpponentClass(u16 trainerId)
 {
+    if (MP_TrainerTower_InBattle())   // Moemon Kai: KANTO's TRAINER TOWER (src/mp/mp_trainer_tower.c)
+        return MP_TrainerTower_OpponentClass(trainerId);
     u8 id = trainerId - 1;
 
     return gFacilityClassToTrainerClass[sFloorTrainers->facilityClass[id]];
@@ -312,6 +323,11 @@ u8 GetTrainerHillOpponentClass(u16 trainerId)
 
 void GetTrainerHillTrainerName(u8 *dst, u16 trainerId)
 {
+    if (MP_TrainerTower_InBattle())   // Moemon Kai: KANTO's TRAINER TOWER
+    {
+        MP_TrainerTower_OpponentName(dst, trainerId);
+        return;
+    }
     s32 i;
     u8 id = trainerId - 1;
 
@@ -321,6 +337,8 @@ void GetTrainerHillTrainerName(u8 *dst, u16 trainerId)
 
 u8 GetTrainerHillTrainerFrontSpriteId(u16 trainerId)
 {
+    if (MP_TrainerTower_InBattle())   // Moemon Kai: KANTO's TRAINER TOWER
+        return MP_TrainerTower_FrontSpriteId(trainerId);
     u8 id, facilityClass;
 
     SetUpDataStruct();
@@ -333,6 +351,11 @@ u8 GetTrainerHillTrainerFrontSpriteId(u16 trainerId)
 
 void InitTrainerHillBattleStruct(void)
 {
+    if (MP_TrainerTower_InBattle())   // Moemon Kai: KANTO's TRAINER TOWER keeps no battle struct; its own clock runs on
+    {
+        MP_TrainerTower_BattleClock();
+        return;
+    }
     s32 i, j;
 
     SetUpDataStruct();
@@ -382,6 +405,11 @@ static void FreeDataStruct(void)
 
 void CopyTrainerHillTrainerText(u8 which, u16 localId)
 {
+    if (MP_TrainerTower_InBattle())   // Moemon Kai: KANTO's TRAINER TOWER (the same TEXT_* meanings)
+    {
+        MP_TrainerTower_TrainerText(which, localId);
+        return;
+    }
     u8 id, floorId;
 
     SetUpDataStruct();
@@ -918,6 +946,8 @@ u32 GetTrainerHillAIFlags(void)
 
 u8 GetTrainerEncounterMusicIdInTrainerHill(u16 trainerId)
 {
+    if (MP_TrainerTower_InBattle())   // Moemon Kai: KANTO's TRAINER TOWER
+        return MP_TrainerTower_EncounterMusicId(trainerId);
     s32 i;
     u8 trId, facilityClass;
 

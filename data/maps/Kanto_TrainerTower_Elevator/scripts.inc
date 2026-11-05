@@ -1,11 +1,7 @@
 Kanto_TrainerTower_Elevator_MapScripts::
-	map_script MAP_SCRIPT_ON_RESUME, Quetzal_EventScript_8471D23
-	map_script MAP_SCRIPT_ON_FRAME_TABLE, Kanto_TrainerTower_Elevator_OnFrame_8471E1B
+	map_script MAP_SCRIPT_ON_RESUME, KantoTT_OnResume
+	map_script MAP_SCRIPT_ON_FRAME_TABLE, KantoTT_OnFrame
 	.byte 0
-
-Kanto_TrainerTower_Elevator_OnFrame_8471E1B:
-	map_script_2 VAR_TEMP_2, 0, Quetzal_EventScript_8471E25
-	.2byte 0
 
 @ Kanto_TrainerTower_Elevator sign / bg event at 0,2
 Kanto_TrainerTower_Elevator_EventScript_84148BD::

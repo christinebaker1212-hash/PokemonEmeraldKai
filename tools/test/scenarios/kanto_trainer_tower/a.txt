@@ -1,0 +1,74 @@
+pressuntil A field 5000
+wait 30
+mp teach 0 94
+mp battlestyle 1
+mp warp 37,115,58,8
+wait 120
+mp face up
+press UP 2
+wait 150
+mp where
+mp warp 37,7,9,8
+wait 120
+press UP 16
+wait 60
+shot welcome
+press A 1
+wait 300
+press A 1
+wait 300
+press A 1
+wait 400
+shot yesnoinfo
+press A 1
+wait 60
+shot modes
+press A 1
+pressuntil A field 1200
+mp ttower
+mp warp 36,124,9,13
+wait 150
+shot floor1
+mp ttower
+press RIGHT 16
+wait 30
+pressuntil A battle 3000
+wait 60
+mp foeparty
+wait 300
+shot b1
+mp foehp 1
+pressuntil A field 6000
+shot b2
+wait 60
+mp ttower
+mp setvar 0x515D 8
+mp warp 37,6,9,8
+wait 150
+mp face up
+wait 10
+press A 1
+pressuntil A field 3000
+wait 30
+mp ttower
+mp checkitem 218
+mp warp 37,7,8,11
+wait 120
+mp face up
+wait 10
+press A 1
+wait 60
+shot timeboard
+press A 1
+wait 30
+mp setvar 0x515C 1
+mp setvar 0x515D 1
+mp warp 36,125,4,8
+wait 150
+shot doubles
+mp setvar 0x515C 2
+mp setvar 0x515D 2
+mp warp 37,0,4,8
+wait 150
+shot knockout
+quit

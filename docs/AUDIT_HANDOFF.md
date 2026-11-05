@@ -8,18 +8,18 @@ then `docs/REGIONS_AUDIT.md` (the decisions and the rules at its top), then the 
 
 ## Where it stands
 
-- **156 of 158 cases are ticked** (1.109.0 45, 47, 88, 112; 1.110.0 106, 110, 113, 125, 130; 1.111.0 116, 146, 61, 58, 59, 64, 97, 141, 62, 60, 65, 139, 57, 17, 24; 1.105.0 added 100, 101 and 138; 1.106.0 105, 15, 49 and 104, the user's rule since 2026-11-05: no case is left half done; 1.107.0 46, 50, 66, 89, 115, 117, 122, 124, 126; 1.108.0 25, 71, 74, 96, 120, 156) (`- [x]` in REGIONS_AUDIT.md; its status line says which release did which).
+- **157 of 158 cases are ticked** (1.109.0 45, 47, 88, 112; 1.110.0 106, 110, 113, 125, 130; 1.111.0 116, 146, 61, 58, 59, 64, 97, 141, 62, 60, 65, 139, 57, 17, 24, 10; 1.105.0 added 100, 101 and 138; 1.106.0 105, 15, 49 and 104, the user's rule since 2026-11-05: no case is left half done; 1.107.0 46, 50, 66, 89, 115, 117, 122, 124, 126; 1.108.0 25, 71, 74, 96, 120, 156) (`- [x]` in REGIONS_AUDIT.md; its status line says which release did which).
 - Released: 1.88.0 (batch A), 1.89.0 (B), 1.90.0 (C, KANTO), 1.91.0 (D, JOHTO), 1.92.0 (E part 1: hidden items,
   weekday siblings, the Sunday lady...), **1.93.0** (E part 2: GOLDENROD's tutor, GAME CORNER TM prizes, NAME RATER,
   UNDERGROUND, CIANWOOD's SEER, the tutor / VAR_RESULT fix): pushed when the session paused; check its release run
   (Actions, "Release") went green, and re-queue it (workflow_dispatch) if not.
 - Case 100 ran (tools/quetzal_port/fix_floria.py), 101 too (fix_park.py); 138 is finished (COOP_NOTES 1.105.0).
 
-## The 2 cases left (`grep "^- \[ \]" docs/REGIONS_AUDIT.md`)
+## The case left (`grep "^- \[ \]" docs/REGIONS_AUDIT.md`)
 
 Small / medium: none left.
 
-Large: 10 (TRAINER TOWER port), 37 (Crystal's BATTLE TOWER).
+Large: 37 (Crystal's BATTLE TOWER). (10, the TRAINER TOWER, ported in 1.111.0: COOP_NOTES "The audit's batch L".)
 
 The user (2026-11-05): no old saves exist in KANTO or JOHTO, so nothing there needs converting on load.
 
