@@ -272,6 +272,18 @@ public class ScreensTest {
         v.showOver(new TodayPage(v));
         shot(v, "today");
         v.showOver(null);
+        // picking one from the boxes (WALK's WHO GOES?, a trade's GIVE): one that can't go is dimmed and says why
+        final JSONObject[] chosen = new JSONObject[1];
+        BoxesPage picker = BoxesPage.picker(v, "WHO GOES?", true,
+                (mon, place) -> mon.optInt("s") == 25 ? "They asked for something else." : null, (mon, place) -> chosen[0] = mon);
+        v.showOver(picker);
+        shot(v, "pick_boxes");
+        int pk = W / v.width();
+        float pbk = Math.min(2f, Math.max(1f, (float) Math.floor((v.width() - 28) * pk / 160f) / pk));
+        int pwx = (v.width() - Math.round(160 * pbk)) / 2;
+        picker.tap((int) (pwx + 8 * pbk + 1.5f * 24 * pbk), (int) (24 + 16 * pbk + 12 * pbk));   // (the box's second place)
+        shot(v, "pick_chosen");
+        v.showOver(null);
         // FRIENDS: two friends, one online in a room with their party
         String may = app.art.toHex("MAY"), wally = app.art.toHex("WALLY");
         app.model().snap.put("friends", new JSONObject("{\"share\":0,\"srv\":\"127.0.0.1:1\",\"list\":[{\"id\":\"0102030405060708\","

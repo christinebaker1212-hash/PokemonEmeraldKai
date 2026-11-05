@@ -590,4 +590,16 @@ Look.creatures, "look_art"; Look.pokemonArt sets GameArt.pokemonArt every frame,
   MOéDEX / MOéNAV (Kai kept POKé BALL, POKéGEAR...).
 - Tests: ScreensTest party_pokemon, dex_pokemon.
 
-Next: the rest of the pass.
+### The reassessment pass (1.103.0, the user 2026-11-05)
+
+- Picking a POKéMON from the boxes (the user: "a list view, which is horrible for trading"): BoxesPage.picker(title,
+  party?, why, picked) is the BOXES page over the tabs with the title and CANCEL on a banner: every box (swipe, the
+  arrows, the box's name for all 40), the party row when it counts; the ones that can't be chosen dimmed; a tap shows
+  the card with CHOOSE, or why not. WALK's WHO GOES? and WHO TRAINS? (boxes only), a trade's OFFER and GIVE (any box:
+  the game finds a POKéMON by personality and Trainer ID, mp_phone_trade.c Where). Tests ScreensTest pick_boxes,
+  pick_chosen.
+- Page fixes from the pictures: the MOéDEX / POKéDEX logo whole (rows 8-16 of the game's picture), the entry's jump
+  chips sharing the page's width, the BAG's chosen pocket inside its strip, names under an opened pack in the small
+  font rather than cut, NEW! on the card, the walk's count clear of its bar, COULDN'T DO only when something waits.
+
+Next: MYSTERY GIFT by scanning (#291), the card games up to the game's (#292).

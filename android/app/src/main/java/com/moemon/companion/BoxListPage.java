@@ -61,10 +61,19 @@ public final class BoxListPage extends Page {
     }
 
     @Override
+    public void back() {
+        v.showOver(boxes.isPicker() ? boxes : null);
+    }
+
+    @Override
     public void tap(int x, int y) {
         if (y < 20) {
             if (x > v.width() - 60) {
-                back();
+                if (boxes.isPicker()) {
+                    v.showOver(boxes);
+                } else {
+                    back();
+                }
             }
             return;
         }
@@ -73,7 +82,7 @@ public final class BoxListPage extends Page {
         int i = row * cols + col;
         if (col >= 0 && col < cols && y + scroll >= TOP && i < list().length()) {
             boxes.showBox(i);
-            v.showOver(null);
+            v.showOver(boxes.isPicker() ? boxes : null);   // (a picker: back to it)
         }
     }
 }

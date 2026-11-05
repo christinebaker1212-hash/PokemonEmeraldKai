@@ -302,33 +302,17 @@ public final class FriendsPage extends Page {
         if (m == null) {
             return;
         }
-        Menu menu = Menu.make(v, title);
-        JSONArray party = m.party();
-        int count = 0;
-        for (int k = 0; party != null && k < party.length(); k++) {
-            JSONObject mon = party.optJSONObject(k);
-            if (mon != null && (want == 0 || mon.optInt("s") == want)) {
-                final JSONObject place = Model.partyPlace(k);
-                menu.add(monName(mon) + " Lv" + mon.optInt("l"), () -> picked.accept(mon, place));
-                count++;
+        // from the boxes as the PC shows them (every BOX, swipe through), the party row with them; one that can't go
+        // is dimmed and says why
+        v.showOver(BoxesPage.picker(v, title, true, (mon, place) -> {
+            if (mon.optInt("off") == 1) {
+                return "It's already ON OFFER.";
             }
-        }
-        int b = m.snap.optInt("box");
-        JSONArray box = m.box(b).optJSONArray("m");
-        for (int k = 0; box != null && k < box.length(); k++) {
-            JSONObject mon = box.optJSONObject(k);
-            if (mon != null && (want == 0 || mon.optInt("s") == want)) {
-                final JSONObject place = Model.boxPlace(b, k);
-                menu.add(monName(mon) + " Lv" + mon.optInt("l") + " (BOX)", () -> picked.accept(mon, place));
-                count++;
+            if (want != 0 && mon.optInt("s") != want) {
+                return "They asked for " + wants(want) + ".";
             }
-        }
-        if (count == 0) {
-            v.message(want == 0 ? "No POKéMON to trade here." : "No " + wants(want) + " in your party or this box. Open the box it's in on BOXES, then come back.");
-            return;
-        }
-        menu.add("CANCEL", null);
-        v.showMenu(menu);
+            return null;
+        }, picked::accept));
     }
 
     private void startTrade(JSONObject friend, JSONObject presence) {

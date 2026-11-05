@@ -70,7 +70,53 @@ public final class BoxesPage extends Page {
         return (w - wpW()) / 2;
     }
 
-    private static final int WY = 4;
+    // (the wallpaper's top: under the picker's banner when picking)
+    private int WY() {
+        return onPick != null ? 24 : 4;
+    }
+
+    // ------------------------------------------------------------------------------- picking one (walks, trades)
+    /** What a pick does with the POKéMON chosen */
+    public interface Pick {
+        void picked(JSONObject mon, JSONObject place);
+    }
+
+    /** Why a POKéMON can't be chosen (null: it can) */
+    public interface Why {
+        String why(JSONObject mon, JSONObject place);
+    }
+
+    private String pickTitle;
+    private Pick onPick;
+    private Why pickWhy;
+    private boolean pickParty;
+
+    /**
+     * The boxes as a picker, over the tabs: the same wallpaper, swipes and party row; the ones that can't be chosen
+     * dimmed; a tap shows the card with CHOOSE (and why not, for a dimmed one). PARTY: whether the party row counts.
+     */
+    public static BoxesPage picker(GameView v, String title, boolean party, Why why, Pick pick) {
+        BoxesPage b = new BoxesPage(v);
+        b.pickTitle = title;
+        b.pickParty = party;
+        b.pickWhy = why;
+        b.onPick = pick;
+        return b;
+    }
+
+    boolean isPicker() {
+        return onPick != null;
+    }
+
+    private String whyNot(JSONObject mon, JSONObject place) {
+        if (mon == null) {
+            return "";
+        }
+        if (place.has("party") && !pickParty) {
+            return "Only a POKéMON in a BOX can.";
+        }
+        return pickWhy == null ? null : pickWhy.why(mon, place);
+    }
 
     private int boxCount(Model m) {
         JSONArray b = m == null ? null : m.boxes();
@@ -98,7 +144,7 @@ public final class BoxesPage extends Page {
     }
 
     private int partyY() {
-        return WY + wpH() + 6;
+        return WY() + wpH() + 6;
     }
 
     private int cardY() {
@@ -119,31 +165,36 @@ public final class BoxesPage extends Page {
             drawGrid(c, w, h, m, p);
             return;
         }
+        if (onPick != null) {
+            banner(c, w, pickTitle, "CANCEL");
+        }
         int b = box(m), x0 = wx(w);
         JSONObject bx = m.box(b);
         c.save();
-        c.translate(x0, WY);
+        c.translate(x0, WY());
         c.scale(bk(), bk());
         art.wallpaper(c, bx.optInt("w"), 0, 0);
         c.restore();
         // the box's name on the wallpaper's banner, the arrows beside it
         byte[] name = GameArt.hexText(bx.optString("n"));
         int nw = art.width(name);
-        int bannerY = WY + (int) (8 * bk()) - 6;
+        int bannerY = WY() + (int) (8 * bk()) - 6;
         art.text(c, name, x0 + (wpW() - nw) / 2, bannerY, GameArt.WHITE_TEXT, 0xFF383838);
         art.text(c, "<", x0 - 12, bannerY, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
         art.text(c, ">", x0 + wpW() + 4, bannerY, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
         for (int s = 0; s < 30; s++) {
             JSONObject place = Model.boxPlace(b, s);
             // (the PC's own places: icons centered at 20 + 24 x column, 28 + 24 x row on the wallpaper, scaled)
-            float cx = x0 + 8 * bk() + (s % 6) * cell(), cy = WY + 16 * bk() + (s / 6) * cell();
+            float cx = x0 + 8 * bk() + (s % 6) * cell(), cy = WY() + 16 * bk() + (s / 6) * cell();
             drawSlotF(c, p, place, cx, cy, cell());
         }
         // the party
         boolean pc = m.pcReachable();
         int py = partyY(), px0 = (w - 6 * PARTY_CELL) / 2;
         art.text(c, pc ? "PARTY" : "PARTY: no PC here", px0, py - 2, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
-        chipButton(c, "ALL BOXES", w - 8 - art.width("ALL BOXES") - 10, py - 7);
+        if (onPick == null) {
+            chipButton(c, "ALL BOXES", w - 8 - art.width("ALL BOXES") - 10, py - 7);
+        }
         for (int i = 0; i < 6; i++) {
             int cx = px0 + i * PARTY_CELL, cy = py + 16;
             art.window(c, 0, cx + 2, cy + 2, PARTY_CELL - 4, PARTY_CELL - 4);
@@ -158,8 +209,8 @@ public final class BoxesPage extends Page {
         if (mon == null) {
             art.window(c, 0, 12, cy + 4, w - 24, 48);
             int ty = cy + 4;
-            for (String line : wrap("Tap a POKéMON to see it. Hold it, or drag it, to move it. Swipe for the next BOX.",
-                    w - 32)) {
+            for (String line : wrap(onPick != null ? "Tap the POKéMON to choose. Swipe, or tap the BOX's name, for another BOX."
+                    : "Tap a POKéMON to see it. Hold it, or drag it, to move it. Swipe for the next BOX.", w - 32)) {
                 art.text(c, line, 14, ty, GameArt.GRAY_TEXT, GameArt.SHADOW);
                 ty += 16;
             }
@@ -214,6 +265,17 @@ public final class BoxesPage extends Page {
             held = null;
         }
         int by = cy + CARD_H + 10, bw = (w - 20) / 4;
+        if (onPick != null) {
+            // picking: CHOOSE, or why it can't be
+            String no = whyNot(mon, selected);
+            button(c, "CHOOSE", 10, by, w - 20, no == null);
+            int ty = by + 26;
+            for (String line : wrap(no == null ? "" : no, w - 24)) {
+                art.text(c, line, 12, ty, 0xFFF8A050, GameArt.WHITE_SHADOW);
+                ty += 16;
+            }
+            return;
+        }
         button(c, "SUMMARY", 10, by, bw, true);
         button(c, moveMode ? "CANCEL" : "MOVE", 10 + bw, by, bw, !locked);
         button(c, "GIVE", 10 + 2 * bw, by, bw, !locked && !egg);
@@ -294,6 +356,9 @@ public final class BoxesPage extends Page {
             if (mon.optInt("off") == 1) {
                 offerMark(c, x + 1, y + 1);
             }
+            if (onPick != null && whyNot(mon, place) != null) {
+                c.drawRect(x + 1, y + 1, x + size - 1, y + size - 1, shade);   // (can't be chosen here)
+            }
         }
         if (p.isDashed(place) || p.itemPending(place)) {
             c.drawRect(x + 1, y + 1, x + size - 1, y + size - 1, dash);
@@ -314,7 +379,7 @@ public final class BoxesPage extends Page {
             return gridPlaceAt(x, y, m);
         }
         int w = v.width();
-        float x0 = wx(w) + 8 * bk(), y0 = WY + 16 * bk(), cl = cell();
+        float x0 = wx(w) + 8 * bk(), y0 = WY() + 16 * bk(), cl = cell();
         if (x >= x0 && x < x0 + 6 * cl && y >= y0 && y < y0 + 5 * cl) {
             return Model.boxPlace(box(m), (int) ((y - y0) / cl) * 6 + (int) ((x - x0) / cl));
         }
@@ -336,11 +401,15 @@ public final class BoxesPage extends Page {
             tapGrid(x, y, m);
             return;
         }
+        if (onPick != null) {
+            tapPick(x, y, m);
+            return;
+        }
         if (y >= partyY() - 7 && y < partyY() + 10 && x >= w - 8 - art.width("ALL BOXES") - 10) {
             setGrid(true);
             return;
         }
-        if (y >= WY && y < WY + 16 * bk() + 4) {
+        if (y >= WY() && y < WY() + 16 * bk() + 4) {
             if (x < x0 + 10) {
                 swipe(-1);
             } else if (x >= x0 + wpW() - 10) {
@@ -392,6 +461,41 @@ public final class BoxesPage extends Page {
         }
     }
 
+    private void tapPick(int x, int y, Model m) {
+        int w = v.width(), x0 = wx(w);
+        if (y < 20) {
+            if (x > w - 60) {
+                back();
+            }
+            return;
+        }
+        if (y >= WY() && y < WY() + 16 * bk() + 4) {
+            if (x < x0 + 10) {
+                swipe(-1);
+            } else if (x >= x0 + wpW() - 10) {
+                swipe(1);
+            } else {
+                v.showOver(new BoxListPage(v, this));
+            }
+            return;
+        }
+        Planned p = planned();
+        JSONObject place = placeAt(x, y);
+        if (place != null) {
+            selected = p.at(place) != null ? place : null;
+            v.invalidate();
+            return;
+        }
+        JSONObject mon = selected == null ? null : p.at(selected);
+        int by = cardY() + CARD_H + 10;
+        if (mon != null && y >= by && y < by + 24 && whyNot(mon, selected) == null) {
+            JSONObject chosen = selected;
+            v.buzz(false);
+            v.showOver(null);
+            onPick.picked(mon, chosen);
+        }
+    }
+
     private void openSummary(JSONObject place) {
         java.util.List<JSONObject> l = around(place);
         int i = 0;
@@ -434,7 +538,7 @@ public final class BoxesPage extends Page {
 
     @Override
     public boolean longPress(int x, int y) {
-        if (v.app.locked()) {
+        if (v.app.locked() || onPick != null) {
             return false;   // (in a battle: nothing moves)
         }
         JSONObject place = placeAt(x, y);
@@ -469,7 +573,7 @@ public final class BoxesPage extends Page {
         }
         // like the game's PC: a POKéMON carried to the box's edge turns to the next box
         int x0 = wx(v.width());
-        boolean arrow = held != null && y >= WY && y < WY + wpH() && (x < x0 + 4 || x >= x0 + wpW() - 4);
+        boolean arrow = held != null && y >= WY() && y < WY() + wpH() && (x < x0 + 4 || x >= x0 + wpW() - 4);
         if (arrow && !inArrow) {
             int dir = x < x0 + 4 ? -1 : 1;
             Model m = v.app.model();

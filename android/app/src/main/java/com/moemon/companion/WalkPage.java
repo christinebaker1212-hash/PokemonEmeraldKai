@@ -114,25 +114,10 @@ public final class WalkPage extends Page {
             v.message(Companion.LOCKED);
             return;
         }
-        Menu menu = Menu.make(v, "WHO GOES?");
-        JSONArray party = m.party();
-        for (int k = 0; party != null && k < party.length(); k++) {
-            JSONObject mon = party.optJSONObject(k);
-            if (mon != null) {
-                final JSONObject place = Model.partyPlace(k);
-                menu.add(art.plain(GameArt.hexText(mon.optString("n"))), () -> sendOff(place, mon));
-            }
-        }
-        JSONArray box = m.box(m.snap.optInt("box")).optJSONArray("m");
-        for (int k = 0; box != null && k < box.length(); k++) {
-            JSONObject mon = box.optJSONObject(k);
-            if (mon != null) {
-                final JSONObject place = Model.boxPlace(m.snap.optInt("box"), k);
-                menu.add(art.plain(GameArt.hexText(mon.optString("n"))) + " (BOX)", () -> sendOff(place, mon));
-            }
-        }
-        menu.add("CANCEL", null);
-        v.showMenu(menu);
+        // (from the boxes as the PC shows them; one ON OFFER in a trade stays)
+        v.showOver(BoxesPage.picker(v, "WHO GOES?", true,
+                (mon, place) -> mon.optInt("off") == 1 ? "It's ON OFFER in a trade." : null,
+                (mon, place) -> sendOff(place, mon)));
     }
 
     private void sendOff(JSONObject place, JSONObject mon) {
@@ -370,20 +355,10 @@ public final class WalkPage extends Page {
     }
 
     private void pickTrainee() {
-        Model m = model();
-        int b = m.snap.optInt("box");
-        JSONArray box = m.box(b).optJSONArray("m");
-        Menu menu = Menu.make(v, "WHO TRAINS? (BOX)");
-        for (int k = 0; box != null && k < box.length(); k++) {
-            final JSONObject mon = box.optJSONObject(k);
-            if (mon == null || mon.optInt("e") == 1) {
-                continue;
-            }
-            final JSONObject place = Model.boxPlace(b, k);
-            menu.add(art.plain(GameArt.hexText(mon.optString("n"))), () -> pickKind(place, mon));
-        }
-        menu.add("CANCEL", null);
-        v.showMenu(menu);
+        // (a POKéMON in a BOX, from the boxes as the PC shows them)
+        v.showOver(BoxesPage.picker(v, "WHO TRAINS?", false,
+                (mon, place) -> mon.optInt("e") == 1 ? "An EGG can't train." : mon.optInt("off") == 1 ? "It's ON OFFER in a trade." : null,
+                (mon, place) -> pickKind(place, mon)));
     }
 
     private void pickKind(JSONObject place, JSONObject mon) {
