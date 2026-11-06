@@ -562,7 +562,7 @@ static void ToggleEntry(void)
             if (GetBoxMonData(&t->slot[i].mon, MON_DATA_SPECIES) == sp)
             {
                 PlaySE(SE_FAILURE);
-                snprintf(U.note, sizeof(U.note), "SPECIES CLAUSE: one of each POKeMON.");
+                snprintf(U.note, sizeof(U.note), "SPECIES CLAUSE: one of each POKéMON.");
                 return;
             }
     }
@@ -582,7 +582,7 @@ static const char *TeamProblem(void)
     if (U.cup == STADIUM_CUP_CHALLENGE)
         return NULL;
     if (t->count < STADIUM_TEAM_SIZE)
-        return "Register six POKeMON first.";
+        return "Register six POKéMON first.";
     for (i = 0; i < t->count; i++)
     {
         const char *why = Refusal(&t->slot[i].mon, t->slot[i].source);
@@ -634,7 +634,7 @@ static void Header(const char *title, const char *right)
     G_FillA(0, 0, 240, 7, 0xffffff, 16);
     G_Fill(0, 15, 240, 1, C_GOLD);
     G_FillA(0, 16, 240, 2, 0x000000, 90);
-    Ball(9, 8, 5, 0xd83828);
+    ItemBall(9, 8, 255);
     G_Text(18, 1, C_GOLD, 0x000000, title, 0, TF_NORMAL);
     if (right)
         G_TextAlign(234, 3, TA_RIGHT, G_WHITE, 0x000000, right, TF_SMALL);
@@ -714,7 +714,7 @@ static void DrawSelect(void)
     u8 i;
     char line[96];
     snprintf(line, sizeof(line), "ROUND %d", U.round + 1);
-    Header("POKeMON STADIUM", line);
+    Header("POKéMON STADIUM", line);
     Blit(U.pics[PIC_AREA(AREA_STADIUM)], 4, 17, 98, 32, 255);
     for (i = 0; i < STADIUM_CUP_COUNT; i++)
     {
@@ -828,7 +828,7 @@ static void DrawClass(void)
     if (U.cup == STADIUM_CUP_CHALLENGE)
     {
         static const u8 sLevels[4] = {30, 45, 60, 75};
-        snprintf(line, sizeof(line), "Every POKeMON Lv %d", sLevels[U.tier]);
+        snprintf(line, sizeof(line), "Every POKéMON Lv %d", sLevels[U.tier]);
         G_Text(157, 32, C_SOFT, G_NO_SHADOW, line, 78, TF_NARROW);
     }
     else
@@ -889,8 +889,8 @@ static u8 HardCount(void)
 
 static const char *const sOptHelp[4][2] = {
     {"Entries are set to the cup's level.", "Your own levels. Bigger rewards!"},
-    {"First 151 only. Bigger rewards!", "Any POKeMON but the great legends."},
-    {"Your POKeMON may hold items.", "No held items. Bigger rewards!"},
+    {"First 151 only. Bigger rewards!", "Any POKéMON but the great legends."},
+    {"Your POKéMON may hold items.", "No held items. Bigger rewards!"},
     {"A team of rentals only wins more.", "A team of rentals only wins more."},
 };
 
@@ -962,7 +962,7 @@ static void DrawOptions(void)
         }
     }
     else
-        G_Text(127, 34, C_INK, G_NO_SHADOW, "The CHALLENGE CUP lends you six random POKeMON for every challenge. "
+        G_Text(127, 34, C_INK, G_NO_SHADOW, "The CHALLENGE CUP lends you six random POKéMON for every challenge. "
                                             "Pick three before each battle.", 106, TF_NARROW);
     // the team
     Panel(3, 109, 234, 18, 0x0c1424, 0x4a5c88);
@@ -1171,10 +1171,10 @@ static void DrawRegister(void)
 }
 
 static const char *const sClauses[][2] = {
-    {"SLEEP CLAUSE", "Your moves can put only one of their POKeMON to sleep."},
-    {"FREEZE CLAUSE", "Only one of their POKeMON can be frozen at a time."},
-    {"SELF-KO CLAUSE", "SELFDESTRUCT or EXPLOSION on your last POKeMON loses."},
-    {"SPECIES CLAUSE", "One of each POKeMON."},
+    {"SLEEP CLAUSE", "Your moves can put only one of their POKéMON to sleep."},
+    {"FREEZE CLAUSE", "Only one of their POKéMON can be frozen at a time."},
+    {"SELF-KO CLAUSE", "SELFDESTRUCT or EXPLOSION on your last POKéMON loses."},
+    {"SPECIES CLAUSE", "One of each POKéMON."},
     {"NO ITEMS", "No BAG items in battle."},
 };
 
@@ -1665,7 +1665,7 @@ static void Battle(void)
     if (picked < STADIUM_PICK)
     {
         PlaySE(SE_FAILURE);
-        snprintf(U.note, sizeof(U.note), "Choose three POKeMON.");
+        snprintf(U.note, sizeof(U.note), "Choose three POKéMON.");
         return;
     }
     if (c->levelSum && sum > c->levelSum)
