@@ -1,0 +1,6 @@
+# MAGIC's regeneration on the table: DRUDGE SKELETONS gets a shield (the green mark), LIGHTNING BOLT destroys it and
+# it regenerates instead (tapped, healed, "regenerates!").
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: used Drudge Skeletons" "mtg: you: cast Lightning Bolt on Drudge Skeletons" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Drudge Skeletons to focus" "mtg: no Lightning Bolt to focus")

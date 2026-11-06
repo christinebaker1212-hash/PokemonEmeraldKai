@@ -12,11 +12,12 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"ChangeZone", MTG_API_CHANGE_ZONE}, {"Mana", MTG_API_MANA}, {"Discard", MTG_API_DISCARD},
     {"Tap", MTG_API_TAP}, {"Untap", MTG_API_UNTAP}, {"Counter", MTG_API_COUNTER},
     {"Sacrifice", MTG_API_SACRIFICE}, {"PutCounter", MTG_API_PUT_COUNTER}, {"Attach", MTG_API_ATTACH},
+    {"Regenerate", MTG_API_REGENERATE},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
-    "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach",
+    "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -402,7 +403,7 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         Targets(d, ctx, ab, DEF_CARD, &who);
         for (i = 0; i < who.n; i++)
             if (OnBattlefield(d, &who.t[i]))
-                Mtg_Destroy(d, who.t[i].id);
+                Mtg_Destroy(d, who.t[i].id, Mtg_Param(ab, "NoRegen") != NULL);
         break;
     case MTG_API_DESTROY_ALL: {
         const char *cards = Mtg_Param(ab, "ValidCards");
@@ -411,9 +412,17 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
             doomed[i] = d->objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_ValidObj(d, i, cards, ctx->source, ctx->controller);
         for (i = 0; i < d->objCount; i++)
             if (doomed[i])
-                Mtg_Destroy(d, i);
+                Mtg_Destroy(d, i, Mtg_Param(ab, "NoRegen") != NULL);
         break;
     }
+    case MTG_API_REGENERATE:   // a shield on each: the next destruction this turn regenerates it instead
+        Targets(d, ctx, ab, DEF_CARD, &who);
+        for (i = 0; i < who.n; i++)
+            if (OnBattlefield(d, &who.t[i]) && d->objs[who.t[i].id].regen < 9) {
+                d->objs[who.t[i].id].regen++;
+                Mtg_Event(d, MTG_EV_REGENERATE, who.t[i].id, 1, d->objs[who.t[i].id].regen);
+            }
+        break;
     case MTG_API_GAIN_LIFE:
     case MTG_API_LOSE_LIFE: {
         int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "LifeAmount"), &ok);

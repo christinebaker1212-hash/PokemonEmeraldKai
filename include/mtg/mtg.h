@@ -102,6 +102,7 @@ typedef struct {
     uint32_t tempKeywords;
     int16_t counters11;           // +1/+1 counters (-1/-1 as negative)
     uint16_t attachedTo;          // an Aura: the creature it enchants (MTG_NO_OBJ: none)
+    uint8_t regen;                // regeneration shields until end of turn (RegenerateEffect)
     uint32_t seq;                 // order within its zone (higher = newer; the library's top is the highest)
 } MtgObj;
 
@@ -189,7 +190,9 @@ enum {
     MTG_EV_ZONE, MTG_EV_DAMAGE, MTG_EV_LIFE, MTG_EV_ATTACK, MTG_EV_BLOCK, MTG_EV_TAP, MTG_EV_COUNTERED,
     MTG_EV_FIZZLE, MTG_EV_LOSE,
     MTG_EV_TRIGGER,   // a triggered ability went on the stack: a = its source, b / c = its target (kind, id)
-    MTG_EV_COUNTERS   // a = the object, b = +1/+1 counters added (negative: -1/-1), c = its counters now
+    MTG_EV_COUNTERS,  // a = the object, b = +1/+1 counters added (negative: -1/-1), c = its counters now
+    MTG_EV_REGENERATE // a = the object: destroyed, it regenerated instead (tapped, out of combat, damage gone);
+                      // b = 0 that, 1 a shield given (c = its shields now)
 };
 typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;   // a, b, c by kind (mtg_game.c Mtg_Event)
 

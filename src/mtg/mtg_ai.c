@@ -46,6 +46,34 @@ static int Amount(const MtgDuel *d, const MtgAbility *ab, const char *key, int x
 
 static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me);
 
+// a creature of mine that is about to be destroyed: lethal damage coming in combat, or the opponent's destroy /
+// damage on the stack aimed at it (for regeneration)
+static int AboutToDie(const MtgDuel *d, int obj, int me)
+{
+    int i, left;
+    if (obj < 0 || !IsCreatureOnField(d, obj) || d->objs[obj].controller != me || d->objs[obj].regen)
+        return 0;
+    left = Mtg_Toughness(d, obj) - d->objs[obj].damage;
+    if (d->stackCount) {
+        const MtgStackEntry *e = &d->stack[d->stackCount - 1];
+        const MtgAbility *ab = e->ability != 0xFFFF ? &gMtgAbilities[e->ability] : NULL;
+        if (ab && e->controller != me && e->target.kind == MTG_TGT_OBJ && e->target.id == obj
+            && (ab->api == MTG_API_DESTROY || ab->api == MTG_API_DEAL_DAMAGE) && !Mtg_Param(ab, "NoRegen"))
+            return 1;
+        return 0;
+    }
+    if (d->step != MTG_STEP_COMBAT_BLOCKERS)
+        return 0;
+    for (i = 0; i < d->objCount; i++) {
+        const MtgObj *o = &d->objs[i];
+        if (!IsCreatureOnField(d, i) || o->controller == me)
+            continue;
+        if ((o->blocking == obj && d->objs[obj].attacking) || (d->objs[obj].blocking == i && o->attacking))
+            left -= Mtg_Power(d, i);
+    }
+    return left <= 0;
+}
+
 // what an action's other costs give up: the cheapest permanents to sacrifice, cards from the hand, life
 static int CostPrice(const MtgDuel *d, const MtgAbility *ab, int me, int src)
 {
@@ -144,6 +172,13 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
     case MTG_API_UNTAP:
     case MTG_API_MANA:
         return 0;
+    case MTG_API_REGENERATE: {   // only when it would die now
+        const char *def = Mtg_Param(ab, "Defined");
+        int who = tgtObj >= 0 ? tgtObj : def && strcmp(def, "Enchanted") == 0 ? d->objs[a->obj].attachedTo : a->obj;
+        if (who == MTG_NO_OBJ)
+            return 0;
+        return AboutToDie(d, who, me) ? 25 + Value(d, who) : 0;
+    }
     case MTG_API_ATTACH: {   // an Aura: Forge's AttachAILogic says whether it helps (Pump) or hurts (Curse)
         const char *logic = Mtg_Svar(ab->card, "AttachAILogic");
         int curse = logic && strcmp(logic, "Curse") == 0;

@@ -529,6 +529,63 @@ static void TestCosts(void)
     }
 }
 
+// regeneration: a shield, used by destruction (lethal damage too), gone at end of turn, NoRegen ignores it
+static void TestRegenerate(void)
+{
+    int skel, bolt, terror, wrath, a;
+    printf("regenerate: shields, lethal damage, destroy, can't be regenerated\n");
+    Table();
+    Lands(0, "Swamp", 3);
+    Lands(0, "Mountain", 1);
+    skel = Put(0, "Drudge Skeletons", MTG_ZONE_BATTLEFIELD);
+    CHECK(Find(MTG_ACT_ACTIVATE, skel, -1, 0) >= 0, "drudge skeletons can regenerate");
+    Do(MTG_ACT_ACTIVATE, skel, -1, 0);
+    PassBoth();
+    CHECK(sD.objs[skel].regen == 1, "a shield (%d)", sD.objs[skel].regen);
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, skel);
+    PassBoth();
+    CHECK(Zone(skel) == MTG_ZONE_BATTLEFIELD && sD.objs[skel].tapped && sD.objs[skel].damage == 0 && sD.objs[skel].regen == 0,
+          "bolted: it regenerates (tapped, healed, the shield used)");
+    terror = Put(0, "Terror", MTG_ZONE_HAND);
+    (void)terror;
+
+    Table();   // Wrath of God: can't be regenerated
+    Lands(0, "Swamp", 1);
+    Lands(0, "Plains", 4);
+    skel = Put(0, "Drudge Skeletons", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_ACTIVATE, skel, -1, 0);
+    PassBoth();
+    wrath = Put(0, "Wrath of God", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, wrath, -1, 0);
+    PassBoth();
+    CHECK(Zone(skel) == MTG_ZONE_GRAVEYARD, "wrath: no regeneration");
+
+    Table();   // the shield wears off at end of turn
+    Lands(0, "Swamp", 1);
+    skel = Put(0, "Drudge Skeletons", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_ACTIVATE, skel, -1, 0);
+    PassBoth();
+    CHECK(sD.objs[skel].regen == 1, "a shield this turn (%d)", sD.objs[skel].regen);
+    GoTo(1, MTG_STEP_UPKEEP);
+    CHECK(sD.objs[skel].regen == 0, "next turn: no shield (%d, turn %d)", sD.objs[skel].regen, sD.turn);
+
+    Table();   // the AI regenerates only when its creature would die
+    {
+        MtgAnswer ans;
+        Lands(1, "Swamp", 1);
+        Lands(0, "Mountain", 1);
+        skel = Put(1, "Drudge Skeletons", MTG_ZONE_BATTLEFIELD);
+        a = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+        Do(MTG_ACT_CAST, a, MTG_TGT_OBJ, skel);
+        Pass();
+        memset(&ans, 0, sizeof(ans));
+        MtgAi_Answer(&sD, &ans);
+        CHECK(Mtg_Query(&sD)->player == 1 && Mtg_Query(&sD)->actions[ans.action].kind == MTG_ACT_ACTIVATE,
+              "the bolt on the stack: the AI regenerates");
+    }
+}
+
 // ---- whole duels between the stand-in AIs
 
 // a choice while something resolves (MTG_Q_CHOOSE): card = 1 / 0, or the candidate holding obj
@@ -967,6 +1024,7 @@ int main(int argc, char **argv)
     TestStatics();
     TestAuras();
     TestCosts();
+    TestRegenerate();
     TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

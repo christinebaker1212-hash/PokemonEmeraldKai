@@ -705,6 +705,12 @@ static void DrawCard(int obj, const Rect *rc, int count, float x, float y)
             G_RoundFill((int)x - 1, (int)y - 1, 6, 6, 0xf0c040, 255);
             G_RoundFrame((int)x - 1, (int)y - 1, 6, 6, 0x5a3a08, 255);
         }
+        if (o->regen) {   // a regeneration shield: a green shield in the top right corner
+            int sx = (int)x + rc->w - 6, sy = (int)y - 1;
+            G_RoundFill(sx, sy, 7, 6, 0x50d080, 255);
+            G_Fill(sx + 2, sy + 6, 3, 1, 0x50d080);
+            G_RoundFrame(sx, sy, 7, 6, 0x0c3a1c, 255);
+        }
     }
     if (IsLand(obj) && count > 1) {   // (the count tab, as on the piles)
         int w;
@@ -1814,6 +1820,26 @@ static int StartEvent(const MtgEvent *e)
         B.leaveColor = MtgGfx_FrameColor(v->objs[obj].def, 0);
         PlaySE(SE_BALL_OPEN);
         return Frames(18);
+    case MTG_EV_REGENERATE:   // a shield given, or used: tapped, out of combat, healed
+        if (obj >= 0 && obj < MTG_MAX_OBJS) {
+            Rect r = ObjRect(obj);
+            v->objs[obj].regen = (uint8_t)e->c;
+            B.flash[obj] = 16;
+            Name(a, sizeof(a), obj);
+            if (e->b) {
+                Ticker("%s will regenerate.", a);
+                PlaySE(SE_M_HARDEN);
+                return Frames(14);
+            }
+            v->objs[obj].damage = 0;
+            v->objs[obj].attacking = 0;
+            v->objs[obj].blocking = MTG_NO_OBJ;
+            if (r.w)
+                G_FillAdd(r.x, r.y, r.w, r.h, 0x60f0a0, 120);
+            Ticker("%s regenerates!", a);
+            PlaySE(SE_SHINY);
+        }
+        return Frames(22);
     case MTG_EV_TAP:
         if (obj >= 0 && obj < MTG_MAX_OBJS) {
             v->objs[obj].tapped = (uint8_t)e->b;

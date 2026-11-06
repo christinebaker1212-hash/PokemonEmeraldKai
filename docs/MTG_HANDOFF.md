@@ -42,6 +42,10 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-06: 1.124.0)
+- **Regenerate**: COOP_NOTES "MAGIC's regeneration". 1542 of 5408 cards play. Indestructible still to come (in
+  Mtg_Destroy, beside the shields).
+
 ## Status (2026-11-06: 1.123.0)
 - **Costs** (Sac / Discard / Random discard / PayLife / Exile and Return itself): COOP_NOTES "MAGIC's costs beyond
   mana". 1470 of 5408 cards play. Biggest blockers now: static ability 446, replacement effect 207, Effect 127,

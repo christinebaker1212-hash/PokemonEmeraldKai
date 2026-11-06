@@ -100,6 +100,7 @@ static void ResetPermanentState(MtgObj *o)
     o->tempKeywords = 0;
     o->counters11 = 0;
     o->attachedTo = MTG_NO_OBJ;
+    o->regen = 0;
 }
 
 // GameAction.changeZone: a card moves (to the library's top when it goes there); a permanent leaving forgets its state
@@ -224,10 +225,26 @@ void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int com
     }
 }
 
-void Mtg_Destroy(MtgDuel *d, int obj)
+void Mtg_Destroy(MtgDuel *d, int obj, int noRegen)
 {
-    if (d->objs[obj].zone == MTG_ZONE_BATTLEFIELD)
-        Mtg_MoveTo(d, obj, MTG_ZONE_GRAVEYARD);   // (regeneration and indestructible: not yet)
+    MtgObj *o = &d->objs[obj];
+    if (o->zone != MTG_ZONE_BATTLEFIELD)
+        return;
+    if (o->regen && !noRegen) {   // (701.15: tapped, removed from combat, its damage gone; the shield used up)
+        int i;
+        o->regen--;
+        o->damage = 0;
+        if (!o->tapped)
+            Mtg_Tap(d, obj, 1);
+        o->attacking = 0;
+        o->blocking = MTG_NO_OBJ;
+        for (i = 0; i < d->objCount; i++)
+            if (d->objs[i].blocking == obj)
+                d->objs[i].blocking = MTG_NO_OBJ;
+        Mtg_Event(d, MTG_EV_REGENERATE, obj, 0, o->regen);
+        return;
+    }
+    Mtg_MoveTo(d, obj, MTG_ZONE_GRAVEYARD);   // (indestructible: not yet)
 }
 
 // GameAction.checkStateEffects
@@ -267,7 +284,7 @@ static void StateBasedActions(MtgDuel *d)
                 Mtg_MoveTo(d, i, MTG_ZONE_GRAVEYARD);
                 again = 1;
             } else if (d->objs[i].damage >= t) {
-                Mtg_Destroy(d, i);
+                Mtg_Destroy(d, i, 0);
                 again = 1;
             }
         }
@@ -855,6 +872,7 @@ static void EndOfTurnCleanup(MtgDuel *d)
         o->damage = 0;
         o->tempPower = o->tempToughness = 0;
         o->tempKeywords = 0;
+        o->regen = 0;
     }
 }
 

@@ -27,6 +27,7 @@ enum {
     MTG_API_SACRIFICE,        // SacrificeEffect (Defined$ Self, or one SacValid$ permanent the player chooses)
     MTG_API_PUT_COUNTER,      // CountersPutEffect (P1P1 / M1M1)
     MTG_API_ATTACH,           // AttachEffect: an Aura spell (K:Enchant:Creature) enters attached to its target
+    MTG_API_REGENERATE,       // RegenerateEffect: a shield on each creature (Defined$ Self or the target)
     MTG_API_COUNT
 };
 
@@ -156,7 +157,7 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone);
 void Mtg_Draw(MtgDuel *d, int player, int count);
 void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int combat);
 void Mtg_GainLife(MtgDuel *d, int player, int amount);
-void Mtg_Destroy(MtgDuel *d, int obj);
+void Mtg_Destroy(MtgDuel *d, int obj, int noRegen);   // a regeneration shield saves it unless noRegen
 void Mtg_Tap(MtgDuel *d, int obj, int tapped);
 uint32_t Mtg_Random(MtgDuel *d, uint32_t n);
 int Mtg_TopOfLibrary(const MtgDuel *d, int player);

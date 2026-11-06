@@ -5936,6 +5936,16 @@ the most). Each table now shows a move before it's made and holds what happened 
   and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
   duel 4).
 
+## MAGIC's regeneration (1.124.0)
+- `AB$ Regenerate` / `SP$ Regenerate` (MTG_API_REGENERATE): a shield on Self, the target or `Defined$ Enchanted`
+  (MtgObj.regen, cleared at cleanup). Mtg_Destroy(d, obj, noRegen) uses one instead of destroying: tapped, out of
+  combat (attacking / blocking cleared both ways), damage gone; lethal damage in state-based actions goes through it,
+  toughness 0 doesn't; `NoRegen$ True` (WRATH OF GOD, TERROR) passes noRegen. Event MTG_EV_REGENERATE (b 1 = a shield
+  given, 0 = used). The table: a green shield in a creature's top-right corner while it has one, "X will
+  regenerate." / "X regenerates!" with a flash. The stand-in AI regenerates only a creature about to die (lethal
+  combat damage after blocks, or the opponent's destroy / damage aimed at it on the stack: mtg_ai.c AboutToDie).
+  Scenario mtg_regen; TestRegenerate. MARLOW plays DRUDGE SKELETONS.
+
 ## MAGIC's costs beyond mana (1.123.0)
 - MtgCost (mtg_internal.h): `Sac<n/Type>`, `Discard<n/Type>` / `Discard<n/Random>`, `PayLife<n>`, `Exile<1/CARDNAME>`,
   `Return<1/CARDNAME>` (a part's description after a second '/' may have spaces: ParseCost joins it). Payable checks
