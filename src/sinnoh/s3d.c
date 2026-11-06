@@ -580,6 +580,31 @@ static void SetupView(void)
     sView.right[0] = 1.0f, sView.right[1] = 0.0f, sView.right[2] = 0.0f;
     sView.up[0] = 0.0f, sView.up[1] = cp, sView.up[2] = -sp;
     sView.focal = 96.0f / tanf(HALF_FOV * 3.14159265f / 180.0f);
+    {
+        // the DISTORTION WORLD: Platinum's camera angles there (pitch and yaw around the target: Camera_
+        // AdjustPositionAroundTarget), and up on a wall or a ceiling the player's 3D position as the target
+        float pitch, yaw, t[3];
+        u8 dw = S3D_Dw_View(&pitch, &yaw, t);
+        if (dw)
+        {
+            float pr = pitch * 3.14159265f / 180.0f, yr = yaw * 3.14159265f / 180.0f, len;
+            if (dw == 2)
+                sView.tx = t[0], sView.ty = t[1], sView.tz = t[2];
+            sView.eye[0] = sView.tx + CAM_DIST * sinf(yr) * cosf(pr);
+            sView.eye[1] = sView.ty + CAM_DIST * sinf(-pr);
+            sView.eye[2] = sView.tz + CAM_DIST * cosf(yr) * cosf(pr);
+            sView.fwd[0] = sView.tx - sView.eye[0], sView.fwd[1] = sView.ty - sView.eye[1], sView.fwd[2] = sView.tz - sView.eye[2];
+            len = sqrtf(sView.fwd[0] * sView.fwd[0] + sView.fwd[1] * sView.fwd[1] + sView.fwd[2] * sView.fwd[2]);
+            sView.fwd[0] /= len, sView.fwd[1] /= len, sView.fwd[2] /= len;
+            // right = fwd x world up, up = right x fwd
+            sView.right[0] = -sView.fwd[2], sView.right[1] = 0.0f, sView.right[2] = sView.fwd[0];
+            len = sqrtf(sView.right[0] * sView.right[0] + sView.right[2] * sView.right[2]);
+            sView.right[0] /= len, sView.right[2] /= len;
+            sView.up[0] = sView.right[1] * sView.fwd[2] - sView.right[2] * sView.fwd[1];
+            sView.up[1] = sView.right[2] * sView.fwd[0] - sView.right[0] * sView.fwd[2];
+            sView.up[2] = sView.right[0] * sView.fwd[1] - sView.right[1] * sView.fwd[0];
+        }
+    }
 }
 
 // World -> screen x, y and depth (FALSE: behind the camera)
@@ -601,6 +626,16 @@ static bool8 Project(float x, float y, float z, float *sx, float *sy, float *dep
 static float sSpriteH[MAX_SPRITES];
 static u8 sSpriteHFrame[MAX_SPRITES];
 
+bool8 S3D_ProjectWorld(float x, float y, float z, float *sx, float *sy, float *depth)
+{
+    return sView.active && Project(x, y, z, sx, sy, depth);
+}
+
+float S3D_PlayerGround(void)
+{
+    return sView.ty;
+}
+
 void S3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float *depth)
 {
     float sx, sy, d, h, near = sView.ty;
@@ -612,6 +647,8 @@ void S3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         *depth = 0.0f;
         return;
     }
+    if (S3D_Dw_PlayerSprite(spriteId, outX, outY, depth))
+        return;   // (up on a DISTORTION WORLD wall, a ceiling, or mid-jump: src/sinnoh/s3d_distortion.c)
     // (a sprite not placed in the last few frames starts from the player's layer)
     if (spriteId < MAX_SPRITES && (u8)(sView.frame - sSpriteHFrame[spriteId]) <= 2)
         near = sSpriteH[spriteId];
@@ -1509,6 +1546,7 @@ void S3D_Update(void)
     sCurMap = map;
     sView.frame++;
     S3D_Gyms_Update();
+    S3D_Dw_Update();
     FindCamera();
     SetupView();
     if (getenv("MOEMON_S3D_TRACE"))

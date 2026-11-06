@@ -55,6 +55,16 @@ void S3D_PlayerWorld(float *x, float *z);       // the player in the map's matri
 void Sinnoh_StoryRefresh(void);                   // shows / hides SINNOH's story people by the story (s3d_legends.c)
 void S3D_Gyms_MapLoaded(void);                    // a map's grid is (re)built: a gym's state on it (s3d_gyms.c)
 void S3D_Gyms_Update(void);                       // every overworld frame
+// The DISTORTION WORLD as Platinum's (src/sinnoh/s3d_distortion.c)
+bool8 S3D_Dw_Active(void);
+void S3D_Dw_OnMapLoad(void);
+bool8 S3D_Dw_PlayerStep(u8 dir, u16 heldKeys);   // (field_player_avatar.c PlayerStep: TRUE when handled)
+void S3D_Dw_Update(void);
+bool8 S3D_Dw_View(float *pitch, float *yaw, float *target);
+bool8 S3D_Dw_PlayerSprite(u16 spriteId, s32 *outX, s32 *outY, float *depth);
+void S3D_Dw_Print(void);
+bool8 S3D_ProjectWorld(float x, float y, float z, float *sx, float *sy, float *depth);   // (s3d.c: this map's world)
+float S3D_PlayerGround(void);                     // (s3d.c: the player's ground height last frame)
 bool8 S3D_Gyms_SeesPlayer(u8 localId);            // a gym's trainer can see the player (same floor)
 bool8 S3D_Gyms_JumpAt(s16 x, s16 y, u8 direction);   // a step there jumps (ETERNA's hour hand; map coords + 7)
 bool8 S3D_Gyms_PushAt(s16 x, s16 y, u8 direction);   // walking into it hits it (VEILSTONE's bags; map coords + 7)

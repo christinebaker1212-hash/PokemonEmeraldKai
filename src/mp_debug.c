@@ -1513,6 +1513,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
                (unsigned)gMPlayInfo_BGM.status, gMPlayInfo_BGM.trackCount, (unsigned)gMPlayInfo_BGM.clock,
                (unsigned)busy, (unsigned)cgb);
     }
+    else if (strcmp(cmd, "dw") == 0)
+    {
+        void S3D_Dw_Print(void);
+        S3D_Dw_Print();   // dw - where the player is in the DISTORTION WORLD (src/sinnoh/s3d_distortion.c)
+    }
     else if (strcmp(cmd, "getvar") == 0)
         printf("[test] var 0x%X = %d\n", (unsigned)strtol(arg, NULL, 0), VarGet((u16)strtol(arg, NULL, 0)));   // getvar ID
     else if (strcmp(cmd, "legendko") == 0)

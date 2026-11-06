@@ -649,6 +649,11 @@ sinnoh/platinum_scripts.inc: $(wildcard data/maps/Sinnoh_*/scripts.inc) $(wildca
 	@mkdir -p sinnoh
 	python3 -I tools/sinnoh/gen_scripts.py --auto $@
 $(DATA_ASM_BUILDDIR)/event_scripts_sinnoh.o: sinnoh/platinum_scripts.inc
+# and its DISTORTION WORLD's floors (tools/sinnoh/gen_distortion.py, the same way)
+sinnoh/platinum_dw.h: tools/sinnoh/gen_distortion.py
+	@mkdir -p sinnoh
+	python3 -I tools/sinnoh/gen_distortion.py --auto $@
+$(C_BUILDDIR)/sinnoh/s3d_distortion.o: sinnoh/platinum_dw.h
 
 $(DATA_ASM_BUILDDIR)/%.o: $(DATA_ASM_SUBDIR)/%.s
 	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_SCANINC_ARGS) - | $(PREPROC) -ie $< charmap.txt | $(ASM_PSEUDO_OP_CONV) | $(AS) $(ASFLAGS) -o $@

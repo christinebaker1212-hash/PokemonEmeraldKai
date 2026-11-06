@@ -7,7 +7,7 @@
 set -e
 DIR="${1:?usage: fetch_decomp.sh DIR}"
 COMMIT=6eeb1b04c6433761f3049811b7e1383619c59743   # (2026-10-24; change it only with a check that the pack still matches)
-PARTS=23  # what is fetched (2: + res/field/events, the warps; 3: + the sprites and trainer pictures, build_gfx.py;
+PARTS=24  # what is fetched (2: + res/field/events, the warps; 3: + the sprites and trainer pictures, build_gfx.py;
           # 4: + the TOWN MAP's art and grid, gen_townmap.py; 5: + the POKéTCH's art, build_poketch.py; 6: + the field effect
           # models, the gyms' bags, tire stacks and snowballs: gymprops.py; 7: + the briefcase's starter screen,
           # build_starter.py; 8: + the map textures' and props' animations, fldtanime and
@@ -21,7 +21,8 @@ PARTS=23  # what is fetched (2: + res/field/events, the warps; 3: + the sprites 
           # gym_features.c: gen_gyms.py, which also reads them); 21: + the BATTLE FRONTIER's own scripts,
           # res/field/frontier_scripts (gen_scripts.py FrontierConverter: the BATTLE TOWER's rooms); 22: + the buildings'
           # material / shape lists, build_model_matshp.dat (build_pack.py: drawn as Platinum draws them); 23: + the JOURNAL's
-          # notebook, res/prebuilt/graphic/f_note_gra.narc (build_journal.py); a
+          # notebook, res/prebuilt/graphic/f_note_gra.narc (build_journal.py); 24: + the DISTORTION WORLD's floors,
+          # res/prebuilt/fielddata/tornworld/ and its overlay's tables, src/overlay009/ (gen_distortion.py); a
           # folder fetched with other parts is fetched again
 MARK="$COMMIT parts $PARTS"
 if [ -f "$DIR/.s3d_commit" ] && [ "$(cat "$DIR/.s3d_commit")" = "$MARK" ]; then
@@ -50,7 +51,8 @@ git sparse-checkout set --no-cone /generated/ /include/data/map_headers.h /res/f
     /res/graphics/field_sprites/player/ /src/underground/mining.c /res/graphics/mining/ /res/fonts/font_unown.png /res/fonts/font_unown.json \
     /include/data/berry_init.h /src/overlay005/villa_furniture.c /include/overlay005/villa_furniture.h \
     /src/overlay008/gym_features.c /res/field/frontier_scripts/ /res/prebuilt/fielddata/build_model/build_model_matshp.dat \
-    /res/prebuilt/graphic/f_note_gra.narc
+    /res/prebuilt/graphic/f_note_gra.narc /res/prebuilt/fielddata/tornworld/ /res/prebuilt/data/tw_arc_etc.narc \
+    /src/overlay009/ /include/constants/distortion_world.h
 for i in 1 2 3 4; do
     git fetch -q --depth 1 --filter=blob:none origin "$COMMIT" && break
     sleep $((2 ** i))

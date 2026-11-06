@@ -340,6 +340,8 @@ void PlayerStep(u8 direction, u16 newKeys, u16 heldKeys)
     struct ObjectEvent *playerObjEvent = &gObjectEvents[gPlayerAvatar.objectEventId];
 
     HideShowWarpArrow(playerObjEvent);
+    if (gPlayerAvatar.preventStep == FALSE && S3D_Dw_PlayerStep(direction, heldKeys))
+        return;   // Moemon Kai: SINNOH's DISTORTION WORLD, its walls and ceilings (src/sinnoh/s3d_distortion.c)
     if (gPlayerAvatar.preventStep == FALSE)
     {
         Bike_TryAcroBikeHistoryUpdate(newKeys, heldKeys);

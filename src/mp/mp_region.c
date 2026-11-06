@@ -2410,6 +2410,8 @@ void MP_Region_TagMet(struct BoxPokemon *b)
 void MP_Region_OnMapLoaded(void)
 {
     u8 cur = MP_Region_Current();
+    void S3D_Dw_OnMapLoad(void);
+    S3D_Dw_OnMapLoad();   // the DISTORTION WORLD's floors (src/sinnoh/s3d_distortion.c)
     MP_Gen_ReturnHeldItems();   // GENERATION: held items past it go back to the bag
     if (cur == REGION_JOHTO)
     {

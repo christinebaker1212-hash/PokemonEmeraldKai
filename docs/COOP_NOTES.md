@@ -3969,6 +3969,18 @@ follow_behind, follow_ground.
   flag 0x3D34), meets GIRATINA (Lv47; 0x3D36; caught also sets TURNBACK CAVE's done flag 0x3D03, else that one
   stays), and CYNTHIA takes them back to SPEAR PILLAR (0x3D35, story_people.EXTRA_DONE 'DISTORTION': CYRUS is gone
   from SPEAR PILLAR after). The arena's people: gen_maps.py EXTRA_PEOPLE (with a flag). Test sinnoh_distortion.
+  Platinum's own DISTORTION WORLD (2026-11-06, being built in phases): src/sinnoh/s3d_distortion.c with Platinum's
+  floor data converted at build time (tools/sinnoh/gen_distortion.py from tw_arc.narc / tw_arc_attr.narc ->
+  sinnoh/platinum_dw.h, never committed; stubs without the decomp). Each floor's floating platforms (floors at
+  other heights, west / east walls, ceilings) with their 32 x 32 tile attributes are walked on Platinum's 3D tile
+  grid (its step tables sDistortionStepDirection*, collision bit 0x8000); jump points carry the player between
+  surfaces (displacement, the sprite turned by the jump's angle through an affine matrix, the hop
+  sFloatingPlatformJumpOffsets); the camera's angle zones turn the view (Platinum's base pitch -10750 plus the
+  zone's angles x 256, over transitionSteps: s3d.c SetupView). Coordinates are Platinum's stacked world (the
+  floor's tile + its offset, heights in tiles). On a platform the player's map position follows along x / z
+  (field_player_avatar.c PlayerStep hands the input to S3D_Dw_PlayerStep); up a wall it stays; the picture and
+  the player's sprite come from the 3D position (S3D_PlaceSprite -> S3D_Dw_PlayerSprite). `mp dw` prints where
+  the player is. Test sinnoh_dw_walls (B1F's wall). Next: the elevators between floors, then events and props.
 - Field obstacles (2026-11-01): Platinum's CUT trees, ROCK SMASH rocks and STRENGTH boulders (690) are the game's
   own (gen_maps.py OBSTACLES: EventScript_CutTree / _RockSmash / _StrengthBoulder, no flag, back each time the map
   loads as in both games). HM badges are the region's: MP_Region_FieldMoveBadge (mp_region.c) gives HOENN's badge for

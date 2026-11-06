@@ -1,0 +1,39 @@
+pressuntil A field 5000
+mp platinumstory
+wait 30
+mp warp 41,40,15,14
+wait 60
+waitfor field 1000
+wait 30
+wait 90
+mp dw
+shot w_ground
+press LEFT 2
+wait 10
+press LEFT 50
+wait 20
+mp dw
+shot w_turned
+press LEFT 6
+wait 40
+mp dw
+shot w_wall
+press UP 2
+wait 30
+press UP 2
+wait 30
+mp dw
+shot w_up
+press DOWN 2
+wait 30
+press DOWN 2
+wait 30
+mp dw
+press RIGHT 2
+wait 30
+mp dw
+press DOWN 2
+wait 40
+mp dw
+shot w_back
+quit

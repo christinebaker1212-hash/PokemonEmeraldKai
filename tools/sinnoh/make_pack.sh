@@ -16,3 +16,5 @@ python3 -I "$REPO/tools/sinnoh/build_daylight.py" "$DIR" "$REPO/sinnoh/platinum_
 # Platinum's scripts, converted to this game's (the build includes them: sinnoh/platinum_scripts.inc)
 echo "$DIR" > "$REPO/sinnoh/decomp_dir"
 python3 -I "$REPO/tools/sinnoh/gen_scripts.py" "$DIR" "$REPO/sinnoh/platinum_scripts.inc"
+# and the DISTORTION WORLD's floors (the build includes them: sinnoh/platinum_dw.h)
+python3 -I "$REPO/tools/sinnoh/gen_distortion.py" "$DIR" "$REPO/sinnoh/platinum_dw.h"
