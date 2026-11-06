@@ -16,6 +16,9 @@
 #include "event_object_movement.h"
 #include "field_camera.h"
 #include "field_player_avatar.h"
+#include "field_screen_effect.h"
+#include "script.h"
+#include "overworld.h"
 #include "fieldmap.h"
 #include "sound.h"
 #include "sprite.h"
@@ -32,6 +35,10 @@ struct DwFloor { u16 map, hid; s16 off[3]; u8 plat, nplat, jump, njump, cam, nca
 struct DwPlatform { s16 kind; u16 attr; struct DwBounds b; u16 vert, horiz; };
 struct DwJump { s16 dir; struct DwBounds b; s16 d[3]; s16 rot, steps; u16 axis, inv; s16 face, kind, idx; };
 struct DwCam { struct DwBounds b; u16 ang[3]; s16 dir; s32 steps; };
+// overlay009's moving platforms (sMovingPlatformMapTemplate*), elevator paths and prop kinds
+struct DwMoving { u16 hid; u8 index; s16 t[3]; u8 path, dir, dest, kind, flag; };
+struct DwPath { u8 next; s16 fin[3], chg[3]; s32 delta[3]; u8 set, clr; };
+struct DwProp { u16 model; float off[3]; float scale; };
 
 #include "../../sinnoh/platinum_dw.h"
 
@@ -39,6 +46,14 @@ struct DwCam { struct DwBounds b; u16 ang[3]; s16 dir; s32 steps; };
 enum { PD_UP, PD_DOWN, PD_LEFT, PD_RIGHT, PD_NONE };
 // Platinum's floating platform kinds (FLOATING_PLATFORM_KIND_*); KIND_LAND: on the map's own ground
 enum { KIND_FLOOR, KIND_WEST, KIND_EAST, KIND_CEILING, KIND_LAND };
+
+// the moving platforms' saved state (Platinum's persisted movingPlatformFlags: which elevator is on which floor),
+// in SINNOH's own vars (bit 15 of the high word: set up)
+#define VAR_DW_PLATFORMS_LO 0x52C0
+#define VAR_DW_PLATFORMS_HI 0x52C1
+#define DW_FLAGS_SET_UP 0x8000
+enum { ELEV_UP, ELEV_DOWN, ELEV_NONE };
+#define DW_PROP_SLOT 8   // (the first of the field's dynamic prop slots the DISTORTION WORLD uses)
 
 #define BASE_PITCH (-10750)   // DISTORTION_WORLD_CAMERA_BASE_ANGLE_X (the field camera's)
 #define ATTR_COLLISION 0x8000
@@ -70,7 +85,18 @@ static struct
     float camStep[3], camF[3];
     s32 camLeft;
     u8 matrix;                     // the player's sprite's affine matrix (0xFF: none)
+    s16 last[3];                   // the tile last frame (a platform is ridden when the player steps onto it)
+    // an elevator ride (Platinum's DistWorldElevatorPlatform): the platform, its path, how far along (world units)
+    u8 riding, ridePhase, rideT;
+    const struct DwMoving *ride;
+    s32 rideOff[3];                // the platform's and the player's offset from their tiles (units x 4096 / 4096)
+    float vib, rideBase[3];
+    s16 rideTile[3];               // the tile the current path starts from (a chained path goes on from the last's end)
+    u8 ridePath;
 } sDw = {.matrix = 0xFF};
+
+// A ride carried over the change of floors (the warp): the path and where along it
+static struct { bool8 on; u16 destHid; u8 destIndex, path, dir; s32 off[3]; } sRideNext;
 
 static const struct DwFloor *FloorFor(u16 map)
 {
@@ -162,7 +188,211 @@ bool8 S3D_Dw_Active(void)
 // On the map's own ground or up on a platform / mid-jump: the 3D position drives the view and the player's sprite
 static bool8 Off(void)
 {
-    return sDw.floor != NULL && (sDw.kind != KIND_LAND || sDw.jump != NULL);
+    return sDw.floor != NULL && (sDw.kind != KIND_LAND || sDw.jump != NULL || sDw.riding);
+}
+
+// --------------------------------------------------------------------------------------------- the moving platforms
+static u32 PlatformFlags(void)
+{
+    u32 f = VarGet(VAR_DW_PLATFORMS_LO) | (u32)VarGet(VAR_DW_PLATFORMS_HI) << 16;
+    if (!(VarGet(VAR_DW_PLATFORMS_HI) & DW_FLAGS_SET_UP))
+    {
+        f = DW_PLATFORM_FLAGS_START;   // (InitPersistedData: a first visit)
+        VarSet(VAR_DW_PLATFORMS_LO, f & 0xFFFF);
+        VarSet(VAR_DW_PLATFORMS_HI, (f >> 16) | DW_FLAGS_SET_UP);
+    }
+    return f & 0x7FFFFFFF;
+}
+
+static void SetPlatformFlag(u8 flag, bool8 on)
+{
+    u32 f = PlatformFlags();
+    if (flag >= DW_PLATFORM_FLAG_INVALID)
+        return;
+    f = on ? f | (1u << flag) : f & ~(1u << flag);
+    VarSet(VAR_DW_PLATFORMS_LO, f & 0xFFFF);
+    VarSet(VAR_DW_PLATFORMS_HI, (f >> 16) | DW_FLAGS_SET_UP);
+}
+
+// A platform on this floor is there (its flag set, or none: always)
+static bool8 Present(const struct DwMoving *m)
+{
+    return m->flag >= DW_PLATFORM_FLAG_INVALID || (PlatformFlags() & (1u << m->flag));
+}
+
+static const struct DwMoving *MovingOf(u16 hid, u8 index)
+{
+    u32 i;
+    for (i = 0; i < DW_MOVING_COUNT; i++)
+        if (sDwMoving[i].hid == hid && sDwMoving[i].index == index)
+            return &sDwMoving[i];
+    return NULL;
+}
+
+static const struct DwMoving *ElevatorAt(s32 x, s32 y, s32 z)
+{
+    u32 i;
+    for (i = 0; sDw.floor && i < DW_MOVING_COUNT; i++)
+    {
+        const struct DwMoving *m = &sDwMoving[i];
+        if (m->hid == sDw.floor->hid && m->t[0] == x && abs(m->t[1] - y) <= 1 && m->t[2] == z && m->dir != ELEV_NONE && Present(m))   // (heights here within a tile of Platinum's)
+            return m;
+    }
+    return NULL;
+}
+
+static u16 ConnectedFloor(u16 hid, bool8 down)
+{
+    u32 i;
+    for (i = 0; i < DW_CONN_COUNT; i++)
+        if (sDwConns[i][0] == hid)
+            return sDwConns[i][down ? 2 : 1];
+    return 0xFFFF;
+}
+
+static const struct DwFloor *FloorOfHid(u16 hid)
+{
+    u32 i;
+    for (i = 0; i < DW_FLOOR_COUNT; i++)
+        if (sDwFloors[i].hid == hid)
+            return &sDwFloors[i];
+    return NULL;
+}
+
+// The platforms shown on this floor: each a prop at its tile (Platinum's sPropInitialPosOffsetByKind, its scale),
+// the one being ridden moved along its path
+static void DrawPlatforms(void)
+{
+    u32 i, slot = DW_PROP_SLOT;
+    for (i = 0; i < DW_MOVING_COUNT && slot < S3D_DYN_PROPS; i++)
+    {
+        const struct DwMoving *m = &sDwMoving[i];
+        float w[3];
+        const struct DwProp *p;
+        if (m->hid != sDw.floor->hid || !Present(m) || m->kind >= ARRAY_COUNT(sDwProps))
+            continue;
+        p = &sDwProps[m->kind];
+        TileWorld(m->t[0], m->t[1], m->t[2], w);
+        if (sDw.riding && (sDw.ride == m || (sDw.ride->hid == m->hid && sDw.ride->index == m->index)))
+            TileWorld(sDw.rideTile[0], sDw.rideTile[1], sDw.rideTile[2], w);
+        if (sDw.riding && (sDw.ride == m || (sDw.ride->hid == m->hid && sDw.ride->index == m->index)))
+        {
+            w[0] += sDw.rideOff[0] / 4096.0f;
+            w[1] += sDw.rideOff[1] / 4096.0f + sDw.vib;
+            w[2] += sDw.rideOff[2] / 4096.0f;
+        }
+        S3D_DynPropScaled(slot++, p->model, w[0] + p->off[0], w[1] + p->off[1], w[2] + p->off[2], 0, p->scale);
+    }
+    for (; slot < S3D_DYN_PROPS; slot++)
+        S3D_DynPropHide(slot);
+}
+
+// The platforms' tiles walkable while a platform is there, void without (the map's own tiles there are void)
+static void PlatformTiles(void)
+{
+    u32 i;
+    for (i = 0; i < DW_MOVING_COUNT; i++)
+    {
+        const struct DwMoving *m = &sDwMoving[i];
+        if (m->hid == sDw.floor->hid && m->dir != ELEV_NONE)
+            MapGridSetMetatileImpassabilityAt(m->t[0] - sDw.floor->off[0] + MAP_OFFSET, m->t[2] - sDw.floor->off[2] + MAP_OFFSET, !Present(m));
+    }
+}
+
+static void StartRide(const struct DwMoving *m, s32 startOff[3], bool8 vibrate)
+{
+    sDw.riding = TRUE;
+    sDw.ride = m;
+    sDw.ridePhase = vibrate ? 0 : 1;
+    sDw.rideT = 0;
+    sDw.vib = vibrate ? 6 : 0;
+    memcpy(sDw.rideOff, startOff, sizeof(sDw.rideOff));
+    sDw.x = m->t[0], sDw.y = m->t[1], sDw.z = m->t[2];
+    sDw.rideTile[0] = m->t[0], sDw.rideTile[1] = m->t[1], sDw.rideTile[2] = m->t[2];
+    sDw.ridePath = m->path;
+    LockPlayerFieldControls();
+    if (vibrate)
+        PlaySE(SE_ELEVATOR);
+    if (getenv("MOEMON_TEST") && vibrate)
+        printf("[dw] elevator %d on floor %d (path %d, %s)\n", m->index, m->hid, m->path, m->dir == ELEV_DOWN ? "down" : "up");
+}
+
+// Platinum's DistWorldElevatorPlatform_*: shake, move to the change of floors, the next floor, move on to the end
+static void RideUpdate(void)
+{
+    const struct DwPath *p = &sDwPaths[sDw.ridePath];
+    u32 i;
+    float w[3];
+    if (sDw.ridePhase == 0)
+    {
+        // the shake: up and down, smaller each time (Vibrate)
+        sDw.vib = -sDw.vib;
+        if (sDw.vib >= 0)
+        {
+            if (sDw.vib >= 4) sDw.vib -= 2;
+            else if (sDw.vib > 1) sDw.vib -= 1;
+            else if (++sDw.rideT >= 8) sDw.vib -= 1;
+            if (sDw.vib <= 0)
+                sDw.vib = 0, sDw.ridePhase = 1;
+        }
+    }
+    else
+    {
+        bool8 done = TRUE;
+        for (i = 0; i < 3; i++)
+            if (sDw.rideOff[i] != (sDw.ridePhase == 3 ? 0 : p->fin[i] * 16 * 4096))
+                sDw.rideOff[i] += p->delta[i], done = FALSE;
+        if (sDw.ridePhase == 1 && sDw.rideOff[0] == p->chg[0] * 16 * 4096 && sDw.rideOff[1] == p->chg[1] * 16 * 4096
+         && sDw.rideOff[2] == p->chg[2] * 16 * 4096 && p->next >= ARRAY_COUNT(sDwPaths))   // (a chained path changes floors on its last leg)
+        {
+            // the change of floors: the platform's flags, then the next floor with the platform it becomes there
+            u16 dest = ConnectedFloor(sDw.floor->hid, sDw.ride->dir == ELEV_DOWN);
+            const struct DwFloor *f = FloorOfHid(dest);
+            const struct DwMoving *to = MovingOf(dest, sDw.ride->dest);
+            SetPlatformFlag(p->set, TRUE);
+            SetPlatformFlag(p->clr, FALSE);
+            if (f != NULL && to != NULL)
+            {
+                s32 fx = sDw.rideTile[0] + p->fin[0], fz = sDw.rideTile[2] + p->fin[2];
+                sRideNext.on = TRUE;
+                sRideNext.destHid = dest;
+                sRideNext.destIndex = sDw.ride->dest;
+                sRideNext.path = sDw.ridePath;
+                sRideNext.dir = sDw.ride->dir;
+                for (i = 0; i < 3; i++)
+                    sRideNext.off[i] = sDw.rideOff[i] - p->fin[i] * 16 * 4096;
+                SetWarpDestination(f->map >> 8, f->map & 0xFF, WARP_ID_NONE, fx - f->off[0], fz - f->off[2]);
+                DoQuietWarp();
+                sDw.ridePhase = 2;   // (waiting for the warp)
+                return;
+            }
+        }
+        if (sDw.ridePhase == 2)
+            return;
+        if (done && sDw.ridePhase == 1 && p->next < ARRAY_COUNT(sDwPaths))
+        {
+            // a chained path: the next leg from where this one ended (MoveSecondHalf -> INIT)
+            for (i = 0; i < 3; i++)
+                sDw.rideTile[i] += p->fin[i], sDw.rideOff[i] = 0;
+            sDw.ridePath = p->next;
+            done = FALSE;
+        }
+        if (done)
+        {
+            // the end of the ride: the player on the platform's tile, free to go
+            sDw.riding = FALSE;
+            PlatformTiles();
+            UnlockPlayerFieldControls();
+            if (getenv("MOEMON_TEST"))
+                printf("[dw] elevator stopped on floor %d at %d,%d,%d\n", sDw.floor->hid, sDw.ride->t[0], sDw.ride->t[1], sDw.ride->t[2]);
+            sDw.last[0] = sDw.ride->t[0], sDw.last[1] = sDw.ride->t[1], sDw.last[2] = sDw.ride->t[2];
+            return;
+        }
+    }
+    TileWorld(sDw.rideTile[0], sDw.rideTile[1], sDw.rideTile[2], w);
+    sDw.pos[0] = w[0] + sDw.rideOff[0] / 4096.0f;
+    sDw.pos[1] = w[1] + sDw.rideOff[1] / 4096.0f + sDw.vib;
+    sDw.pos[2] = w[2] + sDw.rideOff[2] / 4096.0f;
 }
 
 static void StartCamera(const struct DwCam *c)
@@ -278,10 +508,31 @@ void S3D_Dw_OnMapLoad(void)
     sDw.jump = NULL;
     sDw.moving = FALSE;
     sDw.rot = 0;
+    sDw.riding = FALSE;
+    sDw.last[0] = sDw.last[1] = sDw.last[2] = -1;
     if (sDw.matrix != 0xFF)
     {
         FreeOamMatrix(sDw.matrix);
         sDw.matrix = 0xFF;
+    }
+    if (f != NULL && DW_HAVE_DATA)
+        PlatformTiles();
+    if (sRideNext.on)
+    {
+        // the second half of an elevator ride, on the floor it goes to (MoveSecondHalf)
+        const struct DwMoving *m = MovingOf(sRideNext.destHid, sRideNext.destIndex);
+        sRideNext.on = FALSE;
+        if (f != NULL && m != NULL && f->hid == sRideNext.destHid)
+        {
+            static struct DwMoving sRidden;
+            sRidden = *m;
+            sRidden.path = sRideNext.path;   // (the path keeps going: its end is this platform's tile)
+            sRidden.dir = sRideNext.dir;
+            StartRide(MovingOf(m->hid, m->index), sRideNext.off, FALSE);
+            sDw.ride = &sRidden;
+            sDw.ridePath = sRideNext.path;
+            sDw.ridePhase = 3;
+        }
     }
 }
 
@@ -381,6 +632,33 @@ void S3D_Dw_Update(void)
     u32 i;
     if (sDw.floor == NULL)
         return;
+    if (DW_HAVE_DATA)
+        DrawPlatforms();
+    if (sDw.riding)
+    {
+        RideUpdate();
+        return;
+    }
+    if (sDw.kind == KIND_LAND && sDw.jump == NULL && DW_HAVE_DATA)
+    {
+        // a step onto an elevator platform rides it (HandleElevatorPlatformPropAnimatorAt)
+        struct ObjectEvent *obj = &gObjectEvents[gPlayerAvatar.objectEventId];
+        s32 x, y, z;
+        LandTile(&x, &y, &z);
+        if (!obj->singleMovementActive && !(obj->heldMovementActive && !obj->heldMovementFinished)   // (a step finished)
+         && (x != sDw.last[0] || z != sDw.last[2]))   // (a new tile: by x / z, the ground's height read can differ)
+        {
+            const struct DwMoving *m = ElevatorAt(x, y, z);
+            bool8 first = sDw.last[0] < 0;
+            sDw.last[0] = x, sDw.last[1] = y, sDw.last[2] = z;
+            if (m != NULL && !first)
+            {
+                s32 zero[3] = {0, 0, 0};
+                StartRide(m, zero, TRUE);
+                return;
+            }
+        }
+    }
     if (sDw.camLeft > 0)
     {
         if (--sDw.camLeft <= 0)

@@ -77,7 +77,140 @@ def read(root):
         f['njump'] = len(jumps) - f['jump']
         f['ncam'] = len(cams) - f['cam']
         floors.append(f)
-    return floors, plats, jumps, cams, [struct.unpack('<%dH' % (len(a) // 2), a) for a in attrs]
+    return floors, plats, jumps, cams, [struct.unpack('<%dH' % (len(a) // 2), a) for a in attrs], tables(root)
+
+
+# --------------------------------------------------------------------------- overlay009's own tables (its C source)
+OV9 = 'src/overlay009/ov9_02249960.c'
+
+
+class CTables:
+    """overlay009's constant tables, read from its C source: defines, enums and designated initializers"""
+
+    def __init__(self, root):
+        import re
+        self.re = re
+        self.src = open(os.path.join(root, OV9)).read()
+        consts = open(os.path.join(root, 'include/constants/distortion_world.h')).read() + \
+            open(os.path.join(root, 'include/overlay009/ov9_02249960.h')).read()
+        self.ids = header_ids(root)
+        self.values = dict(self.ids)
+        self.values['FX32_ONE'] = 4096
+        self.values['MAP_HEADER_INVALID'] = 0xFFFF
+        self.values['TRUE'], self.values['FALSE'], self.values['NULL'] = 1, 0, 0
+        self.defs = {}
+        for text in (consts, self.src):
+            text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+            text = re.sub(r'//[^\n]*', '', text)
+            for m in re.finditer(r'^#define\s+(\w+)\s+(.+)$', text, re.M):
+                self.defs[m.group(1)] = m.group(2).strip()
+            for m in re.finditer(r'enum\s*\w*\s*\{([^}]*)\}', text):
+                n = -1
+                for item in m.group(1).split(','):
+                    item = item.strip()
+                    if not item:
+                        continue
+                    if '=' in item:
+                        name, val = [t.strip() for t in item.split('=', 1)]
+                        n = self.eval(val)
+                    else:
+                        name, n = item, n + 1
+                    self.values[name] = n
+        self.clean = re.sub(r'//[^\n]*', '', re.sub(r'/\*.*?\*/', '', self.src, flags=re.S))
+
+    def eval(self, expr):
+        expr = str(expr).strip()
+        for _ in range(20):
+            def sub(m):
+                w = m.group(0)
+                if w in self.values:
+                    return '(%d)' % self.values[w]
+                if w in self.defs:
+                    return '(%s)' % self.defs[w]
+                return w
+            new = self.re.sub(r'\b[A-Za-z_]\w*\b', sub, expr)
+            if new == expr:
+                break
+            expr = new
+        expr = self.re.sub(r'\b(0x[0-9A-Fa-f]+|\d+)[uUlL]+\b', r'\1', expr)
+        return int(eval(expr.replace('/', '//'), {}))
+
+    def initializer(self, name):
+        """NAME's initializer as nested lists / dicts (designated fields by name, [INDEX] = by index)"""
+        m = self.re.search(r'\b%s\s*(\[[^\]]*\])?\s*=\s*\{' % name, self.clean)
+        if not m:
+            raise KeyError(name)
+        i = m.end() - 1
+        val, _ = self._parse(self.clean, i)
+        return val
+
+    def _parse(self, t, i):
+        # t[i] == '{'
+        i += 1
+        items, named = [], {}
+        while True:
+            while t[i] in ' \t\r\n,':
+                i += 1
+            if t[i] == '}':
+                return (named if named else items), i + 1
+            key = None
+            m = self.re.match(r'\.(\w+)\s*=\s*', t[i:]) or self.re.match(r'\[([^\]]+)\]\s*=\s*', t[i:])
+            if m:
+                key = m.group(1)
+                i += m.end()
+            if t[i] == '{':
+                v, i = self._parse(t, i)
+            else:
+                j, depth = i, 0
+                while depth or t[j] not in ',}':
+                    depth += t[j] == '('
+                    depth -= t[j] == ')'
+                    j += 1
+                v, i = t[i:j].strip(), j
+            if key is None:
+                items.append(v)
+            else:
+                named[key] = v
+                if not key.isidentifier():
+                    named.setdefault('_order', []).append(key)
+
+
+def tables(root):
+    """The moving platforms by floor, the elevators' paths and the props' models (overlay009's tables)"""
+    import gymprops
+    c = CTables(root)
+    plats = []
+    for entry in c.initializer('sMovingPlatformsMapTemplates'):
+        hid = c.eval(entry[0])
+        for ref in c.initializer(entry[1]):
+            ref = ref.strip()
+            if ref in ('NULL', '0'):
+                continue
+            t = c.initializer(ref.lstrip('&'))
+            plats.append((hid, c.eval(t['index']), c.eval(t['tileX']), c.eval(t['tileY']), c.eval(t['tileZ']),
+                          c.eval(t['elevatorPathIndex']), c.eval(t['elevatorDir']), c.eval(t['destIndex']),
+                          c.eval(t['propKind']), c.eval(t['persistedFlag'])))
+    paths = []
+    for t in c.initializer('sElevatorPlatformPaths'):
+        d = [c.eval(v) for v in t['posDelta']]
+        paths.append((c.eval(t['index']), c.eval(t['nextIndex']), c.eval(t['finalTileXOffset']),
+                      c.eval(t['finalTileYOffset']), c.eval(t['finalTileZOffset']), c.eval(t['changeMapsTileXOffset']),
+                      c.eval(t['changeMapsTileYOffset']), c.eval(t['changeMapsTileZOffset']), d[0], d[1], d[2],
+                      c.eval(t['persistedFlagToSet']), c.eval(t['persistedFlagToClear'])))
+    conns = [(c.eval(t['currID']), c.eval(t['prevID']), c.eval(t['nextID'])) for t in c.initializer('sDistWorldMapConnectionList')]
+    # the props' models (field effect models in the pack: gymprops.py 'fx:' names) and their offsets
+    models = c.initializer('sProp3DModelNARCIndexByKind')
+    offs = c.initializer('sPropInitialPosOffsetByKind')
+    scales = c.initializer('sPropScaleByKind')
+    props = []
+    for k in range(c.values['PROP_KIND_COUNT']):
+        kind = [n for n, v in c.values.items() if n.startswith('PROP_KIND_') and v == k and n != 'PROP_KIND_INVALID'][0]
+        name = 'fx:' + models[kind].replace('_nsbmd', '.nsbmd')
+        num = gymprops.FX_BASE + gymprops.fx_names().index(name) if name in gymprops.fx_names() else 0xFFFF
+        o = [c.eval(v) / 4096.0 for v in offs[kind]]
+        sc = [c.eval(v) / 4096.0 for v in scales[kind]]
+        props.append((num, o, sc[0] or 1.0))
+    return dict(plats=plats, paths=paths, conns=conns, props=props, c=c)
 
 
 def write(out, data):
@@ -86,10 +219,13 @@ def write(out, data):
     if not data:
         o += ['static const struct DwFloor sDwFloors[1];', 'static const struct DwPlatform sDwPlatforms[1];',
               'static const struct DwJump sDwJumps[1];', 'static const struct DwCam sDwCams[1];',
-              'static const u16 sDwAttrs[1][1024];', '#define DW_FLOOR_COUNT 0']
+              'static const u16 sDwAttrs[1][1024];', '#define DW_FLOOR_COUNT 0',
+              'static const struct DwMoving sDwMoving[1];', '#define DW_MOVING_COUNT 0',
+              'static const struct DwPath sDwPaths[1];', 'static const struct DwProp sDwProps[1];',
+              'static const u16 sDwConns[1][3];', '#define DW_CONN_COUNT 0', '#define DW_PLATFORM_FLAGS_START 0']
         open(out, 'w').write('\n'.join(o) + '\n')
         return
-    floors, plats, jumps, cams, attrs = data
+    floors, plats, jumps, cams, attrs, tbl = data
     o.append('#define DW_FLOOR_COUNT %d' % len(floors))
     o.append('static const struct DwFloor sDwFloors[] = {')
     for f in floors:
@@ -111,6 +247,31 @@ def write(out, data):
     o.append('static const struct DwCam sDwCams[] = {')
     for c in cams:
         o.append('    {{%d, %d, %d, %d, %d, %d}, {%d, %d, %d}, %d, %d},' % c)
+    o.append('};')
+    # overlay009's tables: the moving platforms by floor (map header, index, tile, elevator path, its way, the
+    # platform it becomes on the floor it goes to, prop kind, the flag saying it's here), the elevators' paths,
+    # the floors' order and each prop kind's model, offset and scale
+    o.append('#define DW_MOVING_COUNT %d' % len(tbl['plats']))
+    o.append('static const struct DwMoving sDwMoving[] = {')
+    for m in tbl['plats']:
+        o.append('    {%d, %d, {%d, %d, %d}, %d, %d, %d, %d, %d},' % m)
+    o.append('};')
+    o.append('static const struct DwPath sDwPaths[] = {')
+    for q in tbl['paths']:
+        o.append('    {%d, {%d, %d, %d}, {%d, %d, %d}, {%d, %d, %d}, %d, %d},' % q[1:])
+    o.append('};')
+    o.append('#define DW_CONN_COUNT %d' % len(tbl['conns']))
+    o.append('static const u16 sDwConns[][3] = {')
+    for q in tbl['conns']:
+        o.append('    {%d, %d, %d},' % q)
+    o.append('};')
+    c = tbl['c']
+    init = (1 << c.values['DIST_WORLD_PLATFORM_FLAG_B4F_1']) | (1 << c.values['DIST_WORLD_PLATFORM_FLAG_B5F_1'])
+    o.append('#define DW_PLATFORM_FLAGS_START 0x%x   // (InitPersistedData)' % init)
+    o.append('#define DW_PLATFORM_FLAG_INVALID %d' % c.values['DIST_WORLD_PLATFORM_FLAG_INVALID'])
+    o.append('static const struct DwProp sDwProps[] = {')
+    for num, off, sc in tbl['props']:
+        o.append('    {%d, {%.2ff, %.2ff, %.2ff}, %.4ff},' % (num, off[0], off[1], off[2], sc))
     o.append('};')
     o.append('static const u16 sDwAttrs[%d][1024] = {' % len(attrs))
     for a in attrs:

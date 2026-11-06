@@ -52,7 +52,7 @@ git sparse-checkout set --no-cone /generated/ /include/data/map_headers.h /res/f
     /include/data/berry_init.h /src/overlay005/villa_furniture.c /include/overlay005/villa_furniture.h \
     /src/overlay008/gym_features.c /res/field/frontier_scripts/ /res/prebuilt/fielddata/build_model/build_model_matshp.dat \
     /res/prebuilt/graphic/f_note_gra.narc /res/prebuilt/fielddata/tornworld/ /res/prebuilt/data/tw_arc_etc.narc \
-    /src/overlay009/ /include/constants/distortion_world.h
+    /src/overlay009/ /include/overlay009/ /include/constants/distortion_world.h
 for i in 1 2 3 4; do
     git fetch -q --depth 1 --filter=blob:none origin "$COMMIT" && break
     sleep $((2 ** i))

@@ -589,6 +589,16 @@ void DoWarp(void)
     CreateTask(Task_WarpAndLoadMap, 10);
 }
 
+// Moemon Kai: a warp without the door sound (SINNOH's DISTORTION WORLD elevators between floors: s3d_distortion.c)
+void DoQuietWarp(void)
+{
+    LockPlayerFieldControls();
+    TryFadeOutOldMapMusic();
+    WarpFadeOutScreen();
+    gFieldCallback = FieldCB_DefaultWarpExit;
+    CreateTask(Task_WarpAndLoadMap, 10);
+}
+
 // Moemon Maker: the map loaded again where the player stands, quietly (its edits changed while playing from the editor:
 // src/maker/maker_play.c)
 void DoMakerReloadWarp(void)

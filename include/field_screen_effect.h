@@ -21,6 +21,7 @@ void ReturnToFieldOpenStartMenu(void);
 void FieldCB_ReturnToFieldNoScript(void);
 void FieldCB_ReturnToFieldNoScriptCheckMusic(void);
 void DoWarp(void);
+void DoQuietWarp(void);
 bool8 DoSinnohRideWarp(u16 metatileBehavior);   // Moemon Kai: SINNOH's stairs / escalators carry the player (FALSE: not one)
 void DoDiveWarp(void);
 void DoWhiteFadeWarp(void);

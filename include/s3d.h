@@ -63,6 +63,7 @@ void S3D_Dw_Update(void);
 bool8 S3D_Dw_View(float *pitch, float *yaw, float *target);
 bool8 S3D_Dw_PlayerSprite(u16 spriteId, s32 *outX, s32 *outY, float *depth);
 void S3D_Dw_Print(void);
+bool8 S3D_DynPropScaled(u8 slot, u16 model, float x, float y, float z, float turn, float scale);
 bool8 S3D_ProjectWorld(float x, float y, float z, float *sx, float *sy, float *depth);   // (s3d.c: this map's world)
 float S3D_PlayerGround(void);                     // (s3d.c: the player's ground height last frame)
 bool8 S3D_Gyms_SeesPlayer(u8 localId);            // a gym's trainer can see the player (same floor)

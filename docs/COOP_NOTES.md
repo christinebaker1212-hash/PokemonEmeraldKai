@@ -3980,7 +3980,16 @@ follow_behind, follow_ground.
   floor's tile + its offset, heights in tiles). On a platform the player's map position follows along x / z
   (field_player_avatar.c PlayerStep hands the input to S3D_Dw_PlayerStep); up a wall it stays; the picture and
   the player's sprite come from the 3D position (S3D_PlaceSprite -> S3D_Dw_PlayerSprite). `mp dw` prints where
-  the player is. Test sinnoh_dw_walls (B1F's wall). Next: the elevators between floors, then events and props.
+  the player is. Test sinnoh_dw_walls (B1F's wall).
+  The elevators (phase 2): overlay009's tables are read from its C source (gen_distortion.py CTables: defines,
+  enums, designated initializers): sMovingPlatformsMapTemplates (34 platforms), sElevatorPlatformPaths (22, some
+  chained), sDistWorldMapConnectionList, the props' models / offsets / scales. The platform models are field effect
+  models in the 3D pack (gymprops.py 'fx:distortion_world_*', drawn as scaled dynamic props from slot 8). A step
+  onto an elevator tile rides it as Platinum's DistWorldElevatorPlatform: the shake, 4 units a frame to the change
+  of floors, a quiet warp (field_screen_effect.c DoQuietWarp) to the connected floor where the platform it becomes
+  carries the player the rest of the way. Which platform is on which floor is Platinum's persisted flags, kept in
+  SINNOH's vars 0x52C0-0x52C1 (bit 15 of the high word: set up; first visit DW_PLATFORM_FLAGS_START); the tiles of
+  absent platforms are void, present ones walkable. Test sinnoh_dw_elevator (1F down to B1F and back).
 - Field obstacles (2026-11-01): Platinum's CUT trees, ROCK SMASH rocks and STRENGTH boulders (690) are the game's
   own (gen_maps.py OBSTACLES: EventScript_CutTree / _RockSmash / _StrengthBoulder, no flag, back each time the map
   loads as in both games). HM badges are the region's: MP_Region_FieldMoveBadge (mp_region.c) gives HOENN's badge for

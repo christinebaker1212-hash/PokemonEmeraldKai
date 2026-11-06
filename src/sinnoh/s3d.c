@@ -1273,6 +1273,18 @@ bool8 S3D_DynPropTurned(u8 slot, u16 model, float x, float y, float z, float til
     return TRUE;
 }
 
+// The same scaled by SCALE (the DISTORTION WORLD's props: Platinum's sPropScaleByKind)
+bool8 S3D_DynPropScaled(u8 slot, u16 model, float x, float y, float z, float turn, float scale)
+{
+    u32 i;
+    if (!S3D_DynPropTurned(slot, model, x, y, z, 0, turn))
+        return FALSE;
+    for (i = 0; i < 12; i++)
+        if ((i & 3) != 3)
+            sDyn[slot].m[i] *= scale;
+    return TRUE;
+}
+
 void S3D_DynPropHide(u8 slot)
 {
     if (slot < S3D_DYN_PROPS)

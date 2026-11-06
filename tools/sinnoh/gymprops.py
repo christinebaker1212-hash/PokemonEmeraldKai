@@ -31,6 +31,16 @@ GYM_MODELS = {
         'tea_set', 'chandelier')],
     # not a gym's: the healing machine's balls in every POKeMON CENTER (src/sinnoh/s3d_heal.c; the CENTERs share textures)
     'MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F': ['pokecenter_healing_machine_mini_pokeball.nsbmd'],
+    # not a gym's: the DISTORTION WORLD's platforms, elevators and props (overlay009's sProp3DModelNARCIndexByKind
+    # order; src/sinnoh/s3d_distortion.c, numbers through tools/sinnoh/gen_distortion.py)
+    'MAP_HEADER_DISTORTION_WORLD_B1F': ['fx:distortion_world_%s.nsbmd' % n for n in (
+        'small_platform', 'floating_blue_rock', 'medium_elevator_platform_1', 'medium_elevator_platform_2',
+        'medium_elevator_platform_sw', 'medium_moving_platform_1', 'medium_moving_platform_2',
+        'medium_elevator_platform_3', 'large_elevator_platform_1', 'medium_elevator_platform_4',
+        'horizontal_platform_1', 'vertical_platform_1', 'vertical_platform_2', 'horizontal_platform_2',
+        'rotated_platform_east', 'rotated_platform_west', 'large_elevator_platform_2', 'large_elevator_platform_3',
+        'large_elevator_platform_4', 'medium_elevator_platform_5', 'giratina_shadow', 'waterfall', 'land_vine_flower',
+        'land_rock', 'portal')],
 }
 
 

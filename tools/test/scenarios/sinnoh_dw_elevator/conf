@@ -1,0 +1,9 @@
+# Platinum's DISTORTION WORLD elevators (src/sinnoh/s3d_distortion.c, overlay009's sMovingPlatformsMapTemplates /
+# sElevatorPlatformPaths): 1F's platform (40, 289, 54) shakes, sinks 16 tiles, the next floor (B1F) takes over and
+# it settles at its tile there (40, 257, 54); its flag says it's on B1F now, so riding it back goes up. Needs the
+# packs and the decomp. Shots e_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[dw] elevator 0 on floor 573 (path 0, down)" "[dw] elevator stopped on floor 574 at 40,257,54" "[dw] floor 574 at 40,257,54" "[dw] elevator 0 on floor 574 (path 1, up)" "[dw] elevator stopped on floor 573 at 40,289,54" "[dw] floor 573 at 40,288,54 kind 4")
+UNEXPECT_A=("[crash]" "TIMEOUT")
