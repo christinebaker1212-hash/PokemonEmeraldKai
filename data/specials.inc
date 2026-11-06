@@ -775,3 +775,7 @@ gSpecials::
 	def_special Sinnoh_ContestLinkWait, waitstate=1   @ Moemon Kai: SUPER CONTESTS with friends, the group (src/sinnoh/s3d_contest_link.c)
 	def_special Sinnoh_BrainText
 	def_special S3D_Dw_Surf, waitstate=1   @ Moemon Kai: SURF on a DISTORTION WORLD platform (src/sinnoh/s3d_distortion.c)
+	def_special MP_BattleIsland_Sail   @ Moemon Kai: the boat to BATTLE ISLAND and back (src/mp/mp_battleisland.c)
+	def_special MP_BattleIsland_Return
+	def_special MP_Stadium_BufferNews   @ Moemon Kai: POKéMON STADIUM (src/mp/mp_stadium.c, mp_stadium_ui.c)
+	def_special MP_Stadium_Open

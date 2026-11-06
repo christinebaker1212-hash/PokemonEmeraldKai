@@ -1,0 +1,7 @@
+# STADIUM's screens (mp_stadium_ui.c, docs/STADIUM.md) on BATTLE ISLAND: the attendant opens them, the cup list, the
+# PIKA CUP's switches, six rentals registered through the A menu, the game's SUMMARY of a rental and back to the list,
+# three picked against the first trainer and the battle begins.
+MODE=1
+TMO=300
+EXPECT_A=("stadium: screens opened" "stadium: summary of" "stadium: back from the summary" "PIKA CUP class 0 round 1 begins (options 3, rentals only 1)" "stadium: battle 1 against")
+UNEXPECT_A=("crash" "out of memory")

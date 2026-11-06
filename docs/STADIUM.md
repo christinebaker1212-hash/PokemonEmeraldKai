@@ -39,6 +39,28 @@ All teams, movesets, TRAINER names, TRAINER IDs, and Pokémon nicknames will be 
 Achievements will be given for every step of Pokémon Stadium cups that are completed, with great rewards upon full completion. The rewards for beating the Stadiums must be several orders of magnitude better than the original rewards, such as perfect IV Pokémon. A special Stadium ribbon will be given to Pokémon who complete different tiers of the Stadiums. Exceptional rewards will be given for completions using only Rental Pokémon.
 ```
 
+The user's cup options (2026-11-06, verbatim):
+
+```
+I believe that for each cup, there should be the ability to turn on or off certain restrictions in order to gain more rewards.
+
+Here are some of the restrictions available.
+
+LEVEL CAP - Any entry Pokemon will be adjusted to the level cap of the Stadium Cup in question, still keeping the same exclusions as uncapped. If turned off, greater rewards are given.
+SPECIES - Only species from GEN 1 are allowed. If this setting is turned off, then any Pokemon that is NOT a restricted & Legendary Pokémon, such as Major box-art legendaries and mythicals (e.g., Mewtwo, Groudon, Kyogre, Dialga, Palkia, Zacian, Koraidon, Miraidon) are permitted to enter, with the exception of Cups that would allow all Pokemon in Gen 1.  If turned on, greater rewards are given.
+HELD ITEMS - If this setting is on, allows you to have Held Items on entry Pokemon.  If turned off, greater rewards are given.
+RENTALS ONLY - if a trainer registers a team of Pokemon consisting only of Rentals and completes a Cup, they will greater rewards.
+
+If every restriction is in place, the player receives great rewards.
+```
+
+How it's read (noted for the user): each switch's harder side earns more: LEVEL CAP OFF (the POKéMON must fit the
+cup's levels as they are; ON scales them to the cap), SPECIES ON (the first 151 and Generation I moves; OFF opens every
+POKéMON but the restricted legendaries and mythicals, and Generation I moves aren't required), HELD ITEMS OFF, RENTALS
+ONLY. "Every restriction in place" = all four on their hard side: the greatest rewards. In a cup that allows all of
+Generation I (the PRIME CUP, MEWTWO and MEW included) SPECIES OFF also allows the restricted legendaries. The CHALLENGE
+CUP's POKéMON are given, so its switches don't apply (its own rewards).
+
 ## Status
 
 - T15b (data) done: every STADIUM trainer, team and rental list (src/data/mp_stadium_data.h, tools/stadium/gen_data.py)

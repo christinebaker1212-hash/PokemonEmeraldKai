@@ -2240,7 +2240,11 @@ void MP_FrameUpdate(void)
     MP_TCard_Update();   // the TRAINER CARD's badge records and the BADGE CASE's fading (mp_tcard.c)
     {
         void MP_HmRescue_Update(void);
+        void MP_BattleIsland_Update(void);
+        void MP_StadiumUi_Update(void);
         MP_HmRescue_Update();   // HMs a friend's progress made impossible to get (mp_hmrescue.c)
+        MP_BattleIsland_Update();   // the BATTLE TICKET's courier (mp_battleisland.c)
+        MP_StadiumUi_Update();   // POKéMON STADIUM's screens back after a battle (mp_stadium_ui.c)
     }
     if (sFollowRegion && MP_IsInOverworld() && MP_IsLocalFree())
     {

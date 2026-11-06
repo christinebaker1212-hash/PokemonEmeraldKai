@@ -15740,6 +15740,16 @@
       "secondary_tileset": "gTileset_BattleFrontierOutsideEast",
       "border_filepath": "data/layouts/Johto_BattleTowerOutside/border.bin",
       "blockdata_filepath": "data/layouts/Johto_BattleTowerOutside/map.bin"
+    },
+    {
+      "id": "LAYOUT_BATTLE_ISLAND",
+      "name": "BattleIsland_Layout",
+      "width": 40,
+      "height": 34,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_EverGrande",
+      "border_filepath": "data/layouts/BattleIsland/border.bin",
+      "blockdata_filepath": "data/layouts/BattleIsland/map.bin"
     }
   ]
 }

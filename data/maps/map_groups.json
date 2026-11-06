@@ -45,7 +45,8 @@
     "gMapGroup_SinnohIndoor2",
     "gMapGroup_SinnohIndoor3",
     "gMapGroup_SinnohIndoor4",
-    "gMapGroup_Orre"
+    "gMapGroup_Orre",
+    "gMapGroup_BattleIsland"
   ],
   "gMapGroup_TownsAndRoutes": [
     "PetalburgCity",
@@ -1904,5 +1905,9 @@
   ],
   "gMapGroup_Orre": [
     "Orre_OutskirtStand"
+  ],
+  "gMapGroup_BattleIsland": [
+    "BattleIsland",
+    "BattleIsland_Stadium"
   ]
 }

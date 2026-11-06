@@ -1075,6 +1075,9 @@ static const u8 sWhtApricornDesc[] = _("A white APRICORN.");
 static const u8 sBlkApricornDesc[] = _("A black APRICORN.");
 static const u8 sPnkApricornDesc[] = _("A pink APRICORN.");
 
+static const u8 sBattleTicketDesc[] = _(
+    "A ticket for the boat to BATTLE ISLAND, home of POKéMON STADIUM. Any region's port sails there.");
+
 static const u8 sBlueCardDesc[] = _(
     "Card to save points.");
 

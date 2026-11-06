@@ -13,6 +13,7 @@
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "item.h"
+#include "constants/items.h"
 #include "fieldmap.h"
 #include "party_menu.h"
 #include "mp_region.h"
@@ -918,8 +919,9 @@ void Sinnoh_PlatinumMapScripts(void)
     u32 i, j;
     if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
         return;
-    // CANALAVE's ferry sailor: only while the boat can sail (as JOHTO's and KANTO's ports), and for the first boat in
-    if (MP_Region_CanSail() || VarGet(VAR_SINNOH_ARRIVAL) == 1)
+    // CANALAVE's ferry sailor: only while the boat can sail (as JOHTO's and KANTO's ports), for the first boat in, and
+    // with a BATTLE TICKET (the boat to BATTLE ISLAND: mp_battleisland.c)
+    if (MP_Region_CanSail() || VarGet(VAR_SINNOH_ARRIVAL) == 1 || CheckBagHasItem(ITEM_BATTLE_TICKET, 1))
         FlagClear(FLAG_SINNOH_HIDE_REGION_BOAT);
     else
         FlagSet(FLAG_SINNOH_HIDE_REGION_BOAT);

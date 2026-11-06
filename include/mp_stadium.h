@@ -4,6 +4,8 @@
 // POKéMON STADIUM on BATTLE ISLAND (docs/STADIUM.md, docs/stadium/RULES.md): the data from the user's ROM
 // (tools/stadium/gen_data.py -> src/data/mp_stadium_data.h) and its conversion to the game's POKéMON.
 
+#include "constants/stadium.h"
+
 struct Pokemon;
 
 // One POKéMON as STADIUM stores it (Generation I): DVs and stat EXP, not IVs and EVs

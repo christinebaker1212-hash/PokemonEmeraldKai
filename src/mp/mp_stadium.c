@@ -4,6 +4,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp_stadium.h"
+#include "mp_stadium_cup.h"
 #include "battle.h"
 #include "pokemon.h"
 #include "random.h"
@@ -578,4 +579,30 @@ void MP_StadiumCc_Debug(u8 cls, u8 round, u8 trainer)
             printf(" %d", (int)GetMonData(&party[i], MON_DATA_MOVE1 + j));
         printf("\n");
     }
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// The lobby (data/maps/BattleIsland_Stadium/scripts.inc)
+
+#include "script.h"
+void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+
+// The NURSE's news: the player's own results and the cups' champions (gStringVar4)
+void MP_Stadium_BufferNews(void)
+{
+    char buf[400];
+    StadiumRecords_News(buf, sizeof(buf));
+    MP_AsciiToGame(gStringVar4, buf, sizeof(gStringVar4) - 1);
+}
+
+// The attendant: into POKéMON STADIUM (its screens: mp_stadium_ui.c), the script waits until they close
+void MP_Stadium_Open(void)
+{
+    void MP_StadiumUi_Open(void);
+    MP_StadiumUi_Open();
+}
+
+const struct StadiumCcTrainer *StadiumCc_Trainer(u8 cls, u8 i)
+{
+    return &sStadiumCcTrainers[cls % 4][i % 8];
 }

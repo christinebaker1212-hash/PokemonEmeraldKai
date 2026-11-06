@@ -1205,6 +1205,15 @@ static const struct {u16 map; s8 x, y;} sRegionPorts[REGION_COUNT] = {
     {MAP_SINNOH_CANALAVE_CITY, 11, 22},   // (CANALAVE's dock, beside the harbor sailor: tools/sinnoh/words.py)
 };
 
+// Moemon Kai: a region's port (BATTLE ISLAND's boat back when the port it came from is unknown: mp_battleisland.c)
+bool8 MP_Region_PortOf(u8 region, u16 *map, s16 *x, s16 *y)
+{
+    if (region >= REGION_COUNT)
+        return FALSE;
+    *map = sRegionPorts[region].map, *x = sRegionPorts[region].x, *y = sRegionPorts[region].y;
+    return TRUE;
+}
+
 // VAR_0x8004 = the region, VAR_0x8005 = the party slot of the one Pokémon who comes (customs: the others go to the
 // GLOBAL PC; EventScript_RegionCustoms picked it). RESULT 1: the boat leaves (the script waits), 0: not allowed.
 #define TRIP_TRAIN 0x7A   // VAR_0x8007 for the MAGNET TRAIN (EventScript_MagnetTrain*): GOLDENROD <-> SAFFRON, no ticket

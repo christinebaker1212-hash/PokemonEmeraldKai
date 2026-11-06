@@ -1418,6 +1418,11 @@ static void RenderToBackbuffer(void)
             SDL_Texture *Sinnoh_Mining_Canvas(SDL_Renderer *r);   // (SINNOH's Underground digging: src/sinnoh/s3d_mining.c)
             badges = Sinnoh_Mining_Canvas(sRenderer);
         }
+        if (!fight && !badges)
+        {
+            SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r);   // (POKéMON STADIUM's screens: src/mp/mp_stadium_ui.c)
+            badges = MP_StadiumUi_Canvas(sRenderer);
+        }
         if (badges)
         {
             gameTex = badges;

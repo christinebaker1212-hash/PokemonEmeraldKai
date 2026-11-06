@@ -131,6 +131,8 @@ bool8 MP_Region_IsSharedMap(u8 group, u8 num)
                                   MAP_BATTLE_FRONTIER_BATTLE_FACTORY_LOBBY, MAP_BATTLE_FRONTIER_BATTLE_FACTORY_PRE_BATTLE_ROOM,
                                   MAP_BATTLE_FRONTIER_BATTLE_FACTORY_BATTLE_ROOM};
     u32 i;
+    if (group == MAP_GROUP(MAP_BATTLE_ISLAND))   // (BATTLE ISLAND: every region's, mp_battleisland.c)
+        return TRUE;
     for (i = 0; i < ARRAY_COUNT(sShared); i++)
         if (MAP_GROUP(sShared[i]) == group && MAP_NUM(sShared[i]) == num)
             return TRUE;

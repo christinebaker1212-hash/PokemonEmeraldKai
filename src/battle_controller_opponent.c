@@ -44,6 +44,8 @@ void S3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn);  
 
 // Moemon Co-op: the BATTLE SIMULATOR (mp_sim.c)
 extern bool8 gMpSimBattle;
+extern bool8 gMpStadiumBattle;   // Moemon Kai: POKéMON STADIUM (mp_stadium_cup.c)
+u16 MP_StadiumBattle_TrainerPic(void);
 u16 MP_Sim_TrainerPic(void);
 
 static void OpponentHandleGetMonData(void);
@@ -1319,7 +1321,7 @@ static void OpponentHandleDrawTrainerPic(void)
     else if (gBattleTypeFlags & BATTLE_TYPE_EREADER_TRAINER)
     {
         // Moemon Co-op: the BATTLE SIMULATOR's digital trainer: a player's look as a hologram (mp_sim.c)
-        trainerPicId = gMpSimBattle ? MP_Sim_TrainerPic() : GetEreaderTrainerFrontSpriteId();
+        trainerPicId = gMpStadiumBattle ? MP_StadiumBattle_TrainerPic() : gMpSimBattle ? MP_Sim_TrainerPic() : GetEreaderTrainerFrontSpriteId();
     }
     else if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
     {
@@ -1416,7 +1418,7 @@ static void OpponentHandleTrainerSlide(void)
     else if (gBattleTypeFlags & BATTLE_TYPE_EREADER_TRAINER)
     {
         // Moemon Co-op: the BATTLE SIMULATOR's digital trainer: a player's look as a hologram (mp_sim.c)
-        trainerPicId = gMpSimBattle ? MP_Sim_TrainerPic() : GetEreaderTrainerFrontSpriteId();
+        trainerPicId = gMpStadiumBattle ? MP_StadiumBattle_TrainerPic() : gMpSimBattle ? MP_Sim_TrainerPic() : GetEreaderTrainerFrontSpriteId();
     }
     else if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
     {

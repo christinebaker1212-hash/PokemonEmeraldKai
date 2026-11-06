@@ -168,6 +168,7 @@ Kanto_VermilionCity_EventScript_84165C8::
 Kanto_VermilionCity_EventScript_84165D2::
 	lock
 	faceplayer
+	call EventScript_BattleIslandOffer   @ Moemon Kai: BATTLE ISLAND (data/scripts/battle_island.inc)
 	goto_if_eq VAR_QZ_0x5135, 3, Kanto_VermilionCity_EventScript_841662D
 	msgbox Kanto_VermilionCity_Text_842FB5D, MSGBOX_DEFAULT
 	release

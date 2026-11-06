@@ -5276,4 +5276,16 @@ const struct Item gItems[] =
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
+
+    [ITEM_BATTLE_TICKET] =   // Moemon Kai: POKéMON STADIUM's island (any region's port, after any ELITE FOUR)
+    {
+        .name = _("BATTLE TICKET"),
+        .itemId = ITEM_BATTLE_TICKET,
+        .price = 0,
+        .description = sBattleTicketDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
 };

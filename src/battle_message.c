@@ -58,6 +58,11 @@ EWRAM_DATA struct BattleMsgData *gBattleMsgDataPtr = NULL;
 
 // Moemon Co-op: the BATTLE SIMULATOR (mp_sim.c)
 extern bool8 gMpSimBattle;
+extern bool8 gMpStadiumBattle;   // Moemon Kai: POKéMON STADIUM (mp_stadium_cup.c)
+const u8 *MP_StadiumBattle_ClassName(void);
+void MP_StadiumBattle_TrainerName(u8 *out);
+const u8 *MP_StadiumBattle_LoseText(void);
+const u8 *MP_StadiumBattle_WinText(void);
 const u8 *MP_Sim_ClassName(void);
 void MP_Sim_TrainerName(u8 *out);
 const u8 *MP_Sim_LoseText(void);
@@ -2930,6 +2935,8 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                     toCpy = gTrainerClassNames[GetFrontierOpponentClass(gTrainerBattleOpponent_A)];
                 else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER_HILL)
                     toCpy = gTrainerClassNames[GetTrainerHillOpponentClass(gTrainerBattleOpponent_A)];
+                else if (gMpStadiumBattle)   // Moemon Kai: POKéMON STADIUM's trainers (mp_stadium_cup.c)
+                    toCpy = MP_StadiumBattle_ClassName();
                 else if (gMpSimBattle)   // Moemon Co-op: the BATTLE SIMULATOR's digital trainers (mp_sim.c)
                     toCpy = MP_Sim_ClassName();
                 else if (gBattleTypeFlags & BATTLE_TYPE_EREADER_TRAINER)
@@ -2963,6 +2970,11 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                 else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER_HILL)
                 {
                     GetTrainerHillTrainerName(text, gTrainerBattleOpponent_A);
+                    toCpy = text;
+                }
+                else if (gMpStadiumBattle)   // Moemon Kai: POKéMON STADIUM's trainers (mp_stadium_cup.c)
+                {
+                    MP_StadiumBattle_TrainerName(text);
                     toCpy = text;
                 }
                 else if (gMpSimBattle)   // Moemon Co-op: a digital copy of a player (mp_sim.c)
@@ -3002,7 +3014,9 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                     toCpy = gSaveBlock2Ptr->playerName;
                 break;
             case B_TXT_TRAINER1_LOSE_TEXT: // trainerA lose text
-                if (gMpSimBattle)
+                if (gMpStadiumBattle)
+                    toCpy = MP_StadiumBattle_LoseText();   // Moemon Kai: POKéMON STADIUM
+                else if (gMpSimBattle)
                     toCpy = MP_Sim_LoseText();   // Moemon Co-op: the BATTLE SIMULATOR
                 else if (gBattleTypeFlags & BATTLE_TYPE_FRONTIER)
                 {
@@ -3020,7 +3034,9 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                 }
                 break;
             case B_TXT_TRAINER1_WIN_TEXT: // trainerA win text
-                if (gMpSimBattle)
+                if (gMpStadiumBattle)
+                    toCpy = MP_StadiumBattle_WinText();   // Moemon Kai: POKéMON STADIUM
+                else if (gMpSimBattle)
                     toCpy = MP_Sim_WinText();   // Moemon Co-op: the BATTLE SIMULATOR
                 else if (MP_QzEarlyRivalBattle())
                 {
