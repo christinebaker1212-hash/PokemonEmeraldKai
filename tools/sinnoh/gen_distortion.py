@@ -74,6 +74,14 @@ def read(root):
             n = struct.unpack('<i', secs[2][:4])[0]
             for i in range(n):
                 cams.append(struct.unpack('<6h3Hhi', secs[2][4 + i * 24:28 + i * 24]))
+        # the ghost props (DistWorldGhostPropHeader / Template / Trigger): props shown and hidden by group, the groups
+        # turned on and off by the tiles the player steps onto facing a way
+        f['ghosts'], f['trigs'], f['gdefault'] = [], [], 0
+        if secs[3]:
+            tc, trc, f['gdefault'] = struct.unpack('<iiI', secs[3][:12])
+            f['ghosts'] = [struct.unpack('<IHhhh', secs[3][12 + i * 12:24 + i * 12]) for i in range(tc)]
+            q = 12 + tc * 12
+            f['trigs'] = [struct.unpack('<Ihh6h', secs[3][q + i * 20:q + 20 + i * 20]) for i in range(trc)]
         f['nplat'] = len(plats) - f['plat']
         f['njump'] = len(jumps) - f['jump']
         f['ncam'] = len(cams) - f['cam']
@@ -215,7 +223,16 @@ def tables(root):
         sc = [c.eval(v) / 4096.0 for v in scales[kind]]
         props.append((num, o, sc[0] or 1.0))
     evs, named = events(c)
-    return dict(plats=plats, paths=paths, conns=conns, props=props, c=c, events=evs, named=named, root=root,
+    simple = []
+    for entry in c.initializer('sSimplePropsMapTemplates'):
+        hid = c.eval(entry[0])
+        if hid == 0xFFFF or entry[1].strip() in ('NULL', '0'):
+            continue
+        for t in c.initializer(entry[1].strip()):
+            if isinstance(t, dict):
+                simple.append((hid, c.eval(t['propKind']), c.eval(t['tileX']), c.eval(t['tileY']), c.eval(t['tileZ']),
+                               c.eval(t['flagCond']), c.eval(t['flagCondVal'])))
+    return dict(simple=simple, plats=plats, paths=paths, conns=conns, props=props, c=c, events=evs, named=named, root=root,
                 people=people(c, root),
                 falls=[(c.eval(t['mapHeaderID']), c.eval(t['tileX']), c.eval(t['tileZ']), c.eval(t['flagIndex']))
                        for t in c.initializer('sBoulderFallLocations') if c.eval(t['mapHeaderID']) != 0xFFFF],
@@ -431,6 +448,10 @@ def write(out, data):
               '#define DW_FLAG_PUZZLE_FINISHED 0', '#define DW_PLATFORM_FLAG_INVALID 11', '#define DW_FLAG_STEPPING_STONES 0',
               'static const struct { u16 hid; s16 x, z; s16 flag; } sDwFalls[1];', '#define DW_FALL_COUNT 0',
               'static const struct DwTeleport sDwTeleports[1];', '#define DW_TELEPORT_COUNT 0',
+              'static const struct DwGhost sDwGhosts[1];', '#define DW_GHOST_COUNT 0',
+              'static const struct DwGhostTrig sDwGhostTrigs[1];', '#define DW_GHOST_TRIG_COUNT 0',
+              'static const struct DwGhostFloor sDwGhostFloors[1];', '#define DW_GHOST_FLOOR_COUNT 0',
+              'static const struct DwSimple sDwSimple[1];', '#define DW_SIMPLE_COUNT 0',
               'static const struct DwPerson sDwPeople[1];', '#define DW_PEOPLE_COUNT 0',
               'static const struct DwCmd sDwShadows[1];', '#define DW_SHADOW_COUNT 0',
               '#define DW_PROP_GIRATINA_SHADOW 0',
@@ -520,6 +541,33 @@ def write(out, data):
     o.append('static const struct { u16 hid; s16 x, z; s16 flag; } sDwFalls[] = {')
     for hid, x, z, fl in tbl['falls']:
         o.append('    {%d, %d, %d, %d},' % (hid, x, z, fl if fl < 0x8000 else -1))
+    o.append('};')
+    # the ghost props by floor (the props, the floor's first one, count and default groups; the step triggers)
+    gh, tr, gf = [], [], []
+    for f in floors:
+        gf.append((f['hid'], len(gh), len(f['ghosts']), len(tr), len(f['trigs']), f['gdefault']))
+        gh += [(f['hid'],) + g for g in f['ghosts']]
+        tr += [(f['hid'],) + t for t in f['trigs']]
+    o.append('#define DW_GHOST_COUNT %d' % len(gh))
+    o.append('static const struct DwGhost sDwGhosts[] = {')
+    for g in gh:
+        o.append('    {%d, %d, %d, {%d, %d, %d}},' % g)
+    o.append('};')
+    o.append('#define DW_GHOST_TRIG_COUNT %d' % len(tr))
+    o.append('static const struct DwGhostTrig sDwGhostTrigs[] = {')
+    for t in tr:
+        o.append('    {%d, %d, %d, %d, {%d, %d, %d, %d, %d, %d}},' % t)
+    o.append('};')
+    o.append('#define DW_GHOST_FLOOR_COUNT %d' % len(gf))
+    o.append('static const struct DwGhostFloor sDwGhostFloors[] = {')
+    for g in gf:
+        o.append('    {%d, %d, %d, %d, %d, 0x%X},' % g)
+    o.append('};')
+    # the simple props (sSimplePropsMapTemplates: the portals, B5F's waterfall), shown by a condition
+    o.append('#define DW_SIMPLE_COUNT %d' % len(tbl['simple']))
+    o.append('static const struct DwSimple sDwSimple[] = {')
+    for t in tbl['simple']:
+        o.append('    {%d, %d, {%d, %d, %d}, %d, %d},' % t)
     o.append('};')
     # B7F <-> GIRATINA's room (no events: overlay009 checks the tiles)
     tp = teleports(tbl['root'])

@@ -1,0 +1,18 @@
+# WATTSON in a co-op Triple Battle, kept at low HP so he uses his SUPER POTIONs while BOB's THUNDER WAVE paralyzes his
+# POKéMON and ALICE scratches: no HP bar ever turns back (it used to fill, drop to zero and fill again), and the
+# battle goes on to the end.
+MODE=3
+WARP=10,0,5,3
+WARP_B=10,0,5,6
+WARP_C=10,0,3,3
+TMO=500
+ENV_A="MOEMON_DEBUG_PARTY=283:50,280:50 MOEMON_ANIM_SPEED=30"
+ENV_B="MOEMON_DEBUG_PARTY=283:50,280:50 MOEMON_ANIM_SPEED=30"
+ENV_C="MOEMON_DEBUG_PARTY=283:50,280:50 MOEMON_ANIM_SPEED=30"
+EXPECT_A=("(and another: triple)" "co-op: battle over, outcome 1")
+EXPECT_B=("co-op battle link: 3 games" "co-op: battle over, outcome 1")
+EXPECT_C=("co-op battle link: 3 games" "co-op: battle over, outcome 1")
+UNEXPECT_A=("turned back" "BADEGG" "[crash]")
+UNEXPECT_B=("turned back" "BADEGG" "[crash]")
+UNEXPECT_C=("turned back" "BADEGG" "[crash]")
+GEN=3

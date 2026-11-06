@@ -590,6 +590,10 @@ struct BattleBarInfo
     s32 oldValue;
     s32 receivedValue;
     s32 currValue;
+    // Moemon Co-op: a bar animation owns this struct until it ends (healthbox refreshes leave it alone)
+    u8 moving;
+    u32 movedAt;
+    s32 lastShown;   // the HP the moving bar showed last (a check that it never turns back)
 };
 
 struct BattleSpriteData

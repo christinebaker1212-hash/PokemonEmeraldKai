@@ -1020,6 +1020,20 @@ void SetBattleBarStruct(u8 battler, u8 healthboxSpriteId, s32 maxVal, s32 oldVal
     gBattleSpritesDataPtr->battleBars[battler].oldValue = oldVal;
     gBattleSpritesDataPtr->battleBars[battler].receivedValue = receivedValue;
     gBattleSpritesDataPtr->battleBars[battler].currValue = -32768;
+    // Moemon Co-op: a bar that will move (damage, healing, EXP) is marked until it reaches its end
+    gBattleSpritesDataPtr->battleBars[battler].moving = (receivedValue != 0);
+    gBattleSpritesDataPtr->battleBars[battler].movedAt = gMain.vblankCounter1;
+    gBattleSpritesDataPtr->battleBars[battler].lastShown = -1;
+}
+
+// Moemon Co-op: a controller is animating this battler's HP or EXP bar right now. UpdateHealthboxAttribute must not
+// set the bar again meanwhile: that replaced the moving bar's numbers with the party's (not yet updated) HP, and the
+// controller then drove a bar that had already ended, which filled it again from empty (healing in a Triple Battle
+// while another Pokemon's status changed). A bar no one has moved for a few frames (a battle cut short) is free.
+static bool8 BarIsMoving(u8 battler)
+{
+    struct BattleBarInfo *bar = &gBattleSpritesDataPtr->battleBars[battler];
+    return bar->moving && (u32)(gMain.vblankCounter1 - bar->movedAt) <= 4;
 }
 
 void SetHealthboxSpriteInvisible(u8 healthboxSpriteId)
@@ -2176,6 +2190,23 @@ void UpdateHealthboxAttribute(u8 healthboxSpriteId, struct Pokemon *mon, u8 elem
     // its max HP of 0 would divide by zero
     if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE)
         return;
+    if (BarIsMoving(battler))   // Moemon Co-op: the moving bar keeps its numbers (BarIsMoving)
+    {
+        if (elementId == HEALTHBOX_HEALTH_BAR || elementId == HEALTHBOX_EXP_BAR || elementId == HEALTHBOX_CURRENT_HP)
+            return;
+        if (elementId == HEALTHBOX_ALL)
+        {
+            MPNet_Log("battle: healthbox %d refreshed while its bar moves", battler);
+            if (IS_TRIPLE_BATTLE())
+                MP_TriCards_Update(battler, mon, FALSE);
+            UpdateLvlInHealthbox(healthboxSpriteId, GetMonData(mon, MON_DATA_LEVEL));
+            if (GetBattlerSide(battler) == B_SIDE_PLAYER)
+                UpdateHpTextInHealthbox(healthboxSpriteId, GetMonData(mon, MON_DATA_MAX_HP), HP_MAX);
+            UpdateNickInHealthbox(healthboxSpriteId, mon);
+            UpdateStatusIconInHealthbox(healthboxSpriteId);
+            return;
+        }
+    }
     if (IS_TRIPLE_BATTLE())   // Moemon Co-op: the card
         MP_TriCards_Update(battler, mon, elementId == HEALTHBOX_ALL);
 
@@ -2265,11 +2296,11 @@ s32 MP_MoveHealthBar(u8 battler, u8 healthboxSpriteId)
             w = MoveBattleBar(battler, healthboxSpriteId, HEALTH_BAR, 0);
             if (w != -1)
                 v = w;
-            else   // (the first step already reached the end: the bar stays there, the next frame ends it; MoveBattleBar
-                   // reset it to 0 for the next bar, which made it fill again from empty, over and over)
+            else   // (the first step already reached the end: the bar stays there and the next frame ends it, still
+                   // marked as moving until then)
             {
                 gBattleSpritesDataPtr->battleBars[battler].currValue = at;
-                MPNet_Log("battle: health bar ends on a quick step");
+                gBattleSpritesDataPtr->battleBars[battler].moving = TRUE;
             }
         }
     }
@@ -2319,8 +2350,21 @@ s32 MoveBattleBar(u8 battler, u8 healthboxSpriteId, u8 whichBar, u8 unused)
         MP_TriCards_SetBarHp(battler, shown, bar->maxValue);
     }
 
+    // Moemon Co-op: a bar that has reached its end stays there. The stock code set currValue to 0 here, so any call
+    // after the end (a second step in the same frame, a healthbox refresh, a controller that asks once more) moved
+    // the bar again from empty: HP refilling, back to zero, refilling. Now every later call just answers -1.
     if (currentBarValue == -1)
-        gBattleSpritesDataPtr->battleBars[battler].currValue = 0;
+        gBattleSpritesDataPtr->battleBars[battler].moving = FALSE;
+    else
+    {
+        struct BattleBarInfo *bar = &gBattleSpritesDataPtr->battleBars[battler];
+        bar->movedAt = gMain.vblankCounter1;
+        if (whichBar == HEALTH_BAR && bar->lastShown >= 0
+         && (bar->receivedValue < 0 ? currentBarValue < bar->lastShown : currentBarValue > bar->lastShown))
+            MPNet_Log("battle: health bar %d turned back (%d -> %d)", battler, (int)bar->lastShown, (int)currentBarValue);
+        if (whichBar == HEALTH_BAR)
+            bar->lastShown = currentBarValue;
+    }
 
     return currentBarValue;
 }

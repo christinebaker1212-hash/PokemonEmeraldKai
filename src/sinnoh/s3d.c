@@ -106,8 +106,9 @@ static struct
 } sPack;
 
 // Props this game places at run time (SINNOH's gyms that move: src/sinnoh/s3d_gyms.c), in the current map's world
-typedef struct { bool8 on; u8 shade; s16 mesh; float m[12]; } S3dDynProp;
+typedef struct { bool8 on; u8 shade, fade; s16 mesh; float m[12]; } S3dDynProp;   // (fade: 0 opaque, else its alpha 1-31 + 1)
 static u8 sShade;   // (drawing a prop as a see-through dark shape: its alpha 1-31, 0: as it is)
+static u8 sFade;    // (drawing a prop faded: its alpha + 1, 0: as it is)
 static S3dDynProp sDyn[S3D_DYN_PROPS];
 float (*gS3dHeightHook)(s32 mapX, s32 mapY, float h);
 float (*gS3dObjectHeightHook)(u8 localId, float h);
@@ -836,7 +837,7 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const S3dG
     float area = (b->x - a->x) * (c->y - a->y) - (c->x - a->x) * (b->y - a->y);
     s32 minx, maxx, miny, maxy, x, y;
     const S3dTex *t = g->tex >= 0 && (u32)g->tex < sPack.ntex ? &sPack.tex[sPack.shown[g->tex]] : NULL;
-    bool8 clear = g->alpha < 31 || sShade;
+    bool8 clear = g->alpha < 31 || sShade || sFade;
     if (area == 0.0f || g->cull == 3 || (g->cull == 1 && area > 0.0f) || (g->cull == 2 && area < 0.0f))
         return;
     minx = (s32)floorf(fminf(a->x, fminf(b->x, c->x)));
@@ -886,6 +887,8 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const S3dG
                     out[ch] = col[ch];
             }
             al *= g->alpha / 31.0f;
+            if (sFade)
+                al *= (sFade - 1) / 31.0f;
             if (sShade)
             {
                 out[0] = out[1] = out[2] = 0;   // (a shadow: dark, see-through, its texture's shape)
@@ -947,7 +950,7 @@ static void DrawMesh(const S3dMesh *mesh, const float *m, float ox, float oy, fl
     for (gi = 0; gi < mesh->ngroups; gi++)
     {
         S3dGroup *g = &mesh->g[gi];
-        bool8 soft = sShade || g->alpha < 31 || (g->tex >= 0 && (u32)g->tex < sPack.ntex && sPack.tex[sPack.shown[g->tex]].soft);
+        bool8 soft = sShade || sFade || g->alpha < 31 || (g->tex >= 0 && (u32)g->tex < sPack.ntex && sPack.tex[sPack.shown[g->tex]].soft);
         if (soft != pass)
             continue;
         if (g->count > sScratchSize)
@@ -1204,8 +1207,10 @@ static void Render(void)
             if (sDyn[i].on)
             {
                 sShade = sDyn[i].shade;
+                sFade = sDyn[i].fade;
                 DrawMesh(&sPack.mesh[sDyn[i].mesh], sDyn[i].m, 0, 0, 0, pass);
                 sShade = 0;
+                sFade = 0;
             }
 }
 
@@ -1276,6 +1281,7 @@ bool8 S3D_DynPropTurned(u8 slot, u16 model, float x, float y, float z, float til
         return FALSE;
     sDyn[slot].on = TRUE;
     sDyn[slot].shade = 0;
+    sDyn[slot].fade = 0;
     sDyn[slot].mesh = sPack.named[i].mesh;
     // (rows of Ry * Rx: a point is turned about x, then about y; Platinum's angles)
     sDyn[slot].m[0] = cs, sDyn[slot].m[1] = sn * sx, sDyn[slot].m[2] = sn * cx, sDyn[slot].m[3] = x;
@@ -1313,6 +1319,14 @@ void S3D_DynPropShade(u8 slot, u8 alpha)
 {
     if (slot < S3D_DYN_PROPS)
         sDyn[slot].shade = alpha;
+}
+
+// The prop in SLOT drawn see-through (ALPHA 0-31: the DISTORTION WORLD's ghost props fading in and out), until it's
+// set again
+void S3D_DynPropFade(u8 slot, u8 alpha)
+{
+    if (slot < S3D_DYN_PROPS)
+        sDyn[slot].fade = alpha >= 31 ? 0 : alpha + 1;
 }
 
 void S3D_DynPropHide(u8 slot)

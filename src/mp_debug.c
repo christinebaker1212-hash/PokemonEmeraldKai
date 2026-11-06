@@ -1952,7 +1952,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
                     SetMonData(&gEnemyParty[i], MON_DATA_HP, &hp);
             for (i = 0; i < gBattlersCount; i++)
                 if (GetBattlerSide(i) == B_SIDE_OPPONENT && gBattleMons[i].hp)
+                {
                     gBattleMons[i].hp = hp;
+                    UpdateHealthboxAttribute(gHealthboxSpriteIds[i], &gEnemyParty[gBattlerPartyIndexes[i]], HEALTHBOX_HEALTH_BAR);
+                }
             printf("[test] foehp: %d\n", v);
         }
     }
@@ -1983,6 +1986,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
             SetMonData(&gPlayerParty[slot], MON_DATA_HP, &hp);
             if (hp == 0)   // (a faint, as far as REVIVE's cursor knows)
                 MP_NoteFaint(GetMonData(&gPlayerParty[slot], MON_DATA_PERSONALITY));
+            if (gMain.inBattle)
+            {
+                int b;
+                for (b = 0; b < gBattlersCount; b++)
+                    if (GetBattlerSide(b) == B_SIDE_PLAYER && gBattlerPartyIndexes[b] == slot && gBattleMons[b].hp)
+                    {
+                        gBattleMons[b].hp = hp;
+                        UpdateHealthboxAttribute(gHealthboxSpriteIds[b], &gPlayerParty[slot], HEALTHBOX_HEALTH_BAR);
+                    }
+            }
             printf("[test] hp: slot %d = %d\n", slot, v);
         }
     }

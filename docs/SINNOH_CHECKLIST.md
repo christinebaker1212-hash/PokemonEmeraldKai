@@ -33,7 +33,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [~] CELESTIC, CANALAVE: BYRON, IRON ISLAND with RILEY (partner)
 - [~] The three lakes, SNOWPOINT: CANDICE, LAKE ACUITY
 - [~] GALACTIC HQ, MT. CORONET, SPEAR PILLAR (the tag battle with BARRY)
-- [ ] The DISTORTION WORLD, 1:1 (section 3)
+- [x] The DISTORTION WORLD, 1:1 (section 3)
 - [~] SUNYSHORE: VOLKNER (the gym's buttons: PressSunyshoreGymButton), VICTORY ROAD
 - [~] The POKéMON LEAGUE: the ELITE FOUR, CYNTHIA, the platform lift (TriggerPlatformLift), the HALL OF FAME in
       Platinum's own scripts (now the written CHAMPION's)
@@ -63,8 +63,9 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 
 ## 3. Built for 1:1 (Platinum has it, Kai doesn't)
 
-- [ ] The DISTORTION WORLD: walking on walls and ceilings, the turning rooms, boulders, the lift, CYRUS and
-      GIRATINA (overlay009, SetPartyGiratinaForm, StartGiratinaOriginBattle)
+- [x] The DISTORTION WORLD: walking on walls and ceilings, the turning rooms, boulders, the lift, CYRUS and
+      GIRATINA (overlay009, SetPartyGiratinaForm, StartGiratinaOriginBattle): src/sinnoh/s3d_distortion.c, COOP_NOTES
+      "The DISTORTION WORLD" (tests sinnoh_dw_*)
 - [x] ETERNA's gym clock (AdvanceEternaGymClock on s3d_gyms.c's Sinnoh_EternaClock) (sinnoh_gym_eterna)
 - [x] PASTORIA's and SUNYSHORE's gym buttons in Platinum's commands (PressPastoriaGymButton / PressSunyshoreGymButton on
       s3d_gyms.c's Sinnoh_PastoriaWater / Sinnoh_SunyshoreTurn) (sinnoh_gym_pastoria, sinnoh_gym_sunyshore)

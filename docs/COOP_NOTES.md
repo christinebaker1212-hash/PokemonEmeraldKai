@@ -3960,16 +3960,10 @@ follow_behind, follow_ground.
 - Fossils (2026-11-01): OREBURGH's MINING MUSEUM scientist (Sinnoh_EventScript_FossilScientist) gives one SKULL or
   ARMOR FOSSIL (flag 0x3D37; Platinum's come from the Underground, which this game hasn't) and wakes any fossil the
   game knows at Lv 20 with JOHTO's / KANTO's specials (src/qz_specials.c sFossils). Test sinnoh_fossil.
-- The DISTORTION WORLD (2026-11-01, data/scripts/sinnoh_places.inc): Platinum walks it on walls and ceilings through
-  its own 14,000-line system (overlay009), so here it's a scene in GIRATINA's arena, Platinum's own 3D room (a rock
-  path in the void; s3d_gyms.c GYM_DISTORTION keeps steps to its rows 23-28, and field_player_avatar.c never jumps a
-  ledge a SINNOH place blocks). With SPEAR PILLAR's MARS and JUPITER beaten, CYRUS there (Sinnoh_EventScript_
-  DistortionEnter) is pulled through a tear; the player follows, battles CYRUS (TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_
-  DISTORTION_WORLD, Platinum's team, gen_trainers.py LATE_STORY: after every other SINNOH trainer so no id moves;
-  flag 0x3D34), meets GIRATINA (Lv47; 0x3D36; caught also sets TURNBACK CAVE's done flag 0x3D03, else that one
-  stays), and CYNTHIA takes them back to SPEAR PILLAR (0x3D35, story_people.EXTRA_DONE 'DISTORTION': CYRUS is gone
-  from SPEAR PILLAR after). The arena's people: gen_maps.py EXTRA_PEOPLE (with a flag). Test sinnoh_distortion.
-  Platinum's own DISTORTION WORLD (2026-11-06, being built in phases): src/sinnoh/s3d_distortion.c with Platinum's
+- The DISTORTION WORLD (2026-11-06): Platinum's own, from SPEAR PILLAR's distorted map to SENDOFF SPRING, on
+  Platinum's scripts (the written stand-in arena of 2026-11-01 and its test sinnoh_distortion are gone; SPEAR
+  PILLAR's written CYRUS, Sinnoh_EventScript_DistortionEnter, is only story_people.py's, off in Platinum's story).
+  The engine: src/sinnoh/s3d_distortion.c: src/sinnoh/s3d_distortion.c with Platinum's
   floor data converted at build time (tools/sinnoh/gen_distortion.py from tw_arc.narc / tw_arc_attr.narc ->
   sinnoh/platinum_dw.h, never committed; stubs without the decomp). Each floor's floating platforms (floors at
   other heights, west / east walls, ceilings) with their 32 x 32 tile attributes are walked on Platinum's 3D tile
@@ -4014,6 +4008,28 @@ follow_behind, follow_ground.
   puzzle's flags (17) are in SINNOH vars 0x52C4-0x52C5 (bit 15 of 0x52C5: set up). Test sinnoh_dw_story (1F's first
   entry: CYNTHIA through the portal, her lines, the shadow, progress 1); the other DW tests set the progress past
   their floor's first-entry scene.
+  Floor by floor (tests sinnoh_dw_b1f*, _b2f_b3f, _waterfall, _boulders, _b7f, _giratina): B4F's SURF on the
+  platforms (the water's attribute; Sinnoh_EventScript_DwSurf) and the waterfalls carrying the player between B4F's
+  ceiling and B5F (CASCADE_UP / DOWN); STRENGTH's boulders falling through B5F's holes to B6F and into the lake
+  trio's pits (sBoulderFallLocations; field_player_avatar.c PushBoulder_End -> S3D_Dw_BoulderPushed), the trio's
+  tutorials, B6F's stepping stones (FLAG_DISTORTION_WORLD_STEPPING_STONES shows its elevator). CYNTHIA rides the
+  1F and B6F elevators along (DistWorldElevatorPlatform_Init's passenger: her height follows the ride) and stands on
+  B7F's platform (people on an elevator platform stand on its top: PlatformUnder). Platinum's scripts there compare
+  their stacked world's tiles: GetPlayerMapPos / SetObjectEventPos add the floor's offset (S3D_Dw_TileOffset).
+  B7F's north end into GIRATINA's room (facing north, progress >= WON_CYRUS) and the room's south end back are
+  overlay009's own tile checks (gen_distortion.py teleports -> sDwTeleports, their scripts converted for them).
+  The room: its first and second shadows, the stepping stones shown group by group (SHOW_ROOM_PLATFORMS: ghost
+  groups 1-3) and hopped by Platinum's ledges jumped twice (built as two facing ledges: the game's ledge hop lands
+  on the second, which hops one tile on, TwiceLedge), GIRATINA coming down dark from 10 tiles up and brightening
+  (PLAY_GIRATINA_ARRIVAL: its height by the people hook, its palette blended to black), the battle (op 37), the
+  scene after it, and the portal (progress 14) to SENDOFF SPRING. Platinum loads a map again after a battle and its
+  OnLoad takes the legendary away (FLAG_MAP_LOCAL_REMOVE_OBJECT): gen_scripts.py also gives such an OnLoad as the
+  map's ON_RESUME (removes_after_battle: GIRATINA's room, UXIE / AZELF / MESPRIT's caves, FANTINA's bollards...), and
+  after a battle the floor's people its story now shows come out (op 38 -> S3D_Dw_RefreshPeople).
+  Props: the ghost props (each floor file's last section: props in groups, their default groups, the step triggers
+  that show or hide a group as the player walks a way: B3F's 49, TURNBACK CAVE's room) fade in and out over 31
+  steps (s3d.c S3D_DynPropFade); the simple props (sSimplePropsMapTemplates: the portals, B5F's waterfall) by their
+  condition. The field has 128 dynamic prop slots (S3D_DYN_PROPS).
 - Field obstacles (2026-11-01): Platinum's CUT trees, ROCK SMASH rocks and STRENGTH boulders (690) are the game's
   own (gen_maps.py OBSTACLES: EventScript_CutTree / _RockSmash / _StrengthBoulder, no flag, back each time the map
   loads as in both games). HM badges are the region's: MP_Region_FieldMoveBadge (mp_region.c) gives HOENN's badge for
@@ -5620,6 +5636,15 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   one more step every 20 frames x (ANIM SPEED / 5), the room host's MP_BattleAnimSpeed (+30%: 6, 30% quicker; NORMAL:
   none). In battle every controller's CompleteOnHealthbarDone calls battle_interface.c MP_MoveHealthBar; outside it
   party_menu.c Task_PartyMenuModifyHP (logs "party hp: +N in F frames"). Test qol_heal_speed.
+- **A bar never fills twice** (1.115.0, after HP bars filled, dropped to zero and filled again: LEFTOVERS in a
+  sandstorm, a trainer's HYPER POTION, a foe's SUPER POTION in a Triple Battle while THUNDER WAVE landed):
+  battle_interface.c MoveBattleBar used to set currValue to 0 when a bar reached its end, so any call after the end moved
+  it again from empty. A finished bar now keeps its value (every later call answers -1). struct BattleBarInfo.moving
+  (set by SetBattleBarStruct when receivedValue != 0, cleared at the end; free after 4 frames no one moved it) makes
+  UpdateHealthboxAttribute leave a moving bar's numbers alone (HEALTH_BAR / EXP_BAR / CURRENT_HP skipped, ALL redraws the
+  rest and the Triple card without HP). The HP bar and the EXP bar share one BattleBarInfo per battler. A moving HP bar
+  that ever turns back logs "battle: health bar N turned back": tests foe_potion_bar, sand_leftovers, tri_foe_potion
+  UNEXPECT it.
 - **EGGS hatch in half the time**: daycare.c TryProduceOrHatchEgg counts an egg cycle every 128 steps (was 256), so every
   EGG, carried ones too, needs half the steps; FLAME BODY / MAGMA ARMOR still take two cycles a time on top. Test
   qol_egg_hatch (`mp giveegg SPECIES`, `mp eggsteps N`).

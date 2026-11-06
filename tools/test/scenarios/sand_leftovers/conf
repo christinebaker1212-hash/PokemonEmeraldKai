@@ -1,9 +1,9 @@
 # Sandstorm, then LEFTOVERS, at the room's quickest BATTLE SPEED: the heal's HP bar fills once and stops. Its quick steps
 # (a second one every few frames) used to reset the bar to empty when the second landed on the end, so it filled again
-# and again ("battle: health bar ends on a quick step" is that case, now held at the end). Shots sl_*.png.
+# and again. A finished bar now stays at its end, and a bar that turns back logs "turned back". Shots sl_*.png.
 MODE=1
 WARP=0,16,10,11
 TMO=120
 ENV_A="MOEMON_DEBUG_PARTY=280:32 MOEMON_ANIM_SPEED=30"
-EXPECT_A=("battle: health bar ends on a quick step" "[test] battler 0 hp 40/72" "action menu at frame")
-UNEXPECT_A=("[crash]" "TIMEOUT")
+EXPECT_A=("[test] battler 0 hp 40/72" "action menu at frame")
+UNEXPECT_A=("[crash]" "TIMEOUT" "turned back")

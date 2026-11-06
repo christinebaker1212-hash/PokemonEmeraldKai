@@ -1,0 +1,9 @@
+# A trainer's HYPER POTION at the room's quickest BATTLE SPEED: the foe's HP bar fills once and stops (it used to fill,
+# fall back to empty and fill again, over and over). MARCEL carries one; his POKéMON is left at 5 HP and the
+# player only GROWLs. Shots fp_*.png.
+MODE=1
+WARP=0,16,10,11
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:32 MOEMON_ANIM_SPEED=30"
+EXPECT_A=("action menu at frame")
+UNEXPECT_A=("[crash]" "TIMEOUT" "turned back")

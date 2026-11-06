@@ -48,6 +48,10 @@ struct DwProp { u16 model; float off[3]; float scale; };
 struct DwEvent { u16 hid; s16 t[3]; u8 cond; u16 val; u16 cmd, ncmd; };
 struct DwCmd { u8 kind; s32 p[14]; };
 // overlay009's sMapObjectEvents: who stands where, shown by a condition (or added by a script), their script
+struct DwGhost { u16 hid; u8 group, kind; s16 t[3]; };
+struct DwGhostTrig { u16 hid; u8 group; s8 dir; u8 show; struct DwBounds b; };
+struct DwGhostFloor { u16 hid, first, count, tfirst, tcount; u32 def; };
+struct DwSimple { u16 hid; u8 kind; s16 t[3]; u8 cond; u16 val; };
 struct DwTeleport { u16 hid; s16 x, y, z, dz; u8 dir; u16 minProgress; const u8 *script; };
 struct DwPerson { u16 hid; u8 localId; u16 gfx; s16 pos[3]; u8 dir, cond; u16 val, hide; u8 invisible; const u8 *script; };
 
@@ -393,6 +397,75 @@ static const struct DwFloor *FloorOfHid(u16 hid)
     return NULL;
 }
 
+static bool8 Condition(u8 cond, u16 val);
+
+// ---- the ghost props (DistWorldGhostPropManager): props in groups, a group shown or hidden fading in and out over 31
+// steps (Platinum's GHOST_PROP_OPACITY_*, a step every frame of its 30: two of ours), the groups turned on and off by
+// the tiles the player steps onto facing a way (HandleGhostPropTriggerAt) and by GIRATINA's room's stepping stones
+#define DW_GHOSTS_MAX 64
+static struct { const struct DwGhostFloor *f; u32 mask; u8 alpha[DW_GHOSTS_MAX]; u8 tick; } sGhost;
+
+static void GhostsLoad(void)
+{
+    u32 i;
+    memset(&sGhost, 0, sizeof(sGhost));
+    for (i = 0; sDw.floor && i < DW_GHOST_FLOOR_COUNT; i++)
+        if (sDwGhostFloors[i].hid == sDw.floor->hid)
+            sGhost.f = &sDwGhostFloors[i];
+    if (sGhost.f == NULL)
+        return;
+    sGhost.mask = sGhost.f->def;
+    if (sGhost.f->hid == 582 && (PuzzleFlags() & (1u << 16)))
+        sGhost.mask |= (1u << 1) | (1u << 2) | (1u << 3);   // (the room's stones already shown: Platinum keeps the groups)
+    for (i = 0; i < sGhost.f->count && i < DW_GHOSTS_MAX; i++)
+        sGhost.alpha[i] = (sGhost.mask >> sDwGhosts[sGhost.f->first + i].group) & 1 ? 31 : 0;
+}
+
+static void GhostGroup(u8 group, bool8 show)
+{
+    if (show)
+        sGhost.mask |= 1u << group;
+    else
+        sGhost.mask &= ~(1u << group);
+}
+
+static void GhostTriggers(s32 x, s32 y, s32 z, u8 pdir)
+{
+    u32 i;
+    if (sGhost.f == NULL)
+        return;
+    for (i = 0; i < sGhost.f->tcount; i++)
+    {
+        const struct DwGhostTrig *t = &sDwGhostTrigs[sGhost.f->tfirst + i];
+        if (t->dir == pdir && InBounds(&t->b, x, y, z))
+            GhostGroup(t->group, t->show);
+    }
+}
+
+static u32 DrawGhosts(u32 slot)
+{
+    u32 i;
+    if (sGhost.f == NULL)
+        return slot;
+    sGhost.tick ^= 1;
+    for (i = 0; i < sGhost.f->count && i < DW_GHOSTS_MAX && slot < SHADOW_SLOT; i++)
+    {
+        const struct DwGhost *g = &sDwGhosts[sGhost.f->first + i];
+        const struct DwProp *p;
+        float w[3];
+        u8 want = (sGhost.mask >> g->group) & 1 ? 31 : 0;
+        if (sGhost.tick && sGhost.alpha[i] != want)
+            sGhost.alpha[i] += sGhost.alpha[i] < want ? 1 : -1;
+        if (sGhost.alpha[i] == 0 || g->kind >= ARRAY_COUNT(sDwProps))
+            continue;
+        p = &sDwProps[g->kind];
+        TileWorld(g->t[0], g->t[1], g->t[2], w);
+        if (S3D_DynPropScaled(slot, p->model, w[0] + p->off[0], w[1] + p->off[1], w[2] + p->off[2], 0, p->scale))
+            S3D_DynPropFade(slot++, sGhost.alpha[i]);
+    }
+    return slot;
+}
+
 // The platforms shown on this floor: each a prop at its tile (Platinum's sPropInitialPosOffsetByKind, its scale),
 // the one being ridden moved along its path
 static void DrawPlatforms(void)
@@ -417,6 +490,19 @@ static void DrawPlatforms(void)
             w[1] += sDw.rideOff[1] / 4096.0f + sDw.vib;
             w[2] += sDw.rideOff[2] / 4096.0f;
         }
+        S3D_DynPropScaled(slot++, p->model, w[0] + p->off[0], w[1] + p->off[1], w[2] + p->off[2], 0, p->scale);
+    }
+    slot = DrawGhosts(slot);
+    for (i = 0; i < DW_SIMPLE_COUNT && slot < SHADOW_SLOT; i++)
+    {
+        // the simple props (sSimplePropsMapTemplates: the portals, B5F's waterfall), shown by their condition
+        const struct DwSimple *sp = &sDwSimple[i];
+        float w[3];
+        const struct DwProp *p;
+        if (sp->hid != sDw.floor->hid || sp->kind >= ARRAY_COUNT(sDwProps) || (sp->cond && !Condition(sp->cond, sp->val)))
+            continue;
+        p = &sDwProps[sp->kind];
+        TileWorld(sp->t[0], sp->t[1], sp->t[2], w);
         S3D_DynPropScaled(slot++, p->model, w[0] + p->off[0], w[1] + p->off[1], w[2] + p->off[2], 0, p->scale);
     }
     for (; slot < SHADOW_SLOT; slot++)
@@ -1140,12 +1226,26 @@ static bool8 EventUpdate(void)
         break;
     case CMD_SHOW_ROOM_PLATFORMS:
     case CMD_HIDE_ROOM_PLATFORMS:
-        // (the room's stepping stones, ghost props shown group by group: their timing; the props are drawn with the
-        // other ghost props)
+        // the room's stepping stones, ghost groups 1-3 shown one by one (36 frames, then 48 apiece) or hidden 3-1
+        // (16, then 48 apiece, then 8): Platinum's 30 frames a second, doubled
         if (sEv.state == 0)
-            sEv.t = c->kind == CMD_SHOW_ROOM_PLATFORMS ? 36 + 48 * 2 : 16 + 48 * 2 + 8, sEv.state = 1;
-        if (sEv.t-- > 0)
+        {
+            sEv.state = 1;
+            sEv.t = (c->kind == CMD_SHOW_ROOM_PLATFORMS ? 36 : 16) * 2;
+            sEv.off = 0;   // (the groups done)
+        }
+        if (sEv.t > 0 && --sEv.t > 0)
             return FALSE;
+        if (sEv.off < 3)
+        {
+            u8 group = c->kind == CMD_SHOW_ROOM_PLATFORMS ? 1 + sEv.off : 3 - sEv.off;
+            GhostGroup(group, c->kind == CMD_SHOW_ROOM_PLATFORMS);
+            PlaySE(SE_M_TELEPORT);
+            sEv.off++;
+            sEv.t = (sEv.off < 3 ? 48 : (c->kind == CMD_SHOW_ROOM_PLATFORMS ? 0 : 8)) * 2;
+            if (sEv.t)
+                return FALSE;
+        }
         break;
     case CMD_SET_GIRATINA_ANIM:
         VarSet(VAR_DW_SHADOWS, VarGet(VAR_DW_SHADOWS) | (1 << c->p[0]));
@@ -1556,6 +1656,7 @@ void S3D_Dw_OnMapLoad(void)
     }
     if (f != NULL && DW_HAVE_DATA)
         PlatformTiles();
+    GhostsLoad();
     if (sCascadeNext.on)
     {
         // a waterfall's second half on the floor it reaches (CmdRunDataCascadeBase_Update after LoadFloor)
@@ -1751,6 +1852,8 @@ void S3D_Dw_Update(void)
             sDw.last[0] = x, sDw.last[1] = y, sDw.last[2] = z;
             if (!first && TwiceLedge(obj))
                 return;
+            if (!first)
+                GhostTriggers(x, y, z, ToPlatDir(obj->facingDirection));
             if (!first && TileEvents(x, y, z))
                 return;
             if (!first && Teleport(x, y, z, obj->facingDirection))
@@ -1804,6 +1907,7 @@ jumping:
             if (sDw.x != sDw.last[0] || sDw.y != sDw.last[1] || sDw.z != sDw.last[2])
             {
                 sDw.last[0] = sDw.x, sDw.last[1] = sDw.y, sDw.last[2] = sDw.z;
+                GhostTriggers(sDw.x, sDw.y, sDw.z, sDw.dir);
                 TileEvents(sDw.x, sDw.y, sDw.z);
             }
         }

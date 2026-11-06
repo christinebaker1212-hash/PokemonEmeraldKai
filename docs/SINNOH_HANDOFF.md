@@ -3,6 +3,8 @@
 Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 2026-10-31).
 
 ## Where things stand
+- 2026-11-06: the DISTORTION WORLD is Platinum's own, 1F to GIRATINA's room and out to SENDOFF SPRING, on Platinum's
+  scripts and overlay009's data (src/sinnoh/s3d_distortion.c; COOP_NOTES "The DISTORTION WORLD"; tests sinnoh_dw_*).
 - 2026-11-01, the latest: SINNOH is complete as planned. All eight gyms' moving puzzles (PASTORIA's water, SUNYSHORE's
   gears, CANALAVE's platforms, ETERNA's clock, VEILSTONE's bags, SNOWPOINT's sloped ice, HEARTHOME's dark rooms), the
   field obstacles (CUT / ROCK SMASH / STRENGTH with SINNOH's own HM badges), the story's people coming and going with it
@@ -118,8 +120,8 @@ the briefcase and BARRY's battle to mom's Running Shoes (tests sinnoh_platinum_w
 
 To build (not 1:1 yet):
 1. Partner wild battles: written (battle_setup.c TryPartnerWildBattle, test sinnoh_platinum_partner), being verified.
-2. The DISTORTION WORLD 1:1: walking on walls and ceilings, its rotating rooms, the boulders and the lift, CYRUS and
-   GIRATINA's scenes (now a scene in GIRATINA's arena: data/scripts/sinnoh_places.inc). Platinum's is
+2. (Done 2026-11-06: src/sinnoh/s3d_distortion.c.) The DISTORTION WORLD 1:1: walking on walls and ceilings, its
+   rotating rooms, the boulders and the lift, CYRUS and GIRATINA's scenes. Platinum's is
    src/overlay009/ov9_02249960.c (14,000 lines: DistWorldSystem; per-floor map info files with camera angles, moving /
    floating platforms and their jump points, ghost props, sky clouds, map objects that turn with the floor, event
    commands; its tables sMapEvents, sMovingPlatformsMapTemplates, sDistWorldMapConnectionList...). Its scripts need

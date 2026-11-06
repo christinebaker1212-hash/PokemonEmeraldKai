@@ -1,0 +1,61 @@
+pressuntil A field 5000
+mp teach 0 45
+mp trainer 11
+pressuntil A action 4000
+wait 20
+mp hp 0 72
+mp foehp 5
+press A 2
+wait 20
+press A 2
+wait 30
+shotburst fp_t0_ 360 4
+waitfor action 3000
+mp bhp
+mp hp 0 72
+mp foehp 5
+press A 2
+wait 20
+press A 2
+wait 30
+shotburst fp_t1_ 360 4
+waitfor action 3000
+mp bhp
+mp hp 0 72
+mp foehp 5
+press A 2
+wait 20
+press A 2
+wait 30
+shotburst fp_t2_ 360 4
+waitfor action 3000
+mp bhp
+mp hp 0 72
+mp foehp 5
+press A 2
+wait 20
+press A 2
+wait 30
+shotburst fp_t3_ 360 4
+waitfor action 3000
+mp bhp
+mp hp 0 72
+mp foehp 5
+press A 2
+wait 20
+press A 2
+wait 30
+shotburst fp_t4_ 360 4
+waitfor action 3000
+mp bhp
+mp hp 0 72
+mp foehp 5
+press A 2
+wait 20
+press A 2
+wait 30
+shotburst fp_t5_ 360 4
+waitfor action 3000
+mp bhp
+shot fp_after
+quit

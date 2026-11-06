@@ -37,11 +37,12 @@ const u8 *S3D_TextByName(const char *name);
 const u16 *S3D_LayoutBlocks(const struct MapLayout *layout);
 // Props placed at run time (SINNOH's gyms that move, src/sinnoh/s3d_gyms.c): Platinum's model by its number, in the
 // map's matrix world (16 units a tile; S3D_MapOrigin: the map's corner there), turned about the up axis in degrees
-#define S3D_DYN_PROPS 40
+#define S3D_DYN_PROPS 128
 bool8 S3D_DynProp(u8 slot, u16 model, float x, float y, float z, float turn);
 bool8 S3D_DynPropTurned(u8 slot, u16 model, float x, float y, float z, float tilt, float turn);
 void S3D_DynPropHide(u8 slot);
-void S3D_DynPropShade(u8 slot, u8 alpha);   // (drawn as a see-through dark shape)
+void S3D_DynPropShade(u8 slot, u8 alpha);
+void S3D_DynPropFade(u8 slot, u8 alpha);    // (see-through: 0-31)   // (drawn as a see-through dark shape)
 void S3D_DynPropsClear(void);
 #define S3D_DARK_LIGHTS 40
 void S3D_SetDarkness(float level, const s16 (*lights)[3], u8 n);   // a dark room (0: none) lit around {x, y, radius}
