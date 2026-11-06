@@ -81,6 +81,7 @@ static struct
     bool8 menu, rules;      // the REGISTER pop-up (A), the clauses page (VS: SELECT)
     u8 menuCursor;
     u8 teamCursor, teamTop;   // SAVED TEAMS
+    u16 lastFoePic;           // RESULT: the trainer just battled (the run has moved on to the next)
     bool8 confirm;            // SAVED TEAMS: ERASE asked
     u16 age;
     char note[96];          // a line at the bottom (why not, what happened)
@@ -1340,7 +1341,7 @@ static void DrawResult(void)
         Blit(pic, 0, 16, 240, 130, lost ? 50 : 90);
     G_FillA(0, 16, 240, 130, 0x000000, 90);
     // the opponent
-    Blit(TrainerTex(MP_StadiumBattle_TrainerPic()), 160, 26, 72, 72, lost ? 255 : 120);
+    Blit(TrainerTex(U.lastFoePic), 160, 26, 72, 72, lost ? 255 : 120);
     // the verdict
     G_Banner(90 + (U.age < 12 ? (12 - U.age) * 10 : 0), 52, big, lost ? C_RED : C_GOLD, 2.0f, 255);
     // the road: a ball for each trainer, lit for the beaten
@@ -1349,7 +1350,7 @@ static void DrawResult(void)
     Panel(20, 92, 136, 22, 0x0c1424, 0x4a5c88);
     for (i = 0; i < total; i++)
     {
-        bool8 beaten = i < r->trainer || (i == r->trainer && !lost);
+        bool8 beaten = U.result == RES_CUP || i < r->trainer;   // (after a win the run is on the next one already)
         ItemBall(32 + i * 16, 103, beaten ? 255 : 90);
     }
     if (r->cup != STADIUM_CUP_CASTLE)
@@ -1709,8 +1710,10 @@ static void Battle(void)
 
 static void AfterBattle(bool8 won)
 {
+    extern u16 MP_StadiumBattle_TrainerPic(void);
     U.pending = TRUE;
     U.reopen = SCR_RESULT;
+    U.lastFoePic = MP_StadiumBattle_TrainerPic();
     if (won)
         U.result = StadiumCup_Advance() ? RES_CUP : RES_WON;
     else
@@ -1783,6 +1786,7 @@ void MP_StadiumUi_Update(void)
         U.pending = FALSE;
         U.active = TRUE;
         U.screen = U.reopen;
+        MPNet_Log("stadium: screens back (%s)", U.reopen == SCR_RESULT ? "result" : "register");
         U.prevKeys = 0xFFFF;
         U.age = 0;
         if (U.screen == SCR_REGISTER)

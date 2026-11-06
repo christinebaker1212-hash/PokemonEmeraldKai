@@ -1859,6 +1859,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] teach: slot %d move %d\n", slot, move);
         }
     }
+    else if (strcmp(cmd, "bmove") == 0)
+    {
+        // mp bmove MOVE: in a battle, every one of the player's battlers' first move (tests with a sure hit: 129 SWIFT)
+        int move = atoi(arg), b;
+        if (gMain.inBattle && move > 0 && move < MOVES_COUNT)
+            for (b = 0; b < gBattlersCount; b++)
+                if (GetBattlerSide(b) == B_SIDE_PLAYER)
+                {
+                    gBattleMons[b].moves[0] = move;
+                    gBattleMons[b].pp[0] = gBattleMoves[move].pp;
+                }
+        printf("[test] bmove: %d\n", move);
+    }
     else if (strcmp(cmd, "setmove") == 0)
     {
         // mp setmove SLOT INDEX MOVE: sets one of a party Pokémon's four moves (INDEX 0-3)
