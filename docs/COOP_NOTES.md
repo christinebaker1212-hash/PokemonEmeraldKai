@@ -5386,6 +5386,17 @@ overnight list included M2-M5; each is easy to change if the user wants otherwis
   decompile.py's; LITTLEROOT's lab sign with new words and the town sign unchanged both run; the editor's button
   (test command `maker eventgame NAME ON SCRIPT`) and SAVE). `decompile.py MAP_DIR` prints a map's events the same way.
 
+## Moemon Maker, M4c: the three-way merge
+
+- Every edit line keeps the value it replaced (WAS). When an update changes that value, the game leaves the edit out
+  (src/maker/maker_overrides.c) and records it (Skip / SkipProp: the editor's key, WAS, NOW, the game's value now, or
+  GONE when nothing has that key any more: a person or sign moved or removed, an event's person gone).
+  MakerApi_Stale(map) rebuilds the map's header from the edits and lists them, tiles too ("block X Y").
+- The map inspector shows THE GAME CHANGED (N) first (maker/maker_merge.cpp): each entry with the game then, the game
+  now and yours; KEEP MINE rewrites the edit's WAS to the game's value now (the edit applies again), TAKE THE GAME'S
+  drops the edit, REMOVE IT for something gone. Each choice is an undo step and marks the map unsaved like any edit.
+- Test tools/test/maker_merge.sh (test commands `maker merge list|keep N|take N`).
+
 ## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
 - SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py
   STAIRS gives them Emerald's unused behaviors 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down), arrow warps

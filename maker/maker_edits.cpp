@@ -460,8 +460,13 @@ void LoadAllEdits()
         printf("[maker] %d maps' unsaved edits recovered\n", gEd.recovered);
 }
 
+static unsigned sEditsVersion;   // (M4c: the merge asks the game again when the edits changed)
+unsigned EditsVersion() { return sEditsVersion; }
+std::string EditValueText(const std::string &prop, long v) { return ValueText(prop, v); }
+
 void SendToGame(int map)
 {
+    sEditsVersion++;
     MakerApi_SetMapEdits(gEd.maps[map].name, EditsText(map).c_str());
 }
 

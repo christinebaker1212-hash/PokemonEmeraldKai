@@ -116,6 +116,10 @@ void SelectMap(int index);
 std::string EditsDir();
 const MapEdits *FindEdits(int map);
 MapEdits &Edits(int map);
+unsigned EditsVersion();                                        // (counts every change sent to the game)
+std::string EditValueText(const std::string &prop, long v);     // a property's value as the edit file writes it
+bool Merge_Section(int map);                                    // (M4c: maker_merge.cpp) the GAME CHANGED section
+void Merge_TestCommand(const char *cmd, const char *arg);
 int CurrentBlock(int map, int x, int y, int base);
 void SetBlock(int map, int x, int y, int base, int now);
 long CurrentProp(int map, const char *kind, const std::string &key, const char *prop, long base);

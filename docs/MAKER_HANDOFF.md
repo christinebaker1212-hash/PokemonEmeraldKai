@@ -5,7 +5,7 @@ design and the user's 28 decisions, which win wherever anything else differs) an
 (how each M1 piece works).
 
 **Status: M1 is done (1.80.0). M2 is built: M2a events, M2b new maps and the World view, M2c trainers and the
-checker (COOP_NOTES "Moemon Maker, M2a / M2b / M2c"). M3a is built: the database for the game's own Pokémon, moves and items, their pictures from PNGs and the battle bench with a damage estimate (COOP_NOTES "Moemon Maker, M3a: the database"); still to come in M3: new entries with IDs that never move. M4a is built: the debugger (breakpoints, step, continue, watch: COOP_NOTES "Moemon Maker, M4a: the debugger"); M4b is built: every script block of every region assembles from its own macros at run time to the same bytes (`raw` / `label` event lines; tools/test/maker_decompile.sh, 20148 blocks, 0 differ), and any person, sign or trigger can start its event from the game's own script (tools/test/maker_gamescript.sh; COOP_NOTES "Moemon Maker, M4b"); still to come in M4: the three-way merge.** The user's overnight list (2026-11-06) included M2-M5, so M2 started without the questions round; the four
+checker (COOP_NOTES "Moemon Maker, M2a / M2b / M2c"). M3a is built: the database for the game's own Pokémon, moves and items, their pictures from PNGs and the battle bench with a damage estimate (COOP_NOTES "Moemon Maker, M3a: the database"); still to come in M3: new entries with IDs that never move. M4a is built: the debugger (breakpoints, step, continue, watch: COOP_NOTES "Moemon Maker, M4a: the debugger"); M4b is built: every script block of every region assembles from its own macros at run time to the same bytes (`raw` / `label` event lines; tools/test/maker_decompile.sh, 20148 blocks, 0 differ), and any person, sign or trigger can start its event from the game's own script (tools/test/maker_gamescript.sh; COOP_NOTES "Moemon Maker, M4b"); and M4c's three-way merge (THE GAME CHANGED in the map inspector: keep mine / take the game's; COOP_NOTES "Moemon Maker, M4c"). M4 is done.** The user's overnight list (2026-11-06) included M2-M5, so M2 started without the questions round; the four
 open questions below were answered with defaults, listed in COOP_NOTES "Moemon Maker, M2a: events" for the user to
 change if they want.
 
@@ -122,8 +122,8 @@ M1's known limits, carried into later milestones:
    script" for every person, sign and trigger, 7671 scripts). Could come later: friendly commands in place of raw lines
    where they mean exactly the same bytes (msgbox "..." MSGBOX_DEFAULT as `text`), and map scripts (on frame /
    on transition) as events.
-4. **M4c: the three-way merge** once base scripts can be overlaid (the WAS/NOW lines already carry what each edit
-   replaced; the merge shows base before / base now / the edit).
+4. **M4c is done** (COOP_NOTES "Moemon Maker, M4c"). Could come later: an event started from the game's script
+   noticing when that script changed in an update (keep the decompiled body's hash with the event).
 5. **M5** as planned (3D mode for SINNOH, animation timeline, Lua hooks, tileset editor).
 
 ## Earlier next steps (M2a done: continue with M2b, then M2c)

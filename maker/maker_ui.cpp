@@ -1108,6 +1108,8 @@ extern "C" void MakerUi_TestCommand(const char *line)
         World_TestCommand(c.c_str(), arg);
     else if (c == "event" || c == "eventline" || c == "eventview" || c == "eventpicker" || c == "eventselect" || c == "eventgame")
         Events_TestCommand(c.c_str(), arg);
+    else if (c == "merge")
+        Merge_TestCommand(c.c_str(), arg);
     else
         MapView_TestCommand(c.c_str(), arg);
 }

@@ -145,6 +145,11 @@ const char *MakerApi_CheckEvent(const char *map, const char *event, int kind, co
 // (M4b) the body of an event that does what the game's script SCRIPTNAME does (kind 0 person, 1 sign, 2 trigger), from
 // the build's pack of the game's scripts (src/maker/maker_scripts.c), or NULL when there is none
 const char *MakerApi_GameScript(const char *scriptName, int kind);
+// (M4c) edits the game left out because it changed under them since they were made: KEY as the editor's ("person KEY
+// look", "music", "connection 0 offset", "block X Y", "event NAME"), WAS (the game's then), NOW (the edit), BASE (the
+// game's now; GONE: nothing by that key any more). Returns how many (OUT gets up to MAX).
+struct MakerStale { char key[128]; long was, now, base; int gone; };
+int MakerApi_Stale(int map, struct MakerStale *out, int max);
 int MakerApi_SpecialCount(void);
 const char *MakerApi_SpecialName(int i);
 

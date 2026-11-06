@@ -1510,6 +1510,7 @@ void MapView_MapInspector()
         return;
     int m = gEd.map;
     const MakerMapInfo &info = gEd.maps[m];
+    Merge_Section(m);   // (M4c: edits the game changed under, first)
     if (sTiles.sinnoh && sLoadedMap == m)
     {
         ImGui::Spacing();

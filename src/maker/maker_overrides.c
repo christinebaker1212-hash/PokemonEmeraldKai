@@ -93,6 +93,8 @@ struct MapEdits
     u16 *patchedBlocks;
     const u16 *patchedFrom;   // (the base blocks they were made from)
     u32 skipped;              // edits whose WAS the game no longer has
+    struct MakerStale *stale; // (M4c) ... each, with what the game has now, for the editor's merge
+    u32 staleCount, staleCap;
 };
 
 static struct MapEdits *sEdits[2400];   // (the game's maps, then the user's new ones: MAKER_NEW_MAPS_MAX)
@@ -103,6 +105,31 @@ static struct MapEdits *EditsFor(int map)
     if (map < 0 || map >= Maker_MapCount() || map >= (int)ARRAY_COUNT(sEdits))
         return NULL;
     return sEdits[map];
+}
+
+static const char *const sKindNames[] = {"person", "warp", "sign", "trigger", "connection"};
+
+// (M4c) an edit left out because the game changed under it: KEY as the editor knows it ("person KEY look", "music"),
+// what the game had when it was made (WAS), the edit (NOW), what the game has now (BASE; GONE: nothing by that key)
+static void Skip(struct MapEdits *e, const char *key, s32 was, s32 now, s32 base, bool8 gone)
+{
+    struct MakerStale *st;
+    e->skipped++;
+    if (e->staleCount == e->staleCap)
+    {
+        e->staleCap = e->staleCap * 2 + 8;
+        e->stale = realloc(e->stale, e->staleCap * sizeof(*e->stale));
+    }
+    st = &e->stale[e->staleCount++];
+    snprintf(st->key, sizeof(st->key), "%s", key);
+    st->was = was, st->now = now, st->base = base, st->gone = gone;
+}
+
+static void SkipProp(struct MapEdits *e, const struct PropEdit *p, s32 base, bool8 gone)
+{
+    char key[128];
+    snprintf(key, sizeof(key), "%s %s %s", sKindNames[p->kind], p->key, sPropNames[p->prop]);
+    Skip(e, key, p->was, p->now, base, gone);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -195,6 +222,7 @@ static void FreeEdits(int map)
     if (!e)
         return;
     FreeBuilt(e);
+    free(e->stale);
     free(e->blocks);
     free(e->props);
     free(e->adds);
@@ -695,14 +723,14 @@ static void BuildConnections(struct MapEdits *e, const struct MapHeader *base)
             switch (p->prop)
             {
             case PROP_REMOVED: gone = p->now != 0; break;
-            case PROP_DIRECTION: if (b->direction == p->was) v.direction = p->now; else e->skipped++; break;
-            case PROP_OFFSET: if ((s32)b->offset == p->was) v.offset = p->now; else e->skipped++; break;
+            case PROP_DIRECTION: if (b->direction == p->was) v.direction = p->now; else SkipProp(e, p, b->direction, FALSE); break;
+            case PROP_OFFSET: if ((s32)b->offset == p->was) v.offset = p->now; else SkipProp(e, p, b->offset, FALSE); break;
             case PROP_MAP:
                 dn = Maker_Map(p->now);
                 if (bm == p->was && dn)
                     v.mapGroup = dn->mapGroup, v.mapNum = dn->mapNum;
                 else
-                    e->skipped++;
+                    SkipProp(e, p, bm, FALSE);
                 break;
             }
         }
@@ -744,12 +772,13 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
     e->header = malloc(sizeof(*e->header));
     *e->header = *base;
     e->skipped = 0;
+    e->staleCount = 0;
     if (e->hasMusic)
     {
         if (base->music == e->musicWas)
             e->header->music = e->musicNow;
         else
-            e->skipped++;
+            Skip(e, "music", e->musicWas, e->musicNow, base->music, FALSE);
     }
     if (be == NULL)
         return e->header;
@@ -769,8 +798,8 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
     for (j = 0; j < e->propCount; j++)
     {
         const struct PropEdit *p = &e->props[j];
-        bool8 applied = FALSE;
-        s32 tmp, *cur;
+        bool8 applied = FALSE, found = FALSE;
+        s32 tmp, *cur, baseV = 0;
         if (p->prop == PROP_REMOVED)
         {
             u32 count = p->kind == KIND_PERSON ? be->objectEventCount : p->kind == KIND_SIGN ? be->bgEventCount : be->coordEventCount;
@@ -793,7 +822,7 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
                 }
             }
             if (!applied)
-                e->skipped++;
+                SkipProp(e, p, 0, TRUE);
             continue;
         }
         switch (p->kind)
@@ -810,6 +839,7 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
                     struct ObjectEventTemplate orig = be->objectEvents[i];
                     cur = PersonField(&orig, p->prop, &tmp);
                 }
+                found = cur != NULL, baseV = cur ? *cur : 0;
                 if (cur && *cur == p->was)
                 {
                     SetPerson(&objs[i], p->prop, p->now);
@@ -836,6 +866,7 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
                     v = d < 0 ? -1 : (d << 8) | w->warpId;
                     break;
                 }
+                found = v != -1, baseV = v;
                 if (v == p->was && v != -1)
                 {
                     switch (p->prop)
@@ -867,6 +898,8 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
                 KeyOf(key, sizeof(key), "", bn ? bn->script : "", be->bgEvents[i].x, be->bgEvents[i].y);
                 if (strcmp(key, p->key) != 0)
                     continue;
+                found = TRUE;
+                baseV = p->prop == PROP_X ? be->bgEvents[i].x : p->prop == PROP_Y ? be->bgEvents[i].y : be->bgEvents[i].elevation;
                 if (p->prop == PROP_X && be->bgEvents[i].x == p->was)
                     bgs[i].x = p->now, applied = TRUE;
                 else if (p->prop == PROP_Y && be->bgEvents[i].y == p->was)
@@ -883,6 +916,8 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
                 KeyOf(key, sizeof(key), "", cn ? cn->script : "", be->coordEvents[i].x, be->coordEvents[i].y);
                 if (strcmp(key, p->key) != 0)
                     continue;
+                found = TRUE;
+                baseV = p->prop == PROP_X ? be->coordEvents[i].x : be->coordEvents[i].y;
                 if (p->prop == PROP_X && be->coordEvents[i].x == p->was)
                     coords[i].x = p->now, applied = TRUE;
                 else if (p->prop == PROP_Y && be->coordEvents[i].y == p->was)
@@ -892,7 +927,7 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
             break;
         }
         if (!applied)
-            e->skipped++;
+            SkipProp(e, p, baseV, !found);
     }
     // events on the map's own people, signs and triggers (on=KIND:KEY), by the same keys as their edits
     for (j = 0; j < e->eventCount; j++)
@@ -931,7 +966,11 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
         else
             bound = TRUE;   // (on=map, or an added one's script=event:NAME)
         if (!bound)
-            e->skipped++;
+        {
+            char ek[128];
+            snprintf(ek, sizeof(ek), "event %s", d->name);
+            Skip(e, ek, 0, 0, 0, TRUE);
+        }
     }
     // what was taken away left out, what was added put in
     {
@@ -1082,6 +1121,48 @@ const struct MapHeader *Maker_EditedHeader(u16 mapGroup, u16 mapNum)
     if (e == NULL || (e->propCount == 0 && e->addCount == 0 && !e->hasMusic && e->eventCount == 0))
         return NULL;
     return BuildHeader(map, e);
+}
+
+// (M4c) the editor's merge: MAP's edits the game left out because it changed under them, with what it has now (OUT up
+// to MAX; returns how many there are). Tiles come as "block X Y".
+int MakerApi_Stale(int map, struct MakerStale *out, int max)
+{
+    struct MapEdits *e = EditsFor(map);
+    const struct MakerMapName *mn;
+    const struct MapHeader *base;
+    const u16 *blocks;
+    int n = 0;
+    u32 i;
+    if (!e || map >= Maker_MapCount() || MakerApi_IsNewMap(map))
+        return 0;
+    mn = Maker_Map(map);
+    base = Maker_BaseMapHeader(mn->mapGroup, mn->mapNum);
+    if (e->propCount || e->addCount || e->hasMusic || e->eventCount)
+    {
+        FreeBuilt(e);   // (built again from the edits as they are now)
+        BuildHeader(map, e);
+        for (i = 0; i < e->staleCount; i++, n++)
+            if (n < max)
+                out[n] = e->stale[i];
+    }
+    blocks = S3D_LayoutBlocks(base->mapLayout);
+    if (blocks == base->mapLayout->map)
+        blocks = O3D_LayoutBlocks(base->mapLayout);
+    for (i = 0; i < e->blockCount; i++)
+    {
+        const struct BlockEdit *b = &e->blocks[i];
+        bool8 in = b->x < base->mapLayout->width && b->y < base->mapLayout->height;
+        u16 cur = in ? blocks[b->y * base->mapLayout->width + b->x] : 0;
+        if (in && cur == b->was)
+            continue;
+        if (n < max)
+        {
+            snprintf(out[n].key, sizeof(out[n].key), "block %u %u", b->x, b->y);
+            out[n].was = b->was, out[n].now = b->now, out[n].base = cur, out[n].gone = !in;
+        }
+        n++;
+    }
+    return n;
 }
 
 // Which map a header is (the current map's copy, an edited copy, or the game's own)
