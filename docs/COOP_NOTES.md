@@ -3266,6 +3266,12 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
 - Harness: MOEMON_BATTLETEXT=1 logs every battle message ("btext: ..."); MOEMON_GENERATION=N; mp gensetting N.
 - Tests: gen59_moves, gen_seal, region_gens (the harness runs scenarios at GEN 9 unless their conf sets GEN).
 - Harness: mp gencheck ITEM / genrefresh.
+- Evolution items used from the BAG (1.117.1): the stones and items past Emerald's six (SHINY / DUSK / DAWN / ICE
+  STONE, PROTECTOR, ELECTIRIZER, MAGMARIZER, DUBIOUS DISC, REAPER CLOTH, the apples, sweets, pots, teacups, scrolls,
+  armors, METAL ALLOY, WHIPPED DREAM, SACHET, LINKING CORD) have no gItemEffectTable entry, so PokemonUseItemEffects
+  answered "It won't have any effect" for all of them. pokemon.c: an item whose field use is
+  ItemUseOutOfBattle_EvolutionStone and has no table entry evolves by GetEvolutionTargetSpecies(EVO_MODE_ITEM_USE)
+  the way ITEM4_EVO_STONE does. `mp useitemon SLOT ITEM` uses an item as the party menu does. Test evo_items_use.
 
 ## The battle GIMMICKS (1.61.0)
 MEGA EVOLUTION, Z-MOVES, DYNAMAX and TERASTALLIZATION (include/battle_gimmick.h; the battle side at the end of

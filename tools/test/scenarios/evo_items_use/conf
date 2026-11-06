@@ -1,0 +1,10 @@
+# Evolution items used from the field (the party menu's path: ExecuteTableBasedItemEffect): the stones and items past
+# Emerald's six have no item effect table entry and all said "It won't have any effect". LAMPENT takes a DUSK STONE
+# (CHANDELURE), MISDREAVUS too (MISMAGIUS), RHYDON holding a PROTECTOR with a LINKING CORD (RHYPERIOR), APPLIN a TART
+# APPLE (FLAPPLE); a FIRE STONE still does nothing for LAMPENT, and a DUSK STONE nothing for APPLIN.
+MODE=1
+GEN=9
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=633:30,200:30,112:45,865:20"
+EXPECT_A=("useitemon 0 item 95: no effect" "useitemon 3 item 406: no effect" "useitemon 0 item 406: used" "useitemon 1 item 406: used" "useitemon 2 item 523: used" "useitemon 3 item 510: used" "[test] party: 634(" " 454(" " 489(" " 866(")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -1,0 +1,23 @@
+pressuntil A field 5000
+wait 30
+mp hold 2 468
+mp useitemon 0 95
+mp useitemon 3 406
+mp useitemon 0 406
+wait 60
+pressuntil A field 3000
+wait 30
+mp useitemon 1 406
+wait 60
+pressuntil A field 3000
+wait 30
+mp useitemon 2 523
+wait 60
+pressuntil A field 3000
+wait 30
+mp useitemon 3 510
+wait 60
+pressuntil A field 3000
+wait 30
+mp party
+quit

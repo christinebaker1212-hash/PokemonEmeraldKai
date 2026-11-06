@@ -3291,6 +3291,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         QzRuinsEscapeRope();
         printf("[test] ruinsmark: flash %d\n", QzRuinsFlash());
     }
+    else if (strcmp(cmd, "useitemon") == 0)
+    {
+        // useitemon SLOT ITEM - use an item from the field on a party POKéMON as the party menu does (its table effect,
+        // or an evolution: the evolution scene starts); logs whether it had an effect
+        int slot = 0, item = 0;
+        sscanf(arg, "%d %d", &slot, &item);
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            bool8 none;
+            extern void (*gCB2_AfterEvolution)(void);
+            gCB2_AfterEvolution = CB2_ReturnToField;   // (the party menu sets its own)
+            none = ExecuteTableBasedItemEffect(&gPlayerParty[slot], item, slot, 0);
+            printf("[test] useitemon %d item %d: %s\n", slot, item, none ? "no effect" : "used");
+        }
+    }
     else if (strcmp(cmd, "item") == 0)
     {
         // item ID QTY - put items in the bag

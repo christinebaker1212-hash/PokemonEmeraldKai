@@ -20,6 +20,7 @@
 #include "evolution_scene.h"
 #include "field_specials.h"
 #include "item.h"
+#include "item_use.h"
 #include "link.h"
 #include "main.h"
 #include "overworld.h"
@@ -5032,6 +5033,19 @@ bool8 PokemonUseItemEffects(struct Pokemon *mon, u16 item, u8 partyIndex, u8 mov
     {
         gActiveBattler = 0;
         battler = MAX_BATTLERS_COUNT;
+    }
+
+    // Moemon Kai: the evolution stones and items past Emerald's six (DUSK / SHINY / DAWN STONE, ICE STONE, PROTECTOR,
+    // the apples, sweets, pots, LINKING CORD...) have no item effect table entry: evolve by the evolution table as the
+    // six stones' ITEM4_EVO_STONE does (before, every one of them "won't have any effect")
+    if (!gMain.inBattle && GetItemFieldFunc(item) == ItemUseOutOfBattle_EvolutionStone
+     && (!ITEM_HAS_EFFECT(item) || gItemEffectTable[item - ITEM_POTION] == NULL))
+    {
+        u16 targetSpecies = GetEvolutionTargetSpecies(mon, EVO_MODE_ITEM_USE, item);
+        if (targetSpecies == SPECIES_NONE)
+            return TRUE;
+        BeginEvolutionScene(mon, targetSpecies, FALSE, partyIndex);
+        return FALSE;
     }
 
     // Skip using the item if it won't do anything
