@@ -17,6 +17,8 @@ press DOWN 4
 wait 4
 press DOWN 4
 wait 4
+press DOWN 4
+wait 4
 press RIGHT 4
 wait 4
 press A 4

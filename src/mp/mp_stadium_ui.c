@@ -430,9 +430,38 @@ static SDL_Texture *ItemBallTex(void)
     return Store(0x50000, px, 16, 16);
 }
 
+// The ball's own pixels within its 16x16 frame (it sits low in it, as on the field): drawn centered on (cx, cy)
+static void ItemBallSized(float cx, float cy, float scale, u8 alpha)
+{
+    static int x0 = -1, y0, x1, y1;
+    if (x0 < 0)
+    {
+        const u8 *tiles = (const u8 *)gObjectEventPic_ItemBall;
+        int tile, i;
+        x0 = 16, y0 = 16, x1 = 0, y1 = 0;
+        for (tile = 0; tile < 4; tile++)
+            for (i = 0; i < 64; i++)
+            {
+                u8 b = tiles[tile * 32 + i / 2], v = (i & 1) ? b >> 4 : b & 15;
+                int x = (tile % 2) * 8 + i % 8, y = (tile / 2) * 8 + i / 8;
+                if (v)
+                {
+                    if (x < x0) x0 = x;
+                    if (y < y0) y0 = y;
+                    if (x + 1 > x1) x1 = x + 1;
+                    if (y + 1 > y1) y1 = y + 1;
+                }
+            }
+        if (x1 <= x0)
+            x0 = 0, y0 = 0, x1 = 16, y1 = 16;
+    }
+    BlitPart(ItemBallTex(), x0, y0, x1 - x0, y1 - y0, cx - (x1 - x0) * scale / 2, cy - (y1 - y0) * scale / 2,
+             (x1 - x0) * scale, (y1 - y0) * scale, alpha);
+}
+
 static void ItemBall(int cx, int cy, u8 alpha)
 {
-    Blit(ItemBallTex(), cx - 8, cy - 8, 16, 16, alpha);
+    ItemBallSized(cx, cy, 1.0f, alpha);
 }
 
 // A small POKé BALL
@@ -520,6 +549,8 @@ static const char *Refusal(const struct BoxPokemon *b, u8 source)
     struct BoxPokemon *bb = (struct BoxPokemon *)b;
     if (source == STADIUM_SRC_RENTAL)
         return NULL;   // (STADIUM's own, made for the cup)
+    if (U.opt & STADIUM_OPT_RENTALS)
+        return "RENTALS ONLY";
     for (i = 0; i < MAX_MON_MOVES; i++)
         moves[i] = GetBoxMonData(bb, MON_DATA_MOVE1 + i);
     return StadiumCup_Refuse(U.cup, U.tier, U.opt, GetBoxMonData(bb, MON_DATA_SPECIES),
@@ -873,23 +904,18 @@ static const char *const sOptNames[3] = {"LEVEL CAP", "SPECIES", "HELD ITEMS"};
 static u8 HardCount(void)
 {
     u8 n = 0;
-    const struct StadiumTeam *t = &StadiumCup_Save()->team[U.cup];
-    u8 i;
-    bool8 rentals = t->count > 0;
     if (!(U.opt & STADIUM_OPT_LEVEL_CAP)) n++;
     if (U.opt & STADIUM_OPT_SPECIES) n++;
     if (!(U.opt & STADIUM_OPT_HELD_ITEMS)) n++;
-    for (i = 0; i < t->count; i++)
-        if (t->slot[i].source != STADIUM_SRC_RENTAL)
-            rentals = FALSE;
-    return n + rentals;
+    if (U.opt & STADIUM_OPT_RENTALS) n++;
+    return n;
 }
 
 static const char *const sOptHelp[4][2] = {
     {"Entries are set to the cup's level.", "Your own levels. Bigger rewards!"},
     {"First 151 only. Bigger rewards!", "Any POKéMON but the great legends."},
     {"Your POKéMON may hold items.", "No held items. Bigger rewards!"},
-    {"A team of rentals only wins more.", "A team of rentals only wins more."},
+    {"Rentals only, LEVEL CAP off. Bigger rewards!", "Your own POKéMON may enter."},
 };
 
 // A switch drawn as a lit slider
@@ -905,12 +931,8 @@ static void Toggle(int x, int y, bool8 on)
 static void DrawOptions(void)
 {
     char line[96];
-    u8 i, rows = U.cup == STADIUM_CUP_CHALLENGE ? 0 : 3, hard = HardCount();
+    u8 i, rows = U.cup == STADIUM_CUP_CHALLENGE ? 0 : 4, hard = HardCount();
     const struct StadiumTeam *t = &StadiumCup_Save()->team[U.cup];
-    bool8 rentals = t->count > 0;
-    for (i = 0; i < t->count; i++)
-        if (t->slot[i].source != STADIUM_SRC_RENTAL)
-            rentals = FALSE;
     snprintf(line, sizeof(line), "%s%s%s", StadiumCup_Info(U.cup)->name, StadiumCup_Info(U.cup)->tiers > 1 ? "  " : "",
              StadiumCup_Info(U.cup)->tiers > 1 ? sClassNames[U.tier] : "");
     Header(line, U.round ? "ROUND 2" : "ROUND 1");
@@ -940,23 +962,29 @@ static void DrawOptions(void)
         for (i = 0; i < 4; i++)
         {
             int y = 30 + i * 12;
-            bool8 on = i < 3 ? (U.opt & (1 << i)) != 0 : rentals;
+            bool8 on = (U.opt & (1 << i)) != 0;
             bool8 isHard = i == 1 ? on : i == 3 ? on : !on;
             static const char *const sNames[4] = {"LEVEL CAP", "SPECIES", "HELD ITEMS", "RENTALS ONLY"};
-            if (U.optCursor == i && i < 3)
+            if (U.optCursor == i)
                 G_RoundFill(124, y - 1, 111, 12, C_GOLD, 200);
-            G_Text(127, y, i == 3 ? C_SOFT : C_INK, G_NO_SHADOW, sNames[i], 0, TF_NARROW);
-            Toggle(196, y, on);
+            {
+                bool8 held = i == 0 && (U.opt & STADIUM_OPT_RENTALS);   // (RENTALS ONLY keeps it off)
+                G_Text(127, y, held ? C_LOCK : C_INK, G_NO_SHADOW, sNames[i], 0, TF_NARROW);
+                Toggle(196, y, on);
+                if (held)
+                    G_RoundFill(192, y, 34, 10, 0xf8f0d8, 140);
+            }
             if (isHard)
                 G_Circle(231, y + 5, 2.5f, 0xe0a040, 255);
         }
         {
-            u8 k = U.optCursor < 3 ? U.optCursor : 3;
-            bool8 on = k < 3 ? (U.opt & (1 << k)) != 0 : rentals;
+            u8 k = U.optCursor < 4 ? U.optCursor : 3;
+            bool8 on = (U.opt & (1 << k)) != 0;
             G_FillA(125, 79, 109, 1, 0xb0a888, 255);
-            G_Text(127, 81, hard == 4 && k == 3 ? 0x907020 : C_SOFT, G_NO_SHADOW,
-                   hard == 4 ? "Every restriction in place: GREAT REWARDS!" : sOptHelp[k][on ? 0 : 1], 106,
-                   TF_NARROW);
+            G_Text(127, 81, hard == 4 ? 0x907020 : C_SOFT, G_NO_SHADOW,
+                   hard == 4 ? "Every restriction in place: GREAT REWARDS!"
+                   : k == 0 && (U.opt & STADIUM_OPT_RENTALS) ? "Off: rentals are already the cup's level." : sOptHelp[k][on ? 0 : 1],
+                   106, TF_NARROW);
         }
     }
     else
@@ -1122,7 +1150,7 @@ static void DrawRegister(void)
         Blit(IconTex(GetBoxMonData((struct BoxPokemon *)b, MON_DATA_SPECIES)), x - 3, y - 12 + ((n == U.listCursor && (U.age / 8) % 2) ? -1 : 0),
              32, 32, ok ? 255 : 100);
         if (has)
-            Blit(ItemBallTex(), x + 17, y + 7, 10, 10, 255);
+            ItemBallSized(x + 22, y + 12, 0.75f, 255);
         if (n == U.listCursor)
             G_Focus(x, y, 26, 16, G_WHITE, G_WHITE);
     }
@@ -1616,6 +1644,8 @@ static void EnterOptions(void)
     struct StadiumSave *s = StadiumCup_Save();
     U.screen = SCR_OPTIONS;
     U.opt = s->options[U.cup] & 0x80 ? s->options[U.cup] & 0x7F : STADIUM_OPT_DEFAULT;
+    if (U.opt & STADIUM_OPT_RENTALS)
+        U.opt &= ~STADIUM_OPT_LEVEL_CAP;
     U.optCursor = U.cup == STADIUM_CUP_CHALLENGE ? 2 : 0;
 }
 
@@ -1851,7 +1881,7 @@ bool8 MP_StadiumUi_Step(u16 keys)
         break;
     case SCR_OPTIONS:
     {
-        u8 rows = U.cup == STADIUM_CUP_CHALLENGE ? 0 : 3;
+        u8 rows = U.cup == STADIUM_CUP_CHALLENGE ? 0 : 4;
         if (pressed & B_BUTTON)
             U.screen = StadiumCup_Info(U.cup)->tiers > 1 ? SCR_CLASS : SCR_SELECT, PlaySE(SE_SELECT);
         else if (pressed & DPAD_UP && U.optCursor > (rows ? 0 : 2))
@@ -1864,12 +1894,23 @@ bool8 MP_StadiumUi_Step(u16 keys)
             U.optCursor--, PlaySE(SE_SELECT);
         else if (pressed & A_BUTTON)
         {
-            if (U.optCursor < rows)
-                U.opt ^= 1 << U.optCursor, PlaySE(SE_SELECT);
+            if (U.optCursor == 0 && (U.opt & STADIUM_OPT_RENTALS))
+            {
+                // RENTALS ONLY keeps LEVEL CAP off: rentals are made for the cup already (the user: only that way round)
+                PlaySE(SE_FAILURE);
+                snprintf(U.note, sizeof(U.note), "Rentals are already the cup's level.");
+            }
+            else if (U.optCursor < rows)
+            {
+                U.opt ^= 1 << U.optCursor;
+                if (U.optCursor == 3 && (U.opt & STADIUM_OPT_RENTALS))
+                    U.opt &= ~STADIUM_OPT_LEVEL_CAP;
+                PlaySE(SE_SELECT);
+            }
             else if (U.optCursor == rows && rows)
             {
                 U.screen = SCR_REGISTER;
-                U.tab = SRC_TAB_PARTY;
+                U.tab = (U.opt & STADIUM_OPT_RENTALS) ? SRC_TAB_RENTALS : SRC_TAB_PARTY;
                 U.listCursor = 0, U.listTop = 0;
                 BuildList();
                 PlaySE(SE_SELECT);

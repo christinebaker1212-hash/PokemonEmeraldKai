@@ -99,3 +99,13 @@ ERASE / GET / LIST, "stadium_teams.dat" where the server runs): everyone on the 
 (the six become the cup's registered team), COPY (to the first free slot), SAVE OVER or ERASE any of them, and the
 room hears of each change at once. Offline the save keeps its own 99 ("<save>.stadiumteams"). ERASE asks once on the
 player's own screen; nobody else's permission is needed. src/mp/mp_stadium_teams.c; test stadium_teams_online.
+
+## RENTALS ONLY and LEVEL CAP (the user, 2026-11-06)
+
+"you cannot have Level Cap as well as Rentals Only on, because they logically cannot coexist together. Rentals already
+are the perfect level. If you turn on Rentals Only, Level Cap turns off automatically." Then: "Not the reverse. Just the
+way I mentioned." and "You can still choose rentals without Rentals Only on, for the record."
+
+RENTALS ONLY is a switch (STADIUM_OPT_RENTALS): on, it turns LEVEL CAP off and keeps it off (LEVEL CAP greyed, A on it
+explains why); turning LEVEL CAP on never turns RENTALS ONLY off. With it on only rentals can be registered; with it off
+rentals and the player's own may both enter.

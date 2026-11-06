@@ -38,12 +38,11 @@ wait 4
 press DOWN 4
 wait 4
 press A 4
+wait 6
+press DOWN 4
+wait 4
+press A 4
 wait 20
-press R 4
-wait 10
-press R 4
-wait 10
-press R 4
 wait 20
 press A 4
 wait 10

@@ -532,7 +532,7 @@ void StadiumCup_Begin(u8 round, u8 cup, u8 tier, u8 options)
     memset(r, 0, sizeof(*r));
     r->active = TRUE;
     r->round = round, r->cup = cup, r->tier = tier, r->options = options;
-    r->rentalsOnly = cup != STADIUM_CUP_CHALLENGE && s->team[cup].count > 0;
+    r->rentalsOnly = cup != STADIUM_CUP_CHALLENGE && (options & STADIUM_OPT_RENTALS) && s->team[cup].count > 0;
     for (i = 0; i < s->team[cup].count; i++)
         if (s->team[cup].slot[i].source != STADIUM_SRC_RENTAL)
             r->rentalsOnly = FALSE;

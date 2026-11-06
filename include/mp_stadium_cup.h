@@ -20,6 +20,7 @@ enum
 #define STADIUM_OPT_LEVEL_CAP  (1 << 0)   // entries adjusted to the cup's level
 #define STADIUM_OPT_SPECIES    (1 << 1)   // the first 151 and their moves only
 #define STADIUM_OPT_HELD_ITEMS (1 << 2)   // held items come along
+#define STADIUM_OPT_RENTALS    (1 << 3)   // rentals only (and so no LEVEL CAP: rentals are made for the cup; the user)
 #define STADIUM_OPT_DEFAULT    (STADIUM_OPT_LEVEL_CAP | STADIUM_OPT_SPECIES)
 
 // The hard side of each (the rewards grow with them)
