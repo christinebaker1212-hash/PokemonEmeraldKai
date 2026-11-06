@@ -39,6 +39,9 @@ struct DwCam { struct DwBounds b; u16 ang[3]; s16 dir; s32 steps; };
 struct DwMoving { u16 hid; u8 index; s16 t[3]; u8 path, dir, dest, kind, flag; };
 struct DwPath { u8 next; s16 fin[3], chg[3]; s32 delta[3]; u8 set, clr; };
 struct DwProp { u16 model; float off[3]; float scale; };
+// overlay009's events (sMapEvents) and their commands, each with its params struct's fields in order
+struct DwEvent { u16 hid; s16 t[3]; u8 cond; u16 val; u16 cmd, ncmd; };
+struct DwCmd { u8 kind; s32 p[12]; };
 
 #include "../../sinnoh/platinum_dw.h"
 
@@ -53,6 +56,18 @@ enum { KIND_FLOOR, KIND_WEST, KIND_EAST, KIND_CEILING, KIND_LAND };
 #define VAR_DW_PLATFORMS_HI 0x52C1
 #define DW_FLAGS_SET_UP 0x8000
 enum { ELEV_UP, ELEV_DOWN, ELEV_NONE };
+// Platinum's FlagCondition and EventCmdKind
+enum { COND_NONE, COND_PUZZLE_FALSE, COND_PUZZLE_TRUE, COND_PROGRESS_EQ, COND_PROGRESS_LEQ, COND_PROGRESS_GEQ,
+       COND_MANUAL_ADD_ONLY, COND_GIRATINA_SHADOW, COND_CYRUS_APPEARANCE };
+enum { CMD_SET_OBJECT_ANIM, CMD_MOVE_PLATFORM, CMD_ADD_OBJECT, CMD_DELETE_OBJECT, CMD_CASCADE_UP, CMD_START_SCRIPT,
+       CMD_SET_PROGRESS, CMD_SHOW_GIRATINA_SHADOW, CMD_SET_GIRATINA_ANIM, CMD_SET_PUZZLE_FLAG, CMD_CASCADE_DOWN,
+       CMD_GIRATINA_ARRIVAL, CMD_UXIE_TUTO, CMD_AZELF_TUTO, CMD_MESPRIT_TUTO, CMD_SHOW_ROOM_PLATFORMS,
+       CMD_HIDE_ROOM_PLATFORMS, CMD_CLEAR_PUZZLE_FLAG };
+// Platinum's other DISTORTION WORLD state, in SINNOH's vars: the CYRUS appearance state, GIRATINA's shadow
+// flags (bits) and the boulder puzzle's persisted flags (bits)
+#define VAR_DW_CYRUS 0x52C2
+#define VAR_DW_SHADOWS 0x52C3
+#define VAR_DW_PUZZLE 0x52C4
 #define DW_PROP_SLOT 8   // (the first of the field's dynamic prop slots the DISTORTION WORLD uses)
 
 #define BASE_PITCH (-10750)   // DISTORTION_WORLD_CAMERA_BASE_ANGLE_X (the field camera's)
@@ -94,6 +109,17 @@ static struct
     s16 rideTile[3];               // the tile the current path starts from (a chained path goes on from the last's end)
     u8 ridePath;
 } sDw = {.matrix = 0xFF};
+
+// An event's commands running (Platinum's DistWorldLoadedEvent), and the moving platforms' offsets on this floor
+static struct
+{
+    const struct DwCmd *cmd;
+    u8 n, i, state;
+    u16 t;
+    float vib, done[3];
+    u8 carry;                      // the player rides the moving platform
+} sEv;
+static float sPlatOff[64][3];      // (each moving platform of this floor moved from its tile, world units)
 
 // A ride carried over the change of floors (the warp): the path and where along it
 static struct { bool8 on; u16 destHid; u8 destIndex, path, dir; s32 off[3]; } sRideNext;
@@ -188,7 +214,7 @@ bool8 S3D_Dw_Active(void)
 // On the map's own ground or up on a platform / mid-jump: the 3D position drives the view and the player's sprite
 static bool8 Off(void)
 {
-    return sDw.floor != NULL && (sDw.kind != KIND_LAND || sDw.jump != NULL || sDw.riding);
+    return sDw.floor != NULL && (sDw.kind != KIND_LAND || sDw.jump != NULL || sDw.riding || sEv.carry);
 }
 
 // --------------------------------------------------------------------------------------------- the moving platforms
@@ -273,6 +299,8 @@ static void DrawPlatforms(void)
             continue;
         p = &sDwProps[m->kind];
         TileWorld(m->t[0], m->t[1], m->t[2], w);
+        if (i < ARRAY_COUNT(sPlatOff))
+            w[0] += sPlatOff[i][0], w[1] += sPlatOff[i][1], w[2] += sPlatOff[i][2];
         if (sDw.riding && (sDw.ride == m || (sDw.ride->hid == m->hid && sDw.ride->index == m->index)))
             TileWorld(sDw.rideTile[0], sDw.rideTile[1], sDw.rideTile[2], w);
         if (sDw.riding && (sDw.ride == m || (sDw.ride->hid == m->hid && sDw.ride->index == m->index)))
@@ -470,9 +498,20 @@ static void StartJump(const struct DwJump *j)
         printf("[dw] jump to %d,%d,%d kind %d platform %d\n", sDw.x, sDw.y, sDw.z, j->kind, j->idx);
 }
 
+static void Settle(s32 x, s32 y, s32 z);
+static bool8 sJumpSettles;   // (an event's jump: the surface found where it lands, not the jump point's)
+
 static void Landed(void)
 {
     const struct DwJump *j = sDw.jump;
+    if (sJumpSettles)
+    {
+        sJumpSettles = FALSE;
+        sDw.jump = NULL;
+        sDw.moving = FALSE;
+        Settle(sDw.x, sDw.y, sDw.z);
+        return;
+    }
     struct ObjectEvent *obj = &gObjectEvents[gPlayerAvatar.objectEventId];
     s32 mx = obj->currentCoords.x - MAP_OFFSET + sDw.floor->off[0], mz = obj->currentCoords.y - MAP_OFFSET + sDw.floor->off[2];
     sDw.jump = NULL;
@@ -489,6 +528,229 @@ static void Landed(void)
     PlaySE(SE_M_SAND_ATTACK);   // (Platinum's SEQ_SE_PL_SUTYA2: the dust of a landing)
     if (getenv("MOEMON_TEST"))
         printf("[dw] landed at %d,%d,%d on kind %d platform %d\n", sDw.x, sDw.y, sDw.z, sDw.kind, sDw.plat);
+}
+
+// ------------------------------------------------------------------------------------------------------ events
+static bool8 Condition(u8 cond, u16 val)
+{
+    switch (cond)
+    {
+    case COND_NONE: return TRUE;
+    case COND_PUZZLE_FALSE: return !(VarGet(VAR_DW_PUZZLE) & (1 << val));
+    case COND_PUZZLE_TRUE: return (VarGet(VAR_DW_PUZZLE) & (1 << val)) != 0;
+    case COND_PROGRESS_EQ: return VarGet(DW_VAR_PROGRESS) == val;
+    case COND_PROGRESS_LEQ: return VarGet(DW_VAR_PROGRESS) <= val;
+    case COND_PROGRESS_GEQ: return VarGet(DW_VAR_PROGRESS) >= val;
+    case COND_GIRATINA_SHADOW: return !(VarGet(VAR_DW_SHADOWS) & (1 << val));
+    case COND_CYRUS_APPEARANCE: return VarGet(VAR_DW_CYRUS) == val;
+    }
+    return FALSE;
+}
+
+// The player comes to rest at a tile: the surface there (a floating platform holding it, or the map's ground), the
+// map position with them (EventCmdMovePlatform_EndMovement: FindAndPrepareNewCurrentFloatingPlatform)
+static void Settle(s32 x, s32 y, s32 z)
+{
+    struct ObjectEvent *obj = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s32 mx = obj->currentCoords.x - MAP_OFFSET + sDw.floor->off[0], mz = obj->currentCoords.y - MAP_OFFSET + sDw.floor->off[2];
+    s32 pi = PlatAt(x, y, z, -1);
+    sDw.x = x, sDw.y = y, sDw.z = z;
+    sDw.plat = pi;
+    sDw.kind = pi >= 0 ? Plat(pi)->kind : KIND_LAND;
+    sDw.rot = sKindRot[sDw.kind];
+    PlaceOnMap(x - mx, z - mz);
+    sDw.last[0] = x, sDw.last[1] = y, sDw.last[2] = z;
+    TileWorld(x, y, z, sDw.pos);
+    if (getenv("MOEMON_TEST"))
+        printf("[dw] settled at %d,%d,%d on kind %d platform %d\n", x, y, z, sDw.kind, sDw.plat);
+}
+
+static const struct DwEvent *EventAt(s32 x, s32 y, s32 z)
+{
+    u32 i;
+    for (i = 0; sDw.floor && i < DW_EVENT_COUNT; i++)
+    {
+        const struct DwEvent *e = &sDwEvents[i];
+        if (e->hid == sDw.floor->hid && e->t[0] == x && e->t[2] == z && abs(e->t[1] - y) <= 1 && Condition(e->cond, e->val))
+            return e;
+    }
+    return NULL;
+}
+
+static void StartEvent(const struct DwCmd *cmd, u8 n)
+{
+    memset(&sEv, 0, sizeof(sEv));
+    sEv.cmd = cmd;
+    sEv.n = n;
+    LockPlayerFieldControls();
+}
+
+static void LandToState(void)
+{
+    s32 x, y, z;
+    LandTile(&x, &y, &z);
+    sDw.x = x, sDw.y = y, sDw.z = z;
+}
+
+static void PlayerWorldNow(float *w)
+{
+    if (Off())
+        memcpy(w, sDw.pos, sizeof(sDw.pos));
+    else
+    {
+        s32 x, y, z;
+        LandTile(&x, &y, &z);
+        TileWorld(x, y, z, w);
+    }
+}
+
+static const struct DwMoving *FloorMoving(u8 index, u32 *gi)
+{
+    u32 i;
+    for (i = 0; i < DW_MOVING_COUNT; i++)
+        if (sDwMoving[i].hid == sDw.floor->hid && sDwMoving[i].index == index)
+        {
+            *gi = i;
+            return &sDwMoving[i];
+        }
+    return NULL;
+}
+
+// One command a frame (overlay009's sEventCmdHandlers, state by state); TRUE: the event is over
+static bool8 EventUpdate(void)
+{
+    const struct DwCmd *c;
+    u32 i, gi = 0;
+    if (sEv.i >= sEv.n)
+        return TRUE;
+    c = &sEv.cmd[sEv.i];
+    switch (c->kind)
+    {
+    case CMD_MOVE_PLATFORM:
+    {
+        // p: platform index, move the player, (dummy), final offset x y z (tiles), the step a frame x y z (x 4096)
+        const struct DwMoving *m = FloorMoving(c->p[0], &gi);
+        if (m == NULL || gi >= ARRAY_COUNT(sPlatOff))
+            break;
+        if (sEv.state == 0)
+        {
+            sEv.carry = c->p[1];
+            if (sEv.carry)
+            {
+                float w[3];
+                PlayerWorldNow(w);
+                memcpy(sDw.from, w, sizeof(w));
+                if (sDw.kind == KIND_LAND)
+                    LandToState();
+            }
+            memset(sEv.done, 0, sizeof(sEv.done));
+            sEv.vib = 2;
+            sEv.t = 0;
+            sEv.state = 1;
+            PlaySE(SE_ELEVATOR);
+        }
+        if (sEv.state == 1)
+        {
+            // the shake (EventCmdMovePlatform_Vibrate)
+            sEv.vib = -sEv.vib;
+            if (sEv.vib >= 0)
+            {
+                if (sEv.vib > 1)
+                    sEv.vib -= 1;
+                else if (++sEv.t >= 4)
+                    sEv.vib = 0;
+                if (sEv.vib == 0)
+                    sEv.state = 2;
+            }
+        }
+        else if (sEv.state == 2)
+        {
+            bool8 moving = FALSE;
+            for (i = 0; i < 3; i++)
+                if ((s32)sEv.done[i] != c->p[3 + i] * 16)
+                {
+                    float d = c->p[6 + i] / 4096.0f;
+                    sEv.done[i] += d;
+                    sPlatOff[gi][i] += d;
+                    moving = TRUE;
+                }
+            if (!moving)
+                sEv.state = 3;
+        }
+        if (sEv.carry)
+            for (i = 0; i < 3; i++)
+                sDw.pos[i] = sDw.from[i] + sEv.done[i] + (i == 1 ? sEv.vib : 0);
+        if (sEv.state == 3)
+        {
+            if (sEv.carry)
+            {
+                sEv.carry = FALSE;
+                Settle(sDw.x + c->p[3], sDw.y + c->p[4], sDw.z + c->p[5]);
+            }
+            break;   // (the next command)
+        }
+        return FALSE;
+    }
+    case CMD_SET_OBJECT_ANIM:
+        // p: local id, movement action; the player's jump across (MOVEMENT_ACTION_JUMP_DISTORTION_WORLD_*: 3 tiles
+        // over 24 frames, high)
+        if (c->p[0] == 0xFF && c->p[1] >= 0x1000 && c->p[1] < 0x1004)
+        {
+            static struct DwJump sHop;
+            static const s8 sDirs[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+            u8 d = c->p[1] - 0x1000;
+            if (sEv.state == 0)
+            {
+                memset(&sHop, 0, sizeof(sHop));
+                sHop.dir = d;
+                sHop.d[0] = sDirs[d][0] * 3, sHop.d[2] = sDirs[d][1] * 3;
+                sHop.steps = 24;
+                sHop.axis = 1;
+                sHop.face = d;
+                if (sDw.kind == KIND_LAND)
+                    LandToState();
+                sJumpSettles = TRUE;
+                ObjectEventTurn(&gObjectEvents[gPlayerAvatar.objectEventId], FromPlatDir(d));
+                StartJump(&sHop);
+                sEv.state = 1;
+                return FALSE;
+            }
+            if (sDw.jump != NULL)
+                return FALSE;
+        }
+        break;
+    case CMD_SET_PROGRESS:
+        VarSet(DW_VAR_PROGRESS, c->p[0]);
+        break;
+    case CMD_SET_PUZZLE_FLAG:
+        VarSet(VAR_DW_PUZZLE, VarGet(VAR_DW_PUZZLE) | (1 << c->p[0]));
+        break;
+    case CMD_CLEAR_PUZZLE_FLAG:
+        VarSet(VAR_DW_PUZZLE, VarGet(VAR_DW_PUZZLE) & ~(1 << c->p[0]));
+        break;
+    case CMD_SET_GIRATINA_ANIM:
+        VarSet(VAR_DW_SHADOWS, VarGet(VAR_DW_SHADOWS) | (1 << c->p[0]));
+        break;
+    default:
+        if (getenv("MOEMON_TEST"))
+            printf("[dw] event command %d not played yet\n", c->kind);
+        break;
+    }
+    sEv.i++;
+    sEv.state = 0;
+    return sEv.i >= sEv.n;
+}
+
+// A tile stepped onto: an event there (HandleEventAt)
+static bool8 TileEvents(s32 x, s32 y, s32 z)
+{
+    const struct DwEvent *e = EventAt(x, y, z);
+    if (e == NULL)
+        return FALSE;
+    if (getenv("MOEMON_TEST"))
+        printf("[dw] event at %d,%d,%d (%d commands)\n", x, y, z, e->ncmd);
+    StartEvent(&sDwCmds[e->cmd], e->ncmd);
+    return TRUE;
 }
 
 void S3D_Dw_OnMapLoad(void)
@@ -510,6 +772,8 @@ void S3D_Dw_OnMapLoad(void)
     sDw.rot = 0;
     sDw.riding = FALSE;
     sDw.last[0] = sDw.last[1] = sDw.last[2] = -1;
+    memset(sPlatOff, 0, sizeof(sPlatOff));
+    memset(&sEv, 0, sizeof(sEv));
     if (sDw.matrix != 0xFF)
     {
         FreeOamMatrix(sDw.matrix);
@@ -639,6 +903,18 @@ void S3D_Dw_Update(void)
         RideUpdate();
         return;
     }
+    if (sEv.cmd != NULL)
+    {
+        if (sDw.jump != NULL)
+            goto jumping;   // (an event's jump plays below)
+        if (EventUpdate())
+        {
+            sEv.cmd = NULL;
+            UnlockPlayerFieldControls();
+        }
+        if (sEv.cmd != NULL && sDw.jump == NULL)
+            return;
+    }
     if (sDw.kind == KIND_LAND && sDw.jump == NULL && DW_HAVE_DATA)
     {
         // a step onto an elevator platform rides it (HandleElevatorPlatformPropAnimatorAt)
@@ -651,6 +927,8 @@ void S3D_Dw_Update(void)
             const struct DwMoving *m = ElevatorAt(x, y, z);
             bool8 first = sDw.last[0] < 0;
             sDw.last[0] = x, sDw.last[1] = y, sDw.last[2] = z;
+            if (!first && TileEvents(x, y, z))
+                return;
             if (m != NULL && !first)
             {
                 s32 zero[3] = {0, 0, 0};
@@ -667,6 +945,7 @@ void S3D_Dw_Update(void)
             for (i = 0; i < 3; i++)
                 sDw.camF[i] += sDw.camStep[i], sDw.cam[i] = (s32)sDw.camF[i];
     }
+jumping:
     if (sDw.jump != NULL)
     {
         float t = (float)(sDw.t + 1) / sDw.dur, hop[3] = {0}, a[3];
@@ -694,7 +973,14 @@ void S3D_Dw_Update(void)
     {
         Lerp((float)(sDw.t + 1) / sDw.dur);
         if (++sDw.t >= sDw.dur)
+        {
             sDw.moving = FALSE;
+            if (sDw.x != sDw.last[0] || sDw.y != sDw.last[1] || sDw.z != sDw.last[2])
+            {
+                sDw.last[0] = sDw.x, sDw.last[1] = sDw.y, sDw.last[2] = sDw.z;
+                TileEvents(sDw.x, sDw.y, sDw.z);
+            }
+        }
     }
     else
         TileWorld(sDw.x, sDw.y, sDw.z, sDw.pos);

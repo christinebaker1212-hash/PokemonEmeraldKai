@@ -3990,6 +3990,12 @@ follow_behind, follow_ground.
   carries the player the rest of the way. Which platform is on which floor is Platinum's persisted flags, kept in
   SINNOH's vars 0x52C0-0x52C1 (bit 15 of the high word: set up; first visit DW_PLATFORM_FLAGS_START); the tiles of
   absent platforms are void, present ones walkable. Test sinnoh_dw_elevator (1F down to B1F and back).
+  The events (phase 3, under way): overlay009's sMapEvents with their commands (each params struct flattened in
+  field order: gen_distortion.py param_fields) fire when the player comes to a tile (HandleEventAt, by its condition:
+  progress / puzzle / shadow flags). Played so far: MOVE_PLATFORM (the shake, the platform and the player carried at
+  Platinum's step, then the surface under them found: Settle), the player's JUMP_DISTORTION_WORLD (3 tiles over 24
+  frames), SET_DISTORTION_WORLD_PROGRESS (Platinum's VAR_DISTORTION_WORLD_PROGRESS by ids.py), the puzzle and
+  shadow flags (SINNOH vars 0x52C2-0x52C4). Test sinnoh_dw_platforms (B2F's first crossing).
 - Field obstacles (2026-11-01): Platinum's CUT trees, ROCK SMASH rocks and STRENGTH boulders (690) are the game's
   own (gen_maps.py OBSTACLES: EventScript_CutTree / _RockSmash / _StrengthBoulder, no flag, back each time the map
   loads as in both games). HM badges are the region's: MP_Region_FieldMoveBadge (mp_region.c) gives HOENN's badge for

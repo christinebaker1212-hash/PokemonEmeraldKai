@@ -97,6 +97,7 @@ class CTables:
         self.values = dict(self.ids)
         self.values['FX32_ONE'] = 4096
         self.values['MAP_HEADER_INVALID'] = 0xFFFF
+        self.values['GIRATINA_SHADOW_ANIM_B4F_1'], self.values['GIRATINA_SHADOW_ANIM_B4F_2'] = 0, 1   # (system_flags.h)
         self.values['TRUE'], self.values['FALSE'], self.values['NULL'] = 1, 0, 0
         self.defs = {}
         for text in (consts, self.src):
@@ -210,7 +211,97 @@ def tables(root):
         o = [c.eval(v) / 4096.0 for v in offs[kind]]
         sc = [c.eval(v) / 4096.0 for v in scales[kind]]
         props.append((num, o, sc[0] or 1.0))
-    return dict(plats=plats, paths=paths, conns=conns, props=props, c=c)
+    evs, named = events(c)
+    return dict(plats=plats, paths=paths, conns=conns, props=props, c=c, events=evs, named=named, root=root)
+
+
+def param_fields(c, typename):
+    """A params struct's fields in order, nested structs and VecFx32s flattened ([(name, count)])"""
+    m = c.re.search(r'typedef struct %s \{(.*?)\} %s;' % (typename, typename), c.clean, c.re.S)
+    out = []
+    for line in m.group(1).split(';'):
+        line = line.strip()
+        if not line:
+            continue
+        typ, name = line.rsplit(None, 1)
+        if typ.startswith('CmdParams'):
+            out.append((name, param_fields(c, typ)))
+        elif typ == 'VecFx32':
+            out.append((name, 3))
+        else:
+            out.append((name, 1))
+    return out
+
+
+def flatten(c, fields, init):
+    vals = []
+    for name, n in fields:
+        v = init.get(name, 0) if isinstance(init, dict) else 0
+        if isinstance(n, list):
+            vals += flatten(c, n, v if isinstance(v, dict) else {})
+        elif n == 3:
+            vals += [c.eval(x) for x in (v if isinstance(v, list) else [0, 0, 0])]
+        else:
+            vals.append(c.eval(v) if not isinstance(v, (list, dict)) else 0)
+    return vals
+
+
+# each command kind's params struct (overlay009's handlers cast them so)
+CMD_PARAMS = {
+    'EVENT_CMD_SET_MAP_OBJECT_ANIMATION': 'CmdParamsSetMapObjectAnimation',
+    'EVENT_CMD_MOVE_PLATFORM': 'CmdParamsMovePlatform',
+    'EVENT_CMD_ADD_MAP_OBJECT_WITH_LOCAL_ID': 'CmdParamsAddMapObjWithLocalID',
+    'EVENT_CMD_DELETE_MAP_OBJECT_WITH_LOCAL_ID': 'CmdParamsDeleteMapObjWithLocalID',
+    'EVENT_CMD_CASCADE_UP': 'CmdParamsCascadeUp',
+    'EVENT_CMD_CASCADE_DOWN': 'CmdParamsCascadeDown',
+    'EVENT_CMD_START_SCRIPT': 'CmdParamsStartScript',
+    'EVENT_CMD_SET_DISTORTION_WORLD_PROGRESS': 'CmdParamsSetDistortionWorldProgress',
+    'EVENT_CMD_SET_GIRATINA_ANIMATION_FLAG': 'CmdParamsSetGiratinaAnimationFlag',
+    'EVENT_CMD_SET_PUZZLE_FLAG': 'CmdParamsPuzzleFlag',
+    'EVENT_CMD_CLEAR_PUZZLE_FLAG': 'CmdParamsPuzzleFlag',
+}
+
+
+def events(c):
+    """overlay009's sMapEvents: [(map header, x, y, z, condition, value, [(kind, params...)])], and the commands
+    reached by name from its code (the B4F / B5F waterfalls: sMapEventB4F_Waterfall...)"""
+    # (LOCALID_PLAYER and the movement actions the events use: the game's own values here)
+    c.values.setdefault('LOCALID_PLAYER', 0xFF)
+    for k, d in enumerate(('NORTH', 'SOUTH', 'WEST', 'EAST')):
+        c.values['MOVEMENT_ACTION_JUMP_DISTORTION_WORLD_' + d] = 0x1000 + k
+    def cmds_of(name):
+        out = []
+        for cmd in c.initializer(name):
+            if isinstance(cmd, dict):
+                kind, params = cmd['kind'], cmd.get('params', 'NULL')
+            else:
+                kind, params = cmd[0], cmd[1]
+            kname = kind.strip()
+            if kname == 'EVENT_CMD_END':
+                break
+            vals = []
+            if kname in CMD_PARAMS and params.strip() not in ('NULL', '0'):
+                vals = flatten(c, param_fields(c, CMD_PARAMS[kname]), c.initializer(params.strip().lstrip('&')))
+            out.append((c.values[kname], vals))
+        return out
+    evs = []
+    for entry in c.initializer('sMapEvents'):
+        hid = c.eval(entry[0] if isinstance(entry, list) else entry['mapHeaderID'])
+        if hid == 0xFFFF:
+            break
+        lst = entry[1] if isinstance(entry, list) else entry['events']
+        for e in c.initializer(lst.strip()):
+            if isinstance(e, list):
+                continue   # (the terminator)
+            evs.append((hid, c.eval(e['tileX']), c.eval(e['tileY']), c.eval(e['tileZ']), c.eval(e['flagCond']),
+                        c.eval(e['flagCondVal']), cmds_of(e['cmds'].strip())))
+    named = {}
+    for n in ('sMapEventB4F_Waterfall', 'sMapEventB5F_Waterfall'):
+        try:
+            named[n] = cmds_of(n)
+        except KeyError:
+            pass
+    return evs, named
 
 
 def write(out, data):
@@ -222,7 +313,10 @@ def write(out, data):
               'static const u16 sDwAttrs[1][1024];', '#define DW_FLOOR_COUNT 0',
               'static const struct DwMoving sDwMoving[1];', '#define DW_MOVING_COUNT 0',
               'static const struct DwPath sDwPaths[1];', 'static const struct DwProp sDwProps[1];',
-              'static const u16 sDwConns[1][3];', '#define DW_CONN_COUNT 0', '#define DW_PLATFORM_FLAGS_START 0']
+              'static const u16 sDwConns[1][3];', '#define DW_CONN_COUNT 0', '#define DW_PLATFORM_FLAGS_START 0',
+              'static const struct DwEvent sDwEvents[1];', '#define DW_EVENT_COUNT 0', 'static const struct DwCmd sDwCmds[1];',
+              '#define DW_CMDS_B4F_WATERFALL 0xFFFF', '#define DW_CMDS_B5F_WATERFALL 0xFFFF', '#define DW_VAR_PROGRESS 0x4000',
+              '#define DW_FLAG_PUZZLE_FINISHED 0', '#define DW_PLATFORM_FLAG_INVALID 11']
         open(out, 'w').write('\n'.join(o) + '\n')
         return
     floors, plats, jumps, cams, attrs, tbl = data
@@ -273,6 +367,34 @@ def write(out, data):
     for num, off, sc in tbl['props']:
         o.append('    {%d, {%.2ff, %.2ff, %.2ff}, %.4ff},' % (num, off[0], off[1], off[2], sc))
     o.append('};')
+    # the floors' events (overlay009's sMapEvents): tile, condition and its value, then its commands
+    cmds = []
+    def add_cmds(lst):
+        first = len(cmds)
+        cmds.extend(lst)
+        return first, len(lst)
+    o.append('#define DW_EVENT_COUNT %d' % len(tbl['events']))
+    o.append('static const struct DwEvent sDwEvents[] = {')
+    for hid, x, y, z, cond, val, lst in tbl['events']:
+        f, n = add_cmds(lst)
+        o.append('    {%d, {%d, %d, %d}, %d, %d, %d, %d},' % (hid, x, y, z, cond, val, f, n))
+    o.append('};')
+    for name, macro in (('sMapEventB4F_Waterfall', 'B4F_WATERFALL'), ('sMapEventB5F_Waterfall', 'B5F_WATERFALL')):
+        lst = tbl['named'].get(name)
+        if lst is None:
+            o.append('#define DW_CMDS_%s 0xFFFF' % macro)
+        else:
+            f, n = add_cmds(lst)
+            o.append('#define DW_CMDS_%s %d   // (%d commands)' % (macro, f, n))
+    o.append('static const struct DwCmd sDwCmds[] = {')
+    for kind, vals in cmds:
+        vals = (vals + [0] * 12)[:12]
+        o.append('    {%d, {%s}},' % (kind, ', '.join(str(v) for v in vals)))
+    o.append('};')
+    import ids
+    root = tbl['root']
+    o.append('#define DW_VAR_PROGRESS 0x%X   // (Platinum\'s VAR_DISTORTION_WORLD_PROGRESS: tools/sinnoh/ids.py)' % ids.var(root, 'VAR_DISTORTION_WORLD_PROGRESS'))
+    o.append('#define DW_FLAG_PUZZLE_FINISHED 0x%X' % (ids.flag(root, 'FLAG_DISTORTION_WORLD_PUZZLE_FINISHED') or 0))
     o.append('static const u16 sDwAttrs[%d][1024] = {' % len(attrs))
     for a in attrs:
         o.append('    {' + ','.join('0x%x' % v for v in a) + '},')
