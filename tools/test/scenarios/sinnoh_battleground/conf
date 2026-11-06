@@ -1,0 +1,9 @@
+# Platinum's BATTLEGROUND (scripts_battleground.s): the day's trainers drawn on the first visit
+# (GetRandomBattlegroundTrainers, s3d_misc.c ops 27-28: three gym leaders' rematch teams, one of the five partners), shown
+# by their looks (OBJ_EVENT_GFX_VAR_1-4); the first one asked for a battle and beaten (g_after). The FIGHT AREA ferry
+# sailor to SNOWPOINT (TakeShipToSnowpoint: Platinum's dock) waits on the FIGHT AREA's scenes. Needs the 3D pack. Shots g_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:80"
+EXPECT_A=("sinnoh battleground:" "sinnoh battle picture: trainer 22" "reached state")
+UNEXPECT_A=("[crash]" "TIMEOUT")

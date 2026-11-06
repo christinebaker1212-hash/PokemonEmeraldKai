@@ -1,0 +1,51 @@
+pressuntil A field 5000
+mp textspeed 2
+mp battlestyle 1
+mp moves 0 58
+mp platinumstory
+wait 30
+mp warp 41,15,7,10
+wait 120
+mash A 10 20
+wait 200
+shot g_room
+mp warp 41,15,3,9
+wait 90
+waitfor field 1000
+mp face left
+wait 10
+shot g_trainer
+press A 4
+pressuntil A yesno 3000
+wait 20
+press A 4
+pressuntil A action 4000
+shot g_battle
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+pressuntil A field 8000
+wait 30
+shot g_after
+quit

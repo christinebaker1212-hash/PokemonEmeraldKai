@@ -207,7 +207,10 @@ def talk_trainer(root, p, o):
 CLOSED_PEOPLE = {'Sinnoh_Underground': (3, 4, 5)}
 # Story people only Platinum's own map scripts move and talk for (no script of their own when talked to): shown by their
 # hide flag all the same (the Underground's ROARK: its OnFrame intro, gen_scripts.py's map scripts)
-SCENE_PEOPLE = {'Sinnoh_Underground': (17,)}
+SCENE_PEOPLE = {'Sinnoh_Underground': (17,), 'Sinnoh_Battleground': (3, 4, 5, 6)}
+# People whose look a script picks (Platinum's OBJ_EVENT_GFX_VAR_n: the game's own, set through VAR_OBJ_GFX_ID_n): the
+# BATTLEGROUND's four trainers of the day (GetRandomBattlegroundTrainers, s3d_misc.c op 27)
+VAR_LOOKS = {'Sinnoh_Battleground': (3, 4, 5, 6)}
 
 SINNOH_BERRY_TREES = 128   # (the BERRY trees past the save's own 128: src/mp/mp_berrytrees.c)
 OBSTACLES = {'OBJ_EVENT_GFX_CUT_TREE': 'EventScript_CutTree', 'OBJ_EVENT_GFX_ROCK_SMASH': 'EventScript_RockSmash',
@@ -224,6 +227,8 @@ def people(p, root, have):
     for i, o in enumerate(events(root, p['place'])['object_events']):
         label = '%s_EventScript_Person%d' % (p['name'], i + 1)
         gfx = sprites.sprite(o['graphics_id'])
+        if gfx is None and i + 1 in VAR_LOOKS.get(p['name'], ()) and o['graphics_id'].startswith('OBJ_EVENT_GFX_VAR_'):
+            gfx = o['graphics_id']
         hide = o.get('hidden_flag')
         flag = ids.flag(root, hide) if isinstance(hide, str) and hide.startswith('FLAG_') else None
         ghost = isinstance(hide, str) and hide.startswith('MAP_HEADER_')

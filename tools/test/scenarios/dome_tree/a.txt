@@ -1,0 +1,24 @@
+pressuntil A field 5000
+wait 30
+mp warp 26,18,7,11
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+wait 120
+shot d_tree
+mash A 6 30
+mash B 10 20
+wait 60
+waitfor field 2000
+mp warp 26,18,4,11
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+wait 120
+shot d_singles
+mash A 6 30
+mash B 10 20
+waitfor field 2000
+quit

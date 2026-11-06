@@ -5699,3 +5699,26 @@ Platinum's JOURNAL, its rules, words and notebook (src/sinnoh/s3d_journal.c; tes
   window and laid over it; LEFT / RIGHT / A turn the pages (the page lifts away over the next), B / START close.
   ITEM_JOURNAL opens it from the BAG or registered; on CONTINUE it opens first when the last page is two days old or
   more (Journal_CheckOpenOnContinue), then today's page starts. `mp journal [open]` for tests.
+
+## SINNOH after the HALL OF FAME (1.114.0)
+
+The post-LEAGUE places run on Platinum's own scripts (2352 of 2511 entries convert; every entry of the FIGHT AREA,
+SURVIVAL AREA, RESORT AREA, STARK MOUNTAIN, ROUTEs 224-230, the BATTLEGROUND and SNOWPOINT's TEMPLE):
+- Trainers only Platinum's later scripts battle, appended after every other SINNOH trainer so no id moves
+  (tools/sinnoh/gen_trainers.py REMATCHES, ids 2207-2220): the eight gym leaders' rematch teams, CHERYL / MIRA /
+  RILEY / MARLEY / BUCK at the BATTLEGROUND, FLINT beside VOLKNER at the FIGHT AREA.
+- The BATTLEGROUND (test sinnoh_battleground): its four trainers of the day stand on the map again with the look the
+  script picks (gen_maps.py VAR_LOOKS: OBJ_EVENT_GFX_VAR_1-4 through VAR_OBJ_GFX_ID_1-4, their hide flags;
+  gen_scripts.py people() keeps them in the story table with Platinum's entries); GetRandomBattlegroundTrainers is
+  s3d_misc.c ops 27-28 (Platinum's ScrCmd: three gym leaders, then one of the five partners, each later draw empty one
+  time in nine / six; BATTLEGROUND_TRAINER_NONE 0xFFF hides the place).
+- The FIGHT AREA's sailor to SNOWPOINT (TakeShipToSnowpoint): Platinum's macro's dock, world tile 356, 246 = SNOWPOINT
+  (4, 54), beside its own sailor.
+- SNOWPOINT TEMPLE's REGIGIGAS shakes awake (ShakeObject: s3d_misc.c op 26, the statue's sprite two frames to either
+  side, the script waiting TIMES x 4 frames).
+- ROUTE 224's tablet: OAK only comes with the OAK'S LETTER, a distribution event (closed with the rest of
+  CheckDistributionEvent), so the tablet stays unmarked; its commands convert all the same (BufferTabletName: the
+  player's name, the naming screen's "no one"). SetPlayerVolume converts to nothing (the BGM fades around it);
+  WalkSlightlyFast is walk_fast.
+- (gen_maps.py run again: the generated maps had drifted from hand fixes since, so only the BATTLEGROUND's map was
+  kept from that run. The decomp's sparse checkout needed include/data/field/hidden_items.h for items.py.)

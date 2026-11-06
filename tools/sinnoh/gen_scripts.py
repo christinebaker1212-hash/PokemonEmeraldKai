@@ -130,12 +130,12 @@ FANFARE = {'SEQ_FANFA4': 'MUS_OBTAIN_ITEM', 'SEQ_FANFA3': 'MUS_OBTAIN_TMHM', 'SE
            'SEQ_ACCE': 'MUS_OBTAIN_ITEM', 'SEQ_POKEWALKER': 'MUS_OBTAIN_ITEM', 'SEQ_BADGE': 'MUS_OBTAIN_BADGE',
            'SEQ_ASA': 'MUS_HEAL', 'SEQ_KEYITEM': 'MUS_OBTAIN_ITEM', 'SEQ_WAZA': 'MUS_OBTAIN_TMHM'}
 
-CONSTANTS = {'MOVE_NOT_SELECTED': 0xFF, 'TRUE': 1, 'FALSE': 0, 'NO_EXIT_ON_B': 0, 'EXIT_ON_B': 1, 'MENU_YES': 0, 'MENU_NO': 1, 'GENDER_MALE': 0, 'GENDER_FEMALE': 1}
+CONSTANTS = {'BATTLEGROUND_TRAINER_NONE': 0xFFF, 'MOVE_NOT_SELECTED': 0xFF, 'TRUE': 1, 'FALSE': 0, 'NO_EXIT_ON_B': 0, 'EXIT_ON_B': 1, 'MENU_YES': 0, 'MENU_NO': 1, 'GENDER_MALE': 0, 'GENDER_FEMALE': 1}
 
 # Platinum's movement actions -> this game's (Platinum's field runs at 30 frames a second, this one at 60: a delay
 # is twice as many frames here)
 DIRS = {'North': 'up', 'South': 'down', 'West': 'left', 'East': 'right'}
-MOVE_KIND = {'WalkNormal': 'walk_', 'WalkFast': 'walk_fast_', 'WalkFaster': 'walk_faster_', 'WalkSlow': 'walk_slow_',
+MOVE_KIND = {'WalkNormal': 'walk_', 'WalkSlightlyFast': 'walk_fast_', 'WalkFast': 'walk_fast_', 'WalkFaster': 'walk_faster_', 'WalkSlow': 'walk_slow_',
              'WalkSlower': 'walk_slow_', 'WalkFastest': 'walk_faster_',
              'WalkOnSpotNormal': 'walk_in_place_', 'WalkOnSpotFast': 'walk_in_place_fast_',
              'WalkOnSpotFaster': 'walk_in_place_faster_', 'WalkOnSpotSlow': 'walk_in_place_slow_', 'Face': 'face_',
@@ -1085,10 +1085,14 @@ class FileConverter:
             return ['fadescreen FADE_TO_BLACK', 'playse SE_SHIP'] + self.command('Warp', a[1:4])
         if cmd in ('TakeShipToCanalave', 'TakeShipToSnowpoint'):
             # back to the harbor's dock (where the boats come in: the game's own island sailors' spot)
+            # (Platinum's macros: PlayBoatCutscene ..., MAP_HEADER_SNOWPOINT_CITY, 356, 246, its world tiles)
             dock = {'TakeShipToCanalave': ('MAP_SINNOH_CANALAVE_CITY', 11, 22),
                     'TakeShipToSnowpoint': ('MAP_SINNOH_SNOWPOINT_CITY', None, None)}[cmd]
             if dock[1] is None:
-                raise Unsupported(cmd)
+                o = self.dec.origins().get('snowpoint_city')
+                if o is None:
+                    raise Unsupported(cmd)
+                dock = (o[0], 356 - o[1], 246 - o[2])
             go = '%s%s__docked%d' % (PREFIX, self.low, self.next_local())
             return ['fadescreen FADE_TO_BLACK', 'playse SE_SHIP', self.sinnoh(SINNOH_WARP_CONTINUE), 'goto %s' % go,
                     'warp %s, %d, %d' % dock, 'waitstate', '%s:' % go]
@@ -1509,6 +1513,20 @@ class FileConverter:
 
         if cmd == 'CheckDistributionEvent':
             return ['setvar %s, 0' % self.var(a[1])]   # (no distribution events: Platinum without them)
+        # ROUTE 224's tablet (OAK comes only with the OAK'S LETTER, a distribution event: closed, so its tablet stays
+        # unmarked); its two commands, for the scripts to convert whole: the name thanked is the player's, the
+        # writing never chosen (Platinum's naming screen's "no one")
+        if cmd == 'BufferTabletName':
+            return [self.sinnoh(SINNOH_BUFFER_PLAYER, self.value(a[0]))]
+        if cmd == 'OpenShayminTabletNamingScreen':
+            return ['setvar %s, 1' % self.var(a[0])]
+        if cmd == 'GetRandomBattlegroundTrainers':
+            # the BATTLEGROUND's trainers of the day (Platinum's ScrCmd_GetRandomBattlegroundTrainers: three gym
+            # leaders, one of the five partners; BATTLEGROUND_TRAINER_NONE for a place left empty): s3d_misc.c 27-28
+            return [self.sinnoh(SINNOH_MISC, 27, self.var(a[0]), self.var(a[1])),
+                    self.sinnoh(SINNOH_MISC, 28, self.var(a[2]), self.var(a[3]))]
+        if cmd == 'SetPlayerVolume':
+            return []   # (the music's player volume through a scene: the FadeOutBGM / FadeInBGM around it do the work)
         if cmd == 'MessageInstant':
             return ['message %s' % self.text_label(a[0]), 'waitmessage']
         if cmd == 'GetHour':
@@ -1557,6 +1575,10 @@ class FileConverter:
             return ['applymovement %s, %s' % (self.localid(a[0]), self.movement_label(a[1]))]
         if cmd == 'WaitMovement':
             return ['waitmovement 0']
+        if cmd == 'ShakeObject':
+            # (the object shakes side to side TIMES times by XOFFSET pixels: s3d_misc.c op 26; the script waits)
+            times, xoff = int(self.value(a[1])), int(self.value(a[3]))
+            return [self.sinnoh(SINNOH_MISC, 26, self.localid(a[0]), (times << 8) | (xoff & 0xFF)), 'delay %d' % (times * 4)]
         if cmd == 'RemoveObject':
             return ['removeobject %s' % self.localid(a[0])]
         if cmd == 'AddObject':
@@ -2433,7 +2455,9 @@ def people(root, p, low, name, done):
         if lab not in done:
             lab = None
         ghost = isinstance(hide, str) and hide.startswith('MAP_HEADER_')
-        if ghost or sprites.sprite(o['graphics_id']) is None or not inside(p, o['x'], o['z']) \
+        from gen_maps import VAR_LOOKS
+        looks = i + 1 in VAR_LOOKS.get(name, ())   # (a look its script picks: gen_maps.py VAR_LOOKS)
+        if ghost or (sprites.sprite(o['graphics_id']) is None and not looks) or not inside(p, o['x'], o['z']) \
                 or o['graphics_id'].endswith('POKEBALL'):
             continue
         script = mine['script']

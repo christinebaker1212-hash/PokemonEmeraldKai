@@ -56,6 +56,8 @@
 #include "sound.h"
 #include "constants/game_stat.h"
 #include "constants/frontier_util.h"
+#include "task.h"
+#include "constants/sinnoh_gfx.h"
 
 #define MAGIC 0x43534D53   // "SMSC"
 
@@ -260,6 +262,86 @@ static struct Pokemon *PartySlotMon(u16 var)
 
 static u16 sHigh;   // (22's number's high half, from 23)
 
+// Platinum's BATTLEGROUND trainers of the day (scrcmd.c sBattlegroundGymLeaders / sBattlegroundStatTrainers, the game's
+// sprites for them): three leaders, then one of the five; each draw after the first may come up empty (one in nine /
+// one in six), as Platinum's GetRandomBattleground*ID
+#define BATTLEGROUND_NONE 0xFFF
+static u16 sBattleground[4];
+static const u16 sBattlegroundLeaders[8] = {
+    OBJ_EVENT_GFX_SINNOH_ROARK, OBJ_EVENT_GFX_SINNOH_GARDENIA, OBJ_EVENT_GFX_SINNOH_CRASHER_WAKE,
+    OBJ_EVENT_GFX_SINNOH_MAYLENE, OBJ_EVENT_GFX_SINNOH_FANTINA, OBJ_EVENT_GFX_SINNOH_CANDICE, OBJ_EVENT_GFX_SINNOH_BYRON,
+    OBJ_EVENT_GFX_SINNOH_VOLKNER,
+};
+static const u16 sBattlegroundPartners[5] = {
+    OBJ_EVENT_GFX_SINNOH_CHERYL, OBJ_EVENT_GFX_SINNOH_RILEY, OBJ_EVENT_GFX_SINNOH_MARLEY, OBJ_EVENT_GFX_SINNOH_BUCK,
+    OBJ_EVENT_GFX_SINNOH_MIRA,
+};
+
+static u16 BattlegroundDraw(u16 count, u16 not1, u16 not2)
+{
+    u8 tries = 0;
+    for (;;)
+    {
+        u16 r = Random() % (count + 1);
+        if (r == count)
+            return count;
+        if (++tries >= 8)
+            return count;
+        if (r != not1 && r != not2)
+            return r;
+    }
+}
+
+static void Sinnoh_BattlegroundPick(void)
+{
+    u16 t1 = Random() % 8, t2, t3, t4;
+    sBattleground[0] = sBattlegroundLeaders[t1];
+    t2 = BattlegroundDraw(8, t1, 0xFFFF);
+    sBattleground[1] = t2 < 8 ? sBattlegroundLeaders[t2] : BATTLEGROUND_NONE;
+    t3 = BattlegroundDraw(8, t1, t2);
+    sBattleground[2] = t3 < 8 ? sBattlegroundLeaders[t3] : BATTLEGROUND_NONE;
+    t4 = BattlegroundDraw(5, 0xFFFF, 0xFFFF);
+    sBattleground[3] = t4 < 5 ? sBattlegroundPartners[t4] : BATTLEGROUND_NONE;
+    MPNet_Log("sinnoh battleground: %d %d %d %d", sBattleground[0], sBattleground[1], sBattleground[2], sBattleground[3]);
+}
+
+// Platinum's ShakeObject: the object's sprite moved PIXELS to either side, two frames each way, TIMES times
+#define tObj   data[0]
+#define tLeft  data[1]
+#define tPx    data[2]
+#define tFrame data[3]
+static void Task_ShakeObject(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    struct Sprite *sprite = &gSprites[gObjectEvents[tObj].spriteId];
+    if (tLeft <= 0 || !gObjectEvents[tObj].active)
+    {
+        if (gObjectEvents[tObj].active)
+            sprite->x2 = 0;
+        DestroyTask(taskId);
+        return;
+    }
+    sprite->x2 = (tFrame & 2) ? -tPx : tPx;
+    if ((++tFrame & 3) == 0)
+        tLeft--;
+}
+
+static void Sinnoh_ShakeObject(u16 localId, u8 times, u8 pixels)
+{
+    u8 obj = GetObjectEventIdByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+    u8 taskId;
+    if (obj >= OBJECT_EVENTS_COUNT)
+        return;
+    taskId = CreateTask(Task_ShakeObject, 80);
+    gTasks[taskId].tObj = obj;
+    gTasks[taskId].tLeft = times;
+    gTasks[taskId].tPx = pixels;
+}
+#undef tObj
+#undef tLeft
+#undef tPx
+#undef tFrame
+
 void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
 {
     switch (op)
@@ -397,6 +479,19 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         StringCopy(gStringVar2, gStringVar1);
         StringCopy(gStringVar1, gSaveBlock2Ptr->playerName);
         break;
+    case 27:
+    case 28:
+        // Platinum's GetRandomBattlegroundTrainers (its scrcmd.c, the numbers as there): the first call draws all four
+        // and sets the first two variables, the second sets the other two
+        if (op == 27)
+            Sinnoh_BattlegroundPick();
+        VarSet(a, sBattleground[op == 27 ? 0 : 2]);
+        VarSet(b, sBattleground[op == 27 ? 1 : 3]);
+        break;
+    case 26:
+        // Platinum's ShakeObject: object A (a local id on this map) shakes side to side (B: times << 8 | pixels)
+        Sinnoh_ShakeObject(a, b >> 8, b & 0xFF);
+        break;
     case 21:
         if (sM.battleground < 0xFFFF)
             sM.battleground++;
@@ -446,6 +541,7 @@ void Sinnoh_AmityDebug(const char *arg)
 #include "script.h"
 #include "string_util.h"
 #include "task.h"
+#include "constants/sinnoh_gfx.h"
 #include "constants/metatile_behaviors.h"
 #include "constants/moves.h"
 #include "constants/songs.h"
