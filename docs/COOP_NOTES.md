@@ -5936,6 +5936,18 @@ the most). Each table now shows a move before it's made and holds what happened 
   and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
   duel 4).
 
+## MAGIC's Auras (1.122.0)
+- `K:Enchant:Creature` gives the card Forge's aura spell (`SP$ Attach | ValidTgts$ Creature`, MTG_API_ATTACH): cast
+  onto a target creature, it enters attached (MtgObj.attachedTo, set in FinishResolve). State-based actions put an Aura
+  in its owner's graveyard when its creature has left, is no longer a creature or has protection from the Aura's color
+  (its "goes to the graveyard" triggers fire, so RANCOR comes back). Statics: `AffectedDefined$ Enchanted` (Affected$
+  beside it a condition on that creature), `Creature.EnchantedBy` / `enchanted` in Valid specs, `Defined$ Enchanted`
+  in effects (FIREBREATHING), `Mode$ CantAttack,CantBlock` read as two statics. The AI follows Forge's
+  `SVar:AttachAILogic`: Curse on the other side's best creature, Pump (or none) on its own (mtg_ai.c).
+- The table (mtg_board.c DrawCard): a creature wearing an Aura has a gold mark in its corner; with the cursor on an
+  Aura its creature is framed in gold, and the other way round; an Aura's line reads "PACIFISM  ON SERRA ANGEL".
+  Scenario mtg_auras; TestAuras in tools/mtg/test_rules.c. PIP and RHEA play RANCOR, NOLAN HOLY STRENGTH and PACIFISM.
+
 ## MAGIC's static abilities (1.121.0)
 - src/mtg/mtg_static.c: lords, anthems, keywords / landwalk / protection given to others, self statics with a
   condition, can't block / can't attack / can't be blocked by (docs/MTG_HANDOFF.md "Status (2026-11-06)"). The table

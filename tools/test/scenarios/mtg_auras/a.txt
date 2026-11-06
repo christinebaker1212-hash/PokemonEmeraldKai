@@ -1,0 +1,48 @@
+pressuntil A field 5000
+wait 60
+mp mtg starter 0
+mp mtg duel 1
+wait 30
+press A 2
+waitlog 3000 mtg: your move: priority
+wait 10
+mp mtg put 0 field Plains
+mp mtg put 0 field Plains
+mp mtg put 0 field Plains
+mp mtg put 0 field Grizzly Bears
+mp mtg put 0 hand Holy Strength
+mp mtg put 0 hand Pacifism
+mp mtg put 1 field Serra Angel
+wait 10
+mp mtg focus Holy Strength
+press A 2
+wait 30
+wait 12
+press RIGHT 2
+wait 6
+rendershot a_target
+press A 2
+waitlog 900 mtg: ready
+wait 120
+mp mtg focus Pacifism
+press A 2
+wait 30
+wait 12
+press RIGHT 2
+wait 6
+press RIGHT 2
+wait 6
+rendershot a_target2
+press A 2
+waitlog 900 mtg: ready
+wait 120
+mp mtg focus Pacifism
+wait 10
+rendershot a_pacifism
+mp mtg focus Grizzly Bears
+wait 10
+rendershot a_bears
+mp mtg table
+mp mtg lose
+waitlog 300 mtg: duel over
+quit

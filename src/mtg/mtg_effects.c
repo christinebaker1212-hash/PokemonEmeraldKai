@@ -11,12 +11,12 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"LoseLife", MTG_API_LOSE_LIFE}, {"Pump", MTG_API_PUMP}, {"PumpAll", MTG_API_PUMP_ALL},
     {"ChangeZone", MTG_API_CHANGE_ZONE}, {"Mana", MTG_API_MANA}, {"Discard", MTG_API_DISCARD},
     {"Tap", MTG_API_TAP}, {"Untap", MTG_API_UNTAP}, {"Counter", MTG_API_COUNTER},
-    {"Sacrifice", MTG_API_SACRIFICE}, {"PutCounter", MTG_API_PUT_COUNTER},
+    {"Sacrifice", MTG_API_SACRIFICE}, {"PutCounter", MTG_API_PUT_COUNTER}, {"Attach", MTG_API_ATTACH},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
-    "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter",
+    "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -94,6 +94,7 @@ typedef struct { int n; MtgTarget t[MTG_MAX_DEFINED]; } Defined;
 
 static const char *const sDefinedKnown[] = {
     "You", "Opponent", "Player", "Self", "Targeted", "ParentTarget", "TargetedController", "TargetedPlayer",
+    "Enchanted",
 };
 
 // what set a triggered ability off (SpellAbility.getTriggeringObject: "Triggered" + the AbilityKey's name, its
@@ -215,6 +216,11 @@ static void DefinedBy(const MtgDuel *d, const MtgResolveCtx *ctx, const char *de
         Add(out, MTG_TGT_PLAYER, d->active ^ 1);
     } else if (strcmp(def, "Self") == 0)
         Add(out, MTG_TGT_OBJ, ctx->source);
+    else if (strcmp(def, "Enchanted") == 0) {   // the creature its source (an Aura) is attached to
+        int on = ctx->source >= 0 && ctx->source < d->objCount ? d->objs[ctx->source].attachedTo : MTG_NO_OBJ;
+        if (on != MTG_NO_OBJ && d->objs[on].zone == MTG_ZONE_BATTLEFIELD)
+            Add(out, MTG_TGT_OBJ, on);
+    }
     else if (strcmp(def, "Targeted") == 0 || strcmp(def, "ParentTarget") == 0) {
         if (t->kind != MTG_TGT_NONE)
             Add(out, t->kind, t->id);
@@ -503,6 +509,8 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         }
         break;
     }
+    case MTG_API_ATTACH:   // (the Aura enters attached as the spell finishes: mtg_game.c FinishResolve)
+        break;
     case MTG_API_TAP:
     case MTG_API_UNTAP:
         Targets(d, ctx, ab, DEF_CARD, &who);

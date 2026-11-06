@@ -99,6 +99,7 @@ static void ResetPermanentState(MtgObj *o)
     o->tempPower = o->tempToughness = 0;
     o->tempKeywords = 0;
     o->counters11 = 0;
+    o->attachedTo = MTG_NO_OBJ;
 }
 
 // GameAction.changeZone: a card moves (to the library's top when it goes there); a permanent leaving forgets its state
@@ -246,6 +247,17 @@ static void StateBasedActions(MtgDuel *d)
             d->winner = (int8_t)(lost[0] && lost[1] ? -1 : lost[0] ? 1 : 0);
             return;
         }
+        for (i = 0; i < d->objCount; i++) {   // an Aura on nothing it may enchant goes (704.5m)
+            const MtgObj *o = &d->objs[i];
+            int to = o->attachedTo;
+            if (o->zone != MTG_ZONE_BATTLEFIELD || !Mtg_Card(o->def)->enchant)
+                continue;
+            if (to == MTG_NO_OBJ || to >= d->objCount || !IsCreature(d, to)
+                || (Mtg_Protection(d, to) & Mtg_ObjColors(d, i))) {
+                Mtg_MoveTo(d, i, MTG_ZONE_GRAVEYARD);
+                again = 1;
+            }
+        }
         for (i = 0; i < d->objCount; i++) {
             int t;
             if (!IsCreature(d, i))
@@ -280,6 +292,7 @@ void Mtg_DuelInit(MtgDuel *d, const MtgDeck *deck0, const MtgDeck *deck1, uint32
             o->owner = o->controller = (uint8_t)p;
             o->zone = MTG_ZONE_LIBRARY;
             o->blocking = MTG_NO_OBJ;
+            o->attachedTo = MTG_NO_OBJ;
             o->seq = ++d->seq;
             pl->library[pl->libraryCount++] = d->objCount++;
         }
@@ -352,6 +365,8 @@ static void FinishResolve(MtgDuel *d)
         else {
             d->objs[e->source].controller = e->controller;
             Mtg_MoveTo(d, e->source, MTG_ZONE_BATTLEFIELD);
+            if (c->enchant && e->target.kind == MTG_TGT_OBJ)   // an Aura: attached to what it targeted
+                d->objs[e->source].attachedTo = e->target.id;
         }
     }
 }
@@ -530,8 +545,6 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
 {
     int p = d->priority;
     MtgStackEntry *e;
-    MtgObj *o = &d->objs[a->obj];
-    const MtgCardDef *c = Mtg_Card(o->def);
     if (a->kind == MTG_ACT_LAND) {
         Mtg_MoveTo(d, a->obj, MTG_ZONE_BATTLEFIELD);
         d->players[p].landsPlayed++;

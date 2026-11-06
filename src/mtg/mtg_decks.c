@@ -16,7 +16,7 @@ static const char *const sShadow[] = {
     "2 Python", "2 Moor Fiend", "2 Bog Wraith", "2 Gluttonous Zombie", "1 Dark Banishing", "1 Specter's Wail",
     "1 Bog Raiders", NULL};
 static const char *const sGrove[] = {
-    "17 Forest", "2 Llanowar Elves", "2 Grizzly Bears", "2 Pygmy Razorback", "2 Giant Growth", "2 Trained Armodon",
+    "17 Forest", "2 Llanowar Elves", "2 Grizzly Bears", "2 Pygmy Razorback", "2 Giant Growth", "2 Rancor",
     "2 Gorilla Warrior", "2 War Mammoth", "2 Giant Spider", "2 Bull Hippo", "2 Spined Wurm", "1 Craw Wurm",
     "1 Stream of Life", "1 Monstrous Growth", NULL};
 static const char *const sDawn[] = {
@@ -38,7 +38,7 @@ static const char *const sAugust[] = {
     "2 Counterspell", "2 Swords to Plowshares", "2 Unsummon", "1 Prodigal Sorcerer", NULL};
 static const char *const sPip[] = {
     "17 Forest", "3 Llanowar Elves", "2 Fyndhorn Elves", "2 Elvish Champion", "1 Grizzly Bears", "2 Wild Elephant", "2 War Mammoth",
-    "3 Giant Growth", "2 Argothian Swine", "2 Giant Spider", "2 Durkwood Boars", "2 Yavimaya Wurm", NULL};
+    "3 Giant Growth", "2 Rancor", "2 Giant Spider", "2 Durkwood Boars", "2 Yavimaya Wurm", NULL};
 static const char *const sRhea[] = {
     "8 Mountain", "8 Forest", "2 Raging Goblin", "2 Llanowar Elves", "2 Mogg Fanatic", "2 Goblin King",
     "2 Shock", "2 Lightning Bolt", "2 Giant Growth", "2 Gorilla Warrior", "2 Hill Giant", "2 Trained Armodon",
@@ -52,9 +52,9 @@ static const char *const sTess[] = {
     "2 Terror", "2 Remove Soul", "2 Counterspell", "2 Python", "2 Giant Octopus", "2 Dark Banishing",
     "1 Air Elemental", "1 Bog Wraith", NULL};
 static const char *const sNolan[] = {
-    "17 Plains", "2 Eager Cadet", "3 Youthful Knight", "2 Benalish Knight", "2 Crusade", "2 Regal Unicorn",
+    "17 Plains", "2 Holy Strength", "3 Youthful Knight", "2 Benalish Knight", "2 Crusade", "2 Regal Unicorn",
     "2 Pegasus Charger", "2 Ekundu Griffin", "2 Swords to Plowshares", "2 Iron Tusk Elephant", "2 Serra Angel",
-    "2 Border Patrol", NULL};
+    "2 Pacifism", NULL};
 
 // MOSSDEEP's CARD SHOP: AUGUST and PIP upstairs, the others in the room below
 const MtgDuelist gMtgDuelists[MTG_DUELISTS] = {

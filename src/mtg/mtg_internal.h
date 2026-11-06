@@ -26,6 +26,7 @@ enum {
     MTG_API_COUNTER,          // CounterEffect
     MTG_API_SACRIFICE,        // SacrificeEffect (Defined$ Self, or one SacValid$ permanent the player chooses)
     MTG_API_PUT_COUNTER,      // CountersPutEffect (P1P1 / M1M1)
+    MTG_API_ATTACH,           // AttachEffect: an Aura spell (K:Enchant:Creature) enters attached to its target
     MTG_API_COUNT
 };
 
@@ -105,6 +106,7 @@ typedef struct {
     uint16_t card;
     uint8_t mode;                   // MTG_STATIC_*
     uint8_t self;                   // AffectedDefined$ Self (Affected$, if any, is then a condition on itself)
+    uint8_t enchanted;              // AffectedDefined$ Enchanted: the creature its Aura is attached to
     const char *affected;           // Affected$ (CantBlock / CantAttack: ValidCard$; CantBlockBy: ValidAttacker$)
     const char *blocker;            // CantBlockBy: ValidBlocker$
     const char *present;            // IsPresent$: only while the battlefield has (PresentCompare$, default GE1)...

@@ -307,6 +307,10 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
                 c->protection |= MTG_COLOR_BIT(i);
                 return;
             }
+    if (strcmp(k, "Enchant:Creature") == 0) {
+        c->enchant = 1;
+        return;
+    }
     if (strncmp(k, "Landwalk:", 9) == 0)
         for (i = 0; i < 5; i++)
             if (strcmp(k + 9, sBasicTypes[i]) == 0) {
@@ -479,6 +483,18 @@ static void ParseCard(int id, char *text)
             continue;
         }
         c->abilities[c->abilityCount++] = (uint16_t)ParseAbility(c, id, abilityLines[i], kind, 0);
+    }
+    if (c->enchant) {   // an Aura's spell (Forge gives it one: "SP$ Attach | ValidTgts$ Creature")
+        static const char sAura[] = "SP$ Attach | ValidTgts$ Creature";
+        char *text = malloc(sizeof(sAura));
+        int spells = 0;
+        memcpy(text, sAura, sizeof(sAura));
+        for (i = 0; i < c->abilityCount; i++)
+            spells += gMtgAbilities[c->abilities[i]].kind == MTG_AB_SPELL;
+        if (spells || !(c->types & MTG_T_ENCHANTMENT) || c->abilityCount >= 8)
+            Unsupported(c, "Enchant:Creature");
+        else
+            c->abilities[c->abilityCount++] = (uint16_t)ParseAbility(c, id, text, MTG_AB_SPELL, 0);
     }
     for (i = 0; i < nTrig; i++)
         Mtg_ParseTrigger(c, id, triggerLines[i]);

@@ -104,6 +104,13 @@ static int ScoreAction(const MtgDuel *d, const MtgAction *a, int me)
     case MTG_API_UNTAP:
     case MTG_API_MANA:
         return 0;
+    case MTG_API_ATTACH: {   // an Aura: Forge's AttachAILogic says whether it helps (Pump) or hurts (Curse)
+        const char *logic = Mtg_Svar(ab->card, "AttachAILogic");
+        int curse = logic && strcmp(logic, "Curse") == 0;
+        if (!main || tgtObj < 0 || !IsCreatureOnField(d, tgtObj) || curse != !tgtMine)
+            return 0;
+        return curse ? 15 + Value(d, tgtObj) : 9 + Value(d, tgtObj) / 2;
+    }
     }
     return 0;
 }

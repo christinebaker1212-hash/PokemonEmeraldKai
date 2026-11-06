@@ -54,6 +54,7 @@ typedef struct MtgCardDef {
     uint16_t abilities[8];                   // indexes into the ability table (A: lines)
     uint8_t triggerCount;
     uint16_t triggers[6];                    // indexes into the trigger table (T: lines; mtg_trigger.c)
+    uint8_t enchant;                         // an Aura (K:Enchant:Creature): its spell targets a creature to enchant
     uint8_t staticCount;
     uint16_t statics[4];                     // indexes into the static table (S: lines; mtg_static.c)
     uint16_t svarFirst, svarCount;           // the card's SVar: lines
@@ -100,6 +101,7 @@ typedef struct {
     int8_t tempPower, tempToughness;   // until end of turn (Pump)
     uint32_t tempKeywords;
     int16_t counters11;           // +1/+1 counters (-1/-1 as negative)
+    uint16_t attachedTo;          // an Aura: the creature it enchants (MTG_NO_OBJ: none)
     uint32_t seq;                 // order within its zone (higher = newer; the library's top is the highest)
 } MtgObj;
 

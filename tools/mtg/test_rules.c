@@ -50,6 +50,7 @@ static int Put(int player, const char *name, int zone)
     o->owner = o->controller = (uint8_t)player;
     o->zone = (uint8_t)zone;
     o->blocking = MTG_NO_OBJ;
+    o->attachedTo = MTG_NO_OBJ;
     o->seq = ++sD.seq;
     return sD.objCount++;
 }
@@ -354,6 +355,89 @@ static void TestSpells(void)
     Do(MTG_ACT_CAST, stream, MTG_TGT_PLAYER, 0);
     PassBoth();
     CHECK(sD.players[0].life == 24, "X = 4: %d", sD.players[0].life);
+}
+
+// Auras (Enchant:Creature): cast onto a creature, what they give it, Forge's AttachAILogic, falling off
+static void TestAuras(void)
+{
+    int bears, strength, pacifism, angel, bolt, fire, ai;
+    printf("auras: attach, pump, pacifism, the AI's side, falling off\n");
+    Table();
+    Lands(0, "Plains", 3);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    angel = Put(1, "Serra Angel", MTG_ZONE_BATTLEFIELD);
+    strength = Put(0, "Holy Strength", MTG_ZONE_HAND);
+    pacifism = Put(0, "Pacifism", MTG_ZONE_HAND);
+    CHECK(Find(MTG_ACT_CAST, strength, MTG_TGT_OBJ, bears) >= 0, "holy strength can target the bears");
+    Do(MTG_ACT_CAST, strength, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Zone(strength) == MTG_ZONE_BATTLEFIELD && sD.objs[strength].attachedTo == bears, "holy strength on the bears");
+    CHECK(Mtg_Power(&sD, bears) == 3 && Mtg_Toughness(&sD, bears) == 4, "bears 3/4 (%d/%d)", Mtg_Power(&sD, bears),
+          Mtg_Toughness(&sD, bears));
+    CHECK(Mtg_Power(&sD, angel) == 4, "not the angel");
+    Do(MTG_ACT_CAST, pacifism, MTG_TGT_OBJ, angel);
+    PassBoth();
+    CHECK(sD.objs[pacifism].attachedTo == angel, "pacifism on the angel");
+    CHECK(!Mtg_CanBlock(&sD, angel, bears), "the angel can't block");
+    Lands(0, "Mountain", 2);
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Zone(bears) == MTG_ZONE_BATTLEFIELD, "a bolt doesn't kill the 3/4 bears");
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD, "a second one does");
+    CHECK(Zone(strength) == MTG_ZONE_GRAVEYARD, "the bears gone: holy strength goes to the graveyard");
+    CHECK(Zone(pacifism) == MTG_ZONE_BATTLEFIELD, "pacifism stays");
+
+    Table();   // Rancor: back to its owner's hand when it goes to the graveyard
+    Lands(0, "Forest", 1);
+    Lands(0, "Mountain", 1);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    fire = Put(0, "Rancor", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, fire, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Mtg_Power(&sD, bears) == 4 && (Mtg_Keywords(&sD, bears) & MTG_KW_BIT(MTG_KW_TRAMPLE)), "rancor: 4/2 trample");
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, bears);
+    PassBoth();
+    PassBoth();
+    CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && Zone(fire) == MTG_ZONE_HAND, "the bears gone: rancor back in hand (%d)", Zone(fire));
+
+    Table();   // Firebreathing: its ability pumps the creature it enchants
+    Lands(0, "Mountain", 3);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    fire = Put(0, "Firebreathing", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, fire, MTG_TGT_OBJ, bears);
+    PassBoth();
+    Do(MTG_ACT_ACTIVATE, fire, -1, 0);
+    PassBoth();
+    CHECK(Mtg_Power(&sD, bears) == 3, "firebreathing: 3/2 (%d)", Mtg_Power(&sD, bears));
+
+    Table();   // the AI: its pump on its own creature, its curse on the other side's
+    ai = 0;
+    {
+        MtgAction act;
+        memset(&act, 0, sizeof(act));
+        Lands(0, "Plains", 2);
+        bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        angel = Put(1, "Serra Angel", MTG_ZONE_BATTLEFIELD);
+        pacifism = Put(0, "Pacifism", MTG_ZONE_HAND);
+        CHECK(Find(MTG_ACT_CAST, pacifism, MTG_TGT_OBJ, angel) >= 0 && Find(MTG_ACT_CAST, pacifism, MTG_TGT_OBJ, bears) >= 0,
+              "pacifism can go on either");
+        {
+            MtgAnswer ans;
+            const MtgQuery *q;
+            memset(&ans, 0, sizeof(ans));
+            Mtg_RefreshQuery(&sD);
+            q = Mtg_Query(&sD);
+            MtgAi_Answer(&sD, &ans);
+            act = q->actions[ans.action];
+            ai = act.kind == MTG_ACT_CAST && act.obj == pacifism && act.target.kind == MTG_TGT_OBJ && act.target.id == angel;
+        }
+        CHECK(ai, "the AI puts pacifism on the angel");
+    }
 }
 
 // ---- whole duels between the stand-in AIs
@@ -792,6 +876,7 @@ int main(int argc, char **argv)
     TestMana();
     TestSpells();
     TestStatics();
+    TestAuras();
     TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

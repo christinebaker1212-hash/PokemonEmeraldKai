@@ -106,6 +106,17 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         return !d || obj != src;
     if (n == 4 && strncmp(p, "Self", 4) == 0)   // (the card the ability or trigger belongs to)
         return !d || obj == src;
+    if (n == 11 && strncmp(p, "EnchantedBy", 11) == 0)   // the creature the source (an Aura) enchants
+        return !d || (src != MTG_NO_OBJ && src < d->objCount && d->objs[src].attachedTo == obj);
+    if (n == 9 && strncmp(p, "enchanted", 9) == 0) {     // a creature with an Aura on it
+        int k;
+        if (!d)
+            return 1;
+        for (k = 0; k < d->objCount; k++)
+            if (d->objs[k].zone == MTG_ZONE_BATTLEFIELD && d->objs[k].attachedTo == obj && Mtg_Card(d->objs[k].def)->enchant)
+                return 1;
+        return 0;
+    }
     if (n == 6 && strncmp(p, "tapped", 6) == 0)
         return !d || o->tapped;
     if (n == 8 && strncmp(p, "untapped", 8) == 0)

@@ -693,6 +693,19 @@ static void DrawCard(int obj, const Rect *rc, int count, float x, float y)
     }
     if (!onTable)
         return;
+    {   // Auras: the creature under the cursor and its Auras (or the Aura and its creature) framed in gold; a creature
+        // wearing one has a gold mark in its corner
+        int f = Focused(), k, worn = 0;
+        if (f != MTG_NO_OBJ && f != obj && B.view.objs[f].zone == MTG_ZONE_BATTLEFIELD
+            && (B.view.objs[f].attachedTo == obj || o->attachedTo == f))
+            G_RoundFrame((int)x - 2, (int)y - 2, rc->w + 4, rc->h + 4, 0xf0c040, 255);
+        for (k = 0; k < B.view.objCount && !worn; k++)
+            worn = B.view.objs[k].zone == MTG_ZONE_BATTLEFIELD && B.view.objs[k].attachedTo == obj;
+        if (worn) {
+            G_RoundFill((int)x - 1, (int)y - 1, 6, 6, 0xf0c040, 255);
+            G_RoundFrame((int)x - 1, (int)y - 1, 6, 6, 0x5a3a08, 255);
+        }
+    }
     if (IsLand(obj) && count > 1) {   // (the count tab, as on the piles)
         int w;
         snprintf(pt, sizeof(pt), "%d", count);
@@ -920,6 +933,12 @@ static void Tooltip(void)
                 snprintf(line, sizeof(line), "%s  %d/%d", name, c->power, c->toughness);
         } else
             snprintf(line, sizeof(line), "%s", name);
+        if (o->zone == MTG_ZONE_BATTLEFIELD && o->attachedTo != MTG_NO_OBJ) {   // an Aura: what it's on
+            char on[40];
+            Name(on, sizeof(on), o->attachedTo);
+            strncat(line, "  ON ", sizeof(line) - strlen(line) - 1);
+            strncat(line, on, sizeof(line) - strlen(line) - 1);
+        }
         if (HasAction(f) && B.mode == MODE_NORMAL)
             strncat(line, "  {A}", sizeof(line) - strlen(line) - 1);
         else if (B.mode == MODE_ATTACK && o->controller == ME && o->zone == MTG_ZONE_BATTLEFIELD)
@@ -2133,6 +2152,7 @@ void MtgBoard_DebugPut(int player, const char *zone, const char *name)
     o->owner = o->controller = (uint8_t)player;
     o->zone = (uint8_t)z;
     o->blocking = MTG_NO_OBJ;
+    o->attachedTo = MTG_NO_OBJ;
     o->seq = ++B.duel.seq;
     B.duel.objCount++;
     Mtg_RefreshQuery(&B.duel);

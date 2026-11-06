@@ -1,0 +1,6 @@
+# MAGIC's Auras on the table: HOLY STRENGTH on your own creature, PACIFISM on theirs (a target chosen as it's cast);
+# the creature wearing one has a gold mark, the Aura's line says what it's on, and focusing either frames the other.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Holy Strength on Grizzly Bears" "mtg: you: cast Pacifism on Serra Angel" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Holy Strength to focus" "mtg: no Pacifism to focus")

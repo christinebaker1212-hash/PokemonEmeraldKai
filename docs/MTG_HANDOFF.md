@@ -42,6 +42,15 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-06: 1.122.0)
+- **Auras** (Enchant:Creature): MTG_API_ATTACH (the synthetic aura spell), MtgObj.attachedTo, state-based removal,
+  AffectedDefined$ Enchanted, EnchantedBy / enchanted, Defined$ Enchanted, comma mode lists, AttachAILogic in the
+  stand-in AI; COOP_NOTES "MAGIC's Auras". Not yet: Enchant other than creatures (land, artifact, "creature you
+  control"), auras that move (Attach as an activated ability), AttachedBy in triggers (SPIRIT LINK), the aura's
+  controller vs the creature's controller in "you" for Defined$ (fine for the pool's playable ones).
+- 1335 of 5408 cards play (77 Auras). Biggest blockers now: static ability 446, cost 326, replacement effect 207,
+  Effect 126, ChangeType 103, Regenerate 89, TargetMin 79, Animate 73.
+
 ## Status (2026-11-06: 1.121.0)
 - **Static abilities** (src/mtg/mtg_static.c, MtgStatic / MtgStaticMods in mtg_internal.h): `S:Mode$ Continuous` with
   Affected$ (or AffectedDefined$ Self, an Affected$ beside it then a condition on itself), AddPower / AddToughness,
@@ -145,7 +154,8 @@ the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers show
    DamageDoneOnce, Taps, Drawn, LandPlayed...) and their Execute$ effects (Effect, DelayedTrigger, Token...).
 2. **Static abilities** (507: StaticAbilityContinuous above all, the layer order of StaticEffects; CantBlock,
    CantAttack, cost changes).
-3. **Costs** (295: Sac<1/Creature>, Discard<1/Card>, PayLife, untap symbol...) and **Auras** (Enchant: 312).
+3. **Costs** (326: Sac<1/Creature>, Discard<1/Card>, PayLife, untap symbol...); Auras done for creatures in 1.122.0
+   (the other Enchant: kinds remain).
 4. **Replacement effects** (182: Moved, Untap, DamageDone), then Effect, ChangeType, multiple targets
    (TargetMin / TargetMax), Regenerate, Animate, PreventDamage, Tokens (Forge's tokenscripts too), counters,
    Charm, ChangeZoneAll, the rest by the report.

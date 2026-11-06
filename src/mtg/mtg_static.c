@@ -71,7 +71,51 @@ static int Keywords(MtgStatic *st, const char *text)
 }
 
 // S: line text -> a static of card c; a part it doesn't translate makes the card unsupported
+static void ParseOne(MtgCardDef *c, int cardId, char *text);
+
+// The split texts of "Mode$ A,B" lines: the statics point into them, so they live as long as the pool
+static char **sKept;
+static int sKeptCount;
+
+static char *Kept(size_t len)
+{
+    char *t = malloc(len);
+    sKept = realloc(sKept, (size_t)(sKeptCount + 1) * sizeof(char *));
+    sKept[sKeptCount++] = t;
+    return t;
+}
+
+// S: line text -> statics of card c ("Mode$ CantAttack,CantBlock": one of each); a part it doesn't translate makes the
+// card unsupported
 void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text)
+{
+    char *mode = strstr(text, "Mode$"), *comma, *end;
+    if (mode && (end = strchr(mode, '|')) != NULL && (comma = strchr(mode, ',')) != NULL && comma < end) {
+        size_t len = strlen(text);
+        char *a = Kept(len + 1), *b = Kept(len + 1);
+        size_t pre = (size_t)(mode + 5 - text);
+        // the first mode: text up to "Mode$", the first name, the rest from the '|'; the second likewise
+        memcpy(a, text, pre);
+        a[pre] = 0;
+        strncat(a, mode + 5, (size_t)(comma - mode - 5));
+        strcat(a, " ");
+        strcat(a, end);
+        memcpy(b, text, pre);
+        b[pre] = 0;
+        strncat(b, comma + 1, (size_t)(end - comma - 1));
+        strcat(b, end);
+        if (strchr(b + pre, ',') && strchr(b + pre, ',') < strchr(b + pre, '|')) {
+            Mtg_Unsupported(c, "static ability");
+            return;
+        }
+        ParseOne(c, cardId, a);
+        ParseOne(c, cardId, b);
+        return;
+    }
+    ParseOne(c, cardId, text);
+}
+
+static void ParseOne(MtgCardDef *c, int cardId, char *text)
 {
     static const char *const sKnown[] = {"Mode", "Affected", "AddPower", "AddToughness", "AddKeyword", "SetPower",
                                          "SetToughness", "Description", "AffectedZone", "EffectZone", "AffectedDefined",
@@ -102,16 +146,18 @@ void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text)
         || ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "Battlefield") != 0))
         goto unknown;
     if ((s = ParamOf(first, count, "AffectedDefined"))) {
-        if (strcmp(s, "Self") != 0 || st.mode != MTG_STATIC_CONTINUOUS)
+        if (st.mode != MTG_STATIC_CONTINUOUS || (strcmp(s, "Self") != 0 && strcmp(s, "Enchanted") != 0)
+            || (strcmp(s, "Enchanted") == 0 && !c->enchant))
             goto unknown;
-        st.self = 1;
+        st.self = s[0] == 'S';
+        st.enchanted = s[0] == 'E';
     }
     st.affected = ParamOf(first, count, st.mode == MTG_STATIC_CONTINUOUS ? "Affected"
                                       : st.mode == MTG_STATIC_CANT_BLOCK_BY ? "ValidAttacker" : "ValidCard");
     if (st.mode == MTG_STATIC_CANT_BLOCK_BY && (!(st.blocker = ParamOf(first, count, "ValidBlocker"))
                                                 || !Mtg_ValidSpecKnown(st.blocker)))
         goto unknown;
-    if ((!st.affected && !st.self) || (st.affected && !Mtg_ValidSpecKnown(st.affected)))
+    if ((!st.affected && !st.self && !st.enchanted) || (st.affected && !Mtg_ValidSpecKnown(st.affected)))
         goto unknown;
     if (st.mode == MTG_STATIC_RAISE_COST || st.mode == MTG_STATIC_REDUCE_COST) {
         // spells only; "Amount$ n" more or less generic mana, or "Cost$ W" (raise) one more colored symbol
@@ -188,6 +234,8 @@ static int Present(const MtgDuel *d, const MtgStatic *st, int src)
 static int Applies(const MtgDuel *d, const MtgStatic *st, int src, int obj)
 {
     if (st->self && obj != src)
+        return 0;
+    if (st->enchanted && obj != d->objs[src].attachedTo)
         return 0;
     if (st->affected && !Mtg_ValidObj(d, obj, st->affected, src, d->objs[src].controller))
         return 0;
