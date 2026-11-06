@@ -73,6 +73,39 @@ want "maker lua: .*ran too long"
 want "maker event: line 3 ran"
 want "maker event: line 2 ran"
 want "\[test\] item 68: 2"
+# battles: OnDamageCalc makes the player's hits do 1 damage, OnEndTurn logs each turn (a wild ZIGZAGOON, SCRATCH)
+B="$T/battle"; mkdir -p "$B/mm/lua" "$B/shots"
+cat > "$B/mm/lua/battle.lua" <<'S'
+function OnDamageCalc(attacker, target, move, damage, side)
+  if side == 0 then
+    game.log("hit " .. attacker .. " " .. move .. " was " .. damage)
+    return 1
+  end
+end
+function OnEndTurn(turn)
+  game.log("turn " .. turn)
+end
+S
+cat > "$B/play.txt" <<'S'
+pressuntil A field 5000
+mp teach 0 10
+mp wild 288:5
+pressuntil A action 3000
+wait 10
+press A 2
+wait 20
+press A 2
+pressuntillog A 3000 maker lua: turn 1
+wait 30
+quit
+S
+(cd "$B" && env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_NO_UPDATE=1 MOEMON_TEST="$B/play.txt" \
+    MOEMON_SHOTDIR="$B/shots" MOEMON_SKIP_COOP_SETUP=1 MOEMON_COOP_CONFIG="$B/play.ini" MOEMON_DEBUG_QUICKSTART=1 \
+    MOEMON_MAKER_DIR="$B/mm" MOEMON_SAVE="$B/play.sav" timeout 200 "$BIN" > "$B/play.log" 2>&1)
+grep "maker lua" "$B/play.log" | head -4
+grep -q "maker lua: hit SPECIES_[A-Z]* MOVE_SCRATCH was [0-9]*" "$B/play.log" || { echo "FAIL: OnDamageCalc didn't see the player's SCRATCH"; fail=1; }
+grep -q "maker lua: turn 1" "$B/play.log" || { echo "FAIL: OnEndTurn didn't run"; fail=1; }
+
 # the editor: Tools > Lua scripts makes a new script, checks a broken text and a fixed one, saves it
 E="$T/editor"; mkdir -p "$E/mm"
 printf 'AllowSmallTweaks = 1\n' > "$E/on.ini"

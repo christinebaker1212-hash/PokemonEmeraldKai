@@ -10,6 +10,7 @@
 #include "pokemon.h"
 #include "random.h"
 #include "script.h"
+#include "battle.h"
 #include "maker.h"
 #include "maker_api.h"
 
@@ -106,4 +107,15 @@ bool8 MakerLua_StartEvent(const char *name)
         return FALSE;
     ScriptContext_SetupScript(script);
     return TRUE;
+}
+
+// battle_script_commands.c: a move's damage through a Lua OnDamageCalc hook
+int MakerLua_OnDamageCalc(const char *attacker, const char *target, const char *move, int damage, int side);
+s32 Maker_LuaDamage(u8 attacker, u8 target, u16 move, s32 damage)
+{
+    char a[40], t[40], m[40];
+    snprintf(a, sizeof(a), "%s", MakerApi_NameOf(MAKER_NAMES_SPECIES, gBattleMons[attacker].species));
+    snprintf(t, sizeof(t), "%s", MakerApi_NameOf(MAKER_NAMES_SPECIES, gBattleMons[target].species));
+    snprintf(m, sizeof(m), "%s", MakerApi_NameOf(MAKER_NAMES_MOVE, move));
+    return MakerLua_OnDamageCalc(a, t, m, damage, gBattlerPositions[attacker] & BIT_SIDE);
 }

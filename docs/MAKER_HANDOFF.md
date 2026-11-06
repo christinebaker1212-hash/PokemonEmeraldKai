@@ -124,9 +124,8 @@ M1's known limits, carried into later milestones:
    on transition) as events.
 4. **M4c is done** (COOP_NOTES "Moemon Maker, M4c"). Could come later: an event started from the game's script
    noticing when that script changed in an update (keep the decompiled body's hash with the event).
-5. **M5**: Lua hooks are built for the field (COOP_NOTES "Moemon Maker, M5: Lua hooks"); next their battle hooks
-   (OnDamageCalc, OnMoveHit, OnSwitchIn, OnEndTurn, for custom moves / abilities), then the tileset editor, the
-   animation timeline and SINNOH's 3D mode.
+5. **M5**: Lua hooks are built, field and battle (COOP_NOTES "Moemon Maker, M5: Lua hooks"); next the tileset editor,
+   the animation timeline and SINNOH's 3D mode.
 
 ## Earlier next steps (M2a done: continue with M2b, then M2c)
 

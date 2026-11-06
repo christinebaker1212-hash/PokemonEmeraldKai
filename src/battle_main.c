@@ -4451,6 +4451,10 @@ void BattleTurnPassed(void)
         gBattleResults.battleTurnCounter++;
         gBattleStruct->arenaTurnCounter++;
     }
+    {
+        void MakerLua_OnEndTurn(int turn);
+        MakerLua_OnEndTurn(gBattleResults.battleTurnCounter);   // Moemon Maker M5: a Lua OnEndTurn hook (src/maker/maker_lua.cpp)
+    }
 
     for (i = 0; i < gBattlersCount; i++)
     {

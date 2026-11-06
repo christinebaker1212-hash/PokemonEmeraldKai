@@ -9,7 +9,9 @@
 //   game.species(slot)  game.level(slot)  game.map()  game.x()  game.y()  game.random(n)  game.log(text)
 //
 // Hooks the game calls when a script defines them: OnStep(x, y, map) after each step of the player and
-// OnMapEnter(map) when a map loads; OnStep may return the name of an event of the map to start it. An event line
+// OnMapEnter(map) when a map loads (OnStep may return the name of an event of the map to start it), and in battles
+// OnDamageCalc(attacker, target, move, damage, attackerSide) (may return a new damage) and OnEndTurn(turn). In link
+// battles only the master's engine runs, so its hooks decide for everyone (the same pack for all: the lobby checks). An event line
 // `lua FUNCTION args...` calls a function (arguments are numbers or names) and puts what it returns in VAR_RESULT
 // (true 1, false / nil 0), for `if result N`.
 #include <dirent.h>
@@ -235,6 +237,40 @@ unsigned char MakerLua_OnStep(void)
         started = MakerLua_StartEvent(lua_tostring(sL, -1));
     lua_pop(sL, 1);
     return started;
+}
+
+// battle_script_commands.c, a move's damage after the game's random roll and before FOCUS SASH / ENDURE / FOCUS BAND:
+// OnDamageCalc(attacker, target, move, damage, attackerSide) may return a new damage (attacker / target: SPECIES_ names,
+// move: its MOVE_ name, attackerSide 0 the player's)
+int MakerLua_OnDamageCalc(const char *attacker, const char *target, const char *move, int damage, int side)
+{
+    if (!sL && !sLoaded)
+        Load();
+    if (!Function("OnDamageCalc"))
+        return damage;
+    lua_pushstring(sL, attacker);
+    lua_pushstring(sL, target);
+    lua_pushstring(sL, move);
+    lua_pushinteger(sL, damage);
+    lua_pushinteger(sL, side);
+    if (!Run(sL, 5, 1))
+        return damage;
+    if (lua_isnumber(sL, -1))
+    {
+        lua_Number v = lua_tonumber(sL, -1);
+        damage = v < 0 ? 0 : v > 65535 ? 65535 : (int)v;
+    }
+    lua_pop(sL, 1);
+    return damage;
+}
+
+// battle_main.c, as each turn ends: OnEndTurn(turn)
+void MakerLua_OnEndTurn(int turn)
+{
+    if (!Function("OnEndTurn"))
+        return;
+    lua_pushinteger(sL, turn);
+    Run(sL, 1, 0);
 }
 
 // overworld.c, when a map loads (beside its ON_TRANSITION script): OnMapEnter(map)

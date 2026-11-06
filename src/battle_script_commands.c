@@ -1723,11 +1723,14 @@ static void UNUSED Unused_ApplyRandomDmgMultiplier(void)
     ApplyRandomDmgMultiplier();
 }
 
+s32 Maker_LuaDamage(u8 attacker, u8 target, u16 move, s32 damage);   // Moemon Maker M5 (src/maker/maker_luagame.c)
+
 static void Cmd_adjustnormaldamage(void)
 {
     u8 holdEffect, param;
 
     ApplyRandomDmgMultiplier();
+    gBattleMoveDamage = Maker_LuaDamage(gBattlerAttacker, gBattlerTarget, gCurrentMove, gBattleMoveDamage);   // Moemon Maker: a Lua OnDamageCalc hook
 
     if (gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY)
     {
@@ -1773,6 +1776,7 @@ static void Cmd_adjustnormaldamage2(void)
     u8 holdEffect, param;
 
     ApplyRandomDmgMultiplier();
+    gBattleMoveDamage = Maker_LuaDamage(gBattlerAttacker, gBattlerTarget, gCurrentMove, gBattleMoveDamage);   // Moemon Maker: a Lua OnDamageCalc hook
 
     if (gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY)
     {

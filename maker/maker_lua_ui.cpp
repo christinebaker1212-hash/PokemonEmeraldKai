@@ -106,6 +106,8 @@ static const char *const kHelp =
     "Hooks the game calls when a script has them:\n"
     "  OnStep(x, y, map)   after each step; return an event's name to start it\n"
     "  OnMapEnter(map)     when a map loads\n"
+    "  OnDamageCalc(attacker, target, move, damage, side)   return a new damage (side 0: the player's)\n"
+    "  OnEndTurn(turn)     as each battle turn ends\n"
     "An event line  lua FUNCTION args  calls a function; what it returns goes in VAR_RESULT (if result N).\n\n"
     "game.flag(NAME)  game.setflag(NAME, on)   FLAG_ names or your own\n"
     "game.var(NAME)  game.setvar(NAME, n)      VAR_ names\n"

@@ -5413,8 +5413,12 @@ overnight list included M2-M5; each is easy to change if the user wants otherwis
   native): the answer in VAR_RESULT (true 1, false / nil 0) for `if result N`.
 - The editor: Tools > Lua scripts (maker/maker_lua_ui.cpp): the files, the text, Lua's check as you type, the game's
   last problem, what a script can use; Save reloads them in the game (MakerApi_LuaReload).
-- Test tools/test/maker_lua.sh (an event's call and branch, both hooks, the sandbox, the budget; the editor window).
-  Still to come: battle hooks (OnDamageCalc, OnMoveHit, OnSwitchIn, OnEndTurn) for custom moves and abilities.
+- Battle hooks: OnDamageCalc(attacker, target, move, damage, attackerSide) in Cmd_adjustnormaldamage / 2 after the
+  random roll and before FOCUS SASH / ENDURE / FOCUS BAND (SPECIES_ / MOVE_ names, side 0 the player's; a number back is
+  the new damage, 0-65535: maker_luagame.c Maker_LuaDamage), OnEndTurn(turn) in battle_main.c as the turn counter goes
+  up. Link battles: only the master's engine runs, so its hooks decide for everyone (same pack for all).
+- Test tools/test/maker_lua.sh (an event's call and branch, the field hooks, the sandbox, the budget, both battle hooks;
+  the editor window).
 
 ## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
 - SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py
