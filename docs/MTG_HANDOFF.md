@@ -42,6 +42,13 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-06: 1.135.0)
+- Granted abilities and triggers (AddAbility$ / AddTrigger$ / AddSVar$), MustAttack, CantBeCast, CantTarget,
+  CantPlayLand, Count$ValidHand / HalfUp / HalfDown: COOP_NOTES "MAGIC's granted abilities and the newer statics".
+  1953 of 5408. Next by count: AddType (21), CheckSVar statics (19: the Avatars' ReduceCost, the Legates), ValidPlayer
+  (14), GainControl statics (12), SetColor (11), EffectZone$ All / Graveyard, MayLookAt, AddHiddenKeyword, keywords
+  Banding / Phasing / Menace / Flanking; then Effect, ChangeType, TargetMin by docs/MTG_SCOPE.md.
+
 ## Status (2026-11-06: 1.134.0)
 - Alternative costs (S:Mode$ AlternativeCost, ValidSA$ Spell.Self) and the cost parts ExileFromHand / Return /
   tapXType: COOP_NOTES "MAGIC's alternative costs". 1887 of 5408. Still out: the CheckSVar Legates (Cost$ 0 when an

@@ -57,8 +57,8 @@ static int CountedAmount(int cardId, const char *s)
         s++;
     if (!(sv = Mtg_Svar(cardId, s)))
         return 0;
-    if (strncmp(sv, "Count$Valid ", 12) != 0 && strncmp(sv, "Number$", 7) != 0 && strcmp(sv, "Count$CardPower") != 0
-        && strcmp(sv, "Count$CardToughness") != 0)
+    if (strncmp(sv, "Count$Valid", 11) != 0 && strncmp(sv, "Number$", 7) != 0 && strcmp(sv, "Count$CardPower") != 0
+        && strcmp(sv, "Count$CardToughness") != 0 && strcmp(sv, "Count$Domain") != 0)
         return 0;
     Mtg_Amount(NULL, NULL, cardId, s, &ok);
     return ok;
@@ -209,7 +209,7 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
                                          "SetToughness", "Description", "AffectedZone", "EffectZone", "AffectedDefined",
                                          "IsPresent", "PresentCompare", "ValidCard", "ValidAttacker", "ValidBlocker", "CharacteristicDefining",
                                          "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender",
-                                         "ValidCreature", "ValidTarget", "ValidSA", "ValidSource", "Caster"};
+                                         "ValidCreature", "ValidTarget", "ValidSA", "ValidSource", "Caster", "AddAbility", "AddTrigger", "AddSVar"};
     MtgStatic st;
     int first, count, i, v;
     const char *s;
@@ -266,11 +266,11 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     if (st.mode == 0xFF || ((s = ParamOf(first, count, "AffectedZone")) && strcmp(s, "Battlefield") != 0))
         goto unknown;
     if ((s = ParamOf(first, count, "AffectedDefined"))) {
-        if (st.mode != MTG_STATIC_CONTINUOUS || (strcmp(s, "Self") != 0 && strcmp(s, "Enchanted") != 0)
-            || (strcmp(s, "Enchanted") == 0 && !c->enchant))
+        int ench = strcmp(s, "Enchanted") == 0 || strcmp(s, "AttachedBy Self") == 0;   // (the same, for an Aura)
+        if (st.mode != MTG_STATIC_CONTINUOUS || (strcmp(s, "Self") != 0 && !ench) || (ench && !c->enchant))
             goto unknown;
         st.self = s[0] == 'S';
-        st.enchanted = s[0] == 'E';
+        st.enchanted = (uint8_t)ench;
     }
     st.affected = ParamOf(first, count, st.mode == MTG_STATIC_CONTINUOUS ? "Affected"
                                       : st.mode == MTG_STATIC_CANT_BLOCK_BY ? "ValidAttacker"
@@ -365,6 +365,69 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     }
     if ((s = ParamOf(first, count, "AddKeyword")) && !Keywords(&st, s))
         goto unknown;
+    // AddAbility$ "A & B": SVars of its card, each an activated ability ("AB$ ...") of whatever it affects; CARDNAME and
+    // Self there are that permanent (the ability's source), its SVars the granting card's (as Forge's AddSVar)
+    if ((s = ParamOf(first, count, "AddAbility"))) {
+        char names[96], *p = names, *k;
+        if (st.mode != MTG_STATIC_CONTINUOUS || strlen(s) >= sizeof(names))
+            goto unknown;
+        strcpy(names, s);
+        while ((k = Mtg_Token(&p, '&')) != NULL) {
+            const char *sv;
+            char *copy;
+            int i;
+            while (*k == ' ')
+                k++;
+            for (i = (int)strlen(k); i > 0 && k[i - 1] == ' '; i--)
+                k[i - 1] = 0;
+            if (!(sv = Mtg_Svar(cardId, k)) || strncmp(sv, "AB$", 3) != 0 || st.grantCount >= 3)
+                goto unknown;
+            copy = Kept(strlen(sv) + 1);
+            strcpy(copy, sv);
+            st.grant[st.grantCount++] = (uint16_t)Mtg_ParseAbilityText(c, cardId, copy, MTG_AB_ACTIVATED);
+        }
+    }
+    // AddTrigger$ "A & B": SVars of its card, each a trigger ("Mode$ ...") of whatever it affects
+    if ((s = ParamOf(first, count, "AddTrigger"))) {
+        char names[96], *p = names, *k;
+        if (st.mode != MTG_STATIC_CONTINUOUS || strlen(s) >= sizeof(names))
+            goto unknown;
+        strcpy(names, s);
+        while ((k = Mtg_Token(&p, '&')) != NULL) {
+            const char *sv;
+            char *copy;
+            int i, t;
+            while (*k == ' ')
+                k++;
+            for (i = (int)strlen(k); i > 0 && k[i - 1] == ' '; i--)
+                k[i - 1] = 0;
+            if (!(sv = Mtg_Svar(cardId, k)) || strncmp(sv, "Mode$", 5) != 0 || st.grantTrigCount >= 2)
+                goto unknown;
+            copy = Kept(strlen(sv) + 1);
+            strcpy(copy, sv);
+            if ((t = Mtg_ParseGrantedTrigger(c, cardId, copy)) < 0)
+                return;   // (it said why)
+            st.grantTrig[st.grantTrigCount++] = (uint16_t)t;
+        }
+    }
+    // AddSVar$: Forge copies those SVars onto what it affects; here the granted abilities read their own card's
+    if ((s = ParamOf(first, count, "AddSVar"))) {
+        char names[96], *p = names, *k;
+        if (!st.grantCount && !st.grantTrigCount)
+            goto unknown;
+        if (strlen(s) >= sizeof(names))
+            goto unknown;
+        strcpy(names, s);
+        while ((k = Mtg_Token(&p, '&')) != NULL) {
+            int i;
+            while (*k == ' ')
+                k++;
+            for (i = (int)strlen(k); i > 0 && k[i - 1] == ' '; i--)
+                k[i - 1] = 0;
+            if (!Mtg_Svar(cardId, k))
+                goto unknown;
+        }
+    }
     if (c->staticCount >= sizeof(c->statics) / sizeof(c->statics[0]))
         goto unknown;
     if (sStaticCount + 1 > sStaticCap) {
@@ -566,6 +629,60 @@ void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m)
         }
     }
     sDepth--;
+}
+
+int Mtg_ObjAbilities(const MtgDuel *d, int obj, uint16_t *out, int max)
+{
+    const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+    int n = 0, s, k, g;
+    for (k = 0; k < c->abilityCount && n < max; k++)
+        out[n++] = c->abilities[k];
+    if (sDepth || d->objs[obj].zone != MTG_ZONE_BATTLEFIELD)
+        return n;
+    sDepth++;
+    for (s = 0; s < d->objCount && n < max; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *sc;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        sc = Mtg_Card(src->def);
+        for (k = 0; k < sc->staticCount && n < max; k++) {
+            const MtgStatic *st = &gMtgStatics[sc->statics[k]];
+            if (st->mode != MTG_STATIC_CONTINUOUS || !st->grantCount || !Applies(d, st, s, obj))
+                continue;
+            for (g = 0; g < st->grantCount && n < max; g++)
+                out[n++] = st->grant[g];
+        }
+    }
+    sDepth--;
+    return n;
+}
+
+int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max)
+{
+    const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+    int n = 0, s, k, g;
+    for (k = 0; k < c->triggerCount && n < max; k++)
+        out[n++] = c->triggers[k];
+    if (sDepth || d->objs[obj].zone != MTG_ZONE_BATTLEFIELD)
+        return n;
+    sDepth++;
+    for (s = 0; s < d->objCount && n < max; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *sc;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        sc = Mtg_Card(src->def);
+        for (k = 0; k < sc->staticCount && n < max; k++) {
+            const MtgStatic *st = &gMtgStatics[sc->statics[k]];
+            if (st->mode != MTG_STATIC_CONTINUOUS || !st->grantTrigCount || !Applies(d, st, s, obj))
+                continue;
+            for (g = 0; g < st->grantTrigCount && n < max; g++)
+                out[n++] = st->grantTrig[g];
+        }
+    }
+    sDepth--;
+    return n;
 }
 
 // CantBlock / CantAttack: does a static forbid OBJ? CantBlockBy: may OBJ (attacking) not be blocked by OTHER?

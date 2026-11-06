@@ -3505,6 +3505,26 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   cast is priced by CostPriceOf (+1), so the mana cast wins when both exist.
 - Tests: test_rules.c TestAltCosts (CRASH, GUSH, CAVE-IN), scenario mtg_altcost (the menu, the pick).
 
+## MAGIC's granted abilities and the newer statics (1.135.0)
+
+- AddAbility$ / AddTrigger$ (mtg_static.c ParseOne): each named SVar of the static's own card is parsed as an activated
+  ability ("AB$ ...", Mtg_ParseAbilityText) or a trigger ("Mode$ ...", Mtg_ParseGrantedTrigger: ParseTrig without
+  joining the card's own list) into MtgStatic grant[3] / grantTrig[2]. CARDNAME and Self there are the permanent that
+  has it (the ability's source); their SVars are read from the granting card, so AddSVar$ is only checked (the names
+  must exist there). Mtg_ObjAbilities / Mtg_ObjTriggers give a permanent's own plus the granted ones while the static
+  applies: used by the priority actions (mtg_game.c), mana sources (mtg_mana.c Mtg_ManaAbilityColors: Citanul
+  Hierophants) and Mtg_CheckTriggers. Granted triggers only work on the battlefield (no last-known look for "dies").
+- AffectedDefined$ "AttachedBy Self" is read as Enchanted (an Aura's).
+- Counted amounts (mtg_effects.c Mtg_Amount): Count$ValidHand, "/HalfUp", "/HalfDown"; statics also take
+  Count$ValidGraveyard and Count$Domain (CountedAmount).
+- MustAttack (ValidCreature$): the attack answer is forced to include them (mtg_game.c MTG_Q_ATTACKERS) and the board
+  preselects them (mtg_board.c MustAttackers; A on one says "It attacks each combat if able."). CantBeCast (Caster$
+  You / Opponent / Player): Mtg_StaticForbids(CANT_BE_CAST, obj, caster) leaves the cast out. CantTarget (ValidTarget$,
+  ValidSA$ Spell, ValidSource$): Mtg_CanTarget asks it with the source. CantPlayLand (ValidCard$, default every land).
+- Board: an ability's menu line names the permanent (AbilityWords for CARDNAME).
+- Tests: test_rules.c TestGranted (ARCANE TEACHINGS, CITANUL HIEROPHANTS, AURA FLUX, ASPECT OF WOLF, EMPYRIAL ARMOR),
+  TestStatics' BLOODROCK CYCLOPS / DENSE FOLIAGE; scenario mtg_granted.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

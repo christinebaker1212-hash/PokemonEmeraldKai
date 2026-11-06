@@ -1,0 +1,35 @@
+pressuntil A field 5000
+wait 60
+mp mtg starter 0
+mp mtg duel 1
+wait 30
+press A 2
+waitlog 3000 mtg: your move: priority
+wait 10
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Grizzly Bears
+mp mtg put 0 hand Arcane Teachings
+wait 10
+mp mtg focus Arcane Teachings
+press A 2
+wait 30
+press DOWN 2
+wait 8
+rendershot g_cast
+press A 2
+waitlog 900 mtg: ready
+wait 150
+mp mtg focus Grizzly Bears
+press A 2
+wait 30
+rendershot g_menu
+press A 2
+wait 20
+rendershot g_target
+press A 2
+waitlog 900 mtg: ready
+wait 150
+rendershot g_after
+quit

@@ -119,6 +119,7 @@ typedef struct {
 // T: line text -> a trigger of card c (its Execute$ parsed as an MTG_AB_TRIGGERED ability); a part it doesn't
 // translate makes the card unsupported
 void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text);
+int Mtg_ParseGrantedTrigger(MtgCardDef *c, int cardId, char *text);   // a static's AddTrigger$: -1 if unsupported
 void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev);     // the triggers it sets off join d->pending
 int Mtg_TriggerStillTrue(const MtgDuel *d, const MtgStackEntry *e);   // an intervening "if" (IsPresent$) on resolving
 const char *Mtg_TriggerParam(const MtgTrigger *t, const char *key);
@@ -153,6 +154,10 @@ typedef struct {
     const char *unlessDefender;     // CantAttack: UnlessDefender$ ("controlsIsland", "!controlsLand.untapped", ...)
     const char *source;             // CantTarget: ValidSource$ (the spell or ability's source); spellsOnly: ValidSA$ Spell
     uint8_t spellsOnly;
+    uint8_t grantCount;             // AddAbility$: activated abilities what it affects has (its own card's SVars)
+    uint16_t grant[3];
+    uint8_t grantTrigCount;         // AddTrigger$: triggers what it affects has
+    uint16_t grantTrig[2];
 } MtgStatic;
 typedef struct {
     int addPower, addToughness, setPower, setToughness;
@@ -164,6 +169,9 @@ void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text);
 void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text);   // R: lines (only the forms above)
 void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m);
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other);
+// a permanent's abilities now: its card's, then those statics give it (AddAbility$); returns how many (at most max)
+int Mtg_ObjAbilities(const MtgDuel *d, int obj, uint16_t *out, int max);
+int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max);    // ... and triggers (AddTrigger$)
 void Mtg_SpellCost(const MtgDuel *d, int player, int obj, MtgManaCost *out);   // its mana cost with Raise / ReduceCost   // CantBlock / CantAttack (obj), CantBlockBy
                                                                           // (obj attacking, other blocking)
 

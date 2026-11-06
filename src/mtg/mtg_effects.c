@@ -101,22 +101,27 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
             n += d->objs[i].zone == MTG_ZONE_HAND && d->objs[i].owner == ctx->e->target.id;
         return n;
     }
-    if (strncmp(sv, "Count$Valid ", 12) == 0 || strncmp(sv, "Count$ValidGraveyard ", 21) == 0) {
-        // "Count$Valid Forest.YouCtrl", "/Plus.1", "/Minus.2", "/Times.2" after it; ValidGraveyard: in graveyards
-        int i, count = 0, grave = sv[11] == 'G', mod = 0, arg = 0;
-        const char *spec = sv + (grave ? 21 : 12), *slash = strchr(spec, '/');
+    if (strncmp(sv, "Count$Valid ", 12) == 0 || strncmp(sv, "Count$ValidGraveyard ", 21) == 0
+        || strncmp(sv, "Count$ValidHand ", 16) == 0) {
+        // "Count$Valid Forest.YouCtrl", "/Plus.1", "/Minus.2", "/Times.2", "/HalfUp", "/HalfDown" after it;
+        // ValidGraveyard: in graveyards, ValidHand: in hands
+        int i, count = 0, grave = sv[11] == 'G', hand = sv[11] == 'H', mod = 0, arg = 0;
+        const char *spec = sv + (grave ? 21 : hand ? 16 : 12), *slash = strchr(spec, '/');
         char buf[96];
         if (slash) {
             const char *m = slash + 1;
-            mod = strncmp(m, "Plus.", 5) == 0 ? 1 : strncmp(m, "Minus.", 6) == 0 ? 2 : strncmp(m, "Times.", 6) == 0 ? 3 : 0;
+            mod = strncmp(m, "Plus.", 5) == 0 ? 1 : strncmp(m, "Minus.", 6) == 0 ? 2 : strncmp(m, "Times.", 6) == 0 ? 3
+                : strcmp(m, "HalfUp") == 0 ? 4 : strcmp(m, "HalfDown") == 0 ? 5 : 0;
             if (!mod || (size_t)(slash - spec) >= sizeof(buf)) {
                 *ok = 0;
                 return 0;
             }
-            arg = atoi(strchr(m, '.') + 1);
-            if (strspn(strchr(m, '.') + 1, "0123456789") != strlen(strchr(m, '.') + 1)) {
-                *ok = 0;
-                return 0;
+            if (mod <= 3) {
+                arg = atoi(strchr(m, '.') + 1);
+                if (strspn(strchr(m, '.') + 1, "0123456789") != strlen(strchr(m, '.') + 1)) {
+                    *ok = 0;
+                    return 0;
+                }
             }
             memcpy(buf, spec, (size_t)(slash - spec));
             buf[slash - spec] = 0;
@@ -129,10 +134,11 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
         if (!d)
             return 0;
         for (i = 0; i < d->objCount; i++)
-            if (d->objs[i].zone == (grave ? MTG_ZONE_GRAVEYARD : MTG_ZONE_BATTLEFIELD)
+            if (d->objs[i].zone == (grave ? MTG_ZONE_GRAVEYARD : hand ? MTG_ZONE_HAND : MTG_ZONE_BATTLEFIELD)
                 && Mtg_ValidObj(d, i, spec, ctx->source, ctx->controller))
                 count++;
-        return mod == 1 ? count + arg : mod == 2 ? count - arg : mod == 3 ? count * arg : count;
+        return mod == 1 ? count + arg : mod == 2 ? count - arg : mod == 3 ? count * arg : mod == 4 ? (count + 1) / 2
+             : mod == 5 ? count / 2 : count;
     }
     *ok = 0;
     return 0;

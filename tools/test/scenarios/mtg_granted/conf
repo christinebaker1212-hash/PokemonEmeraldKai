@@ -1,0 +1,6 @@
+# MAGIC's granted abilities on the table: ARCANE TEACHINGS on the GRIZZLY BEARS gives them "{T}: 1 damage to any target"; the bears'
+# menu shows it with their own name, and it hits. Shots g_cast, g_menu, g_target, g_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Arcane Teachings to focus" "mtg: no Grizzly Bears to focus")

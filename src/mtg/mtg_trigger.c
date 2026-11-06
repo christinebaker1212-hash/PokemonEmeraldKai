@@ -169,7 +169,8 @@ static int ChainKnown(int ability, int mode, const char **why)
     return 1;
 }
 
-void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
+// ATTACH: one of the card's own (T: lines); else a static's AddTrigger$ (the trigger only). -1: unsupported
+static int ParseTrig(MtgCardDef *c, int cardId, char *text, int attach)
 {
     MtgTrigger *t;
     int first, n, idx, i, mode = 0;
@@ -186,18 +187,20 @@ void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
     t->execute = 0xFFFF;
     t->paramFirst = (uint16_t)first;
     t->paramCount = (uint16_t)n;
-    if (c->triggerCount >= sizeof(c->triggers) / sizeof(c->triggers[0])) {
-        Mtg_Unsupported(c, "too many triggers");
-        return;
+    if (attach) {
+        if (c->triggerCount >= sizeof(c->triggers) / sizeof(c->triggers[0])) {
+            Mtg_Unsupported(c, "too many triggers");
+            return -1;
+        }
+        c->triggers[c->triggerCount++] = (uint16_t)idx;
     }
-    c->triggers[c->triggerCount++] = (uint16_t)idx;
     v = Mtg_TriggerParam(t, "Mode");
     for (i = 1; v && i < MTG_TRIG_COUNT; i++)
         if (strcmp(v, gMtgTriggerModes[i]) == 0)
             mode = i;
     if (!mode) {
         Mtg_Unsupported(c, Reason(v ? v : "?"));
-        return;
+        return -1;
     }
     t->mode = (uint8_t)mode;
     for (i = 0; i < n; i++) {
@@ -205,11 +208,11 @@ void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
         if (!InList(key, sCommonKeys, (int)(sizeof(sCommonKeys) / sizeof(sCommonKeys[0])))
             && !InList(key, sModeKeys[mode], 4)) {
             Mtg_Unsupported(c, Reason(key));
-            return;
+            return -1;
         }
         if (InList(key, sSpecKeys, (int)(sizeof(sSpecKeys) / sizeof(sSpecKeys[0]))) && !Mtg_ValidSpecKnown(val)) {
             Mtg_Unsupported(c, Reason(key));
-            return;
+            return -1;
         }
     }
     // where the card must be: TriggerZones$, else TriggerChangesZone.correctZones' (leaving the battlefield: from
@@ -218,7 +221,7 @@ void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
         t->zones = (uint8_t)Zones(v);
         if (!t->zones || strcmp(v, "Any") == 0) {
             Mtg_Unsupported(c, Reason("TriggerZones"));
-            return;
+            return -1;
         }
     } else if (mode == MTG_TRIG_CHANGES_ZONE && (v = Mtg_TriggerParam(t, "ValidCard")) && strstr(v, "Self")
                && (!Mtg_TriggerParam(t, "Origin") || strcmp(Mtg_TriggerParam(t, "Origin"), "Any") == 0)) {
@@ -226,7 +229,7 @@ void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
         t->zones = (uint8_t)(dz && strcmp(dz, "Any") ? Zones(dz) : 0);
         if (!t->zones) {
             Mtg_Unsupported(c, Reason("Destination"));
-            return;
+            return -1;
         }
     } else if (mode == MTG_TRIG_CYCLED && (v = Mtg_TriggerParam(t, "ValidCard")) && strstr(v, "Self"))
         t->zones = (uint8_t)ZONE_BIT(MTG_ZONE_GRAVEYARD);   // ("when you cycle CARDNAME": it's in the graveyard by then)
@@ -236,21 +239,21 @@ void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
         if (!(v = Mtg_TriggerParam(t, "Destination")) || !Zones(v)
             || ((v = Mtg_TriggerParam(t, "Origin")) && !Zones(v))) {
             Mtg_Unsupported(c, Reason("Origin"));
-            return;
+            return -1;
         }
     }
     if (mode == MTG_TRIG_PHASE && (!(v = Mtg_TriggerParam(t, "Phase")) || !Steps(v))) {
         Mtg_Unsupported(c, Reason("Phase"));
-        return;
+        return -1;
     }
     if ((v = Mtg_TriggerParam(t, "CombatDamage")) && strcmp(v, "True") && strcmp(v, "False")) {
         Mtg_Unsupported(c, Reason("CombatDamage"));
-        return;
+        return -1;
     }
     if ((v = Mtg_TriggerParam(t, "OptionalDecider")) != NULL) {
         if (strcmp(v, "You")) {
             Mtg_Unsupported(c, Reason("OptionalDecider"));
-            return;
+            return -1;
         }
         t->optional = 1;
     }
@@ -260,18 +263,18 @@ void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
         v = Mtg_TriggerParam(t, "PresentZone");
         if (!ok || (v && (!Zones(v) || strcmp(v, "Any") == 0))) {
             Mtg_Unsupported(c, Reason("IsPresent"));
-            return;
+            return -1;
         }
     } else if (Mtg_TriggerParam(t, "PresentCompare") || Mtg_TriggerParam(t, "PresentZone")) {
         Mtg_Unsupported(c, Reason("PresentCompare"));
-        return;
+        return -1;
     }
     // what it does: an SVar "DB$ ..." (an ability of its own kind: it may target, as a spell does)
     v = Mtg_TriggerParam(t, "Execute");
     v = v ? Mtg_Svar(cardId, v) : NULL;
     if (!v || strncmp(v, "DB$", 3) != 0) {
         Mtg_Unsupported(c, Reason("Execute"));
-        return;
+        return -1;
     }
     {
         size_t len = strlen(v) + 1;
@@ -280,10 +283,24 @@ void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
         memcpy(copy, v, len);
         ab = Mtg_ParseAbilityText(c, cardId, copy, MTG_AB_TRIGGERED);
         gMtgTriggers[idx].execute = (uint16_t)ab;
-        if (!ChainKnown(ab, mode, &why))
+        if (!ChainKnown(ab, mode, &why)) {
             Mtg_Unsupported(c, why);
+            return -1;
+        }
     }
+    return idx;
 }
+
+void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
+{
+    ParseTrig(c, cardId, text, 1);
+}
+
+int Mtg_ParseGrantedTrigger(MtgCardDef *c, int cardId, char *text)
+{
+    return ParseTrig(c, cardId, text, 0);
+}
+
 
 // IsPresent$ (Trigger.requirementsCheck's "present" test): how many such cards are in the zone
 static int Present(const MtgDuel *d, const MtgTrigger *t, int host)
@@ -380,10 +397,13 @@ void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev)
     for (i = 0; i < d->objCount; i++) {
         const MtgObj *o = &d->objs[i];
         const MtgCardDef *c = Mtg_Card(o->def);
-        if (!c->triggerCount || !c->supported)
+        uint16_t trig[12];
+        int trigCount;
+        if (!c->supported)
             continue;
-        for (k = 0; k < c->triggerCount; k++) {
-            const MtgTrigger *t = &gMtgTriggers[c->triggers[k]];
+        trigCount = Mtg_ObjTriggers(d, i, trig, 12);   // (its card's and those statics give it: AddTrigger$)
+        for (k = 0; k < trigCount; k++) {
+            const MtgTrigger *t = &gMtgTriggers[trig[k]];
             MtgPending *p;
             if (t->mode != ev->mode || !(t->zones & ZONE_BIT(o->zone)) || !Matches(d, t, i, ev) || !Present(d, t, i))
                 continue;
@@ -391,7 +411,7 @@ void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev)
                 return;
             p = &d->pending[d->pendingCount++];
             p->source = (uint16_t)i;
-            p->trigger = c->triggers[k];
+            p->trigger = trig[k];
             p->trigObj = ev->obj;
             p->trigObj2 = ev->obj2;
             p->controller = o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner;

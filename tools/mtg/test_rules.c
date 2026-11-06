@@ -1019,6 +1019,56 @@ static void TestAltCosts(void)
     }
 }
 
+// abilities and triggers a static gives (AddAbility$ / AddTrigger$)
+static void TestGranted(void)
+{
+    int bears, aura, growth, flux, crusade, i;
+    printf("granted abilities\n");
+    Table();   // ARCANE TEACHINGS: enchanted creature has "{T}: 1 damage to any target"
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    sD.objs[bears].sick = 0;
+    CHECK(Find(MTG_ACT_ACTIVATE, bears, MTG_TGT_PLAYER, 1) < 0, "no ability before the Aura");
+    aura = Put(0, "Arcane Teachings", MTG_ZONE_BATTLEFIELD);
+    sD.objs[aura].attachedTo = (uint16_t)bears;
+    CHECK(Mtg_Power(&sD, bears) == 4, "+2/+2 (power %d)", Mtg_Power(&sD, bears));
+    CHECK(Find(MTG_ACT_ACTIVATE, bears, MTG_TGT_PLAYER, 1) >= 0, "the bears can ping");
+    Do(MTG_ACT_ACTIVATE, bears, MTG_TGT_PLAYER, 1);
+    PassBoth();
+    CHECK(sD.players[1].life == 19 && sD.objs[bears].tapped, "1 damage, the bears tapped (life %d)", sD.players[1].life);
+
+    Table();   // CITANUL HIEROPHANTS: creatures you control have "{T}: Add {G}"
+    Put(0, "Citanul Hierophants", MTG_ZONE_BATTLEFIELD);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    growth = Put(0, "Giant Growth", MTG_ZONE_HAND);
+    for (i = 0; i < sD.objCount; i++)
+        if (sD.objs[i].zone == MTG_ZONE_BATTLEFIELD)
+            sD.objs[i].sick = 1;
+    CHECK(Find(MTG_ACT_CAST, growth, MTG_TGT_OBJ, bears) < 0, "summoning sick: no mana yet");
+    for (i = 0; i < sD.objCount; i++)
+        sD.objs[i].sick = 0;
+    CHECK(Find(MTG_ACT_CAST, growth, MTG_TGT_OBJ, bears) >= 0, "the creatures make green mana");
+
+    Table();   // AURA FLUX: other enchantments have "at the beginning of your upkeep, sacrifice this unless you pay {2}"
+    flux = Put(1, "Aura Flux", MTG_ZONE_BATTLEFIELD);
+    crusade = Put(1, "Crusade", MTG_ZONE_BATTLEFIELD);
+    GoTo(1, MTG_STEP_DRAW);
+    CHECK(Zone(crusade) == MTG_ZONE_GRAVEYARD && Zone(flux) == MTG_ZONE_BATTLEFIELD,
+          "no mana: the Crusade sacrificed, the Flux stays (%d %d)", Zone(crusade), Zone(flux));
+
+    Table();   // ASPECT OF WOLF: +X/+Y, half the Forests rounded down / up; EMPYRIAL ARMOR: +1/+1 a card in hand
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    aura = Put(0, "Aspect of Wolf", MTG_ZONE_BATTLEFIELD);
+    sD.objs[aura].attachedTo = (uint16_t)bears;
+    Lands(0, "Forest", 3);
+    CHECK(Mtg_Power(&sD, bears) == 3 && Mtg_Toughness(&sD, bears) == 4, "three Forests: +1/+2 (%d/%d)",
+          Mtg_Power(&sD, bears), Mtg_Toughness(&sD, bears));
+    aura = Put(0, "Empyrial Armor", MTG_ZONE_BATTLEFIELD);
+    sD.objs[aura].attachedTo = (uint16_t)bears;
+    Put(0, "Forest", MTG_ZONE_HAND);
+    Put(0, "Forest", MTG_ZONE_HAND);
+    CHECK(Mtg_Power(&sD, bears) == 5, "two cards in hand: +2/+2 more (%d)", Mtg_Power(&sD, bears));
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1347,6 +1397,7 @@ int main(int argc, char **argv)
     TestTokens();
     TestAmounts();
     TestAltCosts();
+    TestGranted();
     TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

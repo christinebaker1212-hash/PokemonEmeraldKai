@@ -611,8 +611,10 @@ static void BuildPriority(MtgDuel *d)
             }
             AddWithTargets(d, q, MTG_ACT_CAST, i, ability, x, p);
         } else if (o->zone == MTG_ZONE_BATTLEFIELD && o->controller == p) {
-            for (k = 0; k < c->abilityCount; k++) {
-                const MtgAbility *ab = &gMtgAbilities[c->abilities[k]];
+            uint16_t abil[16];
+            int abilCount = Mtg_ObjAbilities(d, i, abil, 16);   // (its card's and those statics give it)
+            for (k = 0; k < abilCount; k++) {
+                const MtgAbility *ab = &gMtgAbilities[abil[k]];
                 int x = 0;
                 if (ab->kind != MTG_AB_ACTIVATED || ab->api == MTG_API_MANA || ab->fromHand)
                     continue;   // (mana abilities are used by paying, never on their own; Cycling only from the hand)
@@ -634,7 +636,7 @@ static void BuildPriority(MtgDuel *d)
                         AddWithTargets(d, q, MTG_ACT_ACTIVATE, i, ab->choices[m], x, p);
                     continue;
                 }
-                AddWithTargets(d, q, MTG_ACT_ACTIVATE, i, c->abilities[k], x, p);
+                AddWithTargets(d, q, MTG_ACT_ACTIVATE, i, abil[k], x, p);
             }
         }
     }

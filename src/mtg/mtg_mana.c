@@ -46,9 +46,11 @@ int Mtg_ManaAbilityColors(const MtgDuel *d, int obj, int *amount)
         return 0;
     if ((c->types & MTG_T_CREATURE) && o->sick && !(Mtg_Keywords(d, obj) & MTG_KW_BIT(MTG_KW_HASTE)))
         return 0;
+    uint16_t abil[16];
+    int abilCount = Mtg_ObjAbilities(d, obj, abil, 16);   // (Citanul Hierophants' creatures too)
     mask = c->intrinsicMana;
-    for (i = 0; i < c->abilityCount; i++) {
-        const MtgAbility *ab = &gMtgAbilities[c->abilities[i]];
+    for (i = 0; i < abilCount; i++) {
+        const MtgAbility *ab = &gMtgAbilities[abil[i]];
         const char *amt;
         int m;
         if (ab->kind != MTG_AB_ACTIVATED || ab->api != MTG_API_MANA || !ab->cost.tap || ab->cost.sacSelf

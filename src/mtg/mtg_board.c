@@ -2260,6 +2260,7 @@ static int GatherMenu(int focused)
     return n;
 }
 
+static void AbilityWords(char *out, unsigned cap, int source, int ability, int trigger);
 static void MenuLabel(int k, char *out, unsigned cap)
 {
     const MtgAction *a = &B.duel.query.actions[B.menu[k]];
@@ -2292,7 +2293,9 @@ static void MenuLabel(int k, char *out, unsigned cap)
         const MtgCost *cost = &gMtgAbilities[a->ability].cost;
         char c[16];
         CostText(c, sizeof(c), &cost->mana);
-        Mtg_PlainText(text, sizeof(text), desc ? desc : "USE");
+        AbilityWords(text, sizeof(text), a->obj, a->ability, 0xFFFF);   // (CARDNAME as the permanent's own name)
+        if (!desc)
+            snprintf(text, sizeof(text), "USE");
         snprintf(out, cap, "%s%s%s%s", c, cost->tap ? (c[0] ? ",T: " : "T: ") : (c[0] ? ": " : ""), "", text);
         TcgUi_FitText(out, 136, TF_NORMAL);
     }
