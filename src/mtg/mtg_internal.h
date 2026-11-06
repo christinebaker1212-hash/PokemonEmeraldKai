@@ -35,11 +35,16 @@ enum { MTG_AB_SPELL, MTG_AB_ACTIVATED, MTG_AB_SUB,      // A:SP$, A:AB$, SVar:..
 
 typedef struct { const char *key, *value; } MtgParam;
 
-// an ability's cost (Cost.java): mana, {T}, sacrificing itself
+// an ability's cost (Cost.java): mana, {T}, sacrificing itself; Sac<n/Type>, Discard<n/Type> (or n at random),
+// PayLife<n>, Exile<1/CARDNAME>, Return<1/CARDNAME> (the player picks what to sacrifice / discard: Mtg_Answer)
 typedef struct {
     MtgManaCost mana;
-    uint8_t tap, sacSelf;
+    uint8_t tap, sacSelf, exileSelf, returnSelf;
+    uint8_t sacN, discardN, discardRandom, payLife;
+    const char *sacSpec, *discardSpec;   // Valid specs ("Creature", "Land", "Goblin", "Card")
 } MtgCost;
+int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, int casting);
+int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int sac, int source, uint16_t *out);
 
 typedef struct {
     uint8_t kind, api;

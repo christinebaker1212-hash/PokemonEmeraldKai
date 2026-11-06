@@ -5936,6 +5936,18 @@ the most). Each table now shows a move before it's made and holds what happened 
   and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
   duel 4).
 
+## MAGIC's costs beyond mana (1.123.0)
+- MtgCost (mtg_internal.h): `Sac<n/Type>`, `Discard<n/Type>` / `Discard<n/Random>`, `PayLife<n>`, `Exile<1/CARDNAME>`,
+  `Return<1/CARDNAME>` (a part's description after a second '/' may have spaces: ParseCost joins it). Payable checks
+  in BuildPriority (Mtg_CostPayable: the card being cast pays no discard). DoAction pays life, the random discard and
+  the self exile / return at once (PayOtherCosts), then Mtg_Answer asks each sacrifice and discard as MTG_Q_CHOOSE's
+  PICK with query.forCost (1 / 2) before anyone gets priority; the answers go to PayCostPick, not the resolution.
+  Mana abilities with such costs stay out (they're used by paying). Not yet: X amounts, `Discard<0/Hand>`,
+  ExileFromGrave / ExileFromHand / ExileFromTop, tapXType, Mill, "Sacrificed" amounts (FLING).
+- The table: "Sacrifice which?  <name>" over the lit permanents, "Discard a card to pay the cost." in the hand. The
+  stand-in AI takes a cost's price off an action's score (the cheapest sacrifices, 4 a card, life near the end
+  counts double: mtg_ai.c CostPrice). Scenario mtg_costs; TestCosts. RHEA plays ARMS DEALER, MARLOW SONIC SEIZURE.
+
 ## MAGIC's Auras (1.122.0)
 - `K:Enchant:Creature` gives the card Forge's aura spell (`SP$ Attach | ValidTgts$ Creature`, MTG_API_ATTACH): cast
   onto a target creature, it enters attached (MtgObj.attachedTo, set in FinishResolve). State-based actions put an Aura

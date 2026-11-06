@@ -141,6 +141,8 @@ static void Do(int kind, int obj, int tgtKind, int tgtId)
 static void PassBoth(void) { Pass(); Pass(); }   // both pass: the top of the stack resolves
 
 static int Zone(int obj) { return sD.objs[obj].zone; }
+static void ChoosePick(int obj);
+static int HandCount(int player);
 
 static void Lands(int player, const char *name, int n)
 {
@@ -437,6 +439,93 @@ static void TestAuras(void)
             ai = act.kind == MTG_ACT_CAST && act.obj == pacifism && act.target.kind == MTG_TGT_OBJ && act.target.id == angel;
         }
         CHECK(ai, "the AI puts pacifism on the angel");
+    }
+}
+
+// costs beyond mana: sacrifice (picked), discard (picked or at random), pay life, return itself
+static void TestCosts(void)
+{
+    int raze, mountain, land, bomb, elves, bears, book, seizure, a, b, disc, att;
+    const MtgQuery *q;
+    printf("costs: sacrifice, discard, random discard, life, return to hand\n");
+    Table();   // Raze: sacrifice a land as you cast it (the player picks which)
+    mountain = Put(0, "Mountain", MTG_ZONE_BATTLEFIELD);
+    land = Put(0, "Forest", MTG_ZONE_BATTLEFIELD);
+    raze = Put(0, "Raze", MTG_ZONE_HAND);
+    a = Put(1, "Plains", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, raze, MTG_TGT_OBJ, a);
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->forCost == 1, "raze asks what to sacrifice (%d %d)", q->kind, q->forCost);
+    ChoosePick(land);
+    CHECK(Zone(land) == MTG_ZONE_GRAVEYARD && Zone(mountain) == MTG_ZONE_BATTLEFIELD, "the forest sacrificed");
+    PassBoth();
+    CHECK(Zone(a) == MTG_ZONE_GRAVEYARD, "the plains destroyed");
+
+    Table();   // no land to sacrifice once the mountain pays: Raze can't be cast with only one land
+    Put(0, "Mountain", MTG_ZONE_BATTLEFIELD);
+    raze = Put(0, "Raze", MTG_ZONE_HAND);
+    a = Put(1, "Plains", MTG_ZONE_BATTLEFIELD);
+    CHECK(Find(MTG_ACT_CAST, raze, MTG_TGT_OBJ, a) >= 0, "one mountain: it pays and is sacrificed (tapped lands sacrifice)");
+
+    Table();   // Goblin Bombardment: sacrifice a creature, 1 damage
+    bomb = Put(0, "Goblin Bombardment", MTG_ZONE_BATTLEFIELD);
+    elves = Put(0, "Llanowar Elves", MTG_ZONE_BATTLEFIELD);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_ACTIVATE, bomb, MTG_TGT_PLAYER, 1);
+    ChoosePick(elves);
+    PassBoth();
+    CHECK(Zone(elves) == MTG_ZONE_GRAVEYARD && Zone(bears) == MTG_ZONE_BATTLEFIELD && sD.players[1].life == 19,
+          "elves sacrificed, 1 damage (%d)", sD.players[1].life);
+
+    Table();   // Book of Rass: 2 and 2 life, draw
+    Lands(0, "Plains", 2);
+    book = Put(0, "Book of Rass", MTG_ZONE_BATTLEFIELD);
+    Put(0, "Plains", MTG_ZONE_LIBRARY);
+    Do(MTG_ACT_ACTIVATE, book, -1, 0);
+    CHECK(sD.players[0].life == 18, "2 life paid (%d)", sD.players[0].life);
+    PassBoth();
+    CHECK(HandCount(0) == 1, "a card drawn (%d)", HandCount(0));
+
+    Table();   // Sonic Seizure: discard a card at random as you cast it
+    Lands(0, "Mountain", 1);
+    seizure = Put(0, "Sonic Seizure", MTG_ZONE_HAND);
+    CHECK(Find(MTG_ACT_CAST, seizure, MTG_TGT_PLAYER, 1) < 0, "no other card in hand: it can't be cast");
+    a = Put(0, "Grizzly Bears", MTG_ZONE_HAND);
+    b = Put(0, "Serra Angel", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, seizure, MTG_TGT_PLAYER, 1);
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_PRIORITY, "no pick for a random discard");
+    CHECK((Zone(a) == MTG_ZONE_GRAVEYARD) + (Zone(b) == MTG_ZONE_GRAVEYARD) == 1, "one card discarded at random");
+    PassBoth();
+    CHECK(sD.players[1].life == 17, "3 damage (%d)", sD.players[1].life);
+
+    Table();   // Mental Discipline: discard a card of the player's choice
+    Lands(0, "Island", 2);
+    disc = Put(0, "Mental Discipline", MTG_ZONE_BATTLEFIELD);
+    a = Put(0, "Grizzly Bears", MTG_ZONE_HAND);
+    b = Put(0, "Serra Angel", MTG_ZONE_HAND);
+    Put(0, "Island", MTG_ZONE_LIBRARY);
+    Do(MTG_ACT_ACTIVATE, disc, -1, 0);
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->forCost == 2 && q->candidateCount == 2, "which card to discard");
+    ChoosePick(b);
+    CHECK(Zone(b) == MTG_ZONE_GRAVEYARD && Zone(a) == MTG_ZONE_HAND, "the angel discarded");
+    PassBoth();
+    CHECK(HandCount(0) == 2, "and a card drawn (%d)", HandCount(0));
+
+    Table();   // Attunement: return it to its owner's hand: draw three, discard four
+    att = Put(0, "Attunement", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_ACTIVATE, att, -1, 0);
+    CHECK(Zone(att) == MTG_ZONE_HAND, "attunement back in hand");
+
+    Table();   // the AI: a 1-damage ping isn't worth its best creature
+    {
+        MtgAnswer ans;
+        bomb = Put(0, "Goblin Bombardment", MTG_ZONE_BATTLEFIELD);
+        Put(0, "Serra Angel", MTG_ZONE_BATTLEFIELD);
+        Mtg_RefreshQuery(&sD);
+        memset(&ans, 0, sizeof(ans));
+        MtgAi_Answer(&sD, &ans);
+        CHECK(Mtg_Query(&sD)->actions[ans.action].kind == MTG_ACT_PASS, "the AI keeps its angel");
     }
 }
 
@@ -877,6 +966,7 @@ int main(int argc, char **argv)
     TestSpells();
     TestStatics();
     TestAuras();
+    TestCosts();
     TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

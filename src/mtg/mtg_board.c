@@ -1285,7 +1285,8 @@ static const char *ChooseText(void)
 static const char *PickVerb(void)
 {
     const MtgQuery *q = &B.duel.query;
-    return q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_SACRIFICE ? "Sacrifice" : "Choose";
+    return q->forCost == 1 || (q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_SACRIFICE) ? "Sacrifice"
+                                                                                                      : "Choose";
 }
 
 // the card asking (a yes / no, a payment): big at the left, as the opponent's spells show
@@ -1571,7 +1572,8 @@ void MtgBoard_Draw(void)
     }
     case MODE_BLOCK_PICK: Prompt("Block which attacker? (lit)  {A} OK  {B}", 0); break;
     case MODE_DISCARD:
-        Prompt(B.duel.query.kind == MTG_Q_CHOOSE ? "Discard a card of your choice.  {A}"
+        Prompt(B.duel.query.kind == MTG_Q_CHOOSE && B.duel.query.forCost == 2 ? "Discard a card to pay the cost.  {A}"
+               : B.duel.query.kind == MTG_Q_CHOOSE ? "Discard a card of your choice.  {A}"
                                                  : "Too many cards in your hand: discard one.  {A}", 1);
         break;
     case MODE_CONCEDE: Prompt("Concede the duel?  {A} CONCEDE  {B} KEEP PLAYING", 0); break;

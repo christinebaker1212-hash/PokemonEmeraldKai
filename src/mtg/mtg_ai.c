@@ -44,7 +44,47 @@ static int Amount(const MtgDuel *d, const MtgAbility *ab, const char *key, int x
     return Mtg_Amount(d, &ctx, ab->card, Mtg_Param(ab, key), &ok);
 }
 
+static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me);
+
+// what an action's other costs give up: the cheapest permanents to sacrifice, cards from the hand, life
+static int CostPrice(const MtgDuel *d, const MtgAbility *ab, int me, int src)
+{
+    const MtgCost *c = &ab->cost;
+    int price = 0, k;
+    if (c->sacN) {
+        uint16_t list[MTG_MAX_COMBAT];
+        int n = Mtg_CostCandidates(d, me, c, 1, src, list), used[MTG_MAX_COMBAT] = {0};
+        if (n > MTG_MAX_COMBAT)
+            n = MTG_MAX_COMBAT;
+        for (k = 0; k < c->sacN; k++) {   // (the cheapest ones, as Choose picks them)
+            int i, best = -1, bestV = 1 << 30;
+            for (i = 0; i < n; i++) {
+                const MtgCardDef *cd = Mtg_Card(d->objs[list[i]].def);
+                int v = (cd->types & MTG_T_CREATURE) ? Value(d, list[i]) : (cd->types & MTG_T_LAND) ? 5 : 4;
+                if (!used[i] && v < bestV)
+                    bestV = v, best = i;
+            }
+            if (best >= 0)
+                used[best] = 1, price += bestV;
+        }
+    }
+    price += c->discardN * 4;
+    if (c->payLife)
+        price += d->players[me].life <= c->payLife + 5 ? 50 : c->payLife;
+    return price;
+}
+
 static int ScoreAction(const MtgDuel *d, const MtgAction *a, int me)
+{
+    int s = ScoreBase(d, a, me);
+    if (s > 0 && s < 500 && a->ability != 0xFFFF) {
+        int price = CostPrice(d, &gMtgAbilities[a->ability], me, a->obj);
+        s = s > price ? s - price : 0;
+    }
+    return s;
+}
+
+static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
 {
     const MtgCardDef *c = Mtg_Card(d->objs[a->obj].def);
     const MtgAbility *ab = a->ability != 0xFFFF ? &gMtgAbilities[a->ability] : NULL;

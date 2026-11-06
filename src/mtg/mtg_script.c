@@ -167,21 +167,101 @@ const char *Mtg_Svar(int card, const char *name)
     return NULL;
 }
 
-// Cost.java's text: "T", "2 R", "1 T", "T Sac<1/CARDNAME>"
+// a cost part's spec kept for the pool's life (the cost text is parsed from a copy)
+static const char *KeepSpec(const char *s, size_t n)
+{
+    static char **sKeep;
+    static int sKeepCount;
+    char *t = malloc(n + 1);
+    memcpy(t, s, n);
+    t[n] = 0;
+    sKeep = realloc(sKeep, (size_t)(sKeepCount + 1) * sizeof(char *));
+    sKeep[sKeepCount++] = t;
+    return t;
+}
+
+// "Sac<2/Land/two lands>" -> n 2, spec "Land" (the words after a second '/' only describe it); 0: not that part
+static int CostPart(const char *tok, const char *name, int *n, const char **spec, size_t *specLen)
+{
+    size_t len = strlen(name);
+    const char *p, *slash, *end;
+    if (strncmp(tok, name, len) != 0 || tok[len] != '<' || !(end = strchr(tok, '>')))
+        return 0;
+    p = tok + len + 1;
+    if (*p < '0' || *p > '9')
+        return -1;   // (X and the like: not yet)
+    *n = atoi(p);
+    while (*p >= '0' && *p <= '9')
+        p++;
+    if (*p == '>') {
+        *spec = NULL, *specLen = 0;
+        return 1;
+    }
+    if (*p != '/')
+        return -1;
+    p++;
+    slash = strchr(p, '/');
+    *spec = p;
+    *specLen = (size_t)((slash && slash < end ? slash : end) - p);
+    return 1;
+}
+
+// Cost.java's text: "T", "2 R", "1 T", "T Sac<1/CARDNAME>", "1 Sac<1/Creature>", "Discard<1/Card>", "PayLife<2>"
 static int ParseCost(const char *s, MtgCost *out)
 {
-    char buf[96], mana[96] = "", *tok, *save;
+    char buf[160], mana[96] = "", *tok, *save, *open = NULL;
     memset(out, 0, sizeof(*out));
     if (!s)
         return 1;
     strncpy(buf, s, sizeof(buf) - 1);
     buf[sizeof(buf) - 1] = 0;
     for (save = buf, tok = Mtg_Token(&save, ' '); tok; tok = Mtg_Token(&save, ' ')) {
+        int n, r;
+        const char *spec;
+        size_t specLen;
+        if (open) {   // (a part's description had spaces: join it up to its '>')
+            tok[-1] = ' ';
+            if (!strchr(tok, '>'))
+                continue;
+            tok = open;
+            open = NULL;
+        } else if (strchr(tok, '<') && !strchr(tok, '>')) {
+            open = tok;
+            continue;
+        }
         if (strcmp(tok, "T") == 0)
             out->tap = 1;
         else if (strcmp(tok, "Sac<1/CARDNAME>") == 0)
             out->sacSelf = 1;
-        else if (ManaSymbol(tok) >= 0 || strcmp(tok, "X") == 0 || strspn(tok, "0123456789") == strlen(tok)) {
+        else if (strcmp(tok, "Exile<1/CARDNAME>") == 0)
+            out->exileSelf = 1;
+        else if (strcmp(tok, "Return<1/CARDNAME>") == 0)
+            out->returnSelf = 1;
+        else if ((r = CostPart(tok, "PayLife", &n, &spec, &specLen)) != 0) {
+            if (r < 0 || spec || n < 1 || n > 20 || out->payLife)
+                return 0;
+            out->payLife = (uint8_t)n;
+        } else if ((r = CostPart(tok, "Sac", &n, &spec, &specLen)) != 0) {
+            if (r < 0 || !spec || n < 1 || n > 3 || out->sacN)
+                return 0;
+            out->sacN = (uint8_t)n;
+            out->sacSpec = KeepSpec(spec, specLen);
+            if (!Mtg_ValidSpecKnown(out->sacSpec))
+                return 0;
+        } else if ((r = CostPart(tok, "Discard", &n, &spec, &specLen)) != 0) {
+            if (r < 0 || !spec || n < 1 || n > 3 || out->discardN)
+                return 0;
+            out->discardN = (uint8_t)n;
+            if (specLen == 6 && strncmp(spec, "Random", 6) == 0)
+                out->discardRandom = 1, out->discardSpec = "Card";
+            else if (specLen == 4 && strncmp(spec, "Hand", 4) == 0)
+                return 0;
+            else {
+                out->discardSpec = KeepSpec(spec, specLen);
+                if (!Mtg_ValidSpecKnown(out->discardSpec))
+                    return 0;
+            }
+        } else if (ManaSymbol(tok) >= 0 || strcmp(tok, "X") == 0 || strspn(tok, "0123456789") == strlen(tok)) {
             if (strlen(mana) + strlen(tok) + 2 > sizeof(mana))
                 return 0;
             if (mana[0])
@@ -239,6 +319,9 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     }
     if (!ParseCost(Mtg_Param(ab, "Cost"), &ab->cost))
         Unsupported(c, "cost");
+    else if (ab->api == MTG_API_MANA && (ab->cost.sacN || ab->cost.discardN || ab->cost.payLife || ab->cost.exileSelf
+                                         || ab->cost.returnSelf))
+        Unsupported(c, "cost");   // (mana abilities are used by paying: one with a cost to pick, not yet)
     if (kind == MTG_AB_ACTIVATED && !Mtg_Param(ab, "Cost"))
         Unsupported(c, "cost");
     if (kind != MTG_AB_SPELL && kind != MTG_AB_ACTIVATED && Mtg_Param(ab, "Cost"))

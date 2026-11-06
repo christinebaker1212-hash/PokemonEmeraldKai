@@ -518,6 +518,8 @@ static void BuildPriority(MtgDuel *d)
             if (!Mtg_CanPay(d, p, &cost, x, MTG_NO_OBJ))
                 continue;
             ability = MainAbility(c);
+            if (ability != 0xFFFF && !Mtg_CostPayable(d, p, &gMtgAbilities[ability].cost, i, i))
+                continue;
             AddWithTargets(d, q, MTG_ACT_CAST, i, ability, x, p);
         } else if (o->zone == MTG_ZONE_BATTLEFIELD && o->controller == p) {
             for (k = 0; k < c->abilityCount; k++) {
@@ -535,10 +537,118 @@ static void BuildPriority(MtgDuel *d)
                 }
                 if (!Mtg_CanPay(d, p, &ab->cost.mana, x, ab->cost.tap ? i : MTG_NO_OBJ))
                     continue;
+                if (!Mtg_CostPayable(d, p, &ab->cost, i, MTG_NO_OBJ))
+                    continue;
                 AddWithTargets(d, q, MTG_ACT_ACTIVATE, i, c->abilities[k], x, p);
             }
         }
     }
+}
+
+// ---- costs beyond mana and {T} (CostSacrifice, CostDiscard, CostPayLife, CostExile, CostReturn)
+// what may pay a Sac (sac 1) or Discard (sac 0) part: the player's permanents / hand cards of its spec; casting = the
+// card being cast (not in the hand any more). Returns how many (out may be NULL)
+int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int sac, int source, uint16_t *out)
+{
+    int i, n = 0;
+    for (i = 0; i < d->objCount; i++) {
+        const MtgObj *o = &d->objs[i];
+        if (sac ? (o->zone != MTG_ZONE_BATTLEFIELD || o->controller != player)
+                : (o->zone != MTG_ZONE_HAND || o->owner != player))
+            continue;
+        if (!Mtg_ValidObj(d, i, sac ? c->sacSpec : c->discardSpec, source, player))
+            continue;
+        if (out && n < MTG_MAX_COMBAT)
+            out[n] = (uint16_t)i;
+        n++;
+    }
+    return n;
+}
+
+int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, int casting)
+{
+    int n;
+    if (c->payLife && d->players[player].life < c->payLife)
+        return 0;
+    if (c->sacN && Mtg_CostCandidates(d, player, c, 1, source, NULL) < c->sacN)
+        return 0;
+    if (c->discardN) {
+        n = Mtg_CostCandidates(d, player, c, 0, source, NULL);
+        if (casting != MTG_NO_OBJ && d->objs[casting].zone == MTG_ZONE_HAND
+            && Mtg_ValidObj(d, casting, c->discardSpec, source, player))
+            n--;   // (the card being cast pays nothing: it's on the stack by then)
+        if (n < c->discardN)
+            return 0;
+    }
+    return 1;
+}
+
+// the next pick a cost asks for (1), or nothing left (0)
+static int AskCost(MtgDuel *d)
+{
+    const MtgAbility *ab;
+    MtgQuery *q = &d->query;
+    int sac;
+    if (!d->costSac && !d->costDiscard)
+        return 0;
+    ab = &gMtgAbilities[d->costAbility];
+    sac = d->costSac != 0;
+    memset(q, 0, sizeof(*q));
+    q->kind = MTG_Q_CHOOSE;
+    q->choice = MTG_CHOICE_PICK;
+    q->player = d->costPlayer;
+    q->source = d->costSource;
+    q->ability = d->costAbility;
+    q->forCost = sac ? 1 : 2;
+    q->candidateCount = (uint8_t)Mtg_CostCandidates(d, d->costPlayer, &ab->cost, sac, d->costSource, q->candidates);
+    if (q->candidateCount > MTG_MAX_COMBAT)
+        q->candidateCount = MTG_MAX_COMBAT;
+    if (!q->candidateCount) {   // (nothing left to pay with: checked before, so never; the rest is waived)
+        d->costSac = d->costDiscard = 0;
+        return 0;
+    }
+    return 1;
+}
+
+static void PayCostPick(MtgDuel *d, int obj)
+{
+    if (d->costSac) {
+        Mtg_Sacrifice(d, obj);
+        d->costSac--;
+    } else if (d->costDiscard) {
+        Mtg_MoveTo(d, obj, MTG_ZONE_GRAVEYARD);
+        d->costDiscard--;
+    }
+}
+
+// the costs paid at once (life, a random discard, the source exiled or returned); the picks are set to be asked
+static void PayOtherCosts(MtgDuel *d, int p, const MtgAbility *ab, int source)
+{
+    const MtgCost *c = &ab->cost;
+    if (c->payLife) {
+        d->players[p].life -= c->payLife;
+        Mtg_Event(d, MTG_EV_LIFE, p, -c->payLife, d->players[p].life);
+    }
+    if (c->exileSelf)
+        Mtg_MoveTo(d, source, MTG_ZONE_EXILE);
+    if (c->returnSelf)
+        Mtg_MoveTo(d, source, MTG_ZONE_HAND);
+    if (c->discardN && c->discardRandom) {
+        int k;
+        for (k = 0; k < c->discardN; k++) {
+            uint16_t hand[MTG_MAX_COMBAT];
+            int n = Mtg_CostCandidates(d, p, c, 0, source, hand);
+            if (n > MTG_MAX_COMBAT)
+                n = MTG_MAX_COMBAT;
+            if (n)
+                Mtg_MoveTo(d, hand[Mtg_Random(d, (uint32_t)n)], MTG_ZONE_GRAVEYARD);
+        }
+    }
+    d->costSac = c->sacN;
+    d->costDiscard = c->discardRandom ? 0 : c->discardN;
+    d->costPlayer = (uint8_t)p;
+    d->costSource = (uint16_t)source;
+    d->costAbility = (uint16_t)(ab - gMtgAbilities);
 }
 
 static void DoAction(MtgDuel *d, const MtgAction *a)
@@ -578,6 +688,8 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
         TrigEvent(d, MTG_TRIG_SPELL_CAST, a->obj, MTG_NO_OBJ, p);
     if (!e->isSpell && gMtgAbilities[a->ability].cost.sacSelf)
         Mtg_MoveTo(d, a->obj, MTG_ZONE_GRAVEYARD);   // (the ability keeps its source's last known state)
+    if (a->ability != 0xFFFF)
+        PayOtherCosts(d, p, &gMtgAbilities[a->ability], a->obj);
 }
 
 // ---- combat ----
@@ -1024,6 +1136,8 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         } else {
             DoAction(d, &act);
             d->passes = 0;
+            if (AskCost(d))
+                return 1;
         }
         break;
     }
@@ -1076,6 +1190,14 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         PushTrigger(d, NextPending(d), q->actions[a->action].target);
         break;
     case MTG_Q_CHOOSE:
+        if (q->forCost) {   // a cost's sacrifice / discard
+            if (a->card >= q->candidateCount)
+                return 0;
+            PayCostPick(d, q->candidates[a->card]);
+            if (AskCost(d))
+                return 1;
+            break;
+        }
         if (q->choice == MTG_CHOICE_PICK) {
             if (a->card >= q->candidateCount)
                 return 0;

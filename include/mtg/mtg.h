@@ -174,6 +174,7 @@ typedef struct {
     uint16_t source, ability;
     uint8_t choice;
     MtgManaCost pay;
+    uint8_t forCost;                                 // CHOOSE's PICK for a cost: 1 sacrifice, 2 discard
 } MtgQuery;
 
 typedef struct {
@@ -214,6 +215,10 @@ typedef struct MtgDuel {
     MtgStackEntry res;
     uint16_t resAbility;
     int16_t resChoice;                               // the answer: 1 / 0, or the object picked (-1: not asked yet)
+    // a cast or an activation's costs still to pick (sacrifices, then discards): asked as MTG_Q_CHOOSE's PICK with
+    // query.forCost set, before anyone gets priority
+    uint8_t costSac, costDiscard, costPlayer;
+    uint16_t costSource, costAbility;
     MtgQuery query;
     uint32_t eventCount;                             // every event so far (the ring keeps the last MTG_EVENT_RING)
     MtgEvent events[MTG_EVENT_RING];

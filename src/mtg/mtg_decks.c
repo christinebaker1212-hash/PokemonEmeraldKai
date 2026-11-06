@@ -5,14 +5,14 @@
 
 static const char *const sFire[] = {
     "17 Mountain", "2 Raging Goblin", "2 Mogg Fanatic", "2 Canyon Wildcat", "2 Shock", "1 Lightning Bolt",
-    "2 Volcanic Hammer", "2 Goblin Hero", "2 Gray Ogre", "2 Hurloon Minotaur", "2 Hill Giant", "2 Lowland Giant",
+    "2 Volcanic Hammer", "2 Goblin Hero", "2 Gray Ogre", "2 Hurloon Minotaur", "2 Arms Dealer", "2 Lowland Giant",
     "2 Fire Elemental", NULL};
 static const char *const sTide[] = {
     "17 Island", "2 Storm Crow", "2 Coral Merfolk", "2 Bay Falcon", "2 Wind Drake", "2 Horned Turtle",
     "2 Prodigal Sorcerer", "2 Unsummon", "1 Counterspell", "2 Remove Soul", "2 Giant Octopus", "2 Azure Drake",
     "1 Air Elemental", "1 Water Elemental", NULL};
 static const char *const sShadow[] = {
-    "17 Swamp", "2 Bog Imp", "2 Black Knight", "2 Feral Shadow", "2 Scathe Zombies", "2 Terror", "2 Vicious Hunger",
+    "17 Swamp", "2 Bog Imp", "2 Black Knight", "2 Feral Shadow", "2 Scathe Zombies", "2 Terror", "2 Sonic Seizure",
     "2 Python", "2 Moor Fiend", "2 Bog Wraith", "2 Gluttonous Zombie", "1 Dark Banishing", "1 Specter's Wail",
     "1 Bog Raiders", NULL};
 static const char *const sGrove[] = {
