@@ -892,8 +892,14 @@ static void SetBoxWallpaper(u8, u8);
 static void CreateInitBoxTask(u8);
 static bool8 IsInitBoxActive(void);
 static void Task_InitBox(u8);
+// Moemon Kai: the box slide (L2 / R2, the arrows) 30% quicker than Emerald's 6 pixels a frame over 32 frames: its 192
+// pixels in 24 (the icons, the title and the arrows move by the same)
+#define MP_BOX_SCROLL_SPEED  8
+#define MP_BOX_SCROLL_FRAMES 24
+
 static void SetUpScrollToBox(u8);
 static bool8 ScrollToBox(void);
+static bool8 MpJumpToBox(u8 boxId);
 static s8 DetermineBoxScrollDirection(u8);
 static void SetCurrentBox(u8);
 
@@ -2375,6 +2381,8 @@ enum {
     MSTATE_MULTIMOVE_RUN_CANCEL,
     MSTATE_MULTIMOVE_RUN_MOVED,
     MSTATE_SCROLL_BOX_ITEM,
+    MSTATE_MP_JUMP_BOX,      // Moemon Kai: the box grid's pick: the box loaded in place, no slide (MpJumpToBox)
+    MSTATE_MP_JUMP_BOX_ITEM,
     MSTATE_WAIT_ITEM_ANIM,
 };
 
@@ -2395,16 +2403,17 @@ static void Task_PokeStorageMain(u8 taskId)
         switch (input)
         {
         case INPUT_MP_JUMP_BOX:
+            // (the grid's pick loads at once behind the grid, which then zooms into it: no slide over there)
             sStorage->newCurrBoxId = jump;
+            sStorage->scrollState = 0;
             if (sStorage->boxOption != OPTION_MOVE_ITEMS)
             {
-                SetUpScrollToBox(sStorage->newCurrBoxId);
-                sStorage->state = MSTATE_SCROLL_BOX;
+                sStorage->state = MSTATE_MP_JUMP_BOX;
             }
             else
             {
                 TryHideItemAtCursor();
-                sStorage->state = MSTATE_SCROLL_BOX_ITEM;
+                sStorage->state = MSTATE_MP_JUMP_BOX_ITEM;
             }
             break;
         case INPUT_MOVE_CURSOR:
@@ -2718,6 +2727,29 @@ static void Task_PokeStorageMain(u8 taskId)
     case MSTATE_WAIT_ITEM_ANIM:
         if (!IsItemIconAnimActive())
             sStorage->state = MSTATE_HANDLE_INPUT;
+        break;
+    case MSTATE_MP_JUMP_BOX_ITEM:
+        if (!IsItemIconAnimActive())
+            sStorage->state = MSTATE_MP_JUMP_BOX;
+        break;
+    case MSTATE_MP_JUMP_BOX:
+        if (!MpJumpToBox(sStorage->newCurrBoxId))
+        {
+            if (!sInPartyMenu && !IsMonBeingMoved())
+            {
+                RefreshDisplayMon();
+                StartDisplayMonMosaicEffect();
+            }
+            if (sStorage->boxOption == OPTION_MOVE_ITEMS)
+            {
+                TryShowItemAtCursor();
+                sStorage->state = MSTATE_WAIT_ITEM_ANIM;
+            }
+            else
+            {
+                sStorage->state = MSTATE_HANDLE_INPUT;
+            }
+        }
         break;
     }
 }
@@ -4884,8 +4916,8 @@ static void InitBoxMonIconScroll(u8 boxId, s8 direction)
     sStorage->iconScrollState = 0;
     sStorage->iconScrollToBoxId = boxId;
     sStorage->iconScrollDirection = direction;
-    sStorage->iconScrollDistance = 32;
-    sStorage->iconScrollSpeed = -(6 * direction);
+    sStorage->iconScrollDistance = MP_BOX_SCROLL_FRAMES;
+    sStorage->iconScrollSpeed = -(MP_BOX_SCROLL_SPEED * direction);
     sStorage->iconScrollNumIncoming = 0;
     GetIncomingBoxMonData(boxId);
     if (direction > 0)
@@ -5503,9 +5535,9 @@ static void SetUpScrollToBox(u8 boxId)
 {
     s8 direction = DetermineBoxScrollDirection(boxId);
 
-    sStorage->scrollSpeed = (direction > 0) ? 6 : -6;
+    sStorage->scrollSpeed = (direction > 0) ? MP_BOX_SCROLL_SPEED : -MP_BOX_SCROLL_SPEED;
     sStorage->scrollUnused1 = (direction > 0) ? 1 : 2;
-    sStorage->scrollTimer = 32;
+    sStorage->scrollTimer = MP_BOX_SCROLL_FRAMES;
     sStorage->scrollToBoxIdUnused = boxId;
     sStorage->scrollUnused2 = (direction <= 0) ? 5 : 0;
     sStorage->scrollDirectionUnused = direction;
@@ -5552,6 +5584,53 @@ static bool8 ScrollToBox(void)
 
     sStorage->scrollState++;
     return TRUE;
+}
+
+// Moemon Kai: the box grid's pick (mp_boxgrid.c), loaded in place while the grid still covers the box: its wallpaper
+// drawn where the box is, its title written into the title's own tiles, its POKéMON's icons made where they sit.
+// FALSE once done.
+static bool8 MpJumpToBox(u8 boxId)
+{
+    u16 i;
+    switch (sStorage->scrollState)
+    {
+    case 0:
+        sMpTag.hideMarks = TRUE;
+        LoadWallpaperGfx(boxId, 0);
+        // (a direction-0 load leaves its colors in the unfaded buffer: shown at once here)
+        CpuCopy16(&gPlttBufferUnfaded[BG_PLTT_ID(4) + BG_PLTT_ID(sStorage->wallpaperOffset * 2)],
+                  &gPlttBufferFaded[BG_PLTT_ID(4) + BG_PLTT_ID(sStorage->wallpaperOffset * 2)], 2 * PLTT_SIZE_4BPP);
+        sStorage->scrollState++;
+        return TRUE;
+    case 1:
+        if (!WaitForWallpaperGfxLoad())
+            return TRUE;
+        for (i = 0; i < IN_BOX_COLUMNS; i++)
+            DestroyBoxMonIconsInColumn(i);
+        SetCurrentBox(boxId);
+        InitBoxMonSprites(boxId);
+        {
+            u16 wallpaperId = GetBoxWallpaper(boxId);
+            s16 x = GetBoxTitleBaseX(GetBoxNamePtr(boxId));
+            sStorage->boxTitlePal[14] = sBoxTitleColors[wallpaperId][0];
+            sStorage->boxTitlePal[15] = sBoxTitleColors[wallpaperId][1];
+            LoadPalette(&sStorage->boxTitlePal[14], sStorage->boxTitlePalOffset, PLTT_SIZEOF(2));
+            StringCopyPadded(sStorage->boxTitleText, GetBoxNamePtr(boxId), 0, BOX_NAME_LENGTH);
+            DrawTextWindowAndBufferTiles(sStorage->boxTitleText, sStorage->boxTitleTiles, 0, 0, 2);
+            for (i = 0; i < 2; i++)
+            {
+                struct Sprite *t = sStorage->curBoxTitleSprites[i];
+                if (t == NULL || !t->inUse)
+                    continue;
+                CpuCopy32(sStorage->boxTitleTiles + i * 0x100, (void *)(OBJ_VRAM0 + t->oam.tileNum * TILE_SIZE_4BPP), 0x100);
+                t->x = x + i * 32;
+                t->x2 = 0;
+            }
+        }
+        sStorage->scrollState++;
+        return FALSE;
+    }
+    return FALSE;
 }
 
 static s8 DetermineBoxScrollDirection(u8 boxId)
@@ -5819,13 +5898,13 @@ static void CreateIncomingBoxTitle(u8 boxId, s8 direction)
         u8 spriteId = CreateSprite(&template, i * 32 + adjustedX, 28, 24);
 
         sStorage->nextBoxTitleSprites[i] = &gSprites[spriteId];
-        sStorage->nextBoxTitleSprites[i]->sSpeed = (-direction) * 6;
+        sStorage->nextBoxTitleSprites[i]->sSpeed = (-direction) * MP_BOX_SCROLL_SPEED;
         sStorage->nextBoxTitleSprites[i]->sIncomingX = i * 32 + x;
         sStorage->nextBoxTitleSprites[i]->sIncomingDelay = 0;
         sStorage->nextBoxTitleSprites[i]->callback = SpriteCB_IncomingBoxTitle;
         StartSpriteAnim(sStorage->nextBoxTitleSprites[i], i);
 
-        sStorage->curBoxTitleSprites[i]->sSpeed = (-direction) * 6;
+        sStorage->curBoxTitleSprites[i]->sSpeed = (-direction) * MP_BOX_SCROLL_SPEED;
         sStorage->curBoxTitleSprites[i]->sOutgoingDelay = 1;
         sStorage->curBoxTitleSprites[i]->callback = SpriteCB_OutgoingBoxTitle;
     }
@@ -5929,15 +6008,15 @@ static void StartBoxScrollArrowsSlide(s8 direction)
     }
     if (direction < 0)
     {
-        sStorage->arrowSprites[0]->sTimer = 29;
-        sStorage->arrowSprites[1]->sTimer = 5;
+        sStorage->arrowSprites[0]->sTimer = MP_BOX_SCROLL_FRAMES * 29 / 32;
+        sStorage->arrowSprites[1]->sTimer = MP_BOX_SCROLL_FRAMES * 5 / 32;
         sStorage->arrowSprites[0]->data[2] = 72;
         sStorage->arrowSprites[1]->data[2] = 72;
     }
     else
     {
-        sStorage->arrowSprites[0]->sTimer = 5;
-        sStorage->arrowSprites[1]->sTimer = 29;
+        sStorage->arrowSprites[0]->sTimer = MP_BOX_SCROLL_FRAMES * 5 / 32;
+        sStorage->arrowSprites[1]->sTimer = MP_BOX_SCROLL_FRAMES * 29 / 32;
         sStorage->arrowSprites[0]->data[2] = DISPLAY_WIDTH + 8;
         sStorage->arrowSprites[1]->data[2] = DISPLAY_WIDTH + 8;
     }
@@ -12214,7 +12293,8 @@ void MP_Storage_BoxTitle(u8 boxId, u8 *pix, s16 *left, u16 *colors)
 // CB2_PokeStorage before the sprites are built; the sprites it hid come back as they were.
 static void MpBoxGridHide(void)
 {
-    static u16 sHidden[MAX_SPRITES];  // (the hidden sprite's first tile + 1, 0 = not hidden by us)
+    static u32 sHidden[MAX_SPRITES];  // (the hidden sprite's first tile + 1, 0 = not hidden by us; u32, as an icon's
+                                      // tiles can start at 0xFFFF and + 1 then wrapped to 0 in a u16)
     static bool8 sBgOff;
     bool8 hide = MP_BoxGrid_HideBox();
     u16 i;
@@ -12224,19 +12304,23 @@ static void MpBoxGridHide(void)
         if (hide)
         {
             s16 x = s->x + s->x2, y = s->y + s->y2;
-            if (!s->inUse || s->invisible || sHidden[i])
+            // (a sprite this hid stays as it is; one made in its place since, the next box's icons as the PC goes
+            // there behind the grid, is hidden too)
+            if (!s->inUse || s->invisible || sHidden[i] == (u32)s->sheetTileStart + 1)
                 continue;
             if (s == sStorage->arrowSprites[0] || s == sStorage->arrowSprites[1])
                 continue;
             if (x >= 80 && x < DISPLAY_WIDTH + 16 && y >= 12 && y < DISPLAY_HEIGHT + 16)
             {
                 s->invisible = TRUE;
-                sHidden[i] = s->sheetTileStart + 1;
+                sHidden[i] = (u32)s->sheetTileStart + 1;
             }
         }
         else if (sHidden[i])
         {
-            if (s->inUse && sHidden[i] == s->sheetTileStart + 1)
+            // (every sprite this hid shows again, also when the box's icons were made again behind the grid: their
+            // tiles differ then, and checking them left the new box's POKéMON hidden)
+            if (s->inUse)
                 s->invisible = FALSE;
             sHidden[i] = 0;
         }
@@ -12270,4 +12354,19 @@ bool8 MP_Storage_BoxSettled(void)
 {
     return sStorage != NULL && gMain.callback2 == CB2_PokeStorage && gTasks[sStorage->taskId].func == Task_PokeStorageMain
         && sStorage->state == MSTATE_HANDLE_INPUT;
+}
+
+// (tests: mp boxicons) the box's POKéMON icon sprites as they are
+void MP_Storage_DebugIcons(void)
+{
+    u32 i;
+    if (sStorage == NULL)
+        return;
+    for (i = 0; i < IN_BOX_COUNT; i++)
+    {
+        struct Sprite *sp = sStorage->boxMonsSprites[i];
+        if (sp != NULL)
+            printf("[test] boxicon %u: inUse %d invisible %d xy %d,%d+%d,%d prio %d mode %d\n", i, sp->inUse, sp->invisible,
+                   sp->x, sp->y, sp->x2, sp->y2, sp->oam.priority, sp->oam.objMode);
+    }
 }

@@ -42,6 +42,7 @@ press A 2
 shotburst zoomin 40 3
 wait 150
 mp box
+mp boxicons
 shot box5
 shotburst zoom5_ 30 1
 press SEARCH 30

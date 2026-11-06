@@ -944,6 +944,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         u8 StorageGetCurrentBox(void);
         printf("[test] box %d\n", StorageGetCurrentBox() + 1);
     }
+    else if (strcmp(cmd, "boxicons") == 0)
+    {
+        // boxicons - the PC box's POKéMON icon sprites (pokemon_storage_system.c)
+        void MP_Storage_DebugIcons(void);
+        MP_Storage_DebugIcons();
+    }
     else if (strcmp(cmd, "takeegg") == 0)
     {
         void GiveEggFromDaycare(void);
