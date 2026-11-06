@@ -66,6 +66,17 @@ TOWER_BUFFER_SPECIES, TOWER_BUFFER_MOVE = 214, 215     # (a kind's / a move's na
 TOWER_JUDGE_TOTAL, TOWER_JUDGE_STAT, TOWER_JUDGE_BEST = 216, 217, 218   # (the STATS JUDGE: JudgeStats)
 TOWER_RANKINGS = 220   # (JUBILIFE TV's rankings machines: src/sinnoh/s3d_rankings.c)
 SINNOH_PARTY = 63   # (party and BAG queries, Platinum's ribbons: src/sinnoh/s3d_party.c Sinnoh_PartyCall)
+SINNOH_JOURNAL = 64   # (Platinum's journal events: src/sinnoh/s3d_journal.c Sinnoh_JournalScript; 255: the JOURNAL given)
+# Platinum's CreateJournalEvent kinds its ScrCmd_CreateJournalEvent writes (generated/journal_location_events.txt
+# numbers); the others (gyms, the Elite Four...) Platinum writes from the battle's end, as s3d_journal.c does
+JOURNAL_SCRIPT_EVENTS = {'LOCATION_EVENT_GAME_CORNER': 16, 'LOCATION_EVENT_SAFARI_GAME': 17,
+                         'LOCATION_EVENT_ITEM_WAS_OBTAINED': 18, 'LOCATION_EVENT_USED_CUT': 19,
+                         'LOCATION_EVENT_USED_SURF': 21, 'LOCATION_EVENT_USED_STRENGTH': 22,
+                         'LOCATION_EVENT_USED_DEFOG': 23, 'LOCATION_EVENT_USED_ROCK_SMASH': 24,
+                         'LOCATION_EVENT_USED_WATERFALL': 25, 'LOCATION_EVENT_USED_ROCK_CLIMB': 26,
+                         'LOCATION_EVENT_BATTLE_TOWER': 36, 'LOCATION_EVENT_BATTLE_FACTORY': 37,
+                         'LOCATION_EVENT_BATTLE_CASTLE': 38, 'LOCATION_EVENT_BATTLE_HALL': 39,
+                         'LOCATION_EVENT_BATTLE_ARCADE': 40}
 (PARTY_ARG, PARTY_REPEATED_SPECIES, PARTY_GET_RIBBON, PARTY_SET_RIBBON, PARTY_FRIENDSHIP, PARTY_NATURE, PARTY_FIND_NATURE,
  PARTY_TYPES, PARTY_HIDDEN_POWER, PARTY_CONTEST_STAT, PARTY_COMBEE_GENDERS, PARTY_MOVE_COUNT, PARTY_ITEM_QUANTITY,
  PARTY_FOSSIL_COUNT, PARTY_FOOTPRINT, PARTY_OUTSIDER, PARTY_SEEN, PARTY_CAN_ADD_COINS, PARTY_ADD_MONEY, PARTY_REMOVE_MONEY,
@@ -1165,7 +1176,14 @@ class FileConverter:
         if cmd == 'GiveRunningShoes':
             return ['setflag FLAG_SYS_B_DASH']
         if cmd == 'GiveJournal':
-            return ['additem ITEM_JOURNAL', 'special MP_GatchaTicketToast']
+            return ['additem ITEM_JOURNAL', 'special MP_GatchaTicketToast', self.sinnoh(SINNOH_JOURNAL, 255)]
+        if cmd == 'CreateJournalEvent':
+            if a and a[0] in JOURNAL_SCRIPT_EVENTS:
+                param = '0'
+                if a[0] == 'LOCATION_EVENT_ITEM_WAS_OBTAINED' and len(a) > 1:
+                    param = self.var(a[1]) if a[1].startswith('VAR_') else self.value(a[1])
+                return [self.sinnoh(SINNOH_JOURNAL, JOURNAL_SCRIPT_EVENTS[a[0]], param)]
+            return []
         if cmd in ('InitSizeContestRecord', 'RandomizeJubilifeLottery', 'InitDailyRandomLevel', 'SetStepFlag'):
             return []
         if cmd == 'SetObjectFlagIsPersistent':
@@ -1219,7 +1237,8 @@ class FileConverter:
         if cmd == 'GetPartyMonFriendship':
             return [self.sinnoh(SINNOH_CONTEST, 35, self.var(a[0]), self.arg(a[1]))]
         if cmd in ('InitPersistedMapFeaturesForPastoriaGym', 'InitPersistedMapFeaturesForSunyshoreGym',
-                   'InitPersistedMapFeaturesForCanalaveGym', 'InitPersistedMapFeaturesForEternaGym'):
+                   'InitPersistedMapFeaturesForCanalaveGym', 'InitPersistedMapFeaturesForEternaGym',
+                   'InitPersistedMapFeaturesForVeilstoneGym', 'InitPersistedMapFeaturesForHearthomeGym'):
             return []                       # (src/sinnoh/s3d_gyms.c sets its gyms up as their maps load)
         if cmd == 'AdvanceEternaGymClock':
             return ['special Sinnoh_EternaClock', 'waitstate']   # (s3d_gyms.c: the hands to the state its trainers say)
@@ -1511,7 +1530,7 @@ class FileConverter:
             return [self.sinnoh(SINNOH_REGI_DOT, self.var(a[0]), self.value(a[1]))]
         if cmd in ('StopSE', 'WaitForTransition', 'SetInitialVolumeForSequence', 'SetBlackOutWarpId'):
             return []                       # (sounds stop by themselves here; the game picks the heal spot itself)
-        if cmd in ('TurnOnTimeBasedEffects', 'CreateJournalEvent', 'TrySetUnusedCollectedOrbFlag', 'RecordHeapMemory',
+        if cmd in ('TurnOnTimeBasedEffects', 'TrySetUnusedCollectedOrbFlag', 'RecordHeapMemory',
                    'CheckHeapMemory', 'SetMenuXOriginToRight', 'SetMenuXOriginToLeft'):
             return []                       # (Platinum's journal, its memory checks: nothing here)
         out = self.tower_command(cmd, a)

@@ -24,7 +24,7 @@ TEXT_BANKS = ('tv_programs', 'tv_commercials', 'tv_programs_interviews', 'tv_pro
               'contest_visual_competition', 'contest_dance_competition', 'contest_acting_competition',
               'contest_hall_lobby', 'contest_accessory_names_with_articles', 'link_contest_records', 'flavor_names',
               'poffin_types', 'villa_furniture_names', 'ball_seal_names', 'ribbon_names', 'underground_common', 'menu_entries',
-              'rankings_machine')
+              'rankings_machine', 'journal_entries', 'gym_names', 'month_names', 'times_of_day')
 
 
 def fnv(name):

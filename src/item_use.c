@@ -709,6 +709,41 @@ void ItemUseOutOfBattle_PokeblockCase(u8 taskId)
     }
 }
 
+// Moemon Kai: SINNOH's JOURNAL (src/sinnoh/s3d_journal.c), from the BAG or registered; outside SINNOH it can't be used
+void Sinnoh_JournalOpen(MainCallback back, bool8 continuing);
+bool8 S3D_IsSinnohGroup(u8 mapGroup);
+static void CB2_OpenJournalFromBag(void)
+{
+    Sinnoh_JournalOpen(CB2_ReturnToBagMenuPocket, FALSE);
+}
+
+static void Task_OpenRegisteredJournal(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        Sinnoh_JournalOpen(CB2_ReturnToField, FALSE);
+        DestroyTask(taskId);
+    }
+}
+
+void ItemUseOutOfBattle_Journal(u8 taskId)
+{
+    if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) || MenuHelpers_IsLinkActive() == TRUE)
+        DisplayDadsAdviceCannotUseItemMessage(taskId, gTasks[taskId].tUsingRegisteredKeyItem);
+    else if (gTasks[taskId].tUsingRegisteredKeyItem != TRUE)
+    {
+        gBagMenu->newScreenCallback = CB2_OpenJournalFromBag;
+        Task_FadeAndCloseBagMenu(taskId);
+    }
+    else
+    {
+        gFieldCallback = FieldCB_ReturnToFieldNoScript;
+        FadeScreen(FADE_TO_BLACK, 0);
+        gTasks[taskId].func = Task_OpenRegisteredJournal;
+    }
+}
+
 static void CB2_OpenPokeblockFromBag(void)
 {
     OpenPokeblockCase(PBLOCK_CASE_FIELD, CB2_ReturnToBagMenuPocket);

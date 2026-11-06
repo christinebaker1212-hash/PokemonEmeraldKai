@@ -48,6 +48,9 @@
 #include "random.h"
 #include "roamer.h"
 void Sinnoh_RoamerMapChanged(void);   // Moemon Kai: src/sinnoh/s3d_roamer.c
+void Sinnoh_JournalMapChanged(bool8 warp);   // Moemon Kai: SINNOH's JOURNAL (src/sinnoh/s3d_journal.c)
+bool8 Sinnoh_JournalOpenOnContinue(void);
+void Sinnoh_JournalOpen(MainCallback back, bool8 continuing);
 void Sinnoh_RoamerFlew(void);
 void MP_JohtoRoamer_MapChanged(void);
 void MP_JohtoRoamer_Flew(void);
@@ -853,6 +856,7 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     UpdateLocationHistoryForRoamer();
     RoamerMove();
     Sinnoh_RoamerMapChanged();   // Moemon Kai: SINNOH's roamers move on (src/sinnoh/s3d_roamer.c)
+    Sinnoh_JournalMapChanged(FALSE);   // Moemon Kai: SINNOH's JOURNAL (src/sinnoh/s3d_journal.c)
     MP_JohtoRoamer_MapChanged();   // Moemon Kai: JOHTO's beasts too (src/mp/mp_johto_roamer.c)
     DoCurrentWeather();
     ResetFieldTasksArgs();
@@ -906,6 +910,7 @@ static void LoadMapFromWarp(bool32 a1)
     UpdateLocationHistoryForRoamer();
     RoamerMoveToOtherLocationSet();
     Sinnoh_RoamerMapChanged();   // Moemon Kai: SINNOH's roamers move on (src/sinnoh/s3d_roamer.c)
+    Sinnoh_JournalMapChanged(TRUE);   // Moemon Kai: SINNOH's JOURNAL (src/sinnoh/s3d_journal.c)
     MP_JohtoRoamer_MapChanged();   // Moemon Kai: JOHTO's beasts too (src/mp/mp_johto_roamer.c)
     if (gMapHeader.mapLayoutId == LAYOUT_BATTLE_FRONTIER_BATTLE_PYRAMID_FLOOR)
         InitBattlePyramidMap(FALSE);
@@ -1920,8 +1925,17 @@ void CB2_ContinueSavedGame(void)
     {
         TryPutTodaysRivalTrainerOnAir();
         gFieldCallback = FieldCB_FadeTryShowMapPopup;
-        SetMainCallback1(CB1_Overworld);
-        CB2_ReturnToField();
+        if (Sinnoh_JournalOpenOnContinue())   // Moemon Kai: SINNOH's JOURNAL, shown first when its last page is two
+        {                                     // days old or more, then today's page (src/sinnoh/s3d_journal.c)
+            SetMainCallback1(NULL);
+            Sinnoh_JournalOpen(CB2_ReturnToField, TRUE);
+        }
+        else
+        {
+            Sinnoh_JournalMapChanged(TRUE);
+            SetMainCallback1(CB1_Overworld);
+            CB2_ReturnToField();
+        }
     }
 }
 

@@ -4147,6 +4147,9 @@ static void CursorCb_FieldMove(u8 taskId)
         }
         else if (sFieldMoveCursorCallbacks[fieldMove].fieldMoveFunc() == TRUE)
         {
+            void Sinnoh_JournalFieldMove(u8 fieldMove);
+            Sinnoh_JournalFieldMove(fieldMove == FIELD_MOVE_FLASH ? 1 : fieldMove == FIELD_MOVE_MILK_DRINK ? 2
+                                  : fieldMove == FIELD_MOVE_SOFT_BOILED ? 3 : 0);   // Moemon Kai: SINNOH's JOURNAL (s3d_journal.c)
             switch (fieldMove)
             {
             case FIELD_MOVE_MILK_DRINK:

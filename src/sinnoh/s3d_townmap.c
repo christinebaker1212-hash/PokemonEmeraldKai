@@ -88,8 +88,12 @@ bool8 Sinnoh_TownVisited(u16 mapsec)
 
 void Sinnoh_TownMapArrive(void)
 {
+    void Sinnoh_JournalArrived(u16 mapsec);
     u32 i;
     for (i = 0; i < ARRAY_COUNT(sSinnohFlyDests); i++)
         if (sSinnohFlyDests[i].mapsec == gMapHeader.regionMapSectionId && !FlagGet(sSinnohFlyDests[i].flag))
+        {
             FlagSet(sSinnohFlyDests[i].flag);
+            Sinnoh_JournalArrived(sSinnohFlyDests[i].mapsec);   // (the JOURNAL: "Arrived in ...": s3d_journal.c)
+        }
 }

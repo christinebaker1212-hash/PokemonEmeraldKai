@@ -1,0 +1,9 @@
+# SINNOH's JOURNAL (src/sinnoh/s3d_journal.c, Platinum's rules and words): with the JOURNAL in the BAG, a GYM entered
+# without its badge is "too tough", a first visit to SANDGEM TOWN is "Arrived in", beating ROARK takes the "too tough"
+# away and writes "Beat Oreburgh Gym's ROARK!", another trainer is the trainer line; then the notebook. Needs both
+# packs. Shots journal_*.png.
+MODE=1
+TMO=400
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=150:100,150:100,150:100"
+EXPECT_A=("[journal]   event 9 where 0 trainer 0" "[journal]   event 13 where" "[journal]   event 10 where 0 trainer 2067" ", trainer 2063")
+UNEXPECT_A=("[crash]" "TIMEOUT")

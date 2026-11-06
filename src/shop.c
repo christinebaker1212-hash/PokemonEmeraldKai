@@ -465,6 +465,11 @@ void CB2_ExitSellMenu(void)
 
 static void Task_HandleShopMenuQuit(u8 taskId)
 {
+    if (sMartInfo.martType == MART_TYPE_NORMAL)
+    {
+        void Sinnoh_JournalShopEnd(void);
+        Sinnoh_JournalShopEnd();   // Moemon Kai: SINNOH's JOURNAL ("Shopped at a Poké Mart.": s3d_journal.c)
+    }
     ClearStdWindowAndFrameToTransparent(sMartInfo.windowId, 2); // Incorrect use, making it not copy it to vram.
     RemoveWindow(sMartInfo.windowId);
     TryPutSmartShopperOnAir();
@@ -1178,6 +1183,10 @@ static void BuyMenuTryMakePurchase(u8 taskId)
                 void Sinnoh_TvShopping(u16 item, u16 amount);
                 Sinnoh_TvShopping(tItemId, tItemCount);   // Moemon Kai: SINNOH SHOPPING CHAMP CORNER (src/sinnoh/s3d_tv.c)
             }
+            {
+                void Sinnoh_JournalShopBuy(u16 amount, bool8 sold);
+                Sinnoh_JournalShopBuy(tItemCount, FALSE);   // Moemon Kai: SINNOH's JOURNAL (src/sinnoh/s3d_journal.c)
+            }
         }
         else
         {
@@ -1677,6 +1686,8 @@ void MP_ShopDump(void)
 
 void CreatePokemartMenu(const u16 *itemsForSale)
 {
+    void Sinnoh_JournalShopReset(void);
+    Sinnoh_JournalShopReset();   // Moemon Kai: SINNOH's JOURNAL counts the visit's buys and sales (s3d_journal.c)
     CreateShopMenu(MART_TYPE_NORMAL);
     SetShopItemsForSale(MP_ShopItems(itemsForSale));
     ClearItemPurchases();

@@ -1791,6 +1791,10 @@ static void CB2_ExitPokeStorage(void)
     if (MpOnExit())   // Moemon Co-op: the shared PC's box screen goes back to its own menu
         return;
     sPreviousBoxOption = GetCurrentBoxOption();
+    {
+        void Sinnoh_JournalBoxClosed(void);
+        Sinnoh_JournalBoxClosed();   // Moemon Kai: SINNOH's JOURNAL ("Used a PC Box.": src/sinnoh/s3d_journal.c)
+    }
     gFieldCallback = FieldTask_ReturnToPcMenu;
     SetMainCallback2(CB2_ReturnToField);
 }
@@ -6627,8 +6631,11 @@ static void SetMovingMonData(u8 boxId, u8 position)
     sMovingMonOrigBoxPos = position;
 }
 
+void Sinnoh_JournalBoxUsed(void);   // Moemon Kai: SINNOH's JOURNAL (src/sinnoh/s3d_journal.c)
+
 static void SetPlacedMonData(u8 boxId, u8 position)
 {
+    Sinnoh_JournalBoxUsed();
     if (boxId == TOTAL_BOXES_COUNT)
     {
         gPlayerParty[position] = sStorage->movingMon;
@@ -6645,6 +6652,7 @@ static void SetPlacedMonData(u8 boxId, u8 position)
 
 static void PurgeMonOrBoxMon(u8 boxId, u8 position)
 {
+    Sinnoh_JournalBoxUsed();
     if (boxId == TOTAL_BOXES_COUNT)
         ZeroMonData(&gPlayerParty[position]);
     else

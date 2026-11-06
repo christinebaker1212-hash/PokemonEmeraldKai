@@ -2618,6 +2618,10 @@ static void SellItem(u8 taskId)
     u16 *cursorPos = &gBagPosition.cursorPosition[gBagPosition.pocket];
 
     PlaySE(SE_SHOP);
+    {
+        void Sinnoh_JournalShopBuy(u16 amount, bool8 sold);
+        Sinnoh_JournalShopBuy(tItemCount, TRUE);   // Moemon Kai: SINNOH's JOURNAL (src/sinnoh/s3d_journal.c)
+    }
     RemoveBagItem(gSpecialVar_ItemId, tItemCount);
     AddMoney(&gSaveBlock1Ptr->money, (GetItemPrice(gSpecialVar_ItemId) / 2) * tItemCount);
     DestroyListMenuTask(tListTaskId, scrollPos, cursorPos);

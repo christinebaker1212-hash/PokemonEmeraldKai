@@ -384,6 +384,9 @@ def main():
     # DAWN's and LUCAS's own action sheets for the player's looks (src/mp/mp_avatar.c ACT_PLATINUM: player_actions(),
     # before the POKéTCH's)
     out += player_actions(root)
+    # the JOURNAL's notebook (tools/sinnoh/build_journal.py; before the POKéTCH's)
+    import build_journal
+    out += build_journal.section(root)
     # the POKéTCH's app screens and sprites (tools/sinnoh/build_poketch.py)
     import build_poketch
     out += build_poketch.section(root)

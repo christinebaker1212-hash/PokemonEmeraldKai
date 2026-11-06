@@ -528,6 +528,14 @@ static void FinishBattle(void)
 }
 
 void MP_FanClub_AfterPvp(u8 outcome);
+void Sinnoh_JournalFriendBattle(u8 kind, u8 result, const u8 *name1, const u8 *name2);
+
+// SINNOH's JOURNAL's online lines ("Beat X (Single)": src/sinnoh/s3d_journal.c; only in SINNOH, with the JOURNAL)
+static void JournalPvp(u8 outcome)
+{
+    Sinnoh_JournalFriendBattle((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? 2 : 1,
+                               outcome == B_OUTCOME_WON ? 0 : outcome == B_OUTCOME_DREW ? 2 : 1, sNet.oppName, NULL);
+}
 
 static void CB2_MpReturnFromBattle(void)
 {
@@ -553,6 +561,7 @@ static void CB2_MpReturnFromBattle(void)
         AppendRaw(sResultText, CHAR_EXCL_MARK);
         MP_Tourney_OnBattleResult(outcome == B_OUTCOME_WON || outcome == B_OUTCOME_DREW ? outcome : B_OUTCOME_LOST);
         MP_TCard_NotePvp(sNet.oppName, outcome);   // the TRAINER CARD's record against them
+        JournalPvp(outcome);
         MP_Events_Did(MP_DID_PVP);
         if (outcome == B_OUTCOME_WON)
             MP_Events_Did(MP_DID_PVPWIN);
@@ -562,6 +571,7 @@ static void CB2_MpReturnFromBattle(void)
     }
 
     MP_TCard_NotePvp(sNet.oppName, outcome);   // the TRAINER CARD's record against them
+    JournalPvp(outcome);
     MP_FanClub_AfterPvp(outcome);               // KANTO's TRAINER FAN CLUB (mp_fanclub.c)
     MP_Events_Did(MP_DID_PVP);
     if (outcome == B_OUTCOME_WON)

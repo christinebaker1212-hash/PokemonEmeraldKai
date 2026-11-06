@@ -829,6 +829,10 @@ void Sinnoh_UndergroundBulging(void)
 void Sinnoh_UndergroundDig(void)
 {
     s32 spot = Sinnoh_UndergroundDigSpot();
+    {
+        void Sinnoh_JournalDug(void);
+        Sinnoh_JournalDug();   // (the JOURNAL: "Dug for Treasure underground.": s3d_journal.c)
+    }
     memset(M.dirt, 2, sizeof(M.dirt));
     memset(M.grid, 0, sizeof(M.grid));
     M.count = M.items = 0;

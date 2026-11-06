@@ -468,6 +468,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         Tt_Debug(arg);
         return;
     }
+    if (strcmp(cmd, "journal") == 0)   // SINNOH's JOURNAL's page (src/sinnoh/s3d_journal.c); `mp journal open`
+    {
+        void Sinnoh_JournalDebug(void);
+        void Sinnoh_JournalOpen(MainCallback back, bool8 continuing);
+        Sinnoh_JournalDebug();
+        if (arg && strcmp(arg, "open") == 0)
+        {
+            SetMainCallback1(NULL);
+            Sinnoh_JournalOpen(CB2_ReturnToField, FALSE);
+        }
+        return;
+    }
     if (strcmp(cmd, "mtg") == 0)
     {
         void Mtg_Debug(const char *command);

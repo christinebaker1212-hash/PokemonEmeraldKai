@@ -127,7 +127,7 @@ To build (not 1:1 yet):
    DIST_WORLD_PROGRESS_*, GetPlayer3DPos, SetPartyGiratinaForm, StartGiratinaOriginBattle. The 3D engine (s3d.c) needs
    a player that walks on any face (gravity per tile) and the camera Platinum's angle templates give.
 3. The gym puzzles Kai doesn't have yet (ETERNA's clock: AdvanceEternaGymClock; VEILSTONE's, HEARTHOME's), the VILLA,
-   the Frontier Brains' and the HALL MATRON's teams, the PASTORIA size contest, JUBILIFE's TV lottery, the JOURNAL,
+   the Frontier Brains' and the HALL MATRON's teams, the PASTORIA size contest, JUBILIFE's TV lottery, the JOURNAL (done),
    ROTOM's room, Platinum's POKéDEX ratings (LoadPokedexRating), UNOWN messages, DAWN's / LUCAS's own overworld
    sprites (stand-ins now), Platinum's songs the game lacks (`gen_scripts.py --report` lists them: SEQ_OPENING...).
 4. A story test from TWINLEAF to the HALL OF FAME; then the written words go (words*.py, STORY_WORDS, trainer_words.py)

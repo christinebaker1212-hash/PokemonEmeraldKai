@@ -66,7 +66,9 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] ETERNA's gym clock (AdvanceEternaGymClock on s3d_gyms.c's Sinnoh_EternaClock) (sinnoh_gym_eterna)
 - [x] PASTORIA's and SUNYSHORE's gym buttons in Platinum's commands (PressPastoriaGymButton / PressSunyshoreGymButton on
       s3d_gyms.c's Sinnoh_PastoriaWater / Sinnoh_SunyshoreTurn) (sinnoh_gym_pastoria, sinnoh_gym_sunyshore)
-- [ ] HEARTHOME's and VEILSTONE's gyms in Platinum's commands
+- [x] HEARTHOME's and VEILSTONE's gyms in Platinum's commands (1.113.0: InitPersistedMapFeaturesForVeilstoneGym /
+      ForHearthomeGym run as their maps load, s3d_gyms.c; so the gyms' map scripts are Platinum's own too)
+      (sinnoh_gym_veilstone, sinnoh_gym_hearthome)
 - [x] Platform lifts (TriggerPlatformLift: IRON ISLAND's three, the LEAGUE's six; src/sinnoh/s3d_lift.c) (sinnoh_lift,
       sinnoh_lift_iron)
 - [x] The elevators in Platinum's own scripts: the attendants' words, GetFloorsAbove, the "Current Floor" window,
@@ -91,7 +93,12 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The size contest (ROUTE 222's house, REMORAID; not PASTORIA's): Platinum's script, s3d_misc.c 6-9 on Emerald's size
       code with Platinum's rounding and starting record; test sinnoh_size_contest
 - [x] JUBILIFE's TV lottery in Platinum's own script, on the game's own lottery number (s3d_misc.c) (sinnoh_lottery)
-- [ ] The JOURNAL
+- [x] The JOURNAL (1.113.0): Platinum's journal.c rules and journal_printer.c lines in its own words, its notebook
+      (f_note_gra.narc, build_journal.py), ten pages, a page a day the game is loaded; places (first visit to a town, out
+      of a cave / home / the lab / a named building, a GYM too tough), wild POKéMON, gym leaders, the Elite Four, the
+      Champion, trainers, shopping, the PC Box, field moves, item balls, the Underground, the BATTLE FRONTIER, friends'
+      battles; opened from the BAG or on CONTINUE after two days (s3d_journal.c; COOP_NOTES "SINNOH's JOURNAL"; test
+      sinnoh_journal)
 - [x] AMITY SQUARE: Platinum's own scripts with the player's follower as the square's walker (every POKéMON follows in
       this game, so the gates no longer check the party or hand one over: gen_scripts.py KAI_REWRITES); its finds every
       200 steps by Platinum's pools and odds (BERRIES, accessories), its lines, the gift man's BERRY or accessory a

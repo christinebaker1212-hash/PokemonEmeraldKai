@@ -704,6 +704,10 @@ u32 FieldEffectStart(u8 id)
     u32 val;
 
     FieldEffectActiveListAdd(id);
+    {
+        void Sinnoh_JournalFieldEffect(u8 id);
+        Sinnoh_JournalFieldEffect(id);   // Moemon Kai: SINNOH's JOURNAL ("Used Cut at ...": src/sinnoh/s3d_journal.c)
+    }
 
     script = gFieldEffectScriptPointers[id];
 

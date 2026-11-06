@@ -5079,7 +5079,7 @@ const struct Item gItems[] =
         .importance = 1,
         .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .fieldUseFunc = ItemUseOutOfBattle_Journal,   // Moemon Kai: Platinum's JOURNAL (src/sinnoh/s3d_journal.c)
     },
 
     [ITEM_PAL_PAD] =

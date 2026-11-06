@@ -45,6 +45,8 @@ static struct
     const u8 *actions[2][3];   // DAWN's and LUCAS's action sheets (build_gfx.py player_actions(): "PACT"): u8 frames,
                                // pad, 32x32 frames
     const u8 *actionPal[2];    // ... and each one's palette
+    const u8 *journal;     // the JOURNAL's notebook (tools/sinnoh/build_journal.py: "JRNL"): u16 w, h, then the boy's and
+                           // the girl's w*h color numbers and 256 colors
     const u8 *poketch;     // the POKéTCH's art (tools/sinnoh/build_poketch.py: "PKCH")
     const u8 *poketchEnd;
 } sGfx;
@@ -256,6 +258,18 @@ static void Load(void)
                 p += 2 + frames * 512;
             }
         }
+    }
+    // the JOURNAL's notebook: "JRNL", u16 w, h, then twice (boy, girl) w*h color numbers and 256 u16 colors
+    if (p + 8 <= end && memcmp(p, "JRNL", 4) == 0)
+    {
+        u32 w = p[4] | p[5] << 8, h = p[6] | p[7] << 8;
+        if (p + 8 + 2 * (w * h + 512) <= end)
+        {
+            sGfx.journal = p + 4;
+            p += 8 + 2 * (w * h + 512);
+        }
+        else
+            p = end;
     }
     if (p + 4 <= end && memcmp(p, "PKCH", 4) == 0)
     {
@@ -553,6 +567,24 @@ bool8 S3D_Gfx_ContestPicture(bool8 backdrop, u16 n, u16 *w, u16 *h, const u16 **
     *w = p[0] | p[1] << 8;
     *h = p[2] | p[3] << 8;
     *px = (const u16 *)(p + 4);
+    return TRUE;
+}
+
+// The JOURNAL's notebook (GIRL: the girl's): W x H color numbers and 16 palettes of 16 (FALSE: the pack has none)
+bool8 S3D_Gfx_Journal(u8 girl, const u8 **px, const u16 **pal, u16 *w, u16 *h)
+{
+    const u8 *p;
+    u32 n;
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || (p = sGfx.journal) == NULL)
+        return FALSE;
+    *w = p[0] | p[1] << 8;
+    *h = p[2] | p[3] << 8;
+    n = (u32)*w * *h;
+    p += 4 + (girl ? n + 512 : 0);
+    *px = p;
+    *pal = (const u16 *)(p + n);
     return TRUE;
 }
 

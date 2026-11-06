@@ -33,6 +33,9 @@ void MP_RegionBerryTrees_Reset(void);
 const void *Sinnoh_MiscData(u32 *size);   // (small Platinum counters: chunk SMSC, s3d_misc.c)
 void Sinnoh_MiscLoad(const void *data, u32 size);
 void Sinnoh_MiscReset(void);
+const void *Sinnoh_JournalData(u32 *size);   // (SINNOH's JOURNAL: chunk JRNL, s3d_journal.c)
+void Sinnoh_JournalLoad(const void *data, u32 size);
+void Sinnoh_JournalReset(void);
 #include "battle_pyramid.h"
 #include "event_data.h"
 #include "mp.h"
@@ -367,6 +370,7 @@ void MP_Region_StartNewGame(void)
     MP_JohtoRoamer_Reset();
     MP_RegionBerryTrees_Reset();
     Sinnoh_MiscReset();
+    Sinnoh_JournalReset();
     MP_Region_Arrive(sStartRegion);
     if (sStartRegion == REGION_SINNOH)
     {
@@ -623,6 +627,15 @@ void MP_Region_WriteSidecar(void)
             fwrite(sm, size, 1, f);
         }
         {
+            // SINNOH's JOURNAL (src/sinnoh/s3d_journal.c)
+            u32 size;
+            const void *jr = Sinnoh_JournalData(&size);
+            c[0] = CHUNK('J', 'R', 'N', 'L');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(jr, size, 1, f);
+        }
+        {
             u32 format = MP_SAVE_FORMAT;   // the save's own layout version (mp_savefix.h)
             c[0] = CHUNK('S', 'A', 'V', 'F');
             c[1] = sizeof(format);
@@ -779,6 +792,12 @@ static bool8 LoadFrom(const char *path)
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_MiscLoad(buf, c[1]);
             }
+            else if (c[0] == CHUNK('J', 'R', 'N', 'L') && c[1] <= 2048)
+            {
+                u8 buf[2048];
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_JournalLoad(buf, c[1]);
+            }
             else if (c[0] == CHUNK('B', 'T', 'R', 'E') && c[1] <= 2048)
             {
                 u8 buf[2048];
@@ -927,6 +946,7 @@ void MP_Region_LoadFromSave(void)
     MP_JohtoRoamer_Reset();
     MP_RegionBerryTrees_Reset();
     Sinnoh_MiscReset();
+    Sinnoh_JournalReset();
     for (i = 0; i <= 3; i++)
     {
         if (i == 0)

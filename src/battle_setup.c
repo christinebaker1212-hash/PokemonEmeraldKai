@@ -86,6 +86,7 @@ static void DoBattlePikeWildBattle(void);
 static void DoSafariBattle(void);
 static void DoStandardWildBattle(void);
 static void CB2_EndWildBattle(void);
+void Sinnoh_JournalBattleEnd(void);   // Moemon Kai: SINNOH's JOURNAL (src/sinnoh/s3d_journal.c)
 static void CB2_EndScriptedWildBattle(void);
 static u8 GetWildBattleTransition(void);
 static u8 GetTrainerBattleTransition(void);
@@ -809,6 +810,7 @@ void StartRegiBattle(void)
 
 static void CB2_EndWildBattle(void)
 {
+    Sinnoh_JournalBattleEnd();   // Moemon Kai: what the JOURNAL writes of it (src/sinnoh/s3d_journal.c)
     if (sPartnerWild)
     {
         // (the player's other three back where the partner's team was)
@@ -861,6 +863,7 @@ static void CB2_EndWildBattle(void)
 
 static void CB2_EndScriptedWildBattle(void)
 {
+    Sinnoh_JournalBattleEnd();   // Moemon Kai: what the JOURNAL writes of it (src/sinnoh/s3d_journal.c)
     MP_Legend_BattleEnded();   // Moemon Kai: a legendary beaten comes back in a day (mp_legends.c)
     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
     ResetOamRange(0, OAM_ENTRY_COUNT);   // Moemon PC: all 256 (128 left the rest zeroed: an 8x8 tile at 0,0)
@@ -1696,6 +1699,7 @@ void MP_Debug_TrainerBattle(u16 id)
 
 static void CB2_EndTrainerBattle(void)
 {
+    Sinnoh_JournalBattleEnd();   // Moemon Kai: what the JOURNAL writes of it (src/sinnoh/s3d_journal.c)
     if (gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)
     {
         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);

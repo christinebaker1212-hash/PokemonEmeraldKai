@@ -509,7 +509,9 @@ static void Task_RockClimb(u8 taskId)
 // (special, waitstate) climbs the wall in front of the player, the way they face
 void S3D_RockClimbStart(void)
 {
+    void Sinnoh_JournalRockClimb(void);
     u8 taskId = CreateTask(Task_RockClimb, 80);
+    Sinnoh_JournalRockClimb();   // (the JOURNAL: "Used Rock Climb at ...": s3d_journal.c)
     gTasks[taskId].data[0] = GetPlayerFacingDirection();
     gTasks[taskId].data[1] = 0;
     gTasks[taskId].data[2] = 0;
@@ -584,5 +586,7 @@ bool8 SetUpFieldMove_Defog(void)
 // (special) DEFOG blows the fog away: clear skies until the map changes
 void S3D_DefogClear(void)
 {
+    void Sinnoh_JournalDefog(void);
+    Sinnoh_JournalDefog();   // (the JOURNAL: "Used Defog at ...": s3d_journal.c)
     SetWeather(WEATHER_NONE);
 }

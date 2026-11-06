@@ -113,6 +113,8 @@ enum {
     SINNOH_TOWER,                   // ARG: the BATTLE TOWER's function (s3d_tower.c Sinnoh_TowerCall), ARG2 a value or
                                     // variable, ARG3 the variable for the answer
     SINNOH_PARTY,                   // ARG: a party / BAG query or change (s3d_party.c Sinnoh_PartyCall), ARG2, ARG3
+    SINNOH_JOURNAL,                 // ARG: Platinum's LOCATION_EVENT_* (CreateJournalEvent; 255: GiveJournal), ARG2 its
+                                    // value or a variable (the item found): s3d_journal.c Sinnoh_JournalScript
 };
 
 u8 gSinnohMessage[1000];
@@ -720,6 +722,12 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
     {
         void Sinnoh_MiscCall(u16 op, u16 a, u16 b);
         Sinnoh_MiscCall(arg, arg2, arg3);
+        break;
+    }
+    case SINNOH_JOURNAL:
+    {
+        void Sinnoh_JournalScript(u16 type, u16 param);
+        Sinnoh_JournalScript(arg, VarGet(arg2));
         break;
     }
     case SINNOH_PARTY:
