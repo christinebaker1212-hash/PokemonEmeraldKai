@@ -32,7 +32,9 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [~] PASTORIA: CRASHER WAKE, the GREAT MARSH tram (MoveGreatMarshTram)
 - [~] CELESTIC, CANALAVE: BYRON, IRON ISLAND with RILEY (partner)
 - [~] The three lakes, SNOWPOINT: CANDICE, LAKE ACUITY
-- [~] GALACTIC HQ, MT. CORONET, SPEAR PILLAR (the tag battle with BARRY)
+- [x] GALACTIC HQ (the button freeing the lake trio: sinnoh_galactic_hq), MT. CORONET, SPEAR PILLAR (the tag battle with
+      BARRY, CYRUS, the distorted pillar into the DISTORTION WORLD: sinnoh_spear_pillar; Platinum's cutscene itself is a
+      white flash, not built)
 - [x] The DISTORTION WORLD, 1:1 (section 3)
 - [~] SUNYSHORE: VOLKNER (the gym's buttons: PressSunyshoreGymButton), VICTORY ROAD
 - [~] The POKéMON LEAGUE: the ELITE FOUR, CYNTHIA, the platform lift (TriggerPlatformLift), the HALL OF FAME in

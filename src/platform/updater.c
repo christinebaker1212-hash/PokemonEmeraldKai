@@ -1621,8 +1621,7 @@ int Updater_Run(int argc, char **argv)
     {
         // Moemon Maker: the published pack, in the background (MakerPackWorker)
         SDL_Thread *mp = SDL_CreateThread(MakerPackWorker, "maker-pack", NULL);
-        if (mp)
-            SDL_DetachThread(mp);
+        (void)mp;   // (not detached: see fight_platform.c Fight_CheckIngestion)
     }
 
     memset(&U, 0, sizeof(U));

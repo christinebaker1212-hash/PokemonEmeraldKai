@@ -20,10 +20,7 @@ Sinnoh_TurnbackCaveGiratinaRoom_EventScript_Bg3::
 	end
 
 Sinnoh_TurnbackCaveGiratinaRoom_EventScript_Bg4::
-	msgbox Sinnoh_TurnbackCaveGiratinaRoom_Text_Bg4, MSGBOX_SIGN
+	goto SinnohP_turnback_cave_giratina_room_6
 	end
-
-Sinnoh_TurnbackCaveGiratinaRoom_Text_Bg4:
-	.string "A strange glowing panel in the floor.$"
 
 @ --- end of SINNOH words ---

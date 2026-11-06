@@ -1,0 +1,8 @@
+# GALACTIC HQ's control room (Platinum's scripts_galactic_hq_control_room.s): the button frees MESPRIT, AZELF and UXIE
+# (DeactivateLakeGuardianContainmentUnits: the floor shakes as the tubes open), they fly off and SATURN speaks;
+# FLAG_FREED_GALACTIC_HQ_POKEMON (0x33D1) set, the trio gone. Needs both packs. Shots hq_*.png.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[test] flag 13265 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

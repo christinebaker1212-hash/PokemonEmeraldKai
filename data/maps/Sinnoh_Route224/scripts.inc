@@ -3,7 +3,7 @@ Sinnoh_Route224_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route224_EventScript_Bg8::
-	msgbox Sinnoh_Route224_Text_Bg8, MSGBOX_SIGN
+	goto SinnohP_route_224_3
 	end
 
 Sinnoh_Route224_EventScript_Person4::
@@ -13,11 +13,6 @@ Sinnoh_Route224_EventScript_Person4::
 Sinnoh_Route224_EventScript_Person22::
 	msgbox Sinnoh_Route224_Text_Person22, MSGBOX_NPC
 	end
-
-Sinnoh_Route224_Text_Bg8:
-	.string "A stone tablet facing the sea. The\n"
-	.string "words carved on it have worn away, but\l"
-	.string "it feels like a thank-you.$"
 
 Sinnoh_Route224_Text_Person4:
 	.string "PROF. OAK: This route leads to a stone\n"

@@ -1,0 +1,20 @@
+pressuntil A field 5000
+wait 30
+mp clearflag 0x33D1
+mp clearflag 0x3428
+mp clearflag 0x342C
+mp warp 41,87,8,6
+wait 200
+shot hq_start
+mp face up
+press A 2
+wait 60
+shot hq_ask
+press A 2
+wait 120
+shot hq_free
+mash A 80 20
+wait 200
+shot hq_after
+mp getflag 0x33D1
+quit

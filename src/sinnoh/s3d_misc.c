@@ -27,6 +27,7 @@
 //   24 ClearHasPartner: SINNOH's walking partner's walk ends (s3d_scrcmd.c Sinnoh_PartnerUpdate): its graphics var
 //      cleared, the one following the player removed (the map's own object of it, if any, takes over)
 //   21 a battle in the FIGHT AREA's battleground (Platinum's RECORD_TIMES_BATTLED_AT_BATTLEGROUND)
+//   40 SetSpeciesSeen A: the species is seen in the POKéDEX (SPEAR PILLAR's DIALGA and PALKIA)
 //   17 GetCurrentBGM A: the song playing (the VILLA's music box keeps it), 18 SetFieldScene A: that song again
 //   14 CheckAmitySquareManGiftIsAccessory: A the gift's number, B the answer; 15 GetAmitySquareBerryOrAccessoryIDFromMan:
 //      A the gift's number, B its item or accessory
@@ -41,6 +42,7 @@
 #include "lottery_corner.h"
 #include "pokemon.h"
 #include "pokemon_storage_system.h"
+#include "pokedex.h"
 #include "random.h"
 #include "string_util.h"
 #include "constants/items.h"
@@ -553,6 +555,12 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         }
         break;
     }
+    case 40:
+        {
+            if (a > 0)
+                GetSetPokedexFlag(SpeciesToNationalPokedexNum(a), FLAG_SET_SEEN);
+        }
+        break;
     case 39:
         {
             void S3D_Dw_ResetCamera(void);

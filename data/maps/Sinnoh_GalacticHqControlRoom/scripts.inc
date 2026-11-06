@@ -15,7 +15,7 @@ Sinnoh_GalacticHqControlRoom_EventScript_Bg3::
 	end
 
 Sinnoh_GalacticHqControlRoom_EventScript_Bg4::
-	msgbox Sinnoh_GalacticHqControlRoom_Text_Bg4, MSGBOX_SIGN
+	goto SinnohP_galactic_hq_control_room_10
 	end
 
 Sinnoh_GalacticHqControlRoom_EventScript_Person1::
@@ -37,10 +37,6 @@ Sinnoh_GalacticHqControlRoom_EventScript_Person4::
 Sinnoh_GalacticHqControlRoom_EventScript_Person5::
 	msgbox Sinnoh_GalacticHqControlRoom_Text_Person5, MSGBOX_NPC
 	end
-
-Sinnoh_GalacticHqControlRoom_Text_Bg4:
-	.string "A big button. It doesn't seem to do\n"
-	.string "anything right now.$"
 
 Sinnoh_GalacticHqControlRoom_Text_Person1:
 	.string "SATURN: The lake POKéMON are in those\n"

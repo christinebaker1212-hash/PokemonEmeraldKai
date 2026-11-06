@@ -845,7 +845,8 @@ void Fight_CheckIngestion(void)
     n = strlen(sIngestRoot);
     if (n && sIngestRoot[n - 1] != '/' && sIngestRoot[n - 1] != '\\' && n + 1 < sizeof(sIngestRoot))
         strcat(sIngestRoot, "/");
+    // (kept, not detached: SDL_DetachThread racing a thread that has already finished crashed in pthread_detach at
+    // start-up under load; a finished thread waits harmlessly until the game exits)
     t = SDL_CreateThread(Ingest_Thread, "fight-ingest", NULL);
-    if (t != NULL)
-        SDL_DetachThread(t);
+    (void)t;
 }

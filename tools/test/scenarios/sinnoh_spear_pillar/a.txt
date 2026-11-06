@@ -1,0 +1,38 @@
+pressuntil A field 5000
+mp battlestyle 1
+wait 30
+mp setvar 0x523E 1
+mp clearflag 0x34D7
+mp clearflag 0x34DC
+mp clearflag 0x34DD
+mp setflag 0x34DB
+mp warp 43,104,30,34
+wait 200
+shot sp_start
+press UP 16
+wait 20
+press UP 16
+pressuntil A partymenu 4000
+wait 30
+press A 4
+wait 20
+press A 4
+wait 30
+press DOWN 4
+wait 10
+press DOWN 4
+wait 10
+press A 4
+waitfor battle 3000
+wait 200
+mash A 400 8
+pressuntil A field 6000
+shot sp_mid
+mash A 300 20
+wait 400
+mash A 60 20
+shot sp_after
+mp where
+mp getvar 0x523C
+mp getvar 0x523E
+quit

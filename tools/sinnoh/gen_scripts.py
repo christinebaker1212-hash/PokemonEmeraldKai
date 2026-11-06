@@ -151,6 +151,19 @@ DELAYS = {1: ['delay_2'], 2: ['delay_4'], 4: ['delay_8'], 8: ['delay_16'], 15: [
           16: ['delay_16', 'delay_16'], 32: ['delay_16'] * 4}
 
 
+def enum_constants(root, rel, prefix):
+    """{NAME: number} of a C enum's names starting with PREFIX (counted from the last explicit value)"""
+    out, n = {}, -1
+    try:
+        text = open(os.path.join(root, rel), errors='replace').read()
+    except OSError:
+        return out
+    for m in re.finditer(r'^\s*(%s\w+)\s*(?:=\s*(\w+))?\s*,' % prefix, text, re.M):
+        n = int(m.group(2), 0) if m.group(2) and re.match(r'^(0x[0-9A-Fa-f]+|\d+)$', m.group(2)) else n + 1
+        out[m.group(1)] = n
+    return out
+
+
 def _music_of():
     """Platinum's songs (SEQ_*) -> this game's SINNOH songs (gen_maps.py's MUSIC: the songs the maps play)"""
     try:
@@ -750,6 +763,12 @@ class FileConverter:
                 shop = 'pokemart %s' % mart_label(a[0])
             return (['playse SE_SELECT', 'lockall', 'faceplayer', 'call %s' % self.common(self.dec.common_macro['Common_VendorGreeting']),
                      shop, 'msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT', 'releaseall'])
+        if cmd in ('PokeMartSpecialties', 'PokeMartCommon'):
+            # (the shop alone, its own greeting already said by the script: ETERNA's herb shop)
+            if cmd == 'PokeMartCommon':
+                return ['pokemart 0x0']
+            from gen_marts import label as mart_label
+            return ['pokemart %s' % mart_label(a[0])]
         if cmd == 'Common_CallPokecenterNurse':
             return ['setvar VAR_0x800B, %s' % self.localid(a[0]), 'call Common_EventScript_PkmnCenterNurse', 'waitmessage',
                     'waitbuttonpress', 'release']
@@ -1644,6 +1663,32 @@ class FileConverter:
         if cmd == 'ScrCmd_29F':
             # (the ground shakes: the REGI statue waking, LAKE VALOR's blast felt in CANALAVE and PASTORIA)
             return [self.sinnoh(SINNOH_QUAKE, self.value(a[0]))]
+        if cmd == 'ScrCmd_20D':
+            # (SPEAR PILLAR's field effects, Platinum's ov6_02243004: 0 the world starting to shake as the Red Chain
+            # binds DIALGA and PALKIA, 4 the distorted pillar's flash; 1 and 6 ask whether it has finished, 2-3, 5 and
+            # 7 on start / stop others. Here the ground shakes, the flash is a white one, and each has finished)
+            n = int(self.value(a[0]))
+            if n in (1, 6):
+                return ['setvar %s, 1' % self.var(a[1])]
+            if n == 0:
+                return [self.sinnoh(SINNOH_QUAKE, 1)]
+            if n == 4:
+                return ['fadescreen FADE_TO_WHITE', 'fadescreen FADE_FROM_WHITE']
+            return []
+        if cmd == 'GetGameVersion':
+            # (this is Platinum's story: always VERSION_PLATINUM, so its own lines are picked)
+            return ['setvar %s, %s' % (self.var(a[0]), self.value('VERSION_PLATINUM'))]
+        if cmd == 'SetSpeciesSeen':
+            return [self.sinnoh(SINNOH_MISC, 40, self.value(a[0]))]
+        if cmd == 'ScrCmd_2FB':
+            # (SPEAR PILLAR's cutscene, cutscenes/spear_pillar: GIRATINA's shadow tearing the pillar; not built: the screen
+            # goes white as it begins and comes back, then the script warps to the distorted pillar)
+            return ['fadescreen FADE_TO_WHITE', 'delay 60', 'fadescreen FADE_FROM_WHITE']
+        if cmd == 'ScrCmd_2B6':
+            return []                       # (a person's MAP_OBJ_STATUS_18 bit, sub_02062D80: nothing drawn differs here)
+        if cmd == 'DeactivateLakeGuardianContainmentUnits':
+            # (GALACTIC HQ's three tubes open, lake_guardian_containment_units.c; the script goes on to free the trio)
+            return [self.sinnoh(SINNOH_QUAKE, 0)]
         if cmd == 'CheckPartyHasFatefulEncounterRegigigas':
             # (Platinum's REGIGIGAS from its distribution, a DS event: here any REGIGIGAS, SNOWPOINT TEMPLE's after the
             # LEAGUE, as the REGI ruins have always worked here: s3d_legends.c)
@@ -1651,7 +1696,7 @@ class FileConverter:
         if cmd == 'ActivateRegiRuinsDot':
             # (the dot under the player: Platinum's ruins' tables, src/sinnoh/s3d_legends.c Sinnoh_RegiDot)
             return [self.sinnoh(SINNOH_REGI_DOT, self.var(a[0]), self.value(a[1]))]
-        if cmd in ('StopSE', 'WaitForTransition', 'SetInitialVolumeForSequence', 'SetBlackOutWarpId'):
+        if cmd in ('StopSE', 'WaitForTransition', 'SetInitialVolumeForSequence', 'SetBlackOutWarpId', 'SetSubScene63'):
             return []                       # (sounds stop by themselves here; the game picks the heal spot itself)
         if cmd in ('TurnOnTimeBasedEffects', 'TrySetUnusedCollectedOrbFlag', 'RecordHeapMemory',
                    'CheckHeapMemory', 'SetMenuXOriginToRight', 'SetMenuXOriginToLeft'):
@@ -2321,6 +2366,7 @@ def converter(root, low):
     if (root, 'dw') not in _converters:
         _converters[(root, 'dw')] = True
         CONSTANTS.update(dw_constants(root))   # (the DISTORTION WORLD's: s3d_distortion.c)
+        CONSTANTS.update(enum_constants(root, 'include/constants/versions.h', 'VERSION_'))   # (GetGameVersion's answer)
     key = (root, low)
     if key not in _converters:
         dec = _converters.setdefault((root, None), Decomp(root)) if (root, None) not in _converters else _converters[(root, None)]
@@ -2482,6 +2528,15 @@ STAND_INS = re.compile(r'^Sinnoh_EventScript_(Briefcase|RowanLab|DistortionEnter
 KAI_ALWAYS = re.compile(r'^\tgoto (EventScript_SinnohRegionBoat)\n$')
 
 
+def _is_stand_in(name, script):
+    """a person's script that is (or only goes to) one of this game's written stand-ins (STAND_INS)"""
+    if STAND_INS.match(script):
+        return True
+    body = _stub_body(name, script) if script != '0x0' else None
+    m = re.match(r'^\tgoto (\w+)\n$', body or '')
+    return bool(m and STAND_INS.match(m.group(1)))
+
+
 def _replaceable(body):
     if body is None:
         return True
@@ -2538,6 +2593,8 @@ def people(root, p, low, name, done):
     ours = _our_map(name)
     if ours is None:
         return [], []
+    once, frame = init_scripts(root, low)
+    init_entries = set(once.values()) | {f[2] for f in frame}
     ev = events(root, p['place'])
     objs = []
     for i, o in enumerate(ev['object_events']):
@@ -2561,8 +2618,17 @@ def people(root, p, low, name, done):
         trainer = isinstance(o.get('script'), str)
         if lab and STAND_INS.match(script):
             new = lab                      # (a legendary, a story battle: Platinum's scene)
+        elif t and t[0] == low and t[1] in init_entries and (_is_stand_in(name, script) or (
+                person and script != '0x0' and _replaceable(_stub_body(name, script)))):
+            # (a written stand-in or written words where Platinum gives the person nothing of its own to run, only its
+            # map's script: SPEAR PILLAR's CYRUS, whose scene the MARS / JUPITER trigger leads to, and BARRY there)
+            new = 'SinnohP_Nothing'
         elif person and lab and _replaceable(_stub_body(name, script) if script != '0x0' else None):
             new = lab
+        elif person and script != '0x0' and o.get('script') == 0 and _replaceable(_stub_body(name, script)):
+            # (Platinum gives this person nothing to say (script 0: GALACTIC HQ's grunts in CYRUS's speech...): the
+            # written words go)
+            new = 'SinnohP_Nothing'
         elif person and script == '0x0':
             if mine['flag'] == '0x3FFF' and flag and _story_shows(root, hide, name, o, c):
                 # (a story person with nothing to say: CYRUS and BARRY at LAKE VERITY, a STARLY... the map keeps
@@ -2784,6 +2850,7 @@ def build(root, out_path):
         lines.append('%s::\n\tend' % lab)
     mt, maps, skipped = emit_map_tables(root, tables, done)
     lines += mt
+    lines += ['SinnohP_Nothing::', '\tend']   # (a person Platinum gives nothing to say: people())
     lines += ['SinnohP_Movement_SmashRock:', '\trock_smash_break', '\tstep_end']
     lines += ['SinnohP_Movement_Invisible:', '\tset_invisible', '\tstep_end']
     lines += dex_rating_tables(root)

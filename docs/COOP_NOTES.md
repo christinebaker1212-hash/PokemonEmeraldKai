@@ -3738,6 +3738,18 @@ follow_behind, follow_ground.
   any SINNOH map load without the flag begins it. Platinum's "\r" is a new box (both lines scroll away): build_text.py
   makes it this game's page break (its one-line scroll put a page's second line out of the box and stalled the text).
   Platinum's messages have six string slots: 0-2 are STR_VAR_1-3, 3-5 PLACEHOLDER_ID_SINNOH_VAR4-6 (gSinnohStrVar).
+- The story path through to the DISTORTION WORLD on Platinum's own scripts (1.117.0): SPEAR PILLAR's MARS / JUPITER
+  trigger (BARRY's tag battle), CYRUS's scene and the distorted pillar convert (gen_scripts.py: ScrCmd_20D, the pillar's
+  field effects, as a quake / a white flash / "finished"; ScrCmd_2FB, Platinum's SPEAR PILLAR cutscene, not built: a
+  white flash; SetSubScene63; SetSpeciesSeen, s3d_misc.c 40; GetGameVersion, always VERSION_PLATINUM, the versions.h
+  enum read by enum_constants), as do IRON ISLAND's RILEY scenes (ScrCmd_2B6, a person's status bit: nothing) and
+  GALACTIC HQ's button (DeactivateLakeGuardianContainmentUnits: the floor shakes). People Platinum gives nothing to run
+  (its object script 0, or its map's own init entry: SPEAR PILLAR's CYRUS and BARRY, GALACTIC HQ's grunts in CYRUS's
+  speech) run SinnohP_Nothing in place of the written words or a written shortcut (the old talk-to-CYRUS jump into the
+  DISTORTION WORLD); gen_words.py run again moved the signs / people whose scripts now convert onto them (the button,
+  JUBILIFE TV's rankings man, the DISTORTION WORLD's and TURNBACK CAVE's floor panels, ROUTE 224's tablet); ETERNA's herb
+  shop (PokeMartSpecialties, the shop alone). Tests sinnoh_spear_pillar (from the grunts beaten into the DISTORTION
+  WORLD's 1F), sinnoh_galactic_hq.
 - CANALAVE's ferry sailor (2026-11-02, the user: parity with JOHTO's and KANTO's ports): shown only while the boat can
   sail (SINNOH's ELITE FOUR beaten and the S.S. TICKET: qz_specials.c MP_Region_CanSail) and on the first boat in
   (VAR_SINNOH_ARRIVAL 1, the sailor's greeting): FLAG_SINNOH_HIDE_REGION_BOAT 0x3D3D, set on each SINNOH map load

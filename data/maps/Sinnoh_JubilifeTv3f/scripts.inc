@@ -15,12 +15,7 @@ Sinnoh_JubilifeTv3f_EventScript_Person3::
 	end
 
 Sinnoh_JubilifeTv3f_EventScript_Person4::
-	msgbox Sinnoh_JubilifeTv3f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_3f_4
 	end
-
-Sinnoh_JubilifeTv3f_Text_Person4:
-	.string "The rankings change every day.\n"
-	.string "TRAINERS all over SINNOH are working\l"
-	.string "hard.$"
 
 @ --- end of SINNOH words ---
