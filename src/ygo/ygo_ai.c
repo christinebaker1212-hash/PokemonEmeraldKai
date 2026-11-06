@@ -675,8 +675,10 @@ static void Cards(const struct YgoDuel *d, struct YgoAnswer *out)
         /* Tributes: the cheapest that are worth enough */
         unsigned worth = 0, need = q->cancelable ? q->sum : q->min;
         for (k = 0; k < n && worth < need; k++)
-            worth += q->items[order[k]].param;
+            worth += q->items[order[k]].param ? q->items[order[k]].param : 1;   /* (a worth not given counts as one) */
     }
+    if (q->max && k > q->max)
+        k = q->max;   /* (never more than asked) */
     if (k > YGO_PICKS_MAX)
         k = YGO_PICKS_MAX;
     out->count = (uint8_t)k;

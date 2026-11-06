@@ -2,7 +2,7 @@
  *
  * 1. Every Game Boy deck and every special trainer's own deck play each other (both
  *    orders, ROUNDS times, the game's AI on both sides); a Bradley-Terry fit of the
- *    results, as Elo with the average deck at 1500.
+ *    results (each deck also holding a draw against an average one), as Elo with the average deck at 1500.
  * 2. Each special trainer variant plays every one of those VARIANT_GAMES times and is
  *    rated against their ratings.
  * 3. The reference decks the game rates a player's deck against: Game Boy decks spread
@@ -19,7 +19,7 @@
 #include <string.h>
 
 #define ROUNDS 8
-#define VARIANT_GAMES 6
+#define VARIANT_GAMES 10
 #define REFERENCES 12
 #define MAXD 256
 
@@ -63,11 +63,13 @@ int main(void)
     for (r = 0; r < 500; r++)
         for (i = 0; i < sCount; i++)
         {
-            double w = 0, d = 0;
+            /* (each deck also holds a draw against an average one: a prior that keeps every rating finite without
+               pushing any of them up, where half a win for free did) */
+            double w = 0.5, d = 1 / (strength[i] + 1);
             for (j = 0; j < sCount; j++)
                 if (sGames[i][j])
                     w += sWins[i][j], d += sGames[i][j] / (strength[i] + strength[j]);
-            strength[i] = (w + 0.5) / (d + 1e-9);
+            strength[i] = w / d;
         }
     for (i = 0; i < sCount; i++)
         mean += 400 * log10(strength[i]);

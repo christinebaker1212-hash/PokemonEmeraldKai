@@ -209,8 +209,15 @@ int main(void)
             }
             if (!YgoDuel_Answer(&d, &ans))
             {
-                fprintf(stderr, "duel %u: answer refused: %s (question %u prompt %u)\n", i, d.error, d.query.type,
-                        d.query.prompt);
+                fprintf(stderr, "duel %u: answer refused: %s (question %u prompt %u, player %u %s, min %u max %u, %u items; "
+                        "answer %u picks:", i, d.error, d.query.type, d.query.prompt, d.query.player,
+                        random ? "random" : "AI", d.query.min, d.query.max, d.query.count, ans.count);
+                {
+                    unsigned k;
+                    for (k = 0; k < ans.count; k++)
+                        fprintf(stderr, " %u(param %u)", ans.picks[k], d.query.items[ans.picks[k]].param);
+                    fprintf(stderr, ")\n");
+                }
                 CHECK(0);
             }
             CHECK(YgoDuel_Conserved(&d));

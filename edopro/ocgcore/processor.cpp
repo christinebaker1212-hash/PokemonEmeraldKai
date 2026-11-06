@@ -2143,6 +2143,11 @@ bool field::process(Processors::BattleCommand& arg) {
 		return FALSE;
 	}
 	case 9: {
+		// Moemon Kai: an attacker gone by now (an effect in the attack announcement's chain took it): the attack ends
+		if(!core.attacker) {
+			arg.step = 12;
+			return FALSE;
+		}
 		if(is_player_affected_by_effect(infos.turn_player, EFFECT_SKIP_BP)
 			|| core.attacker->is_status(STATUS_ATTACK_CANCELED) || core.attack_rollback) {
 			arg.step = 10;
@@ -2169,6 +2174,10 @@ bool field::process(Processors::BattleCommand& arg) {
 		return FALSE;
 	}
 	case 11: {
+		if(!core.attacker) {   // Moemon Kai: (as in step 9)
+			arg.step = 12;
+			return FALSE;
+		}
 		if(core.attacker->is_affected_by_effect(EFFECT_ATTACK_DISABLED)) {
 			core.attacker->reset(EFFECT_ATTACK_DISABLED, RESET_CODE);
 			pduel->new_message(MSG_ATTACK_DISABLED);
@@ -2214,7 +2223,8 @@ bool field::process(Processors::BattleCommand& arg) {
 		return FALSE;
 	}
 	case 13: {
-		if(core.attacker->fieldid_r == core.pre_field[0] && (!(is_flag(DUEL_STORE_ATTACK_REPLAYS) && !core.chain_attack) || core.attacker->is_status(STATUS_ATTACK_CANCELED))) {
+		// Moemon Kai: (no attacker: nothing to count)
+		if(core.attacker && core.attacker->fieldid_r == core.pre_field[0] && (!(is_flag(DUEL_STORE_ATTACK_REPLAYS) && !core.chain_attack) || core.attacker->is_status(STATUS_ATTACK_CANCELED))) {
 			++core.attacker->announce_count;
 			core.attacker->announced_cards.addcard(core.attack_target);
 			attack_all_target_check();

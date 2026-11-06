@@ -5598,3 +5598,22 @@ the most). Each table now shows a move before it's made and holds what happened 
   attack is announced ("PIP attacks with 2 creatures!") and each attacker / blocker of theirs holds 24 frames;
   18 frames after each of their moves (passes stay quick). B.autoplay (the harness) skips all of it.
 - **POKéMON** (tcg_ui.c): 22 frames after each of the card player's moves (14 after a pass, 8 FAST).
+
+## Deck ratings, fitted as a whole (1.112.0)
+- **YU-GI-OH!** (tools/ygo/rate_npc_decks.c): the opponents' decks are now rated by a Bradley-Terry fit of every
+  result at once (the POKéMON card game's way), as Elo with the average at 1500; before, a running Elo update after
+  each duel against a random opponent made a deck's rating depend on the order its duels came in. Each round every
+  deck meets a different opponent (a stride round the list that changes each round), going first on alternate
+  rounds; each deck also holds a draw against an average one (the prior that keeps one that won or lost everything
+  finite). RATE_TRACE=1 prints each duel; RATE_ONE="A B SEED FIRST" plays just one (to look into it).
+- **POKéMON** (tools/tcg/rate_decks.c): the same draw-against-an-average prior in place of half a free win (which
+  pushed every rating up), and each special trainer variant now plays every rated deck 10 times (was 6).
+- **TRIPLE TRIAD** (tools/tt/rate_cards.c) already fits its card ratings as a whole (a penalized maximum likelihood
+  fit, pulled toward the cards' stars); rerun with the rest.
+- **EDOPro's engine** (edopro/ocgcore/processor.cpp, marked `Moemon Kai`): an attacker taken away during its attack
+  announcement's chain left the battle step reading a null card (steps 9, 11, 13 of BattleCommand); found by the
+  rating run (decks 174 vs 370, seed 2918660262), it now just ends the attack. The game, the tests and the phone app
+  all build from that source.
+- **Yu-Gi-Oh! AI Tributes** (ygo_ai.c, the CARDS answer): a Tribute whose worth the engine doesn't give counts as one,
+  and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
+  duel 4).
