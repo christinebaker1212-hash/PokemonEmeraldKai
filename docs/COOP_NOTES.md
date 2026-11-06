@@ -3481,6 +3481,14 @@ defending player, the attacker's controller's opponent, controls one), a leading
 hasFewerCreaturesInPlayThanYou / hasFewerLandsInPlayThanYou (DefenderIs). Tests in tools/mtg/test_rules.c
 TestStatics (ANURID BARKRIPPER, HAMMERHEAD SHARK, BRANDED BRAWLERS, MANIACAL RAGE). 41 cards: 1850 of 5408.
 
+## STADIUM: clearing a registered team (1.133.1)
+
+The user (2026-11-06): "once a team has registered 6 Pokemon, if you back out, there is no way to clear the selections".
+Taking a POKeMON off only worked by A on the very same copy in the list (memcmp of the BoxPokemon): once it gained EXP,
+moved, or sat in another tab, nothing matched. mp_stadium_ui.c REGISTER: START (or DOWN from the list's last row) puts
+the cursor on the TEAM bar (U.onTeam / U.teamSlot): A takes that slot off, LEFT / RIGHT move, UP goes back; START there
+asks (U.confirm) and clears all six. Test stadium_clear.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

@@ -1,0 +1,7 @@
+# POKéMON STADIUM's REGISTER screen (the user, 2026-11-06: "once a team has registered 6 Pokemon, if you back out,
+# there is no way to clear the selections"): START (or DOWN from the list's last row) goes onto the TEAM bar, where A takes any
+# slot off (also one the list can't match any more); START there asks, then clears all six. Shots on_team, clear_asked, cleared.
+MODE=1
+TMO=300
+EXPECT_A=("stadium: took team slot off (5 left)" "stadium: team cleared")
+UNEXPECT_A=("crash" "out of memory")

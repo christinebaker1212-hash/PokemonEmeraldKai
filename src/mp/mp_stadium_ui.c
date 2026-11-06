@@ -85,7 +85,9 @@ static struct
     u16 lastFoePic;
     bool8 sharedOpened;
     u16 song, mapSong;        // the screens' song (STADIUM's own: mp_stadium_cup.c MP_Stadium_Track), the map's       // REGISTER: the shared PC's boxes asked for (closed again on leaving)           // RESULT: the trainer just battled (the run has moved on to the next)
-    bool8 confirm;            // SAVED TEAMS: ERASE asked
+    bool8 confirm;            // SAVED TEAMS: ERASE asked; REGISTER: CLEAR asked
+    bool8 onTeam;             // REGISTER: the cursor on the TEAM bar (A takes that one off)
+    u8 teamSlot;
     u16 age;
     char note[96];          // a line at the bottom (why not, what happened)
     // the registration list for the tab: what's there and where from
@@ -1199,6 +1201,8 @@ static void DrawRegister(void)
             Blit(IconTex(GetBoxMonData((struct BoxPokemon *)&t->slot[i].mon, MON_DATA_SPECIES)), x - 3, 115, 32, 32, 255);
         else
             ItemBall(x + 13, 135, 110);
+        if (U.onTeam && i == U.teamSlot)
+            G_Focus(x, 127, 26, 16, G_WHITE, G_WHITE);
     }
     snprintf(line, sizeof(line), "%d / 6", t->count);
     G_TextAlign(232, 130, TA_RIGHT, t->count == 6 ? C_GOLD : G_WHITE, 0x000000, line, TF_SMALL);
@@ -1217,7 +1221,15 @@ static void DrawRegister(void)
             G_Text(mx + 8, my + 4 + i * 12, C_INK, G_NO_SHADOW, label, 0, TF_SMALL);
         }
     }
-    Footer(U.menu ? "{A} CHOOSE  {B} BACK" : "{A} MENU  {SELECT} SUMMARY  {L}{R} WHERE FROM  {B} DONE");
+    if (U.confirm)   // START: clearing the team asks first
+    {
+        Panel(40, 60, 160, 36, C_PANEL, 0xb0a888);
+        G_TextAlign(120, 64, TA_CENTER, C_INK, G_NO_SHADOW, "Clear this cup's team?", TF_SMALL);
+        G_TextAlign(120, 79, TA_CENTER, C_SOFT, G_NO_SHADOW, "Your POKéMON stay where they are.", TF_NARROW);
+    }
+    Footer(U.confirm ? "{A} CLEAR  {B} KEEP" : U.menu ? "{A} CHOOSE  {B} BACK"
+           : U.onTeam ? "{A} TAKE OFF  {START} CLEAR ALL  {UP} LIST  {B} DONE"
+                      : "{A} MENU  {SELECT} SUMMARY  {L}{R} FROM  {START} TEAM  {B} DONE");
 }
 
 static const char *const sClauses[][2] = {
@@ -2073,7 +2085,7 @@ bool8 MP_StadiumUi_Step(u16 keys)
             }
             else if (U.optCursor == rows && rows)
             {
-                U.screen = SCR_REGISTER;
+                U.screen = SCR_REGISTER, U.onTeam = FALSE, U.confirm = FALSE;
                 U.tab = (U.opt & STADIUM_OPT_RENTALS) ? SRC_TAB_RENTALS : SRC_TAB_PARTY;
                 U.listCursor = 0, U.listTop = 0;
                 BuildList();
@@ -2142,6 +2154,81 @@ bool8 MP_StadiumUi_Step(u16 keys)
         break;
     }
     case SCR_REGISTER:
+    {
+        struct StadiumTeam *team = &StadiumCup_Save()->team[U.cup];
+        if (U.confirm)   // CLEAR asked: A clears all six
+        {
+            if (pressed & A_BUTTON)
+            {
+                team->count = 0;
+                U.confirm = FALSE, U.onTeam = FALSE;
+                StadiumCup_SaveNow();
+                snprintf(U.note, sizeof(U.note), "The team is cleared.");
+                MPNet_Log("stadium: team cleared");
+                PlaySE(SE_SELECT);
+            }
+            else if (pressed & B_BUTTON)
+                U.confirm = FALSE, PlaySE(SE_SELECT);
+            break;
+        }
+        if (pressed & START_BUTTON && !U.menu)   // START: onto the TEAM bar; there, START clears it (asked first)
+        {
+            if (!team->count)
+                PlaySE(SE_FAILURE);
+            else if (U.onTeam)
+                U.confirm = TRUE, PlaySE(SE_SELECT);
+            else
+            {
+                U.onTeam = TRUE;
+                if (U.teamSlot >= team->count)
+                    U.teamSlot = team->count - 1;
+                memset(U.note, 0, sizeof(U.note));
+                PlaySE(SE_SELECT);
+            }
+            break;
+        }
+        if (U.onTeam)   // the TEAM bar: any slot comes off with A (also one the list can't show any more)
+        {
+            if (pressed & A_BUTTON && U.teamSlot < team->count)
+            {
+                u8 k;
+                for (k = U.teamSlot; k + 1 < team->count; k++)
+                    team->slot[k] = team->slot[k + 1];
+                team->count--;
+                if (U.teamSlot >= team->count && U.teamSlot)
+                    U.teamSlot--;
+                if (!team->count)
+                    U.onTeam = FALSE;
+                snprintf(U.note, sizeof(U.note), "Taken off the team.");
+                MPNet_Log("stadium: took team slot off (%d left)", team->count);
+                PlaySE(SE_SELECT);
+            }
+            else if (pressed & DPAD_LEFT && U.teamSlot > 0)
+                U.teamSlot--, PlaySE(SE_SELECT);
+            else if (pressed & DPAD_RIGHT && U.teamSlot + 1 < team->count)
+                U.teamSlot++, PlaySE(SE_SELECT);
+            else if (pressed & DPAD_UP)
+                U.onTeam = FALSE, PlaySE(SE_SELECT);
+            else if (pressed & B_BUTTON)
+            {
+                U.onTeam = FALSE;
+                StadiumCup_SaveNow();
+                U.screen = SCR_OPTIONS;
+                if (U.sharedOpened)
+                    MP_SharedBox_End(), U.sharedOpened = FALSE;
+                PlaySE(SE_SELECT);
+            }
+            break;
+        }
+        if (pressed & DPAD_DOWN && !U.menu && team->count && (U.listCount == 0 || U.listCursor + REG_COLS >= U.listCount))
+        {
+            U.onTeam = TRUE;   // (down from the list's last row: onto the TEAM bar)
+            if (U.teamSlot >= team->count)
+                U.teamSlot = team->count - 1;
+            memset(U.note, 0, sizeof(U.note));
+            PlaySE(SE_SELECT);
+            break;
+        }
         if (U.menu)
         {
             if (pressed & B_BUTTON)
@@ -2200,6 +2287,7 @@ bool8 MP_StadiumUi_Step(u16 keys)
             PlaySE(SE_SELECT);
         }
         break;
+    }
     case SCR_VS:
     {
         u8 n = StadiumCup_EntryCount();
