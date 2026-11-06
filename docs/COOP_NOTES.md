@@ -3472,6 +3472,15 @@ reported Natures not applying correctly, and IVs not being passed down." daycare
 - Every egg goes through these (the DAY CARE, friends' DAY CARE eggs MP_Daycare_TryCoopEgg, the routes' day cares).
   `mp breedtest N ITEM_A ITEM_B`: N eggs from party 1 (IVs 31) and 2 (IVs 0); test breed_items.
 
+## MAGIC's Threshold and picky attackers (1.133.0)
+
+src/mtg/mtg_static.c: Condition$ on a static (StaticAbility.checkConditions): Threshold (seven or more cards in its
+controller's graveyard), PlayerTurn / NotPlayerTurn (d->active), checked with IsPresent$ in Present(), so it holds for
+every mode. Secondary$ True is only Forge's text flag. CantAttack's UnlessDefender$: controls<Valid spec> (the
+defending player, the attacker's controller's opponent, controls one), a leading "!" negates, or
+hasFewerCreaturesInPlayThanYou / hasFewerLandsInPlayThanYou (DefenderIs). Tests in tools/mtg/test_rules.c
+TestStatics (ANURID BARKRIPPER, HAMMERHEAD SHARK, BRANDED BRAWLERS, MANIACAL RAGE). 41 cards: 1850 of 5408.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

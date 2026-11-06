@@ -135,6 +135,8 @@ typedef struct {
     uint8_t addLandwalk, addProtection;
     uint8_t activator;              // Raise / ReduceCost: 0 anyone, 1 its controller ("You"), 2 the opponent
     uint8_t costGeneric, costPip;   // ...: Amount$ (generic) or Cost$ (one colored symbol: costPip = MTG_W.. + 1)
+    uint8_t condition;              // Condition$: 0 none, 1 Threshold, 2 PlayerTurn, 3 NotPlayerTurn (MTG_COND_*)
+    const char *unlessDefender;     // CantAttack: UnlessDefender$ ("controlsIsland", "!controlsLand.untapped", ...)
 } MtgStatic;
 typedef struct {
     int addPower, addToughness, setPower, setToughness;

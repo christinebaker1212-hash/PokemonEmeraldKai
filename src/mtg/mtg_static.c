@@ -149,7 +149,7 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     static const char *const sKnown[] = {"Mode", "Affected", "AddPower", "AddToughness", "AddKeyword", "SetPower",
                                          "SetToughness", "Description", "AffectedZone", "EffectZone", "AffectedDefined",
                                          "IsPresent", "PresentCompare", "ValidCard", "ValidAttacker", "ValidBlocker", "CharacteristicDefining",
-                                         "Activator", "Type", "Amount", "Cost"};
+                                         "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender"};
     MtgStatic st;
     int first, count, i, v;
     const char *s;
@@ -223,6 +223,28 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
         goto unknown;
     if ((st.present = ParamOf(first, count, "IsPresent")) && !Mtg_ValidSpecKnown(st.present))
         goto unknown;
+    // Condition$ (StaticAbility.java checkConditions): Threshold (seven or more cards in its controller's graveyard),
+    // PlayerTurn / NotPlayerTurn (its controller's turn or not). Secondary$ True only keeps it out of the card's text.
+    if ((s = ParamOf(first, count, "Condition"))) {
+        st.condition = strcmp(s, "Threshold") == 0 ? 1 : strcmp(s, "PlayerTurn") == 0 ? 2 : strcmp(s, "NotPlayerTurn") == 0 ? 3 : 0xFF;
+        if (st.condition == 0xFF)
+            goto unknown;
+    }
+    if ((s = ParamOf(first, count, "Secondary")) && strcmp(s, "True") != 0)
+        goto unknown;
+    // UnlessDefender$ (StaticAbilityCantAttackBlock: "can't attack unless defending player ..."): controls<Valid>, the
+    // Valid spec negated by a leading "!", or hasFewer<Creatures|Lands>InPlayThanYou
+    if ((s = ParamOf(first, count, "UnlessDefender"))) {
+        const char *x = s[0] == '!' ? s + 1 : s;
+        if (st.mode != MTG_STATIC_CANT_ATTACK)
+            goto unknown;
+        if (strncmp(x, "controls", 8) == 0) {
+            if (!Mtg_ValidSpecKnown(x + 8))
+                goto unknown;
+        } else if (strcmp(x, "hasFewerCreaturesInPlayThanYou") != 0 && strcmp(x, "hasFewerLandsInPlayThanYou") != 0)
+            goto unknown;
+        st.unlessDefender = s;
+    }
     st.presentNum = 1;
     if ((s = ParamOf(first, count, "PresentCompare"))) {
         if (!st.present || strlen(s) < 3 || !Integer(s + 2, &v) || v < 0 || v > 255)
@@ -328,10 +350,55 @@ unknown:
     Mtg_Unsupported(c, "replacement effect");
 }
 
+// Condition$ now
+static int ConditionHolds(const MtgDuel *d, const MtgStatic *st, int src)
+{
+    int i, n = 0, me = d->objs[src].controller;
+    switch (st->condition) {
+    case 1:
+        for (i = 0; i < d->objCount; i++)
+            n += d->objs[i].zone == MTG_ZONE_GRAVEYARD && d->objs[i].owner == me;
+        return n >= 7;
+    case 2:
+        return d->active == me;
+    case 3:
+        return d->active != me;
+    }
+    return 1;
+}
+
+// UnlessDefender$: is the defending player (OBJ's controller's opponent) as it says?
+static int DefenderIs(const MtgDuel *d, const MtgStatic *st, int src, int obj)
+{
+    const char *x = st->unlessDefender;
+    int neg = x[0] == '!', you = d->objs[obj].controller, def = you ^ 1, i, mine = 0, theirs = 0, has;
+    if (neg)
+        x++;
+    if (strncmp(x, "controls", 8) == 0) {
+        has = 0;
+        for (i = 0; i < d->objCount && !has; i++)
+            has = d->objs[i].zone == MTG_ZONE_BATTLEFIELD && d->objs[i].controller == def
+                  && Mtg_ValidObj(d, i, x + 8, src, def);
+    } else {
+        int creatures = strstr(x, "Creatures") != NULL;
+        for (i = 0; i < d->objCount; i++)
+            if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD
+                && Mtg_ValidObj(d, i, creatures ? "Creature" : "Land", src, d->objs[i].controller)) {
+                mine += d->objs[i].controller == you;
+                theirs += d->objs[i].controller == def;
+            }
+        has = theirs < mine;
+    }
+    return neg ? !has : has;
+}
+
 // IsPresent$: does the battlefield have enough of them now (relative to the static's source and its controller)?
+// (Condition$ too: both say whether the static is on at all)
 static int Present(const MtgDuel *d, const MtgStatic *st, int src)
 {
     int i, n = 0;
+    if (!ConditionHolds(d, st, src))
+        return 0;
     if (!st->present)
         return 1;
     for (i = 0; i < d->objCount; i++)
@@ -431,6 +498,8 @@ int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other)
                 continue;
             if (mode == MTG_STATIC_CANT_BLOCK_BY && st->blocker && !Mtg_ValidObj(d, other, st->blocker, s, src->controller))
                 continue;
+            if (st->unlessDefender && DefenderIs(d, st, s, obj))
+                continue;   // (the defending player is as it says: it may attack)
             forbid = 1;
         }
     }

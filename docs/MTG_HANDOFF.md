@@ -42,6 +42,12 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-06: 1.133.0)
+- Static Condition$ (Threshold, PlayerTurn, NotPlayerTurn), Secondary$, CantAttack's UnlessDefender$ (controls<Valid>,
+  "!" negated, hasFewer<Creatures|Lands>InPlayThanYou): COOP_NOTES "MAGIC's Threshold and picky attackers". 1850 of
+  5408 cards play. Next statics by count: AlternativeCost (52: pitch spells, needs alternative costs in the cast),
+  ValidSA, AddAbility / AddTrigger / AddSVar / AddType (granted abilities), CantBeCast, CantTarget, MustAttack.
+
 ## Status (2026-11-07: next release)
 - Cycling and "when you cycle" (the Cycled trigger): COOP_NOTES "MAGIC's Cycling". 1809 of 5408 cards play. TypeCycling and LandCycling still out.
 

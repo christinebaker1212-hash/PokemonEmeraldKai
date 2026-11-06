@@ -27,6 +27,13 @@
 "number": "31",
 "set": "wth"
 },
+"Aboshan's Desire": {
+"artist": "Ciruelo",
+"file": "ody_59",
+"frame": "1997",
+"number": "59",
+"set": "ody"
+},
 "Absolute Grace": {
 "artist": "Jeff Miracola",
 "file": "usg_1",
@@ -538,6 +545,13 @@
 "number": "59",
 "set": "usg"
 },
+"Anurid Barkripper": {
+"artist": "Randy Gallegos",
+"file": "jud_104",
+"frame": "1997",
+"number": "104",
+"set": "jud"
+},
 "Anurid Murkdiver": {
 "artist": "Dany Orizio",
 "file": "ons_124",
@@ -1007,6 +1021,13 @@
 "number": "52",
 "set": "nem"
 },
+"Battlewise Aven": {
+"artist": "Wayne England",
+"file": "jud_4",
+"frame": "1997",
+"number": "4",
+"set": "jud"
+},
 "Bay Falcon": {
 "artist": "Una Fricker",
 "file": "mir_54",
@@ -1462,6 +1483,13 @@
 "number": "126",
 "set": "uds"
 },
+"Branded Brawlers": {
+"artist": "Scott M. Fischer",
+"file": "pcy_84",
+"frame": "1997",
+"number": "84",
+"set": "pcy"
+},
 "Brass Secretary": {
 "artist": "DiTerlizzi",
 "file": "uds_128",
@@ -1636,6 +1664,13 @@
 "frame": "1997",
 "number": "119",
 "set": "mmq"
+},
+"Cagemail": {
+"artist": "Scott M. Fischer",
+"file": "jud_7",
+"frame": "1997",
+"number": "7",
+"set": "jud"
 },
 "Call to the Grave": {
 "artist": "Daren Bader",
@@ -1973,6 +2008,13 @@
 "number": "242",
 "set": "usg"
 },
+"Childhood Horror": {
+"artist": "Larry Elmore",
+"file": "ody_123",
+"frame": "1997",
+"number": "123",
+"set": "ody"
+},
 "Chill": {
 "artist": "Greg Simanson",
 "file": "tmp_56",
@@ -2308,6 +2350,13 @@
 "frame": "1997",
 "number": "210",
 "set": "mir"
+},
+"Crashing Centaur": {
+"artist": "Eric Peterson",
+"file": "ody_235",
+"frame": "1997",
+"number": "235",
+"set": "ody"
 },
 "Craven Giant": {
 "artist": "Ron Spencer",
@@ -2897,6 +2946,13 @@
 "number": "117",
 "set": "mir"
 },
+"Dirty Wererat": {
+"artist": "Daren Bader",
+"file": "ody_130",
+"frame": "1997",
+"number": "130",
+"set": "ody"
+},
 "Disciple of Grace": {
 "artist": "Robh Ruppel",
 "file": "usg_10",
@@ -2980,6 +3036,13 @@
 "frame": "1997",
 "number": "12",
 "set": "mir"
+},
+"Divine Sacrament": {
+"artist": "Ray Lago",
+"file": "ody_19",
+"frame": "1997",
+"number": "19",
+"set": "ody"
 },
 "Divine Transformation": {
 "artist": "NéNé Thomas",
@@ -4269,6 +4332,13 @@
 "number": "20",
 "set": "mmq"
 },
+"Frightcrawler": {
+"artist": "Matt Cavotta",
+"file": "ody_138",
+"frame": "1997",
+"number": "138",
+"set": "ody"
+},
 "Frog Tongue": {
 "artist": "Phil Foglio",
 "file": "tmp_228",
@@ -4752,6 +4822,13 @@
 "number": "86",
 "set": "uds"
 },
+"Goblin Mutant": {
+"artist": "Daniel Gelon",
+"file": "ice_188",
+"frame": "1993",
+"number": "188",
+"set": "ice"
+},
 "Goblin Offensive": {
 "artist": "Carl Critchlow",
 "file": "usg_192",
@@ -5052,6 +5129,13 @@
 "frame": "1997",
 "number": "196",
 "set": "ody"
+},
+"Hammerhead Shark": {
+"artist": "Stephen Daniele",
+"file": "sth_32",
+"frame": "1997",
+"number": "32",
+"set": "sth"
 },
 "Hanna's Custody": {
 "artist": "DiTerlizzi",
@@ -5851,6 +5935,13 @@
 "number": "130",
 "set": "mir"
 },
+"Kamahl's Desire": {
+"artist": "Dave Dorman",
+"file": "ody_199",
+"frame": "1997",
+"number": "199",
+"set": "ody"
+},
 "Kamahl, Pit Fighter": {
 "artist": "Kev Walker",
 "file": "ody_198",
@@ -6019,6 +6110,13 @@
 "number": "36",
 "set": "uds"
 },
+"Kirtar's Desire": {
+"artist": "Pete Venters",
+"file": "ody_27",
+"frame": "1997",
+"number": "27",
+"set": "ody"
+},
 "Kismet": {
 "artist": "Kaja Foglio",
 "file": "4ed_33",
@@ -6094,6 +6192,13 @@
 "file": "ody_246",
 "frame": "1997",
 "number": "246",
+"set": "ody"
+},
+"Krosan Beast": {
+"artist": "Kev Walker",
+"file": "ody_248",
+"frame": "1997",
+"number": "248",
 "set": "ody"
 },
 "Krosan Constrictor": {
@@ -6586,6 +6691,13 @@
 "number": "296",
 "set": "tmp"
 },
+"Maniacal Rage": {
+"artist": "Pete Venters",
+"file": "exo_87",
+"frame": "1997",
+"number": "87",
+"set": "exo"
+},
 "Manta Riders": {
 "artist": "Kaja Foglio",
 "file": "tmp_74",
@@ -6760,6 +6872,13 @@
 "frame": "1997",
 "number": "297",
 "set": "tmp"
+},
+"Metamorphic Wurm": {
+"artist": "Thomas M. Baxa",
+"file": "ody_250",
+"frame": "1997",
+"number": "250",
+"set": "ody"
 },
 "Metathran Elite": {
 "artist": "Jim Nelson",
@@ -6936,6 +7055,13 @@
 "number": "190",
 "set": "tmp"
 },
+"Mogg Jailer": {
+"artist": "Mark Romanoski",
+"file": "pls_68",
+"frame": "1997",
+"number": "68",
+"set": "pls"
+},
 "Mogg Raider": {
 "artist": "Brian Snõddy",
 "file": "tmp_191",
@@ -7097,12 +7223,54 @@
 "number": "73",
 "set": "tor"
 },
+"Mystic Crusader": {
+"artist": "Kev Walker",
+"file": "ody_33",
+"frame": "1997",
+"number": "33",
+"set": "ody"
+},
+"Mystic Enforcer": {
+"artist": "Gary Ruddell",
+"file": "ody_290",
+"frame": "1997",
+"number": "290",
+"set": "ody"
+},
+"Mystic Familiar": {
+"artist": "Edward P. Beard, Jr.",
+"file": "tor_11",
+"frame": "1997",
+"number": "11",
+"set": "tor"
+},
+"Mystic Penitent": {
+"artist": "Larry Elmore",
+"file": "ody_34",
+"frame": "1997",
+"number": "34",
+"set": "ody"
+},
 "Mystic Snake": {
 "artist": "Daren Bader",
 "file": "apc_112",
 "frame": "1997",
 "number": "112",
 "set": "apc"
+},
+"Mystic Visionary": {
+"artist": "Matt Cavotta",
+"file": "ody_35",
+"frame": "1997",
+"number": "35",
+"set": "ody"
+},
+"Mystic Zealot": {
+"artist": "Paolo Parente",
+"file": "ody_36",
+"frame": "1997",
+"number": "36",
+"set": "ody"
 },
 "Mythic Proportions": {
 "artist": "Jim Nelson",
@@ -7124,6 +7292,20 @@
 "frame": "1997",
 "number": "69",
 "set": "pcy"
+},
+"Nantuko Blightcutter": {
+"artist": "Matt Cavotta",
+"file": "tor_131",
+"frame": "1997",
+"number": "131",
+"set": "tor"
+},
+"Nantuko Calmer": {
+"artist": "Mark Romanoski",
+"file": "tor_132",
+"frame": "1997",
+"number": "132",
+"set": "tor"
 },
 "Nantuko Disciple": {
 "artist": "Justin Sweet",
@@ -7286,6 +7468,13 @@
 "number": "31",
 "set": "mmq"
 },
+"Nimble Mongoose": {
+"artist": "Terese Nielsen",
+"file": "ody_258",
+"frame": "1997",
+"number": "258",
+"set": "ody"
+},
 "Noble Panther": {
 "artist": "Matt Cavotta",
 "file": "inv_257",
@@ -7348,6 +7537,13 @@
 "frame": "1997",
 "number": "77",
 "set": "lgn"
+},
+"Nut Collector": {
+"artist": "Christopher Moeller",
+"file": "ody_259",
+"frame": "1997",
+"number": "259",
+"set": "ody"
 },
 "Obelisk of Undoing": {
 "artist": "Tom Wänerstrand",
@@ -7460,6 +7656,13 @@
 "frame": "1997",
 "number": "258",
 "set": "inv"
+},
+"Orgg": {
+"artist": "Daniel Gelon",
+"file": "ptc_et63",
+"frame": "1993",
+"number": "et63",
+"set": "ptc"
 },
 "Ornithopter": {
 "artist": "Amy Weber",
@@ -7733,6 +7936,13 @@
 "frame": "1997",
 "number": "50",
 "set": "pls"
+},
+"Phyrexian Boon": {
+"artist": "Mark Tedin",
+"file": "all_58a",
+"frame": "1993",
+"number": "58a",
+"set": "all"
 },
 "Phyrexian Broodlings": {
 "artist": "Daren Bader",
@@ -8125,6 +8335,13 @@
 "frame": "1997",
 "number": "153",
 "set": "mmq"
+},
+"Putrid Imp": {
+"artist": "Wayne England",
+"file": "tor_77",
+"frame": "1997",
+"number": "77",
+"set": "tor"
 },
 "Pygmy Allosaurus": {
 "artist": "Anson Maddocks",
@@ -9162,6 +9379,13 @@
 "number": "270",
 "set": "4ed"
 },
+"Sea Monster": {
+"artist": "Daniel Gelon",
+"file": "tmp_85",
+"frame": "1997",
+"number": "85",
+"set": "tmp"
+},
 "Sea Scryer": {
 "artist": "Martin McKenna",
 "file": "mir_90",
@@ -9413,6 +9637,13 @@
 "frame": "1997",
 "number": "156",
 "set": "tmp"
+},
+"Seton's Scout": {
+"artist": "Mark Romanoski",
+"file": "tor_138",
+"frame": "1997",
+"number": "138",
+"set": "tor"
 },
 "Sever Soul": {
 "artist": "Jeff Easley",
@@ -9680,6 +9911,13 @@
 "number": "23",
 "set": "scg"
 },
+"Silver Seraph": {
+"artist": "Matthew D. Wilson",
+"file": "jud_23",
+"frame": "1997",
+"number": "23",
+"set": "jud"
+},
 "Silvos, Rogue Elemental": {
 "artist": "Carl Critchlow",
 "file": "ons_282",
@@ -9911,6 +10149,13 @@
 "number": "327",
 "set": "usg"
 },
+"Slipstream Eel": {
+"artist": "Mark Tedin",
+"file": "ons_114",
+"frame": "1997",
+"number": "114",
+"set": "ons"
+},
 "Sliver Queen": {
 "artist": "Ron Spencer",
 "file": "sth_129",
@@ -9959,6 +10204,13 @@
 "frame": "1997",
 "number": "271",
 "set": "mmq"
+},
+"Sneaky Homunculus": {
+"artist": "Scott M. Fischer",
+"file": "nem_44",
+"frame": "1997",
+"number": "44",
+"set": "nem"
 },
 "Snorting Gahr": {
 "artist": "Andrew Goldhawk",
@@ -10288,6 +10540,13 @@
 "frame": "1997",
 "number": "273",
 "set": "tmp"
+},
+"Springing Tiger": {
+"artist": "Arnie Swekel",
+"file": "ody_272",
+"frame": "1997",
+"number": "272",
+"set": "ody"
 },
 "Spur Grappler": {
 "artist": "Randy Gallegos",
@@ -11304,6 +11563,13 @@
 "number": "278",
 "set": "usg"
 },
+"Treetop Bracers": {
+"artist": "Heather Hudson",
+"file": "nem_123",
+"frame": "1997",
+"number": "123",
+"set": "nem"
+},
 "Treetop Rangers": {
 "artist": "Daren Bader",
 "file": "usg_279",
@@ -11668,6 +11934,13 @@
 "number": "281",
 "set": "4ed"
 },
+"Veteran Brawlers": {
+"artist": "Paolo Parente",
+"file": "pcy_106",
+"frame": "1997",
+"number": "106",
+"set": "pcy"
+},
 "Viashino Cutthroat": {
 "artist": "Edward P. Beard, Jr.",
 "file": "ulg_94",
@@ -11723,6 +11996,13 @@
 "frame": "1997",
 "number": "140",
 "set": "vis"
+},
+"Vibrating Sphere": {
+"artist": "Richard Thomas",
+"file": "ice_345",
+"frame": "1993",
+"number": "345",
+"set": "ice"
 },
 "Vicious Hunger": {
 "artist": "Massimiliano Frezzato",
@@ -12164,6 +12444,13 @@
 "frame": "1997",
 "number": "300",
 "set": "ons"
+},
+"Werebear": {
+"artist": "Carl Critchlow",
+"file": "ody_282",
+"frame": "1997",
+"number": "282",
+"set": "ody"
 },
 "Western Paladin": {
 "artist": "Carl Critchlow",

@@ -890,6 +890,34 @@ static void TestStatics(void)
         Mtg_SpellCost(&sD, 0, soldier, &cost);
         CHECK(cost.generic == 1 && cost.pip[MTG_W] == 1, "daru warchief: standing troops cost {1}{W} (%d)", cost.generic);
     }
+
+    Table();   // Condition$ Threshold (seven cards in the graveyard), UnlessDefender$ (can't attack unless ...), Secondary$
+    {
+        int rip = Put(0, "Anurid Barkripper", MTG_ZONE_BATTLEFIELD), shark = Put(0, "Hammerhead Shark", MTG_ZONE_BATTLEFIELD);
+        int brawl = Put(0, "Branded Brawlers", MTG_ZONE_BATTLEFIELD), rage, k, land;
+        CHECK(Mtg_Power(&sD, rip) == 2, "barkripper without threshold: 2 power (%d)", Mtg_Power(&sD, rip));
+        for (k = 0; k < 6; k++)
+            Put(0, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+        CHECK(Mtg_Power(&sD, rip) == 2, "six cards: still 2");
+        Put(1, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+        CHECK(Mtg_Power(&sD, rip) == 2, "the opponent's graveyard doesn't count");
+        Put(0, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+        CHECK(Mtg_Power(&sD, rip) == 4 && Mtg_Toughness(&sD, rip) == 4, "threshold: 4/4 (%d/%d)", Mtg_Power(&sD, rip),
+              Mtg_Toughness(&sD, rip));
+        CHECK(Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, shark, -1), "hammerhead shark: no island over there, can't attack");
+        Put(1, "Island", MTG_ZONE_BATTLEFIELD);
+        CHECK(!Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, shark, -1), "an island: it may attack");
+        CHECK(Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, brawl, -1), "branded brawlers: the defender has an untapped land");
+        for (k = 0; k < sD.objCount; k++)
+            if (sD.objs[k].zone == MTG_ZONE_BATTLEFIELD && sD.objs[k].controller == 1)
+                sD.objs[k].tapped = 1;
+        CHECK(!Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, brawl, -1), "their lands tapped: it may attack");
+        rage = Put(0, "Maniacal Rage", MTG_ZONE_BATTLEFIELD);   // an Aura with Secondary$: +2/+2, can't block
+        land = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        sD.objs[rage].attachedTo = (int16_t)land;
+        CHECK(Mtg_Power(&sD, land) == 4 && !Mtg_CanBlock(&sD, land, shark), "maniacal rage: 4/4 and can't block (%d)",
+              Mtg_Power(&sD, land));
+    }
 }
 
 static void TestTriggers(void)
