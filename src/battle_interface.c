@@ -2260,11 +2260,17 @@ s32 MP_MoveHealthBar(u8 battler, u8 healthboxSpriteId)
         sAcc += MP_BattleAnimSpeed() / 5;
         if (sAcc >= 20)
         {
-            s32 w;
+            s32 w, at = gBattleSpritesDataPtr->battleBars[battler].currValue;
             sAcc -= 20;
             w = MoveBattleBar(battler, healthboxSpriteId, HEALTH_BAR, 0);
-            if (w != -1)   // (-1: the first step already reached the end)
+            if (w != -1)
                 v = w;
+            else   // (the first step already reached the end: the bar stays there, the next frame ends it; MoveBattleBar
+                   // reset it to 0 for the next bar, which made it fill again from empty, over and over)
+            {
+                gBattleSpritesDataPtr->battleBars[battler].currValue = at;
+                MPNet_Log("battle: health bar ends on a quick step");
+            }
         }
     }
     return v;
