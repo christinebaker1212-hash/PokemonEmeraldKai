@@ -1,0 +1,40 @@
+pressuntil A field 5000
+wait 60
+mp mtg starter 0
+mp cards case
+wait 30
+press DOWN 2
+wait 6
+press A 2
+wait 20
+rendershot binder
+mp mtg search text goblin
+wait 10
+rendershot binder_goblin
+press SEARCH 2
+wait 20
+rendershot search_menu
+press B 2
+wait 10
+mp mtg search clear
+mp mtg search filter 0 1
+wait 10
+rendershot binder_creatures
+mp mtg search clear
+press B 2
+wait 6
+press UP 2
+wait 6
+rendershot home
+press B 2
+wait 30
+mp register 399
+mp warp 14,12,6,5
+wait 90
+mp face left
+wait 4
+press SELECT 2
+pressuntillog A 600 mtg: challenge from RHEA
+wait 30
+rendershot rhea
+quit

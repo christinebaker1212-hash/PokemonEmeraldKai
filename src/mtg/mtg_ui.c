@@ -29,6 +29,7 @@
 #include "../tcg/tcg_gfx.h"
 #include "../tcg/tcg_foil.h"
 #include "../tcg/tcg_guide.h"
+#include "../tcg/tcg_search.h"
 #include "../tcg/tcg_new.h"
 #include "../tcg/tcg_ui_kit.h"
 
@@ -41,7 +42,8 @@ enum
 {
     KEY_A = 1, KEY_B = 2, KEY_SELECT = 4, KEY_START = 8, KEY_RIGHT = 16, KEY_LEFT = 32, KEY_UP = 64, KEY_DOWN = 128,
     KEY_R = 256, KEY_L = 512,
-    KEY_INSPECT = 2048
+    KEY_INSPECT = 2048,
+    KEY_SEARCH = 0x1000   // L2 / ZL / LT, or F: SEARCH & SORT in the binder and the builder (as the other games')
 };
 enum { ACT_NONE, ACT_CLOSE, ACT_HOME, ACT_TAKE_STARTER, ACT_CLEAR, ACT_COPY, ACT_RECIPE, ACT_BUY_PACK };
 enum { VS_NPC, VS_PRACTICE };
@@ -388,6 +390,56 @@ static int ListOrder(const void *a, const void *b)
     return strcmp(x->name, y->name);
 }
 
+/* SEARCH & SORT (src/tcg/tcg_search.c), as the other card games' binders and builders have it: a name search, the
+   card's type, rarity, mana value, power and toughness (the colors stay on the L / R chips) */
+enum { MK_TYPE = SEARCH_KEY_GAME, MK_MV, MK_POWER, MK_TOUGH };
+static const char *const sSearchTypes[] = {"CREATURE", "INSTANT", "SORCERY", "ENCHANTMENT", "ARTIFACT", "LAND"};
+static const char *const sSearchRarities[] = {"COMMON", "UNCOMMON", "RARE"};
+static const struct SearchFilter sSearchFilters[] = {
+    {"CARD TYPE", SF_CHOICE, MK_TYPE, 6, sSearchTypes, NULL, 0, 0, NULL},
+    {"RARITY", SF_CHOICE, SEARCH_KEY_RARITY, 3, sSearchRarities, NULL, 0, 0, NULL},
+    {"MIN MANA VALUE", SF_MIN, MK_MV, 7, NULL, NULL, 1, 1, NULL},
+    {"MAX MANA VALUE", SF_MAX, MK_MV, 8, NULL, NULL, 0, 1, NULL},
+    {"MIN POWER", SF_MIN, MK_POWER, 6, NULL, NULL, 1, 1, NULL},
+    {"MIN TOUGHNESS", SF_MIN, MK_TOUGH, 6, NULL, NULL, 1, 1, NULL},
+};
+static const struct SearchSort sSearchSorts[] = {
+    {"COLOR", SEARCH_KEY_NUMBER}, {"NAME", -1}, {"RARITY", SEARCH_KEY_RARITY}, {"OWNED", -2},
+    {"MANA VALUE", MK_MV}, {"POWER", MK_POWER}, {"TOUGHNESS", MK_TOUGH},
+};
+static const char *SearchName(unsigned id)
+{
+    static char name[64];
+    if (!Mtg_Card((int)id))
+        return "";
+    Mtg_PlainText(name, sizeof(name), Mtg_Card((int)id)->name);
+    return name;
+}
+static int SearchValue(unsigned id, int key)
+{
+    const MtgCardDef *d = Mtg_Card((int)id);
+    int creature;
+    if (!d)
+        return SEARCH_NA;
+    creature = (d->types & MTG_T_CREATURE) != 0;
+    switch (key) {
+    case SEARCH_KEY_NUMBER: return (int)id;   // (the list's own order: COLOR keeps it)
+    case SEARCH_KEY_RARITY: return d->rarity;
+    case MK_TYPE:
+        return creature ? 0 : d->types & MTG_T_INSTANT ? 1 : d->types & MTG_T_SORCERY ? 2 : d->types & MTG_T_ENCHANTMENT ? 3
+             : d->types & MTG_T_ARTIFACT ? 4 : d->types & MTG_T_LAND ? 5 : SEARCH_NA;
+    case MK_MV: return d->types & MTG_T_LAND ? SEARCH_NA : Mtg_ManaCostTotal(&d->cost);
+    case MK_POWER: return creature && d->power >= 0 ? d->power : SEARCH_NA;
+    case MK_TOUGH: return creature && d->toughness >= 0 ? d->toughness : SEARCH_NA;
+    }
+    return SEARCH_NA;
+}
+static unsigned SearchOwned(unsigned id) { return id < MTG_COLLECTION_CARDS ? C()->owned[id] : 0; }
+static const struct SearchGame sSearchGame = {"magic", sSearchFilters, sizeof(sSearchFilters) / sizeof(sSearchFilters[0]),
+                                              sSearchSorts, sizeof(sSearchSorts) / sizeof(sSearchSorts[0]), SearchName,
+                                              SearchValue, SearchOwned};
+static int Searchable(void) { return U.screen == M_BINDER || U.screen == M_BUILDER; }
+
 static void BuildList(int withBasics)
 {
     static const char *const basics[5] = {"Plains", "Island", "Swamp", "Mountain", "Forest"};
@@ -405,6 +457,10 @@ static void BuildList(int withBasics)
             && InFilter(i))
             U.list[U.listCount++] = (uint16_t)i;
     qsort(U.list + first, (size_t)(U.listCount - first), sizeof(U.list[0]), ListOrder);
+    if (Searchable()) {   // (then SEARCH & SORT over the cards after the basic lands)
+        TcgSearch_Register(SEARCH_MAGIC, &sSearchGame);
+        U.listCount = first + (int)TcgSearch_Apply(SEARCH_MAGIC, U.list + first, (unsigned)(U.listCount - first));
+    }
     if (U.cursor >= U.listCount)
         U.cursor = U.listCount ? U.listCount - 1 : 0;
 }
@@ -465,9 +521,18 @@ static void HomeScreen(void)
         BigCard(Mtg_DeckAce(c, c->activeDeck), 30, 22, bob);
     G_TextAlign(52, 86, TA_CENTER, G_INK, G_INK_SHADOW, d->count && d->name[0] ? d->name : "No deck", TF_SMALL);
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
-    for (i = 0; i < HOME_ROWS; i++)
-        TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.cursor == i, 1, sHomeRows[i],
-                  i == HOME_SPEED ? (Tcg_GetCollection()->fastAnimations ? "FAST" : "NORMAL") : NULL);
+    {
+        // (the BOOSTER PACKS row: how many are waiting, greyed out at none, as the other games' cases)
+        unsigned packs = 0, k;
+        char count[8];
+        for (k = 0; k < MTG_SETS; k++)
+            packs += c->packs[k];
+        snprintf(count, sizeof(count), "%u", packs);
+        for (i = 0; i < HOME_ROWS; i++)
+            TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.cursor == i, i != HOME_PACKS || packs, sHomeRows[i],
+                      i == HOME_SPEED ? (Tcg_GetCollection()->fastAnimations ? "FAST" : "NORMAL")
+                      : i == HOME_PACKS ? count : NULL);
+    }
     OwnedCounts(&have, &total);
     snprintf(line, sizeof(line), "%s\nCARDS %d/%d   WON %u  LOST %u", sHomeHelp[U.cursor], have, total, c->wins,
              c->losses);
@@ -778,8 +843,9 @@ static void BuilderScreen(void)
     if (card >= 0)
         CardLine(line, sizeof(line), card);
     Strip(line);
+    TcgSearch_Badge(SEARCH_MAGIC, -236, 135, (unsigned)n);
     TcgUi_Hints(U.side ? "{A} TAKE OUT  {LEFT} CARDS  {INSPECT} LOOK  {B} DONE"
-                       : "{A} ADD  {SELECT} OUT  {INSPECT} LOOK  {B} DONE");
+                       : "{A} ADD  {SELECT} OUT  {INSPECT} LOOK  {SEARCH} SEARCH  {B} DONE");
 }
 
 // ---- the binder: 7 x 2 faces
@@ -818,7 +884,8 @@ static void BinderScreen(void)
         }
     }
     if (!n)
-        G_TextAlign(120, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind yet.", TF_SMALL);
+        TcgSearch_Narrowed(SEARCH_MAGIC) ? TcgSearch_Empty(SEARCH_MAGIC, 120, 50)
+                                         : (void)G_TextAlign(120, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind yet.", TF_SMALL);
     line[0] = 0;
     if (U.cursor < n) {
         int id = U.list[U.cursor];
@@ -827,7 +894,9 @@ static void BinderScreen(void)
         snprintf(line, sizeof(line), "%s\n%s", name, c->owned[id] ? RarityWord(id) : "Not in your collection yet.");
     }
     Strip(line);
-    TcgUi_Hints(U.showAll ? "{A} LOOK  {L}{R} COLOR  {SELECT} OWNED  {B} BACK" : "{A} LOOK  {L}{R} COLOR  {SELECT} ALL  {B} BACK");
+    TcgSearch_Badge(SEARCH_MAGIC, -236, 135, (unsigned)n);
+    TcgUi_Hints(U.showAll ? "{A} LOOK {L}{R} COLOR {SELECT} OWNED {SEARCH} SEARCH {B} BACK"
+                          : "{A} LOOK {L}{R} COLOR {SELECT} ALL {SEARCH} SEARCH {B} BACK");
 }
 
 // ---- a card's view: the big face, its words; A the big picture
@@ -1329,6 +1398,8 @@ void MtgUi_Draw(void)
     case M_SHOP: ShopScreen(); break;
     default: break;
     }
+    if (TcgSearch_Active() && Searchable() && !TcgGuide_Active())
+        TcgSearch_Draw((unsigned)U.listCount);
     TcgUi_MessageBox(U.message, U.asking, U.askYes);
 }
 
@@ -1472,6 +1543,13 @@ static void DuelOver(int result)
 }
 
 void MtgUi_DebugAutoplay(int on) { MtgBoard_Autoplay(on); }
+void MtgUi_DebugSearch(const char *what)
+{
+    TcgSearch_Register(SEARCH_MAGIC, &sSearchGame);
+    TcgSearch_Debug(SEARCH_MAGIC, what);
+    if (Searchable())
+        BuildList(U.withBasics);
+}
 void MtgUi_DebugEnd(int win) { MtgBoard_ForceEnd(win); }
 
 static void Act(int action)
@@ -1701,6 +1779,25 @@ int MtgUi_Step(unsigned keys)
             Act(then);
         }
         return 1;
+    }
+    if (Searchable() && !TcgGuide_Active()) {
+        // SEARCH & SORT: {SEARCH} opens it over the binder or the builder's cards; it has the buttons while it's open
+        if (TcgSearch_Active()) {
+            int keep = U.cursor < U.listCount ? U.list[U.cursor] : -1, k;
+            if (TcgSearch_Step(pressed)) {
+                BuildList(U.withBasics);
+                U.cursor = 0;
+                for (k = 0; k < U.listCount; k++)
+                    if (U.list[k] == keep)
+                        U.cursor = k;
+            }
+            return 1;
+        }
+        if (pressed & KEY_SEARCH && (U.screen == M_BINDER || U.side == 0)) {
+            TcgSearch_Register(SEARCH_MAGIC, &sSearchGame);
+            TcgSearch_Open(SEARCH_MAGIC);
+            return 1;
+        }
     }
     switch (U.screen) {
     case M_HOME:

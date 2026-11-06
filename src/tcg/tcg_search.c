@@ -213,7 +213,7 @@ static int Passes(const struct SearchGame *g, const struct Settings *s, unsigned
 /* (qsort has no context: the one sort running) */
 static const struct SearchGame *sSortGame;
 static const struct Settings *sSortSet;
-static uint16_t sOrder[4096];   /* each id's place in the list as handed over (ties keep it) */
+static uint16_t sOrder[8192];   /* each id's place in the list as handed over (ties keep it) */
 static int SortValue(unsigned id, int key)
 {
     if (key == -2)

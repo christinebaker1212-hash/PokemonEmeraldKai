@@ -56,6 +56,9 @@
 #include "window.h"
 #include "script_menu.h"
 extern const u8 EventScript_CardClub[], EventScript_YgoClub[];
+// MAGIC's regulars at MOSSDEEP's CARD SHOP (data/scripts/mtg_shop.inc)
+extern const u8 EventScript_MtgDuelist0[], EventScript_MtgDuelist1[], EventScript_MtgDuelist2[], EventScript_MtgDuelist3[],
+    EventScript_MtgDuelist4[], EventScript_MtgDuelist5[];
 
 // ---------------------------------------------------------------------------
 // Who they are
@@ -1421,6 +1424,18 @@ int Tcg_FieldChallenge(void)
             script = gMapHeader.events->objectEvents[i].script;
             break;
         }
+    // Moemon Kai: one of MAGIC's regulars: the button asks them the way talking to them does (their words, then
+    // MAGIC's challenge screen; the user: every card game's players answer the registered CARD CASE)
+    if (script == EventScript_MtgDuelist0 || script == EventScript_MtgDuelist1 || script == EventScript_MtgDuelist2 ||
+        script == EventScript_MtgDuelist3 || script == EventScript_MtgDuelist4 || script == EventScript_MtgDuelist5)
+    {
+        gSelectedObjectEvent = objectId;
+        gSpecialVar_LastTalked = gObjectEvents[objectId].localId;
+        gSpecialVar_Facing = GetPlayerFacingDirection();
+        ScriptContext_SetupScript(script);
+        printf("[tcg] asked a MAGIC player\n");
+        return 1;
+    }
     line = Ask(&gObjectEvents[objectId], script, &answer);
     if (!line)
         return 0;

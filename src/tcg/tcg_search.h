@@ -1,4 +1,4 @@
-/* SEARCH & SORT (src/tcg/tcg_search.c): one menu for the three card games' binders and deck builders, opened with
+/* SEARCH & SORT (src/tcg/tcg_search.c): one menu for the card games' (all four) binders and deck builders, opened with
  * {SEARCH} (L2 / LT / ZL, or F on the keyboard). A name search (any part, any case), a sort and its order, OWNED ONLY,
  * and each game's own filters, all at once; they only change what the list shows and in which order (never a deck, an
  * owned count or a card). Each game's settings are kept apart and remembered ("<save>.search"). */
@@ -7,7 +7,7 @@
 #include <limits.h>
 #include <stdint.h>
 
-enum { SEARCH_POKEMON, SEARCH_YUGIOH, SEARCH_TRIAD, SEARCH_GAMES };
+enum { SEARCH_POKEMON, SEARCH_YUGIOH, SEARCH_TRIAD, SEARCH_MAGIC, SEARCH_GAMES };
 #define SEARCH_NA INT_MIN        /* a value the card doesn't have (a Trainer's HP): no filter on it matches */
 #define SEARCH_ALL (-32768)      /* a choice's value that lets every card through (Triple Triad's ALL STARS) */
 #define SEARCH_FILTERS_MAX 12

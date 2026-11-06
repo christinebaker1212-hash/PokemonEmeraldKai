@@ -1,0 +1,8 @@
+# MAGIC's BINDER gets SEARCH & SORT like the other card games' (tcg_search.c): a name search narrows it to the
+# goblins, {SEARCH} opens the menu over it, CARD TYPE: CREATURE filters, and the case's BOOSTER PACKS row is greyed
+# out with 0 when there are no boosters (shots binder_goblin, search_menu, home). Then the registered CARD CASE
+# in front of RHEA (a MAGIC regular) asks her the way talking does: her words, then MAGIC's challenge (shot rhea).
+MODE=1
+TMO=200
+EXPECT_A=("mtg: starter" "[search] magic: text \"goblin\"" "[search] open (magic)" "[search] magic: text \"\" sort COLOR asc owned 0 narrowed 1" "[tcg] asked a MAGIC player" "mtg: challenge from RHEA")
+UNEXPECT_A=("[crash]")

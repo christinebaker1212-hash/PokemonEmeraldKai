@@ -193,6 +193,9 @@ void Mtg_Debug(const char *command)
             MtgBoard_DebugPut((int)n, zone, command + 4 + at);
         else
             MPNet_Log("mtg: put PLAYER hand|field|grave NAME");
+    } else if (strncmp(command, "search ", 7) == 0) {   // SEARCH & SORT's settings, as "mp cards search" (tcg_search.c)
+        void MtgUi_DebugSearch(const char *what);
+        MtgUi_DebugSearch(command + 7);
     } else if (strncmp(command, "table", 5) == 0) {
         void MtgBoard_DebugState(void);
         MtgBoard_DebugState();

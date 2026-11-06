@@ -5617,3 +5617,14 @@ the most). Each table now shows a move before it's made and holds what happened 
 - **Yu-Gi-Oh! AI Tributes** (ygo_ai.c, the CARDS answer): a Tribute whose worth the engine doesn't give counts as one,
   and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
   duel 4).
+
+## MAGIC's screens like the others' (1.112.0)
+- **SEARCH & SORT** (src/tcg/tcg_search.c, SEARCH_MAGIC "magic"; mtg_ui.c sSearchGame): {SEARCH} (L2 / LT / ZL, or F)
+  in MAGIC's BINDER and on the builder's card side opens the shared menu: a name search, CARD TYPE, RARITY, MIN / MAX
+  MANA VALUE, MIN POWER, MIN TOUGHNESS (the colors stay on the L / R chips); sorts COLOR (the list's own order), NAME,
+  RARITY, OWNED, MANA VALUE, POWER, TOUGHNESS. BuildList applies it after the basic lands; the badge and empty-list
+  words as the others'. tcg_search.c's order table now covers ids up to 8191 (MAGIC's run to 5408). Harness:
+  `mp mtg search text X | filter N C | sort N | clear`. Test mtg_search.
+- **BOOSTER PACKS** on the case's first page shows how many are waiting and is greyed out at none, as the others'.
+- **The registered CARD CASE** in front of one of MAGIC's regulars (EventScript_MtgDuelist0-5) runs their own talk
+  script (their words, then MAGIC's challenge), as talking to them does (tcg_field.c Tcg_FieldChallenge).
