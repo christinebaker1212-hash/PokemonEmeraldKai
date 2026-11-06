@@ -1,0 +1,7 @@
+# The summary's STATS page: A shows each stat's IV as stars out of three (a perfect 31: red stars), A again its EVs,
+# START there asks to clear them (B keeps them, A clears them and the stats are worked out again). Look at the shots.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+EXPECT_A=("summary: stats view 1" "summary: stats view 2" "summary: EVs cleared (slot 0)" "ivev: slot 0 IV 31 30 20 10 0 26 EV 0 0 0 0 0 0" "summary: stats view 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

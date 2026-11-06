@@ -226,6 +226,11 @@ static void PrintAOrBButtonIcon(u8 windowId, bool8 bButton, u32 x);
 static void Task_HandleInput(u8);
 static void ChangeSummaryPokemon(u8, s8);
 static void Task_ChangeSummaryMon(u8);
+static void MpDrawStatsPrompts(void);   // Moemon Kai: the STATS page's views (below)
+static bool8 MpStats_HandleInput(void);
+enum { MP_STATS_VIEW_STATS, MP_STATS_VIEW_IVS, MP_STATS_VIEW_EVS };
+static EWRAM_DATA u8 sMpStatsView = 0;
+static EWRAM_DATA bool8 sMpClearAsk = FALSE;
 static s8 AdvanceMonIndex(s8);
 static s8 AdvanceMultiBattleMonIndex(s8);
 static bool8 IsValidToViewInMulti(struct Pokemon *);
@@ -1170,6 +1175,8 @@ void ShowPokemonSummaryScreen(u8 mode, void *mons, u8 monIndex, u8 maxMonIndex, 
     }
 
     sMonSummaryScreen->currPageIndex = sMonSummaryScreen->minPageIndex;
+    sMpStatsView = MP_STATS_VIEW_STATS;   // Moemon Kai
+    sMpClearAsk = FALSE;
     // Moemon Co-op: back from the ball effect editor, on the POKé BALL page
     if (sMpStartOnBallPage && sMonSummaryScreen->maxPageIndex >= PSS_PAGE_BALL)
         sMonSummaryScreen->currPageIndex = PSS_PAGE_BALL;
@@ -1726,6 +1733,8 @@ static void Task_HandleInput(u8 taskId)
             return;
         if (sMonSummaryScreen->currPageIndex == PSS_PAGE_BALL && MpBall_HandleInput(taskId))
             return;
+        if (sMonSummaryScreen->currPageIndex == PSS_PAGE_SKILLS && MpStats_HandleInput())
+            return;
         if (JOY_NEW(DPAD_UP))
         {
             ChangeSummaryPokemon(taskId, -1);
@@ -1879,6 +1888,11 @@ static void Task_ChangeSummaryMon(u8 taskId)
     case 11:
         PrintPageSpecificText(sMonSummaryScreen->currPageIndex);
         LimitEggSummaryPageDisplay();
+        if (sMonSummaryScreen->currPageIndex == PSS_PAGE_SKILLS)   // Moemon Kai
+        {
+            sMpClearAsk = FALSE;
+            MpDrawStatsPrompts();
+        }
         break;
     case 12:
         gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_MON]].data[2] = 0;
@@ -4046,6 +4060,8 @@ static void PutPageWindowTilemaps(u8 page)
         PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_LEFT);
         PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_RIGHT);
         PutWindowTilemap(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP);
+        sMpClearAsk = FALSE;
+        MpDrawStatsPrompts();
         break;
     case PSS_PAGE_BATTLE_MOVES:
         PutWindowTilemap(PSS_LABEL_WINDOW_BATTLE_MOVES_TITLE);
@@ -4100,6 +4116,9 @@ static void ClearPageWindowTilemaps(u8 page)
         ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TYPE);
         break;
     case PSS_PAGE_SKILLS:
+        if (sMpPromptWindow != WINDOW_NONE)
+            ClearWindowTilemap(sMpPromptWindow);
+        sMpClearAsk = FALSE;
         ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_LEFT);
         ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_RIGHT);
         ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP);
@@ -4590,9 +4609,70 @@ static void BufferLeftColumnStats(void)
     Free(defenseString);
 }
 
+// Moemon Kai: the STATS page's view (A on the page): the stats, each stat's IV as a rating out of three stars (three
+// red ones: a perfect 31), or its EVs; START on the EV view clears them (A / B to confirm)
+static const u8 sMpStatOrder[6] = {MON_DATA_HP_IV, MON_DATA_ATK_IV, MON_DATA_DEF_IV,
+                                   MON_DATA_SPATK_IV, MON_DATA_SPDEF_IV, MON_DATA_SPEED_IV};
+static const u8 sMpStarShape[8] = {0x10, 0x10, 0x38, 0xFE, 0x7C, 0x38, 0x6C, 0x44};   // one row a byte, 8 pixels wide
+
+static u8 MpIvStars(u8 iv)
+{
+    return iv >= 26 ? 3 : iv >= 16 ? 2 : iv >= 1 ? 1 : 0;
+}
+
+static void MpDrawStar(u8 windowId, u16 x, u16 y, u8 color)
+{
+    u8 tile[32];
+    u32 r, c;
+    memset(tile, 0, sizeof(tile));
+    for (r = 0; r < 8; r++)
+        for (c = 0; c < 8; c++)
+            if (sMpStarShape[r] & (0x80 >> c))
+                tile[r * 4 + c / 2] |= (c & 1) ? (color << 4) : color;
+    BlitBitmapToWindow(windowId, tile, x, y, 8, 8);
+}
+
+// row ROW (0-2) of a stats column: stat STAT's IV stars (none for 0, one 1-15, two 16-25, three 26-30, three red for a
+// perfect 31; grey for the ones it lacks) or its EVs, right-aligned to x = WIDTH
+static void MpDrawStatsRow(u8 windowId, u32 stat, u32 row, u32 width)
+{
+    struct Pokemon *mon = &sMonSummaryScreen->currentMon;
+    u16 y = 1 + row * 16;
+    if (sMpStatsView == MP_STATS_VIEW_IVS)
+    {
+        u8 iv = GetMonData(mon, sMpStatOrder[stat]);
+        u8 stars = MpIvStars(iv), i;
+        for (i = 0; i < 3; i++)
+            MpDrawStar(windowId, width - 21 + i * 7, y + 4, i < stars ? (iv == 31 ? 5 : 1) : 2);
+    }
+    else
+    {
+        u8 text[8];
+        u8 ev = GetMonData(mon, sMpStatOrder[stat] - MON_DATA_HP_IV + MON_DATA_HP_EV);
+        ConvertIntToDecimalStringN(text, ev, STR_CONV_MODE_LEFT_ALIGN, 3);
+        PrintTextOnWindow(windowId, text, width - GetStringWidth(FONT_NORMAL, text, 0), y, 0, 0);
+    }
+}
+
+static bool8 MpCanClearEvs(void)
+{
+    return sMonSummaryScreen->currPageIndex == PSS_PAGE_SKILLS
+        && (sMonSummaryScreen->mode == SUMMARY_MODE_NORMAL || sMonSummaryScreen->mode == SUMMARY_MODE_BOX)
+        && !gMain.inBattle && !sMonSummaryScreen->summary.isEgg
+        && !(gBattleTypeFlags & BATTLE_TYPE_LINK);
+}
+
 static void PrintLeftColumnStats(void)
 {
-    PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS_LEFT), gStringVar4, 4, 1, 0, 0);
+    u8 windowId = AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS_LEFT);
+    if (sMpStatsView != MP_STATS_VIEW_STATS && !sMonSummaryScreen->summary.isEgg)
+    {
+        u32 i;
+        for (i = 0; i < 3; i++)
+            MpDrawStatsRow(windowId, i, i, 6 * 8 - 3);
+        return;
+    }
+    PrintTextOnWindow(windowId, gStringVar4, 4, 1, 0, 0);
 }
 
 static void BufferRightColumnStats(void)
@@ -4610,7 +4690,130 @@ static void BufferRightColumnStats(void)
 
 static void PrintRightColumnStats(void)
 {
-    PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS_RIGHT), gStringVar4, 2, 1, 0, 0);
+    u8 windowId = AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS_RIGHT);
+    if (sMpStatsView != MP_STATS_VIEW_STATS && !sMonSummaryScreen->summary.isEgg)
+    {
+        u32 i;
+        for (i = 0; i < 3; i++)
+            MpDrawStatsRow(windowId, 3 + i, i, 3 * 8 - 2);
+        return;
+    }
+    PrintTextOnWindow(windowId, gStringVar4, 2, 1, 0, 0);
+}
+
+// the STATS page's prompt along the bottom (where the INFO page offers RENAME; a status condition takes the strip)
+static void MpDrawStatsPrompts(void)
+{
+    static const u8 sColors[3] = {0, 3, 4};
+    u8 text[48], font;
+    const char *line;
+    if (sMpPromptWindow == WINDOW_NONE)
+        return;
+    FillWindowPixelBuffer(sMpPromptWindow, PIXEL_FILL(0));
+    if (sMonSummaryScreen->summary.isEgg || (sMonSummaryScreen->summary.ailment != AILMENT_NONE && !sMpClearAsk))
+    {
+        ClearWindowTilemap(sMpPromptWindow);
+        CopyWindowToVram(sMpPromptWindow, COPYWIN_FULL);
+        return;
+    }
+    if (sMpClearAsk)
+        line = "CLEAR? {A}YES {B}NO";
+    else if (sMpStatsView == MP_STATS_VIEW_STATS)
+        line = "{A} IV RATING";
+    else if (sMpStatsView == MP_STATS_VIEW_IVS)
+        line = "{A} EVs";
+    else
+        line = MpCanClearEvs() ? "{START} CLEAR EVs" : "{A} STATS";   // (A goes on round the views)
+    MP_AsciiToGame(text, line, sizeof(text) - 1);
+    font = GetStringWidth(FONT_NORMAL, text, 0) <= 10 * 8 - 2 ? FONT_NORMAL : FONT_SMALL;
+    AddTextPrinterParameterized4(sMpPromptWindow, font, (10 * 8 - GetStringWidth(font, text, 0)) / 2, 1,
+                                 0, 0, sColors, TEXT_SKIP_DRAW, text);
+    PutWindowTilemap(sMpPromptWindow);
+    CopyWindowToVram(sMpPromptWindow, COPYWIN_FULL);
+}
+
+// the stats columns drawn again (another view, EVs cleared)
+static void MpRedrawStatsColumns(void)
+{
+    u8 left = AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS_LEFT);
+    u8 right = AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS_RIGHT);
+    FillWindowPixelBuffer(left, PIXEL_FILL(0));
+    FillWindowPixelBuffer(right, PIXEL_FILL(0));
+    BufferLeftColumnStats();
+    PrintLeftColumnStats();
+    BufferRightColumnStats();
+    PrintRightColumnStats();
+    CopyWindowToVram(left, COPYWIN_GFX);
+    CopyWindowToVram(right, COPYWIN_GFX);
+    MpDrawStatsPrompts();
+}
+
+// the Pokémon's EVs back to 0 (the summary's own and the party's / box's), its stats recalculated
+static void MpClearEvs(void)
+{
+    static const u8 zero = 0;
+    struct PokeSummary *sum = &sMonSummaryScreen->summary;
+    struct Pokemon *mon = &sMonSummaryScreen->currentMon;
+    u32 i;
+    for (i = 0; i < NUM_STATS; i++)
+    {
+        SetMonData(mon, MON_DATA_HP_EV + i, &zero);
+        if (sMonSummaryScreen->mode == SUMMARY_MODE_BOX)
+            SetBoxMonData(&sMonSummaryScreen->monList.boxMons[sMonSummaryScreen->curMonIndex], MON_DATA_HP_EV + i, &zero);
+        else
+            SetMonData(&sMonSummaryScreen->monList.mons[sMonSummaryScreen->curMonIndex], MON_DATA_HP_EV + i, &zero);
+    }
+    if (sMonSummaryScreen->mode != SUMMARY_MODE_BOX)
+        CalculateMonStats(&sMonSummaryScreen->monList.mons[sMonSummaryScreen->curMonIndex]);
+    CalculateMonStats(mon);
+    sum->currentHP = GetMonData(mon, MON_DATA_HP);
+    sum->maxHP = GetMonData(mon, MON_DATA_MAX_HP);
+    sum->atk = GetMonData(mon, MON_DATA_ATK);
+    sum->def = GetMonData(mon, MON_DATA_DEF);
+    sum->spatk = GetMonData(mon, MON_DATA_SPATK);
+    sum->spdef = GetMonData(mon, MON_DATA_SPDEF);
+    sum->speed = GetMonData(mon, MON_DATA_SPEED);
+    MPNet_Log("summary: EVs cleared (slot %d)", sMonSummaryScreen->curMonIndex);
+}
+
+// A / START / B on the STATS page (TRUE: taken)
+static bool8 MpStats_HandleInput(void)
+{
+    if (sMonSummaryScreen->summary.isEgg)
+        return FALSE;
+    if (sMpClearAsk)
+    {
+        if (JOY_NEW(A_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            sMpClearAsk = FALSE;
+            MpClearEvs();
+            MpRedrawStatsColumns();
+        }
+        else if (JOY_NEW(B_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            sMpClearAsk = FALSE;
+            MpDrawStatsPrompts();
+        }
+        return TRUE;   // (nothing else while asking)
+    }
+    if (JOY_NEW(A_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        sMpStatsView = (sMpStatsView + 1) % 3;
+        MPNet_Log("summary: stats view %d", sMpStatsView);
+        MpRedrawStatsColumns();
+        return TRUE;
+    }
+    if (JOY_NEW(START_BUTTON) && sMpStatsView == MP_STATS_VIEW_EVS && MpCanClearEvs())
+    {
+        PlaySE(SE_SELECT);
+        sMpClearAsk = TRUE;
+        MpDrawStatsPrompts();
+        return TRUE;
+    }
+    return FALSE;
 }
 
 static void PrintExpPointsNextLevel(void)

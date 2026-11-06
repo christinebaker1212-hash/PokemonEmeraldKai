@@ -3273,6 +3273,18 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   ItemUseOutOfBattle_EvolutionStone and has no table entry evolves by GetEvolutionTargetSpecies(EVO_MODE_ITEM_USE)
   the way ITEM4_EVO_STONE does. `mp useitemon SLOT ITEM` uses an item as the party menu does. Test evo_items_use.
 
+## IV stars and EVs on the STATS page (1.118.0)
+
+- The summary's SKILLS page (pokemon_summary_screen.c, "Moemon Kai: the STATS page's view"): A goes round three views,
+  STATS (the game's own), IVs as stars out of three (MpIvStars: none for 0, one 1-15, two 16-25, three 26-30; a perfect
+  31 is three RED stars, palette color 5; the stars it lacks are grey) and EVs (numbers). sMpStatsView is reset when
+  the summary opens and kept while changing POKéMON. Stars are 8x8 4bpp tiles built from sMpStarShape at run time.
+- The prompt sits in the INFO page's RENAME strip (sMpPromptWindow, MpDrawStatsPrompts; a status condition takes it);
+  on the EV view START asks "CLEAR? A YES B NO" (MpCanClearEvs: NORMAL / BOX summaries outside battles and links, no
+  eggs), and YES zeroes the six EVs on the real POKéMON and the summary's copy, recalculates the stats (party only: box
+  POKéMON keep none) and redraws. Log lines "summary: stats view N", "summary: EVs cleared (slot N)".
+- `mp ivev SLOT [6 IVs 6 EVs]` sets (with all twelve) and logs a party slot's IVs / EVs. Test summary_ivev.
+
 ## The battle GIMMICKS (1.61.0)
 MEGA EVOLUTION, Z-MOVES, DYNAMAX and TERASTALLIZATION (include/battle_gimmick.h; the battle side at the end of
 src/battle_gen59.c, settings / pictures / menu text / AI in src/battle_gimmick.c).

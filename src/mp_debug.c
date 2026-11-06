@@ -2369,6 +2369,33 @@ void MP_TestCommand(const char *cmd, const char *arg)
         HideMapNamePopUpWindow();   // (as the START menu does: its task would draw over the summary's BG0)
         ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gPlayerParty, 0, gPlayerPartyCount - 1, CB2_ReturnToField);
     }
+    else if (strcmp(cmd, "ivev") == 0)
+    {
+        // ivev SLOT [HP ATK DEF SPE SPA SPD IVs, then the six EVs]: set (all twelve given) and log a slot's IVs / EVs
+        int v[13], n = sscanf(arg, "%d %d %d %d %d %d %d %d %d %d %d %d %d", &v[0], &v[1], &v[2], &v[3], &v[4], &v[5],
+                              &v[6], &v[7], &v[8], &v[9], &v[10], &v[11], &v[12]);
+        if (n >= 1 && v[0] >= 0 && v[0] < PARTY_SIZE)
+        {
+            struct Pokemon *mon = &gPlayerParty[v[0]];
+            int i;
+            if (n == 13)
+            {
+                for (i = 0; i < NUM_STATS; i++)
+                {
+                    u8 iv = v[1 + i], ev = v[7 + i];
+                    SetMonData(mon, MON_DATA_HP_IV + i, &iv);
+                    SetMonData(mon, MON_DATA_HP_EV + i, &ev);
+                }
+                CalculateMonStats(mon);
+            }
+            MPNet_Log("ivev: slot %d IV %d %d %d %d %d %d EV %d %d %d %d %d %d ATK %d", v[0],
+                      GetMonData(mon, MON_DATA_HP_IV), GetMonData(mon, MON_DATA_ATK_IV), GetMonData(mon, MON_DATA_DEF_IV),
+                      GetMonData(mon, MON_DATA_SPEED_IV), GetMonData(mon, MON_DATA_SPATK_IV), GetMonData(mon, MON_DATA_SPDEF_IV),
+                      GetMonData(mon, MON_DATA_HP_EV), GetMonData(mon, MON_DATA_ATK_EV), GetMonData(mon, MON_DATA_DEF_EV),
+                      GetMonData(mon, MON_DATA_SPEED_EV), GetMonData(mon, MON_DATA_SPATK_EV), GetMonData(mon, MON_DATA_SPDEF_EV),
+                      GetMonData(mon, MON_DATA_ATK));
+        }
+    }
     else if (strcmp(cmd, "frame") == 0)
     {
         // frame N - OPTIONS > FRAME (0-28; 20+ are the FireRed/LeafGreen ones)

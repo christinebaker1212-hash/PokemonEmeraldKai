@@ -1,0 +1,34 @@
+pressuntil A field 5000
+wait 60
+mp ivev 0 31 30 20 10 0 26 4 252 100 0 6 0
+mp ivev 0
+mp summary
+waitfor summary 300
+wait 60
+press RIGHT 1
+wait 60
+rendershot stats
+press A 1
+wait 40
+rendershot ivs
+press A 1
+wait 40
+rendershot evs
+press START 1
+wait 40
+rendershot ask
+press B 1
+wait 40
+mp ivev 0
+press START 1
+wait 30
+press A 1
+wait 40
+rendershot cleared
+mp ivev 0
+press A 1
+wait 40
+rendershot back
+press B 1
+wait 120
+quit
