@@ -3543,6 +3543,22 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   FREE). Amounts: Count$YourLifeTotal, PlayerCountOpponents$HighestValid / LowestValid <spec>, ...$LowestCardsInHand.
 - Tests: test_rules.c TestGranted's PSYCHATOG, ARREST, ANGER, CONTROL MAGIC, AVATAR OF WOE, CHO-ARRIM LEGATE.
 
+## MAGIC's spells with several targets (1.137.0)
+
+- TargetMin$ / TargetMax$ (0-4 or X; objects only: never players, "Any" or spells; Pump, Destroy, ChangeZone, Tap,
+  Untap, DealDamage without dividing): MtgAbility tgtMin / tgtMax (MTG_TGT_X = as many as the X paid, the spell's or
+  the ability's; X is cut to the targets there are, five at most).
+- The first target comes with the action as before; "two target ..." spells are offered only with that many targets
+  (AddWithTargets). DoAction sets MtgDuel tgtLeft (needed) / tgtOpt (may); AskCost asks them after the costs as
+  query.forCost 7 picks (TargetCandidates: legal, not taken); answering candidateCount stops when only optional ones
+  are left (board: B = DONE, "Another target?"). They go into MtgStackEntry extra[4].
+- Resolving: ResolveTop keeps the targets still legal (it fizzles only with none); ContinueResolve runs the targeting
+  ability once per target, and a sub-ability whose Defined$ is Targeted / ParentTarget likewise (HOPE AND GLORY), then
+  goes back to the first target (resFirst) for the rest of the chain.
+- AI (mtg_ai.c Choose, forCost 7): the opponent's best for what harms, its own best for what helps (Helps); it stops
+  when only the wrong side is left.
+- Tests: test_rules.c TestTargets (SWELTER, CHOKING TETHERS, HOPE AND GLORY, DREGS OF SORROW), scenario mtg_targets.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

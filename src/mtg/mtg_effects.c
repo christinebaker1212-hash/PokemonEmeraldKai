@@ -724,6 +724,7 @@ int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
 static const char *const sCommon[] = {
     "SP", "AB", "DB", "Cost", "ValidTgts", "TgtPrompt", "SubAbility", "SpellDescription", "StackDescription",
     "IsCurse", "PrecostDesc", "CostDesc", "TargetType", "Defined", "UnlessCost", "UnlessPayer", "ActivationZone",
+    "TargetMin", "TargetMax",
 };
 static const char *const sApiParams[MTG_API_COUNT][5] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},
@@ -777,6 +778,22 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
             continue;   // (Forge's own AI hints: read by the AI's translation, never by the rules)
         if (!InList(key, sCommon, (int)(sizeof(sCommon) / sizeof(sCommon[0]))) && !InList(key, sApiParams[ab->api], 5)) {
             *why = key;
+            return 0;
+        }
+    }
+    if (Mtg_Param(ab, "TargetMin") || Mtg_Param(ab, "TargetMax")) {   // several targets: objects, spells and abilities
+        const char *mn = Mtg_Param(ab, "TargetMin"), *mx = Mtg_Param(ab, "TargetMax");
+        int lo = mn && mn[0] >= '0' && mn[0] <= '4' && !mn[1] ? mn[0] - '0' : mn && strcmp(mn, "X") == 0 ? 9 : -1;
+        int hi = mx && mx[0] >= '1' && mx[0] <= '4' && !mx[1] ? mx[0] - '0' : mx && strcmp(mx, "X") == 0 ? 9 : -1;   // (9: X)
+        const char *t = Mtg_Param(ab, "ValidTgts");
+        static const uint8_t sApis[] = {MTG_API_PUMP, MTG_API_DESTROY, MTG_API_CHANGE_ZONE, MTG_API_TAP, MTG_API_UNTAP,
+                                        MTG_API_DEAL_DAMAGE};
+        unsigned k, apiOk = 0;
+        for (k = 0; k < sizeof(sApis); k++)
+            apiOk |= ab->api == sApis[k];
+        if (lo < 0 || hi < 0 || hi < lo || !t || strstr(t, "Player") || strcmp(t, "Any") == 0 || Mtg_Param(ab, "TargetType")
+            || (ab->kind != MTG_AB_SPELL && ab->kind != MTG_AB_ACTIVATED) || !apiOk) {
+            *why = "TargetMin";
             return 0;
         }
     }

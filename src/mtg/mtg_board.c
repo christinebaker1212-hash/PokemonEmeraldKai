@@ -1298,6 +1298,8 @@ static const char *PickVerb(void)
         return "Tap";
     if (q->forCost == 6)
         return "Exile";   // (from the graveyard)
+    if (q->forCost == 7)
+        return "Target";  // (a spell's next target)
     return q->forCost == 1 || (q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_SACRIFICE) ? "Sacrifice"
                                                                                                       : "Choose";
 }
@@ -1554,7 +1556,10 @@ void MtgBoard_Draw(void)
         char line[120], name[64];
         const MtgQuery *q = &B.duel.query;
         Name(name, sizeof(name), q->candidates[B.targetCursor]);
-        snprintf(line, sizeof(line), "%s which?  %s  {A} OK", PickVerb(), name);
+        if (q->forCost == 7 && !B.duel.tgtLeft)   // (another target, or it may stop)
+            snprintf(line, sizeof(line), "Another target?  %s  {A} OK  {B} DONE", name);
+        else
+            snprintf(line, sizeof(line), "%s which?  %s  {A} OK", PickVerb(), name);
         Prompt(line, 1);
         break;
     }
@@ -2741,6 +2746,13 @@ static void HumanChoose(unsigned pressed)
             B.targetCursor = (B.targetCursor + q->candidateCount - 1) % q->candidateCount, PlaySE(SE_SELECT);
         if (pressed & (KEY_RIGHT | KEY_DOWN))
             B.targetCursor = (B.targetCursor + 1) % q->candidateCount, PlaySE(SE_SELECT);
+        if ((pressed & KEY_B) && q->forCost == 7 && !B.duel.tgtLeft) {   // no more targets
+            MPNet_Log("mtg: you: no more targets");
+            a.card = q->candidateCount;
+            PlaySE(SE_SELECT);
+            Answer(&a);
+            return;
+        }
         if (pressed & KEY_A) {
             char name[64];
             Name(name, sizeof(name), q->candidates[B.targetCursor]);

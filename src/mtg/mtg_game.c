@@ -450,6 +450,24 @@ static int ContinueResolve(MtgDuel *d)
     while (d->resAbility != 0xFFFF && !d->over) {
         if (!Mtg_ResolveStep(d, &ctx, d->resAbility))
             return 1;
+        if (d->res.extraCount && d->resExtra < d->res.extraCount
+            && (d->resAbility == d->res.ability || (Mtg_Param(&gMtgAbilities[d->resAbility], "Defined")
+                                                    && (strcmp(Mtg_Param(&gMtgAbilities[d->resAbility], "Defined"), "Targeted") == 0
+                                                        || strcmp(Mtg_Param(&gMtgAbilities[d->resAbility], "Defined"), "ParentTarget") == 0)))) {
+            // the same again, at its next target (and a sub-ability on "Targeted" likewise: HOPE AND GLORY)
+            int t = d->res.extra[d->resExtra++];
+            d->res.target.id = (uint16_t)t;
+            d->res.lkiPower = (int16_t)Mtg_Power(d, t);
+            d->res.lkiToughness = (int16_t)Mtg_Toughness(d, t);
+            d->res.lkiController = d->objs[t].controller;
+            d->resStage = d->resPicks = 0;
+            d->resChoice = -1;
+            continue;
+        }
+        if (d->res.extraCount && d->resExtra) {   // (back to the first target for what follows)
+            d->res.target.id = d->resFirst;
+            d->resExtra = 0;
+        }
         d->resAbility = gMtgAbilities[d->resAbility].sub;
         d->resStage = d->resPicks = 0;
         d->resChoice = -1;
@@ -462,6 +480,25 @@ static int ResolveTop(MtgDuel *d)
 {
     MtgStackEntry e = d->stack[--d->stackCount];
     const MtgAbility *ab = e.ability != 0xFFFF ? &gMtgAbilities[e.ability] : NULL;
+    if (ab && ab->tgt && e.extraCount) {   // several targets: those still legal stay; it fizzles only with none
+        MtgStackEntry t = e;
+        uint16_t all[5];
+        int n = 0, k, legal = 0;
+        all[n++] = e.target.id;
+        for (k = 0; k < e.extraCount; k++)
+            all[n++] = e.extra[k];
+        e.extraCount = 0;
+        for (k = 0; k < n; k++) {
+            t.target.id = all[k];
+            if (!TargetStillLegal(d, &t, ab))
+                continue;
+            if (!legal++)
+                e.target.id = all[k];
+            else
+                e.extra[e.extraCount++] = all[k];
+        }
+    }
+    d->resExtra = 0;
     if ((ab && ab->tgt && !TargetStillLegal(d, &e, ab)) || !Mtg_TriggerStillTrue(d, &e)) {
         Mtg_Event(d, MTG_EV_FIZZLE, e.source, e.ability, 0);
         if (e.isSpell)
@@ -474,6 +511,7 @@ static int ResolveTop(MtgDuel *d)
         e.lkiController = d->objs[e.target.id].controller;
     }
     Mtg_Event(d, MTG_EV_RESOLVE, e.source, e.ability, e.isSpell);
+    d->resFirst = e.target.id;
     d->res = e;
     d->resolving = 1;
     d->resAbility = e.ability;
@@ -505,6 +543,16 @@ static void AddWithTargets(const MtgDuel *d, MtgQuery *q, int kind, int obj, int
     if (!ab || !ab->tgt) {
         AddAction(q, kind, obj, ability, x, t);
         return;
+    }
+    if (ab->tgtMin >= 2 || ab->tgtMax == MTG_TGT_X) {   // ("two target creatures": only with that many to choose from)
+        int n = 0;
+        for (i = 0; i < d->objCount; i++)
+            n += d->objs[i].zone == ab->tgtZone && Mtg_ValidObj(d, i, ab->tgt, obj, player)
+                 && (ab->tgtZone != MTG_ZONE_BATTLEFIELD || Mtg_CanTarget(d, i, obj));
+        if (ab->tgtMax == MTG_TGT_X && x > (n < 5 ? n : 5))
+            x = n < 5 ? n : 5;   // ("X target creatures": X no more than there are; the rest of the mana stays)
+        if (n < (ab->tgtMin == MTG_TGT_X ? x : ab->tgtMin) || (ab->tgtMax == MTG_TGT_X && x < 1))
+            return;
     }
     if (ab->tgtZone != MTG_ZONE_BATTLEFIELD) {   // (cards in a graveyard)
         for (i = 0; i < d->objCount; i++)
@@ -730,6 +778,8 @@ static const MtgCost *CostNow(const MtgDuel *d)
     return &gMtgAbilities[d->costAbility].cost;
 }
 
+static int TargetCandidates(const MtgDuel *d, uint16_t *out);
+
 // the next pick a cost asks for (1), or nothing left (0): sacrifices, discards, exiles, returns, taps
 static int AskCost(MtgDuel *d)
 {
@@ -747,7 +797,21 @@ static int AskCost(MtgDuel *d)
         kind = MTG_COSTK_TAP;
     else if (d->costExileGrave)
         kind = MTG_COSTK_EXILE_GRAVE;
-    else
+    else if ((d->tgtLeft || d->tgtOpt) && d->stackCount) {   // its other targets (TargetMax$)
+        memset(q, 0, sizeof(*q));
+        q->kind = MTG_Q_CHOOSE;
+        q->choice = MTG_CHOICE_PICK;
+        q->player = d->stack[d->stackCount - 1].controller;
+        q->source = d->stack[d->stackCount - 1].source;
+        q->ability = d->stack[d->stackCount - 1].ability;
+        q->forCost = 7;
+        q->candidateCount = (uint8_t)TargetCandidates(d, q->candidates);
+        if (!q->candidateCount) {
+            d->tgtLeft = d->tgtOpt = 0;
+            return 0;
+        }
+        return 1;
+    } else
         return 0;
     memset(q, 0, sizeof(*q));
     q->kind = MTG_Q_CHOOSE;
@@ -768,6 +832,17 @@ static int AskCost(MtgDuel *d)
 
 static void PayCostPick(MtgDuel *d, int obj)
 {
+    if (!d->costSac && !d->costDiscard && !d->costExile && !d->costReturn && !d->costTap && !d->costExileGrave
+        && (d->tgtLeft || d->tgtOpt)) {   // another target
+        MtgStackEntry *e = &d->stack[d->stackCount - 1];
+        if (e->extraCount < 4)
+            e->extra[e->extraCount++] = (uint16_t)obj;
+        if (d->tgtLeft)
+            d->tgtLeft--;
+        else
+            d->tgtOpt--;
+        return;
+    }
     if (d->costSac) {
         if (d->stackCount)   // (its last known power, for Sacrificed$CardPower)
             d->stack[d->stackCount - 1].sacPower = (int16_t)Mtg_Power(d, obj);
@@ -876,6 +951,36 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
         PayCost(d, p, &alt->cost, a->ability, a->obj, 1);
     } else if (a->ability != 0xFFFF)
         PayOtherCosts(d, p, &gMtgAbilities[a->ability], a->obj);
+    d->tgtLeft = d->tgtOpt = 0;
+    if (a->ability != 0xFFFF && gMtgAbilities[a->ability].tgtMax > 1 && a->target.kind == MTG_TGT_OBJ) {
+        const MtgAbility *ab = &gMtgAbilities[a->ability];   // (its other targets: asked after the costs)
+        int most = ab->tgtMax == MTG_TGT_X ? a->x : ab->tgtMax, least = ab->tgtMin == MTG_TGT_X ? a->x : ab->tgtMin;
+        int need = least > 1 ? least : 1;
+        if (most > 5)
+            most = 5;   // (the first and four more)
+        if (need > most)
+            need = most;
+        d->tgtLeft = (uint8_t)(need - 1);
+        d->tgtOpt = (uint8_t)(most - need);
+    }
+}
+
+// the casting spell's (or ability's) other targets that may be picked now: not picked yet, legal as its first
+static int TargetCandidates(const MtgDuel *d, uint16_t *out)
+{
+    const MtgStackEntry *e = &d->stack[d->stackCount - 1];
+    const MtgAbility *ab = &gMtgAbilities[e->ability];
+    int i, k, n = 0;
+    for (i = 0; i < d->objCount && n < MTG_MAX_COMBAT; i++) {
+        int taken = e->target.kind == MTG_TGT_OBJ && e->target.id == i;
+        for (k = 0; k < e->extraCount; k++)
+            taken |= e->extra[k] == i;
+        if (taken || d->objs[i].zone != ab->tgtZone || !Mtg_ValidObj(d, i, ab->tgt, e->source, e->controller)
+            || (ab->tgtZone == MTG_ZONE_BATTLEFIELD && !Mtg_CanTarget(d, i, e->source)))
+            continue;
+        out[n++] = (uint16_t)i;
+    }
+    return n;
 }
 
 // ---- combat ----
@@ -1384,7 +1489,11 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         PushTrigger(d, NextPending(d), q->actions[a->action].target);
         break;
     case MTG_Q_CHOOSE:
-        if (q->forCost) {   // a cost's sacrifice / discard
+        if (q->forCost) {   // a cost's sacrifice / discard (or another target)
+            if (q->forCost == 7 && a->card == q->candidateCount && !d->tgtLeft) {
+                d->tgtOpt = 0;   // (no more targets: it may stop here)
+                break;
+            }
             if (a->card >= q->candidateCount)
                 return 0;
             PayCostPick(d, q->candidates[a->card]);

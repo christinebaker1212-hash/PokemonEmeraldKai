@@ -42,6 +42,11 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.137.0)
+- Several targets (TargetMin$ / TargetMax$, numbers and X): COOP_NOTES "MAGIC's spells with several targets". 2032 of
+  5408. Still out: dividing damage or counters among them (DividedAsYouChoose: Arc Lightning, Fireball), MaxTgts SVars,
+  player targets among several, triggered abilities with several targets.
+
 ## Status (2026-11-06: 1.136.0)
 - ExileFromGrave costs, graveyard statics, CantBeActivated, GainControl statics, CheckSVar conditions, self cost
   reduction, the Legates' free casts: COOP_NOTES "MAGIC's 2000 cards". 2000 of 5408. Next statics: AddType (21),

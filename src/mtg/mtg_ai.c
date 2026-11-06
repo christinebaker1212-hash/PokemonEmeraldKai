@@ -354,6 +354,20 @@ static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
         out->card = 1;
         return;
     }
+    if (q->forCost == 7) {   // another target: the opponent's best for what harms, its own best for what helps
+        int helps = Helps(&gMtgAbilities[q->ability]), bestS = -1000;
+        for (i = 0; i < q->candidateCount; i++) {
+            const MtgObj *o = &d->objs[q->candidates[i]];
+            int mine = (o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner) == q->player;
+            int worth = o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_Card(o->def)->types & MTG_T_CREATURE)
+                      ? Value(d, q->candidates[i]) : Mtg_ManaCostTotal(&Mtg_Card(o->def)->cost);
+            int sc = mine == helps ? 100 + worth : -worth;
+            if (sc > bestS)
+                bestS = sc, best = i;
+        }
+        out->card = (uint8_t)(bestS < 100 && !d->tgtLeft ? q->candidateCount : best);   // (only the wrong side left: stop)
+        return;
+    }
     for (i = 0; i < q->candidateCount; i++) {
         const MtgObj *o = &d->objs[q->candidates[i]];
         const MtgCardDef *c = Mtg_Card(o->def);

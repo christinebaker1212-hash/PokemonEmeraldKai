@@ -476,6 +476,14 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     }
     if (ab->tgt && !Mtg_ValidSpecKnown(ab->tgt))
         Unsupported(c, "ValidTgts");
+    ab->tgtMin = ab->tgtMax = 1;
+    if ((v = Mtg_Param(ab, "TargetMax")) && ((v[0] >= '1' && v[0] <= '4') || strcmp(v, "X") == 0)) {
+        const char *mn = Mtg_Param(ab, "TargetMin");   // (checked by Mtg_ApiParamsKnown; MTG_TGT_X: as many as X)
+        ab->tgtMax = v[0] == 'X' ? MTG_TGT_X : (uint8_t)(v[0] - '0');
+        ab->tgtMin = (uint8_t)(mn && mn[0] >= '0' && mn[0] <= '4' ? mn[0] - '0' : mn && mn[0] == 'X' ? MTG_TGT_X : 1);
+        if (ab->tgtMax == MTG_TGT_X && !(kind == MTG_AB_SPELL ? c->cost.x : ab->cost.mana.x))   // (X paid, not counted)
+            Unsupported(c, "TargetMin");
+    }
     ab->tgtZone = MTG_ZONE_BATTLEFIELD;   // (ChangeZone targets cards where they come from: a graveyard)
     if (ab->api == MTG_API_CHANGE_ZONE && (v = Mtg_Param(ab, "Origin")) && strcmp(v, "Graveyard") == 0)
         ab->tgtZone = MTG_ZONE_GRAVEYARD;

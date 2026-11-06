@@ -66,6 +66,7 @@ extern MtgAltCost *gMtgAltCosts;
 int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, int casting);
 int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int sac, int source, uint16_t *out);
 
+#define MTG_TGT_X 0xFF
 typedef struct {
     uint8_t kind, api;
     uint16_t card;                  // the card it belongs to
@@ -79,6 +80,7 @@ typedef struct {
     uint16_t choices[5];
     uint16_t charmOf;               // a Charm's mode: the charm (0xFFFF: none)
     uint8_t fromHand;               // ActivationZone$ Hand: activated from its owner's hand (Cycling)
+    uint8_t tgtMin, tgtMax;         // TargetMin$ / TargetMax$ (objects only; 1 / 1 without them; MTG_TGT_X: X of them)
 } MtgAbility;
 
 // mtg_script.c

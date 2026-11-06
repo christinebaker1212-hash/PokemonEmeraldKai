@@ -1150,6 +1150,76 @@ static void TestGranted(void)
     }
 }
 
+// spells with several targets (TargetMin$ / TargetMax$): the first with the spell, the rest picked after
+static void TestTargets(void)
+{
+    int swelter, b1, b2, b3, tethers, hope;
+    const MtgQuery *q;
+    MtgAnswer a;
+    printf("several targets\n");
+    Table();   // SWELTER: 2 damage to each of two target creatures (one creature: it can't be cast)
+    b1 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Mountain", 4);
+    swelter = Put(0, "Swelter", MTG_ZONE_HAND);
+    CHECK(Find(MTG_ACT_CAST, swelter, MTG_TGT_OBJ, b1) < 0, "one creature: no Swelter");
+    b2 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, swelter, MTG_TGT_OBJ, b1);
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->forCost == 7 && q->candidateCount == 1 && q->candidates[0] == b2,
+          "asked for the second target (the other bears)");
+    ChoosePick(b2);
+    PassBoth();
+    CHECK(Zone(b1) == MTG_ZONE_GRAVEYARD && Zone(b2) == MTG_ZONE_GRAVEYARD, "both bears dead (%d %d)", Zone(b1), Zone(b2));
+
+    Table();   // CHOKING TETHERS: tap up to four; stopping after two
+    b1 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    b2 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    b3 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Island", 4);
+    tethers = Put(0, "Choking Tethers", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, tethers, MTG_TGT_OBJ, b1);
+    ChoosePick(b2);
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->forCost == 7, "a third may be picked");
+    memset(&a, 0, sizeof(a));
+    a.card = q->candidateCount;   // (done)
+    Answer(&a);
+    PassBoth();
+    CHECK(sD.objs[b1].tapped && sD.objs[b2].tapped && !sD.objs[b3].tapped, "two tapped, the third not");
+
+    Table();   // HOPE AND GLORY: untap two target creatures, each gets +1/+1 (the sub-ability on both)
+    b1 = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    b2 = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    sD.objs[b1].tapped = sD.objs[b2].tapped = 1;
+    Lands(0, "Plains", 2);
+    hope = Put(0, "Hope and Glory", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, hope, MTG_TGT_OBJ, b1);
+    ChoosePick(b2);
+    PassBoth();
+    CHECK(!sD.objs[b1].tapped && !sD.objs[b2].tapped && Mtg_Power(&sD, b1) == 3 && Mtg_Power(&sD, b2) == 3,
+          "both untapped and 3/3 (%d %d)", Mtg_Power(&sD, b1), Mtg_Power(&sD, b2));
+
+    Table();   // DREGS OF SORROW (X 4 B): seven Swamps make X = 2: two of the three bears destroyed, two cards drawn
+    {
+        int dregs, hand, k;
+        b1 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        b2 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        b3 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Swamp", 7);
+        dregs = Put(0, "Dregs of Sorrow", MTG_ZONE_HAND);
+        k = Find(MTG_ACT_CAST, dregs, MTG_TGT_OBJ, b1);
+        CHECK(k >= 0 && Mtg_Query(&sD)->actions[k].x == 2, "X = 2");
+        hand = HandCount(0);
+        Do(MTG_ACT_CAST, dregs, MTG_TGT_OBJ, b1);
+        ChoosePick(b2);
+        CHECK(Mtg_Query(&sD)->kind == MTG_Q_PRIORITY, "two targets for X = 2: no third asked");
+        PassBoth();
+        CHECK(Zone(b1) == MTG_ZONE_GRAVEYARD && Zone(b2) == MTG_ZONE_GRAVEYARD && Zone(b3) == MTG_ZONE_BATTLEFIELD,
+              "two destroyed, one left");
+        CHECK(HandCount(0) == hand - 1 + 2, "two cards drawn (%d -> %d)", hand, HandCount(0));
+    }
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1479,6 +1549,7 @@ int main(int argc, char **argv)
     TestAmounts();
     TestAltCosts();
     TestGranted();
+    TestTargets();
     TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

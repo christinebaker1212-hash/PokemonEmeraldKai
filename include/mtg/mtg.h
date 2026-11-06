@@ -126,6 +126,8 @@ typedef struct {
     uint16_t ability;             // ability table index
     int16_t x;
     MtgTarget target;
+    uint8_t extraCount;           // TargetMin$ / TargetMax$: its other targets (objects, as target's zone)
+    uint16_t extra[4];
     // last known information about the target as it resolves (Forge's LKI copies)
     int16_t lkiPower, lkiToughness;
     int16_t sacPower;             // the power of what its cost sacrificed (Sacrificed$CardPower: FLING)
@@ -187,7 +189,8 @@ typedef struct {
     MtgManaCost pay;
     uint8_t forCost;                                 // CHOOSE's PICK for a cost: 1 sacrifice, 2 discard, 3 exile from
                                                      // the hand, 4 return to the hand, 5 tap, 6 exile from the
-                                                     // graveyard (MTG_COSTK_* + 1)
+                                                     // graveyard (MTG_COSTK_* + 1); 7 another target (a spell's
+                                                     // TargetMax$: answer candidateCount to stop when it may)
 } MtgQuery;
 
 typedef struct {
@@ -234,7 +237,10 @@ typedef struct MtgDuel {
     // query.forCost set, before anyone gets priority
     uint8_t costSac, costDiscard, costPlayer;
     uint16_t costSource, costAbility;
-    uint8_t costExile, costReturn, costTap, costExileGrave;          // ... cards to exile from the hand, permanents to return, to tap
+    uint8_t costExile, costReturn, costTap, costExileGrave;
+    uint8_t tgtLeft, tgtOpt;                         // the casting spell's other targets still to pick: needed, may
+    uint8_t resExtra;                                // its extra targets resolved so far
+    uint16_t resFirst;                               // ... and its first target (each targeting part starts there)          // ... cards to exile from the hand, permanents to return, to tap
     uint8_t costAlt;                                 // ... the cost is the spell's alternative one (its card's altCost)
     MtgQuery query;
     uint32_t eventCount;                             // every event so far (the ring keeps the last MTG_EVENT_RING)

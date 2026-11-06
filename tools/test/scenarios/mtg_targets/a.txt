@@ -1,0 +1,29 @@
+pressuntil A field 5000
+wait 60
+mp mtg starter 0
+mp mtg duel 1
+wait 30
+press A 2
+waitlog 3000 mtg: your move: priority
+wait 10
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 hand Swelter
+mp mtg put 1 field Grizzly Bears
+mp mtg put 1 field Grizzly Bears
+wait 10
+mp mtg focus Swelter
+press A 2
+wait 30
+rendershot t_first
+press A 2
+waitlog 900 mtg: your move: a pick
+wait 12
+rendershot t_second
+press A 2
+waitlog 900 mtg: ready
+wait 150
+rendershot t_after
+quit

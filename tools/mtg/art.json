@@ -307,6 +307,13 @@
 "number": "29",
 "set": "pcy"
 },
+"Alexi, Zephyr Mage": {
+"artist": "Mark Zug",
+"file": "pcy_28",
+"frame": "1997",
+"number": "28",
+"set": "pcy"
+},
 "Ali Baba": {
 "artist": "Julie Baroh",
 "file": "4ed_175",
@@ -664,6 +671,13 @@
 "number": "34",
 "set": "wth"
 },
+"Argothian Elder": {
+"artist": "DiTerlizzi",
+"file": "usg_233",
+"frame": "1997",
+"number": "233",
+"set": "usg"
+},
 "Argothian Enchantress": {
 "artist": "Daren Bader",
 "file": "usg_234",
@@ -768,6 +782,13 @@
 "frame": "1997",
 "number": "104",
 "set": "mir"
+},
+"Ashes to Ashes": {
+"artist": "Drew Tucker",
+"file": "4ed_119",
+"frame": "1993",
+"number": "119",
+"set": "4ed"
 },
 "Aspect of Wolf": {
 "artist": "Jeff A. Menges",
@@ -2260,6 +2281,13 @@
 "number": "219",
 "set": "tmp"
 },
+"Choking Tethers": {
+"artist": "Carl Critchlow",
+"file": "ons_74",
+"frame": "1997",
+"number": "74",
+"set": "ons"
+},
 "Chub Toad": {
 "artist": "Daniel Gelon",
 "file": "ice_229",
@@ -3030,6 +3058,13 @@
 "number": "21",
 "set": "4ed"
 },
+"Death's Duet": {
+"artist": "Keith Parkinson",
+"file": "exo_60",
+"frame": "1997",
+"number": "60",
+"set": "exo"
+},
 "Death's-Head Buzzard": {
 "artist": "Marcelo Vignali",
 "file": "scg_63",
@@ -3338,6 +3373,13 @@
 "number": "69",
 "set": "usg"
 },
+"Distorting Wake": {
+"artist": "Arnie Swekel",
+"file": "inv_52",
+"frame": "1997",
+"number": "52",
+"set": "inv"
+},
 "Dive Bomber": {
 "artist": "Randy Gallegos",
 "file": "ons_26",
@@ -3485,6 +3527,13 @@
 "number": "103",
 "set": "inv"
 },
+"Dregs of Sorrow": {
+"artist": "Thomas Gianni",
+"file": "tmp_131",
+"frame": "1997",
+"number": "131",
+"set": "tmp"
+},
 "Drifting Djinn": {
 "artist": "Carl Critchlow",
 "file": "usg_71",
@@ -3589,6 +3638,13 @@
 "frame": "1997",
 "number": "316",
 "set": "mmq"
+},
+"Dust to Dust": {
+"artist": "Doug Keith",
+"file": "5ed_29",
+"frame": "1997",
+"number": "29",
+"set": "5ed"
 },
 "Dwarven Berserker": {
 "artist": "Douglas Shuler",
@@ -4009,6 +4065,13 @@
 "frame": "1997",
 "number": "25",
 "set": "pls"
+},
+"Essence Fracture": {
+"artist": "Wayne England",
+"file": "ons_82",
+"frame": "1997",
+"number": "82",
+"set": "ons"
 },
 "Eternal Warrior": {
 "artist": "Anson Maddocks",
@@ -4527,6 +4590,13 @@
 "frame": "1997",
 "number": "32",
 "set": "vis"
+},
+"Floodwater Dam": {
+"artist": "Randy Gallegos",
+"file": "all_119",
+"frame": "1993",
+"number": "119",
+"set": "all"
 },
 "Flowstone Blade": {
 "artist": "Allen Williams",
@@ -5914,6 +5984,13 @@
 "number": "8",
 "set": "vis"
 },
+"Hope and Glory": {
+"artist": "Heather Hudson",
+"file": "ulg_9",
+"frame": "1997",
+"number": "9",
+"set": "ulg"
+},
 "Hopping Automaton": {
 "artist": "Val Mayerik",
 "file": "usg_297",
@@ -6305,6 +6382,13 @@
 "frame": "1997",
 "number": "190",
 "set": "inv"
+},
+"Jagged Lightning": {
+"artist": "Michael Weaver",
+"file": "p02_106",
+"frame": "1997",
+"number": "106",
+"set": "p02"
 },
 "Jalum Tome": {
 "artist": "Tom Wänerstrand",
@@ -6866,6 +6950,13 @@
 "number": "201",
 "set": "usg"
 },
+"Lead Astray": {
+"artist": "Adam Rex",
+"file": "jud_14",
+"frame": "1997",
+"number": "14",
+"set": "jud"
+},
 "Leaf Dancer": {
 "artist": "Greg Hildebrandt & Tim Hildebrandt",
 "file": "ody_249",
@@ -7223,6 +7314,13 @@
 "number": "147",
 "set": "ody"
 },
+"Malicious Advice": {
+"artist": "Glen Angus",
+"file": "pls_114",
+"frame": "1997",
+"number": "114",
+"set": "pls"
+},
 "Man-o'-War": {
 "artist": "Jon J Muth",
 "file": "vis_37",
@@ -7496,6 +7594,13 @@
 "number": "256",
 "set": "inv"
 },
+"Midnight Ritual": {
+"artist": "Jeff Easley",
+"file": "mmq_146",
+"frame": "1997",
+"number": "146",
+"set": "mmq"
+},
 "Might Weaver": {
 "artist": "Larry Elmore",
 "file": "inv_198",
@@ -7621,6 +7726,13 @@
 "frame": "1997",
 "number": "158",
 "set": "ons"
+},
+"Mishra's Helix": {
+"artist": "Berry",
+"file": "usg_302",
+"frame": "1997",
+"number": "302",
+"set": "usg"
 },
 "Misshapen Fiend": {
 "artist": "Adam Rex",
@@ -8294,6 +8406,13 @@
 "number": "215",
 "set": "4ed"
 },
+"Orcish Settlers": {
+"artist": "Pete Venters",
+"file": "wth_112",
+"frame": "1997",
+"number": "112",
+"set": "wth"
+},
 "Order of Yawgmoth": {
 "artist": "Chippy",
 "file": "usg_144",
@@ -8475,6 +8594,13 @@
 "frame": "1997",
 "number": "314",
 "set": "mir"
+},
+"Peace and Quiet": {
+"artist": "Don Hazeltine",
+"file": "ulg_17",
+"frame": "1997",
+"number": "17",
+"set": "ulg"
 },
 "Peace of Mind": {
 "artist": "Randy Elliott",
@@ -9190,6 +9316,13 @@
 "number": "119",
 "set": "exo"
 },
+"Rack and Ruin": {
+"artist": "Donato Giancola",
+"file": "ulg_89",
+"frame": "1997",
+"number": "89",
+"set": "ulg"
+},
 "Radiant Essence": {
 "artist": "Jennifer Law",
 "file": "mir_276",
@@ -9245,6 +9378,13 @@
 "frame": "1997",
 "number": "20",
 "set": "scg"
+},
+"Rain of Salt": {
+"artist": "Charles Gillespie",
+"file": "por_147",
+"frame": "1997",
+"number": "147",
+"set": "por"
 },
 "Rain of Tears": {
 "artist": "Eric Peterson",
@@ -9413,6 +9553,13 @@
 "frame": "1997",
 "number": "222",
 "set": "ons"
+},
+"Reckless Spite": {
+"artist": "Pete Venters",
+"file": "tmp_152",
+"frame": "1997",
+"number": "152",
+"set": "tmp"
 },
 "Reclusive Wight": {
 "artist": "Vincent Evans",
@@ -10520,6 +10667,13 @@
 "number": "219",
 "set": "4ed"
 },
+"Shattered Crypt": {
+"artist": "Gary Leach",
+"file": "wth_80",
+"frame": "1997",
+"number": "80",
+"set": "wth"
+},
 "Shatterstorm": {
 "artist": "James Allen",
 "file": "5ed_266",
@@ -10652,6 +10806,13 @@
 "frame": "1993",
 "number": "97a",
 "set": "hml"
+},
+"Sick and Tired": {
+"artist": "Val Mayerik",
+"file": "ulg_66",
+"frame": "1997",
+"number": "66",
+"set": "ulg"
 },
 "Sicken": {
 "artist": "Heather Hudson",
@@ -11948,6 +12109,13 @@
 "number": "69",
 "set": "ulg"
 },
+"Swelter": {
+"artist": "Ben Thompson",
+"file": "jud_101",
+"frame": "1997",
+"number": "101",
+"set": "jud"
+},
 "Sword Dancer": {
 "artist": "Roger Raupp",
 "file": "pcy_25",
@@ -11975,6 +12143,13 @@
 "frame": "1997",
 "number": "133",
 "set": "jud"
+},
+"Symbiosis": {
+"artist": "Jeff Miracola",
+"file": "usg_275",
+"frame": "1997",
+"number": "275",
+"set": "usg"
 },
 "Symbiotic Beast": {
 "artist": "Franz Vohwinkel",
@@ -12283,6 +12458,13 @@
 "frame": "1997",
 "number": "110",
 "set": "mmq"
+},
+"Tidal Surge": {
+"artist": "Douglas Shuler",
+"file": "por_74",
+"frame": "1997",
+"number": "74",
+"set": "por"
 },
 "Tiger Claws": {
 "artist": "Adam Rex",
@@ -12655,6 +12837,13 @@
 "number": "135",
 "set": "jud"
 },
+"Twigwalker": {
+"artist": "Carl Critchlow",
+"file": "ody_279",
+"frame": "1997",
+"number": "279",
+"set": "ody"
+},
 "Twisted Experiment": {
 "artist": "rk post",
 "file": "uds_74",
@@ -12703,6 +12892,13 @@
 "frame": "1997",
 "number": "167",
 "set": "mmq"
+},
+"Undo": {
+"artist": "Terese Nielsen",
+"file": "vis_47",
+"frame": "1997",
+"number": "47",
+"set": "vis"
 },
 "Unearth": {
 "artist": "Don Hazeltine",
@@ -12808,6 +13004,13 @@
 "frame": "1997",
 "number": "85",
 "set": "wth"
+},
+"Urborg Uprising": {
+"artist": "Adam Rex",
+"file": "apc_53",
+"frame": "1997",
+"number": "53",
+"set": "apc"
 },
 "Urborg Volcano": {
 "artist": "Tony Szczudlo",
@@ -13418,6 +13621,13 @@
 "number": "114",
 "set": "mmq"
 },
+"Wave Elemental": {
+"artist": "Zak Plucinski",
+"file": "mir_102",
+"frame": "1997",
+"number": "102",
+"set": "mir"
+},
 "Wayfaring Giant": {
 "artist": "Christopher Moeller",
 "file": "inv_44",
@@ -13663,6 +13873,13 @@
 "number": "194",
 "set": "por"
 },
+"Wintermoon Mesa": {
+"artist": "Tom Wänerstrand",
+"file": "pcy_143",
+"frame": "1997",
+"number": "143",
+"set": "pcy"
+},
 "Wipe Clean": {
 "artist": "Arnie Swekel",
 "file": "scg_26",
@@ -13767,6 +13984,13 @@
 "frame": "1993",
 "number": "279",
 "set": "ice"
+},
+"Word of Binding": {
+"artist": "Ron Spencer",
+"file": "4ed_172",
+"frame": "1993",
+"number": "172",
+"set": "4ed"
 },
 "Word of Blasting": {
 "artist": "Ken Meyer, Jr.",

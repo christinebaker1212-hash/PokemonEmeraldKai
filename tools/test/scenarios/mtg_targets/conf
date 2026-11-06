@@ -1,0 +1,6 @@
+# MAGIC's spells with several targets on the table: SWELTER targets one bear with the spell, then the table asks for the second
+# ("Target which?"); both die. Shots t_first, t_second, t_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: your move: a pick" "mtg: you: picked" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Swelter to focus")
