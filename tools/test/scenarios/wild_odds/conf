@@ -1,0 +1,10 @@
+# Wild odds with a STATIC lead (the user, 2026-11-06: VIRIDIAN FOREST's rare ones came up very often). A PIKACHU
+# leading made the forest's 4% Electric slots (EMOLGA, DEDENNE at GEN 9) one in four each: the GBA's STATIC picked
+# evenly among the matching slots half the time. Now matching slots count double, each by its own odds
+# (wild_encounter.c TryGetAbilityInfluencedWildMonIndex). `mp wildodds N` simulates N grass encounters.
+MODE=1
+WARP=36,0,10,10
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=25:10"
+EXPECT_A=("wildodds: species")
+CHECK="tools/test/scenarios/wild_odds/check.sh"

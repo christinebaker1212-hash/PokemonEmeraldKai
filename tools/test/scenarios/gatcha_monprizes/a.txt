@@ -1,0 +1,38 @@
+pressuntil A field 5000
+mp gatcharig 5 100
+mp gatchapull 2
+wait 10
+mp gatcharig 5
+mp gatchapull 2
+wait 10
+mp gatcharig 5
+mp gatchapull 2
+wait 10
+mp gatcharig 5
+mp gatchapull 2
+wait 10
+mp gatcharig 5
+mp gatchapull 3
+wait 10
+mp gatcharig 5
+mp gatchapull 3
+wait 10
+mp gatcharig 5
+mp gatchapull 3
+wait 10
+mp gatcharig 5
+mp gatchapull 3
+wait 10
+mp gatcharig 4
+mp gatchapull 3
+wait 10
+mp gatcharig 4
+mp gatchapull 3
+wait 10
+mp gatcharig 4
+mp gatchapull 2
+wait 10
+mp gatcharig 4
+mp gatchapull 2
+wait 10
+quit

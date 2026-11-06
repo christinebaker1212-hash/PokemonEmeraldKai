@@ -29,8 +29,8 @@ species = [int(x[1:].rstrip('*')) for v in pools.values() for x in v if x.starts
 items = [int(x[1:]) for v in pools.values() for x in v if x.startswith('i')]
 bad = []
 if gen == 3:
-    if m.group(2) != '19':
-        bad.append('GEN 3 has %s PICKUPs, not the 19 it always had' % m.group(2))
+    if m.group(2) != '26':
+        bad.append('GEN 3 has %s PICKUPs, not 26 (the first 19 and 7 more since 1.131.0)' % m.group(2))
     bad += ['later Moemon %d' % s for s in species if s > num['CHIMECHO']]
     bad += ['later item %d' % i for i in items if 389 <= i <= 396 or i >= 400]
     if len(pools['STANDARD UR']) != 6:
@@ -43,8 +43,13 @@ else:
     for i, g in want.items():
         if (g <= gen) != (i in items):
             bad.append('item %d (GEN %d) %s at GEN %d' % (i, g, 'missing' if g <= gen else 'there', gen))
-    if int(m.group(2)) != 19 + 2 * (gen - 3):
-        bad.append('%s PICKUPs at GEN %d, not %d' % (m.group(2), gen, 19 + 2 * (gen - 3)))
+    want_pickups = 26 + sum([6, 6, 4, 5, 5, 5][:gen - 3])   # each later GENERATION's PICKUPs (1.131.0)
+    if int(m.group(2)) != want_pickups:
+        bad.append('%s PICKUPs at GEN %d, not %d' % (m.group(2), gen, want_pickups))
+    # shiny Moemon only from SSR up (the user, 2026-11-06)
+    for name, v in pools.items():
+        if name.split()[-1] in ('N', 'U', 'R', 'SR') and any(x.endswith('*') for x in v):
+            bad.append('a shiny Moemon in %s' % name)
 for b in bad:
     print('FAIL', b)
 print('%d prizes checked at GEN %d: %s' % (len(species) + len(items), gen, 'ok' if not bad else '%d problems' % len(bad)))

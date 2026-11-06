@@ -3303,6 +3303,43 @@ The user's numbers (2026-11-06), battle_script_commands.c Cmd_getexp / MpCoopSpl
 - Logs "exp: W from the foe, E each of N that fought (unsplit U), EXP Share S" and "exp: slot N +X" (solo).
   `mp gatchapull BANNER` 10-pulls as the phone does. Tests exp_share_egg, exp_unsplit, vitamins_252, gatcha_training.
 
+## The MoeGatcha audit (1.131.0)
+
+The user (2026-11-06): TRAINING drew the fewest pulls, POKé BALLS the next fewest; "improve the pickup as well as the
+main banner, with more rotating options, and a wider variety. Players have noted receiving the same rewards multiple
+times... Reserve shininess in Pokemon to SSR or better. SR odds are too good." mp_gatcha.c:
+- Shiny Moemon only at SSR, UR and EX. STANDARD's R has today's Moemon (batch 0), SR another batch of them (batch 1,
+  never shiny), SSR batch 0 shiny plus the RED GYARADOS (sSSuper is built each day from sSSuperItems in
+  SetupStandard). PICKUP's R and SR / SSR share them. check_gatcha_gen.py fails on a shiny below SSR.
+- SR 5% -> 3% on every banner (the 2% went to N). TRAINING and POKé BALLS: SSR 2%, UR 0.4%, EX 0.1%.
+- The daily round: 4 event Moemon (sDailyMons) + 1 Generation 1-3 Moemon from sClassicDaily + 1 per later GENERATION
+  from sGenDailyMons (13-14 each). Legends: 4 from the week's real-event table + 2 from every Gen 1-3 legend
+  (sLegendDex) + 1 per later GENERATION from all of its legendary / mythical Moemon and its real events
+  (sLaterEvents: ALAMOS DARKRAI, NEWMOON DARKRAI, OAK'S LETTER SHAYMIN, AZURE FLUTE ARCEUS, RANGER MANAPHY, LIBERTY
+  VICTINI, DADA ZARUDE, MOCHI PECHARUNT). DayPick walks a list with a step that shares no factor with its length, so
+  each one comes up once before any comes back.
+- PICKUP: 26 at GEN 3 (7 more: the REGIS, the weather trio, HOENN's starters, the Eeveelutions, SNORLAX / LAPRAS,
+  ABSOL / GARDEVOIR / MILOTIC), 57 at GEN 9 (each generation's trios, pseudo-legends and favorites;
+  EV_SPECIES_STRONG = Lv 50).
+- Repeats: a pick matching one of the save's last 12 prizes (R and up; below, the last 4) is picked again up to four
+  times ("gatcha:recentN" / "gatcha:recentat", log "picked again N time(s)"); a Moemon the POKéDEX has caught comes
+  up half as often (DefWeight); a random one (EV_RANDOM and the new ones) is one not caught when it can be.
+- TRAINING: PERFECT Moemon (EV_TRAINED: every IV 31, Lv 30, SR up; EV_TRAINED_LEGEND at UR; shiny at EX), SOOTHE
+  BELL, EVERSTONE, DESTINY KNOT at R. POKé BALLS: Moemon that come in a special ball (EV_BALLED, through
+  MP_Ball_SetCaught; the note names the ball), legendary ones at UR, shiny at EX.
+- Test gatcha_monprizes (rigged UR / SSR pulls on both banners); gatcha_gen3 / gatcha_gen9 count the PICKUPs.
+
+## Wild odds with STATIC / MAGNET PULL (1.131.0)
+
+The user (2026-11-06): in VIRIDIAN FOREST "certain Pokémon that are supposed to be rare" came up very often.
+`mp wildodds N` (wild_encounter.c MP_WildOddsDump) simulates N grass encounters where the player stands, as
+TryGenerateWildMon chooses them. Without an ability the shares were the table's to the tenth of a percent; with a
+PIKACHU (STATIC) leading, the forest's two 4% Electric slots (EMOLGA, DEDENNE at GEN 9) were 27% each: the GBA's
+STATIC / MAGNET PULL took half of all encounters and picked evenly among the matching slots. Now
+TryGetAbilityInfluencedWildMonIndex counts the matching slots double, each by its own odds (4% -> about 7.5%), and
+reads a water table as its 5 slots (the GBA read 12). Test wild_odds (with a PIKACHU leading, only the two 20% slots
+pass 12%).
+
 ## Triple Battles: the centers in animations (1.120.0)
 
 Battle animations copy a Pokémon (and its partner) onto BG1 or BG2 and hide its sprite while it's there (Cmd_monbg,

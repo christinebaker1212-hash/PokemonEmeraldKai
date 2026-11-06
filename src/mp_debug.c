@@ -2758,6 +2758,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_DebugSwarm(u8 r);
         Sinnoh_DebugSwarm(atoi(arg));
     }
+    else if (strcmp(cmd, "wildodds") == 0)
+    {
+        // wildodds N - N grass encounters here as the game would choose them, counted by species
+        void MP_WildOddsDump(u32 n);
+        int n = 10000;
+        sscanf(arg, "%d", &n);
+        MP_WildOddsDump(n);
+    }
     else if (strcmp(cmd, "landslots") == 0)
     {
         // landslots - grass slots 0-3 here as SINNOH changes them (time of day, swarm): the species

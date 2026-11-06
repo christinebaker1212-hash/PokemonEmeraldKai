@@ -1,0 +1,8 @@
+# MoeGatcha's Moemon prizes on TRAINING and POKe BALLS (1.131.0, the user 2026-11-06: those two banners drew the
+# fewest pulls): TRAINING's PERFECT Moemon have the best IVs in every stat; POKe BALLS' come in a special ball that
+# shows as that ball. Several pulls opening on a rigged UR / SSR (gatcharig) until both kinds came up.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("gatcha: PERFECT Moemon, IVs 31 31 31 31 31 31" "gatcha: it comes in ball item")
+UNEXPECT_A=("[crash]" "TIMEOUT")

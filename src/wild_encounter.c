@@ -56,11 +56,7 @@ static void FeebasSeedRng(u16 seed);
 static bool8 IsWildLevelAllowedByRepel(u8 level);
 static void ApplyFluteEncounterRateMod(u32 *encRate);
 static void ApplyCleanseTagEncounterRateMod(u32 *encRate);
-#ifdef BUGFIX
 static bool8 TryGetAbilityInfluencedWildMonIndex(const struct WildPokemon *wildMon, u8 type, u16 ability, u8 *monIndex, u32 size);
-#else
-static bool8 TryGetAbilityInfluencedWildMonIndex(const struct WildPokemon *wildMon, u8 type, u16 ability, u8 *monIndex);
-#endif
 static bool8 IsAbilityAllowingEncounter(u8 level);
 
 EWRAM_DATA static u8 sWildEncountersDisabled = 0;
@@ -442,11 +438,7 @@ static void CreateWildMon_(u16 species, u8 level)
             CreateMonWithNature(&gEnemyParty[0], species, level, USE_RANDOM_IVS, PickWildMonNature());
     }
 }
-#ifdef BUGFIX
 #define TRY_GET_ABILITY_INFLUENCED_WILD_MON_INDEX(wildPokemon, type, ability, ptr, count) TryGetAbilityInfluencedWildMonIndex(wildPokemon, type, ability, ptr, count)
-#else
-#define TRY_GET_ABILITY_INFLUENCED_WILD_MON_INDEX(wildPokemon, type, ability, ptr, count) TryGetAbilityInfluencedWildMonIndex(wildPokemon, type, ability, ptr)
-#endif
 
 static bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, u8 area, u8 flags)
 {
@@ -1060,44 +1052,38 @@ static bool8 IsAbilityAllowingEncounter(u8 level)
     return TRUE;
 }
 
-static bool8 TryGetRandomWildMonIndexByType(const struct WildPokemon *wildMon, u8 type, u8 numMon, u8 *monIndex)
-{
-    u8 validIndexes[numMon]; // variable length array, an interesting feature
-    u8 i, validMonCount;
-
-    for (i = 0; i < numMon; i++)
-        validIndexes[i] = 0;
-
-    for (validMonCount = 0, i = 0; i < numMon; i++)
-    {
-        if (gSpeciesInfo[wildMon[i].species].types[0] == type || gSpeciesInfo[wildMon[i].species].types[1] == type)
-            validIndexes[validMonCount++] = i;
-    }
-
-    if (validMonCount == 0 || validMonCount == numMon)
-        return FALSE;
-
-    *monIndex = validIndexes[Random() % validMonCount];
-    return TRUE;
-}
-#ifdef BUGFIX
+// Moemon Co-op: a lead with MAGNET PULL / STATIC makes the slots of its type twice as likely, each by its own odds
+// (1.131.0). The GBA's way (half of all encounters one of those slots, picked evenly) made a 4% Electric slot one in
+// four with a PIKACHU leading (the user, 2026-11-06: VIRIDIAN FOREST's rare ones very often). The water table's
+// 5 slots are read as 5 (the GBA read 12 there)
 static bool8 TryGetAbilityInfluencedWildMonIndex(const struct WildPokemon *wildMon, u8 type, u16 ability, u8 *monIndex, u32 size)
-#else
-static bool8 TryGetAbilityInfluencedWildMonIndex(const struct WildPokemon *wildMon, u8 type, u16 ability, u8 *monIndex)
-#endif
 {
+    static const u8 sLandChance[NUM_LAND_MONS_ENCOUNTER_SLOTS] = {20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1};
+    static const u8 sWaterChance[NUM_WATER_MONS_ENCOUNTER_SLOTS] = {60, 30, 5, 4, 1};
+    const u8 *chance = size == NUM_WATER_MONS_ENCOUNTER_SLOTS ? sWaterChance : sLandChance;
+    u16 weight[NUM_LAND_MONS_ENCOUNTER_SLOTS], total = 0, pick;
+    u8 i, matching = 0;
+
+    if (size > NUM_LAND_MONS_ENCOUNTER_SLOTS)
+        size = NUM_LAND_MONS_ENCOUNTER_SLOTS;
     if (GetMonData(&gPlayerParty[0], MON_DATA_SANITY_IS_EGG))
         return FALSE;
-    else if (GetMonAbility(&gPlayerParty[0]) != ability)
+    if (GetMonAbility(&gPlayerParty[0]) != ability)
         return FALSE;
-    else if (Random() % 2 != 0)
+    for (i = 0; i < size; i++)
+    {
+        bool8 match = gSpeciesInfo[wildMon[i].species].types[0] == type || gSpeciesInfo[wildMon[i].species].types[1] == type;
+        weight[i] = chance[i] * (match ? 2 : 1);
+        matching += match;
+        total += weight[i];
+    }
+    if (matching == 0 || matching == size)
         return FALSE;
-
-#ifdef BUGFIX
-    return TryGetRandomWildMonIndexByType(wildMon, type, size, monIndex);
-#else
-    return TryGetRandomWildMonIndexByType(wildMon, type, NUM_LAND_MONS_ENCOUNTER_SLOTS, monIndex);
-#endif
+    pick = Random() % total;
+    for (i = 0; i < size - 1 && pick >= weight[i]; i++)
+        pick -= weight[i];
+    *monIndex = i;
+    return TRUE;
 }
 
 static void ApplyFluteEncounterRateMod(u32 *encRate)
@@ -1125,6 +1111,40 @@ u16 MP_LandSlotSpecies(u8 index)
         return 0;
     info = MP_Region_WildInfo(info);
     return Sinnoh_LandSlot(MP_WildSlotSpecies(info, index), index);
+}
+
+// Moemon Co-op (tests: `mp wildodds N`): N grass encounters here chosen as TryGenerateWildMon chooses them (the lead's
+// ability, the slot's own species, today's outbreak), counted by species
+void MP_WildOddsDump(u32 n)
+{
+    u16 headerId = GetCurrentMapWildMonHeaderId();
+    const struct WildPokemonInfo *info;
+    u16 species[16];
+    u32 count[16], i, k, kinds = 0;
+    if (headerId == HEADER_NONE || (info = gWildMonHeaders[headerId].landMonsInfo) == NULL)
+    {
+        printf("[test] wildodds: no grass here\n");
+        return;
+    }
+    info = MP_Region_WildInfo(info);
+    for (i = 0; i < n; i++)
+    {
+        u8 index;
+        u16 sp;
+        if (!TRY_GET_ABILITY_INFLUENCED_WILD_MON_INDEX(info->wildPokemon, TYPE_STEEL, ABILITY_MAGNET_PULL, &index, NUM_LAND_MONS_ENCOUNTER_SLOTS)
+         && !TRY_GET_ABILITY_INFLUENCED_WILD_MON_INDEX(info->wildPokemon, TYPE_ELECTRIC, ABILITY_STATIC, &index, NUM_LAND_MONS_ENCOUNTER_SLOTS))
+            index = ChooseWildMonIndex_Land();
+        sp = MP_Events_MaybeOutbreak(Sinnoh_LandSlot(MP_WildSlotSpecies(info, index), index));
+        for (k = 0; k < kinds && species[k] != sp; k++)
+            ;
+        if (k == kinds && kinds < ARRAY_COUNT(species))
+            species[kinds] = sp, count[kinds++] = 0;
+        if (k < kinds)
+            count[k]++;
+    }
+    for (k = 0; k < kinds; k++)
+        printf("[test] wildodds: species %d %u of %u (%u.%u%%)\n", species[k], (unsigned)count[k], (unsigned)n,
+               (unsigned)(count[k] * 100 / n), (unsigned)(count[k] * 1000 / n % 10));
 }
 
 // Moemon Kai: a POKé RADAR encounter (src/mp/mp_pokeradar.c) into gEnemyParty[0]: CHAIN's species (SPECIES_NONE: a grass
