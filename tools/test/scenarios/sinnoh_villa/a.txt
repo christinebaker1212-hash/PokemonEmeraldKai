@@ -1,8 +1,8 @@
 pressuntil A field 5000
 wait 30
 mp setflag 0x3758
-mp setflag 0x3766
-mp setflag 0x376B
+mp setflag 0x3753
+mp setflag 0x374C
 mp setvar 0x5258 2
 mp warp 44,68,12,10
 wait 200

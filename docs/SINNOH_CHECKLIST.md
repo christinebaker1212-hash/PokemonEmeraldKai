@@ -90,8 +90,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The VILLA (RESORT AREA) and its furniture: all 44 of Platinum's scripts (the order form, the visitors, each
       piece's own); what's bought stands as Platinum's model (s3d_gyms.c VILLA, its table generated from Platinum's
       villa_furniture.c into src/data/sinnoh_gyms.h, the models in the 3D pack: gymprops.py), blocks its tiles, runs
-      its script on A; the order form's requirements on the game's records (s3d_misc.c 20). The music box's song
-      (SEQ_PL_TOWN02) isn't in the game yet: the music plays on. Test sinnoh_villa
+      its script on A; the order form's requirements on the game's records (s3d_misc.c 20). The music box plays
+      Platinum's song (SEQ_PL_TOWN02 from Platinum's sound data, 1.116.0). Tests sinnoh_villa, sinnoh_music_box
 - [x] The Frontier Brains' and the HALL MATRON's teams (1.114.0: ARGENTA, DARACH, DAHLIA at Platinum's battles with Platinum's sets and words; the FACTORY is Kai's own, with Kai's FACTORY HEAD; PALMER since the TOWER)
 - [x] The size contest (ROUTE 222's house, REMORAID; not PASTORIA's): Platinum's script, s3d_misc.c 6-9 on Emerald's size
       code with Platinum's rounding and starting record; test sinnoh_size_contest
@@ -117,11 +117,12 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       counter from co-op friends talked to there, ROUTE 208's ODD KEYSTONE and ROUTE 209's tower in Platinum's scripts,
       the UNDERGROUND TREASURES CORNER on TV (sinnoh_underground, sinnoh_underground_man, sinnoh_spiritomb,
       sinnoh_spiritomb_talk)
-- [ ] The Underground's own song (SEQ_TANKOU; OREBURGH MINE's stands in)
-- [~] Platinum's songs the game lacks: [x] SEQ_PL_AUDIO (the VILLA's audio system: its bossa nova, mus_sinnoh_villa_audio)
-      and SEQ_PL_PIANO (its piano: the music box, mus_sinnoh_villa) from the user's Platinum rip (2026-11-02, which also
-      gave the Frontier halls and the SUPER CONTEST category dances); [ ] SEQ_OPENING, SEQ_KUSAGASA (the POKé RADAR
-      demo), SEQ_TANKOU: not in the rips the user sent (tracks 1-19 of Platinum's and the Underground's); SEQ_SILENCE_FIELD
+- [x] The Underground's own song (SEQ_TANKOU, from Platinum's sound data: tools/kaisong/sinnoh_songs.py sdat)
+- [x] Platinum's songs the game lacks: [x] SEQ_PL_AUDIO (the VILLA's audio system: its bossa nova, mus_sinnoh_villa_audio)
+      and SEQ_PL_PIANO (its piano, mus_sinnoh_villa) from the user's Platinum rip (2026-11-02, which also
+      gave the Frontier halls and the SUPER CONTEST category dances); [x] SEQ_OPENING, SEQ_KUSAGASA (ROUTE 202's
+      catching lesson), SEQ_TANKOU, SEQ_PL_TOWN02 from Platinum's own sound data (1.116.0, Moemon Music Studio's SDAT
+      player: COOP_NOTES "SINNOH's music"); SEQ_SILENCE_FIELD
       is PAL PARK's (closed)
 - [x] Platinum's POKéDEX ratings (Load*DexRating)
 - [x] Platinum's key items (items 662-684)

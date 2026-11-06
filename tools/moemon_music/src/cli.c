@@ -10,7 +10,8 @@
 //   moemon_music_studio --save IN OUT.mmsproj [SONG]      a project (SONG: the game song it replaces)
 //   moemon_music_studio --original IN OUT.wav             a rip's own sound (its console's emulator)
 //   moemon_music_studio --reference IN OUT.wav [SECONDS]  what the rip's capture says, mixed at full precision
-// IN can also be a rip (PSF, PSF2, USF, GBS / .m3u, 2SF, GSF, GameCube); MMS_BIOS = the PlayStation BIOS folder.
+// IN can also be a rip (PSF, PSF2, USF, GBS / .m3u, 2SF, GSF, GameCube, or a DS sound archive's sequence:
+// "sound_data.sdat#SEQ_NAME" or "sound_data.sdat#NUMBER"); MMS_BIOS = the PlayStation BIOS folder.
 // MMS_DEFAULTS = a defaults file (the window's Defaults panel saves one) every opened song starts with.
 #include <stdio.h>
 #include <stdlib.h>

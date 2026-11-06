@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x3756
+mp setflag 0x3750
+mp setvar 0x5258 2
+mp warp 44,68,18,4
+wait 200
+mp where
+mp face up
+press A 2
+wait 240
+shot mb_playing
+press B 2
+wait 120
+shot mb_after
+quit

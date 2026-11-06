@@ -4537,6 +4537,20 @@ follow_behind, follow_ground.
   TOWER's: gen_maps.py MUSIC), the VILLA's audio system (SEQ_PL_AUDIO; its piano, SEQ_PL_PIANO, is the music box slot
   `villa`), the SUPER CONTEST dances of the Master / Ultra ranks by category (s3d_contest_ui.c BeginDance) and a
   Frontier Brain beaten (for the Brains' battles, not made yet).
+- 2026-11-06 (1.116.0), the songs no rip had, from Platinum's own sound data: tools/kaisong/platinum_sdat.sh fetches
+  pret/pokeplatinum's sound sources at SINNOH's pinned commit (the songs' MIDIs, the banks as text, the wave archives as
+  WAVs, and its converter nitrosfx) and builds a small SDAT (~/.cache/moemon/sdat/pl_sound_data.sdat; Platinum's
+  sequence numbers kept; nitrosfx points its file table 12 bytes short of each file, which the player allows for);
+  Moemon Music Studio's SDAT player (tools/moemon_music/src/rip_sdat.c: `file.sdat#SEQ_NAME`) records them like a 2SF
+  rip; `sinnoh_songs.py sdat` writes music/: SONGS_SDAT, slots 827-830 after JOHTO's radio so no song number moves:
+  MUS_SINNOH_UNDERGROUND (SEQ_TANKOU: the Underground's map, gen_maps.py MUSIC), MUS_SINNOH_CATCHING_DEMO
+  (SEQ_KUSAGASA: ROUTE 202's catching lesson), MUS_SINNOH_OPENING (SEQ_OPENING: ROUTE 201's and the lab's scenes) and
+  MUS_SINNOH_MUSIC_BOX (SEQ_PL_TOWN02: the VILLA's music box, SetScenePlayBGMMusicBox). Test sinnoh_music_box.
+- The VILLA's furniture scripts (1.116.0): gen_scripts.py referenced() also reads src/sinnoh/*.c, so the scripts SINNOH's
+  code runs by label (s3d_gyms.c S3D_Gyms_VillaScript: entries 21-40) are converted; before, the furniture did nothing
+  on A. And each piece's own flag (src/data/sinnoh_gyms.h sVillaFlags, gen_gyms.py): SINNOH's flags are numbered in
+  name order (tools/sinnoh/ids.py), so FLAG_VILLA_FURNITURE_* aren't in a row; s3d_gyms.c assumed they were, so most
+  bought furniture didn't stand there.
 
 
 ## TM51-TM92 (sinnoh-work)

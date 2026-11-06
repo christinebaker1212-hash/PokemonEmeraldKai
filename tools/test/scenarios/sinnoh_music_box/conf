@@ -1,0 +1,9 @@
+# The VILLA's music box (Platinum's own song, SEQ_PL_TOWN02, made from Platinum's sound data by Moemon Music Studio's
+# SDAT player: tools/kaisong/sinnoh_songs.py SONGS_SDAT): with the RACK and the MUSIC BOX bought, A at the RACK runs
+# Platinum's script, which plays the music box's song (MUS_SINNOH_MUSIC_BOX); B ends it and the VILLA's song comes back.
+# Also the VILLA's furniture scripts are there at all (gen_scripts.py finds the ones src/sinnoh/ runs). Shots mb_*.png.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("kaisong: mus_sinnoh_music_box.kaisong plays")
+UNEXPECT_A=("[crash]" "TIMEOUT")

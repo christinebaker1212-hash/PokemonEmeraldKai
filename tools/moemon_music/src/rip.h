@@ -9,7 +9,8 @@
 
 // RIP_GBA: a GSF whose game has its own sound driver (not MP2K), its voices read from the driver as it plays
 // (rip_gsf.cpp: Konami's); RIP_GSF is always a song on MP2K, read from the ROM.
-enum { RIP_PSF1, RIP_PSF2, RIP_USF, RIP_GBS, RIP_2SF, RIP_GSF, RIP_GCN, RIP_SPC, RIP_VGM, RIP_GBA, RIP_NUM_KINDS };
+enum { RIP_PSF1, RIP_PSF2, RIP_USF, RIP_GBS, RIP_2SF, RIP_GSF, RIP_GCN, RIP_SPC, RIP_VGM, RIP_GBA, RIP_SDAT, RIP_NUM_KINDS };
+// RIP_SDAT: a DS sound archive's sequence played by rip_sdat.c's own sequencer ("file.sdat#SEQ_NAME")
 
 #define RIP_MAX_VOICES 64
 #define RIP_MAX_SECONDS 900          // longest a rip plays (15 minutes)
@@ -115,6 +116,7 @@ int rip_open_gsf(RipEmu *e, Rip *r, char *err, int errlen);
 int rip_open_spc(RipEmu *e, Rip *r, char *err, int errlen);
 int rip_open_vgm(RipEmu *e, Rip *r, char *err, int errlen);
 int rip_open_gcn(RipEmu *e, Rip *r, char *err, int errlen);
+int rip_open_sdat(RipEmu *e, Rip *r, int track, char *err, int errlen);
 
 // psflib tags -> Rip fields (title, artist, game, year, copyright, length, fade...)
 int rip_psf_tag(Rip *r, const char *name, const char *value);

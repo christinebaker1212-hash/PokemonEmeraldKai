@@ -1173,7 +1173,7 @@ void S3D_Gyms_LiftProp(float x, float y, float z)
 // of Platinum's (scripts_villa's; the TV: SINNOH's TV broadcast, from below only)
 static bool8 VillaOwns(u8 furniture)
 {
-    return FlagGet(SINNOH_VILLA_FLAG_FIRST + furniture);
+    return furniture < ARRAY_COUNT(sVillaFlags) && FlagGet(sVillaFlags[furniture]);
 }
 
 static void VillaLoad(void)

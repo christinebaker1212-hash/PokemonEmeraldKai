@@ -91,6 +91,7 @@ Files in this repository's `music` folder ship with every update.
 | `mus_sinnoh_bicycle.kaisong` | mus_sinnoh_bicycle | everywhere | Bicycle |
 | `mus_sinnoh_canalave.kaisong` | mus_sinnoh_canalave | everywhere | Canalave City (Daytime) |
 | `mus_sinnoh_canalave_night.kaisong` | mus_sinnoh_canalave_night | everywhere | Canalave City (Nighttime) |
+| `mus_sinnoh_catching_demo.kaisong` | mus_sinnoh_catching_demo | everywhere | SEQ_KUSAGASA |
 | `mus_sinnoh_cavern_on_the_lake.kaisong` | mus_sinnoh_cavern_on_the_lake | everywhere | Cavern on the Lake |
 | `mus_sinnoh_contest_beauty.kaisong` | mus_sinnoh_contest_beauty | everywhere | Super Contest - Beauty Category |
 | `mus_sinnoh_contest_cool.kaisong` | mus_sinnoh_contest_cool | everywhere | Super Contest - Cool Category |
@@ -148,7 +149,9 @@ Files in this repository's `music` folder ship with every update.
 | `mus_sinnoh_looker.kaisong` | mus_sinnoh_looker | everywhere | Looker's Theme |
 | `mus_sinnoh_lucas.kaisong` | mus_sinnoh_lucas | everywhere | Lucas |
 | `mus_sinnoh_mt_coronet.kaisong` | mus_sinnoh_mt_coronet | everywhere | Mt. Coronet |
+| `mus_sinnoh_music_box.kaisong` | mus_sinnoh_music_box | everywhere | SEQ_PL_TOWN02 |
 | `mus_sinnoh_natural_disaster.kaisong` | mus_sinnoh_natural_disaster | everywhere | Natural Disaster! |
+| `mus_sinnoh_opening.kaisong` | mus_sinnoh_opening | everywhere | SEQ_OPENING |
 | `mus_sinnoh_oreburgh.kaisong` | mus_sinnoh_oreburgh | everywhere | Oreburgh City (Daytime) |
 | `mus_sinnoh_oreburgh_gate.kaisong` | mus_sinnoh_oreburgh_gate | everywhere | Oreburgh Gate |
 | `mus_sinnoh_oreburgh_mine.kaisong` | mus_sinnoh_oreburgh_mine | everywhere | Oreburgh Mine |
@@ -188,6 +191,7 @@ Files in this repository's `music` folder ship with every update.
 | `mus_sinnoh_surf.kaisong` | mus_sinnoh_surf | everywhere | Surfing |
 | `mus_sinnoh_twinleaf.kaisong` | mus_sinnoh_twinleaf | everywhere | Twinleaf Town (Daytime) |
 | `mus_sinnoh_twinleaf_night.kaisong` | mus_sinnoh_twinleaf_night | everywhere | Twinleaf Town (Nighttime) |
+| `mus_sinnoh_underground.kaisong` | mus_sinnoh_underground | everywhere | SEQ_TANKOU |
 | `mus_sinnoh_valor_lakefront.kaisong` | mus_sinnoh_valor_lakefront | everywhere | Valor Lakefront (Daytime) |
 | `mus_sinnoh_valor_lakefront_night.kaisong` | mus_sinnoh_valor_lakefront_night | everywhere | Valor Lakefront (Nighttime) |
 | `mus_sinnoh_veilstone.kaisong` | mus_sinnoh_veilstone | everywhere | Veilstone City (Daytime) |
@@ -248,6 +252,7 @@ Files in this repository's `music` folder ship with every update.
 - Field and battle code (by map): Coop
 
 ### mus_victory_gym_leader (354)
+- Scenes: Sinnoh [sinnoh]
 - Field and battle code (by map): Battles, Coop
 
 ### mus_victory_league (355)
@@ -386,6 +391,7 @@ Custom: `mus_poke_mart@rustboro_city_game_center_2f.kaisong`
 - Map music: 20 places<details><summary>show</summary>Lilycove City [lilycove_city], Lilycove City Cove Lily Motel 1F [lilycove_city_cove_lily_motel_1f], Lilycove City Cove Lily Motel 2F [lilycove_city_cove_lily_motel_2f], Lilycove City Department Store 1F [lilycove_city_department_store_1f], Lilycove City Department Store Elevator [lilycove_city_department_store_elevator], Lilycove City Department Store Rooftop [lilycove_city_department_store_rooftop], Lilycove City Harbor [lilycove_city_harbor], Lilycove City House 1 [lilycove_city_house1], Lilycove City House 2 [lilycove_city_house2], Lilycove City House 3 [lilycove_city_house3], Lilycove City House 4 [lilycove_city_house4], Lilycove City Move Deleters House [lilycove_city_move_deleters_house], Lilycove City Pokemon Trainer Fan Club [lilycove_city_pokemon_trainer_fan_club], Pacifidlog Town [pacifidlog_town], Pacifidlog Town House 1 [pacifidlog_town_house1], Pacifidlog Town House 2 [pacifidlog_town_house2], Pacifidlog Town House 3 [pacifidlog_town_house3], Pacifidlog Town House 4 [pacifidlog_town_house4], Pacifidlog Town House 5 [pacifidlog_town_house5], Route 124 Diving Treasure Hunters House [route124_diving_treasure_hunters_house]</details>
 
 ### mus_route111 (409)
+- Map music: Orre Outskirt Stand [orre_outskirt_stand]
 - Events: Route 111 [route111]
 - Field and battle code (by map): Overworld
 
@@ -397,7 +403,7 @@ Custom: `mus_poke_mart@rustboro_city_game_center_2f.kaisong`
 
 ### mus_victory_trainer (412)
 Custom: `mus_victory_trainer@tt.kaisong`
-- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
+- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Export sound [export_sound], Mtg [mtg], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
 - Field and battle code (by map): Battles, Coop
 
 ### mus_title (413)
@@ -586,7 +592,7 @@ Custom: `mus_game_corner@rustboro_city_game_center_1f.kaisong`, `mus_game_corner
 
 ### mus_vs_frontier_brain (471)
 Custom: `mus_vs_frontier_brain@ygo.kaisong`
-- Scenes: POKéMON TCG card duels [tcg], YU-GI-OH! duels [ygo]
+- Scenes: POKéMON TCG card duels [tcg], Sinnoh [sinnoh], YU-GI-OH! duels [ygo]
 - Battles: Frontier Brains (BATTLE FRONTIER)
 
 ### mus_vs_mew (472)
@@ -605,7 +611,7 @@ Custom: `mus_vs_aqua_magma@ygo.kaisong`
 
 ### mus_vs_trainer (476)
 Custom: `mus_vs_trainer@cable_club.kaisong`, `mus_vs_trainer@ygo.kaisong`
-- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Link battles (CABLE CLUB) [cable_club], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], YU-GI-OH! duels [ygo]
+- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Export sound [export_sound], Link battles (CABLE CLUB) [cable_club], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], YU-GI-OH! duels [ygo]
 - Battles: 70 places<details><summary>show</summary>Abandoned Ship Corridors 1F [abandoned_ship_corridors_1f], Abandoned Ship Corridors B1F [abandoned_ship_corridors_b1f], Abandoned Ship Rooms 1F [abandoned_ship_rooms_1f], Abandoned Ship Rooms 2 1F [abandoned_ship_rooms2_1f], Battle Frontier Battle Pyramid Floor [battle_frontier_battle_pyramid_floor], Dewford Town Gym [dewford_town_gym], Fortree City Gym [fortree_city_gym], Jagged Pass [jagged_pass], Lavaridge Town Gym 1F [lavaridge_town_gym_1f], Mauville City (Wally) [mauville_city], Mauville City Gym [mauville_city_gym], Meteor Falls 1F 2R [meteor_falls_1f_2r], Mossdeep City Gym [mossdeep_city_gym], Mt Chimney [mt_chimney], Mt Pyre 2F [mt_pyre_2f], Mt Pyre 3F [mt_pyre_3f], Mt Pyre 4F [mt_pyre_4f], Mt Pyre 5F [mt_pyre_5f], Mt Pyre 6F [mt_pyre_6f], Petalburg City Gym [petalburg_city_gym], Petalburg Woods [petalburg_woods], Route 102 [route102], Route 103 [route103], Route 104 [route104], Route 105 [route105], Route 106 [route106], Route 107 [route107], Route 108 [route108], Route 109 [route109], Route 109 Seashore House [route109_seashore_house], Route 110 [route110], Route 110 Trick House Puzzle 1 [route110_trick_house_puzzle1], Route 110 Trick House Puzzle 2 [route110_trick_house_puzzle2], Route 110 Trick House Puzzle 3 [route110_trick_house_puzzle3], Route 110 Trick House Puzzle 4 [route110_trick_house_puzzle4], Route 110 Trick House Puzzle 6 [route110_trick_house_puzzle6], Route 110 Trick House Puzzle 7 [route110_trick_house_puzzle7], Route 110 Trick House Puzzle 8 [route110_trick_house_puzzle8], Route 111 [route111], Route 112 [route112], Route 113 [route113], Route 114 [route114], Route 115 [route115], Route 116 [route116], Route 117 [route117], Route 118 [route118], Route 119 [route119], Route 120 [route120], Route 121 [route121], Route 123 [route123], Route 124 [route124], Route 125 [route125], Route 126 [route126], Route 127 [route127], Route 128 [route128], Route 129 [route129], Route 130 [route130], Route 131 [route131], Route 132 [route132], Route 133 [route133], Route 134 [route134], Rustboro City Gym [rustboro_city_gym], Rusturf Tunnel [rusturf_tunnel], SS Tidal Lower Deck [ss_tidal_lower_deck], SS Tidal Rooms [ss_tidal_rooms], Sootopolis City Gym B1F [sootopolis_city_gym_b1f], Victory Road 1F [victory_road_1f], Victory Road 1F (Wally) [victory_road_1f], Victory Road B1F [victory_road_b1f], Victory Road B2F [victory_road_b2f]</details>
 - Field and battle code (by map): Battle
 
@@ -672,12 +678,14 @@ Custom: `mus_vs_aqua_magma_leader@ygo.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_rg_encounter_rocket (495)
+- Scenes: Trainer tower [trainer_tower]
 - Events: Kanto Cerulean City [kanto_cerulean_city], Kanto Four Island Icefall Cave Back [kanto_four_island_icefall_cave_back], Kanto Mt Ember Exterior [kanto_mt_ember_exterior], Kanto Rocket Hideout B4F [kanto_rocket_hideout_b4f], Kanto Route 24 [kanto_route24]
 
 ### mus_rg_encounter_girl (496)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Scenes: Trainer tower [trainer_tower]
 
 ### mus_rg_encounter_boy (497)
+- Scenes: Trainer tower [trainer_tower]
 - Events: Kanto Three Island [kanto_three_island], Kanto Two Island Joyful Game Corner [kanto_two_island_joyful_game_corner]
 
 ### mus_rg_hall_of_fame (498)
@@ -716,7 +724,7 @@ Custom: `mus_vs_aqua_magma_leader@ygo.kaisong`
 
 ### mus_rg_vs_trainer (509)
 Custom: `mus_rg_vs_trainer@tt.kaisong`
-- Scenes: TRIPLE TRIAD [tt]
+- Scenes: Export sound [export_sound], Mtg [mtg], TRIPLE TRIAD [tt]
 - Field and battle code (by map): Battles
 
 ### mus_rg_vs_wild (510)
@@ -796,7 +804,7 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Scenes: Pokemon jump [pokemon_jump]
 
 ### mus_rg_union_room (539)
-- Scenes: CO-OP setup screen [setup], POKéMON TCG card duels [tcg], YU-GI-OH! duels [ygo]
+- Scenes: CO-OP setup screen [setup], Export sound [export_sound], POKéMON TCG card duels [tcg], YU-GI-OH! duels [ygo]
 
 ### mus_rg_net_center (540)
 - Map music: Kanto One Island Pokemon Center 1F [kanto_one_island_pokemon_center_1f], Kanto One Island Pokemon Center 2F [kanto_one_island_pokemon_center_2f]
@@ -854,7 +862,7 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_trainer_hill (610)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Johto Battle Tower 1F [johto_battle_tower_1f], Johto Battle Tower Battle Room [johto_battle_tower_battle_room], Johto Battle Tower Elevator [johto_battle_tower_elevator], Johto Battle Tower Hallway [johto_battle_tower_hallway], Johto Battle Tower Outside [johto_battle_tower_outside]
 
 ### mus_johto_new_bark (611)
 Custom: `mus_johto_new_bark.kaisong`
@@ -1003,7 +1011,7 @@ Custom: `mus_johto_follow_me.kaisong`
 
 ### mus_johto_rival_appears (648)
 Custom: `mus_johto_rival_appears.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Events: Johto Indigo Plateau Pokecenter 1F [johto_indigo_plateau_pokecenter1f]
 
 ### mus_johto_rival_departs (649)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
@@ -1334,7 +1342,7 @@ Custom: `mus_sinnoh_oreburgh_gate.kaisong`
 
 ### mus_sinnoh_oreburgh_mine (734)
 Custom: `mus_sinnoh_oreburgh_mine.kaisong`
-- Map music: 13 places<details><summary>show</summary>Sinnoh Fuego Ironworks Building [sinnoh_fuego_ironworks_building], Sinnoh Iron Island 1f [sinnoh_iron_island1f], Sinnoh Iron Island B1f Left Room [sinnoh_iron_island_b1f_left_room], Sinnoh Iron Island B1f Right Room [sinnoh_iron_island_b1f_right_room], Sinnoh Iron Island B2f Left Room [sinnoh_iron_island_b2f_left_room], Sinnoh Iron Island B2f Right Room [sinnoh_iron_island_b2f_right_room], Sinnoh Iron Island B3f [sinnoh_iron_island_b3f], Sinnoh Iron Island Iron Ruins [sinnoh_iron_island_iron_ruins], Sinnoh Oreburgh Mine B1f [sinnoh_oreburgh_mine_b1f], Sinnoh Oreburgh Mine B2f [sinnoh_oreburgh_mine_b2f], Sinnoh Ruin Maniac Cave Long [sinnoh_ruin_maniac_cave_long], Sinnoh Ruin Maniac Cave Short [sinnoh_ruin_maniac_cave_short], Sinnoh Underground [sinnoh_underground]</details>
+- Map music: Sinnoh Fuego Ironworks Building [sinnoh_fuego_ironworks_building], Sinnoh Iron Island 1f [sinnoh_iron_island1f], Sinnoh Iron Island B1f Left Room [sinnoh_iron_island_b1f_left_room], Sinnoh Iron Island B1f Right Room [sinnoh_iron_island_b1f_right_room], Sinnoh Iron Island B2f Left Room [sinnoh_iron_island_b2f_left_room], Sinnoh Iron Island B2f Right Room [sinnoh_iron_island_b2f_right_room], Sinnoh Iron Island B3f [sinnoh_iron_island_b3f], Sinnoh Iron Island Iron Ruins [sinnoh_iron_island_iron_ruins], Sinnoh Oreburgh Mine B1f [sinnoh_oreburgh_mine_b1f], Sinnoh Oreburgh Mine B2f [sinnoh_oreburgh_mine_b2f], Sinnoh Ruin Maniac Cave Long [sinnoh_ruin_maniac_cave_long], Sinnoh Ruin Maniac Cave Short [sinnoh_ruin_maniac_cave_short]
 
 ### mus_sinnoh_gym (735)
 Custom: `mus_sinnoh_gym.kaisong`
@@ -1688,6 +1696,7 @@ Custom: `mus_johto_radio_lucky_channel.kaisong`
 ### mus_johto_radio_buenas_password (821)
 Custom: `mus_johto_radio_buenas_password.kaisong`
 - Scenes: Pokegear [pokegear]
+- Events: Johto Radio Tower 2F [johto_radio_tower2f]
 
 ### mus_johto_radio_unown (822)
 Custom: `mus_johto_radio_unown.kaisong`
@@ -1708,3 +1717,19 @@ Custom: `mus_johto_radio_evolution.kaisong`
 ### mus_johto_radio_rocket (826)
 Custom: `mus_johto_radio_rocket.kaisong`
 - Scenes: Pokegear [pokegear]
+
+### mus_sinnoh_underground (827)
+Custom: `mus_sinnoh_underground.kaisong`
+- Map music: Sinnoh Underground [sinnoh_underground]
+
+### mus_sinnoh_catching_demo (828)
+Custom: `mus_sinnoh_catching_demo.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_opening (829)
+Custom: `mus_sinnoh_opening.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_music_box (830)
+Custom: `mus_sinnoh_music_box.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).

@@ -474,10 +474,12 @@ def villa(root):
         'sVillaFurnitureScriptIDs')[-1]))
     entry = [0 if scripts[t] == 'SCRIPT_ID_OFFSET_TV_BROADCAST' else int(scripts[t], 16) for t in types]
     models = ['S3D_MODEL_%s' % t.replace('VILLA_FURNITURE_', 'VILLA_FURNITURE_') for t in types]
-    out = ['', '// the VILLA (s3d_villa.c): its furniture flags from FLAG_VILLA_FURNITURE_TABLE on, each furniture\'s model and',
+    out = ['', '// the VILLA (s3d_villa.c): each furniture\'s flag (FLAG_VILLA_FURNITURE_*), its model and',
            '// its tiles\' script (Platinum\'s scripts_villa entry; 0: the TV, SINNOH\'s TV broadcast); each slot: furniture,',
            '// collision, x and z of its model (map units), its box left, top, right, bottom (tiles)']
-    out.append('#define SINNOH_VILLA_FLAG_FIRST 0x%X' % ids.flag(root, 'FLAG_VILLA_FURNITURE_TABLE'))
+    # (each piece's own flag: SINNOH's flags are numbered in name order, tools/sinnoh/ids.py, so they aren't in a row)
+    out.append('static const u16 sVillaFlags[%d] = {%s};' % (len(types), ', '.join(
+        '0x%X' % ids.flag(root, 'FLAG_' + t) for t in types)))
     out.append('static const u16 sVillaModels[%d] = {%s};' % (len(types), ', '.join(models)))
     out.append('static const u8 sVillaScripts[%d] = {%s};' % (len(types), ', '.join(str(e) for e in entry)))
     out.append('static const u16 sVillaSlots[%d][8] = {%s};' % (len(slots), ', '.join(

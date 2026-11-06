@@ -8,7 +8,7 @@
 #include "rip.h"
 #include "engine.h"
 
-static const char *const k_kindNames[RIP_NUM_KINDS] = {"PSF", "PSF2", "USF", "GBS", "2SF", "GSF", "GameCube stream", "SPC", "VGM", "GSF"};
+static const char *const k_kindNames[RIP_NUM_KINDS] = {"PSF", "PSF2", "USF", "GBS", "2SF", "GSF", "GameCube stream", "SPC", "VGM", "GSF", "SDAT"};
 
 const char *rip_kind_name(int kind) { return kind >= 0 && kind < RIP_NUM_KINDS ? k_kindNames[kind] : "?"; }
 int rip_needs_bios(int kind) { return kind == RIP_PSF1 || kind == RIP_PSF2; }
@@ -26,6 +26,17 @@ static int ext_is(const char *path, const char *ext) {
 }
 
 int rip_kind_of(const char *path) {
+    // a DS sound archive, maybe naming its sequence after a '#'
+    {
+        const char *h = strrchr(path, '#');
+        char base[1024];
+        size_t n = h ? (size_t)(h - path) : strlen(path);
+        if (n < sizeof base) {
+            memcpy(base, path, n);
+            base[n] = 0;
+            if (ext_is(base, "sdat")) return RIP_SDAT;
+        }
+    }
     if (ext_is(path, "psf") || ext_is(path, "minipsf") || ext_is(path, "psflib")) return RIP_PSF1;
     if (ext_is(path, "psf2") || ext_is(path, "minipsf2") || ext_is(path, "psf2lib")) return RIP_PSF2;
     if (ext_is(path, "usf") || ext_is(path, "miniusf") || ext_is(path, "usflib")) return RIP_USF;
@@ -168,6 +179,7 @@ static int rip_load_inner(Rip *r, const char *path, const char *biosDir, int gbs
     case RIP_GCN: ok = rip_open_gcn(&e, r, err, errlen); break;
     case RIP_SPC: ok = rip_open_spc(&e, r, err, errlen); break;
     case RIP_VGM: ok = rip_open_vgm(&e, r, err, errlen); break;
+    case RIP_SDAT: ok = rip_open_sdat(&e, r, gbsTrack, err, errlen); break;
     }
     if (!ok) {
         if (!err[0]) snprintf(err, errlen, "couldn't play %s", path);

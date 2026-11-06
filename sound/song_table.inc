@@ -1002,6 +1002,16 @@ gSongTable::
 	song mus_johto_radio_evolution, MUSIC_PLAYER_BGM, 0
 	song mus_johto_radio_rocket, MUSIC_PLAYER_BGM, 0
 @ end of JOHTO's radio
+@ Moemon Kai: SINNOH's songs from Platinum's sound data (tools/kaisong/sinnoh_songs.py)
+	.set mus_sinnoh_underground, mus_cave_of_origin
+	.set mus_sinnoh_catching_demo, mus_route101
+	.set mus_sinnoh_opening, mus_route101
+	.set mus_sinnoh_music_box, mus_littleroot
+	song mus_sinnoh_underground, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_catching_demo, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_opening, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_music_box, MUSIC_PLAYER_BGM, 0
+@ end of SINNOH's songs from Platinum's sound data
 
 	.align 2
 dummy_song_header:

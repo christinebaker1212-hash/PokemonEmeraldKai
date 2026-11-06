@@ -767,6 +767,12 @@
 #define MUS_JOHTO_RADIO_EVOLUTION              825
 #define MUS_JOHTO_RADIO_ROCKET                 826
 // end of JOHTO's radio
+// Moemon Kai: SINNOH's songs from Platinum's sound data (tools/kaisong/sinnoh_songs.py)
+#define MUS_SINNOH_UNDERGROUND                827
+#define MUS_SINNOH_CATCHING_DEMO              828
+#define MUS_SINNOH_OPENING                    829
+#define MUS_SINNOH_MUSIC_BOX                  830
+// end of SINNOH's songs from Platinum's sound data
 
 #define MUS_ROUTE118                0x7FFF  // Map is split into 2 music sections. controlled by GetCurrLocationDefaultMusic().
 

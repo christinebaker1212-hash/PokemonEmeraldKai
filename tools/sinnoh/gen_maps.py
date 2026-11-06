@@ -55,7 +55,7 @@ MUSIC = {
     # buildings, caves and the rest
     'SEQ_PC_01_sseq': 'pokecenter', 'SEQ_FS_sseq': 'pokemart', 'SEQ_GYM_sseq': 'gym', 'SEQ_KENKYUJO_sseq': 'research_lab',
     'SEQ_D_01_sseq': 'victory_road', 'SEQ_D_02_sseq': 'eterna_forest', 'SEQ_D_03_sseq': 'cavern_on_the_lake',
-    'SEQ_TANKOU_sseq': 'oreburgh_mine',   # (the Underground's own song isn't made yet: OREBURGH MINE's stands in)
+    'SEQ_TANKOU_sseq': 'underground',   # (from Platinum's own sound data: tools/kaisong/sinnoh_songs.py SONGS_SDAT)
     'SEQ_D_04_sseq': 'oreburgh_mine', 'SEQ_D_05_sseq': 'mt_coronet', 'SEQ_D_06_sseq': 'iron_mountain',
     'SEQ_D_MOUNT1_sseq': 'mt_coronet', 'SEQ_D_MOUNT2_sseq': 'spear_pillar', 'SEQ_D_GINLOBBY_sseq': 'galactic_building',
     'SEQ_D_AGITO_sseq': 'galactic_hideout', 'SEQ_THE_EVENT04_sseq': 'galactic_hideout_deep',

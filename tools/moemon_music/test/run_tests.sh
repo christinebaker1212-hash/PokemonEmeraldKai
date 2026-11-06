@@ -71,6 +71,25 @@ printf 'hifi=0\n' > "$T/hifi.ini"
 MMS_DEFAULTS="$T/hifi.ini" "$B" --save "$T/tiny.gbs" "$T/tiny_lofi.mmsproj"
 grep -q '^hifi=0$' "$T/tiny_lofi.mmsproj"
 
+echo "== Nintendo DS sound archive: a sequence played by the SDAT player, its pitches, intro and loop (an SDAT made here)"
+python3 test/make_test_sdat.py "$T/t.sdat"
+"$B" --original "$T/t.sdat#SEQ_TEST" "$T/sdat_orig.wav"
+python3 - "$T/sdat_orig.wav" <<'PY'
+import sys, wave, struct
+w = wave.open(sys.argv[1]); sr = w.getframerate(); n = w.getnframes()
+d = struct.unpack('<%dh' % (n * 2), w.readframes(n)); a = [(d[i] + d[i + 1]) / 2 for i in range(0, len(d), 2)]
+assert abs(n / sr - 4.5) < 0.05, 'length %.2f s (intro 0.5 + the loop twice)' % (n / sr)
+def freq(t0, t1):
+    x = a[int(t0 * sr):int(t1 * sr)]
+    return sum(1 for i in range(1, len(x)) if x[i - 1] < 0 <= x[i]) / (t1 - t0), max(abs(v) for v in x)
+for (t0, t1), want in (((0.1, 0.4), 0), ((0.6, 0.9), 261.6), ((1.1, 1.4), 329.6), ((1.6, 1.9), 392.0), ((2.1, 2.4), 0),
+                       ((2.6, 2.9), 261.6)):
+    f, peak = freq(t0, t1)
+    assert (peak == 0) if want == 0 else abs(f - want) < 8, '%.1f-%.1f s: %.1f Hz, peak %d (want %s)' % (t0, t1, f, peak, want)
+PY
+"$B" --export "$T/t.sdat#SEQ_TEST" "$T/sdat_song.kaisong" >/dev/null
+python3 test/read_kaisong.py "$T/sdat_song.kaisong" >/dev/null
+
 echo "== Sega Genesis: FM, DAC, PSG tone and noise at the emulator's levels; DAC hits that start without a seek (a VGM made here)"
 python3 test/make_test_vgm.py "$T/parts.vgm"
 "$B" --original "$T/parts.vgm" "$T/parts_orig.wav"

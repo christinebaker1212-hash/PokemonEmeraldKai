@@ -5,6 +5,8 @@ the repository) as song slots of their own and music/<slot>.kaisong files made b
     python3 -I tools/kaisong/sinnoh_songs.py slots              # writes the slots into include/constants/songs.h and
                                                                 # sound/song_table.inc (between their SINNOH markers)
     python3 -I tools/kaisong/sinnoh_songs.py convert DIAMOND_RIP PLATINUM_RIP [STUDIO]   # music/<slot>.kaisong
+    python3 -I tools/kaisong/sinnoh_songs.py sdat [STUDIO]       # SONGS_SDAT: from Platinum's own sound data, no rip:
+                                                                # tools/kaisong/platinum_sdat.sh builds it from the decomp
 
 Each slot is a game song of its own (MUS_SINNOH_*) that plays one of Emerald's songs (FALLBACK) until its .kaisong
 replaces it. A town or route that Platinum plays differently by night has a second slot, <slot>_night
@@ -103,6 +105,21 @@ SONGS = [
     ('P', '49', 'victory_frontier_brain', 'mus_victory_league'),
 ]
 
+# Platinum's songs the rips lack, played from Platinum's own sound data (pret/pokeplatinum's res/sound built by its
+# nitrosfx: tools/kaisong/platinum_sdat.sh) by Moemon Music Studio's SDAT player: (sequence, slot, Emerald song it plays
+# without its .kaisong). Their slots come after JOHTO's radio (FIRST_SDAT), so no other song's number moves.
+FIRST_SDAT = 827
+SONGS_SDAT = [
+    ('SEQ_TANKOU', 'underground', 'mus_cave_of_origin'),
+    ('SEQ_KUSAGASA', 'catching_demo', 'mus_route101'),
+    ('SEQ_OPENING', 'opening', 'mus_route101'),
+    ('SEQ_PL_TOWN02', 'music_box', 'mus_littleroot'),
+]
+H2_BEGIN = '// Moemon Kai: SINNOH\'s songs from Platinum\'s sound data (tools/kaisong/sinnoh_songs.py)'
+H2_END = '// end of SINNOH\'s songs from Platinum\'s sound data'
+T2_BEGIN = '@ Moemon Kai: SINNOH\'s songs from Platinum\'s sound data (tools/kaisong/sinnoh_songs.py)'
+T2_END = '@ end of SINNOH\'s songs from Platinum\'s sound data'
+
 H_BEGIN = '// Moemon Kai: SINNOH\'s songs (tools/kaisong/sinnoh_songs.py)'
 H_END = '// end of SINNOH\'s songs'
 T_BEGIN = '@ Moemon Kai: SINNOH\'s songs (tools/kaisong/sinnoh_songs.py)'
@@ -128,6 +145,13 @@ def slots():
     body = ''.join('\t.set mus_sinnoh_%s, %s\n' % (s[2], s[3]) for s in SONGS)
     body += ''.join('\tsong mus_sinnoh_%s, MUSIC_PLAYER_BGM, 0\n' % s[2] for s in SONGS)
     open(t, 'w').write(replace_block(text, T_BEGIN, T_END, body, '@ end of Johto music\n'))
+    text = open(h).read()
+    body = ''.join('#define MUS_SINNOH_%-26s %d\n' % (x[1].upper(), FIRST_SDAT + i) for i, x in enumerate(SONGS_SDAT))
+    open(h, 'w').write(replace_block(text, H2_BEGIN, H2_END, body, '// end of JOHTO\'s radio\n'))
+    text = open(t).read()
+    body = ''.join('\t.set mus_sinnoh_%s, %s\n' % (x[1], x[2]) for x in SONGS_SDAT)
+    body += ''.join('\tsong mus_sinnoh_%s, MUSIC_PLAYER_BGM, 0\n' % x[1] for x in SONGS_SDAT)
+    open(t, 'w').write(replace_block(text, T2_BEGIN, T2_END, body, '@ end of JOHTO\'s radio\n'))
     names = [s[2] for s in SONGS]
     pairs = ''.join('    {MUS_SINNOH_%s, MUS_SINNOH_%s_NIGHT},\n' % (n.upper(), n.upper()) for n in names if n + '_night' in names)
     open(os.path.join(ROOT, 'src/data/sinnoh_night_songs.h'), 'w').write(
@@ -162,12 +186,37 @@ def convert(diamond, platinum, studio):
     return len(failed)
 
 
+def convert_sdat(studio):
+    """SONGS_SDAT from Platinum's sound data (tools/kaisong/platinum_sdat.sh makes it)"""
+    sdat = os.path.join(os.path.expanduser('~'), '.cache', 'moemon', 'sdat', 'pl_sound_data.sdat')
+    if not os.path.exists(sdat):
+        r = subprocess.run([os.path.join(ROOT, 'tools/kaisong/platinum_sdat.sh'), sdat])
+        if r.returncode:
+            return 1
+    out = os.path.join(ROOT, 'music')
+    failed = 0
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import add_loop
+    for seq, name, _ in SONGS_SDAT:
+        song = 'mus_sinnoh_' + name
+        r = subprocess.run([studio, '--export', sdat + '#' + seq, out, song], capture_output=True, text=True)
+        ok = r.returncode == 0 and os.path.exists(os.path.join(out, song + '.kaisong'))
+        if ok:
+            add_loop.add_loop(os.path.join(out, song + '.kaisong'))
+        print('%-36s %s %s' % (song, 'ok' if ok else 'FAILED', seq), flush=True)
+        failed += not ok
+    return failed
+
+
 def main():
     if sys.argv[1] == 'slots':
         slots()
     elif sys.argv[1] == 'convert':
         studio = sys.argv[4] if len(sys.argv) > 4 else os.path.join(ROOT, 'tools/moemon_music/build/linux/moemon_music_studio')
         sys.exit(convert(sys.argv[2], sys.argv[3], studio))
+    elif sys.argv[1] == 'sdat':
+        studio = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, 'tools/moemon_music/build/linux/moemon_music_studio')
+        sys.exit(convert_sdat(studio))
 
 
 if __name__ == '__main__':

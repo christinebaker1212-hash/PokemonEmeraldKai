@@ -162,7 +162,10 @@ def _music_of():
     out.update({'SEQ_THE_RIV_sseq': 'MUS_SINNOH_RIVAL', 'SEQ_THE_GIRL_sseq': 'MUS_SINNOH_DAWN',
                 'SEQ_THE_BOY_sseq': 'MUS_SINNOH_LUCAS', 'SEQ_TSURETEKE_sseq': 'MUS_SINNOH_FOLLOW_ME',
                 'SEQ_PL_HANDSOME_sseq': 'MUS_SINNOH_LOOKER', 'SEQ_FUE_sseq': 'MUS_SINNOH_AZURE_FLUTE',
-                'SEQ_D_SAFARI_sseq': 'MUS_SINNOH_GREAT_MARSH', 'SEQ_THE_EVENT02_sseq': 'MUS_SINNOH_GALACTIC_APPEARS'})
+                'SEQ_D_SAFARI_sseq': 'MUS_SINNOH_GREAT_MARSH', 'SEQ_THE_EVENT02_sseq': 'MUS_SINNOH_GALACTIC_APPEARS',
+                # from Platinum's own sound data (tools/kaisong/sinnoh_songs.py SONGS_SDAT)
+                'SEQ_KUSAGASA_sseq': 'MUS_SINNOH_CATCHING_DEMO', 'SEQ_OPENING_sseq': 'MUS_SINNOH_OPENING',
+                'SEQ_OPENING_sseq_1': 'MUS_SINNOH_OPENING', 'SEQ_PL_TOWN02_sseq': 'MUS_SINNOH_MUSIC_BOX'})
     return out
 
 
@@ -2339,12 +2342,14 @@ def convertible(root, low, n):
 
 
 def referenced():
-    """{SinnohP_ label} every map's scripts point at (data/maps/Sinnoh_*/scripts.inc)"""
+    """{SinnohP_ label} every map's scripts point at (data/maps/Sinnoh_*/scripts.inc), and SINNOH's code (src/sinnoh/:
+    the VILLA's furniture, s3d_gyms.c S3D_Gyms_VillaScript, and anything else run from C by its label)"""
     out = set()
     for path in glob.glob(os.path.join(ROOT, 'data/maps/Sinnoh_*/scripts.inc')) \
-            + glob.glob(os.path.join(ROOT, 'data/scripts/sinnoh_*.inc')):
+            + glob.glob(os.path.join(ROOT, 'data/scripts/sinnoh_*.inc')) \
+            + glob.glob(os.path.join(ROOT, 'src/sinnoh/*.c')):
         out |= set(re.findall(r'\b(%s\w+)' % PREFIX, open(path, encoding='utf-8').read()))
-    return out
+    return {lab for lab in out if not lab.endswith('_')}   # (a macro's SinnohP_villa_##n is no label)
 
 
 # ----------------------------------------------------------------------------------------------------- map scripts

@@ -607,7 +607,7 @@ static int list_step(int dir)
 static void open_path_track(const char *path, int gbsTrack)
 {
     // a .gbs holds many songs: ask which first
-    if (ends_with(path, ".gbs") && gbsTrack < 0) {
+    if ((ends_with(path, ".gbs") || ends_with(path, ".sdat")) && gbsTrack < 0) {   // (an SDAT: which sequence)
         snprintf(sGbsPath, sizeof(sGbsPath), "%s", path);
         sGbsTrack = 0;
         sModal = MODAL_GBS_TRACK;
@@ -2122,7 +2122,7 @@ static void draw_gbs_track(void)
     textfit(x + 20, y + 44, w - 40, path_base(sGbsPath), C_DIM);
     char lab[32];
     snprintf(lab, sizeof(lab), "%d", sGbsTrack + 1);
-    stepper(x + 20, y + 74, "Song number", &sGbsTrack, 0, 255, 1, lab);
+    stepper(x + 20, y + 74, "Song number", &sGbsTrack, 0, 4095, 1, lab);
     if (button(x + w - 240, y + h - 44, 110, 30, "Open", 1) || kEnter) { sModal = MODAL_NONE; open_path_track(sGbsPath, sGbsTrack); }
     if (button(x + w - 120, y + h - 44, 104, 30, "Cancel", 1) || kEsc) sModal = MODAL_NONE;
 }
