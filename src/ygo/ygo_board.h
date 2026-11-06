@@ -22,6 +22,7 @@ void YgoBoard_Sync(const struct YgoDuel *truth);
 int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, unsigned *card);
 /* Everything that happened has been shown: the opponent waits for it */
 int YgoBoard_Idle(void);
+int YgoBoard_Telegraph(const struct YgoQuery *q, const struct YgoAnswer *a);   /* the opponent's next move shown first */
 void YgoBoard_SetFast(int fast);
 /* The table's background for the next duel */
 enum { YGO_BG_PLAIN, YGO_BG_LIGHT, YGO_BG_DARK, YGO_BG_WATER, YGO_BG_FIRE, YGO_BG_EARTH, YGO_BG_WIND, YGO_BG_ONLINE,

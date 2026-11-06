@@ -916,7 +916,8 @@ static void DuelStep(unsigned pressed, unsigned keys)
             unsigned level = who != 1 ? 3 : U.vs == VS_LESSON ? 0 : U.vs == VS_NPC && U.opp.pool != TCG_SCALE_POOL_NONE ? U.opp.level : 3;
             if (TcgDuel_AiActionLevel(&U.duel, level, &a) &&
                 TcgDuel_Apply(&U.duel, &a) == TCG_OK)
-                U.aiDelay = Tcg_GetCollection()->fastAnimations ? 4 : 14;
+                /* (a beat between the card player's moves, a longer one after the ones you'd want to see) */
+                U.aiDelay = who != 1 ? 6 : Tcg_GetCollection()->fastAnimations ? 8 : a.type == TCG_PASS ? 14 : 22;
             else
             {
                 /* Never stall: an opponent with nothing legal ends its turn. */

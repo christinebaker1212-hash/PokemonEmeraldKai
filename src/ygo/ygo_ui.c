@@ -1003,20 +1003,34 @@ static void DuelStep(unsigned pressed, unsigned keys)
             Y.aiDelay--;
         else
         {
-            /* the opponent at their level; the harness's autoplay for you at its best */
-            if (Y.duel.query.player == 1)
-                YgoDuel_AiAnswerLevel(&Y.duel, Y.opp.level, &a);
+            /* the opponent at their level; the harness's autoplay for you at its best. The opponent's move is shown
+               first (YgoBoard_Telegraph: the card comes forward, the line says what they're doing) and made once the
+               table is idle again */
+            static struct YgoAnswer sTele;
+            static uint32_t sTeleStamp = 0xFFFFFFFF;
+            int show = 0;
+            if (Y.duel.query.player == 1 && sTeleStamp == YgoDuel_AnswerCount(&Y.duel) && YgoDuel_Check(&Y.duel, &sTele))
+                a = sTele, sTeleStamp = 0xFFFFFFFF;
             else
-                YgoDuel_AiAnswer(&Y.duel, &a);
-            if (!YgoDuel_Answer(&Y.duel, &a))
+            {
+                if (Y.duel.query.player == 1)
+                    YgoDuel_AiAnswerLevel(&Y.duel, Y.opp.level, &a);
+                else
+                    YgoDuel_AiAnswer(&Y.duel, &a);
+                if (Y.duel.query.player == 1 && YgoBoard_Telegraph(&Y.duel.query, &a))
+                    sTele = a, sTeleStamp = YgoDuel_AnswerCount(&Y.duel), show = 1;
+            }
+            if (show)
+                ;   /* (made on a later frame) */
+            else if (!YgoDuel_Answer(&Y.duel, &a))
             {
                 printf("[ygo] AI answer refused: %s\n", Y.duel.error);
                 memset(&a, 0, sizeof(a));
                 if (!YgoDuel_Answer(&Y.duel, &a))
                     YgoDuel_Concede(&Y.duel, Y.duel.query.player);
             }
-            Y.aiDelay = Tcg_GetCollection()->fastAnimations ? 4 : 12;
-            if (Y.duel.query.type == YGO_Q_CHAIN || Y.duel.query.type == YGO_Q_CARDS)
+            Y.aiDelay = show ? 0 : Tcg_GetCollection()->fastAnimations ? 6 : 18;
+            if (!show && (Y.duel.query.type == YGO_Q_CHAIN || Y.duel.query.type == YGO_Q_CARDS))
                 Y.aiDelay = 2;
         }
     }

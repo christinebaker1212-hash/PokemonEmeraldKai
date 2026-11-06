@@ -221,6 +221,7 @@ static struct
     int over, frame, tipShown, toActionable;
     unsigned tips;
     u16 music, duelMusic;
+    int teleObj, teleLife;   /* the opponent's next move, shown before it happens (YgoBoard_Telegraph) */
 } B;
 static u16 sNextMusic;
 static int sNextTutorial;
@@ -419,7 +420,12 @@ static struct Rect HomeFacing(unsigned o, float *angle)
         unsigned n = HandList(side, list), i;
         for (i = 0; i < n; i++)
             if (list[i] == o)
-                return side ? OppHandRect(i, n) : HandRect(i, n);
+            {
+                struct Rect r = side ? OppHandRect(i, n) : HandRect(i, n);
+                if (side && (int)o == B.teleObj && B.teleLife > 0)
+                    r.x -= 6;   /* (the card the opponent is about to play comes out of their hand a little) */
+                return r;
+            }
         return side ? OppHandRect(0, 1) : HandRect(0, 1);
     }
     case YGO_LOC_MZONE:
@@ -707,6 +713,14 @@ static int Present(const struct YgoEvent *e)
                                                                                                          : "SUMMON",
                     0xf0c040, Frames(34));
             return Frames(36);
+        }
+        if (c && e->player != B.me)
+        {
+            /* (what the opponent summons is shown up close, whatever its Level: you see what you're up against) */
+            BigCard(c->id, e->value == YGO_SUMMON_FLIP ? "FLIP SUMMON" : e->value == YGO_SUMMON_NORMAL ? "SUMMON"
+                                                                                                     : "SPECIAL SUMMON",
+                    0xf07060, Frames(30));
+            return Frames(32);
         }
         Flash(o, 0xffffff, Frames(16));
         if (ObjCenter(o, &x, &y))
@@ -1453,6 +1467,55 @@ void YgoBoard_Sync(const struct YgoDuel *truth)
     B.d = truth;
     B.objCount = truth->s.objCount;
 }
+/* Moemon Kai: the opponent's next move, shown before it's made (the user: the opponent's turns went by too fast to
+ * follow). The card they're about to use comes forward and glows, and the line under the table says what they're
+ * doing with it; the screen answers for them once the table is idle again. 1 when there's something to show. */
+int YgoBoard_Telegraph(const struct YgoQuery *q, const struct YgoAnswer *a)
+{
+    const struct YgoChoice *ch;
+    const char *verb = NULL;
+    unsigned o;
+    int named = 1, life;
+    if (!B.active || !B.d || a->count == 0 || a->picks[0] >= q->count)
+        return 0;
+    if (q->type != YGO_Q_IDLE && q->type != YGO_Q_BATTLE && q->type != YGO_Q_CHAIN)
+        return 0;
+    ch = &q->items[a->picks[0]];
+    o = ch->obj;
+    if (o >= B.objCount)
+        return 0;
+    if (q->type == YGO_Q_CHAIN)
+        verb = "activates";
+    else
+        switch (ch->kind)
+        {
+        case YGO_ACT_SUMMON:      verb = "Normal Summons"; break;
+        case YGO_ACT_SET_MONSTER: verb = "sets a monster", named = 0; break;
+        case YGO_ACT_FLIP_SUMMON: verb = "Flip Summons"; break;
+        case YGO_ACT_POSITION:    verb = "changes the position of"; break;
+        case YGO_ACT_ACTIVATE:    verb = "activates"; break;
+        case YGO_ACT_SET_SPELL:   verb = "sets a Spell or Trap", named = 0; break;
+        case YGO_ACT_SPECIAL:     verb = "Special Summons"; break;
+        case YGO_ACT_ATTACK:      verb = "attacks with"; break;
+        default:                  return 0;
+        }
+    life = Frames(q->type == YGO_Q_CHAIN ? 24 : 30);
+    B.teleObj = (int)o;
+    B.teleLife = life;
+    Flash(o, 0xff9080, life);
+    if (named)
+    {
+        /* (a card about to be revealed is named; a position change names it only as it's seen) */
+        const char *name = ch->kind == YGO_ACT_POSITION ? NameOf(o) : ObjCard(o) ? ObjCard(o)->name : "a card";
+        Log("%s %s %s.", B.opponent, verb, name);
+    }
+    else
+        Log("%s %s.", B.opponent, verb);
+    if (B.timer < life)
+        B.timer = life;
+    MPNet_Log("ygo board: telegraph %u (%s)", o, verb);
+    return 1;
+}
 int YgoBoard_Idle(void)
 {
     unsigned i;
@@ -1524,6 +1587,8 @@ static void Advance(void)
                 step = -10;
             B.lp[i] += step;
         }
+    if (B.teleLife > 0 && --B.teleLife == 0)
+        B.teleObj = -1;
     if (B.timer > 0)
     {
         B.timer--;
@@ -1536,7 +1601,15 @@ static void Advance(void)
         const struct YgoEvent *e = YgoDuel_GetEvent(s, B.seq++);
         B.settled = 0;
         if (e)
+        {
             B.timer = Present(e);
+            /* (the opponent's own moves stay a moment longer: there's time to see what happened) */
+            if (B.timer > 0 && e->player != B.me &&
+                (e->type == YGO_EV_SUMMON || e->type == YGO_EV_SET || e->type == YGO_EV_ACTIVATE ||
+                 e->type == YGO_EV_POSITION || e->type == YGO_EV_FLIP || e->type == YGO_EV_EQUIP ||
+                 e->type == YGO_EV_CONTROL))
+                B.timer += Frames(10);
+        }
     }
     if (B.seq >= s->eventSeq && B.timer <= 0 && !B.settled)
         Settle();

@@ -5582,3 +5582,19 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   that discard their own Energy or hurt their user count for less unless they knock out (ExpectedDamage). Levels below
   3 sometimes don't retreat (sHoldRetreat). Against the old AI over 3456 duels of the Game Boy decks it wins 54.6%.
   Test tools/tcg/test_ai.c (WeakCharmander).
+
+## The opponent's turn, told (1.112.0)
+The user: the card players' turns went by too fast to follow (POKéMON mostly right, YU-GI-OH! needed more, MAGIC
+the most). Each table now shows a move before it's made and holds what happened a moment longer:
+- **YU-GI-OH!** (ygo_board.c YgoBoard_Telegraph, ygo_ui.c): the AI's answer to a Main / Battle Phase or chain question
+  is kept, the card comes out of their hand (OppHandRect shifted) or glows on the field, the line under the table
+  says what they're doing ("TEST DUELIST sets a monster.", "... Normal Summons Dark Magician."), and the answer goes in
+  once the table is idle again (checked with YgoDuel_Check; online duels unchanged). Every card the opponent summons
+  is shown up close (BigCard), whatever its Level; their summons, sets, activations, position changes, flips, equips
+  and control changes hold Frames(10) longer; 18 frames between their answers (6 FAST).
+- **MAGIC** (mtg_board.c, MtgBoard_Step's computer branch): a land, spell or ability of theirs is telegraphed for
+  30 frames (a glowing card back out of their hand, or their permanent lit up, and "PIP is playing a land..." /
+  "is casting a spell..." / "is using X..."), their land is then shown big for two thirds of a spell's look, an
+  attack is announced ("PIP attacks with 2 creatures!") and each attacker / blocker of theirs holds 24 frames;
+  18 frames after each of their moves (passes stay quick). B.autoplay (the harness) skips all of it.
+- **POKéMON** (tcg_ui.c): 22 frames after each of the card player's moves (14 after a pass, 8 FAST).

@@ -119,6 +119,10 @@ static struct
     int16_t fromX[MTG_MAX_OBJS], fromY[MTG_MAX_OBJS];
     uint8_t slide[MTG_MAX_OBJS];
     int sweepAge, sweepMine, bigCard, bigAge;
+    // the opponent's next move, shown before it's made (the user: their turns went by too fast to follow)
+    int teleT, teleObj, teleFromHand;
+    MtgAnswer teleAnswer;
+    uint32_t teleStamp;
 } B;
 
 static u16 sHeldMusic;
@@ -771,6 +775,13 @@ static void DrawOppHand(void)
     G_TextAlign(16, 62, TA_CENTER, MAT_LABEL, G_NO_SHADOW, "HAND", TF_NARROW);
     for (i = 0; i < shown; i++)
         MtgGfx_DrawCard(MTG_GFX_BACK, (float)(5 + i * 5), 73.0f - (i == 1), 10, 14, (i - 1) * 8.0, 255, 0);
+    if (B.teleT > 0 && B.teleFromHand) {
+        // the card they're about to play, out of their hand and glowing
+        int life = Frames(30), age = life - B.teleT;
+        float k = age < 8 ? age / 8.0f : 1.0f;
+        float x = 10 + 20 * k, y = 70 - 6 * k;
+        MtgGfx_DrawCard(MTG_GFX_BACK, x, y, 12, 17, 0, 255, (unsigned)(90 + 60 * ((B.frame / 6) & 1)));
+    }
     snprintf(n, sizeof(n), "%d", count);
     G_Digits(18 + (shown ? 4 : -6), 82, n, 0, 1, 0xf8f8f8, 255);
 }
@@ -1673,6 +1684,12 @@ static int StartEvent(const MtgEvent *e)
         Ticker("%s played %s.", Who(e->b), a);
         B.flash[obj] = 14;
         PlaySE(SE_RG_CARD_FLIP);
+        if (e->b == THEM && !B.autoplay) {   // their land: shown big too (you see what mana they have coming)
+            B.bigCard = v->objs[obj].def;
+            B.bigAge = BIG_FRAMES / 3;   // (a shorter look than a spell's)
+            B.flash[obj] = 30;
+            return BIG_FRAMES - BIG_FRAMES / 3 + Frames(6);
+        }
         return Frames(14);
     case MTG_EV_CAST:
     case MTG_EV_ACTIVATE: {
@@ -1787,6 +1804,10 @@ static int StartEvent(const MtgEvent *e)
         Name(a, sizeof(a), obj);
         Ticker("%s attacks!", a);
         PlaySE(SE_M_TAKE_DOWN);
+        if (obj >= 0 && obj < MTG_MAX_OBJS && B.duel.objs[obj].controller == THEM) {
+            B.flash[obj] = (uint8_t)Frames(24);   // (each of their attackers, one by one, so you can see who's coming)
+            return Frames(24);
+        }
         return Frames(14);
     case MTG_EV_BLOCK:
         if (obj >= 0 && obj < MTG_MAX_OBJS) {
@@ -1797,7 +1818,7 @@ static int StartEvent(const MtgEvent *e)
         Name(b, sizeof(b), e->b);
         Ticker("%s blocks %s.", a, b);
         PlaySE(SE_M_DETECT);
-        return Frames(16);
+        return obj >= 0 && obj < MTG_MAX_OBJS && B.duel.objs[obj].controller == THEM ? Frames(24) : Frames(16);
     case MTG_EV_DAMAGE: {
         Rect from = ObjRect(obj), to = e->b < 0 ? LifeRect(-1 - e->b) : ObjRect(e->b);
         if (!from.w)
@@ -1880,6 +1901,8 @@ static void Play(void)
     for (i = 0; i < 2; i++)
         if (B.lifeFlash[i])
             B.lifeFlash[i]--;
+    if (B.teleT > 0)
+        B.teleT--;
     if (B.castT)
         B.castT--;
     if (B.resolveT)
@@ -2780,9 +2803,53 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
         }
         {
             MtgAnswer a;
-            MtgAi_Answer(&B.duel, &a);
-            Mtg_Answer(&B.duel, &a);
-            B.aiWait = B.autoplay ? 0 : 2;
+            int shown = 0;
+            if (!B.autoplay && q->player == THEM && B.teleStamp == B.duel.eventCount + 1u) {
+                if (B.teleT > 0)
+                    return 0;       // (still showing it)
+                a = B.teleAnswer;   // (the move shown: now it's made)
+                B.teleStamp = 0;
+            } else {
+                MtgAi_Answer(&B.duel, &a);
+                if (!B.autoplay && q->player == THEM && q->kind == MTG_Q_PRIORITY && a.action < q->actionCount
+                    && q->actions[a.action].kind != MTG_ACT_PASS) {
+                    // their move, shown first: the card comes out of their hand (or their permanent lights up), the
+                    // line says what they're doing, then it's made
+                    const MtgAction *act = &q->actions[a.action];
+                    char name[64];
+                    B.teleAnswer = a;
+                    B.teleStamp = B.duel.eventCount + 1u;
+                    B.teleT = Frames(30);
+                    B.teleObj = act->obj;
+                    B.teleFromHand = act->kind != MTG_ACT_ACTIVATE;
+                    if (act->kind == MTG_ACT_ACTIVATE) {
+                        B.flash[act->obj] = (uint8_t)Frames(30);
+                        Name(name, sizeof(name), act->obj);
+                        Ticker("%s is using %s...", B.opp, name);
+                    } else
+                        Ticker(act->kind == MTG_ACT_LAND ? "%s is playing a land..." : "%s is casting a spell...", B.opp);
+                    PlaySE(SE_SELECT);
+                    shown = 1;
+                }
+            }
+            if (!shown) {
+                int acted = q->player == THEM && ((q->kind == MTG_Q_PRIORITY && a.action < q->actionCount
+                                                   && q->actions[a.action].kind != MTG_ACT_PASS)
+                                                  || (q->kind == MTG_Q_ATTACKERS && a.attack));
+                if (!B.autoplay && q->player == THEM && q->kind == MTG_Q_ATTACKERS && a.attack) {
+                    // their attack, announced before the creatures charge
+                    int n = 0, i;
+                    char line[64];
+                    for (i = 0; i < q->candidateCount; i++)
+                        n += (a.attack >> i) & 1;
+                    snprintf(line, sizeof(line), "%s attacks with %d creature%s!", B.opp, n, n == 1 ? "" : "s");
+                    Hold(line);
+                    PlaySE(SE_M_TAKE_DOWN);
+                }
+                Mtg_Answer(&B.duel, &a);
+                // (a moment after each of their moves: what they did can be seen before the next)
+                B.aiWait = B.autoplay ? 0 : acted ? Frames(18) : 2;
+            }
         }
         return 0;
     }
