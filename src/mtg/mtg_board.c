@@ -1300,6 +1300,8 @@ static const char *PickVerb(void)
         return "Exile";   // (from the graveyard)
     if (q->forCost == 7)
         return "Target";  // (a spell's next target)
+    if (q->candidateCount && B.duel.objs[q->candidates[0]].zone == MTG_ZONE_LIBRARY)
+        return "Find";    // (a search of the library)
     return q->forCost == 1 || (q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_SACRIFICE) ? "Sacrifice"
                                                                                                       : "Choose";
 }
@@ -1485,6 +1487,21 @@ void MtgBoard_Draw(void)
             Rect t = B.rect[q->candidates[B.targetCursor]];
             G_Focus(t.x, t.y, t.w, t.h, 0xf8f070, B.frame);
         } else if (B.targetCursor < q->candidateCount
+                   && B.duel.objs[q->candidates[B.targetCursor]].zone == MTG_ZONE_LIBRARY) {   // a search: the finds fanned
+            int k;
+            char count[16];
+            G_FillA(0, 0, 240, 160, 0x000000, 120);
+            for (k = -2; k <= 2; k++) {
+                int c = B.targetCursor + k, big = k == 0;
+                float w = big ? 52 : 34, h = big ? 72 : 47, x = 120 + k * 40 - w / 2 + (k < 0 ? -6 : k > 0 ? 6 : 0);
+                if (c < 0 || c >= q->candidateCount || ((k == 2 || k == -2) && q->candidateCount < 5))
+                    continue;
+                MtgGfx_DrawCard(B.duel.objs[q->candidates[c]].def, x, 66 - h / 2, w, h, 0, big ? 255 : 170, 0);
+            }
+            G_Focus(120 - 26, 66 - 36, 52, 72, 0xf8f070, B.frame);
+            snprintf(count, sizeof(count), "%d / %d", B.targetCursor + 1, q->candidateCount);
+            G_TextAlign(120, 106, TA_CENTER, 0xffffff, G_NO_SHADOW, count, TF_SMALL);
+        } else if (B.targetCursor < q->candidateCount
                    && B.duel.objs[q->candidates[B.targetCursor]].zone == MTG_ZONE_GRAVEYARD) {   // (its pile)
             int obj = q->candidates[B.targetCursor];
             Rect t = PileRect(B.duel.objs[obj].owner == ME ? PILE_MY_GRAVE : PILE_OPP_GRAVE);
@@ -1597,6 +1614,8 @@ void MtgBoard_Draw(void)
     case MODE_DISCARD:
         Prompt(B.duel.query.kind == MTG_Q_CHOOSE && B.duel.query.forCost == 3 ? "Exile a card to pay the cost.  {A}"
                : B.duel.query.kind == MTG_Q_CHOOSE && B.duel.query.forCost == 2 ? "Discard a card to pay the cost.  {A}"
+               : B.duel.query.kind == MTG_Q_CHOOSE && B.duel.query.ability != 0xFFFF
+                 && gMtgAbilities[B.duel.query.ability].api == MTG_API_CHANGE_ZONE ? "Choose a card from your hand.  {A}"
                : B.duel.query.kind == MTG_Q_CHOOSE ? "Discard a card of your choice.  {A}"
                                                  : "Too many cards in your hand: discard one.  {A}", 1);
         break;

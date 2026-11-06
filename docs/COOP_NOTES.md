@@ -3559,6 +3559,20 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   when only the wrong side is left.
 - Tests: test_rules.c TestTargets (SWELTER, CHOKING TETHERS, HOPE AND GLORY, DREGS OF SORROW), scenario mtg_targets.
 
+## MAGIC's library searches (1.138.0)
+
+- ChangeZone with ChangeType$ and Origin$ Library / Hand (Forge's Hidden ChangeZone, no target): ChangeNum$ cards of
+  that spec, Destination$ Hand / Battlefield / Graveyard / Exile, Tapped$ True (Mtg_ApiParamsKnown; the other hidden
+  keys Mandatory$, ShuffleNonMandatory$, Optional$ are taken as they come: the player always takes a find there is).
+- Resolving (mtg_effects.c): EachChooses with the controller as the one player, FoundOne moves each find (onto the
+  battlefield under the searcher's control), then Mtg_ShuffleLibrary (mtg_game.c) after a library search. A library's
+  copies of one card are one choice (EachChooses dedupes by card), so a 60-card deck fits the 32 candidates.
+- Board: a pick from the library fans the finds around the cursor (MODE_PICK: the big one in the middle, two each side,
+  "n / N"), PickVerb "Find"; a pick from the hand for a ChangeZone says "Choose a card from your hand.".
+- AI: casts searches in its main phase (lands to the battlefield first); picks the costliest card, or the land of the
+  colors its hand asks for; its own cards back from the graveyard too (ScoreAction).
+- Tests: test_rules.c TestSearch (RAMPANT GROWTH, ELVISH PIPER), scenario mtg_search_lib (DIABOLIC TUTOR).
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

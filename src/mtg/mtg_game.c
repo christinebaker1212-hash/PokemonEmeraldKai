@@ -372,6 +372,18 @@ void Mtg_DuelInit(MtgDuel *d, const MtgDeck *deck0, const MtgDeck *deck1, uint32
     Run(d);
 }
 
+void Mtg_ShuffleLibrary(MtgDuel *d, int player)
+{
+    MtgPlayer *pl = &d->players[player];
+    int i;
+    for (i = pl->libraryCount - 1; i > 0; i--) {   // (Fisher-Yates, as at the start)
+        int j = (int)Mtg_Random(d, (uint32_t)i + 1);
+        uint16_t t = pl->library[i];
+        pl->library[i] = pl->library[j];
+        pl->library[j] = t;
+    }
+}
+
 // ---- the stack ----
 static int TargetStillLegal(const MtgDuel *d, const MtgStackEntry *e, const MtgAbility *ab)
 {

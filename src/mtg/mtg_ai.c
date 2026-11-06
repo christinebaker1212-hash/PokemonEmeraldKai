@@ -161,10 +161,16 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
         return 0;
     }
     case MTG_API_DESTROY:
-    case MTG_API_CHANGE_ZONE:
+    case MTG_API_CHANGE_ZONE: {
+        const char *o = Mtg_Param(ab, "Origin"), *dz = Mtg_Param(ab, "Destination");
+        if (Mtg_Param(ab, "ChangeType"))   // a search: worth it in its main phase (a land one early)
+            return main ? (dz && strcmp(dz, "Battlefield") == 0 ? 14 : 11) : 0;
+        if (o && strcmp(o, "Graveyard") == 0 && tgtObj >= 0 && tgtMine && dz && strcmp(dz, "Exile") != 0)
+            return main ? 8 + Mtg_ManaCostTotal(&Mtg_Card(d->objs[tgtObj].def)->cost) : 0;   // (its own card back)
         if (tgtObj < 0 || tgtMine || !IsCreatureOnField(d, tgtObj))
             return 0;
         return 20 + Value(d, tgtObj);
+    }
     case MTG_API_TAP:
         return 0;
     case MTG_API_DESTROY_ALL:
@@ -352,6 +358,30 @@ static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
     int i, best = 0, bestV = 1 << 30;
     if (q->choice != MTG_CHOICE_PICK) {
         out->card = 1;
+        return;
+    }
+    if (q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_CHANGE_ZONE
+        && Mtg_Param(&gMtgAbilities[q->ability], "ChangeType")) {   // a search: the most useful find
+        int bestS = -1;
+        for (i = 0; i < q->candidateCount; i++) {
+            const MtgCardDef *c = Mtg_Card(d->objs[q->candidates[i]].def);
+            int sc = Mtg_ManaCostTotal(&c->cost) * 2 + ((c->types & MTG_T_CREATURE) ? c->power + c->toughness : 0), k;
+            if (c->types & MTG_T_LAND) {   // (a land: the colors its hand asks for)
+                sc = 1;
+                for (k = 0; k < d->objCount; k++) {
+                    const MtgObj *h = &d->objs[k];
+                    int col;
+                    if (h->zone != MTG_ZONE_HAND || h->owner != q->player)
+                        continue;
+                    for (col = 0; col < 5; col++)
+                        if ((c->intrinsicMana & MTG_COLOR_BIT(col)) && Mtg_Card(h->def)->cost.pip[col])
+                            sc += 2;
+                }
+            }
+            if (sc > bestS)
+                bestS = sc, best = i;
+        }
+        out->card = (uint8_t)best;
         return;
     }
     if (q->forCost == 7) {   // another target: the opponent's best for what harms, its own best for what helps

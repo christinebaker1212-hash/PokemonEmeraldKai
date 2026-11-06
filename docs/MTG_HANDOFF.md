@@ -42,6 +42,11 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.138.0)
+- Library and hand searches (ChangeType$): COOP_NOTES "MAGIC's library searches". 2104 of 5408. Still out: Reveal$,
+  LibraryPosition$ (to the library's top: Worldly Tutor), searches of other players (DefinedPlayer$), the sideboard
+  (Wishes), "may" finds left unpicked.
+
 ## Status (2026-11-07: 1.137.0)
 - Several targets (TargetMin$ / TargetMax$, numbers and X): COOP_NOTES "MAGIC's spells with several targets". 2032 of
   5408. Still out: dividing damage or counters among them (DividedAsYouChoose: Arc Lightning, Fireball), MaxTgts SVars,

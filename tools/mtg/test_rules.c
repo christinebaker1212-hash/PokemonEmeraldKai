@@ -1220,6 +1220,34 @@ static void TestTargets(void)
     }
 }
 
+// searches (ChangeZone with ChangeType$: Hidden, the library or the hand)
+static void TestSearch(void)
+{
+    int growth, lands, piper, wurm, i, found = -1;
+    printf("searches\n");
+    Table();   // RAMPANT GROWTH: a basic land from the library onto the battlefield tapped (the table's libraries: Plains)
+    Lands(0, "Forest", 2);
+    growth = Put(0, "Rampant Growth", MTG_ZONE_HAND);
+    lands = sD.players[0].libraryCount;
+    Do(MTG_ACT_CAST, growth, -1, 0);
+    PassBoth();
+    for (i = 0; i < sD.objCount; i++)
+        if (sD.objs[i].zone == MTG_ZONE_BATTLEFIELD && sD.objs[i].controller == 0
+            && strcmp(Mtg_Card(sD.objs[i].def)->name, "Plains") == 0)
+            found = i;
+    CHECK(found >= 0 && sD.objs[found].tapped, "a Plains found, onto the battlefield tapped");
+    CHECK(sD.players[0].libraryCount == lands - 1, "one card fewer in the library (%d)", sD.players[0].libraryCount);
+
+    Table();   // ELVISH PIPER: {G}, {T}: a creature card from the hand onto the battlefield (the only one: no question)
+    Lands(0, "Forest", 1);
+    piper = Put(0, "Elvish Piper", MTG_ZONE_BATTLEFIELD);
+    sD.objs[piper].sick = 0;
+    wurm = Put(0, "Craw Wurm", MTG_ZONE_HAND);
+    Do(MTG_ACT_ACTIVATE, piper, -1, 0);
+    PassBoth();
+    CHECK(Zone(wurm) == MTG_ZONE_BATTLEFIELD && sD.objs[wurm].controller == 0, "the wurm is on the battlefield");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1550,6 +1578,7 @@ int main(int argc, char **argv)
     TestAltCosts();
     TestGranted();
     TestTargets();
+    TestSearch();
     TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

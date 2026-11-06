@@ -183,6 +183,7 @@ int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other);
 int Mtg_ObjAbilities(const MtgDuel *d, int obj, uint16_t *out, int max);
 int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max);
 int Mtg_StaticController(const MtgDuel *d, int obj);
+void Mtg_ShuffleLibrary(MtgDuel *d, int player);   // (mtg_game.c)
 // CheckSVar$: card's SVar NAME counted for SRC (its controller CTRL) compared as CMP says ("GE7", "LEY", NULL = GE1)
 int Mtg_CheckSvar(const MtgDuel *d, int card, int src, int ctrl, const char *name, const char *cmp);
 int Mtg_CheckSvarKnown(int card, const char *name, const char *cmp);   // GainControl$ You statics: who controls OBJ (-1: none says)    // ... and triggers (AddTrigger$)

@@ -1,0 +1,6 @@
+# MAGIC's library searches on the table: DIABOLIC TUTOR fans the library's cards (one of each), RIGHT moves along, A takes it into
+# the hand. Shots s_pick, s_next, s_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: your move: a pick" "mtg: you: picked" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Diabolic Tutor to focus")
