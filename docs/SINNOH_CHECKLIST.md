@@ -151,7 +151,9 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The POFFIN HOUSE's cooking as the game's BERRY BLENDER (CheckCanCookPoffin, OpenPoffinCooking)
 - [x] Platinum's stage art (1.113.0: contest_bg.narc's VISUAL stage and audience, DANCE floor, ACTING stage and results
       bars behind the rounds: build_contest.py stages() "CSTG", s3d_contest_ui.c DrawStagePicture) (sinnoh_contest)
-- [ ] Contests with friends (co-op, as Kai's link contests)
+- [x] Contests with friends: the link desk's BECOME LEADER / JOIN GROUP gather friends in the room; every game runs
+      the same contest, each one's dress-up, steps and moves over the relay (sinnoh_contest_link: COOP_NOTES "SUPER
+      CONTESTS with friends")
 - [x] POKé BALL effects (Kai's mp_ballfx.c) wherever Platinum has Seals: each Seal stands for an earned ball effect
       piece; the SUNYSHORE MARKET's Seal shop sells the day's at Platinum's prices (sinnoh_seals), SOLACEON's gifts
       unlock them, the PC's BALL CAPSULES are the summary's POKé BALL page, the TV's SEAL CLUB SHOW tells of a POKéMON
@@ -169,7 +171,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The interviews and records from SINNOH's own systems: contests, the dress-up photo (PHOTO RATING), POFFINS (the
       POFFIN HOUSE's blends), the BATTLE TOWER's records and interviews, the HALL, BP, ribbons, the GAME CORNER, BERRY
       patches (BERRY LOOKOUT), AMITY SQUARE, the VILLA (sinnoh_studio, sinnoh_tower: COOP_NOTES "SINNOH's TV")
-- [ ] Friends' segments on each other's TV (Platinum's record mixing: co-op)
+- [x] Friends' segments on each other's TV: CO-OP's record mixing carries each game's kept segments; the TV keeps 8
+      of friends' and airs them with the friend's name (sinnoh_tv_mix: COOP_NOTES "SINNOH's TV")
 - [x] JUBILIFE TV's floors and their people: every script converts; the 3F questionnaire man's two words on the
       game's own easy chat (EASY_CHAT_TYPE_MP_TWO_WORDS, its QUESTIONNAIRE screen); his MYSTERY GIFT phrase is the
       game's own (LINK TOGETHER WITH ALL); no phrase unlocks Platinum's extra PC wallpapers (the game's PC has its

@@ -1,0 +1,13 @@
+pressuntil A field 5000
+wait 30
+mp platinumstory
+mp warp 40,1,10,20
+wait 90
+waitfor field 1000
+mp tvcatch 25 2
+waitfor online 6000
+waitlog 3000 mix: applied
+wait 60
+mp tv
+wait 30
+quit

@@ -772,3 +772,4 @@ gSpecials::
 	def_special MP_TrainerTower_Leave
 	def_special CallJohtoBattleTowerFunc   @ Moemon Kai: JOHTO's BATTLE TOWER as Crystal's (src/mp/mp_johto_tower.c, audit case 37)
 	def_special Sinnoh_TvChooseTwoWords, waitstate=1   @ Moemon Kai: JUBILIFE TV's questionnaire, two words (src/sinnoh/s3d_tv.c)
+	def_special Sinnoh_ContestLinkWait, waitstate=1   @ Moemon Kai: SUPER CONTESTS with friends, the group (src/sinnoh/s3d_contest_link.c)

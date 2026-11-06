@@ -1,0 +1,70 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp warp 44,73,5,6
+wait 90
+mash A 60 10
+pressuntil B field 2000
+wait 30
+mp warp 44,73,5,6
+wait 90
+waitfor field 1000
+mp face up
+barrier desk 2
+press A 1
+wait 60
+press A 1
+wait 70
+press A 1
+wait 70
+press A 1
+wait 70
+press A 1
+wait 70
+press A 1
+wait 70
+press A 1
+wait 70
+press A 1
+wait 70
+press A 1
+wait 70
+press A 1
+wait 70
+press A 1
+wait 70
+press A 1
+wait 70
+press A 1
+wait 70
+shot l_group
+press DOWN 1
+wait 10
+press A 1
+wait 70
+shot l_launch
+press A 1
+wait 60
+shot l_lobby
+barrier lobby 2
+wait 240
+shot l_joined
+press A 1
+wait 40
+shot l_ok
+press A 1
+wait 120
+mash A 60 15
+rendershot l_dress
+press START 1
+wait 60
+mash A 80 15
+rendershot l_dance
+mash A 200 8
+rendershot l_acting
+mash A 200 8
+rendershot l_results
+pressuntil A field 20000
+shot l_back
+quit

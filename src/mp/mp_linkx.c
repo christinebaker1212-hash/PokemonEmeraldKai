@@ -170,6 +170,12 @@ void Sinnoh_RankingsPrepare(void *dest);
 void Sinnoh_RankingsMix(const u8 *entries, u8 count, u8 mine, u32 size);
 #define RANK_MAX 0x200
 static EWRAM_DATA u8 *sMixRank = NULL;   // MAX_LINK_PLAYERS players' rankings entries, RANK_MAX apart
+// SINNOH's TV: each game's kept segments, aired on the others' TVs with their name (src/sinnoh/s3d_tv.c)
+u32 Sinnoh_TvMixSize(void);
+void Sinnoh_TvMixPrepare(void *dest);
+void Sinnoh_TvMix(const u8 *entries, u8 count, u8 mine, u32 stride);
+#define TVMIX_MAX 0x300
+static EWRAM_DATA u8 *sMixTv = NULL;     // MAX_LINK_PLAYERS players' TV segments, TVMIX_MAX apart
 
 static u8 RankOf(u8 id, u8 mask)
 {
@@ -178,18 +184,20 @@ static u8 RankOf(u8 id, u8 mask)
 
 static bool8 MixBuffers(void)
 {
-    if (MP_RecordMix_RecordSize() > REC_MAX || Sinnoh_RankingsEntriesSize() > RANK_MAX)
+    if (MP_RecordMix_RecordSize() > REC_MAX || Sinnoh_RankingsEntriesSize() > RANK_MAX || Sinnoh_TvMixSize() > TVMIX_MAX)
         return FALSE;
     if (sMixRank == NULL)
         sMixRank = calloc(1, RANK_MAX * MAX_LINK_PLAYERS);
+    if (sMixTv == NULL)
+        sMixTv = calloc(1, TVMIX_MAX * MAX_LINK_PLAYERS);
     // PC memory, not the game's heap: these stay around between rounds, and taking
     // ~27 KB of gHeap for good left battles short (a move animation's graphics
     // failed to load and the game crashed)
     if (sMixRecv == NULL)
         sMixRecv = calloc(1, REC_MAX * MAX_LINK_PLAYERS);
     if (sMixSend == NULL)
-        sMixSend = calloc(1, REC_MAX + 8 + sizeof(struct LinkPlayer) + 0x400 + RANK_MAX);
-    return sMixRecv != NULL && sMixSend != NULL;
+        sMixSend = calloc(1, REC_MAX + 8 + sizeof(struct LinkPlayer) + 0x400 + RANK_MAX + TVMIX_MAX);
+    return sMixRecv != NULL && sMixSend != NULL && sMixRank != NULL && sMixTv != NULL;
 }
 
 static void StartMixRound(bool8 manual)
@@ -233,6 +241,7 @@ static void OnMixStart(u8 from, const u8 *data, u16 len)
     sMix.startFrame = sFrame;
     memset(sMixRecv, 0, REC_MAX * MAX_LINK_PLAYERS);
     memset(sMixRank, 0, RANK_MAX * MAX_LINK_PLAYERS);
+    memset(sMixTv, 0, TVMIX_MAX * MAX_LINK_PLAYERS);
 
     // Our record, made as the link player with our rank
     p = sMixSend;
@@ -252,8 +261,11 @@ static void OnMixStart(u8 from, const u8 *data, u16 len)
     memcpy(p + 3 + sizeof(struct LinkPlayer), sMixRecv + rank * size, size);
     Sinnoh_RankingsPrepare(sMixRank + rank * RANK_MAX);   // (then our rankings entries)
     memcpy(p + 3 + sizeof(struct LinkPlayer) + size, sMixRank + rank * RANK_MAX, Sinnoh_RankingsEntriesSize());
+    Sinnoh_TvMixPrepare(sMixTv + rank * TVMIX_MAX);   // (then our TV segments)
+    memcpy(p + 3 + sizeof(struct LinkPlayer) + size + Sinnoh_RankingsEntriesSize(), sMixTv + rank * TVMIX_MAX,
+           Sinnoh_TvMixSize());
     sMix.got |= 1 << rank;
-    MP_SendRelay(0xFF, p, 3 + sizeof(struct LinkPlayer) + size + Sinnoh_RankingsEntriesSize());
+    MP_SendRelay(0xFF, p, 3 + sizeof(struct LinkPlayer) + size + Sinnoh_RankingsEntriesSize() + Sinnoh_TvMixSize());
     MPNet_Log("mix: round %d, %d players, rank %d", sMix.round, count, rank);
 }
 
@@ -263,7 +275,7 @@ static void OnMixRec(u8 from, const u8 *data, u16 len)
     u8 rank;
     if (!sMix.active || len < 3 || data[1] != sMix.round || data[2] != sMix.mask || !(sMix.mask & (1 << from)))
         return;
-    if (len < 3 + sizeof(struct LinkPlayer) + size + Sinnoh_RankingsEntriesSize())
+    if (len < 3 + sizeof(struct LinkPlayer) + size + Sinnoh_RankingsEntriesSize() + Sinnoh_TvMixSize())
     {
         AbortMix();   // they can't right now
         return;
@@ -272,6 +284,8 @@ static void OnMixRec(u8 from, const u8 *data, u16 len)
     memcpy(&sMix.players[rank], data + 3, sizeof(struct LinkPlayer));
     memcpy(sMixRecv + rank * size, data + 3 + sizeof(struct LinkPlayer), size);
     memcpy(sMixRank + rank * RANK_MAX, data + 3 + sizeof(struct LinkPlayer) + size, Sinnoh_RankingsEntriesSize());
+    memcpy(sMixTv + rank * TVMIX_MAX, data + 3 + sizeof(struct LinkPlayer) + size + Sinnoh_RankingsEntriesSize(),
+           Sinnoh_TvMixSize());
     sMix.got |= 1 << rank;
     if (sMix.got == (1 << sMix.count) - 1)
         sMix.applyPending = TRUE;
@@ -294,6 +308,7 @@ static void ApplyMix(void)
     MP_RecordMix_Receive(sMixRecv, sMix.myRank);
     NetLink_EndRecordMix();
     Sinnoh_RankingsMix(sMixRank, sMix.count, sMix.myRank, RANK_MAX);   // (JUBILIFE TV's rankings)
+    Sinnoh_TvMix(sMixTv, sMix.count, sMix.myRank, TVMIX_MAX);          // (friends' TV segments)
     for (i = 1; i < SECRET_BASES_COUNT; i++)
         if (gSaveBlock1Ptr->secretBases[i].secretBaseId && gSaveBlock1Ptr->secretBases[i].secretBaseId != before[i])
             newBases++;

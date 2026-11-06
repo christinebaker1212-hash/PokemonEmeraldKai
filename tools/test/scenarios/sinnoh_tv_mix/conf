@@ -1,0 +1,11 @@
+# Friends' segments on SINNOH's TV (Platinum's mixed TV records): ALICE and BOB each have a catch kept (CATCH THAT
+# POKéMON SHOW); CO-OP's record mixing carries each game's kept segments (protocol 77), so each TV keeps the other's
+# with their name (s3d_tv.c Sinnoh_TvMix) and may air it: TRAINER SIGHTINGS (program 3) shows the friend's catch.
+MODE=2
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=418:20"
+ENV_B="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("mix: applied" "sinnoh tv: 1 friends' segments mixed in" "tv: friend BOB type 2 segment 1")
+EXPECT_B=("mix: applied" "sinnoh tv: 1 friends' segments mixed in" "tv: friend ALICE type 2 segment 1")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]")

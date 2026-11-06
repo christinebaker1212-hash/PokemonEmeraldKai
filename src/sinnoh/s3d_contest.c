@@ -332,6 +332,11 @@ static void FillPlayer(struct ContestEntrant *e, u8 slot)
     e->backdrop = 0;
 }
 
+void Contest_FillPlayerEntrant(struct ContestEntrant *e, u8 slot)
+{
+    FillPlayer(e, slot);
+}
+
 // JUBILIFE TV's dress-up studio: the party POKéMON dressed with no contest around it (s3d_contest_ui.c)
 void Contest_StudioEntrant(u8 slot)
 {
@@ -370,13 +375,28 @@ static u8 PickTheme(void)
     return list[Contest_Random() % n];
 }
 
+bool8 Contest_LinkPlan(u32 *seed, u8 *rank, u8 *type, u8 *gameDone, u8 *humans, u8 *me);   // (s3d_contest_link.c)
+const u8 *Contest_LinkEntry(u8 seat);
+
 void Contest_New(u8 rank, u8 type, u8 mode, u8 slot)
 {
-    u8 i;
+    u8 i, gameDone = FlagGet(FLAG_SYS_GAME_CLEAR), humans = 1, me = 0;
+    u32 seed;
+    bool8 link;
     memset(&C, 0, sizeof(C));
     C.rng = Random() | (u32)Random() << 16;
     if (getenv("MOEMON_TEST_CONTEST_SEED"))
         C.rng = strtoul(getenv("MOEMON_TEST_CONTEST_SEED"), NULL, 0);
+    // with friends (s3d_contest_link.c): the leader's seed, rank and type, everyone's entrant in their seat
+    link = Contest_LinkPlan(&seed, &rank, &type, &gameDone, &humans, &me);
+    if (link)
+    {
+        C.rng = seed;
+        mode = CONTEST_OFFICIAL;
+    }
+    C.link = link;
+    C.me = me;
+    C.humans = humans;
     C.rank = rank > 3 ? 3 : rank;
     C.type = type % 5;
     C.mode = mode <= CONTEST_PRACTICE_ACTING + 1 ? mode : CONTEST_OFFICIAL;
@@ -384,7 +404,7 @@ void Contest_New(u8 rank, u8 type, u8 mode, u8 slot)
     C.theme = PickTheme();
     C.made = TRUE;
     FillPlayer(&C.e[0], slot);
-    PickOpponents(FlagGet(FLAG_SYS_GAME_CLEAR));
+    PickOpponents(gameDone);
     PickJudges();
     for (i = 1; i < CONTEST_ENTRANTS; i++)
     {
@@ -392,6 +412,10 @@ void Contest_New(u8 rank, u8 type, u8 mode, u8 slot)
             C.e[i].opponent = i - 1 < OpponentCount() ? i - 1 : 0;
         FillOpponent(&C.e[i]);
     }
+    if (link)
+        for (i = 0; i < CONTEST_ENTRANTS; i++)
+            if ((humans >> i) & 1)
+                Contest_UnpackEntrant(Contest_LinkEntry(i), &C.e[i]);
     for (i = 0; i < CONTEST_ENTRANTS; i++)
         C.order[i] = Contest_IsPractice() ? CONTEST_ENTRANTS - 1 - i : i;
     MPNet_Log("sinnoh contest: rank %d type %d mode %d theme %d, opponents %d %d %d, judges %d %d %d", C.rank, C.type,
@@ -1199,7 +1223,7 @@ static u16 FirstWinAccessory(void)
         {ACCESSORY_YELLOW_BARRETTE, ACCESSORY_YELLOW_BALLOONS, ACCESSORY_HEROIC_HEADBAND, ACCESSORY_AWARD_PODIUM},
     };
     u16 a;
-    if (C.e[0].place > 0)
+    if (C.link || C.e[0].place > 0)
         return 0xFFFF;
     a = sGift[C.type][C.rank];
     return Sinnoh_CanFitAccessory(a, 1) ? a : 0xFFFF;
@@ -1210,6 +1234,12 @@ static void End(void)
     struct Pokemon *mon = &gPlayerParty[C.slot < PARTY_SIZE ? C.slot : 0];
     if (!C.made || !C.scored)
         return;
+    if (C.link)
+    {
+        // (with friends: no ribbon, record or TV segment, as in Platinum)
+        MPNet_Log("sinnoh contest: the group's contest ended, this game's entrant placed %d", C.e[C.me].place + 1);
+        return;
+    }
     if (C.mode != CONTEST_OFFICIAL && C.mode != CONTEST_UNK0 && C.mode != CONTEST_UNK1)
         return;   // (practice and the single rounds give nothing)
     IncrementGameStat(GAME_STAT_ENTERED_CONTEST);   // (the game's contest records: JUBILIFE TV's rankings read them)
@@ -1233,6 +1263,7 @@ static void End(void)
 // ----------------------------------------------------------------------------------------------------- the party
 
 static u16 sPartyResult, sPartyVar, sPartyRank, sPartyType;
+static bool8 sPartyAnyRank;   // (OpenPartyMenuForContest's last: Platinum's link contests ask for no ribbon)
 static u16 sStudioResult;
 static u16 sPickKept, sPicked = 0xFF;   // (CC_PICK_*: Platinum's SelectMoveTutorPokemon on the game's party menu)   // (the studio's answer variable: Contest_StudioDone)
 
@@ -1280,7 +1311,10 @@ void Sinnoh_ContestCall(u16 call, u16 a, u16 b)
         break;
     case CC_END:
         End();
+        if (C.link)
+            Contest_LinkLeave();
         C.made = FALSE;
+        C.link = FALSE;
         break;
     case CC_JUDGE_NAME:
         StringCopy(Contest_Slot(VarGet(b)), Contest_Text(CB_JUDGE_NAMES, Contest_JudgeName(VarGet(a))));
@@ -1318,23 +1352,23 @@ void Sinnoh_ContestCall(u16 call, u16 a, u16 b)
         StringCopy(Contest_Slot(VarGet(a)), C.e[Winner()].nick);
         break;
     case CC_PLACEMENT:
-        VarSet(a, C.e[0].place);
+        VarSet(a, C.e[C.me].place);
         break;
     case CC_WINNER_ENTRY:
         VarSet(a, CONTEST_ENTRANTS - 1 - Winner());
         break;
     case CC_PLAYER_ENTRY:
-        VarSet(a, CONTEST_ENTRANTS - 1);
+        VarSet(a, CONTEST_ENTRANTS - 1 - C.me);
         break;
     case CC_OBJ_GFX:
         e = &C.e[EntryToId(VarGet(a))];
-        VarSet(b, e->opponent == 0xFF ? (gSaveBlock2Ptr->playerGender ? OBJ_EVENT_GFX_MAY_NORMAL : OBJ_EVENT_GFX_BRENDAN_NORMAL) : e->gfx);
+        VarSet(b, e->opponent == 0xFF ? (e->gender ? OBJ_EVENT_GFX_MAY_NORMAL : OBJ_EVENT_GFX_BRENDAN_NORMAL) : e->gfx);
         break;
     case CC_FAME:
         VarSet(b, C.e[EntryToId(VarGet(a))].fame);
         break;
     case CC_MODE:
-        VarSet(a, Contest_IsPractice() ? 2 : 0);   // (CONTEST_MODE_OFFICIAL / _PRACTICE; links come with co-op)
+        VarSet(a, Contest_IsPractice() ? 2 : C.link ? 1 : 0);   // (CONTEST_MODE_OFFICIAL / _LINK / _PRACTICE)
         break;
     case CC_INFO_RANK_TYPE:
         VarSet(a, C.rank);
@@ -1370,8 +1404,11 @@ void Sinnoh_ContestCall(u16 call, u16 a, u16 b)
         break;
     case CC_PARTY_PICKED:
         sPartyResult = gSpecialVar_0x8004 < PARTY_SIZE ? gSpecialVar_0x8004 : 0xFF;
-        if (sPartyResult != 0xFF && !CanEnter(&gPlayerParty[sPartyResult], sPartyRank, sPartyType))
+        if (sPartyResult != 0xFF && !sPartyAnyRank && !CanEnter(&gPlayerParty[sPartyResult], sPartyRank, sPartyType))
             sPartyResult = 0xFF;   // (Platinum's menu doesn't let one without the rank's ribbon be chosen)
+        if (sPartyResult != 0xFF && GetMonData(&gPlayerParty[sPartyResult], MON_DATA_IS_EGG))
+            sPartyResult = 0xFF;
+        sPartyAnyRank = FALSE;
         if (sPartyVar >= VARS_START)
             VarSet(sPartyVar, sPartyRank);
         break;
@@ -1425,6 +1462,16 @@ void Sinnoh_ContestCall(u16 call, u16 a, u16 b)
     }
     case CC_BUFFER_WORD:
         CopyEasyChatWord(Contest_Slot(VarGet(a)), VarGet(b));
+        break;
+    case CC_LINK_LEAD:
+    case CC_LINK_JOIN:
+    case CC_LINK_START:
+    case CC_LINK_END:
+    case CC_LINK_TEXT:
+        Contest_LinkCall(call, a, b);   // (with friends: s3d_contest_link.c)
+        break;
+    case CC_PARTY_ANY_RANK:
+        sPartyAnyRank = VarGet(a) != 0;
         break;
     }
 }

@@ -3771,6 +3771,29 @@ follow_behind, follow_ground.
   TOWER (a loss, or a room won at 7+), the HALL (its POKéMON), the POFFIN HOUSE (berry_blender.c MpSinnohPoffinTv: the
   POKéBLOCK named as Platinum's POFFIN), contests, the dress-up photo and AMITY SQUARE. `mp tv`, `mp tvwatch`,
   `mp tvcatch SPECIES BALLS`, `mp tvnow` (BERRY LOOKOUT and PHOTO RATING as they'd air). Tests sinnoh_tv, sinnoh_studio.
+  Friends' segments (1.113.0, Platinum's mixed TV records): CO-OP's record mixing (mp_linkx.c) sends each game's kept
+  segments after its rankings entries (Sinnoh_TvMixPrepare, 592 bytes); the TV keeps up to 8 friends' (sTv.friends,
+  after the old TVBC layout: older saves load) and airs a friend's or the player's own, the less played one, with the
+  friend's name for the player's (SetPlayer: sOwner). `mp tv` lists them. Test sinnoh_tv_mix.
+- SUPER CONTESTS with friends (1.113.0, protocol 77): src/sinnoh/s3d_contest_link.c on relay messages 10-14
+  (MPR_SCONTEST_FIRST: gather, entry, start, cancel, play). The CONTEST HALL's link desk runs Platinum's script; its
+  StartBattleServer (BECOME LEADER) and StartBattleClient (JOIN GROUP) are a lobby (gen_scripts.py) with the group's
+  names in a window (special Sinnoh_ContestLinkWait). Where Platinum's desk speaks of DS wireless (its welcome, its
+  explanation, "DS Wireless Communications will be launched", the waits) the words are CO-OP's (the user, 2026-11-06:
+  the DS isn't used and players are on the CO-OP server, so the dialogue may match how group contests work there):
+  s3d_contest_link.c Contest_LinkText (CC_LINK_TEXT into gStringVar4, LINK_DESK_TEXTS in gen_scripts.py); "Contest! Is
+  this group OK?" and "Cancel holding a Contest with this group?" stay Platinum's (bank unk_0353). The leader calls every friend in the room twice a second; a game
+  at JOIN GROUP joins the first leader it hears with its entrant (56 bytes: Contest_PackEntrant). START carries a seed,
+  the leader's rank and type (Platinum's link desk enters ULTRA: VAR_0x8004 2) and every entrant in seat order (the
+  leader seat 0); Contest_New (Contest_LinkPlan) builds the same contest in every game: the computer's entrants, judges
+  and theme from the seed as solo, then the people's entrants in their seats (C.link, C.me, C.humans). The screens use
+  C.me for the local entrant. Each game sends its dress-up when it's done, each dance step with its grade as it's
+  made (a lead's become the steps the others copy), each turn's move and judge; it waits ("Waiting for your friends...") at the end of the dress-up, of each half of a dance round and before a turn is performed, so the contest's
+  random numbers are drawn in the same order everywhere (the computer's choices first, in seat order). A friend who
+  leaves or concedes stays on the stage doing nothing: no steps, their first usable move, the middle judge, no random
+  number. No ribbon, record, photo or TV segment (Platinum's link contests give none). The link desk's party menu
+  takes any POKéMON (OpenPartyMenuForContest's last argument: CC_PARTY_ANY_RANK). Test sinnoh_contest_link
+  (tools/test/check_contest_link.sh: the same contest and results in both games).
 - Seals as POKé BALL effects (2026-11-02, the user: "Poke Ball effects take the place of Seals wherever they would
   appear in the story, or in menus or shops"): src/sinnoh/s3d_seals.c. Each of Platinum's Seals (generated/seals.txt's
   ids) stands for an earned ball effect piece (mp_ballunlock.c's MOEGATCHA prizes in order, round again): a Seal given
@@ -3803,8 +3826,7 @@ follow_behind, follow_ground.
   asks for that ribbon at level N, the party menu is the game's (special ChoosePartyMon; VAR_0x8004 kept), the save
   prompt the game's (Common_SaveGame = special SaveGame), the music the game's contest songs. The first win's
   accessory, the winner's photo (chunk CPHO, the lobby's frames: ScrCmd_0A8 shows it), the TV's CONTEST HALL
-  segment. Link contests (StartBattleClient / Server with COMM_TYPE_CONTEST) answer "cancelled" until co-op contests
-  are built; Platinum's POKéTCH-campaign coupons aren't gifts here (the POKéTCH is the game's key item). Test
+  segment. Link contests are contests with friends since 1.113.0 (below: "SUPER CONTESTS with friends"); Platinum's POKéTCH-campaign coupons aren't gifts here (the POKéTCH is the game's key item). Test
   sinnoh_contest. JUBILIFE TV's dress-up studio (ScrCmd_0A6: CC_STUDIO) is the same dress-up screen without the
   timer; START keeps the photo (CPHO's sixth place) and Platinum's script asks its one-word title on the game's easy
   chat (SetDressUpPhotoTitle, BufferCustomMessageWord); the gallery's first frame shows it (ShowDressUpPhoto; the other

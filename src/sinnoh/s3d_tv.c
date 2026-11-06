@@ -13,6 +13,7 @@
 // flags never air (its treasures do: the digging is here, s3d_mining.c);
 // the ones about systems SINNOH doesn't have yet (the dress-up photos, the berry patches, the roamers, the VILLA) wait
 // for them (docs/SINNOH_CHECKLIST.md). The SEAL CLUB SHOW is about POKé BALL effects (they take the Seals' place).
+#include <stddef.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,6 +62,7 @@ extern const u8 *const gNatureNamePointers[];
 #define TV_MAX_PLAYED 4
 #define TV_KEPT       4
 #define TV_SEGMENT_SIZE 40
+#define TV_FRIENDS    8
 #define VAR_SINNOH_INTERVIEW_QUESTION 0x5210   // (Platinum's VAR_RANDOM_INTERVIEW_QUESTION: tools/sinnoh/ids.py)
 
 struct TvInstance { u8 segment, timesPlayed, pad[2]; u32 day; u8 data[TV_SEGMENT_SIZE]; };
@@ -110,7 +112,10 @@ static struct
     u32 counterDay;
     u8 questionDay, question;          // the ROUTE 214 gate's question of the day (Platinum's VAR_RANDOM_INTERVIEW_QUESTION)
     u16 word;                          // the word the easy chat gave (Sinnoh_TvChooseWord)
+    // friends' segments, mixed in with record mixing (Platinum's TV mixed records: Sinnoh_TvMix); older saves end above
+    struct TvFriend { u8 type, gender, pad[2]; u8 name[PLAYER_NAME_LENGTH + 1]; struct TvInstance inst; } friends[TV_FRIENDS];
 } sTv;
+static const u8 *sOwner;   // (a friend's segment on the air: their name for the player's)
 
 static u8 *Slot(u8 i)
 {
@@ -165,7 +170,8 @@ const void *Sinnoh_TvData(u32 *size)
 void Sinnoh_TvLoad(const void *data, u32 size)
 {
     memset(&sTv, 0, sizeof(sTv));
-    if (size == sizeof(sTv) && ((const u32 *)data)[0] == TV_MAGIC)
+    // (saves from before 1.113.0 end before the friends' segments)
+    if (size >= offsetof(typeof(sTv), friends) && size <= sizeof(sTv) && ((const u32 *)data)[0] == TV_MAGIC)
         memcpy(&sTv, data, size);
     Fresh();
 }
@@ -218,15 +224,110 @@ static void SaveSegment(u8 type, u8 segment, const void *data, u32 size)
     MPNet_Log("sinnoh tv: segment %d of program type %d kept", segment, type);
 }
 
+static struct TvFriend *FriendKept(u8 type, u8 segment)
+{
+    u32 i;
+    struct TvFriend *best = NULL;
+    for (i = 0; i < TV_FRIENDS; i++)
+        if (sTv.friends[i].type == type && sTv.friends[i].inst.segment == segment
+            && (best == NULL || sTv.friends[i].inst.timesPlayed < best->inst.timesPlayed))
+            best = &sTv.friends[i];
+    return best;
+}
+
+// the segment kept for the program: the player's own, or a friend's (the less played one when both are kept)
 static struct TvInstance *Kept(u8 type, u8 segment)
 {
     u32 i;
+    struct TvInstance *own = NULL;
+    struct TvFriend *f;
     if (type < TV_INTERVIEWS || type > TV_RECORDS)
         return NULL;
     for (i = 0; i < TV_KEPT; i++)
         if (sTv.kept[type - 1][i].segment == segment)
-            return &sTv.kept[type - 1][i];
+            own = &sTv.kept[type - 1][i];
+    f = FriendKept(type, segment);
+    if (f && (own == NULL || f->inst.timesPlayed < own->timesPlayed))
+        return &f->inst;
+    return own;
+}
+
+static const u8 *OwnerOf(const struct TvInstance *k)
+{
+    u32 i;
+    for (i = 0; i < TV_FRIENDS; i++)
+        if (k == &sTv.friends[i].inst)
+            return sTv.friends[i].name;
     return NULL;
+}
+
+// Record mixing (src/mp/mp_linkx.c): this game's kept segments for friends, theirs into the friends' pool
+#define TV_MIX_MAGIC 0x314D5654   // "TVM1"
+u32 Sinnoh_TvMixSize(void)
+{
+    return 8 + PLAYER_NAME_LENGTH + 1 + sizeof(sTv.kept);
+}
+
+void Sinnoh_TvMixPrepare(void *dest)
+{
+    u8 *p = dest;
+    u32 t, i, magic = TV_MIX_MAGIC;
+    memset(p, 0, Sinnoh_TvMixSize());
+    memcpy(p, &magic, 4);
+    p[4] = gSaveBlock2Ptr->playerGender;
+    memcpy(p + 8, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+    p[8 + PLAYER_NAME_LENGTH] = EOS;
+    memcpy(p + 8 + PLAYER_NAME_LENGTH + 1, sTv.kept, sizeof(sTv.kept));
+    for (t = 0; t < 3; t++)
+        for (i = 0; i < TV_KEPT; i++)
+            ((struct TvInstance *)(p + 8 + PLAYER_NAME_LENGTH + 1))[t * TV_KEPT + i].timesPlayed = 0;
+}
+
+static void AddFriend(u8 type, const u8 *name, u8 gender, const struct TvInstance *inst)
+{
+    u32 i, at = TV_FRIENDS;
+    for (i = 0; i < TV_FRIENDS; i++)
+        if (sTv.friends[i].type == type && sTv.friends[i].inst.segment == inst->segment
+            && StringCompare(sTv.friends[i].name, name) == 0)
+            at = i;   // (the same friend's same segment: the new one in its place)
+    for (i = 0; at == TV_FRIENDS && i < TV_FRIENDS; i++)
+        if (sTv.friends[i].inst.segment == 0)
+            at = i;
+    for (i = 0; at == TV_FRIENDS && i < TV_FRIENDS; i++)
+        if (sTv.friends[i].inst.timesPlayed >= 3)
+            at = i;
+    if (at == TV_FRIENDS)
+        for (i = at = 0; i < TV_FRIENDS; i++)
+            if (sTv.friends[i].inst.day < sTv.friends[at].inst.day)
+                at = i;   // (else the oldest)
+    memset(&sTv.friends[at], 0, sizeof(sTv.friends[at]));
+    sTv.friends[at].type = type;
+    sTv.friends[at].gender = gender;
+    memcpy(sTv.friends[at].name, name, PLAYER_NAME_LENGTH);
+    sTv.friends[at].name[PLAYER_NAME_LENGTH] = EOS;
+    sTv.friends[at].inst = *inst;
+    sTv.friends[at].inst.timesPlayed = 0;
+}
+
+void Sinnoh_TvMix(const u8 *entries, u8 count, u8 mine, u32 stride)
+{
+    u32 k, t, i, magic, added = 0;
+    for (k = 0; k < count; k++)
+    {
+        const u8 *p = entries + k * stride;
+        const struct TvInstance *kept = (const struct TvInstance *)(p + 8 + PLAYER_NAME_LENGTH + 1);
+        memcpy(&magic, p, 4);
+        if (k == mine || magic != TV_MIX_MAGIC)
+            continue;
+        for (t = 0; t < 3; t++)
+            for (i = 0; i < TV_KEPT; i++)
+                if (kept[t * TV_KEPT + i].segment)
+                {
+                    AddFriend(t + 1, p + 8, p[4], &kept[t * TV_KEPT + i]);
+                    added++;
+                }
+    }
+    MPNet_Log("sinnoh tv: %d friends' segments mixed in", added);
 }
 
 static void MonOf(struct Pokemon *mon, struct TvMon *out)
@@ -253,7 +354,7 @@ static bool8 Arrived(u16 mapsec)
 
 static void SetPlayer(u8 slot)
 {
-    StringCopy(Slot(slot), gSaveBlock2Ptr->playerName);
+    StringCopy(Slot(slot), sOwner ? sOwner : gSaveBlock2Ptr->playerName);   // (a friend's segment: their name)
 }
 
 static void SetSpecies(u8 slot, u16 species)
@@ -1456,7 +1557,9 @@ static bool8 SegmentMessage(u8 segment, u16 *bank, u16 *msg)
         return FALSE;
     if (k && k->timesPlayed < 255)
         k->timesPlayed++;
+    sOwner = k ? OwnerOf(k) : NULL;
     name = s->message(k);
+    sOwner = NULL;
     if (type == TV_SIGHTINGS && segment == 10)
         first = "TVProgramTrainerSightings_Text_RateThatNameChange_MoreAttractive";
     else if (type == TV_SIGHTINGS && segment == 21)
@@ -1878,6 +1981,15 @@ void Sinnoh_TvDebug(void)
                 printf("[test] tv: kept type %d segment %d played %d eligible %d species %d\n", t + 1, sTv.kept[t][i].segment,
                        sTv.kept[t][i].timesPlayed, Eligible(t + 1, sTv.kept[t][i].segment),
                        ((struct TvMon *)sTv.kept[t][i].data)->species);
+    for (i = 0; i < TV_FRIENDS; i++)
+        if (sTv.friends[i].inst.segment)
+        {
+            char name[16];
+            MP_GameToAscii(name, sTv.friends[i].name, sizeof(name));
+            printf("[test] tv: friend %s type %d segment %d played %d eligible %d\n", name, sTv.friends[i].type,
+                   sTv.friends[i].inst.segment, sTv.friends[i].inst.timesPlayed,
+                   Eligible(sTv.friends[i].type, sTv.friends[i].inst.segment));
+        }
 }
 
 // (tests: mp tvnow) SINNOH NOW's BERRY LOOKOUT and PHOTO RATING as they would air now: eligible, message, slots

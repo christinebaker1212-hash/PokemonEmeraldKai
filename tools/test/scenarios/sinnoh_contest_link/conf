@@ -1,0 +1,14 @@
+# SUPER CONTESTS with friends (src/sinnoh/s3d_contest_link.c): both at the CONTEST HALL's link desk (Platinum's own
+# script): ENTER, save, COOL, the first POKéMON; ALICE chooses BECOME LEADER, BOB JOIN GROUP; BOB joins ALICE's group,
+# she proceeds ("Contest! Is this group OK?" YES); both games build the same contest (same opponents, judges, theme),
+# dress up, dance (each one's steps reach the other), act (each one's moves too) and reach the same results; no
+# ribbon. Needs the packs. Shots l_*.png.
+MODE=2
+TMO=900
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_TEST_CONTEST_SEED=7"
+ENV_B="MOEMON_DEBUG_REGION=3 MOEMON_TEST_CONTEST_SEED=7"
+EXPECT_A=("sinnoh contest link: leading" "joined (2 in the group)" "the group's contest begins (2 entrants" "sinnoh contest: the screens open" "sinnoh contest: results:" "the group's contest ended")
+EXPECT_B=("sinnoh contest link: joining" "the group's contest begins (seat 1 of 2" "sinnoh contest: the screens open" "sinnoh contest: results:" "the group's contest ended")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+UNEXPECT_B=("[crash]" "TIMEOUT")
+CHECK="tools/test/check_contest_link.sh"

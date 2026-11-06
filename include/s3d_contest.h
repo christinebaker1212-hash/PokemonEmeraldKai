@@ -119,7 +119,16 @@ enum {
     CC_DEX_CAUGHT,        // A: variable <- the national POKéDEX's caught count as Platinum counts it (1-493, no mythicals)
     CC_DEX_DONE,          // A: variable <- that count reached Platinum's goal (482: CheckNationalDexCompleted)
     CC_PARTY_NON_EGGS,    // A: variable <- the party's POKéMON that aren't EGGS (CountPartyNonEggs)
+    CC_LINK_LEAD,         // BECOME LEADER: friends in the room are gathered (s3d_contest_link.c)
+    CC_LINK_JOIN,         // JOIN GROUP: the first friend leading takes this game in
+    CC_LINK_START,        // A: variable <- 0 the group's contest begins (COMM_CLUB_RET_0), 3 no friend is left
+    CC_LINK_END,          // the group left (cancelled by this player)
+    CC_PARTY_ANY_RANK,    // A: variable <- TRUE: the next party menu takes any POKéMON (link contests: no ribbon asked)
+    CC_LINK_TEXT,         // A: which of the CO-OP link desk's words (LINK_TEXT_*) into gStringVar4
 };
+enum { LINK_TEXT_WELCOME, LINK_TEXT_EXPLAIN, LINK_TEXT_LAUNCH, LINK_TEXT_LEAD, LINK_TEXT_JOIN, LINK_TEXT_SETUP,
+       LINK_TEXT_WAITING };
+const u8 *Contest_LinkText(u8 which);
 
 #define PHOTO_STUDIO 5   // (the photos' sixth place: JUBILIFE TV's dress-up studio)
 
@@ -191,9 +200,35 @@ struct SinnohContest
     u32 rng;
     struct ContestEntrant e[CONTEST_ENTRANTS];
     struct ContestActing act;
+    bool8 link;    // a contest with friends (CONTEST_MODE_LINK: s3d_contest_link.c)
+    u8 me;         // this game's entrant (0 unless with friends)
+    u8 humans;     // a bit per entrant played by a person
 };
 
 extern struct SinnohContest gSinnohContest;
+
+// SUPER CONTESTS with friends (s3d_contest_link.c): Platinum's link contests over the co-op relay. One game leads and
+// sends a seed and everyone's entrant; every game then runs the same contest, the friends' dress-ups, dance steps and
+// moves coming over the relay, and waits for them where the rounds meet.
+#define CONTEST_ENTRY_BYTES 56
+void Contest_PackEntrant(u8 *p, const struct ContestEntrant *e);
+void Contest_UnpackEntrant(const u8 *p, struct ContestEntrant *e);
+void Contest_FillPlayerEntrant(struct ContestEntrant *e, u8 slot);
+bool8 Contest_LinkStarted(void);
+void Contest_LinkSetup(void);                 // (Contest_New with friends: their entrants in their seats)
+bool8 Contest_IsHuman(u8 who);
+void Contest_LinkSendDress(void);
+bool8 Contest_LinkDressReady(void);
+void Contest_LinkSendStep(u8 round, u8 part, u8 at, u8 dir, u8 grade);
+bool8 Contest_LinkTakeStep(u8 *who, u8 *round, u8 *part, u8 *at, u8 *dir, u8 *grade);
+void Contest_LinkSendPart(u8 round, u8 part);
+bool8 Contest_LinkPartReady(u8 round, u8 part);
+void Contest_LinkSendMove(u8 turn, u16 move, u8 judge);
+bool8 Contest_LinkMovesReady(u8 turn);
+bool8 Contest_LinkTakeMove(u8 who, u8 turn, u16 *move, u8 *judge);
+void Contest_LinkLeave(void);
+void Contest_LinkCall(u16 call, u16 a, u16 b);
+void Contest_LinkOnRelay(u8 from, const u8 *data, u16 len);
 
 void Sinnoh_ContestCall(u16 call, u16 a, u16 b);
 bool8 Contest_IsMade(void);

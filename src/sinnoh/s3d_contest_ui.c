@@ -78,6 +78,8 @@ static struct
     // acting
     u8 menu, move, judge, place, noteShown;
     bool8 concedeAsk;   // (START on the move list: CONCEDE?)
+    // with friends (s3d_contest_link.c): waiting for them where the rounds meet
+    bool8 waiting, partSent;
     // results
     u8 resultStep;
     // textures
@@ -422,7 +424,7 @@ static void DrawDress(void)
     char s[48];
     G_Fill(0, 0, 240, 160, 0xd8c8e8);
     SDL_RenderSetScale(r, 1, 1);
-    DrawPhoto(0, &C.e[0], 8, 8, 288, U.held != 0xFF);
+    DrawPhoto(0, &C.e[C.me], 8, 8, 288, U.held != 0xFF);
     SDL_RenderSetScale(r, 2, 2);
     G_RoundFill(152, 4, 84, 112, 0x504060, 255);
     G_RoundFill(153, 5, 82, 110, 0xf8f0f8, 255);
@@ -536,9 +538,9 @@ static void DrawDance(void)
         u8 pattern;
         SetNumberSlot(0, Contest_Song(&pattern)->steps);
         G_RoundFill(16, 121, 208, 12, 0x181828, 190);
-        if (lead == 0 && U.part == 0)
+        if (lead == C.me && U.part == 0)
             Word(120, 122, TA_CENTER, 0xf8a0a0, "DanceCompetition_Text_PerformStepsAsMainDancer");
-        else if (lead != 0 && U.part == 1)
+        else if (lead != C.me && U.part == 1)
             Word(120, 122, TA_CENTER, 0xa0c0f8, "DanceCompetition_Text_CopyPokemonBeforeYou");
         for (i = 0; i < 4; i++)
             Word(40 + i * 54, 140, TA_CENTER, G_WHITE, sDirNames[i]);
@@ -565,8 +567,8 @@ static void DrawActing(void)
         G_RoundFill(8, 100, 224, 52, 0x303048, 255);
         for (i = 0; i < MAX_MON_MOVES; i++)
         {
-            u16 m = C.e[0].moves[i];
-            bool8 ok = Contest_MoveUsable(0, m) && Contest_MoveType(m) <= 4;
+            u16 m = C.e[C.me].moves[i];
+            bool8 ok = Contest_MoveUsable(C.me, m) && Contest_MoveType(m) <= 4;
             if (m == MOVE_NONE)
                 continue;
             if (U.scene == SC_ACT_MOVE && U.move == i)
@@ -577,7 +579,7 @@ static void DrawActing(void)
         if (U.scene == SC_ACT_MOVE)
         {
             u16 l1, l2;
-            u16 m = C.e[0].moves[U.move];
+            u16 m = C.e[C.me].moves[U.move];
             Contest_EffectDescription(Contest_MoveEffect(m), &l1, &l2);
             {
                 u8 both[200];
@@ -779,8 +781,8 @@ static void BuildList(void)
 static u8 Worn(u8 a)
 {
     u8 i, n = 0;
-    for (i = 0; i < C.e[0].wornCount; i++)
-        n += C.e[0].worn[i].accessory == a;
+    for (i = 0; i < C.e[C.me].wornCount; i++)
+        n += C.e[C.me].worn[i].accessory == a;
     return n;
 }
 
@@ -789,14 +791,48 @@ static void NextBackdrop(s8 d)
     u8 i;
     for (i = 0; i < 18; i++)
     {
-        C.e[0].backdrop = (C.e[0].backdrop + d + 18) % 18;
-        if (C.e[0].backdrop == 0 || Sinnoh_HasBackdrop(C.e[0].backdrop))
+        C.e[C.me].backdrop = (C.e[C.me].backdrop + d + 18) % 18;
+        if (C.e[C.me].backdrop == 0 || Sinnoh_HasBackdrop(C.e[C.me].backdrop))
             return;
     }
 }
 
+// with friends: "Communicating. Please stand by..." until they're there (Platinum's link contest message)
+static void StartWaiting(void)
+{
+    U.waiting = TRUE;
+    Say(Contest_LinkText(LINK_TEXT_WAITING));
+    U.typed = U.pageCount ? strlen(U.pages[0]) : 0;
+}
+
+static bool8 StillWaiting(bool8 ready)
+{
+    if (!U.waiting)
+        return FALSE;
+    if (!ready)
+        return TRUE;
+    U.waiting = FALSE;
+    U.pageCount = U.page = 0;
+    return FALSE;
+}
+
+static void DressDone(void)
+{
+    Contest_ScoreVisual();
+    U.scene = SC_VISUAL_SHOW;
+    U.shown = 0;
+    U.step = 0;
+}
+
 static void StepDress(u16 keys, u16 pressed)
 {
+    struct ContestEntrant *me = &C.e[C.me];
+    if (U.waiting)
+    {
+        if (!StillWaiting(Contest_LinkDressReady()))
+            DressDone();
+        return;
+    }
     if (Read(pressed))
         return;
     if (U.left && !U.studio)
@@ -811,9 +847,9 @@ static void StepDress(u16 keys, u16 pressed)
             U.hy -= 2;
         if (keys & DPAD_DOWN && U.hy < PHOTO_H - 8)
             U.hy += 2;
-        if (pressed & A_BUTTON && C.e[0].wornCount < CONTEST_MAX_WORN)
+        if (pressed & A_BUTTON && me->wornCount < CONTEST_MAX_WORN)
         {
-            struct ContestWorn *w = &C.e[0].worn[C.e[0].wornCount++];
+            struct ContestWorn *w = &me->worn[me->wornCount++];
             w->accessory = U.held;
             w->x = U.hx;
             w->y = U.hy;
@@ -840,8 +876,8 @@ static void StepDress(u16 keys, u16 pressed)
             U.hy = MON_Y - 24;
             PlaySE(SE_SELECT);
         }
-        if (pressed & (B_BUTTON | SELECT_BUTTON) && C.e[0].wornCount)
-            C.e[0].wornCount--;
+        if (pressed & (B_BUTTON | SELECT_BUTTON) && me->wornCount)
+            me->wornCount--;
         else if (pressed & B_BUTTON && U.studio)
         {
             // (the studio: out again without a photo)
@@ -867,10 +903,16 @@ static void StepDress(u16 keys, u16 pressed)
     if (!U.studio && (U.left == 0 || pressed & START_BUTTON))
     {
         U.held = 0xFF;
-        Contest_ScoreVisual();
-        U.scene = SC_VISUAL_SHOW;
-        U.shown = 0;
-        U.step = 0;
+        if (C.link)
+        {
+            // (the friends' dress-ups: theirs come over the relay, this one goes to them)
+            Contest_LinkSendDress();
+            StartWaiting();
+            if (!StillWaiting(Contest_LinkDressReady()))
+                DressDone();
+            return;
+        }
+        DressDone();
     }
 }
 
@@ -984,6 +1026,9 @@ static void StartPart(void)
     U.playerSteps = 0;
 }
 
+static void EndMeasure(void);
+static void EndPart(void);
+
 static void StepDance(u16 pressed)
 {
     u8 pattern, i, lead = C.order[U.round];
@@ -993,12 +1038,36 @@ static void StepDance(u16 pressed)
     for (i = 0; i < CONTEST_ENTRANTS; i++)
         if (U.flash[i] > 0)
             U.flash[i]--;
+    // the friends' steps of this part (s3d_contest_link.c): a lead's become the steps to copy
+    if (C.link)
+    {
+        u8 who, round = U.round, part = U.part, at, d, grade;
+        while (Contest_LinkTakeStep(&who, &round, &part, &at, &d, &grade))
+        {
+            if (part == 0 && who == lead && U.leadCount < 16)
+            {
+                U.lead[U.leadCount].at = at;
+                U.lead[U.leadCount].dir = d;
+                U.lead[U.leadCount].made = TRUE;
+                U.leadCount++;
+            }
+            Dancer(who, d, grade);
+        }
+    }
+    if (U.waiting)
+    {
+        if (StillWaiting(Contest_LinkPartReady(U.round, U.part)))
+            return;
+        U.partSent = FALSE;
+        EndPart();
+        return;
+    }
     if (Read(pressed))
         return;
     if (U.part == 0)
     {
         // the lead dances: the computer's steps when their time comes, the player's when pressed
-        if (lead == 0)
+        if (lead == C.me)
         {
             if (dir >= 0 && U.leadCount < song->steps && now < measure)
             {
@@ -1011,10 +1080,12 @@ static void StepDance(u16 pressed)
                 U.lead[U.leadCount].dir = dir;
                 U.lead[U.leadCount].made = TRUE;
                 U.leadCount++;
-                Dancer(0, dir, grade);
+                Dancer(C.me, dir, grade);
+                if (C.link)
+                    Contest_LinkSendStep(U.round, 0, at, dir, grade);
             }
         }
-        else
+        else if (!Contest_IsHuman(lead))
             for (i = 0; i < U.leadCount; i++)
                 if (!U.lead[i].made && now >= HalfBeatFrames(U.lead[i].at))
                 {
@@ -1022,10 +1093,7 @@ static void StepDance(u16 pressed)
                     Dancer(lead, U.lead[i].dir, Contest_JudgeStep(U.lead[i].grade, song->near, FALSE, FALSE, 0, 0));
                 }
         if (now >= measure)
-        {
-            U.part = 1;
-            StartPart();
-        }
+            EndMeasure();
         return;
     }
     // the backups copy: the computer's with Platinum's wobble and missed directions, the player's when pressed
@@ -1034,8 +1102,8 @@ static void StepDance(u16 pressed)
         u8 c = U.copyCount[i];
         if (i == lead || c >= U.leadCount || !U.lead[c].made)
             continue;
-        if (i == 0)
-            continue;
+        if (Contest_IsHuman(i))
+            continue;   // (the player's own steps below, friends' over the relay)
         if (now >= HalfBeatFrames(U.lead[c].at))
         {
             static const u8 sSkill[4] = {1, 2, 3, 4};
@@ -1052,7 +1120,7 @@ static void StepDance(u16 pressed)
             U.copyCount[i]++;
         }
     }
-    if (lead != 0 && dir >= 0 && now < measure)
+    if (lead != C.me && dir >= 0 && now < measure)
     {
         u32 half = HalfBeatFrames(1), at = (now + half / 2) / half;
         u32 dist = now > at * half ? now - at * half : at * half - now;
@@ -1061,9 +1129,40 @@ static void StepDance(u16 pressed)
         for (k = 0; k < U.leadCount; k++)
             if (U.lead[k].made && U.lead[k].at == at)
                 there = TRUE, leadDir = U.lead[k].dir;
-        Dancer(0, dir, Contest_JudgeStep(dist / 2, song->near, TRUE, there, dir, leadDir));
+        u8 grade = Contest_JudgeStep(dist / 2, song->near, TRUE, there, dir, leadDir);
+        Dancer(C.me, dir, grade);
+        if (C.link)
+            Contest_LinkSendStep(U.round, 1, at > 255 ? 255 : at, dir, grade);
     }
     if (now >= measure)
+        EndMeasure();
+}
+
+// a part's measure is over: with friends, everyone's steps of it in before the next one (they wait for one another)
+static void EndMeasure(void)
+{
+    if (C.link)
+    {
+        if (!U.partSent)
+            Contest_LinkSendPart(U.round, U.part);
+        U.partSent = TRUE;
+        StartWaiting();
+        if (StillWaiting(Contest_LinkPartReady(U.round, U.part)))
+            return;
+        U.partSent = FALSE;
+    }
+    EndPart();
+}
+
+static void EndPart(void)
+{
+    u8 i;
+    if (U.part == 0)
+    {
+        U.part = 1;
+        StartPart();
+        return;
+    }
     {
         U.round++;
         U.part = 0;
@@ -1079,7 +1178,7 @@ static void StepDance(u16 pressed)
             m4aMPlayAllStop();
             return;
         }
-        if (C.order[U.round] != 0)
+        if (!Contest_IsHuman(C.order[U.round]))
             LeadSteps(C.order[U.round]);
         else
             U.leadCount = 0;
@@ -1094,7 +1193,7 @@ static void BeginDance(void)
     U.beat = 3600 * 16 / song->bpm;
     U.round = 0;
     U.part = 0;
-    if (C.order[0] != 0)
+    if (!Contest_IsHuman(C.order[0]))
         LeadSteps(C.order[0]);
     else
         U.leadCount = 0;
@@ -1215,14 +1314,33 @@ static void ShowNote(void)
 static void ChooseAll(void)
 {
     u8 i;
-    for (i = 1; i < CONTEST_ENTRANTS; i++)
-    {
-        u16 move;
-        u8 judge;
-        Contest_AiChoose(i, &move, &judge);
-        Contest_Choose(i, move, judge);
-    }
-    Contest_Choose(0, C.e[0].moves[U.move], U.judge);
+    // the computer's first, in their order (the random numbers drawn the same way in every game), then the people's
+    for (i = 0; i < CONTEST_ENTRANTS; i++)
+        if (!Contest_IsHuman(i))
+        {
+            u16 move;
+            u8 judge;
+            Contest_AiChoose(i, &move, &judge);
+            Contest_Choose(i, move, judge);
+        }
+    for (i = 0; i < CONTEST_ENTRANTS; i++)
+        if (Contest_IsHuman(i) && i != C.me)
+        {
+            u16 move;
+            u8 judge = 1, k;
+            if (!Contest_LinkTakeMove(i, C.act.turn, &move, &judge))
+            {
+                // (a friend who left: the first move they can use, the middle judge; no random number)
+                for (k = 0, move = C.e[i].moves[0]; k < MAX_MON_MOVES; k++)
+                    if (C.e[i].moves[k] != MOVE_NONE && Contest_MoveUsable(i, C.e[i].moves[k]))
+                    {
+                        move = C.e[i].moves[k];
+                        break;
+                    }
+            }
+            Contest_Choose(i, move, judge);
+        }
+    Contest_Choose(C.me, C.e[C.me].moves[U.move], U.judge);
     U.place = 0;
     U.noteShown = 0;
     C.act.notes = 0;
@@ -1232,6 +1350,12 @@ static void ChooseAll(void)
 
 static void StepActing(u16 pressed)
 {
+    if (U.waiting)
+    {
+        if (!StillWaiting(Contest_LinkMovesReady(C.act.turn)))
+            ChooseAll();
+        return;
+    }
     if (Read(pressed))
         return;
     switch (U.scene)
@@ -1246,6 +1370,8 @@ static void StepActing(u16 pressed)
                 U.concedeAsk = FALSE;
                 C.conceded = TRUE;
                 MPNet_Log("sinnoh contest: the player conceded (turn %d)", C.act.turn + 1);
+                if (C.link)
+                    Contest_LinkLeave();   // (the friends go on: this entrant stays on their stage doing nothing)
                 C.act.turn = CONTEST_TURNS;
                 for (pressed = 0; pressed < CONTEST_ENTRANTS; pressed++)
                     C.e[pressed].acting = C.act.total[pressed];
@@ -1268,9 +1394,9 @@ static void StepActing(u16 pressed)
         }
         if (pressed & DPAD_UP && U.move > 0)
             U.move--;
-        if (pressed & DPAD_DOWN && U.move < MAX_MON_MOVES - 1 && C.e[0].moves[U.move + 1] != MOVE_NONE)
+        if (pressed & DPAD_DOWN && U.move < MAX_MON_MOVES - 1 && C.e[C.me].moves[U.move + 1] != MOVE_NONE)
             U.move++;
-        if (pressed & A_BUTTON && Contest_MoveUsable(0, C.e[0].moves[U.move]) && Contest_MoveType(C.e[0].moves[U.move]) <= 4)
+        if (pressed & A_BUTTON && Contest_MoveUsable(C.me, C.e[C.me].moves[U.move]) && Contest_MoveType(C.e[C.me].moves[U.move]) <= 4)
         {
             PlaySE(SE_SELECT);
             SayName("Contest_Text_ChooseJudge");
@@ -1287,6 +1413,14 @@ static void StepActing(u16 pressed)
         else if (pressed & A_BUTTON)
         {
             PlaySE(SE_SELECT);
+            if (C.link)
+            {
+                // (the friends' choices for this turn first: theirs over the relay, this one to them)
+                Contest_LinkSendMove(C.act.turn, C.e[C.me].moves[U.move], U.judge);
+                StartWaiting();
+                if (StillWaiting(Contest_LinkMovesReady(C.act.turn)))
+                    break;
+            }
             ChooseAll();
         }
         break;
@@ -1333,7 +1467,7 @@ static void StepActing(u16 pressed)
             SetNumberSlot(0, C.act.turn + 1);
             SayName(C.act.turn == CONTEST_TURNS - 1 ? "Contest_Text_LastPerformanceChooseMove" : "Contest_Text_WhichMoveIsYourChoice");
             U.move = 0;
-            while (U.move < MAX_MON_MOVES - 1 && !Contest_MoveUsable(0, C.e[0].moves[U.move]))
+            while (U.move < MAX_MON_MOVES - 1 && !Contest_MoveUsable(C.me, C.e[C.me].moves[U.move]))
                 U.move++;
             U.scene = SC_ACT_MOVE;
         }
@@ -1419,6 +1553,7 @@ void Contest_RunScenes(void)
     U.enableScript = TRUE;
     U.prevKeys = 0xFFFF;
     U.concedeAsk = FALSE;
+    U.waiting = U.partSent = FALSE;
     U.t = 0;
     U.pageCount = U.page = 0;
     U.held = 0xFF;
@@ -1515,8 +1650,8 @@ static void StepScene(u16 keys, u16 pressed)
             BuildList();
             U.left = DRESS_FRAMES;
             U.held = 0xFF;
-            C.e[0].wornCount = 0;
-            C.e[0].backdrop = 0;
+            C.e[C.me].wornCount = 0;
+            C.e[C.me].backdrop = 0;
             U.scene = SC_DRESS;
         }
         break;

@@ -87,6 +87,10 @@ JOURNAL_SCRIPT_EVENTS = {'LOCATION_EVENT_GAME_CORNER': 16, 'LOCATION_EVENT_SAFAR
  PARTY_FOSSIL_SPECIES, PARTY_PRIZE, PARTY_HAS_COINS, PARTY_TUTOR_CAN, PARTY_TUTOR_MENU, PARTY_TUTOR_AFFORD,
  PARTY_TUTOR_PAY, PARTY_RESET_MOVE, PARTY_SHARD_COST, PARTY_SHARD_CLOSE, PARTY_LEARN_OPEN, PARTY_LEARN_RESULT,
  PARTY_TOUGH_WORD, PARTY_TOUGH_ALL, PARTY_FORMS_ON) = range(52)
+CC_LINK_LEAD, CC_LINK_JOIN, CC_LINK_START, CC_LINK_END, CC_PARTY_ANY_RANK, CC_LINK_TEXT = 39, 40, 41, 42, 43, 44
+# Platinum's link desk words that speak of DS wireless: CO-OP's own instead (LINK_TEXT_*: include/s3d_contest.h)
+LINK_DESK_TEXTS = {'ContestCommon_Text_WelcomeLinkContest': 0, 'ContestCommon_Text_ExplainLinkContest': 1,
+                   'ContestCommon_Text_CommunicationsWillBeLaunched': 2, 'ContestCommon_Text_CommunicatingStandBy': 5}   # (include/s3d_contest.h)
 SINNOH_ROAMER = 60   # (a roaming POKéMON set going: src/sinnoh/s3d_roamer.c; the slot, Platinum's ROAMING_SLOT_*)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
@@ -676,6 +680,9 @@ class FileConverter:
             return ['waitfanfare']
         if cmd == 'MessageSynchronized':
             cmd = 'Message'                 # (a link contest's message, said to each player at once: one player)
+        if cmd == 'Message' and self.low == 'contests' and a[0] in LINK_DESK_TEXTS:
+            # (the link desk in CO-OP's words, not DS wireless: src/sinnoh/s3d_contest_link.c Contest_LinkText)
+            return [self.sinnoh(SINNOH_CONTEST, CC_LINK_TEXT, LINK_DESK_TEXTS[a[0]]), 'message gStringVar4', 'waitmessage']
         if cmd == 'Message':
             return ['message %s' % self.text_label(a[0]), 'waitmessage']
         if cmd in ('WaitButton', 'WaitABXPadPress', 'WaitABPress', 'WaitABPressTime'):
@@ -1264,10 +1271,33 @@ class FileConverter:
                     self.sinnoh(SINNOH_CONTEST, 18, self.var(a[2]), self.var(a[3]))]
         if cmd == 'OpenPartyMenuForContest':
             # (the game's party menu: it answers in VAR_0x8004, where the hall keeps the rank: kept and put back)
-            return [self.sinnoh(SINNOH_CONTEST, 23, self.arg(a[1]), self.arg(a[2])), 'special ChoosePartyMon',
+            return ([self.sinnoh(SINNOH_CONTEST, CC_PARTY_ANY_RANK, self.var(a[3]))] if len(a) > 3 else []) + \
+                   [self.sinnoh(SINNOH_CONTEST, 23, self.arg(a[1]), self.arg(a[2])), 'special ChoosePartyMon',
                     'waitstate', self.sinnoh(SINNOH_CONTEST, 24)]
-        if cmd in ('StartBattleClient', 'StartBattleServer') and self.low in ('contests', 'poffin_common'):
-            # (COMM_CLUB_RET_CANCEL: link contests and group cooking come with co-op)
+        if cmd in ('StartBattleClient', 'StartBattleServer') and self.low == 'contests':
+            # SUPER CONTESTS with friends (src/sinnoh/s3d_contest_link.c): BECOME LEADER gathers the friends in the room
+            # in Platinum's group words (its unk_0353 bank), JOIN GROUP joins the first one leading; VAR_RESULT is
+            # Platinum's COMM_CLUB_RET_* (0 the group's contest begins, 1 cancelled, 3 nobody left)
+            n = self.next_local()
+            loop, cancel, ok, done = ('%s%s__link%s%d' % (PREFIX, self.low, k, n) for k in ('Loop', 'Cancel', 'Ok', 'Done'))
+            dest = self.var(a[-1])
+            if cmd == 'StartBattleServer':
+                return [self.sinnoh(SINNOH_CONTEST, CC_LINK_LEAD), '%s:' % loop,
+                        self.sinnoh(SINNOH_CONTEST, CC_LINK_TEXT, 3), 'message gStringVar4', 'waitmessage',
+                        'special Sinnoh_ContestLinkWait', 'waitstate', 'goto_if_eq VAR_RESULT, 1, %s' % cancel,
+                        'message %s' % self.text_label('pl_msg_00000353_00035'), 'waitmessage', 'yesnobox 20, 8',
+                        'goto_if_eq VAR_RESULT, 0, %s' % loop, self.sinnoh(SINNOH_CONTEST, CC_LINK_START, dest),
+                        'closemessage', 'goto %s' % done, '%s:' % cancel,
+                        'message %s' % self.text_label('pl_msg_00000353_00039'), 'waitmessage', 'yesnobox 20, 8',
+                        'goto_if_eq VAR_RESULT, 0, %s' % loop, self.sinnoh(SINNOH_CONTEST, CC_LINK_END),
+                        'setvar %s, 1' % dest, 'closemessage', '%s:' % done]
+            return [self.sinnoh(SINNOH_CONTEST, CC_LINK_JOIN),
+                    self.sinnoh(SINNOH_CONTEST, CC_LINK_TEXT, 4), 'message gStringVar4', 'waitmessage',
+                    'special Sinnoh_ContestLinkWait', 'waitstate', 'goto_if_eq VAR_RESULT, 0, %s' % ok,
+                    self.sinnoh(SINNOH_CONTEST, CC_LINK_END), 'setvar %s, 1' % dest, 'closemessage',
+                    'goto %s' % done, '%s:' % ok, 'setvar %s, 0' % dest, 'closemessage', '%s:' % done]
+        if cmd in ('StartBattleClient', 'StartBattleServer') and self.low == 'poffin_common':
+            # (COMM_CLUB_RET_CANCEL: group cooking is the BERRY BLENDER's own with friends, CO-OP > BERRY GAMES)
             return ['setvar %s, 1' % self.var(a[-1])]
         if cmd == 'WaitForLinkContestSetup':
             return []

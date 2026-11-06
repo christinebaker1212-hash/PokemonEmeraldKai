@@ -1260,6 +1260,8 @@ enum {
     MPR_BATTLE_GO,         // target -> trainer: ready (includes money)
     MPR_CANCEL,            // either side aborts
     MPR_PHRASE_READY,      // either side: the challenge phrase box is closed (both ready: the battle starts)
+    MPR_SCONTEST_FIRST = 10,  // SINNOH's SUPER CONTESTS with friends: 10 gather, 11 entry, 12 start, 13 cancel, 14 play
+                              // (src/sinnoh/s3d_contest_link.c)
     MPR_LINK_PLAYER = 20,  // struct LinkPlayer
     MPR_LINK_BLOCK,        // block data
     MPR_LINK_SYNC,         // standby / close barrier
