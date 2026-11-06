@@ -59,6 +59,7 @@ static size_t sStateSize, sPutSize;
 
 static int16_t sAudio[8192 * 2];
 static int sAudioPairs;
+static void AudioRestart(void);
 
 // ---------------------------------------------------------------------------------------------------------------
 // Buttons
@@ -206,7 +207,7 @@ static void End(int result)
     sActive = 0;
     Arcade_Close();
     Forget();
-    sAudioPairs = 0;
+    AudioRestart();
 }
 
 static void RunFrame(const unsigned short buttons[2], int quiet)
@@ -226,7 +227,7 @@ static void RunFrame(const unsigned short buttons[2], int quiet)
         int room = (int)(sizeof(sAudio) / sizeof(sAudio[0]) / 2) - sAudioPairs;
         if (room < 1024)
         {
-            sAudioPairs = 0;   // nobody's taking it (the sound is off): start again
+            AudioRestart();   // nobody's taking it (the sound is off): start again
             room = (int)(sizeof(sAudio) / sizeof(sAudio[0]) / 2);
         }
         sAudioPairs += Arcade_TakeAudio(sAudio + sAudioPairs * 2, room);
@@ -263,7 +264,7 @@ int ArcFight_Begin(int game, const struct MfSession *session)
     memset(&sPads, 0, sizeof(sPads));
     sPads.seq[0] = sPads.seq[1] = -1;
     Forget();
-    sAudioPairs = 0;
+    AudioRestart();
     sHavePicture = 0;
     memset(sPicture, 0, sizeof(sPicture));
     sActive = 1;
@@ -455,21 +456,71 @@ const char *ArcFight_Error(void)
     return sError;
 }
 
-// The board's sound since the last call, stretched over `frames` samples (the game asks once a frame)
+// The board's sound as a steady stream (1.132.1; the user, 2026-11-06: "extreme audio lagging ... The audio sounds like
+// it's crackling"): it used to stretch whatever the board made since the last call over one call's samples, so an ask
+// after zero or two board frames played silence or a squeezed burst. Now the board's samples wait in sAudio and are
+// read at its own rate (Arcade_SampleRate) with linear interpolation, the speed nudged by up to 3% to keep about three
+// calls' worth waiting (the board runs a frame per game frame, a little faster or slower than its own clock); it
+// starts once that much is in, and running dry holds the last sample, fading, instead of dropping to silence.
+static double sAudioPos;    // the next sample to read, in pairs from sAudio's start (fractional)
+static int sAudioPrimed;
+static short sAudioLast[2];
+
+static void AudioRestart(void)
+{
+    sAudioPairs = 0;
+    sAudioPos = 0;
+    sAudioPrimed = 0;
+}
+
 void ArcFight_MixAudio(short *stereo, int frames, int rate)
 {
-    int i;
+    double step = (double)Arcade_SampleRate() / (rate > 0 ? rate : 42048), want, have, adj;
+    int i, used;
 
-    (void)rate;
-    if (sAudioPairs == 0)
+    if (frames <= 0)
         return;
+    want = step * frames * 3.0;
+    have = sAudioPairs - sAudioPos;
+    if (!sAudioPrimed)
+    {
+        if (have < want)
+            return;   // (silence until three calls' worth is in)
+        sAudioPrimed = 1;
+    }
+    adj = (have - want) / want * 0.05;
+    if (adj > 0.03)
+        adj = 0.03;
+    if (adj < -0.03)
+        adj = -0.03;
+    step *= 1.0 + adj;
     for (i = 0; i < frames; i++)
     {
-        double pos = (i + 0.5) * sAudioPairs / frames - 0.5;
-        int a = pos < 0 ? 0 : (int)pos, b = a + 1 < sAudioPairs ? a + 1 : a;
-        double t = pos < 0 ? 0 : pos - a;
-        stereo[i * 2] = (short)(sAudio[a * 2] * (1 - t) + sAudio[b * 2] * t);
-        stereo[i * 2 + 1] = (short)(sAudio[a * 2 + 1] * (1 - t) + sAudio[b * 2 + 1] * t);
+        int a = (int)sAudioPos;
+        double t = sAudioPos - a;
+        if (a + 1 < sAudioPairs)
+        {
+            sAudioLast[0] = (short)(sAudio[a * 2] * (1 - t) + sAudio[a * 2 + 2] * t);
+            sAudioLast[1] = (short)(sAudio[a * 2 + 1] * (1 - t) + sAudio[a * 2 + 3] * t);
+            sAudioPos += step;
+        }
+        else
+        {
+            sAudioLast[0] = (short)(sAudioLast[0] * 15 / 16);   // (dry: the last sample, fading)
+            sAudioLast[1] = (short)(sAudioLast[1] * 15 / 16);
+            sAudioPrimed = 0;
+        }
+        stereo[i * 2] = sAudioLast[0];
+        stereo[i * 2 + 1] = sAudioLast[1];
     }
-    sAudioPairs = 0;
+    // drop what's been read
+    used = (int)sAudioPos;
+    if (used > sAudioPairs)
+        used = sAudioPairs;
+    if (used > 0)
+    {
+        memmove(sAudio, sAudio + used * 2, (size_t)(sAudioPairs - used) * 2 * sizeof(sAudio[0]));
+        sAudioPairs -= used;
+        sAudioPos -= used;
+    }
 }

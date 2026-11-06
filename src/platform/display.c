@@ -1551,6 +1551,19 @@ void Display_PreInit(void)
         if (SDL_VERSIONNUM(v.major, v.minor, v.patch) < SDL_VERSIONNUM(2, 24, 0))
             SetProcessDPIAware();
         timeBeginPeriod(1); // accurate SDL_Delay(1) for frame pacing with vsync off
+        // Moemon Kai: Windows 11 slows a process whose window is in the background or minimized: its threads go to
+        // the slow cores at a low clock (EcoQoS) and timeBeginPeriod is ignored, so SDL_Delay(1) sleeps ~16 ms
+        // (the user, 2026-11-06: "when the game is in the background, performance seems to suffer greatly").
+        // Opt out of both (SetProcessInformation ProcessPowerThrottling; looked up: older Windows hasn't it)
+        {
+            typedef struct { ULONG Version, ControlMask, StateMask; } MpPowerThrottling;
+            typedef BOOL (WINAPI *SetProcInfoFn)(HANDLE, int, LPVOID, DWORD);
+            SetProcInfoFn set = (SetProcInfoFn)(void *)GetProcAddress(GetModuleHandleA("kernel32.dll"), "SetProcessInformation");
+            MpPowerThrottling pt = {1, 0x1 | 0x4, 0};   // EXECUTION_SPEED | IGNORE_TIMER_RESOLUTION, both off
+            if (set != NULL)
+                printf("[display] background power throttling off: %s\n",
+                       set(GetCurrentProcess(), 4 /* ProcessPowerThrottling */, &pt, sizeof(pt)) ? "yes" : "no");
+        }
     }
 #endif
 }
@@ -1755,10 +1768,25 @@ int Display_NeedsPresent(void)
     return sDirty;
 }
 
+int MakerUi_IsOpen(void);
+// Moemon Kai: the game's window minimized or hidden (nothing of it to show: presenting there can stall on vsync or
+// return at once, either way pacing the game wrong)
+int Display_Minimized(void)
+{
+    return sWindow != NULL && (SDL_GetWindowFlags(sWindow) & (SDL_WINDOW_MINIMIZED | SDL_WINDOW_HIDDEN)) != 0
+        && !MakerUi_IsOpen();
+}
+
 void Display_Present(void)
 {
     if (sRenderer == NULL)
         return;
+    if (Display_Minimized())
+    {
+        PresentPopouts();   // (a friend's pop-out window can still be on screen)
+        sDirty = 0;
+        return;
+    }
     RenderToBackbuffer();
     SDL_RenderPresent(sRenderer);
     // Moemon Fight: while a fight is the picture, wait for the GPU to take this frame before the game runs the next

@@ -3445,6 +3445,20 @@ Windows each one could hold a frame. Now:
   deck tile (0x1D) more than 12 above (the other half of the deck's drop rule). `mp layers [X0 Y0 X1 Y1]` prints
   tiles with two grounds / a height grid. Test sinnoh_bridge_under.
 
+## Arcade sound as a stream, the game in the background (1.132.1)
+
+- The arcade boards' sound (src/platform/arcade_fight.c ArcFight_MixAudio; the user, 2026-11-06: "extreme audio
+  lagging ... crackling" on CPS2 and the other emulated cabinets, never the DANCE machine): it used to stretch whatever
+  the board made since the last call over one call, so a call after zero or two board frames gave silence or a squeezed
+  burst. Now the samples queue in sAudio and are read at Arcade_SampleRate() with linear interpolation, the speed
+  nudged up to 3% to keep three calls' worth waiting (a simulation of uneven board frames and sound calls: 2 calls
+  underran 6x as often as 3); it starts once that much is in; dry, the last sample fades instead of a click.
+- In the background (the user: "when the game is in the background, performance seems to suffer greatly"): on Windows
+  display.c opts the process out of power throttling (SetProcessInformation ProcessPowerThrottling, EXECUTION_SPEED |
+  IGNORE_TIMER_RESOLUTION: Windows 11 otherwise puts a background window's process on slow cores and ignores
+  timeBeginPeriod, so SDL_Delay(1) slept ~16 ms). Minimized or hidden (Display_Minimized), Display_Present skips the
+  game picture (pop-outs still drawn) and sdl2.c's loop sleeps between game frames instead of presenting.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

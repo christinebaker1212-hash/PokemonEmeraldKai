@@ -389,7 +389,15 @@ int main(int argc, char **argv)
         // Present only when there is something new (a game frame, a resize or a
         // settings change). With vsync on, presenting waits for the monitor;
         // otherwise sleep briefly while the next game frame is still >2ms away.
-        if (Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || MP_BadgeCase_IsActive() || MP_StadiumUi_IsActive() || MP_CardScreen_IsActive() || Sinnoh_Contest_IsActive() || Sinnoh_Mining_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
+        // (minimized, 1.132.1: nothing is presented, so the loop sleeps between game frames instead of spinning)
+        if (Display_Minimized())
+        {
+            if (Display_NeedsPresent())
+                Display_Present();   // (only friends' pop-out windows)
+            if (paused || (fixedTimestep - accumulator) / timeScale > 0.002)
+                SDL_Delay(1);
+        }
+        else if (Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || MP_BadgeCase_IsActive() || MP_StadiumUi_IsActive() || MP_CardScreen_IsActive() || Sinnoh_Contest_IsActive() || Sinnoh_Mining_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
             Display_Present();
         else if (paused || (fixedTimestep - accumulator) / timeScale > 0.002)
             SDL_Delay(1);
