@@ -44,6 +44,7 @@ typedef struct {
     MtgManaCost mana;
     uint8_t tap, sacSelf, exileSelf, returnSelf;
     uint8_t sacN, discardN, discardRandom, payLife;
+    uint8_t discardSelf;                    // Discard<1/CARDNAME>: Cycling's (the card itself, from the hand)
     const char *sacSpec, *discardSpec;   // Valid specs ("Creature", "Land", "Goblin", "Card")
 } MtgCost;
 int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, int casting);
@@ -61,6 +62,7 @@ typedef struct {
     uint8_t choiceCount;            // Charm: its modes (Choices$), each an ability of the charm's kind and cost
     uint16_t choices[5];
     uint16_t charmOf;               // a Charm's mode: the charm (0xFFFF: none)
+    uint8_t fromHand;               // ActivationZone$ Hand: activated from its owner's hand (Cycling)
 } MtgAbility;
 
 // mtg_script.c
@@ -80,6 +82,7 @@ extern const char *const gMtgApiNames[MTG_API_COUNT];
 enum {
     MTG_TRIG_NONE, MTG_TRIG_CHANGES_ZONE, MTG_TRIG_PHASE, MTG_TRIG_SPELL_CAST, MTG_TRIG_DAMAGE_DONE, MTG_TRIG_ATTACKS,
     MTG_TRIG_ATTACKER_BLOCKED, MTG_TRIG_ATTACKER_BLOCKED_BY, MTG_TRIG_BLOCKS, MTG_TRIG_ATTACKER_UNBLOCKED,
+    MTG_TRIG_CYCLED,
     MTG_TRIG_COUNT
 };
 typedef struct {

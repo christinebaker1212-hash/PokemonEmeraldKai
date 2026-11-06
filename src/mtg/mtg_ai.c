@@ -122,6 +122,17 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
     int tgtMine = tgtObj >= 0 ? d->objs[tgtObj].controller == me : a->target.kind == MTG_TGT_PLAYER && a->target.id == me;
     if (a->kind == MTG_ACT_LAND)
         return main ? 1000 : 0;
+    if (ab && ab->fromHand) {
+        // Cycling: a land when there are enough, a spell too dear for a while; best at the end of the other's turn
+        int k, lands = 0, good;
+        for (k = 0; k < d->objCount; k++)
+            lands += d->objs[k].zone == MTG_ZONE_BATTLEFIELD && d->objs[k].controller == me
+                  && (Mtg_Card(d->objs[k].def)->types & MTG_T_LAND);
+        good = (c->types & MTG_T_LAND) ? lands >= 5 : Mtg_ManaCostTotal(&c->cost) > lands + 2;
+        if (!good)
+            return 0;
+        return (d->active == opp && d->step == MTG_STEP_END) ? 7 : main ? 4 : 0;
+    }
     if (!ab) {   // a permanent spell
         if (!main)
             return 0;

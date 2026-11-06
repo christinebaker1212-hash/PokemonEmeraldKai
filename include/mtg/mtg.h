@@ -56,6 +56,7 @@ typedef struct MtgCardDef {
     uint16_t triggers[6];                    // indexes into the trigger table (T: lines; mtg_trigger.c)
     uint8_t enchant;                         // an Aura (K:Enchant:...): its spell targets what it may enchant
     const char *enchantSpec;                 // ...: a Valid spec ("Creature", "Land", "Creature.YouCtrl")
+    const char *cyclingCost;                 // K:Cycling:COST (Forge's keyword: an ability from the hand)
     uint8_t starPT;                          // PT:*/* (bit 1 power, 2 toughness): a characteristic-defining static sets it
     uint8_t staticCount;
     uint16_t statics[4];                     // indexes into the static table (S: lines; mtg_static.c)

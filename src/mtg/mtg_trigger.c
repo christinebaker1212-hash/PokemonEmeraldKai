@@ -15,7 +15,7 @@ static int sTrigCount, sTrigCap;
 
 const char *const gMtgTriggerModes[MTG_TRIG_COUNT] = {
     "", "ChangesZone", "Phase", "SpellCast", "DamageDone", "Attacks", "AttackerBlocked", "AttackerBlockedByCreature",
-    "Blocks", "AttackerUnblocked",
+    "Blocks", "AttackerUnblocked", "Cycled",
 };
 
 // the parameters each mode reads (besides the common ones)
@@ -23,6 +23,7 @@ static const char *const sModeKeys[MTG_TRIG_COUNT][4] = {
     [MTG_TRIG_CHANGES_ZONE] = {"Origin", "Destination", "ValidCard"},
     [MTG_TRIG_PHASE] = {"Phase", "ValidPlayer"},
     [MTG_TRIG_SPELL_CAST] = {"ValidCard", "ValidActivatingPlayer"},
+    [MTG_TRIG_CYCLED] = {"ValidCard"},
     [MTG_TRIG_DAMAGE_DONE] = {"ValidSource", "ValidTarget", "CombatDamage"},
     [MTG_TRIG_ATTACKS] = {"ValidCard"},
     [MTG_TRIG_ATTACKER_BLOCKED] = {"ValidCard", "ValidBlocker"},
@@ -227,7 +228,9 @@ void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
             Mtg_Unsupported(c, Reason("Destination"));
             return;
         }
-    } else
+    } else if (mode == MTG_TRIG_CYCLED && (v = Mtg_TriggerParam(t, "ValidCard")) && strstr(v, "Self"))
+        t->zones = (uint8_t)ZONE_BIT(MTG_ZONE_GRAVEYARD);   // ("when you cycle CARDNAME": it's in the graveyard by then)
+    else
         t->zones = (uint8_t)ZONE_BIT(MTG_ZONE_BATTLEFIELD);
     if (mode == MTG_TRIG_CHANGES_ZONE) {
         if (!(v = Mtg_TriggerParam(t, "Destination")) || !Zones(v)
@@ -365,6 +368,7 @@ static int Matches(const MtgDuel *d, const MtgTrigger *t, int host, const MtgTri
         return ObjOk(d, t, "ValidCard", ev->obj, host) && ObjOk(d, t, "ValidBlocked", ev->obj2, host);
     case MTG_TRIG_ATTACKS:
     case MTG_TRIG_ATTACKER_UNBLOCKED:
+    case MTG_TRIG_CYCLED:
         return ObjOk(d, t, "ValidCard", ev->obj, host);
     }
     return 0;

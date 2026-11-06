@@ -1,0 +1,7 @@
+# POKéMON STADIUM's picks (the user, 2026-11-06): RIGHT goes on from the first row of three to the second, R shows the
+# SUMMARY of the six and comes back on the one looked at, B asks before quitting the cup (B again keeps playing), and
+# the battle is SET even when the player's own BATTLE STYLE is SHIFT. Shots picks_row2, quit_asked, quit_kept.
+MODE=1
+TMO=300
+EXPECT_A=("stadium: picks' summary at 4" "stadium: back from the picks' summary at 4" "stadium: battle style SET (yours was SHIFT)")
+UNEXPECT_A=("crash" "out of memory")

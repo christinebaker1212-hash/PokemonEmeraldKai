@@ -42,6 +42,9 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: next release)
+- Cycling and "when you cycle" (the Cycled trigger): COOP_NOTES "MAGIC's Cycling". 1809 of 5408 cards play. TypeCycling and LandCycling still out.
+
 ## Status (2026-11-06: 1.129.0)
 - Charm ("choose one"): COOP_NOTES "MAGIC's \"choose one\"". 1744 of 5408 cards play. Chooser$ Opponent and
   CharmNum > 1 still out.

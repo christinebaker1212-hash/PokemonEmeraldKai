@@ -736,6 +736,46 @@ static void TestAmounts(void)
     }
 }
 
+static int HandCount(int player);
+static void Choose(int card);
+
+// Cycling (Forge's keyword: "{cost}, discard this card: draw a card", from the hand, at instant speed)
+static void TestCycling(void)
+{
+    int sandbar, hand0;
+    Table();
+    CHECK(Mtg_CardByName("Lonely Sandbar") >= 0 && Mtg_Card(Mtg_CardByName("Lonely Sandbar"))->supported,
+          "Lonely Sandbar plays");
+    Lands(0, "Island", 1);
+    sandbar = Put(0, "Lonely Sandbar", MTG_ZONE_HAND);
+    hand0 = HandCount(0);
+    CHECK(Find(MTG_ACT_ACTIVATE, sandbar, MTG_TGT_NONE, 0) >= 0, "cycling offered from the hand");
+    Do(MTG_ACT_ACTIVATE, sandbar, MTG_TGT_NONE, 0);
+    CHECK(Zone(sandbar) == MTG_ZONE_GRAVEYARD, "discarded as the cost");
+    PassBoth();
+    CHECK(HandCount(0) == hand0, "drew a card for it (%d, was %d)", HandCount(0), hand0);
+    Table();   // no blue mana: no cycling; on the battlefield it's a land, not a cycler
+    sandbar = Put(0, "Lonely Sandbar", MTG_ZONE_HAND);
+    CHECK(Find(MTG_ACT_ACTIVATE, sandbar, MTG_TGT_NONE, 0) < 0, "no mana: no cycling");
+    Table();   // "when you cycle CARDNAME": Renewed Faith's 2 life
+    {
+        int faith, life;
+        CHECK(Mtg_CardByName("Renewed Faith") >= 0 && Mtg_Card(Mtg_CardByName("Renewed Faith"))->supported,
+              "Renewed Faith plays");
+        Lands(0, "Plains", 2);
+        faith = Put(0, "Renewed Faith", MTG_ZONE_HAND);
+        life = sD.players[0].life;
+        Do(MTG_ACT_ACTIVATE, faith, MTG_TGT_NONE, 0);
+        if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE)
+            Choose(1);   // (you may gain 2 life: yes)
+        PassBoth();
+        if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE)
+            Choose(1);
+        PassBoth();
+        CHECK(sD.players[0].life == life + 2, "cycling it gained 2 life (%d, was %d)", sD.players[0].life, life);
+    }
+}
+
 // ---- whole duels between the stand-in AIs
 
 // a choice while something resolves (MTG_Q_CHOOSE): card = 1 / 0, or the candidate holding obj
@@ -1176,6 +1216,7 @@ int main(int argc, char **argv)
     TestCosts();
     TestRegenerate();
     TestStatics2();
+    TestCycling();
     TestTokens();
     TestAmounts();
     TestTriggers();

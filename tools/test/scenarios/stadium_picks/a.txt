@@ -1,0 +1,136 @@
+pressuntil A field 5000
+mp additem 398 1
+mp battlestyle 0
+mp warp 46,1,9,3
+wait 80
+press UP 4
+wait 10
+pressuntillog A 3000 screens opened
+wait 40
+press DOWN 4
+wait 6
+press DOWN 4
+wait 30
+press DOWN 4
+wait 6
+press DOWN 4
+wait 30
+press DOWN 4
+wait 30
+press DOWN 4
+wait 30
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 10
+press A 4
+wait 20
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press A 4
+wait 6
+press DOWN 4
+wait 4
+press A 4
+wait 20
+wait 20
+press A 4
+wait 10
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 10
+press SELECT 4
+wait 200
+press RIGHT 4
+wait 60
+press B 4
+wait 300
+press B 4
+wait 10
+press RIGHT 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 40
+wait 10
+press RIGHT 4
+wait 4
+press RIGHT 4
+wait 4
+press RIGHT 4
+wait 4
+press RIGHT 4
+wait 6
+shot picks_row2
+press R 4
+pressuntillog B 3000 back from the picks' summary
+wait 120
+press B 4
+wait 10
+shot quit_asked
+press B 4
+wait 10
+shot quit_kept
+press LEFT 4
+wait 4
+press LEFT 4
+wait 4
+press LEFT 4
+wait 4
+press LEFT 4
+wait 4
+press A 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 10
+press START 4
+wait 300
+quit

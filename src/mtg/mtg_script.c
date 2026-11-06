@@ -343,6 +343,8 @@ static int ParseCost(const char *s, MtgCost *out)
             out->exileSelf = 1;
         else if (strcmp(tok, "Return<1/CARDNAME>") == 0)
             out->returnSelf = 1;
+        else if (strcmp(tok, "Discard<1/CARDNAME>") == 0)
+            out->discardSelf = 1;
         else if ((r = CostPart(tok, "PayLife", &n, &spec, &specLen)) != 0) {
             if (r < 0 || spec || n < 1 || n > 20 || out->payLife)
                 return 0;
@@ -434,6 +436,15 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     if (kind != MTG_AB_SPELL && kind != MTG_AB_ACTIVATED && Mtg_Param(ab, "Cost"))
         Unsupported(c, "optional cost");   // (a trigger's "you may pay ...": not yet)
     ab->tgt = Mtg_Param(ab, "ValidTgts");
+    v = Mtg_Param(ab, "ActivationZone");
+    if (v) {
+        if (strcmp(v, "Hand") == 0 && kind == MTG_AB_ACTIVATED)
+            ab->fromHand = 1;
+        else
+            Unsupported(c, "ActivationZone");
+    }
+    if (ab->cost.discardSelf && !ab->fromHand)
+        Unsupported(c, "cost");
     v = Mtg_Param(ab, "TargetType");
     if (v) {
         if (strcmp(v, "Spell") == 0)
@@ -536,6 +547,10 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
         if (!Mtg_ValidSpecKnown(c->enchantSpec) || strstr(c->enchantSpec, "inZone"))
             Unsupported(c, "Enchant:");
         c->enchant = 1;
+        return;
+    }
+    if (strncmp(k, "Cycling:", 8) == 0) {   // (Forge's CardFactoryUtil: an ability from the hand, made once the lines are read)
+        c->cyclingCost = k + 8;
         return;
     }
     if (strcmp(k, "You may choose not to untap CARDNAME during your untap step.") == 0)
@@ -720,6 +735,16 @@ static void ParseCard(int id, char *text)
             continue;
         }
         c->abilities[c->abilityCount++] = (uint16_t)ParseAbility(c, id, abilityLines[i], kind, 0);
+    }
+    if (c->cyclingCost) {   // Cycling: "Pay COST, discard this card: draw a card", from the hand, as Forge writes it
+        char buf[160], *text;
+        snprintf(buf, sizeof(buf), "AB$ Draw | Cost$ %s Discard<1/CARDNAME> | ActivationZone$ Hand | NumCards$ 1 | "
+                 "Defined$ You | PrecostDesc$ Cycling", c->cyclingCost);
+        text = (char *)KeepSpec(buf, strlen(buf));
+        if (c->abilityCount >= 8)
+            Unsupported(c, "too many abilities");
+        else
+            c->abilities[c->abilityCount++] = (uint16_t)ParseAbility(c, id, text, MTG_AB_ACTIVATED, 0);
     }
     if (c->starPT) {   // a */* side no static sets
         int k, set = 0;

@@ -538,6 +538,14 @@ static void BuildPriority(MtgDuel *d)
         if (o->zone == MTG_ZONE_HAND && o->owner == p) {
             int ability, x = 0;
             MtgManaCost cost;
+            for (k = 0; k < c->abilityCount; k++) {   // abilities from the hand (Cycling): any time with priority
+                const MtgAbility *ab = &gMtgAbilities[c->abilities[k]];
+                if (!ab->fromHand || ab->kind != MTG_AB_ACTIVATED || ab->cost.mana.x)
+                    continue;
+                if (!Mtg_CanPay(d, p, &ab->cost.mana, 0, MTG_NO_OBJ) || !Mtg_CostPayable(d, p, &ab->cost, i, MTG_NO_OBJ))
+                    continue;
+                AddWithTargets(d, q, MTG_ACT_ACTIVATE, i, c->abilities[k], 0, p);
+            }
             if (c->types & MTG_T_LAND) {
                 if (SorceryTiming(d, p) && d->players[p].landsPlayed == 0)
                     AddAction(q, MTG_ACT_LAND, i, 0xFFFF, 0, none);
@@ -567,8 +575,8 @@ static void BuildPriority(MtgDuel *d)
             for (k = 0; k < c->abilityCount; k++) {
                 const MtgAbility *ab = &gMtgAbilities[c->abilities[k]];
                 int x = 0;
-                if (ab->kind != MTG_AB_ACTIVATED || ab->api == MTG_API_MANA)
-                    continue;   // (mana abilities are used by paying, never on their own)
+                if (ab->kind != MTG_AB_ACTIVATED || ab->api == MTG_API_MANA || ab->fromHand)
+                    continue;   // (mana abilities are used by paying, never on their own; Cycling only from the hand)
                 if (ab->cost.tap && (o->tapped || ((c->types & MTG_T_CREATURE) && o->sick
                                                    && !(Mtg_Keywords(d, i) & MTG_KW_BIT(MTG_KW_HASTE)))))
                     continue;
@@ -736,8 +744,10 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
     Mtg_Event(d, e->isSpell ? MTG_EV_CAST : MTG_EV_ACTIVATE, a->obj, a->target.kind, a->target.id);
     if (e->isSpell)
         TrigEvent(d, MTG_TRIG_SPELL_CAST, a->obj, MTG_NO_OBJ, p);
-    if (!e->isSpell && gMtgAbilities[a->ability].cost.sacSelf)
-        Mtg_MoveTo(d, a->obj, MTG_ZONE_GRAVEYARD);   // (the ability keeps its source's last known state)
+    if (!e->isSpell && (gMtgAbilities[a->ability].cost.sacSelf || gMtgAbilities[a->ability].cost.discardSelf))
+        Mtg_MoveTo(d, a->obj, MTG_ZONE_GRAVEYARD);   // (the ability keeps its source's last known state; Cycling's discard)
+    if (!e->isSpell && gMtgAbilities[a->ability].fromHand && gMtgAbilities[a->ability].cost.discardSelf)
+        TrigEvent(d, MTG_TRIG_CYCLED, a->obj, MTG_NO_OBJ, p);   // ("when you cycle ...": TriggerCycled)
     if (a->ability != 0xFFFF)
         PayOtherCosts(d, p, &gMtgAbilities[a->ability], a->obj);
 }

@@ -144,3 +144,14 @@ way I mentioned." and "You can still choose rentals without Rentals Only on, for
 RENTALS ONLY is a switch (STADIUM_OPT_RENTALS): on, it turns LEVEL CAP off and keeps it off (LEVEL CAP greyed, A on it
 explains why); turning LEVEL CAP on never turns RENTALS ONLY off. With it on only rentals can be registered; with it off
 rentals and the player's own may both enter.
+
+## The picks, SET style and QUIT (the user, 2026-11-06)
+
+"Just let the player scroll through all 6 left and right. The Summary screen should be viewable from this screen."
+"all battles in the STADIUM must be set to Set, not Shift." "Add a confirmation so that players don't get too far and
+accidentally quit."
+
+The VS (picks) screen's cursor goes on from the third POKéMON to the fourth with RIGHT (and back with LEFT); UP / DOWN
+still move by rows. R opens the summary screen on the six (Task_OpenVsSummary), coming back on the one last looked at.
+B / QUIT asks first (U.confirm: B again keeps playing, A quits). Each STADIUM battle sets OPTIONS_BATTLE_STYLE_SET and
+CB2_EndStadiumBattle puts the player's own style back (mp_stadium_cup.c sSavedStyle). Test stadium_picks.

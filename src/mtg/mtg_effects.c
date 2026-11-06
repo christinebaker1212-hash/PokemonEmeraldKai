@@ -154,6 +154,7 @@ static const struct { const char *name; uint8_t mode, what; } sTriggered[] = {
     {"Card", MTG_TRIG_CHANGES_ZONE, TW_OBJ}, {"NewCard", MTG_TRIG_CHANGES_ZONE, TW_OBJ},
     {"Player", MTG_TRIG_PHASE, TW_PLAYER},
     {"Card", MTG_TRIG_SPELL_CAST, TW_OBJ}, {"Activator", MTG_TRIG_SPELL_CAST, TW_PLAYER},
+    {"Card", MTG_TRIG_CYCLED, TW_OBJ},
     {"Source", MTG_TRIG_DAMAGE_DONE, TW_OBJ}, {"Target", MTG_TRIG_DAMAGE_DONE, TW_TARGET},
     {"Attacker", MTG_TRIG_ATTACKS, TW_OBJ}, {"Defender", MTG_TRIG_ATTACKS, TW_PLAYER},
     {"DefendingPlayer", MTG_TRIG_ATTACKS, TW_PLAYER},
@@ -691,7 +692,7 @@ int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
 // ---- what a translation understands (else the card stays unsupported)
 static const char *const sCommon[] = {
     "SP", "AB", "DB", "Cost", "ValidTgts", "TgtPrompt", "SubAbility", "SpellDescription", "StackDescription",
-    "IsCurse", "PrecostDesc", "CostDesc", "TargetType", "Defined", "UnlessCost", "UnlessPayer",
+    "IsCurse", "PrecostDesc", "CostDesc", "TargetType", "Defined", "UnlessCost", "UnlessPayer", "ActivationZone",
 };
 static const char *const sApiParams[MTG_API_COUNT][5] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},

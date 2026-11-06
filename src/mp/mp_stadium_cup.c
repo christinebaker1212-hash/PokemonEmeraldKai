@@ -379,6 +379,7 @@ u8 StadiumCup_PickRival(u8 round, const struct Pokemon *team, u8 count)
 
 bool8 gMpStadiumBattle;   // a STADIUM battle is on (battle_controller_opponent.c, battle_message.c)
 static struct Pokemon sSavedParty[PARTY_SIZE];
+static u8 sSavedStyle;   // (the player's BATTLE STYLE: every STADIUM battle is SET, as Stadium's)
 static struct Pokemon sCcTeam[PARTY_SIZE];     // the CHALLENGE CUP's six for this run
 static struct Pokemon sFoeTeam[PARTY_SIZE];    // the opponent's six
 static u8 sFoeCount;
@@ -561,6 +562,7 @@ static void CB2_EndStadiumBattle(void)
             fainted++;
     memcpy(gPlayerParty, sSavedParty, sizeof(gPlayerParty));
     CalculatePlayerPartyCount();
+    gSaveBlock2Ptr->optionsBattleStyle = sSavedStyle;
     gMpStadiumBattle = FALSE;
     MP_MUSIC_SCENE_RELEASE();
     r->lostNone = won && fainted == 0;
@@ -648,6 +650,9 @@ void StadiumCup_StartBattle(void (*after)(bool8 won))
             Refresh(&gEnemyParty[i], 0);
         }
     gMpStadiumBattle = TRUE;
+    sSavedStyle = gSaveBlock2Ptr->optionsBattleStyle;
+    gSaveBlock2Ptr->optionsBattleStyle = OPTIONS_BATTLE_STYLE_SET;
+    MPNet_Log("stadium: battle style SET (yours was %s)", sSavedStyle == OPTIONS_BATTLE_STYLE_SET ? "SET" : "SHIFT");
     gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_EREADER_TRAINER;
     gTrainerBattleOpponent_A = 0;
     LockPlayerFieldControls();

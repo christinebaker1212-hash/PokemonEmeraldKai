@@ -1346,7 +1346,14 @@ static void DrawVs(void)
             y = G_Text(96, y, C_INK, G_NO_SHADOW, sClauses[i][1], 128, TF_NARROW) + 2;
         }
     }
-    Footer(U.rules ? "{A}{B} BACK" : "{A} PICK  {SELECT} RULES  {START} BATTLE!  {B} QUIT");
+    if (U.confirm)   // B: quitting the cup asks first
+    {
+        Panel(40, 60, 160, 36, C_PANEL, 0xb0a888);
+        G_TextAlign(120, 64, TA_CENTER, C_INK, G_NO_SHADOW, "Quit this cup?", TF_SMALL);
+        G_TextAlign(120, 79, TA_CENTER, C_SOFT, G_NO_SHADOW, "The battles won in it are lost.", TF_NARROW);
+    }
+    Footer(U.confirm ? "{A} QUIT  {B} KEEP PLAYING" : U.rules ? "{A}{B} BACK"
+           : "{A} PICK  {R} SUMMARY  {SELECT} RULES  {START} BATTLE!  {B} QUIT");
 }
 
 // After a battle: the cup's picture behind, the verdict as a banner, the opponent beaten (or the one who won), the
@@ -1766,6 +1773,7 @@ static void EnterOptions(void)
 
 static void AfterBattle(bool8 won);
 static void OpenSummary(void);
+static void OpenVsSummary(void);
 static void ScrollList(void);
 
 static void ToVs(void)
@@ -1773,6 +1781,7 @@ static void ToVs(void)
     struct StadiumRun *r = StadiumCup_Run();
     U.screen = SCR_VS;
     U.vsCursor = 0;
+    U.confirm = FALSE;
     memset(r->picks, 0xFF, sizeof(r->picks));
     StadiumCup_FoePicks();
 }
@@ -1879,6 +1888,40 @@ static void Task_OpenSummary(u8 taskId)
     ShowPokemonSummaryScreen(SUMMARY_MODE_LOCK_MOVES, sSummaryMons, U.listCursor - sSummaryBase, n - 1,
                              CB2_StadiumSummaryDone);
     DestroyTask(taskId);
+}
+
+// VS: R shows the SUMMARY of the six to pick from (the cursor's first; back to VS on the one last looked at)
+static void CB2_StadiumVsSummaryDone(void)
+{
+    U.vsCursor = gLastViewedMonIndex;
+    MPNet_Log("stadium: back from the picks' summary at %d", U.vsCursor);
+    U.reopen = SCR_VS;
+    U.pending = TRUE;
+    SetMainCallback2(CB2_ReturnToField);
+}
+
+static void Task_OpenVsSummary(u8 taskId)
+{
+    u8 n = StadiumCup_EntryCount(), i;
+    if (gPaletteFade.active)
+        return;
+    if (n > SUMMARY_MAX)
+        n = SUMMARY_MAX;
+    for (i = 0; i < n; i++)
+        StadiumCup_Entry(&sSummaryMons[i], i);
+    MPNet_Log("stadium: picks' summary at %d (%d)", U.vsCursor, n);
+    CleanupOverworldWindowsAndTilemaps();
+    ShowPokemonSummaryScreen(SUMMARY_MODE_LOCK_MOVES, sSummaryMons, U.vsCursor, n - 1, CB2_StadiumVsSummaryDone);
+    DestroyTask(taskId);
+}
+
+static void OpenVsSummary(void)
+{
+    PlaySE(SE_SELECT);
+    U.active = FALSE;
+    U.draining = TRUE;
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+    CreateTask(Task_OpenVsSummary, 0);
 }
 
 static void OpenSummary(void)
@@ -2165,12 +2208,22 @@ bool8 MP_StadiumUi_Step(u16 keys)
             if (pressed & (A_BUTTON | B_BUTTON | SELECT_BUTTON))
                 U.rules = FALSE, PlaySE(SE_SELECT);
         }
-        else if (pressed & B_BUTTON)
+        else if (U.confirm)
         {
-            r->active = FALSE;
-            U.screen = SCR_SELECT;
-            PlaySE(SE_SELECT);
+            if (pressed & A_BUTTON)
+            {
+                U.confirm = FALSE;
+                r->active = FALSE;
+                U.screen = SCR_SELECT;
+                PlaySE(SE_SELECT);
+            }
+            else if (pressed & B_BUTTON)
+                U.confirm = FALSE, PlaySE(SE_SELECT);
         }
+        else if (pressed & B_BUTTON)
+            U.confirm = TRUE, PlaySE(SE_SELECT);   // (quitting asks first: a cup can be far along)
+        else if (pressed & R_BUTTON && U.vsCursor < n)
+            OpenVsSummary();
         else if (pressed & SELECT_BUTTON)
             U.rules = TRUE, PlaySE(SE_SELECT);
         else if (pressed & START_BUTTON)
@@ -2196,9 +2249,9 @@ bool8 MP_StadiumUi_Step(u16 keys)
                     }
             PlaySE(SE_SELECT);
         }
-        else if (pressed & DPAD_LEFT && U.vsCursor % 3)
+        else if (pressed & DPAD_LEFT && U.vsCursor > 0)   // (through all six, rows and all)
             U.vsCursor--, PlaySE(SE_SELECT);
-        else if (pressed & DPAD_RIGHT && U.vsCursor % 3 < 2 && U.vsCursor + 1 < n)
+        else if (pressed & DPAD_RIGHT && U.vsCursor + 1 < n)
             U.vsCursor++, PlaySE(SE_SELECT);
         else if (pressed & DPAD_UP && U.vsCursor >= 3)
             U.vsCursor -= 3, PlaySE(SE_SELECT);

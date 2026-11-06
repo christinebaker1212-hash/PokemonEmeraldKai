@@ -2251,7 +2251,12 @@ static void MenuLabel(int k, char *out, unsigned cap)
         TcgUi_FitText(out, 206, TF_SMALL);   // (a mode's own words: the menu widens to fit them)
     } else if (a->kind == MTG_ACT_CAST)
         snprintf(out, cap, a->x ? "CAST (X = %d)" : "CAST", a->x);
-    else {
+    else if (gMtgAbilities[a->ability].fromHand) {   // Cycling: its cost, then the word (the POKeMON table's menu style)
+        char c[16];
+        CostText(c, sizeof(c), &gMtgAbilities[a->ability].cost.mana);
+        snprintf(out, cap, "%s%sCYCLE (DRAW A CARD)", c, c[0] ? ": " : "");
+        TcgUi_FitText(out, 136, TF_NORMAL);
+    } else {
         const char *desc = Mtg_Param(&gMtgAbilities[a->ability], "SpellDescription");
         char text[96];
         const MtgCost *cost = &gMtgAbilities[a->ability].cost;
