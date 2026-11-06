@@ -728,9 +728,7 @@ static void DrawSelect(void)
         }
         else
             Panel(3, y, 100, 12, open ? 0x22345c : 0x1a2034, open ? 0x5a70a8 : 0x3a4058);
-        if (!open)
-            G_Text(7, y + 1, C_LOCK, G_NO_SHADOW, "?", 0, TF_NARROW);
-        G_Text(open ? 7 : 13, y + 1, focus ? C_INK : open ? G_WHITE : C_LOCK, focus ? G_NO_SHADOW : 0x000000, CupLabel(i),
+        G_Text(7, y + 1, focus ? C_INK : open ? G_WHITE : C_LOCK, focus ? G_NO_SHADOW : 0x000000, CupLabel(i),
                70, TF_NARROW);
         ClearMarks(100 - StadiumCup_Info(i)->tiers * 6, y + 6, i);
     }
@@ -1764,11 +1762,16 @@ void MP_StadiumUi_Update(void)
 
 static void MoveCup(int dx, int dy)
 {
-    int c = U.cup;
-    if (dx)
+    int c = U.cup, k;
+    (void)dy;
+    for (k = 0; k < STADIUM_CUP_COUNT; k++)   // (a cup not open yet is grey and skipped)
+    {
         c = (c + dx + STADIUM_CUP_COUNT) % STADIUM_CUP_COUNT;
-    if (dy)
-        c = c + dy * 4 < 0 ? c : c + dy * 4 >= STADIUM_CUP_COUNT ? c : c + dy * 4;
+        if (StadiumCup_Open(U.round, c, 0))
+            break;
+    }
+    if (!StadiumCup_Open(U.round, c, 0))
+        c = U.cup;
     if (c != U.cup)
     {
         U.cup = c;
