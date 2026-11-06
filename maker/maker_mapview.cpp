@@ -1523,6 +1523,8 @@ void MapView_MapInspector()
         ImGui::SeparatorText("3D PREVIEW");
         Preview3D();
     }
+    if (sTiles.sinnoh)
+        ModelsSection(m);   // (M5: maker_models_ui.cpp)
     ImGui::Spacing();
     ImGui::SeparatorText("MUSIC");
     int song = (int)CurrentMusic(m, info.music);

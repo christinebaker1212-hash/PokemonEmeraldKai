@@ -5454,6 +5454,23 @@ overnight list included M2-M5; each is easy to change if the user wants otherwis
 - Test tools/test/maker_anims.sh (SCRATCH's animation replaced in a wild battle, starts and ends, the battle goes on;
   the editor makes EMBER's and saves it).
 
+## Moemon Maker, M5: SINNOH's 3D models
+
+- MoemonMaker/models/: `.glb` files from Blender (File > Export > glTF 2.0, glTF Binary; one Blender unit is one tile,
+  Blender's up is the game's up) and MAP_X.txt per map: `place FILE.glb X Y [HEIGHT] [TURN] [SIZE%]` (HEIGHT in tiles
+  above the ground under the tile, TURN in degrees, SIZE 100 = as modelled).
+- src/maker/maker_models.c reads the glb (its own small JSON reader: meshes' POSITION / TEXCOORD_0 / indices, each
+  node's matrix or TRS, the material's base color texture through stb_image or its base color as a 1x1 texture) once
+  per file, and Maker_ModelsMapLoaded (overworld.c, after S3D_Gyms_MapLoaded) puts each placement into the 3D engine:
+  s3d.c S3D_AddMesh appends the mesh and its texture after the pack's (baked light, no culling), S3D_DynPropMesh shows
+  it in one of the runtime prop slots S3D_MAKER_PROPS_FIRST (112) to 127, so up to 16 a map. The ground is
+  S3D_TestGround at the tile's middle; positions from S3D_MapOrigin (S3D_Active isn't set yet at map load).
+- The editor: the map INSPECTOR's 3D MODELS section on SINNOH maps (maker/maker_models_ui.cpp): each placement's
+  x / y / height / turn / size, Remove, and the glb picker with "Place on the last tile pointed at"; saved when a value
+  is let go (MakerApi_ModelsChanged re-places them in a running game). Publish and the pack carry models/.
+- Test tools/test/maker_models.sh (tools/maker/make_test_glb.py's textured cube: read once, placed twice on TWINLEAF
+  TOWN, its colors in the picture; the editor places one and saves it).
+
 ## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
 - SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py
   STAIRS gives them Emerald's unused behaviors 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down), arrow warps

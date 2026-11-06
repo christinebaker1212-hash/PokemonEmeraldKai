@@ -1329,6 +1329,95 @@ void S3D_DynPropFade(u8 slot, u8 alpha)
         sDyn[slot].fade = alpha >= 31 ? 0 : alpha + 1;
 }
 
+// (Moemon Maker M5: src/maker/maker_models.c) a model made outside Platinum, added to the pack's meshes: NVERTS
+// vertices of triangles, 8 floats each (x y z in Platinum's units, u v 0-1, nx ny nz), one texture (RGBA as the pack's;
+// NULL: white). Lit once by a light from above-front (the engine's own lights are Platinum's per map). Its mesh, or -1
+s16 S3D_AddMesh(const float *v8, u32 nverts, const u32 *rgba, u16 tw, u16 th)
+{
+    S3dMesh *m;
+    S3dGroup *g;
+    float lo[3] = {1e30f, 1e30f, 1e30f}, hi[3] = {-1e30f, -1e30f, -1e30f}, r2 = 0;
+    u32 i;
+    s16 tex = -1;
+    if (!sPack.tried)
+        LoadPack();
+    if (!sPack.ok || nverts < 3 || sPack.nmesh >= 0x7FFF)
+        return -1;
+    if (rgba && tw && th)
+    {
+        S3dTex *t;
+        sPack.tex = realloc(sPack.tex, sizeof(S3dTex) * (sPack.ntex + 1));
+        sPack.shown = realloc(sPack.shown, sizeof(u16) * (sPack.ntex + 1));
+        t = &sPack.tex[sPack.ntex];
+        t->w = tw, t->h = th;
+        t->px = malloc(sizeof(u32) * tw * th);
+        memcpy(t->px, rgba, sizeof(u32) * tw * th);
+        t->soft = FALSE;
+        for (i = 0; i < (u32)tw * th; i++)
+            if ((rgba[i] >> 24) > 0 && (rgba[i] >> 24) < 255)
+                t->soft = TRUE;
+        sPack.shown[sPack.ntex] = sPack.ntex;
+        tex = sPack.ntex++;
+    }
+    sPack.mesh = realloc(sPack.mesh, sizeof(S3dMesh) * (sPack.nmesh + 1));
+    sPack.meshShown = realloc(sPack.meshShown, sizeof(u16) * (sPack.nmesh + 1));
+    sPack.doorOf = realloc(sPack.doorOf, sizeof(u16) * (sPack.nmesh + 1));
+    sPack.meshShown[sPack.nmesh] = sPack.nmesh;
+    sPack.doorOf[sPack.nmesh] = 0;
+    m = &sPack.mesh[sPack.nmesh];
+    m->ngroups = 1;
+    m->g = g = calloc(1, sizeof(S3dGroup));
+    g->tex = tex;
+    g->rs = g->rt = 1;     // (repeat)
+    g->alpha = 31;
+    g->pid = 61;
+    g->cull = 0;
+    g->mode = 0;           // (the texture times the vertex color)
+    g->count = nverts / 3 * 3;
+    g->v = malloc(sizeof(S3dVtx) * g->count);
+    g->lit = malloc(sizeof(float) * 3 * g->count);
+    g->litFor = -1;
+    for (i = 0; i < g->count; i++)
+    {
+        const float *s = v8 + 8 * i;
+        S3dVtx *v = &g->v[i];
+        float l = 0.55f + 0.45f * fmaxf(0.0f, s[5] * 0.3f + s[6] * 0.8f + s[7] * 0.5f);
+        int k;
+        v->x = s[0], v->y = s[1], v->z = s[2];
+        v->u = s[3] * (tw ? tw : 1), v->v = s[4] * (th ? th : 1);
+        v->nx = s[5], v->ny = s[6], v->nz = s[7];
+        v->r = v->g = v->b = (u8)(31 * (l > 1 ? 1 : l));
+        v->pad = 0;
+        for (k = 0; k < 3; k++)
+            lo[k] = fminf(lo[k], s[k]), hi[k] = fmaxf(hi[k], s[k]);
+    }
+    for (i = 0; i < 3; i++)
+        m->c[i] = (lo[i] + hi[i]) / 2;
+    for (i = 0; i < g->count; i++)
+    {
+        float dx = g->v[i].x - m->c[0], dy = g->v[i].y - m->c[1], dz = g->v[i].z - m->c[2];
+        r2 = fmaxf(r2, dx * dx + dy * dy + dz * dz);
+    }
+    m->r = sqrtf(r2);
+    return sPack.nmesh++;
+}
+
+// A run-time prop of mesh MESH (S3D_AddMesh's) at a world point, turned about the up axis, scaled
+bool8 S3D_DynPropMesh(u8 slot, s16 mesh, float x, float y, float z, float turn, float scale)
+{
+    float a = turn * 3.14159265f / 180.0f, cs = cosf(a) * scale, sn = sinf(a) * scale;
+    if (slot >= S3D_DYN_PROPS || !sPack.ok || mesh < 0 || (u32)mesh >= sPack.nmesh)
+        return FALSE;
+    sDyn[slot].on = TRUE;
+    sDyn[slot].shade = 0;
+    sDyn[slot].fade = 0;
+    sDyn[slot].mesh = mesh;
+    sDyn[slot].m[0] = cs, sDyn[slot].m[1] = 0, sDyn[slot].m[2] = sn, sDyn[slot].m[3] = x;
+    sDyn[slot].m[4] = 0, sDyn[slot].m[5] = scale, sDyn[slot].m[6] = 0, sDyn[slot].m[7] = y;
+    sDyn[slot].m[8] = -sn, sDyn[slot].m[9] = 0, sDyn[slot].m[10] = cs, sDyn[slot].m[11] = z;
+    return TRUE;
+}
+
 void S3D_DynPropHide(u8 slot)
 {
     if (slot < S3D_DYN_PROPS)

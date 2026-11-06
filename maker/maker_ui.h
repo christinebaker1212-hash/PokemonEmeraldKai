@@ -172,6 +172,8 @@ void DebuggerWindow();
 void LuaWindow();      // (M5: maker_lua_ui.cpp)
 void TilesetsWindow(); // (M5: maker_tilesets_ui.cpp)
 void AnimsWindow();    // (M5: maker_anims_ui.cpp)
+void ModelsSection(int map);   // (M5: maker_models_ui.cpp) a SINNOH map's 3D models
+void Models_TestCommand(const char *cmd, const char *arg);
 void OpenAnims();
 void Anims_TestCommand(const char *cmd, const char *arg);
 void OpenTilesets();

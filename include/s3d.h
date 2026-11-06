@@ -44,6 +44,11 @@ void S3D_DynPropHide(u8 slot);
 void S3D_DynPropShade(u8 slot, u8 alpha);
 void S3D_DynPropFade(u8 slot, u8 alpha);    // (see-through: 0-31)   // (drawn as a see-through dark shape)
 void S3D_DynPropsClear(void);
+// (Moemon Maker M5) a model made outside Platinum (src/maker/maker_models.c: a .glb), added to the meshes: triangles of
+// 8 floats a vertex (x y z, u v 0-1, nx ny nz), one RGBA texture or NULL; its mesh or -1; and a prop of it
+s16 S3D_AddMesh(const float *v8, u32 nverts, const u32 *rgba, u16 tw, u16 th);
+bool8 S3D_DynPropMesh(u8 slot, s16 mesh, float x, float y, float z, float turn, float scale);
+#define S3D_MAKER_PROPS_FIRST 112   // (slots 112-127: the Maker's models on the current map)
 #define S3D_DARK_LIGHTS 40
 void S3D_SetDarkness(float level, const s16 (*lights)[3], u8 n);   // a dark room (0: none) lit around {x, y, radius}
 bool8 S3D_MapOrigin(float *x, float *z);

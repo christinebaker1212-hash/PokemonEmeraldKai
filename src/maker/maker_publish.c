@@ -436,7 +436,9 @@ static void DoPublish(void)
      || !TreeEntriesFor("lua", ".lua", sBranch, &entries, &changes)
      || !TreeEntriesFor("tilesets", ".txt", sBranch, &entries, &changes)
      || !TreeEntriesFor("anims", ".txt", sBranch, &entries, &changes)
-     || !TreeEntriesFor("anims", ".png", sBranch, &entries, &changes))
+     || !TreeEntriesFor("anims", ".png", sBranch, &entries, &changes)
+     || !TreeEntriesFor("models", ".txt", sBranch, &entries, &changes)
+     || !TreeEntriesFor("models", ".glb", sBranch, &entries, &changes))
     {
         free(entries);
         return;
@@ -546,9 +548,9 @@ static void DoRollback(void)
     }
     // the working copy: the same files
     {
-        static const char *const sDirs[] = {"base", "music", "lua", "tilesets", "anims"};
+        static const char *const sDirs[] = {"base", "music", "lua", "tilesets", "anims", "models"};
         int d;
-        for (d = 0; d < 5; d++)
+        for (d = 0; d < (int)(sizeof(sDirs) / sizeof(sDirs[0])); d++)
         {
             char localDir[1100];
             DIR *dd;

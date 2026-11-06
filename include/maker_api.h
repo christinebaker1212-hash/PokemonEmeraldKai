@@ -163,6 +163,8 @@ const char *MakerApi_BehaviorName(int behavior);           // MB_ name, "" when 
 // on a stand-in scene (240x160 RGBA), returning its frame count (0: the text isn't an animation)
 void MakerApi_AnimReload(void);
 int MakerApi_AnimPreview(const char *text, int frame, unsigned int *rgba);
+// (M5) SINNOH's 3D models (src/maker/maker_models.c): MoemonMaker/models/MAP_X.txt changed (placed again if playing there)
+void MakerApi_ModelsChanged(const char *mapName);
 const char *MakerApi_LuaCheck(const char *name, const char *text);
 const char *MakerApi_LuaError(void);
 int MakerApi_Stale(int map, struct MakerStale *out, int max);

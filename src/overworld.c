@@ -108,6 +108,7 @@ struct CableClubPlayer
 extern const struct MapLayout *const gMapLayouts[];
 extern const struct MapHeader *const *const gMapGroups[];
 
+void Maker_ModelsMapLoaded(void);   // Moemon Maker M5 (src/maker/maker_models.c)
 void MakerLua_OnMapEnter(void);   // Moemon Maker M5 (src/maker/maker_lua.cpp)
 static void Overworld_ResetStateAfterWhiteOut(void);
 static void CB2_ReturnToFieldLocal(void);
@@ -863,6 +864,7 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     MP_Region_GiveDevices();   // Moemon Kai: the MOéNAV key item (mp_region.c)
     InitMap();
     S3D_Gyms_MapLoaded();   // Moemon Kai (src/sinnoh/s3d_gyms.c)
+    Maker_ModelsMapLoaded();   // Moemon Maker M5: the user's 3D models on the map (src/maker/maker_models.c)
     CopySecondaryTilesetToVramUsingHeap(gMapHeader.mapLayout);
     LoadSecondaryTilesetPalette(gMapHeader.mapLayout);
 
@@ -937,6 +939,7 @@ static void LoadMapFromWarp(bool32 a1)
     else
         InitMap();
     S3D_Gyms_MapLoaded();   // Moemon Kai: SINNOH's gyms that move: their state on the map's grid (src/sinnoh/s3d_gyms.c)
+    Maker_ModelsMapLoaded();   // Moemon Maker M5: the user's 3D models on the map (src/maker/maker_models.c)
 
     if (a1 != TRUE && isIndoors)
     {
@@ -1921,6 +1924,7 @@ void CB2_ContinueSavedGame(void)
     else
         InitMapFromSavedGame();
         S3D_Gyms_MapLoaded();   // Moemon Kai (src/sinnoh/s3d_gyms.c)
+        Maker_ModelsMapLoaded();   // Moemon Maker M5: the user's 3D models on the map (src/maker/maker_models.c)
     
     #ifdef UBFIX
     CleanupOverworldWindowsAndTilemaps();

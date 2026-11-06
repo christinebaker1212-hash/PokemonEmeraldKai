@@ -1125,6 +1125,8 @@ extern "C" void MakerUi_TestCommand(const char *line)
         Tilesets_TestCommand(c.c_str(), arg);
     else if (c == "anim")
         Anims_TestCommand(c.c_str(), arg);
+    else if (c == "model")
+        Models_TestCommand(c.c_str(), arg);
     else
         MapView_TestCommand(c.c_str(), arg);
 }
