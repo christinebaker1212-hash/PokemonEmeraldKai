@@ -684,11 +684,12 @@ void MP_ModernAnim_Begin(const u8 *const table[], u16 id)
         case B_ANIM_DOOM_DESIRE_HIT:    sM.type = TYPE_STEEL; sM.power = 120; break;
         case B_ANIM_TURN_TRAP:          sM.type = TYPE_NORMAL; sM.power = 15; break;
         case B_ANIM_MON_HIT:            sM.type = TYPE_NORMAL; sM.power = 40; sM.physical = TRUE; break;
-        case B_ANIM_STATS_CHANGE:
-            // the stats going up or down: the game's own animation, as it is (the user, 2026-11-06)
+        case B_ANIM_WISH_HEAL:          sM.type = TYPE_NORMAL; break;
+        default:
+            // everything else plays exactly as CLASSIC (the user, 2026-11-06): the stats going up or down, and
+            // anything near a POKé BALL, a switch, an item or a GIMMICK, so nothing meets the POKé BALL effects
             sM.kind = KIND_NONE;
             return;
-        default:                        sM.type = TYPE_NORMAL; break;
         }
     }
     else if (table == gBattleAnims_StatusConditions)
@@ -995,15 +996,7 @@ static void FxStar(u16 *frame, int x, int y, int age, int size, struct Rgb c)
 static void FxStrike(u16 *frame, int f, struct Rgb c, bool8 ram)
 {
     int h = sF.hit;
-    FxSpeedLines(frame, f, h + 2, c);
-    if (ram && f < h && f >= h - 10)
-    {
-        // a comet tail from the user to the target
-        int t = Ease(f - (h - 10), 10), x = Lerp(sF.ax, sF.tx, t), y = Lerp(sF.ay, sF.ty, t);
-        ThickLine(frame, Lerp(sF.ax, sF.tx, t / 3), Lerp(sF.ay, sF.ty, t / 3), x, y, 4 + (sF.variant == MAV_BIG ? 2 : 0), c,
-                  150, TRUE);
-        Light(frame, x, y, 8, c, 90);
-    }
+    // (no speed lines or comet tail between the two: no beams of any kind, the user 2026-11-06)
     FxStar(frame, sF.tx, sF.ty, f - h, sF.variant == MAV_BIG ? 26 : (ram ? 20 : 16), c);
     if (sF.variant == MAV_BIG && f >= h && f < h + 18)
         Ring(frame, sF.tx, sF.ty, 10 + (f - h) * 4, 2, Brighter(c), 200 * (h + 18 - f) / 18);
@@ -1012,12 +1005,6 @@ static void FxStrike(u16 *frame, int f, struct Rgb c, bool8 ram)
 static void FxPunch(u16 *frame, int f, struct Rgb c)
 {
     int h = sF.hit, age = f - h;
-    if (f >= h - 6 && f < h)
-    {
-        int t = (f - (h - 6)) * 256 / 6;
-        ThickLine(frame, Lerp(sF.ax, sF.tx, t / 2), Lerp(sF.ay, sF.ty, t / 2), Lerp(sF.ax, sF.tx, t), Lerp(sF.ay, sF.ty, t), 3, c,
-                  170, TRUE);
-    }
     if (age >= 0 && age < 14)
     {
         int i;
@@ -1081,11 +1068,6 @@ static void FxBite(u16 *frame, int f, struct Rgb c)
 static void FxPierce(u16 *frame, int f, struct Rgb c)
 {
     int h = sF.hit;
-    if (f >= h - 8 && f < h + 4)
-    {
-        int t = Ease(f - (h - 8), 8), x = Lerp(sF.ax, sF.tx, t), y = Lerp(sF.ay, sF.ty, t);
-        ThickLine(frame, Lerp(sF.ax, sF.tx, t * 2 / 3), Lerp(sF.ay, sF.ty, t * 2 / 3), x, y, 2, c, 230, TRUE);
-    }
     if (f >= h && f < h + 10)
     {
         int i, age = f - h;
@@ -1122,23 +1104,11 @@ static void FxBeam(u16 *frame, int f, struct Rgb c)
     BeamWindow(&s, &e);
     if (f < s || f > e + 6)
         return;
+    // no beam of its own (the user, 2026-11-06: the Classic animation's beam is enough): only the light where it lands
     w = (sF.variant == MAV_BIG ? 6 : 4) * Fade(f - s, 5, e - s - 5, 11) / 256;
     a = Fade(f - s, 3, e - s, 9);
-    if (w > 0)
-    {
-        ThickLine(frame, sF.ax, sF.ay, sF.tx, sF.ty, w + 2, c, a * 3 / 5, FALSE);
-        ThickLine(frame, sF.ax, sF.ay, sF.tx, sF.ty, w, Brighter(c), a, TRUE);
-    }
-    // pulses running down the beam
-    for (k = 0; k < 3; k++)
-    {
-        int t = ((f - s) * 24 + k * 85) % 256;
-        Light(frame, Lerp(sF.ax, sF.tx, t), Lerp(sF.ay, sF.ty, t), 4 + w / 2, Brighter(c), a / 2);
-    }
-    Light(frame, sF.ax, sF.ay, 6 + w, c, a / 3);            // at the mouth
-    Light(frame, sF.tx, sF.ty, 10 + w * 2, c, a * 2 / 5);   // where it lands
-    if (sF.variant == MAV_TWIN)
-        ThickLine(frame, sF.ax, sF.ay + 6, sF.tx, sF.ty + 6, w / 2 + 1, c, a / 2, TRUE);
+    (void)k;
+    Light(frame, sF.tx, sF.ty, 10 + w * 2, c, a * 2 / 5);
 }
 
 static void FxBreath(u16 *frame, int f, struct Rgb c)
@@ -1201,24 +1171,10 @@ static void FxFromSky(u16 *frame, int f, struct Rgb c)
         x = sF.tx + ox;
         if (age <= dur)
         {
+            // (no bolts or streaks: no beams, the user 2026-11-06)
             y = Lerp(-8, sF.ty + 8, age * 256 / dur);
-            if (sM.type == TYPE_ELECTRIC)
-            {
-                // a jagged bolt from the top
-                u32 bs = ps + f;
-                int px = x, py = -4, k;
-                for (k = 0; k < 8 && py < y; k++)
-                {
-                    int nx = px + (int)(Rand(&bs) % 9) - 4, ny = py + (y + 4) / 8;
-                    ThickLine(frame, px, py, nx, ny, 1, c, 240, TRUE);
-                    px = nx, py = ny;
-                }
-            }
-            else
-            {
-                ThickLine(frame, x, y - 12, x, y, 2, c, 190, TRUE);
+            if (sM.type != TYPE_ELECTRIC)
                 Particle(frame, shape, x, y, 0, 20, c, ps);
-            }
         }
         else
         {
@@ -1455,14 +1411,15 @@ static void FxAura(u16 *frame, int f, struct Rgb c, int x0, int y0, bool8 down)
         else
             Light(frame, x0, y, w / 2, c, a * band / 640);
     }
-    // streaks of the color rising (or sinking) around it
+    // motes of the color rising (or sinking) around it (no streaks: no beams, the user 2026-11-06)
     for (i = 0; i < 8; i++)
     {
         u32 ps = sM.seed + i * 40503u;
         int sx = x0 + (int)(Rand(&ps) % 41) - 20, t = (f * 2 + (int)(Rand(&ps) % 40)) % 40;
         int sy = down ? y0 - 30 + t * 3 / 2 : y0 + 26 - t * 3 / 2, l = 6 + (int)(Rand(&ps) % 6);
         int fa = a * (t < 8 ? t : (40 - t > 8 ? 8 : 40 - t)) / 8 * 250 / 256;
-        ThickLine(frame, sx, sy, sx, down ? sy - l : sy + l, 2, c, fa, !down);
+        (void)l;
+        Light(frame, sx, sy, 2, c, fa);
     }
 }
 

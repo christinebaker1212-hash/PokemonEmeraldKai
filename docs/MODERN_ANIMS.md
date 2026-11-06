@@ -14,6 +14,14 @@ Two rules from the user (2026-11-06):
   yet). Check: `python3 tools/moemon_modernanim/ui_check.py OUTDIR` (CLASSIC vs MODERN, the text box pixel for pixel).
 - **The stats going up / down keep the game's own animation**: MODERN draws nothing on B_ANIM_STATS_CHANGE, and the
   BUFF / DEBUFF families have no chevrons of their own.
+- **No beams** (the user, 2026-11-06, 1.120.1: "it doesn't enhance anything"): MODERN draws no line from the user to the
+  target or down from the sky (no beam, comet tail, speed lines, spear, bolt or streak); the Classic animation's own
+  beams are left as they are.
+- **Anything near a POKé BALL plays exactly as CLASSIC** (the user, 2026-11-06, 1.120.1: it clashed with the POKé BALL
+  effects): MODERN draws only on moves, status conditions and the move-made general animations (weather going on,
+  LEECH SEED, INGRAIN, WISH, FUTURE SIGHT / DOOM DESIRE, wraps, FOCUS PUNCH / FOCUS BAND, a hit from confusion); the
+  special animations (throws, send-outs, recalls, level ups, substitutes) and every other general one (items,
+  SUBSTITUTE, CASTFORM, the GIMMICKS...) get nothing.
 
 ## The audit (tools/moemon_modernanim)
 
@@ -44,17 +52,17 @@ sooner):
 
 | family | what it draws |
 |---|---|
-| STRIKE / RAM | speed lines from the user, (RAM) a comet tail into the target, an eight-point impact star |
+| STRIKE / RAM | an eight-point impact star on the target (bigger for RAM) |
 | PUNCH / KICK | a tight ring and four heavy rays / a sweeping arc into the target, then the star |
-| SLASH / BITE / PIERCE | three (two when BIG) bright cuts across the target / two jaws closing / a spear of light |
-| BEAM | a beam from the user to the target: core, glow, pulses running down it, light at both ends (TWIN: two) |
+| SLASH / BITE / PIERCE | three (two when BIG) bright cuts across the target / two jaws closing / sparks where it lands |
+| BEAM | light where the Classic beam lands (no beam of its own) |
 | BREATH | a cone of the type's particles from the mouth to the target |
 | ORB | a ball of light flying in an arc with a trail, a ring where it lands |
-| FROMSKY | bolts (jagged for ELECTRIC), rocks, ice coming down onto the target |
+| FROMSKY | rocks and ice coming down onto the target, light where they land (no bolts) |
 | QUAKE / BLAST / WAVE | cracks along the ground and the heaving waves / an explosion (on the user for EXPLOSION) / a band sweeping the field |
 | SOUND / WIND / MIND / SHADOW | arcs from the mouth / swirling arcs / rings closing in and the air rippled / a dark miasma with wisps |
 | POWDER / STATUS / DRAIN | motes drifting down / a stream of rings and a ring settling / orbs flowing back to the user |
-| HEAL / BUFF / DEBUFF | soft light, stars and plus signs / a column of light and rising streaks / a dark column and sinking streaks |
+| HEAL / BUFF / DEBUFF | soft light, stars and plus signs / a column of light and rising motes / a dark column and sinking motes |
 | SHIELD / FIELD / SWAP / CHARGE / DANCE / MULTI | a hexagon shield / the field washed in the color with particles / two lights trading places / motes gathering / ribbons circling / a star per blow |
 
 A damaging move whose Classic script has no hit gets MODERN's own at the family's moment (MULTI: three blows), so every
