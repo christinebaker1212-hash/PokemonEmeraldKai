@@ -62,7 +62,9 @@ struct ObjectEventTemplate;
 void S3D_Dw_AddPeople(struct MapEvents *ev, struct ObjectEventTemplate *buf, u32 cap);   // (s3d_scrcmd.c, as a map loads)
 void S3D_Dw_AddObject(u8 localId);      // Platinum's AddDistortionWorldMapObject (s3d_misc.c op 30)
 void S3D_Dw_DeleteObject(u8 localId);   // DeleteDistortionWorldMapObject (op 31)
-void S3D_Dw_InitPersisted(void);        // InitPersistedMapFeaturesForDistortionWorld (op 29)
+void S3D_Dw_InitPersisted(void);
+bool8 S3D_Dw_FacingWater(void);         // SURF on a platform's water (field_control_avatar.c)
+void S3D_Dw_Surf(void);                 // special: the hop onto it        // InitPersistedMapFeaturesForDistortionWorld (op 29)
 void S3D_Dw_Player3DPos(u16 *x, u16 *y, u16 *z);
 void S3D_Dw_Shadow(u16 n);      // StartDistortionWorldGiratinaShadowEvent (op 32; 0xFFFF: Finish, op 33)   // GetPlayer3DPos (ops 35, 36)
 bool8 S3D_Dw_Active(void);

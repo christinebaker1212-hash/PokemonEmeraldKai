@@ -869,3 +869,19 @@ Sinnoh_EventScript_ExplorerKit::
 	playse SE_M_DIG
 	special Sinnoh_ExplorerKitUse
 	end
+
+@ SURF on a DISTORTION WORLD floating platform's water (src/sinnoh/s3d_distortion.c S3D_Dw_FacingWater): the game's own
+@ question, then the hop onto the water there (Platinum's FieldMoves_CanUseSurfDistortionWorld)
+Sinnoh_EventScript_DwSurf::
+	checkpartymove MOVE_SURF
+	goto_if_eq VAR_RESULT, PARTY_SIZE, Sinnoh_EventScript_DwSurfEnd
+	bufferpartymonnick STR_VAR_1, VAR_RESULT
+	lockall
+	msgbox gText_WantToUseSurf, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_DwSurfRelease
+	msgbox gText_PlayerUsedSurf, MSGBOX_DEFAULT
+	special S3D_Dw_Surf
+Sinnoh_EventScript_DwSurfRelease:
+	releaseall
+Sinnoh_EventScript_DwSurfEnd:
+	end

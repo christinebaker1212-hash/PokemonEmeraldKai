@@ -240,8 +240,11 @@ def param_fields(c, typename):
 
 def flatten(c, fields, init):
     vals = []
-    for name, n in fields:
-        v = init.get(name, 0) if isinstance(init, dict) else 0
+    for k, (name, n) in enumerate(fields):
+        if isinstance(init, dict):
+            v = init.get(name, 0)
+        else:   # (positional: a struct written without designators, { { .x = ... } })
+            v = init[k] if isinstance(init, list) and k < len(init) else 0
         if isinstance(n, list):
             vals += flatten(c, n, v if isinstance(v, dict) else {})
         elif n == 3:
@@ -477,7 +480,7 @@ def write(out, data):
             o.append('#define DW_CMDS_%s %d   // (%d commands)' % (macro, f, n))
     o.append('static const struct DwCmd sDwCmds[] = {')
     for kind, vals in cmds:
-        vals = (vals + [0] * 12)[:12]
+        vals = (vals + [0] * 14)[:14]
         o.append('    {%d, {%s}},' % (kind, ', '.join(str(v) for v in vals)))
     o.append('};')
     import ids

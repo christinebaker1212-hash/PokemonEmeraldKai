@@ -1,0 +1,52 @@
+pressuntil A field 5000
+mp platinumstory
+mp setvar 0x51B0 6
+mp teach 0 57
+wait 30
+mp warp 41,43,47,30
+wait 60
+waitfor field 1000
+wait 30
+mp dwput 104 170 70 0
+wait 30
+shot w_start
+press A 2
+wait 200
+shot w_ask
+press A 6
+wait 200
+press A 6
+wait 90
+press A 6
+wait 90
+shot w_surf
+mp dw
+press UP 2
+wait 10
+press UP 12
+wait 20
+press UP 12
+wait 20
+press UP 12
+wait 20
+press UP 12
+wait 20
+press UP 12
+wait 20
+press UP 12
+wait 20
+mp dw
+press RIGHT 2
+wait 10
+press RIGHT 12
+wait 200
+shot w_fall
+wait 400
+shot w_fall2
+wait 400
+mp dw
+shot w_b5f
+wait 200
+mp dw
+shot w_after
+quit

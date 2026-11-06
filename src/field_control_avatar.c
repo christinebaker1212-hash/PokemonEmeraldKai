@@ -539,6 +539,9 @@ static const u8 *GetInteractedMetatileScript(struct MapPosition *position, u8 me
 
 static const u8 *GetInteractedWaterScript(struct MapPosition *unused1, u8 metatileBehavior, u8 direction)
 {
+    extern const u8 Sinnoh_EventScript_DwSurf[];
+    if (S3D_Dw_FacingWater())
+        return Sinnoh_EventScript_DwSurf;   // Moemon Kai: SURF on a DISTORTION WORLD platform (src/sinnoh/s3d_distortion.c)
     if (MP_Region_HasFieldMoveBadge(4) == TRUE && PartyHasMonWithSurf() == TRUE && IsPlayerFacingSurfableFishableWater() == TRUE)
         return EventScript_UseSurf;
 

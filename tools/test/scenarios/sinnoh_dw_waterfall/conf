@@ -1,0 +1,8 @@
+# The DISTORTION WORLD B4F's channel on its ceiling: SURF from the platform (the game's own question, the hop onto
+# the water), up the channel, then right into the waterfall (104, 170, 76-79): carried down the falls to B5F
+# (Platinum's CASCADE_DOWN: the floor changes on the way), set on B5F's water below, a slow walk west. Shots w_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=395:50"
+EXPECT_A=("[dw] floor 577 at 104,170,71" "[dw] floor 579")
+UNEXPECT_A=("[crash]" "TIMEOUT")

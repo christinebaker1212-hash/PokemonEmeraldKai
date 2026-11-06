@@ -43,7 +43,7 @@ struct DwPath { u8 next; s16 fin[3], chg[3]; s32 delta[3]; u8 set, clr; };
 struct DwProp { u16 model; float off[3]; float scale; };
 // overlay009's events (sMapEvents) and their commands, each with its params struct's fields in order
 struct DwEvent { u16 hid; s16 t[3]; u8 cond; u16 val; u16 cmd, ncmd; };
-struct DwCmd { u8 kind; s32 p[12]; };
+struct DwCmd { u8 kind; s32 p[14]; };
 // overlay009's sMapObjectEvents: who stands where, shown by a condition (or added by a script), their script
 struct DwPerson { u16 hid; u8 localId; u16 gfx; s16 pos[3]; u8 dir, cond; u16 val, hide; u8 invisible; const u8 *script; };
 
@@ -79,6 +79,7 @@ enum { CMD_SET_OBJECT_ANIM, CMD_MOVE_PLATFORM, CMD_ADD_OBJECT, CMD_DELETE_OBJECT
 
 #define BASE_PITCH (-10750)   // DISTORTION_WORLD_CAMERA_BASE_ANGLE_X (the field camera's)
 #define ATTR_COLLISION 0x8000
+#define ATTR_WATER(a) (((a) & 0xFF) == 0x10 || ((a) & 0xFF) == 0x15)   // (Platinum's water behaviors: surfed)
 
 static const s8 sStep[4][4][3] = {   // [kind][Platinum dir] -> dx, dy, dz (sDistortionStepDirection*)
     {{0, 0, -1}, {0, 0, 1}, {-1, 0, 0}, {1, 0, 0}},   // floor
@@ -125,6 +126,9 @@ static struct
     u16 t;
     float vib, done[3];
     u8 carry;                      // the player rides the moving platform
+    u8 cascade;                    // a waterfall carries the player (drawn from sDw.pos)
+    s32 off;                       // how far the waterfall has carried them (units)
+    s16 start[3];                  // the tile it started from
 } sEv;
 static float sPlatOff[64][3];      // (each moving platform of this floor moved from its tile, world units)
 
@@ -132,6 +136,9 @@ static float sPlatOff[64][3];      // (each moving platform of this floor moved 
 static struct { bool8 on; u16 destHid; u8 destIndex, path, dir; s32 off[3]; } sRideNext;
 // CYNTHIA riding an elevator along (Platinum's passengerMapObj: 1F's down to B1F, B6F's down to B7F): who rides on
 // this floor, and on the floor reached, where she stands as that floor's local id 128 while its arrival scene plays
+// SURF on a floating platform's water (B4F's channel on its ceiling), and a waterfall carried across floors
+static bool8 sSurfing, sSurfStart;
+static struct { bool8 on; u8 up; s32 off; s16 x, y, z; } sCascadeNext;
 static u8 sRider;
 static float sRiderBase;
 static bool8 sRiderBaseSet;
@@ -227,7 +234,7 @@ bool8 S3D_Dw_Active(void)
 // On the map's own ground or up on a platform / mid-jump: the 3D position drives the view and the player's sprite
 static bool8 Off(void)
 {
-    return sDw.floor != NULL && (sDw.kind != KIND_LAND || sDw.jump != NULL || sDw.riding || sEv.carry);
+    return sDw.floor != NULL && (sDw.kind != KIND_LAND || sDw.jump != NULL || sDw.riding || sEv.carry || sEv.cascade);
 }
 
 // --------------------------------------------------------------------------------------------- the moving platforms
@@ -683,7 +690,17 @@ static void Landed(void)
     sDw.dir = j->face >= 0 && j->face < 4 ? j->face : sDw.dir;
     ObjectEventClearHeldMovementIfFinished(obj);
     ObjectEventTurn(obj, FromPlatDir(sDw.dir));
-    PlaySE(SE_M_SAND_ATTACK);   // (Platinum's SEQ_SE_PL_SUTYA2: the dust of a landing)
+    if (sSurfStart)
+    {
+        // (the hop onto the water: surfing from here, the player sitting on the POKéMON)
+        sSurfStart = FALSE;
+        sSurfing = TRUE;
+        ObjectEventSetGraphicsId(obj, GetPlayerAvatarGraphicsIdByStateId(PLAYER_AVATAR_STATE_SURFING));
+        ObjectEventTurn(obj, FromPlatDir(sDw.dir));
+        ScriptContext_Enable();
+    }
+    else
+        PlaySE(SE_M_SAND_ATTACK);   // (Platinum's SEQ_SE_PL_SUTYA2: the dust of a landing)
     if (getenv("MOEMON_TEST"))
         printf("[dw] landed at %d,%d,%d on kind %d platform %d\n", sDw.x, sDw.y, sDw.z, sDw.kind, sDw.plat);
 }
@@ -886,6 +903,114 @@ static bool8 EventUpdate(void)
     case CMD_CLEAR_PUZZLE_FLAG:
         SetPuzzleFlag(c->p[0], FALSE);
         break;
+    case CMD_CASCADE_DOWN:
+    case CMD_CASCADE_UP:
+    {
+        // p: axis, direction, the last tile's fix x y z (tiles), the final offset x y z (units), the change of floors
+        // x y z (tiles), the step x y z (x 4096: Platinum's 30 a second, so half in each of ours); Platinum's
+        // EventCmdCascadeDown / Up: the sprite turned onto the falls, carried along to the next floor, set on the
+        // tile below / above, a slow walk away
+        bool8 up = c->kind == CMD_CASCADE_UP;
+        float w[3];
+        s32 fin = c->p[6], chg = c->p[9] * 16, step = c->p[12] / 8192;
+        struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+        if (step == 0)
+            step = up ? 4 : -1;
+        if (sEv.state == 0)
+        {
+            s32 lx, ly, lz;
+            if (sDw.kind == KIND_LAND)
+            {
+                LandTile(&lx, &ly, &lz);
+                sDw.x = lx, sDw.y = ly, sDw.z = lz;
+                if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING) && pl->fieldEffectSpriteId < MAX_SPRITES)
+                    gSprites[pl->fieldEffectSpriteId].invisible = TRUE;   // (Kai's SURF blob: the falls carry them)
+            }
+            sEv.start[0] = sDw.x, sEv.start[1] = sDw.y, sEv.start[2] = sDw.z;
+            sEv.off = 0;
+            sEv.cascade = TRUE;
+            sEv.t = 0;
+            sDw.rotFrom = sDw.rot;
+            sEv.state = 1;
+            PlaySE(SE_FALL);
+        }
+        if (sEv.state == 1 || sEv.state == 2)
+        {
+            if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING) && pl->fieldEffectSpriteId < MAX_SPRITES)
+                gSprites[pl->fieldEffectSpriteId].invisible = TRUE;   // (the blob below waits for them)
+            if (sEv.t < 16)
+                sDw.rot = sDw.rotFrom + 90.0f * (sEv.t + 1) / 16, sEv.t++;   // (RotateMapObject 90)
+            if (sEv.off != fin)
+                sEv.off += step;
+            if ((up ? sEv.off > fin : sEv.off < fin))
+                sEv.off = fin;
+            TileWorld(sEv.start[0], sEv.start[1], sEv.start[2], w);
+            sDw.pos[0] = w[0], sDw.pos[1] = w[1] + sEv.off, sDw.pos[2] = w[2];
+            if (sEv.state == 1 && (up ? sEv.off >= chg : sEv.off <= chg))
+            {
+                // the change of floors (LoadFloor): carried on there (S3D_Dw_OnMapLoad resumes this)
+                u16 dest = ConnectedFloor(sDw.floor->hid, !up);
+                const struct DwFloor *f = FloorOfHid(dest);
+                if (f != NULL)
+                {
+                    s32 ty = sEv.start[1] + c->p[3];
+                    sCascadeNext.on = TRUE;
+                    sCascadeNext.up = up;
+                    sCascadeNext.off = sEv.off;
+                    sCascadeNext.x = sEv.start[0], sCascadeNext.y = sEv.start[1], sCascadeNext.z = sEv.start[2];
+                    (void)ty;
+                    SetWarpDestination(f->map >> 8, f->map & 0xFF, WARP_ID_NONE, sEv.start[0] - f->off[0], sEv.start[2] - f->off[2]);
+                    DoQuietWarp();
+                    sEv.state = 9;   // (waiting for the warp)
+                    return FALSE;
+                }
+                sEv.state = 2;
+            }
+            if (sEv.off == fin)
+            {
+                // the tile below / above (FinishingPosFix): on foot or surfing there, facing left
+                sEv.cascade = FALSE;
+                Settle(sEv.start[0], sEv.start[1] + c->p[3], sEv.start[2]);
+                if (sDw.kind != KIND_LAND)
+                {
+                    sSurfing = TRUE;
+                    ObjectEventSetGraphicsId(pl, GetPlayerAvatarGraphicsIdByStateId(PLAYER_AVATAR_STATE_SURFING));
+                }
+                else if (pl->fieldEffectSpriteId < MAX_SPRITES)
+                    gSprites[pl->fieldEffectSpriteId].invisible = FALSE;
+                sDw.dir = PD_LEFT;
+                ObjectEventTurn(pl, DIR_WEST);
+                sEv.state = 3;
+                sEv.t = 0;
+            }
+            return FALSE;
+        }
+        if (sEv.state == 9)
+            return FALSE;
+        if (sEv.state == 3 || sEv.state == 4)
+        {
+            // the walk away: two slow steps west (Platinum's WALK_SLOW / WALK_SLOWER_WEST)
+            if (sDw.kind == KIND_LAND)
+            {
+                if (ObjectEventIsMovementOverridden(pl) && !ObjectEventClearHeldMovementIfFinished(pl))
+                    return FALSE;
+                ObjectEventSetHeldMovement(pl, MOVEMENT_ACTION_WALK_SLOW_LEFT);
+            }
+            else
+            {
+                if (sDw.moving)
+                    return FALSE;
+                S3D_Dw_PlayerStep(DIR_WEST, 0);
+            }
+            sEv.state++;
+            return FALSE;
+        }
+        if (sDw.kind == KIND_LAND && ObjectEventIsMovementOverridden(pl) && !ObjectEventClearHeldMovementIfFinished(pl))
+            return FALSE;
+        if (sDw.moving)
+            return FALSE;
+        break;
+    }
     case CMD_START_SCRIPT:
         // p: the floor's script number (Platinum's ScriptManager_Start: the event waits for it to end)
         if (sEv.state == 0)
@@ -947,6 +1072,40 @@ static bool8 TileEvents(s32 x, s32 y, s32 z)
         printf("[dw] event at %d,%d,%d (%d commands)\n", x, y, z, e->ncmd);
     StartEvent(&sDwCmds[e->cmd], e->ncmd);
     return TRUE;
+}
+
+// ---- SURF on the platforms (Platinum's FieldMoves_CanUseSurfDistortionWorld: the tile ahead on the platform walked)
+bool8 S3D_Dw_FacingWater(void)
+{
+    const s8 *d;
+    u16 attr;
+    if (sDw.floor == NULL || !DW_HAVE_DATA || sDw.kind == KIND_LAND || sDw.plat < 0 || sSurfing || sDw.moving || sDw.jump)
+        return FALSE;
+    d = sStep[sDw.kind][sDw.dir & 3];
+    attr = PlatAttr(Plat(sDw.plat), sDw.x + d[0], sDw.y + d[1], sDw.z + d[2]);
+    return attr != 0xFFFF && !(attr & ATTR_COLLISION) && ATTR_WATER(attr) && PartyHasMonWithSurf();
+}
+
+// special: the hop onto the water (Sinnoh_EventScript_DwSurf, after the game's own "use SURF?"); the script waits
+void S3D_Dw_Surf(void)
+{
+    static struct DwJump sHop;
+    if (!S3D_Dw_FacingWater())
+    {
+        ScriptContext_Enable();
+        return;
+    }
+    memset(&sHop, 0, sizeof(sHop));
+    sHop.d[0] = sStep[sDw.kind][sDw.dir & 3][0];
+    sHop.d[1] = sStep[sDw.kind][sDw.dir & 3][1];
+    sHop.d[2] = sStep[sDw.kind][sDw.dir & 3][2];
+    sHop.steps = 16;
+    sHop.axis = 1;
+    sHop.kind = sDw.kind;
+    sHop.idx = sDw.plat;
+    sHop.face = sDw.dir;
+    sSurfStart = TRUE;
+    StartJump(&sHop);
 }
 
 // ---- the floor's people (Platinum's AddMapObjectsForMap / AddMapObjectWithLocalID): templates the map's events gain
@@ -1123,6 +1282,22 @@ void S3D_Dw_OnMapLoad(void)
     }
     if (f != NULL && DW_HAVE_DATA)
         PlatformTiles();
+    if (sCascadeNext.on)
+    {
+        // a waterfall's second half on the floor it reaches (CmdRunDataCascadeBase_Update after LoadFloor)
+        u16 cmd = sCascadeNext.up ? DW_CMDS_B5F_WATERFALL : DW_CMDS_B4F_WATERFALL;
+        sCascadeNext.on = FALSE;
+        if (f != NULL && cmd != 0xFFFF)
+        {
+            StartEvent(&sDwCmds[cmd], 1);
+            sEv.state = 2;
+            sEv.cascade = TRUE;
+            sEv.off = sCascadeNext.off;
+            sEv.t = 16;
+            sEv.start[0] = sCascadeNext.x, sEv.start[1] = sCascadeNext.y, sEv.start[2] = sCascadeNext.z;
+            sDw.rot = sKindRot[sCascadeNext.up ? KIND_LAND : KIND_CEILING] + 90;
+        }
+    }
     if (sRideNext.on)
     {
         // the second half of an elevator ride, on the floor it goes to (MoveSecondHalf)
@@ -1161,6 +1336,13 @@ bool8 S3D_Dw_PlayerStep(u8 dir, u16 heldKeys)
             return FALSE;
         LandTile(&x, &y, &z);
         sDw.x = x, sDw.y = y, sDw.z = z;
+        if (sDw.floor->hid == 579 && pdir == PD_RIGHT && x == 104 && z >= 76 && z <= 79 && abs(y - 128) <= 1
+         && TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING) && DW_CMDS_B5F_WATERFALL != 0xFFFF)
+        {
+            // B5F's waterfall, surfed into heading right: up to B4F's ceiling (DistWorld_HandlePlayerMoved)
+            StartEvent(&sDwCmds[DW_CMDS_B5F_WATERFALL], 1);
+            return TRUE;
+        }
         // (a tap only turns, as on the ground anywhere: a step that way is what takes the jump or turns the camera)
         if (dir != obj->facingDirection && gPlayerAvatar.runningState != MOVING)
             return FALSE;
@@ -1201,6 +1383,24 @@ bool8 S3D_Dw_PlayerStep(u8 dir, u16 heldKeys)
         }
         sDw.dir = pdir;
         mdir = d[0] < 0 ? DIR_WEST : d[0] > 0 ? DIR_EAST : d[2] < 0 ? DIR_NORTH : d[2] > 0 ? DIR_SOUTH : dir;
+        if (sSurfing && sDw.floor->hid == 577 && pdir == PD_RIGHT && sDw.x == 104 && sDw.y == 170 && sDw.z >= 76 && sDw.z <= 79
+         && DW_CMDS_B4F_WATERFALL != 0xFFFF)
+        {
+            // B4F's waterfall, surfed into heading right (DistWorld_HandlePlayerMoved): down to B5F
+            StartEvent(&sDwCmds[DW_CMDS_B4F_WATERFALL], 1);
+            return TRUE;
+        }
+        if (attr != 0xFFFF && !(attr & ATTR_COLLISION) && ATTR_WATER(attr) != sSurfing)
+        {
+            if (sSurfing)
+            {
+                // (out of the water onto the platform: on foot again)
+                sSurfing = FALSE;
+                ObjectEventSetGraphicsId(obj, GetPlayerAvatarGraphicsIdByStateId(PLAYER_AVATAR_STATE_NORMAL));
+            }
+            else
+                attr = ATTR_COLLISION;   // (water without SURF: A in front of it asks: S3D_Dw_FacingWater)
+        }
         if (attr == 0xFFFF || (attr & ATTR_COLLISION))
         {
             // a bump: walking on the spot, slowly, with the sound (as the game's own collisions)
@@ -1406,6 +1606,16 @@ bool8 S3D_Dw_PlayerSprite(u16 spriteId, s32 *outX, s32 *outY, float *depth)
 }
 
 // For tests: where the player is (mp dw)
+void S3D_Dw_Put(s32 x, s32 y, s32 z, u8 dir)
+{
+    if (sDw.floor == NULL)
+        return;
+    Settle(x, y, z);
+    sDw.dir = dir & 3;
+    ObjectEventTurn(&gObjectEvents[gPlayerAvatar.objectEventId], FromPlatDir(sDw.dir));
+    S3D_Dw_Print();
+}
+
 void S3D_Dw_Print(void)
 {
     s32 x, y, z;

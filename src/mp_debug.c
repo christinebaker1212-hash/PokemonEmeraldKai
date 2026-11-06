@@ -1518,6 +1518,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void S3D_Dw_Print(void);
         S3D_Dw_Print();   // dw - where the player is in the DISTORTION WORLD (src/sinnoh/s3d_distortion.c)
     }
+    else if (strcmp(cmd, "dwput") == 0)
+    {
+        // dwput X Y Z [DIR] - the player onto that DISTORTION WORLD tile of this floor (its surface found), facing DIR
+        // (Platinum's: 0 up, 1 down, 2 left, 3 right)
+        void S3D_Dw_Put(s32 x, s32 y, s32 z, u8 dir);
+        int x = 0, y = 0, z = 0, d = 1;
+        sscanf(arg, "%d %d %d %d", &x, &y, &z, &d);
+        S3D_Dw_Put(x, y, z, d);
+    }
     else if (strcmp(cmd, "getvar") == 0)
         printf("[test] var 0x%X = %d\n", (unsigned)strtol(arg, NULL, 0), VarGet((u16)strtol(arg, NULL, 0)));   // getvar ID
     else if (strcmp(cmd, "legendko") == 0)
