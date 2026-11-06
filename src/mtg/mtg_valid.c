@@ -108,6 +108,8 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         return !d || obj == src;
     if (n == 11 && strncmp(p, "EnchantedBy", 11) == 0)   // the creature the source (an Aura) enchants
         return !d || (src != MTG_NO_OBJ && src < d->objCount && d->objs[src].attachedTo == obj);
+    if (n == 5 && (strncmp(p, "token", 5) == 0 || strncmp(p, "Token", 5) == 0))   // a token (nonToken: a card)
+        return !d || ((o->def >= MTG_TOKEN_BASE) ^ neg);
     if (n == 9 && strncmp(p, "enchanted", 9) == 0) {     // a creature with an Aura on it
         int k;
         if (!d)

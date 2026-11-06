@@ -278,6 +278,10 @@ static void StateBasedActions(MtgDuel *d)
             d->winner = (int8_t)(lost[0] && lost[1] ? -1 : lost[0] ? 1 : 0);
             return;
         }
+        for (i = 0; i < d->objCount; i++)   // a token anywhere but the battlefield ceases to exist (704.5d)
+            if (d->objs[i].def >= MTG_TOKEN_BASE && d->objs[i].zone != MTG_ZONE_BATTLEFIELD
+                && d->objs[i].zone != MTG_ZONE_NONE)
+                Mtg_MoveTo(d, i, MTG_ZONE_NONE);
         for (i = 0; i < d->objCount; i++) {   // an Aura on nothing it may enchant goes (704.5m)
             const MtgObj *o = &d->objs[i];
             int to = o->attachedTo;

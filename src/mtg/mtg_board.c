@@ -1685,7 +1685,9 @@ static int StartEvent(const MtgEvent *e)
         if (e->b == MTG_ZONE_LIBRARY && v->players[v->objs[obj].owner].libraryCount)
             v->players[v->objs[obj].owner].libraryCount--;
         // where it comes from when it shows up: the opponent's hand, the stack, their library
-        if (B.duel.objs[obj].controller == THEM && e->b == MTG_ZONE_HAND)
+        if (e->b == MTG_ZONE_NONE)   // a token: it appears out of the spell or ability that made it
+            B.spawn[obj] = StackSpot();
+        else if (B.duel.objs[obj].controller == THEM && e->b == MTG_ZONE_HAND)
             B.spawn[obj] = sOppHand;
         else if (e->b == MTG_ZONE_STACK)
             B.spawn[obj] = StackSpot();

@@ -153,6 +153,13 @@
 "number": "115",
 "set": "ody"
 },
+"Afterlife": {
+"artist": "Pete Venters",
+"file": "mir_1",
+"frame": "1997",
+"number": "1",
+"set": "mir"
+},
 "Aftershock": {
 "artist": "Hannibal King",
 "file": "tmp_160",
@@ -1308,6 +1315,13 @@
 "number": "109",
 "set": "mir"
 },
+"Breeding Pit": {
+"artist": "Adrian Smith",
+"file": "5ed_148",
+"frame": "1997",
+"number": "148",
+"set": "5ed"
+},
 "Briar Shield": {
 "artist": "Scott Kirschner",
 "file": "wth_121",
@@ -1622,6 +1636,13 @@
 "frame": "1993",
 "number": "282",
 "set": "ice"
+},
+"Centaur Glade": {
+"artist": "Alex Horley-Orlandelli",
+"file": "ons_251",
+"frame": "1997",
+"number": "251",
+"set": "ons"
 },
 "Centaur Veteran": {
 "artist": "Mark Zug",
@@ -2638,6 +2659,13 @@
 "number": "6",
 "set": "pcy"
 },
+"Dogged Hunter": {
+"artist": "rk post",
+"file": "ody_20",
+"frame": "1997",
+"number": "20",
+"set": "ody"
+},
 "Doomed Necromancer": {
 "artist": "Mark Brill",
 "file": "ons_140",
@@ -2672,6 +2700,13 @@
 "frame": "1997",
 "number": "87",
 "set": "scg"
+},
+"Dragon Roost": {
+"artist": "Luca Zontini",
+"file": "ons_198",
+"frame": "1997",
+"number": "198",
+"set": "ons"
 },
 "Dragon Tyrant": {
 "artist": "Kev Walker",
@@ -3793,6 +3828,13 @@
 "number": "62",
 "set": "exo"
 },
+"Funeral Pyre": {
+"artist": "Carl Critchlow",
+"file": "jud_10",
+"frame": "1997",
+"number": "10",
+"set": "jud"
+},
 "Fungal Shambler": {
 "artist": "Jim Nelson",
 "file": "papc_100",
@@ -4178,6 +4220,13 @@
 "number": "86",
 "set": "uds"
 },
+"Goblin Offensive": {
+"artist": "Carl Critchlow",
+"file": "usg_192",
+"frame": "1997",
+"number": "192",
+"set": "usg"
+},
 "Goblin Pyromancer": {
 "artist": "Edward P. Beard, Jr.",
 "file": "ons_206",
@@ -4191,6 +4240,13 @@
 "frame": "1997",
 "number": "103",
 "set": "p02"
+},
+"Goblin Scouts": {
+"artist": "Geofrey Darrow",
+"file": "mir_178",
+"frame": "1997",
+"number": "178",
+"set": "mir"
 },
 "Goblin Sharpshooter": {
 "artist": "Greg Staples",
@@ -4234,6 +4290,13 @@
 "number": "81",
 "set": "vis"
 },
+"Goblin Trenches": {
+"artist": "Wayne England",
+"file": "apc_104",
+"frame": "1997",
+"number": "104",
+"set": "apc"
+},
 "Goblin Turncoat": {
 "artist": "Jim Nelson",
 "file": "lgn_72",
@@ -4254,6 +4317,13 @@
 "frame": "1997",
 "number": "97",
 "set": "scg"
+},
+"Goblin Warrens": {
+"artist": "Dan Frazier",
+"file": "5ed_238",
+"frame": "1997",
+"number": "238",
+"set": "5ed"
 },
 "Goliath Beetle": {
 "artist": "Don Hazeltine",
@@ -4814,6 +4884,13 @@
 "frame": "1997",
 "number": "37",
 "set": "5ed"
+},
+"Icatian Town": {
+"artist": "Tom Wänerstrand",
+"file": "ptc_et15",
+"frame": "1993",
+"number": "et15",
+"set": "ptc"
 },
 "Icy Manipulator": {
 "artist": "Amy Weber",
@@ -6089,6 +6166,13 @@
 "number": "90",
 "set": "sth"
 },
+"Mobilization": {
+"artist": "Carl Critchlow",
+"file": "ons_44",
+"frame": "1997",
+"number": "44",
+"set": "ons"
+},
 "Mogg Fanatic": {
 "artist": "Brom",
 "file": "tmp_190",
@@ -6739,6 +6823,34 @@
 "frame": "1997",
 "number": "30",
 "set": "usg"
+},
+"Pegasus Refuge": {
+"artist": "Kev Walker",
+"file": "tmp_35",
+"frame": "1997",
+"number": "35",
+"set": "tmp"
+},
+"Penumbra Bobcat": {
+"artist": "Heather Hudson",
+"file": "apc_82",
+"frame": "1997",
+"number": "82",
+"set": "apc"
+},
+"Penumbra Kavu": {
+"artist": "Tony Szczudlo",
+"file": "apc_83",
+"frame": "1997",
+"number": "83",
+"set": "apc"
+},
+"Penumbra Wurm": {
+"artist": "Jeff Easley",
+"file": "apc_84",
+"frame": "1997",
+"number": "84",
+"set": "apc"
 },
 "Perish": {
 "artist": "Rebecca Guay",
@@ -7818,6 +7930,13 @@
 "number": "224",
 "set": "ons"
 },
+"Rotlung Reanimator": {
+"artist": "Thomas M. Baxa",
+"file": "ons_164",
+"frame": "1997",
+"number": "164",
+"set": "ons"
+},
 "Royal Assassin": {
 "artist": "Tom Wänerstrand",
 "file": "4ed_157",
@@ -7971,6 +8090,13 @@
 "frame": "1997",
 "number": "102",
 "set": "mmq"
+},
+"Sarcomancy": {
+"artist": "Daren Bader",
+"file": "tmp_154",
+"frame": "1997",
+"number": "154",
+"set": "tmp"
 },
 "Savage Gorilla": {
 "artist": "Dave Dorman",
@@ -8245,6 +8371,13 @@
 "number": "24",
 "set": "wth"
 },
+"Serpent Generator": {
+"artist": "Mark Tedin",
+"file": "bchr_108",
+"frame": "1993",
+"number": "108",
+"set": "bchr"
+},
 "Serpent Warrior": {
 "artist": "Roger Raupp",
 "file": "por_109",
@@ -8503,6 +8636,13 @@
 "frame": "1993",
 "number": "97a",
 "set": "hml"
+},
+"Siege-Gang Commander": {
+"artist": "Christopher Moeller",
+"file": "scg_103",
+"frame": "1997",
+"number": "103",
+"set": "scg"
 },
 "Sift": {
 "artist": "Pete Venters",
@@ -8777,6 +8917,13 @@
 "number": "71",
 "set": "uds"
 },
+"Sliver Queen": {
+"artist": "Ron Spencer",
+"file": "sth_129",
+"frame": "1997",
+"number": "129",
+"set": "sth"
+},
 "Sluggishness": {
 "artist": "Pete Venters",
 "file": "ulg_92",
@@ -8804,6 +8951,13 @@
 "frame": "1997",
 "number": "170",
 "set": "ons"
+},
+"Snake Pit": {
+"artist": "Carl Critchlow",
+"file": "mmq_271",
+"frame": "1997",
+"number": "271",
+"set": "mmq"
 },
 "Snorting Gahr": {
 "artist": "Andrew Goldhawk",
@@ -9140,6 +9294,13 @@
 "frame": "1997",
 "number": "273",
 "set": "ody"
+},
+"Squirrel Wrangler": {
+"artist": "Carl Critchlow",
+"file": "pcy_127",
+"frame": "1997",
+"number": "127",
+"set": "pcy"
 },
 "Stalking Assassin": {
 "artist": "Dana Knutson",
@@ -9560,6 +9721,27 @@
 "frame": "1997",
 "number": "133",
 "set": "jud"
+},
+"Symbiotic Beast": {
+"artist": "Franz Vohwinkel",
+"file": "ons_287",
+"frame": "1997",
+"number": "287",
+"set": "ons"
+},
+"Symbiotic Elf": {
+"artist": "Wayne England",
+"file": "ons_288",
+"frame": "1997",
+"number": "288",
+"set": "ons"
+},
+"Symbiotic Wurm": {
+"artist": "Matt Cavotta",
+"file": "ons_289",
+"frame": "1997",
+"number": "289",
+"set": "ons"
 },
 "Tainted Aether": {
 "artist": "Thomas M. Baxa",
@@ -10302,6 +10484,13 @@
 "frame": "1997",
 "number": "136",
 "set": "jud"
+},
+"Verdant Force": {
+"artist": "DiTerlizzi",
+"file": "tmp_263",
+"frame": "1997",
+"number": "263",
+"set": "tmp"
 },
 "Verdigris": {
 "artist": "Zina Saunders",
@@ -11184,6 +11373,13 @@
 "frame": "1993",
 "number": "116",
 "set": "4ed"
+},
+"Zombie Infestation": {
+"artist": "Thomas M. Baxa",
+"file": "ody_170",
+"frame": "1997",
+"number": "170",
+"set": "ody"
 },
 "Zombify": {
 "artist": "Mark Romanoski",

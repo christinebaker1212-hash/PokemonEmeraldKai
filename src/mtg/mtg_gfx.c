@@ -253,7 +253,7 @@ static int FrameOf(const MtgCardDef *c)
 }
 unsigned MtgGfx_FrameColor(int card, int shade)
 {
-    const MtgCardDef *c = card >= 0 && card < Mtg_DbCount() ? Mtg_Card(card) : NULL;
+    const MtgCardDef *c = card >= 0 ? Mtg_Card(card) : NULL;
     int f = c ? FrameOf(c) : F_COLORLESS;
     return shade == 1 ? sFrames[f].light : shade == 2 ? sFrames[f].dark : shade == 3 ? sFrames[f].box : sFrames[f].base;
 }
@@ -359,6 +359,28 @@ static void LayoutOf(int w, int h, struct Layout *l)
     }
 }
 
+/* a token's illustration (tokens have no printed card): the card's color in soft diagonal bands behind a silver
+ * token coin with a T, so a token never looks like a card whose art is missing */
+static void TokenArt(struct GSurface *s, unsigned base, int x, int y, int w, int h)
+{
+    int i, j;
+    float cx = x + w / 2.0f, cy = y + h / 2.0f, r = G_MinF(w, h) * 0.34f;
+    for (j = 0; j < h; j++)
+        for (i = 0; i < w; i++)
+            S_Fill(s, x + i, y + j, 1, 1, ARGB(G_Mix(base, ((i + j) / 3) & 1 ? 0xffffff : 0x000000, 0.18f), 255));
+    if (r < 2)
+        return;
+    S_Disc(s, cx, cy, r + 0.8f, ARGB(0x303438, 255));
+    S_Disc(s, cx, cy, r, ARGB(0xd8dee6, 255));
+    S_Ring(s, cx, cy, r - 1.0f, 0.7f, ARGB(0x8a96a4, 255));
+    if (r >= 4)
+    {
+        int tw = (int)(r * 1.1f), th = (int)(r * 1.1f), sw = tw / 4 > 0 ? tw / 4 : 1;
+        S_Fill(s, (int)(cx - tw / 2.0f), (int)(cy - th / 2.0f), tw, sw, ARGB(0x3a4250, 255));
+        S_Fill(s, (int)(cx - sw / 2.0f), (int)(cy - th / 2.0f), sw, th, ARGB(0x3a4250, 255));
+    }
+}
+
 static void Face(struct GSurface *s, int card)
 {
     const MtgCardDef *c = Mtg_Card(card);
@@ -414,6 +436,8 @@ static void Face(struct GSurface *s, int card)
         ArtInto(art, s, l.artX, l.artY, l.artW, l.artH);
     else if (c->types & MTG_T_LAND)
         LandArt(s, c, l.artX, l.artY, l.artW, l.artH);
+    else if (card >= MTG_TOKEN_BASE)
+        TokenArt(s, base, l.artX, l.artY, l.artW, l.artH);
     else
         S_Fill(s, l.artX, l.artY, l.artW, l.artH, ARGB(G_Mix(base, 0x000000, 0.2f), 255));
     /* the type bar */
@@ -493,7 +517,7 @@ SDL_Texture *MtgGfx_CardTexture(int card, int w, int h)
     struct GSurface s;
     if (!G_R() || w <= 0 || h <= 0)
         return NULL;
-    if (card < 0 || card >= Mtg_DbCount())
+    if (card < 0 || !Mtg_Card(card))
         card = MTG_GFX_BACK;
     for (i = 0; i < TEXTURES; i++)
         if (sTex[i].texture && sTex[i].card == card && sTex[i].w == w && sTex[i].h == h && sTex[i].mode == sArtMode)
@@ -694,7 +718,7 @@ void MtgGfx_KeywordLine(int card, uint32_t kw, char *out, unsigned cap)
                                                     "DOUBLE STRIKE", "TRAMPLE", "SHROUD", "FEAR", "FLASH", "LIFELINK"};
     static const char *const walks[5] = {"PLAINSWALK", "ISLANDWALK", "SWAMPWALK", "MOUNTAINWALK", "FORESTWALK"};
     static const char *const colors[5] = {"WHITE", "BLUE", "BLACK", "RED", "GREEN"};
-    const MtgCardDef *c = card >= 0 && card < Mtg_DbCount() ? Mtg_Card(card) : NULL;
+    const MtgCardDef *c = card >= 0 ? Mtg_Card(card) : NULL;
     unsigned n = 0;
     int k;
     if (!cap)

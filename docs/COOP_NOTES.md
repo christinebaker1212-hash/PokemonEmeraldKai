@@ -5936,6 +5936,18 @@ the most). Each table now shows a move before it's made and holds what happened 
   and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
   duel 4).
 
+## MAGIC's tokens (1.126.0)
+- Mtg_TokenDef (mtg_script.c) makes a definition from Forge's token script name (colors_power_toughness[_a]_type
+  words[_keywords], landwalk words too: "r_1_1_goblin_scout_mountainwalk"), kept at ids MTG_TOKEN_BASE (0x7000) and
+  up, apart from the pool: Mtg_DbCount, collections, boosters and the binder never see them. A name it can't read
+  (banding, X/X, TokenPower$...) keeps the card out. `SP$ / AB$ / DB$ Token` (MTG_API_TOKEN): TokenScript$,
+  TokenOwner$ (the payer list: You, Opponent, Targeted..., triggered names), TokenAmount$; a new object per token
+  entering through Mtg_MoveTo (enter triggers, ETB tapped). State-based actions send a token anywhere but the
+  battlefield to MTG_ZONE_NONE (704.5d). Valid property `token` / `nonToken`.
+- The table: a token's face is the game's frame with a silver token coin (a T) over its color's bands
+  (mtg_gfx.c TokenArt); it appears out of the stack spot. The stand-in AI makes tokens in a main phase.
+  Scenario mtg_tokens; TestTokens.
+
 ## MAGIC's lands that enter tapped, "doesn't untap", counted statics (1.125.0)
 - Two replacement forms read by mtg_static.c Mtg_ParseReplacement into MtgStatic modes: MTG_STATIC_ETB_TAPPED
   (`R:Event$ Moved | Destination$ Battlefield | ReplaceWith$` an SVar `DB$ Tap | ... | ETB$ True`; ValidCard$

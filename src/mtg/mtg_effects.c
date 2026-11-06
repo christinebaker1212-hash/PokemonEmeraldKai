@@ -12,12 +12,12 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"ChangeZone", MTG_API_CHANGE_ZONE}, {"Mana", MTG_API_MANA}, {"Discard", MTG_API_DISCARD},
     {"Tap", MTG_API_TAP}, {"Untap", MTG_API_UNTAP}, {"Counter", MTG_API_COUNTER},
     {"Sacrifice", MTG_API_SACRIFICE}, {"PutCounter", MTG_API_PUT_COUNTER}, {"Attach", MTG_API_ATTACH},
-    {"Regenerate", MTG_API_REGENERATE},
+    {"Regenerate", MTG_API_REGENERATE}, {"Token", MTG_API_TOKEN},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
-    "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate",
+    "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -423,6 +423,29 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                 Mtg_Event(d, MTG_EV_REGENERATE, who.t[i].id, 1, d->objs[who.t[i].id].regen);
             }
         break;
+    case MTG_API_TOKEN: {   // TokenEffect: the tokens enter under each owner's control
+        const char *own = Mtg_Param(ab, "TokenOwner");
+        int def = Mtg_TokenDef(Mtg_Param(ab, "TokenScript")), n = 1, k, p;
+        if (Mtg_Param(ab, "TokenAmount"))
+            n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "TokenAmount"), &ok);
+        DefinedBy(d, ctx, own ? own : "You", &who);
+        for (i = 0; i < who.n && def >= 0; i++) {
+            if (who.t[i].kind != MTG_TGT_PLAYER)
+                continue;
+            p = who.t[i].id;
+            for (k = 0; k < n && k < 20 && d->objCount < MTG_MAX_OBJS; k++) {
+                int obj = d->objCount++;
+                MtgObj *o = &d->objs[obj];
+                memset(o, 0, sizeof(*o));
+                o->def = (uint16_t)def;
+                o->owner = o->controller = (uint8_t)p;
+                o->zone = MTG_ZONE_NONE;
+                o->blocking = o->attachedTo = MTG_NO_OBJ;
+                Mtg_MoveTo(d, obj, MTG_ZONE_BATTLEFIELD);
+            }
+        }
+        break;
+    }
     case MTG_API_GAIN_LIFE:
     case MTG_API_LOSE_LIFE: {
         int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "LifeAmount"), &ok);
@@ -635,6 +658,7 @@ static const char *const sApiParams[MTG_API_COUNT][5] = {
     [MTG_API_DISCARD] = {"NumCards", "Mode", "DiscardValid"},
     [MTG_API_SACRIFICE] = {"SacValid", "Amount", "SacMessage"},
     [MTG_API_PUT_COUNTER] = {"CounterType", "CounterNum"},
+    [MTG_API_TOKEN] = {"TokenScript", "TokenOwner", "TokenAmount"},
 };
 static const char *const sPayersKnown[] = {
     "You", "Opponent", "Player", "Targeted", "TargetedController", "TargetedPlayer",
@@ -767,6 +791,12 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return 1;
     case MTG_API_COUNTER:
         return ab->tgtStack;
+    case MTG_API_TOKEN:
+        v = Mtg_Param(ab, "TokenOwner");
+        if (v && !InList(v, sPayersKnown, (int)(sizeof(sPayersKnown) / sizeof(sPayersKnown[0])))
+            && !(ab->kind != MTG_AB_SPELL && ab->kind != MTG_AB_ACTIVATED && Mtg_TriggeredDefinedKnown(0, v)))
+            return 0;
+        return Mtg_TokenDef(Mtg_Param(ab, "TokenScript")) >= 0 && AmountKnown(ab, "TokenAmount", 0);
     }
     return 1;
 }

@@ -1,0 +1,6 @@
+# MAGIC's tokens on the table: GOBLIN SCOUTS makes three 1/1 Goblin Scout tokens (drawn with the game's own frame),
+# INSPECT on one (R2) reads Goblin Scout 1/1 MOUNTAINWALK. (A token leaving the table: TestTokens.)
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Goblin Scouts" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Goblin Scouts to focus")

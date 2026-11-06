@@ -28,6 +28,7 @@ enum {
     MTG_API_PUT_COUNTER,      // CountersPutEffect (P1P1 / M1M1)
     MTG_API_ATTACH,           // AttachEffect: an Aura spell (K:Enchant:Creature) enters attached to its target
     MTG_API_REGENERATE,       // RegenerateEffect: a shield on each creature (Defined$ Self or the target)
+    MTG_API_TOKEN,            // TokenEffect: TokenAmount$ tokens of TokenScript$ for TokenOwner$ (Mtg_TokenDef)
     MTG_API_COUNT
 };
 

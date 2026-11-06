@@ -66,7 +66,9 @@ typedef struct MtgCardDef {
 // Load the pack (graphics/mtg/forge.pak's bytes; its text is copied, the bytes can go). Returns the card count.
 int Mtg_DbLoad(const void *pak, uint32_t size);
 int Mtg_DbCount(void);
-const MtgCardDef *Mtg_Card(int id);
+const MtgCardDef *Mtg_Card(int id);         // a pool card, or a token (id >= MTG_TOKEN_BASE)
+#define MTG_TOKEN_BASE 0x7000                // token definitions (made from Forge's token names: Mtg_TokenDef)
+int Mtg_TokenDef(const char *script);        // "g_1_1_saproling" -> its definition's id, -1 if not understood
 int Mtg_CardByName(const char *name);       // -1 if not in the pool
 
 // ---- a duel ----

@@ -172,6 +172,10 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
     case MTG_API_UNTAP:
     case MTG_API_MANA:
         return 0;
+    case MTG_API_TOKEN:   // creatures for its side, in a main phase (or at the end of the other's turn, activated)
+        if (Mtg_Param(ab, "TokenOwner") && strcmp(Mtg_Param(ab, "TokenOwner"), "You") != 0)
+            return 0;
+        return main ? 9 : (a->kind == MTG_ACT_ACTIVATE && d->active == opp && d->step == MTG_STEP_END) ? 6 : 0;
     case MTG_API_REGENERATE: {   // only when it would die now
         const char *def = Mtg_Param(ab, "Defined");
         int who = tgtObj >= 0 ? tgtObj : def && strcmp(def, "Enchanted") == 0 ? d->objs[a->obj].attachedTo : a->obj;

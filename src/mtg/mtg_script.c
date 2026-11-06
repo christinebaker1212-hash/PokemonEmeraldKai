@@ -1,6 +1,7 @@
 // Moemon Kai: reading Forge's card scripts (graphics/mtg/forge.pak) into card definitions: what Forge's CardRules /
 // CardFactory / AbilityFactory do. A line the engine doesn't translate yet makes the card unsupported (with the
 // reason, for docs/MTG_SCOPE.md), so a duel never meets a card it would play wrongly.
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "mtg_internal.h"
@@ -14,7 +15,102 @@ static int sCardCount;
 static char *sText;            // the pack's text, copied once and cut into strings in place
 
 int Mtg_DbCount(void) { return sCardCount; }
-const MtgCardDef *Mtg_Card(int id) { return (id >= 0 && id < sCardCount) ? &sCards[id] : NULL; }
+// tokens: definitions made once from Forge's token script names, kept apart from the pool (never in a collection)
+#define MAX_TOKENS 128
+static MtgCardDef sTokens[MAX_TOKENS];
+static char sTokenScript[MAX_TOKENS][40], sTokenName[MAX_TOKENS][40], sTokenSub[MAX_TOKENS][40];
+static int sTokenCount;
+
+const MtgCardDef *Mtg_Card(int id)
+{
+    if (id >= MTG_TOKEN_BASE)
+        return id - MTG_TOKEN_BASE < sTokenCount ? &sTokens[id - MTG_TOKEN_BASE] : NULL;
+    return (id >= 0 && id < sCardCount) ? &sCards[id] : NULL;
+}
+
+// Forge's token names (res/tokenscripts): colors_power_toughness[_a (artifact)]_type words[_keywords], e.g.
+// "w_1_1_spirit_flying", "c_1_1_a_gnome", "c_0_2_a_wall_defender", "br_3_1_graveborn_haste"
+int Mtg_TokenDef(const char *script)
+{
+    static const char sCol[] = "wubrg";
+    char buf[40], *p, *tok, *save;
+    MtgCardDef *c;
+    int i, part = 0;
+    if (!script || strlen(script) >= sizeof(buf))
+        return -1;
+    for (i = 0; i < sTokenCount; i++)
+        if (strcmp(sTokenScript[i], script) == 0)
+            return sTokens[i].supported ? MTG_TOKEN_BASE + i : -1;
+    if (sTokenCount >= MAX_TOKENS)
+        return -1;
+    c = &sTokens[sTokenCount];
+    memset(c, 0, sizeof(*c));
+    strcpy(sTokenScript[sTokenCount], script);
+    sTokenName[sTokenCount][0] = sTokenSub[sTokenCount][0] = 0;
+    c->name = sTokenName[sTokenCount];
+    c->subtypes = sTokenSub[sTokenCount];
+    c->oracle = "";
+    c->types = MTG_T_CREATURE;
+    c->supported = 1;
+    strcpy(buf, script);
+    for (save = buf, tok = Mtg_Token(&save, '_'); tok; tok = Mtg_Token(&save, '_'), part++) {
+        int kw;
+        if (part == 0) {   // colors ("c" colorless)
+            for (p = tok; *p; p++) {
+                const char *k = strchr(sCol, *p);
+                if (k)
+                    c->colors |= MTG_COLOR_BIT(k - sCol);
+                else if (*p != 'c')
+                    c->supported = 0;
+            }
+        } else if (part == 1 || part == 2) {
+            if (!*tok || strspn(tok, "0123456789") != strlen(tok))
+                c->supported = 0;
+            else if (part == 1)
+                c->power = (int8_t)atoi(tok);
+            else
+                c->toughness = (int8_t)atoi(tok);
+        } else if (part == 3 && strcmp(tok, "a") == 0)
+            c->types |= MTG_T_ARTIFACT;
+        else {
+            char word[24];
+            snprintf(word, sizeof(word), "%s", tok);
+            word[0] = (char)(word[0] >= 'a' && word[0] <= 'z' ? word[0] - 32 : word[0]);
+            static const char *const sWalk[5] = {"plainswalk", "islandwalk", "swampwalk", "mountainwalk", "forestwalk"};
+            static const char *const sNot[] = {"banding", "menace", "provoke", "flanking", "shadow", "horsemanship",
+                                               "indestructible", "deathtouch", "hexproof", "changeling", "phasing"};
+            int w, other = 0;
+            for (w = 0; w < (int)(sizeof(sNot) / sizeof(sNot[0])); w++)
+                other |= strcmp(tok, sNot[w]) == 0;
+            for (w = 0; w < 5; w++)
+                if (strcmp(tok, sWalk[w]) == 0)
+                    break;
+            if (w < 5)
+                c->landwalk |= MTG_COLOR_BIT(w), c->keywords |= 0x80000000u;   // (marks the end of the type words)
+            else if (other)
+                c->supported = 0;
+            else if ((kw = Mtg_KeywordByName(word)) >= 0)
+                c->keywords |= MTG_KW_BIT(kw);
+            else if (!c->keywords && strspn(tok, "abcdefghijklmnopqrstuvwxyz") == strlen(tok)) {
+                char *sub = sTokenSub[sTokenCount];
+                if (strlen(sub) + strlen(word) + 2 > sizeof(sTokenSub[0]))
+                    c->supported = 0;
+                else {
+                    if (*sub)
+                        strcat(sub, " ");
+                    strcat(sub, word);
+                }
+            } else
+                c->supported = 0;
+        }
+    }
+    c->keywords &= ~0x80000000u;
+    if (part < 4 || !sTokenSub[sTokenCount][0])
+        c->supported = 0;
+    snprintf(sTokenName[sTokenCount], sizeof(sTokenName[0]), "%s", sTokenSub[sTokenCount]);
+    sTokenCount++;
+    return c->supported ? MTG_TOKEN_BASE + sTokenCount - 1 : -1;
+}
 
 int Mtg_CardByName(const char *name)
 {

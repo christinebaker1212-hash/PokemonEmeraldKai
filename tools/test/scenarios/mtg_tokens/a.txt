@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 60
+mp mtg starter 0
+mp mtg duel 1
+wait 30
+press A 2
+waitlog 3000 mtg: your move: priority
+wait 10
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 hand Goblin Scouts
+wait 10
+mp mtg focus Goblin Scouts
+press A 2
+waitlog 900 mtg: ready
+wait 60
+rendershot k_tokens
+mp mtg focus Goblin Scout
+wait 6
+press R2 2
+wait 20
+rendershot k_inspect
+press B 2
+wait 10
+mp mtg table
+mp mtg lose
+waitlog 300 mtg: duel over
+quit

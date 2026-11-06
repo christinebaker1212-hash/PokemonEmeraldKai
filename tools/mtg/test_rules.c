@@ -641,6 +641,45 @@ static void TestStatics2(void)
     }
 }
 
+// tokens: made from Forge's token names, under their owner's control, gone once they leave the battlefield
+static void TestTokens(void)
+{
+    int scouts, i, n, tok = -1, after, bears, bolt;
+    printf("tokens: goblin scouts, afterlife, a token dies and is gone\n");
+    CHECK(Mtg_TokenDef("g_1_1_saproling") >= MTG_TOKEN_BASE, "a saproling token");
+    CHECK(Mtg_TokenDef("w_1_1_spirit_flying") >= 0 && (Mtg_Card(Mtg_TokenDef("w_1_1_spirit_flying"))->keywords & MTG_KW_BIT(MTG_KW_FLYING)),
+          "a flying spirit");
+    CHECK(strcmp(Mtg_Card(Mtg_TokenDef("c_1_1_a_gnome"))->name, "Gnome") == 0
+          && (Mtg_Card(Mtg_TokenDef("c_1_1_a_gnome"))->types & MTG_T_ARTIFACT), "an artifact gnome");
+    Table();
+    Lands(0, "Mountain", 5);
+    scouts = Put(0, "Goblin Scouts", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, scouts, -1, 0);
+    PassBoth();
+    for (i = n = 0; i < sD.objCount; i++)
+        if (sD.objs[i].def >= MTG_TOKEN_BASE && sD.objs[i].zone == MTG_ZONE_BATTLEFIELD && sD.objs[i].controller == 0)
+            n++, tok = i;
+    CHECK(n == 3, "three goblins (%d)", n);
+    CHECK(tok >= 0 && Mtg_Power(&sD, tok) == 1 && (Mtg_Landwalk(&sD, tok) & MTG_COLOR_BIT(MTG_R)), "1/1 mountainwalk goblin scouts");
+    CHECK(tok >= 0 && strcmp(Mtg_Card(sD.objs[tok].def)->name, "Goblin Scout") == 0, "named Goblin Scout");
+    Lands(0, "Mountain", 1);
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, tok);
+    PassBoth();
+    CHECK(Zone(tok) == MTG_ZONE_NONE, "a bolted token is gone, not in the graveyard (%d)", Zone(tok));
+
+    Table();   // Afterlife: destroy target creature, its controller gets a 1/1 flying spirit
+    Lands(0, "Plains", 3);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    after = Put(0, "Afterlife", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, after, MTG_TGT_OBJ, bears);
+    PassBoth();
+    for (i = n = 0; i < sD.objCount; i++)
+        if (sD.objs[i].def >= MTG_TOKEN_BASE && sD.objs[i].zone == MTG_ZONE_BATTLEFIELD && sD.objs[i].controller == 1)
+            n++;
+    CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && n == 1, "the bears destroyed, its controller gets a spirit (%d)", n);
+}
+
 // ---- whole duels between the stand-in AIs
 
 // a choice while something resolves (MTG_Q_CHOOSE): card = 1 / 0, or the candidate holding obj
@@ -1081,6 +1120,7 @@ int main(int argc, char **argv)
     TestCosts();
     TestRegenerate();
     TestStatics2();
+    TestTokens();
     TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
