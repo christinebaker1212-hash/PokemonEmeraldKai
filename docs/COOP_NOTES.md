@@ -5370,8 +5370,21 @@ overnight list included M2-M5; each is easy to change if the user wants otherwis
   the C code's tables (gName). `mp makerproof FILE` (src/maker/maker_events.c Maker_RawProof) compiles each as an
   event and walks it beside the built script: the same bytes, a pointer into the event the same place as the label of
   that name, any other pointer the same address. tools/test/maker_decompile.sh: 20148 blocks, 0 differ.
-- `decompile.py MAP_DIR` prints a map's object / sign / trigger scripts as events of raw lines (the start of M4b's
-  editor side: friendly commands, texts inlined and the local labels they reach are still to come).
+- **"Start from the game's script"** (the inspector's EVENT section, beside "Give it an event of its own"): an event
+  that does what the person's / sign's / trigger's own script does, to change from there. tools/maker/decompile.py
+  --pack (map_data_rules.mk -> include/constants/maker_scripts.h, zlib, never committed) writes every map.json
+  script (7671; the 204 it can't: their first block is data) as the event's body: `label` + `raw` lines of the entry
+  block, then every block of the same scripts file it reaches (branches, movements; one that runs on into the next
+  label keeps the next after it, or a `raw goto`), SINNOH's `goto SinnohP_...` stubs followed into
+  platinum_scripts.inc; texts it reaches in that file inlined as quoted strings when the Maker's text says them
+  exactly (letters, digits, `!?.-/,:'()&+=%`, é, \n \p \l, {PLAYER}; others stay the game's pointer); a trigger's
+  var / value as the page's `var=VAR_X==N`. src/maker/maker_scripts.c unpacks it (stb's zlib) the first time and
+  MakerApi_GameScript(script, kind) gives the body. Names the Maker's lists lack fall back to the generated constants
+  (maker_events.c NamedValue). Editor colors: `label` purple, raw text green, raw jumps blue, raw battles red; the
+  command picker's Advanced tab has "Game Command" and "Label".
+- Tests: tools/test/maker_gamescript.sh (`mp makerpackcheck`: all 7671 compile; `mp makergamescript LABEL` equals
+  decompile.py's; LITTLEROOT's lab sign with new words and the town sign unchanged both run; the editor's button
+  (test command `maker eventgame NAME ON SCRIPT`) and SAVE). `decompile.py MAP_DIR` prints a map's events the same way.
 
 ## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
 - SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py

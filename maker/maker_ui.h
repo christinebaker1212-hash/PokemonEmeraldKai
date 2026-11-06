@@ -142,7 +142,8 @@ void DiscardUnsaved();
 void Message(const char *fmt, ...);
 
 // maker_events_ui.cpp (M2: events)
-void EventSection(const char *on, const std::string &suggestedName, std::map<std::string, std::string> *added);
+void EventSection(const char *on, const std::string &suggestedName, std::map<std::string, std::string> *added,
+                  const char *gameScript = nullptr);   // (M4b: the game's script by name, to start from)
 void EventPickerWindow();
 void QuickEventMenu(int x, int y);
 void Events_TestCommand(const char *cmd, const char *arg);

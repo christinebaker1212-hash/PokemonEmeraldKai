@@ -64,6 +64,8 @@ static const std::vector<CommandInfo> &Commands()
         {"Advanced", "Face the Player", "", {"face"}},
         {"Advanced", "Lock", "Stops others moving.", {"lock"}},
         {"Advanced", "Release", "", {"release"}},
+        {"Advanced", "Game Command", "One of the game's own script commands, as its scripts write them (its macros and names).", {"raw msgbox \"Hello!\", MSGBOX_DEFAULT"}},
+        {"Advanced", "Label", "A place in this event a game command's goto or call can name.", {"label MY_PLACE"}},
     };
     return sCmds;
 }
@@ -179,6 +181,20 @@ static ImVec4 LineColor(const std::string &t)
         return dark ? ImVec4(0.75f, 0.95f, 0.75f, 1) : ImVec4(0.1f, 0.45f, 0.1f, 1);
     if (t.rfind("battle ", 0) == 0 || t.rfind("wildbattle ", 0) == 0)
         return dark ? ImVec4(1.0f, 0.6f, 0.6f, 1) : ImVec4(0.7f, 0.1f, 0.1f, 1);
+    // (M4b) a script started from the game's: its labels like pages, its words like text, its jumps like flow
+    if (t.rfind("label ", 0) == 0)
+        return dark ? ImVec4(0.85f, 0.7f, 1.0f, 1) : ImVec4(0.45f, 0.2f, 0.65f, 1);
+    if (t.rfind("raw ", 0) == 0)
+    {
+        std::string w = t.substr(4, t.find(' ', 4) == std::string::npos ? std::string::npos : t.find(' ', 4) - 4);
+        if (t.find('"') != std::string::npos)
+            return dark ? ImVec4(0.75f, 0.95f, 0.75f, 1) : ImVec4(0.1f, 0.45f, 0.1f, 1);
+        if (w == "end" || w == "return" || w == "goto" || w == "call" || w.rfind("goto_if", 0) == 0
+            || w.rfind("call_if", 0) == 0)
+            return dark ? ImVec4(0.55f, 0.75f, 1.0f, 1) : ImVec4(0.1f, 0.3f, 0.75f, 1);
+        if (w.rfind("trainerbattle", 0) == 0 || w == "dowildbattle" || w == "setwildbattle")
+            return dark ? ImVec4(1.0f, 0.6f, 0.6f, 1) : ImVec4(0.7f, 0.1f, 0.1f, 1);
+    }
     return ImGui::GetStyleColorVec4(ImGuiCol_Text);
 }
 
@@ -410,7 +426,8 @@ static std::string NewName(int map, const std::string &suggested)
     return name;
 }
 
-void EventSection(const char *on, const std::string &suggestedName, std::map<std::string, std::string> *added)
+void EventSection(const char *on, const std::string &suggestedName, std::map<std::string, std::string> *added,
+                  const char *gameScript)
 {
     int map = gEd.map;
     std::string name;
@@ -441,6 +458,25 @@ void EventSection(const char *on, const std::string &suggestedName, std::map<std
                 (*added)["script"] = "event:" + name;
             EndChange();
             sSelLine = 1;
+        }
+        // (M4b) the game's own script as the event's lines: its branches, movements and words, to change from there
+        const char *body = !added && gameScript ? MakerApi_GameScript(gameScript, KindOf(on)) : nullptr;
+        if (body)
+        {
+            if (ImGui::Button("Start from the game's script"))
+            {
+                std::string text = body;   // (copied before anything else asks the game)
+                name = NewName(map, suggestedName);
+                BeginChange(map);
+                EventDef &d = Edits(map).events[name];
+                d.on = on;
+                d.body = text;
+                EndChange();
+                sSelLine = 1;
+            }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("An event that does what the game's script does, line for line (the game's own\n"
+                                  "commands as raw lines, its words as text): change any of it.");
         }
         return;
     }
@@ -627,6 +663,19 @@ void Events_TestCommand(const char *cmd, const char *arg)
         sPickerOpen = 1;
     else if (c == "eventselect")
         sSelLine = atoi(arg);
+    else if (c == "eventgame")   // "eventgame NAME ON SCRIPT": as the "Start from the game's script" button
+    {
+        char name[64] = "", on[160] = "", script[128] = "";
+        sscanf(arg, "%63s %159s %127s", name, on, script);
+        const char *body = MakerApi_GameScript(script, KindOf(on));
+        if (!body)
+            return;
+        sName = name;
+        std::string text = body;
+        BeginChange(gEd.map);
+        Edits(gEd.map).events[sName] = EventDef{on, text};
+        EndChange();
+    }
 }
 
 } // namespace maker

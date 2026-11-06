@@ -14,7 +14,7 @@ AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/layouts.h
 AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/map_event_ids.h
 # Moemon Maker: the editor's names (maps, songs, people's looks) from this build's own constants (tools/maker/gen_names.py)
 AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/maker_names.h $(INCLUDECONSTS_OUTDIR)/maker_tilesets.h $(INCLUDECONSTS_OUTDIR)/maker_ops.h
-AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/maker_macros.h data/maker_globals.inc
+AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/maker_macros.h data/maker_globals.inc $(INCLUDECONSTS_OUTDIR)/maker_scripts.h
 
 MAP_DIRS := $(dir $(wildcard $(MAPS_DIR)/*/map.json))
 MAP_CONNECTIONS := $(patsubst $(MAPS_DIR)/%/,$(MAPS_DIR)/%/connections.inc,$(MAP_DIRS))
@@ -58,6 +58,10 @@ $(INCLUDECONSTS_OUTDIR)/maker_macros.h: tools/maker/gen_macros.py tools/maker/ge
 	python3 tools/maker/gen_macros.py $@ $(INCLUDECONSTS_OUTDIR)/maker_labels.h data/maker_globals.inc
 	@touch $@   # (maker_labels.h and data/maker_globals.inc are only rewritten when they change: no needless rebuilds)
 $(INCLUDECONSTS_OUTDIR)/maker_labels.h: $(INCLUDECONSTS_OUTDIR)/maker_macros.h
+# (M4b) every person's, sign's and trigger's script as a Maker event, for "Start from the game's script"
+$(INCLUDECONSTS_OUTDIR)/maker_scripts.h: tools/maker/decompile.py $(filter-out data/maker_%,$(wildcard data/event_scripts*.s)) $(wildcard data/scripts/*.inc) $(wildcard data/scripts/*/*.inc) $(wildcard data/maps/*/scripts.inc) $(MAP_JSONS)
+	python3 tools/maker/decompile.py --pack $@
+	@touch $@
 data/maker_globals.inc: $(INCLUDECONSTS_OUTDIR)/maker_macros.h
 $(INCLUDECONSTS_OUTDIR)/maker_tilesets.h: tools/maker/gen_names.py src/data/tilesets/headers.h src/data/tilesets/qz_headers.h
 	python3 tools/maker/gen_names.py --tilesets $@

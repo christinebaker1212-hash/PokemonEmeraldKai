@@ -280,7 +280,7 @@ static bool8 ParseAdd(struct MapEdits *e, const char *line)
 // One map's edits from their text (the file's, or the editor's); returns the map, or -1
 static int ParseEdits(const char *text, const char *from)
 {
-    char line[512];
+    char line[2048];   // (a decompiled script's line can hold a whole text)
     const char *p = text;
     struct MapEdits *e = NULL;
     struct EventDef *ev = NULL;   // (the event whose indented lines these are)

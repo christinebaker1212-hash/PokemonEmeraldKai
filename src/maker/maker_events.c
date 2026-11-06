@@ -175,8 +175,17 @@ static const u8 *GameText(const char *src)
 static bool8 NamedValue(int table, const char *name, u32 *value)
 {
     unsigned v;
+    s32 sv;
     if (!MakerApi_ValueOf(table, name, &v))
+    {
+        // (M4b) any other constant the game's scripts name (VAR_QZ_0x5009...: maker_macros.h), by its full name
+        if (strchr(name, '_') && Maker_RawSymbol(name, &sv))
+        {
+            *value = (u32)sv;
+            return TRUE;
+        }
         return FALSE;
+    }
     *value = v;
     return TRUE;
 }
@@ -298,7 +307,7 @@ struct Ctx
     u8 ifDepth;
     bool8 hasElse[16];
     // M4b: `label NAME` lines (a decompiled script's own places): name, label, where it ended up
-    struct { char name[64]; u16 id; s32 at; } locals[128];
+    struct { char name[128]; u16 id; s32 at; } locals[128];
     int localCount;
     u32 *ptrAt;           // where the raw lines put pointers (for the proof: compared by what they point at)
     int ptrCount, ptrCap;
@@ -347,7 +356,7 @@ static void RawError(void *x, const char *msg) { Error(&((struct Ctx *)x)->o, "%
 static bool8 RawPointer(void *x, const char *arg)
 {
     struct Ctx *c = x;
-    char name[600];
+    char name[2048];
     const u8 *at;
     s32 v;
     int k;
@@ -622,7 +631,7 @@ static void Command(struct Ctx *c, char *line)
         }
         if (strncmp(t, "label ", 6) == 0)   // a place in this event the raw lines can point at
         {
-            char name[64];
+            char name[128];
             int k;
             snprintf(name, sizeof(name), "%s", t + 6);
             for (k = (int)strlen(name); k > 0 && (name[k - 1] == ' ' || name[k - 1] == '\t'); k--)
@@ -958,7 +967,7 @@ struct Compiled
     const u8 **lineAt;      // (M4's debugger) where each command line's code starts, and its line in the event's text
     u16 *lineNo;
     int lineCount;
-    char (*labelName)[64];  // (M4b) the event's `label` lines and where each is in script
+    char (*labelName)[128];  // (M4b) the event's `label` lines and where each is in script
     const u8 **labelAt;
     int labelCount;
     u32 *ptrAt;             // (M4b) where its raw lines put pointers, and the script's length
@@ -1030,7 +1039,7 @@ static const u8 *Build(struct Ctx *c, struct Page *pages, int pageCount, bool8 s
         c->ifDepth = 0;
         for (k = 0; k < pages[p].cmdCount; k++)
         {
-            char line[600];
+            char line[2048];
             o->line = pages[p].firstLine + 1 + k;
             snprintf(line, sizeof(line), "%s", pages[p].cmds[k]);
             if (sLineCount == sLineCap)

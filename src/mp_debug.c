@@ -1209,6 +1209,45 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int Maker_RawProof(const char *path);
         Maker_RawProof(arg);
     }
+    else if (strcmp(cmd, "makergamescript") == 0)   // "mp makergamescript LABEL": the event "Start from the game's script"
+    {                                                // makes of it (each line "[mp] maker script: LINE")
+        const char *MakerApi_GameScript(const char *scriptName, int kind);
+        const char *body = MakerApi_GameScript(arg, 1), *l;
+        if (!body)
+            printf("[mp] maker script: none\n");
+        for (l = body; l && *l;)
+        {
+            const char *nl = strchr(l, '\n');
+            size_t len = nl ? (size_t)(nl - l) : strlen(l);
+            printf("[mp] maker script: %.*s\n", (int)len, l);
+            l += len + (nl ? 1 : 0);
+        }
+    }
+    else if (strcmp(cmd, "makerpackcheck") == 0)   // "mp makerpackcheck": every script of the editor's "Start from the
+    {                                               // game's script" compiles (src/maker/maker_scripts.c)
+        int Maker_GameScriptCount(void);
+        const char *Maker_GameScriptLabel(int i);
+        const char *MakerApi_GameScript(const char *scriptName, int kind);
+        const char *MakerApi_CheckEvent(const char *map, const char *event, int kind, const char *source);
+        int i, n = Maker_GameScriptCount(), bad = 0;
+        for (i = 0; i < n; i++)
+        {
+            const char *label = Maker_GameScriptLabel(i), *body = MakerApi_GameScript(label, 0), *l, *err;
+            char *src = malloc(strlen(body) * 2 + 16), *d = src;
+            for (l = body; *l;)   // (as the editor hands it over: every line indented by two)
+            {
+                const char *nl = strchr(l, '\n');
+                size_t len = nl ? (size_t)(nl - l) : strlen(l);
+                d += sprintf(d, "  %.*s\n", (int)len, l);
+                l += len + (nl ? 1 : 0);
+            }
+            err = MakerApi_CheckEvent("PACKCHECK", label, 0, src);
+            if (err && err[0] && bad++ < 40)
+                printf("[mp] maker pack: %s: %s\n", label, err);
+            free(src);
+        }
+        printf("[mp] maker pack: %d scripts, %d don't compile\n", n, bad);
+    }
     else if (strcmp(cmd, "dbinfo") == 0)
     {
         // dbinfo SPECIES MOVE ITEM - what the game reads for them now (Moemon Maker M3's database edits included)

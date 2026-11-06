@@ -420,8 +420,8 @@ static void Substitute(const char *line, char *out, size_t cap, char pnames[][32
 
 static bool8 RunMacro(struct MakerRawSink *s, const struct MakerMacro *m, char **args, int nargs, int depth)
 {
-    char pnames[MAX_ARGS][32], pdefault[MAX_ARGS][48], *values[MAX_ARGS], params[256], *pp[MAX_ARGS], body[2048];
-    char line[512], *bl, *next, kw[MAX_ARGS][128];
+    char pnames[MAX_ARGS][32], pdefault[MAX_ARGS][48], *values[MAX_ARGS], params[256], *pp[MAX_ARGS], body[6144];
+    char line[2048], *bl, *next, kw[MAX_ARGS][128];
     int np, i, top = 0;
     // .if nesting: taking (this branch runs), taken (a branch already ran), outer (the enclosing one runs)
     bool8 taking[16], taken[16], outer[16];
@@ -580,7 +580,7 @@ static bool8 RunMacro(struct MakerRawSink *s, const struct MakerMacro *m, char *
 // One `raw` line of an event: a macro of the game's scripts with its arguments, or an assembler line (.byte ...)
 bool8 Maker_RawLine(struct MakerRawSink *s, const char *text)
 {
-    char buf[512];
+    char buf[2048];   // (a decompiled text is inlined as a quoted string: room for the longest)
     snprintf(buf, sizeof(buf), "%s", text);
     return Line(s, buf, 0);
 }

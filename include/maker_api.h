@@ -142,6 +142,9 @@ void MakerApi_ReloadArt(void);
 int MakerApi_SpeciesPicture(int species, int back, int shiny, unsigned char *rgba);   // 64x64 RGBA as the game shows it   // lines left out by the last MakerApi_SetDatabase: the game changed under them
 int MakerApi_TextWidth(const char *utf8);   // in the message box's font, in pixels (M2c's checker)
 const char *MakerApi_CheckEvent(const char *map, const char *event, int kind, const char *source);   // "" when it compiles
+// (M4b) the body of an event that does what the game's script SCRIPTNAME does (kind 0 person, 1 sign, 2 trigger), from
+// the build's pack of the game's scripts (src/maker/maker_scripts.c), or NULL when there is none
+const char *MakerApi_GameScript(const char *scriptName, int kind);
 int MakerApi_SpecialCount(void);
 const char *MakerApi_SpecialName(int i);
 

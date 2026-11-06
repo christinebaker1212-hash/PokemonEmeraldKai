@@ -1783,7 +1783,10 @@ void MapView_Inspector()
         EventKey(gEd.selKind, gEd.selIndex, &k, &key);
         std::string suggested = gEd.selKind == SEL_OBJECT && sObjs[gEd.selIndex].localIdName[0]
                               ? std::string(sObjs[gEd.selIndex].localIdName).substr(8) : std::string(k) + "_" + key.substr(0, key.find('@'));
-        EventSection((std::string(k) + ":" + key).c_str(), suggested, nullptr);
+        const char *script = gEd.selKind == SEL_OBJECT ? sObjs[gEd.selIndex].scriptName
+                           : gEd.selKind == SEL_BG ? sBgs[gEd.selIndex].scriptName
+                           : gEd.selKind == SEL_COORD ? sCoords[gEd.selIndex].scriptName : nullptr;
+        EventSection((std::string(k) + ":" + key).c_str(), suggested, nullptr, script);
     }
 }
 
