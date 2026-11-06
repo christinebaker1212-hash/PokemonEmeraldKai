@@ -1,0 +1,41 @@
+pressuntil A field 5000
+mp platinumstory
+mp setvar 0x51B0 4
+wait 30
+mp warp 41,41,15,22
+wait 60
+waitfor field 1000
+wait 30
+shot c_start
+press UP 2
+wait 20
+press A 2
+wait 60
+shot c_talk
+mash A 8 30
+wait 60
+shot c_after
+mp getvar 0x51B0
+mp warp 41,42,18,18
+wait 60
+waitfor field 1000
+wait 30
+shot y_start
+mp dw
+press DOWN 2
+wait 10
+press DOWN 12
+wait 10
+press DOWN 12
+wait 120
+shot y_cyrus
+mash A 10 30
+wait 30
+shot y_ask
+press A 2
+mash A 20 30
+wait 120
+shot y_after
+mp getvar 0x51B0
+mp dw
+quit

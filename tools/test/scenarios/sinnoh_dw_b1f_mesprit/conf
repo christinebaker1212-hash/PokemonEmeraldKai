@@ -1,0 +1,7 @@
+# The DISTORTION WORLD B1F's MESPRIT (the event at 15, 257, 58 starts B1F's script 3: its cry, MESPRIT added and gone
+# north, removed): progress 4 (SAW_B1F_MESPRIT). Shots m_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[dw] event at 15," "[test] var 0x51B0 = 4")
+UNEXPECT_A=("[crash]" "TIMEOUT")
