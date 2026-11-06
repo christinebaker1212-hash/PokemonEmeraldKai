@@ -648,6 +648,8 @@ static int AskCost(MtgDuel *d)
 static void PayCostPick(MtgDuel *d, int obj)
 {
     if (d->costSac) {
+        if (d->stackCount)   // (its last known power, for Sacrificed$CardPower)
+            d->stack[d->stackCount - 1].sacPower = (int16_t)Mtg_Power(d, obj);
         Mtg_Sacrifice(d, obj);
         d->costSac--;
     } else if (d->costDiscard) {

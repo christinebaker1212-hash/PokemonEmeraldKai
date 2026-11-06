@@ -122,6 +122,7 @@ typedef struct {
     MtgTarget target;
     // last known information about the target as it resolves (Forge's LKI copies)
     int16_t lkiPower, lkiToughness;
+    int16_t sacPower;             // the power of what its cost sacrificed (Sacrificed$CardPower: FLING)
     uint8_t lkiController;
     // a triggered ability (TriggerHandler / WrappedAbility): its trigger, what set it off ("TriggeredCard"...), and
     // whether its controller may choose not to (OptionalDecider$ You: asked as it resolves)

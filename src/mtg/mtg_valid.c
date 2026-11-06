@@ -74,10 +74,11 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
     const MtgObj *o = d ? &d->objs[obj] : NULL;
     const MtgCardDef *c = d ? Mtg_Card(o->def) : NULL;
     int i, bit, neg = 0, num;
-    if (StartsWith(p, n, "non")) {
-        neg = 1;
-        p += 3;
-        n -= 3;
+    if (StartsWith(p, n, "non") || (n > 1 && p[0] == '!')) {   // "nonBlack", "!token": the property turned round
+        int r;
+        size_t skip = p[0] == '!' ? 1 : 3;
+        r = CardProp(d, obj, p + skip, n - skip, src, controller, known);
+        return *known && (!d || !r);
     }
     for (i = 0; i < 5; i++)
         if (strlen(sColorProps[i]) == n && strncmp(p, sColorProps[i], n) == 0)
@@ -90,18 +91,26 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         return !d || (((c->supertypes & MTG_ST_BASIC) != 0) ^ neg);
     if (n == 9 && strncmp(p, "Legendary", 9) == 0)
         return !d || (((c->supertypes & MTG_ST_LEGENDARY) != 0) ^ neg);
-    if (neg) {   // a subtype ("nonWall")
-        if (p[0] >= 'A' && p[0] <= 'Z' && KnownSubtype(p, n))
-            return !d || !HasSubtype(c, p, n);
-        *known = 0;
-        return 0;
-    }
     if (n == 7 && strncmp(p, "YouCtrl", 7) == 0)
         return !d || o->controller == controller;
     if (n == 7 && strncmp(p, "OppCtrl", 7) == 0)
         return !d || o->controller != controller;
     if (n == 6 && strncmp(p, "YouOwn", 6) == 0)
         return !d || o->owner == controller;
+    if (n == 6 && strncmp(p, "OppOwn", 6) == 0)
+        return !d || o->owner != controller;
+    if (n == 11 && strncmp(p, "YouDontCtrl", 11) == 0)
+        return !d || o->controller != controller;
+    if (n == 16 && strncmp(p, "ActivePlayerCtrl", 16) == 0)
+        return !d || o->controller == d->active;
+    if (n == 12 && strncmp(p, "attackingYou", 12) == 0)   // (two players: attacking, and not the controller's own)
+        return !d || (o->attacking && o->controller != controller);
+    if (n == 14 && strncmp(p, "blockingSource", 14) == 0)   // blocking the source (an attacker)
+        return !d || (src != MTG_NO_OBJ && o->blocking == src);
+    if ((n == 15 && strncmp(p, "blockedBySource", 15) == 0) || (n == 18 && strncmp(p, "blockedBySourceLKI", 18) == 0))
+        return !d || (src != MTG_NO_OBJ && src < d->objCount && d->objs[src].blocking == obj);
+    if (n == 22 && strncmp(p, "wasDealtDamageThisTurn", 22) == 0)   // (marked damage lasts the turn)
+        return !d || o->damage > 0;
     if (n == 5 && strncmp(p, "Other", 5) == 0)
         return !d || obj != src;
     if (n == 4 && strncmp(p, "Self", 4) == 0)   // (the card the ability or trigger belongs to)

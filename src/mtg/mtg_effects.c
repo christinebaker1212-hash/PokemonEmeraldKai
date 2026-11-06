@@ -72,18 +72,66 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
         }
         return (int)n;
     }
-    if (strncmp(sv, "Count$Valid ", 12) == 0) {
-        int i, count = 0;
-        if (!Mtg_ValidSpecKnown(sv + 12)) {
+    if (strcmp(sv, "Sacrificed$CardPower") == 0)
+        return d ? ctx->e->sacPower : 0;
+    if (strcmp(sv, "Targeted$CardManaCost") == 0) {
+        if (!d)
+            return 0;
+        return ctx->e->target.kind == MTG_TGT_OBJ || ctx->e->target.kind == MTG_TGT_STACK
+            ? Mtg_ManaCostTotal(&Mtg_Card(d->objs[ctx->e->target.id].def)->cost) : 0;
+    }
+    if (strcmp(sv, "Count$Domain") == 0) {   // basic land types among its controller's lands
+        int i;
+        uint8_t types = 0;
+        if (!d)
+            return 0;
+        for (i = 0; i < d->objCount; i++)
+            if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && d->objs[i].controller == ctx->controller)
+                types |= Mtg_Card(d->objs[i].def)->intrinsicMana;
+        return __builtin_popcount(types & 0x1f);
+    }
+    if (strcmp(sv, "TargetedPlayer$CardsInHand") == 0) {
+        int i, n = 0;
+        if (!d)
+            return 0;
+        if (ctx->e->target.kind != MTG_TGT_PLAYER)
+            return 0;
+        for (i = 0; i < d->objCount; i++)
+            n += d->objs[i].zone == MTG_ZONE_HAND && d->objs[i].owner == ctx->e->target.id;
+        return n;
+    }
+    if (strncmp(sv, "Count$Valid ", 12) == 0 || strncmp(sv, "Count$ValidGraveyard ", 21) == 0) {
+        // "Count$Valid Forest.YouCtrl", "/Plus.1", "/Minus.2", "/Times.2" after it; ValidGraveyard: in graveyards
+        int i, count = 0, grave = sv[11] == 'G', mod = 0, arg = 0;
+        const char *spec = sv + (grave ? 21 : 12), *slash = strchr(spec, '/');
+        char buf[96];
+        if (slash) {
+            const char *m = slash + 1;
+            mod = strncmp(m, "Plus.", 5) == 0 ? 1 : strncmp(m, "Minus.", 6) == 0 ? 2 : strncmp(m, "Times.", 6) == 0 ? 3 : 0;
+            if (!mod || (size_t)(slash - spec) >= sizeof(buf)) {
+                *ok = 0;
+                return 0;
+            }
+            arg = atoi(strchr(m, '.') + 1);
+            if (strspn(strchr(m, '.') + 1, "0123456789") != strlen(strchr(m, '.') + 1)) {
+                *ok = 0;
+                return 0;
+            }
+            memcpy(buf, spec, (size_t)(slash - spec));
+            buf[slash - spec] = 0;
+            spec = buf;
+        }
+        if (!Mtg_ValidSpecKnown(spec)) {
             *ok = 0;
             return 0;
         }
         if (!d)
             return 0;
         for (i = 0; i < d->objCount; i++)
-            if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_ValidObj(d, i, sv + 12, ctx->source, ctx->controller))
+            if (d->objs[i].zone == (grave ? MTG_ZONE_GRAVEYARD : MTG_ZONE_BATTLEFIELD)
+                && Mtg_ValidObj(d, i, spec, ctx->source, ctx->controller))
                 count++;
-        return count;
+        return mod == 1 ? count + arg : mod == 2 ? count - arg : mod == 3 ? count * arg : count;
     }
     *ok = 0;
     return 0;

@@ -42,6 +42,9 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-06: 1.127.0)
+- Target properties and counted amounts: COOP_NOTES "MAGIC's targets and amounts". 1712 of 5408 cards play.
+
 ## Status (2026-11-06: 1.126.0)
 - **Tokens**: COOP_NOTES "MAGIC's tokens". 1634 of 5408 cards play. Token pieces still out: TokenPower / Toughness /
   Types / Colors, AtEOT, RememberTokens, tokens with abilities (Forge's tokenscripts files, not read yet).

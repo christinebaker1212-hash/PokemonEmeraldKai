@@ -680,6 +680,32 @@ static void TestTokens(void)
     CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && n == 1, "the bears destroyed, its controller gets a spirit (%d)", n);
 }
 
+// counted amounts: the sacrificed creature's power (Fling), domain (Tribal Flames), cards in graveyards
+static void TestAmounts(void)
+{
+    int fling, angel, flames, b;
+    printf("amounts: sacrificed power, domain\n");
+    Table();
+    Lands(0, "Mountain", 2);
+    angel = Put(0, "Serra Angel", MTG_ZONE_BATTLEFIELD);
+    fling = Put(0, "Fling", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, fling, MTG_TGT_PLAYER, 1);
+    ChoosePick(angel);
+    PassBoth();
+    CHECK(Zone(angel) == MTG_ZONE_GRAVEYARD && sD.players[1].life == 16, "fling the angel: 4 damage (%d)", sD.players[1].life);
+
+    Table();
+    Put(0, "Mountain", MTG_ZONE_BATTLEFIELD);
+    Put(0, "Forest", MTG_ZONE_BATTLEFIELD);
+    Put(0, "Island", MTG_ZONE_BATTLEFIELD);
+    b = Put(1, "Serra Angel", MTG_ZONE_BATTLEFIELD);
+    flames = Put(0, "Tribal Flames", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, flames, MTG_TGT_PLAYER, 1);
+    PassBoth();
+    CHECK(sD.players[1].life == 17, "three basic land types: 3 damage (%d)", sD.players[1].life);
+    (void)b;
+}
+
 // ---- whole duels between the stand-in AIs
 
 // a choice while something resolves (MTG_Q_CHOOSE): card = 1 / 0, or the candidate holding obj
@@ -1121,6 +1147,7 @@ int main(int argc, char **argv)
     TestRegenerate();
     TestStatics2();
     TestTokens();
+    TestAmounts();
     TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

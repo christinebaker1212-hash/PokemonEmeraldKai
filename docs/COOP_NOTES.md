@@ -5936,6 +5936,13 @@ the most). Each table now shows a move before it's made and holds what happened 
   and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
   duel 4).
 
+## MAGIC's targets and amounts (1.127.0)
+- Valid properties: `!x` and `nonX` turn any property round (one recursion in CardProp); OppOwn, YouDontCtrl,
+  ActivePlayerCtrl, attackingYou, blockingSource, blockedBySource(LKI), wasDealtDamageThisTurn (marked damage).
+- Amounts (Mtg_Amount): Sacrificed$CardPower (MtgStackEntry.sacPower, set as a cost's sacrifice is picked: FLING),
+  Targeted$CardManaCost, Count$Domain, TargetedPlayer$CardsInHand, Count$ValidGraveyard, and /Plus.N /Minus.N /Times.N
+  after a Count$Valid. TestAmounts.
+
 ## MAGIC's tokens (1.126.0)
 - Mtg_TokenDef (mtg_script.c) makes a definition from Forge's token script name (colors_power_toughness[_a]_type
   words[_keywords], landwalk words too: "r_1_1_goblin_scout_mountainwalk"), kept at ids MTG_TOKEN_BASE (0x7000) and
