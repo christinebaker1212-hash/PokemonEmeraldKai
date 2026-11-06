@@ -2,6 +2,7 @@
 #include "decompress.h"
 #include "graphics.h"
 #include "item_icon.h"
+#include "pokemon.h"
 #include "malloc.h"
 #include "mp.h"
 #include "sprite.h"
@@ -172,6 +173,8 @@ const void *GetItemIconPicOrPalette(u16 itemId, u8 which)
         itemId = ITEMS_COUNT; // Use last icon, the "return to field" arrow
     else if (itemId >= ITEMS_COUNT)
         itemId = 0;
+    else if (IS_MAKER_ITEM(itemId))
+        itemId = Maker_ItemBase(itemId);   // Moemon Maker (M3b): a new item, its base's icon (the "?" when empty)
 
     return gItemIconTable[itemId][which];
 }

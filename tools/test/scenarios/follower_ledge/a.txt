@@ -1,0 +1,12 @@
+pressuntil A field 5000
+wait 30
+mp follow 0
+wait 90
+press DOWN 4
+wait 30
+press DOWN 4
+wait 30
+press DOWN 4
+shotburst hop 40 4
+wait 120
+quit

@@ -5265,6 +5265,7 @@ const union AnimCmd *const *const gMonFrontAnimsPtrTable_Moe[] =
 {
     // Moemon Kai: all species use a static front frame
     [SPECIES_NONE] = sAnims_MoemonStatic,
+    MAKER_SPECIES_RANGE = sAnims_MoemonStatic,
     [SPECIES_BULBASAUR] = sAnims_MoemonStatic,
     [SPECIES_IVYSAUR] = sAnims_MoemonStatic,
     [SPECIES_VENUSAUR] = sAnims_MoemonStatic,

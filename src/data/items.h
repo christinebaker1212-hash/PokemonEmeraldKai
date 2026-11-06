@@ -11,6 +11,17 @@ const struct Item gItems[] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
 
+    MAKER_ITEM_RANGE =   // (Moemon Maker M3b: the new items, filled by the Maker)
+    {
+        .name = _("????????"),
+        .itemId = ITEM_NONE,
+        .price = 0,
+        .description = sDummyDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
 // Pokeballs
 
     [ITEM_MASTER_BALL] =

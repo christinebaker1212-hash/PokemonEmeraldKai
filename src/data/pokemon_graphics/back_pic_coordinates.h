@@ -7,6 +7,7 @@
 const struct MonCoords gMonBackPicCoords_Moe[] =
 {
     [SPECIES_NONE] = { .size = 0x88, .y_offset = 0 },
+    MAKER_SPECIES_RANGE = { .size = 0x88, .y_offset = 0 },
     [SPECIES_BULBASAUR] = { .size = 0x64, .y_offset = 0 },
     [SPECIES_IVYSAUR] = { .size = 0x66, .y_offset = 0 },
     [SPECIES_VENUSAUR] = { .size = 0x87, .y_offset = 0 },

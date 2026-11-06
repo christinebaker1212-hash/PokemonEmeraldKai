@@ -1,0 +1,9 @@
+# The summary's STATS page keeps its view (IV stars, EVs) while changing POKéMON, and shows the new one's (1.130.0: the
+# stars were blitted but never copied to the screen, so the last POKéMON's stayed). Six perfect IVs, then six 0s: the
+# stars change; EVs 252/252 then 0s: the numbers change (check.sh compares the stat columns of the shots).
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:30,258:30"
+EXPECT_A=("summary: stats view 1" "summary: stats view 2")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="tools/test/scenarios/summary_ivev_switch/check.sh"

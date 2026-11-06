@@ -1111,7 +1111,7 @@ extern "C" void MakerUi_TestCommand(const char *line)
         Trainers_TestCommand(c.c_str(), arg);
     else if (c == "debugger" || c == "break" || c == "step" || c == "continue" || c == "held" || c == "watch")
         Debugger_TestCommand(c.c_str(), arg);
-    else if (c == "db" || c == "database" || c == "pic")
+    else if (c == "db" || c == "database" || c == "pic" || c == "newspecies" || c == "newmove" || c == "newitem")
         Database_TestCommand(c.c_str(), arg);
     else if (c == "newmap" || c == "newmapwindow" || c == "world")
         World_TestCommand(c.c_str(), arg);

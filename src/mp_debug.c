@@ -1264,6 +1264,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] db move %d %s power %d accuracy %d\n", mv, b, gBattleMoves[mv].power, gBattleMoves[mv].accuracy);
         printf("[test] db item %d %s price %d\n", it, c, gItems[it].price);
     }
+    else if (strcmp(cmd, "sealed") == 0)
+    {
+        // sealed SPECIES - whether it's SEALED here (Moemon Maker M3b: a new POKéMON no pack fills is) and its base
+        int sp = 0;
+        bool8 MP_Gen_SealedSpecies(u16 species);
+        sscanf(arg, "%d", &sp);
+        printf("[test] sealed %d %d base %d\n", sp, MP_Gen_SealedSpecies(sp), Maker_SpeciesBase(sp));
+    }
     else if (strcmp(cmd, "coins") == 0)
     {
         // coins N - set the COINS; coins - print them

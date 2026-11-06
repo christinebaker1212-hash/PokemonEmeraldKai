@@ -1,6 +1,7 @@
 const u32 *const gLevelUpLearnsets[NUM_SPECIES] =
 {
     [SPECIES_NONE] = sBulbasaurLevelUpLearnset,
+    MAKER_SPECIES_RANGE = sBulbasaurLevelUpLearnset,
     [SPECIES_BULBASAUR] = sBulbasaurLevelUpLearnset,
     [SPECIES_IVYSAUR] = sIvysaurLevelUpLearnset,
     [SPECIES_VENUSAUR] = sVenusaurLevelUpLearnset,

@@ -35,6 +35,7 @@
 const struct SpeciesInfo gSpeciesInfo[] =
 {
     [SPECIES_NONE] = {0},
+    MAKER_SPECIES_RANGE = {0},   // (Moemon Maker M3b: the new POKéMON, filled by the Maker)
 
     [SPECIES_BULBASAUR] =
     {

@@ -3,6 +3,7 @@
 const struct CompressedSpritePalette gMonShinyPaletteTable_Moe[] =
 {
     SPECIES_SHINY_PAL(NONE, gMonShinyPalette_CircledQuestionMark),
+    MAKER_SPECIES_RANGE = {gMonShinyPalette_CircledQuestionMark, SPECIES_SHINY_TAG},
     SPECIES_SHINY_PAL(BULBASAUR, gMonShinyPalette_Bulbasaur),
     SPECIES_SHINY_PAL(IVYSAUR, gMonShinyPalette_Ivysaur),
     SPECIES_SHINY_PAL(VENUSAUR, gMonShinyPalette_Venusaur),

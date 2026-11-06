@@ -6181,7 +6181,7 @@ void MP_DexInfoScreen(u16 *out)
 
 void MP_DexFootprint(u16 species, u8 out[16][16])
 {
-    const u8 *fp = gMonFootprintTable[species];
+    const u8 *fp = gMonFootprintTable[Maker_SpeciesBase(species)];   // (Moemon Maker M3b: a new POKéMON, its base's)
     u32 t, r, b;
     memset(out, 0, 16 * 16);
     for (t = 0; t < 4; t++)

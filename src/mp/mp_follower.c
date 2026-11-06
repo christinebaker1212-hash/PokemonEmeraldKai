@@ -26,6 +26,7 @@
 #include "overworld.h"
 #include "palette.h"
 #include "pokemon.h"
+#include "constants/abilities.h"
 #include "script.h"
 #include "sound.h"
 #include "sprite.h"
@@ -70,6 +71,8 @@ struct FollowerSlot
     struct Coords16 prev;     // tile the follower is leaving
     struct Coords16 cur;      // tile it is walking to (the owner's last tile)
     struct Coords16 ownerLast;
+    struct Coords16 hopFrom, hopTo;   // a ledge: from the tile its Trainer jumped from to the ledge below it
+    u8 hopWait, hopTimer;             // (waiting for its Trainer to land; then the hop's frames)
     s16 ownerLastX, ownerLastY;   // owner sprite position last frame
     u16 moved;                // pixels the owner moved in its current step
     u8 dir;
@@ -160,6 +163,25 @@ static void InitIfNeeded(void)
     sTrace = getenv("MOEMON_FOLLOWTRACE") != NULL;
     sMoveTrace = getenv("MOEMON_MOVETRACE") != NULL;
     sInit = TRUE;
+}
+
+#define LEDGE_HOP_FRAMES 16
+#define LEDGE_HOP_HEIGHT 10   // (pixels at the top of its hop)
+
+static bool8 IsLedge(s16 x, s16 y)
+{
+    u8 b = MapGridGetMetatileBehaviorAt(x, y);
+    return MetatileBehavior_IsJumpEast(b) || MetatileBehavior_IsJumpWest(b) || MetatileBehavior_IsJumpNorth(b)
+        || MetatileBehavior_IsJumpSouth(b);
+}
+
+// A POKéMON drawn flying or floating glides down a ledge with its Trainer: FLYING types and LEVITATE
+static bool8 FollowerFlies(const struct FollowerSlot *s)
+{
+    u16 species = NationalPokedexNumToSpecies(s->dex);
+    const struct SpeciesInfo *si = &gSpeciesInfo[species];
+    return si->types[0] == TYPE_FLYING || si->types[1] == TYPE_FLYING
+        || si->abilities[0] == ABILITY_LEVITATE || si->abilities[1] == ABILITY_LEVITATE;
 }
 
 static const struct MpFollowerGfx *FindGfx(u16 dex, bool8 female)
@@ -677,8 +699,20 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         }
         else
         {
+            if (s->hopWait || s->hopTimer)   // (its Trainer moved on before it hopped: it's down already)
+                s->cur = s->hopTo, s->hopWait = 0, s->hopTimer = 0;
             s->prev = s->cur;
             s->cur = s->ownerLast;
+            if (IsLedge(s->ownerLast.x, s->ownerLast.y) && !FollowerFlies(s))
+            {
+                // a ledge: its Trainer jumps over the ledge's tile (the game moves them onto it, then past it). It waits
+                // where they jumped from and, once they've landed, hops down onto the ledge right behind them (one that
+                // flies glides along instead; A4, the user 2026-11-06)
+                s->hopFrom = s->prev;
+                s->hopTo = s->cur;
+                s->cur = s->prev;
+                s->hopWait = 1;
+            }
             s->ownerLast = owner->currentCoords;
             s->moved = 0;
             s->dir = DirBetween(s->prev, s->cur, s->dir);
@@ -722,6 +756,15 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         }
         fvx = s->prev.x * 256 + (s->cur.x - s->prev.x) * frac;
         fvy = s->prev.y * 256 + (s->cur.y - s->prev.y) * frac;
+        if (s->hopWait && frac >= 256)   // its Trainer has landed: its own hop now
+            s->hopWait = 0, s->hopTimer = 1;
+        if (s->hopTimer)
+        {
+            s32 p = s->hopTimer * 256 / LEDGE_HOP_FRAMES;
+            fvx = s->hopFrom.x * 256 + (s->hopTo.x - s->hopFrom.x) * p;
+            fvy = s->hopFrom.y * 256 + (s->hopTo.y - s->hopFrom.y) * p;
+            s->dir = DirBetween(s->hopFrom, s->hopTo, s->dir);
+        }
         fxPrev = s->prev;
         fxCur = s->cur;
         fxMoved = frac >= 256 ? 16 : frac * 16 / 256;
@@ -772,8 +815,20 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         fs->x = fx;
         fs->y = fy;
         fs->x2 = 0;
-        // Hop along when the owner jumps (ledges)
-        fs->y2 = (abs(s->cur.x - s->prev.x) + abs(s->cur.y - s->prev.y) >= 2) ? os->y2 : 0;
+        // Hop along when the owner jumps (ledges): its own hop just after them (A4, the user 2026-11-06), or with them
+        if (s->hopTimer)
+        {
+            s32 p = s->hopTimer * 256 / LEDGE_HOP_FRAMES;
+            fs->y2 = -(s16)(p * (256 - p) * LEDGE_HOP_HEIGHT / (128 * 128));
+            if (++s->hopTimer > LEDGE_HOP_FRAMES)
+            {
+                s->prev = s->cur = s->hopTo;   // (down: the tile behind its Trainer)
+                s->hopTimer = 0;
+                MPNet_Log("follower: hopped down the ledge to %d,%d", s->hopTo.x - MAP_OFFSET, s->hopTo.y - MAP_OFFSET);
+            }
+        }
+        else
+            fs->y2 = (abs(s->cur.x - s->prev.x) + abs(s->cur.y - s->prev.y) >= 2) ? os->y2 : 0;
 
         // Walking frames while moving, a slow idle bob while standing
         s->animTimer++;
@@ -923,7 +978,7 @@ u16 MP_Follower_LocalDex(bool8 *female)
     if (!mon || GetMonData(mon, MON_DATA_HP) == 0)
         return 0;
     *female = GetMonGender(mon) == MON_FEMALE;
-    return SpeciesToNationalPokedexNum(GetMonData(mon, MON_DATA_SPECIES));
+    return SpeciesToNationalPokedexNum(Maker_SpeciesBase(GetMonData(mon, MON_DATA_SPECIES)));   // (Maker M3b: a new one walks as its base)
 }
 
 // The follower's Stadium hue, for the network (mp_hue.c; 0 = its own colors)
@@ -1023,7 +1078,7 @@ bool8 MP_Follower_HasGraphics(struct Pokemon *mon)
     u16 species = GetMonData(mon, MON_DATA_SPECIES);
     if (species == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
         return FALSE;
-    return FindGfx(SpeciesToNationalPokedexNum(species), FALSE) != NULL;
+    return FindGfx(SpeciesToNationalPokedexNum(Maker_SpeciesBase(species)), FALSE) != NULL;
 }
 
 // The tile the local follower is on, for talking to it

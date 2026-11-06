@@ -4670,6 +4670,7 @@ static void PrintLeftColumnStats(void)
         u32 i;
         for (i = 0; i < 3; i++)
             MpDrawStatsRow(windowId, i, i, 6 * 8 - 3);
+        CopyWindowToVram(windowId, COPYWIN_GFX);   // (the stars are blitted, never printed: shown now, or the last POKéMON's stay)
         return;
     }
     PrintTextOnWindow(windowId, gStringVar4, 4, 1, 0, 0);
@@ -4696,6 +4697,7 @@ static void PrintRightColumnStats(void)
         u32 i;
         for (i = 0; i < 3; i++)
             MpDrawStatsRow(windowId, 3 + i, i, 3 * 8 - 2);
+        CopyWindowToVram(windowId, COPYWIN_GFX);
         return;
     }
     PrintTextOnWindow(windowId, gStringVar4, 2, 1, 0, 0);
@@ -5047,7 +5049,7 @@ static void PrintMoveDetails(u16 move)
         if (sMonSummaryScreen->currPageIndex == PSS_PAGE_BATTLE_MOVES)
         {
             PrintMovePowerAndAccuracy(move);
-            PrintTextOnWindow(windowId, gMoveDescriptionPointers[move - 1], 6, 1, 0, 0);
+            PrintTextOnWindow(windowId, gMoveDescriptionPointers[(IS_MAKER_MOVE(move) && Maker_MoveBase(move) ? Maker_MoveBase(move) : move) - 1], 6, 1, 0, 0);
         }
         else
         {

@@ -17,6 +17,7 @@
 #include "sprite.h"
 #include "task.h"
 #include "constants/battle_anim.h"
+#include "constants/moves.h"
 
 /*
     This file handles the commands for the macros defined in
@@ -218,6 +219,10 @@ void MP_ModernAnim_OnSound(s8 pan);
 void LaunchBattleAnimation(const u8 *const animsTable[], u16 tableId, bool8 isMoveAnim)
 {
     s32 i;
+    u16 ownId = tableId;   // (the Maker's own animation for a new move is found by its own id)
+
+    if (animsTable == gBattleAnims_Moves && IS_MAKER_MOVE(tableId))   // Moemon Maker (M3b): a new move, its base's
+        tableId = Maker_MoveBase(tableId) ? Maker_MoveBase(tableId) : MOVE_POUND;
 
     // Moemon Co-op: contests have no battle to read FURY CUTTER's / ROLLOUT's counters from
     // (the GBA read address 0 and carried on; here it crashed): a stand-in, their first hit
@@ -263,7 +268,7 @@ void LaunchBattleAnimation(const u8 *const animsTable[], u16 tableId, bool8 isMo
     MP_ModernAnim_Begin(animsTable, tableId);   // Moemon Co-op: BATTLE ANIMS > MODERN draws over it
     {
         const u8 *MP_MakerAnim_Begin(const u8 *const table[], u16 id);
-        const u8 *replaced = MP_MakerAnim_Begin(animsTable, tableId);   // Moemon Maker: a move's own animation (maker_anims.c)
+        const u8 *replaced = MP_MakerAnim_Begin(animsTable, ownId);   // Moemon Maker: a move's own animation (maker_anims.c)
         if (replaced)
             sBattleAnimScriptPtr = replaced;
     }

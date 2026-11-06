@@ -8698,6 +8698,8 @@ static void Cmd_metronome(void)
         // Just pick a valid move value (between 1 and MOVES_COUNT-1)
         gCurrentMove = (Random() % (MOVES_COUNT - 1)) + 1;
     #endif
+        if (IS_MAKER_MOVE(gCurrentMove))
+            continue;   // (Moemon Maker M3b: METRONOME stays with the game's own moves)
 
         for (i = 0; i < MAX_MON_MOVES; i++); // ?
 

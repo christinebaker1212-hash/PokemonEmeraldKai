@@ -1,0 +1,9 @@
+# A follower that doesn't fly hops down a ledge just after its Trainer lands (the user, 2026-11-06), onto the ledge's
+# foot right behind them; one that flies (FLYING, LEVITATE) glides along with them. ROUTE 101's ledge at (8,6) with
+# TORCHIC. Shots hop_*.
+MODE=1
+WARP=0,16,8,3
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:10"
+EXPECT_A=("follower: hopped down the ledge to 8,6")
+UNEXPECT_A=("[crash]" "TIMEOUT")

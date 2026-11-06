@@ -48,6 +48,7 @@ static u32 FaintStamp(u32 personality)
 
 static const u8 *ItemEffect(u16 item)
 {
+    item = Maker_ItemBase(item);   // (Moemon Maker M3b: a new item, its base's)
     if (!ITEM_HAS_EFFECT(item) || item == ITEM_ENIGMA_BERRY)
         return NULL;
     return gItemEffectTable[item - ITEM_POTION];

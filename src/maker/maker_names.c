@@ -2,6 +2,8 @@
 // map, each map's people / signs / triggers by name, and the named values (songs, looks, movement types, trainer types,
 // items, species, flags) worked out by the compiler from the game's own constants. The tables are made when the game is
 // built (tools/maker/gen_names.py), so they're always this build's.
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "global.h"
 #include "constants/event_objects.h"
@@ -128,17 +130,39 @@ static const struct MakerNamedValue *Table(int table, int *count)
     return NULL;
 }
 
+// M3b: the new POKéMON (moves, items) the database makes come after the game's own, named SPECIES_NEW_<id> (the name
+// the files keep; the editor shows the name the user gave)
+int Maker_NewEntryCount(int table);
+unsigned Maker_NewEntryAt(int table, int k);
+const char *Maker_NewEntryPrefix(int table);   // "SPECIES_NEW_"...; NULL: the table has none
+
+static const char *NewName(int table, unsigned value)
+{
+    static char ring[8][40];
+    static int at;
+    char *s = ring[at++ & 7];
+    snprintf(s, sizeof(ring[0]), "%s%u", Maker_NewEntryPrefix(table), value);
+    return s;
+}
+
 int MakerApi_NameCount(int table)
 {
     int n;
     Table(table, &n);
-    return n;
+    return n + Maker_NewEntryCount(table);
 }
 
 const char *MakerApi_NameAt(int table, int i, unsigned int *value)
 {
     int n;
     const struct MakerNamedValue *t = Table(table, &n);
+    if (i >= n && i < n + Maker_NewEntryCount(table))
+    {
+        unsigned v = Maker_NewEntryAt(table, i - n);
+        if (value)
+            *value = v;
+        return NewName(table, v);
+    }
     if (i < 0 || i >= n)
         return NULL;
     if (value)
@@ -153,6 +177,9 @@ const char *MakerApi_NameOf(int table, unsigned int value)
     for (i = 0; i < n; i++)
         if (t[i].value == value)
             return t[i].name;
+    for (i = 0; i < Maker_NewEntryCount(table); i++)
+        if (Maker_NewEntryAt(table, i) == value)
+            return NewName(table, value);
     return "";
 }
 
@@ -160,12 +187,18 @@ int MakerApi_ValueOf(int table, const char *name, unsigned int *value)
 {
     int n, i;
     const struct MakerNamedValue *t = Table(table, &n);
+    const char *pre = Maker_NewEntryPrefix(table);
     for (i = 0; i < n; i++)
         if (strcmp(t[i].name, name) == 0)
         {
             *value = t[i].value;
             return 1;
         }
+    if (pre && strncmp(name, pre, strlen(pre)) == 0)
+    {
+        *value = strtoul(name + strlen(pre), NULL, 10);   // (any id of the range: a file may name one before it's made)
+        return 1;
+    }
     return 0;
 }
 

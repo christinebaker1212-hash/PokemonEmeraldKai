@@ -1063,8 +1063,15 @@
 #define FIRST_GEN59_SPECIES SPECIES_VICTINI
 #define LAST_GEN59_SPECIES  SPECIES_PECHARUNT
 #define IS_GEN59_SPECIES(species) ((species) >= FIRST_GEN59_SPECIES && (species) <= LAST_GEN59_SPECIES)
-#define SPECIES_EGG 1051
 // end of Gen 5-9 species
+// Moemon Maker (M3b): the user's new POKéMON (MoemonMaker/database.txt `new species ID "NAME" base=SPECIES_X`), at ids
+// that never move. Until the Maker fills one it is the circled "?" (a POKéMON from a pack that isn't there: SEALED)
+#define SPECIES_MAKER_FIRST (LAST_GEN59_SPECIES + 1)
+#define MAKER_SPECIES_SLOTS 128
+#define SPECIES_MAKER_LAST (SPECIES_MAKER_FIRST + MAKER_SPECIES_SLOTS - 1)
+#define IS_MAKER_SPECIES(species) ((species) >= SPECIES_MAKER_FIRST && (species) <= SPECIES_MAKER_LAST)
+#define MAKER_SPECIES_RANGE [SPECIES_MAKER_FIRST ... SPECIES_MAKER_LAST]   // (a table's rows for them: the "?" until filled)
+#define SPECIES_EGG 1179
 
 #define NUM_SPECIES SPECIES_EGG
 

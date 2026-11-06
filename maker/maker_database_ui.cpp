@@ -36,6 +36,22 @@ static const char *const kHead[3] = {"species", "move", "item"};
 static const int kTable[3] = {MAKER_NAMES_SPECIES, MAKER_NAMES_MOVE, MAKER_NAMES_ITEM};
 static const char *const kPrefix[3] = {"SPECIES_", "MOVE_", "ITEM_"};
 
+// M3b: the user's new POKeMON (src/maker/maker_database.c `new species ID "NAME" base=SPECIES_X`): ids from 1051,
+// handed out once and never again (the file keeps the next one), so a saved POKeMON keeps being the same one
+struct NewSpecies
+{
+    int base;
+    std::string name;
+};
+static std::map<int, NewSpecies> sNewK[3];   // by MAKER_DB_* then id (POKeMON, moves, items)
+static const int kNewFirst[3] = {MAKER_NEW_SPECIES_FIRST, MAKER_NEW_MOVE_FIRST, MAKER_NEW_ITEM_FIRST};
+static const int kNewLast[3] = {MAKER_NEW_SPECIES_LAST, MAKER_NEW_MOVE_LAST, MAKER_NEW_ITEM_LAST};
+static const char *const kNewWord[3] = {"species", "move", "item"};
+static const char *const kNewWhat[3] = {"POKeMON", "move", "item"};
+static int sNextNewK[3] = {MAKER_NEW_SPECIES_FIRST, MAKER_NEW_MOVE_FIRST, MAKER_NEW_ITEM_FIRST};
+#define sNew sNewK[0]
+static bool IsNew(int k, int id) { return sNewK[k].count(id) != 0; }
+
 static const char *Name(int table, int v)
 {
     const char *n = MakerApi_NameOf(table, (unsigned)v);
@@ -82,9 +98,22 @@ static std::string DatabaseText()
 {
     std::string out = "# Moemon Maker: the user's database edits (written by the editor; was= is the game's own value)\n";
     for (int k = 0; k < 3; k++)
+    {
+        if (!sNewK[k].empty() || sNextNewK[k] != kNewFirst[k])
+            out += std::string("# next new ") + kNewWord[k] + " " + std::to_string(sNextNewK[k]) + "\n";
+        for (auto &kv : sNewK[k])
+        {
+            out += std::string("new ") + kNewWord[k] + " " + std::to_string(kv.first) + " " + Quote(kv.second.name) +
+                   " base=" + Name(kTable[k], kv.second.base) + "\n";
+            if (sDb[k].count(kv.first))
+                for (auto &l : sDb[k][kv.first].lines)
+                    out += "  " + l.first + " " + l.second.now + "\n";   // (nothing of the game's to clash with: no was=)
+        }
+    }
+    for (int k = 0; k < 3; k++)
         for (auto &kv : sDb[k])
         {
-            if (kv.second.lines.empty())
+            if (kv.second.lines.empty() || IsNew(k, kv.first))
                 continue;
             out += std::string(kHead[k]) + " " + Name(kTable[k], kv.first) + "\n";
             for (auto &l : kv.second.lines)
@@ -99,6 +128,8 @@ static void Load()
     sLoaded = true;
     for (auto &d : sDb)
         d.clear();
+    for (int k = 0; k < 3; k++)
+        sNewK[k].clear(), sNextNewK[k] = kNewFirst[k];
     FILE *f = fopen((EditsDir() + "/database.txt").c_str(), "rb");
     if (!f)
         return;
@@ -111,6 +142,34 @@ static void Load()
         if (line[0] != ' ')
         {
             cur = nullptr;
+            int nid, next, nk = -1;
+            for (int k = 0; k < 3; k++)
+            {
+                std::string w = std::string("# next new ") + kNewWord[k] + " %d", h = std::string("new ") + kNewWord[k] + " %d";
+                if (sscanf(line, w.c_str(), &next) == 1)
+                    sNextNewK[k] = std::max(sNextNewK[k], next);
+                if (sscanf(line, h.c_str(), &nid) == 1)
+                    nk = k;
+            }
+            if (nk >= 0)
+            {
+                NewSpecies n{0, "NEW"};
+                if (const char *q = strchr(line, '"'))
+                {
+                    const char *e = strchr(q + 1, '"');
+                    n.name = e ? std::string(q + 1, e - q - 1) : std::string(q + 1);
+                }
+                if (const char *b = strstr(line, "base="))
+                {
+                    char bs[96] = "";
+                    sscanf(b + 5, "%95s", bs);
+                    n.base = (int)Value(kTable[nk], bs);
+                }
+                sNewK[nk][nid] = n;
+                sNextNewK[nk] = std::max(sNextNewK[nk], nid + 1);
+                cur = &sDb[nk][nid];
+                continue;
+            }
             for (int k = 0; k < 3; k++)
             {
                 std::string head = std::string(kHead[k]) + " ";
@@ -168,8 +227,7 @@ bool Database_Unsaved()
 
 static bool Picker(const char *id, int table, int *value)
 {
-    bool picked = false;
-    ImGui::SetNextItemWidth(-FLT_MIN);
+    bool picked = false;   // (the caller sets the width)
     if (ImGui::BeginCombo(id, Name(table, *value), ImGuiComboFlags_HeightLarge))
     {
         static char filter[64];
@@ -375,6 +433,7 @@ static void LearnsetEditor(int id, const MakerSpeciesInfo &base)
             if (ImGui::InputInt("##lv", &list[i].first, 0))
                 list[i].first = std::max(0, std::min(list[i].first, 100)), ch = true;
             ImGui::TableNextColumn();
+            ImGui::SetNextItemWidth(-FLT_MIN);
             ch |= Picker("##mv", MAKER_NAMES_MOVE, &list[i].second);
             ImGui::TableNextColumn();
             if (ImGui::SmallButton("-"))
@@ -515,10 +574,50 @@ static void PicturesPanel(int id, const char *name)
     ImGui::TextDisabled("Fit to the game's 15 colors + clear, shared by the front and back. They're in MoemonMaker/art/.");
 }
 
+static int sRemoveNew = -1, sRemoveNewK;
+
+// M3b: a new entry's name and the entry of the game's it starts from; true if it's a new one
+static bool NewHeader(int k, int id, int maxLen)
+{
+    if (!IsNew(k, id))
+        return false;
+    NewSpecies &n = sNewK[k][id];
+    char buf[32];
+    snprintf(buf, sizeof(buf), "%s", n.name.c_str());
+    ImGui::PushID("newhead");
+    ImGui::AlignTextToFramePadding();
+    ImGui::TextUnformatted("Name");
+    ImGui::SameLine(130 * gEd.uiScale);
+    ImGui::SetNextItemWidth(200 * gEd.uiScale);
+    if (ImGui::InputText("##newname", buf, maxLen + 1))
+    {
+        for (char *p = buf; *p; p++)
+            *p = (char)toupper((unsigned char)*p);
+        n.name = buf;
+        Changed();
+    }
+    ImGui::AlignTextToFramePadding();
+    ImGui::TextUnformatted("Based on");
+    ImGui::SameLine(130 * gEd.uiScale);
+    ImGui::SetNextItemWidth(200 * gEd.uiScale);
+    int base = n.base;
+    if (Picker("##newbase", kTable[k], &base) && base > 0 && base < kNewFirst[k])
+        n.base = base, Changed();
+    ImGui::SameLine();
+    if (ImGui::Button("Remove it"))
+        sRemoveNew = id, sRemoveNewK = k;
+    ImGui::TextDisabled("New %s #%d: its number never changes. Until a line below changes it, it's its base in everything.",
+                        kNewWhat[k], id);
+    ImGui::Separator();
+    ImGui::PopID();
+    return true;
+}
+
 static void SpeciesPage(int id)
 {
     MakerSpeciesInfo b;
-    if (!MakerApi_SpeciesInfo(id, &b))
+    bool isNew = IsNew(0, id);
+    if (!MakerApi_SpeciesInfo(isNew ? sNew[id].base : id, &b))
     {
         ImGui::TextDisabled("Not a POKeMON the game has.");
         return;
@@ -526,7 +625,8 @@ static void SpeciesPage(int id)
     int total = 0;
     for (int i = 0; i < 6; i++)
         total += b.stats[i];
-    TextRow(0, id, "name", "Name", b.name, 0, 10, false);
+    if (!NewHeader(0, id, 10))   // (a new one: its pictures, icon, cry, TMs and walk are its base's until changed)
+        TextRow(0, id, "name", "Name", b.name, 0, 10, false);
     Row(0, id, "stats", "Base stats", kStats, 6, -1, b.stats, 1, 255);
     {
         int v[6];
@@ -548,18 +648,33 @@ static void SpeciesPage(int id)
     Row(0, id, "growth", "Growth rate (0-5)", NULL, 1, -1, &b.growth, 0, 5);
     Row(0, id, "egggroups", "Egg groups", kTwo, 2, -1, b.eggGroups, 0, 15);
     LearnsetEditor(id, b);
-    PicturesPanel(id, Name(MAKER_NAMES_SPECIES, id));
+    PicturesPanel(id, isNew ? ("NEW_" + std::to_string(id)).c_str() : Name(MAKER_NAMES_SPECIES, id));
+}
+
+// M3b: a new entry, starting as BASE (one of the game's), at the next id never used
+static int MakeNew(int k, int base, const char *name)
+{
+    if (sNextNewK[k] > kNewLast[k])
+    {
+        Message("All %d new %s numbers are used", kNewLast[k] - kNewFirst[k] + 1, kNewWhat[k]);
+        return 0;
+    }
+    int id = sNextNewK[k]++;
+    sNewK[k][id] = NewSpecies{base, name};
+    Changed();
+    return id;
 }
 
 static void MovePage(int id)
 {
     MakerMoveInfo b;
-    if (!MakerApi_MoveInfo(id, &b))
+    if (!MakerApi_MoveInfo(IsNew(1, id) ? sNewK[1][id].base : id, &b))
     {
         ImGui::TextDisabled("Not a move the game has.");
         return;
     }
-    TextRow(1, id, "name", "Name", b.name, 0, 12, false);
+    if (!NewHeader(1, id, 12))   // (a new one: its animation, words and contest data are its base's)
+        TextRow(1, id, "name", "Name", b.name, 0, 12, false);
     Row(1, id, "power", "Power", NULL, 1, -1, &b.power, 0, 255);
     Row(1, id, "type", "Type", NULL, 1, MAKER_NAMES_TYPE, &b.type, 0, 255);
     Row(1, id, "accuracy", "Accuracy (0: never misses)", NULL, 1, -1, &b.accuracy, 0, 100);
@@ -576,12 +691,13 @@ static void MovePage(int id)
 static void ItemPage(int id)
 {
     MakerItemInfo b;
-    if (!MakerApi_ItemInfo(id, &b))
+    if (!MakerApi_ItemInfo(IsNew(2, id) ? sNewK[2][id].base : id, &b))
     {
         ImGui::TextDisabled("Not an item the game has.");
         return;
     }
-    TextRow(2, id, "name", "Name", b.name, 0, 13, false);
+    if (!NewHeader(2, id, 13))   // (a new one: its icon and what it does are its base's)
+        TextRow(2, id, "name", "Name", b.name, 0, 13, false);
     Row(2, id, "price", "Price", NULL, 1, -1, &b.price, 0, 65535);
     Row(2, id, "hold", "Hold effect", NULL, 1, -1, &b.holdEffect, 0, 255);
     Row(2, id, "holdparam", "Hold effect value", NULL, 1, -1, &b.holdParam, 0, 255);
@@ -617,11 +733,37 @@ void DatabaseWindow()
     std::transform(f.begin(), f.end(), f.begin(), ::toupper);
     int n = MakerApi_NameCount(kTable[k]), count = MakerApi_DatabaseCount(k);
     size_t pre = strlen(kPrefix[k]);
+    {
+        // M3b: the new ones first, by the names the user gave them
+        std::string label = std::string("+ New ") + kNewWhat[k];
+        if (ImGui::Button(label.c_str(), ImVec2(-FLT_MIN, 0)))
+        {
+            int base = sSel[k] > 0 && sSel[k] < kNewFirst[k] ? sSel[k] : (IsNew(k, sSel[k]) ? sNewK[k][sSel[k]].base : 1);
+            if (int id = MakeNew(k, base, k == 1 ? "NEW MOVE" : k == 2 ? "NEW ITEM" : "NEW"))
+                sSel[k] = id;
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("A new %s, starting as the selected one (or the one it's based on)", kNewWhat[k]);
+        for (auto &kv : sNewK[k])
+        {
+            if (!f.empty() && kv.second.name.find(f) == std::string::npos)
+                continue;
+            ImGui::PushID(kv.first);
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.35f, 0.75f, 0.35f, 1));
+            if (ImGui::Selectable((kv.second.name + "  (new)").c_str(), sSel[k] == kv.first))
+                sSel[k] = kv.first;
+            ImGui::PopStyleColor();
+            ImGui::PopID();
+        }
+        if (!sNewK[k].empty())
+            ImGui::Separator();
+    }
     for (int i = 0; i < n; i++)
     {
         unsigned v;
         const char *nm = MakerApi_NameAt(kTable[k], i, &v);
-        if (v == 0 || (int)v >= count || (!f.empty() && !strstr(nm, f.c_str())))
+        if (v == 0 || (int)v >= count || IsNew(k, (int)v) || ((int)v >= kNewFirst[k] && (int)v <= kNewLast[k])
+         || (!f.empty() && !strstr(nm, f.c_str())))
             continue;
         ImGui::PushID(i);
         bool edited = sDb[k].count((int)v) && !sDb[k][(int)v].lines.empty();
@@ -637,7 +779,7 @@ void DatabaseWindow()
     ImGui::SameLine();
     ImGui::BeginChild("detail", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
     ImGui::PushFont(gEd.fontBold);
-    ImGui::Text("%s", Name(kTable[k], sSel[k]));
+    ImGui::Text("%s", IsNew(k, sSel[k]) ? sNewK[k][sSel[k]].name.c_str() : Name(kTable[k], sSel[k]));
     ImGui::PopFont();
     ImGui::TextDisabled("Edited values are orange; x puts one back to the game's own.");
     ImGui::Separator();
@@ -657,6 +799,15 @@ void DatabaseWindow()
     if (ImGui::Button("Save (Ctrl+S)") && Database_Save())
         Message("Saved the database");
     ImGui::End();
+    if (sRemoveNew >= 0)
+    {
+        // (its number isn't given out again: a saved one becomes the "?" until it's made again)
+        sNewK[sRemoveNewK].erase(sRemoveNew);
+        sDb[sRemoveNewK].erase(sRemoveNew);
+        sSel[sRemoveNewK] = 1;
+        sRemoveNew = -1;
+        Changed();
+    }
 }
 
 void OpenDatabase()
@@ -679,6 +830,20 @@ void Database_TestCommand(const char *cmd, const char *arg)
             unsigned v;
             if (MakerApi_ValueOf(MAKER_NAMES_SPECIES, arg, &v))
                 sTab = 0, sSel[0] = (int)v;
+        }
+        return;
+    }
+    if (c == "newspecies" || c == "newmove" || c == "newitem")
+    {
+        // newspecies / newmove / newitem NAME BASE: a new one (saved)
+        int k = c == "newmove" ? 1 : c == "newitem" ? 2 : 0;
+        char nm[32] = "", bs[96] = "";
+        if (sscanf(arg, "%31s %95s", nm, bs) == 2)
+        {
+            int id = MakeNew(k, (int)Value(kTable[k], bs), nm);
+            printf("[maker] new %s %s %d\n", kNewWord[k], nm, id);
+            sTab = k, sSel[k] = id;
+            Database_Save();
         }
         return;
     }

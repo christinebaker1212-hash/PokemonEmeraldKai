@@ -3,6 +3,7 @@
 const struct CompressedSpriteSheet gMonBackPicTable_Moe[] =
 {
     SPECIES_SPRITE(NONE, gMonBackPic_CircledQuestionMark),
+    MAKER_SPECIES_RANGE = {gMonBackPic_CircledQuestionMark, MON_PIC_SIZE, SPECIES_NONE},
     SPECIES_SPRITE(BULBASAUR, gMonBackPic_Bulbasaur),
     SPECIES_SPRITE(IVYSAUR, gMonBackPic_Ivysaur),
     SPECIES_SPRITE(VENUSAUR, gMonBackPic_Venusaur),

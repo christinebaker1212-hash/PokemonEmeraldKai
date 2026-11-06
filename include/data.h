@@ -161,10 +161,15 @@ extern const struct CompressedSpritePalette *gMakerArtPal[2], *gMakerArtShiny[2]
 #define gMonBackPicTable       MP_MONART_ART(gMakerArtBack, gMonBackPicTable)
 #define gMonPaletteTable       MP_MONART_ART(gMakerArtPal, gMonPaletteTable)
 #define gMonShinyPaletteTable  MP_MONART_ART(gMakerArtShiny, gMonShinyPaletteTable)
-#define gMonFrontPicCoords     MP_MONART(gMonFrontPicCoords)
-#define gMonBackPicCoords      MP_MONART(gMonBackPicCoords)
-#define gEnemyMonElevation     MP_MONART(gEnemyMonElevation)
-#define gMonFrontAnimsPtrTable MP_MONART(gMonFrontAnimsPtrTable)
+// (M3b: the new POKéMON's coordinates, elevation and front animation, copied from the POKéMON each is based on)
+extern const struct MonCoords *gMakerCoordsFront[2], *gMakerCoordsBack[2];
+extern const u8 *gMakerElevation[2];
+extern const union AnimCmd *const *const *gMakerFrontAnims[2];
+#define gMonFrontPicCoords     MP_MONART_ART(gMakerCoordsFront, gMonFrontPicCoords)
+#define gMonBackPicCoords      MP_MONART_ART(gMakerCoordsBack, gMonBackPicCoords)
+#define gEnemyMonElevation     MP_MONART_ART(gMakerElevation, gEnemyMonElevation)
+#define gMonFrontAnimsPtrTable MP_MONART_ART(gMakerFrontAnims, gMonFrontAnimsPtrTable)
+extern const u32 gMonArtCounts2_Moe[3], gMonArtCounts2_Pokemon[3];   // (front coords, back coords, front animations)
 
 // Moemon Maker (M2c): the game reads its trainers through this pointer: the built table (gTrainersBase, data.c), or the
 // Maker's patched copy (src/maker/maker_trainers.c)

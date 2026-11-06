@@ -1595,6 +1595,8 @@ u8 MP_Gen_OfMove(u16 move)
 {
     static const u16 sLast[] = {165, 251, 354, 467, 559, 621, 689, 778};
     u8 g;
+    if (IS_MAKER_MOVE(move))   // (Moemon Maker M3b: a new move, never sealed by the GENERATION; an empty slot always)
+        return Maker_MoveBase(move) ? 0 : 99;
     for (g = 0; g < ARRAY_COUNT(sLast); g++)
         if (move <= sLast[g])
             return g + 1;
@@ -1705,6 +1707,8 @@ bool8 MP_Gen_ItemAllowed(u16 item)
 // (like an EGG), until GENERATION is raised again
 bool8 MP_Gen_SealedSpecies(u16 species)
 {
+    if (IS_MAKER_SPECIES(species))
+        return !Maker_SpeciesDefined(species);   // (Moemon Maker M3b: from a pack that isn't here)
     return species != SPECIES_NONE && species < NUM_SPECIES && MP_Gen_OfSpecies(species) > UseCap();
 }
 

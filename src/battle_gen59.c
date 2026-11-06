@@ -200,6 +200,7 @@ static void Say(u8 msg)
 
 static const struct Gen59Move *Data(u16 move)
 {
+    move = Maker_MoveBase(move);   // (Moemon Maker M3b: a new move works as its base)
     return IS_GEN59_MOVE(move) ? &gGen59Moves[move - FIRST_GEN58_MOVE] : NULL;
 }
 

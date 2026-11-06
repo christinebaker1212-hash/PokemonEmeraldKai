@@ -15,6 +15,10 @@
 //     price 250 was=300
 //     description "Restores 20 HP." was=0x5E6F7A8B                      (the game's words' hash)
 //
+//   new species 1051 "SPARKIT" base=SPECIES_PIKACHU                       (M3b: a new POKéMON at an id that never moves,
+//     stats 45 60 40 95 55 50                                            everything its base's until a line changes it;
+//                                                                         no was=: there's nothing in the game to clash)
+//
 // The game reads these tables through pointers (include/pokemon.h, item.h, data.h: gSpeciesInfo is gSpeciesInfoTable
 // and so on), so patched copies are all it takes: battles, the summary, the POKéDEX, shops and the bag read the edited
 // values like their own. Moves and abilities keep the game's own effects (decision 23: Lua hooks come in M5).
@@ -295,6 +299,78 @@ static u8 *sItemTexts[ITEMS_COUNT + 1];
 static u8 (*sSpeciesNames)[POKEMON_NAME_LENGTH + 1];
 static u8 (*sMoveNames)[MOVE_NAME_LENGTH + 1];
 static int sConflicts;
+_Static_assert(MAKER_NEW_SPECIES_FIRST == SPECIES_MAKER_FIRST && MAKER_NEW_SPECIES_LAST == SPECIES_MAKER_LAST,
+               "include/maker_api.h's new POKeMON ids are the game's");
+_Static_assert(MAKER_NEW_MOVE_FIRST == MOVE_MAKER_FIRST && MAKER_NEW_MOVE_LAST == MOVE_MAKER_LAST
+               && MAKER_NEW_ITEM_FIRST == ITEM_MAKER_FIRST && MAKER_NEW_ITEM_LAST == ITEM_MAKER_LAST,
+               "include/maker_api.h's new move and item ids are the game's");
+static u16 sNewBase[MAKER_SPECIES_SLOTS];   // (M3b: each new POKéMON's base; 0: the slot is empty)
+static u16 sNewMoveBase[MAKER_MOVE_SLOTS];   // (and each new move's)
+static u16 sNewItemBase[MAKER_ITEM_SLOTS];   // (and item's)
+
+u16 Maker_ItemBase(u16 item)
+{
+    if (!IS_MAKER_ITEM(item))
+        return item;
+    return sNewItemBase[item - ITEM_MAKER_FIRST];
+}
+
+u16 Maker_MoveBase(u16 move)
+{
+    if (!IS_MAKER_MOVE(move))
+        return move;
+    return sNewMoveBase[move - MOVE_MAKER_FIRST];
+}
+
+u16 Maker_SpeciesBase(u16 species)
+{
+    if (!IS_MAKER_SPECIES(species))
+        return species;
+    return sNewBase[species - SPECIES_MAKER_FIRST];
+}
+
+bool8 Maker_SpeciesDefined(u16 species)
+{
+    return IS_MAKER_SPECIES(species) && sNewBase[species - SPECIES_MAKER_FIRST] != SPECIES_NONE;
+}
+
+// The names tables' new entries (maker_names.c)
+const char *Maker_NewEntryPrefix(int table)
+{
+    return table == MAKER_NAMES_SPECIES ? "SPECIES_NEW_" : table == MAKER_NAMES_MOVE ? "MOVE_NEW_"
+         : table == MAKER_NAMES_ITEM ? "ITEM_NEW_" : NULL;
+}
+
+// (the table's slots: their bases, how many, the first id)
+static const u16 *NewSlots(int table, int *count, int *first)
+{
+    if (table == MAKER_NAMES_SPECIES)
+        return *count = MAKER_SPECIES_SLOTS, *first = SPECIES_MAKER_FIRST, sNewBase;
+    if (table == MAKER_NAMES_MOVE)
+        return *count = MAKER_MOVE_SLOTS, *first = MOVE_MAKER_FIRST, sNewMoveBase;
+    if (table == MAKER_NAMES_ITEM)
+        return *count = MAKER_ITEM_SLOTS, *first = ITEM_MAKER_FIRST, sNewItemBase;
+    return *count = 0, *first = 0, NULL;
+}
+
+int Maker_NewEntryCount(int table)
+{
+    int i, n = 0, count, first;
+    const u16 *slots = NewSlots(table, &count, &first);
+    for (i = 0; i < count; i++)
+        n += slots[i] != 0;
+    return n;
+}
+
+unsigned Maker_NewEntryAt(int table, int k)
+{
+    int i, count, first;
+    const u16 *slots = NewSlots(table, &count, &first);
+    for (i = 0; i < count; i++)
+        if (slots[i] != 0 && k-- == 0)
+            return first + i;
+    return 0;
+}
 
 static void Reset(void)
 {
@@ -317,6 +393,80 @@ static void Reset(void)
     gItemsTable = gItemsBase;
     gSpeciesNamesTable = gSpeciesNamesBase;
     gMoveNamesTable = gMoveNamesBase;
+    memset(sNewBase, 0, sizeof(sNewBase));
+    memset(sNewMoveBase, 0, sizeof(sNewMoveBase));
+    memset(sNewItemBase, 0, sizeof(sNewItemBase));
+}
+
+static void SetName(int id, const char *text)
+{
+    u8 enc[64];
+    memset(enc, EOS, sizeof(enc));
+    MP_AsciiToGame(enc, text, POKEMON_NAME_LENGTH);
+    enc[POKEMON_NAME_LENGTH] = EOS;
+    if (!sSpeciesNames)
+    {
+        sSpeciesNames = malloc(sizeof(*sSpeciesNames) * gSpeciesNamesCount);
+        memcpy(sSpeciesNames, gSpeciesNamesBase, sizeof(*sSpeciesNames) * gSpeciesNamesCount);
+        gSpeciesNamesTable = sSpeciesNames;
+    }
+    if ((u32)id < gSpeciesNamesCount)
+        memcpy(sSpeciesNames[id], enc, POKEMON_NAME_LENGTH + 1);
+}
+
+static struct SpeciesInfo *Species(int id);
+
+static struct BattleMove *Move(int id, u8 **category);
+
+// M3b: a new move starts as its base: its numbers, effect and category, its name until "NAME" (its animation, words,
+// contest data and GENERATION follow Maker_MoveBase)
+static void NewMove(int id, int base, const char *name)
+{
+    u8 *category, enc[32];
+    sNewMoveBase[id - MOVE_MAKER_FIRST] = base;
+    *Move(id, &category) = gBattleMovesBase[base];
+    *category = gMoveCategoriesBase[base];
+    memset(enc, EOS, sizeof(enc));
+    MP_AsciiToGame(enc, name, MOVE_NAME_LENGTH);
+    enc[MOVE_NAME_LENGTH] = EOS;
+    if (!sMoveNames)
+    {
+        sMoveNames = malloc(sizeof(*sMoveNames) * MOVES_COUNT);
+        memcpy(sMoveNames, gMoveNamesBase, sizeof(*sMoveNames) * MOVES_COUNT);
+        gMoveNamesTable = sMoveNames;
+    }
+    memcpy(sMoveNames[id], enc, MOVE_NAME_LENGTH + 1);
+}
+
+static struct Item *ItemEntry(int id);
+
+// M3b: a new item starts as its base: its pocket, what it does held and used, its price and words, its name until
+// "NAME" (its icon and its effect follow Maker_ItemBase)
+static void NewItem(int id, int base, const char *name)
+{
+    struct Item *it = ItemEntry(id);
+    sNewItemBase[id - ITEM_MAKER_FIRST] = base;
+    *it = gItemsBase[base];
+    it->itemId = id;
+    memset(it->name, EOS, sizeof(it->name));
+    MP_AsciiToGame(it->name, name, ITEM_NAME_LENGTH - 1);
+    it->name[ITEM_NAME_LENGTH - 1] = EOS;
+}
+
+// M3b: a new POKéMON starts as its base: its numbers, its name until "NAME" and its learnset (everything else the game
+// reads by species follows Maker_SpeciesBase: pictures, icon, cry, TMs, the follower)
+static void NewSpecies(int id, int base, const char *name)
+{
+    sNewBase[id - SPECIES_MAKER_FIRST] = base;
+    *Species(id) = gSpeciesInfoBase[base];
+    SetName(id, name);
+    if (!sLearnsets)
+    {
+        sLearnsets = malloc(sizeof(*sLearnsets) * NUM_SPECIES);
+        memcpy(sLearnsets, gLevelUpLearnsetsBase, sizeof(*sLearnsets) * NUM_SPECIES);
+        gLevelUpLearnsetsTable = sLearnsets;
+    }
+    sLearnsets[id] = gLevelUpLearnsetsBase[base];
 }
 
 static struct SpeciesInfo *Species(int id)
@@ -565,7 +715,66 @@ int Maker_SetDatabase(const char *text)
         {
             int v;
             kind = -1;
-            if (sscanf(line, "species %95s", a) == 1 && Named(MAKER_NAMES_SPECIES, a, &v) && v > 0 && (u32)v < gSpeciesInfoCount)
+            char nm[64] = "", bs[96] = "";
+            if (sscanf(line, "new species %d", &v) == 1)
+            {
+                // `new species ID "NAME" base=SPECIES_X`
+                const char *q = strchr(line, '"'), *b = strstr(line, "base=");
+                int base;
+                if (q)
+                    Quoted(q, nm, sizeof(nm));
+                if (b)
+                    sscanf(b + 5, "%95s", bs);
+                if (IS_MAKER_SPECIES(v) && b && Named(MAKER_NAMES_SPECIES, bs, &base) && base > 0 && base < NUM_SPECIES
+                 && !IS_MAKER_SPECIES(base))
+                {
+                    NewSpecies(v, base, nm[0] ? nm : "NEW");
+                    kind = KIND_SPECIES;
+                    snprintf(a, sizeof(a), "%s", nm);
+                }
+                else
+                    printf("[maker] database: %s (left out: ids %d-%d, base a POKeMON of the game's)\n", line,
+                           SPECIES_MAKER_FIRST, SPECIES_MAKER_LAST);
+            }
+            else if (sscanf(line, "new move %d", &v) == 1)
+            {
+                // `new move ID "NAME" base=MOVE_X`
+                const char *q = strchr(line, '"'), *b = strstr(line, "base=");
+                int base;
+                if (q)
+                    Quoted(q, nm, sizeof(nm));
+                if (b)
+                    sscanf(b + 5, "%95s", bs);
+                if (IS_MAKER_MOVE(v) && b && Named(MAKER_NAMES_MOVE, bs, &base) && base > 0 && base < MOVE_MAKER_FIRST)
+                {
+                    NewMove(v, base, nm[0] ? nm : "NEW MOVE");
+                    kind = KIND_MOVE;
+                    snprintf(a, sizeof(a), "%s", nm);
+                }
+                else
+                    printf("[maker] database: %s (left out: ids %d-%d, base a move of the game's)\n", line,
+                           MOVE_MAKER_FIRST, MOVE_MAKER_LAST);
+            }
+            else if (sscanf(line, "new item %d", &v) == 1)
+            {
+                // `new item ID "NAME" base=ITEM_X`
+                const char *q = strchr(line, '"'), *b = strstr(line, "base=");
+                int base;
+                if (q)
+                    Quoted(q, nm, sizeof(nm));
+                if (b)
+                    sscanf(b + 5, "%95s", bs);
+                if (IS_MAKER_ITEM(v) && b && Named(MAKER_NAMES_ITEM, bs, &base) && base > 0 && base < ITEM_MAKER_FIRST)
+                {
+                    NewItem(v, base, nm[0] ? nm : "NEW ITEM");
+                    kind = KIND_ITEM;
+                    snprintf(a, sizeof(a), "%s", nm);
+                }
+                else
+                    printf("[maker] database: %s (left out: ids %d-%d, base an item of the game's)\n", line,
+                           ITEM_MAKER_FIRST, ITEM_MAKER_LAST);
+            }
+            else if (sscanf(line, "species %95s", a) == 1 && Named(MAKER_NAMES_SPECIES, a, &v) && v > 0 && (u32)v < gSpeciesInfoCount)
                 kind = KIND_SPECIES;
             else if (sscanf(line, "move %95s", a) == 1 && Named(MAKER_NAMES_MOVE, a, &v) && v > 0 && v < MOVES_COUNT)
                 kind = KIND_MOVE;
@@ -586,6 +795,17 @@ int Maker_SetDatabase(const char *text)
     }
     if (count)
         printf("[maker] database: %d edited entr%s%s\n", count, count == 1 ? "y" : "ies", sConflicts ? " (some left out)" : "");
+    {
+        // (M3b: new POKéMON came or went: their pictures, icons and the rest follow)
+        static u32 sLastNew;
+        u32 h = Fnv(sNewBase, sizeof(sNewBase), 2166136261u);   // (only the POKéMON have pictures)
+        if (h != sLastNew)
+        {
+            void Maker_LoadArt(void);
+            sLastNew = h;
+            Maker_LoadArt();
+        }
+    }
     return count;
 }
 

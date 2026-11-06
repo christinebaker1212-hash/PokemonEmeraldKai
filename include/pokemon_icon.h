@@ -1,8 +1,14 @@
 #ifndef GUARD_POKEMON_ICON_H
 #define GUARD_POKEMON_ICON_H
 
-extern const u8 gMonIconPaletteIndices[];
-extern const u8 *const gMonIconTable[];
+// Moemon Maker (M3b): through pointers, the built tables (...Base, pokemon_icon.c) or the Maker's copies with its new
+// POKéMON's icons (src/maker/maker_art.c)
+extern const u8 gMonIconPaletteIndicesBase[];
+extern const u8 *const gMonIconTableBase[];
+extern const u8 *gMonIconPaletteIndicesTable;
+extern const u8 *const *gMonIconTableTable;
+#define gMonIconPaletteIndices gMonIconPaletteIndicesTable
+#define gMonIconTable gMonIconTableTable
 extern const struct SpritePalette gMonIconPaletteTable[];
 
 const u8 *GetMonIconTiles(u16 species, bool32 handleDeoxys);

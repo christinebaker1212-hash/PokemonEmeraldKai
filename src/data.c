@@ -323,6 +323,8 @@ const union AnimCmd *const gAnims_MonPic[MAX_MON_PIC_FRAMES] =
 // (Moemon Maker's art copies these tables whole: src/maker/maker_art.c)
 const u32 gMonArtCounts_Moe[4] = {ARRAY_COUNT(gMonFrontPicTable_Moe), ARRAY_COUNT(gMonBackPicTable_Moe),
                                   ARRAY_COUNT(gMonPaletteTable_Moe), ARRAY_COUNT(gMonShinyPaletteTable_Moe)};
+const u32 gMonArtCounts2_Moe[3] = {ARRAY_COUNT(gMonFrontPicCoords_Moe), ARRAY_COUNT(gMonBackPicCoords_Moe),
+                                   ARRAY_COUNT(gMonFrontAnimsPtrTable_Moe)};
 
 #include "data/trainer_parties.h"
 #include "constants/qz_port.h"

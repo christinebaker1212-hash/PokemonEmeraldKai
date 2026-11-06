@@ -29,11 +29,21 @@
 
 const char *Maker_ReadDir(void);
 extern const u32 gMonArtCounts_Moe[4], gMonArtCounts_Pokemon[4];
+#include "pokemon_icon.h"
 
 const struct CompressedSpriteSheet *gMakerArtFront[2], *gMakerArtBack[2];
 const struct CompressedSpritePalette *gMakerArtPal[2], *gMakerArtShiny[2];
+const struct MonCoords *gMakerCoordsFront[2], *gMakerCoordsBack[2];
+const u8 *gMakerElevation[2];
+const union AnimCmd *const *const *gMakerFrontAnims[2];
 static struct CompressedSpriteSheet *sFront[2], *sBack[2];
 static struct CompressedSpritePalette *sPal[2], *sShiny[2];
+static struct MonCoords *sCoordsF[2], *sCoordsB[2];
+static u8 *sElev[2];
+static const union AnimCmd *const **sAnims[2];
+static const u8 **sIcons;
+static u8 *sIconPal;
+static int sNewCount;   // (M3b: the new POKéMON given their base's pictures)
 static void *sBlocks[NUM_SPECIES * 8];   // (every buffer made, to free them on a reload)
 static int sBlockCount, sArtCount;
 
@@ -278,8 +288,16 @@ static void Reset(void)
         free(sFront[i]), free(sBack[i]), free(sPal[i]), free(sShiny[i]);
         sFront[i] = NULL, sBack[i] = NULL, sPal[i] = NULL, sShiny[i] = NULL;
         gMakerArtFront[i] = NULL, gMakerArtBack[i] = NULL, gMakerArtPal[i] = NULL, gMakerArtShiny[i] = NULL;
+        free(sCoordsF[i]), free(sCoordsB[i]), free(sElev[i]), free(sAnims[i]);
+        sCoordsF[i] = NULL, sCoordsB[i] = NULL, sElev[i] = NULL, sAnims[i] = NULL;
+        gMakerCoordsFront[i] = NULL, gMakerCoordsBack[i] = NULL, gMakerElevation[i] = NULL, gMakerFrontAnims[i] = NULL;
     }
+    free(sIcons), sIcons = NULL;
+    free(sIconPal), sIconPal = NULL;
+    gMonIconTableTable = gMonIconTableBase;
+    gMonIconPaletteIndicesTable = gMonIconPaletteIndicesBase;
     sArtCount = 0;
+    sNewCount = 0;
 }
 
 // A set's four tables copied whole (Unown's other letters live past NUM_SPECIES)
@@ -296,6 +314,74 @@ static void Table(int set)
     memcpy(sBack[set], sSetBack[set], sizeof(**sBack) * n[1]);
     memcpy(sPal[set], sSetPal[set], sizeof(**sPal) * n[2]);
     memcpy(sShiny[set], sSetShiny[set], sizeof(**sShiny) * n[3]);
+    {
+        // (and, for the new POKéMON, the coordinates, elevation and front animations)
+        const u32 *c = set ? gMonArtCounts2_Pokemon : gMonArtCounts2_Moe;
+        sCoordsF[set] = malloc(sizeof(**sCoordsF) * c[0]);
+        sCoordsB[set] = malloc(sizeof(**sCoordsB) * c[1]);
+        sAnims[set] = malloc(sizeof(**sAnims) * c[2]);
+        sElev[set] = malloc(NUM_SPECIES);
+        memcpy(sCoordsF[set], set ? gMonFrontPicCoords_Pokemon : gMonFrontPicCoords_Moe, sizeof(**sCoordsF) * c[0]);
+        memcpy(sCoordsB[set], set ? gMonBackPicCoords_Pokemon : gMonBackPicCoords_Moe, sizeof(**sCoordsB) * c[1]);
+        memcpy(sAnims[set], set ? gMonFrontAnimsPtrTable_Pokemon : gMonFrontAnimsPtrTable_Moe, sizeof(**sAnims) * c[2]);
+        memcpy(sElev[set], set ? gEnemyMonElevation_Pokemon : gEnemyMonElevation_Moe, NUM_SPECIES);
+    }
+}
+
+// M3b: each new POKéMON (MoemonMaker/database.txt `new species`) drawn as the POKéMON it's based on until its own
+// pictures (NEW_<id>_front.png...) replace them: the rows of its base in every table, under its own tags
+static void FillNewSpecies(void)
+{
+    int s, set;
+    for (s = SPECIES_MAKER_FIRST; s <= SPECIES_MAKER_LAST; s++)
+    {
+        u16 base = Maker_SpeciesBase(s);
+        if (base == SPECIES_NONE)
+            continue;
+        for (set = 0; set < 2; set++)
+        {
+            Table(set);
+            sFront[set][s] = sSetFront[set][base], sFront[set][s].tag = s;
+            sBack[set][s] = sSetBack[set][base], sBack[set][s].tag = s;
+            sPal[set][s] = sSetPal[set][base], sPal[set][s].tag = s;
+            sShiny[set][s] = sSetShiny[set][base], sShiny[set][s].tag = s + SPECIES_SHINY_TAG;
+            sCoordsF[set][s] = sCoordsF[set][base];
+            sCoordsB[set][s] = sCoordsB[set][base];
+            sAnims[set][s] = sAnims[set][base];
+            sElev[set][s] = sElev[set][base];
+        }
+        if (!sIcons)
+        {
+            u32 n = SPECIES_UNOWN_QMARK + 1;
+            sIcons = malloc(sizeof(*sIcons) * n);
+            sIconPal = malloc(n);
+            memcpy(sIcons, gMonIconTableBase, sizeof(*sIcons) * n);
+            memcpy(sIconPal, gMonIconPaletteIndicesBase, n);
+            gMonIconTableTable = (const u8 *const *)sIcons;
+            gMonIconPaletteIndicesTable = sIconPal;
+        }
+        sIcons[s] = gMonIconTableBase[base];
+        sIconPal[s] = gMonIconPaletteIndicesBase[base];
+        sNewCount++;
+    }
+}
+
+static void UseCopies(void)
+{
+    int set;
+    for (set = 0; set < 2; set++)
+    {
+        if (!sFront[set])
+            continue;
+        gMakerArtFront[set] = sFront[set];
+        gMakerArtBack[set] = sBack[set];
+        gMakerArtPal[set] = sPal[set];
+        gMakerArtShiny[set] = sShiny[set];
+        gMakerCoordsFront[set] = sCoordsF[set];
+        gMakerCoordsBack[set] = sCoordsB[set];
+        gMakerElevation[set] = sElev[set];
+        gMakerFrontAnims[set] = (const union AnimCmd *const *const *)sAnims[set];
+    }
 }
 
 // One species' pictures into both sets
@@ -307,9 +393,10 @@ static void Apply(int species, u8 *front, u8 *back, u8 *shiny)
         u8 *pics[2], *ownFront = NULL, *ownBack = NULL;
         u16 pal[16], shinyPal[16];
         int count;
-        pics[0] = front ? front : (ownFront = GamePicture(&sSetFront[set][species], &sSetPal[set][species], 128));
-        pics[1] = back ? back : (ownBack = GamePicture(&sSetBack[set][species], &sSetPal[set][species], 64));
-        LZ77UnCompWram(sSetPal[set][species].data, pal);
+        int src = IS_MAKER_SPECIES(species) && Maker_SpeciesBase(species) ? Maker_SpeciesBase(species) : species;   // (M3b)
+        pics[0] = front ? front : (ownFront = GamePicture(&sSetFront[set][src], &sSetPal[set][src], 128));
+        pics[1] = back ? back : (ownBack = GamePicture(&sSetBack[set][src], &sSetPal[set][src], 64));
+        LZ77UnCompWram(sSetPal[set][src].data, pal);
         count = MakePalette(pics, pal);
         if (count)
         {
@@ -335,6 +422,8 @@ void Maker_LoadArt(void)
     DIR *d;
     struct dirent *de;
     Reset();
+    FillNewSpecies();
+    UseCopies();
     snprintf(dir, sizeof(dir), "%s/art", Maker_ReadDir());
     if (!(d = opendir(dir)))
         return;
@@ -361,7 +450,9 @@ void Maker_LoadArt(void)
         }
         else
             continue;
-        if (!MakerApi_ValueOf(MAKER_NAMES_SPECIES, name, &v) || v == 0 || v >= NUM_SPECIES)
+        if (sscanf(name, "NEW_%u", &v) == 1 && IS_MAKER_SPECIES(v))
+            ;   // (M3b: a new POKéMON's own pictures, by its id)
+        else if (!MakerApi_ValueOf(MAKER_NAMES_SPECIES, name, &v) || v == 0 || v >= NUM_SPECIES)
         {
             printf("[maker] art: no %s (left out)\n", name);
             continue;
@@ -381,14 +472,7 @@ void Maker_LoadArt(void)
     closedir(d);
     if (sArtCount)
     {
-        int set;
-        for (set = 0; set < 2; set++)
-        {
-            gMakerArtFront[set] = sFront[set];
-            gMakerArtBack[set] = sBack[set];
-            gMakerArtPal[set] = sPal[set];
-            gMakerArtShiny[set] = sShiny[set];
-        }
+        UseCopies();
         printf("[maker] art: %d POKeMON with pictures of the user's own\n", sArtCount);
     }
 }

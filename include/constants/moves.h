@@ -857,7 +857,14 @@
 #define FIRST_GEN58_MOVE MOVE_HONE_CLAWS
 #define LAST_GEN58_MOVE  MOVE_MALIGNANT_CHAIN
 
-#define MOVES_COUNT 848
+// Moemon Maker (M3b): the user's new moves (MoemonMaker/database.txt `new move ID "NAME" base=MOVE_X`), at ids that never
+// move; a slot no pack fills is "-" (a POKéMON knowing one is SEALED)
+#define MOVE_MAKER_FIRST (LAST_GEN58_MOVE + 1)
+#define MAKER_MOVE_SLOTS 64
+#define MOVE_MAKER_LAST (MOVE_MAKER_FIRST + MAKER_MOVE_SLOTS - 1)
+#define IS_MAKER_MOVE(move) ((move) >= MOVE_MAKER_FIRST && (move) <= MOVE_MAKER_LAST)
+#define MAKER_MOVE_RANGE [MOVE_MAKER_FIRST ... MOVE_MAKER_LAST]
+#define MOVES_COUNT 912
 // end of Gen 5-8 moves
 
 // Used for checks for moves affected by Disable, Mimic, etc.

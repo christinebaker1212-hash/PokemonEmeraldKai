@@ -5327,6 +5327,33 @@ overnight list included M2-M5; each is easy to change if the user wants otherwis
   tables, before abilities, items and weather). Test commands `maker bench TRAINER KIND`, `maker damage A LV B LV MOVE`
   (tools/test/maker_trainers.sh).
 
+## Moemon Maker, M3b: new POKéMON, moves and items (ids that never move)
+
+- **Slots at build time:** species 1051-1178 (SPECIES_MAKER_FIRST..LAST; the EGG moved to 1179 and Unown's letters after it,
+  as Gen 4 and Gens 5-9 moved it before), moves 848-911 (MOVE_MAKER_*; MOVES_COUNT 912), items 746-809 (ITEM_MAKER_*;
+  ITEMS_COUNT 810). Every table sized by NUM_SPECIES / MOVES_COUNT / ITEMS_COUNT has their rows; the tables that end at
+  the last built entry got GCC range rows (MAKER_SPECIES_RANGE / MAKER_MOVE_RANGE / MAKER_ITEM_RANGE: the circled "?",
+  "-", "????????") so an empty slot is always safe to draw. A POKéMON in an empty slot (its pack gone) is SEALED
+  (MP_Gen_SealedSpecies), as is one knowing an empty move (MP_Gen_OfMove 99); nothing is deleted.
+- **The file:** MoemonMaker/database.txt `new species ID "NAME" base=SPECIES_X` (and `new move` / `new item`), then the
+  M3a field lines without was= (nothing in the game to clash with); `# next new species N` keeps the next id so a removed
+  one's number is never handed out again. Other files name them SPECIES_NEW_<id> / MOVE_NEW_<id> / ITEM_NEW_<id>
+  (maker_names.c: listed after the game's own in every picker, so trainers, wild tables, shops and learnsets can use them).
+- **The base:** maker_database.c copies the base's row into the patched tables (species info, name, learnset; battle
+  move and category; item) and Maker_SpeciesBase / Maker_MoveBase / Maker_ItemBase (include/pokemon.h) answer the rest:
+  the cry (SpeciesToCryId), TM / tutor compatibility, the follower, the footprint, the Pokemon Jump picture; a move's
+  animation (LaunchBattleAnimation: the Maker's own animation file for the new move still wins, found by its own id),
+  its words, its Gen 5-9 data (battle_gen59.c Data); an item's icon and effect table entry. maker_art.c gives a new
+  POKéMON its base's pictures, palettes, coordinates, elevation, front animation and icon under its own tags (copies of
+  the tables, gMakerCoords* / gMakerElevation / gMakerFrontAnims, gMonIconTable / gMonIconPaletteIndices through pointers),
+  then MoemonMaker/art/NEW_<id>_front.png etc. replace them. METRONOME never calls a new move. New POKéMON have no
+  national number (no POKéDEX entry) and no evolutions yet.
+- **The editor:** DATABASE > "+ New POKeMON" / "+ New move" / "+ New item" (from the selected one), listed first in green
+  with the user's name, a name and "Based on" row and "Remove it" (maker_database_ui.cpp NewHeader / MakeNew).
+- Fixed on the way: CanLearnTutorMove read past its 412-row table for every Gen 4+ POKéMON.
+- Test tools/test/maker_newspecies.sh (SPARKIT from PIKACHU leads, uses ZAPPER (from THUNDER SHOCK), catches another
+  SPARKIT; slot 1052 SEALED; the editor makes a POKéMON, a move and an item and saves them).
+
 ## Moemon Maker, M4a: the debugger
 
 - **Breakpoints** on a Maker event's command lines (maker/maker_debug_ui.cpp, Tools > Debugger: a click on the dot
@@ -6066,6 +6093,18 @@ the most). Each table now shows a move before it's made and holds what happened 
 - **Yu-Gi-Oh! AI Tributes** (ygo_ai.c, the CARDS answer): a Tribute whose worth the engine doesn't give counts as one,
   and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
   duel 4).
+
+## MAGIC's Cycling
+- `K:Cycling:COST` (MtgCardDef.cyclingCost) becomes, once the card's lines are read, the ability Forge's
+  CardFactoryUtil makes for it: `AB$ Draw | Cost$ COST Discard<1/CARDNAME> | ActivationZone$ Hand | NumCards$ 1`.
+  MtgAbility.fromHand (ActivationZone$ Hand, the only zone so far) and MtgCost.discardSelf (Discard<1/CARDNAME>, only
+  with it); BuildPriority offers it for hand cards at any priority (before the land / spell check, so a cycling land
+  cycles too) and never on the battlefield; DoAction puts the card in the graveyard as it's paid.
+- The table's menu: "COST: CYCLE (DRAW A CARD)". The AI cycles a land with 5+ lands out or a spell 3+ mana beyond its
+  lands, best at the end of the other's turn (mtg_ai.c ScoreBase).
+- "When you cycle CARDNAME" (T:Mode$ Cycled, MTG_TRIG_CYCLED, TriggeredCard): fired as the cycling is paid; a
+  ValidCard$ Card.Self trigger works from the graveyard (where the card is by then). TypeCycling and LandCycling still
+  keep their cards out. TestCycling (LONELY SANDBAR, RENEWED FAITH) in tools/mtg/test_rules.c.
 
 ## MAGIC's "choose one" (1.129.0)
 - `SP$ / AB$ Charm | Choices$ A,B,C` (MTG_API_CHARM, CharmNum 1 only): each mode is parsed as a spell (so it may

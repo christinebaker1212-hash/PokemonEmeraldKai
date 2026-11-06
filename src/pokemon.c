@@ -5060,7 +5060,7 @@ bool8 PokemonUseItemEffects(struct Pokemon *mon, u16 item, u8 partyIndex, u8 mov
     // the apples, sweets, pots, LINKING CORD...) have no item effect table entry: evolve by the evolution table as the
     // six stones' ITEM4_EVO_STONE does (before, every one of them "won't have any effect")
     if (!gMain.inBattle && GetItemFieldFunc(item) == ItemUseOutOfBattle_EvolutionStone
-     && (!ITEM_HAS_EFFECT(item) || gItemEffectTable[item - ITEM_POTION] == NULL))
+     && (!ITEM_HAS_EFFECT(Maker_ItemBase(item)) || gItemEffectTable[Maker_ItemBase(item) - ITEM_POTION] == NULL))
     {
         u16 targetSpecies = GetEvolutionTargetSpecies(mon, EVO_MODE_ITEM_USE, item);
         if (targetSpecies == SPECIES_NONE)
@@ -5070,9 +5070,9 @@ bool8 PokemonUseItemEffects(struct Pokemon *mon, u16 item, u8 partyIndex, u8 mov
     }
 
     // Skip using the item if it won't do anything
-    if (!ITEM_HAS_EFFECT(item))
+    if (!ITEM_HAS_EFFECT(Maker_ItemBase(item)))
         return TRUE;
-    if (gItemEffectTable[item - ITEM_POTION] == NULL && item != ITEM_ENIGMA_BERRY)
+    if (gItemEffectTable[Maker_ItemBase(item) - ITEM_POTION] == NULL && item != ITEM_ENIGMA_BERRY)
         return TRUE;
 
     // Get item effect
@@ -5085,7 +5085,7 @@ bool8 PokemonUseItemEffects(struct Pokemon *mon, u16 item, u8 partyIndex, u8 mov
     }
     else
     {
-        itemEffect = gItemEffectTable[item - ITEM_POTION];
+        itemEffect = gItemEffectTable[Maker_ItemBase(item) - ITEM_POTION];
     }
 
     // Do item effect
@@ -5594,7 +5594,7 @@ u8 GetItemEffectParamOffset(u16 itemId, u8 effectByte, u8 effectBit)
 
     offset = ITEM_EFFECT_ARG_START;
 
-    temp = gItemEffectTable[itemId - ITEM_POTION];
+    temp = gItemEffectTable[Maker_ItemBase(itemId) - ITEM_POTION];
 
     if (!temp && itemId != ITEM_ENIGMA_BERRY)
         return 0;
@@ -5719,7 +5719,7 @@ u8 *UseStatIncreaseItem(u16 itemId)
     }
     else
     {
-        itemEffect = gItemEffectTable[itemId - ITEM_POTION];
+        itemEffect = gItemEffectTable[Maker_ItemBase(itemId) - ITEM_POTION];
     }
 
     gPotentialItemEffectBattler = gBattlerInMenuId;
@@ -6035,6 +6035,8 @@ u16 HoennToNationalOrder(u16 hoennNum)
 
 u16 SpeciesToCryId(u16 species)
 {
+    if (IS_MAKER_SPECIES(species + 1))   // Moemon Maker (M3b): a new POKéMON cries as its base (the "?" as BULBASAUR)
+        species = Maker_SpeciesBase(species + 1) ? Maker_SpeciesBase(species + 1) - 1 : 0;
     if (species <= SPECIES_CELEBI - 1)
         return species;
 
@@ -6579,7 +6581,7 @@ bool8 TryIncrementMonLevel(struct Pokemon *mon)
 
 u32 CanMonLearnTMHM(struct Pokemon *mon, u8 tm)
 {
-    u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0);
+    u16 species = Maker_SpeciesBase(GetMonData(mon, MON_DATA_SPECIES_OR_EGG, 0));   // (M3b: a new POKéMON, its base's TMs)
     if (species == SPECIES_EGG)
     {
         return 0;
@@ -6614,6 +6616,7 @@ u32 CanMonLearnTMHM(struct Pokemon *mon, u8 tm)
 
 u32 CanSpeciesLearnTMHM(u16 species, u8 tm)
 {
+    species = Maker_SpeciesBase(species);   // (M3b)
     if (species == SPECIES_EGG)
     {
         return 0;

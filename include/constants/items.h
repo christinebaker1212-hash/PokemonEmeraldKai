@@ -810,7 +810,14 @@
 #include "constants/tms_hms_tm3.h"
 #define ITEM_BLUE_CARD 744   // Moemon Kai: Crystal's BLUE CARD, BUENA's PASSWORD points (mp_buena.c; the points in VAR_JOHTO_BUENA_POINTS)
 #define ITEM_BATTLE_TICKET 745   // Moemon Kai: the boat to BATTLE ISLAND (POKéMON STADIUM: mp_battleisland.c), after any ELITE FOUR
-#define ITEMS_COUNT (ITEM_BATTLE_TICKET + 1)
+// Moemon Maker (M3b): the user's new items (MoemonMaker/database.txt `new item ID "NAME" base=ITEM_X`), at ids that never
+// move; a slot no pack fills is "????????" and does nothing
+#define ITEM_MAKER_FIRST (ITEM_BATTLE_TICKET + 1)
+#define MAKER_ITEM_SLOTS 64
+#define ITEM_MAKER_LAST (ITEM_MAKER_FIRST + MAKER_ITEM_SLOTS - 1)
+#define IS_MAKER_ITEM(item) ((item) >= ITEM_MAKER_FIRST && (item) <= ITEM_MAKER_LAST)
+#define MAKER_ITEM_RANGE [ITEM_MAKER_FIRST ... ITEM_MAKER_LAST]
+#define ITEMS_COUNT (ITEM_MAKER_LAST + 1)
 // end of Gen 5-9 items
 #define FIRST_PLATINUM_KEY_ITEM ITEM_GALACTIC_KEY
 #define LAST_PLATINUM_ITEM ITEM_GOOEY_MULCH

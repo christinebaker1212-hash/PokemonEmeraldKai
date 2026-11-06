@@ -2008,7 +2008,7 @@ static u16 PickFillerSpecies(struct Pokemon *src, u8 slot, u16 trainerId)
         {
             u8 k;
             bool8 used = FALSE;
-            if (species >= SPECIES_OLD_UNOWN_B && species <= SPECIES_OLD_UNOWN_Z)
+            if ((species >= SPECIES_OLD_UNOWN_B && species <= SPECIES_OLD_UNOWN_Z) || IS_MAKER_SPECIES(species))
                 continue;
             if (IS_GEN4_SPECIES(species) && !IS_GEN4_SPECIES(srcSpecies))
                 continue;   // Moemon Kai: Gen 4 Moemon only where the game puts them (after the ELITE FOUR, other regions)

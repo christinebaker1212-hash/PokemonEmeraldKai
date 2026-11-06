@@ -1631,6 +1631,7 @@ static const u32 sPkShinyPalette_CircledQuestionMark[] = INCGFX_U32("graphics/po
 const struct CompressedSpriteSheet gMonFrontPicTable_Pokemon[] =
 {
     SPECIES_SPRITE(NONE, sPkFrontPic_CircledQuestionMark),
+    MAKER_SPECIES_RANGE = {sPkFrontPic_CircledQuestionMark, MON_PIC_SIZE, SPECIES_NONE},
     SPECIES_SPRITE(BULBASAUR, sPkFrontPic_Bulbasaur),
     SPECIES_SPRITE(IVYSAUR, sPkFrontPic_Ivysaur),
     SPECIES_SPRITE(VENUSAUR, sPkFrontPic_Venusaur),
@@ -2078,6 +2079,7 @@ const struct CompressedSpriteSheet gMonFrontPicTable_Pokemon[] =
 const struct CompressedSpriteSheet gMonBackPicTable_Pokemon[] =
 {
     SPECIES_SPRITE(NONE, sPkBackPic_CircledQuestionMark),
+    MAKER_SPECIES_RANGE = {sPkBackPic_CircledQuestionMark, MON_PIC_SIZE, SPECIES_NONE},
     SPECIES_SPRITE(BULBASAUR, sPkBackPic_Bulbasaur),
     SPECIES_SPRITE(IVYSAUR, sPkBackPic_Ivysaur),
     SPECIES_SPRITE(VENUSAUR, sPkBackPic_Venusaur),
@@ -2525,6 +2527,7 @@ const struct CompressedSpriteSheet gMonBackPicTable_Pokemon[] =
 const struct CompressedSpritePalette gMonPaletteTable_Pokemon[] =
 {
     SPECIES_PAL(NONE, sPkPalette_CircledQuestionMark),
+    MAKER_SPECIES_RANGE = {sPkPalette_CircledQuestionMark, SPECIES_NONE},
     SPECIES_PAL(BULBASAUR, sPkPalette_Bulbasaur),
     SPECIES_PAL(IVYSAUR, sPkPalette_Ivysaur),
     SPECIES_PAL(VENUSAUR, sPkPalette_Venusaur),
@@ -2972,6 +2975,7 @@ const struct CompressedSpritePalette gMonPaletteTable_Pokemon[] =
 const struct CompressedSpritePalette gMonShinyPaletteTable_Pokemon[] =
 {
     SPECIES_SHINY_PAL(NONE, sPkShinyPalette_CircledQuestionMark),
+    MAKER_SPECIES_RANGE = {sPkShinyPalette_CircledQuestionMark, SPECIES_SHINY_TAG},
     SPECIES_SHINY_PAL(BULBASAUR, sPkShinyPalette_Bulbasaur),
     SPECIES_SHINY_PAL(IVYSAUR, sPkShinyPalette_Ivysaur),
     SPECIES_SHINY_PAL(VENUSAUR, sPkShinyPalette_Venusaur),
@@ -3423,6 +3427,7 @@ const struct CompressedSpritePalette gMonShinyPaletteTable_Pokemon[] =
 const struct MonCoords gMonFrontPicCoords_Pokemon[] =
 {
     [SPECIES_NONE]        = { .size = MON_COORDS_SIZE(64, 64), .y_offset =  0 },
+    MAKER_SPECIES_RANGE = { .size = MON_COORDS_SIZE(64, 64), .y_offset =  0 },
     [SPECIES_BULBASAUR]   = { .size = MON_COORDS_SIZE(32, 40), .y_offset = 14 },
     [SPECIES_IVYSAUR]     = { .size = MON_COORDS_SIZE(40, 48), .y_offset = 10 },
     [SPECIES_VENUSAUR]    = { .size = MON_COORDS_SIZE(64, 64), .y_offset =  3 },
@@ -3874,6 +3879,7 @@ const struct MonCoords gMonFrontPicCoords_Pokemon[] =
 const struct MonCoords gMonBackPicCoords_Pokemon[] =
 {
     [SPECIES_NONE]        = { .size = MON_COORDS_SIZE(64, 64), .y_offset =  0 },
+    MAKER_SPECIES_RANGE = { .size = MON_COORDS_SIZE(64, 64), .y_offset =  0 },
     [SPECIES_BULBASAUR]   = { .size = MON_COORDS_SIZE(48, 32), .y_offset = 16 },
     [SPECIES_IVYSAUR]     = { .size = MON_COORDS_SIZE(48, 48), .y_offset =  9 },
     [SPECIES_VENUSAUR]    = { .size = MON_COORDS_SIZE(64, 56), .y_offset =  7 },
@@ -9645,6 +9651,7 @@ SINGLE_ANIMATION(UnownQMark);
 const union AnimCmd *const *const gMonFrontAnimsPtrTable_Pokemon[] =
 {
     [SPECIES_NONE]        = sAnims_None,
+    MAKER_SPECIES_RANGE = sAnims_None,
     [SPECIES_BULBASAUR]   = sAnims_Bulbasaur,
     [SPECIES_IVYSAUR]     = sAnims_Ivysaur,
     [SPECIES_VENUSAUR]    = sAnims_Venusaur,
@@ -10542,3 +10549,5 @@ void MP_MonArt_Check(void)
 // (Moemon Maker's art copies these tables whole: src/maker/maker_art.c)
 const u32 gMonArtCounts_Pokemon[4] = {ARRAY_COUNT(gMonFrontPicTable_Pokemon), ARRAY_COUNT(gMonBackPicTable_Pokemon),
                                       ARRAY_COUNT(gMonPaletteTable_Pokemon), ARRAY_COUNT(gMonShinyPaletteTable_Pokemon)};
+const u32 gMonArtCounts2_Pokemon[3] = {ARRAY_COUNT(gMonFrontPicCoords_Pokemon), ARRAY_COUNT(gMonBackPicCoords_Pokemon),
+                                       ARRAY_COUNT(gMonFrontAnimsPtrTable_Pokemon)};

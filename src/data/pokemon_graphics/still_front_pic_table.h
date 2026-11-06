@@ -3,6 +3,7 @@
 const struct CompressedSpriteSheet gMonStillFrontPicTable[] =
 {
     SPECIES_SPRITE(NONE,          gMonStillFrontPic_CircledQuestionMark),
+    MAKER_SPECIES_RANGE = {gMonStillFrontPic_CircledQuestionMark, MON_PIC_SIZE, SPECIES_NONE},
     SPECIES_SPRITE(BULBASAUR,     gMonStillFrontPic_Bulbasaur),
     SPECIES_SPRITE(IVYSAUR,       gMonStillFrontPic_Ivysaur),
     SPECIES_SPRITE(VENUSAUR,      gMonStillFrontPic_Venusaur),

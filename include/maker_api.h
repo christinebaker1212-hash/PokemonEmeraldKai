@@ -117,6 +117,12 @@ int MakerApi_SetTrainers(const char *text);
 // The database (M3a: src/maker/maker_database.c): the game's own Pokémon, moves and items, and the user's edits
 // (MoemonMaker/database.txt)
 enum { MAKER_DB_SPECIES, MAKER_DB_MOVE, MAKER_DB_ITEM };
+#define MAKER_NEW_SPECIES_FIRST 1051   // (M3b: the new POKéMON, include/constants/species.h SPECIES_MAKER_FIRST..LAST)
+#define MAKER_NEW_SPECIES_LAST 1178
+#define MAKER_NEW_MOVE_FIRST 848   // (moves.h MOVE_MAKER_FIRST..LAST)
+#define MAKER_NEW_MOVE_LAST 911
+#define MAKER_NEW_ITEM_FIRST 746   // (items.h ITEM_MAKER_FIRST..LAST)
+#define MAKER_NEW_ITEM_LAST 809
 #define MAKER_LEARNSET_MAX 128
 struct MakerSpeciesInfo
 {

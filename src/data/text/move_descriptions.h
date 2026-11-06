@@ -1424,6 +1424,7 @@ static const u8 sPsychoBoostDescription[] = _(
 const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
 {
     [MOVE_POUND - 1] = sPoundDescription,
+    [MOVE_MAKER_FIRST - 1 ... MOVE_MAKER_LAST - 1] = sNullDescription,   // (Moemon Maker M3b: a new move's are its base's)
     [MOVE_KARATE_CHOP - 1] = sKarateChopDescription,
     [MOVE_DOUBLE_SLAP - 1] = sDoubleSlapDescription,
     [MOVE_COMET_PUNCH - 1] = sCometPunchDescription,

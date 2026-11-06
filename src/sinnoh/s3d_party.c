@@ -251,7 +251,7 @@ static bool8 TutorKnows(struct Pokemon *mon, u16 move)
 static u32 TutorMoves(struct Pokemon *mon, u16 tutor, u16 *out)
 {
     u32 i, n = 0;
-    u16 species = mon ? GetMonData(mon, MON_DATA_SPECIES) : SPECIES_NONE;
+    u16 species = mon ? Maker_SpeciesBase(GetMonData(mon, MON_DATA_SPECIES)) : SPECIES_NONE;   // (Maker M3b: a new one, its base's)
     for (i = 0; i < SINNOH_TUTOR_COUNT; i++)
     {
         if (sSinnohTutorMoves[i][5] != tutor)

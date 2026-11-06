@@ -1,6 +1,7 @@
 const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
 {
     [ITEM_NONE] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
+    MAKER_ITEM_RANGE = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},   // (Moemon Maker M3b: a new item shows its base's)
     // Pokeballs
     [ITEM_MASTER_BALL] = {gItemIcon_MasterBall, gItemIconPalette_MasterBall},
     [ITEM_ULTRA_BALL] = {gItemIcon_UltraBall, gItemIconPalette_UltraBall},

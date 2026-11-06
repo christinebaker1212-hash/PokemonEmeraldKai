@@ -395,6 +395,12 @@ extern const u8 *const gItemEffectTable[];
 extern const u32 gExperienceTables[][MAX_LEVEL + 1];
 extern const u32 *const *gLevelUpLearnsetsTable;
 #define gLevelUpLearnsets gLevelUpLearnsetsTable
+// Moemon Maker (M3b, src/maker/maker_database.c): a new POKéMON's base (what it's drawn, heard and taught as until
+// the Maker says otherwise); SPECIES_NONE for a slot no pack fills (the "?", SEALED); any other species is its own
+u16 Maker_SpeciesBase(u16 species);
+bool8 Maker_SpeciesDefined(u16 species);
+u16 Maker_MoveBase(u16 move);   // (the same for the new moves: MOVE_NONE for an empty slot)
+u16 Maker_ItemBase(u16 item);   // (and the new items: ITEM_NONE for an empty slot)
 extern const u8 gPPUpGetMask[];
 extern const u8 gPPUpClearMask[];
 extern const u8 gPPUpAddValues[];

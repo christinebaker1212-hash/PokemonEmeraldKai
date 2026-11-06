@@ -2327,7 +2327,8 @@ static bool8 CanLearnTutorMove(u16 species, u8 tutor)
         return (tutor == TUTOR_MOVE_FRENZY_PLANT && species == SPECIES_VENUSAUR)
             || (tutor == TUTOR_MOVE_BLAST_BURN && species == SPECIES_CHARIZARD)
             || (tutor == TUTOR_MOVE_HYDRO_CANNON && species == SPECIES_BLASTOISE);
-    if (sTutorLearnsets[species] & (1 << tutor))
+    species = Maker_SpeciesBase(species);   // (Moemon Maker M3b: a new POKéMON, its base's)
+    if (species < ARRAY_COUNT(sTutorLearnsets) && (sTutorLearnsets[species] & (1 << tutor)))   // (Gen 4 on: past the table)
         return TRUE;
     else
         return FALSE;
@@ -4746,7 +4747,7 @@ static bool8 IsHPRecoveryItem(u16 item)
     if (item == ITEM_ENIGMA_BERRY)
         effect = gSaveBlock1Ptr->enigmaBerry.itemEffect;
     else
-        effect = gItemEffectTable[item - ITEM_POTION];
+        effect = gItemEffectTable[Maker_ItemBase(item) - ITEM_POTION];
 
     if (effect[4] & ITEM4_HEAL_HP)
         return TRUE;
@@ -5107,7 +5108,7 @@ void ItemUseCB_PPRecovery(u8 taskId, TaskFunc task)
     if (item == ITEM_ENIGMA_BERRY)
         effect = gSaveBlock1Ptr->enigmaBerry.itemEffect;
     else
-        effect = gItemEffectTable[item - ITEM_POTION];
+        effect = gItemEffectTable[Maker_ItemBase(item) - ITEM_POTION];
 
     if (!(effect[4] & ITEM4_HEAL_PP_ONE))
     {
@@ -6004,16 +6005,16 @@ u8 GetItemEffectType(u16 item)
     const u8 *itemEffect;
     u32 statusCure;
 
-    if (!ITEM_HAS_EFFECT(item))
+    if (!ITEM_HAS_EFFECT(Maker_ItemBase(item)))
         return ITEM_EFFECT_NONE;
-    if (item != ITEM_ENIGMA_BERRY && gItemEffectTable[item - ITEM_POTION] == NULL) // Moemon Kai: an item in range without one
+    if (item != ITEM_ENIGMA_BERRY && gItemEffectTable[Maker_ItemBase(item) - ITEM_POTION] == NULL) // Moemon Kai: an item in range without one
         return ITEM_EFFECT_NONE;
 
     // Read the item's effect properties.
     if (item == ITEM_ENIGMA_BERRY)
         itemEffect = gSaveBlock1Ptr->enigmaBerry.itemEffect;
     else
-        itemEffect = gItemEffectTable[item - ITEM_POTION];
+        itemEffect = gItemEffectTable[Maker_ItemBase(item) - ITEM_POTION];
 
     if ((itemEffect[0] & (ITEM0_DIRE_HIT | ITEM0_X_ATTACK)) || itemEffect[1] || itemEffect[2] || (itemEffect[3] & ITEM3_GUARD_SPEC))
         return ITEM_EFFECT_X_ITEM;
@@ -7221,7 +7222,7 @@ u8 MP_PhoneItemUse(u16 item)
         return 3;
     if (f == ItemUseOutOfBattle_PPRecovery)
     {
-        const u8 *effect = item >= ITEM_POTION && item != ITEM_ENIGMA_BERRY ? gItemEffectTable[item - ITEM_POTION] : NULL;
+        const u8 *effect = item >= ITEM_POTION && item != ITEM_ENIGMA_BERRY ? gItemEffectTable[Maker_ItemBase(item) - ITEM_POTION] : NULL;
         return effect != NULL && (effect[4] & ITEM4_HEAL_PP_ONE) ? 5 : 4;
     }
     if (f == ItemUseOutOfBattle_PPUp)

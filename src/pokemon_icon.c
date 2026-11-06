@@ -25,9 +25,10 @@ struct MonIconSpriteTemplate
 static u8 CreateMonIconSprite(struct MonIconSpriteTemplate *, s16, s16, u8);
 static void FreeAndDestroyMonIconSprite_(struct Sprite *sprite);
 
-const u8 *const gMonIconTable[] =
+const u8 *const gMonIconTableBase[] =
 {
     [SPECIES_NONE] = gMonIcon_Bulbasaur,
+    MAKER_SPECIES_RANGE = gMonIcon_QuestionMark,
     [SPECIES_BULBASAUR] = gMonIcon_Bulbasaur,
     [SPECIES_IVYSAUR] = gMonIcon_Ivysaur,
     [SPECIES_VENUSAUR] = gMonIcon_Venusaur,
@@ -471,7 +472,7 @@ const u8 *const gMonIconTable[] =
     GEN59_ICON   // Moemon Kai: Gen 5-9
 };
 
-const u8 gMonIconPaletteIndices[] =
+const u8 gMonIconPaletteIndicesBase[] =
 {
     [SPECIES_NONE] = 0,
     [SPECIES_BULBASAUR] = 1,
@@ -916,6 +917,9 @@ const u8 gMonIconPaletteIndices[] =
     GEN4_ICONPAL   // Moemon Kai: Gen 4
     GEN59_ICONPAL   // Moemon Kai: Gen 5-9
 };
+const u8 *gMonIconPaletteIndicesTable = gMonIconPaletteIndicesBase;
+const u8 *const *gMonIconTableTable = gMonIconTableBase;
+
 
 const struct SpritePalette gMonIconPaletteTable[] =
 {

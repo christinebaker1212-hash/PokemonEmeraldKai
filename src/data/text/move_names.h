@@ -1,6 +1,7 @@
 const u8 gMoveNames[MOVES_COUNT][MOVE_NAME_LENGTH + 1] =
 {
     [MOVE_NONE] = _("-"),
+    MAKER_MOVE_RANGE = _("-"),   // (Moemon Maker M3b: the new moves, named by the Maker)
     [MOVE_POUND] = _("POUND"),
     [MOVE_KARATE_CHOP] = _("KARATE CHOP"),
     [MOVE_DOUBLE_SLAP] = _("DOUBLESLAP"),
