@@ -170,7 +170,10 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       POFFIN HOUSE's blends), the BATTLE TOWER's records and interviews, the HALL, BP, ribbons, the GAME CORNER, BERRY
       patches (BERRY LOOKOUT), AMITY SQUARE, the VILLA (sinnoh_studio, sinnoh_tower: COOP_NOTES "SINNOH's TV")
 - [ ] Friends' segments on each other's TV (Platinum's record mixing: co-op)
-- [ ] JUBILIFE TV's floors and their people
+- [x] JUBILIFE TV's floors and their people: every script converts; the 3F questionnaire man's two words on the
+      game's own easy chat (EASY_CHAT_TYPE_MP_TWO_WORDS, its QUESTIONNAIRE screen); his MYSTERY GIFT phrase is the
+      game's own (LINK TOGETHER WITH ALL); no phrase unlocks Platinum's extra PC wallpapers (the game's PC has its
+      own) (sinnoh_jubilife_tv)
 
 ## 7. Battles look right
 

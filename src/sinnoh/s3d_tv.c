@@ -1722,9 +1722,14 @@ enum {
     TVCALL_VILLA,          // A: the furniture (a value or variable), B: TRUE for none
     TVCALL_AMITY,          // A: what (0 the POKéMON, 1 an item, 2 an accessory), B: its variable
     TVCALL_QUESTION,       // A: variable <- the ROUTE 214 gate's question of the day (0-3)
+    TVCALL_TWO_WORDS,      // A: variable <- TRUE when picked, B: the first word's variable (after Sinnoh_TvChooseTwoWords)
+    TVCALL_SECOND_WORD,    // A: the second word's variable
+    TVCALL_GIFT_PHRASE,    // A: variable <- the four words in 0x8000-0x8003 are the game's MYSTERY GIFT phrase
+    TVCALL_UNLOCK_GIFT,    // the game's MYSTERY GIFT unlocked
 };
 
 static u8 sSegment, sInterview;
+static u16 sTwoWords[2];   // (Sinnoh_TvChooseTwoWords)
 
 static void SetBankMessage(u16 bankVar, u16 msgVar, bool8 ok, u16 bank, u16 msg)
 {
@@ -1794,6 +1799,27 @@ void Sinnoh_TvCall(u16 call, u16 a, u16 b)
         VarSet(a, sTv.word != EC_EMPTY_WORD);
         VarSet(b, sTv.word);
         break;
+    case TVCALL_TWO_WORDS:
+        VarSet(a, sTwoWords[0] != EC_EMPTY_WORD || sTwoWords[1] != EC_EMPTY_WORD);
+        VarSet(b, sTwoWords[0]);
+        break;
+    case TVCALL_SECOND_WORD:
+        VarSet(a, sTwoWords[1]);
+        break;
+    case TVCALL_GIFT_PHRASE:
+    {
+        // (Platinum's CheckIsMysteryGiftPhrase, its "EVERYONE HAPPY WI-FI CONNECTION": the game's own phrase, the
+        // questionnaire's LINK TOGETHER WITH ALL, since the game's words are its own)
+        static const u16 sPhrase[4] = {EC_WORD_LINK, EC_WORD_TOGETHER, EC_WORD_WITH, EC_WORD_ALL};
+        u32 i;
+        for (i = 0; i < 4 && VarGet(VAR_0x8000 + i) == sPhrase[i]; i++)
+            ;
+        VarSet(a, i == 4);
+        break;
+    }
+    case TVCALL_UNLOCK_GIFT:
+        FlagSet(FLAG_SYS_MYSTERY_GIFT_ENABLE);
+        break;
     case TVCALL_HIDDEN_ITEM:
         Sinnoh_TvHiddenItem(VarGet(a));
         break;
@@ -1822,6 +1848,15 @@ void Sinnoh_TvCall(u16 call, u16 a, u16 b)
 }
 
 // Special (waitstate): the reporter's one word, on the game's own easy chat screen (GABBY and TY's: "Interview")
+// Platinum's ChooseTwoCustomMessageWords (JUBILIFE TV's 3F): two words on the game's own easy chat
+void Sinnoh_TvChooseTwoWords(void)
+{
+    sTwoWords[0] = sTwoWords[1] = EC_EMPTY_WORD;
+    CleanupOverworldWindowsAndTilemaps();
+    DoEasyChatScreen(EASY_CHAT_TYPE_MP_TWO_WORDS, sTwoWords, CB2_ReturnToFieldContinueScript,
+                     EASY_CHAT_PERSON_DISPLAY_NONE);
+}
+
 void Sinnoh_TvChooseWord(void)
 {
     sTv.word = EC_EMPTY_WORD;

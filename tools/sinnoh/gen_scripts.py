@@ -15,6 +15,7 @@ builds (SINNOH then says nothing: it needs the packs anyway).
     python3 -I tools/sinnoh/gen_scripts.py --auto [OUT.inc]      the build's: from the decomp make_pack.sh used
                                                                  (sinnoh/decomp_dir), else --stub
     python3 -I tools/sinnoh/gen_scripts.py --report POKEPLATINUM_DIR      what converts, what doesn't yet (and why)
+    python3 -I tools/sinnoh/gen_scripts.py --report-entries POKEPLATINUM_DIR    the same, each entry that doesn't by name
 
 A script converts when every command it reaches (its labels, the labels it goes to or calls, the ones it falls into)
 is one this file knows (CONVERT below); the rest keep this game's written words until their commands are added
@@ -89,7 +90,8 @@ JOURNAL_SCRIPT_EVENTS = {'LOCATION_EVENT_GAME_CORNER': 16, 'LOCATION_EVENT_SAFAR
 SINNOH_ROAMER = 60   # (a roaming POKéMON set going: src/sinnoh/s3d_roamer.c; the slot, Platinum's ROAMING_SLOT_*)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
- TVCALL_HIDDEN_ITEM, TVCALL_NAME_RATED, TVCALL_STORAGE, TVCALL_VILLA, TVCALL_AMITY, TVCALL_QUESTION) = range(18)
+ TVCALL_HIDDEN_ITEM, TVCALL_NAME_RATED, TVCALL_STORAGE, TVCALL_VILLA, TVCALL_AMITY, TVCALL_QUESTION,
+ TVCALL_TWO_WORDS, TVCALL_SECOND_WORD, TVCALL_GIFT_PHRASE, TVCALL_UNLOCK_GIFT) = range(22)
 TV_FRAMING = {'LoadTVGreeting': 0, 'LoadTVSegmentIntro': 1, 'LoadTVFarewell': 2, 'LoadTVFarewellExtended': 3}
 # Platinum's POKéDEX ratings (its src/unk_0205DFC4.c Pokedex_GetRatingMessageID_*): (up to this many, message) in
 # pokedex_ratings' bank; the last rows are for a complete dex. National: (caught up to, message, female's message)
@@ -1393,6 +1395,21 @@ class FileConverter:
             # (one word on the game's own easy chat: GABBY and TY's "Interview" screen)
             return ['special Sinnoh_TvChooseWord', 'waitstate',
                     self.sinnoh(SINNOH_TV, TVCALL_WORD, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'ChooseTwoCustomMessageWords':
+            # (two words on the game's own easy chat, its questionnaire's: JUBILIFE TV's 3F)
+            return ['special Sinnoh_TvChooseTwoWords', 'waitstate',
+                    self.sinnoh(SINNOH_TV, TVCALL_TWO_WORDS, self.var(a[0]), self.var(a[1])),
+                    self.sinnoh(SINNOH_TV, TVCALL_SECOND_WORD, self.var(a[2]))]
+        if cmd == 'GetWallpaperFromCustomMessageWords':
+            # (Platinum's eight extra PC wallpapers: the game's PC has its own, so no phrase unlocks one: 0xFF)
+            return ['setvar %s, 0xFF' % self.var(a[0])]
+        if cmd == 'CheckIsMysteryGiftPhrase':
+            # (the game's own MYSTERY GIFT phrase in 0x8000-0x8003: s3d_tv.c TVCALL_GIFT_PHRASE)
+            if a[1:5] != ['VAR_0x8000', 'VAR_0x8001', 'VAR_0x8002', 'VAR_0x8003']:
+                return None
+            return [self.sinnoh(SINNOH_TV, TVCALL_GIFT_PHRASE, self.var(a[0]))]
+        if cmd == 'UnlockMysteryGift':
+            return [self.sinnoh(SINNOH_TV, TVCALL_UNLOCK_GIFT)]
         if cmd == 'SaveTVSegmentHiddenItem':
             return [self.sinnoh(SINNOH_TV, TVCALL_HIDDEN_ITEM, self.arg(a[0]))]
         if cmd == 'ScrCmd_2B8':
@@ -2636,7 +2653,7 @@ def build(root, out_path):
           % (os.path.relpath(out_path, ROOT), len(done), len(texts), maps, skipped))
 
 
-def report(root):
+def report(root, entries=False):
     why = collections.Counter()
     ok = total = 0
     for path in sorted(glob.glob(os.path.join(root, 'res/field/scripts/scripts_*.s'))):
@@ -2651,6 +2668,8 @@ def report(root):
                 ok += 1
             else:
                 why[w.split(' ')[0] if not w.startswith(('flag', 'variable', 'value')) else w] += 1
+                if entries:
+                    print('%s %d %s: %s' % (low, n, name, w))
     print('%d of %d script entries convert' % (ok, total))
     print('songs the game lacks: %s' % ' '.join(sorted(MISSING_MUSIC)))
     for w, k in why.most_common(60):
@@ -2670,6 +2689,8 @@ def main():
         stub(a[1] if len(a) > 1 else OUT)
     elif a and a[0] == '--report':
         report(a[1])
+    elif a and a[0] == '--report-entries':
+        report(a[1], True)
     elif a:
         build(a[0], a[1] if len(a) > 1 else OUT)
     else:

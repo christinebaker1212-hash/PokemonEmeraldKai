@@ -1,0 +1,47 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp warp 42,31,10,10
+wait 90
+waitfor field 1000
+shot t_1f
+mp warp 42,32,10,10
+wait 90
+waitfor field 1000
+shot t_2f
+mp warp 42,37,10,10
+wait 90
+waitfor field 1000
+shot t_4f
+mp warp 42,34,10,16
+wait 90
+waitfor field 1000
+mp face up
+wait 10
+press A 1
+wait 60
+shot t_ask
+pressuntil A yesno 2000
+wait 20
+press A 1
+pressuntil A easychat 3000
+wait 60
+shot t_words
+press DOWN 1
+wait 20
+press RIGHT 1
+wait 20
+shot t_cancelpick
+press A 1
+wait 40
+shot t_cancelask
+press UP 1
+wait 20
+press A 1
+wait 90
+shot t_cancel
+mash B 10 20
+waitfor field 1000
+shot t_done
+quit

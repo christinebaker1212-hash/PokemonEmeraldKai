@@ -1,0 +1,8 @@
+# JUBILIFE TV's floors (Platinum's scripts_jubilife_tv_*.s): each floor shown, and the 3F questionnaire man
+# (ChooseTwoCustomMessageWords: two words on the game's own easy chat, its QUESTIONNAIRE screen; B there is his
+# "Oh, all right."). Needs the packs. Shots t_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("reached state" "warp: 42,34")
+UNEXPECT_A=("[crash]" "TIMEOUT" "Message missing")

@@ -23,6 +23,7 @@
 #define EASY_CHAT_TYPE_APPRENTICE              19
 #define EASY_CHAT_TYPE_QUESTIONNAIRE           20
 #define EASY_CHAT_TYPE_MP_PHRASE               21 // Moemon Co-op: CO-OP phrases
+#define EASY_CHAT_TYPE_MP_TWO_WORDS            22 // Moemon Kai: two words for a questionnaire (SINNOH's JUBILIFE TV)
 
 #define EASY_CHAT_PERSON_REPORTER_MALE   0
 #define EASY_CHAT_PERSON_REPORTER_FEMALE 1

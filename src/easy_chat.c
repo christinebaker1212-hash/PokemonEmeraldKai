@@ -684,6 +684,18 @@ static const struct EasyChatScreenTemplate sEasyChatScreenTemplates[] = {
         .confirmText1 = gText_TheAnswer,
         .confirmText2 = gText_IsAsShownOkay,
     },
+    { // Moemon Kai: two words for a questionnaire (Platinum's ChooseTwoCustomMessageWords: JUBILIFE TV's 3F)
+        .type = EASY_CHAT_TYPE_MP_TWO_WORDS,
+        .numColumns = 2,
+        .numRows = 1,
+        .frameId = FRAMEID_COMBINE_TWO_WORDS,
+        .fourFooterOptions = FALSE,
+        .titleText = gText_Questionnaire,
+        .instructionsText1 = gText_CombineTwoWordsOrPhrases2,
+        .instructionsText2 = gText_AndFillOutTheQuestionnaire,
+        .confirmText1 = gText_TheAnswer,
+        .confirmText2 = gText_IsAsShownOkay,
+    },
     { // Moemon Co-op: a phrase shown above your head to other players
         .type = EASY_CHAT_TYPE_MP_PHRASE,
         .numColumns = 2,
