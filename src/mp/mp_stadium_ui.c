@@ -34,6 +34,7 @@
 #include "item.h"
 #include "script.h"
 #include "sound.h"
+#include "mp_kaisong_scene.h"
 #include "string_util.h"
 #include "constants/characters.h"
 #include "constants/songs.h"
@@ -82,7 +83,8 @@ static struct
     u8 menuCursor;
     u8 teamCursor, teamTop;   // SAVED TEAMS
     u16 lastFoePic;
-    bool8 sharedOpened;       // REGISTER: the shared PC's boxes asked for (closed again on leaving)           // RESULT: the trainer just battled (the run has moved on to the next)
+    bool8 sharedOpened;
+    u16 song, mapSong;        // the screens' song (STADIUM's own: mp_stadium_cup.c MP_Stadium_Track), the map's       // REGISTER: the shared PC's boxes asked for (closed again on leaving)           // RESULT: the trainer just battled (the run has moved on to the next)
     bool8 confirm;            // SAVED TEAMS: ERASE asked
     u16 age;
     char note[96];          // a line at the bottom (why not, what happened)
@@ -1560,6 +1562,42 @@ static void TeamAction(u8 choice)
     }
 }
 
+
+// ---- the screens' songs: STADIUM's own (music/stadium_*.kaisong), the map's back when the screens close ----
+
+u16 MP_Stadium_Track(const char *name, u16 fallback);
+
+static void ScreenMusic(void)
+{
+    const char *name;
+    u16 song;
+    struct StadiumRun *r = StadiumCup_Run();
+    switch (U.screen)
+    {
+    case SCR_REGISTER: case SCR_VS: case SCR_TEAMS:
+        name = "stadium_select";
+        break;
+    case SCR_RESULT:
+        name = U.result == RES_CUP ? (r->cup == STADIUM_CUP_CASTLE ? "stadium_castle_won" : r->cup == STADIUM_CUP_MEWTWO
+                                      ? "stadium_mewtwo_won" : "stadium_cup_won")
+             : U.result == RES_WON ? "stadium_select" : "stadium_lost";
+        break;
+    case SCR_SELECT:
+        name = "stadium_menu";
+        break;
+    default:   // (a cup's own screens: the castle, MEWTWO and the CHALLENGE CUP have menus of their own)
+        name = U.cup == STADIUM_CUP_CASTLE ? "stadium_castle_menu" : U.cup == STADIUM_CUP_MEWTWO ? "stadium_mewtwo_menu"
+             : U.cup == STADIUM_CUP_CHALLENGE ? "stadium_free_menu" : "stadium_menu";
+        break;
+    }
+    song = MP_Stadium_Track(name, 0);
+    if (song && song != U.song)
+    {
+        U.song = song;
+        PlayBGM(song);
+    }
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // The canvas (display.c), the frame (sdl2.c: spectators, test shots)
 
@@ -1642,6 +1680,8 @@ static void Close(void)
     StadiumCup_SaveNow();
     if (U.sharedOpened)
         MP_SharedBox_End(), U.sharedOpened = FALSE;
+    if (U.song)
+        MP_MUSIC_TO_MAP(PlayNewMapMusic(GetCurrentMapMusic())), U.song = 0;
     U.active = FALSE;
     U.draining = TRUE;
     PlaySE(SE_PC_OFF);
@@ -1654,6 +1694,8 @@ void MP_StadiumUi_Open(void)
 {
     struct StadiumSave *s = StadiumCup_Save();
     memset(U.note, 0, sizeof(U.note));
+    U.mapSong = GetCurrentMapMusic();
+    U.song = 0;
     U.active = TRUE;
     U.screen = SCR_SELECT;
     U.cup = s->lastCup < STADIUM_CUP_COUNT ? s->lastCup : 0;
@@ -1809,12 +1851,15 @@ void MP_StadiumUi_Update(void)
         U.pending = FALSE;
         U.active = TRUE;
         U.screen = U.reopen;
+        U.song = 0;   // (the field played the map's song meanwhile)
         MPNet_Log("stadium: screens back (%s)", U.reopen == SCR_RESULT ? "result" : "register");
         U.prevKeys = 0xFFFF;
         U.age = 0;
         if (U.screen == SCR_REGISTER)
             BuildList(), ScrollList();
     }
+    if (U.active && !U.pending)
+        ScreenMusic();
 }
 
 static void MoveCup(int dx, int dy)

@@ -38,6 +38,11 @@
 #include "../data/mp_kaisong_samples.h"
 #include "../data/mp_kaisong_names.h"
 
+static const char *SongName(u16 song)   // (a new track's number is past the table: Moemon Maker's, STADIUM's)
+{
+    return song < ARRAY_COUNT(sKaisongSongNames) ? sKaisongSongNames[song] : "a new track";
+}
+
 void MPNet_Log(const char *fmt, ...);
 const char *Updater_ExeFile(const char *name);
 
@@ -264,9 +269,11 @@ static void ScanDir(const char *dir, u8 maker)
             }
             f->variant = PlaceVariant(at);
         }
-        if ((song = SongByName(stem)) < 0 && maker && !at && sTrackCount < MAKER_SONG_COUNT)
+        if ((song = SongByName(stem)) < 0 && (maker || strncmp(stem, "stadium_", 8) == 0) && !at
+         && sTrackCount < MAKER_SONG_COUNT)
         {
-            // Moemon Maker: a new track
+            // Moemon Maker: a new track (and POKéMON STADIUM's own songs, shipped in music/: played by name,
+            // src/mp/mp_stadium_cup.c MP_Stadium_Track)
             snprintf(sTracks[sTrackCount], sizeof(sTracks[0]), "%s", stem);
             song = MAKER_SONG_FIRST + sTrackCount++;
         }
@@ -433,7 +440,7 @@ static u8 *BuildTrack(const u8 *code, u32 len, u32 *relocs, u32 n)
 
 static bool8 Fail(struct KaiFile *f, const char *why)
 {
-    MPNet_Log("kaisong: %s: %s; the game's own %s plays", f->file, why, sKaisongSongNames[f->song]);
+    MPNet_Log("kaisong: %s: %s; the game's own %s plays", f->file, why, SongName(f->song));
     f->failed = TRUE;
     return FALSE;
 }
@@ -756,7 +763,7 @@ static bool8 Load(struct KaiFile *f)
     free(L.smpl);
     free(L.wave);
     f->header = h;
-    MPNet_Log("kaisong: %s plays as %s%s (%d tracks, %d voices, %u bytes)", f->file, sKaisongSongNames[f->song],
+    MPNet_Log("kaisong: %s plays as %s%s (%d tracks, %d voices, %u bytes)", f->file, SongName(f->song),
               f->scene >= 0 ? " in its scene" : f->group < 0 ? " everywhere" : " here", trackCount, f->voices, (unsigned)size);
     return TRUE;
 }
@@ -894,7 +901,8 @@ void MP_Kaisong_StartVariant(u16 song, u8 variant)
 void MP_Kaisong_Started(const struct SongHeader *header)
 {
     struct SoundInfo *soundInfo = SOUND_INFO_PTR;
-    u8 want = KAI_GAME_VOICES, i;
+    u8 want = KAI_GAME_VOICES;
+    int i;
     for (i = 0; i < sKai.count; i++)
         if (sKai.files[i].header == header)
             want = sKai.files[i].voices;
@@ -949,7 +957,7 @@ void MP_Kaisong_Log(void)
     for (i = 0; i < sKai.count; i++)
     {
         struct KaiFile *f = &sKai.files[i];
-        MPNet_Log("kaisong:   %s -> song %d (%s), map %d.%d, scene %s%s", f->file, f->song, sKaisongSongNames[f->song],
+        MPNet_Log("kaisong:   %s -> song %d (%s), map %d.%d, scene %s%s", f->file, f->song, SongName(f->song),
                   f->group, f->num, f->scene >= 0 ? sKaisongScenes[f->scene].key : "-",
                   f->failed ? ", can't be played" : f->header ? ", loaded" : "");
     }

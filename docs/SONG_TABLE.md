@@ -236,6 +236,40 @@ Files in this repository's `music` folder ship with every update.
 | `mus_vs_rival@ygo.kaisong` | mus_vs_rival | ygo | 0044 SEQ_DU_D_09 |
 | `mus_vs_trainer@cable_club.kaisong` | mus_vs_trainer | cable_club | 0044 SEQ_DU_D_09 |
 | `mus_vs_trainer@ygo.kaisong` | mus_vs_trainer | ygo | 003E SEQ_DU_D_03 |
+| `stadium_castle_e4.kaisong` | stadium_castle_e4 | POKéMON STADIUM (its own track) | Gym Leader Castle (Elite Four) |
+| `stadium_castle_leader.kaisong` | stadium_castle_leader | POKéMON STADIUM (its own track) | Gym Leader Battle |
+| `stadium_castle_menu.kaisong` | stadium_castle_menu | POKéMON STADIUM (its own track) | Gym Leader Castle Menu |
+| `stadium_castle_rival.kaisong` | stadium_castle_rival | POKéMON STADIUM (its own track) | Rival Battle |
+| `stadium_castle_stage.kaisong` | stadium_castle_stage | POKéMON STADIUM (its own track) | Gym Leader Castle Stage Clear |
+| `stadium_castle_trainer.kaisong` | stadium_castle_trainer | POKéMON STADIUM (its own track) | Gym Leader Castle (Preliminary Battles) |
+| `stadium_castle_won.kaisong` | stadium_castle_won | POKéMON STADIUM (its own track) | Gym Leader Castle Clear |
+| `stadium_cup_won.kaisong` | stadium_cup_won | POKéMON STADIUM (its own track) | Pokémon Victory Poses & Cup Presentation |
+| `stadium_free.kaisong` | stadium_free | POKéMON STADIUM (its own track) | Free Battle |
+| `stadium_free_menu.kaisong` | stadium_free_menu | POKéMON STADIUM (its own track) | Free Battle Menu |
+| `stadium_lost.kaisong` | stadium_lost | POKéMON STADIUM (its own track) | VS Lost |
+| `stadium_menu.kaisong` | stadium_menu | POKéMON STADIUM (its own track) | Stadium Selection |
+| `stadium_mewtwo.kaisong` | stadium_mewtwo | POKéMON STADIUM (its own track) | Battle with Mewtwo |
+| `stadium_mewtwo_menu.kaisong` | stadium_mewtwo_menu | POKéMON STADIUM (its own track) | VS. Mewtwo Menu |
+| `stadium_mewtwo_won.kaisong` | stadium_mewtwo_won | POKéMON STADIUM (its own track) | Mewtwo Defeated |
+| `stadium_petit_1.kaisong` | stadium_petit_1 | POKéMON STADIUM (its own track) | Petit Cup Battles 1-3 |
+| `stadium_petit_2.kaisong` | stadium_petit_2 | POKéMON STADIUM (its own track) | Petit Cup Battles 4-6 |
+| `stadium_petit_final.kaisong` | stadium_petit_final | POKéMON STADIUM (its own track) | Petit Cup Final |
+| `stadium_petit_semi.kaisong` | stadium_petit_semi | POKéMON STADIUM (its own track) | Petit Cup Semifinal |
+| `stadium_pika_1.kaisong` | stadium_pika_1 | POKéMON STADIUM (its own track) | Pika Cup Battles 1-3 |
+| `stadium_pika_2.kaisong` | stadium_pika_2 | POKéMON STADIUM (its own track) | Pika Cup Battles 4-6 |
+| `stadium_pika_final.kaisong` | stadium_pika_final | POKéMON STADIUM (its own track) | Pika Cup Final |
+| `stadium_pika_semi.kaisong` | stadium_pika_semi | POKéMON STADIUM (its own track) | Pika Cup Semifinal |
+| `stadium_poke_1.kaisong` | stadium_poke_1 | POKéMON STADIUM (its own track) | Poké Cup Battles 1-3 |
+| `stadium_poke_2.kaisong` | stadium_poke_2 | POKéMON STADIUM (its own track) | Poké Cup Battles 4-6 |
+| `stadium_poke_final.kaisong` | stadium_poke_final | POKéMON STADIUM (its own track) | Poké Cup Final |
+| `stadium_poke_semi.kaisong` | stadium_poke_semi | POKéMON STADIUM (its own track) | Poké Cup Semifinal |
+| `stadium_prime_1.kaisong` | stadium_prime_1 | POKéMON STADIUM (its own track) | Prime Cup Battles 1-3 |
+| `stadium_prime_2.kaisong` | stadium_prime_2 | POKéMON STADIUM (its own track) | Prime Cup Battles 4-6 |
+| `stadium_prime_final.kaisong` | stadium_prime_final | POKéMON STADIUM (its own track) | Prime Cup Final |
+| `stadium_prime_semi.kaisong` | stadium_prime_semi | POKéMON STADIUM (its own track) | Prime Cup Semifinal |
+| `stadium_select.kaisong` | stadium_select | POKéMON STADIUM (its own track) | Pokémon Selection |
+| `stadium_vs.kaisong` | stadium_vs | POKéMON STADIUM (its own track) | VS Intro |
+| `stadium_won.kaisong` | stadium_won | POKéMON STADIUM (its own track) | VS Won |
 
 ## Songs
 
@@ -358,7 +392,7 @@ Files in this repository's `music` folder ship with every update.
 - Map music: 37 places<details><summary>show</summary>Mauville City [mauville_city], Mauville City Bike Shop [mauville_city_bike_shop], Mauville City House 1 [mauville_city_house1], Mauville City House 2 [mauville_city_house2], Mossdeep City [mossdeep_city], Mossdeep City Game Corner 1F [mossdeep_city_game_corner_1f], Mossdeep City Game Corner B1F [mossdeep_city_game_corner_b1f], Mossdeep City House 1 [mossdeep_city_house1], Mossdeep City House 2 [mossdeep_city_house2], Mossdeep City House 3 [mossdeep_city_house3], Mossdeep City House 4 [mossdeep_city_house4], Mossdeep City Space Center 1F [mossdeep_city_space_center_1f], Mossdeep City Space Center 2F [mossdeep_city_space_center_2f], Mossdeep City Stevens House [mossdeep_city_stevens_house], Route 111 Old Ladys Rest Stop [route111_old_ladys_rest_stop], Route 111 Winstrate Familys House [route111_winstrate_familys_house], Route 113 Glass Workshop [route113_glass_workshop], Route 116 Tunnelers Rest House [route116_tunnelers_rest_house], Route 117 Pokemon Day Care [route117_pokemon_day_care], Route 119 House [route119_house], Route 119 Weather Institute 1F [route119_weather_institute_1f], Route 119 Weather Institute 2F [route119_weather_institute_2f], Route 123 Berry Masters House [route123_berry_masters_house], Rustboro City [rustboro_city], Rustboro City Cutters House [rustboro_city_cutters_house], Rustboro City Devon Corp 1F [rustboro_city_devon_corp_1f], Rustboro City Devon Corp 2F [rustboro_city_devon_corp_2f], Rustboro City Devon Corp 3F [rustboro_city_devon_corp_3f], Rustboro City Flat 1 1F [rustboro_city_flat1_1f], Rustboro City Flat 1 2F [rustboro_city_flat1_2f], Rustboro City Flat 2 1F [rustboro_city_flat2_1f], Rustboro City Flat 2 2F [rustboro_city_flat2_2f], Rustboro City Flat 2 3F [rustboro_city_flat2_3f], Rustboro City Game Center Rooftop [rustboro_city_game_center_rooftop], Rustboro City House 1 [rustboro_city_house1], Rustboro City House 2 [rustboro_city_house2], Rustboro City House 3 [rustboro_city_house3]</details>
 
 ### mus_poke_center (400)
-- Map music: 34 places<details><summary>show</summary>Battle Frontier Pokemon Center 1F [battle_frontier_pokemon_center_1f], Battle Frontier Pokemon Center 2F [battle_frontier_pokemon_center_2f], Dewford Town Pokemon Center 1F [dewford_town_pokemon_center_1f], Dewford Town Pokemon Center 2F [dewford_town_pokemon_center_2f], Ever Grande City Pokemon Center 1F [ever_grande_city_pokemon_center_1f], Ever Grande City Pokemon Center 2F [ever_grande_city_pokemon_center_2f], Ever Grande City Pokemon League 1F [ever_grande_city_pokemon_league_1f], Ever Grande City Pokemon League 2F [ever_grande_city_pokemon_league_2f], Fallarbor Town Pokemon Center 1F [fallarbor_town_pokemon_center_1f], Fallarbor Town Pokemon Center 2F [fallarbor_town_pokemon_center_2f], Fortree City Pokemon Center 1F [fortree_city_pokemon_center_1f], Fortree City Pokemon Center 2F [fortree_city_pokemon_center_2f], Lavaridge Town Pokemon Center 1F [lavaridge_town_pokemon_center_1f], Lavaridge Town Pokemon Center 2F [lavaridge_town_pokemon_center_2f], Lilycove City Pokemon Center 1F [lilycove_city_pokemon_center_1f], Lilycove City Pokemon Center 2F [lilycove_city_pokemon_center_2f], Mauville City Pokemon Center 1F [mauville_city_pokemon_center_1f], Mauville City Pokemon Center 2F [mauville_city_pokemon_center_2f], Mossdeep City Pokemon Center 1F [mossdeep_city_pokemon_center_1f], Mossdeep City Pokemon Center 2F [mossdeep_city_pokemon_center_2f], Oldale Town Pokemon Center 1F [oldale_town_pokemon_center_1f], Oldale Town Pokemon Center 2F [oldale_town_pokemon_center_2f], Pacifidlog Town Pokemon Center 1F [pacifidlog_town_pokemon_center_1f], Pacifidlog Town Pokemon Center 2F [pacifidlog_town_pokemon_center_2f], Petalburg City Pokemon Center 1F [petalburg_city_pokemon_center_1f], Petalburg City Pokemon Center 2F [petalburg_city_pokemon_center_2f], Rustboro City Pokemon Center 1F [rustboro_city_pokemon_center_1f], Rustboro City Pokemon Center 2F [rustboro_city_pokemon_center_2f], Slateport City Pokemon Center 1F [slateport_city_pokemon_center_1f], Slateport City Pokemon Center 2F [slateport_city_pokemon_center_2f], Sootopolis City Pokemon Center 1F [sootopolis_city_pokemon_center_1f], Sootopolis City Pokemon Center 2F [sootopolis_city_pokemon_center_2f], Verdanturf Town Pokemon Center 1F [verdanturf_town_pokemon_center_1f], Verdanturf Town Pokemon Center 2F [verdanturf_town_pokemon_center_2f]</details>
+- Map music: 35 places<details><summary>show</summary>Battle Frontier Pokemon Center 1F [battle_frontier_pokemon_center_1f], Battle Frontier Pokemon Center 2F [battle_frontier_pokemon_center_2f], Battle Island Stadium [battle_island_stadium], Dewford Town Pokemon Center 1F [dewford_town_pokemon_center_1f], Dewford Town Pokemon Center 2F [dewford_town_pokemon_center_2f], Ever Grande City Pokemon Center 1F [ever_grande_city_pokemon_center_1f], Ever Grande City Pokemon Center 2F [ever_grande_city_pokemon_center_2f], Ever Grande City Pokemon League 1F [ever_grande_city_pokemon_league_1f], Ever Grande City Pokemon League 2F [ever_grande_city_pokemon_league_2f], Fallarbor Town Pokemon Center 1F [fallarbor_town_pokemon_center_1f], Fallarbor Town Pokemon Center 2F [fallarbor_town_pokemon_center_2f], Fortree City Pokemon Center 1F [fortree_city_pokemon_center_1f], Fortree City Pokemon Center 2F [fortree_city_pokemon_center_2f], Lavaridge Town Pokemon Center 1F [lavaridge_town_pokemon_center_1f], Lavaridge Town Pokemon Center 2F [lavaridge_town_pokemon_center_2f], Lilycove City Pokemon Center 1F [lilycove_city_pokemon_center_1f], Lilycove City Pokemon Center 2F [lilycove_city_pokemon_center_2f], Mauville City Pokemon Center 1F [mauville_city_pokemon_center_1f], Mauville City Pokemon Center 2F [mauville_city_pokemon_center_2f], Mossdeep City Pokemon Center 1F [mossdeep_city_pokemon_center_1f], Mossdeep City Pokemon Center 2F [mossdeep_city_pokemon_center_2f], Oldale Town Pokemon Center 1F [oldale_town_pokemon_center_1f], Oldale Town Pokemon Center 2F [oldale_town_pokemon_center_2f], Pacifidlog Town Pokemon Center 1F [pacifidlog_town_pokemon_center_1f], Pacifidlog Town Pokemon Center 2F [pacifidlog_town_pokemon_center_2f], Petalburg City Pokemon Center 1F [petalburg_city_pokemon_center_1f], Petalburg City Pokemon Center 2F [petalburg_city_pokemon_center_2f], Rustboro City Pokemon Center 1F [rustboro_city_pokemon_center_1f], Rustboro City Pokemon Center 2F [rustboro_city_pokemon_center_2f], Slateport City Pokemon Center 1F [slateport_city_pokemon_center_1f], Slateport City Pokemon Center 2F [slateport_city_pokemon_center_2f], Sootopolis City Pokemon Center 1F [sootopolis_city_pokemon_center_1f], Sootopolis City Pokemon Center 2F [sootopolis_city_pokemon_center_2f], Verdanturf Town Pokemon Center 1F [verdanturf_town_pokemon_center_1f], Verdanturf Town Pokemon Center 2F [verdanturf_town_pokemon_center_2f]</details>
 - Scenes: Berry crush [berry_crush]
 
 ### mus_route104 (401)
@@ -403,7 +437,7 @@ Custom: `mus_poke_mart@rustboro_city_game_center_2f.kaisong`
 
 ### mus_victory_trainer (412)
 Custom: `mus_victory_trainer@tt.kaisong`
-- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Export sound [export_sound], Mtg [mtg], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
+- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Export sound [export_sound], Mtg [mtg], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], Stadium cup [stadium_cup], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
 - Field and battle code (by map): Battles, Coop
 
 ### mus_title (413)
@@ -436,7 +470,7 @@ Custom: `mus_victory_trainer@tt.kaisong`
 - Events: Ever Grande City Champions Room [ever_grande_city_champions_room], Lavaridge Town [lavaridge_town], Lilycove City [lilycove_city], Littleroot Town Brendans House 1F [littleroot_town_brendans_house_1f], Littleroot Town Brendans House 2F [littleroot_town_brendans_house_2f], Route 103 [route103], Route 104 [route104], Route 110 [route110], Route 119 [route119], Rustboro City [rustboro_city]
 
 ### mus_ever_grande (422)
-- Map music: Battle Colosseum 2P [battle_colosseum_2p], Battle Colosseum 4P [battle_colosseum_4p], Ever Grande City [ever_grande_city], Record Corner [record_corner], Trade Center [trade_center], Union Room [union_room]
+- Map music: Battle Colosseum 2P [battle_colosseum_2p], Battle Colosseum 4P [battle_colosseum_4p], Battle Island [battle_island], Ever Grande City [ever_grande_city], Record Corner [record_corner], Trade Center [trade_center], Union Room [union_room]
 
 ### mus_encounter_suspicious (423)
 - A trainer spots you: 15 places<details><summary>show</summary>Mauville City Gym [mauville_city_gym], Mossdeep City Gym [mossdeep_city_gym], Mt Pyre 2F [mt_pyre_2f], Mt Pyre 5F [mt_pyre_5f], Mt Pyre 6F [mt_pyre_6f], Route 110 [route110], Route 110 Trick House Puzzle 7 [route110_trick_house_puzzle7], Route 113 [route113], Route 114 [route114], Route 115 [route115], Route 117 [route117], Route 119 [route119], Route 120 [route120], Route 121 [route121], Route 123 [route123]</details>
@@ -596,6 +630,7 @@ Custom: `mus_vs_frontier_brain@ygo.kaisong`
 - Battles: Frontier Brains (BATTLE FRONTIER)
 
 ### mus_vs_mew (472)
+- Scenes: Stadium cup [stadium_cup]
 - Battles: wild Mew
 
 ### mus_b_dome_lobby (473)
@@ -611,13 +646,13 @@ Custom: `mus_vs_aqua_magma@ygo.kaisong`
 
 ### mus_vs_trainer (476)
 Custom: `mus_vs_trainer@cable_club.kaisong`, `mus_vs_trainer@ygo.kaisong`
-- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Export sound [export_sound], Link battles (CABLE CLUB) [cable_club], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], YU-GI-OH! duels [ygo]
+- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Export sound [export_sound], Link battles (CABLE CLUB) [cable_club], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], Stadium cup [stadium_cup], YU-GI-OH! duels [ygo]
 - Battles: 70 places<details><summary>show</summary>Abandoned Ship Corridors 1F [abandoned_ship_corridors_1f], Abandoned Ship Corridors B1F [abandoned_ship_corridors_b1f], Abandoned Ship Rooms 1F [abandoned_ship_rooms_1f], Abandoned Ship Rooms 2 1F [abandoned_ship_rooms2_1f], Battle Frontier Battle Pyramid Floor [battle_frontier_battle_pyramid_floor], Dewford Town Gym [dewford_town_gym], Fortree City Gym [fortree_city_gym], Jagged Pass [jagged_pass], Lavaridge Town Gym 1F [lavaridge_town_gym_1f], Mauville City (Wally) [mauville_city], Mauville City Gym [mauville_city_gym], Meteor Falls 1F 2R [meteor_falls_1f_2r], Mossdeep City Gym [mossdeep_city_gym], Mt Chimney [mt_chimney], Mt Pyre 2F [mt_pyre_2f], Mt Pyre 3F [mt_pyre_3f], Mt Pyre 4F [mt_pyre_4f], Mt Pyre 5F [mt_pyre_5f], Mt Pyre 6F [mt_pyre_6f], Petalburg City Gym [petalburg_city_gym], Petalburg Woods [petalburg_woods], Route 102 [route102], Route 103 [route103], Route 104 [route104], Route 105 [route105], Route 106 [route106], Route 107 [route107], Route 108 [route108], Route 109 [route109], Route 109 Seashore House [route109_seashore_house], Route 110 [route110], Route 110 Trick House Puzzle 1 [route110_trick_house_puzzle1], Route 110 Trick House Puzzle 2 [route110_trick_house_puzzle2], Route 110 Trick House Puzzle 3 [route110_trick_house_puzzle3], Route 110 Trick House Puzzle 4 [route110_trick_house_puzzle4], Route 110 Trick House Puzzle 6 [route110_trick_house_puzzle6], Route 110 Trick House Puzzle 7 [route110_trick_house_puzzle7], Route 110 Trick House Puzzle 8 [route110_trick_house_puzzle8], Route 111 [route111], Route 112 [route112], Route 113 [route113], Route 114 [route114], Route 115 [route115], Route 116 [route116], Route 117 [route117], Route 118 [route118], Route 119 [route119], Route 120 [route120], Route 121 [route121], Route 123 [route123], Route 124 [route124], Route 125 [route125], Route 126 [route126], Route 127 [route127], Route 128 [route128], Route 129 [route129], Route 130 [route130], Route 131 [route131], Route 132 [route132], Route 133 [route133], Route 134 [route134], Rustboro City Gym [rustboro_city_gym], Rusturf Tunnel [rusturf_tunnel], SS Tidal Lower Deck [ss_tidal_lower_deck], SS Tidal Rooms [ss_tidal_rooms], Sootopolis City Gym B1F [sootopolis_city_gym_b1f], Victory Road 1F [victory_road_1f], Victory Road 1F (Wally) [victory_road_1f], Victory Road B1F [victory_road_b1f], Victory Road B2F [victory_road_b2f]</details>
 - Field and battle code (by map): Battle
 
 ### mus_vs_gym_leader (477)
 Custom: `mus_vs_gym_leader@tt.kaisong`
-- Scenes: Link battles (CABLE CLUB) [cable_club], POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt]
+- Scenes: Link battles (CABLE CLUB) [cable_club], POKéMON TCG card duels [tcg], Stadium cup [stadium_cup], TRIPLE TRIAD [tt]
 - Battles: Dewford Town Gym (Brawly) [dewford_town_gym], Fortree City Gym (Winona) [fortree_city_gym], Lavaridge Town Gym 1F (Flannery) [lavaridge_town_gym_1f], Mauville City Gym (Wattson) [mauville_city_gym], Mossdeep City Gym (Tate&Liza) [mossdeep_city_gym], Petalburg City Gym (Norman) [petalburg_city_gym], Rustboro City Gym (Roxanne) [rustboro_city_gym], Sootopolis City Gym 1F (Juan) [sootopolis_city_gym_1f]
 
 ### mus_vs_champion (478)
@@ -633,12 +668,12 @@ Custom: `mus_vs_champion@tt.kaisong`, `mus_vs_champion@ygo.kaisong`
 
 ### mus_vs_rival (481)
 Custom: `mus_vs_rival@tt.kaisong`, `mus_vs_rival@ygo.kaisong`
-- Scenes: POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
+- Scenes: POKéMON TCG card duels [tcg], Stadium cup [stadium_cup], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
 - Battles: 14 places<details><summary>show</summary>Frontier battle, Lilycove City (Brendan) [lilycove_city], Lilycove City (May) [lilycove_city], Meteor Falls Stevens Cave (Steven) [meteor_falls_stevens_cave], Route 103 (Brendan) [route103], Route 103 (May) [route103], Route 104 (Brendan) [route104], Route 104 (May) [route104], Route 110 (Brendan) [route110], Route 110 (May) [route110], Route 119 (Brendan) [route119], Route 119 (May) [route119], Rustboro City (Brendan) [rustboro_city], Rustboro City (May) [rustboro_city]</details>
 
 ### mus_vs_elite_four (482)
 Custom: `mus_vs_elite_four@tcg.kaisong`, `mus_vs_elite_four@tt.kaisong`, `mus_vs_elite_four@ygo.kaisong`
-- Scenes: POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
+- Scenes: POKéMON TCG card duels [tcg], Stadium cup [stadium_cup], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
 - Battles: Ever Grande City Drakes Room (Drake) [ever_grande_city_drakes_room], Ever Grande City Glacias Room (Glacia) [ever_grande_city_glacias_room], Ever Grande City Phoebes Room (Phoebe) [ever_grande_city_phoebes_room], Ever Grande City Sidneys Room (Sidney) [ever_grande_city_sidneys_room]
 
 ### mus_vs_aqua_magma_leader (483)

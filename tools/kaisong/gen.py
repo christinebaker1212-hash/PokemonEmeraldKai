@@ -273,7 +273,12 @@ def custom_songs(folder=None):
             off = struct.unpack_from('<H', data, 10)[0]
             if data[off:off + 4] == b'INFO':
                 n = struct.unpack_from('<I', data, off + 4)[0]
-                for line in data[off + 8:off + 8 + n].decode('utf-8', 'replace').splitlines():
+                raw = data[off + 8:off + 8 + n]
+                try:
+                    text = raw.decode('utf-8')
+                except UnicodeDecodeError:   # (titles taken from a rip's Latin-1 tags: "Pok\xe9mon")
+                    text = raw.decode('latin-1')
+                for line in text.splitlines():
                     k, _, v = line.partition('=')
                     info[k.strip()] = v.strip()
         out.append((os.path.basename(f), song, place, info))
@@ -328,7 +333,10 @@ def table_md(rows, customs):
     if customs:
         L += ['| file | replaces | where | title |', '|---|---|---|---|']
         for f, song, place, info in customs:
-            L.append('| `%s` | %s | %s | %s |' % (f, song, mapname.get(place, place) if place else 'everywhere',
+            where = mapname.get(place, place) if place else 'everywhere'
+            if song.startswith('stadium_') and not place:
+                where = 'POKéMON STADIUM (its own track)'
+            L.append('| `%s` | %s | %s | %s |' % (f, song, where,
                                                     info.get('title', '').replace('|', '/')))
     else:
         L.append('None yet.')

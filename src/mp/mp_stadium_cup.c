@@ -34,6 +34,7 @@
 #include "constants/species.h"
 #include "constants/trainers.h"
 #include "mp_kaisong_scene.h"
+#include "mp_kaisong.h"
 
 extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
 extern const struct PokedexEntry gPokedexEntries[];
@@ -733,4 +734,57 @@ bool8 MP_StadiumClause_SelfKo(void)
         return FALSE;
     MPNet_Log("stadium: SELF-KO CLAUSE");
     return TRUE;
+}
+
+// ---- POKéMON STADIUM's own songs (music/stadium_*.kaisong, converted from the user's USF rips by Moemon Music Studio;
+// played by name: mp_kaisong.c). A missing file falls back to the game's song.
+
+u16 MP_Stadium_Track(const char *name, u16 fallback)
+{
+    int id = MP_Kaisong_TrackId(name);
+    static char sLast[40];
+    if (strcmp(sLast, name) != 0)
+    {
+        snprintf(sLast, sizeof(sLast), "%s", name);
+        MPNet_Log("stadium: song %s%s", name, id >= 0 ? "" : " (missing: the game's own instead)");
+    }
+    return id >= 0 ? (u16)id : fallback;
+}
+
+// A battle's song by cup and stage (STADIUM's: battles 1-3, 4-6, the semifinal, the final; the castle's gyms, leaders,
+// ELITE FOUR and RIVAL; MEWTWO; the CHALLENGE CUP has FREE BATTLE's)
+u16 MP_StadiumBattle_Music(void)
+{
+    static const char *const sCup[4] = {"pika", "petit", "poke", "prime"};
+    char name[40];
+    u8 t = sRun.trainer;
+    switch (sRun.cup)
+    {
+    case STADIUM_CUP_PIKA: case STADIUM_CUP_PETIT: case STADIUM_CUP_POKE: case STADIUM_CUP_PRIME:
+        snprintf(name, sizeof(name), "stadium_%s_%s", sCup[sRun.cup == STADIUM_CUP_PIKA ? 0 : sRun.cup == STADIUM_CUP_PETIT ? 1
+                                                                : sRun.cup == STADIUM_CUP_POKE ? 2 : 3],
+                 t < 3 ? "1" : t < 6 ? "2" : t == 6 ? "semi" : "final");
+        return MP_Stadium_Track(name, t >= 6 ? MUS_VS_ELITE_FOUR : MUS_VS_TRAINER);
+    case STADIUM_CUP_CASTLE:
+        if (t >= 36)
+            return MP_Stadium_Track("stadium_castle_rival", MUS_VS_RIVAL);
+        if (t >= 32)
+            return MP_Stadium_Track("stadium_castle_e4", MUS_VS_ELITE_FOUR);
+        return t % 4 == 3 ? MP_Stadium_Track("stadium_castle_leader", MUS_VS_GYM_LEADER)
+                          : MP_Stadium_Track("stadium_castle_trainer", MUS_VS_TRAINER);
+    case STADIUM_CUP_MEWTWO:
+        return MP_Stadium_Track("stadium_mewtwo", MUS_VS_MEW);
+    default:
+        return MP_Stadium_Track("stadium_free", MUS_VS_TRAINER);
+    }
+}
+
+u16 MP_StadiumBattle_Victory(u16 song)
+{
+    u8 t = sRun.trainer;
+    if (sRun.cup == STADIUM_CUP_MEWTWO)
+        return MP_Stadium_Track("stadium_mewtwo_won", song);
+    if (sRun.cup == STADIUM_CUP_CASTLE && (t % 4 == 3 || t >= 32))
+        return MP_Stadium_Track("stadium_castle_stage", song);
+    return MP_Stadium_Track("stadium_won", song);
 }

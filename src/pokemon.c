@@ -6789,6 +6789,10 @@ static u16 MpRegionBattleBGM(void)
 // Moemon Kai: a victory song in JOHTO is its own (HeartGold / SoulSilver's); elsewhere the song as asked
 u16 MP_RegionVictorySong(u16 song)
 {
+    extern bool8 gMpStadiumBattle;
+    u16 MP_StadiumBattle_Victory(u16 song);
+    if (gMpStadiumBattle)
+        return MP_StadiumBattle_Victory(song);   // Moemon Kai: POKéMON STADIUM's own (mp_stadium_cup.c)
     if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL)))
     {
         switch (song)
@@ -6847,6 +6851,10 @@ bool8 MP_JohtoTower_InBattle(void);    // (src/mp/mp_johto_tower.c)
 
 u16 GetBattleBGM(void)
 {
+    extern bool8 gMpStadiumBattle;
+    u16 MP_StadiumBattle_Music(void);
+    if (gMpStadiumBattle)
+        return MP_StadiumBattle_Music();   // Moemon Kai: POKéMON STADIUM's own (mp_stadium_cup.c)
     if (MP_TrainerTower_InBattle())
         return MUS_RG_VS_TRAINER;   // Moemon Kai: KANTO's TRAINER TOWER, as FireRed's (its trainers are all plain classes)
     if (MP_JohtoTower_InBattle())
