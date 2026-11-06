@@ -1,0 +1,8 @@
+pressuntil A field 5000
+wait 10
+mp breedtest 400 0 0
+mp breedtest 400 195 0
+mp breedtest 400 0 195
+mp breedtest 400 427 0
+mp breedtest 400 195 427
+quit

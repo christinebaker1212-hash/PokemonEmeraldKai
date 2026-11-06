@@ -1,0 +1,9 @@
+# Breeding (the user, 2026-11-06: "Be certain that Everstones and Destiny Knots function properly ... Natures not
+# applying correctly, and IVs not being passed down"): daycare.c. An EVERSTONE on either parent always passes its
+# Nature; three different IVs come from the parents, five with a DESTINY KNOT (check.sh reads the counts).
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:15,25:15"
+EXPECT_A=("breed 400 eggs")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="tools/test/scenarios/breed_items/check.sh"

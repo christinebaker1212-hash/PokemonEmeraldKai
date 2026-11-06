@@ -3459,6 +3459,19 @@ Windows each one could hold a frame. Now:
   timeBeginPeriod, so SDL_Delay(1) slept ~16 ms). Minimized or hidden (Display_Minimized), Display_Present skips the
   game picture (pop-outs still drawn) and sdl2.c's loop sleeps between game frames instead of presenting.
 
+## Breeding: EVERSTONE and DESTINY KNOT (1.132.2)
+
+The user (2026-11-06): "Be certain that Everstones and Destiny Knots function properly in regards to breeding. A player
+reported Natures not applying correctly, and IVs not being passed down." daycare.c:
+- GetParentToInheritNature: an EVERSTONE on either parent passes its Nature every time (BLACK / WHITE on); both: one at
+  random. Emerald's only looked at the mother / DITTO and passed it half the time. The personality search runs until
+  it finds the Nature (it gave up after 2400 tries).
+- InheritIVs: three different stats from the parents, five when either holds a DESTINY KNOT (X / Y on). Emerald's
+  pick removed list slot i instead of the picked slot, so a stat could be picked twice (BUGFIX isn't defined here:
+  MODERN only turns on UBFIX). Parent slots without a POKeMON (a friend's egg made from one) give the other's IV.
+- Every egg goes through these (the DAY CARE, friends' DAY CARE eggs MP_Daycare_TryCoopEgg, the routes' day cares).
+  `mp breedtest N ITEM_A ITEM_B`: N eggs from party 1 (IVs 31) and 2 (IVs 0); test breed_items.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

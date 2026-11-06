@@ -836,6 +836,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         StoreSelectedPokemonInDaycare();
         printf("[test] daycare: %d in it\n", CountPokemonInDaycare(&gSaveBlock1Ptr->daycare));
     }
+    else if (strcmp(cmd, "breedtest") == 0)
+    {
+        // breedtest N ITEM_A ITEM_B - N eggs from party 1 and 2 holding those items (daycare.c MP_Daycare_BreedTest)
+        void MP_Daycare_BreedTest(int n, u16 itemA, u16 itemB);
+        int n = 200, a = 0, b = 0;
+        sscanf(arg, "%d %d %d", &n, &a, &b);
+        MP_Daycare_BreedTest(n, a, b);
+    }
     else if (strcmp(cmd, "daycarestate") == 0)
     {
         // daycarestate [STEPS] - the DAY CARE pair (species, steps), JOHTO's owners (bit: the MAN's slot), KANTO's

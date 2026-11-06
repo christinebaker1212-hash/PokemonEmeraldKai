@@ -555,45 +555,23 @@ static u16 GetEggSpecies(u16 species)
     return species;
 }
 
+// Moemon Kai: an EVERSTONE passes its holder's Nature every time, from either parent, as in BLACK / WHITE on (the user,
+// 2026-11-06: "Be certain that Everstones and Destiny Knots function properly"; Emerald gave only the mother's or
+// DITTO's, half the time). Both holding one: either at random.
 static s32 GetParentToInheritNature(struct DayCare *daycare)
 {
-    u32 species[DAYCARE_MON_COUNT];
+    bool8 holds[DAYCARE_MON_COUNT];
     s32 i;
-    s32 dittoCount;
-    s32 parent = -1;
-
-    // search for female gender
     for (i = 0; i < DAYCARE_MON_COUNT; i++)
-    {
-        if (GetBoxMonGender(&daycare->mons[i].mon) == MON_FEMALE)
-            parent = i;
-    }
-
-    // search for ditto
-    for (dittoCount = 0, i = 0; i < DAYCARE_MON_COUNT; i++)
-    {
-        species[i] = GetBoxMonData(&daycare->mons[i].mon, MON_DATA_SPECIES);
-        if (species[i] == SPECIES_DITTO)
-            dittoCount++, parent = i;
-    }
-
-    // coin flip on ...two Dittos
-    if (dittoCount == DAYCARE_MON_COUNT)
-    {
-        if (Random() >= USHRT_MAX / 2)
-            parent = 0;
-        else
-            parent = 1;
-    }
-
-    // Don't inherit nature if not holding Everstone
-    if (GetBoxMonData(&daycare->mons[parent].mon, MON_DATA_HELD_ITEM) != ITEM_EVERSTONE
-        || Random() >= USHRT_MAX / 2)
-    {
-        return -1;
-    }
-
-    return parent;
+        holds[i] = GetBoxMonData(&daycare->mons[i].mon, MON_DATA_SANITY_HAS_SPECIES)
+                && GetBoxMonData(&daycare->mons[i].mon, MON_DATA_HELD_ITEM) == ITEM_EVERSTONE;
+    if (holds[0] && holds[1])
+        return Random() & 1;
+    if (holds[0])
+        return 0;
+    if (holds[1])
+        return 1;
+    return -1;
 }
 
 static void _TriggerPendingDaycareEgg(struct DayCare *daycare)
@@ -622,7 +600,7 @@ static void _TriggerPendingDaycareEgg(struct DayCare *daycare)
                 break; // found a personality with the same nature
 
             natureTries++;
-        } while (natureTries <= 2400);
+        } while (natureTries <= 100000);   // Moemon Kai: (1 in 25 a try: never runs out, as 2400 could)
 
         daycare->offspringPersonality = personality;
     }
@@ -668,75 +646,28 @@ static void RemoveIVIndexFromList(u8 *ivs, u8 selectedIv)
     }
 }
 
+// Moemon Kai: three different IVs from the parents, five when either holds a DESTINY KNOT (X / Y on; the user,
+// 2026-11-06: "IVs not being passed down"). Emerald's own pick could take the same stat twice (it removed list slot
+// i instead of the slot it picked), so an egg often got only one or two of its parents' IVs.
 static void InheritIVs(struct Pokemon *egg, struct DayCare *daycare)
 {
-    u8 i;
-    u8 selectedIvs[INHERITED_IV_COUNT];
+    u8 i, count = INHERITED_IV_COUNT;
     u8 availableIVs[NUM_STATS];
-    u8 whichParents[INHERITED_IV_COUNT];
-    u8 iv;
-
-    // Initialize a list of IV indices.
+    for (i = 0; i < DAYCARE_MON_COUNT; i++)
+        if (GetBoxMonData(&daycare->mons[i].mon, MON_DATA_SANITY_HAS_SPECIES)
+         && GetBoxMonData(&daycare->mons[i].mon, MON_DATA_HELD_ITEM) == ITEM_DESTINY_KNOT)
+            count = 5;
     for (i = 0; i < NUM_STATS; i++)
-    {
         availableIVs[i] = i;
-    }
-
-    // Select the 3 IVs that will be inherited.
-    for (i = 0; i < INHERITED_IV_COUNT; i++)
+    for (i = 0; i < count; i++)
     {
-        // Randomly pick an IV from the available list and stop from being chosen again.
-        // BUG: Instead of removing the IV that was just picked, this
-        // removes position 0 (HP) then position 1 (DEF), then position 2. This is why HP and DEF
-        // have a lower chance to be inherited in Emerald and why the IV picked for inheritance can
-        // be repeated. Amusingly, FRLG and RS also got this wrong. They remove selectedIvs[i], which
-        // is not an index! This means that it can sometimes remove the wrong stat.
-        #ifndef BUGFIX
-        selectedIvs[i] = availableIVs[Random() % (NUM_STATS - i)];
-        RemoveIVIndexFromList(availableIVs, i);
-        #else
-        u8 index = Random() % (NUM_STATS - i);
-        selectedIvs[i] = availableIVs[index];
+        u8 index = Random() % (NUM_STATS - i), stat = availableIVs[index];
+        u8 parent = Random() % DAYCARE_MON_COUNT, iv;
         RemoveIVIndexFromList(availableIVs, index);
-        #endif
-    }
-
-    // Determine which parent each of the selected IVs should inherit from.
-    for (i = 0; i < INHERITED_IV_COUNT; i++)
-    {
-        whichParents[i] = Random() % DAYCARE_MON_COUNT;
-    }
-
-    // Set each of inherited IVs on the egg mon.
-    for (i = 0; i < INHERITED_IV_COUNT; i++)
-    {
-        switch (selectedIvs[i])
-        {
-            case 0:
-                iv = GetBoxMonData(&daycare->mons[whichParents[i]].mon, MON_DATA_HP_IV);
-                SetMonData(egg, MON_DATA_HP_IV, &iv);
-                break;
-            case 1:
-                iv = GetBoxMonData(&daycare->mons[whichParents[i]].mon, MON_DATA_ATK_IV);
-                SetMonData(egg, MON_DATA_ATK_IV, &iv);
-                break;
-            case 2:
-                iv = GetBoxMonData(&daycare->mons[whichParents[i]].mon, MON_DATA_DEF_IV);
-                SetMonData(egg, MON_DATA_DEF_IV, &iv);
-                break;
-            case 3:
-                iv = GetBoxMonData(&daycare->mons[whichParents[i]].mon, MON_DATA_SPEED_IV);
-                SetMonData(egg, MON_DATA_SPEED_IV, &iv);
-                break;
-            case 4:
-                iv = GetBoxMonData(&daycare->mons[whichParents[i]].mon, MON_DATA_SPATK_IV);
-                SetMonData(egg, MON_DATA_SPATK_IV, &iv);
-                break;
-            case 5:
-                iv = GetBoxMonData(&daycare->mons[whichParents[i]].mon, MON_DATA_SPDEF_IV);
-                SetMonData(egg, MON_DATA_SPDEF_IV, &iv);
-                break;
-        }
+        if (!GetBoxMonData(&daycare->mons[parent].mon, MON_DATA_SANITY_HAS_SPECIES))
+            parent ^= 1;
+        iv = GetBoxMonData(&daycare->mons[parent].mon, MON_DATA_HP_IV + stat);
+        SetMonData(egg, MON_DATA_HP_IV + stat, &iv);
     }
 }
 
@@ -1574,4 +1505,50 @@ void MP_Daycare_TryCoopEgg(struct DayCare *daycare)
 void MP_ApplyDaycareExperience(struct Pokemon *mon)
 {
     ApplyDaycareExperience(mon);
+}
+
+// Moemon Kai (tests: `mp breedtest N ITEM_A ITEM_B`): party POKéMON 1 and 2 as the parents (A's IVs all 31, B's all 0,
+// holding ITEM_A / ITEM_B), N eggs made as the DAY CARE makes them: how many took a parent's Nature, and how many IVs
+// each egg took from them (an IV of 31 or 0; a random one is that 1 time in 16)
+void MP_Daycare_BreedTest(int n, u16 itemA, u16 itemB)
+{
+    struct DayCare tmp;
+    struct Pokemon egg;
+    u8 iv, natA, natB;
+    int i, k, natureA = 0, natureB = 0, ivTotal = 0, ivMin = 99, ivMax = 0;
+    memset(&tmp, 0, sizeof(tmp));
+    tmp.mons[0].mon = gPlayerParty[0].box;
+    tmp.mons[1].mon = gPlayerParty[1].box;
+    for (k = 0; k < NUM_STATS; k++)
+    {
+        iv = 31;
+        SetBoxMonData(&tmp.mons[0].mon, MON_DATA_HP_IV + k, &iv);
+        iv = 0;
+        SetBoxMonData(&tmp.mons[1].mon, MON_DATA_HP_IV + k, &iv);
+    }
+    SetBoxMonData(&tmp.mons[0].mon, MON_DATA_HELD_ITEM, &itemA);
+    SetBoxMonData(&tmp.mons[1].mon, MON_DATA_HELD_ITEM, &itemB);
+    natA = GetNatureFromPersonality(GetBoxMonData(&tmp.mons[0].mon, MON_DATA_PERSONALITY));
+    natB = GetNatureFromPersonality(GetBoxMonData(&tmp.mons[1].mon, MON_DATA_PERSONALITY));
+    for (i = 0; i < n; i++)
+    {
+        int got = 0;
+        u8 nat;
+        _TriggerPendingDaycareEgg(&tmp);
+        BuildDaycareEgg(&tmp, &egg);
+        nat = GetNatureFromPersonality(GetMonData(&egg, MON_DATA_PERSONALITY));
+        natureA += nat == natA;
+        natureB += nat == natB;
+        for (k = 0; k < NUM_STATS; k++)
+        {
+            u8 v = GetMonData(&egg, MON_DATA_HP_IV + k);
+            got += v == 31 || v == 0;
+        }
+        ivTotal += got;
+        if (got < ivMin) ivMin = got;
+        if (got > ivMax) ivMax = got;
+    }
+    FlagClear(FLAG_PENDING_DAYCARE_EGG);
+    printf("[test] breed %d eggs: natureA %d natureB %d (natures %d %d) ivs avg %d.%02d min %d max %d\n", n, natureA,
+           natureB, natA, natB, ivTotal / n, (ivTotal * 100 / n) % 100, ivMin, ivMax);
 }
