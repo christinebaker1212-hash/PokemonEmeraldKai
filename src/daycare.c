@@ -742,6 +742,27 @@ static void InheritIVs(struct Pokemon *egg, struct DayCare *daycare)
 
 // Counts the number of egg moves a Pokémon learns and stores the moves in
 // the given array.
+// Moemon Kai: a species' egg moves (STADIUM's CHALLENGE CUP, mp_stadium.c); out holds EGG_MOVES_ARRAY_COUNT
+u8 MP_SpeciesEggMoves(u16 species, u16 *out)
+{
+    u16 i, idx = 0xFFFF, n = 0;
+    for (i = 0; i < ARRAY_COUNT(gEggMoves) - 1; i++)
+        if (gEggMoves[i] == species + EGG_MOVES_SPECIES_OFFSET)
+        {
+            idx = i + 1;
+            break;
+        }
+    if (idx == 0xFFFF)
+        return 0;
+    for (i = 0; i < EGG_MOVES_ARRAY_COUNT && idx + i < ARRAY_COUNT(gEggMoves); i++)
+    {
+        if (gEggMoves[idx + i] > EGG_MOVES_SPECIES_OFFSET)
+            break;
+        out[n++] = gEggMoves[idx + i];
+    }
+    return n;
+}
+
 static u8 GetEggMoves(struct Pokemon *pokemon, u16 *eggMoves)
 {
     u16 eggMoveIdx;

@@ -517,6 +517,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] trainer battle %d\n", atoi(arg));
         MP_Debug_TrainerBattle(atoi(arg));
     }
+    else if (strcmp(cmd, "stadium") == 0)   // mp stadium ROUND DIVISION TRAINER: a STADIUM trainer's team as built (mp_stadium.c)
+    {
+        void MP_Stadium_Debug(u8 round, u8 division, u8 index);
+        int r = 0, d = 0, t = 0;
+        sscanf(arg, "%d %d %d", &r, &d, &t);
+        MP_Stadium_Debug(r, d, t);
+    }
+    else if (strcmp(cmd, "ccteam") == 0)   // mp ccteam CLASS ROUND TRAINER (255: the player): a CHALLENGE CUP team (mp_stadium.c)
+    {
+        void MP_StadiumCc_Debug(u8 cls, u8 round, u8 trainer);
+        int c = 0, r = 0, t = 255;
+        sscanf(arg, "%d %d %d", &c, &r, &t);
+        MP_StadiumCc_Debug(c, r, t);
+    }
     else if (strcmp(cmd, "sumstate") == 0)   // the summary screen's page and input mode (mp summary opens it)
     {
         void MP_Summary_Debug(void);

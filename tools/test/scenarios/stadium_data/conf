@@ -1,0 +1,7 @@
+# STADIUM's data (mp_stadium.c, docs/STADIUM.md): a trainer's team from the ROM's tables turned into the game's IVs,
+# EVs and natures (BUG BOY's DVs of 0 are IVs of 1; MEWTWO in Round 2 has 31s), and CHALLENGE CUP teams rolled for the
+# player and a trainer of each class without a crash.
+MODE=1
+TMO=200
+EXPECT_A=("stadium: 0/0/0 mon 0 species 10 lv 25 nature 3 ivs 1 1 1 1 1 1" "stadium: 1/20/0 mon 0 species 150 lv 100 nature 15 ivs 31 31 31 31 31 31" "ccteam: 5 species" "stadium data done")
+UNEXPECT_A=("crash" "no trainer")

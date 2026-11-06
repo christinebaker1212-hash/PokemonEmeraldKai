@@ -1,0 +1,2911 @@
+{
+ "source": "Bulbapedia \"Challenge Cup\" (the user sent the page, 2026-11-06) + Supplementary Series (altissimo1) for the AI templates and stat EXP",
+ "classes": [
+  {
+   "name": "POKE BALL",
+   "level": 30,
+   "bst_target": 280,
+   "pool": [
+    {
+     "dex": 1,
+     "name": "BULBAsaur",
+     "types": [
+      "Grass",
+      "Poison"
+     ],
+     "bst": 318,
+     "rate": 7.0
+    },
+    {
+     "dex": 4,
+     "name": "CHARmander",
+     "types": [
+      "Fire"
+     ],
+     "bst": 309,
+     "rate": 13.0
+    },
+    {
+     "dex": 7,
+     "name": "SQUIRtle",
+     "types": [
+      "Water"
+     ],
+     "bst": 314,
+     "rate": 5.0
+    },
+    {
+     "dex": 16,
+     "name": "PIDgey",
+     "types": [
+      "Normal",
+      "Flying"
+     ],
+     "bst": 251,
+     "rate": 8.0
+    },
+    {
+     "dex": 19,
+     "name": "RATtata",
+     "types": [
+      "Normal"
+     ],
+     "bst": 253,
+     "rate": 5.0
+    },
+    {
+     "dex": 21,
+     "name": "SPEArow",
+     "types": [
+      "Normal",
+      "Flying"
+     ],
+     "bst": 262,
+     "rate": 10.0
+    },
+    {
+     "dex": 23,
+     "name": "EKans",
+     "types": [
+      "Poison"
+     ],
+     "bst": 288,
+     "rate": 8.0
+    },
+    {
+     "dex": 27,
+     "name": "SANDshrew",
+     "types": [
+      "Ground"
+     ],
+     "bst": 300,
+     "rate": 12.0
+    },
+    {
+     "dex": 29,
+     "name": "NIDOran",
+     "types": [
+      "Poison"
+     ],
+     "bst": 275,
+     "rate": 9.0
+    },
+    {
+     "dex": 32,
+     "name": "NIDOran",
+     "types": [
+      "Poison"
+     ],
+     "bst": 273,
+     "rate": 8.0
+    },
+    {
+     "dex": 37,
+     "name": "VULpix",
+     "types": [
+      "Fire"
+     ],
+     "bst": 299,
+     "rate": 21.0
+    },
+    {
+     "dex": 39,
+     "name": "JIGGLYpuff",
+     "types": [
+      "Normal"
+     ],
+     "bst": 270,
+     "rate": 7.0
+    },
+    {
+     "dex": 41,
+     "name": "ZUbat",
+     "types": [
+      "Poison",
+      "Flying"
+     ],
+     "bst": 245,
+     "rate": 7.0
+    },
+    {
+     "dex": 43,
+     "name": "ODDish",
+     "types": [
+      "Grass",
+      "Poison"
+     ],
+     "bst": 320,
+     "rate": 7.0
+    },
+    {
+     "dex": 46,
+     "name": "PAras",
+     "types": [
+      "Bug",
+      "Grass"
+     ],
+     "bst": 285,
+     "rate": 18.0
+    },
+    {
+     "dex": 48,
+     "name": "VENOnat",
+     "types": [
+      "Bug",
+      "Poison"
+     ],
+     "bst": 305,
+     "rate": 9.0
+    },
+    {
+     "dex": 50,
+     "name": "DIGlett",
+     "types": [
+      "Ground"
+     ],
+     "bst": 265,
+     "rate": 7.0
+    },
+    {
+     "dex": 60,
+     "name": "POLIwag",
+     "types": [
+      "Water"
+     ],
+     "bst": 300,
+     "rate": 6.0
+    },
+    {
+     "dex": 66,
+     "name": "MAChop",
+     "types": [
+      "Fighting"
+     ],
+     "bst": 305,
+     "rate": 11.0
+    },
+    {
+     "dex": 69,
+     "name": "BELLsprout",
+     "types": [
+      "Grass",
+      "Poison"
+     ],
+     "bst": 300,
+     "rate": 7.0
+    },
+    {
+     "dex": 74,
+     "name": "GEOdude",
+     "types": [
+      "Rock",
+      "Ground"
+     ],
+     "bst": 300,
+     "rate": 30.0
+    },
+    {
+     "dex": 79,
+     "name": "SLOWpoke",
+     "types": [
+      "Water",
+      "Psychic"
+     ],
+     "bst": 315,
+     "rate": 7.0
+    },
+    {
+     "dex": 81,
+     "name": "MAGNEmite",
+     "types": [
+      "Electric",
+      "Steel"
+     ],
+     "bst": 325,
+     "rate": 29.0
+    },
+    {
+     "dex": 86,
+     "name": "SEel",
+     "types": [
+      "Water"
+     ],
+     "bst": 325,
+     "rate": 5.0
+    },
+    {
+     "dex": 88,
+     "name": "GRImer",
+     "types": [
+      "Poison"
+     ],
+     "bst": 325,
+     "rate": 6.0
+    },
+    {
+     "dex": 90,
+     "name": "SHELLder",
+     "types": [
+      "Water"
+     ],
+     "bst": 305,
+     "rate": 6.0
+    },
+    {
+     "dex": 96,
+     "name": "DROWzee",
+     "types": [
+      "Psychic"
+     ],
+     "bst": 328,
+     "rate": 10.0
+    },
+    {
+     "dex": 98,
+     "name": "KRAbby",
+     "types": [
+      "Water"
+     ],
+     "bst": 325,
+     "rate": 5.0
+    },
+    {
+     "dex": 102,
+     "name": "EXEGGcute",
+     "types": [
+      "Grass",
+      "Psychic"
+     ],
+     "bst": 325,
+     "rate": 9.0
+    },
+    {
+     "dex": 116,
+     "name": "HORsea",
+     "types": [
+      "Water"
+     ],
+     "bst": 295,
+     "rate": 6.0
+    },
+    {
+     "dex": 118,
+     "name": "GOLdeen",
+     "types": [
+      "Water"
+     ],
+     "bst": 320,
+     "rate": 5.0
+    },
+    {
+     "dex": 132,
+     "name": "DITto",
+     "types": [
+      "Normal"
+     ],
+     "bst": 288,
+     "rate": 8.0
+    },
+    {
+     "dex": 147,
+     "name": "DRAtini",
+     "types": [
+      "Dragon"
+     ],
+     "bst": 300,
+     "rate": 11.0
+    },
+    {
+     "dex": 152,
+     "name": "CHIKOrita",
+     "types": [
+      "Grass"
+     ],
+     "bst": 318,
+     "rate": 6.0
+    },
+    {
+     "dex": 155,
+     "name": "CYNDAquil",
+     "types": [
+      "Fire"
+     ],
+     "bst": 309,
+     "rate": 13.0
+    },
+    {
+     "dex": 158,
+     "name": "TOTOdile",
+     "types": [
+      "Water"
+     ],
+     "bst": 314,
+     "rate": 5.0
+    },
+    {
+     "dex": 161,
+     "name": "SENtret",
+     "types": [
+      "Normal"
+     ],
+     "bst": 215,
+     "rate": 4.0
+    },
+    {
+     "dex": 163,
+     "name": "HOOThoot",
+     "types": [
+      "Normal",
+      "Flying"
+     ],
+     "bst": 262,
+     "rate": 10.0
+    },
+    {
+     "dex": 165,
+     "name": "LEDYba",
+     "types": [
+      "Bug",
+      "Flying"
+     ],
+     "bst": 265,
+     "rate": 10.0
+    },
+    {
+     "dex": 167,
+     "name": "SPINarak",
+     "types": [
+      "Bug",
+      "Poison"
+     ],
+     "bst": 250,
+     "rate": 7.0
+    },
+    {
+     "dex": 172,
+     "name": "PIChu",
+     "types": [
+      "Electric"
+     ],
+     "bst": 205,
+     "rate": 25.0
+    },
+    {
+     "dex": 173,
+     "name": "CLEffa",
+     "types": [
+      "Normal"
+     ],
+     "bst": 218,
+     "rate": 4.0
+    },
+    {
+     "dex": 174,
+     "name": "IGGLYbuff",
+     "types": [
+      "Normal"
+     ],
+     "bst": 210,
+     "rate": 4.0
+    },
+    {
+     "dex": 175,
+     "name": "TOGepi",
+     "types": [
+      "Normal"
+     ],
+     "bst": 245,
+     "rate": 5.0
+    },
+    {
+     "dex": 179,
+     "name": "MAReep",
+     "types": [
+      "Electric"
+     ],
+     "bst": 280,
+     "rate": 29.0
+    },
+    {
+     "dex": 183,
+     "name": "MARill",
+     "types": [
+      "Water"
+     ],
+     "bst": 250,
+     "rate": 17.0
+    },
+    {
+     "dex": 187,
+     "name": "HOPpip",
+     "types": [
+      "Grass",
+      "Flying"
+     ],
+     "bst": 250,
+     "rate": 14.0
+    },
+    {
+     "dex": 191,
+     "name": "SUNkern",
+     "types": [
+      "Grass"
+     ],
+     "bst": 180,
+     "rate": 12.0
+    },
+    {
+     "dex": 194,
+     "name": "WOOper",
+     "types": [
+      "Water",
+      "Ground"
+     ],
+     "bst": 210,
+     "rate": 17.0
+    },
+    {
+     "dex": 204,
+     "name": "PINEco",
+     "types": [
+      "Bug"
+     ],
+     "bst": 290,
+     "rate": 8.0
+    },
+    {
+     "dex": 209,
+     "name": "SNUBbull",
+     "types": [
+      "Normal"
+     ],
+     "bst": 300,
+     "rate": 7.0
+    },
+    {
+     "dex": 218,
+     "name": "SLUgma",
+     "types": [
+      "Fire"
+     ],
+     "bst": 250,
+     "rate": 25.0
+    },
+    {
+     "dex": 220,
+     "name": "SWInub",
+     "types": [
+      "Ice",
+      "Ground"
+     ],
+     "bst": 250,
+     "rate": 7.0
+    },
+    {
+     "dex": 223,
+     "name": "REMOraid",
+     "types": [
+      "Water"
+     ],
+     "bst": 300,
+     "rate": 6.0
+    },
+    {
+     "dex": 235,
+     "name": "SMEARgle",
+     "types": [
+      "Normal"
+     ],
+     "bst": 250,
+     "rate": 5.0
+    },
+    {
+     "dex": 236,
+     "name": "TYROgue",
+     "types": [
+      "Fighting"
+     ],
+     "bst": 210,
+     "rate": 10.0
+    },
+    {
+     "dex": 246,
+     "name": "LARVitar",
+     "types": [
+      "Rock",
+      "Ground"
+     ],
+     "bst": 300,
+     "rate": 30.0
+    }
+   ],
+   "trainers": [
+    {
+     "class": "CAMPER",
+     "name": "MARCUS",
+     "template": {
+      "FIRE": 2,
+      "GROUND": 4
+     },
+     "moves": [],
+     "statexp": [
+      6400,
+      9000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "ROCKET",
+     "name": "GRUNT/EXECUTIVE M",
+     "template": {
+      "POISON": 6
+     },
+     "moves": [
+      "POISON GAS",
+      "POISONPOWDER",
+      "TOXIC"
+     ],
+     "statexp": [
+      12800,
+      25600
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "PICNICKER",
+     "name": "MELISSA",
+     "template": {
+      "FLYING": 4,
+      "ANY": 2
+     },
+     "moves": [],
+     "statexp": [
+      6000,
+      36000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "GUITARIST",
+     "name": "DARREN",
+     "template": {
+      "ELECTRIC": 3,
+      "GRASS": 3
+     },
+     "moves": [
+      "GLARE",
+      "STUN SPORE",
+      "THUNDER WAVE"
+     ],
+     "statexp": [
+      12800,
+      28000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "FISHER",
+     "name": "CURTIS",
+     "template": {
+      "WATER": 6
+     },
+     "moves": [
+      "RAIN DANCE"
+     ],
+     "statexp": [
+      20000,
+      58000
+     ],
+     "speed": [
+      null,
+      30000
+     ]
+    },
+    {
+     "class": "MEDIUM",
+     "name": "PEGGY",
+     "template": {
+      "PSYCHIC": 3,
+      "ANY": 3
+     },
+     "moves": [
+      "CONFUSE RAY",
+      "SUPERSONIC",
+      "SWAGGER",
+      "SWEET KISS"
+     ],
+     "statexp": [
+      12800,
+      32000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "ROCKET",
+     "name": "GRUNT/EXECUTIVE F",
+     "template": {
+      "NORMAL": 6
+     },
+     "moves": [
+      "BITE",
+      "BONE CLUB",
+      "HEADBUTT",
+      "HYPER FANG",
+      "LOW KICK",
+      "ROCK SLIDE",
+      "ROLLING KICK"
+     ],
+     "statexp": [
+      20000,
+      55000
+     ],
+     "speed": [
+      51200,
+      65535
+     ]
+    },
+    {
+     "class": "JUGGLER",
+     "name": "DWIGHT",
+     "template": {
+      "ANY": 6
+     },
+     "moves": [],
+     "statexp": [
+      36000,
+      65535
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    }
+   ]
+  },
+  {
+   "name": "GREAT BALL",
+   "level": 45,
+   "bst_target": 360,
+   "pool": [
+    {
+     "dex": 2,
+     "name": "IVYsaur",
+     "types": [
+      "Grass",
+      "Poison"
+     ],
+     "bst": 405,
+     "rate": 9.0
+    },
+    {
+     "dex": 8,
+     "name": "WARtortle",
+     "types": [
+      "Water"
+     ],
+     "bst": 405,
+     "rate": 7.0
+    },
+    {
+     "dex": 12,
+     "name": "BUTTERfree",
+     "types": [
+      "Bug",
+      "Flying"
+     ],
+     "bst": 385,
+     "rate": 8.0
+    },
+    {
+     "dex": 15,
+     "name": "BEEdrill",
+     "types": [
+      "Bug",
+      "Poison"
+     ],
+     "bst": 385,
+     "rate": 8.0
+    },
+    {
+     "dex": 17,
+     "name": "PIDGEotto",
+     "types": [
+      "Normal",
+      "Flying"
+     ],
+     "bst": 349,
+     "rate": 7.0
+    },
+    {
+     "dex": 25,
+     "name": "PIKAchu",
+     "types": [
+      "Electric"
+     ],
+     "bst": 300,
+     "rate": 16.0
+    },
+    {
+     "dex": 30,
+     "name": "NIDOrina",
+     "types": [
+      "Poison"
+     ],
+     "bst": 365,
+     "rate": 8.0
+    },
+    {
+     "dex": 33,
+     "name": "NIDOrino",
+     "types": [
+      "Poison"
+     ],
+     "bst": 365,
+     "rate": 8.0
+    },
+    {
+     "dex": 35,
+     "name": "CLEFairy",
+     "types": [
+      "Normal"
+     ],
+     "bst": 323,
+     "rate": 5.0
+    },
+    {
+     "dex": 44,
+     "name": "GLOom",
+     "types": [
+      "Grass",
+      "Poison"
+     ],
+     "bst": 395,
+     "rate": 9.0
+    },
+    {
+     "dex": 47,
+     "name": "PARAsect",
+     "types": [
+      "Bug",
+      "Grass"
+     ],
+     "bst": 405,
+     "rate": 10.0
+    },
+    {
+     "dex": 52,
+     "name": "MEOwth",
+     "types": [
+      "Normal"
+     ],
+     "bst": 290,
+     "rate": 5.0
+    },
+    {
+     "dex": 54,
+     "name": "PSYduck",
+     "types": [
+      "Water"
+     ],
+     "bst": 320,
+     "rate": 6.0
+    },
+    {
+     "dex": 56,
+     "name": "MANkey",
+     "types": [
+      "Fighting"
+     ],
+     "bst": 305,
+     "rate": 9.0
+    },
+    {
+     "dex": 58,
+     "name": "GROWLithe",
+     "types": [
+      "Fire"
+     ],
+     "bst": 350,
+     "rate": 17.0
+    },
+    {
+     "dex": 61,
+     "name": "POLIwhirl",
+     "types": [
+      "Water"
+     ],
+     "bst": 385,
+     "rate": 7.0
+    },
+    {
+     "dex": 63,
+     "name": "ABra",
+     "types": [
+      "Psychic"
+     ],
+     "bst": 310,
+     "rate": 8.0
+    },
+    {
+     "dex": 67,
+     "name": "MAChoke",
+     "types": [
+      "Fighting"
+     ],
+     "bst": 405,
+     "rate": 12.0
+    },
+    {
+     "dex": 70,
+     "name": "WEEPINbell",
+     "types": [
+      "Grass",
+      "Poison"
+     ],
+     "bst": 390,
+     "rate": 9.0
+    },
+    {
+     "dex": 72,
+     "name": "TENTAcool",
+     "types": [
+      "Water",
+      "Poison"
+     ],
+     "bst": 335,
+     "rate": 7.0
+    },
+    {
+     "dex": 75,
+     "name": "GRAVeler",
+     "types": [
+      "Rock",
+      "Ground"
+     ],
+     "bst": 390,
+     "rate": 18.0
+    },
+    {
+     "dex": 83,
+     "name": "FARfetch'd",
+     "types": [
+      "Normal",
+      "Flying"
+     ],
+     "bst": 352,
+     "rate": 8.0
+    },
+    {
+     "dex": 84,
+     "name": "DOduo",
+     "types": [
+      "Normal",
+      "Flying"
+     ],
+     "bst": 310,
+     "rate": 5.0
+    },
+    {
+     "dex": 92,
+     "name": "GASTly",
+     "types": [
+      "Ghost",
+      "Poison"
+     ],
+     "bst": 310,
+     "rate": 9.0
+    },
+    {
+     "dex": 95,
+     "name": "ONix",
+     "types": [
+      "Rock",
+      "Ground"
+     ],
+     "bst": 385,
+     "rate": 18.0
+    },
+    {
+     "dex": 100,
+     "name": "VOLTorb",
+     "types": [
+      "Electric"
+     ],
+     "bst": 330,
+     "rate": 16.0
+    },
+    {
+     "dex": 104,
+     "name": "CUbone",
+     "types": [
+      "Ground"
+     ],
+     "bst": 320,
+     "rate": 8.0
+    },
+    {
+     "dex": 108,
+     "name": "LICKItung",
+     "types": [
+      "Normal"
+     ],
+     "bst": 385,
+     "rate": 6.0
+    },
+    {
+     "dex": 109,
+     "name": "KOFfing",
+     "types": [
+      "Poison"
+     ],
+     "bst": 340,
+     "rate": 5.0
+    },
+    {
+     "dex": 111,
+     "name": "RHYhorn",
+     "types": [
+      "Ground",
+      "Rock"
+     ],
+     "bst": 345,
+     "rate": 16.0
+    },
+    {
+     "dex": 120,
+     "name": "STARyu",
+     "types": [
+      "Water"
+     ],
+     "bst": 340,
+     "rate": 7.0
+    },
+    {
+     "dex": 133,
+     "name": "EEVee",
+     "types": [
+      "Normal"
+     ],
+     "bst": 325,
+     "rate": 5.0
+    },
+    {
+     "dex": 137,
+     "name": "PORYgon",
+     "types": [
+      "Normal"
+     ],
+     "bst": 395,
+     "rate": 6.0
+    },
+    {
+     "dex": 138,
+     "name": "OMAnyte",
+     "types": [
+      "Rock",
+      "Water"
+     ],
+     "bst": 355,
+     "rate": 12.0
+    },
+    {
+     "dex": 140,
+     "name": "KAButo",
+     "types": [
+      "Rock",
+      "Water"
+     ],
+     "bst": 355,
+     "rate": 12.0
+    },
+    {
+     "dex": 153,
+     "name": "BAYleef",
+     "types": [
+      "Grass"
+     ],
+     "bst": 405,
+     "rate": 9.0
+    },
+    {
+     "dex": 159,
+     "name": "CROConaw",
+     "types": [
+      "Water"
+     ],
+     "bst": 405,
+     "rate": 7.0
+    },
+    {
+     "dex": 166,
+     "name": "LEDian",
+     "types": [
+      "Bug",
+      "Flying"
+     ],
+     "bst": 390,
+     "rate": 8.0
+    },
+    {
+     "dex": 168,
+     "name": "ARIAdos",
+     "types": [
+      "Bug",
+      "Poison"
+     ],
+     "bst": 390,
+     "rate": 8.0
+    },
+    {
+     "dex": 170,
+     "name": "CHINchou",
+     "types": [
+      "Water",
+      "Electric"
+     ],
+     "bst": 330,
+     "rate": 19.0
+    },
+    {
+     "dex": 176,
+     "name": "TOGetic",
+     "types": [
+      "Normal",
+      "Flying"
+     ],
+     "bst": 405,
+     "rate": 7.0
+    },
+    {
+     "dex": 177,
+     "name": "NAtu",
+     "types": [
+      "Psychic",
+      "Flying"
+     ],
+     "bst": 320,
+     "rate": 6.0
+    },
+    {
+     "dex": 180,
+     "name": "FLAaffy",
+     "types": [
+      "Electric"
+     ],
+     "bst": 365,
+     "rate": 18.0
+    },
+    {
+     "dex": 184,
+     "name": "AZUmarill",
+     "types": [
+      "Water"
+     ],
+     "bst": 410,
+     "rate": 7.0
+    },
+    {
+     "dex": 188,
+     "name": "SKIPloom",
+     "types": [
+      "Grass",
+      "Flying"
+     ],
+     "bst": 340,
+     "rate": 23.0
+    },
+    {
+     "dex": 190,
+     "name": "AIpom",
+     "types": [
+      "Normal"
+     ],
+     "bst": 360,
+     "rate": 11.0
+    },
+    {
+     "dex": 193,
+     "name": "YANma",
+     "types": [
+      "Bug",
+      "Flying"
+     ],
+     "bst": 390,
+     "rate": 8.0
+    },
+    {
+     "dex": 202,
+     "name": "WOBbuffet",
+     "types": [
+      "Psychic"
+     ],
+     "bst": 405,
+     "rate": 11.0
+    },
+    {
+     "dex": 206,
+     "name": "DUNSparce",
+     "types": [
+      "Normal"
+     ],
+     "bst": 415,
+     "rate": 6.0
+    },
+    {
+     "dex": 216,
+     "name": "TEDDIursa",
+     "types": [
+      "Normal"
+     ],
+     "bst": 330,
+     "rate": 5.0
+    },
+    {
+     "dex": 219,
+     "name": "MAGcargo",
+     "types": [
+      "Fire",
+      "Rock"
+     ],
+     "bst": 410,
+     "rate": 19.0
+    },
+    {
+     "dex": 222,
+     "name": "CORsola",
+     "types": [
+      "Water",
+      "Rock"
+     ],
+     "bst": 380,
+     "rate": 10.0
+    },
+    {
+     "dex": 225,
+     "name": "DELIbird",
+     "types": [
+      "Ice",
+      "Flying"
+     ],
+     "bst": 330,
+     "rate": 7.0
+    },
+    {
+     "dex": 228,
+     "name": "HOUNdour",
+     "types": [
+      "Dark",
+      "Fire"
+     ],
+     "bst": 330,
+     "rate": 17.0
+    },
+    {
+     "dex": 231,
+     "name": "PHAnpy",
+     "types": [
+      "Ground"
+     ],
+     "bst": 330,
+     "rate": 13.0
+    },
+    {
+     "dex": 238,
+     "name": "SMOOchum",
+     "types": [
+      "Ice",
+      "Psychic"
+     ],
+     "bst": 305,
+     "rate": 15.0
+    },
+    {
+     "dex": 239,
+     "name": "ELEkid",
+     "types": [
+      "Electric"
+     ],
+     "bst": 360,
+     "rate": 19.0
+    },
+    {
+     "dex": 240,
+     "name": "MAGby",
+     "types": [
+      "Fire"
+     ],
+     "bst": 365,
+     "rate": 24.0
+    }
+   ],
+   "trainers": [
+    {
+     "class": "TWINS",
+     "name": "JAN&JANE",
+     "template": {
+      "BUG": 4,
+      "ANY": 2
+     },
+     "moves": [],
+     "statexp": [
+      6400,
+      8000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "SCHOOLBOY",
+     "name": "OLIVER",
+     "template": {
+      "GROUND": 2,
+      "ROCK": 2,
+      "ANY": 2
+     },
+     "moves": [
+      "SANDSTORM"
+     ],
+     "statexp": [
+      11000,
+      30000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "SAILOR",
+     "name": "CURT",
+     "template": {
+      "ICE": 1,
+      "WATER": 4,
+      "ANY": 1
+     },
+     "moves": [],
+     "statexp": [
+      25600,
+      35000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "SWIMMER",
+     "name": "DARCY",
+     "template": {
+      "NORMAL": 4,
+      "ANY": 2
+     },
+     "moves": [
+      "ATTRACT"
+     ],
+     "statexp": [
+      15000,
+      27000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "OFFICER",
+     "name": "GERALD",
+     "template": {
+      "FIRE": 3,
+      "GRASS": 3
+     },
+     "moves": [
+      "SUNNY DAY",
+      "SOLARBEAM"
+     ],
+     "statexp": [
+      20000,
+      40000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "KIMONO GIRL",
+     "name": "EMIKO",
+     "template": {
+      "ANY": 6
+     },
+     "moves": [],
+     "statexp": [
+      25600,
+      50000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "SCIENTIST",
+     "name": "ROBERTO",
+     "template": {
+      "DARK": 1,
+      "GHOST": 1,
+      "PSYCHIC": 2,
+      "ANY": 2
+     },
+     "moves": [],
+     "statexp": [
+      22000,
+      45000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "GENTLEMAN",
+     "name": "TRAVIS",
+     "template": {
+      "ANY": 6
+     },
+     "moves": [],
+     "statexp": [
+      30000,
+      60000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ULTRA BALL",
+   "level": 60,
+   "bst_target": 447,
+   "pool": [
+    {
+     "dex": 5,
+     "name": "CHARmeleon",
+     "types": [
+      "Fire"
+     ],
+     "bst": 405,
+     "rate": 17.0
+    },
+    {
+     "dex": 18,
+     "name": "PIDgeot",
+     "types": [
+      "Normal",
+      "Flying"
+     ],
+     "bst": 469,
+     "rate": 7.0
+    },
+    {
+     "dex": 20,
+     "name": "RATIcate",
+     "types": [
+      "Normal"
+     ],
+     "bst": 413,
+     "rate": 4.0
+    },
+    {
+     "dex": 22,
+     "name": "FEArow",
+     "types": [
+      "Normal",
+      "Flying"
+     ],
+     "bst": 442,
+     "rate": 8.0
+    },
+    {
+     "dex": 24,
+     "name": "ARbok",
+     "types": [
+      "Poison"
+     ],
+     "bst": 438,
+     "rate": 6.0
+    },
+    {
+     "dex": 26,
+     "name": "RAIchu",
+     "types": [
+      "Electric"
+     ],
+     "bst": 475,
+     "rate": 25.0
+    },
+    {
+     "dex": 28,
+     "name": "SANDslash",
+     "types": [
+      "Ground"
+     ],
+     "bst": 450,
+     "rate": 11.0
+    },
+    {
+     "dex": 36,
+     "name": "CLEFable",
+     "types": [
+      "Normal"
+     ],
+     "bst": 473,
+     "rate": 5.0
+    },
+    {
+     "dex": 40,
+     "name": "WIGGLYtuff",
+     "types": [
+      "Normal"
+     ],
+     "bst": 425,
+     "rate": 4.0
+    },
+    {
+     "dex": 42,
+     "name": "GOLbat",
+     "types": [
+      "Poison",
+      "Flying"
+     ],
+     "bst": 455,
+     "rate": 8.0
+    },
+    {
+     "dex": 45,
+     "name": "VILEplume",
+     "types": [
+      "Grass",
+      "Poison"
+     ],
+     "bst": 480,
+     "rate": 13.0
+    },
+    {
+     "dex": 49,
+     "name": "VENOmoth",
+     "types": [
+      "Bug",
+      "Poison"
+     ],
+     "bst": 450,
+     "rate": 14.0
+    },
+    {
+     "dex": 51,
+     "name": "DUGtrio",
+     "types": [
+      "Ground"
+     ],
+     "bst": 405,
+     "rate": 9.0
+    },
+    {
+     "dex": 53,
+     "name": "PERsian",
+     "types": [
+      "Normal"
+     ],
+     "bst": 440,
+     "rate": 6.0
+    },
+    {
+     "dex": 64,
+     "name": "KADabra",
+     "types": [
+      "Psychic"
+     ],
+     "bst": 400,
+     "rate": 5.0
+    },
+    {
+     "dex": 77,
+     "name": "PONYta",
+     "types": [
+      "Fire"
+     ],
+     "bst": 410,
+     "rate": 28.0
+    },
+    {
+     "dex": 80,
+     "name": "SLOWbro",
+     "types": [
+      "Water",
+      "Psychic"
+     ],
+     "bst": 490,
+     "rate": 8.0
+    },
+    {
+     "dex": 82,
+     "name": "MAGNEton",
+     "types": [
+      "Electric",
+      "Steel"
+     ],
+     "bst": 465,
+     "rate": 27.0
+    },
+    {
+     "dex": 87,
+     "name": "DEWgong",
+     "types": [
+      "Water",
+      "Ice"
+     ],
+     "bst": 475,
+     "rate": 8.0
+    },
+    {
+     "dex": 93,
+     "name": "HAUNter",
+     "types": [
+      "Ghost",
+      "Poison"
+     ],
+     "bst": 405,
+     "rate": 8.0
+    },
+    {
+     "dex": 97,
+     "name": "HYPno",
+     "types": [
+      "Psychic"
+     ],
+     "bst": 483,
+     "rate": 7.0
+    },
+    {
+     "dex": 99,
+     "name": "KINGler",
+     "types": [
+      "Water"
+     ],
+     "bst": 475,
+     "rate": 7.0
+    },
+    {
+     "dex": 105,
+     "name": "MAROwak",
+     "types": [
+      "Ground"
+     ],
+     "bst": 425,
+     "rate": 9.0
+    },
+    {
+     "dex": 106,
+     "name": "HITMONlee",
+     "types": [
+      "Fighting"
+     ],
+     "bst": 455,
+     "rate": 9.0
+    },
+    {
+     "dex": 107,
+     "name": "HITMONchan",
+     "types": [
+      "Fighting"
+     ],
+     "bst": 455,
+     "rate": 9.0
+    },
+    {
+     "dex": 110,
+     "name": "WEEzing",
+     "types": [
+      "Poison"
+     ],
+     "bst": 490,
+     "rate": 6.0
+    },
+    {
+     "dex": 113,
+     "name": "CHANsey",
+     "types": [
+      "Normal"
+     ],
+     "bst": 450,
+     "rate": 7.0
+    },
+    {
+     "dex": 114,
+     "name": "TANgela",
+     "types": [
+      "Grass"
+     ],
+     "bst": 435,
+     "rate": 11.0
+    },
+    {
+     "dex": 117,
+     "name": "SEAdra",
+     "types": [
+      "Water"
+     ],
+     "bst": 440,
+     "rate": 7.0
+    },
+    {
+     "dex": 119,
+     "name": "SEAking",
+     "types": [
+      "Water"
+     ],
+     "bst": 450,
+     "rate": 9.0
+    },
+    {
+     "dex": 122,
+     "name": "MR.mime",
+     "types": [
+      "Psychic"
+     ],
+     "bst": 460,
+     "rate": 8.0
+    },
+    {
+     "dex": 148,
+     "name": "DRAGONair",
+     "types": [
+      "Dragon"
+     ],
+     "bst": 420,
+     "rate": 7.0
+    },
+    {
+     "dex": 156,
+     "name": "QUILava",
+     "types": [
+      "Fire"
+     ],
+     "bst": 405,
+     "rate": 17.0
+    },
+    {
+     "dex": 162,
+     "name": "FURret",
+     "types": [
+      "Normal"
+     ],
+     "bst": 415,
+     "rate": 4.0
+    },
+    {
+     "dex": 164,
+     "name": "NOCTowl",
+     "types": [
+      "Normal",
+      "Flying"
+     ],
+     "bst": 442,
+     "rate": 8.0
+    },
+    {
+     "dex": 171,
+     "name": "LANturn",
+     "types": [
+      "Water",
+      "Electric"
+     ],
+     "bst": 460,
+     "rate": 28.0
+    },
+    {
+     "dex": 182,
+     "name": "BELLossom",
+     "types": [
+      "Grass"
+     ],
+     "bst": 480,
+     "rate": 11.0
+    },
+    {
+     "dex": 185,
+     "name": "SUDOwoodo",
+     "types": [
+      "Rock"
+     ],
+     "bst": 410,
+     "rate": 15.0
+    },
+    {
+     "dex": 189,
+     "name": "JUMPluff",
+     "types": [
+      "Grass",
+      "Flying"
+     ],
+     "bst": 450,
+     "rate": 16.0
+    },
+    {
+     "dex": 192,
+     "name": "SUNflora",
+     "types": [
+      "Grass"
+     ],
+     "bst": 425,
+     "rate": 11.0
+    },
+    {
+     "dex": 195,
+     "name": "QUAGsire",
+     "types": [
+      "Water",
+      "Ground"
+     ],
+     "bst": 430,
+     "rate": 11.0
+    },
+    {
+     "dex": 198,
+     "name": "MURkrow",
+     "types": [
+      "Dark",
+      "Flying"
+     ],
+     "bst": 405,
+     "rate": 6.0
+    },
+    {
+     "dex": 199,
+     "name": "SLOWking",
+     "types": [
+      "Water",
+      "Psychic"
+     ],
+     "bst": 490,
+     "rate": 8.0
+    },
+    {
+     "dex": 200,
+     "name": "MISDreavus",
+     "types": [
+      "Ghost"
+     ],
+     "bst": 435,
+     "rate": 8.0
+    },
+    {
+     "dex": 203,
+     "name": "GIRAFarig",
+     "types": [
+      "Normal",
+      "Psychic"
+     ],
+     "bst": 455,
+     "rate": 9.0
+    },
+    {
+     "dex": 205,
+     "name": "FORRETress",
+     "types": [
+      "Bug",
+      "Steel"
+     ],
+     "bst": 465,
+     "rate": 11.0
+    },
+    {
+     "dex": 207,
+     "name": "GLIgar",
+     "types": [
+      "Ground",
+      "Flying"
+     ],
+     "bst": 430,
+     "rate": 11.0
+    },
+    {
+     "dex": 210,
+     "name": "GRANbull",
+     "types": [
+      "Normal"
+     ],
+     "bst": 450,
+     "rate": 7.0
+    },
+    {
+     "dex": 211,
+     "name": "QWILfish",
+     "types": [
+      "Water",
+      "Poison"
+     ],
+     "bst": 430,
+     "rate": 5.0
+    },
+    {
+     "dex": 213,
+     "name": "SHUCkle",
+     "types": [
+      "Bug",
+      "Rock"
+     ],
+     "bst": 505,
+     "rate": 20.0
+    },
+    {
+     "dex": 215,
+     "name": "SNEasel",
+     "types": [
+      "Dark",
+      "Ice"
+     ],
+     "bst": 430,
+     "rate": 11.0
+    },
+    {
+     "dex": 221,
+     "name": "PILOswine",
+     "types": [
+      "Ice",
+      "Ground"
+     ],
+     "bst": 450,
+     "rate": 13.0
+    },
+    {
+     "dex": 224,
+     "name": "OCTILlery",
+     "types": [
+      "Water"
+     ],
+     "bst": 480,
+     "rate": 6.0
+    },
+    {
+     "dex": 226,
+     "name": "MANtine",
+     "types": [
+      "Water",
+      "Flying"
+     ],
+     "bst": 465,
+     "rate": 8.0
+    },
+    {
+     "dex": 227,
+     "name": "SKARmory",
+     "types": [
+      "Steel",
+      "Flying"
+     ],
+     "bst": 465,
+     "rate": 7.0
+    },
+    {
+     "dex": 234,
+     "name": "STANtler",
+     "types": [
+      "Normal"
+     ],
+     "bst": 465,
+     "rate": 5.0
+    },
+    {
+     "dex": 237,
+     "name": "HITMONtop",
+     "types": [
+      "Fighting"
+     ],
+     "bst": 455,
+     "rate": 9.0
+    },
+    {
+     "dex": 247,
+     "name": "PUPitar",
+     "types": [
+      "Rock",
+      "Ground"
+     ],
+     "bst": 410,
+     "rate": 20.0
+    }
+   ],
+   "trainers": [
+    {
+     "class": "CAMPER",
+     "name": "MARCUS",
+     "template": {
+      "FIRE": 2,
+      "GROUND": 3,
+      "ANY": 1
+     },
+     "moves": [],
+     "statexp": [
+      3200,
+      4500
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "ROCKET",
+     "name": "GRUNT/EXECUTIVE M",
+     "template": {
+      "POISON": 4,
+      "ANY": 2
+     },
+     "moves": [
+      "TOXIC"
+     ],
+     "statexp": [
+      6400,
+      22000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "PICNICKER",
+     "name": "MELISSA",
+     "template": {
+      "FLYING": 5,
+      "ANY": 1
+     },
+     "moves": [],
+     "statexp": [
+      14000,
+      35000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "GUITARIST",
+     "name": "DARREN",
+     "template": {
+      "ELECTRIC": 2,
+      "GRASS": 2,
+      "ANY": 2
+     },
+     "moves": [
+      "GLARE",
+      "STUN SPORE",
+      "THUNDER WAVE"
+     ],
+     "statexp": [
+      12000,
+      30000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "FISHER",
+     "name": "CURTIS",
+     "template": {
+      "WATER": 6
+     },
+     "moves": [
+      "RAIN DANCE"
+     ],
+     "statexp": [
+      16000,
+      40000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "MEDIUM",
+     "name": "PEGGY",
+     "template": {
+      "GHOST": 2,
+      "PSYCHIC": 3,
+      "ANY": 1
+     },
+     "moves": [
+      "CONFUSE RAY",
+      "SUPERSONIC",
+      "SWAGGER",
+      "SWEET KISS"
+     ],
+     "statexp": [
+      7500,
+      28000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "ROCKET",
+     "name": "GRUNT/EXECUTIVE F",
+     "template": {
+      "NORMAL": 6
+     },
+     "moves": [],
+     "statexp": [
+      14000,
+      35000
+     ],
+     "speed": [
+      40000,
+      65535
+     ]
+    },
+    {
+     "class": "JUGGLER",
+     "name": "DWIGHT",
+     "template": {
+      "ANY": 6
+     },
+     "moves": [],
+     "statexp": [
+      25600,
+      50000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    }
+   ]
+  },
+  {
+   "name": "MASTER BALL",
+   "level": 75,
+   "bst_target": 507,
+   "pool": [
+    {
+     "dex": 3,
+     "name": "VENUsaur",
+     "types": [
+      "Grass",
+      "Poison"
+     ],
+     "bst": 525,
+     "rate": 14.0
+    },
+    {
+     "dex": 6,
+     "name": "CHARizard",
+     "types": [
+      "Fire",
+      "Flying"
+     ],
+     "bst": 534,
+     "rate": 12.0
+    },
+    {
+     "dex": 9,
+     "name": "BLASToise",
+     "types": [
+      "Water"
+     ],
+     "bst": 530,
+     "rate": 5.0
+    },
+    {
+     "dex": 31,
+     "name": "NIDOqueen",
+     "types": [
+      "Poison",
+      "Ground"
+     ],
+     "bst": 495,
+     "rate": 9.0
+    },
+    {
+     "dex": 34,
+     "name": "NIDOking",
+     "types": [
+      "Poison",
+      "Ground"
+     ],
+     "bst": 495,
+     "rate": 9.0
+    },
+    {
+     "dex": 38,
+     "name": "NINEtales",
+     "types": [
+      "Fire"
+     ],
+     "bst": 505,
+     "rate": 12.0
+    },
+    {
+     "dex": 55,
+     "name": "GOLduck",
+     "types": [
+      "Water"
+     ],
+     "bst": 500,
+     "rate": 7.0
+    },
+    {
+     "dex": 57,
+     "name": "PRIMEape",
+     "types": [
+      "Fighting"
+     ],
+     "bst": 455,
+     "rate": 6.0
+    },
+    {
+     "dex": 59,
+     "name": "ARCANine",
+     "types": [
+      "Fire"
+     ],
+     "bst": 555,
+     "rate": 9.0
+    },
+    {
+     "dex": 62,
+     "name": "POLIwrath",
+     "types": [
+      "Water",
+      "Fighting"
+     ],
+     "bst": 500,
+     "rate": 8.0
+    },
+    {
+     "dex": 65,
+     "name": "ALAkazam",
+     "types": [
+      "Psychic"
+     ],
+     "bst": 490,
+     "rate": 5.0
+    },
+    {
+     "dex": 68,
+     "name": "MAChamp",
+     "types": [
+      "Fighting"
+     ],
+     "bst": 505,
+     "rate": 12.0
+    },
+    {
+     "dex": 71,
+     "name": "VICTREebel",
+     "types": [
+      "Grass",
+      "Poison"
+     ],
+     "bst": 480,
+     "rate": 14.0
+    },
+    {
+     "dex": 73,
+     "name": "TENTAcruel",
+     "types": [
+      "Water",
+      "Poison"
+     ],
+     "bst": 515,
+     "rate": 5.0
+    },
+    {
+     "dex": 76,
+     "name": "GOlem",
+     "types": [
+      "Rock",
+      "Ground"
+     ],
+     "bst": 485,
+     "rate": 12.0
+    },
+    {
+     "dex": 78,
+     "name": "RAPIDash",
+     "types": [
+      "Fire"
+     ],
+     "bst": 500,
+     "rate": 10.0
+    },
+    {
+     "dex": 85,
+     "name": "DOdrio",
+     "types": [
+      "Normal",
+      "Flying"
+     ],
+     "bst": 460,
+     "rate": 6.0
+    },
+    {
+     "dex": 89,
+     "name": "MUk",
+     "types": [
+      "Poison"
+     ],
+     "bst": 500,
+     "rate": 4.0
+    },
+    {
+     "dex": 91,
+     "name": "CLOYSter",
+     "types": [
+      "Water",
+      "Ice"
+     ],
+     "bst": 525,
+     "rate": 7.0
+    },
+    {
+     "dex": 94,
+     "name": "GENgar",
+     "types": [
+      "Ghost",
+      "Poison"
+     ],
+     "bst": 500,
+     "rate": 9.0
+    },
+    {
+     "dex": 101,
+     "name": "ELECtrode",
+     "types": [
+      "Electric"
+     ],
+     "bst": 480,
+     "rate": 19.0
+    },
+    {
+     "dex": 103,
+     "name": "EXEGGutor",
+     "types": [
+      "Grass",
+      "Psychic"
+     ],
+     "bst": 520,
+     "rate": 18.0
+    },
+    {
+     "dex": 112,
+     "name": "RHYdon",
+     "types": [
+      "Ground",
+      "Rock"
+     ],
+     "bst": 485,
+     "rate": 12.0
+    },
+    {
+     "dex": 115,
+     "name": "KANGASkhan",
+     "types": [
+      "Normal"
+     ],
+     "bst": 490,
+     "rate": 6.0
+    },
+    {
+     "dex": 121,
+     "name": "STARmie",
+     "types": [
+      "Water",
+      "Psychic"
+     ],
+     "bst": 520,
+     "rate": 6.0
+    },
+    {
+     "dex": 123,
+     "name": "SCYther",
+     "types": [
+      "Bug",
+      "Flying"
+     ],
+     "bst": 500,
+     "rate": 11.0
+    },
+    {
+     "dex": 124,
+     "name": "JYnx",
+     "types": [
+      "Ice",
+      "Psychic"
+     ],
+     "bst": 455,
+     "rate": 9.0
+    },
+    {
+     "dex": 125,
+     "name": "ELECTAbuzz",
+     "types": [
+      "Electric"
+     ],
+     "bst": 490,
+     "rate": 19.0
+    },
+    {
+     "dex": 126,
+     "name": "MAGmar",
+     "types": [
+      "Fire"
+     ],
+     "bst": 495,
+     "rate": 9.0
+    },
+    {
+     "dex": 127,
+     "name": "PINsir",
+     "types": [
+      "Bug"
+     ],
+     "bst": 500,
+     "rate": 8.0
+    },
+    {
+     "dex": 128,
+     "name": "TAUros",
+     "types": [
+      "Normal"
+     ],
+     "bst": 490,
+     "rate": 6.0
+    },
+    {
+     "dex": 130,
+     "name": "GYARAdos",
+     "types": [
+      "Water",
+      "Flying"
+     ],
+     "bst": 540,
+     "rate": 8.0
+    },
+    {
+     "dex": 131,
+     "name": "LAPras",
+     "types": [
+      "Water",
+      "Ice"
+     ],
+     "bst": 535,
+     "rate": 7.0
+    },
+    {
+     "dex": 134,
+     "name": "VAPOReon",
+     "types": [
+      "Water"
+     ],
+     "bst": 525,
+     "rate": 5.0
+    },
+    {
+     "dex": 135,
+     "name": "JOLTeon",
+     "types": [
+      "Electric"
+     ],
+     "bst": 525,
+     "rate": 21.0
+    },
+    {
+     "dex": 136,
+     "name": "FLAReon",
+     "types": [
+      "Fire"
+     ],
+     "bst": 525,
+     "rate": 9.0
+    },
+    {
+     "dex": 139,
+     "name": "OMAstar",
+     "types": [
+      "Rock",
+      "Water"
+     ],
+     "bst": 495,
+     "rate": 12.0
+    },
+    {
+     "dex": 141,
+     "name": "KAButops",
+     "types": [
+      "Rock",
+      "Water"
+     ],
+     "bst": 495,
+     "rate": 12.0
+    },
+    {
+     "dex": 142,
+     "name": "AEROdactyl",
+     "types": [
+      "Rock",
+      "Flying"
+     ],
+     "bst": 515,
+     "rate": 15.0
+    },
+    {
+     "dex": 143,
+     "name": "SNORlax",
+     "types": [
+      "Normal"
+     ],
+     "bst": 540,
+     "rate": 9.0
+    },
+    {
+     "dex": 154,
+     "name": "MEGAnium",
+     "types": [
+      "Grass"
+     ],
+     "bst": 525,
+     "rate": 14.0
+    },
+    {
+     "dex": 157,
+     "name": "TYPHLosion",
+     "types": [
+      "Fire"
+     ],
+     "bst": 534,
+     "rate": 9.0
+    },
+    {
+     "dex": 160,
+     "name": "FERALigatr",
+     "types": [
+      "Water"
+     ],
+     "bst": 530,
+     "rate": 5.0
+    },
+    {
+     "dex": 169,
+     "name": "CRObat",
+     "types": [
+      "Poison",
+      "Flying"
+     ],
+     "bst": 535,
+     "rate": 9.0
+    },
+    {
+     "dex": 178,
+     "name": "XAtu",
+     "types": [
+      "Psychic",
+      "Flying"
+     ],
+     "bst": 470,
+     "rate": 6.0
+    },
+    {
+     "dex": 181,
+     "name": "AMPharos",
+     "types": [
+      "Electric"
+     ],
+     "bst": 500,
+     "rate": 20.0
+    },
+    {
+     "dex": 186,
+     "name": "POLItoed",
+     "types": [
+      "Water"
+     ],
+     "bst": 500,
+     "rate": 7.0
+    },
+    {
+     "dex": 196,
+     "name": "ESPeon",
+     "types": [
+      "Psychic"
+     ],
+     "bst": 525,
+     "rate": 8.0
+    },
+    {
+     "dex": 197,
+     "name": "UMBReon",
+     "types": [
+      "Dark"
+     ],
+     "bst": 525,
+     "rate": 10.0
+    },
+    {
+     "dex": 208,
+     "name": "STEElix",
+     "types": [
+      "Steel",
+      "Ground"
+     ],
+     "bst": 510,
+     "rate": 23.0
+    },
+    {
+     "dex": 212,
+     "name": "SCIzor",
+     "types": [
+      "Bug",
+      "Steel"
+     ],
+     "bst": 500,
+     "rate": 12.0
+    },
+    {
+     "dex": 214,
+     "name": "HERAcross",
+     "types": [
+      "Bug",
+      "Fighting"
+     ],
+     "bst": 500,
+     "rate": 13.0
+    },
+    {
+     "dex": 217,
+     "name": "URSAring",
+     "types": [
+      "Normal"
+     ],
+     "bst": 500,
+     "rate": 7.0
+    },
+    {
+     "dex": 229,
+     "name": "HOUNdoom",
+     "types": [
+      "Dark",
+      "Fire"
+     ],
+     "bst": 500,
+     "rate": 13.0
+    },
+    {
+     "dex": 230,
+     "name": "KINGdra",
+     "types": [
+      "Water",
+      "Dragon"
+     ],
+     "bst": 540,
+     "rate": 7.0
+    },
+    {
+     "dex": 232,
+     "name": "DONphan",
+     "types": [
+      "Ground"
+     ],
+     "bst": 500,
+     "rate": 16.0
+    },
+    {
+     "dex": 233,
+     "name": "PORYgon2",
+     "types": [
+      "Normal"
+     ],
+     "bst": 515,
+     "rate": 10.0
+    },
+    {
+     "dex": 241,
+     "name": "MILtank",
+     "types": [
+      "Normal"
+     ],
+     "bst": 490,
+     "rate": 6.0
+    },
+    {
+     "dex": 242,
+     "name": "BLISsey",
+     "types": [
+      "Normal"
+     ],
+     "bst": 540,
+     "rate": 9.0
+    }
+   ],
+   "trainers": [
+    {
+     "class": "TWINS",
+     "name": "JAN&JANE",
+     "template": {
+      "BUG": 3,
+      "FLYING": 2,
+      "ANY": 1
+     },
+     "moves": [],
+     "statexp": [
+      500,
+      3200
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "SCHOOLBOY",
+     "name": "OLIVER",
+     "template": {
+      "STEEL": 1,
+      "GROUND": 3,
+      "ROCK": 2
+     },
+     "moves": [
+      "SANDSTORM"
+     ],
+     "statexp": [
+      7500,
+      12800
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "SAILOR",
+     "name": "CURT",
+     "template": {
+      "ICE": 2,
+      "WATER": 3,
+      "ANY": 1
+     },
+     "moves": [],
+     "statexp": [
+      12800,
+      20000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "SWIMMER",
+     "name": "DARCY",
+     "template": {
+      "FIGHTING": 2,
+      "NORMAL": 3,
+      "ANY": 1
+     },
+     "moves": [
+      "ATTRACT"
+     ],
+     "statexp": [
+      7500,
+      18000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "OFFICER",
+     "name": "GERALD",
+     "template": {
+      "FIRE": 3,
+      "GRASS": 3
+     },
+     "moves": [
+      "SUNNY DAY",
+      "SOLARBEAM"
+     ],
+     "statexp": [
+      14000,
+      30000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "KIMONO GIRL",
+     "name": "EMIKO",
+     "template": {
+      "ANY": 6
+     },
+     "moves": [],
+     "statexp": [
+      16000,
+      35000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "SCIENTIST",
+     "name": "ROBERTO",
+     "template": {
+      "DARK": 1,
+      "GHOST": 1,
+      "PSYCHIC": 2,
+      "ANY": 2
+     },
+     "moves": [],
+     "statexp": [
+      12800,
+      33000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    },
+    {
+     "class": "GENTLEMAN",
+     "name": "TRAVIS",
+     "template": {
+      "ANY": 6
+     },
+     "moves": [],
+     "statexp": [
+      22400,
+      47000
+     ],
+     "speed": [
+      null,
+      null
+     ]
+    }
+   ]
+  }
+ ],
+ "player_templates": [
+  [
+   "ELECTRIC",
+   "GROUND",
+   "WATER"
+  ],
+  [
+   "ELECTRIC",
+   "FIRE",
+   "WATER"
+  ],
+  [
+   "ROCK",
+   "GRASS",
+   "WATER"
+  ],
+  [
+   "ELECTRIC",
+   "GROUND",
+   "FLYING"
+  ],
+  [
+   "ELECTRIC",
+   "GROUND",
+   "FIRE"
+  ],
+  [
+   "ROCK",
+   "FIRE",
+   "GRASS"
+  ]
+ ],
+ "player_statexp": "about 131 per BST point below 680, every stat",
+ "banned": [
+  "CATERPIE",
+  "METAPOD",
+  "WEEDLE",
+  "KAKUNA",
+  "MAGIKARP",
+  "ARTICUNO",
+  "ZAPDOS",
+  "MOLTRES",
+  "DRAGONITE",
+  "MEWTWO",
+  "MEW",
+  "UNOWN",
+  "RAIKOU",
+  "ENTEI",
+  "SUICUNE",
+  "TYRANITAR",
+  "LUGIA",
+  "HO-OH",
+  "CELEBI"
+ ],
+ "never_moves": [
+  "RETURN",
+  "FRUSTRATION",
+  "HIDDEN POWER",
+  "REST",
+  "RECOVER",
+  "SLEEP TALK",
+  "RAPID SPIN"
+ ],
+ "items": {
+  "berry": 116,
+  "type_boost": 89,
+  "hax": 38,
+  "species": 13,
+  "hax_list": [
+   "KINGS ROCK",
+   "SCOPE LENS",
+   "BRIGHTPOWDER",
+   "QUICK CLAW"
+  ]
+ },
+ "nicknames": "player: species name with the second half lowercase (BULBAsaur); opponent: the first half lowercase (bulbaSAUR); NIDORAN without the symbol",
+ "rules": {
+  "pick": "3 of 6",
+  "clauses": [
+   "SLEEP",
+   "FREEZE",
+   "SELF-KO",
+   "SPECIES",
+   "ITEM"
+  ]
+ }
+}

@@ -41,8 +41,11 @@ Achievements will be given for every step of Pokémon Stadium cups that are comp
 
 ## Status
 
-- T15a (BATTLE ISLAND, ticket, travel, the building) and T15b (data) under way; T15c (screens), T15d (music,
-  rewards) next.
+- T15b (data) done: every STADIUM trainer, team and rental list (src/data/mp_stadium_data.h, tools/stadium/gen_data.py)
+  and the CHALLENGE CUP's pools, templates and trainers (src/data/mp_stadium_cc.h, tools/stadium/gen_challenge.py from
+  tools/stadium/challenge_cup.json); src/mp/mp_stadium.c builds them (Stadium_BuildMon, StadiumCc_MakeTeam); test
+  stadium_data (mp stadium / mp ccteam). The cups' rules: docs/stadium/RULES.md (from the six pages the user sent).
+- T15a (BATTLE ISLAND, ticket, travel, the building), T15c (screens), T15d (music, rewards) next.
 
 ## The data (T15b)
 
@@ -56,6 +59,10 @@ Achievements will be given for every step of Pokémon Stadium cups that are comp
   Battle Now, and the rental lists (Petit 45, Pika 91, Poké / Castle 149, Prime 149 / 150). Record formats in the
   script's header. Trainer names are the game's (JR.♂ / COOL♀ are stored with ¾ / © for the symbols).
 - The Challenge Cup is Stadium 2's (the user's rule): pret/pokestadium oldnotes/stadiumgs/rosters/challengecup.
-- Conversions (the user's rules): Gen 1 moves only (move ids 1-165 are the same numbers); DVs to IVs as 2 x DV + 1
+- Conversions (the user's rules, src/mp/mp_stadium.c Stadium_Convert): Gen 1 moves only (move ids 1-165 are the same numbers); DVs to IVs as 2 x DV + 1
   (15 -> 31); stat EXP to EVs; natures that raise the attacking stat the moveset uses (and the stat the user named:
   speed for the fast ones, HP-like bulk for the slow ones go to the EVs, since no nature raises HP).
+- Trainer IDs: STADIUM stores 0 for every trainer's and rental's POKéMON; they keep it (00000), with STADIUM's OT names.
+- The rival's seven teams (VENUSAUR, BLASTOISE, CHARIZARD, VAPOREON, JOLTEON, FLAREON leads, and a seventh): the one
+  that counters the player's six best is chosen (StadiumRival_Pick, with the screens).
+- Pictures: STADIUM's classes as KANTO's FireRed pictures (gen_data.py PICS); MEWTWO shows MEWTWO.
