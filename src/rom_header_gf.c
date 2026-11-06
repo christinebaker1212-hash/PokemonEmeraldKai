@@ -5,6 +5,12 @@
 #include "battle_main.h"
 #include "item.h"
 #include "pokeball.h"
+// (Moemon Maker: the built tables behind the pointers the game reads: data.c, pokemon.c, item.c)
+extern const u8 gSpeciesNamesBase[][POKEMON_NAME_LENGTH + 1];
+extern const u8 gMoveNamesBase[][MOVE_NAME_LENGTH + 1];
+extern const struct SpeciesInfo gSpeciesInfoBase[];
+extern const struct Item gItemsBase[];
+extern const struct BattleMove gBattleMovesBase[];
 
 // The purpose of this struct is for outside applications to be
 // able to access parts of the ROM or its save file, like a public API.
@@ -107,8 +113,8 @@ static const struct GFRomHeader sGFRomHeader = {
     .monIcons = gMonIconTable,
     .monIconPaletteIds = gMonIconPaletteIndices,
     .monIconPalettes = gMonIconPaletteTable,
-    .monSpeciesNames = gSpeciesNames,
-    .moveNames = gMoveNames,
+    .monSpeciesNames = gSpeciesNamesBase,   // (Moemon Maker: the built tables, not the pointers)
+    .moveNames = gMoveNamesBase,
     .decorations = gDecorations,
     .flagsOffset = offsetof(struct SaveBlock1, flags),
     .varsOffset = offsetof(struct SaveBlock1, vars),
@@ -150,11 +156,11 @@ static const struct GFRomHeader sGFRomHeader = {
     .externalEventFlagsOffset = offsetof(struct SaveBlock1, externalEventFlags),
     .externalEventDataOffset = offsetof(struct SaveBlock1, externalEventData),
     .unk18 = 0x00000000,
-    .speciesInfo = gSpeciesInfo,
+    .speciesInfo = gSpeciesInfoBase,
     .abilityNames = gAbilityNames,
     .abilityDescriptions = gAbilityDescriptionPointers,
-    .items = gItems,
-    .moves = gBattleMoves,
+    .items = gItemsBase,
+    .moves = gBattleMovesBase,
     .ballGfx = gBallSpriteSheets,
     .ballPalettes = gBallSpritePalettes,
     .gcnLinkFlagsOffset = offsetof(struct SaveBlock2, gcnLinkFlags),

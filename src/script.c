@@ -1,6 +1,7 @@
 #include "global.h"
 #include "mp.h"
 #include "script.h"
+#include "maker.h"
 #include "event_data.h"
 #include "mystery_gift.h"
 #include "util.h"
@@ -110,6 +111,10 @@ bool8 RunScriptCommand(struct ScriptContext *ctx)
                     continue;
 #endif
             }
+
+            // Moemon Maker (M4): the debugger holds the field's script at a breakpoint (never an immediate script)
+            if (gMakerDebugOn && ctx == &sGlobalScriptContext && Maker_DebugHold(ctx->scriptPtr))
+                return TRUE;
 
             cmdCode = *(ctx->scriptPtr);
             ctx->scriptPtr++;

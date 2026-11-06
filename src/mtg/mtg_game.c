@@ -40,21 +40,44 @@ const MtgEvent *Mtg_EventAt(const MtgDuel *d, uint32_t n)
     return &d->events[n % MTG_EVENT_RING];
 }
 
+// (the layers: the printed value or a static's SetPower, then the statics' and pumps' changes, then the counters)
 int Mtg_Power(const MtgDuel *d, int obj)
 {
     const MtgObj *o = &d->objs[obj];
-    return Mtg_Card(o->def)->power + o->counters11 + o->tempPower;
+    MtgStaticMods m;
+    Mtg_StaticMods(d, obj, &m);
+    return (m.setPower != MTG_STATIC_NO_SET ? m.setPower : Mtg_Card(o->def)->power) + m.addPower + o->counters11
+         + o->tempPower;
 }
 
 int Mtg_Toughness(const MtgDuel *d, int obj)
 {
     const MtgObj *o = &d->objs[obj];
-    return Mtg_Card(o->def)->toughness + o->counters11 + o->tempToughness;
+    MtgStaticMods m;
+    Mtg_StaticMods(d, obj, &m);
+    return (m.setToughness != MTG_STATIC_NO_SET ? m.setToughness : Mtg_Card(o->def)->toughness) + m.addToughness
+         + o->counters11 + o->tempToughness;
 }
 
 uint32_t Mtg_Keywords(const MtgDuel *d, int obj)
 {
-    return Mtg_Card(d->objs[obj].def)->keywords | d->objs[obj].tempKeywords;
+    MtgStaticMods m;
+    Mtg_StaticMods(d, obj, &m);
+    return Mtg_Card(d->objs[obj].def)->keywords | d->objs[obj].tempKeywords | m.keywords;
+}
+
+uint8_t Mtg_Landwalk(const MtgDuel *d, int obj)
+{
+    MtgStaticMods m;
+    Mtg_StaticMods(d, obj, &m);
+    return Mtg_Card(d->objs[obj].def)->landwalk | m.landwalk;
+}
+
+uint8_t Mtg_Protection(const MtgDuel *d, int obj)
+{
+    MtgStaticMods m;
+    Mtg_StaticMods(d, obj, &m);
+    return Mtg_Card(d->objs[obj].def)->protection | m.protection;
 }
 
 static int IsCreature(const MtgDuel *d, int obj)
@@ -172,7 +195,7 @@ void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int com
     if (to.kind == MTG_TGT_OBJ) {
         if (d->objs[to.id].zone != MTG_ZONE_BATTLEFIELD)
             return;
-        if (sourceObj != MTG_NO_OBJ && (Mtg_Card(d->objs[to.id].def)->protection & Mtg_ObjColors(d, sourceObj)))
+        if (sourceObj != MTG_NO_OBJ && (Mtg_Protection(d, to.id) & Mtg_ObjColors(d, sourceObj)))
             return;
         if (!(Mtg_Card(d->objs[to.id].def)->types & MTG_T_CREATURE))
             return;   // (planeswalkers: not yet)
@@ -463,6 +486,7 @@ static void BuildPriority(MtgDuel *d)
             continue;
         if (o->zone == MTG_ZONE_HAND && o->owner == p) {
             int ability, x = 0;
+            MtgManaCost cost;
             if (c->types & MTG_T_LAND) {
                 if (SorceryTiming(d, p) && d->players[p].landsPlayed == 0)
                     AddAction(q, MTG_ACT_LAND, i, 0xFFFF, 0, none);
@@ -470,12 +494,13 @@ static void BuildPriority(MtgDuel *d)
             }
             if (!(c->types & MTG_T_INSTANT) && !(c->keywords & MTG_KW_BIT(MTG_KW_FLASH)) && !SorceryTiming(d, p))
                 continue;
-            if (c->cost.x) {   // (X: the most that can be paid; a player's own pick is the UI's to come)
-                x = Mtg_MaxX(d, p, &c->cost, MTG_NO_OBJ);
+            Mtg_SpellCost(d, p, i, &cost);   // (Raise / ReduceCost statics)
+            if (cost.x) {   // (X: the most that can be paid; a player's own pick is the UI's to come)
+                x = Mtg_MaxX(d, p, &cost, MTG_NO_OBJ);
                 if (x == 0)
                     continue;
             }
-            if (!Mtg_CanPay(d, p, &c->cost, x, MTG_NO_OBJ))
+            if (!Mtg_CanPay(d, p, &cost, x, MTG_NO_OBJ))
                 continue;
             ability = MainAbility(c);
             AddWithTargets(d, q, MTG_ACT_CAST, i, ability, x, p);
@@ -516,7 +541,9 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
     if (d->stackCount >= MTG_MAX_STACK)
         return;
     if (a->kind == MTG_ACT_CAST) {
-        Mtg_Pay(d, p, &c->cost, a->x, MTG_NO_OBJ);
+        MtgManaCost cost;
+        Mtg_SpellCost(d, p, a->obj, &cost);
+        Mtg_Pay(d, p, &cost, a->x, MTG_NO_OBJ);
         Mtg_MoveTo(d, a->obj, MTG_ZONE_STACK);
     } else {
         const MtgAbility *ab = &gMtgAbilities[a->ability];
@@ -548,7 +575,8 @@ static int CanAttack(const MtgDuel *d, int obj)
     const MtgObj *o = &d->objs[obj];
     uint32_t kw = Mtg_Keywords(d, obj);
     return IsCreature(d, obj) && o->controller == d->active && !o->tapped
-        && (!o->sick || (kw & MTG_KW_BIT(MTG_KW_HASTE))) && !(kw & MTG_KW_BIT(MTG_KW_DEFENDER));
+        && (!o->sick || (kw & MTG_KW_BIT(MTG_KW_HASTE))) && !(kw & MTG_KW_BIT(MTG_KW_DEFENDER))
+        && !Mtg_StaticForbids(d, MTG_STATIC_CANT_ATTACK, obj, MTG_NO_OBJ);
 }
 
 static int ControlsLandType(const MtgDuel *d, int player, int basic)
@@ -571,10 +599,15 @@ int Mtg_CanBlock(const MtgDuel *d, int blocker, int attacker)
         return 0;
     if ((akw & MTG_KW_BIT(MTG_KW_FEAR)) && !(bc->types & MTG_T_ARTIFACT) && !(bc->colors & MTG_COLOR_BIT(MTG_B)))
         return 0;
-    if (ac->protection & bc->colors)
+    uint8_t walk = Mtg_Landwalk(d, attacker);
+    (void)ac;
+    if (Mtg_Protection(d, attacker) & bc->colors)
+        return 0;
+    if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BLOCK, blocker, MTG_NO_OBJ)
+        || Mtg_StaticForbids(d, MTG_STATIC_CANT_BLOCK_BY, attacker, blocker))
         return 0;
     for (i = 0; i < 5; i++)
-        if ((ac->landwalk & MTG_COLOR_BIT(i)) && ControlsLandType(d, d->objs[blocker].controller, i))
+        if ((walk & MTG_COLOR_BIT(i)) && ControlsLandType(d, d->objs[blocker].controller, i))
             return 0;
     return 1;
 }

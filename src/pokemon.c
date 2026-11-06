@@ -87,8 +87,18 @@ EWRAM_DATA struct Pokemon gEnemyParty[PARTY_SIZE] = {0};
 EWRAM_DATA struct SpriteTemplate gMultiuseSpriteTemplate = {0};
 EWRAM_DATA static struct MonSpritesGfxManager *sMonSpritesGfxManagers[MON_SPR_GFX_MANAGERS_COUNT] = {NULL};
 
+#undef gBattleMoves
+#undef gMoveCategories
+#define gBattleMoves gBattleMovesBase   // (Moemon Maker: the built tables; the game reads the pointers, include/pokemon.h)
+#define gMoveCategories gMoveCategoriesBase
 #include "data/battle_moves.h"
 #include "data/move_categories.h"
+#undef gBattleMoves
+#undef gMoveCategories
+#define gBattleMoves gBattleMovesTable
+#define gMoveCategories gMoveCategoriesTable
+const struct BattleMove *gBattleMovesTable = gBattleMovesBase;
+const u8 *gMoveCategoriesTable = gMoveCategoriesBase;
 
 // Used in an unreferenced function in RS.
 // Unreferenced here and in FRLG.
@@ -1413,10 +1423,21 @@ const s8 gNatureStatTable[NUM_NATURES][NUM_NATURE_STATS] =
 #include "data/pokemon/trainer_class_lookups.h"
 #include "data/pokemon/cry_ids.h"
 #include "data/pokemon/experience_tables.h"
+#undef gSpeciesInfo
+#undef gLevelUpLearnsets
+#define gSpeciesInfo gSpeciesInfoBase   // (Moemon Maker: the built tables, as above)
+#define gLevelUpLearnsets gLevelUpLearnsetsBase
 #include "data/pokemon/species_info.h"
 #include "data/pokemon/level_up_learnsets.h"
 #include "data/pokemon/evolution.h"
 #include "data/pokemon/level_up_learnset_pointers.h"
+#undef gSpeciesInfo
+#undef gLevelUpLearnsets
+#define gSpeciesInfo gSpeciesInfoTable
+#define gLevelUpLearnsets gLevelUpLearnsetsTable
+const struct SpeciesInfo *gSpeciesInfoTable = gSpeciesInfoBase;
+const u32 gSpeciesInfoCount = ARRAY_COUNT(gSpeciesInfoBase);
+const u32 *const *gLevelUpLearnsetsTable = gLevelUpLearnsetsBase;
 
 // SPECIES_NONE are ignored in the following two tables, so decrement before accessing these arrays to get the right result
 

@@ -1491,6 +1491,12 @@ screen opening or closing: the party menu, the BAG, the POKéDEX pages, warps...
 animations, flashes) keep their speed.
 
 ## CANDY JAR (D3, mp_candy.c; ITEM_CANDY_JAR 398, ITEMS_COUNT 399)
+Battle facilities (T15e, the user: "for each Pokemon that is fainted by the player, they shall recieve one Candy of
+that Pokemon's type if they have obtained the Candy Jar"): Cmd_tryfaintmon calls MP_Candy_OnFoeFaint(species) for a
+foe that faints; it counts when the battle has BATTLE_TYPE_FRONTIER (HOENN's FRONTIER and TENTS, SINNOH's), _TRAINER_HILL
+(TRAINER HILL, KANTO's TRAINER TOWER, JOHTO's BATTLE TOWER) or _EREADER_TRAINER (BATTLE SIMULATOR, POKéMON STADIUM),
+on the game running the battle, with the jar in the bag; a toast after the battle says how many. Tests stadium_win,
+sinnoh_tower, kanto_trainer_tower.
 gMpCandies[type]: ReleaseMon (stock release) and Tag_ReleaseAll call MP_Candy_OnRelease(species): +1 of the first
 type (MYSTERY counts as NORMAL; max 9999). Saved in "<save>.bag" after the item marks ("CNDY", count, u16 each;
 MP_Bag_LoadFromSave resets them first, ClearBag too). MP_Candy_Update (MP_FrameUpdate): candies and no jar, local
@@ -5218,6 +5224,122 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
   maker_play.sh, maker_publish.sh (a stand-in for GitHub's API: maker_github_mock.py), maker_pack.sh, maker_sinnoh.sh;
   harness commands `maker ...` (maker_ui.cpp MakerUi_TestCommand) and `makershot NAME`.
 
+## Moemon Maker, M2a: events
+
+A person, sign or trigger gets an event of its own in the Maker: pages (RPG Maker's: the last page whose conditions
+all hold runs) with an indented command list, kept in the map's edit file as a block (`event NAME on=...` and its
+lines indented by two: src/maker/maker_overrides.c's header; the language: src/maker/maker_events.c's header).
+
+- **Compiled at run time into the game's own script commands** (maker_events.c): MAKER_OP_* from
+  data/script_cmd_table.inc (tools/maker/gen_names.py --ops -> include/constants/maker_ops.h, never committed), in
+  buffers of its own with native pointers (ScriptReadPointer reads 8 bytes here) to text encoded with MP_AsciiToGame
+  ({PLAYER}, \n, \p, \l). No new script engine. A compiled event is cached by its text and never freed (a running
+  script may point into it). Conditions compile to checkflag / compare / checkitem, badges and time of day to small
+  natives (callnative) that set VAR_RESULT. "choice" uses ScriptMenu_MultichoiceList (script_menu.c: any list of
+  answers) through a native and waitstate.
+- **Names:** the game's FLAG_ / VAR_ / ITEM_ / SPECIES_ / TRAINER_ / MUS_ / SE_ by name (maker_names.c, new VAR and
+  TRAINER tables; specials by name from data/specials.inc, Maker_SpecialIndex); a flag name of the user's own is a
+  Maker flag (maker_flags.c, "<save>.maker"); self switches A-D are Maker flags "SELF:MAP:EVENT:L".
+- **Binding:** on=person:KEY / sign:KEY / trigger:KEY by the same keys as the other edits (BuildHeader replaces the
+  script pointer; a trigger fires on every step, trigger var 1 = index 1 since VarGet(1) is 1, and its pages decide);
+  an added person or sign takes `script=event:NAME` (ScriptOnMap); on=map is for autorun pages only.
+- **Autorun:** field_control_avatar.c ProcessPlayerFieldInput, beside the map's frame scripts, calls Maker_TryAutorun:
+  each event with an autorun page runs its selector (only conditions, RunScriptImmediately, VAR_RESULT = the page)
+  and the page that holds starts. As in RPG Maker it runs again until its conditions change (a self switch).
+- **The editor** (maker/maker_events_ui.cpp): the inspector's EVENT section for the selected person / sign / trigger
+  (and added ones): "Give it an event of its own", the command list (colored by kind, double-click to change a line;
+  a page line opens trigger + conditions fields), Insert (Ctrl+Space) opens the command picker (tabs Message, Flow,
+  Party & Items, Movement, Screen, Sound, Battle, Advanced; type to find), Delete / up / down / New page, the text view
+  (Ctrl+T) of the same text, and the game's check of it under the title (MakerApi_CheckEvent). Events mode's
+  right-click has "Quick event here": a talking person, a trainer, a gift POKeMON, an item giver, a nurse, a static
+  encounter, a sign.
+- **Test:** tools/test/maker_events.sh (pages, a self switch, yes / no, an item, a flag of the user's own, a choice,
+  an autorun once). The command `log N` (tests) logs "maker event: line N ran".
+
+The four open questions in docs/MAKER_HANDOFF.md, answered with defaults while the user slept (2026-11-06, the
+overnight list included M2-M5; each is easy to change if the user wants otherwise):
+1. Existing people's words before M4: **yes**: any person, sign or trigger can be given an event of its own in place of
+   the game's script (the game's stays in the build; taking the event away brings it back).
+2. SINNOH: **allowed** on SINNOH's maps too (decision 20: the user may edit SINNOH's scripts and words; Claude still
+   writes none).
+3. Co-op: events run for the player who triggers them, like the game's own scripts; "for everyone" commands later.
+4. New maps' tiles: existing tilesets only for now (the tileset editor stays in M5).
+
+## Moemon Maker, M2b: new maps and the World view
+
+- **New maps** (src/maker/maker_newmaps.c): MoemonMaker/maps/MAP_X.txt holds a map the user made: `newmap MAP_X W H`,
+  `tilesets PRIMARY SECONDARY` (the TILES panel's names: tilesets.c Tilesets_MakerByName), `header music= type=
+  weather= section= region= cycling= running= escape= name= battle=`, `border`, then `row Y` lines of tiles. It joins
+  the game as map group MAKER_MAP_GROUP (47, one past MAP_GROUPS_COUNT) with layout id MAKER_LAYOUT_FIRST (0x4000) + n,
+  and the Maker's map list after the game's own (maker_names.c Maker_MapCount / Maker_Map / Maker_MapIndex /
+  Maker_BaseMapHeader), so its people, warps, connections, events and wild slots are ordinary edits
+  (MoemonMaker/base/MAP_X.txt). overworld.c: Overworld_GetMapHeaderByGroupAndId answers group 47 from the new maps
+  (LITTLEROOT TOWN if the map's file is gone, so a save made there still loads) and GetMapLayout answers 0x4000+.
+  sEdits (maker_overrides.c) grew to 2400 entries (the game's 1701 maps were already past its old 1700).
+- **The editor** (maker/maker_world.cpp): File > New map (templates Blank, New Route, New Town, New Gym; name, size,
+  region, both tilesets, music, or a copy of another map's tiles) writes the file and sends it (MakerApi_SetNewMap),
+  reloads the map list (new maps under "New Maps") and opens it. Tools > World: a region's maps laid out by their
+  connections (the game's and the user's edits), the user's unconnected new maps above; double-click opens one, a
+  drag that leaves a map against another's edge adds the connection both ways (edits on both maps).
+- Test tools/test/maker_newmap.sh (the editor makes one; a game started inside it runs an event there).
+
+## Moemon Maker, M2c: trainers and the checker
+
+- **Trainers** (src/maker/maker_trainers.c, maker/maker_trainers_ui.cpp, Tools > Trainers): MoemonMaker/trainers.txt,
+  one block a trainer with a hash of the game's own (`was=`: an update that changes the trainer wins, the editor says
+  so). The game reads trainers through gTrainers, now `#define gTrainers gTrainersTable` (include/data.h): data.c
+  builds the table as gTrainersBase and points gTrainersTable at it, or at the Maker's patched copy (name, class,
+  picture, music, AI flags, double, items, a party with held items and moves: always ItemCustomMoves; a move left 0 is
+  the species' own at that level). Level scaling, TEAM PADDING and co-op joining read the edited party like any other.
+  Test tools/test/maker_trainers.sh.
+- **The checker** (maker/maker_publish.cpp CheckEvents, decision 25): an event the game can't compile (error), an
+  autorun page that never turns itself off (error), a flag of the user's own that nothing sets (warning), a letter the
+  font doesn't have (error: only English letters, é and É), a line too wide for the message box (warning, measured in
+  the game's font: MakerApi_TextWidth, 208 pixels).
+
+## Moemon Maker, M3a: the database
+
+- **The tables through pointers:** gSpeciesInfo, gBattleMoves, gMoveCategories, gLevelUpLearnsets (include/pokemon.h),
+  gItems (item.h), gSpeciesNames and gMoveNames (data.h) are `#define`d to pointers (gSpeciesInfoTable...) that point at
+  the built tables (renamed ...Base where they're built: pokemon.c, item.c, data.c) or at the Maker's patched copies.
+  Code reads them exactly as before. Never take `ARRAY_COUNT` / `sizeof` of these names (use gSpeciesInfoCount,
+  gSpeciesNamesCount, gItemsCount, MOVES_COUNT, NUM_SPECIES), and never put `&gSpeciesInfo[x]` in a static initializer.
+- **The edits** (src/maker/maker_database.c, maker/maker_database_ui.cpp, Tools > Database): MoemonMaker/database.txt,
+  `species` / `move` / `item` blocks, one line a field with the value it replaced (`was=`; a learnset's and an item's
+  words' as a hash). A line whose `was` no longer matches the game is left out (the game's update wins) and the window
+  says how many. POKeMON: name, base stats, types, abilities, catch rate, EXP yield, EVs, wild held items, gender,
+  egg cycles, friendship, growth rate, egg groups, learnset. Moves: name, power, type, accuracy, PP, category,
+  priority, effect chance, effect (the game's own effects: decision 23), target, flags. Items: name, price, hold effect
+  and value, words. Hot: the editor sends the whole text as it changes (MakerApi_SetDatabase).
+- Test tools/test/maker_database.sh (debug `mp dbinfo SPECIES MOVE ITEM` prints what the game reads).
+- **Pictures** (src/maker/maker_art.c, DATABASE > POKeMON > PICTURES): MoemonMaker/art/SPECIES_X_front.png (64x64, or
+  64x128 for the front's two frames), _back.png, _shiny.png (the front in shiny colors: gives the shiny palette; without
+  it the new palette turned a sixth of the way round). Fit to 15 colors + clear by a median cut, the front and back
+  sharing one palette (a picture left as the game's is fit with the new one). gMonFrontPicTable / BackPic / Palette /
+  ShinyPalette are now `MP_MONART_ART(gMakerArt..., table)` (include/data.h): the Maker's patched copies (whole tables:
+  gMonArtCounts_Moe / _Pokemon) whose entries point at all-literal LZ77 data, in both CREATURES sets. MakerApi_SpeciesPicture
+  draws what the game shows for the editor. Test: maker_database.sh (a generated PNG, `maker pic SPECIES`).
+- **The battle bench** (TRAINERS window, BATTLE BENCH): "Battle this trainer now" starts a test game (a story point's
+  team or a copy of save file 1, never the real save) on the open map and battles the trainer as soon as the field is
+  up (src/maker/maker_play.c MakerApi_PlayBattle / BenchFrame: the trainer's flag cleared, a one-line Maker event
+  `battle TRAINER ...` run). Under it a damage estimate both ways (MakerApi_Damage, maker_database.c: perfect IVs, no
+  EVs, neutral natures; the game's formula with the physical / special split, STAB and the type chart from the edited
+  tables, before abilities, items and weather). Test commands `maker bench TRAINER KIND`, `maker damage A LV B LV MOVE`
+  (tools/test/maker_trainers.sh).
+
+## Moemon Maker, M4a: the debugger
+
+- **Breakpoints** on a Maker event's command lines (maker/maker_debug_ui.cpp, Tools > Debugger: a click on the dot
+  before a line). The compiler keeps where each command line's code starts (maker_events.c Compiled.lineAt / lineNo,
+  numbered as the compiler reads the body: blank lines left out, the first line 1). script.c asks Maker_DebugHold before
+  each command of the field's script (sGlobalScriptContext only: an immediate script never waits) while gMakerDebugOn;
+  a held script returns TRUE (still running) without running the command. STEP (F10) runs that line and holds at the
+  next line of any Maker event; CONTINUE (F8) runs on to the next breakpoint. Stopping the test game lets go.
+- **WATCH**: FLAG_... / VAR_... by the game's names, the user's own flags by name and self switches
+  (SELF:MAP:EVENT:A) through MakerApi_DebugValue (maker_flags.c Maker_FlagFind never gives a name a flag).
+- Test tools/test/maker_debug.sh (`maker break MAP EVENT LINE`, `maker step`, `maker continue`, `maker held`,
+  `maker watch NAME`).
+
 ## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
 - SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py
   STAIRS gives them Emerald's unused behaviors 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down), arrow warps
@@ -5813,6 +5935,12 @@ the most). Each table now shows a move before it's made and holds what happened 
 - **Yu-Gi-Oh! AI Tributes** (ygo_ai.c, the CARDS answer): a Tribute whose worth the engine doesn't give counts as one,
   and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
   duel 4).
+
+## MAGIC's static abilities (1.121.0)
+- src/mtg/mtg_static.c: lords, anthems, keywords / landwalk / protection given to others, self statics with a
+  condition, can't block / can't attack / can't be blocked by (docs/MTG_HANDOFF.md "Status (2026-11-06)"). The table
+  shows what they change through Mtg_Power / Mtg_Toughness / Mtg_Keywords as before (a changed creature's numbers in
+  green); landwalk or protection given by a static isn't in the keyword line under the name yet.
 
 ## MAGIC's screens like the others' (1.112.0)
 - **SEARCH & SORT** (src/tcg/tcg_search.c, SEARCH_MAGIC "magic"; mtg_ui.c sSearchGame): {SEARCH} (L2 / LT / ZL, or F)

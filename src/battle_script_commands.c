@@ -3130,6 +3130,7 @@ static void Cmd_tryfaintmon(void)
             {
                 if (gBattleResults.opponentFaintCounter < 255)
                     gBattleResults.opponentFaintCounter++;
+                MP_Candy_OnFoeFaint(gBattleMons[gActiveBattler].species);   // Moemon Kai: battle facilities' candies (mp_candy.c)
                 {
                     void Sinnoh_RankingsDefeated(void);
                     Sinnoh_RankingsDefeated();   // Moemon Kai: POKéMON defeated (JUBILIFE TV's rankings: s3d_rankings.c)

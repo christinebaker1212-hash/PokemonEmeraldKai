@@ -31,7 +31,10 @@ struct BagPocket
     u8 capacity;
 };
 
-extern const struct Item gItems[];
+// Moemon Maker (M3): the built table (gItemsBase, item.c) or the Maker's patched copy (src/maker/maker_database.c)
+extern const struct Item *gItemsTable;
+#define gItems gItemsTable
+extern const u32 gItemsCount;
 extern struct BagPocket gBagPockets[];
 
 void ApplyNewEncryptionKeyToBagItems(u32 newKey);

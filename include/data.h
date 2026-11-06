@@ -153,18 +153,29 @@ extern const u8 gEnemyMonElevation_Moe[NUM_SPECIES], gEnemyMonElevation_Pokemon[
 extern const union AnimCmd *const *const gMonFrontAnimsPtrTable_Moe[], *const *const gMonFrontAnimsPtrTable_Pokemon[];
 bool8 MP_MonArtPokemon(void);   // mp_monart.c
 #define MP_MONART(table) (MP_MonArtPokemon() ? table##_Pokemon : table##_Moe)
-#define gMonFrontPicTable      MP_MONART(gMonFrontPicTable)
-#define gMonBackPicTable       MP_MONART(gMonBackPicTable)
-#define gMonPaletteTable       MP_MONART(gMonPaletteTable)
-#define gMonShinyPaletteTable  MP_MONART(gMonShinyPaletteTable)
+// Moemon Maker (M3): the user's own pictures (src/maker/maker_art.c) are patched copies of these four, per set
+extern const struct CompressedSpriteSheet *gMakerArtFront[2], *gMakerArtBack[2];
+extern const struct CompressedSpritePalette *gMakerArtPal[2], *gMakerArtShiny[2];
+#define MP_MONART_ART(maker, table) (MP_MonArtPokemon() ? (maker[1] ? maker[1] : table##_Pokemon) : (maker[0] ? maker[0] : table##_Moe))
+#define gMonFrontPicTable      MP_MONART_ART(gMakerArtFront, gMonFrontPicTable)
+#define gMonBackPicTable       MP_MONART_ART(gMakerArtBack, gMonBackPicTable)
+#define gMonPaletteTable       MP_MONART_ART(gMakerArtPal, gMonPaletteTable)
+#define gMonShinyPaletteTable  MP_MONART_ART(gMakerArtShiny, gMonShinyPaletteTable)
 #define gMonFrontPicCoords     MP_MONART(gMonFrontPicCoords)
 #define gMonBackPicCoords      MP_MONART(gMonBackPicCoords)
 #define gEnemyMonElevation     MP_MONART(gEnemyMonElevation)
 #define gMonFrontAnimsPtrTable MP_MONART(gMonFrontAnimsPtrTable)
 
-extern const struct Trainer gTrainers[];
+// Moemon Maker (M2c): the game reads its trainers through this pointer: the built table (gTrainersBase, data.c), or the
+// Maker's patched copy (src/maker/maker_trainers.c)
+extern const struct Trainer *gTrainersTable;
+#define gTrainers gTrainersTable
 extern const u8 gTrainerClassNames[][13];
-extern const u8 gSpeciesNames[][POKEMON_NAME_LENGTH + 1];
-extern const u8 gMoveNames[MOVES_COUNT][MOVE_NAME_LENGTH + 1];
+// Moemon Maker (M3): names through pointers too (the built tables, data.c, or the Maker's edited copies)
+extern const u8 (*gSpeciesNamesTable)[POKEMON_NAME_LENGTH + 1];
+#define gSpeciesNames gSpeciesNamesTable
+extern const u32 gSpeciesNamesCount;
+extern const u8 (*gMoveNamesTable)[MOVE_NAME_LENGTH + 1];
+#define gMoveNames gMoveNamesTable
 
 #endif // GUARD_DATA_H

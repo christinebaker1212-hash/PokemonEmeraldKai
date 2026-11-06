@@ -31,6 +31,7 @@
 #include "maker.h"
 #include "mp_region.h"
 #include "maker_api.h"
+#include "battle_setup.h"
 
 extern char gPlatformSavePath[512];
 void Platform_ReopenSaveFile(void);
@@ -49,6 +50,7 @@ void SetContinueGameWarp(s8 mapGroup, s8 mapNum, s8 warpId, s16 x, s16 y);
 void SetLastHealLocationWarp(u8 healLocationId);
 
 static bool8 sPlaying;
+static u16 sBenchTrainer;   // (M3: the battle bench: a trainer to battle as soon as the field is up)
 static bool8 sNewGamePending;     // a story point: MP_DebugQuickStartNewGame asks Maker_PlayNewGame
 static u8 sKind;
 static s16 sMap, sX, sY;
@@ -158,6 +160,30 @@ int MakerApi_Play(int map, int x, int y, int kind, int slot)
     return 1;
 }
 
+// The battle bench (M3, the TRAINERS window): play as KIND and battle TRAINER at once (its "already beaten" flag cleared)
+int MakerApi_PlayBattle(int map, int x, int y, int kind, int slot, int trainer)
+{
+    if (trainer <= 0 || !MakerApi_Play(map, x, y, kind, slot))
+        return 0;
+    sBenchTrainer = trainer;
+    return 1;
+}
+
+static void BenchFrame(void)
+{
+    const struct MakerMapName *m = Maker_Map(sMap);
+    const char *name = MakerApi_NameOf(MAKER_NAMES_TRAINER, sBenchTrainer);
+    char src[200];
+    if (!sBenchTrainer || sNewGamePending || gMain.callback2 != CB2_Overworld || ArePlayerFieldControlsLocked()
+     || ScriptContext_IsEnabled() || m == NULL)
+        return;
+    snprintf(src, sizeof(src), "battle %s \"The battle bench!\" \"That was the bench battle.\"\n", name);
+    ClearTrainerFlag(sBenchTrainer);
+    ScriptContext_SetupScript(Maker_EventScript(m->name, "BATTLE_BENCH", MAKER_EVENT_ON_SIGN, src));
+    printf("[maker] battle bench: %s\n", name);
+    sBenchTrainer = 0;
+}
+
 bool8 Maker_PlayNewGamePending(void)
 {
     return sNewGamePending;
@@ -251,6 +277,8 @@ void Maker_StopPlay(void)
         return;
     sPlaying = FALSE;
     sNewGamePending = FALSE;
+    sBenchTrainer = 0;
+    Maker_DebugReset();
     UseSave(sRealSavePath);
     Display_SetMainWindowShown(FALSE);
     Maker_BackToWaiting();
@@ -284,6 +312,8 @@ void Maker_PlayFrame(void)
 {
     if (sNewGamePending && gMain.callback2 == CB2_Overworld)
         sNewGamePending = FALSE;
+    if (sPlaying)
+        BenchFrame();
     if (!sPlaying || !sReload || gMain.callback2 != CB2_Overworld || ArePlayerFieldControlsLocked() || ScriptContext_IsEnabled())
         return;
     if (sReload == 1)

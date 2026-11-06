@@ -32,6 +32,10 @@ struct MakerMapInfo
 int MakerApi_MapCount(void);
 int MakerApi_MapInfo(int index, struct MakerMapInfo *info);   // 0 if there's no such map
 int MakerApi_FindMap(const char *name);                      // its index, or -1
+int MakerApi_SetNewMap(const char *text);   // M2b: a new map made or changed (MoemonMaker/maps/MAP_X.txt); its index
+int MakerApi_IsNewMap(int index);           // 1 for a map the user made
+int MakerApi_TilesetCount(void);
+const char *MakerApi_TilesetName(int i, int *secondary);
 
 // A map's tiles (src/maker/maker_tiles.c): loaded into the game's own BG VRAM while the editor is open, animated by
 // the game's own tile animations
@@ -92,11 +96,54 @@ int MakerApi_ConnectionInfo(int map, int i, int *direction, int *offset, int *de
 
 // Named values (songs, looks, movement types, trainer types, items, species, flags): MAKER_NAMES_*
 enum { MAKER_NAMES_SONG, MAKER_NAMES_GFX, MAKER_NAMES_MOVEMENT, MAKER_NAMES_TRAINERTYPE, MAKER_NAMES_ITEM,
-       MAKER_NAMES_SPECIES, MAKER_NAMES_FLAG, MAKER_NAMES_COUNT };
+       MAKER_NAMES_SPECIES, MAKER_NAMES_FLAG, MAKER_NAMES_VAR, MAKER_NAMES_TRAINER, MAKER_NAMES_MAPSEC, MAKER_NAMES_MOVE,
+       MAKER_NAMES_TYPE, MAKER_NAMES_ABILITY, MAKER_NAMES_COUNT };
 int MakerApi_NameCount(int table);
 const char *MakerApi_NameAt(int table, int i, unsigned int *value);
 const char *MakerApi_NameOf(int table, unsigned int value);       // "" if it has none
 int MakerApi_ValueOf(int table, const char *name, unsigned int *value);   // 0 if no such name
+// Trainers (M2c: src/maker/maker_trainers.c): the game's own, and the user's edits (MoemonMaker/trainers.txt)
+struct MakerTrainerMon { int species, level, iv, item, moves[4]; };
+struct MakerTrainerInfo
+{
+    char name[16];
+    int trainerClass, pic, music, doubleBattle, partySize;
+    unsigned int ai, hash;
+    int items[4];
+    struct MakerTrainerMon party[6];
+};
+int MakerApi_TrainerInfo(int id, struct MakerTrainerInfo *info);   // 0 if there's no such trainer
+int MakerApi_SetTrainers(const char *text);
+// The database (M3a: src/maker/maker_database.c): the game's own Pokémon, moves and items, and the user's edits
+// (MoemonMaker/database.txt)
+enum { MAKER_DB_SPECIES, MAKER_DB_MOVE, MAKER_DB_ITEM };
+#define MAKER_LEARNSET_MAX 128
+struct MakerSpeciesInfo
+{
+    char name[24];
+    int stats[6], types[2], abilities[2], evs[6], items[2], eggGroups[2];
+    int catchRate, expYield, gender, eggCycles, friendship, growth, flee, color;
+    int learnCount, learnLevel[MAKER_LEARNSET_MAX], learnMove[MAKER_LEARNSET_MAX];
+    unsigned int learnHash;
+};
+struct MakerMoveInfo { char name[24]; int power, type, accuracy, pp, chance, target, priority, flags, effect, category; };
+struct MakerItemInfo { char name[24]; char description[400]; int price, holdEffect, holdParam, pocket; unsigned int descriptionHash; };
+int MakerApi_DatabaseCount(int kind);
+int MakerApi_SpeciesInfo(int id, struct MakerSpeciesInfo *info);   // 0 if there's no such Pokémon
+int MakerApi_MoveInfo(int id, struct MakerMoveInfo *info);
+int MakerApi_ItemInfo(int id, struct MakerItemInfo *info);
+int MakerApi_SetDatabase(const char *text);   // the edited entries
+int MakerApi_DatabaseConflicts(void);
+// The battle bench's damage estimate (perfect IVs, no EVs, neutral natures; before abilities, items and weather)
+struct MakerDamage { int min, max, defenderHp, effectiveness, stab; };   // effectiveness in percent
+int MakerApi_Damage(int atkSpecies, int atkLevel, int defSpecies, int defLevel, int move, struct MakerDamage *out);
+// Pictures (M3: src/maker/maker_art.c): MoemonMaker/art/SPECIES_X_front / _back / _shiny.png
+void MakerApi_ReloadArt(void);
+int MakerApi_SpeciesPicture(int species, int back, int shiny, unsigned char *rgba);   // 64x64 RGBA as the game shows it   // lines left out by the last MakerApi_SetDatabase: the game changed under them
+int MakerApi_TextWidth(const char *utf8);   // in the message box's font, in pixels (M2c's checker)
+const char *MakerApi_CheckEvent(const char *map, const char *event, int kind, const char *source);   // "" when it compiles
+int MakerApi_SpecialCount(void);
+const char *MakerApi_SpecialName(int i);
 
 // A map's wild Pokémon as built (src/maker/maker_wild.c)
 enum { MAKER_WILD_LAND, MAKER_WILD_WATER, MAKER_WILD_ROCK, MAKER_WILD_FISH, MAKER_WILD_AREAS };
@@ -125,7 +172,16 @@ void MakerApi_ReloadEdits(void);       // the saved edits again (the editor's un
 
 // Playing from the editor, F5 (src/maker/maker_play.c)
 enum { MAKER_PLAY_SAVE, MAKER_PLAY_START, MAKER_PLAY_BADGES4, MAKER_PLAY_CHAMPION, MAKER_PLAY_TEST, MAKER_PLAY_KINDS };
-int MakerApi_Play(int map, int x, int y, int kind, int slot);   // slot: the save file copied (1-3; 0 = the one in use)
+int MakerApi_Play(int map, int x, int y, int kind, int slot);
+// The debugger (M4: maker_events.c): breakpoints on a Maker event's lines, step / continue, watched values
+int MakerApi_DebugSetBreak(const char *map, const char *event, int line, int on);
+int MakerApi_DebugHasBreak(const char *map, const char *event, int line);
+void MakerApi_DebugClearBreaks(void);
+int MakerApi_DebugPaused(char *map, int mapSize, char *event, int eventSize, int *line);   // 1 while a script is held
+void MakerApi_DebugContinue(void);
+void MakerApi_DebugStep(void);
+int MakerApi_DebugValue(const char *name, int *value);   // 0 if there's no such flag / variable
+int MakerApi_PlayBattle(int map, int x, int y, int kind, int slot, int trainer);   // (M3: the battle bench)   // slot: the save file copied (1-3; 0 = the one in use)
 void MakerApi_StopPlay(void);
 int MakerApi_IsPlaying(void);
 unsigned int MakerApi_GameWindowId(void);   // the game's own window (F12 / closing it ends the test)

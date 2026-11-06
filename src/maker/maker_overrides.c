@@ -17,6 +17,9 @@
 //                                                  offset; or removed 0 1
 //   add connection N direction=.. map=MAP_X offset=..
 //   add warp N x=.. y=.. elevation=.. dest=MAP_X:N a new warp (after the map's own: theirs keep their numbers)
+//   event NAME on=person:KEY | sign:KEY | trigger:KEY | map     an event (M2: src/maker/maker_events.c), its pages and
+//     page trigger=talk flag=..                                commands on the indented lines after it; an added
+//       text "..."                                             person or sign takes one with script=event:NAME
 //
 // Person PROPs: x y elevation look movement range_x range_y trainer sight flag (values by name where they have one);
 // "removed" 0 1 takes a person, sign or trigger away. An added person's script is one the map's own people, signs or
@@ -40,6 +43,7 @@
 #include "s3d.h"
 #include "o3d.h"   // Moemon Kai: ORRE
 #include "event_data.h"
+#include "script.h"
 #include "constants/event_bg.h"
 #include "constants/flags.h"
 #include "constants/items.h"
@@ -65,6 +69,7 @@ struct WildEdit { u8 area, slot, prop; s32 was, now; };   // prop: 0 species, 1 
 enum { ADD_PERSON, ADD_HIDDEN, ADD_SIGN, ADD_CONNECTION, ADD_WARP };
 struct AddEdit { u8 kind; u16 n; s32 v[PROP_COUNT]; bool8 has[PROP_COUNT]; char script[80]; };
 struct PropEdit { u8 kind, prop; char key[80]; s32 was, now; };
+struct EventDef { char name[48]; char on[96]; char *body; u32 len, cap; };
 
 struct MapEdits
 {
@@ -78,6 +83,8 @@ struct MapEdits
     u32 addCount, addCap;
     struct WildEdit *wild;
     u32 wildCount, wildCap;
+    struct EventDef *defs;   // M2's events (maker_events.c)
+    u32 eventCount, eventCap;
     bool8 hasMusic;
     s32 musicWas, musicNow;
     // built from the edits: the patched header (NULL until asked for) and blocks
@@ -88,7 +95,7 @@ struct MapEdits
     u32 skipped;              // edits whose WAS the game no longer has
 };
 
-static struct MapEdits *sEdits[1700];
+static struct MapEdits *sEdits[2400];   // (the game's maps, then the user's new ones: MAKER_NEW_MAPS_MAX)
 static bool8 sAny, sLoaded;
 
 static struct MapEdits *EditsFor(int map)
@@ -192,6 +199,9 @@ static void FreeEdits(int map)
     free(e->props);
     free(e->adds);
     free(e->wild);
+    for (u32 k = 0; k < e->eventCount; k++)
+        free(e->defs[k].body);
+    free(e->defs);
     free(e);
     sEdits[map] = NULL;
 }
@@ -273,6 +283,7 @@ static int ParseEdits(const char *text, const char *from)
     char line[512];
     const char *p = text;
     struct MapEdits *e = NULL;
+    struct EventDef *ev = NULL;   // (the event whose indented lines these are)
     int map = -1, lineNo = 0;
     while (*p)
     {
@@ -286,6 +297,23 @@ static int ParseEdits(const char *text, const char *from)
         line[len] = 0;
         p = nl ? nl + 1 : p + strlen(p);
         lineNo++;
+        if (len && line[len - 1] == '\r')
+            line[--len] = 0;
+        if (ev && (line[0] == ' ' || line[0] == '\t' || line[0] == 0))
+        {
+            // an event's page or command (kept as written: maker_events.c compiles it)
+            if (ev->len + len + 2 > ev->cap)
+            {
+                ev->cap = (ev->len + len + 2) * 2;
+                ev->body = realloc(ev->body, ev->cap);
+            }
+            memcpy(ev->body + ev->len, line, len);
+            ev->len += len;
+            ev->body[ev->len++] = '\n';
+            ev->body[ev->len] = 0;
+            continue;
+        }
+        ev = NULL;
         if (line[0] == '#' || line[0] == 0 || line[0] == '\r')
             continue;
         n = sscanf(line, "%95s %95s %95s %95s %95s", word[0], word[1], word[2], word[3], word[4]);
@@ -311,7 +339,22 @@ static int ParseEdits(const char *text, const char *from)
         }
         if (e == NULL)
             continue;
-        if (strcmp(word[0], "block") == 0 && n == 5)
+        if (strcmp(word[0], "event") == 0 && n >= 2)
+        {
+            if (e->eventCount == e->eventCap)
+            {
+                e->eventCap = e->eventCap ? e->eventCap * 2 : 8;
+                e->defs = realloc(e->defs, e->eventCap * sizeof(*e->defs));
+            }
+            ev = &e->defs[e->eventCount++];
+            memset(ev, 0, sizeof(*ev));
+            snprintf(ev->name, sizeof(ev->name), "%s", word[1]);
+            if (n >= 3 && strncmp(word[2], "on=", 3) == 0)
+                snprintf(ev->on, sizeof(ev->on), "%s", word[2] + 3);
+            ev->body = calloc(1, 64);
+            ev->cap = 64;
+        }
+        else if (strcmp(word[0], "block") == 0 && n == 5)
             AddBlock(e, atoi(word[1]), atoi(word[2]), strtol(word[3], NULL, 0), strtol(word[4], NULL, 0));
         else if (strcmp(word[0], "music") == 0 && n == 3)
         {
@@ -485,7 +528,13 @@ static void LoadAll(void)
 void Maker_LoadEdits(void)
 {
     if (!sLoaded)
+    {
+        Maker_NewMaps_Load();   // (M2b: the new maps first: their edits name them)
         LoadAll();
+        Maker_LoadTrainers();   // (M2c)
+        Maker_LoadDatabase();   // (M3a)
+        Maker_LoadArt();   // (M3)
+    }
 }
 
 void MakerApi_ReloadEdits(void)
@@ -495,6 +544,9 @@ void MakerApi_ReloadEdits(void)
         FreeEdits(i);
     sAny = FALSE;
     LoadAll();
+    Maker_LoadTrainers();
+    Maker_LoadDatabase();
+    Maker_LoadArt();
 }
 
 // The editor's edits of one map (its whole text; "" when it has none left)
@@ -562,10 +614,23 @@ static s32 *PersonField(struct ObjectEventTemplate *t, u8 prop, s32 *tmp)
 }
 
 // A script by its label among the map's own (its people's, signs', triggers'), or the Maker's own
-static const u8 *ScriptOnMap(int map, const struct MapEvents *be, const char *label)
+// An event of the map's edits by name, compiled for a person, sign or trigger (maker_events.c)
+static const u8 *EventScriptOf(int map, const char *name, u8 kind)
+{
+    struct MapEdits *e = EditsFor(map);
+    u32 i;
+    for (i = 0; e && i < e->eventCount; i++)
+        if (strcmp(e->defs[i].name, name) == 0)
+            return Maker_EventScript(Maker_Map(map)->name, name, kind, e->defs[i].body);
+    return Maker_EventScript_Nothing;
+}
+
+static const u8 *ScriptOnMap(int map, const struct MapEvents *be, const char *label, u8 kind)
 {
     const struct MakerMapEventNames *names = Maker_MapEventNames(map);
     u32 i;
+    if (strncmp(label, "event:", 6) == 0)
+        return EventScriptOf(map, label + 6, kind);
     if (strcmp(label, "itemball") == 0)
         return Maker_EventScript_ItemBall;
     if (strcmp(label, "nothing") == 0 || label[0] == 0 || names == NULL)
@@ -829,6 +894,45 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
         if (!applied)
             e->skipped++;
     }
+    // events on the map's own people, signs and triggers (on=KIND:KEY), by the same keys as their edits
+    for (j = 0; j < e->eventCount; j++)
+    {
+        const struct EventDef *d = &e->defs[j];
+        bool8 bound = FALSE;
+        if (strncmp(d->on, "person:", 7) == 0)
+            for (i = 0; i < be->objectEventCount && !bound; i++)
+            {
+                const struct MakerObjName *on = names && i < names->objCount ? Maker_ObjName(names->obj + i) : NULL;
+                KeyOf(key, sizeof(key), on ? on->localId : "", on ? on->script : "", be->objectEvents[i].x, be->objectEvents[i].y);
+                if (strcmp(key, d->on + 7) == 0)
+                    objs[i].script = Maker_EventScript(mn->name, d->name, MAKER_EVENT_ON_PERSON, d->body), bound = TRUE;
+            }
+        else if (strncmp(d->on, "sign:", 5) == 0)
+            for (i = 0; i < be->bgEventCount && !bound; i++)
+            {
+                const struct MakerBgName *bn = names && i < names->bgCount ? Maker_BgName(names->bg + i) : NULL;
+                KeyOf(key, sizeof(key), "", bn ? bn->script : "", be->bgEvents[i].x, be->bgEvents[i].y);
+                if (strcmp(key, d->on + 5) == 0 && be->bgEvents[i].kind != BG_EVENT_HIDDEN_ITEM
+                 && be->bgEvents[i].kind != BG_EVENT_SECRET_BASE)
+                    bgs[i].bgUnion.script = Maker_EventScript(mn->name, d->name, MAKER_EVENT_ON_SIGN, d->body), bound = TRUE;
+            }
+        else if (strncmp(d->on, "trigger:", 8) == 0)
+            for (i = 0; i < be->coordEventCount && !bound; i++)
+            {
+                const struct MakerCoordName *cn = names && i < names->coordCount ? Maker_CoordName(names->coord + i) : NULL;
+                KeyOf(key, sizeof(key), "", cn ? cn->script : "", be->coordEvents[i].x, be->coordEvents[i].y);
+                if (strcmp(key, d->on + 8) == 0)
+                {
+                    coords[i].script = Maker_EventScript(mn->name, d->name, MAKER_EVENT_ON_TRIGGER, d->body);
+                    coords[i].trigger = 1, coords[i].index = 1;   // (on every step: VarGet(1) is 1; the pages decide)
+                    bound = TRUE;
+                }
+            }
+        else
+            bound = TRUE;   // (on=map, or an added one's script=event:NAME)
+        if (!bound)
+            e->skipped++;
+    }
     // what was taken away left out, what was added put in
     {
         u32 n = 0, maxLocal = 0;
@@ -857,7 +961,7 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
             t->movementRangeX = a->v[PROP_RANGE_X];
             t->movementRangeY = a->v[PROP_RANGE_Y];
             t->trainerType = a->v[PROP_TRAINER];
-            t->script = ScriptOnMap(map, be, a->script);
+            t->script = ScriptOnMap(map, be, a->script, MAKER_EVENT_ON_PERSON);
             if (strcmp(a->script, "itemball") == 0)
             {
                 // (the item rides in the berry tree / sight field, read by Maker_ItemBallItem; taken once)
@@ -898,7 +1002,7 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
             else
             {
                 b->kind = BG_EVENT_PLAYER_FACING_ANY;
-                b->bgUnion.script = ScriptOnMap(map, be, a->script);
+                b->bgUnion.script = ScriptOnMap(map, be, a->script, MAKER_EVENT_ON_SIGN);
             }
         }
         e->events->bgEventCount = n;
@@ -943,6 +1047,29 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
     return e->header;
 }
 
+// field_control_avatar.c ProcessPlayerFieldInput, beside the map's own frame scripts: an event's autorun page whose
+// conditions hold starts (RPG Maker's Autorun: it runs again until its page's conditions change, e.g. a self switch)
+bool8 Maker_TryAutorun(void)
+{
+    struct MapEdits *e;
+    u32 i;
+    if (!sAny)
+        return FALSE;
+    e = EditsFor(Maker_MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum));
+    for (i = 0; e && i < e->eventCount; i++)
+        if (strstr(e->defs[i].body, "autorun"))
+        {
+            const u8 *body = Maker_EventAutorun(Maker_Map(Maker_MapIndex(gSaveBlock1Ptr->location.mapGroup,
+                                                gSaveBlock1Ptr->location.mapNum))->name, e->defs[i].name, e->defs[i].body);
+            if (body)
+            {
+                ScriptContext_SetupScript(body);
+                return TRUE;
+            }
+        }
+    return FALSE;
+}
+
 // overworld.c Overworld_GetMapHeaderByGroupAndId: an edited map's header, or NULL for the game's own
 const struct MapHeader *Maker_EditedHeader(u16 mapGroup, u16 mapNum)
 {
@@ -952,7 +1079,7 @@ const struct MapHeader *Maker_EditedHeader(u16 mapGroup, u16 mapNum)
         return NULL;
     map = Maker_MapIndex(mapGroup, mapNum);
     e = EditsFor(map);
-    if (e == NULL || (e->propCount == 0 && e->addCount == 0 && !e->hasMusic))
+    if (e == NULL || (e->propCount == 0 && e->addCount == 0 && !e->hasMusic && e->eventCount == 0))
         return NULL;
     return BuildHeader(map, e);
 }

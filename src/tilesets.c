@@ -1,3 +1,4 @@
+#include <string.h>
 #include "global.h"
 #include "tilesets.h"
 #include "tileset_anims.h"
@@ -25,4 +26,28 @@ int Tilesets_MakerMetatileCount(const struct Tileset *tileset, const char **name
     if (name)
         *name = "";
     return 0;
+}
+
+// Moemon Maker (M2b): a tileset by the name the TILES panel shows ("General"), for the user's new maps
+const struct Tileset *Tilesets_MakerByName(const char *name)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sMakerTilesetSizes); i++)
+        if (strcmp(sMakerTilesetSizes[i].name, name) == 0)
+            return sMakerTilesetSizes[i].tileset;
+    return NULL;
+}
+
+int MakerApi_TilesetCount(void)
+{
+    return ARRAY_COUNT(sMakerTilesetSizes);
+}
+
+const char *MakerApi_TilesetName(int i, int *secondary)
+{
+    if (i < 0 || i >= (int)ARRAY_COUNT(sMakerTilesetSizes))
+        return NULL;
+    if (secondary)
+        *secondary = sMakerTilesetSizes[i].tileset->isSecondary;
+    return sMakerTilesetSizes[i].name;
 }

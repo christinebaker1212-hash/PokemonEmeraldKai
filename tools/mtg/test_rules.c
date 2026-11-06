@@ -385,6 +385,93 @@ static int HandCount(int player)
     return n;
 }
 
+// static abilities (mtg_static.c): lords, anthems, keywords and protection granted, the layers
+static void TestStatics(void)
+{
+    int lord, lord2, merfolk, bears, goblin, moon, island, law, bolt, black;
+    printf("statics: lords, anthems, landwalk, protection, can't block, conditions\n");
+
+    Table();   // Lord of Atlantis: other Merfolk +1/+1 and islandwalk; itself and non-Merfolk unchanged
+    lord = Put(0, "Lord of Atlantis", MTG_ZONE_BATTLEFIELD);
+    merfolk = Put(0, "Merfolk of the Pearl Trident", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_Power(&sD, merfolk) == 2 && Mtg_Toughness(&sD, merfolk) == 2, "the lord pumps another merfolk (%d/%d)",
+          Mtg_Power(&sD, merfolk), Mtg_Toughness(&sD, merfolk));
+    CHECK(Mtg_Power(&sD, lord) == 2 && Mtg_Toughness(&sD, lord) == 2, "not itself");
+    CHECK(Mtg_Power(&sD, bears) == 2, "not a bear");
+    CHECK(Mtg_CanBlock(&sD, bears, merfolk), "no island: the bears block the merfolk");
+    island = Put(1, "Island", MTG_ZONE_BATTLEFIELD);
+    CHECK(!Mtg_CanBlock(&sD, bears, merfolk), "an island: islandwalk");
+    CHECK(Mtg_CanBlock(&sD, bears, lord), "the lord itself has no islandwalk");
+    lord2 = Put(0, "Lord of Atlantis", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_Power(&sD, merfolk) == 3 && Mtg_Power(&sD, lord) == 3 && Mtg_Power(&sD, lord2) == 3,
+          "two lords pump each other (%d %d %d)", Mtg_Power(&sD, merfolk), Mtg_Power(&sD, lord), Mtg_Power(&sD, lord2));
+    Mtg_MoveTo(&sD, lord, MTG_ZONE_GRAVEYARD);
+    Mtg_MoveTo(&sD, lord2, MTG_ZONE_GRAVEYARD);
+    CHECK(Mtg_Power(&sD, merfolk) == 1, "the lords gone: back to 1/1");
+    (void)island;
+
+    Table();   // Bad Moon: black creatures, either side; a pump stacks on it; Goblin King's mountainwalk
+    moon = Put(0, "Bad Moon", MTG_ZONE_BATTLEFIELD);
+    black = Put(1, "Drudge Skeletons", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_Power(&sD, black) == 2 && Mtg_Toughness(&sD, black) == 2, "bad moon pumps the opponent's black creature too (%d/%d)",
+          Mtg_Power(&sD, black), Mtg_Toughness(&sD, black));
+    CHECK(Mtg_Power(&sD, bears) == 2, "not the green bears");
+    sD.objs[black].tempPower = 2;
+    CHECK(Mtg_Power(&sD, black) == 4, "a pump on top (%d)", Mtg_Power(&sD, black));
+    goblin = Put(0, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    Put(0, "Goblin King", MTG_ZONE_BATTLEFIELD);
+    Put(1, "Mountain", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_Power(&sD, goblin) == 2 && !Mtg_CanBlock(&sD, bears, goblin), "goblin king: +1/+1 and mountainwalk");
+    (void)moon;
+
+    Table();   // Absolute Law: every creature has protection from red; the bolt can't target them
+    law = Put(1, "Absolute Law", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Mountain", 1);
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    CHECK((Mtg_Protection(&sD, bears) & MTG_COLOR_BIT(MTG_R)) != 0, "protection from red");
+    CHECK(!Mtg_CanTarget(&sD, bears, bolt), "the bolt can't target the bears");
+    (void)law;
+
+    Table();   // can't block, can't be blocked by, a static on itself only while it's untapped
+    {
+        int glider = Put(1, "Aesthir Glider", MTG_ZONE_BATTLEFIELD), kithkin = Put(0, "Amrou Kithkin", MTG_ZONE_BATTLEFIELD);
+        int angel = Put(1, "Serra Angel", MTG_ZONE_BATTLEFIELD), tortoise;
+        bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        CHECK(!Mtg_CanBlock(&sD, glider, kithkin), "aesthir glider can't block");
+        CHECK(!Mtg_CanBlock(&sD, angel, kithkin) && Mtg_CanBlock(&sD, bears, kithkin),
+              "amrou kithkin: not by power 3 or more (the angel), the bears may");
+        Put(0, "Bedlam", MTG_ZONE_BATTLEFIELD);
+        CHECK(!Mtg_CanBlock(&sD, bears, kithkin), "bedlam: no creature can block");
+        tortoise = Put(0, "Giant Tortoise", MTG_ZONE_BATTLEFIELD);
+        CHECK(Mtg_Toughness(&sD, tortoise) == 4, "giant tortoise untapped: 1/4 (%d)", Mtg_Toughness(&sD, tortoise));
+        sD.objs[tortoise].tapped = 1;
+        CHECK(Mtg_Toughness(&sD, tortoise) == 1, "tapped: 1/1");
+    }
+
+    Table();   // RaiseCost / ReduceCost: chill makes red spells cost {2} more; a soldier spell {1} less under daru warchief
+    {
+        MtgManaCost cost;
+        const MtgQuery *q;
+        int k, castable = 0, soldier;
+        Put(1, "Chill", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Mountain", 1);
+        bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+        Mtg_SpellCost(&sD, 0, bolt, &cost);
+        CHECK(cost.generic == 2 && cost.pip[MTG_R] == 1, "chill: the bolt costs {2}{R} (%d, %d)", cost.generic, cost.pip[MTG_R]);
+        q = Mtg_Query(&sD);
+        for (k = 0; k < q->actionCount; k++)
+            castable |= q->actions[k].kind == MTG_ACT_CAST && q->actions[k].obj == bolt;
+        CHECK(!castable, "one mountain can't cast it any more");
+        Put(0, "Daru Warchief", MTG_ZONE_BATTLEFIELD);
+        soldier = Put(0, "Standing Troops", MTG_ZONE_HAND);
+        Mtg_SpellCost(&sD, 0, soldier, &cost);
+        CHECK(cost.generic == 1 && cost.pip[MTG_W] == 1, "daru warchief: standing troops cost {1}{W} (%d)", cost.generic);
+    }
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -704,6 +791,7 @@ int main(int argc, char **argv)
     TestCombat();
     TestMana();
     TestSpells();
+    TestStatics();
     TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

@@ -461,6 +461,7 @@ bool8 MP_IsLocalFree(void);
 // The CANDY JAR (mp_candy.c): candies from released Moemon, ten of a kind make a RARE CANDY
 extern u16 gMpCandies[];
 void MP_Candy_OnRelease(u16 species);
+void MP_Candy_OnFoeFaint(u16 species);   // a foe fainted in a battle facility: a candy of its type (with the CANDY JAR)
 u32 MP_Candy_Total(void);
 void MP_Candy_Reset(void);
 u16 MP_Candy_ConvertCount(void);

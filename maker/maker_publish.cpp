@@ -5,6 +5,7 @@
 // in the working copy.
 #include <stdio.h>
 #include <string.h>
+#include <SDL.h>
 #include <set>
 #include <string>
 #include <vector>
@@ -88,6 +89,145 @@ static bool CanLeave(const std::vector<char> &walk, int w, int h, const std::vec
         }
     }
     return false;
+}
+
+// ---- M2c: the events' checks (docs/MOEMON_MAKER.md decision 25: errors block Publish, warnings don't)
+
+static std::vector<std::string> EvLines(const std::string &body)
+{
+    std::vector<std::string> out;
+    size_t pos = 0;
+    while (pos < body.size())
+    {
+        size_t nl = body.find('\n', pos);
+        std::string l = body.substr(pos, nl == std::string::npos ? std::string::npos : nl - pos);
+        size_t a = l.find_first_not_of(" \t");
+        out.push_back(a == std::string::npos ? "" : l.substr(a));
+        pos = nl == std::string::npos ? body.size() : nl + 1;
+    }
+    return out;
+}
+
+static std::vector<std::string> Quoted(const std::string &l)
+{
+    std::vector<std::string> out;
+    size_t pos = 0;
+    while ((pos = l.find('"', pos)) != std::string::npos)
+    {
+        size_t end = l.find('"', pos + 1);
+        if (end == std::string::npos)
+            break;
+        out.push_back(l.substr(pos + 1, end - pos - 1));
+        pos = end + 1;
+    }
+    return out;
+}
+
+// Every flag of the user's own any event anywhere sets (setflag X)
+static std::set<std::string> FlagsSet()
+{
+    std::set<std::string> out;
+    for (int m = 0; m < (int)gEd.maps.size(); m++)
+        if (const MapEdits *e = FindEdits(m))
+            for (auto &ev : e->events)
+                for (const std::string &l : EvLines(ev.second.body))
+                    if (l.rfind("setflag ", 0) == 0)
+                        out.insert(l.substr(8, l.find(' ', 8) == std::string::npos ? std::string::npos : l.find(' ', 8) - 8));
+    return out;
+}
+
+static void CheckEvents(int m, const MapEdits &e, std::vector<Issue> &out)
+{
+    static std::set<std::string> sSet;
+    static Uint32 sSetAt;
+    if (SDL_GetTicks() - sSetAt > 1000 || sSet.empty())
+        sSet = FlagsSet(), sSetAt = SDL_GetTicks();
+    const MakerMapInfo &info = gEd.maps[m];
+    char t[400];
+    for (auto &ev : e.events)
+    {
+        const std::string &name = ev.first;
+        std::string src;
+        for (const std::string &l : EvLines(ev.second.body))
+            src += "  " + l + "\n";
+        int kind = ev.second.on.rfind("sign:", 0) == 0 ? 1 : ev.second.on.rfind("trigger:", 0) == 0 ? 2 : ev.second.on == "map" ? 3 : 0;
+        const char *problem = MakerApi_CheckEvent(info.name, name.c_str(), kind, src.c_str());
+        if (problem && problem[0])
+        {
+            snprintf(t, sizeof(t), "%s: event %s, %s", info.title, name.c_str(), problem);
+            out.push_back(Issue{true, m, t});
+        }
+        std::vector<std::string> lines = EvLines(ev.second.body);
+        for (size_t i = 0; i < lines.size(); i++)
+        {
+            const std::string &l = lines[i];
+            // an autorun page that never turns itself off runs forever
+            if (l.rfind("page", 0) == 0 && l.find("trigger=autorun") != std::string::npos)
+            {
+                bool changes = false;
+                for (size_t k = i + 1; k < lines.size() && lines[k].rfind("page", 0) != 0; k++)
+                    if (lines[k].rfind("self ", 0) == 0 || lines[k].rfind("setflag ", 0) == 0 || lines[k].rfind("clearflag ", 0) == 0
+                     || lines[k].rfind("setvar ", 0) == 0 || lines[k].rfind("addvar ", 0) == 0 || lines[k].rfind("warp ", 0) == 0)
+                        changes = true;
+                if (!changes || (l.find("self=") == std::string::npos && l.find("flag=") == std::string::npos && l.find("var=") == std::string::npos))
+                {
+                    snprintf(t, sizeof(t), "%s: event %s has an autorun page that never turns itself off (it would run forever): "
+                             "give it a condition and change it inside (self A on, with noself=A on the page).", info.title, name.c_str());
+                    out.push_back(Issue{true, m, t});
+                }
+            }
+            // flags of the user's own that nothing sets
+            for (const char *key : {"flag=", "if flag ", "if !flag "})
+            {
+                size_t at = l.find(key);
+                if (at == std::string::npos)
+                    continue;
+                size_t a = at + strlen(key), b = l.find(' ', a);
+                std::string flag = l.substr(a, b == std::string::npos ? std::string::npos : b - a);
+                if (flag.rfind("FLAG_", 0) != 0 && !flag.empty() && !sSet.count(flag) && l.find("noflag=" + flag) == std::string::npos)
+                {
+                    snprintf(t, sizeof(t), "%s: event %s asks for the flag %s, but nothing sets it.", info.title, name.c_str(), flag.c_str());
+                    out.push_back(Issue{false, m, t});
+                }
+            }
+            // words: letters the font doesn't have, lines too wide for the message box
+            for (const std::string &q : Quoted(l))
+            {
+                for (size_t c = 0; c < q.size(); c++)
+                {
+                    unsigned char ch = q[c];
+                    if (ch >= 0x80 && !(ch == 0xC3 && c + 1 < q.size() && ((unsigned char)q[c + 1] == 0xA9 || (unsigned char)q[c + 1] == 0x89)))
+                    {
+                        snprintf(t, sizeof(t), "%s: event %s: the game's font has no \"%s\" (only English letters, é and É).", info.title,
+                                 name.c_str(), q.substr(c, 2).c_str());
+                        out.push_back(Issue{true, m, t});
+                        break;
+                    }
+                    if (ch == 0xC3)
+                        c++;
+                }
+                size_t pos = 0;
+                while (pos <= q.size())
+                {
+                    size_t brk = q.size();
+                    for (const char *sep : {"\\n", "\\p", "\\l"})
+                    {
+                        size_t f = q.find(sep, pos);
+                        if (f != std::string::npos && f < brk)
+                            brk = f;
+                    }
+                    std::string part = q.substr(pos, brk - pos);
+                    if (MakerApi_TextWidth(part.c_str()) > 208)
+                    {
+                        snprintf(t, sizeof(t), "%s: event %s: \"%s\" is too wide for the message box (use \\n for a new line).",
+                                 info.title, name.c_str(), part.c_str());
+                        out.push_back(Issue{false, m, t});
+                    }
+                    pos = brk + 2;
+                }
+            }
+        }
+    }
 }
 
 static std::vector<Issue> Check()
@@ -179,6 +319,7 @@ static std::vector<Issue> Check()
                     out.push_back(Issue{true, m, t});
                 }
         }
+        CheckEvents(m, *e, out);   // (M2c: events)
         if (int n = (m == gEd.map) ? MapView_ProblemCount() : 0)
         {
             snprintf(t, sizeof(t), "%s: %d edits the game changed under (see PROBLEMS): they're left out until you choose.", info.title, n);

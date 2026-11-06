@@ -13,7 +13,7 @@ AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/map_groups.h
 AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/layouts.h
 AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/map_event_ids.h
 # Moemon Maker: the editor's names (maps, songs, people's looks) from this build's own constants (tools/maker/gen_names.py)
-AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/maker_names.h $(INCLUDECONSTS_OUTDIR)/maker_tilesets.h
+AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/maker_names.h $(INCLUDECONSTS_OUTDIR)/maker_tilesets.h $(INCLUDECONSTS_OUTDIR)/maker_ops.h
 
 MAP_DIRS := $(dir $(wildcard $(MAPS_DIR)/*/map.json))
 MAP_CONNECTIONS := $(patsubst $(MAPS_DIR)/%/,$(MAPS_DIR)/%/connections.inc,$(MAP_DIRS))
@@ -46,8 +46,11 @@ $(INCLUDECONSTS_OUTDIR)/map_event_ids.h: $(MAP_JSONS)
 	@echo "$(MAPJSON) event_constants emerald <MAP_JSONS> $(INCLUDECONSTS_OUTDIR)/map_event_ids.h"
 
 # Moemon Maker: the editor's names, made again whenever the constants they come from change
-$(INCLUDECONSTS_OUTDIR)/maker_names.h: tools/maker/gen_names.py $(INCLUDECONSTS_OUTDIR)/map_groups.h include/constants/songs.h include/constants/event_objects.h include/constants/qz_port.h include/constants/sinnoh_gfx.h include/mp.h include/constants/event_object_movement.h include/constants/trainer_types.h include/constants/items.h include/constants/species.h include/constants/flags.h $(MAP_JSONS)
+$(INCLUDECONSTS_OUTDIR)/maker_names.h: tools/maker/gen_names.py $(INCLUDECONSTS_OUTDIR)/map_groups.h include/constants/songs.h include/constants/event_objects.h include/constants/qz_port.h include/constants/sinnoh_gfx.h include/mp.h include/constants/event_object_movement.h include/constants/trainer_types.h include/constants/items.h include/constants/species.h include/constants/flags.h include/constants/vars.h include/constants/opponents.h include/constants/region_map_sections.h include/constants/moves.h include/constants/pokemon.h include/constants/abilities.h data/specials.inc data/qz_specials.inc $(MAP_JSONS)
 	python3 tools/maker/gen_names.py $@
+	@touch $@
+$(INCLUDECONSTS_OUTDIR)/maker_ops.h: tools/maker/gen_names.py data/script_cmd_table.inc
+	python3 tools/maker/gen_names.py --ops $@
 	@touch $@
 $(INCLUDECONSTS_OUTDIR)/maker_tilesets.h: tools/maker/gen_names.py src/data/tilesets/headers.h src/data/tilesets/qz_headers.h
 	python3 tools/maker/gen_names.py --tilesets $@

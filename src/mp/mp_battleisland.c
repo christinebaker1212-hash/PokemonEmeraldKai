@@ -6,6 +6,7 @@
 // left from.
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "global.h"
 #include "mp.h"
 #include "mp_region.h"
@@ -255,6 +256,9 @@ void MP_BattleIsland_Update(void)
         return;
     sT.slow = 0;
     if (!TicketOwed() || MP_BattleIsland_IsIsland(gSaveBlock1Ptr->location.mapGroup))
+        return;
+    // (headless tests: only the ones about the ticket, so SCOTT never walks into another scenario)
+    if (getenv("MOEMON_TEST") && !getenv("MOEMON_TEST_COURIER"))
         return;
     memset(&sT, 0, sizeof(sT));
     LockPlayerFieldControls();

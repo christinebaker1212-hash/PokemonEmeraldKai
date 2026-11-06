@@ -477,6 +477,20 @@ above, or leaves something for later:
 - **SINNOH** is edited top-down by what each tile does, with the 3D PREVIEW; a full 3D mode comes in M5.
 - **No "Open Music Studio" button**, as decided. Tracks are imported by path or by dropping the file on the editor.
 
+## M2a, as built (2026-11-06)
+
+Events are in. Details in COOP_NOTES "Moemon Maker, M2a: events". Where the build differs from the plan above:
+
+- **An event is text in the map's edit file** (`event NAME on=...` and its lines indented by two), not one JSON file
+  per event: the same one-edit-a-line file as M1, so git diffs stay small and the game reads it as it is.
+- **The text view is the language itself** (decision 18's Poryscript style, kept simple: `text "..."`, `if yes` /
+  `else` / `end`, `giveitem ITEM_POTION 2`...); the command list shows the same lines indented and colored, and each
+  line is changed in place (a page line with a trigger and condition fields). Both views edit the same text.
+- **Triggers:** Talk (people and signs), Step (triggers) and Autorun. Touch and Every frame (parallel) come later.
+- **Co-op:** "this player has" only; "anyone has" and "for everyone" commands come later (question 3's default).
+- **Live previews** of the message box, movement routes and songs, and "where used / rename everywhere", are still to
+  come (M2c, with the checker).
+
 ## Build order
 
 1. **M1, quick edits on the base game** (done 2026-11-03): drawing any map into any buffer (the refactor above), the editor shell

@@ -457,7 +457,7 @@ static void ParseCard(int id, char *text)
                 Unsupported(c, "too many triggers");
         }
         else if (strcmp(line, "S") == 0)
-            Unsupported(c, "static ability");
+            Mtg_ParseStatic(c, id, val);
         else if (strcmp(line, "R") == 0)
             Unsupported(c, "replacement effect");
         else if (strcmp(line, "AlternateMode") == 0)
@@ -493,6 +493,85 @@ static void ParseCard(int id, char *text)
         Unsupported(c, "no name");
 }
 
+// Every subtype a card of the pool has (from each Types: line, before the cards are parsed: the cards' Valid specs are
+// checked against it as they load), sorted
+static char **sSubtypes;
+static int sSubtypeCount;
+
+static int CmpStr(const void *a, const void *b)
+{
+    return strcmp(*(char *const *)a, *(char *const *)b);
+}
+
+static void CollectSubtypes(const char *text, int cardCount, const uint8_t *table)
+{
+    static const char *const sNot[] = {"Land", "Creature", "Artifact", "Enchantment", "Instant", "Sorcery",
+                                       "Planeswalker", "Tribal", "Kindred", "Basic", "Legendary", "Snow", "World"};
+    int i, cap = 0, k, n = 0;
+    for (i = 0; i < cardCount; i++) {
+        uint32_t e[4];
+        const char *t, *line, *end;
+        memcpy(e, table + 16 * i, 16);
+        t = text + e[1];
+        line = strstr(t, "Types:");
+        while (line && line != t && line[-1] != '\n')
+            line = strstr(line + 1, "Types:");
+        if (!line)
+            continue;
+        line += 6;
+        end = strchr(line, '\n');
+        if (!end)
+            end = line + strlen(line);
+        while (line < end) {
+            const char *w = line;
+            size_t len;
+            while (line < end && *line != ' ')
+                line++;
+            len = (size_t)(line - w);
+            while (line < end && *line == ' ')
+                line++;
+            if (!len)
+                continue;
+            for (k = 0; k < (int)(sizeof(sNot) / sizeof(sNot[0])); k++)
+                if (strlen(sNot[k]) == len && strncmp(sNot[k], w, len) == 0)
+                    break;
+            if (k < (int)(sizeof(sNot) / sizeof(sNot[0])))
+                continue;
+            if (n == cap)
+                cap = cap ? cap * 2 : 1024, sSubtypes = realloc(sSubtypes, cap * sizeof(char *));
+            sSubtypes[n] = malloc(len + 1);
+            memcpy(sSubtypes[n], w, len);
+            sSubtypes[n++][len] = 0;
+        }
+    }
+    qsort(sSubtypes, n, sizeof(char *), CmpStr);
+    for (i = k = 0; i < n; i++) {   // (each once)
+        if (k && strcmp(sSubtypes[k - 1], sSubtypes[i]) == 0) {
+            free(sSubtypes[i]);
+            continue;
+        }
+        sSubtypes[k++] = sSubtypes[i];
+    }
+    sSubtypeCount = k;
+}
+
+int Mtg_IsSubtype(const char *t, size_t n)
+{
+    int lo = 0, hi = sSubtypeCount - 1;
+    while (lo <= hi) {
+        int mid = (lo + hi) / 2, c = strncmp(sSubtypes[mid], t, n);
+        if (c == 0 && sSubtypes[mid][n])
+            c = 1;
+        if (c == 0)
+            return 1;
+        if (c < 0)
+            lo = mid + 1;
+        else
+            hi = mid - 1;
+    }
+    return 0;
+}
+
 int Mtg_DbLoad(const void *pak, uint32_t size)
 {
     const uint8_t *p = pak;
@@ -511,6 +590,7 @@ int Mtg_DbLoad(const void *pak, uint32_t size)
     sText[size - textOff] = 0;
     sCards = calloc(count, sizeof(MtgCardDef));
     sCardCount = (int)count;
+    CollectSubtypes(sText, (int)count, p + 12);
     for (i = 0; i < count; i++) {
         uint32_t e[4];
         memcpy(e, p + 12 + 16 * i, 16);

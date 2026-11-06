@@ -92,7 +92,7 @@ int MakerApi_MapInfo(int index, struct MakerMapInfo *info)
     memset(info, 0, sizeof(*info));
     info->name = m->name;
     info->groupName = m->group;
-    info->region = RegionOf(m->name);
+    info->region = index >= Maker_MapCount() - Maker_NewMapCount() ? Maker_NewMapRegion(m->mapNum) : RegionOf(m->name);
     info->mapGroup = m->mapGroup;
     info->mapNum = m->mapNum;
     Title(info->title, sizeof(info->title), m->name);
@@ -104,7 +104,7 @@ int MakerApi_MapInfo(int index, struct MakerMapInfo *info)
         info->height = h->mapLayout->height;
     }
     info->music = h->music;
-    if (h->regionMapSectionId != MAPSEC_SECRET_BASE)
+    if (h->regionMapSectionId != MAPSEC_SECRET_BASE && index < Maker_MapCount() - Maker_NewMapCount())   // (new maps: "New Maps")
     {
         buf[0] = EOS;
         GetMapName(buf, h->regionMapSectionId, 0);

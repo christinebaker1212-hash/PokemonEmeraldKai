@@ -10538,3 +10538,7 @@ void MP_MonArt_Check(void)
     }
     printf("[test] monartcheck: %u species without a full POKEMON picture\n", (unsigned)bad);
 }
+
+// (Moemon Maker's art copies these tables whole: src/maker/maker_art.c)
+const u32 gMonArtCounts_Pokemon[4] = {ARRAY_COUNT(gMonFrontPicTable_Pokemon), ARRAY_COUNT(gMonBackPicTable_Pokemon),
+                                      ARRAY_COUNT(gMonPaletteTable_Pokemon), ARRAY_COUNT(gMonShinyPaletteTable_Pokemon)};

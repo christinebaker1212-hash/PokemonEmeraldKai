@@ -28,7 +28,13 @@ EWRAM_DATA struct BagPocket gBagPockets[POCKETS_COUNT] = {0};
 #include "data/text/item_descriptions_tm2.h"   // Moemon Kai: TM51-TM92
 #include "data/text/item_descriptions_tm3.h"   // Moemon Kai: TM93 on
 #include "data/text/item_descriptions_qz.h"   // Moemon Kai: Johto / Kanto items
+#undef gItems
+#define gItems gItemsBase   // (Moemon Maker: the built table; the game reads gItemsTable, include/item.h)
 #include "data/items.h"
+#undef gItems
+#define gItems gItemsTable
+const struct Item *gItemsTable = gItemsBase;
+const u32 gItemsCount = ARRAY_COUNT(gItemsBase);
 
 static u16 GetBagItemQuantity(u16 *quantity)
 {

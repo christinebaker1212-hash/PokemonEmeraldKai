@@ -187,6 +187,11 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
 
     if (TryRunOnFrameMapScript() == TRUE)
         return TRUE;
+    {
+        bool8 Maker_TryAutorun(void);
+        if (Maker_TryAutorun())   // Moemon Maker: an event's autorun page (src/maker/maker_overrides.c)
+            return TRUE;
+    }
 
     // Moemon Co-op: carrying a decoration in the MOéMON GARDEN: A puts it down in front, B puts it back
     if (input->pressedBButton && TrySetupDiveEmergeScript() == TRUE)

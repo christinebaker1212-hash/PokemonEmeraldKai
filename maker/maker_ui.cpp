@@ -187,6 +187,12 @@ static std::string Pretty(const char *groupName)
     return out;
 }
 
+static void LoadMaps();
+void ReloadMapList()
+{
+    LoadMaps();
+}
+
 static void LoadMaps()
 {
     int n = MakerApi_MapCount();
@@ -404,6 +410,8 @@ static void MenuBar()
         return;
     if (ImGui::BeginMenu("File"))
     {
+        if (ImGui::MenuItem("New map..."))
+            OpenNewMap();   // (M2b: maker_world.cpp)
         if (ImGui::MenuItem("Save", "Ctrl+S", false, AnyUnsaved()))
             Save();
         ImGui::MenuItem("Publish...", NULL, &gEd.publishOpen);
@@ -466,6 +474,14 @@ static void MenuBar()
     if (ImGui::BeginMenu("Tools"))
     {
         ImGui::MenuItem("Music...", NULL, &gEd.musicOpen);
+        if (ImGui::MenuItem("World..."))
+            OpenWorld();
+        if (ImGui::MenuItem("Trainers..."))
+            OpenTrainers();
+        if (ImGui::MenuItem("Database..."))
+            OpenDatabase();
+        if (ImGui::MenuItem("Debugger..."))
+            OpenDebugger();
         ImGui::EndMenu();
     }
     if (ImGui::BeginMenu("Help"))
@@ -857,6 +873,11 @@ static void Frame()
     ProblemsPanel();
     WildPanel();
     MusicWindow();
+    NewMapWindow();
+    WorldWindow();
+    TrainersWindow();
+    DatabaseWindow();
+    DebuggerWindow();
     PublishWindow();
     StatusBar();
     ClosePrompt();
@@ -1077,6 +1098,16 @@ extern "C" void MakerUi_TestCommand(const char *line)
     }
     else if (c == "wild" || c == "wildchance")
         Wild_TestCommand(c.c_str(), arg);
+    else if (c == "trainer" || c == "trainers" || c == "bench" || c == "damage")
+        Trainers_TestCommand(c.c_str(), arg);
+    else if (c == "debugger" || c == "break" || c == "step" || c == "continue" || c == "held" || c == "watch")
+        Debugger_TestCommand(c.c_str(), arg);
+    else if (c == "db" || c == "database" || c == "pic")
+        Database_TestCommand(c.c_str(), arg);
+    else if (c == "newmap" || c == "newmapwindow" || c == "world")
+        World_TestCommand(c.c_str(), arg);
+    else if (c == "event" || c == "eventline" || c == "eventview" || c == "eventpicker" || c == "eventselect")
+        Events_TestCommand(c.c_str(), arg);
     else
         MapView_TestCommand(c.c_str(), arg);
 }

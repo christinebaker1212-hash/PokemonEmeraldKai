@@ -3,6 +3,7 @@
 #ifndef GUARD_MTG_INTERNAL_H
 #define GUARD_MTG_INTERNAL_H
 
+#include <stddef.h>
 #include "mtg/mtg.h"
 
 // ApiType.java: the effects translated so far (the rest make a card unsupported)
@@ -58,6 +59,7 @@ const char *Mtg_Param(const MtgAbility *ab, const char *key);   // NULL if absen
 const char *Mtg_Svar(int card, const char *name);
 int Mtg_ParseManaCost(const char *s, MtgManaCost *out);         // 0 if it has symbols the engine doesn't know
 int Mtg_KeywordByName(const char *name);                        // MTG_KW_* or -1
+int Mtg_IsSubtype(const char *t, size_t n);                      // a subtype some card of the pool has
 char *Mtg_Token(char **p, char sep);                            // splits text in place, like strtok_r
 int Mtg_ParseParams(char *s, int *first);                       // "K$ V | K$ V" -> gMtgParams; returns the count
 extern const char *const gMtgApiNames[MTG_API_COUNT];
@@ -94,6 +96,38 @@ int Mtg_TriggerStillTrue(const MtgDuel *d, const MtgStackEntry *e);   // an inte
 const char *Mtg_TriggerParam(const MtgTrigger *t, const char *key);
 int Mtg_ParseAbilityText(MtgCardDef *c, int cardId, char *text, int kind);   // (mtg_script.c, for the triggers)
 void Mtg_Unsupported(MtgCardDef *c, const char *why);
+
+// mtg_static.c: static abilities (StaticAbilityContinuous.java: power, toughness, keywords of what they affect)
+#define MTG_STATIC_NO_SET (-1000)
+enum { MTG_STATIC_CONTINUOUS, MTG_STATIC_CANT_BLOCK, MTG_STATIC_CANT_ATTACK, MTG_STATIC_CANT_BLOCK_BY,
+       MTG_STATIC_RAISE_COST, MTG_STATIC_REDUCE_COST };
+typedef struct {
+    uint16_t card;
+    uint8_t mode;                   // MTG_STATIC_*
+    uint8_t self;                   // AffectedDefined$ Self (Affected$, if any, is then a condition on itself)
+    const char *affected;           // Affected$ (CantBlock / CantAttack: ValidCard$; CantBlockBy: ValidAttacker$)
+    const char *blocker;            // CantBlockBy: ValidBlocker$
+    const char *present;            // IsPresent$: only while the battlefield has (PresentCompare$, default GE1)...
+    uint8_t presentOp;              // 0 GE, 1 EQ, 2 LE
+    uint8_t presentNum;
+    int8_t addPower, addToughness;
+    int16_t setPower, setToughness; // MTG_STATIC_NO_SET: none
+    uint32_t addKeywords;
+    uint8_t addLandwalk, addProtection;
+    uint8_t activator;              // Raise / ReduceCost: 0 anyone, 1 its controller ("You"), 2 the opponent
+    uint8_t costGeneric, costPip;   // ...: Amount$ (generic) or Cost$ (one colored symbol: costPip = MTG_W.. + 1)
+} MtgStatic;
+typedef struct {
+    int addPower, addToughness, setPower, setToughness;
+    uint32_t keywords;
+    uint8_t landwalk, protection;
+} MtgStaticMods;
+extern MtgStatic *gMtgStatics;
+void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text);
+void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m);
+int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other);
+void Mtg_SpellCost(const MtgDuel *d, int player, int obj, MtgManaCost *out);   // its mana cost with Raise / ReduceCost   // CantBlock / CantAttack (obj), CantBlockBy
+                                                                          // (obj attacking, other blocking)
 
 // mtg_valid.c: Forge's "Valid" properties (CardProperty.java, PlayerProperty.java)
 int Mtg_ValidObj(const MtgDuel *d, int obj, const char *spec, int sourceObj, int controller);

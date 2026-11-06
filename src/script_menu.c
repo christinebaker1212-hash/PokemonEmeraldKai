@@ -51,6 +51,27 @@ bool8 ScriptMenu_Multichoice(u8 left, u8 top, u8 multichoiceId, bool8 ignoreBPre
     }
 }
 
+// Moemon Maker (M2 events, src/maker/maker_events.c "choice"): a multichoice from any list of answers
+bool8 ScriptMenu_MultichoiceList(u8 left, u8 top, const struct MenuAction *actions, u8 count, bool8 ignoreBPress)
+{
+    int i, width = 0;
+    u8 windowId, newWidth;
+    if (FuncIsActiveTask(Task_HandleMultichoiceInput) == TRUE)
+        return FALSE;
+    gSpecialVar_Result = 0xFF;
+    for (i = 0; i < count; i++)
+        width = DisplayTextAndGetWidth(actions[i].text, width);
+    newWidth = ConvertPixelWidthToTileWidth(width);
+    left = ScriptMenu_AdjustLeftCoordFromWidth(left, newWidth);
+    windowId = CreateWindowFromRect(left, top, newWidth, count * 2);
+    SetStandardWindowBorderStyle(windowId, FALSE);
+    PrintMenuTable(windowId, count, actions);
+    InitMenuInUpperLeftCornerNormal(windowId, count, 0);
+    ScheduleBgCopyTilemapToVram(0);
+    InitMultichoiceCheckWrap(ignoreBPress, count, windowId, MULTI_YESNOINFO);
+    return TRUE;
+}
+
 bool8 ScriptMenu_MultichoiceWithDefault(u8 left, u8 top, u8 multichoiceId, bool8 ignoreBPress, u8 defaultChoice)
 {
     if (FuncIsActiveTask(Task_HandleMultichoiceInput) == TRUE)

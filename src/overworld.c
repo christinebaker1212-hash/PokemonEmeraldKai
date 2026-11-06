@@ -553,6 +553,12 @@ static void InitMapView(void)
 const struct MapLayout *GetMapLayout(void)
 {
     u16 mapLayoutId = gSaveBlock1Ptr->mapLayoutId;
+    if (mapLayoutId >= 0x4000)   // Moemon Maker: a new map's layout (src/maker/maker_newmaps.c MAKER_LAYOUT_FIRST)
+    {
+        const struct MapLayout *Maker_NewMapLayout(u16 layoutId);
+        const struct MapLayout *made = Maker_NewMapLayout(mapLayoutId);
+        return made ? made : gMapLayouts[LAYOUT_LITTLEROOT_TOWN - 1];
+    }
     if (mapLayoutId)
         return gMapLayouts[mapLayoutId - 1];
     return NULL;
@@ -603,8 +609,17 @@ struct MapHeader const *const Overworld_GetMapHeaderByGroupAndId(u16 mapGroup, u
 {
     // Moemon Maker: a map the user edited is its edited copy (src/maker/maker_overrides.c)
     const struct MapHeader *Maker_EditedHeader(u16 mapGroup, u16 mapNum);
+    const struct MapHeader *Maker_NewMapHeader(u16 num);
     const struct MapHeader *edited = Maker_EditedHeader(mapGroup, mapNum);
-    return edited ? edited : gMapGroups[mapGroup][mapNum];
+    if (edited)
+        return edited;
+    if (mapGroup >= MAP_GROUPS_COUNT)
+    {
+        // a map the user made (src/maker/maker_newmaps.c); one whose file is gone is LITTLEROOT TOWN
+        const struct MapHeader *made = Maker_NewMapHeader(mapNum);
+        return made ? made : gMapGroups[MAP_GROUP(MAP_LITTLEROOT_TOWN)][MAP_NUM(MAP_LITTLEROOT_TOWN)];
+    }
+    return gMapGroups[mapGroup][mapNum];
 }
 
 struct MapHeader const *const GetDestinationWarpMapHeader(void)

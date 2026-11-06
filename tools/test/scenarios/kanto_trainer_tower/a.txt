@@ -1,4 +1,5 @@
 pressuntil A field 5000
+mp additem 398 1
 wait 30
 mp teach 0 94
 mp battlestyle 1

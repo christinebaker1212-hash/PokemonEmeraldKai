@@ -680,8 +680,11 @@ static void DrawCard(int obj, const Rect *rc, int count, float x, float y)
     // (the user: for the table's looks)
     if (Focused() == obj && ShowFocus() && B.mode != MODE_RESULT && B.mode != MODE_VIEW && B.mode != MODE_CHOOSE
         && B.mode != MODE_PICK) {
-        if (o->zone == MTG_ZONE_HAND && !(c->types & MTG_T_LAND))
-            CompactCost((int)cx, (int)y - 4, &c->cost, 0);
+        if (o->zone == MTG_ZONE_HAND && !(c->types & MTG_T_LAND)) {
+            MtgManaCost cost;   // (as it would be paid now: what cost-changing cards on the table add or take off)
+            Mtg_SpellCost(&B.view, o->owner, obj, &cost);
+            CompactCost((int)cx, (int)y - 4, &cost, 0);
+        }
         else if (onTable) {
             const MtgCost *k = ActivatedCost(obj);
             if (k)

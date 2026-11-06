@@ -38,6 +38,17 @@ u16 Maker_FlagId(const char *name)
     return MAKER_FLAGS_START + sCount++;
 }
 
+// A name's flag id if it has one (0 if not): never gives one
+u16 Maker_FlagFind(const char *name)
+{
+    u32 i;
+    Init();
+    for (i = 0; i < sCount; i++)
+        if (strcmp(sNames[i], name) == 0)
+            return MAKER_FLAGS_START + i;
+    return 0;
+}
+
 u8 *Maker_FlagPointer(u16 id)
 {
     if (id < MAKER_FLAGS_START || id >= MAKER_FLAGS_START + MAKER_FLAGS_COUNT)

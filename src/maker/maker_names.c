@@ -10,6 +10,12 @@
 #include "constants/items.h"
 #include "constants/species.h"
 #include "constants/flags.h"
+#include "constants/vars.h"
+#include "constants/opponents.h"
+#include "constants/region_map_sections.h"
+#include "constants/moves.h"
+#include "constants/pokemon.h"
+#include "constants/abilities.h"
 #include "constants/songs.h"
 #include "constants/qz_port.h"
 #include "constants/sinnoh_gfx.h"
@@ -22,12 +28,14 @@ extern const struct MapHeader *const *const gMapGroups[];
 
 int Maker_MapCount(void)
 {
-    return MAKER_MAP_COUNT;
+    return MAKER_MAP_COUNT + Maker_NewMapCount();   // (M2b: the user's new maps after the game's own)
 }
 
 const struct MakerMapName *Maker_Map(int index)
 {
-    return index >= 0 && index < MAKER_MAP_COUNT ? &sMakerMapNames[index] : NULL;
+    if (index >= MAKER_MAP_COUNT)
+        return Maker_NewMapName(index - MAKER_MAP_COUNT);
+    return index >= 0 ? &sMakerMapNames[index] : NULL;
 }
 
 int Maker_MapIndex(u16 mapGroup, u16 mapNum)
@@ -43,6 +51,8 @@ int Maker_MapIndex(u16 mapGroup, u16 mapNum)
                 sIndex[sMakerMapNames[i].mapGroup][sMakerMapNames[i].mapNum] = i;
         sBuilt = TRUE;
     }
+    if (mapGroup == MAKER_MAP_GROUP)
+        return mapNum < Maker_NewMapCount() ? MAKER_MAP_COUNT + mapNum : -1;
     return mapGroup < 64 && mapNum < 256 ? sIndex[mapGroup][mapNum] : -1;
 }
 
@@ -91,6 +101,8 @@ const struct MakerCoordName *Maker_CoordName(int i)
 
 const struct MapHeader *Maker_BaseMapHeader(u16 mapGroup, u16 mapNum)
 {
+    if (mapGroup == MAKER_MAP_GROUP)
+        return Maker_NewMapHeader(mapNum);
     return gMapGroups[mapGroup][mapNum];
 }
 
@@ -105,6 +117,12 @@ static const struct MakerNamedValue *Table(int table, int *count)
     case MAKER_NAMES_ITEM: *count = MAKER_ITEM_COUNT; return sItemNames;
     case MAKER_NAMES_SPECIES: *count = MAKER_SPECIES_COUNT; return sSpeciesNames;
     case MAKER_NAMES_FLAG: *count = MAKER_FLAG_COUNT; return sFlagNames;
+    case MAKER_NAMES_VAR: *count = MAKER_VAR_COUNT; return sVarNames;
+    case MAKER_NAMES_TRAINER: *count = MAKER_TRAINER_COUNT; return sTrainerNames;
+    case MAKER_NAMES_MAPSEC: *count = MAKER_MAPSEC_COUNT; return sMapsecNames;
+    case MAKER_NAMES_MOVE: *count = MAKER_MOVE_COUNT; return sMoveNames;
+    case MAKER_NAMES_TYPE: *count = MAKER_TYPE_COUNT; return sTypeNames;
+    case MAKER_NAMES_ABILITY: *count = MAKER_ABILITY_COUNT; return sAbilityNames;
     }
     *count = 0;
     return NULL;
@@ -149,4 +167,34 @@ int MakerApi_ValueOf(int table, const char *name, unsigned int *value)
             return 1;
         }
     return 0;
+}
+
+// The specials by name (M2's event compiler, the editor's command picker): their number in gSpecials, and whether the
+// script waits for them
+int MakerApi_SpecialCount(void)
+{
+    return MAKER_SPECIAL_COUNT;
+}
+
+const char *MakerApi_SpecialName(int i)
+{
+    return i >= 0 && i < MAKER_SPECIAL_COUNT ? sMakerSpecials[i].name : NULL;
+}
+
+int Maker_SpecialIndex(const char *name, bool8 *waits)
+{
+    int i;
+    for (i = 0; i < MAKER_SPECIAL_COUNT; i++)
+        if (strcmp(sMakerSpecials[i].name, name) == 0)
+        {
+            if (waits)
+                *waits = sMakerSpecials[i].waitstate;
+            return i;
+        }
+    return -1;
+}
+
+int MakerApi_IsNewMap(int index)
+{
+    return index >= MAKER_MAP_COUNT && index < Maker_MapCount();
 }

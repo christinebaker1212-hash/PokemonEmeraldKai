@@ -4,8 +4,10 @@ Where Moemon Maker stands, the whole plan, and what to do next. Read this first,
 design and the user's 28 decisions, which win wherever anything else differs) and COOP_NOTES "Moemon Maker, M1"
 (how each M1 piece works).
 
-**Status: M1 is done and released in 1.80.0. The user asked to wait for instructions before starting M2.**
-Don't start M2 until the user says so, and ask the four open questions below first.
+**Status: M1 is done (1.80.0). M2 is built: M2a events, M2b new maps and the World view, M2c trainers and the
+checker (COOP_NOTES "Moemon Maker, M2a / M2b / M2c"). M3a is built: the database for the game's own Pokémon, moves and items, their pictures from PNGs and the battle bench with a damage estimate (COOP_NOTES "Moemon Maker, M3a: the database"); still to come in M3: new entries with IDs that never move. M4a is built: the debugger (breakpoints, step, continue, watch: COOP_NOTES "Moemon Maker, M4a: the debugger"); still to come in M4: the decompiler of the four regions' scripts with its byte-for-byte round trip, and the three-way merge.** The user's overnight list (2026-11-06) included M2-M5, so M2 started without the questions round; the four
+open questions below were answered with defaults, listed in COOP_NOTES "Moemon Maker, M2a: events" for the user to
+change if they want.
 
 ## What Moemon Maker is
 
@@ -106,7 +108,35 @@ M1's known limits, carried into later milestones:
    - The debugger: breakpoints, stepping, watched flags and variables, and "why isn't this event here?".
 5. **M5.** Full 3D mode for SINNOH, the animation timeline, Lua hooks, and a tileset editor.
 
-## Next steps (when the user says go)
+## Next steps (2026-11-06: M2, M3a and M4a built; start here)
+
+1. **Tell the user the M2 defaults** (COOP_NOTES "Moemon Maker, M2a: events" lists the four open questions and the
+   defaults taken) and change whatever they pick differently.
+2. **M3b: new entries with IDs that never move.** New species past NUM_SPECIES touch every per-species table (graphics,
+   cries, icons, footprints, dex, coords, elevations, evolutions, TM / tutor / egg learnsets, front anims) and every
+   `species > NUM_SPECIES` check (the "?" picture): give each table a pointer like M3a's, sized from the pack, and the
+   IDs by name in "<save>.maker". Moves past MOVES_COUNT and items past ITEMS_COUNT the same way (names, battle data,
+   animations, contest data, icons, descriptions, bag pockets). SEALED when the pack is missing (decision in
+   MOEMON_MAKER.md 6).
+3. **M4b: the decompiler and its round trip.** Findings so far: the regions' scripts are event.inc macros that nest
+   (msgbox = loadword + callstd, giveitem = setorcopyvar x2 + callstd) and branch on their arguments (trainerbattle's
+   `.if \type == ...`), so the Maker's run-time compiler needs the macros themselves: a generator (gen_names.py) that
+   turns asm/macros/event.inc into a table of macros, each a list of emits (byte / short / word / ptrvalue of an
+   argument or a constant), calls of other macros with substituted arguments, and `.if ARG == CONST` branches; a `raw
+   MACRO args` command in maker_events.c that runs that table; `label NAME` lines inside an event; a generated table of
+   the global script labels (`Label::` in data/scripts/*.inc, data/maps/*/scripts.inc, the ports' .inc) as
+   `{"NAME", NAME}` for pointers to scripts outside the event. Then tools/maker/decompile.py: a map's scripts.inc into
+   events (the object / sign / trigger scripts from map.json, every local label they reach copied in as `label`,
+   texts inlined as quoted strings, friendly commands where they mean exactly the same bytes, raw otherwise). The proof
+   (decision 19): an in-game test compiles every decompiled event and walks it beside the built script, command by
+   command (same opcodes and values; a pointer into the event = the same relative place; a text = the same bytes; any
+   other pointer = the same address). HOENN first, then KANTO / JOHTO (the same macro format), then SINNOH
+   (sinnoh/platinum_scripts.inc, generated: decompile what gen_scripts.py writes, never commit it).
+4. **M4c: the three-way merge** once base scripts can be overlaid (the WAS/NOW lines already carry what each edit
+   replaced; the merge shows base before / base now / the edit).
+5. **M5** as planned (3D mode for SINNOH, animation timeline, Lua hooks, tileset editor).
+
+## Earlier next steps (M2a done: continue with M2b, then M2c)
 
 1. **Ask the four open questions.** The user liked choices rounds (AskUserQuestion, thorough and specific), so ask
    these and the finer M2a choices that way:

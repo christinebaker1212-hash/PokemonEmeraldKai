@@ -43,6 +43,13 @@ static int HasSubtype(const MtgCardDef *c, const char *t, size_t n)
     return 0;
 }
 
+// A word that is a real subtype of some card in the pool ("Goblin", "Island")? Anything else written like one
+// ("DefenderCtrl", "Snow") is a property the engine doesn't translate: it must keep the card out, never read as a type
+static int KnownSubtype(const char *t, size_t n)
+{
+    return Mtg_IsSubtype(t, n);
+}
+
 static int StartsWith(const char *p, size_t n, const char *word)
 {
     size_t w = strlen(word);
@@ -84,7 +91,7 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
     if (n == 9 && strncmp(p, "Legendary", 9) == 0)
         return !d || (((c->supertypes & MTG_ST_LEGENDARY) != 0) ^ neg);
     if (neg) {   // a subtype ("nonWall")
-        if (p[0] >= 'A' && p[0] <= 'Z')
+        if (p[0] >= 'A' && p[0] <= 'Z' && KnownSubtype(p, n))
             return !d || !HasSubtype(c, p, n);
         *known = 0;
         return 0;
@@ -153,7 +160,7 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         for (i = 0; i < (int)n; i++)
             if (!((p[i] >= 'a' && p[i] <= 'z') || (p[i] >= 'A' && p[i] <= 'Z')))
                 break;
-        if (i == (int)n)
+        if (i == (int)n && KnownSubtype(p, n))
             return !d || HasSubtype(c, p, n);
     }
     *known = 0;
@@ -193,7 +200,7 @@ static int Alternative(const MtgDuel *d, int isPlayer, int id, const char *a, si
     }
     bit = TypeBit(a, tn);
     if (!bit) {   // a bare subtype ("Goblin")
-        if (!(a[0] >= 'A' && a[0] <= 'Z')) {
+        if (!(a[0] >= 'A' && a[0] <= 'Z') || !KnownSubtype(a, tn)) {
             *known = 0;
             return 0;
         }
@@ -269,7 +276,8 @@ int Mtg_CanTarget(const MtgDuel *d, int obj, int sourceObj)
     const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
     if (Mtg_Keywords(d, obj) & MTG_KW_BIT(MTG_KW_SHROUD))
         return 0;
-    if (sourceObj != MTG_NO_OBJ && (c->protection & Mtg_ObjColors(d, sourceObj)))
+    (void)c;
+    if (sourceObj != MTG_NO_OBJ && (Mtg_Protection(d, obj) & Mtg_ObjColors(d, sourceObj)))
         return 0;
     return 1;
 }

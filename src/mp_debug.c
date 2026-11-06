@@ -1204,6 +1204,22 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int id = atoi(arg);
         printf("[test] item %d: %d\n", id, CountTotalItemQuantityInBag(id));
     }
+    else if (strcmp(cmd, "dbinfo") == 0)
+    {
+        // dbinfo SPECIES MOVE ITEM - what the game reads for them now (Moemon Maker M3's database edits included)
+        int sp = 0, mv = 0, it = 0;
+        char a[32], b[32], c[32];
+        sscanf(arg, "%d %d %d", &sp, &mv, &it);
+        MP_GameToAscii(a, gSpeciesNames[sp], POKEMON_NAME_LENGTH);
+        MP_GameToAscii(b, gMoveNames[mv], MOVE_NAME_LENGTH);
+        MP_GameToAscii(c, gItems[it].name, ITEM_NAME_LENGTH - 1);
+        printf("[test] db species %d %s stats %d %d %d %d %d %d types %d %d learn0 %u\n", sp, a, gSpeciesInfo[sp].baseHP,
+               gSpeciesInfo[sp].baseAttack, gSpeciesInfo[sp].baseDefense, gSpeciesInfo[sp].baseSpeed,
+               gSpeciesInfo[sp].baseSpAttack, gSpeciesInfo[sp].baseSpDefense, gSpeciesInfo[sp].types[0],
+               gSpeciesInfo[sp].types[1], gLevelUpLearnsets[sp][0] & LEVEL_UP_MOVE_ID);
+        printf("[test] db move %d %s power %d accuracy %d\n", mv, b, gBattleMoves[mv].power, gBattleMoves[mv].accuracy);
+        printf("[test] db item %d %s price %d\n", it, c, gItems[it].price);
+    }
     else if (strcmp(cmd, "coins") == 0)
     {
         // coins N - set the COINS; coins - print them

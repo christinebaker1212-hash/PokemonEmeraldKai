@@ -320,6 +320,9 @@ const union AnimCmd *const gAnims_MonPic[MAX_MON_PIC_FRAMES] =
 #include "data/pokemon_graphics/front_pic_anims.h"
 #include "data/pokemon_graphics/front_pic_table.h"
 #include "data/pokemon_graphics/unknown_table.h"
+// (Moemon Maker's art copies these tables whole: src/maker/maker_art.c)
+const u32 gMonArtCounts_Moe[4] = {ARRAY_COUNT(gMonFrontPicTable_Moe), ARRAY_COUNT(gMonBackPicTable_Moe),
+                                  ARRAY_COUNT(gMonPaletteTable_Moe), ARRAY_COUNT(gMonShinyPaletteTable_Moe)};
 
 #include "data/trainer_parties.h"
 #include "constants/qz_port.h"
@@ -327,6 +330,22 @@ const union AnimCmd *const gAnims_MonPic[MAX_MON_PIC_FRAMES] =
 #include "data/trainers_kai_johto.h"   // Moemon Kai: JOHTO trainers Crystal has and Quetzal doesn't
 #include "data/trainer_parties_sinnoh.h"   // Moemon Kai: SINNOH
 #include "data/text/trainer_class_names.h"
+#undef gTrainers
+#define gTrainers gTrainersBase   // (Moemon Maker: the built table; the game reads gTrainersTable, include/data.h)
 #include "data/trainers.h"
+#undef gTrainers
+#define gTrainers gTrainersTable
+const struct Trainer *gTrainersTable = gTrainersBase;
+#undef gSpeciesNames
+#undef gMoveNames
+#define gSpeciesNames gSpeciesNamesBase   // (Moemon Maker: the built tables; the game reads the pointers, include/data.h)
+#define gMoveNames gMoveNamesBase
 #include "data/text/species_names.h"
 #include "data/text/move_names.h"
+#undef gSpeciesNames
+#undef gMoveNames
+#define gSpeciesNames gSpeciesNamesTable
+#define gMoveNames gMoveNamesTable
+const u8 (*gSpeciesNamesTable)[POKEMON_NAME_LENGTH + 1] = gSpeciesNamesBase;
+const u32 gSpeciesNamesCount = ARRAY_COUNT(gSpeciesNamesBase);
+const u8 (*gMoveNamesTable)[MOVE_NAME_LENGTH + 1] = gMoveNamesBase;

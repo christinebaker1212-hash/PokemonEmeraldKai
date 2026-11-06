@@ -39,6 +39,14 @@ struct PropEdit
     bool operator==(const PropEdit &o) const { return was == o.was && now == o.now; }
 };
 
+// An event (M2): what it's on ("person:KEY", "sign:KEY", "trigger:KEY", "added" for an added person / sign's
+// script=event:NAME, "map" for autorun only) and its pages and commands, one a line, indented by two spaces a level
+struct EventDef
+{
+    std::string on, body;
+    bool operator==(const EventDef &o) const { return on == o.on && body == o.body; }
+};
+
 // A map's edits (maker_edits.cpp): tiles by y * w + x, properties by "KIND KEY PROP" (person LOCALID_X x)
 struct MapEdits
 {
@@ -46,7 +54,8 @@ struct MapEdits
     std::map<int, std::pair<int, int>> blocks;   // was, now
     std::map<std::string, PropEdit> props;
     std::map<std::string, std::map<std::string, std::string>> adds;   // "person 1" -> {"x": "10", "look": "OBJ_..."}
-    bool Empty() const { return blocks.empty() && props.empty() && adds.empty(); }
+    std::map<std::string, EventDef> events;                             // by name
+    bool Empty() const { return blocks.empty() && props.empty() && adds.empty() && events.empty(); }
 };
 
 struct Place
@@ -131,6 +140,39 @@ int SaveAll();
 void RecoveryTick();
 void DiscardUnsaved();
 void Message(const char *fmt, ...);
+
+// maker_events_ui.cpp (M2: events)
+void EventSection(const char *on, const std::string &suggestedName, std::map<std::string, std::string> *added);
+void EventPickerWindow();
+void QuickEventMenu(int x, int y);
+void Events_TestCommand(const char *cmd, const char *arg);
+std::string EventOn(int map, const std::string &on);   // the event on something, by name ("" if none)
+
+// maker_world.cpp (M2b: new maps, the World view)
+void NewMapWindow();
+void OpenNewMap();
+void WorldWindow();
+void OpenWorld();
+void World_TestCommand(const char *cmd, const char *arg);
+
+// maker_trainers_ui.cpp (M2c: trainers)
+void TrainersWindow();
+void OpenTrainers();
+int Trainers_Save();
+bool Trainers_Unsaved();
+void Trainers_TestCommand(const char *cmd, const char *arg);
+
+// maker_debug_ui.cpp (M4: the debugger)
+void DebuggerWindow();
+void OpenDebugger();
+void Debugger_TestCommand(const char *cmd, const char *arg);
+
+// maker_database_ui.cpp (M3a: the database)
+void DatabaseWindow();
+void OpenDatabase();
+int Database_Save();
+bool Database_Unsaved();
+void Database_TestCommand(const char *cmd, const char *arg);
 
 // maker_wild.cpp
 void WildPanel();

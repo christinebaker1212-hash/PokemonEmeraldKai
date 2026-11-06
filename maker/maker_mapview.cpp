@@ -913,6 +913,8 @@ static void AddMenu()
         AddEvent("sign", sAddX, sAddY);
     if (ImGui::MenuItem("Add a warp here"))
         AddEvent("warp", sAddX, sAddY);
+    ImGui::Separator();
+    QuickEventMenu(sAddX, sAddY);   // (M2: maker_events_ui.cpp)
     ImGui::EndPopup();
 }
 
@@ -1443,6 +1445,8 @@ static void AddedInspector()
     if (ImGui::Button("Remove it (Delete)"))
         DeleteSelected();
     ImGui::TextDisabled("Drag it on the map to move it.");
+    if ((person && !itemball) || (!person && !hidden && !warp))
+        EventSection("added", key, Added(key));   // (M2: its own event, script=event:NAME)
 }
 
 static const char *const kDirNames[] = {"", "down", "up", "left", "right", "dive", "emerge"};
@@ -1771,6 +1775,16 @@ void MapView_Inspector()
             DeleteSelected();
     }
     ImGui::TextDisabled("Drag it on the map to move it.");
+    if (gEd.selKind != SEL_WARP)
+    {
+        // (M2: an event of its own in place of the game's script; maker_events_ui.cpp)
+        const char *k;
+        std::string key;
+        EventKey(gEd.selKind, gEd.selIndex, &k, &key);
+        std::string suggested = gEd.selKind == SEL_OBJECT && sObjs[gEd.selIndex].localIdName[0]
+                              ? std::string(sObjs[gEd.selIndex].localIdName).substr(8) : std::string(k) + "_" + key.substr(0, key.find('@'));
+        EventSection((std::string(k) + ":" + key).c_str(), suggested, nullptr);
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -31,7 +31,7 @@ printf 'pressuntil A field 5000\nwait 90\nquit\n' > "$T/play.txt"
 (cd "$T" && env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_NO_UPDATE=1 MOEMON_TEST="$T/play.txt" MOEMON_MUSIC_LOG=1 \
     MOEMON_SHOTDIR="$T/shots" MOEMON_SKIP_COOP_SETUP=1 MOEMON_COOP_CONFIG="$T/play.ini" MOEMON_DEBUG_QUICKSTART=1 \
     MOEMON_DEBUG_WARP=0,9,10,13 MOEMON_MAKER_DIR="$T/mm" MOEMON_SAVE="$T/play.sav" timeout 150 "$BIN" > "$T/play.log" 2>&1)
-grep -q "kaisong: song 16384 " "$T/play.log" || { echo "FAIL: LITTLEROOT didn't play the new track"; fail=1; }
+grep -q "kaisong: song 16[0-9][0-9][0-9] (mus_maker_test) for the map" "$T/play.log" || { echo "FAIL: LITTLEROOT didn't play the new track"; fail=1; }
 grep -q "left out\|not understood" "$T/play.log" && { echo "FAIL: edits left out"; grep "left out\|not understood" "$T/play.log"; fail=1; }
 [ $fail = 0 ] && echo "maker_music: OK"
 exit $fail

@@ -255,6 +255,22 @@ std::string EditsText(int map)
             out += " " + kv.first + "=" + kv.second;
         out += "\n";
     }
+    for (auto &ev : e->events)
+    {
+        // event NAME on=..., then its lines indented by two (the game reads them as the event's: maker_overrides.c)
+        out += "event " + ev.first + (ev.second.on.empty() ? "" : " on=" + ev.second.on) + "\n";
+        size_t pos = 0;
+        const std::string &b = ev.second.body;
+        while (pos < b.size())
+        {
+            size_t nl = b.find('\n', pos);
+            std::string l = b.substr(pos, nl == std::string::npos ? std::string::npos : nl - pos);
+            pos = nl == std::string::npos ? b.size() : nl + 1;
+            if (l.find_first_not_of(" \t") == std::string::npos)
+                continue;
+            out += "  " + l + "\n";
+        }
+    }
     return out;
 }
 
@@ -263,11 +279,23 @@ static bool ParseText(const std::string &text, int *mapOut, MapEdits *out)
     int map = -1;
     MapEdits e;
     size_t pos = 0;
+    std::string eventName;   // (the event whose indented lines follow)
     while (pos < text.size())
     {
         size_t nl = text.find('\n', pos);
         std::string line = text.substr(pos, nl == std::string::npos ? std::string::npos : nl - pos);
         pos = nl == std::string::npos ? text.size() : nl + 1;
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();
+        if (!eventName.empty() && (line.empty() || line[0] == ' ' || line[0] == '\t'))
+        {
+            if (line.compare(0, 2, "  ") == 0)
+                line = line.substr(2);
+            if (!line.empty())
+                e.events[eventName].body += line + "\n";
+            continue;
+        }
+        eventName.clear();
         if (line.empty() || line[0] == '#')
             continue;
         char w[5][96];
@@ -293,6 +321,13 @@ static bool ParseText(const std::string &text, int *mapOut, MapEdits *out)
             long a, b;
             if (sscanf(line.c_str(), "wild %*s %*s %*s %95s %95s", was, now) == 2 && TextValue(w[3], was, &a) && TextValue(w[3], now, &b))
                 e.props[std::string("wild ") + w[1] + " " + w[2] + " " + w[3]] = PropEdit{a, b};
+        }
+        else if (n >= 2 && !strcmp(w[0], "event"))
+        {
+            eventName = w[1];
+            EventDef &d = e.events[eventName];
+            d.on = n >= 3 && !strncmp(w[2], "on=", 3) ? w[2] + 3 : "";
+            d.body.clear();
         }
         else if (n >= 3 && !strcmp(w[0], "add"))
         {
@@ -448,7 +483,8 @@ void EndChange()
     int map = sChangeMap;
     auto it = sEdits.find(map);
     MapEdits after = it == sEdits.end() ? MapEdits() : it->second;
-    if (after.blocks == sChangeBefore.blocks && after.props == sChangeBefore.props && after.adds == sChangeBefore.adds)
+    if (after.blocks == sChangeBefore.blocks && after.props == sChangeBefore.props && after.adds == sChangeBefore.adds
+     && after.events == sChangeBefore.events)
         return;   // (nothing changed: no undo step)
     sUndo.push_back(UndoStep{map, sChangeBefore, after});
     if (sUndo.size() > 500)
@@ -504,6 +540,8 @@ void Redo()
 
 bool AnyUnsaved()
 {
+    if (Trainers_Unsaved() || Database_Unsaved())
+        return true;
     for (auto &d : sDirty)
         if (d.second)
             return true;
@@ -548,6 +586,8 @@ int SaveAll()
     }
     sRecoveryDue = 0;
     printf("[maker] saved %d maps\n", written);
+    Trainers_Save();   // (M2c: MoemonMaker/trainers.txt)
+    Database_Save();   // (M3a: MoemonMaker/database.txt)
     return written;
 }
 

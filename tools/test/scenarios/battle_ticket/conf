@@ -1,0 +1,7 @@
+# The BATTLE TICKET (mp_battleisland.c): once any ELITE FOUR is beaten (an old save too), SCOTT walks up in HOENN
+# and hands it over; it comes once.
+MODE=1
+TMO=400
+EXPECT_A=("battle island: BATTLE TICKET handed over (region 0)" "battle ticket done")
+UNEXPECT_A=("crash" "out of memory")
+ENV_A="MOEMON_TEST_COURIER=1"

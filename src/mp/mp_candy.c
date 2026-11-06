@@ -11,7 +11,9 @@
 #include "field_message_box.h"
 #include "fieldmap.h"
 #include "item.h"
+#include "battle.h"
 #include "battle_main.h"
+#include "constants/battle.h"
 #include "main.h"
 #include "overworld.h"
 #include "pokemon.h"
@@ -68,6 +70,28 @@ void MP_Candy_OnRelease(u16 species)
     if (gMpCandies[type] < CANDY_MAX)
         gMpCandies[type]++;
     MPNet_Log("candy: released species %d -> type %d candy (%d now)", species, type, gMpCandies[type]);
+}
+
+// Battle facilities (the user, T15e: "For any battle facility, like the BATTLE TOWERS, the BATTLE TENT, the BATTLE
+// SIMULATOR, BATTLE ISLAND, BATTLE FRONTIER, etc, for each Pokemon that is fainted by the player, they shall recieve
+// one Candy of that Pokemon's type if they have obtained the Candy Jar"): every facility marks its battles with one
+// of these (HOENN's and SINNOH's FRONTIERS and TENTS, JOHTO's BATTLE TOWER, the TRAINER HILL / TOWER: theirs; the
+// BATTLE SIMULATOR and POKéMON STADIUM: the e-Reader trainer's). battle_script_commands.c Cmd_tryfaintmon calls it
+// for each foe that faints (on the game running the battle).
+static u16 sFacilityCandies;
+
+void MP_Candy_OnFoeFaint(u16 species)
+{
+    u8 type;
+    if (!(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL | BATTLE_TYPE_EREADER_TRAINER))
+     || (gBattleTypeFlags & BATTLE_TYPE_LINK && !(gBattleTypeFlags & BATTLE_TYPE_IS_MASTER))
+     || !CheckBagHasItem(ITEM_CANDY_JAR, 1))
+        return;
+    type = CandyType(species);
+    if (gMpCandies[type] < CANDY_MAX)
+        gMpCandies[type]++;
+    sFacilityCandies++;
+    MPNet_Log("candy: facility foe species %d fainted -> type %d candy (%d now)", species, type, gMpCandies[type]);
 }
 
 u32 MP_Candy_Total(void)
@@ -333,6 +357,14 @@ void MP_Candy_Update(void)
 {
     if (gMain.inBattle || FuncIsActiveTask(Task_BirchCandyJar) || !MP_IsInOverworld() || !MP_IsLocalFree())
         return;
+    if (sFacilityCandies)   // (the battle's candies, told once it's over)
+    {
+        char msg[64];
+        void MP_Events_QueueToast(const char *ascii);
+        snprintf(msg, sizeof(msg), "+%d CAND%s in the CANDY JAR", sFacilityCandies, sFacilityCandies == 1 ? "Y" : "IES");
+        MP_Events_QueueToast(msg);
+        sFacilityCandies = 0;
+    }
     if (MP_Candy_Total() == 0 || CheckBagHasItem(ITEM_CANDY_JAR, 1))
         return;
     LockPlayerFieldControls();

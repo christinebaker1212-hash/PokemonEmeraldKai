@@ -54,6 +54,8 @@ typedef struct MtgCardDef {
     uint16_t abilities[8];                   // indexes into the ability table (A: lines)
     uint8_t triggerCount;
     uint16_t triggers[6];                    // indexes into the trigger table (T: lines; mtg_trigger.c)
+    uint8_t staticCount;
+    uint16_t statics[4];                     // indexes into the static table (S: lines; mtg_static.c)
     uint16_t svarFirst, svarCount;           // the card's SVar: lines
     uint8_t rarity, banned;                  // MTG_RARITY_*; on Premodern's banned list (tools/mtg/pool.json)
     uint8_t supported;                       // every line understood by the engine
@@ -227,6 +229,8 @@ const MtgEvent *Mtg_EventAt(const MtgDuel *d, uint32_t n);   // n < eventCount; 
 int Mtg_Power(const MtgDuel *d, int obj);
 int Mtg_Toughness(const MtgDuel *d, int obj);
 uint32_t Mtg_Keywords(const MtgDuel *d, int obj);
+uint8_t Mtg_Landwalk(const MtgDuel *d, int obj);      // by basic land type W..G (MTG_COLOR_BIT)
+uint8_t Mtg_Protection(const MtgDuel *d, int obj);    // from colors (MTG_COLOR_BIT)
 
 // the stand-in computer player (src/mtg/mtg_ai.c) until forge-ai's translation
 void MtgAi_Answer(const MtgDuel *d, MtgAnswer *out);

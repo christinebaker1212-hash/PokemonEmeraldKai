@@ -380,14 +380,21 @@ extern u8 gEnemyPartyCount;
 extern struct Pokemon gEnemyParty[PARTY_SIZE];
 extern struct SpriteTemplate gMultiuseSpriteTemplate;
 
-extern const struct BattleMove gBattleMoves[];
-extern const u8 gMoveCategories[];   // MOVE_CATEGORY_*, Gen 4's split (src/data/move_categories.h)
+// Moemon Maker (M3): the game reads its moves, species and learnsets through these pointers: the built tables
+// (gBattleMovesBase ..., pokemon.c), or the Maker's patched copies (src/maker/maker_database.c)
+extern const struct BattleMove *gBattleMovesTable;
+#define gBattleMoves gBattleMovesTable
+extern const u8 *gMoveCategoriesTable;   // MOVE_CATEGORY_*, Gen 4's split (src/data/move_categories.h)
+#define gMoveCategories gMoveCategoriesTable
 extern const u8 gFacilityClassToPicIndex[];
 extern const u8 gFacilityClassToTrainerClass[];
-extern const struct SpeciesInfo gSpeciesInfo[];
+extern const struct SpeciesInfo *gSpeciesInfoTable;
+#define gSpeciesInfo gSpeciesInfoTable
+extern const u32 gSpeciesInfoCount;   // (entries in the built table, Unown's forms and Gen 4-9 included)
 extern const u8 *const gItemEffectTable[];
 extern const u32 gExperienceTables[][MAX_LEVEL + 1];
-extern const u32 *const gLevelUpLearnsets[];
+extern const u32 *const *gLevelUpLearnsetsTable;
+#define gLevelUpLearnsets gLevelUpLearnsetsTable
 extern const u8 gPPUpGetMask[];
 extern const u8 gPPUpClearMask[];
 extern const u8 gPPUpAddValues[];

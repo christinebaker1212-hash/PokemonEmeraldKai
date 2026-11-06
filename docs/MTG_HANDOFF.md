@@ -42,6 +42,22 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-06: 1.121.0)
+- **Static abilities** (src/mtg/mtg_static.c, MtgStatic / MtgStaticMods in mtg_internal.h): `S:Mode$ Continuous` with
+  Affected$ (or AffectedDefined$ Self, an Affected$ beside it then a condition on itself), AddPower / AddToughness,
+  SetPower / SetToughness (layer 7b, the newest wins), AddKeyword (the engine's keywords, landwalk as `Landwalk:Island`
+  or `Islandwalk`, `Protection from red`), IsPresent$ with PresentCompare$ GE / EQ / LE n; `CantBlock`, `CantAttack`
+  (ValidCard$) and `CantBlockBy` (ValidAttacker$ / ValidBlocker$); `RaiseCost` / `ReduceCost` of spells (Type$ Spell,
+  Activator$ You / Opponent, Amount$ n or Cost$ one colored symbol: Mtg_SpellCost, used by the cast actions and the
+  cost shown on a card in hand). Mtg_Power / Mtg_Toughness / Mtg_Keywords /
+  Mtg_Landwalk / Mtg_Protection include them (an Affected$ looking at power or keywords sees them without statics: no
+  loops); CanAttack and Mtg_CanBlock ask Mtg_StaticForbids. Tests: TestStatics in tools/mtg/test_rules.c.
+- **Valid specs**: a capitalized word is a subtype only when some card of the pool has it (Mtg_IsSubtype, from every
+  Types: line before the cards parse); "DefenderCtrl", "Snow" and the like keep a card out instead of misreading it.
+- 1252 of 5408 cards play (docs/MTG_SCOPE.md). Biggest blockers now: static ability 469 (AlternativeCost, ReduceCost /
+  RaiseCost, AffectedDefined$ Enchanted with auras, Condition$, AddAbility / AddTrigger, characteristic-defining */*),
+  cost 319, Enchant:Creature 282, replacement effect 191.
+
 ## Status (2026-11-05: in the game, 1.100.0)
 - **1.100.0: triggered abilities, booster packs by set, achievements** (COOP_NOTES "MAGIC"): 1136 of 5408 cards play.
 - **1.96.0: the presentation pass** (below): printed art, faces, every screen and the table like the other games'.

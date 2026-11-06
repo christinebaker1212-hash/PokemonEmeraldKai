@@ -501,7 +501,13 @@ static bool8 SetUpFieldMove_Dive(void);
 
 // static const data
 #include "data/pokemon/tutor_learnsets.h"
+// (Moemon Maker: the field moves' menu names are fixed when the game is built: the built names table)
+extern const u8 gMoveNamesBase[][MOVE_NAME_LENGTH + 1];
+#undef gMoveNames
+#define gMoveNames gMoveNamesBase
 #include "data/party_menu.h"
+#undef gMoveNames
+#define gMoveNames gMoveNamesTable
 
 // code
 static void InitPartyMenu(u8 menuType, u8 layout, u8 partyAction, bool8 keepCursorPos, u8 messageId, TaskFunc task, MainCallback callback)

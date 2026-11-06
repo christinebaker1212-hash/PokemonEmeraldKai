@@ -7,3 +7,4 @@ heal_locations.h
 wild_encounter.h
 maker_names.h
 maker_tilesets.h
+maker_ops.h
