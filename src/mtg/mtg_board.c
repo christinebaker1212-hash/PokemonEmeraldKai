@@ -1296,6 +1296,8 @@ static const char *PickVerb(void)
         return "Return";   // (a cost: back to its owner's hand)
     if (q->forCost == 5)
         return "Tap";
+    if (q->forCost == 6)
+        return "Exile";   // (from the graveyard)
     return q->forCost == 1 || (q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_SACRIFICE) ? "Sacrifice"
                                                                                                       : "Choose";
 }
@@ -1479,6 +1481,11 @@ void MtgBoard_Draw(void)
         }
         if (B.targetCursor < q->candidateCount && B.rect[q->candidates[B.targetCursor]].on) {
             Rect t = B.rect[q->candidates[B.targetCursor]];
+            G_Focus(t.x, t.y, t.w, t.h, 0xf8f070, B.frame);
+        } else if (B.targetCursor < q->candidateCount
+                   && B.duel.objs[q->candidates[B.targetCursor]].zone == MTG_ZONE_GRAVEYARD) {   // (its pile)
+            int obj = q->candidates[B.targetCursor];
+            Rect t = PileRect(B.duel.objs[obj].owner == ME ? PILE_MY_GRAVE : PILE_OPP_GRAVE);
             G_Focus(t.x, t.y, t.w, t.h, 0xf8f070, B.frame);
         }
     } else if (B.mode == MODE_TARGET || B.mode == MODE_BLOCK_PICK) {

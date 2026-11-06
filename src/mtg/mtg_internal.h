@@ -48,15 +48,18 @@ typedef struct {
     const char *sacSpec, *discardSpec;   // Valid specs ("Creature", "Land", "Goblin", "Card")
     uint8_t exileHandN, returnN, tapTypeN;  // ExileFromHand<n/Type>, Return<n/Type> (own permanents), tapXType<n/Type>
     const char *exileHandSpec, *returnSpec, *tapTypeSpec;
+    uint8_t exileGraveN;                    // ExileFromGrave<n/Type>: cards from its player's graveyard
+    const char *exileGraveSpec;
 } MtgCost;
 // what a cost's picks come from (Mtg_CostCandidates): 0 discard (hand), 1 sacrifice, 2 exile from the hand, 3 return
-// to the hand, 4 tap (an untapped permanent)
-enum { MTG_COSTK_DISCARD, MTG_COSTK_SAC, MTG_COSTK_EXILE_HAND, MTG_COSTK_RETURN, MTG_COSTK_TAP };
+// to the hand, 4 tap (an untapped permanent), 5 exile from the graveyard
+enum { MTG_COSTK_DISCARD, MTG_COSTK_SAC, MTG_COSTK_EXILE_HAND, MTG_COSTK_RETURN, MTG_COSTK_TAP, MTG_COSTK_EXILE_GRAVE };
 int Mtg_ParseCost(const char *s, MtgCost *out);
 // a spell's alternative cost ("you may ... rather than pay this spell's mana cost": StaticAbilityAlternativeCost)
 typedef struct {
     MtgCost cost;
     const char *present;   // IsPresent$ (YouCtrl...): only while the battlefield has one
+    const char *check[2], *compare[2];   // CheckSVar$ / CheckSecondSVar$ and their compares (default GE1)
     char label[40];        // the menu's words ("SACRIFICE A MOUNTAIN"), from its Description$
 } MtgAltCost;
 extern MtgAltCost *gMtgAltCosts;
@@ -130,7 +133,7 @@ void Mtg_Unsupported(MtgCardDef *c, const char *why);
 #define MTG_STATIC_NO_SET (-1000)
 enum { MTG_STATIC_CONTINUOUS, MTG_STATIC_CANT_BLOCK, MTG_STATIC_CANT_ATTACK, MTG_STATIC_CANT_BLOCK_BY,
        MTG_STATIC_RAISE_COST, MTG_STATIC_REDUCE_COST,
-       MTG_STATIC_MUST_ATTACK, MTG_STATIC_CANT_BE_CAST, MTG_STATIC_CANT_TARGET, MTG_STATIC_CANT_PLAY_LAND,
+       MTG_STATIC_MUST_ATTACK, MTG_STATIC_CANT_BE_CAST, MTG_STATIC_CANT_TARGET, MTG_STATIC_CANT_PLAY_LAND, MTG_STATIC_CANT_BE_ACTIVATED,
        MTG_STATIC_ETB_TAPPED, MTG_STATIC_NO_UNTAP };   // (two replacement effects, R: lines, kept here: they test alike)
 typedef struct {
     uint16_t card;
@@ -156,6 +159,11 @@ typedef struct {
     uint8_t spellsOnly;
     uint8_t grantCount;             // AddAbility$: activated abilities what it affects has (its own card's SVars)
     uint16_t grant[3];
+    const char *check, *compare;    // CheckSVar$ X | SVarCompare$ GE7 (an SVar counted now, against a number or an SVar)
+    uint8_t selfCost;               // Raise / ReduceCost with ValidCard$ Card.Self | EffectZone$ All: its own, from the hand
+    uint8_t gainControl;            // GainControl$ You: its controller controls what it affects
+    uint8_t fromGrave;              // EffectZone$ Graveyard: works while its card is in a graveyard (not the battlefield)
+    uint8_t saKind;                 // CantBeActivated: 0 any ability, 1 those with {T}, 2 Cycling
     uint8_t grantTrigCount;         // AddTrigger$: triggers what it affects has
     uint16_t grantTrig[2];
 } MtgStatic;
@@ -171,7 +179,11 @@ void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m);
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other);
 // a permanent's abilities now: its card's, then those statics give it (AddAbility$); returns how many (at most max)
 int Mtg_ObjAbilities(const MtgDuel *d, int obj, uint16_t *out, int max);
-int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max);    // ... and triggers (AddTrigger$)
+int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max);
+int Mtg_StaticController(const MtgDuel *d, int obj);
+// CheckSVar$: card's SVar NAME counted for SRC (its controller CTRL) compared as CMP says ("GE7", "LEY", NULL = GE1)
+int Mtg_CheckSvar(const MtgDuel *d, int card, int src, int ctrl, const char *name, const char *cmp);
+int Mtg_CheckSvarKnown(int card, const char *name, const char *cmp);   // GainControl$ You statics: who controls OBJ (-1: none says)    // ... and triggers (AddTrigger$)
 void Mtg_SpellCost(const MtgDuel *d, int player, int obj, MtgManaCost *out);   // its mana cost with Raise / ReduceCost   // CantBlock / CantAttack (obj), CantBlockBy
                                                                           // (obj attacking, other blocking)
 

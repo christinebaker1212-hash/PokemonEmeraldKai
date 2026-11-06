@@ -122,9 +122,10 @@ static int sAltCount, sAltCap;
 
 // "S:Mode$ AlternativeCost | ValidSA$ Spell.Self | EffectZone$ All | Cost$ ... [| IsPresent$ ...] | Description$ ...":
 // the spell may be cast paying that instead of its mana cost (StaticAbilityAlternativeCost). Costs without mana only.
-static void ParseAlt(MtgCardDef *c, char *text)
+static void ParseAlt(MtgCardDef *c, int cardId, char *text)
 {
-    static const char *const sKnown[] = {"Mode", "ValidSA", "EffectZone", "Cost", "IsPresent", "Description"};
+    static const char *const sKnown[] = {"Mode", "ValidSA", "EffectZone", "Cost", "IsPresent", "Description", "ValidCard",
+                                         "ValidPlayer", "CheckSVar", "SVarCompare", "CheckSecondSVar", "SecondSVarCompare"};
     MtgAltCost alt;
     int first, count, i;
     const char *s, *desc;
@@ -138,7 +139,23 @@ static void ParseAlt(MtgCardDef *c, char *text)
         if (k == sizeof(sKnown) / sizeof(sKnown[0]))
             goto unknown;
     }
-    if (!(s = ParamOf(first, count, "ValidSA")) || strcmp(s, "Spell.Self") != 0 || c->altCost
+    // ValidSA$ Spell.Self, or Spell with ValidCard$ Card.Self (the Legates' form), ValidPlayer$ You
+    if ((s = ParamOf(first, count, "ValidSA")) && strcmp(s, "Spell") == 0) {
+        const char *vc = ParamOf(first, count, "ValidCard");
+        if (!vc || strcmp(vc, "Card.Self") != 0)
+            goto unknown;
+        s = "Spell.Self";
+    } else if (ParamOf(first, count, "ValidCard"))
+        goto unknown;
+    if ((desc = ParamOf(first, count, "ValidPlayer")) && strcmp(desc, "You") != 0)
+        goto unknown;
+    for (i = 0; i < 2; i++) {   // CheckSVar$ / CheckSecondSVar$ (each GE1 unless its compare says)
+        alt.check[i] = ParamOf(first, count, i ? "CheckSecondSVar" : "CheckSVar");
+        alt.compare[i] = ParamOf(first, count, i ? "SecondSVarCompare" : "SVarCompare");
+        if ((alt.check[i] && !Mtg_CheckSvarKnown(cardId, alt.check[i], alt.compare[i])) || (!alt.check[i] && alt.compare[i]))
+            goto unknown;
+    }
+    if (!s || strcmp(s, "Spell.Self") != 0 || c->altCost
         || !(s = ParamOf(first, count, "EffectZone")) || strcmp(s, "All") != 0
         || !(s = ParamOf(first, count, "Cost")) || !Mtg_ParseCost(s, &alt.cost)
         || Mtg_ManaCostTotal(&alt.cost.mana) || alt.cost.mana.x || alt.cost.tap || alt.cost.sacSelf || alt.cost.exileSelf
@@ -157,7 +174,9 @@ static void ParseAlt(MtgCardDef *c, char *text)
                 alt.label[n++] = (*from >= 'a' && *from <= 'z') ? (char)(*from - 32) : *from;
         }
         alt.label[n] = 0;
-        if (!n)
+        if (!n && desc && strstr(desc, "without paying its mana cost"))
+            snprintf(alt.label, sizeof(alt.label), "FOR FREE");   // (the Legates, Massacre)
+        else if (!n)
             snprintf(alt.label, sizeof(alt.label), "PAY ITS OTHER COST");
     }
     if (sAltCount + 1 > sAltCap) {
@@ -175,7 +194,7 @@ void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text)
 {
     char *mode = strstr(text, "Mode$"), *comma, *end;
     if (mode && strncmp(mode + 5 + strspn(mode + 5, " "), "AlternativeCost", 15) == 0) {
-        ParseAlt(c, text);
+        ParseAlt(c, cardId, text);
         return;
     }
     if (mode && (end = strchr(mode, '|')) != NULL && (comma = strchr(mode, ',')) != NULL && comma < end) {
@@ -192,12 +211,8 @@ void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text)
         b[pre] = 0;
         strncat(b, comma + 1, (size_t)(end - comma - 1));
         strcat(b, end);
-        if (strchr(b + pre, ',') && strchr(b + pre, ',') < strchr(b + pre, '|')) {
-            Mtg_Unsupported(c, "static ability");
-            return;
-        }
         ParseOne(c, cardId, a);
-        ParseOne(c, cardId, b);
+        Mtg_ParseStatic(c, cardId, b);   // (the rest: more modes split again)
         return;
     }
     ParseOne(c, cardId, text);
@@ -209,7 +224,8 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
                                          "SetToughness", "Description", "AffectedZone", "EffectZone", "AffectedDefined",
                                          "IsPresent", "PresentCompare", "ValidCard", "ValidAttacker", "ValidBlocker", "CharacteristicDefining",
                                          "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender",
-                                         "ValidCreature", "ValidTarget", "ValidSA", "ValidSource", "Caster", "AddAbility", "AddTrigger", "AddSVar"};
+                                         "ValidCreature", "ValidTarget", "ValidSA", "ValidSource", "Caster", "AddAbility", "AddTrigger", "AddSVar", "GainControl",
+                                         "CheckSVar", "SVarCompare"};
     MtgStatic st;
     int first, count, i, v;
     const char *s;
@@ -232,11 +248,13 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
             : strcmp(s, "CantAttack") == 0 ? MTG_STATIC_CANT_ATTACK : strcmp(s, "CantBlockBy") == 0 ? MTG_STATIC_CANT_BLOCK_BY
             : strcmp(s, "RaiseCost") == 0 ? MTG_STATIC_RAISE_COST : strcmp(s, "ReduceCost") == 0 ? MTG_STATIC_REDUCE_COST
             : strcmp(s, "MustAttack") == 0 ? MTG_STATIC_MUST_ATTACK : strcmp(s, "CantBeCast") == 0 ? MTG_STATIC_CANT_BE_CAST
-            : strcmp(s, "CantTarget") == 0 ? MTG_STATIC_CANT_TARGET : strcmp(s, "CantPlayLand") == 0 ? MTG_STATIC_CANT_PLAY_LAND : 0xFF;
+            : strcmp(s, "CantTarget") == 0 ? MTG_STATIC_CANT_TARGET : strcmp(s, "CantPlayLand") == 0 ? MTG_STATIC_CANT_PLAY_LAND
+            : strcmp(s, "CantBeActivated") == 0 ? MTG_STATIC_CANT_BE_ACTIVATED : 0xFF;
     // the newer modes' own keys (StaticAbilityMustAttack, CantBeCast, CantTarget, CantPlayLand), nowhere else
     if ((ParamOf(first, count, "ValidCreature") && st.mode != MTG_STATIC_MUST_ATTACK)
-        || ((ParamOf(first, count, "ValidTarget") || ParamOf(first, count, "ValidSA") || ParamOf(first, count, "ValidSource"))
-            && st.mode != MTG_STATIC_CANT_TARGET)
+        || ((ParamOf(first, count, "ValidTarget") || ParamOf(first, count, "ValidSource")) && st.mode != MTG_STATIC_CANT_TARGET)
+        || (ParamOf(first, count, "ValidSA") && st.mode != MTG_STATIC_CANT_TARGET && st.mode != MTG_STATIC_CANT_BE_ACTIVATED
+            && st.mode != MTG_STATIC_CANT_ATTACK && st.mode != MTG_STATIC_CANT_BLOCK)
         || (ParamOf(first, count, "Caster") && st.mode != MTG_STATIC_CANT_BE_CAST))
         goto unknown;
     if (st.mode == MTG_STATIC_CANT_TARGET) {
@@ -246,6 +264,15 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
         if ((st.source = ParamOf(first, count, "ValidSource")) && !Mtg_ValidSpecKnown(st.source))
             goto unknown;
         if (!ParamOf(first, count, "ValidTarget") || ParamOf(first, count, "AffectedZone"))
+            goto unknown;
+    }
+    // CantBeActivated (StaticAbilityCantBeCast's activated side): ValidCard$ whose abilities; ValidSA$ Activated (all),
+    // Activated.hasTapCost, Activated.Cycling; Activator$ Player (anyone) only
+    if (st.mode == MTG_STATIC_CANT_BE_ACTIVATED) {
+        s = ParamOf(first, count, "ValidSA");
+        st.saKind = !s || strcmp(s, "Activated") == 0 ? 0 : strcmp(s, "Activated.hasTapCost") == 0 ? 1
+                  : strcmp(s, "Activated.Cycling") == 0 ? 2 : 0xFF;
+        if (st.saKind == 0xFF || ((s = ParamOf(first, count, "Activator")) && strcmp(s, "Player") != 0))
             goto unknown;
     }
     if (st.mode == MTG_STATIC_CANT_BE_CAST) {   // Caster$ Player (anyone, as none) / You / Opponent: the static's activator slot
@@ -261,8 +288,15 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
         st.self = 1;
         if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "All") != 0)
             goto unknown;
-    } else if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "Battlefield") != 0)
-        goto unknown;
+    } else if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "All") == 0
+               && (st.mode == MTG_STATIC_REDUCE_COST || st.mode == MTG_STATIC_RAISE_COST)
+               && (s = ParamOf(first, count, "ValidCard")) && strcmp(s, "Card.Self") == 0) {
+        st.selfCost = 1;   // (the Avatars: "CARDNAME costs {6} less to cast" from the hand)
+    } else if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "Battlefield") != 0) {
+        if (strcmp(s, "Graveyard") != 0 || st.mode != MTG_STATIC_CONTINUOUS || ParamOf(first, count, "AffectedDefined"))
+            goto unknown;
+        st.fromGrave = 1;   // (Anger, Wonder...: while the card is in its owner's graveyard)
+    }
     if (st.mode == 0xFF || ((s = ParamOf(first, count, "AffectedZone")) && strcmp(s, "Battlefield") != 0))
         goto unknown;
     if ((s = ParamOf(first, count, "AffectedDefined"))) {
@@ -276,6 +310,8 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
                                       : st.mode == MTG_STATIC_CANT_BLOCK_BY ? "ValidAttacker"
                                       : st.mode == MTG_STATIC_MUST_ATTACK ? "ValidCreature"
                                       : st.mode == MTG_STATIC_CANT_TARGET ? "ValidTarget" : "ValidCard");
+    if (st.mode == MTG_STATIC_CANT_BE_ACTIVATED && !st.affected)
+        st.affected = "Card";   // (Stabilizer: every card's Cycling)
     if (st.mode == MTG_STATIC_CANT_PLAY_LAND && !st.affected)
         st.affected = "Land";   // (Territorial Dispute: every land)
     if (st.mode == MTG_STATIC_CANT_BLOCK_BY && (st.blocker = ParamOf(first, count, "ValidBlocker")) != NULL
@@ -305,7 +341,8 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
                 goto unknown;
         } else
             goto unknown;
-    } else if ((ParamOf(first, count, "Activator") && st.mode != MTG_STATIC_CANT_BE_CAST) || ParamOf(first, count, "Type")
+    } else if ((ParamOf(first, count, "Activator") && st.mode != MTG_STATIC_CANT_BE_CAST && st.mode != MTG_STATIC_CANT_BE_ACTIVATED)
+               || ParamOf(first, count, "Type")
                || ParamOf(first, count, "Amount") || ParamOf(first, count, "Cost"))
         goto unknown;
     if (st.mode == MTG_STATIC_CANT_BE_CAST && ParamOf(first, count, "Activator"))
@@ -365,6 +402,17 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     }
     if ((s = ParamOf(first, count, "AddKeyword")) && !Keywords(&st, s))
         goto unknown;
+    if ((st.check = ParamOf(first, count, "CheckSVar"))) {   // (StaticAbility.checkConditions' CheckSVar)
+        st.compare = ParamOf(first, count, "SVarCompare");
+        if (!Mtg_CheckSvarKnown(cardId, st.check, st.compare))
+            goto unknown;
+    } else if (ParamOf(first, count, "SVarCompare"))
+        goto unknown;
+    if ((s = ParamOf(first, count, "GainControl"))) {   // (Control Magic: "You control enchanted creature")
+        if (strcmp(s, "You") != 0 || st.mode != MTG_STATIC_CONTINUOUS || !st.enchanted)
+            goto unknown;
+        st.gainControl = 1;
+    }
     // AddAbility$ "A & B": SVars of its card, each an activated ability ("AB$ ...") of whatever it affects; CARDNAME and
     // Self there are that permanent (the ability's source), its SVars the granting card's (as Forge's AddSVar)
     if ((s = ParamOf(first, count, "AddAbility"))) {
@@ -503,9 +551,54 @@ unknown:
 }
 
 // Condition$ now
+int Mtg_CheckSvar(const MtgDuel *d, int card, int src, int ctrl, const char *name, const char *cmp)
+{
+    MtgStackEntry e;
+    MtgResolveCtx ctx;
+    int ok, v, w;
+    char *end;
+    memset(&e, 0, sizeof(e));
+    ctx.e = &e;
+    ctx.controller = ctrl;
+    ctx.source = src;
+    v = Mtg_Amount(d, &ctx, card, name, &ok);
+    if (!cmp)
+        cmp = "GE1";
+    w = (int)strtol(cmp + 2, &end, 10);
+    if (end == cmp + 2 || *end)
+        w = Mtg_Amount(d, &ctx, card, cmp + 2, &ok);   // ("LEY": another SVar)
+    return strncmp(cmp, "GE", 2) == 0 ? v >= w : strncmp(cmp, "GT", 2) == 0 ? v > w : strncmp(cmp, "LE", 2) == 0 ? v <= w
+         : strncmp(cmp, "LT", 2) == 0 ? v < w : strncmp(cmp, "EQ", 2) == 0 ? v == w : v != w;
+}
+
+int Mtg_CheckSvarKnown(int card, const char *name, const char *cmp)
+{
+    int ok;
+    char *end;
+    if (!Mtg_Svar(card, name))
+        return 0;
+    Mtg_Amount(NULL, NULL, card, name, &ok);
+    if (!ok)
+        return 0;
+    if (!cmp)
+        return 1;
+    if (strlen(cmp) < 3 || (strncmp(cmp, "GE", 2) && strncmp(cmp, "GT", 2) && strncmp(cmp, "LE", 2) && strncmp(cmp, "LT", 2)
+                            && strncmp(cmp, "EQ", 2) && strncmp(cmp, "NE", 2)))
+        return 0;
+    strtol(cmp + 2, &end, 10);
+    if (end != cmp + 2 && !*end)
+        return 1;
+    if (!Mtg_Svar(card, cmp + 2))
+        return 0;
+    Mtg_Amount(NULL, NULL, card, cmp + 2, &ok);
+    return ok;
+}
+
 static int ConditionHolds(const MtgDuel *d, const MtgStatic *st, int src)
 {
     int i, n = 0, me = d->objs[src].controller;
+    if (st->check && !Mtg_CheckSvar(d, st->card, src, me, st->check, st->compare))
+        return 0;
     switch (st->condition) {
     case 1:
         for (i = 0; i < d->objCount; i++)
@@ -584,11 +677,13 @@ void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m)
     for (s = 0; s < d->objCount; s++) {
         const MtgObj *src = &d->objs[s];
         const MtgCardDef *c;
-        if (src->zone != MTG_ZONE_BATTLEFIELD)
+        if (src->zone != MTG_ZONE_BATTLEFIELD && src->zone != MTG_ZONE_GRAVEYARD)
             continue;
         c = Mtg_Card(src->def);
         for (k = 0; k < c->staticCount; k++) {
             const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if ((src->zone == MTG_ZONE_GRAVEYARD) != st->fromGrave)
+                continue;   // (EffectZone$ Graveyard: only from there; the rest only from the battlefield)
             if (st->mode != MTG_STATIC_CONTINUOUS || !Applies(d, st, s, obj))
                 continue;
             m->addPower += st->addPower;
@@ -643,11 +738,13 @@ int Mtg_ObjAbilities(const MtgDuel *d, int obj, uint16_t *out, int max)
     for (s = 0; s < d->objCount && n < max; s++) {
         const MtgObj *src = &d->objs[s];
         const MtgCardDef *sc;
-        if (src->zone != MTG_ZONE_BATTLEFIELD)
+        if (src->zone != MTG_ZONE_BATTLEFIELD && src->zone != MTG_ZONE_GRAVEYARD)
             continue;
         sc = Mtg_Card(src->def);
         for (k = 0; k < sc->staticCount && n < max; k++) {
             const MtgStatic *st = &gMtgStatics[sc->statics[k]];
+            if ((src->zone == MTG_ZONE_GRAVEYARD) != st->fromGrave)
+                continue;   // (EffectZone$ Graveyard: only from there; the rest only from the battlefield)
             if (st->mode != MTG_STATIC_CONTINUOUS || !st->grantCount || !Applies(d, st, s, obj))
                 continue;
             for (g = 0; g < st->grantCount && n < max; g++)
@@ -670,11 +767,13 @@ int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max)
     for (s = 0; s < d->objCount && n < max; s++) {
         const MtgObj *src = &d->objs[s];
         const MtgCardDef *sc;
-        if (src->zone != MTG_ZONE_BATTLEFIELD)
+        if (src->zone != MTG_ZONE_BATTLEFIELD && src->zone != MTG_ZONE_GRAVEYARD)
             continue;
         sc = Mtg_Card(src->def);
         for (k = 0; k < sc->staticCount && n < max; k++) {
             const MtgStatic *st = &gMtgStatics[sc->statics[k]];
+            if ((src->zone == MTG_ZONE_GRAVEYARD) != st->fromGrave)
+                continue;   // (EffectZone$ Graveyard: only from there; the rest only from the battlefield)
             if (st->mode != MTG_STATIC_CONTINUOUS || !st->grantTrigCount || !Applies(d, st, s, obj))
                 continue;
             for (g = 0; g < st->grantTrigCount && n < max; g++)
@@ -683,6 +782,30 @@ int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max)
     }
     sDepth--;
     return n;
+}
+
+int Mtg_StaticController(const MtgDuel *d, int obj)
+{
+    int s, k, who = -1;
+    uint32_t seq = 0;
+    if (sDepth)
+        return -1;
+    sDepth++;
+    for (s = 0; s < d->objCount; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *c;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(src->def);
+        for (k = 0; k < c->staticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (!st->gainControl || !Applies(d, st, s, obj) || src->seq < seq)
+                continue;
+            who = src->controller, seq = src->seq;   // (the newest wins: timestamps)
+        }
+    }
+    sDepth--;
+    return who;
 }
 
 // CantBlock / CantAttack: does a static forbid OBJ? CantBlockBy: may OBJ (attacking) not be blocked by OTHER?
@@ -695,11 +818,13 @@ int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other)
     for (s = 0; s < d->objCount && !forbid; s++) {
         const MtgObj *src = &d->objs[s];
         const MtgCardDef *c;
-        if (src->zone != MTG_ZONE_BATTLEFIELD)
+        if (src->zone != MTG_ZONE_BATTLEFIELD && src->zone != MTG_ZONE_GRAVEYARD)
             continue;
         c = Mtg_Card(src->def);
         for (k = 0; k < c->staticCount && !forbid; k++) {
             const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if ((src->zone == MTG_ZONE_GRAVEYARD) != st->fromGrave)
+                continue;   // (EffectZone$ Graveyard: only from there; the rest only from the battlefield)
             if (st->mode != mode || !Applies(d, st, s, obj))
                 continue;
             if (mode == MTG_STATIC_CANT_BLOCK_BY && st->blocker && !Mtg_ValidObj(d, other, st->blocker, s, src->controller))
@@ -709,6 +834,10 @@ int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other)
             // CantBeCast: OTHER is the player casting it (Caster$: anyone / its controller / an opponent)
             if (mode == MTG_STATIC_CANT_BE_CAST && ((st->activator == 1 && other != src->controller)
                                                     || (st->activator == 2 && other == src->controller)))
+                continue;
+            // CantBeActivated: OTHER is the ability (its kind: any, with {T}, Cycling)
+            if (mode == MTG_STATIC_CANT_BE_ACTIVATED && other != 0xFFFF
+                && ((st->saKind == 1 && !gMtgAbilities[other].cost.tap) || (st->saKind == 2 && !gMtgAbilities[other].fromHand)))
                 continue;
             // CantTarget: OTHER is the targeting spell's or ability's source (ValidSA$ Spell: only from a spell, which
             // isn't on the battlefield; ValidSource$: only such sources)
@@ -737,11 +866,13 @@ void Mtg_SpellCost(const MtgDuel *d, int player, int obj, MtgManaCost *out)
     for (s = 0; s < d->objCount; s++) {
         const MtgObj *src = &d->objs[s];
         const MtgCardDef *c;
-        if (src->zone != MTG_ZONE_BATTLEFIELD)
+        if (src->zone != MTG_ZONE_BATTLEFIELD && src->zone != MTG_ZONE_GRAVEYARD)
             continue;
         c = Mtg_Card(src->def);
         for (k = 0; k < c->staticCount; k++) {
             const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if ((src->zone == MTG_ZONE_GRAVEYARD) != st->fromGrave)
+                continue;   // (EffectZone$ Graveyard: only from there; the rest only from the battlefield)
             if ((st->mode != MTG_STATIC_RAISE_COST && st->mode != MTG_STATIC_REDUCE_COST)
                 || (st->activator == 1 && player != src->controller) || (st->activator == 2 && player == src->controller)
                 || !Mtg_ValidObj(d, obj, st->affected, s, src->controller) || !Present(d, st, s))
@@ -751,6 +882,19 @@ void Mtg_SpellCost(const MtgDuel *d, int player, int obj, MtgManaCost *out)
                 if (st->costPip)
                     out->pip[st->costPip - 1]++;
             } else
+                reduce += st->costGeneric;
+        }
+    }
+    {   // its own "costs less to cast" (the Avatars: EffectZone$ All, from the hand)
+        const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+        int k;
+        for (k = 0; k < c->staticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (!st->selfCost || (st->check && !Mtg_CheckSvar(d, st->card, obj, player, st->check, st->compare)))
+                continue;
+            if (st->mode == MTG_STATIC_RAISE_COST)
+                raise += st->costGeneric;
+            else
                 reduce += st->costGeneric;
         }
     }

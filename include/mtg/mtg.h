@@ -110,6 +110,7 @@ typedef struct {
     int16_t counters11;           // +1/+1 counters (-1/-1 as negative)
     uint16_t attachedTo;          // an Aura: the creature it enchants (MTG_NO_OBJ: none)
     uint8_t regen;                // regeneration shields until end of turn (RegenerateEffect)
+    uint8_t ctrlBase;             // under a static's control (Control Magic): its controller before + 1 (0: none)
     uint32_t seq;                 // order within its zone (higher = newer; the library's top is the highest)
 } MtgObj;
 
@@ -185,7 +186,8 @@ typedef struct {
     uint8_t choice;
     MtgManaCost pay;
     uint8_t forCost;                                 // CHOOSE's PICK for a cost: 1 sacrifice, 2 discard, 3 exile from
-                                                     // the hand, 4 return to the hand, 5 tap (MTG_COSTK_* + 1)
+                                                     // the hand, 4 return to the hand, 5 tap, 6 exile from the
+                                                     // graveyard (MTG_COSTK_* + 1)
 } MtgQuery;
 
 typedef struct {
@@ -232,7 +234,7 @@ typedef struct MtgDuel {
     // query.forCost set, before anyone gets priority
     uint8_t costSac, costDiscard, costPlayer;
     uint16_t costSource, costAbility;
-    uint8_t costExile, costReturn, costTap;          // ... cards to exile from the hand, permanents to return, to tap
+    uint8_t costExile, costReturn, costTap, costExileGrave;          // ... cards to exile from the hand, permanents to return, to tap
     uint8_t costAlt;                                 // ... the cost is the spell's alternative one (its card's altCost)
     MtgQuery query;
     uint32_t eventCount;                             // every event so far (the ring keeps the last MTG_EVENT_RING)

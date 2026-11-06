@@ -56,6 +56,8 @@ int Mtg_ManaAbilityColors(const MtgDuel *d, int obj, int *amount)
         if (ab->kind != MTG_AB_ACTIVATED || ab->api != MTG_API_MANA || !ab->cost.tap || ab->cost.sacSelf
             || Mtg_ManaCostTotal(&ab->cost.mana) || ab->cost.mana.x)
             continue;
+        if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, obj, abil[i]))
+            continue;   // (Null Rod on a Mox, Cursed Totem on Llanowar Elves)
         m = Mtg_ProducedColors(Mtg_Param(ab, "Produced"));
         if (m <= 0)
             continue;

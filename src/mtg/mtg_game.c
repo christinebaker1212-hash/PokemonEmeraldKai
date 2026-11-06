@@ -137,7 +137,7 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
         o->sick = zone == MTG_ZONE_BATTLEFIELD;   // (a permanent arriving: under its controller since this turn)
     }
     if (zone != MTG_ZONE_BATTLEFIELD)
-        o->controller = o->owner;
+        o->controller = o->owner, o->ctrlBase = 0;
     o->zone = (uint8_t)zone;
     o->seq = ++d->seq;
     if (zone == MTG_ZONE_LIBRARY) {
@@ -277,6 +277,29 @@ static void StateBasedActions(MtgDuel *d)
             d->over = 1;
             d->winner = (int8_t)(lost[0] && lost[1] ? -1 : lost[0] ? 1 : 0);
             return;
+        }
+        for (i = 0; i < d->objCount; i++) {   // control from statics (Control Magic: layer 2), back when they end
+            MtgObj *o = &d->objs[i];
+            int want, now;
+            if (o->zone != MTG_ZONE_BATTLEFIELD)
+                continue;
+            want = Mtg_StaticController(d, i);
+            if (want >= 0 && !o->ctrlBase)
+                o->ctrlBase = (uint8_t)(o->controller + 1);
+            now = want >= 0 ? want : o->ctrlBase ? o->ctrlBase - 1 : o->controller;
+            if (want < 0)
+                o->ctrlBase = 0;
+            if (now != o->controller) {   // (a new controller: out of combat, and sick until their turn)
+                int k;
+                o->controller = (uint8_t)now;
+                o->sick = 1;
+                o->attacking = 0;
+                o->blocking = MTG_NO_OBJ;
+                for (k = 0; k < d->objCount; k++)
+                    if (d->objs[k].blocking == i)
+                        d->objs[k].blocking = MTG_NO_OBJ;
+                again = 1;
+            }
         }
         for (i = 0; i < d->objCount; i++)   // a token anywhere but the battlefield ceases to exist (704.5d)
             if (d->objs[i].def >= MTG_TOKEN_BASE && d->objs[i].zone != MTG_ZONE_BATTLEFIELD
@@ -538,11 +561,14 @@ static void AddAltCasts(const MtgDuel *d, MtgQuery *q, int obj, int p)
         if (!have)
             return;
     }
+    for (k = 0; k < 2; k++)   // (CheckSVar$: "if an opponent controls a Swamp and you control a Plains")
+        if (alt->check[k] && !Mtg_CheckSvar(d, d->objs[obj].def, obj, p, alt->check[k], alt->compare[k]))
+            return;
     if (!Mtg_CostPayable(d, p, &alt->cost, obj, obj))
         return;
     if (ability != 0xFFFF) {
         const MtgCost *own = &gMtgAbilities[ability].cost;
-        if (own->sacN || own->discardN || own->payLife || own->exileHandN || own->returnN || own->tapTypeN)
+        if (own->sacN || own->discardN || own->payLife || own->exileHandN || own->returnN || own->tapTypeN || own->exileGraveN)
             return;
     }
     if (ability != 0xFFFF && gMtgAbilities[ability].api == MTG_API_CHARM) {
@@ -574,7 +600,8 @@ static void BuildPriority(MtgDuel *d)
             MtgManaCost cost;
             for (k = 0; k < c->abilityCount; k++) {   // abilities from the hand (Cycling): any time with priority
                 const MtgAbility *ab = &gMtgAbilities[c->abilities[k]];
-                if (!ab->fromHand || ab->kind != MTG_AB_ACTIVATED || ab->cost.mana.x)
+                if (!ab->fromHand || ab->kind != MTG_AB_ACTIVATED || ab->cost.mana.x
+                    || Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, i, c->abilities[k]))   // (Stabilizer)
                     continue;
                 if (!Mtg_CanPay(d, p, &ab->cost.mana, 0, MTG_NO_OBJ) || !Mtg_CostPayable(d, p, &ab->cost, i, MTG_NO_OBJ))
                     continue;
@@ -618,6 +645,8 @@ static void BuildPriority(MtgDuel *d)
                 int x = 0;
                 if (ab->kind != MTG_AB_ACTIVATED || ab->api == MTG_API_MANA || ab->fromHand)
                     continue;   // (mana abilities are used by paying, never on their own; Cycling only from the hand)
+                if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, i, abil[k]))
+                    continue;   // (Arrest, Null Rod...)
                 if (ab->cost.tap && (o->tapped || ((c->types & MTG_T_CREATURE) && o->sick
                                                    && !(Mtg_Keywords(d, i) & MTG_KW_BIT(MTG_KW_HASTE)))))
                     continue;
@@ -647,16 +676,16 @@ static void BuildPriority(MtgDuel *d)
 // cards (discard, exile) of its spec; a card being cast is on the stack by then. Returns how many (out may be NULL)
 int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int kind, int source, uint16_t *out)
 {
-    int i, n = 0, hand = kind == MTG_COSTK_DISCARD || kind == MTG_COSTK_EXILE_HAND;
+    int i, n = 0, hand = kind == MTG_COSTK_DISCARD || kind == MTG_COSTK_EXILE_HAND, grave = kind == MTG_COSTK_EXILE_GRAVE;
     const char *spec = kind == MTG_COSTK_SAC ? c->sacSpec : kind == MTG_COSTK_DISCARD ? c->discardSpec
                      : kind == MTG_COSTK_EXILE_HAND ? c->exileHandSpec : kind == MTG_COSTK_RETURN ? c->returnSpec
-                     : c->tapTypeSpec;
+                     : kind == MTG_COSTK_EXILE_GRAVE ? c->exileGraveSpec : c->tapTypeSpec;
     if (!spec)
         return 0;
     for (i = 0; i < d->objCount; i++) {
         const MtgObj *o = &d->objs[i];
-        if (hand ? (o->zone != MTG_ZONE_HAND || o->owner != player)
-                 : (o->zone != MTG_ZONE_BATTLEFIELD || o->controller != player))
+        if (hand || grave ? (o->zone != (hand ? MTG_ZONE_HAND : MTG_ZONE_GRAVEYARD) || o->owner != player)
+                          : (o->zone != MTG_ZONE_BATTLEFIELD || o->controller != player))
             continue;
         if (kind == MTG_COSTK_TAP && o->tapped)
             continue;
@@ -671,13 +700,15 @@ int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int kind,
 
 int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, int casting)
 {
-    static const uint8_t sKinds[] = {MTG_COSTK_SAC, MTG_COSTK_DISCARD, MTG_COSTK_EXILE_HAND, MTG_COSTK_RETURN, MTG_COSTK_TAP};
+    static const uint8_t sKinds[] = {MTG_COSTK_SAC, MTG_COSTK_DISCARD, MTG_COSTK_EXILE_HAND, MTG_COSTK_RETURN, MTG_COSTK_TAP,
+                                     MTG_COSTK_EXILE_GRAVE};
     unsigned k;
     if (c->payLife && d->players[player].life < c->payLife)
         return 0;
     for (k = 0; k < sizeof(sKinds); k++) {
         int kind = sKinds[k], need = kind == MTG_COSTK_SAC ? c->sacN : kind == MTG_COSTK_DISCARD ? (c->discardN)
-                 : kind == MTG_COSTK_EXILE_HAND ? c->exileHandN : kind == MTG_COSTK_RETURN ? c->returnN : c->tapTypeN, n;
+                 : kind == MTG_COSTK_EXILE_HAND ? c->exileHandN : kind == MTG_COSTK_RETURN ? c->returnN
+                 : kind == MTG_COSTK_EXILE_GRAVE ? c->exileGraveN : c->tapTypeN, n;
         const char *spec = kind == MTG_COSTK_DISCARD ? c->discardSpec : c->exileHandSpec;
         if (!need)
             continue;
@@ -714,6 +745,8 @@ static int AskCost(MtgDuel *d)
         kind = MTG_COSTK_RETURN;
     else if (d->costTap)
         kind = MTG_COSTK_TAP;
+    else if (d->costExileGrave)
+        kind = MTG_COSTK_EXILE_GRAVE;
     else
         return 0;
     memset(q, 0, sizeof(*q));
@@ -727,7 +760,7 @@ static int AskCost(MtgDuel *d)
     if (q->candidateCount > MTG_MAX_COMBAT)
         q->candidateCount = MTG_MAX_COMBAT;
     if (!q->candidateCount) {   // (nothing left to pay with: checked before, so never; the rest is waived)
-        d->costSac = d->costDiscard = d->costExile = d->costReturn = d->costTap = 0;
+        d->costSac = d->costDiscard = d->costExile = d->costReturn = d->costTap = d->costExileGrave = 0;
         return 0;
     }
     return 1;
@@ -752,6 +785,9 @@ static void PayCostPick(MtgDuel *d, int obj)
     } else if (d->costTap) {
         Mtg_Tap(d, obj, 1);
         d->costTap--;
+    } else if (d->costExileGrave) {
+        Mtg_MoveTo(d, obj, MTG_ZONE_EXILE);
+        d->costExileGrave--;
     }
 }
 
@@ -782,6 +818,7 @@ static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source
     d->costExile = c->exileHandN;
     d->costReturn = c->returnN;
     d->costTap = c->tapTypeN;
+    d->costExileGrave = c->exileGraveN;
     d->costPlayer = (uint8_t)p;
     d->costSource = (uint16_t)source;
     d->costAbility = (uint16_t)ability;

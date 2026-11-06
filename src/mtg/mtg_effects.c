@@ -81,6 +81,31 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
         return ctx->e->target.kind == MTG_TGT_OBJ || ctx->e->target.kind == MTG_TGT_STACK
             ? Mtg_ManaCostTotal(&Mtg_Card(d->objs[ctx->e->target.id].def)->cost) : 0;
     }
+    // (two players: "the opponent with the most / fewest" is the opponent) the Valid spec read from their side
+    if (strncmp(sv, "PlayerCountOpponents$HighestValid ", 34) == 0 || strncmp(sv, "PlayerCountOpponents$LowestValid ", 33) == 0) {
+        const char *spec = strchr(sv, ' ') + 1;
+        int i, n = 0, opp;
+        if (!Mtg_ValidSpecKnown(spec)) {
+            *ok = 0;
+            return 0;
+        }
+        if (!d)
+            return 0;
+        opp = ctx->controller ^ 1;
+        for (i = 0; i < d->objCount; i++)
+            n += d->objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_ValidObj(d, i, spec, ctx->source, opp);
+        return n;
+    }
+    if (strcmp(sv, "PlayerCountOpponents$LowestCardsInHand") == 0 || strcmp(sv, "PlayerCountOpponents$HighestCardsInHand") == 0) {
+        int i, n = 0;
+        if (!d)
+            return 0;
+        for (i = 0; i < d->objCount; i++)
+            n += d->objs[i].zone == MTG_ZONE_HAND && d->objs[i].owner == (ctx->controller ^ 1);
+        return n;
+    }
+    if (strcmp(sv, "Count$YourLifeTotal") == 0)
+        return d ? d->players[ctx->controller].life : 0;
     if (strcmp(sv, "Count$Domain") == 0) {   // basic land types among its controller's lands
         int i;
         uint8_t types = 0;

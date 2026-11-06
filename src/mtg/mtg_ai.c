@@ -102,7 +102,7 @@ static int CostPriceOf(const MtgDuel *d, const MtgCost *c, int me, int src)
         }
     }
     price += c->discardN * 4;
-    price += c->exileHandN * 5 + c->returnN * 3 + c->tapTypeN * 2;   // (a card gone for good; a land back; a creature tapped)
+    price += c->exileHandN * 5 + c->returnN * 3 + c->tapTypeN * 2 + c->exileGraveN;   // (a card gone for good; a land back; a creature tapped)
     if (c->payLife)
         price += d->players[me].life <= c->payLife + 5 ? 50 : c->payLife;
     return price;
@@ -206,9 +206,11 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
     }
     case MTG_API_ATTACH: {   // an Aura: Forge's AttachAILogic says whether it helps (Pump) or hurts (Curse)
         const char *logic = Mtg_Svar(ab->card, "AttachAILogic");
-        int curse = logic && strcmp(logic, "Curse") == 0;
+        int curse = logic && (strcmp(logic, "Curse") == 0 || strcmp(logic, "GainControl") == 0);
         if (!main || tgtObj < 0 || curse != !tgtMine)
             return 0;
+        if (logic && strcmp(logic, "GainControl") == 0)   // (Control Magic: the best thing they have becomes ours)
+            return 20 + Value(d, tgtObj);
         if (!IsCreatureOnField(d, tgtObj))   // (a land's or an artifact's Aura)
             return 6;
         return curse ? 15 + Value(d, tgtObj) : 9 + Value(d, tgtObj) / 2;

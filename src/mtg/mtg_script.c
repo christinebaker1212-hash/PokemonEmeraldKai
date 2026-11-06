@@ -369,6 +369,14 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
                 if (!Mtg_ValidSpecKnown(out->discardSpec))
                     return 0;
             }
+        } else if ((r = CostPart(tok, "ExileFromGrave", &n, &spec, &specLen)) != 0) {   // CostExile from the graveyard
+            if (r < 0 || !spec || n < 1 || n > 5 || out->exileGraveN)
+                return 0;
+            out->exileGraveN = (uint8_t)n;
+            out->exileGraveSpec = specLen == 4 && strncmp(spec, "card", 4) == 0 ? "Card"   // (Psychatog's spelling)
+                                                                               : KeepSpec(spec, specLen);
+            if (!Mtg_ValidSpecKnown(out->exileGraveSpec) || strstr(out->exileGraveSpec, "CARDNAME"))
+                return 0;
         } else if ((r = CostPart(tok, "ExileFromHand", &n, &spec, &specLen)) != 0
                    || (r = CostPart(tok, "Return", &n, &spec, &specLen)) != 0
                    || (r = CostPart(tok, "tapXType", &n, &spec, &specLen)) != 0) {
@@ -442,6 +450,7 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     if (!Mtg_ParseCost(Mtg_Param(ab, "Cost"), &ab->cost))
         Unsupported(c, "cost");
     else if (ab->api == MTG_API_MANA && (ab->cost.sacN || ab->cost.discardN || ab->cost.payLife || ab->cost.exileSelf
+                                         || ab->cost.exileGraveN
                                          || ab->cost.returnSelf))
         Unsupported(c, "cost");   // (mana abilities are used by paying: one with a cost to pick, not yet)
     if (kind == MTG_AB_ACTIVATED && !Mtg_Param(ab, "Cost"))

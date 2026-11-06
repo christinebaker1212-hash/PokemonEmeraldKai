@@ -1067,6 +1067,87 @@ static void TestGranted(void)
     Put(0, "Forest", MTG_ZONE_HAND);
     Put(0, "Forest", MTG_ZONE_HAND);
     CHECK(Mtg_Power(&sD, bears) == 5, "two cards in hand: +2/+2 more (%d)", Mtg_Power(&sD, bears));
+
+    Table();   // PSYCHATOG: "Exile two cards from your graveyard: +1/+1 until end of turn"
+    {
+        int tog = Put(0, "Psychatog", MTG_ZONE_BATTLEFIELD), g1, g2, k, act = -1;
+        const MtgQuery *q;
+        g1 = Put(0, "Forest", MTG_ZONE_GRAVEYARD);
+        g2 = Put(0, "Island", MTG_ZONE_GRAVEYARD);
+        q = Mtg_Query(&sD);
+        Mtg_RefreshQuery(&sD);
+        for (k = 0; k < q->actionCount; k++)
+            if (q->actions[k].kind == MTG_ACT_ACTIVATE && q->actions[k].obj == tog
+                && gMtgAbilities[q->actions[k].ability].cost.exileGraveN == 2)
+                act = k;
+        CHECK(act >= 0, "two in the graveyard: the exile ability is there");
+        if (act >= 0) {
+            MtgAnswer a;
+            memset(&a, 0, sizeof(a));
+            a.action = (uint16_t)act;
+            Answer(&a);
+            for (k = 0; k < 2 && Mtg_Query(&sD)->kind == MTG_Q_CHOOSE; k++)
+                ChoosePick(k == 0 ? g1 : g2);
+            PassBoth();
+            CHECK(Zone(g1) == MTG_ZONE_EXILE && Zone(g2) == MTG_ZONE_EXILE && Mtg_Power(&sD, tog) == 2,
+                  "both exiled, the tog 2/3 (%d %d, power %d)", Zone(g1), Zone(g2), Mtg_Power(&sD, tog));
+        }
+    }
+
+    Table();   // ARREST: the enchanted creature's abilities can't be activated; ANGER in the graveyard: haste
+    {
+        int tim = Put(0, "Prodigal Sorcerer", MTG_ZONE_BATTLEFIELD), arrest;
+        sD.objs[tim].sick = 0;
+        CHECK(Find(MTG_ACT_ACTIVATE, tim, MTG_TGT_PLAYER, 1) >= 0, "the sorcerer pings");
+        arrest = Put(1, "Arrest", MTG_ZONE_BATTLEFIELD);
+        sD.objs[arrest].attachedTo = (uint16_t)tim;
+        CHECK(Find(MTG_ACT_ACTIVATE, tim, MTG_TGT_PLAYER, 1) < 0, "arrested: no ping");
+    }
+    Table();
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Put(0, "Anger", MTG_ZONE_GRAVEYARD);
+    CHECK(!(Mtg_Keywords(&sD, bears) & MTG_KW_BIT(MTG_KW_HASTE)), "no Mountain: no haste");
+    Put(0, "Mountain", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_Keywords(&sD, bears) & MTG_KW_BIT(MTG_KW_HASTE), "Anger in the graveyard and a Mountain: haste");
+
+    Table();   // CONTROL MAGIC: cast on their bears, the bears are ours; the Aura gone, they go back
+    {
+        int magic;
+        bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Island", 4);
+        magic = Put(0, "Control Magic", MTG_ZONE_HAND);
+        Do(MTG_ACT_CAST, magic, MTG_TGT_OBJ, bears);
+        PassBoth();
+        CHECK(sD.objs[bears].controller == 0 && sD.objs[bears].sick, "the bears are ours (and sick)");
+        Mtg_MoveTo(&sD, magic, MTG_ZONE_GRAVEYARD);
+        Pass();
+        CHECK(sD.objs[bears].controller == 1, "the Aura gone: back to their owner (%d)", sD.objs[bears].controller);
+    }
+
+    Table();   // AVATAR OF WOE: {6} less with ten creature cards in graveyards; CHO-ARRIM LEGATE free against a Swamp
+    {
+        int woe = Put(0, "Avatar of Woe", MTG_ZONE_HAND), legate, k, alt = 0;
+        MtgManaCost cost;
+        const MtgQuery *q;
+        Mtg_SpellCost(&sD, 0, woe, &cost);
+        CHECK(cost.generic == 6, "an empty graveyard: full cost (%d)", cost.generic);
+        for (k = 0; k < 10; k++)
+            Put(k & 1, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+        Mtg_SpellCost(&sD, 0, woe, &cost);
+        CHECK(cost.generic == 0 && cost.pip[MTG_B] == 2, "ten creatures there: BB (%d)", cost.generic);
+        legate = Put(0, "Cho-Arrim Legate", MTG_ZONE_HAND);
+        Put(0, "Plains", MTG_ZONE_BATTLEFIELD);
+        Mtg_RefreshQuery(&sD);
+        q = Mtg_Query(&sD);
+        for (k = 0; k < q->actionCount; k++)
+            alt |= q->actions[k].obj == legate && q->actions[k].alt;
+        CHECK(!alt, "no Swamp across the table: no free cast");
+        Put(1, "Swamp", MTG_ZONE_BATTLEFIELD);
+        Mtg_RefreshQuery(&sD);
+        for (k = 0; k < q->actionCount; k++)
+            alt |= q->actions[k].obj == legate && q->actions[k].alt;
+        CHECK(alt, "their Swamp and our Plains: the Legate for free");
+    }
 }
 
 static void TestTriggers(void)

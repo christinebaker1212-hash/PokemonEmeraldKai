@@ -3525,6 +3525,24 @@ asks (U.confirm) and clears all six. Test stadium_clear.
 - Tests: test_rules.c TestGranted (ARCANE TEACHINGS, CITANUL HIEROPHANTS, AURA FLUX, ASPECT OF WOLF, EMPYRIAL ARMOR),
   TestStatics' BLOODROCK CYCLOPS / DENSE FOLIAGE; scenario mtg_granted.
 
+## MAGIC's 2000 cards: control, locks, counted conditions (1.136.0)
+
+- ExileFromGrave<n/Type> cost (mtg_script.c; Psychatog's "card" read as Card): MTG_COSTK_EXILE_GRAVE, MtgDuel
+  costExileGrave, query.forCost 6 (board PickVerb "Exile", the cursor on the graveyard pile).
+- EffectZone$ Graveyard statics (MtgStatic fromGrave: Anger, Wonder, Valor, Brawn, Filth): every static loop takes
+  sources in a graveyard too and keeps each static to its own zone.
+- CantBeActivated (ValidCard$, ValidSA$ Activated / Activated.hasTapCost / Activated.Cycling): Mtg_StaticForbids(...,
+  obj, ability) in the priority actions (hand and battlefield) and mana sources. Mode$ lists of three or more modes
+  (Arrest) split one at a time; ValidSA$ beside CantAttack / CantBlock belongs to the CantBeActivated part.
+- GainControl$ You (Control Magic and 12 more): Mtg_StaticController (the newest Aura wins); StateBasedActions moves
+  control and back (MtgObj ctrlBase = the controller before + 1), the creature sick and out of combat. AI: AttachAILogic
+  GainControl aims at the opponent's best permanent.
+- CheckSVar$ / SVarCompare$ on statics (Mtg_CheckSvar: a number or another SVar), Raise / ReduceCost with ValidCard$
+  Card.Self | EffectZone$ All (selfCost: the Avatars, from the hand, in Mtg_SpellCost), AlternativeCost with ValidSA$
+  Spell + ValidCard$ Card.Self, ValidPlayer$ You and CheckSVar$ / CheckSecondSVar$ (the Legates, Massacre: label FOR
+  FREE). Amounts: Count$YourLifeTotal, PlayerCountOpponents$HighestValid / LowestValid <spec>, ...$LowestCardsInHand.
+- Tests: test_rules.c TestGranted's PSYCHATOG, ARREST, ANGER, CONTROL MAGIC, AVATAR OF WOE, CHO-ARRIM LEGATE.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64
