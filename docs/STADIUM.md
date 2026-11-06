@@ -88,3 +88,14 @@ CUP's POKéMON are given, so its switches don't apply (its own rewards).
 - The rival's seven teams (VENUSAUR, BLASTOISE, CHARIZARD, VAPOREON, JOLTEON, FLAREON leads, and a seventh): the one
   that counters the player's six best is chosen (StadiumRival_Pick, with the screens).
 - Pictures: STADIUM's classes as KANTO's FireRed pictures (gen_data.py PICS); MEWTWO shows MEWTWO.
+
+## Saved teams (the user, 2026-11-06)
+
+"players must be able to register up to 99 teams per Server, and erase teams as well without prior authorization, copy
+teams as well, and be able to use each others."
+
+A cup's options screen has SAVED TEAMS: 99 slots. Online they are the server's (mp_scores.c, store ops MP_ST_TEAM_PUT /
+ERASE / GET / LIST, "stadium_teams.dat" where the server runs): everyone on the server sees the same 99, anyone can USE
+(the six become the cup's registered team), COPY (to the first free slot), SAVE OVER or ERASE any of them, and the
+room hears of each change at once. Offline the save keeps its own 99 ("<save>.stadiumteams"). ERASE asks once on the
+player's own screen; nobody else's permission is needed. src/mp/mp_stadium_teams.c; test stadium_teams_online.

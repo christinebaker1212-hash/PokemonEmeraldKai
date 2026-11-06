@@ -8,7 +8,7 @@ The asset packs at pret/pokestadium's yamls/us/rom.yaml offsets (stadium_select_
 0x5FFC30): PERS-SZP = a header then Yay0 (tools/stadium/yay0.py), the pictures RGBA 5551, big endian:
   - the cups' pictures: four 128 x 96 (two 128 x 192 sheets): POKé CUP (STARMIE / TAUROS), PRIME CUP (ELECTRODE /
     JOLTEON), PETIT CUP (SHELLDER / GEODUDE), PIKA CUP (MR. MIME / RATICATE)
-  - the classes' banners: four 256 x 64: POKé BALL, GREAT BALL, ULTRA BALL, MASTER BALL
+  - the classes' banners: four 256 x 72: POKé BALL, GREAT BALL, ULTRA BALL, MASTER BALL
   - the areas' name signs (area_select_ui 0x4D1330, at 0x6E60, every 0x6200): ten 196 x 64: STADIUM, FREE BATTLE,
     GYM LEADER CASTLE, VS MEWTWO, KIDS CLUB, VICTORY PALACE, POKéMON LAB, GB TOWER, DODUO / DODRIO GB TOWER
   - four 256 x 96 name plates (the packs at 0x45B660, 0x461600, 0x46DD80, 0x49BD40)
@@ -39,9 +39,9 @@ def main():
         for half in range(2):
             off = sheet + half * 128 * 96 * 2
             pics.append((128, 96, select[off:off + 128 * 96 * 2]))
-    for i in range(4):
-        off = i * 256 * 64 * 2
-        pics.append((256, 64, balls[off:off + 256 * 64 * 2]))
+    for i in range(4):   # (72 rows each: read as 64 they slice into each other)
+        off = i * 256 * 72 * 2
+        pics.append((256, 72, balls[off:off + 256 * 72 * 2]))
     area = asset(rom, 0x4D1330, 0x4EB0C0)
     for i in range(10):
         off = 0x6E60 + i * 0x6200

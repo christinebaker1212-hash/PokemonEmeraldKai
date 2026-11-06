@@ -1,0 +1,8 @@
+# POKéMON STADIUM's saved teams on the server (mp_stadium_teams.c, mp_scores.c MP_ST_TEAM_*): ALICE registers six
+# rentals for the PIKA CUP and saves them in slot 1; BOB hears of it at once and USEs that team (no permission asked)
+MODE=2
+TMO=400
+EXPECT_A=("stadium teams: saved slot 1 (server)" "stadium teams: slot 1 saved by the server")
+EXPECT_B=("stadium teams: the server's list" "stadium teams: slot 1 saved by the server" "stadium teams: used slot 1")
+UNEXPECT_A=("crash")
+UNEXPECT_B=("crash")

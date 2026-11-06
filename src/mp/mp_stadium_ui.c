@@ -17,6 +17,7 @@
 #include "mp_region.h"
 #include "mp_stadium.h"
 #include "mp_stadium_cup.h"
+#include "mp_stadium_teams.h"
 #include "data.h"
 #include "decompress.h"
 #include "graphics.h"
@@ -55,7 +56,7 @@
 extern const u8 gMpStadiumGfx[];
 const u16 *MP_CardScreen_Halve(SDL_Renderer *r, SDL_Texture *canvas, u16 *out);
 
-enum { SCR_SELECT, SCR_CLASS, SCR_OPTIONS, SCR_REGISTER, SCR_VS, SCR_RESULT };
+enum { SCR_SELECT, SCR_CLASS, SCR_OPTIONS, SCR_REGISTER, SCR_VS, SCR_RESULT, SCR_TEAMS };
 enum { SRC_TAB_PARTY, SRC_TAB_BOXES, SRC_TAB_GLOBAL, SRC_TAB_RENTALS, SRC_TAB_COUNT };
 enum { RES_WON, RES_LOST, RES_CONTINUE, RES_CUP, RES_OVER };
 
@@ -79,13 +80,15 @@ static struct
     u8 reopen;              // the screen to come back to after a battle / the SUMMARY
     bool8 menu, rules;      // the REGISTER pop-up (A), the clauses page (VS: SELECT)
     u8 menuCursor;
+    u8 teamCursor, teamTop;   // SAVED TEAMS
+    bool8 confirm;            // SAVED TEAMS: ERASE asked
     u16 age;
     char note[96];          // a line at the bottom (why not, what happened)
     // the registration list for the tab: what's there and where from
     u16 listCount;
     struct { u8 source; u16 rental; struct BoxPokemon mon; } list[LIST_MAX];
     SDL_Renderer *owner;
-    SDL_Texture *canvas, *pics[24];
+    SDL_Texture *canvas, *pics[24], *greyBalls[4];
     bool8 hasCastle;
     struct SpriteTex sprites[SPRITE_CACHE];
     u32 spriteAge;
@@ -131,7 +134,25 @@ static void MakePics(SDL_Renderer *r)
                   | (((v >> 1) & 31) * 255 / 31);
         }
         if (i == PIC_CASTLE)
-            U.hasCastle = (px[0] >> 24) != 0;   // (a clear stand-in until the user's picture is in graphics/stadium)
+            U.hasCastle = (px[0] >> 24) != 0;
+        if (i >= PIC_BALL(0) && i <= PIC_BALL(3))   // (and a grey one: a class not open yet)
+        {
+            static u32 grey[256 * 96];
+            u32 k2;
+            for (k2 = 0; k2 < (u32)w * h && k2 < ARRAY_COUNT(grey); k2++)
+            {
+                u32 c = px[k2], l = (((c >> 16) & 255) * 30 + ((c >> 8) & 255) * 59 + (c & 255) * 11) / 100;
+                l = l * 3 / 4 + 20;
+                grey[k2] = (c & 0xFF000000u) | l << 16 | l << 8 | l;
+            }
+            U.greyBalls[i - PIC_BALL(0)] = SDL_CreateTexture(r, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, w, h);
+            if (U.greyBalls[i - PIC_BALL(0)])
+            {
+                SDL_UpdateTexture(U.greyBalls[i - PIC_BALL(0)], NULL, grey, w * 4);
+                SDL_SetTextureBlendMode(U.greyBalls[i - PIC_BALL(0)], SDL_BLENDMODE_BLEND);
+                SDL_SetTextureScaleMode(U.greyBalls[i - PIC_BALL(0)], SDL_ScaleModeLinear);
+            }
+        }   // (a clear stand-in until the user's picture is in graphics/stadium)
         p += w * h * 2;
         U.pics[i] = SDL_CreateTexture(r, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, w, h);
         if (U.pics[i])
@@ -388,6 +409,32 @@ static void BlitPart(SDL_Texture *t, int sx, int sy, int sw, int sh, float x, fl
     SDL_RenderSetScale(U.owner, 2, 2);
 }
 
+// The field's item ball (its overworld sprite, 16x16), for empty places on a team and the road of trainers
+extern const u32 gObjectEventPic_ItemBall[];
+extern const u16 gObjectEventPal_Npc3[];
+static SDL_Texture *ItemBallTex(void)
+{
+    static u32 px[16 * 16];
+    const u8 *tiles = (const u8 *)gObjectEventPic_ItemBall;
+    SDL_Texture *t;
+    int tile, i;
+    if ((t = Cached(0x50000)))
+        return t;
+    for (tile = 0; tile < 4; tile++)
+        for (i = 0; i < 64; i++)
+        {
+            u8 b = tiles[tile * 32 + i / 2], v = (i & 1) ? b >> 4 : b & 15;
+            int x = (tile % 2) * 8 + i % 8, y = (tile / 2) * 8 + i / 8;
+            px[y * 16 + x] = v ? Rgb555(gObjectEventPal_Npc3[v]) : 0;
+        }
+    return Store(0x50000, px, 16, 16);
+}
+
+static void ItemBall(int cx, int cy, u8 alpha)
+{
+    Blit(ItemBallTex(), cx - 8, cy - 8, 16, 16, alpha);
+}
+
 // A small POKé BALL
 static void Ball(int cx, int cy, int r, unsigned top)
 {
@@ -604,7 +651,7 @@ static void Footer(const char *hint)
         G_Hint(4, 147, G_WHITE, 0x000000, hint, TF_SMALL, 1);
 }
 
-static const char *const sClassNames[4] = {"POKe BALL", "GREAT BALL", "ULTRA BALL", "MASTER BALL"};
+static const char *const sClassNames[4] = {"POKé BALL", "GREAT BALL", "ULTRA BALL", "MASTER BALL"};
 
 // Stars for the classes won: gold with every restriction in place
 static void ClearMarks(int x, int y, u8 cup)
@@ -755,21 +802,70 @@ static void DrawSelect(void)
     Footer("{A} ENTER  {L}{R} ROUND  {B} EXIT");
 }
 
+// The classes as STADIUM's banners (the one under the cursor lit and pushed out), and on the right the class's eight
+// opponents and the best won there (how many restrictions were in place)
 static void DrawClass(void)
 {
-    u8 t;
-    Header(StadiumCup_Info(U.cup)->name, "CHOOSE A CLASS");
+    u8 t, i;
+    char line[64];
+    Header(StadiumCup_Info(U.cup)->name, U.round ? "ROUND 2" : "ROUND 1");
     for (t = 0; t < 4; t++)
     {
-        bool8 open = StadiumCup_Open(U.round, U.cup, t);
-        int y = 22 + t * 30;
-        if (U.tier == t)
-            G_RoundFill(30, y - 2, 180, 30, C_GOLD, 200);
-        Blit(U.pics[4 + t], 40, y, 160, 26, open ? 255 : 70);
-        if (StadiumCup_Cleared(U.round, U.cup, t))
-            G_Text(204, y + 6, C_GOLD, 0x000000, "WON", 0, TF_SMALL);
-        if (!open)
-            G_Text(204, y + 6, C_LOCK, 0x000000, "LOCKED", 0, TF_NARROW);
+        bool8 open = StadiumCup_Open(U.round, U.cup, t), focus = U.tier == t;
+        int y = 19 + t * 31, push = focus ? 4 : 0;
+        if (focus)
+        {
+            G_RoundFill(2, y - 1, 148, 31, C_GOLD, 120 + (U.age * 6) % 100);
+            G_RoundFill(3, y, 146, 29, 0x101828, 200);
+        }
+        Blit(open ? U.pics[PIC_BALL(t)] : U.greyBalls[t], 10 + push, y, 110, 31, open ? 255 : 150);
+        if (open && StadiumCup_Cleared(U.round, U.cup, t))
+            Chip(118, y + 11, "WON", 0xc09020);
+    }
+    // the class under the cursor
+    Panel(153, 18, 84, 126, C_PANEL, 0xb0a888);
+    G_Text(157, 20, C_INK, G_NO_SHADOW, sClassNames[U.tier], 0, TF_SMALL);
+    if (U.cup == STADIUM_CUP_CHALLENGE)
+    {
+        static const u8 sLevels[4] = {30, 45, 60, 75};
+        snprintf(line, sizeof(line), "Every POKeMON Lv %d", sLevels[U.tier]);
+        G_Text(157, 32, C_SOFT, G_NO_SHADOW, line, 78, TF_NARROW);
+    }
+    else
+    {
+        snprintf(line, sizeof(line), "%d TRAINERS", StadiumCup_TrainerCount(U.round, U.cup, U.tier));
+        G_Text(157, 32, C_SOFT, G_NO_SHADOW, line, 78, TF_NARROW);
+        for (i = 0; i < 8 && i < StadiumCup_TrainerCount(U.round, U.cup, U.tier); i++)
+        {
+            const struct StadiumTrainer *tr = Stadium_Trainer(U.round, StadiumCup_Info(U.cup)->division[U.tier], i);
+            int x = 156 + (i % 4) * 20, y = 43 + (i / 4) * 24;
+            G_RoundFill(x, y, 19, 22, i == 7 ? 0xe8c070 : 0xe0d8c0, 255);
+            if (tr && tr->pic)
+                BlitPart(TrainerTex(tr->pic), 8, 0, 48, 56, x, y + 1, 19, 21, StadiumCup_Open(U.round, U.cup, U.tier) ? 255 : 80);
+        }
+    }
+    // the best won here
+    {
+        u16 c = StadiumCup_Save()->cleared[U.round][U.cup][U.tier];
+        u8 best = 0, k;
+        for (k = 0; k < 16; k++)   // (bit h: won with the hard sides h; the most of them)
+            if ((c & (1 << k)) && __builtin_popcount(k) > best)
+                best = __builtin_popcount(k);
+        G_FillA(156, 95, 78, 1, 0xb0a888, 255);
+        G_Text(157, 97, C_INK, G_NO_SHADOW, "BEST", 0, TF_NARROW);
+        if (!c)
+            G_Text(157, 108, C_SOFT, G_NO_SHADOW, "Not won yet.", 78, TF_NARROW);
+        else
+        {
+            for (k = 0; k < 4; k++)
+            {
+                G_Circle(162 + k * 10, 113, 4, k < best ? (best == 4 ? C_GOLD : 0xe0a040) : 0xc8c0a8, 255);
+                if (k < best)
+                    G_Circle(161 + k * 10, 112, 1.3f, 0xffffff, 200);
+            }
+            snprintf(line, sizeof(line), "%d of 4 restrictions", best);
+            G_Text(157, 121, C_SOFT, G_NO_SHADOW, line, 78, TF_NARROW);
+        }
     }
     Footer("{A} CHOOSE  {B} BACK");
 }
@@ -791,62 +887,117 @@ static u8 HardCount(void)
     return n + rentals;
 }
 
+static const char *const sOptHelp[4][2] = {
+    {"Entries are set to the cup's level.", "Your own levels. Bigger rewards!"},
+    {"First 151 only. Bigger rewards!", "Any POKeMON but the great legends."},
+    {"Your POKeMON may hold items.", "No held items. Bigger rewards!"},
+    {"A team of rentals only wins more.", "A team of rentals only wins more."},
+};
+
+// A switch drawn as a lit slider
+static void Toggle(int x, int y, bool8 on)
+{
+    G_RoundFill(x - 4, y + 1, 34, 10, 0x000000, 80);
+    G_RoundFill(x - 4, y, 34, 10, on ? 0x40a050 : 0x904040, 255);
+    G_FillA(x - 2, y, 30, 1, 0xffffff, 80);
+    G_Circle(on ? x + 25 : x + 1, y + 5, 4, 0xf8f8f8, 255);
+    G_TextAlign(on ? x + 9 : x + 16, y, TA_CENTER, G_WHITE, 0x202020, on ? "ON" : "OFF", TF_NARROW);
+}
+
 static void DrawOptions(void)
 {
     char line[96];
-    u8 i, rows = U.cup == STADIUM_CUP_CHALLENGE ? 0 : 3;
+    u8 i, rows = U.cup == STADIUM_CUP_CHALLENGE ? 0 : 3, hard = HardCount();
     const struct StadiumTeam *t = &StadiumCup_Save()->team[U.cup];
-    snprintf(line, sizeof(line), "%s%s%s", StadiumCup_Info(U.cup)->name, StadiumCup_Info(U.cup)->tiers > 1 ? " " : "",
+    bool8 rentals = t->count > 0;
+    for (i = 0; i < t->count; i++)
+        if (t->slot[i].source != STADIUM_SRC_RENTAL)
+            rentals = FALSE;
+    snprintf(line, sizeof(line), "%s%s%s", StadiumCup_Info(U.cup)->name, StadiumCup_Info(U.cup)->tiers > 1 ? "  " : "",
              StadiumCup_Info(U.cup)->tiers > 1 ? sClassNames[U.tier] : "");
     Header(line, U.round ? "ROUND 2" : "ROUND 1");
-    G_RoundFill(8, 20, 224, 122, C_PANEL, 255);
-    for (i = 0; i < rows; i++)
+    // the cup's picture and its class banner
     {
-        bool8 on = (U.opt & (1 << i)) != 0;
-        bool8 hard = i == 1 ? on : !on;
-        int y = 24 + i * 16;
-        if (U.optCursor == i)
-            G_Focus(12, y - 1, 216, 15, C_GOLD, C_GOLD);
-        G_Text(16, y, C_INK, G_NO_SHADOW, sOptNames[i], 0, TF_NORMAL);
-        G_TextAlign(176, y, TA_CENTER, on ? C_GREEN : C_RED, G_NO_SHADOW, on ? "ON" : "OFF", TF_NORMAL);
-        if (hard)
-            G_Text(198, y + 2, C_GOLD, G_NO_SHADOW, "+", 0, TF_SMALL);
+        SDL_Texture *pic = CupPic(U.cup);
+        Panel(3, 18, 116, 88, 0x101420, C_GOLD);
+        if (pic)
+            Blit(pic, 5, 20, 112, 84, 255);
+        else
+            CupScene(U.cup, 5, 20, 112, 84, TRUE);
+        if (StadiumCup_Info(U.cup)->tiers > 1)
+            Blit(U.pics[PIC_BALL(U.tier)], 13, 78, 96, 27, 255);
+    }
+    // the switches
+    Panel(122, 18, 115, 88, C_PANEL, 0xb0a888);
+    G_Text(126, 19, C_INK, G_NO_SHADOW, "RESTRICTIONS", 0, TF_SMALL);
+    for (i = 0; i < 4; i++)   // stars: one for each in place
+    {
+        int cx = 202 + i * 9;
+        G_Circle(cx, 25, 3.5f, i < hard ? (hard == 4 ? C_GOLD : 0xe0a040) : 0xc8c0a8, 255);
+        if (i < hard)
+            G_Circle(cx - 1, 24, 1.2f, 0xffffff, 200);
     }
     if (rows)
     {
-        bool8 rentals = t->count > 0;
-        for (i = 0; i < t->count; i++)
-            if (t->slot[i].source != STADIUM_SRC_RENTAL)
-                rentals = FALSE;
-        G_Text(16, 72, C_INK, G_NO_SHADOW, "RENTALS ONLY", 0, TF_NORMAL);
-        G_TextAlign(176, 72, TA_CENTER, rentals ? C_GREEN : C_SOFT, G_NO_SHADOW, rentals ? "YES" : "NO", TF_NORMAL);
-        if (rentals)
-            G_Text(198, 74, C_GOLD, G_NO_SHADOW, "+", 0, TF_SMALL);
-        snprintf(line, sizeof(line), "RESTRICTIONS IN PLACE: %d of 4%s", HardCount(), HardCount() == 4 ? "  GREAT REWARDS!" : "");
-        G_Text(16, 90, HardCount() == 4 ? C_GOLD : C_INK, G_NO_SHADOW, line, 210, TF_SMALL);
-        // the team (6 icons)
-        for (i = 0; i < STADIUM_TEAM_SIZE; i++)
+        for (i = 0; i < 4; i++)
         {
-            int x = 16 + i * 34;
-            G_RoundFill(x, 104, 30, 30, 0xe0d8c0, 255);
-            if (i < t->count)
-                Blit(IconTex(GetBoxMonData((struct BoxPokemon *)&t->slot[i].mon, MON_DATA_SPECIES)), x - 1, 103, 32, 32, 255);
+            int y = 30 + i * 12;
+            bool8 on = i < 3 ? (U.opt & (1 << i)) != 0 : rentals;
+            bool8 isHard = i == 1 ? on : i == 3 ? on : !on;
+            static const char *const sNames[4] = {"LEVEL CAP", "SPECIES", "HELD ITEMS", "RENTALS ONLY"};
+            if (U.optCursor == i && i < 3)
+                G_RoundFill(124, y - 1, 111, 12, C_GOLD, 200);
+            G_Text(127, y, i == 3 ? C_SOFT : C_INK, G_NO_SHADOW, sNames[i], 0, TF_NARROW);
+            Toggle(196, y, on);
+            if (isHard)
+                G_Circle(231, y + 5, 2.5f, 0xe0a040, 255);
+        }
+        {
+            u8 k = U.optCursor < 3 ? U.optCursor : 3;
+            bool8 on = k < 3 ? (U.opt & (1 << k)) != 0 : rentals;
+            G_FillA(125, 79, 109, 1, 0xb0a888, 255);
+            G_Text(127, 81, hard == 4 && k == 3 ? 0x907020 : C_SOFT, G_NO_SHADOW,
+                   hard == 4 ? "Every restriction in place: GREAT REWARDS!" : sOptHelp[k][on ? 0 : 1], 106,
+                   TF_NARROW);
         }
     }
     else
-        G_Text(16, 26, C_INK, G_NO_SHADOW, "The CHALLENGE CUP lends you six random POKeMON for each challenge. "
-                                           "Pick three of them before every battle.", 208, TF_SMALL);
+        G_Text(127, 34, C_INK, G_NO_SHADOW, "The CHALLENGE CUP lends you six random POKeMON for every challenge. "
+                                            "Pick three before each battle.", 106, TF_NARROW);
+    // the team
+    Panel(3, 109, 234, 18, 0x0c1424, 0x4a5c88);
+    G_Text(7, 113, C_GOLD, 0x000000, rows ? "TEAM" : "LENT", 0, TF_NARROW);
+    for (i = 0; i < STADIUM_TEAM_SIZE; i++)
     {
-        int y = 24 + rows * 16 + (rows ? 64 : 40);
-        if (rows == 0)
-            y = 70;
-        if (U.optCursor == rows)
-            G_Focus(12, 124, 104, 15, C_GOLD, C_GOLD);
-        if (U.optCursor == rows + 1)
-            G_Focus(124, 124, 104, 15, C_GOLD, C_GOLD);
-        (void)y;
-        G_TextAlign(64, 125, TA_CENTER, rows ? C_INK : C_LOCK, G_NO_SHADOW, "REGISTER TEAM", TF_SMALL);
-        G_TextAlign(176, 125, TA_CENTER, C_INK, G_NO_SHADOW, "START", TF_SMALL);
+        int x = 32 + i * 30;
+        G_RoundFill(x, 111, 27, 14, i < t->count && rows ? 0x3a5088 : 0x1a2034, 255);
+        if (i < t->count && rows)
+            Blit(IconTex(GetBoxMonData((struct BoxPokemon *)&t->slot[i].mon, MON_DATA_SPECIES)), x - 3, 98, 32, 32, 255);
+        else
+            ItemBall(x + 13, 118, rows ? 110 : 255);
+    }
+    if (rows)
+    {
+        snprintf(line, sizeof(line), "%d / 6", t->count);
+        G_TextAlign(232, 113, TA_RIGHT, t->count == 6 ? C_GOLD : G_WHITE, 0x000000, line, TF_SMALL);
+    }
+    // the buttons
+    {
+        static const char *const sButtons[3] = {"REGISTER", "SAVED TEAMS", "START!"};
+        for (i = 0; i < 3; i++)
+        {
+            bool8 focus = U.optCursor == rows + i, dim = i < 2 && !rows;
+            int x = 3 + i * 79;
+            if (focus)
+            {
+                Panel(x, 129, 76, 16, C_GOLD, 0xf8e080);
+                G_FillAdd(x + 2 + (U.age * 2) % 68, 130, 6, 14, 0xffffff, 60);
+            }
+            else
+                Panel(x, 129, 76, 16, dim ? 0x1a2034 : 0x22345c, dim ? 0x3a4058 : 0x5a70a8);
+            G_TextAlign(x + 38, 131, TA_CENTER, focus ? C_INK : dim ? C_LOCK : G_WHITE, focus ? G_NO_SHADOW : 0x000000,
+                        sButtons[i], TF_SMALL);
+        }
     }
     Footer("{A} CHANGE / CHOOSE  {B} BACK");
 }
@@ -973,7 +1124,7 @@ static void DrawRegister(void)
         Blit(IconTex(GetBoxMonData((struct BoxPokemon *)b, MON_DATA_SPECIES)), x - 3, y - 12 + ((n == U.listCursor && (U.age / 8) % 2) ? -1 : 0),
              32, 32, ok ? 255 : 100);
         if (has)
-            Ball(x + 22, y + 12, 3, 0xd83828);
+            Blit(ItemBallTex(), x + 17, y + 7, 10, 10, 255);
         if (n == U.listCursor)
             G_Focus(x, y, 26, 16, G_WHITE, G_WHITE);
     }
@@ -997,7 +1148,7 @@ static void DrawRegister(void)
         if (i < t->count)
             Blit(IconTex(GetBoxMonData((struct BoxPokemon *)&t->slot[i].mon, MON_DATA_SPECIES)), x - 3, 115, 32, 32, 255);
         else
-            Ball(x + 13, 135, 4, 0x505868);
+            ItemBall(x + 13, 135, 110);
     }
     snprintf(line, sizeof(line), "%d / 6", t->count);
     G_TextAlign(232, 130, TA_RIGHT, t->count == 6 ? C_GOLD : G_WHITE, 0x000000, line, TF_SMALL);
@@ -1148,17 +1299,217 @@ static void DrawVs(void)
     Footer(U.rules ? "{A}{B} BACK" : "{A} PICK  {SELECT} RULES  {START} BATTLE!  {B} QUIT");
 }
 
+// After a battle: the cup's picture behind, the verdict as a banner, the opponent beaten (or the one who won), the
+// road so far as eight POKé BALLs; a cup won rains confetti
 static void DrawResult(void)
 {
     struct StadiumRun *r = StadiumCup_Run();
+    bool8 lost = U.result == RES_LOST || U.result == RES_OVER || U.result == RES_CONTINUE;
     const char *big = U.result == RES_CUP ? "CUP WON!" : U.result == RES_WON ? "YOU WIN!" : U.result == RES_CONTINUE ? "CONTINUE?" : "GAME OVER";
+    SDL_Texture *pic = CupPic(r->cup);
+    u8 i, total = StadiumCup_TrainerCount(r->round, r->cup, r->tier);
+    extern u16 MP_StadiumBattle_TrainerPic(void);
     Header(StadiumCup_Info(r->cup)->name, NULL);
-    G_Banner(120, 60, big, U.result == RES_LOST || U.result == RES_OVER ? C_RED : C_GOLD, 2.0f, 255);
+    if (pic)
+        Blit(pic, 0, 16, 240, 130, lost ? 50 : 90);
+    G_FillA(0, 16, 240, 130, 0x000000, 90);
+    // the opponent
+    Blit(TrainerTex(MP_StadiumBattle_TrainerPic()), 160, 26, 72, 72, lost ? 255 : 120);
+    // the verdict
+    G_Banner(90 + (U.age < 12 ? (12 - U.age) * 10 : 0), 52, big, lost ? C_RED : C_GOLD, 2.0f, 255);
+    // the road: a ball for each trainer, lit for the beaten
+    if (total > 8)
+        total = 8;
+    Panel(20, 92, 136, 22, 0x0c1424, 0x4a5c88);
+    for (i = 0; i < total; i++)
+    {
+        bool8 beaten = i < r->trainer || (i == r->trainer && !lost);
+        ItemBall(32 + i * 16, 103, beaten ? 255 : 90);
+    }
+    if (r->cup != STADIUM_CUP_CASTLE)
+    {
+        char line[48];
+        snprintf(line, sizeof(line), "CONTINUES %d", r->continues);
+        G_TextAlign(88, 118, TA_CENTER, G_WHITE, 0x000000, line, TF_SMALL);
+    }
     if (U.result == RES_CUP)
-        G_Text(20, 90, G_WHITE, 0x000000, U.note[0] ? "" : "The cup is yours! Your prizes are on their way.", 200, TF_SMALL);
+    {
+        for (i = 0; i < 40; i++)   // confetti
+        {
+            int x = (i * 53 + U.age * (1 + i % 3)) % 240, y = 16 + (i * 37 + U.age * (2 + i % 2)) % 130;
+            static const unsigned sColors[5] = {0xf8d040, 0xe85040, 0x50a0f0, 0x60d070, 0xf080c0};
+            G_Fill(x, y, 2, 3, sColors[i % 5]);
+        }
+        G_TextAlign(120, 128, TA_CENTER, 0xf8e8a0, 0x000000, "Your prizes are on their way.", TF_SMALL);
+    }
     else if (U.result == RES_CONTINUE)
-        G_TextAlign(120, 90, TA_CENTER, G_WHITE, 0x000000, "Use a continue and try again?", TF_SMALL);
+        G_TextAlign(120, 128, TA_CENTER, G_WHITE, 0x000000, "Use a continue and try again?", TF_SMALL);
     Footer(U.result == RES_CONTINUE ? "{A} CONTINUE  {B} GIVE UP" : "{A} OK");
+}
+
+
+// ---- SAVED TEAMS: 99 slots, the server's online (everyone's: anyone may use, copy, save over or erase any of them),
+// the save's own offline (mp_stadium_teams.c)
+
+#define TEAM_ROWS 11
+static const char *const sTeamMenuFull[5] = {"USE", "COPY", "SAVE OVER", "ERASE", "CANCEL"};
+static const char *const sTeamMenuEmpty[2] = {"SAVE HERE", "CANCEL"};
+
+static void DrawTeams(void)
+{
+    char line[64];
+    u8 i;
+    const struct StadiumSavedTeam *sel = StadiumTeams_Get(U.teamCursor);
+    snprintf(line, sizeof(line), "%s %d/99", StadiumTeams_IsServer() ? "SERVER" : "THIS SAVE", StadiumTeams_Count());
+    Header("SAVED TEAMS", line);
+    // the slots
+    Panel(3, 18, 117, 127, 0x18243e, 0x4a5c88);
+    for (i = 0; i < TEAM_ROWS && U.teamTop + i < STADIUM_SAVED_TEAMS; i++)
+    {
+        u8 n = U.teamTop + i;
+        const struct StadiumSavedTeam *t = StadiumTeams_Get(n);
+        int y = 20 + i * 11;
+        bool8 focus = n == U.teamCursor;
+        if (focus)
+            G_RoundFill(5, y, 113, 11, C_GOLD, 255);
+        snprintf(line, sizeof(line), "%02d", n + 1);
+        G_Text(8, y, focus ? C_INK : 0x8898b8, focus ? G_NO_SHADOW : 0x000000, line, 0, TF_NARROW);
+        if (t)
+        {
+            char owner[16];
+            Ascii(owner, t->owner, sizeof(owner));
+            G_Text(22, y, focus ? C_INK : G_WHITE, focus ? G_NO_SHADOW : 0x000000, owner, 44, TF_NARROW);
+            {
+                SDL_Rect clip = {66, y, 50, 11};
+                SDL_RenderSetClipRect(U.owner, &clip);
+                G_Text(66, y, focus ? 0x604010 : 0xc0b080, focus ? G_NO_SHADOW : 0x000000,
+                       t->cup < STADIUM_CUP_COUNT ? StadiumCup_Info(t->cup)->name : "?", 0, TF_NARROW);
+                SDL_RenderSetClipRect(U.owner, NULL);
+            }
+        }
+        else
+            G_Text(22, y, focus ? C_SOFT : 0x485878, G_NO_SHADOW, "- - - - -", 0, TF_NARROW);
+    }
+    // where in the 99
+    G_RoundFill(116, 20, 2, 122, 0x0a1020, 255);
+    G_RoundFill(116, 20 + 108 * U.teamTop / (STADIUM_SAVED_TEAMS - TEAM_ROWS), 2, 14, C_GOLD, 255);
+    // the slot under the cursor
+    Panel(123, 18, 114, 127, C_PANEL, 0xb0a888);
+    snprintf(line, sizeof(line), "SLOT %02d", U.teamCursor + 1);
+    G_Text(127, 20, C_INK, G_NO_SHADOW, line, 0, TF_SMALL);
+    if (sel)
+    {
+        char owner[16];
+        Ascii(owner, sel->owner, sizeof(owner));
+        snprintf(line, sizeof(line), "by %s", owner);
+        G_Text(127, 32, C_SOFT, G_NO_SHADOW, line, 106, TF_NARROW);
+        G_Text(127, 42, 0x806030, G_NO_SHADOW, sel->cup < STADIUM_CUP_COUNT ? StadiumCup_Info(sel->cup)->name : "?", 106, TF_NARROW);
+        for (i = 0; i < STADIUM_TEAM_SIZE; i++)
+        {
+            int x = 127 + (i % 3) * 36, y = 54 + (i / 3) * 34;
+            G_RoundFill(x, y, 34, 32, 0xe0d8c0, 255);
+            if (i < sel->count)
+            {
+                struct BoxPokemon *b = (struct BoxPokemon *)&sel->slot[i].mon;
+                Blit(IconTex(GetBoxMonData(b, MON_DATA_SPECIES)), x + 1, y - 4, 32, 32, 255);
+                snprintf(line, sizeof(line), "Lv%d", GetLevelFromBoxMonExp(b));
+                G_TextAlign(x + 17, y + 21, TA_CENTER, C_INK, G_NO_SHADOW, line, TF_NARROW);
+            }
+            else
+                ItemBall(x + 17, y + 14, 110);
+        }
+    }
+    else
+        G_Text(127, 34, C_SOFT, G_NO_SHADOW, "Empty. Press A to save this cup's registered team here.", 106, TF_NARROW);
+    // A's menu, ERASE's question
+    if (U.menu)
+    {
+        u8 rows = sel ? 5 : 2;
+        int my = 60;
+        Panel(150, my, 64, 6 + rows * 12, C_PANEL, 0xb0a888);
+        for (i = 0; i < rows; i++)
+        {
+            if (U.menuCursor == i)
+                G_RoundFill(153, my + 3 + i * 12, 58, 11, C_GOLD, 255);
+            G_Text(158, my + 4 + i * 12, i == 3 && sel ? C_RED : C_INK, G_NO_SHADOW, sel ? sTeamMenuFull[i] : sTeamMenuEmpty[i], 0,
+                   TF_SMALL);
+        }
+    }
+    if (U.confirm)
+    {
+        Panel(40, 60, 160, 36, C_PANEL, 0xb0a888);
+        snprintf(line, sizeof(line), "Erase slot %02d's team?", U.teamCursor + 1);
+        G_TextAlign(120, 64, TA_CENTER, C_INK, G_NO_SHADOW, line, TF_SMALL);
+        G_TextAlign(120, 79, TA_CENTER, C_SOFT, G_NO_SHADOW, StadiumTeams_IsServer() ? "Everyone on the server loses it." : "It's gone for good.", TF_NARROW);
+    }
+    Footer(U.confirm ? "{A} ERASE  {B} KEEP" : U.menu ? "{A} CHOOSE  {B} BACK" : "{A} MENU  {L}{R} PAGE  {B} BACK");
+}
+
+static void TeamFromCup(struct StadiumSavedTeam *out)
+{
+    const struct StadiumTeam *t = &StadiumCup_Save()->team[U.cup];
+    memset(out, 0, sizeof(*out));
+    out->cup = U.cup;
+    out->count = t->count;
+    memcpy(out->owner, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+    out->owner[PLAYER_NAME_LENGTH] = EOS;
+    out->ownerId = gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8);
+    memcpy(out->slot, t->slot, sizeof(out->slot));
+}
+
+static void TeamAction(u8 choice)
+{
+    const struct StadiumSavedTeam *sel = StadiumTeams_Get(U.teamCursor);
+    struct StadiumSavedTeam team;
+    struct StadiumTeam *cupTeam = &StadiumCup_Save()->team[U.cup];
+    if (!sel)
+        choice = choice == 0 ? 2 : 4;   // (an empty slot's SAVE HERE is SAVE OVER)
+    switch (choice)
+    {
+    case 0:   // USE: the six become this cup's registered team (anyone's: no permission needed)
+        cupTeam->count = sel->count;
+        memcpy(cupTeam->slot, sel->slot, sizeof(cupTeam->slot));
+        StadiumCup_SaveNow();
+        PlaySE(SE_SELECT);
+        snprintf(U.note, sizeof(U.note), "Slot %02d's team is registered for this cup.", U.teamCursor + 1);
+        MPNet_Log("stadium teams: used slot %d", U.teamCursor + 1);
+        break;
+    case 1:   // COPY: into the first free slot
+        team = *sel;
+        {
+            u8 to = StadiumTeams_FirstFree();
+            if (to == 0xFF || !StadiumTeams_Put(to, &team))
+            {
+                PlaySE(SE_FAILURE);
+                snprintf(U.note, sizeof(U.note), "All 99 slots are taken.");
+            }
+            else
+            {
+                PlaySE(SE_SELECT);
+                snprintf(U.note, sizeof(U.note), "Copied to slot %02d.", to + 1);
+            }
+        }
+        break;
+    case 2:   // SAVE HERE / SAVE OVER: this cup's registered team
+        if (cupTeam->count == 0)
+        {
+            PlaySE(SE_FAILURE);
+            snprintf(U.note, sizeof(U.note), "Register a team for this cup first.");
+            break;
+        }
+        TeamFromCup(&team);
+        StadiumTeams_Put(U.teamCursor, &team);
+        PlaySE(SE_SAVE);
+        snprintf(U.note, sizeof(U.note), "Saved in slot %02d.", U.teamCursor + 1);
+        break;
+    case 3:   // ERASE: asked once
+        U.confirm = TRUE;
+        PlaySE(SE_SELECT);
+        break;
+    default:
+        PlaySE(SE_SELECT);
+        break;
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -1176,6 +1527,7 @@ SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r)
     if (U.owner != r)
     {
         memset(U.pics, 0, sizeof(U.pics));
+        memset(U.greyBalls, 0, sizeof(U.greyBalls));
         memset(U.sprites, 0, sizeof(U.sprites));
         U.canvas = NULL;
         U.owner = r;
@@ -1210,6 +1562,7 @@ SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r)
     case SCR_REGISTER: DrawRegister(); break;
     case SCR_VS: DrawVs(); break;
     case SCR_RESULT: DrawResult(); break;
+    case SCR_TEAMS: DrawTeams(); break;
     }
     U.frameRead = FALSE;
     SDL_SetRenderTarget(r, previous);
@@ -1265,7 +1618,7 @@ static void EnterOptions(void)
     struct StadiumSave *s = StadiumCup_Save();
     U.screen = SCR_OPTIONS;
     U.opt = s->options[U.cup] & 0x80 ? s->options[U.cup] & 0x7F : STADIUM_OPT_DEFAULT;
-    U.optCursor = U.cup == STADIUM_CUP_CHALLENGE ? 1 : 0;
+    U.optCursor = U.cup == STADIUM_CUP_CHALLENGE ? 2 : 0;
 }
 
 static void AfterBattle(bool8 won);
@@ -1480,8 +1833,8 @@ bool8 MP_StadiumUi_Step(u16 keys)
             U.screen = SCR_SELECT, PlaySE(SE_SELECT);
         else if (pressed & DPAD_UP && U.tier > 0)
             U.tier--, PlaySE(SE_SELECT);
-        else if (pressed & DPAD_DOWN && U.tier < 3)
-            U.tier++, PlaySE(SE_SELECT);
+        else if (pressed & DPAD_DOWN && U.tier < 3 && StadiumCup_Open(U.round, U.cup, U.tier + 1))
+            U.tier++, PlaySE(SE_SELECT);   // (a class not open yet is grey and can't be chosen)
         else if (pressed & A_BUTTON)
         {
             if (StadiumCup_Open(U.round, U.cup, U.tier))
@@ -1498,10 +1851,14 @@ bool8 MP_StadiumUi_Step(u16 keys)
         u8 rows = U.cup == STADIUM_CUP_CHALLENGE ? 0 : 3;
         if (pressed & B_BUTTON)
             U.screen = StadiumCup_Info(U.cup)->tiers > 1 ? SCR_CLASS : SCR_SELECT, PlaySE(SE_SELECT);
-        else if (pressed & DPAD_UP && U.optCursor > (rows ? 0 : 1))
+        else if (pressed & DPAD_UP && U.optCursor > (rows ? 0 : 2))
             U.optCursor--, PlaySE(SE_SELECT);
-        else if (pressed & DPAD_DOWN && U.optCursor < rows + 1)
+        else if (pressed & DPAD_DOWN && U.optCursor < rows)
             U.optCursor++, PlaySE(SE_SELECT);
+        else if (pressed & DPAD_RIGHT && U.optCursor >= rows && U.optCursor < rows + 2)
+            U.optCursor++, PlaySE(SE_SELECT);
+        else if (pressed & DPAD_LEFT && U.optCursor > rows && U.optCursor > (rows ? 0 : 2))
+            U.optCursor--, PlaySE(SE_SELECT);
         else if (pressed & A_BUTTON)
         {
             if (U.optCursor < rows)
@@ -1514,8 +1871,65 @@ bool8 MP_StadiumUi_Step(u16 keys)
                 BuildList();
                 PlaySE(SE_SELECT);
             }
-            else if (U.optCursor == rows + 1)
+            else if (U.optCursor == rows + 1 && rows)
+            {
+                U.screen = SCR_TEAMS;
+                U.confirm = FALSE, U.menu = FALSE;
+                PlaySE(SE_SELECT);
+            }
+            else if (U.optCursor == rows + 2)
                 StartRun();
+        }
+        break;
+    }
+    case SCR_TEAMS:
+    {
+        bool8 full = StadiumTeams_Get(U.teamCursor) != NULL;
+        if (StadiumTeams_TakeFull())
+            snprintf(U.note, sizeof(U.note), "The server's 99 slots are full.");
+        if (U.confirm)
+        {
+            if (pressed & A_BUTTON)
+            {
+                StadiumTeams_Erase(U.teamCursor);
+                U.confirm = FALSE;
+                PlaySE(SE_SELECT);
+                snprintf(U.note, sizeof(U.note), "Slot %02d erased.", U.teamCursor + 1);
+            }
+            else if (pressed & B_BUTTON)
+                U.confirm = FALSE, PlaySE(SE_SELECT);
+        }
+        else if (U.menu)
+        {
+            u8 rows = full ? 5 : 2;
+            if (pressed & B_BUTTON)
+                U.menu = FALSE, PlaySE(SE_SELECT);
+            else if (pressed & DPAD_UP && U.menuCursor > 0)
+                U.menuCursor--, PlaySE(SE_SELECT);
+            else if (pressed & DPAD_DOWN && U.menuCursor + 1 < rows)
+                U.menuCursor++, PlaySE(SE_SELECT);
+            else if (pressed & A_BUTTON)
+            {
+                U.menu = FALSE;
+                TeamAction(U.menuCursor);
+            }
+        }
+        else if (pressed & B_BUTTON)
+            U.screen = SCR_OPTIONS, PlaySE(SE_SELECT);
+        else if (pressed & A_BUTTON)
+            U.menu = TRUE, U.menuCursor = 0, memset(U.note, 0, sizeof(U.note)), PlaySE(SE_SELECT);
+        else if (pressed & (DPAD_UP | DPAD_DOWN | L_BUTTON | R_BUTTON))
+        {
+            int c = U.teamCursor + (pressed & DPAD_UP ? -1 : pressed & DPAD_DOWN ? 1 : pressed & L_BUTTON ? -TEAM_ROWS : TEAM_ROWS);
+            if (c < 0) c = 0;
+            if (c >= STADIUM_SAVED_TEAMS) c = STADIUM_SAVED_TEAMS - 1;
+            U.teamCursor = c;
+            if (U.teamCursor < U.teamTop)
+                U.teamTop = U.teamCursor;
+            if (U.teamCursor >= U.teamTop + TEAM_ROWS)
+                U.teamTop = U.teamCursor - TEAM_ROWS + 1;
+            memset(U.note, 0, sizeof(U.note));
+            PlaySE(SE_SELECT);
         }
         break;
     }

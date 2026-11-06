@@ -1108,6 +1108,12 @@ void MP_Store_OnMessage(const u8 *data, u16 len)
     case MP_ST_RH_TOP:
         MP_Rhythm_OnStore(data, len);   // Moemon Rhythm: a chart's records (mp_rhythm.c)
         break;
+    case MP_ST_TEAM_LIST:
+    {
+        void StadiumTeams_OnStore(const u8 *data, u16 len);
+        StadiumTeams_OnStore(data, len);   // POKéMON STADIUM's saved teams (mp_stadium_teams.c)
+        break;
+    }
     case MP_ST_SIM_ROSTER:
     {
         void MP_Sim_OnStore(const u8 *data, u16 len);

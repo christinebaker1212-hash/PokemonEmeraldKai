@@ -306,9 +306,161 @@ static void SimRoster(MPStoreSendFunc send, void *ctx)
     } while (i < sSimCount && part < parts);
 }
 
+// ---- POKéMON STADIUM's saved teams (src/mp/mp_stadium_teams.c): 99 slots for the whole server, kept in
+// "stadium_teams.dat"; the records are the game's, opaque here. Anyone may save over, copy or erase any of them.
+
+#define TEAM_FILE "stadium_teams.dat"
+#define TEAM_MAGIC 0x314D5453   // "STM1"
+
+struct TeamSlot
+{
+    uint16_t len;
+    uint8_t data[MP_TEAM_REC_MAX];
+};
+
+static struct TeamSlot *sTeams;
+static int sTeamsLoaded;
+
+static void TeamPath(char *out, size_t size, const char *suffix)
+{
+    const char *dir = getenv("MOEMON_STORE_DIR");
+    snprintf(out, size, "%s%s%s%s", dir ? dir : "", dir ? "/" : "", TEAM_FILE, suffix);
+}
+
+static void TeamLoad(void)
+{
+    char path[600];
+    FILE *f;
+    uint32_t magic = 0;
+    if (sTeamsLoaded)
+        return;
+    sTeamsLoaded = 1;
+    sTeams = calloc(MP_TEAM_SLOTS, sizeof(*sTeams));
+    TeamPath(path, sizeof(path), "");
+    if (!sTeams || !(f = fopen(path, "rb")))
+        return;
+    if (fread(&magic, 4, 1, f) != 1 || magic != TEAM_MAGIC || fread(sTeams, sizeof(*sTeams), MP_TEAM_SLOTS, f) != MP_TEAM_SLOTS)
+        memset(sTeams, 0, MP_TEAM_SLOTS * sizeof(*sTeams));
+    fclose(f);
+}
+
+static void TeamSave(void)
+{
+    char tmp[600], path[600];
+    FILE *f;
+    uint32_t magic = TEAM_MAGIC;
+    TeamPath(tmp, sizeof(tmp), ".tmp");
+    TeamPath(path, sizeof(path), "");
+    if (!(f = fopen(tmp, "wb")))
+        return;
+    fwrite(&magic, 4, 1, f);
+    fwrite(sTeams, sizeof(*sTeams), MP_TEAM_SLOTS, f);
+    fclose(f);
+    remove(path);
+    rename(tmp, path);
+}
+
+// One slot's news to the room (part 0xFF; len 0 = erased), or 0xFE to the sender alone: no room left
+static void TeamOne(MPStoreSendFunc send, void *ctx, int slot, int full)
+{
+    static uint8_t out[8 + MP_TEAM_REC_MAX];
+    uint16_t l = full ? 0 : sTeams[slot].len;
+    out[0] = MP_ST_TEAM_LIST, out[1] = full ? 0xFE : 0xFF, out[2] = 1, out[3] = 1;
+    out[4] = (uint8_t)slot, out[5] = (uint8_t)l, out[6] = (uint8_t)(l >> 8);
+    if (l)
+        memcpy(out + 7, sTeams[slot].data, l);
+    send(ctx, full ? 0 : 1, out, (uint16_t)(7 + l));
+}
+
+static void TeamList(MPStoreSendFunc send, void *ctx)
+{
+    static uint8_t out[MP_MAX_MSG - 16];
+    int i = 0, part = 0, parts = 0, size = 4, k;
+    for (k = 0; k < MP_TEAM_SLOTS; k++)
+        if (sTeams[k].len)
+        {
+            if (size + 3 + sTeams[k].len > (int)sizeof(out))
+                parts++, size = 4;
+            size += 3 + sTeams[k].len;
+        }
+    parts++;
+    do
+    {
+        uint16_t n = 4;
+        uint8_t count = 0;
+        for (; i < MP_TEAM_SLOTS; i++)
+        {
+            if (!sTeams[i].len)
+                continue;
+            if (n + 3 + sTeams[i].len > sizeof(out))
+                break;
+            out[n] = (uint8_t)i;
+            out[n + 1] = (uint8_t)sTeams[i].len;
+            out[n + 2] = (uint8_t)(sTeams[i].len >> 8);
+            memcpy(out + n + 3, sTeams[i].data, sTeams[i].len);
+            n += 3 + sTeams[i].len;
+            count++;
+        }
+        out[0] = MP_ST_TEAM_LIST;
+        out[1] = (uint8_t)part++;
+        out[2] = (uint8_t)parts;
+        out[3] = count;
+        send(ctx, 0, out, n);
+    } while (i < MP_TEAM_SLOTS && part < parts);
+}
+
+static void TeamHandle(const uint8_t *data, uint16_t len, MPStoreSendFunc send, void *ctx)
+{
+    TeamLoad();
+    if (!sTeams)
+        return;
+    switch (data[0])
+    {
+    case MP_ST_TEAM_PUT:
+    {
+        int slot = len >= 2 ? data[1] : 0xFF, k;
+        uint16_t l = len >= 2 ? (uint16_t)(len - 2) : 0;
+        if (l == 0 || l > MP_TEAM_REC_MAX)
+            return;
+        if (slot == 0xFF)
+            for (k = 0; k < MP_TEAM_SLOTS && slot == 0xFF; k++)
+                if (!sTeams[k].len)
+                    slot = k;
+        if (slot == 0xFF)
+        {
+            TeamOne(send, ctx, 0, 1);
+            return;
+        }
+        if (slot >= MP_TEAM_SLOTS)
+            return;
+        sTeams[slot].len = l;
+        memcpy(sTeams[slot].data, data + 2, l);
+        TeamSave();
+        TeamOne(send, ctx, slot, 0);
+        break;
+    }
+    case MP_ST_TEAM_ERASE:
+        if (len >= 2 && data[1] < MP_TEAM_SLOTS)
+        {
+            memset(&sTeams[data[1]], 0, sizeof(sTeams[0]));
+            TeamSave();
+            TeamOne(send, ctx, data[1], 0);
+        }
+        break;
+    case MP_ST_TEAM_GET:
+        TeamList(send, ctx);
+        break;
+    }
+}
+
 void MPScores_Handle(const uint8_t *data, uint16_t len, MPStoreSendFunc send, void *ctx)
 {
     static uint8_t reply[8 + MP_RH_TOP * (MP_RH_NAME + 8)];
+    if (len >= 1 && data[0] >= MP_ST_TEAM_PUT && data[0] <= MP_ST_TEAM_LIST)
+    {
+        TeamHandle(data, len, send, ctx);
+        return;
+    }
     if (len >= 1 && (data[0] == MP_ST_SIM_PUT || data[0] == MP_ST_SIM_GET))
     {
         SimLoad();

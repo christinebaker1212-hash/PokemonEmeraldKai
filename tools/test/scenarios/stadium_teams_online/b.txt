@@ -1,0 +1,29 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 100
+mp warp 46,1,10,3
+wait 80
+press UP 4
+wait 10
+pressuntillog A 3000 screens opened
+wait 20
+barrier saved 2
+wait 60
+press A 4
+wait 20
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 20
+press A 4
+wait 6
+press A 4
+wait 20
+barrier done 2
+quit

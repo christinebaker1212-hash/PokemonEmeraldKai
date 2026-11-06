@@ -1280,6 +1280,10 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
         {
             void MP_Sim_OnConnected(void);
             MP_Sim_OnConnected();   // the BATTLE SIMULATOR: our record up, everyone's back (mp_sim.c)
+            {
+                void StadiumTeams_OnConnected(void);
+                StadiumTeams_OnConnected();   // POKéMON STADIUM's saved teams, the server's (mp_stadium_teams.c)
+            }
         }
         SendLocalState(TRUE);
         break;
