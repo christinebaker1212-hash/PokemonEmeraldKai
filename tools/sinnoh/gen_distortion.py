@@ -365,13 +365,28 @@ def c_kind_shadow(tbl):
     return tbl['c'].values['EVENT_CMD_SHOW_GIRATINA_SHADOW']
 
 
+def event_scripts(c, root, evs):
+    """[(map header, script number, label)] the events' START_SCRIPT commands run (Platinum's scripts of that floor)"""
+    names = {i: n for n, i in header_ids(root).items()}
+    kind = c.values['EVENT_CMD_START_SCRIPT']
+    out = set()
+    for hid, x, y, z, cond, val, lst in evs:
+        for k, vals in lst:
+            if k == kind and vals:
+                out.add((hid, vals[0], 'SinnohP_%s_%d' % (names[hid][len('MAP_HEADER_'):].lower(), vals[0])))
+    return sorted(out)
+
+
 def script_labels(root):
-    """The converted scripts the DISTORTION WORLD's people use (gen_scripts.py converts them), none without the decomp"""
+    """The converted scripts the DISTORTION WORLD's people and events use (gen_scripts.py converts them), none without
+    the decomp"""
     try:
         c = CTables(root)
     except (OSError, KeyError):
         return set()
-    return {p[-1] for p in people(c, root) if p[-1] and p[-1].startswith('SinnohP_')}
+    evs, named = events(c)
+    return {p[-1] for p in people(c, root) if p[-1] and p[-1].startswith('SinnohP_')} | \
+        {e[2] for e in event_scripts(c, root, evs)}
 
 
 def write(out, data):
@@ -389,7 +404,8 @@ def write(out, data):
               '#define DW_FLAG_PUZZLE_FINISHED 0', '#define DW_PLATFORM_FLAG_INVALID 11',
               'static const struct DwPerson sDwPeople[1];', '#define DW_PEOPLE_COUNT 0',
               'static const struct DwCmd sDwShadows[1];', '#define DW_SHADOW_COUNT 0',
-              '#define DW_PROP_GIRATINA_SHADOW 0']
+              '#define DW_PROP_GIRATINA_SHADOW 0',
+              'static const struct { u16 hid, n; const u8 *script; } sDwEventScripts[1];', '#define DW_EVENT_SCRIPT_COUNT 0']
         open(out, 'w').write('\n'.join(o) + '\n')
         return
     floors, plats, jumps, cams, attrs, tbl = data
@@ -468,6 +484,15 @@ def write(out, data):
     root = tbl['root']
     o.append('#define DW_VAR_PROGRESS 0x%X   // (Platinum\'s VAR_DISTORTION_WORLD_PROGRESS: tools/sinnoh/ids.py)' % ids.var(root, 'VAR_DISTORTION_WORLD_PROGRESS'))
     o.append('#define DW_FLAG_PUZZLE_FINISHED 0x%X' % (ids.flag(root, 'FLAG_DISTORTION_WORLD_PUZZLE_FINISHED') or 0))
+    # the scripts the events start (START_SCRIPT: the floor's script by number)
+    es = event_scripts(c, tbl['root'], tbl['events'])
+    for lab in sorted({e[2] for e in es}):
+        o.append('extern const u8 %s[];' % lab)
+    o.append('#define DW_EVENT_SCRIPT_COUNT %d' % len(es))
+    o.append('static const struct { u16 hid, n; const u8 *script; } sDwEventScripts[] = {')
+    for hid, n, lab in es:
+        o.append('    {%d, %d, %s},' % (hid, n, lab))
+    o.append('};')
     # GIRATINA's shadow flying by for the scripts (sGiratinaShadowExternal: StartDistortionWorldGiratinaShadowEvent)
     o.append('#define DW_SHADOW_COUNT %d' % len(tbl['shadows']))
     o.append('#define DW_PROP_GIRATINA_SHADOW %d' % c.values['PROP_KIND_GIRATINA_SHADOW'])

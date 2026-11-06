@@ -130,6 +130,12 @@ static float sPlatOff[64][3];      // (each moving platform of this floor moved 
 
 // A ride carried over the change of floors (the warp): the path and where along it
 static struct { bool8 on; u16 destHid; u8 destIndex, path, dir; s32 off[3]; } sRideNext;
+// CYNTHIA riding an elevator along (Platinum's passengerMapObj: 1F's down to B1F, B6F's down to B7F): who rides on
+// this floor, and on the floor reached, where she stands as that floor's local id 128 while its arrival scene plays
+static u8 sRider;
+static float sRiderBase;
+static bool8 sRiderBaseSet;
+static struct { bool8 on; u16 hid, progress; s16 x, y; } sArrival;
 
 static const struct DwFloor *FloorFor(u16 map)
 {
@@ -467,6 +473,17 @@ static void StartRide(const struct DwMoving *m, s32 startOff[3], bool8 vibrate)
     sDw.rideTile[0] = m->t[0], sDw.rideTile[1] = m->t[1], sDw.rideTile[2] = m->t[2];
     sDw.ridePath = m->path;
     LockPlayerFieldControls();
+    sRider = 0;
+    sRiderBaseSet = FALSE;
+    if (vibrate && sDw.floor != NULL)
+    {
+        // (DistWorldElevatorPlatform_Init: CYNTHIA rides along at these points of the story)
+        u8 id = sDw.floor->hid == 573 && VarGet(DW_VAR_PROGRESS) == 2 ? 129
+              : sDw.floor->hid == 580 && VarGet(DW_VAR_PROGRESS) == 7 ? 134 : 0;
+        u8 obj;
+        if (id && !TryGetObjectEventIdByLocalIdAndMap(id, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &obj))
+            sRider = id;
+    }
     if (vibrate)
         PlaySE(SE_ELEVATOR);
     if (getenv("MOEMON_TEST") && vibrate)
@@ -517,6 +534,19 @@ static void RideUpdate(void)
                 sRideNext.dir = sDw.ride->dir;
                 for (i = 0; i < 3; i++)
                     sRideNext.off[i] = sDw.rideOff[i] - p->fin[i] * 16 * 4096;
+                sArrival.on = FALSE;
+                if (sRider)
+                {
+                    u8 obj;
+                    if (!TryGetObjectEventIdByLocalIdAndMap(sRider, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &obj))
+                    {
+                        sArrival.on = TRUE;
+                        sArrival.hid = dest;
+                        sArrival.progress = VarGet(DW_VAR_PROGRESS);
+                        sArrival.x = gObjectEvents[obj].currentCoords.x - MAP_OFFSET + sDw.floor->off[0] + p->fin[0] - f->off[0];
+                        sArrival.y = gObjectEvents[obj].currentCoords.y - MAP_OFFSET + sDw.floor->off[2] + p->fin[2] - f->off[2];
+                    }
+                }
                 SetWarpDestination(f->map >> 8, f->map & 0xFF, WARP_ID_NONE, fx - f->off[0], fz - f->off[2]);
                 DoQuietWarp();
                 sDw.ridePhase = 2;   // (waiting for the warp)
@@ -856,6 +886,34 @@ static bool8 EventUpdate(void)
     case CMD_CLEAR_PUZZLE_FLAG:
         SetPuzzleFlag(c->p[0], FALSE);
         break;
+    case CMD_START_SCRIPT:
+        // p: the floor's script number (Platinum's ScriptManager_Start: the event waits for it to end)
+        if (sEv.state == 0)
+        {
+            for (i = 0; i < DW_EVENT_SCRIPT_COUNT; i++)
+                if (sDwEventScripts[i].hid == sDw.floor->hid && sDwEventScripts[i].n == c->p[0])
+                    break;
+            if (i == DW_EVENT_SCRIPT_COUNT || sDwEventScripts[i].script == NULL)
+                break;
+            ScriptContext_SetupScript(sDwEventScripts[i].script);
+            sEv.state = 1;
+            return FALSE;
+        }
+        if (ScriptContext_IsEnabled())
+            return FALSE;
+        LockPlayerFieldControls();   // (the script's own release ends its lock; the event goes on)
+        break;
+    case CMD_ADD_OBJECT:
+    case CMD_DELETE_OBJECT:
+        // p: the floor, the local id (another floor's people show by their condition when it loads)
+        if (c->p[0] == sDw.floor->hid)
+        {
+            if (c->kind == CMD_ADD_OBJECT)
+                S3D_Dw_AddObject(c->p[1]);
+            else
+                S3D_Dw_DeleteObject(c->p[1]);
+        }
+        break;
     case CMD_SHOW_GIRATINA_SHADOW:
         if (sEv.state == 0)
         {
@@ -941,6 +999,22 @@ void S3D_Dw_AddPeople(struct MapEvents *ev, struct ObjectEventTemplate *buf, u32
         memcpy(buf, ev->objectEvents, ev->objectEventCount * sizeof(*buf));
         ev->objectEvents = buf;
     }
+    if (sArrival.on && sArrival.hid == f->hid && VarGet(DW_VAR_PROGRESS) == sArrival.progress && ev->objectEventCount < cap)
+    {
+        // CYNTHIA off the elevator, for the floor's arrival scene (B7F's keeps her talk script, Platinum's 6)
+        struct ObjectEventTemplate *t = &buf[ev->objectEventCount++];
+        s32 k = PersonOf(f->hid, 128);
+        memset(t, 0, sizeof(*t));
+        t->localId = 128;
+        t->graphicsIdLo = OBJ_EVENT_GFX_SINNOH_CYNTHIA & 0xFF;
+        t->graphicsIdHi = OBJ_EVENT_GFX_SINNOH_CYNTHIA >> 8;
+        t->x = sArrival.x;
+        t->y = sArrival.y;
+        t->elevation = 3;
+        t->movementType = MOVEMENT_TYPE_FACE_DOWN;
+        t->script = f->hid == 581 && k >= 0 ? sDwPeople[k].script : NULL;
+        n++;
+    }
     for (i = 0; i < DW_PEOPLE_COUNT; i++)
     {
         const struct DwPerson *p = &sDwPeople[i];
@@ -990,6 +1064,19 @@ void S3D_Dw_DeleteObject(u8 localId)
     RemoveObjectEventByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
 }
 
+// CYNTHIA riding along: up and down with the elevator (s3d.c's people heights)
+static float PersonHeight(u8 localId, float h)
+{
+    if (sDw.floor != NULL && sDw.riding && sRider && localId == sRider)
+    {
+        // (her ground when the ride starts: the height given back is kept as the next frame's search height)
+        if (!sRiderBaseSet)
+            sRiderBase = h, sRiderBaseSet = TRUE;
+        return sRiderBase + sDw.rideOff[1] / 4096.0f + sDw.vib;
+    }
+    return NAN;
+}
+
 // Platinum's INVISIBLE people (the places scripts walk others to) stay unseen
 static void HidePeople(void)
 {
@@ -1010,6 +1097,8 @@ void S3D_Dw_OnMapLoad(void)
     u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
     const struct DwFloor *f = FloorFor(map);
     sFromOutside = f != NULL && sDw.floor == NULL;
+    if (f == NULL || f->hid != sArrival.hid)
+        sArrival.on = FALSE;
     if (f != sDw.floor || map != sDw.map)
     {
         memset(sDw.cam, 0, sizeof(sDw.cam));
@@ -1049,6 +1138,8 @@ void S3D_Dw_OnMapLoad(void)
             sDw.ride = &sRidden;
             sDw.ridePath = sRideNext.path;
             sDw.ridePhase = 3;
+            sRider = sArrival.on && sArrival.hid == f->hid ? 128 : 0;
+            sRiderBaseSet = FALSE;
         }
     }
 }
@@ -1150,6 +1241,8 @@ void S3D_Dw_Update(void)
     if (sDw.floor == NULL)
         return;
     HidePeople();
+    if (gS3dObjectHeightHook == NULL)
+        gS3dObjectHeightHook = PersonHeight;
     if (DW_HAVE_DATA)
         DrawPlatforms(), ShadowUpdate();
     if (sDw.riding)
