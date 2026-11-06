@@ -1013,6 +1013,7 @@ void MP_SharedBox_SaveBlocksMoved(struct PokemonStorage *own);
 void MP_SharedBox_Begin(void);
 bool8 MP_SharedBox_Loaded(void);
 bool8 MP_SharedBox_IsOpen(void);
+const struct PokemonStorage *MP_SharedBox_Storage(void);
 void MP_SharedBox_Update(void);
 void MP_SharedBox_End(void);
 bool8 MP_SharedBox_Busy(void);

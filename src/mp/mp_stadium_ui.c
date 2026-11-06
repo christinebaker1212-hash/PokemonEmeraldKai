@@ -57,7 +57,7 @@ extern const u8 gMpStadiumGfx[];
 const u16 *MP_CardScreen_Halve(SDL_Renderer *r, SDL_Texture *canvas, u16 *out);
 
 enum { SCR_SELECT, SCR_CLASS, SCR_OPTIONS, SCR_REGISTER, SCR_VS, SCR_RESULT, SCR_TEAMS };
-enum { SRC_TAB_PARTY, SRC_TAB_BOXES, SRC_TAB_GLOBAL, SRC_TAB_RENTALS, SRC_TAB_COUNT };
+enum { SRC_TAB_PARTY, SRC_TAB_BOXES, SRC_TAB_SHARED, SRC_TAB_GLOBAL, SRC_TAB_RENTALS, SRC_TAB_COUNT };
 enum { RES_WON, RES_LOST, RES_CONTINUE, RES_CUP, RES_OVER };
 
 #define LIST_MAX 512
@@ -81,7 +81,8 @@ static struct
     bool8 menu, rules;      // the REGISTER pop-up (A), the clauses page (VS: SELECT)
     u8 menuCursor;
     u8 teamCursor, teamTop;   // SAVED TEAMS
-    u16 lastFoePic;           // RESULT: the trainer just battled (the run has moved on to the next)
+    u16 lastFoePic;
+    bool8 sharedOpened;       // REGISTER: the shared PC's boxes asked for (closed again on leaving)           // RESULT: the trainer just battled (the run has moved on to the next)
     bool8 confirm;            // SAVED TEAMS: ERASE asked
     u16 age;
     char note[96];          // a line at the bottom (why not, what happened)
@@ -518,6 +519,22 @@ static void BuildList(void)
                     AddToList(STADIUM_SRC_BOX, 0, &st->boxes[b][i]);
         break;
     }
+    case SRC_TAB_SHARED:   // (online: the server's boxes, asked for the first time the tab shows)
+        if (!MP_IsConnected())
+            break;
+        if (!MP_SharedBox_IsOpen())
+        {
+            MP_SharedBox_Begin();
+            U.sharedOpened = TRUE;
+        }
+        if (MP_SharedBox_Loaded())
+        {
+            const struct PokemonStorage *st = MP_SharedBox_Storage();
+            for (b = 0; b < TOTAL_BOXES_COUNT; b++)
+                for (i = 0; i < IN_BOX_COUNT; i++)
+                    AddToList(STADIUM_SRC_SHARED, 0, &st->boxes[b][i]);
+        }
+        break;
     case SRC_TAB_GLOBAL:
     {
         struct PokemonStorage *st = MP_Region_GlobalPC();
@@ -1113,7 +1130,7 @@ static void DetailCard(const struct BoxPokemon *b, u8 source)
 
 static void DrawRegister(void)
 {
-    static const char *const sTabs[SRC_TAB_COUNT] = {"PARTY", "BOXES", "GLOBAL PC", "RENTALS"};
+    static const char *const sTabs[SRC_TAB_COUNT] = {"PARTY", "BOXES", "SHARED", "GLOBAL", "RENTALS"};
     const struct StadiumTeam *t = &StadiumCup_Save()->team[U.cup];
     char line[96];
     u8 i;
@@ -1138,8 +1155,12 @@ static void DrawRegister(void)
     }
     // the list: four across, five down
     Panel(3, 31, 119, 92, 0x18243e, 0x4a5c88);
+    if (U.tab == SRC_TAB_SHARED && U.listCount == 0 && MP_SharedBox_Loaded())
+        BuildList();
     if (U.listCount == 0)
-        G_TextAlign(62, 70, TA_CENTER, 0xa8b8d8, 0x000000, "Nobody here.", TF_SMALL);
+        G_TextAlign(62, 70, TA_CENTER, 0xa8b8d8, 0x000000,
+                    U.tab != SRC_TAB_SHARED ? "Nobody here." : !MP_IsConnected() ? "Online only." : MP_SharedBox_Loaded() ? "Nobody here." : "Loading...",
+                    TF_SMALL);
     for (i = 0; i < REG_VIEW && U.listTop + i < U.listCount; i++)
     {
         u16 n = U.listTop + i;
@@ -1619,6 +1640,8 @@ bool8 MP_StadiumUi_IsActive(void)
 static void Close(void)
 {
     StadiumCup_SaveNow();
+    if (U.sharedOpened)
+        MP_SharedBox_End(), U.sharedOpened = FALSE;
     U.active = FALSE;
     U.draining = TRUE;
     PlaySE(SE_PC_OFF);
@@ -2005,6 +2028,8 @@ bool8 MP_StadiumUi_Step(u16 keys)
         {
             StadiumCup_SaveNow();
             U.screen = SCR_OPTIONS;
+            if (U.sharedOpened)
+                MP_SharedBox_End(), U.sharedOpened = FALSE;
             PlaySE(SE_SELECT);
         }
         else if (pressed & (L_BUTTON | R_BUTTON))

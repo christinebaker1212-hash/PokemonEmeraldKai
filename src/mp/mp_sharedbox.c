@@ -827,6 +827,12 @@ bool8 MP_SharedBox_IsOpen(void)
     return sOpen;
 }
 
+// The shared boxes as last heard (read only: POKéMON STADIUM's registration copies from them, src/mp/mp_stadium_ui.c)
+const struct PokemonStorage *MP_SharedBox_Storage(void)
+{
+    return &sMirror;
+}
+
 // Every frame (MP_FrameUpdate): sends what changed, when the box screen is steady
 void MP_SharedBox_Update(void)
 {
