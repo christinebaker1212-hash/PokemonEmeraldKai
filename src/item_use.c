@@ -48,6 +48,7 @@
 #include "constants/item_effects.h"
 #include "constants/items.h"
 #include "constants/songs.h"
+#include "constants/metatile_behaviors.h"
 
 static void SetUpItemUseCallback(u8);
 static void FieldCB_UseItemOnField(void);
@@ -249,7 +250,8 @@ void ItemUseOutOfBattle_Bike(u8 taskId)
     u8 behavior;
     PlayerGetDestCoords(&coordsX, &coordsY);
     behavior = MapGridGetMetatileBehaviorAt(coordsX, coordsY);
-    if (FlagGet(FLAG_SYS_CYCLING_ROAD) == TRUE || MetatileBehavior_IsVerticalRail(behavior) == TRUE || MetatileBehavior_IsHorizontalRail(behavior) == TRUE || MetatileBehavior_IsIsolatedVerticalRail(behavior) == TRUE || MetatileBehavior_IsIsolatedHorizontalRail(behavior) == TRUE)
+    if (FlagGet(FLAG_SYS_CYCLING_ROAD) == TRUE || behavior == MB_UNUSED_54 || behavior == MB_UNUSED_55   // Moemon Kai: (a SINNOH bike bridge)
+     || MetatileBehavior_IsVerticalRail(behavior) == TRUE || MetatileBehavior_IsHorizontalRail(behavior) == TRUE || MetatileBehavior_IsIsolatedVerticalRail(behavior) == TRUE || MetatileBehavior_IsIsolatedHorizontalRail(behavior) == TRUE)
     {
         DisplayCannotDismountBikeMessage(taskId, tUsingRegisteredKeyItem);
     }

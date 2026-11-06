@@ -514,6 +514,8 @@ extern u8 gMpOamFx[256];
 extern u16 *gMpFxLayer;
 u8 gMpOamShadow[256];   // Moemon Kai: per OAM entry: a shadow sprite's (mp_shadow.c; gba_easy_draw.c darkens under it)
 u8 gMpOamShadowLive[256];   // ... as the OAM drawn now has them (LoadOam)
+u8 gMpOamFade[256];         // Moemon Kai: per OAM entry: a see-through sprite's sixteenths (sprite->mpFade; gba_easy_draw.c)
+u8 gMpOamFadeLive[256];     // ... as the OAM drawn now has them (LoadOam)
 u16 gMpOamUnder[256];       // Moemon Kai: per OAM entry: the entry (+ 1) it gives way to (sprite->mpUnder; gba_easy_draw.c)
 u16 gMpOamUnderLive[256];   // ... as the OAM drawn now has them (LoadOam)
 bool8 MP_ModernAnim_IsFxSprite(const struct Sprite *sprite);
@@ -535,6 +537,7 @@ void AddSpritesToOamBuffer(void)
     bool8 anyUnder = FALSE;
 
     memset(gMpOamShadow, 0, sizeof(gMpOamShadow));
+    memset(gMpOamFade, 0, sizeof(gMpOamFade));
     memset(gMpOamUnder, 0, sizeof(gMpOamUnder));
     memset(spriteEnd, 0, sizeof(spriteEnd));
     while (i < MAX_SPRITES)
@@ -554,6 +557,8 @@ void AddSpritesToOamBuffer(void)
                 memset(gMpOamUi + first, 1, oamIndex - first);
             if (sprite->mpShadow && oamIndex > first && oamIndex <= 256)
                 memset(gMpOamShadow + first, 1, oamIndex - first);
+            if (sprite->mpFade && oamIndex > first && oamIndex <= 256)
+                memset(gMpOamFade + first, sprite->mpFade, oamIndex - first);
             if (full)
                 break;
         }
@@ -741,6 +746,7 @@ void LoadOam(void)
         // Moemon Kai: and which entries are shadows (1.63.11: marked as the list was built, a frame whose OAM wasn't
         // copied, a fade's, drew a shadow solid and its owner as a shadow)
         memcpy(gMpOamShadowLive, gMpOamShadow, sizeof(gMpOamShadowLive));
+        memcpy(gMpOamFadeLive, gMpOamFade, sizeof(gMpOamFadeLive));
         memcpy(gMpOamUnderLive, gMpOamUnder, sizeof(gMpOamUnderLive));
     }
 }

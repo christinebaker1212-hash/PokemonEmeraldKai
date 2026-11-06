@@ -1,0 +1,8 @@
+# SINNOH: a person taken off the map (a script's removeobject after walking away, or leaving the view) fades out over
+# 20 frames instead of blinking out (the user, 2026-11-06; event_object_movement.c RemoveObjectEventFading,
+# sprite->mpFade drawn by gba_easy_draw.c). TWINLEAF's breeder, then the map's people as before.
+MODE=1
+TMO=60
+WARP=40,0,21,15
+EXPECT_A=("field: person 1 fades out")
+UNEXPECT_A=("[crash]" "TIMEOUT")

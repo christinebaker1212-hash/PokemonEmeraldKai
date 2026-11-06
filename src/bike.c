@@ -173,6 +173,9 @@ static bool8 CyclingRoadSlope(u8 direction, u16 heldKeys)
 
 void MovePlayerOnBike(u8 direction, u16 newKeys, u16 heldKeys)
 {
+    bool8 Sinnoh_MovePlayerOnBike(u8 direction, u16 newKeys, u16 heldKeys);   // Moemon Kai: Platinum's BICYCLE (s3d_bike.c)
+    if (Sinnoh_MovePlayerOnBike(direction, newKeys, heldKeys))
+        return;
     if (CyclingRoadSlope(direction, heldKeys))
     {
         gPlayerAvatar.bikeSpeed = PLAYER_SPEED_STANDING;

@@ -77,6 +77,12 @@ BEHAVIOR.update({b: S3D_BRIDGE for b in range(0x71, 0x76)})
 ROCK_CLIMB = (0x4B, 0x4C)      # solid, kept as the game's unused 0x4B / 0x4C: A in front climbs (s3d_misc.c S3D_RockClimb*)
 BEHAVIOR.update({0x4B: 0x4B, 0x4C: 0x4C,
                  0xD9: 0xD9, 0xDA: 0xDA})   # (bike slopes, top and bottom: walked up only on a bike, s3d_misc.c S3D_BikeSlopeBlocked)
+# Platinum's BICYCLE tiles (src/sinnoh/s3d_bike.c): the narrow bike bridges, ridden only along them (0x76-0x79 north-south,
+# 0x7A-0x7D east-west: over grass, water, sand) as the game's unused 0x54 / 0x55; the jump ramps (0xD7 eastward, 0xD8
+# westward) as 0x56 / 0x57
+BEHAVIOR.update({b: 0x54 for b in range(0x76, 0x7A)})
+BEHAVIOR.update({b: 0x55 for b in range(0x7A, 0x7E)})
+BEHAVIOR.update({0xD7: 0x56, 0xD8: 0x57})
 WATER = (0x10, 0x13, 0x15)     # surfable (0x13: a waterfall, climbed with WATERFALL)
 
 

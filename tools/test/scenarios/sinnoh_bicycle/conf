@@ -1,0 +1,8 @@
+# SINNOH's BICYCLE as Platinum's (src/sinnoh/s3d_bike.c): ROUTE 210 NORTH's narrow bike bridge (x 21, y 11-27,
+# north-south) is never walked onto; on the bike it's ridden north, a turn sideways on it goes nowhere; B switches gears.
+MODE=1
+TMO=90
+WARP=40,30,21,28
+ENV_A="MOEMON_GYM_TRACE=1"
+EXPECT_A=("step 21,28 -> 21,27: blocked" "sinnoh bike: gear 3" "sinnoh bike: gear 4" "step 21,28 -> 21,27: free" "where map 40.30 xy 21,24")
+UNEXPECT_A=("[crash]" "TIMEOUT" "where map 40.30 xy 20,")

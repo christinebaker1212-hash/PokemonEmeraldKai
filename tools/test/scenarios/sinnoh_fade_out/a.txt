@@ -1,0 +1,9 @@
+pressuntil A field 5000
+wait 30
+mp removeobj 1
+shotburst f 24 6
+wait 40
+press LEFT 16
+wait 20
+shot after
+quit

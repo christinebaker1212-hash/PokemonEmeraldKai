@@ -258,6 +258,7 @@ struct Sprite
     u8 mpUnder;             // Moemon Kai: drawn at a higher OAM priority yet behind this sprite (its id + 1): its pixels
                             // give way to that sprite's (a follower raised above tall grass behind its Trainer)
     bool8 mpCastShadow;     // ... a shadow goes under it (followers, Garden POKeMON; map objects get one anyway)
+    u8 mpFade;              // Moemon Kai: drawn see-through: 1-15 sixteenths of it over the backgrounds (0: solid)
 };
 
 struct OamMatrix

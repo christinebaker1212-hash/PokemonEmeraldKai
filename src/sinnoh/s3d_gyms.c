@@ -1388,11 +1388,24 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
         if (!isnan(h) && (isnan(f) || h - f > 12))
             blocked = TRUE;
     }
+    // ... and the other way: under a bridge, a step onto a deck tile whose only ground is the deck far above is blocked
+    // (ROUTE 211's high bridge over the river bank: (15, 21) has no ground under the deck in Platinum's BDHC, so the
+    // player climbed onto it from below)
+    if (!blocked && MapGridGetMetatileBehaviorAt(toX, toY) == MB_UNUSED_1D
+     && fromX == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x
+     && fromY == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y)
+    {
+        float h = S3D_PlayerHeight(), f = S3D_TileFloor(toX - MAP_OFFSET, toY - MAP_OFFSET, h);
+        if (!isnan(h) && !isnan(f) && f - h > 12)
+            blocked = TRUE;
+    }
     if (!blocked && fromX == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x
      && fromY == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y)
     {
         bool8 S3D_BikeSlopeBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY);
-        blocked = S3D_BikeSlopeBlocked(fromX, fromY, toX, toY);   // (Platinum's bike slopes: s3d_misc.c)
+        bool8 Sinnoh_BikeTileBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY);
+        blocked = S3D_BikeSlopeBlocked(fromX, fromY, toX, toY)    // (Platinum's bike slopes: s3d_misc.c)
+               || Sinnoh_BikeTileBlocked(fromX, fromY, toX, toY);  // (its bike bridges and ramps: s3d_bike.c)
     }
     if (getenv("MOEMON_GYM_TRACE"))
         printf("[gym] step %d,%d -> %d,%d: %s (player at %.0f)\n", fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET,

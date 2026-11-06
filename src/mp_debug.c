@@ -2726,6 +2726,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d,%d", &x, &y);
         MP_Poketch_DebugTap(x, y);
     }
+    else if (strcmp(cmd, "removeobj") == 0)
+    {
+        // removeobj LOCALID - the current map's person taken away as a script's removeobject does (SINNOH: fades out)
+        RemoveObjectEventByLocalIdAndMap(atoi(arg), gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+    }
+    else if (strcmp(cmd, "layers") == 0)
+    {
+        void S3D_DebugLayers(const char *arg);
+        S3D_DebugLayers(arg);
+    }
     else if (strcmp(cmd, "gym") == 0)
     {
         // gym - a SINNOH gym that moves: its state (src/sinnoh/s3d_gyms.c)

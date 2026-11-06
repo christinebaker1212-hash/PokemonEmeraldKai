@@ -1,0 +1,9 @@
+# ROUTE 211 WEST's high bridge (the user, 2026-11-06: "A bridge in Route 211 can be climbed on from below by walking
+# under it"): under the deck on the river bank, a step south onto (15, 21), where Platinum's ground data has only the deck
+# 64 above, is blocked (s3d_gyms.c S3D_Gyms_StepBlocked); the player stays at the bank's height.
+MODE=1
+TMO=90
+WARP=40,33,15,18
+ENV_A="MOEMON_GYM_TRACE=1"
+EXPECT_A=("step 15,20 -> 15,21: blocked")
+UNEXPECT_A=("[crash]" "TIMEOUT" "step 15,20 -> 15,21: free")

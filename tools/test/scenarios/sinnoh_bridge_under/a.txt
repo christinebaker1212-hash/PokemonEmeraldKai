@@ -1,0 +1,12 @@
+pressuntil A field 5000
+wait 30
+press DOWN 16
+wait 20
+press DOWN 16
+wait 20
+press DOWN 16
+wait 20
+press DOWN 16
+wait 20
+shot under
+quit

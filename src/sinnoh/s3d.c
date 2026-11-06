@@ -1467,6 +1467,66 @@ float S3D_TileFloor(s32 mapX, s32 mapY, float near)
     }
 }
 
+// (tests: `mp layers`: every tile of the current map with more than one ground height, e.g. a bridge over the ground)
+void S3D_DebugLayers(const char *arg)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum), x, y;
+    int x0, y0, x1, y1;
+    if (map < 0 || !sPack.ok)
+        return;
+    // `mp layers beh B`: every tile of the current map with behavior B (hex)
+    if (arg && sscanf(arg, "beh %x", (unsigned *)&x0) == 1)
+    {
+        int n = 0;
+        for (y = 0; y < gMapHeader.mapLayout->height; y++)
+            for (x = 0; x < gMapHeader.mapLayout->width; x++)
+                if (MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET) == x0 && n++ < 400)
+                    printf("[test] beh %02X at %d,%d\n", x0, x, y);
+        return;
+    }
+    // `mp layers X0 Y0 X1 Y1`: a grid of every tile's heights (top/bottom) and behavior there
+    if (arg && sscanf(arg, "%d %d %d %d", &x0, &y0, &x1, &y1) == 4)
+    {
+        for (y = y0; y <= y1; y++)
+        {
+            char line[1024];
+            int n = snprintf(line, sizeof(line), "[test] grid y%02d:", y);
+            for (x = x0; x <= x1 && n < (int)sizeof(line) - 24; x++)
+            {
+                s32 gtx = sMaps[map].cx * 32 + x, gtz = sMaps[map].cz * 32 + y, cx = gtx / 32, cz = gtz / 32;
+                const S3dCell *c = CellIn(MatrixNumbered(sMaps[map].mat), cx, cz);
+                u32 t;
+                if (c == NULL) { n += snprintf(line + n, sizeof(line) - n, " ----"); continue; }
+                t = (gtz - cz * 32) * 32 + (gtx - cx * 32);
+                if (c->hn[t] == 0) n += snprintf(line + n, sizeof(line) - n, "   .  ");
+                else if (c->hn[t] == 1) n += snprintf(line + n, sizeof(line) - n, " %3.0f%02X", c->h[t][0], MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET) & 0xFF);
+                else n += snprintf(line + n, sizeof(line) - n, " %3.0f/%-3.0f", c->h[t][c->hn[t] > 2 ? 2 : 1], c->h[t][0]);
+            }
+            printf("%s\n", line);
+        }
+        return;
+    }
+    for (y = 0; y < gMapHeader.mapLayout->height; y++)
+        for (x = 0; x < gMapHeader.mapLayout->width; x++)
+        {
+            s32 gtx = sMaps[map].cx * 32 + x, gtz = sMaps[map].cz * 32 + y, cx = gtx / 32, cz = gtz / 32;
+            const S3dCell *c = CellIn(MatrixNumbered(sMaps[map].mat), cx, cz);
+            u32 t, i;
+            char line[128];
+            int n;
+            if (c == NULL)
+                continue;
+            t = (gtz - cz * 32) * 32 + (gtx - cx * 32);
+            if (c->hn[t] < 2)
+                continue;
+            n = snprintf(line, sizeof(line), "[test] layers %d,%d beh %02X:", x, y,
+                         MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET));
+            for (i = 0; i < c->hn[t] && i < 3; i++)
+                n += snprintf(line + n, sizeof(line) - n, " %.0f", c->h[t][i]);
+            printf("%s\n", line);
+        }
+}
+
 // The current map's block (0, 0) corner in its matrix's world (for a gym's run-time props); FALSE: not a SINNOH map
 // the current map's top-left block in Platinum's matrix (SINNOH's converted scripts: Platinum's map coordinates)
 bool8 S3D_MapCells(s32 *cx, s32 *cz)

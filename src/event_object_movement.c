@@ -1419,13 +1419,57 @@ static void RemoveObjectEvent(struct ObjectEvent *objectEvent)
     RemoveObjectEventInternal(objectEvent);
 }
 
+// Moemon Kai: a person leaving a SINNOH 3D scene fades out (the user, 2026-11-06: trainers who walk away blinked out of
+// existence while still in view; Platinum's camera and the wider screen show further than the DS did). The sprite
+// stays as a ghost, placed in the scene as before, see-through (sprite->mpFade) for MP_GHOST_FRAMES, then goes.
+#define MP_GHOST_FRAMES 20
+static void SpriteCB_MpGhostFade(struct Sprite *sprite)
+{
+    if (++sprite->data[1] < MP_GHOST_FRAMES)
+    {
+        sprite->mpFade = 16 - (sprite->data[1] * 16 + MP_GHOST_FRAMES - 1) / MP_GHOST_FRAMES;
+        if (sprite->mpFade == 0)
+            sprite->mpFade = 1;
+        return;
+    }
+    {
+        struct SpriteFrameImage image;
+        image.size = sprite->data[0];
+        sprite->images = &image;
+        DestroySprite(sprite);
+    }
+}
+
+static void RemoveObjectEventFading(struct ObjectEvent *objectEvent)
+{
+    bool8 S3D_Active(void);
+    struct Sprite *sprite = &gSprites[objectEvent->spriteId];
+    if (!S3D_Active() || gMain.callback2 != CB2_Overworld || objectEvent->invisible || !sprite->inUse || sprite->invisible
+     || objectEvent->isPlayer)
+    {
+        RemoveObjectEvent(objectEvent);
+        return;
+    }
+    {
+        void ScriptMovement_ForgetObject(u8 objEventId);   // (script_movement.c)
+        ScriptMovement_ForgetObject(objectEvent - gObjectEvents);
+    }
+    objectEvent->active = FALSE;
+    sprite->data[0] = GetObjectEventGraphicsInfo(OBJ_GFX_ID(objectEvent))->size;
+    sprite->data[1] = 0;
+    sprite->mpFade = 15;
+    sprite->animPaused = TRUE;
+    sprite->callback = SpriteCB_MpGhostFade;
+    MPNet_Log("field: person %d fades out", objectEvent->localId);
+}
+
 void RemoveObjectEventByLocalIdAndMap(u8 localId, u8 mapNum, u8 mapGroup)
 {
     u8 objectEventId;
     if (!TryGetObjectEventIdByLocalIdAndMap(localId, mapNum, mapGroup, &objectEventId))
     {
         FlagSet(GetObjectEventFlagIdByObjectEventId(objectEventId));
-        RemoveObjectEvent(&gObjectEvents[objectEventId]);
+        RemoveObjectEventFading(&gObjectEvents[objectEventId]);
     }
 }
 
@@ -1752,7 +1796,7 @@ static void RemoveObjectEventIfOutsideView(struct ObjectEvent *objectEvent)
     if (objectEvent->initialCoords.x >= left && objectEvent->initialCoords.x <= right
      && objectEvent->initialCoords.y >= top && objectEvent->initialCoords.y <= bottom)
         return;
-    RemoveObjectEvent(objectEvent);
+    RemoveObjectEventFading(objectEvent);   // Moemon Kai: (in a SINNOH 3D scene it fades out)
 }
 
 void SpawnObjectEventsOnReturnToField(s16 x, s16 y)

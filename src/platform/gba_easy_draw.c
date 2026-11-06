@@ -502,6 +502,8 @@ static bool sUiSprite;
 static u8 sUiPix[4][DISPLAY_WIDTH];
 extern u8 gMpOamShadowLive[256];
 static bool sShadowSprite;
+static u8 sFadeSprite;   // Moemon Kai: a see-through sprite's sixteenths (sprite->mpFade), 0: solid
+extern u8 gMpOamFadeLive[256];
 // Moemon Kai: entries that give way to another (sprite->mpUnder, sprite.c gMpOamUnderLive): a follower raised to a
 // higher priority to stand above tall grass, walking behind its Trainer, never covers them. Its pixels on this line are
 // remembered (sUnderPix: its entry + 1) and the Trainer's pixels, drawn after it, take them out of its layer.
@@ -533,7 +535,20 @@ static void ShadowKeepForFrame(void)
 
 // Moemon Kai: a shadow sprite's pixel (mp_shadow.c): what the backgrounds show there at the sprite's priority and below,
 // darkened (the backdrop if none); sprites drawn after it (everything: shadows come last in the OAM) cover it
+static uint16_t UnderPixel(struct scanlineData *scanline, int prnum, int x);
 static uint16_t ShadowPixel(struct scanlineData *scanline, int prnum, int x)
+{
+    uint16_t c = UnderPixel(scanline, prnum, x);
+    // a quarter darker (1.63.8: the user asked for half the 1.63.4 shadow's strength), fading out with the screen
+    // (sShadowKeep: 48 a quarter off, 64 none)
+    {
+        unsigned int r = c & 0x1F, g = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;
+        return (r * sShadowKeep >> 6) | ((g * sShadowKeep >> 6) << 5) | ((b * sShadowKeep >> 6) << 10);
+    }
+}
+
+// What the backgrounds show at x at priority PRNUM and below (the backdrop if none): under a shadow or a see-through sprite
+static uint16_t UnderPixel(struct scanlineData *scanline, int prnum, int x)
 {
     unsigned int p, k;
     uint16_t c = *(uint16_t *)PLTT;
@@ -548,12 +563,7 @@ static uint16_t ShadowPixel(struct scanlineData *scanline, int prnum, int x)
             }
         }
 found:
-    // a quarter darker (1.63.8: the user asked for half the 1.63.4 shadow's strength), fading out with the screen
-    // (sShadowKeep: 48 a quarter off, 64 none)
-    {
-        unsigned int r = c & 0x1F, g = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;
-        return (r * sShadowKeep >> 6) | ((g * sShadowKeep >> 6) << 5) | ((b * sShadowKeep >> 6) << 10);
-    }
+    return c;
 }
 
 // One sprite pixel of `color` at global_x on this line: battle weather, the dark cave's window, OBJ windows, blending,
@@ -635,6 +645,15 @@ static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct 
                     sUnderPix[global_x] = 0;
                 }
             }
+        }
+        // Moemon Kai: a see-through sprite: its sixteenths over what the backgrounds show there
+        if (sFadeSprite)
+        {
+            uint16_t u = UnderPixel(scanline, oam->priority, global_x);
+            unsigned int a = sFadeSprite, k = 16 - a;
+            color = ((((color & 0x1F) * a + (u & 0x1F) * k) >> 4) & 0x1F)
+                  | (((((color >> 5) & 0x1F) * a + ((u >> 5) & 0x1F) * k) >> 4) << 5)
+                  | (((((color >> 10) & 0x1F) * a + ((u >> 10) & 0x1F) * k) >> 4) << 10);
         }
         //write pixel to pixel framebuffer
         pixels[global_x] = color | (1 << 15);
@@ -902,6 +921,7 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
         sFxSprite = gMpFxLayer != NULL && gMpOamFx[i];   // Moemon Co-op: a battle animation's effect sprite
         sUiSprite = gMpUiLayer != NULL && gMpOamUi[i];   // Moemon Kai: the battle's UI (MODERN keeps off it)
         sShadowSprite = gMpOamShadowLive[i];   // Moemon Kai: a shadow (mp_shadow.c; as LoadOam copied the OAM)
+        sFadeSprite = gMpOamFadeLive[i];       // Moemon Kai: see-through (a SINNOH person fading away)
         if (oam->shape == MP_BIG_OAM_SHAPE)   // Moemon PC: a picture of any size (mp_bigsprite.h)
         {
             DrawBigSprite(scanline, oam, vcount, windowsEnabled, blendMode);

@@ -3424,6 +3424,27 @@ Windows each one could hold a frame. Now:
   never inside the field's frame (1.131.0 crashed on Windows: the rest of that frame moved MAUVILLE's people with the
   save swapped, MovementType_WalkBackAndForth_Step3; found from the release exe's symbols). Test title_from_options.
 
+## SINNOH's BICYCLE, fading people, ROUTE 211's bridge (1.132.0)
+
+- The BICYCLE in SINNOH is Platinum's (src/sinnoh/s3d_bike.c, the user 2026-11-06: "Return the unique Sinnoh
+  Bicycle's functionality to normal"): bike.c MovePlayerOnBike asks Sinnoh_MovePlayerOnBike first; on a SINNOH map
+  with the MACH flag (the BICYCLE rides as the MACH BIKE elsewhere) B switches 3rd / 4th gear (SE_CLICK; 4th to start),
+  3rd = PlayerWalkFast, 4th = PlayerWalkFaster, no glide. S3D_BikeSlopeBlocked lets a bike up a muddy slope in 4th
+  only. Platinum's bike bridges (0x76-0x79 / 0x7A-0x7D) are the pack's 0x54 north-south / 0x55 east-west and its
+  ramps (0xD7 / 0xD8) 0x56 / 0x57 (tools/sinnoh/build_pack.py): Sinnoh_BikeTileBlocked (from S3D_Gyms_StepBlocked)
+  keeps feet off a bridge and steps along it only, a ramp ahead in its direction is a PlayerJumpLedge, and
+  item_use.c refuses to get off on a bridge. `mp layers beh B` lists a map's tiles of a behavior. Test sinnoh_bicycle
+  (ROUTE 210 NORTH's bridge at x 21).
+- People leaving a SINNOH 3D scene fade out (event_object_movement.c RemoveObjectEventFading: a script's
+  removeobject and RemoveObjectEventIfOutsideView): the sprite stays a ghost for 20 frames, placed as before
+  (sprite.c places by x / y, not by the object), drawn see-through by sprite->mpFade (1-15 sixteenths; sprite.c
+  gMpOamFade -> gba_easy_draw.c blends over UnderPixel, the backgrounds there), then goes. `mp removeobj ID`; test
+  sinnoh_fade_out.
+- ROUTE 211 WEST's high bridge (row 20-21) over the river bank: at (15, 21) Platinum's BDHC has only the deck, 64
+  above the bank, so a step south from under it climbed on. S3D_Gyms_StepBlocked now blocks the player's step onto a
+  deck tile (0x1D) more than 12 above (the other half of the deck's drop rule). `mp layers [X0 Y0 X1 Y1]` prints
+  tiles with two grounds / a height grid. Test sinnoh_bridge_under.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

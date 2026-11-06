@@ -1,0 +1,20 @@
+pressuntil A field 5000
+wait 30
+press UP 16
+wait 20
+mp mountbike 1
+wait 30
+press B 2
+wait 10
+press B 2
+wait 10
+press UP 8
+wait 4
+press UP 8
+wait 20
+mp where
+press LEFT 8
+wait 20
+mp where
+shot bridge
+quit
