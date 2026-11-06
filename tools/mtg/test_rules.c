@@ -920,6 +920,86 @@ static void TestStatics(void)
     }
 }
 
+// the action casting OBJ for its alternative cost (target any), or -1
+static int FindAlt(int obj)
+{
+    const MtgQuery *q;
+    int i;
+    Mtg_RefreshQuery(&sD);
+    q = Mtg_Query(&sD);
+    for (i = 0; i < q->actionCount; i++)
+        if (q->actions[i].kind == MTG_ACT_CAST && q->actions[i].obj == obj && q->actions[i].alt)
+            return i;
+    return -1;
+}
+
+// alternative costs (StaticAbilityAlternativeCost) and the cost parts they use: Sac, Return, ExileFromHand
+static void TestAltCosts(void)
+{
+    MtgAnswer a;
+    int crash, mountain, bird, gush, isl1, isl2, cave, bolt, bears, k, n0;
+    printf("alternative costs: crash, gush, cave-in\n");
+
+    Table();   // CRASH: sacrifice a Mountain instead of {2}{R}; one Mountain can't pay the mana
+    mountain = Put(0, "Mountain", MTG_ZONE_BATTLEFIELD);
+    crash = Put(0, "Crash", MTG_ZONE_HAND);
+    bird = Put(1, "Ornithopter", MTG_ZONE_BATTLEFIELD);
+    CHECK(Find(MTG_ACT_CAST, crash, -1, 0) < 0 || sD.query.actions[Find(MTG_ACT_CAST, crash, -1, 0)].alt,
+          "no mana cast with one mountain");
+    k = FindAlt(crash);
+    CHECK(k >= 0, "crash may be cast by sacrificing a mountain");
+    if (k >= 0) {
+        memset(&a, 0, sizeof(a));
+        a.action = (uint16_t)k;
+        Answer(&a);
+        CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->forCost == 1, "asked what to sacrifice");
+        ChoosePick(mountain);
+        CHECK(Zone(mountain) == MTG_ZONE_GRAVEYARD && !sD.objs[mountain].tapped, "the mountain sacrificed");
+        PassBoth();
+        CHECK(Zone(bird) == MTG_ZONE_GRAVEYARD, "the ornithopter destroyed (%d)", Zone(bird));
+    }
+
+    Table();   // GUSH: return two Islands instead of {4}{U}; draws two
+    isl1 = Put(0, "Island", MTG_ZONE_BATTLEFIELD);
+    isl2 = Put(0, "Island", MTG_ZONE_BATTLEFIELD);
+    gush = Put(0, "Gush", MTG_ZONE_HAND);
+    Put(0, "Grizzly Bears", MTG_ZONE_LIBRARY);
+    Put(0, "Grizzly Bears", MTG_ZONE_LIBRARY);
+    k = FindAlt(gush);
+    CHECK(k >= 0, "gush may be cast by returning two islands");
+    if (k >= 0) {
+        memset(&a, 0, sizeof(a));
+        a.action = (uint16_t)k;
+        Answer(&a);
+        CHECK(Mtg_Query(&sD)->forCost == 4, "asked what to return (%d)", Mtg_Query(&sD)->forCost);
+        ChoosePick(isl1);
+        ChoosePick(isl2);
+        CHECK(Zone(isl1) == MTG_ZONE_HAND && Zone(isl2) == MTG_ZONE_HAND, "both islands back in the hand");
+        n0 = HandCount(0);
+        PassBoth();
+        CHECK(HandCount(0) == n0 + 2, "drew two (%d -> %d)", n0, HandCount(0));
+    }
+
+    Table();   // CAVE-IN: exile a red card from the hand instead of {3}{R}{R}; 2 damage to each creature and player
+    cave = Put(0, "Cave-In", MTG_ZONE_HAND);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK(FindAlt(cave) < 0, "no other red card: no free cast");
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    k = FindAlt(cave);
+    CHECK(k >= 0, "a bolt to exile: cave-in may be cast");
+    if (k >= 0) {
+        memset(&a, 0, sizeof(a));
+        a.action = (uint16_t)k;
+        Answer(&a);
+        CHECK(Mtg_Query(&sD)->forCost == 3, "asked what to exile (%d)", Mtg_Query(&sD)->forCost);
+        ChoosePick(bolt);
+        CHECK(Zone(bolt) == MTG_ZONE_EXILE, "the bolt exiled");
+        PassBoth();
+        CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && sD.players[0].life == 18 && sD.players[1].life == 18,
+              "2 to everything (bears %d, life %d / %d)", Zone(bears), sD.players[0].life, sD.players[1].life);
+    }
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1247,6 +1327,7 @@ int main(int argc, char **argv)
     TestCycling();
     TestTokens();
     TestAmounts();
+    TestAltCosts();
     TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

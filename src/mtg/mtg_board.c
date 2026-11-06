@@ -1292,6 +1292,10 @@ static const char *ChooseText(void)
 static const char *PickVerb(void)
 {
     const MtgQuery *q = &B.duel.query;
+    if (q->forCost == 4)
+        return "Return";   // (a cost: back to its owner's hand)
+    if (q->forCost == 5)
+        return "Tap";
     return q->forCost == 1 || (q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_SACRIFICE) ? "Sacrifice"
                                                                                                       : "Choose";
 }
@@ -1579,7 +1583,8 @@ void MtgBoard_Draw(void)
     }
     case MODE_BLOCK_PICK: Prompt("Block which attacker? (lit)  {A} OK  {B}", 0); break;
     case MODE_DISCARD:
-        Prompt(B.duel.query.kind == MTG_Q_CHOOSE && B.duel.query.forCost == 2 ? "Discard a card to pay the cost.  {A}"
+        Prompt(B.duel.query.kind == MTG_Q_CHOOSE && B.duel.query.forCost == 3 ? "Exile a card to pay the cost.  {A}"
+               : B.duel.query.kind == MTG_Q_CHOOSE && B.duel.query.forCost == 2 ? "Discard a card to pay the cost.  {A}"
                : B.duel.query.kind == MTG_Q_CHOOSE ? "Discard a card of your choice.  {A}"
                                                  : "Too many cards in your hand: discard one.  {A}", 1);
         break;
@@ -2226,11 +2231,20 @@ static int GatherMenu(int focused)
             continue;
         for (k = 0; k < n; k++) {
             const MtgAction *b = &q->actions[B.menu[k]];
-            if (b->kind == a->kind && b->ability == a->ability && (b->obj == a->obj || IsLand(focused)))
+            if (b->kind == a->kind && b->ability == a->ability && b->alt == a->alt && (b->obj == a->obj || IsLand(focused)))
                 dup = 1;
         }
         if (!dup && n < 8)
             B.menu[n++] = (uint16_t)i;
+    }
+    {   // the ordinary casts first, then the ones for an alternative cost (stable: each keeps its order)
+        uint16_t sorted[8];
+        int m = 0, pass;
+        for (pass = 0; pass < 2; pass++)
+            for (k = 0; k < n; k++)
+                if (q->actions[B.menu[k]].alt == pass)
+                    sorted[m++] = B.menu[k];
+        memcpy(B.menu, sorted, sizeof(uint16_t) * (size_t)n);
     }
     return n;
 }
@@ -2240,6 +2254,11 @@ static void MenuLabel(int k, char *out, unsigned cap)
     const MtgAction *a = &B.duel.query.actions[B.menu[k]];
     if (a->kind == MTG_ACT_LAND)
         snprintf(out, cap, "PLAY THE LAND");
+    else if (a->kind == MTG_ACT_CAST && a->alt) {   // its alternative cost, in the card's own words ("SACRIFICE A MOUNTAIN")
+        const MtgCardDef *c = Mtg_Card(B.duel.objs[a->obj].def);
+        snprintf(out, cap, "CAST: %s", gMtgAltCosts[c->altCost - 1].label);
+        TcgUi_FitText(out, 206, TF_SMALL);
+    }
     else if (a->kind == MTG_ACT_CAST && a->ability != 0xFFFF && gMtgAbilities[a->ability].charmOf != 0xFFFF) {
         const char *desc = Mtg_Param(&gMtgAbilities[a->ability], "SpellDescription");   // a mode of a "choose one"
         char text[96];

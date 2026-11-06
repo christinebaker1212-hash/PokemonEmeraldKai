@@ -42,6 +42,11 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-06: 1.134.0)
+- Alternative costs (S:Mode$ AlternativeCost, ValidSA$ Spell.Self) and the cost parts ExileFromHand / Return /
+  tapXType: COOP_NOTES "MAGIC's alternative costs". 1887 of 5408. Still out: the CheckSVar Legates (Cost$ 0 when an
+  opponent controls ...), Reveal / GainLife alt costs, alt costs beside an additional cost.
+
 ## Status (2026-11-06: 1.133.0)
 - Static Condition$ (Threshold, PlayerTurn, NotPlayerTurn), Secondary$, CantAttack's UnlessDefender$ (controls<Valid>,
   "!" negated, hasFewer<Creatures|Lands>InPlayThanYou): COOP_NOTES "MAGIC's Threshold and picky attackers". 1850 of

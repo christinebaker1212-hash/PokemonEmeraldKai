@@ -8,6 +8,7 @@
 // condition on that card: "as long as it's untapped"). IsPresent$ (with PresentCompare$ GE / EQ / LE n, GE1 by default):
 // only while the battlefield has that many of those. CantBlock / CantAttack (ValidCard$) and CantBlockBy (ValidAttacker$
 // can't be blocked by ValidBlocker$) forbid what they say. Anything else a static ability says keeps the card out for now.
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "mtg_internal.h"
@@ -116,9 +117,67 @@ static char *Kept(size_t len)
 
 // S: line text -> statics of card c ("Mode$ CantAttack,CantBlock": one of each); a part it doesn't translate makes the
 // card unsupported
+MtgAltCost *gMtgAltCosts;
+static int sAltCount, sAltCap;
+
+// "S:Mode$ AlternativeCost | ValidSA$ Spell.Self | EffectZone$ All | Cost$ ... [| IsPresent$ ...] | Description$ ...":
+// the spell may be cast paying that instead of its mana cost (StaticAbilityAlternativeCost). Costs without mana only.
+static void ParseAlt(MtgCardDef *c, char *text)
+{
+    static const char *const sKnown[] = {"Mode", "ValidSA", "EffectZone", "Cost", "IsPresent", "Description"};
+    MtgAltCost alt;
+    int first, count, i;
+    const char *s, *desc;
+    memset(&alt, 0, sizeof(alt));
+    count = Mtg_ParseParams(text, &first);
+    for (i = 0; i < count; i++) {
+        unsigned k;
+        for (k = 0; k < sizeof(sKnown) / sizeof(sKnown[0]); k++)
+            if (strcmp(gMtgParams[first + i].key, sKnown[k]) == 0)
+                break;
+        if (k == sizeof(sKnown) / sizeof(sKnown[0]))
+            goto unknown;
+    }
+    if (!(s = ParamOf(first, count, "ValidSA")) || strcmp(s, "Spell.Self") != 0 || c->altCost
+        || !(s = ParamOf(first, count, "EffectZone")) || strcmp(s, "All") != 0
+        || !(s = ParamOf(first, count, "Cost")) || !Mtg_ParseCost(s, &alt.cost)
+        || Mtg_ManaCostTotal(&alt.cost.mana) || alt.cost.mana.x || alt.cost.tap || alt.cost.sacSelf || alt.cost.exileSelf
+        || alt.cost.returnSelf || alt.cost.discardSelf || alt.cost.discardRandom)
+        goto unknown;
+    if ((alt.present = ParamOf(first, count, "IsPresent")) && !Mtg_ValidSpecKnown(alt.present))
+        goto unknown;
+    // the menu's words: what the Description says the player may do ("you may sacrifice a Mountain rather than ...")
+    desc = ParamOf(first, count, "Description");
+    {
+        const char *from = desc ? strstr(desc, "may ") : NULL, *to = from ? strstr(from, " rather than") : NULL;
+        size_t n = 0;
+        if (from && to && to > from + 4) {
+            from += 4;
+            for (; from < to && n + 1 < sizeof(alt.label); from++)
+                alt.label[n++] = (*from >= 'a' && *from <= 'z') ? (char)(*from - 32) : *from;
+        }
+        alt.label[n] = 0;
+        if (!n)
+            snprintf(alt.label, sizeof(alt.label), "PAY ITS OTHER COST");
+    }
+    if (sAltCount + 1 > sAltCap) {
+        sAltCap = sAltCap ? sAltCap * 2 : 64;
+        gMtgAltCosts = realloc(gMtgAltCosts, (size_t)sAltCap * sizeof(MtgAltCost));
+    }
+    gMtgAltCosts[sAltCount++] = alt;
+    c->altCost = (uint16_t)sAltCount;
+    return;
+unknown:
+    Mtg_Unsupported(c, "static ability");
+}
+
 void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text)
 {
     char *mode = strstr(text, "Mode$"), *comma, *end;
+    if (mode && strncmp(mode + 5 + strspn(mode + 5, " "), "AlternativeCost", 15) == 0) {
+        ParseAlt(c, text);
+        return;
+    }
     if (mode && (end = strchr(mode, '|')) != NULL && (comma = strchr(mode, ',')) != NULL && comma < end) {
         size_t len = strlen(text);
         char *a = Kept(len + 1), *b = Kept(len + 1);

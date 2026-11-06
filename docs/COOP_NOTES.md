@@ -3489,6 +3489,22 @@ moved, or sat in another tab, nothing matched. mp_stadium_ui.c REGISTER: START (
 the cursor on the TEAM bar (U.onTeam / U.teamSlot): A takes that slot off, LEFT / RIGHT move, UP goes back; START there
 asks (U.confirm) and clears all six. Test stadium_clear.
 
+## MAGIC's alternative costs (1.134.0)
+
+- Parsing (mtg_static.c ParseAlt): "S:Mode$ AlternativeCost | ValidSA$ Spell.Self | EffectZone$ All | Cost$ ... [|
+  IsPresent$ ...] | Description$ ..." into gMtgAltCosts (card's altCost = index + 1): no mana, no {T} / self parts; the
+  menu's words come from the Description between "may " and " rather than" (CAST: SACRIFICE A MOUNTAIN).
+- Cost parts (mtg_script.c Mtg_ParseCost, for abilities too): ExileFromHand<n/Type>, Return<n/Type> (own permanents
+  to the hand), tapXType<n/Type> (untapped own permanents). Mtg_CostCandidates takes a kind (MTG_COSTK_*: 0 discard,
+  1 sacrifice, 2 exile from the hand, 3 return, 4 tap); MtgDuel costExile / costReturn / costTap and costAlt (the cost
+  being paid is the card's alt one: CostNow); query.forCost 3 exile, 4 return, 5 tap (board: the hand's discard UI
+  with "Exile a card to pay the cost.", PickVerb "Return" / "Tap").
+- Casting (mtg_game.c AddAltCasts from BuildPriority): its own MTG_ACT_CAST actions with alt = 1, while IsPresent$
+  holds and Mtg_CostPayable; never beside an additional cost of the spell's own; X spells excluded. DoAction moves it to
+  the stack without mana, then PayCost(alt). Board: GatherMenu keeps alt apart and lists it after CAST. AI: the alt
+  cast is priced by CostPriceOf (+1), so the mana cast wins when both exist.
+- Tests: test_rules.c TestAltCosts (CRASH, GUSH, CAVE-IN), scenario mtg_altcost (the menu, the pick).
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

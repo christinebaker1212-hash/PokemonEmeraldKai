@@ -1,0 +1,6 @@
+# MAGIC's alternative costs on the table: CRASH with three Mountains offers CAST and "CAST: SACRIFICE A MOUNTAIN" (its words); the second
+# targets the Ornithopter, asks which Mountain to sacrifice, and destroys it. Shots alt_menu, alt_target, alt_pick, alt_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: your move: a pick" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Crash to focus")

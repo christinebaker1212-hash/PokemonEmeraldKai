@@ -471,6 +471,7 @@ static void AddAction(MtgQuery *q, int kind, int obj, int ability, int x, MtgTar
     a->ability = (uint16_t)ability;
     a->x = (int16_t)x;
     a->target = t;
+    a->alt = 0;
 }
 
 static void AddWithTargets(const MtgDuel *d, MtgQuery *q, int kind, int obj, int ability, int x, int player)
@@ -521,6 +522,39 @@ static int SorceryTiming(const MtgDuel *d, int player)
         && (d->step == MTG_STEP_MAIN1 || d->step == MTG_STEP_MAIN2);
 }
 
+static int MainAbility(const MtgCardDef *c);
+
+// a spell's casts for its alternative cost (StaticAbilityAlternativeCost): while its IsPresent$ holds and the cost can
+// be paid; never with an additional cost of its own beside it (none in the pool does both)
+static void AddAltCasts(const MtgDuel *d, MtgQuery *q, int obj, int p)
+{
+    const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+    const MtgAltCost *alt = &gMtgAltCosts[c->altCost - 1];
+    int ability = MainAbility(c), before = q->actionCount, k, m;
+    if (alt->present) {
+        int have = 0;
+        for (k = 0; k < d->objCount && !have; k++)
+            have = d->objs[k].zone == MTG_ZONE_BATTLEFIELD && Mtg_ValidObj(d, k, alt->present, obj, p);
+        if (!have)
+            return;
+    }
+    if (!Mtg_CostPayable(d, p, &alt->cost, obj, obj))
+        return;
+    if (ability != 0xFFFF) {
+        const MtgCost *own = &gMtgAbilities[ability].cost;
+        if (own->sacN || own->discardN || own->payLife || own->exileHandN || own->returnN || own->tapTypeN)
+            return;
+    }
+    if (ability != 0xFFFF && gMtgAbilities[ability].api == MTG_API_CHARM) {
+        const MtgAbility *ch = &gMtgAbilities[ability];
+        for (k = 0; k < ch->choiceCount; k++)
+            AddWithTargets(d, q, MTG_ACT_CAST, obj, ch->choices[k], 0, p);
+    } else
+        AddWithTargets(d, q, MTG_ACT_CAST, obj, ability, 0, p);
+    for (m = before; m < q->actionCount; m++)
+        q->actions[m].alt = 1;
+}
+
 static void BuildPriority(MtgDuel *d)
 {
     MtgQuery *q = &d->query;
@@ -553,6 +587,8 @@ static void BuildPriority(MtgDuel *d)
             }
             if (!(c->types & MTG_T_INSTANT) && !(c->keywords & MTG_KW_BIT(MTG_KW_FLASH)) && !SorceryTiming(d, p))
                 continue;
+            if (c->altCost && !c->cost.x)   // its alternative cost too ("rather than pay this spell's mana cost")
+                AddAltCasts(d, q, i, p);
             Mtg_SpellCost(d, p, i, &cost);   // (Raise / ReduceCost statics)
             if (cost.x) {   // (X: the most that can be paid; a player's own pick is the UI's to come)
                 x = Mtg_MaxX(d, p, &cost, MTG_NO_OBJ);
@@ -601,18 +637,25 @@ static void BuildPriority(MtgDuel *d)
     }
 }
 
-// ---- costs beyond mana and {T} (CostSacrifice, CostDiscard, CostPayLife, CostExile, CostReturn)
-// what may pay a Sac (sac 1) or Discard (sac 0) part: the player's permanents / hand cards of its spec; casting = the
-// card being cast (not in the hand any more). Returns how many (out may be NULL)
-int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int sac, int source, uint16_t *out)
+// ---- costs beyond mana and {T} (CostSacrifice, CostDiscard, CostPayLife, CostExile, CostReturn, CostTapType)
+// what may pay a part of KIND (MTG_COSTK_*): the player's permanents (sacrifice, return, tap: untapped ones) or hand
+// cards (discard, exile) of its spec; a card being cast is on the stack by then. Returns how many (out may be NULL)
+int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int kind, int source, uint16_t *out)
 {
-    int i, n = 0;
+    int i, n = 0, hand = kind == MTG_COSTK_DISCARD || kind == MTG_COSTK_EXILE_HAND;
+    const char *spec = kind == MTG_COSTK_SAC ? c->sacSpec : kind == MTG_COSTK_DISCARD ? c->discardSpec
+                     : kind == MTG_COSTK_EXILE_HAND ? c->exileHandSpec : kind == MTG_COSTK_RETURN ? c->returnSpec
+                     : c->tapTypeSpec;
+    if (!spec)
+        return 0;
     for (i = 0; i < d->objCount; i++) {
         const MtgObj *o = &d->objs[i];
-        if (sac ? (o->zone != MTG_ZONE_BATTLEFIELD || o->controller != player)
-                : (o->zone != MTG_ZONE_HAND || o->owner != player))
+        if (hand ? (o->zone != MTG_ZONE_HAND || o->owner != player)
+                 : (o->zone != MTG_ZONE_BATTLEFIELD || o->controller != player))
             continue;
-        if (!Mtg_ValidObj(d, i, sac ? c->sacSpec : c->discardSpec, source, player))
+        if (kind == MTG_COSTK_TAP && o->tapped)
+            continue;
+        if (!Mtg_ValidObj(d, i, spec, source, player))
             continue;
         if (out && n < MTG_MAX_COMBAT)
             out[n] = (uint16_t)i;
@@ -623,44 +666,63 @@ int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int sac, 
 
 int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, int casting)
 {
-    int n;
+    static const uint8_t sKinds[] = {MTG_COSTK_SAC, MTG_COSTK_DISCARD, MTG_COSTK_EXILE_HAND, MTG_COSTK_RETURN, MTG_COSTK_TAP};
+    unsigned k;
     if (c->payLife && d->players[player].life < c->payLife)
         return 0;
-    if (c->sacN && Mtg_CostCandidates(d, player, c, 1, source, NULL) < c->sacN)
-        return 0;
-    if (c->discardN) {
-        n = Mtg_CostCandidates(d, player, c, 0, source, NULL);
-        if (casting != MTG_NO_OBJ && d->objs[casting].zone == MTG_ZONE_HAND
-            && Mtg_ValidObj(d, casting, c->discardSpec, source, player))
+    for (k = 0; k < sizeof(sKinds); k++) {
+        int kind = sKinds[k], need = kind == MTG_COSTK_SAC ? c->sacN : kind == MTG_COSTK_DISCARD ? (c->discardN)
+                 : kind == MTG_COSTK_EXILE_HAND ? c->exileHandN : kind == MTG_COSTK_RETURN ? c->returnN : c->tapTypeN, n;
+        const char *spec = kind == MTG_COSTK_DISCARD ? c->discardSpec : c->exileHandSpec;
+        if (!need)
+            continue;
+        n = Mtg_CostCandidates(d, player, c, kind, source, NULL);
+        if ((kind == MTG_COSTK_DISCARD || kind == MTG_COSTK_EXILE_HAND) && casting != MTG_NO_OBJ
+            && d->objs[casting].zone == MTG_ZONE_HAND && Mtg_ValidObj(d, casting, spec, source, player))
             n--;   // (the card being cast pays nothing: it's on the stack by then)
-        if (n < c->discardN)
+        if (n < need)
             return 0;
     }
     return 1;
 }
 
-// the next pick a cost asks for (1), or nothing left (0)
+// the cost being paid now (an ability's, or a spell's alternative one)
+static const MtgCost *CostNow(const MtgDuel *d)
+{
+    if (d->costAlt)
+        return &gMtgAltCosts[Mtg_Card(d->objs[d->costSource].def)->altCost - 1].cost;
+    return &gMtgAbilities[d->costAbility].cost;
+}
+
+// the next pick a cost asks for (1), or nothing left (0): sacrifices, discards, exiles, returns, taps
 static int AskCost(MtgDuel *d)
 {
-    const MtgAbility *ab;
     MtgQuery *q = &d->query;
-    int sac;
-    if (!d->costSac && !d->costDiscard)
+    int kind;
+    if (d->costSac)
+        kind = MTG_COSTK_SAC;
+    else if (d->costDiscard)
+        kind = MTG_COSTK_DISCARD;
+    else if (d->costExile)
+        kind = MTG_COSTK_EXILE_HAND;
+    else if (d->costReturn)
+        kind = MTG_COSTK_RETURN;
+    else if (d->costTap)
+        kind = MTG_COSTK_TAP;
+    else
         return 0;
-    ab = &gMtgAbilities[d->costAbility];
-    sac = d->costSac != 0;
     memset(q, 0, sizeof(*q));
     q->kind = MTG_Q_CHOOSE;
     q->choice = MTG_CHOICE_PICK;
     q->player = d->costPlayer;
     q->source = d->costSource;
     q->ability = d->costAbility;
-    q->forCost = sac ? 1 : 2;
-    q->candidateCount = (uint8_t)Mtg_CostCandidates(d, d->costPlayer, &ab->cost, sac, d->costSource, q->candidates);
+    q->forCost = (uint8_t)(kind == MTG_COSTK_SAC ? 1 : kind == MTG_COSTK_DISCARD ? 2 : kind + 1);
+    q->candidateCount = (uint8_t)Mtg_CostCandidates(d, d->costPlayer, CostNow(d), kind, d->costSource, q->candidates);
     if (q->candidateCount > MTG_MAX_COMBAT)
         q->candidateCount = MTG_MAX_COMBAT;
     if (!q->candidateCount) {   // (nothing left to pay with: checked before, so never; the rest is waived)
-        d->costSac = d->costDiscard = 0;
+        d->costSac = d->costDiscard = d->costExile = d->costReturn = d->costTap = 0;
         return 0;
     }
     return 1;
@@ -676,13 +738,21 @@ static void PayCostPick(MtgDuel *d, int obj)
     } else if (d->costDiscard) {
         Mtg_MoveTo(d, obj, MTG_ZONE_GRAVEYARD);
         d->costDiscard--;
+    } else if (d->costExile) {
+        Mtg_MoveTo(d, obj, MTG_ZONE_EXILE);
+        d->costExile--;
+    } else if (d->costReturn) {
+        Mtg_MoveTo(d, obj, MTG_ZONE_HAND);
+        d->costReturn--;
+    } else if (d->costTap) {
+        Mtg_Tap(d, obj, 1);
+        d->costTap--;
     }
 }
 
 // the costs paid at once (life, a random discard, the source exiled or returned); the picks are set to be asked
-static void PayOtherCosts(MtgDuel *d, int p, const MtgAbility *ab, int source)
+static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source, int alt)
 {
-    const MtgCost *c = &ab->cost;
     if (c->payLife) {
         d->players[p].life -= c->payLife;
         Mtg_Event(d, MTG_EV_LIFE, p, -c->payLife, d->players[p].life);
@@ -695,7 +765,7 @@ static void PayOtherCosts(MtgDuel *d, int p, const MtgAbility *ab, int source)
         int k;
         for (k = 0; k < c->discardN; k++) {
             uint16_t hand[MTG_MAX_COMBAT];
-            int n = Mtg_CostCandidates(d, p, c, 0, source, hand);
+            int n = Mtg_CostCandidates(d, p, c, MTG_COSTK_DISCARD, source, hand);
             if (n > MTG_MAX_COMBAT)
                 n = MTG_MAX_COMBAT;
             if (n)
@@ -704,9 +774,18 @@ static void PayOtherCosts(MtgDuel *d, int p, const MtgAbility *ab, int source)
     }
     d->costSac = c->sacN;
     d->costDiscard = c->discardRandom ? 0 : c->discardN;
+    d->costExile = c->exileHandN;
+    d->costReturn = c->returnN;
+    d->costTap = c->tapTypeN;
     d->costPlayer = (uint8_t)p;
     d->costSource = (uint16_t)source;
-    d->costAbility = (uint16_t)(ab - gMtgAbilities);
+    d->costAbility = (uint16_t)ability;
+    d->costAlt = (uint8_t)alt;
+}
+
+static void PayOtherCosts(MtgDuel *d, int p, const MtgAbility *ab, int source)
+{
+    PayCost(d, p, &ab->cost, (int)(ab - gMtgAbilities), source, 0);
 }
 
 static void DoAction(MtgDuel *d, const MtgAction *a)
@@ -721,7 +800,9 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
     }
     if (d->stackCount >= MTG_MAX_STACK)
         return;
-    if (a->kind == MTG_ACT_CAST) {
+    if (a->kind == MTG_ACT_CAST && a->alt) {   // (its alternative cost instead of its mana: paid below)
+        Mtg_MoveTo(d, a->obj, MTG_ZONE_STACK);
+    } else if (a->kind == MTG_ACT_CAST) {
         MtgManaCost cost;
         Mtg_SpellCost(d, p, a->obj, &cost);
         Mtg_Pay(d, p, &cost, a->x, MTG_NO_OBJ);
@@ -748,7 +829,10 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
         Mtg_MoveTo(d, a->obj, MTG_ZONE_GRAVEYARD);   // (the ability keeps its source's last known state; Cycling's discard)
     if (!e->isSpell && gMtgAbilities[a->ability].fromHand && gMtgAbilities[a->ability].cost.discardSelf)
         TrigEvent(d, MTG_TRIG_CYCLED, a->obj, MTG_NO_OBJ, p);   // ("when you cycle ...": TriggerCycled)
-    if (a->ability != 0xFFFF)
+    if (a->kind == MTG_ACT_CAST && a->alt) {
+        const MtgAltCost *alt = &gMtgAltCosts[Mtg_Card(d->objs[a->obj].def)->altCost - 1];
+        PayCost(d, p, &alt->cost, a->ability, a->obj, 1);
+    } else if (a->ability != 0xFFFF)
         PayOtherCosts(d, p, &gMtgAbilities[a->ability], a->obj);
 }
 

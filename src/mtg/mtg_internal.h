@@ -46,7 +46,20 @@ typedef struct {
     uint8_t sacN, discardN, discardRandom, payLife;
     uint8_t discardSelf;                    // Discard<1/CARDNAME>: Cycling's (the card itself, from the hand)
     const char *sacSpec, *discardSpec;   // Valid specs ("Creature", "Land", "Goblin", "Card")
+    uint8_t exileHandN, returnN, tapTypeN;  // ExileFromHand<n/Type>, Return<n/Type> (own permanents), tapXType<n/Type>
+    const char *exileHandSpec, *returnSpec, *tapTypeSpec;
 } MtgCost;
+// what a cost's picks come from (Mtg_CostCandidates): 0 discard (hand), 1 sacrifice, 2 exile from the hand, 3 return
+// to the hand, 4 tap (an untapped permanent)
+enum { MTG_COSTK_DISCARD, MTG_COSTK_SAC, MTG_COSTK_EXILE_HAND, MTG_COSTK_RETURN, MTG_COSTK_TAP };
+int Mtg_ParseCost(const char *s, MtgCost *out);
+// a spell's alternative cost ("you may ... rather than pay this spell's mana cost": StaticAbilityAlternativeCost)
+typedef struct {
+    MtgCost cost;
+    const char *present;   // IsPresent$ (YouCtrl...): only while the battlefield has one
+    char label[40];        // the menu's words ("SACRIFICE A MOUNTAIN"), from its Description$
+} MtgAltCost;
+extern MtgAltCost *gMtgAltCosts;
 int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, int casting);
 int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int sac, int source, uint16_t *out);
 

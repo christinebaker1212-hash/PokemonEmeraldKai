@@ -75,9 +75,14 @@ static int AboutToDie(const MtgDuel *d, int obj, int me)
 }
 
 // what an action's other costs give up: the cheapest permanents to sacrifice, cards from the hand, life
+static int CostPriceOf(const MtgDuel *d, const MtgCost *c, int me, int src);
 static int CostPrice(const MtgDuel *d, const MtgAbility *ab, int me, int src)
 {
-    const MtgCost *c = &ab->cost;
+    return CostPriceOf(d, &ab->cost, me, src);
+}
+
+static int CostPriceOf(const MtgDuel *d, const MtgCost *c, int me, int src)
+{
     int price = 0, k;
     if (c->sacN) {
         uint16_t list[MTG_MAX_COMBAT];
@@ -97,6 +102,7 @@ static int CostPrice(const MtgDuel *d, const MtgAbility *ab, int me, int src)
         }
     }
     price += c->discardN * 4;
+    price += c->exileHandN * 5 + c->returnN * 3 + c->tapTypeN * 2;   // (a card gone for good; a land back; a creature tapped)
     if (c->payLife)
         price += d->players[me].life <= c->payLife + 5 ? 50 : c->payLife;
     return price;
@@ -105,8 +111,12 @@ static int CostPrice(const MtgDuel *d, const MtgAbility *ab, int me, int src)
 static int ScoreAction(const MtgDuel *d, const MtgAction *a, int me)
 {
     int s = ScoreBase(d, a, me);
-    if (s > 0 && s < 500 && a->ability != 0xFFFF) {
+    if (s > 0 && s < 500 && a->ability != 0xFFFF && !a->alt) {
         int price = CostPrice(d, &gMtgAbilities[a->ability], me, a->obj);
+        s = s > price ? s - price : 0;
+    }
+    if (s > 0 && s < 500 && a->alt) {   // the alternative cost's price: the mana cast wins when both are there
+        int price = 1 + CostPriceOf(d, &gMtgAltCosts[Mtg_Card(d->objs[a->obj].def)->altCost - 1].cost, me, a->obj);
         s = s > price ? s - price : 0;
     }
     return s;

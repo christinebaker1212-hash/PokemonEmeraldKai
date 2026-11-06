@@ -58,6 +58,7 @@ typedef struct MtgCardDef {
     const char *enchantSpec;                 // ...: a Valid spec ("Creature", "Land", "Creature.YouCtrl")
     const char *cyclingCost;                 // K:Cycling:COST (Forge's keyword: an ability from the hand)
     uint8_t starPT;                          // PT:*/* (bit 1 power, 2 toughness): a characteristic-defining static sets it
+    uint16_t altCost;                        // S:Mode$ AlternativeCost: gMtgAltCosts index + 1 (0: none; mtg_static.c)
     uint8_t staticCount;
     uint16_t statics[4];                     // indexes into the static table (S: lines; mtg_static.c)
     uint16_t svarFirst, svarCount;           // the card's SVar: lines
@@ -166,6 +167,7 @@ typedef struct {
     uint16_t obj, ability;
     int16_t x;
     MtgTarget target;
+    uint8_t alt;      // MTG_ACT_CAST: cast for its alternative cost instead of its mana cost (S:Mode$ AlternativeCost)
 } MtgAction;
 
 typedef struct {
@@ -182,7 +184,8 @@ typedef struct {
     uint16_t source, ability;
     uint8_t choice;
     MtgManaCost pay;
-    uint8_t forCost;                                 // CHOOSE's PICK for a cost: 1 sacrifice, 2 discard
+    uint8_t forCost;                                 // CHOOSE's PICK for a cost: 1 sacrifice, 2 discard, 3 exile from
+                                                     // the hand, 4 return to the hand, 5 tap (MTG_COSTK_* + 1)
 } MtgQuery;
 
 typedef struct {
@@ -229,6 +232,8 @@ typedef struct MtgDuel {
     // query.forCost set, before anyone gets priority
     uint8_t costSac, costDiscard, costPlayer;
     uint16_t costSource, costAbility;
+    uint8_t costExile, costReturn, costTap;          // ... cards to exile from the hand, permanents to return, to tap
+    uint8_t costAlt;                                 // ... the cost is the spell's alternative one (its card's altCost)
     MtgQuery query;
     uint32_t eventCount;                             // every event so far (the ring keeps the last MTG_EVENT_RING)
     MtgEvent events[MTG_EVENT_RING];

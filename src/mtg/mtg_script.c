@@ -313,7 +313,7 @@ static int CostPart(const char *tok, const char *name, int *n, const char **spec
 }
 
 // Cost.java's text: "T", "2 R", "1 T", "T Sac<1/CARDNAME>", "1 Sac<1/Creature>", "Discard<1/Card>", "PayLife<2>"
-static int ParseCost(const char *s, MtgCost *out)
+int Mtg_ParseCost(const char *s, MtgCost *out)
 {
     char buf[160], mana[96] = "", *tok, *save, *open = NULL;
     memset(out, 0, sizeof(*out));
@@ -369,6 +369,19 @@ static int ParseCost(const char *s, MtgCost *out)
                 if (!Mtg_ValidSpecKnown(out->discardSpec))
                     return 0;
             }
+        } else if ((r = CostPart(tok, "ExileFromHand", &n, &spec, &specLen)) != 0
+                   || (r = CostPart(tok, "Return", &n, &spec, &specLen)) != 0
+                   || (r = CostPart(tok, "tapXType", &n, &spec, &specLen)) != 0) {
+            // ExileFromHand<n/Type>, Return<n/Type> (permanents its player controls back to the hand), tapXType<n/Type>
+            // (untapped permanents its player controls tapped): CostExile, CostReturn, CostTapType
+            uint8_t *num = tok[0] == 'E' ? &out->exileHandN : tok[0] == 'R' ? &out->returnN : &out->tapTypeN;
+            const char **sp = tok[0] == 'E' ? &out->exileHandSpec : tok[0] == 'R' ? &out->returnSpec : &out->tapTypeSpec;
+            if (r < 0 || !spec || n < 1 || n > 3 || *num)
+                return 0;
+            *num = (uint8_t)n;
+            *sp = KeepSpec(spec, specLen);
+            if (!Mtg_ValidSpecKnown(*sp) || strstr(*sp, "CARDNAME"))
+                return 0;
         } else if (ManaSymbol(tok) >= 0 || strcmp(tok, "X") == 0 || strspn(tok, "0123456789") == strlen(tok)) {
             if (strlen(mana) + strlen(tok) + 2 > sizeof(mana))
                 return 0;
@@ -426,7 +439,7 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         Unsupported(c, gMtgParams[first].value);
         return idx;
     }
-    if (!ParseCost(Mtg_Param(ab, "Cost"), &ab->cost))
+    if (!Mtg_ParseCost(Mtg_Param(ab, "Cost"), &ab->cost))
         Unsupported(c, "cost");
     else if (ab->api == MTG_API_MANA && (ab->cost.sacN || ab->cost.discardN || ab->cost.payLife || ab->cost.exileSelf
                                          || ab->cost.returnSelf))
