@@ -549,9 +549,6 @@ void StadiumCup_Begin(u8 round, u8 cup, u8 tier, u8 options)
               round + 1, options, r->rentalsOnly);
 }
 
-// The rewards, the ribbon and the achievements once a cup is won (mp_stadium_rewards.c)
-void StadiumRewards_CupWon(u8 round, u8 cup, u8 tier, u8 hardness, bool8 first);
-
 static void (*sAfterBattle)(bool8 won);
 
 static void CB2_EndStadiumBattle(void)

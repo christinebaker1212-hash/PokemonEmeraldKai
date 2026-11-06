@@ -1,0 +1,8 @@
+# POKéMON STADIUM's rewards (mp_stadium_rewards.c): the PIKA CUP won with no restrictions (a prize with 3 perfect IVs,
+# the STADIUM RIBBON on the team), won again (money and a RARE CANDY), the POKé CUP's MASTER BALL class with every
+# restriction (a shiny prize with 6 perfect IVs, a MASTER BALL and an ASTRAL BALL, all three ribbons), MEWTWO beaten
+# with rentals only (a shiny MEWTWO); the result screen shows the last prizes; the achievements count it all.
+MODE=1
+TMO=300
+EXPECT_A=("stadium: prizes again" ", 3 perfect IVs" "6 perfect IVs, shiny" "stadium: prize MEWTWO Lv 70, 4 perfect IVs, shiny" "STADIUM LEGEND RIBBON for" "stadium: party 0 ribbons 111" "achievement progress 10 = 1" "stadium rewards done")
+UNEXPECT_A=("crash" "out of memory")

@@ -112,4 +112,27 @@ bool8 StadiumCup_Advance(void);
 bool8 StadiumCup_UseContinue(void);
 void StadiumCup_StartBattle(void (*after)(bool8 won));
 
+// The rewards (src/mp/mp_stadium_rewards.c): what the last cup won gave, for the result screen
+struct StadiumPrize
+{
+    bool8 first;           // the class's first win at this hardness (else money and a RARE CANDY)
+    bool8 shiny;
+    u8 level, perfect;     // the prize POKéMON's level and perfect IVs
+    u16 species;           // SPECIES_NONE: none
+    u32 personality, otId;
+    u8 count;
+    char line[8][40];      // "$40000", "RARE CANDY x8", "STADIUM RIBBON x6"...
+};
+void StadiumRewards_CupWon(u8 round, u8 cup, u8 tier, u8 hardness, bool8 first);
+const struct StadiumPrize *StadiumRewards_Last(void);
+
+// The achievements' progress (mp_achieve.c AK_STADIUM)
+enum
+{
+    STADIUM_ACH_ANY, STADIUM_ACH_PIKA, STADIUM_ACH_PETIT, STADIUM_ACH_POKE, STADIUM_ACH_PRIME, STADIUM_ACH_CASTLE,
+    STADIUM_ACH_MEWTWO, STADIUM_ACH_CHALLENGE, STADIUM_ACH_ROUND2, STADIUM_ACH_RENTALS, STADIUM_ACH_HARD,
+    STADIUM_ACH_HARD_R1, STADIUM_ACH_BATTLES,
+};
+s32 StadiumRewards_Progress(u16 what);
+
 #endif // GUARD_MP_STADIUM_CUP_H

@@ -67,7 +67,42 @@ CUP's POKéMON are given, so its switches don't apply (its own rewards).
   and the CHALLENGE CUP's pools, templates and trainers (src/data/mp_stadium_cc.h, tools/stadium/gen_challenge.py from
   tools/stadium/challenge_cup.json); src/mp/mp_stadium.c builds them (Stadium_BuildMon, StadiumCc_MakeTeam); test
   stadium_data (mp stadium / mp ccteam). The cups' rules: docs/stadium/RULES.md (from the six pages the user sent).
-- T15a (BATTLE ISLAND, ticket, travel, the building), T15c (screens), T15d (music, rewards) next.
+- T15a (BATTLE ISLAND, BATTLE TICKET, the building): built (mp_battleisland.c); T15c (screens, src/mp/mp_stadium_ui.c),
+  saved teams (mp_stadium_teams.c) and T15d (music, rewards, ribbons, achievements) done: the sections below.
+- Still missing: the user's GYM LEADER CASTLE picture (graphics/stadium/gym_leader_castle.png, 160x120; the link the
+  user sent couldn't be fetched from here: tools/stadium/extract_gfx.py picks it up when the file is there).
+
+## Music (T15d)
+
+STADIUM's own songs from the user's USF rips (34 of them), converted with Moemon Music Studio into
+music/stadium_*.kaisong. A shipped music file named `stadium_*` is a new track of its own (mp_kaisong.c ScanDir, like
+the Maker's MAKER_SONG_FIRST tracks), found by name: mp_stadium_cup.c MP_Stadium_Track (log "stadium: song NAME").
+The screens: stadium_menu (STADIUM SELECT, the classes and options), stadium_select (registering, VS, saved teams),
+the castle's / MEWTWO's / CHALLENGE CUP's own menus; battles by cup and stage (`stadium_<cup>_1` battles 1-3, `_2`
+4-6, `_semi`, `_final`), the castle's trainers, leaders, ELITE FOUR and RIVAL, MEWTWO, the CHALLENGE CUP's FREE BATTLE;
+results stadium_won / stadium_cup_won / castle / MEWTWO won / stadium_lost. Playback quality: the user, 2026-11-06,
+"The current playback quality is fine." (an earlier ask for 98-99% fidelity was dropped).
+
+## Rewards (T15d)
+
+src/mp/mp_stadium_rewards.c. A class won for the first time at a hardness (16 of them: each switch's hard side, so a
+class can be won again harder for more) gives: a prize POKéMON with perfect IVs (3, one more for each restriction in
+place; the others no lower than 15-31), shiny when won with rentals only or with every restriction; from the cup's
+rental list (STADIUM's own POKéMON, moves and nature), the castle's and CHALLENGE CUP's from STADIUM's gift POKéMON
+(BULBASAUR, CHARMANDER, SQUIRTLE, HITMONLEE, HITMONCHAN, EEVEE, OMANYTE, KABUTO), MEWTWO (Round 1) / MEW (Round 2) for
+beating MEWTWO; RARE CANDIES and PP MAXes, money (the class, the round, each restriction); a MASTER BALL for rentals
+only, an ASTRAL BALL with every restriction. The CHALLENGE CUP counts as every restriction (its six are given). A win
+already won at that hardness: money and a RARE CANDY. The result screen lists them (StadiumRewards_Last).
+
+The STADIUM RIBBONS go on the registered team's own POKéMON (party and PC; rentals are STADIUM's, the shared / global
+PCs' copies stay as their owners keep them), in the save's spare gift ribbon slots, so the summary and the POKéNAV show
+them with their own words (gift_ribbon_descriptions.h 65-67, MAX_GIFT_RIBBON 67): STADIUM RIBBON (MARINE's slot, any
+cup), STADIUM MASTER RIBBON (LAND's: a MASTER BALL class, the castle or MEWTWO), STADIUM LEGEND RIBBON (SKY's: every
+restriction).
+
+Achievements: the STADIUM tab (mp_achieve.c AK_STADIUM, read from the save's wins, so old wins count): a first win,
+each cup, the castle, MEWTWO, the CHALLENGE CUP, ROUND 2, rentals only (1, 10), every restriction (1, all of ROUND 1),
+100 battles. Test stadium_rewards (`mp stadiumwin ROUND CUP CLASS HARDNESS [1 = show the result screen]`).
 
 ## The data (T15b)
 

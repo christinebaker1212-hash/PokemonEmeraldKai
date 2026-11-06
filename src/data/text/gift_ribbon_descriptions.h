@@ -46,6 +46,14 @@ const u8 gGiftRibbonDescriptionPart2_LovedPokemon[] = _("for a loved MOéMON.");
 const u8 gGiftRibbonDescriptionPart1_LoveForPokemon[] = _("RIBBON that shows");
 const u8 gGiftRibbonDescriptionPart2_LoveForPokemon[] = _("love for MOéMON.");
 
+// Moemon Kai: POKéMON STADIUM's (mp_stadium_rewards.c: the MARINE / LAND / SKY slots)
+const u8 gGiftRibbonDescriptionPart1_Stadium[] = _("STADIUM RIBBON");
+const u8 gGiftRibbonDescriptionPart2_Stadium[] = _("Won a STADIUM cup.");
+const u8 gGiftRibbonDescriptionPart1_StadiumMaster[] = _("STADIUM MASTER RIBBON");
+const u8 gGiftRibbonDescriptionPart2_StadiumMaster[] = _("Won STADIUM's hardest.");
+const u8 gGiftRibbonDescriptionPart1_StadiumLegend[] = _("STADIUM LEGEND RIBBON");
+const u8 gGiftRibbonDescriptionPart2_StadiumLegend[] = _("Won with no handicaps.");
+
 const u8 *const gGiftRibbonDescriptionPointers[MAX_GIFT_RIBBON][2] =
 {
     {gGiftRibbonDescriptionPart1_2003RegionalTourney,   gGiftRibbonDescriptionPart2_Champion},
@@ -111,5 +119,8 @@ const u8 *const gGiftRibbonDescriptionPointers[MAX_GIFT_RIBBON][2] =
     {gGiftRibbonDescriptionPart1_LotsOfFriends,         gGiftRibbonDescriptionPart2_EmptyString},
     {gGiftRibbonDescriptionPart1_FullOfEnergy,          gGiftRibbonDescriptionPart2_EmptyString},
     {gGiftRibbonDescriptionPart1_LovedPokemon,          gGiftRibbonDescriptionPart2_LovedPokemon},
-    {gGiftRibbonDescriptionPart1_LoveForPokemon,        gGiftRibbonDescriptionPart2_LoveForPokemon}
+    {gGiftRibbonDescriptionPart1_LoveForPokemon,        gGiftRibbonDescriptionPart2_LoveForPokemon},
+    {gGiftRibbonDescriptionPart1_Stadium,               gGiftRibbonDescriptionPart2_Stadium},
+    {gGiftRibbonDescriptionPart1_StadiumMaster,         gGiftRibbonDescriptionPart2_StadiumMaster},
+    {gGiftRibbonDescriptionPart1_StadiumLegend,         gGiftRibbonDescriptionPart2_StadiumLegend},
 };

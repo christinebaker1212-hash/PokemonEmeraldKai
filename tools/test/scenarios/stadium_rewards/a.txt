@@ -1,0 +1,14 @@
+pressuntil A field 5000
+mp stadiumwin 0 0 0 0
+wait 10
+mp stadiumwin 0 0 0 0
+wait 10
+mp stadiumwin 0 2 3 15
+wait 10
+mp stadiumwin 0 6 0 8 1
+wait 70
+rendershot prizes
+press A 4
+wait 20
+log stadium rewards done
+quit

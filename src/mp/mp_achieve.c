@@ -16,6 +16,7 @@
 #include "global.h"
 #include "mp.h"
 #include "mp_region.h"
+#include "mp_stadium_cup.h"
 #include "event_data.h"
 #include "money.h"
 #include "overworld.h"
@@ -45,11 +46,12 @@ enum {
     AK_MONEY,    // money held right now
     AK_CLEARED,  // regions whose League is beaten (arg: one region + 1, or 0 for how many)
     AK_STARTED,  // regions the player has been to
+    AK_STADIUM,  // POKéMON STADIUM (arg: STADIUM_ACH_*, mp_stadium_rewards.c)
 };
 
 // The menu's tabs
-enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_MAGIC, C_TRIAD, C_DANCE, C_JOHTO, C_KANTO, C_SINNOH, NUM_ACH_CATS };
-static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "MAGIC", "TRIPLE TRIAD", "DANCE", "JOHTO", "KANTO", "SINNOH"};
+enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_MAGIC, C_TRIAD, C_DANCE, C_JOHTO, C_KANTO, C_SINNOH, C_STADIUM, NUM_ACH_CATS };
+static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "MAGIC", "TRIPLE TRIAD", "DANCE", "JOHTO", "KANTO", "SINNOH", "STADIUM"};
 
 enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD, FL_JOHTO_BEASTS, FL_KANTO_BIRDS, FL_JOHTO_BADGES, FL_KANTO_BADGES,
        FL_ALPH, FL_ARCEUS_TRIALS, FL_SINNOH_BADGES, FL_SINNOH_LAKES, FL_SINNOH_CREATION };
@@ -491,6 +493,22 @@ static const struct Achievement sAch[] = {
     {"sregigigas", "THE COLOSSAL", "Face REGIGIGAS under SNOWPOINT TEMPLE.", AK_FLAG, 0x3D05, 1, 1, C_SINNOH},
     {"scresselia", "LUNAR WING", "Face CRESSELIA on FULLMOON ISLAND.", AK_FLAG, 0x3D06, 1, 1, C_SINNOH},
     {"sarceus", "THE ORIGIN", "Face ARCEUS in the HALL OF ORIGIN.", AK_FLAG, 0x3D09, 1, 2, C_SINNOH},
+    // POKéMON STADIUM on BATTLE ISLAND (mp_stadium_rewards.c StadiumRewards_Progress)
+    {"stwin", "STADIUM DEBUT", "Win a cup at the POK~MON STADIUM.", AK_STADIUM, STADIUM_ACH_ANY, 1, 0, C_STADIUM},
+    {"stpika", "PIKA CUP", "Win the PIKA CUP.", AK_STADIUM, STADIUM_ACH_PIKA, 1, 0, C_STADIUM},
+    {"stpetit", "PETIT CUP", "Win the PETIT CUP.", AK_STADIUM, STADIUM_ACH_PETIT, 1, 0, C_STADIUM},
+    {"stpoke", "POK~ CUP", "Win all four classes of the POK~ CUP.", AK_STADIUM, STADIUM_ACH_POKE, 4, 1, C_STADIUM},
+    {"stprime", "PRIME CUP", "Win all four classes of the PRIME CUP.", AK_STADIUM, STADIUM_ACH_PRIME, 4, 1, C_STADIUM},
+    {"stcastle", "CASTLE CONQUEROR", "Beat the GYM LEADER CASTLE.", AK_STADIUM, STADIUM_ACH_CASTLE, 1, 1, C_STADIUM},
+    {"stmewtwo", "VS. MEWTWO", "Beat MEWTWO at the STADIUM.", AK_STADIUM, STADIUM_ACH_MEWTWO, 1, 2, C_STADIUM},
+    {"stchallenge", "CHALLENGE ACCEPTED", "Win a class of the CHALLENGE CUP.", AK_STADIUM, STADIUM_ACH_CHALLENGE, 1, 0, C_STADIUM},
+    {"stchallenge4", "CHALLENGE CHAMPION", "Win all four classes of the CHALLENGE CUP.", AK_STADIUM, STADIUM_ACH_CHALLENGE, 4, 1, C_STADIUM},
+    {"stround2", "ROUND 2", "Win every cup and class of ROUND 2.", AK_STADIUM, STADIUM_ACH_ROUND2, 12, 2, C_STADIUM},
+    {"strental", "RENTAL HERO", "Win a cup with rental POK~MON only.", AK_STADIUM, STADIUM_ACH_RENTALS, 1, 1, C_STADIUM},
+    {"strental10", "RENTAL LEGEND", "Win 10 cup classes with rental POK~MON only.", AK_STADIUM, STADIUM_ACH_RENTALS, 10, 2, C_STADIUM},
+    {"sthard", "NO HANDICAPS", "Win a cup with every restriction in place.", AK_STADIUM, STADIUM_ACH_HARD, 1, 1, C_STADIUM},
+    {"sthard12", "STADIUM LEGEND", "Win every class of ROUND 1 with every restriction.", AK_STADIUM, STADIUM_ACH_HARD_R1, 12, 2, C_STADIUM},
+    {"stbattles", "STADIUM REGULAR", "Win 100 battles at the STADIUM.", AK_STADIUM, STADIUM_ACH_BATTLES, 100, 1, C_STADIUM},
     {"karceus", "ARCEUS TRIALS", "Complete all seventeen ARCEUS trials in KANTO.", AK_FLAGS, FL_ARCEUS_TRIALS, 17, 2, C_KANTO},
     {"karceusn", "THE ORIGINAL ONE", "Face the Normal-type ARCEUS in ALTERING CAVE.", AK_FLAG, 0x2E16, 1, 2, C_KANTO},
 };
@@ -631,6 +649,7 @@ static s32 Progress(const struct Achievement *a)
             return (gRegionState.started >> (a->arg - 1)) & 1;
         return ((gRegionState.started >> REGION_HOENN) & 1) + ((gRegionState.started >> REGION_JOHTO) & 1)
              + ((gRegionState.started >> REGION_KANTO) & 1);
+    case AK_STADIUM: return StadiumRewards_Progress(a->arg);
     case AK_FLAG:   return FlagGet(a->arg) ? 1 : 0;
     case AK_STAT:   return GetGameStat(a->arg);
     case AK_CAUGHT: return GetNationalPokedexCount(FLAG_GET_CAUGHT);

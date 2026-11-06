@@ -141,7 +141,7 @@
 // corresponds to one of the special ribbons listed
 // in gGiftRibbonDescriptionPointers. Most of these were
 // never distributed
-#define MAX_GIFT_RIBBON 64
+#define MAX_GIFT_RIBBON 67   // Moemon Kai: + POKéMON STADIUM's three (65-67: mp_stadium_rewards.c)
 
 #define MIN_LEVEL 1
 #define MAX_LEVEL 100

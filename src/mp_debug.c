@@ -524,6 +524,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d %d %d", &r, &d, &t);
         MP_Stadium_Debug(r, d, t);
     }
+    else if (strcmp(cmd, "stadiumwin") == 0)   // mp stadiumwin ROUND CUP CLASS HARDNESS: the party wins it (mp_stadium_rewards.c)
+    {
+        void MP_StadiumRewards_Debug(u8 round, u8 cup, u8 tier, u8 hardness);
+        void MP_StadiumUi_DebugResult(u8 round, u8 cup, u8 tier);
+        int r = 0, c = 0, t = 0, h = 0, show = 0;
+        sscanf(arg, "%d %d %d %d %d", &r, &c, &t, &h, &show);
+        MP_StadiumRewards_Debug(r, c, t, h);
+        if (show)   // (then the result screen with the prizes)
+            MP_StadiumUi_DebugResult(r, c, t);
+    }
     else if (strcmp(cmd, "ccteam") == 0)   // mp ccteam CLASS ROUND TRAINER (255: the player): a CHALLENGE CUP team (mp_stadium.c)
     {
         void MP_StadiumCc_Debug(u8 cls, u8 round, u8 trainer);

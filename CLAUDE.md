@@ -83,6 +83,11 @@ regenerated map keeps them (where the same thing changed, the editor asks the us
 The dev update channel ended with the Maker's first update (the user, 2026-11-03): every build follows main,
 AllowSmallTweaks only unlocks the small tweaks, and no dev updates are pushed.
 
+**POKéMON STADIUM** on BATTLE ISLAND (the user's spec and decisions: `docs/STADIUM.md`, the cups' rules
+docs/stadium/RULES.md): data from the user's ROM (tools/stadium/, never commit the ROM), src/mp/mp_stadium*.c (cups and
+battles mp_stadium_cup.c, screens mp_stadium_ui.c, saved teams per server mp_stadium_teams.c, rewards / ribbons /
+achievements mp_stadium_rewards.c), its music as music/stadium_*.kaisong (new tracks by name); tests stadium_*.
+
 **ORRE** (Pokémon Colosseum's region, started 2026-11-04): the user's decisions and where it stands in
 `docs/ORRE_DECISIONS.md` (3D maps under a Platinum-style camera, 2D sprites rendered from the models, Kai's battles, Colosseum's own words
 and scripts, Shadow Pokémon in Orre only). Packs ripped from the disc by tools/orre/make_pack.sh into orre/ (never

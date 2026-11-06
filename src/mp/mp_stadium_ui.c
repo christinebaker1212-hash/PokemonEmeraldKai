@@ -1351,6 +1351,41 @@ static void DrawVs(void)
 
 // After a battle: the cup's picture behind, the verdict as a banner, the opponent beaten (or the one who won), the
 // road so far as eight POKé BALLs; a cup won rains confetti
+// The prizes of the cup just won (mp_stadium_rewards.c), sliding up over the road once the banner has landed
+static void DrawPrizes(void)
+{
+    const struct StadiumPrize *p = StadiumRewards_Last();
+    int y = U.age < 40 ? 160 : U.age < 56 ? 160 - (U.age - 40) * 6 : 72, i, x = 10;
+    char line[48];
+    if (U.age < 40)
+        return;
+    Panel(6, y, 228, 72, 0x18243e, 0xc8a040);
+    G_Text(12, y + 1, C_GOLD, 0x000000, p->first ? "PRIZES" : "PRIZES (won before)", 0, TF_SMALL);
+    y += 3;
+    if (p->species != SPECIES_NONE)
+    {
+        SDL_Texture *t = FrontTex(p->species, p->personality, p->otId);
+        G_RoundFill(x, y + 12, 46, 46, p->shiny ? 0x40306a : 0x22304e, 255);
+        if (t)
+            Blit(t, x + 1, y + 13, 44, 44, 255);
+        if (p->shiny)
+            for (i = 0; i < 4; i++)   // (a twinkle for the shiny)
+            {
+                int k = (U.age / 4 + i * 5) % 20;
+                G_Fill(x + 4 + (i * 13) % 38, y + 14 + (i * 17 + k) % 38, 1, 1, 0xfff8c0);
+            }
+        snprintf(line, sizeof(line), "Lv%d  %d perfect IVs%s", p->level, p->perfect, p->shiny ? "  SHINY" : "");
+        G_Text(60, y + 12, p->shiny ? 0xf8d8ff : G_WHITE, 0x000000, line, 0, TF_SMALL);
+        x = 60;
+        y += 10;
+    }
+    for (i = 0; i < p->count; i++)
+    {
+        int col = i / 4, row = i % 4;
+        G_Text(x + col * 86, y + 12 + row * 10, 0xf8e8a0, 0x000000, p->line[i], 84, TF_NARROW);
+    }
+}
+
 static void DrawResult(void)
 {
     struct StadiumRun *r = StadiumCup_Run();
@@ -1390,7 +1425,7 @@ static void DrawResult(void)
             static const unsigned sColors[5] = {0xf8d040, 0xe85040, 0x50a0f0, 0x60d070, 0xf080c0};
             G_Fill(x, y, 2, 3, sColors[i % 5]);
         }
-        G_TextAlign(120, 128, TA_CENTER, 0xf8e8a0, 0x000000, "Your prizes are on their way.", TF_SMALL);
+        DrawPrizes();
     }
     else if (U.result == RES_CONTINUE)
         G_TextAlign(120, 128, TA_CENTER, G_WHITE, 0x000000, "Use a continue and try again?", TF_SMALL);
@@ -1665,6 +1700,20 @@ const u16 *MP_StadiumUi_Frame(void)
     if (!U.frameRead)
         U.frameRead = MP_CardScreen_Halve(U.owner, U.canvas, U.frame) != NULL;
     return U.frameRead ? U.frame : NULL;
+}
+
+void MP_StadiumUi_Open(void);
+
+// Tests (mp stadiumwin ... 1): the result screen of the cup just won, with its prizes
+void MP_StadiumUi_DebugResult(u8 round, u8 cup, u8 tier)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    MP_StadiumUi_Open();
+    r->round = round, r->cup = cup, r->tier = tier;
+    r->trainer = StadiumCup_TrainerCount(round, cup, tier);
+    U.screen = SCR_RESULT;
+    U.result = RES_CUP;
+    U.age = 0;
 }
 
 bool8 MP_StadiumUi_IsActive(void)
