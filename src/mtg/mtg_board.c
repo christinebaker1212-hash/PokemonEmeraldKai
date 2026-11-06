@@ -2213,6 +2213,17 @@ static void YourMove(const char *what)   // (the log, once a decision: the test 
     }
 }
 
+// the attackers that must attack (StaticAbilityMustAttack), as candidate bits
+static uint32_t MustAttackers(const MtgQuery *q)
+{
+    uint32_t m = 0;
+    int i;
+    for (i = 0; i < q->candidateCount && i < 32; i++)
+        if (Mtg_StaticForbids(&B.duel, MTG_STATIC_MUST_ATTACK, q->candidates[i], MTG_NO_OBJ))
+            m |= 1u << i;
+    return m;
+}
+
 static void Pass(void) { AnswerAction(0); }
 
 // the actions of the focused card (a stack of lands: any of them), one per kind and ability
@@ -2537,7 +2548,7 @@ static void HumanAttack(unsigned pressed)
     }
     if (B.mode != MODE_ATTACK) {
         B.mode = MODE_ATTACK;
-        B.attack = 0;
+        B.attack = MustAttackers(q);   // (those that attack each combat if able: chosen already, and they stay)
         B.row = ROW_MY_PERMS;
         B.pile = PILE_NONE;
         for (i = 0; i < B.itemCount[ROW_MY_PERMS]; i++)   // the cursor on the first who can attack
@@ -2554,17 +2565,22 @@ static void HumanAttack(unsigned pressed)
             PlaySE(SE_FAILURE);
             Hold(WhyCantAttack(f));
         } else {
-            B.attack ^= 1u << i;
-            PlaySE(B.attack & (1u << i) ? SE_M_TAKE_DOWN : SE_SELECT);
+            if (MustAttackers(q) & (1u << i)) {
+                PlaySE(SE_FAILURE);
+                Hold("It attacks each combat if able.");
+            } else {
+                B.attack ^= 1u << i;
+                PlaySE(B.attack & (1u << i) ? SE_M_TAKE_DOWN : SE_SELECT);
+            }
         }
     }
-    if ((pressed & KEY_B) && B.attack) {   // (B: no one, after all)
-        B.attack = 0;
+    if ((pressed & KEY_B) && B.attack != MustAttackers(q)) {   // (B: no one, after all)
+        B.attack = MustAttackers(q);
         PlaySE(SE_SELECT);
     }
     if (pressed & KEY_SELECT) {   // everyone, or no one
         uint32_t all = q->candidateCount >= 32 ? 0xFFFFFFFFu : (1u << q->candidateCount) - 1;
-        B.attack = B.attack == all ? 0 : all;
+        B.attack = B.attack == all ? MustAttackers(q) : all;
         PlaySE(SE_SELECT);
     }
     if (pressed & KEY_START) {

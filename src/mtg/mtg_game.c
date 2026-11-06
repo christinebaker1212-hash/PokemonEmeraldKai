@@ -581,11 +581,14 @@ static void BuildPriority(MtgDuel *d)
                 AddWithTargets(d, q, MTG_ACT_ACTIVATE, i, c->abilities[k], 0, p);
             }
             if (c->types & MTG_T_LAND) {
-                if (SorceryTiming(d, p) && d->players[p].landsPlayed == 0)
+                if (SorceryTiming(d, p) && d->players[p].landsPlayed == 0
+                    && !Mtg_StaticForbids(d, MTG_STATIC_CANT_PLAY_LAND, i, p))   // (Territorial Dispute...)
                     AddAction(q, MTG_ACT_LAND, i, 0xFFFF, 0, none);
                 continue;
             }
             if (!(c->types & MTG_T_INSTANT) && !(c->keywords & MTG_KW_BIT(MTG_KW_FLASH)) && !SorceryTiming(d, p))
+                continue;
+            if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_CAST, i, p))   // ("creature spells can't be cast"...)
                 continue;
             if (c->altCost && !c->cost.x)   // its alternative cost too ("rather than pay this spell's mana cost")
                 AddAltCasts(d, q, i, p);
@@ -1287,7 +1290,12 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         }
         break;
     }
-    case MTG_Q_ATTACKERS:
+    case MTG_Q_ATTACKERS: {
+        MtgAnswer forced = *a;   // ("attacks each combat if able": StaticAbilityMustAttack, whatever was answered)
+        for (i = 0; i < q->candidateCount && i < 32; i++)
+            if (Mtg_StaticForbids(d, MTG_STATIC_MUST_ATTACK, q->candidates[i], MTG_NO_OBJ))
+                forced.attack |= 1u << i;
+        a = &forced;
         for (i = 0; i < q->candidateCount; i++)
             if (a->attack & (1u << i)) {
                 int o = q->candidates[i];
@@ -1305,6 +1313,7 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             d->stepStarted = 3;
         }
         break;
+    }
     case MTG_Q_BLOCKERS:
         for (i = 0; i < q->candidateCount; i++) {
             int b = q->candidates[i], k = a->block[i];

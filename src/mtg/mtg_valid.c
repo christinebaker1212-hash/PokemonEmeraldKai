@@ -301,5 +301,7 @@ int Mtg_CanTarget(const MtgDuel *d, int obj, int sourceObj)
     (void)c;
     if (sourceObj != MTG_NO_OBJ && (Mtg_Protection(d, obj) & Mtg_ObjColors(d, sourceObj)))
         return 0;
+    if (Mtg_StaticForbids(d, MTG_STATIC_CANT_TARGET, obj, sourceObj))   // ("can't be the target of ...": mtg_static.c)
+        return 0;
     return 1;
 }

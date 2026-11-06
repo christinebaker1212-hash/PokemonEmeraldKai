@@ -129,6 +129,7 @@ void Mtg_Unsupported(MtgCardDef *c, const char *why);
 #define MTG_STATIC_NO_SET (-1000)
 enum { MTG_STATIC_CONTINUOUS, MTG_STATIC_CANT_BLOCK, MTG_STATIC_CANT_ATTACK, MTG_STATIC_CANT_BLOCK_BY,
        MTG_STATIC_RAISE_COST, MTG_STATIC_REDUCE_COST,
+       MTG_STATIC_MUST_ATTACK, MTG_STATIC_CANT_BE_CAST, MTG_STATIC_CANT_TARGET, MTG_STATIC_CANT_PLAY_LAND,
        MTG_STATIC_ETB_TAPPED, MTG_STATIC_NO_UNTAP };   // (two replacement effects, R: lines, kept here: they test alike)
 typedef struct {
     uint16_t card;
@@ -150,6 +151,8 @@ typedef struct {
     uint8_t costGeneric, costPip;   // ...: Amount$ (generic) or Cost$ (one colored symbol: costPip = MTG_W.. + 1)
     uint8_t condition;              // Condition$: 0 none, 1 Threshold, 2 PlayerTurn, 3 NotPlayerTurn (MTG_COND_*)
     const char *unlessDefender;     // CantAttack: UnlessDefender$ ("controlsIsland", "!controlsLand.untapped", ...)
+    const char *source;             // CantTarget: ValidSource$ (the spell or ability's source); spellsOnly: ValidSA$ Spell
+    uint8_t spellsOnly;
 } MtgStatic;
 typedef struct {
     int addPower, addToughness, setPower, setToughness;

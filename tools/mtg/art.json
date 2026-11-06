@@ -1329,6 +1329,13 @@
 "number": "58",
 "set": "apc"
 },
+"Bloodrock Cyclops": {
+"artist": "Tom Wänerstrand",
+"file": "wth_90",
+"frame": "1997",
+"number": "90",
+"set": "wth"
+},
 "Bloodshot Cyclops": {
 "artist": "Ray Lago",
 "file": "uds_77",
@@ -2903,6 +2910,13 @@
 "frame": "1997",
 "number": "24",
 "set": "ons"
+},
+"Dense Foliage": {
+"artist": "Alan Rabinowitz",
+"file": "wth_124",
+"frame": "1997",
+"number": "124",
+"set": "wth"
 },
 "Derelor": {
 "artist": "Anson Maddocks",
@@ -4849,6 +4863,13 @@
 "frame": "1997",
 "number": "179",
 "set": "tmp"
+},
+"Goblin Brigand": {
+"artist": "Arnie Swekel",
+"file": "scg_94",
+"frame": "1997",
+"number": "94",
+"set": "scg"
 },
 "Goblin Burrows": {
 "artist": "David Martin",
@@ -7832,6 +7853,13 @@
 "number": "341",
 "set": "4ed"
 },
+"Otarian Juggernaut": {
+"artist": "Brian Snõddy",
+"file": "ody_305",
+"frame": "1997",
+"number": "305",
+"set": "ody"
+},
 "Overgrown Estate": {
 "artist": "Brian Snõddy",
 "file": "apc_113",
@@ -10618,6 +10646,20 @@
 "number": "17",
 "set": "apc"
 },
+"Spectral Shield": {
+"artist": "Margaret Organ-Kean",
+"file": "ice_302",
+"frame": "1993",
+"number": "302",
+"set": "ice"
+},
+"Spellbane Centaur": {
+"artist": "Rick Farrell",
+"file": "ody_271",
+"frame": "1997",
+"number": "271",
+"set": "ody"
+},
 "Spellgorger Barbarian": {
 "artist": "Mark Romanoski",
 "file": "jud_100",
@@ -10890,6 +10932,13 @@
 "frame": "1997",
 "number": "310",
 "set": "ody"
+},
+"Steel Golem": {
+"artist": "Donato Giancola",
+"file": "wth_157",
+"frame": "1997",
+"number": "157",
+"set": "wth"
 },
 "Stench of Decay": {
 "artist": "Heather Hudson",
@@ -11197,6 +11246,13 @@
 "file": "mir_42",
 "frame": "1997",
 "number": "42",
+"set": "mir"
+},
+"Suq'Ata Firewalker": {
+"artist": "David O'Connor",
+"file": "mir_94",
+"frame": "1997",
+"number": "94",
 "set": "mir"
 },
 "Sustainer of the Realm": {
@@ -12059,6 +12115,13 @@
 "frame": "1997",
 "number": "44",
 "set": "mir"
+},
+"Urborg Drake": {
+"artist": "Sam Wood",
+"file": "inv_283",
+"frame": "1997",
+"number": "283",
+"set": "inv"
 },
 "Urborg Elf": {
 "artist": "Bob Petillo",

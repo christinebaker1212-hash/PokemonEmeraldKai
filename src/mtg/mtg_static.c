@@ -208,7 +208,8 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     static const char *const sKnown[] = {"Mode", "Affected", "AddPower", "AddToughness", "AddKeyword", "SetPower",
                                          "SetToughness", "Description", "AffectedZone", "EffectZone", "AffectedDefined",
                                          "IsPresent", "PresentCompare", "ValidCard", "ValidAttacker", "ValidBlocker", "CharacteristicDefining",
-                                         "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender"};
+                                         "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender",
+                                         "ValidCreature", "ValidTarget", "ValidSA", "ValidSource", "Caster"};
     MtgStatic st;
     int first, count, i, v;
     const char *s;
@@ -229,7 +230,30 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     s = ParamOf(first, count, "Mode");
     st.mode = !s ? 0xFF : strcmp(s, "Continuous") == 0 ? MTG_STATIC_CONTINUOUS : strcmp(s, "CantBlock") == 0 ? MTG_STATIC_CANT_BLOCK
             : strcmp(s, "CantAttack") == 0 ? MTG_STATIC_CANT_ATTACK : strcmp(s, "CantBlockBy") == 0 ? MTG_STATIC_CANT_BLOCK_BY
-            : strcmp(s, "RaiseCost") == 0 ? MTG_STATIC_RAISE_COST : strcmp(s, "ReduceCost") == 0 ? MTG_STATIC_REDUCE_COST : 0xFF;
+            : strcmp(s, "RaiseCost") == 0 ? MTG_STATIC_RAISE_COST : strcmp(s, "ReduceCost") == 0 ? MTG_STATIC_REDUCE_COST
+            : strcmp(s, "MustAttack") == 0 ? MTG_STATIC_MUST_ATTACK : strcmp(s, "CantBeCast") == 0 ? MTG_STATIC_CANT_BE_CAST
+            : strcmp(s, "CantTarget") == 0 ? MTG_STATIC_CANT_TARGET : strcmp(s, "CantPlayLand") == 0 ? MTG_STATIC_CANT_PLAY_LAND : 0xFF;
+    // the newer modes' own keys (StaticAbilityMustAttack, CantBeCast, CantTarget, CantPlayLand), nowhere else
+    if ((ParamOf(first, count, "ValidCreature") && st.mode != MTG_STATIC_MUST_ATTACK)
+        || ((ParamOf(first, count, "ValidTarget") || ParamOf(first, count, "ValidSA") || ParamOf(first, count, "ValidSource"))
+            && st.mode != MTG_STATIC_CANT_TARGET)
+        || (ParamOf(first, count, "Caster") && st.mode != MTG_STATIC_CANT_BE_CAST))
+        goto unknown;
+    if (st.mode == MTG_STATIC_CANT_TARGET) {
+        if ((s = ParamOf(first, count, "ValidSA")) && strcmp(s, "Spell") != 0)
+            goto unknown;
+        st.spellsOnly = s != NULL;
+        if ((st.source = ParamOf(first, count, "ValidSource")) && !Mtg_ValidSpecKnown(st.source))
+            goto unknown;
+        if (!ParamOf(first, count, "ValidTarget") || ParamOf(first, count, "AffectedZone"))
+            goto unknown;
+    }
+    if (st.mode == MTG_STATIC_CANT_BE_CAST) {   // Caster$ Player (anyone, as none) / You / Opponent: the static's activator slot
+        s = ParamOf(first, count, "Caster");
+        st.activator = !s || strcmp(s, "Player") == 0 ? 0 : strcmp(s, "You") == 0 ? 1 : strcmp(s, "Opponent") == 0 ? 2 : 0xFF;
+        if (st.activator == 0xFF)
+            goto unknown;
+    }
     if ((s = ParamOf(first, count, "CharacteristicDefining"))) {   // */*: on the card itself, wherever it is
         if (strcmp(s, "True") != 0 || st.mode != MTG_STATIC_CONTINUOUS || ParamOf(first, count, "Affected")
             || ParamOf(first, count, "AffectedDefined") || !c->starPT)
@@ -249,7 +273,11 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
         st.enchanted = s[0] == 'E';
     }
     st.affected = ParamOf(first, count, st.mode == MTG_STATIC_CONTINUOUS ? "Affected"
-                                      : st.mode == MTG_STATIC_CANT_BLOCK_BY ? "ValidAttacker" : "ValidCard");
+                                      : st.mode == MTG_STATIC_CANT_BLOCK_BY ? "ValidAttacker"
+                                      : st.mode == MTG_STATIC_MUST_ATTACK ? "ValidCreature"
+                                      : st.mode == MTG_STATIC_CANT_TARGET ? "ValidTarget" : "ValidCard");
+    if (st.mode == MTG_STATIC_CANT_PLAY_LAND && !st.affected)
+        st.affected = "Land";   // (Territorial Dispute: every land)
     if (st.mode == MTG_STATIC_CANT_BLOCK_BY && (st.blocker = ParamOf(first, count, "ValidBlocker")) != NULL
         && !Mtg_ValidSpecKnown(st.blocker))
         goto unknown;   // (none: it can't be blocked at all)
@@ -277,8 +305,10 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
                 goto unknown;
         } else
             goto unknown;
-    } else if (ParamOf(first, count, "Activator") || ParamOf(first, count, "Type") || ParamOf(first, count, "Amount")
-               || ParamOf(first, count, "Cost"))
+    } else if ((ParamOf(first, count, "Activator") && st.mode != MTG_STATIC_CANT_BE_CAST) || ParamOf(first, count, "Type")
+               || ParamOf(first, count, "Amount") || ParamOf(first, count, "Cost"))
+        goto unknown;
+    if (st.mode == MTG_STATIC_CANT_BE_CAST && ParamOf(first, count, "Activator"))
         goto unknown;
     if ((st.present = ParamOf(first, count, "IsPresent")) && !Mtg_ValidSpecKnown(st.present))
         goto unknown;
@@ -559,6 +589,18 @@ int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other)
                 continue;
             if (st->unlessDefender && DefenderIs(d, st, s, obj))
                 continue;   // (the defending player is as it says: it may attack)
+            // CantBeCast: OTHER is the player casting it (Caster$: anyone / its controller / an opponent)
+            if (mode == MTG_STATIC_CANT_BE_CAST && ((st->activator == 1 && other != src->controller)
+                                                    || (st->activator == 2 && other == src->controller)))
+                continue;
+            // CantTarget: OTHER is the targeting spell's or ability's source (ValidSA$ Spell: only from a spell, which
+            // isn't on the battlefield; ValidSource$: only such sources)
+            if (mode == MTG_STATIC_CANT_TARGET && other != MTG_NO_OBJ) {
+                if (st->spellsOnly && d->objs[other].zone == MTG_ZONE_BATTLEFIELD)
+                    continue;
+                if (st->source && !Mtg_ValidObj(d, other, st->source, s, src->controller))
+                    continue;
+            }
             forbid = 1;
         }
     }

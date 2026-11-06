@@ -998,6 +998,25 @@ static void TestAltCosts(void)
         CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && sD.players[0].life == 18 && sD.players[1].life == 18,
               "2 to everything (bears %d, life %d / %d)", Zone(bears), sD.players[0].life, sD.players[1].life);
     }
+    // MustAttack: BLOODROCK CYCLOPS attacks though the answer left it out; CantTarget: DENSE FOLIAGE keeps creatures
+    // from being a spell's target (the player still is)
+    Table();
+    {
+        int cyclops = Put(0, "Bloodrock Cyclops", MTG_ZONE_BATTLEFIELD);
+        sD.objs[cyclops].sick = 0;
+        Attack(0);
+        CHECK(sD.objs[cyclops].attacking, "bloodrock cyclops attacks each combat if able");
+    }
+    Table();
+    {
+        int foliage = Put(1, "Dense Foliage", MTG_ZONE_BATTLEFIELD), bolt2;
+        bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Mountain", 1);
+        bolt2 = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+        CHECK(Find(MTG_ACT_CAST, bolt2, MTG_TGT_OBJ, bears) < 0, "dense foliage: the bolt can't target the bears");
+        CHECK(Find(MTG_ACT_CAST, bolt2, MTG_TGT_PLAYER, 1) >= 0, "the opponent still can be");
+        (void)foliage;
+    }
 }
 
 static void TestTriggers(void)
