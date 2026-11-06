@@ -80,6 +80,25 @@ void Maker_PlayFrame(void);
 void Maker_EditsChangedWhilePlaying(int map, bool8 blocksOnly);
 void Maker_BackToWaiting(void);
 
+// M4b: the game's own script macros assembled at run time (src/maker/maker_raw.c; an event's `raw` lines)
+struct MakerRawSink
+{
+    void *ctx;
+    void (*byte)(void *ctx, u8 v);
+    void (*halfword)(void *ctx, u16 v);
+    void (*word)(void *ctx, u32 v);
+    bool8 (*pointer)(void *ctx, const char *arg);   // ptrvalue ARG: a label, a "text", a number
+    u32 (*here)(void *ctx);                          // `.`: where the next byte goes
+    void (*error)(void *ctx, const char *msg);
+    bool8 (*isLabel)(void *ctx, const char *name);   // a label of the event (may be NULL)
+};
+bool8 Maker_RawLine(struct MakerRawSink *s, const char *text);
+void Maker_RawReset(void);
+bool8 Maker_RawSymbol(const char *name, s32 *value);
+const u8 *Maker_RawLabel(const char *name);   // a global label of the game's scripts (NULL: none)
+bool8 Maker_RawIsMacro(const char *name);
+const u8 *Maker_EventLabel(const char *map, const char *event, u8 kind, const char *source, const char *label);
+
 // The editor (src/maker/maker_main.c)
 void Maker_Open(void);          // from the main menu: the editor window opens, the game waits on a black screen
 bool8 Maker_IsOpen(void);

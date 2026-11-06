@@ -5340,6 +5340,39 @@ overnight list included M2-M5; each is easy to change if the user wants otherwis
 - Test tools/test/maker_debug.sh (`maker break MAP EVENT LINE`, `maker step`, `maker continue`, `maker held`,
   `maker watch NAME`).
 
+## Moemon Maker, M4b: the game's scripts as raw lines (the round trip)
+
+- **`raw MACRO args`**: an event line in the game's own script macros, assembled at run time by src/maker/maker_raw.c
+  the way gas builds data/event_scripts*.s: a macro's body line by line (.byte / .short / .2byte / .hword / .int /
+  .4byte / .word / .long, ptrvalue and .quad as pointers, .set, .if / .elseif / .else / .endif, .ifb / .ifnb, .ifdef
+  / .ifndef, other macros with `\name` put in as text, keyword arguments `name=value`, `:req` and `=default`
+  parameters; arguments split at commas, or at spaces between plain names as gas does). Expressions: numbers, the
+  constants, `.set` symbols, `.`, C macros of one parameter (MAP_NUM(map), ITEM_TO_BERRY(item): their bodies with the
+  argument put in), unary - ~ !, the binary operators and parentheses; a label in an `.if` is 1 (an address).
+- **`label NAME`**: a place in the event a raw line can point at. A page whose first line is `label` is a raw page:
+  no lock / faceplayer / release / end of its own (the raw lines say them). A pointer argument is a quoted text (a
+  GameText), a label of the event, a global label (its address), a constant / number, or else a label further on; a
+  name never placed is an error ("no label or constant NAME") before the jump that has nowhere to go.
+- **The tables**: tools/maker/gen_macros.py (map_data_rules.mk, never committed) writes include/constants/maker_macros.h
+  (the macros of asm/macros/event.inc, qz_event.inc, movement.inc (create_movement_action expanded), map.inc,
+  battle_tent.inc, trainer_hill.inc, battle_frontier/*.inc and the `.macro`s of the scripts files themselves; every
+  constant of include/constants/*.h, constants/*.inc and the scripts files' own `.set` / `=` lines, evaluated; the
+  SCR_OP_ numbers, SPECIAL_ / SPECIAL_WAITSTATE_, the TMs and HMs by move, STR_VAR_1-3; the one-parameter C macros),
+  include/constants/maker_labels.h (every label of data/event_scripts*.s and what they include, plus the C names the
+  scripts point at that src/ defines: gStringVar4, a callnative's function, gText_...; compiled alone in
+  src/maker/maker_labeltab.c so its `extern const u8` lines never meet the game's declarations) and
+  data/maker_globals.inc (`.ifdef NAME / .global NAME / .endif` for every file-local label, included at the end of
+  every event_scripts*.s: a label is made global where it is defined). The last two are only rewritten when they
+  change.
+- **The proof** (decision 19): tools/maker/decompile.py --proof writes every global label's block of every scripts
+  file (HOENN, KANTO / JOHTO, SINNOH's generated platinum_scripts.inc, ORRE, the STADIUM) as `@ NAME` and raw lines,
+  leaving out texts (.string), assembler-only data (.align / .balign / .incbin / .if / .set / .macro / `#` lines) and
+  the C code's tables (gName). `mp makerproof FILE` (src/maker/maker_events.c Maker_RawProof) compiles each as an
+  event and walks it beside the built script: the same bytes, a pointer into the event the same place as the label of
+  that name, any other pointer the same address. tools/test/maker_decompile.sh: 20148 blocks, 0 differ.
+- `decompile.py MAP_DIR` prints a map's object / sign / trigger scripts as events of raw lines (the start of M4b's
+  editor side: friendly commands, texts inlined and the local labels they reach are still to come).
+
 ## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
 - SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py
   STAIRS gives them Emerald's unused behaviors 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down), arrow warps

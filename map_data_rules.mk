@@ -14,6 +14,7 @@ AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/layouts.h
 AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/map_event_ids.h
 # Moemon Maker: the editor's names (maps, songs, people's looks) from this build's own constants (tools/maker/gen_names.py)
 AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/maker_names.h $(INCLUDECONSTS_OUTDIR)/maker_tilesets.h $(INCLUDECONSTS_OUTDIR)/maker_ops.h
+AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/maker_macros.h data/maker_globals.inc
 
 MAP_DIRS := $(dir $(wildcard $(MAPS_DIR)/*/map.json))
 MAP_CONNECTIONS := $(patsubst $(MAPS_DIR)/%/,$(MAPS_DIR)/%/connections.inc,$(MAP_DIRS))
@@ -52,6 +53,12 @@ $(INCLUDECONSTS_OUTDIR)/maker_names.h: tools/maker/gen_names.py $(INCLUDECONSTS_
 $(INCLUDECONSTS_OUTDIR)/maker_ops.h: tools/maker/gen_names.py data/script_cmd_table.inc
 	python3 tools/maker/gen_names.py --ops $@
 	@touch $@
+# (M4b) the script macros, constants and global labels for the Maker's raw lines (src/maker/maker_raw.c)
+$(INCLUDECONSTS_OUTDIR)/maker_macros.h: tools/maker/gen_macros.py tools/maker/gen_names.py asm/macros/event.inc asm/macros/qz_event.inc asm/macros/movement.inc asm/macros/map.inc asm/macros/battle_tent.inc asm/macros/trainer_hill.inc $(wildcard asm/macros/battle_frontier/*.inc) data/script_cmd_table.inc data/specials.inc $(filter-out data/maker_%,$(wildcard data/event_scripts*.s)) $(INCLUDECONSTS_OUTDIR)/map_groups.h $(INCLUDECONSTS_OUTDIR)/map_event_ids.h $(filter-out include/constants/maker_%.h,$(wildcard include/constants/*.h)) $(wildcard data/scripts/*.inc) $(wildcard data/scripts/*/*.inc) $(wildcard data/maps/*/scripts.inc)
+	python3 tools/maker/gen_macros.py $@ $(INCLUDECONSTS_OUTDIR)/maker_labels.h data/maker_globals.inc
+	@touch $@   # (maker_labels.h and data/maker_globals.inc are only rewritten when they change: no needless rebuilds)
+$(INCLUDECONSTS_OUTDIR)/maker_labels.h: $(INCLUDECONSTS_OUTDIR)/maker_macros.h
+data/maker_globals.inc: $(INCLUDECONSTS_OUTDIR)/maker_macros.h
 $(INCLUDECONSTS_OUTDIR)/maker_tilesets.h: tools/maker/gen_names.py src/data/tilesets/headers.h src/data/tilesets/qz_headers.h
 	python3 tools/maker/gen_names.py --tilesets $@
 	@touch $@

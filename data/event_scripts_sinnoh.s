@@ -578,3 +578,6 @@
 	.include "data/maps/Sinnoh_PoffinHouse/scripts.inc"
 	.include "data/maps/Sinnoh_EternaCityUndergroundManHouse/scripts.inc"
 	.include "data/maps/Sinnoh_Underground/scripts.inc"
+
+	@ Moemon Maker M4b: the file-local labels (texts, movements) made global, for the Maker's raw lines (generated)
+	.include "data/maker_globals.inc"

@@ -5,7 +5,7 @@ design and the user's 28 decisions, which win wherever anything else differs) an
 (how each M1 piece works).
 
 **Status: M1 is done (1.80.0). M2 is built: M2a events, M2b new maps and the World view, M2c trainers and the
-checker (COOP_NOTES "Moemon Maker, M2a / M2b / M2c"). M3a is built: the database for the game's own Pokémon, moves and items, their pictures from PNGs and the battle bench with a damage estimate (COOP_NOTES "Moemon Maker, M3a: the database"); still to come in M3: new entries with IDs that never move. M4a is built: the debugger (breakpoints, step, continue, watch: COOP_NOTES "Moemon Maker, M4a: the debugger"); still to come in M4: the decompiler of the four regions' scripts with its byte-for-byte round trip, and the three-way merge.** The user's overnight list (2026-11-06) included M2-M5, so M2 started without the questions round; the four
+checker (COOP_NOTES "Moemon Maker, M2a / M2b / M2c"). M3a is built: the database for the game's own Pokémon, moves and items, their pictures from PNGs and the battle bench with a damage estimate (COOP_NOTES "Moemon Maker, M3a: the database"); still to come in M3: new entries with IDs that never move. M4a is built: the debugger (breakpoints, step, continue, watch: COOP_NOTES "Moemon Maker, M4a: the debugger"); M4b's round trip is built: every script block of every region assembles from its own macros at run time to the same bytes (`raw` / `label` event lines; COOP_NOTES "Moemon Maker, M4b"; tools/test/maker_decompile.sh, 20148 blocks, 0 differ); still to come in M4: the decompiler's editor side (a map's events with friendly commands and inlined texts) and the three-way merge.** The user's overnight list (2026-11-06) included M2-M5, so M2 started without the questions round; the four
 open questions below were answered with defaults, listed in COOP_NOTES "Moemon Maker, M2a: events" for the user to
 change if they want.
 
@@ -118,20 +118,12 @@ M1's known limits, carried into later milestones:
    IDs by name in "<save>.maker". Moves past MOVES_COUNT and items past ITEMS_COUNT the same way (names, battle data,
    animations, contest data, icons, descriptions, bag pockets). SEALED when the pack is missing (decision in
    MOEMON_MAKER.md 6).
-3. **M4b: the decompiler and its round trip.** Findings so far: the regions' scripts are event.inc macros that nest
-   (msgbox = loadword + callstd, giveitem = setorcopyvar x2 + callstd) and branch on their arguments (trainerbattle's
-   `.if \type == ...`), so the Maker's run-time compiler needs the macros themselves: a generator (gen_names.py) that
-   turns asm/macros/event.inc into a table of macros, each a list of emits (byte / short / word / ptrvalue of an
-   argument or a constant), calls of other macros with substituted arguments, and `.if ARG == CONST` branches; a `raw
-   MACRO args` command in maker_events.c that runs that table; `label NAME` lines inside an event; a generated table of
-   the global script labels (`Label::` in data/scripts/*.inc, data/maps/*/scripts.inc, the ports' .inc) as
-   `{"NAME", NAME}` for pointers to scripts outside the event. Then tools/maker/decompile.py: a map's scripts.inc into
-   events (the object / sign / trigger scripts from map.json, every local label they reach copied in as `label`,
-   texts inlined as quoted strings, friendly commands where they mean exactly the same bytes, raw otherwise). The proof
-   (decision 19): an in-game test compiles every decompiled event and walks it beside the built script, command by
-   command (same opcodes and values; a pointer into the event = the same relative place; a text = the same bytes; any
-   other pointer = the same address). HOENN first, then KANTO / JOHTO (the same macro format), then SINNOH
-   (sinnoh/platinum_scripts.inc, generated: decompile what gen_scripts.py writes, never commit it).
+3. **M4b, the editor side.** The round trip is done (COOP_NOTES "Moemon Maker, M4b": `raw` and `label` lines, the
+   generated macro / constant / label tables, the proof over all 20148 blocks). Left: decompile.py MAP_DIR into
+   events the editor shows well (every local label an event reaches copied in as `label`, texts inlined as quoted
+   strings, friendly commands where they mean exactly the same bytes, raw otherwise), the Maker's "OPEN THE GAME'S
+   SCRIPT" on a base person / sign / trigger (the event replaces the map's script through the overrides, as M2's swap),
+   and a proof of each converted map (the proof already compiles any event file of `@ NAME` blocks).
 4. **M4c: the three-way merge** once base scripts can be overlaid (the WAS/NOW lines already carry what each edit
    replaced; the merge shows base before / base now / the edit).
 5. **M5** as planned (3D mode for SINNOH, animation timeline, Lua hooks, tileset editor).

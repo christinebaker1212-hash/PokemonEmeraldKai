@@ -735,3 +735,6 @@
 	.include "data/maps/Kanto_MtMoon_Route4Cave/scripts.inc"
 	.include "data/maps/Kanto_CinnabarIsland_PrimalChamber/scripts.inc"
 	.include "data/maps/Kanto_CeruleanCave_RayquazaChamber/scripts.inc"
+
+	@ Moemon Maker M4b: the file-local labels (texts, movements) made global, for the Maker's raw lines (generated)
+	.include "data/maker_globals.inc"

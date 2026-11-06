@@ -1087,3 +1087,6 @@ Common_EventScript_LegendaryFlewAway::
 	.include "data/text/frontier_brain.inc"
 	.include "data/text/save.inc"
 	.include "data/text/birch_speech.inc"
+
+	@ Moemon Maker M4b: the file-local labels (texts, movements) made global, for the Maker's raw lines (generated)
+	.include "data/maker_globals.inc"

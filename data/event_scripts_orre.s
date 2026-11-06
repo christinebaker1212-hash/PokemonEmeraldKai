@@ -7,3 +7,6 @@
 	.include "asm/macros/event.inc"
 	.section script_data, "aw"
 	.include "data/maps/Orre_OutskirtStand/scripts.inc"
+
+	@ Moemon Maker M4b: the file-local labels (texts, movements) made global, for the Maker's raw lines (generated)
+	.include "data/maker_globals.inc"

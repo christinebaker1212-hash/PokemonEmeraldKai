@@ -1204,6 +1204,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int id = atoi(arg);
         printf("[test] item %d: %d\n", id, CountTotalItemQuantityInBag(id));
     }
+    else if (strcmp(cmd, "makerproof") == 0)   // "mp makerproof PATH": M4b's round trip (src/maker/maker_events.c)
+    {
+        int Maker_RawProof(const char *path);
+        Maker_RawProof(arg);
+    }
     else if (strcmp(cmd, "dbinfo") == 0)
     {
         // dbinfo SPECIES MOVE ITEM - what the game reads for them now (Moemon Maker M3's database edits included)

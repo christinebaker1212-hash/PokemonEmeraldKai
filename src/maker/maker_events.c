@@ -297,7 +297,96 @@ struct Ctx
     u16 ifStack[16][2];   // per open "if": its else label, its end label
     u8 ifDepth;
     bool8 hasElse[16];
+    // M4b: `label NAME` lines (a decompiled script's own places): name, label, where it ended up
+    struct { char name[64]; u16 id; s32 at; } locals[128];
+    int localCount;
+    u32 *ptrAt;           // where the raw lines put pointers (for the proof: compared by what they point at)
+    int ptrCount, ptrCap;
+    u32 codeLen;          // the last Build's length
 };
+
+static void RecordPointer(struct Ctx *c)
+{
+    if (c->ptrCount >= c->ptrCap)
+    {
+        c->ptrCap = c->ptrCap * 2 + 32;
+        c->ptrAt = realloc(c->ptrAt, c->ptrCap * sizeof(u32));
+    }
+    c->ptrAt[c->ptrCount++] = c->o.n;
+}
+
+// ---- M4b: `raw` lines (the game's own script macros: maker_raw.c) and `label` lines
+static int LocalLabel(struct Ctx *c, const char *name)
+{
+    int i;
+    for (i = 0; i < c->localCount; i++)
+        if (strcmp(c->locals[i].name, name) == 0)
+            return i;
+    if (c->localCount >= (int)ARRAY_COUNT(c->locals))
+        return -1;
+    snprintf(c->locals[c->localCount].name, sizeof(c->locals[0].name), "%s", name);
+    c->locals[c->localCount].id = NewLabel(&c->o);
+    c->locals[c->localCount].at = -1;
+    return c->localCount++;
+}
+static int FindLocal(struct Ctx *c, const char *name)
+{
+    int i;
+    for (i = 0; i < c->localCount; i++)
+        if (strcmp(c->locals[i].name, name) == 0)
+            return i;
+    return -1;
+}
+static void RawByte(void *x, u8 v) { B1(&((struct Ctx *)x)->o, v); }
+static void RawHalf(void *x, u16 v) { B2(&((struct Ctx *)x)->o, v); }
+static void RawWord(void *x, u32 v) { BW(&((struct Ctx *)x)->o, v); }
+static u32 RawHere(void *x) { return ((struct Ctx *)x)->o.n; }
+static bool8 RawIsLabel(void *x, const char *name) { return FindLocal((struct Ctx *)x, name) >= 0; }
+static void RawError(void *x, const char *msg) { Error(&((struct Ctx *)x)->o, "%s", msg); }
+// ptrvalue ARG: a label of this event, a "text", a label of the game's scripts, or a number / constant
+static bool8 RawPointer(void *x, const char *arg)
+{
+    struct Ctx *c = x;
+    char name[600];
+    const u8 *at;
+    s32 v;
+    int k;
+    size_t n;
+    snprintf(name, sizeof(name), "%s", arg);
+    n = strlen(name);
+    while (n && (name[n - 1] == ' ' || name[n - 1] == '\t'))
+        name[--n] = 0;
+    RecordPointer(c);
+    if (name[0] == '"' && n >= 2 && name[n - 1] == '"')
+    {
+        name[n - 1] = 0;
+        BP(&c->o, (uintptr_t)GameText(name + 1));
+        return TRUE;
+    }
+    if ((k = FindLocal(c, name)) >= 0)
+    {
+        BLabel(&c->o, c->locals[k].id);
+        return TRUE;
+    }
+    if ((at = Maker_RawLabel(name)) != NULL)
+    {
+        BP(&c->o, (uintptr_t)at);
+        return TRUE;
+    }
+    if (Maker_RawSymbol(name, &v) || Number(name, &v))
+    {
+        BP(&c->o, (uintptr_t)(intptr_t)v);
+        return TRUE;
+    }
+    // (a label of this event not seen yet: placed later)
+    if ((k = LocalLabel(c, name)) >= 0 && (isalpha((unsigned char)name[0]) || name[0] == '_'))
+    {
+        BLabel(&c->o, c->locals[k].id);
+        return TRUE;
+    }
+    Error(&c->o, "nothing called %s to point at", name);
+    return FALSE;
+}
 
 static u16 SelfFlag(struct Ctx *c, const char *sw)
 {
@@ -517,9 +606,37 @@ static void Command(struct Ctx *c, char *line)
 {
     struct Out *o = &c->o;
     char *w[MAX_WORDS];
-    int n = Words(line, w);
+    int n;
     const char *cmd;
     s32 v;
+    {
+        const char *t = line;
+        while (*t == ' ' || *t == '\t')
+            t++;
+        if (strncmp(t, "raw ", 4) == 0 || strncmp(t, "raw\t", 4) == 0)   // the game's own macros, as they are
+        {
+            struct MakerRawSink sink = {c, RawByte, RawHalf, RawWord, RawPointer, RawHere, RawError, RawIsLabel};
+            if (!Maker_RawLine(&sink, t + 4) && !o->error[0])
+                Error(o, "raw: %s isn't understood", t + 4);
+            return;
+        }
+        if (strncmp(t, "label ", 6) == 0)   // a place in this event the raw lines can point at
+        {
+            char name[64];
+            int k;
+            snprintf(name, sizeof(name), "%s", t + 6);
+            for (k = (int)strlen(name); k > 0 && (name[k - 1] == ' ' || name[k - 1] == '\t'); k--)
+                name[k - 1] = 0;
+            if ((k = LocalLabel(c, name)) < 0)
+                Error(o, "too many labels", NULL);
+            else if (o->labels[c->locals[k].id] >= 0)
+                Error(o, "the label %s is there twice", name);
+            else
+                Place(o, c->locals[k].id);
+            return;
+        }
+    }
+    n = Words(line, w);
     if (n == 0)
         return;
     cmd = w[0];
@@ -841,6 +958,12 @@ struct Compiled
     const u8 **lineAt;      // (M4's debugger) where each command line's code starts, and its line in the event's text
     u16 *lineNo;
     int lineCount;
+    char (*labelName)[64];  // (M4b) the event's `label` lines and where each is in script
+    const u8 **labelAt;
+    int labelCount;
+    u32 *ptrAt;             // (M4b) where its raw lines put pointers, and the script's length
+    int ptrCount;
+    u32 scriptLen;
 };
 static struct Compiled *sCompiled;
 
@@ -897,9 +1020,12 @@ static const u8 *Build(struct Ctx *c, struct Page *pages, int pageCount, bool8 s
     for (p = 0; p < pageCount && !selector; p++)
     {
         bool8 person = c->kind == MAKER_EVENT_ON_PERSON && pages[p].trigger == TRIGGER_TALK;
+        // a page that starts with a label is a script as the game has it (decompiled): no lock / release added
+        bool8 rawPage = pages[p].cmdCount && strncmp(pages[p].cmds[0], "label ", 6) == 0;
         Place(o, bodies[p]);
-        B1(o, person ? MAKER_OP_LOCK : MAKER_OP_LOCKALL);
-        if (person)
+        if (!rawPage)
+            B1(o, person ? MAKER_OP_LOCK : MAKER_OP_LOCKALL);
+        if (person && !rawPage)
             B1(o, MAKER_OP_FACEPLAYER);
         c->ifDepth = 0;
         for (k = 0; k < pages[p].cmdCount; k++)
@@ -919,10 +1045,20 @@ static const u8 *Build(struct Ctx *c, struct Page *pages, int pageCount, bool8 s
         }
         if (c->ifDepth)
             Error(o, "an if has no end", NULL);
-        B1(o, person ? MAKER_OP_RELEASE : MAKER_OP_RELEASEALL);
-        B1(o, MAKER_OP_END);
+        if (!rawPage)
+        {
+            B1(o, person ? MAKER_OP_RELEASE : MAKER_OP_RELEASEALL);
+            B1(o, MAKER_OP_END);
+        }
     }
-    // final: the labels' pointers
+    // final: the labels' pointers (a name never placed first: it says which, before the jump that has nowhere to go)
+    for (k = 0; k < c->localCount; k++)
+    {
+        c->locals[k].at = o->labels[c->locals[k].id];
+        if (c->locals[k].at < 0 && !selector)
+            Error(o, "no label or constant %s", c->locals[k].name);
+    }
+    c->codeLen = o->n;
     code = malloc(o->n);
     memcpy(code, o->b, o->n);
     for (k = 0; k < (int)o->fixCount; k++)
@@ -999,7 +1135,19 @@ static struct Compiled *Compile(const char *map, const char *event, u8 kind, con
     {
         int i;
         sLineCount = 0;
+        Maker_RawReset();
         ev->script = Build(&c, pages, pageCount, FALSE, ev->bodies);
+        ev->scriptLen = c.codeLen;
+        ev->ptrAt = c.ptrAt, ev->ptrCount = c.ptrCount;
+        c.ptrAt = NULL;
+        ev->labelCount = c.localCount;
+        ev->labelName = malloc(sizeof(*ev->labelName) * (c.localCount + 1));
+        ev->labelAt = malloc(sizeof(*ev->labelAt) * (c.localCount + 1));
+        for (i = 0; i < c.localCount; i++)
+        {
+            memcpy(ev->labelName[i], c.locals[i].name, sizeof(ev->labelName[i]));
+            ev->labelAt[i] = c.locals[i].at >= 0 ? ev->script + c.locals[i].at : NULL;
+        }
         ev->lineAt = malloc(sizeof(*ev->lineAt) * (sLineCount + 1));
         ev->lineNo = malloc(sizeof(*ev->lineNo) * (sLineCount + 1));
         for (i = 0; i < sLineCount; i++)
@@ -1029,6 +1177,124 @@ static struct Compiled *Find(const char *map, const char *event, u8 kind, const 
          && strcmp(ev->source, source) == 0)
             return ev;
     return Compile(map, event, kind, source);
+}
+
+// (M4b) the proof of the decompiler (decision 19): every block of PATH ("@ LABEL" then its lines, from
+// tools/maker/decompile.py --proof) compiled as an event and walked beside the game's own script at LABEL: the same
+// bytes, a pointer into the event the same place as the game's label of that name, any other pointer the same address
+int Maker_RawProof(const char *path)
+{
+    FILE *f = fopen(path, "rb");
+    char *all, *p, *name = NULL, *body = NULL;
+    long size;
+    int blocks = 0, same = 0, shown = 0;
+    if (!f)
+    {
+        MPNet_Log("maker proof: can't read %s", path);
+        return 0;
+    }
+    fseek(f, 0, SEEK_END);
+    size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    all = malloc(size + 2);
+    size = (long)fread(all, 1, size, f);
+    fclose(f);
+    all[size] = 0;
+    all[size + 1] = 0;
+    for (p = all; ; )
+    {
+        char *next = strstr(p, "\n@ "), *nl;
+        if (strncmp(p, "@ ", 2) != 0)
+        {
+            if (!next)
+                break;
+            p = next + 1;
+            continue;
+        }
+        if (next)
+            *next = 0;
+        nl = strchr(p, '\n');
+        name = p + 2;
+        body = nl ? nl + 1 : p + strlen(p);
+        if (nl)
+            *nl = 0;
+        {
+            char *src = malloc(strlen(body) + strlen(name) + 16);
+            struct Compiled *ev;
+            const u8 *orig = Maker_RawLabel(name), *code;
+            const char *why = NULL;
+            u32 i, k, len, at = 0;
+            sprintf(src, "label %s\n%s", name, body);
+            ev = Compile("PROOF", name, MAKER_EVENT_ON_MAP, src);
+            blocks++;
+            code = ev->labelCount ? ev->labelAt[0] : NULL;
+            if (ev->error[0])
+                why = ev->error;
+            else if (!orig || !code)
+                why = "no such label in the game";
+            else
+            {
+                u32 start = (u32)(code - ev->script);
+                len = ev->scriptLen - start;
+                for (i = 0; i < len && !why; )
+                {
+                    bool8 isPtr = FALSE;
+                    for (k = 0; k < (u32)ev->ptrCount; k++)
+                        if (ev->ptrAt[k] == start + i)
+                            isPtr = TRUE;
+                    if (isPtr)
+                    {
+                        uintptr_t pc = 0, po = 0;
+                        int b;
+                        for (b = 0; b < (int)sizeof(uintptr_t); b++)
+                            pc |= (uintptr_t)code[i + b] << (8 * b), po |= (uintptr_t)orig[i + b] << (8 * b);
+                        if (pc >= (uintptr_t)ev->script && pc < (uintptr_t)ev->script + ev->scriptLen)
+                        {
+                            int j;
+                            for (j = 0; j < ev->labelCount; j++)
+                                if ((uintptr_t)ev->labelAt[j] == pc)
+                                    break;
+                            if (j == ev->labelCount || (uintptr_t)Maker_RawLabel(ev->labelName[j]) != po)
+                                why = "a pointer into the event isn't the game's", at = i;
+                        }
+                        else if (pc != po)
+                            why = "a pointer differs", at = i;
+                        i += sizeof(uintptr_t);
+                    }
+                    else
+                    {
+                        if (code[i] != orig[i])
+                            why = "a byte differs", at = i;
+                        i++;
+                    }
+                }
+            }
+            if (!why)
+                same++;
+            else if (shown++ < 40)
+                MPNet_Log("maker proof: %s: %s (at %u: %02X vs %02X)", name, why, at, code ? code[at] : 0, orig ? orig[at] : 0);
+            free(src);
+        }
+        if (!next)
+            break;
+        p = next + 1;
+    }
+    MPNet_Log("maker proof: %d blocks, %d the same, %d differ", blocks, same, blocks - same);
+    free(all);
+    return blocks - same;
+}
+
+// (M4b) where a `label` of an event ended up in its compiled script (NULL: no such label, or it didn't compile)
+const u8 *Maker_EventLabel(const char *map, const char *event, u8 kind, const char *source, const char *label)
+{
+    struct Compiled *ev = Find(map, event, kind, source);
+    int i;
+    if (ev->error[0])
+        return NULL;
+    for (i = 0; i < ev->labelCount; i++)
+        if (strcmp(ev->labelName[i], label) == 0)
+            return ev->labelAt[i];
+    return NULL;
 }
 
 // The script an event runs (talk / step), compiled once for this text; a script that does nothing if it can't be
