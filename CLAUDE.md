@@ -88,7 +88,8 @@ docs/stadium/RULES.md): data from the user's ROM (tools/stadium/, never commit t
 battles mp_stadium_cup.c, screens mp_stadium_ui.c, saved teams per server mp_stadium_teams.c, rewards / ribbons /
 achievements mp_stadium_rewards.c), its music as music/stadium_*.kaisong (new tracks by name); tests stadium_*.
 
-**ORRE** (Pokémon Colosseum's region, started 2026-11-04): the user's decisions and where it stands in
+**ORRE** (Pokémon Colosseum's region, started 2026-11-04): **start at `docs/ORRE_HANDOFF.md`** (status, the disc's
+link and the decomp's, setting up a session, next steps, open questions); the user's decisions in
 `docs/ORRE_DECISIONS.md` (3D maps under a Platinum-style camera, 2D sprites rendered from the models, Kai's battles, Colosseum's own words
 and scripts, Shadow Pokémon in Orre only). Packs ripped from the disc by tools/orre/make_pack.sh into orre/ (never
 committed; the release builds them from the `ORRE_DISC_URL` secret and ships them as MoemonOrre.zip). **ORRE has its own

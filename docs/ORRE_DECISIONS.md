@@ -90,7 +90,7 @@ Colosseum's collision. Test: scenario `orre_outskirt_stand` (needs orre/ from ma
   (O3D_LayoutBlocks after SINNOH's), fieldmap.c / field_camera.c (O3D_METATILE_BEHAVIOR on O3D_IsOrreGroup maps).
   orre/ from Updater_OrreRoot, or MOEMON_ORRE_PAK; MOEMON_O3D_PERF prints a frame's time.
 
-## Next
+## Next (the full list, with what is known of each: docs/ORRE_HANDOFF.md)
 1. The OUTSKIRT STAND's door: its trigger (the ramp's top) as a warp into S1_shop_1F, made a map the same way, and
    the exit loop as the way out to the world map (Colosseum's world map screen: worldmap_menu_rel).
 2. Colosseum's start positions and people: the map modules' tables (.rel; their records aren't decoded yet: the
