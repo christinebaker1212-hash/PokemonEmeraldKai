@@ -170,6 +170,10 @@ void Trainers_TestCommand(const char *cmd, const char *arg);
 // maker_debug_ui.cpp (M4: the debugger)
 void DebuggerWindow();
 void LuaWindow();      // (M5: maker_lua_ui.cpp)
+void TilesetsWindow(); // (M5: maker_tilesets_ui.cpp)
+void OpenTilesets();
+void Tilesets_TestCommand(const char *cmd, const char *arg);
+const MakerTilesInfo *MapView_TilesInfo();
 void OpenLua();
 void Lua_TestCommand(const char *cmd, const char *arg);
 void OpenDebugger();

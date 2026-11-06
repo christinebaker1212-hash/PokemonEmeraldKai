@@ -112,6 +112,7 @@ struct ShopData
     s16 viewportObjects[OBJECT_EVENTS_COUNT][5];
 };
 
+const u16 *Maker_TilesetMetatiles(const struct Tileset *ts);   // Moemon Maker M5 (src/maker/maker_tilesets.c)
 static EWRAM_DATA struct MartInfo sMartInfo = {0};
 static EWRAM_DATA struct ShopData *sShopData = NULL;
 static EWRAM_DATA struct ListMenuItem *sListMenuItems = NULL;
@@ -859,9 +860,9 @@ static void BuyMenuDrawMapBg(void)
                 metatileLayerType = METATILE_LAYER_TYPE_COVERED;
 
             if (metatile < Fieldmap_PrimaryMetatiles(mapLayout))   // Moemon Kai: FRLG split
-                BuyMenuDrawMapMetatile(i, j, mapLayout->primaryTileset->metatiles + metatile * NUM_TILES_PER_METATILE, metatileLayerType);
+                BuyMenuDrawMapMetatile(i, j, Maker_TilesetMetatiles(mapLayout->primaryTileset) + metatile * NUM_TILES_PER_METATILE, metatileLayerType);
             else
-                BuyMenuDrawMapMetatile(i, j, mapLayout->secondaryTileset->metatiles + ((metatile - Fieldmap_PrimaryMetatiles(mapLayout)) * NUM_TILES_PER_METATILE), metatileLayerType);
+                BuyMenuDrawMapMetatile(i, j, Maker_TilesetMetatiles(mapLayout->secondaryTileset) + ((metatile - Fieldmap_PrimaryMetatiles(mapLayout)) * NUM_TILES_PER_METATILE), metatileLayerType);
         }
     }
 }

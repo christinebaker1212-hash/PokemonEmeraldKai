@@ -433,7 +433,8 @@ static void DoPublish(void)
     int changes = 0;
     if (!Head(commit, tree) || !TreeEntriesFor("base", ".txt", sBranch, &entries, &changes)
      || !TreeEntriesFor("music", ".kaisong", sBranch, &entries, &changes)
-     || !TreeEntriesFor("lua", ".lua", sBranch, &entries, &changes))
+     || !TreeEntriesFor("lua", ".lua", sBranch, &entries, &changes)
+     || !TreeEntriesFor("tilesets", ".txt", sBranch, &entries, &changes))
     {
         free(entries);
         return;
@@ -543,9 +544,9 @@ static void DoRollback(void)
     }
     // the working copy: the same files
     {
-        static const char *const sDirs[] = {"base", "music", "lua"};
+        static const char *const sDirs[] = {"base", "music", "lua", "tilesets"};
         int d;
-        for (d = 0; d < 3; d++)
+        for (d = 0; d < 4; d++)
         {
             char localDir[1100];
             DIR *dd;

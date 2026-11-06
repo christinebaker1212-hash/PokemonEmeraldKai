@@ -2399,6 +2399,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d,%d", &x, &y);
         printf("[test] metatile %d,%d = 0x%X\n", x, y, MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET));
     }
+    else if (strcmp(cmd, "behaviorat") == 0)
+    {
+        // behaviorat X,Y - the metatile behavior there (map coordinates; the Maker's tileset edits included)
+        int x = 0, y = 0;
+        sscanf(arg, "%d,%d", &x, &y);
+        printf("[test] behavior %d,%d = 0x%X\n", x, y, MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET));
+    }
     else if (strcmp(cmd, "riding") == 0)
     {
         // riding - the player's bike state (0 on foot, 1 MACH BIKE / BICYCLE, 2 ACRO BIKE)

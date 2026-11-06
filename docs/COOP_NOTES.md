@@ -5420,6 +5420,23 @@ overnight list included M2-M5; each is easy to change if the user wants otherwis
 - Test tools/test/maker_lua.sh (an event's call and branch, the field hooks, the sandbox, the budget, both battle hooks;
   the editor window).
 
+## Moemon Maker, M5: the tileset editor
+
+- Tools > Tileset editor (maker/maker_tilesets_ui.cpp): the open map's primary or secondary tileset, every metatile as
+  the game draws it (edited ones framed orange); a picked metatile's eight entries (bottom 0-3, top 4-7: tile 0-1023,
+  palette 0-15, flips; or a click on the tile sheet drawn in that palette) and its attributes (behavior with its MB_
+  name, layer type NORMAL / COVERED / SPLIT); "Back to the game's"; "Save tilesets". SINNOH's maps are Platinum's
+  models: nothing to edit there.
+- MoemonMaker/tilesets/NAME.txt (NAME as the TILES panel shows it: "General", "Petalburg"...): `metatile ID SLOT WAS
+  NOW` and `attr ID WAS NOW` in hex, sent to the game as they're made (MakerApi_SetTilesetEdits). src/maker/maker_tilesets.c
+  keeps patched copies of a tileset's metatiles / attributes; the game reads them through Maker_TilesetMetatiles /
+  Maker_TilesetAttributes (field_camera.c drawing, fieldmap.c behaviors and layers, shop.c's map view, the editor's own
+  maker_tiles.c). An edit whose WAS the game no longer has is left out ("[maker] tileset X: N edits left out", the
+  window shows how many). Publish and the pack carry tilesets/.
+- Test tools/test/maker_tilesets.sh (the editor changes LITTLEROOT's ground metatile's first entry and makes it TALL
+  GRASS, saves; the game reads the new behavior there (`mp behaviorat X,Y`); a stale edit is left out). Still to come:
+  drawing the tiles' pixels and palettes.
+
 ## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
 - SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py
   STAIRS gives them Emerald's unused behaviors 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down), arrow warps

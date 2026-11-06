@@ -152,6 +152,13 @@ struct MakerStale { char key[128]; long was, now, base; int gone; };
 // (M5) Lua hooks (src/maker/maker_lua.cpp): MoemonMaker/lua/*.lua loaded again, a script's text checked ("" when it
 // compiles), the last problem the game had loading or running one ("" when none)
 void MakerApi_LuaReload(void);
+// (M5) tileset edits (src/maker/maker_tilesets.c): a tileset's file text as the editor makes it; the game's own entry
+// (SLOT 0-7) or attributes (SLOT -1) of a metatile; how many of its edits were left out
+void MakerApi_SetTilesetEdits(const char *name, const char *text);
+int MakerApi_TilesetBase(const char *name, int id, int slot);
+int MakerApi_TilesetSkipped(const char *name);
+void MakerApi_RenderTile(int entry, unsigned int *rgba);   // 8x8 RGBA of one tile entry, as the loaded map's tiles show it
+const char *MakerApi_BehaviorName(int behavior);           // MB_ name, "" when none
 const char *MakerApi_LuaCheck(const char *name, const char *text);
 const char *MakerApi_LuaError(void);
 int MakerApi_Stale(int map, struct MakerStale *out, int max);

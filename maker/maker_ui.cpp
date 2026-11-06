@@ -484,6 +484,8 @@ static void MenuBar()
             OpenDebugger();
         if (ImGui::MenuItem("Lua scripts..."))
             OpenLua();
+        if (ImGui::MenuItem("Tileset editor..."))
+            OpenTilesets();
         ImGui::EndMenu();
     }
     if (ImGui::BeginMenu("Help"))
@@ -881,6 +883,7 @@ static void Frame()
     DatabaseWindow();
     DebuggerWindow();
     LuaWindow();
+    TilesetsWindow();
     PublishWindow();
     StatusBar();
     ClosePrompt();
@@ -1115,6 +1118,8 @@ extern "C" void MakerUi_TestCommand(const char *line)
         Merge_TestCommand(c.c_str(), arg);
     else if (c == "lua")
         Lua_TestCommand(c.c_str(), arg);
+    else if (c == "tileset")
+        Tilesets_TestCommand(c.c_str(), arg);
     else
         MapView_TestCommand(c.c_str(), arg);
 }

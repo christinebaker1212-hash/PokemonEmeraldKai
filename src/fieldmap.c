@@ -37,6 +37,7 @@ EWRAM_DATA static u32 UNUSED sFiller = 0; // without this, the next file won't a
 
 COMMON_DATA struct BackupMapLayout gBackupMapLayout = {0};
 
+const u16 *Maker_TilesetAttributes(const struct Tileset *ts);   // Moemon Maker M5 (src/maker/maker_tilesets.c)
 static const struct ConnectionFlags sDummyConnectionFlags = {0};
 
 static void InitMapLayoutData(const struct MapHeader *mapHeader);
@@ -428,11 +429,11 @@ u16 GetMetatileAttributesById(u16 metatile)
         return metatile - O3D_METATILE_BEHAVIOR;
     if (metatile < split)
     {
-        return gMapHeader.mapLayout->primaryTileset->metatileAttributes[metatile];
+        return Maker_TilesetAttributes(gMapHeader.mapLayout->primaryTileset)[metatile];   // Moemon Maker: tileset edits
     }
     else if (metatile < NUM_METATILES_TOTAL)
     {
-        return gMapHeader.mapLayout->secondaryTileset->metatileAttributes[metatile - split];
+        return Maker_TilesetAttributes(gMapHeader.mapLayout->secondaryTileset)[metatile - split];
     }
     else
     {

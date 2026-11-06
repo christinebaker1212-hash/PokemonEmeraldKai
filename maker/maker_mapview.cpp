@@ -1503,6 +1503,12 @@ static void Preview3D()
     ImGui::TextDisabled("Tile %d, %d, through the game's camera", x, y);
 }
 
+// (M5) the loaded map's tiles, for the TILESETS window
+const MakerTilesInfo *MapView_TilesInfo()
+{
+    return &sTiles;
+}
+
 // The map's own: its music (with a play button) and the maps joined at its edges
 void MapView_MapInspector()
 {

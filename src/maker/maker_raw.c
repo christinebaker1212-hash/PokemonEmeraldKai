@@ -598,3 +598,13 @@ void Maker_RawReset(void)   // a new assembly: the symbols .set by the last one 
         }
     }
 }
+
+// (M5) a metatile behavior's MB_ name ("" when none), for the TILESETS window
+const char *MakerApi_BehaviorName(int behavior)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sMakerSyms); i++)
+        if (strncmp(sMakerSyms[i].name, "MB_", 3) == 0 && sMakerSyms[i].value == behavior)
+            return sMakerSyms[i].name;
+    return "";
+}

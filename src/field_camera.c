@@ -25,6 +25,7 @@ struct FieldCameraOffset
     bool8 copyBGToVRAM;
 };
 
+const u16 *Maker_TilesetMetatiles(const struct Tileset *ts);   // Moemon Maker M5 (src/maker/maker_tilesets.c)
 static void RedrawMapSliceNorth(struct FieldCameraOffset *, const struct MapLayout *);
 static void RedrawMapSliceSouth(struct FieldCameraOffset *, const struct MapLayout *);
 static void RedrawMapSliceEast(struct FieldCameraOffset *, const struct MapLayout *);
@@ -247,11 +248,11 @@ static void DrawMetatileAt(const struct MapLayout *mapLayout, u16 offset, int x,
         metatileId = 1;
     if (metatileId < Fieldmap_PrimaryMetatiles(mapLayout))   // Moemon Kai: FRLG split
     {
-        metatiles = mapLayout->primaryTileset->metatiles;
+        metatiles = Maker_TilesetMetatiles(mapLayout->primaryTileset);   // Moemon Maker: the user's tileset edits
     }
     else
     {
-        metatiles = mapLayout->secondaryTileset->metatiles;
+        metatiles = Maker_TilesetMetatiles(mapLayout->secondaryTileset);
         metatileId -= Fieldmap_PrimaryMetatiles(mapLayout);
     }
     DrawMetatile(MapGridGetMetatileLayerTypeAt(x, y), metatiles + metatileId * NUM_TILES_PER_METATILE, offset);

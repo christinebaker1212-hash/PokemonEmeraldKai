@@ -22,6 +22,8 @@ int Tilesets_MakerMetatileCount(const struct Tileset *tileset, const char **name
 void TilesetAnims_InitForLayout(const struct MapLayout *layout);                    // tileset_anims.c
 u8 TilesetAnims_Queued(void);
 
+const u16 *Maker_TilesetMetatiles(const struct Tileset *ts);
+const u16 *Maker_TilesetAttributes(const struct Tileset *ts);
 static const struct MapLayout *sLayout;   // the editor's map's layout (its tiles are in BG VRAM)
 static u8 *sTileBase;                     // where its tiles are: BG VRAM, or while the game plays (F5) a copy of our own
 static u8 *sOwnTiles;
@@ -118,9 +120,9 @@ static const u16 *MetatileEntries(u16 id)
         return NULL;
     split = Fieldmap_PrimaryMetatiles(sLayout);
     if (id < split)
-        return sLayout->primaryTileset ? &sLayout->primaryTileset->metatiles[id * 8] : NULL;
+        return sLayout->primaryTileset ? &Maker_TilesetMetatiles(sLayout->primaryTileset)[id * 8] : NULL;
     if (id < NUM_METATILES_TOTAL && sLayout->secondaryTileset)
-        return &sLayout->secondaryTileset->metatiles[(id - split) * 8];
+        return &Maker_TilesetMetatiles(sLayout->secondaryTileset)[(id - split) * 8];
     return NULL;
 }
 
@@ -145,6 +147,27 @@ static void DrawTile(u32 *out, u16 entry, int ox, int oy, bool8 opaque)
             if (c || opaque)
                 out[(oy + y) * 16 + ox + x] = Rgba(c ? pal[c] : sPalettes[0][0]);
         }
+}
+
+// (M5) one 8x8 tile entry as the loaded map's tiles show it (the TILESETS window's picker); 64 RGBA
+void MakerApi_RenderTile(int entry, unsigned int *rgba)
+{
+    u32 buf[256];
+    int y;
+    if (sTileBase == NULL)
+    {
+        memset(rgba, 0, 64 * 4);
+        return;
+    }
+    DrawTile(buf, (u16)entry, 0, 0, TRUE);
+    for (y = 0; y < 8; y++)
+        memcpy(rgba + y * 8, buf + y * 16, 8 * 4);
+}
+
+// (M5) the tileset edits changed: the editor's pictures drawn again
+void Maker_TilesChanged(void)
+{
+    sTilesChanged = TRUE;
 }
 
 void MakerApi_RenderMetatile(int id, unsigned int *rgba, int layers)
@@ -177,9 +200,9 @@ static u16 Attributes(int id)
         return 0;
     split = Fieldmap_PrimaryMetatiles(sLayout);
     if (id < split)
-        return sLayout->primaryTileset ? sLayout->primaryTileset->metatileAttributes[id] : 0;
+        return sLayout->primaryTileset ? Maker_TilesetAttributes(sLayout->primaryTileset)[id] : 0;
     if (id < NUM_METATILES_TOTAL && sLayout->secondaryTileset)
-        return sLayout->secondaryTileset->metatileAttributes[id - split];
+        return Maker_TilesetAttributes(sLayout->secondaryTileset)[id - split];
     return 0;
 }
 
