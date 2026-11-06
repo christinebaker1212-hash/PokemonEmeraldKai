@@ -38,6 +38,7 @@ static struct
     u16 backCount;
     const u8 *accessories[100];   // SUPER CONTESTS' art (tools/sinnoh/build_contest.py: "CNTS"): u16 w, h, RGB555
     const u8 *backdrops2[18];
+    const u8 *stages[8];    // Platinum's contest stages (build_contest.py stages(): "CSTG"): u16 w, h, RGB555
     const u8 *mining[128];  // the Underground's digging (tools/sinnoh/build_mining.py: "MINE"): u16 w, h, RGB555
     const u8 *unownWidths;  // Platinum's UNOWN font (tools/sinnoh/build_unown.py: "UNWN"): widths, glyphs
     const u16 *unownGlyphs;
@@ -207,6 +208,22 @@ static void Load(void)
                     sGfx.backdrops2[k] = p;
                 p += 4 + w * h * 2;
             }
+        }
+    }
+    // the contests' stages: "CSTG", u16 count, pictures (u16 w, h, RGB555)
+    if (p + 6 <= end && memcmp(p, "CSTG", 4) == 0)
+    {
+        u32 k;
+        n = p[4] | p[5] << 8;
+        p += 6;
+        for (k = 0; k < n && p + 4 <= end; k++)
+        {
+            u32 w = p[0] | p[1] << 8, h = p[2] | p[3] << 8;
+            if (p + 4 + w * h * 2 > end)
+                break;
+            if (k < ARRAY_COUNT(sGfx.stages))
+                sGfx.stages[k] = p;
+            p += 4 + w * h * 2;
         }
     }
     // the Underground's digging screen: "MINE", u16 count, pictures (u16 w, h, RGB555)
@@ -546,6 +563,20 @@ bool8 S3D_Gfx_MiningPicture(u16 n, u16 *w, u16 *h, const u16 **px)
     if (!sGfx.tried)
         Load();
     if (!sGfx.ok || n >= ARRAY_COUNT(sGfx.mining) || (p = sGfx.mining[n]) == NULL || (p[0] | p[1] << 8) == 0)
+        return FALSE;
+    *w = p[0] | p[1] << 8;
+    *h = p[2] | p[3] << 8;
+    *px = (const u16 *)(p + 4);
+    return TRUE;
+}
+
+// A contest stage (s3d_contest_ui.c STAGE_*): FALSE when the pack has none
+bool8 S3D_Gfx_ContestStage(u16 n, u16 *w, u16 *h, const u16 **px)
+{
+    const u8 *p;
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || n >= ARRAY_COUNT(sGfx.stages) || (p = sGfx.stages[n]) == NULL)
         return FALSE;
     *w = p[0] | p[1] << 8;
     *h = p[2] | p[3] << 8;

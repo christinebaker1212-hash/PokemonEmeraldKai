@@ -78,4 +78,5 @@ SCORING, back to the hall. Four entrants: the player (entry 0) and three opponen
 ## Still to build
 - Contests with friends (co-op link contests: StartBattleClient / Server answer "cancelled" now), JUBILIFE TV's
   dress-up photos (ScrCmd_0A6, ShowDressUpPhoto), the link records (ShowLinkContestRecords), the POFFIN HOUSE's
-  cooking (the game's BERRY BLENDER), Platinum's stage art (contest_bg.narc / contest_obj.narc).
+  cooking (the game's BERRY BLENDER). Platinum's stages (contest_bg.narc) are drawn behind the rounds since 1.113.0
+  (build_contest.py stages(), "CSTG"; s3d_contest_ui.c DrawStagePicture).

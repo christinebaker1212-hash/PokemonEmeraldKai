@@ -38,6 +38,10 @@
 #define MON_Y 128
 
 bool8 S3D_Gfx_ContestPicture(bool8 backdrop, u16 n, u16 *w, u16 *h, const u16 **px);
+bool8 S3D_Gfx_ContestStage(u16 n, u16 *w, u16 *h, const u16 **px);
+
+// Platinum's stages (sinnoh/platinum_gfx.pak "CSTG": tools/sinnoh/build_contest.py STAGES' order)
+enum { STAGE_VISUAL, STAGE_DANCE, STAGE_DANCE2, STAGE_ACTING, STAGE_RESULTS, STAGE_AUDIENCE, STAGE_COUNT };
 bool8 Sinnoh_HasBackdrop(u16 backdrop);
 void Sinnoh_AccessoryName(u8 *dest, u16 accessory, bool8 article);
 
@@ -78,7 +82,7 @@ static struct
     u8 resultStep;
     // textures
     SDL_Renderer *owner;
-    SDL_Texture *canvas, *acc[100], *bd[18], *mon[CONTEST_ENTRANTS];
+    SDL_Texture *canvas, *acc[100], *bd[18], *mon[CONTEST_ENTRANTS], *stage[STAGE_COUNT];
     u16 monSpecies[CONTEST_ENTRANTS];
     u32 monKey[CONTEST_ENTRANTS];
     const struct ContestEntrant *photo;
@@ -231,6 +235,44 @@ static SDL_Texture *ArtTexture(bool8 backdrop, u16 n)
     return *slot;
 }
 
+static SDL_Texture *StageTexture(u8 n)
+{
+    static u32 px[256 * 256];
+    const u16 *src;
+    u16 w, h;
+    u32 i;
+    if (n >= STAGE_COUNT)
+        return NULL;
+    if (U.stage[n])
+        return U.stage[n];
+    if (!S3D_Gfx_ContestStage(n, &w, &h, &src) || (u32)w * h > sizeof(px) / 4)
+        return NULL;
+    for (i = 0; i < (u32)w * h; i++)
+        px[i] = Argb(src[i]);
+    U.stage[n] = SDL_CreateTexture(U.owner, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, w, h);
+    if (U.stage[n])
+    {
+        SDL_UpdateTexture(U.stage[n], NULL, px, w * 4);
+        SDL_SetTextureScaleMode(U.stage[n], SDL_ScaleModeNearest);
+    }
+    return U.stage[n];
+}
+
+// Platinum's stage N over the screen: its DS picture from (8, SRCY), the 240 x 160 the screen shows; FALSE (FALLBACK
+// drawn) without the pack
+static bool8 DrawStagePicture(u8 n, int srcY, unsigned fallback)
+{
+    SDL_Texture *t = StageTexture(n);
+    if (t)
+    {
+        SDL_Rect src = {8, srcY, 240, 160}, dst = {0, 0, 240, 160};
+        SDL_RenderCopy(G_R(), t, &src, &dst);
+        return TRUE;
+    }
+    G_Fill(0, 0, 240, 160, fallback);
+    return FALSE;
+}
+
 static SDL_Texture *MonTexture(u8 k, const struct ContestEntrant *e)
 {
     static u8 tiles[MON_PIC_SIZE * 4];
@@ -269,6 +311,7 @@ static void Forget(void)
 {
     memset(U.acc, 0, sizeof(U.acc));
     memset(U.bd, 0, sizeof(U.bd));
+    memset(U.stage, 0, sizeof(U.stage));
     memset(U.mon, 0, sizeof(U.mon));
     memset(U.monKey, 0, sizeof(U.monKey));
     U.canvas = NULL;
@@ -415,7 +458,7 @@ static void DrawVisualShow(void)
     SDL_Renderer *r = G_R();
     u8 k = U.shown < CONTEST_ENTRANTS ? CONTEST_ENTRANTS - 1 - U.shown : 0;
     const struct ContestEntrant *e = &C.e[k];
-    G_Fill(0, 0, 240, 160, 0x302838);
+    DrawStagePicture(STAGE_VISUAL, 0, 0x302838);   // (Platinum's: the audience above the stage)
     SDL_RenderSetScale(r, 1, 1);
     DrawPhoto(k, e, 112, 12, 256, FALSE);
     SDL_RenderSetScale(r, 2, 2);
@@ -429,8 +472,14 @@ static void DrawStage(u8 highlight)
 {
     SDL_Renderer *r = G_R();
     u8 i;
-    G_Fill(0, 0, 240, 100, 0x283058);
-    G_Fill(0, 72, 240, 48, 0x8a6a48);
+    // Platinum's DANCE floor (its panels under the dancers' feet) or ACTING stage (the heart below)
+    if (U.scene == SC_DANCE || U.scene == SC_INTRO_DANCE || U.scene == SC_DANCE_END)
+    {
+        if (!DrawStagePicture(STAGE_DANCE, 77, 0x283058))
+            G_Fill(0, 72, 240, 48, 0x8a6a48);
+    }
+    else if (!DrawStagePicture(STAGE_ACTING, 40, 0x283058))
+        G_Fill(0, 72, 240, 48, 0x8a6a48);
     SDL_RenderSetScale(r, 1, 1);
     for (i = 0; i < CONTEST_ENTRANTS; i++)
     {
@@ -453,6 +502,7 @@ static void DrawStage(u8 highlight)
     SDL_RenderSetScale(r, 2, 2);
     for (i = 0; i < CONTEST_ENTRANTS; i++)
     {
+        G_RoundFill(34 + i * 56 - 25, 82, 50, 11, 0x181828, 190);   // (readable over Platinum's stage art)
         WordGame(34 + i * 56, 82, TA_CENTER, highlight == i ? 0xf8e070 : G_WHITE, C.e[i].nick);
         if (U.flash[i] > 0)
             Word(34 + i * 56, 6, TA_CENTER, U.flashGrade[i] <= 1 ? 0xf8e070 : U.flashGrade[i] <= 3 ? 0x90f090 : 0xc0c0c0,
@@ -479,11 +529,13 @@ static void DrawDance(void)
         }
     G_Fill(14 + (int)(now * 208 / (measure ? measure : 1)), 100, 2, 18, U.part ? 0x70e070 : 0xf07070);
     snprintf(s, sizeof(s), "%d/%d", U.round < CONTEST_ENTRANTS ? U.round + 1 : CONTEST_ENTRANTS, CONTEST_ENTRANTS);
+    G_RoundFill(212, 90, 24, 9, 0x181828, 190);
     G_TextAlign(232, 90, TA_RIGHT, G_WHITE, G_NO_SHADOW, s, TF_SMALL);
     if (!Talking())
     {
         u8 pattern;
         SetNumberSlot(0, Contest_Song(&pattern)->steps);
+        G_RoundFill(16, 121, 208, 12, 0x181828, 190);
         if (lead == 0 && U.part == 0)
             Word(120, 122, TA_CENTER, 0xf8a0a0, "DanceCompetition_Text_PerformStepsAsMainDancer");
         else if (lead != 0 && U.part == 1)
@@ -549,9 +601,13 @@ static void DrawActing(void)
             G_TextAlign(120, 75, TA_CENTER, 0xf8d038, G_NO_SHADOW, "A: YES     B: NO", TF_SMALL);
         }
         else
+        {
+            G_RoundFill(6, 90, 64, 9, 0x181828, 190);
             G_TextAlign(8, 90, TA_LEFT, 0xc0c0d0, G_NO_SHADOW, "START: CONCEDE", TF_SMALL);
+        }
     }
     snprintf(s, sizeof(s), "%d/%d", C.act.turn < CONTEST_TURNS ? C.act.turn + 1 : CONTEST_TURNS, CONTEST_TURNS);
+    G_RoundFill(212, 90, 24, 9, 0x181828, 190);
     G_TextAlign(232, 90, TA_RIGHT, G_WHITE, G_NO_SHADOW, s, TF_SMALL);
 }
 
@@ -559,25 +615,42 @@ static void DrawResults(void)
 {
     u8 i, r;
     static const unsigned sColor[3] = {0xf06080, 0x60c0f8, 0xf8c040};
-    G_Fill(0, 0, 240, 160, 0x302838);
+    // Platinum's results: a row of its picture each (32 apart from 8: the POKeMON's plate, its name, the score's
+    // track, the placing's light at the right)
+    bool8 art = DrawStagePicture(STAGE_RESULTS, 8, 0x302838);   // (8 up: the last row's bar clears the text box)
     for (i = 0; i < CONTEST_ENTRANTS; i++)
     {
         u8 id = CONTEST_ENTRANTS - 1 - i;
-        int x = 52, w = 0;
-        WordGame(6, 8 + i * 26, TA_LEFT, C.e[id].place == 0 && U.resultStep >= 4 ? 0xf8e070 : G_WHITE, C.e[id].nick);
+        int top = art ? i * 32 : 8 + i * 26;
+        int x = art ? 36 : 52, w = 0;
+        if (art)
+        {
+            SDL_Texture *t = MonTexture(id, &C.e[id]);
+            SDL_Renderer *rr = G_R();
+            if (t)
+            {
+                SDL_Rect d = {2 * 2, (top + 3) * 2, 26 * 2, 26 * 2};
+                SDL_RenderSetScale(rr, 1, 1);
+                SDL_RenderCopy(rr, t, NULL, &d);
+                SDL_RenderSetScale(rr, 2, 2);
+            }
+        }
+        WordGame(art ? 40 : 6, art ? top + 3 : top, TA_LEFT,
+                 C.e[id].place == 0 && U.resultStep >= 4 ? (art ? 0xb04070 : 0xf8e070) : (art ? 0x303030 : G_WHITE), C.e[id].nick);
         for (r = 0; r < ROUND_COUNT; r++)
         {
             if (!Contest_HasRound(r) || U.resultStep < r + 1)
                 continue;
             w = C.e[id].round[r] * 180 / 100;
-            G_Fill(x, 9 + i * 26, w, 8, sColor[r]);
+            G_Fill(x, art ? top + 20 : top + 1, w, art ? 4 : 8, sColor[r]);
             x += w;
         }
         if (U.resultStep >= 4)
         {
             char s[8];
             snprintf(s, sizeof(s), "%d", C.e[id].place + 1);
-            G_TextAlign(234, 8 + i * 26, TA_RIGHT, G_WHITE, G_NO_SHADOW, s, TF_NORMAL);
+            G_TextAlign(art ? 232 : 234, art ? top - 1 : top, art ? TA_CENTER : TA_RIGHT, art ? 0x105030 : G_WHITE,
+                        G_NO_SHADOW, s, TF_NORMAL);
         }
     }
 }
@@ -594,7 +667,7 @@ static void Draw(void)
     case SC_VISUAL_SHOW:
     case SC_INTRO_VISUAL:
         if (U.scene == SC_INTRO_VISUAL)
-            G_Fill(0, 0, 240, 160, 0x302838);
+            DrawStagePicture(STAGE_VISUAL, 0, 0x302838);
         else
             DrawVisualShow();
         break;

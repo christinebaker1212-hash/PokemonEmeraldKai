@@ -139,7 +139,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The FASHION CASE: Platinum's 100 accessories and 18 backdrops kept, given, checked, named in its words
       (src/sinnoh/s3d_fashion.c; AMITY SQUARE's and the hall's gifts convert)
 - [x] POFFINS as POKéBLOCKS (the POFFIN case checks, GivePoffin)
-- [ ] The contest's art in the graphics pack: accessories, backdrops, the dress-up screen, contest_bg / contest_obj
+- [x] The contest's art in the graphics pack: accessories, backdrops, the stages (contest_bg)
 - [x] The CONTEST HALL's lobby and stages, the POFFIN HOUSE as maps again (numbers of every other map kept)
 - [x] The VISUAL round: dress-up (accessories placed on the POKéMON over a backdrop, Platinum's time and theme),
       then its judging (sinnoh_contest)
@@ -149,7 +149,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       (ContestPhotoHasData, the lobby's frames), the hall's receptionists, practice
 - [x] JUBILIFE TV's dress-up and its photos (ScrCmd_0A6, ShowDressUpPhoto, DressUpPhotoHasData) (sinnoh_studio)
 - [x] The POFFIN HOUSE's cooking as the game's BERRY BLENDER (CheckCanCookPoffin, OpenPoffinCooking)
-- [ ] Platinum's stage art (contest_bg / contest_obj)
+- [x] Platinum's stage art (1.113.0: contest_bg.narc's VISUAL stage and audience, DANCE floor, ACTING stage and results
+      bars behind the rounds: build_contest.py stages() "CSTG", s3d_contest_ui.c DrawStagePicture) (sinnoh_contest)
 - [ ] Contests with friends (co-op, as Kai's link contests)
 - [x] POKé BALL effects (Kai's mp_ballfx.c) wherever Platinum has Seals: each Seal stands for an earned ball effect
       piece; the SUNYSHORE MARKET's Seal shop sells the day's at Platinum's prices (sinnoh_seals), SOLACEON's gifts

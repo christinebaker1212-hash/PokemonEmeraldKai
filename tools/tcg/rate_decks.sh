@@ -1,7 +1,7 @@
 #!/bin/bash
 # CARD SCALING's deck ratings: src/tcg/tcg_ratings.c (tools/tcg/rate_decks.c). Run it again
 # whenever the rules, the AI or a deck change (tools/tcg/test.sh checks it's up to date).
-# About a minute.
+# About 25 minutes (each special deck plays the others; the fit takes all the results at once).
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 OUT=$(mktemp -d /tmp/moemon-tcg-rate.XXXXXX)

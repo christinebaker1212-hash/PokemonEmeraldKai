@@ -75,6 +75,6 @@ gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/special"
 "$OUT/special"
 
-# CARD SCALING's deck ratings: up to date with the rules, the AI and the decks (about a minute)
+# CARD SCALING's deck ratings: up to date with the rules, the AI and the decks (about 25 minutes)
 tools/tcg/rate_decks.sh > /dev/null
 git diff --quiet -- src/tcg/tcg_ratings.c || { echo 'src/tcg/tcg_ratings.c is out of date (tools/tcg/rate_decks.sh)'; exit 1; }

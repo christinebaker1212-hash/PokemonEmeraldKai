@@ -97,6 +97,77 @@ def section(root):
             out += struct.pack('<HH', w, h) + px
         else:
             out += struct.pack('<HH', 0, 0)
+    return bytes(out) + stages(root)
+
+
+# Platinum's stages (res/prebuilt/contest/graphic/contest_bg.narc, as overlay017 loads them): (screen, tiles, palette)
+# members of the main screen's picture, in the order src/sinnoh/s3d_contest_ui.c names them (STAGE_*)
+STAGE_NARC = 'res/prebuilt/contest/graphic/contest_bg.narc'
+STAGES = [
+    (2, 1, 30),    # the VISUAL round's stage, the audience above (ov17_0223B140.c: BG3)
+    (14, 13, 32),  # the DANCE round's floor (ov17_0223DAD0.c ov17_0223E67C: Unk_ov17_02252FC4[0])
+    (15, 13, 32),  # ... its other floor (Unk_ov17_02252FC4[1])
+    (22, 23, 35),  # the ACTING round's stage (ov17_0223CB1C.c: BG3)
+    (25, 27, 39),  # the results' bars (ov17_02250744.c: BG3)
+    (20, 19, 34),  # the audience (ov17_0223CB1C.c: the lower screen)
+]
+
+
+def lz10(d):
+    """Nintendo's LZ77 (type 0x10), the NARC's members' compression"""
+    if not d or d[0] != 0x10:
+        return d
+    size = d[1] | d[2] << 8 | d[3] << 16
+    out, i = bytearray(), 4
+    while len(out) < size:
+        flags = d[i]
+        i += 1
+        for b in range(8):
+            if len(out) >= size:
+                break
+            if flags & (0x80 >> b):
+                v = d[i] << 8 | d[i + 1]
+                i += 2
+                for _ in range((v >> 12) + 3):
+                    out.append(out[-((v & 0xFFF) + 1)])
+            else:
+                out.append(d[i])
+                i += 1
+    return bytes(out)
+
+
+def stage_picture(m, scr, chr_, pal):
+    """A stage's 256-wide picture (the screen's left 32 x 32 block for the wider ones), RGB555 | 0x8000"""
+    import build_journal as bj
+    s = bj.section_of(m[scr], b'SCRN')
+    w, h = struct.unpack_from('<HH', s, 8)
+    size = struct.unpack_from('<I', s, 16)[0]
+    ents = struct.unpack_from('<%dH' % (size // 2), s, 20)
+    ts = bj.tiles(m[chr_])
+    p = bj.palettes(m[pal])
+    out = bytearray()
+    for y in range(min(h, 256)):
+        for x in range(256):
+            e = ents[(y // 8) * 32 + x // 8] if w > 256 else ents[(y // 8) * (w // 8) + x // 8]
+            n, hf, vf, bank = e & 0x3FF, e >> 10 & 1, e >> 11 & 1, e >> 12
+            c = 0
+            if n < len(ts):
+                c = ts[n][(7 - y % 8 if vf else y % 8) * 8 + (7 - x % 8 if hf else x % 8)]
+            out += struct.pack('<H', 0x8000 | p[(bank * 16 + c) % 256 if c else 0])
+    return 256, min(h, 256), out
+
+
+def stages(root):
+    """Section "CSTG": u16 count, pictures (u16 w, h, RGB555)"""
+    path = os.path.join(root, STAGE_NARC)
+    if not os.path.exists(path):
+        return b''
+    from tv_data import narc_members
+    m = [lz10(x) for x in narc_members(path)]
+    out = bytearray(b'CSTG') + struct.pack('<H', len(STAGES))
+    for scr, chr_, pal in STAGES:
+        w, h, px = stage_picture(m, scr, chr_, pal)
+        out += struct.pack('<HH', w, h) + px
     return bytes(out)
 
 

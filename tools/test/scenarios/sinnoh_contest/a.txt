@@ -31,6 +31,7 @@ mash A 60 20
 rendershot c_dress
 press START 1
 wait 30
+rendershot c_show
 mash A 60 20
 rendershot c_visual
 mash A 60 20
