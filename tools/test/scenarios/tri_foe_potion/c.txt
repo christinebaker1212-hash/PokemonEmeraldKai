@@ -3,6 +3,7 @@ mp teach 0 45
 mp teach 1 45
 waitfor online 6000
 waitlog 4000 is waiting for a partner
+watchlog co-op: battle over
 wait 400
 shot c0
 press RIGHT 12
@@ -12,6 +13,6 @@ wait 60
 shot c00
 waitfor action 8000
 shot c1
-pressuntillog A 30000 co-op: battle over
+pressuntillog A 30000
 wait 300
 quit

@@ -2074,6 +2074,10 @@ u8 GetBattlerSpriteSubpriority(u8 battler)
             subpriority = 20;
         else if (position == B_POSITION_OPPONENT_LEFT)
             subpriority = 40;
+        else if (position == B_POSITION_PLAYER_CENTER)
+            subpriority = 25;   // Moemon Co-op: a Triple's centers, between their side's left and right
+        else if (position == B_POSITION_OPPONENT_CENTER)
+            subpriority = 45;
         else
             subpriority = 50;
     }
@@ -2087,7 +2091,7 @@ u8 GetBattlerSpriteBGPriority(u8 battler)
 
     if (IsContest())
         return 2;
-    else if (position == B_POSITION_PLAYER_LEFT || position == B_POSITION_OPPONENT_RIGHT)
+    else if (MP_BG2_POSITION(position))   // (Moemon Co-op: a Triple's centers too)
         return GetAnimBgAttribute(2, BG_ANIM_PRIORITY);
     else
         return GetAnimBgAttribute(1, BG_ANIM_PRIORITY);
@@ -2098,7 +2102,7 @@ u8 GetBattlerSpriteBGPriorityRank(u8 battler)
     if (!IsContest())
     {
         u8 position = GetBattlerPosition(battler);
-        if (position == B_POSITION_PLAYER_LEFT || position == B_POSITION_OPPONENT_RIGHT)
+        if (MP_BG2_POSITION(position))   // (Moemon Co-op: a Triple's centers too)
             return 2;
         else
             return 1;

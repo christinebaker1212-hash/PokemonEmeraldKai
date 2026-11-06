@@ -1,0 +1,17 @@
+# A Triple Battle's center POKéMON in animations: PSYCHIC (which moves its target and the target's partner onto BG
+# layers) at the foe's center (battler 5) and at the player's center (battler 4). The center used to share a BG with its
+# partner (0 / 1), so one of them vanished for the animation; now each goes to its own (MP_BG2_POSITION). Look at the
+# psy5_ / psy4_ shots: all six POKéMON stay drawn.
+MODE=3
+WARP=10,0,5,3
+WARP_B=10,0,5,6
+WARP_C=10,0,3,3
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:50,280:50"
+ENV_B="MOEMON_DEBUG_PARTY=283:50,280:50"
+ENV_C="MOEMON_DEBUG_PARTY=283:50,280:50"
+EXPECT_A=("(and another: triple)" "animall done")
+EXPECT_B=("co-op battle link: 3 games")
+EXPECT_C=("co-op battle link: 3 games")
+UNEXPECT_A=("[crash]" "didn't end")
+GEN=3

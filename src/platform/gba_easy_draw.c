@@ -494,6 +494,12 @@ static bool winCheckHorizontalBounds(u16 left, u16 right, u16 xpos)
 extern u8 gMpOamFx[256];
 extern u16 *gMpFxLayer;
 static bool sFxSprite;
+// Moemon Kai: MODERN never draws over the battle's UI: the pixels that come from BG0 (the text box and menus) or the
+// battle interface's sprites (gMpOamUi: HP boxes, HP bars, the party's ball bars) are marked in gMpUiLayer
+extern u8 gMpOamUi[256];
+u8 *gMpUiLayer;
+static bool sUiSprite;
+static u8 sUiPix[4][DISPLAY_WIDTH];
 extern u8 gMpOamShadowLive[256];
 static bool sShadowSprite;
 // Moemon Kai: entries that give way to another (sprite->mpUnder, sprite.c gMpOamUnderLive): a follower raised to a
@@ -637,6 +643,8 @@ static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct 
         // Moemon Co-op: BATTLE ANIMS > MODERN marks the effect sprites' pixels (mp_modernanim.c)
         if (gMpFxLayer != NULL)
             gMpFxLayer[vcount * DISPLAY_WIDTH + global_x] = sFxSprite ? (color | 0x8000) : 0;
+        if (gMpUiLayer != NULL && pixels == scanline->spriteLayers[oam->priority])
+            sUiPix[oam->priority][global_x] = sUiSprite;
     }
 }
 
@@ -892,6 +900,7 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
         if ((int)vcount >= MP_BigSprite_OamClipY(i))   // Moemon PC: clipped above this line (in water, in the ground)
             continue;
         sFxSprite = gMpFxLayer != NULL && gMpOamFx[i];   // Moemon Co-op: a battle animation's effect sprite
+        sUiSprite = gMpUiLayer != NULL && gMpOamUi[i];   // Moemon Kai: the battle's UI (MODERN keeps off it)
         sShadowSprite = gMpOamShadowLive[i];   // Moemon Kai: a shadow (mp_shadow.c; as LoadOam copied the OAM)
         if (oam->shape == MP_BIG_OAM_SHAPE)   // Moemon PC: a picture of any size (mp_bigsprite.h)
         {
@@ -1215,6 +1224,11 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
         }
     }
 
+    if (gMpUiLayer != NULL)
+    {
+        memset(sUiPix, 0, sizeof(sUiPix));
+        memset(&gMpUiLayer[vcount * DISPLAY_WIDTH], 0, DISPLAY_WIDTH);
+    }
     if (REG_DISPCNT & DISPCNT_OBJ_ON)
         DrawSprites(&scanline, vcount, windowsEnabled);
 
@@ -1274,6 +1288,8 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
                     //write the pixel to scanline buffer output
                     pixels[xpos] = color;
                     gMpPixelObjPal[vcount * DISPLAY_WIDTH + xpos] = 0;
+                    if (gMpUiLayer != NULL)
+                        gMpUiLayer[vcount * DISPLAY_WIDTH + xpos] = bgnum == 0;   // (BG0: the text box, menus)
                 }
             }
         }
@@ -1289,6 +1305,8 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
                 //draw the pixel
                 pixels[xpos] = src[xpos];
                 gMpPixelObjPal[vcount * DISPLAY_WIDTH + xpos] = scanline.spritePal[prnum][xpos];
+                if (gMpUiLayer != NULL)
+                    gMpUiLayer[vcount * DISPLAY_WIDTH + xpos] = sUiPix[prnum][xpos];
             }
         }
     }

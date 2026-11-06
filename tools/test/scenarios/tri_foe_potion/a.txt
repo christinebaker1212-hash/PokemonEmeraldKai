@@ -6,14 +6,24 @@ press UP 2
 wait 30
 press A 2
 pressuntillog A 6000 joins the battle against trainer
+watchlog co-op: battle over
 waitfor action 8000
 mp foehp 9
 shotburst a1_ 1500 10
 mash A 14 20
 waitfor action 8000
 mp foehp 9
+mp hp 0 100
+mp hp 2 100
+mp hp 4 100
 shotburst a2_ 1500 10
 mash A 14 20
-pressuntillog A 30000 co-op: battle over
+waitfor action 8000
+mp foehp 1
+mp hp 0 100
+mp hp 2 100
+mp hp 4 100
+mash A 14 20
+pressuntillog A 30000
 wait 300
 quit

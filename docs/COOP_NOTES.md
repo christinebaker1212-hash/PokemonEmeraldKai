@@ -2584,6 +2584,9 @@ walk (red: checked against the FLOORS grid; row 6 in front of the arcade cabinet
   local server), tools/rhythm/test.sh (every chart).
 
 ## BATTLE ANIMS > MODERN (mp_modernanim.c; 1.43.0)
+**Rebuilt in 1.120.0: docs/MODERN_ANIMS.md** (the audit of every move, the families each move draws, the UI mask that
+keeps MODERN off the text box and HP boxes, the stat-change animation left as the game's own). What follows is the
+1.43.0 layer the families sit on (glow, trails, hit bursts).
 OPTIONS > BATTLE > BATTLE ANIMS: CLASSIC / MODERN (gMpConfig.battleAnims, ini battle_anims; MOEMON_BATTLE_ANIMS for
 tests). This game only: the Classic animation script always runs (same sprites, tasks, sounds, frame count), MODERN
 draws over the finished picture (sdl2.c VDraw after the battle weather), so friends on either setting stay in step.
@@ -3293,6 +3296,17 @@ The user's numbers (2026-11-06), battle_script_commands.c Cmd_getexp / MpCoopSpl
   crashed with them before).
 - Logs "exp: W from the foe, E each of N that fought (unsplit U), EXP Share S" and "exp: slot N +X" (solo).
   `mp gatchapull BANNER` 10-pulls as the phone does. Tests exp_share_egg, exp_unsplit, vitamins_252, gatcha_training.
+
+## Triple Battles: the centers in animations (1.120.0)
+
+Battle animations copy a Pokémon (and its partner) onto BG1 or BG2 and hide its sprite while it's there (Cmd_monbg,
+Task_InitUpdateMonBg). The layer came from the position (BG1 for OPPONENT_LEFT / PLAYER_RIGHT, BG2 otherwise), so a
+center (4 / 5) shared BG2 with its partner (BATTLE_PARTNER: 0 / 1) and the second copy wiped the first: the player's
+center vanished during moves aimed at it, and tasks reading GetBattlerSpriteBGPriorityRank (BG1 for the centers) moved
+the wrong layer. MP_BG2_POSITION (battle_anim.h) is now the one rule everywhere (battle_anim.c's monbg sites,
+battle_anim_mons.c's priority functions, battle_anim_dark.c): BG2 for PLAYER_LEFT, OPPONENT_RIGHT, OPPONENT_CENTER.
+The centers' sprite subpriority sits between their side's left and right (25 / 45), and one effect's BG offset has
+center values. Test tri_anim_center (PSYCHIC at both centers; the old rule showed two of the player's three).
 
 ## IV stars and EVs on the STATS page (1.118.0)
 

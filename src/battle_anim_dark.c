@@ -844,7 +844,7 @@ void AnimTask_MetallicShine(u8 taskId)
 
     if (IsDoubleBattle() && !IsContest())
     {
-        if (GetBattlerPosition(gBattleAnimAttacker) == B_POSITION_OPPONENT_RIGHT || GetBattlerPosition(gBattleAnimAttacker) == B_POSITION_PLAYER_LEFT)
+        if (MP_BG2_POSITION(GetBattlerPosition(gBattleAnimAttacker)))   // (Moemon Co-op: a Triple's centers too)
         {
             if (IsBattlerSpriteVisible(BATTLE_PARTNER(gBattleAnimAttacker)) == TRUE)
             {

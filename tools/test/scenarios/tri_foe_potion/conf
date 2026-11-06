@@ -1,6 +1,6 @@
 # WATTSON in a co-op Triple Battle, kept at low HP so he uses his SUPER POTIONs while BOB's THUNDER WAVE paralyzes his
 # POKéMON and ALICE scratches: no HP bar ever turns back (it used to fill, drop to zero and fill again), and the
-# battle goes on to the end.
+# battle goes on to the end (then the foes are put at 1 HP and the leads healed, so a fainted lead never leaves a script at a party menu).
 MODE=3
 WARP=10,0,5,3
 WARP_B=10,0,5,6

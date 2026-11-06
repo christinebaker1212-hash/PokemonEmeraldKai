@@ -185,6 +185,10 @@ void ClearBattleAnimBg(u32 bgId);
 u8 GetAnimBattlerSpriteId(u8 animBattler);
 bool8 IsDoubleBattle(void);
 u8 GetBattleBgPaletteNum(void);
+// Moemon Co-op: the positions whose Pokemon a battle animation moves to BG2 (the others to BG1). A Triple's center
+// Pokemon (4/5) go opposite their partner (BATTLE_PARTNER: 0/1), so the two never share a BG and overwrite each other.
+#define MP_BG2_POSITION(position) ((position) == B_POSITION_PLAYER_LEFT || (position) == B_POSITION_OPPONENT_RIGHT \
+                                || (position) == B_POSITION_OPPONENT_CENTER)
 u8 GetBattlerSpriteBGPriorityRank(u8 battler);
 void StoreSpriteCallbackInData6(struct Sprite *sprite, void (*callback)(struct Sprite *));
 void SetSpritePrimaryCoordsFromSecondaryCoords(struct Sprite *sprite);

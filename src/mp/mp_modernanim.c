@@ -20,6 +20,7 @@
 #include "global.h"
 #include "battle.h"
 #include "battle_anim.h"
+#include "battle_interface.h"
 #include "contest.h"
 #include "main.h"
 #include "mp.h"
@@ -51,6 +52,9 @@ void AnimTask_HorizontalShake(u8 taskId);
 u8 gMpOamFx[256];          // per OAM entry: drawn by a battle animation's effect sprite (sprite.c fills it)
 u16 *gMpFxLayer;           // while MODERN draws: the effect sprites' pixels (bit 15 = drawn), else NULL
 static u16 sFxLayer[W * H];
+extern u8 *gMpUiLayer;     // gba_easy_draw.c: the battle UI's pixels (BG0's text box and menus, the HP boxes)
+static u8 sUiLayer[W * H];
+static u16 sSnap[W * H];   // the picture before MODERN drew on it (the UI's pixels come back from it)
 
 enum { KIND_NONE, KIND_MOVE, KIND_GENERAL, KIND_STATUS };
 enum { HIT_SPLAT, HIT_SHAKE, HIT_SOUND, HIT_QUAKE };
@@ -75,9 +79,11 @@ static struct
     bool8 statDown;
     u8 attacker, target;
     u16 frame;               // frames since it started
-    u16 lastBurst;
+    u16 lastBurst, firstBurst;
     bool8 hadBurst;
     bool8 quaked;
+    u16 nBurst[4];           // the audit (MOEMON_MODERN_AUDIT): hits by kind
+    u32 fxPixels, fxPeak;    // effect-sprite pixels in all, and the most in one frame
     struct Burst bursts[MAX_BURSTS];
     u8 shake;                // frames of shake left
     u8 shakeAmp;
@@ -86,10 +92,28 @@ static struct
     u32 seed;
 } sM;
 
+struct Rgb { u8 r, g, b; };
+
+// the move's own effect (below: "The move's own effect")
+#include "../data/mp_modernanim_moves.h"
+
+static struct
+{
+    u8 family, variant;
+    struct Rgb c;
+    u16 len;          // the Classic animation's length (frames; the audit's, or a guess)
+    s16 hit;          // the (first) hit's frame: the audit's, the live one when it comes sooner
+    s16 lastHit;
+    bool8 synth;      // no hit in the Classic script: MODERN makes its own at H
+    bool8 synthDone;
+    u8 synthCount;    // MULTI: blows made so far
+    s16 ax, ay, tx, ty;
+} sF;
+static void FamilyBegin(void);
+
 // ---------------------------------------------------------------------------
 // Colors
 
-struct Rgb { u8 r, g, b; };
 
 // A bright color per type (and the light at its core): what the move's energy looks like
 static const struct Rgb sTypeColor[NUMBER_OF_MON_TYPES] = {
@@ -170,6 +194,7 @@ static void Light(u16 *frame, int cx, int cy, int radius, struct Rgb c, int stre
             k = strength * (r2 - d2) / r2;             // a smooth falloff
             k = k * (r2 - d2) / r2;
             AddPx(frame, x, y, c.r * k >> 8, c.g * k >> 8, c.b * k >> 8);
+            MixPx(frame, x, y, c.r, c.g, c.b, k / 4);   // (a touch of the color itself: light vanishes on pale fields)
         }
 }
 
@@ -600,9 +625,24 @@ static u8 BattlerFor(u8 which)
     }
 }
 
+// MOEMON_MODERN_AUDIT: one line per animation (docs/MODERN_ANIMS.md, tools/moemon_modernanim)
+static void AuditFlush(void)
+{
+    static s8 sAudit = -1;
+    if (sAudit < 0)
+        sAudit = getenv("MOEMON_MODERN_AUDIT") != NULL;
+    if (sAudit && sM.kind != KIND_NONE)
+        MPNet_Log("modern audit: kind %d id %d type %d power %d frames %d hits splat %d shake %d sound %d quake %d"
+                  " fx %u peak %u first %d last %d", sM.kind, sM.id, sM.type, sM.power, sM.frame, sM.nBurst[HIT_SPLAT],
+                  sM.nBurst[HIT_SHAKE], sM.nBurst[HIT_SOUND], sM.nBurst[HIT_QUAKE], (unsigned)sM.fxPixels,
+                  (unsigned)sM.fxPeak, sM.hadBurst ? sM.firstBurst : -1, sM.hadBurst ? sM.lastBurst : -1);
+    sM.kind = KIND_NONE;
+}
+
 // battle_anim.c LaunchBattleAnimation
 void MP_ModernAnim_Begin(const u8 *const table[], u16 id)
 {
+    AuditFlush();
     memset(&sM.bursts, 0, sizeof(sM.bursts));
     sM.kind = KIND_NONE;
     if (!MP_ModernAnim_On())
@@ -612,6 +652,8 @@ void MP_ModernAnim_Begin(const u8 *const table[], u16 id)
     sM.hadBurst = FALSE;
     sM.quaked = FALSE;
     sM.shake = 0;
+    memset(sM.nBurst, 0, sizeof(sM.nBurst));
+    sM.fxPixels = sM.fxPeak = 0;
     sM.attacker = gBattleAnimAttacker;
     sM.target = gBattleAnimTarget;
     sM.seed = 0x9E3779B9u * (id + 1) + gBattleAnimAttacker * 7919;
@@ -643,14 +685,9 @@ void MP_ModernAnim_Begin(const u8 *const table[], u16 id)
         case B_ANIM_TURN_TRAP:          sM.type = TYPE_NORMAL; sM.power = 15; break;
         case B_ANIM_MON_HIT:            sM.type = TYPE_NORMAL; sM.power = 40; sM.physical = TRUE; break;
         case B_ANIM_STATS_CHANGE:
-        {
-            u16 arg = gBattleSpritesDataPtr != NULL && gBattleSpritesDataPtr->animationData != NULL
-                    ? gBattleSpritesDataPtr->animationData->animArg & 0xFF : 0;
-            sM.statDown = (arg >= STAT_ANIM_MINUS1 && arg < STAT_ANIM_MULTIPLE_PLUS1)
-                       || arg == STAT_ANIM_MULTIPLE_MINUS1 || arg == STAT_ANIM_MULTIPLE_MINUS2;
-            sM.type = sM.statDown ? TYPE_WATER : TYPE_FIRE;   // cool blue going down, warm orange going up
-            break;
-        }
+            // the stats going up or down: the game's own animation, as it is (the user, 2026-11-06)
+            sM.kind = KIND_NONE;
+            return;
         default:                        sM.type = TYPE_NORMAL; break;
         }
     }
@@ -667,6 +704,7 @@ void MP_ModernAnim_Begin(const u8 *const table[], u16 id)
         sM.physical = FALSE;
     }
     // (special animations: ball throws, switches and level ups have their own effects: mp_ballfx.c)
+    FamilyBegin();
 }
 
 // A hit: a burst where it lands (battle_anim.c: hit splats, shake tasks, sounds aimed at the target)
@@ -700,8 +738,17 @@ static void Burst(u8 kind, s16 x, s16 y)
     sM.bursts[slot].strength = strength > 255 ? 255 : strength;
     sM.bursts[slot].kind = kind;
     sM.bursts[slot].seed = sM.seed + sM.frame * 2654435761u;
+    if (!sM.hadBurst)
+    {
+        sM.firstBurst = sM.frame;
+        if (sF.hit > (s16)sM.frame && !sF.synth)
+            sF.hit = sM.frame;   // (the Classic blow came sooner than the audit's: follow it)
+    }
+    if ((s16)sM.frame > sF.lastHit && !sF.synth)
+        sF.lastHit = sM.frame;
     sM.lastBurst = sM.frame;
     sM.hadBurst = TRUE;
+    sM.nBurst[kind]++;
     if (kind != HIT_SOUND && sM.power >= 60 && (sM.physical || sM.power >= 90 || kind == HIT_QUAKE))
     {
         sM.shake = sM.power >= 100 ? 8 : 6;
@@ -715,6 +762,896 @@ static void BurstOn(u8 kind, u8 battler, s16 dx, s16 dy)
         return;
     Burst(kind, GetBattlerSpriteCoord(battler, BATTLER_COORD_X_2) + dx,
           GetBattlerSpriteCoord(battler, BATTLER_COORD_Y_PIC_OFFSET) + dy);
+}
+
+// ---------------------------------------------------------------------------
+// The move's own effect (1.120.0): each move has a family (src/data/mp_modernanim_moves.h from
+// tools/moemon_modernanim/gen_recipes.py) drawn along the Classic animation's own timing: the audit's length and hit
+// frames for the move, corrected by the hits seen live. docs/MODERN_ANIMS.md.
+
+
+static int ISqrt(int v)
+{
+    int r = 0, b = 1 << 14;
+    if (v <= 0)
+        return 0;
+    while (b > v)
+        b >>= 2;
+    while (b)
+    {
+        if (v >= r + b)
+            v -= r + b, r = (r >> 1) + b;
+        else
+            r >>= 1;
+        b >>= 2;
+    }
+    return r;
+}
+
+static const s8 sSin64[64] = {   // sin(i * 2pi / 64) * 64
+      0,   6,  12,  19,  24,  30,  36,  41,  45,  49,  53,  56,  59,  61,  63,  64,
+     64,  64,  63,  61,  59,  56,  53,  49,  45,  41,  36,  30,  24,  19,  12,   6,
+      0,  -6, -12, -19, -24, -30, -36, -41, -45, -49, -53, -56, -59, -61, -63, -64,
+    -64, -64, -63, -61, -59, -56, -53, -49, -45, -41, -36, -30, -24, -19, -12,  -6,
+};
+#define SIN64(a) (sSin64[(a) & 63])
+#define COS64(a) (sSin64[((a) + 16) & 63])
+
+static int Ease(int t, int len)   // 0..256, slow-fast-slow
+{
+    int x;
+    if (len <= 0 || t >= len)
+        return 256;
+    if (t <= 0)
+        return 0;
+    x = t * 256 / len;
+    return x * x * (768 - 2 * x) / 65536;
+}
+
+static int Fade(int t, int in, int hold, int out)   // 0..256 over in / hold / out frames
+{
+    if (t < 0)
+        return 0;
+    if (t < in)
+        return 256 * t / in;
+    t -= in;
+    if (t < hold)
+        return 256;
+    t -= hold;
+    if (t < out)
+        return 256 * (out - t) / out;
+    return 0;
+}
+
+// A thick soft line: white core, the color around it (alpha 0-256)
+static void ThickLine(u16 *frame, int x0, int y0, int x1, int y1, int width, struct Rgb c, int alpha, bool8 core)
+{
+    int dx = x1 - x0, dy = y1 - y0, len = ISqrt(dx * dx + dy * dy), minx, maxx, miny, maxy, x, y;
+    if (len == 0 || alpha <= 0 || width <= 0)
+        return;
+    minx = (x0 < x1 ? x0 : x1) - width - 1, maxx = (x0 > x1 ? x0 : x1) + width + 1;
+    miny = (y0 < y1 ? y0 : y1) - width - 1, maxy = (y0 > y1 ? y0 : y1) + width + 1;
+    if (minx < 0) minx = 0;
+    if (miny < 0) miny = 0;
+    if (maxx >= W) maxx = W - 1;
+    if (maxy >= H) maxy = H - 1;
+    for (y = miny; y <= maxy; y++)
+        for (x = minx; x <= maxx; x++)
+        {
+            int px = x - x0, py = y - y0, along = (px * dx + py * dy), d, k;
+            if (along < 0 || along > len * len)
+                continue;
+            d = abs(px * dy - py * dx) * 16 / len;   // distance from the line, sixteenths of a pixel
+            if (d > width * 16)
+                continue;
+            k = alpha * (width * 16 - d) / (width * 16);
+            MixPx(frame, x, y, c.r, c.g, c.b, k);
+            if (core && d < width * 6)
+                MixPx(frame, x, y, 255, 255, 255, k * (width * 6 - d) / (width * 6));
+        }
+}
+
+// An arc of a circle (angles in 64ths of a turn, a0 to a1), thick, anti-aliased by distance
+static void Arc(u16 *frame, int cx, int cy, int r, int a0, int a1, int thick, struct Rgb c, int alpha)
+{
+    int a, steps;
+    if (r <= 0 || alpha <= 0)
+        return;
+    steps = (a1 - a0) * r / 8 + 2;
+    for (a = 0; a <= steps; a++)
+    {
+        int ang16 = a0 * 16 + (a1 - a0) * 16 * a / steps, i0 = ang16 >> 4, fr = ang16 & 15, t;
+        int cs = (COS64(i0) * (16 - fr) + COS64(i0 + 1) * fr) / 16, sn = (SIN64(i0) * (16 - fr) + SIN64(i0 + 1) * fr) / 16;
+        for (t = -thick; t <= thick; t++)
+        {
+            int rr = r + t, k = alpha * (thick + 1 - abs(t)) / (thick + 1);
+            MixPx(frame, cx + cs * rr / 64, cy + sn * rr / 64, c.r, c.g, c.b, k);
+        }
+    }
+}
+
+// Darken around a point (shadows, miasma): alpha 0-256
+static void Shade(u16 *frame, int cx, int cy, int radius, struct Rgb tint, int strength)
+{
+    int x, y, r2 = radius * radius;
+    if (radius <= 0 || strength <= 0)
+        return;
+    for (y = cy - radius; y <= cy + radius; y++)
+        for (x = cx - radius; x <= cx + radius; x++)
+        {
+            int d2 = (x - cx) * (x - cx) + (y - cy) * (y - cy);
+            if (d2 >= r2)
+                continue;
+            MixPx(frame, x, y, tint.r / 4, tint.g / 5, tint.b / 4, strength * (r2 - d2) / r2);
+        }
+}
+
+// The picture rippled inside a box (the air warped by psychic power): rows pushed aside along a sine
+static void Warp(u16 *frame, int cx, int cy, int hw, int hh, int amp, int phase)
+{
+    static u16 sRow[W];
+    int y;
+    if (amp <= 0)
+        return;
+    for (y = cy - hh; y <= cy + hh; y++)
+    {
+        int x0 = cx - hw, x1 = cx + hw, shift, x;
+        if ((unsigned)y >= H)
+            continue;
+        shift = SIN64(y * 3 + phase) * amp / 64 * (hh - abs(y - cy)) / hh;
+        if (shift == 0)
+            continue;
+        if (x0 < 0) x0 = 0;
+        if (x1 >= W) x1 = W - 1;
+        for (x = x0; x <= x1; x++)
+            sRow[x] = frame[y * W + x];
+        for (x = x0; x <= x1; x++)
+        {
+            int sx = x - shift;
+            if (sx >= x0 && sx <= x1)
+                frame[y * W + x] = sRow[sx];
+        }
+    }
+}
+
+// A chevron (^ or v), 11 pixels wide
+static void Chevron(u16 *frame, int x0, int y, bool8 down, struct Rgb c, int a)
+{
+    int k;
+    for (k = -5; k <= 5; k++)
+    {
+        int yy = y + (down ? -abs(k) / 2 : abs(k) / 2);
+        MixPx(frame, x0 + k, yy, c.r, c.g, c.b, a);
+        MixPx(frame, x0 + k, yy + 1, 255, 255, 255, a / 3);
+    }
+}
+
+// A hexagon outline (a shield) centered on (cx, cy)
+static void Hexagon(u16 *frame, int cx, int cy, int rx, int ry, struct Rgb c, int alpha)
+{
+    static const s8 sHex[7][2] = {{0, -64}, {55, -32}, {55, 32}, {0, 64}, {-55, 32}, {-55, -32}, {0, -64}};
+    int i;
+    for (i = 0; i < 6; i++)
+        ThickLine(frame, cx + sHex[i][0] * rx / 64, cy + sHex[i][1] * ry / 64, cx + sHex[i + 1][0] * rx / 64,
+                  cy + sHex[i + 1][1] * ry / 64, 2, c, alpha, TRUE);
+}
+
+static int Lerp(int a, int b, int t256)
+{
+    return a + (b - a) * t256 / 256;
+}
+
+static struct Rgb Brighter(struct Rgb c)
+{
+    struct Rgb b = {(c.r + 255) / 2, (c.g + 255) / 2, (c.b + 255) / 2};
+    return b;
+}
+
+// The particle shape of the move's type
+static int TypeShape(void)
+{
+    return sTypeParticles[sM.type < NUMBER_OF_MON_TYPES ? sM.type : TYPE_NORMAL].shape;
+}
+
+// The move's own impact where MODERN makes one (a Classic script with no hit)
+static void SynthHit(int x, int y)
+{
+    Burst(HIT_SPLAT, x, y);
+}
+
+// ---- the families --------------------------------------------------------------------------------------------
+
+// speed lines streaming back from the user, toward the blow
+static void FxSpeedLines(u16 *frame, int f, int until, struct Rgb c)
+{
+    int i, dx = sF.tx - sF.ax, dy = sF.ty - sF.ay, len = ISqrt(dx * dx + dy * dy);
+    u32 seed = sM.seed;
+    if (len == 0 || f >= until)
+        return;
+    for (i = 0; i < 7; i++)
+    {
+        int off = (int)(Rand(&seed) % 33) - 16, t = (f * 3 + (int)(Rand(&seed) % 20)) % 20, l = 10 + (int)(Rand(&seed) % 10);
+        int px = -dy * off / len, py = dx * off / len;
+        int sx = sF.ax + px - dx * (t + l) / len, sy = sF.ay + py - dy * (t + l) / len;
+        Spark(frame, sx, sy, sx + dx * l / len, sy + dy * l / len, c, 150 * (until - f) / until);
+    }
+}
+
+// an impact star: eight points, long ones and short ones
+static void FxStar(u16 *frame, int x, int y, int age, int size, struct Rgb c)
+{
+    int i, a;
+    if (age < 0 || age >= 12)
+        return;
+    a = 240 * (12 - age) / 12;
+    for (i = 0; i < 8; i++)
+    {
+        int ang = i * 8 + 4, l = (i & 1 ? size * 2 / 3 : size) * (age < 3 ? age + 1 : 3) / 3;
+        ThickLine(frame, x, y, x + COS64(ang) * l / 64, y + SIN64(ang) * l / 64, i & 1 ? 1 : 2, c, a, TRUE);
+    }
+    Light(frame, x, y, size / 2 + 2, Brighter(c), a / 2);
+}
+
+static void FxStrike(u16 *frame, int f, struct Rgb c, bool8 ram)
+{
+    int h = sF.hit;
+    FxSpeedLines(frame, f, h + 2, c);
+    if (ram && f < h && f >= h - 10)
+    {
+        // a comet tail from the user to the target
+        int t = Ease(f - (h - 10), 10), x = Lerp(sF.ax, sF.tx, t), y = Lerp(sF.ay, sF.ty, t);
+        ThickLine(frame, Lerp(sF.ax, sF.tx, t / 3), Lerp(sF.ay, sF.ty, t / 3), x, y, 4 + (sF.variant == MAV_BIG ? 2 : 0), c,
+                  150, TRUE);
+        Light(frame, x, y, 8, c, 90);
+    }
+    FxStar(frame, sF.tx, sF.ty, f - h, sF.variant == MAV_BIG ? 26 : (ram ? 20 : 16), c);
+    if (sF.variant == MAV_BIG && f >= h && f < h + 18)
+        Ring(frame, sF.tx, sF.ty, 10 + (f - h) * 4, 2, Brighter(c), 200 * (h + 18 - f) / 18);
+}
+
+static void FxPunch(u16 *frame, int f, struct Rgb c)
+{
+    int h = sF.hit, age = f - h;
+    if (f >= h - 6 && f < h)
+    {
+        int t = (f - (h - 6)) * 256 / 6;
+        ThickLine(frame, Lerp(sF.ax, sF.tx, t / 2), Lerp(sF.ay, sF.ty, t / 2), Lerp(sF.ax, sF.tx, t), Lerp(sF.ay, sF.ty, t), 3, c,
+                  170, TRUE);
+    }
+    if (age >= 0 && age < 14)
+    {
+        int i;
+        // the blow's flash: a tight ring and four heavy rays
+        Ring(frame, sF.tx, sF.ty, 4 + age * 3, age < 4 ? 3 : 2, c, 230 * (14 - age) / 14);
+        for (i = 0; i < 4; i++)
+        {
+            int ang = i * 16 + 8, l0 = 6 + age * 2, l1 = l0 + 10 - age / 2;
+            ThickLine(frame, sF.tx + COS64(ang) * l0 / 64, sF.ty + SIN64(ang) * l0 / 64, sF.tx + COS64(ang) * l1 / 64,
+                      sF.ty + SIN64(ang) * l1 / 64, 2, c, 220 * (14 - age) / 14, TRUE);
+        }
+        Light(frame, sF.tx, sF.ty, 9, Brighter(c), 140 * (14 - age) / 14);
+    }
+}
+
+static void FxKick(u16 *frame, int f, struct Rgb c)
+{
+    int h = sF.hit, age = f - h;
+    if (f >= h - 8 && f < h + 6)
+    {
+        // a sweeping arc into the target, from below
+        int t = f - (h - 8), a1 = 40 + t * 3;
+        Arc(frame, sF.tx, sF.ty + 4, 20, a1 - 14, a1, 2, c, 220 * (14 - t) / 14);
+        Arc(frame, sF.tx, sF.ty + 4, 17, a1 - 10, a1, 1, Brighter(c), 200 * (14 - t) / 14);
+    }
+    FxStar(frame, sF.tx, sF.ty, age, 18, c);
+}
+
+static void FxSlash(u16 *frame, int f, struct Rgb c)
+{
+    int i, n = sF.variant == MAV_BIG ? 2 : 3;
+    for (i = 0; i < n; i++)
+    {
+        int start = sF.hit - 4 + i * 3, age = f - start, len = n == 2 ? 36 : 26, off = (i - (n - 1) / 2) * 9, prog, a;
+        if (age < 0 || age >= 14)
+            continue;
+        prog = age < 4 ? (age + 1) * 64 : 256;
+        a = 255 * (14 - age) / 14;
+        // top right to bottom left, offset sideways
+        {
+            int x0 = sF.tx + len / 2 + off, y0 = sF.ty - len / 2, x1 = sF.tx - len / 2 + off, y1 = sF.ty + len / 2;
+            ThickLine(frame, x0, y0, Lerp(x0, x1, prog), Lerp(y0, y1, prog), age < 6 ? 2 : 1, c, a, TRUE);
+        }
+    }
+}
+
+static void FxBite(u16 *frame, int f, struct Rgb c)
+{
+    int h = sF.hit;
+    if (f >= h - 10 && f < h + 8)
+    {
+        int t = f - (h - 10), gap = t < 10 ? 18 - t * 18 / 10 : 0, a = 230 * (18 - t) / 18;
+        Arc(frame, sF.tx, sF.ty - gap, 16, 36, 60, 2, c, a);    // the upper jaw
+        Arc(frame, sF.tx, sF.ty + gap, 16, 4, 28, 2, c, a);     // the lower jaw
+        Arc(frame, sF.tx, sF.ty - gap, 13, 38, 58, 1, Brighter(c), a);
+        Arc(frame, sF.tx, sF.ty + gap, 13, 6, 26, 1, Brighter(c), a);
+    }
+    FxStar(frame, sF.tx, sF.ty, f - h, 14, c);
+}
+
+static void FxPierce(u16 *frame, int f, struct Rgb c)
+{
+    int h = sF.hit;
+    if (f >= h - 8 && f < h + 4)
+    {
+        int t = Ease(f - (h - 8), 8), x = Lerp(sF.ax, sF.tx, t), y = Lerp(sF.ay, sF.ty, t);
+        ThickLine(frame, Lerp(sF.ax, sF.tx, t * 2 / 3), Lerp(sF.ay, sF.ty, t * 2 / 3), x, y, 2, c, 230, TRUE);
+    }
+    if (f >= h && f < h + 10)
+    {
+        int i, age = f - h;
+        for (i = 0; i < 6; i++)
+        {
+            int ang = i * 11 + 3, l = 6 + age * 2;
+            Spark(frame, sF.tx, sF.ty, sF.tx + COS64(ang) * l / 64, sF.ty + SIN64(ang) * l / 64, c, 240 * (10 - age) / 10);
+        }
+    }
+}
+
+// the beam's window: from a little before the hit to a little after (or the middle of a hitless animation)
+static void BeamWindow(int *s, int *e)
+{
+    if (sF.hit > 0)
+    {
+        *s = sF.hit - 22 > 4 ? sF.hit - 22 : 4;
+        *e = (sF.lastHit > sF.hit ? sF.lastHit : sF.hit) + 12;
+    }
+    else
+    {
+        *s = sF.len / 4;
+        *e = sF.len * 3 / 4;
+    }
+    if (*e > sF.len - 2 && sF.len > 8)
+        *e = sF.len - 2;
+    if (*e <= *s)
+        *e = *s + 16;
+}
+
+static void FxBeam(u16 *frame, int f, struct Rgb c)
+{
+    int s, e, w, a, k;
+    BeamWindow(&s, &e);
+    if (f < s || f > e + 6)
+        return;
+    w = (sF.variant == MAV_BIG ? 6 : 4) * Fade(f - s, 5, e - s - 5, 11) / 256;
+    a = Fade(f - s, 3, e - s, 9);
+    if (w > 0)
+    {
+        ThickLine(frame, sF.ax, sF.ay, sF.tx, sF.ty, w + 2, c, a * 3 / 5, FALSE);
+        ThickLine(frame, sF.ax, sF.ay, sF.tx, sF.ty, w, Brighter(c), a, TRUE);
+    }
+    // pulses running down the beam
+    for (k = 0; k < 3; k++)
+    {
+        int t = ((f - s) * 24 + k * 85) % 256;
+        Light(frame, Lerp(sF.ax, sF.tx, t), Lerp(sF.ay, sF.ty, t), 4 + w / 2, Brighter(c), a / 2);
+    }
+    Light(frame, sF.ax, sF.ay, 6 + w, c, a / 3);            // at the mouth
+    Light(frame, sF.tx, sF.ty, 10 + w * 2, c, a * 2 / 5);   // where it lands
+    if (sF.variant == MAV_TWIN)
+        ThickLine(frame, sF.ax, sF.ay + 6, sF.tx, sF.ty + 6, w / 2 + 1, c, a / 2, TRUE);
+}
+
+static void FxBreath(u16 *frame, int f, struct Rgb c)
+{
+    int s, e, i, dx = sF.tx - sF.ax, dy = sF.ty - sF.ay, len = ISqrt(dx * dx + dy * dy), shape = TypeShape();
+    BeamWindow(&s, &e);
+    if (len == 0 || f < s || f > e + 18)
+        return;
+    // particles leaving the mouth along the line, a cone widening toward the target
+    for (i = 0; i < 26; i++)
+    {
+        u32 ps = sM.seed + i * 7919u;
+        int born = s + (int)(Rand(&ps) % (e - s + 1)), age = f - born, life = 18, t, spread, x, y;
+        if (age < 0 || age >= life || born > e)
+            continue;
+        t = age * 256 / life;
+        spread = ((int)(Rand(&ps) % 21) - 10) * t / 256;
+        x = Lerp(sF.ax, sF.tx, t) - dy * spread / len;
+        y = Lerp(sF.ay, sF.ty, t) + dx * spread / len;
+        Particle(frame, shape == P_RINGLET ? P_DOT : shape, x, y, age / 2, life, c, ps);
+        if ((i & 3) == 0)
+            Light(frame, x, y, 4, c, 70 * (life - age) / life);
+    }
+    if (f >= s && f <= e)
+        Light(frame, sF.tx, sF.ty, 12, c, 60);
+}
+
+static void FxOrb(u16 *frame, int f, struct Rgb c)
+{
+    int h = sF.hit > 0 ? sF.hit : sF.len / 2, s = h - 14 > 2 ? h - 14 : 2, r = sF.variant == MAV_BIG ? 8 : 6;
+    if (f >= s && f < h)
+    {
+        int t = Ease(f - s, h - s), x = Lerp(sF.ax, sF.tx, t), y = Lerp(sF.ay, sF.ty, t) - SIN64(t / 8) * 10 / 64, k;
+        for (k = 1; k <= 4; k++)   // the trail
+        {
+            int tt = Ease(f - s - k * 2, h - s);
+            Light(frame, Lerp(sF.ax, sF.tx, tt), Lerp(sF.ay, sF.ty, tt), r - k, c, 90 - k * 18);
+        }
+        Light(frame, x, y, r + 3, c, 170);
+        Ring(frame, x, y, r - 2, 1, Brighter(c), 200);
+        Light(frame, x, y, r / 2, Brighter(c), 200);
+    }
+    if (f >= h && f < h + 16)
+    {
+        int age = f - h;
+        Ring(frame, sF.tx, sF.ty, 6 + age * 3, 2, c, 220 * (16 - age) / 16);
+        Light(frame, sF.tx, sF.ty, 14 - age / 2, Brighter(c), 160 * (16 - age) / 16);
+    }
+}
+
+static void FxFromSky(u16 *frame, int f, struct Rgb c)
+{
+    int h = sF.hit > 0 ? sF.hit : sF.len / 2, i, shape = TypeShape();
+    for (i = 0; i < 6; i++)
+    {
+        u32 ps = sM.seed + i * 104729u;
+        int land = h - 6 + (int)(Rand(&ps) % 14), dur = 10, age = f - (land - dur), x, y, ox = (int)(Rand(&ps) % 41) - 20;
+        if (age < 0 || age > dur + 8)
+            continue;
+        x = sF.tx + ox;
+        if (age <= dur)
+        {
+            y = Lerp(-8, sF.ty + 8, age * 256 / dur);
+            if (sM.type == TYPE_ELECTRIC)
+            {
+                // a jagged bolt from the top
+                u32 bs = ps + f;
+                int px = x, py = -4, k;
+                for (k = 0; k < 8 && py < y; k++)
+                {
+                    int nx = px + (int)(Rand(&bs) % 9) - 4, ny = py + (y + 4) / 8;
+                    ThickLine(frame, px, py, nx, ny, 1, c, 240, TRUE);
+                    px = nx, py = ny;
+                }
+            }
+            else
+            {
+                ThickLine(frame, x, y - 12, x, y, 2, c, 190, TRUE);
+                Particle(frame, shape, x, y, 0, 20, c, ps);
+            }
+        }
+        else
+        {
+            Light(frame, x, sF.ty + 8, 7, c, 130 * (dur + 8 - age) / 8);
+        }
+    }
+}
+
+static void FxQuake(u16 *frame, int f, struct Rgb c)
+{
+    int h = sF.hit > 0 ? sF.hit : sF.len / 3, age = f - h, i;
+    if (age < 0 || age > 40)
+        return;
+    // cracks running out along the ground under the target
+    for (i = 0; i < 5; i++)
+    {
+        int ang = 28 + i * 2 - 4, l = age < 12 ? age * 4 : 48;
+        ThickLine(frame, sF.tx, sF.ty + 26, sF.tx + COS64(ang) * l / 64 * (i & 1 ? -1 : 1), sF.ty + 26 + SIN64(ang) * l / 256, 1,
+                  c, 180 * (40 - age) / 40, FALSE);
+    }
+    if (!sM.quaked && age == 0)
+    {
+        sM.quaked = TRUE;
+        Burst(HIT_QUAKE, sF.tx, sF.ty + 24);
+    }
+}
+
+static void FxBlast(u16 *frame, int f, struct Rgb c)
+{
+    // an explosion: on the user for EXPLOSION / SELF-DESTRUCT / MIND BLOWN, otherwise where the blow lands
+    bool8 self = sM.id == MOVE_EXPLOSION || sM.id == MOVE_SELF_DESTRUCT || sM.id == MOVE_MIND_BLOWN
+              || sM.id == MOVE_MISTY_EXPLOSION || sM.id == MOVE_FINAL_GAMBIT;
+    int h = sF.hit > 0 ? sF.hit : sF.len / 2, age = f - h, cx = self ? sF.ax : sF.tx, cy = self ? sF.ay : sF.ty;
+    if (age < -6 || age > 30)
+        return;
+    if (age < 0)
+    {
+        Light(frame, cx, cy, 6 - age, c, 40 * (6 + age));   // gathering
+        return;
+    }
+    Light(frame, cx, cy, 18 + age, c, 200 * (30 - age) / 30);
+    Light(frame, cx, cy, 10 + age / 2, Brighter(c), 160 * (30 - age) / 30);
+    Ring(frame, cx, cy, 8 + age * 4, 3, c, 220 * (30 - age) / 30);
+    Ring(frame, cx, cy, 4 + age * 3, 1, Brighter(c), 180 * (30 - age) / 30);
+}
+
+static void FxWave(u16 *frame, int f, struct Rgb c)
+{
+    int s, e, t, x, y, side = GetBattlerSide(sM.attacker) == B_SIDE_PLAYER ? 1 : -1;
+    BeamWindow(&s, &e);
+    if (f < s || f > e)
+        return;
+    // a band sweeping from the user's side across the field
+    t = (f - s) * 256 / (e - s + 1);
+    for (y = 40; y < 120; y += 2)
+    {
+        int crest = Lerp(side > 0 ? -20 : W + 20, side > 0 ? W + 20 : -20, t) + SIN64(y * 2 + f * 3) * 6 / 64;
+        for (x = crest - 10; x <= crest + 10; x++)
+        {
+            int d = abs(x - crest), a = 150 * (10 - d) / 10 * Fade(f - s, 4, e - s - 8, 4) / 256;
+            MixPx(frame, x, y, c.r, c.g, c.b, a);
+            MixPx(frame, x, y + 1, c.r, c.g, c.b, a / 2);
+            if (d < 2)
+                MixPx(frame, x, y, 255, 255, 255, a);
+        }
+    }
+}
+
+static void FxSound(u16 *frame, int f, struct Rgb c)
+{
+    int s = 2, e = sF.len > 20 ? sF.len - 8 : 24, k, dx = sF.tx - sF.ax, dy = sF.ty - sF.ay, ang;
+    if (f < s || f > e)
+        return;
+    // the direction to the target, in 64ths of a turn
+    ang = abs(dx) >= abs(dy) ? (dx > 0 ? 0 : 32) : (dy > 0 ? 16 : 48);
+    if (dx != 0 && dy != 0)
+        ang = dx > 0 ? (dy > 0 ? 6 : 58) : (dy > 0 ? 26 : 38);
+    for (k = 0; k < 5; k++)
+    {
+        int age = (f - s) - k * 7, r;
+        if (age < 0 || age >= 30)
+            continue;
+        r = 8 + age * 3;
+        Arc(frame, sF.ax, sF.ay, r, ang - 7, ang + 7, age < 10 ? 2 : 1, c, 210 * (30 - age) / 30);
+    }
+}
+
+static void FxWind(u16 *frame, int f, struct Rgb c)
+{
+    int s, e, k;
+    BeamWindow(&s, &e);
+    if (f < s - 6 || f > e + 6)
+        return;
+    for (k = 0; k < 4; k++)
+    {
+        int r = 10 + k * 6, a0 = (f * 3 + k * 16) & 63, a = 170 * Fade(f - s + 6, 6, e - s, 6) / 256;
+        Arc(frame, sF.tx, sF.ty - k * 4 + 8, r, a0, a0 + 18, 1, k & 1 ? Brighter(c) : c, a);
+    }
+}
+
+static void FxMind(u16 *frame, int f, struct Rgb c)
+{
+    int s = 4, e = sF.len > 24 ? sF.len - 6 : 30, k, a = Fade(f - s, 6, e - s - 12, 6);
+    if (f < s || f > e)
+        return;
+    for (k = 0; k < 3; k++)
+    {
+        int age = ((f - s) + k * 8) % 24;
+        Ring(frame, sF.tx, sF.ty, 30 - age, 1, c, a * (age < 4 ? age : 4) / 4 * 200 / 256);
+    }
+    Warp(frame, sF.tx, sF.ty, 30, 26, 2 * a / 256, f * 4);
+    Light(frame, sF.tx, sF.ty, 18, c, a / 5);
+}
+
+static void FxShadow(u16 *frame, int f, struct Rgb c)
+{
+    int s = 2, e = sF.len > 20 ? sF.len - 4 : 24, a = Fade(f - s, 8, e - s - 16, 8), k;
+    if (f < s || f > e)
+        return;
+    Shade(frame, sF.tx, sF.ty + 4, 30, c, a * 3 / 5);
+    for (k = 0; k < 6; k++)
+    {
+        int ang = (f + k * 11) & 63, r = 16 + (k * 5) % 12;
+        Particle(frame, P_WISP, sF.tx + COS64(ang) * r / 64, sF.ty + SIN64(ang) * r / 96 + 4, 4, 28, c, k);
+    }
+}
+
+static void FxPowder(u16 *frame, int f, struct Rgb c)
+{
+    int s = 4, e = sF.len > 24 ? sF.len - 6 : 30, i;
+    if (f < s || f > e + 12)
+        return;
+    for (i = 0; i < 22; i++)
+    {
+        u32 ps = sM.seed + i * 31337u;
+        int born = s + (int)(Rand(&ps) % (e - s + 1)), age = f - born, life = 26, x, y;
+        if (age < 0 || age >= life)
+            continue;
+        x = sF.tx + (int)(Rand(&ps) % 49) - 24 + SIN64(age * 3 + i * 9) * 3 / 64;
+        y = sF.ty - 34 + age * 2;
+        Particle(frame, P_DOT, x, y, age, life, c, ps);
+        if ((i & 3) == 0)
+            Light(frame, x, y, 3, Brighter(c), 80 * (life - age) / life);
+    }
+}
+
+static void FxStatus(u16 *frame, int f, struct Rgb c)
+{
+    int s, e, k;
+    BeamWindow(&s, &e);
+    if (sM.attacker == sM.target || sF.ax == sF.tx)
+    {
+        // on the user (or the user's side): a ring of light settling on it
+        if (f >= s && f <= e)
+            Ring(frame, sF.ax, sF.ay, 20 - (f - s) % 16, 1, c, 180);
+        return;
+    }
+    for (k = 0; k < 6; k++)
+    {
+        int t = ((f - s) * 12 + k * 43) % 256;
+        if (f < s || f > e)
+            break;
+        Ring(frame, Lerp(sF.ax, sF.tx, t), Lerp(sF.ay, sF.ty, t), 3 + t / 64, 1, c, 200);
+    }
+    if (f >= e - 10 && f <= e + 12)
+    {
+        int age = f - (e - 10);
+        Ring(frame, sF.tx, sF.ty, 18, 2, c, 200 * (age < 6 ? age : (22 - age > 0 ? 22 - age : 0)) / 16);
+    }
+}
+
+static void FxDrain(u16 *frame, int f, struct Rgb c)
+{
+    int s, e, k;
+    BeamWindow(&s, &e);
+    s = sF.hit > 0 ? sF.hit : s;
+    e = sF.len > s + 30 ? sF.len - 4 : s + 30;
+    for (k = 0; k < 7; k++)
+    {
+        int born = s + k * 4, age = f - born, life = 22, t, x, y;
+        if (age < 0 || age >= life)
+            continue;
+        t = Ease(age, life);
+        x = Lerp(sF.tx, sF.ax, t);
+        y = Lerp(sF.ty, sF.ay, t) - SIN64(t / 8) * 16 / 64;
+        Light(frame, x, y, 5, c, 170);
+        Light(frame, x, y, 2, Brighter(c), 200);
+    }
+    if (f >= s + 20 && f < e)
+        Light(frame, sF.ax, sF.ay, 16, c, 70 * Fade(f - s - 20, 6, e - s - 32, 6) / 256);
+}
+
+static void FxHeal(u16 *frame, int f, struct Rgb c, int x0, int y0)
+{
+    int s = 4, e = sF.len > 24 ? sF.len - 4 : 30, i, a = Fade(f - s, 8, e - s - 16, 8);
+    struct Rgb soft = {(c.r + 255 * 2) / 3, (c.g + 255 * 2) / 3, (c.b + 255 * 2) / 3};
+    if (f < s || f > e)
+        return;
+    Light(frame, x0, y0, 22, soft, a / 4);
+    for (i = 0; i < 12; i++)
+    {
+        u32 ps = sM.seed + i * 7907u;
+        int born = s + (int)(Rand(&ps) % (e - s + 1)), age = f - born, life = 24, x, y;
+        if (age < 0 || age >= life)
+            continue;
+        x = x0 + (int)(Rand(&ps) % 37) - 18;
+        y = y0 + 20 - age * 2;
+        if (i & 1)
+        {
+            // a small plus
+            MixPx(frame, x, y, 255, 255, 255, 200 * (life - age) / life);
+            MixPx(frame, x - 1, y, soft.r, soft.g, soft.b, 200 * (life - age) / life);
+            MixPx(frame, x + 1, y, soft.r, soft.g, soft.b, 200 * (life - age) / life);
+            MixPx(frame, x, y - 1, soft.r, soft.g, soft.b, 200 * (life - age) / life);
+            MixPx(frame, x, y + 1, soft.r, soft.g, soft.b, 200 * (life - age) / life);
+        }
+        else
+            Particle(frame, P_STAR, x, y, age, life, soft, ps);
+    }
+}
+
+static void FxAura(u16 *frame, int f, struct Rgb c, int x0, int y0, bool8 down)
+{
+    int s = 2, e = sF.len > 20 ? sF.len - 4 : 24, a = Fade(f - s, 8, e - s - 16, 8), y, i;
+    if (f < s || f > e)
+        return;
+    // a column of light (rising for stats up; a dark one sinking for stats down)
+    for (y = y0 - 34; y <= y0 + 26; y += 2)
+    {
+        int band = SIN64((y - (down ? -f : f) * 2) * 2) * 24 / 64 + 40;
+        int w = 16 + (y0 + 26 - y) / 8;
+        if (down)
+            Shade(frame, x0, y, w / 2, c, a * band / 512);
+        else
+            Light(frame, x0, y, w / 2, c, a * band / 640);
+    }
+    // streaks of the color rising (or sinking) around it
+    for (i = 0; i < 8; i++)
+    {
+        u32 ps = sM.seed + i * 40503u;
+        int sx = x0 + (int)(Rand(&ps) % 41) - 20, t = (f * 2 + (int)(Rand(&ps) % 40)) % 40;
+        int sy = down ? y0 - 30 + t * 3 / 2 : y0 + 26 - t * 3 / 2, l = 6 + (int)(Rand(&ps) % 6);
+        int fa = a * (t < 8 ? t : (40 - t > 8 ? 8 : 40 - t)) / 8 * 250 / 256;
+        ThickLine(frame, sx, sy, sx, down ? sy - l : sy + l, 2, c, fa, !down);
+    }
+}
+
+static void FxShield(u16 *frame, int f, struct Rgb c)
+{
+    int s = 4, e = sF.len > 24 ? sF.len - 4 : 30, a = Fade(f - s, 6, e - s - 14, 8), grow, side;
+    if (f < s || f > e)
+        return;
+    side = GetBattlerSide(sM.attacker) == B_SIDE_PLAYER ? 1 : -1;
+    grow = Ease(f - s, 8);
+    Hexagon(frame, sF.ax + side * 18, sF.ay, 14 * grow / 256 + 4, 30 * grow / 256 + 6, c, a * 3 / 4);
+    Light(frame, sF.ax + side * 18, sF.ay - 10 + ((f * 2) % 24), 6, Brighter(c), a / 4);   // a glint running down it
+}
+
+static void FxField(u16 *frame, int f, struct Rgb c)
+{
+    int s = 2, e = sF.len > 20 ? sF.len - 4 : 24, a = Fade(f - s, 12, e - s - 24, 12), x, y, i;
+    if (f < s || f > e)
+        return;
+    // the field washed gently in the move's color, a band of light rolling across it
+    for (y = 0; y < H; y += 1)
+    {
+        int band = 30 + SIN64(y / 2 + f * 2) * 14 / 64;
+        for (x = 0; x < W; x += 1)
+            if (((x + y) & 1) == 0)
+                MixPx(frame, x, y, c.r, c.g, c.b, a * band / 1024);
+    }
+    for (i = 0; i < 16; i++)
+    {
+        u32 ps = sM.seed + i * 2654435761u;
+        int px = (int)(Rand(&ps) % W), py = ((int)(Rand(&ps) % H) + f * 2) % H;
+        Particle(frame, TypeShape() == P_BOLT ? P_STAR : TypeShape(), px, py, 4, 24, c, ps);
+    }
+}
+
+static void FxSwap(u16 *frame, int f, struct Rgb c)
+{
+    int s, e, t;
+    BeamWindow(&s, &e);
+    if (f < s || f > e || sF.ax == sF.tx)
+        return;
+    t = Ease(f - s, e - s);
+    // two lights trading places along an arc
+    Light(frame, Lerp(sF.ax, sF.tx, t), Lerp(sF.ay, sF.ty, t) - SIN64(t / 8) * 18 / 64, 7, c, 170);
+    Light(frame, Lerp(sF.tx, sF.ax, t), Lerp(sF.ty, sF.ay, t) + SIN64(t / 8) * 18 / 64, 7, Brighter(c), 170);
+}
+
+static void FxCharge(u16 *frame, int f, struct Rgb c)
+{
+    int e = sF.len > 20 ? sF.len - 6 : 24, i;
+    if (f > e)
+        return;
+    for (i = 0; i < 10; i++)
+    {
+        int t = (f * 2 + i * 26) % 50, ang = i * 6 + 3, r = 34 - t * 34 / 50;
+        Particle(frame, P_STAR, sF.ax + COS64(ang) * r / 64, sF.ay + SIN64(ang) * r / 64, t / 3, 20, c, i);
+    }
+    Light(frame, sF.ax, sF.ay, 8 + f * 10 / (e + 1), c, 30 + f * 70 / (e + 1));
+}
+
+static void FxDance(u16 *frame, int f, struct Rgb c)
+{
+    int s = 2, e = sF.len > 20 ? sF.len - 4 : 24, a = Fade(f - s, 6, e - s - 12, 6), k;
+    if (f < s || f > e)
+        return;
+    for (k = 0; k < 2; k++)
+        Arc(frame, sF.ax, sF.ay + 6 - k * 10, 24 - k * 4, (f * 2 + k * 32) & 63, ((f * 2 + k * 32) & 63) + 22, 1,
+            k ? Brighter(c) : c, a * 3 / 4);
+    if (sF.hit > 0)
+        FxStar(frame, sF.tx, sF.ty, f - sF.hit, 16, c);
+}
+
+static void DrawFamily(u16 *frame)
+{
+    int f = sM.frame;
+    struct Rgb c = sF.c;
+    switch (sF.family)
+    {
+    case MA_STRIKE:  FxStrike(frame, f, c, FALSE); break;
+    case MA_RAM:     FxStrike(frame, f, c, TRUE); break;
+    case MA_PUNCH:   FxPunch(frame, f, c); break;
+    case MA_KICK:    FxKick(frame, f, c); break;
+    case MA_SLASH:   FxSlash(frame, f, c); break;
+    case MA_BITE:    FxBite(frame, f, c); break;
+    case MA_PIERCE:  FxPierce(frame, f, c); break;
+    case MA_BEAM:    FxBeam(frame, f, c); break;
+    case MA_BREATH:  FxBreath(frame, f, c); break;
+    case MA_ORB:     FxOrb(frame, f, c); break;
+    case MA_FROMSKY: FxFromSky(frame, f, c); break;
+    case MA_QUAKE:   FxQuake(frame, f, c); break;
+    case MA_BLAST:   FxBlast(frame, f, c); break;
+    case MA_WAVE:    FxWave(frame, f, c); break;
+    case MA_SOUND:   FxSound(frame, f, c); break;
+    case MA_WIND:    FxWind(frame, f, c); break;
+    case MA_MIND:    FxMind(frame, f, c); break;
+    case MA_SHADOW:  FxShadow(frame, f, c); break;
+    case MA_POWDER:  FxPowder(frame, f, c); break;
+    case MA_STATUS:  FxStatus(frame, f, c); break;
+    case MA_DRAIN:   FxDrain(frame, f, c); break;
+    case MA_HEAL:
+        // HEAL PULSE / FLORAL HEALING / POLLEN PUFF on another: the light on the target
+        if (sM.attacker != sM.target && (sM.id == MOVE_HEAL_PULSE || sM.id == MOVE_FLORAL_HEALING))
+            FxHeal(frame, f, c, sF.tx, sF.ty);
+        else
+            FxHeal(frame, f, c, sF.ax, sF.ay);
+        break;
+    case MA_BUFF:    FxAura(frame, f, c, sF.ax, sF.ay, FALSE); break;
+    case MA_DEBUFF:  FxAura(frame, f, c, sF.tx, sF.ty, TRUE); break;
+    case MA_SHIELD:  FxShield(frame, f, c); break;
+    case MA_FIELD:   FxField(frame, f, c); break;
+    case MA_SWAP:    FxSwap(frame, f, c); break;
+    case MA_CHARGE:  FxCharge(frame, f, c); break;
+    case MA_DANCE:   FxDance(frame, f, c); break;
+    case MA_MULTI:
+        // a small star at each blow (the Classic hits, or MODERN's own spread over the animation)
+        if (sM.hadBurst)
+            FxStar(frame, sF.tx, sF.ty, f - sM.lastBurst, 12, c);
+        break;
+    }
+}
+
+// A move with damage but no hit in its Classic script: MODERN's own blow(s) at the recipe's frame
+static bool8 DamagingFamily(void)
+{
+    return sM.power > 0 && sF.family != MA_HEAL && sF.family != MA_BUFF && sF.family != MA_SHIELD
+        && sF.family != MA_FIELD && sF.family != MA_CHARGE;
+}
+
+static void SynthHits(void)
+{
+    int f = sM.frame;
+    if (!sF.synth || (sM.hadBurst && sF.family != MA_MULTI))
+        return;
+    if (sF.family == MA_MULTI)
+    {
+        // two to five blows spread over the middle of the animation (none once the Classic ones started)
+        int n = 3, k;
+        if (sM.nBurst[HIT_SPLAT] + sM.nBurst[HIT_SHAKE] > sF.synthCount)
+            return;
+        for (k = sF.synthCount; k < n; k++)
+            if (f == sF.len / 4 + k * (sF.len / 2) / n)
+            {
+                SynthHit(sF.tx + (k - 1) * 6, sF.ty + ((k & 1) ? -4 : 4));
+                sF.synthCount++;
+                break;
+            }
+        return;
+    }
+    if (!sF.synthDone && f >= sF.hit)
+    {
+        sF.synthDone = TRUE;
+        if (sF.family == MA_BLAST && (sM.id == MOVE_EXPLOSION || sM.id == MOVE_SELF_DESTRUCT))
+            return;   // (the blast itself)
+        if (sF.family == MA_QUAKE)
+            return;   // (FxQuake heaves the ground)
+        SynthHit(sF.tx, sF.ty);
+    }
+}
+
+static void FamilyBegin(void)
+{
+    memset(&sF, 0, sizeof(sF));
+    if (sM.kind != KIND_MOVE || sM.id >= MOVES_COUNT)
+        return;
+    {
+        const struct MaRecipe *r = &sMaRecipes[sM.id];
+        struct Rgb c = {r->r, r->g, r->b};
+        sF.family = r->family;
+        sF.variant = r->variant;
+        sF.c = c;
+        sF.len = r->frames ? r->frames : 90;
+        sF.hit = r->firstHit;
+        sF.lastHit = r->lastHit;
+        if (sF.hit < 0)
+        {
+            // no hit in the Classic script: MODERN's own, where the energy would land
+            sF.synth = DamagingFamily();
+            sF.hit = sF.family == MA_BEAM || sF.family == MA_BREATH || sF.family == MA_WAVE ? sF.len * 3 / 5 : sF.len / 2;
+            sF.lastHit = sF.hit;
+        }
+    }
+}
+
+static void FamilyPositions(void)
+{
+    sF.ax = GetBattlerSpriteCoord(sM.attacker, BATTLER_COORD_X_2);
+    sF.ay = GetBattlerSpriteCoord(sM.attacker, BATTLER_COORD_Y_PIC_OFFSET);
+    sF.tx = GetBattlerSpriteCoord(sM.target, BATTLER_COORD_X_2);
+    sF.ty = GetBattlerSpriteCoord(sM.target, BATTLER_COORD_Y_PIC_OFFSET);
 }
 
 // battle_anim.c Cmd_createsprite: a hit splat (or another sprite that marks a blow landing)
@@ -779,6 +1716,16 @@ bool8 MP_ModernAnim_IsFxSprite(const struct Sprite *sprite)
         && sprite->template->tileTag < ANIM_SPRITES_START + 300;
 }
 
+// sprite.c: a sprite of the battle's UI (MODERN never draws over it)
+bool8 MP_ModernAnim_IsUiSprite(const struct Sprite *sprite)
+{
+    u16 tag;
+    if (gMpFxLayer == NULL || sprite->template == NULL)
+        return FALSE;
+    tag = sprite->template->tileTag;
+    return tag >= TAG_HEALTHBOX_PLAYER1_TILE && tag <= TAG_STATUS_SUMMARY_BALLS_TILE + 4;
+}
+
 // sdl2.c VDraw: over the finished picture
 void MP_ModernAnim_Composite(u16 *frame)
 {
@@ -789,10 +1736,14 @@ void MP_ModernAnim_Composite(u16 *frame)
     if (!running)
     {
         if (sM.kind != KIND_NONE && !gAnimScriptActive)
+        {
+            AuditFlush();
             sM.kind = KIND_NONE;   // over: nothing outlives the Classic animation
+        }
         if (gMpFxLayer != NULL)
         {
             gMpFxLayer = NULL;
+            gMpUiLayer = NULL;
             memset(sM.trail, 0, sizeof(sM.trail));
         }
         return;
@@ -802,37 +1753,59 @@ void MP_ModernAnim_Composite(u16 *frame)
         memset(sFxLayer, 0, sizeof(sFxLayer));
         memset(sM.trail, 0, sizeof(sM.trail));
         gMpFxLayer = sFxLayer;   // from the next frame the renderer marks the effect sprites
+        gMpUiLayer = sUiLayer;   // ... and the UI's pixels
+        sM.frame++;              // (nothing drawn until the UI is known)
+        return;
     }
+    memcpy(sSnap, frame, sizeof(sSnap));
     c = sTypeColor[sM.type < NUMBER_OF_MON_TYPES ? sM.type : TYPE_NORMAL];
 
     GlowAndTrails(frame, c);
-    if (sM.kind == KIND_MOVE && sM.attacker != sM.target)
-        DrawCharge(frame, c);
-    if (sM.kind == KIND_GENERAL && sM.id == B_ANIM_STATS_CHANGE)
-        DrawStatChevrons(frame, sM.attacker, sM.statDown, c);
+    if (sM.kind == KIND_MOVE)
+    {
+        FamilyPositions();
+        SynthHits();
+        DrawFamily(frame);
+        if (sM.attacker != sM.target && (sF.family == MA_BEAM || sF.family == MA_BREATH || sF.family == MA_ORB
+                                      || sF.family == MA_FROMSKY || sF.family == MA_WAVE))
+            DrawCharge(frame, sF.c);
+    }
     for (i = 0; i < MAX_BURSTS; i++)
         if (sM.bursts[i].strength)
             DrawBurst(frame, &sM.bursts[i], c);
 
-    // the shake: the whole picture a pixel or two aside, for a few frames
+    // the shake: the scene a pixel or two aside for a few frames (the UI stays still: below)
     if (sM.shake)
     {
-        int dx = (sM.shake & 1) ? sM.shakeAmp : -sM.shakeAmp, y;
+        static u16 sRowCopy[W];
+        int dx = (sM.shake & 1) ? sM.shakeAmp : -sM.shakeAmp, y, x;
         if (sM.shake <= 2)
             dx = dx > 0 ? 1 : -1;
         for (y = 0; y < H; y++)
         {
             u16 *row = frame + y * W;
-            if (dx > 0)
+            const u8 *ui = sUiLayer + y * W;
+            memcpy(sRowCopy, row, sizeof(sRowCopy));
+            for (x = 0; x < W; x++)
             {
-                memmove(row + dx, row, (W - dx) * sizeof(u16));
-            }
-            else
-            {
-                memmove(row, row - dx, (W + dx) * sizeof(u16));
+                int sx = x - dx;
+                if (!ui[x] && sx >= 0 && sx < W && !ui[sx])
+                    row[x] = sRowCopy[sx];
             }
         }
         sM.shake--;
+    }
+    // nothing of MODERN over the battle's UI: its pixels as the game drew them
+    for (i = 0; i < W * H; i++)
+        if (sUiLayer[i])
+            frame[i] = sSnap[i];
+    {
+        u32 n = 0, k;
+        for (k = 0; k < W * H; k++)
+            n += sFxLayer[k] >> 15;
+        sM.fxPixels += n;
+        if (n > sM.fxPeak)
+            sM.fxPeak = n;
     }
     memset(sFxLayer, 0, sizeof(sFxLayer));   // the renderer fills it again next frame
     sM.frame++;

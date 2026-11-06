@@ -2587,6 +2587,10 @@ void AnimTask_DoomDesireLightBeam(u8 taskId)
                     gBattle_BG1_X = 14;
                 if (position == B_POSITION_PLAYER_RIGHT)
                     gBattle_BG1_X = -20;
+                if (position == B_POSITION_OPPONENT_CENTER)   // Moemon Co-op: a Triple's centers
+                    gBattle_BG1_X = -135;
+                if (position == B_POSITION_PLAYER_CENTER)
+                    gBattle_BG1_X = -3;
             }
             else
             {

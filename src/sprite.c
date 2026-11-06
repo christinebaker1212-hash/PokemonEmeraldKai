@@ -517,6 +517,8 @@ u8 gMpOamShadowLive[256];   // ... as the OAM drawn now has them (LoadOam)
 u16 gMpOamUnder[256];       // Moemon Kai: per OAM entry: the entry (+ 1) it gives way to (sprite->mpUnder; gba_easy_draw.c)
 u16 gMpOamUnderLive[256];   // ... as the OAM drawn now has them (LoadOam)
 bool8 MP_ModernAnim_IsFxSprite(const struct Sprite *sprite);
+bool8 MP_ModernAnim_IsUiSprite(const struct Sprite *sprite);
+u8 gMpOamUi[256];   // Moemon Kai: per OAM entry: the battle's UI (MODERN keeps off it: gba_easy_draw.c gMpUiLayer)
 
 void AddSpritesToOamBuffer(void)
 {
@@ -525,7 +527,10 @@ void AddSpritesToOamBuffer(void)
 
     MP_BigSprite_BeginOam();
     if (gMpFxLayer != NULL)
+    {
         memset(gMpOamFx, 0, sizeof(gMpOamFx));
+        memset(gMpOamUi, 0, sizeof(gMpOamUi));
+    }
     u16 spriteFirst[MAX_SPRITES], spriteEnd[MAX_SPRITES];
     bool8 anyUnder = FALSE;
 
@@ -545,6 +550,8 @@ void AddSpritesToOamBuffer(void)
             // Moemon Co-op: BATTLE ANIMS > MODERN: this sprite's entries are an animation's effect (mp_modernanim.c)
             if (gMpFxLayer != NULL && MP_ModernAnim_IsFxSprite(sprite) && oamIndex > first && oamIndex <= 256)
                 memset(gMpOamFx + first, 1, oamIndex - first);
+            if (gMpFxLayer != NULL && MP_ModernAnim_IsUiSprite(sprite) && oamIndex > first && oamIndex <= 256)
+                memset(gMpOamUi + first, 1, oamIndex - first);
             if (sprite->mpShadow && oamIndex > first && oamIndex <= 256)
                 memset(gMpOamShadow + first, 1, oamIndex - first);
             if (full)

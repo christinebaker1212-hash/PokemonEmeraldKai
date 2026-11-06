@@ -1,0 +1,19 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+press UP 2
+wait 30
+press A 2
+pressuntillog A 6000 joins the battle against trainer
+waitfor action 8000
+wait 30
+shot before
+mp animall 94 94 0 5
+shotburst psy5_ 90 6
+waitlog 3000 animall done
+wait 20
+mp animall 94 94 1 4
+shotburst psy4_ 90 6
+waitlog 3000 animall done
+wait 20
+quit

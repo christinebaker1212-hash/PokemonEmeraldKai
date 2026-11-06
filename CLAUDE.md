@@ -371,7 +371,8 @@ tools/release/package_songs.sh); VERSUS online by RN_* messages, records server-
 docs/RHYTHM_DECISIONS.md, COOP_NOTES "The DANCE machine"; tests dance_*, tools/test/dance_songs_test.sh, tools/rhythm/test.sh).
 
 Also BATTLE ANIMS > MODERN (mp_modernanim.c: glows, trails and hit bursts drawn over the Classic animation, which always runs:
-same frame count, test anim_modern checks all 716) and the BATTLE SIMULATOR in the BATTLE TENTS (mp_sim.c: digital copies of
+same frame count, test anim_modern checks all 716; 1.120.0 rebuilt it: every move's own family effect, never over the UI,
+the stat-change animation untouched: docs/MODERN_ANIMS.md, tools/moemon_modernanim) and the BATTLE SIMULATOR in the BATTLE TENTS (mp_sim.c: digital copies of
 players from the last server, records via mp_scores.c MP_ST_SIM_*, "<save>.sim"; tests sim_*). Every trainer battle but the
 Elite Four's and the Champion's can be joined (MP_Coop_JoinTrainerOk; test join_gym); COOP_NOTES "Joining a battle in progress".
 
@@ -428,6 +429,8 @@ Gotchas worth knowing before touching battles:
   Test link changes at lag with tools/mp_server/lagproxy.py / `WORST=1 tools/test/regress.sh`.
 - Triple Battles: battlers 4/5 exist. Anything doing `battler ^ BIT_FLANK` or assuming positions 0-3 (screen rebuild,
   shadows, Cmd_monbg) breaks for them, often by touching sprite 0 = battler 0's healthbox. Use BATTLE_PARTNER.
+  Battle animations put a Pokémon and its partner on BG1 / BG2 by position: use MP_BG2_POSITION (battle_anim.h), which
+  sends the centers opposite their partners (they used to share BG2 with 0 / 1 and one vanished; test tri_anim_center).
 - Bump MP_PROTOCOL_VERSION (src/mp/mp_net.h) on any protocol change; tools/test rebuilds the server from it.
 - Sprite palettes 16-63 have no bit in a palette mask (`1 << (16 + n)`): fade one sprite's palette by slot with
   MP_BlendSpritePalette / MP_BeginSpritePaletteFade. Ball and co-op palettes live there (see COOP_NOTES, graphics).
