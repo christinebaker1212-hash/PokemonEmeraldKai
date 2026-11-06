@@ -124,6 +124,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       is PAL PARK's (closed)
 - [x] Platinum's POKéDEX ratings (Load*DexRating)
 - [x] Platinum's key items (items 662-684)
+- [x] The TOWN MAP / FLY map's town and landmark blocks, gray until visited, blue towns and red cities (sinnoh_townmap)
 
 ## 4. Region travel at parity with JOHTO and KANTO
 

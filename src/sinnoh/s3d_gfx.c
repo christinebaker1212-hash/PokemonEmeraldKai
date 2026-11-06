@@ -33,6 +33,8 @@ static struct
     struct SinnohPic pics[SINNOH_PIC_COUNT];
     const u16 *town[2];    // the TOWN MAP's pages (tools/sinnoh/gen_townmap.py picture), RGB555
     u16 townW, townH;
+    const u8 *townBlocks[48];   // its FLY spots' blocks (gen_townmap.py blocks: "TBLK"): page, spot, hide, 0, x y w h, pixels
+    u16 townBlockCount;
     struct S3dStarterGfx starter;   // the briefcase (tools/sinnoh/build_starter.py: "STRT"; frames NULL: none)
     const u8 *backs;       // the partners' backs (build_gfx.py backs(): "BACK"), each u16 picture, palette, 4 frames
     u16 backCount;
@@ -141,6 +143,23 @@ static void Load(void)
             sGfx.town[1] = (const u16 *)(p + 10 + w * h * 2);
             p += 10 + pages * w * h * 2;
         }
+    }
+    // then its FLY spots' blocks: "TBLK", u16 count, each u8 page, spot, hidden while locked, 0, u16 x, y, w, h, then
+    // w * h locked and w * h unlocked RGB555 pixels
+    if (p + 6 <= end && memcmp(p, "TBLK", 4) == 0)
+    {
+        u32 n = p[4] | p[5] << 8, i;
+        const u8 *q = p + 6;
+        for (i = 0; i < n && q + 12 <= end; i++)
+        {
+            u32 w = q[8] | q[9] << 8, h = q[10] | q[11] << 8;
+            if (q + 12 + w * h * 4 > end)
+                break;
+            if (sGfx.townBlockCount < ARRAY_COUNT(sGfx.townBlocks))
+                sGfx.townBlocks[sGfx.townBlockCount++] = q;
+            q += 12 + w * h * 4;
+        }
+        p = q;
     }
     if (p + 8 <= end && memcmp(p, "STRT", 4) == 0)
     {
@@ -414,6 +433,15 @@ bool8 S3D_Gfx_TownMap(u8 page, const u16 **pixels, u16 *w, u16 *h)
     *w = sGfx.townW;
     *h = sGfx.townH;
     return TRUE;
+}
+
+// The TOWN MAP's FLY spot block N: its header (u8 page, spot, hidden while locked, 0, u16 x, y, w, h) and pixels after
+// it (w * h locked, then w * h unlocked); NULL past the last
+const u8 *S3D_Gfx_TownBlock(u32 n)
+{
+    if (!sGfx.tried)
+        Load();
+    return sGfx.ok && n < sGfx.townBlockCount ? sGfx.townBlocks[n] : NULL;
 }
 
 // The POKéTCH's app screen NAME: 192x160 shade bytes (0 lightest .. 3 darkest); NULL: none

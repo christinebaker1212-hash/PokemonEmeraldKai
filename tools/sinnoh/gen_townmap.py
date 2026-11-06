@@ -241,6 +241,75 @@ def picture(root, page):
     return out
 
 
+
+# ------------------------------------------------------------------------------- the FLY spots' blocks (build_gfx)
+BLOCK_SHAPES = ['1x1_SQUARE', 'VERTICAL', '2x2_SQUARE', 'TOP_LEFT_ANGLE', 'TOP_RIGHT_ANGLE', 'HORIZONTAL',
+                'SMALL_RECTANGLE']
+
+
+def blocks(root, page):
+    """Platinum's FLY spots' blocks on page PAGE (its applications/town_map/fly_locations.c sFlyLocations, the art
+    fly_destination_blocks.png): [(fly spot index in sSinnohFlyDests or 0xFF, hide while locked, x, y, w, h, locked
+    RGB555 rows, unlocked rows)] in the page's texels, 0 = clear, else 0x8000 | color. Locked in Platinum's palette 5
+    (gray), unlocked in 6 (towns, blue) or 7 (cities, red); the VICTORY ROAD block only once unlocked (the LEAGUE's
+    spot here), PAL PARK's never (closed)"""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import png8
+    from gen_frontier import decomp_file
+    src = decomp_file(root, 'src/applications/town_map/fly_locations.c')
+    img = png8.Image(os.path.join(root, 'res/graphics/town_map/fly_destination_blocks.png'))
+    with open(os.path.join(root, 'res/graphics/town_map/fly_destination_blocks.png'), 'rb') as f:
+        raw = f.read()
+    # (the PNG's own palette: png8 keeps indices; PLTE read here)
+    i = raw.index(b'PLTE')
+    n = struct.unpack('>I', raw[i - 4:i])[0]
+    pal = [tuple(raw[i + 4 + 3 * k:i + 7 + 3 * k]) for k in range(n // 3)]
+    order = re.findall(r'\{(MAPSEC_SINNOH_\w+),', open('src/data/region_map/sinnoh_region_map.h').read().split(
+        'sSinnohFlyDests[]')[1])
+    z0 = PAGES[page]
+
+    def ds(sx, sy):
+        return sx * 7 / 8 + 21.5, (sy + 8 * z0 - 16) * 7 / 8 - 37.5
+
+    def rgb(c):
+        return 0x8000 | (c[0] >> 3) | (c[1] >> 3) << 5 | (c[2] >> 3) << 10
+
+    out = []
+    for m in re.finditer(r'\.mapHeader = MAP_HEADER_(\w+),.*?\.blockShape = FLY_LOCATION_SHAPE_(\w+),\s*'
+                         r'\.palette = FLY_LOCATION_PALETTE_(\w+),\s*\.specialFlyLocationID = (\w+),\s*'
+                         r'\.spriteX = ([^,]+),\s*\.spriteY = ([^,]+),', src, re.S):
+        header, shape, palname, special = m.group(1), BLOCK_SHAPES.index(m.group(2)), m.group(3), m.group(4)
+        px = eval(m.group(5).replace('TOWN_MAP_GRID_SPACING', '7')) + 25 - 8
+        py = eval(m.group(6).replace('TOWN_MAP_GRID_SPACING', '7')) - 34 - 8
+        if special == 'FLY_LOCATION_PAL_PARK':
+            continue
+        sec = 'MAPSEC_SINNOH_' + header
+        idx = order.index(sec) if sec in order else 0xFF
+        hide = 1 if special == 'FLY_LOCATION_VICTORY_ROAD' else 0
+        unl = 1 if palname == 'BLUE' else 2
+        # the sprite's box in the page's texels (the inverse of ds, at twice the resolution)
+        x0 = int(((px - 21.5) * 8 / 7) * 2) - 1
+        y0 = int(((py + 37.5) * 8 / 7 - 8 * z0 + 16) * 2) - 1
+        x1 = int(((px + 16 - 21.5) * 8 / 7) * 2) + 2
+        y1 = int(((py + 16 + 37.5) * 8 / 7 - 8 * z0 + 16) * 2) + 2
+        if x1 <= 0 or y1 <= 0 or x0 >= TEX_W or y0 >= TEX_H:
+            continue
+        x0, y0, x1, y1 = max(x0, 0), max(y0, 0), min(x1, TEX_W), min(y1, TEX_H)
+        locked, unlocked = [], []
+        for Y in range(y0, y1):
+            lr, ur = [], []
+            for X in range(x0, x1):
+                fx, fy = ds((X + 0.5) / 2, (Y + 0.5) / 2)
+                sx, sy = int(fx) - px, int(fy) - py
+                c = img.px(sx, shape * 16 + sy) if 0 <= sx < 16 and 0 <= sy < 16 else 0
+                lr.append(rgb(pal[c]) if c else 0)
+                ur.append(rgb(pal[unl * 16 + c]) if c else 0)
+            locked.append(lr)
+            unlocked.append(ur)
+        out.append((idx, hide, x0, y0, x1 - x0, y1 - y0, locked, unlocked))
+    return out
+
+
 if __name__ == '__main__':
     from gen_maps import places as all_places
     from source import open_source

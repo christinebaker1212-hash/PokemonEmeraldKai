@@ -4217,7 +4217,13 @@ follow_behind, follow_ground.
   white, a black and a signature: the picture follows the fades through the two and stops when another palette is
   loaded. FLY spots: the places with a heal location, each unlocked by flag 0x3D40 + n set on arriving
   (s3d_townmap.c Sinnoh_TownMapArrive from MP_Region_OnMapLoaded). Met location: MP_METGAME_SINNOH (13) with the
-  section's number past MAPSEC_SINNOH_FIRST (mp_region.c MP_Region_TagMet, the summary screen). Test sinnoh_townmap.
+  section's number past MAPSEC_SINNOH_FIRST (mp_region.c MP_Region_TagMet, the summary screen).
+  The towns' blocks (2026-11-06): Platinum's FLY spot blocks (src/applications/town_map/fly_locations.c sFlyLocations:
+  shape, palette, spriteX / spriteY; art res/graphics/town_map/fly_destination_blocks.png) mapped through the same 8/7
+  scaling onto each page (gen_townmap.py blocks, "TBLK" after "TOWN" in the pack: locked pixels in Platinum's gray
+  palette, unlocked in its blue (towns) or red (cities)); s3d_townmap.c WithBlocks lays them on the page by each FLY
+  spot's flag when a map opens. VICTORY ROAD's shows once the LEAGUE's spot is open; PAL PARK's never (closed). Test
+  sinnoh_townmap (JUBILIFE red, SANDGEM / TWINLEAF blue, the rest gray).
 - The POKéTCH (2026-11-01; ITEM_POKETCH 660, a key item usable in every region, registrable): src/sinnoh/poketch.c.
   PÓKETCH Co.'s president (JUBILIFE, 1F) gives it. It draws over the field's picture (MP_Poketch_Composite from VDraw)
   as Platinum's 192x160 LCD between a red case with the side button, and takes the buttons while open

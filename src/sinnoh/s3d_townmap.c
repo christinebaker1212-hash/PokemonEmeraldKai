@@ -5,6 +5,7 @@
 // that says the picture's palette is still the one loaded (another screen's palette turns the picture off).
 // Also the FLY spots' flags, set on arriving (Sinnoh_TownMapArrive).
 #include <stdio.h>
+#include <string.h>
 #include "global.h"
 #include "event_data.h"
 #include "palette.h"
@@ -12,6 +13,7 @@
 #include "constants/heal_locations.h"
 
 bool8 S3D_Gfx_TownMap(u8 page, const u16 **pixels, u16 *w, u16 *h);   // (s3d_gfx.c)
+const u8 *S3D_Gfx_TownBlock(u32 n);
 extern void (*gMpBgPictureLine)(int line, u16 *layer, s32 x0, s32 y0, s32 dx, s32 dy);
 extern int gMpBgPictureBg;
 
@@ -50,6 +52,36 @@ static void Line(int line, u16 *layer, s32 x0, s32 y0, s32 dx, s32 dy)
     }
 }
 
+static bool8 SpotUnlocked(u8 spot);
+static u16 sWork[480 * 320];   // the page with its FLY spots' blocks
+
+// The page with Platinum's FLY spot blocks on it (gen_townmap.py blocks): gray while the town is unvisited, blue
+// (towns) or red (cities) once its FLY spot is open; VICTORY ROAD's only once the LEAGUE's is open
+static const u16 *WithBlocks(u8 page, const u16 *pixels, u16 w, u16 h)
+{
+    const u8 *b;
+    u32 n;
+    if (w * h > ARRAY_COUNT(sWork))
+        return pixels;
+    memcpy(sWork, pixels, w * h * 2);
+    for (n = 0; (b = S3D_Gfx_TownBlock(n)) != NULL; n++)
+    {
+        u32 x0 = b[4] | b[5] << 8, y0 = b[6] | b[7] << 8, bw = b[8] | b[9] << 8, bh = b[10] | b[11] << 8, x, y;
+        bool8 open = SpotUnlocked(b[1]);
+        const u8 *px = b + 12 + (open ? bw * bh * 2 : 0);
+        if (b[0] != page || (b[2] && !open) || b[1] == 0xFF)
+            continue;
+        for (y = 0; y < bh; y++)
+            for (x = 0; x < bw; x++, px += 2)
+            {
+                u16 c = px[0] | px[1] << 8;
+                if (c && x0 + x < w && y0 + y < h)
+                    sWork[(y0 + y) * w + x0 + x] = c & 0x7FFF;
+            }
+    }
+    return sWork;
+}
+
 // Page PAGE (0 NORTH, 1 SOUTH; 0xFF: none) on BG BG, its texture (OFFX, OFFY) at the screen's top-left in the full view
 void S3D_TownMapShowOn(u8 page, int bg, s32 offX, s32 offY)
 {
@@ -59,6 +91,7 @@ void S3D_TownMapShowOn(u8 page, int bg, s32 offX, s32 offY)
         gMpBgPictureLine = NULL;
         return;
     }
+    sPixels = WithBlocks(page, sPixels, sW, sH);
     sOffX = offX;
     sOffY = offY;
     gMpBgPictureBg = bg;
@@ -84,6 +117,11 @@ bool8 Sinnoh_TownVisited(u16 mapsec)
         if (sSinnohFlyDests[i].mapsec == mapsec)
             return FlagGet(sSinnohFlyDests[i].flag);
     return FALSE;
+}
+
+static bool8 SpotUnlocked(u8 spot)
+{
+    return spot < ARRAY_COUNT(sSinnohFlyDests) && FlagGet(sSinnohFlyDests[spot].flag);
 }
 
 void Sinnoh_TownMapArrive(void)

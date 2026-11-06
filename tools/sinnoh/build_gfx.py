@@ -15,7 +15,7 @@ their first frame. Sheets of any other shape (the grunts in a row) aren't taken:
 Battle pictures: each trainer class's front picture, its first 80x80 frame, drawn whole by the big-sprite renderer
 (mp_bigsprite.c) over the stand-in's place.
 
-Format (little endian): "S3DG" u32 version 2 (then "TOWN", the TOWN MAP; "STRT", the briefcase: build_starter.py; "PACT", DAWN's and
+Format (little endian): "S3DG" u32 version 2 (then "TOWN", the TOWN MAP, and "TBLK", its FLY spots' blocks; "STRT", the briefcase: build_starter.py; "PACT", DAWN's and
   LUCAS's action sheets: player_actions(); "PKCH")
   u16 sprites: each char name[24] (Platinum's, lower case), u8 kind (0 walking: 9 frames 32x32, 1 still 32x32,
                2 still 16x16, 3 walking with a bow: 10 frames, the POKeMON CENTER nurse), u8 pad, u16 palette[16]
@@ -367,6 +367,16 @@ def main():
     for k in range(len(gen_townmap.PAGES)):
         for row in gen_townmap.picture(root, k):
             out += struct.pack('<%dH' % len(row), *row)
+    # the FLY spots' blocks on those pages (gen_townmap.py blocks): "TBLK", u16 count, each u8 page, u8 FLY spot (index
+    # in sSinnohFlyDests; 0xFF none), u8 hidden while locked, u8 0, u16 x, y, w, h, then its locked and unlocked
+    # pixels (w * h RGB555 each, 0 = clear)
+    bl = [(k, b) for k in range(len(gen_townmap.PAGES)) for b in gen_townmap.blocks(root, k)]
+    out += b'TBLK' + struct.pack('<H', len(bl))
+    for k, (idx, hide, x, y, w, h, locked, unlocked) in bl:
+        out += struct.pack('<4B4H', k, idx, hide, 0, x, y, w, h)
+        for rows in (locked, unlocked):
+            for row in rows:
+                out += struct.pack('<%dH' % len(row), *row)
     # the briefcase's starter screen, drawn ahead of time (tools/sinnoh/build_starter.py; before the POKéTCH's section,
     # which runs to the end)
     import build_starter

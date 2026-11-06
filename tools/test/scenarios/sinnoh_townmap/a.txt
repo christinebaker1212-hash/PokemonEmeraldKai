@@ -5,6 +5,7 @@ wait 60
 waitfor field 1000
 mp getflag 0x3D40
 mp setflag 0x3D4C
+mp setflag 0x3D47
 mp flymap
 wait 200
 press RIGHT 2
