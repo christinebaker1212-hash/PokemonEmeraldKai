@@ -164,6 +164,11 @@ Sinnoh_EventScript_GripClaw::
 	sinnoh 64, 18, ITEM_GRIP_CLAW, 0
 	end
 
+Sinnoh_EventScript_GriseousOrb::
+	finditem ITEM_GRISEOUS_ORB, 1
+	sinnoh 64, 18, ITEM_GRISEOUS_ORB, 0
+	end
+
 Sinnoh_EventScript_GuardSpec::
 	finditem ITEM_GUARD_SPEC, 1
 	sinnoh 64, 18, ITEM_GUARD_SPEC, 0

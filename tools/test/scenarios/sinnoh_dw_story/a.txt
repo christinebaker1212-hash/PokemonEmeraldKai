@@ -1,0 +1,17 @@
+pressuntil A field 5000
+mp platinumstory
+mp setvar 0x51B0 0
+wait 30
+mp warp 41,39,34,30
+wait 60
+shot s_arrive
+wait 150
+shot s_cynthia
+shotburst s_sh 1500 6
+mash A 50 30
+mash A 30 30
+wait 60
+shot s_after
+mp getvar 0x51B0
+mp dw
+quit

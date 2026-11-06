@@ -492,6 +492,63 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         // Platinum's ShakeObject: object A (a local id on this map) shakes side to side (B: times << 8 | pixels)
         Sinnoh_ShakeObject(a, b >> 8, b & 0xFF);
         break;
+    // the DISTORTION WORLD (src/sinnoh/s3d_distortion.c)
+    case 29:
+    {
+        void S3D_Dw_InitPersisted(void);
+        S3D_Dw_InitPersisted();
+        break;
+    }
+    case 30:
+    case 31:
+    {
+        void S3D_Dw_AddObject(u8 localId);
+        void S3D_Dw_DeleteObject(u8 localId);
+        if (op == 30)
+            S3D_Dw_AddObject(VarGet(a));
+        else
+            S3D_Dw_DeleteObject(VarGet(a));
+        break;
+    }
+    case 32:
+    case 33:
+    {
+        void S3D_Dw_Shadow(u16 n);
+        S3D_Dw_Shadow(op == 32 ? VarGet(a) : 0xFFFF);
+        break;
+    }
+    case 34:
+        // SetPartyGiratinaForm: GIRATINA has the one form here (its GRISEOUS ORB powers it up in battle)
+        MPNet_Log("sinnoh dw: GIRATINA's form %u (one form here)", VarGet(a));
+        break;
+    case 35:
+    case 36:
+    {
+        void S3D_Dw_Player3DPos(u16 *x, u16 *y, u16 *z);
+        u16 x, y, z;
+        S3D_Dw_Player3DPos(&x, &y, &z);
+        if (op == 35)
+            VarSet(a, x), VarSet(b, y);
+        else
+            VarSet(a, z);
+        break;
+    }
+    case 37:
+    {
+        // StartGiratinaOriginBattle: the wild GIRATINA (the script starts the legendary's battle next)
+        void CreateScriptedWildMon(u16 species, u8 level, u16 item);
+        CreateScriptedWildMon(VarGet(a), VarGet(b), ITEM_NONE);
+        break;
+    }
+    case 38:
+    {
+        // GetBattleResult: Platinum's BATTLE_RESULT_* (WIN 1, LOSE 2, DRAW 3, CAPTURED_MON 4, PLAYER_FLED 5,
+        // ENEMY_FLED 6) from the game's battle outcome
+        extern u8 gBattleOutcome;
+        static const u8 sResult[8] = {0, 1, 2, 3, 5, 5, 6, 4};   // (B_OUTCOME_WON .. B_OUTCOME_CAUGHT)
+        VarSet(a, gBattleOutcome < ARRAY_COUNT(sResult) ? sResult[gBattleOutcome] : 0);
+        break;
+    }
     case 21:
         if (sM.battleground < 0xFFFF)
             sM.battleground++;

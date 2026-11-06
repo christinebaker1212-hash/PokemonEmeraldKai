@@ -106,7 +106,8 @@ static struct
 } sPack;
 
 // Props this game places at run time (SINNOH's gyms that move: src/sinnoh/s3d_gyms.c), in the current map's world
-typedef struct { bool8 on; s16 mesh; float m[12]; } S3dDynProp;
+typedef struct { bool8 on; u8 shade; s16 mesh; float m[12]; } S3dDynProp;
+static u8 sShade;   // (drawing a prop as a see-through dark shape: its alpha 1-31, 0: as it is)
 static S3dDynProp sDyn[S3D_DYN_PROPS];
 float (*gS3dHeightHook)(s32 mapX, s32 mapY, float h);
 float (*gS3dObjectHeightHook)(u8 localId, float h);
@@ -835,7 +836,7 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const S3dG
     float area = (b->x - a->x) * (c->y - a->y) - (c->x - a->x) * (b->y - a->y);
     s32 minx, maxx, miny, maxy, x, y;
     const S3dTex *t = g->tex >= 0 && (u32)g->tex < sPack.ntex ? &sPack.tex[sPack.shown[g->tex]] : NULL;
-    bool8 clear = g->alpha < 31;
+    bool8 clear = g->alpha < 31 || sShade;
     if (area == 0.0f || g->cull == 3 || (g->cull == 1 && area > 0.0f) || (g->cull == 2 && area < 0.0f))
         return;
     minx = (s32)floorf(fminf(a->x, fminf(b->x, c->x)));
@@ -885,6 +886,11 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const S3dG
                     out[ch] = col[ch];
             }
             al *= g->alpha / 31.0f;
+            if (sShade)
+            {
+                out[0] = out[1] = out[2] = 0;   // (a shadow: dark, see-through, its texture's shape)
+                al = sShade / 31.0f;
+            }
             {
                 u16 old = sColor[y][x];
                 u16 px = 0;
@@ -941,7 +947,7 @@ static void DrawMesh(const S3dMesh *mesh, const float *m, float ox, float oy, fl
     for (gi = 0; gi < mesh->ngroups; gi++)
     {
         S3dGroup *g = &mesh->g[gi];
-        bool8 soft = g->alpha < 31 || (g->tex >= 0 && (u32)g->tex < sPack.ntex && sPack.tex[sPack.shown[g->tex]].soft);
+        bool8 soft = sShade || g->alpha < 31 || (g->tex >= 0 && (u32)g->tex < sPack.ntex && sPack.tex[sPack.shown[g->tex]].soft);
         if (soft != pass)
             continue;
         if (g->count > sScratchSize)
@@ -1196,7 +1202,11 @@ static void Render(void)
     for (pass = 0; pass < 2; pass++)
         for (i = 0; i < S3D_DYN_PROPS; i++)
             if (sDyn[i].on)
+            {
+                sShade = sDyn[i].shade;
                 DrawMesh(&sPack.mesh[sDyn[i].mesh], sDyn[i].m, 0, 0, 0, pass);
+                sShade = 0;
+            }
 }
 
 // Moemon Maker: the 3D world of MAP around tile (TILEX, TILEY) as the game's camera sees it with the player there, into
@@ -1265,6 +1275,7 @@ bool8 S3D_DynPropTurned(u8 slot, u16 model, float x, float y, float z, float til
     if (i == sPack.nnamed || sPack.named[i].mesh < 0 || (u32)sPack.named[i].mesh >= sPack.nmesh)
         return FALSE;
     sDyn[slot].on = TRUE;
+    sDyn[slot].shade = 0;
     sDyn[slot].mesh = sPack.named[i].mesh;
     // (rows of Ry * Rx: a point is turned about x, then about y; Platinum's angles)
     sDyn[slot].m[0] = cs, sDyn[slot].m[1] = sn * sx, sDyn[slot].m[2] = sn * cx, sDyn[slot].m[3] = x;
@@ -1283,6 +1294,25 @@ bool8 S3D_DynPropScaled(u8 slot, u16 model, float x, float y, float z, float tur
         if ((i & 3) != 3)
             sDyn[slot].m[i] *= scale;
     return TRUE;
+}
+
+// Turned as S3D_DynPropTurned, then scaled
+bool8 S3D_DynPropTurnedScaled(u8 slot, u16 model, float x, float y, float z, float tilt, float turn, float scale)
+{
+    u32 i;
+    if (!S3D_DynPropTurned(slot, model, x, y, z, tilt, turn))
+        return FALSE;
+    for (i = 0; i < 12; i++)
+        if ((i & 3) != 3)
+            sDyn[slot].m[i] *= scale;
+    return TRUE;
+}
+
+// The prop in SLOT drawn as a see-through dark shape (ALPHA 1-31; GIRATINA's shadow), until it's set again
+void S3D_DynPropShade(u8 slot, u8 alpha)
+{
+    if (slot < S3D_DYN_PROPS)
+        sDyn[slot].shade = alpha;
 }
 
 void S3D_DynPropHide(u8 slot)

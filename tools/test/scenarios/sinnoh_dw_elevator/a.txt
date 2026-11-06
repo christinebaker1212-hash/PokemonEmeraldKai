@@ -1,5 +1,6 @@
 pressuntil A field 5000
 mp platinumstory
+mp setvar 0x51B0 4
 wait 30
 mp warp 41,39,19,45
 wait 60

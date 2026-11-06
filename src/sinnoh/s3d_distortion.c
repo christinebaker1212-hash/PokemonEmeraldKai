@@ -24,9 +24,11 @@
 #include "sprite.h"
 #include "constants/event_object_movement.h"
 #include "constants/songs.h"
+#include "constants/species.h"
 #include "constants/maps.h"
 #include "constants/map_groups.h"
 #include "s3d.h"
+#include "mp.h"
 
 void MoveCameraAndRedrawMap(int deltaX, int deltaY);   // (field_camera.c)
 
@@ -42,6 +44,8 @@ struct DwProp { u16 model; float off[3]; float scale; };
 // overlay009's events (sMapEvents) and their commands, each with its params struct's fields in order
 struct DwEvent { u16 hid; s16 t[3]; u8 cond; u16 val; u16 cmd, ncmd; };
 struct DwCmd { u8 kind; s32 p[12]; };
+// overlay009's sMapObjectEvents: who stands where, shown by a condition (or added by a script), their script
+struct DwPerson { u16 hid; u8 localId; u16 gfx; s16 pos[3]; u8 dir, cond; u16 val, hide; u8 invisible; const u8 *script; };
 
 #include "../../sinnoh/platinum_dw.h"
 
@@ -67,8 +71,11 @@ enum { CMD_SET_OBJECT_ANIM, CMD_MOVE_PLATFORM, CMD_ADD_OBJECT, CMD_DELETE_OBJECT
 // flags (bits) and the boulder puzzle's persisted flags (bits)
 #define VAR_DW_CYRUS 0x52C2
 #define VAR_DW_SHADOWS 0x52C3
-#define VAR_DW_PUZZLE 0x52C4
-#define DW_PROP_SLOT 8   // (the first of the field's dynamic prop slots the DISTORTION WORLD uses)
+#define VAR_DW_PUZZLE 0x52C4      // (flags 0-15; 16 in VAR_DW_PUZZLE_HI's bit 0, its bit 15: set up)
+#define VAR_DW_PUZZLE_HI 0x52C5
+#define DW_PERSON_FLAGS 0x3C10   // a person's hide flag: this + its place in sDwPeople (set as its condition says on each load)
+#define DW_PROP_SLOT 8
+#define SHADOW_SLOT (S3D_DYN_PROPS - 1)   // (GIRATINA's shadow: the last)   // (the first of the field's dynamic prop slots the DISTORTION WORLD uses)
 
 #define BASE_PITCH (-10750)   // DISTORTION_WORLD_CAMERA_BASE_ANGLE_X (the field camera's)
 #define ATTR_COLLISION 0x8000
@@ -240,6 +247,77 @@ static void SetPlatformFlag(u8 flag, bool8 on)
     VarSet(VAR_DW_PLATFORMS_HI, (f >> 16) | DW_FLAGS_SET_UP);
 }
 
+// Platinum's persisted boulder puzzle flags (DIST_WORLD_PUZZLE_FLAG_*: where each boulder is, the tutorials seen, the
+// trio in B6F, GIRATINA's room's platforms)
+enum { PUZZLE_UXIE_TUTO_SEEN = 10, PUZZLE_COUNT = 17 };
+static void InitPuzzle(void);
+static u32 PuzzleFlags(void)
+{
+    if (!(VarGet(VAR_DW_PUZZLE_HI) & DW_FLAGS_SET_UP))
+        InitPuzzle();
+    return VarGet(VAR_DW_PUZZLE) | (u32)(VarGet(VAR_DW_PUZZLE_HI) & 1) << 16;
+}
+
+static void SetPuzzleFlags(u32 f)
+{
+    VarSet(VAR_DW_PUZZLE, f & 0xFFFF);
+    VarSet(VAR_DW_PUZZLE_HI, ((f >> 16) & 1) | DW_FLAGS_SET_UP);
+}
+
+static void SetPuzzleFlag(u8 flag, bool8 on)
+{
+    u32 f = PuzzleFlags();
+    if (flag >= PUZZLE_COUNT)
+        return;
+    SetPuzzleFlags(on ? f | (1u << flag) : f & ~(1u << flag));
+}
+
+// InitPersistedData's puzzle: the three boulders on B5F, or (the puzzle done once) in B6F's pits, tutorials seen
+static void InitPuzzle(void)
+{
+    if (!FlagGet(DW_FLAG_PUZZLE_FINISHED))
+        SetPuzzleFlags(1 << 0 | 1 << 1 | 1 << 2);
+    else
+        SetPuzzleFlags(1 << PUZZLE_UXIE_TUTO_SEEN | 1 << 11 | 1 << 12 | 1 << 6 | 1 << 7 | 1 << 8);
+}
+
+// Platinum's InitPersistedMapFeaturesForDistortionWorld (each floor's transition script): entered from outside, the
+// world starts over (its persisted data cleared, InitPersistedData then sets it up: the B7F start has every elevator
+// down); a floor reached by an elevator here is a warp, which keeps it (Platinum's floors change without one)
+static bool8 sFromOutside;
+void S3D_Dw_InitPersisted(void)
+{
+    u32 f = DW_PLATFORM_FLAGS_START;
+    if (!sFromOutside || sDw.floor == NULL)
+        return;
+    sFromOutside = FALSE;
+    if (sDw.floor->hid == 581)   // MAP_HEADER_DISTORTION_WORLD_B7F
+        f = 1 << 0 | 1 << 1 | 1 << 2 | 1 << 3 | 1 << 4 | 1 << 7 | 1 << 9 | 1 << 10;
+    VarSet(VAR_DW_PLATFORMS_LO, f & 0xFFFF);
+    VarSet(VAR_DW_PLATFORMS_HI, (f >> 16) | DW_FLAGS_SET_UP);
+    InitPuzzle();
+    MPNet_Log("sinnoh dw: entered, the world set up (platforms %x, puzzle %x)", f, PuzzleFlags());
+}
+
+// Platinum's GetPlayer3DPos: the player's tile in its stacked world (y in tiles)
+void S3D_Dw_Player3DPos(u16 *x, u16 *y, u16 *z)
+{
+    struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+    if (sDw.floor == NULL)
+    {
+        *x = pl->currentCoords.x - MAP_OFFSET, *y = 0, *z = pl->currentCoords.y - MAP_OFFSET;
+        return;
+    }
+    if (sDw.kind == KIND_LAND && !sDw.riding)
+    {
+        s32 lx, ly, lz;
+        LandTile(&lx, &ly, &lz);
+        *x = lx, *y = ly, *z = lz;
+        return;
+    }
+    *x = sDw.x, *y = sDw.y, *z = sDw.z;
+}
+
 // A platform on this floor is there (its flag set, or none: always)
 static bool8 Present(const struct DwMoving *m)
 {
@@ -290,7 +368,7 @@ static const struct DwFloor *FloorOfHid(u16 hid)
 static void DrawPlatforms(void)
 {
     u32 i, slot = DW_PROP_SLOT;
-    for (i = 0; i < DW_MOVING_COUNT && slot < S3D_DYN_PROPS; i++)
+    for (i = 0; i < DW_MOVING_COUNT && slot < SHADOW_SLOT; i++)
     {
         const struct DwMoving *m = &sDwMoving[i];
         float w[3];
@@ -311,8 +389,58 @@ static void DrawPlatforms(void)
         }
         S3D_DynPropScaled(slot++, p->model, w[0] + p->off[0], w[1] + p->off[1], w[2] + p->off[2], 0, p->scale);
     }
-    for (; slot < S3D_DYN_PROPS; slot++)
+    for (; slot < SHADOW_SLOT; slot++)
         S3D_DynPropHide(slot);
+}
+
+// ---- GIRATINA's shadow flying by (Platinum's DistWorldGiratinaShadowProp: from a tile, a step each frame, its cry or
+// its flight's sound first; drawn until its steps are done)
+static const s16 sShadowTurn[5][2] = {{0, 0}, {0, 180}, {0, 90}, {0, 270}, {90, 0}};   // (tilt, turn) by rotAnglesIndex
+static struct { bool8 on; u16 t, steps; float pos[3], step[3], scale; u8 rot; } sShadow;
+
+static void StartShadow(const s32 *p)
+{
+    // p: tile x y z, turn, sound (1 cry, 2 the flight), scale x y z, step x y z (x 4096), steps
+    memset(&sShadow, 0, sizeof(sShadow));
+    if (sDw.floor == NULL)
+        return;
+    sShadow.on = TRUE;
+    sShadow.rot = p[3] < 5 && p[3] >= 0 ? p[3] : 0;
+    sShadow.pos[0] = (p[0] - sDw.floor->off[0]) * 16 + (sShadow.rot == 4 ? 8 : 0);
+    sShadow.pos[1] = (p[1] - sDw.floor->off[1]) * 16;
+    sShadow.pos[2] = (p[2] - sDw.floor->off[2]) * 16;
+    // (Platinum's field runs at 30 frames a second: its step in two of ours)
+    sShadow.step[0] = p[8] / 8192.0f, sShadow.step[1] = p[9] / 8192.0f, sShadow.step[2] = p[10] / 8192.0f;
+    sShadow.scale = p[5] / 4096.0f;
+    sShadow.steps = p[11] * 2;
+    if (p[4] == 1)
+        PlayCry_Normal(SPECIES_GIRATINA, 0);
+    else if (p[4] == 2)
+        PlaySE(SE_M_FLY);
+}
+
+static void ShadowUpdate(void)
+{
+    const struct DwProp *pr = &sDwProps[DW_PROP_GIRATINA_SHADOW < ARRAY_COUNT(sDwProps) ? DW_PROP_GIRATINA_SHADOW : 0];
+    if (!sShadow.on || sShadow.t >= sShadow.steps)
+    {
+        S3D_DynPropHide(SHADOW_SLOT);
+        return;
+    }
+    sShadow.pos[0] += sShadow.step[0], sShadow.pos[1] += sShadow.step[1], sShadow.pos[2] += sShadow.step[2];
+    sShadow.t++;
+    S3D_DynPropTurnedScaled(SHADOW_SLOT, pr->model, sShadow.pos[0] + pr->off[0], sShadow.pos[1] + pr->off[1],
+                            sShadow.pos[2] + pr->off[2], sShadowTurn[sShadow.rot][0], sShadowTurn[sShadow.rot][1],
+                            pr->scale * sShadow.scale);
+    S3D_DynPropShade(SHADOW_SLOT, 16);
+}
+
+void S3D_Dw_Shadow(u16 n)
+{
+    if (n == 0xFFFF)
+        sShadow.on = FALSE;
+    else if (n < DW_SHADOW_COUNT)
+        StartShadow(sDwShadows[n].p);
 }
 
 // The platforms' tiles walkable while a platform is there, void without (the map's own tiles there are void)
@@ -536,8 +664,8 @@ static bool8 Condition(u8 cond, u16 val)
     switch (cond)
     {
     case COND_NONE: return TRUE;
-    case COND_PUZZLE_FALSE: return !(VarGet(VAR_DW_PUZZLE) & (1 << val));
-    case COND_PUZZLE_TRUE: return (VarGet(VAR_DW_PUZZLE) & (1 << val)) != 0;
+    case COND_PUZZLE_FALSE: return !(PuzzleFlags() & (1u << val));
+    case COND_PUZZLE_TRUE: return (PuzzleFlags() & (1u << val)) != 0;
     case COND_PROGRESS_EQ: return VarGet(DW_VAR_PROGRESS) == val;
     case COND_PROGRESS_LEQ: return VarGet(DW_VAR_PROGRESS) <= val;
     case COND_PROGRESS_GEQ: return VarGet(DW_VAR_PROGRESS) >= val;
@@ -723,10 +851,20 @@ static bool8 EventUpdate(void)
         VarSet(DW_VAR_PROGRESS, c->p[0]);
         break;
     case CMD_SET_PUZZLE_FLAG:
-        VarSet(VAR_DW_PUZZLE, VarGet(VAR_DW_PUZZLE) | (1 << c->p[0]));
+        SetPuzzleFlag(c->p[0], TRUE);
         break;
     case CMD_CLEAR_PUZZLE_FLAG:
-        VarSet(VAR_DW_PUZZLE, VarGet(VAR_DW_PUZZLE) & ~(1 << c->p[0]));
+        SetPuzzleFlag(c->p[0], FALSE);
+        break;
+    case CMD_SHOW_GIRATINA_SHADOW:
+        if (sEv.state == 0)
+        {
+            StartShadow(c->p);
+            sEv.state = 1;
+        }
+        if (sShadow.on && sShadow.t < sShadow.steps)
+            return FALSE;
+        sShadow.on = FALSE;
         break;
     case CMD_SET_GIRATINA_ANIM:
         VarSet(VAR_DW_SHADOWS, VarGet(VAR_DW_SHADOWS) | (1 << c->p[0]));
@@ -753,10 +891,125 @@ static bool8 TileEvents(s32 x, s32 y, s32 z)
     return TRUE;
 }
 
+// ---- the floor's people (Platinum's AddMapObjectsForMap / AddMapObjectWithLocalID): templates the map's events gain
+// as it loads (s3d_scrcmd.c Sinnoh_PlatinumMapScripts), each shown or hidden by its own flag as its condition says, so
+// the game's own object code spawns them, finds their scripts and keeps them across battles
+
+static u16 MapNow(void)
+{
+    return (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+}
+
+static bool8 PersonShown(const struct DwPerson *p)
+{
+    if (p->cond == COND_MANUAL_ADD_ONLY)
+        return FALSE;
+    return Condition(p->cond, p->val) && (p->hide == 0 || !FlagGet(p->hide));
+}
+
+static u16 PersonFlag(u32 i)
+{
+    return sDwPeople[i].hide ? sDwPeople[i].hide : DW_PERSON_FLAGS + i;
+}
+
+// The person of this floor with that local id (Platinum lists some twice, in two places: the one its condition shows)
+static s32 PersonOf(u16 hid, u8 localId)
+{
+    s32 i, first = -1;
+    for (i = 0; i < DW_PEOPLE_COUNT; i++)
+        if (sDwPeople[i].hid == hid && sDwPeople[i].localId == localId)
+        {
+            if (PersonShown(&sDwPeople[i]))
+                return i;
+            if (first < 0)
+                first = i;
+        }
+    return first;
+}
+
+void S3D_Dw_AddPeople(struct MapEvents *ev, struct ObjectEventTemplate *buf, u32 cap)
+{
+    static const u8 sFace[4] = {MOVEMENT_TYPE_FACE_UP, MOVEMENT_TYPE_FACE_DOWN, MOVEMENT_TYPE_FACE_LEFT, MOVEMENT_TYPE_FACE_RIGHT};
+    const struct DwFloor *f = FloorFor(MapNow());
+    u32 i, n = 0;
+    if (f == NULL || DW_PEOPLE_COUNT == 0 || ev == NULL)
+        return;
+    if (ev->objectEvents != buf)
+    {
+        if (ev->objectEventCount > cap)
+            return;
+        memcpy(buf, ev->objectEvents, ev->objectEventCount * sizeof(*buf));
+        ev->objectEvents = buf;
+    }
+    for (i = 0; i < DW_PEOPLE_COUNT; i++)
+    {
+        const struct DwPerson *p = &sDwPeople[i];
+        struct ObjectEventTemplate *t;
+        if (p->hid != f->hid || PersonOf(p->hid, p->localId) != (s32)i || ev->objectEventCount >= cap)
+            continue;
+        if (p->hide == 0)
+        {
+            if (PersonShown(p))
+                FlagClear(DW_PERSON_FLAGS + i);
+            else
+                FlagSet(DW_PERSON_FLAGS + i);
+        }
+        t = &buf[ev->objectEventCount++];
+        memset(t, 0, sizeof(*t));
+        t->localId = p->localId;
+        t->graphicsIdLo = p->gfx & 0xFF;
+        t->graphicsIdHi = p->gfx >> 8;
+        t->x = p->pos[0] - f->off[0];
+        t->y = p->pos[2] - f->off[2];
+        t->elevation = 3;
+        t->movementType = sFace[p->dir & 3];
+        t->script = p->script;
+        t->flagId = PersonFlag(i);
+        n++;
+    }
+    MPNet_Log("sinnoh dw: %u people on floor %u", n, f->hid);
+}
+
+// Platinum's AddDistortionWorldMapObject / DeleteDistortionWorldMapObject (s3d_misc.c ops 30, 31)
+void S3D_Dw_AddObject(u8 localId)
+{
+    const struct DwFloor *f = FloorFor(MapNow());
+    s32 i = f ? PersonOf(f->hid, localId) : -1;
+    if (i < 0)
+        return;
+    FlagClear(PersonFlag(i));
+    TrySpawnObjectEvent(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+}
+
+void S3D_Dw_DeleteObject(u8 localId)
+{
+    const struct DwFloor *f = FloorFor(MapNow());
+    s32 i = f ? PersonOf(f->hid, localId) : -1;
+    if (i >= 0)
+        FlagSet(PersonFlag(i));
+    RemoveObjectEventByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+}
+
+// Platinum's INVISIBLE people (the places scripts walk others to) stay unseen
+static void HidePeople(void)
+{
+    u32 i, j;
+    if (sDw.floor == NULL)
+        return;
+    for (i = 0; i < DW_PEOPLE_COUNT; i++)
+        if (sDwPeople[i].invisible && sDwPeople[i].hid == sDw.floor->hid)
+            for (j = 0; j < OBJECT_EVENTS_COUNT; j++)
+                if (gObjectEvents[j].active && gObjectEvents[j].localId == sDwPeople[i].localId
+                 && gObjectEvents[j].mapNum == gSaveBlock1Ptr->location.mapNum
+                 && gObjectEvents[j].mapGroup == gSaveBlock1Ptr->location.mapGroup)
+                    gObjectEvents[j].invisible = TRUE;
+}
+
 void S3D_Dw_OnMapLoad(void)
 {
     u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
     const struct DwFloor *f = FloorFor(map);
+    sFromOutside = f != NULL && sDw.floor == NULL;
     if (f != sDw.floor || map != sDw.map)
     {
         memset(sDw.cam, 0, sizeof(sDw.cam));
@@ -896,8 +1149,9 @@ void S3D_Dw_Update(void)
     u32 i;
     if (sDw.floor == NULL)
         return;
+    HidePeople();
     if (DW_HAVE_DATA)
-        DrawPlatforms();
+        DrawPlatforms(), ShadowUpdate();
     if (sDw.riding)
     {
         RideUpdate();

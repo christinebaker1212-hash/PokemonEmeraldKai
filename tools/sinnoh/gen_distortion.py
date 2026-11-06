@@ -99,6 +99,8 @@ class CTables:
         self.values['MAP_HEADER_INVALID'] = 0xFFFF
         self.values['GIRATINA_SHADOW_ANIM_B4F_1'], self.values['GIRATINA_SHADOW_ANIM_B4F_2'] = 0, 1   # (system_flags.h)
         self.values['TRUE'], self.values['FALSE'], self.values['NULL'] = 1, 0, 0
+        for k, n in enumerate(('FACE_UP', 'FACE_DOWN', 'FACE_LEFT', 'FACE_RIGHT')):   # (constants/map_object.h's order)
+            self.values[n] = k
         self.defs = {}
         for text in (consts, self.src):
             text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
@@ -212,7 +214,10 @@ def tables(root):
         sc = [c.eval(v) / 4096.0 for v in scales[kind]]
         props.append((num, o, sc[0] or 1.0))
     evs, named = events(c)
-    return dict(plats=plats, paths=paths, conns=conns, props=props, c=c, events=evs, named=named, root=root)
+    return dict(plats=plats, paths=paths, conns=conns, props=props, c=c, events=evs, named=named, root=root,
+                people=people(c, root),
+                shadows=[flatten(c, param_fields(c, 'DistWorldGiratinaShadowTemplate'), t)
+                         for t in c.initializer('sGiratinaShadowExternal')])
 
 
 def param_fields(c, typename):
@@ -259,6 +264,7 @@ CMD_PARAMS = {
     'EVENT_CMD_SET_GIRATINA_ANIMATION_FLAG': 'CmdParamsSetGiratinaAnimationFlag',
     'EVENT_CMD_SET_PUZZLE_FLAG': 'CmdParamsPuzzleFlag',
     'EVENT_CMD_CLEAR_PUZZLE_FLAG': 'CmdParamsPuzzleFlag',
+    'EVENT_CMD_SHOW_GIRATINA_SHADOW': 'DistWorldGiratinaShadowTemplate',   # (tile x y z, turn, sound, scale x3, delta x3, steps)
 }
 
 
@@ -304,6 +310,70 @@ def events(c):
     return evs, named
 
 
+DW_ITEM_FLAGS = 0x3C00   # an item ball's flag here (free: the trainers' flags end at 0x391F, the legendaries' start at 0x3D00)
+
+
+# looks the sprite table leaves out here: the trio's DISTORTION WORLD copies are their own, GIRATINA's ORIGIN FORME
+# stands as its ALTERED one (this game has one GIRATINA overworld sprite), INVISIBLE ones are spawned hidden
+DW_LOOKS = {'DIST_WORLD_B1F_MESPRIT': 'MESPRIT', 'DIST_WORLD_B6F_AZELF': 'AZELF', 'DIST_WORLD_B6F_MESPRIT': 'MESPRIT',
+            'DIST_WORLD_B6F_UXIE': 'UXIE', 'GIRATINA_ORIGIN': 'GIRATINA_ALTERED'}
+
+
+def people(c, root, scripts_inc=None):
+    """overlay009's sMapObjectEvents: [(map header, local id, this game's look, x, z, height tile, facing, condition,
+    value, hide flag, invisible, script label or None)] (spawned by s3d_distortion.c as Platinum adds them; their
+    scripts the converted SinnohP_<map file>_<n>: gen_scripts.py converts every one this lists)"""
+    import sprites
+    ids_ = header_ids(root)
+    names = {i: n for n, i in ids_.items()}
+    out = []
+    for entry in c.initializer('sMapObjectEvents'):
+        hid = c.eval(entry[0] if isinstance(entry, list) else entry['mapHeaderID'])
+        if hid == 0xFFFF:
+            break
+        lst = (entry[1] if isinstance(entry, list) else entry['objEvents']).strip()
+        for ref in c.initializer(lst):
+            ref = ref.strip()
+            if ref in ('NULL', '0'):
+                continue
+            o = c.initializer(ref.lstrip('&'))
+            e = o['objEvent']
+            gfx = e['graphicsID'].strip()[len('OBJ_EVENT_GFX_'):]
+            invisible = gfx == 'INVISIBLE'
+            look = 'OBJ_EVENT_GFX_MAN_1' if invisible else sprites.sprite(DW_LOOKS.get(gfx, gfx))
+            assert look, 'gen_distortion: no look for ' + gfx
+            low = names[hid][len('MAP_HEADER_'):].lower()
+            m = c.re.match(r'SCRIPT_ID\(VISIBLE_ITEMS,\s*(\d+)\)', e['script'].strip())
+            hide = 0
+            if m:   # an item ball: the game's own item script (data/scripts/sinnoh_items.inc), its own flag
+                import items
+                ball = items.ball(root, items.VISIBLE_BASE + int(m.group(1)))
+                lab = items.script_label(*ball) if ball else None
+                hide = DW_ITEM_FLAGS + len([q for q in out if q[-3]])
+            elif gfx == 'STRENGTH_BOULDER':   # (the game's own STRENGTH script, as gen_maps.py's OBSTACLES)
+                lab = 'EventScript_StrengthBoulder'
+            else:
+                script = c.eval(e['script'])
+                lab = 'SinnohP_%s_%d' % (low, script) if script else None
+            out.append((hid, c.eval(e['localID']), look, c.eval(e['x']), c.eval(e['z']), c.eval(e['y']) // 4096 // 16,
+                        c.eval(e['dir']), c.eval(o['flagCond']), c.eval(o['flagCondVal']), hide, invisible, lab))
+    return out
+
+
+
+def c_kind_shadow(tbl):
+    return tbl['c'].values['EVENT_CMD_SHOW_GIRATINA_SHADOW']
+
+
+def script_labels(root):
+    """The converted scripts the DISTORTION WORLD's people use (gen_scripts.py converts them), none without the decomp"""
+    try:
+        c = CTables(root)
+    except (OSError, KeyError):
+        return set()
+    return {p[-1] for p in people(c, root) if p[-1] and p[-1].startswith('SinnohP_')}
+
+
 def write(out, data):
     o = ['// SINNOH: Platinum\'s DISTORTION WORLD data (tools/sinnoh/gen_distortion.py from the decomp): not to be '
          'edited, never committed', '#define DW_HAVE_DATA %d' % (1 if data else 0)]
@@ -316,7 +386,10 @@ def write(out, data):
               'static const u16 sDwConns[1][3];', '#define DW_CONN_COUNT 0', '#define DW_PLATFORM_FLAGS_START 0',
               'static const struct DwEvent sDwEvents[1];', '#define DW_EVENT_COUNT 0', 'static const struct DwCmd sDwCmds[1];',
               '#define DW_CMDS_B4F_WATERFALL 0xFFFF', '#define DW_CMDS_B5F_WATERFALL 0xFFFF', '#define DW_VAR_PROGRESS 0x4000',
-              '#define DW_FLAG_PUZZLE_FINISHED 0', '#define DW_PLATFORM_FLAG_INVALID 11']
+              '#define DW_FLAG_PUZZLE_FINISHED 0', '#define DW_PLATFORM_FLAG_INVALID 11',
+              'static const struct DwPerson sDwPeople[1];', '#define DW_PEOPLE_COUNT 0',
+              'static const struct DwCmd sDwShadows[1];', '#define DW_SHADOW_COUNT 0',
+              '#define DW_PROP_GIRATINA_SHADOW 0']
         open(out, 'w').write('\n'.join(o) + '\n')
         return
     floors, plats, jumps, cams, attrs, tbl = data
@@ -395,6 +468,23 @@ def write(out, data):
     root = tbl['root']
     o.append('#define DW_VAR_PROGRESS 0x%X   // (Platinum\'s VAR_DISTORTION_WORLD_PROGRESS: tools/sinnoh/ids.py)' % ids.var(root, 'VAR_DISTORTION_WORLD_PROGRESS'))
     o.append('#define DW_FLAG_PUZZLE_FINISHED 0x%X' % (ids.flag(root, 'FLAG_DISTORTION_WORLD_PUZZLE_FINISHED') or 0))
+    # GIRATINA's shadow flying by for the scripts (sGiratinaShadowExternal: StartDistortionWorldGiratinaShadowEvent)
+    o.append('#define DW_SHADOW_COUNT %d' % len(tbl['shadows']))
+    o.append('#define DW_PROP_GIRATINA_SHADOW %d' % c.values['PROP_KIND_GIRATINA_SHADOW'])
+    o.append('static const struct DwCmd sDwShadows[] = {')
+    for v in tbl['shadows']:
+        o.append('    {%d, {%s}},' % (c_kind_shadow(tbl), ', '.join(str(x) for x in v)))
+    o.append('};')
+    # the DISTORTION WORLD's own people (sMapObjectEvents)
+    labs = sorted({p[-1] for p in tbl['people'] if p[-1]})
+    for lab in labs:
+        o.append('extern const u8 %s[];' % lab)
+    o.append('#define DW_PEOPLE_COUNT %d' % len(tbl['people']))
+    o.append('static const struct DwPerson sDwPeople[] = {')
+    for hid, lid, look, x, z, y, d, cond, val, hide, inv, lab in tbl['people']:
+        o.append('    {%d, %d, %s, {%d, %d, %d}, %d, %d, %d, 0x%X, %d, %s},' % (hid, lid, look, x, y, z, d, cond, val, hide, inv,
+                                                                       lab or 'NULL'))
+    o.append('};')
     o.append('static const u16 sDwAttrs[%d][1024] = {' % len(attrs))
     for a in attrs:
         o.append('    {' + ','.join('0x%x' % v for v in a) + '},')

@@ -121,7 +121,7 @@ def labels(name):
     return set(re.findall(r'^(\w+)::', open(path, encoding='utf-8').read(), re.M))
 
 
-used_items = set()   # (item, count) of every item ball: data/scripts/sinnoh_items.inc
+used_items = {('ITEM_GRISEOUS_ORB', 1)}   # (item, count) of every item ball: data/scripts/sinnoh_items.inc (and the DISTORTION WORLD's, spawned by s3d_distortion.c)
 
 
 def inside(p, x, z):

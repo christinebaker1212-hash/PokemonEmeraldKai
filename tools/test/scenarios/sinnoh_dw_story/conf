@@ -1,0 +1,8 @@
+# Platinum's DISTORTION WORLD story begins (1F's first-entry script, converted from the decomp): the player steps
+# aside, CYNTHIA appears through the portal (overlay009's people, src/sinnoh/s3d_distortion.c), her lines, GIRATINA's
+# shadow flies by (its cry), she walks off and is removed; the progress variable is 1 (ENTERED_1F). Shots s_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3"
+EXPECT_A=("sinnoh dw: 2 people on floor 573" "[test] var 0x51B0 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

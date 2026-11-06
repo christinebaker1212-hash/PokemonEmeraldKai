@@ -3996,6 +3996,24 @@ follow_behind, follow_ground.
   Platinum's step, then the surface under them found: Settle), the player's JUMP_DISTORTION_WORLD (3 tiles over 24
   frames), SET_DISTORTION_WORLD_PROGRESS (Platinum's VAR_DISTORTION_WORLD_PROGRESS by ids.py), the puzzle and
   shadow flags (SINNOH vars 0x52C2-0x52C4). Test sinnoh_dw_platforms (B2F's first crossing).
+  The story (phase 3): the DISTORTION WORLD's scripts are Platinum's, converted by gen_scripts.py with its seven own
+  commands as `sinnoh SINNOH_MISC` ops 29-38 (s3d_misc.c): 29 InitPersistedMapFeaturesForDistortionWorld (entered
+  from outside the world starts over, the B7F start with every elevator down; a floor reached by an elevator here is
+  a warp, which keeps it), 30 / 31 Add / DeleteDistortionWorldMapObject, 32 / 33 GIRATINA's shadow (sGiratinaShadow
+  External; the event command SHOW_GIRATINA_SHADOW the same: the model drawn as a see-through dark shape,
+  s3d.c S3D_DynPropShade, at Platinum's 30-a-second pace, its cry first), 34 SetPartyGiratinaForm (GIRATINA has one
+  form here), 35 / 36 GetPlayer3DPos, 37 StartGiratinaOriginBattle (the wild GIRATINA, then the legendary battle),
+  38 GetBattleResult (Platinum's BATTLE_RESULT_* from gBattleOutcome). Movement actions 105-114 (steps along a wall:
+  a step up or down one keeps its tile) are DW_STEPS; the DW maps' coordinates in Warp / SetObjectEventPos are made
+  local by their floor offsets (Decomp.origins). The people are overlay009's sMapObjectEvents (gen_distortion.py
+  people -> sDwPeople: local ids 128+, the look by sprites.py, Platinum's script, the boulders the game's STRENGTH
+  script, TURNBACK CAVE's GRISEOUS ORB an item ball with flag 0x3C00): as a floor loads they're added to the map's
+  events (s3d_scrcmd.c Sinnoh_PlatinumMapScripts -> S3D_Dw_AddPeople), each with its own flag (0x3C10 + its place)
+  set as its condition says (progress, puzzle, shadow, CYRUS; MANUAL ones only by op 30), so the game's own object
+  code spawns them, finds their scripts and keeps them across battles; INVISIBLE ones stay unseen. The boulder
+  puzzle's flags (17) are in SINNOH vars 0x52C4-0x52C5 (bit 15 of 0x52C5: set up). Test sinnoh_dw_story (1F's first
+  entry: CYNTHIA through the portal, her lines, the shadow, progress 1); the other DW tests set the progress past
+  their floor's first-entry scene.
 - Field obstacles (2026-11-01): Platinum's CUT trees, ROCK SMASH rocks and STRENGTH boulders (690) are the game's
   own (gen_maps.py OBSTACLES: EventScript_CutTree / _RockSmash / _StrengthBoulder, no flag, back each time the map
   loads as in both games). HM badges are the region's: MP_Region_FieldMoveBadge (mp_region.c) gives HOENN's badge for

@@ -41,6 +41,7 @@ const u16 *S3D_LayoutBlocks(const struct MapLayout *layout);
 bool8 S3D_DynProp(u8 slot, u16 model, float x, float y, float z, float turn);
 bool8 S3D_DynPropTurned(u8 slot, u16 model, float x, float y, float z, float tilt, float turn);
 void S3D_DynPropHide(u8 slot);
+void S3D_DynPropShade(u8 slot, u8 alpha);   // (drawn as a see-through dark shape)
 void S3D_DynPropsClear(void);
 #define S3D_DARK_LIGHTS 40
 void S3D_SetDarkness(float level, const s16 (*lights)[3], u8 n);   // a dark room (0: none) lit around {x, y, radius}
@@ -56,6 +57,14 @@ void Sinnoh_StoryRefresh(void);                   // shows / hides SINNOH's stor
 void S3D_Gyms_MapLoaded(void);                    // a map's grid is (re)built: a gym's state on it (s3d_gyms.c)
 void S3D_Gyms_Update(void);                       // every overworld frame
 // The DISTORTION WORLD as Platinum's (src/sinnoh/s3d_distortion.c)
+struct MapEvents;
+struct ObjectEventTemplate;
+void S3D_Dw_AddPeople(struct MapEvents *ev, struct ObjectEventTemplate *buf, u32 cap);   // (s3d_scrcmd.c, as a map loads)
+void S3D_Dw_AddObject(u8 localId);      // Platinum's AddDistortionWorldMapObject (s3d_misc.c op 30)
+void S3D_Dw_DeleteObject(u8 localId);   // DeleteDistortionWorldMapObject (op 31)
+void S3D_Dw_InitPersisted(void);        // InitPersistedMapFeaturesForDistortionWorld (op 29)
+void S3D_Dw_Player3DPos(u16 *x, u16 *y, u16 *z);
+void S3D_Dw_Shadow(u16 n);      // StartDistortionWorldGiratinaShadowEvent (op 32; 0xFFFF: Finish, op 33)   // GetPlayer3DPos (ops 35, 36)
 bool8 S3D_Dw_Active(void);
 void S3D_Dw_OnMapLoad(void);
 bool8 S3D_Dw_PlayerStep(u8 dir, u16 heldKeys);   // (field_player_avatar.c PlayerStep: TRUE when handled)
@@ -63,6 +72,7 @@ void S3D_Dw_Update(void);
 bool8 S3D_Dw_View(float *pitch, float *yaw, float *target);
 bool8 S3D_Dw_PlayerSprite(u16 spriteId, s32 *outX, s32 *outY, float *depth);
 void S3D_Dw_Print(void);
+bool8 S3D_DynPropTurnedScaled(u8 slot, u16 model, float x, float y, float z, float tilt, float turn, float scale);
 bool8 S3D_DynPropScaled(u8 slot, u16 model, float x, float y, float z, float turn, float scale);
 bool8 S3D_ProjectWorld(float x, float y, float z, float *sx, float *sy, float *depth);   // (s3d.c: this map's world)
 float S3D_PlayerGround(void);                     // (s3d.c: the player's ground height last frame)

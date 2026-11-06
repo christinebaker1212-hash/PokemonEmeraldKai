@@ -170,6 +170,13 @@ MUSIC_OF = _music_of()
 MISSING_MUSIC = set()   # Platinum's songs its scripts play that the game lacks (--report lists them)
 
 
+# the DISTORTION WORLD's steps on its walls (Platinum's movement actions 105-114: one tile in 8 frames along a 3D axis,
+# map_object_move.c's tables): a step up or down a wall stays on its tile here, one along the ground is a quick step
+DW_STEPS = {'MoveAction_105': ['delay_8'], 'MoveAction_106': ['delay_8'], 'MoveAction_109': ['delay_8'],
+            'MoveAction_110': ['delay_8'], 'MoveAction_107': ['walk_fast_down'], 'MoveAction_112': ['walk_fast_down'],
+            'MoveAction_113': ['walk_fast_down'], 'MoveAction_108': ['walk_fast_up'], 'MoveAction_111': ['walk_fast_up'],
+            'MoveAction_114': ['walk_fast_up']}
+
 class Unsupported(Exception):
     pass
 
@@ -285,6 +292,18 @@ class Decomp:
                 low = p['place']['header'][len('MAP_HEADER_'):].lower()
                 self._origins.setdefault(low, (p['id'], p['x0'] * 32, p['z0'] * 32))
                 self.names.setdefault(p['id'], p['name'])
+            # the DISTORTION WORLD's floors are placed in one stacked world (tw_arc.narc's offsets: gen_distortion.py):
+            # Platinum's tiles there are the floor's own plus its offset
+            try:
+                import gen_distortion
+                ids_ = gen_distortion.header_ids(self.root)
+                for f in gen_distortion.read(self.root)[0]:
+                    low = [n for n, i in ids_.items() if i == f['hid']][0][len('MAP_HEADER_'):].lower()
+                    if low in self._origins:
+                        m, ox, oz = self._origins[low]
+                        self._origins[low] = (m, ox + f['off'][0], oz + f['off'][2])
+            except (OSError, ImportError, IndexError, KeyError):
+                pass
         return self._origins
 
     def trainer(self, x):
@@ -541,6 +560,8 @@ class FileConverter:
             return '0xF2'                 # (the walking partner on a map it walked into: s3d_scrcmd.c Sinnoh_PartnerUpdate)
         if x in self.localids:
             return str(self.localids[x])
+        if x.startswith('DIST_WORLD_MAP_OBJECT_') and x in CONSTANTS:
+            return str(CONSTANTS[x])     # (the DISTORTION WORLD's own people: src/sinnoh/s3d_distortion.c spawns them)
         if re.match(r'^\d+$', x):
             return x
         if x.startswith('VAR_'):
@@ -583,7 +604,12 @@ class FileConverter:
             return MOVE_ONE[cmd] * n
         if cmd in ('PlayerGive', 'PlayerReceive', 'PauseAnimation', 'ResumeAnimation', 'MoveAction_153'):
             return []                       # (the player's give / receive poses, an object's paused frames)
+        if cmd in DW_STEPS:
+            return DW_STEPS[cmd] * n
         m = re.match(r'^(\w+?)(North|South|West|East)$', cmd)
+        if m and m.group(1) == 'JumpDistortionWorld':
+            # (the DISTORTION WORLD's long jump, 3 tiles: this game's 2-tile jump and a quick last step)
+            return ['jump_2_' + DIRS[m.group(2)], 'walk_faster_' + DIRS[m.group(2)]] * n
         if m and m.group(1) in MOVE_KIND:
             return [MOVE_KIND[m.group(1)] + DIRS[m.group(2)]] * n
         raise Unsupported('movement %s' % cmd)
@@ -952,6 +978,29 @@ class FileConverter:
         if cmd == 'GiveBadge':
             n = int(self.value(a[0]))
             return ['setflag 0x%X' % (0x3320 + n)]   # (FLAG_SINNOH_BADGE01 + n, include/mp_region.h)
+        # the DISTORTION WORLD (src/sinnoh/s3d_distortion.c, s3d_misc.c ops 29-37)
+        if cmd == 'InitPersistedMapFeaturesForDistortionWorld':
+            return [self.sinnoh(SINNOH_MISC, 29)]
+        if cmd == 'AddDistortionWorldMapObject':
+            return [self.sinnoh(SINNOH_MISC, 30, self.localid(a[0]))]
+        if cmd == 'DeleteDistortionWorldMapObject':
+            return [self.sinnoh(SINNOH_MISC, 31, self.localid(a[0]))]
+        if cmd == 'StartDistortionWorldGiratinaShadowEvent':
+            return [self.sinnoh(SINNOH_MISC, 32, self.value(a[0]))]
+        if cmd == 'FinishDistortionWorldGiratinaShadowEvent':
+            return [self.sinnoh(SINNOH_MISC, 33)]
+        if cmd == 'SetPartyGiratinaForm':
+            return [self.sinnoh(SINNOH_MISC, 34, self.value(a[0]))]
+        if cmd == 'GetPlayer3DPos':
+            return [self.sinnoh(SINNOH_MISC, 35, self.var(a[0]), self.var(a[1])), self.sinnoh(SINNOH_MISC, 36, self.var(a[2]))]
+        if cmd == 'StartGiratinaOriginBattle':
+            # (GIRATINA in its Origin Forme, Platinum's ScrCmd_StartGiratinaOriginBattle: a legendary's battle)
+            return [self.sinnoh(SINNOH_MISC, 37, self.value(a[0]), self.value(a[1])), 'special BattleSetup_StartLegendaryBattle', 'waitstate']
+        if cmd == 'DoDWWarp':
+            return ['playse SE_WARP_IN']   # (Platinum's swirl into the DISTORTION WORLD: the game's warp sound)
+        if cmd == 'GetBattleResult':
+            # (Platinum's BATTLE_RESULT_* from the game's battle outcome: s3d_misc.c op 38)
+            return [self.sinnoh(SINNOH_MISC, 38, self.var(a[0]))]
         if cmd == 'StartLegendaryBattle':
             return ['setwildbattle %s, %s' % (self.value(a[0]), self.value(a[1])),
                     'special BattleSetup_StartLegendaryBattle', 'waitstate']
@@ -2237,8 +2286,36 @@ class FrontierConverter(FileConverter):
 _converters = {}
 
 
+def dw_constants(root):
+    """The DISTORTION WORLD's progress values and its people's local ids (include/constants/distortion_world.h)"""
+    path = os.path.join(root, 'include/constants/distortion_world.h')
+    if not os.path.exists(path):
+        return {}
+    text = open(path).read()
+    out = {'DIST_WORLD_MAP_OBJECT_BASE_LOCAL_ID': 128, 'GIRATINA_FORM_ALTERED': 0, 'GIRATINA_FORM_ORIGIN': 1,
+           'BATTLE_RESULT_WIN': 1, 'BATTLE_RESULT_LOSE': 2, 'BATTLE_RESULT_CAPTURED_MON': 4, 'BATTLE_RESULT_DRAW': 3,
+           'BATTLE_RESULT_PLAYER_FLED': 5, 'BATTLE_RESULT_ENEMY_FLED': 6}
+    for m in re.finditer(r'enum\s*\w*\s*\{([^}]*)\}', text):
+        n = -1
+        for item in m.group(1).split(','):
+            item = item.strip()
+            if not item:
+                continue
+            if '=' in item:
+                name, val = [t.strip() for t in item.split('=', 1)]
+                val = re.sub(r'\w+', lambda w: str(out.get(w.group(0), w.group(0))), val)
+                n = eval(val)
+            else:
+                name, n = item, n + 1
+            out[name] = n
+    return out
+
+
 def converter(root, low):
     """the FileConverter of Platinum's scripts_<low>.s (None: no such file)"""
+    if (root, 'dw') not in _converters:
+        _converters[(root, 'dw')] = True
+        CONSTANTS.update(dw_constants(root))   # (the DISTORTION WORLD's: s3d_distortion.c)
     key = (root, low)
     if key not in _converters:
         dec = _converters.setdefault((root, None), Decomp(root)) if (root, None) not in _converters else _converters[(root, None)]
@@ -2643,7 +2720,8 @@ TEXT_REF = re.compile(r'^%sT_(\d+)_(\d+)$' % PREFIX)   # (one of Platinum's line
 
 
 def build(root, out_path):
-    refs = referenced()
+    import gen_distortion
+    refs = referenced() | gen_distortion.script_labels(root)   # (and the DISTORTION WORLD's people's: s3d_distortion.c)
     text_refs = {lab for lab in refs if TEXT_REF.match(lab)}
     refs -= text_refs
     wanted = collections.defaultdict(set)

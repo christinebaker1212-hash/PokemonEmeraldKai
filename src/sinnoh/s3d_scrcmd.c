@@ -982,6 +982,7 @@ void Sinnoh_PlatinumMapScripts(void)
         sStoryEvents.coordEvents = m->trigger;
         sStoryEvents.coordEventCount = m->triggers;
     }
+    S3D_Dw_AddPeople(&sStoryEvents, sStoryObjects, ARRAY_COUNT(sStoryObjects));   // (the DISTORTION WORLD's: s3d_distortion.c)
     gMapHeader.events = &sStoryEvents;
 }
 
