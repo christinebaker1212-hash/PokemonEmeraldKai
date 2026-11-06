@@ -5936,6 +5936,13 @@ the most). Each table now shows a move before it's made and holds what happened 
   and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
   duel 4).
 
+## MAGIC's "choose one" (1.129.0)
+- `SP$ / AB$ Charm | Choices$ A,B,C` (MTG_API_CHARM, CharmNum 1 only): each mode is parsed as a spell (so it may
+  target), then given the charm's kind and cost (MtgAbility.choices / charmOf). BuildPriority offers one action per
+  mode (with its own targets); the stack entry is the mode's ability, so the charm itself never resolves.
+- The table: a card with several modes opens a menu of the modes' own words (SpellDescription, "until end of turn"
+  shortened to "this turn", up to 206 px wide). Scenario mtg_charm; a check in TestAmounts (BLUE ELEMENTAL BLAST).
+
 ## MAGIC's */* creatures and other Auras (1.128.0)
 - PT:*/N or */*: MtgCardDef.starPT (bit 1 power, 2 toughness), the printed number 0; a characteristic-defining static
   (`CharacteristicDefining$ True`, EffectZone$ All, SetPower$ / SetToughness$ X counted: setPowerX / setToughX) sets

@@ -715,6 +715,25 @@ static void TestAmounts(void)
         CHECK(strcmp(Mtg_PTText(Mtg_Card(sD.objs[r1].def)), "*/3") == 0, "printed */3");
         (void)r2;
     }
+
+    Table();   // a "choose one": Blue Elemental Blast counters a red spell or destroys a red permanent, each its own action
+    {
+        int beb, goblin, bolt;
+        Lands(1, "Island", 1);
+        Lands(0, "Mountain", 1);
+        goblin = Put(0, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+        beb = Put(1, "Blue Elemental Blast", MTG_ZONE_HAND);
+        bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+        Do(MTG_ACT_CAST, bolt, MTG_TGT_PLAYER, 1);
+        Pass();
+        CHECK(Find(MTG_ACT_CAST, beb, MTG_TGT_STACK, bolt) >= 0 && Find(MTG_ACT_CAST, beb, MTG_TGT_OBJ, goblin) >= 0,
+              "both modes offered: counter the bolt, or destroy the goblin");
+        Do(MTG_ACT_CAST, beb, MTG_TGT_OBJ, goblin);
+        PassBoth();
+        CHECK(Zone(goblin) == MTG_ZONE_GRAVEYARD, "the goblin destroyed");
+        PassBoth();
+        CHECK(sD.players[1].life == 17, "the bolt resolves (%d)", sD.players[1].life);
+    }
 }
 
 // ---- whole duels between the stand-in AIs

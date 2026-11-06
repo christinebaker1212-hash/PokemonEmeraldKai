@@ -13,11 +13,12 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Tap", MTG_API_TAP}, {"Untap", MTG_API_UNTAP}, {"Counter", MTG_API_COUNTER},
     {"Sacrifice", MTG_API_SACRIFICE}, {"PutCounter", MTG_API_PUT_COUNTER}, {"Attach", MTG_API_ATTACH},
     {"Regenerate", MTG_API_REGENERATE}, {"Token", MTG_API_TOKEN},
+    {"Charm", MTG_API_CHARM},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
-    "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token",
+    "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -589,6 +590,7 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         }
         break;
     }
+    case MTG_API_CHARM:    // (never on the stack itself: each mode is cast or activated on its own)
     case MTG_API_ATTACH:   // (the Aura enters attached as the spell finishes: mtg_game.c FinishResolve)
         break;
     case MTG_API_TAP:
@@ -707,6 +709,7 @@ static const char *const sApiParams[MTG_API_COUNT][5] = {
     [MTG_API_SACRIFICE] = {"SacValid", "Amount", "SacMessage"},
     [MTG_API_PUT_COUNTER] = {"CounterType", "CounterNum"},
     [MTG_API_TOKEN] = {"TokenScript", "TokenOwner", "TokenAmount"},
+    [MTG_API_CHARM] = {"Choices"},
 };
 static const char *const sPayersKnown[] = {
     "You", "Opponent", "Player", "Targeted", "TargetedController", "TargetedPlayer",

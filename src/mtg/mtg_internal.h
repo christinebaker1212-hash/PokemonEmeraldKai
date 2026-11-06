@@ -29,6 +29,7 @@ enum {
     MTG_API_ATTACH,           // AttachEffect: an Aura spell (K:Enchant:Creature) enters attached to its target
     MTG_API_REGENERATE,       // RegenerateEffect: a shield on each creature (Defined$ Self or the target)
     MTG_API_TOKEN,            // TokenEffect: TokenAmount$ tokens of TokenScript$ for TokenOwner$ (Mtg_TokenDef)
+    MTG_API_CHARM,            // CharmEffect: "choose one" (Choices$): each mode is offered as its own action
     MTG_API_COUNT
 };
 
@@ -57,6 +58,9 @@ typedef struct {
     const char *tgt;                // ValidTgts$ (NULL: no target)
     uint8_t tgtStack;               // TargetType$ Spell: targets a spell on the stack
     uint8_t tgtZone;                // where its targets are (MTG_ZONE_*: the battlefield, or ChangeZone's Origin$)
+    uint8_t choiceCount;            // Charm: its modes (Choices$), each an ability of the charm's kind and cost
+    uint16_t choices[5];
+    uint16_t charmOf;               // a Charm's mode: the charm (0xFFFF: none)
 } MtgAbility;
 
 // mtg_script.c

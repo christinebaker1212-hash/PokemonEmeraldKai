@@ -1,0 +1,6 @@
+# MAGIC's "choose one" spells: FEVER CHARM in hand opens a menu of its modes (each in its own words), the first is
+# chosen and cast on the bears.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Fever Charm on Grizzly Bears" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Fever Charm to focus")

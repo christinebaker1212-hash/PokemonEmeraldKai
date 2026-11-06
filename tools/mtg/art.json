@@ -104,6 +104,13 @@
 "number": "123",
 "set": "ons"
 },
+"Active Volcano": {
+"artist": "Justin Hampton",
+"file": "bchr_43",
+"frame": "1993",
+"number": "43",
+"set": "bchr"
+},
 "Adarkar Sentinel": {
 "artist": "Melissa A. Benson",
 "file": "ice_306",
@@ -1273,6 +1280,13 @@
 "number": "120",
 "set": "wth"
 },
+"Blue Elemental Blast": {
+"artist": "Richard Thomas",
+"file": "4ed_63",
+"frame": "1993",
+"number": "63",
+"set": "4ed"
+},
 "Blue Scarab": {
 "artist": "Amy Weber",
 "file": "ice_9",
@@ -1861,6 +1875,13 @@
 "number": "69",
 "set": "hml"
 },
+"Chaos Charm": {
+"artist": "Steve Luke",
+"file": "mir_163",
+"frame": "1997",
+"number": "163",
+"set": "mir"
+},
 "Chaosphere": {
 "artist": "Steve Luke",
 "file": "mir_164",
@@ -2295,6 +2316,13 @@
 "number": "300",
 "set": "inv"
 },
+"Crosis's Charm": {
+"artist": "David Martin",
+"file": "pls_99",
+"frame": "1997",
+"number": "99",
+"set": "pls"
+},
 "Crossbow Ambush": {
 "artist": "Kev Walker",
 "file": "sth_105",
@@ -2448,6 +2476,13 @@
 "frame": "1997",
 "number": "301",
 "set": "inv"
+},
+"Darigaaz's Charm": {
+"artist": "David Martin",
+"file": "pls_100",
+"frame": "1997",
+"number": "100",
+"set": "pls"
 },
 "Daring Leap": {
 "artist": "Paolo Parente",
@@ -2967,6 +3002,13 @@
 "number": "303",
 "set": "inv"
 },
+"Dromar's Charm": {
+"artist": "David Martin",
+"file": "pls_105",
+"frame": "1997",
+"number": "105",
+"set": "pls"
+},
 "Dromosaur": {
 "artist": "Ciruelo",
 "file": "usg_182",
@@ -3338,6 +3380,13 @@
 "number": "285",
 "set": "tmp"
 },
+"Energy Bolt": {
+"artist": "Scott Kirschner",
+"file": "mir_263",
+"frame": "1997",
+"number": "263",
+"set": "mir"
+},
 "Energy Tap": {
 "artist": "Daniel Gelon",
 "file": "4ed_69",
@@ -3548,6 +3597,13 @@
 "number": "47a",
 "set": "hml"
 },
+"Feast or Famine": {
+"artist": "Pete Venters",
+"file": "all_49a",
+"frame": "1993",
+"number": "49a",
+"set": "all"
+},
 "Feeding Frenzy": {
 "artist": "Nelson DeCastro",
 "file": "ons_147",
@@ -3631,6 +3687,13 @@
 "frame": "1997",
 "number": "123",
 "set": "mir"
+},
+"Fever Charm": {
+"artist": "David Martin",
+"file": "ons_202",
+"frame": "1997",
+"number": "202",
+"set": "ons"
 },
 "Fevered Convulsions": {
 "artist": "Jeff Miracola",
@@ -3771,6 +3834,13 @@
 "frame": "1997",
 "number": "190",
 "set": "mmq"
+},
+"Flash Flood": {
+"artist": "Tom Wänerstrand",
+"file": "bchr_21",
+"frame": "1993",
+"number": "21",
+"set": "bchr"
 },
 "Flashfires": {
 "artist": "Dameon Willich",
@@ -5080,6 +5150,13 @@
 "frame": "1997",
 "number": "84",
 "set": "mmq"
+},
+"Hope Charm": {
+"artist": "Greg Spalenka",
+"file": "vis_8",
+"frame": "1997",
+"number": "8",
+"set": "vis"
 },
 "Hopping Automaton": {
 "artist": "Val Mayerik",
@@ -6565,6 +6642,13 @@
 "number": "311",
 "set": "mir"
 },
+"Misery Charm": {
+"artist": "David Martin",
+"file": "ons_158",
+"frame": "1997",
+"number": "158",
+"set": "ons"
+},
 "Misshapen Fiend": {
 "artist": "Adam Rex",
 "file": "mmq_147",
@@ -7180,6 +7264,13 @@
 "frame": "1997",
 "number": "115",
 "set": "vis"
+},
+"Parch": {
+"artist": "Ron Spencer",
+"file": "ulg_86",
+"frame": "1997",
+"number": "86",
+"set": "ulg"
 },
 "Pardic Collaborator": {
 "artist": "Pete Venters",
@@ -8083,6 +8174,13 @@
 "frame": "1997",
 "number": "122",
 "set": "inv"
+},
+"Red Elemental Blast": {
+"artist": "Richard Thomas",
+"file": "4ed_218",
+"frame": "1993",
+"number": "218",
+"set": "4ed"
 },
 "Red Scarab": {
 "artist": "Sandra Everingham",
@@ -10513,6 +10611,13 @@
 "number": "242",
 "set": "ons"
 },
+"Thunderbolt": {
+"artist": "Dylan Martens",
+"file": "wth_115",
+"frame": "1997",
+"number": "115",
+"set": "wth"
+},
 "Thundering Giant": {
 "artist": "Mark Zug",
 "file": "usg_221",
@@ -10827,6 +10932,13 @@
 "frame": "1997",
 "number": "315",
 "set": "inv"
+},
+"Treva's Charm": {
+"artist": "David Martin",
+"file": "pls_129",
+"frame": "1997",
+"number": "129",
+"set": "pls"
 },
 "Tribal Flames": {
 "artist": "Tony Szczudlo",
@@ -11232,6 +11344,13 @@
 "file": "ons_179",
 "frame": "1997",
 "number": "179",
+"set": "ons"
+},
+"Vitality Charm": {
+"artist": "David Martin",
+"file": "ons_296",
+"frame": "1997",
+"number": "296",
 "set": "ons"
 },
 "Vitalizing Wind": {

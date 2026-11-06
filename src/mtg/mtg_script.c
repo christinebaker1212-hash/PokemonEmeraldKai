@@ -412,6 +412,7 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     ab->kind = kind;
     ab->card = cardId;
     ab->sub = 0xFFFF;
+    ab->charmOf = 0xFFFF;
     ab->paramFirst = first;
     ab->paramCount = n;
     if (n == 0) {
@@ -456,6 +457,38 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         if (s < 0)
             Unsupported(c, "SubAbility");
         gMtgAbilities[idx].sub = s < 0 ? 0xFFFF : s;   // (the table may have moved)
+    }
+    if (gMtgAbilities[idx].api == MTG_API_CHARM) {   // its modes: parsed as spells, then given the charm's kind and cost
+        char buf[160], *tok, *save;
+        const char *ch = Mtg_Param(&gMtgAbilities[idx], "Choices");
+        if (!ch || strlen(ch) >= sizeof(buf) || kind == MTG_AB_SUB || kind == MTG_AB_TRIGGERED) {
+            Unsupported(c, "Charm");
+            return idx;
+        }
+        strcpy(buf, ch);
+        for (save = buf, tok = Mtg_Token(&save, ','); tok; tok = Mtg_Token(&save, ',')) {
+            int k, m = -1;
+            while (*tok == ' ')
+                tok++;
+            for (k = 0; k < c->svarCount; k++) {
+                MtgParam *sv = &gMtgSvars[c->svarFirst + k];
+                if (strcmp(sv->key, tok) == 0 && strncmp(sv->value, "DB$", 3) == 0) {
+                    size_t len = strlen(sv->value) + 1;
+                    char *copy = malloc(len);
+                    memcpy(copy, sv->value, len);
+                    m = ParseAbility(c, cardId, copy, MTG_AB_SPELL, depth + 1);
+                    break;
+                }
+            }
+            if (m < 0 || gMtgAbilities[idx].choiceCount >= 5) {
+                Unsupported(c, "Charm");
+                break;
+            }
+            gMtgAbilities[m].kind = (uint8_t)kind;
+            gMtgAbilities[m].cost = gMtgAbilities[idx].cost;
+            gMtgAbilities[m].charmOf = (uint16_t)idx;
+            gMtgAbilities[idx].choices[gMtgAbilities[idx].choiceCount++] = (uint16_t)m;
+        }
     }
     return idx;
 }

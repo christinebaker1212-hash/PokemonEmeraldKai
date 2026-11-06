@@ -2240,7 +2240,16 @@ static void MenuLabel(int k, char *out, unsigned cap)
     const MtgAction *a = &B.duel.query.actions[B.menu[k]];
     if (a->kind == MTG_ACT_LAND)
         snprintf(out, cap, "PLAY THE LAND");
-    else if (a->kind == MTG_ACT_CAST)
+    else if (a->kind == MTG_ACT_CAST && a->ability != 0xFFFF && gMtgAbilities[a->ability].charmOf != 0xFFFF) {
+        const char *desc = Mtg_Param(&gMtgAbilities[a->ability], "SpellDescription");   // a mode of a "choose one"
+        char text[96];
+        char *u;
+        Mtg_PlainText(text, sizeof(text), desc ? desc : "CAST");
+        if ((u = strstr(text, " until end of turn")) != NULL)   // (shorter, the same meaning: it fits the menu)
+            memmove(u + 10, u + 18, strlen(u + 18) + 1), memcpy(u, " this turn", 10);
+        snprintf(out, cap, "%s", text);
+        TcgUi_FitText(out, 206, TF_SMALL);   // (a mode's own words: the menu widens to fit them)
+    } else if (a->kind == MTG_ACT_CAST)
         snprintf(out, cap, a->x ? "CAST (X = %d)" : "CAST", a->x);
     else {
         const char *desc = Mtg_Param(&gMtgAbilities[a->ability], "SpellDescription");

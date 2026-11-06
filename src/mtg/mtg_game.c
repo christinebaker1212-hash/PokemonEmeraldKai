@@ -556,6 +556,12 @@ static void BuildPriority(MtgDuel *d)
             ability = MainAbility(c);
             if (ability != 0xFFFF && !Mtg_CostPayable(d, p, &gMtgAbilities[ability].cost, i, i))
                 continue;
+            if (ability != 0xFFFF && gMtgAbilities[ability].api == MTG_API_CHARM) {   // one action per mode
+                const MtgAbility *ch = &gMtgAbilities[ability];
+                for (k = 0; k < ch->choiceCount; k++)
+                    AddWithTargets(d, q, MTG_ACT_CAST, i, ch->choices[k], x, p);
+                continue;
+            }
             AddWithTargets(d, q, MTG_ACT_CAST, i, ability, x, p);
         } else if (o->zone == MTG_ZONE_BATTLEFIELD && o->controller == p) {
             for (k = 0; k < c->abilityCount; k++) {
@@ -575,6 +581,12 @@ static void BuildPriority(MtgDuel *d)
                     continue;
                 if (!Mtg_CostPayable(d, p, &ab->cost, i, MTG_NO_OBJ))
                     continue;
+                if (ab->api == MTG_API_CHARM) {
+                    int m;
+                    for (m = 0; m < ab->choiceCount; m++)
+                        AddWithTargets(d, q, MTG_ACT_ACTIVATE, i, ab->choices[m], x, p);
+                    continue;
+                }
                 AddWithTargets(d, q, MTG_ACT_ACTIVATE, i, c->abilities[k], x, p);
             }
         }
