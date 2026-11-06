@@ -3718,6 +3718,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] minecell: none\n");
     }
+    else if (strcmp(cmd, "minestrike") == 0)
+    {
+        // minestrike: one blow at the digging screen's cursor, only while its wall is being dug (a button pressed
+        // after the screen closed would start the next spot's digging)
+        bool8 Sinnoh_MiningTestStrike(void);
+        printf("[test] minestrike: %d\n", Sinnoh_MiningTestStrike());
+    }
     else if (strcmp(cmd, "tvwatch") == 0)
     {
         // tvwatch: watch SINNOH's TV (as its TV tiles do: field_control_avatar.c)

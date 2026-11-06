@@ -33,101 +33,101 @@ press R 1
 wait 10
 mp mining
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 rendershot u_dig
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp minecell
-press A 1
+mp minestrike
 wait 22
 mp mining
 rendershot u_end
 wait 120
 rendershot u_msg
-wait 900
+pressuntil B field 3000
 mp mining
 mp underground
 mp bag

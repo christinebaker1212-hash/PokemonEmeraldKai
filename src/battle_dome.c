@@ -3350,6 +3350,8 @@ static void SpriteCB_MonIconCardScrollRight(struct Sprite *sprite)
 
 static void SpriteCB_HorizontalScrollArrow(struct Sprite *sprite)
 {
+    if (sInfoCard == NULL)   // Moemon Kai: the tourney tree has no info card (the GBA read near address 0)
+        return;
     int taskId1 = sprite->data[0];
     int arrId = gTasks[gTasks[taskId1].data[4]].data[1];
     int tournmanetTrainerId = sTourneyTreeTrainerIds[arrId];
@@ -3419,6 +3421,8 @@ static void SpriteCB_HorizontalScrollArrow(struct Sprite *sprite)
 
 static void SpriteCB_VerticalScrollArrow(struct Sprite *sprite)
 {
+    if (sInfoCard == NULL)   // Moemon Kai: the tourney tree has no info card (the GBA read near address 0)
+        return;
     int taskId1 = sprite->data[0];
 
     if (gTasks[taskId1].data[3] == 1)
@@ -3545,7 +3549,8 @@ static void Task_HandleInfoCardInput(u8 taskId)
                     gBattle_BG2_Y = 0;
                     trainerTourneyId = sTourneyTreeTrainerIds[gTasks[taskId2].data[1]];
                     DisplayTrainerInfoOnCard(gTasks[taskId].tUsingAlternateSlot | MOVE_CARD_UP, trainerTourneyId);
-                    sInfoCard->pos = 0;
+                    if (sInfoCard != NULL)   // Moemon Kai: not made yet (Task_ShowTourneyInfoCard makes it, zeroed); the GBA wrote near 0
+                sInfoCard->pos = 0;
                 }
             }
             else // i == MATCHCARD_INPUT_UP
@@ -3661,7 +3666,8 @@ static void Task_HandleInfoCardInput(u8 taskId)
                     gBattle_BG2_Y = 0;
                     trainerTourneyId = sTourneyTreeTrainerIds[gTasks[taskId2].data[1]];
                     DisplayTrainerInfoOnCard(gTasks[taskId].tUsingAlternateSlot | MOVE_CARD_DOWN, trainerTourneyId);
-                    sInfoCard->pos = 0;
+                    if (sInfoCard != NULL)   // Moemon Kai: not made yet (Task_ShowTourneyInfoCard makes it, zeroed); the GBA wrote near 0
+                sInfoCard->pos = 0;
                 }
             }
             else // i == MATCHCARD_INPUT_DOWN
@@ -5069,7 +5075,8 @@ static void Task_HandleTourneyTreeInput(u8 taskId)
             gTasks[newTaskId].tPrevTaskId = taskId;
 
             gTasks[taskId].tState = STATE_SHOW_INFOCARD_TRAINER + 1;
-            sInfoCard->pos = 0;
+            if (sInfoCard != NULL)   // Moemon Kai: not made yet (Task_ShowTourneyInfoCard makes it, zeroed); the GBA wrote near 0
+                sInfoCard->pos = 0;
         }
         break;
     case STATE_SHOW_INFOCARD_TRAINER + 1:

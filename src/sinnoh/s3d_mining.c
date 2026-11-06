@@ -872,6 +872,15 @@ void Sinnoh_MiningDebug(void)
     printf("\n");
 }
 
+// (tests) one blow at the cursor while the wall is dug (FALSE: not digging now)
+bool8 Sinnoh_MiningTestStrike(void)
+{
+    if (!M.active || M.phase != MS_MAIN)
+        return FALSE;
+    Strike(M.cx, M.cy);
+    return TRUE;
+}
+
 // a cell over a treasure still under dirt, the one whose blow would bare the most of the treasures (the cursor goes
 // there)
 bool8 Sinnoh_MiningTestCell(u8 *x, u8 *y)
