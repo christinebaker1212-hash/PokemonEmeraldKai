@@ -1,0 +1,35 @@
+pressuntil A field 5000
+mp textspeed 2
+mp battlestyle 1
+mp platinumstory
+wait 30
+mp warp 40,7,15,18
+wait 60
+shot f_arrive
+pressuntil A yesno 4000
+shot f_teamup
+wait 20
+press A 4
+pressuntil A partymenu 3000
+wait 30
+press A 4
+wait 20
+press A 4
+wait 30
+press DOWN 4
+wait 10
+press DOWN 4
+wait 10
+press A 4
+waitfor battle 3000
+wait 260
+shot f_battle
+mash A 400 8
+pressuntil A field 9000
+wait 60
+shot f_after
+mash A 40 15
+wait 60
+mp getvar 0x51BB
+shot f_end
+quit

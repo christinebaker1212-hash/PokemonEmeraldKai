@@ -1,0 +1,8 @@
+# Platinum's FIGHT AREA arrival (scripts_fight_area.s FightArea_OnFrame_Rival): BARRY meets the player off the boat,
+# walks them up to VOLKNER and FLINT and the two team up against them (StartTagBattle, BARRY's team by the starter);
+# won, PALMER comes over (f_after). Needs the 3D pack. Shots f_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:100,9:100 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("sinnoh battle picture: trainer 22" "reached state" "var 0x51BB = 2")
+UNEXPECT_A=("[crash]" "TIMEOUT")
