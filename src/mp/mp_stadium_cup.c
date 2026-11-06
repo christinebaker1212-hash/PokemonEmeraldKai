@@ -9,6 +9,9 @@
 #include "mp_stadium_cup.h"
 #include "battle.h"
 #include "battle_setup.h"
+#include "battle_util.h"
+#include "battle_main.h"
+#include "battle_anim.h"
 #include "battle_transition.h"
 #include "data.h"
 #include "event_data.h"
@@ -23,6 +26,7 @@
 #include "string_util.h"
 #include "task.h"
 #include "constants/battle.h"
+#include "constants/battle_move_effects.h"
 #include "constants/characters.h"
 #include "constants/items.h"
 #include "constants/moves.h"
@@ -694,3 +698,39 @@ void MP_StadiumBattle_TrainerName(u8 *out)
 
 const u8 *MP_StadiumBattle_LoseText(void) { return sText_Lose; }
 const u8 *MP_StadiumBattle_WinText(void) { return sText_Win; }
+
+// ---- the clauses in battle (battle_script_commands.c; shown on the VS screen's RULES page) ----------------------------
+
+// SLEEP / FREEZE CLAUSE: a second POKéMON of the same side can't be put to sleep / frozen while one already is
+bool8 MP_StadiumClause_Blocks(u8 battler, u8 moveEffect)
+{
+    struct Pokemon *party;
+    u32 status;
+    u8 i;
+    if (!gMpStadiumBattle)
+        return FALSE;
+    if (moveEffect == MOVE_EFFECT_SLEEP)
+        status = STATUS1_SLEEP;
+    else if (moveEffect == MOVE_EFFECT_FREEZE)
+        status = STATUS1_FREEZE;
+    else
+        return FALSE;
+    party = GetBattlerSide(battler) == B_SIDE_PLAYER ? gPlayerParty : gEnemyParty;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (i != gBattlerPartyIndexes[battler] && GetMonData(&party[i], MON_DATA_SPECIES)
+         && GetMonData(&party[i], MON_DATA_HP) && (GetMonData(&party[i], MON_DATA_STATUS) & status))
+        {
+            MPNet_Log("stadium: %s CLAUSE", status == STATUS1_SLEEP ? "SLEEP" : "FREEZE");
+            return TRUE;
+        }
+    return FALSE;
+}
+
+// SELF-KO CLAUSE: both sides out at once by SELFDESTRUCT / EXPLOSION: its user's side loses
+bool8 MP_StadiumClause_SelfKo(void)
+{
+    if (!gMpStadiumBattle || gBattleMoves[gCurrentMove].effect != EFFECT_EXPLOSION)
+        return FALSE;
+    MPNet_Log("stadium: SELF-KO CLAUSE");
+    return TRUE;
+}

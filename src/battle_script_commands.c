@@ -1,4 +1,6 @@
 #include "global.h"
+bool8 MP_StadiumClause_Blocks(u8 battler, u8 moveEffect);   // Moemon Kai: mp_stadium_cup.c
+bool8 MP_StadiumClause_SelfKo(void);
 u16 MP_RegionVictorySong(u16 song);   // Moemon Kai (pokemon.c)
 #include "battle_gen4.h"
 #include "battle_gen59.h"
@@ -2353,6 +2355,18 @@ void SetMoveEffect(bool8 primary, u8 certain)
     if (gBattleMons[gEffectBattler].status2 & STATUS2_SUBSTITUTE && affectsUser != MOVE_EFFECT_AFFECTS_USER)
         INCREMENT_RESET_RETURN
 
+    // Moemon Kai: POKéMON STADIUM's SLEEP and FREEZE CLAUSES: one of a side's POKéMON asleep / frozen at a time
+    if (affectsUser != MOVE_EFFECT_AFFECTS_USER && MP_StadiumClause_Blocks(gEffectBattler, gBattleCommunication[MOVE_EFFECT_BYTE]))
+    {
+        if (primary)
+        {
+            gBattleCommunication[MOVE_EFFECT_BYTE] = 0;
+            gBattlescriptCurrInstr = BattleScript_ButItFailed;
+            return;
+        }
+        INCREMENT_RESET_RETURN
+    }
+
     if (gBattleCommunication[MOVE_EFFECT_BYTE] <= PRIMARY_STATUS_MOVE_EFFECT)
     {
         switch (sStatusFlagsForMoveEffects[gBattleCommunication[MOVE_EFFECT_BYTE]])
@@ -4010,6 +4024,9 @@ static void Cmd_checkteamslost(void)
     }
     if (HP_count == 0)
         gBattleOutcome |= B_OUTCOME_WON;
+    // Moemon Kai: POKéMON STADIUM's SELF-KO CLAUSE: a self-destructing move that ends both sides loses for its user
+    if (gBattleOutcome == B_OUTCOME_DREW && MP_StadiumClause_SelfKo())
+        gBattleOutcome = GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER ? B_OUTCOME_LOST : B_OUTCOME_WON;
 
     // For link battles that haven't ended, count number of empty battler spots
     // In link multi battles, jump to pointer if more than 1 spot empty
