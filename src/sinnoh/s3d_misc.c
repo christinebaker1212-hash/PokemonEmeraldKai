@@ -547,8 +547,18 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         extern u8 gBattleOutcome;
         static const u8 sResult[8] = {0, 1, 2, 3, 5, 5, 6, 4};   // (B_OUTCOME_WON .. B_OUTCOME_CAUGHT)
         VarSet(a, gBattleOutcome < ARRAY_COUNT(sResult) ? sResult[gBattleOutcome] : 0);
+        {
+            void S3D_Dw_RefreshPeople(void);
+            S3D_Dw_RefreshPeople();   // (Platinum's map loads again after the battle: the DISTORTION WORLD's people)
+        }
         break;
     }
+    case 39:
+        {
+            void S3D_Dw_ResetCamera(void);
+            S3D_Dw_ResetCamera();   // (ResetDistortionWorldPersistedCameraAngles)
+        }
+        break;
     case 21:
         if (sM.battleground < 0xFFFF)
             sM.battleground++;

@@ -29,6 +29,9 @@
 #include "constants/map_groups.h"
 #include "s3d.h"
 #include "mp.h"
+#include "palette.h"
+#include "metatile_behavior.h"
+#include "constants/rgb.h"
 
 void MoveCameraAndRedrawMap(int deltaX, int deltaY);   // (field_camera.c)
 
@@ -45,6 +48,7 @@ struct DwProp { u16 model; float off[3]; float scale; };
 struct DwEvent { u16 hid; s16 t[3]; u8 cond; u16 val; u16 cmd, ncmd; };
 struct DwCmd { u8 kind; s32 p[14]; };
 // overlay009's sMapObjectEvents: who stands where, shown by a condition (or added by a script), their script
+struct DwTeleport { u16 hid; s16 x, y, z, dz; u8 dir; u16 minProgress; const u8 *script; };
 struct DwPerson { u16 hid; u8 localId; u16 gfx; s16 pos[3]; u8 dir, cond; u16 val, hide; u8 invisible; const u8 *script; };
 
 #include "../../sinnoh/platinum_dw.h"
@@ -231,6 +235,17 @@ bool8 S3D_Dw_Active(void)
     return sDw.floor != NULL;
 }
 
+// The floor's place in the DISTORTION WORLD's stacked world: Platinum's scripts there give and compare tiles with it
+// added (GetPlayerMapPos, SetObjectEventPos); FALSE off its floors
+bool8 S3D_Dw_TileOffset(s32 *x, s32 *z)
+{
+    if (sDw.floor == NULL)
+        return FALSE;
+    *x = sDw.floor->off[0];
+    *z = sDw.floor->off[2];
+    return TRUE;
+}
+
 // On the map's own ground or up on a platform / mid-jump: the 3D position drives the view and the player's sprite
 static bool8 Off(void)
 {
@@ -406,6 +421,18 @@ static void DrawPlatforms(void)
     }
     for (; slot < SHADOW_SLOT; slot++)
         S3D_DynPropHide(slot);
+}
+
+// ---- GIRATINA coming down into its room (EventCmdPlayGiratinaArrival_*): from 10 tiles up, dark, brightening once down
+static struct { bool8 on; u8 state, wait; float off, dark; } sArrive;
+
+static void ArriveTint(void)
+{
+    u8 obj;
+    if (TryGetObjectEventIdByLocalIdAndMap(128, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &obj))
+        return;
+    if (gObjectEvents[obj].spriteId < MAX_SPRITES)
+        MP_BlendSpritePalette(gSprites[gObjectEvents[obj].spriteId].oam.paletteNum, (u8)(sArrive.dark + 0.5f), RGB_BLACK);
 }
 
 // ---- GIRATINA's shadow flying by (Platinum's DistWorldGiratinaShadowProp: from a tile, a step each frame, its cry or
@@ -608,6 +635,15 @@ static void StartCamera(const struct DwCam *c)
     sDw.camLeft = c->steps > 0 ? c->steps : 1;
     if (getenv("MOEMON_TEST"))
         printf("[dw] camera to %d %d %d over %d\n", c->ang[0], c->ang[1], c->ang[2], (int)c->steps);
+}
+
+// Platinum's ResetDistortionWorldPersistedCameraAngles (s3d_misc.c op 39): the camera's usual angles again
+void S3D_Dw_ResetCamera(void)
+{
+    memset(sDw.cam, 0, sizeof(sDw.cam));
+    memset(sDw.camTo, 0, sizeof(sDw.camTo));
+    memset(sDw.camF, 0, sizeof(sDw.camF));
+    sDw.camLeft = 0;
 }
 
 // ApplyCameraAngleForPlayerPosition: the zone the player is in, facing the way they go
@@ -1073,6 +1109,44 @@ static bool8 EventUpdate(void)
             return FALSE;
         sShadow.on = FALSE;
         break;
+    case CMD_GIRATINA_ARRIVAL:
+        // (Platinum's steps at 30 frames a second: halved in ours)
+        if (sEv.state == 0)
+        {
+            S3D_Dw_AddObject(128);
+            sArrive.on = TRUE, sArrive.off = 160.0f, sArrive.dark = 16.0f, sArrive.wait = 0;
+            PlayCry_Normal(SPECIES_GIRATINA, 0);
+            sEv.state = 1;
+        }
+        if (sEv.state == 1)
+        {
+            sArrive.off -= sArrive.off >= 16.0f ? 0.5f : 0.25f;
+            if (sArrive.off <= 0)
+                sArrive.off = 0, sEv.state = 2;
+            ArriveTint();
+            return FALSE;
+        }
+        if (sEv.state == 2)
+        {
+            sArrive.dark -= 16.0f / 180.0f;
+            if (sArrive.dark <= 0)
+                sArrive.dark = 0, sEv.state = 3;
+            ArriveTint();
+            return FALSE;
+        }
+        if (++sArrive.wait < 60)
+            return FALSE;
+        sArrive.on = FALSE;
+        break;
+    case CMD_SHOW_ROOM_PLATFORMS:
+    case CMD_HIDE_ROOM_PLATFORMS:
+        // (the room's stepping stones, ghost props shown group by group: their timing; the props are drawn with the
+        // other ghost props)
+        if (sEv.state == 0)
+            sEv.t = c->kind == CMD_SHOW_ROOM_PLATFORMS ? 36 + 48 * 2 : 16 + 48 * 2 + 8, sEv.state = 1;
+        if (sEv.t-- > 0)
+            return FALSE;
+        break;
     case CMD_SET_GIRATINA_ANIM:
         VarSet(VAR_DW_SHADOWS, VarGet(VAR_DW_SHADOWS) | (1 << c->p[0]));
         break;
@@ -1096,6 +1170,43 @@ static bool8 TileEvents(s32 x, s32 y, s32 z)
         printf("[dw] event at %d,%d,%d (%d commands)\n", x, y, z, e->ncmd);
     StartEvent(&sDwCmds[e->cmd], e->ncmd);
     return TRUE;
+}
+
+// Platinum's ledges jumped twice (GIRATINA's room: stones three tiles apart, the two tiles between them its JUMP_*_TWICE
+// pair, built as two ledges facing each other): the game's ledge hop lands on the second of the pair, which then hops
+// one tile on to the next stone
+static bool8 TwiceLedge(struct ObjectEvent *obj)
+{
+    u8 b = MapGridGetMetatileBehaviorAt(obj->currentCoords.x, obj->currentCoords.y);
+    u8 d = obj->facingDirection;
+    if (!((d == DIR_NORTH && MetatileBehavior_IsJumpSouth(b)) || (d == DIR_SOUTH && MetatileBehavior_IsJumpNorth(b))
+       || (d == DIR_WEST && MetatileBehavior_IsJumpEast(b)) || (d == DIR_EAST && MetatileBehavior_IsJumpWest(b))))
+        return FALSE;
+    ObjectEventClearHeldMovementIfFinished(obj);
+    if (ObjectEventSetHeldMovement(obj, GetJumpMovementAction(d)))
+        return FALSE;
+    PlaySE(SE_LEDGE);
+    return TRUE;
+}
+
+// B7F's north end into GIRATINA's room (once CYRUS is beaten) and the room's south end back: no events, overlay009's
+// own tile checks (DistWorld_HandlePlayerPositionChanged)
+static bool8 Teleport(s32 x, s32 y, s32 z, u8 dir)
+{
+    u32 i;
+    for (i = 0; i < DW_TELEPORT_COUNT; i++)
+    {
+        const struct DwTeleport *t = &sDwTeleports[i];
+        if (t->hid == sDw.floor->hid && dir == t->dir && x == t->x && abs(y - t->y) <= 1
+         && (z == t->z || z == t->z + t->dz) && VarGet(DW_VAR_PROGRESS) >= t->minProgress)
+        {
+            if (getenv("MOEMON_TEST"))
+                printf("[dw] teleport at %d,%d,%d\n", x, y, z);
+            ScriptContext_SetupScript(t->script);
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 // ---- the boulder puzzle (sBoulderFallLocations, DistWorldFallingBoulder_*): STRENGTH's boulders pushed onto B5F's
@@ -1252,6 +1363,30 @@ static s32 PersonOf(u16 hid, u8 localId)
     return first;
 }
 
+static void HidePeople(void);
+
+// After a battle (s3d_misc.c op 38, GetBattleResult): Platinum loads the map again, so the people the story shows now
+// come out (GIRATINA's room's portal once GIRATINA is gone); this game comes back without a reload
+void S3D_Dw_RefreshPeople(void)
+{
+    const struct DwFloor *f = sDw.floor;
+    u32 i;
+    if (f == NULL)
+        return;
+    for (i = 0; i < DW_PEOPLE_COUNT; i++)
+    {
+        const struct DwPerson *p = &sDwPeople[i];
+        if (p->hid != f->hid || p->hide != 0 || p->cond == COND_MANUAL_ADD_ONLY || PersonOf(p->hid, p->localId) != (s32)i)
+            continue;
+        if (PersonShown(p) && FlagGet(DW_PERSON_FLAGS + i))
+        {
+            FlagClear(DW_PERSON_FLAGS + i);
+            TrySpawnObjectEvent(p->localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+            HidePeople();
+        }
+    }
+}
+
 void S3D_Dw_AddPeople(struct MapEvents *ev, struct ObjectEventTemplate *buf, u32 cap)
 {
     static const u8 sFace[4] = {MOVEMENT_TYPE_FACE_UP, MOVEMENT_TYPE_FACE_DOWN, MOVEMENT_TYPE_FACE_LEFT, MOVEMENT_TYPE_FACE_RIGHT};
@@ -1331,19 +1466,48 @@ void S3D_Dw_DeleteObject(u8 localId)
     RemoveObjectEventByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
 }
 
-// CYNTHIA riding along: up and down with the elevator (s3d.c's people heights)
+float S3D_TestGround(s32 mapX, s32 mapY, float near);
+
+// Someone standing on an elevator platform (no ground of the floor's own there: the platform is a prop): its top
+static float PlatformUnder(u8 localId)
+{
+    u8 obj;
+    u32 i;
+    s32 x, z, mx, my;
+    if (sDw.floor == NULL || TryGetObjectEventIdByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &obj))
+        return NAN;
+    mx = gObjectEvents[obj].currentCoords.x - MAP_OFFSET;
+    my = gObjectEvents[obj].currentCoords.y - MAP_OFFSET;
+    if (S3D_TestGround(mx * 16 + 8, my * 16 + 8, -4096.0f) != -4096.0f)
+        return NAN;   // (the floor's own ground)
+    x = mx + sDw.floor->off[0];
+    z = my + sDw.floor->off[2];
+    for (i = 0; i < DW_MOVING_COUNT; i++)
+    {
+        const struct DwMoving *m = &sDwMoving[i];
+        if (m->hid == sDw.floor->hid && Present(m) && abs(m->t[0] - x) <= 2 && abs(m->t[2] - z) <= 2)
+            return (m->t[1] - sDw.floor->off[1]) * 16.0f;
+    }
+    return NAN;
+}
+
+// CYNTHIA riding along: up and down with the elevator (s3d.c's people heights); people on a platform stand on it
 static float PersonHeight(u8 localId, float h)
 {
+    float top;
     if (sFall.on && localId == sFall.localId)
         return h + sFall.off;
+    if (sArrive.on && localId == 128 && sDw.floor != NULL && sDw.floor->hid == 582)
+        return h + sArrive.off;
+    top = PlatformUnder(localId);
     if (sDw.floor != NULL && sDw.riding && sRider && localId == sRider)
     {
         // (her ground when the ride starts: the height given back is kept as the next frame's search height)
         if (!sRiderBaseSet)
-            sRiderBase = h, sRiderBaseSet = TRUE;
+            sRiderBase = top == top ? top : h, sRiderBaseSet = TRUE;
         return sRiderBase + sDw.rideOff[1] / 4096.0f + sDw.vib;
     }
-    return NAN;
+    return top;
 }
 
 // Platinum's INVISIBLE people (the places scripts walk others to) stay unseen
@@ -1585,7 +1749,11 @@ void S3D_Dw_Update(void)
             const struct DwMoving *m = ElevatorAt(x, y, z);
             bool8 first = sDw.last[0] < 0;
             sDw.last[0] = x, sDw.last[1] = y, sDw.last[2] = z;
+            if (!first && TwiceLedge(obj))
+                return;
             if (!first && TileEvents(x, y, z))
+                return;
+            if (!first && Teleport(x, y, z, obj->facingDirection))
                 return;
             if (m != NULL && !first)
             {

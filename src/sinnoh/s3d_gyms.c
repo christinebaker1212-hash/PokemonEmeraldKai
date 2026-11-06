@@ -54,7 +54,7 @@ u16 S3D_Gyms_HealBallModel(void)   // (the healing machine's balls: s3d_heal.c)
 #define VAR_SINNOH_CANALAVE_HI 0x52F6   // (bits 16-23)
 #define VAR_SINNOH_CANALAVE_FLOOR 0x52F7   // the floor the player is on
 
-enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA, GYM_VEILSTONE, GYM_SNOWPOINT, GYM_HEARTHOME, GYM_DISTORTION,
+enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA, GYM_VEILSTONE, GYM_SNOWPOINT, GYM_HEARTHOME,
        GYM_VILLA };
 
 static struct
@@ -1273,8 +1273,6 @@ void S3D_Gyms_MapLoaded(void)
         sG.gym = GYM_HEARTHOME;
         HearthLoad(map);
     }
-    else if (map == MAP_SINNOH_DISTORTION_WORLD_GIRATINA_ROOM)
-        sG.gym = GYM_DISTORTION;   // (GIRATINA's arena: only its rock is walked, rows 23-28; the floor data runs on)
     else if (map == MAP_SINNOH_VILLA)
     {
         sG.gym = GYM_VILLA;
@@ -1370,9 +1368,6 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
         break;
     case GYM_VEILSTONE:
         blocked = VeilBlocked(toX - MAP_OFFSET, toY - MAP_OFFSET);
-        break;
-    case GYM_DISTORTION:
-        blocked = toY - MAP_OFFSET < 23 || toY - MAP_OFFSET > 28;
         break;
     case GYM_SNOWPOINT:
         blocked = SnowBlocked(fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET, toY - MAP_OFFSET);

@@ -394,6 +394,11 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
             y = gSaveBlock1Ptr->pos.y;
         }
         S3D_MapCells(&cx, &cz);
+        {
+            s32 ox, oz;
+            if (S3D_Dw_TileOffset(&ox, &oz))
+                x += ox, y += oz;
+        }
         VarSet(arg, x + cx * 32);
         VarSet(arg2, y + cz * 32);
         break;
@@ -849,6 +854,11 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
         S3D_MapCells(&cx, &cz);
         x = VarGet(arg2) - cx * 32;
         y = VarGet(arg3) - cz * 32;
+        {
+            s32 ox, oz;
+            if (S3D_Dw_TileOffset(&ox, &oz))
+                x -= ox, y -= oz;
+        }
         SetObjEventTemplateCoords(id, x, y);
         TryMoveObjectEventToMapCoords(id, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, x, y);
         {

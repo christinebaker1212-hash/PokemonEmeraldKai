@@ -1,0 +1,83 @@
+pressuntil A field 5000
+mp platinumstory
+mp battlestyle 1
+mp setvar 0x51B0 10
+wait 30
+mp warp 41,46,15,30
+wait 60
+waitfor field 1000
+wait 30
+mp dw
+shot g_b7f
+press UP 2
+wait 10
+press UP 100
+wait 200
+pressuntil A field 3000
+wait 30
+mp dw
+shot g_room
+press UP 2
+wait 10
+press UP 30
+wait 30
+shot g_shadow1
+pressuntil A field 3000
+wait 30
+mp getvar 0x51B0
+press UP 2
+wait 10
+press UP 200
+wait 60
+shot g_shadow2
+wait 200
+pressuntil A field 3000
+mp getvar 0x51B0
+mp dw
+press UP 2
+wait 10
+press UP 60
+wait 200
+shot g_arrive
+wait 200
+shot g_arrive2
+pressuntil A field 4000
+mp getvar 0x51B0
+mp dw
+mp objlist
+shot g_before
+press UP 2
+wait 30
+press A 2
+wait 300
+shot g_battle
+mash A 220 20
+shot h1
+mash A 20 30
+shot h2
+mash A 20 30
+shot h3
+mash A 20 30
+shot h4
+mash A 20 30
+shot h5
+pressuntil A field 8000
+wait 60
+shot g_after
+mp getvar 0x51B0
+mp objlist
+pressuntil A field 4000
+shot g_end
+mp getvar 0x51B0
+press UP 2
+wait 30
+press A 2
+wait 250
+shot g_portal
+press A 2
+mash A 8 30
+wait 300
+shot g_spring
+mp getvar 0x51BA
+mp where
+quit

@@ -1,0 +1,59 @@
+pressuntil A field 5000
+mp platinumstory
+mp battlestyle 1
+mp setvar 0x51B0 7
+mp setflag 0x3395
+wait 30
+mp warp 41,45,29,50
+wait 60
+waitfor field 1000
+wait 30
+mp dw
+shot b_start
+mp objlist
+press UP 2
+wait 10
+press UP 12
+wait 10
+press UP 12
+wait 400
+mp dw
+shot b_b7f
+mp objlist
+wait 300
+shot b_arrive
+mash A 10 30
+wait 60
+mp getvar 0x51B0
+shot b_after
+press UP 2
+wait 10
+press UP 160
+wait 60
+shot c_event
+wait 60
+pressuntil A field 6000
+wait 60
+shot c_after
+mp objlist
+mp dw
+press UP 2
+wait 30
+press A 2
+wait 120
+shot c_talk
+mash A 20 30
+wait 200
+shot c_battle
+mash A 300 20
+pressuntil A field 6000
+wait 60
+shot c_won
+mp getvar 0x51B0
+mp objlist
+mp dw
+mash A 30 30
+wait 300
+shot c_end
+mp getvar 0x51B0
+quit

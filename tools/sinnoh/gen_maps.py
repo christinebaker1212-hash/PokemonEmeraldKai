@@ -132,15 +132,6 @@ def inside(p, x, z):
 # People this game adds to a place, after Platinum's (their local ids follow): the GAME CENTER's attendant (as in
 # GOLDENROD's and CELADON's GAME CORNERS: data/scripts/mp_region.inc EventScript_GameCenterGuide)
 EXTRA_PEOPLE = {
-    # the DISTORTION WORLD's arena (data/scripts/sinnoh_places.inc): CYRUS, GIRATINA and CYNTHIA on Platinum's rock
-    'Sinnoh_DistortionWorldGiratinaRoom': [
-        {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_CYRUS', 'x': 15, 'y': 25, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN',
-         'script': 'Sinnoh_EventScript_DistortionCyrus', 'flag': '0x3D34'},
-        {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_GIRATINA_ALTERED', 'x': 15, 'y': 22, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN',
-         'script': 'Sinnoh_EventScript_DistortionGiratina', 'flag': '0x3D36'},
-        {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_CYNTHIA', 'x': 18, 'y': 26, 'movement_type': 'MOVEMENT_TYPE_FACE_LEFT',
-         'script': 'Sinnoh_EventScript_DistortionCynthia'},
-    ],
     'Sinnoh_VeilstoneCityPrizeExchange': [
         {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_UNUSED_RECEPTIONIST', 'x': 7, 'y': 4, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN',
          'script': 'EventScript_GameCenterGuide'},

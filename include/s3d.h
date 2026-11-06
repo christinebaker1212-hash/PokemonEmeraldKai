@@ -71,6 +71,8 @@ bool8 S3D_Dw_BoulderPushed(struct ObjectEvent *boulder);   // after a push: TRUE
 void S3D_Dw_Player3DPos(u16 *x, u16 *y, u16 *z);
 void S3D_Dw_Shadow(u16 n);      // StartDistortionWorldGiratinaShadowEvent (op 32; 0xFFFF: Finish, op 33)   // GetPlayer3DPos (ops 35, 36)
 bool8 S3D_Dw_Active(void);
+bool8 S3D_Dw_TileOffset(s32 *x, s32 *z);
+void S3D_Dw_ResetCamera(void);
 void S3D_Dw_OnMapLoad(void);
 bool8 S3D_Dw_PlayerStep(u8 dir, u16 heldKeys);   // (field_player_avatar.c PlayerStep: TRUE when handled)
 void S3D_Dw_Update(void);

@@ -1,0 +1,8 @@
+# GIRATINA's room: B7F's north end (89, 65, 57) facing north once CYRUS is beaten warps into the room (overlay009's
+# own tile check, no event); its events: the first shadow (progress 11), the second (12), GIRATINA's arrival (13:
+# it comes down dark from above and brightens). Shots g_*.png.
+MODE=1
+TMO=900
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:100,9:100 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("[dw] teleport at 89,65,5" "[test] var 0x51B0 = 13")
+UNEXPECT_A=("[crash]" "TIMEOUT")

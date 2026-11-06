@@ -978,7 +978,7 @@ class FileConverter:
         if cmd == 'GiveBadge':
             n = int(self.value(a[0]))
             return ['setflag 0x%X' % (0x3320 + n)]   # (FLAG_SINNOH_BADGE01 + n, include/mp_region.h)
-        # the DISTORTION WORLD (src/sinnoh/s3d_distortion.c, s3d_misc.c ops 29-37)
+        # the DISTORTION WORLD (src/sinnoh/s3d_distortion.c, s3d_misc.c ops 29-39)
         if cmd == 'InitPersistedMapFeaturesForDistortionWorld':
             return [self.sinnoh(SINNOH_MISC, 29)]
         if cmd == 'AddDistortionWorldMapObject':
@@ -987,6 +987,8 @@ class FileConverter:
             return [self.sinnoh(SINNOH_MISC, 31, self.localid(a[0]))]
         if cmd == 'StartDistortionWorldGiratinaShadowEvent':
             return [self.sinnoh(SINNOH_MISC, 32, self.value(a[0]))]
+        if cmd == 'ResetDistortionWorldPersistedCameraAngles':
+            return [self.sinnoh(SINNOH_MISC, 39)]
         if cmd == 'FinishDistortionWorldGiratinaShadowEvent':
             return [self.sinnoh(SINNOH_MISC, 33)]
         if cmd == 'SetPartyGiratinaForm':
@@ -2351,6 +2353,18 @@ def referenced():
 INIT_KIND = {'OnTransition': 'MAP_SCRIPT_ON_TRANSITION', 'OnLoad': 'MAP_SCRIPT_ON_LOAD', 'OnResume': 'MAP_SCRIPT_ON_RESUME'}
 
 
+def removes_after_battle(c, n):
+    """Platinum's OnLoad entry N of converter C takes away an object once its battle is done (FLAG_MAP_LOCAL_REMOVE_OBJECT)"""
+    try:
+        for lab in c.reach(c.entries[n - 1]):
+            for cmd, a in c.labels[lab]:
+                if 'FLAG_MAP_LOCAL_REMOVE_OBJECT' in a:
+                    return True
+    except (IndexError, KeyError, Unsupported):
+        pass
+    return False
+
+
 def init_scripts(root, low):
     """Platinum's scripts_init_<low>.s: ({kind: entry}, [(variable, value, entry)] its frame table)"""
     path = os.path.join(root, 'res/field/scripts', 'scripts_init_%s.s' % low)
@@ -2610,6 +2624,10 @@ def emit_map_tables(root, tables, done):
                 lines += ['\t.2byte %d, %d' % (x, y), '\t.byte 0, 0', '\t.2byte %s, %s, 0' % (var, val),
                           '\tspace64 4', '\tptrvalue %s' % lab]
         ok = {k: n for k, n in once.items() if c.entry_label(n) in done}
+        if 'OnLoad' in ok and 'OnResume' not in once and removes_after_battle(c, ok['OnLoad']):
+            # (Platinum loads the map again after a battle and its OnLoad takes away the legendary just fought: this
+            # game comes back to the map without loading it, through ON_RESUME)
+            ok['OnResume'] = ok['OnLoad']
         rows = []
         for var, val, n in frame:
             if c.entry_label(n) not in done:

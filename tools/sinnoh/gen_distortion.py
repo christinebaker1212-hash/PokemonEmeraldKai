@@ -11,6 +11,7 @@ tiles from offsetAltitude).
 
 usage: gen_distortion.py POKEPLATINUM_DIR OUT.h | --auto OUT.h (the decomp named in sinnoh/decomp_dir; stubs without)
 """
+import re
 import os
 import struct
 import sys
@@ -385,6 +386,24 @@ def event_scripts(c, root, evs):
     return sorted(out)
 
 
+def teleports(root):
+    """overlay009's two steps that are no events (DistWorld_HandlePlayerPositionChanged): B7F's north end into
+    GIRATINA's room once CYRUS is beaten, the room's south end back: [(hid, x, y, z, dz, dir, min progress, script)]"""
+    src = open(os.path.join(root, OV9), errors='replace').read()
+    d = {m.group(1): int(m.group(2)) for m in re.finditer(r'#define\s+(\w+_TELEPORT_\w+)\s+(\d+)', src)}
+    ids_ = header_ids(root)
+    out = []
+    for pre, header, low, dz, dirn, prog in (
+            ('B7F', 'MAP_HEADER_DISTORTION_WORLD_B7F', 'distortion_world_b7f', -1, 'DIR_NORTH', 10),
+            ('GIRATINA_ROOM', 'MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM', 'distortion_world_giratina_room', 1, 'DIR_SOUTH', 0)):
+        try:
+            out.append((ids_[header], d[pre + '_TELEPORT_TILE_X'], d[pre + '_TELEPORT_TILE_Y'], d[pre + '_TELEPORT_TILE_Z'],
+                        dz, dirn, prog, 'SinnohP_%s_%d' % (low, d[pre + '_TELEPORT_SCRIPT_ID'])))
+        except KeyError:
+            pass
+    return out
+
+
 def script_labels(root):
     """The converted scripts the DISTORTION WORLD's people and events use (gen_scripts.py converts them), none without
     the decomp"""
@@ -394,7 +413,7 @@ def script_labels(root):
         return set()
     evs, named = events(c)
     return {p[-1] for p in people(c, root) if p[-1] and p[-1].startswith('SinnohP_')} | \
-        {e[2] for e in event_scripts(c, root, evs)}
+        {e[2] for e in event_scripts(c, root, evs)} | {t[-1] for t in teleports(root)}
 
 
 def write(out, data):
@@ -411,6 +430,7 @@ def write(out, data):
               '#define DW_CMDS_B4F_WATERFALL 0xFFFF', '#define DW_CMDS_B5F_WATERFALL 0xFFFF', '#define DW_VAR_PROGRESS 0x4000',
               '#define DW_FLAG_PUZZLE_FINISHED 0', '#define DW_PLATFORM_FLAG_INVALID 11', '#define DW_FLAG_STEPPING_STONES 0',
               'static const struct { u16 hid; s16 x, z; s16 flag; } sDwFalls[1];', '#define DW_FALL_COUNT 0',
+              'static const struct DwTeleport sDwTeleports[1];', '#define DW_TELEPORT_COUNT 0',
               'static const struct DwPerson sDwPeople[1];', '#define DW_PEOPLE_COUNT 0',
               'static const struct DwCmd sDwShadows[1];', '#define DW_SHADOW_COUNT 0',
               '#define DW_PROP_GIRATINA_SHADOW 0',
@@ -500,6 +520,15 @@ def write(out, data):
     o.append('static const struct { u16 hid; s16 x, z; s16 flag; } sDwFalls[] = {')
     for hid, x, z, fl in tbl['falls']:
         o.append('    {%d, %d, %d, %d},' % (hid, x, z, fl if fl < 0x8000 else -1))
+    o.append('};')
+    # B7F <-> GIRATINA's room (no events: overlay009 checks the tiles)
+    tp = teleports(tbl['root'])
+    for t in tp:
+        o.append('extern const u8 %s[];' % t[-1])
+    o.append('#define DW_TELEPORT_COUNT %d' % len(tp))
+    o.append('static const struct DwTeleport sDwTeleports[] = {')
+    for t in tp:
+        o.append('    {%d, %d, %d, %d, %d, %s, %d, %s},' % t)
     o.append('};')
     # the scripts the events start (START_SCRIPT: the floor's script by number)
     es = event_scripts(c, tbl['root'], tbl['events'])
