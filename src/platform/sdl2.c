@@ -16,6 +16,7 @@
 #endif
 
 #include <SDL2/SDL.h>
+#include "aw_file.h"
 
 #include "global.h"
 #include "mp_region.h"
@@ -399,6 +400,7 @@ int main(int argc, char **argv)
         MP_Sim_OnClose();   // Moemon Co-op: the BATTLE SIMULATOR record, as the game closes (mp_sim.c)
     }
     CloseSaveFile();
+    AwFile_Flush();   // Moemon Co-op: every side file queued is on disk before the game closes (aw_file.c)
 
     Display_SaveSettings();
     Display_Shutdown();
@@ -471,6 +473,7 @@ static void BackUpSaveFile(void)
     FILE *in, *out;
     if (sDone && SDL_GetTicks() - sLastBackup < 10 * 60 * 1000)
         return;
+    AwFile_Flush();   // (the side files as last written, before they're copied)
     in = fopen(gPlatformSavePath, "rb");
     if (in == NULL)
         return;
@@ -1587,6 +1590,7 @@ static void TestHarnessStep(void)
 void SoftReset(u32 resetFlags)
 {
     puts("Soft Reset called. Exiting.");
+    AwFile_Flush();   // (the side files queued: aw_file.c)
     exit(0);
 }
 

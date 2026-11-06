@@ -447,6 +447,8 @@ Gotchas worth knowing before touching battles:
 - Species 1051-1178, moves 848-911 and items 746-809 are Moemon Maker's slots (M3b; the EGG is 1179): a loop over every
   species / move / item that picks one at random must skip IS_MAKER_SPECIES / IS_MAKER_MOVE / IS_MAKER_ITEM, and a
   table indexed by them needs their rows (MAKER_SPECIES_RANGE ...) or Maker_SpeciesBase / MoveBase / ItemBase.
+- Sidecar files are written through src/platform/aw_file.c (AwFile_Open / Write / Close: a background thread, swapped in
+  whole), never fopen for writing on the game thread: it hitched (COOP_NOTES "Side files written in the background").
 - Test clients all share one Trainer ID, so anything that moves a Pokémon between games needs `mp giveforeign`-style
   checks (a different OT ID caught the BAD EGG bug). `[heap] out of memory` in a log means the game heap ran out.
 

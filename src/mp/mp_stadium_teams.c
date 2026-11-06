@@ -11,6 +11,7 @@
 #include "mp_stadium_cup.h"
 #include "mp_stadium_teams.h"
 #include "../mp/mp_net.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 extern char gPlatformSavePath[512];
 
@@ -54,19 +55,16 @@ static void LocalLoad(void)
 
 static void LocalSave(void)
 {
-    char path[600], tmp[620];
-    FILE *f;
+    char path[600];
+    AwFile *f;
     u32 magic = TEAMS_MAGIC;
     LocalPath(path, sizeof(path));
-    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
-    if (!(f = fopen(tmp, "wb")))
+    if (!(f = AwFile_Open(path)))   // (written in the background, swapped in whole: aw_file.c)
         return;
-    fwrite(&magic, 4, 1, f);
-    fwrite(sT.used, sizeof(sT.used), 1, f);
-    fwrite(sT.team, sizeof(sT.team), 1, f);
-    fclose(f);
-    remove(path);
-    rename(tmp, path);
+    AwFile_Write(&magic, 4, 1, f);
+    AwFile_Write(sT.used, sizeof(sT.used), 1, f);
+    AwFile_Write(sT.team, sizeof(sT.team), 1, f);
+    AwFile_Close(f);
 }
 
 static bool8 Online(void)

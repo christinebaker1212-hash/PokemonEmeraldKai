@@ -2174,6 +2174,8 @@ void MP_SaveSlotChanged(void)
     void Gamepad_ReloadSettings(void);
     void Display_ReloadSettings(void);
     void Tcg_ForgetSidecars(void);
+    void AwFile_Flush(void);
+    AwFile_Flush();   // (the old save file's side files all on disk before the new one's are read: aw_file.c)
     MP_Lobby_Disconnect();
     if (sInitDone)
     {

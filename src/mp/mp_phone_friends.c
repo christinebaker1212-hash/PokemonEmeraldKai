@@ -25,6 +25,7 @@
 #include "mp_phone_net.h"
 #include "mp_phone_int.h"
 #include "tcg/integration.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 extern char gPlatformSavePath[512];
 bool8 MP_Lobby_ServerAddress(char *out, int len);
@@ -92,15 +93,15 @@ static void PalsPath(char *out, size_t size)
 static void PalsWrite(void)
 {
     char path[600];
-    FILE *f;
+    AwFile *f;
     if (MOEMON_DEV_BUILD)   // (a dev build never writes a save or its side files)
         return;
     PalsPath(path, sizeof(path));
-    f = fopen(path, "wb");
+    f = AwFile_Open(path);
     if (f != NULL)
     {
-        fwrite(&sPals, sizeof(sPals), 1, f);
-        fclose(f);
+        AwFile_Write(&sPals, sizeof(sPals), 1, f);
+        AwFile_Close(f);
     }
 }
 

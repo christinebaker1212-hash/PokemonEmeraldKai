@@ -1,0 +1,9 @@
+# SINNOH's cave mouths (the user, 2026-11-06: the warps sat a tile short of the mouth and fired when walked onto from
+# below). Platinum puts the warp on the tile in front of the entrance and marks the entrance itself; the player warps
+# by pushing into it (field_control_avatar.c SinnohEntranceToward). ROUTE 207's MT. CORONET entrance: stepping onto its
+# warp tile (53,8) from below keeps the player on ROUTE 207; pushing east into the mouth goes in.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+EXPECT_A=("where map 40.27 xy 53,8" "where map 42.49 ")
+UNEXPECT_A=("[crash]" "TIMEOUT")

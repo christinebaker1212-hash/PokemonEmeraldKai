@@ -26,6 +26,7 @@
 #include "constants/flags.h"
 #include "constants/maps.h"
 #include "constants/species.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 extern char gPlatformSavePath[512];
 
@@ -121,20 +122,20 @@ static void Load(void)
 static void Store(void)
 {
     char path[600];
-    FILE *f;
+    AwFile *f;
     u32 i;
     Path(path, sizeof(path));
     if (sKoCount == 0)
     {
-        remove(path);
+        AwFile_Remove(path);
         return;
     }
-    f = fopen(path, "w");
+    f = AwFile_Open(path);
     if (f == NULL)
         return;
     for (i = 0; i < sKoCount; i++)
-        fprintf(f, "%04x %lld\n", sKo[i].flag, (long long)sKo[i].at);
-    fclose(f);
+        AwFile_Printf(f, "%04x %lld\n", sKo[i].flag, (long long)sKo[i].at);
+    AwFile_Close(f);
 }
 
 static s32 Find(u16 flag)

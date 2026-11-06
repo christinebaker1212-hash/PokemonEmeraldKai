@@ -595,15 +595,25 @@ void MainMenu_ReloadSave(void)
 
 // Moemon Kai: OPTIONS > RETURN TO MAIN MENU (special MP_ReturnToTitle): the room left, the save and its side files read
 // again from disk as when the game starts (anything unsaved gone), then the title screen. The PC build's SoftReset quits
-void MP_ReturnToTitleNow(void)
+// The save is read again at the start of the next frame, never inside the field's own (1.131.1: the rest of that frame
+// still moved the map's people with the save already swapped, which crashed on Windows: MovementType_WalkBackAndForth)
+static void CB2_MpReturnToTitle(void)
 {
     void MP_SaveSlotChanged(void);
+    SetVBlankCallback(NULL);
+    ResetTasks();
+    ResetSpriteData();
     MP_SaveSlotChanged();
     MpReloadSave();
+    SetMainCallback2(CB2_InitTitleScreen);
+}
+
+void MP_ReturnToTitleNow(void)
+{
     m4aMPlayAllStop();
     gMain.callback1 = NULL;
     ScriptContext_Init();
-    SetMainCallback2(CB2_InitTitleScreen);
+    SetMainCallback2(CB2_MpReturnToTitle);
 }
 
 void CB2_InitMainMenu(void)

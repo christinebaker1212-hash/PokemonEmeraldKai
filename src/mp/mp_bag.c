@@ -1,4 +1,5 @@
 #include "mp_version.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 // Moemon Co-op: a bigger BAG (PC only).
 //
 // The pockets hold more kinds of items than the GBA's save block has room for
@@ -74,7 +75,7 @@ void MP_Bag_SyncToSaveBlock(void)
 
 static void MarksFromCurrentOrder(void);
 static bool8 ReadMarks(FILE *f);
-static void WriteMarks(FILE *f);
+static void WriteMarks(AwFile *f);
 
 #define BAG_MAGIC 0x4D424147   // "MBAG"
 
@@ -107,29 +108,29 @@ void MP_Bag_WriteSidecar(void)
     if (MOEMON_DEV_BUILD)
         return;
     char path[600];
-    FILE *f;
+    AwFile *f;
     u32 header[3];
     u8 p;
     if (gSaveBlock1Ptr == NULL)
         return;
     SidecarPath(path, sizeof(path));
-    f = fopen(path, "wb");
+    f = AwFile_Open(path);
     if (!f)
         return;
     header[0] = BAG_MAGIC;
     header[1] = gSaveCounter;
     header[2] = SaveBlockPocketsSum();
-    fwrite(header, sizeof(header), 1, f);
+    AwFile_Write(header, sizeof(header), 1, f);
     for (p = 0; p < POCKETS_COUNT; p++)
     {
         u8 n = sPockets[p].bigCount - sPockets[p].saveCount;
-        fwrite(&n, 1, 1, f);
-        fwrite(sPockets[p].big + sPockets[p].saveCount, sizeof(struct ItemSlot), n, f);
+        AwFile_Write(&n, 1, 1, f);
+        AwFile_Write(sPockets[p].big + sPockets[p].saveCount, sizeof(struct ItemSlot), n, f);
     }
     WriteMarks(f);   // the items' "new" marks and when they came in
     MP_Candy_Write(f);   // the CANDY JAR's candies (mp_candy.c)
     MP_DexExt_Write(f);  // Moemon Kai: dex flags past the save block's (pokedex.c)
-    fclose(f);
+    AwFile_Close(f);
 }
 
 // The extra slots from one sidecar file, if it was written with this very save
@@ -265,15 +266,15 @@ static void MarksFromCurrentOrder(void)
         }
 }
 
-static void WriteMarks(FILE *f)
+static void WriteMarks(AwFile *f)
 {
     u32 magic = MARKS_MAGIC;
     u16 count = ITEMS_COUNT;
-    fwrite(&magic, sizeof(magic), 1, f);
-    fwrite(&count, sizeof(count), 1, f);
-    fwrite(&sNextObtained, sizeof(sNextObtained), 1, f);
-    fwrite(sObtained, sizeof(sObtained[0]), ITEMS_COUNT, f);
-    fwrite(sNewMark, 1, sizeof(sNewMark), f);
+    AwFile_Write(&magic, sizeof(magic), 1, f);
+    AwFile_Write(&count, sizeof(count), 1, f);
+    AwFile_Write(&sNextObtained, sizeof(sNextObtained), 1, f);
+    AwFile_Write(sObtained, sizeof(sObtained[0]), ITEMS_COUNT, f);
+    AwFile_Write(sNewMark, 1, sizeof(sNewMark), f);
 }
 
 static bool8 ReadMarks(FILE *f)

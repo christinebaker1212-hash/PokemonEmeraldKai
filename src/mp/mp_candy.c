@@ -3,6 +3,7 @@
 // them filling a jar; CONVERT turns each 10 of a kind into a RARE CANDY.
 // The counts go in "<save>.bag" with the save (mp_bag.c), so they always match the saved game.
 #include <stdio.h>
+#include "aw_file.h"
 #include <string.h>
 #include "global.h"
 #include "mp.h"
@@ -147,13 +148,13 @@ bool8 MP_Candy_ConvertType(u8 type, u16 *made)
 }
 
 // "<save>.bag" (mp_bag.c): after the item marks
-void MP_Candy_Write(FILE *f)
+void MP_Candy_Write(AwFile *f)
 {
     u32 magic = CANDY_MAGIC;
     u16 count = NUMBER_OF_MON_TYPES;
-    fwrite(&magic, sizeof(magic), 1, f);
-    fwrite(&count, sizeof(count), 1, f);
-    fwrite(gMpCandies, sizeof(gMpCandies[0]), NUMBER_OF_MON_TYPES, f);
+    AwFile_Write(&magic, sizeof(magic), 1, f);
+    AwFile_Write(&count, sizeof(count), 1, f);
+    AwFile_Write(gMpCandies, sizeof(gMpCandies[0]), NUMBER_OF_MON_TYPES, f);
 }
 
 void MP_Candy_Read(FILE *f)

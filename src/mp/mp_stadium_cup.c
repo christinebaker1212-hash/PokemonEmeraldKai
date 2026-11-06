@@ -35,6 +35,7 @@
 #include "constants/trainers.h"
 #include "mp_kaisong_scene.h"
 #include "mp_kaisong.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
 extern const struct PokedexEntry gPokedexEntries[];
@@ -226,20 +227,17 @@ static void Load(void)
 
 void StadiumCup_SaveNow(void)
 {
-    char path[600], tmp[610];
-    FILE *f;
+    char path[600];
+    AwFile *f;
     u32 magic = STADIUM_FILE_MAGIC, version = STADIUM_FILE_VERSION;
     Load();
     FilePath(path, sizeof(path));
-    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
-    if (!(f = fopen(tmp, "wb")))
+    if (!(f = AwFile_Open(path)))   // (written in the background, swapped in whole: aw_file.c)
         return;
-    fwrite(&magic, 4, 1, f);
-    fwrite(&version, 4, 1, f);
-    fwrite(&sSave, sizeof(sSave), 1, f);
-    fclose(f);
-    remove(path);
-    rename(tmp, path);
+    AwFile_Write(&magic, 4, 1, f);
+    AwFile_Write(&version, 4, 1, f);
+    AwFile_Write(&sSave, sizeof(sSave), 1, f);
+    AwFile_Close(f);
 }
 
 struct StadiumSave *StadiumCup_Save(void)

@@ -8,6 +8,7 @@
 #include "tt/collection.h"
 #include "tt/rating.h"
 #include "tt/duel.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 #define R(x) TT_RULE_BIT(TT_RULE_##x)
 static const char *const sRegionNames[TT_REGIONS] = {
@@ -379,29 +380,15 @@ int Tt_CollectionSave(const struct TtCollection *c, const char *path)
     static unsigned char data[FILE_MAX];
     size_t n = Write(c, data);
     char tmp[1024];
-    FILE *f;
+    AwFile *f;
     int ok;
     if (strlen(path) > sizeof(tmp) - 5)
         return 0;
-    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
-    f = fopen(tmp, "wb");
-    if (!f)
-        return 0;
-    ok = fwrite(data, 1, n, f) == n;
-    if (fclose(f))
+    f = AwFile_Open(path);   /* (written in the background, swapped in whole: aw_file.c) */
+    ok = AwFile_Write(data, 1, n, f) == n;
+    if (AwFile_Close(f))
         ok = 0;
-    if (!ok)
-    {
-        remove(tmp);
-        return 0;
-    }
-    remove(path); /* Windows' rename never replaces a file */
-    if (rename(tmp, path))
-    {
-        remove(tmp);
-        return 0;
-    }
-    return 1;
+    return ok;
 #endif
 }
 

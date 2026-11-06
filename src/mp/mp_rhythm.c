@@ -36,6 +36,7 @@
 #include "mp_version.h"
 #include "rhythm.h"
 #include "rhythm/play.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 void MPNet_Log(const char *fmt, ...);
 void MP_Achieve_Count(const char *name, s32 n);
@@ -537,16 +538,16 @@ static void SaveBests(void)
 {
 #if !MOEMON_DEV_BUILD
     char path[600];
-    FILE *f;
+    AwFile *f;
     u32 magic = BESTS_MAGIC, n = (u32)sBestCount;
     BestsPath(path, sizeof(path));
-    if (!(f = fopen(path, "wb")))
+    if (!(f = AwFile_Open(path)))
         return;
-    fwrite(&magic, 4, 1, f);
-    fwrite(sOptionBytes, OPTION_BYTES, 1, f);
-    fwrite(&n, 4, 1, f);
-    fwrite(sBests, sizeof(*sBests), n, f);
-    fclose(f);
+    AwFile_Write(&magic, 4, 1, f);
+    AwFile_Write(sOptionBytes, OPTION_BYTES, 1, f);
+    AwFile_Write(&n, 4, 1, f);
+    AwFile_Write(sBests, sizeof(*sBests), n, f);
+    AwFile_Close(f);
 #endif
 }
 

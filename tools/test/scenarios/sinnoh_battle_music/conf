@@ -1,0 +1,8 @@
+# SINNOH's special battle themes (the user, 2026-11-06: "Special NPC battle music never plays"): a Team Galactic grunt
+# plays Platinum's Galactic theme (MUS_SINNOH_VS_GALACTIC, 787), not the plain trainer one (pokemon.c MpSinnohBattleBGM:
+# also the commanders 788, CYRUS 789, the Frontier Brains, and legendary POKeMON: sinnoh_legend_music)
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_PARTY=280:50"
+EXPECT_A=("bgm song 787 ")
+UNEXPECT_A=("[crash]" "TIMEOUT")

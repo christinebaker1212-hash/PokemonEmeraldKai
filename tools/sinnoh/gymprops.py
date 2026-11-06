@@ -41,6 +41,10 @@ GYM_MODELS = {
         'rotated_platform_east', 'rotated_platform_west', 'large_elevator_platform_2', 'large_elevator_platform_3',
         'large_elevator_platform_4', 'medium_elevator_platform_5', 'giratina_shadow', 'waterfall', 'land_vine_flower',
         'land_rock', 'portal')],
+    # not a gym's: SINNOH's signposts, signboards and mailboxes (Platinum's objects with these models; src/sinnoh/s3d_signs.c,
+    # where they stand from tools/sinnoh/gen_signs.py)
+    'MAP_HEADER_TWINLEAF_TOWN': ['fx:%s.nsbmd' % n for n in (
+        'map_signpost', 'arrow_signpost', 'gym_signpost', 'signboard', 'trainer_tips', 'mailbox')],
 }
 
 

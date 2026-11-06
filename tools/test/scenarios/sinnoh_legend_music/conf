@@ -1,0 +1,7 @@
+# A wild GIRATINA in SINNOH plays Platinum's GIRATINA theme (MUS_SINNOH_VS_GIRATINA), not the wild one (pokemon.c
+# MpSinnohBattleBGM; the lake trio, DIALGA / PALKIA, the REGIS, ARCEUS and other legends have theirs)
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_PARTY=280:50"
+EXPECT_A=("bgm song 796 ")
+UNEXPECT_A=("[crash]" "TIMEOUT")

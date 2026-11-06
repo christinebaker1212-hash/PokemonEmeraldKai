@@ -41,6 +41,7 @@
 #include "phone_proto.h"
 #include "mp_net.h"
 #include "mp_phone_int.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 extern char gPlatformSavePath[512];
 u8 MP_CopyMonToPC(struct Pokemon *mon);                                         // pokemon.c
@@ -117,21 +118,14 @@ static void TradesPath(char *out, size_t size)
 
 static bool8 TradesWrite(void)
 {
-    char path[600], tmp[610];
-    FILE *f;
+    char path[600];
+    AwFile *f;
     bool8 ok;
     TradesPath(path, sizeof(path));
-    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
-    f = fopen(tmp, "wb");
-    if (f == NULL)
-        return FALSE;
-    ok = fwrite(&sTr, sizeof(sTr), 1, f) == 1;
-    ok = fflush(f) == 0 && ok;
-    ok = fclose(f) == 0 && ok;
-    if (!ok)
-        return FALSE;
-    remove(path);
-    return rename(tmp, path) == 0;
+    f = AwFile_Open(path);   // (written in the background, swapped in whole: aw_file.c)
+    ok = AwFile_Write(&sTr, sizeof(sTr), 1, f) == 1;
+    ok = AwFile_Close(f) == 0 && ok;
+    return ok;
 }
 
 static struct TradeRec *Find(const u8 t[16])

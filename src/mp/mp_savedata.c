@@ -1,4 +1,5 @@
 #include "mp_version.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 // Moemon Co-op: small numbers kept next to the save file ("<save>.coop"),
 // for things that belong to this save but not to the game itself: daily
 // gifts sent, the play-together streak, rewards already claimed...
@@ -25,6 +26,7 @@ static struct Entry sEntries[MAX_ENTRIES];
 static int sCount;
 static char sLoadedFor[512];
 static bool8 sLoaded;
+static bool8 sHold, sDirty;   // (MP_SaveData_Hold)
 
 s32 MP_DayNumber(s32 yyyymmdd);
 s32 MP_Today(void);
@@ -92,17 +94,17 @@ static void Save(void)
 {
     if (MOEMON_DEV_BUILD)
         return;
-    FILE *f;
+    AwFile *f;
     char path[600];
     int i;
     Path(path, sizeof(path));
-    f = fopen(path, "w");
+    f = AwFile_Open(path);
     if (!f)
         return;
-    fprintf(f, "; Moemon Co-op data for this save file (gifts, streaks, rewards)\n");
+    AwFile_Printf(f, "; Moemon Co-op data for this save file (gifts, streaks, rewards)\n");
     for (i = 0; i < sCount; i++)
-        fprintf(f, "%s = %d\n", sEntries[i].key, (int)sEntries[i].value);
-    fclose(f);
+        AwFile_Printf(f, "%s = %d\n", sEntries[i].key, (int)sEntries[i].value);
+    AwFile_Close(f);
 }
 
 s32 MP_SaveData_Get(const char *key)
@@ -142,7 +144,21 @@ void MP_SaveData_Set(const char *key, s32 value)
         sCount++;
     }
     sEntries[i].value = value;
-    Save();
+    if (sHold)
+        sDirty = TRUE;
+    else
+        Save();
+}
+
+// Several changes at once (a MoeGatcha 10-pull's pity counts and prizes): the file is written once, when let go
+void MP_SaveData_Hold(bool8 hold)
+{
+    sHold = hold;
+    if (!hold && sDirty)
+    {
+        sDirty = FALSE;
+        Save();
+    }
 }
 
 void MP_SaveData_Add(const char *key, s32 delta)

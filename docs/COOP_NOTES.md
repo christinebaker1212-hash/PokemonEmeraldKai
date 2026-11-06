@@ -3400,6 +3400,30 @@ src/battle_gen59.c, settings / pictures / menu text / AI in src/battle_gimmick.c
   order, MYSTERY skipped), tools/moemon_gen59/gen_items.py MEGA / ZCRYSTALS; generation 0 (only their gimmick's
   setting counts: MP_Gimmick_ItemAllowed); sold at LILYCOVE 3F, GOLDENROD 5F, CELADON 5F from 6 badges (shop.c sMpMegaStones / sMpZCrystals).
 - Tests: gimmick_mega, gimmick_dynamax, gimmick_z, gimmick_ai.
+## Side files written in the background (1.131.1)
+
+The user (2026-11-06): "Moemon is not a demanding game, and it should never be hitching." Every "<save>.x" sidecar
+used to fopen / fwrite / fclose (and often rename a .tmp) on the game thread, many times in a walk or a battle; on
+Windows each one could hold a frame. Now:
+- src/platform/aw_file.c (include/aw_file.h): AwFile_Open(path) gives an in-memory buffer (AwFile_Write / Printf /
+  Putc / Puts, the stdio shapes), AwFile_Close queues it; one SDL worker thread ("moemon_files") writes `<path>.tmp`
+  and swaps it in (MoveFileExA REPLACE / rename), so a file is always whole. Jobs for the same path coalesce (the
+  latest wins). AwFile_Remove deletes at once (a queued write of it is dropped, one being written waited out).
+  AwFile_Flush waits for the queue: at exit, in a soft reset, before BackUpSaveFile copies, and in
+  MP_SaveSlotChanged (a switched save never reads a half-written sidecar). No thread: written at once.
+- Every sidecar writer goes through it (bag, boxes, life, dex, candy, region, legends, tcard, pack, phone*, stadium*,
+  sim, rhythm, the three card collections, NEW, SEARCH, the POKeTCH, the .coop). Never fopen a sidecar for writing on
+  the game thread; reading stays plain stdio (AwFile_Flush first when the same file may be queued). Left as they are:
+  mp_store.c (the server's), mp_linkx.c, mtg_collection.c, mp_phone.c's busy mark (a crash marker, must land now).
+- MP_SaveData (".coop") rewrote the whole file on every MP_SaveData_Set (about 50 times in a 10-pull);
+  MP_SaveData_Hold(TRUE) ... (FALSE) batches a burst into one write (MoeGatcha's RollPrizes). The MoeGatcha's teaser
+  reel picks (PickFromPool) no longer touch the save: only real prizes (PickPrize) remember what was won.
+- No MoeGatcha POKeMON with perfect IVs (the user, 2026-11-06): TRAINING's pools are items only (EV_TRAINED gone).
+- Eggs: one cycle every 64 steps (daycare.c; the PHONE LINK walk and the app's Notifier the same).
+- RETURN TO MAIN MENU (main_menu.c MP_ReturnToTitleNow): the save is read again in the next frame's CB2_MpReturnToTitle,
+  never inside the field's frame (1.131.0 crashed on Windows: the rest of that frame moved MAUVILLE's people with the
+  save swapped, MovementType_WalkBackAndForth_Step3; found from the release exe's symbols). Test title_from_options.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

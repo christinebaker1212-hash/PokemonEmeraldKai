@@ -15,6 +15,7 @@
 #include "strings.h"
 #include "mp.h"
 #include "mp_version.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 #define MAX_DEFAULT_WALLPAPER 3   // (WALLPAPER_SAVANNA: src/data/wallpapers.h)
 
 extern char gPlatformSavePath[512];
@@ -131,8 +132,8 @@ void MP_Boxes_LoadFromSave(const struct PokemonStorageLegacy *saved)
 void MP_Boxes_WriteSidecar(void)
 {
     const struct PokemonStorage *src = MP_PersonalStorage();
-    char path[600], tmp[610];
-    FILE *f;
+    char path[600];
+    AwFile *f;
     if (MOEMON_DEV_BUILD || gSaveBlock2Ptr == NULL || src == NULL)
         return;
     memset(&sFile, 0, sizeof(sFile));
@@ -145,17 +146,7 @@ void MP_Boxes_WriteSidecar(void)
     memcpy(sFile.boxNames, src->boxNames[LEGACY_BOXES_COUNT], sizeof(sFile.boxNames));
     memcpy(sFile.boxWallpapers, src->boxWallpapers + LEGACY_BOXES_COUNT, sizeof(sFile.boxWallpapers));
     snprintf(path, sizeof(path), "%s.boxes", gPlatformSavePath);
-    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
-    f = fopen(tmp, "wb");
-    if (f == NULL)
-        return;
-    if (fwrite(&sFile, sizeof(sFile), 1, f) != 1)
-    {
-        fclose(f);
-        remove(tmp);
-        return;
-    }
-    fclose(f);
-    remove(path);
-    rename(tmp, path);
+    f = AwFile_Open(path);   // (written in the background, swapped in whole: aw_file.c)
+    AwFile_Write(&sFile, sizeof(sFile), 1, f);
+    AwFile_Close(f);
 }

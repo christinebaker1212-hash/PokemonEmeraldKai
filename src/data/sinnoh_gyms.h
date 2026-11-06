@@ -77,6 +77,12 @@
 #define S3D_MODEL_DISTORTION_WORLD_LAND_VINE_FLOWER 32801
 #define S3D_MODEL_DISTORTION_WORLD_LAND_ROCK 32802
 #define S3D_MODEL_DISTORTION_WORLD_PORTAL 32803
+#define S3D_MODEL_MAP_SIGNPOST 32804
+#define S3D_MODEL_ARROW_SIGNPOST 32805
+#define S3D_MODEL_GYM_SIGNPOST 32806
+#define S3D_MODEL_SIGNBOARD 32807
+#define S3D_MODEL_TRAINER_TIPS 32808
+#define S3D_MODEL_MAILBOX 32809
 
 // PASTORIA: the deep water's tiles, the gates (open at water level 0 low, 1 middle, 2 high), the buttons
 // (the water to that level)

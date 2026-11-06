@@ -1,0 +1,7 @@
+# OPTIONS > GAME > RETURN TO MAIN MENU (1.131.1: 1.131.0 crashed on Windows reading the save again in the middle of the
+# field's frame, while MAUVILLE's people still walked: MovementType_WalkBackAndForth). Saved, the title, CONTINUE, field.
+MODE=1
+TMO=120
+WARP=0,2,37,8
+EXPECT_A=("save file changed" "[test] frame")
+UNEXPECT_A=("[crash]" "TIMEOUT")

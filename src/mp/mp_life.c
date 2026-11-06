@@ -167,6 +167,7 @@ static u8 Clamp100(s32 v)
 }
 
 #include "../data/mp_life_instincts.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 static u32 Instincts(u16 species)
 {
@@ -1767,16 +1768,13 @@ void MP_Life_WriteSidecar(void)
 {
     if (MOEMON_DEV_BUILD)
         return;
-    char path[600], tmp[620];
-    FILE *f;
+    char path[600];
+    AwFile *f;
     struct LifeHeader h;
     if (!sLoaded || gSaveBlock1Ptr == NULL)
         return;
     SidecarPath(path, sizeof(path), 0);
-    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
-    f = fopen(tmp, "wb");
-    if (f == NULL)
-        return;
+    f = AwFile_Open(path);   // (written in the background, swapped in whole: aw_file.c)
     h.magic = LIFE_MAGIC;
     h.version = LIFE_VERSION;
     h.saveCounter = gSaveCounter;
@@ -1792,13 +1790,11 @@ void MP_Life_WriteSidecar(void)
     h.badgeMask = sBadgeMask;
     h.newsCount = sNewsCount;
     memcpy(h.news, sNews, sizeof(h.news));
-    fwrite(&h, sizeof(h), 1, f);
-    fwrite(sRecs, sizeof(struct MpLifeRec), sRecCount, f);
-    fwrite(sBonds, sizeof(struct MpLifeBond), sBondCount, f);
-    fwrite(sNames, sizeof(struct MpLifeName), sNameCount, f);
-    fclose(f);
-    remove(path);
-    rename(tmp, path);
+    AwFile_Write(&h, sizeof(h), 1, f);
+    AwFile_Write(sRecs, sizeof(struct MpLifeRec), sRecCount, f);
+    AwFile_Write(sBonds, sizeof(struct MpLifeBond), sBondCount, f);
+    AwFile_Write(sNames, sizeof(struct MpLifeName), sNameCount, f);
+    AwFile_Close(f);
 }
 
 static bool8 ReadSidecar(const char *path, bool8 needCounter)

@@ -21,6 +21,7 @@
 #include "constants/trainers.h"
 #include "constants/rgb.h"
 #include "gba/syscall.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 const u16 *MP_GetObjectEventPaletteData(u16 tag);
 extern const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[];
@@ -537,25 +538,25 @@ static void PutBE32(u8 *p, u32 v)
     p[0] = v >> 24; p[1] = v >> 16; p[2] = v >> 8; p[3] = v;
 }
 
-static void WriteChunk(FILE *f, const char *type, const u8 *data, u32 len)
+static void WriteChunk(AwFile *f, const char *type, const u8 *data, u32 len)
 {
     u8 hdr[8];
     u32 crc;
     PutBE32(hdr, len);
     memcpy(hdr + 4, type, 4);
-    fwrite(hdr, 1, 8, f);
+    AwFile_Write(hdr, 1, 8, f);
     if (len)
-        fwrite(data, 1, len, f);
+        AwFile_Write(data, 1, len, f);
     crc = Crc32(0, hdr + 4, 4);
     crc = Crc32(crc, data, len);
     PutBE32(hdr, crc);
-    fwrite(hdr, 1, 4, f);
+    AwFile_Write(hdr, 1, 4, f);
 }
 
 // Minimal PNG writer: RGBA, zlib "stored" blocks (no compression library needed)
 static bool8 WritePng(const char *path, const u8 *rgba, int w, int h, const char *text)
 {
-    FILE *f = fopen(path, "wb");
+    AwFile *f = AwFile_Open(path);
     static const u8 sig[8] = {0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A};
     u8 ihdr[13];
     u32 rawLen = (u32)(w * 4 + 1) * h, zLen, a = 1, b = 0, pos = 0, i;
@@ -594,7 +595,7 @@ static bool8 WritePng(const char *path, const u8 *rgba, int w, int h, const char
     PutBE32(z + pos, (b << 16) | a);
     pos += 4;
 
-    fwrite(sig, 1, 8, f);
+    AwFile_Write(sig, 1, 8, f);
     PutBE32(ihdr, w);
     PutBE32(ihdr + 4, h);
     ihdr[8] = 8;  // bit depth
@@ -611,7 +612,7 @@ static bool8 WritePng(const char *path, const u8 *rgba, int w, int h, const char
     }
     WriteChunk(f, "IDAT", z, pos);
     WriteChunk(f, "IEND", NULL, 0);
-    fclose(f);
+    AwFile_Close(f);
     free(raw);
     free(z);
     return TRUE;

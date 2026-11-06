@@ -1,0 +1,7 @@
+# SINNOH's signposts, signboards and mailboxes are drawn (the user, 2026-11-06: "A sign is invisible that tells you
+# where you are"): Platinum's own models for its sign objects (src/sinnoh/s3d_signs.c, src/data/sinnoh_signs.h from
+# tools/sinnoh/gen_signs.py). TWINLEAF TOWN has its map signpost and two mailboxes. Needs sinnoh/platinum3d.pak.
+MODE=1
+TMO=60
+EXPECT_A=("sinnoh: 3 signs on this map")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -15,6 +15,7 @@
 #include "constants/species.h"
 #include "constants/characters.h"
 #include "main.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 extern char gPlatformSavePath[512];
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
@@ -82,30 +83,30 @@ static void SaveCredits(void)
 {
     if (MOEMON_DEV_BUILD)
         return;
-    FILE *f;
+    AwFile *f;
     char path[600];
     int nat, i;
     DexPath(path, sizeof(path));
-    f = fopen(path, "w");
+    f = AwFile_Open(path);
     if (!f)
         return;
-    fprintf(f, "; Moemon Co-op: who caught each Moemon first (national number, name)\n");
+    AwFile_Printf(f, "; Moemon Co-op: who caught each Moemon first (national number, name)\n");
     for (nat = 1; nat <= NATIONAL_DEX_COUNT; nat++)
     {
         char ascii[32];
         if (sCaughtBy[nat][0] == EOS || sCaughtBy[nat][0] == 0)
             continue;
         MP_GameToAscii(ascii, sCaughtBy[nat], PLAYER_NAME_LENGTH);
-        fprintf(f, "%d ", nat);
+        AwFile_Printf(f, "%d ", nat);
         for (i = 0; i <= PLAYER_NAME_LENGTH; i++)
         {
-            fprintf(f, "%02x", sCaughtBy[nat][i]);
+            AwFile_Printf(f, "%02x", sCaughtBy[nat][i]);
             if (sCaughtBy[nat][i] == EOS)
                 break;
         }
-        fprintf(f, "  ; %s\n", ascii);
+        AwFile_Printf(f, "  ; %s\n", ascii);
     }
-    fclose(f);
+    AwFile_Close(f);
 }
 
 // Who caught it, when it was a friend (NULL: you, or nobody yet)

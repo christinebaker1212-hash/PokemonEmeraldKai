@@ -34,6 +34,7 @@
 #include "constants/berry.h"
 #include "constants/items.h"
 #include "constants/pokemon.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 const u8 *S3D_Gfx_PoketchScreen(const char *name);
 bool8 S3D_Gfx_PoketchCell(const char *sheet, u16 cell, s16 *x, s16 *y, u16 *w, u16 *h, const u8 **px);
@@ -195,7 +196,7 @@ static void LoadState(void)
 static void SaveState(void)
 {
     struct SaveFile f = {SAVE_MAGIC, 4, sP.color, sP.app, sP.stepBase, sP.counter, 0};
-    FILE *fp;
+    AwFile *fp;
     memcpy(f.memo, sP.memo, sizeof(f.memo));
     memcpy(f.dots, sP.dots, sizeof(f.dots));
     memcpy(f.markX, sP.markX, 6), memcpy(f.markY, sP.markY, 6);
@@ -205,10 +206,10 @@ static void SaveState(void)
     memcpy(f.radarSpecies, sP.radarSpecies, sizeof(f.radarSpecies));
     memcpy(f.radarChain, sP.radarChain, sizeof(f.radarChain));
     memcpy(f.calMarks, sP.calMarks, sizeof(f.calMarks));
-    if ((fp = fopen(sP.path, "wb")) != NULL)
+    if ((fp = AwFile_Open(sP.path)) != NULL)
     {
-        fwrite(&f, sizeof(f), 1, fp);
-        fclose(fp);
+        AwFile_Write(&f, sizeof(f), 1, fp);
+        AwFile_Close(fp);
     }
 }
 

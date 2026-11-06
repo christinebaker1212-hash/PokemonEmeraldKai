@@ -817,10 +817,56 @@ static bool8 CheckStandardWildEncounter(u16 metatileBehavior)
     return FALSE;
 }
 
+// Moemon Kai: SINNOH's cave mouths and gate entrances. Platinum puts the warp on the tile in front of the entrance and
+// marks the entrance itself (WARP_ENTRANCE_EAST / WEST / NORTH: our east / west / north arrow warps, with no warp of its
+// own): the player warps by pushing from the warp tile into the entrance. The pack made that front tile a step-on warp,
+// so stepping onto it from any side warped a tile short of the mouth (the user, 2026-11-06). The entrance beside the
+// player going DIR (0: none)
+static bool8 SinnohEntranceToward(struct MapPosition *position, u8 dir)
+{
+    struct MapPosition at = *position;
+    u16 behavior;
+    if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        return FALSE;
+    switch (dir)
+    {
+    case DIR_EAST:
+        at.x++;
+        break;
+    case DIR_WEST:
+        at.x--;
+        break;
+    case DIR_NORTH:
+        at.y--;
+        break;
+    default:
+        return FALSE;
+    }
+    behavior = MapGridGetMetatileBehaviorAt(at.x, at.y);
+    if (MetatileBehavior_IsSinnohStairs(behavior) || GetWarpEventAtMapPosition(&gMapHeader, &at) != WARP_ID_NONE)
+        return FALSE;
+    return (dir == DIR_EAST && MetatileBehavior_IsEastArrowWarp(behavior))
+        || (dir == DIR_WEST && MetatileBehavior_IsWestArrowWarp(behavior))
+        || (dir == DIR_NORTH && MetatileBehavior_IsNorthArrowWarp(behavior));
+}
+
+static bool8 IsSinnohEntranceFront(struct MapPosition *position)
+{
+    return SinnohEntranceToward(position, DIR_EAST) || SinnohEntranceToward(position, DIR_WEST)
+        || SinnohEntranceToward(position, DIR_NORTH);
+}
+
 static bool8 TryArrowWarp(struct MapPosition *position, u16 metatileBehavior, u8 direction)
 {
     s8 warpEventId = GetWarpEventAtMapPosition(&gMapHeader, position);
 
+    if (warpEventId != WARP_ID_NONE && SinnohEntranceToward(position, direction))
+    {
+        StoreInitialPlayerAvatarState();   // Moemon Kai: pushed into a SINNOH cave mouth / gate entrance (above)
+        SetupWarp(&gMapHeader, warpEventId, position);
+        DoWarp();
+        return TRUE;
+    }
     if (IsArrowWarpMetatileBehavior(metatileBehavior, direction) == TRUE && warpEventId != WARP_ID_NONE)
     {
         StoreInitialPlayerAvatarState();
@@ -837,7 +883,8 @@ static bool8 TryStartWarpEventScript(struct MapPosition *position, u16 metatileB
 {
     s8 warpEventId = GetWarpEventAtMapPosition(&gMapHeader, position);
 
-    if (warpEventId != WARP_ID_NONE && IsWarpMetatileBehavior(metatileBehavior) == TRUE)
+    if (warpEventId != WARP_ID_NONE && IsWarpMetatileBehavior(metatileBehavior) == TRUE
+     && !(MetatileBehavior_IsNonAnimDoor(metatileBehavior) && IsSinnohEntranceFront(position)))   // (Moemon Kai: above)
     {
         // Moemon Kai: a closed way (JOHTO's / KANTO's GAME CENTER has no ROOFTOP): a word, and the player steps back
         if (MP_Region_WarpClosed(gMapHeader.events->warps[warpEventId].mapGroup, gMapHeader.events->warps[warpEventId].mapNum))

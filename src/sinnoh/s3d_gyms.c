@@ -1223,6 +1223,8 @@ const u8 *S3D_Gyms_VillaScript(s16 x, s16 y, u8 direction)
     return entry < ARRAY_COUNT(sScripts) ? sScripts[entry] : NULL;
 }
 
+void Sinnoh_Signs_MapLoaded(float ox, float oz);
+
 void S3D_Gyms_MapLoaded(void)
 {
     u16 map = CurrentMap();
@@ -1237,6 +1239,7 @@ void S3D_Gyms_MapLoaded(void)
     Sinnoh_Tram_MapLoaded();   // (the GREAT MARSH's tram: s3d_tram.c)
     if (!S3D_MapOrigin(&sG.ox, &sG.oz))
         return;
+    Sinnoh_Signs_MapLoaded(sG.ox, sG.oz);   // (the signposts, signboards and mailboxes: s3d_signs.c)
     if (map == MAP_SINNOH_PASTORIA_CITY_GYM)
     {
         sG.gym = GYM_PASTORIA;

@@ -22,6 +22,7 @@
 #include "mp.h"
 #include "mp_region.h"
 #include "mp_tcard.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 extern char gPlatformSavePath[512];
 
@@ -101,17 +102,17 @@ static bool8 FlagOf(u8 i)
     return FlagGet(MP_Region_BadgeFlag(i / TCARD_BADGES_PER_REGION, i % TCARD_BADGES_PER_REGION)) != 0;
 }
 
-static void Put(FILE *f, const void *p, size_t n) { fwrite(p, 1, n, f); }
+static void Put(AwFile *f, const void *p, size_t n) { AwFile_Write(p, 1, n, f); }
 static bool8 Get(FILE *f, void *p, size_t n) { return fread(p, 1, n, f) == n; }
 
 static void Save(void)
 {
     char path[600];
-    FILE *f;
+    AwFile *f;
     u32 head[3] = {TCARD_MAGIC, TCARD_VERSION, sT.owner};
     u8 i;
     Path(path, sizeof(path));
-    f = fopen(path, "wb");
+    f = AwFile_Open(path);
     if (f == NULL)
         return;
     Put(f, head, sizeof(head));
@@ -154,7 +155,7 @@ static void Save(void)
     Put(f, sT.sig, sizeof(sT.sig));
     Put(f, sT.regionSeconds, sizeof(sT.regionSeconds));
     Put(f, &sT.stickers, 2);
-    fclose(f);
+    AwFile_Close(f);
 }
 
 void MP_TCard_SaveNow(void)

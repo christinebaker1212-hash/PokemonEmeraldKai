@@ -16,6 +16,7 @@
 #include "tcg_gfx.h"
 #include "tcg_ui_kit.h"
 #include "tcg_search.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 extern char gPlatformSavePath[];
 
@@ -109,17 +110,18 @@ static void Load(void)
 }
 static void Save(void)
 {
-    char path[512], tmp[520], line[256];
-    FILE *f, *old;
+    char path[512], line[256];
+    AwFile *f;
+    FILE *old;
     unsigned g;
     int i;
     if (!sDirty || !gPlatformSavePath[0])
         return;
     sDirty = 0;
     Path(path, sizeof(path));
-    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
-    if (!(f = fopen(tmp, "w")))
+    if (!(f = AwFile_Open(path)))   /* (written in the background, swapped in whole: aw_file.c) */
         return;
+    AwFile_Flush();   /* (the file as last written, to keep the other games' lines) */
     if ((old = fopen(path, "r")))
     {
         /* the lines of games not opened since the game started stay as they were */
@@ -130,7 +132,7 @@ static void Save(void)
             for (g = 0; g < SEARCH_GAMES; g++)
                 known |= sGame[g] && strlen(sGame[g]->id) == n && !strncmp(line, sGame[g]->id, n);
             if (!known && line[n] == '\t')
-                fputs(line, f);
+                AwFile_Puts(line, f);
         }
         fclose(old);
     }
@@ -138,14 +140,12 @@ static void Save(void)
     {
         if (!sGame[g])
             continue;
-        fprintf(f, "%s\t%s\t%u %u %u", sGame[g]->id, sSet[g].text, sSet[g].sort, sSet[g].desc, sSet[g].ownedOnly);
+        AwFile_Printf(f, "%s\t%s\t%u %u %u", sGame[g]->id, sSet[g].text, sSet[g].sort, sSet[g].desc, sSet[g].ownedOnly);
         for (i = 0; i < sGame[g]->filterCount; i++)
-            fprintf(f, " %d", sSet[g].f[i]);
-        fputc('\n', f);
+            AwFile_Printf(f, " %d", sSet[g].f[i]);
+        AwFile_Putc('\n', f);
     }
-    fclose(f);
-    remove(path);
-    rename(tmp, path);
+    AwFile_Close(f);
 }
 void TcgSearch_Register(unsigned game, const struct SearchGame *g)
 {

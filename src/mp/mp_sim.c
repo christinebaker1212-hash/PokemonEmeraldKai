@@ -39,6 +39,7 @@
 #include "constants/characters.h"
 #include "constants/items.h"
 #include "constants/songs.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 extern char gPlatformSavePath[512];
 void MP_PackAppearance(const struct MpAppearance *a, u8 *p);
@@ -125,23 +126,20 @@ static void LoadCache(void)
 
 static void SaveCache(void)
 {
-    char path[600], tmp[610];
-    FILE *f;
+    char path[600];
+    AwFile *f;
     u32 magic = SIM_CACHE_MAGIC;
     if (MOEMON_DEV_BUILD)
         return;
     CachePath(path, sizeof(path));
-    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
-    if (!(f = fopen(tmp, "wb")))
+    if (!(f = AwFile_Open(path)))   // (written in the background, swapped in whole: aw_file.c)
         return;
-    fwrite(&magic, 4, 1, f);
-    fwrite(sSim.server, SIM_SERVER_LEN, 1, f);
-    fwrite(&sSim.best, 2, 1, f);
-    fwrite(&sSim.count, 2, 1, f);
-    fwrite(sSim.rec, sizeof(sSim.rec[0]), sSim.count, f);
-    fclose(f);
-    remove(path);
-    rename(tmp, path);
+    AwFile_Write(&magic, 4, 1, f);
+    AwFile_Write(sSim.server, SIM_SERVER_LEN, 1, f);
+    AwFile_Write(&sSim.best, 2, 1, f);
+    AwFile_Write(&sSim.count, 2, 1, f);
+    AwFile_Write(sSim.rec, sizeof(sSim.rec[0]), sSim.count, f);
+    AwFile_Close(f);
 }
 
 // Which server the roster comes from: the address a friend's server was reached at, else the online lobby

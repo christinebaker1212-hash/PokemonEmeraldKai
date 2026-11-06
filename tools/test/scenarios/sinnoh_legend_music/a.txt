@@ -1,0 +1,9 @@
+pressuntil A field 5000
+wait 30
+mp warp 40,0,13,23
+waitfor field 600
+wait 30
+mp wild 512:50
+pressuntil A action 2500
+mp bgm
+quit

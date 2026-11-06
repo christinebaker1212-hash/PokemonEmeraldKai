@@ -142,8 +142,6 @@ enum {
     EV_SPECIES_LEGEND,  // a legendary or mythical one (Lv 50, met in a fateful encounter)
     EV_SPECIES_STRONG,  // a strong one (Lv 50): PICKUP's pseudo-legends and favorites
     // Picked at the pull like EV_RANDOM (def->qty becomes the species), preferring ones the POKeDEX hasn't caught:
-    EV_TRAINED,         // TRAINING: a Moemon with perfect IVs (Lv 30)
-    EV_TRAINED_LEGEND,  // TRAINING: a legendary one with perfect IVs (Lv 50)
     EV_BALLED,          // POKe BALLS: a Moemon that comes in a special ball (Lv 20)
     EV_BALLED_LEGEND,   // POKe BALLS: a legendary one in a special ball (Lv 50)
     // GENERATION 4-9's real events and gifts: in STANDARD's daily legends from their generation on
@@ -240,8 +238,6 @@ static const struct EventMon sEventMons[] = {
     [EV_SPECIES_STARTER] = {NULL, SPECIES_NONE, 5, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
     [EV_SPECIES_LEGEND]  = {NULL, SPECIES_NONE, 50, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
     [EV_SPECIES_STRONG]  = {NULL, SPECIES_NONE, 50, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
-    [EV_TRAINED]         = {NULL, SPECIES_NONE, 30, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
-    [EV_TRAINED_LEGEND]  = {NULL, SPECIES_NONE, 50, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
     [EV_BALLED]          = {NULL, SPECIES_NONE, 20, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
     [EV_BALLED_LEGEND]   = {NULL, SPECIES_NONE, 50, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
     // The Alamos Town movie Darkrai, the MEMBER CARD's on Newmoon Island, OAK'S LETTER's Shaymin, the AZURE FLUTE's
@@ -279,13 +275,13 @@ struct PrizeDef
 
 static bool8 IsRandomEv(u16 ev)
 {
-    return ev == EV_RANDOM || ev == EV_RANDOM_LEGEND || (ev >= EV_TRAINED && ev <= EV_BALLED_LEGEND);
+    return ev == EV_RANDOM || ev == EV_RANDOM_LEGEND || ev == EV_BALLED || ev == EV_BALLED_LEGEND;
 }
 
 // A random one that is legendary
 static bool8 IsRandomLegendEv(u16 ev)
 {
-    return ev == EV_RANDOM_LEGEND || ev == EV_TRAINED_LEGEND || ev == EV_BALLED_LEGEND;
+    return ev == EV_RANDOM_LEGEND || ev == EV_BALLED_LEGEND;
 }
 
 // The Moemon a prize gives (a random one keeps its species in qty; 0 = not picked yet)
@@ -696,19 +692,18 @@ static const struct PrizeDef sTrainRare[] = {
     ITEM(ITEM_POWER_WEIGHT, 1, 2), ITEM(ITEM_POWER_BRACER, 1, 2), ITEM(ITEM_POWER_BELT, 1, 2),
     ITEM(ITEM_POWER_LENS, 1, 2), ITEM(ITEM_POWER_BAND, 1, 2), ITEM(ITEM_POWER_ANKLET, 1, 2),
 };
-// (1.131.0) PERFECT Moemon: perfect IVs in every stat, one the POKeDEX hasn't caught when it can (EV_TRAINED)
+// (no Moemon with perfect IVs here, ever: the user, 2026-11-06)
 static const struct PrizeDef sTrainSuper[] = {
-    ITEM(ITEM_RARE_CANDY, 4, 20), ITEM(ITEM_PP_MAX, 3, 8), SET(SET_VITAMINS, 1, 18), MON(EV_TRAINED, 10),
+    ITEM(ITEM_RARE_CANDY, 4, 20), ITEM(ITEM_PP_MAX, 3, 8), SET(SET_VITAMINS, 1, 18),
 };
 static const struct PrizeDef sTrainSSuper[] = {
-    ITEM(ITEM_RARE_CANDY, 6, 18), SET(SET_VITAMINS, 2, 16), ITEM(ITEM_PP_MAX, 5, 6), MON(EV_TRAINED, 16),
+    ITEM(ITEM_RARE_CANDY, 6, 18), SET(SET_VITAMINS, 2, 16), ITEM(ITEM_PP_MAX, 5, 6),
 };
 static const struct PrizeDef sTrainUltra[] = {
-    ITEM(ITEM_RARE_CANDY, 10, 16), SET(SET_VITAMINS, 2, 16), ITEM(ITEM_PP_MAX, 10, 5), MON(EV_TRAINED_LEGEND, 18),
+    ITEM(ITEM_RARE_CANDY, 10, 16), SET(SET_VITAMINS, 2, 16), ITEM(ITEM_PP_MAX, 10, 5),
 };
 static const struct PrizeDef sTrainEx[] = {
-    ITEM(ITEM_RARE_CANDY, 15, 12), SET(SET_VITAMINS, 3, 12), ITEM(ITEM_PP_MAX, 25, 4), SHINY(EV_TRAINED, 8),
-    SHINY(EV_TRAINED_LEGEND, 16),
+    ITEM(ITEM_RARE_CANDY, 15, 16), SET(SET_VITAMINS, 3, 16), ITEM(ITEM_PP_MAX, 25, 5),
 };
 
 // BALL banner: special and hard-to-find POKé BALLS
@@ -877,7 +872,7 @@ static struct BannerDef sBanners[BANNER_COUNT] = {
         {5350, 2800, 1350, 300, 150, 45, 5}, RGB(31, 10, 20),
     },
     [BANNER_TRAINING] = {
-        "TRAINING", "Candies, vitamins, PERFECT Moemon!",
+        "TRAINING", "RARE CANDIES and vitamins!",
         {{sTrainCommon, ARRAY_COUNT(sTrainCommon)}, {sTrainUncommon, ARRAY_COUNT(sTrainUncommon)}, {sTrainRare, ARRAY_COUNT(sTrainRare)},
          {sTrainSuper, ARRAY_COUNT(sTrainSuper)}, {sTrainSSuper, ARRAY_COUNT(sTrainSSuper)}, {sTrainUltra, ARRAY_COUNT(sTrainUltra)}, {sTrainEx, ARRAY_COUNT(sTrainEx)}},
         {5300, 2800, 1350, 300, 200, 40, 10}, RGB(31, 17, 2),
@@ -1320,7 +1315,14 @@ static const struct PrizeDef *PickOnce(const struct Pool *pool)
     return &pool->defs[0];
 }
 
+// Any prize of the pool (the reel's teasers: nothing remembered)
 static const struct PrizeDef *PickFromPool(u8 rarity)
+{
+    return PickOnce(BannerPool(rarity));
+}
+
+// A prize won (RollPrizes): not one won lately when it can be helped, and remembered
+static const struct PrizeDef *PickPrize(u8 rarity)
 {
     const struct Pool *pool = BannerPool(rarity);
     const struct PrizeDef *def = PickOnce(pool);
@@ -1435,8 +1437,7 @@ static void PrizeName(const struct PrizeDef *def, u32 amount, u8 *dst)
             }
             title = species;
         }
-        snprintf(buf, sizeof(buf), "%s%s%s", def->shiny ? "SHINY " : "",
-                 def->id == EV_TRAINED || def->id == EV_TRAINED_LEGEND ? "PERFECT " : "", title);
+        snprintf(buf, sizeof(buf), "%s%s", def->shiny ? "SHINY " : "", title);
         MP_AsciiToGame(dst, buf, 30);
     }
     else if (def->kind == K_SET)
@@ -1488,18 +1489,6 @@ static void GiveEventMon(const struct PrizeDef *def, struct Result *res)
     if (e->moves[0] != MOVE_NONE)   // else: the moves it knows at that level
         for (i = 0; i < MAX_MON_MOVES; i++)
             SetMonMoveSlot(mon, e->moves[i], i);
-    if (def->id == EV_TRAINED || def->id == EV_TRAINED_LEGEND)
-    {
-        // TRAINING's PERFECT Moemon: the best IVs in every stat
-        u8 iv = MAX_PER_STAT_IVS;
-        for (i = 0; i < NUM_STATS; i++)
-            SetMonData(mon, MON_DATA_HP_IV + i, &iv);
-        CalculateMonStats(mon);
-        MPNet_Log("gatcha: PERFECT Moemon, IVs %d %d %d %d %d %d", (int)GetMonData(mon, MON_DATA_HP_IV),
-                  (int)GetMonData(mon, MON_DATA_ATK_IV), (int)GetMonData(mon, MON_DATA_DEF_IV),
-                  (int)GetMonData(mon, MON_DATA_SPEED_IV), (int)GetMonData(mon, MON_DATA_SPATK_IV),
-                  (int)GetMonData(mon, MON_DATA_SPDEF_IV));
-    }
     if (def->id == EV_BALLED || def->id == EV_BALLED_LEGEND)
     {
         // POKe BALLS': it comes in one of the special balls
@@ -3247,12 +3236,13 @@ static u8 RollPrizes(struct Result *results, u8 count)
     u8 i, best = 0;
     bool8 gotRare = FALSE;
     StirRandom();
+    MP_SaveData_Hold(TRUE);   // (one write of the save's side file for the whole pull, not one per pity count)
     for (i = 0; i < count; i++)
     {
         struct Result *r = &results[i];
         bool8 lastChance = (count == 10 && i == count - 1 && !gotRare);
         r->rarity = RollRarity(lastChance);
-        r->def = PickFromPool(r->rarity);
+        r->def = PickPrize(r->rarity);
         if (i == 0 && sRigDef)
             r->def = sRigDef;
         sRigDef = NULL;
@@ -3307,6 +3297,7 @@ static u8 RollPrizes(struct Result *results, u8 count)
         MP_Achieve_Unlock("ssr");
     if (results[best].rarity >= R_UR)
         MP_Achieve_Unlock("ur");
+    MP_SaveData_Hold(FALSE);
     SaveAfterPull();
     return best;
 }

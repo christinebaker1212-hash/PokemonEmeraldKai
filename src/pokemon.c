@@ -6851,12 +6851,49 @@ u16 MP_RegionVictorySong(u16 song)
 }
 
 // Moemon Kai: SINNOH's own battle songs (Diamond / Platinum's, music/mus_sinnoh_vs_*.kaisong)
+// (1.132.0: Team Galactic, its commanders and boss, the Frontier Brains and the legendary POKeMON have their own, as in
+// Platinum: the user, 2026-11-06, "Special NPC battle music never plays")
 static u16 MpSinnohBattleBGM(void)
 {
     if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
+    {
+        switch (GetMonData(&gEnemyParty[0], MON_DATA_SPECIES))
+        {
+        case SPECIES_UXIE:
+        case SPECIES_MESPRIT:
+        case SPECIES_AZELF:
+            return MUS_SINNOH_VS_LAKE_GUARDIANS;
+        case SPECIES_DIALGA:
+        case SPECIES_PALKIA:
+            return MUS_SINNOH_VS_DIALGA_PALKIA;
+        case SPECIES_GIRATINA:
+            return MUS_SINNOH_VS_GIRATINA;
+        case SPECIES_REGIROCK:
+        case SPECIES_REGICE:
+        case SPECIES_REGISTEEL:
+        case SPECIES_REGIGIGAS:
+            return MUS_SINNOH_VS_REGIS;
+        case SPECIES_ARCEUS:
+            return MUS_SINNOH_VS_ARCEUS;
+        }
+        if (MP_IsLegendSpecies(GetMonData(&gEnemyParty[0], MON_DATA_SPECIES)))
+            return MUS_SINNOH_VS_LEGENDARY;
         return MUS_SINNOH_VS_WILD;
+    }
     switch (gTrainers[gTrainerBattleOpponent_A].trainerClass)
     {
+    case TRAINER_CLASS_SINNOH_GALACTIC:
+        return MUS_SINNOH_VS_GALACTIC;
+    case TRAINER_CLASS_SINNOH_COMMANDER:
+        return MUS_SINNOH_VS_GALACTIC_COMMANDER;
+    case TRAINER_CLASS_SINNOH_GALACTIC_BOSS:
+        return MUS_SINNOH_VS_GALACTIC_BOSS;
+    case TRAINER_CLASS_SINNOH_TOWER_TYCOON:
+    case TRAINER_CLASS_SINNOH_FACTORY_HEAD:
+    case TRAINER_CLASS_SINNOH_HALL_MATRON:
+    case TRAINER_CLASS_SINNOH_CASTLE_VALET:
+    case TRAINER_CLASS_SINNOH_ARCADE_STAR:
+        return MUS_SINNOH_VS_FRONTIER_BRAIN;
     case TRAINER_CLASS_CHAMPION:
         return MUS_SINNOH_VS_CHAMPION;
     case TRAINER_CLASS_ELITE_FOUR:

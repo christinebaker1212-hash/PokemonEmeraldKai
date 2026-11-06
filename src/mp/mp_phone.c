@@ -96,6 +96,7 @@ static void SpawnsLoad(void);
 static void SpawnsWrite(void);
 static void SpawnsReset(void);
 #include "mp_phone_int.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 // --------------------------------------------------------------------------------------------------- the sidecar
 
@@ -117,13 +118,13 @@ static void NewSaveId(void)
 static void WriteNow(void)
 {
     char path[600];
-    FILE *f;
+    AwFile *f;
     Path(path, sizeof(path));
-    f = fopen(path, "wb");
+    f = AwFile_Open(path);
     if (f == NULL)
         return;
-    fwrite(&sFile, sizeof(sFile), 1, f);
-    fclose(f);
+    AwFile_Write(&sFile, sizeof(sFile), 1, f);
+    AwFile_Close(f);
     sDirty = FALSE;
 }
 
@@ -903,18 +904,18 @@ static void SpawnsReset(void)
 static void SpawnsWrite(void)
 {
     char path[600];
-    FILE *f;
+    AwFile *f;
     u32 magic = SPAWN_MAGIC;
     if (!sMetDirty)
         return;
     SpawnPath(path, sizeof(path));
-    f = fopen(path, "wb");
+    f = AwFile_Open(path);
     if (f == NULL)
         return;
-    fwrite(&magic, 4, 1, f);
-    fwrite(&sMetCount, 4, 1, f);
-    fwrite(sMet, sizeof(sMet[0]), sMetCount, f);
-    fclose(f);
+    AwFile_Write(&magic, 4, 1, f);
+    AwFile_Write(&sMetCount, 4, 1, f);
+    AwFile_Write(sMet, sizeof(sMet[0]), sMetCount, f);
+    AwFile_Close(f);
     sMetDirty = FALSE;
 }
 
@@ -1380,7 +1381,7 @@ static void BusyPath(char *out, size_t size)
 static void BusyMark(s8 phone, u32 id)
 {
     char path[600];
-    FILE *f;
+    FILE *f;   // (on disk at once: it tells a crash midway apart, so never in the background)
     BusyPath(path, sizeof(path));
     f = fopen(path, "wb");
     if (f != NULL)

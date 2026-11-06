@@ -1,4 +1,5 @@
 #include "global.h"
+#include "aw_file.h"
 #include "mp.h"
 #include "mp_region.h"
 #include "battle_main.h"
@@ -4673,14 +4674,14 @@ void MP_DexExt_Reset(void)
     memset(sDexExtOwned, 0, sizeof(sDexExtOwned));
 }
 
-void MP_DexExt_Write(FILE *f)
+void MP_DexExt_Write(AwFile *f)
 {
     u32 magic = DEX_EXT_MAGIC;
     u16 count = NUM_DEX_EXT_FLAG_BYTES;
-    fwrite(&magic, sizeof(magic), 1, f);
-    fwrite(&count, sizeof(count), 1, f);
-    fwrite(sDexExtSeen, 1, count, f);
-    fwrite(sDexExtOwned, 1, count, f);
+    AwFile_Write(&magic, sizeof(magic), 1, f);
+    AwFile_Write(&count, sizeof(count), 1, f);
+    AwFile_Write(sDexExtSeen, 1, count, f);
+    AwFile_Write(sDexExtOwned, 1, count, f);
 }
 
 void MP_DexExt_Read(FILE *f)

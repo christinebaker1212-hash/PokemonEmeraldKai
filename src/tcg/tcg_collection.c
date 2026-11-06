@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 const struct TcgCard *Tcg_Card(unsigned id) { return id && id <= TCG_CARD_COUNT ? &gTcgCards[id] : NULL; }
 uint32_t Tcg_Random(uint32_t *state)
@@ -661,7 +662,7 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
 #else
     unsigned char data[FILE_SIZE(FORMAT)], *p = data + 12;
     unsigned i, j;
-    FILE *f;
+    AwFile *f;
     char tmp[1024];
     if (strlen(path) > sizeof(tmp) - 5)
         return 0;
@@ -724,24 +725,10 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     p += 4;
     Put(&p, FORMAT, 4);
     Put(&p, Crc(data + 12, sizeof(data) - 12), 4);
-    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
-    f = fopen(tmp, "wb");
-    if (!f)
-        return 0;
-    i = fwrite(data, 1, sizeof(data), f) == sizeof(data);
-    if (fclose(f))
+    f = AwFile_Open(path);   /* (written in the background, swapped in whole: aw_file.c) */
+    i = AwFile_Write(data, 1, sizeof(data), f) == sizeof(data);
+    if (AwFile_Close(f))
         i = 0;
-    if (!i)
-    {
-        remove(tmp);
-        return 0;
-    }
-    remove(path); /* Windows' rename never replaces a file */
-    if (rename(tmp, path))
-    {
-        remove(tmp);
-        return 0;
-    }
-    return 1;
+    return i;
 #endif
 }

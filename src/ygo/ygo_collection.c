@@ -6,6 +6,7 @@
 #include "ygo/collection.h"
 #include "ygo/duel.h"
 #include "ygo_edo.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 static uint32_t Rand(uint32_t *s)
 {
@@ -571,7 +572,7 @@ int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
     unsigned char *p = data + 12;
     unsigned i, j, ok;
     char tmp[1024];
-    FILE *f;
+    AwFile *f;
     if (strlen(path) > sizeof(tmp) - 5)
         return 0;
     Put(&p, YGO_CARD_COUNT, 2);
@@ -623,25 +624,11 @@ int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
     p += 4;
     Put(&p, YGO_FILE_FORMAT, 4);
     Put(&p, Crc(data + 12, PAYLOAD_SIZE), 4);
-    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
-    f = fopen(tmp, "wb");
-    if (!f)
-        return 0;
-    ok = fwrite(data, 1, sizeof(data), f) == sizeof(data);
-    if (fclose(f))
+    f = AwFile_Open(path);   /* (written in the background, swapped in whole: aw_file.c) */
+    ok = AwFile_Write(data, 1, sizeof(data), f) == sizeof(data);
+    if (AwFile_Close(f))
         ok = 0;
-    if (!ok)
-    {
-        remove(tmp);
-        return 0;
-    }
-    remove(path); /* Windows' rename never replaces a file */
-    if (rename(tmp, path))
-    {
-        remove(tmp);
-        return 0;
-    }
-    return 1;
+    return ok;
 #endif
 }
 

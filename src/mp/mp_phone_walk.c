@@ -51,6 +51,7 @@
 #include "phone_proto.h"
 #include "mp_phone_int.h"
 #include "../data/mp_map_group_sizes.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 u8 MP_CopyMonToPC(struct Pokemon *mon);                  // pokemon.c
 void MP_ApplyDaycareExperience(struct Pokemon *mon);     // daycare.c
@@ -88,22 +89,21 @@ static void FilePath(char *out, size_t size, const char *ext)
 static bool8 WalkWrite(void)
 {
     char path[600];
-    FILE *f;
+    AwFile *f;
     bool8 ok;
     FilePath(path, sizeof(path), "walk");
-    f = fopen(path, "wb");
+    f = AwFile_Open(path);
     if (f == NULL)
         return FALSE;
-    ok = fwrite(&sWalk, sizeof(sWalk), 1, f) == 1;
-    ok = fflush(f) == 0 && ok;
-    return fclose(f) == 0 && ok;
+    ok = AwFile_Write(&sWalk, sizeof(sWalk), 1, f) == 1;
+    return AwFile_Close(f) == 0 && ok;
 }
 
 static void WalkErase(void)
 {
     char path[600];
     FilePath(path, sizeof(path), "walk");
-    remove(path);
+    AwFile_Remove(path);   // (after any write of it still queued)
 }
 
 // Is this POKéMON (personality, Trainer ID) anywhere in the save: the party or the player's own boxes?
@@ -442,9 +442,10 @@ static const char *DoHome(const char *json)
     nick[POKEMON_NAME_LENGTH] = EOS;
     if (egg)
     {
-        // an EGG's steps: a cycle each 256 (it hatches in the game, on the next step once none are left)
+        // an EGG's steps: a cycle each 64, as in the game (daycare.c); it hatches in the game, on the next step once
+        // none are left
         u8 cycles = GetMonData(&sMon, MON_DATA_FRIENDSHIP);
-        u32 done = (u32)steps / 256;
+        u32 done = (u32)steps / 64;
         cycles = done >= cycles ? 0 : cycles - done;
         SetMonData(&sMon, MON_DATA_FRIENDSHIP, &cycles);
         moments = 0;
@@ -561,18 +562,18 @@ static struct
 static void TrainWrite(void)
 {
     char path[600];
-    FILE *f;
+    AwFile *f;
     FilePath(path, sizeof(path), "train");
     if (sTrain.count == 0)
     {
-        remove(path);
+        AwFile_Remove(path);
         return;
     }
-    f = fopen(path, "wb");
+    f = AwFile_Open(path);
     if (f != NULL)
     {
-        fwrite(&sTrain, sizeof(sTrain), 1, f);
-        fclose(f);
+        AwFile_Write(&sTrain, sizeof(sTrain), 1, f);
+        AwFile_Close(f);
     }
 }
 

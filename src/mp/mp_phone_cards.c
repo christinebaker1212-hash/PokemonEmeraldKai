@@ -25,6 +25,7 @@
 #include "mp_phone_int.h"
 #include "event_data.h"
 #include "constants/flags.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 extern char gPlatformSavePath[512];
 unsigned Tt_Tier(void);             // tt_field.c
@@ -79,12 +80,12 @@ static void DailyToday(void)
 static void DailyWrite(void)
 {
     char path[600];
-    FILE *f;
+    AwFile *f;
     DailyPath(path, sizeof(path));
-    if ((f = fopen(path, "wb")) != NULL)
+    if ((f = AwFile_Open(path)) != NULL)
     {
-        fwrite(&sDaily, sizeof(sDaily), 1, f);
-        fclose(f);
+        AwFile_Write(&sDaily, sizeof(sDaily), 1, f);
+        AwFile_Close(f);
     }
 }
 

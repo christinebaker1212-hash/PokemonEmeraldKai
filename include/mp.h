@@ -467,11 +467,12 @@ void MP_Candy_Reset(void);
 u16 MP_Candy_ConvertCount(void);
 bool8 MP_Candy_Convert(u16 *made);
 #ifdef EOF
-void MP_Candy_Write(FILE *f);
+struct AwFile;   // (aw_file.h: side files written in the background)
+void MP_Candy_Write(struct AwFile *f);
 void MP_Candy_Read(FILE *f);
 // pokedex.c: dex flags past the save block's arrays (Gen 4 on), in "<save>.bag" after the candies
 void MP_DexExt_Reset(void);
-void MP_DexExt_Write(FILE *f);
+void MP_DexExt_Write(struct AwFile *f);
 void MP_DexExt_Read(FILE *f);
 #endif
 void MP_Candy_Update(void);
@@ -982,6 +983,7 @@ void MP_Qol_Update(void);
 bool8 MP_Qol_SkipActive(void);
 u8 MP_Qol_FieldTextSpeed(u8 normalSpeed);
 void MP_SaveData_Set(const char *key, s32 value);
+void MP_SaveData_Hold(bool8 hold);   // several changes, one write of the file (mp_savedata.c)
 void MP_SaveData_Add(const char *key, s32 delta);
 s32 MP_Today(void);              // YYYYMMDD, local time
 s32 MP_DayNumber(s32 yyyymmdd);  // days since 2000-01-01

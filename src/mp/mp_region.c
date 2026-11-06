@@ -4,6 +4,7 @@
 //   (tools/quetzal_port/import.py). They are kept in "<save>.region", written with the save and only read back
 //   when it was written with this very save (like the bag's extra slots, mp_bag.c).
 #include <stdio.h>
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 #include "mp_version.h"
 #include <string.h>
 #include <stdlib.h>
@@ -421,24 +422,21 @@ static u8 sSaveFormat;   // the loaded save's format (mp_savefix.h): its region 
 
 void MP_Region_WriteSidecar(void)
 {
-    char path[600], tmp[610];
-    FILE *f;
+    char path[600];
+    AwFile *f;
     u32 header[4];
     if (gSaveBlock2Ptr == NULL || MOEMON_DEV_BUILD)   // (a dev build never writes a save or its side files)
         return;
     snprintf(path, sizeof(path), "%s.region", gPlatformSavePath);
-    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
-    f = fopen(tmp, "wb");
-    if (!f)
-        return;
+    f = AwFile_Open(path);   // (written in the background, swapped in whole: aw_file.c)
     header[0] = REGION_MAGIC;
     header[1] = REGION_FORMAT;
     header[2] = Fingerprint();
     header[3] = sizeof(sFlags) + sizeof(sVars) + sizeof(gRegionState);
-    fwrite(header, sizeof(header), 1, f);
-    fwrite(sFlags, sizeof(sFlags), 1, f);
-    fwrite(sVars, sizeof(sVars), 1, f);
-    fwrite(&gRegionState, sizeof(gRegionState), 1, f);
+    AwFile_Write(header, sizeof(header), 1, f);
+    AwFile_Write(sFlags, sizeof(sFlags), 1, f);
+    AwFile_Write(sVars, sizeof(sVars), 1, f);
+    AwFile_Write(&gRegionState, sizeof(gRegionState), 1, f);
     // chunks: {tag, length, data}
     {
         u32 c[2];
@@ -449,15 +447,15 @@ void MP_Region_WriteSidecar(void)
                 continue;
             c[0] = CHUNK('P', 'C', '0' + r, ' ');
             c[1] = sizeof(sAwayPC[r]);
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(&sAwayPC[r], sizeof(sAwayPC[r]), 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(&sAwayPC[r], sizeof(sAwayPC[r]), 1, f);
         }
         if (sGlobalValid)
         {
             c[0] = CHUNK('G', 'L', 'P', 'C');
             c[1] = sizeof(sGlobalPC);
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(&sGlobalPC, sizeof(sGlobalPC), 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(&sGlobalPC, sizeof(sGlobalPC), 1, f);
         }
         for (r = 0; r < REGION_COUNT; r++)
         {
@@ -465,28 +463,28 @@ void MP_Region_WriteSidecar(void)
                 continue;
             c[0] = CHUNK('P', 'I', '0' + r, ' ');
             c[1] = sizeof(sAwayItems[r]);
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(sAwayItems[r], sizeof(sAwayItems[r]), 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(sAwayItems[r], sizeof(sAwayItems[r]), 1, f);
         }
         if (sGlobalItemCount)
         {
             c[0] = CHUNK('G', 'I', 'T', 'M');
             c[1] = sGlobalItemCount * sizeof(struct ItemSlot);
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(sGlobalItems, sizeof(struct ItemSlot), sGlobalItemCount, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(sGlobalItems, sizeof(struct ItemSlot), sGlobalItemCount, f);
         }
         c[0] = CHUNK('L', 'V', 'L', '4');   // (LVLS before SINNOH: 3 regions' EXP a record, read and converted)
         c[1] = sLevelCount * sizeof(sLevels[0]);
-        fwrite(c, sizeof(c), 1, f);
-        fwrite(sLevels, sizeof(sLevels[0]), sLevelCount, f);
+        AwFile_Write(c, sizeof(c), 1, f);
+        AwFile_Write(sLevels, sizeof(sLevels[0]), sLevelCount, f);
         {
             // SINNOH's HONEY trees (src/sinnoh/s3d_wild.c)
             u32 size;
             const void *honey = Sinnoh_HoneyData(&size);
             c[0] = CHUNK('H', 'O', 'N', 'Y');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(honey, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(honey, size, 1, f);
         }
         {
             // SINNOH's BATTLE CASTLE's and ARCADE's records (src/sinnoh/s3d_frontier.c)
@@ -494,8 +492,8 @@ void MP_Region_WriteSidecar(void)
             const void *frontier = Sinnoh_FrontierData(&size);
             c[0] = CHUNK('F', 'R', 'N', 'T');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(frontier, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(frontier, size, 1, f);
         }
         {
             // SINNOH's BATTLE HALL record (src/sinnoh/s3d_hall.c)
@@ -503,8 +501,8 @@ void MP_Region_WriteSidecar(void)
             const void *hall = Sinnoh_HallData(&size);
             c[0] = CHUNK('H', 'A', 'L', 'L');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(hall, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(hall, size, 1, f);
         }
         {
             // SINNOH's BATTLE TOWER records and the challenge REST saved (src/sinnoh/s3d_tower.c)
@@ -512,8 +510,8 @@ void MP_Region_WriteSidecar(void)
             const void *tower = Sinnoh_TowerData(&size);
             c[0] = CHUNK('T', 'O', 'W', 'R');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(tower, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(tower, size, 1, f);
         }
         {
             // Platinum's Gen 4 ribbons, by POKéMON (src/sinnoh/s3d_party.c)
@@ -522,8 +520,8 @@ void MP_Region_WriteSidecar(void)
             const void *rib = Sinnoh_RibbonsData(&size);
             c[0] = CHUNK('R', 'I', 'B', 'N');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(rib, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(rib, size, 1, f);
         }
         {
             // KANTO's ROUTE 5 DAY-CARE: FireRed's one-POKéMON day care (daycare.c)
@@ -531,8 +529,8 @@ void MP_Region_WriteSidecar(void)
             const void *dc = MP_Route5Daycare_Data(&size);
             c[0] = CHUNK('R', '5', 'D', 'C');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(dc, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(dc, size, 1, f);
         }
         {
             // JUBILIFE TV's rankings (src/sinnoh/s3d_rankings.c)
@@ -541,8 +539,8 @@ void MP_Region_WriteSidecar(void)
             const void *rank = Sinnoh_RankingsData(&size);
             c[0] = CHUNK('R', 'A', 'N', 'K');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(rank, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(rank, size, 1, f);
         }
         {
             // SINNOH's TV: its kept segments and records (src/sinnoh/s3d_tv.c)
@@ -550,8 +548,8 @@ void MP_Region_WriteSidecar(void)
             const void *tv = Sinnoh_TvData(&size);
             c[0] = CHUNK('T', 'V', 'B', 'C');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(tv, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(tv, size, 1, f);
         }
         {
             // Platinum's FASHION CASE: SUPER CONTESTS' accessories and backdrops (src/sinnoh/s3d_fashion.c)
@@ -559,13 +557,13 @@ void MP_Region_WriteSidecar(void)
             const void *fashion = Sinnoh_FashionData(&size);
             c[0] = CHUNK('F', 'A', 'S', 'H');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(fashion, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(fashion, size, 1, f);
             fashion = Sinnoh_PhotoData(&size);   // (and the contest hall's photos)
             c[0] = CHUNK('C', 'P', 'H', 'O');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(fashion, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(fashion, size, 1, f);
         }
         {
             // SINNOH's Underground: the way back up, the day's dug spots, the Plates had (src/sinnoh/s3d_underground.c)
@@ -573,8 +571,8 @@ void MP_Region_WriteSidecar(void)
             const void *ug = Sinnoh_UndergroundData(&size);
             c[0] = CHUNK('U', 'N', 'D', 'G');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(ug, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(ug, size, 1, f);
         }
         {
             // the UNOWN letters seen (src/sinnoh/s3d_legends.c)
@@ -582,15 +580,15 @@ void MP_Region_WriteSidecar(void)
             const void *un = Sinnoh_UnownData(&size);
             c[0] = CHUNK('U', 'N', 'O', 'F');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(un, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(un, size, 1, f);
         }
         {
             // the UNOWN letters caught (Crystal's UNOWN dex)
             c[0] = CHUNK('U', 'N', 'O', 'C');
             c[1] = sizeof(sJohtoUnownCaught);
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(&sJohtoUnownCaught, sizeof(sJohtoUnownCaught), 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(&sJohtoUnownCaught, sizeof(sJohtoUnownCaught), 1, f);
         }
         {
             // the roaming POKéMON (src/sinnoh/s3d_roamer.c)
@@ -598,8 +596,8 @@ void MP_Region_WriteSidecar(void)
             const void *ro = Sinnoh_RoamerData(&size);
             c[0] = CHUNK('R', 'O', 'A', 'M');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(ro, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(ro, size, 1, f);
         }
         {
             // JOHTO's roaming beasts (src/mp/mp_johto_roamer.c)
@@ -607,8 +605,8 @@ void MP_Region_WriteSidecar(void)
             const void *jr = MP_JohtoRoamer_Data(&size);
             c[0] = CHUNK('J', 'R', 'M', 'S');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(jr, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(jr, size, 1, f);
         }
         {
             // the BERRY trees past the save's 128 (src/mp/mp_berrytrees.c)
@@ -616,8 +614,8 @@ void MP_Region_WriteSidecar(void)
             const void *bt = MP_RegionBerryTrees_Data(&size);
             c[0] = CHUNK('B', 'T', 'R', 'E');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(bt, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(bt, size, 1, f);
         }
         {
             // small Platinum counters (src/sinnoh/s3d_misc.c)
@@ -625,8 +623,8 @@ void MP_Region_WriteSidecar(void)
             const void *sm = Sinnoh_MiscData(&size);
             c[0] = CHUNK('S', 'M', 'S', 'C');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(sm, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(sm, size, 1, f);
         }
         {
             // SINNOH's JOURNAL (src/sinnoh/s3d_journal.c)
@@ -634,20 +632,18 @@ void MP_Region_WriteSidecar(void)
             const void *jr = Sinnoh_JournalData(&size);
             c[0] = CHUNK('J', 'R', 'N', 'L');
             c[1] = size;
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(jr, size, 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(jr, size, 1, f);
         }
         {
             u32 format = MP_SAVE_FORMAT;   // the save's own layout version (mp_savefix.h)
             c[0] = CHUNK('S', 'A', 'V', 'F');
             c[1] = sizeof(format);
-            fwrite(c, sizeof(c), 1, f);
-            fwrite(&format, sizeof(format), 1, f);
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(&format, sizeof(format), 1, f);
         }
     }
-    fclose(f);
-    remove(path);
-    rename(tmp, path);
+    AwFile_Close(f);
 }
 
 static const u8 sGlobalName[] = _("GLOBAL");   // + 1-40: BOX_NAME_LENGTH (8) letters at most

@@ -17,6 +17,7 @@
 #include "mtg/collection.h"
 #include "mtg/integration.h"
 #include "tcg_new.h"
+#include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 extern char gPlatformSavePath[512];
 struct YgoCollection *Ygo_GetCollection(void);
@@ -50,21 +51,21 @@ static void Path(char *out, size_t size)
 static void Save(void)
 {
     char path[600];
-    FILE *f;
+    AwFile *f;
     unsigned g;
     uint32_t head[2] = {NEW_MAGIC, sOwner};
     Path(path, sizeof(path));
-    f = fopen(path, "wb");
+    f = AwFile_Open(path);
     if (f == NULL)
         return;
-    fwrite(head, sizeof(head), 1, f);
+    AwFile_Write(head, sizeof(head), 1, f);
     for (g = 0; g < CARDNEW_GAMES; g++)
     {
         uint32_t n = sCount[g];
-        fwrite(&n, 4, 1, f);
-        fwrite(sSeen[g], 1, n, f);
+        AwFile_Write(&n, 4, 1, f);
+        AwFile_Write(sSeen[g], 1, n, f);
     }
-    fclose(f);
+    AwFile_Close(f);
 }
 
 static void Load(void)
