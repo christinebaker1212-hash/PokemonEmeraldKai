@@ -2635,6 +2635,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_TowerDebug(const char *arg);
         Sinnoh_TowerDebug(arg);   // SINNOH's BATTLE TOWER (src/sinnoh/s3d_tower.c)
     }
+    else if (strcmp(cmd, "brainstreak") == 0)
+    {
+        void Sinnoh_BrainDebug(const char *arg);
+        Sinnoh_BrainDebug(arg);   // the Frontier Brains (src/sinnoh/s3d_frontier.c)
+    }
     else if (strcmp(cmd, "hall") == 0)
     {
         void Sinnoh_HallDebug(void);

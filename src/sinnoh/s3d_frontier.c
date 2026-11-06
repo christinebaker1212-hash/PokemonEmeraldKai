@@ -38,6 +38,11 @@
 #include "constants/script_menu.h"
 #include "constants/songs.h"
 #include "constants/weather.h"
+#include "sinnoh_tower.h"
+
+const u8 *S3D_TextByName(const char *name);
+u16 Sinnoh_HallStreak(void);   // (s3d_hall.c)
+u8 *Sinnoh_HallPrints(void);
 
 extern const u8 *gQzScrollOptions[];
 extern u8 gQzScrollCount;
@@ -54,6 +59,7 @@ static struct FrontierSave
 {
     u16 streak[2], best[2], sets[2];
     u16 cp;
+    u8 prints[2];   // the Frontier Brain's prints won (bit 0 Silver, 1 Gold; added 1.114.0: older records read 0)
 } sSave;
 
 static struct
@@ -269,6 +275,88 @@ static void ApplyEvent(void)
         SetCurrentAndNextWeatherNoDelay(sRun.weather);
 }
 
+// ---------------------------------------------------------------------------------------------- the Frontier Brains
+// Platinum's Frontier Brains (its overlay104 battle_*_helpers.c): the HALL MATRON ARGENTA, the CASTLE VALET DARACH and
+// the ARCADE STAR DAHLIA battle the player at the streak's set numbers (constants/battle_frontier.h: the CASTLE's and
+// ARCADE's 21st and 49th, the HALL's 50th and 170th), with Platinum's frontier sets for them (s3d_tower.c), their words
+// from Platinum's scene texts. A win gives the Silver or the Gold Print once.
+enum { BRAIN_HALL, BRAIN_CASTLE, BRAIN_ARCADE };
+static const u16 sBrainBattle[3][2] = {{50, 170}, {21, 49}, {21, 49}};
+// (approaching, the intro, the intro for Gold, beaten, beaten for Gold, the Silver Print, the Gold Print)
+static const char *const sBrainText[3][7] = {
+    {"BattleHallScene_Text_HallMatronApproaching", "BattleHallScene_Text_ArgentaIntro",
+     "BattleHallScene_Text_ArgentaIntroGold", "BattleHallScene_Text_BeatArgenta", "BattleHallScene_Text_BeatArgentaGold",
+     "BattleHall_Text_SilverPrintAdded", "BattleHall_Text_GoldPrintAdded"},
+    {"BattleCastleScene_Text_CastleValetApproaching", "BattleCastleScene_Text_DarachIntro",
+     "BattleCastleScene_Text_DarachIntroGold", "BattleCastleScene_Text_BeatDarach",
+     "BattleCastleScene_Text_BeatDarachGold", "BattleCastle_Text_SinglePrintAdded", "BattleCastle_Text_GoldPrintAdded"},
+    {"BattleArcadeScene_Text_ArcadeStarApproaching", "BattleArcadeScene_Text_DahliaIntro",
+     "BattleArcadeScene_Text_DahliaIntroGold", "BattleArcadeScene_Text_BeatDahlia", "BattleArcadeScene_Text_BeatDahliaGold",
+     "BattleArcade_Text_SilverPrintAdded", "BattleArcade_Text_GoldPrintAdded"},
+};
+static u8 sBrainFought;    // the battle under way: 0 none, else the brain's kind (1 Silver, 2 Gold)
+static u8 sBrainNewPrint;  // the beaten brain's print is new
+
+// The brain the next battle is against: 0 none, 1 Silver, 2 Gold
+u8 Sinnoh_BrainNext(u8 brain)
+{
+    u32 next = (brain == BRAIN_HALL ? Sinnoh_HallStreak() : sSave.streak[brain - BRAIN_CASTLE]) + 1;
+    return next == sBrainBattle[brain][0] ? 1 : next == sBrainBattle[brain][1] ? 2 : 0;
+}
+
+// The battle about to start is (KIND 1 / 2) or isn't (0) against the brain
+void Sinnoh_BrainBattle(u8 kind)
+{
+    sBrainFought = kind;
+}
+
+// Platinum's words about the brain (`sinnoh` scripts: VAR_0x8008 the facility, 0 CASTLE, 1 ARCADE, 2 HALL; VAR_0x8004
+// 0 the brain comes (next battle), 1 its intro, 2 beaten (the battle just won), 3 the print added): gStringVar4,
+// VAR_RESULT the brain's kind (1 Silver, 2 Gold) or 0 for nothing to say
+u16 Sinnoh_BrainText(void)
+{
+    u8 brain = gSpecialVar_0x8008 >= 2 ? BRAIN_HALL : BRAIN_CASTLE + gSpecialVar_0x8008, step = gSpecialVar_0x8004, kind;
+    const char *name;
+    kind = step < 2 ? Sinnoh_BrainNext(brain) : sBrainFought;
+    if (step == 3 && !sBrainNewPrint)
+        kind = 0;
+    if (kind == 0)
+        return gSpecialVar_Result = 0;
+    name = step == 0 ? sBrainText[brain][0] : step == 1 ? sBrainText[brain][kind] : step == 2 ? sBrainText[brain][2 + kind]
+         : sBrainText[brain][4 + kind];
+    if (step == 2)
+    {
+        // (Platinum's PRINT_STATE: each print once)
+        u8 bit = 1 << (kind - 1), *prints = brain == BRAIN_HALL ? Sinnoh_HallPrints() : &sSave.prints[brain - BRAIN_CASTLE];
+        sBrainNewPrint = !(*prints & bit);
+        *prints |= bit;
+        MPNet_Log("frontier: brain %d (%s) beaten%s", brain, kind == 2 ? "gold" : "silver", sBrainNewPrint ? ", a new print" : "");
+    }
+    StringCopy(gStringVar1, gSaveBlock2Ptr->playerName);   // (Platinum's BufferPlayerName 0)
+    StringExpandPlaceholders(gStringVar4, S3D_TextByName(name));
+    {
+        u16 bank, msg;
+        bool8 S3D_TextNamed(const char *name, u16 *bank, u16 *msg);
+        if (!S3D_TextNamed(name, &bank, &msg))
+            MPNet_Log("frontier: no text %s", name);
+    }
+    return gSpecialVar_Result = kind;
+}
+
+// (tests: `mp brainstreak FACILITY N`, 0 CASTLE, 1 ARCADE, 2 HALL: the streak set to N, the prints shown)
+void Sinnoh_BrainDebug(const char *arg)
+{
+    int facility = 0, n = 0;
+    void Sinnoh_HallSetStreak(u16 streak);
+    sscanf(arg, "%d %d", &facility, &n);
+    if (facility >= 2)
+        Sinnoh_HallSetStreak(n);
+    else
+        sSave.streak[facility] = n;
+    printf("[test] brain: facility %d streak %d, prints %d %d %d, next brain %d\n", facility, n, sSave.prints[0],
+           sSave.prints[1], *Sinnoh_HallPrints(), Sinnoh_BrainNext(facility >= 2 ? BRAIN_HALL : BRAIN_CASTLE + facility));
+}
+
 // ---------------------------------------------------------------------------------------------- the battles
 static void CB2_EndFrontierBattle(void)
 {
@@ -306,7 +394,9 @@ u16 Sinnoh_FrontierBattle(void)
 {
     u32 i, band, streak = sSave.streak[sRun.facility];
     u8 lvlMode = gSaveBlock2Ptr->frontier.lvlMode;
-    if (sRun.facility == FACILITY_ARCADE && sRun.event == EV_FREE_WIN)
+    u8 brain = Sinnoh_BrainNext(BRAIN_CASTLE + sRun.facility);
+    Sinnoh_BrainBattle(brain);
+    if (sRun.facility == FACILITY_ARCADE && sRun.event == EV_FREE_WIN && !brain)   // (never past the brain)
     {
         gSpecialVar_Result = TRUE;
         ScriptContext_Enable();
@@ -324,9 +414,23 @@ u16 Sinnoh_FrontierBattle(void)
     gTrainerBattleOpponent_A = band * (FRONTIER_TRAINERS_COUNT / 10) + Random() % (FRONTIER_TRAINERS_COUNT / 10);
     gFacilityTrainers = gBattleFrontierTrainers;
     gFacilityTrainerMons = gBattleFrontierMons;
-    gSaveBlock2Ptr->frontier.lvlMode = FRONTIER_LVL_50;
-    FillFrontierTrainerParty(3);
-    gSaveBlock2Ptr->frontier.lvlMode = lvlMode;
+    if (brain)
+    {
+        // the Frontier Brain: Platinum's sets for it, none of the player's kinds
+        u16 ft = Sinnoh_Frontier_Brain(BRAIN_CASTLE + sRun.facility, brain - 1), avoid[3];
+        for (i = 0; i < 3; i++)
+            avoid[i] = GetMonData(&sRun.team[i], MON_DATA_SPECIES);
+        ZeroEnemyPartyMons();
+        Sinnoh_Frontier_SetOpponent(TRAINER_SINNOH_FRONTIER_A, ft);
+        Sinnoh_Frontier_FillParty(gEnemyParty, ft, 3, avoid, NULL, 3, 50);
+        gTrainerBattleOpponent_A = TRAINER_SINNOH_FRONTIER_A;
+    }
+    else
+    {
+        gSaveBlock2Ptr->frontier.lvlMode = FRONTIER_LVL_50;
+        FillFrontierTrainerParty(3);
+        gSaveBlock2Ptr->frontier.lvlMode = lvlMode;
+    }
     sRun.weather = WEATHER_NONE;
     if (sRun.facility == FACILITY_ARCADE)
         ApplyEvent();
@@ -335,8 +439,16 @@ u16 Sinnoh_FrontierBattle(void)
     MPNet_Log("frontier: facility %d battle %d (streak %d): trainer %d", sRun.facility, sRun.battle + 1, streak,
               gTrainerBattleOpponent_A);
     CreateTask(Task_StartFrontierBattle, 1);
-    MP_MUSIC_SCENE_HOLD(MUS_VS_TRAINER, MUS_VICTORY_TRAINER);
-    PlayMapChosenOrBattleBGM(0);
+    if (brain)
+    {
+        MP_MUSIC_SCENE_HOLD(MUS_VS_FRONTIER_BRAIN, MUS_VICTORY_GYM_LEADER);
+        PlayMapChosenOrBattleBGM(MUS_VS_FRONTIER_BRAIN);
+    }
+    else
+    {
+        MP_MUSIC_SCENE_HOLD(MUS_VS_TRAINER, MUS_VICTORY_TRAINER);
+        PlayMapChosenOrBattleBGM(0);
+    }
     BattleTransition_StartOnField(GetSpecialBattleTransition(B_TRANSITION_GROUP_B_TOWER));
     return 0;
 }

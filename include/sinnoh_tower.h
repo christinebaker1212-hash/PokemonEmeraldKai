@@ -41,6 +41,7 @@ u8 Sinnoh_Frontier_Pic(u16 battleTrainerId);
 u8 Sinnoh_Frontier_SinnohPic(u16 battleTrainerId);
 void Sinnoh_Frontier_Name(u8 *dst, u16 battleTrainerId);
 void Sinnoh_Frontier_Speech(u16 battleTrainerId, u8 kind);   // into gStringVar4
+u16 Sinnoh_Frontier_Brain(u8 facility, u8 gold);   // 0 HALL, 1 CASTLE, 2 ARCADE: Platinum's Frontier Brain
 u8 Sinnoh_Frontier_FillParty(struct Pokemon *party, u16 frontierTrainer, u8 count, const u16 *avoidSpecies,
                              const u16 *avoidItems, u8 avoidCount, u8 level);
 

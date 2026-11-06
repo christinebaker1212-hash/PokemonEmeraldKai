@@ -44,6 +44,17 @@ static const struct SinnohFrontierTrainer *Of(u16 battleTrainerId)
     return &sSinnohFrontierTrainers[Sinnoh_Frontier_OpponentOf(battleTrainerId)];
 }
 
+// (s3d_hall.c, s3d_frontier.c) the BATTLE HALL's (0), CASTLE's (1) or ARCADE's (2) Frontier Brain, Silver (0) or Gold (1)
+u16 Sinnoh_Frontier_Brain(u8 facility, u8 gold)
+{
+    static const u16 sBrains[3][2] = {
+        {SINNOH_FT_HALL_MATRON_ARGENTA_SILVER, SINNOH_FT_HALL_MATRON_ARGENTA_GOLD},
+        {SINNOH_FT_CASTLE_VALET_DARACH_SILVER, SINNOH_FT_CASTLE_VALET_DARACH_GOLD},
+        {SINNOH_FT_ARCADE_STAR_DAHLIA_SILVER, SINNOH_FT_ARCADE_STAR_DAHLIA_GOLD},
+    };
+    return sBrains[facility % 3][gold & 1];
+}
+
 u8 Sinnoh_Frontier_Class(u16 battleTrainerId)
 {
     return Of(battleTrainerId)->trainerClass;

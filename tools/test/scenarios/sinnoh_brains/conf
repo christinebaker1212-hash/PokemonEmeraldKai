@@ -1,0 +1,11 @@
+# Platinum's Frontier Brains (src/sinnoh/s3d_frontier.c Sinnoh_BrainText): the CASTLE streak at 20, so the next battle
+# is the 21st, against the CASTLE VALET DARACH (Silver): Platinum's words as he comes (b_approach, b_intro), his
+# Platinum sets (frontier trainer 313), his battle picture (b_battle), then his words beaten and the Silver Print
+# (b_print); the challenge stops. Then the HALL streak at 49: the HALL MATRON ARGENTA (Silver) comes too (h_intro).
+MODE=1
+TMO=500
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:60,9:60,3:60"
+EXPECT_A=("frontier: facility 0 team 6 9 3" "next brain 1" "frontier: facility 0 battle 1 (streak 20): trainer 3077" "frontier: battle won"
+          "frontier: brain 1 (silver) beaten, a new print" "frontier: facility 0 streak 21" "frontier: facility 0 ends at"
+          "frontier: brain 0 (silver) beaten, a new print")
+UNEXPECT_A=("[crash]" "TIMEOUT" "frontier: no text")

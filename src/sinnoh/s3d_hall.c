@@ -36,6 +36,10 @@
 #include "constants/field_specials.h"
 #include "constants/songs.h"
 #include "constants/species.h"
+#include "sinnoh_tower.h"
+
+u8 Sinnoh_BrainNext(u8 brain);   // (s3d_frontier.c: the Frontier Brains, 0 the HALL's)
+void Sinnoh_BrainBattle(u8 kind);
 
 extern const u8 *gQzScrollOptions[];
 extern u8 gQzScrollCount;
@@ -53,6 +57,7 @@ static struct HallSave
     u32 personality;
     u8 ranks[NUMBER_OF_MON_TYPES];
     u16 streak, best;
+    u8 prints;            // the HALL MATRON's prints won (bit 0 Silver, 1 Gold; added 1.114.0)
 } sHall;
 
 static struct
@@ -126,7 +131,9 @@ u16 Sinnoh_HallSetMon(void)
     sRun.slot = gSpecialVar_0x8004;
     if (sHall.species != species || sHall.personality != personality)
     {
+        u8 prints = sHall.prints;   // (the prints are the player's, not the POKéMON's)
         memset(&sHall, 0, sizeof(sHall));
+        sHall.prints = prints;
         sHall.species = species;
         sHall.personality = personality;
     }
@@ -197,8 +204,10 @@ static u8 OpponentLevel(u8 playerLevel, u8 type)
     return out < 1 ? 1 : out;
 }
 
-// A POKéMON of TYPE from the rank's groups (Platinum's: the type's POKéMON in four by base stat total)
-static u16 OpponentSpecies(u8 type, u8 rank, u16 not)
+// A POKéMON of TYPE from the rank's groups (Platinum's: the type's POKéMON in four by base stat total). BRAIN (Platinum's
+// BattleHall_PickNextOpponentPokemon for the HALL MATRON): 1 Silver, from the group the player's own POKéMON is in
+// (the strongest when it isn't of the type), 2 Gold, from the strongest group
+static u16 OpponentSpecies(u8 type, u8 rank, u16 not, u8 brain)
 {
     static u16 sPool[NUM_SPECIES];
     static const u8 sGroups[HALL_RANKS][2] = {{0, 0}, {0, 0}, {0, 1}, {0, 1}, {0, 1}, {1, 2}, {1, 2}, {1, 2}, {2, 3}, {2, 3}};
@@ -224,6 +233,18 @@ static u16 OpponentSpecies(u8 type, u8 rank, u16 not)
         rank = HALL_RANKS - 1;
     lo = n * sGroups[rank][0] / 4;
     hi = n * (sGroups[rank][1] + 1) / 4;
+    if (brain)
+    {
+        u32 group = 3;
+        for (i = 0; brain == 1 && i < n; i++)
+            if (sPool[i] == not || Bst(sPool[i]) >= Bst(not))
+            {
+                group = i * 4 / n;
+                break;
+            }
+        lo = n * group / 4;
+        hi = n * (group + 1) / 4;
+    }
     if (hi <= lo)
         hi = lo + 1;
     if (hi > n)
@@ -268,8 +289,16 @@ u16 Sinnoh_HallBattle(void)
 {
     struct Pokemon *mine = &gPlayerParty[sRun.slot];
     u8 rank = sHall.ranks[sRun.type], level = OpponentLevel(GetMonData(mine, MON_DATA_LEVEL), sRun.type);
-    u16 species = OpponentSpecies(sRun.type, rank, GetMonData(mine, MON_DATA_SPECIES));
+    u8 brain = Sinnoh_BrainNext(0), ivs = 8 + 2 * (rank < HALL_RANKS ? rank : HALL_RANKS - 1);
+    u16 species = OpponentSpecies(sRun.type, rank, GetMonData(mine, MON_DATA_SPECIES), brain);
     u32 trainer;
+    Sinnoh_BrainBattle(brain);
+    if (brain)
+    {
+        // the HALL MATRON: the player's level, every IV full (BattleHall_GetOpponentLevel, BattleHall_LoadOpponentMonData)
+        level = GetMonData(mine, MON_DATA_LEVEL);
+        ivs = MAX_PER_STAT_IVS;
+    }
     if (species == SPECIES_NONE)
     {
         gSpecialVar_Result = TRUE;
@@ -282,18 +311,30 @@ u16 Sinnoh_HallBattle(void)
     gPlayerParty[0] = sRun.saved[sRun.slot];
     CalculatePlayerPartyCount();
     ZeroEnemyPartyMons();
-    CreateMon(&gEnemyParty[0], species, level, 8 + 2 * (rank < HALL_RANKS ? rank : HALL_RANKS - 1), FALSE, 0,
-              OT_ID_RANDOM_NO_SHINY, 0);
+    CreateMon(&gEnemyParty[0], species, level, ivs, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
     trainer = (rank < HALL_RANKS ? rank : HALL_RANKS - 1) * (FRONTIER_TRAINERS_COUNT / HALL_RANKS)
             + Random() % (FRONTIER_TRAINERS_COUNT / HALL_RANKS);
+    if (brain)
+    {
+        Sinnoh_Frontier_SetOpponent(TRAINER_SINNOH_FRONTIER_A, Sinnoh_Frontier_Brain(0, brain - 1));
+        trainer = TRAINER_SINNOH_FRONTIER_A;
+    }
     gFacilityTrainers = gBattleFrontierTrainers;
     VarSet(VAR_FRONTIER_FACILITY, FRONTIER_FACILITY_TOWER);
     gTrainerBattleOpponent_A = trainer;
     gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_BATTLE_TOWER;   // (one frontier flag: all of them were the PALACE's and ARENA's rules too)
     MPNet_Log("hall: type %d rank %d: species %d Lv%d (trainer %d)", sRun.type, rank + 1, species, level, trainer);
     CreateTask(Task_StartHallBattle, 1);
-    MP_MUSIC_SCENE_HOLD(MUS_VS_TRAINER, MUS_VICTORY_TRAINER);
-    PlayMapChosenOrBattleBGM(0);
+    if (brain)
+    {
+        MP_MUSIC_SCENE_HOLD(MUS_VS_FRONTIER_BRAIN, MUS_VICTORY_GYM_LEADER);
+        PlayMapChosenOrBattleBGM(MUS_VS_FRONTIER_BRAIN);
+    }
+    else
+    {
+        MP_MUSIC_SCENE_HOLD(MUS_VS_TRAINER, MUS_VICTORY_TRAINER);
+        PlayMapChosenOrBattleBGM(0);
+    }
     BattleTransition_StartOnField(GetSpecialBattleTransition(B_TRANSITION_GROUP_B_TOWER));
     return 0;
 }
@@ -353,4 +394,20 @@ void Sinnoh_HallDebug(void)
 u16 Sinnoh_HallBest(void)
 {
     return sHall.best;
+}
+
+// (s3d_frontier.c, the Frontier Brains) the streak, and the HALL MATRON's prints
+u16 Sinnoh_HallStreak(void)
+{
+    return sHall.streak;
+}
+
+u8 *Sinnoh_HallPrints(void)
+{
+    return &sHall.prints;
+}
+
+void Sinnoh_HallSetStreak(u16 streak)   // (tests)
+{
+    sHall.streak = streak;
 }

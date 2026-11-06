@@ -297,6 +297,38 @@ Sinnoh_Text_FactoryNo:
 	.string "Come back whenever you're ready to\n"
 	.string "borrow a new team!$"
 
+@ Platinum's Frontier Brains at the HALL, CASTLE and ARCADE (s3d_frontier.c Sinnoh_BrainText; VAR_0x8008 the facility:
+@ 0 CASTLE, 1 ARCADE, 2 HALL): before the battle, its words when it's the brain's turn; after a win, its words beaten
+@ and the print added. Platinum's own words.
+Sinnoh_EventScript_BrainComes::
+	setvar VAR_0x8004, 0
+	special Sinnoh_BrainText
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_BrainNone
+	message gStringVar4
+	waitmessage
+	setvar VAR_0x8004, 1
+	special Sinnoh_BrainText
+	message gStringVar4
+	waitmessage
+Sinnoh_EventScript_BrainNone:
+	return
+
+Sinnoh_EventScript_BrainBeaten::
+	setvar VAR_0x8004, 2
+	special Sinnoh_BrainText
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_BrainNone
+	message gStringVar4
+	waitmessage
+	setvar VAR_0x8004, 3
+	special Sinnoh_BrainText
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_BrainNone
+	playfanfare MUS_OBTAIN_SYMBOL
+	message gStringVar4
+	waitmessage
+	waitfanfare
+	closemessage
+	return
+
 @ SINNOH's BATTLE HALL (src/sinnoh/s3d_hall.c): one POKéMON against the type the player picks, ten ranks a type
 Sinnoh_EventScript_HallCounter::
 	lock
@@ -323,10 +355,13 @@ Sinnoh_EventScript_HallPick:
 	waitstate
 	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, Sinnoh_EventScript_HallStop
 	msgbox Sinnoh_Text_HallGo, MSGBOX_DEFAULT
+	setvar VAR_0x8008, 2
+	call Sinnoh_EventScript_BrainComes
 	closemessage
 	special Sinnoh_HallBattle
 	waitstate
 	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_HallLost
+	call Sinnoh_EventScript_BrainBeaten
 	special Sinnoh_HallWon
 	msgbox Sinnoh_Text_HallWon, MSGBOX_DEFAULT
 	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_HallPick
@@ -480,10 +515,12 @@ Sinnoh_EventScript_ArcadeBoard:
 
 Sinnoh_EventScript_FrontierFight:
 	msgbox Sinnoh_Text_FrontierGo, MSGBOX_DEFAULT
+	call Sinnoh_EventScript_BrainComes
 	closemessage
 	special Sinnoh_FrontierBattle
 	waitstate
 	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_FrontierLost
+	call Sinnoh_EventScript_BrainBeaten
 	special Sinnoh_FrontierWon
 	goto_if_ne VAR_RESULT, 0, Sinnoh_EventScript_FrontierSetWon
 	goto_if_eq VAR_0x8008, 1, Sinnoh_EventScript_FrontierWonPlain

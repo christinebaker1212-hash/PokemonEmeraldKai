@@ -89,7 +89,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       villa_furniture.c into src/data/sinnoh_gyms.h, the models in the 3D pack: gymprops.py), blocks its tiles, runs
       its script on A; the order form's requirements on the game's records (s3d_misc.c 20). The music box's song
       (SEQ_PL_TOWN02) isn't in the game yet: the music plays on. Test sinnoh_villa
-- [ ] The Frontier Brains' and the HALL MATRON's teams
+- [x] The Frontier Brains' and the HALL MATRON's teams (1.114.0: ARGENTA, DARACH, DAHLIA at Platinum's battles with Platinum's sets and words; the FACTORY is Kai's own, with Kai's FACTORY HEAD; PALMER since the TOWER)
 - [x] The size contest (ROUTE 222's house, REMORAID; not PASTORIA's): Platinum's script, s3d_misc.c 6-9 on Emerald's size
       code with Platinum's rounding and starting record; test sinnoh_size_contest
 - [x] JUBILIFE's TV lottery in Platinum's own script, on the game's own lottery number (s3d_misc.c) (sinnoh_lottery)

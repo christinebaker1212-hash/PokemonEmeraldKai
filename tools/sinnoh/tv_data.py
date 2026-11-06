@@ -24,7 +24,9 @@ TEXT_BANKS = ('tv_programs', 'tv_commercials', 'tv_programs_interviews', 'tv_pro
               'contest_visual_competition', 'contest_dance_competition', 'contest_acting_competition',
               'contest_hall_lobby', 'contest_accessory_names_with_articles', 'link_contest_records', 'flavor_names',
               'poffin_types', 'villa_furniture_names', 'ball_seal_names', 'ribbon_names', 'underground_common', 'menu_entries',
-              'rankings_machine', 'journal_entries', 'gym_names', 'month_names', 'times_of_day')
+              'rankings_machine', 'journal_entries', 'gym_names', 'month_names', 'times_of_day',
+              'battle_hall', 'battle_hall_scene', 'battle_castle', 'battle_castle_scene', 'battle_arcade',
+              'battle_arcade_scene')   # (the Frontier Brains' words: s3d_frontier.c)
 
 
 def fnv(name):

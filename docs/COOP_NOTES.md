@@ -3927,8 +3927,8 @@ follow_behind, follow_ground.
   none fainted, +2 each above half HP), spent before a battle on REST (10 CP) or BERRIES (a SITRUS BERRY each, 6 CP).
   ARCADE: the board lands on one of 18 events for the next battle (healing, a status on either side, sun / rain /
   sandstorm through the field weather the battle starts with, +3 levels either side, berries either side, a free
-  win, a bonus BP); MOEMON_TEST_ARCADE=N fixes it for tests. Records in "<save>.region" chunk FRNT. Not here: their
-  Frontier Brains (no data for their teams). Tests sinnoh_castle, sinnoh_arcade.
+  win, a bonus BP); MOEMON_TEST_ARCADE=N fixes it for tests. Records in "<save>.region" chunk FRNT. Tests
+  sinnoh_castle, sinnoh_arcade. Their Frontier Brains: below.
 - The BATTLE HALL (2026-11-01, src/sinnoh/s3d_hall.c, Sinnoh_EventScript_HallCounter): Platinum's rules with the
   game's own pieces. One POKéMON (Lv 30+, no legend: gFrontierBannedSpecies or a catch rate of 5 or less) picks the
   type of each opponent from a list with each type's rank (17 types, FAIRY from GEN 6); ten ranks a type. The
@@ -3938,8 +3938,21 @@ follow_behind, follow_ground.
   group ... 9-10 the strongest two), held by a frontier trainer of the rank's strength (gBattleFrontierTrainers,
   BATTLE_TYPE_FRONTIER: no EXP, no prize, a loss ends the streak). The chosen POKéMON alone in the party for the
   battle, healed after. 3 + streak/10 BP (10 at most) every 10 wins. Record (species, personality, ranks, streak,
-  best) in "<save>.region" chunk HALL; another POKéMON starts a new one. Not here: Platinum's HALL MATRON (no data
-  for her team). `mp hall`; test sinnoh_hall.
+  best) in "<save>.region" chunk HALL; another POKéMON starts a new one. `mp hall`; test sinnoh_hall.
+- The Frontier Brains (1.114.0, s3d_frontier.c Sinnoh_BrainNext / Sinnoh_BrainText, data/scripts/sinnoh_places.inc
+  Sinnoh_EventScript_BrainComes / _BrainBeaten): Platinum's battle numbers (constants/battle_frontier.h: the CASTLE's
+  and ARCADE's 21st and 49th, the HALL's 50th and 170th) bring the CASTLE VALET DARACH, the ARCADE STAR DAHLIA and the
+  HALL MATRON ARGENTA, Silver then Gold. DARACH and DAHLIA: three of their Platinum frontier sets (gen_frontier.py's
+  SINNOH_FT_*; s3d_tower.c Sinnoh_Frontier_Brain / Sinnoh_Frontier_FillParty at Lv 50, IVs 31), none of the player's
+  kinds; the ARCADE's board still spins (a free win never skips the brain). ARGENTA (BattleHall_PickNextOpponentPokemon
+  / _GetOpponentLevel): the type picked, Silver from the group the player's POKéMON is in (by base stat total; the
+  strongest group when it isn't of the type), Gold from the strongest group, at the player's level with every IV 31.
+  All as TRAINER_SINNOH_FRONTIER_A (their names, Platinum's battle pictures, their lines), the Frontier Brain music.
+  Their words before and after are Platinum's scene texts (battle_*_scene banks: the brain comes, the intro, beaten;
+  battle_* banks: the print added), reached by name (tv_data.py TEXT_BANKS). Each print once (Platinum's PRINT_STATE):
+  FrontierSave.prints, HallSave.prints (kept when another POKéMON starts a new HALL record). The FACTORY is Kai's own
+  BATTLE FACTORY (a shared map), so its FACTORY HEAD is Kai's, not THORTON. `mp brainstreak FACILITY N` (0 CASTLE,
+  1 ARCADE, 2 HALL); test sinnoh_brains.
 - The BATTLE FACTORY (2026-11-01): SINNOH's FACTORY counter (Sinnoh_EventScript_FactoryGuide) leads into the game's
   own BATTLE FACTORY (rental battles, Platinum's rules too); its lobby, pre-battle and battle rooms are maps shared by
   every region (mp_region.c MP_Region_IsSharedMap), so the player stays in SINNOH there (no PC swap) and the lobby's
