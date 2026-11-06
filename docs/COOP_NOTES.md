@@ -5628,3 +5628,33 @@ the most). Each table now shows a move before it's made and holds what happened 
 - **BOOSTER PACKS** on the case's first page shows how many are waiting and is greyed out at none, as the others'.
 - **The registered CARD CASE** in front of one of MAGIC's regulars (EventScript_MtgDuelist0-5) runs their own talk
   script (their words, then MAGIC's challenge), as talking to them does (tcg_field.c Tcg_FieldChallenge).
+
+## SINNOH's JOURNAL (1.113.0)
+
+Platinum's JOURNAL, its rules, words and notebook (src/sinnoh/s3d_journal.c; test sinnoh_journal):
+- Ten pages, saved in the region side file as chunk "JRNL" (mp_region.c). A new page each day the game is loaded
+  (Platinum's Journal_GetSavedPage: the pages move down, today's starts empty), titled with the date, the weekday and
+  "Started from" the place; here also when the player comes to SINNOH from another region and when the JOURNAL is
+  given (gen_scripts.py GiveJournal adds `sinnoh SINNOH_JOURNAL, 255`). Only in SINNOH, only with the JOURNAL in the BAG.
+- What goes in, as Platinum writes it: the first visit to a town (a FLY spot unlocked on arriving: s3d_townmap.c
+  Sinnoh_TownMapArrive; outdoor maps only); on a warp, out of a cave ("Got through", "Departed from" for the
+  WINDWORKS, the TEMPLE, the IRONWORKS), out of the player's home ("Rested comfortably at home."), the lab, one of
+  Platinum's named buildings ("Exited from" / "Departed from", sMapsInfo), into a GYM without its badge ("... was too
+  tough...", taken away when its leader is beaten); wild POKéMON caught, or defeated from the fifth of the session on,
+  with the time of day (encounter.c UpdateJournal); gym leaders, the Elite Four (only the last stays) and the Champion
+  among the place lines, other trainers on the trainer line, its words shorter for longer names (journal_printer.c);
+  a POKé MART visit's shopping (bought, sold, both: shop.c / item_menu.c SellItem; not the VEILSTONE store, the herb
+  shop or CELESTIC's house), a PC Box with something moved, field moves (FieldEffectStart's Cut, Surf, Rock Smash,
+  Strength, Waterfall, Dig, Sweet Scent; Fly and Teleport written on arriving, with the place; party_menu.c Flash,
+  Milk Drink, Softboiled; s3d_misc.c Rock Climb, Defog), item balls (sinnoh_items.inc `sinnoh 64, 18, ITEM`, only when
+  picked up), the Underground's digging, the GAME CORNER and the BATTLE FRONTIER (Platinum's CreateJournalEvent ->
+  `sinnoh SINNOH_JOURNAL, TYPE, PARAM`, Sinnoh_JournalScript), friends' battles on the two online lines ("Beat X
+  (Single)", mp_battle.c JournalPvp).
+- The words are Platinum's banks by name (journal_entries, gym_names, month_names, times_of_day: tv_data.py
+  TEXT_BANKS); places, trainers, POKéMON and items by the game's own names, as SINNOH's TV writes them.
+- The screen: Platinum's notebook (f_note_gra.narc, tools/sinnoh/build_journal.py -> "JRNL" in platinum_gfx.pak, the
+  boy's or the girl's, each page in its own palette) drawn as BG3's full-color picture (gba_easy_draw.c
+  gMpBgPictureLine), from (8, 12) of the DS page so its title line and nine lines fit; the words printed into a hidden
+  window and laid over it; LEFT / RIGHT / A turn the pages (the page lifts away over the next), B / START close.
+  ITEM_JOURNAL opens it from the BAG or registered; on CONTINUE it opens first when the last page is two days old or
+  more (Journal_CheckOpenOnContinue), then today's page starts. `mp journal [open]` for tests.
