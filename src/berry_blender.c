@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "overworld.h"
 #include "berry_blender.h"
@@ -2356,6 +2357,33 @@ static bool8 AreBlenderBerriesSame(struct BlenderBerry *berries, u8 a, u8 b)
         return FALSE;
 }
 
+// Moemon Kai: the POKéBLOCK as the POFFIN Platinum names (POFFIN_TYPE_*: its first flavor then its second, RICH with
+// three flavors, OVERRIPE with more, FOUL from a failed blend, MILD past 50), for SINNOH's TV (s3d_tv.c)
+static void MpSinnohPoffinTv(const struct Pokeblock *b)
+{
+    void Sinnoh_TvPoffin(u8 poffin);
+    const u8 f[FLAVOR_COUNT] = {b->spicy, b->dry, b->sweet, b->bitter, b->sour};
+    u8 first = 0, second = 0xFF, i;
+    if (b->color == PBLOCK_CLR_BLACK)
+        Sinnoh_TvPoffin(27);
+    else if (b->color == PBLOCK_CLR_WHITE)
+        Sinnoh_TvPoffin(26);
+    else if (b->color == PBLOCK_CLR_GRAY)
+        Sinnoh_TvPoffin(25);
+    else if (b->color == PBLOCK_CLR_GOLD)
+        Sinnoh_TvPoffin(28);
+    else
+    {
+        for (i = 1; i < FLAVOR_COUNT; i++)
+            if (f[i] > f[first])
+                first = i;
+        for (i = 0; i < FLAVOR_COUNT; i++)
+            if (i != first && f[i] > 0 && (second == 0xFF || f[i] > f[second]))
+                second = i;
+        Sinnoh_TvPoffin(first * 5 + (second == 0xFF ? first : second));
+    }
+}
+
 static u32 CalculatePokeblockColor(struct BlenderBerry *berries, s16 *_flavors, u8 numPlayers, u8 negativeFlavors)
 {
     s16 flavors[FLAVOR_COUNT + 1];
@@ -3689,6 +3717,8 @@ static bool8 PrintBlendingResults(void)
 
         RemoveBagItem(gSpecialVar_ItemId, 1);
         AddPokeblock(&pokeblock);
+        if (MP_Region_Current() == REGION_SINNOH && !(MP_Blender_Active() && MP_Blender_NumPlayers() >= 2))
+            MpSinnohPoffinTv(&pokeblock);   // Moemon Kai: SINNOH's TV interviews about the POFFIN cooked alone
         if (MP_Blender_Active() && MP_Blender_NumPlayers() >= 2)
             MP_Events_Did(MP_DID_BLEND);   // Moemon Co-op: blended with friends
 

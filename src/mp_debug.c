@@ -3591,6 +3591,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Tv_DebugScreens(bool8 on);
         MP_Tv_DebugScreens(strcmp(arg, "off") != 0);
     }
+    else if (strcmp(cmd, "tvnow") == 0)
+    {
+        // tvnow: SINNOH NOW's BERRY LOOKOUT and POKéMON PHOTO RATING as they'd air now (s3d_tv.c)
+        void Sinnoh_TvDebugNow(void);
+        Sinnoh_TvDebugNow();
+    }
     else if (strcmp(cmd, "tvprogram") == 0)
     {
         // tvprogram N: Platinum's program N (1-9) on air from now on, whatever the hour (0: the schedule's again)

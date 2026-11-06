@@ -2,6 +2,7 @@
 #include "mp.h"
 #include "event_data.h"
 #include "mp_region.h"
+#include "s3d.h"
 #include "overworld.h"
 #include "field_effect.h"
 #include "random.h"
@@ -1026,9 +1027,14 @@ static void Task_FadeToSlotMachine(u8 taskId)
     }
 }
 
+static u32 sMpSlotsStartCoins, sMpSlotsStartFrame;   // Moemon Kai: SINNOH's TV RECORDS (coins and time this sitting)
+
 void PlaySlotMachine(u8 machineId, MainCallback exitCallback)
 {
     u8 taskId;
+
+    sMpSlotsStartCoins = GetCoins();
+    sMpSlotsStartFrame = gMain.vblankCounter1;
 
     sSlotMachine = AllocZeroed(sizeof(*sSlotMachine));
     PlaySlotMachine_Internal(machineId, exitCallback);
@@ -1746,6 +1752,8 @@ static bool8 SlotTask_EndGame(struct Task *task)
         VarSet(0x51AA, sSlotMachine->bonusesThisSitting);
     MPNet_Log("slots: %d BONUS this sitting", sSlotMachine->bonusesThisSitting);
     SetCoins(sSlotMachine->coins);
+    if (MP_Region_Current() == REGION_SINNOH)   // Moemon Kai: SINNOH's TV (Platinum's sub_0206DD38, 1,000 COINS up)
+        Sinnoh_TvSlots(sSlotMachine->coins, sMpSlotsStartCoins, (gMain.vblankCounter1 - sMpSlotsStartFrame) / 3600);
     TryPutFindThatGamerOnAir(GetCoins());
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
     sSlotMachine->state++; // SLOTTASK_FREE

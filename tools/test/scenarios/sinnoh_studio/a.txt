@@ -55,5 +55,9 @@ wait 60
 mash B 20 20
 waitfor field 1000
 shot s_done
+mp tvnow
+mp setflag 0x3D48
+mp setflag 0x3D45
+mp tvnow
 quit
 quit

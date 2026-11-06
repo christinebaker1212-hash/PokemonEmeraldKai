@@ -77,4 +77,13 @@ struct S3dStarterGfx
 };
 const struct S3dStarterGfx *S3D_Gfx_Starter(void);   // NULL: the pack has none
 
+// SINNOH's TV (s3d_tv.c): what the BATTLE FRONTIER, ribbons and the GAME CORNER give its RECORDS and interviews
+struct Pokemon;
+void Sinnoh_TvBattlePoints(u32 bp);
+void Sinnoh_TvTowerRecord(struct Pokemon *mon, u16 streak, bool8 single);
+void Sinnoh_TvTowerOutcome(bool8 win, u16 streak);
+void Sinnoh_TvFrontierHall(struct Pokemon *mon);
+void Sinnoh_TvRibbon(struct Pokemon *mon, u8 ribbon, u8 count);
+void Sinnoh_TvSlots(u32 coins, u32 start, u32 minutes);
+
 #endif

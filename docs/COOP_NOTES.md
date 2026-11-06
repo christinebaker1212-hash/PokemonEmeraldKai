@@ -3763,8 +3763,14 @@ follow_behind, follow_ground.
   (field_player_avatar.c), shopping (shop.c), eggs (egg_hatch.c), the GREAT MARSH (safari_zone.c), hidden items, the name
   rater, the PC bulletin, BERRY crops, POKé BALL effects (the SEAL CLUB SHOW, in the Seals' place). The reporters ask for
   one word on the game's own easy chat (GABBY and TY's screen: special Sinnoh_TvChooseWord). Online-only and Underground
-  segments never air; those about systems SINNOH lacks yet (contests, photos, BERRY patches, roamers, the VILLA) wait
-  for them (docs/SINNOH_CHECKLIST.md). `mp tv`, `mp tvwatch`, `mp tvcatch SPECIES BALLS`. Test sinnoh_tv.
+  segments never air. Since 1.113.0 every other segment has its source: SINNOH NOW's BERRY LOOKOUT (Platinum's patch
+  table, a patch in a part reached, its BERRY's stage: mp_berrytrees.c) and POKéMON PHOTO RATING (JUBILIFE TV's dress-up
+  photo, its trainer and title: s3d_fashion.c); RECORDS from the BATTLE TOWER (a new best streak: s3d_tower.c EndRecords),
+  BP from the TOWER / HALL / CASTLE / ARCADE (counted daily), ribbons (s3d_party.c Sinnoh_MonGiveRibbon, Platinum's ribbon
+  names), the GAME CORNER's slots (slot_machine.c, 1,000 COINS up in one sitting); the interviews' subjects from the
+  TOWER (a loss, or a room won at 7+), the HALL (its POKéMON), the POFFIN HOUSE (berry_blender.c MpSinnohPoffinTv: the
+  POKéBLOCK named as Platinum's POFFIN), contests, the dress-up photo and AMITY SQUARE. `mp tv`, `mp tvwatch`,
+  `mp tvcatch SPECIES BALLS`, `mp tvnow` (BERRY LOOKOUT and PHOTO RATING as they'd air). Tests sinnoh_tv, sinnoh_studio.
 - Seals as POKé BALL effects (2026-11-02, the user: "Poke Ball effects take the place of Seals wherever they would
   appear in the story, or in menus or shops"): src/sinnoh/s3d_seals.c. Each of Platinum's Seals (generated/seals.txt's
   ids) stands for an earned ball effect piece (mp_ballunlock.c's MOEGATCHA prizes in order, round again): a Seal given

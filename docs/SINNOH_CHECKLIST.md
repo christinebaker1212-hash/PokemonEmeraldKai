@@ -74,7 +74,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The elevators in Platinum's own scripts: the attendants' words, GetFloorsAbove, the "Current Floor" window,
       SetSpecialLocation, PlayElevatorAnimation; the VISTA LIGHTHOUSE's ride by itself (sinnoh_elevator)
 - [x] BERRY soil patches: Platinum's 118, its first BERRIES ripe, the game's own BERRY trees (128+ in the region
-      sidecar: src/mp/mp_berrytrees.c) (sinnoh_berry); the TV's BERRY LOOKOUT still to come
+      sidecar: src/mp/mp_berrytrees.c) (sinnoh_berry); the TV's BERRY LOOKOUT reads them (sinnoh_studio: mp tvnow)
 - [x] The roamers: MESPRIT, CRESSELIA and PROF. OAK's birds in Platinum's own scripts (ActivateRoamingPokemon,
       DrawPokemonPreview, FlickerObject), their moves, encounters, HP kept, the HALL OF FAME's reset, the TV's ROAMER
       NEWS FLASH (src/sinnoh/s3d_roamer.c) (sinnoh_roamer)
@@ -166,8 +166,9 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       items, the name rater, the PC bulletin, BERRY crops, POKé BALL effects in the SEAL CLUB SHOW's place (sinnoh_tv: a catch)
 - [x] Each of the nine programs watched to its end (sinnoh_tv_programs: mp tvprogram N); SINNOH NOW, RECORDS and the
       VARIETY HOUR play Platinum's segments; the reporters' interviews (one word on the game's own easy chat)
-- [ ] The interviews and records that need systems SINNOH lacks: contests, dress-up photos, poffins, the frontier's
-      records, BERRY patches, the VILLA
+- [x] The interviews and records from SINNOH's own systems: contests, the dress-up photo (PHOTO RATING), POFFINS (the
+      POFFIN HOUSE's blends), the BATTLE TOWER's records and interviews, the HALL, BP, ribbons, the GAME CORNER, BERRY
+      patches (BERRY LOOKOUT), AMITY SQUARE, the VILLA (sinnoh_studio, sinnoh_tower: COOP_NOTES "SINNOH's TV")
 - [ ] Friends' segments on each other's TV (Platinum's record mixing: co-op)
 - [ ] JUBILIFE TV's floors and their people
 

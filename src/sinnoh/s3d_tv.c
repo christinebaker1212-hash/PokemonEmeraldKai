@@ -35,6 +35,9 @@
 #include "mp.h"
 #include "mp_region.h"
 #include "s3d.h"
+#include "s3d_contest.h"
+#include "berry.h"
+#include "constants/berry.h"
 #include "constants/battle.h"
 #include "battle.h"
 #include "battle_message.h"
@@ -119,9 +122,13 @@ bool8 Sinnoh_SwarmToday(u16 *mapsec, u16 *species);
 bool8 Sinnoh_DexCompleted(void);
 u8 Sinnoh_PoketchCurrentApp(void);
 
-// SUPER CONTESTS' dress-up photos (JUBILIFE TV's and the CONTEST HALL's: not built yet)
-static bool8 Sinnoh_HasDressUpPhoto(void) { return FALSE; }
-static u16 Sinnoh_DressUpPhotoSpecies(void) { return SPECIES_NONE; }
+// JUBILIFE TV's dress-up photo (Platinum's ImageClips' newest DressUpPhoto: s3d_fashion.c keeps the studio's one)
+static bool8 Sinnoh_HasDressUpPhoto(void) { return Sinnoh_ContestPhoto(PHOTO_STUDIO) != NULL; }
+static u16 Sinnoh_DressUpPhotoSpecies(void)
+{
+    const struct ContestEntrant *e = Sinnoh_ContestPhoto(PHOTO_STUDIO);
+    return e ? e->species : SPECIES_NONE;
+}
 
 // Platinum's contest type and rank names (its contest_text bank)
 static void Sinnoh_ContestTypeName(u8 *dest, u8 type)
@@ -881,7 +888,35 @@ static const char *Rec_Ribbon(struct TvInstance *k)
     struct TvRibbon *r = (void *)k->data;
     SetPlayer(0);
     SetMonName(1, &r->mon);
-    StringCopy(Slot(2), gText_EmptyString2);   // (the ribbon's name: this game's ribbons are its own)
+    static const char *const sNames[] = {
+        "RibbonName_Text_HoennChampion", "RibbonName_Text_HoennCool", "RibbonName_Text_HoennCoolSuper",
+        "RibbonName_Text_HoennCoolHyper", "RibbonName_Text_HoennCoolMaster", "RibbonName_Text_HoennBeauty",
+        "RibbonName_Text_HoennBeautySuper", "RibbonName_Text_HoennBeautyHyper", "RibbonName_Text_HoennBeautyMaster",
+        "RibbonName_Text_HoennCute", "RibbonName_Text_HoennCuteSuper", "RibbonName_Text_HoennCuteHyper",
+        "RibbonName_Text_HoennCuteMaster", "RibbonName_Text_HoennSmart", "RibbonName_Text_HoennSmartSuper",
+        "RibbonName_Text_HoennSmartHyper", "RibbonName_Text_HoennSmartMaster", "RibbonName_Text_HoennTough",
+        "RibbonName_Text_HoennToughSuper", "RibbonName_Text_HoennToughHyper", "RibbonName_Text_HoennToughMaster",
+        "RibbonName_Text_HoennWinning", "RibbonName_Text_HoennVictory", "RibbonName_Text_HoennArtist",
+        "RibbonName_Text_HoennEffort", "RibbonName_Text_HoennMarine", "RibbonName_Text_HoennLand",
+        "RibbonName_Text_HoennSky", "RibbonName_Text_HoennCountry", "RibbonName_Text_HoennNational",
+        "RibbonName_Text_HoennEarth", "RibbonName_Text_HoennWorld", "RibbonName_Text_SinnohChamp", "RibbonName_Text_Cool",
+        "RibbonName_Text_CoolGreat", "RibbonName_Text_CoolUltra", "RibbonName_Text_CoolMaster", "RibbonName_Text_Beauty",
+        "RibbonName_Text_BeautyGreat", "RibbonName_Text_BeautyUltra", "RibbonName_Text_BeautyMaster",
+        "RibbonName_Text_Cute", "RibbonName_Text_CuteGreat", "RibbonName_Text_CuteUltra", "RibbonName_Text_CuteMaster",
+        "RibbonName_Text_Smart", "RibbonName_Text_SmartGreat", "RibbonName_Text_SmartUltra",
+        "RibbonName_Text_SmartMaster", "RibbonName_Text_Tough", "RibbonName_Text_ToughGreat",
+        "RibbonName_Text_ToughUltra", "RibbonName_Text_ToughMaster", "RibbonName_Text_Ability",
+        "RibbonName_Text_GreatAbility", "RibbonName_Text_DoubleAbility", "RibbonName_Text_MultiAbility",
+        "RibbonName_Text_PairAbility", "RibbonName_Text_WorldAbility", "RibbonName_Text_Alert", "RibbonName_Text_Shock",
+        "RibbonName_Text_Downcast", "RibbonName_Text_Careless", "RibbonName_Text_Relax", "RibbonName_Text_Snooze",
+        "RibbonName_Text_Smile", "RibbonName_Text_Gorgeous", "RibbonName_Text_Royal", "RibbonName_Text_GorgeousRoyal",
+        "RibbonName_Text_Footprint", "RibbonName_Text_Record", "RibbonName_Text_History", "RibbonName_Text_Legend",
+        "RibbonName_Text_Red", "RibbonName_Text_Green", "RibbonName_Text_Blue", "RibbonName_Text_Festival",
+        "RibbonName_Text_Carnival", "RibbonName_Text_Classic", "RibbonName_Text_Premier"};   // (Platinum's ribbon.c order)
+    if (r->ribbon < ARRAY_COUNT(sNames))
+        SetPlatinum(2, sNames[r->ribbon]);
+    else
+        StringCopy(Slot(2), gText_EmptyString2);
     SetNumber(3, r->count, 3);
     return "pl_msg_00000417_00004";
 }
@@ -973,10 +1008,10 @@ static const char *Int_Poffin(struct TvInstance *k)
     SetWord(2, p->word);
     switch (p->poffin)
     {
-    case 1: return "TVProgramInterviews_Text_ThreeCheersForPoffinCorner_RichPoffin";
-    case 2: return "TVProgramInterviews_Text_ThreeCheersForPoffinCorner_OverripePoffin";
-    case 3: return "TVProgramInterviews_Text_ThreeCheersForPoffinCorner_FoulPoffin";
-    case 4: return "TVProgramInterviews_Text_ThreeCheersForPoffinCorner_MildPoffin";
+    case 25: return "TVProgramInterviews_Text_ThreeCheersForPoffinCorner_RichPoffin";   // (POFFIN_TYPE_RICH..MILD)
+    case 26: return "TVProgramInterviews_Text_ThreeCheersForPoffinCorner_OverripePoffin";
+    case 27: return "TVProgramInterviews_Text_ThreeCheersForPoffinCorner_FoulPoffin";
+    case 28: return "TVProgramInterviews_Text_ThreeCheersForPoffinCorner_MildPoffin";
     }
     return "TVProgramInterviews_Text_ThreeCheersForPoffinCorner_RegularPoffin";
 }
@@ -1161,14 +1196,93 @@ static const char *Now_Nature(struct TvInstance *k)
     return "TVProgramSinnohNow_Text_RichBoyNatureCorner_StatAffinity";
 }
 
+// BERRY LOOKOUT: a soil patch in a part of SINNOH reached (Platinum's sBerryLookoutPatchInfo: runs of patches by their
+// number, the first arrival that opens them, the map whose name is read) and how far its BERRY has grown
+static const struct { u8 count; u16 arrival, map; } sLookout[] = {
+    {2, MAPSEC_SINNOH_FLOAROMA_TOWN, MAP_SINNOH_FLOAROMA_TOWN},
+    {4, MAPSEC_SINNOH_FLOAROMA_TOWN, MAP_SINNOH_ROUTE205_SOUTH},
+    {4, MAPSEC_SINNOH_FLOAROMA_TOWN, MAP_SINNOH_ETERNA_FOREST_OUTSIDE},
+    {4, MAPSEC_SINNOH_CELESTIC_TOWN, MAP_SINNOH_FUEGO_IRONWORKS_OUTSIDE},
+    {4, MAPSEC_SINNOH_FLOAROMA_TOWN, MAP_SINNOH_ROUTE205_NORTH},
+    {4, MAPSEC_SINNOH_OREBURGH_CITY, MAP_SINNOH_ROUTE206},
+    {4, MAPSEC_SINNOH_OREBURGH_CITY, MAP_SINNOH_ROUTE207},
+    {4, MAPSEC_SINNOH_OREBURGH_CITY, MAP_SINNOH_ROUTE208},
+    {4, MAPSEC_SINNOH_HEARTHOME_CITY, MAP_SINNOH_ROUTE209},
+    {4, MAPSEC_SINNOH_SOLACEON_TOWN, MAP_SINNOH_SOLACEON_TOWN},
+    {4, MAPSEC_SINNOH_SOLACEON_TOWN, MAP_SINNOH_ROUTE210_SOUTH},
+    {4, MAPSEC_SINNOH_CELESTIC_TOWN, MAP_SINNOH_ROUTE210_NORTH},
+    {4, MAPSEC_SINNOH_CELESTIC_TOWN, MAP_SINNOH_ROUTE211_EAST},
+    {4, MAPSEC_SINNOH_HEARTHOME_CITY, MAP_SINNOH_ROUTE212_NORTH},
+    {4, MAPSEC_SINNOH_PASTORIA_CITY, MAP_SINNOH_ROUTE212_SOUTH},
+    {4, MAPSEC_SINNOH_PASTORIA_CITY, MAP_SINNOH_PASTORIA_CITY},
+    {4, MAPSEC_SINNOH_PASTORIA_CITY, MAP_SINNOH_ROUTE213},
+    {4, MAPSEC_SINNOH_VEILSTONE_CITY, MAP_SINNOH_ROUTE214},
+    {4, MAPSEC_SINNOH_VEILSTONE_CITY, MAP_SINNOH_ROUTE215},
+    {4, MAPSEC_SINNOH_CELESTIC_TOWN, MAP_SINNOH_ROUTE218},
+    {4, MAPSEC_SINNOH_CELESTIC_TOWN, MAP_SINNOH_ROUTE221},
+    {4, MAPSEC_SINNOH_VEILSTONE_CITY, MAP_SINNOH_ROUTE222},
+    {4, MAPSEC_SINNOH_POKEMON_LEAGUE, MAP_SINNOH_ROUTE224},   // (Platinum: outside VICTORY ROAD, the LEAGUE's FLY spot)
+    {4, MAPSEC_SINNOH_FIGHT_AREA, MAP_SINNOH_FIGHT_AREA},
+    {4, MAPSEC_SINNOH_FIGHT_AREA, MAP_SINNOH_ROUTE225},
+    {4, MAPSEC_SINNOH_SURVIVAL_AREA, MAP_SINNOH_ROUTE226},
+    {4, MAPSEC_SINNOH_SURVIVAL_AREA, MAP_SINNOH_ROUTE228},
+    {4, MAPSEC_SINNOH_SURVIVAL_AREA, MAP_SINNOH_ROUTE229},
+    {4, MAPSEC_SINNOH_RESORT_AREA, MAP_SINNOH_RESORT_AREA},
+    {4, MAPSEC_SINNOH_SURVIVAL_AREA, MAP_SINNOH_ROUTE230},
+};
+struct BerryTree *MP_RegionBerryTree(u8 id);   // (mp_berrytrees.c: SINNOH's patch n is tree 128 + n)
+static const char *Now_BerryLookout(struct TvInstance *k)
+{
+    u8 patches[128];
+    u32 i, j, n = 0, count = 0;
+    const struct BerryTree *tree;
+    const struct MapHeader *h;
+    for (i = 0; i < ARRAY_COUNT(sLookout); i++)
+        for (j = 0; j < sLookout[i].count; j++, n++)
+            if (Sinnoh_TownVisited(sLookout[i].arrival))
+                patches[count++] = n;
+    if (count == 0)
+        return NULL;
+    n = patches[Random() % count];
+    for (i = 0, j = n; j >= sLookout[i].count; i++)
+        j -= sLookout[i].count;
+    h = Overworld_GetMapHeaderByGroupAndId(sLookout[i].map >> 8, sLookout[i].map & 0xFF);
+    SetPlace(0, h->regionMapSectionId);
+    tree = MP_RegionBerryTree(128 + n);
+    switch (tree ? tree->stage : BERRY_STAGE_NO_BERRY)
+    {
+    case BERRY_STAGE_BERRIES:   return "TVProgramSinnohNow_Text_BerryLookout_Fruit";
+    case BERRY_STAGE_FLOWERING: return "TVProgramSinnohNow_Text_BerryLookout_Blooming";
+    case BERRY_STAGE_TALLER:    return "TVProgramSinnohNow_Text_BerryLookout_Growing";
+    case BERRY_STAGE_SPROUTED:  return "TVProgramSinnohNow_Text_BerryLookout_Sprouted";
+    }
+    return "TVProgramSinnohNow_Text_BerryLookout_None";
+}
+static bool8 Now_BerryLookoutOk(struct TvInstance *k) { return Sinnoh_TownVisited(MAPSEC_SINNOH_OREBURGH_CITY); }
+
+// POKéMON PHOTO RATING: the dress-up photo's trainer and the title they gave it
+static const char *Now_PhotoRating(struct TvInstance *k)
+{
+    const struct ContestEntrant *e = Sinnoh_ContestPhoto(PHOTO_STUDIO);
+    if (e == NULL)
+        return NULL;
+    memcpy(Slot(0), e->trainer, sizeof(e->trainer));
+    Slot(0)[sizeof(e->trainer) - 1] = EOS;
+    SetWord(1, *Sinnoh_PhotoTitle(PHOTO_STUDIO));
+    return "TVProgramSinnohNow_Text_PokemonPhotoRating";
+}
+static bool8 Now_PhotoRatingOk(struct TvInstance *k) { return Sinnoh_HasDressUpPhoto(); }
+
 static const struct TvSegment sSinnohNow[] = {
     [2] = {Now_Weather, Always},
     [3] = {Now_BestThree, NULL},
     [5] = {Now_Swarm, Now_SwarmOk},
+    [9] = {Now_BerryLookout, Now_BerryLookoutOk},
     [12] = {Now_Nature, NULL},
     [15] = {Now_Roamer, Now_RoamerOk},
+    [17] = {Now_PhotoRating, Now_PhotoRatingOk},
     [18] = {NULL, NULL},
-    // (1: groups, online; 9: the berry patches, 17: dress-up photos: until SINNOH has them)
+    // (1: groups, online only)
 };
 
 // VARIETY HOUR (its messages by number: "#V" and the message's place in the bank)
@@ -1729,4 +1843,24 @@ void Sinnoh_TvDebug(void)
                 printf("[test] tv: kept type %d segment %d played %d eligible %d species %d\n", t + 1, sTv.kept[t][i].segment,
                        sTv.kept[t][i].timesPlayed, Eligible(t + 1, sTv.kept[t][i].segment),
                        ((struct TvMon *)sTv.kept[t][i].data)->species);
+}
+
+// (tests: mp tvnow) SINNOH NOW's BERRY LOOKOUT and PHOTO RATING as they would air now: eligible, message, slots
+void Sinnoh_TvDebugNow(void)
+{
+    static const u8 sSegs[] = {9, 17};
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sSegs); i++)
+    {
+        const struct TvSegment *s = &sSinnohNow[sSegs[i]];
+        bool8 ok = s->eligible == NULL || s->eligible(NULL);
+        const char *name = ok ? s->message(NULL) : NULL;
+        char a[40] = "", b[40] = "";
+        if (name)
+        {
+            MP_GameToAscii(a, Slot(0), sizeof(a));
+            MP_GameToAscii(b, Slot(1), sizeof(b));
+        }
+        printf("[test] tv now %d: eligible %d %s [%s] [%s]\n", sSegs[i], ok, name ? name : "-", a, b);
+    }
 }

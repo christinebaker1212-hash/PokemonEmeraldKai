@@ -4,6 +4,7 @@
 // unk_02049D08.c.
 #include <stdio.h>
 #include "global.h"
+#include "s3d.h"
 #include "battle.h"
 #include "pokemon.h"
 #include "random.h"
@@ -485,11 +486,23 @@ static void CheckRibbonStreak(void)
 static void EndRecords(bool8 wonRoom)
 {
     u8 m = sT.challengeMode;
+    u16 before;
     if (m >= BT_RECORD_MODES)
         return;
     sTS.latest[m] = Streak();
+    before = sTS.record[m];
     if (sTS.latest[m] > sTS.record[m])
         sTS.record[m] = sTS.latest[m];
+    // the TV (Platinum's sub_0204A5A0 / sub_0204A5EC, singles and doubles): RECORDS on a new best (or the same best at a
+    // multiple of 7), the reporter's interview on a loss or a room won at 7 in a row or more
+    if ((m == BT_MODE_SINGLE || m == BT_MODE_DOUBLE) && sT.slots[0] < PARTY_SIZE)
+    {
+        u16 s = sTS.record[m];
+        if (s > 1 && (before < s || (before == s && s % 7 == 0)))
+            Sinnoh_TvTowerRecord(&sT.saved[sT.slots[0]], s, m == BT_MODE_SINGLE);
+        if (!wonRoom || sTS.latest[m] >= 7)
+            Sinnoh_TvTowerOutcome(wonRoom, sTS.latest[m]);
+    }
     sTS.streakOn[m] = wonRoom;
     sTS.victories += wonRoom ? BT_OPPONENTS : sT.wins;
     if (wonRoom)
@@ -521,6 +534,7 @@ static u16 GiveBattlePoints(void)
         bp = room >= 7 ? 7 : sSolo[room];
     gSaveBlock2Ptr->frontier.battlePoints = min(gSaveBlock2Ptr->frontier.battlePoints + bp, MAX_BATTLE_FRONTIER_POINTS);
     sTS.pointsReceived += bp;
+    Sinnoh_TvBattlePoints(bp);   // (the TV's RECORDS: s3d_tv.c)
     MPNet_Log("tower: %d BP", bp);
     return bp;
 }

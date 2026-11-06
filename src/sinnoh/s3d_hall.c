@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
+#include "s3d.h"
 #include "battle.h"
 #include "battle_main.h"
 #include "battle_setup.h"
@@ -315,6 +316,7 @@ u16 Sinnoh_HallWon(void)
         gSaveBlock2Ptr->frontier.battlePoints += bp;
         if (gSaveBlock2Ptr->frontier.battlePoints > MAX_BATTLE_FRONTIER_POINTS)
             gSaveBlock2Ptr->frontier.battlePoints = MAX_BATTLE_FRONTIER_POINTS;
+        Sinnoh_TvBattlePoints(bp);   // (the TV's RECORDS: s3d_tv.c)
     }
     ConvertIntToDecimalStringN(gStringVar1, sHall.streak, STR_CONV_MODE_LEFT_ALIGN, 4);
     ConvertIntToDecimalStringN(gStringVar2, sHall.ranks[sRun.type], STR_CONV_MODE_LEFT_ALIGN, 2);
@@ -328,6 +330,8 @@ u16 Sinnoh_HallEnd(void)
 {
     ConvertIntToDecimalStringN(gStringVar1, sHall.streak, STR_CONV_MODE_LEFT_ALIGN, 4);
     MPNet_Log("hall: the challenge ends at %d (best %d)", sHall.streak, sHall.best);
+    if (sRun.slot < PARTY_SIZE)
+        Sinnoh_TvFrontierHall(&gPlayerParty[sRun.slot]);   // (Platinum's FrontierScrCmd_C7: the TV's interview subject)
     sHall.streak = 0;
     memset(sHall.ranks, 0, sizeof(sHall.ranks));
     return 0;

@@ -133,10 +133,13 @@ bool8 Sinnoh_MonHasRibbon(struct Pokemon *mon, u8 ribbon)
     return (h->bits[ribbon / 8] >> (ribbon % 8)) & 1;
 }
 
+u8 Sinnoh_MonGen4RibbonCount(struct Pokemon *mon);
+
 void Sinnoh_MonGiveRibbon(struct Pokemon *mon, u8 ribbon)
 {
     u8 field, level, one = TRUE;
     struct RibbonHolder *h;
+    u8 given = ribbon;
     if (Sinnoh_MonHasRibbon(mon, ribbon))
         return;
     if (ContestRibbon(ribbon, &field, &level))
@@ -151,6 +154,7 @@ void Sinnoh_MonGiveRibbon(struct Pokemon *mon, u8 ribbon)
     else
         return;
     IncrementGameStat(GAME_STAT_RECEIVED_RIBBONS);
+    Sinnoh_TvRibbon(mon, given, GetMonData(mon, MON_DATA_RIBBON_COUNT) + Sinnoh_MonGen4RibbonCount(mon));   // (the TV)
 }
 
 // how many of Platinum's Gen 4 ribbons a POKéMON has (the summary's ribbon count adds them)

@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "s3d.h"
 #include "battle.h"
 #include "battle_main.h"
 #include "battle_setup.h"
@@ -372,6 +373,7 @@ u16 Sinnoh_FrontierWon(void)
         gSaveBlock2Ptr->frontier.battlePoints += bp;
         if (gSaveBlock2Ptr->frontier.battlePoints > MAX_BATTLE_FRONTIER_POINTS)
             gSaveBlock2Ptr->frontier.battlePoints = MAX_BATTLE_FRONTIER_POINTS;
+        Sinnoh_TvBattlePoints(bp);   // (the TV's RECORDS: s3d_tv.c)
         sRun.battle = 0;
         for (i = 0; i < 3; i++)
             Heal(&sRun.team[i]);
