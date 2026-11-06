@@ -148,7 +148,7 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
 {
     static const char *const sKnown[] = {"Mode", "Affected", "AddPower", "AddToughness", "AddKeyword", "SetPower",
                                          "SetToughness", "Description", "AffectedZone", "EffectZone", "AffectedDefined",
-                                         "IsPresent", "PresentCompare", "ValidCard", "ValidAttacker", "ValidBlocker",
+                                         "IsPresent", "PresentCompare", "ValidCard", "ValidAttacker", "ValidBlocker", "CharacteristicDefining",
                                          "Activator", "Type", "Amount", "Cost"};
     MtgStatic st;
     int first, count, i, v;
@@ -171,8 +171,16 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     st.mode = !s ? 0xFF : strcmp(s, "Continuous") == 0 ? MTG_STATIC_CONTINUOUS : strcmp(s, "CantBlock") == 0 ? MTG_STATIC_CANT_BLOCK
             : strcmp(s, "CantAttack") == 0 ? MTG_STATIC_CANT_ATTACK : strcmp(s, "CantBlockBy") == 0 ? MTG_STATIC_CANT_BLOCK_BY
             : strcmp(s, "RaiseCost") == 0 ? MTG_STATIC_RAISE_COST : strcmp(s, "ReduceCost") == 0 ? MTG_STATIC_REDUCE_COST : 0xFF;
-    if (st.mode == 0xFF || ((s = ParamOf(first, count, "AffectedZone")) && strcmp(s, "Battlefield") != 0)
-        || ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "Battlefield") != 0))
+    if ((s = ParamOf(first, count, "CharacteristicDefining"))) {   // */*: on the card itself, wherever it is
+        if (strcmp(s, "True") != 0 || st.mode != MTG_STATIC_CONTINUOUS || ParamOf(first, count, "Affected")
+            || ParamOf(first, count, "AffectedDefined") || !c->starPT)
+            goto unknown;
+        st.self = 1;
+        if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "All") != 0)
+            goto unknown;
+    } else if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "Battlefield") != 0)
+        goto unknown;
+    if (st.mode == 0xFF || ((s = ParamOf(first, count, "AffectedZone")) && strcmp(s, "Battlefield") != 0))
         goto unknown;
     if ((s = ParamOf(first, count, "AffectedDefined"))) {
         if (st.mode != MTG_STATIC_CONTINUOUS || (strcmp(s, "Self") != 0 && strcmp(s, "Enchanted") != 0)
@@ -234,10 +242,16 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
             goto unknown;
         st.toughX = s;
     }
-    if ((s = ParamOf(first, count, "SetPower")) && !(Integer(s, &v) && (st.setPower = (int16_t)v, 1)))
-        goto unknown;
-    if ((s = ParamOf(first, count, "SetToughness")) && !(Integer(s, &v) && (st.setToughness = (int16_t)v, 1)))
-        goto unknown;
+    if ((s = ParamOf(first, count, "SetPower")) && !(Integer(s, &v) && (st.setPower = (int16_t)v, 1))) {
+        if (!CountedAmount(cardId, s))
+            goto unknown;
+        st.setPowerX = s;
+    }
+    if ((s = ParamOf(first, count, "SetToughness")) && !(Integer(s, &v) && (st.setToughness = (int16_t)v, 1))) {
+        if (!CountedAmount(cardId, s))
+            goto unknown;
+        st.setToughX = s;
+    }
     if ((s = ParamOf(first, count, "AddKeyword")) && !Keywords(&st, s))
         goto unknown;
     if (c->staticCount >= sizeof(c->statics) / sizeof(c->statics[0]))
@@ -380,6 +394,19 @@ void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m)
                 m->setPower = st->setPower, setPowerSeq = src->seq + 1;
             if (st->setToughness != MTG_STATIC_NO_SET && src->seq + 1 > setToughSeq)
                 m->setToughness = st->setToughness, setToughSeq = src->seq + 1;
+            if (st->setPowerX || st->setToughX) {   // (a */* creature's own: counted now; any later set wins)
+                MtgStackEntry e;
+                MtgResolveCtx ctx;
+                int ok;
+                memset(&e, 0, sizeof(e));
+                ctx.e = &e;
+                ctx.controller = src->controller;
+                ctx.source = s;
+                if (st->setPowerX && setPowerSeq == 0)
+                    m->setPower = Mtg_Amount(d, &ctx, st->card, st->setPowerX, &ok), setPowerSeq = 1;
+                if (st->setToughX && setToughSeq == 0)
+                    m->setToughness = Mtg_Amount(d, &ctx, st->card, st->setToughX, &ok), setToughSeq = 1;
+            }
         }
     }
     sDepth--;

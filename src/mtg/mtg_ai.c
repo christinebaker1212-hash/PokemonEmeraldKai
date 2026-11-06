@@ -186,8 +186,10 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
     case MTG_API_ATTACH: {   // an Aura: Forge's AttachAILogic says whether it helps (Pump) or hurts (Curse)
         const char *logic = Mtg_Svar(ab->card, "AttachAILogic");
         int curse = logic && strcmp(logic, "Curse") == 0;
-        if (!main || tgtObj < 0 || !IsCreatureOnField(d, tgtObj) || curse != !tgtMine)
+        if (!main || tgtObj < 0 || curse != !tgtMine)
             return 0;
+        if (!IsCreatureOnField(d, tgtObj))   // (a land's or an artifact's Aura)
+            return 6;
         return curse ? 15 + Value(d, tgtObj) : 9 + Value(d, tgtObj) / 2;
     }
     }

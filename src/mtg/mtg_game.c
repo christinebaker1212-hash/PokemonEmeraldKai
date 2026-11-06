@@ -287,7 +287,8 @@ static void StateBasedActions(MtgDuel *d)
             int to = o->attachedTo;
             if (o->zone != MTG_ZONE_BATTLEFIELD || !Mtg_Card(o->def)->enchant)
                 continue;
-            if (to == MTG_NO_OBJ || to >= d->objCount || !IsCreature(d, to)
+            if (to == MTG_NO_OBJ || to >= d->objCount || d->objs[to].zone != MTG_ZONE_BATTLEFIELD
+                || !Mtg_ValidObj(d, to, Mtg_Card(o->def)->enchantSpec ? Mtg_Card(o->def)->enchantSpec : "Creature", i, o->controller)
                 || (Mtg_Protection(d, to) & Mtg_ObjColors(d, i) & ~Mtg_AuraOwnProtection(o->def))) {
                 Mtg_MoveTo(d, i, MTG_ZONE_GRAVEYARD);
                 again = 1;

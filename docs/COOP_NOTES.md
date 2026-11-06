@@ -5936,6 +5936,15 @@ the most). Each table now shows a move before it's made and holds what happened 
   and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
   duel 4).
 
+## MAGIC's */* creatures and other Auras (1.128.0)
+- PT:*/N or */*: MtgCardDef.starPT (bit 1 power, 2 toughness), the printed number 0; a characteristic-defining static
+  (`CharacteristicDefining$ True`, EffectZone$ All, SetPower$ / SetToughness$ X counted: setPowerX / setToughX) sets
+  it, and a card with a * side no such static sets stays out. Mtg_PTText prints "*/3" on the info lines and
+  screens; the table's numbers are the counted ones (never green for a * side).
+- K:Enchant:<spec> (MtgCardDef.enchantSpec: "Land", "Artifact", "Creature.YouCtrl"...): the Aura's spell targets that
+  spec, and state-based actions check it (relative to the Aura's controller). "You may choose not to untap" is read
+  (the engine always untaps: a legal choice).
+
 ## MAGIC's targets and amounts (1.127.0)
 - Valid properties: `!x` and `nonX` turn any property round (one recursion in CardProp); OppOwn, YouDontCtrl,
   ActivePlayerCtrl, attackingYou, blockingSource, blockedBySource(LKI), wasDealtDamageThisTurn (marked damage).

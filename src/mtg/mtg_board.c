@@ -722,7 +722,8 @@ static void DrawCard(int obj, const Rect *rc, int count, float x, float y)
     }
     if (c->types & MTG_T_CREATURE) {
         int power = Mtg_Power(&B.view, obj), tough = Mtg_Toughness(&B.view, obj) - o->damage;
-        unsigned text = o->damage ? 0xffd860 : (power > c->power || tough > c->toughness) ? 0x9cf0b0 : 0xc8ecff;
+        unsigned text = o->damage ? 0xffd860 : ((power > c->power && !(c->starPT & 1)) || (tough > c->toughness && !(c->starPT & 2)))
+                                               ? 0x9cf0b0 : 0xc8ecff;
         snprintf(pt, sizeof(pt), "%d/%d", power < 0 ? 0 : power, tough < 0 ? 0 : tough);
         Plate((int)cx - 13, (int)y + rc->h, 26, 9, NULL, pt, 0, text);
         if (o->sick && !(Mtg_Keywords(&B.view, obj) & MTG_KW_BIT(MTG_KW_HASTE)))
@@ -936,7 +937,7 @@ static void Tooltip(void)
             if (o->zone == MTG_ZONE_BATTLEFIELD)
                 snprintf(line, sizeof(line), "%s  %d/%d", name, Mtg_Power(&B.view, f), Mtg_Toughness(&B.view, f));
             else
-                snprintf(line, sizeof(line), "%s  %d/%d", name, c->power, c->toughness);
+                snprintf(line, sizeof(line), "%s  %s", name, Mtg_PTText(c));
         } else
             snprintf(line, sizeof(line), "%s", name);
         if (o->zone == MTG_ZONE_BATTLEFIELD && o->attachedTo != MTG_NO_OBJ) {   // an Aura: what it's on
@@ -1129,10 +1130,10 @@ static void InspectWindow(int obj)
     if (c->types & MTG_T_CREATURE) {
         if (o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_Power(&B.view, obj) != c->power
                                                 || Mtg_Toughness(&B.view, obj) != c->toughness || o->damage))
-            snprintf(line, sizeof(line), "%d/%d now (printed %d/%d)%s", Mtg_Power(&B.view, obj),
-                     Mtg_Toughness(&B.view, obj), c->power, c->toughness, o->damage ? ", hurt" : "");
+            snprintf(line, sizeof(line), "%d/%d now (printed %s)%s", Mtg_Power(&B.view, obj),
+                     Mtg_Toughness(&B.view, obj), Mtg_PTText(c), o->damage ? ", hurt" : "");
         else
-            snprintf(line, sizeof(line), "%d/%d", c->power, c->toughness);
+            snprintf(line, sizeof(line), "%s", Mtg_PTText(c));
         G_TextAlign(230, y + 1, TA_RIGHT, G_INK, G_INK_SHADOW, line, TF_SMALL);
         y += 13;
     }

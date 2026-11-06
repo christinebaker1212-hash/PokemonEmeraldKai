@@ -704,6 +704,17 @@ static void TestAmounts(void)
     PassBoth();
     CHECK(sD.players[1].life == 17, "three basic land types: 3 damage (%d)", sD.players[1].life);
     (void)b;
+
+    Table();   // a */* creature: Pestilence Rats counts the other Rats
+    {
+        int r1 = Put(0, "Pestilence Rats", MTG_ZONE_BATTLEFIELD), r2;
+        CHECK(Mtg_Power(&sD, r1) == 0 && Mtg_Toughness(&sD, r1) == 3, "a lone rat 0/3 (%d/%d)", Mtg_Power(&sD, r1), Mtg_Toughness(&sD, r1));
+        r2 = Put(1, "Pestilence Rats", MTG_ZONE_BATTLEFIELD);
+        CHECK(Mtg_Power(&sD, r1) == 1 && Mtg_Toughness(&sD, r1) == 3, "two rats: each 1/3 (%d/%d)", Mtg_Power(&sD, r1),
+              Mtg_Toughness(&sD, r1));
+        CHECK(strcmp(Mtg_PTText(Mtg_Card(sD.objs[r1].def)), "*/3") == 0, "printed */3");
+        (void)r2;
+    }
 }
 
 // ---- whole duels between the stand-in AIs

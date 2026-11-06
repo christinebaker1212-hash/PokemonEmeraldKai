@@ -776,7 +776,7 @@ static void CardLine(char *line, unsigned cap, int card)   // the strip's words 
         cost[n] = 0;
     }
     if (def->types & MTG_T_CREATURE)
-        snprintf(line, cap, "%s  %d/%d  %s", name, def->power, def->toughness, cost);
+        snprintf(line, cap, "%s  %s  %s", name, Mtg_PTText(def), cost);
     else
         snprintf(line, cap, "%s  %s", name, cost);
 }
@@ -933,7 +933,7 @@ static void InspectScreen(void)
     Mtg_PlainText(text, sizeof(text), c->oracle);
     y = G_Text(94, y + 2, 0x404040, G_NO_SHADOW, text[0] ? text : "(No rules text.)", 136, TF_NARROW);
     if (c->types & MTG_T_CREATURE) {
-        snprintf(line, sizeof(line), "%d/%d", c->power, c->toughness);
+        snprintf(line, sizeof(line), "%s", Mtg_PTText(c));
         G_TextAlign(230, y + 1, TA_RIGHT, G_INK, G_INK_SHADOW, line, TF_SMALL);
         y += 13;
     }

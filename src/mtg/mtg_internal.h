@@ -122,6 +122,7 @@ typedef struct {
     uint8_t presentNum;
     int8_t addPower, addToughness;
     const char *powerX, *toughX;    // AddPower$ X / AddToughness$ -X: an SVar counted now (Count$Valid ..., Number$)
+    const char *setPowerX, *setToughX;   // SetPower$ X / SetToughness$ X counted (a */* creature's CharacteristicDefining$)
     int16_t setPower, setToughness; // MTG_STATIC_NO_SET: none
     uint32_t addKeywords;
     uint8_t addLandwalk, addProtection;

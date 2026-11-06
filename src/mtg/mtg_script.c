@@ -15,6 +15,16 @@ static int sCardCount;
 static char *sText;            // the pack's text, copied once and cut into strings in place
 
 int Mtg_DbCount(void) { return sCardCount; }
+const char *Mtg_PTText(const MtgCardDef *c)
+{
+    static char buf[16];
+    char p[6], t[6];
+    snprintf(p, sizeof(p), "%d", c->power);
+    snprintf(t, sizeof(t), "%d", c->toughness);
+    snprintf(buf, sizeof(buf), "%s/%s", (c->starPT & 1) ? "*" : p, (c->starPT & 2) ? "*" : t);
+    return buf;
+}
+
 // tokens: definitions made once from Forge's token script names, kept apart from the pool (never in a collection)
 #define MAX_TOKENS 128
 static MtgCardDef sTokens[MAX_TOKENS];
@@ -486,10 +496,17 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
                 c->protection |= MTG_COLOR_BIT(i);
                 return;
             }
-    if (strcmp(k, "Enchant:Creature") == 0) {
+    if (strncmp(k, "Enchant:", 8) == 0) {   // "Enchant:Creature", "Enchant:Land.YouCtrl:land you control"
+        const char *spec = k + 8, *colon = strchr(spec, ':');
+        size_t n = colon ? (size_t)(colon - spec) : strlen(spec);
+        c->enchantSpec = KeepSpec(spec, n);
+        if (!Mtg_ValidSpecKnown(c->enchantSpec) || strstr(c->enchantSpec, "inZone"))
+            Unsupported(c, "Enchant:");
         c->enchant = 1;
         return;
     }
+    if (strcmp(k, "You may choose not to untap CARDNAME during your untap step.") == 0)
+        return;   // (it always untaps here: a choice the rules allow; what staying tapped does keeps a card out itself)
     if (strncmp(k, "Landwalk:", 9) == 0)
         for (i = 0; i < 5; i++)
             if (strcmp(k + 9, sBasicTypes[i]) == 0) {
@@ -618,11 +635,19 @@ static void ParseCard(int id, char *text)
             ParseTypes(c, val);
         else if (strcmp(line, "PT") == 0) {
             char *slash = strchr(val, '/');
-            if (!slash || strchr(val, '*'))
+            if (!slash)
                 Unsupported(c, "* power or toughness");
-            else {
-                c->power = (int8_t)atoi(val);
-                c->toughness = (int8_t)atoi(slash + 1);
+            else {   // "*" alone on a side: set by a characteristic-defining static (checked once every line is read)
+                if (strncmp(val, "*/", 2) == 0)
+                    c->starPT |= 1;
+                else if (strchr(val, '*') && strchr(val, '*') < slash)
+                    Unsupported(c, "* power or toughness");
+                if (strcmp(slash + 1, "*") == 0)
+                    c->starPT |= 2;
+                else if (strchr(slash + 1, '*'))
+                    Unsupported(c, "* power or toughness");
+                c->power = (int8_t)((c->starPT & 1) ? 0 : atoi(val));
+                c->toughness = (int8_t)((c->starPT & 2) ? 0 : atoi(slash + 1));
             }
         } else if (strcmp(line, "K") == 0)
             ParseKeyword(c, val);
@@ -663,11 +688,23 @@ static void ParseCard(int id, char *text)
         }
         c->abilities[c->abilityCount++] = (uint16_t)ParseAbility(c, id, abilityLines[i], kind, 0);
     }
+    if (c->starPT) {   // a */* side no static sets
+        int k, set = 0;
+        for (k = 0; k < c->staticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (st->self && (st->setPowerX || st->setPower != MTG_STATIC_NO_SET))
+                set |= 1;
+            if (st->self && (st->setToughX || st->setToughness != MTG_STATIC_NO_SET))
+                set |= 2;
+        }
+        if ((c->starPT & set) != c->starPT)
+            Unsupported(c, "* power or toughness");
+    }
     if (c->enchant) {   // an Aura's spell (Forge gives it one: "SP$ Attach | ValidTgts$ Creature")
-        static const char sAura[] = "SP$ Attach | ValidTgts$ Creature";
-        char *text = malloc(sizeof(sAura));
+        char buf[128], *text;
         int spells = 0;
-        memcpy(text, sAura, sizeof(sAura));
+        snprintf(buf, sizeof(buf), "SP$ Attach | ValidTgts$ %s", c->enchantSpec ? c->enchantSpec : "Creature");
+        text = (char *)KeepSpec(buf, strlen(buf));
         for (i = 0; i < c->abilityCount; i++)
             spells += gMtgAbilities[c->abilities[i]].kind == MTG_AB_SPELL;
         if (spells || !(c->types & MTG_T_ENCHANTMENT) || c->abilityCount >= 8)

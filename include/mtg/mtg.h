@@ -54,7 +54,9 @@ typedef struct MtgCardDef {
     uint16_t abilities[8];                   // indexes into the ability table (A: lines)
     uint8_t triggerCount;
     uint16_t triggers[6];                    // indexes into the trigger table (T: lines; mtg_trigger.c)
-    uint8_t enchant;                         // an Aura (K:Enchant:Creature): its spell targets a creature to enchant
+    uint8_t enchant;                         // an Aura (K:Enchant:...): its spell targets what it may enchant
+    const char *enchantSpec;                 // ...: a Valid spec ("Creature", "Land", "Creature.YouCtrl")
+    uint8_t starPT;                          // PT:*/* (bit 1 power, 2 toughness): a characteristic-defining static sets it
     uint8_t staticCount;
     uint16_t statics[4];                     // indexes into the static table (S: lines; mtg_static.c)
     uint16_t svarFirst, svarCount;           // the card's SVar: lines
@@ -70,6 +72,7 @@ const MtgCardDef *Mtg_Card(int id);         // a pool card, or a token (id >= MT
 #define MTG_TOKEN_BASE 0x7000                // token definitions (made from Forge's token names: Mtg_TokenDef)
 int Mtg_TokenDef(const char *script);        // "g_1_1_saproling" -> its definition's id, -1 if not understood
 int Mtg_CardByName(const char *name);       // -1 if not in the pool
+const char *Mtg_PTText(const MtgCardDef *c);  // "2/3", "*/*", "*/1" as printed (a static buffer)
 
 // ---- a duel ----
 #define MTG_PLAYERS     2

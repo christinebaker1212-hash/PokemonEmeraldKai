@@ -958,6 +958,13 @@
 "number": "173",
 "set": "mmq"
 },
+"Battle Squadron": {
+"artist": "Mark Tedin",
+"file": "mmq_174",
+"frame": "1997",
+"number": "174",
+"set": "mmq"
+},
 "Battle Strain": {
 "artist": "Dave Dorman",
 "file": "ody_177",
@@ -985,6 +992,13 @@
 "frame": "1997",
 "number": "215",
 "set": "tmp"
+},
+"Beast of Burden": {
+"artist": "Ron Spears",
+"file": "pulg_122",
+"frame": "1997",
+"number": "122",
+"set": "pulg"
 },
 "Beasts of Bogardan": {
 "artist": "Daniel Gelon",
@@ -2078,6 +2092,13 @@
 "number": "279",
 "set": "tmp"
 },
+"Coiling Woodworm": {
+"artist": "David Martin",
+"file": "nem_103",
+"frame": "1997",
+"number": "103",
+"set": "nem"
+},
 "Collective Unconscious": {
 "artist": "Andrew Goldhawk",
 "file": "mmq_236",
@@ -2384,6 +2405,13 @@
 "file": "bchr_5",
 "frame": "1993",
 "number": "5",
+"set": "bchr"
+},
+"Dakkon Blackblade": {
+"artist": "Richard Kane Ferguson",
+"file": "bchr_75",
+"frame": "1993",
+"number": "75",
 "set": "bchr"
 },
 "Dakmor Lancer": {
@@ -4920,6 +4948,13 @@
 "number": "17",
 "set": "wth"
 },
+"Heedless One": {
+"artist": "Mark Zug",
+"file": "ons_265",
+"frame": "1997",
+"number": "265",
+"set": "ons"
+},
 "Helionaut": {
 "artist": "Franz Vohwinkel",
 "file": "apc_13",
@@ -5634,6 +5669,13 @@
 "number": "325",
 "set": "inv"
 },
+"Keldon Warlord": {
+"artist": "Kev Brockschmidt",
+"file": "4ed_207",
+"frame": "1993",
+"number": "207",
+"set": "4ed"
+},
 "Kelsinko Ranger": {
 "artist": "Mark Poole",
 "file": "ice_33",
@@ -6236,6 +6278,13 @@
 "number": "110",
 "set": "inv"
 },
+"Maraxus of Keld": {
+"artist": "Adrian Smith",
+"file": "wth_111",
+"frame": "1997",
+"number": "111",
+"set": "wth"
+},
 "Marble Diamond": {
 "artist": "Jeff Miracola",
 "file": "mir_310",
@@ -6565,6 +6614,13 @@
 "number": "192",
 "set": "tmp"
 },
+"Molimo, Maro-Sorcerer": {
+"artist": "Mark Zug",
+"file": "inv_199",
+"frame": "1997",
+"number": "199",
+"set": "inv"
+},
 "Molting Harpy": {
 "artist": "Jeff Laubenstein",
 "file": "mmq_148",
@@ -6858,6 +6914,13 @@
 "frame": "1993",
 "number": "81",
 "set": "bchr"
+},
+"Nightmare": {
+"artist": "Melissa A. Benson",
+"file": "4ed_150",
+"frame": "1993",
+"number": "150",
+"set": "4ed"
 },
 "Nightscape Familiar": {
 "artist": "Jeff Easley",
@@ -7250,6 +7313,13 @@
 "frame": "1993",
 "number": "152",
 "set": "4ed"
+},
+"Pestilence Rats": {
+"artist": "Jeff A. Menges",
+"file": "ice_157",
+"frame": "1993",
+"number": "157",
+"set": "ice"
 },
 "Petrified Field": {
 "artist": "Glen Angus",
@@ -7993,6 +8063,13 @@
 "number": "263",
 "set": "inv"
 },
+"Reckless One": {
+"artist": "Ron Spencer",
+"file": "ons_222",
+"frame": "1997",
+"number": "222",
+"set": "ons"
+},
 "Reclusive Wight": {
 "artist": "Vincent Evans",
 "file": "usg_153",
@@ -8314,6 +8391,13 @@
 "frame": "1997",
 "number": "251",
 "set": "tmp"
+},
+"Roots": {
+"artist": "Nicola Leonard",
+"file": "hml_95",
+"frame": "1993",
+"number": "95",
+"set": "hml"
 },
 "Rootwater Alligator": {
 "artist": "Stephen Daniele",
@@ -10681,6 +10765,13 @@
 "number": "50",
 "set": "exo"
 },
+"Treefolk Seedlings": {
+"artist": "John Matson",
+"file": "usg_278",
+"frame": "1997",
+"number": "278",
+"set": "usg"
+},
 "Treetop Rangers": {
 "artist": "Daren Bader",
 "file": "usg_279",
@@ -10820,6 +10911,13 @@
 "frame": "1997",
 "number": "123",
 "set": "vis"
+},
+"Uktabi Wildcats": {
+"artist": "John Matson",
+"file": "mir_248",
+"frame": "1997",
+"number": "248",
+"set": "mir"
 },
 "Undead Warchief": {
 "artist": "Greg Hildebrandt",
@@ -11863,6 +11961,13 @@
 "frame": "1997",
 "number": "143",
 "set": "uds"
+},
+"Yavimaya Kavu": {
+"artist": "Greg Staples",
+"file": "inv_291",
+"frame": "1997",
+"number": "291",
+"set": "inv"
 },
 "Yavimaya Wurm": {
 "artist": "Melissa A. Benson",

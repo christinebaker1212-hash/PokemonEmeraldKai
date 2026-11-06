@@ -42,6 +42,9 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-06: 1.128.0)
+- */* creatures and Auras for other permanents: COOP_NOTES "MAGIC's */* creatures and other Auras". 1727 of 5408.
+
 ## Status (2026-11-06: 1.127.0)
 - Target properties and counted amounts: COOP_NOTES "MAGIC's targets and amounts". 1712 of 5408 cards play.
 
