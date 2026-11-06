@@ -216,6 +216,8 @@ def tables(root):
     evs, named = events(c)
     return dict(plats=plats, paths=paths, conns=conns, props=props, c=c, events=evs, named=named, root=root,
                 people=people(c, root),
+                falls=[(c.eval(t['mapHeaderID']), c.eval(t['tileX']), c.eval(t['tileZ']), c.eval(t['flagIndex']))
+                       for t in c.initializer('sBoulderFallLocations') if c.eval(t['mapHeaderID']) != 0xFFFF],
                 shadows=[flatten(c, param_fields(c, 'DistWorldGiratinaShadowTemplate'), t)
                          for t in c.initializer('sGiratinaShadowExternal')])
 
@@ -377,6 +379,9 @@ def event_scripts(c, root, evs):
         for k, vals in lst:
             if k == kind and vals:
                 out.add((hid, vals[0], 'SinnohP_%s_%d' % (names[hid][len('MAP_HEADER_'):].lower(), vals[0])))
+    b6f = header_ids(root)['MAP_HEADER_DISTORTION_WORLD_B6F']
+    for n in (5, 6, 7):   # (a boulder in its pit: DistWorldFallingBoulder_TickToCorrectPit's scripts)
+        out.add((b6f, n, 'SinnohP_distortion_world_b6f_%d' % n))
     return sorted(out)
 
 
@@ -404,7 +409,8 @@ def write(out, data):
               'static const u16 sDwConns[1][3];', '#define DW_CONN_COUNT 0', '#define DW_PLATFORM_FLAGS_START 0',
               'static const struct DwEvent sDwEvents[1];', '#define DW_EVENT_COUNT 0', 'static const struct DwCmd sDwCmds[1];',
               '#define DW_CMDS_B4F_WATERFALL 0xFFFF', '#define DW_CMDS_B5F_WATERFALL 0xFFFF', '#define DW_VAR_PROGRESS 0x4000',
-              '#define DW_FLAG_PUZZLE_FINISHED 0', '#define DW_PLATFORM_FLAG_INVALID 11',
+              '#define DW_FLAG_PUZZLE_FINISHED 0', '#define DW_PLATFORM_FLAG_INVALID 11', '#define DW_FLAG_STEPPING_STONES 0',
+              'static const struct { u16 hid; s16 x, z; s16 flag; } sDwFalls[1];', '#define DW_FALL_COUNT 0',
               'static const struct DwPerson sDwPeople[1];', '#define DW_PEOPLE_COUNT 0',
               'static const struct DwCmd sDwShadows[1];', '#define DW_SHADOW_COUNT 0',
               '#define DW_PROP_GIRATINA_SHADOW 0',
@@ -487,6 +493,14 @@ def write(out, data):
     root = tbl['root']
     o.append('#define DW_VAR_PROGRESS 0x%X   // (Platinum\'s VAR_DISTORTION_WORLD_PROGRESS: tools/sinnoh/ids.py)' % ids.var(root, 'VAR_DISTORTION_WORLD_PROGRESS'))
     o.append('#define DW_FLAG_PUZZLE_FINISHED 0x%X' % (ids.flag(root, 'FLAG_DISTORTION_WORLD_PUZZLE_FINISHED') or 0))
+    o.append('#define DW_FLAG_STEPPING_STONES 0x%X   // (B6F\'s platform 1 shows: Platinum\'s FLAG_DISTORTION_WORLD_STEPPING_STONES)'
+             % (ids.flag(root, 'FLAG_DISTORTION_WORLD_STEPPING_STONES') or 0))
+    # where a pushed boulder falls (sBoulderFallLocations: B5F's holes, B6F's pits; the pit's puzzle flag, or none)
+    o.append('#define DW_FALL_COUNT %d' % len(tbl['falls']))
+    o.append('static const struct { u16 hid; s16 x, z; s16 flag; } sDwFalls[] = {')
+    for hid, x, z, fl in tbl['falls']:
+        o.append('    {%d, %d, %d, %d},' % (hid, x, z, fl if fl < 0x8000 else -1))
+    o.append('};')
     # the scripts the events start (START_SCRIPT: the floor's script by number)
     es = event_scripts(c, tbl['root'], tbl['events'])
     for lab in sorted({e[2] for e in es}):

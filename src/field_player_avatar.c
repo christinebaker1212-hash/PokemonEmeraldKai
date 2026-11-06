@@ -876,6 +876,7 @@ static bool8 TryPushBoulder(s16 x, s16 y, u8 direction)
             y = gObjectEvents[objectEventId].currentCoords.y;
             MoveCoords(direction, &x, &y);
             if (IsBoulderHole(&gObjectEvents[objectEventId], x, y)   // Moemon Kai: FireRed's fall through a hole
+             || S3D_Dw_BoulderFallAt(x, y)   // Moemon Kai: the DISTORTION WORLD's holes and pits (src/sinnoh/s3d_distortion.c)
              || (GetCollisionAtCoords(&gObjectEvents[objectEventId], x, y, direction) == COLLISION_NONE
              && MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(x, y)) == FALSE))
             {
@@ -1663,7 +1664,7 @@ static bool8 PushBoulder_End(struct Task *task, struct ObjectEvent *player, stru
         DestroyTask(FindTaskIdByFunc(Task_PushBoulder));
         // Moemon Kai: a boulder into a hole (KANTO's SEAFOAM, VICTORY ROAD), or on a FireRed switch (VICTORY ROAD,
         // the TANOBY KEY)
-        if (!MP_BoulderFallThroughHole(boulder))
+        if (!S3D_Dw_BoulderPushed(boulder) && !MP_BoulderFallThroughHole(boulder))
             TryRunBoulderSwitchScript(boulder->currentCoords.x - MAP_OFFSET, boulder->currentCoords.y - MAP_OFFSET);
     }
     return FALSE;

@@ -334,6 +334,8 @@ void S3D_Dw_Player3DPos(u16 *x, u16 *y, u16 *z)
 // A platform on this floor is there (its flag set, or none: always)
 static bool8 Present(const struct DwMoving *m)
 {
+    if (m->hid == 580 && m->index == 1 && !FlagGet(DW_FLAG_STEPPING_STONES))
+        return FALSE;   // (B6F's platform to B7F: there once the puzzle is done, isGiratinaRoomElevator)
     return m->flag >= DW_PLATFORM_FLAG_INVALID || (PlatformFlags() & (1u << m->flag));
 }
 
@@ -1011,6 +1013,28 @@ static bool8 EventUpdate(void)
             return FALSE;
         break;
     }
+    case CMD_UXIE_TUTO:
+    case CMD_AZELF_TUTO:
+    case CMD_MESPRIT_TUTO:
+    {
+        // B5F's lake guardian over its boulder (EventCmdShow*BoulderTuto: up, hovering, off to B6F): its cry, then
+        // the tutorial seen and the guardian waiting in B6F (puzzle flags 10-12, 13-15)
+        static const u16 sSpecies[3] = {SPECIES_UXIE, SPECIES_AZELF, SPECIES_MESPRIT};
+        u8 k = c->kind - CMD_UXIE_TUTO;
+        if (sEv.state == 0)
+        {
+            S3D_Dw_AddObject(131 + k);
+            PlayCry_Normal(sSpecies[k], 0);
+            sEv.t = 0;
+            sEv.state = 1;
+        }
+        if (++sEv.t < 90)
+            return FALSE;
+        S3D_Dw_DeleteObject(131 + k);
+        SetPuzzleFlag(10 + k, TRUE);
+        SetPuzzleFlag(13 + k, TRUE);
+        break;
+    }
     case CMD_START_SCRIPT:
         // p: the floor's script number (Platinum's ScriptManager_Start: the event waits for it to end)
         if (sEv.state == 0)
@@ -1072,6 +1096,90 @@ static bool8 TileEvents(s32 x, s32 y, s32 z)
         printf("[dw] event at %d,%d,%d (%d commands)\n", x, y, z, e->ncmd);
     StartEvent(&sDwCmds[e->cmd], e->ncmd);
     return TRUE;
+}
+
+// ---- the boulder puzzle (sBoulderFallLocations, DistWorldFallingBoulder_*): STRENGTH's boulders pushed onto B5F's
+// holes fall to B6F; there, into the right pit they stay (the lake guardian there goes home), into a wrong one they
+// fall back to B5F
+static struct { u8 on, localId, dest, t; s16 flag; float off; } sFall;
+enum { FALL_B6F, FALL_PIT, FALL_WRONG };
+
+static s32 FallAt(s16 x, s16 y)
+{
+    u32 i;
+    if (sDw.floor == NULL)
+        return -1;
+    for (i = 0; i < DW_FALL_COUNT; i++)
+        if (sDwFalls[i].hid == sDw.floor->hid && sDwFalls[i].x == x - MAP_OFFSET + sDw.floor->off[0]
+         && sDwFalls[i].z == y - MAP_OFFSET + sDw.floor->off[2])
+            return i;
+    return -1;
+}
+
+bool8 S3D_Dw_BoulderFallAt(s16 x, s16 y)
+{
+    return FallAt(x, y) >= 0;
+}
+
+// (field_player_avatar.c PushBoulder_End) TRUE: the boulder falls
+bool8 S3D_Dw_BoulderPushed(struct ObjectEvent *boulder)
+{
+    s32 i = FallAt(boulder->currentCoords.x, boulder->currentCoords.y);
+    if (i < 0 || sFall.on || boulder->localId < 128 || boulder->localId > 130)
+        return FALSE;
+    sFall.on = TRUE;
+    sFall.localId = boulder->localId;
+    sFall.flag = sDwFalls[i].flag;
+    sFall.dest = sFall.flag >= 17 ? FALL_B6F : (sFall.flag >= 6 && sFall.flag <= 8 && !(PuzzleFlags() & (1u << sFall.flag))) ? FALL_PIT : FALL_WRONG;
+    sFall.t = 0;
+    sFall.off = 0;
+    LockPlayerFieldControls();
+    PlaySE(SE_FALL);
+    MPNet_Log("sinnoh dw: boulder %u falls (%s)", sFall.localId, sFall.dest == FALL_B6F ? "to B6F" : sFall.dest == FALL_PIT ? "into its pit" : "back to B5F");
+    return TRUE;
+}
+
+static void FallUpdate(void)
+{
+    u8 k = sFall.localId - 128;   // (0 MESPRIT's, 1 AZELF's, 2 UXIE's boulder)
+    if (!sFall.on)
+        return;
+    sFall.off -= sFall.dest == FALL_PIT ? (sFall.t < 8 ? 1.0f : 2.0f) : 4.0f;
+    if (++sFall.t < (sFall.dest == FALL_PIT ? 12 : 30))
+        return;
+    sFall.on = FALSE;
+    S3D_Dw_DeleteObject(sFall.localId);
+    if (sFall.dest == FALL_B6F)
+    {
+        SetPuzzleFlag(3 + k, TRUE);   // (*_BOULDER_IN_B6F_OUTSIDE)
+        SetPuzzleFlag(0 + k, FALSE);  // (*_BOULDER_IN_B5F)
+    }
+    else if (sFall.dest == FALL_WRONG)
+    {
+        SetPuzzleFlag(0 + k, TRUE);
+        SetPuzzleFlag(3 + k, FALSE);
+    }
+    else
+    {
+        // in its pit: the boulder there for good, the guardian's flag cleared and its scene (B6F's scripts 5 / 7 / 6)
+        static const u8 sGuardian[3] = {15, 14, 13}, sScript[3] = {5, 7, 6};
+        u8 p = sFall.flag - 6;   // (0 MESPRIT's pit, 1 AZELF's, 2 UXIE's)
+        u32 i;
+        SetPuzzleFlag(sFall.flag, TRUE);
+        SetPuzzleFlag(3 + k, FALSE);
+        S3D_Dw_AddObject(144 + p);
+        PlaySE(SE_M_STRENGTH);
+        SetPuzzleFlag(sGuardian[p], FALSE);
+        if ((PuzzleFlags() & (7u << 6)) == (7u << 6))
+            FlagSet(DW_FLAG_PUZZLE_FINISHED);
+        for (i = 0; i < DW_EVENT_SCRIPT_COUNT; i++)
+            if (sDwEventScripts[i].hid == 580 && sDwEventScripts[i].n == sScript[p] && sDwEventScripts[i].script)
+            {
+                ScriptContext_SetupScript(sDwEventScripts[i].script);
+                return;
+            }
+    }
+    UnlockPlayerFieldControls();
 }
 
 // ---- SURF on the platforms (Platinum's FieldMoves_CanUseSurfDistortionWorld: the tile ahead on the platform walked)
@@ -1226,6 +1334,8 @@ void S3D_Dw_DeleteObject(u8 localId)
 // CYNTHIA riding along: up and down with the elevator (s3d.c's people heights)
 static float PersonHeight(u8 localId, float h)
 {
+    if (sFall.on && localId == sFall.localId)
+        return h + sFall.off;
     if (sDw.floor != NULL && sDw.riding && sRider && localId == sRider)
     {
         // (her ground when the ride starts: the height given back is kept as the next frame's search height)
@@ -1441,6 +1551,7 @@ void S3D_Dw_Update(void)
     if (sDw.floor == NULL)
         return;
     HidePeople();
+    FallUpdate();
     if (gS3dObjectHeightHook == NULL)
         gS3dObjectHeightHook = PersonHeight;
     if (DW_HAVE_DATA)

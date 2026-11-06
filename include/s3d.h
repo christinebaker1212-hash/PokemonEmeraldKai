@@ -64,7 +64,10 @@ void S3D_Dw_AddObject(u8 localId);      // Platinum's AddDistortionWorldMapObjec
 void S3D_Dw_DeleteObject(u8 localId);   // DeleteDistortionWorldMapObject (op 31)
 void S3D_Dw_InitPersisted(void);
 bool8 S3D_Dw_FacingWater(void);         // SURF on a platform's water (field_control_avatar.c)
-void S3D_Dw_Surf(void);                 // special: the hop onto it        // InitPersistedMapFeaturesForDistortionWorld (op 29)
+void S3D_Dw_Surf(void);                 // special: the hop onto it
+struct ObjectEvent;
+bool8 S3D_Dw_BoulderFallAt(s16 x, s16 y);   // a boulder may be pushed onto a hole / pit there (map coords)
+bool8 S3D_Dw_BoulderPushed(struct ObjectEvent *boulder);   // after a push: TRUE, it falls        // InitPersistedMapFeaturesForDistortionWorld (op 29)
 void S3D_Dw_Player3DPos(u16 *x, u16 *y, u16 *z);
 void S3D_Dw_Shadow(u16 n);      // StartDistortionWorldGiratinaShadowEvent (op 32; 0xFFFF: Finish, op 33)   // GetPlayer3DPos (ops 35, 36)
 bool8 S3D_Dw_Active(void);

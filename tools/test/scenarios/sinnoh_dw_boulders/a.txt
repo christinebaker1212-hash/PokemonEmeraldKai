@@ -1,0 +1,20 @@
+pressuntil A field 5000
+mp platinumstory
+mp setvar 0x51B0 6
+wait 30
+mp warp 41,44,17,34
+wait 60
+waitfor field 1000
+wait 30
+mp setflag 0x889
+mp getvar 0x52C4
+shot o_start
+press RIGHT 2
+wait 10
+press RIGHT 12
+wait 20
+shotburst o_fall 60 6
+wait 80
+mp getvar 0x52C4
+shot o_after
+quit
