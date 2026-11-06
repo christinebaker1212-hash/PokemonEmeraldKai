@@ -169,6 +169,9 @@ void Trainers_TestCommand(const char *cmd, const char *arg);
 
 // maker_debug_ui.cpp (M4: the debugger)
 void DebuggerWindow();
+void LuaWindow();      // (M5: maker_lua_ui.cpp)
+void OpenLua();
+void Lua_TestCommand(const char *cmd, const char *arg);
 void OpenDebugger();
 void Debugger_TestCommand(const char *cmd, const char *arg);
 

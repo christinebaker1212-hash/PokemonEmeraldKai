@@ -420,6 +420,9 @@ ifeq ($(PORTABLE),1)
     OS_LFLAGS += -lstdc++
   endif
   OBJS += $(EDO_OBJS)
+  # Moemon Maker M5: Lua hooks on that same Lua (src/maker/maker_lua.cpp, built with EDOPro's flags)
+  MAKER_LUA_OBJS := $(OBJ_DIR)/src/maker/maker_lua.cpp.o
+  OBJS += $(MAKER_LUA_OBJS)
 endif
 
 # Moemon Kai: the GAME CENTER's arcade boards (arcade/: cps2recomp's CPS-2 machine, GPL-3.0, its 68000 interpreted;
@@ -592,6 +595,10 @@ $(OBJ_DIR)/fight/%.o: fight/%.c
 
 # Moemon Co-op: the EDOPro engine's objects (EDO_OBJS): C++, Lua's .c files too
 $(OBJ_DIR)/edopro/%.cpp.o: edopro/%.cpp
+	@echo "$(EDO_CXX) <edopro flags> -o $@ $<"
+	@$(EDO_CXX) $(EDO_CXXFLAGS) -MMD -MP -c $< -o $@
+$(OBJ_DIR)/src/maker/maker_lua.cpp.o: src/maker/maker_lua.cpp
+	@mkdir -p $(@D)
 	@echo "$(EDO_CXX) <edopro flags> -o $@ $<"
 	@$(EDO_CXX) $(EDO_CXXFLAGS) -MMD -MP -c $< -o $@
 $(OBJ_DIR)/edopro/%.c.o: edopro/%.c

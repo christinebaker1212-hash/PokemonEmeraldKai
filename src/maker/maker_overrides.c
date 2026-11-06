@@ -653,6 +653,18 @@ static const u8 *EventScriptOf(int map, const char *name, u8 kind)
     return Maker_EventScript_Nothing;
 }
 
+// (M5) an event of the current map by name, for a Lua hook's answer; NULL when the map has none by that name
+const u8 *Maker_MapEventScript(const char *name)
+{
+    int map = Maker_MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    struct MapEdits *e = EditsFor(map);
+    u32 i;
+    for (i = 0; e && i < e->eventCount; i++)
+        if (strcmp(e->defs[i].name, name) == 0)
+            return Maker_EventScript(Maker_Map(map)->name, name, MAKER_EVENT_ON_PERSON, e->defs[i].body);
+    return NULL;
+}
+
 static const u8 *ScriptOnMap(int map, const struct MapEvents *be, const char *label, u8 kind)
 {
     const struct MakerMapEventNames *names = Maker_MapEventNames(map);

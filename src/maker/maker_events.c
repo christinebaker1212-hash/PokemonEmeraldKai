@@ -445,6 +445,18 @@ static void Native_Log(void)   // tests: which page and line ran (VAR_0x8005: th
     MPNet_Log("maker event: line %d ran", VarGet(VAR_0x8005));
 }
 
+// (M5) `lua FUNCTION args...`: the line kept in a registry, the native reads VAR_0x8004 for which
+int MakerLua_Call(const char *line);
+static char **sLuaCalls;
+static u16 sLuaCallCount, sLuaCallCap;
+
+static void Native_Lua(void)
+{
+    u16 i = VarGet(VAR_0x8004);
+    int r = i < sLuaCallCount ? MakerLua_Call(sLuaCalls[i]) : -1;
+    gSpecialVar_Result = r < 0 ? 0 : (u16)r;
+}
+
 static void Callnative(struct Out *o, void (*fn)(void))
 {
     B1(o, MAKER_OP_CALLNATIVE);
@@ -818,6 +830,28 @@ static void Command(struct Ctx *c, char *line)
         int s = Maker_SpecialIndex("HealPlayerParty", NULL);
         B1(o, MAKER_OP_SPECIAL);
         B2(o, s < 0 ? 0 : s);
+    }
+    else if (strcmp(cmd, "lua") == 0 && n > 1)   // (M5) a Lua function of MoemonMaker/lua/: its answer in VAR_RESULT
+    {
+        char rest[512];
+        u16 i;
+        int k, len = 0;
+        rest[0] = 0;
+        for (k = 1; k < n; k++)   // (the function and its arguments, as words)
+            len += snprintf(rest + len, sizeof(rest) - len, "%s%s", k > 1 ? " " : "", w[k]);
+        for (i = 0; i < sLuaCallCount && strcmp(sLuaCalls[i], rest) != 0; i++)
+            ;
+        if (i == sLuaCallCount)
+        {
+            if (sLuaCallCount == sLuaCallCap)
+            {
+                sLuaCallCap = sLuaCallCap * 2 + 16;
+                sLuaCalls = realloc(sLuaCalls, sLuaCallCap * sizeof(*sLuaCalls));
+            }
+            sLuaCalls[sLuaCallCount++] = strdup(rest);
+        }
+        SetVar(o, VAR_0x8004, i);
+        Callnative(o, Native_Lua);
     }
     else if (strcmp(cmd, "special") == 0 && n > 1)
     {

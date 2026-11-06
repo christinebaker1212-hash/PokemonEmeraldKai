@@ -5397,6 +5397,25 @@ overnight list included M2-M5; each is easy to change if the user wants otherwis
   drops the edit, REMOVE IT for something gone. Each choice is an undo step and marks the map unsaved like any edit.
 - Test tools/test/maker_merge.sh (test commands `maker merge list|keep N|take N`).
 
+## Moemon Maker, M5: Lua hooks
+
+- MoemonMaker/lua/*.lua (the published pack's lua/ for players: tools/maker/build_pack.sh, Publish's third folder) load
+  into one Lua state, EDOPro's Lua 5.4 (src/maker/maker_lua.cpp, C++ built with EDOPro's flags: Makefile
+  MAKER_LUA_OBJS), in name order, the first time anything asks. Sandboxed and deterministic: base / string / table /
+  math only, no print, dofile, loadfile, load, require, collectgarbage, math.random; a budget of 5,000,000
+  instructions a call ("the script ran too long", the game carries on).
+- `game` (src/maker/maker_luagame.c, the C side): flag / setflag (FLAG_ names or the user's own), var / setvar, item /
+  giveitem / takeitem, money / addmoney, partycount / species(slot) / level(slot), map / x / y, random (the game's
+  Random(), so a link stays in step), log ("maker lua: ..." in the log).
+- Hooks: OnStep(x, y, map) after each player step (field_control_avatar.c; return an event's name to start that event
+  of the map: maker_overrides.c Maker_MapEventScript), OnMapEnter(map) where a map loads (overworld.c, before its
+  ON_TRANSITION script). Event line `lua FUNCTION args...` (maker_events.c: a registry read through VAR_0x8004 and a
+  native): the answer in VAR_RESULT (true 1, false / nil 0) for `if result N`.
+- The editor: Tools > Lua scripts (maker/maker_lua_ui.cpp): the files, the text, Lua's check as you type, the game's
+  last problem, what a script can use; Save reloads them in the game (MakerApi_LuaReload).
+- Test tools/test/maker_lua.sh (an event's call and branch, both hooks, the sandbox, the budget; the editor window).
+  Still to come: battle hooks (OnDamageCalc, OnMoveHit, OnSwitchIn, OnEndTurn) for custom moves and abilities.
+
 ## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
 - SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py
   STAIRS gives them Emerald's unused behaviors 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down), arrow warps

@@ -108,6 +108,7 @@ struct CableClubPlayer
 extern const struct MapLayout *const gMapLayouts[];
 extern const struct MapHeader *const *const gMapGroups[];
 
+void MakerLua_OnMapEnter(void);   // Moemon Maker M5 (src/maker/maker_lua.cpp)
 static void Overworld_ResetStateAfterWhiteOut(void);
 static void CB2_ReturnToFieldLocal(void);
 static void CB2_ReturnToFieldLink(void);
@@ -854,6 +855,7 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     SetDefaultFlashLevel();
     Overworld_ClearSavedMusic();
     Sinnoh_StoryRefresh();   // Moemon Kai: SINNOH's story people for where the story is (src/sinnoh/s3d_legends.c)
+    MakerLua_OnMapEnter();   // Moemon Maker M5: a Lua OnMapEnter hook (src/maker/maker_lua.cpp)
     RunOnTransitionMapScript();
     MP_HideForeignLegends();   // Moemon Kai: each region's legendaries only there (qz_specials.c)
     MP_JohtoBerries_Init();   // Moemon Kai: JOHTO's BERRY patches start with Crystal's BERRIES (mp_apricorn.c)
@@ -917,6 +919,7 @@ static void LoadMapFromWarp(bool32 a1)
     SetDefaultFlashLevel();
     Overworld_ClearSavedMusic();
     Sinnoh_StoryRefresh();   // Moemon Kai: SINNOH's story people for where the story is (src/sinnoh/s3d_legends.c)
+    MakerLua_OnMapEnter();   // Moemon Maker M5: a Lua OnMapEnter hook (src/maker/maker_lua.cpp)
     RunOnTransitionMapScript();
     MP_HideForeignLegends();   // Moemon Kai: each region's legendaries only there (qz_specials.c)
     MP_JohtoBerries_Init();   // Moemon Kai: JOHTO's BERRY patches start with Crystal's BERRIES (mp_apricorn.c)

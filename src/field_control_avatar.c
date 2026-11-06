@@ -206,6 +206,11 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
             MP_ResortGorgeousStep();   // Moemon Kai: FireRed's SELPHY wish timer (qz_specials.c)
             MP_KantoMassageStep();     // and DAISY's grooming
         }
+        {
+            u8 MakerLua_OnStep(void);
+            if (MakerLua_OnStep())   // Moemon Maker M5: a Lua OnStep hook started an event (src/maker/maker_lua.cpp)
+                return TRUE;
+        }
         if (TryStartStepBasedScript(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
     }

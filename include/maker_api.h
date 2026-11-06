@@ -149,6 +149,11 @@ const char *MakerApi_GameScript(const char *scriptName, int kind);
 // look", "music", "connection 0 offset", "block X Y", "event NAME"), WAS (the game's then), NOW (the edit), BASE (the
 // game's now; GONE: nothing by that key any more). Returns how many (OUT gets up to MAX).
 struct MakerStale { char key[128]; long was, now, base; int gone; };
+// (M5) Lua hooks (src/maker/maker_lua.cpp): MoemonMaker/lua/*.lua loaded again, a script's text checked ("" when it
+// compiles), the last problem the game had loading or running one ("" when none)
+void MakerApi_LuaReload(void);
+const char *MakerApi_LuaCheck(const char *name, const char *text);
+const char *MakerApi_LuaError(void);
 int MakerApi_Stale(int map, struct MakerStale *out, int max);
 int MakerApi_SpecialCount(void);
 const char *MakerApi_SpecialName(int i);

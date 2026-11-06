@@ -482,6 +482,8 @@ static void MenuBar()
             OpenDatabase();
         if (ImGui::MenuItem("Debugger..."))
             OpenDebugger();
+        if (ImGui::MenuItem("Lua scripts..."))
+            OpenLua();
         ImGui::EndMenu();
     }
     if (ImGui::BeginMenu("Help"))
@@ -878,6 +880,7 @@ static void Frame()
     TrainersWindow();
     DatabaseWindow();
     DebuggerWindow();
+    LuaWindow();
     PublishWindow();
     StatusBar();
     ClosePrompt();
@@ -1110,6 +1113,8 @@ extern "C" void MakerUi_TestCommand(const char *line)
         Events_TestCommand(c.c_str(), arg);
     else if (c == "merge")
         Merge_TestCommand(c.c_str(), arg);
+    else if (c == "lua")
+        Lua_TestCommand(c.c_str(), arg);
     else
         MapView_TestCommand(c.c_str(), arg);
 }
