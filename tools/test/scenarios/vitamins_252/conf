@@ -1,0 +1,6 @@
+# Vitamins in 1.119.0: each gives 126 EVs, up to 252 in a stat (a third PROTEIN does nothing), ZINC the same
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("IV 31 31 31 31 31 31 EV 0 126 0 0 0 0" "IV 31 31 31 31 31 31 EV 0 252 0 0 0 0" "IV 31 31 31 31 31 31 EV 0 252 0 0 0 252")
+UNEXPECT_A=("[crash]" "TIMEOUT" "EV 0 255")

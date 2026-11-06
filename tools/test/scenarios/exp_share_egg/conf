@@ -1,0 +1,9 @@
+# EXP in 1.119.0: the lead holds a LUCKY EGG (+100% now), two others hold an EXP Share: neither halves the lead's EXP,
+# and each holder gets all of it, the LUCKY EGG's doubling too (a ZIGZAGOON Lv5: 42 EXP, so 84 each)
+MODE=1
+TMO=150
+GEN=3
+ENV_A="MOEMON_DEBUG_PARTY=280:15,280:15,280:15"
+EXPECT_A=("exp: 42 from the foe, 42 each of 1 that fought (unsplit 0), EXP Share 84" "exp: slot 0 +84" "exp: slot 1 +84"
+          "exp: slot 2 +84")
+UNEXPECT_A=("[crash]" "TIMEOUT")

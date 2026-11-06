@@ -3363,6 +3363,31 @@ static u16 sMpCoopExp[3], sMpCoopShareExp[3];
 // a faint's EXP the caught Pokemon is worth (the damage dealt, 10-100%). 0 = an ordinary getexp.
 static u8 sMpCatchExpPercent;
 
+// Moemon Kai (the user, 2026-11-06): once an Elite Four is beaten, with LEVEL SCALING on, every POKéMON that fought
+// gets the whole EXP instead of a share of it
+static bool8 MpExpUnsplit(void)
+{
+    return MP_LevelScaling() && MP_Region_AnyCleared();
+}
+
+static u8 MpHoldEffectOf(u8 slot)
+{
+    u16 item = GetMonData(&gPlayerParty[slot], MON_DATA_HELD_ITEM);
+    return item == ITEM_ENIGMA_BERRY ? gSaveBlock1Ptr->enigmaBerry.holdEffect : GetItemHoldEffect(item);
+}
+
+// Moemon Kai: EXP Share holders get all the EXP a POKéMON that fought got (each of them: several don't split it),
+// doubled when one that fought (of SLOTS FIRST..FIRST + COUNT - 1) holds a LUCKY EGG
+static u16 MpExpShareFor(u16 battlerExp, s32 sentIn, u8 first, u8 count)
+{
+    u8 i;
+    for (i = first; i < first + count; i++)
+        if ((gBitTable[i] & sentIn) && GetMonData(&gPlayerParty[i], MON_DATA_HP) != 0
+         && MpHoldEffectOf(i) == HOLD_EFFECT_LUCKY_EGG)
+            return min(0xFFFF, battlerExp * 2);
+    return battlerExp;
+}
+
 static void MpCoopSplitExp(u16 calculatedExp, s32 sentIn)
 {
     u8 owner, i, size = MP_Coop_SeatSize();   // 3 per player, 2 in a triple
@@ -3383,16 +3408,9 @@ static void MpCoopSplitExp(u16 calculatedExp, s32 sentIn)
             if (holdEffect == HOLD_EFFECT_EXP_SHARE)
                 viaExpShare++;
         }
-        if (viaExpShare)
-        {
-            sMpCoopExp[owner] = max(1, SAFE_DIV(calculatedExp / 2, viaSentIn));
-            sMpCoopShareExp[owner] = max(1, calculatedExp / 2 / viaExpShare);
-        }
-        else
-        {
-            sMpCoopExp[owner] = max(1, SAFE_DIV(calculatedExp, viaSentIn));
-            sMpCoopShareExp[owner] = 0;
-        }
+        // (Moemon Kai: no halving for the EXP Share; the whole EXP to each one that fought after the League)
+        sMpCoopExp[owner] = max(1, viaSentIn == 0 || MpExpUnsplit() ? calculatedExp : calculatedExp / viaSentIn);
+        sMpCoopShareExp[owner] = viaExpShare ? MpExpShareFor(sMpCoopExp[owner], sentIn, owner * size, size) : 0;
     }
 }
 
@@ -3434,10 +3452,10 @@ static void MpCoopExpBegin(s32 sentIn, u8 fainted)
         if (!(sentIn & gBitTable[slot]) && holdEffect != HOLD_EFFECT_EXP_SHARE)
             continue;
         gain = (sentIn & gBitTable[slot]) ? sMpCoopExp[owner] : 0;
-        if (holdEffect == HOLD_EFFECT_EXP_SHARE)
-            gain += sMpCoopShareExp[owner];
+        if (holdEffect == HOLD_EFFECT_EXP_SHARE && !(sentIn & gBitTable[slot]))   // (one that fought: its own)
+            gain = sMpCoopShareExp[owner];
         if (holdEffect == HOLD_EFFECT_LUCKY_EGG)
-            gain = gain * 150 / 100;
+            gain = gain * 2;   // Moemon Kai: +100% (Gen 3: +50%)
         if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
             gain = gain * 150 / 100;
         if (MP_Coop_IsTradedMon(slot))
@@ -3691,23 +3709,15 @@ static void Cmd_getexp(void)
             if (gMpCoopBattle)
                 MpCoopSplitExp(calculatedExp, sentIn);
 
-            if (viaExpShare) // at least one mon is getting exp via exp share
-            {
-                *exp = SAFE_DIV(calculatedExp / 2, viaSentIn);
-                if (*exp == 0)
-                    *exp = 1;
-
-                gExpShareExp = calculatedExp / 2 / viaExpShare;
-                if (gExpShareExp == 0)
-                    gExpShareExp = 1;
-            }
-            else
-            {
-                *exp = SAFE_DIV(calculatedExp, viaSentIn);
-                if (*exp == 0)
-                    *exp = 1;
-                gExpShareExp = 0;
-            }
+            // Moemon Kai: the EXP Share no longer halves anything: each holder gets what one that fought got (with
+            // its LUCKY EGG), and after the League with LEVEL SCALING on each one that fought gets the whole EXP
+            *exp = MpExpUnsplit() ? calculatedExp : SAFE_DIV(calculatedExp, viaSentIn);
+            if (*exp == 0)
+                *exp = 1;
+            gExpShareExp = viaExpShare ? MpExpShareFor(viaSentIn ? *exp : calculatedExp, sentIn, 0, PARTY_SIZE) : 0;
+            if (!gMpCoopBattle)
+                MPNet_Log("exp: %d from the foe, %d each of %d that fought (unsplit %d), EXP Share %d", calculatedExp,
+                          *exp, (int)viaSentIn, MpExpUnsplit(), gExpShareExp);
 
             gBattleScripting.getexpState++;
             gBattleStruct->expGetterMonId = 0;
@@ -3767,10 +3777,10 @@ static void Cmd_getexp(void)
                     else
                         gBattleMoveDamage = 0;
 
-                    if (holdEffect == HOLD_EFFECT_EXP_SHARE)
-                        gBattleMoveDamage += gExpShareExp;
+                    if (holdEffect == HOLD_EFFECT_EXP_SHARE && !(gBattleStruct->sentInPokes & 1))
+                        gBattleMoveDamage = gExpShareExp;   // (Moemon Kai: one that fought keeps its own)
                     if (holdEffect == HOLD_EFFECT_LUCKY_EGG)
-                        gBattleMoveDamage = (gBattleMoveDamage * 150) / 100;
+                        gBattleMoveDamage = gBattleMoveDamage * 2;   // Moemon Kai: +100% (Gen 3: +50%)
                     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
                         gBattleMoveDamage = (gBattleMoveDamage * 150) / 100;
 
@@ -3825,6 +3835,8 @@ static void Cmd_getexp(void)
                     PREPARE_STRING_BUFFER(gBattleTextBuff2, i);
                     PREPARE_WORD_NUMBER_BUFFER(gBattleTextBuff3, 5, gBattleMoveDamage);
 
+                    if (!gMpCoopBattle)
+                        MPNet_Log("exp: slot %d +%d", gBattleStruct->expGetterMonId, (int)gBattleMoveDamage);
                     if (gMpCoopBattle)
                         MPNet_Log("co-op exp: slot %d +%d (bonus %d%%)", gBattleStruct->expGetterMonId,
                                   (int)gBattleMoveDamage, MP_Coop_ExpBonusFor(gBattleStruct->expGetterMonId));
@@ -7163,10 +7175,10 @@ static void Cmd_various(void)
         return;
     case VARIOUS_MP_CATCH_EXP:
     {
-        // Moemon Co-op: the caught Pokemon gives EXP like a faint, scaled by the damage dealt (at least 10%)
+        // Moemon Co-op: the caught Pokemon gives EXP like a faint (Moemon Kai, the user 2026-11-06: all of it, however
+        // much HP it had left; before, the share of its HP knocked off, at least 10%)
         u32 maxHP = gBattleMons[gBattlerTarget].maxHP, hp = gBattleMons[gBattlerTarget].hp;
-        u32 percent = maxHP ? (maxHP - min(hp, maxHP)) * 100 / maxHP : 100;
-        sMpCatchExpPercent = max(10, min(100, percent));
+        sMpCatchExpPercent = 100;
         MPNet_Log("catch exp: hp %u/%u, %u%% of a faint", (unsigned)hp, (unsigned)maxHP, (unsigned)sMpCatchExpPercent);
         break;
     }

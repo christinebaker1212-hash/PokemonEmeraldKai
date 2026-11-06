@@ -550,15 +550,15 @@ Battle emotes: MP_BattleOverlay_Composite repaints the pick and bubbles over the
 
 ## Catch EXP (H3)
 
-A caught Pokemon gives EXP like a faint, scaled by the damage dealt: (maxHP - HP) * 100 / maxHP, at least 10%
-(a full-HP catch) and 100% at most (data/battle_scripts_2.s BattleScript_MpCatchExp, called right after "Gotcha!" in
+A caught Pokemon gives EXP like a faint: since 1.119.0 all of it (the user, 2026-11-06), however much HP it had
+(before: scaled by the damage dealt, (maxHP - HP) * 100 / maxHP, 10% to 100%) (data/battle_scripts_2.s BattleScript_MpCatchExp, called right after "Gotcha!" in
 BattleScript_PrintCaughtMonInfo, BattleScript_MpCoopBallCaught and ...GoOn; GENESIS / EPOCH BALLS use the same
 scripts). VARIOUS_MP_CATCH_EXP sets sMpCatchExpPercent (log "catch exp: hp H/M, P% of a faint"); Cmd_getexp scales
 calculatedExp by it before the co-op split, so in co-op everyone gets a share as after a faint, and leaves the music
 alone (MUS_CAUGHT is playing, no wild victory song); state 6 clears it. getexp's own rules still apply (no EXP in the
 Safari Zone or link battles; EVs too). Level-ups from it evolve after the battle: FreeResetData_ReturnToOvOrDoEvolutions
-and mp_coop.c OutcomeEvolves accept B_OUTCOME_CAUGHT as well as WON. Tests: catch_exp (solo, full HP = 10%, Torchic
-evolves), coop_catch_exp (lag, 1 HP = 95%, both evolve).
+and mp_coop.c OutcomeEvolves accept B_OUTCOME_CAUGHT as well as WON. Tests: catch_exp (solo, full HP = 100%, Torchic
+evolves), coop_catch_exp (lag, both evolve).
 
 ## BATTLE FLAG phrases and prize (H4, protocol 40: mp_trainer.c, mp_battle.c, item_use.c)
 
@@ -3272,6 +3272,27 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   answered "It won't have any effect" for all of them. pokemon.c: an item whose field use is
   ItemUseOutOfBattle_EvolutionStone and has no table entry evolves by GetEvolutionTargetSpecies(EVO_MODE_ITEM_USE)
   the way ITEM4_EVO_STONE does. `mp useitemon SLOT ITEM` uses an item as the party menu does. Test evo_items_use.
+
+## EXP, vitamins and the TRAINING MOEGATCHA (1.119.0)
+
+The user's numbers (2026-11-06), battle_script_commands.c Cmd_getexp / MpCoopSplitExp / MpCoopExpBegin:
+- LUCKY EGG: +100% (Gen 3: +50%).
+- EXP Share: nothing is halved any more. Each holder that didn't fight gets what one that fought got (MpExpShareFor),
+  doubled when one that fought holds a LUCKY EGG; several holders each get all of it. One that fought and holds an
+  EXP Share gets only its own. In co-op the same per player (their own seats).
+- After an Elite Four (MP_Region_AnyCleared) with LEVEL SCALING on (MP_LevelScaling: the host's online),
+  MpExpUnsplit: each POKéMON that fought gets the whole EXP instead of a share. No other EXP cut exists under level
+  scaling ("EXP is normal for the level they are": mp_levelscale.c); the split among the ones that fought was the
+  only proration.
+- Catch EXP: 100% of a faint (above).
+- Vitamins: 126 EVs each (ITEM6_ADD_EV; it fits the s8 the item code reads), up to 252 a stat
+  (EV_ITEM_RAISE_LIMIT); 510 in all as before.
+- TRAINING MOEGATCHA (mp_gatcha.c): every vitamin / RARE CANDY prize and the VITAMIN SET come with 3-5 more
+  (TrainingBonusDef, decided in RollPrizes as a copy in sRandDefs, log "gatcha: training bonus, xN"), and their
+  weights went up in every pool. The pull's "gatcha: results" line names such prizes -1 (it overran its buffer and
+  crashed with them before).
+- Logs "exp: W from the foe, E each of N that fought (unsplit U), EXP Share S" and "exp: slot N +X" (solo).
+  `mp gatchapull BANNER` 10-pulls as the phone does. Tests exp_share_egg, exp_unsplit, vitamins_252, gatcha_training.
 
 ## IV stars and EVs on the STATS page (1.118.0)
 

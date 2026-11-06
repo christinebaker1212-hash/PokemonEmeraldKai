@@ -549,32 +549,33 @@ void MP_Gatcha_SetDay(s32 day)
 
 // TRAINING banner: build your Moemon up
 static const struct PrizeDef sTrainCommon[] = {
-    ITEM(ITEM_RARE_CANDY, 1, 14), ITEM(ITEM_HP_UP, 1, 6), ITEM(ITEM_PROTEIN, 1, 6), ITEM(ITEM_IRON, 1, 6),
-    ITEM(ITEM_CALCIUM, 1, 6), ITEM(ITEM_ZINC, 1, 6), ITEM(ITEM_CARBOS, 1, 6),
+    // (vitamins and RARE CANDIES: 3-5 more with every one of them, TrainingBonusDef)
+    ITEM(ITEM_RARE_CANDY, 1, 24), ITEM(ITEM_HP_UP, 1, 10), ITEM(ITEM_PROTEIN, 1, 10), ITEM(ITEM_IRON, 1, 10),
+    ITEM(ITEM_CALCIUM, 1, 10), ITEM(ITEM_ZINC, 1, 10), ITEM(ITEM_CARBOS, 1, 10),
 };
 static const struct PrizeDef sTrainUncommon[] = {
-    ITEM(ITEM_RARE_CANDY, 1, 14), ITEM(ITEM_HP_UP, 2, 5), ITEM(ITEM_PROTEIN, 2, 5), ITEM(ITEM_IRON, 2, 5),
-    ITEM(ITEM_CALCIUM, 2, 5), ITEM(ITEM_ZINC, 2, 5), ITEM(ITEM_CARBOS, 2, 5), ITEM(ITEM_PP_UP, 1, 8),
+    ITEM(ITEM_RARE_CANDY, 1, 24), ITEM(ITEM_HP_UP, 2, 9), ITEM(ITEM_PROTEIN, 2, 9), ITEM(ITEM_IRON, 2, 9),
+    ITEM(ITEM_CALCIUM, 2, 9), ITEM(ITEM_ZINC, 2, 9), ITEM(ITEM_CARBOS, 2, 9), ITEM(ITEM_PP_UP, 1, 6),
 };
 static const struct PrizeDef sTrainRare[] = {
-    ITEM(ITEM_RARE_CANDY, 2, 14), ITEM(ITEM_HP_UP, 5, 3), ITEM(ITEM_PROTEIN, 5, 3), ITEM(ITEM_IRON, 5, 3),
-    ITEM(ITEM_CALCIUM, 5, 3), ITEM(ITEM_ZINC, 5, 3), ITEM(ITEM_CARBOS, 5, 3), ITEM(ITEM_PP_UP, 3, 8),
-    ITEM(ITEM_LUCKY_EGG, 1, 5), ITEM(ITEM_MACHO_BRACE, 1, 5), ITEM(ITEM_EXP_SHARE, 1, 5),
+    ITEM(ITEM_RARE_CANDY, 2, 22), ITEM(ITEM_HP_UP, 5, 6), ITEM(ITEM_PROTEIN, 5, 6), ITEM(ITEM_IRON, 5, 6),
+    ITEM(ITEM_CALCIUM, 5, 6), ITEM(ITEM_ZINC, 5, 6), ITEM(ITEM_CARBOS, 5, 6), ITEM(ITEM_PP_UP, 3, 6),
+    ITEM(ITEM_LUCKY_EGG, 1, 4), ITEM(ITEM_MACHO_BRACE, 1, 4), ITEM(ITEM_EXP_SHARE, 1, 4),
     // GEN 4 on: the POWER items, each training one stat
     ITEM(ITEM_POWER_WEIGHT, 1, 2), ITEM(ITEM_POWER_BRACER, 1, 2), ITEM(ITEM_POWER_BELT, 1, 2),
     ITEM(ITEM_POWER_LENS, 1, 2), ITEM(ITEM_POWER_BAND, 1, 2), ITEM(ITEM_POWER_ANKLET, 1, 2),
 };
 static const struct PrizeDef sTrainSuper[] = {
-    ITEM(ITEM_RARE_CANDY, 4, 14), ITEM(ITEM_PP_MAX, 3, 10), SET(SET_VITAMINS, 1, 12),
+    ITEM(ITEM_RARE_CANDY, 4, 20), ITEM(ITEM_PP_MAX, 3, 8), SET(SET_VITAMINS, 1, 18),
 };
 static const struct PrizeDef sTrainSSuper[] = {
-    ITEM(ITEM_RARE_CANDY, 6, 12), SET(SET_VITAMINS, 2, 10), ITEM(ITEM_PP_MAX, 5, 8),
+    ITEM(ITEM_RARE_CANDY, 6, 18), SET(SET_VITAMINS, 2, 16), ITEM(ITEM_PP_MAX, 5, 6),
 };
 static const struct PrizeDef sTrainUltra[] = {
-    ITEM(ITEM_RARE_CANDY, 10, 10), SET(SET_VITAMINS, 2, 10), ITEM(ITEM_PP_MAX, 10, 6),
+    ITEM(ITEM_RARE_CANDY, 10, 16), SET(SET_VITAMINS, 2, 16), ITEM(ITEM_PP_MAX, 10, 5),
 };
 static const struct PrizeDef sTrainEx[] = {
-    ITEM(ITEM_RARE_CANDY, 15, 10), SET(SET_VITAMINS, 3, 10), ITEM(ITEM_PP_MAX, 25, 6),
+    ITEM(ITEM_RARE_CANDY, 15, 16), SET(SET_VITAMINS, 3, 16), ITEM(ITEM_PP_MAX, 25, 5),
 };
 
 // BALL banner: special and hard-to-find POKé BALLS
@@ -2987,6 +2988,22 @@ static void TellFriends(const struct Result *r)
 
 // The prizes of COUNT pulls on the banner shown (sBanner), rolled and given: the pity counts, the 10-pull's R+,
 // random Moemon and ball pieces decided now, the achievements, the save after (the reel and the phone both)
+// A vitamin, a RARE CANDY or the VITAMIN SET (the TRAINING banner's 3-5 extra)
+static bool8 TrainingBonusDef(const struct PrizeDef *def)
+{
+    u8 i;
+    if (def->kind == K_SET)
+        return def->id == SET_VITAMINS;
+    if (def->kind != K_ITEM)
+        return FALSE;
+    if (def->id == ITEM_RARE_CANDY)
+        return TRUE;
+    for (i = 0; i < ARRAY_COUNT(sSets[SET_VITAMINS]); i++)
+        if (sSets[SET_VITAMINS][i] == def->id)
+            return TRUE;
+    return FALSE;
+}
+
 static u8 RollPrizes(struct Result *results, u8 count)
 {
     u8 i, best = 0;
@@ -3015,6 +3032,14 @@ static u8 RollPrizes(struct Result *results, u8 count)
             sRandDefs[i].qty = MP_BallUnlock_PrizeCount() ? 1 + Random() % MP_BallUnlock_PrizeCount() : 0;
             r->def = &sRandDefs[i];
         }
+        else if (sBanner == BANNER_TRAINING && TrainingBonusDef(r->def))
+        {
+            // TRAINING: every vitamin and RARE CANDY prize (a VITAMIN SET: each of the six) comes with 3-5 more
+            sRandDefs[i] = *r->def;
+            sRandDefs[i].qty += 3 + Random() % 3;
+            r->def = &sRandDefs[i];
+            MPNet_Log("gatcha: training bonus, x%u", (unsigned)sRandDefs[i].qty);
+        }
         GivePrize(r);
         if (r->rarity >= R_R)
             gotRare = TRUE;
@@ -3023,11 +3048,17 @@ static u8 RollPrizes(struct Result *results, u8 count)
     }
     MPNet_Log("gatcha: %d pull(s), best rarity %d", count, results[best].rarity);
     {
-        char list[96];
+        // (a prize decided at the pull, sRandDefs: its pool entry's number; the list never runs past its end)
+        char list[160];
         int at = 0;
-        for (i = 0; i < count; i++)
-            at += snprintf(list + at, sizeof(list) - at, " %s:%d", sRarityShort[results[i].rarity],
-                           (int)(results[i].def - BannerPool(results[i].rarity)->defs));
+        list[0] = 0;
+        for (i = 0; i < count && at < (int)sizeof(list) - 1; i++)
+        {
+            const struct Pool *pool = BannerPool(results[i].rarity);
+            const struct PrizeDef *def = results[i].def;
+            int index = def >= pool->defs && def < pool->defs + pool->count ? (int)(def - pool->defs) : -1;
+            at += snprintf(list + at, sizeof(list) - at, " %s:%d", sRarityShort[results[i].rarity], index);
+        }
         MPNet_Log("gatcha: results%s", list);
     }
     // achievements: pulls made, and the rarest prize

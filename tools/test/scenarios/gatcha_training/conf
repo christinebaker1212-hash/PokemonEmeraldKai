@@ -1,0 +1,8 @@
+# The TRAINING MOEGATCHA in 1.119.0: every vitamin or RARE CANDY prize comes with 3-5 more (check.sh: each bonus line
+# says at least x4), and they come up more often (two 10-pulls: most of the 20 prizes are bonus ones)
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("gatchapull: ok, 10 prizes" "gatcha: training bonus, x")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="tools/test/scenarios/gatcha_training/check.sh"

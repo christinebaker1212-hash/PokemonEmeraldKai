@@ -1,0 +1,9 @@
+# After an Elite Four with LEVEL SCALING on (1.119.0): two POKéMON fought the wild one (the lead, then a switch), and
+# each gets the whole EXP instead of half (the log's "unsplit 1"; check.sh: both got the foe's full amount)
+MODE=1
+TMO=150
+GEN=3
+ENV_A="MOEMON_DEBUG_PARTY=280:15,280:15 MOEMON_LEVEL_SCALING=1"
+EXPECT_A=("of 2 that fought (unsplit 1)" "exp: slot 0 +" "exp: slot 1 +")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="tools/test/scenarios/exp_unsplit/check.sh"

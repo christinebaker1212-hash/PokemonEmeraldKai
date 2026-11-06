@@ -1,0 +1,6 @@
+pressuntil A field 5000
+mp gatchapull 2
+wait 10
+mp gatchapull 2
+wait 10
+quit

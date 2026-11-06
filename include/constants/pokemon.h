@@ -204,7 +204,7 @@
 #define USE_RANDOM_IVS (MAX_PER_STAT_IVS + 1)
 #define MAX_PER_STAT_EVS 255
 #define MAX_TOTAL_EVS 510
-#define EV_ITEM_RAISE_LIMIT 100
+#define EV_ITEM_RAISE_LIMIT 252   // Moemon Kai: vitamins up to 252 a stat (Gen 3: 100)
 
 // Battle move flags
 #define FLAG_MAKES_CONTACT          (1 << 0)

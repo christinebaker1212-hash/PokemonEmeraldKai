@@ -1,0 +1,19 @@
+pressuntil A field 5000
+mp ivev 0 31 31 31 31 31 31 0 0 0 0 0 0
+mp useitemon 0 64
+wait 30
+mp ivev 0
+mp useitemon 0 64
+wait 30
+mp ivev 0
+mp useitemon 0 64
+wait 30
+mp ivev 0
+mp useitemon 0 70
+wait 30
+mp useitemon 0 70
+wait 30
+mp useitemon 0 70
+wait 30
+mp ivev 0
+quit

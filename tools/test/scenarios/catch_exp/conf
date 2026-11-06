@@ -1,7 +1,7 @@
-# Catch EXP solo: a MASTER BALL at a full-HP ZIGZAGOON is worth 10% of a faint's EXP, enough for the lead TORCHIC
+# Catch EXP solo: a MASTER BALL at a full-HP ZIGZAGOON is worth all of a faint's EXP (1.119.0; 10% before), enough for the lead TORCHIC
 # (one point short of Lv16) to grow, and it evolves after the battle like after a win
 MODE=1
 TMO=150
 ENV_A="MOEMON_DEBUG_PARTY=280:15+"
-EXPECT_A=("10% of a faint" "[test] party: 281(")
+EXPECT_A=("100% of a faint" "[test] party: 281(")
 CHECK="tools/test/scenarios/catch_exp/check.sh"

@@ -2776,6 +2776,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_MonArt_Check(void);
         MP_MonArt_Check();
     }
+    else if (strcmp(cmd, "gatchapull") == 0)
+    {
+        // gatchapull BANNER - a 10-pull on a banner (0 STANDARD, 1 PICKUP, 2 TRAINING, 3 BALLS), as the phone does
+        void MP_Gatcha_AddPulls(s32 n);
+        struct MpGatchaPrize got[10];
+        u8 n = 0;
+        MP_Gatcha_AddPulls(10);
+        const char *res = MP_Gatcha_PhonePull(atoi(arg), 4, got, &n);
+        MPNet_Log("gatchapull: %s, %d prizes", res ? res : "ok", n);   // (NULL: done)
+    }
     else if (strcmp(cmd, "gatchadump") == 0)
     {
         // gatchadump - every banner's prizes at the GENERATION (mp gen N first to pick one)

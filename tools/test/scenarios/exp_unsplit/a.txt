@@ -1,0 +1,27 @@
+pressuntil A field 5000
+mp regionclear 0
+mp wild 288:5
+pressuntil A action 3000
+wait 10
+press DOWN 1
+wait 10
+press A 1
+waitfor partymenu 600
+wait 30
+press RIGHT 1
+wait 10
+press A 1
+wait 30
+press A 1
+pressuntil A action 3000
+wait 10
+mp foehp 1
+press UP 1
+press LEFT 1
+wait 10
+press A 1
+wait 20
+press A 1
+pressuntillog A 6000 exp: slot 1 +
+pressuntil A field 9000
+quit
