@@ -261,6 +261,12 @@ void LaunchBattleAnimation(const u8 *const animsTable[], u16 tableId, bool8 isMo
     sBattleAnimScriptPtr = animsTable[tableId];
     gAnimScriptActive = TRUE;
     MP_ModernAnim_Begin(animsTable, tableId);   // Moemon Co-op: BATTLE ANIMS > MODERN draws over it
+    {
+        const u8 *MP_MakerAnim_Begin(const u8 *const table[], u16 id);
+        const u8 *replaced = MP_MakerAnim_Begin(animsTable, tableId);   // Moemon Maker: a move's own animation (maker_anims.c)
+        if (replaced)
+            sBattleAnimScriptPtr = replaced;
+    }
     sAnimFramesToWait = 0;
     sAnimCallDepth = 0;
     gAnimScriptCallback = RunAnimScriptCommand;

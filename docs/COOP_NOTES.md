@@ -5437,6 +5437,23 @@ overnight list included M2-M5; each is easy to change if the user wants otherwis
   GRASS, saves; the game reads the new behavior there (`mp behaviorat X,Y`); a stale edit is left out). Still to come:
   drawing the tiles' pixels and palettes.
 
+## Moemon Maker, M5: the animation timeline
+
+- Tools > Animations (maker/maker_anims_ui.cpp): a move's own animation, one row an element on a timeline (bars from a
+  first frame for a length, dragged to move), the header line (`anim MOVE_X frames=N replace=0|1`) and the picked line
+  to edit, ADD buttons (Sound, Flash, Shake, Ring, Burst, Beam, Image), and a preview on a stand-in battle scene
+  (MakerApi_AnimPreview) that plays or steps.
+- MoemonMaker/anims/MOVE_X.txt (+ PNGs beside it): `sound START SE_X`, `flash START LEN RRGGBB STRENGTH`, `shake START
+  LEN attacker|target AMOUNT`, `ring START LEN WHERE RRGGBB R0 R1`, `burst START LEN WHERE RRGGBB COUNT`, `beam START
+  LEN RRGGBB WIDTH`, `image START LEN FILE.png FROM TO [SCALE%]` (WHERE / FROM / TO: attacker, target, center, X,Y).
+- src/maker/maker_anims.c: battle_anim.c asks MP_MakerAnim_Begin as a move's animation starts; replace=1 swaps the
+  Classic script for a generated wait of the animation's frames (delay 0x04 n ... end 0x08), so every game of a link
+  waits the same; replace=0 draws over the Classic one. sdl2.c's MP_MakerAnim_Composite draws the elements over the
+  finished picture after MODERN (positions from GetBattlerSpriteCoord), plays the sounds on their frames and shakes a
+  Pokemon by its sprite's x2 (put back after). Publish and the pack carry anims/.
+- Test tools/test/maker_anims.sh (SCRATCH's animation replaced in a wild battle, starts and ends, the battle goes on;
+  the editor makes EMBER's and saves it).
+
 ## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
 - SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py
   STAIRS gives them Emerald's unused behaviors 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down), arrow warps

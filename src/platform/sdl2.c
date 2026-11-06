@@ -935,6 +935,10 @@ void VDraw(void)
         MP_DayTint_Update();             // Moemon Kai: Platinum's time-of-day tint outside SINNOH (mp_daytint.c)
     }
     MP_ModernAnim_Composite(image);      // ... BATTLE ANIMS > MODERN: glows, trails and impacts over the animation
+    {
+        void MP_MakerAnim_Composite(u16 *frame);
+        MP_MakerAnim_Composite(image);   // ... Moemon Maker: a move's own animation (src/maker/maker_anims.c)
+    }
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)

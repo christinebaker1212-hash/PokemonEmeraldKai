@@ -159,6 +159,10 @@ int MakerApi_TilesetBase(const char *name, int id, int slot);
 int MakerApi_TilesetSkipped(const char *name);
 void MakerApi_RenderTile(int entry, unsigned int *rgba);   // 8x8 RGBA of one tile entry, as the loaded map's tiles show it
 const char *MakerApi_BehaviorName(int behavior);           // MB_ name, "" when none
+// (M5) move animations (src/maker/maker_anims.c): loaded again from MoemonMaker/anims; frame FRAME of an animation's text
+// on a stand-in scene (240x160 RGBA), returning its frame count (0: the text isn't an animation)
+void MakerApi_AnimReload(void);
+int MakerApi_AnimPreview(const char *text, int frame, unsigned int *rgba);
 const char *MakerApi_LuaCheck(const char *name, const char *text);
 const char *MakerApi_LuaError(void);
 int MakerApi_Stale(int map, struct MakerStale *out, int max);
