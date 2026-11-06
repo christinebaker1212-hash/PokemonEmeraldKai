@@ -546,7 +546,7 @@ static void ParseCard(int id, char *text)
         else if (strcmp(line, "S") == 0)
             Mtg_ParseStatic(c, id, val);
         else if (strcmp(line, "R") == 0)
-            Unsupported(c, "replacement effect");
+            Mtg_ParseReplacement(c, id, val);
         else if (strcmp(line, "AlternateMode") == 0)
             Unsupported(c, "AlternateMode");
         else if (strcmp(line, "Color") == 0) {

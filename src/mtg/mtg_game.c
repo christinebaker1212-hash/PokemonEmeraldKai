@@ -145,6 +145,8 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
         p->library[p->libraryCount++] = (uint16_t)obj;
     }
     Mtg_Event(d, MTG_EV_ZONE, obj, from, zone);
+    if (zone == MTG_ZONE_BATTLEFIELD && Mtg_StaticForbids(d, MTG_STATIC_ETB_TAPPED, obj, MTG_NO_OBJ))
+        Mtg_Tap(d, obj, 1);   // (it enters tapped: ETBTapped)
     if (from != MTG_ZONE_BATTLEFIELD)
         Mtg_CheckTriggers(d, &ev);
 }
@@ -247,6 +249,18 @@ void Mtg_Destroy(MtgDuel *d, int obj, int noRegen)
     Mtg_MoveTo(d, obj, MTG_ZONE_GRAVEYARD);   // (indestructible: not yet)
 }
 
+// the protection an Aura gives its own creature (WHITE WARD's from white: it doesn't push itself off)
+static uint8_t Mtg_AuraOwnProtection(int def)
+{
+    const MtgCardDef *c = Mtg_Card(def);
+    uint8_t p = 0;
+    int k;
+    for (k = 0; k < c->staticCount; k++)
+        if (gMtgStatics[c->statics[k]].enchanted)
+            p |= gMtgStatics[c->statics[k]].addProtection;
+    return p;
+}
+
 // GameAction.checkStateEffects
 static void StateBasedActions(MtgDuel *d)
 {
@@ -270,7 +284,7 @@ static void StateBasedActions(MtgDuel *d)
             if (o->zone != MTG_ZONE_BATTLEFIELD || !Mtg_Card(o->def)->enchant)
                 continue;
             if (to == MTG_NO_OBJ || to >= d->objCount || !IsCreature(d, to)
-                || (Mtg_Protection(d, to) & Mtg_ObjColors(d, i))) {
+                || (Mtg_Protection(d, to) & Mtg_ObjColors(d, i) & ~Mtg_AuraOwnProtection(o->def))) {
                 Mtg_MoveTo(d, i, MTG_ZONE_GRAVEYARD);
                 again = 1;
             }
@@ -963,7 +977,8 @@ static int StartStep(MtgDuel *d)
     case MTG_STEP_UNTAP:
         for (i = 0; i < d->objCount; i++)
             if (d->objs[i].controller == d->active && d->objs[i].zone == MTG_ZONE_BATTLEFIELD) {
-                Mtg_Tap(d, i, 0);
+                if (!d->objs[i].tapped || !Mtg_StaticForbids(d, MTG_STATIC_NO_UNTAP, i, MTG_NO_OBJ))
+                    Mtg_Tap(d, i, 0);
                 d->objs[i].sick = 0;
             }
         break;

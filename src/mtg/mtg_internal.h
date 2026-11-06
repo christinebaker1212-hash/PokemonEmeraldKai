@@ -107,7 +107,8 @@ void Mtg_Unsupported(MtgCardDef *c, const char *why);
 // mtg_static.c: static abilities (StaticAbilityContinuous.java: power, toughness, keywords of what they affect)
 #define MTG_STATIC_NO_SET (-1000)
 enum { MTG_STATIC_CONTINUOUS, MTG_STATIC_CANT_BLOCK, MTG_STATIC_CANT_ATTACK, MTG_STATIC_CANT_BLOCK_BY,
-       MTG_STATIC_RAISE_COST, MTG_STATIC_REDUCE_COST };
+       MTG_STATIC_RAISE_COST, MTG_STATIC_REDUCE_COST,
+       MTG_STATIC_ETB_TAPPED, MTG_STATIC_NO_UNTAP };   // (two replacement effects, R: lines, kept here: they test alike)
 typedef struct {
     uint16_t card;
     uint8_t mode;                   // MTG_STATIC_*
@@ -119,6 +120,7 @@ typedef struct {
     uint8_t presentOp;              // 0 GE, 1 EQ, 2 LE
     uint8_t presentNum;
     int8_t addPower, addToughness;
+    const char *powerX, *toughX;    // AddPower$ X / AddToughness$ -X: an SVar counted now (Count$Valid ..., Number$)
     int16_t setPower, setToughness; // MTG_STATIC_NO_SET: none
     uint32_t addKeywords;
     uint8_t addLandwalk, addProtection;
@@ -132,6 +134,7 @@ typedef struct {
 } MtgStaticMods;
 extern MtgStatic *gMtgStatics;
 void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text);
+void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text);   // R: lines (only the forms above)
 void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m);
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other);
 void Mtg_SpellCost(const MtgDuel *d, int player, int obj, MtgManaCost *out);   // its mana cost with Raise / ReduceCost   // CantBlock / CantAttack (obj), CantBlockBy

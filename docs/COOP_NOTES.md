@@ -5936,6 +5936,16 @@ the most). Each table now shows a move before it's made and holds what happened 
   and the AI never picks more than the question's max (it picked all three for "1 Tribute": tools/ygo/test_edo.c
   duel 4).
 
+## MAGIC's lands that enter tapped, "doesn't untap", counted statics (1.125.0)
+- Two replacement forms read by mtg_static.c Mtg_ParseReplacement into MtgStatic modes: MTG_STATIC_ETB_TAPPED
+  (`R:Event$ Moved | Destination$ Battlefield | ReplaceWith$` an SVar `DB$ Tap | ... | ETB$ True`; ValidCard$
+  Card.Self, or another card's spec with ActiveZones$ Battlefield: KISMET) checked in Mtg_MoveTo, and
+  MTG_STATIC_NO_UNTAP (`Event$ Untap | Layer$ CantHappen | ValidStepTurnToController$ You`) checked in the untap
+  step. Every other R: form still keeps a card out.
+- Statics: AddPower$ / AddToughness$ X (or -X) whose SVar is Count$Valid ..., Number$ or Count$CardPower, counted each
+  time (BLANCHWOOD ARMOR); CantBlockBy without ValidBlocker$ (can't be blocked); the Wards' `Protection:Card.Black:...`
+  (and an Aura's own protection doesn't push it off: WHITE WARD). TestStatics2.
+
 ## MAGIC's regeneration (1.124.0)
 - `AB$ Regenerate` / `SP$ Regenerate` (MTG_API_REGENERATE): a shield on Self, the target or `Defined$ Enchanted`
   (MtgObj.regen, cleared at cleanup). Mtg_Destroy(d, obj, noRegen) uses one instead of destroying: tapped, out of

@@ -42,6 +42,12 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-06: 1.125.0)
+- ETB tapped and "doesn't untap" replacements, counted static amounts, unblockable, Wards: COOP_NOTES "MAGIC's lands
+  that enter tapped...". 1606 of 5408 cards play. Biggest blockers now: static ability 427, Effect 129, ChangeType 127,
+  cost 112, replacement effect 92 (DamageDone prevention 19, Moved / PayBeforeETB 8...), TargetMin 83, Animate 78,
+  Token 66, ValidTgts 66, Pump 55.
+
 ## Status (2026-11-06: 1.124.0)
 - **Regenerate**: COOP_NOTES "MAGIC's regeneration". 1542 of 5408 cards play. Indestructible still to come (in
   Mtg_Destroy, beside the shields).

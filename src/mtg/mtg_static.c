@@ -38,6 +38,31 @@ static int Integer(const char *s, int *out)
     return 1;
 }
 
+// "Black..." starts with "black" (any case)
+static int SameWord(const char *s, const char *word)
+{
+    for (; *word; s++, word++)
+        if ((*s | 0x20) != *word)
+            return 0;
+    return 1;
+}
+
+// AddPower$ X (or -X): its SVar a count the static can take at any time (Count$Valid ..., Number$, Count$CardPower)
+static int CountedAmount(int cardId, const char *s)
+{
+    const char *sv;
+    int ok;
+    if (s[0] == '-' || s[0] == '+')
+        s++;
+    if (!(sv = Mtg_Svar(cardId, s)))
+        return 0;
+    if (strncmp(sv, "Count$Valid ", 12) != 0 && strncmp(sv, "Number$", 7) != 0 && strcmp(sv, "Count$CardPower") != 0
+        && strcmp(sv, "Count$CardToughness") != 0)
+        return 0;
+    Mtg_Amount(NULL, NULL, cardId, s, &ok);
+    return ok;
+}
+
 // "Flying & First Strike", "Islandwalk", "Protection from red": into the static; 0 if one isn't known
 static int Keywords(MtgStatic *st, const char *text)
 {
@@ -62,6 +87,10 @@ static int Keywords(MtgStatic *st, const char *text)
             if (strcmp(k, sWalk[i]) == 0 || (strncmp(k, "Landwalk:", 9) == 0 && strcmp(k + 9, sBasic[i]) == 0))
                 st->addLandwalk |= MTG_COLOR_BIT(i), found = 1;
             if (strncmp(k, "Protection from ", 16) == 0 && strcmp(k + 16, sProt[i]) == 0)
+                st->addProtection |= MTG_COLOR_BIT(i), found = 1;
+            // the Wards' "Protection:Card.Black:black:Card.CardUID_HostCardUID" (the Aura itself stays on)
+            if (strncmp(k, "Protection:Card.", 16) == 0 && SameWord(k + 16, sProt[i])
+                && k[16 + strlen(sProt[i])] == ':')
                 st->addProtection |= MTG_COLOR_BIT(i), found = 1;
         }
         if (!found)
@@ -154,9 +183,9 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     }
     st.affected = ParamOf(first, count, st.mode == MTG_STATIC_CONTINUOUS ? "Affected"
                                       : st.mode == MTG_STATIC_CANT_BLOCK_BY ? "ValidAttacker" : "ValidCard");
-    if (st.mode == MTG_STATIC_CANT_BLOCK_BY && (!(st.blocker = ParamOf(first, count, "ValidBlocker"))
-                                                || !Mtg_ValidSpecKnown(st.blocker)))
-        goto unknown;
+    if (st.mode == MTG_STATIC_CANT_BLOCK_BY && (st.blocker = ParamOf(first, count, "ValidBlocker")) != NULL
+        && !Mtg_ValidSpecKnown(st.blocker))
+        goto unknown;   // (none: it can't be blocked at all)
     if ((!st.affected && !st.self && !st.enchanted) || (st.affected && !Mtg_ValidSpecKnown(st.affected)))
         goto unknown;
     if (st.mode == MTG_STATIC_RAISE_COST || st.mode == MTG_STATIC_REDUCE_COST) {
@@ -195,10 +224,16 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
             goto unknown;
         st.presentNum = (uint8_t)v;
     }
-    if ((s = ParamOf(first, count, "AddPower")) && !(Integer(s, &v) && (st.addPower = (int8_t)v, 1)))
-        goto unknown;
-    if ((s = ParamOf(first, count, "AddToughness")) && !(Integer(s, &v) && (st.addToughness = (int8_t)v, 1)))
-        goto unknown;
+    if ((s = ParamOf(first, count, "AddPower")) && !(Integer(s, &v) && (st.addPower = (int8_t)v, 1))) {
+        if (!CountedAmount(cardId, s))
+            goto unknown;
+        st.powerX = s;
+    }
+    if ((s = ParamOf(first, count, "AddToughness")) && !(Integer(s, &v) && (st.addToughness = (int8_t)v, 1))) {
+        if (!CountedAmount(cardId, s))
+            goto unknown;
+        st.toughX = s;
+    }
     if ((s = ParamOf(first, count, "SetPower")) && !(Integer(s, &v) && (st.setPower = (int16_t)v, 1)))
         goto unknown;
     if ((s = ParamOf(first, count, "SetToughness")) && !(Integer(s, &v) && (st.setToughness = (int16_t)v, 1)))
@@ -216,6 +251,67 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     return;
 unknown:
     Mtg_Unsupported(c, "static ability");
+}
+
+// R: lines the engine plays as statics: "enters the battlefield tapped" (Event$ Moved, ReplaceWith$ an SVar that taps
+// it: ETBTapped) and "doesn't untap during its controller's untap step" (Event$ Untap, Layer$ CantHappen)
+void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text)
+{
+    static const char *const sKnown[] = {"Event", "ValidCard", "Destination", "ReplaceWith", "ReplacementResult",
+                                         "Description", "ActiveZones", "Layer", "ValidStepTurnToController"};
+    MtgStatic st;
+    int first, count, i;
+    const char *s, *ev;
+    memset(&st, 0, sizeof(st));
+    st.card = (uint16_t)cardId;
+    st.setPower = st.setToughness = MTG_STATIC_NO_SET;
+    count = Mtg_ParseParams(text, &first);
+    for (i = 0; i < count; i++) {
+        unsigned k;
+        for (k = 0; k < sizeof(sKnown) / sizeof(sKnown[0]); k++)
+            if (strcmp(gMtgParams[first + i].key, sKnown[k]) == 0)
+                break;
+        if (k == sizeof(sKnown) / sizeof(sKnown[0]))
+            goto unknown;
+    }
+    ev = ParamOf(first, count, "Event");
+    st.affected = ParamOf(first, count, "ValidCard");
+    if (!ev || !st.affected || !Mtg_ValidSpecKnown(st.affected))
+        goto unknown;
+    if ((s = ParamOf(first, count, "ActiveZones")) && strcmp(s, "Battlefield") != 0)
+        goto unknown;
+    if (strcmp(st.affected, "Card.Self") != 0 && !ParamOf(first, count, "ActiveZones"))
+        goto unknown;   // (another card's: only from the battlefield)
+    if (strcmp(ev, "Moved") == 0) {
+        const char *sv;
+        if (!(s = ParamOf(first, count, "Destination")) || strcmp(s, "Battlefield") != 0
+            || !(s = ParamOf(first, count, "ReplaceWith")) || !(sv = Mtg_Svar(cardId, s)) || ParamOf(first, count, "Layer")
+            || ParamOf(first, count, "ValidStepTurnToController"))
+            goto unknown;
+        // "DB$ Tap | Defined$ Self | ETB$ True" (Defined$ ReplacedCard for another card's)
+        if (strcmp(sv, "DB$ Tap | Defined$ Self | ETB$ True") != 0 && strcmp(sv, "DB$ Tap | ETB$ True | Defined$ ReplacedCard") != 0
+            && strcmp(sv, "DB$ Tap | Defined$ ReplacedCard | ETB$ True") != 0)
+            goto unknown;
+        st.mode = MTG_STATIC_ETB_TAPPED;
+    } else if (strcmp(ev, "Untap") == 0) {
+        if (!(s = ParamOf(first, count, "Layer")) || strcmp(s, "CantHappen") != 0
+            || !(s = ParamOf(first, count, "ValidStepTurnToController")) || strcmp(s, "You") != 0
+            || ParamOf(first, count, "ReplaceWith") || ParamOf(first, count, "Destination"))
+            goto unknown;
+        st.mode = MTG_STATIC_NO_UNTAP;
+    } else
+        goto unknown;
+    if (c->staticCount >= sizeof(c->statics) / sizeof(c->statics[0]))
+        goto unknown;
+    if (sStaticCount + 1 > sStaticCap) {
+        sStaticCap = sStaticCap ? sStaticCap * 2 : 256;
+        gMtgStatics = realloc(gMtgStatics, (size_t)sStaticCap * sizeof(MtgStatic));
+    }
+    gMtgStatics[sStaticCount] = st;
+    c->statics[c->staticCount++] = (uint16_t)sStaticCount++;
+    return;
+unknown:
+    Mtg_Unsupported(c, "replacement effect");
 }
 
 // IsPresent$: does the battlefield have enough of them now (relative to the static's source and its controller)?
@@ -264,6 +360,19 @@ void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m)
                 continue;
             m->addPower += st->addPower;
             m->addToughness += st->addToughness;
+            if (st->powerX || st->toughX) {   // (counted now, as Forge's layer 7c does each time)
+                MtgStackEntry e;
+                MtgResolveCtx ctx;
+                int ok;
+                memset(&e, 0, sizeof(e));
+                ctx.e = &e;
+                ctx.controller = src->controller;
+                ctx.source = s;
+                if (st->powerX)
+                    m->addPower += Mtg_Amount(d, &ctx, st->card, st->powerX, &ok);
+                if (st->toughX)
+                    m->addToughness += Mtg_Amount(d, &ctx, st->card, st->toughX, &ok);
+            }
             m->keywords |= st->addKeywords;
             m->landwalk |= st->addLandwalk;
             m->protection |= st->addProtection;
@@ -293,7 +402,7 @@ int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other)
             const MtgStatic *st = &gMtgStatics[c->statics[k]];
             if (st->mode != mode || !Applies(d, st, s, obj))
                 continue;
-            if (mode == MTG_STATIC_CANT_BLOCK_BY && !Mtg_ValidObj(d, other, st->blocker, s, src->controller))
+            if (mode == MTG_STATIC_CANT_BLOCK_BY && st->blocker && !Mtg_ValidObj(d, other, st->blocker, s, src->controller))
                 continue;
             forbid = 1;
         }

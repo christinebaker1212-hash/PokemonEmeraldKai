@@ -586,6 +586,61 @@ static void TestRegenerate(void)
     }
 }
 
+// statics that count (Blanchwood Armor: +1/+1 per Forest you control), unblockable, the Wards
+static void TestStatics2(void)
+{
+    int bears, armor, ward, path, b2;
+    printf("statics 2: counted amounts, unblockable, wards\n");
+    Table();
+    Lands(0, "Forest", 3);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    armor = Put(0, "Blanchwood Armor", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, armor, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Mtg_Power(&sD, bears) == 5 && Mtg_Toughness(&sD, bears) == 5, "three forests: 5/5 (%d/%d)", Mtg_Power(&sD, bears),
+          Mtg_Toughness(&sD, bears));
+    Put(0, "Forest", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_Power(&sD, bears) == 6, "a fourth: 6/6 (%d)", Mtg_Power(&sD, bears));
+
+    Table();   // Cephalid Pathmage can't be blocked
+    path = Put(0, "Cephalid Pathmage", MTG_ZONE_BATTLEFIELD);
+    b2 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK(!Mtg_CanBlock(&sD, b2, path), "nothing blocks the pathmage");
+
+    Table();   // White Ward on a creature: protection from white, and it stays on
+    Lands(0, "Plains", 1);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    ward = Put(0, "White Ward", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, ward, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK((Mtg_Protection(&sD, bears) & MTG_COLOR_BIT(MTG_W)) != 0, "protection from white");
+    CHECK(Zone(ward) == MTG_ZONE_BATTLEFIELD, "the ward stays on");
+
+    Table();   // Coastal Tower enters tapped; Kismet: the opponent's things enter tapped
+    {
+        int tower = Put(0, "Coastal Tower", MTG_ZONE_HAND), elves, angel, meek;
+        Do(MTG_ACT_LAND, tower, -1, 0);
+        CHECK(Zone(tower) == MTG_ZONE_BATTLEFIELD && sD.objs[tower].tapped, "coastal tower enters tapped");
+        Put(1, "Kismet", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Forest", 1);
+        elves = Put(0, "Llanowar Elves", MTG_ZONE_HAND);
+        Do(MTG_ACT_CAST, elves, -1, 0);
+        PassBoth();
+        CHECK(Zone(elves) == MTG_ZONE_BATTLEFIELD && sD.objs[elves].tapped, "kismet: the elves enter tapped");
+
+        Table();   // Meekstone: power 3 or more doesn't untap
+        meek = Put(1, "Meekstone", MTG_ZONE_BATTLEFIELD);
+        angel = Put(0, "Serra Angel", MTG_ZONE_BATTLEFIELD);
+        elves = Put(0, "Llanowar Elves", MTG_ZONE_BATTLEFIELD);
+        sD.objs[angel].tapped = sD.objs[elves].tapped = 1;
+        while (sD.turn < 3)   // (to player 0's next turn, past its untap step)
+            GoTo(sD.priority ^ 1, MTG_STEP_UPKEEP);
+        CHECK(sD.objs[angel].tapped && !sD.objs[elves].tapped, "meekstone: the angel stays tapped, the elves untap (%d %d, turn %d, meek zone %d, forbids %d)",
+              sD.objs[angel].tapped, sD.objs[elves].tapped, sD.turn, Zone(meek), Mtg_StaticForbids(&sD, MTG_STATIC_NO_UNTAP, angel, MTG_NO_OBJ));
+        (void)meek;
+    }
+}
+
 // ---- whole duels between the stand-in AIs
 
 // a choice while something resolves (MTG_Q_CHOOSE): card = 1 / 0, or the candidate holding obj
@@ -1025,6 +1080,7 @@ int main(int argc, char **argv)
     TestAuras();
     TestCosts();
     TestRegenerate();
+    TestStatics2();
     TestTriggers();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
