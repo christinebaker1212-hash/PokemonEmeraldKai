@@ -57,6 +57,10 @@ u8 Orre_Shadow_Count(void);                             // the rows (48)
 const struct OrreShadowMon *Orre_Shadow_DataAt(u8 index);
 
 bool8 Orre_Shadow_Is(struct Pokemon *mon);
+bool8 Orre_Shadow_IsKey(u32 otId, u32 personality);
+// its curated dark palette (src/data/orre_shadow_palettes.h) over PAL's 16 colours (the transparent one kept), for the
+// MOéMON or the POKéMON pictures; FALSE (PAL as it was) if the species has none
+bool8 Orre_Shadow_Recolor(u16 *pal, u16 species, bool8 pokemonArt);
 bool8 Orre_Shadow_IsBox(struct BoxPokemon *box);
 u8 Orre_Shadow_Id(struct Pokemon *mon);                 // its Colosseum id, 0 if not Shadow
 // turns MON into Colosseum's Shadow Pokémon ID (snagged): its heart gauge closed, at the table's size

@@ -58,6 +58,16 @@ finite amount of Shadow Pokemon, we can curate what they look like." Every Shado
 chosen one by one (in the spirit of XD's Shadow Lugia: darkened, violet-leaning, its eyes and accents kept bright), for
 both of Kai's art sets (OPTIONS > CREATURES: MOéMON and POKéMON), its front, back and shiny pictures, and its sprite in
 the field and the Garden; it returns to its own colours when purified.
+- **Built (2026-11-07, a first pass for the user to curate):** tools/orre/shadow_palettes.py makes each of the 48's dark
+  palettes for both art sets into src/data/orre_shadow_palettes.h: one treatment for all (the body sunk into a violet-to-
+  indigo ramp keeping its lightness order and its parts apart by hue, large white areas sinking too as Shadow Lugia's
+  did, outlines near-black indigo, small highlights cold lavender, eyes and small bright accents a glowing red-violet,
+  MOéMON skin ashen lavender), then the tool's CURATED table, empty until the user has chosen: `--preview OUT.png`
+  draws all 48 (MOéMON own / dark, POKéMON own / dark). The game shows it through the Stadium hues' pipeline
+  (mp_hue.c: MP_HUE_SHADOW from MP_Hue_Find / MP_Hue_OfBoxMon, MakeLz applying Orre_Shadow_Recolor), so every
+  picture that takes a Pokémon's palette gets it (battle front and back, summary, the phone app); shiny or not (the
+  dark palette covers it while Shadow). Icons keep their colours (shared palettes); field / Garden sprites next.
+  Test shadow_look (tools/orre/check_shadow_look.py).
 
 ## How Colosseum does it (the decomp: christinebaker1212-hash/pkmn-colosseum; Colosseum calls them "dark Pokémon")
 - **The Shadow Pokémon table**: common_rel's .data + 0x1439D8, 97 records of 0x38 bytes (count at + 0x14A6F8; the

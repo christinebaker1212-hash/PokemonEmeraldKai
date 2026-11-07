@@ -19,6 +19,7 @@
 #include "orre_shadow.h"
 #include "battle.h"
 #include "constants/moves.h"
+#include "constants/species.h"
 #include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 void MPNet_Log(const char *fmt, ...);
@@ -27,6 +28,7 @@ u8 *Orre_StoryFlagBytes(u32 *size);
 void Orre_StoryReset(void);
 
 #include "../data/orre_shadow.h"
+#include "../data/orre_shadow_palettes.h"
 
 #define ORRE_MAGIC 0x4552524F   // "ORRE"
 #define ORRE_FORMAT 1
@@ -94,6 +96,23 @@ static struct OrreShadowRec *RecOfBox(struct BoxPokemon *box)
 static struct OrreShadowRec *RecOf(struct Pokemon *mon)
 {
     return mon ? RecOfBox(&mon->box) : NULL;
+}
+
+bool8 Orre_Shadow_IsKey(u32 otId, u32 personality)
+{
+    return sRecCount != 0 && Find(personality, otId) != NULL;
+}
+
+bool8 Orre_Shadow_Recolor(u16 *pal, u16 species, bool8 pokemonArt)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sOrreShadowPalettes); i++)
+        if (sOrreShadowPalettes[i].species == species)
+        {
+            memcpy(pal + 1, (pokemonArt ? sOrreShadowPalettes[i].pokemon : sOrreShadowPalettes[i].moe) + 1, 15 * sizeof(u16));
+            return TRUE;
+        }
+    return FALSE;
 }
 
 bool8 Orre_Shadow_IsBox(struct BoxPokemon *box)

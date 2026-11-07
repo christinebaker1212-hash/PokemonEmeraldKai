@@ -9,6 +9,7 @@
 // friends' too: their hue travels in the wire state).
 #include <string.h>
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "mp.h"
 #include "data.h"
 #include "decompress.h"
@@ -198,6 +199,8 @@ s16 MP_Hue_OfBoxMon(const struct BoxPokemon *b)
      || GetBoxMonData(m, MON_DATA_SANITY_IS_BAD_EGG))
         return 0;
     species = GetBoxMonData(m, MON_DATA_SPECIES);
+    if (Orre_Shadow_IsBox(m))
+        return MP_HUE_SHADOW;   // Moemon Kai: a Shadow Pokémon's dark palette (src/orre/orre_shadow.c)
     memset(nick, EOS, sizeof(nick));
     memset(ot, EOS, sizeof(ot));
     GetBoxMonData(m, MON_DATA_NICKNAME, nick);
@@ -244,15 +247,19 @@ static const struct BoxPokemon *FindMon(u32 otId, u32 personality, bool8 anyOt)
 
 s16 MP_Hue_Find(u32 otId, u32 personality)
 {
+    if (Orre_Shadow_IsKey(otId, personality))
+        return MP_HUE_SHADOW;   // Moemon Kai: a Shadow Pokémon (a foe's too), wherever it is
     return MP_Hue_OfBoxMon(FindMon(otId, personality, FALSE));
 }
 
 // Icons only know the personality
 s16 MP_Hue_FindByPersonality(u32 personality)
 {
+    s16 hue;
     if (personality == 0)
         return 0;
-    return MP_Hue_OfBoxMon(FindMon(0, personality, TRUE));
+    hue = MP_Hue_OfBoxMon(FindMon(0, personality, TRUE));
+    return hue == MP_HUE_SHADOW ? 0 : hue;   // (Moemon Kai: icons keep their colours)
 }
 
 // ---------------------------------------------------------------------------
@@ -319,7 +326,7 @@ static void ShiftColor(u16 *color, int hueDiff)
 void MP_Hue_ShiftPalette(u16 *pal, u16 keepMask, s16 hue)
 {
     int diff = hue < 0 ? hue + 360 : hue, i;
-    if (hue == 0)
+    if (hue == 0 || hue == MP_HUE_SHADOW)
         return;
     for (i = 1; i < 16; i++)
         if (!(keepMask & (1 << i)))
@@ -365,6 +372,9 @@ static const u32 *MakeLz(const u32 *lz, u16 species, s16 hue, u8 *slotOut)
     if (size == 0)
         return lz;   // (not a palette this knows: as it is)
     LZ77UnCompWram(lz, pal);
+    if (hue == MP_HUE_SHADOW)
+        Orre_Shadow_Recolor(pal, species, MP_MonArtPokemon() && !sForceMoe);   // Moemon Kai: its curated dark palette
+    else
     for (i = 0; i < size / 32; i++)
         MP_Hue_ShiftPalette(&pal[i * 16], SkinMask(species), hue);
     slot = sLzNext;
@@ -449,7 +459,10 @@ const struct CompressedSpritePalette *MP_Hue_LzStruct(const struct CompressedSpr
     {
         u16 colors[LZ_MAX_COLORS];   // (the loaded palette is the first 16 of them)
         LZ77UnCompWram(pal->data, colors);
-        MP_Hue_ShiftPalette(colors, SkinMask(species), hue);
+        if (hue == MP_HUE_SHADOW)
+            Orre_Shadow_Recolor(colors, species, MP_MonArtPokemon() && !sForceMoe);   // Moemon Kai
+        else
+            MP_Hue_ShiftPalette(colors, SkinMask(species), hue);
         if (memcmp(colors, &gPlttBufferUnfaded[OBJ_PLTT_ID(loaded)], PLTT_SIZE_4BPP) != 0)
         {
             CpuCopy16(colors, &gPlttBufferUnfaded[OBJ_PLTT_ID(loaded)], PLTT_SIZE_4BPP);
