@@ -1417,6 +1417,50 @@ static void TestDelayed(void)
     CHECK(Zone(wurm) == MTG_ZONE_GRAVEYARD && Zone(basilisk) == MTG_ZONE_GRAVEYARD, "destroyed at end of combat");
 }
 
+// PreventDamage: "prevent the next n damage that would be dealt to ... this turn" (a shield, used up first)
+static void TestPrevent(void)
+{
+    int clergy, bears, shock, cons, i;
+    static const char *const cards[] = {"Clergy en-Vec", "Conservator", "Femeref Healer", "Bandage", "Alabaster Wall",
+                                        "Battlefield Medic", NULL};
+    printf("prevent damage: shields on creatures and players\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Clergy en-Vec: 1 prevented, so SHOCK leaves the bears at 1 damage
+    clergy = Put(0, "Clergy en-Vec", MTG_ZONE_BATTLEFIELD);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Mountain", 1);
+    shock = Put(0, "Shock", MTG_ZONE_HAND);
+    Do(MTG_ACT_ACTIVATE, clergy, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(sD.objs[bears].prevent == 1, "a 1-damage shield on the bears");
+    Do(MTG_ACT_CAST, shock, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Zone(bears) == MTG_ZONE_BATTLEFIELD && sD.objs[bears].damage == 1 && sD.objs[bears].prevent == 0,
+          "1 prevented, 1 dealt: the bears live");
+
+    Table();   // Conservator: the next 2 to you
+    cons = Put(0, "Conservator", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Mountain", 4);
+    shock = Put(0, "Shock", MTG_ZONE_HAND);
+    Do(MTG_ACT_ACTIVATE, cons, -1, 0);
+    PassBoth();
+    CHECK(sD.players[0].prevent == 2, "a 2-damage shield on its player");
+    Do(MTG_ACT_CAST, shock, MTG_TGT_PLAYER, 0);
+    PassBoth();
+    CHECK(sD.players[0].life == 20 && sD.players[0].prevent == 0, "SHOCK to itself prevented");
+
+    Table();   // the shields end with the turn
+    clergy = Put(0, "Clergy en-Vec", MTG_ZONE_BATTLEFIELD);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_ACTIVATE, clergy, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(sD.objs[bears].prevent == 1, "shield up");
+    GoTo(1, MTG_STEP_DRAW);
+    CHECK(sD.objs[bears].prevent == 0, "gone at end of turn");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1751,6 +1795,7 @@ int main(int argc, char **argv)
     TestTriggers();
     TestUnless();
     TestDelayed();
+    TestPrevent();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

@@ -216,6 +216,13 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
         if (Mtg_Param(ab, "TokenOwner") && strcmp(Mtg_Param(ab, "TokenOwner"), "You") != 0)
             return 0;
         return main ? 9 : (a->kind == MTG_ACT_ACTIVATE && d->active == opp && d->step == MTG_STEP_END) ? 6 : 0;
+    case MTG_API_PREVENT_DAMAGE:   // its own creature about to die, or itself low on life in their attack
+        if (tgtObj >= 0)
+            return tgtMine && AboutToDie(d, tgtObj, me) && !d->objs[tgtObj].prevent ? 22 + Value(d, tgtObj) : 0;
+        if (a->target.kind == MTG_TGT_PLAYER && tgtMine && d->active == opp && d->step == MTG_STEP_COMBAT_BLOCKERS
+            && d->players[me].life <= 6 && !d->players[me].prevent)
+            return 12;
+        return 0;
     case MTG_API_REGENERATE: {   // only when it would die now
         const char *def = Mtg_Param(ab, "Defined");
         int who = tgtObj >= 0 ? tgtObj : def && strcmp(def, "Enchanted") == 0 ? d->objs[a->obj].attachedTo : a->obj;
@@ -331,6 +338,8 @@ static int Helps(const MtgAbility *ab)
     switch (ab->api) {
     case MTG_API_PUMP: case MTG_API_PUMP_ALL: case MTG_API_GAIN_LIFE: case MTG_API_DRAW: case MTG_API_UNTAP:
         return !Mtg_Param(ab, "IsCurse");
+    case MTG_API_PREVENT_DAMAGE:
+        return 1;
     case MTG_API_PUT_COUNTER:
         return (v = Mtg_Param(ab, "CounterType")) && strcmp(v, "P1P1") == 0;
     case MTG_API_CHANGE_ZONE:

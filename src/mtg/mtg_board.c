@@ -1900,6 +1900,18 @@ static int StartEvent(const MtgEvent *e)
         B.leaveColor = MtgGfx_FrameColor(v->objs[obj].def, 0);
         PlaySE(SE_BALL_OPEN);
         return Frames(18);
+    case MTG_EV_PREVENTED:   // a "prevent the next n damage" shield used up
+        if (e->b >= 0 && e->b < MTG_MAX_OBJS) {
+            Rect r = ObjRect(e->b);
+            Name(a, sizeof(a), e->b);
+            if (r.w)
+                G_FillAdd(r.x, r.y, r.w, r.h, 0xf0f0c0, 110);
+            B.flash[e->b] = 12;
+            Ticker("%d damage to %s was prevented.", e->c, a);
+        } else
+            Ticker("%d damage to %s was prevented.", e->c, -1 - e->b == ME ? "you" : B.opp);
+        PlaySE(SE_M_HARDEN);
+        return Frames(16);
     case MTG_EV_REGENERATE:   // a shield given, or used: tapped, out of combat, healed
         if (obj >= 0 && obj < MTG_MAX_OBJS) {
             Rect r = ObjRect(obj);

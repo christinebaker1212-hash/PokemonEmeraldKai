@@ -1,0 +1,6 @@
+# MAGIC's damage prevention on the table: CLERGY EN-VEC shields our GRIZZLY BEARS (the next 1 damage), then our own SHOCK
+# at them: "1 damage to Grizzly Bears was prevented." and the bears live. Shots pv_target, pv_shock, pv_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: used Clergy en-Vec on Grizzly Bears" "mtg: you: cast Shock on Grizzly Bears" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Clergy en-Vec to focus" "mtg: no Shock to focus")

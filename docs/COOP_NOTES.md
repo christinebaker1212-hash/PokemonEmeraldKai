@@ -3639,6 +3639,19 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   delayed triggers whose Execute$ uses an untranslated effect.
 - Tests: test_rules.c TestDelayed (BLESSED WINE next upkeep only, THICKET BASILISK at end of combat); scenario mtg_delayed.
 
+## MAGIC's damage prevention (1.144.0)
+
+- MTG_API_PREVENT_DAMAGE (PreventDamageEffect): Amount$ (any amount Mtg_Amount knows) onto each target or Defined$:
+  MtgObj.prevent / MtgPlayer.prevent, a shield of "the next n damage" that Mtg_DealDamage uses up first (before
+  protection and the creature check; MTG_EV_PREVENTED a/b/c = source / object or -1 - player / amount, the board's
+  "n damage to X was prevented."), cleared by EndOfTurnCleanup.
+- AI: on its own creature about to die (AboutToDie) without a shield, or on itself at 6 life or less while the other
+  side attacks; Helps() counts it as helping (trigger targets).
+- Unlocked 42: CLERGY EN-VEC, FEMEREF HEALER, ALABASTER WALL, CONSERVATOR, BANDAGE, BATTLEFIELD MEDIC, AVEN REDEEMER...
+  Still out: DividedAsYouChoose, PreventionSubAbility / ShieldEffectTarget, Activation$ / Activator$ limits.
+- Tests: test_rules.c TestPrevent (SHOCK into a 1-damage shield, CONSERVATOR on its player, gone at end of turn);
+  scenario mtg_prevent.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

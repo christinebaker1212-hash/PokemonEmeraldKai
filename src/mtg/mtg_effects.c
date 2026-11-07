@@ -14,13 +14,13 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Sacrifice", MTG_API_SACRIFICE}, {"PutCounter", MTG_API_PUT_COUNTER}, {"Attach", MTG_API_ATTACH},
     {"Regenerate", MTG_API_REGENERATE}, {"Token", MTG_API_TOKEN},
     {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL}, {"Animate", MTG_API_ANIMATE},
-    {"DelayedTrigger", MTG_API_DELAYED_TRIGGER},
+    {"DelayedTrigger", MTG_API_DELAYED_TRIGGER}, {"PreventDamage", MTG_API_PREVENT_DAMAGE},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
-    "ChangeZoneAll", "Animate", "DelayedTrigger",
+    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -660,6 +660,17 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         }
         break;
     }
+    case MTG_API_PREVENT_DAMAGE: {   // a shield on each: the next Amount$ damage to it this turn is prevented
+        int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "Amount"), &ok);
+        Targets(d, ctx, ab, DEF_CARD, &who);
+        for (i = 0; i < who.n && n > 0; i++) {
+            uint8_t *sh = who.t[i].kind == MTG_TGT_PLAYER ? &d->players[who.t[i].id].prevent
+                        : OnBattlefield(d, &who.t[i]) ? &d->objs[who.t[i].id].prevent : NULL;
+            if (sh)
+                *sh = (uint8_t)(*sh + n > 255 ? 255 : *sh + n);
+        }
+        break;
+    }
     case MTG_API_DELAYED_TRIGGER: {   // DelayedTriggerEffect: set up now, fires once when its step begins
         const char *rem = Mtg_Param(ab, "RememberObjects"), *nt = Mtg_Param(ab, "NextTurn");
         MtgDelayed *dl;
@@ -947,6 +958,7 @@ static const char *const sApiParams[MTG_API_COUNT][10] = {
     [MTG_API_CHANGE_ZONE_ALL] = {"Origin", "Destination", "ChangeType", "Shuffle", "UseAllOriginZones"},
     [MTG_API_ANIMATE] = {"Power", "Toughness", "Types", "Colors", "OverwriteColors", "Keywords", "RemoveCreatureTypes",
                          "Duration"},
+    [MTG_API_PREVENT_DAMAGE] = {"Amount"},
     [MTG_API_DELAYED_TRIGGER] = {"Mode", "Phase", "ValidPlayer", "Execute", "RememberObjects", "NextTurn",
                                  "TriggerDescription", "Secondary"},
     [MTG_API_GAIN_LIFE] = {"LifeAmount"},
@@ -1078,6 +1090,8 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
             return 0;
         return ab->tgt || Mtg_Param(ab, "Defined");
     }
+    case MTG_API_PREVENT_DAMAGE:
+        return AmountKnown(ab, "Amount", 1) && (ab->tgt || Mtg_Param(ab, "Defined"));
     case MTG_API_DELAYED_TRIGGER: {
         const char *rem = Mtg_Param(ab, "RememberObjects");
         if (!ab->delayed)

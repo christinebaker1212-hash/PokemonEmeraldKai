@@ -203,8 +203,19 @@ void Mtg_GainLife(MtgDuel *d, int player, int amount)
 // damage from a source (protection prevents it; lifelink gains it), Card.addDamage / Player.addDamage
 void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int combat)
 {
+    uint8_t *shield;
     if (amount <= 0)
         return;
+    // "prevent the next n damage" (PreventDamageEffect's shield, used up first)
+    shield = to.kind == MTG_TGT_OBJ ? &d->objs[to.id].prevent : to.kind == MTG_TGT_PLAYER ? &d->players[to.id].prevent : NULL;
+    if (shield && *shield && (to.kind != MTG_TGT_OBJ || d->objs[to.id].zone == MTG_ZONE_BATTLEFIELD)) {
+        int n = *shield < amount ? *shield : amount;
+        *shield = (uint8_t)(*shield - n);
+        amount -= n;
+        Mtg_Event(d, MTG_EV_PREVENTED, sourceObj, to.kind == MTG_TGT_OBJ ? to.id : -1 - to.id, n);
+        if (amount <= 0)
+            return;
+    }
     if (to.kind == MTG_TGT_OBJ) {
         if (d->objs[to.id].zone != MTG_ZONE_BATTLEFIELD)
             return;
@@ -1180,12 +1191,15 @@ static int AnyFirstStrike(const MtgDuel *d)
 static void EndOfTurnCleanup(MtgDuel *d)
 {
     int i;
+    for (i = 0; i < MTG_PLAYERS; i++)
+        d->players[i].prevent = 0;
     for (i = 0; i < d->objCount; i++) {
         MtgObj *o = &d->objs[i];
         o->damage = 0;
         o->tempPower = o->tempToughness = 0;
         o->tempKeywords = 0;
         o->regen = 0;
+        o->prevent = 0;
         if (o->animUntil == 1)
             o->animUntil = 0;   // (an Animate until end of turn wears off)
     }

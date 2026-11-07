@@ -300,6 +300,20 @@
 "number": "1",
 "set": "inv"
 },
+"Alabaster Potion": {
+"artist": "Harold McNeill",
+"file": "4ed_1",
+"frame": "1993",
+"number": "1",
+"set": "4ed"
+},
+"Alabaster Wall": {
+"artist": "Randy Gallegos",
+"file": "mmq_2",
+"frame": "1997",
+"number": "2",
+"set": "mmq"
+},
 "Aladdin's Ring": {
 "artist": "Dan Frazier",
 "file": "4ed_292",
@@ -396,6 +410,13 @@
 "file": "4ed_2",
 "frame": "1993",
 "number": "2",
+"set": "4ed"
+},
+"Amulet of Kroog": {
+"artist": "Margaret Organ-Kean",
+"file": "4ed_293",
+"frame": "1993",
+"number": "293",
 "set": "4ed"
 },
 "An-Havva Inn": {
@@ -1021,6 +1042,13 @@
 "number": "34",
 "set": "jud"
 },
+"Aven Redeemer": {
+"artist": "Tim Hildebrandt",
+"file": "lgn_3",
+"frame": "1997",
+"number": "3",
+"set": "lgn"
+},
 "Aven Smokeweaver": {
 "artist": "Kev Walker",
 "file": "ody_64",
@@ -1154,6 +1182,13 @@
 "number": "91",
 "set": "tor"
 },
+"Bandage": {
+"artist": "Rebecca Guay",
+"file": "sth_1",
+"frame": "1997",
+"number": "1",
+"set": "sth"
+},
 "Barbarian Lunatic": {
 "artist": "Ron Spears",
 "file": "ody_175",
@@ -1244,6 +1279,13 @@
 "frame": "1997",
 "number": "139",
 "set": "apc"
+},
+"Battlefield Medic": {
+"artist": "Matt Thompson",
+"file": "ons_9",
+"frame": "1997",
+"number": "9",
+"set": "ons"
 },
 "Battlefield Percher": {
 "artist": "Edward P. Beard, Jr.",
@@ -2652,6 +2694,13 @@
 "number": "7",
 "set": "usg"
 },
+"Clergy en-Vec": {
+"artist": "Heather Hudson",
+"file": "tmp_14",
+"frame": "1997",
+"number": "14",
+"set": "tmp"
+},
 "Clickslither": {
 "artist": "Kev Walker",
 "file": "lgn_90",
@@ -2875,6 +2924,13 @@
 "frame": "1993",
 "number": "180",
 "set": "ice"
+},
+"Conservator": {
+"artist": "Amy Weber",
+"file": "4ed_309",
+"frame": "1993",
+"number": "309",
+"set": "4ed"
 },
 "Consumptive Goo": {
 "artist": "Carl Critchlow",
@@ -4577,6 +4633,13 @@
 "number": "190",
 "set": "4ed"
 },
+"Ethereal Champion": {
+"artist": "Terese Nielsen",
+"file": "mir_15",
+"frame": "1997",
+"number": "15",
+"set": "mir"
+},
 "Evacuation": {
 "artist": "Rob Alexander",
 "file": "sth_30",
@@ -4815,6 +4878,13 @@
 "number": "129",
 "set": "vis"
 },
+"Femeref Healer": {
+"artist": "Steve Luke",
+"file": "mir_17",
+"frame": "1997",
+"number": "17",
+"set": "mir"
+},
 "Femeref Scouts": {
 "artist": "Zak Plucinski",
 "file": "mir_19",
@@ -4905,6 +4975,13 @@
 "frame": "1993",
 "number": "50a",
 "set": "all"
+},
+"Field Surgeon": {
+"artist": "Heather Hudson",
+"file": "uds_8",
+"frame": "1997",
+"number": "8",
+"set": "uds"
 },
 "Field of Souls": {
 "artist": "Richard Kane Ferguson",
@@ -5192,6 +5269,13 @@
 "frame": "1993",
 "number": "119",
 "set": "all"
+},
+"Flowering Field": {
+"artist": "Jeff Miracola",
+"file": "pcy_9",
+"frame": "1997",
+"number": "9",
+"set": "pcy"
 },
 "Flowstone Blade": {
 "artist": "Allen Williams",
@@ -5998,6 +6082,13 @@
 "number": "190",
 "set": "usg"
 },
+"Goblin Legionnaire": {
+"artist": "Mark Romanoski",
+"file": "apc_103",
+"frame": "1997",
+"number": "103",
+"set": "apc"
+},
 "Goblin Lookout": {
 "artist": "Jim Nelson",
 "file": "lgn_101",
@@ -6467,6 +6558,20 @@
 "number": "52",
 "set": "hml"
 },
+"Heal": {
+"artist": "Mark Tedin",
+"file": "ice_30",
+"frame": "1993",
+"number": "30",
+"set": "ice"
+},
+"Healing Salve": {
+"artist": "Dan Frazier",
+"file": "4ed_28",
+"frame": "1993",
+"number": "28",
+"set": "4ed"
+},
 "Heart Sliver": {
 "artist": "Ron Spencer",
 "file": "tmp_182",
@@ -6740,6 +6845,13 @@
 "number": "80",
 "set": "usg"
 },
+"Hot Springs": {
+"artist": "Nicola Leonard",
+"file": "ice_248",
+"frame": "1993",
+"number": "248",
+"set": "ice"
+},
 "Howl from Beyond": {
 "artist": "Mark Poole",
 "file": "4ed_141",
@@ -6830,6 +6942,13 @@
 "frame": "1993",
 "number": "142",
 "set": "4ed"
+},
+"Hypochondria": {
+"artist": "Christopher Moeller",
+"file": "tor_7",
+"frame": "1997",
+"number": "7",
+"set": "tor"
 },
 "Icatian Scout": {
 "artist": "Rob Alexander",
@@ -7075,6 +7194,13 @@
 "frame": "1993",
 "number": "367",
 "set": "4ed"
+},
+"Ivory Charm": {
+"artist": "Gerry Grace",
+"file": "mir_23",
+"frame": "1997",
+"number": "23",
+"set": "mir"
 },
 "Ivory Mask": {
 "artist": "Glen Angus",
@@ -7403,6 +7529,13 @@
 "file": "bchr_9",
 "frame": "1993",
 "number": "9",
+"set": "bchr"
+},
+"Kei Takahashi": {
+"artist": "Scott Kirschner",
+"file": "bchr_78",
+"frame": "1993",
+"number": "78",
 "set": "bchr"
 },
 "Keldon Arsonist": {
@@ -8322,6 +8455,13 @@
 "number": "144",
 "set": "tmp"
 },
+"Martyrs' Tomb": {
+"artist": "Anthony S. Waters",
+"file": "apc_110",
+"frame": "1997",
+"number": "110",
+"set": "apc"
+},
 "Mask of Law and Grace": {
 "artist": "Kev Walker",
 "file": "uds_11",
@@ -8336,12 +8476,26 @@
 "number": "58",
 "set": "nem"
 },
+"Master Apothecary": {
+"artist": "Terese Nielsen",
+"file": "ody_32",
+"frame": "1997",
+"number": "32",
+"set": "ody"
+},
 "Master Decoy": {
 "artist": "Phil Foglio",
 "file": "tmp_29",
 "frame": "1997",
 "number": "29",
 "set": "tmp"
+},
+"Master Healer": {
+"artist": "Adam Rex",
+"file": "uds_12",
+"frame": "1997",
+"number": "12",
+"set": "uds"
 },
 "Master of Arms": {
 "artist": "Dan Frazier",
@@ -8510,6 +8664,13 @@
 "frame": "1997",
 "number": "106",
 "set": "ulg"
+},
+"Militant Monk": {
+"artist": "Mark Brill",
+"file": "tor_9",
+"frame": "1997",
+"number": "9",
+"set": "tor"
 },
 "Mind Ravel": {
 "artist": "Mark Tedin",
@@ -9113,6 +9274,13 @@
 "number": "67",
 "set": "exo"
 },
+"Necra Disciple": {
+"artist": "Jeff Miracola",
+"file": "apc_44",
+"frame": "1997",
+"number": "44",
+"set": "apc"
+},
 "Need for Speed": {
 "artist": "Christopher Moeller",
 "file": "ody_209",
@@ -9295,6 +9463,13 @@
 "number": "259",
 "set": "ody"
 },
+"Oasis": {
+"artist": "Brian Snõddy",
+"file": "4ed_362",
+"frame": "1993",
+"number": "362",
+"set": "4ed"
+},
 "Obelisk of Undoing": {
 "artist": "Tom Wänerstrand",
 "file": "bchr_104",
@@ -9442,6 +9617,20 @@
 "number": "et63",
 "set": "ptc"
 },
+"Orim's Cure": {
+"artist": "Don Hazeltine",
+"file": "mmq_33",
+"frame": "1997",
+"number": "33",
+"set": "mmq"
+},
+"Orim, Samite Healer": {
+"artist": "Kaja Foglio",
+"file": "tmp_33",
+"frame": "1997",
+"number": "33",
+"set": "tmp"
+},
 "Ornithopter": {
 "artist": "Amy Weber",
 "file": "4ed_341",
@@ -9511,6 +9700,13 @@
 "frame": "1993",
 "number": "82",
 "set": "bchr"
+},
+"Panacea": {
+"artist": "Donato Giancola",
+"file": "mmq_308",
+"frame": "1997",
+"number": "308",
+"set": "mmq"
 },
 "Panic Attack": {
 "artist": "Mike Ploog",
@@ -10471,6 +10667,20 @@
 "number": "156",
 "set": "4ed"
 },
+"Raka Disciple": {
+"artist": "Arnie Swekel",
+"file": "apc_66",
+"frame": "1997",
+"number": "66",
+"set": "apc"
+},
+"Rakalite": {
+"artist": "Christopher Rush",
+"file": "bchr_105",
+"frame": "1993",
+"number": "105",
+"set": "bchr"
+},
 "Rally": {
 "artist": "Heather Hudson",
 "file": "ice_48",
@@ -10723,6 +10933,13 @@
 "number": "122",
 "set": "inv"
 },
+"Recuperate": {
+"artist": "Tim Hildebrandt",
+"file": "scg_21",
+"frame": "1997",
+"number": "21",
+"set": "scg"
+},
 "Red Elemental Blast": {
 "artist": "Richard Thomas",
 "file": "4ed_218",
@@ -10918,6 +11135,13 @@
 "frame": "1997",
 "number": "19",
 "set": "vis"
+},
+"Revered Elder": {
+"artist": "Donato Giancola",
+"file": "mmq_43",
+"frame": "1997",
+"number": "43",
+"set": "mmq"
 },
 "Revive": {
 "artist": "Matthew D. Wilson",
@@ -11345,6 +11569,34 @@
 "frame": "1997",
 "number": "326",
 "set": "inv"
+},
+"Samite Archer": {
+"artist": "Scott M. Fischer",
+"file": "inv_269",
+"frame": "1997",
+"number": "269",
+"set": "inv"
+},
+"Samite Healer": {
+"artist": "Tom Wänerstrand",
+"file": "4ed_47",
+"frame": "1993",
+"number": "47",
+"set": "4ed"
+},
+"Samite Pilgrim": {
+"artist": "D. J. Cleland-Hura",
+"file": "pls_15",
+"frame": "1997",
+"number": "15",
+"set": "pls"
+},
+"Sanctum Custodian": {
+"artist": "Paolo Parente",
+"file": "usg_42",
+"frame": "1997",
+"number": "42",
+"set": "usg"
 },
 "Sandbar Merfolk": {
 "artist": "rk post",
@@ -11822,6 +12074,13 @@
 "number": "16",
 "set": "hml"
 },
+"Serra Paladin": {
+"artist": "Pete Venters",
+"file": "hml_17",
+"frame": "1993",
+"number": "17",
+"set": "hml"
+},
 "Serra Zealot": {
 "artist": "DiTerlizzi",
 "file": "usg_46",
@@ -11982,6 +12241,13 @@
 "frame": "1997",
 "number": "16",
 "set": "apc"
+},
+"Shield of the Ages": {
+"artist": "Anson Maddocks",
+"file": "ice_335",
+"frame": "1993",
+"number": "335",
+"set": "ice"
 },
 "Shifting Sliver": {
 "artist": "Darrell Riche",
@@ -12914,6 +13180,13 @@
 "number": "143",
 "set": "s99"
 },
+"Squee's Toy": {
+"artist": "Heather Hudson",
+"file": "tmp_309",
+"frame": "1997",
+"number": "309",
+"set": "tmp"
+},
 "Squee, Goblin Nabob": {
 "artist": "David Monette",
 "file": "mmq_214",
@@ -13375,6 +13648,13 @@
 "frame": "1997",
 "number": "101",
 "set": "usg"
+},
+"Sunfire Balm": {
+"artist": "Monte Michael Moore",
+"file": "ons_56",
+"frame": "1997",
+"number": "56",
+"set": "ons"
 },
 "Sungrass Prairie": {
 "artist": "Ron Spencer",
@@ -14153,6 +14433,13 @@
 "number": "50",
 "set": "exo"
 },
+"Treefolk Healer": {
+"artist": "Matt Cavotta",
+"file": "inv_218",
+"frame": "1997",
+"number": "218",
+"set": "inv"
+},
 "Treefolk Seedlings": {
 "artist": "John Matson",
 "file": "usg_278",
@@ -14264,6 +14551,13 @@
 "frame": "1997",
 "number": "246",
 "set": "mir"
+},
+"Troubled Healer": {
+"artist": "Terese Nielsen",
+"file": "pcy_27",
+"frame": "1997",
+"number": "27",
+"set": "pcy"
 },
 "True Believer": {
 "artist": "Alex Horley-Orlandelli",

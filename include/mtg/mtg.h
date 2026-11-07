@@ -116,6 +116,7 @@ typedef struct {
     int16_t counters11;           // +1/+1 counters (-1/-1 as negative)
     uint16_t attachedTo;          // an Aura: the creature it enchants (MTG_NO_OBJ: none)
     uint8_t regen;                // regeneration shields until end of turn (RegenerateEffect)
+    uint8_t prevent;              // "prevent the next n damage" this turn (PreventDamageEffect's shield)
     uint8_t animUntil;            // Animate: 0 none, 1 until end of turn, 2 for good; then what it became:
     uint8_t animTypes, animColors, animOverwrite;   // card types added; colors (instead of its own when animOverwrite)
     int8_t animPower, animToughness;   // its base power / toughness (MTG_ANIM_NO_PT: its own)
@@ -169,6 +170,7 @@ typedef struct {
 typedef struct {
     int16_t life;
     uint8_t landsPlayed, lost, drewFromEmpty;
+    uint8_t prevent;               // "prevent the next n damage that would be dealt to you" this turn
     uint8_t pool[MTG_MANA_KINDS];  // floating mana (empties at the end of each step)
     uint16_t library[MTG_DECK_MAX + 20];
     uint16_t libraryCount;
@@ -224,8 +226,9 @@ enum {
     MTG_EV_FIZZLE, MTG_EV_LOSE,
     MTG_EV_TRIGGER,   // a triggered ability went on the stack: a = its source, b / c = its target (kind, id)
     MTG_EV_COUNTERS,  // a = the object, b = +1/+1 counters added (negative: -1/-1), c = its counters now
-    MTG_EV_REGENERATE // a = the object: destroyed, it regenerated instead (tapped, out of combat, damage gone);
-                      // b = 0 that, 1 a shield given (c = its shields now)
+    MTG_EV_REGENERATE, // a = the object: destroyed, it regenerated instead (tapped, out of combat, damage gone);
+                       // b = 0 that, 1 a shield given (c = its shields now)
+    MTG_EV_PREVENTED   // a = the source, b = what it was dealt to (an object, or -1 - player), c = how much was prevented
 };
 typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;   // a, b, c by kind (mtg_game.c Mtg_Event)
 
