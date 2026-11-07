@@ -85,10 +85,13 @@ rules, and what each tool does. This file is where things stand, what a new sess
    ELITE FOUR, HOENN's ferries and every port, landing at the OUTSKIRT STAND by the sailor: src/orre/orre_ferry.c).
 1. **Music** (the user, 2026-11-07: "Colosseum's own world map screen, then convert the music"): see 6.
    Then the world map's own song (worldmap_song) and the travel scene: the user's plan, "The bike ride" below.
-2. **Where people stand.** Doors and entries are done (below, "Rooms, doors and entries"). The people: each room's
-   characters table (the floor record's + 0x14 slot, floor_data.c floorDataBiosGetCharInfo; records of 36 bytes:
-   flags, u16 angle, u16 model, ..., the talk script at + 0x14 (floorCharacterBiosGetTalkSctID), the move script at
-   + 0x10, x y z at + 0x18; colo_rooms.py reads the slots the same way) for where they stand and which model they are.
+2. **Where people stand: read** (2026-11-07). tools/orre/colo_rooms.py gives each room's `people` (the floor record's
+   + 0x14 slot: 36-byte records, flags (visible 0x80), the angle at + 4, the people info row at + 6, the name at + 8,
+   the move / talk scripts at + 0x10 / + 0x14, x y z at + 0x18) and `people_info()` each row's model file (common_rel
+   + 0x13E440, 0x2C each, the u32 at + 0xC a file id: ken_b1.dat the hero, hizuki_b1/_b2.dat RUI, bag_b1.dat RUI's
+   sack in PHENAC...): 757 people in the field rooms, 116 models. Many start hidden (the OUTSKIRT STAND's all are:
+   the room's script shows them by the story), so placing them waits for the scripts (step 5). Next: their sprites
+   (step 4).
 3. **Maps: done** (all 121 field rooms). The stadiums' battle stages (kind 2 rooms: M1_water_colo, M2_earth_colo,
    M4_cylinder_colo, M4_bottom_colo, T1_ancient_colo) aren't maps: Kai's battles. The `_ev` and `_bf` copies aren't
    either (a scene's or a battle's).

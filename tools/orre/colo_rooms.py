@@ -14,6 +14,15 @@ each of its doors, stairs and elevators leads, all read from the game's own tabl
              the script with the args when the hero passes / touches / checks that trigger)
      links   {collision id: Link}: where its triggers lead (below)
      gates   collision objects the room's scripts switch on and off (scriptSetCol, native 0x76: story gates)
+     people  [Person]: the room's characters (the record's + 0x14 slot, floor_data.c floorDataBiosGetCharInfo: a
+             FieldTable of 36-byte records, floor_character*.c floorCharacterBios*: u8 flags (visible 0x80, load-init
+             0x40, talk through walls 0x10, move type & 7), u8 talk start / end types (>> 6, >> 4 & 3), pad, s16 angle
+             in degrees (+ 4), u16 the people info row (+ 6, below), u16 name (+ 8), u32 move script (+ 0x10), u32
+             talk script (+ 0x14), f32 x y z (+ 0x18))
+
+  The people info table (common_rel .data + 0x13E440, 0x2C each, count at + 0x14A6E8; people_exact_8018F5B4.c
+  peopleInfoBiosGetPtrFromIndex): each row's u32 at + 0xC is its model's file id (the archives' _ids.txt: id << 16
+  | type, ken_b1.dat the hero, hizuki_b1.dat RUI...): people_info(unpacked) -> [model file name or None].
 
   A link is one of (the shared script bank 0x0596, common_script_0596.json in the decomp):
      0596:4  link_floor_with_sound(room, entry, sound): a door, a staircase, a way out; room 910 = the world map
@@ -144,10 +153,46 @@ def scd_native_calls(d):
 
 # ---- the rooms
 
+class Person:
+    def __init__(self, index, flags, talk_types, angle, info, name, move, talk, x, y, z):
+        self.index, self.flags, self.talk_types, self.angle, self.info = index, flags, talk_types, angle, info
+        self.name, self.move, self.talk, self.x, self.y, self.z = name, move, talk, x, y, z
+
+    @property
+    def visible(self):
+        return bool(self.flags & 0x80)
+
+    def __repr__(self):
+        return "Person(%d info %d at %.1f,%.1f,%.1f angle %d talk %08X)" % (self.index, self.info, self.x, self.y,
+                                                                           self.z, self.angle, self.talk)
+
+
+PEOPLE_INFO, PEOPLE_INFO_COUNT, PEOPLE_INFO_SIZE = 0x13E440, 0x14A6E8, 0x2C
+
+
+def people_info(unpacked):
+    """[model file name or None] per people info row (above)."""
+    ids = {}
+    for f in sorted(os.listdir(unpacked)):
+        p = os.path.join(unpacked, f, "_ids.txt")
+        if os.path.exists(p):
+            for line in open(p):
+                w = line.split()
+                if len(w) >= 2:
+                    ids.setdefault(int(w[0], 16) >> 16, w[1])
+    data = colo_data._data(unpacked)
+    n = struct.unpack_from(">I", data, PEOPLE_INFO_COUNT)[0]
+    out = []
+    for i in range(n):
+        fid = struct.unpack_from(">I", data, PEOPLE_INFO + i * PEOPLE_INFO_SIZE + 0xC)[0] >> 16
+        out.append(ids.get(fid) if fid else None)
+    return out
+
+
 class Room:
     def __init__(self, room, file, area, kind, place):
         self.room, self.file, self.area, self.kind, self.place = room, file, area, kind, place
-        self.entries, self.events, self.links, self.gates = [], [], {}, set()
+        self.entries, self.events, self.links, self.gates, self.people = [], [], {}, set(), []
 
     def __repr__(self):
         return "Room(%d %s)" % (self.room, self.file)
@@ -182,6 +227,21 @@ def rooms(unpacked):
         for k in range(n):
             ang, x, y, z = struct.unpack_from(">hxxfff", d, base + 16 * k)
             r.entries.append((ang, x, y, z))
+        # the characters (the + 0x14 slot, the same kind of table)
+        pslot = crel.get((colo_data.DATA_SECTION, rec + 0x14))
+        if pslot is None or pslot[0] != 0 or pslot[3] not in stores:
+            continue
+        sec, desc = stores[pslot[3]]
+        if (sec, desc) not in rr or (sec, desc + 4) not in rr:
+            continue
+        cnt, ent = rr[(sec, desc)], rr[(sec, desc + 4)]
+        n = struct.unpack_from(">I", d, secs[cnt[2]][0] + cnt[3])[0]
+        base = secs[ent[2]][0] + ent[3]
+        for k in range(n):
+            o = base + 36 * k
+            flags, types, ang, info, name = struct.unpack_from(">BBxxhHH", d, o)
+            move, talk, x, y, z = struct.unpack_from(">IIfff", d, o + 0x10)
+            r.people.append(Person(k, flags, types, ang, info, name, move, talk, x, y, z))
     n = struct.unpack_from(">I", data, EVENT_COUNT)[0]
     for i in range(n):
         kind, room, col, script, a, b, c, e = struct.unpack_from(">BxHIIIIII", data, EVENTS + i * EVENT_SIZE)
