@@ -28,6 +28,8 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
   silent ("Placeholder music - none").
 - **Map names from the game's own areas** (the user, 2026-11-07): each map's name is Colosseum's name for its place.
 - **The tile scale is Claude's call** (the user, 2026-11-07): 8 Colosseum units a tile, as the OUTSKIRT STAND has it.
+- **Colosseum's own world map screen** (the user, 2026-11-07): leaving a place through its exits opens Colosseum's
+  world map (its own screen, art and travel), never a Kai-style town map. Then the music is converted.
 
 ## Rules to keep
 - The disc image is never committed, and neither are the packs (orre/ is ignored): tools/orre/make_pack.sh builds
@@ -112,9 +114,14 @@ Colosseum's collision. Test: scenario `orre_outskirt_stand` (needs orre/ from ma
   (O3D_LayoutBlocks after SINNOH's), fieldmap.c / field_camera.c (O3D_METATILE_BEHAVIOR on O3D_IsOrreGroup maps).
   orre/ from Updater_OrreRoot, or MOEMON_ORRE_PAK; MOEMON_O3D_PERF prints a frame's time.
 
+- **The world map** (2026-11-07, src/orre/worldmap.c): Colosseum's own screen (its map, pieces, pictures, words,
+  cursor links and which places show, from the game's tables: docs/ORRE_HANDOFF.md "The world map") in a 480x320
+  picture of its own (display.c / sdl2.c, as the BADGE CASE's). maps.py `exits` -> gen_maps.py's coord events ->
+  data/scripts/orre.inc Orre_EventScript_WorldMap (specials Orre_WorldMap, Orre_WorldMapTravel). Colosseum's story
+  flags: src/orre/orre_story.c (`mp orreflag N [0|1]`; not saved yet). The pack's reader: src/orre/orre_data.c.
+
 ## Next (the full list, with what is known of each: docs/ORRE_HANDOFF.md)
-1. The OUTSKIRT STAND's door: its trigger (the ramp's top) as a warp into S1_shop_1F, made a map the same way, and
-   the exit loop as the way out to the world map (Colosseum's world map screen: worldmap_menu_rel).
+1. The music, converted (the user, 2026-11-07), then the world map's travel scene.
 2. Colosseum's start positions and people: the map modules' tables (.rel; their records aren't decoded yet: the
    direction / x / y / z records seen in S1_out.rel have no clear stride) for where people stand, and their models.
 3. Sprites: render the character models (with their own animations, still to be read) into GBA-style sprite sheets.

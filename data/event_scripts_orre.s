@@ -2,10 +2,12 @@
 #include "constants/global.h"
 #include "constants/flags.h"
 #include "constants/vars.h"
+#include "constants/comparison_operators.h"
 	.include "asm/macros.inc"
 	.include "constants/constants.inc"
 	.include "asm/macros/event.inc"
 	.section script_data, "aw"
+	.include "data/scripts/orre.inc"
 	.include "data/maps/Orre_OutskirtStand/scripts.inc"
 	.include "data/maps/Orre_OutskirtStandDiner/scripts.inc"
 

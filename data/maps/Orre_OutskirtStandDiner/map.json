@@ -14,8 +14,8 @@
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": null,
   "object_events": [],
-  "coord_events": [],
   "bg_events": [],
+  "coord_events": [],
   "warp_events": [
     {
       "x": 8,

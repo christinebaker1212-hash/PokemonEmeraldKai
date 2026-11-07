@@ -1423,6 +1423,11 @@ static void RenderToBackbuffer(void)
             SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r);   // (POKéMON STADIUM's screens: src/mp/mp_stadium_ui.c)
             badges = MP_StadiumUi_Canvas(sRenderer);
         }
+        if (!fight && !badges)
+        {
+            SDL_Texture *Orre_WorldMap_Canvas(SDL_Renderer *r);   // (ORRE's world map: src/orre/worldmap.c)
+            badges = Orre_WorldMap_Canvas(sRenderer);
+        }
         if (badges)
         {
             gameTex = badges;

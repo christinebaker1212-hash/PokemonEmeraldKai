@@ -1,4 +1,4 @@
-# ORRE handoff (2026-11-06)
+# ORRE handoff (2026-11-07)
 
 Pokémon Colosseum's region in Kai. **Read `docs/ORRE_DECISIONS.md` first**: the user's decisions (own engine, 2D
 sprites rendered from the models, Kai's battles, Colosseum's own words and scripts, Shadow Pokémon in Orre only), the
@@ -17,7 +17,13 @@ rules, and what each tool does. This file is where things stand, what a new sess
 - **The OUTSKIRT STAND walks, inside and out** (group 45: map 0 Orre_OutskirtStand, `MOEMON_DEBUG_WARP=45,0,25,29`
   at the foot of the diner's ramp; map 1 Orre_OutskirtStandDiner, S1_shop_1F): the diner's door leads in and its
   doorway back out. Named OUTSKIRT STAND from Colosseum's own text, silent until its song is converted. No people
-  or scripts yet; the lot's exits (the trigger round it) don't lead anywhere yet.
+  or scripts yet.
+- **Colosseum's own world map** (2026-11-07, src/orre/worldmap.c): stepping on the lot's way out (the trigger loop,
+  collision object 2: maps.py `exits`) opens it, all of it the game's own (below, "The world map"). B goes back to the
+  field; A on a place ORRE has a map for travels to that map's start; a place not in the game yet is refused (a
+  buzz). Only the OUTSKIRT STAND shows until Colosseum's story flags are set: nothing sets them yet but
+  `mp orreflag N` (src/orre/orre_story.c, not saved yet). Test: scenario `orre_worldmap`. No travel scene yet (the
+  bike ride: move_demo.map, cam_move_demo_*.cam, lbl_3_data_270).
 
 ## Resources
 - **The disc** (the user's, 2026-11-04): Pokemon Colosseum (USA), GC6E01, an RVZ inside a zip:
@@ -58,9 +64,9 @@ rules, and what each tool does. This file is where things stand, what a new sess
    sinnoh_feet_row, sinnoh_lift_iron and sinnoh_gym passed with ORRE's hooks in.
 
 ## Next steps (in order)
-1. **The way out.** The trigger loop round the OUTSKIRT STAND's lot (collision object 2) is how Colosseum leaves for
-   its world map (worldmap_menu_rel in the decomp; the floor table's kind 5 room world_map, room 0x38e). Ask the
-   user how ORRE's world map works in Kai (Colosseum's own screen, or a Kai-style town map) before building it.
+1. **Music, now** (the user, 2026-11-07: "Colosseum's own world map screen, then convert the music"): see 6.
+   Then the world map's own song (worldmap_song) and the travel scene (the bike ride, lbl_3_data_270: per place a
+   camera file, cam_move_demo_01-15, and a speed).
 2. **Where people stand, and where doors lead.** The map modules (.rel: REL_M1.md "FieldTable" descriptors) publish
    each room's tables; S1_out.rel has (direction, x, y, z)-like records whose stride isn't decoded. Decode them (the
    decomp's readers of those tables, or XD's decomp) for start positions, people and their models, and for which
@@ -73,10 +79,11 @@ rules, and what each tool does. This file is where things stand, what a new sess
 5. **Words and scripts.** The map scripts (.scd, the GS VM) converted to Kai's (as tools/sinnoh/gen_scripts.py does
    SINNOH's); the text (msg.py) into Kai's charset, controls mapped (`{hero}`, `{rui}`, `{npc}`, `{item}`...). Never
    write ORRE's words or scripts by hand.
-6. **Music** (the user, 2026-11-07: converted, it can't be found online): the MusyX projects in common.fsys
+6. **Music** (the user, 2026-11-07: converted, it can't be found online; next): the MusyX projects in common.fsys
    (snd_music_proj / _pool / _sdir) and the songs (0x08 members), to .kaisong; the decomp's MusyX library is the
    reference. Each map gets its song as its song converts.
-7. **Snagging and Shadow Pokémon**, in Orre only (state in a sidecar: saves never change layout).
+7. **Snagging and Shadow Pokémon**, in Orre only (state in a sidecar: saves never change layout; Colosseum's story
+   flags, src/orre/orre_story.c, go there too).
 8. The in-game download screen when orre/ is missing (as the DANCE machine's rh_screen.c StateNoSongs).
 
 ## Open questions for the user
@@ -100,6 +107,23 @@ rules, and what each tool does. This file is where things stand, what a new sess
   mt_battle_song, battle2..9, title_song...); their samples are the disc's files/sound/*.samp (snd_music.samp 3.5 MB),
   copied in as sound/*.samp. The decomp restored the MusyX library (pkmn-colosseum PR #668): the reference for the
   sequencer and the sample directory.
+
+## The world map (src/orre/worldmap.c)
+- **What it is made of**, all in orre_data.pak: main.dol's menu tables (dol/menu_items.bin: items of 0x1C, u8 flags
+  (0x80 shown, 0x40 the last), s16 x y w h (640x480; negative mirrors), s16 sprites a b, s16 the next item at 0x18;
+  dol/menu_sprites.bin: sprites of 0x18, u16 x y w h at 8, u32 the texture's resource id at 0x10: the decomp's
+  src/game/menu/menu_bios_range_8005D7F8.c), the textures by resource id (index/ids.txt, from fsys.py's _ids.txt:
+  .tex = u16 w h, u8 code at 4 (0x04 CMPR, 0x20 RGBA8), texels at 0x80), worldmap_menu_rel's .data (section 3) and
+  world_map/world_map.msg. The screen's items run from 0x906 (the map) to 0x91C (the words' box).
+- **Its tables** (src/rel/worldmap_menu_rel/worldmap_menu_rel.c; read by src/game/gs_title.c wmapCursorMove /
+  wmapDrawInfo / fn_80024A2C): places (9: flag, room, menu item, picture; rooms S1_out, S2_out_2, D1_out, D2_out,
+  D4_out, M1_out, M2_out, M3_out, M4_out_2), description rows (12: flag + 9 messages, the first row whose flag is 0 or
+  set; place i's message is msg[order[i]], order = main.dol lbl_802E4F58 = 0 8 6 5 2 1 3 4 7, dol/wm_desc_order.bin),
+  the travel scene's cameras (20: lbl_3_data_270) and the cursor's links (66: directions 1 up 2 right 4 down 8 left,
+  from, to). THE UNDER's picture is mapsnap008 once flag 0x45D is set.
+- The cursor's pieces (0x91A the red diamond, 0x931-0x934 the brackets, 0x935 / 0x936 the cross lines) are drawn
+  round the place's centre here; where Colosseum's code puts them exactly (it moves them from their table places)
+  isn't read yet.
 
 ## Learned (formats and pitfalls)
 - FSYS member types (byte 2 of the id): 0x02 map model, 0x04 character / object model, 0x06 collision, 0x0A text,

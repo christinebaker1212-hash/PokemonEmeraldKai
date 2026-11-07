@@ -4053,6 +4053,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
         st = Updater_OrreState(&done, &total, &err);
         printf("[test] orre state %d %ld/%ld %s\n", st, done, total, err ? err : "");
     }
+    else if (strcmp(cmd, "orreflag") == 0)
+    {
+        // orreflag N [0|1]: Colosseum's story flag N (hex with 0x) set, or cleared with 0 (src/orre/orre_story.c)
+        bool8 Orre_Flag(u16 flag);
+        void Orre_SetFlag(u16 flag, bool8 on);
+        unsigned long flag = strtoul(arg, NULL, 0);
+        const char *on = strchr(arg, ' ');
+        Orre_SetFlag(flag, on ? atoi(on + 1) != 0 : TRUE);
+        printf("[test] orreflag 0x%lX %d\n", flag, Orre_Flag(flag));
+    }
     else if (strcmp(cmd, "s3dground") == 0)
     {
         // s3dground X Y [NEAR]: SINNOH's ground height (BDHC) at map pixel (X, Y) of this map, the layer nearest NEAR

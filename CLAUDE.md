@@ -95,7 +95,7 @@ and scripts, Shadow Pokémon in Orre only). Packs ripped from the disc by tools/
 committed; the release builds them from the `ORRE_DISC_URL` secret and ships them as MoemonOrre.zip). **ORRE has its own
 3D engine, src/orre/o3d.c, never SINNOH's** (the user, 2026-11-04): never put ORRE code in src/sinnoh/ or s3d.h, or
 SINNOH's in src/orre/; where both hook into the game each has its own line. The OUTSKIRT STAND walks (scenario
-orre_outskirt_stand).
+orre_outskirt_stand); its way out opens Colosseum's own world map (src/orre/worldmap.c, scenario orre_worldmap).
 
 **Magic: The Gathering** (a fourth card game): the user's decisions in `docs/MTG_DECISIONS.md`; **start at
 `docs/MTG_HANDOFF.md`**. Forge translated into C (src/mtg/, include/mtg/mtg.h; its AI too, later), reading Forge's own

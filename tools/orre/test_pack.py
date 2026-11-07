@@ -27,7 +27,7 @@ def main(src, out):
     for arc in sorted(os.listdir(src)):
         for fn in sorted(os.listdir(os.path.join(src, arc))):
             path = os.path.join(src, arc, fn)
-            if build_pack.is_data(fn):
+            if build_pack.is_data(arc, fn):
                 if hashlib.sha1(pd.read("%s/%s" % (arc, fn))).digest() != hashlib.sha1(open(path, "rb").read()).digest():
                     print("FAIL data", arc, fn)
                     bad += 1

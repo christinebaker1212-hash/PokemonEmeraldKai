@@ -42,10 +42,20 @@ def archive_ids(iso_files):
     return out
 
 
+def unpacked_archive_ids(unpacked):
+    """{FSYS group id: archive name} from fsys.py's _archive_id.txt files."""
+    out = {}
+    for arc in os.listdir(unpacked):
+        p = os.path.join(unpacked, arc, "_archive_id.txt")
+        if os.path.exists(p):
+            out[int(open(p).read().split()[0], 16)] = arc
+    return out
+
+
 def floors(unpacked, iso_files=None):
     data = _data(unpacked)
     count = struct.unpack_from(">I", data, FLOOR_COUNT)[0]
-    names = archive_ids(iso_files) if iso_files else {}
+    names = archive_ids(iso_files) if iso_files else unpacked_archive_ids(unpacked)
     out = []
     for i in range(count):
         r = FLOOR_TABLE + i * FLOOR_SIZE

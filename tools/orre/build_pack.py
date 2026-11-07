@@ -6,7 +6,9 @@
                      (.scd), floor data (.flr), camera shots (.cam), the map modules' tables (.rel), the character
                      and object models (.dat, HSD: for their sprites), and the music and sounds: the songs (.snd),
                      the MusyX projects (common/snd_*_proj / _pool / _sdir.bin) and their samples (sound/*.samp,
-                     the disc's files/sound/, copied in by make_pack.sh)
+                     the disc's files/sound/, copied in by make_pack.sh), the world map's textures, index/ids.txt
+                     (every member's resource id and file) and dol/menu_items.bin, dol/menu_sprites.bin,
+                     dol/wm_desc_order.bin (main.dol's menu tables, as they are: copied in as sys/main.dol by make_pack.sh)
 
     python3 -I tools/orre/build_pack.py UNPACKED_DIR OUT_DIR
 
@@ -46,10 +48,39 @@ VERSION = 2
 DATA_TYPES = ("msg", "col", "scd", "flr", "cam", "rel", "dat", "snd", "samp")
 
 
-def is_data(fn):
-    """A file orre_data.pak keeps: the types above, and the sound projects (common's snd_*_proj / _pool / _sdir)."""
+TEX_ARCHIVES = ("world_map",)   # archives whose textures (.tex) are kept: the screens ORRE draws from them
+
+
+def is_data(arc, fn):
+    """A file orre_data.pak keeps: the types above, the sound projects (common's snd_*_proj / _pool / _sdir), and the
+    textures of TEX_ARCHIVES."""
     ext = fn.rsplit(".", 1)[-1]
-    return ext in DATA_TYPES or (ext == "bin" and fn.startswith("snd_"))
+    return (ext in DATA_TYPES or (ext == "bin" and fn.startswith("snd_"))
+            or (ext == "tex" and arc in TEX_ARCHIVES))
+
+
+# main.dol's menu tables (the Colosseum decomp: src/game/menu/menu_bios_range_8005D7F8.c): (address, record size,
+# the address of their count): every menu's items (position, size, two sprites, the next item) and sprites (a
+# rectangle on a texture, by its resource id); a count under 0x80000000 is the count itself: the world map's order of
+# its places' descriptions (lbl_802E4F58: src/game/gs_title.c wmapDrawInfo)
+DOL_TABLES = {"menu_items": (0x802EF0A8, 0x1C, 0x80478968), "menu_sprites": (0x802E7CE8, 0x18, 0x80478908),
+              "wm_desc_order": (0x802E4F58, 1, 9)}
+
+
+def dol_tables(path):
+    d = open(path, "rb").read()
+    offs, addrs, sizes = (struct.unpack_from(">18I", d, o) for o in (0, 0x48, 0x90))
+
+    def at(a):
+        for o, ad, sz in zip(offs, addrs, sizes):
+            if ad <= a < ad + sz:
+                return o + a - ad
+        raise KeyError(hex(a))
+    out = {}
+    for name, (addr, size, count) in DOL_TABLES.items():
+        n = count if count < 0x80000000 else struct.unpack_from(">I", d, at(count))[0]
+        out[name] = d[at(addr):at(addr) + n * size]
+    return out
 
 
 def mesh_bytes(m, tex_index):
@@ -147,12 +178,25 @@ def build(src, out):
     files = []
     for arc in sorted(os.listdir(src)):
         for fn in sorted(os.listdir(os.path.join(src, arc))):
-            if is_data(fn):
+            if is_data(arc, fn):
                 data = open(os.path.join(src, arc, fn), "rb").read()
                 z = zlib.compress(data, 9)
                 if len(z) >= len(data):
                     z = None
                 files.append(("%s/%s" % (arc, fn), data, z))
+    # every member's resource id (fsys.py's _ids.txt), and main.dol's menu tables
+    ids = []
+    for arc in sorted(os.listdir(src)):
+        p = os.path.join(src, arc, "_ids.txt")
+        if os.path.exists(p):
+            ids += ["%s %s/%s" % (l.split()[0], arc, l.split()[1]) for l in open(p).read().split("\n") if l.strip()]
+    if ids:
+        data = ("\n".join(ids) + "\n").encode()
+        files.append(("index/ids.txt", data, zlib.compress(data, 9)))
+    dol = os.path.join(src, "sys", "main.dol")
+    if os.path.exists(dol):
+        for name, data in dol_tables(dol).items():
+            files.append(("dol/%s.bin" % name, data, zlib.compress(data, 9)))
     table, blobs, off, stored = [], [], 0, {}
     for name, data, z in files:
         if len(name.encode()) > 47:
