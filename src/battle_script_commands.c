@@ -1,4 +1,5 @@
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 bool8 MP_StadiumClause_Blocks(u8 battler, u8 moveEffect);   // Moemon Kai: mp_stadium_cup.c
 bool8 MP_StadiumClause_SelfKo(void);
 u16 MP_RegionVictorySong(u16 song);   // Moemon Kai (pokemon.c)
@@ -770,6 +771,7 @@ static const u16 sMovesForbiddenToCopy[] =
     MOVE_COVET,
     MOVE_TRICK,
     MOVE_FOCUS_PUNCH,
+    MOVE_SHADOW_RUSH,   // Moemon Kai: Colosseum's: no METRONOME, MIMIC or SKETCH of it
     METRONOME_FORBIDDEN_END
 };
 
@@ -3774,6 +3776,21 @@ static void Cmd_getexp(void)
             }
             else if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_LEVEL) == MAX_LEVEL)
             {
+                *(&gBattleStruct->sentInPokes) >>= 1;
+                gBattleScripting.getexpState = 5;
+                gBattleMoveDamage = 0; // used for exp
+            }
+            else if (!gMpCoopBattle && Orre_Shadow_Is(&gPlayerParty[gBattleStruct->expGetterMonId]))
+            {
+                // Moemon Kai: a Shadow Pokémon takes no EXP of its own: Colosseum keeps it (from the gauge's level 3) to
+                // give back when it's purified, with no message (fight_range_80211A00.c)
+                u32 shadowExp = (gBattleStruct->sentInPokes & 1) ? *exp : (holdEffect == HOLD_EFFECT_EXP_SHARE ? gExpShareExp : 0);
+                if (holdEffect == HOLD_EFFECT_LUCKY_EGG)
+                    shadowExp *= 2;
+                if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
+                    shadowExp = shadowExp * 150 / 100;
+                if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_HP))
+                    Orre_Shadow_TakeExp(&gPlayerParty[gBattleStruct->expGetterMonId], shadowExp);
                 *(&gBattleStruct->sentInPokes) >>= 1;
                 gBattleScripting.getexpState = 5;
                 gBattleMoveDamage = 0; // used for exp

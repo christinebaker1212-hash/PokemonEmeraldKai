@@ -428,6 +428,7 @@ struct CompressedSpritePalette;
 u8 MP_Hue_Number(const u8 *otName, const u8 *nickname, u16 trainerId);
 s16 MP_Hue_Degrees(u16 species, u8 nv);
 void MP_Hue_Limits(u16 species, u8 *min, u8 *max);
+#define MP_HUE_SHADOW 0x7FFF   // (Moemon Kai: not a turn: a Shadow Pokémon's dark palette, src/orre/orre_shadow.c)
 s16 MP_Hue_OfBoxMon(const struct BoxPokemon *b);
 s16 MP_Hue_Find(u32 otId, u32 personality);
 s16 MP_Hue_FindByPersonality(u32 personality);

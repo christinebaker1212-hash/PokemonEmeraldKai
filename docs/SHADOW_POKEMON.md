@@ -38,7 +38,36 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
   Hyper Mode's and CALL's chances by nature and level, the walking / day care step counts (field_control_avatar.c).
   `mp shadow make|drop|steps|stepcount|purify|reload|table`; test shadow_gauge (tools/orre/check_shadow.py recomputes
   every value from the table).
-- Next: S3, battles (Shadow Rush, Hyper Mode, CALL, the aura, EXP stored, the battling drop on sending out).
+- **S3a, battles** (2026-11-07): MOVE_SHADOW_RUSH (912, after the Maker's slots; Colosseum's row: 90 power, 100
+  accuracy, 5 PP, NORMAL, contact, recoil a quarter; Colosseum's name and description from common_rel's description
+  messages at .data + 0x647B4; a violet TAKE DOWN in Kai's 2D animations; never copied by METRONOME / MIMIC / SKETCH;
+  a Gen 3 move to the GENERATION). In battle a Shadow Pokémon's moves are Colosseum's (pokemon_data.c
+  pokemonBiosGetPokemonWazaPtr): slot 0 SHADOW RUSH, slot 1 "????" until the gauge's level 2, slot 2 until 4, slot 3
+  until 5; its own moves and PP are never written over (battle_controller_player.c Copy / SetPlayerMonData). The
+  battling drop once a battle, the first time it's sent out; no EXP of its own: none at levels 0-2, stored from level
+  3 (battle_script_commands.c Cmd_getexp). Test shadow_battle (tools/orre/check_shadow_battle.py). Solo battles only for
+  now: in co-op the master's game doesn't know a partner's Shadow Pokémon yet (their records are in their own sidecar).
+- Next, S3b: Hyper Mode (each SHADOW RUSH rolls the nature's chance by the gauge's level; not asleep or already in it;
+  Colosseum's messages 0x771B / 0x771C), CALL (snaps it out by the CALL chance and takes the CALL drop; wakes a
+  sleeper: messages 0x7704-0x7709, 0x771D), the aura, and the dark palettes (below); then the opponents' Shadow
+  Pokémon (Cipher's) and co-op.
+
+## Dark palettes (the user, 2026-11-07)
+"Along with the aura, I think Pokemon should have special, dark palettes, similar to Shadow Lugia. Since there are a
+finite amount of Shadow Pokemon, we can curate what they look like." Every Shadow Pokémon gets its own dark palette,
+chosen one by one (in the spirit of XD's Shadow Lugia: darkened, violet-leaning, its eyes and accents kept bright), for
+both of Kai's art sets (OPTIONS > CREATURES: MOéMON and POKéMON), its front, back and shiny pictures, and its sprite in
+the field and the Garden; it returns to its own colours when purified.
+- **Built (2026-11-07, a first pass for the user to curate):** tools/orre/shadow_palettes.py makes each of the 48's dark
+  palettes for both art sets into src/data/orre_shadow_palettes.h: one treatment for all (the body sunk into a violet-to-
+  indigo ramp keeping its lightness order and its parts apart by hue, large white areas sinking too as Shadow Lugia's
+  did, outlines near-black indigo, small highlights cold lavender, eyes and small bright accents a glowing red-violet,
+  MOéMON skin ashen lavender), then the tool's CURATED table, empty until the user has chosen: `--preview OUT.png`
+  draws all 48 (MOéMON own / dark, POKéMON own / dark). The game shows it through the Stadium hues' pipeline
+  (mp_hue.c: MP_HUE_SHADOW from MP_Hue_Find / MP_Hue_OfBoxMon, MakeLz applying Orre_Shadow_Recolor), so every
+  picture that takes a Pokémon's palette gets it (battle front and back, summary, the phone app); shiny or not (the
+  dark palette covers it while Shadow). Icons keep their colours (shared palettes); field / Garden sprites next.
+  Test shadow_look (tools/orre/check_shadow_look.py).
 
 ## How Colosseum does it (the decomp: christinebaker1212-hash/pkmn-colosseum; Colosseum calls them "dark Pokémon")
 - **The Shadow Pokémon table**: common_rel's .data + 0x1439D8, 97 records of 0x38 bytes (count at + 0x14A6F8; the

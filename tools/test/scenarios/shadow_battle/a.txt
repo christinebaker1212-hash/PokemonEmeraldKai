@@ -1,0 +1,23 @@
+pressuntil A field 5000
+mp shadow make 0 1
+mp shadow drop 0 9
+mp wild 263:2
+pressuntil A action 3000
+wait 10
+press A 2
+wait 30
+shot moves_closed
+press A 2
+pressuntil A field 9000
+wait 60
+mp shadow drop 0 4 12
+mp wild 263:2
+pressuntil A action 3000
+wait 10
+press A 2
+wait 30
+shot moves_open
+press A 2
+pressuntil A field 9000
+wait 60
+mp shadow drop 0 9

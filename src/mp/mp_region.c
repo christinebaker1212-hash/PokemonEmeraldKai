@@ -1591,6 +1591,8 @@ u8 MP_Gen_OfMove(u16 move)
 {
     static const u16 sLast[] = {165, 251, 354, 467, 559, 621, 689, 778};
     u8 g;
+    if (move == MOVE_SHADOW_RUSH)
+        return 3;   // (Colosseum's: a Gen 3 game's)
     if (IS_MAKER_MOVE(move))   // (Moemon Maker M3b: a new move, never sealed by the GENERATION; an empty slot always)
         return Maker_MoveBase(move) ? 0 : 99;
     for (g = 0; g < ARRAY_COUNT(sLast); g++)

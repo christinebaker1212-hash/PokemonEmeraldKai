@@ -1417,6 +1417,11 @@ static const u8 sPsychoBoostDescription[] = _(
     "Allows a full-power attack,\n"
     "but sharply lowers SP. ATK.");
 
+// Moemon Kai: Colosseum's own words for SHADOW RUSH (common_rel's description messages, 0x2A67)
+static const u8 sShadowRushDescription[] = _(
+    "An attack that is so harsh,\n"
+    "it also hurts the attacker.");
+
 #include "move_descriptions_gen4.h"   // Moemon Kai: Gen 4 moves
 #include "move_descriptions_gen58.h"   // Moemon Kai: Gen 5-8 moves
 
@@ -1780,4 +1785,5 @@ const u8 *const gMoveDescriptionPointers[MOVES_COUNT - 1] =
     [MOVE_PSYCHO_BOOST - 1] = sPsychoBoostDescription,
     MOVE_DESCRIPTIONS_GEN4
     MOVE_DESCRIPTIONS_GEN58
+    [MOVE_SHADOW_RUSH - 1] = sShadowRushDescription,
 };

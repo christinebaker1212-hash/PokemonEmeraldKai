@@ -1,0 +1,11 @@
+# A Shadow Pokémon in battle (src/orre/orre_shadow.c, docs/SHADOW_POKEMON.md): made Colosseum's Shadow 1 (a gauge of
+# 30), its move list is SHADOW RUSH and three "????" (shot moves_closed); SHADOW RUSH wins a wild battle; sent out
+# once, the gauge takes its battling drop; it takes no EXP at a closed gauge. A scent opens it to its fourth bar
+# (level 4): two of its own moves show (moves_open) and the EXP it earns is kept for its purification. Its own four
+# moves and their PP are the party's still after both battles (SHADOW RUSH never writes over them).
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+EXPECT_A=("shadow: Shadow 1 (species 335) made" "shadow: Shadow 1 sent out, gauge" "shadow: Shadow 1 EXP")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 -I tools/orre/check_shadow_battle.py"

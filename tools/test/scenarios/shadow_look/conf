@@ -1,0 +1,10 @@
+# A Shadow Pokémon's dark palette (docs/SHADOW_POKEMON.md "Dark palettes"; src/data/orre_shadow_palettes.h from
+# tools/orre/shadow_palettes.py): a QUAGSIRE (Colosseum's Shadow 8 is one) in its own colours, made Shadow (its dark
+# MOéMON palette in battle), with OPTIONS > CREATURES on POKéMON (its dark POKéMON palette), purified (its own again).
+# CHECK compares the four pictures' colours where the QUAGSIRE stands. Shots *.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=195:40"
+EXPECT_A=("shadow: Shadow 8 (species 195) made" "shadow: Shadow 8 purified")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 -I tools/orre/check_shadow_look.py"

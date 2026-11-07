@@ -1,0 +1,32 @@
+pressuntil A field 5000
+mp wild 263:2
+pressuntil A action 3000
+wait 10
+shot own_moe
+press A 2
+press A 2
+pressuntil A field 9000
+wait 30
+mp shadow make 0 8
+mp wild 263:2
+pressuntil A action 3000
+wait 10
+shot dark_moe
+press A 2
+press A 2
+pressuntil A field 9000
+wait 30
+mp creatures 1
+mp wild 263:2
+pressuntil A action 3000
+wait 10
+shot dark_pokemon
+press A 2
+press A 2
+pressuntil A field 9000
+wait 30
+mp shadow purify 0
+mp wild 263:2
+pressuntil A action 3000
+wait 10
+shot own_pokemon
