@@ -5,10 +5,12 @@ palettes"): one palette per Shadow Pokémon (src/data/orre_shadow.h's 48) for ea
 (graphics/moemon/gMonPalette_X.bin) and POKéMON (graphics/pokemon/x/normal.pal), shown while it is Shadow (shiny or not),
 its own colours again once purified.
 
-Each starts from one treatment, in the spirit of XD's Shadow Lugia (shadow_colour below): the body sunk into a deep
-violet ramp that keeps each colour's lightness order and its parts apart, outlines near-black indigo, highlights a cold
-lavender, the eyes and small bright accents (few pixels, strong colour) a glowing red-violet, MOéMON's skin (the
-Stadium hues' skin slots, src/data/mp_hues.h) an ashen lavender rather than violet. Then CURATED gives any Pokémon's
+Each follows Shadow Lugia's own scheme (XD), its colours' roles working against each other (BODY ... OUTLINE below): the
+largest part a deep indigo-plum, the largest light part a pale cool lavender-grey (Lugia's belly), the next part apart
+blue-black to a steel-blue edge (its fins and plates), the eyes and small bright accents a crimson-magenta glow,
+highlights icy lilac, outlines near-black violet, MOéMON's skin (the Stadium hues' skin slots, src/data/mp_hues.h) an
+ashen lilac. Each colour keeps its lightness order along its role's ramp (roles(): which part a colour is, by the
+share of the picture it covers and its hue family). Then CURATED gives any Pokémon's
 own colours slot by slot, chosen looking at the preview (`--preview OUT.png`: each one's MOéMON and POKéMON pictures,
 own colours and dark, side by side).
 
@@ -108,22 +110,69 @@ def pkmn_art(const):
     return colours, px
 
 
-def shadow_colour(rgb, share, skin):
-    """One colour of the dark palette: SHARE of the picture's pixels it covers, SKIN a MOéMON skin slot."""
-    r, g, b = (v / 255.0 for v in rgb)
-    h, s, v = colorsys.rgb_to_hsv(r, g, b)
-    lum = 0.299 * r + 0.587 * g + 0.114 * b
-    if lum < 0.16:                                   # outline: near-black indigo
-        return tuple(255 * x for x in colorsys.hsv_to_rgb(0.72, 0.55, 0.10 + 0.4 * lum))
-    if skin:                                         # MOéMON's skin: ashen lavender
-        return tuple(255 * x for x in colorsys.hsv_to_rgb(0.74, 0.14, 0.52 + 0.42 * lum))
-    if share < 0.025 and s > 0.45 and v > 0.45:      # eyes, small bright accents: a glowing red-violet
-        return tuple(255 * x for x in colorsys.hsv_to_rgb(0.94, 0.80, max(0.85, v)))
-    if s < 0.18 and lum > 0.78 and share < 0.06:     # highlights (a white body sinks like the rest): cold lavender
-        return tuple(255 * x for x in colorsys.hsv_to_rgb(0.75, 0.22, 0.70 + 0.25 * lum))
-    # the body: a deep violet ramp, its parts kept apart by their hue (spread over violet to indigo)
-    band = 0.64 + 0.22 * ((h + 0.08) % 1.0)
-    return tuple(255 * x for x in colorsys.hsv_to_rgb(band, 0.32 + 0.45 * s, 0.10 + 0.60 * lum ** 0.9))
+# Shadow Lugia's scheme (XD): each role a ramp from its darkest to its lightest shade (0-255 RGB)
+BODY = ((34, 18, 60), (130, 88, 172))       # deep indigo-plum: the largest part
+UNDER = ((116, 110, 150), (216, 210, 236))  # pale cool lavender-grey: the largest light part (Lugia's belly, wings' undersides)
+HARD = ((12, 22, 56), (72, 122, 196))       # blue-black to a steel-blue edge: fins, plates, the next part apart
+SKIN = ((146, 134, 178), (230, 224, 242))   # MOéMON's skin: ashen lilac
+EYE = ((150, 18, 64), (255, 98, 152))       # crimson-magenta glow: eyes and small bright accents
+HILITE = (230, 226, 250)                    # icy lilac highlights
+OUTLINE = ((14, 8, 24), (40, 30, 64))       # near-black violet
+
+
+def lum_of(rgb):
+    return (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255.0
+
+
+def ramp(r, t):
+    t = max(0.0, min(1.0, t))
+    return tuple(a + (b - a) * t for a, b in zip(r[0], r[1]))
+
+
+def roles(colours, counts, skin_mask):
+    """{slot: role}: each of the palette's colours given a part of Shadow Lugia's scheme by what it covers."""
+    total = max(1, sum(counts[1:]))
+    role, groups = {}, {}
+    for i in range(1, 16):
+        if counts[i] == 0 and colours[i] == colours[0]:
+            continue
+        r, g, b = (v / 255.0 for v in colours[i])
+        h, sat, val = colorsys.rgb_to_hsv(r, g, b)
+        lum, share = lum_of(colours[i]), counts[i] / total
+        if lum < 0.16:
+            role[i] = "outline"
+        elif skin_mask >> i & 1:
+            role[i] = "skin"
+        elif share < 0.025 and sat > 0.45 and val > 0.45:
+            role[i] = "eye"
+        elif sat < 0.18 and lum > 0.8 and share < 0.04:
+            role[i] = "hilite"
+        else:
+            key = "neutral-light" if sat < 0.2 and lum > 0.6 else "neutral" if sat < 0.2 else int(((h * 360) + 15) % 360 // 30)
+            groups.setdefault(key, []).append(i)
+    # the parts, largest first: the largest the body; of the rest, the lightest large one the underside, then the next
+    # large one the hard parts; the others go to the role nearest their lightness
+    cover = lambda k: sum(counts[i] for i in groups[k])
+    light = lambda k: sum(lum_of(colours[i]) * counts[i] for i in groups[k]) / max(1, cover(k))
+    order = sorted(groups, key=cover, reverse=True)
+    assigned = {}
+    if order:
+        assigned[order[0]] = "body"
+        rest = [k for k in order[1:] if cover(k) / total > 0.06]
+        under = max(rest, key=light, default=None)
+        if under is not None and light(under) > light(order[0]) + 0.08:
+            assigned[under] = "under"
+        hard = [k for k in order[1:] if k not in assigned and cover(k) / total > 0.03]
+        if hard:
+            assigned[hard[0]] = "hard"
+        for k in order:
+            if k not in assigned:
+                lk = light(k)
+                assigned[k] = "under" if lk > 0.72 else "hard" if lk < 0.35 else "body"
+    for k, slots in groups.items():
+        for i in slots:
+            role[i] = assigned[k]
+    return role
 
 
 def make(colours, px, skin_mask, curated):
@@ -131,13 +180,25 @@ def make(colours, px, skin_mask, curated):
     for row in px:
         for i in row:
             counts[i & 15] += 1
-    total = max(1, sum(counts[1:]))
-    out = [colours[0]]
-    for i in range(1, 16):
-        if i in curated:
-            out.append(curated[i])
-        else:
-            out.append(shadow_colour(colours[i], counts[i] / total, bool(skin_mask >> i & 1)))
+    role = roles(colours, counts, skin_mask)
+    ramps = {"body": BODY, "under": UNDER, "hard": HARD, "skin": SKIN, "eye": EYE, "outline": OUTLINE}
+    # each role's colours keep their lightness order along its ramp
+    by_role = {}
+    for i, rl in role.items():
+        by_role.setdefault(rl, []).append(i)
+    out = list(colours)
+    for rl, slots in by_role.items():
+        if rl == "hilite":
+            for i in slots:
+                out[i] = HILITE
+            continue
+        ls = [lum_of(colours[i]) for i in slots]
+        lo, hi = min(ls), max(ls)
+        for i, l in zip(slots, ls):
+            t = 0.15 + 0.75 * (l - lo) / (hi - lo) if hi - lo > 0.04 else 0.25 + 0.6 * l
+            out[i] = ramp(ramps[rl], t)
+    for i, c in curated.items():
+        out[i] = c
     return out
 
 

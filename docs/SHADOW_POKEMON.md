@@ -58,7 +58,12 @@ finite amount of Shadow Pokemon, we can curate what they look like." Every Shado
 chosen one by one (in the spirit of XD's Shadow Lugia: darkened, violet-leaning, its eyes and accents kept bright), for
 both of Kai's art sets (OPTIONS > CREATURES: MOéMON and POKéMON), its front, back and shiny pictures, and its sprite in
 the field and the Garden; it returns to its own colours when purified.
-- **Built (2026-11-07, a first pass for the user to curate):** tools/orre/shadow_palettes.py makes each of the 48's dark
+- **Shadow Lugia's scheme** (the user, 2026-11-07: "decide complimentary colors for Shadow Pokemon based on Shadow
+  Lugia's original appearance. Let's make them look really cool"): every dark palette now gives each colour a role
+  of Shadow Lugia's: the largest part deep indigo-plum, the largest light part a pale cool lavender-grey (its belly),
+  the next part apart blue-black to a steel-blue edge (its fins), eyes and small bright accents a crimson-magenta glow,
+  highlights icy lilac, outlines near-black violet, MOéMON skin ashen lilac (tools/orre/shadow_palettes.py roles()).
+- **Built (2026-11-07):** tools/orre/shadow_palettes.py makes each of the 48's dark
   palettes for both art sets into src/data/orre_shadow_palettes.h: one treatment for all (the body sunk into a violet-to-
   indigo ramp keeping its lightness order and its parts apart by hue, large white areas sinking too as Shadow Lugia's
   did, outlines near-black indigo, small highlights cold lavender, eyes and small bright accents a glowing red-violet,
