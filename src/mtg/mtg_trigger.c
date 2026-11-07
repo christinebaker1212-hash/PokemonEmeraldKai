@@ -15,7 +15,7 @@ static int sTrigCount, sTrigCap;
 
 const char *const gMtgTriggerModes[MTG_TRIG_COUNT] = {
     "", "ChangesZone", "Phase", "SpellCast", "DamageDone", "Attacks", "AttackerBlocked", "AttackerBlockedByCreature",
-    "Blocks", "AttackerUnblocked", "Cycled",
+    "Blocks", "AttackerUnblocked", "Cycled", "Taps", "LandPlayed",
 };
 
 // the parameters each mode reads (besides the common ones)
@@ -24,6 +24,8 @@ static const char *const sModeKeys[MTG_TRIG_COUNT][4] = {
     [MTG_TRIG_PHASE] = {"Phase", "ValidPlayer"},
     [MTG_TRIG_SPELL_CAST] = {"ValidCard", "ValidActivatingPlayer"},
     [MTG_TRIG_CYCLED] = {"ValidCard"},
+    [MTG_TRIG_TAPS] = {"ValidCard"},
+    [MTG_TRIG_LAND_PLAYED] = {"ValidCard"},
     [MTG_TRIG_DAMAGE_DONE] = {"ValidSource", "ValidTarget", "CombatDamage"},
     [MTG_TRIG_ATTACKS] = {"ValidCard"},
     [MTG_TRIG_ATTACKER_BLOCKED] = {"ValidCard", "ValidBlocker"},
@@ -33,7 +35,7 @@ static const char *const sModeKeys[MTG_TRIG_COUNT][4] = {
 };
 static const char *const sCommonKeys[] = {
     "Mode", "Execute", "TriggerDescription", "TriggerZones", "OptionalDecider", "Secondary",
-    "IsPresent", "PresentCompare", "PresentZone",
+    "IsPresent", "PresentCompare", "PresentZone", "CheckSVar", "SVarCompare",
 };
 // the parameters that are Valid specs (mtg_valid.c)
 static const char *const sSpecKeys[] = {
@@ -250,12 +252,22 @@ static int ParseTrig(MtgCardDef *c, int cardId, char *text, int attach)
         Mtg_Unsupported(c, Reason("CombatDamage"));
         return -1;
     }
-    if ((v = Mtg_TriggerParam(t, "OptionalDecider")) != NULL) {
-        if (strcmp(v, "You")) {
+    if ((v = Mtg_TriggerParam(t, "OptionalDecider")) != NULL) {   // who says "may": its controller, or another
+        t->optional = strcmp(v, "You") == 0 ? 1 : strcmp(v, "TriggeredPlayer") == 0 ? 4
+                    : strcmp(v, "TriggeredCardController") == 0 || strcmp(v, "TriggeredSourceController") == 0 ? 3 : 0;
+        if (!t->optional) {
             Mtg_Unsupported(c, Reason("OptionalDecider"));
             return -1;
         }
-        t->optional = 1;
+    }
+    if ((v = Mtg_TriggerParam(t, "CheckSVar")) != NULL) {   // (an "if" on an amount counted as it triggers and resolves)
+        if (!Mtg_CheckSvarKnown(cardId, v, Mtg_TriggerParam(t, "SVarCompare"))) {
+            Mtg_Unsupported(c, Reason("CheckSVar"));
+            return -1;
+        }
+    } else if (Mtg_TriggerParam(t, "SVarCompare")) {
+        Mtg_Unsupported(c, Reason("SVarCompare"));
+        return -1;
     }
     if (Mtg_TriggerParam(t, "IsPresent")) {
         int ok;
@@ -305,9 +317,11 @@ int Mtg_ParseGrantedTrigger(MtgCardDef *c, int cardId, char *text)
 // IsPresent$ (Trigger.requirementsCheck's "present" test): how many such cards are in the zone
 static int Present(const MtgDuel *d, const MtgTrigger *t, int host)
 {
-    const char *spec = Mtg_TriggerParam(t, "IsPresent"), *zv;
+    const char *spec = Mtg_TriggerParam(t, "IsPresent"), *zv, *sv = Mtg_TriggerParam(t, "CheckSVar");
     unsigned zones;
     int i, count = 0, ok;
+    if (sv && !Mtg_CheckSvar(d, t->card, host, d->objs[host].controller, sv, Mtg_TriggerParam(t, "SVarCompare")))
+        return 0;   // (CheckSVar$: checked with IsPresent$, as it triggers and again as it resolves)
     if (!spec)
         return 1;
     zv = Mtg_TriggerParam(t, "PresentZone");
@@ -340,7 +354,7 @@ static int PlayerOk(const MtgDuel *d, const MtgTrigger *t, const char *key, int 
     const char *spec = Mtg_TriggerParam(t, key);
     if (!spec)
         return 1;
-    return player < MTG_PLAYERS && Mtg_ValidPlayer(d, player, spec, d->objs[host].controller);
+    return player < MTG_PLAYERS && Mtg_ValidPlayerFrom(d, player, spec, host, d->objs[host].controller);
 }
 
 // Trigger<Mode>.performTest
@@ -366,7 +380,7 @@ static int Matches(const MtgDuel *d, const MtgTrigger *t, int host, const MtgTri
             return 0;
         if ((v = Mtg_TriggerParam(t, "ValidTarget")) != NULL) {
             if (ev->player < MTG_PLAYERS)
-                return Mtg_ValidPlayer(d, ev->player, v, d->objs[host].controller);
+                return Mtg_ValidPlayerFrom(d, ev->player, v, host, d->objs[host].controller);
             return ev->obj2 != MTG_NO_OBJ && Mtg_ValidObj(d, ev->obj2, v, host, d->objs[host].controller);
         }
         return 1;
@@ -386,6 +400,8 @@ static int Matches(const MtgDuel *d, const MtgTrigger *t, int host, const MtgTri
     case MTG_TRIG_ATTACKS:
     case MTG_TRIG_ATTACKER_UNBLOCKED:
     case MTG_TRIG_CYCLED:
+    case MTG_TRIG_TAPS:
+    case MTG_TRIG_LAND_PLAYED:
         return ObjOk(d, t, "ValidCard", ev->obj, host);
     }
     return 0;

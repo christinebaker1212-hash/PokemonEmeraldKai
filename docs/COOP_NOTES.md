@@ -3700,6 +3700,20 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's trigger modes Taps and LandPlayed, other players' "may" (1.160.0)
+
+- Mode$ Taps (MTG_TRIG_TAPS: Mtg_Tap fires it when a permanent on the battlefield becomes tapped, mana payments
+  included) and Mode$ LandPlayed (MTG_TRIG_LAND_PLAYED: a land played from the hand, DoAction), each with ValidCard$
+  and TriggeredCard.
+- OptionalDecider$ TriggeredCardController / TriggeredSourceController (MtgStackEntry.optional 3: trigCtrl decides) and
+  TriggeredPlayer (4: trigPlayer); ContinueResolve asks that player.
+- Trigger CheckSVar$ / SVarCompare$: checked with IsPresent$ as it triggers and as it resolves (Present).
+- Valid Player.EnchantedController (Mtg_ValidPlayerFrom: the controller of what its source, an Aura, is attached to;
+  triggers pass their host) and Card.StrictlySelf (as Self).
+- Unlocked 37: CITY OF BRASS, PSYCHIC VENOM, CITY OF TRAITORS, BURGEONING, LAND TAX, YAVIMAYA ELDER, FECUNDITY, CURSED
+  LAND, LINGERING DEATH, WARP ARTIFACT, FEEDBACK, SEIZURES, BLIGHT, LIFETAP, AVEN FISHER...
+- Tests: test_rules.c TestTrigModes.
+
 ## MAGIC's "can't be countered" (1.159.0)
 
 - R: Event$ Counter | Layer$ CantHappen: ValidCard$ Card.Self with ValidSA$ Spell is MtgCardDef.cantBeCountered (the

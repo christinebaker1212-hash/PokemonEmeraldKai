@@ -2269,6 +2269,67 @@ static void TestCantCounter(void)
     CHECK(sD.objs[istvan].damage == 3 || Zone(istvan) == MTG_ZONE_GRAVEYARD, "the bolt's isn't");
 }
 
+static void TestTrigModes(void)
+{
+    int city, forest, venom, cursed, fec, bears, k, before, i;
+    const MtgQuery *q;
+    MtgAnswer a;
+    static const char *const cards[] = {"City of Brass", "City of Traitors", "Psychic Venom", "Cursed Land", "Fecundity",
+                                        "Land Tax", "Burgeoning", "Yavimaya Elder", NULL};
+    printf("trigger modes: taps, land played; the enchanted's controller; another player's may\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // City of Brass: tapped, it deals 1 damage to its controller
+    city = Put(0, "City of Brass", MTG_ZONE_BATTLEFIELD);
+    Mtg_Tap(&sD, city, 1);
+    CHECK(sD.pendingCount == 1, "a trigger waits (%d)", sD.pendingCount);
+    for (k = 0; k < 6 && sD.players[0].life == 20; k++)
+        Pass();
+    CHECK(sD.players[0].life == 19, "1 damage to its controller (%d)", sD.players[0].life);
+
+    Table();   // Psychic Venom on their Forest: tapped, 2 damage to its controller
+    forest = Put(1, "Forest", MTG_ZONE_BATTLEFIELD);
+    venom = Put(0, "Psychic Venom", MTG_ZONE_BATTLEFIELD);
+    sD.objs[venom].attachedTo = (uint16_t)forest;
+    Mtg_Tap(&sD, forest, 1);
+    for (k = 0; k < 6 && sD.players[1].life == 20; k++)
+        Pass();
+    CHECK(sD.players[1].life == 18, "2 damage to the land's controller (%d)", sD.players[1].life);
+
+    Table();   // Cursed Land: in the upkeep of the enchanted land's controller
+    forest = Put(1, "Forest", MTG_ZONE_BATTLEFIELD);
+    cursed = Put(0, "Cursed Land", MTG_ZONE_BATTLEFIELD);
+    sD.objs[cursed].attachedTo = (uint16_t)forest;
+    GoToTurn(1, MTG_STEP_DRAW);
+    CHECK(sD.players[1].life == 19 && sD.players[0].life == 20, "1 damage to them in their upkeep (%d, %d)",
+          sD.players[1].life, sD.players[0].life);
+
+    Table();   // City of Traitors: another land played, it's sacrificed
+    city = Put(0, "City of Traitors", MTG_ZONE_BATTLEFIELD);
+    forest = Put(0, "Forest", MTG_ZONE_HAND);
+    Do(MTG_ACT_LAND, forest, -1, 0);
+    for (k = 0; k < 6 && Zone(city) == MTG_ZONE_BATTLEFIELD; k++)
+        Pass();
+    CHECK(Zone(city) == MTG_ZONE_GRAVEYARD, "sacrificed (%d)", Zone(city));
+
+    Table();   // Fecundity: their creature dies, they decide whether to draw
+    fec = Put(0, "Fecundity", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    before = HandCount(1);
+    Mtg_Destroy(&sD, bears, 0);
+    for (k = 0; k < 6 && Mtg_Query(&sD)->kind != MTG_Q_CHOOSE; k++)
+        Pass();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_YESNO && q->player == 1, "its controller is asked (%d, %d)",
+          q->kind, q->player);
+    memset(&a, 0, sizeof(a));
+    a.card = 1;
+    Answer(&a);
+    CHECK(HandCount(1) == before + 1, "and draws (%d -> %d)", before, HandCount(1));
+    (void)fec;
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2673,6 +2734,7 @@ int main(int argc, char **argv)
     TestPreventAll();
     TestChooseSource();
     TestCantCounter();
+    TestTrigModes();
     TestDuels();
     TestRandomDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

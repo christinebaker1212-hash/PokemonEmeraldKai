@@ -163,7 +163,7 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         return !d || o->damage > 0;
     if (n == 5 && strncmp(p, "Other", 5) == 0)
         return !d || obj != src;
-    if (n == 4 && strncmp(p, "Self", 4) == 0)   // (the card the ability or trigger belongs to)
+    if ((n == 4 && strncmp(p, "Self", 4) == 0) || (n == 12 && strncmp(p, "StrictlySelf", 12) == 0))   // (the card the ability or trigger belongs to)
         return !d || obj == src;
     if ((n == 11 && strncmp(p, "EnchantedBy", 11) == 0) || (n == 10 && strncmp(p, "AttachedBy", 10) == 0))
         return !d || (src != MTG_NO_OBJ && src < d->objCount && d->objs[src].attachedTo == obj);   // (what its Aura is on)
@@ -258,6 +258,9 @@ static int Alternative(const MtgDuel *d, int isPlayer, int id, const char *a, si
             const char *pp = dot + 1;
             if (pn == 12 && strncmp(pp, "IsRemembered", 12) == 0)   // (a player the resolving chain or Effect remembers)
                 return !d || (isPlayer && Mtg_IsRememberedPlayer(d, id));
+            if (pn == 19 && strncmp(pp, "EnchantedController", 19) == 0)   // (the controller of the creature its Aura holds)
+                return !d || (isPlayer && src != MTG_NO_OBJ && d->objs[src].attachedTo != MTG_NO_OBJ
+                              && d->objs[d->objs[src].attachedTo].controller == id);
             if (!((pn == 8 && strncmp(pp, "Opponent", 8) == 0) || (pn == 3 && strncmp(pp, "You", 3) == 0))) {
                 *known = 0;
                 return 0;
@@ -336,6 +339,12 @@ int Mtg_ValidPlayer(const MtgDuel *d, int player, const char *spec, int controll
 {
     int known;
     return Valid(d, 1, player, spec, MTG_NO_OBJ, controller, &known) && known;
+}
+
+int Mtg_ValidPlayerFrom(const MtgDuel *d, int player, const char *spec, int src, int controller)
+{
+    int known;
+    return Valid(d, 1, player, spec, src, controller, &known) && known;
 }
 
 int Mtg_ValidPlayerSpecKnown(const char *spec)

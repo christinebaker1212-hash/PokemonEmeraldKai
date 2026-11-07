@@ -144,7 +144,7 @@ extern const char *const gMtgApiNames[MTG_API_COUNT];
 enum {
     MTG_TRIG_NONE, MTG_TRIG_CHANGES_ZONE, MTG_TRIG_PHASE, MTG_TRIG_SPELL_CAST, MTG_TRIG_DAMAGE_DONE, MTG_TRIG_ATTACKS,
     MTG_TRIG_ATTACKER_BLOCKED, MTG_TRIG_ATTACKER_BLOCKED_BY, MTG_TRIG_BLOCKS, MTG_TRIG_ATTACKER_UNBLOCKED,
-    MTG_TRIG_CYCLED,
+    MTG_TRIG_CYCLED, MTG_TRIG_TAPS, MTG_TRIG_LAND_PLAYED,   // (Taps: a permanent became tapped; LandPlayed: a land played)
     MTG_TRIG_COUNT
 };
 typedef struct {
@@ -252,7 +252,8 @@ void Mtg_SpellCost(const MtgDuel *d, int player, int obj, MtgManaCost *out);   /
 // mtg_valid.c: Forge's "Valid" properties (CardProperty.java, PlayerProperty.java)
 int Mtg_ValidObj(const MtgDuel *d, int obj, const char *spec, int sourceObj, int controller);
 int Mtg_ValidPlayer(const MtgDuel *d, int player, const char *spec, int controller);
-int Mtg_ValidPlayerSpecKnown(const char *spec);                  // (a player's spec: You, Player.IsRemembered...)
+int Mtg_ValidPlayerSpecKnown(const char *spec);
+int Mtg_ValidPlayerFrom(const MtgDuel *d, int player, const char *spec, int src, int controller);   // (SRC: its source)                  // (a player's spec: You, Player.IsRemembered...)
 int Mtg_ValidSpecKnown(const char *spec);                        // every alternative and property understood
 uint8_t Mtg_ObjColors(const MtgDuel *d, int obj);
 int Mtg_CanTarget(const MtgDuel *d, int obj, int sourceObj);     // shroud, protection

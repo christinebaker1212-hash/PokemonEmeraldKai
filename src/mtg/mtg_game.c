@@ -341,6 +341,8 @@ void Mtg_Tap(MtgDuel *d, int obj, int tapped)
     if (d->objs[obj].tapped != tapped) {
         d->objs[obj].tapped = (uint8_t)tapped;
         Mtg_Event(d, MTG_EV_TAP, obj, tapped, 0);
+        if (tapped && d->objs[obj].zone == MTG_ZONE_BATTLEFIELD)   // ("whenever ... becomes tapped": TriggerTaps)
+            TrigEvent(d, MTG_TRIG_TAPS, obj, MTG_NO_OBJ, d->objs[obj].controller);
     }
 }
 
@@ -684,9 +686,10 @@ static int ContinueResolve(MtgDuel *d)
     ctx.e = &d->res;
     ctx.controller = d->res.controller;
     ctx.source = d->res.source;
-    if (d->res.optional == 1) {   // "you may" (OptionalDecider$ You): asked as it resolves
-        if (d->resChoice < 0) {
-            Mtg_AskChoice(d, d->res.controller, MTG_CHOICE_YESNO, NULL);
+    if (d->res.optional == 1 || d->res.optional >= 3) {   // "you may" (OptionalDecider$): asked as it resolves
+        if (d->resChoice < 0) {   // (3: the triggering card's / source's controller decides, 4: the triggering player)
+            int who = d->res.optional == 3 ? d->res.trigCtrl : d->res.optional == 4 ? d->res.trigPlayer : d->res.controller;
+            Mtg_AskChoice(d, who < MTG_PLAYERS ? who : d->res.controller, MTG_CHOICE_YESNO, NULL);
             return 1;
         }
         if (d->resChoice == 0)
@@ -1232,6 +1235,7 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
         Mtg_MoveTo(d, a->obj, MTG_ZONE_BATTLEFIELD);
         d->players[p].landsPlayed++;
         Mtg_Event(d, MTG_EV_LAND, a->obj, p, 0);
+        TrigEvent(d, MTG_TRIG_LAND_PLAYED, a->obj, MTG_NO_OBJ, p);   // ("whenever a land is played": TriggerLandPlayed)
         return;
     }
     if (d->stackCount >= MTG_MAX_STACK)
