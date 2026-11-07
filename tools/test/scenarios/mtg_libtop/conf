@@ -1,0 +1,6 @@
+# MAGIC's library positions on the table: REPEL puts the opponent's LLANOWAR ELVES on top of their library (their library
+# count goes up by one, the creature row is empty). Shots lt_target, lt_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Repel on Llanowar Elves" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Repel to focus")

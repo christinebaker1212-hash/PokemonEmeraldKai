@@ -3686,6 +3686,20 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   (their mana with X), UpTo$, counters moved between permanents.
 - Tests: test_rules.c TestCounters (SPIKE FEEDER, SERRATED ARROWS, counters_ specs); scenario mtg_counters.
 
+## MAGIC's library positions and tutors (1.147.0)
+
+- LibraryPosition$ (0 the top, -1 the bottom, n under n cards) on ChangeZone / ChangeZoneAll to the Library:
+  Mtg_PutInLibrary (mtg_game.c: Mtg_MoveTo to the top, then moved in the owner's library array). A ChangeZone to the
+  Library with no target or Defined$ moves the card itself (Cromat).
+- Tutors: a search from the Library to the Library (ChangeNum$ 1, no Reorder$) puts the find on top and
+  Mtg_ShuffleLibraryBelow shuffles the rest under it (resStage 0x20 says something was found); from the Hand to the
+  Library any number (each pick on top).
+- sApiParams holds 12 names per effect now (Mtg_ApiParamsKnown reads all 12).
+- Unlocked 30: ENLIGHTENED / MYSTICAL / VAMPIRIC / WORLDLY TUTOR, AURA EXTRACTION, REPEL, TIME EBB, SUBMERGE, CROMAT,
+  PLOW UNDER, REINFORCEMENTS, the Informers... Still out: Reorder$, a target player's hand to their library,
+  ConditionCheckSVar$ choices (Ether Well), Chooser$.
+- Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

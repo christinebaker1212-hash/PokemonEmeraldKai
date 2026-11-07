@@ -1,0 +1,23 @@
+pressuntil A field 5000
+wait 60
+mp mtg starter 0
+mp mtg duel 1
+wait 30
+press A 2
+waitlog 3000 mtg: your move: priority
+wait 10
+mp mtg put 0 field Island
+mp mtg put 0 field Island
+mp mtg put 0 field Island
+mp mtg put 0 field Island
+mp mtg put 0 hand Repel
+wait 10
+mp mtg focus Repel
+press A 2
+wait 20
+rendershot lt_target
+press A 2
+waitlog 900 mtg: ready
+wait 150
+rendershot lt_after
+quit

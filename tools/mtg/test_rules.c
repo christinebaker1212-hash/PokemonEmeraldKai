@@ -1535,6 +1535,53 @@ static void TestCounters(void)
           && !Mtg_ValidObj(&sD, arrows, "Artifact.counters_GE3_ARROWHEAD", arrows, 0), "counters_ specs count them");
 }
 
+// a card put in its player's library at the bottom (the test's own set-up: Put leaves libraries alone)
+static int PutLibBottom(int player, const char *name)
+{
+    int obj = Put(player, name, MTG_ZONE_LIBRARY);
+    MtgPlayer *pl = &sD.players[player];
+    memmove(&pl->library[1], &pl->library[0], pl->libraryCount * sizeof(pl->library[0]));
+    pl->library[0] = (uint16_t)obj;
+    pl->libraryCount++;
+    return obj;
+}
+
+// LibraryPosition$: onto the top, the bottom or n cards down; a tutor's find left on top of the shuffled rest
+static void TestLibraryPosition(void)
+{
+    int ext, crusade, tutor, bears, i, count;
+    static const char *const cards[] = {"Aura Extraction", "Enlightened Tutor", "Mystical Tutor", "Vampiric Tutor",
+                                        "Worldly Tutor", "Time Ebb", "Repel", "Cromat", NULL};
+    printf("library positions: top, bottom, tutors\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Aura Extraction: their enchantment on top of their library
+    Lands(0, "Plains", 2);
+    crusade = Put(1, "Crusade", MTG_ZONE_BATTLEFIELD);
+    ext = Put(0, "Aura Extraction", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, ext, MTG_TGT_OBJ, crusade);
+    PassBoth();
+    CHECK(Zone(crusade) == MTG_ZONE_LIBRARY && Mtg_TopOfLibrary(&sD, 1) == crusade, "on top of its owner's library");
+
+    Table();   // Enlightened Tutor: the enchantment found, the library shuffled, the find on top
+    Lands(0, "Plains", 1);
+    crusade = PutLibBottom(0, "Crusade");
+    count = sD.players[0].libraryCount;
+    tutor = Put(0, "Enlightened Tutor", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, tutor, -1, 0);
+    PassBoth();
+    CHECK(Mtg_TopOfLibrary(&sD, 0) == crusade && sD.players[0].libraryCount == count, "found and put on top");
+
+    Table();   // the bottom, and two cards down
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Mtg_PutInLibrary(&sD, bears, -1);
+    CHECK(sD.players[0].library[0] == bears && Mtg_TopOfLibrary(&sD, 0) != bears, "-1: the bottom");
+    Mtg_MoveTo(&sD, bears, MTG_ZONE_GRAVEYARD);
+    Mtg_PutInLibrary(&sD, bears, 2);
+    CHECK(sD.players[0].library[sD.players[0].libraryCount - 3] == bears, "2: under two cards");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1872,6 +1919,7 @@ int main(int argc, char **argv)
     TestPrevent();
     TestControl();
     TestCounters();
+    TestLibraryPosition();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

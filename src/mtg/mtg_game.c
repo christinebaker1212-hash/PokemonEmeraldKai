@@ -431,6 +431,34 @@ void Mtg_DuelInit(MtgDuel *d, const MtgDeck *deck0, const MtgDeck *deck1, uint32
     Run(d);
 }
 
+// a card into its owner's library at LibraryPosition$: 0 the top, -1 the bottom, n with n cards above it
+void Mtg_PutInLibrary(MtgDuel *d, int obj, int pos)
+{
+    MtgPlayer *pl = &d->players[d->objs[obj].owner];
+    int at;
+    Mtg_MoveTo(d, obj, MTG_ZONE_LIBRARY);   // (on top: the array's end)
+    if (pos == 0 || d->objs[obj].zone != MTG_ZONE_LIBRARY || pl->libraryCount < 2)
+        return;
+    at = pos < 0 ? 0 : pl->libraryCount - 1 - pos;
+    if (at < 0)
+        at = 0;
+    memmove(&pl->library[at + 1], &pl->library[at], (size_t)(pl->libraryCount - 1 - at) * sizeof(pl->library[0]));
+    pl->library[at] = (uint16_t)obj;
+}
+
+// a shuffle of all but the top keepTop cards (a tutor's find stays on top)
+void Mtg_ShuffleLibraryBelow(MtgDuel *d, int player, int keepTop)
+{
+    MtgPlayer *pl = &d->players[player];
+    int i, n = pl->libraryCount - keepTop;
+    for (i = n - 1; i > 0; i--) {
+        int j = (int)Mtg_Random(d, (uint32_t)i + 1);
+        uint16_t t = pl->library[i];
+        pl->library[i] = pl->library[j];
+        pl->library[j] = t;
+    }
+}
+
 void Mtg_ShuffleLibrary(MtgDuel *d, int player)
 {
     MtgPlayer *pl = &d->players[player];

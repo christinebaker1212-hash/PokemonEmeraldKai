@@ -530,14 +530,37 @@ static unsigned ZoneList(const char *s)
 }
 
 // a search's find: to its destination (onto the battlefield under the searcher's control, tapped if it says)
-static int sFoundZone, sFoundTapped, sFoundCtrl;
+static int sFoundZone, sFoundTapped, sFoundCtrl, sFoundPos;
 static void FoundOne(MtgDuel *d, int obj)
 {
+    if (sFoundZone == MTG_ZONE_LIBRARY) {   // (to the top: the rest is shuffled under it; resStage 0x20 says one was found)
+        Mtg_PutInLibrary(d, obj, sFoundPos);
+        d->resStage |= 0x20;
+        return;
+    }
     if (sFoundZone == MTG_ZONE_BATTLEFIELD)
         d->objs[obj].controller = (uint8_t)sFoundCtrl;
     Mtg_MoveTo(d, obj, sFoundZone);
     if (sFoundZone == MTG_ZONE_BATTLEFIELD && sFoundTapped)
         Mtg_Tap(d, obj, 1);
+}
+
+// LibraryPosition$: 0 (the top), -1 (the bottom) or a number of cards from the top; 1 if absent or known
+static int LibPosKnown(const MtgAbility *ab, int *pos)
+{
+    const char *v = Mtg_Param(ab, "LibraryPosition");
+    *pos = 0;
+    if (!v)
+        return 1;
+    if (strcmp(v, "-1") == 0) {
+        *pos = -1;
+        return 1;
+    }
+    if (v[0] >= '0' && v[0] <= '9' && !v[1]) {
+        *pos = v[0] - '0';
+        return 1;
+    }
+    return 0;
 }
 
 // GainControlEffect's LoseControl$ ("EOT", "LeavesPlay,LoseControl", "Untap,...") as MTG_CTRL_* bits; -1: not known
@@ -711,7 +734,12 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                     d->objs[i].controller = d->objs[i].owner;
                 if (zone == MTG_ZONE_LIBRARY)
                     shuffled[d->objs[i].owner] = 1;
-                Mtg_MoveTo(d, i, zone);
+                if (zone == MTG_ZONE_LIBRARY && Mtg_Param(ab, "LibraryPosition")) {
+                    int pos;
+                    LibPosKnown(ab, &pos);
+                    Mtg_PutInLibrary(d, i, pos);
+                } else
+                    Mtg_MoveTo(d, i, zone);
             }
         for (i = 0; i < MTG_PLAYERS; i++)
             if (shuffled[i] && sh && strcmp(sh, "True") == 0)
@@ -876,19 +904,24 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
             me.t[0].kind = MTG_TGT_PLAYER;
             me.t[0].id = (uint16_t)ctx->controller;
             sFoundZone = strcmp(dest, "Hand") == 0 ? MTG_ZONE_HAND : strcmp(dest, "Battlefield") == 0 ? MTG_ZONE_BATTLEFIELD
-                       : strcmp(dest, "Exile") == 0 ? MTG_ZONE_EXILE : MTG_ZONE_GRAVEYARD;
+                       : strcmp(dest, "Exile") == 0 ? MTG_ZONE_EXILE : strcmp(dest, "Library") == 0 ? MTG_ZONE_LIBRARY
+                       : MTG_ZONE_GRAVEYARD;
+            LibPosKnown(ab, &sFoundPos);
             sFoundTapped = tp && strcmp(tp, "True") == 0;
             sFoundCtrl = ctx->controller;
             if (!EachChooses(d, ctx, &me, n, lib ? MTG_ZONE_LIBRARY : MTG_ZONE_HAND, Mtg_Param(ab, "ChangeType"), FoundOne))
                 return 0;
-            if (lib)
+            if (lib && sFoundZone == MTG_ZONE_LIBRARY)   // (the find stays on top: Enlightened Tutor)
+                Mtg_ShuffleLibraryBelow(d, ctx->controller, (d->resStage & 0x20) ? 1 : 0);
+            else if (lib)
                 Mtg_ShuffleLibrary(d, ctx->controller);
             break;
         }
         int zone = strcmp(dest, "Exile") == 0 ? MTG_ZONE_EXILE : strcmp(dest, "Hand") == 0 ? MTG_ZONE_HAND
                  : strcmp(dest, "Library") == 0 ? MTG_ZONE_LIBRARY
                  : strcmp(dest, "Battlefield") == 0 ? MTG_ZONE_BATTLEFIELD : MTG_ZONE_GRAVEYARD;
-        int from = strcmp(Mtg_Param(ab, "Origin"), "Graveyard") == 0 ? MTG_ZONE_GRAVEYARD : MTG_ZONE_BATTLEFIELD;
+        int from = strcmp(Mtg_Param(ab, "Origin"), "Graveyard") == 0 ? MTG_ZONE_GRAVEYARD : MTG_ZONE_BATTLEFIELD, pos;
+        LibPosKnown(ab, &pos);
         Targets(d, ctx, ab, DEF_CARD, &who);
         for (i = 0; i < who.n; i++) {
             int obj = who.t[i].id;
@@ -896,7 +929,10 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                 continue;
             if (zone == MTG_ZONE_BATTLEFIELD)   // (onto the battlefield under its owner's control, or GainControl$)
                 d->objs[obj].controller = Mtg_Param(ab, "GainControl") ? (uint8_t)ctx->controller : d->objs[obj].owner;
-            Mtg_MoveTo(d, obj, zone);
+            if (zone == MTG_ZONE_LIBRARY)
+                Mtg_PutInLibrary(d, obj, pos);   // (LibraryPosition$: the top unless it says)
+            else
+                Mtg_MoveTo(d, obj, zone);
         }
         break;
     }
@@ -1076,13 +1112,13 @@ static const char *const sCommon[] = {
     "IsCurse", "PrecostDesc", "CostDesc", "TargetType", "Defined", "UnlessCost", "UnlessPayer", "ActivationZone",
     "TargetMin", "TargetMax",
 };
-static const char *const sApiParams[MTG_API_COUNT][10] = {
+static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},
     [MTG_API_DAMAGE_ALL] = {"NumDmg", "ValidCards", "ValidPlayers", "ValidDescription"},
     [MTG_API_DRAW] = {"NumCards"},
     [MTG_API_DESTROY] = {"NoRegen"},
     [MTG_API_DESTROY_ALL] = {"ValidCards", "NoRegen"},
-    [MTG_API_CHANGE_ZONE_ALL] = {"Origin", "Destination", "ChangeType", "Shuffle", "UseAllOriginZones"},
+    [MTG_API_CHANGE_ZONE_ALL] = {"Origin", "Destination", "ChangeType", "Shuffle", "UseAllOriginZones", "LibraryPosition"},
     [MTG_API_ANIMATE] = {"Power", "Toughness", "Types", "Colors", "OverwriteColors", "Keywords", "RemoveCreatureTypes",
                          "Duration"},
     [MTG_API_PREVENT_DAMAGE] = {"Amount"},
@@ -1096,7 +1132,7 @@ static const char *const sApiParams[MTG_API_COUNT][10] = {
     [MTG_API_PUMP] = {"NumAtt", "NumDef", "KW"},
     [MTG_API_PUMP_ALL] = {"NumAtt", "NumDef", "KW", "ValidCards"},
     [MTG_API_CHANGE_ZONE] = {"Origin", "Destination", "GainControl", "ChangeType", "ChangeNum", "ChangeTypeDesc", "Tapped",
-                             "Mandatory", "ShuffleNonMandatory", "Optional"},
+                             "Mandatory", "ShuffleNonMandatory", "Optional", "LibraryPosition"},
     [MTG_API_MANA] = {"Produced", "Amount"},
     [MTG_API_DISCARD] = {"NumCards", "Mode", "DiscardValid"},
     [MTG_API_SACRIFICE] = {"SacValid", "Amount", "SacMessage"},
@@ -1136,7 +1172,7 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         const char *key = gMtgParams[ab->paramFirst + i].key;
         if (strncmp(key, "AI", 2) == 0)
             continue;   // (Forge's own AI hints: read by the AI's translation, never by the rules)
-        if (!InList(key, sCommon, (int)(sizeof(sCommon) / sizeof(sCommon[0]))) && !InList(key, sApiParams[ab->api], 10)) {
+        if (!InList(key, sCommon, (int)(sizeof(sCommon) / sizeof(sCommon[0]))) && !InList(key, sApiParams[ab->api], 12)) {
             *why = key;
             return 0;
         }
@@ -1248,6 +1284,11 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
             return 0;
         if (ab->tgt && (strstr(ab->tgt, "Creature") || strstr(ab->tgt, "Card") || strstr(ab->tgt, "Permanent")))
             return 0;   // (a target player only: "target player's graveyard")
+        {
+            int pos;
+            if (!LibPosKnown(ab, &pos) || (Mtg_Param(ab, "LibraryPosition") && strcmp(dz, "Library")))
+                return 0;
+        }
         return !(v = Mtg_Param(ab, "Shuffle")) || strcmp(v, "True") == 0;
     }
     case MTG_API_GAIN_LIFE:
@@ -1263,15 +1304,21 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return 1;
     case MTG_API_CHANGE_ZONE: {
         const char *o = Mtg_Param(ab, "Origin"), *dz = Mtg_Param(ab, "Destination");
-        int grave = o && strcmp(o, "Graveyard") == 0;
+        int grave = o && strcmp(o, "Graveyard") == 0, pos;
+        if (!LibPosKnown(ab, &pos) || (Mtg_Param(ab, "LibraryPosition") && (!dz || strcmp(dz, "Library"))))
+            return 0;
         if ((v = Mtg_Param(ab, "ChangeType"))) {   // a search (Hidden: the library or the hand) for ChangeNum$ cards
             const char *n = Mtg_Param(ab, "ChangeNum");
             if (!o || (strcmp(o, "Library") && strcmp(o, "Hand")) || !dz || ab->tgt || Mtg_Param(ab, "Defined")
                 || Mtg_Param(ab, "GainControl") || !Mtg_ValidSpecKnown(v) || (n && !AmountKnown(ab, "ChangeNum", 0)))
                 return 0;
-            if (strcmp(dz, "Hand") && strcmp(dz, "Battlefield") && strcmp(dz, "Graveyard") && strcmp(dz, "Exile"))
+            if (strcmp(dz, "Library") == 0 && strcmp(o, "Hand")   // (a tutor to the top: one card, then the rest shuffled)
+                && ((n && strcmp(n, "1")) || Mtg_Param(ab, "Reorder") || pos != 0))
                 return 0;
-            return strcmp(o, dz) != 0 && (!(v = Mtg_Param(ab, "Tapped")) || strcmp(v, "True") == 0);
+            if (strcmp(dz, "Hand") && strcmp(dz, "Battlefield") && strcmp(dz, "Graveyard") && strcmp(dz, "Exile")
+                && strcmp(dz, "Library"))
+                return 0;
+            return (strcmp(o, dz) != 0 || strcmp(dz, "Library") == 0) && (!(v = Mtg_Param(ab, "Tapped")) || strcmp(v, "True") == 0);
         }
         if (Mtg_Param(ab, "ChangeNum") || Mtg_Param(ab, "Tapped") || Mtg_Param(ab, "Mandatory")
             || Mtg_Param(ab, "ShuffleNonMandatory") || Mtg_Param(ab, "Optional"))
@@ -1283,7 +1330,7 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
             return 0;
         if (Mtg_Param(ab, "GainControl") && strcmp(dz, "Battlefield"))
             return 0;
-        return ab->tgt || Mtg_Param(ab, "Defined");
+        return ab->tgt || Mtg_Param(ab, "Defined") || (strcmp(dz, "Library") == 0 && !grave);   // (CARDNAME to the top)
     }
     case MTG_API_SACRIFICE:
         if ((v = Mtg_Param(ab, "SacValid")) && strcmp(v, "Self") && !Mtg_ValidSpecKnown(v))

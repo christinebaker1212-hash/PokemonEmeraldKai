@@ -930,6 +930,13 @@
 "number": "1",
 "set": "pls"
 },
+"Aura Extraction": {
+"artist": "Luca Zontini",
+"file": "ons_5",
+"frame": "1997",
+"number": "5",
+"set": "ons"
+},
 "Aura Flux": {
 "artist": "John Avon",
 "file": "ulg_27",
@@ -2722,6 +2729,13 @@
 "number": "244",
 "set": "usg"
 },
+"Civic Guildmage": {
+"artist": "Andrew Robinson",
+"file": "mir_7",
+"frame": "1997",
+"number": "7",
+"set": "mir"
+},
 "Claws of Gix": {
 "artist": "Henry G. Higginbotham",
 "file": "usg_290",
@@ -3162,6 +3176,13 @@
 "frame": "1997",
 "number": "168",
 "set": "mir"
+},
+"Cromat": {
+"artist": "Donato Giancola",
+"file": "apc_94",
+"frame": "1997",
+"number": "94",
+"set": "apc"
 },
 "Crookclaw Elder": {
 "artist": "Ron Spencer",
@@ -3884,6 +3905,13 @@
 "number": "57",
 "set": "uds"
 },
+"Disempower": {
+"artist": "John Matson",
+"file": "mir_9",
+"frame": "1997",
+"number": "9",
+"set": "mir"
+},
 "Disenchant": {
 "artist": "Amy Weber",
 "file": "4ed_22",
@@ -4451,6 +4479,13 @@
 "number": "242",
 "set": "4ed"
 },
+"Elven Warhounds": {
+"artist": "Kev Walker",
+"file": "tmp_225",
+"frame": "1997",
+"number": "225",
+"set": "tmp"
+},
 "Elvish Archers": {
 "artist": "Anson Maddocks",
 "file": "4ed_243",
@@ -4638,6 +4673,13 @@
 "file": "mir_121",
 "frame": "1997",
 "number": "121",
+"set": "mir"
+},
+"Enlightened Tutor": {
+"artist": "Dan Frazier",
+"file": "mir_14",
+"frame": "1997",
+"number": "14",
 "set": "mir"
 },
 "Enormous Baloth": {
@@ -4877,6 +4919,13 @@
 "frame": "1993",
 "number": "32",
 "set": "bchr"
+},
+"Fallow Earth": {
+"artist": "Janine Johnston",
+"file": "mir_214",
+"frame": "1997",
+"number": "214",
+"set": "mir"
 },
 "Fallow Wurm": {
 "artist": "Stephen L. Walsh",
@@ -6593,6 +6642,13 @@
 "number": "69",
 "set": "mir"
 },
+"Harmonic Convergence": {
+"artist": "John Avon",
+"file": "ulg_103",
+"frame": "1997",
+"number": "103",
+"set": "ulg"
+},
 "Harrow": {
 "artist": "Eric David Anderson",
 "file": "tmp_230",
@@ -7012,6 +7068,13 @@
 "frame": "1993",
 "number": "88a",
 "set": "hml"
+},
+"Hunting Drake": {
+"artist": "Wayne England",
+"file": "pls_27",
+"frame": "1997",
+"number": "27",
+"set": "pls"
 },
 "Hunting Grounds": {
 "artist": "Mark Brill",
@@ -7768,6 +7831,13 @@
 "frame": "1997",
 "number": "10",
 "set": "mgb"
+},
+"King Crab": {
+"artist": "Daniel Gelon",
+"file": "ulg_34",
+"frame": "1997",
+"number": "34",
+"set": "ulg"
 },
 "Kingfisher": {
 "artist": "Edward P. Beard, Jr.",
@@ -8749,6 +8819,13 @@
 "number": "37",
 "set": "uds"
 },
+"Mercenary Informer": {
+"artist": "Nelson DeCastro",
+"file": "pcy_15",
+"frame": "1997",
+"number": "15",
+"set": "pcy"
+},
 "Merchant Scroll": {
 "artist": "Liz Danforth",
 "file": "hml_33",
@@ -9225,6 +9302,13 @@
 "number": "152",
 "set": "ody"
 },
+"Mortuary": {
+"artist": "Robert Bliss",
+"file": "sth_66",
+"frame": "1997",
+"number": "66",
+"set": "sth"
+},
 "Moss Diamond": {
 "artist": "Donato Giancola",
 "file": "mir_312",
@@ -9428,6 +9512,13 @@
 "number": "74",
 "set": "tor"
 },
+"Nantuko Tracer": {
+"artist": "Greg Staples",
+"file": "jud_125",
+"frame": "1997",
+"number": "125",
+"set": "jud"
+},
 "Narcissism": {
 "artist": "Christopher Moeller",
 "file": "tor_134",
@@ -9560,6 +9651,13 @@
 "frame": "1993",
 "number": "150",
 "set": "4ed"
+},
+"Nightscape Apprentice": {
+"artist": "Andrew Goldhawk",
+"file": "inv_112",
+"frame": "1997",
+"number": "112",
+"set": "inv"
 },
 "Nightscape Familiar": {
 "artist": "Jeff Easley",
@@ -10471,6 +10569,13 @@
 "number": "116",
 "set": "uds"
 },
+"Plow Under": {
+"artist": "Edward P. Beard, Jr.",
+"file": "uds_117",
+"frame": "1997",
+"number": "117",
+"set": "uds"
+},
 "Polluted Delta": {
 "artist": "Rob Alexander",
 "file": "ons_321",
@@ -11101,6 +11206,13 @@
 "number": "78",
 "set": "wth"
 },
+"Rebel Informer": {
+"artist": "Scott M. Fischer",
+"file": "pcy_75",
+"frame": "1997",
+"number": "75",
+"set": "pcy"
+},
 "Rebuild": {
 "artist": "Allen Williams",
 "file": "ulg_40",
@@ -11135,6 +11247,13 @@
 "frame": "1997",
 "number": "152",
 "set": "tmp"
+},
+"Reclaim": {
+"artist": "Andrew Robinson",
+"file": "exo_120",
+"frame": "1997",
+"number": "120",
+"set": "exo"
 },
 "Reclusive Wight": {
 "artist": "Vincent Evans",
@@ -11220,6 +11339,13 @@
 "number": "268",
 "set": "4ed"
 },
+"Reinforcements": {
+"artist": "Diana Vick",
+"file": "all_12a",
+"frame": "1993",
+"number": "12a",
+"set": "all"
+},
 "Rejuvenate": {
 "artist": "Greg Simanson",
 "file": "usg_271",
@@ -11282,6 +11408,13 @@
 "frame": "1997",
 "number": "50",
 "set": "ons"
+},
+"Repel": {
+"artist": "Terese Nielsen",
+"file": "ody_98",
+"frame": "1997",
+"number": "98",
+"set": "ody"
 },
 "Repentant Blacksmith": {
 "artist": "Drew Tucker",
@@ -11906,6 +12039,13 @@
 "number": "100",
 "set": "mmq"
 },
+"Saprazzan Outrigger": {
+"artist": "Doug Chaffee",
+"file": "mmq_101",
+"frame": "1997",
+"number": "101",
+"set": "mmq"
+},
 "Saprazzan Raider": {
 "artist": "Jeff Miracola",
 "file": "mmq_102",
@@ -12388,6 +12528,13 @@
 "frame": "1997",
 "number": "166",
 "set": "ons"
+},
+"Shadow Guildmage": {
+"artist": "Mike Kimble",
+"file": "mir_140",
+"frame": "1997",
+"number": "140",
+"set": "mir"
 },
 "Shadowblood Ridge": {
 "artist": "Glen Angus",
@@ -13698,6 +13845,13 @@
 "number": "61a",
 "set": "all"
 },
+"Sterling Grove": {
+"artist": "Jeff Miracola",
+"file": "inv_278",
+"frame": "1997",
+"number": "278",
+"set": "inv"
+},
 "Stern Proctor": {
 "artist": "Randy Gallegos",
 "file": "usg_99",
@@ -13936,6 +14090,13 @@
 "number": "147",
 "set": "mir"
 },
+"Submerge": {
+"artist": "Mark Romanoski",
+"file": "nem_48",
+"frame": "1997",
+"number": "48",
+"set": "nem"
+},
 "Subterranean Spirit": {
 "artist": "John Bolton",
 "file": "mir_195",
@@ -14019,6 +14180,13 @@
 "frame": "1997",
 "number": "51",
 "set": "pcy"
+},
+"Sunscape Apprentice": {
+"artist": "Stephanie Law",
+"file": "inv_41",
+"frame": "1997",
+"number": "41",
+"set": "inv"
 },
 "Sunscape Familiar": {
 "artist": "Brian Despain",
@@ -14257,6 +14425,13 @@
 "frame": "1997",
 "number": "48",
 "set": "uds"
+},
+"Temporal Spring": {
+"artist": "John Matson",
+"file": "apc_125",
+"frame": "1997",
+"number": "125",
+"set": "apc"
 },
 "Tendrils of Despair": {
 "artist": "John Coulthart",
@@ -14558,6 +14733,13 @@
 "frame": "1993",
 "number": "342",
 "set": "ice"
+},
+"Time Ebb": {
+"artist": "Alan Rabinowitz",
+"file": "por_75",
+"frame": "1997",
+"number": "75",
+"set": "por"
 },
 "Timid Drake": {
 "artist": "Mike Dringenberg",
@@ -15903,6 +16085,13 @@
 "number": "44",
 "set": "inv"
 },
+"Wayward Soul": {
+"artist": "M. W. Kaluta & DiTerlizzi",
+"file": "exo_51",
+"frame": "1997",
+"number": "51",
+"set": "exo"
+},
 "Weakness": {
 "artist": "Douglas Shuler",
 "file": "4ed_170",
@@ -16315,6 +16504,13 @@
 "frame": "1997",
 "number": "142",
 "set": "exo"
+},
+"Worldly Tutor": {
+"artist": "David O'Connor",
+"file": "mir_255",
+"frame": "1997",
+"number": "255",
+"set": "mir"
 },
 "Worn Powerstone": {
 "artist": "Henry G. Higginbotham",

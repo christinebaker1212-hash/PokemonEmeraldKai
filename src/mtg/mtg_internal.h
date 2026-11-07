@@ -249,6 +249,8 @@ typedef struct {
 // one ability of a resolving chain: 1 done, 0 waiting for a choice (d->query is set; d->resChoice will hold it)
 int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability);
 void Mtg_AddCounters(MtgDuel *d, int obj, int n);
+void Mtg_PutInLibrary(MtgDuel *d, int obj, int pos);          // LibraryPosition$: 0 top, -1 bottom, n below n cards
+void Mtg_ShuffleLibraryBelow(MtgDuel *d, int player, int keepTop);
 // counters of every kind: kinds are interned names (MTG_CTR_P1P1 / M1M1 the +1/+1 ones, kept as counters11)
 enum { MTG_CTR_NONE, MTG_CTR_P1P1, MTG_CTR_M1M1 };
 int Mtg_CounterKind(const char *name);           // the kind for "CHARGE", "P2P2"... (interned; -1: not a name)
