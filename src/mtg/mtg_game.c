@@ -264,6 +264,8 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
     MtgObj *o = &d->objs[obj];
     int from = o->zone, i;
     MtgTrigEvent ev;
+    if (from == MTG_ZONE_BATTLEFIELD && zone == MTG_ZONE_GRAVEYARD && Mtg_Card(o->def)->diesToLibraryTop)
+        zone = MTG_ZONE_LIBRARY;   // "if it would die, put it on top of its owner's library instead" (its top: the end)
     memset(&ev, 0, sizeof(ev));
     ev.mode = MTG_TRIG_CHANGES_ZONE;
     ev.obj = (uint16_t)obj;
@@ -427,6 +429,10 @@ void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int com
         Mtg_CheckTriggers(d, &ev);
         ev.mode = MTG_TRIG_DAMAGE_DONE_ONCE;   // ("whenever it is dealt damage": each damage dealt, here)
         Mtg_CheckTriggers(d, &ev);
+        if (sourceObj != MTG_NO_OBJ) {
+            ev.mode = MTG_TRIG_DAMAGE_DEALT_ONCE;   // ("whenever it deals damage")
+            Mtg_CheckTriggers(d, &ev);
+        }
     }
 }
 

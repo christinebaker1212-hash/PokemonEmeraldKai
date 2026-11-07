@@ -214,7 +214,7 @@ void Orre_Shadow_Drop(struct Pokemon *mon, u8 source, u8 strength)
 u8 Orre_Shadow_HyperChance(struct Pokemon *mon)
 {
     u8 level = Orre_Shadow_Level(mon);
-    return level <= ORRE_SHADOW_OPEN ? sOrreShadowNatures[GetNature(mon)].hyper[level] : 0;
+    return level <= ORRE_SHADOW_OPEN ? sOrreShadowNatures[GetNature(mon)].hyperMode[level] : 0;
 }
 
 u8 Orre_Shadow_CallChance(struct Pokemon *mon)

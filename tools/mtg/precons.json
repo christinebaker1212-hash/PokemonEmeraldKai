@@ -1,0 +1,12730 @@
+[
+ {
+  "name": "Deck A",
+  "set": "6ED",
+  "date": "1999-04-21",
+  "kind": "STARTER",
+  "cards": [
+   [
+    1,
+    "Ardent Militia"
+   ],
+   [
+    1,
+    "Blood Pet"
+   ],
+   [
+    1,
+    "Call of the Wild"
+   ],
+   [
+    1,
+    "Creeping Mold"
+   ],
+   [
+    1,
+    "Drudge Skeletons"
+   ],
+   [
+    1,
+    "Enfeeblement"
+   ],
+   [
+    7,
+    "Forest"
+   ],
+   [
+    1,
+    "Giant Growth"
+   ],
+   [
+    1,
+    "Giant Spider"
+   ],
+   [
+    1,
+    "Gravebane Zombie"
+   ],
+   [
+    1,
+    "Healing Salve"
+   ],
+   [
+    1,
+    "Hidden Horror"
+   ],
+   [
+    1,
+    "Llanowar Elves"
+   ],
+   [
+    1,
+    "Mischievous Poltergeist"
+   ],
+   [
+    1,
+    "Obsianus Golem"
+   ],
+   [
+    1,
+    "Panther Warriors"
+   ],
+   [
+    3,
+    "Plains"
+   ],
+   [
+    1,
+    "Raise Dead"
+   ],
+   [
+    1,
+    "Rampant Growth"
+   ],
+   [
+    1,
+    "Rod of Ruin"
+   ],
+   [
+    1,
+    "Samite Healer"
+   ],
+   [
+    1,
+    "Scaled Wurm"
+   ],
+   [
+    7,
+    "Swamp"
+   ],
+   [
+    1,
+    "Terror"
+   ],
+   [
+    1,
+    "Trained Armodon"
+   ],
+   [
+    1,
+    "Warrior's Honor"
+   ]
+  ]
+ },
+ {
+  "name": "Deck B",
+  "set": "6ED",
+  "date": "1999-04-21",
+  "kind": "STARTER",
+  "cards": [
+   [
+    1,
+    "Air Elemental"
+   ],
+   [
+    1,
+    "Anaba Bodyguard"
+   ],
+   [
+    1,
+    "Blaze"
+   ],
+   [
+    1,
+    "Boomerang"
+   ],
+   [
+    1,
+    "Castle"
+   ],
+   [
+    1,
+    "Counterspell"
+   ],
+   [
+    1,
+    "D'Avenant Archer"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    1,
+    "Fit of Rage"
+   ],
+   [
+    1,
+    "Hero's Resolve"
+   ],
+   [
+    1,
+    "Horned Turtle"
+   ],
+   [
+    6,
+    "Island"
+   ],
+   [
+    1,
+    "Lightning Blast"
+   ],
+   [
+    1,
+    "Mana Prism"
+   ],
+   [
+    6,
+    "Mountain"
+   ],
+   [
+    1,
+    "Phantom Warrior"
+   ],
+   [
+    5,
+    "Plains"
+   ],
+   [
+    1,
+    "Prodigal Sorcerer"
+   ],
+   [
+    1,
+    "Pyrotechnics"
+   ],
+   [
+    1,
+    "Sabretooth Tiger"
+   ],
+   [
+    1,
+    "Sibilant Spirit"
+   ],
+   [
+    1,
+    "Storm Crow"
+   ],
+   [
+    1,
+    "Tremor"
+   ],
+   [
+    1,
+    "Venerable Monk"
+   ],
+   [
+    1,
+    "Wall of Fire"
+   ],
+   [
+    1,
+    "Wind Drake"
+   ]
+  ]
+ },
+ {
+  "name": "Deep Freeze",
+  "set": "TMP",
+  "date": "1997-10-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Anoint"
+   ],
+   [
+    1,
+    "Avenging Angel"
+   ],
+   [
+    1,
+    "Cloudchaser Eagle"
+   ],
+   [
+    3,
+    "Counterspell"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Dismiss"
+   ],
+   [
+    1,
+    "Dream Cache"
+   ],
+   [
+    1,
+    "Emmessi Tome"
+   ],
+   [
+    2,
+    "Gaseous Form"
+   ],
+   [
+    2,
+    "Horned Turtle"
+   ],
+   [
+    1,
+    "Invulnerability"
+   ],
+   [
+    13,
+    "Island"
+   ],
+   [
+    1,
+    "Knight of Dawn"
+   ],
+   [
+    1,
+    "Legacy's Allure"
+   ],
+   [
+    2,
+    "Master Decoy"
+   ],
+   [
+    3,
+    "Pacifism"
+   ],
+   [
+    11,
+    "Plains"
+   ],
+   [
+    2,
+    "Power Sink"
+   ],
+   [
+    1,
+    "Precognition"
+   ],
+   [
+    1,
+    "Puppet Strings"
+   ],
+   [
+    2,
+    "Repentance"
+   ],
+   [
+    1,
+    "Sky Spirit"
+   ],
+   [
+    2,
+    "Soltari Lancer"
+   ],
+   [
+    1,
+    "Spell Blast"
+   ],
+   [
+    1,
+    "Time Ebb"
+   ],
+   [
+    2,
+    "Wind Drake"
+   ]
+  ]
+ },
+ {
+  "name": "Deep Freeze - Advanced Deck",
+  "set": "TMP",
+  "date": "1997-10-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    4,
+    "Adarkar Wastes"
+   ],
+   [
+    1,
+    "Angelic Renewal"
+   ],
+   [
+    2,
+    "Avenging Angel"
+   ],
+   [
+    2,
+    "Binding Grasp"
+   ],
+   [
+    4,
+    "Counterspell"
+   ],
+   [
+    1,
+    "Desertion"
+   ],
+   [
+    2,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Dismiss"
+   ],
+   [
+    1,
+    "Dissipate"
+   ],
+   [
+    4,
+    "Impulse"
+   ],
+   [
+    1,
+    "Inspiration"
+   ],
+   [
+    10,
+    "Island"
+   ],
+   [
+    2,
+    "Man-o'-War"
+   ],
+   [
+    6,
+    "Plains"
+   ],
+   [
+    1,
+    "Portent"
+   ],
+   [
+    2,
+    "Quicksand"
+   ],
+   [
+    2,
+    "Rainbow Efreet"
+   ],
+   [
+    2,
+    "Sky Spirit"
+   ],
+   [
+    2,
+    "Suq'Ata Firewalker"
+   ],
+   [
+    1,
+    "Svyelunite Temple"
+   ],
+   [
+    3,
+    "Thalakos Lowlands"
+   ],
+   [
+    2,
+    "Whispers of the Muse"
+   ],
+   [
+    3,
+    "Wrath of God"
+   ]
+  ]
+ },
+ {
+  "name": "Flames of Rath - Advanced Deck",
+  "set": "TMP",
+  "date": "1997-10-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    3,
+    "Ball Lightning"
+   ],
+   [
+    2,
+    "Disenchant"
+   ],
+   [
+    4,
+    "Dwarven Ruins"
+   ],
+   [
+    2,
+    "Earthquake"
+   ],
+   [
+    2,
+    "Fireball"
+   ],
+   [
+    3,
+    "Fireblast"
+   ],
+   [
+    2,
+    "Furnace of Rath"
+   ],
+   [
+    3,
+    "Gemstone Mine"
+   ],
+   [
+    2,
+    "Hammer of Bogardan"
+   ],
+   [
+    4,
+    "Incinerate"
+   ],
+   [
+    2,
+    "Jokulhaups"
+   ],
+   [
+    4,
+    "Kindle"
+   ],
+   [
+    2,
+    "Lightning Elemental"
+   ],
+   [
+    12,
+    "Mountain"
+   ],
+   [
+    2,
+    "Reflecting Pool"
+   ],
+   [
+    1,
+    "Repentance"
+   ],
+   [
+    2,
+    "Scabland"
+   ],
+   [
+    4,
+    "Steel Golem"
+   ],
+   [
+    1,
+    "Thran Tome"
+   ],
+   [
+    2,
+    "Thunderbolt"
+   ],
+   [
+    1,
+    "Undiscovered Paradise"
+   ]
+  ]
+ },
+ {
+  "name": "The Flames of Rath",
+  "set": "TMP",
+  "date": "1997-10-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Blood Frenzy"
+   ],
+   [
+    1,
+    "Coiled Tinviper"
+   ],
+   [
+    2,
+    "Disenchant"
+   ],
+   [
+    1,
+    "Firefly"
+   ],
+   [
+    3,
+    "Fireslinger"
+   ],
+   [
+    1,
+    "Flowstone Giant"
+   ],
+   [
+    1,
+    "Flowstone Salamander"
+   ],
+   [
+    1,
+    "Furnace of Rath"
+   ],
+   [
+    1,
+    "Goblin Bombardment"
+   ],
+   [
+    4,
+    "Kindle"
+   ],
+   [
+    3,
+    "Lightning Blast"
+   ],
+   [
+    2,
+    "Lightning Elemental"
+   ],
+   [
+    1,
+    "Magmasaur"
+   ],
+   [
+    1,
+    "Maze of Shadows"
+   ],
+   [
+    4,
+    "Mogg Fanatic"
+   ],
+   [
+    19,
+    "Mountain"
+   ],
+   [
+    5,
+    "Plains"
+   ],
+   [
+    2,
+    "Rolling Thunder"
+   ],
+   [
+    1,
+    "Sandstone Warrior"
+   ],
+   [
+    1,
+    "Searing Touch"
+   ],
+   [
+    1,
+    "Soltari Guerrillas"
+   ],
+   [
+    1,
+    "Squee's Toy"
+   ],
+   [
+    1,
+    "Tahngarth's Rage"
+   ],
+   [
+    2,
+    "Wild Wurm"
+   ]
+  ]
+ },
+ {
+  "name": "The Slivers",
+  "set": "TMP",
+  "date": "1997-10-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    4,
+    "Clot Sliver"
+   ],
+   [
+    2,
+    "Counterspell"
+   ],
+   [
+    2,
+    "Dark Banishing"
+   ],
+   [
+    2,
+    "Diabolic Edict"
+   ],
+   [
+    1,
+    "Dismiss"
+   ],
+   [
+    2,
+    "Dream Cache"
+   ],
+   [
+    1,
+    "Ertai's Meddling"
+   ],
+   [
+    1,
+    "Essence Bottle"
+   ],
+   [
+    1,
+    "Evincar's Justice"
+   ],
+   [
+    1,
+    "Extinction"
+   ],
+   [
+    1,
+    "Fevered Convulsions"
+   ],
+   [
+    13,
+    "Island"
+   ],
+   [
+    1,
+    "Lobotomy"
+   ],
+   [
+    4,
+    "Metallic Sliver"
+   ],
+   [
+    1,
+    "Mindwhip Sliver"
+   ],
+   [
+    3,
+    "Mnemonic Sliver"
+   ],
+   [
+    2,
+    "Power Sink"
+   ],
+   [
+    1,
+    "Rootwater Depths"
+   ],
+   [
+    1,
+    "Spell Blast"
+   ],
+   [
+    11,
+    "Swamp"
+   ],
+   [
+    1,
+    "Whispers of the Muse"
+   ],
+   [
+    4,
+    "Winged Sliver"
+   ]
+  ]
+ },
+ {
+  "name": "The Slivers - Advanced Deck",
+  "set": "TMP",
+  "date": "1997-10-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    4,
+    "Clot Sliver"
+   ],
+   [
+    3,
+    "Counterspell"
+   ],
+   [
+    1,
+    "Dismiss"
+   ],
+   [
+    1,
+    "Drain Life"
+   ],
+   [
+    1,
+    "Fevered Convulsions"
+   ],
+   [
+    3,
+    "Impulse"
+   ],
+   [
+    8,
+    "Island"
+   ],
+   [
+    1,
+    "Lobotomy"
+   ],
+   [
+    4,
+    "Metallic Sliver"
+   ],
+   [
+    1,
+    "Mindwhip Sliver"
+   ],
+   [
+    3,
+    "Mnemonic Sliver"
+   ],
+   [
+    2,
+    "Nevinyrral's Disk"
+   ],
+   [
+    1,
+    "Portent"
+   ],
+   [
+    1,
+    "Power Sink"
+   ],
+   [
+    2,
+    "Quicksand"
+   ],
+   [
+    4,
+    "Rootwater Depths"
+   ],
+   [
+    3,
+    "Stupor"
+   ],
+   [
+    6,
+    "Swamp"
+   ],
+   [
+    2,
+    "Terror"
+   ],
+   [
+    4,
+    "Underground River"
+   ],
+   [
+    1,
+    "Whispers of the Muse"
+   ],
+   [
+    4,
+    "Winged Sliver"
+   ]
+  ]
+ },
+ {
+  "name": "The Swarm",
+  "set": "TMP",
+  "date": "1997-10-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Aluren"
+   ],
+   [
+    1,
+    "Anoint"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    1,
+    "Elven Warhounds"
+   ],
+   [
+    1,
+    "Elvish Fury"
+   ],
+   [
+    14,
+    "Forest"
+   ],
+   [
+    1,
+    "Krakilin"
+   ],
+   [
+    3,
+    "Master Decoy"
+   ],
+   [
+    4,
+    "Muscle Sliver"
+   ],
+   [
+    1,
+    "Needle Storm"
+   ],
+   [
+    2,
+    "Overrun"
+   ],
+   [
+    3,
+    "Pacifism"
+   ],
+   [
+    3,
+    "Pincher Beetles"
+   ],
+   [
+    7,
+    "Plains"
+   ],
+   [
+    2,
+    "Ranger en-Vec"
+   ],
+   [
+    1,
+    "Recycle"
+   ],
+   [
+    3,
+    "Rootwalla"
+   ],
+   [
+    3,
+    "Skyshroud Elf"
+   ],
+   [
+    1,
+    "Soltari Crusader"
+   ],
+   [
+    2,
+    "Soltari Trooper"
+   ],
+   [
+    3,
+    "Trained Armodon"
+   ],
+   [
+    2,
+    "Vec Townships"
+   ]
+  ]
+ },
+ {
+  "name": "The Swarm - Advanced Deck",
+  "set": "TMP",
+  "date": "1997-10-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Aluren"
+   ],
+   [
+    2,
+    "Arctic Wolves"
+   ],
+   [
+    3,
+    "Armageddon"
+   ],
+   [
+    2,
+    "Birds of Paradise"
+   ],
+   [
+    4,
+    "Brushland"
+   ],
+   [
+    1,
+    "Force of Nature"
+   ],
+   [
+    11,
+    "Forest"
+   ],
+   [
+    1,
+    "Hurricane"
+   ],
+   [
+    2,
+    "Lhurgoyf"
+   ],
+   [
+    4,
+    "Llanowar Elves"
+   ],
+   [
+    4,
+    "Llanowar Sentinel"
+   ],
+   [
+    4,
+    "Muscle Sliver"
+   ],
+   [
+    3,
+    "Nature's Resurgence"
+   ],
+   [
+    4,
+    "Quicksand"
+   ],
+   [
+    4,
+    "River Boa"
+   ],
+   [
+    1,
+    "Sacred Guide"
+   ],
+   [
+    2,
+    "Skyshroud Elf"
+   ],
+   [
+    1,
+    "Spirit Link"
+   ],
+   [
+    1,
+    "Trained Armodon"
+   ],
+   [
+    3,
+    "Uktabi Orangutan"
+   ],
+   [
+    2,
+    "Vec Townships"
+   ]
+  ]
+ },
+ {
+  "name": "Call of the Kor",
+  "set": "STH",
+  "date": "1998-03-02",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Cloudchaser Eagle"
+   ],
+   [
+    1,
+    "Dark Banishing"
+   ],
+   [
+    1,
+    "Darkling Stalker"
+   ],
+   [
+    1,
+    "Death Stroke"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    3,
+    "Endless Scream"
+   ],
+   [
+    2,
+    "Enfeeblement"
+   ],
+   [
+    2,
+    "Evincar's Justice"
+   ],
+   [
+    1,
+    "Flickering Ward"
+   ],
+   [
+    2,
+    "Gravedigger"
+   ],
+   [
+    2,
+    "Knight of Dawn"
+   ],
+   [
+    2,
+    "Lab Rats"
+   ],
+   [
+    2,
+    "Lancers en-Kor"
+   ],
+   [
+    3,
+    "Nomads en-Kor"
+   ],
+   [
+    13,
+    "Plains"
+   ],
+   [
+    1,
+    "Screeching Harpy"
+   ],
+   [
+    1,
+    "Shaman en-Kor"
+   ],
+   [
+    1,
+    "Skeleton Scavengers"
+   ],
+   [
+    1,
+    "Smite"
+   ],
+   [
+    1,
+    "Soltari Champion"
+   ],
+   [
+    4,
+    "Spirit en-Kor"
+   ],
+   [
+    11,
+    "Swamp"
+   ],
+   [
+    1,
+    "Temper"
+   ],
+   [
+    2,
+    "Warrior en-Kor"
+   ]
+  ]
+ },
+ {
+  "name": "Call of the Kor - Advanced Deck",
+  "set": "STH",
+  "date": "1998-03-02",
+  "kind": "THEME",
+  "cards": [
+   [
+    3,
+    "Armageddon"
+   ],
+   [
+    4,
+    "Crusade"
+   ],
+   [
+    3,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Empyrial Armor"
+   ],
+   [
+    3,
+    "Infantry Veteran"
+   ],
+   [
+    2,
+    "Knight of Dawn"
+   ],
+   [
+    4,
+    "Order of the White Shield"
+   ],
+   [
+    18,
+    "Plains"
+   ],
+   [
+    2,
+    "Shaman en-Kor"
+   ],
+   [
+    3,
+    "Soltari Champion"
+   ],
+   [
+    4,
+    "Soltari Priest"
+   ],
+   [
+    4,
+    "Tithe"
+   ],
+   [
+    4,
+    "Warrior en-Kor"
+   ],
+   [
+    4,
+    "White Knight"
+   ]
+  ]
+ },
+ {
+  "name": "Migraine",
+  "set": "STH",
+  "date": "1998-03-02",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Bottomless Pit"
+   ],
+   [
+    3,
+    "Coercion"
+   ],
+   [
+    1,
+    "Dark Banishing"
+   ],
+   [
+    1,
+    "Dark Ritual"
+   ],
+   [
+    4,
+    "Dauthi Horror"
+   ],
+   [
+    1,
+    "Dauthi Mindripper"
+   ],
+   [
+    2,
+    "Dauthi Slayer"
+   ],
+   [
+    4,
+    "Death Stroke"
+   ],
+   [
+    2,
+    "Diabolic Edict"
+   ],
+   [
+    1,
+    "Ensnaring Bridge"
+   ],
+   [
+    4,
+    "Foul Imp"
+   ],
+   [
+    1,
+    "Hornet Cannon"
+   ],
+   [
+    3,
+    "Megrim"
+   ],
+   [
+    2,
+    "Mind Peel"
+   ],
+   [
+    1,
+    "Mindwarper"
+   ],
+   [
+    2,
+    "Pit Imp"
+   ],
+   [
+    1,
+    "Portcullis"
+   ],
+   [
+    1,
+    "Rabid Rats"
+   ],
+   [
+    24,
+    "Swamp"
+   ]
+  ]
+ },
+ {
+  "name": "The Sparkler",
+  "set": "STH",
+  "date": "1998-03-02",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Capsize"
+   ],
+   [
+    1,
+    "Contempt"
+   ],
+   [
+    1,
+    "Counterspell"
+   ],
+   [
+    1,
+    "Evacuation"
+   ],
+   [
+    2,
+    "Fanning the Flames"
+   ],
+   [
+    2,
+    "Flowstone Blade"
+   ],
+   [
+    1,
+    "Intruder Alarm"
+   ],
+   [
+    14,
+    "Island"
+   ],
+   [
+    3,
+    "Lightning Blast"
+   ],
+   [
+    3,
+    "Mana Leak"
+   ],
+   [
+    1,
+    "Mind Games"
+   ],
+   [
+    1,
+    "Mogg Fanatic"
+   ],
+   [
+    13,
+    "Mountain"
+   ],
+   [
+    2,
+    "Power Sink"
+   ],
+   [
+    2,
+    "Propaganda"
+   ],
+   [
+    1,
+    "Ransack"
+   ],
+   [
+    1,
+    "Reins of Power"
+   ],
+   [
+    1,
+    "Searing Touch"
+   ],
+   [
+    1,
+    "Shatter"
+   ],
+   [
+    2,
+    "Shock"
+   ],
+   [
+    2,
+    "Spell Blast"
+   ],
+   [
+    1,
+    "Wall of Razors"
+   ],
+   [
+    1,
+    "Wall of Tears"
+   ],
+   [
+    1,
+    "Whispers of the Muse"
+   ]
+  ]
+ },
+ {
+  "name": "The Sparkler - Advanced Deck",
+  "set": "STH",
+  "date": "1998-03-02",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Capsize"
+   ],
+   [
+    1,
+    "Coral Atoll"
+   ],
+   [
+    4,
+    "Counterspell"
+   ],
+   [
+    1,
+    "Dismiss"
+   ],
+   [
+    2,
+    "Disrupt"
+   ],
+   [
+    1,
+    "Dissipate"
+   ],
+   [
+    1,
+    "Dwarven Ruins"
+   ],
+   [
+    1,
+    "Earthquake"
+   ],
+   [
+    1,
+    "Fanning the Flames"
+   ],
+   [
+    4,
+    "Impulse"
+   ],
+   [
+    4,
+    "Incinerate"
+   ],
+   [
+    13,
+    "Island"
+   ],
+   [
+    1,
+    "Jokulhaups"
+   ],
+   [
+    3,
+    "Mana Leak"
+   ],
+   [
+    9,
+    "Mountain"
+   ],
+   [
+    1,
+    "Portent"
+   ],
+   [
+    1,
+    "Power Sink"
+   ],
+   [
+    2,
+    "Propaganda"
+   ],
+   [
+    4,
+    "Quicksand"
+   ],
+   [
+    1,
+    "Searing Touch"
+   ],
+   [
+    2,
+    "Shock"
+   ],
+   [
+    1,
+    "Whispers of the Muse"
+   ]
+  ]
+ },
+ {
+  "name": "The Spikes",
+  "set": "STH",
+  "date": "1998-03-02",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Bayou Dragonfly"
+   ],
+   [
+    1,
+    "Canopy Spider"
+   ],
+   [
+    1,
+    "Elven Rite"
+   ],
+   [
+    1,
+    "Fanning the Flames"
+   ],
+   [
+    12,
+    "Forest"
+   ],
+   [
+    2,
+    "Heartstone"
+   ],
+   [
+    1,
+    "Hermit Druid"
+   ],
+   [
+    4,
+    "Kindle"
+   ],
+   [
+    1,
+    "Lowland Basilisk"
+   ],
+   [
+    9,
+    "Mountain"
+   ],
+   [
+    2,
+    "Pincher Beetles"
+   ],
+   [
+    2,
+    "Rampant Growth"
+   ],
+   [
+    2,
+    "Shock"
+   ],
+   [
+    4,
+    "Skyshroud Elf"
+   ],
+   [
+    1,
+    "Spike Breeder"
+   ],
+   [
+    2,
+    "Spike Colony"
+   ],
+   [
+    4,
+    "Spike Drone"
+   ],
+   [
+    2,
+    "Spike Feeder"
+   ],
+   [
+    2,
+    "Spike Soldier"
+   ],
+   [
+    3,
+    "Spike Worker"
+   ],
+   [
+    1,
+    "Tempting Licid"
+   ],
+   [
+    1,
+    "Tranquility"
+   ],
+   [
+    1,
+    "Verdant Touch"
+   ]
+  ]
+ },
+ {
+  "name": "The Spikes - Advanced Deck",
+  "set": "STH",
+  "date": "1998-03-02",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Armageddon"
+   ],
+   [
+    2,
+    "City of Brass"
+   ],
+   [
+    2,
+    "Forest"
+   ],
+   [
+    1,
+    "Gemstone Mine"
+   ],
+   [
+    1,
+    "Hammer of Bogardan"
+   ],
+   [
+    3,
+    "Incinerate"
+   ],
+   [
+    2,
+    "Jolrael's Centaur"
+   ],
+   [
+    4,
+    "Karplusan Forest"
+   ],
+   [
+    4,
+    "Kindle"
+   ],
+   [
+    2,
+    "Lhurgoyf"
+   ],
+   [
+    4,
+    "Llanowar Elves"
+   ],
+   [
+    4,
+    "Mogg Hollows"
+   ],
+   [
+    1,
+    "Mountain"
+   ],
+   [
+    1,
+    "Orgg"
+   ],
+   [
+    1,
+    "Pincher Beetles"
+   ],
+   [
+    3,
+    "Quicksand"
+   ],
+   [
+    2,
+    "Reflecting Pool"
+   ],
+   [
+    2,
+    "River Boa"
+   ],
+   [
+    1,
+    "Shard Phoenix"
+   ],
+   [
+    1,
+    "Shivan Dragon"
+   ],
+   [
+    2,
+    "Skyshroud Elf"
+   ],
+   [
+    2,
+    "Spike Breeder"
+   ],
+   [
+    3,
+    "Spike Drone"
+   ],
+   [
+    2,
+    "Spike Worker"
+   ],
+   [
+    3,
+    "Suq'Ata Lancer"
+   ],
+   [
+    2,
+    "Uktabi Orangutan"
+   ],
+   [
+    2,
+    "Undiscovered Paradise"
+   ],
+   [
+    1,
+    "Vec Townships"
+   ],
+   [
+    1,
+    "Wildfire Emissary"
+   ]
+  ]
+ },
+ {
+  "name": "Dominator - Advanced Deck",
+  "set": "EXO",
+  "date": "1998-06-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Capsize"
+   ],
+   [
+    4,
+    "Counterspell"
+   ],
+   [
+    1,
+    "Erratic Portal"
+   ],
+   [
+    2,
+    "Fellwar Stone"
+   ],
+   [
+    2,
+    "Force Spike"
+   ],
+   [
+    2,
+    "Impulse"
+   ],
+   [
+    17,
+    "Island"
+   ],
+   [
+    1,
+    "Legacy's Allure"
+   ],
+   [
+    3,
+    "Man-o'-War"
+   ],
+   [
+    4,
+    "Mana Leak"
+   ],
+   [
+    4,
+    "Memory Lapse"
+   ],
+   [
+    2,
+    "Mind Games"
+   ],
+   [
+    1,
+    "Power Sink"
+   ],
+   [
+    2,
+    "Propaganda"
+   ],
+   [
+    2,
+    "Suq'Ata Firewalker"
+   ],
+   [
+    3,
+    "Undiscovered Paradise"
+   ],
+   [
+    4,
+    "Wasteland"
+   ],
+   [
+    4,
+    "Winter Orb"
+   ]
+  ]
+ },
+ {
+  "name": "Dominator - Basic Deck",
+  "set": "EXO",
+  "date": "1998-06-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Capsize"
+   ],
+   [
+    2,
+    "Cloud Spirit"
+   ],
+   [
+    4,
+    "Counterspell"
+   ],
+   [
+    1,
+    "Dominating Licid"
+   ],
+   [
+    1,
+    "Equilibrium"
+   ],
+   [
+    1,
+    "Erratic Portal"
+   ],
+   [
+    2,
+    "Fade Away"
+   ],
+   [
+    2,
+    "Forbid"
+   ],
+   [
+    26,
+    "Island"
+   ],
+   [
+    2,
+    "Killer Whale"
+   ],
+   [
+    1,
+    "Legacy's Allure"
+   ],
+   [
+    3,
+    "Mana Leak"
+   ],
+   [
+    2,
+    "Mind Games"
+   ],
+   [
+    2,
+    "Mirozel"
+   ],
+   [
+    1,
+    "Propaganda"
+   ],
+   [
+    4,
+    "Thalakos Scout"
+   ],
+   [
+    1,
+    "Time Ebb"
+   ],
+   [
+    1,
+    "Treasure Trove"
+   ],
+   [
+    2,
+    "Wayward Soul"
+   ]
+  ]
+ },
+ {
+  "name": "Groundbreaker - Advanced Deck",
+  "set": "EXO",
+  "date": "1998-06-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Anarchist"
+   ],
+   [
+    1,
+    "Army Ants"
+   ],
+   [
+    1,
+    "City of Brass"
+   ],
+   [
+    3,
+    "Diabolic Edict"
+   ],
+   [
+    1,
+    "Dirtcowl Wurm"
+   ],
+   [
+    2,
+    "Earthquake"
+   ],
+   [
+    2,
+    "Flowstone Flood"
+   ],
+   [
+    1,
+    "Forest"
+   ],
+   [
+    1,
+    "Hammer of Bogardan"
+   ],
+   [
+    4,
+    "Incinerate"
+   ],
+   [
+    2,
+    "Karplusan Forest"
+   ],
+   [
+    2,
+    "Monstrous Hound"
+   ],
+   [
+    3,
+    "Mountain"
+   ],
+   [
+    3,
+    "Orcish Settlers"
+   ],
+   [
+    1,
+    "Orgg"
+   ],
+   [
+    1,
+    "Plaguebearer"
+   ],
+   [
+    3,
+    "Quicksand"
+   ],
+   [
+    4,
+    "Rain of Tears"
+   ],
+   [
+    1,
+    "Ravenous Baboons"
+   ],
+   [
+    3,
+    "Reflecting Pool"
+   ],
+   [
+    2,
+    "Searing Touch"
+   ],
+   [
+    4,
+    "Stone Rain"
+   ],
+   [
+    2,
+    "Sulfurous Springs"
+   ],
+   [
+    3,
+    "Swamp"
+   ],
+   [
+    2,
+    "Uktabi Orangutan"
+   ],
+   [
+    2,
+    "Undiscovered Paradise"
+   ],
+   [
+    4,
+    "Wasteland"
+   ]
+  ]
+ },
+ {
+  "name": "Groundbreaker - Basic Deck",
+  "set": "EXO",
+  "date": "1998-06-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Aftershock"
+   ],
+   [
+    3,
+    "Anarchist"
+   ],
+   [
+    2,
+    "Dauthi Jackal"
+   ],
+   [
+    1,
+    "Dauthi Slayer"
+   ],
+   [
+    3,
+    "Diabolic Edict"
+   ],
+   [
+    1,
+    "Evincar's Justice"
+   ],
+   [
+    3,
+    "Flowstone Flood"
+   ],
+   [
+    1,
+    "Monstrous Hound"
+   ],
+   [
+    12,
+    "Mountain"
+   ],
+   [
+    1,
+    "Nausea"
+   ],
+   [
+    1,
+    "Necrologia"
+   ],
+   [
+    3,
+    "Rain of Tears"
+   ],
+   [
+    1,
+    "Scalding Salamander"
+   ],
+   [
+    1,
+    "Searing Touch"
+   ],
+   [
+    3,
+    "Shock"
+   ],
+   [
+    4,
+    "Stone Rain"
+   ],
+   [
+    12,
+    "Swamp"
+   ],
+   [
+    1,
+    "Thopter Squadron"
+   ],
+   [
+    2,
+    "Thrull Surgeon"
+   ],
+   [
+    2,
+    "Vampire Hounds"
+   ],
+   [
+    1,
+    "Volrath's Dungeon"
+   ]
+  ]
+ },
+ {
+  "name": "White Heat - Advanced Deck",
+  "set": "EXO",
+  "date": "1998-06-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Armageddon"
+   ],
+   [
+    2,
+    "City of Brass"
+   ],
+   [
+    2,
+    "Disenchant"
+   ],
+   [
+    3,
+    "Gemstone Mine"
+   ],
+   [
+    4,
+    "Incinerate"
+   ],
+   [
+    2,
+    "Infantry Veteran"
+   ],
+   [
+    4,
+    "Kindle"
+   ],
+   [
+    4,
+    "Mountain"
+   ],
+   [
+    4,
+    "Order of the White Shield"
+   ],
+   [
+    7,
+    "Plains"
+   ],
+   [
+    3,
+    "Shock"
+   ],
+   [
+    4,
+    "Soltari Foot Soldier"
+   ],
+   [
+    2,
+    "Soltari Priest"
+   ],
+   [
+    2,
+    "Soltari Visionary"
+   ],
+   [
+    2,
+    "Tithe"
+   ],
+   [
+    3,
+    "Undiscovered Paradise"
+   ],
+   [
+    4,
+    "Vigilant Martyr"
+   ],
+   [
+    4,
+    "Welkin Hawk"
+   ],
+   [
+    2,
+    "White Knight"
+   ]
+  ]
+ },
+ {
+  "name": "White Heat - Basic Deck",
+  "set": "EXO",
+  "date": "1998-06-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Goblin Bombardment"
+   ],
+   [
+    4,
+    "Kindle"
+   ],
+   [
+    2,
+    "Knight of Dawn"
+   ],
+   [
+    2,
+    "Lightning Blast"
+   ],
+   [
+    1,
+    "Limited Resources"
+   ],
+   [
+    2,
+    "Master Decoy"
+   ],
+   [
+    9,
+    "Mountain"
+   ],
+   [
+    1,
+    "Onslaught"
+   ],
+   [
+    1,
+    "Paladin en-Vec"
+   ],
+   [
+    2,
+    "Pegasus Stampede"
+   ],
+   [
+    13,
+    "Plains"
+   ],
+   [
+    1,
+    "Reconnaissance"
+   ],
+   [
+    2,
+    "Searing Touch"
+   ],
+   [
+    1,
+    "Shackles"
+   ],
+   [
+    1,
+    "Shattering Pulse"
+   ],
+   [
+    2,
+    "Shock"
+   ],
+   [
+    4,
+    "Soltari Foot Soldier"
+   ],
+   [
+    3,
+    "Soltari Visionary"
+   ],
+   [
+    2,
+    "Sonic Burst"
+   ],
+   [
+    1,
+    "Temper"
+   ],
+   [
+    1,
+    "Wall of Nets"
+   ],
+   [
+    4,
+    "Welkin Hawk"
+   ]
+  ]
+ },
+ {
+  "name": "Widowmaker - Advanced Deck",
+  "set": "EXO",
+  "date": "1998-06-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Ancestral Memories"
+   ],
+   [
+    2,
+    "Blood Pet"
+   ],
+   [
+    1,
+    "Bottle Gnomes"
+   ],
+   [
+    2,
+    "Counterspell"
+   ],
+   [
+    1,
+    "Dark Ritual"
+   ],
+   [
+    1,
+    "Dissipate"
+   ],
+   [
+    2,
+    "Fallen Angel"
+   ],
+   [
+    1,
+    "Haunting Misery"
+   ],
+   [
+    2,
+    "Impulse"
+   ],
+   [
+    8,
+    "Island"
+   ],
+   [
+    3,
+    "Living Death"
+   ],
+   [
+    4,
+    "Man-o'-War"
+   ],
+   [
+    2,
+    "Memory Lapse"
+   ],
+   [
+    4,
+    "Merfolk Looter"
+   ],
+   [
+    4,
+    "Merfolk Traders"
+   ],
+   [
+    1,
+    "Necratog"
+   ],
+   [
+    1,
+    "Phyrexian Furnace"
+   ],
+   [
+    4,
+    "Rootwater Depths"
+   ],
+   [
+    1,
+    "Spinning Darkness"
+   ],
+   [
+    1,
+    "Spirit of the Night"
+   ],
+   [
+    7,
+    "Swamp"
+   ],
+   [
+    4,
+    "Underground River"
+   ],
+   [
+    2,
+    "Undiscovered Paradise"
+   ],
+   [
+    1,
+    "Vampire Hounds"
+   ]
+  ]
+ },
+ {
+  "name": "Widowmaker - Basic Deck",
+  "set": "EXO",
+  "date": "1998-06-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Capsize"
+   ],
+   [
+    2,
+    "Counterspell"
+   ],
+   [
+    2,
+    "Dark Banishing"
+   ],
+   [
+    2,
+    "Dark Ritual"
+   ],
+   [
+    2,
+    "Diabolic Edict"
+   ],
+   [
+    2,
+    "Forbid"
+   ],
+   [
+    14,
+    "Island"
+   ],
+   [
+    1,
+    "Keeper of the Mind"
+   ],
+   [
+    2,
+    "Mana Leak"
+   ],
+   [
+    3,
+    "Manta Riders"
+   ],
+   [
+    4,
+    "Merfolk Looter"
+   ],
+   [
+    2,
+    "Mind Maggots"
+   ],
+   [
+    1,
+    "Mindless Automaton"
+   ],
+   [
+    2,
+    "Necrologia"
+   ],
+   [
+    1,
+    "Null Brooch"
+   ],
+   [
+    1,
+    "Oath of Scholars"
+   ],
+   [
+    1,
+    "Rootwater Hunter"
+   ],
+   [
+    1,
+    "Skyshroud Vampire"
+   ],
+   [
+    11,
+    "Swamp"
+   ],
+   [
+    1,
+    "Thalakos Scout"
+   ],
+   [
+    1,
+    "Treasure Trove"
+   ],
+   [
+    3,
+    "Vampire Hounds"
+   ]
+  ]
+ },
+ {
+  "name": "Sleeper",
+  "set": "USG",
+  "date": "1998-10-12",
+  "kind": "THEME",
+  "cards": [
+   [
+    3,
+    "Angelic Page"
+   ],
+   [
+    1,
+    "Barrin's Codex"
+   ],
+   [
+    4,
+    "Brilliant Halo"
+   ],
+   [
+    2,
+    "Clear"
+   ],
+   [
+    1,
+    "Disciple of Grace"
+   ],
+   [
+    1,
+    "Disciple of Law"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Dragon Blood"
+   ],
+   [
+    4,
+    "Drifting Meadow"
+   ],
+   [
+    1,
+    "Endoskeleton"
+   ],
+   [
+    2,
+    "Humble"
+   ],
+   [
+    1,
+    "Monk Idealist"
+   ],
+   [
+    2,
+    "Monk Realist"
+   ],
+   [
+    2,
+    "Opal Caryatid"
+   ],
+   [
+    3,
+    "Opal Gargoyle"
+   ],
+   [
+    1,
+    "Opal Titan"
+   ],
+   [
+    2,
+    "Pacifism"
+   ],
+   [
+    3,
+    "Pegasus Charger"
+   ],
+   [
+    18,
+    "Plains"
+   ],
+   [
+    1,
+    "Sanctum Custodian"
+   ],
+   [
+    1,
+    "Serra's Embrace"
+   ],
+   [
+    2,
+    "Songstitcher"
+   ],
+   [
+    1,
+    "Voice of Grace"
+   ],
+   [
+    1,
+    "Waylay"
+   ]
+  ]
+ },
+ {
+  "name": "Sleeper - Enhanced Deck",
+  "set": "USG",
+  "date": "1998-10-12",
+  "kind": "THEME",
+  "cards": [
+   [
+    4,
+    "Argothian Enchantress"
+   ],
+   [
+    3,
+    "Brilliant Halo"
+   ],
+   [
+    2,
+    "Citanul Centaurs"
+   ],
+   [
+    2,
+    "Clear"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    4,
+    "Drifting Meadow"
+   ],
+   [
+    4,
+    "Endless Wurm"
+   ],
+   [
+    10,
+    "Forest"
+   ],
+   [
+    1,
+    "Fortitude"
+   ],
+   [
+    2,
+    "Harrow"
+   ],
+   [
+    1,
+    "Hidden Ancients"
+   ],
+   [
+    1,
+    "Hidden Guerrillas"
+   ],
+   [
+    1,
+    "Hidden Herd"
+   ],
+   [
+    2,
+    "Hidden Predators"
+   ],
+   [
+    2,
+    "Hidden Stag"
+   ],
+   [
+    3,
+    "Humble"
+   ],
+   [
+    1,
+    "Hurricane"
+   ],
+   [
+    1,
+    "Lhurgoyf"
+   ],
+   [
+    1,
+    "Oath of Lieges"
+   ],
+   [
+    3,
+    "Pariah"
+   ],
+   [
+    6,
+    "Plains"
+   ],
+   [
+    4,
+    "Slippery Karst"
+   ],
+   [
+    1,
+    "Worship"
+   ]
+  ]
+ },
+ {
+  "name": "Special Delivery",
+  "set": "USG",
+  "date": "1998-10-12",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Acridian"
+   ],
+   [
+    1,
+    "Anaconda"
+   ],
+   [
+    3,
+    "Arc Lightning"
+   ],
+   [
+    1,
+    "Argothian Wurm"
+   ],
+   [
+    1,
+    "Bull Hippo"
+   ],
+   [
+    2,
+    "Cradle Guard"
+   ],
+   [
+    1,
+    "Fiery Mantle"
+   ],
+   [
+    10,
+    "Forest"
+   ],
+   [
+    2,
+    "Goblin Patrol"
+   ],
+   [
+    2,
+    "Goblin War Buggy"
+   ],
+   [
+    1,
+    "Heat Ray"
+   ],
+   [
+    1,
+    "Hidden Ancients"
+   ],
+   [
+    1,
+    "Hidden Spider"
+   ],
+   [
+    1,
+    "Hush"
+   ],
+   [
+    1,
+    "Jagged Lightning"
+   ],
+   [
+    11,
+    "Mountain"
+   ],
+   [
+    1,
+    "Pouncing Jaguar"
+   ],
+   [
+    1,
+    "Scrap"
+   ],
+   [
+    1,
+    "Shiv's Embrace"
+   ],
+   [
+    2,
+    "Shivan Raptor"
+   ],
+   [
+    1,
+    "Shower of Sparks"
+   ],
+   [
+    2,
+    "Slippery Karst"
+   ],
+   [
+    2,
+    "Smoldering Crater"
+   ],
+   [
+    1,
+    "Symbiosis"
+   ],
+   [
+    1,
+    "Thran Turbine"
+   ],
+   [
+    2,
+    "Thundering Giant"
+   ],
+   [
+    1,
+    "Torch Song"
+   ],
+   [
+    3,
+    "Wild Dogs"
+   ],
+   [
+    1,
+    "Wildfire"
+   ]
+  ]
+ },
+ {
+  "name": "Special Delivery - Enhanced Deck",
+  "set": "USG",
+  "date": "1998-10-12",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Citanul Centaurs"
+   ],
+   [
+    1,
+    "City of Brass"
+   ],
+   [
+    2,
+    "Cradle Guard"
+   ],
+   [
+    2,
+    "Cursed Scroll"
+   ],
+   [
+    1,
+    "Fireball"
+   ],
+   [
+    4,
+    "Forest"
+   ],
+   [
+    2,
+    "Hurricane"
+   ],
+   [
+    1,
+    "Hush"
+   ],
+   [
+    4,
+    "Incinerate"
+   ],
+   [
+    3,
+    "Karplusan Forest"
+   ],
+   [
+    2,
+    "Lightning Dragon"
+   ],
+   [
+    2,
+    "Mirri, Cat Warrior"
+   ],
+   [
+    4,
+    "Mogg Fanatic"
+   ],
+   [
+    5,
+    "Mountain"
+   ],
+   [
+    3,
+    "Pouncing Jaguar"
+   ],
+   [
+    2,
+    "Reflecting Pool"
+   ],
+   [
+    2,
+    "Searing Touch"
+   ],
+   [
+    1,
+    "Shattering Pulse"
+   ],
+   [
+    3,
+    "Shivan Raptor"
+   ],
+   [
+    2,
+    "Shock"
+   ],
+   [
+    2,
+    "Slippery Karst"
+   ],
+   [
+    2,
+    "Smoldering Crater"
+   ],
+   [
+    1,
+    "Stalking Stones"
+   ],
+   [
+    1,
+    "Thran Turbine"
+   ],
+   [
+    2,
+    "Wasteland"
+   ],
+   [
+    4,
+    "Wild Dogs"
+   ]
+  ]
+ },
+ {
+  "name": "The Plague",
+  "set": "USG",
+  "date": "1998-10-12",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Befoul"
+   ],
+   [
+    1,
+    "Blood Vassal"
+   ],
+   [
+    1,
+    "Corrupt"
+   ],
+   [
+    3,
+    "Disciple of Grace"
+   ],
+   [
+    2,
+    "Disenchant"
+   ],
+   [
+    3,
+    "Drifting Meadow"
+   ],
+   [
+    2,
+    "Expunge"
+   ],
+   [
+    1,
+    "Flesh Reaver"
+   ],
+   [
+    2,
+    "Humble"
+   ],
+   [
+    1,
+    "Opal Acrolith"
+   ],
+   [
+    1,
+    "Pariah"
+   ],
+   [
+    4,
+    "Pestilence"
+   ],
+   [
+    7,
+    "Plains"
+   ],
+   [
+    2,
+    "Polluted Mire"
+   ],
+   [
+    2,
+    "Rune of Protection: Black"
+   ],
+   [
+    1,
+    "Sanctum Guardian"
+   ],
+   [
+    1,
+    "Sicken"
+   ],
+   [
+    1,
+    "Silent Attendant"
+   ],
+   [
+    12,
+    "Swamp"
+   ],
+   [
+    3,
+    "Unworthy Dead"
+   ],
+   [
+    2,
+    "Urza's Armor"
+   ],
+   [
+    3,
+    "Voice of Grace"
+   ],
+   [
+    3,
+    "Wall of Junk"
+   ],
+   [
+    1,
+    "Worship"
+   ]
+  ]
+ },
+ {
+  "name": "The Plague - Enhanced Deck",
+  "set": "USG",
+  "date": "1998-10-12",
+  "kind": "THEME",
+  "cards": [
+   [
+    3,
+    "Dark Ritual"
+   ],
+   [
+    4,
+    "Disciple of Grace"
+   ],
+   [
+    2,
+    "Drain Life"
+   ],
+   [
+    3,
+    "Drifting Meadow"
+   ],
+   [
+    2,
+    "Expunge"
+   ],
+   [
+    3,
+    "Humble"
+   ],
+   [
+    1,
+    "Marble Titan"
+   ],
+   [
+    1,
+    "Opal Acrolith"
+   ],
+   [
+    2,
+    "Paladin en-Vec"
+   ],
+   [
+    3,
+    "Pariah"
+   ],
+   [
+    4,
+    "Pestilence"
+   ],
+   [
+    7,
+    "Plains"
+   ],
+   [
+    2,
+    "Polluted Mire"
+   ],
+   [
+    4,
+    "Reflecting Pool"
+   ],
+   [
+    1,
+    "Sanctum Guardian"
+   ],
+   [
+    1,
+    "Spirit Mirror"
+   ],
+   [
+    1,
+    "Standing Troops"
+   ],
+   [
+    8,
+    "Swamp"
+   ],
+   [
+    2,
+    "Voice of Grace"
+   ],
+   [
+    2,
+    "Wall of Essence"
+   ],
+   [
+    2,
+    "Wall of Junk"
+   ],
+   [
+    1,
+    "Wall of Nets"
+   ],
+   [
+    1,
+    "Worship"
+   ]
+  ]
+ },
+ {
+  "name": "Tombstone",
+  "set": "USG",
+  "date": "1998-10-12",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Abyssal Horror"
+   ],
+   [
+    2,
+    "Catalog"
+   ],
+   [
+    1,
+    "Confiscate"
+   ],
+   [
+    1,
+    "Despondency"
+   ],
+   [
+    3,
+    "Diabolic Servitude"
+   ],
+   [
+    3,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Drifting Meadow"
+   ],
+   [
+    1,
+    "Exhume"
+   ],
+   [
+    1,
+    "Expunge"
+   ],
+   [
+    2,
+    "Humble"
+   ],
+   [
+    9,
+    "Island"
+   ],
+   [
+    3,
+    "Pendrell Drake"
+   ],
+   [
+    1,
+    "Phyrexian Ghoul"
+   ],
+   [
+    3,
+    "Plains"
+   ],
+   [
+    2,
+    "Polluted Mire"
+   ],
+   [
+    2,
+    "Power Sink"
+   ],
+   [
+    2,
+    "Remote Isle"
+   ],
+   [
+    1,
+    "Rescind"
+   ],
+   [
+    1,
+    "Sandbar Merfolk"
+   ],
+   [
+    3,
+    "Sandbar Serpent"
+   ],
+   [
+    1,
+    "Sicken"
+   ],
+   [
+    1,
+    "Somnophore"
+   ],
+   [
+    1,
+    "Stern Proctor"
+   ],
+   [
+    9,
+    "Swamp"
+   ],
+   [
+    1,
+    "Turnabout"
+   ],
+   [
+    2,
+    "Victimize"
+   ],
+   [
+    1,
+    "Wizard Mentor"
+   ]
+  ]
+ },
+ {
+  "name": "Tombstone - Enhanced Deck",
+  "set": "USG",
+  "date": "1998-10-12",
+  "kind": "THEME",
+  "cards": [
+   [
+    4,
+    "Abyssal Horror"
+   ],
+   [
+    2,
+    "Adarkar Wastes"
+   ],
+   [
+    4,
+    "Animate Dead"
+   ],
+   [
+    1,
+    "Armageddon"
+   ],
+   [
+    2,
+    "Benthic Behemoth"
+   ],
+   [
+    3,
+    "Catalog"
+   ],
+   [
+    2,
+    "Counterspell"
+   ],
+   [
+    3,
+    "Diabolic Servitude"
+   ],
+   [
+    3,
+    "Disenchant"
+   ],
+   [
+    4,
+    "Drifting Djinn"
+   ],
+   [
+    2,
+    "Drifting Meadow"
+   ],
+   [
+    2,
+    "Island"
+   ],
+   [
+    1,
+    "Living Death"
+   ],
+   [
+    2,
+    "Mana Leak"
+   ],
+   [
+    3,
+    "Merfolk Looter"
+   ],
+   [
+    2,
+    "Plains"
+   ],
+   [
+    2,
+    "Polluted Mire"
+   ],
+   [
+    1,
+    "Reanimate"
+   ],
+   [
+    3,
+    "Reflecting Pool"
+   ],
+   [
+    2,
+    "Remote Isle"
+   ],
+   [
+    2,
+    "Rootwater Depths"
+   ],
+   [
+    2,
+    "Swamp"
+   ],
+   [
+    2,
+    "Thalakos Lowlands"
+   ],
+   [
+    3,
+    "Underground River"
+   ],
+   [
+    2,
+    "Verdant Force"
+   ],
+   [
+    1,
+    "Warrior Angel"
+   ]
+  ]
+ },
+ {
+  "name": "Crusher",
+  "set": "ULG",
+  "date": "1999-02-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Argothian Swine"
+   ],
+   [
+    1,
+    "Cradle Guard"
+   ],
+   [
+    1,
+    "Crosswinds"
+   ],
+   [
+    1,
+    "Defense of the Heart"
+   ],
+   [
+    2,
+    "Disenchant"
+   ],
+   [
+    3,
+    "Drifting Meadow"
+   ],
+   [
+    1,
+    "Elvish Herder"
+   ],
+   [
+    1,
+    "Erase"
+   ],
+   [
+    17,
+    "Forest"
+   ],
+   [
+    1,
+    "Gaea's Bounty"
+   ],
+   [
+    1,
+    "Gaea's Embrace"
+   ],
+   [
+    1,
+    "Gang of Elk"
+   ],
+   [
+    2,
+    "Humble"
+   ],
+   [
+    1,
+    "Lone Wolf"
+   ],
+   [
+    2,
+    "Mother of Runes"
+   ],
+   [
+    2,
+    "Pacifism"
+   ],
+   [
+    4,
+    "Plains"
+   ],
+   [
+    1,
+    "Radiant's Judgment"
+   ],
+   [
+    1,
+    "Rancor"
+   ],
+   [
+    1,
+    "Silk Net"
+   ],
+   [
+    3,
+    "Simian Grunts"
+   ],
+   [
+    1,
+    "Symbiosis"
+   ],
+   [
+    1,
+    "Ticking Gnomes"
+   ],
+   [
+    1,
+    "Treetop Village"
+   ],
+   [
+    1,
+    "Weatherseed Treefolk"
+   ],
+   [
+    1,
+    "Wing Snare"
+   ],
+   [
+    2,
+    "Yavimaya Granger"
+   ],
+   [
+    2,
+    "Yavimaya Scion"
+   ],
+   [
+    3,
+    "Yavimaya Wurm"
+   ]
+  ]
+ },
+ {
+  "name": "Crusher - Enhanced Deck",
+  "set": "ULG",
+  "date": "1999-02-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    4,
+    "Armageddon"
+   ],
+   [
+    4,
+    "Brushland"
+   ],
+   [
+    2,
+    "City of Brass"
+   ],
+   [
+    1,
+    "Clear"
+   ],
+   [
+    2,
+    "Cradle Guard"
+   ],
+   [
+    1,
+    "Darkwatch Elves"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    1,
+    "Eladamri, Lord of Leaves"
+   ],
+   [
+    2,
+    "Elvish Lyrist"
+   ],
+   [
+    11,
+    "Forest"
+   ],
+   [
+    2,
+    "Gaea's Cradle"
+   ],
+   [
+    1,
+    "Harrow"
+   ],
+   [
+    2,
+    "Humble"
+   ],
+   [
+    2,
+    "Hurricane"
+   ],
+   [
+    2,
+    "Lhurgoyf"
+   ],
+   [
+    4,
+    "Llanowar Elves"
+   ],
+   [
+    1,
+    "Might of Oaks"
+   ],
+   [
+    1,
+    "Overrun"
+   ],
+   [
+    4,
+    "Plains"
+   ],
+   [
+    2,
+    "Priest of Titania"
+   ],
+   [
+    1,
+    "Scragnoth"
+   ],
+   [
+    2,
+    "Spike Feeder"
+   ],
+   [
+    1,
+    "Symbiosis"
+   ],
+   [
+    2,
+    "Wall of Blossoms"
+   ],
+   [
+    4,
+    "Weatherseed Treefolk"
+   ]
+  ]
+ },
+ {
+  "name": "Phyrexian Assault",
+  "set": "ULG",
+  "date": "1999-02-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Arc Lightning"
+   ],
+   [
+    1,
+    "Avalanche Riders"
+   ],
+   [
+    2,
+    "Bone Shredder"
+   ],
+   [
+    1,
+    "Corrupt"
+   ],
+   [
+    2,
+    "Defender of Chaos"
+   ],
+   [
+    1,
+    "Engineered Plague"
+   ],
+   [
+    2,
+    "Expunge"
+   ],
+   [
+    1,
+    "Fog of Gnats"
+   ],
+   [
+    1,
+    "Ghitu Encampment"
+   ],
+   [
+    2,
+    "Ghitu Slinger"
+   ],
+   [
+    1,
+    "Giant Cockroach"
+   ],
+   [
+    2,
+    "Goblin Medics"
+   ],
+   [
+    1,
+    "Headlong Rush"
+   ],
+   [
+    1,
+    "Heat Ray"
+   ],
+   [
+    1,
+    "Looming Shade"
+   ],
+   [
+    1,
+    "Molten Hydra"
+   ],
+   [
+    10,
+    "Mountain"
+   ],
+   [
+    1,
+    "Phyrexian Broodlings"
+   ],
+   [
+    2,
+    "Phyrexian Debaser"
+   ],
+   [
+    2,
+    "Phyrexian Defiler"
+   ],
+   [
+    1,
+    "Phyrexian Denouncer"
+   ],
+   [
+    1,
+    "Phyrexian Plaguelord"
+   ],
+   [
+    1,
+    "Phyrexian Reclamation"
+   ],
+   [
+    1,
+    "Polluted Mire"
+   ],
+   [
+    1,
+    "Smoldering Crater"
+   ],
+   [
+    1,
+    "Spawning Pool"
+   ],
+   [
+    12,
+    "Swamp"
+   ],
+   [
+    1,
+    "Tethered Skirge"
+   ],
+   [
+    1,
+    "Treacherous Link"
+   ],
+   [
+    1,
+    "Viashino Cutthroat"
+   ],
+   [
+    1,
+    "Viashino Heretic"
+   ],
+   [
+    1,
+    "Viashino Runner"
+   ]
+  ]
+ },
+ {
+  "name": "Phyrexian Assault - Enhanced Deck",
+  "set": "ULG",
+  "date": "1999-02-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Avalanche Riders"
+   ],
+   [
+    3,
+    "Bone Shredder"
+   ],
+   [
+    3,
+    "Cinder Marsh"
+   ],
+   [
+    3,
+    "City of Brass"
+   ],
+   [
+    2,
+    "Expunge"
+   ],
+   [
+    3,
+    "Fireslinger"
+   ],
+   [
+    1,
+    "Ghitu Encampment"
+   ],
+   [
+    3,
+    "Ghitu Slinger"
+   ],
+   [
+    2,
+    "Goblin Medics"
+   ],
+   [
+    1,
+    "Lightning Blast"
+   ],
+   [
+    1,
+    "Molten Hydra"
+   ],
+   [
+    6,
+    "Mountain"
+   ],
+   [
+    2,
+    "Phyrexian Broodlings"
+   ],
+   [
+    3,
+    "Phyrexian Debaser"
+   ],
+   [
+    3,
+    "Phyrexian Defiler"
+   ],
+   [
+    2,
+    "Phyrexian Plaguelord"
+   ],
+   [
+    2,
+    "Phyrexian Reclamation"
+   ],
+   [
+    1,
+    "Polluted Mire"
+   ],
+   [
+    1,
+    "Price of Progress"
+   ],
+   [
+    3,
+    "Reflecting Pool"
+   ],
+   [
+    2,
+    "Shock"
+   ],
+   [
+    1,
+    "Smoldering Crater"
+   ],
+   [
+    1,
+    "Spawning Pool"
+   ],
+   [
+    7,
+    "Swamp"
+   ],
+   [
+    1,
+    "Viashino Cutthroat"
+   ],
+   [
+    1,
+    "Viashino Heretic"
+   ]
+  ]
+ },
+ {
+  "name": "Radiant's Revenge",
+  "set": "ULG",
+  "date": "1999-02-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Catalog"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Dragon Blood"
+   ],
+   [
+    1,
+    "Drifting Meadow"
+   ],
+   [
+    1,
+    "Erase"
+   ],
+   [
+    1,
+    "Fog Bank"
+   ],
+   [
+    12,
+    "Island"
+   ],
+   [
+    2,
+    "Miscalculation"
+   ],
+   [
+    1,
+    "Mobile Fort"
+   ],
+   [
+    1,
+    "Mother of Runes"
+   ],
+   [
+    2,
+    "Opal Champion"
+   ],
+   [
+    2,
+    "Opportunity"
+   ],
+   [
+    1,
+    "Pacifism"
+   ],
+   [
+    2,
+    "Path of Peace"
+   ],
+   [
+    11,
+    "Plains"
+   ],
+   [
+    1,
+    "Power Sink"
+   ],
+   [
+    1,
+    "Radiant's Dragoons"
+   ],
+   [
+    3,
+    "Radiant's Judgment"
+   ],
+   [
+    1,
+    "Raven Familiar"
+   ],
+   [
+    2,
+    "Remote Isle"
+   ],
+   [
+    1,
+    "Ring of Gix"
+   ],
+   [
+    2,
+    "Sanctum Custodian"
+   ],
+   [
+    2,
+    "Sustainer of the Realm"
+   ],
+   [
+    1,
+    "Thornwind Faeries"
+   ],
+   [
+    2,
+    "Ticking Gnomes"
+   ],
+   [
+    1,
+    "Urza's Blueprints"
+   ],
+   [
+    2,
+    "Vigilant Drake"
+   ]
+  ]
+ },
+ {
+  "name": "Radiant's Revenge - Enhanced Deck",
+  "set": "ULG",
+  "date": "1999-02-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    4,
+    "Adarkar Wastes"
+   ],
+   [
+    1,
+    "Catalog"
+   ],
+   [
+    2,
+    "Cessation"
+   ],
+   [
+    2,
+    "Clear"
+   ],
+   [
+    4,
+    "Counterspell"
+   ],
+   [
+    3,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Dismiss"
+   ],
+   [
+    2,
+    "Dream Cache"
+   ],
+   [
+    2,
+    "Drifting Meadow"
+   ],
+   [
+    1,
+    "Faerie Conclave"
+   ],
+   [
+    2,
+    "Forbidding Watchtower"
+   ],
+   [
+    1,
+    "Force Spike"
+   ],
+   [
+    1,
+    "Fountain of Youth"
+   ],
+   [
+    7,
+    "Island"
+   ],
+   [
+    1,
+    "Mana Leak"
+   ],
+   [
+    2,
+    "Miscalculation"
+   ],
+   [
+    2,
+    "Opportunity"
+   ],
+   [
+    1,
+    "Pacifism"
+   ],
+   [
+    2,
+    "Palinchron"
+   ],
+   [
+    3,
+    "Plains"
+   ],
+   [
+    1,
+    "Portent"
+   ],
+   [
+    1,
+    "Power Sink"
+   ],
+   [
+    2,
+    "Reflecting Pool"
+   ],
+   [
+    2,
+    "Remote Isle"
+   ],
+   [
+    3,
+    "Thalakos Lowlands"
+   ],
+   [
+    2,
+    "Whispers of the Muse"
+   ],
+   [
+    4,
+    "Wrath of God"
+   ]
+  ]
+ },
+ {
+  "name": "Time Drain",
+  "set": "ULG",
+  "date": "1999-02-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Acridian"
+   ],
+   [
+    1,
+    "Anthroplasm"
+   ],
+   [
+    1,
+    "Archivist"
+   ],
+   [
+    1,
+    "Bloated Toad"
+   ],
+   [
+    3,
+    "Cloud of Faeries"
+   ],
+   [
+    1,
+    "Confiscate"
+   ],
+   [
+    1,
+    "Darkwatch Elves"
+   ],
+   [
+    2,
+    "Exhaustion"
+   ],
+   [
+    1,
+    "Faerie Conclave"
+   ],
+   [
+    8,
+    "Forest"
+   ],
+   [
+    2,
+    "Frantic Search"
+   ],
+   [
+    2,
+    "Hush"
+   ],
+   [
+    2,
+    "Intervene"
+   ],
+   [
+    11,
+    "Island"
+   ],
+   [
+    2,
+    "Miscalculation"
+   ],
+   [
+    1,
+    "Opportunity"
+   ],
+   [
+    2,
+    "Peregrine Drake"
+   ],
+   [
+    2,
+    "Remote Isle"
+   ],
+   [
+    1,
+    "Rewind"
+   ],
+   [
+    3,
+    "Simian Grunts"
+   ],
+   [
+    2,
+    "Slippery Karst"
+   ],
+   [
+    2,
+    "Snap"
+   ],
+   [
+    2,
+    "Thornwind Faeries"
+   ],
+   [
+    1,
+    "Thran War Machine"
+   ],
+   [
+    1,
+    "Treetop Village"
+   ],
+   [
+    1,
+    "Walking Sponge"
+   ],
+   [
+    1,
+    "Weatherseed Faeries"
+   ],
+   [
+    1,
+    "Zephid's Embrace"
+   ]
+  ]
+ },
+ {
+  "name": "Time Drain - Enhanced Deck",
+  "set": "ULG",
+  "date": "1999-02-15",
+  "kind": "THEME",
+  "cards": [
+   [
+    3,
+    "Armageddon"
+   ],
+   [
+    3,
+    "Birds of Paradise"
+   ],
+   [
+    2,
+    "Brushland"
+   ],
+   [
+    2,
+    "City of Brass"
+   ],
+   [
+    3,
+    "Cloud of Faeries"
+   ],
+   [
+    2,
+    "Counterspell"
+   ],
+   [
+    3,
+    "Disenchant"
+   ],
+   [
+    1,
+    "Drifting Meadow"
+   ],
+   [
+    6,
+    "Forest"
+   ],
+   [
+    1,
+    "Intervene"
+   ],
+   [
+    4,
+    "Island"
+   ],
+   [
+    2,
+    "Legacy's Allure"
+   ],
+   [
+    2,
+    "Miscalculation"
+   ],
+   [
+    1,
+    "Palinchron"
+   ],
+   [
+    3,
+    "Peregrine Drake"
+   ],
+   [
+    2,
+    "Plains"
+   ],
+   [
+    2,
+    "Propaganda"
+   ],
+   [
+    2,
+    "Reflecting Pool"
+   ],
+   [
+    1,
+    "Remote Isle"
+   ],
+   [
+    1,
+    "Rewind"
+   ],
+   [
+    2,
+    "Simian Grunts"
+   ],
+   [
+    2,
+    "Skyshroud Forest"
+   ],
+   [
+    1,
+    "Snap"
+   ],
+   [
+    3,
+    "Tradewind Rider"
+   ],
+   [
+    3,
+    "Wall of Blossoms"
+   ],
+   [
+    3,
+    "Whispers of the Muse"
+   ]
+  ]
+ },
+ {
+  "name": "Assassin",
+  "set": "UDS",
+  "date": "1999-06-07",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Attrition"
+   ],
+   [
+    1,
+    "Body Snatcher"
+   ],
+   [
+    1,
+    "Bone Shredder"
+   ],
+   [
+    2,
+    "Dark Ritual"
+   ],
+   [
+    1,
+    "Despondency"
+   ],
+   [
+    2,
+    "Disease Carriers"
+   ],
+   [
+    2,
+    "Duress"
+   ],
+   [
+    1,
+    "Dying Wail"
+   ],
+   [
+    1,
+    "Engineered Plague"
+   ],
+   [
+    1,
+    "Eradicate"
+   ],
+   [
+    1,
+    "Festering Wound"
+   ],
+   [
+    2,
+    "Looming Shade"
+   ],
+   [
+    1,
+    "Mantis Engine"
+   ],
+   [
+    2,
+    "Nightshade Seer"
+   ],
+   [
+    2,
+    "Order of Yawgmoth"
+   ],
+   [
+    1,
+    "Ostracize"
+   ],
+   [
+    1,
+    "Plague Dogs"
+   ],
+   [
+    4,
+    "Polluted Mire"
+   ],
+   [
+    4,
+    "Ravenous Rats"
+   ],
+   [
+    1,
+    "Sanguine Guard"
+   ],
+   [
+    2,
+    "Scent of Nightshade"
+   ],
+   [
+    2,
+    "Sicken"
+   ],
+   [
+    2,
+    "Slinking Skirge"
+   ],
+   [
+    1,
+    "Soul Feast"
+   ],
+   [
+    1,
+    "Spawning Pool"
+   ],
+   [
+    2,
+    "Squirming Mass"
+   ],
+   [
+    16,
+    "Swamp"
+   ],
+   [
+    2,
+    "Unnerve"
+   ]
+  ]
+ },
+ {
+  "name": "Battle Surge",
+  "set": "UDS",
+  "date": "1999-06-07",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Aether Sting"
+   ],
+   [
+    3,
+    "Arc Lightning"
+   ],
+   [
+    2,
+    "Curfew"
+   ],
+   [
+    2,
+    "Fatigue"
+   ],
+   [
+    1,
+    "Ghitu War Cry"
+   ],
+   [
+    2,
+    "Goblin Berserker"
+   ],
+   [
+    1,
+    "Goblin Marshal"
+   ],
+   [
+    2,
+    "Goblin War Buggy"
+   ],
+   [
+    9,
+    "Island"
+   ],
+   [
+    1,
+    "Jagged Lightning"
+   ],
+   [
+    2,
+    "Keldon Champion"
+   ],
+   [
+    3,
+    "Kingfisher"
+   ],
+   [
+    1,
+    "Mark of Fury"
+   ],
+   [
+    14,
+    "Mountain"
+   ],
+   [
+    1,
+    "Parch"
+   ],
+   [
+    1,
+    "Raven Familiar"
+   ],
+   [
+    2,
+    "Thieving Magpie"
+   ],
+   [
+    1,
+    "Thundering Giant"
+   ],
+   [
+    1,
+    "Trumpet Blast"
+   ],
+   [
+    1,
+    "Urza's Incubator"
+   ],
+   [
+    2,
+    "Viashino Cutthroat"
+   ],
+   [
+    3,
+    "Viashino Sandscout"
+   ],
+   [
+    4,
+    "Wild Colos"
+   ]
+  ]
+ },
+ {
+  "name": "Battle Surge - Enhanced Deck",
+  "set": "UDS",
+  "date": "1999-06-07",
+  "kind": "THEME",
+  "cards": [
+   [
+    3,
+    "Arc Lightning"
+   ],
+   [
+    3,
+    "Catalog"
+   ],
+   [
+    3,
+    "Curfew"
+   ],
+   [
+    3,
+    "Goblin War Buggy"
+   ],
+   [
+    7,
+    "Island"
+   ],
+   [
+    3,
+    "Keldon Champion"
+   ],
+   [
+    3,
+    "Keldon Vandals"
+   ],
+   [
+    2,
+    "Lightning Blast"
+   ],
+   [
+    3,
+    "Mogg Fanatic"
+   ],
+   [
+    12,
+    "Mountain"
+   ],
+   [
+    4,
+    "Raging Goblin"
+   ],
+   [
+    2,
+    "Remote Isle"
+   ],
+   [
+    2,
+    "Shock"
+   ],
+   [
+    2,
+    "Smoldering Crater"
+   ],
+   [
+    4,
+    "Thieving Magpie"
+   ],
+   [
+    1,
+    "Whispers of the Muse"
+   ],
+   [
+    3,
+    "Wild Colos"
+   ]
+  ]
+ },
+ {
+  "name": "Enchanter",
+  "set": "UDS",
+  "date": "1999-06-07",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Archery Training"
+   ],
+   [
+    2,
+    "Brilliant Halo"
+   ],
+   [
+    1,
+    "Capashen Standard"
+   ],
+   [
+    1,
+    "Confiscate"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Drifting Meadow"
+   ],
+   [
+    3,
+    "Fledgling Osprey"
+   ],
+   [
+    1,
+    "Hermetic Study"
+   ],
+   [
+    1,
+    "Horseshoe Crab"
+   ],
+   [
+    1,
+    "Humble"
+   ],
+   [
+    13,
+    "Island"
+   ],
+   [
+    1,
+    "Mask of Law and Grace"
+   ],
+   [
+    3,
+    "Metathran Elite"
+   ],
+   [
+    2,
+    "Miscalculation"
+   ],
+   [
+    1,
+    "Monk Realist"
+   ],
+   [
+    1,
+    "Mother of Runes"
+   ],
+   [
+    1,
+    "Opportunity"
+   ],
+   [
+    7,
+    "Plains"
+   ],
+   [
+    1,
+    "Private Research"
+   ],
+   [
+    1,
+    "Quash"
+   ],
+   [
+    1,
+    "Radiant's Judgment"
+   ],
+   [
+    1,
+    "Rayne, Academy Chancellor"
+   ],
+   [
+    2,
+    "Remote Isle"
+   ],
+   [
+    1,
+    "Sigil of Sleep"
+   ],
+   [
+    2,
+    "Thieving Magpie"
+   ],
+   [
+    2,
+    "Thornwind Faeries"
+   ],
+   [
+    1,
+    "Thran Golem"
+   ],
+   [
+    2,
+    "Tormented Angel"
+   ],
+   [
+    1,
+    "Vigilant Drake"
+   ],
+   [
+    1,
+    "Wall of Glare"
+   ],
+   [
+    1,
+    "Zephid's Embrace"
+   ]
+  ]
+ },
+ {
+  "name": "Fiendish Nature",
+  "set": "UDS",
+  "date": "1999-06-07",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Ancient Silverback"
+   ],
+   [
+    1,
+    "Braidwood Cup"
+   ],
+   [
+    1,
+    "Chime of Night"
+   ],
+   [
+    1,
+    "Cradle Guard"
+   ],
+   [
+    1,
+    "Diabolic Servitude"
+   ],
+   [
+    2,
+    "Elvish Lyrist"
+   ],
+   [
+    2,
+    "Expunge"
+   ],
+   [
+    13,
+    "Forest"
+   ],
+   [
+    2,
+    "Gamekeeper"
+   ],
+   [
+    1,
+    "Goliath Beetle"
+   ],
+   [
+    3,
+    "Heart Warden"
+   ],
+   [
+    2,
+    "Hunting Moa"
+   ],
+   [
+    1,
+    "Marker Beetles"
+   ],
+   [
+    1,
+    "No Rest for the Wicked"
+   ],
+   [
+    1,
+    "Pattern of Rebirth"
+   ],
+   [
+    1,
+    "Phyrexian Monitor"
+   ],
+   [
+    1,
+    "Phyrexian Reclamation"
+   ],
+   [
+    2,
+    "Plague Dogs"
+   ],
+   [
+    3,
+    "Plated Spider"
+   ],
+   [
+    1,
+    "Polluted Mire"
+   ],
+   [
+    1,
+    "Rancor"
+   ],
+   [
+    2,
+    "Slippery Karst"
+   ],
+   [
+    1,
+    "Splinter"
+   ],
+   [
+    6,
+    "Swamp"
+   ],
+   [
+    2,
+    "Symbiosis"
+   ],
+   [
+    2,
+    "Twisted Experiment"
+   ],
+   [
+    1,
+    "Victimize"
+   ],
+   [
+    1,
+    "Winding Wurm"
+   ],
+   [
+    3,
+    "Yavimaya Elder"
+   ]
+  ]
+ },
+ {
+  "name": "Fiendish Nature - Enhanced Deck",
+  "set": "UDS",
+  "date": "1999-06-07",
+  "kind": "THEME",
+  "cards": [
+   [
+    3,
+    "Ancient Silverback"
+   ],
+   [
+    1,
+    "Cradle Guard"
+   ],
+   [
+    2,
+    "Elvish Lyrist"
+   ],
+   [
+    4,
+    "Engineered Plague"
+   ],
+   [
+    13,
+    "Forest"
+   ],
+   [
+    2,
+    "Gamekeeper"
+   ],
+   [
+    2,
+    "Giant Growth"
+   ],
+   [
+    4,
+    "Llanowar Elves"
+   ],
+   [
+    2,
+    "Pattern of Rebirth"
+   ],
+   [
+    3,
+    "Plague Dogs"
+   ],
+   [
+    1,
+    "Polluted Mire"
+   ],
+   [
+    2,
+    "Rancor"
+   ],
+   [
+    3,
+    "Recurring Nightmare"
+   ],
+   [
+    2,
+    "Slippery Karst"
+   ],
+   [
+    6,
+    "Swamp"
+   ],
+   [
+    1,
+    "Symbiosis"
+   ],
+   [
+    2,
+    "Uktabi Orangutan"
+   ],
+   [
+    1,
+    "Verdant Force"
+   ],
+   [
+    4,
+    "Wall of Blossoms"
+   ],
+   [
+    2,
+    "Yavimaya Elder"
+   ]
+  ]
+ },
+ {
+  "name": "Deepwood Menace",
+  "set": "MMQ",
+  "date": "1999-10-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Battle Squadron"
+   ],
+   [
+    2,
+    "Cinder Elemental"
+   ],
+   [
+    2,
+    "Deepwood Drummer"
+   ],
+   [
+    2,
+    "Deepwood Tantiv"
+   ],
+   [
+    3,
+    "Deepwood Wolverine"
+   ],
+   [
+    2,
+    "Desert Twister"
+   ],
+   [
+    11,
+    "Forest"
+   ],
+   [
+    3,
+    "Horned Troll"
+   ],
+   [
+    2,
+    "Kris Mage"
+   ],
+   [
+    1,
+    "Lunge"
+   ],
+   [
+    13,
+    "Mountain"
+   ],
+   [
+    1,
+    "Natural Affinity"
+   ],
+   [
+    2,
+    "Revive"
+   ],
+   [
+    2,
+    "Saber Ants"
+   ],
+   [
+    2,
+    "Shock Troops"
+   ],
+   [
+    2,
+    "Squallmonger"
+   ],
+   [
+    3,
+    "Thunderclap"
+   ],
+   [
+    1,
+    "Tiger Claws"
+   ],
+   [
+    1,
+    "Tranquility"
+   ],
+   [
+    3,
+    "Vine Trellis"
+   ],
+   [
+    1,
+    "Volcanic Wind"
+   ]
+  ]
+ },
+ {
+  "name": "Deepwood Menace - Enhanced Deck",
+  "set": "MMQ",
+  "date": "1999-10-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    4,
+    "Birds of Paradise"
+   ],
+   [
+    1,
+    "Cinder Elemental"
+   ],
+   [
+    2,
+    "Collective Unconscious"
+   ],
+   [
+    2,
+    "Deepwood Wolverine"
+   ],
+   [
+    1,
+    "Deranged Hermit"
+   ],
+   [
+    12,
+    "Forest"
+   ],
+   [
+    2,
+    "Gaea's Cradle"
+   ],
+   [
+    2,
+    "Horned Troll"
+   ],
+   [
+    4,
+    "Llanowar Elves"
+   ],
+   [
+    6,
+    "Mountain"
+   ],
+   [
+    4,
+    "Rancor"
+   ],
+   [
+    3,
+    "Shock"
+   ],
+   [
+    2,
+    "Shock Troops"
+   ],
+   [
+    2,
+    "Squallmonger"
+   ],
+   [
+    2,
+    "Symbiosis"
+   ],
+   [
+    2,
+    "Treetop Village"
+   ],
+   [
+    2,
+    "Vine Trellis"
+   ],
+   [
+    2,
+    "Volcanic Wind"
+   ],
+   [
+    1,
+    "Weatherseed Treefolk"
+   ],
+   [
+    4,
+    "Wild Dogs"
+   ]
+  ]
+ },
+ {
+  "name": "Disrupter",
+  "set": "MMQ",
+  "date": "1999-10-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Alley Grifters"
+   ],
+   [
+    1,
+    "Bog Witch"
+   ],
+   [
+    1,
+    "Cackling Witch"
+   ],
+   [
+    1,
+    "Cateran Enforcer"
+   ],
+   [
+    1,
+    "Cinder Elemental"
+   ],
+   [
+    2,
+    "Dark Ritual"
+   ],
+   [
+    2,
+    "Deepwood Ghoul"
+   ],
+   [
+    1,
+    "Enslaved Horror"
+   ],
+   [
+    1,
+    "Gerrard's Irregulars"
+   ],
+   [
+    1,
+    "Henge Guardian"
+   ],
+   [
+    1,
+    "Larceny"
+   ],
+   [
+    1,
+    "Lunge"
+   ],
+   [
+    1,
+    "Maggot Therapy"
+   ],
+   [
+    2,
+    "Molting Harpy"
+   ],
+   [
+    8,
+    "Mountain"
+   ],
+   [
+    1,
+    "Ogre Taskmaster"
+   ],
+   [
+    1,
+    "Primeval Shambler"
+   ],
+   [
+    2,
+    "Rain of Tears"
+   ],
+   [
+    1,
+    "Sever Soul"
+   ],
+   [
+    1,
+    "Shock Troops"
+   ],
+   [
+    1,
+    "Silent Assassin"
+   ],
+   [
+    2,
+    "Snuff Out"
+   ],
+   [
+    3,
+    "Specter's Wail"
+   ],
+   [
+    3,
+    "Stone Rain"
+   ],
+   [
+    1,
+    "Subterranean Hangar"
+   ],
+   [
+    12,
+    "Swamp"
+   ],
+   [
+    1,
+    "Thrashing Wumpus"
+   ],
+   [
+    2,
+    "Thunderclap"
+   ],
+   [
+    1,
+    "Undertaker"
+   ],
+   [
+    1,
+    "Vendetta"
+   ],
+   [
+    2,
+    "Wall of Distortion"
+   ]
+  ]
+ },
+ {
+  "name": "Disrupter - Enhanced Deck",
+  "set": "MMQ",
+  "date": "1999-10-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Avalanche Riders"
+   ],
+   [
+    2,
+    "Befoul"
+   ],
+   [
+    2,
+    "Bone Shredder"
+   ],
+   [
+    1,
+    "Cateran Enforcer"
+   ],
+   [
+    2,
+    "Cinder Elemental"
+   ],
+   [
+    4,
+    "Dark Ritual"
+   ],
+   [
+    2,
+    "Deepwood Ghoul"
+   ],
+   [
+    2,
+    "Duress"
+   ],
+   [
+    2,
+    "Enslaved Horror"
+   ],
+   [
+    2,
+    "Goblin War Buggy"
+   ],
+   [
+    6,
+    "Mountain"
+   ],
+   [
+    2,
+    "Pillage"
+   ],
+   [
+    1,
+    "Rain of Tears"
+   ],
+   [
+    2,
+    "Shock"
+   ],
+   [
+    3,
+    "Shock Troops"
+   ],
+   [
+    1,
+    "Silent Assassin"
+   ],
+   [
+    2,
+    "Snuff Out"
+   ],
+   [
+    2,
+    "Stone Rain"
+   ],
+   [
+    4,
+    "Sulfurous Springs"
+   ],
+   [
+    9,
+    "Swamp"
+   ],
+   [
+    1,
+    "Thrashing Wumpus"
+   ],
+   [
+    2,
+    "Thunderclap"
+   ],
+   [
+    3,
+    "Undertaker"
+   ],
+   [
+    1,
+    "Vendetta"
+   ]
+  ]
+ },
+ {
+  "name": "Rebel's Call",
+  "set": "MMQ",
+  "date": "1999-10-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Afterlife"
+   ],
+   [
+    2,
+    "Arrest"
+   ],
+   [
+    2,
+    "Ballista Squad"
+   ],
+   [
+    2,
+    "Charm Peddler"
+   ],
+   [
+    2,
+    "Cho-Manno's Blessing"
+   ],
+   [
+    1,
+    "Cho-Manno, Revolutionary"
+   ],
+   [
+    2,
+    "Devout Witness"
+   ],
+   [
+    2,
+    "Disenchant"
+   ],
+   [
+    1,
+    "Fountain of Cho"
+   ],
+   [
+    2,
+    "Jhovall Rider"
+   ],
+   [
+    1,
+    "Moonlit Wake"
+   ],
+   [
+    2,
+    "Nightwind Glider"
+   ],
+   [
+    2,
+    "Pious Warrior"
+   ],
+   [
+    20,
+    "Plains"
+   ],
+   [
+    2,
+    "Ramosian Captain"
+   ],
+   [
+    2,
+    "Ramosian Commander"
+   ],
+   [
+    2,
+    "Ramosian Lieutenant"
+   ],
+   [
+    2,
+    "Ramosian Rally"
+   ],
+   [
+    3,
+    "Ramosian Sergeant"
+   ],
+   [
+    1,
+    "Ramosian Sky Marshal"
+   ],
+   [
+    2,
+    "Steadfast Guard"
+   ],
+   [
+    2,
+    "Task Force"
+   ],
+   [
+    2,
+    "Thermal Glider"
+   ]
+  ]
+ },
+ {
+  "name": "Rebel's Call - Enhanced Deck",
+  "set": "MMQ",
+  "date": "1999-10-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Arc Lightning"
+   ],
+   [
+    2,
+    "Armageddon"
+   ],
+   [
+    4,
+    "Avalanche Riders"
+   ],
+   [
+    1,
+    "Cave-In"
+   ],
+   [
+    2,
+    "City of Brass"
+   ],
+   [
+    2,
+    "Disenchant"
+   ],
+   [
+    1,
+    "Dust Bowl"
+   ],
+   [
+    2,
+    "Exile"
+   ],
+   [
+    1,
+    "Hammer of Bogardan"
+   ],
+   [
+    2,
+    "Lunge"
+   ],
+   [
+    4,
+    "Mother of Runes"
+   ],
+   [
+    9,
+    "Mountain"
+   ],
+   [
+    2,
+    "Nightwind Glider"
+   ],
+   [
+    1,
+    "Pacifism"
+   ],
+   [
+    11,
+    "Plains"
+   ],
+   [
+    3,
+    "Ramosian Captain"
+   ],
+   [
+    4,
+    "Ramosian Lieutenant"
+   ],
+   [
+    1,
+    "Ramosian Rally"
+   ],
+   [
+    1,
+    "Reverent Mantra"
+   ],
+   [
+    2,
+    "Shock"
+   ],
+   [
+    2,
+    "Thermal Glider"
+   ],
+   [
+    1,
+    "Wrath of God"
+   ]
+  ]
+ },
+ {
+  "name": "Tidal Mastery",
+  "set": "MMQ",
+  "date": "1999-10-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Afterlife"
+   ],
+   [
+    2,
+    "Alabaster Wall"
+   ],
+   [
+    1,
+    "Ballista Squad"
+   ],
+   [
+    1,
+    "Cho-Arrim Legate"
+   ],
+   [
+    1,
+    "Cloud Sprite"
+   ],
+   [
+    1,
+    "Coastal Piracy"
+   ],
+   [
+    2,
+    "Counterspell"
+   ],
+   [
+    2,
+    "Crossbow Infantry"
+   ],
+   [
+    1,
+    "Customs Depot"
+   ],
+   [
+    2,
+    "Darting Merfolk"
+   ],
+   [
+    1,
+    "Devout Witness"
+   ],
+   [
+    1,
+    "Diplomatic Escort"
+   ],
+   [
+    2,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Drake Hatchling"
+   ],
+   [
+    16,
+    "Island"
+   ],
+   [
+    1,
+    "Kyren Archive"
+   ],
+   [
+    1,
+    "Noble Purpose"
+   ],
+   [
+    1,
+    "Overtaker"
+   ],
+   [
+    10,
+    "Plains"
+   ],
+   [
+    1,
+    "Puffer Extract"
+   ],
+   [
+    1,
+    "Ramosian Rally"
+   ],
+   [
+    2,
+    "Saprazzan Legate"
+   ],
+   [
+    3,
+    "Stinging Barrier"
+   ],
+   [
+    1,
+    "Story Circle"
+   ],
+   [
+    1,
+    "Thwart"
+   ],
+   [
+    1,
+    "War Tax"
+   ]
+  ]
+ },
+ {
+  "name": "Tidal Mastery - Enhanced Deck",
+  "set": "MMQ",
+  "date": "1999-10-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Alabaster Wall"
+   ],
+   [
+    1,
+    "Arrest"
+   ],
+   [
+    1,
+    "Ballista Squad"
+   ],
+   [
+    1,
+    "Braidwood Cup"
+   ],
+   [
+    4,
+    "Catalog"
+   ],
+   [
+    1,
+    "Cessation"
+   ],
+   [
+    1,
+    "Clear"
+   ],
+   [
+    3,
+    "Counterspell"
+   ],
+   [
+    1,
+    "Crossbow Infantry"
+   ],
+   [
+    3,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Drifting Meadow"
+   ],
+   [
+    2,
+    "Exile"
+   ],
+   [
+    15,
+    "Island"
+   ],
+   [
+    1,
+    "Kyren Archive"
+   ],
+   [
+    1,
+    "Mother of Runes"
+   ],
+   [
+    1,
+    "Pacifism"
+   ],
+   [
+    2,
+    "Palinchron"
+   ],
+   [
+    9,
+    "Plains"
+   ],
+   [
+    3,
+    "Stinging Barrier"
+   ],
+   [
+    2,
+    "Stroke of Genius"
+   ],
+   [
+    2,
+    "Thwart"
+   ],
+   [
+    2,
+    "War Tax"
+   ],
+   [
+    1,
+    "Wrath of God"
+   ]
+  ]
+ },
+ {
+  "name": "Chargoyf",
+  "set": "BRB",
+  "date": "1999-11-12",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Arc Lightning"
+   ],
+   [
+    1,
+    "Broken Fall"
+   ],
+   [
+    9,
+    "Forest"
+   ],
+   [
+    1,
+    "Gorilla Warrior"
+   ],
+   [
+    1,
+    "Lhurgoyf"
+   ],
+   [
+    1,
+    "Llanowar Elves"
+   ],
+   [
+    1,
+    "Maniacal Rage"
+   ],
+   [
+    1,
+    "Mogg Hollows"
+   ],
+   [
+    6,
+    "Mountain"
+   ],
+   [
+    1,
+    "Pincher Beetles"
+   ],
+   [
+    1,
+    "Plated Rootwalla"
+   ],
+   [
+    1,
+    "Raging Goblin"
+   ],
+   [
+    1,
+    "River Boa"
+   ],
+   [
+    1,
+    "Scryb Sprites"
+   ],
+   [
+    1,
+    "Seeker of Skybreak"
+   ],
+   [
+    1,
+    "Shower of Sparks"
+   ],
+   [
+    1,
+    "Skyshroud Elite"
+   ],
+   [
+    1,
+    "Slippery Karst"
+   ],
+   [
+    1,
+    "Spike Feeder"
+   ],
+   [
+    1,
+    "Spike Weaver"
+   ],
+   [
+    1,
+    "Steam Blast"
+   ],
+   [
+    1,
+    "Symbiosis"
+   ],
+   [
+    1,
+    "Tranquility"
+   ],
+   [
+    1,
+    "Trumpeting Armodon"
+   ],
+   [
+    1,
+    "Uthden Troll"
+   ],
+   [
+    1,
+    "Village Elder"
+   ],
+   [
+    1,
+    "Wildfire Emissary"
+   ]
+  ]
+ },
+ {
+  "name": "Cinder Heart",
+  "set": "BRB",
+  "date": "1999-11-12",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Abyssal Specter"
+   ],
+   [
+    1,
+    "Cackling Fiend"
+   ],
+   [
+    1,
+    "Cinder Marsh"
+   ],
+   [
+    1,
+    "Crazed Skirge"
+   ],
+   [
+    1,
+    "Dark Ritual"
+   ],
+   [
+    1,
+    "Exhume"
+   ],
+   [
+    1,
+    "Fire Ants"
+   ],
+   [
+    1,
+    "Heat Ray"
+   ],
+   [
+    1,
+    "Lightning Elemental"
+   ],
+   [
+    1,
+    "Living Death"
+   ],
+   [
+    7,
+    "Mountain"
+   ],
+   [
+    1,
+    "Nekrataal"
+   ],
+   [
+    1,
+    "Pestilence"
+   ],
+   [
+    1,
+    "Phyrexian Ghoul"
+   ],
+   [
+    1,
+    "Polluted Mire"
+   ],
+   [
+    1,
+    "Reanimate"
+   ],
+   [
+    1,
+    "Rolling Thunder"
+   ],
+   [
+    1,
+    "Sadistic Glee"
+   ],
+   [
+    1,
+    "Sengir Vampire"
+   ],
+   [
+    1,
+    "Sewer Rats"
+   ],
+   [
+    1,
+    "Subversion"
+   ],
+   [
+    8,
+    "Swamp"
+   ],
+   [
+    1,
+    "Syphon Soul"
+   ],
+   [
+    1,
+    "Terror"
+   ],
+   [
+    1,
+    "Unnerve"
+   ],
+   [
+    1,
+    "Wall of Heat"
+   ],
+   [
+    1,
+    "Weakness"
+   ]
+  ]
+ },
+ {
+  "name": "Breakdown",
+  "set": "NEM",
+  "date": "2000-02-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    4,
+    "Accumulated Knowledge"
+   ],
+   [
+    2,
+    "Blastoderm"
+   ],
+   [
+    4,
+    "Cloudskate"
+   ],
+   [
+    1,
+    "Dehydration"
+   ],
+   [
+    2,
+    "Ensnare"
+   ],
+   [
+    1,
+    "False Demise"
+   ],
+   [
+    10,
+    "Forest"
+   ],
+   [
+    2,
+    "Hickory Woodlot"
+   ],
+   [
+    10,
+    "Island"
+   ],
+   [
+    1,
+    "Parallax Inhibitor"
+   ],
+   [
+    1,
+    "Puffer Extract"
+   ],
+   [
+    2,
+    "Revive"
+   ],
+   [
+    2,
+    "Rusting Golem"
+   ],
+   [
+    2,
+    "Saprazzan Skerry"
+   ],
+   [
+    1,
+    "Seal of Removal"
+   ],
+   [
+    1,
+    "Seal of Strength"
+   ],
+   [
+    1,
+    "Skyshroud Behemoth"
+   ],
+   [
+    4,
+    "Skyshroud Ridgeback"
+   ],
+   [
+    2,
+    "Stronghold Zeppelin"
+   ],
+   [
+    1,
+    "Vine Trellis"
+   ],
+   [
+    1,
+    "War Tax"
+   ],
+   [
+    3,
+    "Waterfront Bouncer"
+   ],
+   [
+    2,
+    "Woodripper"
+   ]
+  ]
+ },
+ {
+  "name": "Breakdown - Enhanced Deck",
+  "set": "NEM",
+  "date": "2000-02-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    3,
+    "Blastoderm"
+   ],
+   [
+    3,
+    "Cloud Sprite"
+   ],
+   [
+    4,
+    "Cloudskate"
+   ],
+   [
+    1,
+    "Creeping Mold"
+   ],
+   [
+    3,
+    "Dehydration"
+   ],
+   [
+    1,
+    "Emperor Crocodile"
+   ],
+   [
+    4,
+    "Ensnare"
+   ],
+   [
+    10,
+    "Forest"
+   ],
+   [
+    2,
+    "Hickory Woodlot"
+   ],
+   [
+    10,
+    "Island"
+   ],
+   [
+    4,
+    "Misstep"
+   ],
+   [
+    1,
+    "Palinchron"
+   ],
+   [
+    1,
+    "Raven Familiar"
+   ],
+   [
+    2,
+    "River Boa"
+   ],
+   [
+    2,
+    "Saprazzan Skerry"
+   ],
+   [
+    3,
+    "Stronghold Zeppelin"
+   ],
+   [
+    1,
+    "Symbiosis"
+   ],
+   [
+    2,
+    "Uktabi Orangutan"
+   ],
+   [
+    1,
+    "Vine Trellis"
+   ],
+   [
+    2,
+    "Waterfront Bouncer"
+   ]
+  ]
+ },
+ {
+  "name": "Eruption",
+  "set": "NEM",
+  "date": "2000-02-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Alabaster Wall"
+   ],
+   [
+    1,
+    "Arc Mage"
+   ],
+   [
+    1,
+    "Belbe's Armor"
+   ],
+   [
+    2,
+    "Chieftain en-Dal"
+   ],
+   [
+    1,
+    "Crenellated Wall"
+   ],
+   [
+    1,
+    "Defender en-Vec"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    1,
+    "Downhill Charge"
+   ],
+   [
+    1,
+    "Flaming Sword"
+   ],
+   [
+    1,
+    "Flowstone Armor"
+   ],
+   [
+    2,
+    "Flowstone Crusher"
+   ],
+   [
+    1,
+    "Flowstone Overseer"
+   ],
+   [
+    1,
+    "Inviolability"
+   ],
+   [
+    1,
+    "Iron Lance"
+   ],
+   [
+    1,
+    "Kris Mage"
+   ],
+   [
+    3,
+    "Laccolith Grunt"
+   ],
+   [
+    2,
+    "Laccolith Warrior"
+   ],
+   [
+    2,
+    "Laccolith Whelp"
+   ],
+   [
+    14,
+    "Mountain"
+   ],
+   [
+    1,
+    "Oracle's Attendants"
+   ],
+   [
+    10,
+    "Plains"
+   ],
+   [
+    1,
+    "Ramosian Rally"
+   ],
+   [
+    1,
+    "Seal of Cleansing"
+   ],
+   [
+    3,
+    "Seal of Fire"
+   ],
+   [
+    1,
+    "Sivvi's Ruse"
+   ],
+   [
+    1,
+    "Thunderclap"
+   ],
+   [
+    2,
+    "Trap Runner"
+   ],
+   [
+    1,
+    "Volcanic Wind"
+   ]
+  ]
+ },
+ {
+  "name": "Eruption - Enhanced Deck",
+  "set": "NEM",
+  "date": "2000-02-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Arc Lightning"
+   ],
+   [
+    1,
+    "Armageddon"
+   ],
+   [
+    2,
+    "Expendable Troops"
+   ],
+   [
+    4,
+    "Goblin Patrol"
+   ],
+   [
+    4,
+    "Goblin Raider"
+   ],
+   [
+    1,
+    "Hammer of Bogardan"
+   ],
+   [
+    1,
+    "Healing Salve"
+   ],
+   [
+    1,
+    "Keldon Champion"
+   ],
+   [
+    2,
+    "Laccolith Grunt"
+   ],
+   [
+    4,
+    "Laccolith Whelp"
+   ],
+   [
+    1,
+    "Lightning Dragon"
+   ],
+   [
+    13,
+    "Mountain"
+   ],
+   [
+    1,
+    "Pillage"
+   ],
+   [
+    9,
+    "Plains"
+   ],
+   [
+    1,
+    "Reckless Abandon"
+   ],
+   [
+    1,
+    "Remedy"
+   ],
+   [
+    2,
+    "Ring of Gix"
+   ],
+   [
+    2,
+    "Seal of Cleansing"
+   ],
+   [
+    4,
+    "Seal of Fire"
+   ],
+   [
+    4,
+    "Shock"
+   ]
+  ]
+ },
+ {
+  "name": "Mercenaries",
+  "set": "NEM",
+  "date": "2000-02-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Alley Grifters"
+   ],
+   [
+    1,
+    "Battlefield Percher"
+   ],
+   [
+    1,
+    "Belbe's Portal"
+   ],
+   [
+    1,
+    "Carrion Wall"
+   ],
+   [
+    1,
+    "Cateran Brute"
+   ],
+   [
+    1,
+    "Cateran Enforcer"
+   ],
+   [
+    1,
+    "Cateran Kidnappers"
+   ],
+   [
+    1,
+    "Cateran Summons"
+   ],
+   [
+    2,
+    "Dark Ritual"
+   ],
+   [
+    1,
+    "Dark Triumph"
+   ],
+   [
+    1,
+    "Haunted Crossroads"
+   ],
+   [
+    1,
+    "Intimidation"
+   ],
+   [
+    1,
+    "Massacre"
+   ],
+   [
+    2,
+    "Mind Swords"
+   ],
+   [
+    3,
+    "Misshapen Fiend"
+   ],
+   [
+    3,
+    "Parallax Dementia"
+   ],
+   [
+    2,
+    "Phyrexian Driver"
+   ],
+   [
+    1,
+    "Phyrexian Prowler"
+   ],
+   [
+    1,
+    "Rampart Crawler"
+   ],
+   [
+    1,
+    "Rathi Assassin"
+   ],
+   [
+    1,
+    "Rathi Fiend"
+   ],
+   [
+    1,
+    "Rathi Intimidator"
+   ],
+   [
+    1,
+    "Seal of Doom"
+   ],
+   [
+    1,
+    "Skulking Fugitive"
+   ],
+   [
+    4,
+    "Spineless Thug"
+   ],
+   [
+    2,
+    "Strongarm Thug"
+   ],
+   [
+    23,
+    "Swamp"
+   ]
+  ]
+ },
+ {
+  "name": "Replicator",
+  "set": "NEM",
+  "date": "2000-02-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    4,
+    "Blastoderm"
+   ],
+   [
+    1,
+    "Bog Witch"
+   ],
+   [
+    2,
+    "Cackling Witch"
+   ],
+   [
+    1,
+    "Coiling Woodworm"
+   ],
+   [
+    2,
+    "Deepwood Drummer"
+   ],
+   [
+    1,
+    "Flowstone Armor"
+   ],
+   [
+    17,
+    "Forest"
+   ],
+   [
+    4,
+    "Howling Wolf"
+   ],
+   [
+    1,
+    "Hunted Wumpus"
+   ],
+   [
+    2,
+    "Invigorate"
+   ],
+   [
+    4,
+    "Nesting Wurm"
+   ],
+   [
+    2,
+    "Plague Witch"
+   ],
+   [
+    1,
+    "Saproling Burst"
+   ],
+   [
+    1,
+    "Saproling Cluster"
+   ],
+   [
+    2,
+    "Seal of Doom"
+   ],
+   [
+    4,
+    "Skyshroud Sentinel"
+   ],
+   [
+    1,
+    "Squallmonger"
+   ],
+   [
+    2,
+    "Stampede Driver"
+   ],
+   [
+    1,
+    "Subterranean Hangar"
+   ],
+   [
+    7,
+    "Swamp"
+   ]
+  ]
+ },
+ {
+  "name": "Replicator - Enhanced Deck",
+  "set": "NEM",
+  "date": "2000-02-14",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Arc Lightning"
+   ],
+   [
+    1,
+    "Collective Unconscious"
+   ],
+   [
+    2,
+    "Earthquake"
+   ],
+   [
+    14,
+    "Forest"
+   ],
+   [
+    4,
+    "Howling Wolf"
+   ],
+   [
+    3,
+    "Maro"
+   ],
+   [
+    1,
+    "Mercadian Bazaar"
+   ],
+   [
+    3,
+    "Mountain"
+   ],
+   [
+    4,
+    "Nesting Wurm"
+   ],
+   [
+    3,
+    "Rancor"
+   ],
+   [
+    4,
+    "Repopulate"
+   ],
+   [
+    2,
+    "Revive"
+   ],
+   [
+    4,
+    "Skyshroud Sentinel"
+   ],
+   [
+    4,
+    "Smoldering Crater"
+   ],
+   [
+    1,
+    "Spontaneous Generation"
+   ],
+   [
+    2,
+    "Squallmonger"
+   ],
+   [
+    2,
+    "Thran Foundry"
+   ],
+   [
+    2,
+    "Treetop Village"
+   ],
+   [
+    3,
+    "Vine Trellis"
+   ]
+  ]
+ },
+ {
+  "name": "Distress",
+  "set": "PCY",
+  "date": "2000-06-05",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Afterlife"
+   ],
+   [
+    1,
+    "Agent of Shauku"
+   ],
+   [
+    1,
+    "Angelic Favor"
+   ],
+   [
+    1,
+    "Avatar of Woe"
+   ],
+   [
+    1,
+    "Ballista Squad"
+   ],
+   [
+    1,
+    "Belbe's Percher"
+   ],
+   [
+    1,
+    "Chilling Apparition"
+   ],
+   [
+    2,
+    "Dark Ritual"
+   ],
+   [
+    1,
+    "Death Charmer"
+   ],
+   [
+    3,
+    "Despoil"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Excise"
+   ],
+   [
+    2,
+    "Fresh Volunteers"
+   ],
+   [
+    3,
+    "Glittering Lion"
+   ],
+   [
+    2,
+    "Glittering Lynx"
+   ],
+   [
+    1,
+    "Maggot Therapy"
+   ],
+   [
+    1,
+    "Nakaya Shade"
+   ],
+   [
+    1,
+    "Peat Bog"
+   ],
+   [
+    1,
+    "Plague Fiend"
+   ],
+   [
+    9,
+    "Plains"
+   ],
+   [
+    2,
+    "Rain of Tears"
+   ],
+   [
+    2,
+    "Rhystic Syphon"
+   ],
+   [
+    1,
+    "Rhystic Tutor"
+   ],
+   [
+    1,
+    "Seal of Cleansing"
+   ],
+   [
+    1,
+    "Seal of Doom"
+   ],
+   [
+    1,
+    "Shield Dancer"
+   ],
+   [
+    2,
+    "Skulking Fugitive"
+   ],
+   [
+    1,
+    "Snuff Out"
+   ],
+   [
+    1,
+    "Spineless Thug"
+   ],
+   [
+    1,
+    "Steal Strength"
+   ],
+   [
+    11,
+    "Swamp"
+   ]
+  ]
+ },
+ {
+  "name": "Pummel",
+  "set": "PCY",
+  "date": "2000-06-05",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Animate Land"
+   ],
+   [
+    1,
+    "Avatar of Might"
+   ],
+   [
+    2,
+    "Blastoderm"
+   ],
+   [
+    2,
+    "Darba"
+   ],
+   [
+    2,
+    "Deepwood Wolverine"
+   ],
+   [
+    20,
+    "Forest"
+   ],
+   [
+    2,
+    "Hickory Woodlot"
+   ],
+   [
+    2,
+    "Hunted Wumpus"
+   ],
+   [
+    1,
+    "Invigorate"
+   ],
+   [
+    1,
+    "Jolrael's Favor"
+   ],
+   [
+    2,
+    "Living Terrain"
+   ],
+   [
+    1,
+    "Lumbering Satyr"
+   ],
+   [
+    2,
+    "Pygmy Razorback"
+   ],
+   [
+    1,
+    "Seal of Strength"
+   ],
+   [
+    1,
+    "Silverglade Elemental"
+   ],
+   [
+    1,
+    "Skyshroud Claim"
+   ],
+   [
+    2,
+    "Snag"
+   ],
+   [
+    1,
+    "Spitting Spider"
+   ],
+   [
+    2,
+    "Spore Frog"
+   ],
+   [
+    1,
+    "Stampede Driver"
+   ],
+   [
+    3,
+    "Thresher Beast"
+   ],
+   [
+    1,
+    "Tranquility"
+   ],
+   [
+    1,
+    "Treetop Bracers"
+   ],
+   [
+    2,
+    "Vine Trellis"
+   ],
+   [
+    1,
+    "Vintara Elephant"
+   ],
+   [
+    1,
+    "Vitalizing Wind"
+   ],
+   [
+    2,
+    "Wild Might"
+   ]
+  ]
+ },
+ {
+  "name": "Slither",
+  "set": "PCY",
+  "date": "2000-06-05",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Barbed Field"
+   ],
+   [
+    1,
+    "Chimeric Idol"
+   ],
+   [
+    1,
+    "Citadel of Pain"
+   ],
+   [
+    1,
+    "Desert Twister"
+   ],
+   [
+    1,
+    "Flameshot"
+   ],
+   [
+    10,
+    "Forest"
+   ],
+   [
+    2,
+    "Invigorate"
+   ],
+   [
+    3,
+    "Keldon Berserker"
+   ],
+   [
+    1,
+    "Kyren Negotiations"
+   ],
+   [
+    1,
+    "Latulla, Keldon Overseer"
+   ],
+   [
+    14,
+    "Mountain"
+   ],
+   [
+    1,
+    "Mungha Wurm"
+   ],
+   [
+    1,
+    "Reverent Silence"
+   ],
+   [
+    2,
+    "Rhystic Lightning"
+   ],
+   [
+    2,
+    "Scoria Cat"
+   ],
+   [
+    2,
+    "Seal of Fire"
+   ],
+   [
+    4,
+    "Silt Crawler"
+   ],
+   [
+    4,
+    "Spur Grappler"
+   ],
+   [
+    2,
+    "Squallmonger"
+   ],
+   [
+    1,
+    "Stampede Driver"
+   ],
+   [
+    2,
+    "Vine Trellis"
+   ],
+   [
+    1,
+    "Vintara Snapper"
+   ],
+   [
+    1,
+    "War Cadence"
+   ],
+   [
+    1,
+    "Zerapa Minotaur"
+   ]
+  ]
+ },
+ {
+  "name": "Turnaround",
+  "set": "PCY",
+  "date": "2000-06-05",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Chieftain en-Dal"
+   ],
+   [
+    1,
+    "Crossbow Infantry"
+   ],
+   [
+    1,
+    "Daze"
+   ],
+   [
+    1,
+    "Defiant Vanguard"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Diving Griffin"
+   ],
+   [
+    1,
+    "Foil"
+   ],
+   [
+    2,
+    "Glittering Lion"
+   ],
+   [
+    1,
+    "Heightened Awareness"
+   ],
+   [
+    10,
+    "Island"
+   ],
+   [
+    1,
+    "Mageta the Lion"
+   ],
+   [
+    2,
+    "Mine Bearer"
+   ],
+   [
+    14,
+    "Plains"
+   ],
+   [
+    1,
+    "Rethink"
+   ],
+   [
+    1,
+    "Reveille Squad"
+   ],
+   [
+    1,
+    "Rhystic Circle"
+   ],
+   [
+    1,
+    "Rhystic Shield"
+   ],
+   [
+    1,
+    "Rhystic Study"
+   ],
+   [
+    3,
+    "Ribbon Snake"
+   ],
+   [
+    1,
+    "Seal of Cleansing"
+   ],
+   [
+    3,
+    "Shield Dancer"
+   ],
+   [
+    3,
+    "Spiketail Hatchling"
+   ],
+   [
+    1,
+    "Stronghold Machinist"
+   ],
+   [
+    1,
+    "Sword Dancer"
+   ],
+   [
+    1,
+    "Topple"
+   ],
+   [
+    2,
+    "Trap Runner"
+   ],
+   [
+    2,
+    "Waterfront Bouncer"
+   ]
+  ]
+ },
+ {
+  "name": "Blowout",
+  "set": "INV",
+  "date": "2000-10-02",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Addle"
+   ],
+   [
+    1,
+    "Agonizing Demise"
+   ],
+   [
+    1,
+    "Annihilate"
+   ],
+   [
+    1,
+    "Breath of Darigaaz"
+   ],
+   [
+    1,
+    "Cinder Shade"
+   ],
+   [
+    1,
+    "Firescreamer"
+   ],
+   [
+    1,
+    "Ghitu Fire"
+   ],
+   [
+    1,
+    "Halam Djinn"
+   ],
+   [
+    1,
+    "Hate Weaver"
+   ],
+   [
+    2,
+    "Hooded Kavu"
+   ],
+   [
+    1,
+    "Hypnotic Cloud"
+   ],
+   [
+    2,
+    "Kavu Aggressor"
+   ],
+   [
+    1,
+    "Maniacal Rage"
+   ],
+   [
+    10,
+    "Mountain"
+   ],
+   [
+    1,
+    "Mourning"
+   ],
+   [
+    1,
+    "Phyrexian Delver"
+   ],
+   [
+    1,
+    "Phyrexian Reaper"
+   ],
+   [
+    1,
+    "Phyrexian Slayer"
+   ],
+   [
+    4,
+    "Ravenous Rats"
+   ],
+   [
+    2,
+    "Scorching Lava"
+   ],
+   [
+    2,
+    "Shivan Zombie"
+   ],
+   [
+    1,
+    "Smoldering Tar"
+   ],
+   [
+    1,
+    "Soul Burn"
+   ],
+   [
+    12,
+    "Swamp"
+   ],
+   [
+    2,
+    "Thunderscape Apprentice"
+   ],
+   [
+    1,
+    "Trench Wurm"
+   ],
+   [
+    2,
+    "Urborg Volcano"
+   ],
+   [
+    2,
+    "Vicious Kavu"
+   ],
+   [
+    1,
+    "Zap"
+   ]
+  ]
+ },
+ {
+  "name": "Dismissal",
+  "set": "INV",
+  "date": "2000-10-02",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Agonizing Demise"
+   ],
+   [
+    1,
+    "Cursed Flesh"
+   ],
+   [
+    1,
+    "Disrupt"
+   ],
+   [
+    1,
+    "Drake-Skull Cameo"
+   ],
+   [
+    2,
+    "Dream Thrush"
+   ],
+   [
+    1,
+    "Duskwalker"
+   ],
+   [
+    2,
+    "Faerie Squadron"
+   ],
+   [
+    1,
+    "Hate Weaver"
+   ],
+   [
+    11,
+    "Island"
+   ],
+   [
+    1,
+    "Lobotomy"
+   ],
+   [
+    1,
+    "Metathran Zombie"
+   ],
+   [
+    1,
+    "Nightscape Apprentice"
+   ],
+   [
+    1,
+    "Opt"
+   ],
+   [
+    1,
+    "Phyrexian Infiltrator"
+   ],
+   [
+    2,
+    "Probe"
+   ],
+   [
+    1,
+    "Prohibit"
+   ],
+   [
+    3,
+    "Ravenous Rats"
+   ],
+   [
+    3,
+    "Recoil"
+   ],
+   [
+    1,
+    "Repulse"
+   ],
+   [
+    2,
+    "Salt Marsh"
+   ],
+   [
+    1,
+    "Seer's Vision"
+   ],
+   [
+    1,
+    "Slinking Serpent"
+   ],
+   [
+    1,
+    "Spite // Malice"
+   ],
+   [
+    1,
+    "Stalking Assassin"
+   ],
+   [
+    1,
+    "Sulfur Vent"
+   ],
+   [
+    9,
+    "Swamp"
+   ],
+   [
+    1,
+    "Tidal Visionary"
+   ],
+   [
+    2,
+    "Urborg Drake"
+   ],
+   [
+    1,
+    "Urborg Emissary"
+   ],
+   [
+    1,
+    "Vodalian Hypnotist"
+   ],
+   [
+    2,
+    "Vodalian Serpent"
+   ],
+   [
+    1,
+    "Vodalian Zombie"
+   ]
+  ]
+ },
+ {
+  "name": "Heavy Duty",
+  "set": "INV",
+  "date": "2000-10-02",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Angel of Mercy"
+   ],
+   [
+    1,
+    "Ardent Soldier"
+   ],
+   [
+    2,
+    "Armadillo Cloak"
+   ],
+   [
+    1,
+    "Benalish Emissary"
+   ],
+   [
+    1,
+    "Benalish Lancer"
+   ],
+   [
+    1,
+    "Benalish Trapper"
+   ],
+   [
+    1,
+    "Capashen Unicorn"
+   ],
+   [
+    2,
+    "Charging Troll"
+   ],
+   [
+    1,
+    "Crimson Acolyte"
+   ],
+   [
+    2,
+    "Elfhame Palace"
+   ],
+   [
+    2,
+    "Explosive Growth"
+   ],
+   [
+    11,
+    "Forest"
+   ],
+   [
+    2,
+    "Kavu Chameleon"
+   ],
+   [
+    1,
+    "Kavu Climber"
+   ],
+   [
+    2,
+    "Llanowar Cavalry"
+   ],
+   [
+    1,
+    "Llanowar Elite"
+   ],
+   [
+    2,
+    "Llanowar Knight"
+   ],
+   [
+    1,
+    "Noble Panther"
+   ],
+   [
+    1,
+    "Obsidian Acolyte"
+   ],
+   [
+    1,
+    "Pincer Spider"
+   ],
+   [
+    11,
+    "Plains"
+   ],
+   [
+    2,
+    "Rampant Elephant"
+   ],
+   [
+    2,
+    "Razorfoot Griffin"
+   ],
+   [
+    1,
+    "Rooting Kavu"
+   ],
+   [
+    2,
+    "Shackles"
+   ],
+   [
+    1,
+    "Thicket Elemental"
+   ],
+   [
+    1,
+    "Treefolk Healer"
+   ],
+   [
+    2,
+    "Wax // Wane"
+   ]
+  ]
+ },
+ {
+  "name": "Spectrum",
+  "set": "INV",
+  "date": "2000-10-02",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Assault // Battery"
+   ],
+   [
+    2,
+    "Exclude"
+   ],
+   [
+    3,
+    "Fertile Ground"
+   ],
+   [
+    1,
+    "Fires of Yavimaya"
+   ],
+   [
+    14,
+    "Forest"
+   ],
+   [
+    1,
+    "Global Ruin"
+   ],
+   [
+    1,
+    "Halam Djinn"
+   ],
+   [
+    3,
+    "Harrow"
+   ],
+   [
+    2,
+    "Island"
+   ],
+   [
+    2,
+    "Kavu Climber"
+   ],
+   [
+    2,
+    "Mountain"
+   ],
+   [
+    1,
+    "Nomadic Elf"
+   ],
+   [
+    1,
+    "Ordered Migration"
+   ],
+   [
+    2,
+    "Plains"
+   ],
+   [
+    2,
+    "Probe"
+   ],
+   [
+    2,
+    "Quirion Trailblazer"
+   ],
+   [
+    1,
+    "Sabertooth Nishoba"
+   ],
+   [
+    1,
+    "Serpentine Kavu"
+   ],
+   [
+    1,
+    "Spite // Malice"
+   ],
+   [
+    2,
+    "Swamp"
+   ],
+   [
+    3,
+    "Thornscape Apprentice"
+   ],
+   [
+    2,
+    "Tribal Flames"
+   ],
+   [
+    2,
+    "Voracious Cobra"
+   ],
+   [
+    2,
+    "Wax // Wane"
+   ],
+   [
+    1,
+    "Wayfaring Giant"
+   ],
+   [
+    2,
+    "Yavimaya Barbarian"
+   ],
+   [
+    2,
+    "Zanam Djinn"
+   ]
+  ]
+ },
+ {
+  "name": "Barrage",
+  "set": "PLS",
+  "date": "2001-02-05",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Alpha Kavu"
+   ],
+   [
+    1,
+    "Amphibious Kavu"
+   ],
+   [
+    1,
+    "Assault // Battery"
+   ],
+   [
+    1,
+    "Caldera Kavu"
+   ],
+   [
+    1,
+    "Explosive Growth"
+   ],
+   [
+    2,
+    "Fertile Ground"
+   ],
+   [
+    1,
+    "Fires of Yavimaya"
+   ],
+   [
+    2,
+    "Flametongue Kavu"
+   ],
+   [
+    12,
+    "Forest"
+   ],
+   [
+    1,
+    "Gaea's Herald"
+   ],
+   [
+    2,
+    "Horned Kavu"
+   ],
+   [
+    1,
+    "Implode"
+   ],
+   [
+    1,
+    "Kavu Recluse"
+   ],
+   [
+    1,
+    "Llanowar Elite"
+   ],
+   [
+    1,
+    "Magma Burst"
+   ],
+   [
+    2,
+    "Mogg Jailer"
+   ],
+   [
+    1,
+    "Mogg Sentry"
+   ],
+   [
+    11,
+    "Mountain"
+   ],
+   [
+    2,
+    "Nomadic Elf"
+   ],
+   [
+    1,
+    "Root Greevil"
+   ],
+   [
+    1,
+    "Scorching Lava"
+   ],
+   [
+    1,
+    "Serpentine Kavu"
+   ],
+   [
+    1,
+    "Simoon"
+   ],
+   [
+    1,
+    "Singe"
+   ],
+   [
+    2,
+    "Sparkcaster"
+   ],
+   [
+    1,
+    "Thornscape Apprentice"
+   ],
+   [
+    3,
+    "Thornscape Familiar"
+   ],
+   [
+    1,
+    "Thunderscape Apprentice"
+   ],
+   [
+    1,
+    "Thunderscape Battlemage"
+   ],
+   [
+    1,
+    "Thunderscape Familiar"
+   ]
+  ]
+ },
+ {
+  "name": "Comeback",
+  "set": "PLS",
+  "date": "2001-02-05",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Ancient Spring"
+   ],
+   [
+    1,
+    "Arctic Merfolk"
+   ],
+   [
+    3,
+    "Cavern Harpy"
+   ],
+   [
+    1,
+    "Coastal Tower"
+   ],
+   [
+    1,
+    "Confound"
+   ],
+   [
+    2,
+    "Dromar's Cavern"
+   ],
+   [
+    1,
+    "Dromar's Charm"
+   ],
+   [
+    1,
+    "Faerie Squadron"
+   ],
+   [
+    1,
+    "Galina's Knight"
+   ],
+   [
+    1,
+    "Guard Dogs"
+   ],
+   [
+    1,
+    "Honorable Scout"
+   ],
+   [
+    2,
+    "Hunting Drake"
+   ],
+   [
+    7,
+    "Island"
+   ],
+   [
+    1,
+    "Mana Cylix"
+   ],
+   [
+    2,
+    "Marsh Crocodile"
+   ],
+   [
+    1,
+    "Nightscape Familiar"
+   ],
+   [
+    2,
+    "Phyrexian Bloodstock"
+   ],
+   [
+    4,
+    "Plains"
+   ],
+   [
+    1,
+    "Planeswalker's Scorn"
+   ],
+   [
+    2,
+    "Ravenous Rats"
+   ],
+   [
+    1,
+    "Salt Marsh"
+   ],
+   [
+    1,
+    "Sawtooth Loon"
+   ],
+   [
+    2,
+    "Silver Drake"
+   ],
+   [
+    2,
+    "Sisay's Ingenuity"
+   ],
+   [
+    1,
+    "Slay"
+   ],
+   [
+    1,
+    "Stormscape Apprentice"
+   ],
+   [
+    1,
+    "Stormscape Battlemage"
+   ],
+   [
+    3,
+    "Stormscape Familiar"
+   ],
+   [
+    6,
+    "Swamp"
+   ],
+   [
+    1,
+    "Terminal Moraine"
+   ],
+   [
+    3,
+    "Tidal Visionary"
+   ],
+   [
+    1,
+    "Vodalian Merchant"
+   ],
+   [
+    1,
+    "Waterspout Elemental"
+   ]
+  ]
+ },
+ {
+  "name": "Domain",
+  "set": "PLS",
+  "date": "2001-02-05",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Allied Strategies"
+   ],
+   [
+    1,
+    "Breath of Darigaaz"
+   ],
+   [
+    1,
+    "Confound"
+   ],
+   [
+    2,
+    "Exotic Curse"
+   ],
+   [
+    2,
+    "Exotic Disease"
+   ],
+   [
+    8,
+    "Forest"
+   ],
+   [
+    1,
+    "Gaea's Might"
+   ],
+   [
+    3,
+    "Harrow"
+   ],
+   [
+    3,
+    "Island"
+   ],
+   [
+    1,
+    "Kavu Recluse"
+   ],
+   [
+    2,
+    "Kavu Scout"
+   ],
+   [
+    1,
+    "Magnigoth Treefolk"
+   ],
+   [
+    3,
+    "Mountain"
+   ],
+   [
+    1,
+    "Ordered Migration"
+   ],
+   [
+    3,
+    "Plains"
+   ],
+   [
+    1,
+    "Primal Growth"
+   ],
+   [
+    1,
+    "Quirion Dryad"
+   ],
+   [
+    2,
+    "Quirion Explorer"
+   ],
+   [
+    2,
+    "Quirion Trailblazer"
+   ],
+   [
+    1,
+    "Rith's Charm"
+   ],
+   [
+    3,
+    "Samite Pilgrim"
+   ],
+   [
+    2,
+    "Stratadon"
+   ],
+   [
+    1,
+    "Strength of Unity"
+   ],
+   [
+    3,
+    "Swamp"
+   ],
+   [
+    2,
+    "Terminal Moraine"
+   ],
+   [
+    1,
+    "Treva's Charm"
+   ],
+   [
+    3,
+    "Tribal Flames"
+   ],
+   [
+    1,
+    "Wandering Stream"
+   ],
+   [
+    1,
+    "Wayfaring Giant"
+   ],
+   [
+    2,
+    "Worldly Counsel"
+   ]
+  ]
+ },
+ {
+  "name": "Scout",
+  "set": "PLS",
+  "date": "2001-02-05",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Amphibious Kavu"
+   ],
+   [
+    1,
+    "Ancient Kavu"
+   ],
+   [
+    1,
+    "Armadillo Cloak"
+   ],
+   [
+    1,
+    "Aurora Griffin"
+   ],
+   [
+    1,
+    "Eladamri's Call"
+   ],
+   [
+    1,
+    "Elfhame Palace"
+   ],
+   [
+    2,
+    "Fertile Ground"
+   ],
+   [
+    1,
+    "Fleetfoot Panther"
+   ],
+   [
+    11,
+    "Forest"
+   ],
+   [
+    1,
+    "Geothermal Crevice"
+   ],
+   [
+    2,
+    "Gerrard's Command"
+   ],
+   [
+    1,
+    "Harrow"
+   ],
+   [
+    1,
+    "Horned Kavu"
+   ],
+   [
+    1,
+    "Irrigation Ditch"
+   ],
+   [
+    1,
+    "Magma Burst"
+   ],
+   [
+    1,
+    "Mirrorwood Treefolk"
+   ],
+   [
+    2,
+    "Mountain"
+   ],
+   [
+    1,
+    "Nomadic Elf"
+   ],
+   [
+    3,
+    "Plains"
+   ],
+   [
+    1,
+    "Pollen Remedy"
+   ],
+   [
+    1,
+    "Quirion Elves"
+   ],
+   [
+    2,
+    "Quirion Explorer"
+   ],
+   [
+    1,
+    "Radiant Kavu"
+   ],
+   [
+    1,
+    "Rampant Elephant"
+   ],
+   [
+    1,
+    "Rith's Charm"
+   ],
+   [
+    2,
+    "Rith's Grove"
+   ],
+   [
+    1,
+    "Shivan Oasis"
+   ],
+   [
+    1,
+    "Singe"
+   ],
+   [
+    1,
+    "Slingshot Goblin"
+   ],
+   [
+    1,
+    "Steel Leaf Paladin"
+   ],
+   [
+    3,
+    "Stone Kavu"
+   ],
+   [
+    2,
+    "Sunscape Battlemage"
+   ],
+   [
+    1,
+    "Thornscape Apprentice"
+   ],
+   [
+    2,
+    "Thornscape Battlemage"
+   ],
+   [
+    1,
+    "Thornscape Familiar"
+   ],
+   [
+    2,
+    "Thunderscape Battlemage"
+   ],
+   [
+    1,
+    "Viashino Grappler"
+   ],
+   [
+    1,
+    "Zap"
+   ]
+  ]
+ },
+ {
+  "name": "Armada",
+  "set": "7ED",
+  "date": "2001-04-11",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Angelic Page"
+   ],
+   [
+    1,
+    "Crossbow Infantry"
+   ],
+   [
+    1,
+    "Disenchant"
+   ],
+   [
+    2,
+    "Eager Cadet"
+   ],
+   [
+    1,
+    "Glorious Anthem"
+   ],
+   [
+    2,
+    "Healing Salve"
+   ],
+   [
+    1,
+    "Heavy Ballista"
+   ],
+   [
+    2,
+    "Knight Errant"
+   ],
+   [
+    2,
+    "Longbow Archer"
+   ],
+   [
+    1,
+    "Master Healer"
+   ],
+   [
+    2,
+    "Pacifism"
+   ],
+   [
+    15,
+    "Plains"
+   ],
+   [
+    1,
+    "Razorfoot Griffin"
+   ],
+   [
+    2,
+    "Samite Healer"
+   ],
+   [
+    1,
+    "Serra Advocate"
+   ],
+   [
+    2,
+    "Serra's Embrace"
+   ],
+   [
+    1,
+    "Spirit Link"
+   ],
+   [
+    2,
+    "Standing Troops"
+   ]
+  ]
+ },
+ {
+  "name": "Bomber",
+  "set": "7ED",
+  "date": "2001-04-11",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Air Elemental"
+   ],
+   [
+    1,
+    "Ancestral Memories"
+   ],
+   [
+    2,
+    "Boomerang"
+   ],
+   [
+    1,
+    "Confiscate"
+   ],
+   [
+    1,
+    "Coral Merfolk"
+   ],
+   [
+    2,
+    "Counterspell"
+   ],
+   [
+    1,
+    "Daring Apprentice"
+   ],
+   [
+    1,
+    "Fighting Drake"
+   ],
+   [
+    1,
+    "Force Spike"
+   ],
+   [
+    1,
+    "Glacial Wall"
+   ],
+   [
+    1,
+    "Horned Turtle"
+   ],
+   [
+    1,
+    "Inspiration"
+   ],
+   [
+    17,
+    "Island"
+   ],
+   [
+    1,
+    "Merfolk Looter"
+   ],
+   [
+    1,
+    "Merfolk of the Pearl Trident"
+   ],
+   [
+    1,
+    "Prodigal Sorcerer"
+   ],
+   [
+    1,
+    "Sage Owl"
+   ],
+   [
+    1,
+    "Thieving Magpie"
+   ],
+   [
+    1,
+    "Unsummon"
+   ],
+   [
+    1,
+    "Wall of Air"
+   ],
+   [
+    2,
+    "Wind Drake"
+   ]
+  ]
+ },
+ {
+  "name": "Decay",
+  "set": "7ED",
+  "date": "2001-04-11",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Abyssal Specter"
+   ],
+   [
+    1,
+    "Befoul"
+   ],
+   [
+    2,
+    "Blood Pet"
+   ],
+   [
+    1,
+    "Bog Imp"
+   ],
+   [
+    1,
+    "Charcoal Diamond"
+   ],
+   [
+    1,
+    "Corrupt"
+   ],
+   [
+    1,
+    "Crypt Rats"
+   ],
+   [
+    1,
+    "Dakmor Lancer"
+   ],
+   [
+    2,
+    "Dark Banishing"
+   ],
+   [
+    2,
+    "Drudge Skeletons"
+   ],
+   [
+    1,
+    "Duress"
+   ],
+   [
+    1,
+    "Fallen Angel"
+   ],
+   [
+    1,
+    "Foul Imp"
+   ],
+   [
+    2,
+    "Gravedigger"
+   ],
+   [
+    1,
+    "Greed"
+   ],
+   [
+    1,
+    "Looming Shade"
+   ],
+   [
+    1,
+    "Mind Rot"
+   ],
+   [
+    1,
+    "Ostracize"
+   ],
+   [
+    1,
+    "Phyrexian Hulk"
+   ],
+   [
+    1,
+    "Serpent Warrior"
+   ],
+   [
+    16,
+    "Swamp"
+   ]
+  ]
+ },
+ {
+  "name": "Infestation",
+  "set": "7ED",
+  "date": "2001-04-11",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Blaze"
+   ],
+   [
+    1,
+    "Fire Elemental"
+   ],
+   [
+    2,
+    "Goblin Chariot"
+   ],
+   [
+    2,
+    "Goblin Digging Team"
+   ],
+   [
+    2,
+    "Goblin Gardener"
+   ],
+   [
+    1,
+    "Goblin Glider"
+   ],
+   [
+    1,
+    "Goblin King"
+   ],
+   [
+    1,
+    "Goblin Matron"
+   ],
+   [
+    2,
+    "Goblin Raider"
+   ],
+   [
+    1,
+    "Lightning Blast"
+   ],
+   [
+    16,
+    "Mountain"
+   ],
+   [
+    1,
+    "Patagia Golem"
+   ],
+   [
+    2,
+    "Pillage"
+   ],
+   [
+    2,
+    "Raging Goblin"
+   ],
+   [
+    2,
+    "Shock"
+   ],
+   [
+    2,
+    "Spitting Earth"
+   ],
+   [
+    1,
+    "Trained Orgg"
+   ]
+  ]
+ },
+ {
+  "name": "Way Wild",
+  "set": "7ED",
+  "date": "2001-04-11",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Ancient Silverback"
+   ],
+   [
+    1,
+    "Blanchwood Armor"
+   ],
+   [
+    2,
+    "Creeping Mold"
+   ],
+   [
+    14,
+    "Forest"
+   ],
+   [
+    1,
+    "Fyndhorn Elder"
+   ],
+   [
+    1,
+    "Giant Growth"
+   ],
+   [
+    2,
+    "Giant Spider"
+   ],
+   [
+    1,
+    "Gorilla Chieftain"
+   ],
+   [
+    3,
+    "Grizzly Bears"
+   ],
+   [
+    2,
+    "Llanowar Elves"
+   ],
+   [
+    1,
+    "Lure"
+   ],
+   [
+    1,
+    "Pride of Lions"
+   ],
+   [
+    1,
+    "Redwood Treefolk"
+   ],
+   [
+    1,
+    "Regeneration"
+   ],
+   [
+    1,
+    "Rod of Ruin"
+   ],
+   [
+    1,
+    "Spined Wurm"
+   ],
+   [
+    1,
+    "Stream of Life"
+   ],
+   [
+    1,
+    "Thorn Elemental"
+   ],
+   [
+    2,
+    "Trained Armodon"
+   ],
+   [
+    1,
+    "Wild Growth"
+   ],
+   [
+    1,
+    "Wood Elves"
+   ]
+  ]
+ },
+ {
+  "name": "Burial",
+  "set": "APC",
+  "date": "2001-06-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Annihilate"
+   ],
+   [
+    2,
+    "Chromatic Sphere"
+   ],
+   [
+    2,
+    "Consume Strength"
+   ],
+   [
+    2,
+    "Dead Ringers"
+   ],
+   [
+    1,
+    "Death Grasp"
+   ],
+   [
+    3,
+    "Elfhame Palace"
+   ],
+   [
+    5,
+    "Forest"
+   ],
+   [
+    1,
+    "Foul Presence"
+   ],
+   [
+    3,
+    "Grave Defiler"
+   ],
+   [
+    4,
+    "Llanowar Dead"
+   ],
+   [
+    3,
+    "Maggot Carrier"
+   ],
+   [
+    2,
+    "Mournful Zombie"
+   ],
+   [
+    1,
+    "Phyrexian Arena"
+   ],
+   [
+    1,
+    "Phyrexian Gargantua"
+   ],
+   [
+    2,
+    "Phyrexian Reaper"
+   ],
+   [
+    3,
+    "Plains"
+   ],
+   [
+    4,
+    "Putrid Warrior"
+   ],
+   [
+    2,
+    "Quagmire Druid"
+   ],
+   [
+    1,
+    "Soul Link"
+   ],
+   [
+    3,
+    "Strength of Night"
+   ],
+   [
+    10,
+    "Swamp"
+   ],
+   [
+    1,
+    "Tigereye Cameo"
+   ],
+   [
+    1,
+    "Wax // Wane"
+   ],
+   [
+    2,
+    "Zombie Boa"
+   ]
+  ]
+ },
+ {
+  "name": "Pandemonium",
+  "set": "APC",
+  "date": "2001-06-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Allied Strategies"
+   ],
+   [
+    1,
+    "Captain's Maneuver"
+   ],
+   [
+    1,
+    "Emblazoned Golem"
+   ],
+   [
+    2,
+    "Evasive Action"
+   ],
+   [
+    2,
+    "Exotic Curse"
+   ],
+   [
+    2,
+    "Fertile Ground"
+   ],
+   [
+    12,
+    "Forest"
+   ],
+   [
+    1,
+    "Gaea's Balance"
+   ],
+   [
+    3,
+    "Harrow"
+   ],
+   [
+    1,
+    "Helionaut"
+   ],
+   [
+    3,
+    "Island"
+   ],
+   [
+    1,
+    "Last Stand"
+   ],
+   [
+    3,
+    "Lay of the Land"
+   ],
+   [
+    1,
+    "Life // Death"
+   ],
+   [
+    2,
+    "Mountain"
+   ],
+   [
+    1,
+    "Nomadic Elf"
+   ],
+   [
+    1,
+    "Order // Chaos"
+   ],
+   [
+    3,
+    "Penumbra Bobcat"
+   ],
+   [
+    2,
+    "Penumbra Kavu"
+   ],
+   [
+    1,
+    "Penumbra Wurm"
+   ],
+   [
+    3,
+    "Plains"
+   ],
+   [
+    2,
+    "Quirion Elves"
+   ],
+   [
+    1,
+    "Quirion Trailblazer"
+   ],
+   [
+    1,
+    "Stratadon"
+   ],
+   [
+    3,
+    "Swamp"
+   ],
+   [
+    2,
+    "Tribal Flames"
+   ],
+   [
+    2,
+    "Urborg Elf"
+   ],
+   [
+    1,
+    "Wayfaring Giant"
+   ]
+  ]
+ },
+ {
+  "name": "Swoop",
+  "set": "APC",
+  "date": "2001-06-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Aether Mutation"
+   ],
+   [
+    2,
+    "Ana Disciple"
+   ],
+   [
+    2,
+    "Ceta Sanctuary"
+   ],
+   [
+    2,
+    "Chromatic Sphere"
+   ],
+   [
+    2,
+    "Coastal Drake"
+   ],
+   [
+    1,
+    "Confound"
+   ],
+   [
+    1,
+    "Fertile Ground"
+   ],
+   [
+    13,
+    "Forest"
+   ],
+   [
+    3,
+    "Gaea's Skyfolk"
+   ],
+   [
+    2,
+    "Glade Gnarr"
+   ],
+   [
+    9,
+    "Island"
+   ],
+   [
+    1,
+    "Jaded Response"
+   ],
+   [
+    2,
+    "Jungle Barrier"
+   ],
+   [
+    2,
+    "Kavu Chameleon"
+   ],
+   [
+    1,
+    "Lay of the Land"
+   ],
+   [
+    2,
+    "Living Airship"
+   ],
+   [
+    1,
+    "Mystic Snake"
+   ],
+   [
+    1,
+    "Pincer Spider"
+   ],
+   [
+    1,
+    "Rainbow Crow"
+   ],
+   [
+    1,
+    "Repulse"
+   ],
+   [
+    1,
+    "Rooting Kavu"
+   ],
+   [
+    1,
+    "Rushing River"
+   ],
+   [
+    2,
+    "Temporal Spring"
+   ],
+   [
+    1,
+    "Tidal Visionary"
+   ],
+   [
+    2,
+    "Urborg Elf"
+   ],
+   [
+    1,
+    "Wash Out"
+   ],
+   [
+    1,
+    "Yavimaya's Embrace"
+   ]
+  ]
+ },
+ {
+  "name": "Whirlpool",
+  "set": "APC",
+  "date": "2001-06-04",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Bloodfire Dwarf"
+   ],
+   [
+    1,
+    "Bloodfire Infusion"
+   ],
+   [
+    2,
+    "Bloodfire Kavu"
+   ],
+   [
+    2,
+    "Chromatic Sphere"
+   ],
+   [
+    1,
+    "Coastal Drake"
+   ],
+   [
+    1,
+    "Confound"
+   ],
+   [
+    1,
+    "Dwarven Patrol"
+   ],
+   [
+    1,
+    "Exclude"
+   ],
+   [
+    2,
+    "Faerie Squadron"
+   ],
+   [
+    1,
+    "Fire // Ice"
+   ],
+   [
+    1,
+    "Flametongue Kavu"
+   ],
+   [
+    12,
+    "Island"
+   ],
+   [
+    2,
+    "Jilt"
+   ],
+   [
+    1,
+    "Metathran Transport"
+   ],
+   [
+    2,
+    "Minotaur Illusionist"
+   ],
+   [
+    12,
+    "Mountain"
+   ],
+   [
+    1,
+    "Opt"
+   ],
+   [
+    2,
+    "Quicksilver Dagger"
+   ],
+   [
+    1,
+    "Rainbow Crow"
+   ],
+   [
+    2,
+    "Razorfin Hunter"
+   ],
+   [
+    1,
+    "Scorching Lava"
+   ],
+   [
+    2,
+    "Stun"
+   ],
+   [
+    1,
+    "Suffocating Blast"
+   ],
+   [
+    2,
+    "Whirlpool Drake"
+   ],
+   [
+    3,
+    "Whirlpool Rider"
+   ],
+   [
+    1,
+    "Whirlpool Warrior"
+   ]
+  ]
+ },
+ {
+  "name": "Liftoff",
+  "set": "ODY",
+  "date": "2001-10-01",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Abandoned Outpost"
+   ],
+   [
+    1,
+    "Angelic Wall"
+   ],
+   [
+    2,
+    "Aven Windreader"
+   ],
+   [
+    1,
+    "Beloved Chaplain"
+   ],
+   [
+    2,
+    "Blessed Orator"
+   ],
+   [
+    2,
+    "Cephalid Broker"
+   ],
+   [
+    2,
+    "Cephalid Looter"
+   ],
+   [
+    1,
+    "Cephalid Retainer"
+   ],
+   [
+    2,
+    "Cephalid Scout"
+   ],
+   [
+    1,
+    "Embolden"
+   ],
+   [
+    2,
+    "Hallowed Healer"
+   ],
+   [
+    9,
+    "Island"
+   ],
+   [
+    3,
+    "Kirtar's Desire"
+   ],
+   [
+    2,
+    "Millikin"
+   ],
+   [
+    1,
+    "Mystic Crusader"
+   ],
+   [
+    1,
+    "Mystic Penitent"
+   ],
+   [
+    2,
+    "Mystic Visionary"
+   ],
+   [
+    3,
+    "Mystic Zealot"
+   ],
+   [
+    1,
+    "Nomad Decoy"
+   ],
+   [
+    1,
+    "Peek"
+   ],
+   [
+    1,
+    "Pilgrim of Justice"
+   ],
+   [
+    10,
+    "Plains"
+   ],
+   [
+    1,
+    "Puppeteer"
+   ],
+   [
+    1,
+    "Seafloor Debris"
+   ],
+   [
+    1,
+    "Second Thoughts"
+   ],
+   [
+    1,
+    "Shelter"
+   ],
+   [
+    1,
+    "Skycloud Egg"
+   ],
+   [
+    2,
+    "Syncopate"
+   ],
+   [
+    2,
+    "Think Tank"
+   ]
+  ]
+ },
+ {
+  "name": "One-Two Punch",
+  "set": "ODY",
+  "date": "2001-10-01",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Beast Attack"
+   ],
+   [
+    3,
+    "Chatter of the Squirrel"
+   ],
+   [
+    2,
+    "Deep Reconnaissance"
+   ],
+   [
+    2,
+    "Druid Lyrist"
+   ],
+   [
+    1,
+    "Earth Rift"
+   ],
+   [
+    3,
+    "Elephant Ambush"
+   ],
+   [
+    2,
+    "Engulfing Flames"
+   ],
+   [
+    1,
+    "Firebolt"
+   ],
+   [
+    15,
+    "Forest"
+   ],
+   [
+    1,
+    "Gorilla Titan"
+   ],
+   [
+    1,
+    "Howling Gale"
+   ],
+   [
+    1,
+    "Krosan Archer"
+   ],
+   [
+    2,
+    "Leaf Dancer"
+   ],
+   [
+    1,
+    "Moment's Peace"
+   ],
+   [
+    10,
+    "Mountain"
+   ],
+   [
+    1,
+    "Nantuko Mentor"
+   ],
+   [
+    1,
+    "Rabid Elephant"
+   ],
+   [
+    2,
+    "Reckless Charge"
+   ],
+   [
+    1,
+    "Refresh"
+   ],
+   [
+    2,
+    "Roar of the Wurm"
+   ],
+   [
+    2,
+    "Scorching Missile"
+   ],
+   [
+    1,
+    "Seize the Day"
+   ],
+   [
+    2,
+    "Sylvan Might"
+   ],
+   [
+    1,
+    "Volcanic Spray"
+   ]
+  ]
+ },
+ {
+  "name": "Pressure Cooker",
+  "set": "ODY",
+  "date": "2001-10-01",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Barbarian Lunatic"
+   ],
+   [
+    1,
+    "Bog Wreckage"
+   ],
+   [
+    1,
+    "Braids, Cabal Minion"
+   ],
+   [
+    2,
+    "Cabal Pit"
+   ],
+   [
+    2,
+    "Chainflinger"
+   ],
+   [
+    2,
+    "Childhood Horror"
+   ],
+   [
+    1,
+    "Crypt Creeper"
+   ],
+   [
+    1,
+    "Dwarven Strike Force"
+   ],
+   [
+    2,
+    "Engulfing Flames"
+   ],
+   [
+    1,
+    "Face of Fear"
+   ],
+   [
+    2,
+    "Famished Ghoul"
+   ],
+   [
+    2,
+    "Firebolt"
+   ],
+   [
+    3,
+    "Flame Burst"
+   ],
+   [
+    1,
+    "Frightcrawler"
+   ],
+   [
+    2,
+    "Ghastly Demise"
+   ],
+   [
+    1,
+    "Halberdier"
+   ],
+   [
+    1,
+    "Innocent Blood"
+   ],
+   [
+    1,
+    "Liquid Fire"
+   ],
+   [
+    2,
+    "Morbid Hunger"
+   ],
+   [
+    1,
+    "Morgue Theft"
+   ],
+   [
+    9,
+    "Mountain"
+   ],
+   [
+    3,
+    "Pardic Firecat"
+   ],
+   [
+    1,
+    "Ravaged Highlands"
+   ],
+   [
+    1,
+    "Reckless Charge"
+   ],
+   [
+    1,
+    "Repentant Vampire"
+   ],
+   [
+    2,
+    "Shadowblood Egg"
+   ],
+   [
+    11,
+    "Swamp"
+   ],
+   [
+    1,
+    "Thermal Blast"
+   ]
+  ]
+ },
+ {
+  "name": "Trounce-O-Matic",
+  "set": "ODY",
+  "date": "2001-10-01",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Careful Study"
+   ],
+   [
+    2,
+    "Cephalid Looter"
+   ],
+   [
+    2,
+    "Crashing Centaur"
+   ],
+   [
+    1,
+    "Deluge"
+   ],
+   [
+    2,
+    "Diligent Farmhand"
+   ],
+   [
+    13,
+    "Forest"
+   ],
+   [
+    9,
+    "Island"
+   ],
+   [
+    1,
+    "Ivy Elemental"
+   ],
+   [
+    2,
+    "Krosan Avenger"
+   ],
+   [
+    2,
+    "Metamorphic Wurm"
+   ],
+   [
+    2,
+    "Muscle Burst"
+   ],
+   [
+    2,
+    "Nimble Mongoose"
+   ],
+   [
+    1,
+    "Overrun"
+   ],
+   [
+    2,
+    "Peek"
+   ],
+   [
+    2,
+    "Predict"
+   ],
+   [
+    2,
+    "Repel"
+   ],
+   [
+    1,
+    "Roar of the Wurm"
+   ],
+   [
+    1,
+    "Seafloor Debris"
+   ],
+   [
+    1,
+    "Seton's Desire"
+   ],
+   [
+    2,
+    "Springing Tiger"
+   ],
+   [
+    1,
+    "Stone-Tongue Basilisk"
+   ],
+   [
+    1,
+    "Sylvan Might"
+   ],
+   [
+    1,
+    "Timberland Ruins"
+   ],
+   [
+    1,
+    "Twigwalker"
+   ],
+   [
+    2,
+    "Werebear"
+   ],
+   [
+    2,
+    "Wild Mongrel"
+   ]
+  ]
+ },
+ {
+  "name": "Garfield",
+  "set": "DKM",
+  "date": "2001-12-01",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Balduvian Bears"
+   ],
+   [
+    2,
+    "Barbed Sextant"
+   ],
+   [
+    1,
+    "Bounty of the Hunt"
+   ],
+   [
+    2,
+    "Death Spark"
+   ],
+   [
+    1,
+    "Elkin Bottle"
+   ],
+   [
+    1,
+    "Elvish Bard"
+   ],
+   [
+    1,
+    "Folk of the Pines"
+   ],
+   [
+    12,
+    "Forest"
+   ],
+   [
+    2,
+    "Fyndhorn Elves"
+   ],
+   [
+    2,
+    "Giant Growth"
+   ],
+   [
+    2,
+    "Giant Trap Door Spider"
+   ],
+   [
+    1,
+    "Hurricane"
+   ],
+   [
+    2,
+    "Incinerate"
+   ],
+   [
+    1,
+    "Jokulhaups"
+   ],
+   [
+    1,
+    "Karplusan Forest"
+   ],
+   [
+    2,
+    "Lava Burst"
+   ],
+   [
+    1,
+    "Lhurgoyf"
+   ],
+   [
+    12,
+    "Mountain"
+   ],
+   [
+    2,
+    "Phyrexian War Beast"
+   ],
+   [
+    1,
+    "Pillage"
+   ],
+   [
+    1,
+    "Shatter"
+   ],
+   [
+    2,
+    "Storm Shaman"
+   ],
+   [
+    2,
+    "Walking Wall"
+   ],
+   [
+    2,
+    "Woolly Spider"
+   ],
+   [
+    2,
+    "Yavimaya Ancients"
+   ],
+   [
+    2,
+    "Yavimaya Ants"
+   ]
+  ]
+ },
+ {
+  "name": "Grave Danger",
+  "set": "TOR",
+  "date": "2002-02-08",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Afflict"
+   ],
+   [
+    3,
+    "Aquamoeba"
+   ],
+   [
+    1,
+    "Balshan Collaborator"
+   ],
+   [
+    1,
+    "Breakthrough"
+   ],
+   [
+    2,
+    "Careful Study"
+   ],
+   [
+    1,
+    "Cephalid Aristocrat"
+   ],
+   [
+    1,
+    "Cephalid Broker"
+   ],
+   [
+    1,
+    "Cephalid Illusionist"
+   ],
+   [
+    2,
+    "Cephalid Looter"
+   ],
+   [
+    1,
+    "Cephalid Vandal"
+   ],
+   [
+    2,
+    "Chainer's Edict"
+   ],
+   [
+    2,
+    "Churning Eddy"
+   ],
+   [
+    2,
+    "Compulsion"
+   ],
+   [
+    2,
+    "Crypt Creeper"
+   ],
+   [
+    1,
+    "False Memories"
+   ],
+   [
+    11,
+    "Island"
+   ],
+   [
+    1,
+    "Morgue Theft"
+   ],
+   [
+    2,
+    "Obsessive Search"
+   ],
+   [
+    4,
+    "Organ Grinder"
+   ],
+   [
+    1,
+    "Painbringer"
+   ],
+   [
+    2,
+    "Psychatog"
+   ],
+   [
+    1,
+    "Skywing Aven"
+   ],
+   [
+    11,
+    "Swamp"
+   ],
+   [
+    2,
+    "Tainted Isle"
+   ],
+   [
+    1,
+    "Zombie Assassin"
+   ]
+  ]
+ },
+ {
+  "name": "Insanity",
+  "set": "TOR",
+  "date": "2002-02-08",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Acorn Harvest"
+   ],
+   [
+    1,
+    "Anurid Scavenger"
+   ],
+   [
+    2,
+    "Arrogant Wurm"
+   ],
+   [
+    3,
+    "Basking Rootwalla"
+   ],
+   [
+    2,
+    "Boneshard Slasher"
+   ],
+   [
+    2,
+    "Carrion Rats"
+   ],
+   [
+    2,
+    "Centaur Veteran"
+   ],
+   [
+    10,
+    "Forest"
+   ],
+   [
+    1,
+    "Grotesque Hybrid"
+   ],
+   [
+    2,
+    "Krosan Archer"
+   ],
+   [
+    2,
+    "Krosan Constrictor"
+   ],
+   [
+    2,
+    "Muscle Burst"
+   ],
+   [
+    1,
+    "Nantuko Blightcutter"
+   ],
+   [
+    1,
+    "Nantuko Cultivator"
+   ],
+   [
+    1,
+    "Narcissism"
+   ],
+   [
+    3,
+    "Putrid Imp"
+   ],
+   [
+    2,
+    "Strength of Lunacy"
+   ],
+   [
+    12,
+    "Swamp"
+   ],
+   [
+    2,
+    "Sylvan Might"
+   ],
+   [
+    2,
+    "Tainted Wood"
+   ],
+   [
+    2,
+    "Waste Away"
+   ],
+   [
+    3,
+    "Wild Mongrel"
+   ]
+  ]
+ },
+ {
+  "name": "Sacrilege",
+  "set": "TOR",
+  "date": "2002-02-08",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Angel of Retribution"
+   ],
+   [
+    1,
+    "Auramancer"
+   ],
+   [
+    1,
+    "Aven Cloudchaser"
+   ],
+   [
+    3,
+    "Buried Alive"
+   ],
+   [
+    2,
+    "Cabal Surgeon"
+   ],
+   [
+    1,
+    "Carrion Wurm"
+   ],
+   [
+    4,
+    "Crippling Fatigue"
+   ],
+   [
+    1,
+    "Crypt Creeper"
+   ],
+   [
+    4,
+    "Gravedigger"
+   ],
+   [
+    1,
+    "Grotesque Hybrid"
+   ],
+   [
+    1,
+    "Hypochondria"
+   ],
+   [
+    1,
+    "Ichorid"
+   ],
+   [
+    1,
+    "Malevolent Awakening"
+   ],
+   [
+    3,
+    "Mystic Familiar"
+   ],
+   [
+    10,
+    "Plains"
+   ],
+   [
+    3,
+    "Putrid Imp"
+   ],
+   [
+    1,
+    "Stern Judge"
+   ],
+   [
+    1,
+    "Strength of Isolation"
+   ],
+   [
+    12,
+    "Swamp"
+   ],
+   [
+    2,
+    "Tainted Field"
+   ],
+   [
+    3,
+    "Teroh's Faithful"
+   ],
+   [
+    1,
+    "Teroh's Vanguard"
+   ],
+   [
+    1,
+    "Whispering Shade"
+   ],
+   [
+    1,
+    "Zombify"
+   ]
+  ]
+ },
+ {
+  "name": "Waking Nightmares",
+  "set": "TOR",
+  "date": "2002-02-08",
+  "kind": "THEME",
+  "cards": [
+   [
+    3,
+    "Barbarian Outcast"
+   ],
+   [
+    1,
+    "Caustic Tar"
+   ],
+   [
+    1,
+    "Chainer, Dementia Master"
+   ],
+   [
+    1,
+    "Demolish"
+   ],
+   [
+    1,
+    "Enslaved Dwarf"
+   ],
+   [
+    3,
+    "Faceless Butcher"
+   ],
+   [
+    2,
+    "Firebolt"
+   ],
+   [
+    2,
+    "Flame Burst"
+   ],
+   [
+    1,
+    "Flaming Gambit"
+   ],
+   [
+    1,
+    "Gravegouger"
+   ],
+   [
+    1,
+    "Malevolent Awakening"
+   ],
+   [
+    3,
+    "Mesmeric Fiend"
+   ],
+   [
+    9,
+    "Mountain"
+   ],
+   [
+    2,
+    "Pardic Collaborator"
+   ],
+   [
+    1,
+    "Petradon"
+   ],
+   [
+    3,
+    "Petravark"
+   ],
+   [
+    2,
+    "Pyromania"
+   ],
+   [
+    2,
+    "Rancid Earth"
+   ],
+   [
+    1,
+    "Shade's Form"
+   ],
+   [
+    1,
+    "Slithery Stalker"
+   ],
+   [
+    3,
+    "Soul Scourge"
+   ],
+   [
+    12,
+    "Swamp"
+   ],
+   [
+    2,
+    "Tainted Peak"
+   ],
+   [
+    2,
+    "Temporary Insanity"
+   ]
+  ]
+ },
+ {
+  "name": "Inundation",
+  "set": "JUD",
+  "date": "2002-05-27",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Aven Cloudchaser"
+   ],
+   [
+    2,
+    "Battle Screech"
+   ],
+   [
+    2,
+    "Beloved Chaplain"
+   ],
+   [
+    3,
+    "Benevolent Bodyguard"
+   ],
+   [
+    1,
+    "Commander Eesha"
+   ],
+   [
+    1,
+    "Dedicated Martyr"
+   ],
+   [
+    1,
+    "Embolden"
+   ],
+   [
+    3,
+    "Guided Strike"
+   ],
+   [
+    3,
+    "Militant Monk"
+   ],
+   [
+    2,
+    "Mystic Penitent"
+   ],
+   [
+    2,
+    "Nomad Decoy"
+   ],
+   [
+    3,
+    "Patrol Hound"
+   ],
+   [
+    20,
+    "Plains"
+   ],
+   [
+    1,
+    "Prismatic Strands"
+   ],
+   [
+    1,
+    "Selfless Exorcist"
+   ],
+   [
+    2,
+    "Shelter"
+   ],
+   [
+    1,
+    "Shieldmage Advocate"
+   ],
+   [
+    2,
+    "Spurnmage Advocate"
+   ],
+   [
+    4,
+    "Suntail Hawk"
+   ],
+   [
+    1,
+    "Tireless Tribe"
+   ],
+   [
+    2,
+    "Unquestioned Authority"
+   ],
+   [
+    1,
+    "Valor"
+   ]
+  ]
+ },
+ {
+  "name": "Painflow",
+  "set": "JUD",
+  "date": "2002-05-27",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Anurid Barkripper"
+   ],
+   [
+    2,
+    "Anurid Swarmsnapper"
+   ],
+   [
+    2,
+    "Battlefield Scrounger"
+   ],
+   [
+    2,
+    "Brawn"
+   ],
+   [
+    1,
+    "Crush of Wurms"
+   ],
+   [
+    2,
+    "Deep Reconnaissance"
+   ],
+   [
+    3,
+    "Diligent Farmhand"
+   ],
+   [
+    20,
+    "Forest"
+   ],
+   [
+    4,
+    "Giant Warthog"
+   ],
+   [
+    1,
+    "Grizzly Fate"
+   ],
+   [
+    1,
+    "Krosan Archer"
+   ],
+   [
+    2,
+    "Krosan Wayfarer"
+   ],
+   [
+    2,
+    "Moment's Peace"
+   ],
+   [
+    2,
+    "Nantuko Elder"
+   ],
+   [
+    2,
+    "Nantuko Tracer"
+   ],
+   [
+    2,
+    "Rabid Elephant"
+   ],
+   [
+    2,
+    "Roar of the Wurm"
+   ],
+   [
+    1,
+    "Seton's Desire"
+   ],
+   [
+    2,
+    "Sudden Strength"
+   ],
+   [
+    1,
+    "Thriss, Nantuko Primus"
+   ],
+   [
+    2,
+    "Tunneler Wurm"
+   ],
+   [
+    3,
+    "Werebear"
+   ]
+  ]
+ },
+ {
+  "name": "Spectral Slam",
+  "set": "JUD",
+  "date": "2002-05-27",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Battlewise Aven"
+   ],
+   [
+    2,
+    "Benevolent Bodyguard"
+   ],
+   [
+    2,
+    "Blessed Orator"
+   ],
+   [
+    2,
+    "Elephant Guide"
+   ],
+   [
+    1,
+    "Exoskeletal Armor"
+   ],
+   [
+    1,
+    "Forcemage Advocate"
+   ],
+   [
+    12,
+    "Forest"
+   ],
+   [
+    1,
+    "Guided Strike"
+   ],
+   [
+    2,
+    "Hallowed Healer"
+   ],
+   [
+    2,
+    "Ironshell Beetle"
+   ],
+   [
+    1,
+    "Krosan Verge"
+   ],
+   [
+    1,
+    "Mirari's Wake"
+   ],
+   [
+    1,
+    "Nantuko Monastery"
+   ],
+   [
+    1,
+    "Patrol Hound"
+   ],
+   [
+    2,
+    "Phantom Centaur"
+   ],
+   [
+    2,
+    "Phantom Flock"
+   ],
+   [
+    1,
+    "Phantom Nantuko"
+   ],
+   [
+    4,
+    "Phantom Nomad"
+   ],
+   [
+    3,
+    "Phantom Tiger"
+   ],
+   [
+    12,
+    "Plains"
+   ],
+   [
+    2,
+    "Second Thoughts"
+   ],
+   [
+    2,
+    "Seton's Desire"
+   ],
+   [
+    1,
+    "Spirit Flare"
+   ],
+   [
+    1,
+    "Strength of Isolation"
+   ]
+  ]
+ },
+ {
+  "name": "Bait & Switch",
+  "set": "ONS",
+  "date": "2002-10-07",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Barren Moor"
+   ],
+   [
+    2,
+    "Boneknitter"
+   ],
+   [
+    2,
+    "Cabal Slaver"
+   ],
+   [
+    1,
+    "Crown of Suspicion"
+   ],
+   [
+    1,
+    "Endemic Plague"
+   ],
+   [
+    1,
+    "Fallen Cleric"
+   ],
+   [
+    1,
+    "Feeding Frenzy"
+   ],
+   [
+    1,
+    "Frightshroud Courier"
+   ],
+   [
+    1,
+    "Ghosthelm Courier"
+   ],
+   [
+    4,
+    "Imagecrafter"
+   ],
+   [
+    1,
+    "Information Dealer"
+   ],
+   [
+    11,
+    "Island"
+   ],
+   [
+    1,
+    "Ixidor's Will"
+   ],
+   [
+    2,
+    "Lonely Sandbar"
+   ],
+   [
+    1,
+    "Mage's Guile"
+   ],
+   [
+    1,
+    "Misery Charm"
+   ],
+   [
+    3,
+    "Mistform Dreamer"
+   ],
+   [
+    1,
+    "Mistform Mutant"
+   ],
+   [
+    2,
+    "Mistform Shrieker"
+   ],
+   [
+    2,
+    "Mistform Stalker"
+   ],
+   [
+    4,
+    "Mistform Wall"
+   ],
+   [
+    1,
+    "Peer Pressure"
+   ],
+   [
+    1,
+    "Smother"
+   ],
+   [
+    9,
+    "Swamp"
+   ],
+   [
+    3,
+    "Swat"
+   ],
+   [
+    1,
+    "Trickery Charm"
+   ]
+  ]
+ },
+ {
+  "name": "Celestial Assault",
+  "set": "ONS",
+  "date": "2002-10-07",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Airborne Aid"
+   ],
+   [
+    1,
+    "Akroma's Blessing"
+   ],
+   [
+    2,
+    "Ascending Aven"
+   ],
+   [
+    2,
+    "Daru Cavalier"
+   ],
+   [
+    1,
+    "Defensive Maneuvers"
+   ],
+   [
+    1,
+    "Dispersing Orb"
+   ],
+   [
+    2,
+    "Dive Bomber"
+   ],
+   [
+    1,
+    "Essence Fracture"
+   ],
+   [
+    1,
+    "Gustcloak Harrier"
+   ],
+   [
+    2,
+    "Gustcloak Runner"
+   ],
+   [
+    1,
+    "Gustcloak Savior"
+   ],
+   [
+    1,
+    "Gustcloak Sentinel"
+   ],
+   [
+    1,
+    "Gustcloak Skirmisher"
+   ],
+   [
+    2,
+    "Inspirit"
+   ],
+   [
+    2,
+    "Ironfist Crusher"
+   ],
+   [
+    10,
+    "Island"
+   ],
+   [
+    2,
+    "Mage's Guile"
+   ],
+   [
+    1,
+    "Meddle"
+   ],
+   [
+    1,
+    "Oblation"
+   ],
+   [
+    1,
+    "Pearlspear Courier"
+   ],
+   [
+    2,
+    "Piety Charm"
+   ],
+   [
+    13,
+    "Plains"
+   ],
+   [
+    2,
+    "Sandskin"
+   ],
+   [
+    2,
+    "Screaming Seahawk"
+   ],
+   [
+    1,
+    "Seaside Haven"
+   ],
+   [
+    1,
+    "Sunfire Balm"
+   ],
+   [
+    2,
+    "Unified Strike"
+   ]
+  ]
+ },
+ {
+  "name": "Devastation",
+  "set": "ONS",
+  "date": "2002-10-07",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Aether Charge"
+   ],
+   [
+    2,
+    "Barkhide Mauler"
+   ],
+   [
+    1,
+    "Battering Craghorn"
+   ],
+   [
+    2,
+    "Chain of Plasma"
+   ],
+   [
+    1,
+    "Charging Slateback"
+   ],
+   [
+    1,
+    "Cryptic Gateway"
+   ],
+   [
+    3,
+    "Elvish Pioneer"
+   ],
+   [
+    1,
+    "Erratic Explosion"
+   ],
+   [
+    3,
+    "Explosive Vegetation"
+   ],
+   [
+    13,
+    "Forest"
+   ],
+   [
+    2,
+    "Forgotten Cave"
+   ],
+   [
+    1,
+    "Krosan Groundshaker"
+   ],
+   [
+    9,
+    "Mountain"
+   ],
+   [
+    1,
+    "Naturalize"
+   ],
+   [
+    1,
+    "Primal Boost"
+   ],
+   [
+    1,
+    "Shaleskin Bruiser"
+   ],
+   [
+    1,
+    "Snapping Thragg"
+   ],
+   [
+    3,
+    "Snarling Undorak"
+   ],
+   [
+    1,
+    "Solar Blast"
+   ],
+   [
+    1,
+    "Tephraderm"
+   ],
+   [
+    1,
+    "Thunder of Hooves"
+   ],
+   [
+    1,
+    "Towering Baloth"
+   ],
+   [
+    2,
+    "Tranquil Thicket"
+   ],
+   [
+    1,
+    "Venomspout Brackus"
+   ],
+   [
+    3,
+    "Wirewood Elf"
+   ],
+   [
+    3,
+    "Wirewood Savage"
+   ]
+  ]
+ },
+ {
+  "name": "Ivory Doom",
+  "set": "ONS",
+  "date": "2002-10-07",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Akroma's Blessing"
+   ],
+   [
+    1,
+    "Astral Slide"
+   ],
+   [
+    1,
+    "Aven Soulgazer"
+   ],
+   [
+    4,
+    "Barren Moor"
+   ],
+   [
+    2,
+    "Battlefield Medic"
+   ],
+   [
+    2,
+    "Cabal Archon"
+   ],
+   [
+    1,
+    "Cabal Executioner"
+   ],
+   [
+    3,
+    "Daru Healer"
+   ],
+   [
+    1,
+    "Daunting Defender"
+   ],
+   [
+    1,
+    "Death Pulse"
+   ],
+   [
+    2,
+    "Disciple of Grace"
+   ],
+   [
+    4,
+    "Disciple of Malice"
+   ],
+   [
+    2,
+    "Doubtless One"
+   ],
+   [
+    3,
+    "Foothill Guide"
+   ],
+   [
+    1,
+    "Gangrenous Goliath"
+   ],
+   [
+    1,
+    "Headhunter"
+   ],
+   [
+    2,
+    "Pacifism"
+   ],
+   [
+    8,
+    "Plains"
+   ],
+   [
+    2,
+    "Profane Prayers"
+   ],
+   [
+    4,
+    "Secluded Steppe"
+   ],
+   [
+    1,
+    "Sigil of the New Dawn"
+   ],
+   [
+    2,
+    "Smother"
+   ],
+   [
+    1,
+    "Starlit Sanctum"
+   ],
+   [
+    8,
+    "Swamp"
+   ],
+   [
+    2,
+    "Swat"
+   ]
+  ]
+ },
+ {
+  "name": "Elvish Rage",
+  "set": "LGN",
+  "date": "2003-02-03",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Birchlore Rangers"
+   ],
+   [
+    1,
+    "Bloodline Shaman"
+   ],
+   [
+    3,
+    "Defiant Elf"
+   ],
+   [
+    2,
+    "Elven Riders"
+   ],
+   [
+    1,
+    "Elvish Pathcutter"
+   ],
+   [
+    1,
+    "Elvish Pioneer"
+   ],
+   [
+    1,
+    "Elvish Scrapper"
+   ],
+   [
+    1,
+    "Elvish Soultiller"
+   ],
+   [
+    1,
+    "Elvish Warrior"
+   ],
+   [
+    2,
+    "Everglove Courier"
+   ],
+   [
+    25,
+    "Forest"
+   ],
+   [
+    2,
+    "Gempalm Strider"
+   ],
+   [
+    1,
+    "Heedless One"
+   ],
+   [
+    3,
+    "Patron of the Wild"
+   ],
+   [
+    1,
+    "Snarling Undorak"
+   ],
+   [
+    3,
+    "Stonewood Invoker"
+   ],
+   [
+    1,
+    "Taunting Elf"
+   ],
+   [
+    2,
+    "Timberwatch Elf"
+   ],
+   [
+    1,
+    "Tribal Forcemage"
+   ],
+   [
+    1,
+    "Wellwisher"
+   ],
+   [
+    2,
+    "Wirewood Channeler"
+   ],
+   [
+    2,
+    "Wirewood Elf"
+   ],
+   [
+    2,
+    "Wirewood Hivemaster"
+   ]
+  ]
+ },
+ {
+  "name": "Morph Mayhem",
+  "set": "LGN",
+  "date": "2003-02-03",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Akroma's Blessing"
+   ],
+   [
+    2,
+    "Ascending Aven"
+   ],
+   [
+    1,
+    "Aven Redeemer"
+   ],
+   [
+    1,
+    "Chromeshell Crab"
+   ],
+   [
+    1,
+    "Daru Lancer"
+   ],
+   [
+    1,
+    "Daru Mender"
+   ],
+   [
+    2,
+    "Deftblade Elite"
+   ],
+   [
+    1,
+    "Discombobulate"
+   ],
+   [
+    2,
+    "Echo Tracer"
+   ],
+   [
+    4,
+    "Glory Seeker"
+   ],
+   [
+    1,
+    "Imagecrafter"
+   ],
+   [
+    1,
+    "Improvised Armor"
+   ],
+   [
+    1,
+    "Ironfist Crusher"
+   ],
+   [
+    11,
+    "Island"
+   ],
+   [
+    1,
+    "Liege of the Axe"
+   ],
+   [
+    2,
+    "Lonely Sandbar"
+   ],
+   [
+    1,
+    "Master of the Veil"
+   ],
+   [
+    1,
+    "Mistform Mutant"
+   ],
+   [
+    2,
+    "Pacifism"
+   ],
+   [
+    11,
+    "Plains"
+   ],
+   [
+    2,
+    "Secluded Steppe"
+   ],
+   [
+    1,
+    "Swooping Talon"
+   ],
+   [
+    2,
+    "Voidmage Apprentice"
+   ],
+   [
+    1,
+    "Wall of Deceit"
+   ],
+   [
+    1,
+    "Weaver of Lies"
+   ],
+   [
+    1,
+    "Whipcorder"
+   ],
+   [
+    2,
+    "Willbender"
+   ],
+   [
+    2,
+    "Wingbeat Warrior"
+   ]
+  ]
+ },
+ {
+  "name": "Sliver Shivers",
+  "set": "LGN",
+  "date": "2003-02-03",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Akroma's Blessing"
+   ],
+   [
+    1,
+    "Brood Sliver"
+   ],
+   [
+    1,
+    "Crown of Vigor"
+   ],
+   [
+    1,
+    "Essence Sliver"
+   ],
+   [
+    2,
+    "Explosive Vegetation"
+   ],
+   [
+    7,
+    "Forest"
+   ],
+   [
+    5,
+    "Island"
+   ],
+   [
+    2,
+    "Lonely Sandbar"
+   ],
+   [
+    2,
+    "Mage's Guile"
+   ],
+   [
+    3,
+    "Mistform Dreamer"
+   ],
+   [
+    4,
+    "Pacifism"
+   ],
+   [
+    9,
+    "Plains"
+   ],
+   [
+    4,
+    "Plated Sliver"
+   ],
+   [
+    4,
+    "Quick Sliver"
+   ],
+   [
+    1,
+    "Root Sliver"
+   ],
+   [
+    4,
+    "Secluded Steppe"
+   ],
+   [
+    3,
+    "Shifting Sliver"
+   ],
+   [
+    2,
+    "Tribal Unity"
+   ],
+   [
+    3,
+    "Ward Sliver"
+   ]
+  ]
+ },
+ {
+  "name": "Zombies Unleashed",
+  "set": "LGN",
+  "date": "2003-02-03",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Aphetto Exterminator"
+   ],
+   [
+    2,
+    "Barren Moor"
+   ],
+   [
+    1,
+    "Boneknitter"
+   ],
+   [
+    2,
+    "Corpse Harvester"
+   ],
+   [
+    1,
+    "Cruel Revival"
+   ],
+   [
+    2,
+    "Deathmark Prelate"
+   ],
+   [
+    1,
+    "Dirge of Dread"
+   ],
+   [
+    2,
+    "Dripping Dead"
+   ],
+   [
+    2,
+    "Embalmed Brawler"
+   ],
+   [
+    1,
+    "Feeding Frenzy"
+   ],
+   [
+    1,
+    "Festering Goblin"
+   ],
+   [
+    2,
+    "Frightshroud Courier"
+   ],
+   [
+    2,
+    "Gempalm Polluter"
+   ],
+   [
+    1,
+    "Ghastly Remains"
+   ],
+   [
+    1,
+    "Graveborn Muse"
+   ],
+   [
+    2,
+    "Infernal Caretaker"
+   ],
+   [
+    1,
+    "Noxious Ghoul"
+   ],
+   [
+    2,
+    "Shepherd of Rot"
+   ],
+   [
+    4,
+    "Skinthinner"
+   ],
+   [
+    3,
+    "Smokespew Invoker"
+   ],
+   [
+    1,
+    "Soulless One"
+   ],
+   [
+    23,
+    "Swamp"
+   ],
+   [
+    2,
+    "Withered Wretch"
+   ]
+  ]
+ },
+ {
+  "name": "Goblin Mob",
+  "set": "SCG",
+  "date": "2003-05-26",
+  "kind": "THEME",
+  "cards": [
+   [
+    2,
+    "Carbonize"
+   ],
+   [
+    1,
+    "Enrage"
+   ],
+   [
+    1,
+    "Flamestick Courier"
+   ],
+   [
+    2,
+    "Forgotten Cave"
+   ],
+   [
+    1,
+    "Gempalm Incinerator"
+   ],
+   [
+    3,
+    "Goblin Brigand"
+   ],
+   [
+    2,
+    "Goblin Burrows"
+   ],
+   [
+    2,
+    "Goblin Grappler"
+   ],
+   [
+    1,
+    "Goblin Psychopath"
+   ],
+   [
+    2,
+    "Goblin Sky Raider"
+   ],
+   [
+    2,
+    "Goblin Sledder"
+   ],
+   [
+    2,
+    "Goblin Taskmaster"
+   ],
+   [
+    2,
+    "Goblin War Strike"
+   ],
+   [
+    1,
+    "Goblin Warchief"
+   ],
+   [
+    20,
+    "Mountain"
+   ],
+   [
+    1,
+    "Nosy Goblin"
+   ],
+   [
+    1,
+    "Reckless One"
+   ],
+   [
+    3,
+    "Rock Jockey"
+   ],
+   [
+    1,
+    "Siege-Gang Commander"
+   ],
+   [
+    2,
+    "Skirk Commando"
+   ],
+   [
+    1,
+    "Skirk Drill Sergeant"
+   ],
+   [
+    2,
+    "Skirk Marauder"
+   ],
+   [
+    2,
+    "Skirk Volcanist"
+   ],
+   [
+    1,
+    "Sparksmith"
+   ],
+   [
+    1,
+    "Sulfuric Vortex"
+   ],
+   [
+    1,
+    "Wave of Indifference"
+   ]
+  ]
+ },
+ {
+  "name": "Max Attax",
+  "set": "SCG",
+  "date": "2003-05-26",
+  "kind": "THEME",
+  "cards": [
+   [
+    3,
+    "Accelerated Mutation"
+   ],
+   [
+    2,
+    "Barren Moor"
+   ],
+   [
+    2,
+    "Chill Haunting"
+   ],
+   [
+    2,
+    "Dragon Fangs"
+   ],
+   [
+    1,
+    "Dragon Shadow"
+   ],
+   [
+    2,
+    "Elvish Aberration"
+   ],
+   [
+    3,
+    "Fierce Empath"
+   ],
+   [
+    1,
+    "Final Punishment"
+   ],
+   [
+    14,
+    "Forest"
+   ],
+   [
+    1,
+    "Gluttonous Zombie"
+   ],
+   [
+    3,
+    "Krosan Drover"
+   ],
+   [
+    2,
+    "Kurgadon"
+   ],
+   [
+    1,
+    "Root Elemental"
+   ],
+   [
+    1,
+    "Smother"
+   ],
+   [
+    2,
+    "Spitting Gourna"
+   ],
+   [
+    2,
+    "Sprouting Vines"
+   ],
+   [
+    6,
+    "Swamp"
+   ],
+   [
+    2,
+    "Symbiotic Beast"
+   ],
+   [
+    2,
+    "Temple of the False God"
+   ],
+   [
+    2,
+    "Titanic Bulvox"
+   ],
+   [
+    2,
+    "Tranquil Thicket"
+   ],
+   [
+    1,
+    "Treespring Lorian"
+   ],
+   [
+    1,
+    "Venomspout Brackus"
+   ],
+   [
+    2,
+    "Wirewood Guardian"
+   ]
+  ]
+ },
+ {
+  "name": "Pulverize",
+  "set": "SCG",
+  "date": "2003-05-26",
+  "kind": "THEME",
+  "cards": [
+   [
+    1,
+    "Aven Fateshaper"
+   ],
+   [
+    1,
+    "Bloodstoke Howler"
+   ],
+   [
+    2,
+    "Carbonize"
+   ],
+   [
+    3,
+    "Chartooth Cougar"
+   ],
+   [
+    2,
+    "Dispersal Shield"
+   ],
+   [
+    2,
+    "Dragon Breath"
+   ],
+   [
+    2,
+    "Erratic Explosion"
+   ],
+   [
+    1,
+    "Frenetic Raptor"
+   ],
+   [
+    2,
+    "Goblin Machinist"
+   ],
+   [
+    12,
+    "Island"
+   ],
+   [
+    1,
+    "Macetail Hystrodon"
+   ],
+   [
+    1,
+    "Mischievous Quanar"
+   ],
+   [
+    2,
+    "Mistform Warchief"
+   ],
+   [
+    12,
+    "Mountain"
+   ],
+   [
+    1,
+    "Parallel Thoughts"
+   ],
+   [
+    2,
+    "Pyrostatic Pillar"
+   ],
+   [
+    2,
+    "Rush of Knowledge"
+   ],
+   [
+    3,
+    "Scornful Egotist"
+   ],
+   [
+    2,
+    "Shoreline Ranger"
+   ],
+   [
+    1,
+    "Skittish Valesk"
+   ],
+   [
+    1,
+    "Slice and Dice"
+   ],
+   [
+    1,
+    "Thundercloud Elemental"
+   ],
+   [
+    3,
+    "Torrent of Fire"
+   ]
+  ]
+ },
+ {
+  "name": "Jakub \u0160lemr - Prismatic Black Aggro",
+  "set": "WC97",
+  "date": "1997-09-01",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Black Knight"
+   ],
+   [
+    4,
+    "Choking Sands"
+   ],
+   [
+    3,
+    "City of Brass"
+   ],
+   [
+    4,
+    "Contagion"
+   ],
+   [
+    2,
+    "Earthquake"
+   ],
+   [
+    4,
+    "Fallen Askari"
+   ],
+   [
+    3,
+    "Gemstone Mine"
+   ],
+   [
+    4,
+    "Incinerate"
+   ],
+   [
+    4,
+    "Knight of Stromgald"
+   ],
+   [
+    4,
+    "Man-o'-War"
+   ],
+   [
+    1,
+    "Necratog"
+   ],
+   [
+    4,
+    "Nekrataal"
+   ],
+   [
+    2,
+    "Shadow Guildmage"
+   ],
+   [
+    2,
+    "Sulfurous Springs"
+   ],
+   [
+    10,
+    "Swamp"
+   ],
+   [
+    2,
+    "Uktabi Orangutan"
+   ],
+   [
+    1,
+    "Underground River"
+   ],
+   [
+    3,
+    "Undiscovered Paradise"
+   ]
+  ]
+ },
+ {
+  "name": "Svend Geertsen - Green Stompy",
+  "set": "WC97",
+  "date": "1997-09-01",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    2,
+    "Bounty of the Hunt"
+   ],
+   [
+    16,
+    "Forest"
+   ],
+   [
+    4,
+    "Fyndhorn Elves"
+   ],
+   [
+    4,
+    "Ghazb\u00e1n Ogre"
+   ],
+   [
+    4,
+    "Giant Growth"
+   ],
+   [
+    3,
+    "Harvest Wurm"
+   ],
+   [
+    2,
+    "Heart of Yavimaya"
+   ],
+   [
+    2,
+    "Jolrael's Centaur"
+   ],
+   [
+    3,
+    "Lhurgoyf"
+   ],
+   [
+    4,
+    "Quirion Ranger"
+   ],
+   [
+    4,
+    "Rogue Elephant"
+   ],
+   [
+    4,
+    "Spectral Bears"
+   ],
+   [
+    2,
+    "Uktabi Orangutan"
+   ],
+   [
+    2,
+    "Whirling Dervish"
+   ],
+   [
+    4,
+    "Winter Orb"
+   ]
+  ]
+ },
+ {
+  "name": "Ben Rubin - Sligh",
+  "set": "WC98",
+  "date": "1998-09-01",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Ball Lightning"
+   ],
+   [
+    4,
+    "Cursed Scroll"
+   ],
+   [
+    4,
+    "Fireblast"
+   ],
+   [
+    2,
+    "Goblin Vandal"
+   ],
+   [
+    2,
+    "Hammer of Bogardan"
+   ],
+   [
+    4,
+    "Incinerate"
+   ],
+   [
+    4,
+    "Ironclaw Orcs"
+   ],
+   [
+    4,
+    "Jackal Pup"
+   ],
+   [
+    4,
+    "Mogg Fanatic"
+   ],
+   [
+    2,
+    "Mogg Flunkies"
+   ],
+   [
+    17,
+    "Mountain"
+   ],
+   [
+    4,
+    "Shock"
+   ],
+   [
+    1,
+    "Viashino Sandstalker"
+   ],
+   [
+    4,
+    "Wasteland"
+   ]
+  ]
+ },
+ {
+  "name": "Brian Hacker - White Weenie",
+  "set": "WC98",
+  "date": "1998-09-01",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    1,
+    "Aura of Silence"
+   ],
+   [
+    4,
+    "Cataclysm"
+   ],
+   [
+    3,
+    "Disenchant"
+   ],
+   [
+    4,
+    "Empyrial Armor"
+   ],
+   [
+    3,
+    "Nomads en-Kor"
+   ],
+   [
+    3,
+    "Paladin en-Vec"
+   ],
+   [
+    17,
+    "Plains"
+   ],
+   [
+    4,
+    "Soltari Monk"
+   ],
+   [
+    4,
+    "Soltari Priest"
+   ],
+   [
+    1,
+    "Soltari Visionary"
+   ],
+   [
+    4,
+    "Soul Warden"
+   ],
+   [
+    4,
+    "Tithe"
+   ],
+   [
+    4,
+    "Warrior en-Kor"
+   ],
+   [
+    4,
+    "White Knight"
+   ]
+  ]
+ },
+ {
+  "name": "Brian Selden - Cali Nightmare",
+  "set": "WC98",
+  "date": "1998-09-01",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Birds of Paradise"
+   ],
+   [
+    3,
+    "City of Brass"
+   ],
+   [
+    1,
+    "Cloudchaser Eagle"
+   ],
+   [
+    2,
+    "Firestorm"
+   ],
+   [
+    8,
+    "Forest"
+   ],
+   [
+    1,
+    "Gemstone Mine"
+   ],
+   [
+    2,
+    "Karplusan Forest"
+   ],
+   [
+    2,
+    "Lobotomy"
+   ],
+   [
+    1,
+    "Man-o'-War"
+   ],
+   [
+    2,
+    "Nekrataal"
+   ],
+   [
+    1,
+    "Orcish Settlers"
+   ],
+   [
+    4,
+    "Recurring Nightmare"
+   ],
+   [
+    2,
+    "Reflecting Pool"
+   ],
+   [
+    2,
+    "Scroll Rack"
+   ],
+   [
+    2,
+    "Spike Feeder"
+   ],
+   [
+    1,
+    "Spike Weaver"
+   ],
+   [
+    1,
+    "Spirit of the Night"
+   ],
+   [
+    4,
+    "Survival of the Fittest"
+   ],
+   [
+    1,
+    "Swamp"
+   ],
+   [
+    1,
+    "Thrull Surgeon"
+   ],
+   [
+    1,
+    "Tradewind Rider"
+   ],
+   [
+    2,
+    "Uktabi Orangutan"
+   ],
+   [
+    2,
+    "Underground River"
+   ],
+   [
+    2,
+    "Undiscovered Paradise"
+   ],
+   [
+    1,
+    "Verdant Force"
+   ],
+   [
+    1,
+    "Volrath's Stronghold"
+   ],
+   [
+    4,
+    "Wall of Blossoms"
+   ],
+   [
+    2,
+    "Wall of Roots"
+   ]
+  ]
+ },
+ {
+  "name": "Randy Buehler - Draw, Go",
+  "set": "WC98",
+  "date": "1998-09-01",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Counterspell"
+   ],
+   [
+    4,
+    "Dismiss"
+   ],
+   [
+    2,
+    "Dissipate"
+   ],
+   [
+    3,
+    "Forbid"
+   ],
+   [
+    4,
+    "Force Spike"
+   ],
+   [
+    4,
+    "Impulse"
+   ],
+   [
+    18,
+    "Island"
+   ],
+   [
+    3,
+    "Mana Leak"
+   ],
+   [
+    1,
+    "Memory Lapse"
+   ],
+   [
+    4,
+    "Nevinyrral's Disk"
+   ],
+   [
+    4,
+    "Quicksand"
+   ],
+   [
+    1,
+    "Rainbow Efreet"
+   ],
+   [
+    4,
+    "Stalking Stones"
+   ],
+   [
+    4,
+    "Whispers of the Muse"
+   ]
+  ]
+ },
+ {
+  "name": "Mark Le Pine - Sped Red",
+  "set": "WC99",
+  "date": "1999-09-27",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    2,
+    "Ancient Tomb"
+   ],
+   [
+    2,
+    "Arc Lightning"
+   ],
+   [
+    4,
+    "Avalanche Riders"
+   ],
+   [
+    4,
+    "Cursed Scroll"
+   ],
+   [
+    3,
+    "Fireslinger"
+   ],
+   [
+    2,
+    "Ghitu Encampment"
+   ],
+   [
+    3,
+    "Hammer of Bogardan"
+   ],
+   [
+    4,
+    "Jackal Pup"
+   ],
+   [
+    4,
+    "Mogg Fanatic"
+   ],
+   [
+    16,
+    "Mountain"
+   ],
+   [
+    4,
+    "Pillage"
+   ],
+   [
+    4,
+    "Shock"
+   ],
+   [
+    4,
+    "Stone Rain"
+   ],
+   [
+    4,
+    "Wasteland"
+   ]
+  ]
+ },
+ {
+  "name": "Matt Linde - Mono-Green Stompy",
+  "set": "WC99",
+  "date": "1999-09-27",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Albino Troll"
+   ],
+   [
+    4,
+    "Cursed Scroll"
+   ],
+   [
+    4,
+    "Elvish Lyrist"
+   ],
+   [
+    14,
+    "Forest"
+   ],
+   [
+    4,
+    "Gaea's Cradle"
+   ],
+   [
+    4,
+    "Giant Growth"
+   ],
+   [
+    4,
+    "Llanowar Elves"
+   ],
+   [
+    4,
+    "Pouncing Jaguar"
+   ],
+   [
+    4,
+    "Rancor"
+   ],
+   [
+    4,
+    "River Boa"
+   ],
+   [
+    4,
+    "Treetop Village"
+   ],
+   [
+    2,
+    "Uktabi Orangutan"
+   ],
+   [
+    4,
+    "Wild Dogs"
+   ]
+  ]
+ },
+ {
+  "name": "Janosch K\u00fchn - Angry Non-Hermit",
+  "set": "WC00",
+  "date": "2000-10-01",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Arc Lightning"
+   ],
+   [
+    4,
+    "Avalanche Riders"
+   ],
+   [
+    4,
+    "Birds of Paradise"
+   ],
+   [
+    4,
+    "Blastoderm"
+   ],
+   [
+    1,
+    "Creeping Mold"
+   ],
+   [
+    2,
+    "Dust Bowl"
+   ],
+   [
+    10,
+    "Forest"
+   ],
+   [
+    4,
+    "Karplusan Forest"
+   ],
+   [
+    4,
+    "Llanowar Elves"
+   ],
+   [
+    2,
+    "Masticore"
+   ],
+   [
+    4,
+    "Mountain"
+   ],
+   [
+    1,
+    "Phyrexian Processor"
+   ],
+   [
+    4,
+    "Plow Under"
+   ],
+   [
+    2,
+    "Priest of Titania"
+   ],
+   [
+    4,
+    "Rishadan Port"
+   ],
+   [
+    2,
+    "Saproling Burst"
+   ],
+   [
+    4,
+    "Stone Rain"
+   ]
+  ]
+ },
+ {
+  "name": "Alex Borteh - Merfolk Opposition",
+  "set": "WC01",
+  "date": "2001-10-29",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Counterspell"
+   ],
+   [
+    2,
+    "Darting Merfolk"
+   ],
+   [
+    4,
+    "Gush"
+   ],
+   [
+    20,
+    "Island"
+   ],
+   [
+    4,
+    "Lord of Atlantis"
+   ],
+   [
+    4,
+    "Merfolk Looter"
+   ],
+   [
+    4,
+    "Merfolk of the Pearl Trident"
+   ],
+   [
+    4,
+    "Opposition"
+   ],
+   [
+    4,
+    "Static Orb"
+   ],
+   [
+    4,
+    "Thwart"
+   ],
+   [
+    4,
+    "Vodalian Merchant"
+   ],
+   [
+    2,
+    "Waterfront Bouncer"
+   ]
+  ]
+ },
+ {
+  "name": "Antoine Ruel - Blue-Black-Red Nether-Go",
+  "set": "WC01",
+  "date": "2001-10-29",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Accumulated Knowledge"
+   ],
+   [
+    4,
+    "Counterspell"
+   ],
+   [
+    2,
+    "Crosis's Charm"
+   ],
+   [
+    2,
+    "Duress"
+   ],
+   [
+    3,
+    "Fact or Fiction"
+   ],
+   [
+    4,
+    "Fire // Ice"
+   ],
+   [
+    8,
+    "Island"
+   ],
+   [
+    3,
+    "Nether Spirit"
+   ],
+   [
+    3,
+    "Opt"
+   ],
+   [
+    4,
+    "Salt Marsh"
+   ],
+   [
+    3,
+    "Shivan Reef"
+   ],
+   [
+    2,
+    "Spite // Malice"
+   ],
+   [
+    1,
+    "Sulfurous Springs"
+   ],
+   [
+    2,
+    "Tsabo's Decree"
+   ],
+   [
+    2,
+    "Tsabo's Web"
+   ],
+   [
+    4,
+    "Underground River"
+   ],
+   [
+    4,
+    "Undermine"
+   ],
+   [
+    3,
+    "Urborg Volcano"
+   ],
+   [
+    2,
+    "Urza's Rage"
+   ]
+  ]
+ },
+ {
+  "name": "Jan Tomcani - Dark Fires",
+  "set": "WC01",
+  "date": "2001-10-29",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Birds of Paradise"
+   ],
+   [
+    4,
+    "Blastoderm"
+   ],
+   [
+    2,
+    "City of Brass"
+   ],
+   [
+    4,
+    "Fire // Ice"
+   ],
+   [
+    4,
+    "Fires of Yavimaya"
+   ],
+   [
+    2,
+    "Flametongue Kavu"
+   ],
+   [
+    8,
+    "Forest"
+   ],
+   [
+    3,
+    "Karplusan Forest"
+   ],
+   [
+    2,
+    "Kavu Chameleon"
+   ],
+   [
+    4,
+    "Llanowar Elves"
+   ],
+   [
+    2,
+    "Llanowar Wastes"
+   ],
+   [
+    3,
+    "Mountain"
+   ],
+   [
+    4,
+    "Rishadan Port"
+   ],
+   [
+    4,
+    "Saproling Burst"
+   ],
+   [
+    2,
+    "Spiritmonger"
+   ],
+   [
+    2,
+    "Sulfurous Springs"
+   ],
+   [
+    4,
+    "Thornscape Battlemage"
+   ],
+   [
+    2,
+    "Urza's Rage"
+   ]
+  ]
+ },
+ {
+  "name": "Tom van de Logt - Machine Head",
+  "set": "WC01",
+  "date": "2001-10-29",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Blazing Specter"
+   ],
+   [
+    2,
+    "Crypt Angel"
+   ],
+   [
+    4,
+    "Dark Ritual"
+   ],
+   [
+    4,
+    "Duress"
+   ],
+   [
+    2,
+    "Flametongue Kavu"
+   ],
+   [
+    6,
+    "Mountain"
+   ],
+   [
+    3,
+    "Phyrexian Scuta"
+   ],
+   [
+    4,
+    "Plague Spitter"
+   ],
+   [
+    4,
+    "Rishadan Port"
+   ],
+   [
+    3,
+    "Skizzik"
+   ],
+   [
+    4,
+    "Sulfurous Springs"
+   ],
+   [
+    6,
+    "Swamp"
+   ],
+   [
+    4,
+    "Terminate"
+   ],
+   [
+    4,
+    "Urborg Volcano"
+   ],
+   [
+    3,
+    "Urza's Rage"
+   ],
+   [
+    3,
+    "Vendetta"
+   ]
+  ]
+ },
+ {
+  "name": "Brian Kibler - Red Zone 2K2",
+  "set": "WC02",
+  "date": "2002-11-05",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Anurid Brushhopper"
+   ],
+   [
+    4,
+    "Birds of Paradise"
+   ],
+   [
+    4,
+    "Brushland"
+   ],
+   [
+    4,
+    "Call of the Herd"
+   ],
+   [
+    2,
+    "City of Brass"
+   ],
+   [
+    3,
+    "Fire // Ice"
+   ],
+   [
+    4,
+    "Flametongue Kavu"
+   ],
+   [
+    7,
+    "Forest"
+   ],
+   [
+    3,
+    "Glory"
+   ],
+   [
+    4,
+    "Karplusan Forest"
+   ],
+   [
+    3,
+    "Living Wish"
+   ],
+   [
+    3,
+    "Llanowar Elves"
+   ],
+   [
+    2,
+    "Mountain"
+   ],
+   [
+    4,
+    "Phantom Centaur"
+   ],
+   [
+    3,
+    "Plains"
+   ],
+   [
+    2,
+    "Wax // Wane"
+   ],
+   [
+    4,
+    "Wild Mongrel"
+   ]
+  ]
+ },
+ {
+  "name": "Carlos Rom\u00e3o - Psychatog",
+  "set": "WC02",
+  "date": "2002-11-05",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    2,
+    "Cephalid Coliseum"
+   ],
+   [
+    3,
+    "Chainer's Edict"
+   ],
+   [
+    3,
+    "Circular Logic"
+   ],
+   [
+    4,
+    "Counterspell"
+   ],
+   [
+    3,
+    "Cunning Wish"
+   ],
+   [
+    1,
+    "Darkwater Catacombs"
+   ],
+   [
+    3,
+    "Deep Analysis"
+   ],
+   [
+    3,
+    "Fact or Fiction"
+   ],
+   [
+    10,
+    "Island"
+   ],
+   [
+    3,
+    "Memory Lapse"
+   ],
+   [
+    4,
+    "Nightscape Familiar"
+   ],
+   [
+    4,
+    "Psychatog"
+   ],
+   [
+    4,
+    "Repulse"
+   ],
+   [
+    4,
+    "Salt Marsh"
+   ],
+   [
+    3,
+    "Swamp"
+   ],
+   [
+    4,
+    "Underground River"
+   ],
+   [
+    2,
+    "Upheaval"
+   ]
+  ]
+ },
+ {
+  "name": "Raphael Levy - Le Wonder Goose",
+  "set": "WC02",
+  "date": "2002-11-05",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Breakthrough"
+   ],
+   [
+    4,
+    "Careful Study"
+   ],
+   [
+    8,
+    "Forest"
+   ],
+   [
+    2,
+    "Genesis"
+   ],
+   [
+    10,
+    "Island"
+   ],
+   [
+    4,
+    "Mental Note"
+   ],
+   [
+    4,
+    "Nimble Mongoose"
+   ],
+   [
+    4,
+    "Roar of the Wurm"
+   ],
+   [
+    1,
+    "Rushing River"
+   ],
+   [
+    3,
+    "Seton's Scout"
+   ],
+   [
+    4,
+    "Werebear"
+   ],
+   [
+    4,
+    "Wild Mongrel"
+   ],
+   [
+    4,
+    "Wonder"
+   ],
+   [
+    4,
+    "Yavimaya Coast"
+   ]
+  ]
+ },
+ {
+  "name": "Sim Han How - Squirrel Opposition",
+  "set": "WC02",
+  "date": "2002-11-05",
+  "kind": "CHAMPION",
+  "cards": [
+   [
+    4,
+    "Birds of Paradise"
+   ],
+   [
+    4,
+    "Circular Logic"
+   ],
+   [
+    3,
+    "Deep Analysis"
+   ],
+   [
+    3,
+    "Fire // Ice"
+   ],
+   [
+    3,
+    "Flametongue Kavu"
+   ],
+   [
+    8,
+    "Forest"
+   ],
+   [
+    5,
+    "Island"
+   ],
+   [
+    3,
+    "Karplusan Forest"
+   ],
+   [
+    3,
+    "Llanowar Elves"
+   ],
+   [
+    4,
+    "Merfolk Looter"
+   ],
+   [
+    4,
+    "Opposition"
+   ],
+   [
+    3,
+    "Phantom Centaur"
+   ],
+   [
+    2,
+    "Shivan Reef"
+   ],
+   [
+    3,
+    "Squirrel Nest"
+   ],
+   [
+    4,
+    "Wild Mongrel"
+   ],
+   [
+    4,
+    "Yavimaya Coast"
+   ]
+  ]
+ }
+]

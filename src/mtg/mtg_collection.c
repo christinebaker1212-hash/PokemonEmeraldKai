@@ -4,13 +4,15 @@
 //   u32 beaten, u32 owned count, then {u32 hash, u8 count} each, then MTG_DECKS decks {char name[16], u16 count,
 //   then count u32 hashes}; from version 2, MTG_DECKS u32s: each deck's ACE CARD by its hash (0: none chosen);
 //   from version 3, MTG_DECKS u8s: each deck's hand tray color (TCG_TRAY_*); from version 4, u16 boosters opened,
-//   u8 set count, then {char code[4], u8 held, u8 opened} each (the booster sets by their codes: src/mtg/mtg_sets.c).
+//   u8 set count, then {char code[4], u8 held, u8 opened} each (the booster sets by their codes: src/mtg/mtg_sets.c);
+//   from version 5 each set's record also holds u8 PRIZES claimed (a set with only those is written too), then u32
+//   milestone PRIZES claimed, u16 structure decks bought.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "mtg/collection.h"
 
-#define MTGC_VERSION 4
+#define MTGC_VERSION 5
 
 uint32_t Mtg_Rand(uint32_t *rng)
 {
@@ -257,18 +259,21 @@ uint32_t Mtg_CollectionWrite(const MtgCollection *c, uint8_t *out, uint32_t cap)
     {
         int sets = 0;
         for (k = 0; k < MTG_SETS; k++)
-            sets += c->packs[k] || c->opened[k];
+            sets += c->packs[k] || c->opened[k] || c->setPrizes[k];
         W8(&w, (uint32_t)sets);
         for (k = 0; k < MTG_SETS; k++)
-            if (c->packs[k] || c->opened[k]) {
+            if (c->packs[k] || c->opened[k] || c->setPrizes[k]) {
                 char code[4] = {0, 0, 0, 0};   // (three letters, the fourth 0)
                 strncpy(code, gMtgSets[k].code, 3);
                 for (i = 0; i < 4; i++)
                     W8(&w, (uint8_t)code[i]);
                 W8(&w, c->packs[k]);
                 W8(&w, c->opened[k]);
+                W8(&w, c->setPrizes[k]);
             }
     }
+    W32(&w, c->rewards);
+    W16(&w, c->preconsBought);
     return w.ok ? w.n : 0;
 }
 
@@ -344,11 +349,19 @@ int Mtg_CollectionRead(MtgCollection *c, const uint8_t *in, uint32_t size)
             s = Mtg_SetByCode(code);
             j = (int)R8(&r);
             k = (int)R8(&r);
-            if (s >= 0) {   // (a set the game no longer has: its boosters dropped)
-                c->packs[s] = (uint8_t)(j > MTG_PACKS_MAX ? MTG_PACKS_MAX : j);
-                c->opened[s] = (uint8_t)k;
+            {
+                uint32_t prizes = version >= 5 ? R8(&r) : 0;
+                if (s >= 0) {   // (a set the game no longer has: its boosters dropped)
+                    c->packs[s] = (uint8_t)(j > MTG_PACKS_MAX ? MTG_PACKS_MAX : j);
+                    c->opened[s] = (uint8_t)k;
+                    c->setPrizes[s] = (uint8_t)prizes;
+                }
             }
         }
+    }
+    if (version >= 5 && r.ok) {
+        c->rewards = R32(&r);
+        c->preconsBought = (uint16_t)R16(&r);
     }
     if (c->activeDeck >= MTG_DECKS)
         c->activeDeck = 0;
@@ -418,4 +431,93 @@ int Mtg_DeckAce(const MtgCollection *c, int deck)
     if (c->ace[deck] >= 0 && Mtg_DeckCopies(d, c->ace[deck]))
         return c->ace[deck];
     return Mtg_AutoAce(d->cards, d->count);
+}
+
+// ---- the CARD SHOP's counter: spares and prices (as the POKeMON CARD CLUB's, tcg_collection.c)
+unsigned Mtg_Spare(const MtgCollection *c, int card)
+{
+    unsigned keep = MTG_TRADE_KEEP, d;
+    if (card < 0 || card >= Mtg_DbCount() || card >= MTG_COLLECTION_CARDS || Mtg_IsBasicLand(card))
+        return 0;
+    for (d = 0; d < MTG_DECKS; d++) {
+        unsigned used = (unsigned)Mtg_DeckCopies(&c->decks[d], card);
+        if (used > keep)
+            keep = used;
+    }
+    return c->owned[card] > keep ? c->owned[card] - keep : 0;
+}
+
+unsigned Mtg_PointValue(int card)
+{
+    static const uint8_t values[] = {1, 2, 6};   // common, uncommon, rare (the POKeMON cards' values)
+    if (card < 0 || card >= Mtg_DbCount() || Mtg_IsBasicLand(card))
+        return 0;
+    return values[Mtg_Card(card)->rarity <= MTG_RARITY_RARE ? Mtg_Card(card)->rarity : MTG_RARITY_RARE];
+}
+
+unsigned Mtg_PointCost(int card)
+{
+    static const uint8_t costs[] = {5, 15, 50};  // the POKeMON CARD CLUB's commons and uncommons; rares here too
+    if (card < 0 || card >= Mtg_DbCount() || Mtg_IsBasicLand(card) || !Mtg_CanUse(card))
+        return 0;
+    return costs[Mtg_Card(card)->rarity <= MTG_RARITY_RARE ? Mtg_Card(card)->rarity : MTG_RARITY_RARE];
+}
+
+int Mtg_TradeIn(MtgCollection *c, int card, unsigned count, uint32_t *points)
+{
+    unsigned value = Mtg_PointValue(card);
+    if (!count || !value || count > Mtg_Spare(c, card))
+        return 0;
+    c->owned[card] = (uint8_t)(c->owned[card] - count);
+    *points += count * value;
+    return 1;
+}
+
+// ---- structure decks
+static int PreconLine(const char *line, int *count, char *name, unsigned cap)
+{
+    const char *sp = strchr(line, ' ');
+    if (!sp)
+        return 0;
+    *count = atoi(line);
+    snprintf(name, cap, "%s", sp + 1);
+    return *count > 0;
+}
+
+int Mtg_PreconMissing(int k, char *first, unsigned cap)
+{
+    const char *const *l;
+    int missing = 0;
+    if (first && cap)
+        first[0] = 0;
+    for (l = gMtgPrecons[k].cards; *l; l++) {
+        char name[64];
+        int n, id;
+        if (!PreconLine(*l, &n, name, sizeof(name)))
+            continue;
+        id = Mtg_CardByName(name);
+        if (id < 0 || !Mtg_CanUse(id)) {
+            if (!missing && first && cap)
+                snprintf(first, cap, "%s", name);
+            missing++;
+        }
+    }
+    return missing;
+}
+
+int Mtg_PreconPlays(int k)
+{
+    return k >= 0 && k < MTG_PRECONS && !Mtg_PreconMissing(k, NULL, 0);
+}
+
+unsigned Mtg_PreconCost(int k)
+{
+    static const uint16_t costs[] = {60, 100, 200};   // starter, theme, World Championship deck
+    return costs[gMtgPrecons[k].kind];
+}
+
+int Mtg_PreconDeck(int k, MtgSavedDeck *out)
+{
+    MtgRecipe r = {gMtgPrecons[k].name, gMtgPrecons[k].about, 0, gMtgPrecons[k].cards};
+    return Mtg_RecipeDeck(&r, out);
 }

@@ -3,7 +3,34 @@
 The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the pool plays: `docs/MTG_SCOPE.md`
 (generated: `tools/mtg/scope.py`). This file: what is built, how it is built, what comes next.
 
-## Pick up here (2026-11-05, end of the session that built 1.96.0-1.100.0)
+## Pick up here (2026-11-07, 1.167.0: the CARD SHOP counter and structure decks)
+**The user's rules from this session (keep them):**
+- **MOSSDEEP's CARD CLUB maps are the user's** (they're editing them): change only the scripts that point there
+  (data/scripts/mtg_shop.inc) and the C behind them. No new map objects / people there without asking.
+- Structure decks are **curated** ("Let's not overwhelm the player"): tools/mtg/fetch_precons.py CURATED (16 now).
+  Add to it sparingly; keep the order (starters, theme decks by era, World Championship decks).
+- "Remember to add them as cards are available": the shop shows a curated deck by itself once its last card plays,
+  so the work is **translating the cards the curated decks wait for**. tools/mtg/test.sh prints each deck's count and
+  first missing card. 4 of 16 play now (SIXTH STARTER A, INFESTATION, ARMADA, BOMBER).
+- Every card-game screen keeps parity with POKeMON's (the counter copies tcg_ui.c CounterScreen; CARD POINTS on HOME).
+
+**Next, by deck (the blockers, from the scope dump):**
+- SIXTH STARTER B: Pyrotechnics (DividedAsYouChoose: damage divided among targets; needs a division prompt on the
+  table, also Fireball / Arc Lightning / Rolling Thunder).
+- OPPOSITION: Darting Merfolk (ChangeZone of itself to the hand as an ability), Static Orb (static: untap at most two).
+- GREEN STOMPY: Echo (Albino Troll, Pouncing Jaguar; also Cradle Guard for CRUSHER and FIENDISH NATURE: an upkeep
+  trigger, "sacrifice unless you pay" while it came under control since the last upkeep), Cursed Scroll (NameCard),
+  Wild Dogs (T:APlayerHasMoreLifeThanEachOther).
+- MACHINE HEAD: Kicker (Phyrexian Scuta, Skizzik, Urza's Rage), Duress (Discard with a reveal and a chooser).
+- CRUSHER: Echo, Humble (RemoveAllAbilities), Lhurgoyf (*/* by graveyard card types).
+- WAY WILD: Lure / Pride of Lions / Thorn Elemental (statics), Wild Growth (T:TapsForMana).
+- SLIGH: Cursed Scroll, Goblin Vandal (T:Execute), Hammer of Bogardan (ActivationZone Graveyard), Incinerate
+  (RememberDamaged: can't regenerate), Mogg Flunkies (can't attack or block alone).
+- Larger: REBELS CALL, FIENDISH NATURE, SLIVER SHIVERS (ChooseType / ChooseColor ETB), GOBLIN MOB (Morph, Provoke),
+  PSYCHATOG (Flashback, Madness, Wish).
+Echo and Kicker each unlock many pool cards besides (docs/MTG_SCOPE.md); they're the best value next.
+
+## Earlier pick-up notes (2026-11-05, end of the session that built 1.96.0-1.100.0)
 **Check first:** the 1.100.0 release run (release.yml, commit ed713ed6 on the default branch
 `claude/clever-clarke-hqati2`) was still building when this was written. If it failed, read its job logs, fix, push
 to the default branch and re-queue it (workflow_dispatch). The Windows build was not tried locally (no MinGW in that
@@ -42,8 +69,8 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
-## Tabled (2026-11-07, the user: "Table the rest of the Magic cards for now")
-- Card translation stops at 1.162.0 (2763 of 5408 playable). Don't start new MAGIC card work until the user asks.
+## Tabled (2026-11-07, the user: "Table the rest of the Magic cards for now") - resumed the same day
+- The user asked to continue MAGIC (1.167.0, 2793 of 5408 playable); the "Pick up here" section above leads.
 - Where it stood: the next step was triggers whose Execute$ is an "AB$ ... | Cost$ ..." ("you may pay {cost}. If you
   do, ..."; about 45 cards: ACADEMY RECTOR, BRASS MAN, AUSPICIOUS ANCESTOR, CUSTOMS DEPOT...). Plan: let mtg_script.c
   keep a triggered ability's Cost$ (today "optional cost" is unsupported) in gMtgUnlessCosts, and in Mtg_ResolveStep
@@ -51,6 +78,11 @@ the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers show
   paid or can't pay: the whole chain is passed by).
 - After that, by count: TapsForMana (15, mostly extra mana), ChooseType (37: needs a type menu on the table), the
   replacement effects left (Moved 22, DamageDone ReplaceWith 28).
+
+## Status (2026-11-07: 1.167.0)
+- The CARD SHOP counter (TRADE IN, CARD SHOP, PRIZES), structure decks, CARD POINTS on HOME; DamageDealtOnce, Counter
+  destinations, "may draw", RearrangeTopOfLibrary, dies-to-library: COOP_NOTES "MAGIC's CARD SHOP counter and
+  structure decks". 2793 of 5408.
 
 ## Status (2026-11-07: 1.162.0)
 - State triggers (Mode$ Always) and DamageDoneOnce: COOP_NOTES "MAGIC's state triggers". 2763 of 5408. Next by count:
@@ -285,6 +317,8 @@ the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers show
 - `include/mtg/collection.h`, `src/mtg/mtg_collection.c`: the save's cards and decks ("<save>.mtg"), boosters.
 - `src/mtg/mtg_decks.c`: the five starters and the six MOSSDEEP regulars' decks (tools/mtg/test.sh checks every
   card is playable).
+- `tools/mtg/fetch_precons.py` -> `tools/mtg/precons.json` (MTGJSON's Premodern-era precons) and
+  `src/mtg/mtg_precons_data.c` (the CURATED structure decks; `--offline` rewrites it from the json).
 - `include/mtg/integration.h`, `src/mtg/mtg_integration.c` (the pack, the sidecar, specials, `mp mtg`),
   `src/mtg/mtg_pak.c` (the .incbin), `src/mtg/mtg_text.c` (card words in the font's letters), `src/mtg/mtg_ui.c`
   (the screens), `src/mtg/mtg_board.c` (the table), `data/scripts/mtg_shop.inc` (MOSSDEEP).

@@ -66,6 +66,7 @@ typedef struct MtgCardDef {
     const char *enchantSpec;                 // ...: a Valid spec ("Creature", "Land", "Creature.YouCtrl")
     const char *cyclingCost;                 // K:Cycling:COST (Forge's keyword: an ability from the hand)
     uint8_t cantBeCountered;                 // R: Event$ Counter | ValidCard$ Card.Self: "This spell can't be countered."
+    uint8_t diesToLibraryTop;                // R: Event$ Moved to the Graveyard, ReplaceWith$ to the library's top (GRAVEBANE ZOMBIE)
     uint8_t mayNotUntap;                     // K:You may choose not to untap CARDNAME ...: it stays tapped while it holds
                                              // something (an UntilUntaps Effect of its own in force)
     uint8_t starPT;                          // PT:*/* (bit 1 power, 2 toughness): a characteristic-defining static sets it

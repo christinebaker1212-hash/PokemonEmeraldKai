@@ -6851,3 +6851,39 @@ SURVIVAL AREA, RESORT AREA, STARK MOUNTAIN, ROUTEs 224-230, the BATTLEGROUND and
   WalkSlightlyFast is walk_fast.
 - (gen_maps.py run again: the generated maps had drifted from hand fixes since, so only the BATTLEGROUND's map was
   kept from that run. The decomp's sparse checkout needed include/data/field/hidden_items.h for items.py.)
+
+## MAGIC's CARD SHOP counter and structure decks (1.167.0)
+
+The user (2026-11-07): "Players do not have enough options for structure decks at the moment. Please remember to add
+them as cards are available. Expand the card shop to the parity of Pokemon's card shop, allowing rewards to be given
+for completion landmarks. Allow duplicates to be sold. Instead of W/L rate in the card game menu, show Card Points
+like the rest." Then: "Let's not overwhelm the player with theme decks. Please make a curated selection." And: the
+user edits MOSSDEEP's CARD CLUB maps themselves; change only the scripts that point there (data/scripts/mtg_shop.inc).
+- The case's HOME strip: CARDS x/y   CARD POINTS n (YU-GI-OH!'s words), no WON / LOST.
+- MtgUi_OpenShop is the POKeMON CARD CLUB's counter (tcg_ui.c CounterScreen): tabs TRADE IN / CARD SHOP / PRIZES,
+  L / R, the CARD POINTS shared with the other games (Tcg_GetCollection()->dust).
+  - TRADE IN: Mtg_Spare (copies past MTG_TRADE_KEEP 4 and past what any deck uses; basic lands never) at
+    Mtg_PointValue 1 / 2 / 6 by rarity (the POKeMON cards' values); A one, SELECT all of a card, ALL SPARES.
+  - CARD SHOP: the structure decks that play (first: few, above the long list), every available set's booster
+    (MTG_PACK_COST), A CARD YOU PICK (the BINDER as a price list, SHOP_BINDER: only cards the shop sells, at full
+    brightness, Mtg_PointCost 5 / 15 / 50), RARE CANDY 20, PP UP 25, MOEGATCHA TICKET 30 (the CARD CLUB's).
+    A structure deck: its cards into the collection, the deck into the first empty slot, preconsBought++.
+  - PRIZES: a row a booster set (its next step: 25 % two boosters, 50 % three and 30 CP, 75 % the set's mascot rare,
+    from Mtg_SetOwned's usable cards), the milestones (sMilestones: wins 1 / 10 / 25 / 50 / 100, boosters opened
+    10 / 50 / 100, regulars 3 / all, a structure deck, sets 1 / 4 / all; each a named rare, 30 CP if it doesn't play),
+    EVERY CARD (500 CP). Read from what the save counts, so old saves get theirs.
+- The save: "<save>.mtg" format 5 (MtgCollection.setPrizes per set inside its set record, rewards, preconsBought);
+  formats 1-4 read as before.
+- Structure decks: tools/mtg/fetch_precons.py reads MTGJSON's deck lists, keeps the Premodern years' precons whose
+  main deck is all pool cards (tools/mtg/precons.json, 125), and writes only its CURATED 16 (two Sixth Edition
+  starters, nine theme decks, five World Championship decks; names and words of the tool's own, describing what's
+  inside: MTGJSON's 7ED theme names don't match their colors) into src/mtg/mtg_precons_data.c. Mtg_PreconPlays
+  checks every card at run time, so a deck appears in the shop by itself once its last card translates (test.sh
+  prints what each waits for). Prices Mtg_PreconCost: 60 starter, 100 theme, 200 champion.
+- Cards translated for them (2793 of 5408): DamageDealtOnce triggers (SPIRIT LINK, ESSENCE SLIVER; each damage dealt,
+  as DamageDoneOnce), Counter's Destination$ Graveyard / TopOfLibrary (DARING APPRENTICE, MEMORY LAPSE), Draw's
+  OptionalDecider$ True (the drawer is asked: SIBILANT SPIRIT), RearrangeTopOfLibrary (SAGE OWL: picks from the top
+  down, MTG_CHOICE_PICK), "if it would die, put it on top of its owner's library instead" (MtgCardDef.diesToLibraryTop
+  in Mtg_MoveTo: GRAVEBANE ZOMBIE). Tests: test_rules.c TestDeckCards, TestCollection (spares, prices, format 5,
+  every structure deck's cards in the pool and the playing ones legal); scenarios mtg_counter, mtg_shop.
+- Debug: `mp mtg own N NAME`, `mp mtg shop`, `mp mtg state` (also CP, decks bought, prizes, deck slots).

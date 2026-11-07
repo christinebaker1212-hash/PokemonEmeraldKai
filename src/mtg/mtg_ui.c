@@ -20,6 +20,8 @@
 #include "mp.h"
 #include "sound.h"
 #include "constants/songs.h"
+#include "constants/items.h"
+#include "item.h"
 #include "tcg/integration.h"
 #include "tcg/tcg.h"
 #include "mtg/integration.h"
@@ -45,7 +47,8 @@ enum
     KEY_INSPECT = 2048,
     KEY_SEARCH = 0x1000   // L2 / ZL / LT, or F: SEARCH & SORT in the binder and the builder (as the other games')
 };
-enum { ACT_NONE, ACT_CLOSE, ACT_HOME, ACT_TAKE_STARTER, ACT_CLEAR, ACT_COPY, ACT_RECIPE, ACT_BUY_PACK };
+enum { ACT_NONE, ACT_CLOSE, ACT_HOME, ACT_TAKE_STARTER, ACT_CLEAR, ACT_COPY, ACT_RECIPE, ACT_BUY_PACK, ACT_TRADE_ONE,
+       ACT_TRADE_ALL, ACT_TRADE_EVERY, ACT_BUY_DECK, ACT_BUY_CARD, ACT_BUY_ITEM };
 enum { VS_NPC, VS_PRACTICE };
 
 #define PANEL_W KIT_PANEL_W
@@ -81,9 +84,12 @@ static struct
     uint8_t boosterRarity[MTG_PACK_MAX];   // each card's rarity in its set
     int boosterCount, flipped, revealAge, revealNext, pack;   // pack: the set being opened
     int rewarded;                    // the duel's end counted (its words on the result screen)
+    int tab;                         // the CARD SHOP counter's tab: TRADE IN, CARD SHOP, PRIZES
 } U;
+#define SHOP_BINDER 2                // U.showAll: the BINDER as the counter's "card you pick" list
 
 static MtgCollection *C(void) { return Mtg_GetCollection(); }
+static unsigned Points(void) { return Tcg_GetCollection()->dust; }   // CARD POINTS (shared by the card games)
 int Tcg_GrantCase(void);
 
 static void Say(int then, const char *format, ...) __attribute__((format(printf, 2, 3)));
@@ -454,7 +460,7 @@ static void BuildList(int withBasics)
     first = U.listCount;
     for (i = 0; i < Mtg_DbCount() && i < MTG_COLLECTION_CARDS; i++)
         if ((c->owned[i] || (U.showAll && !withBasics)) && Mtg_CanUse(i) && !(withBasics && Mtg_IsBasicLand(i))
-            && InFilter(i))
+            && !(U.showAll == SHOP_BINDER && !Mtg_PointCost(i)) && InFilter(i))   // (the shop: only cards it sells)
             U.list[U.listCount++] = (uint16_t)i;
     qsort(U.list + first, (size_t)(U.listCount - first), sizeof(U.list[0]), ListOrder);
     if (Searchable()) {   // (then SEARCH & SORT over the cards after the basic lands)
@@ -534,8 +540,8 @@ static void HomeScreen(void)
                       : i == HOME_PACKS ? count : NULL);
     }
     OwnedCounts(&have, &total);
-    snprintf(line, sizeof(line), "%s\nCARDS %d/%d   WON %u  LOST %u", sHomeHelp[U.cursor], have, total, c->wins,
-             c->losses);
+    snprintf(line, sizeof(line), "%s\nCARDS %d/%d   CARD POINTS %u", sHomeHelp[U.cursor], have, total,
+             Tcg_GetCollection()->dust);
     Strip(line);
     TcgUi_Hints("{SELECT} HOW TO PLAY  {L}{R} OTHER GAMES");
 }
@@ -865,7 +871,7 @@ static void BinderScreen(void)
         int count = c->owned[id];
         if (on)
             y -= 2;
-        MtgGfx_DrawCard(id, (float)x, (float)y, 30, 42, 0, count ? 255 : 80, 0);
+        MtgGfx_DrawCard(id, (float)x, (float)y, 30, 42, 0, count || U.showAll == SHOP_BINDER ? 255 : 80, 0);
         if (count)
             Foil(id, x, y, 30, 42, (unsigned)(U.frame + i * 13));
         if (count) {
@@ -891,12 +897,17 @@ static void BinderScreen(void)
         int id = U.list[U.cursor];
         char name[64];
         PlainName(name, sizeof(name), id);
-        snprintf(line, sizeof(line), "%s\n%s", name, c->owned[id] ? RarityWord(id) : "Not in your collection yet.");
+        if (U.showAll == SHOP_BINDER)
+            snprintf(line, sizeof(line), "%s: %u CARD POINTS\nYou have %u. You own %d.", name, Mtg_PointCost(id),
+                     Points(), c->owned[id]);
+        else
+            snprintf(line, sizeof(line), "%s\n%s", name, c->owned[id] ? RarityWord(id) : "Not in your collection yet.");
     }
     Strip(line);
     TcgSearch_Badge(SEARCH_MAGIC, -236, 135, (unsigned)n);
-    TcgUi_Hints(U.showAll ? "{A} LOOK {L}{R} COLOR {SELECT} OWNED {SEARCH} SEARCH {B} BACK"
-                          : "{A} LOOK {L}{R} COLOR {SELECT} ALL {SEARCH} SEARCH {B} BACK");
+    TcgUi_Hints(U.showAll == SHOP_BINDER ? "{A} BUY {INSPECT} LOOK {L}{R} COLOR {SEARCH} SEARCH {B} BACK"
+                : U.showAll ? "{A} LOOK {L}{R} COLOR {SELECT} OWNED {SEARCH} SEARCH {B} BACK"
+                            : "{A} LOOK {L}{R} COLOR {SELECT} ALL {SEARCH} SEARCH {B} BACK");
 }
 
 // ---- a card's view: the big face, its words; A the big picture
@@ -1257,9 +1268,68 @@ static void OpenPack(int set)
               c->packs[set], gMtgSets[set].code, c->packs[set] == 1 ? "" : "s");
 }
 
-// ---- the CARD SHOP's counter (the YU-GI-OH! side's): boosters for CARD POINTS
-static unsigned Points(void) { return Tcg_GetCollection()->dust; }
-static int ShopRows(uint8_t *sets)
+// ---- the CARD SHOP's counter, as the POKeMON CARD CLUB's (tcg_ui.c): TRADE IN spare cards for CARD POINTS, spend
+// them (boosters, structure decks, a card you pick, the CARD CLUB's three items), PRIZES for collection milestones.
+// Only the scripts that open it are MOSSDEEP's (data/scripts/mtg_shop.inc); its maps are the user's (2026-11-07).
+static const char *const sCounterTabs[] = {"TRADE IN", "CARD SHOP", "PRIZES"};
+enum { SR_PACK, SR_DECK, SR_CARD, SR_ITEM };
+enum { ITEM_BUY_CANDY, ITEM_BUY_PP_UP, ITEM_BUY_TICKET, ITEM_BUYS };
+static const char *const sItemNames[ITEM_BUYS] = {"RARE CANDY", "PP UP", "MOEGATCHA TICKET"};
+static const unsigned sItemCost[ITEM_BUYS] = {20, 25, 30};   // (the POKeMON CARD CLUB's prices)
+typedef struct { uint8_t kind, arg; } ShopRow;
+#define SHOP_ROWS (MTG_SETS + MTG_PRECONS + 1 + ITEM_BUYS)
+static int ShopList(ShopRow *rows)
+{
+    int i, n = 0;
+    for (i = 0; i < MTG_PRECONS; i++)   // (the structure decks first: few, and above the long list of boosters)
+        if (Mtg_PreconPlays(i))
+            rows[n].kind = SR_DECK, rows[n++].arg = (uint8_t)i;
+    for (i = 0; i < MTG_SETS; i++)
+        if (Mtg_SetAvailable(i))
+            rows[n].kind = SR_PACK, rows[n++].arg = (uint8_t)i;
+    rows[n].kind = SR_CARD, rows[n++].arg = 0;
+    for (i = 0; i < ITEM_BUYS; i++)
+        rows[n].kind = SR_ITEM, rows[n++].arg = (uint8_t)i;
+    return n;
+}
+static unsigned ShopRowCost(const ShopRow *r)
+{
+    return r->kind == SR_PACK ? MTG_PACK_COST : r->kind == SR_DECK ? Mtg_PreconCost(r->arg)
+         : r->kind == SR_ITEM ? sItemCost[r->arg] : 0;
+}
+static int SpareList(uint16_t *out)   // cards with spare copies, by name
+{
+    MtgCollection *c = C();
+    int i, n = 0;
+    for (i = 0; i < Mtg_DbCount() && i < MTG_COLLECTION_CARDS; i++)
+        if (Mtg_Spare(c, i) && Mtg_PointValue(i))
+            out[n++] = (uint16_t)i;
+    qsort(out, (size_t)n, sizeof(out[0]), ListOrder);
+    return n;
+}
+
+// PRIZES: each booster set's 25 / 50 / 75 % (one row a set, its next step), the milestones, every card
+enum { MS_WINS, MS_PACKS, MS_REGULARS, MS_DECKS, MS_SETS };
+static const struct { uint8_t kind; uint16_t goal; const char *card, *label, *text; } sMilestones[] = {
+    {MS_WINS, 1, "Serra Angel", "1 WIN", "Win a MAGIC duel"},
+    {MS_WINS, 10, "Sengir Vampire", "10 WINS", "Win 10 MAGIC duels"},
+    {MS_WINS, 25, "Shivan Dragon", "25 WINS", "Win 25 MAGIC duels"},
+    {MS_WINS, 50, "Mahamoti Djinn", "50 WINS", "Win 50 MAGIC duels"},
+    {MS_WINS, 100, "Akroma, Angel of Wrath", "100 WINS", "Win 100 MAGIC duels"},
+    {MS_PACKS, 10, "Birds of Paradise", "10 PACKS", "Open 10 boosters"},
+    {MS_PACKS, 50, "Morphling", "50 PACKS", "Open 50 boosters"},
+    {MS_PACKS, 100, "Masticore", "100 PACKS", "Open 100 boosters"},
+    {MS_REGULARS, 3, "Royal Assassin", "3 REGULARS", "Beat 3 of the CARD SHOP's regulars"},
+    {MS_REGULARS, MTG_DUELISTS, "Sliver Queen", "ALL REGULARS", "Beat every regular of the CARD SHOP"},
+    {MS_DECKS, 1, "Wrath of God", "1 DECK", "Buy a structure deck"},
+    {MS_SETS, 1, "Force of Nature", "1 SET", "Own every card of a booster set"},
+    {MS_SETS, 4, "Lightning Angel", "4 SETS", "Own every card of 4 booster sets"},
+    {MS_SETS, 0, "Rorix Bladewing", "ALL SETS", "Own every card of every booster set"},
+};
+#define MILESTONES ((int)(sizeof(sMilestones) / sizeof(sMilestones[0])))
+#define EVERY_CARD_BIT (1u << 31)
+#define EVERY_CARD_POINTS 500
+static int PrizeSets(uint8_t *sets)   // the booster sets the game has (as the shop's)
 {
     int i, n = 0;
     for (i = 0; i < MTG_SETS; i++)
@@ -1267,32 +1337,303 @@ static int ShopRows(uint8_t *sets)
             sets[n++] = (uint8_t)i;
     return n;
 }
+static int PrizeRows(void)
+{
+    uint8_t sets[MTG_SETS];
+    return PrizeSets(sets) + MILESTONES + 1;
+}
+static int SetStep(int set)   // the set's next PRIZE: 0 25 %, 1 50 %, 2 75 %, 3 all claimed
+{
+    int step = 0;
+    while (step < 3 && (C()->setPrizes[set] >> step) & 1)
+        step++;
+    return step;
+}
+static unsigned MilestoneHave(int k)
+{
+    MtgCollection *c = C();
+    unsigned n = 0;
+    int i, total, count;
+    uint8_t sets[MTG_SETS];
+    switch (sMilestones[k].kind) {
+    case MS_WINS: return c->wins;
+    case MS_PACKS: return c->packsOpened;
+    case MS_DECKS: return c->preconsBought;
+    case MS_REGULARS:
+        for (i = 0; i < MTG_DUELISTS; i++)
+            n += (c->beaten >> i) & 1;
+        return n;
+    default:
+        count = PrizeSets(sets);
+        for (i = 0; i < count; i++)
+            n += Mtg_SetOwned(c, sets[i], &total) == total && total;
+        return n;
+    }
+}
+static unsigned MilestoneGoal(int k)
+{
+    uint8_t sets[MTG_SETS];
+    return sMilestones[k].goal ? sMilestones[k].goal : (unsigned)PrizeSets(sets);
+}
+static int PrizeCard(const char *name)   // the prize card, if it plays (else CARD POINTS stand in)
+{
+    int id = Mtg_CardByName(name);
+    return id >= 0 && Mtg_CanUse(id) ? id : -1;
+}
+/* A row's words and label; 0 not yet, 1 ready to claim, 2 done */
+static int PrizeState(int row, char *what, size_t size, char *label, size_t lsize)
+{
+    MtgCollection *c = C();
+    uint8_t sets[MTG_SETS];
+    int count = PrizeSets(sets);
+    if (row < count) {
+        int set = sets[row], total, have = Mtg_SetOwned(c, set, &total), step = SetStep(set), mascot = Mtg_SetMascot(set);
+        snprintf(label, lsize, "%s", gMtgSets[set].name);
+        if (step == 3) {
+            snprintf(what, size, "%s (%d/%d): every PRIZE claimed.", gMtgSets[set].name, have, total);
+            return 2;
+        }
+        if (step == 2) {
+            char name[64] = "30 CARD POINTS";
+            if (mascot >= 0)
+                PlainName(name, sizeof(name), mascot);
+            snprintf(what, size, "%s 75%% (%d/%d): %s", gMtgSets[set].name, have, total, name);
+        } else
+            snprintf(what, size, "%s %d%% (%d/%d): %s", gMtgSets[set].name, 25 * (step + 1), have, total,
+                     step ? "3 boosters + 30 CP" : "2 boosters");
+        return total && have * 4 >= total * (step + 1);
+    }
+    row -= count;
+    if (row < MILESTONES) {
+        unsigned have = MilestoneHave(row), goal = MilestoneGoal(row);
+        int card = PrizeCard(sMilestones[row].card);
+        char name[64] = "30 CARD POINTS";
+        if (card >= 0)
+            PlainName(name, sizeof(name), card);
+        snprintf(label, lsize, "%s", sMilestones[row].label);
+        if (goal > 1)
+            snprintf(what, size, "%s (%u/%u): %s", sMilestones[row].text, have < goal ? have : goal, goal, name);
+        else
+            snprintf(what, size, "%s: %s", sMilestones[row].text, name);
+        if ((c->rewards >> row) & 1)
+            return 2;
+        return goal && have >= goal;
+    }
+    {
+        int have, total;
+        OwnedCounts(&have, &total);
+        snprintf(label, lsize, "EVERY CARD");
+        snprintf(what, size, "Every card (%d/%d): %u CARD POINTS", have, total, EVERY_CARD_POINTS);
+        if (c->rewards & EVERY_CARD_BIT)
+            return 2;
+        return total && have >= total;
+    }
+}
+static void GiveCard(int card, const char *what)
+{
+    MtgCollection *c = C();
+    if (card >= 0 && c->owned[card] < MTG_OWNED_MAX) {
+        char name[64];
+        c->owned[card]++;
+        PlainName(name, sizeof(name), card);
+        Say(ACT_NONE, "You received %s!", name);
+    } else {
+        Tcg_GetCollection()->dust += 30;
+        Say(ACT_NONE, "You received 30 CARD POINTS%s!", what);
+    }
+}
+static void ClaimPrize(int row)
+{
+    MtgCollection *c = C();
+    uint8_t sets[MTG_SETS];
+    int count = PrizeSets(sets);
+    char label[32], what[160];
+    if (PrizeState(row, what, sizeof(what), label, sizeof(label)) != 1) {
+        PlaySE(SE_FAILURE);
+        return;
+    }
+    if (row < count) {
+        int set = sets[row], step = SetStep(set);
+        c->setPrizes[set] |= (uint8_t)(1 << step);
+        if (step < 2) {
+            int k, got = 0;
+            for (k = 0; k < (step ? 3 : 2); k++)
+                got += Mtg_AwardPack(c, set);
+            if (step)
+                Tcg_GetCollection()->dust += 30;
+            Say(ACT_NONE, step ? "You received %d %s boosters and 30 CARD POINTS!" : "You received %d %s boosters!",
+                got, gMtgSets[set].code);
+        } else
+            GiveCard(Mtg_SetMascot(set), "");
+    } else if (row - count < MILESTONES) {
+        int k = row - count;
+        c->rewards |= 1u << k;
+        GiveCard(PrizeCard(sMilestones[k].card), "");
+    } else {
+        c->rewards |= EVERY_CARD_BIT;
+        Tcg_GetCollection()->dust += EVERY_CARD_POINTS;
+        Say(ACT_NONE, "Every card! The CARD SHOP gives you %u CARD POINTS!", EVERY_CARD_POINTS);
+    }
+    MPNet_Log("mtg: prize %s claimed", label);
+    PlayFanfare(MUS_OBTAIN_ITEM);
+}
+
 static void ShopScreen(void)
 {
-    static const char *const sTabs[] = {"BOOSTERS"};
-    uint8_t sets[MTG_SETS];
-    int n = ShopRows(sets), k, top = U.cursor < 3 ? 0 : U.cursor - 3;
-    char line[128];
+    MtgCollection *c = C();
+    char line[200], right[24];
+    int i, n, rows = 6, top;
     TcgUi_Background();
     TcgUi_SidePanel("CARD SHOP", MTG_THEME);
     snprintf(line, sizeof(line), "%u CP", Points());
-    TcgUi_ShopTabs(sTabs, 1, 0, 0xe8c898, 0x7a4a2a, 0x4a2a10, line, "CARD POINTS", 0x2858a8);
+    TcgUi_ShopTabs(sCounterTabs, 3, U.tab, 0xe8c898, 0x7a4a2a, 0x4a2a10, line, "CARD POINTS", 0x2858a8);
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
-    if (top > n - 6)
-        top = n > 6 ? n - 6 : 0;
-    for (k = 0; k < 6 && top + k < n; k++) {
-        int row = top + k;
-        snprintf(line, sizeof(line), "%u", MTG_PACK_COST);
-        TcgUi_Row(LIST_X + 2, 8 + k * ROW_H, LIST_W - 4, U.cursor == row, Points() >= MTG_PACK_COST,
-                  gMtgSets[sets[row]].name, line);
-    }
-    if (U.cursor < n) {
-        const MtgSet *st = &gMtgSets[sets[U.cursor]];
-        snprintf(line, sizeof(line), "A %s booster: %d cards, a rare in each. You have %u.", st->code,
-                 st->commons + st->uncommons + st->rares, C()->packs[sets[U.cursor]]);
+    top = U.cursor < 3 ? 0 : U.cursor - 3;
+    if (U.tab == 0) {
+        static uint16_t list[MTG_COLLECTION_CARDS];
+        n = SpareList(list);
+        if (top > n + 1 - rows)
+            top = n + 1 > rows ? n + 1 - rows : 0;
+        for (i = 0; i < rows && top + i <= n; i++) {
+            char name[64];
+            if (top + i == n) {
+                if (n)
+                    TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, top + i == U.cursor, 1, "ALL SPARES", NULL);
+                continue;
+            }
+            PlainName(name, sizeof(name), list[top + i]);
+            snprintf(right, sizeof(right), "x%u", Mtg_Spare(c, list[top + i]));
+            TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, top + i == U.cursor, 1, name, right);
+        }
+        if (!n) {
+            G_Text(LIST_X + 8, 12, 0x707070, G_NO_SHADOW, "No spare cards yet.", LIST_W - 14, TF_SMALL);
+            Strip("Copies past four (and past what your decks use) trade for CARD POINTS.");
+        } else if (U.cursor >= n)
+            Strip("Every spare card at once: copies past four and past what your decks use.");
+        else {
+            char name[64];
+            PlainName(name, sizeof(name), list[U.cursor]);
+            snprintf(line, sizeof(line), "%s: %u CP each, %u spare.\n{A} ONE  {SELECT} ALL SPARE", name,
+                     Mtg_PointValue(list[U.cursor]), Mtg_Spare(c, list[U.cursor]));
+            Strip(line);
+        }
+    } else if (U.tab == 1) {
+        ShopRow list[SHOP_ROWS];
+        n = ShopList(list);
+        if (top > n - rows)
+            top = n > rows ? n - rows : 0;
+        for (i = 0; i < rows && top + i < n; i++) {
+            const ShopRow *r = &list[top + i];
+            const char *name = r->kind == SR_PACK ? gMtgSets[r->arg].name : r->kind == SR_DECK ? gMtgPrecons[r->arg].name
+                             : r->kind == SR_CARD ? "A CARD YOU PICK" : sItemNames[r->arg];
+            if (r->kind == SR_CARD)
+                snprintf(right, sizeof(right), "5-50");
+            else
+                snprintf(right, sizeof(right), "%u", ShopRowCost(r));
+            TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, top + i == U.cursor,
+                      r->kind == SR_CARD || Points() >= ShopRowCost(r), name, right);
+        }
+        if (U.cursor < n) {
+            const ShopRow *r = &list[U.cursor];
+            if (r->kind == SR_PACK) {
+                const MtgSet *st = &gMtgSets[r->arg];
+                snprintf(line, sizeof(line), "A %s booster: %d cards, a rare in each. You have %u.", st->code,
+                         st->commons + st->uncommons + st->rares, c->packs[r->arg]);
+            } else if (r->kind == SR_DECK) {
+                MtgSavedDeck d;
+                Mtg_PreconDeck(r->arg, &d);
+                snprintf(line, sizeof(line), "%s (%s, %u): %d cards. %s", gMtgPrecons[r->arg].name,
+                         gMtgPrecons[r->arg].set, gMtgPrecons[r->arg].year, d.count, gMtgPrecons[r->arg].about);
+            } else if (r->kind == SR_CARD)
+                snprintf(line, sizeof(line), "Any card that can be played: 5 CP a common, 15 an uncommon, 50 a rare.");
+            else
+                snprintf(line, sizeof(line), "%s", r->arg == ITEM_BUY_TICKET ? "One pull on any MOEGATCHA banner."
+                                                                             : "It goes into your BAG.");
+            Strip(line);
+        }
+    } else {
+        char label[32];
+        uint8_t sets[MTG_SETS];
+        int count = PrizeSets(sets);
+        n = PrizeRows();
+        if (top > n - rows)
+            top = n > rows ? n - rows : 0;
+        for (i = 0; i < rows && top + i < n; i++) {
+            int state = PrizeState(top + i, line, sizeof(line), label, sizeof(label));
+            int step = top + i < count ? SetStep(sets[top + i]) : 0;
+            snprintf(right, sizeof(right), "%s", state == 2 ? "DONE" : state == 1 ? "READY!"
+                                                : top + i < count ? (step == 0 ? "25%" : step == 1 ? "50%" : "75%") : "");
+            TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, top + i == U.cursor, state != 0, label, right);
+        }
+        PrizeState(U.cursor, line, sizeof(line), label, sizeof(label));
         Strip(line);
     }
-    TcgUi_Hints("{A} BUY  {B} LEAVE");
+    TcgUi_Hints("{L}{R} COUNTER  {B} LEAVE");
+}
+
+static void ShopStep(unsigned pressed)
+{
+    MtgCollection *c = C();
+    if (pressed & (KEY_L | KEY_R)) {
+        U.tab = (U.tab + (pressed & KEY_R ? 1 : 2)) % 3;
+        U.cursor = 0;
+        PlaySE(SE_SELECT);
+        return;
+    }
+    if (pressed & KEY_B) {
+        PlaySE(SE_SELECT);
+        Close();
+        return;
+    }
+    if (U.tab == 0) {
+        static uint16_t list[MTG_COLLECTION_CARDS];
+        int n = SpareList(list);
+        MoveCursor(pressed, n ? n + 1 : 0);
+        if (!n)
+            return;
+        if (pressed & KEY_A && U.cursor == n) {
+            unsigned points = 0;
+            int i;
+            for (i = 0; i < n; i++)
+                points += Mtg_Spare(c, list[i]) * Mtg_PointValue(list[i]);
+            Ask(ACT_TRADE_EVERY, 0, "Trade in every spare card for %u CP?", points);
+        } else if (U.cursor < n && pressed & (KEY_A | KEY_SELECT)) {
+            char name[64];
+            int id = list[U.cursor];
+            PlainName(name, sizeof(name), id);
+            if (pressed & KEY_A)
+                Ask(ACT_TRADE_ONE, id, "Trade in one %s for %u CP?", name, Mtg_PointValue(id));
+            else
+                Ask(ACT_TRADE_ALL, id, "Trade in all %u spare %s for %u CP?", Mtg_Spare(c, id), name,
+                    Mtg_Spare(c, id) * Mtg_PointValue(id));
+        }
+    } else if (U.tab == 1) {
+        ShopRow list[SHOP_ROWS];
+        int n = ShopList(list);
+        MoveCursor(pressed, n);
+        if (pressed & KEY_A && U.cursor < n) {
+            const ShopRow *r = &list[U.cursor];
+            unsigned cost = ShopRowCost(r);
+            PlaySE(SE_SELECT);
+            if (r->kind == SR_CARD) {
+                Screen(M_BINDER);
+                U.showAll = SHOP_BINDER;
+                U.filter = FILTERS - 1;
+                BuildList(0);
+            } else if (Points() < cost)
+                Say(ACT_NONE, "That takes %u CARD POINTS. You have %u.", cost, Points());
+            else if (r->kind == SR_PACK)
+                Ask(ACT_BUY_PACK, r->arg, "A %s booster for %u CARD POINTS?", gMtgSets[r->arg].code, cost);
+            else if (r->kind == SR_DECK)
+                Ask(ACT_BUY_DECK, r->arg, "The %s structure deck for %u CARD POINTS?", gMtgPrecons[r->arg].name, cost);
+            else
+                Ask(ACT_BUY_ITEM, r->arg, "%s for %u CP?", sItemNames[r->arg], cost);
+        }
+    } else {
+        MoveCursor(pressed, PrizeRows());
+        if (pressed & KEY_A)
+            ClaimPrize(U.cursor);
+    }
 }
 
 static void Inspect(int card, int back)
@@ -1418,6 +1759,7 @@ void MtgUi_OpenShop(void)   // the CARD SHOP's clerk: boosters for CARD POINTS
     Mtg_EnsureDb();
     U.returnToGame = NULL;
     Open(M_SHOP);
+    U.tab = 0;
     U.fromScript = 1;
     MPNet_Log("mtg: card shop");
 }
@@ -1578,6 +1920,90 @@ static void Act(int action)
             Say(ACT_NONE, "A %s booster went into your CARD CASE.", gMtgSets[U.askArg].code);
         } else
             Say(ACT_NONE, "You can't carry more %s boosters.", gMtgSets[U.askArg].code);
+        break;
+    case ACT_TRADE_ONE:
+    case ACT_TRADE_ALL: {
+        uint32_t points = 0;
+        unsigned n = action == ACT_TRADE_ONE ? 1 : Mtg_Spare(c, U.askArg);
+        char name[64];
+        PlainName(name, sizeof(name), U.askArg);
+        if (Mtg_TradeIn(c, U.askArg, n, &points)) {
+            Tcg_GetCollection()->dust += points;
+            PlaySE(SE_SHOP);
+            MPNet_Log("mtg: traded in %u %s for %u CP", n, name, (unsigned)points);
+            Say(ACT_NONE, "Traded in %u x %s for %u CARD POINTS.", n, name, (unsigned)points);
+        }
+        break;
+    }
+    case ACT_TRADE_EVERY: {
+        static uint16_t list[MTG_COLLECTION_CARDS];
+        int k, n = SpareList(list);
+        uint32_t points = 0;
+        unsigned count = 0;
+        for (k = 0; k < n; k++) {
+            unsigned spare = Mtg_Spare(c, list[k]);
+            if (Mtg_TradeIn(c, list[k], spare, &points))
+                count += spare;
+        }
+        Tcg_GetCollection()->dust += points;
+        PlaySE(SE_SHOP);
+        MPNet_Log("mtg: traded in %u spare cards for %u CP", count, (unsigned)points);
+        Say(ACT_NONE, "Traded in %u spare cards for %u CARD POINTS.", count, (unsigned)points);
+        U.cursor = 0;
+        break;
+    }
+    case ACT_BUY_DECK: {
+        // the deck's cards into the collection, and the deck into an empty slot when there is one
+        MtgSavedDeck d;
+        unsigned cost = Mtg_PreconCost(U.askArg);
+        int i, slot = EmptySlot();
+        if (Points() < cost || Mtg_PreconDeck(U.askArg, &d))
+            break;
+        Tcg_GetCollection()->dust -= cost;
+        for (i = 0; i < d.count; i++)
+            if (!Mtg_IsBasicLand(d.cards[i]) && c->owned[d.cards[i]] < MTG_OWNED_MAX)
+                c->owned[d.cards[i]]++;
+        if (c->preconsBought < 0xffff)
+            c->preconsBought++;
+        PlaySE(SE_SHOP);
+        MPNet_Log("mtg: bought the %s structure deck", gMtgPrecons[U.askArg].name);
+        if (slot < MTG_DECKS) {
+            c->decks[slot] = d;
+            snprintf(c->decks[slot].name, MTG_DECK_NAME, "%s", gMtgPrecons[U.askArg].name);
+            c->ace[slot] = -1;
+            c->tray[slot] = 0;
+            Say(ACT_NONE, "The %s deck is yours: its cards are in your BINDER and the deck is in slot %d.",
+                gMtgPrecons[U.askArg].name, slot + 1);
+        } else
+            Say(ACT_NONE, "The %s deck's cards are in your BINDER. (Every deck slot is full.)",
+                gMtgPrecons[U.askArg].name);
+        break;
+    }
+    case ACT_BUY_CARD: {
+        unsigned cost = Mtg_PointCost(U.askArg);
+        char name[64];
+        PlainName(name, sizeof(name), U.askArg);
+        if (!cost || Points() < cost || c->owned[U.askArg] >= MTG_OWNED_MAX)
+            break;
+        Tcg_GetCollection()->dust -= cost;
+        c->owned[U.askArg]++;
+        PlaySE(SE_SHOP);
+        MPNet_Log("mtg: bought %s for %u CP", name, cost);
+        Say(ACT_NONE, "You got %s!", name);
+        break;
+    }
+    case ACT_BUY_ITEM:
+        if (Points() < sItemCost[U.askArg])
+            break;
+        if (U.askArg == ITEM_BUY_TICKET)
+            MP_Gatcha_AddTickets(1);
+        else if (!AddBagItem(U.askArg == ITEM_BUY_CANDY ? ITEM_RARE_CANDY : ITEM_PP_UP, 1)) {
+            Say(ACT_NONE, "Your BAG is full.");
+            break;
+        }
+        Tcg_GetCollection()->dust -= sItemCost[U.askArg];
+        PlaySE(SE_SHOP);
+        Say(ACT_NONE, "You got the %s!", sItemNames[U.askArg]);
         break;
     case ACT_COPY: {
         int d = EmptySlot();
@@ -1968,9 +2394,37 @@ int MtgUi_Step(unsigned keys)
         StepBuilder(pressed);
         break;
     case M_BINDER:
-        if (pressed & (KEY_L | KEY_R))
+        if (U.showAll == SHOP_BINDER && pressed & (KEY_A | KEY_B)) {   // the counter's "card you pick"
+            if (pressed & KEY_B) {
+                PlaySE(SE_SELECT);
+                Screen(M_SHOP);
+                U.tab = 1;
+                U.showAll = 0;
+                {
+                    ShopRow list[SHOP_ROWS];
+                    int n = ShopList(list), k;
+                    for (k = 0; k < n; k++)
+                        if (list[k].kind == SR_CARD)
+                            U.cursor = k;
+                }
+            } else if (U.cursor < U.listCount) {
+                int id = U.list[U.cursor];
+                unsigned cost = Mtg_PointCost(id);
+                char name[64];
+                PlainName(name, sizeof(name), id);
+                PlaySE(SE_SELECT);
+                if (!cost)
+                    Say(ACT_NONE, "The CARD SHOP doesn't sell %s.", name);
+                else if (c->owned[id] >= MTG_OWNED_MAX)
+                    Say(ACT_NONE, "You can't carry more of %s.", name);
+                else if (Points() < cost)
+                    Say(ACT_NONE, "%s costs %u CP. You have %u.", name, cost, Points());
+                else
+                    Ask(ACT_BUY_CARD, id, "%s for %u CP?", name, cost);
+            }
+        } else if (pressed & (KEY_L | KEY_R))
             Filter(pressed, FILTERS);
-        else if (pressed & KEY_SELECT) {   // every card, or the owned ones
+        else if (pressed & KEY_SELECT && U.showAll != SHOP_BINDER) {   // every card, or the owned ones
             U.showAll ^= 1;
             U.cursor = 0;
             BuildList(0);
@@ -2081,23 +2535,9 @@ int MtgUi_Step(unsigned keys)
         }
         break;
     }
-    case M_SHOP: {
-        uint8_t sets[MTG_SETS];
-        int n = ShopRows(sets);
-        MoveCursor(pressed, n);
-        if (pressed & KEY_B) {
-            PlaySE(SE_SELECT);
-            Close();
-        } else if (pressed & KEY_A && n) {
-            PlaySE(SE_SELECT);
-            if (Points() >= MTG_PACK_COST)
-                Ask(ACT_BUY_PACK, sets[U.cursor], "A %s booster for %u CARD POINTS?", gMtgSets[sets[U.cursor]].code,
-                    MTG_PACK_COST);
-            else
-                Say(ACT_NONE, "A booster takes %u CARD POINTS. You have %u.", MTG_PACK_COST, Points());
-        }
+    case M_SHOP:
+        ShopStep(pressed);
         break;
-    }
     }
     return 1;
 }

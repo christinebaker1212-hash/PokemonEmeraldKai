@@ -115,6 +115,10 @@ screens copy the POKeMON / YU-GI-OH! sides' in every detail and its table is the
 them so), faces src/mtg/mtg_gfx.c with Scryfall's art (graphics/mtg/printed.bin: tools/mtg/fetch_art.py,
 build_printed.py). Boosters by set (1.100.0: src/mtg/mtg_sets.c, data src/mtg/mtg_sets_data.c from tools/mtg/fetch_sets.py),
 triggers src/mtg/mtg_trigger.c, MAGIC achievements (mp_achieve.c C_MAGIC). The CARD CASE's L / R round: POKeMON, YU-GI-OH!, MAGIC, TRIPLE TRIAD (always last).
+The CARD SHOP counter as POKeMON's (1.167.0: TRADE IN spares, CARD SHOP, PRIZES; mtg_ui.c ShopScreen) and curated
+structure decks from real precons that appear once their cards play (tools/mtg/fetch_precons.py CURATED ->
+src/mtg/mtg_precons_data.c): COOP_NOTES "MAGIC's CARD SHOP counter and structure decks". **MOSSDEEP's CARD CLUB maps
+are the user's (2026-11-07): change only data/scripts/mtg_shop.inc and the C behind it.**
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

@@ -1,0 +1,79 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp mtg starter 0
+mp mtg points 400
+mp mtg own 6 Raging Goblin
+mp mtg own 9 Shock
+mp mtg shop
+wait 20
+rendershot a_trade
+press A 2
+wait 10
+rendershot a_trade_ask
+press A 2
+wait 10
+press A 2
+wait 10
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press A 2
+wait 10
+press A 2
+wait 10
+press A 2
+wait 10
+mp mtg state
+press R 2
+wait 10
+rendershot a_deck
+press A 2
+wait 10
+press A 2
+wait 10
+rendershot a_deck_bought
+press A 2
+wait 10
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press A 2
+wait 10
+rendershot a_pick
+press A 2
+wait 10
+press A 2
+wait 10
+press A 2
+wait 10
+press B 2
+wait 10
+press R 2
+wait 10
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+rendershot a_prize
+press A 2
+wait 120
+rendershot a_prize_got
+press A 2
+wait 20
+mp mtg state
+press B 2
+wait 30
+quit

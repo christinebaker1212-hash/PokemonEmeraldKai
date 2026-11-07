@@ -874,6 +874,13 @@
 "number": "140",
 "set": "scg"
 },
+"Armadillo Cloak": {
+"artist": "Paolo Parente",
+"file": "inv_229",
+"frame": "1997",
+"number": "229",
+"set": "inv"
+},
 "Armageddon": {
 "artist": "Jesper Myrfors",
 "file": "4ed_5",
@@ -1146,6 +1153,13 @@
 "frame": "1997",
 "number": "30",
 "set": "lgn"
+},
+"Aven Fateshaper": {
+"artist": "Anthony S. Waters",
+"file": "ons_69",
+"frame": "1997",
+"number": "69",
+"set": "ons"
 },
 "Aven Fisher": {
 "artist": "Christopher Moeller",
@@ -3982,6 +3996,13 @@
 "number": "100",
 "set": "pls"
 },
+"Daring Apprentice": {
+"artist": "Kaja Foglio",
+"file": "mir_60",
+"frame": "1997",
+"number": "60",
+"set": "mir"
+},
 "Daring Leap": {
 "artist": "Paolo Parente",
 "file": "pls_101",
@@ -4514,6 +4535,13 @@
 "number": "139",
 "set": "ons"
 },
+"Discombobulate": {
+"artist": "Alex Horley-Orlandelli",
+"file": "ons_79",
+"frame": "1997",
+"number": "79",
+"set": "ons"
+},
 "Disease Carriers": {
 "artist": "Chippy & Matthew D. Wilson",
 "file": "uds_57",
@@ -4654,6 +4682,13 @@
 "number": "161",
 "set": "vis"
 },
+"Doubtless One": {
+"artist": "Justin Sweet",
+"file": "ons_27",
+"frame": "1997",
+"number": "27",
+"set": "ons"
+},
 "Douse": {
 "artist": "Val Mayerik",
 "file": "usg_70",
@@ -4786,6 +4821,13 @@
 "frame": "1997",
 "number": "320",
 "set": "usg"
+},
+"Drinker of Sorrow": {
+"artist": "Carl Critchlow",
+"file": "lgn_66",
+"frame": "1997",
+"number": "66",
+"set": "lgn"
 },
 "Dripping Dead": {
 "artist": "Thomas M. Baxa",
@@ -5102,6 +5144,13 @@
 "number": "13",
 "set": "mir"
 },
+"El-Hajjâj": {
+"artist": "Dameon Willich",
+"file": "4ed_134",
+"frame": "1993",
+"number": "134",
+"set": "4ed"
+},
 "Eladamri's Call": {
 "artist": "Kev Walker",
 "file": "pls_106",
@@ -5122,6 +5171,13 @@
 "frame": "1997",
 "number": "224",
 "set": "tmp"
+},
+"Elemental Augury": {
+"artist": "Anthony S. Waters",
+"file": "ice_286",
+"frame": "1993",
+"number": "286",
+"set": "ice"
 },
 "Elephant Guide": {
 "artist": "Jim Nelson",
@@ -5283,6 +5339,13 @@
 "frame": "1997",
 "number": "87",
 "set": "jud"
+},
+"Emberwilde Caliph": {
+"artist": "Jennifer Law",
+"file": "mir_262",
+"frame": "1997",
+"number": "262",
+"set": "mir"
 },
 "Emerald Dragonfly": {
 "artist": "Quinton Hoover",
@@ -5493,6 +5556,13 @@
 "frame": "1997",
 "number": "82",
 "set": "ons"
+},
+"Essence Sliver": {
+"artist": "Glen Angus",
+"file": "lgn_13",
+"frame": "1997",
+"number": "13",
+"set": "lgn"
 },
 "Eternal Warrior": {
 "artist": "Anson Maddocks",
@@ -7447,6 +7517,13 @@
 "number": "40",
 "set": "apc"
 },
+"Gravebane Zombie": {
+"artist": "Gary Leach",
+"file": "mir_127",
+"frame": "1997",
+"number": "127",
+"set": "mir"
+},
 "Gravebind": {
 "artist": "Drew Tucker",
 "file": "ice_129",
@@ -7566,6 +7643,13 @@
 "number": "16",
 "set": "wth"
 },
+"Guilty Conscience": {
+"artist": "Christopher Moeller",
+"file": "scg_17",
+"frame": "1997",
+"number": "17",
+"set": "scg"
+},
 "Guma": {
 "artist": "Daren Bader",
 "file": "usg_197",
@@ -7627,6 +7711,13 @@
 "file": "mir_128",
 "frame": "1997",
 "number": "128",
+"set": "mir"
+},
+"Harbor Guardian": {
+"artist": "Stuart Beel",
+"file": "mir_266",
+"frame": "1997",
+"number": "266",
 "set": "mir"
 },
 "Harmattan Efreet": {
@@ -8049,6 +8140,13 @@
 "number": "299",
 "set": "mmq"
 },
+"Horned Cheetah": {
+"artist": "John Matson",
+"file": "inv_251",
+"frame": "1997",
+"number": "251",
+"set": "inv"
+},
 "Horned Kavu": {
 "artist": "Michael Sutfin",
 "file": "pls_110",
@@ -8322,6 +8420,13 @@
 "number": "7",
 "set": "bchr"
 },
+"Index": {
+"artist": "Kev Walker",
+"file": "apc_25",
+"frame": "1997",
+"number": "25",
+"set": "apc"
+},
 "Infantry Veteran": {
 "artist": "Christopher Rush",
 "file": "vis_9",
@@ -8370,6 +8475,13 @@
 "frame": "1997",
 "number": "91",
 "set": "pcy"
+},
+"Information Dealer": {
+"artist": "Jerry Tiritilli",
+"file": "ons_88",
+"frame": "1997",
+"number": "88",
+"set": "ons"
 },
 "Infuse": {
 "artist": "Randy Gallegos",
@@ -8748,6 +8860,13 @@
 "frame": "1993",
 "number": "143",
 "set": "4ed"
+},
+"Justice": {
+"artist": "Ruth Thompson",
+"file": "ice_32",
+"frame": "1993",
+"number": "32",
+"set": "ice"
 },
 "Kaervek's Hex": {
 "artist": "Ian Miller",
@@ -10093,6 +10212,13 @@
 "number": "27",
 "set": "mir"
 },
+"Memory Lapse": {
+"artist": "Mark Tedin",
+"file": "hml_32a",
+"frame": "1993",
+"number": "32a",
+"set": "hml"
+},
 "Mental Discipline": {
 "artist": "Edward P. Beard, Jr.",
 "file": "uds_37",
@@ -10358,6 +10484,13 @@
 "frame": "1997",
 "number": "131",
 "set": "mir"
+},
+"Mirri's Guile": {
+"artist": "Brom",
+"file": "tmp_236",
+"frame": "1997",
+"number": "236",
+"set": "tmp"
 },
 "Mirri, Cat Warrior": {
 "artist": "Daren Bader",
@@ -11086,6 +11219,13 @@
 "frame": "1997",
 "number": "257",
 "set": "inv"
+},
+"Noble Purpose": {
+"artist": "Kev Walker",
+"file": "mmq_32",
+"frame": "1997",
+"number": "32",
+"set": "mmq"
 },
 "Noble Stand": {
 "artist": "Greg Hildebrandt & Tim Hildebrandt",
@@ -13726,6 +13866,20 @@
 "number": "39",
 "set": "tmp"
 },
+"Sage Aven": {
+"artist": "Randy Gallegos",
+"file": "ons_111",
+"frame": "1997",
+"number": "111",
+"set": "ons"
+},
+"Sage Owl": {
+"artist": "Mark Poole",
+"file": "wth_52",
+"frame": "1997",
+"number": "52",
+"set": "wth"
+},
 "Salt Flats": {
 "artist": "Scott Kirschner",
 "file": "tmp_324",
@@ -14713,6 +14867,13 @@
 "number": "47",
 "set": "pcy"
 },
+"Sibilant Spirit": {
+"artist": "Ron Spencer",
+"file": "ice_97",
+"frame": "1993",
+"number": "97",
+"set": "ice"
+},
 "Sick and Tired": {
 "artist": "Val Mayerik",
 "file": "ulg_66",
@@ -15420,6 +15581,13 @@
 "number": "162",
 "set": "ice"
 },
+"Soul Link": {
+"artist": "Jeff Easley",
+"file": "apc_120",
+"frame": "1997",
+"number": "120",
+"set": "apc"
+},
 "Soul Rend": {
 "artist": "Jeff Miracola",
 "file": "mir_144",
@@ -15664,6 +15832,20 @@
 "frame": "1997",
 "number": "71",
 "set": "nem"
+},
+"Spire Owl": {
+"artist": "Steve Firchow",
+"file": "usg_98",
+"frame": "1997",
+"number": "98",
+"set": "usg"
+},
+"Spirit Link": {
+"artist": "Kaja Foglio",
+"file": "4ed_51",
+"frame": "1993",
+"number": "51",
+"set": "4ed"
 },
 "Spirit Shackle": {
 "artist": "Edward P. Beard, Jr.",
@@ -17541,6 +17723,13 @@
 "number": "362",
 "set": "ice"
 },
+"Undermine": {
+"artist": "Massimiliano Frezzato",
+"file": "inv_282",
+"frame": "1997",
+"number": "282",
+"set": "inv"
+},
 "Undertaker": {
 "artist": "Jeff Easley",
 "file": "mmq_167",
@@ -18486,6 +18675,13 @@
 "number": "56",
 "set": "lgn"
 },
+"Warrior Angel": {
+"artist": "Brom",
+"file": "sth_24",
+"frame": "1997",
+"number": "24",
+"set": "sth"
+},
 "Warrior's Honor": {
 "artist": "D. Alexander Gregory",
 "file": "vis_24",
@@ -19192,6 +19388,13 @@
 "frame": "1997",
 "number": "180",
 "set": "inv"
+},
+"Zebra Unicorn": {
+"artist": "Margaret Organ-Kean",
+"file": "mir_290",
+"frame": "1997",
+"number": "290",
+"set": "mir"
 },
 "Zephid": {
 "artist": "Daren Bader",

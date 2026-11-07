@@ -167,6 +167,21 @@ void Mtg_Debug(const char *command)
         MPNet_Log("mtg: state optedIn %u deck %u (%s, %u cards) wins %u losses %u beaten %x owned %d (%d kinds)",
                   c->optedIn, c->activeDeck, c->decks[c->activeDeck].name, c->decks[c->activeDeck].count, c->wins,
                   c->losses, c->beaten, owned, kinds);
+        MPNet_Log("mtg: counter cp %u decks bought %u prizes %x", Tcg_GetCollection()->dust, c->preconsBought,
+                  c->rewards);
+        for (i = 0; i < MTG_DECKS; i++)
+            if (c->decks[i].count)
+                MPNet_Log("mtg: deck slot %d %s (%u cards)", i, c->decks[i].name, c->decks[i].count);
+    } else if (strncmp(command, "own ", 4) == 0) {   // own N NAME: copies of a card in the collection
+        int at = 0, id;
+        if (sscanf(command + 4, "%u %n", &n, &at) == 1 && at && (id = Mtg_CardByName(command + 4 + at)) >= 0) {
+            c->owned[id] = (uint8_t)(n > MTG_OWNED_MAX ? MTG_OWNED_MAX : n);
+            MPNet_Log("mtg: own %u %s", n, Mtg_Card(id)->name);
+        } else
+            MPNet_Log("mtg: own N NAME");
+    } else if (strncmp(command, "shop", 4) == 0) {
+        void MtgUi_OpenShop(void);
+        MtgUi_OpenShop();
     } else if (sscanf(command, "duel %u", &n) == 1)
         MtgUi_OpenChallenge(n);
     else if (sscanf(command, "autoplay %u", &n) == 1)

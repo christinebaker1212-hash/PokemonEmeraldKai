@@ -1,0 +1,8 @@
+# MAGIC's CARD SHOP counter, as the POKeMON CARD CLUB's: TRADE IN one spare RAGING GOBLIN (6 owned, four kept), then
+# ALL SPARES (the other goblin and five SHOCKs: 7 CP in all, 407); the CARD SHOP tab's first structure deck (SIXTH STARTER A, 60 CP:
+# its cards owned and the deck in slot 1), A CARD YOU PICK (the binder as a price list: the second card bought); PRIZES'
+# 1 DECK milestone claimed (WRATH OF GOD, bit 10). The case's menu shows CARD POINTS (mtg_shop shows it).
+MODE=1
+TMO=200
+EXPECT_A=("mtg: traded in 1 Raging Goblin for 1 CP" "mtg: traded in 6 spare cards for 6 CP" "mtg: counter cp 407 decks bought 0" "mtg: bought the SIXTH STARTER A structure deck" "mtg: deck slot 1 SIXTH STARTER A (40 cards)" "mtg: bought " "CP" "mtg: prize 1 DECK claimed" "prizes 400")
+UNEXPECT_A=("[crash]" "mtg: unknown command")

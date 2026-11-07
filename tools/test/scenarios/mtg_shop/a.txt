@@ -250,7 +250,20 @@ press A 2
 wait 40
 pressuntillog A 600 mtg: card shop
 wait 20
+rendershot a_shop_trade
+press R 2
+wait 10
 rendershot a_shop
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
 press A 2
 wait 10
 rendershot a_shop_ask
@@ -258,6 +271,9 @@ press A 2
 wait 10
 press A 2
 wait 10
+press R 2
+wait 10
+rendershot a_shop_prizes
 press B 2
 wait 40
 press A 2

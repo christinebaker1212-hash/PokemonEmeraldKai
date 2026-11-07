@@ -17,12 +17,14 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"DelayedTrigger", MTG_API_DELAYED_TRIGGER}, {"PreventDamage", MTG_API_PREVENT_DAMAGE},
     {"GainControl", MTG_API_GAIN_CONTROL}, {"PutCounterAll", MTG_API_PUT_COUNTER_ALL},
     {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG}, {"Mill", MTG_API_MILL}, {"FlipCoin", MTG_API_FLIP_COIN}, {"Cleanup", MTG_API_CLEANUP}, {"Reveal", MTG_API_REVEAL}, {"RepeatEach", MTG_API_REPEAT_EACH}, {"SetLife", MTG_API_SET_LIFE}, {"Effect", MTG_API_EFFECT}, {"Fog", MTG_API_FOG}, {"ChooseSource", MTG_API_CHOOSE_SOURCE},
+    {"RearrangeTopOfLibrary", MTG_API_REARRANGE_TOP},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
     "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal", "RepeatEach", "SetLife", "Effect", "Fog", "ChooseSource",
+    "RearrangeTopOfLibrary",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -222,6 +224,7 @@ static const struct { const char *name; uint8_t mode, what; } sTriggered[] = {
     {"Card", MTG_TRIG_CYCLED, TW_OBJ}, {"Card", MTG_TRIG_TAPS, TW_OBJ}, {"Card", MTG_TRIG_LAND_PLAYED, TW_OBJ},
     {"Target", MTG_TRIG_BECOMES_TARGET, TW_OBJ}, {"Source", MTG_TRIG_BECOMES_TARGET, TW_OBJ2},
     {"Source", MTG_TRIG_DAMAGE_DONE_ONCE, TW_OBJ}, {"Target", MTG_TRIG_DAMAGE_DONE_ONCE, TW_TARGET},
+    {"Source", MTG_TRIG_DAMAGE_DEALT_ONCE, TW_OBJ}, {"Target", MTG_TRIG_DAMAGE_DEALT_ONCE, TW_TARGET},
     {"Source", MTG_TRIG_DAMAGE_DONE, TW_OBJ}, {"Target", MTG_TRIG_DAMAGE_DONE, TW_TARGET},
     {"Attacker", MTG_TRIG_ATTACKS, TW_OBJ}, {"Defender", MTG_TRIG_ATTACKS, TW_PLAYER},
     {"DefendingPlayer", MTG_TRIG_ATTACKS, TW_PLAYER},
@@ -794,7 +797,7 @@ static void Pump(MtgDuel *d, int obj, int att, int def, uint32_t kw)
     o->tempKeywords |= kw;
 }
 
-static void CounterSpell(MtgDuel *d, int sourceObj)
+static void CounterSpell(MtgDuel *d, int sourceObj, int toLibraryTop)   // (Destination$ TopOfLibrary: MEMORY LAPSE)
 {
     int i;
     if (Mtg_Card(d->objs[sourceObj].def)->cantBeCountered
@@ -804,7 +807,10 @@ static void CounterSpell(MtgDuel *d, int sourceObj)
         if (d->stack[i].source == sourceObj && d->stack[i].isSpell) {
             memmove(&d->stack[i], &d->stack[i + 1], (d->stackCount - i - 1) * sizeof(d->stack[0]));
             d->stackCount--;
-            Mtg_MoveTo(d, sourceObj, MTG_ZONE_GRAVEYARD);
+            if (toLibraryTop)
+                Mtg_PutInLibrary(d, sourceObj, 0);
+            else
+                Mtg_MoveTo(d, sourceObj, MTG_ZONE_GRAVEYARD);
             Mtg_Event(d, MTG_EV_COUNTERED, sourceObj, 0, 0);
             return;
         }
@@ -846,6 +852,16 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         const char *nc = Mtg_Param(ab, "NumCards");
         int n = nc ? Mtg_Amount(d, ctx, card, nc, &ok) : 1;
         Targets(d, ctx, ab, DEF_PLAYER, &who);
+        if (Mtg_Param(ab, "OptionalDecider") && who.n && who.t[0].kind == MTG_TGT_PLAYER) {
+            // DrawEffect's OptionalDecider$ True: the one who would draw may (SIBILANT SPIRIT's defending player)
+            if (d->resChoice < 0) {
+                Mtg_AskChoice(d, who.t[0].id, MTG_CHOICE_YESNO, NULL);
+                return 0;
+            }
+            if (d->resChoice == 0)
+                who.n = 0;
+            d->resChoice = -1;
+        }
         for (i = 0; i < who.n; i++)
             if (who.t[i].kind == MTG_TGT_PLAYER)
                 Mtg_Draw(d, who.t[i].id, n);
@@ -1206,7 +1222,7 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         Targets(d, ctx, ab, DEF_CARD, &who);
         for (i = 0; i < who.n; i++)
             if (who.t[i].kind == MTG_TGT_STACK)
-                CounterSpell(d, who.t[i].id);
+                CounterSpell(d, who.t[i].id, Mtg_Param(ab, "Destination") && !strcmp(Mtg_Param(ab, "Destination"), "TopOfLibrary"));
         break;
     case MTG_API_SACRIFICE: {   // SacrificeEffect: SacValid$ Self (its source), or each Defined$ player chooses
         const char *valid = Mtg_Param(ab, "SacValid"), *amt = Mtg_Param(ab, "Amount");
@@ -1292,6 +1308,37 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                 Mtg_Event(d, MTG_EV_CHOSEN, list[i], ctx->controller, 0);
             }
         d->resChoice = -1;
+        break;
+    }
+    case MTG_API_REARRANGE_TOP: {   // RearrangeTopOfLibraryEffect: the top cards put back, its owner picking each from
+        // the top down (d->resPicks placed so far; the last left is the bottom one)
+        MtgPlayer *pl;
+        int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "NumCards"), &ok), owner;
+        Targets(d, ctx, ab, DEF_PLAYER, &who);
+        if (!who.n || who.t[0].kind != MTG_TGT_PLAYER)
+            break;
+        owner = who.t[0].id;
+        pl = &d->players[owner];
+        if (n > pl->libraryCount)
+            n = pl->libraryCount;
+        while (d->resPicks < n - 1) {
+            uint16_t list[MTG_MAX_COMBAT];
+            int k, m = n - d->resPicks, top = pl->libraryCount - 1 - d->resPicks;
+            for (k = 0; k < m && k < MTG_MAX_COMBAT; k++)
+                list[k] = pl->library[top - k];
+            if (d->resChoice < 0)
+                return AskPick(d, owner, list, m);
+            for (k = 0; k < m; k++)
+                if (pl->library[top - k] == d->resChoice) {   // (the pick goes to the next place from the top)
+                    uint16_t t = pl->library[top];
+                    pl->library[top] = pl->library[top - k];
+                    pl->library[top - k] = t;
+                    break;
+                }
+            d->resChoice = -1;
+            d->resPicks++;
+        }
+        d->resPicks = 0;
         break;
     }
     case MTG_API_REVEAL: {   // RevealEffect: cards of a hand shown and remembered (AnyNumber$: every one that may be)
@@ -1547,7 +1594,9 @@ static const char *const sCommon[] = {
 static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},
     [MTG_API_DAMAGE_ALL] = {"NumDmg", "ValidCards", "ValidPlayers", "ValidDescription"},
-    [MTG_API_DRAW] = {"NumCards"},
+    [MTG_API_DRAW] = {"NumCards", "OptionalDecider"},
+    [MTG_API_COUNTER] = {"Destination"},
+    [MTG_API_REARRANGE_TOP] = {"NumCards"},
     [MTG_API_DESTROY] = {"NoRegen"},
     [MTG_API_DESTROY_ALL] = {"ValidCards", "NoRegen"},
     [MTG_API_CHANGE_ZONE_ALL] = {"Origin", "Destination", "ChangeType", "Shuffle", "UseAllOriginZones", "LibraryPosition"},
@@ -1685,6 +1734,8 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     case MTG_API_DISCARD:
         if (!AmountKnown(ab, "NumCards", 0))
             return 0;
+        if ((v = Mtg_Param(ab, "OptionalDecider")) && strcmp(v, "True"))
+            return 0;
         if (ab->api == MTG_API_DISCARD) {
             v = Mtg_Param(ab, "Mode");
             if (!v || (strcmp(v, "Random") && strcmp(v, "TgtChoose") && strcmp(v, "Hand")))
@@ -1697,6 +1748,8 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return (v = Mtg_Param(ab, "ValidCards")) && Mtg_ValidSpecKnown(v);
     case MTG_API_MILL:
         return AmountKnown(ab, "NumCards", 0);
+    case MTG_API_REARRANGE_TOP:
+        return AmountKnown(ab, "NumCards", 1) && (!(v = Mtg_Param(ab, "Defined")) || !strcmp(v, "You"));
     case MTG_API_CLEANUP:
         return 1;
     case MTG_API_FOG:
@@ -1868,7 +1921,7 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
             return 0;   // (a spell choosing its color: not yet)
         return 1;
     case MTG_API_COUNTER:
-        return ab->tgtStack;
+        return ab->tgtStack && (!(v = Mtg_Param(ab, "Destination")) || !strcmp(v, "Graveyard") || !strcmp(v, "TopOfLibrary"));
     case MTG_API_TOKEN:
         v = Mtg_Param(ab, "TokenOwner");
         if (v && !InList(v, sPayersKnown, (int)(sizeof(sPayersKnown) / sizeof(sPayersKnown[0])))

@@ -1437,6 +1437,96 @@ static void TestDelayed(void)
     CHECK(Zone(wurm) == MTG_ZONE_GRAVEYARD && Zone(basilisk) == MTG_ZONE_GRAVEYARD, "destroyed at end of combat");
 }
 
+// The structure decks' cards (1.167.0): "whenever it deals damage", counters to the library's top, "may draw",
+// rearranging the top of the library, "if it would die, put it on top of its owner's library instead"
+static void TestDeckCards(void)
+{
+    int link, bears, zombie, lapse, bolt, owl, spirit, apprentice, i, hand, top[4];
+    static const char *const cards[] = {"Spirit Link", "Essence Sliver", "Gravebane Zombie", "Memory Lapse",
+                                        "Daring Apprentice", "Sibilant Spirit", "Sage Owl", NULL};
+    const MtgQuery *q;
+    printf("the structure decks' cards: deals damage, counters, may draw, rearrange, dies to the library\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Spirit Link on the bears: 2 combat damage, 2 life
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    link = Put(0, "Spirit Link", MTG_ZONE_BATTLEFIELD);
+    sD.objs[link].attachedTo = (uint16_t)bears;
+    Attack(1u << 0);
+    GoTo(0, MTG_STEP_MAIN2);
+    CHECK(sD.players[1].life == 18 && sD.players[0].life == 22, "the bears' 2 damage: 2 life (%d, %d)",
+          sD.players[0].life, sD.players[1].life);
+
+    Table();   // Gravebane Zombie: Lightning Bolt puts it on top of its owner's library
+    zombie = Put(1, "Gravebane Zombie", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Mountain", 1);
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, zombie);
+    PassBoth();
+    CHECK(Zone(zombie) == MTG_ZONE_LIBRARY && sD.players[1].library[sD.players[1].libraryCount - 1] == zombie,
+          "the zombie went on top of the library, not the graveyard (zone %d)", Zone(zombie));
+
+    Table();   // Memory Lapse: the bolt on top of its owner's library
+    Lands(0, "Mountain", 1);
+    Lands(1, "Island", 2);
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    lapse = Put(1, "Memory Lapse", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_PLAYER, 1);
+    Pass();   // (player 1 may answer)
+    Do(MTG_ACT_CAST, lapse, MTG_TGT_STACK, bolt);
+    PassBoth();
+    CHECK(Zone(bolt) == MTG_ZONE_LIBRARY && sD.players[0].library[sD.players[0].libraryCount - 1] == bolt
+          && sD.players[1].life == 20, "the bolt countered onto the top of the library");
+
+    Table();   // Daring Apprentice: tapped and sacrificed, the bolt countered (to the graveyard)
+    Lands(0, "Mountain", 1);
+    apprentice = Put(1, "Daring Apprentice", MTG_ZONE_BATTLEFIELD);
+    sD.objs[apprentice].sick = 0;
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_PLAYER, 1);
+    Pass();
+    Do(MTG_ACT_ACTIVATE, apprentice, MTG_TGT_STACK, bolt);
+    PassBoth();
+    CHECK(Zone(bolt) == MTG_ZONE_GRAVEYARD && Zone(apprentice) == MTG_ZONE_GRAVEYARD && sD.players[1].life == 20,
+          "the apprentice countered the bolt");
+
+    Table();   // Sibilant Spirit attacks: the defending player may draw (asked; yes draws one)
+    spirit = Put(0, "Sibilant Spirit", MTG_ZONE_BATTLEFIELD);
+    for (i = 0; i < 5; i++)
+        Put(1, "Island", MTG_ZONE_LIBRARY);
+    hand = HandCount(1);
+    Attack(1u << 0);
+    for (i = 0; i < 6 && (q = Mtg_Query(&sD))->kind == MTG_Q_PRIORITY; i++)
+        Pass();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_YESNO && q->player == 1, "the defending player is asked (%d %d)",
+          q->kind, q->player);
+    Choose(1);
+    CHECK(HandCount(1) == hand + 1, "they drew");
+    (void)spirit;
+
+    Table();   // Sage Owl: the top four put back in the order picked (the fourth from the top picked first: on top)
+    for (i = 0; i < 4; i++)
+        top[i] = sD.players[0].library[sD.players[0].libraryCount - 1 - i];
+    Lands(0, "Island", 2);
+    owl = Put(0, "Sage Owl", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, owl, -1, 0);
+    PassBoth();
+    for (i = 0; i < 4 && (q = Mtg_Query(&sD))->kind == MTG_Q_PRIORITY; i++)
+        Pass();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_PICK && q->candidateCount == 4, "four to put back (%d %d)",
+          q->kind, q->candidateCount);
+    ChoosePick(top[3]);   // (the fourth from the top goes on top)
+    for (i = 0; i < 2; i++) {
+        q = Mtg_Query(&sD);
+        if (q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_PICK)
+            Choose(0);
+    }
+    CHECK(sD.players[0].library[sD.players[0].libraryCount - 1] == top[3], "the fourth card is on top now");
+}
+
 // PreventDamage: "prevent the next n damage that would be dealt to ... this turn" (a shield, used up first)
 static void TestPrevent(void)
 {
@@ -2736,6 +2826,7 @@ static void TestCollection(void)
     for (k = 0; k < 41; k++)
         Mtg_DeckAdd(&c.decks[3], Card("Island"));
     c.wins = 7, c.beaten = 5, c.activeDeck = 3;
+    c.rewards = 0x8005, c.preconsBought = 3, c.setPrizes[2] = 5;   // (format 5: a set held for its PRIZES alone)
     c.ace[0] = (int16_t)Card("Llanowar Elves");
     c.tray[2] = 0x41;
     size = Mtg_CollectionWrite(&c, buf, sizeof(buf));
@@ -2752,8 +2843,9 @@ static void TestCollection(void)
           && back.packsOpened == 1, "the boosters came back");
     CHECK(Mtg_DeckAce(&back, 0) == (Mtg_DeckCopies(&back.decks[0], c.ace[0]) ? c.ace[0] : Mtg_AutoAce(back.decks[0].cards,
           back.decks[0].count)), "the ACE CARD stands for its deck");
+    CHECK(back.rewards == 0x8005 && back.preconsBought == 3 && back.setPrizes[2] == 5, "the PRIZES came back");
     {   // a format 1 file (no ACE CARDs at its end) still reads, every deck's ace picked by the game
-        uint32_t v4 = 3 + 6;   // (format 4's boosters: one set's)
+        uint32_t v4 = 3 + 7 * 2 + 6;   // (formats 4 and 5's end: two sets' records, the PRIZES)
         buf[4] = 1;
         CHECK(Mtg_CollectionRead(&back, buf, size - v4 - MTG_DECKS * 5) && back.ace[0] == -1
               && back.decks[3].count == 41 && !back.tray[2], "format 1 reads");
@@ -2765,6 +2857,40 @@ static void TestCollection(void)
         buf[4] = 4;
     }
     CHECK(!Mtg_CollectionRead(&back, buf, 3), "a cut file is refused");
+    {   // TRADE IN: copies past four and past what a deck uses; basic lands never
+        uint32_t points = 0;
+        int elf = Card("Llanowar Elves"), forest = Card("Forest");
+        c.owned[elf] = 7;
+        CHECK(Mtg_Spare(&c, elf) == 3, "7 elves, four kept: 3 spare (got %u)", Mtg_Spare(&c, elf));
+        CHECK(Mtg_Spare(&c, forest) == 0 && Mtg_PointValue(forest) == 0, "basic lands aren't traded");
+        CHECK(Mtg_TradeIn(&c, elf, 3, &points) && c.owned[elf] == 4 && points == 3 * Mtg_PointValue(elf),
+              "three traded in for %u CP", points);
+        CHECK(!Mtg_TradeIn(&c, elf, 1, &points), "the last four stay");
+        CHECK(Mtg_PointCost(Card("Shivan Dragon")) == 50 && Mtg_PointCost(Card("Llanowar Elves")) == 5 && Mtg_PointCost(forest) == 0,
+              "prices by rarity");
+    }
+    {   // the structure decks: every card of each is in the pool; the ones that play make legal decks
+        int plays = 0;
+        char first[64];
+        for (k = 0; k < MTG_PRECONS; k++) {
+            const char *const *l;
+            int unknown = 0, missing = Mtg_PreconMissing(k, first, sizeof(first));
+            for (l = gMtgPrecons[k].cards; *l; l++) {
+                const char *name = strchr(*l, ' ');
+                unknown += !name || Mtg_CardByName(name + 1) < 0;
+            }
+            CHECK(!unknown, "structure deck %s: %d cards not in the pool", gMtgPrecons[k].name, unknown);
+            if (!missing) {
+                plays++;
+                CHECK(Mtg_PreconDeck(k, &d) == 0 && d.count >= MTG_DECK_MIN && !Mtg_DeckProblem(NULL, &d),
+                      "structure deck %s plays: %s", gMtgPrecons[k].name, Mtg_DeckProblem(NULL, &d));
+            } else
+                printf("  structure deck %s waits for %d card%s (%s...)\n", gMtgPrecons[k].name, missing,
+                       missing == 1 ? "" : "s", first);
+        }
+        printf("  %d of %d structure decks play\n", plays, MTG_PRECONS);
+        CHECK(plays >= 1, "a structure deck plays");
+    }
 }
 
 int main(int argc, char **argv)
@@ -2799,6 +2925,7 @@ int main(int argc, char **argv)
     TestTriggers();
     TestUnless();
     TestDelayed();
+    TestDeckCards();
     TestPrevent();
     TestControl();
     TestCounters();

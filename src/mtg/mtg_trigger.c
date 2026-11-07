@@ -16,6 +16,7 @@ static int sTrigCount, sTrigCap;
 const char *const gMtgTriggerModes[MTG_TRIG_COUNT] = {
     "", "ChangesZone", "Phase", "SpellCast", "DamageDone", "Attacks", "AttackerBlocked", "AttackerBlockedByCreature",
     "Blocks", "AttackerUnblocked", "Cycled", "Taps", "LandPlayed", "BecomesTarget", "Always", "DamageDoneOnce",
+    "DamageDealtOnce",
 };
 
 // the parameters each mode reads (besides the common ones)
@@ -28,6 +29,7 @@ static const char *const sModeKeys[MTG_TRIG_COUNT][4] = {
     [MTG_TRIG_LAND_PLAYED] = {"ValidCard"},
     [MTG_TRIG_BECOMES_TARGET] = {"ValidTarget", "ValidSource"},
     [MTG_TRIG_DAMAGE_DONE_ONCE] = {"ValidSource", "ValidTarget", "CombatDamage"},
+    [MTG_TRIG_DAMAGE_DEALT_ONCE] = {"ValidSource", "ValidTarget", "CombatDamage"},
     [MTG_TRIG_DAMAGE_DONE] = {"ValidSource", "ValidTarget", "CombatDamage"},
     [MTG_TRIG_ATTACKS] = {"ValidCard"},
     [MTG_TRIG_ATTACKER_BLOCKED] = {"ValidCard", "ValidBlocker"},
@@ -399,6 +401,7 @@ static int Matches(const MtgDuel *d, const MtgTrigger *t, int host, const MtgTri
         return ObjOk(d, t, "ValidCard", ev->obj, host) && PlayerOk(d, t, "ValidActivatingPlayer", ev->player, host);
     case MTG_TRIG_DAMAGE_DONE:
     case MTG_TRIG_DAMAGE_DONE_ONCE:   // (each damage here: "whenever it is dealt damage")
+    case MTG_TRIG_DAMAGE_DEALT_ONCE:  // (each damage here: "whenever it deals damage", the same life in the end)
         if ((v = Mtg_TriggerParam(t, "CombatDamage")) && (strcmp(v, "True") == 0) != (ev->combat != 0))
             return 0;
         if (!ObjOk(d, t, "ValidSource", ev->obj, host))

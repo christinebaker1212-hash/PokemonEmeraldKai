@@ -47,6 +47,7 @@ enum {
     MTG_API_EFFECT,           // EffectEffect: StaticAbilities$ in force for a while (MtgDuel.effects)
     MTG_API_FOG,              // FogEffect: all combat damage this turn is prevented (MtgDuel.fog)
     MTG_API_CHOOSE_SOURCE,    // ChooseSourceEffect: its controller picks a source (Choices$): MtgDuel.chosen1
+    MTG_API_REARRANGE_TOP,    // RearrangeTopOfLibraryEffect: the top NumCards$ put back in the order their owner picks
     MTG_API_COUNT
 };
 
@@ -146,6 +147,7 @@ enum {
     MTG_TRIG_ATTACKER_BLOCKED, MTG_TRIG_ATTACKER_BLOCKED_BY, MTG_TRIG_BLOCKS, MTG_TRIG_ATTACKER_UNBLOCKED,
     MTG_TRIG_CYCLED, MTG_TRIG_TAPS, MTG_TRIG_LAND_PLAYED, MTG_TRIG_BECOMES_TARGET,
     MTG_TRIG_ALWAYS, MTG_TRIG_DAMAGE_DONE_ONCE,   // (Always: a state trigger, IsPresent$; DamageDoneOnce: as DamageDone)   // (Taps: a permanent became tapped; LandPlayed: a land played)
+    MTG_TRIG_DAMAGE_DEALT_ONCE,   // ("whenever it deals damage": each damage it deals, here, as DamageDoneOnce)
     MTG_TRIG_COUNT
 };
 typedef struct {

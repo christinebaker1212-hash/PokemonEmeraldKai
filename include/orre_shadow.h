@@ -28,7 +28,7 @@ struct OrreShadowMon
 struct OrreShadowNature
 {
     u8 rate[5];         // the rate (sOrreDpRate) for sources 0-4
-    u8 hyper[7];        // Hyper Mode's chance (%) by the gauge's level
+    u8 hyperMode[7];    // (not "hyper": a Windows macro) Hyper Mode's chance (%) by the gauge's level
     u8 call[7];         // CALL's chance (%) by the gauge's level
 };
 

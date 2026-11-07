@@ -584,7 +584,7 @@ static int SplitTarget(const char *spec, const char **cards, const char **player
 
 static int ParseRepl(MtgCardDef *c, int cardId, char *text, MtgStatic *out)
 {
-    static const char *const sKnown[] = {"Event", "ValidCard", "Destination", "ReplaceWith", "ReplacementResult",
+    static const char *const sKnown[] = {"Event", "ValidCard", "Origin", "Destination", "ReplaceWith", "ReplacementResult",
                                          "Description", "ActiveZones", "Layer", "ValidStepTurnToController",
                                          "Prevent", "ValidTarget", "ValidSource", "IsCombat", "Secondary", "IsPresent",
                                          "PresentCompare", "CheckSVar", "SVarCompare", "DamageAmount", "PreventionEffect",
@@ -719,6 +719,18 @@ static int ParseRepl(MtgCardDef *c, int cardId, char *text, MtgStatic *out)
         return 0;
     if (strcmp(st.affected, "Card.Self") != 0 && !zones && !sReplForEffect)
         return 0;   // (another card's: only from the battlefield)
+    if (strcmp(ev, "Moved") == 0 && (s = ParamOf(first, count, "Origin"))) {
+        // "if it would die, put it on top of its owner's library instead" (on the card: Mtg_MoveTo)
+        const char *sv, *d2 = ParamOf(first, count, "Destination"), *rw = ParamOf(first, count, "ReplaceWith");
+        if (sReplForEffect || strcmp(s, "Battlefield") || !d2 || strcmp(d2, "Graveyard") || strcmp(st.affected, "Card.Self")
+            || !rw || !(sv = Mtg_Svar(cardId, rw)) || ParamOf(first, count, "Layer")
+            || strcmp(sv, "DB$ ChangeZone | Origin$ Battlefield | Destination$ Library | LibraryPosition$ 0 | Defined$ ReplacedCard"))
+            return 0;
+        c->diesToLibraryTop = 1;
+        return 2;
+    }
+    if (ParamOf(first, count, "Origin"))
+        return 0;
     if (strcmp(ev, "Moved") == 0) {
         if (sReplForEffect)
             return 0;
