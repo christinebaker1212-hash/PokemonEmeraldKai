@@ -74,7 +74,8 @@ int Updater_OrreState(long *done, long *total, const char **error);
 #define tTimer data[0]
 
 // (special, waitstate) VAR_RESULT: 1 ready to sail; 2 a download is needed (its size in STR_VAR_1, in MB); 3 the boat
-// isn't sailing yet (no release has ORRE's packs); 4 the release couldn't be asked (why in STR_VAR_1)
+// isn't sailing yet (no release has ORRE's packs); 4 the release couldn't be asked (why in STR_VAR_1); 5 the launch's
+// download is still under way
 static void Task_OrreCheckBoat(u8 taskId)
 {
     long done, total;
@@ -82,7 +83,9 @@ static void Task_OrreCheckBoat(u8 taskId)
     int st = Updater_OrreState(&done, &total, &err);
     if (st == UPD_CHECKING || (st == UPD_IDLE && gTasks[taskId].tTimer++ < 2))
         return;
-    if (st == UPD_AVAILABLE)
+    if (st == UPD_DOWNLOADING || st == UPD_INSTALLING)
+        gSpecialVar_Result = 5;   // (the launch's own download is still under way: platform/updater.c OrrePreWorker)
+    else if (st == UPD_AVAILABLE)
     {
         ConvertIntToDecimalStringN(gStringVar1, (total + (1 << 20) - 1) >> 20, STR_CONV_MODE_LEFT_ALIGN, 5);
         gSpecialVar_Result = 2;

@@ -23,9 +23,15 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
 - **The packs ship with the game** (the user: "completely rip the 3D models and text from the Colosseum ISO so that it
   can be bundled in a download, without requiring the ISO from the user"): players need no disc.
 - **As their own zip** (the user, 2026-11-04: "make it its own zip"): MoemonOrre.zip, like the DANCE machine's songs,
-  downloaded when a player first goes to ORRE, not in the game's own zip.
-- **Shipping waits for a complete ORRE** (the user, 2026-11-07: "Shipping will be turned on when I am confident that
-  the experience is completable, and full"): the `ORRE_DISC_URL` secret is the user's to add, then.
+  not in the game's own zip. **Fetched at launch** (the user, 2026-11-07: "It should be pre-downloaded upon launch as
+  part of the updater. If it can't be downloaded, it skips until next time"): after the launch's update check
+  (src/platform/updater.c OrrePreWorker) the packs download and unpack in the background while the game runs; a
+  failure only waits for the next launch. The boat checks them before it sails (src/orre/orre_ferry.c Orre_CheckBoat):
+  still downloading, it shows the progress; missing, it offers the download; no release with them, it doesn't sail
+  (never an empty ORRE: docs/user_images/74.png). Test tools/test/orre_download_test.sh orre ("the boat", "at launch").
+- **Shipped early** (the user, 2026-11-07, after the boat landed in an empty ORRE without the packs: "Let's go ahead
+  and ship it. My players won't visit until it's ready"): this replaces "shipping waits for a complete ORRE"; the
+  release ships MoemonOrre.zip once the user adds the `ORRE_DISC_URL` repository secret (a link to the disc).
 - **Music: Colosseum's own, converted** (the user, 2026-11-07: "The music cannot be found online, and thus, must be
   converted"), from the disc's sound data into .kaisong songs; never a placeholder: a map without its song yet is
   silent ("Placeholder music - none").

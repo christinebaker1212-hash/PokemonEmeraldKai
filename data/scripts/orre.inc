@@ -32,6 +32,7 @@ EventScript_OrreSail::
 	special Orre_CheckBoat
 	waitstate
 	goto_if_eq VAR_RESULT, 2, EventScript_OrreDownload
+	goto_if_eq VAR_RESULT, 5, EventScript_OrreDownloading
 	goto_if_eq VAR_RESULT, 3, EventScript_OrreNotYet
 	goto_if_eq VAR_RESULT, 4, EventScript_OrreNoConnection
 EventScript_OrreBoard::
@@ -43,6 +44,14 @@ EventScript_OrreBoard::
 EventScript_OrreDownload::
 	msgbox gText_OrreDownload, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_OrreStay
+	special Orre_DownloadPacks
+	waitstate
+	goto_if_eq VAR_RESULT, TRUE, EventScript_OrreBoard
+	msgbox gText_OrreDownloadFailed, MSGBOX_DEFAULT
+	release
+	end
+EventScript_OrreDownloading::
+	msgbox gText_OrreDownloading, MSGBOX_DEFAULT
 	special Orre_DownloadPacks
 	waitstate
 	goto_if_eq VAR_RESULT, TRUE, EventScript_OrreBoard
@@ -97,6 +106,10 @@ gText_OrreDownloadFailed::
 	.string "The download didn't finish.\n"
 	.string "({STR_VAR_1})\p"
 	.string "Try again whenever you like.$"
+
+gText_OrreDownloading::
+	.string "ORRE is still being downloaded.\n"
+	.string "The boat sails as soon as it's done.$"
 
 gText_OrreNotYet::
 	.string "Sorry, the boat to ORRE isn't\n"
