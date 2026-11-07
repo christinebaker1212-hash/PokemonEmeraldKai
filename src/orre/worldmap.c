@@ -44,8 +44,8 @@ void MPNet_Log(const char *fmt, ...);
 #define ITEM_FIRST 0x906   // the screen's first menu item (the map)
 #define ITEM_PICTURE 0x91B // the place's picture
 #define ITEM_WORDS 0x91C   // its description
-#define ITEM_SELECT 0xCA9
-#define ITEM_CANCEL 0xCAA
+#define ITEM_A 0xCA7       // the GameCube's A / B pictures: where Kai's own prompts go (Select / Cancel at 0xCA9 / 0xCAA)
+#define ITEM_B 0xCA8
 #define ITEM_DOT 0x91A     // the cursor: its red diamond, the four brackets round it, the cross lines through it
 #define ITEM_HLINE 0x935
 #define ITEM_VLINE 0x936
@@ -79,6 +79,7 @@ static struct
     bool8 enableScript;
     SDL_Renderer *owner;
     SDL_Texture *canvas;
+    SDL_Texture *scene;   // the 640x480 picture the game composes, scaled once onto the canvas
     struct { u32 id; SDL_Texture *t; } tex[MAX_TEX];
     u32 nTex;
     u16 bigFrame[CW * CH];
@@ -86,6 +87,7 @@ static struct
 } W;
 
 static s8 sChosen = -1;
+static void FindBoxes(void);
 
 static u32 Be32(const u8 *p) { return (u32)p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]; }
 static s16 Be16(const u8 *p) { return (s16)(p[0] << 8 | p[1]); }
@@ -257,6 +259,7 @@ static bool8 LoadData(void)
     W.nPlaces = min(Be32(W.rel + off + 0x6C8), MAX_PLACES);
     W.nRows = Be32(W.rel + off + 0x6CC);
     W.nLinks = Be32(W.rel + off + 0x6D4);
+    FindBoxes();
     return TRUE;
 }
 
@@ -292,7 +295,7 @@ static SDL_Texture *Texture(SDL_Renderer *r, u32 id)
             {
                 SDL_UpdateTexture(t, NULL, px, w * 4);
                 SDL_SetTextureBlendMode(t, SDL_BLENDMODE_BLEND);
-                SDL_SetTextureScaleMode(t, SDL_ScaleModeLinear);
+                SDL_SetTextureScaleMode(t, SDL_ScaleModeNearest);   // (drawn 1:1 into the scene: no bleed between pieces)
             }
             free(px);
             free(d);
@@ -324,10 +327,10 @@ static void DrawSprite(SDL_Renderer *r, const Item *it, float dx, float dy, u32 
     src.h = (u16)Be16(s + 14);
     if ((t = Texture(r, picture ? picture : Be32(s + 0x10))) == NULL)
         return;
-    dst.x = OX + (it->x + dx) * SCALE;
-    dst.y = (it->y + dy) * SCALE;
-    dst.w = abs(it->w) * SCALE;
-    dst.h = abs(it->h) * SCALE;
+    dst.x = roundf(it->x + dx);
+    dst.y = roundf(it->y + dy);
+    dst.w = abs(it->w);
+    dst.h = abs(it->h);
     if (it->w < 0)
         flip |= SDL_FLIP_HORIZONTAL;
     if (it->h < 0)
@@ -378,7 +381,81 @@ static s32 ShownPlace(u8 *alpha)
     return W.cur;
 }
 
-static void Draw(SDL_Renderer *r)
+// the screen's boxes (the place's picture, its words, the buttons' box), in 640x480: the cursor's cross lines stop
+// at them
+static const u16 sBoxItems[][2] = {{0x9AD, 0x9B0}, {0x91D, 0x925}, {0xCAB, 0xCB3}};
+static SDL_Rect sBoxes[ARRAY_COUNT(sBoxItems)];
+
+static void FindBoxes(void)
+{
+    u32 b, i;
+    Item it;
+    for (b = 0; b < ARRAY_COUNT(sBoxItems); b++)
+    {
+        int x0 = 9999, y0 = 9999, x1 = -9999, y1 = -9999;
+        for (i = sBoxItems[b][0]; i <= sBoxItems[b][1]; i++)
+            if (GetItem(i, &it))
+            {
+                x0 = min(x0, (int)it.x);
+                y0 = min(y0, (int)it.y);
+                x1 = max(x1, it.x + abs(it.w));
+                y1 = max(y1, it.y + abs(it.h));
+            }
+        sBoxes[b].x = x0;
+        sBoxes[b].y = y0;
+        sBoxes[b].w = x1 - x0;
+        sBoxes[b].h = y1 - y0;
+    }
+}
+
+// a cross line (an item stretched along one axis) moved by dx, dy, drawn only where no box is
+static void DrawLine(SDL_Renderer *r, const Item *it, float dx, float dy, bool8 across)
+{
+    int from = across ? it->x : it->y, to = from + (across ? abs(it->w) : abs(it->h));
+    int at = (int)roundf(across ? it->y + dy : it->x + dx), thick = across ? abs(it->h) : abs(it->w);
+    while (from < to)
+    {
+        int end = to, next = to;
+        u32 b;
+        for (b = 0; b < ARRAY_COUNT(sBoxes); b++)
+        {
+            const SDL_Rect *q = &sBoxes[b];
+            int lo = across ? q->x : q->y, hi = lo + (across ? q->w : q->h);
+            int qlo = across ? q->y : q->x, qhi = qlo + (across ? q->h : q->w);
+            if (at + thick <= qlo || at >= qhi || hi <= from)
+                continue;
+            if (lo <= from)
+            {
+                from = max(from, hi);   // (inside a box: on past it)
+                end = next = -1;
+                break;
+            }
+            end = min(end, lo);
+            next = min(next, hi);
+        }
+        if (end < 0)
+            continue;
+        {
+            Item seg = *it;
+            if (across)
+            {
+                seg.x = from;
+                seg.w = end - from;
+                DrawSprite(r, &seg, 0, dy, 0, 160);
+            }
+            else
+            {
+                seg.y = from;
+                seg.h = end - from;
+                DrawSprite(r, &seg, dx, 0, 0, 160);
+            }
+        }
+        from = next;
+    }
+}
+
+// the scene as Colosseum composes it, at 640x480 (no words: they go on the canvas, at its own resolution)
+static void DrawScene(SDL_Renderer *r)
 {
     Item it, dot;
     u32 i = ITEM_FIRST, n = 0;
@@ -406,9 +483,9 @@ static void Draw(SDL_Renderer *r)
         else if (i == ITEM_DOT)
             DrawSprite(r, &it, gx, gy, 0, 255);
         else if (i == ITEM_HLINE)
-            DrawSprite(r, &it, 0, cy - (it.y + 1.5f), 0, 160);
+            DrawLine(r, &it, 0, cy - (it.y + abs(it.h) / 2.0f), TRUE);
         else if (i == ITEM_VLINE)
-            DrawSprite(r, &it, cx - (it.x + 1.5f), 0, 0, 160);
+            DrawLine(r, &it, cx - (it.x + abs(it.w) / 2.0f), 0, FALSE);
         else if (i >= ITEM_CORNER0 && i <= ITEM_CORNER3)
             DrawSprite(r, &it, gx + (it.w > 0 ? -spread : spread), gy + (it.h > 0 ? -spread : spread), 0, 255);
         else if (i == ITEM_PICTURE)
@@ -416,27 +493,56 @@ static void Draw(SDL_Renderer *r)
             if (place >= 0)
                 DrawSprite(r, &it, 0, 0, PlacePicture(place), alpha);
         }
-        else if (i == ITEM_WORDS)
-        {
-            if (place >= 0)
-            {
-                G_TextAlpha(alpha);
-                G_Text((int)(OX + it.x * SCALE) + 2, (int)(it.y * SCALE) + 10, 0xFFFFFF, 0x303030,
-                       Msg(PlaceWords(place)), (int)(it.w * SCALE) - 4, TF_NORMAL);
-                G_TextAlpha(255);
-            }
-        }
-        else if (i == ITEM_SELECT || i == ITEM_CANCEL)
-        {
-            const char *s = Msg(i == ITEM_SELECT ? MSG_SELECT : MSG_CANCEL);
-            G_Text((int)(OX + it.x * SCALE), (int)(it.y * SCALE), 0xFFFFFF, 0x303030, s, 0, TF_NORMAL);
-        }
-        else if (i != 0xA41)   // (the second picture: the one before, which Kai's fade draws in the first's place)
+        // (not drawn: the second picture 0xA41, the one before, which the fade draws in the first's place; and the
+        // GameCube's A / B button pictures 0xCA7 / 0xCA8: the canvas draws Kai's own prompts for the controller in use)
+        else if (i != 0xA41 && i != ITEM_A && i != ITEM_B)
             DrawSprite(r, &it, 0, 0, 0, 255);
         if (it.flags & 0x40)
             break;
         i = (u16)it.next;
     }
+}
+
+// the words over the scaled scene: the place's description, and the buttons' prompts as Kai draws them everywhere
+// ({A} / {B}: the controller's own icons, OPTIONS > CONTROLS > BUTTON ICONS)
+static void DrawWords(void)
+{
+    Item it;
+    s32 place;
+    u8 alpha;
+    char line[64];
+    place = ShownPlace(&alpha);
+    if (place >= 0 && GetItem(ITEM_WORDS, &it))
+    {
+        G_TextAlpha(alpha);
+        G_Text((int)(OX + it.x * SCALE) + 2, (int)(it.y * SCALE) + 10, 0xFFFFFF, 0x303030,
+               Msg(PlaceWords(place)), (int)(it.w * SCALE) - 4, TF_NORMAL);
+        G_TextAlpha(255);
+    }
+    // (the prompts start where the game's button pictures stood: 0xCA7 / 0xCA8, beside Select / Cancel)
+    if (GetItem(ITEM_A, &it))
+    {
+        snprintf(line, sizeof(line), "{A} %s", Msg(MSG_SELECT));
+        G_Hint((int)(OX + it.x * SCALE), (int)((it.y + it.h / 2.0f) * SCALE) - 8, 0xFFFFFF, 0x303030, line, TF_NORMAL, 1);
+    }
+    if (GetItem(ITEM_B, &it))
+    {
+        snprintf(line, sizeof(line), "{B} %s", Msg(MSG_CANCEL));
+        G_Hint((int)(OX + it.x * SCALE), (int)((it.y + it.h / 2.0f) * SCALE) - 8, 0xFFFFFF, 0x303030, line, TF_NORMAL, 1);
+    }
+}
+
+static void Draw(SDL_Renderer *r)
+{
+    SDL_FRect dst = {OX, 0, 640 * SCALE, 480 * SCALE};
+    SDL_SetRenderTarget(r, W.scene);
+    DrawScene(r);
+    SDL_SetRenderTarget(r, W.canvas);
+    SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
+    SDL_RenderClear(r);
+    SDL_RenderCopyF(r, W.scene, NULL, &dst);
+    SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
+    DrawWords();
     if ((W.state == WM_OPEN || W.state == WM_CLOSE) && W.t)
     {
         SDL_SetRenderDrawColor(r, 0, 0, 0, (u8)(255 * W.t / FADE));
@@ -460,7 +566,7 @@ SDL_Texture *Orre_WorldMap_Canvas(SDL_Renderer *r)
         for (i = 0; i < W.nTex; i++)
             W.tex[i].t = NULL;
         W.nTex = 0;
-        W.canvas = NULL;
+        W.canvas = W.scene = NULL;
         W.owner = r;
     }
     if (!W.canvas)
@@ -470,6 +576,14 @@ SDL_Texture *Orre_WorldMap_Canvas(SDL_Renderer *r)
             return NULL;
         SDL_SetTextureBlendMode(W.canvas, SDL_BLENDMODE_NONE);
         SDL_SetTextureScaleMode(W.canvas, SDL_ScaleModeLinear);
+    }
+    if (!W.scene)
+    {
+        W.scene = SDL_CreateTexture(r, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 640, 480);
+        if (!W.scene)
+            return NULL;
+        SDL_SetTextureBlendMode(W.scene, SDL_BLENDMODE_NONE);
+        SDL_SetTextureScaleMode(W.scene, SDL_ScaleModeLinear);
     }
     previous = SDL_GetRenderTarget(r);
     SDL_RenderGetViewport(r, &oldViewport);

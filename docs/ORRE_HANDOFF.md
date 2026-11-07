@@ -121,6 +121,11 @@ rules, and what each tool does. This file is where things stand, what a new sess
   set; place i's message is msg[order[i]], order = main.dol lbl_802E4F58 = 0 8 6 5 2 1 3 4 7, dol/wm_desc_order.bin),
   the travel scene's cameras (20: lbl_3_data_270) and the cursor's links (66: directions 1 up 2 right 4 down 8 left,
   from, to). THE UNDER's picture is mapsnap008 once flag 0x45D is set.
+- **Drawn** as the game composes it: every piece 1:1 into a 640x480 scene (nearest: stretched pieces never bleed into
+  their neighbours on the texture), the scene scaled once onto the 480x320 canvas, then the words on top at the
+  canvas's own size. The cursor's cross lines stop at the three boxes (picture, words, buttons). The GameCube's A / B
+  pictures (0xCA7 / 0xCA8) are left out: Kai's own prompts go there (G_Hint "{A} Select" / "{B} Cancel", the icons
+  of the controller in use), as on every other screen of the game.
 - The cursor's pieces (0x91A the red diamond, 0x931-0x934 the brackets, 0x935 / 0x936 the cross lines) are drawn
   round the place's centre here; where Colosseum's code puts them exactly (it moves them from their table places)
   isn't read yet.
