@@ -50,8 +50,27 @@ def main(src):
         groups["group_order"].append(GROUP)
     groups[GROUP] = []
     table = []
+    # every map's grid first, and each one's warp tiles in order (its triggers in maps.py's order, a trigger's reached
+    # tiles left to right, top to bottom): a door leads to the middle tile of the trigger it names over there
+    grids, warp_tiles = {}, {}
     for m in orre_maps.MAPS:
         g = grid.build(grid.read(open(find(src, m["file"] + ".col"), "rb").read()), grid.TILE, m["start"])
+        grids[m["file"]] = g
+        warp_tiles[m["file"]] = []
+        for tid in m.get("warps", {}):
+            tiles = sorted((y, x) for y in range(g["h"]) for x in range(g["w"])
+                           if g["walk"][y, x] and g["trigger"][y, x] == tid)
+            if not tiles:
+                raise SystemExit("%s: trigger %d leads nowhere (none of its tiles is reached)" % (m["file"], tid))
+            warp_tiles[m["file"]] += [(tid, x, y) for y, x in tiles]
+    by_file = orre_maps.by_file()
+
+    def warp_id(file, tid):
+        ws = [i for i, w in enumerate(warp_tiles[file]) if w[0] == tid]
+        return ws[len(ws) // 2]
+
+    for m in orre_maps.MAPS:
+        g = grids[m["file"]]
         lid = "LAYOUT_" + m["id"][4:]
         ldir = "data/layouts/%s" % m["name"]
         os.makedirs(ldir, exist_ok=True)
@@ -72,7 +91,10 @@ def main(src):
               "region_map_section": mapsec(colo_data.plain(text[m["place"]])), "requires_flash": False, "weather": "WEATHER_NONE",
               "map_type": "MAP_TYPE_TOWN", "allow_cycling": True, "allow_escaping": False, "allow_running": True,
               "show_map_name": m["file"].endswith("_out"), "battle_scene": "MAP_BATTLE_SCENE_NORMAL", "connections": None,
-              "object_events": [], "warp_events": [], "coord_events": [], "bg_events": []}
+              "object_events": [], "coord_events": [], "bg_events": [],
+              "warp_events": [{"x": x, "y": y, "elevation": 0, "dest_map": by_file[m["warps"][tid][0]]["id"],
+                               "dest_warp_id": str(warp_id(m["warps"][tid][0], m["warps"][tid][1]))}
+                              for tid, x, y in warp_tiles[m["file"]]]}
         json.dump(mj, open(mdir + "/map.json", "w"), indent=2)
         open(mdir + "/map.json", "a").write("\n")
         sp = mdir + "/scripts.inc"

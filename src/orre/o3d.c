@@ -52,7 +52,7 @@ int uncompress(unsigned char *dest, unsigned long *destLen, const unsigned char 
 #define HALF_FOV 8.0914306640625f
 #define TEX_MAX 256
 #define BLOCKED (0x0001 | (1 << 10) | (3 << 12))            // metatile 1, collision, elevation 3
-#define WALK ((O3D_METATILE_BEHAVIOR + 0) | (3 << 12))      // a plain tile, elevation 3
+#define WALK ((O3D_METATILE_BEHAVIOR + 0) | (3 << 12))      // a plain tile, elevation 3 (+ its behavior)
 
 #include "orre_maps.h"   // sOrreMaps: each ORRE map, its file in the pack, size in blocks, start tile (tools/orre/gen_maps.py)
 
@@ -326,7 +326,7 @@ static bool8 MapLoad(u32 i)
         {
             const u8 *t = cells + ((u32)y * gw + x) * 16;
             u32 k = (u32)y * gw + x, n = t[2] > 3 ? 3 : t[2], j;
-            om->blocks[k] = (t[0] & 1) ? WALK : BLOCKED;
+            om->blocks[k] = (t[0] & 1) ? (WALK + t[3]) : BLOCKED;   // (t[3]: the tile's behavior: a warp's)
             om->hn[k] = (u8)n;
             for (j = 0; j < n; j++)
             {

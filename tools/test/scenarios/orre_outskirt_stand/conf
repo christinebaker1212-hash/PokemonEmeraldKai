@@ -1,12 +1,13 @@
 # ORRE's OUTSKIRT STAND in its own 3D engine (src/orre/o3d.c) (docs/ORRE_DECISIONS.md): Pokemon Colosseum's own map model from ORRE's pack
 # (orre/orre3d.pak, tools/orre/make_pack.sh; the test needs it) under Platinum's camera, walked on Emerald's grid
 # made from Colosseum's collision (tools/orre/grid.py): the ramp's railing stops a step right, the ramp leads down to
-# the lot and back up to the diner's door; its name is Colosseum's (OUTSKIRT STAND), and it has no music until
+# the lot and back up through the diner's door, inside (its car's aisle) and back out; its name is Colosseum's (OUTSKIRT STAND), and it has no music until
 # ORRE's songs are converted. Shots o_*.png.
 MODE=1
 TMO=120
 WARP=45,0,25,29
 EXPECT_A=("[o3d] ORRE's S1_out: 114 meshes" "[test] collision 25 29: 0 behavior 0" "[test] collision 26 29: 1 behavior 0"
-          "[test] where map 45.0 xy 25,35" "[test] where map 45.0 xy 25,27"
+          "[test] where map 45.0 xy 25,36" "[test] where map 45.1 xy 10,17" "[test] where map 45.1 xy 14,16"
+          "[test] where map 45.0 xy 25,28" "ORRE's S1_shop_1F: 71 meshes"
           "[test] mapname 0x1C0 OUTSKIRT STAND" "[test] music 65535")
 UNEXPECT_A=("[crash]" "TIMEOUT" "no ORRE pack" "where map 45.0 xy 26,29")

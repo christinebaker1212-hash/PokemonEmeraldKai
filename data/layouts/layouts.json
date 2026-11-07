@@ -15750,6 +15750,16 @@
       "secondary_tileset": "gTileset_EverGrande",
       "border_filepath": "data/layouts/BattleIsland/border.bin",
       "blockdata_filepath": "data/layouts/BattleIsland/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_OUTSKIRT_STAND_DINER",
+      "name": "Orre_OutskirtStandDiner_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_OutskirtStandDiner/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_OutskirtStandDiner/map.bin"
     }
   ]
 }

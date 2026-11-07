@@ -47,8 +47,9 @@ The rip is done and checked: `tools/orre/make_pack.sh DISC` (a .rvz / .iso, or a
 - **orre3d.pak** (94 MB): all 174 map models (1.7 million triangles without the skies), their 764 textures kept in
   the disc's own GX encoding (lossless; CMPR at 4 bits a texel), meshes indexed. Format at the top of
   tools/orre/build_pack.py.
-- **orre_data.pak** (18 MB): the game's own bytes of every text file (36,249 strings), collision, map script, floor
-  data, camera shot, map module (their tables) and character / object model (254: for the sprites), one copy each.
+- **orre_data.pak** (27 MB): the game's own bytes of every text file (36,249 strings), collision, map script, floor
+  data, camera shot, map module (their tables), character / object model (254: for the sprites), and the music and
+  sounds (78 songs, the MusyX projects, their samples), one copy each.
 - `ORRE_TEST=1 tools/orre/make_pack.sh DISC` also runs tools/orre/test_pack.py: every map's triangles and textures
   and every data file read back from the packs equal the disc's. 174 maps, 764 textures, 2058 files: OK.
 
@@ -81,13 +82,22 @@ Colosseum's collision. Test: scenario `orre_outskirt_stand` (needs orre/ from ma
   gMapGroup_Orre (group 45, after SINNOH's), data/event_scripts_orre.s and src/sinnoh/orre_maps.h (sOrreMaps: file,
   blocks, start tile). Only the map's size comes from the disc. No music (MUS_NONE) until ORRE's songs are
   converted; the map section is ORRE's own, named from Colosseum's text (below). Debug warp: MOEMON_DEBUG_WARP=45,0,25,29.
-- **Grid** (tools/orre/grid.py; gridview.py draws it over a top-down picture): the .col's objects have three triangle
-  grids: +0x24 the floor, +0x28 walls, +0x2C triggers (doors, the exits to the world map). A tile is 8 Colosseum units
-  (a person is about 15: two tiles, as Kai's 32-pixel sprites); a tile is walkable with floor under its centre that
-  isn't too steep, no wall across it at a person's height, and reached from the start without crossing a wall or a
-  step over 6 units; triggers are reached, not walked through (so the world past the exits and the insides of props'
-  wall outlines stay blocked). Where a wall lies between two walkable tiles, the one nearer it is blocked (Emerald's
-  grid has no walls between tiles). The grid is in the pack (version 2), blocks of 32 x 32 tiles, the floor centred.
+- **Grid** (tools/orre/grid.py; gridview.py draws it over a top-down picture, with the collision's walls in yellow and
+  floor edges in cyan): the .col's objects have three triangle grids: +0x24 the floor, +0x28 walls, +0x2C triggers
+  (doors, the exits to the world map). A tile is 8 Colosseum units (a person is about 15: two tiles, as Kai's
+  32-pixel sprites; the tile scale is Claude's call, the user 2026-11-07). What a person reaches from the start is
+  worked out on a fine grid (1 unit): every wall at a person's height (1-10 units above the ground) thickened by a
+  person's radius (2.5), so a gap passes only if a person fits through it; the floor only, no step over 6 units;
+  trigger cells are reached, not walked through (so the world past the exits and the insides of props' wall outlines
+  stay out). A tile is walkable when that reach comes within 2 units of its centre (a trigger tile: when it touches
+  the trigger). Where a wall still lies between two walkable tiles, the one nearer it is blocked (Emerald's grid has
+  no walls between tiles). Tile-by-tile tests failed both ways (2026-11-07): one closed the diner's 11-unit aisle,
+  one opened a gap behind the OUTSKIRT STAND's train. The grid is in the pack (version 2), blocks of 32 x 32 tiles.
+- **Doors** (tools/orre/maps.py `warps`: trigger -> (map file, trigger there), by hand until the scripts say where
+  each leads): gen_maps.py writes a warp event on every reached tile of a door's trigger, leading to the middle tile
+  of the trigger it names; the pack gives those tiles MB_NON_ANIMATED_DOOR (0x60, the grid record's behavior byte),
+  stepped on to warp. Arriving, the player walks on the way they were going (field_screen_effect.c OrreArrivalDir,
+  ORRE's own beside SINNOH's), into the room or out to the street.
 - **Names** (2026-11-07): each map's `place` in tools/orre/maps.py is one of Colosseum's place names (common_rel's
   messages 3501-3527), the one its floor record's area is; gen_maps.py reads the text from the disc and writes ORRE's
   map sections (include/constants/region_map_sections_orre.h, 0x1C0 on, included from the region_map_sections

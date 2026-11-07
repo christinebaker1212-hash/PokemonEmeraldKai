@@ -1,5 +1,6 @@
 #include "global.h"
 #include "s3d.h"
+#include "o3d.h"   // Moemon Kai: ORRE
 #include "constants/metatile_behaviors.h"
 #include "cable_club.h"
 #include "event_data.h"
@@ -407,6 +408,28 @@ static u8 SinnohArrivalDir(s16 x, s16 y)
     return DIR_NONE + 0xFF;
 }
 
+// Moemon Kai: ORRE's doors the same way, its own (src/orre/o3d.c): the player arrives on the far side's trigger
+// and walks on the way they were going (into the room, out to the street), or back if that way is shut
+static bool8 OrreCanStep(s16 x, s16 y, u8 dir)
+{
+    s16 nx = x, ny = y;
+    MoveCoords(dir, &nx, &ny);
+    return MapGridGetCollisionAt(nx, ny) == 0 && !MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(nx, ny))
+        && GetObjectEventIdByXY(nx, ny) == OBJECT_EVENTS_COUNT;
+}
+
+static u8 OrreArrivalDir(s16 x, s16 y)
+{
+    u8 dir = GetPlayerFacingDirection();
+    if (!O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup) || dir < DIR_SOUTH || dir > DIR_EAST)
+        return DIR_NONE;
+    if (OrreCanStep(x, y, dir))
+        return dir;
+    if (OrreCanStep(x, y, GetOppositeDirection(dir)))
+        return GetOppositeDirection(dir);
+    return DIR_NONE + 0xFF;
+}
+
 static void Task_ExitNonAnimDoor(u8 taskId)
 {
     struct Task *task = &gTasks[taskId];
@@ -428,11 +451,13 @@ static void Task_ExitNonAnimDoor(u8 taskId)
             u8 dir = MP_MapPic_ArrivalDir(*x, *y);   // Moemon Co-op: the GAME CENTER's stairs step off sideways
             if (dir == DIR_NONE)
                 dir = SinnohArrivalDir(*x, *y);
+            if (dir == DIR_NONE)
+                dir = OrreArrivalDir(*x, *y);   // Moemon Kai: ORRE's
             if (dir == DIR_NONE && MpLadderStepOff(*x, *y))
                 dir = DIR_SOUTH;
             SetPlayerVisibility(TRUE);
             objEventId = GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0);
-            if (dir == DIR_NONE + 0xFF)   // (SINNOH: nowhere to step)
+            if (dir == DIR_NONE + 0xFF)   // (SINNOH or ORRE: nowhere to step)
             {
                 UnfreezeObjectEvents();
                 task->tState = 3;

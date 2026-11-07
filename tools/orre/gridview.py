@@ -82,4 +82,11 @@ if __name__ == "__main__":
             elif not g["walk"][y, x]:
                 d.rectangle(r, fill=(255, 40, 40, 90))
             d.rectangle(r, outline=(160, 160, 160, 60))
+    # the collision's walls (yellow) and floor edges (cyan) as lines, to check they sit on the model
+    col = grid.read(open(cp, "rb").read())
+    def pt(q):
+        return ((q[0] - g["x0"]) * scale, (q[2] - g["z0"]) * scale)
+    for T, colr in ((col["wall"], (255, 230, 0, 255)), (col["floor"], (0, 230, 255, 255))):
+        for t in T:
+            d.line([pt(t[0]), pt(t[1]), pt(t[2]), pt(t[0])], fill=colr, width=1)
     Image.alpha_composite(img, over).save(out)

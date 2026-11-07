@@ -14,9 +14,10 @@ rules, and what each tool does. This file is where things stand, what a new sess
   (their decision, 2026-11-07). No in-game download screen yet.
 - **Engine: ORRE's own**, src/orre/o3d.c (+ gx_tex.c, orre_maps.h, include/o3d.h), a copy of SINNOH's that goes its
   own way. Never put ORRE code in src/sinnoh/ or s3d.h (the user, 2026-11-04).
-- **One map walks: the OUTSKIRT STAND** (Orre_OutskirtStand, group 45 map 0; `MOEMON_DEBUG_WARP=45,0,25,29` starts
-  at the foot of the diner's ramp), named OUTSKIRT STAND from Colosseum's own text, silent until its song is
-  converted. No warps, people or scripts yet.
+- **The OUTSKIRT STAND walks, inside and out** (group 45: map 0 Orre_OutskirtStand, `MOEMON_DEBUG_WARP=45,0,25,29`
+  at the foot of the diner's ramp; map 1 Orre_OutskirtStandDiner, S1_shop_1F): the diner's door leads in and its
+  doorway back out. Named OUTSKIRT STAND from Colosseum's own text, silent until its song is converted. No people
+  or scripts yet; the lot's exits (the trigger round it) don't lead anywhere yet.
 
 ## Resources
 - **The disc** (the user's, 2026-11-04): Pokemon Colosseum (USA), GC6E01, an RVZ inside a zip:
@@ -57,24 +58,26 @@ rules, and what each tool does. This file is where things stand, what a new sess
    sinnoh_feet_row, sinnoh_lift_iron and sinnoh_gym passed with ORRE's hooks in.
 
 ## Next steps (in order)
-1. **The diner's door.** Its trigger is collision object 13 of S1_out.col (the `D` tiles at the ramp's top, row 27).
-   Add S1_shop_1F to tools/orre/maps.py (a start point inside: find it with gridview.py), have gen_maps.py write
-   warp events for each map's door triggers (which trigger leads where: the map modules' tables or the scripts;
-   until then, by hand in maps.py), and check the warp both ways in a scenario.
-2. **The way out.** The trigger loop round the parking lot (object 2) is how Colosseum leaves for its world map
-   (worldmap_menu_rel in the decomp). Decide with the user how ORRE's world map works in Kai (Colosseum's own screen,
-   or a Kai-style town map) before building it.
-3. **Where people stand.** The map modules (.rel) publish tables (REL_M1.md: "FieldTable" descriptors, fields not
-   named). S1_out.rel has (direction, x, y, z)-like records whose stride isn't clear yet. Decode them (the decomp's
-   readers of those tables, or XD's decomp) for start positions, people and their models.
+1. **The way out.** The trigger loop round the OUTSKIRT STAND's lot (collision object 2) is how Colosseum leaves for
+   its world map (worldmap_menu_rel in the decomp; the floor table's kind 5 room world_map, room 0x38e). Ask the
+   user how ORRE's world map works in Kai (Colosseum's own screen, or a Kai-style town map) before building it.
+2. **Where people stand, and where doors lead.** The map modules (.rel: REL_M1.md "FieldTable" descriptors) publish
+   each room's tables; S1_out.rel has (direction, x, y, z)-like records whose stride isn't decoded. Decode them (the
+   decomp's readers of those tables, or XD's decomp) for start positions, people and their models, and for which
+   trigger leads to which room (then maps.py's `warps` come from the game instead of by hand).
+3. **More maps**: each one in tools/orre/maps.py (file, id, name, a start point found with gridview.py, its place
+   name, its doors), then gen_maps.py and build_pack.py. PHENAC CITY (M1_out) next, its buildings after.
 4. **Sprites.** Render the character models (orre_data.pak, `.dat`) into GBA-style sprite sheets (the user's
    decision): their animations (each model set's joint animations, after the root joint) aren't read yet; hsd.py
    draws the bind pose. tools/sinnoh/build_starter.py pre-draws Platinum's models, as a reference.
 5. **Words and scripts.** The map scripts (.scd, the GS VM) converted to Kai's (as tools/sinnoh/gen_scripts.py does
    SINNOH's); the text (msg.py) into Kai's charset, controls mapped (`{hero}`, `{rui}`, `{npc}`, `{item}`...). Never
    write ORRE's words or scripts by hand.
-6. **Snagging and Shadow Pokémon**, in Orre only (state in a sidecar: saves never change layout).
-7. The in-game download screen when orre/ is missing (as the DANCE machine's rh_screen.c StateNoSongs).
+6. **Music** (the user, 2026-11-07: converted, it can't be found online): the MusyX projects in common.fsys
+   (snd_music_proj / _pool / _sdir) and the songs (0x08 members), to .kaisong; the decomp's MusyX library is the
+   reference. Each map gets its song as its song converts.
+7. **Snagging and Shadow Pokémon**, in Orre only (state in a sidecar: saves never change layout).
+8. The in-game download screen when orre/ is missing (as the DANCE machine's rh_screen.c StateNoSongs).
 
 ## Open questions for the user
 - The sky is left out (Platinum's camera looks down at the ground). Keep it that way?
@@ -91,8 +94,12 @@ rules, and what each tool does. This file is where things stand, what a new sess
   names (3501-3527), the item, move and Pokemon names, the debug room list (60020-60143: each file's name for the
   developers, e.g. "INSIDE THE DINER (S1_shop_1F)", not shown to players). The room -> place-name table the PDA uses
   isn't found yet (a table of (id, name) pairs at .data + 0x2C20 has other ids).
-- **Sound**: common.fsys holds MusyX projects (snd_music_proj / _pool / _sdir, snd_se_*); the songs are the 0x08
-  members (agb_*_song and others). The decomp restored the MusyX library (pkmn-colosseum PR #668).
+- **Sound** (in orre_data.pak since 2026-11-07, so the music converts without the disc): common.fsys holds the MusyX
+  projects (common/snd_music_proj / _pool / _sdir.bin, and snd_se_* for sounds); the 78 songs are the 0x08 members
+  (`<name>_song.snd`: stand_song, stand2_song (likely the OUTSKIRT STAND's), pokecen_song, worldmap_song,
+  mt_battle_song, battle2..9, title_song...); their samples are the disc's files/sound/*.samp (snd_music.samp 3.5 MB),
+  copied in as sound/*.samp. The decomp restored the MusyX library (pkmn-colosseum PR #668): the reference for the
+  sequencer and the sample directory.
 
 ## Learned (formats and pitfalls)
 - FSYS member types (byte 2 of the id): 0x02 map model, 0x04 character / object model, 0x06 collision, 0x0A text,

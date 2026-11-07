@@ -18,6 +18,7 @@ import numpy as np
 
 TILE = 8.0          # Colosseum units a tile (a person is about two tiles tall: Kai's sprites are 32 pixels)
 PERSON = 10.0       # a wall this high above the ground blocks a step
+RADIUS = 2.5        # a person's half width (Colosseum units): a wall nearer a tile's centre than this blocks it
 STEEP = 0.6         # floor normals flatter than this are too steep to walk
 BLOCK_TILES = 32    # the field engine's maps are whole blocks of 32 x 32 tiles (s3d.c S3D_LayoutBlocks)
 
@@ -120,6 +121,89 @@ def _dist(p, a, b):
     return math.hypot(p[0] - ax - t * dx, p[1] - az - t * dz)
 
 
+FINE = 1.0   # the reach is worked out on a grid of FINE Colosseum units, walls thickened by RADIUS
+
+
+def _reach(start, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs):
+    """The tiles a person reaches from START: a flood fill on a fine grid where every wall at a person's height is
+    RADIUS thick (a gap passes only if a person fits through it), the floor's tiles only, no step over 6 units;
+    trigger cells (doors, exits) are reached, not walked through. A tile is reached when the flood comes within 2
+    units of its centre."""
+    from collections import deque
+    k = int(round(tile / FINE))
+    W, H = w * k, h * k
+    block = np.zeros((H, W), dtype=bool)
+    trigf = np.full((H, W), -1, dtype=np.int32)
+    ground = np.array([[heights[y][x][0] if heights[y][x] else np.nan for x in range(w)] for y in range(h)])
+    usable = ~np.isnan(ground)   # (tiles with floor that isn't too steep: walk before walls)
+    usable &= np.array([[bool(heights[y][x]) for x in range(w)] for y in range(h)])
+
+    def cell(px, pz):
+        return int((pz - z0) // FINE), int((px - x0) // FINE)
+
+    for p0, p1, y0, y1 in segs:
+        L = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
+        for t in np.linspace(0.0, 1.0, max(2, int(L / (FINE * 0.5)) + 1)):
+            px, pz = p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t
+            cz, cx = cell(px, pz)
+            if not (0 <= cx < W and 0 <= cz < H):
+                continue
+            g = ground[cz // k, cx // k]
+            if g != g or y1 < g + 1.0 or y0 > g + PERSON:
+                continue
+            block[cz, cx] = True
+    r = int(math.ceil(RADIUS / FINE))
+    grown = block.copy()
+    for dz in range(-r, r + 1):
+        for dx in range(-r, r + 1):
+            if dx * dx + dz * dz <= (RADIUS / FINE) ** 2 and (dx or dz):
+                grown |= np.roll(np.roll(block, dz, 0), dx, 1)
+    block = grown
+    for p0, p1, tid in tsegs:
+        L = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
+        for t in np.linspace(0.0, 1.0, max(2, int(L / (FINE * 0.5)) + 1)):
+            cz, cx = cell(p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t)
+            for dz in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    if 0 <= cz + dz < H and 0 <= cx + dx < W:
+                        trigf[cz + dz, cx + dx] = tid
+    for y in range(h):
+        for x in range(w):
+            if not (heights[y][x]) or not usable[y, x]:
+                block[y * k:(y + 1) * k, x * k:(x + 1) * k] = True
+    sz, sx = cell(*start)
+    if block[sz, sx]:
+        raise ValueError("the start (%.1f, %.1f) is in a wall or off the floor" % start)
+    seen = np.zeros((H, W), dtype=bool)
+    seen[sz, sx] = True
+    q = deque([(sz, sx)])
+    while q:
+        cz, cx = q.popleft()
+        if trigf[cz, cx] >= 0:
+            continue
+        g0 = ground[cz // k, cx // k]
+        for nz, nx in ((cz + 1, cx), (cz - 1, cx), (cz, cx + 1), (cz, cx - 1)):
+            if 0 <= nz < H and 0 <= nx < W and not seen[nz, nx] and (not block[nz, nx] or trigf[nz, nx] >= 0):
+                if abs(ground[nz // k, nx // k] - g0) > 6.0:
+                    continue
+                seen[nz, nx] = True
+                q.append((nz, nx))
+    out = np.zeros((h, w), dtype=bool)
+    c = k // 2
+    near = max(1, int(round(2.0 / FINE)))
+    for y in range(h):
+        for x in range(w):
+            if seen[y * k + c - near:y * k + c + near + 1, x * k + c - near:x * k + c + near + 1].any():
+                out[y, x] = True
+            elif trig[y, x] >= 0:
+                # (a door or an exit the flood touched: the trigger is drawn 3 cells thick and the flood stops at its
+                # first cell, so a cell past the tile's edge counts too)
+                zs, xs = slice(max(0, y * k - 1), (y + 1) * k + 1), slice(max(0, x * k - 1), (x + 1) * k + 1)
+                if (seen[zs, xs] & (trigf[zs, xs] == trig[y, x])).any():
+                    out[y, x] = True
+    return out
+
+
 def build(col, tile=TILE, start=None):
     """-> dict: w, h (tiles, whole blocks), tile, x0, z0 (the grid's corner in Colosseum units), walk (h, w) bool,
     heights (h, w) list of floats, trigger (h, w) object id or -1. START (x, z in Colosseum units): only what can be
@@ -154,7 +238,6 @@ def build(col, tile=TILE, start=None):
             pts = T[:, [0, 2]]
             for a, b in ((0, 1), (1, 2), (2, 0)):
                 tsegs.append((pts[a], pts[b], tid))
-    m = tile * 0.15   # (a wall right on a tile's edge blocks only the tile it leans into)
     for ty in range(h):
         for tx in range(w):
             cx, cz = x0 + (tx + 0.5) * tile, z0 + (ty + 0.5) * tile
@@ -165,12 +248,13 @@ def build(col, tile=TILE, start=None):
             g, flat = hs[0]
             if not flat:
                 continue
-            bx0, bz0, bx1, bz1 = cx - tile / 2 + m, cz - tile / 2 + m, cx + tile / 2 - m, cz + tile / 2 - m
+            # (a person standing at the centre: a wall within RADIUS of it; narrow aisles of Colosseum's rooms stay
+            # open, where a test of the whole tile closed them)
             blocked = False
             for p0, p1, y0, y1 in segs:
                 if y1 < g + 1.0 or y0 > g + PERSON:
                     continue
-                if _seg_hits_box(p0, p1, bx0, bz0, bx1, bz1):
+                if _dist((cx, cz), p0, p1) < RADIUS:
                     blocked = True
                     break
             walk[ty, tx] = not blocked
@@ -194,25 +278,7 @@ def build(col, tile=TILE, start=None):
         return None
 
     if start is not None:
-        sx, sz = int((start[0] - x0) // tile), int((start[1] - z0) // tile)
-        if not (0 <= sx < w and 0 <= sz < h) or not walk[sz, sx] or trig[sz, sx] >= 0:
-            raise ValueError("the start (%d, %d) isn't a walkable tile" % (sx, sz))
-        seen = np.zeros_like(walk)
-        stack = [(sx, sz)]
-        seen[sz, sx] = True
-        while stack:
-            x, y = stack.pop()
-            if trig[y, x] >= 0:
-                continue   # (a door or an exit: reached, not walked through)
-            for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
-                if 0 <= nx < w and 0 <= ny < h and walk[ny, nx] and not seen[ny, nx]:
-                    if abs(heights[ny][nx][0] - heights[y][x][0]) > 6.0:
-                        continue   # (a step too high: a ledge, a wall the floor runs up)
-                    if wall_between(x, y, nx, ny):
-                        continue
-                    seen[ny, nx] = True
-                    stack.append((nx, ny))
-        walk = seen
+        walk = _reach(start, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs)
         # Emerald's grid has no walls between tiles: where one still parts two walkable tiles, the tile nearer the
         # wall is blocked
         for y in range(h):

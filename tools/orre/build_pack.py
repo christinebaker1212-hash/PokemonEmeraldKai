@@ -3,8 +3,10 @@
 
   orre/orre3d.pak    every map's model (all 174): meshes and textures for the 3D engine
   orre/orre_data.pak the rest the conversions read, as the game's own bytes: text (.msg), collision (.col), scripts
-                     (.scd), floor data (.flr), camera shots (.cam), the map modules' tables (.rel), and the character
-                     and object models (.dat, HSD: for their sprites)
+                     (.scd), floor data (.flr), camera shots (.cam), the map modules' tables (.rel), the character
+                     and object models (.dat, HSD: for their sprites), and the music and sounds: the songs (.snd),
+                     the MusyX projects (common/snd_*_proj / _pool / _sdir.bin) and their samples (sound/*.samp,
+                     the disc's files/sound/, copied in by make_pack.sh)
 
     python3 -I tools/orre/build_pack.py UNPACKED_DIR OUT_DIR
 
@@ -20,7 +22,8 @@ orre3d.pak (little endian): "ORZ3" u32 version, u32 textures, u32 maps, then
               vertices (triangles; Colosseum's units, Y up)
             (version 2) u32 grid (0: none; 1: the map is in the game, tools/orre/maps.py): u16 w, h (tiles, whole
               blocks of 32), f32 tile (Colosseum units a tile), x0, z0 (the grid's corner); then per tile (row by row):
-              u8 flags (1 walkable, 2 a trigger), s8 the trigger's collision object (-1 none), u8 heights (0-3), u8 pad,
+              u8 flags (1 walkable, 2 a trigger), s8 the trigger's collision object (-1 none), u8 heights (0-3),
+              u8 the tile's behavior (the field engine's: 0 plain, 0x60 a warp stepped on: tools/orre/maps.py warps),
               f32 heights x3 (the ground's, lowest first; Colosseum units) (tools/orre/grid.py)
   then the data: textures one after another.
 orre_data.pak: "ORDT" u32 version, u32 files, each char name[48] ("<archive>/<member>.<type>"), u32 offset, u32 bytes,
@@ -40,7 +43,13 @@ import grid  # noqa: E402
 import maps as orre_maps  # noqa: E402
 
 VERSION = 2
-DATA_TYPES = ("msg", "col", "scd", "flr", "cam", "rel", "dat")
+DATA_TYPES = ("msg", "col", "scd", "flr", "cam", "rel", "dat", "snd", "samp")
+
+
+def is_data(fn):
+    """A file orre_data.pak keeps: the types above, and the sound projects (common's snd_*_proj / _pool / _sdir)."""
+    ext = fn.rsplit(".", 1)[-1]
+    return ext in DATA_TYPES or (ext == "bin" and fn.startswith("snd_"))
 
 
 def mesh_bytes(m, tex_index):
@@ -111,7 +120,9 @@ def build(src, out):
                     for x in range(g["w"]):
                         hs = (g["heights"][y][x] + [0.0, 0.0, 0.0])[:3]
                         fl = (1 if g["walk"][y, x] else 0) | (2 if g["trigger"][y, x] >= 0 else 0)
-                        body.append(struct.pack("<BbBBfff", fl, int(g["trigger"][y, x]), len(g["heights"][y][x][:3]), 0, *hs))
+                        tid = int(g["trigger"][y, x])
+                        beh = orre_maps.STEP_WARP if g["walk"][y, x] and tid in m_conf.get("warps", {}) else 0
+                        body.append(struct.pack("<BbBBfff", fl, tid, len(g["heights"][y][x][:3]), beh, *hs))
             else:
                 body.append(struct.pack("<I", 0))
             raw_body = b"".join(body)
@@ -136,7 +147,7 @@ def build(src, out):
     files = []
     for arc in sorted(os.listdir(src)):
         for fn in sorted(os.listdir(os.path.join(src, arc))):
-            if fn.rsplit(".", 1)[-1] in DATA_TYPES:
+            if is_data(fn):
                 data = open(os.path.join(src, arc, fn), "rb").read()
                 z = zlib.compress(data, 9)
                 if len(z) >= len(data):

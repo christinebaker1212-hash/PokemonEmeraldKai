@@ -2,4 +2,5 @@
 // size in blocks of 32 x 32 tiles and the tile the player can start on (src/orre/o3d.c)
 static const struct { u16 map; const char *file; u8 bw, bh, startX, startY; } sOrreMaps[] = {
     {MAP_ORRE_OUTSKIRT_STAND, "S1_out", 2, 2, 25, 29},   // start tile 25, 29
+    {MAP_ORRE_OUTSKIRT_STAND_DINER, "S1_shop_1F", 1, 1, 10, 17},   // start tile 10, 17
 };

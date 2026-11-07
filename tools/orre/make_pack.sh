@@ -45,6 +45,9 @@ echo "870e8b9693ca780782d80f22a6a4572d8ba9458f  $WORK/files/main.dol" | sha1sum 
     || { echo "this isn't Pokemon Colosseum (USA) GC6E01"; exit 1; }
 "$DTK" vfs cp "$DISC:files" "$WORK/files/" > /dev/null
 python3 -I "$REPO/tools/orre/fsys.py" unpack "$WORK/files" "$WORK/unpacked"
+# the music's and sounds' samples aren't in archives: the disc's files/sound/ goes in beside them
+mkdir -p "$WORK/unpacked/sound"
+cp "$WORK/files/sound/"*.samp "$WORK/unpacked/sound/"
 mkdir -p "$REPO/orre"
 python3 -I "$REPO/tools/orre/build_pack.py" "$WORK/unpacked" "$REPO/orre" 2>/dev/null
 [ -n "$ORRE_TEST" ] && python3 -I "$REPO/tools/orre/test_pack.py" "$WORK/unpacked" "$REPO/orre" 2>/dev/null

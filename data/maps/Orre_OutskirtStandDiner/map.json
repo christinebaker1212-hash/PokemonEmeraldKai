@@ -1,0 +1,56 @@
+{
+  "id": "MAP_ORRE_OUTSKIRT_STAND_DINER",
+  "name": "Orre_OutskirtStandDiner",
+  "layout": "LAYOUT_ORRE_OUTSKIRT_STAND_DINER",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_OUTSKIRT_STAND",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "coord_events": [],
+  "bg_events": [],
+  "warp_events": [
+    {
+      "x": 8,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_OUTSKIRT_STAND",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 9,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_OUTSKIRT_STAND",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 10,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_OUTSKIRT_STAND",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 11,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_OUTSKIRT_STAND",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 12,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_OUTSKIRT_STAND",
+      "dest_warp_id": "1"
+    }
+  ]
+}
