@@ -61,7 +61,8 @@ TripleEligible; the rider's side takes the carrier's MPR_COOP_ACCEPT unasked, MP
 encounter asks riders first (MP_Coop_TryWildTeamUp), surfing too: water battles roll their extra Pokémon from the water table
 (wild_encounter.c MP_RollExtraWaterMon, sCoop.wildWater); while surfing only riders can join (nobody else is on the water).
 The carrier keeps sRidingMe until the rider's state says the ride ended (their PIG_ON arrives before their state shows
-MPF_RIDING: clearing on "not riding" forgot them a frame after hopping on). Tests piggy_trainer, piggy_surf_wild.
+MPF_RIDING: clearing on "not riding" forgot them a frame after hopping on). Tests piggy_trainer, piggy_surf_wild,
+piggy_surf_trainer (ROUTE 105: surfing into LUIS's sight).
 Crash report (src/platform/crash_log.c, installed first thing in main): Windows SEH filter / Linux signals append to
 crash_log.txt: exception, exe+offset of the faulting address, callbacks, map, and exe+offsets found on the stack (resolve with
 x86_64-w64-mingw32-nm on the same exe; keep a copy of each shipped exe). Debug `mp crash` forces one.
