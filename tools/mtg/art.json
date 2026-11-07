@@ -27,6 +27,13 @@
 "number": "30",
 "set": "wth"
 },
+"Abeyance": {
+"artist": "Thomas Gianni",
+"file": "wth_1",
+"frame": "1997",
+"number": "1",
+"set": "wth"
+},
 "Abjure": {
 "artist": "Ted Naifeh",
 "file": "wth_31",
@@ -1770,6 +1777,13 @@
 "number": "97",
 "set": "ulg"
 },
+"Blockade Runner": {
+"artist": "Carl Critchlow",
+"file": "mmq_60",
+"frame": "1997",
+"number": "60",
+"set": "mmq"
+},
 "Blood Pet": {
 "artist": "Brom",
 "file": "tmp_109",
@@ -1958,6 +1972,13 @@
 "frame": "1997",
 "number": "165",
 "set": "tmp"
+},
+"Boiling Blood": {
+"artist": "Cliff Nielsen",
+"file": "wth_92",
+"frame": "1997",
+"number": "92",
+"set": "wth"
 },
 "Bola Warrior": {
 "artist": "Adam Rex",
@@ -2210,6 +2231,13 @@
 "frame": "1997",
 "number": "160",
 "set": "por"
+},
+"Bullwhip": {
+"artist": "Brom",
+"file": "sth_132",
+"frame": "1997",
+"number": "132",
+"set": "sth"
 },
 "Buoyancy": {
 "artist": "Jeff Miracola",
@@ -2638,6 +2666,13 @@
 "number": "140",
 "set": "apc"
 },
+"Cease-Fire": {
+"artist": "Darrell Riche",
+"file": "ody_14",
+"frame": "1997",
+"number": "14",
+"set": "ody"
+},
 "Celestial Prism": {
 "artist": "Amy Weber",
 "file": "4ed_304",
@@ -2694,12 +2729,26 @@
 "number": "71",
 "set": "ody"
 },
+"Cephalid Inkshrouder": {
+"artist": "Tony Szczudlo",
+"file": "jud_36",
+"frame": "1997",
+"number": "36",
+"set": "jud"
+},
 "Cephalid Looter": {
 "artist": "Keith Garletts",
 "file": "ody_72",
 "frame": "1997",
 "number": "72",
 "set": "ody"
+},
+"Cephalid Pathmage": {
+"artist": "Alex Horley-Orlandelli",
+"file": "lgn_31",
+"frame": "1997",
+"number": "31",
+"set": "lgn"
 },
 "Cephalid Retainer": {
 "artist": "Tony Szczudlo",
@@ -3358,6 +3407,13 @@
 "frame": "1997",
 "number": "93",
 "set": "tor"
+},
+"Crafty Pathmage": {
+"artist": "Wayne England",
+"file": "ons_77",
+"frame": "1997",
+"number": "77",
+"set": "ons"
 },
 "Crag Saurian": {
 "artist": "Matthew D. Wilson",
@@ -4605,6 +4661,13 @@
 "number": "169",
 "set": "mir"
 },
+"Dwarven Nomad": {
+"artist": "Mike Kimble",
+"file": "mir_170",
+"frame": "1997",
+"number": "170",
+"set": "mir"
+},
 "Dwarven Patrol": {
 "artist": "Greg Hildebrandt",
 "file": "apc_61",
@@ -4653,6 +4716,13 @@
 "frame": "1993",
 "number": "72a",
 "set": "hml"
+},
+"Dwarven Warriors": {
+"artist": "Douglas Shuler",
+"file": "4ed_187",
+"frame": "1993",
+"number": "187",
+"set": "4ed"
 },
 "Dying Wail": {
 "artist": "Brian Snõddy",
@@ -5311,6 +5381,13 @@
 "frame": "1997",
 "number": "6",
 "set": "puds"
+},
+"Falter": {
+"artist": "Mike Raabe",
+"file": "usg_184",
+"frame": "1997",
+"number": "184",
+"set": "usg"
 },
 "Fanatical Devotion": {
 "artist": "Massimiliano Frezzato",
@@ -6173,6 +6250,13 @@
 "number": "191",
 "set": "mmq"
 },
+"Furnace Brood": {
+"artist": "Jeff Miracola",
+"file": "exo_84",
+"frame": "1997",
+"number": "84",
+"set": "exo"
+},
 "Furnace Spirit": {
 "artist": "Jeff Miracola",
 "file": "sth_87",
@@ -6929,6 +7013,13 @@
 "number": "40",
 "set": "apc"
 },
+"Gravebind": {
+"artist": "Drew Tucker",
+"file": "ice_129",
+"frame": "1993",
+"number": "129",
+"set": "ice"
+},
 "Graveborn Muse": {
 "artist": "Kev Walker",
 "file": "lgn_73",
@@ -7229,6 +7320,13 @@
 "frame": "1997",
 "number": "296",
 "set": "mmq"
+},
+"Hearth Charm": {
+"artist": "Greg Spalenka",
+"file": "vis_82",
+"frame": "1997",
+"number": "82",
+"set": "vis"
 },
 "Heartwood Giant": {
 "artist": "Randy Elliott",
@@ -7587,6 +7685,13 @@
 "number": "108",
 "set": "wth"
 },
+"Hurr Jackal": {
+"artist": "Drew Tucker",
+"file": "4ed_203",
+"frame": "1993",
+"number": "203",
+"set": "4ed"
+},
 "Hurricane": {
 "artist": "Dameon Willich",
 "file": "4ed_251",
@@ -7769,6 +7874,13 @@
 "number": "157",
 "set": "ons"
 },
+"Infiltrate": {
+"artist": "Nelson DeCastro",
+"file": "nem_33",
+"frame": "1997",
+"number": "33",
+"set": "nem"
+},
 "Inflame": {
 "artist": "Eric Peterson",
 "file": "pcy_91",
@@ -7810,6 +7922,13 @@
 "frame": "1997",
 "number": "41",
 "set": "ons"
+},
+"Instigator": {
+"artist": "Fred Fields",
+"file": "mmq_140",
+"frame": "1997",
+"number": "140",
+"set": "mmq"
 },
 "Intimidation": {
 "artist": "Terese Nielsen",
@@ -8054,6 +8173,13 @@
 "file": "hml_77",
 "frame": "1993",
 "number": "77",
+"set": "hml"
+},
+"Joven's Tools": {
+"artist": "Nicola Leonard",
+"file": "hml_108",
+"frame": "1993",
+"number": "108",
 "set": "hml"
 },
 "Jump": {
@@ -10534,6 +10660,13 @@
 "number": "254",
 "set": "5ed"
 },
+"Orcish Healer": {
+"artist": "Quinton Hoover",
+"file": "ice_208",
+"frame": "1993",
+"number": "208",
+"set": "ice"
+},
 "Orcish Oriflamme": {
 "artist": "Dan Frazier",
 "file": "4ed_215",
@@ -12858,6 +12991,13 @@
 "number": "97",
 "set": "mmq"
 },
+"Saprazzan Breaker": {
+"artist": "Pete Venters",
+"file": "mmq_98",
+"frame": "1997",
+"number": "98",
+"set": "mmq"
+},
 "Saprazzan Legate": {
 "artist": "Andrew Goldhawk",
 "file": "mmq_100",
@@ -13669,6 +13809,13 @@
 "frame": "1993",
 "number": "97a",
 "set": "hml"
+},
+"Shrouded Serpent": {
+"artist": "Dana Knutson",
+"file": "pcy_47",
+"frame": "1997",
+"number": "47",
+"set": "pcy"
 },
 "Sick and Tired": {
 "artist": "Val Mayerik",
@@ -15427,6 +15574,13 @@
 "number": "267",
 "set": "ice"
 },
+"Tawnos's Wand": {
+"artist": "Douglas Shuler",
+"file": "4ed_348",
+"frame": "1993",
+"number": "348",
+"set": "4ed"
+},
 "Tectonic Break": {
 "artist": "Rebecca Guay",
 "file": "mmq_216",
@@ -15440,6 +15594,13 @@
 "frame": "1997",
 "number": "43",
 "set": "inv"
+},
+"Teleport": {
+"artist": "Douglas Shuler",
+"file": "bchr_26",
+"frame": "1993",
+"number": "26",
+"set": "bchr"
 },
 "Telethopter": {
 "artist": "Thomas M. Baxa",
@@ -15973,6 +16134,13 @@
 "number": "167",
 "set": "ice"
 },
+"Touch of Invisibility": {
+"artist": "Eric Peterson",
+"file": "ody_109",
+"frame": "1997",
+"number": "109",
+"set": "ody"
+},
 "Touchstone": {
 "artist": "George Pratt",
 "file": "wth_161",
@@ -16021,6 +16189,13 @@
 "frame": "1997",
 "number": "24",
 "set": "ulg"
+},
+"Trailblazer": {
+"artist": "Julie Baroh",
+"file": "ice_272",
+"frame": "1993",
+"number": "272",
+"set": "ice"
 },
 "Trained Armodon": {
 "artist": "Gary Leach",

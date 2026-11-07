@@ -44,6 +44,7 @@ enum {
     MTG_API_REVEAL,           // RevealEffect: cards from a hand shown (RevealValid$, AnyNumber$, Random$), remembered
     MTG_API_REPEAT_EACH,      // RepeatEachEffect: RepeatSubAbility$ once for each RepeatPlayers$ / RepeatCards$, each remembered
     MTG_API_SET_LIFE,         // SetLifeEffect: a player's life total becomes LifeAmount$
+    MTG_API_EFFECT,           // EffectEffect: StaticAbilities$ in force for a while (MtgDuel.effects)
     MTG_API_COUNT
 };
 
@@ -106,6 +107,8 @@ typedef struct {
     uint16_t delayed;               // DelayedTrigger: its trigger (gMtgTriggers[delayed - 1]), built from its own params
     uint16_t winSub, loseSub;       // FlipCoin: WinSubAbility$ / LoseSubAbility$ (0xFFFF: none)
     uint16_t repeatSub;             // RepeatEach: its RepeatSubAbility$ (0xFFFF: none)
+    uint16_t effStatics[3];         // Effect: its StaticAbilities$ (gMtgStatics), parsed at load
+    uint8_t effStaticCount;
     uint8_t tgtFromSub;             // its tgt is the one target of a sub-ability later in its chain (chosen as it's cast;
                                     // its own effect doesn't act on it: Scent of Ivy's Reveal, then Pump)
     uint8_t tgtShared;              // a sub-ability whose target is its chain's (tgtFromSub on the first)
@@ -116,7 +119,10 @@ typedef struct {
 int Mtg_AbilityUses(const MtgDuel *d, int obj, int ability);
 void Mtg_Remember(MtgDuel *d, int obj);   // onto the resolving chain's remembered objects (once each)
 int Mtg_IsRemembered(const MtgDuel *d, int obj);
-int Mtg_IsRememberedPlayer(const MtgDuel *d, int player);   // times used this turn (ActivationLimit$)
+int Mtg_IsRememberedPlayer(const MtgDuel *d, int player);
+extern const MtgEffect *gMtgEffCtx;   // the Effect whose statics are being read (IsRemembered reads its list)
+int Mtg_EffectAlive(const MtgDuel *d, const MtgEffect *e);
+int Mtg_ParseEffectStatic(MtgCardDef *c, int cardId, char *text);   // gMtgStatics index, -1 (card unsupported)   // times used this turn (ActivationLimit$)
 extern MtgCost *gMtgUnlessCosts;
 
 // mtg_script.c
@@ -176,7 +182,7 @@ void Mtg_Unsupported(MtgCardDef *c, const char *why);
 enum { MTG_STATIC_CONTINUOUS, MTG_STATIC_CANT_BLOCK, MTG_STATIC_CANT_ATTACK, MTG_STATIC_CANT_BLOCK_BY,
        MTG_STATIC_RAISE_COST, MTG_STATIC_REDUCE_COST,
        MTG_STATIC_MUST_ATTACK, MTG_STATIC_CANT_BE_CAST, MTG_STATIC_CANT_TARGET, MTG_STATIC_CANT_PLAY_LAND, MTG_STATIC_CANT_BE_ACTIVATED,
-       MTG_STATIC_ETB_TAPPED, MTG_STATIC_NO_UNTAP };   // (two replacement effects, R: lines, kept here: they test alike)
+       MTG_STATIC_ETB_TAPPED, MTG_STATIC_NO_UNTAP, MTG_STATIC_CANT_REGENERATE };   // (two replacement effects, R: lines, kept here: they test alike)
 typedef struct {
     uint16_t card;
     uint8_t mode;                   // MTG_STATIC_*
@@ -208,6 +214,7 @@ typedef struct {
     uint8_t saKind;                 // CantBeActivated: 0 any ability, 1 those with {T}, 2 Cycling
     uint8_t grantTrigCount;         // AddTrigger$: triggers what it affects has
     uint16_t grantTrig[2];
+    uint8_t hiddenKw;               // AddHiddenKeyword$ "CARDNAME can't block." made it a CantBlock (Affected$ its spec)
 } MtgStatic;
 typedef struct {
     int addPower, addToughness, setPower, setToughness;

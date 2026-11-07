@@ -225,7 +225,7 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
                                          "IsPresent", "PresentCompare", "ValidCard", "ValidAttacker", "ValidBlocker", "CharacteristicDefining",
                                          "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender",
                                          "ValidCreature", "ValidTarget", "ValidSA", "ValidSource", "Caster", "AddAbility", "AddTrigger", "AddSVar", "GainControl",
-                                         "CheckSVar", "SVarCompare"};
+                                         "CheckSVar", "SVarCompare", "AddHiddenKeyword"};
     MtgStatic st;
     int first, count, i, v;
     const char *s;
@@ -249,7 +249,20 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
             : strcmp(s, "RaiseCost") == 0 ? MTG_STATIC_RAISE_COST : strcmp(s, "ReduceCost") == 0 ? MTG_STATIC_REDUCE_COST
             : strcmp(s, "MustAttack") == 0 ? MTG_STATIC_MUST_ATTACK : strcmp(s, "CantBeCast") == 0 ? MTG_STATIC_CANT_BE_CAST
             : strcmp(s, "CantTarget") == 0 ? MTG_STATIC_CANT_TARGET : strcmp(s, "CantPlayLand") == 0 ? MTG_STATIC_CANT_PLAY_LAND
-            : strcmp(s, "CantBeActivated") == 0 ? MTG_STATIC_CANT_BE_ACTIVATED : 0xFF;
+            : strcmp(s, "CantBeActivated") == 0 ? MTG_STATIC_CANT_BE_ACTIVATED
+            : strcmp(s, "CantRegenerate") == 0 ? MTG_STATIC_CANT_REGENERATE : 0xFF;
+    if ((s = ParamOf(first, count, "AddHiddenKeyword"))) {   // "CARDNAME can't block." / "can't attack.": those modes
+        if (st.mode != MTG_STATIC_CONTINUOUS || ParamOf(first, count, "AddPower") || ParamOf(first, count, "AddToughness")
+            || ParamOf(first, count, "AddKeyword") || ParamOf(first, count, "SetPower") || !ParamOf(first, count, "Affected"))
+            goto unknown;
+        if (strncmp(s, "CARDNAME can't block.", 21) == 0)
+            st.mode = MTG_STATIC_CANT_BLOCK;
+        else if (strncmp(s, "CARDNAME can't attack.", 22) == 0)
+            st.mode = MTG_STATIC_CANT_ATTACK;
+        else
+            goto unknown;
+        st.hiddenKw = 1;
+    }
     // the newer modes' own keys (StaticAbilityMustAttack, CantBeCast, CantTarget, CantPlayLand), nowhere else
     if ((ParamOf(first, count, "ValidCreature") && st.mode != MTG_STATIC_MUST_ATTACK)
         || ((ParamOf(first, count, "ValidTarget") || ParamOf(first, count, "ValidSource")) && st.mode != MTG_STATIC_CANT_TARGET)
@@ -270,14 +283,21 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     // Activated.hasTapCost, Activated.Cycling; Activator$ Player (anyone) only
     if (st.mode == MTG_STATIC_CANT_BE_ACTIVATED) {
         s = ParamOf(first, count, "ValidSA");
-        st.saKind = !s || strcmp(s, "Activated") == 0 ? 0 : strcmp(s, "Activated.hasTapCost") == 0 ? 1
-                  : strcmp(s, "Activated.Cycling") == 0 ? 2 : 0xFF;
-        if (st.saKind == 0xFF || ((s = ParamOf(first, count, "Activator")) && strcmp(s, "Player") != 0))
+        st.saKind = !s || strcmp(s, "Activated") == 0 || strcmp(s, "Activated.!ManaAbility") == 0 ? 0
+                  : strcmp(s, "Activated.hasTapCost") == 0 ? 1 : strcmp(s, "Activated.Cycling") == 0 ? 2 : 0xFF;
+        if (st.saKind == 0xFF)
             goto unknown;
+        if ((s = ParamOf(first, count, "Activator"))) {   // (an Effect's: its remembered player only)
+            if (strcmp(s, "Player.IsRemembered") == 0)
+                st.activator = 3;
+            else if (strcmp(s, "Player") != 0)
+                goto unknown;
+        }
     }
     if (st.mode == MTG_STATIC_CANT_BE_CAST) {   // Caster$ Player (anyone, as none) / You / Opponent: the static's activator slot
         s = ParamOf(first, count, "Caster");
-        st.activator = !s || strcmp(s, "Player") == 0 ? 0 : strcmp(s, "You") == 0 ? 1 : strcmp(s, "Opponent") == 0 ? 2 : 0xFF;
+        st.activator = !s || strcmp(s, "Player") == 0 ? 0 : strcmp(s, "You") == 0 ? 1 : strcmp(s, "Opponent") == 0 ? 2
+                     : strcmp(s, "Player.IsRemembered") == 0 ? 3 : 0xFF;
         if (st.activator == 0xFF)
             goto unknown;
     }
@@ -306,7 +326,7 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
         st.self = s[0] == 'S';
         st.enchanted = (uint8_t)ench;
     }
-    st.affected = ParamOf(first, count, st.mode == MTG_STATIC_CONTINUOUS ? "Affected"
+    st.affected = ParamOf(first, count, st.mode == MTG_STATIC_CONTINUOUS || st.hiddenKw ? "Affected"
                                       : st.mode == MTG_STATIC_CANT_BLOCK_BY ? "ValidAttacker"
                                       : st.mode == MTG_STATIC_MUST_ATTACK ? "ValidCreature"
                                       : st.mode == MTG_STATIC_CANT_TARGET ? "ValidTarget" : "ValidCard");
@@ -489,6 +509,16 @@ unknown:
     Mtg_Unsupported(c, "static ability");
 }
 
+// an Effect's StaticAbilities$ line: parsed as the card's own would be, then kept apart from the card's statics
+int Mtg_ParseEffectStatic(MtgCardDef *c, int cardId, char *text)
+{
+    int before = c->staticCount;
+    ParseOne(c, cardId, text);
+    if (c->staticCount == before)
+        return -1;
+    return c->statics[--c->staticCount];
+}
+
 // R: lines the engine plays as statics: "enters the battlefield tapped" (Event$ Moved, ReplaceWith$ an SVar that taps
 // it: ETBTapped) and "doesn't untap during its controller's untap step" (Event$ Untap, Layer$ CantHappen)
 void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text)
@@ -665,6 +695,50 @@ static int Applies(const MtgDuel *d, const MtgStatic *st, int src, int obj)
 }
 
 // What every static on the battlefield does to OBJ now
+// one static's share of what OBJ is now (SRC its source, CTRL that source's controller)
+static void ModsBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, uint32_t srcSeq, MtgStaticMods *m,
+                   uint32_t *setPowerSeqP, uint32_t *setToughSeqP)
+{
+    uint32_t setPowerSeq = *setPowerSeqP, setToughSeq = *setToughSeqP;
+    m->addPower += st->addPower;
+    m->addToughness += st->addToughness;
+    if (st->powerX || st->toughX) {   // (counted now, as Forge's layer 7c does each time)
+        MtgStackEntry e;
+        MtgResolveCtx ctx;
+        int ok;
+        memset(&e, 0, sizeof(e));
+        ctx.e = &e;
+        ctx.controller = ctrl;
+        ctx.source = s;
+        if (st->powerX)
+            m->addPower += Mtg_Amount(d, &ctx, st->card, st->powerX, &ok);
+        if (st->toughX)
+            m->addToughness += Mtg_Amount(d, &ctx, st->card, st->toughX, &ok);
+    }
+    m->keywords |= st->addKeywords;
+    m->landwalk |= st->addLandwalk;
+    m->protection |= st->addProtection;
+    if (st->setPower != MTG_STATIC_NO_SET && srcSeq + 1 > setPowerSeq)
+        m->setPower = st->setPower, setPowerSeq = srcSeq + 1;
+    if (st->setToughness != MTG_STATIC_NO_SET && srcSeq + 1 > setToughSeq)
+        m->setToughness = st->setToughness, setToughSeq = srcSeq + 1;
+    if (st->setPowerX || st->setToughX) {   // (a */* creature's own: counted now; any later set wins)
+        MtgStackEntry e;
+        MtgResolveCtx ctx;
+        int ok;
+        memset(&e, 0, sizeof(e));
+        ctx.e = &e;
+        ctx.controller = ctrl;
+        ctx.source = s;
+        if (st->setPowerX && setPowerSeq == 0)
+            m->setPower = Mtg_Amount(d, &ctx, st->card, st->setPowerX, &ok), setPowerSeq = 1;
+        if (st->setToughX && setToughSeq == 0)
+            m->setToughness = Mtg_Amount(d, &ctx, st->card, st->setToughX, &ok), setToughSeq = 1;
+    }
+    *setPowerSeqP = setPowerSeq;
+    *setToughSeqP = setToughSeq;
+}
+
 void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m)
 {
     uint32_t setPowerSeq = 0, setToughSeq = 0;
@@ -686,42 +760,20 @@ void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m)
                 continue;   // (EffectZone$ Graveyard: only from there; the rest only from the battlefield)
             if (st->mode != MTG_STATIC_CONTINUOUS || !Applies(d, st, s, obj))
                 continue;
-            m->addPower += st->addPower;
-            m->addToughness += st->addToughness;
-            if (st->powerX || st->toughX) {   // (counted now, as Forge's layer 7c does each time)
-                MtgStackEntry e;
-                MtgResolveCtx ctx;
-                int ok;
-                memset(&e, 0, sizeof(e));
-                ctx.e = &e;
-                ctx.controller = src->controller;
-                ctx.source = s;
-                if (st->powerX)
-                    m->addPower += Mtg_Amount(d, &ctx, st->card, st->powerX, &ok);
-                if (st->toughX)
-                    m->addToughness += Mtg_Amount(d, &ctx, st->card, st->toughX, &ok);
-            }
-            m->keywords |= st->addKeywords;
-            m->landwalk |= st->addLandwalk;
-            m->protection |= st->addProtection;
-            if (st->setPower != MTG_STATIC_NO_SET && src->seq + 1 > setPowerSeq)
-                m->setPower = st->setPower, setPowerSeq = src->seq + 1;
-            if (st->setToughness != MTG_STATIC_NO_SET && src->seq + 1 > setToughSeq)
-                m->setToughness = st->setToughness, setToughSeq = src->seq + 1;
-            if (st->setPowerX || st->setToughX) {   // (a */* creature's own: counted now; any later set wins)
-                MtgStackEntry e;
-                MtgResolveCtx ctx;
-                int ok;
-                memset(&e, 0, sizeof(e));
-                ctx.e = &e;
-                ctx.controller = src->controller;
-                ctx.source = s;
-                if (st->setPowerX && setPowerSeq == 0)
-                    m->setPower = Mtg_Amount(d, &ctx, st->card, st->setPowerX, &ok), setPowerSeq = 1;
-                if (st->setToughX && setToughSeq == 0)
-                    m->setToughness = Mtg_Amount(d, &ctx, st->card, st->setToughX, &ok), setToughSeq = 1;
-            }
+            ModsBy(d, st, s, src->controller, src->seq, m, &setPowerSeq, &setToughSeq);
         }
+    }
+    for (s = 0; s < d->effCount; s++) {   // (the Effects in force: their own statics, their own remembered)
+        const MtgEffect *e = &d->effects[s];
+        if (!Mtg_EffectAlive(d, e))
+            continue;
+        gMtgEffCtx = e;
+        for (k = 0; k < gMtgAbilities[e->ability].effStaticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[gMtgAbilities[e->ability].effStatics[k]];
+            if (st->mode == MTG_STATIC_CONTINUOUS && Applies(d, st, e->source, obj))
+                ModsBy(d, st, e->source, e->controller, e->sourceSeq, m, &setPowerSeq, &setToughSeq);
+        }
+        gMtgEffCtx = NULL;
     }
     sDepth--;
 }
@@ -809,6 +861,37 @@ int Mtg_StaticController(const MtgDuel *d, int obj)
 }
 
 // CantBlock / CantAttack: does a static forbid OBJ? CantBlockBy: may OBJ (attacking) not be blocked by OTHER?
+// does this static (from S, controlled by CTRL) forbid it? (Mtg_StaticForbids' test of one)
+static int ForbidBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, int mode, int obj, int other)
+{
+    if (st->mode != mode || !Applies(d, st, s, obj))
+        return 0;
+    if (mode == MTG_STATIC_CANT_BLOCK_BY && st->blocker && !Mtg_ValidObj(d, other, st->blocker, s, ctrl))
+        return 0;
+    if (st->unlessDefender && DefenderIs(d, st, s, obj))
+        return 0;   // (the defending player is as it says: it may attack)
+    // CantBeCast: OTHER is the player casting it (Caster$: anyone / its controller / an opponent / remembered)
+    if (mode == MTG_STATIC_CANT_BE_CAST && ((st->activator == 1 && other != ctrl)
+                                            || (st->activator == 2 && other == ctrl)
+                                            || (st->activator == 3 && !Mtg_IsRememberedPlayer(d, other))))
+        return 0;
+    if (mode == MTG_STATIC_CANT_BE_ACTIVATED && st->activator == 3 && !Mtg_IsRememberedPlayer(d, d->objs[obj].controller))
+        return 0;
+    // CantBeActivated: OTHER is the ability (its kind: any, with {T}, Cycling)
+    if (mode == MTG_STATIC_CANT_BE_ACTIVATED && other != 0xFFFF
+        && ((st->saKind == 1 && !gMtgAbilities[other].cost.tap) || (st->saKind == 2 && !gMtgAbilities[other].fromHand)))
+        return 0;
+    // CantTarget: OTHER is the targeting spell's or ability's source (ValidSA$ Spell: only from a spell, which
+    // isn't on the battlefield; ValidSource$: only such sources)
+    if (mode == MTG_STATIC_CANT_TARGET && other != MTG_NO_OBJ) {
+        if (st->spellsOnly && d->objs[other].zone == MTG_ZONE_BATTLEFIELD)
+            return 0;
+        if (st->source && !Mtg_ValidObj(d, other, st->source, s, ctrl))
+            return 0;
+    }
+    return 1;
+}
+
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other)
 {
     int s, k, forbid = 0;
@@ -825,30 +908,20 @@ int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other)
             const MtgStatic *st = &gMtgStatics[c->statics[k]];
             if ((src->zone == MTG_ZONE_GRAVEYARD) != st->fromGrave)
                 continue;   // (EffectZone$ Graveyard: only from there; the rest only from the battlefield)
-            if (st->mode != mode || !Applies(d, st, s, obj))
+            if (!ForbidBy(d, st, s, src->controller, mode, obj, other))
                 continue;
-            if (mode == MTG_STATIC_CANT_BLOCK_BY && st->blocker && !Mtg_ValidObj(d, other, st->blocker, s, src->controller))
-                continue;
-            if (st->unlessDefender && DefenderIs(d, st, s, obj))
-                continue;   // (the defending player is as it says: it may attack)
-            // CantBeCast: OTHER is the player casting it (Caster$: anyone / its controller / an opponent)
-            if (mode == MTG_STATIC_CANT_BE_CAST && ((st->activator == 1 && other != src->controller)
-                                                    || (st->activator == 2 && other == src->controller)))
-                continue;
-            // CantBeActivated: OTHER is the ability (its kind: any, with {T}, Cycling)
-            if (mode == MTG_STATIC_CANT_BE_ACTIVATED && other != 0xFFFF
-                && ((st->saKind == 1 && !gMtgAbilities[other].cost.tap) || (st->saKind == 2 && !gMtgAbilities[other].fromHand)))
-                continue;
-            // CantTarget: OTHER is the targeting spell's or ability's source (ValidSA$ Spell: only from a spell, which
-            // isn't on the battlefield; ValidSource$: only such sources)
-            if (mode == MTG_STATIC_CANT_TARGET && other != MTG_NO_OBJ) {
-                if (st->spellsOnly && d->objs[other].zone == MTG_ZONE_BATTLEFIELD)
-                    continue;
-                if (st->source && !Mtg_ValidObj(d, other, st->source, s, src->controller))
-                    continue;
-            }
             forbid = 1;
         }
+    }
+    for (s = 0; s < d->effCount && !forbid; s++) {   // (the Effects in force)
+        const MtgEffect *e = &d->effects[s];
+        if (!Mtg_EffectAlive(d, e))
+            continue;
+        gMtgEffCtx = e;
+        for (k = 0; k < gMtgAbilities[e->ability].effStaticCount && !forbid; k++)
+            forbid = ForbidBy(d, &gMtgStatics[gMtgAbilities[e->ability].effStatics[k]], e->source, e->controller, mode, obj,
+                              other);
+        gMtgEffCtx = NULL;
     }
     sDepth--;
     return forbid;

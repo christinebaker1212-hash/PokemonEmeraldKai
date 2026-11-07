@@ -302,6 +302,16 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
             return 0;
         return main ? 4 : 0;
     }
+    case MTG_API_EFFECT: {   // rules for a while: a curse on theirs, a help on its own before combat
+        int curse = Mtg_Param(ab, "IsCurse") != NULL;
+        if (a->target.kind == MTG_TGT_PLAYER)   // (Cease-Fire, Abeyance: at the other player)
+            return main && !tgtMine ? 4 : 0;
+        if (tgtObj >= 0)
+            return curse ? (main && !tgtMine ? 4 : 0)
+                         : (d->active == me && d->step == MTG_STEP_MAIN1 && tgtMine && IsCreatureOnField(d, tgtObj)
+                            && !d->objs[tgtObj].tapped ? 5 : 0);
+        return d->active == me && d->step == MTG_STEP_MAIN1 ? 4 : 0;   // (Falter: before its attack)
+    }
     case MTG_API_DIG:   // looking for cards: in its own main phase (a target player's: the other's)
         return main && (a->target.kind != MTG_TGT_PLAYER || tgtMine) ? 7 : 0;
     case MTG_API_PUT_COUNTER: {   // counters that grow its own creature, curse counters on theirs, charges at their end step

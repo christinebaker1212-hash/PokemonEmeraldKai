@@ -145,9 +145,49 @@ int Mtg_IsRememberedPlayer(const MtgDuel *d, int player)
     return Mtg_IsRemembered(d, MTG_REM_PLAYER + player);
 }
 
+const MtgEffect *gMtgEffCtx;
+
+int Mtg_EffectAlive(const MtgDuel *d, const MtgEffect *e)
+{
+    int k;
+    if (e->until == MTG_EFF_HOST_OR_EOT || e->until == MTG_EFF_HOST) {   // (its source left the battlefield: over)
+        const MtgObj *s = &d->objs[e->source];
+        if (s->zone != MTG_ZONE_BATTLEFIELD || s->seq != e->sourceSeq)
+            return 0;
+    }
+    if (e->exileOnMoved)   // ExileOnMoved$ Battlefield: what it remembers left the battlefield
+        for (k = 0; k < e->remCount; k++)
+            if (e->rem[k] < MTG_REM_PLAYER && (d->objs[e->rem[k]].seq != e->remSeq[k]
+                                               || d->objs[e->rem[k]].zone != MTG_ZONE_BATTLEFIELD))
+                return 0;
+    return 1;
+}
+
+// Effects that ended: gone (KIND: also those lasting until it, MTG_EFF_* or 0xFF for none)
+static void PruneEffects(MtgDuel *d, int kind, int player)
+{
+    int i, n = 0;
+    for (i = 0; i < d->effCount; i++) {
+        const MtgEffect *e = &d->effects[i];
+        int ends = !Mtg_EffectAlive(d, e)
+                || (kind == MTG_EFF_EOT && (e->until == MTG_EFF_EOT || e->until == MTG_EFF_HOST_OR_EOT))
+                || (kind == MTG_EFF_NEXT_TURN && e->until == MTG_EFF_NEXT_TURN && e->controller == player)
+                || (kind == MTG_EFF_END_COMBAT && e->until == MTG_EFF_END_COMBAT);
+        if (!ends)
+            d->effects[n++] = *e;
+    }
+    d->effCount = (uint8_t)n;
+}
+
 int Mtg_IsRemembered(const MtgDuel *d, int obj)
 {
     int i;
+    if (gMtgEffCtx) {   // (an Effect's own list: a card that has moved since is a new one)
+        for (i = 0; i < gMtgEffCtx->remCount; i++)
+            if (gMtgEffCtx->rem[i] == obj && (obj >= MTG_REM_PLAYER || d->objs[obj].seq == gMtgEffCtx->remSeq[i]))
+                return 1;
+        return 0;
+    }
     for (i = 0; i < d->remCount; i++)
         if (d->rem[i] == obj)
             return 1;
@@ -358,7 +398,8 @@ void Mtg_Destroy(MtgDuel *d, int obj, int noRegen)
     MtgObj *o = &d->objs[obj];
     if (o->zone != MTG_ZONE_BATTLEFIELD)
         return;
-    if (o->regen && !noRegen) {   // (701.15: tapped, removed from combat, its damage gone; the shield used up)
+    if (o->regen && !noRegen && !Mtg_StaticForbids(d, MTG_STATIC_CANT_REGENERATE, obj, MTG_NO_OBJ)) {
+        // (701.15: tapped, removed from combat, its damage gone; the shield used up)
         int i;
         o->regen--;
         o->damage = 0;
@@ -431,6 +472,7 @@ static int ControlLayer(MtgDuel *d)
 static void StateBasedActions(MtgDuel *d)
 {
     int again = 1, i, lost[MTG_PLAYERS] = {0, 0};
+    PruneEffects(d, 0xFF, 0);
     while (again && !d->over) {
         again = 0;
         for (i = 0; i < MTG_PLAYERS; i++)
@@ -1404,6 +1446,7 @@ static int AnyFirstStrike(const MtgDuel *d)
 static void EndOfTurnCleanup(MtgDuel *d)
 {
     int i;
+    PruneEffects(d, MTG_EFF_EOT, 0);
     for (i = 0; i < MTG_PLAYERS; i++)
         d->players[i].prevent = 0;
     for (i = 0; i < d->objCount; i++) {
@@ -1507,6 +1550,7 @@ static int StartStep(MtgDuel *d)
     d->stepStarted = 1;
     switch (d->step) {
     case MTG_STEP_UNTAP:
+        PruneEffects(d, MTG_EFF_NEXT_TURN, d->active);   // ("until your next turn")
         for (i = 0; i < d->objCount; i++)
             d->objs[i].usedN[0] = d->objs[i].usedN[1] = 0;   // (ActivationLimit$: each turn)
         for (i = 0; i < d->objCount; i++)
@@ -1549,6 +1593,7 @@ static int StartStep(MtgDuel *d)
         break;
     case MTG_STEP_COMBAT_END:
         EndCombat(d);
+        PruneEffects(d, MTG_EFF_END_COMBAT, 0);
         break;
     case MTG_STEP_CLEANUP:
         if (HandCount(d, d->active) > MTG_HAND_SIZE) {

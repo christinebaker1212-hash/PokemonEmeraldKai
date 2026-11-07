@@ -16,13 +16,13 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL}, {"Animate", MTG_API_ANIMATE},
     {"DelayedTrigger", MTG_API_DELAYED_TRIGGER}, {"PreventDamage", MTG_API_PREVENT_DAMAGE},
     {"GainControl", MTG_API_GAIN_CONTROL}, {"PutCounterAll", MTG_API_PUT_COUNTER_ALL},
-    {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG}, {"Mill", MTG_API_MILL}, {"FlipCoin", MTG_API_FLIP_COIN}, {"Cleanup", MTG_API_CLEANUP}, {"Reveal", MTG_API_REVEAL}, {"RepeatEach", MTG_API_REPEAT_EACH}, {"SetLife", MTG_API_SET_LIFE},
+    {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG}, {"Mill", MTG_API_MILL}, {"FlipCoin", MTG_API_FLIP_COIN}, {"Cleanup", MTG_API_CLEANUP}, {"Reveal", MTG_API_REVEAL}, {"RepeatEach", MTG_API_REPEAT_EACH}, {"SetLife", MTG_API_SET_LIFE}, {"Effect", MTG_API_EFFECT},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
-    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal", "RepeatEach", "SetLife",
+    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal", "RepeatEach", "SetLife", "Effect",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -986,6 +986,35 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         }
         break;
     }
+    case MTG_API_EFFECT: {   // EffectEffect: its statics in force for a while, with what it remembers
+        const char *rem = Mtg_Param(ab, "RememberObjects"), *du = Mtg_Param(ab, "Duration");
+        MtgEffect *ef;
+        if (d->effCount >= MTG_MAX_EFFECTS || !ab->effStaticCount)
+            break;
+        ef = &d->effects[d->effCount++];
+        memset(ef, 0, sizeof(*ef));
+        ef->ability = (uint16_t)(ab - gMtgAbilities);
+        ef->source = (uint16_t)ctx->source;
+        ef->sourceSeq = d->objs[ctx->source].seq;
+        ef->controller = (uint8_t)ctx->controller;
+        ef->until = !du ? MTG_EFF_EOT : strcmp(du, "Permanent") == 0 ? MTG_EFF_PERMANENT
+                  : strcmp(du, "UntilHostLeavesPlayOrEOT") == 0 ? MTG_EFF_HOST_OR_EOT
+                  : strcmp(du, "UntilYourNextTurn") == 0 ? MTG_EFF_NEXT_TURN
+                  : strcmp(du, "UntilEndOfCombat") == 0 ? MTG_EFF_END_COMBAT : MTG_EFF_HOST;
+        ef->exileOnMoved = Mtg_Param(ab, "ExileOnMoved") != NULL;
+        if (rem) {
+            DefinedBy(d, ctx, rem, &who);
+            for (i = 0; i < who.n && ef->remCount < 4; i++) {
+                if (who.t[i].kind == MTG_TGT_PLAYER)
+                    ef->rem[ef->remCount++] = (uint16_t)(MTG_REM_PLAYER + who.t[i].id);
+                else if (who.t[i].kind == MTG_TGT_OBJ) {
+                    ef->remSeq[ef->remCount] = d->objs[who.t[i].id].seq;
+                    ef->rem[ef->remCount++] = who.t[i].id;
+                }
+            }
+        }
+        break;
+    }
     case MTG_API_SET_LIFE: {   // SetLifeEffect: a player's life becomes the amount
         int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "LifeAmount"), &ok);
         Targets(d, ctx, ab, DEF_PLAYER, &who);
@@ -1471,6 +1500,8 @@ static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_REVEAL] = {"RevealValid", "AnyNumber", "Random", "RememberRevealed"},
     [MTG_API_REPEAT_EACH] = {"RepeatSubAbility", "RepeatPlayers", "RepeatCards", "Zone", "DamageMap", "ChangeZoneTable"},
     [MTG_API_SET_LIFE] = {"LifeAmount"},
+    [MTG_API_EFFECT] = {"StaticAbilities", "RememberObjects", "Duration", "ExileOnMoved", "ForgetOnMoved", "Name",
+                        "Stackable"},
     [MTG_API_DELAYED_TRIGGER] = {"Mode", "Phase", "ValidPlayer", "Execute", "RememberObjects", "NextTurn",
                                  "TriggerDescription", "Secondary"},
     [MTG_API_GAIN_LIFE] = {"LifeAmount"},
@@ -1602,6 +1633,18 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return AmountKnown(ab, "NumCards", 0);
     case MTG_API_CLEANUP:
         return 1;
+    case MTG_API_EFFECT: {   // (its statics are parsed as it's loaded: mtg_script.c)
+        const char *du = Mtg_Param(ab, "Duration"), *rem = Mtg_Param(ab, "RememberObjects");
+        if (!Mtg_Param(ab, "StaticAbilities"))
+            return 0;
+        if (du && strcmp(du, "Permanent") && strcmp(du, "UntilHostLeavesPlayOrEOT") && strcmp(du, "UntilYourNextTurn")
+            && strcmp(du, "UntilEndOfCombat") && strcmp(du, "AsLongAsInPlay"))
+            return 0;
+        if (((v = Mtg_Param(ab, "ExileOnMoved")) && strcmp(v, "Battlefield"))
+            || ((v = Mtg_Param(ab, "ForgetOnMoved")) && strcmp(v, "Battlefield")))
+            return 0;
+        return !rem || InList(rem, sDefinedKnown, (int)(sizeof(sDefinedKnown) / sizeof(sDefinedKnown[0])));
+    }
     case MTG_API_REPEAT_EACH: {   // (its RepeatSubAbility$ is parsed as it's loaded: mtg_script.c)
         const char *rp = Mtg_Param(ab, "RepeatPlayers"), *rc = Mtg_Param(ab, "RepeatCards"), *zn = Mtg_Param(ab, "Zone");
         if (!Mtg_Param(ab, "RepeatSubAbility") || !rp == !rc)

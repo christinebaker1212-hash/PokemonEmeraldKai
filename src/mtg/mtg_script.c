@@ -640,6 +640,31 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
                 gMtgAbilities[idx].manaPain = (uint8_t)(dmg[0] - '0');
         }
     }
+    if (gMtgAbilities[idx].api == MTG_API_EFFECT && Mtg_Param(&gMtgAbilities[idx], "StaticAbilities")) {
+        char names[96], *p = names, *k;   // its statics: SVars of its card, parsed now, kept on the ability
+        const char *list = Mtg_Param(&gMtgAbilities[idx], "StaticAbilities");
+        if (strlen(list) >= sizeof(names))
+            Unsupported(c, "Effect");
+        else {
+            strcpy(names, list);
+            while ((k = Mtg_Token(&p, ',')) != NULL) {
+                const char *sv;
+                char *copy;
+                int st;
+                while (*k == ' ')
+                    k++;
+                if (!(sv = Mtg_Svar(cardId, k)) || gMtgAbilities[idx].effStaticCount >= 3) {
+                    Unsupported(c, "Effect");
+                    break;
+                }
+                copy = malloc(strlen(sv) + 1);
+                strcpy(copy, sv);
+                if ((st = Mtg_ParseEffectStatic(c, cardId, copy)) < 0)
+                    break;   // (it said why)
+                gMtgAbilities[idx].effStatics[gMtgAbilities[idx].effStaticCount++] = (uint16_t)st;
+            }
+        }
+    }
     if (gMtgAbilities[idx].api == MTG_API_REPEAT_EACH) {   // the chain run for each item: no RepeatEach of its own
         const char *name = Mtg_Param(&gMtgAbilities[idx], "RepeatSubAbility");
         int s = name ? SubAbility(c, cardId, name, depth) : -1, k;

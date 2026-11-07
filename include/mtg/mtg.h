@@ -169,6 +169,19 @@ typedef struct {
 } MtgPending;
 #define MTG_MAX_PENDING 24
 
+// an Effect's rules for a while (EffectEffect: its StaticAbilities$, a card in Forge's command zone): the ability that
+// made it, its source (and that source's place then), what it remembers (objects with their place: one moved is
+// forgotten), and when it ends
+enum { MTG_EFF_EOT, MTG_EFF_PERMANENT, MTG_EFF_HOST_OR_EOT, MTG_EFF_NEXT_TURN, MTG_EFF_END_COMBAT, MTG_EFF_HOST };
+typedef struct {
+    uint16_t ability, source;
+    uint32_t sourceSeq;
+    uint8_t controller, until, exileOnMoved, remCount;
+    uint16_t rem[4];                // (a player: 0xFF00 + the player)
+    uint32_t remSeq[4];
+} MtgEffect;
+#define MTG_MAX_EFFECTS 12
+
 // a delayed trigger waiting for its step (DelayedTriggerEffect): fires once, then is gone
 typedef struct {
     uint16_t trigger, source, obj;   // obj: what it remembers (RememberObjects$; MTG_NO_OBJ: nothing)
@@ -282,6 +295,8 @@ typedef struct MtgDuel {
     uint16_t repAb, repReturn;
     uint8_t repIdx, repCount, repStart;
     uint16_t repItems[16];
+    uint8_t effCount;                                // Effects in force (EffectEffect)
+    MtgEffect effects[MTG_MAX_EFFECTS];
     uint8_t resFlip;                                 // the coin just flipped: 1 won, 2 lost (0: none)
     int16_t resChoice;                               // the answer: 1 / 0, or the object picked (-1: not asked yet)
     // a cast or an activation's costs still to pick (sacrifices, then discards): asked as MTG_Q_CHOOSE's PICK with

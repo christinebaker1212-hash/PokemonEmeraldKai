@@ -42,6 +42,10 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.156.0)
+- Effects for a while (Effect with StaticAbilities$): COOP_NOTES "MAGIC's effects for a while". 2599 of 5408. Next:
+  replacement effects (97, and 78 Effects that carry them), Effects with Triggers$ (21), ChooseType (35).
+
 ## Status (2026-11-07: 1.155.0)
 - Auras that watch their creature (AttachedBy), DamagedBy, MultiColor: COOP_NOTES "MAGIC's Auras that watch their
   creature". 2574 of 5408. Next by count: Effect (163), replacement effects (97), ChooseType (35).

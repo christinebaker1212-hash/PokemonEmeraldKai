@@ -3700,6 +3700,26 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's effects for a while (1.156.0)
+
+- Effect (MTG_API_EFFECT, Forge's EffectEffect with only StaticAbilities$): MtgDuel.effects[12] (MtgEffect: the
+  ability, its source and that source's seq, controller, until, ExileOnMoved, up to four remembered objects with their
+  seq or players). Its statics are SVars parsed at load (Mtg_ParseEffectStatic: ParseOne, kept off the card's own
+  list) into MtgAbility.effStatics.
+- Mtg_StaticMods (ModsBy) and Mtg_StaticForbids (ForbidBy) read the effects in force too, with gMtgEffCtx set so
+  IsRemembered / Player.IsRemembered read the effect's list (a remembered card that has moved since is a new one).
+- Duration$: none (cleanup), Permanent, UntilHostLeavesPlayOrEOT, AsLongAsInPlay, UntilYourNextTurn (its controller's
+  next untap step), UntilEndOfCombat; ExileOnMoved$ Battlefield ends it when what it remembers leaves; PruneEffects
+  in state-based actions, untap, end of combat and cleanup.
+- Statics newly read: AddHiddenKeyword$ "CARDNAME can't block." / "can't attack." (as CantBlock / CantAttack over
+  Affected$), Caster$ / Activator$ Player.IsRemembered, ValidSA$ Activated.!ManaAbility, Mode$ CantRegenerate
+  (Mtg_Destroy skips the shield).
+- AI: a curse at the opponent's, an evasion on its own untapped creature before combat, a whole-board effect in its
+  first main phase.
+- Unlocked 25: FALTER, INFILTRATE, CEASE-FIRE, ABEYANCE, HURR JACKAL, DWARVEN WARRIORS, BOILING BLOOD, INSTIGATOR,
+  BULLWHIP, TELEPORT, TRAILBLAZER... Still out: Effects with ReplacementEffects$ (78) or Triggers$ (21).
+- Tests: test_rules.c TestEffect; scenario mtg_effect.
+
 ## MAGIC's Auras that watch their creature, "damaged by" (1.155.0)
 
 - Valid AttachedBy (as EnchantedBy): the object its source, an Aura, is attached to; a trigger's ValidCard$

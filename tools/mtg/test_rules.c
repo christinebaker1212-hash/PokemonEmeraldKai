@@ -1974,6 +1974,75 @@ static void TestAttachedDamaged(void)
     CHECK(Zone(foe) == MTG_ZONE_GRAVEYARD && Mtg_Power(&sD, vamp) == 5, "the vampire grew (%d)", Mtg_Power(&sD, vamp));
 }
 
+// EffectEffect: rules for a while from a spell or ability. FALTER (creatures without flying can't block this turn, gone
+// at cleanup), INFILTRATE (its target can't be blocked; it ends if that creature leaves), CEASE-FIRE (the target player
+// can't cast creature spells this turn), HURR JACKAL (its target can't be regenerated)
+static void TestEffect(void)
+{
+    int falter, bears, angel, foeBears, inf, cease, giant, jackal, skel, i;
+    static const char *const cards[] = {"Falter", "Infiltrate", "Cease-Fire", "Abeyance", "Hurr Jackal", "Dwarven Warriors",
+                                        "Boiling Blood", "Instigator", NULL};
+    printf("effects for a while\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();
+    Lands(0, "Mountain", 2);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    foeBears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    angel = Put(1, "Serra Angel", MTG_ZONE_BATTLEFIELD);
+    falter = Put(0, "Falter", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, falter, -1, 0);
+    PassBoth();
+    CHECK(sD.effCount == 1, "an effect in force");
+    CHECK(!Mtg_CanBlock(&sD, foeBears, bears) && Mtg_CanBlock(&sD, angel, bears), "only the flyer may block");
+    GoTo(1, MTG_STEP_UPKEEP);
+    CHECK(sD.active == 1 && sD.effCount == 0 && Mtg_CanBlock(&sD, foeBears, bears), "gone by the next turn (%d effects, can block %d, turn %d)", sD.effCount, Mtg_CanBlock(&sD, foeBears, bears), sD.turn);
+
+    Table();
+    Lands(0, "Island", 1);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    foeBears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    inf = Put(0, "Infiltrate", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, inf, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(!Mtg_CanBlock(&sD, foeBears, bears) && Mtg_CanBlock(&sD, bears, foeBears), "the bears can't be blocked");
+    Mtg_MoveTo(&sD, bears, MTG_ZONE_HAND);
+    Mtg_MoveTo(&sD, bears, MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_CanBlock(&sD, foeBears, bears), "back from the hand: a new creature, blockable");
+
+    Table();
+    Lands(0, "Plains", 3);
+    Lands(1, "Forest", 5);
+    cease = Put(0, "Cease-Fire", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, cease, MTG_TGT_PLAYER, 1);
+    PassBoth();
+    GoTo(1, MTG_STEP_UPKEEP);
+    GoTo(1, MTG_STEP_MAIN1);
+    giant = Put(1, "Llanowar Elves", MTG_ZONE_HAND);
+    CHECK(sD.effCount == 0 && Find(MTG_ACT_CAST, giant, -1, 0) >= 0, "the next turn: creatures again");
+    Table();
+    Lands(0, "Plains", 3);
+    Lands(1, "Forest", 5);
+    cease = Put(0, "Cease-Fire", MTG_ZONE_HAND);
+    giant = Put(1, "Llanowar Elves", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, cease, MTG_TGT_PLAYER, 1);
+    PassBoth();
+    CHECK(Mtg_StaticForbids(&sD, MTG_STATIC_CANT_BE_CAST, giant, 1) && !Mtg_StaticForbids(&sD, MTG_STATIC_CANT_BE_CAST, giant, 0),
+          "the target player can't cast creatures this turn, the caster can");
+
+    Table();
+    jackal = Put(0, "Hurr Jackal", MTG_ZONE_BATTLEFIELD);
+    sD.objs[jackal].sick = 0;
+    Lands(1, "Swamp", 1);
+    skel = Put(1, "Drudge Skeletons", MTG_ZONE_BATTLEFIELD);
+    sD.objs[skel].regen = 1;
+    Do(MTG_ACT_ACTIVATE, jackal, MTG_TGT_OBJ, skel);
+    PassBoth();
+    Mtg_Destroy(&sD, skel, 0);
+    CHECK(Zone(skel) == MTG_ZONE_GRAVEYARD, "no regeneration after the jackal");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2374,6 +2443,7 @@ int main(int argc, char **argv)
     TestRepeat();
     TestAiLookahead();
     TestAttachedDamaged();
+    TestEffect();
     TestDuels();
     TestRandomDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

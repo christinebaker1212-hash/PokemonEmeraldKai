@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 60
+mp mtg starter 0
+mp mtg duel 1
+wait 30
+press A 2
+waitlog 3000 mtg: your move: priority
+wait 10
+mp mtg put 0 field Island
+mp mtg put 0 field Raging Goblin
+mp mtg put 0 hand Infiltrate
+wait 10
+mp mtg focus Infiltrate
+press A 2
+wait 20
+press RIGHT 2
+wait 6
+rendershot ef_cast
+press A 2
+waitlog 900 mtg: ready
+wait 60
+press START 2
+waitlog 900 mtg: your move: attackers
+wait 10
+mp mtg focus Raging Goblin
+press A 2
+wait 10
+press START 2
+wait 20
+wait 400
+rendershot ef_after
+quit
