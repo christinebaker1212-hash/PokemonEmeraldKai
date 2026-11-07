@@ -701,6 +701,10 @@ void StadiumCup_StartBattle(void (*after)(bool8 won))
         }
     gMpStadiumBattle = TRUE;
     {
+        void MP_StadiumAi_BattleStart(void);
+        MP_StadiumAi_BattleStart();   // (the trainers' switching: mp_stadium_ai.c)
+    }
+    {
         void MP_StadiumAnnouncer_BattleStart(void);
         MP_StadiumAnnouncer_BattleStart();   // (the announcer: mp_stadium_announcer.c)
     }

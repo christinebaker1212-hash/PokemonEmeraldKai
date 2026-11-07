@@ -1,6 +1,8 @@
 package com.moemon.companion;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -163,6 +165,12 @@ public class ScreensTest {
         int tw = (v.width() - 16) / 4;
         tap(v, 8 + tw + tw / 2, GameView.TOP + 112 + 8);   // (SKILLS, the second of four tabs)
         shot(v, "summary_skills");
+        // the stats tapped: the game's IV RATING (stars), then the EVs, then back to the stats
+        tap(v, 60, GameView.TOP + 136 + 20);
+        shot(v, "summary_ivs");
+        tap(v, 60, GameView.TOP + 136 + 20);
+        shot(v, "summary_evs");
+        tap(v, 60, GameView.TOP + 136 + 20);
         tap(v, 8 + 2 * tw + tw / 2, GameView.TOP + 112 + 8);
         tap(v, 60, GameView.TOP + 136 + 4 + 12);
         shot(v, "summary_moves");
@@ -190,6 +198,16 @@ public class ScreensTest {
         Thread.sleep(2200);
         shot(v, "gift_open");
         v.showOver(null);
+        // a scan with no game linked: kept on the phone for the game, the box waits wrapped (twice: the same code
+        // the same day is refused)
+        if (app.client.status() != com.moemon.companion.core.LinkClient.Status.LINKED) {
+            int before = app.giftsWaiting();
+            MysteryGiftPage.scanned(v, "4006381333931");
+            assertEquals(before + 1, app.giftsWaiting());
+            shot(v, "gift_saved");
+            assertNotNull(app.queueGift(MysteryGiftPage.hash("4006381333931")));
+            v.showOver(null);
+        }
         app.ach = new JSONObject("{\"t\":\"ach\",\"cats\":[\"STORY\",\"BATTLE\",\"CO-OP\"],\"list\":["
                 + "[0,\"FIRST PARTNER\",\"Get your first POK\u00e9MON.\",\"DONE\",\"+3 MOEGATCHA pulls\",1],"
                 + "[0,\"BADGE COLLECTOR\",\"Earn four BADGES in any region.\",\"2/4\",\"+5 MOEGATCHA pulls, BALL COLOR: MINT\",0],"

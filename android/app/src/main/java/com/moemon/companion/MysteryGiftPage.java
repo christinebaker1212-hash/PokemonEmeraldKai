@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import com.moemon.companion.core.LinkClient;
+
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
@@ -23,29 +25,33 @@ public final class MysteryGiftPage extends Page {
     private JSONObject gift;
     private long openedAt;
     private String refused;
+    private boolean saved;   // kept for the game (no link): the box waits, wrapped
 
     MysteryGiftPage(GameView v) {
         super(v);
         sentAt = System.currentTimeMillis();
     }
 
-    /** MYSTERY GIFT's scan (ME page): the camera, any code */
+    /** MYSTERY GIFT's scan (ME page): the camera, any code (without a link, or in a battle, the scan waits) */
     static void openScan(GameView v) {
-        if (v.app.client == null) {
-            v.message("Link with your game first: the gift goes to its BAG.");
-            return;
-        }
-        if (v.app.locked()) {
-            v.message(Companion.LOCKED);
-            return;
-        }
         Intent i = new Intent(v.getContext(), ScanActivity.class).putExtra("gift", true);
         ((MainActivity) v.getContext()).startActivityForResult(i, 2);
     }
 
     /** A code was read: its hash to the game, and the box while it answers */
     static void scanned(GameView v, String text) {
-        if (text == null || text.isEmpty() || v.app.client == null) {
+        if (text == null || text.isEmpty()) {
+            return;
+        }
+        if (v.app.client == null || v.app.client.status() != LinkClient.Status.LINKED || v.app.locked()) {
+            // no game to answer now: the scan waits on the phone with today's date (Companion.queueGift)
+            MysteryGiftPage p = new MysteryGiftPage(v);
+            p.refused = v.app.queueGift(hash(text));
+            p.saved = p.refused == null;
+            if (p.saved) {
+                v.sound.play("se_select");
+            }
+            v.showOver(p);
             return;
         }
         try {
@@ -77,7 +83,7 @@ public final class MysteryGiftPage extends Page {
     @Override
     public void draw(Canvas c, int w, int h) {
         long now = System.currentTimeMillis();
-        if (gift == null && refused == null) {
+        if (gift == null && refused == null && !saved) {
             if (v.app.lastGiftAt > sentAt && v.app.lastGift != null) {
                 gift = v.app.lastGift;
                 openedAt = now + 700;   // (the box shakes a little longer, then opens)
@@ -100,14 +106,22 @@ public final class MysteryGiftPage extends Page {
                 c.drawLine(x + k + off, 0, x + k + off + h, h, fill);
             }
         }
-        banner(c, w, "MYSTERY GIFT", open || refused != null ? "OK" : "");
+        banner(c, w, "MYSTERY GIFT", open || refused != null || saved ? "OK" : "");
         int cx = w / 2, cy = h / 2 - 30;
         if (!open) {
             // the wrapped box, shaking harder until it opens
-            float shake = refused != null ? 0 : (float) Math.sin(now / 45.0) * (gift != null ? 4 : 2);
+            float shake = refused != null || saved ? 0 : (float) Math.sin(now / 45.0) * (gift != null ? 4 : 2);
             drawBox(c, cx + shake, cy, false, 0);
-            String line = refused != null ? "" : "Wrapping your gift...";
+            String line = refused != null ? "" : saved ? "Saved for your game!" : "Wrapping your gift...";
             art.text(c, line, (w - art.width(line)) / 2, cy + 50, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
+            if (saved) {
+                String l2 = "It opens when your game is linked.";
+                art.text(c, l2, (w - art.width(l2)) / 2, cy + 68, GameArt.GRAY_TEXT, 0xFF101018);
+                int n = v.app.giftsWaiting();
+                String l3 = n == 1 ? "1 GIFT WAITING" : n + " GIFTS WAITING";
+                art.text(c, l3, (w - art.width(l3)) / 2, cy + 88, GOLD, 0xFF101018);
+                button(c, "SCAN ANOTHER", w / 2 - 60, h - 40, 120, true);
+            }
             if (refused != null) {
                 int ty = cy + 48;
                 for (String l : wrap(refused, w - 32)) {
@@ -184,8 +198,13 @@ public final class MysteryGiftPage extends Page {
     @Override
     public void tap(int x, int y) {
         int w = v.width(), h = v.contentHeight();
-        if (y < 20 && x > w - 60 && (gift != null || refused != null)) {
+        if (y < 20 && x > w - 60 && (gift != null || refused != null || saved)) {
             back();
+            return;
+        }
+        if (saved && y >= h - 40 && y < h - 16) {
+            v.showOver(null);
+            openScan(v);
             return;
         }
         if (gift != null && System.currentTimeMillis() >= openedAt && gift.optInt("left") > 0 && y >= h - 40 && y < h - 16) {

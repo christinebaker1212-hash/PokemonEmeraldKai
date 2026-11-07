@@ -227,3 +227,14 @@ to trainers in the BATTLE FRONTIER." Seven people in the lobby (data/maps/Battle
 part: the PETIT, PIKA, POKé and PRIME CUPS, the CHALLENGE CUP, the GYM LEADER CASTLE, and a reporter. Their words
 follow the cups' own rules in mp_stadium_cup.c (levels, sums, the PETIT CUP's height and weight); change them there
 first if a cup's rules change.
+
+## The trainers' switching (1.173.0)
+
+src/mp/mp_stadium_ai.c (the user, 2026-11-07: "allow STADIUM trainers to switch out Pokemon intelligently"): in a STADIUM
+battle battle_ai_switch_items.c's ShouldSwitch asks MP_StadiumAi_ShouldSwitch after its trap / PERISH SONG / WONDER
+GUARD checks, and GetMostSuitableMonToSwitchInto asks MP_StadiumAi_Replacement after a faint. A matchup is the best
+move's damage each way as a share of the target's HP (power, STAB, the type chart, the stats, LEVITATE / absorbing
+abilities / WONDER GUARD), plus or minus a knock-out first by Speed. A trainer switches when a bench POKéMON's matchup
+(less half the hit it takes coming in) beats the one out by 35 points of HP and the one out is in danger (60%+ a hit)
+or can't hurt the foe (under 15%); never twice in two turns, never out of boosts, never when it finishes the foe
+first, never when nearly gone anyway. `mp stadiumai` runs fixed matchups (test stadium_ai).

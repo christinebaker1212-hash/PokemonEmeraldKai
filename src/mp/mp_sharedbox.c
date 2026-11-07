@@ -55,7 +55,10 @@ static EWRAM_DATA u8 sBaseWallpapers[TOTAL_BOXES_COUNT] = {0};
 static EWRAM_DATA u8 sHand[MP_STORE_HAND][BLOB] = {0};            // what the server has in our hand
 static EWRAM_DATA u8 sHandCount = 0;
 // boxes that arrived while a transaction was out (applied with its answer)
-static EWRAM_DATA u8 sStash[TOTAL_BOXES_COUNT][1 + MP_STORE_BOXNAME + 1 + SLOTS / TOTAL_BOXES_COUNT * (1 + BLOB) + 1] = {0};
+// (a BOX_DATA message: op, box, name, wallpaper, count, then (pos, data) for each of up to 30; until 1.173.0 this was a
+// byte short, so a box holding all 30 was dropped and the shared PC never finished opening)
+#define BOX_MSG_MAX (2 + MP_STORE_BOXNAME + 2 + IN_BOX_COUNT * (1 + BLOB))
+static EWRAM_DATA u8 sStash[TOTAL_BOXES_COUNT][BOX_MSG_MAX] = {0};
 static EWRAM_DATA u16 sStashLen[TOTAL_BOXES_COUNT] = {0};
 static EWRAM_DATA u8 sResult[MP_MAX_MSG] = {0};                     // a transaction's answer, applied when steady
 static EWRAM_DATA u16 sResultLen = 0;
@@ -775,6 +778,8 @@ void MP_SharedBox_OnMessage(const u8 *data, u16 len)
             memcpy(sStash[data[1]], data, len);
             sStashLen[data[1]] = len;
         }
+        else
+            MPNet_Log("shared PC: a box message too long (%u bytes, box %u)", len, len >= 2 ? data[1] : 0);
         break;
     case MP_ST_TXN_RESULT:
         if (len >= 3 && len <= sizeof(sResult) && sPending && (data[1] | (data[2] << 8)) == sSeq)

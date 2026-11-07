@@ -24,6 +24,7 @@ public final class SummaryPage extends Page {
     private final List<JSONObject> places;
     private final BoxesPage boxes;   // for MOVE (null from the party)
     private int index, tab, move = -1;
+    private int statsView;   // the SKILLS page's stats: 0 the stats, 1 IV RATING, 2 EVs (the game's A on its page)
     private String renaming;   // the new name being typed (null: not renaming)
     private final Paint fill = new Paint();
 
@@ -312,16 +313,46 @@ public final class SummaryPage extends Page {
         for (int i = 0; stats != null && i < 6; i++) {
             top = Math.max(top, stats.optInt(i));
         }
+        boolean hasIv = mon.has("iv");   // (a game from before 1.173.0 sends no IVs: the stats only)
+        int view = hasIv ? statsView : 0;
+        long ivs = mon.optLong("iv");
+        JSONArray evs = mon.optJSONArray("ev");
         for (int i = 0; i < 6; i++) {
             int color = mark[i] > 0 ? GameArt.RED_TEXT : mark[i] < 0 ? GameArt.BLUE_TEXT : GameArt.TEXT;
             art.text(c, STAT_NAMES[i], 18, y, color, GameArt.SHADOW);
-            String val = stats == null ? "?" : (i == 0 && mon.has("hp") ? mon.optInt("hp") + "/" : "") + stats.optInt(i);
-            art.text(c, val, 120 - art.width(val) + 26, y);
-            if (stats != null) {
-                bar(c, 154, y + 6, w - 184, stats.optInt(i), top, i == 0 ? 0xFF70F8A8 : mark[i] > 0 ? 0xFFF87858
-                        : mark[i] < 0 ? 0xFF5890F8 : 0xFFF8C858);
+            if (view == 1) {
+                // the game's IV RATING: none for 0, one star 1-15, two 16-25, three 26-30, three red for a perfect 31
+                int iv = (int) ((ivs >> (5 * i)) & 31), n = iv >= 26 ? 3 : iv >= 16 ? 2 : iv >= 1 ? 1 : 0;
+                for (int k = 0; k < 3; k++) {
+                    star(c, 154 + k * 12, y + 4, k < n ? (iv == 31 ? GameArt.RED_TEXT : GameArt.TEXT) : 0xFFC0C0C8);
+                }
+            } else if (view == 2) {
+                int ev = evs == null ? 0 : evs.optInt(i);
+                String val = String.valueOf(ev);
+                art.text(c, val, 120 - art.width(val) + 26, y);
+                bar(c, 154, y + 6, w - 184, ev, 252, 0xFFB070F0);
+            } else {
+                String val = stats == null ? "?" : (i == 0 && mon.has("hp") ? mon.optInt("hp") + "/" : "") + stats.optInt(i);
+                art.text(c, val, 120 - art.width(val) + 26, y);
+                if (stats != null) {
+                    bar(c, 154, y + 6, w - 184, stats.optInt(i), top, i == 0 ? 0xFF70F8A8 : mark[i] > 0 ? 0xFFF87858
+                            : mark[i] < 0 ? 0xFF5890F8 : 0xFFF8C858);
+                }
             }
             y += 15;
+        }
+        if (hasIv) {
+            // what a tap shows next, as the game's prompt under its stats ("A IV RATING", "A EVs", "A STATS")
+            String next = view == 0 ? "TAP: IV RATING" : view == 1 ? "TAP: EVs" : "TAP: STATS";
+            if (view == 2) {
+                int total = 0;
+                for (int i = 0; evs != null && i < 6; i++) {
+                    total += evs.optInt(i);
+                }
+                art.text(c, "TOTAL " + total + "/510", 18, y - 2, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            }
+            art.text(c, next, w - 20 - art.width(next), y - 2, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            y += 13;
         }
         y += 4;
         JSONArray xp = mon.optJSONArray("xp");
@@ -345,6 +376,20 @@ public final class SummaryPage extends Page {
         JSONArray ad = art.data.optJSONArray("abilityDesc");
         if (ad != null) {
             art.paragraph(c, ad.optString(mon.optInt("ab")), 18, y, w - 40, GameArt.GRAY_TEXT, GameArt.SHADOW);
+        }
+    }
+
+    /** The game's IV star (pokemon_summary_screen.c sMpStarShape: 8x8, one row a byte), a pixel a square */
+    private static final int[] STAR = {0x10, 0x10, 0x38, 0xFE, 0x7C, 0x38, 0x6C, 0x44};
+
+    private void star(Canvas c, int x, int y, int color) {
+        fill.setColor(color);
+        for (int r = 0; r < 8; r++) {
+            for (int k = 0; k < 8; k++) {
+                if ((STAR[r] & (0x80 >> k)) != 0) {
+                    c.drawRect(x + k, y + r, x + k + 1, y + r + 1, fill);
+                }
+            }
         }
     }
 
@@ -492,6 +537,11 @@ public final class SummaryPage extends Page {
         }
         if (tab == 0 && y >= dexButtonY() && y < dexButtonY() + 26 && x >= 18 && x < w - 18) {
             openDex(mon);
+            return;
+        }
+        if (tab == 1 && mon.has("iv") && y >= BODY_Y && y < BODY_Y + 2 + 6 * 15 + 13) {
+            statsView = (statsView + 1) % 3;   // (the stats, IV RATING, EVs, round again)
+            v.sound.play("se_select");
             return;
         }
         if (tab == 2 && y >= BODY_Y + 4 && y < BODY_Y + 4 + 4 * 32) {

@@ -126,11 +126,16 @@ int PhoneKai_GiftsLeft(void)
     return GIFTS_A_DAY - (int)MP_SaveData_Get(key);
 }
 
-// {"op":"mgift","code":"<hex>"}: the code's gift for today
+// {"op":"mgift","code":"<hex>"[,"day":YYYYMMDD]}: the code's gift for today, or for the day the phone scanned it
+// without a link (up to a week back: that day's twelve and that day's gift, as if the game had been there)
 static const char *DoGift(const char *json)
 {
     char code[80], key[40];
     long day = GiftDay();
+    long long scanned;
+    if (JsonNum(json, "day", &scanned) && scanned > 20000101 && scanned <= day
+        && MP_DayNumber((s32)scanned) >= MP_DayNumber((s32)day) - 7)
+        day = (long)scanned;
     int used, k;
     u32 h = 2166136261u, codeHash = 2166136261u, roll, pick;
     u16 item, qty = 1;
@@ -189,8 +194,8 @@ static const char *DoGift(const char *json)
     {
         u8 name[ITEM_NAME_LENGTH + 4];
         CopyItemName(item, name);
-        BufAdd(&sDoneExtra, "\"item\":%u,\"qty\":%u,\"tier\":%u,\"left\":%d,\"n\":", item, qty, tier,
-               GIFTS_A_DAY - used - 1);
+        BufAdd(&sDoneExtra, "\"item\":%u,\"qty\":%u,\"tier\":%u,\"left\":%d,\"day\":%ld,\"n\":", item, qty, tier,
+               GIFTS_A_DAY - used - 1, day);
         BufText(&sDoneExtra, name, sizeof(name) - 1);
     }
     MPNet_Log("[phone] mystery gift: code %08x -> item %u x%u (tier %u), %d left today", codeHash, item, qty, tier,

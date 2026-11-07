@@ -282,6 +282,21 @@ left and a bar, READY wobbling, tap to choose, + ADD EGG through the box picker,
 Tests: tools/phone/incubator_test.py (in and out of the save, custody across restarts, `full`, hatching by steps, the
 day's cap, `noegg`, FORGET), ScreensTest (walk_incubator, box_choose; the steps and the order).
 
+### Offline MYSTERY GIFT scans, IVs and EVs (1.173.0)
+
+- A scan with no game linked (or in a battle) waits on the phone: Companion.queueGift keeps {code hash, day, at} in
+  gifts_waiting.json, twelve a day and a code once a day as the game counts; MysteryGiftPage shows "Saved for your
+  game!" and ME > MYSTERY GIFT "N WAITING" (SCAN works on the ME page without a link). Once linked (onModel) each
+  waiting scan goes as {"op":"mgift","code","day"}; the game (mp_phone_kai.c DoGift) uses that day, if within a week
+  and not later than today, for the day's twelve and the gift itself (the same code, day and Trainer ID: the same item
+  the game would have given that day). The answers come back as one toast naming the gifts; bagfull / unknown keep the
+  scan for the next link, other refusals drop it. Test tools/phone/kai_test.py (yesterday's scan, a month back and
+  tomorrow as today), ScreensTest gift_saved.
+- Every POKéMON's snapshot carries "iv" (5 bits a stat in the summary's order HP, ATTACK, DEFENSE, SP. ATK, SP. DEF,
+  SPEED) and "ev" (the six, when any): SummaryPage's SKILLS page cycles the stats, IV RATING (the game's stars:
+  none for 0, one 1-15, two 16-25, three 26-30, three red for 31) and EVs with their total, by a tap on the stats.
+  ScreensTest summary_ivs / summary_evs.
+
 ### WALK and training kept in step, typing (1.172.0)
 
 - The snapshot's `rev` (mp_phone.c Rev) never covered the walk, training or the daily report: starting or stopping

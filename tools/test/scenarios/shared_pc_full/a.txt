@@ -1,0 +1,16 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp sharedpc
+wait 30
+press A 2
+waitfor pcstorage 900
+waitfor sharedsteady 900
+mp sharedbox 1
+mp sharedbox 40
+press B 2
+wait 30
+press B 2
+wait 200
+waitfor sharedclosed 900
+quit

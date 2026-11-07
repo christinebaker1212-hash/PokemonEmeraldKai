@@ -410,6 +410,21 @@ void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
                (unsigned)GetMonData(&sTmp, MON_DATA_ATK), (unsigned)GetMonData(&sTmp, MON_DATA_DEF),
                (unsigned)GetMonData(&sTmp, MON_DATA_SPATK), (unsigned)GetMonData(&sTmp, MON_DATA_SPDEF),
                (unsigned)GetMonData(&sTmp, MON_DATA_SPEED));
+        // IVs and EVs in the stats' order (the summary's IV RATING / EVs views: the app draws the stars the same way)
+        {
+            static const u8 sIv[6] = {MON_DATA_HP_IV, MON_DATA_ATK_IV, MON_DATA_DEF_IV, MON_DATA_SPATK_IV,
+                                      MON_DATA_SPDEF_IV, MON_DATA_SPEED_IV};
+            u32 ivs = 0, evs[6], anyEv = 0;
+            for (i = 0; i < 6; i++)
+            {
+                ivs |= (GetBoxMonData(box, sIv[i]) & 31) << (5 * i);
+                anyEv |= evs[i] = GetBoxMonData(box, sIv[i] - MON_DATA_HP_IV + MON_DATA_HP_EV);
+            }
+            BufAdd(b, ",\"iv\":%u", (unsigned)ivs);
+            if (anyEv)
+                BufAdd(b, ",\"ev\":[%u,%u,%u,%u,%u,%u]", (unsigned)evs[0], (unsigned)evs[1], (unsigned)evs[2],
+                       (unsigned)evs[3], (unsigned)evs[4], (unsigned)evs[5]);
+        }
         BufAdd(b, ",\"xp\":[%u,%u,%u]", (unsigned)exp, (unsigned)gExperienceTables[growth][lvl],
                (unsigned)gExperienceTables[growth][lvl < MAX_LEVEL ? lvl + 1 : lvl]);
         BufAdd(b, ",\"pp\":[%u,%u,%u,%u]", (unsigned)GetBoxMonData(box, MON_DATA_PP1),

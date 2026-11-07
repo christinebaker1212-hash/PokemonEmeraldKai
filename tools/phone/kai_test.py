@@ -143,6 +143,27 @@ def main():
         if d['ok'] or d.get('why') != 'giftdone':
             fail('a thirteenth gift: %s' % d)
         print('mystery gift: 12 a day (tiers %s), the same code refused, the 13th refused' % tiers)
+
+        # scanned on the phone without a link: the scan's own day (yesterday has its twelve; the same code that
+        # day gives that day's gift); more than a week back counts as today (full); a day to come as today too
+        import datetime
+        day = lambda n: int((datetime.date.today() - datetime.timedelta(days=n)).strftime('%Y%m%d'))
+        y = link.order(op='mgift', code='0123456789012', day=day(1))
+        if not y['ok'] or y.get('day') != day(1) or y.get('left') != 11:
+            fail('a gift scanned yesterday: %s' % y)
+        if link.order(op='mgift', code='0123456789012', day=day(1)).get('why') != 'giftsame':
+            fail('yesterday\'s code twice')
+        for n in (30, -1):
+            o = link.order(op='mgift', code='5901234123457', day=day(n))
+            if o['ok'] or o.get('why') != 'giftdone':
+                fail('a scan %d days back should count as today: %s' % (n, o))
+        print('mystery gift: a scan from yesterday counts on yesterday; a month back or tomorrow count as today')
+
+        # the summary's IVs (5 bits each, the stats' order) and EVs, for every POKeMON
+        m = snap['party'][0]
+        if 'iv' not in m or any(((m['iv'] >> (5 * i)) & 31) > 31 for i in range(6)):
+            fail('the first POKeMON has no IVs: %s' % m)
+        print('summary: IVs %s, EVs %s' % ([(m['iv'] >> (5 * i)) & 31 for i in range(6)], m.get('ev')))
     finally:
         game.kill()
     print('KAI TEST PASSED')

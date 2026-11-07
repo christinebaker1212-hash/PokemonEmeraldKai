@@ -60,6 +60,8 @@ public final class Companion implements LinkClient.Listener {
     public JSONObject ach, gatcha;                                // the ME page's: achievements, MOEGATCHA banners
     public JSONObject lastPull;                                   // the last MOEGATCHA pull's answer (its prizes)
     public JSONObject lastGift;                                   // the last MYSTERY GIFT's answer (its item)
+    private org.json.JSONArray giftQueue;                         // MYSTERY GIFTS scanned without a link: [{code, day, at}]
+    private final java.util.Set<String> giftsSent = new java.util.HashSet<>();   // (asked of the game, no answer yet)
     public long lastGiftAt;
     public long lastPullAt;
     public long gearAt;                                           // (when it came)
@@ -1202,9 +1204,141 @@ public final class Companion implements LinkClient.Listener {
         changed();
     }
 
+    // MYSTERY GIFTS scanned while the game isn't linked (the user, 2026-11-07: "scan QR and barcodes offline"): kept
+    // on the phone with the day they were scanned, twelve a day and a code once a day as the game counts them, and
+    // asked of the game with that day once it links ("mgift" with "day": mp_phone_kai.c DoGift, up to a week back)
+    static final String GIFT_QUEUE = "gifts_waiting.json";
+    public static final int GIFTS_A_DAY = 12;
+
+    private synchronized org.json.JSONArray giftQueue() {
+        if (giftQueue == null) {
+            JSONObject o = readJson(GIFT_QUEUE);
+            giftQueue = o == null ? new org.json.JSONArray() : o.optJSONArray("gifts");
+            if (giftQueue == null) {
+                giftQueue = new org.json.JSONArray();
+            }
+        }
+        return giftQueue;
+    }
+
+    private synchronized void saveGiftQueue() {
+        try {
+            store.write(GIFT_QUEUE, new JSONObject().put("gifts", giftQueue()).toString());
+        } catch (org.json.JSONException ignored) {
+        }
+    }
+
+    static long today() {
+        java.time.LocalDate d = java.time.LocalDate.now();
+        return d.getYear() * 10000L + d.getMonthValue() * 100 + d.getDayOfMonth();
+    }
+
+    /** How many scans wait for the game */
+    public synchronized int giftsWaiting() {
+        return giftQueue().length();
+    }
+
+    /** A scan kept for later: null, or why not (the day's twelve, the same code twice in a day) */
+    public synchronized String queueGift(String code) {
+        org.json.JSONArray q = giftQueue();
+        long day = today();
+        int n = 0;
+        for (int i = 0; i < q.length(); i++) {
+            JSONObject g = q.optJSONObject(i);
+            if (g != null && g.optLong("day") == day) {
+                if (code.equals(g.optString("code"))) {
+                    return "That code already waits with its gift for today. Try another one!";
+                }
+                n++;
+            }
+        }
+        if (n >= GIFTS_A_DAY) {
+            return "That's all twelve MYSTERY GIFTS for today. More tomorrow!";
+        }
+        try {
+            q.put(new JSONObject().put("code", code).put("day", day).put("at", System.currentTimeMillis()));
+        } catch (org.json.JSONException e) {
+            return "That code couldn't be kept.";
+        }
+        // (a week is as far back as the game gives a day's gift: older scans would come as today's)
+        saveGiftQueue();
+        return null;
+    }
+
+    // the waiting scans to the game, once linked (each once until it answers)
+    private synchronized void sendWaitingGifts() {
+        if (client == null || client.status() != LinkClient.Status.LINKED || locked()) {
+            return;
+        }
+        org.json.JSONArray q = giftQueue();
+        for (int i = 0; i < q.length(); i++) {
+            JSONObject g = q.optJSONObject(i);
+            String key = g == null ? null : g.optString("code") + "@" + g.optLong("day");
+            if (key == null || giftsSent.contains(key)) {
+                continue;
+            }
+            try {
+                client.order(new JSONObject().put("op", "mgift").put("code", g.optString("code"))
+                        .put("day", g.optLong("day")));
+                giftsSent.add(key);
+            } catch (org.json.JSONException ignored) {
+            }
+        }
+    }
+
+    // a waiting scan answered (KEEP: the BAG was full, it waits for the next link)
+    private synchronized void giftAnswered(JSONObject order, boolean keep) {
+        String key = order.optString("code") + "@" + order.optLong("day");
+        giftsSent.remove(key);
+        if (keep) {
+            return;
+        }
+        org.json.JSONArray q = giftQueue(), left = new org.json.JSONArray();
+        for (int i = 0; i < q.length(); i++) {
+            JSONObject g = q.optJSONObject(i);
+            if (g != null && !key.equals(g.optString("code") + "@" + g.optLong("day"))) {
+                left.put(g);
+            }
+        }
+        giftQueue = left;
+        saveGiftQueue();
+    }
+
+    // a scan kept without a link, opened by the game: one line naming the gifts opened in a row
+    private final java.util.List<String> giftsOpened = new java.util.ArrayList<>();
+    private long giftsOpenedAt;
+
+    private void waitingGiftAnswer(JSONObject order, JSONObject done) {
+        String w = done.optString("why");
+        boolean ok = done.optInt("ok") == 1 && done.has("item");
+        giftAnswered(order, !ok && (w.equals("bagfull") || w.equals("unknown")));
+        long now = System.currentTimeMillis();
+        if (ok) {
+            if (now - giftsOpenedAt > 8000) {
+                giftsOpened.clear();
+            }
+            giftsOpenedAt = now;
+            String name = art.plain(GameArt.hexText(done.optString("n")));
+            int qty = done.optInt("qty", 1);
+            giftsOpened.add(qty > 1 ? name + " x" + qty : name);
+            toast = (giftsOpened.size() == 1 ? "A MYSTERY GIFT you scanned opened: " : giftsOpened.size()
+                    + " MYSTERY GIFTS you scanned opened: ") + String.join(", ", giftsOpened) + ". They're in your BAG.";
+            toastGood = true;
+            lastGift = done;
+        } else {
+            toast = w.equals("bagfull") ? "A MYSTERY GIFT you scanned waits: the BAG is full."
+                    : w.equals("unknown") ? "Your scanned MYSTERY GIFTS wait: restart the game to update it."
+                    : "A scanned MYSTERY GIFT: " + why(w);
+            toastGood = false;
+        }
+        toastAt = now;
+        changed();
+    }
+
     @Override
     public void onModel(Model model) {
         walkFromGame(model.snap, null);
+        sendWaitingGifts();
         incubatorFromGame(model.snap.optJSONObject("incubator"));
         // a game older than the app sends less (stats, places): say so once, the game updates itself on its start
         String game = model.save().optString("game"), app = Updater.version(context);
@@ -1221,6 +1355,10 @@ public final class Companion implements LinkClient.Listener {
 
     @Override
     public void onAnswer(JSONObject order, JSONObject done) {
+        if (order != null && "mgift".equals(order.optString("op")) && order.has("day")) {
+            waitingGiftAnswer(order, done);
+            return;
+        }
         if (done.optInt("ok") == 0) {
             // ("unknown": an order the game doesn't know yet: an older game, which updates itself on its start)
             String w = done.optString("why");

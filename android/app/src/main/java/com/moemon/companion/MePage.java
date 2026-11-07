@@ -37,8 +37,10 @@ public class MePage extends Page {
         Model m = v.app.model();
         banner(c, w, "TRAINER", m == null ? "" : "");
         if (m == null) {
-            art.window(c, 0, 12, 30, w - 24, 30);
-            art.text(c, "Link with your game to see your card.", 18, 36);
+            art.window(c, 0, 12, 30 - scroll, w - 24, 30);
+            art.text(c, "Link with your game to see your card.", 18, 36 - scroll);
+            // (MYSTERY GIFT scans without a link: kept on the phone for the game)
+            contentH = drawGift(c, w, 70 - scroll, null) + 8 + scroll;
             return;
         }
         JSONObject kai = kai();
@@ -153,15 +155,21 @@ public class MePage extends Page {
     // ----------------------------------------------------------------------------------- MYSTERY GIFT
 
     private int drawGift(Canvas c, int w, int y, JSONObject kai) {
-        if (!kai.has("gift")) {
+        if (kai != null && !kai.has("gift")) {
             return y;   // (an older game)
         }
-        int left = kai.optInt("gift");
-        y = heading(c, w, y, "MYSTERY GIFT", left + " LEFT TODAY");
+        // linked: the game's count for today; without a link: scans wait on the phone until it links
+        int waiting = v.app.giftsWaiting(), left = kai == null ? 1 : kai.optInt("gift");
+        y = heading(c, w, y, "MYSTERY GIFT", waiting > 0 ? waiting + " WAITING" : kai == null ? "" : left + " LEFT TODAY");
         giftY = y + scroll;
         art.window(c, 0, 12, y + 4, w - 24, 38);
-        art.text(c, "Scan any QR code, or the", 18, y + 4);
-        art.text(c, "bar code on something from a store.", 18, y + 20, GameArt.GRAY_TEXT, GameArt.SHADOW);
+        if (kai == null) {
+            art.text(c, "Scan now: the gifts open when", 18, y + 4);
+            art.text(c, "your game is linked again.", 18, y + 20, GameArt.GRAY_TEXT, GameArt.SHADOW);
+        } else {
+            art.text(c, "Scan any QR code, or the", 18, y + 4);
+            art.text(c, "bar code on something from a store.", 18, y + 20, GameArt.GRAY_TEXT, GameArt.SHADOW);
+        }
         button(c, "SCAN", w - 76, y + 8, 60, left > 0);
         return y + 46;
     }
@@ -262,6 +270,14 @@ public class MePage extends Page {
         int w = v.width();
         int ay = y + scroll;
         JSONObject kai = kai();
+        if (giftY >= 0 && ay >= giftY && ay < giftY + 44) {
+            if (kai != null && kai.optInt("gift") <= 0 && kai.has("gift")) {
+                v.message(Companion.why("giftdone"));
+            } else {
+                MysteryGiftPage.openScan(v);
+            }
+            return;
+        }
         if (kai == null) {
             return;
         }
@@ -271,14 +287,6 @@ public class MePage extends Page {
         }
         if (gatchaY >= 0 && ay >= gatchaY && ay < gatchaY + 44) {
             v.showOver(new GatchaPage(v, this));
-            return;
-        }
-        if (giftY >= 0 && ay >= giftY && ay < giftY + 44) {
-            if (kai.optInt("gift") > 0) {
-                MysteryGiftPage.openScan(v);
-            } else {
-                v.message(Companion.why("giftdone"));
-            }
             return;
         }
         if (jarY >= 0 && jarRows > 0 && ay >= jarY + 4 + jarRows * 20 && ay < jarY + 4 + jarRows * 20 + 26) {

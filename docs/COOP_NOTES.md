@@ -7026,3 +7026,10 @@ the decks shouldn't show up in the Card Points, it should show up like how Pokem
 - Tests: mtg_counter (the DECKS tab: bought, SOLD OUT), mtg_club (the challenge picture), mtg_shop / mtg_search
   (half hour 5's room); fades checked by hand with MOEMON_CARD_FADE=1 and rendershotburst.
 
+## The shared PC with a full box (1.173.0)
+
+mp_sharedbox.c keeps each BOX_DATA message (op, box, name, wallpaper, count, then (pos, 112 bytes) per POKéMON) until
+the box screen is steady. Its buffer was sized without the box byte, one byte short of a box holding all 30, so such a
+box was dropped, never counted as loaded, and the shared PC stayed on "Connecting..." for everyone from 1.7.0 on, as
+soon as one box filled. BOX_MSG_MAX now counts it; a message that still doesn't fit is logged. Test shared_pc_full
+(a server file with all 40 boxes full).

@@ -528,6 +528,13 @@ static bool8 ShouldSwitch(void)
         return TRUE;
     if (ShouldSwitchIfWonderGuard())
         return TRUE;
+    {
+        // Moemon Co-op: STADIUM trainers weigh every matchup (src/mp/mp_stadium_ai.c)
+        extern bool8 gMpStadiumBattle;
+        bool8 MP_StadiumAi_ShouldSwitch(u8 battler, s32 firstId, s32 lastId);
+        if (gMpStadiumBattle)
+            return MP_StadiumAi_ShouldSwitch(gActiveBattler, firstId, lastId);
+    }
     if (FindMonThatAbsorbsOpponentsMove())
         return TRUE;
     if (ShouldSwitchIfNaturalCure())
@@ -678,6 +685,13 @@ u8 GetMostSuitableMonToSwitchInto(void)
         return *(gBattleStruct->monToSwitchIntoId + gActiveBattler);
     if (gBattleTypeFlags & BATTLE_TYPE_ARENA)
         return gBattlerPartyIndexes[gActiveBattler] + 1;
+    {
+        // Moemon Co-op: a STADIUM trainer sends the best matchup for the foe that's out (src/mp/mp_stadium_ai.c)
+        u8 MP_StadiumAi_Replacement(u8 battler, s32 firstId, s32 lastId);
+        u8 pick = MP_StadiumAi_Replacement(gActiveBattler, 0, PARTY_SIZE);
+        if (pick != PARTY_SIZE)
+            return pick;
+    }
 
     if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
     {

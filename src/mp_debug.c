@@ -527,6 +527,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d %d %d", &r, &d, &t);
         MP_Stadium_Debug(r, d, t);
     }
+    else if (strcmp(cmd, "stadiumai") == 0)   // mp stadiumai: STADIUM trainers' switching on fixed matchups (mp_stadium_ai.c)
+    {
+        void MP_StadiumAi_SelfTest(void);
+        MP_StadiumAi_SelfTest();
+    }
     else if (strcmp(cmd, "stadiumwin") == 0)   // mp stadiumwin ROUND CUP CLASS HARDNESS: the party wins it (mp_stadium_rewards.c)
     {
         void MP_StadiumRewards_Debug(u8 round, u8 cup, u8 tier, u8 hardness);

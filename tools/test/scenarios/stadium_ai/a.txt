@@ -1,0 +1,5 @@
+pressuntil A field 5000
+wait 30
+mp stadiumai
+wait 30
+quit

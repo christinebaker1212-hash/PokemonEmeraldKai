@@ -1,0 +1,7 @@
+# A full shared PC (all 40 boxes, 1200 POKeMON) still opens: the server sends every box when someone opens it.
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+TMO=400
+EXPECT_A=("[test] sharedbox 1: 0:" "[test] sharedbox 40: 0:" "shared PC: closed")
+UNEXPECT_A=("crash" "out of memory" "no answer from the server" "connection was lost")
