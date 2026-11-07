@@ -16,7 +16,10 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
 - **Battles**: Kai's own battle system (2D, co-op, PvP), never Colosseum's 3D battle scenes.
 - **Words and scripts**: Colosseum's own, converted from the game (as SINNOH's are Platinum's): never original
   dialogue or scripts for Orre.
-- **Shadow Pokémon**: only in Orre (snagging, the heart gauge, Hyper Mode, Shadow moves, purification).
+- **Shadow Pokémon**: only in Orre (snagging, the heart gauge, Hyper Mode, Shadow moves, purification). Settled in
+  full before the story (the user, 2026-11-07): **docs/SHADOW_POKEMON.md** (Colosseum 1:1; confined to ORRE and kept
+  out of PvP, facilities and trades until purified; co-op: the first to snag gets it; more Shadow Pokémon on Cipher's
+  teams from GENERATION 4, added on top; missed ones met again later; the Garden opens the gauge too).
 - **The packs ship with the game** (the user: "completely rip the 3D models and text from the Colosseum ISO so that it
   can be bundled in a download, without requiring the ISO from the user"): players need no disc.
 - **As their own zip** (the user, 2026-11-04: "make it its own zip"): MoemonOrre.zip, like the DANCE machine's songs,

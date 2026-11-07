@@ -102,6 +102,7 @@ SINNOH's in src/orre/; where both hook into the game each has its own line. All 
 (tools/orre/maps.py ORDER), their doors / stairs / elevators and entries from the game's own tables
 (tools/orre/colo_rooms.py; ORRE_HANDOFF "Rooms, doors and entries"; scenarios orre_all_maps, orre_all_doors,
 orre_all_places from tools/orre/gen_tests.py); the ways out open Colosseum's own world map (src/orre/worldmap.c).
+Shadow Pokémon (designed before the story, the user 2026-11-07): `docs/SHADOW_POKEMON.md`.
 
 **Magic: The Gathering** (a fourth card game): the user's decisions in `docs/MTG_DECISIONS.md`; **start at
 `docs/MTG_HANDOFF.md`**. Forge translated into C (src/mtg/, include/mtg/mtg.h; its AI too, later), reading Forge's own
