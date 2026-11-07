@@ -46,7 +46,8 @@ LilycoveCity_Harbor_EventScript_FerryRegularLocationSelect::
 	case 3, LilycoveCity_Harbor_EventScript_GoToNavelRock
 	case 4, LilycoveCity_Harbor_EventScript_GoToBirthIsland
 	case 5, LilycoveCity_Harbor_EventScript_GoToFarawayIsland
-	case 6, LilycoveCity_Harbor_EventScript_ExitSailSelect
+	case 6, EventScript_BattleIslandSail   @ Moemon Kai: BATTLE ISLAND (data/scripts/battle_island.inc)
+	case 7, LilycoveCity_Harbor_EventScript_ExitSailSelect
 	case MULTI_B_PRESSED, LilycoveCity_Harbor_EventScript_ExitSailSelect
 	end
 
@@ -163,10 +164,16 @@ LilycoveCity_Harbor_EventScript_SetFirstTimeShowingMysticTicket::
 
 LilycoveCity_Harbor_EventScript_GetHasTicketsState::
 	setvar VAR_TEMP_A, 0
+	checkitem ITEM_BATTLE_TICKET, 1   @ Moemon Kai: the BATTLE TICKET opens the destination list too
+	call_if_eq VAR_RESULT, TRUE, LilycoveCity_Harbor_EventScript_SetHasBattleTicket
 	call_if_eq VAR_TEMP_E, 1, LilycoveCity_Harbor_EventScript_SetHasEonTicket
 	call_if_eq VAR_TEMP_D, 1, LilycoveCity_Harbor_EventScript_SetHasAuroraTicket
 	call_if_eq VAR_TEMP_C, 1, LilycoveCity_Harbor_EventScript_SetHasOldSeaMap
 	call_if_eq VAR_TEMP_9, 1, LilycoveCity_Harbor_EventScript_SetHasMysticTicket
+	return
+
+LilycoveCity_Harbor_EventScript_SetHasBattleTicket::
+	addvar VAR_TEMP_A, 1
 	return
 
 LilycoveCity_Harbor_EventScript_SetHasEonTicket::

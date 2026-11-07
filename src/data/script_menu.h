@@ -315,6 +315,22 @@ static const struct MenuAction MultichoiceList_SSTidalSlateportNoBF[] =
     {gText_Exit},
 };
 
+// Moemon Kai: SLATEPORT's boat with the BATTLE TICKET: BATTLE ISLAND beside the usual trips
+static const struct MenuAction MultichoiceList_SSTidalSlateportNoBFBattleIsland[] =
+{
+    {gText_LilycoveCity},
+    {gText_BattleIsland},
+    {gText_Exit},
+};
+
+static const struct MenuAction MultichoiceList_SSTidalSlateportWithBFBattleIsland[] =
+{
+    {gText_LilycoveCity},
+    {gText_BattleFrontier},
+    {gText_BattleIsland},
+    {gText_Exit},
+};
+
 static const struct MenuAction MultichoiceList_Floors[] =
 {
     {gText_5F},
@@ -1016,6 +1032,8 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_FR_HELIX_AMBER]             = MULTICHOICE(MultichoiceList_FrHelixAmber),
     [MULTI_FR_DOME_AMBER]              = MULTICHOICE(MultichoiceList_FrDomeAmber),
     [MULTI_BUENA_PASSWORD]             = MULTICHOICE(MultichoiceList_BuenaPassword),
+    [MULTI_SSTIDAL_SLATEPORT_NO_BF_BI] = MULTICHOICE(MultichoiceList_SSTidalSlateportNoBFBattleIsland),
+    [MULTI_SSTIDAL_SLATEPORT_WITH_BF_BI] = MULTICHOICE(MultichoiceList_SSTidalSlateportWithBFBattleIsland),
 };
 #pragma GCC diagnostic pop
 
@@ -1113,6 +1131,7 @@ static const u8 *const sLilycoveSSTidalDestinations[SSTIDAL_SELECTION_COUNT] =
     [SSTIDAL_SELECTION_NAVEL_ROCK]      = gText_NavelRock,
     [SSTIDAL_SELECTION_BIRTH_ISLAND]    = gText_BirthIsland,
     [SSTIDAL_SELECTION_FARAWAY_ISLAND]  = gText_FarawayIsland,
+    [SSTIDAL_SELECTION_BATTLE_ISLAND]   = gText_BattleIsland,
     [SSTIDAL_SELECTION_EXIT]            = gText_Exit,
 };
 

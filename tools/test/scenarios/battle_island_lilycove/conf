@@ -1,0 +1,7 @@
+# LILYCOVE's ferry with the BATTLE TICKET: BATTLE ISLAND is one more destination in the S.S. TIDAL's list, beside
+# SLATEPORT, the BATTLE FRONTIER and the event islands (here FARAWAY ISLAND), not a question before it (shot
+# bil_menu), and picking it sails there.
+MODE=1
+TMO=300
+EXPECT_A=("battle island: sailing from map 13.10" "voyage: arrived" "lilycove island done")
+UNEXPECT_A=("crash" "out of memory")

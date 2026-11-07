@@ -22,14 +22,16 @@
 #include "sound.h"
 #include "task.h"
 #include "text.h"
+#include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
 #include "constants/items.h"
 #include "constants/maps.h"
 #include "constants/songs.h"
 
 #define LOCALID_TICKET_COURIER 0xDD
-#define ISLAND_LANDING_X 24
+#define ISLAND_LANDING_X 24   // (only if the map has no sailor: see LandingSpot)
 #define ISLAND_LANDING_Y 30
+#define ISLAND_SAILOR 0       // the landing's sailor: BATTLE ISLAND's first person (data/maps/BattleIsland/map.json)
 
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 void MP_Voyage_Begin(bool8 eastbound, bool8 faded);   // mp_voyage.c
@@ -40,11 +42,36 @@ bool8 MP_BattleIsland_IsIsland(u8 group)
     return group == MAP_GROUP(MAP_BATTLE_ISLAND);
 }
 
-// EventScript_BattleIslandOffer: the boat from a port (the origin noted by the warp: mp_region.c MP_Region_NoteWarp)
+// Where the boat sets the player down: the tile in front of the landing's sailor, read from the island's map as
+// the game has it (Moemon Maker's edits included: Overworld_GetMapHeaderByGroupAndId gives the patched header), so
+// moving or turning the sailor in the editor moves the landing with them
+static void LandingSpot(s16 *x, s16 *y)
+{
+    const struct MapHeader *h = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(MAP_BATTLE_ISLAND), MAP_NUM(MAP_BATTLE_ISLAND));
+    const struct ObjectEventTemplate *s;
+    *x = ISLAND_LANDING_X;
+    *y = ISLAND_LANDING_Y;
+    if (!h || !h->events || h->events->objectEventCount <= ISLAND_SAILOR)
+        return;
+    s = &h->events->objectEvents[ISLAND_SAILOR];
+    *x = s->x;
+    *y = s->y;
+    switch (s->movementType)
+    {
+    case MOVEMENT_TYPE_FACE_UP:    (*y)--; break;
+    case MOVEMENT_TYPE_FACE_DOWN:  (*y)++; break;
+    case MOVEMENT_TYPE_FACE_LEFT:  (*x)--; break;
+    default:                       (*x)++; break;   // (facing right, as the island first had it)
+    }
+}
+
+// EventScript_BattleIslandOffer / EventScript_BattleIslandSail: the boat from a port (the origin noted by the warp:
+// mp_region.c MP_Region_NoteWarp)
 void MP_BattleIsland_Sail(void)
 {
-    SetWarpDestination(MAP_GROUP(MAP_BATTLE_ISLAND), MAP_NUM(MAP_BATTLE_ISLAND), WARP_ID_NONE, ISLAND_LANDING_X,
-                       ISLAND_LANDING_Y);
+    s16 x, y;
+    LandingSpot(&x, &y);
+    SetWarpDestination(MAP_GROUP(MAP_BATTLE_ISLAND), MAP_NUM(MAP_BATTLE_ISLAND), WARP_ID_NONE, x, y);
     MPNet_Log("battle island: sailing from map %d.%d", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
     MP_Voyage_Begin(TRUE, FALSE);
 }

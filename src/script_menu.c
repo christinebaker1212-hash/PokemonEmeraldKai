@@ -532,6 +532,13 @@ static void CreateLilycoveSSTidalMultichoice(void)
         }
     }
 
+    // Moemon Kai: BATTLE ISLAND, one more trip for the BATTLE TICKET (mp_battleisland.c)
+    if (gSpecialVar_0x8004 == 0 && CheckBagHasItem(ITEM_BATTLE_TICKET, 1) == TRUE)
+    {
+        sLilycoveSSTidalSelections[selectionCount] = SSTIDAL_SELECTION_BATTLE_ISLAND;
+        selectionCount++;
+    }
+
     sLilycoveSSTidalSelections[selectionCount] = SSTIDAL_SELECTION_EXIT;
     selectionCount++;
 

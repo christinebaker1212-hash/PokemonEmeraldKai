@@ -147,6 +147,8 @@
 #define MULTI_FR_HELIX_AMBER               241
 #define MULTI_FR_DOME_AMBER                242
 #define MULTI_BUENA_PASSWORD               243   // Moemon Kai: BUENA's three choices, STR_VAR_1..3 (mp_buena.c, case 141)
+#define MULTI_SSTIDAL_SLATEPORT_NO_BF_BI   244   // Moemon Kai: SLATEPORT's boat with BATTLE ISLAND (the BATTLE TICKET)
+#define MULTI_SSTIDAL_SLATEPORT_WITH_BF_BI 245
 
 // Lilycove SS Tidal Multichoice Selections
 #define SSTIDAL_SELECTION_SLATEPORT        0
@@ -155,8 +157,9 @@
 #define SSTIDAL_SELECTION_NAVEL_ROCK       3
 #define SSTIDAL_SELECTION_BIRTH_ISLAND     4
 #define SSTIDAL_SELECTION_FARAWAY_ISLAND   5
-#define SSTIDAL_SELECTION_EXIT             6
-#define SSTIDAL_SELECTION_COUNT            7
+#define SSTIDAL_SELECTION_BATTLE_ISLAND    6   // Moemon Kai: with the BATTLE TICKET (mp_battleisland.c)
+#define SSTIDAL_SELECTION_EXIT             7
+#define SSTIDAL_SELECTION_COUNT            8
 
 // Std String Ids
 #define STDSTRING_COOL             0

@@ -67,6 +67,11 @@ CUP's POKéMON are given, so its switches don't apply (its own rewards).
   and the CHALLENGE CUP's pools, templates and trainers (src/data/mp_stadium_cc.h, tools/stadium/gen_challenge.py from
   tools/stadium/challenge_cup.json); src/mp/mp_stadium.c builds them (Stadium_BuildMon, StadiumCc_MakeTeam); test
   stadium_data (mp stadium / mp ccteam). The cups' rules: docs/stadium/RULES.md (from the six pages the user sent).
+- BATTLE ISLAND's boat (1.163.0): HOENN's ferry clerks list BATTLE ISLAND among their destinations (LILYCOVE's
+  SSTIDAL_SELECTION_BATTLE_ISLAND in script_menu.c, SLATEPORT's MULTI_SSTIDAL_SLATEPORT_*_BI; JOHTO's, KANTO's and
+  SINNOH's ports still ask first, EventScript_BattleIslandOffer). The boat lands on the tile in front of the island's
+  sailor (object 0) as the map has it, Moemon Maker's edits included (mp_battleisland.c LandingSpot): move or turn
+  the sailor in the editor and the landing follows. Tests battle_island_voyage, battle_island_lilycove.
 - T15a (BATTLE ISLAND, BATTLE TICKET, the building): built (mp_battleisland.c); T15c (screens, src/mp/mp_stadium_ui.c),
   saved teams (mp_stadium_teams.c) and T15d (music, rewards, ribbons, achievements) done: the sections below.
 - Still missing: the user's GYM LEADER CASTLE picture (graphics/stadium/gym_leader_castle.png, 160x120; the link the

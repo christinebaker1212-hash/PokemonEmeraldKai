@@ -1,0 +1,31 @@
+pressuntil A field 5000
+mp setflag 0x864
+mp setflag 0x1D0
+mp setflag 0x8D6
+mp setflag 0x1B0
+mp additem 376 1
+mp additem 745 1
+mp warp 13,10,8,11
+wait 80
+mp face up
+wait 10
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+shot bil_menu
+press UP 2
+wait 10
+press A 2
+pressuntillog A 1500 battle island: sailing from
+waitlog 3000 voyage: arrived
+wait 60
+mp where
+log lilycove island done
+quit

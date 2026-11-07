@@ -269,6 +269,8 @@ map, the overlays apply to the new one. If the original changed under an edit, t
 The command-line compiler (`moemake`) builds everything in `MoemonMaker/` in the release workflow. It then runs a
 headless check of every pack: each map loads, each warp arrives somewhere, each trainer can be battled. This works the
 same way `save_layout.py` protects saves. A release that would break a pack fails before anyone downloads it.
+(tools/maker/check_pack.py, run by the maker-pack workflow: every line of every map file, events included since 1.163.0:
+an event's `on=`, its pages' conditions, its commands, and each `raw` line's macro against the game's asm/macros.)
 
 ### 4. The checker
 

@@ -1,5 +1,6 @@
-# BATTLE ISLAND's boat (mp_battleisland.c): with a BATTLE TICKET, SLATEPORT's ferry clerk offers the island, the
-# voyage lands on BATTLE ISLAND, and the island's sailor sails back to the port the player left from.
+# BATTLE ISLAND's boat (mp_battleisland.c): with a BATTLE TICKET, SLATEPORT's ferry clerk lists BATTLE ISLAND beside
+# LILYCOVE (shot bi_menu), the voyage lands in front of the island's sailor (shot bi_landed: wherever the map, Moemon
+# Maker edits included, has them), and the sailor sails back to the port the player left from.
 MODE=1
 TMO=400
 EXPECT_A=("battle island: sailing from map 9.9" "voyage: arrived" "battle island: sailing back" "voyage island done")

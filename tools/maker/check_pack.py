@@ -50,6 +50,18 @@ for path in glob.glob(os.path.join(ROOT, 'data/maps/*/map.json')):
 LAYOUTS = {l['id']: l for l in json.load(open(os.path.join(ROOT, 'data/layouts/layouts.json')))['layouts'] if 'id' in l}
 TRACKS = {os.path.basename(p)[:-8] for p in glob.glob(os.path.join(SRC, 'music', '*.kaisong'))}
 
+# events (M2: src/maker/maker_events.c): the commands an event's indented lines may hold, a page's conditions, and the
+# game's own script macros a `raw` line assembles (src/maker/maker_raw.c, from the same asm/macros files)
+EVENT_COMMANDS = {'text', 'yesno', 'choice', 'if', 'else', 'end', 'stop', 'setflag', 'clearflag', 'self', 'setvar',
+                  'addvar', 'subvar', 'giveitem', 'takeitem', 'givemon', 'money', 'heal', 'lua', 'special', 'battle',
+                  'wildbattle', 'music', 'fanfare', 'sound', 'wait', 'fade', 'move', 'remove', 'warp', 'lock',
+                  'release', 'face', 'log', 'raw', 'label'}
+PAGE_KEYS = {'trigger', 'flag', 'noflag', 'self', 'noself', 'var', 'item', 'badges', 'time'}
+MACROS = set()
+for p in ('asm/macros/event.inc', 'asm/macros/qz_event.inc', 'asm/macros/movement.inc'):
+    if os.path.exists(os.path.join(ROOT, p)):
+        MACROS |= set(re.findall(r'^\s*\.macro\s+(\w+)', read(p), re.M))
+
 errors, warnings = [], []
 TABLES = {'look': GFX, 'movement': MOVEMENT, 'trainer': TRAINERTYPE, 'flag': FLAGS | {'0'}, 'item': ITEMS}
 PERSON = {'x', 'y', 'elevation', 'look', 'movement', 'range_x', 'range_y', 'trainer', 'sight', 'flag', 'removed'}
@@ -85,11 +97,25 @@ for path in sorted(glob.glob(os.path.join(SRC, 'base', '*.txt'))):
     lines = open(path, encoding='utf-8').read().splitlines()
     map_id = None
     blocks, w, h = None, 0, 0
+    in_event = False
     for n, line in enumerate(lines, 1):
         where = '%s line %d' % (name, n)
         if not line.strip() or line.startswith('#'):
             continue
         word = line.split()
+        if line[0] in ' \t':   # an event's page or command (the indented lines after its "event" line)
+            if not in_event:
+                errors.append('%s: an indented line outside an event: %s' % (where, line.strip()))
+            elif word[0] == 'page':
+                for kv in word[1:]:
+                    if kv.split('=')[0] not in PAGE_KEYS:
+                        errors.append('%s: a page condition the game doesn\'t know: %s' % (where, kv))
+            elif word[0] not in EVENT_COMMANDS:
+                errors.append('%s: an event command the game doesn\'t know: %s' % (where, word[0]))
+            elif word[0] == 'raw' and (len(word) < 2 or (MACROS and word[1].rstrip(',') not in MACROS)):
+                errors.append('%s: a script command the game doesn\'t have: %s' % (where, line.strip()))
+            continue
+        in_event = False
         if word[0] == 'map':
             map_id = word[1]
             if map_id not in MAPS:
@@ -116,6 +142,13 @@ for path in sorted(glob.glob(os.path.join(SRC, 'base', '*.txt'))):
                 errors.append('%s: not understood: %s' % (where, line))
             elif word[3] == 'species' and (word[4] not in SPECIES or word[5] not in SPECIES):
                 errors.append('%s: a species the game doesn\'t know: %s' % (where, line))
+        elif word[0] == 'event' and len(word) == 3 and word[2].startswith('on='):
+            on = word[2][3:]
+            kind, _, key = on.partition(':')
+            if not (on == 'map' or (kind in ('person', 'sign', 'trigger') and key)
+                    or (kind == 'add' and re.match(r'^\d+$', key))):
+                errors.append('%s: an event on something the game doesn\'t know: %s' % (where, on))
+            in_event = True
         elif word[0] == 'music' and len(word) == 3:
             for v in word[1:]:
                 if v not in SONGS and v not in TRACKS:

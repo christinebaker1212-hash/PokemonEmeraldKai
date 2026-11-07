@@ -3965,7 +3965,9 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "regionreload") == 0)
     {
         // regionreload: writes "<save>.region" and reads it back (chunks: other regions' PCs, the GLOBAL PC, levels)
+        void AwFile_Flush(void);
         MP_Region_WriteSidecar();
+        AwFile_Flush();   // (the write goes on in the background: wait for it before reading back)
         MP_Region_LoadFromSave();
     }
     else if (strcmp(cmd, "s3dtext") == 0)

@@ -5,13 +5,28 @@ mp warp 9,9,8,11
 wait 80
 mp face up
 wait 10
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+shot bi_menu
+press UP 2
+wait 10
+press A 2
 pressuntillog A 1500 battle island: sailing from
 waitlog 3000 voyage: arrived
 wait 120
 mp where
-mp warp 46,0,23,30
+shot bi_landed
+mp warp 46,0,18,27
 wait 80
-mp face left
+mp face down
 wait 10
 pressuntillog A 1500 battle island: sailing back
 waitlog 3000 voyage: arrived

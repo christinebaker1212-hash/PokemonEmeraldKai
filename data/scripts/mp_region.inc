@@ -117,7 +117,6 @@ gText_RegionCustomsCancel::
 @ HOENN's ferry clerks (SLATEPORT, LILYCOVE): the boat to the other regions beside the S.S. TIDAL's own voyages.
 @ Returns to go on with the usual voyages; a trip or EXIT ends the script.
 EventScript_HoennRegionFerry::
-	call EventScript_BattleIslandOffer
 	specialvar VAR_RESULT, QzGetReachableRegionsMask
 	goto_if_eq VAR_RESULT, 0, EventScript_HoennRegionFerry_Usual
 	message gText_HoennRegionFerry
