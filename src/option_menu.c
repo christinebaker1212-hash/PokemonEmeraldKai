@@ -291,6 +291,8 @@ static const u8 sText_Close[] = _("CLOSE");
 
 static const u8 sText_On[] = _("ON");
 static const u8 sText_Off[] = _("OFF");
+static const u8 sText_English[] = _("ENGLISH");
+static const u8 sText_Japanese[] = _("JAPANESE");
 static const u8 sText_NameCaseAsTyped[] = _("UNCORRECTED");
 static const u8 sText_NameCaseCaps[] = _("ALL CAPS");
 static const u8 sText_NameCaseMixed[] = _("Mixed Case");
@@ -552,9 +554,11 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
     case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SHADOWS: case OPT_CARDTITLE: case OPT_BGMUTE:
-    case OPT_ANNOUNCER:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
+    case OPT_ANNOUNCER:
+        names[0] = sText_Off, names[1] = sText_English, names[2] = sText_Japanese;
+        return 3;
     case OPT_BADGEFADE:
         names[TCARD_FADE_PLATINUM] = sText_FadePlatinum, names[TCARD_FADE_SLOW] = sText_FadeSlow, names[TCARD_FADE_OFF] = sText_Off;
         return 3;
@@ -825,7 +829,7 @@ static u8 Current(u8 row)
     case OPT_SINNOHSPRITES: return 2 - gMpConfig.sinnohSprites % 3;
     case OPT_SHADOWS:     return !gMpConfig.noShadows;
     case OPT_BGMUTE:      return gMpConfig.muteInBackground != 0;
-    case OPT_ANNOUNCER:   return !gMpConfig.noAnnouncer;
+    case OPT_ANNOUNCER:   return gMpConfig.noAnnouncer ? 0 : gMpConfig.announcerJp ? 2 : 1;
     case OPT_BADGEFADE:   return MP_TCard_Fade();
     case OPT_CARDTITLE:   return MP_TCard_ShowTitle() != 0;
     }
@@ -909,9 +913,14 @@ static void Change(u8 row, int dir)
         gMpConfig.followerSprites = Wrap(gMpConfig.followerSprites + dir, MP_FOLLOW_SPRITES_COUNT);
         MPNet_Log("follower sprites: %d", gMpConfig.followerSprites);
         break;
-    case OPT_ANNOUNCER:
-        gMpConfig.noAnnouncer = !gMpConfig.noAnnouncer;
-        MPNet_Log("announcer: %d", !gMpConfig.noAnnouncer);
+    case OPT_ANNOUNCER:   // OFF, ENGLISH, JAPANESE
+        {
+            u8 v = Wrap((gMpConfig.noAnnouncer ? 0 : gMpConfig.announcerJp ? 2 : 1) + (dir != 0 ? dir : 1), 3);
+            gMpConfig.noAnnouncer = v == 0;
+            if (v != 0)
+                gMpConfig.announcerJp = v == 2;
+            MPNet_Log("announcer: %d (%s)", !gMpConfig.noAnnouncer, gMpConfig.announcerJp ? "Japanese" : "English");
+        }
         break;
     case OPT_BGMUTE:
         gMpConfig.muteInBackground = !gMpConfig.muteInBackground;
@@ -1240,7 +1249,8 @@ static void DrawHint(void)
     }
     else if (opt == OPT_ANNOUNCER)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.noAnnouncer ? "STADIUM BATTLES WITHOUT THE ANNOUNCER"
-                                                                  : "THE STADIUM'S ANNOUNCER CALLS ITS BATTLES");
+                                             : gMpConfig.announcerJp ? "THE STADIUM'S ANNOUNCER, IN JAPANESE"
+                                                                     : "THE STADIUM'S ANNOUNCER CALLS ITS BATTLES");
     else if (opt == OPT_BGMUTE)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.muteInBackground ? "SILENT WHILE ANOTHER WINDOW IS IN FRONT"
                                                                         : "SOUND PLAYS EVEN WHEN NOT IN FOCUS");

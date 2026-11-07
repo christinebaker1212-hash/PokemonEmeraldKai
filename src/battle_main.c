@@ -5551,6 +5551,7 @@ static void RunTurnActionsFunctions(void)
     }
 }
 
+extern bool8 gMpStadiumBattle;   // Moemon Kai: mp_stadium_cup.c
 static void HandleEndTurn_BattleWon(void)
 {
     gCurrentActionFuncId = 0;
@@ -5577,7 +5578,12 @@ static void HandleEndTurn_BattleWon(void)
         BattleStopLowHpSound();
         gBattlescriptCurrInstr = BattleScript_FrontierTrainerBattleWon;
 
-        if (gTrainerBattleOpponent_A == TRAINER_FRONTIER_BRAIN)
+        if (gMpStadiumBattle)
+        {
+            u16 MP_StadiumBattle_Victory(u16 song);
+            PlayBGM(MP_StadiumBattle_Victory(MUS_VICTORY_TRAINER));   // Moemon Kai: POKéMON STADIUM's own (mp_stadium_cup.c)
+        }
+        else if (gTrainerBattleOpponent_A == TRAINER_FRONTIER_BRAIN)
             PlayBGM(MUS_VICTORY_GYM_LEADER);
         else
             PlayBGM(MUS_VICTORY_TRAINER);

@@ -14,7 +14,10 @@ import struct
 import sys
 import zipfile
 
-ARCHIVE = 0x197C1E0
+# (title, archive offset, clips, the pack's name)
+GAMES = [(b'POKEMON STADIUM', 0x197C1E0, 823, 'announcer.s1'),          # Pokemon Stadium (USA) 1.0
+         (b'POKEMON STADIUM 2', 0x1975C00, 831, 'announcer_jp.s1')]     # POKEMON STADIUM 2 (Japan), CP2J
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 
 def normalize(rom):
@@ -34,13 +37,20 @@ def normalize(rom):
     return None
 
 
+def which(rom):
+    """The GAMES entry rom is, or None."""
+    title = rom[0x20:0x34].rstrip(b' \0')
+    for g in GAMES:
+        if title == g[0] and has_archive(rom, g[1]):
+            return g
+    return None
+
+
 def find_rom(data, depth=0):
-    """A Pokemon Stadium (USA) 1.0 image in data (a ROM, or a zip of them)."""
+    """A Pokemon Stadium (USA) 1.0 or POKEMON STADIUM 2 (Japan) image in data (a ROM, or a zip of them)."""
     rom = normalize(data)
     if rom is not None:
-        if rom[0x20:0x34].rstrip(b' \0') == b'POKEMON STADIUM' and has_archive(rom):
-            return rom
-        return None
+        return rom if which(rom) else None
     if depth > 2 or data[:2] != b'PK':
         return None
     with zipfile.ZipFile(io.BytesIO(data)) as z:
@@ -53,11 +63,12 @@ def find_rom(data, depth=0):
     return None
 
 
-def has_archive(rom):
-    return rom[ARCHIVE:ARCHIVE + 2] == b'S1' and struct.unpack('>H', rom[ARCHIVE + 2:ARCHIVE + 4])[0] == 3
+def has_archive(rom, at):
+    return rom[at:at + 2] == b'S1' and struct.unpack('>H', rom[at + 2:at + 4])[0] == 3
 
 
-def archive(rom):
+def archive(rom, game):
+    ARCHIVE, want = game[1], game[2]
     u32 = lambda o: struct.unpack('>I', rom[o:o + 4])[0]
     u16 = lambda o: struct.unpack('>H', rom[o:o + 2])[0]
     end = 0
@@ -74,8 +85,9 @@ def archive(rom):
                 raise SystemExit('make_voice_pack: clip %d is not a MORT stream' % (clips + i))
         clips += n
         end = max(end, off + size)
-    if clips != 823:
-        raise SystemExit('make_voice_pack: %d clips, 823 expected (Pokemon Stadium (USA) 1.0 is needed)' % clips)
+    if clips != want:
+        raise SystemExit('make_voice_pack: %d clips, %d expected (Pokemon Stadium (USA) 1.0 or POKEMON STADIUM 2 (Japan) '
+                         'is needed)' % (clips, want))
     return rom[ARCHIVE:ARCHIVE + end]
 
 
@@ -83,16 +95,17 @@ def main():
     if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(2)
-    out = sys.argv[2] if len(sys.argv) > 2 else 'stadium/announcer.s1'
     with open(sys.argv[1], 'rb') as f:
         rom = find_rom(f.read())
     if rom is None:
-        raise SystemExit('make_voice_pack: no Pokemon Stadium (USA) 1.0 ROM in ' + sys.argv[1])
-    data = archive(rom)
+        raise SystemExit('make_voice_pack: no Pokemon Stadium (USA) 1.0 or POKEMON STADIUM 2 (Japan) ROM in ' + sys.argv[1])
+    game = which(rom)
+    out = sys.argv[2] if len(sys.argv) > 2 else os.path.join(REPO, 'stadium', game[3])
+    data = archive(rom, game)
     os.makedirs(os.path.dirname(out) or '.', exist_ok=True)
     with open(out, 'wb') as f:
         f.write(data)
-    print('make_voice_pack: 823 clips, %d bytes to %s' % (len(data), out))
+    print('make_voice_pack: %d clips, %d bytes to %s' % (game[2], len(data), out))
 
 
 if __name__ == '__main__':

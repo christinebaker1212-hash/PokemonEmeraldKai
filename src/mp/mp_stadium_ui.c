@@ -1419,6 +1419,16 @@ static void DrawPrizes(void)
     }
 }
 
+// The cup won: A only once the prizes have slid up (frame 56) and stayed long enough to be read, two seconds and a half
+// more for each line (the user, 2026-11-07: "make sure the player cannot skip the rewards screen after beating a cup
+// without reading it")
+static u16 PrizesReadAge(void)
+{
+    const struct StadiumPrize *p = StadiumRewards_Last();
+    return 56 + 120 + 30 * (p->count + (p->species != SPECIES_NONE ? 2 : 0));
+}
+#define PRIZES_READ_AGE PrizesReadAge()
+
 static void DrawResult(void)
 {
     struct StadiumRun *r = StadiumCup_Run();
@@ -1462,7 +1472,10 @@ static void DrawResult(void)
     }
     else if (U.result == RES_CONTINUE)
         G_TextAlign(120, 128, TA_CENTER, G_WHITE, 0x000000, "Use a continue and try again?", TF_SMALL);
-    Footer(U.result == RES_CONTINUE ? "{A} CONTINUE  {B} GIVE UP" : "{A} OK");
+    if (U.result == RES_CUP && U.age < PRIZES_READ_AGE)
+        Footer("");   // (the prizes are still being read: OK shows once A can go on)
+    else
+        Footer(U.result == RES_CONTINUE ? "{A} CONTINUE  {B} GIVE UP" : "{A} OK");
 }
 
 
@@ -2514,8 +2527,10 @@ bool8 MP_StadiumUi_Step(u16 keys)
                 PlaySE(SE_SELECT);
             }
         }
-        else if (pressed & A_BUTTON)
+        else if ((pressed & A_BUTTON) && (U.result != RES_CUP || U.age >= PRIZES_READ_AGE))
         {
+            if (U.result == RES_CUP)
+                MPNet_Log("stadium: prizes read (%d frames), on", U.age);
             if (U.result == RES_WON)
                 ToVs();
             else

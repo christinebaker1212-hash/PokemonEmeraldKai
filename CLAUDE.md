@@ -90,7 +90,9 @@ achievements mp_stadium_rewards.c), its music as music/stadium_*.kaisong (new tr
 fans (1.168.0, data/maps/BattleIsland_Stadium). Its announcer (1.165.0): Stadium's own 823 voice clips from the user's ROM (stadium/announcer.s1, never committed:
 tools/stadium/mort/make_voice_pack.py; the release's STADIUM_ROM_URL secret), decoded by SubDrag's MORT decoder (mort/,
 public domain), lines chosen by the battle's messages and only when they fit the time the battle gives them, never cut
-off: src/mp/mp_stadium_announcer.c, docs/STADIUM.md "The announcer"; OPTIONS > BATTLE > ANNOUNCER; test stadium_announcer.
+off: src/mp/mp_stadium_announcer.c, docs/STADIUM.md "The announcer"; OPTIONS > BATTLE > ANNOUNCER (OFF / ENGLISH /
+JAPANESE: POKEMON STADIUM 2 (Japan)'s 831 clips laid under the English numbers, stadium/announcer_jp.s1, secret
+STADIUM_JP_ROM_URL; STADIUM.md "The Japanese announcer"); tests stadium_announcer, stadium_announcer_jp.
 
 **ORRE** (Pokémon Colosseum's region, started 2026-11-04): **start at `docs/ORRE_HANDOFF.md`** (status, the disc's
 link and the decomp's, setting up a session, next steps, open questions); the user's decisions in

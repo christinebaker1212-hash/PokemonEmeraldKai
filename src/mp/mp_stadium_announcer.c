@@ -1,7 +1,8 @@
 // POKéMON STADIUM's announcer (docs/STADIUM.md "The announcer"): Stadium's own 823 voice clips, from the player's
-// ROM (stadium/announcer.s1: tools/stadium/mort/make_voice_pack.py, or the ROM itself dropped in stadium/), decoded
-// by SubDrag's MORT decoder (mort/) on a worker thread and mixed over the game's sound (music_player.c). OPTIONS >
-// BATTLE > ANNOUNCER (on unless turned off).
+// ROM (stadium/announcer.s1: tools/stadium/mort/make_voice_pack.py, or the ROM itself dropped in stadium/), or the
+// Japanese ones (POKEMON STADIUM 2's 831, stadium/announcer_jp.s1), decoded by SubDrag's MORT decoder (mort/) on a
+// worker thread and mixed over the game's sound (music_player.c). OPTIONS > BATTLE > ANNOUNCER: OFF / ENGLISH /
+// JAPANESE.
 //
 // The battle's own messages are the cues (battle_message.c BufferStringBattle -> MP_Announcer_OnBattleString):
 // a POKéMON sent out, a move used, super / not very effective, critical hits, misses, failures, statuses, faints,
@@ -104,7 +105,7 @@ struct Clip
 
 static struct
 {
-    bool8 tried, ok;
+    bool8 tried, ok, jp;   // jp: the Japanese voices (POKEMON STADIUM 2's)
     u8 *data;
     u32 size;
     struct Clip clip[CLIPS];
@@ -113,14 +114,36 @@ static struct
     SDL_Thread *thread;
     u16 want[MAX_WANT];   // the worker's queue
     u16 wantHead, wantCount;
+    SDL_atomic_t decoding;   // the worker is decoding a clip
+    u8 lang;                 // the voices asked for when the pack was loaded (0 English, 1 Japanese)
 } sPack;
 
 static u32 BE32(const u8 *p) { return (u32)p[0] << 24 | (u32)p[1] << 16 | (u32)p[2] << 8 | p[3]; }
 static u16 BE16(const u8 *p) { return (u16)(p[0] << 8 | p[1]); }
 
+// The Japanese game (POKEMON STADIUM 2, the one the USA's POKeMON STADIUM was made from) has 831 clips: the same
+// lines in the same order, with 8 more of its own among the remarks. sJpShift says how far each USA clip number
+// moves in it (from that clip on), so the Japanese clips are laid out under the USA numbers and everything else
+// here stays the same (clips were matched by transcribing both: docs/STADIUM.md "The Japanese announcer").
+#define CLIPS_JP 831
+static const struct { u16 from, add; } sJpShift[] = {
+    {181, 2}, {217, 4}, {221, 6}, {365, 8},
+};
+
+static u16 JpClip(u16 us)
+{
+    u32 i;
+    u16 add = 0;
+    for (i = 0; i < ARRAY_COUNT(sJpShift); i++)
+        if (us >= sJpShift[i].from)
+            add = sJpShift[i].add;
+    return us + add;
+}
+
 // The speech archive's clips (an S1 of three S1s of MORT streams). FALSE: not the archive.
 static bool8 ReadArchive(void)
 {
+    static struct Clip sAll[CLIPS_JP];
     u32 c, i, n = 0;
     if (sPack.size < 64 || memcmp(sPack.data, "S1", 2) != 0 || BE16(sPack.data + 2) != 3)
         return FALSE;
@@ -130,9 +153,13 @@ static bool8 ReadArchive(void)
         if (child + 4 > sPack.size || memcmp(sPack.data + child, "S1", 2) != 0)
             return FALSE;
         count = BE16(sPack.data + child + 2);
-        for (i = 0; i < count && n < CLIPS; i++, n++)
+        for (i = 0; i < count; i++, n++)
         {
-            struct Clip *k = &sPack.clip[n];
+            struct Clip *k;
+            if (n >= CLIPS_JP)
+                return FALSE;
+            k = &sAll[n];
+            memset(k, 0, sizeof(*k));
             k->off = child + BE32(sPack.data + child + 4 + i * 8);
             k->len = BE32(sPack.data + child + 8 + i * 8);
             if (k->off + 8 > sPack.size || memcmp(sPack.data + k->off, "MORT", 4) != 0)
@@ -141,7 +168,12 @@ static bool8 ReadArchive(void)
             k->frames = (u16)((u32)BE16(sPack.data + k->off + 4) * 160 * 60 / (BE16(sPack.data + k->off + 6) ? BE16(sPack.data + k->off + 6) : RATE));
         }
     }
-    return n == CLIPS;
+    if (n != CLIPS && n != CLIPS_JP)
+        return FALSE;
+    sPack.jp = n == CLIPS_JP;
+    for (i = 0; i < CLIPS; i++)
+        sPack.clip[i] = sAll[sPack.jp ? JpClip(i) : i];
+    return TRUE;
 }
 
 static u8 *ReadFile(const char *path, u32 *size)
@@ -166,13 +198,14 @@ static u8 *ReadFile(const char *path, u32 *size)
     return data;
 }
 
-// The player's own ROM dropped in stadium/ (any byte order): the archive is copied out of it
-#define ROM_ARCHIVE 0x197C1E0
+// The player's own ROM dropped in stadium/ (any byte order): the archive is copied out of it. Pokemon Stadium (USA)
+// keeps it at 0x197C1E0, POKEMON STADIUM 2 (Japan) at 0x1975C00.
 static bool8 FromRom(const char *path)
 {
-    u32 size, i, end = 0, c;
+    static const u32 sAt[] = {0x197C1E0, 0x1975C00};
+    u32 size, i, end = 0, c, at = 0;
     u8 *rom = ReadFile(path, &size);
-    if (rom == NULL || size < ROM_ARCHIVE + 64)
+    if (rom == NULL || size < sAt[0] + 64)
     {
         free(rom);
         return FALSE;
@@ -181,25 +214,28 @@ static bool8 FromRom(const char *path)
         for (i = 0; i + 1 < size; i += 2) { u8 t = rom[i]; rom[i] = rom[i + 1]; rom[i + 1] = t; }
     else if (rom[0] == 0x40 && rom[1] == 0x12)   // .n64: little-endian words
         for (i = 0; i + 3 < size; i += 4) { u8 a = rom[i], b = rom[i + 1]; rom[i] = rom[i + 3]; rom[i + 1] = rom[i + 2]; rom[i + 2] = b; rom[i + 3] = a; }
-    if (memcmp(rom + ROM_ARCHIVE, "S1", 2) != 0 || BE16(rom + ROM_ARCHIVE + 2) != 3)
+    for (i = 0; i < ARRAY_COUNT(sAt) && at == 0; i++)
+        if (memcmp(rom + sAt[i], "S1", 2) == 0 && BE16(rom + sAt[i] + 2) == 3)
+            at = sAt[i];
+    if (at == 0)
     {
         free(rom);
         return FALSE;
     }
     for (c = 0; c < 3; c++)
     {
-        u32 e = BE32(rom + ROM_ARCHIVE + 4 + c * 8) + BE32(rom + ROM_ARCHIVE + 8 + c * 8);
+        u32 e = BE32(rom + at + 4 + c * 8) + BE32(rom + at + 8 + c * 8);
         if (e > end)
             end = e;
     }
-    if (ROM_ARCHIVE + end > size)
+    if (at + end > size)
     {
         free(rom);
         return FALSE;
     }
     sPack.data = malloc(end);
     if (sPack.data != NULL)
-        memcpy(sPack.data, rom + ROM_ARCHIVE, end);
+        memcpy(sPack.data, rom + at, end);
     sPack.size = end;
     free(rom);
     return sPack.data != NULL;
@@ -220,6 +256,7 @@ static int Worker(void *unused)
         id = sPack.want[sPack.wantHead];
         sPack.wantHead = (sPack.wantHead + 1) % MAX_WANT;
         sPack.wantCount--;
+        SDL_AtomicSet(&sPack.decoding, 1);
         SDL_UnlockMutex(sPack.lock);
         k = &sPack.clip[id];
         if (Mort_Decode(sPack.data, (int)sPack.size, k->off, k->len, &pcm, &count) && count > 0)
@@ -260,45 +297,102 @@ static int Worker(void *unused)
             free(pcm);
             SDL_AtomicSet(&k->state, 3);
         }
+        SDL_AtomicSet(&sPack.decoding, 0);
     }
     return 0;
 }
 
 static void Want(u16 id);
 
-static bool8 LoadPack(void)
+static s16 VoiceClip(void);
+
+// The pack loaded before for the other language, let go (only while no line plays; the worker is told to stop first)
+static void Unload(void)
 {
-    const char *path;
-    char rom[600];
-    static const char *const sRoms[] = {"stadium/Pokemon Stadium (USA).z64", "stadium/Pokemon Stadium (USA).v64",
-                                        "stadium/Pokemon Stadium (USA).n64", "stadium/stadium.z64"};
     u32 i;
-    if (sPack.tried)
-        return sPack.ok;
-    sPack.tried = TRUE;
-    path = getenv("MOEMON_STADIUM_VOICE");
-    if (path == NULL)
-        path = Updater_ExeFile("stadium/announcer.s1");
-    sPack.data = ReadFile(path, &sPack.size);
-    if (sPack.data == NULL)
-        for (i = 0; i < ARRAY_COUNT(sRoms) && sPack.data == NULL; i++)
-        {
-            snprintf(rom, sizeof(rom), "%s", Updater_ExeFile(sRoms[i]));
-            if (FromRom(rom))
-                MPNet_Log("announcer: the voices from %s", sRoms[i]);
-        }
-    if (sPack.data == NULL || !ReadArchive())
+    if (sPack.lock != NULL)
     {
-        MPNet_Log("announcer: no voices (stadium/announcer.s1, or the ROM in stadium/)");
+        SDL_LockMutex(sPack.lock);
+        sPack.wantCount = 0;
+        SDL_UnlockMutex(sPack.lock);
+        while (SDL_AtomicGet(&sPack.decoding))
+            SDL_Delay(1);
+    }
+    for (i = 0; i < CLIPS; i++)
+    {
+        free(sPack.clip[i].pcm);
+        memset(&sPack.clip[i], 0, sizeof(sPack.clip[i]));
+    }
+    free(sPack.data);
+    sPack.data = NULL;
+    sPack.size = 0;
+    sPack.ok = sPack.jp = FALSE;
+}
+
+// The voices in one language: its pack (stadium/announcer.s1 or announcer_jp.s1), else that game's ROM in stadium/
+static void ReadVoices(u8 lang)
+{
+    static const char *const sRoms[2][4] = {
+        {"stadium/Pokemon Stadium (USA).z64", "stadium/Pokemon Stadium (USA).v64", "stadium/Pokemon Stadium (USA).n64",
+         "stadium/stadium.z64"},
+        {"stadium/Pokemon Stadium 2 (Japan).z64", "stadium/Pokemon Stadium 2 (Japan).v64",
+         "stadium/Pokemon Stadium 2 (Japan).n64", "stadium/stadium_jp.z64"}};
+    char rom[600];
+    const char *path = getenv(lang ? "MOEMON_STADIUM_VOICE_JP" : "MOEMON_STADIUM_VOICE");
+    u32 i;
+    if (path == NULL)
+        path = Updater_ExeFile(lang ? "stadium/announcer_jp.s1" : "stadium/announcer.s1");
+    sPack.data = ReadFile(path, &sPack.size);
+    for (i = 0; i < ARRAY_COUNT(sRoms[lang]) && sPack.data == NULL; i++)
+    {
+        snprintf(rom, sizeof(rom), "%s", Updater_ExeFile(sRoms[lang][i]));
+        if (FromRom(rom))
+            MPNet_Log("announcer: the voices from %s", sRoms[lang][i]);
+    }
+    if (sPack.data != NULL && !ReadArchive())
+    {
         free(sPack.data);
         sPack.data = NULL;
+    }
+}
+
+// OPTIONS > BATTLE > ANNOUNCER: ENGLISH or JAPANESE; the other language's voices when only those are there
+static bool8 LoadPack(void)
+{
+    u8 lang = gMpConfig.announcerJp ? 1 : 0;
+    if (sPack.tried && sPack.lang == lang)
+        return sPack.ok;
+    if (sPack.tried)
+    {
+        if (VoiceClip() >= 0)
+            return sPack.ok;   // (the language changes once the line playing ends)
+        Unload();
+    }
+    sPack.tried = TRUE;
+    sPack.lang = lang;
+    ReadVoices(lang);
+    if (sPack.data == NULL)
+    {
+        ReadVoices(!lang);
+        if (sPack.data != NULL)
+            MPNet_Log("announcer: no %s voices, the %s ones instead", lang ? "Japanese" : "English", lang ? "English" : "Japanese");
+    }
+    if (sPack.data == NULL)
+    {
+        MPNet_Log("announcer: no voices (stadium/announcer.s1 or announcer_jp.s1, or the ROM in stadium/)");
         return FALSE;
+    }
+    if (sPack.thread != NULL)
+    {
+        sPack.ok = TRUE;
+        MPNet_Log("announcer: %d %s clips ready to decode (%u bytes)", CLIPS, sPack.jp ? "Japanese" : "English", (unsigned)sPack.size);
+        return TRUE;
     }
     sPack.lock = SDL_CreateMutex();
     sPack.wake = SDL_CreateCond();
     sPack.thread = SDL_CreateThread(Worker, "moemon_announcer", NULL);
     sPack.ok = sPack.lock != NULL && sPack.wake != NULL && sPack.thread != NULL;
-    MPNet_Log("announcer: %d clips ready to decode (%u bytes)%s", CLIPS, (unsigned)sPack.size, sPack.ok ? "" : ", no worker");
+    MPNet_Log("announcer: %d %s clips ready to decode (%u bytes)%s", CLIPS, sPack.jp ? "Japanese" : "English", (unsigned)sPack.size, sPack.ok ? "" : ", no worker");
     if (sPack.ok && getenv("MOEMON_ANNOUNCER_DUMPALL") != NULL)
     {
         u16 c;
@@ -340,6 +434,11 @@ static struct
     u32 pos;           // in the clip's samples, 16.16
     float duck;        // the game's sound: 1 normal .. 0.7 under the voice
 } sVoice = {-1, 0, 1.0f};
+
+static s16 VoiceClip(void)
+{
+    return sVoice.clip;
+}
 
 void MP_StadiumAnnouncer_Mix(float *buffer, s32 count)
 {
@@ -402,6 +501,8 @@ static struct
     u8 lastFaintSide;
     bool8 countDue;           // a POKeMON fell since the last turn line: the count of who's left
     u16 turnsChosen;
+    bool8 winDue;             // the last foe fell: "There goes the battle!" waits for "...was defeated!" and the win song
+    bool8 winNow;             // the defeat message is up: said as soon as no line is playing
 } A = {.screenClip = -1};
 
 static void ScreenUpdate(void);
@@ -641,6 +742,7 @@ void MP_StadiumAnnouncer_BattleStart(void)
     A.firstPrompt = TRUE;
     A.turnsChosen = 0;
     A.lastFaint = 0;
+    A.winDue = A.winNow = FALSE;
     WantBattle();
     MPNet_Log("announcer: battle on (text speed %d, anim speed %d)", gSaveBlock2Ptr->optionsTextSpeed, gMpConfig.animSpeed);
 }
@@ -745,7 +847,12 @@ static void Faint(u16 id)
     A.lastFaintSide = side;
     A.countDue = TRUE;
     if (Left(side) == 0 && side == B_SIDE_OPPONENT && Left(other) > 0)
-        Cue(CUE_FAINT, PRIO_RESULT, LIST(sWon), FALSE, "the win");
+    {
+        // (the user, 2026-11-07: the win line with "STADIUM X was defeated!" and the victory song, not at the faint)
+        A.winDue = TRUE;
+        Want(sWon[0]);
+        MPNet_Log("announcer: the win waits for the defeat message");
+    }
     else if (both)
         Cue(CUE_FAINT, PRIO_FAINT, LIST(sDoubleFaint), TRUE, "both down");
     else if (Left(side) == 1 && Left(other) == 1)
@@ -820,6 +927,14 @@ void MP_Announcer_OnBattleString(u16 id)
     case STRINGID_TARGETFAINTED:
         Faint(id);
         break;
+    case STRINGID_PLAYERDEFEATEDTRAINER1:
+    case STRINGID_TWOENEMIESDEFEATED:
+        if (A.winDue)
+        {
+            A.winDue = FALSE;
+            A.winNow = TRUE;   // (MP_StadiumAnnouncer_Update: once any line playing ends; never one over another)
+        }
+        break;
     case STRINGID_RETURNMON:
         if (GetBattlerSide(gActiveBattler) == B_SIDE_PLAYER)
             Cue(CUE_RETURN, PRIO_REACT, LIST(sSwitchPlayer), FALSE, "switch");
@@ -841,6 +956,17 @@ void MP_StadiumAnnouncer_Update(void)
     if (sVoice.clip < 0 && A.busyUntil > A.frame + 2)
         A.busyUntil = A.frame;   // (the mixer finished it a little early: free)
     ScreenUpdate();
+    // (the win line keeps its place even when the battle's screens close before the playing line ends)
+    if (A.winNow && !Busy())
+    {
+        if (SDL_AtomicGet(&sPack.clip[sWon[0]].state) == 2)
+        {
+            A.winNow = FALSE;
+            Start(sWon[0], "the win");
+        }
+        else
+            Want(sWon[0]);
+    }
     if (!A.battle)
         return;
     if (gMain.newKeys & A_BUTTON)

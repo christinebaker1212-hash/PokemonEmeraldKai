@@ -3,8 +3,9 @@
 # team), the PRIME CUP's POKé BALL class with LEVEL CAP, SPECIES and HELD ITEMS (the LEGEND RIBBON without rentals; no
 # shiny, no ASTRAL BALL outside a MASTER BALL class), the POKé CUP's MASTER BALL class with every restriction (a shiny
 # prize with 6 perfect IVs, a MASTER BALL and an ASTRAL BALL), MEWTWO beaten with rentals only (MEWTWO, not shiny:
-# no MASTER BALL class); the result screen shows the last prizes; the achievements count it all.
+# no MASTER BALL class); the result screen shows the last prizes and A can't leave it before they've been read
+# (A mashed at once does nothing; "prizes read" comes after "mashed early"); the achievements count it all.
 MODE=1
 TMO=300
-EXPECT_A=("stadium: prizes again" ", 3 perfect IVs" "STADIUM RIBBON for 1" "STADIUM LEGEND RIBBON for 3" "6 perfect IVs, shiny" "prize line ASTRAL BALL" "stadium: prize MEWTWO Lv 70, 4 perfect IVs" "stadium: party 0 ribbons 111" "achievement progress 10 = 1" "stadium rewards done")
+EXPECT_A=("stadium: prizes again" ", 3 perfect IVs" "STADIUM RIBBON for 1" "STADIUM LEGEND RIBBON for 3" "6 perfect IVs, shiny" "prize line ASTRAL BALL" "stadium: prize MEWTWO Lv 70, 4 perfect IVs" "stadium: party 0 ribbons 111" "achievement progress 10 = 1" "stadium mashed early" "stadium: prizes read (" "stadium rewards done")
 UNEXPECT_A=("crash" "out of memory" "MEWTWO Lv 70, 4 perfect IVs, shiny")

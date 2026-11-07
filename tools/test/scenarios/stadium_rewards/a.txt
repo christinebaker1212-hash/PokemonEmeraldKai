@@ -10,6 +10,9 @@ wait 10
 mp stadiumwin 0 6 0 8 1
 wait 90
 rendershot prizes
+mash A 20 6
+log stadium mashed early
+wait 400
 press A 4
 wait 40
 log stadium rewards done

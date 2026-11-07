@@ -99,6 +99,10 @@ HITMONCHAN, EEVEE, OMANYTE, KABUTO), MEWTWO (Round 1) / MEW (Round 2) for beatin
 money (the class, the round, each restriction); a MASTER BALL for rentals only, an ASTRAL BALL only in a MASTER BALL
 class with every restriction. The CHALLENGE CUP counts as every restriction (its six are given). A win already won at
 that hardness: money and a RARE CANDY. The result screen lists them (StadiumRewards_Last).
+A can't leave the result screen of a cup won until the prizes have been up long enough to read (1.174.0, the user:
+"make sure the player cannot skip the rewards screen after beating a cup without reading it"): mp_stadium_ui.c
+PrizesReadAge, the slide-up (56 frames) + 2 s + half a second per prize line (two for the prize POKéMON); "{A} OK"
+shows only then. Log "stadium: prizes read (N frames), on"; test stadium_rewards mashes A at once and checks it stays.
 
 The STADIUM RIBBONS go on the registered team's own POKéMON (party and PC; rentals are STADIUM's, the shared / global
 PCs' copies stay as their owners keep them) on every win, a repeat one too, so a POKéMON new to the team gets them
@@ -162,7 +166,41 @@ is on the highest setting."
   Lines said lately aren't repeated while another fits. The log says each decision ("announcer: clip N (why, F
   frames)", "skipped (nothing fits W frames)", "dropped (a line is playing)", "held"); `mp announcer` prints the
   windows learned. Test stadium_announcer (needs stadium/announcer.s1).
-- OPTIONS > BATTLE > ANNOUNCER (gMpConfig.noAnnouncer, ini stadium_announcer = 1 / 0), on by default.
+- OPTIONS > BATTLE > ANNOUNCER: OFF / ENGLISH / JAPANESE (gMpConfig.noAnnouncer + announcerJp, ini
+  stadium_announcer = 1 / 0 and stadium_announcer_jp = 0 / 1), ENGLISH by default.
+- The win (1.174.0, the user: "save the announcer's 'THERE GOES THE BATTLE!' announcement until the 'STADIUM X WAS
+  DEFEATED!' message and the victory music plays"): the last foe falling only marks the win as due (A.winDue); the
+  defeat message (STRINGID_PLAYERDEFEATEDTRAINER1 / TWOENEMIESDEFEATED) makes it ready (A.winNow), and clip 365 plays
+  as soon as no line is playing. The victory song is STADIUM's own (battle_main.c HandleEndTurn_BattleWon ->
+  mp_stadium_cup.c MP_StadiumBattle_Victory: stadium_won, the castle's stage song, MEWTWO's; before 1.174.0 the battle
+  played the game's trainer victory song). Log "announcer: the win waits for the defeat message", "stadium: song
+  stadium_won", then "clip 365 (the win, ...)".
+
+### The Japanese announcer (1.174.0)
+
+The user (2026-11-07): "can we add support for the Japanese language announcer, as well?" (with a link to their ROM of
+POKEMON STADIUM 2, Japan, CP2J Rev.00: the game the USA's Pokemon Stadium was made from).
+
+- Its speech archive is the same S1 of three S1s at ROM 0x1975C00: 165 + 1 + 665 = 831 clips at 16000 Hz.
+  make_voice_pack.py tells the two games apart by the title and the archive and writes stadium/announcer_jp.s1;
+  the release builds it from the STADIUM_JP_ROM_URL secret (release.yml, package.sh ships both packs). Without the
+  pack the game reads the ROM dropped in stadium/ ("Pokemon Stadium 2 (Japan).z64", .v64 / .n64, stadium_jp.z64).
+  MOEMON_STADIUM_VOICE_JP=file (or MOEMON_STADIUM_VOICE pointed at a Japanese pack) for tests.
+- Same lines, same order, 8 more: matched by transcribing both games' clips (English with Whisper base.en, Japanese
+  with Whisper medium) and lining them up. Groups 0 and 1 (names, PIKACHU) are the same; in group 2 the Japanese has
+  two "the level is low, but let's see a good battle" before the first move (JP 181-182), the 97 and 98 CUP
+  introductions after the 99 CUP's (219-220), the 97 / 98 CUP rules lines (225-226), and two more faint lines
+  ("What did it even come out for? Down!", "Down! It was no help at all!", 371-372) before "And there goes the
+  battle!" (JP 373). So from English 181 the Japanese number is 2 more, from 217 4, from 221 6, from 365 8 (checked
+  again at the names, the moves, the turn and count lines and the last clip: 369 -> 377, 584 -> 592, 768 -> 776,
+  821 -> 829).
+  ReadArchive lays the Japanese clips out under the English numbers (sJpShift: from an English clip on, how far it
+  moves), so every table and cue in the announcer is shared. The Japanese cup introductions name Japan's cups (ULTRA
+  CUP for PRIME CUP, FANCY for PETIT, YELLOW for PIKA, 99 for POKé CUP); the castle, the faints, the names and the
+  moves are the same lines.
+- Choosing a language loads that pack at the next battle (the other is let go once no line plays: Unload stops the
+  worker first); a language whose voices aren't there falls back to the other ("announcer: no Japanese voices, the
+  English ones instead"). Test stadium_announcer_jp.
 
 Achievements: the STADIUM tab (mp_achieve.c AK_STADIUM, read from the save's wins, so old wins count): a first win,
 each cup, the castle, MEWTWO, the CHALLENGE CUP, ROUND 2, rentals only (1, 10), every restriction (1, all of ROUND 1),
