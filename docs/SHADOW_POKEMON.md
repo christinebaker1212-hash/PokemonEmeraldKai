@@ -77,6 +77,16 @@ the field and the Garden; it returns to its own colours when purified.
   of Shadow Lugia's: the largest part deep indigo-plum, the largest light part a pale cool lavender-grey (its belly),
   the next part apart blue-black to a steel-blue edge (its fins), eyes and small bright accents a crimson-magenta glow,
   highlights icy lilac, outlines near-black violet, MOéMON skin ashen lilac (tools/orre/shadow_palettes.py roles()).
+- **Each one looked at, smooth, with its own accents** (the user, 2026-11-07: "Quilava's fire should be brighter ...
+  If there are complimentary colors that would look really good that aren't in Shadow Lugia's palette, use them";
+  "tons of stray pixels ... make it smooth. Makuhita's head highlight turned darker"): a role goes to a whole material
+  (materials(): shades of one hue touching in the picture, joined only where the whole group stays one hue), never to
+  part of a gradient, and a highlight stays its material's lightest. PICKS per Pokémon: shadow fire (magenta to a
+  white-hot core) for QUILAVA's and HOUNDOOM's flames and SLUGMA's lava; gold (violet's complement) for FLAAFFY's
+  orbs, SKIPLOOM's and SUNFLORA's petals, STANTLER's antlers, URSARING's ring, beaks, fruit and gems; crimson for
+  SKARMORY's blades and the red crests and capes; a hot pink glow for SUDOWOODO's orbs, MISDREAVUS's pearls,
+  SMEARGLE's paint; cyan for VIBRAVA's wings and TYRANITAR's gem; ABSOL, SWABLU, NOCTOWL's and DELIBIRD's light parts
+  as pale as Lugia's belly. Small reds (eyes) always glow.
 - **Built (2026-11-07):** tools/orre/shadow_palettes.py makes each of the 48's dark
   palettes for both art sets into src/data/orre_shadow_palettes.h: one treatment for all (the body sunk into a violet-to-
   indigo ramp keeping its lightness order and its parts apart by hue, large white areas sinking too as Shadow Lugia's
