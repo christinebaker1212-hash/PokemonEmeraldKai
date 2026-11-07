@@ -1015,7 +1015,23 @@ static void CaptureChallengePic(struct TcgOpponent *o, struct ObjectEvent *npc)
     CapturePortrait(o, npc);
 }
 
-// The portrait of someone on the map, for the other card games' screens (Triple Triad's CARD QUEEN)
+// The challenge screen's picture of someone on the map, for the other card games (MAGIC's duelists, TRIPLE TRIAD's
+// CARD QUEEN): their battle picture as the POKeMON and YU-GI-OH! screens show it, their sprite only when they have none
+void Tcg_ChallengePicOfObject(unsigned objectId, uint32_t *pixels, uint8_t *w, uint8_t *h)
+{
+    static struct TcgOpponent sFace;
+    struct TcgOpponent *o = &sFace;
+    *w = *h = 0;
+    if (objectId >= OBJECT_EVENTS_COUNT || !gObjectEvents[objectId].active)
+        return;
+    o->portraitW = o->portraitH = 0;
+    CaptureChallengePic(o, &gObjectEvents[objectId]);
+    *w = o->portraitW;
+    *h = o->portraitH;
+    memcpy(pixels, o->portrait, sizeof(o->portrait));
+}
+
+// The portrait of someone on the map (their sprite)
 void Tcg_PortraitOfObject(unsigned objectId, uint32_t *pixels, uint8_t *w, uint8_t *h)
 {
     static struct TcgOpponent sFace;

@@ -2826,7 +2826,7 @@ static void TestCollection(void)
     for (k = 0; k < 41; k++)
         Mtg_DeckAdd(&c.decks[3], Card("Island"));
     c.wins = 7, c.beaten = 5, c.activeDeck = 3;
-    c.rewards = 0x8005, c.preconsBought = 3, c.setPrizes[2] = 5;   // (format 5: a set held for its PRIZES alone)
+    c.rewards = 0x8005, c.preconsBought = 3, c.preconsSold = 0x0105, c.setPrizes[2] = 5;   // (format 5-6: a set held for its PRIZES alone, decks sold)
     c.ace[0] = (int16_t)Card("Llanowar Elves");
     c.tray[2] = 0x41;
     size = Mtg_CollectionWrite(&c, buf, sizeof(buf));
@@ -2843,7 +2843,8 @@ static void TestCollection(void)
           && back.packsOpened == 1, "the boosters came back");
     CHECK(Mtg_DeckAce(&back, 0) == (Mtg_DeckCopies(&back.decks[0], c.ace[0]) ? c.ace[0] : Mtg_AutoAce(back.decks[0].cards,
           back.decks[0].count)), "the ACE CARD stands for its deck");
-    CHECK(back.rewards == 0x8005 && back.preconsBought == 3 && back.setPrizes[2] == 5, "the PRIZES came back");
+    CHECK(back.rewards == 0x8005 && back.preconsBought == 3 && back.preconsSold == 0x0105 && back.setPrizes[2] == 5,
+          "the PRIZES and the decks sold came back");
     {   // a format 1 file (no ACE CARDs at its end) still reads, every deck's ace picked by the game
         uint32_t v4 = 3 + 7 * 2 + 6;   // (formats 4 and 5's end: two sets' records, the PRIZES)
         buf[4] = 1;

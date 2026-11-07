@@ -16,6 +16,8 @@ The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the po
   so the work is **translating the cards the curated decks wait for**. tools/mtg/test.sh prints each deck's count and
   first missing card. 4 of 16 play now (SIXTH STARTER A, INFESTATION, ARMADA, BOMBER).
 - Every card-game screen keeps parity with POKeMON's (the counter copies tcg_ui.c CounterScreen; CARD POINTS on HOME).
+- Structure decks are sold for money on the clerk's DECKS tab, one of each, as POKeMON's theme decks at the GAME CENTER
+  (the user, 2026-11-07: never on the CARD POINTS list).
 
 **Next, by deck (the blockers, from the scope dump):**
 - SIXTH STARTER B: Pyrotechnics (DividedAsYouChoose: damage divided among targets; needs a division prompt on the

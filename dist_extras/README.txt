@@ -1458,11 +1458,12 @@ CASE's third side once you have a MAGIC deck (L and R).
                   CASE. CARD CASE > BOOSTER PACKS opens them: most have 15
                   cards, 11 commons, 3 uncommons and a rare, all from that set.
   The CARD SHOP   Its clerk's counter (L and R go round it):
+                  DECKS: STRUCTURE DECKS for money, one of each (real decks
+                    of their day: a few at first, more as more cards play).
                   TRADE IN: copies past four (and past what your decks use)
                     for CARD POINTS, one card, all of one, or every spare.
-                  CARD SHOP: STRUCTURE DECKS (real decks of their day: a few
-                    at first, more as more cards play), boosters, a card you
-                    pick, RARE CANDY, PP UP and MOEGATCHA TICKETS.
+                  CARD SHOP: boosters, a card you pick, RARE CANDY, PP UP
+                    and MOEGATCHA TICKETS, for CARD POINTS.
                   PRIZES: boosters at 25% and 50% of a set, its rare at 75%,
                     rare cards for wins, boosters opened, regulars beaten,
                     a structure deck and whole sets, CARD POINTS for every

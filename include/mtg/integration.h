@@ -15,6 +15,7 @@ void Mtg_Debug(const char *command);          // "mp mtg ..." (src/mp_debug.c)
 void Mtg_PlainText(char *out, unsigned cap, const char *in);   // card words in the font's letters (mtg_text.c)
 
 int MtgUi_Active(void);
+int MtgUi_Screen(void);                       // its screen (the card screens fade between them)
 int MtgUi_Step(unsigned keys);
 void MtgUi_Draw(void);
 void MtgUi_OpenCase(void (*returnToGame)(void), int fromScript);

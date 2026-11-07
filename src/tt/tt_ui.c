@@ -163,6 +163,7 @@ static void Screen(int screen)
     U.age = 0;
 }
 int TtUi_Active(void) { return U.screen != T_CLOSED; }
+int TtUi_Screen(void) { return U.screen; }
 unsigned TtUi_HiddenFrom(void)
 {
     unsigned peer = Tt_Online()->peer;

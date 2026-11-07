@@ -9,6 +9,7 @@ struct TtCollection *Tt_GetCollection(void);
 void Tt_WriteSidecar(void);   /* right after the game was saved (from Tcg_WriteSidecar) */
 
 int TtUi_Active(void);
+int TtUi_Screen(void);   /* its screen (the card screens fade between them) */
 int TtUi_Step(unsigned keys);
 void TtUi_Draw(void);
 void TtUi_OpenCase(void (*returnToGame)(void), int fromScript);

@@ -6958,3 +6958,30 @@ used."
   (MP_AutoThrow_Composite from MP_BattleOverlay_Composite).
 - Tests: auto_throw (on, three POKé BALLS out, NO, L stopping it), coop_auto_throw (at NA-JP lag).
 
+## Card screens: fades, MAGIC's challenge picture and DECKS tab, the opening deal (1.170.0)
+
+The user (2026-11-07): "I think the challenge screens still look off - compare how Pokemon and Yugioh challenge screens
+look. The full trainer sprite isn't used, opting instead for the overworld sprite. Additionally, for all 3 card games,
+all card game menus, there is no fading between menus or screens, so it feels like it just blinks right at you. It's
+too responsive, and inconsistent with how Emerald handles fade ins and outs." Then: "when a duel in Magic begins, all
+the cards are drawn to the hand at once! It's unsatisfying." And: "structure decks are still not purchasable ...
+the decks shouldn't show up in the Card Points, it should show up like how Pokemon's does it!"
+- Fades (src/tcg/tcg_ui.c, the canvas every card game draws through): a change of screen (ScreenKey: POKeMON's
+  U.screen, YgoUi_Screen / TtUi_Screen / MtgUi_Screen, HOW TO PLAY) and the CARD CASE opening and closing fade the
+  last picture to black (FadeSnap of the old canvas, or of the game's picture on opening), then the new one in, 6 frames
+  each way in the game's 16 levels (Kai's whole-screen fade: palette.c, 8 steps of 2, 30% quicker). Closing: the cards'
+  last picture darkens, then the live game picture brightens (FadeClosing). The counters run in Tcg_Step on the game's
+  frames, not in drawing (a fade never stalls when frames aren't drawn); no buttons during a fade, and buttons held
+  through it count once let go (sFadeHeld). Off in the test harness unless MOEMON_CARD_FADE=1: the card scenarios time
+  their presses to the screens.
+- MAGIC's and TRIPLE TRIAD's CARD QUEEN's challenge screens get the battle picture as POKeMON's and YU-GI-OH!'s do
+  (tcg_field.c Tcg_ChallengePicOfObject: CaptureChallengePic, their sprite only when they have none); MAGIC's shows
+  PLAYS with the deck's colors (ColorOrbs) and a BEATEN ribbon for regulars beaten, as POKeMON's PLAYS and WON TODAY.
+- MAGIC's structure decks moved off the CARD POINTS list to a DECKS tab first, sold for money one of each as the
+  POKeMON side's GAME CENTER theme decks (Mtg_PreconPrice 15000 / 18000 / 24000; MtgCollection.preconsSold bits,
+  "<save>.mtg" format 6; SOLD OUT after); the tabs: DECKS, TRADE IN, CARD SHOP, PRIZES.
+- MAGIC's opening hands are dealt (mtg_board.c MtgBoard_Start: the view starts with every card in the libraries and the
+  opening draws play as draws: yours turned up, theirs flying across), then the turn sweep.
+- Tests: mtg_counter (the DECKS tab: bought, SOLD OUT), mtg_club (the challenge picture), mtg_shop / mtg_search
+  (half hour 5's room); fades checked by hand with MOEMON_CARD_FADE=1 and rendershotburst.
+

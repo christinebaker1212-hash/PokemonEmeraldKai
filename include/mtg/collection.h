@@ -40,6 +40,7 @@ typedef struct {
     uint8_t setPrizes[MTG_SETS];       // each set's PRIZES claimed (bits: 25 / 50 / 75 % owned), from format 5
     uint32_t rewards;                  // the CARD SHOP's milestone PRIZES claimed (bits, mtg_ui.c sMilestones' order)
     uint16_t preconsBought;            // structure decks bought
+    uint16_t preconsSold;              // which structure decks were bought (bits, gMtgPrecons' order): one of each, from format 6
 } MtgCollection;
 
 // ---- the CARD SHOP's counter (as the POKeMON CARD CLUB's): spares traded in, cards and decks for CARD POINTS
@@ -61,7 +62,7 @@ typedef struct {
 #define MTG_PRECONS 16
 extern const MtgPrecon gMtgPrecons[MTG_PRECONS];
 int Mtg_PreconPlays(int k);                                     // every card of it plays (Mtg_CanUse)
-unsigned Mtg_PreconCost(int k);                                 // CARD POINTS (by kind and size)
+unsigned Mtg_PreconPrice(int k);                                // money, by kind (the GAME CENTER's theme decks' prices)
 int Mtg_PreconDeck(int k, MtgSavedDeck *out);                   // its cards as a deck; the number not found (0)
 int Mtg_PreconMissing(int k, char *first, unsigned cap);        // cards that don't play yet; the first one's name
 

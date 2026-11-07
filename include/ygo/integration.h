@@ -10,6 +10,7 @@ void Ygo_WriteSidecar(void);
 
 /* The screens */
 int YgoUi_Active(void);
+int YgoUi_Screen(void);   /* its screen (the card screens fade between them) */
 int YgoUi_Step(unsigned keys);
 void YgoUi_Draw(void);
 /* The CARD CASE on its YU-GI-OH! side (returnToGame: as Tcg_OpenCase's) */

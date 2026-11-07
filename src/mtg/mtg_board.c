@@ -190,7 +190,16 @@ void MtgBoard_Start(const MtgDeck *mine, const MtgDeck *theirs, uint32_t seed, c
     snprintf(B.opp, sizeof(B.opp), "%s", opponent);
     Mtg_DuelInit(&B.duel, mine, theirs, seed);
     memcpy(&B.view, &B.duel, sizeof(B.view));
-    B.evShown = B.duel.eventCount;   // (the opening hands: dealt before the table shows)
+    // the opening hands dealt one card at a time, as the POKeMON and YU-GI-OH! tables deal theirs (the user,
+    // 2026-11-07: "all the cards are drawn to the hand at once! It's unsatisfying"): the table starts with every card
+    // in the libraries and the opening draws play out like any draw (yours turned up, theirs flying across)
+    {
+        int i;
+        for (i = 0; i < B.view.objCount && i < MTG_MAX_OBJS; i++)
+            if (B.view.objs[i].zone == MTG_ZONE_HAND)
+                B.view.objs[i].zone = MTG_ZONE_LIBRARY;
+    }
+    B.evShown = 0;
     {
         int i;
         for (i = 0; i < FLOATERS; i++)

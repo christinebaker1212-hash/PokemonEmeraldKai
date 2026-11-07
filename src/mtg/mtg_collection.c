@@ -12,7 +12,7 @@
 #include <string.h>
 #include "mtg/collection.h"
 
-#define MTGC_VERSION 5
+#define MTGC_VERSION 6
 
 uint32_t Mtg_Rand(uint32_t *rng)
 {
@@ -274,6 +274,7 @@ uint32_t Mtg_CollectionWrite(const MtgCollection *c, uint8_t *out, uint32_t cap)
     }
     W32(&w, c->rewards);
     W16(&w, c->preconsBought);
+    W16(&w, c->preconsSold);
     return w.ok ? w.n : 0;
 }
 
@@ -363,6 +364,8 @@ int Mtg_CollectionRead(MtgCollection *c, const uint8_t *in, uint32_t size)
         c->rewards = R32(&r);
         c->preconsBought = (uint16_t)R16(&r);
     }
+    if (version >= 6 && r.ok)
+        c->preconsSold = (uint16_t)R16(&r);
     if (c->activeDeck >= MTG_DECKS)
         c->activeDeck = 0;
     return r.ok;
@@ -510,10 +513,12 @@ int Mtg_PreconPlays(int k)
     return k >= 0 && k < MTG_PRECONS && !Mtg_PreconMissing(k, NULL, 0);
 }
 
-unsigned Mtg_PreconCost(int k)
+unsigned Mtg_PreconPrice(int k)
 {
-    static const uint16_t costs[] = {60, 100, 200};   // starter, theme, World Championship deck
-    return costs[gMtgPrecons[k].kind];
+    // sold for money as the POKeMON side's theme decks are at the GAME CENTER (the user, 2026-11-07: "it should show
+    // up like how Pokemon's does it"): a starter as their 15000, a theme deck as their 18000, a champion's deck above
+    static const uint16_t prices[] = {15000, 18000, 24000};   // starter, theme, World Championship deck
+    return prices[gMtgPrecons[k].kind];
 }
 
 int Mtg_PreconDeck(int k, MtgSavedDeck *out)

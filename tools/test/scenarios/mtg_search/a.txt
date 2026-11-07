@@ -29,9 +29,10 @@ rendershot home
 press B 2
 wait 30
 mp register 399
-mp warp 14,12,6,5
+mp mtg club 5
+mp warp 14,12,7,6
 wait 90
-mp face left
+mp face right
 wait 4
 press SELECT 2
 pressuntillog A 600 mtg: challenge from RHEA

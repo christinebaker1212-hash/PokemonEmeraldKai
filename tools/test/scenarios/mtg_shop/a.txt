@@ -251,6 +251,9 @@ press A 2
 wait 40
 pressuntillog A 600 mtg: card shop
 wait 20
+rendershot a_shop_decks
+press R 2
+wait 10
 rendershot a_shop_trade
 press R 2
 wait 10

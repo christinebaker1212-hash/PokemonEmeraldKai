@@ -47,6 +47,7 @@ int Tcg_HandleEvent(const union SDL_Event *event);
 /* Draws the open card screen over the game picture and returns it (NULL when
  * closed): the display scales it like the game, spectators get Tcg_Frame. */
 struct SDL_Texture *Tcg_Canvas(struct SDL_Renderer *renderer, struct SDL_Texture *game);
+int Tcg_Fading(void);   /* a fade between card screens is playing (no buttons then) */
 const unsigned short *Tcg_Frame(void);
 /* Players who mustn't see this screen (the online opponent: your hand). */
 unsigned Tcg_HiddenFrom(void);
@@ -54,6 +55,7 @@ void Tcg_DestroyTextures(void);
 void Tcg_OpenChallenge(const char *name, const char *deck, unsigned pack);
 /* Someone on the map as the card screens show them (their sprite, up to 32x32 ARGB) */
 void Tcg_PortraitOfObject(unsigned objectId, uint32_t *pixels, uint8_t *w, uint8_t *h);
+void Tcg_ChallengePicOfObject(unsigned objectId, uint32_t *pixels, uint8_t *w, uint8_t *h);   /* their battle picture */
 void Tcg_Debug(const char *command);
 /* Right after the game was saved: the collection goes in "<save>.cards". */
 void Tcg_WriteSidecar(void);

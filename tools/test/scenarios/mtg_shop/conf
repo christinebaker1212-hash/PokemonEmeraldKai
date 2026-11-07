@@ -1,7 +1,7 @@
 # MAGIC at MOSSDEEP's CARD SHOP: a regular ignores Magic before the player has a deck; the clerk hands out a starter
 # (EMBER), the CARD CASE opens on its MAGIC side (four tabs, TRIPLE TRIAD last: R goes to it); PIP's challenge, a few turns played by the computer on
 # both sides, then a win (mp mtg win) and the booster it brings into the CARD CASE, opened on BOOSTER PACKS; the clerk's counter sells
-# one for CARD POINTS (its counter: TRADE IN, CARD SHOP, PRIZES); the clerk's way down to the play room (through the
+# one for CARD POINTS (its tabs: DECKS for money, then TRADE IN, CARD SHOP, PRIZES); the clerk's way down to the play room (through the
 # counter, onto the mat), a regular there asks for a duel (half hour 5's room); the mat goes back up behind the counter.
 MODE=1
 TMO=300

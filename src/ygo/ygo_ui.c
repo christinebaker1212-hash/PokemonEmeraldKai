@@ -216,6 +216,7 @@ static void Screen(int screen)
     Y.age = 0;
 }
 int YgoUi_Active(void) { return Y.screen != Y_CLOSED; }
+int YgoUi_Screen(void) { return Y.screen; }
 unsigned YgoUi_HiddenFrom(void)
 {
     unsigned peer = Ygo_Online()->peer;

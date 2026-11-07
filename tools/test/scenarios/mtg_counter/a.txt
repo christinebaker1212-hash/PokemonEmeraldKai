@@ -7,6 +7,22 @@ mp mtg own 6 Raging Goblin
 mp mtg own 9 Shock
 mp mtg shop
 wait 20
+rendershot a_decks
+press A 2
+wait 10
+rendershot a_deck_ask
+press A 2
+wait 10
+rendershot a_deck_bought
+press A 2
+wait 10
+press A 2
+wait 10
+rendershot a_sold_out
+press A 2
+wait 10
+press R 2
+wait 10
 rendershot a_trade
 press A 2
 wait 10
@@ -28,14 +44,7 @@ wait 10
 mp mtg state
 press R 2
 wait 10
-rendershot a_deck
-press A 2
-wait 10
-press A 2
-wait 10
-rendershot a_deck_bought
-press A 2
-wait 10
+rendershot a_shop
 press UP 2
 wait 4
 press UP 2

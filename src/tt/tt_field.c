@@ -517,7 +517,7 @@ void Tt_QueenTalk(void)
     static struct TtOpponent sQueen;
     MPNet_Log("tt: card queen");
     Tt_QueenOpponent(&sQueen);
-    Tcg_PortraitOfObject(GetObjectEventIdByLocalIdAndMap((u8)gSpecialVar_LastTalked, gSaveBlock1Ptr->location.mapNum,
+    Tcg_ChallengePicOfObject(GetObjectEventIdByLocalIdAndMap((u8)gSpecialVar_LastTalked, gSaveBlock1Ptr->location.mapNum,
                                                          gSaveBlock1Ptr->location.mapGroup),
                          sQueen.portrait, &sQueen.portraitW, &sQueen.portraitH);
     TtUi_OpenQueen(&sQueen);

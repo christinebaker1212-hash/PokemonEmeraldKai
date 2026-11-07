@@ -3698,10 +3698,34 @@ static void CounterStep(unsigned pressed, int tab)
     }
 }
 
+static unsigned sFadeHeld;     /* buttons held through a fade between card screens (the canvas's fades, below) */
+#define FADE_FRAMES 6           /* each way (the canvas's fades, below) */
+static int sFadeOut, sFadeIn, sFadeClosing;
+int Tcg_Fading(void);
 int Tcg_Step(unsigned keys)
 {
     struct TcgCollection *c = Tcg_GetCollection();
-    unsigned pressed = keys & ~U.previousKeys;
+    unsigned pressed;
+    /* the fades between screens run on the game's frames (drawn or not): no buttons while one plays, and those held
+     * through it count once let go */
+    if (sFadeClosing > 0 && !Tcg_IsActive())
+        sFadeClosing--;
+    if (Tcg_IsActive() && Tcg_Fading())
+    {
+        if (sFadeOut > 0)
+        {
+            if (--sFadeOut == 0)
+                sFadeIn = FADE_FRAMES - 1;
+        }
+        else
+            sFadeIn--;
+        sFadeHeld |= keys;
+        MP_Sound_TickFanfare();
+        return 1;
+    }
+    sFadeHeld &= keys;
+    keys &= ~sFadeHeld;
+    pressed = keys & ~U.previousKeys;
     U.previousKeys = keys;
     /* HOW TO PLAY over any of the three games' first screens: it has the buttons while it's open */
     if (TcgGuide_Active())
@@ -4374,6 +4398,16 @@ int Tcg_HandleEvent(const union SDL_Event *event)
 /* ------------------------------------------------------------------ */
 /* The canvas                                                           */
 /* ------------------------------------------------------------------ */
+/* ---- Fades. Every change of card screen (the four games' menus, their tables, HOW TO PLAY) and the CARD CASE opening
+ * and closing fade to black and back as the game's own screens do (the user, 2026-11-07: "there is no fading between
+ * menus or screens, so it feels like it just blinks right at you ... inconsistent with how Emerald handles fade ins and
+ * outs"): the last picture darkens, then the new one brightens, in the game's own steps and at Kai's speed (palette.c:
+ * a whole-screen fade, 8 steps of 2, 30% quicker). Buttons held through a fade count only once let go. Off in the test
+ * harness unless MOEMON_CARD_FADE=1 (the card scenarios time their presses to the screens). */
+static SDL_Texture *sFadeSnap;
+static int sFadeKey = -1;      /* the screen shown last frame, -1: the cards were closed */
+/* sFadeOut, sFadeIn: frames left of the old picture darkening / the new one brightening; sFadeClosing: the cards
+ * closed, their last picture darkening, then the game's brightening (declared above Tcg_Step, which counts them) */
 static SDL_Texture *sCanvas;
 static SDL_Renderer *sCanvasOwner;
 static uint16_t sFrame[240 * 160];
@@ -4386,9 +4420,88 @@ void Tcg_DestroyTextures(void)
         SDL_DestroyTexture(sCanvas);
     sCanvas = NULL;
     sCanvasOwner = NULL;
+    if (sFadeSnap)
+        SDL_DestroyTexture(sFadeSnap);
+    sFadeSnap = NULL;
     if (U.portrait)
         SDL_DestroyTexture(U.portrait);
     U.portrait = NULL;
+}
+static int FadeOn(void)
+{
+    static int on = -1;
+    if (on < 0)
+        on = !getenv("MOEMON_TEST") || (getenv("MOEMON_CARD_FADE") && atoi(getenv("MOEMON_CARD_FADE")));
+    return on;
+}
+static int ScreenKey(void)
+{
+    if (TcgGuide_Active())
+        return 0x1000;
+    if (YgoUi_Active())
+        return 0x100 | YgoUi_Screen();
+    if (TtUi_Active())
+        return 0x200 | TtUi_Screen();
+    if (MtgUi_Active())
+        return 0x300 | MtgUi_Screen();
+    return U.screen;
+}
+int Tcg_Fading(void)
+{
+    return sFadeOut > 0 || sFadeIn > 0;
+}
+static void FadeSnap(SDL_Renderer *r, SDL_Texture *from)
+{
+    if (!sFadeSnap)
+    {
+        sFadeSnap = SDL_CreateTexture(r, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 240, 160);
+        if (!sFadeSnap)
+            return;
+        SDL_SetTextureBlendMode(sFadeSnap, SDL_BLENDMODE_NONE);
+    }
+    SDL_SetRenderTarget(r, sFadeSnap);
+    SDL_RenderSetViewport(r, NULL);
+    SDL_RenderSetClipRect(r, NULL);
+    SDL_RenderSetScale(r, 1, 1);
+    SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
+    SDL_RenderClear(r);
+    if (from)
+        SDL_RenderCopy(r, from, NULL, NULL);
+}
+static void FadeDarken(SDL_Renderer *r, int step)   /* step of FADE_FRAMES: 0 none, FADE_FRAMES black */
+{
+    int level = (step * 16 + FADE_FRAMES - 1) / FADE_FRAMES;   /* (the game's 16 levels) */
+    SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(r, 0, 0, 0, (Uint8)(level >= 16 ? 255 : level * 16));
+    SDL_RenderFillRect(r, NULL);
+}
+/* (closed) the cards' last picture darkening, then the game's own brightening */
+static SDL_Texture *FadeClosing(SDL_Renderer *r, SDL_Texture *game)
+{
+    SDL_Texture *previous = SDL_GetRenderTarget(r);
+    SDL_Rect oldViewport, oldClip;
+    SDL_bool clipped = SDL_RenderIsClipEnabled(r);
+    float oldX, oldY;
+    int out = sFadeClosing > FADE_FRAMES - 1;
+    if (!sCanvas || !sFadeSnap)
+    {
+        sFadeClosing = 0;
+        return NULL;
+    }
+    SDL_RenderGetViewport(r, &oldViewport);
+    SDL_RenderGetClipRect(r, &oldClip);
+    SDL_RenderGetScale(r, &oldX, &oldY);
+    SDL_SetRenderTarget(r, sCanvas);
+    SDL_RenderSetViewport(r, NULL);
+    SDL_RenderSetClipRect(r, NULL);
+    SDL_RenderSetScale(r, 1, 1);
+    SDL_RenderCopy(r, out ? sFadeSnap : game, NULL, NULL);
+    FadeDarken(r, out ? 2 * FADE_FRAMES - sFadeClosing : sFadeClosing);
+    SDL_SetRenderTarget(r, previous);
+    SDL_RenderSetViewport(r, &oldViewport);
+    SDL_RenderSetClipRect(r, clipped ? &oldClip : NULL);
+    SDL_RenderSetScale(r, oldX, oldY);
+    return sCanvas;
 }
 SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
 {
@@ -4396,13 +4509,33 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     SDL_Rect oldViewport, oldClip;
     SDL_bool clipped;
     float oldX, oldY;
+    int key;
     if (!Tcg_IsActive())
-        return NULL;
+    {
+        if (sFadeKey >= 0 && FadeOn() && sCanvas && sCanvasOwner == r && game)
+        {
+            /* (just closed: from the last card picture, kept in sCanvas) */
+            previous = SDL_GetRenderTarget(r);
+            SDL_RenderGetViewport(r, &oldViewport);
+            clipped = SDL_RenderIsClipEnabled(r);
+            SDL_RenderGetClipRect(r, &oldClip);
+            SDL_RenderGetScale(r, &oldX, &oldY);
+            FadeSnap(r, sCanvas);
+            SDL_SetRenderTarget(r, previous);
+            SDL_RenderSetViewport(r, &oldViewport);
+            SDL_RenderSetClipRect(r, clipped ? &oldClip : NULL);
+            SDL_RenderSetScale(r, oldX, oldY);
+            sFadeClosing = 2 * FADE_FRAMES - 1;
+        }
+        sFadeKey = -1;
+        sFadeOut = sFadeIn = 0;
+        return sFadeClosing > 0 && game ? FadeClosing(r, game) : NULL;
+    }
     G_Begin(r);
     G_SetArtMode(gMpConfig.cardArt);
     G_SetBackMode(gMpConfig.cardBack);
     if (sCanvas && sCanvasOwner != r)
-        sCanvas = NULL;
+        sCanvas = sFadeSnap = NULL;
     if (!sCanvas)
     {
         sCanvas = SDL_CreateTexture(r, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 240, 160);
@@ -4417,6 +4550,16 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     clipped = SDL_RenderIsClipEnabled(r);
     SDL_RenderGetClipRect(r, &oldClip);
     SDL_RenderGetScale(r, &oldX, &oldY);
+    /* a new screen, or the cards just opened: the picture before it, to darken */
+    key = ScreenKey();
+    if (FadeOn() && key != sFadeKey)
+    {
+        FadeSnap(r, sFadeKey < 0 || sFadeClosing > 0 ? game : sCanvas);
+        sFadeOut = FADE_FRAMES;
+        sFadeIn = 0;
+        sFadeClosing = 0;
+    }
+    sFadeKey = key;
     SDL_SetRenderTarget(r, sCanvas);
     SDL_RenderSetViewport(r, NULL);
     SDL_RenderSetClipRect(r, NULL);
@@ -4503,6 +4646,14 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     if (TcgSearch_Active() && Searchable() && !TcgGuide_Active())
         TcgSearch_Draw(ListSize());
     MessageBox();
+    if (sFadeOut > 0 && sFadeSnap)
+    {
+        /* (the old picture darkening; the new one, drawn above, waits) */
+        SDL_RenderCopy(r, sFadeSnap, NULL, NULL);
+        FadeDarken(r, FADE_FRAMES + 1 - sFadeOut);
+    }
+    else if (sFadeIn > 0)
+        FadeDarken(r, sFadeIn);
     SDL_SetRenderTarget(r, previous);
     SDL_RenderSetViewport(r, &oldViewport);
     SDL_RenderSetClipRect(r, clipped ? &oldClip : NULL);
