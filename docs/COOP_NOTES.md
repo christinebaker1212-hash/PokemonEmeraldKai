@@ -1277,8 +1277,10 @@ line's x.y.0 title cut to fit (FitAscii); the reader opens each update with "<ve
 FONT_SMALL, 12 px rows, malloc'd PatchRow array) into WIN_FULL (28x16 at baseBlock 512, the last tiles before the
 tilemap), shown by clearing rows 2-19 and framing it (ShowPatchReader; CopyBgTilemapBufferToVram: this screen runs no
 scheduled copies). UP/DOWN scroll, LEFT/RIGHT/L/R/A page, B back. v0.1.0-v0.4.0 are the days before 1.0 (Oct 18-21),
-written from the commit log. Test patch_notes (MOEMON_SKIP_COOP_SETUP=0 shows the screen in a test; waitfor
-patchlist / patchtext; log "patch notes: line X, N notes").
+written from the commit log. Every version line back to 0.1 is listed (1.170.1: PATCH_LINES_MAX was 128 with 8-bit
+counters, so past 1.47 the oldest lines fell off; now 1024 and u16). 1.32.1 has no notes on purpose: it was merged into
+1.33.1 before release (commit 1abfcc9b), whose notes carry its changes. Test patch_notes (MOEMON_SKIP_COOP_SETUP=0 shows the screen in a test; waitfor
+patchlist / patchtext; log "patch notes: line X, N notes"; pressuntillog to the 0.1 line).
 
 ## Full 7-letter names (1.4.1)
 StringCopyN / StringAppendN copy exactly N bytes and never end the string. A name that fills all 7 letters has no end
@@ -6974,6 +6976,12 @@ the decks shouldn't show up in the Card Points, it should show up like how Pokem
   frames, not in drawing (a fade never stalls when frames aren't drawn); no buttons during a fade, and buttons held
   through it count once let go (sFadeHeld). Off in the test harness unless MOEMON_CARD_FADE=1: the card scenarios time
   their presses to the screens.
+- 1.170.1: L / R from one game's CARD CASE to the next cuts straight, no fade (the user: "switching between TCG, Magic,
+  Yugioh, and TT has a fade between them...that's just too much fading"). Each game's ToSide calls Tcg_SkipFade: the
+  next screen change is taken as is, and the frame or two between closing one case and opening the next shows the last
+  picture (sCanvas) instead of starting the closing fade (at most 3 frames, so a case that really closes still fades).
+  Log "[cards] screen 0x...: fade" / ": cut (another game's case)"; the harness draws only on shot frames, so a
+  scenario shoots once to start a fade. Test cards_side_cut (MOEMON_CARD_FADE=1).
 - MAGIC's and TRIPLE TRIAD's CARD QUEEN's challenge screens get the battle picture as POKeMON's and YU-GI-OH!'s do
   (tcg_field.c Tcg_ChallengePicOfObject: CaptureChallengePic, their sprite only when they have none); MAGIC's shows
   PLAYS with the deck's colors (ColorOrbs) and a BEATEN ribbon for regulars beaten, as POKeMON's PLAYS and WON TODAY.

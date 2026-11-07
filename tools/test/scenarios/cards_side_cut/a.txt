@@ -1,0 +1,34 @@
+pressuntil A field 5000
+wait 30
+mp cards starter 0
+mp ygo starter 0
+mp tt starter
+mp mtg starter 0
+mp cards case
+wait 60
+rendershot opening
+wait 40
+rendershot case_first
+press R 2
+wait 4
+rendershot side_r1
+wait 20
+press R 2
+wait 4
+rendershot side_r2
+wait 20
+press R 2
+wait 4
+rendershot side_r3
+wait 20
+press L 2
+wait 4
+rendershot side_l1
+wait 20
+press DOWN 2
+wait 6
+press A 2
+wait 4
+rendershot into_screen
+wait 30
+quit

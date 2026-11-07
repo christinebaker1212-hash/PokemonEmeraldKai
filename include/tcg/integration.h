@@ -48,6 +48,7 @@ int Tcg_HandleEvent(const union SDL_Event *event);
  * closed): the display scales it like the game, spectators get Tcg_Frame. */
 struct SDL_Texture *Tcg_Canvas(struct SDL_Renderer *renderer, struct SDL_Texture *game);
 int Tcg_Fading(void);   /* a fade between card screens is playing (no buttons then) */
+void Tcg_SkipFade(void);   /* the next card screen change cuts straight (L / R between the games' cases) */
 const unsigned short *Tcg_Frame(void);
 /* Players who mustn't see this screen (the online opponent: your hand). */
 unsigned Tcg_HiddenFrom(void);

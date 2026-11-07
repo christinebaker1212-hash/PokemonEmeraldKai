@@ -361,6 +361,7 @@ static void ToSide(unsigned game)
 {
     void (*callback)(void) = U.returnToGame;
     int script = U.fromScript;
+    Tcg_SkipFade();
     U.returnToGame = NULL;
     U.fromScript = 0;
     U.message[0] = 0;
@@ -4450,6 +4451,13 @@ int Tcg_Fading(void)
 {
     return sFadeOut > 0 || sFadeIn > 0;
 }
+/* L / R from one game's CARD CASE to the next: a straight cut, no fade (the user: fading between the games was too
+ * much). The next screen change is taken as is. */
+static int sFadeSkip;
+void Tcg_SkipFade(void)
+{
+    sFadeSkip = 1;
+}
 static void FadeSnap(SDL_Renderer *r, SDL_Texture *from)
 {
     if (!sFadeSnap)
@@ -4512,6 +4520,10 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     int key;
     if (!Tcg_IsActive())
     {
+        /* (between one game's case and the next: the last picture held, never the closing fade) */
+        if (sFadeSkip && sFadeSkip++ <= 3 && sFadeKey >= 0 && sCanvas && sCanvasOwner == r)
+            return sCanvas;
+        sFadeSkip = 0;
         if (sFadeKey >= 0 && FadeOn() && sCanvas && sCanvasOwner == r && game)
         {
             /* (just closed: from the last card picture, kept in sCanvas) */
@@ -4552,13 +4564,21 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
     SDL_RenderGetScale(r, &oldX, &oldY);
     /* a new screen, or the cards just opened: the picture before it, to darken */
     key = ScreenKey();
-    if (FadeOn() && key != sFadeKey)
+    if (key != sFadeKey && sFadeSkip)
     {
+        sFadeOut = sFadeIn = sFadeClosing = 0;
+        MPNet_Log("[cards] screen %#x: cut (another game's case)", key);
+    }
+    else if (FadeOn() && key != sFadeKey)
+    {
+        MPNet_Log("[cards] screen %#x: fade", key);
         FadeSnap(r, sFadeKey < 0 || sFadeClosing > 0 ? game : sCanvas);
         sFadeOut = FADE_FRAMES;
         sFadeIn = 0;
         sFadeClosing = 0;
     }
+    if (key != sFadeKey)
+        sFadeSkip = 0;
     sFadeKey = key;
     SDL_SetRenderTarget(r, sCanvas);
     SDL_RenderSetViewport(r, NULL);

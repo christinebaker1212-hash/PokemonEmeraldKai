@@ -179,6 +179,7 @@ static void ToSide(int right)
 {
     void (*callback)(void) = U.returnToGame;
     int script = U.fromScript;
+    Tcg_SkipFade();
     U.returnToGame = NULL;
     U.fromScript = 0;
     U.message[0] = 0;

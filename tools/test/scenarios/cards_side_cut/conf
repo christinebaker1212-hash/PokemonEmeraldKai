@@ -1,0 +1,8 @@
+# L / R between the four games' CARD CASEs cuts straight to the next game, with no fade (the user, 2026-11-07: fading
+# between the games was too much); going into one of a case's screens still fades as Emerald does (MOEMON_CARD_FADE=1).
+# Shots 4 frames after each press show the next case at full brightness.
+MODE=1
+TMO=150
+ENV_A="MOEMON_CARD_FADE=1"
+EXPECT_A=("cut (another game's case)" ": fade")
+UNEXPECT_A=("[crash]")

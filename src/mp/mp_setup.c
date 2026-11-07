@@ -129,7 +129,7 @@ enum {
 #define MAX_JOIN_ENTRIES (1 + MP_LIST_MAX + MP_LAN_MAX_GAMES)
 
 // PATCH NOTES
-#define PATCH_LINES_MAX  128
+#define PATCH_LINES_MAX  1024   // (every version line back to the first build: the user)
 #define PATCH_FONT       FONT_SMALL
 #define PATCH_ROW_H      12
 #define PATCH_ROWS       10      // rows on the reader's page (WIN_FULL is 128 px tall)
@@ -191,10 +191,10 @@ static EWRAM_DATA struct
     // text entry return
     u8 returnTo;               // 0 none, 1 = host name, 2 = host password, 3 = join password, 4 = join by name, 5 = join by name password
     // PATCH NOTES
-    u8 patchLineCount;
+    u16 patchLineCount;
     struct { u16 first; u8 count; } patchLine[PATCH_LINES_MAX];   // a version line ("1.17"): its notes, newest first
-    u8 patchCursor;
-    u8 patchScroll;
+    u16 patchCursor;
+    u16 patchScroll;
     struct PatchRow *rows;     // the line's notes, laid out (malloc)
     u16 rowCount;
     u16 rowTop;
@@ -945,7 +945,8 @@ static void DrawPatches(void)
     FillWindowPixelBuffer(WIN_MAIN, PIXEL_FILL(1));
     for (r = 0; r < LIST_ROWS && sSetup.patchScroll + r < sSetup.patchLineCount; r++)
     {
-        u8 idx = sSetup.patchScroll + r, y = 1 + LINE_H * r;
+        u16 idx = sSetup.patchScroll + r;
+        u8 y = 1 + LINE_H * r;
         const struct MpPatchNote *latest = MP_PatchNotes_Get(sSetup.patchLine[idx].first);
         const struct MpPatchNote *build = MP_PatchNotes_Get(sSetup.patchLine[idx].first + sSetup.patchLine[idx].count - 1);
         PatchLineName(latest->version, label, sizeof(label));
@@ -1042,7 +1043,7 @@ static void WrapPatchItem(const char *src, int len, u8 x, u8 kind)
         AddPatchRow(line, x, kind, first && (kind == 'B' || kind == 'S'));
 }
 
-static void BuildPatchText(u8 lineIndex)
+static void BuildPatchText(u16 lineIndex)
 {
     u16 first = sSetup.patchLine[lineIndex].first;
     u8 count = sSetup.patchLine[lineIndex].count;
