@@ -794,6 +794,8 @@ int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, 
 // the cost being paid now (an ability's, or a spell's alternative one)
 static const MtgCost *CostNow(const MtgDuel *d)
 {
+    if (d->costAlt == 2)   // (an UnlessCost$ paid as its ability resolves)
+        return &gMtgUnlessCosts[gMtgAbilities[d->costAbility].unless - 1];
     if (d->costAlt)
         return &gMtgAltCosts[Mtg_Card(d->objs[d->costSource].def)->altCost - 1].cost;
     return &gMtgAbilities[d->costAbility].cost;
@@ -865,7 +867,7 @@ static void PayCostPick(MtgDuel *d, int obj)
         return;
     }
     if (d->costSac) {
-        if (d->stackCount)   // (its last known power, for Sacrificed$CardPower)
+        if (d->stackCount && d->costAlt != 2)   // (its last known power, for Sacrificed$CardPower)
             d->stack[d->stackCount - 1].sacPower = (int16_t)Mtg_Power(d, obj);
         Mtg_Sacrifice(d, obj);
         d->costSac--;
@@ -893,6 +895,12 @@ static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source
     if (c->payLife) {
         d->players[p].life -= c->payLife;
         Mtg_Event(d, MTG_EV_LIFE, p, -c->payLife, d->players[p].life);
+    }
+    if (c->damageYou) {
+        MtgTarget you;
+        you.kind = MTG_TGT_PLAYER;
+        you.id = (uint16_t)p;
+        Mtg_DealDamage(d, source, you, c->damageYou, 0);
     }
     if (c->exileSelf)
         Mtg_MoveTo(d, source, MTG_ZONE_EXILE);
@@ -924,6 +932,14 @@ static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source
 static void PayOtherCosts(MtgDuel *d, int p, const MtgAbility *ab, int source)
 {
     PayCost(d, p, &ab->cost, (int)(ab - gMtgAbilities), source, 0);
+}
+
+int Mtg_PayUnlessCost(MtgDuel *d, int p, int ability, int source)
+{
+    const MtgCost *c = &gMtgUnlessCosts[gMtgAbilities[ability].unless - 1];
+    Mtg_Pay(d, p, &c->mana, 0, MTG_NO_OBJ);
+    PayCost(d, p, c, ability, source, 2);
+    return AskCost(d);
 }
 
 static void DoAction(MtgDuel *d, const MtgAction *a)
@@ -1524,6 +1540,13 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             PayCostPick(d, q->candidates[a->card]);
             if (AskCost(d))
                 return 1;
+            if (d->costAlt == 2) {   // an UnlessCost$ paid: its ability goes on resolving (it does nothing now)
+                d->costAlt = 0;
+                if (d->resolving && ContinueResolve(d))
+                    return 1;
+                d->priority = d->active;
+                d->passes = 0;
+            }
             break;
         }
         if (q->choice == MTG_CHOICE_PICK) {

@@ -3608,6 +3608,22 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   AI: animates its own land (Defined$ Self) in its first main phase.
 - Tests: test_rules.c TREETOP VILLAGE (3/3 green trampler, a land again next turn); scenario mtg_animate.
 
+## MAGIC's "unless" costs that aren't mana (1.142.0)
+
+- UnlessCost$ as a whole Cost (AbilityUtils.handleUnlessCost): Return<n/Type>, Discard<n/Type|Random>, Sac<n/Type>,
+  PayLife<n>, ExileFromGrave<n/Type>, DamageYou<n> (new in Mtg_ParseCost: CostDamage, its source deals n to its player;
+  activated abilities' Cost$ take it too), with or without mana. Parsed once per ability into gMtgUnlessCosts
+  (MtgAbility.unless = index + 1); a mana-only one or an SVar amount stays on the old path (Mtg_Param).
+- Mtg_ResolveStep: each payer who can pay it (Mtg_CanPay + Mtg_CostPayable) is asked MTG_CHOICE_PAY; yes ->
+  Mtg_PayUnlessCost (mtg_game.c): mana and the at-once parts, then the picks through the casting costs' AskCost with
+  costAlt 2 (CostNow reads gMtgUnlessCosts); the forCost answer goes on with ContinueResolve once the picks are done.
+  resStage 0xC0 is set first, so the ability does nothing and its subs resolve. A Sac pick there leaves sacPower alone.
+- Board: the question names the cost in words (UnlessWords: "return 1 Island?"); AI pays unless it leaves it at 5 life
+  or less, or costs two sacrifices / three returns.
+- Unlocked 37: the Karoos and the Invasion lairs, Balduvian Horde / Bog Elemental / Masticore, Lava Blister, Browbeat...
+  Still out (12): X / Y amounts, PutCardToLibFromGrave, ExileFromGrave<1/All>, Sac<4/...>, DefinedCost_Self.
+- Tests: test_rules.c TestUnless (CORAL ATOLL paid / not / can't, BALDUVIAN HORDE, LAVA BLISTER); scenario mtg_unless.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

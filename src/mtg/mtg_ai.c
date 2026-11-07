@@ -369,6 +369,13 @@ static void TriggerTarget(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
 static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
 {
     int i, best = 0, bestV = 1 << 30;
+    if (q->choice == MTG_CHOICE_PAY && q->ability != 0xFFFF && gMtgAbilities[q->ability].unless) {
+        // a cost that isn't only mana: paid unless it costs too much life or too many permanents
+        const MtgCost *c = &gMtgUnlessCosts[gMtgAbilities[q->ability].unless - 1];
+        int life = d->players[q->player].life - c->payLife - c->damageYou;
+        out->card = (uint8_t)(life > 5 && c->sacN < 2 && c->returnN < 3);
+        return;
+    }
     if (q->choice != MTG_CHOICE_PICK) {
         out->card = 1;
         return;

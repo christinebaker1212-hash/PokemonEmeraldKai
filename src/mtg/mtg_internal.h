@@ -52,6 +52,7 @@ typedef struct {
     const char *exileHandSpec, *returnSpec, *tapTypeSpec;
     uint8_t exileGraveN;                    // ExileFromGrave<n/Type>: cards from its player's graveyard
     const char *exileGraveSpec;
+    uint8_t damageYou;                      // DamageYou<n>: its source deals n damage to its player (CostDamage)
 } MtgCost;
 // what a cost's picks come from (Mtg_CostCandidates): 0 discard (hand), 1 sacrifice, 2 exile from the hand, 3 return
 // to the hand, 4 tap (an untapped permanent), 5 exile from the graveyard
@@ -66,6 +67,9 @@ typedef struct {
 } MtgAltCost;
 extern MtgAltCost *gMtgAltCosts;
 int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, int casting);
+// pays an ability's non-mana UnlessCost$ as it resolves: its mana and what's paid at once now, then 1 if a pick is asked
+// (d->query: the answer goes on with the resolution once the picks are done)
+int Mtg_PayUnlessCost(MtgDuel *d, int player, int ability, int source);
 int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int sac, int source, uint16_t *out);
 
 #define MTG_TGT_X 0xFF
@@ -84,7 +88,10 @@ typedef struct {
     uint8_t fromHand;               // ActivationZone$ Hand: activated from its owner's hand (Cycling)
     uint8_t manaPain;               // a mana ability's "CARDNAME deals n damage to you" (SubAbility$ DealDamage, Defined$ You)
     uint8_t tgtMin, tgtMax;         // TargetMin$ / TargetMax$ (objects only; 1 / 1 without them; MTG_TGT_X: X of them)
+    uint16_t unless;                // UnlessCost$ that isn't only mana (Return<1/Land>, Discard<1/Random>, DamageYou<5>...):
+                                    // gMtgUnlessCosts[unless - 1] (0: none, or a mana one: Mtg_Param)
 } MtgAbility;
+extern MtgCost *gMtgUnlessCosts;
 
 // mtg_script.c
 extern MtgAbility *gMtgAbilities;

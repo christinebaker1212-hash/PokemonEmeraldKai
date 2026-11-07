@@ -865,8 +865,12 @@ int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
     if (Mtg_Param(ab, "UnlessCost") && !(d->resStage & 0x80)) {
         Defined payers;
         const char *who = Mtg_Param(ab, "UnlessPayer");
+        const MtgCost *other = ab->unless ? &gMtgUnlessCosts[ab->unless - 1] : NULL;
         DefinedBy(d, ctx, who ? who : "TargetedController", &payers);
-        UnlessCost(d, ctx, ab, &cost);
+        if (other)
+            cost = other->mana;
+        else
+            UnlessCost(d, ctx, ab, &cost);
         for (;;) {
             int pi = d->resStage & 0x3F, p;
             if (pi >= payers.n) {
@@ -874,7 +878,8 @@ int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
                 break;
             }
             p = payers.t[pi].id;
-            if (payers.t[pi].kind != MTG_TGT_PLAYER || !Mtg_CanPay(d, p, &cost, 0, MTG_NO_OBJ)) {
+            if (payers.t[pi].kind != MTG_TGT_PLAYER || !Mtg_CanPay(d, p, &cost, 0, MTG_NO_OBJ)
+                || (other && !Mtg_CostPayable(d, p, other, ctx->source, MTG_NO_OBJ))) {
                 d->resStage++;
                 continue;
             }
@@ -883,9 +888,13 @@ int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
                 return 0;
             }
             if (d->resChoice == 1) {
-                Mtg_Pay(d, p, &cost, 0, MTG_NO_OBJ);
                 d->resStage = 0xC0;
                 d->resChoice = -1;
+                if (other) {   // (its sacrifices, discards, returns... are picked now: the answer goes on from there)
+                    if (Mtg_PayUnlessCost(d, p, ability, ctx->source))
+                        return 0;
+                } else
+                    Mtg_Pay(d, p, &cost, 0, MTG_NO_OBJ);
                 break;
             }
             d->resChoice = -1;
@@ -987,7 +996,7 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     if (Mtg_Param(ab, "UnlessCost")) {
         MtgManaCost cost;
         v = Mtg_Param(ab, "UnlessPayer");
-        if (!UnlessCost(NULL, NULL, ab, &cost)) {
+        if (!ab->unless && !UnlessCost(NULL, NULL, ab, &cost)) {
             *why = "UnlessCost";
             return 0;
         }

@@ -1,0 +1,6 @@
+# MAGIC's costs that aren't mana in "unless": CORAL ATOLL enters, its trigger asks to return an untapped Island (the menu
+# says so); paid, the Island is picked and goes back to the hand, the atoll stays. Shots un_ask, un_pick, un_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: ready" "mtg: you: paid")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Coral Atoll to focus")

@@ -1319,6 +1319,71 @@ static void TestSearch(void)
     }
 }
 
+// UnlessCost$ that isn't only mana (AbilityUtils.handleUnlessCost with a full Cost): returns, discards, damage
+static void TestUnless(void)
+{
+    int atoll, island, horde, card, blister, i;
+    const MtgQuery *q;
+    static const char *const cards[] = {"Coral Atoll", "Balduvian Horde", "Lava Blister", "Karoo", "Bog Elemental",
+                                        "Browbeat", "Masticore", NULL};
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Coral Atoll: sacrificed unless an untapped Island goes back to the hand
+    island = Put(0, "Island", MTG_ZONE_BATTLEFIELD);
+    atoll = Put(0, "Coral Atoll", MTG_ZONE_HAND);
+    Do(MTG_ACT_LAND, atoll, -1, 0);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_PAY && q->player == 0, "the atoll asks to return an Island");
+    Choose(1);
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->forCost == 4 && q->candidateCount == 1 && q->candidates[0] == island,
+          "the Island is the one to return");
+    ChoosePick(island);
+    CHECK(Zone(island) == MTG_ZONE_HAND && Zone(atoll) == MTG_ZONE_BATTLEFIELD, "the Island back, the atoll stays");
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_PRIORITY && sD.stackCount == 0, "and the game goes on");
+
+    Table();   // not paid: sacrificed
+    island = Put(0, "Island", MTG_ZONE_BATTLEFIELD);
+    atoll = Put(0, "Coral Atoll", MTG_ZONE_HAND);
+    Do(MTG_ACT_LAND, atoll, -1, 0);
+    PassBoth();
+    Choose(0);
+    CHECK(Zone(island) == MTG_ZONE_BATTLEFIELD && Zone(atoll) == MTG_ZONE_GRAVEYARD, "not paid: the atoll sacrificed");
+
+    Table();   // no untapped Island: sacrificed without asking
+    island = Put(0, "Island", MTG_ZONE_BATTLEFIELD);
+    sD.objs[island].tapped = 1;
+    atoll = Put(0, "Coral Atoll", MTG_ZONE_HAND);
+    Do(MTG_ACT_LAND, atoll, -1, 0);
+    PassBoth();
+    CHECK(Zone(atoll) == MTG_ZONE_GRAVEYARD && Mtg_Query(&sD)->kind == MTG_Q_PRIORITY, "a tapped Island can't pay");
+
+    Table();   // Balduvian Horde: sacrificed unless a card is discarded at random
+    Lands(0, "Mountain", 4);
+    horde = Put(0, "Balduvian Horde", MTG_ZONE_HAND);
+    card = Put(0, "Grizzly Bears", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, horde, -1, 0);
+    PassBoth();
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_PAY, "the horde asks for a discard");
+    Choose(1);
+    CHECK(Zone(card) == MTG_ZONE_GRAVEYARD && Zone(horde) == MTG_ZONE_BATTLEFIELD, "the bears discarded, the horde stays");
+
+    Table();   // Lava Blister: the land's controller may take 6 damage instead
+    Lands(0, "Mountain", 2);
+    atoll = Put(1, "Coral Atoll", MTG_ZONE_BATTLEFIELD);
+    blister = Put(0, "Lava Blister", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, blister, MTG_TGT_OBJ, atoll);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_PAY && q->player == 1, "the land's controller is asked");
+    Choose(1);
+    CHECK(sD.players[1].life == 14 && Zone(atoll) == MTG_ZONE_BATTLEFIELD, "6 damage taken, the land kept");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1651,6 +1716,7 @@ int main(int argc, char **argv)
     TestTargets();
     TestSearch();
     TestTriggers();
+    TestUnless();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

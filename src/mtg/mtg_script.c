@@ -9,7 +9,8 @@
 MtgAbility *gMtgAbilities;
 MtgParam *gMtgParams;
 MtgParam *gMtgSvars;
-static int sAbilityCount, sAbilityCap, sParamCount, sParamCap, sSvarCount, sSvarCap;
+static int sAbilityCount, sAbilityCap, sParamCount, sParamCap, sSvarCount, sSvarCap, sUnlessCount, sUnlessCap;
+MtgCost *gMtgUnlessCosts;
 static MtgCardDef *sCards;
 static int sCardCount;
 static char *sText;            // the pack's text, copied once and cut into strings in place
@@ -345,7 +346,11 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
             out->returnSelf = 1;
         else if (strcmp(tok, "Discard<1/CARDNAME>") == 0)
             out->discardSelf = 1;
-        else if ((r = CostPart(tok, "PayLife", &n, &spec, &specLen)) != 0) {
+        else if ((r = CostPart(tok, "DamageYou", &n, &spec, &specLen)) != 0) {   // CostDamage
+            if (r < 0 || spec || n < 1 || n > 20 || out->damageYou)
+                return 0;
+            out->damageYou = (uint8_t)n;
+        } else if ((r = CostPart(tok, "PayLife", &n, &spec, &specLen)) != 0) {
             if (r < 0 || spec || n < 1 || n > 20 || out->payLife)
                 return 0;
             out->payLife = (uint8_t)n;
@@ -455,6 +460,18 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         Unsupported(c, "cost");   // (mana abilities are used by paying: one with a cost to pick, not yet)
     if (kind == MTG_AB_ACTIVATED && !Mtg_Param(ab, "Cost"))
         Unsupported(c, "cost");
+    v = Mtg_Param(ab, "UnlessCost");
+    if (v && !Mtg_Svar(cardId, v)) {   // (an SVar names an amount of mana: mtg_effects.c)
+        MtgManaCost m;
+        MtgCost uc;
+        if (!(Mtg_ParseManaCost(v, &m) && !m.x) && Mtg_ParseCost(v, &uc) && !uc.tap && !uc.sacSelf && !uc.exileSelf
+            && !uc.returnSelf && !uc.discardSelf && !uc.mana.x) {
+            gMtgUnlessCosts = Grow(gMtgUnlessCosts, &sUnlessCap, sUnlessCount + 1, sizeof(MtgCost));
+            gMtgUnlessCosts[sUnlessCount++] = uc;
+            ab = &gMtgAbilities[idx];
+            ab->unless = (uint16_t)sUnlessCount;
+        }
+    }
     if (kind != MTG_AB_SPELL && kind != MTG_AB_ACTIVATED && Mtg_Param(ab, "Cost"))
         Unsupported(c, "optional cost");   // (a trigger's "you may pay ...": not yet)
     ab->tgt = Mtg_Param(ab, "ValidTgts");

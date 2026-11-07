@@ -1278,6 +1278,39 @@ static void AbilityWords(char *out, unsigned cap, int source, int ability, int t
     Mtg_PlainText(out, cap, raw);
 }
 
+// an UnlessCost$ that isn't only mana, in words: "discard a card at random, take 5 damage"
+static void UnlessWords(char *out, unsigned cap, const MtgCost *c)
+{
+    char mana[24];
+    unsigned n = 0;
+    out[0] = 0;
+#define UW_PART(...) do { if (n < cap) n += (unsigned)snprintf(out + n, cap - n, "%s", n ? ", " : ""); \
+                          if (n < cap) n += (unsigned)snprintf(out + n, cap - n, __VA_ARGS__); } while (0)
+#define UW_SPEC(s) ((s) && strncmp((s), "Card", 4) != 0 ? (s) : "card")
+    CostText(mana, sizeof(mana), &c->mana);
+    if (mana[0] && strcmp(mana, "0") != 0)
+        UW_PART("pay %s", mana);
+    if (c->payLife)
+        UW_PART("pay %d life", c->payLife);
+    if (c->damageYou)
+        UW_PART("take %d damage", c->damageYou);
+    if (c->discardN)
+        UW_PART(c->discardRandom ? "discard %d at random" : "discard %d %.*s", c->discardN,
+                (int)strcspn(UW_SPEC(c->discardSpec), ".,"), UW_SPEC(c->discardSpec));
+    if (c->sacN)
+        UW_PART("sacrifice %d %.*s", c->sacN, (int)strcspn(UW_SPEC(c->sacSpec), ".,"), UW_SPEC(c->sacSpec));
+    if (c->returnN)
+        UW_PART("return %d %.*s", c->returnN, (int)strcspn(UW_SPEC(c->returnSpec), ".,"), UW_SPEC(c->returnSpec));
+    if (c->exileGraveN)
+        UW_PART("exile %d from your graveyard", c->exileGraveN);
+    if (c->exileHandN)
+        UW_PART("exile %d from your hand", c->exileHandN);
+    if (c->tapTypeN)
+        UW_PART("tap %d %.*s", c->tapTypeN, (int)strcspn(UW_SPEC(c->tapTypeSpec), ".,"), UW_SPEC(c->tapTypeSpec));
+#undef UW_PART
+#undef UW_SPEC
+}
+
 static char sChooseText[200];
 static const char *ChooseText(void)
 {
@@ -1285,7 +1318,11 @@ static const char *ChooseText(void)
     char name[64], cost[24], words[160];
     Name(name, sizeof(name), q->source);
     AbilityWords(words, sizeof(words), q->source, q->ability, B.duel.res.trigger);
-    if (q->choice == MTG_CHOICE_PAY) {
+    if (q->choice == MTG_CHOICE_PAY && q->ability != 0xFFFF && gMtgAbilities[q->ability].unless) {
+        char other[64];
+        UnlessWords(other, sizeof(other), &gMtgUnlessCosts[gMtgAbilities[q->ability].unless - 1]);
+        snprintf(sChooseText, sizeof(sChooseText), "%s: %s?  %s", name, other, words);
+    } else if (q->choice == MTG_CHOICE_PAY) {
         CostText(cost, sizeof(cost), &q->pay);
         snprintf(sChooseText, sizeof(sChooseText), "%s: pay %s?  %s", name, cost[0] ? cost : "0", words);
     } else
