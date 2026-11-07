@@ -17,8 +17,10 @@ common_rel (the decomp names them: christinebaker1212-hash/pkmn-colosseum), neve
                         (every 256 steps: field_exact_801ED3B8.c), 2 CALL, 3 the day care, 4 a scent (times its
                         strength), 5 a share of what's left
   the natures           .data + 0x121614, 0x28 each (count + 0x14A6D8; PokemonSeikakuData): + 0 .. + 4 the rate (an index
-                        into the rates) for sources 0-4, + 0x18 Hyper Mode's chance by gauge level (0 full .. 6 empty),
-                        + 0x1F CALL's chance by gauge level
+                        into the rates) for sources 0-4, + 0x0B .. + 0x10 the chances (%) of Hyper Mode's ways of
+                        ignoring orders (fight_range_8022A504.c: a move of its own choosing, attacking the opposing
+                        trainer, attacking its own, attacking itself, too confused to act, trying its item), + 0x18
+                        Hyper Mode's chance by gauge level (0 full .. 6 empty), + 0x1F CALL's chance by gauge level
   the rates             .data + 0x13E430, (kake, waru) pairs (count + 0x14A6E4): a source's drop times kake / waru
 
 A drop (pokemon_range_8011F5FC.c pokemonAddDpFormPokemonDpFilterId): DP += source * kake / waru, never below 0. The
@@ -82,7 +84,8 @@ def read(unpacked):
     natures = []
     for i in range(_u32(d, NATURE_COUNT)):
         o = NATURE + i * NATURE_SIZE
-        natures.append({"rate": list(d[o:o + 5]), "hyper": list(d[o + 0x18:o + 0x1F]), "call": list(d[o + 0x1F:o + 0x26])})
+        natures.append({"rate": list(d[o:o + 5]), "hyper": list(d[o + 0x18:o + 0x1F]), "call": list(d[o + 0x1F:o + 0x26]),
+                        "disobey": list(d[o + 0x0B:o + 0x11])})
     return shadows, dpf, rates, natures
 
 
@@ -108,8 +111,8 @@ def write(out, shadows, dpf, rates, natures):
     L.append("// the gauge's level (0 full .. 6 empty)")
     L.append("static const struct OrreShadowNature sOrreShadowNatures[%d] = {" % len(natures))
     for i, n in enumerate(natures):
-        L.append("    {{%s}, {%s}, {%s}},   // nature %d" % (", ".join(map(str, n["rate"])), ", ".join(map(str, n["hyper"])),
-                                                         ", ".join(map(str, n["call"])), i))
+        L.append("    {{%s}, {%s}, {%s}, {%s}},   // nature %d" % (", ".join(map(str, n["rate"])), ", ".join(map(str, n["hyper"])),
+                                                               ", ".join(map(str, n["call"])), ", ".join(map(str, n["disobey"])), i))
     L.append("};")
     open(out, "w").write("\n".join(L) + "\n")
 

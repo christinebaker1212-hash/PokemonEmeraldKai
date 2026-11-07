@@ -3330,7 +3330,7 @@ static void PlayerHandleChooseAction(void)
     if (sMpLHeld != 0xFF || !JOY_HELD(L_BUTTON))
         sMpLHeld = 0;
     BattleTv_ClearExplosionFaintCause();
-    BattlePutTextOnWindow(gText_BattleMenu, B_WIN_ACTION_MENU);
+    BattlePutTextOnWindow(Orre_Shadow_CallAvailable() ? gText_Orre_BattleMenuCall : gText_BattleMenu, B_WIN_ACTION_MENU);   // Moemon Kai: CALL in ORRE
 
     for (i = 0; i < 4; i++)
         ActionSelectionDestroyCursorAt(i);

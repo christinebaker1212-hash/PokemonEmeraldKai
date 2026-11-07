@@ -30,6 +30,8 @@ struct OrreShadowNature
     u8 rate[5];         // the rate (sOrreDpRate) for sources 0-4
     u8 hyperMode[7];    // (not "hyper": a Windows macro) Hyper Mode's chance (%) by the gauge's level
     u8 call[7];         // CALL's chance (%) by the gauge's level
+    u8 disobey[6];      // Hyper Mode's ways of ignoring orders (%): its own move, the opposing trainer, its own trainer,
+                        // itself, too confused, its item
 };
 
 // the heart gauge's sources (Colosseum's DP filters)
@@ -86,6 +88,18 @@ void Orre_Shadow_SentOut(struct Pokemon *mon);      // sent out: the battling dr
 // TRUE when MON is Shadow (it takes no EXP of its own)
 bool8 Orre_Shadow_TakeExp(struct Pokemon *mon, u32 exp);
 u32 Orre_Shadow_StoredExp(struct Pokemon *mon);
+// HYPER MODE (fight_range_*.c: a SHADOW RUSH may bring it on, by the nature's chance at the gauge's level; while in it
+// the Pokémon ignores orders but for SHADOW RUSH, by its nature's chances, and SHADOW RUSH lands a critical hit 9 times
+// in 10; it lasts past the battle until CALL brings it round or it faints) and CALL (in RUN's place in ORRE's trainer
+// battles)
+bool8 Orre_Shadow_InHyper(u8 battler);
+u8 Orre_Shadow_BattleCommand(u8 mode);          // the battle script's ORRE modes (constants/battle_gen4.h ORRE_*)
+u8 Orre_Shadow_HyperDisobedience(void);         // 0xFF: none (IsMonDisobedient's own rules then); else its result
+bool8 Orre_Shadow_HyperCrit(void);              // SHADOW RUSH in HYPER MODE: a critical hit this time
+bool8 Orre_Shadow_CallAvailable(void);          // the fourth command is CALL (ORRE's trainer battles)
+void Orre_Shadow_Call(u8 battler);              // CALL, by BATTLER's trainer: its outcome chosen and done
+const u8 *Orre_Shadow_BattleText(u8 line);      // STRINGID_ORRE_TEXT / _TEXT2's words
+extern const u8 gText_Orre_BattleMenuCall[];    // the action menu with CALL
 extern const u8 gText_Orre_HiddenMove[];   // "????": a hidden move's name (Colosseum's)
 void Orre_Shadow_Debug(const char *arg);   // `mp shadow ...` (tests)
 

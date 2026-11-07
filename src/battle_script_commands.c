@@ -1325,7 +1325,8 @@ static void Cmd_critcalc(void)
      && !(gStatuses3[gBattlerAttacker] & STATUS3_CANT_SCORE_A_CRIT)
      && !gGen4Sides[GetBattlerSide(gBattlerTarget)].luckyChant   // Moemon Kai: LUCKY CHANT
      && !(gBattleTypeFlags & (BATTLE_TYPE_WALLY_TUTORIAL | BATTLE_TYPE_FIRST_BATTLE))
-     && (MP_Gen59_AlwaysCrit(gCurrentMove, gBattlerAttacker) || !(Random() % sCriticalHitChance[critChance])))   // Moemon Kai: STORM THROW...
+     && (MP_Gen59_AlwaysCrit(gCurrentMove, gBattlerAttacker) || !(Random() % sCriticalHitChance[critChance])   // Moemon Kai: STORM THROW...
+         || Orre_Shadow_HyperCrit()))   // Moemon Kai: SHADOW RUSH in HYPER MODE (Colosseum's fight_seq.c: 90%)
         gCritMultiplier = MP_Gen4_CritMultiplier(gBattlerAttacker);   // Moemon Kai: SNIPER
     else
         gCritMultiplier = 1;

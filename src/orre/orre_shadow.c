@@ -20,6 +20,17 @@
 #include "battle.h"
 #include "constants/moves.h"
 #include "constants/species.h"
+#include "constants/items.h"
+#include "constants/battle_gen4.h"
+#include "battle_controllers.h"
+#include "battle_message.h"
+#include "battle_scripts.h"
+#include "battle_util.h"
+#include "random.h"
+#include "o3d.h"
+#include "battle_anim.h"
+#include "util.h"
+#include "mp.h"
 #include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 void MPNet_Log(const char *fmt, ...);
@@ -311,7 +322,14 @@ void Orre_Shadow_BattleMoves(struct Pokemon *mon, u16 *moves, u8 *pp)
 
 void Orre_Shadow_BattleStart(void)
 {
+    u32 i;
     sBattle++;
+    for (i = 0; i < PARTY_SIZE; i++)   // (fainted: out of HYPER MODE)
+    {
+        struct OrreShadowRec *r = RecOf(&gPlayerParty[i]);
+        if (r && GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0)
+            r->flags &= ~REC_HYPER;
+    }
 }
 
 void Orre_Shadow_SentOut(struct Pokemon *mon)
@@ -339,6 +357,182 @@ u32 Orre_Shadow_StoredExp(struct Pokemon *mon)
 {
     struct OrreShadowRec *r = RecOf(mon);
     return r ? r->storedExp : 0;
+}
+
+// ---- HYPER MODE and CALL: Colosseum's words (fight_common/fight.msg 0x7704-0x771D), its rules (fight_range_8022A504.c,
+// fight_range_exact_8022DCB8.c, fight_range_80211A00.c, fight_seq.c)
+
+enum { T_HYPER_ENTER, T_SELFISH, T_ATK_FOE, T_ATK_YOU, T_ATK_SELF, T_CONFUSED, T_ITEM_NOHOW, T_ITEM_NONE,
+       T_CALL, T_CALL_RESPONDED, T_CALL_SENSES, T_CALL_IGNORING, T_CALL_NOT_LISTENING, T_CALL_FAILED, T_COUNT };
+static const u8 sT_HyperEnter[] = _("{B_ATK_NAME_WITH_PREFIX}'s emotions rose to\na fever pitch!\pIt entered HYPER MODE!");
+static const u8 sT_Selfish[] = _("{B_ATK_NAME_WITH_PREFIX} selfishly used\n{B_BUFF1} without orders!");
+static const u8 sT_AtkFoe[] = _("{B_ATK_NAME_WITH_PREFIX} ignored orders and\nattacked the opposing trainer!");
+static const u8 sT_AtkYou[] = _("Unbelievable!\n{B_ATK_NAME_WITH_PREFIX} ignored orders and\lattacked {B_PLAYER_NAME}!");
+static const u8 sT_AtkSelf[] = _("{B_ATK_NAME_WITH_PREFIX} is in HYPER MODE!\nIt attacked itself!");
+static const u8 sT_Confused[] = _("{B_ATK_NAME_WITH_PREFIX} is in HYPER MODE!\nIt's too confused to do anything!");
+static const u8 sT_ItemNoHow[] = _("{B_ATK_NAME_WITH_PREFIX} tried to use its item\nwithout permission!\pBut it didn't know how!");
+static const u8 sT_ItemNone[] = _("{B_ATK_NAME_WITH_PREFIX} tried to use its item\nwithout permission!\pBut it's not holding anything!");
+static const u8 sT_Call[] = _("{B_PLAYER_NAME} called {B_ATK_NAME_WITH_PREFIX}!");
+static const u8 sT_CallResponded[] = _("{B_ATK_NAME_WITH_PREFIX} eagerly responded to\nthe call!");
+static const u8 sT_CallSenses[] = _("{B_ATK_NAME_WITH_PREFIX} came to its senses\nfrom the trainer's call!");
+static const u8 sT_CallIgnoring[] = _("It's no good!\nIt's ignoring orders!");
+static const u8 sT_CallNotListening[] = _("It's no good!\nIt's not listening!");
+static const u8 sT_CallFailed[] = _("{B_ATK_NAME_WITH_PREFIX} failed to hear!");
+static const u8 *const sTexts[T_COUNT] = {sT_HyperEnter, sT_Selfish, sT_AtkFoe, sT_AtkYou, sT_AtkSelf, sT_Confused,
+    sT_ItemNoHow, sT_ItemNone, sT_Call, sT_CallResponded, sT_CallSenses, sT_CallIgnoring, sT_CallNotListening, sT_CallFailed};
+static u8 sLine[2];
+
+const u8 gText_Orre_BattleMenuCall[] = _("FIGHT{CLEAR_TO 56}BAG\nMOéMON{CLEAR_TO 56}CALL");
+
+const u8 *Orre_Shadow_BattleText(u8 line)
+{
+    return sTexts[sLine[line & 1] < T_COUNT ? sLine[line & 1] : 0];
+}
+
+// a battler's Shadow record: the player's own POKéMON in a battle of their own (co-op: the master doesn't know a
+// partner's Shadow Pokémon yet)
+static struct OrreShadowRec *BattlerRec(u8 battler)
+{
+    if (battler >= MAX_BATTLERS_COUNT || GetBattlerSide(battler) != B_SIDE_PLAYER || gMpCoopBattle)
+        return NULL;
+    return RecOf(&gPlayerParty[gBattlerPartyIndexes[battler]]);
+}
+
+bool8 Orre_Shadow_InHyper(u8 battler)
+{
+    struct OrreShadowRec *r = BattlerRec(battler);
+    return r != NULL && (r->flags & REC_HYPER) && gBattleMons[battler].hp != 0;
+}
+
+u8 Orre_Shadow_BattleCommand(u8 mode)
+{
+    u8 atk = gBattlerAttacker;
+    struct OrreShadowRec *r;
+    switch (mode)
+    {
+    case ORRE_HYPER_ROLL:   // (fight_range_exact_8022DCB8.c: not asleep, not already in it, the nature's chance)
+        r = BattlerRec(atk);
+        if (r == NULL || gCurrentMove != MOVE_SHADOW_RUSH || gBattleMons[atk].hp == 0 || (r->flags & REC_HYPER)
+         || (gBattleMons[atk].status1 & STATUS1_SLEEP))
+            return 0;
+        if (Random() % 100 >= Orre_Shadow_HyperChance(&gPlayerParty[gBattlerPartyIndexes[atk]]))
+            return 0;
+        r->flags |= REC_HYPER;
+        sLine[0] = T_HYPER_ENTER;
+        MPNet_Log("shadow: Shadow %u entered HYPER MODE", r->id);
+        return 1;
+    }
+    return 0;
+}
+
+bool8 Orre_Shadow_HyperCrit(void)
+{
+    return gCurrentMove == MOVE_SHADOW_RUSH && Orre_Shadow_InHyper(gBattlerAttacker) && Random() % 100 < 90;
+}
+
+u8 Orre_Shadow_HyperDisobedience(void)
+{
+    u8 atk = gBattlerAttacker, k, roll, sum = 0, way = 0xFF;
+    struct OrreShadowRec *r = BattlerRec(atk);
+    struct Pokemon *mon;
+    const u8 *chance;
+    if (r == NULL)
+        return 0xFF;
+    if (!(r->flags & REC_HYPER) || gBattleMons[atk].hp == 0 || gCurrentMove == MOVE_SHADOW_RUSH)
+        return DISOBEDIENCE_OBEDIENT;   // (a Shadow Pokémon out of HYPER MODE obeys; SHADOW RUSH always)
+    mon = &gPlayerParty[gBattlerPartyIndexes[atk]];
+    chance = sOrreShadowNatures[GetNature(mon)].disobey;
+    roll = Random() % 100;
+    for (k = 0; k < 6 && way == 0xFF; k++)
+        if (roll < (sum += chance[k]))
+            way = k;
+    if (way == 0xFF)
+        return DISOBEDIENCE_OBEDIENT;
+    MPNet_Log("shadow: Shadow %u in HYPER MODE ignores orders (way %u)", r->id, way);
+    if (way == 0)
+    {
+        // a usable move of its own choosing (not one it can't use now, not a hidden one), else too confused to act
+        u8 pick[MAX_MON_MOVES], n = 0, limits = CheckMoveLimitations(atk, 0, MOVE_LIMITATIONS_ALL);
+        for (k = 0; k < MAX_MON_MOVES; k++)
+            if (gBattleMons[atk].moves[k] != MOVE_NONE && !(limits & gBitTable[k]))
+                pick[n++] = k;
+        if (n)
+        {
+            gCurrMovePos = gChosenMovePos = pick[Random() % n];
+            gCalledMove = gBattleMons[atk].moves[gCurrMovePos];
+            PREPARE_MOVE_BUFFER(gBattleTextBuff1, gCalledMove);
+            sLine[0] = T_SELFISH;
+            gBattlescriptCurrInstr = BattleScript_OrreHyperOwnMove;
+            gBattlerTarget = GetMoveTarget(gCalledMove, NO_TARGET_OVERRIDE);
+            gHitMarker |= HITMARKER_DISOBEDIENT_MOVE;
+            return DISOBEDIENCE_OTHER;
+        }
+        way = 4;
+    }
+    if (way == 3)
+    {
+        // a blow to itself (fightSeqCalcDamage at power 40, as confusion's)
+        gBattleMoveDamage = CalculateBaseDamage(&gBattleMons[atk], &gBattleMons[atk], MOVE_POUND, 0, 40, 0, atk, atk);
+        gBattlerTarget = atk;
+        sLine[0] = T_ATK_SELF;
+        gBattlescriptCurrInstr = BattleScript_OrreHyperHitsItself;
+        gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
+        return DISOBEDIENCE_OTHER;
+    }
+    sLine[0] = way == 1 ? T_ATK_FOE : way == 2 ? T_ATK_YOU : way == 4 ? T_CONFUSED
+             : gBattleMons[atk].item == ITEM_NONE ? T_ITEM_NONE : T_ITEM_NOHOW;
+    gBattlescriptCurrInstr = BattleScript_OrreHyperIgnored;
+    return DISOBEDIENCE_IGNORED;
+}
+
+bool8 Orre_Shadow_CallAvailable(void)
+{
+    return O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup) && (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+        && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)) && !gMpCoopBattle;
+}
+
+static void Wake(u8 battler)
+{
+    gBattleMons[battler].status1 &= ~STATUS1_SLEEP;
+    gBattleMons[battler].status2 &= ~STATUS2_NIGHTMARE;
+    gActiveBattler = battler;
+    BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_STATUS_BATTLE, 0, sizeof(gBattleMons[battler].status1),
+                                 &gBattleMons[battler].status1);
+    MarkBattlerForControllerExec(battler);
+}
+
+void Orre_Shadow_Call(u8 battler)
+{
+    struct OrreShadowRec *r = BattlerRec(battler);
+    bool8 asleep = (gBattleMons[battler].status1 & STATUS1_SLEEP) != 0;
+    sLine[0] = T_CALL;
+    if (r != NULL && (r->flags & REC_HYPER))
+    {
+        u8 chance = Orre_Shadow_CallChance(&gPlayerParty[gBattlerPartyIndexes[battler]]);
+        if (Random() % 100 < chance)
+        {
+            // came to its senses: HYPER MODE over, CALL's drop of the heart gauge, and awake
+            sLine[1] = T_CALL_SENSES;
+            r->flags &= ~REC_HYPER;
+            DropRec(r, GetNature(&gPlayerParty[gBattlerPartyIndexes[battler]]), ORRE_DP_CALL, 0);
+            if (asleep)
+                Wake(battler);
+        }
+        else
+        {
+            sLine[1] = T_CALL_IGNORING;
+            if (asleep && Random() % 100 < chance / 2)
+                Wake(battler);
+        }
+    }
+    else if (asleep)
+    {
+        sLine[1] = T_CALL_RESPONDED;
+        Wake(battler);
+    }
+    else
+        sLine[1] = r != NULL ? T_CALL_FAILED : T_CALL_NOT_LISTENING;
+    MPNet_Log("shadow: CALL to battler %u: outcome %u", battler, sLine[1]);
 }
 
 // ---- "<save>.orre": {magic, format, story flag bytes, records}
@@ -441,6 +635,14 @@ void Orre_Shadow_Debug(const char *arg)
             Orre_Shadow_Step();
     else if (strcmp(cmd, "purify") == 0)
         Orre_Shadow_Purified(mon);
+    else if (strcmp(cmd, "hyper") == 0)   // hyper SLOT 0|1: HYPER MODE off / on
+    {
+        struct OrreShadowRec *r = RecOf(mon);
+        if (r)
+            r->flags = a ? (r->flags | REC_HYPER) : (r->flags & ~REC_HYPER);
+        printf("[test] shadow hyper %d: %d\n", slot, r ? (r->flags & REC_HYPER) != 0 : -1);
+        return;
+    }
     else if (strcmp(cmd, "reload") == 0)   // reload: "<save>.orre" read back (after a save)
     {
         void AwFile_Flush(void);

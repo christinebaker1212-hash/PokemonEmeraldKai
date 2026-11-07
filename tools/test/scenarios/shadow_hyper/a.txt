@@ -1,0 +1,46 @@
+pressuntil A field 5000
+mp shadow make 0 8
+mp shadow drop 0 4 12
+mp shadow hyper 0 1
+mp wild 263:95 150 150 150 150
+pressuntil A action 3000
+wait 10
+press A 2
+wait 20
+press RIGHT 2
+wait 5
+shot hyper_moves
+press A 2
+pressuntil A action 3000
+wait 10
+press A 2
+wait 20
+press RIGHT 2
+press A 2
+pressuntil A action 3000
+wait 10
+press A 2
+wait 20
+press RIGHT 2
+press A 2
+pressuntil A action 3000
+wait 10
+press A 2
+wait 20
+press RIGHT 2
+press A 2
+pressuntil A action 3000
+wait 10
+press A 2
+wait 20
+press RIGHT 2
+press A 2
+pressuntil A action 3000
+wait 10
+press A 2
+wait 20
+press RIGHT 2
+press A 2
+pressuntil A action 3000
+wait 10
+mp shadow drop 0 9

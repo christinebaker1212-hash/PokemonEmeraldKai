@@ -1,4 +1,5 @@
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "battle_gen4.h"
 #include "battle_gen59.h"
 #include "battle_gimmick.h"
@@ -604,6 +605,15 @@ static bool8 MpCoopTryRun(void)
 void HandleAction_Run(void)
 {
     gBattlerAttacker = gBattlerByTurnOrder[gCurrentTurnActionNumber];
+
+    if (Orre_Shadow_CallAvailable())
+    {
+        // Moemon Kai: ORRE's trainer battles have CALL in RUN's place (src/orre/orre_shadow.c)
+        Orre_Shadow_Call(gBattlerAttacker);
+        gBattlescriptCurrInstr = BattleScript_OrreCall;
+        gCurrentActionFuncId = B_ACTION_EXEC_SCRIPT;
+        return;
+    }
 
     // Moemon Co-op: the team runs only when everyone chose RUN (HandleAction_Run
     // runs once: the other runners' actions were cleared)
@@ -4304,6 +4314,11 @@ u8 IsMonDisobedient(void)
         return DISOBEDIENCE_OBEDIENT;
     if (GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT)
         return DISOBEDIENCE_OBEDIENT;
+    {
+        u8 shadow = Orre_Shadow_HyperDisobedience();   // Moemon Kai: a Shadow Pokémon's HYPER MODE (src/orre/orre_shadow.c)
+        if (shadow != 0xFF)
+            return shadow;
+    }
 
     if (IsBattlerModernFatefulEncounter(gBattlerAttacker)) // only false if illegal Mew or Deoxys
     {

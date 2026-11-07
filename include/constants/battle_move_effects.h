@@ -469,7 +469,8 @@
 #define EFFECT_SUPERCELL_SLAM 461
 #define EFFECT_PSYCHIC_NOISE 462
 #define EFFECT_UPPER_HAND 463
-#define NUM_BATTLE_MOVE_EFFECTS 464
+#define EFFECT_ORRE_SHADOW_RUSH 464   // Moemon Kai: Colosseum's SHADOW RUSH: a quarter's recoil, then the HYPER MODE roll
+#define NUM_BATTLE_MOVE_EFFECTS 465
 // end of Gen 5-8 effects
 
 #endif  // GUARD_CONSTANTS_BATTLE_MOVE_EFFECTS_H

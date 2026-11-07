@@ -4855,6 +4855,10 @@ static void HandleTurnActionSelectionState(void)
                     *(gBattleStruct->stateIdAfterSelScript + gActiveBattler) = STATE_BEFORE_ACTION_CHOSEN;
                     return;
                 }
+                else if (Orre_Shadow_CallAvailable() && gBattleBufferB[gActiveBattler][1] == B_ACTION_RUN)
+                {
+                    gBattleCommunication[gActiveBattler]++;   // Moemon Kai: CALL, taken like a move in its turn
+                }
                 else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER
                          && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
                          && gBattleBufferB[gActiveBattler][1] == B_ACTION_RUN)
@@ -4959,7 +4963,8 @@ static void HandleTurnActionSelectionState(void)
                     }
                     break;
                 case B_ACTION_RUN:
-                    gHitMarker |= HITMARKER_RUN;
+                    if (!Orre_Shadow_CallAvailable())   // (Moemon Kai: CALL isn't running away: the others still choose)
+                        gHitMarker |= HITMARKER_RUN;
                     gBattleCommunication[gActiveBattler]++;
                     break;
                 case B_ACTION_SAFARI_WATCH_CAREFULLY:

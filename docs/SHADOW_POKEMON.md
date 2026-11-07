@@ -47,7 +47,21 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
   battling drop once a battle, the first time it's sent out; no EXP of its own: none at levels 0-2, stored from level
   3 (battle_script_commands.c Cmd_getexp). Test shadow_battle (tools/orre/check_shadow_battle.py). Solo battles only for
   now: in co-op the master's game doesn't know a partner's Shadow Pokémon yet (their records are in their own sidecar).
-- Next, S3b: Hyper Mode (each SHADOW RUSH rolls the nature's chance by the gauge's level; not asleep or already in it;
+- **S3b, HYPER MODE and CALL** (2026-11-07): SHADOW RUSH has its own effect (EFFECT_ORRE_SHADOW_RUSH: EFFECT_RECOIL's
+  hit, then `gen4 ORRE_HYPER_ROLL`: modes 200 on go to Orre_Shadow_BattleCommand): a Shadow Pokémon not asleep and not
+  already in it enters HYPER MODE by its nature's chance at the gauge's level (Colosseum's words, fight.msg 0x771B).
+  In HYPER MODE (kept in its record past the battle; a faint ends it) SHADOW RUSH crits 9 times in 10 (critcalc) and any
+  other order may be ignored (battle_util.c IsMonDisobedient -> Orre_Shadow_HyperDisobedience) by the nature's six
+  chances (common_rel's natures + 0x0B .. + 0x10, now in the table): a move of its own choosing, attacking the opposing
+  trainer, attacking you, hitting itself (power 40), too confused to act, trying its item; each with Colosseum's
+  words (two text ids STRINGID_ORRE_TEXT / _TEXT2 whose words the Shadow code picks). CALL is the fourth command in
+  ORRE's trainer battles (RUN's place: no running from trainers there either): a turn action (HandleAction_Run ->
+  Orre_Shadow_Call): in HYPER MODE it brings the Pokémon round by the CALL chance (and the gauge's CALL drop) or "It's
+  no good! It's ignoring orders!"; it wakes a sleeper; else "...failed to hear!" (a Shadow Pokémon) or "It's not
+  listening!". Tests shadow_hyper, shadow_call. Not yet: a held item actually used in HYPER MODE (Colosseum uses some
+  BERRIES), "won't accept an item" (0x770B), the HYPER MODE reminder at its turn (0x771C).
+- Next, S3c: the aura, then the opponents' Shadow Pokémon (Cipher's, with snagging) and co-op.
+- (old note) S3b was: Hyper Mode (each SHADOW RUSH rolls the nature's chance by the gauge's level; not asleep or already in it;
   Colosseum's messages 0x771B / 0x771C), CALL (snaps it out by the CALL chance and takes the CALL drop; wakes a
   sleeper: messages 0x7704-0x7709, 0x771D), the aura, and the dark palettes (below); then the opponents' Shadow
   Pokémon (Cipher's) and co-op.

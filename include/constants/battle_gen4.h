@@ -49,6 +49,10 @@
 #define G4_RERUN_MOVE         45   // leaves the charging turn's call and runs the move's script again (POWER HERB)
 #define G4_ARRIVE_SYNC        44   // HEALING WISH / LUNAR DANCE: sends the healed status and PP (jumps back to itself between them)
 
+// Moemon Kai: ORRE's modes of the same command (src/orre/orre_shadow.c Orre_Shadow_BattleCommand), 200 on
+#define ORRE_FIRST            200
+#define ORRE_HYPER_ROLL       200  // after SHADOW RUSH: jumps if the Shadow Pokémon entered HYPER MODE
+
 // Moemon Kai: Gen 5-9 modes of the same command (src/battle_gen59.c MP_Gen59_Command)
 #define G59_FIRST             100
 #define G59_STATS_CANT        100  // jumps if none of the move's stat changes can happen (status moves)

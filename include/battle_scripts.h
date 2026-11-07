@@ -239,6 +239,10 @@ extern const u8 BattleScript_MpCoopBallCaught[];
 extern const u8 BattleScript_MpCoopUseItem[];
 extern const u8 BattleScript_MpCoopLearnMoveLater[];
 extern const u8 BattleScript_MpCoopWantsToRun[];
+extern const u8 BattleScript_OrreCall[];   // Moemon Kai: ORRE's (src/orre/orre_shadow.c)
+extern const u8 BattleScript_OrreHyperIgnored[];
+extern const u8 BattleScript_OrreHyperOwnMove[];
+extern const u8 BattleScript_OrreHyperHitsItself[];
 extern const u8 BattleScript_MpCoopBallNoTarget[];
 extern const u8 BattleScript_MpCoopGotAway[];
 extern const u8 BattleScript_MpCoopSmokeBallEscape[];

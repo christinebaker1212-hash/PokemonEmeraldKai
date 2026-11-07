@@ -1,0 +1,10 @@
+# CALL (src/orre/orre_shadow.c): in a trainer battle in ORRE the fourth command is CALL (shot call_menu); calling a
+# Shadow Pokémon in HYPER MODE (QUAGSIRE as Colosseum's Shadow 8) brings it round by its nature's CALL chance (out of
+# HYPER MODE, the heart gauge's CALL drop) or not ("It's no good! It's ignoring orders!"), in its turn, in Colosseum's
+# words. Shots *.png.
+MODE=1
+TMO=200
+WARP=45,0,33,40
+ENV_A="MOEMON_DEBUG_PARTY=195:40"
+EXPECT_A=("[test] shadow hyper 0: 1" "shadow: CALL to battler 0: outcome")
+UNEXPECT_A=("[crash]" "TIMEOUT" "no running from a trainer")

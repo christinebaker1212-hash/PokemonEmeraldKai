@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 const u8 *MP_JohtoRivalTrainerName(u16 trainerNum);   // Moemon Kai (qz_specials.c)
 #include "mp.h"
 #include "battle.h"
@@ -2591,6 +2592,10 @@ void BufferStringBattle(u16 stringID)
         break;
     case STRINGID_MP_JOIN_HELP:
         stringPtr = sText_MpJoinHelp;
+        break;
+    case STRINGID_ORRE_TEXT:
+    case STRINGID_ORRE_TEXT2:
+        stringPtr = Orre_Shadow_BattleText(stringID - STRINGID_ORRE_TEXT);   // Moemon Kai: Colosseum's words
         break;
     case STRINGID_MP_GROUP_STAT_NOLOWER:
         stringPtr = GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER ? sText_MpGroupPartyNoLower : sText_MpGroupFoesNoLower;

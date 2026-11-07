@@ -399,6 +399,8 @@
 #define STRINGID_MP_WEATHER_ALL_SAND        404   // "Everyone was buffeted by the sandstorm!"
 #define STRINGID_MP_WEATHER_ALL_HAIL        405   // "Everyone was pelted by HAIL!"
 #define STRINGID_MP_JOIN_HELP               406   // "X has come to help!" (a friend joined the battle, mp_join.c)
+#define STRINGID_ORRE_TEXT                  407   // Moemon Kai: Colosseum's battle words the Shadow code chose (orre_shadow.c)
+#define STRINGID_ORRE_TEXT2                 408   // (a second line of them: CALL's outcome)
 
 // Moemon Kai: Gen 4 messages, 420 on (handled in BufferStringBattle, not the table)
 #include "constants/battle_gen4_strings.h"

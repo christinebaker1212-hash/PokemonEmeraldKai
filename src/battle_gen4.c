@@ -1,6 +1,7 @@
 // Moemon Kai: Gen 4's battle rules on top of Kai's (Gen 3) engine. See include/battle_gen4.h.
 // Numbers follow Diamond / Pearl / Platinum unless a comment says otherwise.
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "battle.h"
 #include "battle_gen4.h"
 #include "battle_gen59.h"
@@ -546,6 +547,8 @@ static void SwapStages(u8 a, u8 b, u8 stat)
 u8 MP_Gen4_Command(u8 mode)
 {
     u8 atk = gBattlerAttacker, def = gBattlerTarget;
+    if (mode >= ORRE_FIRST)
+        return Orre_Shadow_BattleCommand(mode);   // Moemon Kai: ORRE's (src/orre/orre_shadow.c)
     if (mode >= G59_FIRST)
         return MP_Gen59_Command(mode);
     struct Gen4Side *defSide = &gGen4Sides[GetBattlerSide(def)], *atkSide = &gGen4Sides[GetBattlerSide(atk)];

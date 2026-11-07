@@ -4620,7 +4620,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT] =
     // accuracy 100, PP 5, NORMAL, contact, recoil a quarter: effect 48; docs/SHADOW_POKEMON.md)
     [MOVE_SHADOW_RUSH] =
     {
-        .effect = EFFECT_RECOIL,
+        .effect = EFFECT_ORRE_SHADOW_RUSH,   // (EFFECT_RECOIL's, then Colosseum's HYPER MODE roll)
         .power = 90,
         .type = TYPE_NORMAL,
         .accuracy = 100,

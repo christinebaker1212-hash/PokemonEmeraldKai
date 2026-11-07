@@ -235,6 +235,7 @@ gBattleScriptsForMoveEffects::
 	ptrvalue BattleScript_EffectCamouflage             /* EFFECT_CAMOUFLAGE*/
 	.include "data/battle_effect_ptrs_gen4.inc"         @ Moemon Kai: Gen 4 effects
 	.include "data/battle_effect_ptrs_gen58.inc"        @ Moemon Kai: Gen 5-8 effects
+	ptrvalue BattleScript_EffectOrreShadowRush          @ EFFECT_ORRE_SHADOW_RUSH (Moemon Kai: Colosseum's)
 
 BattleScript_EffectHit::
 	jumpifnotmove MOVE_SURF, BattleScript_HitFromAtkCanceler
@@ -4416,6 +4417,57 @@ BattleScript_IgnoresAndFallsAsleep::
 	seteffectprimary
 	moveendto MOVEEND_NEXT_TARGET
 	end
+
+@ Moemon Kai: Colosseum's SHADOW RUSH: a hit with a quarter's recoil, then the Shadow Pokémon may enter HYPER MODE
+@ (src/orre/orre_shadow.c, docs/SHADOW_POKEMON.md)
+BattleScript_EffectOrreShadowRush::
+	setmoveeffect MOVE_EFFECT_RECOIL_25 | MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN
+	attackcanceler
+	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+	attackstring
+	ppreduce
+	critcalc
+	damagecalc
+	typecalc
+	adjustnormaldamage
+	attackanimation
+	waitanimation
+	effectivenesssound
+	hitanimation BS_TARGET
+	waitstate
+	healthbarupdate BS_TARGET
+	datahpupdate BS_TARGET
+	critmessage
+	waitmessage B_WAIT_TIME_LONG
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+	seteffectwithchance
+	tryfaintmon BS_TARGET
+	gen4 ORRE_HYPER_ROLL, BattleScript_OrreHyperEnter
+	goto BattleScript_MoveEnd
+
+BattleScript_OrreHyperEnter::
+	printstring STRINGID_ORRE_TEXT
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
+
+@ HYPER MODE's ways of ignoring orders (orre_shadow.c Orre_Shadow_HyperDisobedience): a turn lost to it, a move of its own
+@ choosing, a blow to itself
+BattleScript_OrreHyperIgnored::
+	printstring STRINGID_ORRE_TEXT
+	waitmessage B_WAIT_TIME_LONG
+	moveendto MOVEEND_NEXT_TARGET
+	end
+
+BattleScript_OrreHyperOwnMove::
+	printstring STRINGID_ORRE_TEXT
+	waitmessage B_WAIT_TIME_LONG
+	jumptocalledmove FALSE
+
+BattleScript_OrreHyperHitsItself::
+	printstring STRINGID_ORRE_TEXT
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_DoSelfConfusionDmg
 
 BattleScript_IgnoresAndHitsItself::
 	printstring STRINGID_PKMNWONTOBEY
