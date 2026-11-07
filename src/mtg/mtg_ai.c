@@ -20,6 +20,58 @@ static int Value(const MtgDuel *d, int obj)   // a creature's rough worth
     return v;
 }
 
+// ---- a look-ahead for what the scores below don't know (RepeatEach, SetLife, a Reveal's chain...): the action played
+// on a copy of the duel, both passing until it has resolved (this AI answering what it asks), the board compared
+static int sSimulating;   // (inside a look-ahead: no look-ahead of its own)
+
+static int Eval(const MtgDuel *d, int me)
+{
+    int i, v = (d->players[me].life - d->players[me ^ 1].life) * 2;
+    if (d->over)
+        return d->winner == me ? 10000 : -10000;
+    for (i = 0; i < d->objCount; i++) {
+        const MtgObj *o = &d->objs[i];
+        int worth;
+        if (o->zone == MTG_ZONE_HAND)
+            v += o->owner == me ? 2 : -2;
+        if (o->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        worth = (Mtg_ObjTypes(d, i) & MTG_T_CREATURE) ? Value(d, i) + 2
+              : (Mtg_ObjTypes(d, i) & MTG_T_LAND) ? 3 : Mtg_ManaCostTotal(&Mtg_Card(o->def)->cost) + 1;
+        v += o->controller == me ? worth : -worth;
+    }
+    return v;
+}
+
+void MtgAi_Answer(const MtgDuel *d, MtgAnswer *out);
+
+static int Lookahead(const MtgDuel *d, const MtgAction *a, int me)
+{
+    static MtgDuel copy;
+    MtgAnswer ans;
+    int idx = (int)(a - d->query.actions), base = d->stackCount, guard = 0, before;
+    if (sSimulating || idx < 0 || idx >= d->query.actionCount)
+        return 0;
+    sSimulating = 1;
+    copy = *d;
+    before = Eval(d, me);
+    memset(&ans, 0, sizeof(ans));
+    ans.action = (uint16_t)idx;
+    if (Mtg_Answer(&copy, &ans))
+        while (guard++ < 300 && !copy.over) {
+            const MtgQuery *q = Mtg_Query(&copy);
+            if (q->kind == MTG_Q_PRIORITY && !copy.resolving && copy.stackCount <= base)
+                break;   // (it has resolved)
+            memset(&ans, 0, sizeof(ans));
+            if (q->kind != MTG_Q_PRIORITY)
+                MtgAi_Answer(&copy, &ans);   // (its choices, as this AI would make them; priority: pass)
+            if (!Mtg_Answer(&copy, &ans))
+                break;
+        }
+    sSimulating = 0;
+    return Eval(&copy, me) - before;
+}
+
 static int IsCreatureOnField(const MtgDuel *d, int obj)
 {
     return d->objs[obj].zone == MTG_ZONE_BATTLEFIELD && (Mtg_ObjTypes(d, obj) & MTG_T_CREATURE);
@@ -290,6 +342,11 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
             return 6;
         return curse ? 15 + Value(d, tgtObj) : 9 + Value(d, tgtObj) / 2;
     }
+    }
+    if (main && ab) {   // (a kind the scores above don't know: tried on a copy, played when it comes out ahead)
+        int gain = Lookahead(d, a, me);
+        if (gain > 2)
+            return 3 + (gain > 30 ? 30 : gain);
     }
     return 0;
 }

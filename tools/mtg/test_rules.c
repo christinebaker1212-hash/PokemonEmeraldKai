@@ -1904,6 +1904,34 @@ static void TestRepeat(void)
     CHECK(sD.players[0].life == 20, "BLESSED WIND: life 20 (%d)", sD.players[0].life);
 }
 
+// the AI's look-ahead for kinds it has no score for: ACIDIC SOIL cast when the opponent has more lands, kept otherwise
+static void TestAiLookahead(void)
+{
+    int soil;
+    MtgAnswer a;
+    const MtgQuery *q;
+    printf("AI look-ahead\n");
+    Table();
+    Lands(0, "Mountain", 3);
+    Lands(1, "Plains", 7);
+    soil = Put(0, "Acidic Soil", MTG_ZONE_HAND);
+    Mtg_RefreshQuery(&sD);
+    q = Mtg_Query(&sD);
+    MtgAi_Answer(&sD, &a);
+    CHECK(q->actions[a.action].kind == MTG_ACT_CAST && q->actions[a.action].obj == soil,
+          "ACIDIC SOIL cast against more lands");
+    CHECK(sD.players[0].life == 20 && Zone(soil) == MTG_ZONE_HAND, "the look-ahead left the duel as it was");
+
+    Table();
+    Lands(0, "Mountain", 7);
+    soil = Put(0, "Acidic Soil", MTG_ZONE_HAND);
+    Mtg_RefreshQuery(&sD);
+    q = Mtg_Query(&sD);
+    MtgAi_Answer(&sD, &a);
+    CHECK(!(q->actions[a.action].kind == MTG_ACT_CAST && q->actions[a.action].obj == soil),
+          "ACIDIC SOIL kept when it hurts its caster more");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2089,6 +2117,60 @@ static void TestDuels(void)
     printf("  red %d, green %d, draws %d, longest %d turns\n", wins[0], wins[1], wins[2], maxTurns);
 }
 
+// whole duels between random two-color decks from every playable card: whatever the cards do, the duel goes on (no
+// refused answer, no endless loop) and ends; the look-ahead and every effect run under the sanitizers here
+static void RandomDeck(MtgDeck *d, uint32_t *rng)
+{
+    static const char *const basics[5] = {"Plains", "Island", "Swamp", "Mountain", "Forest"};
+    static uint16_t pool[6000];
+    int c1, c2, n = 0, i, k;
+    *rng = *rng * 1103515245u + 12345u;
+    c1 = (int)((*rng >> 16) % 5);
+    *rng = *rng * 1103515245u + 12345u;
+    c2 = (c1 + 1 + (int)((*rng >> 16) % 4)) % 5;
+    for (i = 0; i < Mtg_DbCount(); i++) {
+        const MtgCardDef *c = Mtg_Card(i);
+        if (!c->supported || (c->types & MTG_T_LAND) || c->banned
+            || (c->colors & ~(MTG_COLOR_BIT(c1) | MTG_COLOR_BIT(c2))))
+            continue;
+        pool[n++] = (uint16_t)i;
+    }
+    d->count = 0;
+    for (k = 0; k < 12; k++) {
+        d->cards[d->count++] = (uint16_t)Card(basics[c1]);
+        d->cards[d->count++] = (uint16_t)Card(basics[c2]);
+    }
+    for (k = 0; k < 9 && n; k++) {   // nine cards, four of each
+        *rng = *rng * 1103515245u + 12345u;
+        i = pool[(*rng >> 16) % (uint32_t)n];
+        for (c1 = 0; c1 < 4; c1++)
+            d->cards[d->count++] = (uint16_t)i;
+    }
+}
+
+static void TestRandomDuels(void)
+{
+    static MtgDeck a, b;
+    static MtgDuel duel;
+    uint32_t rng = 20261107u;
+    int seed, ended = 0, longest = 0, games = 30;
+    printf("random-deck duels\n");
+    for (seed = 1; seed <= games; seed++) {
+        int turns, winner, before = sFails;
+        RandomDeck(&a, &rng);
+        RandomDeck(&b, &rng);
+        Mtg_DuelInit(&duel, &a, &b, (uint32_t)seed * 7u);
+        PlayOut(&duel, &turns, &winner);
+        ended += Mtg_Query(&duel)->kind == MTG_Q_GAME_OVER;
+        if (turns > longest)
+            longest = turns;
+        if (sFails != before)
+            printf("  (seed %d)\n", seed);
+    }
+    CHECK(ended == games, "every random duel ended (%d of %d)", ended, games);
+    printf("  %d duels, longest %d turns\n", games, longest);
+}
+
 static void TestDb(void)
 {
     static const char *const sMust[] = {"Lightning Bolt", "Grizzly Bears", "Giant Growth", "Serra Angel",
@@ -2248,7 +2330,9 @@ int main(int argc, char **argv)
     TestRemember();
     TestHidden();
     TestRepeat();
+    TestAiLookahead();
     TestDuels();
+    TestRandomDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;
 }

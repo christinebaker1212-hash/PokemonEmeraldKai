@@ -3700,6 +3700,17 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's AI look-ahead and random-deck duels (1.154.0)
+
+- mtg_ai.c Lookahead: an action whose kind ScoreBase has no score for (RepeatEach, SetLife, a Reveal's chain...) is
+  played on a copy of the duel (MtgDuel is plain data, about 25 KB), both passing until it has resolved with this AI
+  answering its choices (no look-ahead inside one: sSimulating), and Eval (life x2, permanents' worth, cards in hand)
+  compared before and after; cast in a main phase when it gains more than 2.
+- tools/mtg/test_rules.c TestRandomDuels: 30 duels between random two-color decks of every playable card (nine
+  cards, four each, 24 basics) under the sanitizers; each must end with no refused answer. 300 were run once for
+  1.154.0 (longest 108 turns).
+- Test TestAiLookahead (ACIDIC SOIL cast against more lands, kept when it hurts its caster more).
+
 ## MAGIC's "for each" spells and SetLife (1.153.0)
 
 - RepeatEach (MTG_API_REPEAT_EACH): RepeatSubAbility$ (MtgAbility.repeatSub, parsed at load; no RepeatEach inside)
