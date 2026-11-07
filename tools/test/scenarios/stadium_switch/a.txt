@@ -1,0 +1,128 @@
+pressuntil A field 5000
+mp additem 398 1
+mp battlestyle 1
+mp warp 46,1,9,3
+wait 80
+press UP 4
+wait 10
+pressuntillog A 3000 screens opened
+wait 40
+press DOWN 4
+wait 6
+press DOWN 4
+wait 30
+press DOWN 4
+wait 6
+press DOWN 4
+wait 30
+press DOWN 4
+wait 30
+press DOWN 4
+wait 30
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 10
+press A 4
+wait 20
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press A 4
+wait 6
+press DOWN 4
+wait 4
+press A 4
+wait 20
+wait 20
+press A 4
+wait 10
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 10
+press SELECT 4
+wait 200
+press RIGHT 4
+wait 60
+press B 4
+wait 300
+press B 4
+wait 10
+press RIGHT 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 40
+press A 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 10
+press SELECT 4
+wait 10
+press B 4
+wait 6
+press START 4
+pressuntil A action 20000
+mp stadiumai force
+mp bmove 98
+press A 4
+wait 10
+pressuntil A action 6000
+mp bmove 98
+press A 4
+wait 10
+pressuntil A action 6000
+mp bmove 98
+press A 4
+wait 10
+pressuntil A action 6000
+mp stadiumai force 0
+wait 30
+quit

@@ -12,6 +12,7 @@
 #include "battle_anim.h"
 #include "util.h"
 #include "battle_main.h"
+#include "battle_controllers.h"
 #include "pokemon.h"
 #include "constants/abilities.h"
 #include "constants/battle_move_effects.h"
@@ -206,7 +207,9 @@ static bool8 StatsRaised(u8 battler)
 }
 
 // ShouldSwitch's question in a STADIUM battle: switch, and to whom (gBattleStruct->AI_monToSwitchIntoId)
-bool8 MP_StadiumAi_ShouldSwitch(u8 battler, s32 firstId, s32 lastId)
+static bool8 sForce;   // `mp stadiumai force`: every chance to switch is taken (test stadium_switch)
+
+static bool8 Decide(u8 battler, s32 firstId, s32 lastId)
 {
     struct Side me, foe;
     s32 now, hurt, threat, bench;
@@ -216,6 +219,15 @@ bool8 MP_StadiumAi_ShouldSwitch(u8 battler, s32 firstId, s32 lastId)
     FromBattler(&me, battler);
     FromBattler(&foe, FoeOf(battler));
     now = Matchup(&me, &foe, &hurt, &threat);
+    if (sForce)
+    {
+        pick = BestBench(battler, firstId, lastId, &foe, TRUE, &bench);
+        if (pick == PARTY_SIZE)
+            return FALSE;
+        gBattleStruct->AI_monToSwitchIntoId[battler] = pick;
+        MPNet_Log("stadium ai: battler %d switches to party %d (forced)", battler, pick);
+        return TRUE;
+    }
     if (sSwitched[battler] && (u8)(turn - sLastSwitchTurn[battler]) < 2)
         return FALSE;   // (not twice in a row: it just came in)
     if (StatsRaised(battler) && threat < 700)
@@ -238,6 +250,22 @@ bool8 MP_StadiumAi_ShouldSwitch(u8 battler, s32 firstId, s32 lastId)
         return TRUE;
     }
     return FALSE;
+}
+
+// ShouldSwitch's question in a STADIUM battle. A switch is the trainer's action this turn: like the game's own
+// switching checks, it's sent to the battle here (without it the battle waits for the trainer forever: 1.173.0's
+// softlock right after the player chose a move)
+bool8 MP_StadiumAi_ShouldSwitch(u8 battler, s32 firstId, s32 lastId)
+{
+    if (!Decide(battler, firstId, lastId))
+        return FALSE;
+    BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_SWITCH, 0);
+    return TRUE;
+}
+
+void MP_StadiumAi_Force(bool8 on)
+{
+    sForce = on;
 }
 
 // who comes in after a faint: the best matchup against the foe that's out (PARTY_SIZE: not a STADIUM battle)
@@ -326,21 +354,21 @@ void MP_StadiumAi_SelfTest(void)
     gBattleStruct->monToSwitchIntoId[1] = PARTY_SIZE;
     gBattleStruct->AI_monToSwitchIntoId[1] = PARTY_SIZE;
     gBattleResults.battleTurnCounter = 3;
-    sw = MP_StadiumAi_ShouldSwitch(1, 0, 3);
+    sw = Decide(1, 0, 3);
     MPNet_Log("stadium ai test: GYARADOS vs PIKACHU: %s %d", sw ? "switch to" : "stays", sw ? gBattleStruct->AI_monToSwitchIntoId[1] : -1);
     // 2. the next turn, GOLEM out: stays (it just came in, and it's the right one anyway)
     SetBattleMon(1, &gEnemyParty[2]);
     gBattlerPartyIndexes[1] = 2;
     gBattleStruct->AI_monToSwitchIntoId[1] = PARTY_SIZE;
     gBattleResults.battleTurnCounter = 4;
-    sw = MP_StadiumAi_ShouldSwitch(1, 0, 3);
+    sw = Decide(1, 0, 3);
     MPNet_Log("stadium ai test: GOLEM vs PIKACHU: %s", sw ? "switches" : "stays");
     // 3. a later turn, STARMIE out against PIKACHU: faster and hitting hard, it stays and fights
     SetBattleMon(1, &gEnemyParty[1]);
     gBattlerPartyIndexes[1] = 1;
     gBattleStruct->AI_monToSwitchIntoId[1] = PARTY_SIZE;
     gBattleResults.battleTurnCounter = 9;
-    sw = MP_StadiumAi_ShouldSwitch(1, 0, 3);
+    sw = Decide(1, 0, 3);
     MPNet_Log("stadium ai test: STARMIE vs PIKACHU: %s %d", sw ? "switch to" : "stays", sw ? gBattleStruct->AI_monToSwitchIntoId[1] : -1);
     // 4. GYARADOS fainted: GOLEM comes in, not STARMIE
     SetMonData(&gEnemyParty[0], MON_DATA_HP, &(u16){0});

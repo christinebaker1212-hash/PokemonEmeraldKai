@@ -237,4 +237,7 @@ move's damage each way as a share of the target's HP (power, STAB, the type char
 abilities / WONDER GUARD), plus or minus a knock-out first by Speed. A trainer switches when a bench POKéMON's matchup
 (less half the hit it takes coming in) beats the one out by 35 points of HP and the one out is in danger (60%+ a hit)
 or can't hurt the foe (under 15%); never twice in two turns, never out of boosts, never when it finishes the foe
-first, never when nearly gone anyway. `mp stadiumai` runs fixed matchups (test stadium_ai).
+first, never when nearly gone anyway. A switch is the trainer's action for the turn and is sent to the battle
+(BtlController_EmitTwoReturnValues B_ACTION_SWITCH), as the game's own switching checks do: 1.173.0 left it out and
+the battle waited for the trainer forever (1.173.1). `mp stadiumai` runs fixed matchups (test stadium_ai); `mp stadiumai
+force` makes trainers take every switch (test stadium_switch: a real battle, the move menu back after each switch).

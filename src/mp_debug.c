@@ -530,7 +530,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "stadiumai") == 0)   // mp stadiumai: STADIUM trainers' switching on fixed matchups (mp_stadium_ai.c)
     {
         void MP_StadiumAi_SelfTest(void);
-        MP_StadiumAi_SelfTest();
+        void MP_StadiumAi_Force(bool8 on);
+        if (strncmp(arg, "force", 5) == 0)
+            MP_StadiumAi_Force(arg[5] != ' ' || atoi(arg + 6) != 0);   // mp stadiumai force [0]: take every switch
+        else
+            MP_StadiumAi_SelfTest();
     }
     else if (strcmp(cmd, "stadiumwin") == 0)   // mp stadiumwin ROUND CUP CLASS HARDNESS: the party wins it (mp_stadium_rewards.c)
     {
