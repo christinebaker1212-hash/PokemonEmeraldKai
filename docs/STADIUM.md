@@ -176,6 +176,16 @@ is on the highest setting."
   played the game's trainer victory song). Log "announcer: the win waits for the defeat message", "stadium: song
   stadium_won", then "clip 365 (the win, ...)".
 
+- Long lines and repeats (1.174.1, the user: a line "kept repeating ... on loop, over and over"; "prevents any line
+  from being repeated immediately after it's already sounded, but lets it repeat if the situation actually calls for
+  it"): the mixer's position was a u32 16.16, which wraps at 65536 samples (4.1 s), so any longer line (the cup and
+  castle introductions, "They're both down!", the count lines, most of the Japanese) started over forever and held
+  every other line off; it's 64 bits now, and a line still playing 2 s past its own length is stopped ("ran past its
+  length"). The guard: Start refuses the clip just said unless A.reason moved since (a battle message different from
+  the last one, a new turn to choose, a screen's line, a new battle): "clip N not said again". The log says when a
+  clip ends ("clip N done after F frames"). `mp announcer say N` plays a clip as a screen line would, `mp announcer
+  again` asks for the last one with nothing new. Tests stadium_announcer_long, stadium_faint_wait.
+
 ### The Japanese announcer (1.174.0)
 
 The user (2026-11-07): "can we add support for the Japanese language announcer, as well?" (with a link to their ROM of

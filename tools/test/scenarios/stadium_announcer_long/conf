@@ -1,0 +1,8 @@
+# POKéMON STADIUM's announcer: a line longer than 4.1 seconds (the castle's introduction, clip 222: 9 s) plays to its
+# end and stops (1.174.0's mixer counted the position in 32 bits, wrapped at 65536 samples and started such a line
+# over forever); the same line asked again with nothing new in between isn't said twice in a row; a new reason (a new
+# screen) lets it play again. Needs stadium/announcer.s1.
+MODE=1
+TMO=300
+EXPECT_A=("announcer: clip 222 (a screen, " "announcer: clip 222 done after" "clip 222 not said again (asked again" "long lines done")
+UNEXPECT_A=("crash" "out of memory" "ran past its length" "no voices")

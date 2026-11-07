@@ -431,7 +431,8 @@ static void WantList(const u16 *list, u8 n)
 static struct
 {
     s16 clip;          // -1: silent
-    u32 pos;           // in the clip's samples, 16.16
+    u64 pos;           // in the clip's samples, 16.16 (64 bits: a u32 wrapped at 65536 samples, 4.1 s, and a longer
+                       // line started over forever: 1.174.0)
     float duck;        // the game's sound: 1 normal .. 0.7 under the voice
 } sVoice = {-1, 0, 1.0f};
 
@@ -444,7 +445,7 @@ void MP_StadiumAnnouncer_Mix(float *buffer, s32 count)
 {
     struct Clip *k;
     s32 n;
-    const u32 step = (u32)(((u64)RATE << 16) / OUT_RATE);
+    const u64 step = ((u64)RATE << 16) / OUT_RATE;
     float target = sVoice.clip >= 0 ? 0.72f : 1.0f;
     for (n = 0; n + 1 < count; n += 2)
     {
@@ -457,7 +458,7 @@ void MP_StadiumAnnouncer_Mix(float *buffer, s32 count)
     k = &sPack.clip[sVoice.clip];
     for (n = 0; n + 1 < count; n += 2)
     {
-        u32 i = sVoice.pos >> 16;
+        u64 i = sVoice.pos >> 16;
         float a, b, v, f;
         if (i + 1 >= k->samples)
         {
@@ -503,7 +504,15 @@ static struct
     u16 turnsChosen;
     bool8 winDue;             // the last foe fell: "There goes the battle!" waits for "...was defeated!" and the win song
     bool8 winNow;             // the defeat message is up: said as soon as no line is playing
-} A = {.screenClip = -1};
+    // a line never plays twice in a row unless something new happened in between (the user, 2026-11-07: "prevents any
+    // line from being repeated immediately after it's already sounded, but lets it repeat if the situation actually
+    // calls for it"): `reason` counts new things (a different battle message, a new turn to choose, a screen)
+    u32 reason, lastClipReason;
+    s16 lastClip;
+    u16 lastString;
+    s16 playing;              // the clip the mixer was given (-1: none), to log when it ends
+    u32 playingSince;
+} A = {.screenClip = -1, .lastClip = -1, .playing = -1};
 
 static void ScreenUpdate(void);
 
@@ -576,6 +585,15 @@ static bool8 Recent(u16 clip)
 
 static void Start(u16 clip, const char *why)
 {
+    if ((s16)clip == A.lastClip && A.reason == A.lastClipReason)
+    {
+        MPNet_Log("announcer: clip %d not said again (%s: nothing new since it was said)", clip, why);
+        return;
+    }
+    A.lastClip = (s16)clip;
+    A.lastClipReason = A.reason;
+    A.playing = (s16)clip;
+    A.playingSince = A.frame;
     sVoice.clip = (s16)clip;
     sVoice.pos = 0;
     A.busyUntil = A.frame + sPack.clip[clip].frames;
@@ -743,6 +761,7 @@ void MP_StadiumAnnouncer_BattleStart(void)
     A.turnsChosen = 0;
     A.lastFaint = 0;
     A.winDue = A.winNow = FALSE;
+    A.reason++;   // (a new battle: any line may open it)
     WantBattle();
     MPNet_Log("announcer: battle on (text speed %d, anim speed %d)", gSaveBlock2Ptr->optionsTextSpeed, gMpConfig.animSpeed);
 }
@@ -870,6 +889,9 @@ void MP_Announcer_OnBattleString(u16 id)
     if (!A.battle || !gMpStadiumBattle)
         return;
     cue = CueOf(id);
+    if (id != A.lastString)
+        A.reason++;   // (the same message again is no new reason to speak)
+    A.lastString = id;
     Learn(A.frame);
     A.lastMsg = A.frame;
     A.lastCue = cue;
@@ -955,8 +977,19 @@ void MP_StadiumAnnouncer_Update(void)
         return;
     if (sVoice.clip < 0 && A.busyUntil > A.frame + 2)
         A.busyUntil = A.frame;   // (the mixer finished it a little early: free)
+    if (A.playing >= 0 && sVoice.clip != A.playing)
+    {
+        MPNet_Log("announcer: clip %d done after %u frames", A.playing, A.frame - A.playingSince);
+        A.playing = -1;
+    }
     ScreenUpdate();
     // (the win line keeps its place even when the battle's screens close before the playing line ends)
+    if (sVoice.clip >= 0 && A.frame > A.busyUntil + 120)
+    {
+        // (a line never runs two seconds past its own length; if one ever does, it's stopped rather than heard forever)
+        MPNet_Log("announcer: clip %d ran past its length, stopped", sVoice.clip);
+        sVoice.clip = -1;
+    }
     if (A.winNow && !Busy())
     {
         if (SDL_AtomicGet(&sPack.clip[sWon[0]].state) == 2)
@@ -999,6 +1032,7 @@ void MP_StadiumAnnouncer_Update(void)
     if (A.chooseSince == 0)
     {
         A.chooseSince = A.frame;
+        A.reason++;   // (a new turn to choose)
         A.prompted = A.idleSaid = FALSE;
         A.turnsChosen++;
     }
@@ -1044,6 +1078,7 @@ void MP_StadiumAnnouncer_Screen(u16 clip, const char *why)
     if (gMpConfig.noAnnouncer || !LoadPack() || clip >= CLIPS)
         return;
     Want(clip);
+    A.reason++;   // (a new screen)
     if (Busy())
     {
         MPNet_Log("announcer: %s dropped (a line is playing)", why);
@@ -1070,6 +1105,13 @@ static void ScreenUpdate(void)
 }
 
 // Tests (mp announcer): what was learned
+// Tests (`mp announcer again`): the last line asked for again with no new reason, which the repeat guard refuses
+void MP_StadiumAnnouncer_SayAgain(void)
+{
+    if (A.lastClip >= 0 && !Busy())
+        Start((u16)A.lastClip, "asked again");
+}
+
 void MP_StadiumAnnouncer_Debug(void)
 {
     u8 c;

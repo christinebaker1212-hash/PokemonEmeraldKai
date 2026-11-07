@@ -1,0 +1,7 @@
+# POKéMON STADIUM's announcer while the player's POKéMON has fainted and the next one is being chosen (the party
+# screen left waiting a long while): a line never plays twice in a row unless the battle gave a new reason for it.
+# 1.174.0 said the same line over and over while the player waited.
+MODE=1
+TMO=600
+EXPECT_A=("announcer: battle on" "announcer faint wait end")
+UNEXPECT_A=("crash" "out of memory")

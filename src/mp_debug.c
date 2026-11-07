@@ -2068,9 +2068,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "announcer") == 0)
     {
-        // announcer: POKeMON STADIUM's announcer, what it learned of the battle's pace (mp_stadium_announcer.c)
+        // announcer: POKeMON STADIUM's announcer, what it learned of the battle's pace (mp_stadium_announcer.c);
+        // announcer say N: clip N said now, as a screen's line would be
         void MP_StadiumAnnouncer_Debug(void);
-        MP_StadiumAnnouncer_Debug();
+        void MP_StadiumAnnouncer_Screen(u16 clip, const char *why);
+        int n;
+        void MP_StadiumAnnouncer_SayAgain(void);
+        if (sscanf(arg, "say %d", &n) == 1)
+            MP_StadiumAnnouncer_Screen((u16)n, "the debug command");
+        else if (strncmp(arg, "again", 5) == 0)
+            MP_StadiumAnnouncer_SayAgain();   // (announcer again: the last line asked for once more, with nothing new)
+        else
+            MP_StadiumAnnouncer_Debug();
     }
     else if (strcmp(cmd, "pinhp") == 0)
     {

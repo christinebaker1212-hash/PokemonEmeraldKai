@@ -1,0 +1,9 @@
+pressuntil A field 5000
+mp announcer say 222
+wait 900
+mp announcer again
+wait 60
+mp announcer say 222
+wait 900
+log long lines done
+quit
