@@ -1,0 +1,35 @@
+pressuntil A field 5000
+mp orreflag 0xADF
+mp orreflag 0xDCF
+mp orreflag 0x42E
+mp orreflag 0xA59
+mp orreflag 0x3DF
+mp orreflag 0x3F8
+mp orreflag 0x9DF
+mp orreflag 0xA0E
+wait 20
+press DOWN 20
+wait 60
+rendershot pan_stand
+press UP 5
+wait 60
+press UP 5
+wait 60
+press LEFT 5
+wait 60
+press UP 5
+wait 60
+rendershot pan_top
+press UP 5
+wait 60
+press LEFT 5
+wait 60
+press DOWN 5
+wait 60
+press DOWN 5
+wait 60
+press DOWN 5
+wait 60
+rendershot pan_bottom
+press B 5
+wait 40
