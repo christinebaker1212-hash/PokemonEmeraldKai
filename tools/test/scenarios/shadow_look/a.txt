@@ -1,5 +1,5 @@
 pressuntil A field 5000
-mp wild 263:2
+mp wild 288:2
 pressuntil A action 3000
 wait 10
 shot own_moe
@@ -7,8 +7,15 @@ press A 2
 press A 2
 pressuntil A field 9000
 wait 30
-mp shadow make 0 8
-mp wild 263:2
+mp summary
+waitfor summary 300
+wait 40
+shot own_moe_summary
+press B 2
+waitfor field 600
+wait 30
+mp shadow make 0 3
+mp wild 288:2
 pressuntil A action 3000
 wait 10
 shot dark_moe
@@ -16,8 +23,15 @@ press A 2
 press A 2
 pressuntil A field 9000
 wait 30
+mp summary
+waitfor summary 300
+wait 40
+shot dark_moe_summary
+press B 2
+waitfor field 600
+wait 30
 mp creatures 1
-mp wild 263:2
+mp wild 288:2
 pressuntil A action 3000
 wait 10
 shot dark_pokemon
@@ -25,8 +39,26 @@ press A 2
 press A 2
 pressuntil A field 9000
 wait 30
+mp summary
+waitfor summary 300
+wait 40
+shot dark_pokemon_summary
+press B 2
+waitfor field 600
+wait 30
 mp shadow purify 0
-mp wild 263:2
+mp wild 288:2
 pressuntil A action 3000
 wait 10
 shot own_pokemon
+press A 2
+press A 2
+pressuntil A field 9000
+wait 30
+mp summary
+waitfor summary 300
+wait 40
+shot own_pokemon_summary
+press B 2
+waitfor field 600
+wait 30

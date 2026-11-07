@@ -127,6 +127,11 @@ BattleScript_MpCoopBallNoTarget::
 @ Moemon Co-op: a player chose RUN in a co-op wild battle, but not everyone did
 @ Moemon Kai: CALL (ORRE's trainer battles, in RUN's place: src/orre/orre_shadow.c Orre_Shadow_Call): "X called Y!", then
 @ what came of it (a HYPER MODE snapped out of, a sleeper woken, or nothing)
+BattleScript_OrreTurnMsg::
+	printstring STRINGID_ORRE_TEXT
+	waitmessage B_WAIT_TIME_LONG
+	end2
+
 BattleScript_OrreCall::
 	printstring STRINGID_ORRE_TEXT
 	waitmessage B_WAIT_TIME_LONG

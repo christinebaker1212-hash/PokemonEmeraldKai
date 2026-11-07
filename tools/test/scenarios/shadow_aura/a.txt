@@ -1,0 +1,24 @@
+pressuntil A field 5000
+mp wild 288:2
+pressuntil A action 3000
+wait 10
+shot plain
+press A 2
+press A 2
+pressuntil A field 9000
+wait 30
+mp shadow make 0 3
+mp wild 288:95 150 150 150 150
+shotburst sendout 600 12
+pressuntil A action 3000
+wait 60
+shot faint
+mp shadow hyper 0 1
+wait 30
+shot hyper_idle
+press A 2
+wait 20
+press A 2
+shotburst turn 600 10
+pressuntil A action 4000
+wait 10

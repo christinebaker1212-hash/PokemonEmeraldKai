@@ -102,5 +102,14 @@ const u8 *Orre_Shadow_BattleText(u8 line);      // STRINGID_ORRE_TEXT / _TEXT2's
 extern const u8 gText_Orre_BattleMenuCall[];    // the action menu with CALL
 extern const u8 gText_Orre_HiddenMove[];   // "????": a hidden move's name (Colosseum's)
 void Orre_Shadow_Debug(const char *arg);   // `mp shadow ...` (tests)
+// the end of BATTLER's turn (battle_gen4.c's end-turn steps): HYPER MODE's reminder, or coming to its senses on its own
+// (1 in 256); the script to run, NULL none
+const u8 *Orre_Shadow_EndTurn(u8 battler);
+
+// ---- the Shadow aura (src/orre/orre_aura.c): drawn over the frame around a Shadow Pokémon in battle, faint while
+// it's out, a burst when Colosseum plays its aura
+enum { ORRE_AURA_APPEAR, ORRE_AURA_HYPER, ORRE_AURA_PULSE };
+void Orre_Aura_Burst(u8 battler, u8 kind);
+void Orre_Aura_Composite(u16 *frame);   // sdl2.c VDraw
 
 #endif
