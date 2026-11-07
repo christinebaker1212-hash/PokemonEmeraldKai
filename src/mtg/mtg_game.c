@@ -323,6 +323,22 @@ static void TrigEvent(MtgDuel *d, int mode, int obj, int obj2, int player)
     Mtg_CheckTriggers(d, &ev);
 }
 
+// "becomes the target of a spell or ability": T, by SOURCE (the spell, or the ability's source) of CTRL's
+static void TargetEvent(MtgDuel *d, MtgTarget t, int source, int ctrl)
+{
+    MtgTrigEvent ev;
+    if (t.kind != MTG_TGT_OBJ && t.kind != MTG_TGT_PLAYER)
+        return;
+    memset(&ev, 0, sizeof(ev));
+    ev.mode = MTG_TRIG_BECOMES_TARGET;
+    ev.obj = t.kind == MTG_TGT_OBJ ? t.id : MTG_NO_OBJ;
+    ev.obj2 = (uint16_t)source;
+    ev.player = t.kind == MTG_TGT_PLAYER ? (uint8_t)t.id : 0xFF;
+    ev.step = d->step;
+    ev.objCtrl = (uint8_t)ctrl;
+    Mtg_CheckTriggers(d, &ev);
+}
+
 void Mtg_Draw(MtgDuel *d, int player, int count)
 {
     while (count-- > 0) {
@@ -1141,8 +1157,13 @@ static void PayCostPick(MtgDuel *d, int obj)
     if (!d->costSac && !d->costDiscard && !d->costExile && !d->costReturn && !d->costTap && !d->costExileGrave
         && (d->tgtLeft || d->tgtOpt)) {   // another target
         MtgStackEntry *e = &d->stack[d->stackCount - 1];
-        if (e->extraCount < 4)
+        if (e->extraCount < 4) {
+            MtgTarget t;
             e->extra[e->extraCount++] = (uint16_t)obj;
+            t.kind = MTG_TGT_OBJ;
+            t.id = (uint16_t)obj;
+            TargetEvent(d, t, e->source, e->controller);
+        }
         if (d->tgtLeft)
             d->tgtLeft--;
         else
@@ -1264,6 +1285,7 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
     e->target = a->target;
     e->trigger = 0xFFFF;
     Mtg_Event(d, e->isSpell ? MTG_EV_CAST : MTG_EV_ACTIVATE, a->obj, a->target.kind, a->target.id);
+    TargetEvent(d, a->target, a->obj, p);
     if (e->isSpell)
         TrigEvent(d, MTG_TRIG_SPELL_CAST, a->obj, MTG_NO_OBJ, p);
     if (!e->isSpell && (gMtgAbilities[a->ability].cost.sacSelf || gMtgAbilities[a->ability].cost.discardSelf))
@@ -1675,6 +1697,7 @@ static void PushTrigger(MtgDuel *d, int i, MtgTarget target)
     e->optional = t->optional;
     d->passes = 0;
     Mtg_Event(d, MTG_EV_TRIGGER, pd.source, target.kind, target.id);
+    TargetEvent(d, target, pd.source, pd.controller);
 }
 
 static int NextPending(const MtgDuel *d)   // the active player's first (101.4: APNAP), in the order they happened

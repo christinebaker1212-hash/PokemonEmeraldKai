@@ -2330,6 +2330,47 @@ static void TestTrigModes(void)
     (void)fec;
 }
 
+static void TestBecomesTarget(void)
+{
+    int prot, illu, bolt, giant, k, lib;
+    static const char *const cards[] = {"Angelic Protector", "Cephalid Illusionist", "Cowardice", "Skulking Ghost",
+                                        "Daru Spiritualist", NULL};
+    int i;
+    printf("becomes the target\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Angelic Protector: targeted by a Bolt, it gets +0/+3 first and lives
+    prot = Put(1, "Angelic Protector", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Mountain", 1);
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, prot);
+    CHECK(sD.pendingCount == 1 || sD.stackCount == 2, "its trigger waits (%d pending, %d on the stack)", sD.pendingCount,
+          sD.stackCount);
+    for (k = 0; k < 6 && Zone(bolt) != MTG_ZONE_GRAVEYARD; k++)
+        Pass();
+    CHECK(Zone(prot) == MTG_ZONE_BATTLEFIELD && sD.objs[prot].damage == 3, "it lives (zone %d, damage %d)", Zone(prot),
+          sD.objs[prot].damage);
+
+    Table();   // Cephalid Illusionist: targeted, its controller mills three
+    illu = Put(0, "Cephalid Illusionist", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Mountain", 1);
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    lib = sD.players[0].libraryCount;
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, illu);
+    for (k = 0; k < 6 && Zone(bolt) != MTG_ZONE_GRAVEYARD; k++)
+        Pass();
+    CHECK(sD.players[0].libraryCount == lib - 3, "three milled (%d -> %d)", lib, sD.players[0].libraryCount);
+
+    Table();   // a player targeted doesn't set off a creature's
+    giant = Put(1, "Angelic Protector", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Mountain", 1);
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_PLAYER, 1);
+    CHECK(sD.pendingCount == 0 && sD.stackCount == 1, "nothing triggers (%d)", sD.pendingCount);
+    (void)giant;
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2735,6 +2776,7 @@ int main(int argc, char **argv)
     TestChooseSource();
     TestCantCounter();
     TestTrigModes();
+    TestBecomesTarget();
     TestDuels();
     TestRandomDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

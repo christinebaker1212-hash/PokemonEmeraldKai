@@ -657,6 +657,13 @@
 "number": "4",
 "set": "usg"
 },
+"Angelic Protector": {
+"artist": "DiTerlizzi",
+"file": "tmp_2",
+"frame": "1997",
+"number": "2",
+"set": "tmp"
+},
 "Angelic Shield": {
 "artist": "Adam Rex",
 "file": "inv_228",
@@ -2043,6 +2050,13 @@
 "number": "78",
 "set": "nem"
 },
+"Boneshard Slasher": {
+"artist": "Ron Spencer",
+"file": "tor_50",
+"frame": "1997",
+"number": "50",
+"set": "tor"
+},
 "Book of Rass": {
 "artist": "Sandra Everingham",
 "file": "bchr_95",
@@ -2806,12 +2820,26 @@
 "number": "123",
 "set": "tor"
 },
+"Cephalid Aristocrat": {
+"artist": "Rob Alexander",
+"file": "tor_27",
+"frame": "1997",
+"number": "27",
+"set": "tor"
+},
 "Cephalid Broker": {
 "artist": "Dave Dorman",
 "file": "ody_71",
 "frame": "1997",
 "number": "71",
 "set": "ody"
+},
+"Cephalid Illusionist": {
+"artist": "Pete Venters",
+"file": "tor_28",
+"frame": "1997",
+"number": "28",
+"set": "tor"
 },
 "Cephalid Inkshrouder": {
 "artist": "Tony Szczudlo",
@@ -3261,6 +3289,13 @@
 "number": "112",
 "set": "tmp"
 },
+"Cloud Cover": {
+"artist": "Marc Fishman",
+"file": "pls_98",
+"frame": "1997",
+"number": "98",
+"set": "pls"
+},
 "Cloud Djinn": {
 "artist": "Mike Dringenberg",
 "file": "wth_36",
@@ -3548,6 +3583,13 @@
 "number": "33",
 "set": "lgn"
 },
+"Cowardice": {
+"artist": "Scott M. Fischer",
+"file": "mmq_70",
+"frame": "1997",
+"number": "70",
+"set": "mmq"
+},
 "Crackdown": {
 "artist": "Rebecca Guay",
 "file": "mmq_15",
@@ -3821,6 +3863,13 @@
 "number": "127",
 "set": "4ed"
 },
+"Cursed Monstrosity": {
+"artist": "Jeff Remmer",
+"file": "ody_126",
+"frame": "1997",
+"number": "126",
+"set": "ody"
+},
 "Cursed Totem": {
 "artist": "D. Alexander Gregory",
 "file": "mir_299",
@@ -3974,6 +4023,13 @@
 "frame": "1997",
 "number": "315",
 "set": "ons"
+},
+"Daru Spiritualist": {
+"artist": "Dave Dorman",
+"file": "scg_5",
+"frame": "1997",
+"number": "5",
+"set": "scg"
 },
 "Daru Warchief": {
 "artist": "Tim Hildebrandt",
@@ -6459,6 +6515,13 @@
 "frame": "1993",
 "number": "138",
 "set": "4ed"
+},
+"Fugitive Druid": {
+"artist": "Quinton Hoover",
+"file": "tmp_229",
+"frame": "1997",
+"number": "229",
+"set": "tmp"
 },
 "Fugitive Wizard": {
 "artist": "Jim Nelson",
@@ -10471,6 +10534,13 @@
 "number": "312",
 "set": "mir"
 },
+"Mossdog": {
+"artist": "Matt Cavotta",
+"file": "nem_106",
+"frame": "1997",
+"number": "106",
+"set": "nem"
+},
 "Mossfire Valley": {
 "artist": "John Avon",
 "file": "ody_321",
@@ -12900,6 +12970,13 @@
 "number": "19",
 "set": "vis"
 },
+"Retromancer": {
+"artist": "Robh Ruppel",
+"file": "usg_209",
+"frame": "1997",
+"number": "209",
+"set": "usg"
+},
 "Reveka, Wizard Savant": {
 "artist": "Susan Van Camp",
 "file": "hml_37",
@@ -13999,6 +14076,13 @@
 "number": "254",
 "set": "tmp"
 },
+"Segmented Wurm": {
+"artist": "Jeff Miracola",
+"file": "tmp_269",
+"frame": "1997",
+"number": "269",
+"set": "tmp"
+},
 "Segovian Leviathan": {
 "artist": "Melissa A. Benson",
 "file": "4ed_99",
@@ -14643,6 +14727,20 @@
 "number": "158",
 "set": "usg"
 },
+"Skulking Fugitive": {
+"artist": "Scott M. Fischer",
+"file": "mmq_161",
+"frame": "1997",
+"number": "161",
+"set": "mmq"
+},
+"Skulking Ghost": {
+"artist": "Robert Bliss",
+"file": "mir_143",
+"frame": "1997",
+"number": "143",
+"set": "mir"
+},
 "Skull Catapult": {
 "artist": "Bryon Wackwitz",
 "file": "ice_336",
@@ -14824,6 +14922,13 @@
 "frame": "1997",
 "number": "273",
 "set": "inv"
+},
+"Sleeping Potion": {
+"artist": "Daren Bader",
+"file": "pls_34",
+"frame": "1997",
+"number": "34",
+"set": "pls"
 },
 "Sleight of Hand": {
 "artist": "Phil Foglio",
@@ -15349,6 +15454,13 @@
 "frame": "1997",
 "number": "49",
 "set": "pcy"
+},
+"Spinal Graft": {
+"artist": "Ron Spencer",
+"file": "tmp_159",
+"frame": "1997",
+"number": "159",
+"set": "tmp"
 },
 "Spindrift Drake": {
 "artist": "Anthony S. Waters",
@@ -16267,6 +16379,13 @@
 "number": "196",
 "set": "mir"
 },
+"Tar Pit Warrior": {
+"artist": "George Pratt",
+"file": "vis_70",
+"frame": "1997",
+"number": "70",
+"set": "vis"
+},
 "Tarnished Citadel": {
 "artist": "David Martin",
 "file": "ody_329",
@@ -16280,6 +16399,13 @@
 "frame": "1993",
 "number": "267",
 "set": "ice"
+},
+"Task Force": {
+"artist": "Gary Ruddell",
+"file": "mmq_52",
+"frame": "1997",
+"number": "52",
+"set": "mmq"
 },
 "Tawnos's Wand": {
 "artist": "Douglas Shuler",
@@ -16420,6 +16546,13 @@
 "frame": "1997",
 "number": "55",
 "set": "ody"
+},
+"Tethered Skirge": {
+"artist": "Brian Snõddy",
+"file": "ulg_70",
+"frame": "1997",
+"number": "70",
+"set": "ulg"
 },
 "Thaumatog": {
 "artist": "Monte Michael Moore",

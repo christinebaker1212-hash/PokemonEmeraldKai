@@ -3700,6 +3700,19 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's "becomes the target" (1.161.0)
+
+- Mode$ BecomesTarget (MTG_TRIG_BECOMES_TARGET): mtg_game.c TargetEvent fires for each target as a spell or ability
+  goes on the stack (DoAction's first target, PayCostPick's further ones, a triggered ability's own as it's put on the
+  stack). The event: obj the targeted card (or player in ev.player), obj2 the spell or the ability's source, objCtrl
+  the one who targets. TriggeredTarget / TriggeredSource.
+- ValidTarget$ is a card or player spec (both alternatives work: "You,Permanent.YouCtrl"); ValidSource$ "SpellAbility.X"
+  reads as "Card.X" (the spell or the ability's source), "Spell.X" only a spell on the stack (SourceSpec); OppCtrl also
+  needs the one who targets to be an opponent.
+- Unlocked 19: ANGELIC PROTECTOR, CEPHALID ILLUSIONIST / ARISTOCRAT, COWARDICE, CLOUD COVER, SKULKING GHOST / FUGITIVE,
+  DARU SPIRITUALIST, CURSED MONSTROSITY, SPINAL GRAFT, TETHERED SKIRGE, SLEEPING POTION...
+- Tests: test_rules.c TestBecomesTarget.
+
 ## MAGIC's trigger modes Taps and LandPlayed, other players' "may" (1.160.0)
 
 - Mode$ Taps (MTG_TRIG_TAPS: Mtg_Tap fires it when a permanent on the battlefield becomes tapped, mana payments

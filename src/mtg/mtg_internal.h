@@ -144,7 +144,7 @@ extern const char *const gMtgApiNames[MTG_API_COUNT];
 enum {
     MTG_TRIG_NONE, MTG_TRIG_CHANGES_ZONE, MTG_TRIG_PHASE, MTG_TRIG_SPELL_CAST, MTG_TRIG_DAMAGE_DONE, MTG_TRIG_ATTACKS,
     MTG_TRIG_ATTACKER_BLOCKED, MTG_TRIG_ATTACKER_BLOCKED_BY, MTG_TRIG_BLOCKS, MTG_TRIG_ATTACKER_UNBLOCKED,
-    MTG_TRIG_CYCLED, MTG_TRIG_TAPS, MTG_TRIG_LAND_PLAYED,   // (Taps: a permanent became tapped; LandPlayed: a land played)
+    MTG_TRIG_CYCLED, MTG_TRIG_TAPS, MTG_TRIG_LAND_PLAYED, MTG_TRIG_BECOMES_TARGET,   // (Taps: a permanent became tapped; LandPlayed: a land played)
     MTG_TRIG_COUNT
 };
 typedef struct {

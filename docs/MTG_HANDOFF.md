@@ -42,6 +42,10 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.161.0)
+- "Becomes the target" (Mode$ BecomesTarget): COOP_NOTES "MAGIC's becomes the target". 2734 of 5408. Next by count:
+  T:Execute (52), T:Always (21), T:DamageDoneOnce (17), T:TapsForMana (15), ChooseType (37), replacement effects left.
+
 ## Status (2026-11-07: 1.160.0)
 - Trigger modes Taps / LandPlayed, other players' OptionalDecider$, trigger CheckSVar$, Player.EnchantedController:
   COOP_NOTES "MAGIC's trigger modes Taps and LandPlayed". 2715 of 5408. Next by count: T:Execute (52), T:BecomesTarget

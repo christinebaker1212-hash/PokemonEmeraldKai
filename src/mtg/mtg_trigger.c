@@ -15,7 +15,7 @@ static int sTrigCount, sTrigCap;
 
 const char *const gMtgTriggerModes[MTG_TRIG_COUNT] = {
     "", "ChangesZone", "Phase", "SpellCast", "DamageDone", "Attacks", "AttackerBlocked", "AttackerBlockedByCreature",
-    "Blocks", "AttackerUnblocked", "Cycled", "Taps", "LandPlayed",
+    "Blocks", "AttackerUnblocked", "Cycled", "Taps", "LandPlayed", "BecomesTarget",
 };
 
 // the parameters each mode reads (besides the common ones)
@@ -26,6 +26,7 @@ static const char *const sModeKeys[MTG_TRIG_COUNT][4] = {
     [MTG_TRIG_CYCLED] = {"ValidCard"},
     [MTG_TRIG_TAPS] = {"ValidCard"},
     [MTG_TRIG_LAND_PLAYED] = {"ValidCard"},
+    [MTG_TRIG_BECOMES_TARGET] = {"ValidTarget", "ValidSource"},
     [MTG_TRIG_DAMAGE_DONE] = {"ValidSource", "ValidTarget", "CombatDamage"},
     [MTG_TRIG_ATTACKS] = {"ValidCard"},
     [MTG_TRIG_ATTACKER_BLOCKED] = {"ValidCard", "ValidBlocker"},
@@ -42,6 +43,21 @@ static const char *const sSpecKeys[] = {
     "ValidCard", "ValidPlayer", "ValidActivatingPlayer", "ValidSource", "ValidTarget", "ValidBlocker", "ValidBlocked",
     "IsPresent",
 };
+
+// BecomesTarget's ValidSource$: "SpellAbility.OppCtrl" / "Spell.Aura" as a card spec (the spell, or the ability's
+// source) in BUF; *spellOnly: only a spell (on the stack)
+static const char *SourceSpec(const char *v, char *buf, size_t size, int *spellOnly)
+{
+    *spellOnly = 0;
+    if (strncmp(v, "SpellAbility", 12) == 0)
+        snprintf(buf, size, "Card%s", v + 12);
+    else if (strncmp(v, "Spell", 5) == 0 && (v[5] == '.' || !v[5])) {
+        *spellOnly = 1;
+        snprintf(buf, size, "Card%s", v + 5);
+    } else
+        snprintf(buf, size, "%s", v);
+    return buf;
+}
 
 static const struct { const char *name; uint8_t step; } sPhases[] = {
     {"Upkeep", MTG_STEP_UPKEEP}, {"Draw", MTG_STEP_DRAW}, {"Main1", MTG_STEP_MAIN1},
@@ -212,7 +228,14 @@ static int ParseTrig(MtgCardDef *c, int cardId, char *text, int attach)
             Mtg_Unsupported(c, Reason(key));
             return -1;
         }
-        if (InList(key, sSpecKeys, (int)(sizeof(sSpecKeys) / sizeof(sSpecKeys[0]))) && !Mtg_ValidSpecKnown(val)) {
+        if (mode == MTG_TRIG_BECOMES_TARGET && strcmp(key, "ValidSource") == 0) {
+            char buf[128];
+            int so;
+            if (!Mtg_ValidSpecKnown(SourceSpec(val, buf, sizeof(buf), &so))) {
+                Mtg_Unsupported(c, Reason(key));
+                return -1;
+            }
+        } else if (InList(key, sSpecKeys, (int)(sizeof(sSpecKeys) / sizeof(sSpecKeys[0]))) && !Mtg_ValidSpecKnown(val)) {
             Mtg_Unsupported(c, Reason(key));
             return -1;
         }
@@ -399,6 +422,22 @@ static int Matches(const MtgDuel *d, const MtgTrigger *t, int host, const MtgTri
         return ObjOk(d, t, "ValidCard", ev->obj, host) && ObjOk(d, t, "ValidBlocked", ev->obj2, host);
     case MTG_TRIG_ATTACKS:
     case MTG_TRIG_ATTACKER_UNBLOCKED:
+    case MTG_TRIG_BECOMES_TARGET:   // obj (or player) targeted by a spell or ability of obj2's
+        if ((v = Mtg_TriggerParam(t, "ValidTarget")) != NULL
+            && !(ev->player < MTG_PLAYERS ? Mtg_ValidPlayerFrom(d, ev->player, v, host, d->objs[host].controller)
+                                          : ev->obj != MTG_NO_OBJ && Mtg_ValidObj(d, ev->obj, v, host, d->objs[host].controller)))
+            return 0;
+        if ((v = Mtg_TriggerParam(t, "ValidSource")) != NULL) {
+            char buf[128];
+            int spellOnly;
+            const char *spec = SourceSpec(v, buf, sizeof(buf), &spellOnly);
+            if (ev->obj2 == MTG_NO_OBJ || (spellOnly && d->objs[ev->obj2].zone != MTG_ZONE_STACK))
+                return 0;
+            if (strstr(spec, "OppCtrl") && ev->objCtrl == d->objs[host].controller)
+                return 0;   // (OppCtrl: the one who targets is an opponent, as well as its source's controller)
+            return Mtg_ValidObj(d, ev->obj2, spec, host, d->objs[host].controller);
+        }
+        return 1;
     case MTG_TRIG_CYCLED:
     case MTG_TRIG_TAPS:
     case MTG_TRIG_LAND_PLAYED:
