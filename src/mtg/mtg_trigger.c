@@ -15,7 +15,7 @@ static int sTrigCount, sTrigCap;
 
 const char *const gMtgTriggerModes[MTG_TRIG_COUNT] = {
     "", "ChangesZone", "Phase", "SpellCast", "DamageDone", "Attacks", "AttackerBlocked", "AttackerBlockedByCreature",
-    "Blocks", "AttackerUnblocked", "Cycled", "Taps", "LandPlayed", "BecomesTarget",
+    "Blocks", "AttackerUnblocked", "Cycled", "Taps", "LandPlayed", "BecomesTarget", "Always", "DamageDoneOnce",
 };
 
 // the parameters each mode reads (besides the common ones)
@@ -27,6 +27,7 @@ static const char *const sModeKeys[MTG_TRIG_COUNT][4] = {
     [MTG_TRIG_TAPS] = {"ValidCard"},
     [MTG_TRIG_LAND_PLAYED] = {"ValidCard"},
     [MTG_TRIG_BECOMES_TARGET] = {"ValidTarget", "ValidSource"},
+    [MTG_TRIG_DAMAGE_DONE_ONCE] = {"ValidSource", "ValidTarget", "CombatDamage"},
     [MTG_TRIG_DAMAGE_DONE] = {"ValidSource", "ValidTarget", "CombatDamage"},
     [MTG_TRIG_ATTACKS] = {"ValidCard"},
     [MTG_TRIG_ATTACKER_BLOCKED] = {"ValidCard", "ValidBlocker"},
@@ -397,6 +398,7 @@ static int Matches(const MtgDuel *d, const MtgTrigger *t, int host, const MtgTri
     case MTG_TRIG_SPELL_CAST:
         return ObjOk(d, t, "ValidCard", ev->obj, host) && PlayerOk(d, t, "ValidActivatingPlayer", ev->player, host);
     case MTG_TRIG_DAMAGE_DONE:
+    case MTG_TRIG_DAMAGE_DONE_ONCE:   // (each damage here: "whenever it is dealt damage")
         if ((v = Mtg_TriggerParam(t, "CombatDamage")) && (strcmp(v, "True") == 0) != (ev->combat != 0))
             return 0;
         if (!ObjOk(d, t, "ValidSource", ev->obj, host))
@@ -444,6 +446,41 @@ static int Matches(const MtgDuel *d, const MtgTrigger *t, int host, const MtgTri
         return ObjOk(d, t, "ValidCard", ev->obj, host);
     }
     return 0;
+}
+
+// Mode$ Always: a state trigger (603.8) for each permanent whose IsPresent$ holds now, unless one of its own already
+// waits, is on the stack or resolves
+void Mtg_CheckStateTriggers(MtgDuel *d)
+{
+    int i, k, j;
+    for (i = 0; i < d->objCount; i++) {
+        const MtgObj *o = &d->objs[i];
+        uint16_t trig[12];
+        int trigCount, busy;
+        if (o->zone != MTG_ZONE_BATTLEFIELD || !Mtg_Card(o->def)->supported)
+            continue;
+        trigCount = Mtg_ObjTriggers(d, i, trig, 12);
+        for (k = 0; k < trigCount; k++) {
+            const MtgTrigger *t = &gMtgTriggers[trig[k]];
+            MtgPending *p;
+            if (t->mode != MTG_TRIG_ALWAYS || !(t->zones & ZONE_BIT(o->zone)) || !Present(d, t, i))
+                continue;
+            busy = d->resAbility != 0xFFFF && d->res.source == i && d->res.trigger == trig[k];
+            for (j = 0; j < d->pendingCount && !busy; j++)
+                busy = d->pending[j].source == i && d->pending[j].trigger == trig[k];
+            for (j = 0; j < d->stackCount && !busy; j++)
+                busy = d->stack[j].source == i && d->stack[j].trigger == trig[k];
+            if (busy || d->pendingCount >= MTG_MAX_PENDING)
+                continue;
+            p = &d->pending[d->pendingCount++];
+            memset(p, 0, sizeof(*p));
+            p->source = (uint16_t)i;
+            p->trigger = trig[k];
+            p->trigObj = p->trigObj2 = MTG_NO_OBJ;
+            p->controller = o->controller;
+            p->trigPlayer = p->trigCtrl = 0xFF;
+        }
+    }
 }
 
 void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev)

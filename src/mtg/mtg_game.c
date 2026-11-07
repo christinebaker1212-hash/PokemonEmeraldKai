@@ -425,6 +425,8 @@ void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int com
         ev.amount = (int16_t)amount;
         ev.objCtrl = sourceObj != MTG_NO_OBJ ? d->objs[sourceObj].controller : 0xFF;
         Mtg_CheckTriggers(d, &ev);
+        ev.mode = MTG_TRIG_DAMAGE_DONE_ONCE;   // ("whenever it is dealt damage": each damage dealt, here)
+        Mtg_CheckTriggers(d, &ev);
     }
 }
 
@@ -1759,6 +1761,7 @@ static void Run(MtgDuel *d)
         StateBasedActions(d);
         if (d->over)
             continue;
+        Mtg_CheckStateTriggers(d);   // (Mode$ Always)
         if (d->pendingCount && PlacePending(d))
             return;
         if (d->over)

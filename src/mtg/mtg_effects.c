@@ -221,6 +221,7 @@ static const struct { const char *name; uint8_t mode, what; } sTriggered[] = {
     {"Card", MTG_TRIG_SPELL_CAST, TW_OBJ}, {"Activator", MTG_TRIG_SPELL_CAST, TW_PLAYER},
     {"Card", MTG_TRIG_CYCLED, TW_OBJ}, {"Card", MTG_TRIG_TAPS, TW_OBJ}, {"Card", MTG_TRIG_LAND_PLAYED, TW_OBJ},
     {"Target", MTG_TRIG_BECOMES_TARGET, TW_OBJ}, {"Source", MTG_TRIG_BECOMES_TARGET, TW_OBJ2},
+    {"Source", MTG_TRIG_DAMAGE_DONE_ONCE, TW_OBJ}, {"Target", MTG_TRIG_DAMAGE_DONE_ONCE, TW_TARGET},
     {"Source", MTG_TRIG_DAMAGE_DONE, TW_OBJ}, {"Target", MTG_TRIG_DAMAGE_DONE, TW_TARGET},
     {"Attacker", MTG_TRIG_ATTACKS, TW_OBJ}, {"Defender", MTG_TRIG_ATTACKS, TW_PLAYER},
     {"DefendingPlayer", MTG_TRIG_ATTACKS, TW_PLAYER},

@@ -3700,6 +3700,19 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's state triggers and "whenever it is dealt damage" (1.162.0)
+
+- Mode$ Always (MTG_TRIG_ALWAYS): Mtg_CheckStateTriggers, run after state-based actions each time a player would get
+  priority, puts one waiting for each permanent whose IsPresent$ (and CheckSVar$) holds, unless one of its own already
+  waits, is on the stack or resolves (603.8). "When you control no Swamps, sacrifice CARDNAME."
+- Mode$ DamageDoneOnce (MTG_TRIG_DAMAGE_DONE_ONCE): fired with each DamageDone event (Mtg_DealDamage), the same keys
+  and TriggeredSource / TriggeredTarget, TriggerCount$DamageAmount its amount. (Simultaneous combat damage from two
+  creatures to one target is two triggers here, not one: a small difference from 120.3.)
+- Unlocked 29: COVETOUS DRAGON, EMPEROR CROCODILE, BARBARIAN OUTCAST, ENDANGERED ARMODON, FLOODGATE, the sea creatures
+  that need an Island (SEA SERPENT, DANDAN, MANTA RAY, PIRATE SHIP...), JACKAL PUP, FUNGUSAUR, PHYREXIAN NEGATOR, FILTHY
+  CUR, WALL OF ESSENCE / HOPE / SOULS, BINDING AGONY, DRUID'S CALL, REPERCUSSION...
+- Tests: test_rules.c TestStateTrig.
+
 ## MAGIC's "becomes the target" (1.161.0)
 
 - Mode$ BecomesTarget (MTG_TRIG_BECOMES_TARGET): mtg_game.c TargetEvent fires for each target as a spell or ability

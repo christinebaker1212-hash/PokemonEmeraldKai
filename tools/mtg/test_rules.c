@@ -2371,6 +2371,46 @@ static void TestBecomesTarget(void)
     (void)giant;
 }
 
+static void TestStateTrig(void)
+{
+    int dragon, pup, fung, k, i;
+    MtgTarget t;
+    static const char *const cards[] = {"Covetous Dragon", "Emperor Crocodile", "Jackal Pup", "Fungusaur", "Phyrexian Negator",
+                                        NULL};
+    printf("state triggers, dealt damage\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Covetous Dragon: no artifacts, it's sacrificed (one trigger, not one a priority check)
+    dragon = Put(0, "Covetous Dragon", MTG_ZONE_BATTLEFIELD);
+    for (k = 0; k < 6 && Zone(dragon) == MTG_ZONE_BATTLEFIELD; k++)
+        Pass();
+    CHECK(Zone(dragon) == MTG_ZONE_GRAVEYARD, "sacrificed (%d)", Zone(dragon));
+    Table();
+    dragon = Put(0, "Covetous Dragon", MTG_ZONE_BATTLEFIELD);
+    Put(0, "Ornithopter", MTG_ZONE_BATTLEFIELD);
+    Pass();
+    Pass();
+    CHECK(Zone(dragon) == MTG_ZONE_BATTLEFIELD && sD.pendingCount == 0, "with an artifact it stays");
+
+    Table();   // Jackal Pup: dealt 2, its controller loses 2
+    pup = Put(0, "Jackal Pup", MTG_ZONE_BATTLEFIELD);
+    t.kind = MTG_TGT_OBJ;
+    t.id = (uint16_t)pup;
+    Mtg_DealDamage(&sD, MTG_NO_OBJ, t, 1, 0);
+    for (k = 0; k < 6 && sD.players[0].life == 20; k++)
+        Pass();
+    CHECK(sD.players[0].life == 19, "its controller loses that much (%d)", sD.players[0].life);
+
+    Table();   // Fungusaur: dealt damage, a +1/+1 counter
+    fung = Put(0, "Fungusaur", MTG_ZONE_BATTLEFIELD);
+    t.id = (uint16_t)fung;
+    Mtg_DealDamage(&sD, MTG_NO_OBJ, t, 1, 0);
+    for (k = 0; k < 6 && Mtg_Power(&sD, fung) == 2; k++)
+        Pass();
+    CHECK(Mtg_Power(&sD, fung) == 3, "a counter (%d)", Mtg_Power(&sD, fung));
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2777,6 +2817,7 @@ int main(int argc, char **argv)
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();
+    TestStateTrig();
     TestDuels();
     TestRandomDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

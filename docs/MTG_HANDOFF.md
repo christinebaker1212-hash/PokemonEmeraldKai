@@ -42,6 +42,11 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.162.0)
+- State triggers (Mode$ Always) and DamageDoneOnce: COOP_NOTES "MAGIC's state triggers". 2763 of 5408. Next by count:
+  T:Execute (52), T:TapsForMana (15, mostly extra mana), ChooseType (37), replacement effects left (Moved 22,
+  DamageDone ReplaceWith 28).
+
 ## Status (2026-11-07: 1.161.0)
 - "Becomes the target" (Mode$ BecomesTarget): COOP_NOTES "MAGIC's becomes the target". 2734 of 5408. Next by count:
   T:Execute (52), T:Always (21), T:DamageDoneOnce (17), T:TapsForMana (15), ChooseType (37), replacement effects left.

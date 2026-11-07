@@ -144,7 +144,8 @@ extern const char *const gMtgApiNames[MTG_API_COUNT];
 enum {
     MTG_TRIG_NONE, MTG_TRIG_CHANGES_ZONE, MTG_TRIG_PHASE, MTG_TRIG_SPELL_CAST, MTG_TRIG_DAMAGE_DONE, MTG_TRIG_ATTACKS,
     MTG_TRIG_ATTACKER_BLOCKED, MTG_TRIG_ATTACKER_BLOCKED_BY, MTG_TRIG_BLOCKS, MTG_TRIG_ATTACKER_UNBLOCKED,
-    MTG_TRIG_CYCLED, MTG_TRIG_TAPS, MTG_TRIG_LAND_PLAYED, MTG_TRIG_BECOMES_TARGET,   // (Taps: a permanent became tapped; LandPlayed: a land played)
+    MTG_TRIG_CYCLED, MTG_TRIG_TAPS, MTG_TRIG_LAND_PLAYED, MTG_TRIG_BECOMES_TARGET,
+    MTG_TRIG_ALWAYS, MTG_TRIG_DAMAGE_DONE_ONCE,   // (Always: a state trigger, IsPresent$; DamageDoneOnce: as DamageDone)   // (Taps: a permanent became tapped; LandPlayed: a land played)
     MTG_TRIG_COUNT
 };
 typedef struct {
@@ -169,7 +170,8 @@ typedef struct {
 // translate makes the card unsupported
 void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text);
 int Mtg_ParseGrantedTrigger(MtgCardDef *c, int cardId, char *text);   // a static's AddTrigger$: -1 if unsupported
-void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev);     // the triggers it sets off join d->pending
+void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev);
+void Mtg_CheckStateTriggers(MtgDuel *d);   // Mode$ Always whose IsPresent$ holds (not again while one waits)     // the triggers it sets off join d->pending
 int Mtg_TriggerStillTrue(const MtgDuel *d, const MtgStackEntry *e);   // an intervening "if" (IsPresent$) on resolving
 const char *Mtg_TriggerParam(const MtgTrigger *t, const char *key);
 int Mtg_ParseAbilityText(MtgCardDef *c, int cardId, char *text, int kind);

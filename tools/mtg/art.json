@@ -1371,6 +1371,13 @@
 "number": "175",
 "set": "ody"
 },
+"Barbarian Outcast": {
+"artist": "Mark Tedin",
+"file": "tor_92",
+"frame": "1997",
+"number": "92",
+"set": "tor"
+},
 "Barbed Field": {
 "artist": "Carl Critchlow",
 "file": "pcy_83",
@@ -1629,6 +1636,13 @@
 "frame": "1997",
 "number": "89",
 "set": "wth"
+},
+"Binding Agony": {
+"artist": "Robert Bliss",
+"file": "mir_106",
+"frame": "1997",
+"number": "106",
+"set": "mir"
 },
 "Binding Grasp": {
 "artist": "Ruth Thompson",
@@ -3583,6 +3597,13 @@
 "number": "33",
 "set": "lgn"
 },
+"Covetous Dragon": {
+"artist": "rk post",
+"file": "uds_80",
+"frame": "1997",
+"number": "80",
+"set": "uds"
+},
 "Cowardice": {
 "artist": "Scott M. Fischer",
 "file": "mmq_70",
@@ -3918,6 +3939,13 @@
 "frame": "1993",
 "number": "313",
 "set": "4ed"
+},
+"Dandân": {
+"artist": "Drew Tucker",
+"file": "bchr_18",
+"frame": "1993",
+"number": "18",
+"set": "bchr"
 },
 "Daraja Griffin": {
 "artist": "Stuart Griffin",
@@ -4815,6 +4843,13 @@
 "number": "238",
 "set": "ody"
 },
+"Druid's Call": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "ody_239",
+"frame": "1997",
+"number": "239",
+"set": "ody"
+},
 "Dry Spell": {
 "artist": "Brian Snõddy",
 "file": "hml_46a",
@@ -5270,6 +5305,13 @@
 "number": "284",
 "set": "tmp"
 },
+"Emperor Crocodile": {
+"artist": "Kev Walker",
+"file": "uds_105",
+"frame": "1997",
+"number": "105",
+"set": "uds"
+},
 "Empress Galina": {
 "artist": "Matt Cavotta",
 "file": "inv_54",
@@ -5290,6 +5332,13 @@
 "frame": "1997",
 "number": "261",
 "set": "ons"
+},
+"Endangered Armodon": {
+"artist": "Kev Walker",
+"file": "sth_107",
+"frame": "1997",
+"number": "107",
+"set": "sth"
 },
 "Endless Wurm": {
 "artist": "DiTerlizzi",
@@ -5921,6 +5970,13 @@
 "number": "66",
 "set": "jud"
 },
+"Filthy Cur": {
+"artist": "Adam Rex",
+"file": "ody_136",
+"frame": "1997",
+"number": "136",
+"set": "ody"
+},
 "Fire Diamond": {
 "artist": "Richard Thomas",
 "file": "mir_302",
@@ -6186,6 +6242,13 @@
 "frame": "1997",
 "number": "316",
 "set": "ons"
+},
+"Floodgate": {
+"artist": "Jeff Miracola",
+"file": "mir_67",
+"frame": "1997",
+"number": "67",
+"set": "mir"
 },
 "Floodwater Dam": {
 "artist": "Randy Gallegos",
@@ -6516,6 +6579,13 @@
 "number": "138",
 "set": "4ed"
 },
+"Frozen Solid": {
+"artist": "Glen Angus",
+"file": "scg_36",
+"frame": "1997",
+"number": "36",
+"set": "scg"
+},
 "Fugitive Druid": {
 "artist": "Quinton Hoover",
 "file": "tmp_229",
@@ -6564,6 +6634,13 @@
 "frame": "1997",
 "number": "100",
 "set": "papc"
+},
+"Fungusaur": {
+"artist": "Daniel Gelon",
+"file": "4ed_246",
+"frame": "1993",
+"number": "246",
+"set": "4ed"
 },
 "Furious Assault": {
 "artist": "Greg Staples",
@@ -7265,6 +7342,13 @@
 "number": "238",
 "set": "5ed"
 },
+"Goblins of the Flarg": {
+"artist": "Tom Wänerstrand",
+"file": "bchr_51",
+"frame": "1993",
+"number": "51",
+"set": "bchr"
+},
 "Goliath Beetle": {
 "artist": "Don Hazeltine",
 "file": "uds_107",
@@ -7285,6 +7369,13 @@
 "frame": "1993",
 "number": "94a",
 "set": "all"
+},
+"Gorilla Pack": {
+"artist": "Anthony S. Waters",
+"file": "ice_247",
+"frame": "1993",
+"number": "247",
+"set": "ice"
 },
 "Gorilla Warrior": {
 "artist": "John Matson",
@@ -8462,6 +8553,13 @@
 "number": "110",
 "set": "uds"
 },
+"Jackal Pup": {
+"artist": "Susan Van Camp",
+"file": "tmp_183",
+"frame": "1997",
+"number": "183",
+"set": "tmp"
+},
 "Jackalope Herd": {
 "artist": "Ron Spencer",
 "file": "exo_111",
@@ -9148,6 +9246,13 @@
 "number": "41",
 "set": "apc"
 },
+"Last Laugh": {
+"artist": "John Matson",
+"file": "tor_68",
+"frame": "1997",
+"number": "68",
+"set": "tor"
+},
 "Latulla, Keldon Overseer": {
 "artist": "Brom",
 "file": "pcy_95",
@@ -9785,6 +9890,13 @@
 "number": "60",
 "set": "inv"
 },
+"Manta Ray": {
+"artist": "Una Fricker",
+"file": "wth_42",
+"frame": "1997",
+"number": "42",
+"set": "wth"
+},
 "Manta Riders": {
 "artist": "Kaja Foglio",
 "file": "tmp_74",
@@ -9826,6 +9938,13 @@
 "frame": "1997",
 "number": "28",
 "set": "tmp"
+},
+"Marjhan": {
+"artist": "Daniel Gelon",
+"file": "hml_31",
+"frame": "1993",
+"number": "31",
+"set": "hml"
 },
 "Mark of Fury": {
 "artist": "Thomas M. Baxa",
@@ -10344,6 +10463,13 @@
 "frame": "1997",
 "number": "68",
 "set": "pls"
+},
+"Mogg Maniac": {
+"artist": "Brian Snõddy",
+"file": "sth_94",
+"frame": "1997",
+"number": "94",
+"set": "sth"
 },
 "Mogg Raider": {
 "artist": "Brian Snõddy",
@@ -11696,6 +11822,13 @@
 "number": "64",
 "set": "uds"
 },
+"Phyrexian Negator": {
+"artist": "John Zeleznik",
+"file": "uds_65",
+"frame": "1997",
+"number": "65",
+"set": "uds"
+},
 "Phyrexian Plaguelord": {
 "artist": "Kev Walker",
 "file": "ulg_62",
@@ -11807,6 +11940,20 @@
 "frame": "1997",
 "number": "321",
 "set": "tmp"
+},
+"Pious Warrior": {
+"artist": "Jeff Miracola",
+"file": "mmq_34",
+"frame": "1997",
+"number": "34",
+"set": "mmq"
+},
+"Pirate Ship": {
+"artist": "Tom Wänerstrand",
+"file": "4ed_91",
+"frame": "1993",
+"number": "91",
+"set": "4ed"
 },
 "Pit Imp": {
 "artist": "Phil Foglio",
@@ -12886,6 +13033,13 @@
 "number": "11",
 "set": "bchr"
 },
+"Repercussion": {
+"artist": "Michael Sutfin",
+"file": "uds_95",
+"frame": "1997",
+"number": "95",
+"set": "uds"
+},
 "Replenish": {
 "artist": "Jim Nelson",
 "file": "uds_15",
@@ -13502,6 +13656,13 @@
 "number": "266",
 "set": "mmq"
 },
+"Saber Ants": {
+"artist": "Greg Staples",
+"file": "mmq_267",
+"frame": "1997",
+"number": "267",
+"set": "mmq"
+},
 "Sabertooth Nishoba": {
 "artist": "Gary Ruddell",
 "file": "inv_268",
@@ -13942,6 +14103,13 @@
 "frame": "1997",
 "number": "90",
 "set": "mir"
+},
+"Sea Serpent": {
+"artist": "Jeff A. Menges",
+"file": "4ed_98",
+"frame": "1993",
+"number": "98",
+"set": "4ed"
 },
 "Sea Spirit": {
 "artist": "Rob Alexander",
@@ -14705,6 +14873,13 @@
 "frame": "1997",
 "number": "21",
 "set": "nem"
+},
+"Skeleton Ship": {
+"artist": "Amy Weber & Tom Wänerstrand",
+"file": "ice_301",
+"frame": "1993",
+"number": "301",
+"set": "ice"
 },
 "Skirk Outrider": {
 "artist": "Greg Staples",
@@ -16547,6 +16722,13 @@
 "number": "55",
 "set": "ody"
 },
+"Tethered Griffin": {
+"artist": "Matthew D. Wilson",
+"file": "uds_21",
+"frame": "1997",
+"number": "21",
+"set": "uds"
+},
 "Tethered Skirge": {
 "artist": "Brian Snõddy",
 "file": "ulg_70",
@@ -18101,6 +18283,13 @@
 "number": "171",
 "set": "mmq"
 },
+"Wall of Essence": {
+"artist": "Adam Rex",
+"file": "sth_22",
+"frame": "1997",
+"number": "22",
+"set": "sth"
+},
 "Wall of Fire": {
 "artist": "Richard Thomas",
 "file": "4ed_230",
@@ -18114,6 +18303,13 @@
 "frame": "1993",
 "number": "55",
 "set": "bchr"
+},
+"Wall of Hope": {
+"artist": "David Martin",
+"file": "lgn_24",
+"frame": "1997",
+"number": "24",
+"set": "lgn"
 },
 "Wall of Ice": {
 "artist": "Richard Thomas",
@@ -18163,6 +18359,13 @@
 "frame": "1997",
 "number": "46",
 "set": "mir"
+},
+"Wall of Souls": {
+"artist": "John Matson",
+"file": "sth_75",
+"frame": "1997",
+"number": "75",
+"set": "sth"
 },
 "Wall of Spears": {
 "artist": "Sandra Everingham",
