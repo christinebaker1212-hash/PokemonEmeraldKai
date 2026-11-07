@@ -1,0 +1,8 @@
+pressuntil A field 5000
+mp shadow make 0 1
+mp wild 288:2
+pressuntil A action 3000
+wait 10
+mp shadow out
+shot outside
+quit

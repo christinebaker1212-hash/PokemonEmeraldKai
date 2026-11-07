@@ -573,6 +573,26 @@ static struct OrreShadowRec *EnemyRec(u8 battler)
     return r != NULL && (r->flags & REC_ENEMY) ? r : NULL;
 }
 
+// decisions 2 and 3 (docs/SHADOW_POKEMON.md): a Shadow Pokémon battles only ORRE's own battles (co-op story battles
+// too), never outside ORRE, in PvP / link battles or a facility (MP_Gen_SealedMon: it can't be sent out)
+bool8 Orre_Shadow_Barred(struct Pokemon *mon)
+{
+    if (!gMain.inBattle || !Orre_Shadow_Is(mon))
+        return FALSE;
+    if (!O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
+        return TRUE;
+    return (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_FRONTIER)) && !gMpCoopBattle;
+}
+
+bool8 Orre_Shadow_PartyHasShadow(void)
+{
+    u8 i;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (Orre_Shadow_Is(&gPlayerParty[i]))
+            return TRUE;
+    return FALSE;
+}
+
 bool8 Orre_Shadow_HasSnagMachine(void)
 {
     return Orre_Flag(ORRE_FLAG_SNAG_MACHINE);
@@ -819,6 +839,15 @@ void Orre_Shadow_Debug(const char *arg)
     {
         void Orre_RelicStone(void);
         Orre_RelicStone();
+        return;
+    }
+    else if (strcmp(cmd, "out") == 0)   // out: the battlers out (species, party slot)
+    {
+        u8 i;
+        printf("[test] shadow out:");
+        for (i = 0; i < gBattlersCount; i++)
+            printf(" %u/%u", gBattleMons[i].species, gBattlerPartyIndexes[i]);
+        printf("\n");
         return;
     }
     else if (strcmp(cmd, "foes") == 0)   // foes: the opponent's party (species, Shadow id)

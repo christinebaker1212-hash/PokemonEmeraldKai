@@ -107,6 +107,9 @@ void Orre_Shadow_Debug(const char *arg);   // `mp shadow ...` (tests)
 bool8 Orre_Shadow_MakeEnemy(struct Pokemon *mon, u8 id);
 void Orre_Shadow_EnemyParty(void);           // the trainer's party just built (battle_main.c): its Shadow Pokémon
 bool8 Orre_Shadow_HasSnagMachine(void);
+// ---- ORRE's confinement (decisions 2, 3)
+bool8 Orre_Shadow_Barred(struct Pokemon *mon);   // in this battle it can't battle (outside ORRE, PvP, facilities)
+bool8 Orre_Shadow_PartyHasShadow(void);          // (the voyage out of ORRE refuses then)
 bool8 Orre_Shadow_Snaggable(u8 battler);     // a ball can be thrown at it (a trainer's Shadow Pokémon, the SNAG MACHINE)
 u8 Orre_Shadow_SnagRate(u8 battler);         // its catch rate (Colosseum's Shadow table)
 bool8 Orre_Shadow_WrongSnag(void);           // a ball at a trainer's POKéMON that isn't Shadow: RUI's words (TRUE)

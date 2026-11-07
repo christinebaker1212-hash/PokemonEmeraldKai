@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "pokemon_icon.h"   // (GetUnownLetterByPersonality: Crystal's UNOWN dex)
 #include "fieldmap.h"
 #include "metatile_behavior.h"
@@ -1719,6 +1720,8 @@ bool8 MP_Gen_SealedMon(struct Pokemon *mon)
     species = GetMonData(mon, MON_DATA_SPECIES);
     if (species == SPECIES_NONE)
         return FALSE;
+    if (Orre_Shadow_Barred(mon))   // Moemon Kai: a Shadow Pokémon battles only ORRE's own battles
+        return TRUE;
     if (MP_Gen_SealedSpecies(species))
         return TRUE;
     for (i = 0; i < MAX_MON_MOVES; i++)

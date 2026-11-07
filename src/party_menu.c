@@ -6722,8 +6722,9 @@ static bool8 TrySwitchInPokemon(void)
     if (MP_Gen_SealedMon(&gPlayerParty[slot]))   // Moemon Kai: past the GENERATION
     {
         static const u8 sText_Sealed[] = _("{STR_VAR_1} is from a later\ngeneration and can't battle!{PAUSE_UNTIL_PRESS}");
+        static const u8 sText_Shadow[] = _("{STR_VAR_1} is a SHADOW POKéMON\nand can't battle here!{PAUSE_UNTIL_PRESS}");
         GetMonNickname(&gPlayerParty[slot], gStringVar1);
-        StringExpandPlaceholders(gStringVar4, sText_Sealed);
+        StringExpandPlaceholders(gStringVar4, Orre_Shadow_Barred(&gPlayerParty[slot]) ? sText_Shadow : sText_Sealed);
         return FALSE;
     }
     if (GetPartyIdFromBattleSlot(slot) == gBattleStruct->prevSelectedPartySlot)
