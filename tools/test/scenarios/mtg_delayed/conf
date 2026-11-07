@@ -1,0 +1,6 @@
+# MAGIC's delayed triggers on the table: BLESSED WINE (1 life now, a card at the beginning of the next turn's upkeep);
+# END TURN, and the card comes in the opponent's upkeep. Shots dl_cast, dl_upkeep.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Blessed Wine" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Blessed Wine to focus")

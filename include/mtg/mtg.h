@@ -158,6 +158,14 @@ typedef struct {
 } MtgPending;
 #define MTG_MAX_PENDING 24
 
+// a delayed trigger waiting for its step (DelayedTriggerEffect): fires once, then is gone
+typedef struct {
+    uint16_t trigger, source, obj;   // obj: what it remembers (RememberObjects$; MTG_NO_OBJ: nothing)
+    uint8_t controller, nextTurn;
+    uint16_t turn;                   // the turn it was set up (NextTurn$: only from a later one)
+} MtgDelayed;
+#define MTG_MAX_DELAYED 12
+
 typedef struct {
     int16_t life;
     uint8_t landsPlayed, lost, drewFromEmpty;
@@ -237,6 +245,8 @@ typedef struct MtgDuel {
     // triggered abilities waiting to go on the stack
     uint8_t pendingCount;
     MtgPending pending[MTG_MAX_PENDING];
+    uint8_t delayedCount;
+    MtgDelayed delayed[MTG_MAX_DELAYED];
     // what is resolving, when it stopped for a choice (MTG_Q_CHOOSE): the entry, the ability of its chain it's at,
     // how far that ability got (resStage: its UnlessCost asked; resPicks: cards chosen so far)
     uint8_t resolving, resStage, resPicks;

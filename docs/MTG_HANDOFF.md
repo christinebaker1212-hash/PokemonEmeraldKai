@@ -42,6 +42,10 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.143.0)
+- Delayed triggers (Mode$ Phase): COOP_NOTES "MAGIC's delayed triggers". 2263 of 5408. Next by count: replacement
+  effects (96), PreventDamage (54), counters beyond +1/+1 (PutCounter 41), GainControl (40), LibraryPosition (39).
+
 ## Status (2026-11-07: 1.142.0)
 - UnlessCost$ forms that aren't mana (return, discard, sacrifice, life, DamageYou): COOP_NOTES "MAGIC's unless costs
   that aren't mana". 2227 of 5408. Next by count: replacement effects (96), DelayedTrigger (58), PreventDamage (54),

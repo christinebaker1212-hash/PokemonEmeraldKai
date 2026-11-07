@@ -1384,6 +1384,39 @@ static void TestUnless(void)
     CHECK(sD.players[1].life == 14 && Zone(atoll) == MTG_ZONE_BATTLEFIELD, "6 damage taken, the land kept");
 }
 
+// DelayedTrigger (Mode$ Phase): set up by an effect, fires once when its step begins
+static void TestDelayed(void)
+{
+    int wine, basilisk, wurm, hand, i;
+    static const char *const cards[] = {"Blessed Wine", "Thicket Basilisk", "Cinder Wall", "Carrier Pigeons",
+                                        "Brood of Cockroaches", "Lifeline", "Wall of Tears", NULL};
+    printf("delayed triggers: next upkeep, end of combat\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Blessed Wine: 1 life now, a card at the beginning of the next turn's upkeep
+    Lands(0, "Plains", 2);
+    wine = Put(0, "Blessed Wine", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, wine, -1, 0);
+    PassBoth();
+    hand = HandCount(0);
+    CHECK(sD.players[0].life == 21 && sD.delayedCount == 1, "1 life, a card to come");
+    GoTo(0, MTG_STEP_END);
+    CHECK(HandCount(0) == hand, "not this turn");
+    GoTo(1, MTG_STEP_DRAW);
+    CHECK(HandCount(0) == hand + 1 && sD.delayedCount == 0, "drawn in the next upkeep, once");
+
+    Table();   // Thicket Basilisk: what it blocks is destroyed at end of combat
+    wurm = Put(0, "Craw Wurm", MTG_ZONE_BATTLEFIELD);
+    basilisk = Put(1, "Thicket Basilisk", MTG_ZONE_BATTLEFIELD);
+    Attack(1);
+    Block(basilisk, wurm);
+    GoTo(0, MTG_STEP_COMBAT_DAMAGE);
+    CHECK(Zone(wurm) == MTG_ZONE_BATTLEFIELD, "the wurm lives through the damage");
+    GoTo(0, MTG_STEP_MAIN2);
+    CHECK(Zone(wurm) == MTG_ZONE_GRAVEYARD && Zone(basilisk) == MTG_ZONE_GRAVEYARD, "destroyed at end of combat");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1717,6 +1750,7 @@ int main(int argc, char **argv)
     TestSearch();
     TestTriggers();
     TestUnless();
+    TestDelayed();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

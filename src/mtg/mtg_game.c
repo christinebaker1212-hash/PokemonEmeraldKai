@@ -1331,6 +1331,7 @@ static int StartStep(MtgDuel *d)
     case MTG_STEP_UPKEEP: case MTG_STEP_DRAW: case MTG_STEP_MAIN1: case MTG_STEP_COMBAT_BEGIN:
     case MTG_STEP_COMBAT_END: case MTG_STEP_MAIN2: case MTG_STEP_END:
         TrigEvent(d, MTG_TRIG_PHASE, MTG_NO_OBJ, MTG_NO_OBJ, d->active);
+        Mtg_FireDelayed(d);   // ("at the beginning of the next ...": DelayedTrigger)
         break;
     }
     return 0;

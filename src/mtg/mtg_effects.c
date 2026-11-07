@@ -14,12 +14,13 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Sacrifice", MTG_API_SACRIFICE}, {"PutCounter", MTG_API_PUT_COUNTER}, {"Attach", MTG_API_ATTACH},
     {"Regenerate", MTG_API_REGENERATE}, {"Token", MTG_API_TOKEN},
     {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL}, {"Animate", MTG_API_ANIMATE},
+    {"DelayedTrigger", MTG_API_DELAYED_TRIGGER},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
-    "ChangeZoneAll", "Animate",
+    "ChangeZoneAll", "Animate", "DelayedTrigger",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -176,7 +177,7 @@ typedef struct { int n; MtgTarget t[MTG_MAX_DEFINED]; } Defined;
 
 static const char *const sDefinedKnown[] = {
     "You", "Opponent", "Player", "Self", "Targeted", "ParentTarget", "TargetedController", "TargetedPlayer",
-    "Enchanted",
+    "Enchanted", "DelayTriggerRemembered", "DelayTriggerRememberedLKI",
 };
 
 // what set a triggered ability off (SpellAbility.getTriggeringObject: "Triggered" + the AbilityKey's name, its
@@ -290,7 +291,10 @@ static void DefinedBy(const MtgDuel *d, const MtgResolveCtx *ctx, const char *de
     out->n = 0;
     if (strncmp(def, "Triggered", 9) == 0)
         Triggered(d, ctx, def, out);
-    else if (strcmp(def, "You") == 0)
+    else if (strncmp(def, "DelayTriggerRemembered", 22) == 0) {   // (a delayed trigger's: what it remembered)
+        if (ctx->e->trigObj != MTG_NO_OBJ && ctx->e->trigger != 0xFFFF)
+            Add(out, MTG_TGT_OBJ, ctx->e->trigObj);
+    } else if (strcmp(def, "You") == 0)
         Add(out, MTG_TGT_PLAYER, ctx->controller);
     else if (strcmp(def, "Opponent") == 0)
         Add(out, MTG_TGT_PLAYER, ctx->controller ^ 1);
@@ -656,6 +660,28 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         }
         break;
     }
+    case MTG_API_DELAYED_TRIGGER: {   // DelayedTriggerEffect: set up now, fires once when its step begins
+        const char *rem = Mtg_Param(ab, "RememberObjects"), *nt = Mtg_Param(ab, "NextTurn");
+        MtgDelayed *dl;
+        if (!ab->delayed || d->delayedCount >= MTG_MAX_DELAYED)
+            break;
+        dl = &d->delayed[d->delayedCount++];
+        dl->trigger = (uint16_t)(ab->delayed - 1);
+        dl->source = (uint16_t)ctx->source;
+        dl->controller = (uint8_t)ctx->controller;
+        dl->turn = d->turn;
+        dl->nextTurn = (uint8_t)(nt && strcmp(nt, "True") == 0);
+        dl->obj = MTG_NO_OBJ;
+        if (rem) {
+            DefinedBy(d, ctx, rem, &who);
+            for (i = 0; i < who.n; i++)
+                if (who.t[i].kind == MTG_TGT_OBJ) {
+                    dl->obj = who.t[i].id;
+                    break;
+                }
+        }
+        break;
+    }
     case MTG_API_REGENERATE:   // a shield on each: the next destruction this turn regenerates it instead
         Targets(d, ctx, ab, DEF_CARD, &who);
         for (i = 0; i < who.n; i++)
@@ -921,6 +947,8 @@ static const char *const sApiParams[MTG_API_COUNT][10] = {
     [MTG_API_CHANGE_ZONE_ALL] = {"Origin", "Destination", "ChangeType", "Shuffle", "UseAllOriginZones"},
     [MTG_API_ANIMATE] = {"Power", "Toughness", "Types", "Colors", "OverwriteColors", "Keywords", "RemoveCreatureTypes",
                          "Duration"},
+    [MTG_API_DELAYED_TRIGGER] = {"Mode", "Phase", "ValidPlayer", "Execute", "RememberObjects", "NextTurn",
+                                 "TriggerDescription", "Secondary"},
     [MTG_API_GAIN_LIFE] = {"LifeAmount"},
     [MTG_API_LOSE_LIFE] = {"LifeAmount"},
     [MTG_API_PUMP] = {"NumAtt", "NumDef", "KW"},
@@ -1049,6 +1077,15 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         if (Mtg_Param(ab, "Power") && !Mtg_Param(ab, "Toughness"))
             return 0;
         return ab->tgt || Mtg_Param(ab, "Defined");
+    }
+    case MTG_API_DELAYED_TRIGGER: {
+        const char *rem = Mtg_Param(ab, "RememberObjects");
+        if (!ab->delayed)
+            return 0;
+        if (rem && strcmp(rem, "Self") && strcmp(rem, "Targeted") && strcmp(rem, "ParentTarget")
+            && !(ab->kind != MTG_AB_SPELL && ab->kind != MTG_AB_ACTIVATED && Mtg_TriggeredDefinedKnown(0, rem)))
+            return 0;
+        return 1;
     }
     case MTG_API_CHANGE_ZONE_ALL: {
         const char *o = Mtg_Param(ab, "Origin"), *dz = Mtg_Param(ab, "Destination");

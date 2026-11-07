@@ -421,3 +421,72 @@ void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev)
         }
     }
 }
+
+// DelayedTriggerEffect's trigger: Mode$ Phase at Phase$ for ValidPlayer$, doing Execute$ (an SVar of the card). The
+// ability's own params serve as the trigger's (its Mode$ / Phase$ / ValidPlayer$ / Execute$ / TriggerDescription$).
+int Mtg_MakeDelayedTrigger(MtgCardDef *c, int cardId, int ability)
+{
+    const MtgAbility *ab = &gMtgAbilities[ability];
+    MtgTrigger *t;
+    const char *v, *why;
+    int idx, ex;
+    size_t len;
+    char *copy;
+    if (!(v = Mtg_Param(ab, "Mode")) || strcmp(v, "Phase") || !(v = Mtg_Param(ab, "Phase")) || !Steps(v)
+        || ((v = Mtg_Param(ab, "ValidPlayer")) && strcmp(v, "Player") && strcmp(v, "You"))
+        || !(v = Mtg_Param(ab, "Execute")) || !(v = Mtg_Svar(cardId, v)) || strncmp(v, "DB$", 3) != 0) {
+        Mtg_Unsupported(c, "DelayedTrigger");
+        return -1;
+    }
+    len = strlen(v) + 1;
+    copy = malloc(len);
+    memcpy(copy, v, len);
+    ex = Mtg_ParseAbilityText(c, cardId, copy, MTG_AB_TRIGGERED);
+    if (!ChainKnown(ex, MTG_TRIG_PHASE, &why)) {
+        Mtg_Unsupported(c, why);
+        return -1;
+    }
+    if (sTrigCount + 1 > sTrigCap) {
+        sTrigCap = sTrigCap ? sTrigCap * 2 : 1024;
+        gMtgTriggers = realloc(gMtgTriggers, (size_t)sTrigCap * sizeof(MtgTrigger));
+    }
+    idx = sTrigCount++;
+    t = &gMtgTriggers[idx];
+    memset(t, 0, sizeof(*t));
+    ab = &gMtgAbilities[ability];   // (the table may have moved)
+    t->mode = MTG_TRIG_PHASE;
+    t->card = (uint16_t)cardId;
+    t->execute = (uint16_t)ex;
+    t->paramFirst = ab->paramFirst;
+    t->paramCount = ab->paramCount;
+    t->zones = 0;   // (on no card: only its ability sets it up)
+    return idx;
+}
+
+void Mtg_FireDelayed(MtgDuel *d)
+{
+    int i = 0;
+    while (i < d->delayedCount) {
+        MtgDelayed *dl = &d->delayed[i];
+        const MtgTrigger *t = &gMtgTriggers[dl->trigger];
+        const char *vp = Mtg_TriggerParam(t, "ValidPlayer");
+        MtgPending *p;
+        if (!(Steps(Mtg_TriggerParam(t, "Phase")) & (1u << d->step)) || (dl->nextTurn && d->turn == dl->turn)
+            || (vp && strcmp(vp, "You") == 0 && d->active != dl->controller)) {
+            i++;
+            continue;
+        }
+        if (d->pendingCount < MTG_MAX_PENDING) {
+            p = &d->pending[d->pendingCount++];
+            memset(p, 0, sizeof(*p));
+            p->source = dl->source;
+            p->trigger = dl->trigger;
+            p->trigObj = dl->obj;
+            p->trigObj2 = MTG_NO_OBJ;
+            p->controller = dl->controller;
+            p->trigPlayer = (uint8_t)d->active;
+        }
+        memmove(dl, dl + 1, (size_t)(d->delayedCount - i - 1) * sizeof(*dl));
+        d->delayedCount--;
+    }
+}

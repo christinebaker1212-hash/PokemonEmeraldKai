@@ -3624,6 +3624,21 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   Still out (12): X / Y amounts, PutCardToLibFromGrave, ExileFromGrave<1/All>, Sac<4/...>, DefinedCost_Self.
 - Tests: test_rules.c TestUnless (CORAL ATOLL paid / not / can't, BALDUVIAN HORDE, LAVA BLISTER); scenario mtg_unless.
 
+## MAGIC's delayed triggers (1.143.0)
+
+- MTG_API_DELAYED_TRIGGER (DelayedTriggerEffect), Mode$ Phase only: Phase$ (Upkeep, EndCombat, End of Turn... the
+  trigger table's steps), ValidPlayer$ Player / You, NextTurn$ True, RememberObjects$ (Self, Targeted, ParentTarget, or a
+  Triggered... name of the trigger it runs under), Execute$ an SVar. Mtg_MakeDelayedTrigger (mtg_trigger.c) builds an
+  MtgTrigger from the ability's own params at load (zones 0: no card carries it) and parses Execute$ (MtgAbility.delayed).
+- MtgDuel.delayed[MTG_MAX_DELAYED]: {trigger, source, obj remembered, controller, turn, nextTurn}, added as the effect
+  resolves. StartStep's "at the beginning of" point calls Mtg_FireDelayed after TrigEvent(PHASE): each whose step it is
+  (and, with NextTurn$, from a later turn; ValidPlayer$ You: on its controller's turn) joins d->pending with trigObj =
+  the remembered object, and is gone. Defined$ DelayTriggerRemembered / ...LKI = e->trigObj.
+- Unlocked 36: the slowtrips (BLESSED WINE, CARRIER PIGEONS, FORESIGHT...), the basilisks and COCKATRICE, CINDER WALL,
+  BROOD OF COCKROACHES, LIFELINE, WALL OF TEARS... Still out: SpellCast / ChangesZone modes (ThisTurn$), Spawner>,
+  delayed triggers whose Execute$ uses an untranslated effect.
+- Tests: test_rules.c TestDelayed (BLESSED WINE next upkeep only, THICKET BASILISK at end of combat); scenario mtg_delayed.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

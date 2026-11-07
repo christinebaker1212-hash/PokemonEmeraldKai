@@ -32,6 +32,7 @@ enum {
     MTG_API_CHARM,            // CharmEffect: "choose one" (Choices$): each mode is offered as its own action
     MTG_API_CHANGE_ZONE_ALL,
     MTG_API_ANIMATE,          // AnimateEffect: becomes Power$/Toughness$ Types$ Colors$ with Keywords$ (until end of turn)  // ChangeZoneAllEffect: every ChangeType$ card from Origin$ (a target player's) to Destination$
+    MTG_API_DELAYED_TRIGGER,  // DelayedTriggerEffect: a one-time trigger set up now (Mode$ Phase: at a later step)
     MTG_API_COUNT
 };
 
@@ -90,6 +91,7 @@ typedef struct {
     uint8_t tgtMin, tgtMax;         // TargetMin$ / TargetMax$ (objects only; 1 / 1 without them; MTG_TGT_X: X of them)
     uint16_t unless;                // UnlessCost$ that isn't only mana (Return<1/Land>, Discard<1/Random>, DamageYou<5>...):
                                     // gMtgUnlessCosts[unless - 1] (0: none, or a mana one: Mtg_Param)
+    uint16_t delayed;               // DelayedTrigger: its trigger (gMtgTriggers[delayed - 1]), built from its own params
 } MtgAbility;
 extern MtgCost *gMtgUnlessCosts;
 
@@ -138,7 +140,11 @@ int Mtg_ParseGrantedTrigger(MtgCardDef *c, int cardId, char *text);   // a stati
 void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev);     // the triggers it sets off join d->pending
 int Mtg_TriggerStillTrue(const MtgDuel *d, const MtgStackEntry *e);   // an intervening "if" (IsPresent$) on resolving
 const char *Mtg_TriggerParam(const MtgTrigger *t, const char *key);
-int Mtg_ParseAbilityText(MtgCardDef *c, int cardId, char *text, int kind);   // (mtg_script.c, for the triggers)
+int Mtg_ParseAbilityText(MtgCardDef *c, int cardId, char *text, int kind);
+// a DelayedTrigger ability's trigger (Mode$ Phase only); -1 (and the card unsupported) if it isn't translated
+int Mtg_MakeDelayedTrigger(MtgCardDef *c, int cardId, int ability);
+// the delayed triggers whose step has begun join d->pending (each fires once)
+void Mtg_FireDelayed(MtgDuel *d);   // (mtg_script.c, for the triggers)
 void Mtg_Unsupported(MtgCardDef *c, const char *why);
 
 // mtg_static.c: static abilities (StaticAbilityContinuous.java: power, toughness, keywords of what they affect)

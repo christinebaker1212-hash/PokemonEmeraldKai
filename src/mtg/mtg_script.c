@@ -504,6 +504,11 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     ab->tgtZone = MTG_ZONE_BATTLEFIELD;   // (ChangeZone targets cards where they come from: a graveyard)
     if (ab->api == MTG_API_CHANGE_ZONE && (v = Mtg_Param(ab, "Origin")) && strcmp(v, "Graveyard") == 0)
         ab->tgtZone = MTG_ZONE_GRAVEYARD;
+    if (ab->api == MTG_API_DELAYED_TRIGGER) {   // (its Execute$ is parsed now: the table may move)
+        int t = Mtg_MakeDelayedTrigger(c, cardId, idx);
+        ab = &gMtgAbilities[idx];
+        ab->delayed = (uint16_t)(t < 0 ? 0 : t + 1);
+    }
     {
         const char *why;
         if (!Mtg_ApiParamsKnown(ab, &why))
