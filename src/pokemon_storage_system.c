@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
+#include "o3d.h"
 #include "mp_region.h"
 #include "malloc.h"
 #include "mp.h"
@@ -97,6 +99,8 @@ enum {
     MSG_CHANGED_TO_ITEM,
     MSG_CANT_STORE_MAIL,
     MSG_MP_ON_OFFER,   // Moemon Co-op: ON OFFER for a trade by mail
+    MSG_MP_SHADOW_ORRE,     // Moemon Kai: a Shadow Pokémon can't leave ORRE (docs/SHADOW_POKEMON.md decision 2)
+    MSG_MP_SHADOW_SHARED,   // ... or go in the SHARED PC (decision 3: no trades)
 };
 
 // IDs for how to resolve variables in the above messages
@@ -424,6 +428,7 @@ struct PokemonStorageSystemData
     u8 screenChangeType;
     bool8 isReopening;
     u8 taskId;
+    u8 mpShadowMsg;   // Moemon Kai: MpShadowStays's message for MSTATE_ERROR_MP_SHADOW
     struct UnkUtil unkUtil;
     struct UnkUtilData unkUtilData[8];
     u16 partyMenuTilemapBuffer[0x108];
@@ -776,6 +781,7 @@ static void MpToggleView(void);
 static bool8 MpGroupHeld(void);
 static u8 MpSendOne(void);
 static u8 MpSendTagged(void);
+static u8 MpShadowStays(bool8 party, u8 pos);
 static void MpAddSendMenuText(void);
 static void MpAddTagSendMenuText(void);
 static bool8 MpSendResultMessage(u8 result);
@@ -1147,6 +1153,8 @@ static const struct SpriteTemplate sSpriteTemplate_DisplayMon =
 };
 
 static const u8 sText_MpOnOffer[] = _("It's ON OFFER for a trade by mail.");
+static const u8 sText_MpShadowOrre[] = _("It can't leave ORRE yet.");   // (a Shadow Pokémon: one line)
+static const u8 sText_MpShadowShared[] = _("It can't be shared yet.");
 static const struct StorageMessage sMessages[] =
 {
     [MSG_EXIT_BOX]             = {gText_ExitFromBox,             MSG_VAR_NONE},
@@ -1181,6 +1189,8 @@ static const struct StorageMessage sMessages[] =
     [MSG_CHANGED_TO_ITEM]      = {gText_ChangedToNewItem,        MSG_VAR_ITEM_NAME},
     [MSG_CANT_STORE_MAIL]      = {gText_MailCantBeStored,        MSG_VAR_NONE},
     [MSG_MP_ON_OFFER]          = {sText_MpOnOffer,               MSG_VAR_NONE},
+    [MSG_MP_SHADOW_ORRE]       = {sText_MpShadowOrre,            MSG_VAR_NONE},
+    [MSG_MP_SHADOW_SHARED]     = {sText_MpShadowShared,          MSG_VAR_NONE},
 };
 
 static const struct WindowTemplate sYesNoWindowTemplate =
@@ -2376,6 +2386,7 @@ enum {
     MSTATE_WAIT_MSG,
     MSTATE_ERROR_LAST_PARTY_MON,
     MSTATE_ERROR_HAS_MAIL,
+    MSTATE_ERROR_MP_SHADOW,   // Moemon Kai: a Shadow Pokémon stays (MpShadowStays)
     MSTATE_WAIT_ERROR_MSG,
     MSTATE_MULTIMOVE_RUN,
     MSTATE_MULTIMOVE_RUN_CANCEL,
@@ -2501,7 +2512,11 @@ static void Task_PokeStorageMain(u8 taskId)
             }
             break;
         case INPUT_DEPOSIT:
-            if (!IsRemovingLastPartyMon())
+            if ((sStorage->mpShadowMsg = MpShadowStays(sCursorArea == CURSOR_AREA_IN_PARTY, sCursorPosition)) != 0)
+            {
+                sStorage->state = MSTATE_ERROR_MP_SHADOW;
+            }
+            else if (!IsRemovingLastPartyMon())
             {
                 if (ItemIsMail(sStorage->displayMonItemId))
                 {
@@ -2519,7 +2534,11 @@ static void Task_PokeStorageMain(u8 taskId)
             }
             break;
         case INPUT_MOVE_MON:
-            if (IsRemovingLastPartyMon())
+            if ((sStorage->mpShadowMsg = MpShadowStays(sCursorArea == CURSOR_AREA_IN_PARTY, sCursorPosition)) != 0)
+            {
+                sStorage->state = MSTATE_ERROR_MP_SHADOW;
+            }
+            else if (IsRemovingLastPartyMon())
             {
                 sStorage->state = MSTATE_ERROR_LAST_PARTY_MON;
             }
@@ -2530,7 +2549,11 @@ static void Task_PokeStorageMain(u8 taskId)
             }
             break;
         case INPUT_SHIFT_MON:
-            if (!CanShiftMon())
+            if ((sStorage->mpShadowMsg = MpShadowStays(sCursorArea == CURSOR_AREA_IN_PARTY, sCursorPosition)) != 0)
+            {
+                sStorage->state = MSTATE_ERROR_MP_SHADOW;
+            }
+            else if (!CanShiftMon())
             {
                 sStorage->state = MSTATE_ERROR_LAST_PARTY_MON;
             }
@@ -2541,6 +2564,11 @@ static void Task_PokeStorageMain(u8 taskId)
             }
             break;
         case INPUT_WITHDRAW:
+            if ((sStorage->mpShadowMsg = MpShadowStays(FALSE, sCursorPosition)) != 0)
+            {
+                sStorage->state = MSTATE_ERROR_MP_SHADOW;
+                break;
+            }
             PlaySE(SE_SELECT);
             SetPokeStorageTask(Task_WithdrawMon);
             break;
@@ -2681,6 +2709,11 @@ static void Task_PokeStorageMain(u8 taskId)
     case MSTATE_ERROR_HAS_MAIL:
         PlaySE(SE_FAILURE);
         PrintMessage(MSG_PLEASE_REMOVE_MAIL);
+        sStorage->state = MSTATE_WAIT_ERROR_MSG;
+        break;
+    case MSTATE_ERROR_MP_SHADOW:
+        PlaySE(SE_FAILURE);
+        PrintMessage(sStorage->mpShadowMsg);
         sStorage->state = MSTATE_WAIT_ERROR_MSG;
         break;
     case MSTATE_WAIT_ERROR_MSG:
@@ -2831,7 +2864,9 @@ static void Task_OnSelectedMon(u8 taskId)
             SetPokeStorageTask(Task_PokeStorageMain);
             break;
         case MENU_MOVE:
-            if (IsRemovingLastPartyMon())
+            if ((sStorage->mpShadowMsg = MpShadowStays(sCursorArea == CURSOR_AREA_IN_PARTY, sCursorPosition)) != 0)
+                sStorage->state = 8;   // Moemon Kai: a Shadow Pokémon stays
+            else if (IsRemovingLastPartyMon())
             {
                 sStorage->state = 3;
             }
@@ -2848,7 +2883,9 @@ static void Task_OnSelectedMon(u8 taskId)
             SetPokeStorageTask(Task_PlaceMon);
             break;
         case MENU_SHIFT:
-            if (!CanShiftMon())
+            if ((sStorage->mpShadowMsg = MpShadowStays(sCursorArea == CURSOR_AREA_IN_PARTY, sCursorPosition)) != 0)
+                sStorage->state = 8;
+            else if (!CanShiftMon())
             {
                 sStorage->state = 3;
             }
@@ -2860,12 +2897,19 @@ static void Task_OnSelectedMon(u8 taskId)
             }
             break;
         case MENU_WITHDRAW:
+            if ((sStorage->mpShadowMsg = MpShadowStays(FALSE, sCursorPosition)) != 0)
+            {
+                sStorage->state = 8;
+                break;
+            }
             PlaySE(SE_SELECT);
             ClearBottomWindow();
             SetPokeStorageTask(Task_WithdrawMon);
             break;
         case MENU_STORE:
-            if (IsRemovingLastPartyMon())
+            if ((sStorage->mpShadowMsg = MpShadowStays(TRUE, sCursorPosition)) != 0)
+                sStorage->state = 8;
+            else if (IsRemovingLastPartyMon())
             {
                 sStorage->state = 3;
             }
@@ -2936,7 +2980,9 @@ static void Task_OnSelectedMon(u8 taskId)
         case MENU_MP_SEND_PC:
         case MENU_MP_SEND_SHARED:
             // Moemon Co-op: to the other storage
-            if (MpSendResultMessage(MpSendOne()))
+            if ((sStorage->mpShadowMsg = MpShadowStays(sCursorArea == CURSOR_AREA_IN_PARTY, sCursorPosition)) != 0)
+                sStorage->state = 8;
+            else if (MpSendResultMessage(MpSendOne()))
                 sStorage->state = 6;
             else
             {
@@ -2964,6 +3010,11 @@ static void Task_OnSelectedMon(u8 taskId)
     case 7:
         PlaySE(SE_FAILURE);
         PrintMessage(MSG_MP_ON_OFFER);
+        sStorage->state = 6;
+        break;
+    case 8:   // Moemon Kai: a Shadow Pokémon stays (MpShadowStays)
+        PlaySE(SE_FAILURE);
+        PrintMessage(sStorage->mpShadowMsg);
         sStorage->state = 6;
         break;
     case 6:
@@ -10686,6 +10737,8 @@ static u8 Tag_Toggle(void)
     if (area == TAG_AREA_PARTY ? !GetMonData(&gPlayerParty[pos], MON_DATA_SANITY_HAS_SPECIES)
                                : !GetCurrentBoxMonData(pos, MON_DATA_SANITY_HAS_SPECIES))
         return INPUT_TAG_FAIL;
+    if (MpShadowStays(area == TAG_AREA_PARTY, pos))
+        return INPUT_TAG_FAIL;   // (Moemon Kai: a Shadow Pokémon stays: never in a group that leaves)
     Tag_Validate();
     if (sMpTag.area != area || (area == TAG_AREA_BOX && sMpTag.box != StorageGetCurrentBox()))
     {
@@ -12369,4 +12422,29 @@ void MP_Storage_DebugIcons(void)
             printf("[test] boxicon %u: inUse %d invisible %d xy %d,%d+%d,%d prio %d mode %d\n", i, sp->inUse, sp->invisible,
                    sp->x, sp->y, sp->x2, sp->y2, sp->oam.priority, sp->oam.objMode);
     }
+}
+
+// Moemon Kai: ORRE's confinement in the PC (docs/SHADOW_POKEMON.md decisions 2 and 3): a Shadow Pokémon in the player's
+// own boxes can't be taken out of them outside ORRE, and none goes near the SHARED PC (no trades of any kind); the
+// message to show (MSG_MP_SHADOW_*), 0 when it can move
+static u8 MpShadowStays(bool8 party, u8 pos)
+{
+    bool8 shadow;
+    if (party)
+        shadow = pos < PARTY_SIZE && Orre_Shadow_Is(&gPlayerParty[pos]);
+    else
+        shadow = pos < IN_BOX_COUNT && Orre_Shadow_IsBox(GetBoxedMonPtr(StorageGetCurrentBox(), pos));
+    if (!shadow)
+        return 0;
+    if (MP_PcStorage_IsShared())
+    {
+        MPNet_Log("pc: a SHADOW POKéMON stays (the SHARED PC)");
+        return MSG_MP_SHADOW_SHARED;
+    }
+    if (!party && !O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
+    {
+        MPNet_Log("pc: a SHADOW POKéMON stays (outside ORRE)");
+        return MSG_MP_SHADOW_ORRE;
+    }
+    return 0;
 }

@@ -31,6 +31,7 @@
 #include "battle_anim.h"
 #include "util.h"
 #include "pokedex.h"
+#include "pokemon_storage_system.h"
 #include "mp.h"
 #include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
@@ -833,6 +834,16 @@ void Orre_Shadow_Debug(const char *arg)
             Orre_Shadow_Step();
     else if (strcmp(cmd, "purify") == 0)
         Orre_Shadow_Purified(mon);
+    else if (strcmp(cmd, "makebox") == 0)   // makebox BOX POS ID: a boxed Pokémon (BOX from 1) made Shadow ID
+    {
+        struct Pokemon tmp;
+        if (slot >= 1 && slot <= TOTAL_BOXES_COUNT && a >= 0 && a < IN_BOX_COUNT)
+        {
+            BoxMonToMon(GetBoxedMonPtr(slot - 1, a), &tmp);
+            printf("[test] shadow makebox %d %d %d: %d\n", slot, a, b, Orre_Shadow_Make(&tmp, b));
+        }
+        return;
+    }
     else if (strcmp(cmd, "exp") == 0)   // exp SLOT N: N EXP earned (stored from the gauge's level 3)
         Orre_Shadow_TakeExp(mon, a);
     else if (strcmp(cmd, "relic") == 0)   // relic: the RELIC STONE (party_menu.c Orre_RelicStone)

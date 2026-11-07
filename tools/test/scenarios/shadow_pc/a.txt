@@ -1,0 +1,43 @@
+pressuntil A field 5000
+wait 60
+mp boxput 1 0 335 20
+mp shadow makebox 1 0 1
+mp curbox 1
+mp pc
+wait 120
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 240
+press A 2
+wait 40
+press A 2
+wait 40
+shot move_refused
+press B 2
+wait 30
+press B 2
+wait 30
+mp boxmons 1
+press B 2
+wait 60
+press B 2
+wait 120
+mp pc
+wait 120
+press A 2
+wait 240
+press A 2
+wait 40
+press A 2
+wait 40
+shot withdraw_refused
+press B 2
+wait 30
+press B 2
+wait 30
+mp boxmons 1
+mp party
+quit

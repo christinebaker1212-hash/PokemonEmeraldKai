@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "mp.h"
 #include "mp_tcard.h"
 #include "mp_life.h"
@@ -608,8 +609,14 @@ static void ChangeRow(s8 dir, bool8 big)
     {
         // NONE, then each party slot
         s16 v = (sTrade.mine.monSlot == 0xFF) ? 0 : sTrade.mine.monSlot + 1;
-        s16 n = gPlayerPartyCount + 1;
-        v = (v + dir + n) % n;
+        s16 n = gPlayerPartyCount + 1, k;
+        // (Moemon Kai: past a Shadow Pokémon: no trades until it's purified, docs/SHADOW_POKEMON.md decision 3)
+        for (k = 0; k < n; k++)
+        {
+            v = (v + dir + n) % n;
+            if (v == 0 || !Orre_Shadow_Is(&gPlayerParty[v - 1]))
+                break;
+        }
         sTrade.mine.monSlot = (v == 0) ? 0xFF : v - 1;
         break;
     }

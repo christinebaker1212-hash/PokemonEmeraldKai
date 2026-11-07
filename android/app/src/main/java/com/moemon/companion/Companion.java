@@ -1052,6 +1052,7 @@ public final class Companion implements LinkClient.Listener {
             case "full": return "There's no room.";
             case "egg": return "An EGG can't hold an item.";
             case "mail": return "MAIL can't be moved from here.";
+            case "shadow": return "A SHADOW POKéMON can't be traded until it's purified.";
             case "noitem": return "There's none of that item left.";
             case "cantheld": return "That item can't be held.";
             case "bagfull": return "The BAG is full.";

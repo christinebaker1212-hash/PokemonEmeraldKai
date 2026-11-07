@@ -1,0 +1,10 @@
+# CO-OP > TRADE with a Shadow Pokémon (mp_trade.c; docs/SHADOW_POKEMON.md decision 3: no trades until purified): ALICE's
+# lead is Colosseum's Shadow 1, so the offer row skips it and offers her second (MUDKIP); BOB's TREECKO comes the
+# other way, and the Shadow Pokémon stays with ALICE.
+MODE=2
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:12,283:12"
+ENV_B="MOEMON_DEBUG_PARTY=277:12 MOEMON_DEBUG_PID_SALT=7"
+EXPECT_A=("shadow: Shadow 1 (species 335) made" "trade: both ready" "trade with player 2 complete" "party: 280(" ") 277(")
+EXPECT_B=("trade: both ready" "trade with player 1 complete" "party: 283(")
+UNEXPECT_B=("party: 280(")

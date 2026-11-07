@@ -104,10 +104,13 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
   SEALED for the battle (MP_Gen_SealedMon: never the lead, can't be switched in, "...is a SHADOW POKéMON and can't
   battle here!") outside ORRE and in PvP / link battles and the BATTLE FRONTIER anywhere, so every facility (STADIUM,
   SIMULATOR, tents...) is covered at once; ORRE's own battles and co-op story battles there are untouched. Test
-  shadow_confined. Orre_Shadow_PartyHasShadow is for the voyage out of ORRE (there's no way out yet: it's entered by
-  warp). Still to do: no withdrawing one from a PC outside ORRE (the boxes are shared across regions), no trades
-  (co-op trades, the shared PC, the phone's trades by mail).
-- Next: the rest of the confinement, the A-Life, then co-op.
+  shadow_confined.
+- **S6, the rest of the confinement** (2026-11-07): the voyage out of ORRE (src/orre/orre_ferry.c: the OUTSKIRT
+  STAND's sailor won't sail with a Shadow Pokémon in the party; test orre_voyage); the PC (pokemon_storage_system.c
+  MpShadowStays: outside ORRE a Shadow Pokémon in the player's own boxes can't be picked up, withdrawn, shifted or
+  tagged, "It can't leave ORRE yet."; none goes near the SHARED PC, "It can't be shared yet."; test shadow_pc); trades
+  (CO-OP > TRADE skips it on the offer row, test trade_shadow; the phone's trades by mail refuse it, why "shadow").
+- Next: the A-Life, then co-op.
 - (old note) S3b was: Hyper Mode (each SHADOW RUSH rolls the nature's chance by the gauge's level; not asleep or already in it;
   Colosseum's messages 0x771B / 0x771C), CALL (snaps it out by the CALL chance and takes the CALL drop; wakes a
   sleeper: messages 0x7704-0x7709, 0x771D), the aura, and the dark palettes (below); then the opponents' Shadow

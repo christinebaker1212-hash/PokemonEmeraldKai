@@ -1,0 +1,9 @@
+# ORRE's confinement in the PC (pokemon_storage_system.c MpShadowStays; docs/SHADOW_POKEMON.md decisions 2 and 3): a
+# Shadow MAKUHITA in BOX 1, the player in LITTLEROOT (outside ORRE): MOVE POKéMON can't pick it up and WITHDRAW can't
+# take it ("It can't leave ORRE yet."); it stays in the box, the party unchanged. Shots move_refused,
+# withdraw_refused.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=156:20"
+EXPECT_A=("[test] shadow makebox 1 0 1: 1" "pc: a SHADOW POKéMON stays (outside ORRE)" "[test] boxmons 1: 0:335" ") 0 0 0 0 0  pc box1")
+UNEXPECT_A=("crash" "TIMEOUT")

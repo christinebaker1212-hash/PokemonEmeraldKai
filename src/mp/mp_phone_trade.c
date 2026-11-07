@@ -18,6 +18,7 @@
 #include <string.h>
 #include <time.h>
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "mp.h"
 #include "mp_life.h"
 #include "main.h"
@@ -813,6 +814,11 @@ static struct TradeRec *NewRec(const char *json, u8 role, const char **why)
     if (MP_Phone_OnOffer((u32)p, (u32)o))
     {
         *why = "onoffer";
+        return NULL;
+    }
+    if (Orre_Shadow_IsBox(box))
+    {
+        *why = "shadow";   // (Moemon Kai: a Shadow Pokémon isn't traded until it's purified: docs/SHADOW_POKEMON.md)
         return NULL;
     }
     if (MP_Phone_InTraining((u32)p, (u32)o))
