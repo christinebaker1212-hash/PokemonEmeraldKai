@@ -1,0 +1,37 @@
+pressuntil A field 5000
+wait 120
+press DOWN 20
+wait 40
+rendershot wm_open
+wait 30
+rendershot wm_map
+press B 5
+wait 40
+mp where
+shot wm_back
+press UP 20
+wait 20
+press DOWN 20
+wait 60
+press A 5
+wait 200
+mp where
+shot wm_arrived
+mp orreflag 0x3DF
+press DOWN 120
+wait 20
+mp where
+press RIGHT 112
+wait 20
+mp where
+press DOWN 140
+wait 80
+rendershot wm_two
+press LEFT 5
+wait 40
+rendershot wm_phenac
+press A 5
+wait 20
+press B 5
+wait 40
+mp where

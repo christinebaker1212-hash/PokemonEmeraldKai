@@ -1904,7 +1904,8 @@
     "Sinnoh_Underground"
   ],
   "gMapGroup_Orre": [
-    "Orre_OutskirtStand"
+    "Orre_OutskirtStand",
+    "Orre_OutskirtStandDiner"
   ],
   "gMapGroup_BattleIsland": [
     "BattleIsland",

@@ -779,3 +779,5 @@ gSpecials::
 	def_special MP_BattleIsland_Return
 	def_special MP_Stadium_BufferNews   @ Moemon Kai: POKéMON STADIUM (src/mp/mp_stadium.c, mp_stadium_ui.c)
 	def_special MP_Stadium_Open
+	def_special Orre_WorldMap, waitstate=1   @ Moemon Kai: ORRE's world map, Colosseum's own screen (src/orre/worldmap.c)
+	def_special Orre_WorldMapTravel

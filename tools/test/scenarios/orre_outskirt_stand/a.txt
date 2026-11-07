@@ -1,6 +1,8 @@
 pressuntil A field 5000
 wait 200
 shot o_start
+mp mapname
+mp music
 press RIGHT 40
 wait 20
 mp where
@@ -11,6 +13,20 @@ wait 20
 mp where
 shot o_lot
 press UP 200
-wait 20
+wait 120
 mp where
-shot o_door
+mp mapname
+shot o_diner
+press RIGHT 40
+wait 20
+press UP 20
+press RIGHT 120
+wait 30
+mp where
+shot o_aisle
+press LEFT 160
+wait 20
+press DOWN 30
+wait 120
+mp where
+shot o_back

@@ -5,6 +5,7 @@
 #include <string.h>
 #include "platform/gamepad.h"
 #include "global.h"
+#include "region_map.h"   // (mapname: GetMapName)
 #include "metatile_behavior.h"
 #include "roamer.h"
 #include "s3d_underground.h"
@@ -4023,6 +4024,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] collision %d %d: %d behavior %d\n", x, y, MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET),
                MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET));
     }
+    else if (strcmp(cmd, "mapname") == 0)
+    {
+        // mapname: this map's section and its name as the game shows it (GetMapName)
+        u8 name[40], ascii[40];
+        u32 k;
+        GetMapName(name, gMapHeader.regionMapSectionId, 0);
+        for (k = 0; k < sizeof(ascii) - 1 && name[k] != EOS; k++)
+            ascii[k] = name[k] == CHAR_SPACE ? ' ' : (name[k] >= CHAR_A && name[k] <= CHAR_Z) ? 'A' + name[k] - CHAR_A : '?';
+        ascii[k] = 0;
+        printf("[test] mapname 0x%X %s\n", (unsigned)gMapHeader.regionMapSectionId, ascii);
+    }
     else if (strcmp(cmd, "orrecheck") == 0 || strcmp(cmd, "orredownload") == 0 || strcmp(cmd, "orrestate") == 0)
     {
         // ORRE's packs (updater.c sOrre): orrecheck asks the release what it has, orredownload fetches and installs
@@ -4040,6 +4052,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
             Updater_OrreDownload();
         st = Updater_OrreState(&done, &total, &err);
         printf("[test] orre state %d %ld/%ld %s\n", st, done, total, err ? err : "");
+    }
+    else if (strcmp(cmd, "orreflag") == 0)
+    {
+        // orreflag N [0|1]: Colosseum's story flag N (hex with 0x) set, or cleared with 0 (src/orre/orre_story.c)
+        bool8 Orre_Flag(u16 flag);
+        void Orre_SetFlag(u16 flag, bool8 on);
+        unsigned long flag = strtoul(arg, NULL, 0);
+        const char *on = strchr(arg, ' ');
+        Orre_SetFlag(flag, on ? atoi(on + 1) != 0 : TRUE);
+        printf("[test] orreflag 0x%lX %d\n", flag, Orre_Flag(flag));
     }
     else if (strcmp(cmd, "s3dground") == 0)
     {

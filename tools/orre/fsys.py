@@ -6,6 +6,10 @@ The archive layout and the LZSS are the game's own loader's, as the Colosseum de
 a copy of its reader that keeps members of one name but different types apart.
 
   python3 tools/orre/fsys.py unpack DISC_FILES_DIR OUT_DIR   (every *.fsys -> OUT_DIR/<archive>/)
+  python3 tools/orre/fsys.py ids DISC_FILES_DIR OUT_DIR      (only each archive's _ids.txt)
+Each archive's folder also gets _ids.txt: "<member id, hex> <file>" a line, the ids the game's resources go by
+(a menu sprite's texture, a destination's picture...), and _archive_id.txt: the archive's own id (the floor
+table's group).
 """
 import os
 import struct
@@ -95,7 +99,7 @@ def member_data(d, m):
     return d[off:off + size]
 
 
-def unpack(src_dir, out_dir):
+def unpack(src_dir, out_dir, ids_only=False):
     total = 0
     for fn in sorted(os.listdir(src_dir)):
         if not fn.endswith(".fsys"):
@@ -104,21 +108,28 @@ def unpack(src_dir, out_dir):
         dst = os.path.join(out_dir, fn[:-5])
         os.makedirs(dst, exist_ok=True)
         seen = set()
+        ids = []
         for m in members(d):
             ext = TYPE_EXT.get((m[1] >> 8) & 0xFF, "t%02x" % ((m[1] >> 8) & 0xFF))
             name = "%s.%s" % (m[2], ext)
             if name in seen:
                 name = "%s_%d.%s" % (m[2], m[0], ext)
             seen.add(name)
-            with open(os.path.join(dst, name), "wb") as f:
-                f.write(member_data(d, m))
+            ids.append("%08x %s" % (m[1], name))
+            if not ids_only:
+                with open(os.path.join(dst, name), "wb") as f:
+                    f.write(member_data(d, m))
             total += 1
+        with open(os.path.join(dst, "_ids.txt"), "w") as f:
+            f.write("\n".join(ids) + "\n")
+        with open(os.path.join(dst, "_archive_id.txt"), "w") as f:   # (the archive's own id: header + 8)
+            f.write("%08x\n" % u32(d, 8))
     return total
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 4 and sys.argv[1] == "unpack":
-        print(unpack(sys.argv[2], sys.argv[3]), "members")
+    if len(sys.argv) == 4 and sys.argv[1] in ("unpack", "ids"):
+        print(unpack(sys.argv[2], sys.argv[3], sys.argv[1] == "ids"), "members")
     else:
         print(__doc__)
         sys.exit(1)
