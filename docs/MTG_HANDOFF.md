@@ -42,6 +42,16 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Tabled (2026-11-07, the user: "Table the rest of the Magic cards for now")
+- Card translation stops at 1.162.0 (2763 of 5408 playable). Don't start new MAGIC card work until the user asks.
+- Where it stood: the next step was triggers whose Execute$ is an "AB$ ... | Cost$ ..." ("you may pay {cost}. If you
+  do, ..."; about 45 cards: ACADEMY RECTOR, BRASS MAN, AUSPICIOUS ANCESTOR, CUSTOMS DEPOT...). Plan: let mtg_script.c
+  keep a triggered ability's Cost$ (today "optional cost" is unsupported) in gMtgUnlessCosts, and in Mtg_ResolveStep
+  ask its controller MTG_CHOICE_PAY before the root resolves, the reverse of UnlessCost (paid: the chain resolves; not
+  paid or can't pay: the whole chain is passed by).
+- After that, by count: TapsForMana (15, mostly extra mana), ChooseType (37: needs a type menu on the table), the
+  replacement effects left (Moved 22, DamageDone ReplaceWith 28).
+
 ## Status (2026-11-07: 1.162.0)
 - State triggers (Mode$ Always) and DamageDoneOnce: COOP_NOTES "MAGIC's state triggers". 2763 of 5408. Next by count:
   T:Execute (52), T:TapsForMana (15, mostly extra mana), ChooseType (37), replacement effects left (Moved 22,
