@@ -98,6 +98,10 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         return !d || o->controller == controller;
     if (n == 12 && strncmp(p, "IsRemembered", 12) == 0)   // (the resolving chain's remembered objects)
         return !d || Mtg_IsRemembered(d, obj);
+    if (n == 20 && strncmp(p, "RememberedPlayerCtrl", 20) == 0)   // (controlled by a remembered player: RepeatEach's)
+        return !d || Mtg_IsRememberedPlayer(d, o->controller);
+    if (n == 19 && strncmp(p, "RememberedPlayerOwn", 19) == 0)
+        return !d || Mtg_IsRememberedPlayer(d, o->owner);
     if (n == 7 && strncmp(p, "OppCtrl", 7) == 0)
         return !d || o->controller != controller;
     if (n == 6 && strncmp(p, "YouOwn", 6) == 0)

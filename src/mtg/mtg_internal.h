@@ -42,6 +42,8 @@ enum {
     MTG_API_FLIP_COIN,        // FlipCoinEffect: a coin; WinSubAbility$ or LoseSubAbility$ then resolves
     MTG_API_CLEANUP,          // CleanupEffect: ClearRemembered$ (the chain's remembered objects forgotten)
     MTG_API_REVEAL,           // RevealEffect: cards from a hand shown (RevealValid$, AnyNumber$, Random$), remembered
+    MTG_API_REPEAT_EACH,      // RepeatEachEffect: RepeatSubAbility$ once for each RepeatPlayers$ / RepeatCards$, each remembered
+    MTG_API_SET_LIFE,         // SetLifeEffect: a player's life total becomes LifeAmount$
     MTG_API_COUNT
 };
 
@@ -103,6 +105,7 @@ typedef struct {
                                     // gMtgUnlessCosts[unless - 1] (0: none, or a mana one: Mtg_Param)
     uint16_t delayed;               // DelayedTrigger: its trigger (gMtgTriggers[delayed - 1]), built from its own params
     uint16_t winSub, loseSub;       // FlipCoin: WinSubAbility$ / LoseSubAbility$ (0xFFFF: none)
+    uint16_t repeatSub;             // RepeatEach: its RepeatSubAbility$ (0xFFFF: none)
     uint8_t tgtFromSub;             // its tgt is the one target of a sub-ability later in its chain (chosen as it's cast;
                                     // its own effect doesn't act on it: Scent of Ivy's Reveal, then Pump)
     uint8_t tgtShared;              // a sub-ability whose target is its chain's (tgtFromSub on the first)
@@ -112,7 +115,8 @@ typedef struct {
 } MtgAbility;
 int Mtg_AbilityUses(const MtgDuel *d, int obj, int ability);
 void Mtg_Remember(MtgDuel *d, int obj);   // onto the resolving chain's remembered objects (once each)
-int Mtg_IsRemembered(const MtgDuel *d, int obj);   // times used this turn (ActivationLimit$)
+int Mtg_IsRemembered(const MtgDuel *d, int obj);
+int Mtg_IsRememberedPlayer(const MtgDuel *d, int player);   // times used this turn (ActivationLimit$)
 extern MtgCost *gMtgUnlessCosts;
 
 // mtg_script.c

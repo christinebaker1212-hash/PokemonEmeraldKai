@@ -16,13 +16,13 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL}, {"Animate", MTG_API_ANIMATE},
     {"DelayedTrigger", MTG_API_DELAYED_TRIGGER}, {"PreventDamage", MTG_API_PREVENT_DAMAGE},
     {"GainControl", MTG_API_GAIN_CONTROL}, {"PutCounterAll", MTG_API_PUT_COUNTER_ALL},
-    {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG}, {"Mill", MTG_API_MILL}, {"FlipCoin", MTG_API_FLIP_COIN}, {"Cleanup", MTG_API_CLEANUP}, {"Reveal", MTG_API_REVEAL},
+    {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG}, {"Mill", MTG_API_MILL}, {"FlipCoin", MTG_API_FLIP_COIN}, {"Cleanup", MTG_API_CLEANUP}, {"Reveal", MTG_API_REVEAL}, {"RepeatEach", MTG_API_REPEAT_EACH}, {"SetLife", MTG_API_SET_LIFE},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
-    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal",
+    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal", "RepeatEach", "SetLife",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -59,11 +59,18 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
     }
     if (strcmp(sv, "Count$xPaid") == 0)
         return d ? ctx->e->x : 0;
-    if (strcmp(sv, "Remembered$Amount") == 0 || strcmp(sv, "Count$RememberedSize") == 0)
-        return d ? d->remCount : 0;
+    if (strcmp(sv, "Remembered$Amount") == 0 || strcmp(sv, "Count$RememberedSize") == 0) {   // (the cards, not players)
+        int k, n = 0;
+        for (k = 0; d && k < d->remCount; k++)
+            n += d->rem[k] < MTG_REM_PLAYER;
+        return n;
+    }
     if (strncmp(sv, "Remembered$Card", 15) == 0 || strncmp(sv, "RememberedLKI$Card", 18) == 0) {   // the first one's
         const char *what = strstr(sv, "$Card") + 5;
-        int r = d && d->remCount ? d->rem[0] : -1;
+        int r = -1, k;
+        for (k = 0; d && k < d->remCount && r < 0; k++)
+            if (d->rem[k] < MTG_REM_PLAYER)
+                r = d->rem[k];
         if (strcmp(what, "Power") && strcmp(what, "Toughness") && strcmp(what, "ManaCost")) {
             *ok = 0;
             return 0;
@@ -202,6 +209,7 @@ typedef struct { int n; MtgTarget t[MTG_MAX_DEFINED]; } Defined;
 static const char *const sDefinedKnown[] = {
     "You", "Opponent", "Player", "Self", "Targeted", "ParentTarget", "TargetedController", "TargetedPlayer",
     "Enchanted", "DelayTriggerRemembered", "DelayTriggerRememberedLKI", "Remembered", "RememberedLKI", "RememberedCard",
+    "Player.IsRemembered",
 };
 
 // what set a triggered ability off (SpellAbility.getTriggeringObject: "Triggered" + the AbilityKey's name, its
@@ -318,10 +326,17 @@ static void DefinedBy(const MtgDuel *d, const MtgResolveCtx *ctx, const char *de
     else if (strncmp(def, "DelayTriggerRemembered", 22) == 0) {   // (a delayed trigger's: what it remembered)
         if (ctx->e->trigObj != MTG_NO_OBJ && ctx->e->trigger != 0xFFFF)
             Add(out, MTG_TGT_OBJ, ctx->e->trigObj);
-    } else if (strcmp(def, "Remembered") == 0 || strcmp(def, "RememberedLKI") == 0 || strcmp(def, "RememberedCard") == 0) {
-        int i;   // (the chain's remembered objects; RememberedCard: the first)
-        for (i = 0; i < d->remCount && (i == 0 || def[10] != 'C'); i++)
-            Add(out, MTG_TGT_OBJ, d->rem[i]);
+    } else if (strcmp(def, "Remembered") == 0 || strcmp(def, "RememberedLKI") == 0 || strcmp(def, "RememberedCard") == 0
+               || strcmp(def, "Player.IsRemembered") == 0) {
+        int i, cardOnly = def[10] == 'C', playersOnly = def[0] == 'P';   // (RememberedCard: the first card only)
+        for (i = 0; i < d->remCount; i++) {
+            int pl = d->rem[i] >= MTG_REM_PLAYER;
+            if ((pl && cardOnly) || (!pl && playersOnly))
+                continue;
+            Add(out, pl ? MTG_TGT_PLAYER : MTG_TGT_OBJ, pl ? d->rem[i] - MTG_REM_PLAYER : d->rem[i]);
+            if (cardOnly)
+                break;
+        }
     } else if (strcmp(def, "You") == 0)
         Add(out, MTG_TGT_PLAYER, ctx->controller);
     else if (strcmp(def, "Opponent") == 0)
@@ -970,6 +985,17 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         }
         break;
     }
+    case MTG_API_SET_LIFE: {   // SetLifeEffect: a player's life becomes the amount
+        int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "LifeAmount"), &ok);
+        Targets(d, ctx, ab, DEF_PLAYER, &who);
+        for (i = 0; i < who.n; i++)
+            if (who.t[i].kind == MTG_TGT_PLAYER) {
+                int was = d->players[who.t[i].id].life;
+                d->players[who.t[i].id].life = n;
+                Mtg_Event(d, MTG_EV_LIFE, who.t[i].id, n - was, n);
+            }
+        break;
+    }
     case MTG_API_GAIN_LIFE:
     case MTG_API_LOSE_LIFE: {
         int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "LifeAmount"), &ok);
@@ -1147,6 +1173,28 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                         break;
                     Mtg_MoveTo(d, top, MTG_ZONE_GRAVEYARD);
                 }
+        break;
+    }
+    case MTG_API_REPEAT_EACH: {   // RepeatEachEffect: the items now; ContinueResolve runs RepeatSubAbility$ for each
+        const char *rp = Mtg_Param(ab, "RepeatPlayers"), *rc = Mtg_Param(ab, "RepeatCards"), *zn = Mtg_Param(ab, "Zone");
+        int zone = !zn || strcmp(zn, "Battlefield") == 0 ? MTG_ZONE_BATTLEFIELD : strcmp(zn, "Graveyard") == 0
+                 ? MTG_ZONE_GRAVEYARD : MTG_ZONE_HAND, k;
+        d->repCount = 0;
+        if (rp) {   // (in turn order, APNAP)
+            if (strcmp(rp, "Player") == 0) {
+                d->repItems[d->repCount++] = (uint16_t)(MTG_REM_PLAYER + d->active);
+                d->repItems[d->repCount++] = (uint16_t)(MTG_REM_PLAYER + (d->active ^ 1));
+            } else
+                d->repItems[d->repCount++] = (uint16_t)(MTG_REM_PLAYER + (ctx->controller ^ 1));
+        } else
+            for (k = 0; k < d->objCount && d->repCount < 16; k++)
+                if (d->objs[k].zone == zone && Mtg_ValidObj(d, k, rc, ctx->source, ctx->controller))
+                    d->repItems[d->repCount++] = (uint16_t)k;
+        if (d->repCount) {
+            d->repAb = (uint16_t)(ab - gMtgAbilities);
+            d->repIdx = 0;
+            d->repStart = 1;
+        }
         break;
     }
     case MTG_API_CLEANUP:   // CleanupEffect: ClearRemembered$
@@ -1420,6 +1468,8 @@ static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_FLIP_COIN] = {"WinSubAbility", "LoseSubAbility"},
     [MTG_API_CLEANUP] = {"ClearRemembered"},
     [MTG_API_REVEAL] = {"RevealValid", "AnyNumber", "Random", "RememberRevealed"},
+    [MTG_API_REPEAT_EACH] = {"RepeatSubAbility", "RepeatPlayers", "RepeatCards", "Zone", "DamageMap", "ChangeZoneTable"},
+    [MTG_API_SET_LIFE] = {"LifeAmount"},
     [MTG_API_DELAYED_TRIGGER] = {"Mode", "Phase", "ValidPlayer", "Execute", "RememberObjects", "NextTurn",
                                  "TriggerDescription", "Secondary"},
     [MTG_API_GAIN_LIFE] = {"LifeAmount"},
@@ -1436,7 +1486,7 @@ static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_CHARM] = {"Choices"},
 };
 static const char *const sPayersKnown[] = {
-    "You", "Opponent", "Player", "Targeted", "TargetedController", "TargetedPlayer",
+    "You", "Opponent", "Player", "Targeted", "TargetedController", "TargetedPlayer", "Player.IsRemembered",
 };
 
 static int InList(const char *key, const char *const *list, int n)
@@ -1551,6 +1601,16 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return AmountKnown(ab, "NumCards", 0);
     case MTG_API_CLEANUP:
         return 1;
+    case MTG_API_REPEAT_EACH: {   // (its RepeatSubAbility$ is parsed as it's loaded: mtg_script.c)
+        const char *rp = Mtg_Param(ab, "RepeatPlayers"), *rc = Mtg_Param(ab, "RepeatCards"), *zn = Mtg_Param(ab, "Zone");
+        if (!Mtg_Param(ab, "RepeatSubAbility") || !rp == !rc)
+            return 0;
+        if (rp && strcmp(rp, "Player") && strcmp(rp, "Player.Opponent") && strcmp(rp, "Opponent"))
+            return 0;
+        if (rc && !Mtg_ValidSpecKnown(rc))
+            return 0;
+        return !zn || strcmp(zn, "Battlefield") == 0 || strcmp(zn, "Graveyard") == 0 || strcmp(zn, "Hand") == 0;
+    }
     case MTG_API_REVEAL:
         return !(v = Mtg_Param(ab, "RevealValid")) || Mtg_ValidSpecKnown(v);
     case MTG_API_FLIP_COIN:   // (its branches are checked as they're parsed: mtg_script.c)
@@ -1605,6 +1665,7 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     }
     case MTG_API_GAIN_LIFE:
     case MTG_API_LOSE_LIFE:
+    case MTG_API_SET_LIFE:
         return AmountKnown(ab, "LifeAmount", 1);
     case MTG_API_PUMP:
     case MTG_API_PUMP_ALL:

@@ -1862,6 +1862,48 @@ static void TestHidden(void)
     CHECK(Zone(wurm) == MTG_ZONE_GRAVEYARD, "no basic land in the graveyard: the wurm is sacrificed");
 }
 
+// RepeatEachEffect (each player remembered in turn: ACIDIC SOIL deals each their own lands' count, BIORHYTHM sets each
+// life to their creatures' count) and SetLifeEffect (BLESSED WIND)
+static void TestRepeat(void)
+{
+    int soil, bio, wind, i;
+    static const char *const cards[] = {"Acidic Soil", "Biorhythm", "Blessed Wind", "Price of Progress",
+                                        "Stronghold Discipline", "Wing Storm", NULL};
+    printf("for each player\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();
+    Lands(0, "Mountain", 3);
+    Lands(1, "Plains", 2);
+    soil = Put(0, "Acidic Soil", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, soil, -1, 0);
+    PassBoth();
+    CHECK(sD.players[0].life == 17 && sD.players[1].life == 18, "each dealt their own lands' count (%d, %d)",
+          sD.players[0].life, sD.players[1].life);
+    CHECK(sD.remCount == 0 && sD.repAb == 0xFFFF, "nothing left remembered");
+
+    Table();
+    Lands(0, "Forest", 8);
+    Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    bio = Put(0, "Biorhythm", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bio, -1, 0);
+    PassBoth();
+    CHECK(sD.players[0].life == 1 && sD.players[1].life == 3, "lives set to the creatures each controls (%d, %d)",
+          sD.players[0].life, sD.players[1].life);
+
+    Table();
+    Lands(0, "Plains", 9);
+    sD.players[0].life = 4;
+    wind = Put(0, "Blessed Wind", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, wind, MTG_TGT_PLAYER, 0);
+    PassBoth();
+    CHECK(sD.players[0].life == 20, "BLESSED WIND: life 20 (%d)", sD.players[0].life);
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2205,6 +2247,7 @@ int main(int argc, char **argv)
     TestMillFlip();
     TestRemember();
     TestHidden();
+    TestRepeat();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

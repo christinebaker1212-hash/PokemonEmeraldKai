@@ -243,7 +243,8 @@ enum {
     MTG_EV_COIN,       // a = the source, b = the player who flipped, c = 1 won / 0 lost
     MTG_EV_REVEAL      // a = the card revealed (from a hand), b = the player revealing it
 };
-typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;   // a, b, c by kind (mtg_game.c Mtg_Event)
+typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;
+#define MTG_REM_PLAYER 0xFF00   // a remembered player in MtgDuel.rem / repItems   // a, b, c by kind (mtg_game.c Mtg_Event)
 
 typedef struct MtgDuel {
     uint32_t rng;
@@ -275,7 +276,11 @@ typedef struct MtgDuel {
     // Remembered$Amount, IsRemembered; Cleanup's ClearRemembered$ empties it); remWatch: moves now are remembered
     // (0xFF any zone, else only into zone remWatch - 1)
     uint8_t remCount, remWatch;
-    uint16_t rem[16];
+    uint16_t rem[16];                                // (a player: MTG_REM_PLAYER + the player)
+    // a RepeatEach resolving: its ability, the chain to go on with after it, the items (as rem's) and which one now
+    uint16_t repAb, repReturn;
+    uint8_t repIdx, repCount, repStart;
+    uint16_t repItems[16];
     uint8_t resFlip;                                 // the coin just flipped: 1 won, 2 lost (0: none)
     int16_t resChoice;                               // the answer: 1 / 0, or the object picked (-1: not asked yet)
     // a cast or an activation's costs still to pick (sacrifices, then discards): asked as MTG_Q_CHOOSE's PICK with

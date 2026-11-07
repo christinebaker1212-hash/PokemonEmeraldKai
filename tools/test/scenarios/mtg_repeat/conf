@@ -1,0 +1,6 @@
+# MAGIC's "for each player" spells on the table: ACIDIC SOIL deals each player damage equal to the lands they
+# control, one player after the other (3 to you, 2 to the opponent here: their Island and the Plains). Shots rp_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Acidic Soil" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Acidic Soil to focus")

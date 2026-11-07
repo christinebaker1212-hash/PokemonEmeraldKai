@@ -3700,6 +3700,22 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's "for each" spells and SetLife (1.153.0)
+
+- RepeatEach (MTG_API_REPEAT_EACH): RepeatSubAbility$ (MtgAbility.repeatSub, parsed at load; no RepeatEach inside)
+  once for each RepeatPlayers$ (Player in turn order, Opponent / Player.Opponent) or RepeatCards$ (a spec in Zone$,
+  the battlefield by default). Each item is remembered while its run resolves (players as MTG_REM_PLAYER + p in
+  MtgDuel.rem) and forgotten after it, so what the runs remember stays (Harsh Mercy's way). State: MtgDuel repAb /
+  repReturn / repIdx / repCount / repItems / repStart, stepped in ContinueResolve after a coin's branch.
+- Read by Defined$ Remembered (players too) / Player.IsRemembered (also an UnlessPayer$), Valid RememberedPlayerCtrl /
+  RememberedPlayerOwn; Remembered$Amount counts the cards only. DamageMap$ / ChangeZoneTable$ are read (damage is
+  dealt one item after the other).
+- SetLife (MTG_API_SET_LIFE): a player's life becomes LifeAmount$ (MTG_EV_LIFE with the difference).
+- The AI doesn't cast RepeatEach / SetLife / Reveal spells yet (score 0).
+- Unlocked 11: ACIDIC SOIL, PRICE OF PROGRESS, BIORHYTHM, BLESSED WIND, STRONGHOLD DISCIPLINE, WING STORM, OMEN OF
+  FIRE, NATURE'S RESURGENCE, KAMAHL'S SUMMONS, WAITING IN THE WEEDS, STERN JUDGE.
+- Tests: test_rules.c TestRepeat; scenario mtg_repeat.
+
 ## MAGIC's choices among a player's own cards (1.152.0)
 
 - ChangeZone with ChangeType$ from the Battlefield or a Graveyard (Hidden$ True: "return a creature you control to

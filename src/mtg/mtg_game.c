@@ -139,6 +139,11 @@ void Mtg_Remember(MtgDuel *d, int obj)
     d->rem[d->remCount++] = (uint16_t)obj;
 }
 
+int Mtg_IsRememberedPlayer(const MtgDuel *d, int player)
+{
+    return Mtg_IsRemembered(d, MTG_REM_PLAYER + player);
+}
+
 int Mtg_IsRemembered(const MtgDuel *d, int obj)
 {
     int i;
@@ -652,9 +657,31 @@ static int ContinueResolve(MtgDuel *d)
                     next = b;
                 }
             }
+            if (gMtgAbilities[d->resAbility].api == MTG_API_REPEAT_EACH && d->repStart) {   // its first item's run
+                d->repStart = 0;
+                d->repReturn = next;
+                Mtg_Remember(d, d->repItems[0]);
+                next = gMtgAbilities[d->repAb].repeatSub;
+            }
             if (next == 0xFFFF && d->resReturn != 0xFFFF) {   // (the branch done: the coin's own chain goes on)
                 next = d->resReturn;
                 d->resReturn = 0xFFFF;
+            }
+            if (next == 0xFFFF && d->repAb != 0xFFFF) {   // a RepeatEach item done: the next one, or what follows it
+                int k;
+                for (k = 0; k < d->remCount; k++)   // (the item forgotten; what the run remembered stays)
+                    if (d->rem[k] == d->repItems[d->repIdx]) {
+                        memmove(&d->rem[k], &d->rem[k + 1], (d->remCount - k - 1) * sizeof(d->rem[0]));
+                        d->remCount--;
+                        break;
+                    }
+                if (++d->repIdx < d->repCount) {
+                    Mtg_Remember(d, d->repItems[d->repIdx]);
+                    next = gMtgAbilities[d->repAb].repeatSub;
+                } else {
+                    next = d->repReturn;
+                    d->repAb = 0xFFFF;
+                }
             }
             d->resAbility = next;
         }
@@ -709,6 +736,8 @@ static int ResolveTop(MtgDuel *d)
     d->resFlip = 0;
     d->resCondAb = 0xFFFF;
     d->remCount = 0;   // (a new chain remembers its own)
+    d->repAb = 0xFFFF;
+    d->repStart = 0;
     d->resStage = d->resPicks = 0;
     d->resChoice = -1;
     return ContinueResolve(d);

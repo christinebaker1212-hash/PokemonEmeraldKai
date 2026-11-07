@@ -132,6 +132,13 @@
 "number": "126",
 "set": "sth"
 },
+"Acidic Soil": {
+"artist": "Scott M. Fischer",
+"file": "usg_172",
+"frame": "1997",
+"number": "172",
+"set": "usg"
+},
 "Active Volcano": {
 "artist": "Justin Hampton",
 "file": "bchr_43",
@@ -1525,6 +1532,13 @@
 "number": "60",
 "set": "ice"
 },
+"Biorhythm": {
+"artist": "Ron Spears",
+"file": "ons_247",
+"frame": "1997",
+"number": "247",
+"set": "ons"
+},
 "Bird Maiden": {
 "artist": "Kaja Foglio",
 "file": "4ed_177",
@@ -1657,6 +1671,13 @@
 "frame": "1997",
 "number": "7",
 "set": "por"
+},
+"Blessed Wind": {
+"artist": "Anthony S. Waters",
+"file": "pcy_4",
+"frame": "1997",
+"number": "4",
+"set": "pcy"
 },
 "Blessed Wine": {
 "artist": "Kaja Foglio",
@@ -7979,6 +8000,13 @@
 "number": "199",
 "set": "ody"
 },
+"Kamahl's Summons": {
+"artist": "Anthony S. Waters",
+"file": "ons_269",
+"frame": "1997",
+"number": "269",
+"set": "ons"
+},
 "Kamahl, Fist of Krosa": {
 "artist": "Matthew D. Wilson",
 "file": "ons_268",
@@ -10023,6 +10051,13 @@
 "number": "255",
 "set": "ice"
 },
+"Nature's Resurgence": {
+"artist": "Scott M. Fischer",
+"file": "wth_137",
+"frame": "1997",
+"number": "137",
+"set": "wth"
+},
 "Nature's Wrath": {
 "artist": "Liz Danforth",
 "file": "all_98",
@@ -10288,6 +10323,13 @@
 "frame": "1997",
 "number": "112",
 "set": "p02"
+},
+"Omen of Fire": {
+"artist": "Pete Venters",
+"file": "all_75",
+"frame": "1993",
+"number": "75",
+"set": "all"
 },
 "Onslaught": {
 "artist": "Paolo Parente",
@@ -11148,6 +11190,13 @@
 "file": "exo_117",
 "frame": "1997",
 "number": "117",
+"set": "exo"
+},
+"Price of Progress": {
+"artist": "Richard Kane Ferguson",
+"file": "exo_95",
+"frame": "1997",
+"number": "95",
 "set": "exo"
 },
 "Priest of Gix": {
@@ -14622,6 +14671,13 @@
 "number": "278",
 "set": "inv"
 },
+"Stern Judge": {
+"artist": "Matt Cavotta",
+"file": "tor_16",
+"frame": "1997",
+"number": "16",
+"set": "tor"
+},
 "Stern Proctor": {
 "artist": "Randy Gallegos",
 "file": "usg_99",
@@ -14823,6 +14879,13 @@
 "file": "nem_45",
 "frame": "1997",
 "number": "45",
+"set": "nem"
+},
+"Stronghold Discipline": {
+"artist": "Li Tie",
+"file": "nem_73",
+"frame": "1997",
+"number": "73",
 "set": "nem"
 },
 "Stronghold Machinist": {
@@ -16687,6 +16750,13 @@
 "number": "288",
 "set": "inv"
 },
+"Waiting in the Weeds": {
+"artist": "Susan Van Camp",
+"file": "mir_252",
+"frame": "1997",
+"number": "252",
+"set": "mir"
+},
 "Wake of Vultures": {
 "artist": "Jeff Miracola",
 "file": "vis_74",
@@ -17218,6 +17288,13 @@
 "frame": "1997",
 "number": "117",
 "set": "ulg"
+},
+"Wing Storm": {
+"artist": "Heather Hudson",
+"file": "pcy_135",
+"frame": "1997",
+"number": "135",
+"set": "pcy"
 },
 "Winged Sliver": {
 "artist": "Anthony S. Waters",

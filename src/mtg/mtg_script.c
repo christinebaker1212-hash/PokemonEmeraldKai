@@ -524,6 +524,7 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     ab->sub = 0xFFFF;
     ab->charmOf = 0xFFFF;
     ab->winSub = ab->loseSub = 0xFFFF;
+    ab->repeatSub = 0xFFFF;
     ab->paramFirst = first;
     ab->paramCount = n;
     if (n == 0) {
@@ -638,6 +639,17 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
             else
                 gMtgAbilities[idx].manaPain = (uint8_t)(dmg[0] - '0');
         }
+    }
+    if (gMtgAbilities[idx].api == MTG_API_REPEAT_EACH) {   // the chain run for each item: no RepeatEach of its own
+        const char *name = Mtg_Param(&gMtgAbilities[idx], "RepeatSubAbility");
+        int s = name ? SubAbility(c, cardId, name, depth) : -1, k;
+        for (k = s; k >= 0 && k != 0xFFFF; k = gMtgAbilities[k].sub)
+            if (gMtgAbilities[k].api == MTG_API_REPEAT_EACH)
+                s = -1;
+        if (s < 0)
+            Unsupported(c, "RepeatEach");
+        else
+            gMtgAbilities[idx].repeatSub = (uint16_t)s;
     }
     if (gMtgAbilities[idx].api == MTG_API_FLIP_COIN) {   // its branches: chains of their own, without another coin
         int b;
