@@ -45,6 +45,7 @@ enum {
     MTG_API_REPEAT_EACH,      // RepeatEachEffect: RepeatSubAbility$ once for each RepeatPlayers$ / RepeatCards$, each remembered
     MTG_API_SET_LIFE,         // SetLifeEffect: a player's life total becomes LifeAmount$
     MTG_API_EFFECT,           // EffectEffect: StaticAbilities$ in force for a while (MtgDuel.effects)
+    MTG_API_FOG,              // FogEffect: all combat damage this turn is prevented (MtgDuel.fog)
     MTG_API_COUNT
 };
 
@@ -182,7 +183,8 @@ void Mtg_Unsupported(MtgCardDef *c, const char *why);
 enum { MTG_STATIC_CONTINUOUS, MTG_STATIC_CANT_BLOCK, MTG_STATIC_CANT_ATTACK, MTG_STATIC_CANT_BLOCK_BY,
        MTG_STATIC_RAISE_COST, MTG_STATIC_REDUCE_COST,
        MTG_STATIC_MUST_ATTACK, MTG_STATIC_CANT_BE_CAST, MTG_STATIC_CANT_TARGET, MTG_STATIC_CANT_PLAY_LAND, MTG_STATIC_CANT_BE_ACTIVATED,
-       MTG_STATIC_ETB_TAPPED, MTG_STATIC_NO_UNTAP, MTG_STATIC_CANT_REGENERATE };   // (two replacement effects, R: lines, kept here: they test alike)
+       MTG_STATIC_ETB_TAPPED, MTG_STATIC_NO_UNTAP, MTG_STATIC_CANT_REGENERATE,
+       MTG_STATIC_PREVENT_DAMAGE };   // (PREVENT_DAMAGE: Event$ DamageDone | Prevent$ True, another R: line)   // (two replacement effects, R: lines, kept here: they test alike)
 typedef struct {
     uint16_t card;
     uint8_t mode;                   // MTG_STATIC_*
@@ -215,6 +217,10 @@ typedef struct {
     uint8_t grantTrigCount;         // AddTrigger$: triggers what it affects has
     uint16_t grantTrig[2];
     uint8_t hiddenKw;               // AddHiddenKeyword$ "CARDNAME can't block." made it a CantBlock (Affected$ its spec)
+    // PreventDamage: ValidTarget$ split into its cards' part (affected) and its players' (targetPlayer); tgtKind 0 any
+    // target, 1 cards only, 2 players only, 3 both as said; combatOnly IsCombat$ True (2: False); damageMax DamageAmount$ LEn
+    const char *targetPlayer;
+    uint8_t tgtKind, combatOnly, damageMax;
 } MtgStatic;
 typedef struct {
     int addPower, addToughness, setPower, setToughness;
@@ -223,7 +229,9 @@ typedef struct {
 } MtgStaticMods;
 extern MtgStatic *gMtgStatics;
 void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text);
-void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text);   // R: lines (only the forms above)
+void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text);
+int Mtg_ParseEffectReplacement(MtgCardDef *c, int cardId, char *text);   // an Effect's ReplacementEffects$ line (-1: not known)
+int Mtg_DamagePrevented(const MtgDuel *d, int src, MtgTarget to, int combat, int amount);   // a PreventDamage in force says so   // R: lines (only the forms above)
 void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m);
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other);
 // a permanent's abilities now: its card's, then those statics give it (AddAbility$); returns how many (at most max)
@@ -240,6 +248,7 @@ void Mtg_SpellCost(const MtgDuel *d, int player, int obj, MtgManaCost *out);   /
 // mtg_valid.c: Forge's "Valid" properties (CardProperty.java, PlayerProperty.java)
 int Mtg_ValidObj(const MtgDuel *d, int obj, const char *spec, int sourceObj, int controller);
 int Mtg_ValidPlayer(const MtgDuel *d, int player, const char *spec, int controller);
+int Mtg_ValidPlayerSpecKnown(const char *spec);                  // (a player's spec: You, Player.IsRemembered...)
 int Mtg_ValidSpecKnown(const char *spec);                        // every alternative and property understood
 uint8_t Mtg_ObjColors(const MtgDuel *d, int obj);
 int Mtg_CanTarget(const MtgDuel *d, int obj, int sourceObj);     // shroud, protection

@@ -65,6 +65,8 @@ typedef struct MtgCardDef {
     uint8_t enchant;                         // an Aura (K:Enchant:...): its spell targets what it may enchant
     const char *enchantSpec;                 // ...: a Valid spec ("Creature", "Land", "Creature.YouCtrl")
     const char *cyclingCost;                 // K:Cycling:COST (Forge's keyword: an ability from the hand)
+    uint8_t mayNotUntap;                     // K:You may choose not to untap CARDNAME ...: it stays tapped while it holds
+                                             // something (an UntilUntaps Effect of its own in force)
     uint8_t starPT;                          // PT:*/* (bit 1 power, 2 toughness): a characteristic-defining static sets it
     uint16_t altCost;                        // S:Mode$ AlternativeCost: gMtgAltCosts index + 1 (0: none; mtg_static.c)
     uint8_t etbKind, etbNum, etbX;           // K:etbCounter:TYPE:N: enters with N (etbX: X, as paid) counters of a kind
@@ -172,7 +174,9 @@ typedef struct {
 // an Effect's rules for a while (EffectEffect: its StaticAbilities$, a card in Forge's command zone): the ability that
 // made it, its source (and that source's place then), what it remembers (objects with their place: one moved is
 // forgotten), and when it ends
-enum { MTG_EFF_EOT, MTG_EFF_PERMANENT, MTG_EFF_HOST_OR_EOT, MTG_EFF_NEXT_TURN, MTG_EFF_END_COMBAT, MTG_EFF_HOST };
+enum { MTG_EFF_EOT, MTG_EFF_PERMANENT, MTG_EFF_HOST_OR_EOT, MTG_EFF_NEXT_TURN, MTG_EFF_END_COMBAT, MTG_EFF_HOST,
+       MTG_EFF_AFTER_UNTAP,    // UntilTheEndOfYourNextUntap: over once its controller's next untap step is done
+       MTG_EFF_UNTIL_UNTAPS }; // UntilUntaps: over when its source untaps ("for as long as it remains tapped")
 typedef struct {
     uint16_t ability, source;
     uint32_t sourceSeq;
@@ -297,6 +301,7 @@ typedef struct MtgDuel {
     uint16_t repItems[16];
     uint8_t effCount;                                // Effects in force (EffectEffect)
     MtgEffect effects[MTG_MAX_EFFECTS];
+    uint8_t fog;                                     // a Fog resolved: combat damage this turn is prevented
     uint8_t resFlip;                                 // the coin just flipped: 1 won, 2 lost (0: none)
     int16_t resChoice;                               // the answer: 1 / 0, or the object picked (-1: not asked yet)
     // a cast or an activation's costs still to pick (sacrifices, then discards): asked as MTG_Q_CHOOSE's PICK with

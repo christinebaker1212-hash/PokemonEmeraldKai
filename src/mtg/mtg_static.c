@@ -520,14 +520,77 @@ int Mtg_ParseEffectStatic(MtgCardDef *c, int cardId, char *text)
 }
 
 // R: lines the engine plays as statics: "enters the battlefield tapped" (Event$ Moved, ReplaceWith$ an SVar that taps
-// it: ETBTapped) and "doesn't untap during its controller's untap step" (Event$ Untap, Layer$ CantHappen)
-void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text)
+// it: ETBTapped), "doesn't untap during its controller's untap step" (Event$ Untap, Layer$ CantHappen) and "prevent all
+// damage that would be dealt ..." (Event$ DamageDone, Prevent$ True: PreventDamage)
+static int sReplForEffect;   // (parsing an Effect's ReplacementEffects$: ActiveZones$ Command is its own)
+
+// a spec with its Emblem alternatives left out (there are no emblems here), or NULL when it's only those
+static const char *NoEmblems(const char *spec)
+{
+    char *out = malloc(strlen(spec) + 1), *o = out;
+    const char *p = spec;
+    while (*p) {
+        const char *comma = strchr(p, ',');
+        size_t n = comma ? (size_t)(comma - p) : strlen(p);
+        if (strncmp(p, "Emblem", 6) != 0) {
+            if (o != out)
+                *o++ = ',';
+            memcpy(o, p, n);
+            o += n;
+        }
+        if (!comma)
+            break;
+        p = comma + 1;
+    }
+    *o = 0;
+    if (o == out) {
+        free(out);
+        return NULL;
+    }
+    return out;
+}
+
+static int IsPlayerAlt(const char *p, size_t n)
+{
+    return (n >= 6 && strncmp(p, "Player", 6) == 0 && (n == 6 || p[6] == '.')) || (n == 3 && strncmp(p, "You", 3) == 0)
+        || (n == 8 && strncmp(p, "Opponent", 8) == 0);
+}
+
+// ValidTarget$ into its cards' and its players' parts (each NULL when it has none)
+static int SplitTarget(const char *spec, const char **cards, const char **players)
+{
+    char *c = malloc(strlen(spec) + 1), *pl = malloc(strlen(spec) + 1), *co = c, *po = pl;
+    const char *p = spec;
+    while (*p) {
+        const char *comma = strchr(p, ',');
+        size_t n = comma ? (size_t)(comma - p) : strlen(p);
+        char **o = IsPlayerAlt(p, n) ? &po : &co;
+        char *base = o == &po ? pl : c;
+        if (*o != base)
+            *(*o)++ = ',';
+        memcpy(*o, p, n);
+        *o += n;
+        if (!comma)
+            break;
+        p = comma + 1;
+    }
+    *co = *po = 0;
+    *cards = co != c ? c : (free(c), (const char *)NULL);
+    *players = po != pl ? pl : (free(pl), (const char *)NULL);
+    if (*cards && !Mtg_ValidSpecKnown(*cards))
+        return 0;
+    return !*players || Mtg_ValidPlayerSpecKnown(*players);
+}
+
+static int ParseRepl(MtgCardDef *c, int cardId, char *text, MtgStatic *out)
 {
     static const char *const sKnown[] = {"Event", "ValidCard", "Destination", "ReplaceWith", "ReplacementResult",
-                                         "Description", "ActiveZones", "Layer", "ValidStepTurnToController"};
+                                         "Description", "ActiveZones", "Layer", "ValidStepTurnToController",
+                                         "Prevent", "ValidTarget", "ValidSource", "IsCombat", "Secondary", "IsPresent",
+                                         "PresentCompare", "CheckSVar", "SVarCompare", "DamageAmount", "PreventionEffect"};
     MtgStatic st;
     int first, count, i;
-    const char *s, *ev;
+    const char *s, *ev, *zones;
     memset(&st, 0, sizeof(st));
     st.card = (uint16_t)cardId;
     st.setPower = st.setToughness = MTG_STATIC_NO_SET;
@@ -538,46 +601,127 @@ void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text)
             if (strcmp(gMtgParams[first + i].key, sKnown[k]) == 0)
                 break;
         if (k == sizeof(sKnown) / sizeof(sKnown[0]))
-            goto unknown;
+            return 0;
     }
     ev = ParamOf(first, count, "Event");
+    zones = ParamOf(first, count, "ActiveZones");
+    if (!ev)
+        return 0;
+    if (zones && strcmp(zones, "Battlefield") != 0 && !(sReplForEffect && strcmp(zones, "Command") == 0))
+        return 0;
+    if (strcmp(ev, "DamageDone") == 0) {   // ReplacePreventDamage (Prevent$ True: all of it, nothing in its place)
+        const char *tgt = ParamOf(first, count, "ValidTarget"), *srcSpec = ParamOf(first, count, "ValidSource");
+        if (!(s = ParamOf(first, count, "Prevent")) || strcmp(s, "True") != 0 || ParamOf(first, count, "ValidCard")
+            || ParamOf(first, count, "ReplaceWith") || ParamOf(first, count, "Destination") || ParamOf(first, count, "Layer")
+            || ParamOf(first, count, "ValidStepTurnToController") || ParamOf(first, count, "PreventionEffect"))
+            return 0;
+        if (tgt) {
+            if (!SplitTarget(tgt, &st.affected, &st.targetPlayer))
+                goto fail;
+            st.tgtKind = (uint8_t)((st.affected ? 1 : 0) | (st.targetPlayer ? 2 : 0));
+        }
+        if (srcSpec && (!(st.source = NoEmblems(srcSpec)) || !Mtg_ValidSpecKnown(st.source)))
+            goto fail;
+        if ((s = ParamOf(first, count, "IsCombat")))
+            st.combatOnly = strcmp(s, "True") == 0 ? 1 : 2;
+        if ((s = ParamOf(first, count, "DamageAmount"))) {
+            if (strncmp(s, "LE", 2) || s[2] < '1' || s[2] > '9' || s[3])
+                goto fail;
+            st.damageMax = (uint8_t)(s[2] - '0');
+        }
+        if ((s = ParamOf(first, count, "IsPresent"))) {
+            const char *cmp = ParamOf(first, count, "PresentCompare");
+            if (!Mtg_ValidSpecKnown(s) || (cmp && (strncmp(cmp, "GE", 2) || cmp[2] < '0' || cmp[2] > '9' || cmp[3])))
+                goto fail;
+            st.present = s;
+            st.presentNum = (uint8_t)(cmp ? cmp[2] - '0' : 1);
+        } else if (ParamOf(first, count, "PresentCompare"))
+            goto fail;
+        if ((s = ParamOf(first, count, "CheckSVar"))) {
+            st.check = s;
+            st.compare = ParamOf(first, count, "SVarCompare");
+            if (!Mtg_CheckSvarKnown(cardId, st.check, st.compare))
+                goto fail;
+        } else if (ParamOf(first, count, "SVarCompare"))
+            goto fail;
+        st.mode = MTG_STATIC_PREVENT_DAMAGE;
+        *out = st;
+        return 1;
+    fail:
+        free((void *)st.affected);
+        free((void *)st.targetPlayer);
+        free((void *)st.source);
+        return 0;
+    }
+    if (ParamOf(first, count, "Prevent") || ParamOf(first, count, "ValidTarget")
+        || ParamOf(first, count, "ValidSource") || ParamOf(first, count, "IsCombat") || ParamOf(first, count, "IsPresent")
+        || ParamOf(first, count, "CheckSVar") || ParamOf(first, count, "DamageAmount"))
+        return 0;
     st.affected = ParamOf(first, count, "ValidCard");
-    if (!ev || !st.affected || !Mtg_ValidSpecKnown(st.affected))
-        goto unknown;
-    if ((s = ParamOf(first, count, "ActiveZones")) && strcmp(s, "Battlefield") != 0)
-        goto unknown;
-    if (strcmp(st.affected, "Card.Self") != 0 && !ParamOf(first, count, "ActiveZones"))
-        goto unknown;   // (another card's: only from the battlefield)
+    if (!st.affected || !Mtg_ValidSpecKnown(st.affected))
+        return 0;
+    if (strcmp(st.affected, "Card.Self") != 0 && !zones && !sReplForEffect)
+        return 0;   // (another card's: only from the battlefield)
     if (strcmp(ev, "Moved") == 0) {
+        if (sReplForEffect)
+            return 0;
         const char *sv;
         if (!(s = ParamOf(first, count, "Destination")) || strcmp(s, "Battlefield") != 0
             || !(s = ParamOf(first, count, "ReplaceWith")) || !(sv = Mtg_Svar(cardId, s)) || ParamOf(first, count, "Layer")
             || ParamOf(first, count, "ValidStepTurnToController"))
-            goto unknown;
+            return 0;
         // "DB$ Tap | Defined$ Self | ETB$ True" (Defined$ ReplacedCard for another card's)
         if (strcmp(sv, "DB$ Tap | Defined$ Self | ETB$ True") != 0 && strcmp(sv, "DB$ Tap | ETB$ True | Defined$ ReplacedCard") != 0
             && strcmp(sv, "DB$ Tap | Defined$ ReplacedCard | ETB$ True") != 0)
-            goto unknown;
+            return 0;
         st.mode = MTG_STATIC_ETB_TAPPED;
     } else if (strcmp(ev, "Untap") == 0) {
         if (!(s = ParamOf(first, count, "Layer")) || strcmp(s, "CantHappen") != 0
-            || !(s = ParamOf(first, count, "ValidStepTurnToController")) || strcmp(s, "You") != 0
+            || !(s = ParamOf(first, count, "ValidStepTurnToController"))
+            || (strcmp(s, "You") != 0 && !(sReplForEffect && strcmp(s, "Player.Activator") == 0))
             || ParamOf(first, count, "ReplaceWith") || ParamOf(first, count, "Destination"))
-            goto unknown;
+            return 0;
         st.mode = MTG_STATIC_NO_UNTAP;
     } else
-        goto unknown;
+        return 0;
+    (void)c;
+    *out = st;
+    return 1;
+}
+
+static int AddStatic(MtgCardDef *c, const MtgStatic *st)
+{
     if (c->staticCount >= sizeof(c->statics) / sizeof(c->statics[0]))
-        goto unknown;
+        return 0;
     if (sStaticCount + 1 > sStaticCap) {
         sStaticCap = sStaticCap ? sStaticCap * 2 : 256;
         gMtgStatics = realloc(gMtgStatics, (size_t)sStaticCap * sizeof(MtgStatic));
     }
-    gMtgStatics[sStaticCount] = st;
+    gMtgStatics[sStaticCount] = *st;
     c->statics[c->staticCount++] = (uint16_t)sStaticCount++;
-    return;
-unknown:
-    Mtg_Unsupported(c, "replacement effect");
+    return 1;
+}
+
+void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text)
+{
+    MtgStatic st;
+    if (!ParseRepl(c, cardId, text, &st) || !AddStatic(c, &st))
+        Mtg_Unsupported(c, "replacement effect");
+}
+
+// an Effect's ReplacementEffects$ line: kept apart from the card's statics, as Mtg_ParseEffectStatic's
+int Mtg_ParseEffectReplacement(MtgCardDef *c, int cardId, char *text)
+{
+    MtgStatic st;
+    int ok;
+    sReplForEffect = 1;
+    ok = ParseRepl(c, cardId, text, &st);
+    sReplForEffect = 0;
+    if (!ok || !AddStatic(c, &st)) {
+        Mtg_Unsupported(c, "ReplacementEffects");
+        return -1;
+    }
+    return c->statics[--c->staticCount];
 }
 
 // Condition$ now
@@ -925,6 +1069,55 @@ int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other)
     }
     sDepth--;
     return forbid;
+}
+
+// one PreventDamage (from S, its controller CTRL) against damage from SRC to TO
+static int PreventBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, int src, MtgTarget to, int combat, int amount)
+{
+    if (st->mode != MTG_STATIC_PREVENT_DAMAGE)
+        return 0;
+    if ((st->combatOnly == 1 && !combat) || (st->combatOnly == 2 && combat) || (st->damageMax && amount > st->damageMax))
+        return 0;
+    if (to.kind == MTG_TGT_OBJ) {
+        if (st->tgtKind == 2 || (st->affected && !Mtg_ValidObj(d, to.id, st->affected, s, ctrl)))
+            return 0;
+    } else if (to.kind == MTG_TGT_PLAYER) {
+        if (st->tgtKind == 1 || (st->targetPlayer && !Mtg_ValidPlayer(d, to.id, st->targetPlayer, ctrl)))
+            return 0;
+    } else
+        return 0;
+    if (st->source && (src == MTG_NO_OBJ || !Mtg_ValidObj(d, src, st->source, s, ctrl)))
+        return 0;
+    return Present(d, st, s);
+}
+
+int Mtg_DamagePrevented(const MtgDuel *d, int src, MtgTarget to, int combat, int amount)
+{
+    int s, k, prevent = 0;
+    if (sDepth)
+        return 0;
+    sDepth++;
+    for (s = 0; s < d->objCount && !prevent; s++) {
+        const MtgObj *o = &d->objs[s];
+        const MtgCardDef *c;
+        if (o->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(o->def);
+        for (k = 0; k < c->staticCount && !prevent; k++)
+            prevent = PreventBy(d, &gMtgStatics[c->statics[k]], s, o->controller, src, to, combat, amount);
+    }
+    for (s = 0; s < d->effCount && !prevent; s++) {
+        const MtgEffect *e = &d->effects[s];
+        if (!Mtg_EffectAlive(d, e))
+            continue;
+        gMtgEffCtx = e;
+        for (k = 0; k < gMtgAbilities[e->ability].effStaticCount && !prevent; k++)
+            prevent = PreventBy(d, &gMtgStatics[gMtgAbilities[e->ability].effStatics[k]], e->source, e->controller, src, to,
+                                combat, amount);
+        gMtgEffCtx = NULL;
+    }
+    sDepth--;
+    return prevent;
 }
 
 // A spell's mana cost as its caster pays it now: Raise / ReduceCost from the battlefield (a reduction takes generic

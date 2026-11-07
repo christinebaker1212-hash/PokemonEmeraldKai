@@ -150,9 +150,9 @@ const MtgEffect *gMtgEffCtx;
 int Mtg_EffectAlive(const MtgDuel *d, const MtgEffect *e)
 {
     int k;
-    if (e->until == MTG_EFF_HOST_OR_EOT || e->until == MTG_EFF_HOST) {   // (its source left the battlefield: over)
-        const MtgObj *s = &d->objs[e->source];
-        if (s->zone != MTG_ZONE_BATTLEFIELD || s->seq != e->sourceSeq)
+    if (e->until == MTG_EFF_HOST_OR_EOT || e->until == MTG_EFF_HOST || e->until == MTG_EFF_UNTIL_UNTAPS) {
+        const MtgObj *s = &d->objs[e->source];   // (its source left the battlefield, or untapped: over)
+        if (s->zone != MTG_ZONE_BATTLEFIELD || s->seq != e->sourceSeq || (e->until == MTG_EFF_UNTIL_UNTAPS && !s->tapped))
             return 0;
     }
     if (e->exileOnMoved)   // ExileOnMoved$ Battlefield: what it remembers left the battlefield
@@ -172,7 +172,8 @@ static void PruneEffects(MtgDuel *d, int kind, int player)
         int ends = !Mtg_EffectAlive(d, e)
                 || (kind == MTG_EFF_EOT && (e->until == MTG_EFF_EOT || e->until == MTG_EFF_HOST_OR_EOT))
                 || (kind == MTG_EFF_NEXT_TURN && e->until == MTG_EFF_NEXT_TURN && e->controller == player)
-                || (kind == MTG_EFF_END_COMBAT && e->until == MTG_EFF_END_COMBAT);
+                || (kind == MTG_EFF_END_COMBAT && e->until == MTG_EFF_END_COMBAT)
+                || (kind == MTG_EFF_AFTER_UNTAP && e->until == MTG_EFF_AFTER_UNTAP && e->controller == player);
         if (!ends)
             d->effects[n++] = *e;
     }
@@ -344,6 +345,11 @@ void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int com
     uint8_t *shield;
     if (amount <= 0)
         return;
+    // "prevent all (combat) damage ...": a Fog this turn, or a PreventDamage replacement in force (mtg_static.c)
+    if ((combat && d->fog) || Mtg_DamagePrevented(d, sourceObj, to, combat, amount)) {
+        Mtg_Event(d, MTG_EV_PREVENTED, sourceObj, to.kind == MTG_TGT_OBJ ? to.id : -1 - to.id, amount);
+        return;
+    }
     // "prevent the next n damage" (PreventDamageEffect's shield, used up first)
     shield = to.kind == MTG_TGT_OBJ ? &d->objs[to.id].prevent : to.kind == MTG_TGT_PLAYER ? &d->players[to.id].prevent : NULL;
     if (shield && *shield && (to.kind != MTG_TGT_OBJ || d->objs[to.id].zone == MTG_ZONE_BATTLEFIELD)) {
@@ -1447,6 +1453,7 @@ static void EndOfTurnCleanup(MtgDuel *d)
 {
     int i;
     PruneEffects(d, MTG_EFF_EOT, 0);
+    d->fog = 0;
     for (i = 0; i < MTG_PLAYERS; i++)
         d->players[i].prevent = 0;
     for (i = 0; i < d->objCount; i++) {
@@ -1543,6 +1550,18 @@ static void BlocksDeclared(MtgDuel *d)
     }
 }
 
+// "You may choose not to untap CARDNAME": chosen while an UntilUntaps Effect of its own holds something
+static int HoldsLock(const MtgDuel *d, int obj)
+{
+    int k;
+    if (!Mtg_Card(d->objs[obj].def)->mayNotUntap)
+        return 0;
+    for (k = 0; k < d->effCount; k++)
+        if (d->effects[k].until == MTG_EFF_UNTIL_UNTAPS && d->effects[k].source == obj && Mtg_EffectAlive(d, &d->effects[k]))
+            return 1;
+    return 0;
+}
+
 // the step's turn-based actions; returns 1 if it is waiting for a decision (the query is set)
 static int StartStep(MtgDuel *d)
 {
@@ -1555,10 +1574,11 @@ static int StartStep(MtgDuel *d)
             d->objs[i].usedN[0] = d->objs[i].usedN[1] = 0;   // (ActivationLimit$: each turn)
         for (i = 0; i < d->objCount; i++)
             if (d->objs[i].controller == d->active && d->objs[i].zone == MTG_ZONE_BATTLEFIELD) {
-                if (!d->objs[i].tapped || !Mtg_StaticForbids(d, MTG_STATIC_NO_UNTAP, i, MTG_NO_OBJ))
+                if (!d->objs[i].tapped || (!Mtg_StaticForbids(d, MTG_STATIC_NO_UNTAP, i, MTG_NO_OBJ) && !HoldsLock(d, i)))
                     Mtg_Tap(d, i, 0);
                 d->objs[i].sick = 0;
             }
+        PruneEffects(d, MTG_EFF_AFTER_UNTAP, d->active);   // ("doesn't untap during your next untap step": done)
         break;
     case MTG_STEP_DRAW:
         if (d->turn > 1)   // the starting player skips the first draw

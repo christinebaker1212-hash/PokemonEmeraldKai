@@ -101,6 +101,52 @@ static int Amount(const MtgDuel *d, const MtgAbility *ab, const char *key, int x
 
 static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me);
 
+static int AboutToDie(const MtgDuel *d, int obj, int me);
+static int Value(const MtgDuel *d, int obj);
+
+// an Effect that prevents damage: BY its remembered (target) creature, TO it, or neither (a Fog for some)
+static int EffectPrevents(const MtgAbility *ab, int *by, int *to)
+{
+    int k, any = 0;
+    *by = *to = 0;
+    for (k = 0; k < ab->effStaticCount; k++) {
+        const MtgStatic *st = &gMtgStatics[ab->effStatics[k]];
+        if (st->mode != MTG_STATIC_PREVENT_DAMAGE)
+            continue;
+        any = 1;
+        if (st->source && strstr(st->source, "IsRemembered"))
+            *by = 1;
+        if (st->affected && strstr(st->affected, "IsRemembered"))
+            *to = 1;
+    }
+    return any;
+}
+
+// "prevent all combat damage" in their attack, blockers declared: worth the damage coming to it and its creatures
+// about to die
+static int FogScore(const MtgDuel *d, int me)
+{
+    int i, dmg = 0, saved = 0, opp = me ^ 1;
+    if (d->active != opp || d->step != MTG_STEP_COMBAT_BLOCKERS || d->stackCount)
+        return 0;
+    for (i = 0; i < d->objCount; i++) {
+        int k, blocked = 0;
+        if (IsCreatureOnField(d, i) && d->objs[i].controller == me && AboutToDie(d, i, me))
+            saved += 10 + Value(d, i);
+        if (!IsCreatureOnField(d, i) || d->objs[i].controller != opp || !d->objs[i].attacking)
+            continue;
+        for (k = 0; k < d->objCount && !blocked; k++)
+            blocked = d->objs[k].zone == MTG_ZONE_BATTLEFIELD && d->objs[k].blocking == i;
+        if (!blocked)
+            dmg += Mtg_Power(d, i);
+    }
+    if (dmg >= d->players[me].life)
+        return 40;
+    if (dmg >= 4 && d->players[me].life - dmg <= 6)
+        saved += 12;
+    return saved ? 6 + saved : 0;
+}
+
 // a creature of mine that is about to be destroyed: lethal damage coming in combat, or the opponent's destroy /
 // damage on the stack aimed at it (for regeneration)
 static int AboutToDie(const MtgDuel *d, int obj, int me)
@@ -303,7 +349,20 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
         return main ? 4 : 0;
     }
     case MTG_API_EFFECT: {   // rules for a while: a curse on theirs, a help on its own before combat
-        int curse = Mtg_Param(ab, "IsCurse") != NULL;
+        int curse = Mtg_Param(ab, "IsCurse") != NULL, by, to, k;
+        if (EffectPrevents(ab, &by, &to)) {   // damage prevention: in their attack, once blockers are declared
+            if (d->active != opp || d->step != MTG_STEP_COMBAT_BLOCKERS || d->stackCount)
+                return 0;
+            if (tgtObj >= 0) {   // ("by target creature": one of their attackers; "to": its own creature about to die)
+                if (by && !tgtMine && IsCreatureOnField(d, tgtObj) && d->objs[tgtObj].attacking)
+                    return 6 + 2 * Mtg_Power(d, tgtObj);
+                return to && tgtMine && AboutToDie(d, tgtObj, me) ? 20 + Value(d, tgtObj) : 0;
+            }
+            for (k = 0; k < d->effCount; k++)
+                if (d->effects[k].ability == (uint16_t)(ab - gMtgAbilities))
+                    return 0;   // (already in force)
+            return FogScore(d, me);
+        }
         if (a->target.kind == MTG_TGT_PLAYER)   // (Cease-Fire, Abeyance: at the other player)
             return main && !tgtMine ? 4 : 0;
         if (tgtObj >= 0)
@@ -327,6 +386,8 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
             return main && (tgtObj < 0 || tgtMine) ? 6 : 0;
         return a->kind == MTG_ACT_ACTIVATE && d->active == opp && d->step == MTG_STEP_END ? 4 : 0;
     }
+    case MTG_API_FOG:   // their attack, blockers declared: the damage coming to itself and its creatures about to die
+        return d->fog ? 0 : FogScore(d, me);
     case MTG_API_PREVENT_DAMAGE:   // its own creature about to die, or itself low on life in their attack
         if (tgtObj >= 0)
             return tgtMine && AboutToDie(d, tgtObj, me) && !d->objs[tgtObj].prevent ? 22 + Value(d, tgtObj) : 0;

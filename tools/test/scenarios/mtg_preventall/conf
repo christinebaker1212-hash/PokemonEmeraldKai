@@ -1,0 +1,7 @@
+# MAGIC's "prevent all damage" on the table: our LIGHTNING BOLT at the opponent's CALLOUS GIANT ("if a source would deal 3
+# or less damage to it, prevent that damage"): "3 damage to Callous Giant was prevented." and it lives. Shots pa_target,
+# pa_prevented, pa_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Lightning Bolt on Callous Giant" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Lightning Bolt to focus")

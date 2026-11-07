@@ -1968,7 +1968,7 @@ static int StartEvent(const MtgEvent *e)
                e->c ? (e->b == ME ? "you win!" : "they win!") : (e->b == ME ? "you lose." : "they lose."));
         PlaySE(e->c ? SE_SHOP : SE_FAILURE);
         return Frames(30);
-    case MTG_EV_PREVENTED:   // a "prevent the next n damage" shield used up
+    case MTG_EV_PREVENTED:   // a "prevent the next n damage" shield used up, or a prevention in force (Fog...)
         if (e->b >= 0 && e->b < MTG_MAX_OBJS) {
             Rect r = ObjRect(e->b);
             Name(a, sizeof(a), e->b);

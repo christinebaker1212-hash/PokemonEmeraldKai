@@ -3700,6 +3700,31 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's damage prevention and "doesn't untap" for a while (1.157.0)
+
+- Replacement effects R: Event$ DamageDone | Prevent$ True (Forge's ReplacePreventDamage) as statics of mode
+  MTG_STATIC_PREVENT_DAMAGE (mtg_static.c ParseRepl): ValidTarget$ split into its cards' part (affected) and its
+  players' (targetPlayer: You, Player, Opponent, Player.IsRemembered), ValidSource$ (Emblem alternatives dropped),
+  IsCombat$, DamageAmount$ LEn, IsPresent$, CheckSVar$; Secondary$ only hides a line. Mtg_DamagePrevented reads the
+  battlefield's and the Effects' in force; Mtg_DealDamage asks it before any shield and logs MTG_EV_PREVENTED for the
+  whole amount ("3 damage to Callous Giant was prevented.").
+- Fog (MTG_API_FOG): MtgDuel.fog, all combat damage this turn, cleared at cleanup.
+- Effects with ReplacementEffects$ (Mtg_ParseEffectReplacement, kept with its statics in effStatics): the prevention
+  above with ActiveZones$ Command, and Event$ Untap | Layer$ CantHappen (ValidStepTurnToController$ You or
+  Player.Activator: the untap step that would untap it). New durations: UntilTheEndOfYourNextUntap (MTG_EFF_AFTER_UNTAP,
+  pruned after its controller's untap step) and UntilUntaps (MTG_EFF_UNTIL_UNTAPS: over once its source untaps).
+- K:You may choose not to untap CARDNAME (MtgCardDef.mayNotUntap): chosen for its player while an UntilUntaps Effect
+  of its own holds something (ICE FLOE, AMBER PRISON, MANA LEECH, SAND SQUID, WHIP VINE); otherwise it untaps.
+- Valid Player.IsRemembered (a player the chain or the Effect remembers).
+- AI: a Fog (or a prevention Effect for a whole side) in the opponent's attack once blockers are declared, when the
+  damage coming would kill it or leave it low or one of its creatures is about to die (FogScore); "by target
+  creature" at one of their attackers, "to target creature" on its own about to die.
+- Unlocked 42: FOG, HOLY DAY, LULL, SPORE FROG, DAWNSTRIDER, CALLOUS GIANT, ENERGY FIELD, MUZZLE, DIVINE LIGHT, WALL OF
+  VAPOR, KOR HAVEN, RESTRAIN, ICE FLOE, SAMITE ALCHEMIST, SAFEGUARD... Still out: ReplaceWith$ (damage redirected or
+  changed), Event$ Moved / Draw / Counter replacements, ChooseSource$ ("a source of your choice": 45).
+- Tests: test_rules.c TestPreventAll (and GoToTurn: GoTo stops where a player has priority in the other's step too);
+  scenario mtg_preventall.
+
 ## MAGIC's effects for a while (1.156.0)
 
 - Effect (MTG_API_EFFECT, Forge's EffectEffect with only StaticAbilities$): MtgDuel.effects[12] (MtgEffect: the

@@ -249,6 +249,8 @@ static int Alternative(const MtgDuel *d, int isPlayer, int id, const char *a, si
         if (dot) {   // "Player.Opponent", "Player.You"
             size_t pn = n - tn - 1;
             const char *pp = dot + 1;
+            if (pn == 12 && strncmp(pp, "IsRemembered", 12) == 0)   // (a player the resolving chain or Effect remembers)
+                return !d || (isPlayer && Mtg_IsRememberedPlayer(d, id));
             if (!((pn == 8 && strncmp(pp, "Opponent", 8) == 0) || (pn == 3 && strncmp(pp, "You", 3) == 0))) {
                 *known = 0;
                 return 0;
@@ -327,6 +329,13 @@ int Mtg_ValidPlayer(const MtgDuel *d, int player, const char *spec, int controll
 {
     int known;
     return Valid(d, 1, player, spec, MTG_NO_OBJ, controller, &known) && known;
+}
+
+int Mtg_ValidPlayerSpecKnown(const char *spec)
+{
+    int known;
+    Valid(NULL, 1, 0, spec, 0, 0, &known);
+    return known;
 }
 
 int Mtg_ValidSpecKnown(const char *spec)

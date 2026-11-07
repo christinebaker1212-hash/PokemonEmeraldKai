@@ -90,6 +90,25 @@ static void GoTo(int player, int step)
     exit(1);
 }
 
+// GoTo in PLAYER's own turn (GoTo also stops where they have priority in the other player's step)
+static void GoToTurn(int player, int step)
+{
+    int guard = 0;
+    while (guard++ < 400) {
+        const MtgQuery *q = Mtg_Query(&sD);
+        MtgAnswer a;
+        memset(&a, 0, sizeof(a));
+        memset(a.block, -1, sizeof(a.block));
+        if (q->kind == MTG_Q_PRIORITY && sD.step == step && sD.active == player && q->player == player && sD.stackCount == 0)
+            return;
+        if (q->kind == MTG_Q_GAME_OVER)
+            break;
+        Answer(&a);
+    }
+    printf("  never reached step %d of player %d's turn\n", step, player);
+    exit(1);
+}
+
 static void Table(void)
 {
     static MtgDeck lands[2];
@@ -216,7 +235,7 @@ static void Attack(uint32_t mask)
     GoTo(sD.active, MTG_STEP_COMBAT_BEGIN);
     Pass();
     Pass();
-    CHECK(Mtg_Query(&sD)->kind == MTG_Q_ATTACKERS, "asked for attackers");
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_ATTACKERS, "asked for attackers (%d, step %d, player %d)", Mtg_Query(&sD)->kind, sD.step, Mtg_Query(&sD)->player);
     memset(&a, 0, sizeof(a));
     a.attack = mask;
     Answer(&a);
@@ -2043,6 +2062,111 @@ static void TestEffect(void)
     CHECK(Zone(skel) == MTG_ZONE_GRAVEYARD, "no regeneration after the jackal");
 }
 
+static void TestPreventAll(void)
+{
+    int bears, fog, giant, bolt, field, restrain, floe, alch, goblin, i;
+    MtgTarget t;
+    static const char *const cards[] = {"Fog", "Holy Day", "Callous Giant", "Energy Field", "Restrain", "Ice Floe",
+                                        "Samite Alchemist", "Muzzle", "Divine Light", "Wall of Vapor", "Kor Haven", NULL};
+    printf("damage prevented, doesn't untap for a while\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Fog: no combat damage this turn
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Lands(1, "Forest", 1);
+    fog = Put(1, "Fog", MTG_ZONE_HAND);
+    Attack(1);
+    GoTo(1, MTG_STEP_COMBAT_BLOCKERS);
+    Do(MTG_ACT_CAST, fog, -1, 0);
+    PassBoth();
+    CHECK(sD.fog == 1, "the fog is in");
+    GoTo(0, MTG_STEP_COMBAT_END);
+    CHECK(sD.players[1].life == 20, "no combat damage (%d)", sD.players[1].life);
+    t.kind = MTG_TGT_PLAYER;
+    t.id = 1;
+    Mtg_DealDamage(&sD, bears, t, 2, 0);
+    CHECK(sD.players[1].life == 18, "noncombat damage still dealt (%d)", sD.players[1].life);
+    GoTo(1, MTG_STEP_UPKEEP);
+    CHECK(sD.fog == 0, "the fog lifts at end of turn");
+
+    Table();   // Callous Giant: 3 or less damage to it prevented
+    Lands(0, "Mountain", 1);
+    giant = Put(1, "Callous Giant", MTG_ZONE_BATTLEFIELD);
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, giant);
+    PassBoth();
+    CHECK(sD.objs[giant].damage == 0, "3 damage prevented (%d)", sD.objs[giant].damage);
+    t.kind = MTG_TGT_OBJ;
+    t.id = (uint16_t)giant;
+    Mtg_DealDamage(&sD, MTG_NO_OBJ, t, 4, 0);
+    CHECK(sD.objs[giant].damage == 4, "4 isn't (%d)", sD.objs[giant].damage);
+
+    Table();   // Energy Field: damage to you from sources you don't control
+    field = Put(0, "Energy Field", MTG_ZONE_BATTLEFIELD);
+    Lands(1, "Mountain", 1);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    bolt = Put(1, "Lightning Bolt", MTG_ZONE_HAND);
+    GoTo(1, MTG_STEP_MAIN1);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_PLAYER, 0);
+    PassBoth();
+    CHECK(sD.players[0].life == 20, "their bolt prevented (%d)", sD.players[0].life);
+    t.kind = MTG_TGT_PLAYER;
+    t.id = 0;
+    Mtg_DealDamage(&sD, bears, t, 2, 0);
+    CHECK(sD.players[0].life == 18, "its own creature's isn't (%d)", sD.players[0].life);
+    (void)field;
+
+    Table();   // Restrain: an Effect remembering its target, combat damage by it prevented
+    goblin = Put(0, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Lands(1, "Plains", 3);
+    restrain = Put(1, "Restrain", MTG_ZONE_HAND);
+    Attack(3);
+    GoTo(1, MTG_STEP_COMBAT_BLOCKERS);
+    Do(MTG_ACT_CAST, restrain, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(sD.effCount == 1, "an effect in force (%d)", sD.effCount);
+    GoTo(0, MTG_STEP_COMBAT_END);
+    CHECK(sD.players[1].life == 19, "only the goblin hit (%d)", sD.players[1].life);
+    (void)goblin;
+
+    Table();   // Ice Floe: an attacker tapped, not untapping while the floe stays tapped (it chooses to, holding it)
+    floe = Put(0, "Ice Floe", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    GoTo(1, MTG_STEP_UPKEEP);
+    Attack(1);
+    GoTo(0, MTG_STEP_COMBAT_BLOCKERS);
+    Do(MTG_ACT_ACTIVATE, floe, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(sD.objs[bears].tapped && sD.effCount == 1, "the bears tapped, an effect in force");
+    GoToTurn(0, MTG_STEP_UPKEEP);
+    CHECK(sD.objs[floe].tapped && sD.effCount == 1, "the floe stays tapped, holding them");
+    GoToTurn(1, MTG_STEP_UPKEEP);
+    CHECK(sD.objs[bears].tapped, "they stay tapped in their untap step");
+    Mtg_Tap(&sD, floe, 0);
+    GoToTurn(0, MTG_STEP_UPKEEP);
+    CHECK(sD.effCount == 0, "the floe untapped: over");
+    GoToTurn(1, MTG_STEP_UPKEEP);
+    CHECK(!sD.objs[bears].tapped, "they untap again");
+
+    Table();   // Samite Alchemist: its creature tapped, not untapping in its controller's next untap step
+    Lands(0, "Plains", 2);
+    alch = Put(0, "Samite Alchemist", MTG_ZONE_BATTLEFIELD);
+    sD.objs[alch].sick = 0;
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_ACTIVATE, alch, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(sD.objs[bears].tapped && sD.objs[bears].prevent == 4, "tapped, 4 damage to be prevented");
+    GoToTurn(1, MTG_STEP_UPKEEP);
+    GoToTurn(0, MTG_STEP_UPKEEP);
+    CHECK(sD.objs[bears].tapped && sD.effCount == 0, "still tapped after its next untap step, the effect over (%d, %d)",
+          sD.objs[bears].tapped, sD.effCount);
+    GoToTurn(1, MTG_STEP_UPKEEP);
+    GoToTurn(0, MTG_STEP_UPKEEP);
+    CHECK(!sD.objs[bears].tapped, "untapped the one after");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2444,6 +2568,7 @@ int main(int argc, char **argv)
     TestAiLookahead();
     TestAttachedDamaged();
     TestEffect();
+    TestPreventAll();
     TestDuels();
     TestRandomDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

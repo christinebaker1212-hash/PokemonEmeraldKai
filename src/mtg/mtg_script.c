@@ -640,12 +640,18 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
                 gMtgAbilities[idx].manaPain = (uint8_t)(dmg[0] - '0');
         }
     }
-    if (gMtgAbilities[idx].api == MTG_API_EFFECT && Mtg_Param(&gMtgAbilities[idx], "StaticAbilities")) {
-        char names[96], *p = names, *k;   // its statics: SVars of its card, parsed now, kept on the ability
-        const char *list = Mtg_Param(&gMtgAbilities[idx], "StaticAbilities");
-        if (strlen(list) >= sizeof(names))
-            Unsupported(c, "Effect");
-        else {
+    if (gMtgAbilities[idx].api == MTG_API_EFFECT) {   // its statics and replacements: SVars of its card, parsed now, kept on the ability
+        static const char *const sLists[2] = {"StaticAbilities", "ReplacementEffects"};
+        int li;
+        for (li = 0; li < 2; li++) {
+            char names[96], *p = names, *k;
+            const char *list = Mtg_Param(&gMtgAbilities[idx], sLists[li]);
+            if (!list)
+                continue;
+            if (strlen(list) >= sizeof(names)) {
+                Unsupported(c, "Effect");
+                break;
+            }
             strcpy(names, list);
             while ((k = Mtg_Token(&p, ',')) != NULL) {
                 const char *sv;
@@ -659,7 +665,8 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
                 }
                 copy = malloc(strlen(sv) + 1);
                 strcpy(copy, sv);
-                if ((st = Mtg_ParseEffectStatic(c, cardId, copy)) < 0)
+                st = li ? Mtg_ParseEffectReplacement(c, cardId, copy) : Mtg_ParseEffectStatic(c, cardId, copy);
+                if (st < 0)
                     break;   // (it said why)
                 gMtgAbilities[idx].effStatics[gMtgAbilities[idx].effStaticCount++] = (uint16_t)st;
             }
@@ -797,8 +804,10 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
         c->cyclingCost = k + 8;
         return;
     }
-    if (strcmp(k, "You may choose not to untap CARDNAME during your untap step.") == 0)
-        return;   // (it always untaps here: a choice the rules allow; what staying tapped does keeps a card out itself)
+    if (strcmp(k, "You may choose not to untap CARDNAME during your untap step.") == 0) {
+        c->mayNotUntap = 1;   // (chosen for its player: it stays tapped while its own lock holds something: mtg_game.c)
+        return;
+    }
     if (strncmp(k, "Landwalk:", 9) == 0)
         for (i = 0; i < 5; i++)
             if (strcmp(k + 9, sBasicTypes[i]) == 0) {

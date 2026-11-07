@@ -42,6 +42,11 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.157.0)
+- Damage prevention (R: DamageDone Prevent$, Fog, Effects with ReplacementEffects$) and "doesn't untap" for a while:
+  COOP_NOTES "MAGIC's damage prevention and doesn't untap". 2641 of 5408. Next by count: replacement effects left
+  (87: ReplaceWith$, Moved, Draw), ChooseSource (45), ChooseType (37), T:Execute (52).
+
 ## Status (2026-11-07: 1.156.0)
 - Effects for a while (Effect with StaticAbilities$): COOP_NOTES "MAGIC's effects for a while". 2599 of 5408. Next:
   replacement effects (97, and 78 Effects that carry them), Effects with Triggers$ (21), ChooseType (35).
