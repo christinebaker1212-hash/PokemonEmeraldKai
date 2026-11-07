@@ -1,0 +1,1322 @@
+pressuntil A field 5000
+wait 30
+mp warp 45,0,25,28
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,1,10,17
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,2,28,88
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,2,35,77
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,2,29,57
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,2,49,63
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,2,61,55
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,2,48,32
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,2,63,88
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,3,14,21
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,3,10,9
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,4,16,18
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,4,19,12
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,5,17,15
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,6,12,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,7,14,18
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,8,16,22
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,8,15,15
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,9,17,14
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,10,33,26
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,10,33,40
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,11,32,7
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,12,32,47
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,13,28,65
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,13,46,64
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,13,48,59
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,13,51,55
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,13,57,56
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,13,44,19
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,13,30,124
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,13,39,112
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,13,33,106
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,13,11,115
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,13,24,104
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,13,14,100
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,14,8,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,15,16,23
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,16,16,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,17,16,18
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,18,20,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,18,11,11
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,19,17,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,20,17,21
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,21,16,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,22,16,16
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,23,7,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,23,7,22
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,23,10,15
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,23,25,15
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,24,9,13
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,24,12,16
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,25,6,15
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,25,9,19
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,25,8,12
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,25,21,14
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,26,16,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,26,15,14
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,27,19,28
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,27,76,96
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,27,16,131
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,27,77,131
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,27,16,60
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,28,16,65
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,29,34,56
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,29,82,74
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,29,74,24
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,30,33,95
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,30,39,37
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,30,97,45
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,31,7,43
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,31,31,42
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,32,32,44
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,33,19,33
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,33,33,32
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,33,27,21
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,33,16,18
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,33,44,23
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,33,44,29
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,33,58,39
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,33,64,23
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,34,13,49
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,34,23,12
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,35,19,16
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,36,16,25
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,37,16,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,38,16,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,39,15,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,40,20,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,41,16,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,41,15,18
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,42,14,20
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,43,15,18
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,44,65,64
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,44,68,59
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,44,49,86
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,44,49,84
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,44,61,85
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,44,38,64
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,44,54,29
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,44,71,32
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,44,80,63
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,44,54,48
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,44,38,23
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,45,17,12
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,45,15,20
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,46,17,13
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,47,13,16
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,47,16,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,48,16,21
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,48,13,16
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,49,14,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,49,19,11
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,50,15,17
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,50,17,16
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,51,12,12
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,52,11,22
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,52,12,10
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,53,14,21
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,53,20,21
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,53,35,14
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,53,50,10
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,54,22,19
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,54,26,19
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,54,36,19
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,54,19,19
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,54,30,27
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,54,32,29
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,55,16,21
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,56,47,26
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,56,41,22
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,56,28,22
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,57,21,18
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,57,8,18
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,58,15,10
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,58,17,22
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,59,30,29
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,59,38,30
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,60,15,23
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,60,16,9
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,61,33,20
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,61,15,40
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,61,42,54
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,61,21,73
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,61,49,18
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,62,27,46
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,62,16,17
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,62,4,32
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,63,18,38
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,63,48,21
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,63,43,57
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,63,47,57
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,63,27,72
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,63,27,43
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,63,37,22
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,64,27,9
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,64,12,22
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,65,19,7
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,65,12,24
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,66,20,10
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,66,17,22
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,67,27,21
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,67,40,21
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,67,19,10
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,68,16,12
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,69,16,22
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,69,16,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,70,32,205
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,70,32,4
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,71,17,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,71,17,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,72,32,207
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,72,32,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,73,17,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,73,17,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,74,32,207
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,74,31,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,75,17,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,75,17,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,76,32,210
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,76,31,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,77,17,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,77,17,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,78,32,210
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,78,31,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,79,17,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,79,17,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,80,32,206
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,80,47,14
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,81,17,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,81,17,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,82,23,139
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,82,201,19
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,83,17,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,83,17,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,84,13,143
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,84,180,13
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,85,17,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,85,17,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,86,12,145
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,86,179,14
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,87,17,11
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,87,17,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,88,21,110
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,88,152,18
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,89,14,32
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,91,15,13
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,91,15,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,91,11,17
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,91,18,17
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,92,12,16
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,93,21,24
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,93,25,20
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,94,16,18
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,95,25,16
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,95,21,13
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,96,8,20
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,96,11,24
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,97,28,37
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,97,28,44
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,97,31,41
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,98,16,18
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,99,28,25
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,99,35,25
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,99,32,21
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,100,21,18
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,100,25,14
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,101,16,18
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,102,32,49
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,102,32,34
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,102,22,33
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,102,42,33
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,103,17,22
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,104,15,23
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,105,16,23
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,105,9,23
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,105,9,13
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,107,12,18
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,108,17,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,109,6,14
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,109,23,12
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,109,16,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,110,15,8
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,111,16,8
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,112,16,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,113,17,18
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,114,16,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,115,16,20
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,116,15,21
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,116,29,23
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,116,29,44
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,116,11,19
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,116,16,40
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,116,7,47
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,117,27,36
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,117,24,18
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,117,29,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,117,42,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,117,34,36
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,117,45,34
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,118,17,19
+wait 60
+press DOWN 24
+wait 150
+mp where
+mp warp 45,118,9,21
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,119,35,16
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,119,29,24
+wait 60
+press UP 24
+wait 150
+mp where
+mp warp 45,120,17,19
+wait 60
+press DOWN 24
+wait 150
+mp where

@@ -1,0 +1,10 @@
+45.119 xy 35,36   # the world map's SNAGEM HIDEOUT -> S2_out_2
+45.59 xy 30,50   # the world map's FRONT OF LAB -> D1_out
+45.68 xy 16,30   # the world map's MT. BATTLE -> D2_out
+45.90 xy 15,23   # the world map's REALGAM TOWER -> D4_out
+45.2 xy 48,107   # the world map's PHENAC CITY -> M1_out
+45.13 xy 36,134   # the world map's PYRITE TOWN -> M2_out
+45.33 xy 30,52   # the world map's AGATE VILLAGE -> M3_out
+45.110 xy 16,17   # the world map's THE UNDER -> M4_out_2
+45.0 xy 33,40   # the world map's OUTSKIRT STAND -> S1_out
+45.111 xy 15,22   # the world map's REALGAM TOWER -> D4_out_2

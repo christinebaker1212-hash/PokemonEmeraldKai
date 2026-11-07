@@ -1,0 +1,112 @@
+{
+  "id": "MAP_ORRE_REALGAMTWR_LOBBY_TOWER_1F_1",
+  "name": "Orre_RealgamtwrLobby_Tower1F1",
+  "layout": "LAYOUT_ORRE_REALGAMTWR_LOBBY_TOWER_1F_1",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_REALGAMTWR_LOBBY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 31,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_9",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 32,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_9",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 31,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAM_TOWER_TOWER_2F",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 32,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAM_TOWER_TOWER_2F",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 21,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAM_TOWER_TOWER_1F_2",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 22,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAM_TOWER_TOWER_1F_2",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 23,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAM_TOWER_TOWER_1F_2",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 41,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAM_TOWER_TOWER_1F_3",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 42,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAM_TOWER_TOWER_1F_3",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 32,
+      "y": 48,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_LOBBY_TOWER_1F_1",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 32,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_LOBBY_TOWER_1F_1",
+      "dest_warp_id": "10"
+    },
+    {
+      "x": 22,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_LOBBY_TOWER_1F_1",
+      "dest_warp_id": "11"
+    },
+    {
+      "x": 41,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_LOBBY_TOWER_1F_1",
+      "dest_warp_id": "12"
+    }
+  ]
+}

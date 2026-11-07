@@ -446,6 +446,17 @@ bool8 O3D_IsOrreGroup(u8 mapGroup)
     return ARRAY_COUNT(sOrreMaps) > 0 && mapGroup == MAP_GROUP(MAP_ORRE_OUTSKIRT_STAND);
 }
 
+// the way a player arriving at (x, y) of an ORRE map faces: the angle of the room's entry that lands there
+// (sOrreArrivals: Colosseum's entry positions, tools/orre/gen_maps.py); DIR_NONE where no entry lands
+u8 O3D_ArrivalDir(u16 map, s16 x, s16 y)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sOrreArrivals); i++)
+        if (sOrreArrivals[i].map == map && sOrreArrivals[i].x == x && sOrreArrivals[i].y == y)
+            return sOrreArrivals[i].dir;
+    return DIR_NONE;
+}
+
 // ------------------------------------------------------------------------------------------------ map blocks
 const u16 *O3D_LayoutBlocks(const struct MapLayout *layout)
 {

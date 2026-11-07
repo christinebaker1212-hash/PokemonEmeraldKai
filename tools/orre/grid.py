@@ -6,7 +6,7 @@ The .col layout is the game's (the Colosseum decomp: GScolsys2Walk.c ColGrid / C
 the objects, u32 their count; each object 0x40 bytes: f32 translate xyz, rotate xyz (radians), scale xyz, then three
 triangle grids (0 = none): +0x24 the floor (walk), +0x28 walls (hit), +0x2C event triggers (thru); u16 flags at
 +0x3C. A grid: u32 triangles, u32 count, ... ; a triangle 0x34 bytes: f32 three corners, f32 normal, u8 surface/attr,
-u8 layer, u16 id.
+u8 layer, u16 id: a trigger's id is its event's collision id (the event table's: tools/orre/colo_rooms.py).
 
     python3 -I tools/orre/grid.py MAP.col [START_X START_Z]  (prints the grid: . walkable, # blocked, D trigger)
 """
@@ -32,8 +32,10 @@ def _mtx(f):
     return Rz @ Ry @ Rx @ np.diag([sx, sy, sz]), np.array([tx, ty, tz])
 
 
-def read(data):
-    """{'floor': (n,3,3), 'wall': (n,3,3), 'trigger': [(id, (n,3,3))]} in the map's world."""
+def read(data, open_gates=()):
+    """{'floor': (n,3,3), 'wall': (n,3,3), 'trigger': [(id, (n,3,3))]} in the map's world (a trigger's id: its
+    triangles' u16 id, the collision id the game's events name). OPEN_GATES: collision objects whose walls are left
+    out (the story gates a room's scripts switch on and off: tools/orre/colo_rooms.py Room.gates)."""
     off, n = struct.unpack_from(">II", data, 0)
     out = {"floor": [], "wall": [], "trigger": []}
     for i in range(n):
@@ -41,7 +43,7 @@ def read(data):
         rot, t = _mtx(struct.unpack_from(">9f", data, o))
         for slot, kind in ((0x24, "floor"), (0x28, "wall"), (0x2C, "trigger")):
             p = struct.unpack_from(">I", data, o + slot)[0]
-            if not p:
+            if not p or (kind == "wall" and i in open_gates):
                 continue
             tris, cnt = struct.unpack_from(">II", data, p)
             if cnt == 0 or tris + cnt * 0x34 > len(data):
@@ -49,7 +51,9 @@ def read(data):
             T = np.array([struct.unpack_from(">9f", data, tris + k * 0x34) for k in range(cnt)]).reshape(-1, 3, 3)
             T = T @ rot.T + t
             if kind == "trigger":
-                out["trigger"].append((i, T))
+                ids = np.array([struct.unpack_from(">H", data, tris + k * 0x34 + 0x32)[0] for k in range(cnt)])
+                for tid in sorted(set(ids.tolist())):
+                    out["trigger"].append((tid, T[ids == tid]))
             else:
                 out[kind].append(T)
     for k in ("floor", "wall"):
@@ -121,11 +125,29 @@ def _dist(p, a, b):
     return math.hypot(p[0] - ax - t * dx, p[1] - az - t * dz)
 
 
+def _dist_many(p, A, B):
+    """The distances from p to every segment A[i]-B[i] (x, z), as _dist."""
+    d = B - A
+    L = (d * d).sum(1)
+    t = np.where(L == 0, 0.0, np.clip(((p[0] - A[:, 0]) * d[:, 0] + (p[1] - A[:, 1]) * d[:, 1]) / np.where(L == 0, 1, L), 0, 1))
+    return np.hypot(p[0] - A[:, 0] - t * d[:, 0], p[1] - A[:, 1] - t * d[:, 1])
+
+
+def _cross_many(a0, a1, B0, B1):
+    """Which segments B0[i]-B1[i] the segment a0-a1 crosses, as _seg_cross."""
+    def orient(p, q, r):
+        return (q[..., 0] - p[..., 0]) * (r[..., 1] - p[..., 1]) - (q[..., 1] - p[..., 1]) * (r[..., 0] - p[..., 0])
+    a0, a1 = np.asarray(a0, float), np.asarray(a1, float)
+    d1, d2 = orient(B0, B1, a0), orient(B0, B1, a1)
+    d3, d4 = orient(a0, a1, B0), orient(a0, a1, B1)
+    return ((d1 > 0) != (d2 > 0)) & ((d3 > 0) != (d4 > 0))
+
+
 FINE = 1.0   # the reach is worked out on a grid of FINE Colosseum units, walls thickened by RADIUS
 
 
-def _reach(start, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs):
-    """The tiles a person reaches from START: a flood fill on a fine grid where every wall at a person's height is
+def _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs):
+    """The tiles a person reaches from STARTS: a flood fill on a fine grid where every wall at a person's height is
     RADIUS thick (a gap passes only if a person fits through it), the floor's tiles only, no step over 6 units;
     trigger cells (doors, exits) are reached, not walked through. A tile is reached when the flood comes within 2
     units of its centre."""
@@ -171,12 +193,22 @@ def _reach(start, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs):
         for x in range(w):
             if not (heights[y][x]) or not usable[y, x]:
                 block[y * k:(y + 1) * k, x * k:(x + 1) * k] = True
-    sz, sx = cell(*start)
-    if block[sz, sx]:
-        raise ValueError("the start (%.1f, %.1f) is in a wall or off the floor" % start)
     seen = np.zeros((H, W), dtype=bool)
-    seen[sz, sx] = True
-    q = deque([(sz, sx)])
+    q = deque()
+    for start in starts:
+        sz, sx = cell(*start)
+        if not (0 <= sz < H and 0 <= sx < W):
+            continue
+        if block[sz, sx]:   # (an entry against a railing: the nearest spot a person fits, a few units off)
+            near = [(abs(dz) + abs(dx), sz + dz, sx + dx) for dz in range(-6, 7) for dx in range(-6, 7)
+                    if 0 <= sz + dz < H and 0 <= sx + dx < W and not block[sz + dz, sx + dx]]
+            if not near:
+                continue   # (an entry in a wall or off the floor: a place only a scene uses)
+            _, sz, sx = min(near)
+        seen[sz, sx] = True
+        q.append((sz, sx))
+    if not q:
+        raise ValueError("every start is in a wall or off the floor: %s" % (starts,))
     while q:
         cz, cx = q.popleft()
         if trigf[cz, cx] >= 0:
@@ -204,11 +236,12 @@ def _reach(start, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs):
     return out
 
 
-def build(col, tile=TILE, start=None):
+def build(col, tile=TILE, start=None, stops=None):
     """-> dict: w, h (tiles, whole blocks), tile, x0, z0 (the grid's corner in Colosseum units), walk (h, w) bool,
-    heights (h, w) list of floats, trigger (h, w) object id or -1. START (x, z in Colosseum units): only what can be
-    reached from there is walkable (the insides of props' wall outlines, the world past a map's exit triggers);
-    trigger tiles (doors, exits) are reached but not walked through."""
+    heights (h, w) list of floats, trigger (h, w) collision id or -1. START (x, z in Colosseum units, or a list of
+    them: a room's entries): only what can be reached from there is walkable (the insides of props' wall outlines,
+    the world past a map's exit triggers); STOPS (collision ids: the triggers that lead somewhere, every trigger when
+    None) are reached but not walked through, and only they mark their tiles."""
     fl, wl = col["floor"], col["wall"]
     if len(fl) == 0:
         raise ValueError("no floor")
@@ -232,8 +265,15 @@ def build(col, tile=TILE, start=None):
         pts = T[:, [0, 2]]
         for a, b in ((0, 1), (1, 2), (2, 0)):
             segs.append((pts[a], pts[b], ys.min(), ys.max()))
+    SA = np.array([s_[0] for s_ in segs]).reshape(-1, 2)
+    SB = np.array([s_[1] for s_ in segs]).reshape(-1, 2)
+    SY0 = np.array([s_[2] for s_ in segs])
+    SY1 = np.array([s_[3] for s_ in segs])
+    SLO, SHI = np.minimum(SA, SB), np.maximum(SA, SB)
     tsegs = []
     for tid, TT in col["trigger"]:
+        if stops is not None and tid not in stops:
+            continue
         for T in TT:
             pts = T[:, [0, 2]]
             for a, b in ((0, 1), (1, 2), (2, 0)):
@@ -250,13 +290,9 @@ def build(col, tile=TILE, start=None):
                 continue
             # (a person standing at the centre: a wall within RADIUS of it; narrow aisles of Colosseum's rooms stay
             # open, where a test of the whole tile closed them)
-            blocked = False
-            for p0, p1, y0, y1 in segs:
-                if y1 < g + 1.0 or y0 > g + PERSON:
-                    continue
-                if _dist((cx, cz), p0, p1) < RADIUS:
-                    blocked = True
-                    break
+            near = ((SY1 >= g + 1.0) & (SY0 <= g + PERSON) & (SLO[:, 0] <= cx + RADIUS) & (SHI[:, 0] >= cx - RADIUS)
+                    & (SLO[:, 1] <= cz + RADIUS) & (SHI[:, 1] >= cz - RADIUS))
+            blocked = bool(near.any() and (_dist_many((cx, cz), SA[near], SB[near]) < RADIUS).any())
             walk[ty, tx] = not blocked
             for p0, p1, tid in tsegs:
                 if _seg_hits_box(p0, p1, cx - tile / 2, cz - tile / 2, cx + tile / 2, cz + tile / 2):
@@ -270,29 +306,88 @@ def build(col, tile=TILE, start=None):
     def wall_between(x, y, nx, ny):
         a, b = centre(x, y), centre(nx, ny)
         g = min(heights[y][x][0], heights[ny][nx][0])
-        for p0, p1, y0, y1 in segs:
-            if y1 < g + 1.0 or y0 > g + PERSON:
-                continue
-            if _seg_cross(a, b, p0, p1):
-                return (p0, p1)
+        lo, hi = np.minimum(a, b), np.maximum(a, b)
+        near = np.nonzero((SY1 >= g + 1.0) & (SY0 <= g + PERSON) & (SLO[:, 0] <= hi[0]) & (SHI[:, 0] >= lo[0])
+                          & (SLO[:, 1] <= hi[1]) & (SHI[:, 1] >= lo[1]))[0]
+        if len(near):
+            hit = near[_cross_many(a, b, SA[near], SB[near])]
+            if len(hit):
+                return (SA[hit[0]], SB[hit[0]])
         return None
 
     if start is not None:
-        walk = _reach(start, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs)
+        starts = [start] if isinstance(start[0], (int, float)) else list(start)
+        walk = _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs)
         # Emerald's grid has no walls between tiles: where one still parts two walkable tiles, the tile nearer the
         # wall is blocked
         for y in range(h):
             for x in range(w):
                 for nx, ny in ((x + 1, y), (x, y + 1)):
                     if nx < w and ny < h and walk[y, x] and walk[ny, nx]:
+                        if trig[y, x] >= 0 or trig[ny, nx] >= 0:
+                            continue   # (a door's frame: its trigger is stepped onto across it)
                         wseg = wall_between(x, y, nx, ny)
                         if wseg:
                             da, db = _dist(centre(x, y), *wseg), _dist(centre(nx, ny), *wseg)
-                            if trig[y, x] >= 0 or (db <= da and trig[ny, nx] < 0):
+                            if db <= da:
                                 walk[ny, nx] = False
                             else:
                                 walk[y, x] = False
+        if stops:
+            _connect(walk, heights, trig, stops)
     return {"w": w, "h": h, "tile": tile, "x0": x0, "z0": z0, "walk": walk, "heights": heights, "trigger": trig}
+
+
+CONNECT = 3   # tiles: how far a door's trigger may lie from what is reached and still be joined to it
+
+
+def _connect(walk, heights, trig, stops):
+    """Doors whose trigger the reach missed: it sits in a door frame the thickened walls keep the flood out of, a
+    tile or so from what was reached. The shortest way (CONNECT tiles at most) from the reached tiles to one of its
+    tiles is opened, every tile of it given the ground of the tile it was entered from (a door frame has no floor of
+    its own in some rooms); a trigger tile so reached is walkable, and stepped on it warps."""
+    from collections import deque
+    h, w = walk.shape
+    for tid in sorted(stops):
+        tiles = trig == tid
+        if not tiles.any():
+            continue
+        # (entered when one of its walkable tiles is beside a walkable tile that isn't a trigger)
+        plain = walk & (trig < 0)
+        beside = np.zeros_like(walk)
+        beside[1:] |= plain[:-1]
+        beside[:-1] |= plain[1:]
+        beside[:, 1:] |= plain[:, :-1]
+        beside[:, :-1] |= plain[:, 1:]
+        if (walk & tiles & beside).any():
+            continue
+        prev = {}
+        dist = {(int(y), int(x)): 0 for y, x in np.argwhere(plain)}
+        q = deque(dist)
+        found = None
+        while q and found is None:
+            cy, cx = q.popleft()
+            if dist[(cy, cx)] >= CONNECT:
+                continue
+            for ny, nx in ((cy + 1, cx), (cy - 1, cx), (cy, cx + 1), (cy, cx - 1)):
+                if 0 <= ny < h and 0 <= nx < w and (ny, nx) not in dist and (trig[ny, nx] < 0 or trig[ny, nx] == tid):
+                    dist[(ny, nx)] = dist[(cy, cx)] + 1
+                    prev[(ny, nx)] = (cy, cx)
+                    if tiles[ny, nx]:
+                        found = (ny, nx)
+                        break
+                    q.append((ny, nx))
+        if found is None:
+            continue
+        path = [found]
+        while path[-1] in prev:
+            path.append(prev[path[-1]])
+        for k in range(len(path) - 2, -1, -1):   # (from the reached tile out to the trigger)
+            y, x = path[k]
+            py, px = path[k + 1]
+            if not heights[y][x]:
+                heights[y][x] = list(heights[py][px])
+            walk[y, x] = True
 
 
 def show(g):

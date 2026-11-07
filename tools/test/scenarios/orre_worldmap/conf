@@ -1,11 +1,13 @@
 # ORRE's world map (src/orre/worldmap.c): Colosseum's own screen, opened by stepping on the OUTSKIRT STAND's way out
 # (its loop's trigger: tools/orre/maps.py exits). At first only the OUTSKIRT STAND is shown; B goes back to the
-# field, A on it travels there (its start); with PHENAC's flag set (mp orreflag) PHENAC CITY shows too, its words
-# and picture, and A on it is refused (no PHENAC map yet). Needs orre/ (tools/orre/make_pack.sh). Shots wm_*.png.
+# field, A on it travels there (Colosseum's entry 0 of the room); with PHENAC's flag set (mp orreflag) PHENAC CITY
+# shows too, its words and picture, and A on it travels to PHENAC CITY's entry 0 (its south gate). Needs orre/
+# (tools/orre/make_pack.sh). Shots wm_*.png.
 MODE=1
 TMO=120
 WARP=45,0,25,43
 EXPECT_A=("orre world map: open at room 1, 1 of 9 places shown" "orre world map: cancelled"
-          "orre world map: to S1_out" "[test] where map 45.0 xy 25,29" "[test] orreflag 0x3DF 1"
-          "orre world map: open at room 1, 2 of 9 places shown" "orre world map: room 3 isn't in the game yet")
+          "orre world map: to S1_out" "[test] where map 45.0 xy 33,40" "[test] orreflag 0x3DF 1"
+          "orre world map: open at room 1, 2 of 9 places shown" "orre world map: to M1_out"
+          "[test] where map 45.2 xy 48,107" "PHENAC CITY")
 UNEXPECT_A=("[crash]" "TIMEOUT" "won't load" "isn't in ORRE's pack")

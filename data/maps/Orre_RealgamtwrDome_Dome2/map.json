@@ -1,0 +1,42 @@
+{
+  "id": "MAP_ORRE_REALGAMTWR_DOME_DOME_2",
+  "name": "Orre_RealgamtwrDome_Dome2",
+  "layout": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_2",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_REALGAMTWR_DOME",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 13,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_1",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 13,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_1",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 12,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_2",
+      "dest_warp_id": "2"
+    }
+  ]
+}

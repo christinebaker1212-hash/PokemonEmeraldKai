@@ -1,0 +1,77 @@
+{
+  "id": "MAP_ORRE_THE_UNDER_HOTEL_B1",
+  "name": "Orre_TheUnder_HotelB1",
+  "layout": "LAYOUT_ORRE_THE_UNDER_HOTEL_B1",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_THE_UNDER",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 14,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER",
+      "dest_warp_id": "34"
+    },
+    {
+      "x": 15,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER",
+      "dest_warp_id": "34"
+    },
+    {
+      "x": 16,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER",
+      "dest_warp_id": "34"
+    },
+    {
+      "x": 17,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER",
+      "dest_warp_id": "34"
+    },
+    {
+      "x": 11,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_HOTEL_1F",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 12,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_HOTEL_1F",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 16,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_HOTEL_B1",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 12,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_HOTEL_B1",
+      "dest_warp_id": "7"
+    }
+  ]
+}

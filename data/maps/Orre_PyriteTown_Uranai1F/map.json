@@ -1,0 +1,42 @@
+{
+  "id": "MAP_ORRE_PYRITE_TOWN_URANAI_1F",
+  "name": "Orre_PyriteTown_Uranai1F",
+  "layout": "LAYOUT_ORRE_PYRITE_TOWN_URANAI_1F",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_PYRITE_TOWN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 15,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_TOWN",
+      "dest_warp_id": "28"
+    },
+    {
+      "x": 16,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_TOWN",
+      "dest_warp_id": "28"
+    },
+    {
+      "x": 15,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_TOWN_URANAI_1F",
+      "dest_warp_id": "2"
+    }
+  ]
+}

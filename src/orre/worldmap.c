@@ -140,7 +140,7 @@ static s32 PlaceOfItem(u32 item)
     return -1;
 }
 
-// the place's picture (fn_80024A2C: THE UNDER's, once flag 0x45D is set, is mapsnap008)
+// the place's picture (fn_80024A2C: REALGAM TOWER's (room 0x66), once flag 0x45D is set, is mapsnap008)
 static u32 PlacePicture(u32 i)
 {
     if (PlaceRoom(i) == 0x66 && Orre_Flag(0x45D))
@@ -148,12 +148,21 @@ static u32 PlacePicture(u32 i)
     return Be32(W.places + i * 16 + 12);
 }
 
-// the sOrreMaps entry whose room is the place's (-1: not in the game yet)
+// the room travelling to a place lands in (gs_title.c's travel: REALGAM TOWER's (0x66) is 0x7B, the tower with its
+// door, once flag 0x45D is set)
+static u32 PlaceDestRoom(u32 i)
+{
+    if (PlaceRoom(i) == 0x66 && Orre_Flag(0x45D))
+        return 0x7B;
+    return PlaceRoom(i);
+}
+
+// the sOrreMaps entry of the room travelling to the place lands in (-1: not in the game yet)
 static s32 PlaceMap(u32 i)
 {
     u32 k;
     for (k = 0; k < ARRAY_COUNT(sOrreMaps); k++)
-        if (sOrreMaps[k].room == PlaceRoom(i))
+        if (sOrreMaps[k].room == PlaceDestRoom(i))
             return k;
     return -1;
 }

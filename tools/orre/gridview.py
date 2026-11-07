@@ -3,6 +3,9 @@
 blocked tiles red, triggers blue, tile lines grey.
 
   python3 -I tools/orre/gridview.py MAP.map MAP.col OUT.png [PX_PER_TILE [START_X START_Z]]
+  python3 -I tools/orre/gridview.py --room UNPACKED_DIR ROOM OUT.png [PX_PER_TILE]
+      (a room of the game, tools/orre/colo_rooms.py: reached from its entries (green dots), its links' triggers
+      blue with their collision ids, the other triggers outlined in white)
 """
 import os
 import sys
@@ -64,10 +67,21 @@ def topdown(meshes, images, x0, z0, wu, hu, scale):
 
 
 if __name__ == "__main__":
-    mp, cp, out = sys.argv[1:4]
-    px = int(sys.argv[4]) if len(sys.argv) > 4 else 12
-    st = (float(sys.argv[5]), float(sys.argv[6])) if len(sys.argv) > 6 else None
-    g = grid.build(grid.read(open(cp, "rb").read()), grid.TILE, st)
+    room = None
+    if sys.argv[1] == "--room":
+        import colo_rooms
+        src, rid, out = sys.argv[2], int(sys.argv[3], 0), sys.argv[4]
+        room = colo_rooms.rooms(src)[rid]
+        mp = os.path.join(src, room.file, room.file + ".map")
+        cp = os.path.join(src, room.file, room.file + ".col")
+        px = int(sys.argv[5]) if len(sys.argv) > 5 else 12
+        st = [(e[1], e[3]) for e in room.entries]
+        g = grid.build(grid.read(open(cp, "rb").read()), grid.TILE, st, set(room.links))
+    else:
+        mp, cp, out = sys.argv[1:4]
+        px = int(sys.argv[4]) if len(sys.argv) > 4 else 12
+        st = (float(sys.argv[5]), float(sys.argv[6])) if len(sys.argv) > 6 else None
+        g = grid.build(grid.read(open(cp, "rb").read()), grid.TILE, st)
     f = hsd.HsdFile(open(mp, "rb").read())
     meshes = [m for s in hsd.model_sets(f) if not hsd.is_sky(s) for m in s]
     scale = px / g["tile"]
@@ -89,4 +103,15 @@ if __name__ == "__main__":
     for T, colr in ((col["wall"], (255, 230, 0, 255)), (col["floor"], (0, 230, 255, 255))):
         for t in T:
             d.line([pt(t[0]), pt(t[1]), pt(t[2]), pt(t[0])], fill=colr, width=1)
+    if room is not None:
+        for tid, TT in col["trigger"]:
+            for t in TT:
+                d.line([pt(t[0]), pt(t[1]), pt(t[2]), pt(t[0])], fill=(255, 255, 255, 200) if tid not in room.links
+                       else (60, 120, 255, 255), width=2)
+            c = TT.reshape(-1, 3).mean(0)
+            d.text(pt(c), str(tid), fill=(255, 255, 255, 255) if tid not in room.links else (120, 200, 255, 255))
+        for k, e in enumerate(room.entries):
+            x, y = pt((e[1], 0, e[3]))
+            d.ellipse((x - 4, y - 4, x + 4, y + 4), fill=(0, 255, 0, 255))
+            d.text((x + 5, y - 5), "e%d" % k, fill=(0, 255, 0, 255))
     Image.alpha_composite(img, over).save(out)

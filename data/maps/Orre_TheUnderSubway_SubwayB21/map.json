@@ -1,0 +1,119 @@
+{
+  "id": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_1",
+  "name": "Orre_TheUnderSubway_SubwayB21",
+  "layout": "LAYOUT_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_1",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_THE_UNDER_SUBWAY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 20,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_2",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 21,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_2",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 22,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_2",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 23,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_2",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 26,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B1",
+      "dest_warp_id": "10"
+    },
+    {
+      "x": 36,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B1",
+      "dest_warp_id": "11"
+    },
+    {
+      "x": 19,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B3",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 31,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_COLOSSEUM_ENTER_1F_2",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 31,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_COLOSSEUM_ENTER_1F_2",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 32,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_COLOSSEUM_ENTER_1F_2",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 26,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_1",
+      "dest_warp_id": "10"
+    },
+    {
+      "x": 37,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_1",
+      "dest_warp_id": "11"
+    },
+    {
+      "x": 22,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_1",
+      "dest_warp_id": "12"
+    },
+    {
+      "x": 21,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_1",
+      "dest_warp_id": "13"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+# ORRE (tools/orre/gen_tests.py): every door, staircase and elevator of Colosseum's field rooms leads where the
+# game's own tables say (tools/orre/colo_rooms.py): from the walkable tile in front of each trigger a step onto it,
+# then where the player comes out (tools/orre/check_tests.py against expect.txt: the entry's tile, or a tile off an
+# elevator). Needs orre/ (tools/orre/make_pack.sh). About 4 minutes.
+MODE=1
+TMO=1500
+WARP=45,0,33,40
+CHECK="python3 -I tools/orre/check_tests.py tools/test/scenarios/orre_all_doors/expect.txt"
+UNEXPECT_A=("[crash]" "TIMEOUT" "has no grid" "isn't the size of its map" "no ORRE pack")

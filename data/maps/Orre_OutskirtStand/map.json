@@ -63,6 +63,15 @@
     },
     {
       "type": "trigger",
+      "x": 50,
+      "y": 32,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
       "x": 10,
       "y": 33,
       "elevation": 0,
@@ -279,6 +288,42 @@
     },
     {
       "type": "trigger",
+      "x": 50,
+      "y": 43,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 13,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 14,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 15,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
       "x": 16,
       "y": 44,
       "elevation": 0,
@@ -316,6 +361,24 @@
     {
       "type": "trigger",
       "x": 20,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 21,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 22,
       "y": 44,
       "elevation": 0,
       "var": "VAR_TEMP_0",
@@ -387,6 +450,24 @@
     },
     {
       "type": "trigger",
+      "x": 30,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 31,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
       "x": 32,
       "y": 44,
       "elevation": 0,
@@ -442,6 +523,24 @@
     {
       "type": "trigger",
       "x": 38,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 39,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 40,
       "y": 44,
       "elevation": 0,
       "var": "VAR_TEMP_0",
@@ -510,6 +609,33 @@
       "var": "VAR_TEMP_0",
       "var_value": "0",
       "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 48,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 49,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 50,
+      "y": 44,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
     }
   ],
   "warp_events": [
@@ -526,6 +652,41 @@
       "elevation": 0,
       "dest_map": "MAP_ORRE_OUTSKIRT_STAND_DINER",
       "dest_warp_id": "2"
+    },
+    {
+      "x": 33,
+      "y": 40,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_OUTSKIRT_STAND",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 25,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_OUTSKIRT_STAND",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 9,
+      "y": 40,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_OUTSKIRT_STAND",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 55,
+      "y": 40,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_OUTSKIRT_STAND",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 27,
+      "y": 47,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_OUTSKIRT_STAND",
+      "dest_warp_id": "6"
     }
   ]
 }

@@ -1,0 +1,365 @@
+pressuntil A field 5000
+wait 30
+mp warp 45,0,33,40
+wait 70
+mp where
+mp warp 45,1,10,18
+wait 70
+mp where
+mp warp 45,2,48,107
+wait 70
+mp where
+mp warp 45,3,14,20
+wait 70
+mp where
+mp warp 45,4,16,18
+wait 70
+mp where
+mp warp 45,5,19,14
+wait 70
+mp where
+mp warp 45,6,13,19
+wait 70
+mp where
+mp warp 45,7,15,17
+wait 70
+mp where
+mp warp 45,8,16,22
+wait 70
+mp where
+mp warp 45,9,17,13
+wait 70
+mp where
+mp warp 45,10,33,39
+wait 70
+mp where
+mp warp 45,11,32,8
+wait 70
+mp where
+mp warp 45,12,32,46
+wait 70
+mp where
+mp warp 45,13,36,134
+wait 70
+mp where
+mp warp 45,14,8,18
+wait 70
+mp where
+mp warp 45,15,15,23
+wait 70
+mp where
+mp warp 45,16,15,18
+wait 70
+mp where
+mp warp 45,17,16,18
+wait 70
+mp where
+mp warp 45,18,20,19
+wait 70
+mp where
+mp warp 45,19,17,17
+wait 70
+mp where
+mp warp 45,20,16,20
+wait 70
+mp where
+mp warp 45,21,16,19
+wait 70
+mp where
+mp warp 45,22,16,15
+wait 70
+mp where
+mp warp 45,23,7,22
+wait 70
+mp where
+mp warp 45,24,8,16
+wait 70
+mp where
+mp warp 45,25,8,19
+wait 70
+mp where
+mp warp 45,26,16,19
+wait 70
+mp where
+mp warp 45,27,19,31
+wait 70
+mp where
+mp warp 45,28,16,60
+wait 70
+mp where
+mp warp 45,29,39,56
+wait 70
+mp where
+mp warp 45,30,28,97
+wait 70
+mp where
+mp warp 45,31,8,43
+wait 70
+mp where
+mp warp 45,32,36,44
+wait 70
+mp where
+mp warp 45,33,30,52
+wait 70
+mp where
+mp warp 45,34,13,46
+wait 70
+mp where
+mp warp 45,35,20,15
+wait 70
+mp where
+mp warp 45,36,17,24
+wait 70
+mp where
+mp warp 45,37,16,19
+wait 70
+mp where
+mp warp 45,38,16,19
+wait 70
+mp where
+mp warp 45,39,16,18
+wait 70
+mp where
+mp warp 45,40,20,20
+wait 70
+mp where
+mp warp 45,41,15,19
+wait 70
+mp where
+mp warp 45,42,17,19
+wait 70
+mp where
+mp warp 45,43,14,18
+wait 70
+mp where
+mp warp 45,44,80,63
+wait 70
+mp where
+mp warp 45,45,15,18
+wait 70
+mp where
+mp warp 45,46,19,11
+wait 70
+mp where
+mp warp 45,47,16,20
+wait 70
+mp where
+mp warp 45,48,16,21
+wait 70
+mp where
+mp warp 45,49,14,20
+wait 70
+mp where
+mp warp 45,50,16,18
+wait 70
+mp where
+mp warp 45,51,15,14
+wait 70
+mp where
+mp warp 45,52,10,23
+wait 70
+mp where
+mp warp 45,53,13,21
+wait 70
+mp where
+mp warp 45,54,26,19
+wait 70
+mp where
+mp warp 45,55,15,21
+wait 70
+mp where
+mp warp 45,56,47,26
+wait 70
+mp where
+mp warp 45,57,8,18
+wait 70
+mp where
+mp warp 45,58,16,21
+wait 70
+mp where
+mp warp 45,59,30,50
+wait 70
+mp where
+mp warp 45,60,16,23
+wait 70
+mp where
+mp warp 45,61,33,20
+wait 70
+mp where
+mp warp 45,62,27,45
+wait 70
+mp where
+mp warp 45,63,43,56
+wait 70
+mp where
+mp warp 45,64,12,21
+wait 70
+mp where
+mp warp 45,65,17,7
+wait 70
+mp where
+mp warp 45,66,16,21
+wait 70
+mp where
+mp warp 45,67,19,12
+wait 70
+mp where
+mp warp 45,68,16,30
+wait 70
+mp where
+mp warp 45,69,16,22
+wait 70
+mp where
+mp warp 45,70,31,204
+wait 70
+mp where
+mp warp 45,71,17,20
+wait 70
+mp where
+mp warp 45,72,32,206
+wait 70
+mp where
+mp warp 45,73,17,20
+wait 70
+mp where
+mp warp 45,74,32,206
+wait 70
+mp where
+mp warp 45,75,17,20
+wait 70
+mp where
+mp warp 45,76,32,209
+wait 70
+mp where
+mp warp 45,77,17,20
+wait 70
+mp where
+mp warp 45,78,32,208
+wait 70
+mp where
+mp warp 45,79,17,20
+wait 70
+mp where
+mp warp 45,80,32,204
+wait 70
+mp where
+mp warp 45,81,17,20
+wait 70
+mp where
+mp warp 45,82,24,138
+wait 70
+mp where
+mp warp 45,83,17,20
+wait 70
+mp where
+mp warp 45,84,13,144
+wait 70
+mp where
+mp warp 45,85,17,20
+wait 70
+mp where
+mp warp 45,86,12,145
+wait 70
+mp where
+mp warp 45,87,17,20
+wait 70
+mp where
+mp warp 45,88,21,111
+wait 70
+mp where
+mp warp 45,89,17,30
+wait 70
+mp where
+mp warp 45,90,15,23
+wait 70
+mp where
+mp warp 45,91,15,20
+wait 70
+mp where
+mp warp 45,92,12,15
+wait 70
+mp where
+mp warp 45,93,21,23
+wait 70
+mp where
+mp warp 45,94,16,18
+wait 70
+mp where
+mp warp 45,95,25,16
+wait 70
+mp where
+mp warp 45,96,11,24
+wait 70
+mp where
+mp warp 45,97,28,44
+wait 70
+mp where
+mp warp 45,98,16,18
+wait 70
+mp where
+mp warp 45,99,28,25
+wait 70
+mp where
+mp warp 45,100,21,18
+wait 70
+mp where
+mp warp 45,101,16,18
+wait 70
+mp where
+mp warp 45,102,32,48
+wait 70
+mp where
+mp warp 45,103,17,22
+wait 70
+mp where
+mp warp 45,104,15,22
+wait 70
+mp where
+mp warp 45,105,17,24
+wait 70
+mp where
+mp warp 45,106,50,54
+wait 70
+mp where
+mp warp 45,107,10,15
+wait 70
+mp where
+mp warp 45,108,17,19
+wait 70
+mp where
+mp warp 45,109,16,17
+wait 70
+mp where
+mp warp 45,110,16,17
+wait 70
+mp where
+mp warp 45,111,15,22
+wait 70
+mp where
+mp warp 45,112,16,19
+wait 70
+mp where
+mp warp 45,113,17,19
+wait 70
+mp where
+mp warp 45,114,17,19
+wait 70
+mp where
+mp warp 45,115,16,20
+wait 70
+mp where
+mp warp 45,116,7,47
+wait 70
+mp where
+mp warp 45,117,29,18
+wait 70
+mp where
+mp warp 45,118,17,17
+wait 70
+mp where
+mp warp 45,119,35,36
+wait 70
+mp where
+mp warp 45,120,17,19
+wait 70
+mp where

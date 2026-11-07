@@ -15760,6 +15760,1196 @@
       "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
       "border_filepath": "data/layouts/Orre_OutskirtStandDiner/border.bin",
       "blockdata_filepath": "data/layouts/Orre_OutskirtStandDiner/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PHENAC_CITY",
+      "name": "Orre_PhenacCity_Layout",
+      "width": 96,
+      "height": 128,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PhenacCity/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PhenacCity/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PRE_GYM_GYM_B1",
+      "name": "Orre_PreGym_GymB1_Layout",
+      "width": 64,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PreGym_GymB1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PreGym_GymB1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_TOWN",
+      "name": "Orre_PyriteTown_Layout",
+      "width": 64,
+      "height": 160,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteTown/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteTown/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_AGATE_VILLAGE",
+      "name": "Orre_AgateVillage_Layout",
+      "width": 96,
+      "height": 128,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_AgateVillage/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_AgateVillage/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER",
+      "name": "Orre_TheUnder_Layout",
+      "width": 96,
+      "height": 128,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_JUNK_B1",
+      "name": "Orre_TheUnder_JunkB1_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder_JunkB1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder_JunkB1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_HOTEL_B1",
+      "name": "Orre_TheUnder_HotelB1_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder_HotelB1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder_HotelB1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_LABO_B1",
+      "name": "Orre_TheUnder_LaboB1_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder_LaboB1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder_LaboB1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_SUBWAY_SUBWAY_B1",
+      "name": "Orre_TheUnderSubway_SubwayB1_Layout",
+      "width": 64,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnderSubway_SubwayB1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnderSubway_SubwayB1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_SUBWAY_SUBWAY_B3",
+      "name": "Orre_TheUnderSubway_SubwayB3_Layout",
+      "width": 64,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnderSubway_SubwayB3/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnderSubway_SubwayB3/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_FRONT_OF_LAB",
+      "name": "Orre_FrontOfLab_Layout",
+      "width": 64,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_FrontOfLab/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_FrontOfLab/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_LABORATORY_LABO_B1",
+      "name": "Orre_Laboratory_LaboB1_Layout",
+      "width": 64,
+      "height": 96,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_Laboratory_LaboB1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_Laboratory_LaboB1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_LABORATORY_LABO_B2",
+      "name": "Orre_Laboratory_LaboB2_Layout",
+      "width": 32,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_Laboratory_LaboB2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_Laboratory_LaboB2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_LABORATORY_LABO_B3",
+      "name": "Orre_Laboratory_LaboB3_Layout",
+      "width": 64,
+      "height": 96,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_Laboratory_LaboB3/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_Laboratory_LaboB3/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_LABORATORY_GARAGE_B1",
+      "name": "Orre_Laboratory_GarageB1_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_Laboratory_GarageB1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_Laboratory_GarageB1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE",
+      "name": "Orre_MtBattle_Layout",
+      "width": 32,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BTL_COLOSSEUM_CRATER_COLO",
+      "name": "Orre_MtBtlColosseum_CraterColo_Layout",
+      "width": 160,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBtlColosseum_CraterColo/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBtlColosseum_CraterColo/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAM_TOWER",
+      "name": "Orre_RealgamTower_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamTower/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamTower/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_TOWER_COLOSSEUM_CASINO_COLO",
+      "name": "Orre_TowerColosseum_CasinoColo_Layout",
+      "width": 96,
+      "height": 96,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TowerColosseum_CasinoColo/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TowerColosseum_CasinoColo/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PHENAC_CITY_PC_B1",
+      "name": "Orre_PhenacCity_PcB1_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PhenacCity_PcB1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PhenacCity_PcB1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_DEEP_COLOSSEUM_ENTER_B1",
+      "name": "Orre_DeepColosseum_EnterB1_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_DeepColosseum_EnterB1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_DeepColosseum_EnterB1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PHENAC_CITY_PC_1F",
+      "name": "Orre_PhenacCity_Pc1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PhenacCity_Pc1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PhenacCity_Pc1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MAYORS_HOUSE_HOUSEA_1F",
+      "name": "Orre_MayorsHouse_HouseA1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MayorsHouse_HouseA1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MayorsHouse_HouseA1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MAYORS_HOUSE_HOUSEA_2F",
+      "name": "Orre_MayorsHouse_HouseA2F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MayorsHouse_HouseA2F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MayorsHouse_HouseA2F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PHENAC_CITY_HOUSEB_1F",
+      "name": "Orre_PhenacCity_HouseB1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PhenacCity_HouseB1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PhenacCity_HouseB1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PHENAC_CITY_HOUSEC_1F",
+      "name": "Orre_PhenacCity_HouseC1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PhenacCity_HouseC1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PhenacCity_HouseC1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PHENAC_CITY_SHOP_1F",
+      "name": "Orre_PhenacCity_Shop1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PhenacCity_Shop1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PhenacCity_Shop1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PHENAC_CITY_SHOP_2F",
+      "name": "Orre_PhenacCity_Shop2F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PhenacCity_Shop2F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PhenacCity_Shop2F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PRE_GYM_GYM_1F",
+      "name": "Orre_PreGym_Gym1F_Layout",
+      "width": 64,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PreGym_Gym1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PreGym_Gym1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PHENAC_STADIUM_STADIUM_1F",
+      "name": "Orre_PhenacStadium_Stadium1F_Layout",
+      "width": 64,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PhenacStadium_Stadium1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PhenacStadium_Stadium1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_TOWN_POLICE_1F",
+      "name": "Orre_PyriteTown_Police1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteTown_Police1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteTown_Police1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_TOWN_HOTEL_1F",
+      "name": "Orre_PyriteTown_Hotel1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteTown_Hotel1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteTown_Hotel1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_TOWN_URANAI_1F",
+      "name": "Orre_PyriteTown_Uranai1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteTown_Uranai1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteTown_Uranai1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_TOWN_HOUSEA_1F",
+      "name": "Orre_PyriteTown_HouseA1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteTown_HouseA1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteTown_HouseA1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_TOWN_GUILD_1F_1",
+      "name": "Orre_PyriteTown_Guild1F1_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteTown_Guild1F1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteTown_Guild1F1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_TOWN_GUILD_1F_2",
+      "name": "Orre_PyriteTown_Guild1F2_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteTown_Guild1F2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteTown_Guild1F2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_TOWN_SHOP_1F",
+      "name": "Orre_PyriteTown_Shop1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteTown_Shop1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteTown_Shop1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_TOWN_WINDMILL_1F",
+      "name": "Orre_PyriteTown_Windmill1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteTown_Windmill1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteTown_Windmill1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_TOWN_WINDMILL_2F",
+      "name": "Orre_PyriteTown_Windmill2F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteTown_Windmill2F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteTown_Windmill2F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_BLDG_BUILDING_1F",
+      "name": "Orre_PyriteBldg_Building1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteBldg_Building1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteBldg_Building1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_BLDG_BUILDING_2F",
+      "name": "Orre_PyriteBldg_Building2F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteBldg_Building2F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteBldg_Building2F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_BLDG_BUILDING_3F",
+      "name": "Orre_PyriteBldg_Building3F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteBldg_Building3F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteBldg_Building3F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_BLDG_BUILDING_4F",
+      "name": "Orre_PyriteBldg_Building4F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteBldg_Building4F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteBldg_Building4F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_CAVE_CAVE_1F_1",
+      "name": "Orre_PyriteCave_Cave1F1_Layout",
+      "width": 96,
+      "height": 160,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteCave_Cave1F1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteCave_Cave1F1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MIRORS_HIDEOUT_CAVE_1F_2",
+      "name": "Orre_MirorsHideout_Cave1F2_Layout",
+      "width": 32,
+      "height": 96,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MirorsHideout_Cave1F2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MirorsHideout_Cave1F2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_CAVE_CAVE_2F_1",
+      "name": "Orre_PyriteCave_Cave2F1_Layout",
+      "width": 128,
+      "height": 96,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteCave_Cave2F1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteCave_Cave2F1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_CAVE_CAVE_2F_2",
+      "name": "Orre_PyriteCave_Cave2F2_Layout",
+      "width": 128,
+      "height": 128,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteCave_Cave2F2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteCave_Cave2F2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_CAVE_CAVE_3F_1",
+      "name": "Orre_PyriteCave_Cave3F1_Layout",
+      "width": 64,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteCave_Cave3F1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteCave_Cave3F1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_CAVE_CAVE_3F_2",
+      "name": "Orre_PyriteCave_Cave3F2_Layout",
+      "width": 96,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteCave_Cave3F2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteCave_Cave3F2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_RELIC_CAVE_CAVE_1F_1",
+      "name": "Orre_RelicCave_Cave1F1_Layout",
+      "width": 32,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RelicCave_Cave1F1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RelicCave_Cave1F1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_RELIC_CAVE_CAVE_1F_2",
+      "name": "Orre_RelicCave_Cave1F2_Layout",
+      "width": 64,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RelicCave_Cave1F2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RelicCave_Cave1F2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_AGATE_VILLAGE_SHRINE_1F",
+      "name": "Orre_AgateVillage_Shrine1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_AgateVillage_Shrine1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_AgateVillage_Shrine1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_AGATE_VILLAGE_HOUSEA_1F",
+      "name": "Orre_AgateVillage_HouseA1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_AgateVillage_HouseA1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_AgateVillage_HouseA1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_AGATE_VILLAGE_HOUSEB_1F",
+      "name": "Orre_AgateVillage_HouseB1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_AgateVillage_HouseB1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_AgateVillage_HouseB1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_AGATE_VILLAGE_PC_1F",
+      "name": "Orre_AgateVillage_Pc1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_AgateVillage_Pc1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_AgateVillage_Pc1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_AGATE_VILLAGE_SHOP_1F",
+      "name": "Orre_AgateVillage_Shop1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_AgateVillage_Shop1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_AgateVillage_Shop1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_AGATE_VILLAGE_HOUSEC_1F",
+      "name": "Orre_AgateVillage_HouseC1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_AgateVillage_HouseC1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_AgateVillage_HouseC1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_AGATE_VILLAGE_HOUSEC_2F",
+      "name": "Orre_AgateVillage_HouseC2F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_AgateVillage_HouseC2F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_AgateVillage_HouseC2F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_AGATE_VILLAGE_HOUSED_1F",
+      "name": "Orre_AgateVillage_HouseD1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_AgateVillage_HouseD1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_AgateVillage_HouseD1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_JUNK_1F",
+      "name": "Orre_TheUnder_Junk1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder_Junk1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder_Junk1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_HOTEL_1F",
+      "name": "Orre_TheUnder_Hotel1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder_Hotel1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder_Hotel1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_SHOP_1F",
+      "name": "Orre_TheUnder_Shop1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder_Shop1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder_Shop1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_LABO_1F",
+      "name": "Orre_TheUnder_Labo1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder_Labo1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder_Labo1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_HOUSEA_1F",
+      "name": "Orre_TheUnder_HouseA1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder_HouseA1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder_HouseA1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_1",
+      "name": "Orre_TheUnderSubway_SubwayB21_Layout",
+      "width": 64,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnderSubway_SubwayB21/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnderSubway_SubwayB21/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_2",
+      "name": "Orre_TheUnderSubway_SubwayB22_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnderSubway_SubwayB22/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnderSubway_SubwayB22/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_SUBWAY_TRAIN_1F",
+      "name": "Orre_TheUnderSubway_Train1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnderSubway_Train1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnderSubway_Train1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_BOTTOM_1F",
+      "name": "Orre_TheUnder_Bottom1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder_Bottom1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder_Bottom1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_LABORATORY_LABO_1F",
+      "name": "Orre_Laboratory_Labo1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_Laboratory_Labo1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_Laboratory_Labo1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_LABORATORY_GARAGE_1F",
+      "name": "Orre_Laboratory_Garage1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_Laboratory_Garage1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_Laboratory_Garage1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_LABORATORY_GARAGE_B2_1",
+      "name": "Orre_Laboratory_GarageB21_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_Laboratory_GarageB21/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_Laboratory_GarageB21/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_LABORATORY_GARAGE_B2_2",
+      "name": "Orre_Laboratory_GarageB22_Layout",
+      "width": 64,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_Laboratory_GarageB22/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_Laboratory_GarageB22/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_PC_1F",
+      "name": "Orre_MtBattle_Pc1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Pc1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Pc1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_VALLEY_1",
+      "name": "Orre_MtBattle_Valley1_Layout",
+      "width": 64,
+      "height": 224,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Valley1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Valley1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_REST_1",
+      "name": "Orre_MtBattle_Rest1_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Rest1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Rest1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_VALLEY_2",
+      "name": "Orre_MtBattle_Valley2_Layout",
+      "width": 64,
+      "height": 224,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Valley2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Valley2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_REST_2",
+      "name": "Orre_MtBattle_Rest2_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Rest2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Rest2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_VALLEY_3",
+      "name": "Orre_MtBattle_Valley3_Layout",
+      "width": 64,
+      "height": 224,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Valley3/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Valley3/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_REST_3",
+      "name": "Orre_MtBattle_Rest3_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Rest3/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Rest3/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_MAGMA_1",
+      "name": "Orre_MtBattle_Magma1_Layout",
+      "width": 64,
+      "height": 224,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Magma1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Magma1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_REST_4",
+      "name": "Orre_MtBattle_Rest4_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Rest4/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Rest4/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_MAGMA_2",
+      "name": "Orre_MtBattle_Magma2_Layout",
+      "width": 64,
+      "height": 224,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Magma2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Magma2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_REST_5",
+      "name": "Orre_MtBattle_Rest5_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Rest5/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Rest5/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_MAGMA_3",
+      "name": "Orre_MtBattle_Magma3_Layout",
+      "width": 64,
+      "height": 224,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Magma3/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Magma3/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_REST_6",
+      "name": "Orre_MtBattle_Rest6_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Rest6/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Rest6/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_CLOUD_1",
+      "name": "Orre_MtBattle_Cloud1_Layout",
+      "width": 224,
+      "height": 160,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Cloud1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Cloud1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_REST_7",
+      "name": "Orre_MtBattle_Rest7_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Rest7/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Rest7/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_CLOUD_2",
+      "name": "Orre_MtBattle_Cloud2_Layout",
+      "width": 192,
+      "height": 160,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Cloud2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Cloud2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_REST_8",
+      "name": "Orre_MtBattle_Rest8_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Rest8/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Rest8/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_CLOUD_3",
+      "name": "Orre_MtBattle_Cloud3_Layout",
+      "width": 192,
+      "height": 160,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Cloud3/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Cloud3/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_REST_9",
+      "name": "Orre_MtBattle_Rest9_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Rest9/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Rest9/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_MT_BATTLE_CLOUD_4",
+      "name": "Orre_MtBattle_Cloud4_Layout",
+      "width": 192,
+      "height": 128,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_MtBattle_Cloud4/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_MtBattle_Cloud4/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_1",
+      "name": "Orre_RealgamtwrDome_Dome1_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrDome_Dome1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrDome_Dome1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_2",
+      "name": "Orre_RealgamtwrDome_Dome2_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrDome_Dome2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrDome_Dome2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_3",
+      "name": "Orre_RealgamtwrDome_Dome3_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrDome_Dome3/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrDome_Dome3/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_4",
+      "name": "Orre_RealgamtwrDome_Dome4_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrDome_Dome4/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrDome_Dome4/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_5",
+      "name": "Orre_RealgamtwrDome_Dome5_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrDome_Dome5/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrDome_Dome5/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_6",
+      "name": "Orre_RealgamtwrDome_Dome6_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrDome_Dome6/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrDome_Dome6/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_7",
+      "name": "Orre_RealgamtwrDome_Dome7_Layout",
+      "width": 64,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrDome_Dome7/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrDome_Dome7/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_8",
+      "name": "Orre_RealgamtwrDome_Dome8_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrDome_Dome8/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrDome_Dome8/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_9",
+      "name": "Orre_RealgamtwrDome_Dome9_Layout",
+      "width": 64,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrDome_Dome9/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrDome_Dome9/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_10",
+      "name": "Orre_RealgamtwrDome_Dome10_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrDome_Dome10/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrDome_Dome10/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_11",
+      "name": "Orre_RealgamtwrDome_Dome11_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrDome_Dome11/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrDome_Dome11/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAMTWR_LOBBY_TOWER_1F_1",
+      "name": "Orre_RealgamtwrLobby_Tower1F1_Layout",
+      "width": 64,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamtwrLobby_Tower1F1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamtwrLobby_Tower1F1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAM_TOWER_TOWER_1F_2",
+      "name": "Orre_RealgamTower_Tower1F2_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamTower_Tower1F2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamTower_Tower1F2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAM_TOWER_TOWER_1F_3",
+      "name": "Orre_RealgamTower_Tower1F3_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamTower_Tower1F3/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamTower_Tower1F3/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAM_TOWER_TOWER_2F",
+      "name": "Orre_RealgamTower_Tower2F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamTower_Tower2F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamTower_Tower2F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_COLOSSEUM_ENTER_1F",
+      "name": "Orre_PyriteColosseum_Enter1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteColosseum_Enter1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteColosseum_Enter1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_UNDER_COLOSSEUM_ENTER_1F",
+      "name": "Orre_UnderColosseum_Enter1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_UnderColosseum_Enter1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_UnderColosseum_Enter1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_OUT_2",
+      "name": "Orre_TheUnder_Out2_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder_Out2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder_Out2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAM_TOWER_OUT_2",
+      "name": "Orre_RealgamTower_Out2_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamTower_Out2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamTower_Out2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_REALGAM_TOWER_TOWER_2F_2",
+      "name": "Orre_RealgamTower_Tower2F2_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_RealgamTower_Tower2F2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_RealgamTower_Tower2F2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_THE_UNDER_KANPO_1F",
+      "name": "Orre_TheUnder_Kanpo1F_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_TheUnder_Kanpo1F/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_TheUnder_Kanpo1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PHENAC_CITY_CARDE_1",
+      "name": "Orre_PhenacCity_Carde1_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PhenacCity_Carde1/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PhenacCity_Carde1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_SNAGEM_HIDEOUT_BUILDING_1F_2",
+      "name": "Orre_SnagemHideout_Building1F2_Layout",
+      "width": 32,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_SnagemHideout_Building1F2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_SnagemHideout_Building1F2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_SNAGEM_HIDEOUT_BUILDING_2F_2",
+      "name": "Orre_SnagemHideout_Building2F2_Layout",
+      "width": 64,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_SnagemHideout_Building2F2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_SnagemHideout_Building2F2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_SNAGEM_HIDEOUT_BUILDING_3F_2",
+      "name": "Orre_SnagemHideout_Building3F2_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_SnagemHideout_Building3F2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_SnagemHideout_Building3F2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_SNAGEM_HIDEOUT_OUT_2",
+      "name": "Orre_SnagemHideout_Out2_Layout",
+      "width": 64,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_SnagemHideout_Out2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_SnagemHideout_Out2/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORRE_PYRITE_COLOSSEUM_ENTER_1F_2",
+      "name": "Orre_PyriteColosseum_Enter1F2_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_PyriteColosseum_Enter1F2/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_PyriteColosseum_Enter1F2/map.bin"
     }
   ]
 }

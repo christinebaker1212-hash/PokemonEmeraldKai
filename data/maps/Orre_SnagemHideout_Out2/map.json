@@ -1,0 +1,377 @@
+{
+  "id": "MAP_ORRE_SNAGEM_HIDEOUT_OUT_2",
+  "name": "Orre_SnagemHideout_Out2",
+  "layout": "LAYOUT_ORRE_SNAGEM_HIDEOUT_OUT_2",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_SNAGEM_HIDEOUT",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 19,
+      "y": 37,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 20,
+      "y": 37,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 21,
+      "y": 37,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 21,
+      "y": 38,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 22,
+      "y": 38,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 23,
+      "y": 38,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 23,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 24,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 25,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 26,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 27,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 28,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 29,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 31,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 32,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 33,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 34,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 35,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 36,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 37,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 38,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 39,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 40,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 41,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 42,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 43,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 44,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 45,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 46,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 47,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 48,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 49,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 50,
+      "y": 39,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 34,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_1F_2",
+      "dest_warp_id": "16"
+    },
+    {
+      "x": 35,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_1F_2",
+      "dest_warp_id": "16"
+    },
+    {
+      "x": 28,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_1F_2",
+      "dest_warp_id": "15"
+    },
+    {
+      "x": 29,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_1F_2",
+      "dest_warp_id": "15"
+    },
+    {
+      "x": 35,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_OUT_2",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 35,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_OUT_2",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 28,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_OUT_2",
+      "dest_warp_id": "6"
+    }
+  ]
+}

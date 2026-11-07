@@ -1,0 +1,84 @@
+{
+  "id": "MAP_ORRE_MT_BATTLE_REST_7",
+  "name": "Orre_MtBattle_Rest7",
+  "layout": "LAYOUT_ORRE_MT_BATTLE_REST_7",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_MT_BATTLE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 15,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_2",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 16,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_2",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 17,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_2",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 18,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_2",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 16,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_1",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 17,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_1",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 17,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_REST_7",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 17,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_REST_7",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 20,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_REST_7",
+      "dest_warp_id": "8"
+    }
+  ]
+}

@@ -28,6 +28,9 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
   silent ("Placeholder music - none").
 - **Map names from the game's own areas** (the user, 2026-11-07): each map's name is Colosseum's name for its place.
 - **The tile scale is Claude's call** (the user, 2026-11-07): 8 Colosseum units a tile, as the OUTSKIRT STAND has it.
+- **Every map, then the hard work** (the user, 2026-11-07: "The baseline is that all maps will be able to be traveled
+  to and are finished. After that, the REALLY hard work begins"): all of Colosseum's field rooms as maps, their doors
+  where the game's tables lead (docs/ORRE_HANDOFF.md "Rooms, doors and entries"); people, scripts and the rest after.
 - **Colosseum's own world map screen** (the user, 2026-11-07): leaving a place through its exits opens Colosseum's
   world map (its own screen, art and travel), never a Kai-style town map. Then the music is converted.
 - **The world map fits the screen** (the user, 2026-11-07: "fit the map to the screen, use zooms and panning if
@@ -84,11 +87,13 @@ Learned:
 The user: "load the Outskirt Stand". It walks: Colosseum's own model (the locomotive diner, the lot, the wheels and
 their baked shadows) drawn by the SINNOH engine under Platinum's camera, the player on Emerald's grid made from
 Colosseum's collision. Test: scenario `orre_outskirt_stand` (needs orre/ from make_pack.sh).
-- **Maps** (tools/orre/maps.py: a Colosseum map file, its map id and a start point): tools/orre/gen_maps.py UNPACKED_DIR
+- **Maps** (since 2026-11-07 all 121 field rooms, everything about them from the game's tables: tools/orre/maps.py,
+  colo_rooms.py, docs/ORRE_HANDOFF.md "Rooms, doors and entries"): tools/orre/gen_maps.py UNPACKED_DIR
   writes data/maps/<name>/ (map.json, scripts.inc), data/layouts/<name>/ (placeholder blocks, all blocked),
-  gMapGroup_Orre (group 45, after SINNOH's), data/event_scripts_orre.s and src/sinnoh/orre_maps.h (sOrreMaps: file,
-  blocks, start tile). Only the map's size comes from the disc. No music (MUS_NONE) until ORRE's songs are
-  converted; the map section is ORRE's own, named from Colosseum's text (below). Debug warp: MOEMON_DEBUG_WARP=45,0,25,29.
+  gMapGroup_Orre (group 45, after SINNOH's), data/event_scripts_orre.s and src/orre/orre_maps.h (sOrreMaps: file,
+  blocks, start tile, room; sOrreArrivals: each entry's landing and facing). No music (MUS_NONE) until ORRE's songs
+  are converted; the map section is ORRE's own, named from Colosseum's text (below). Debug warp:
+  MOEMON_DEBUG_WARP=45,0,33,40 (the OUTSKIRT STAND's entry 0).
 - **Grid** (tools/orre/grid.py; gridview.py draws it over a top-down picture, with the collision's walls in yellow and
   floor edges in cyan): the .col's objects have three triangle grids: +0x24 the floor, +0x28 walls, +0x2C triggers
   (doors, the exits to the world map). A tile is 8 Colosseum units (a person is about 15: two tiles, as Kai's
@@ -100,11 +105,11 @@ Colosseum's collision. Test: scenario `orre_outskirt_stand` (needs orre/ from ma
   the trigger). Where a wall still lies between two walkable tiles, the one nearer it is blocked (Emerald's grid has
   no walls between tiles). Tile-by-tile tests failed both ways (2026-11-07): one closed the diner's 11-unit aisle,
   one opened a gap behind the OUTSKIRT STAND's train. The grid is in the pack (version 2), blocks of 32 x 32 tiles.
-- **Doors** (tools/orre/maps.py `warps`: trigger -> (map file, trigger there), by hand until the scripts say where
-  each leads): gen_maps.py writes a warp event on every reached tile of a door's trigger, leading to the middle tile
-  of the trigger it names; the pack gives those tiles MB_NON_ANIMATED_DOOR (0x60, the grid record's behavior byte),
-  stepped on to warp. Arriving, the player walks on the way they were going (field_screen_effect.c OrreArrivalDir,
-  ORRE's own beside SINNOH's), into the room or out to the street.
+- **Doors** (tools/orre/maps.py `warps`, from the game's event table: docs/ORRE_HANDOFF.md "Rooms, doors and
+  entries"): gen_maps.py writes a warp event on every reached tile of a door's trigger, leading to the landing of the
+  entry the game names over there (or the middle tile of the other elevator's trigger); the pack gives those tiles
+  MB_NON_ANIMATED_DOOR (0x60, the grid record's behavior byte), stepped on to warp. Arriving on a door, the player
+  walks on the way they were going (field_screen_effect.c OrreArrivalDir); on an entry, they face its angle.
 - **Names** (2026-11-07): each map's `place` in tools/orre/maps.py is one of Colosseum's place names (common_rel's
   messages 3501-3527), the one its floor record's area is; gen_maps.py reads the text from the disc and writes ORRE's
   map sections (include/constants/region_map_sections_orre.h, 0x1C0 on, included from the region_map_sections

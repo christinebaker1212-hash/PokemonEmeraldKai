@@ -1,0 +1,77 @@
+{
+  "id": "MAP_ORRE_THE_UNDER_LABO_1F",
+  "name": "Orre_TheUnder_Labo1F",
+  "layout": "LAYOUT_ORRE_THE_UNDER_LABO_1F",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_THE_UNDER",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 15,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER",
+      "dest_warp_id": "38"
+    },
+    {
+      "x": 16,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER",
+      "dest_warp_id": "38"
+    },
+    {
+      "x": 17,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER",
+      "dest_warp_id": "38"
+    },
+    {
+      "x": 18,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_LABO_B1",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 18,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_LABO_B1",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 18,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_LABO_B1",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 18,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_LABO_B1",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 15,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_LABO_1F",
+      "dest_warp_id": "7"
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "id": "MAP_ORRE_LABORATORY_LABO_B3",
+  "name": "Orre_Laboratory_LaboB3",
+  "layout": "LAYOUT_ORRE_LABORATORY_LABO_B3",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_LABORATORY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 17,
+      "y": 37,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B1",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 18,
+      "y": 37,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B1",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 48,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B1",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 42,
+      "y": 56,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B2",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 43,
+      "y": 56,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B2",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 46,
+      "y": 56,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B1",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 47,
+      "y": 56,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B1",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 26,
+      "y": 71,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B1",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 27,
+      "y": 71,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B1",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 27,
+      "y": 41,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B2",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 27,
+      "y": 42,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B2",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 36,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B2",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 36,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B2",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 36,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B2",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 17,
+      "y": 38,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B3",
+      "dest_warp_id": "14"
+    },
+    {
+      "x": 48,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B3",
+      "dest_warp_id": "15"
+    },
+    {
+      "x": 39,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B3",
+      "dest_warp_id": "16"
+    },
+    {
+      "x": 24,
+      "y": 42,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B3",
+      "dest_warp_id": "17"
+    }
+  ]
+}

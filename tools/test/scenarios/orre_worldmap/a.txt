@@ -31,7 +31,8 @@ press LEFT 5
 wait 40
 rendershot wm_phenac
 press A 5
-wait 20
-press B 5
-wait 40
+wait 200
 mp where
+mp facing
+mp mapname
+shot wm_phenac_city
