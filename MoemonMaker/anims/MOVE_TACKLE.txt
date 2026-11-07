@@ -1,0 +1,6 @@
+anim MOVE_TACKLE frames=48 replace=1
+sound 0 SE_M_TACKLE
+beam 4 18 FFE080 6
+flash 18 8 FFFFFF 40
+shake 20 12 target 3
+burst 20 16 target FFD040 12
