@@ -10853,11 +10853,12 @@ static void Cmd_handleballthrow(void)
             gBattlerTarget = BATTLE_PARTNER(gBattlerTarget);
     }
 
-    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
+    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild && !Orre_Shadow_Snaggable(gBattlerTarget))
     {
         BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_TRAINER_BLOCK);
         MarkBattlerForControllerExec(gActiveBattler);
-        gBattlescriptCurrInstr = BattleScript_TrainerBallBlock;
+        // Moemon Kai: with the SNAG MACHINE in ORRE, RUI says it isn't a Shadow Pokémon
+        gBattlescriptCurrInstr = Orre_Shadow_WrongSnag() ? BattleScript_OrreSnagWrong : BattleScript_TrainerBallBlock;
     }
     else if (gMpUncatchableWild)
     {
@@ -10881,7 +10882,9 @@ static void Cmd_handleballthrow(void)
         {
             BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_3_SHAKES_SUCCESS);
             MarkBattlerForControllerExec(gActiveBattler);
-            gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught : BattleScript_SuccessBallThrow;
+            gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught
+                                   : Orre_Shadow_Snaggable(gBattlerTarget) ? BattleScript_OrreSnagged   // Moemon Kai: a snag
+                                   : BattleScript_SuccessBallThrow;
             MP_Ball_SetCaught(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], gLastUsedItem);
             if (CalculatePlayerPartyCount() == PARTY_SIZE)
                 gBattleCommunication[MULTISTRING_CHOOSER] = 0;
@@ -10904,6 +10907,8 @@ static void Cmd_handleballthrow(void)
 
         if (gLastUsedItem == ITEM_SAFARI_BALL)
             catchRate = gBattleStruct->safariCatchFactor * 1275 / 100;
+        else if (Orre_Shadow_Snaggable(gBattlerTarget))
+            catchRate = Orre_Shadow_SnagRate(gBattlerTarget);   // Moemon Kai: Colosseum's Shadow table's own
         else
             catchRate = gSpeciesInfo[gBattleMons[gBattlerTarget].species].catchRate;
 
@@ -10990,7 +10995,9 @@ static void Cmd_handleballthrow(void)
         {
             BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_3_SHAKES_SUCCESS);
             MarkBattlerForControllerExec(gActiveBattler);
-            gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught : BattleScript_SuccessBallThrow;
+            gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught
+                                   : Orre_Shadow_Snaggable(gBattlerTarget) ? BattleScript_OrreSnagged   // Moemon Kai: a snag
+                                   : BattleScript_SuccessBallThrow;
             MP_Ball_SetCaught(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], gLastUsedItem);   // Moemon Co-op: special balls
 
             if (CalculatePlayerPartyCount() == PARTY_SIZE)
@@ -11017,7 +11024,9 @@ static void Cmd_handleballthrow(void)
 
             if (shakes == BALL_3_SHAKES_SUCCESS) // mon caught, copy of the code above
             {
-                gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught : BattleScript_SuccessBallThrow;
+                gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught
+                                   : Orre_Shadow_Snaggable(gBattlerTarget) ? BattleScript_OrreSnagged   // Moemon Kai: a snag
+                                   : BattleScript_SuccessBallThrow;
                 MP_Ball_SetCaught(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], gLastUsedItem);   // Moemon Co-op: special balls
 
                 if (CalculatePlayerPartyCount() == PARTY_SIZE)

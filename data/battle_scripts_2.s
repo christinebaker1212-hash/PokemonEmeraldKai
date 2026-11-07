@@ -1,5 +1,6 @@
 #include "constants/battle.h"
 #include "constants/battle_script_commands.h"
+#include "constants/battle_gen4.h"
 #include "constants/battle_anim.h"
 #include "constants/battle_string_ids.h"
 #include "constants/items.h"
@@ -127,6 +128,28 @@ BattleScript_MpCoopBallNoTarget::
 @ Moemon Co-op: a player chose RUN in a co-op wild battle, but not everyone did
 @ Moemon Kai: CALL (ORRE's trainer battles, in RUN's place: src/orre/orre_shadow.c Orre_Shadow_Call): "X called Y!", then
 @ what came of it (a HYPER MODE snapped out of, a sleeper woken, or nothing)
+@ Moemon Kai: a trainer's Shadow Pokémon snagged (src/orre/orre_shadow.c): the player's now, it leaves the battle as if
+@ it had fainted (its catch EXP given, no faint EXP) and the trainer sends out the next one, or has lost
+BattleScript_OrreSnagged::
+	incrementgamestat GAME_STAT_POKEMON_CAPTURES
+	printstring STRINGID_GOTCHAPKMNCAUGHTPLAYER
+	waitmessage B_WAIT_TIME_LONG
+	call BattleScript_MpCatchExp
+	setbyte cMULTISTRING_CHOOSER, 0xFF
+	givecaughtmon
+	gen4 ORRE_SNAGGED, BattleScript_OrreSnaggedEnd
+	printfromtable gCaughtMonStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_OrreSnaggedEnd::
+	waitstate
+	finishaction
+
+BattleScript_OrreSnagWrong::
+	waitmessage B_WAIT_TIME_LONG
+	printstring STRINGID_ORRE_TEXT
+	waitmessage B_WAIT_TIME_LONG
+	finishaction
+
 BattleScript_OrreTurnMsg::
 	printstring STRINGID_ORRE_TEXT
 	waitmessage B_WAIT_TIME_LONG

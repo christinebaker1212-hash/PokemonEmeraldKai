@@ -102,6 +102,14 @@ const u8 *Orre_Shadow_BattleText(u8 line);      // STRINGID_ORRE_TEXT / _TEXT2's
 extern const u8 gText_Orre_BattleMenuCall[];    // the action menu with CALL
 extern const u8 gText_Orre_HiddenMove[];   // "????": a hidden move's name (Colosseum's)
 void Orre_Shadow_Debug(const char *arg);   // `mp shadow ...` (tests)
+// ---- the opponents' Shadow Pokémon and snagging
+// MON (a trainer's, in gEnemyParty) made Colosseum's Shadow Pokémon ID from its own data, for this battle
+bool8 Orre_Shadow_MakeEnemy(struct Pokemon *mon, u8 id);
+void Orre_Shadow_EnemyParty(void);           // the trainer's party just built (battle_main.c): its Shadow Pokémon
+bool8 Orre_Shadow_HasSnagMachine(void);
+bool8 Orre_Shadow_Snaggable(u8 battler);     // a ball can be thrown at it (a trainer's Shadow Pokémon, the SNAG MACHINE)
+u8 Orre_Shadow_SnagRate(u8 battler);         // its catch rate (Colosseum's Shadow table)
+bool8 Orre_Shadow_WrongSnag(void);           // a ball at a trainer's POKéMON that isn't Shadow: RUI's words (TRUE)
 // the end of BATTLER's turn (battle_gen4.c's end-turn steps): HYPER MODE's reminder, or coming to its senses on its own
 // (1 in 256); the script to run, NULL none
 const u8 *Orre_Shadow_EndTurn(u8 battler);

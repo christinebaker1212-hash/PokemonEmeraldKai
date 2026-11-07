@@ -1,0 +1,9 @@
+# Snagging (src/orre/orre_shadow.c, docs/SHADOW_POKEMON.md "S4"): with the SNAG MACHINE (Kai's ORRE flag 0xFFF),
+# a trainer (ALLEN: two POKéMON) whose lead is Colosseum's Shadow 1 (MAKUHITA, built from Colosseum's own data: only
+# SHADOW RUSH, its aura); a MASTER BALL at it snags it (a trainer battle, yet the ball isn't blocked), it goes into the
+# party as the player's Shadow Pokémon, and the battle goes on with the trainer's next POKéMON. Shots *.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=156:40"
+EXPECT_A=("shadow: the opponent's POKéMON 0 is Shadow 1" "Shadow 1 snagged (party)" "[test] party: 156(" "[test] shadow 1: id 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

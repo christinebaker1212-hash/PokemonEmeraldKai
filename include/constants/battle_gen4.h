@@ -52,6 +52,7 @@
 // Moemon Kai: ORRE's modes of the same command (src/orre/orre_shadow.c Orre_Shadow_BattleCommand), 200 on
 #define ORRE_FIRST            200
 #define ORRE_HYPER_ROLL       200  // after SHADOW RUSH: jumps if the Shadow Pokémon entered HYPER MODE
+#define ORRE_SNAGGED          201  // a snag given to the player: it leaves the battle; jumps if it went to the party
 
 // Moemon Kai: Gen 5-9 modes of the same command (src/battle_gen59.c MP_Gen59_Command)
 #define G59_FIRST             100

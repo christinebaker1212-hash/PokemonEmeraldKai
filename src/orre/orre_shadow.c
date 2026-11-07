@@ -30,6 +30,7 @@
 #include "o3d.h"
 #include "battle_anim.h"
 #include "util.h"
+#include "pokedex.h"
 #include "mp.h"
 #include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
@@ -61,6 +62,7 @@ struct OrreShadowRec
 };
 
 #define REC_HYPER 1
+#define REC_ENEMY 2     // an opponent's Shadow Pokémon in this battle (never saved; a snag makes it the player's)
 
 static struct OrreShadowRec sRecs[MAX_RECS];
 static u16 sRecCount;
@@ -320,10 +322,21 @@ void Orre_Shadow_BattleMoves(struct Pokemon *mon, u16 *moves, u8 *pp)
             moves[i] = MOVE_NONE, pp[i] = 0;
 }
 
+static void PurgeEnemies(void)
+{
+    u32 i;
+    for (i = 0; i < sRecCount; )
+        if (sRecs[i].flags & REC_ENEMY)
+            sRecs[i] = sRecs[--sRecCount];
+        else
+            i++;
+}
+
 void Orre_Shadow_BattleStart(void)
 {
     u32 i;
     sBattle++;
+    PurgeEnemies();   // (the last battle's opponents)
     for (i = 0; i < PARTY_SIZE; i++)   // (fainted: out of HYPER MODE)
     {
         struct OrreShadowRec *r = RecOf(&gPlayerParty[i]);
@@ -364,7 +377,7 @@ u32 Orre_Shadow_StoredExp(struct Pokemon *mon)
 
 enum { T_HYPER_ENTER, T_SELFISH, T_ATK_FOE, T_ATK_YOU, T_ATK_SELF, T_CONFUSED, T_ITEM_NOHOW, T_ITEM_NONE,
        T_CALL, T_CALL_RESPONDED, T_CALL_SENSES, T_CALL_IGNORING, T_CALL_NOT_LISTENING, T_CALL_FAILED, T_HYPER_STILL,
-       T_SENSES, T_COUNT };
+       T_SENSES, T_WRONG_TARGET, T_COUNT };
 static const u8 sT_HyperEnter[] = _("{B_ATK_NAME_WITH_PREFIX}'s emotions rose to\na fever pitch!\pIt entered HYPER MODE!");
 static const u8 sT_Selfish[] = _("{B_ATK_NAME_WITH_PREFIX} selfishly used\n{B_BUFF1} without orders!");
 static const u8 sT_AtkFoe[] = _("{B_ATK_NAME_WITH_PREFIX} ignored orders and\nattacked the opposing trainer!");
@@ -383,13 +396,17 @@ static const u8 sT_HyperStill[] = _("{B_ATK_NAME_WITH_PREFIX} is in HYPER MODE!"
 static const u8 sT_Senses[] = _("{B_ATK_NAME_WITH_PREFIX} came to its senses.");            // (0x771E)
 static const u8 *const sTexts[T_COUNT] = {sT_HyperEnter, sT_Selfish, sT_AtkFoe, sT_AtkYou, sT_AtkSelf, sT_Confused,
     sT_ItemNoHow, sT_ItemNone, sT_Call, sT_CallResponded, sT_CallSenses, sT_CallIgnoring, sT_CallNotListening, sT_CallFailed,
-    sT_HyperStill, sT_Senses};
+    sT_HyperStill, sT_Senses, NULL};
 static u8 sLine[2];
+static const u8 *sWrongTarget;   // (RUI's words: Orre_Shadow_WrongSnag)
+static u8 Snagged(void);
 
 const u8 gText_Orre_BattleMenuCall[] = _("FIGHT{CLEAR_TO 56}BAG\nMOéMON{CLEAR_TO 56}CALL");
 
 const u8 *Orre_Shadow_BattleText(u8 line)
 {
+    if (sLine[line & 1] == T_WRONG_TARGET)
+        return sWrongTarget;
     return sTexts[sLine[line & 1] < T_COUNT ? sLine[line & 1] : 0];
 }
 
@@ -414,6 +431,8 @@ u8 Orre_Shadow_BattleCommand(u8 mode)
     struct OrreShadowRec *r;
     switch (mode)
     {
+    case ORRE_SNAGGED:
+        return Snagged();
     case ORRE_HYPER_ROLL:   // (fight_range_exact_8022DCB8.c: not asleep, not already in it, the nature's chance)
         r = BattlerRec(atk);
         if (r == NULL || gCurrentMove != MOVE_SHADOW_RUSH || gBattleMons[atk].hp == 0 || (r->flags & REC_HYPER)
@@ -489,6 +508,133 @@ u8 Orre_Shadow_HyperDisobedience(void)
              : gBattleMons[atk].item == ITEM_NONE ? T_ITEM_NONE : T_ITEM_NOHOW;
     gBattlescriptCurrInstr = BattleScript_OrreHyperIgnored;
     return DISOBEDIENCE_IGNORED;
+}
+
+// ---- the opponents' Shadow Pokémon and snagging (docs/SHADOW_POKEMON.md "S4")
+
+static u8 sPendingFoe[PARTY_SIZE];   // `mp shadow foe SLOT ID`: the next trainer battle's (tests, until ORRE's trainers)
+
+bool8 Orre_Shadow_MakeEnemy(struct Pokemon *mon, u8 id)
+{
+    const struct OrreShadowMon *data = Orre_Shadow_Data(id);
+    struct OrreShadowRec *r;
+    u32 otId, personality;
+    u8 i, iv, nature;
+    u16 ev;
+    if (data == NULL || mon == NULL)
+        return FALSE;
+    // Colosseum's own Pokémon (its trainer Pokémon table's row): species, level, nature, IVs, EVs, moves, friendship,
+    // Ability slot; the trainer's OT kept
+    otId = GetMonData(mon, MON_DATA_SPECIES) != SPECIES_NONE ? GetMonData(mon, MON_DATA_OT_ID) : Random32();
+    nature = data->nature < NUM_NATURES ? data->nature : Random() % NUM_NATURES;
+    do
+        personality = Random32();
+    while (GetNatureFromPersonality(personality) != nature);
+    // (made with the trainer's OT ID: it's part of the data's key, so it can't be changed after)
+    CreateMon(mon, data->species, data->level, USE_RANDOM_IVS, TRUE, personality, OT_ID_PRESET, otId);
+    for (i = 0; i < NUM_STATS; i++)
+    {
+        iv = data->ivs[i] > MAX_PER_STAT_IVS ? MAX_PER_STAT_IVS : data->ivs[i];
+        SetMonData(mon, MON_DATA_HP_IV + i, &iv);
+        ev = data->evs[i] > 255 ? 255 : data->evs[i];
+        SetMonData(mon, MON_DATA_HP_EV + i, &ev);
+    }
+    for (i = 0; i < MAX_MON_MOVES; i++)
+        SetMonMoveSlot(mon, data->moves[i] < MOVES_COUNT ? data->moves[i] : MOVE_NONE, i);
+    iv = data->ability & 1;
+    SetMonData(mon, MON_DATA_ABILITY_NUM, &iv);
+    iv = data->friendship < 0 ? 0 : data->friendship > 255 ? 255 : data->friendship;
+    SetMonData(mon, MON_DATA_FRIENDSHIP, &iv);
+    CalculateMonStats(mon);
+    if (!Orre_Shadow_Make(mon, id) || (r = RecOf(mon)) == NULL)
+        return FALSE;
+    r->flags |= REC_ENEMY;
+    return TRUE;
+}
+
+void Orre_Shadow_EnemyParty(void)
+{
+    u8 i;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (sPendingFoe[i])
+        {
+            if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && Orre_Shadow_MakeEnemy(&gEnemyParty[i], sPendingFoe[i]))
+                MPNet_Log("shadow: the opponent's POKéMON %u is Shadow %u", i, sPendingFoe[i]);
+            sPendingFoe[i] = 0;
+        }
+}
+
+static struct OrreShadowRec *EnemyRec(u8 battler)
+{
+    struct OrreShadowRec *r;
+    if (battler >= MAX_BATTLERS_COUNT || GetBattlerSide(battler) != B_SIDE_OPPONENT)
+        return NULL;
+    r = RecOf(&gEnemyParty[gBattlerPartyIndexes[battler]]);
+    return r != NULL && (r->flags & REC_ENEMY) ? r : NULL;
+}
+
+bool8 Orre_Shadow_HasSnagMachine(void)
+{
+    return Orre_Flag(ORRE_FLAG_SNAG_MACHINE);
+}
+
+bool8 Orre_Shadow_Snaggable(u8 battler)
+{
+    return (gBattleTypeFlags & BATTLE_TYPE_TRAINER) && Orre_Shadow_HasSnagMachine() && EnemyRec(battler) != NULL
+        && gBattleMons[battler].hp != 0 && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK));
+}
+
+u8 Orre_Shadow_SnagRate(u8 battler)
+{
+    struct OrreShadowRec *r = EnemyRec(battler);
+    const struct OrreShadowMon *data = r ? Orre_Shadow_Data(r->id) : NULL;
+    return data ? data->catchRate : gSpeciesInfo[gBattleMons[battler].species].catchRate;
+}
+
+// a ball thrown at a trainer's POKéMON that isn't Shadow, with the SNAG MACHINE: RUI's words (fight_menu.c: 0x7716
+// before flag 0x99F, else 0x7702); NULL: the usual "The TRAINER blocked the BALL!"
+static const u8 sT_NoAura[] = _("RUI: No, wait!\nThat POKéMON doesn't have a\lblack aura!");
+static const u8 sT_NotShadow[] = _("RUI: No! Stop!\nThat's not a SHADOW POKéMON!");
+bool8 Orre_Shadow_WrongSnag(void)
+{
+    if (!Orre_Shadow_HasSnagMachine() || !O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
+        return FALSE;
+    sWrongTarget = Orre_Flag(0x99F) ? sT_NotShadow : sT_NoAura;
+    sLine[0] = T_WRONG_TARGET;
+    return TRUE;
+}
+
+// the snag done (the battle script's ORRE_SNAGGED, after givecaughtmon gave it to the player): its record becomes the
+// player's (its OT is the player's now), the POKéDEX knows it, and it leaves the battle as if it had fainted (no EXP:
+// the catch's was given), so the trainer sends out the next one or has lost. TRUE: it went into the party (no PC line)
+static u8 Snagged(void)
+{
+    u8 target = gBattlerTarget;
+    struct Pokemon *mon = &gEnemyParty[gBattlerPartyIndexes[target]];
+    u32 personality = GetMonData(mon, MON_DATA_PERSONALITY), i;
+    u16 zero = 0, species = GetMonData(mon, MON_DATA_SPECIES);
+    bool8 toParty = gBattleCommunication[MULTISTRING_CHOOSER] == 0xFF;
+    for (i = 0; i < sRecCount; i++)
+        if ((sRecs[i].flags & REC_ENEMY) && sRecs[i].personality == personality)
+        {
+            sRecs[i].flags &= ~REC_ENEMY;
+            sRecs[i].otId = GetMonData(mon, MON_DATA_OT_ID);
+            MPNet_Log("shadow: Shadow %u snagged (%s)", sRecs[i].id, toParty ? "party" : "PC");
+            break;
+        }
+    GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_SEEN);
+    GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_CAUGHT);
+    gBattleMons[target].hp = 0;
+    SetMonData(mon, MON_DATA_HP, &zero);
+    gBattleStruct->givenExpMons |= gBitTable[gBattlerPartyIndexes[target]];
+    // its health bar goes, the battle music comes back
+    gActiveBattler = gBattlerAttacker;
+    BtlController_EmitPlayFanfareOrBGM(B_COMM_TO_CONTROLLER, GetBattleBGM(), TRUE);
+    MarkBattlerForControllerExec(gActiveBattler);
+    gActiveBattler = target;
+    BtlController_EmitSpriteInvisibility(B_COMM_TO_CONTROLLER, 2);
+    MarkBattlerForControllerExec(gActiveBattler);
+    return toParty;
 }
 
 // fight_range_exact_8022DCB8.c _fightCheckDarkPokemonAppear: each turn in HYPER MODE it may come to its senses on its
@@ -628,7 +774,7 @@ void Orre_Shadow_WriteSidecar(void)
 {
     char path[600];
     AwFile *f;
-    u32 head[4], size;
+    u32 head[4], size, i;
     u8 *flags = Orre_StoryFlagBytes(&size);
     if (gSaveBlock2Ptr == NULL || MOEMON_DEV_BUILD)   // (a dev build never writes a save or its side files)
         return;
@@ -638,11 +784,14 @@ void Orre_Shadow_WriteSidecar(void)
     head[0] = ORRE_MAGIC;
     head[1] = ORRE_FORMAT;
     head[2] = size;
-    head[3] = sRecCount;
+    head[3] = 0;
+    for (i = 0; i < sRecCount; i++)
+        head[3] += !(sRecs[i].flags & REC_ENEMY);
     AwFile_Write(head, sizeof(head), 1, f);
     AwFile_Write(flags, size, 1, f);
-    if (sRecCount)
-        AwFile_Write(sRecs, sizeof(sRecs[0]), sRecCount, f);
+    for (i = 0; i < sRecCount; i++)   // (an opponent's are the battle's only)
+        if (!(sRecs[i].flags & REC_ENEMY))
+            AwFile_Write(&sRecs[i], sizeof(sRecs[0]), 1, f);
     AwFile_Close(f);
 }
 
@@ -664,6 +813,22 @@ void Orre_Shadow_Debug(const char *arg)
             Orre_Shadow_Step();
     else if (strcmp(cmd, "purify") == 0)
         Orre_Shadow_Purified(mon);
+    else if (strcmp(cmd, "foes") == 0)   // foes: the opponent's party (species, Shadow id)
+    {
+        u8 i;
+        printf("[test] shadow foes:");
+        for (i = 0; i < PARTY_SIZE; i++)
+            printf(" %u/%u", (unsigned)GetMonData(&gEnemyParty[i], MON_DATA_SPECIES), Orre_Shadow_Id(&gEnemyParty[i]));
+        printf("\n");
+        return;
+    }
+    else if (strcmp(cmd, "foe") == 0)   // foe SLOT ID: the next trainer battle's SLOT is Colosseum's Shadow ID
+    {
+        if (slot >= 0 && slot < PARTY_SIZE && Orre_Shadow_Data(a))
+            sPendingFoe[slot] = a;
+        printf("[test] shadow foe %d %d\n", slot, a);
+        return;
+    }
     else if (strcmp(cmd, "hyper") == 0)   // hyper SLOT 0|1: HYPER MODE off / on
     {
         struct OrreShadowRec *r = RecOf(mon);

@@ -21,7 +21,7 @@
 #define MAX_WISPS 64
 #define FX 16           // wisp positions in 1/16 pixels
 #define PAD 6           // the halo reaches this far past the outline
-#define TOP 20          // the flames rise this far above it
+#define TOP 28          // the flames rise this far above it (HYPER MODE's; 20 otherwise)
 #define BOX_W (128 + 2 * PAD)
 #define BOX_H (128 + TOP + PAD)
 #define TEXT_TOP 112    // the battle text box stays clear
@@ -39,6 +39,8 @@ static u32 sRng = 0x5AD0A0A1;
 static u8 sDist[BOX_W * BOX_H];             // each pixel's distance from the Pokémon (0 = the Pokémon itself)
 static u8 sBelow[BOX_W * BOX_H];            // how far above the Pokémon it is, in its column (255: nothing below)
 static u16 sEdge[512][2];
+static u8 sUi[TEXT_TOP][DISPLAY_WIDTH / 8];  // the UI on screen (the healthboxes): never drawn over (the user, 2026-11-07)
+static s8 sShakeX, sShakeY;                 // HYPER MODE's shake this frame
 
 static u32 Rand(void)
 {
@@ -120,10 +122,35 @@ static void Colours(bool8 hyper, u16 *core, u16 *rim, u16 *spark)
     *spark = hyper ? RGB(31, 10, 16) : RGB(22, 10, 31);
 }
 
+// the healthboxes (both halves and the HP bar) of every battler, marked so the aura never covers them
+static void MarkUi(void)
+{
+    u8 b, k;
+    memset(sUi, 0, sizeof(sUi));
+    for (b = 0; b < gBattlersCount && b < MAX_BATTLERS_COUNT; b++)
+    {
+        u8 ids[3];
+        ids[0] = gHealthboxSpriteIds[b];
+        if (ids[0] >= MAX_SPRITES || !gSprites[ids[0]].inUse)
+            continue;
+        ids[1] = gSprites[ids[0]].oam.affineParam;
+        ids[2] = gSprites[ids[0]].data[5];
+        for (k = 0; k < 3; k++)
+        {
+            s16 x, y, w, h, i, j;
+            if (ids[k] >= MAX_SPRITES || !SpriteBox(ids[k], &x, &y, &w, &h))
+                continue;
+            for (j = y < 0 ? 0 : y; j < y + h && j < TEXT_TOP; j++)
+                for (i = x < 0 ? 0 : x; i < x + w && i < DISPLAY_WIDTH; i++)
+                    sUi[j][i >> 3] |= 1 << (i & 7);
+        }
+    }
+}
+
 static void Put(u16 *frame, s16 x, s16 y, u16 colour, u8 a)
 {
     u16 *dst;
-    if (x < 0 || x >= DISPLAY_WIDTH || y < 0 || y >= TEXT_TOP || a == 0)
+    if (x < 0 || x >= DISPLAY_WIDTH || y < 0 || y >= TEXT_TOP || a == 0 || (sUi[y][x >> 3] >> (x & 7) & 1))
         return;
     dst = &frame[y * DISPLAY_WIDTH + x];
     *dst = Mix(*dst, colour, a > 14 ? 14 : a) | 0x8000;
@@ -198,7 +225,7 @@ static bool8 DrawBattler(u16 *frame, u8 battler, u16 strength, bool8 hyper)
     // moving up (a smooth noise scrolled with time), violet at their edges, bright flickers inside
     Colours(hyper, &core, &rim, &spark);
     halo = 2 + (strength * 3) / 256;
-    flame = 4 + (strength * (TOP - 4)) / 256;
+    flame = 4 + (strength * ((hyper ? TOP : 20) - 4)) / 256;
     for (y = 0; y < H; y++)
     {
         s16 fy = y0 + y;
@@ -206,16 +233,26 @@ static bool8 DrawBattler(u16 *frame, u8 battler, u16 strength, bool8 hyper)
             continue;
         for (x = 0; x < W; x++)
         {
-            s16 fx = x0 + x, heat = 0;
-            u8 d = sDist[y * W + x], up = sBelow[y * W + x];
+            s16 fx = x0 + x, heat = 0, lx = x, ly = y;
+            u8 d, up;
+            // (HYPER MODE: the whole aura shakes)
+            if (hyper)
+            {
+                lx = x - sShakeX, ly = y - sShakeY;
+                if (lx < 0 || ly < 0 || lx >= W || ly >= H || sDist[y * W + x] == 0)
+                    continue;
+            }
+            d = sDist[ly * W + lx], up = sBelow[ly * W + lx];
             if (d == 0 || fx < 0 || fx >= DISPLAY_WIDTH)
                 continue;
             if (d <= halo)
                 heat = 256 * (halo + 1 - d) / (halo + 1);
             if (up != 255 && up <= flame)
             {
-                // a tongue's height here: a smooth noise in bands of columns, moving up with time
-                s16 tongue = flame * (40 + Smooth(fx, fy + sTime / 2, 3, 6)) / 296, h;
+                // a tongue's height here: a smooth noise in bands of columns, moving up with time (in HYPER MODE
+                // thinner, jagged and racing up)
+                s16 tongue = hyper ? flame * (24 + Smooth(fx, fy + sTime * 2, 2, 4)) / 280
+                                   : flame * (40 + Smooth(fx, fy + sTime / 2, 3, 6)) / 296, h;
                 if (up <= tongue)
                 {
                     h = 256 * (tongue + 1 - up) / (tongue + 1);
@@ -226,7 +263,7 @@ static bool8 DrawBattler(u16 *frame, u8 battler, u16 strength, bool8 hyper)
             if (heat <= 0)
                 continue;
             heat = heat * (strength + 128) / 384;   // (faint while it's out)
-            if (heat > 150 && Noise(fx, fy, sTime / 3) > 240)
+            if (heat > 150 && Noise(fx, fy, hyper ? sTime : sTime / 3) > (hyper ? 225 : 240))
                 Put(frame, fx, fy, spark, 12);
             else
                 Put(frame, fx, fy, heat > 110 ? core : rim, 2 + heat / 18);
@@ -234,7 +271,7 @@ static bool8 DrawBattler(u16 *frame, u8 battler, u16 strength, bool8 hyper)
     }
 
     // wisps of smoke torn from the flames' tops
-    sSpawnAcc[battler] += 10 + strength / 2;
+    sSpawnAcc[battler] += 10 + strength / 2 + (hyper ? 160 : 0);
     n = 0;
     while (sSpawnAcc[battler] >= 256 && edges)
     {
@@ -251,9 +288,9 @@ static bool8 DrawBattler(u16 *frame, u8 battler, u16 strength, bool8 hyper)
             w->hyper = hyper;
             w->x = (x0 + sEdge[e][0]) * FX;
             w->y = (y0 + sEdge[e][1] - flame / 2) * FX;
-            w->vx = (s16)(Rand() % 7) - 3;
+            w->vx = hyper ? (s16)(Rand() % 13) - 6 : (s16)(Rand() % 7) - 3;
             w->age = 0;
-            w->life = 16 + Rand() % 14;
+            w->life = hyper ? 10 + Rand() % 10 : 16 + Rand() % 14;
             w->size = 2 + (strength > 160);
         }
     }
@@ -269,7 +306,7 @@ static bool8 DrawBattler(u16 *frame, u8 battler, u16 strength, bool8 hyper)
             w->on = FALSE;
             continue;
         }
-        w->y -= 10;
+        w->y -= w->hyper ? 22 : 10;   // (HYPER MODE's thrown up hard)
         w->x += w->vx + ((Noise(i, w->age >> 2, 0) & 7) - 3);
         cx = w->x / FX, cy = w->y / FX;
         fade = 16 - (w->age * 16) / w->life;
@@ -285,7 +322,10 @@ static bool8 DrawBattler(u16 *frame, u8 battler, u16 strength, bool8 hyper)
                     continue;   // (behind the Pokémon)
                 if (px < x0 || px >= x0 + W || py < y0 - 8)
                     continue;   // (kept near it: the healthboxes stay clear)
-                Put(frame, px, py, dd * 2 < r * r ? core : rim, (fade * (dd * 2 < r * r ? 9 : 5)) / 16);
+                if (w->hyper && dx == 0 && dy == 0 && (i & 3) == 0)
+                    Put(frame, px, py, spark, (fade * 14) / 16);   // (a spark among them)
+                else
+                    Put(frame, px, py, dd * 2 < r * r ? core : rim, (fade * (dd * 2 < r * r ? 9 : 5)) / 16);
             }
     }
     return TRUE;
@@ -307,6 +347,9 @@ void Orre_Aura_Composite(u16 *frame)
         return;
     }
     sTime++;
+    MarkUi();
+    sShakeX = (s8)(Rand() % 3) - 1;
+    sShakeY = (s8)(Rand() % 3) - 1;
     for (b = 0; b < gBattlersCount && b < MAX_BATTLERS_COUNT; b++)
     {
         bool8 hyper;
@@ -323,7 +366,15 @@ void Orre_Aura_Composite(u16 *frame)
         }
         any = TRUE;
         hyper = Orre_Shadow_InHyper(b);
-        strength = hyper ? 140 : 90;   // (faint while it's out; stronger in HYPER MODE)
+        strength = 90;   // (faint while it's out)
+        if (hyper)
+        {
+            // HYPER MODE: violent: throbbing, and sudden flare-ups
+            u8 t = sTime % 24, throb = t < 12 ? t : 24 - t;
+            strength = 150 + throb * 6;
+            if (Rand() % 14 == 0 && sBurst[b] < 210)
+                sBurst[b] = 210, sBurstHyper[b] = TRUE;
+        }
         if (sBurst[b] > strength)
         {
             strength = sBurst[b];

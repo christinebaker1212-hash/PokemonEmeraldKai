@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 void S3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn);   // Moemon Kai (src/sinnoh/s3d_gfx.c)
 #include "battle_gimmick.h"
 #include "mp.h"
@@ -625,6 +626,7 @@ static u32 GetOpponentMonData(u8 monId, u8 *dst)
             battleMon.moves[size] = GetMonData(&gEnemyParty[monId], MON_DATA_MOVE1 + size);
             battleMon.pp[size] = GetMonData(&gEnemyParty[monId], MON_DATA_PP1 + size);
         }
+        Orre_Shadow_BattleMoves(&gEnemyParty[monId], battleMon.moves, battleMon.pp);   // Moemon Kai: a Shadow Pokémon's
         battleMon.ppBonuses = GetMonData(&gEnemyParty[monId], MON_DATA_PP_BONUSES);
         battleMon.friendship = GetMonData(&gEnemyParty[monId], MON_DATA_FRIENDSHIP);
         battleMon.experience = GetMonData(&gEnemyParty[monId], MON_DATA_EXP);
@@ -672,6 +674,7 @@ static u32 GetOpponentMonData(u8 monId, u8 *dst)
             moveData.moves[size] = GetMonData(&gEnemyParty[monId], MON_DATA_MOVE1 + size);
             moveData.pp[size] = GetMonData(&gEnemyParty[monId], MON_DATA_PP1 + size);
         }
+        Orre_Shadow_BattleMoves(&gEnemyParty[monId], moveData.moves, moveData.pp);   // Moemon Kai: a Shadow Pokémon's
         moveData.ppBonuses = GetMonData(&gEnemyParty[monId], MON_DATA_PP_BONUSES);
         src = (u8 *)(&moveData);
         for (size = 0; size < sizeof(moveData); size++)
@@ -963,6 +966,8 @@ static void SetOpponentMonData(u8 monId)
             SetMonData(&gEnemyParty[monId], MON_DATA_HELD_ITEM, &battlePokemon->item);
             for (i = 0; i < MAX_MON_MOVES; i++)
             {
+                if (Orre_Shadow_SlotOverlaid(&gEnemyParty[monId], i))
+                    continue;   // Moemon Kai: a Shadow Pokémon's own moves stay under SHADOW RUSH / "????"
                 SetMonData(&gEnemyParty[monId], MON_DATA_MOVE1 + i, &battlePokemon->moves[i]);
                 SetMonData(&gEnemyParty[monId], MON_DATA_PP1 + i, &battlePokemon->pp[i]);
             }
@@ -1002,6 +1007,8 @@ static void SetOpponentMonData(u8 monId)
     case REQUEST_MOVES_PP_BATTLE:
         for (i = 0; i < MAX_MON_MOVES; i++)
         {
+            if (Orre_Shadow_SlotOverlaid(&gEnemyParty[monId], i))
+                continue;   // Moemon Kai: (as above)
             SetMonData(&gEnemyParty[monId], MON_DATA_MOVE1 + i, &moveData->moves[i]);
             SetMonData(&gEnemyParty[monId], MON_DATA_PP1 + i, &moveData->pp[i]);
         }
@@ -1024,6 +1031,8 @@ static void SetOpponentMonData(u8 monId)
     case REQUEST_PPMOVE2_BATTLE:
     case REQUEST_PPMOVE3_BATTLE:
     case REQUEST_PPMOVE4_BATTLE:
+        if (Orre_Shadow_SlotOverlaid(&gEnemyParty[monId], gBattleBufferA[gActiveBattler][1] - REQUEST_PPMOVE1_BATTLE))
+            break;   // Moemon Kai: SHADOW RUSH's PP aren't its own move's
         SetMonData(&gEnemyParty[monId], MON_DATA_PP1 + gBattleBufferA[gActiveBattler][1] - REQUEST_PPMOVE1_BATTLE, &gBattleBufferA[gActiveBattler][3]);
         break;
     case REQUEST_OTID_BATTLE:
@@ -2083,8 +2092,9 @@ static void OpponentHandleEndBounceEffect(void)
 
 static void OpponentHandleSpriteInvisibility(void)
 {
-    if (gMpCoopWild && gBattleBufferA[gActiveBattler][1] == 2)
+    if ((gMpCoopWild || (gBattleTypeFlags & BATTLE_TYPE_TRAINER)) && gBattleBufferA[gActiveBattler][1] == 2)
     {
+        // (Moemon Kai: a trainer's Shadow Pokémon snagged leaves the same way: src/orre/orre_shadow.c)
         MP_LegacyAnim_ClearKept(gActiveBattler);   // a GENESIS / EPOCH BALL's kept ball goes with it
         // Moemon Co-op: a caught wild Pokemon leaves (its sprite went into the ball)
         // and stays gone when the battle screen is rebuilt after the BAG or party screen

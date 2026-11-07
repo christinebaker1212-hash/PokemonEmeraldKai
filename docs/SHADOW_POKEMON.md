@@ -71,7 +71,26 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
   its senses on its own (0x771E) (battle_gen4.c G4E_ORRE -> Orre_Shadow_EndTurn). Either side's Shadow Pokémon shows
   it (an opponent's once Cipher's are built: Rui's "black aura" lines 0x770A / 0x7717 go with them). Test
   shadow_aura (tools/orre/check_shadow_aura.py).
-- Next: the opponents' Shadow Pokémon (Cipher's, with snagging) and co-op.
+  The user (2026-11-07): "never cover up UI elements like the opponent's health with it! Hyper mode should also make
+  it more violent": the healthboxes (both halves, the HP bar) are never drawn over (orre_aura.c MarkUi); HYPER MODE
+  throbs, flares up at random, shakes, its flames thinner, jagged, taller and racing up, wisps and sparks thrown up hard.
+- **S4, the opponents' Shadow Pokémon and snagging** (2026-11-07, the machinery; ORRE's trainers come with the story):
+  Orre_Shadow_MakeEnemy builds a trainer's POKéMON as Colosseum's Shadow Pokémon from its own data (the trainer
+  Pokémon table's row: species, level, nature, IVs, EVs, moves, friendship, Ability slot; the trainer's OT, made with it:
+  it's part of the data's key) and gives it a record for the battle (REC_ENEMY: never saved, the next battle drops it).
+  Its gauge is full, so only SHADOW RUSH shows (the opponent's controller overlays it as the player's does, and keeps
+  its own moves' PP); its aura shows. Snagging needs the SNAG MACHINE (Colosseum's hero has it from the start; here
+  Kai's ORRE flag 0xFFF, ORRE_FLAG_SNAG_MACHINE, for the story to set): a ball at a trainer's Shadow Pokémon isn't
+  blocked (the L quick throw offers it too), its catch rate is the Shadow table's; caught, "Gotcha!", its catch EXP,
+  it goes to the party or the PC as the player's Shadow Pokémon (its record moves over: its OT is the player's now; the
+  POKéDEX knows it; no nickname while Shadow) and it leaves the battle as if it had fainted (no faint EXP): the trainer
+  sends out the next one, or has lost (battle_scripts_2.s BattleScript_OrreSnagged, ORRE_SNAGGED). A ball at one that
+  isn't Shadow, with the SNAG MACHINE in ORRE: RUI's "No, wait! That POKéMON doesn't have a black aura!" (0x7716,
+  before flag 0x99F) or "No! Stop! That's not a SHADOW POKéMON!" (0x7702). Tests: `mp shadow foe SLOT ID` makes the
+  next trainer battle's POKéMON Shadow; scenario shadow_snag. Not yet: RUI's "There's a SHADOW POKéMON!" when one is
+  sent out (0x770A / 0x7717, with the story), Colosseum's own ball-shake lines (0x7710-0x7712, 0x7718) in ORRE, co-op
+  (first snag wins: decision 4).
+- Next: purification at the RELIC STONE, ORRE's confinement, the A-Life, then co-op.
 - (old note) S3b was: Hyper Mode (each SHADOW RUSH rolls the nature's chance by the gauge's level; not asleep or already in it;
   Colosseum's messages 0x771B / 0x771C), CALL (snaps it out by the CALL chance and takes the CALL drop; wakes a
   sleeper: messages 0x7704-0x7709, 0x771D), the aura, and the dark palettes (below); then the opponents' Shadow

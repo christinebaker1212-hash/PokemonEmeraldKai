@@ -891,6 +891,7 @@ static void CB2_InitBattleInternal(void)
             CreateNPCTrainerParty(&gEnemyParty[PARTY_SIZE / 2], gTrainerBattleOpponent_B, FALSE);
         }
         SetWildMonHeldItem();
+        Orre_Shadow_EnemyParty();   // Moemon Kai: a trainer's Shadow Pokémon (src/orre/orre_shadow.c)
     }
 
     gMain.inBattle = TRUE;

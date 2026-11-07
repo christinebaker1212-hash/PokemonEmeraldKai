@@ -246,8 +246,10 @@ static bool8 MpQuickBallReady(void)
     s32 ball = MP_SaveData_Get("ball:last");
     if (!MP_IsBallItem(ball) || (ball == ITEM_SAFARI_BALL && !QzBugContest_Active()) || !CheckBagHasItem(ball, 1))
         return FALSE;
-    if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild)
-        return FALSE;
+    if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild
+     && !Orre_Shadow_Snaggable(GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT))
+     && !Orre_Shadow_Snaggable(GetBattlerAtPosition(B_POSITION_OPPONENT_RIGHT)))
+        return FALSE;   // (Moemon Kai: but a trainer's Shadow Pokémon can be snagged)
     if (gBattleTypeFlags & (BATTLE_TYPE_SAFARI | BATTLE_TYPE_WALLY_TUTORIAL | BATTLE_TYPE_FIRST_BATTLE
                           | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED))
         return FALSE;
