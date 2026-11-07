@@ -1007,7 +1007,10 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         const char *dest = Mtg_Param(ab, "Destination");
         if (Mtg_Param(ab, "ChangeType")) {   // a search of its controller's library (then a shuffle) or hand
             const char *nc = Mtg_Param(ab, "ChangeNum"), *tp = Mtg_Param(ab, "Tapped");
-            int lib = strcmp(Mtg_Param(ab, "Origin"), "Library") == 0, n = nc ? Mtg_Amount(d, ctx, card, nc, &ok) : 1;
+            const char *og = Mtg_Param(ab, "Origin");
+            int lib = strcmp(og, "Library") == 0, n = nc ? Mtg_Amount(d, ctx, card, nc, &ok) : 1;
+            int fromZone = lib ? MTG_ZONE_LIBRARY : strcmp(og, "Battlefield") == 0 ? MTG_ZONE_BATTLEFIELD
+                         : strcmp(og, "Graveyard") == 0 ? MTG_ZONE_GRAVEYARD : MTG_ZONE_HAND;
             Defined me;
             me.n = 1;
             me.t[0].kind = MTG_TGT_PLAYER;
@@ -1018,7 +1021,9 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
             LibPosKnown(ab, &sFoundPos);
             sFoundTapped = tp && strcmp(tp, "True") == 0;
             sFoundCtrl = ctx->controller;
-            if (!EachChooses(d, ctx, &me, n, lib ? MTG_ZONE_LIBRARY : MTG_ZONE_HAND, Mtg_Param(ab, "ChangeType"), FoundOne))
+            if (fromZone == MTG_ZONE_GRAVEYARD && sFoundZone == MTG_ZONE_BATTLEFIELD)
+                sFoundCtrl = ctx->controller;   // (its own card back under its control)
+            if (!EachChooses(d, ctx, &me, n, fromZone, Mtg_Param(ab, "ChangeType"), FoundOne))
                 return 0;
             if (lib && sFoundZone == MTG_ZONE_LIBRARY)   // (the find stays on top: Enlightened Tutor)
                 Mtg_ShuffleLibraryBelow(d, ctx->controller, (d->resStage & 0x20) ? 1 : 0);
@@ -1422,7 +1427,7 @@ static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_PUMP] = {"NumAtt", "NumDef", "KW"},
     [MTG_API_PUMP_ALL] = {"NumAtt", "NumDef", "KW", "ValidCards"},
     [MTG_API_CHANGE_ZONE] = {"Origin", "Destination", "GainControl", "ChangeType", "ChangeNum", "ChangeTypeDesc", "Tapped",
-                             "Mandatory", "ShuffleNonMandatory", "Optional", "LibraryPosition"},
+                             "Mandatory", "ShuffleNonMandatory", "Optional", "LibraryPosition", "Hidden"},
     [MTG_API_MANA] = {"Produced", "Amount"},
     [MTG_API_DISCARD] = {"NumCards", "Mode", "DiscardValid"},
     [MTG_API_SACRIFICE] = {"SacValid", "Amount", "SacMessage"},
@@ -1616,6 +1621,17 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
             return 0;
         if ((v = Mtg_Param(ab, "ChangeType"))) {   // a search (Hidden: the library or the hand) for ChangeNum$ cards
             const char *n = Mtg_Param(ab, "ChangeNum");
+            if (o && (strcmp(o, "Battlefield") == 0 || strcmp(o, "Graveyard") == 0)) {
+                // its controller's own cards of a kind chosen there ("return a black or blue creature you control"): the
+                // spec has to say whose, the choice is never optional
+                if (!(strstr(v, "YouCtrl") || strstr(v, "YouOwn")) || Mtg_Param(ab, "Optional")
+                    || Mtg_Param(ab, "ShuffleNonMandatory") || ab->tgt || Mtg_Param(ab, "Defined") || !dz
+                    || Mtg_Param(ab, "GainControl") || !Mtg_ValidSpecKnown(v) || (n && !AmountKnown(ab, "ChangeNum", 0))
+                    || strcmp(o, dz) == 0 || Mtg_Param(ab, "Tapped"))
+                    return 0;
+                return strcmp(dz, "Hand") == 0 || strcmp(dz, "Graveyard") == 0 || strcmp(dz, "Exile") == 0
+                    || (strcmp(dz, "Library") == 0 && pos == 0) || (strcmp(o, "Graveyard") == 0 && strcmp(dz, "Battlefield") == 0);
+            }
             if (!o || (strcmp(o, "Library") && strcmp(o, "Hand")) || !dz || ab->tgt || Mtg_Param(ab, "Defined")
                 || Mtg_Param(ab, "GainControl") || !Mtg_ValidSpecKnown(v) || (n && !AmountKnown(ab, "ChangeNum", 0)))
                 return 0;

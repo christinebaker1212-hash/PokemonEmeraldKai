@@ -1,0 +1,6 @@
+# MAGIC's choices among a player's own cards on the table: SHRIEKING DRAKE enters and asks "Return which?" over its
+# controller's creatures; A takes GRIZZLY BEARS back to the hand. Shots b_pick, b_after.
+MODE=1
+TMO=260
+EXPECT_A=("mtg: you: cast Shrieking Drake" "mtg: your move: a pick" "mtg: you: picked Grizzly Bears" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Shrieking Drake to focus")

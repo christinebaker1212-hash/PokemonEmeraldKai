@@ -3700,6 +3700,18 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's choices among a player's own cards (1.152.0)
+
+- ChangeZone with ChangeType$ from the Battlefield or a Graveyard (Hidden$ True: "return a creature you control to
+  its owner's hand", "return a basic land card from your graveyard"): its controller picks ChangeNum$ of their own
+  cards of the kind there (EachChooses), never optional; the spec must say whose (YouCtrl / YouOwn). From a graveyard
+  onto the battlefield, under its controller.
+- The board asks "Return which?" / "Exile which?" for them (PickVerb); the AI gives up the least valuable
+  (mtg_ai.c GivesUpOwn), a find from the library or onto the battlefield stays the most useful.
+- Unlocked 15: SHRIEKING DRAKE, SILVER DRAKE, HARVEST WURM, MARSH CROCODILE, STEEL LEAF PALADIN, FALSE MEMORIES,
+  ROFELLOS'S GIFT, TERRAIN GENERATOR... Still out: OriginAlternative$, Chooser$, Origin$ Sideboard (the Wishes).
+- Tests: test_rules.c TestHidden; scenario mtg_bounce.
+
 ## MAGIC's remembered cards, conditions and reveals (1.151.0)
 
 - MtgDuel rem[16] / remCount: the resolving chain's remembered objects (Forge's card.getRemembered), emptied as a

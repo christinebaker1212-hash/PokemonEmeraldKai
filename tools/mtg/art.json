@@ -5179,6 +5179,13 @@
 "number": "126",
 "set": "wth"
 },
+"False Memories": {
+"artist": "Ron Spencer",
+"file": "tor_37",
+"frame": "1997",
+"number": "37",
+"set": "tor"
+},
 "False Prophet": {
 "artist": "Eric Peterson",
 "file": "puds_6",
@@ -5612,6 +5619,13 @@
 "frame": "1997",
 "number": "33",
 "set": "uds"
+},
+"Fleetfoot Panther": {
+"artist": "Mark Brill",
+"file": "pls_108",
+"frame": "1997",
+"number": "108",
+"set": "pls"
 },
 "Flesh Reaver": {
 "artist": "Pete Venters",
@@ -6957,6 +6971,13 @@
 "number": "230",
 "set": "tmp"
 },
+"Harvest Wurm": {
+"artist": "Stephen L. Walsh",
+"file": "wth_130",
+"frame": "1997",
+"number": "130",
+"set": "wth"
+},
 "Hasran Ogress": {
 "artist": "Dan Frazier",
 "file": "bchr_34",
@@ -7313,6 +7334,13 @@
 "frame": "1997",
 "number": "299",
 "set": "mmq"
+},
+"Horned Kavu": {
+"artist": "Michael Sutfin",
+"file": "pls_110",
+"frame": "1997",
+"number": "110",
+"set": "pls"
 },
 "Horned Sliver": {
 "artist": "Allen Williams",
@@ -8455,6 +8483,13 @@
 "number": "109",
 "set": "wth"
 },
+"Lava Zombie": {
+"artist": "Tom Wänerstrand",
+"file": "pls_113",
+"frame": "1997",
+"number": "113",
+"set": "pls"
+},
 "Lavamancer's Skill": {
 "artist": "Monte Michael Moore",
 "file": "ons_215",
@@ -9070,6 +9105,13 @@
 "frame": "1997",
 "number": "118",
 "set": "pcy"
+},
+"Marsh Crocodile": {
+"artist": "Kev Walker",
+"file": "pls_115",
+"frame": "1997",
+"number": "115",
+"set": "pls"
 },
 "Marsh Gas": {
 "artist": "Douglas Shuler",
@@ -11696,6 +11738,13 @@
 "number": "207",
 "set": "usg"
 },
+"Razing Snidd": {
+"artist": "Alan Pollack",
+"file": "pls_121",
+"frame": "1997",
+"number": "121",
+"set": "pls"
+},
 "Razorfin Hunter": {
 "artist": "Jeff Easley",
 "file": "apc_119",
@@ -12234,6 +12283,13 @@
 "frame": "1993",
 "number": "344",
 "set": "4ed"
+},
+"Rofellos's Gift": {
+"artist": "Pete Venters",
+"file": "uds_119",
+"frame": "1997",
+"number": "119",
+"set": "uds"
 },
 "Rofellos, Llanowar Emissary": {
 "artist": "Michael Sutfin",
@@ -13327,6 +13383,13 @@
 "number": "142",
 "set": "apc"
 },
+"Shivan Wurm": {
+"artist": "Scott M. Fischer",
+"file": "pls_124",
+"frame": "1997",
+"number": "124",
+"set": "pls"
+},
 "Shivan Zombie": {
 "artist": "Tony Szczudlo",
 "file": "inv_271",
@@ -13361,6 +13424,13 @@
 "frame": "1997",
 "number": "53",
 "set": "pls"
+},
+"Shrieking Drake": {
+"artist": "Ian Miller",
+"file": "pmei_1997-2",
+"frame": "1997",
+"number": "1997-2",
+"set": "pmei"
 },
 "Shrink": {
 "artist": "Liz Danforth",
@@ -13431,6 +13501,13 @@
 "frame": "1997",
 "number": "281",
 "set": "ons"
+},
+"Silver Drake": {
+"artist": "Alan Pollack",
+"file": "pmei_2000-2",
+"frame": "1997",
+"number": "2000-2",
+"set": "pmei"
 },
 "Silver Erne": {
 "artist": "Melissa A. Benson",
@@ -14062,6 +14139,13 @@
 "number": "105",
 "set": "scg"
 },
+"Sparkcaster": {
+"artist": "Adam Rex",
+"file": "pls_126",
+"frame": "1997",
+"number": "126",
+"set": "pls"
+},
 "Sparksmith": {
 "artist": "Jim Nelson",
 "file": "ons_235",
@@ -14440,6 +14524,13 @@
 "number": "122",
 "set": "nem"
 },
+"Stampeding Wildebeests": {
+"artist": "Randy Gallegos",
+"file": "vis_121",
+"frame": "1997",
+"number": "121",
+"set": "vis"
+},
 "Standing Troops": {
 "artist": "Daren Bader",
 "file": "exo_22",
@@ -14509,6 +14600,13 @@
 "frame": "1997",
 "number": "157",
 "set": "wth"
+},
+"Steel Leaf Paladin": {
+"artist": "Paolo Parente",
+"file": "pls_127",
+"frame": "1997",
+"number": "127",
+"set": "pls"
 },
 "Stench of Decay": {
 "artist": "Heather Hudson",
@@ -15153,6 +15251,13 @@
 "frame": "1997",
 "number": "18",
 "set": "tor"
+},
+"Terrain Generator": {
+"artist": "Alan Pollack",
+"file": "nem_143",
+"frame": "1997",
+"number": "143",
+"set": "nem"
 },
 "Terravore": {
 "artist": "Jim Nelson",

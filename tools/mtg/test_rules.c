@@ -1823,6 +1823,45 @@ static void TestRemember(void)
     CHECK(HandCount(1) == 3, "two discarded, two drawn (%d in hand)", HandCount(1));
 }
 
+// a ChangeType$ choice among its controller's own cards there (Hidden$): SHRIEKING DRAKE returns a creature its
+// controller controls; HARVEST WURM a basic land from its controller's graveyard, else it's sacrificed
+static void TestHidden(void)
+{
+    int drake, bears, wurm, forest, i;
+    static const char *const cards[] = {"Shrieking Drake", "Harvest Wurm", "Marsh Crocodile", "Silver Drake",
+                                        "Steel Leaf Paladin", NULL};
+    printf("choices among its own cards\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();
+    Lands(0, "Island", 1);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    drake = Put(0, "Shrieking Drake", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, drake, -1, 0);
+    PassBoth();   // the drake resolves, its trigger goes on the stack
+    PassBoth();   // the trigger resolves: which creature back to the hand?
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE, "a creature to return is asked for");
+    ChoosePick(bears);
+    CHECK(Zone(bears) == MTG_ZONE_HAND && Zone(drake) == MTG_ZONE_BATTLEFIELD, "the bears back in hand, the drake stays");
+
+    Table();
+    Lands(0, "Forest", 2);
+    forest = Put(0, "Forest", MTG_ZONE_GRAVEYARD);
+    wurm = Put(0, "Harvest Wurm", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, wurm, -1, 0);
+    PassBoth();
+    PassBoth();
+    CHECK(Zone(forest) == MTG_ZONE_HAND && Zone(wurm) == MTG_ZONE_BATTLEFIELD, "the forest back, the wurm stays");
+    Table();
+    Lands(0, "Forest", 2);
+    wurm = Put(0, "Harvest Wurm", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, wurm, -1, 0);
+    PassBoth();
+    PassBoth();
+    CHECK(Zone(wurm) == MTG_ZONE_GRAVEYARD, "no basic land in the graveyard: the wurm is sacrificed");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2165,6 +2204,7 @@ int main(int argc, char **argv)
     TestActivation();
     TestMillFlip();
     TestRemember();
+    TestHidden();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

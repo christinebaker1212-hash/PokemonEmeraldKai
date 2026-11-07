@@ -423,6 +423,14 @@ static void TriggerTarget(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
     out->action = (uint16_t)best;
 }
 
+// a ChangeType$ choice among its own permanents, or its own graveyard's cards to somewhere but the battlefield: what it
+// gives up (the least to lose, below), not a find
+static int GivesUpOwn(const MtgAbility *ab)
+{
+    const char *o = Mtg_Param(ab, "Origin"), *dz = Mtg_Param(ab, "Destination");
+    return o && (strcmp(o, "Battlefield") == 0 || (strcmp(o, "Graveyard") == 0 && (!dz || strcmp(dz, "Battlefield"))));
+}
+
 // a choice while resolving: "you may" yes, pay to keep its own things or to save its spell, the least to lose
 static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
 {
@@ -439,7 +447,7 @@ static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
         return;
     }
     if (q->ability != 0xFFFF && ((gMtgAbilities[q->ability].api == MTG_API_CHANGE_ZONE
-                                  && Mtg_Param(&gMtgAbilities[q->ability], "ChangeType"))
+                                  && Mtg_Param(&gMtgAbilities[q->ability], "ChangeType") && !GivesUpOwn(&gMtgAbilities[q->ability]))
                                  || gMtgAbilities[q->ability].api == MTG_API_DIG)) {   // a search or a dig: the most useful find
         int bestS = -1;
         for (i = 0; i < q->candidateCount; i++) {
