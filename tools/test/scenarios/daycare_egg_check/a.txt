@@ -2,6 +2,6 @@ pressuntil A field 5000
 wait 10
 mp daycare 0
 mp daycare 0
-mp eggsteps 200
+mp eggsteps 100
 mp daycarestate
 quit

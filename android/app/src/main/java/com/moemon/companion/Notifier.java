@@ -60,10 +60,10 @@ public final class Notifier {
         }
         Model m = app.model();
         Walk w = app.walk();
-        // an EGG on the walk ready to hatch (its cycles all walked off: 64 steps each, as in the game)
+        // an EGG on the walk ready to hatch (its cycles all walked off: 32 steps each, as in the game)
         if (w != null) {
             JSONObject mon = w.game.optJSONObject("mon");
-            if (mon != null && mon.optInt("e") == 1 && w.steps() / 64 >= mon.optInt("f")) {
+            if (mon != null && mon.optInt("e") == 1 && w.steps() / 32 >= mon.optInt("f")) {
                 post(c, 2, today, "Your EGG is moving!", "It's ready to hatch. Bring it home to the game.");
             }
         }

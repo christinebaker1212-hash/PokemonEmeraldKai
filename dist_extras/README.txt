@@ -656,8 +656,9 @@ SECRET BASES    CO-OP menu > FRIENDS > pick a friend > VISIT SECRET BASE walks
 TRAINER CARDS   CO-OP menu > FRIENDS > pick a friend > TRAINER CARD (both
                 sides).
 DAY CARE        Each player's DAY CARE is their own: friends' DAY CARE MOEMON
-                never meet yours. The DAY CARE MAN checks for an EGG every 64
-                steps (the original game waited 256).
+                never meet yours. The DAY CARE MAN checks for an EGG every 32
+                steps (the original game waited 256), and an EGG loses a
+                hatching cycle every 32 steps (the original game: 256).
 BREEDING        Works as in POKEMON SCARLET / VIOLET: NIDORAN and VOLBEAT /
                 ILLUMISE EGGS come as both kinds (with DITTO too), babies hatch
                 without an incense, egg moves come from either parent (TM moves

@@ -2,6 +2,6 @@ pressuntil A field 5000
 wait 60
 mp giveegg 172
 mp eggsteps 0
-mp eggsteps 63
-mp eggsteps 64
+mp eggsteps 31
+mp eggsteps 32
 quit

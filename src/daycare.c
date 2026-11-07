@@ -1090,9 +1090,9 @@ static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
     }
 
     // Check if an egg should be produced
-    // Moemon Kai: the DAY CARE MAN's EGG check every 64 steps, not every 256 (the user, 2026-11-07): the same chance each
-    // check (the parents' compatibility), four times as often
-    if (daycare->offspringPersonality == 0 && validEggs == DAYCARE_MON_COUNT && (daycare->mons[1].steps & 0x3F) == 0x3F)
+    // Moemon Kai: the DAY CARE MAN's EGG check every 32 steps, not every 256 (the user, 2026-11-07: 64 in 1.171.5, 32 in
+    // 1.171.6): the same chance each check (the parents' compatibility), eight times as often
+    if (daycare->offspringPersonality == 0 && validEggs == DAYCARE_MON_COUNT && (daycare->mons[1].steps & 0x1F) == 0x1F)
     {
         u8 compatibility = GetDaycareCompatibilityScore(daycare);
         bool8 egg = compatibility > (Random() * 100u) / USHRT_MAX;
@@ -1103,9 +1103,10 @@ static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
     }
 
     // Try to hatch Egg
-    // Moemon Kai: an egg cycle every 64 steps, not every 256: every EGG hatches in a quarter of the time (half in
-    // 1.115.0, half again in 1.132.0: the user, 2026-11-06); FLAME BODY and MAGMA ARMOR still take two cycles at once
-    if ((++daycare->stepCounter & 0x3F) == 0x3F)
+    // Moemon Kai: an egg cycle every 32 steps, not every 256: every EGG hatches in an eighth of the time (half in
+    // 1.115.0, half again in 1.132.0, the user 2026-11-06; half again in 1.171.6, the user 2026-11-07); FLAME BODY and
+    // MAGMA ARMOR still take two cycles at once
+    if ((++daycare->stepCounter & 0x1F) == 0x1F)
     {
         u32 eggCycles;
         u8 toSub = GetEggCyclesToSubtract();

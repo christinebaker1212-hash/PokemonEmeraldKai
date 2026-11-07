@@ -3524,18 +3524,22 @@ Ditto to allow yields of Nidoran Male and Female." daycare.c, as SCARLET / VIOLE
   counts, eggs in A's / B's ball, the main parent's Ability slot, a POWER item's stat, A's / B's first move known) and
   breed_gen9_hatch (a real DAY CARE EGG taken and hatched: `mp hatch SLOT`).
 
-## Each player's own DAY CARE, and an EGG check every 64 steps (1.171.5)
+## Each player's own DAY CARE, and an EGG check every 32 steps (1.171.5, 1.171.6)
 The user (2026-11-07): "reduce the Day Care Man's Egg generation RNG from 256 steps every check to 64 steps every
 check", then "Remove the Co-op day care. Instance each player's day care so they cannot interact."
-- daycare.c TryProduceOrHatchEgg: the EGG check when `(mons[1].steps & 0x3F) == 0x3F` (was 0xFF): the same chance
-  (GetDaycareCompatibilityScore), four times as often, for every DAY CARE on the game's pair (ROUTE 117, FOUR ISLAND,
-  JOHTO's). Log "daycare: EGG check at step N, P% chance: an EGG | none". Egg cycles were already every 64 steps.
+- daycare.c TryProduceOrHatchEgg: the EGG check when `(mons[1].steps & 0x1F) == 0x1F` (was 0xFF; 0x3F in 1.171.5, then
+  "Make the Day Care Man's check for an egg 32 steps as well"): the same chance (GetDaycareCompatibilityScore), eight
+  times as often, for every DAY CARE on the game's pair (ROUTE 117, FOUR ISLAND,
+  JOHTO's). Log "daycare: EGG check at step N, P% chance: an EGG | none".
+- 1.171.6 ("Half the amount of steps an egg takes to hatch once more"): an egg cycle every 32 steps (stepCounter & 0x1F;
+  was 64, first 256), and the phone's walk (mp_phone_walk.c, the app's Notifier.java) counts 32 a cycle too. Test
+  qol_egg_hatch (a cycle by step 31, another 32 later).
 - The co-op DAY CARE is gone: MP_Daycare_TryCoopEgg, mp_linkx.c's lone-POKéMON broadcast (SendDaycare /
   UpdateDaycare / sFriendDc) and MP_Linkx_SetPendingEgg are removed, and an older game's LX_DAYCARE is ignored (the
   enum value stays so the relay types keep their numbers). Each DAY CARE reads only its own save. An EGG made with a
   friend's POKéMON before 1.171.5 ("<save>.coopegg") is still the DAY CARE MAN's to hand over (MP_Linkx_TakePendingEgg,
   CheckPendingEggOnLoad); no new ones are made. Debug `mp coopegg` removed.
-- Test daycare_egg_check (two MAGNEMITE, never an EGG: checks at steps 63, 127, 191, none at 255).
+- Test daycare_egg_check (two MAGNEMITE, never an EGG: checks at steps 31, 63, 95 in 100 steps, none between).
 
 ## MAGIC's Threshold and picky attackers (1.133.0)
 
@@ -6632,7 +6636,7 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   rest and the Triple card without HP). The HP bar and the EXP bar share one BattleBarInfo per battler. A moving HP bar
   that ever turns back logs "battle: health bar N turned back": tests foe_potion_bar, sand_leftovers, tri_foe_potion
   UNEXPECT it.
-- **EGGS hatch in half the time**: daycare.c TryProduceOrHatchEgg counts an egg cycle every 128 steps (was 256), so every
+- **EGGS hatch in half the time**: daycare.c TryProduceOrHatchEgg counts an egg cycle every 128 steps (was 256; 64 in 1.132.0, 32 in 1.171.6: "Each player's own DAY CARE"), so every
   EGG, carried ones too, needs half the steps; FLAME BODY / MAGMA ARMOR still take two cycles a time on top. Test
   qol_egg_hatch (`mp giveegg SPECIES`, `mp eggsteps N`).
 - **Skipping the credits**: START during the credits puts "Skip the credits?   START: skip" over the picture for 4 s

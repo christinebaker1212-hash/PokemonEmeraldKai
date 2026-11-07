@@ -442,10 +442,10 @@ static const char *DoHome(const char *json)
     nick[POKEMON_NAME_LENGTH] = EOS;
     if (egg)
     {
-        // an EGG's steps: a cycle each 64, as in the game (daycare.c); it hatches in the game, on the next step once
+        // an EGG's steps: a cycle each 32, as in the game (daycare.c); it hatches in the game, on the next step once
         // none are left
         u8 cycles = GetMonData(&sMon, MON_DATA_FRIENDSHIP);
-        u32 done = (u32)steps / 64;
+        u32 done = (u32)steps / 32;
         cycles = done >= cycles ? 0 : cycles - done;
         SetMonData(&sMon, MON_DATA_FRIENDSHIP, &cycles);
         moments = 0;

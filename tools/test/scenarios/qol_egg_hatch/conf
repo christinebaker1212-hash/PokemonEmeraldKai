@@ -1,6 +1,6 @@
-# EGGS hatch in a quarter of the time: an egg cycle every 64 steps (not 256). A PICHU EGG (10 cycles) loses one by the 63rd
-# step and another 64 steps later (the lead has no FLAME BODY)
+# EGGS hatch in an eighth of the time: an egg cycle every 32 steps (not 256). A PICHU EGG (10 cycles) loses one by the 31st
+# step and another 32 steps later (the lead has no FLAME BODY)
 MODE=1
 ENV_A="MOEMON_DEBUG_PARTY=280:15"
-EXPECT_A=("egg slot 1: 10 cycles left after 0 steps" "egg slot 1: 9 cycles left after 63 steps" "egg slot 1: 8 cycles left after 64 steps")
+EXPECT_A=("egg slot 1: 10 cycles left after 0 steps" "egg slot 1: 9 cycles left after 31 steps" "egg slot 1: 8 cycles left after 32 steps")
 UNEXPECT_A=("[crash]")
