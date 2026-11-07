@@ -42,6 +42,11 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.151.0)
+- Remembered cards, conditions, reveals, a chain's target in a sub-ability: COOP_NOTES "MAGIC's remembered cards,
+  conditions and reveals". 2515 of 5408. Next by count: Effect (163), replacement effects (97), RepeatEach (41),
+  ChooseType (35), Hidden (34), T:ValidCard (32).
+
 ## Status (2026-11-07: 1.150.0)
 - Mill and coin flips: COOP_NOTES "MAGIC's mill and coin flips". 2476 of 5408. Next by count: replacement effects (97),
   RepeatEach (36), ChooseType (34), RememberChanged (33), T:ValidCard (32), Reveal (24).

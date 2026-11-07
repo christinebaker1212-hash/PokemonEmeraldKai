@@ -133,6 +133,14 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
                                  && (d->step == MTG_STEP_MAIN1 || d->step == MTG_STEP_MAIN2);
     int tgtObj = a->target.kind == MTG_TGT_OBJ ? a->target.id : -1;
     int tgtMine = tgtObj >= 0 ? d->objs[tgtObj].controller == me : a->target.kind == MTG_TGT_PLAYER && a->target.id == me;
+    if (ab && ab->tgtFromSub) {   // (the target is a later ability's: weighed as that one: Scent of Ivy's Pump)
+        uint16_t k;
+        for (k = ab->sub; k != 0xFFFF; k = gMtgAbilities[k].sub)
+            if (gMtgAbilities[k].tgtShared) {
+                ab = &gMtgAbilities[k];
+                break;
+            }
+    }
     if (a->kind == MTG_ACT_LAND)
         return main ? 1000 : 0;
     if (ab && ab->fromHand) {

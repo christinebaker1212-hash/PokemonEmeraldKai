@@ -1741,6 +1741,88 @@ static void TestMillFlip(void)
     CHECK(wins > 0 && losses > 0, "both sides came up (%d won, %d lost)", wins, losses);
 }
 
+// remembered cards and conditions: SCENT OF IVY (reveals the green cards in hand, its later Pump's target chosen as
+// it's cast), SOUL REND (destroys only a white creature), RUPTURE (the sacrificed creature's power), STITCH TOGETHER
+// (hand or battlefield by the graveyard's count), FORGET (draws as many as were discarded)
+static void TestRemember(void)
+{
+    int scent, bears, soul, white, black, rup, ogre, stitch, dead, forget, i, life0, life1;
+    static const char *const cards[] = {"Scent of Ivy", "Ivy Seer", "Soul Rend", "Rupture", "Stitch Together", "Forget",
+                                        "Urza's Bauble", NULL};
+    printf("remembered cards and conditions\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();
+    Lands(0, "Forest", 1);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    scent = Put(0, "Scent of Ivy", MTG_ZONE_HAND);
+    Put(0, "Llanowar Elves", MTG_ZONE_HAND);
+    Put(0, "Giant Growth", MTG_ZONE_HAND);
+    Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    CHECK(Find(MTG_ACT_CAST, scent, MTG_TGT_OBJ, bears) >= 0, "SCENT OF IVY targets as it's cast");
+    Do(MTG_ACT_CAST, scent, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Mtg_Power(&sD, bears) == 4 && Mtg_Toughness(&sD, bears) == 4, "two green cards revealed: +2/+2 (%d/%d)",
+          Mtg_Power(&sD, bears), Mtg_Toughness(&sD, bears));
+    CHECK(sD.remCount == 0, "the remembered cards cleaned up");
+
+    Table();
+    Lands(0, "Swamp", 4);
+    white = Put(1, "Savannah Lions", MTG_ZONE_BATTLEFIELD);
+    black = Put(1, "Hypnotic Specter", MTG_ZONE_BATTLEFIELD);
+    soul = Put(0, "Soul Rend", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, soul, MTG_TGT_OBJ, black);
+    PassBoth();
+    CHECK(Zone(black) == MTG_ZONE_BATTLEFIELD, "SOUL REND leaves a black creature");
+    soul = Put(0, "Soul Rend", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, soul, MTG_TGT_OBJ, white);
+    PassBoth();
+    CHECK(Zone(white) == MTG_ZONE_GRAVEYARD, "SOUL REND destroys a white one");
+
+    Table();
+    Lands(0, "Mountain", 3);
+    ogre = Put(0, "Gray Ogre", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    rup = Put(0, "Rupture", MTG_ZONE_HAND);
+    life0 = sD.players[0].life;
+    life1 = sD.players[1].life;
+    Do(MTG_ACT_CAST, rup, -1, 0);
+    PassBoth();
+    if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE)
+        ChoosePick(ogre);
+    CHECK(Zone(ogre) == MTG_ZONE_GRAVEYARD && Zone(bears) == MTG_ZONE_GRAVEYARD, "the ogre sacrificed, the bears dealt 2");
+    CHECK(sD.players[0].life == life0 - 2 && sD.players[1].life == life1 - 2, "each player dealt the ogre's power");
+
+    Table();
+    Lands(0, "Swamp", 2);
+    dead = Put(0, "Hill Giant", MTG_ZONE_GRAVEYARD);
+    stitch = Put(0, "Stitch Together", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, stitch, MTG_TGT_OBJ, dead);
+    PassBoth();
+    CHECK(Zone(dead) == MTG_ZONE_HAND, "few cards in the graveyard: back to the hand");
+    Table();
+    Lands(0, "Swamp", 2);
+    dead = Put(0, "Hill Giant", MTG_ZONE_GRAVEYARD);
+    for (i = 0; i < 7; i++)
+        Put(0, "Island", MTG_ZONE_GRAVEYARD);
+    stitch = Put(0, "Stitch Together", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, stitch, MTG_TGT_OBJ, dead);
+    PassBoth();
+    CHECK(Zone(dead) == MTG_ZONE_BATTLEFIELD, "threshold of seven: onto the battlefield");
+
+    Table();
+    Lands(0, "Island", 2);
+    forget = Put(0, "Forget", MTG_ZONE_HAND);
+    for (i = 0; i < 3; i++)
+        Put(1, "Plains", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, forget, MTG_TGT_PLAYER, 1);
+    PassBoth();
+    while (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE || Mtg_Query(&sD)->kind == MTG_Q_DISCARD)
+        Choose(0);
+    CHECK(HandCount(1) == 3, "two discarded, two drawn (%d in hand)", HandCount(1));
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2082,6 +2164,7 @@ int main(int argc, char **argv)
     TestDig();
     TestActivation();
     TestMillFlip();
+    TestRemember();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

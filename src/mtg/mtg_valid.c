@@ -96,6 +96,8 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         return !d || (((c->supertypes & MTG_ST_LEGENDARY) != 0) ^ neg);
     if (n == 7 && strncmp(p, "YouCtrl", 7) == 0)
         return !d || o->controller == controller;
+    if (n == 12 && strncmp(p, "IsRemembered", 12) == 0)   // (the resolving chain's remembered objects)
+        return !d || Mtg_IsRemembered(d, obj);
     if (n == 7 && strncmp(p, "OppCtrl", 7) == 0)
         return !d || o->controller != controller;
     if (n == 6 && strncmp(p, "YouOwn", 6) == 0)

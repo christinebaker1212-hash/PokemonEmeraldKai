@@ -132,6 +132,22 @@ static void ResetPermanentState(MtgObj *o)
     o->usedN[0] = o->usedN[1] = 0;
 }
 
+void Mtg_Remember(MtgDuel *d, int obj)
+{
+    if (Mtg_IsRemembered(d, obj) || d->remCount >= sizeof(d->rem) / sizeof(d->rem[0]))
+        return;
+    d->rem[d->remCount++] = (uint16_t)obj;
+}
+
+int Mtg_IsRemembered(const MtgDuel *d, int obj)
+{
+    int i;
+    for (i = 0; i < d->remCount; i++)
+        if (d->rem[i] == obj)
+            return 1;
+    return 0;
+}
+
 // times OBJ's ABILITY (a Charm's mode counts as the charm) was activated this turn
 int Mtg_AbilityUses(const MtgDuel *d, int obj, int ability)
 {
@@ -220,6 +236,8 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
     if (zone != MTG_ZONE_BATTLEFIELD)
         o->controller = o->owner, o->ctrlBase = 0;
     o->zone = (uint8_t)zone;
+    if (d->remWatch && (d->remWatch == 0xFF || d->remWatch == zone + 1))   // (RememberChanged$, ...Milled$...)
+        Mtg_Remember(d, obj);
     o->seq = ++d->seq;
     if (zone == MTG_ZONE_LIBRARY) {
         MtgPlayer *p = &d->players[o->owner];
@@ -616,6 +634,7 @@ static int ContinueResolve(MtgDuel *d)
             d->res.lkiToughness = (int16_t)Mtg_Toughness(d, t);
             d->res.lkiController = d->objs[t].controller;
             d->resStage = d->resPicks = 0;
+            d->resCondAb = 0xFFFF;
             d->resChoice = -1;
             continue;
         }
@@ -640,6 +659,7 @@ static int ContinueResolve(MtgDuel *d)
             d->resAbility = next;
         }
         d->resStage = d->resPicks = 0;
+        d->resCondAb = 0xFFFF;
         d->resChoice = -1;
     }
     FinishResolve(d);
@@ -687,6 +707,8 @@ static int ResolveTop(MtgDuel *d)
     d->resAbility = e.ability;
     d->resReturn = 0xFFFF;
     d->resFlip = 0;
+    d->resCondAb = 0xFFFF;
+    d->remCount = 0;   // (a new chain remembers its own)
     d->resStage = d->resPicks = 0;
     d->resChoice = -1;
     return ContinueResolve(d);

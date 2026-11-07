@@ -240,7 +240,8 @@ enum {
     MTG_EV_PREVENTED,  // a = the source, b = what it was dealt to (an object, or -1 - player), c = how much was prevented
     MTG_EV_CONTROL,    // a = the object, b = its new controller
     MTG_EV_KCOUNTERS,  // a = the object, b = a counter kind (not +1/+1: MTG_EV_COUNTERS), c = how many it has now
-    MTG_EV_COIN        // a = the source, b = the player who flipped, c = 1 won / 0 lost
+    MTG_EV_COIN,       // a = the source, b = the player who flipped, c = 1 won / 0 lost
+    MTG_EV_REVEAL      // a = the card revealed (from a hand), b = the player revealing it
 };
 typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;   // a, b, c by kind (mtg_game.c Mtg_Event)
 
@@ -268,6 +269,13 @@ typedef struct MtgDuel {
     MtgStackEntry res;
     uint16_t resAbility;
     uint16_t resReturn;                              // a coin's branch resolving: the chain to go on with after it
+    uint16_t resCondAb;                              // the ability whose Condition*$ was checked (0xFFFF: none) ...
+    uint8_t resCondSkip;                             // ... and it failed: that ability is passed by
+    // the resolving chain's remembered objects (Forge's card.getRemembered: Remember*$, Defined$ Remembered,
+    // Remembered$Amount, IsRemembered; Cleanup's ClearRemembered$ empties it); remWatch: moves now are remembered
+    // (0xFF any zone, else only into zone remWatch - 1)
+    uint8_t remCount, remWatch;
+    uint16_t rem[16];
     uint8_t resFlip;                                 // the coin just flipped: 1 won, 2 lost (0: none)
     int16_t resChoice;                               // the answer: 1 / 0, or the object picked (-1: not asked yet)
     // a cast or an activation's costs still to pick (sacrifices, then discards): asked as MTG_Q_CHOOSE's PICK with

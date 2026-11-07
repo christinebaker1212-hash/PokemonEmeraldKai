@@ -1,0 +1,7 @@
+# MAGIC's reveals and remembered cards on the table: SCENT OF IVY is cast on GRIZZLY BEARS (its target chosen as
+# it's cast), the green cards in hand are revealed one by one on the ticker and the bears get +X/+X for them.
+# Shots rv_target, rv_reveal, rv_after.
+MODE=1
+TMO=260
+EXPECT_A=("mtg: you: cast Scent of Ivy on Grizzly Bears" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Scent of Ivy to focus")

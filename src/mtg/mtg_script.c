@@ -418,6 +418,11 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
     return Mtg_ParseManaCost(mana, &out->mana);
 }
 
+// a chain whose first ability targets nothing and one later sub-ability targets: that target is the chain's, chosen
+// as it is cast (Forge asks for every target of the chain then too); sShareTop is the chain's first ability while its
+// sub-abilities are parsed, sShareFound the one that took the target (tgtShared)
+static int sShareTop = -1, sShareFound = -1;
+
 static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int depth);
 
 static int SubAbility(MtgCardDef *c, int cardId, const char *name, int depth)
@@ -589,6 +594,10 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         ab = &gMtgAbilities[idx];
         ab->delayed = (uint16_t)(t < 0 ? 0 : t + 1);
     }
+    if (kind == MTG_AB_SUB && ab->tgt && sShareTop >= 0 && sShareFound < 0) {
+        ab->tgtShared = 1;   // (the chain's one target: see sShareTop)
+        sShareFound = idx;
+    }
     {
         const char *why;
         if (!Mtg_ApiParamsKnown(ab, &why))
@@ -596,7 +605,27 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     }
     sub = Mtg_Param(ab, "SubAbility");
     if (sub) {
-        int s = SubAbility(c, cardId, sub, depth);
+        int s, top = kind != MTG_AB_SUB && !ab->tgt && sShareTop < 0, k;
+        if (top)
+            sShareTop = idx, sShareFound = -1;
+        s = SubAbility(c, cardId, sub, depth);
+        if (top) {
+            if (sShareFound >= 0) {   // the target found: the chain's own if it's in this chain, without TargetMin$
+                int inChain = 0;
+                for (k = s; k >= 0 && k != 0xFFFF; k = gMtgAbilities[k].sub)
+                    inChain |= k == sShareFound;
+                if (!inChain || Mtg_Param(&gMtgAbilities[sShareFound], "TargetMin")
+                    || Mtg_Param(&gMtgAbilities[sShareFound], "TargetMax"))
+                    Unsupported(c, "a second target");
+                else {
+                    gMtgAbilities[idx].tgt = gMtgAbilities[sShareFound].tgt;
+                    gMtgAbilities[idx].tgtZone = gMtgAbilities[sShareFound].tgtZone;
+                    gMtgAbilities[idx].tgtStack = gMtgAbilities[sShareFound].tgtStack;
+                    gMtgAbilities[idx].tgtFromSub = 1;
+                }
+            }
+            sShareTop = sShareFound = -1;
+        }
         if (s < 0)
             Unsupported(c, "SubAbility");
         gMtgAbilities[idx].sub = s < 0 ? 0xFFFF : s;   // (the table may have moved)

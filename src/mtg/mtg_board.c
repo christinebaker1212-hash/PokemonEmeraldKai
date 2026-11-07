@@ -1948,6 +1948,11 @@ static int StartEvent(const MtgEvent *e)
             PlaySE(e->c > before ? SE_USE_ITEM : SE_M_DETECT);
         }
         return Frames(14);
+    case MTG_EV_REVEAL:   // a card shown from a hand
+        Name(a, sizeof(a), obj);
+        Ticker("%s %s %s.", e->b == ME ? "You" : B.opp, e->b == ME ? "reveal" : "reveals", a);
+        PlaySE(SE_SELECT);
+        return Frames(22);
     case MTG_EV_COIN:   // a coin flipped: who, and won or lost
         if (obj >= 0 && obj < MTG_MAX_OBJS)
             B.flash[obj] = 16;

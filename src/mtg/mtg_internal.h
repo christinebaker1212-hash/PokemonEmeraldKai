@@ -40,6 +40,8 @@ enum {
     MTG_API_DIG,              // DigEffect: the top DigNum$ cards, ChangeNum$ of them to DestinationZone$, the rest to DestinationZone2$
     MTG_API_MILL,             // MillEffect: the top NumCards$ cards of a player's library into their graveyard
     MTG_API_FLIP_COIN,        // FlipCoinEffect: a coin; WinSubAbility$ or LoseSubAbility$ then resolves
+    MTG_API_CLEANUP,          // CleanupEffect: ClearRemembered$ (the chain's remembered objects forgotten)
+    MTG_API_REVEAL,           // RevealEffect: cards from a hand shown (RevealValid$, AnyNumber$, Random$), remembered
     MTG_API_COUNT
 };
 
@@ -101,11 +103,16 @@ typedef struct {
                                     // gMtgUnlessCosts[unless - 1] (0: none, or a mana one: Mtg_Param)
     uint16_t delayed;               // DelayedTrigger: its trigger (gMtgTriggers[delayed - 1]), built from its own params
     uint16_t winSub, loseSub;       // FlipCoin: WinSubAbility$ / LoseSubAbility$ (0xFFFF: none)
+    uint8_t tgtFromSub;             // its tgt is the one target of a sub-ability later in its chain (chosen as it's cast;
+                                    // its own effect doesn't act on it: Scent of Ivy's Reveal, then Pump)
+    uint8_t tgtShared;              // a sub-ability whose target is its chain's (tgtFromSub on the first)
     uint8_t actLimit;               // ActivationLimit$ n: n times each turn (0: no limit)
     uint8_t actSorcery, actMyTurn;  // SorcerySpeed$ True ("only any time you could cast a sorcery"); PlayerTurn$ True
     uint16_t actSteps;              // ActivationPhases$: the steps it may be activated in (bits 1 << MTG_STEP_*; 0: any)
 } MtgAbility;
-int Mtg_AbilityUses(const MtgDuel *d, int obj, int ability);   // times used this turn (ActivationLimit$)
+int Mtg_AbilityUses(const MtgDuel *d, int obj, int ability);
+void Mtg_Remember(MtgDuel *d, int obj);   // onto the resolving chain's remembered objects (once each)
+int Mtg_IsRemembered(const MtgDuel *d, int obj);   // times used this turn (ActivationLimit$)
 extern MtgCost *gMtgUnlessCosts;
 
 // mtg_script.c

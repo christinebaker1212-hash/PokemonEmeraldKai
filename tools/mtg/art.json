@@ -195,6 +195,13 @@
 "number": "91",
 "set": "apc"
 },
+"Aether Rift": {
+"artist": "Heather Hudson",
+"file": "inv_227",
+"frame": "1997",
+"number": "227",
+"set": "inv"
+},
 "Aether Sting": {
 "artist": "Pete Venters",
 "file": "uds_76",
@@ -824,6 +831,13 @@
 "frame": "1993",
 "number": "5",
 "set": "4ed"
+},
+"Armistice": {
+"artist": "Dan Frazier",
+"file": "mmq_3",
+"frame": "1997",
+"number": "3",
+"set": "mmq"
 },
 "Armor Sliver": {
 "artist": "Scott Kirschner",
@@ -2050,12 +2064,26 @@
 "number": "5",
 "set": "usg"
 },
+"Brine Seer": {
+"artist": "Donato Giancola",
+"file": "uds_28",
+"frame": "1997",
+"number": "28",
+"set": "uds"
+},
 "Brine Shaman": {
 "artist": "Cornelius Brudi",
 "file": "ice_115",
 "frame": "1993",
 "number": "115",
 "set": "ice"
+},
+"Brink of Madness": {
+"artist": "Donato Giancola",
+"file": "ulg_50",
+"frame": "1997",
+"number": "50",
+"set": "ulg"
 },
 "Broken Fall": {
 "artist": "Zina Saunders",
@@ -2238,6 +2266,13 @@
 "frame": "1997",
 "number": "58",
 "set": "scg"
+},
+"Calming Verse": {
+"artist": "Rebecca Guay",
+"file": "pcy_110",
+"frame": "1997",
+"number": "110",
+"set": "pcy"
 },
 "Caltrops": {
 "artist": "Jeff Laubenstein",
@@ -2673,6 +2708,13 @@
 "number": "163",
 "set": "mir"
 },
+"Chaos Harlequin": {
+"artist": "Alan Rabinowitz",
+"file": "all_69",
+"frame": "1993",
+"number": "69",
+"set": "all"
+},
 "Chaosphere": {
 "artist": "Steve Luke",
 "file": "mir_164",
@@ -2792,6 +2834,13 @@
 "number": "219",
 "set": "tmp"
 },
+"Choking Sands": {
+"artist": "Roger Raupp",
+"file": "mir_113",
+"frame": "1997",
+"number": "113",
+"set": "mir"
+},
 "Choking Tethers": {
 "artist": "Carl Critchlow",
 "file": "ons_74",
@@ -2812,6 +2861,13 @@
 "frame": "1997",
 "number": "183",
 "set": "mmq"
+},
+"Cinder Seer": {
+"artist": "Donato Giancola",
+"file": "uds_78",
+"frame": "1997",
+"number": "78",
+"set": "uds"
 },
 "Cinder Shade": {
 "artist": "Nelson DeCastro",
@@ -3183,6 +3239,13 @@
 "frame": "1997",
 "number": "128",
 "set": "mmq"
+},
+"Cosmic Horror": {
+"artist": "Jesper Myrfors",
+"file": "4ed_126",
+"frame": "1993",
+"number": "126",
+"set": "4ed"
 },
 "Counterspell": {
 "artist": "Mark Poole",
@@ -3730,6 +3793,13 @@
 "number": "85",
 "set": "scg"
 },
+"Decree of Pain": {
+"artist": "Carl Critchlow",
+"file": "scg_64",
+"frame": "1997",
+"number": "64",
+"set": "scg"
+},
 "Decree of Savagery": {
 "artist": "Alex Horley-Orlandelli",
 "file": "scg_115",
@@ -4198,6 +4268,13 @@
 "frame": "1997",
 "number": "87",
 "set": "scg"
+},
+"Dragon Mask": {
+"artist": "Craig Hooper",
+"file": "vis_144",
+"frame": "1997",
+"number": "144",
+"set": "vis"
 },
 "Dragon Roost": {
 "artist": "Luca Zontini",
@@ -5802,6 +5879,13 @@
 "number": "376",
 "set": "4ed"
 },
+"Forget": {
+"artist": "Mike Kimble",
+"file": "hml_26",
+"frame": "1993",
+"number": "26",
+"set": "hml"
+},
 "Forgotten Cave": {
 "artist": "Tony Szczudlo",
 "file": "ons_317",
@@ -6109,6 +6193,13 @@
 "frame": "1997",
 "number": "192",
 "set": "mmq"
+},
+"Ghastly Demise": {
+"artist": "Gary Ruddell",
+"file": "ody_139",
+"frame": "1997",
+"number": "139",
+"set": "ody"
 },
 "Ghitu Encampment": {
 "artist": "Don Hazeltine",
@@ -7174,6 +7265,13 @@
 "number": "7",
 "set": "sth"
 },
+"Honor the Fallen": {
+"artist": "Terese Nielsen",
+"file": "mmq_21",
+"frame": "1997",
+"number": "21",
+"set": "mmq"
+},
 "Hooded Kavu": {
 "artist": "John Howe",
 "file": "inv_147",
@@ -7461,6 +7559,13 @@
 "number": "9",
 "set": "vis"
 },
+"Infernal Genesis": {
+"artist": "Ron Spencer",
+"file": "pcy_68",
+"frame": "1997",
+"number": "68",
+"set": "pcy"
+},
 "Infernal Tribute": {
 "artist": "Terese Nielsen",
 "file": "wth_73",
@@ -7642,6 +7747,13 @@
 "frame": "1997",
 "number": "245",
 "set": "ody"
+},
+"Ivy Seer": {
+"artist": "Donato Giancola",
+"file": "uds_110",
+"frame": "1997",
+"number": "110",
+"set": "uds"
 },
 "Jackalope Herd": {
 "artist": "Ron Spencer",
@@ -8231,6 +8343,13 @@
 "number": "54",
 "set": "all"
 },
+"Krovikan Sorcerer": {
+"artist": "Pat Lewis",
+"file": "ice_81",
+"frame": "1993",
+"number": "81",
+"set": "ice"
+},
 "Kurgadon": {
 "artist": "Carl Critchlow",
 "file": "scg_124",
@@ -8642,6 +8761,13 @@
 "file": "4ed_82",
 "frame": "1993",
 "number": "82",
+"set": "4ed"
+},
+"Lord of the Pit": {
+"artist": "Mark Tedin",
+"file": "4ed_144",
+"frame": "1993",
+"number": "144",
 "set": "4ed"
 },
 "Lord of the Undead": {
@@ -9400,6 +9526,13 @@
 "number": "93",
 "set": "nem"
 },
+"Mogg Bombers": {
+"artist": "Dermot Power",
+"file": "sth_91",
+"frame": "1997",
+"number": "91",
+"set": "sth"
+},
 "Mogg Fanatic": {
 "artist": "Brom",
 "file": "tmp_190",
@@ -9532,6 +9665,13 @@
 "frame": "1993",
 "number": "36",
 "set": "4ed"
+},
+"Morality Shift": {
+"artist": "Jerry Tiritilli",
+"file": "jud_70",
+"frame": "1997",
+"number": "70",
+"set": "jud"
 },
 "Morgue Thrull": {
 "artist": "Robert Bliss",
@@ -9952,6 +10092,13 @@
 "frame": "1997",
 "number": "113",
 "set": "inv"
+},
+"Nightshade Seer": {
+"artist": "Donato Giancola",
+"file": "uds_63",
+"frame": "1997",
+"number": "63",
+"set": "uds"
 },
 "Nightwind Glider": {
 "artist": "Randy Gallegos",
@@ -10862,6 +11009,20 @@
 "frame": "1997",
 "number": "149",
 "set": "usg"
+},
+"Planeswalker's Fury": {
+"artist": "Christopher Moeller",
+"file": "pls_70",
+"frame": "1997",
+"number": "70",
+"set": "pls"
+},
+"Planeswalker's Mirth": {
+"artist": "John Matson",
+"file": "pls_12",
+"frame": "1997",
+"number": "12",
+"set": "pls"
 },
 "Plated Rootwalla": {
 "artist": "Randy Elliott",
@@ -12025,6 +12186,13 @@
 "number": "118",
 "set": "vis"
 },
+"Robber Fly": {
+"artist": "John Matson",
+"file": "mmq_209",
+"frame": "1997",
+"number": "209",
+"set": "mmq"
+},
 "Robe of Mirrors": {
 "artist": "John Matson",
 "file": "exo_43",
@@ -12227,6 +12395,13 @@
 "frame": "1993",
 "number": "bl100",
 "set": "ptc"
+},
+"Rupture": {
+"artist": "Gao Yan",
+"file": "nem_97",
+"frame": "1997",
+"number": "97",
+"set": "nem"
 },
 "Rushwood Dryad": {
 "artist": "Todd Lockwood",
@@ -12536,6 +12711,34 @@
 "number": "69",
 "set": "bchr"
 },
+"Scent of Brine": {
+"artist": "Greg Staples",
+"file": "uds_45",
+"frame": "1997",
+"number": "45",
+"set": "uds"
+},
+"Scent of Cinder": {
+"artist": "Marc Fishman",
+"file": "uds_96",
+"frame": "1997",
+"number": "96",
+"set": "uds"
+},
+"Scent of Ivy": {
+"artist": "John Avon",
+"file": "uds_120",
+"frame": "1997",
+"number": "120",
+"set": "uds"
+},
+"Scent of Nightshade": {
+"artist": "John Avon",
+"file": "uds_69",
+"frame": "1997",
+"number": "69",
+"set": "uds"
+},
 "School of Piranha": {
 "artist": "Daren Bader",
 "file": "exo_45",
@@ -12591,6 +12794,13 @@
 "frame": "1997",
 "number": "46",
 "set": "exo"
+},
+"Scroll Rack": {
+"artist": "Heather Hudson",
+"file": "tmp_308",
+"frame": "1997",
+"number": "308",
+"set": "tmp"
 },
 "Scryb Sprites": {
 "artist": "Amy Weber",
@@ -13137,6 +13347,13 @@
 "frame": "1997",
 "number": "212",
 "set": "mmq"
+},
+"Shocker": {
+"artist": "Thomas M. Baxa",
+"file": "tmp_204",
+"frame": "1997",
+"number": "204",
+"set": "tmp"
 },
 "Shriek of Dread": {
 "artist": "Nelson DeCastro",
@@ -13705,6 +13922,13 @@
 "number": "338",
 "set": "ice"
 },
+"Soldevi Sage": {
+"artist": "Carol Heyer",
+"file": "all_34a",
+"frame": "1993",
+"number": "34a",
+"set": "all"
+},
 "Solidarity": {
 "artist": "John Zeleznik",
 "file": "uds_20",
@@ -13788,6 +14012,13 @@
 "frame": "1993",
 "number": "162",
 "set": "ice"
+},
+"Soul Rend": {
+"artist": "Jeff Miracola",
+"file": "mir_144",
+"frame": "1997",
+"number": "144",
+"set": "mir"
 },
 "Soul Shepherd": {
 "artist": "John Coulthart",
@@ -14314,6 +14545,13 @@
 "number": "107",
 "set": "mmq"
 },
+"Stitch Together": {
+"artist": "Arnie Swekel",
+"file": "jud_72",
+"frame": "1997",
+"number": "72",
+"set": "jud"
+},
 "Stoic Champion": {
 "artist": "Greg Hildebrandt",
 "file": "lgn_21",
@@ -14740,6 +14978,13 @@
 "frame": "1993",
 "number": "52",
 "set": "4ed"
+},
+"Sylvan Hierophant": {
+"artist": "Brian Durfee",
+"file": "wth_141",
+"frame": "1997",
+"number": "141",
+"set": "wth"
 },
 "Sylvan Messenger": {
 "artist": "Heather Hudson",
@@ -15272,6 +15517,13 @@
 "frame": "1997",
 "number": "57",
 "set": "wth"
+},
+"Tolarian Winds": {
+"artist": "Lawrence Snelly",
+"file": "usg_104",
+"frame": "1997",
+"number": "104",
+"set": "usg"
 },
 "Tonic Peddler": {
 "artist": "Adam Rex",
@@ -15868,6 +16120,13 @@
 "number": "330",
 "set": "inv"
 },
+"Urza's Bauble": {
+"artist": "Christopher Rush",
+"file": "ice_343",
+"frame": "1993",
+"number": "343",
+"set": "ice"
+},
 "Urza's Guilt": {
 "artist": "Paolo Parente",
 "file": "pls_130",
@@ -16266,6 +16525,13 @@
 "frame": "1997",
 "number": "201",
 "set": "mir"
+},
+"Volcanic Eruption": {
+"artist": "Douglas Shuler",
+"file": "4ed_112",
+"frame": "1993",
+"number": "112",
+"set": "4ed"
 },
 "Volcanic Geyser": {
 "artist": "David O'Connor",
@@ -16868,6 +17134,13 @@
 "frame": "1997",
 "number": "289",
 "set": "inv"
+},
+"Winter Blast": {
+"artist": "Kaja Foglio",
+"file": "4ed_290",
+"frame": "1993",
+"number": "290",
+"set": "4ed"
 },
 "Winter Sky": {
 "artist": "Mike Kimble",

@@ -3700,6 +3700,28 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's remembered cards, conditions and reveals (1.151.0)
+
+- MtgDuel rem[16] / remCount: the resolving chain's remembered objects (Forge's card.getRemembered), emptied as a
+  chain starts (ResolveTop) and by Cleanup's ClearRemembered$. Remember*$ on any effect (RememberChanged$, ...Milled$,
+  ...Discarded$, ...Destroyed$, ...Sacrificed$, ...Drawn$, ...Tokens$) sets d->remWatch while it resolves and
+  Mtg_MoveTo remembers what it moves (a Dig only into its first zone); RememberTargets$ the target, RememberRevealed$ the
+  revealed; ForgetOtherRemembered$ starts over. Read by Defined$ Remembered / RememberedLKI / RememberedCard, Valid
+  IsRemembered, Remembered$Amount, Remembered$CardPower / Toughness / ManaCost, DelayedTrigger RememberObjects$.
+- Conditions (mtg_effects.c ConditionMet, checked once as an ability starts: d->resCondAb / resCondSkip):
+  ConditionDefined$ + ConditionPresent$ + ConditionCompare$ (without Defined$: permanents on the battlefield), and
+  ConditionCheckSVar$ + ConditionSVarCompare$; not met, the ability is passed by and its chain goes on.
+- Reveal (MTG_API_REVEAL): RevealValid$ cards from a hand, AnyNumber$ reveals every one that may be (always the most
+  for the cards in the pool), Random$ one at random; MTG_EV_REVEAL's line "You reveal Giant Growth."
+- A chain's one target in a later sub-ability (Scent of Ivy's Pump): taken by the first ability as it's cast
+  (MtgAbility tgtFromSub / tgtShared, mtg_script.c sShareTop); the first ability's own effect never acts on it; the
+  AI weighs the action as the targeting ability.
+- MTG_MAX_DEFINED is 16 (Defined$ Remembered can name many).
+- Unlocked 39: SCENT OF IVY / BRINE / CINDER / NIGHTSHADE, the Seers, SOUL REND, RUPTURE, STITCH TOGETHER, FORGET,
+  URZA'S BAUBLE, PLANESWALKER'S FURY / MIRTH, SCROLL RACK, VOLCANIC ERUPTION, MOGG BOMBERS... Still out: Condition$
+  (Threshold...), ChangeType$ Remembered.sameName, Effect, the Wishes.
+- Tests: test_rules.c TestRemember; scenario mtg_reveal.
+
 ## MAGIC's mill and coin flips (1.150.0)
 
 - Mill (mtg_effects.c MTG_API_MILL): NumCards$ off the top of You / Defined$ / a target player's library into the

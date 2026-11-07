@@ -16,13 +16,13 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL}, {"Animate", MTG_API_ANIMATE},
     {"DelayedTrigger", MTG_API_DELAYED_TRIGGER}, {"PreventDamage", MTG_API_PREVENT_DAMAGE},
     {"GainControl", MTG_API_GAIN_CONTROL}, {"PutCounterAll", MTG_API_PUT_COUNTER_ALL},
-    {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG}, {"Mill", MTG_API_MILL}, {"FlipCoin", MTG_API_FLIP_COIN},
+    {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG}, {"Mill", MTG_API_MILL}, {"FlipCoin", MTG_API_FLIP_COIN}, {"Cleanup", MTG_API_CLEANUP}, {"Reveal", MTG_API_REVEAL},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
-    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin",
+    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -59,6 +59,20 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
     }
     if (strcmp(sv, "Count$xPaid") == 0)
         return d ? ctx->e->x : 0;
+    if (strcmp(sv, "Remembered$Amount") == 0 || strcmp(sv, "Count$RememberedSize") == 0)
+        return d ? d->remCount : 0;
+    if (strncmp(sv, "Remembered$Card", 15) == 0 || strncmp(sv, "RememberedLKI$Card", 18) == 0) {   // the first one's
+        const char *what = strstr(sv, "$Card") + 5;
+        int r = d && d->remCount ? d->rem[0] : -1;
+        if (strcmp(what, "Power") && strcmp(what, "Toughness") && strcmp(what, "ManaCost")) {
+            *ok = 0;
+            return 0;
+        }
+        if (r < 0)
+            return 0;
+        return what[0] == 'P' ? Mtg_Power(d, r) : what[0] == 'T' ? Mtg_Toughness(d, r)
+                              : Mtg_ManaCostTotal(&Mtg_Card(d->objs[r].def)->cost);
+    }
     if (strcmp(sv, "Targeted$CardPower") == 0)
         return d ? ctx->e->lkiPower : 0;
     if (strcmp(sv, "Targeted$CardToughness") == 0)
@@ -182,12 +196,12 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
 }
 
 // ---- who or what an effect acts on (AbilityUtils.getDefinedCards / getDefinedPlayers)
-#define MTG_MAX_DEFINED 4
+#define MTG_MAX_DEFINED 16
 typedef struct { int n; MtgTarget t[MTG_MAX_DEFINED]; } Defined;
 
 static const char *const sDefinedKnown[] = {
     "You", "Opponent", "Player", "Self", "Targeted", "ParentTarget", "TargetedController", "TargetedPlayer",
-    "Enchanted", "DelayTriggerRemembered", "DelayTriggerRememberedLKI",
+    "Enchanted", "DelayTriggerRemembered", "DelayTriggerRememberedLKI", "Remembered", "RememberedLKI", "RememberedCard",
 };
 
 // what set a triggered ability off (SpellAbility.getTriggeringObject: "Triggered" + the AbilityKey's name, its
@@ -285,7 +299,7 @@ static void Targets(const MtgDuel *d, const MtgResolveCtx *ctx, const MtgAbility
     const char *def = Mtg_Param(ab, "Defined");
     const MtgTarget *t = &ctx->e->target;
     out->n = 0;
-    if (ab->tgt) {
+    if (ab->tgt && !ab->tgtFromSub) {
         if (t->kind != MTG_TGT_NONE)
             Add(out, t->kind, t->id);
         return;
@@ -304,6 +318,10 @@ static void DefinedBy(const MtgDuel *d, const MtgResolveCtx *ctx, const char *de
     else if (strncmp(def, "DelayTriggerRemembered", 22) == 0) {   // (a delayed trigger's: what it remembered)
         if (ctx->e->trigObj != MTG_NO_OBJ && ctx->e->trigger != 0xFFFF)
             Add(out, MTG_TGT_OBJ, ctx->e->trigObj);
+    } else if (strcmp(def, "Remembered") == 0 || strcmp(def, "RememberedLKI") == 0 || strcmp(def, "RememberedCard") == 0) {
+        int i;   // (the chain's remembered objects; RememberedCard: the first)
+        for (i = 0; i < d->remCount && (i == 0 || def[10] != 'C'); i++)
+            Add(out, MTG_TGT_OBJ, d->rem[i]);
     } else if (strcmp(def, "You") == 0)
         Add(out, MTG_TGT_PLAYER, ctx->controller);
     else if (strcmp(def, "Opponent") == 0)
@@ -807,7 +825,7 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         uint8_t moving[MTG_MAX_OBJS];
         while (!(to & (1u << zone)))
             zone++;
-        if (ab->tgt) {
+        if (ab->tgt && !ab->tgtFromSub) {
             Targets(d, ctx, ab, DEF_PLAYER, &who);
             if (!who.n || who.t[0].kind != MTG_TGT_PLAYER)
                 break;
@@ -869,7 +887,7 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                 break;
             p = np.t[0].kind == MTG_TGT_PLAYER ? np.t[0].id : d->objs[np.t[0].id].controller;
         }
-        if (ab->tgt && ctx->e->target.kind == MTG_TGT_PLAYER && Mtg_Param(ab, "Defined")) {
+        if (ab->tgt && !ab->tgtFromSub && ctx->e->target.kind == MTG_TGT_PLAYER && Mtg_Param(ab, "Defined")) {
             p = ctx->e->target.id;   // ("target opponent gains control of CARDNAME": the target is the new controller)
             DefinedBy(d, ctx, Mtg_Param(ab, "Defined"), &who);
         } else
@@ -1126,6 +1144,41 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                 }
         break;
     }
+    case MTG_API_CLEANUP:   // CleanupEffect: ClearRemembered$
+        if (Mtg_Param(ab, "ClearRemembered"))
+            d->remCount = 0;
+        break;
+    case MTG_API_REVEAL: {   // RevealEffect: cards of a hand shown and remembered (AnyNumber$: every one that may be)
+        const char *valid = Mtg_Param(ab, "RevealValid"), *any = Mtg_Param(ab, "AnyNumber"), *rnd = Mtg_Param(ab, "Random");
+        int k;
+        Targets(d, ctx, ab, DEF_PLAYER, &who);
+        for (i = 0; i < who.n; i++) {
+            uint16_t list[MTG_MAX_OBJS > 64 ? 64 : MTG_MAX_OBJS];
+            int m = 0, p = who.t[i].id;
+            if (who.t[i].kind != MTG_TGT_PLAYER)
+                continue;
+            for (k = 0; k < d->objCount && m < 64; k++)
+                if (d->objs[k].zone == MTG_ZONE_HAND && d->objs[k].owner == p
+                    && (!valid || Mtg_ValidObj(d, k, valid, ctx->source, ctx->controller)))
+                    list[m++] = (uint16_t)k;
+            if (!m)
+                continue;
+            if (rnd && strcmp(rnd, "True") == 0) {   // (a card at random)
+                k = list[Mtg_Random(d, (uint32_t)m)];
+                Mtg_Event(d, MTG_EV_REVEAL, k, p, 0);
+                Mtg_Remember(d, k);
+                continue;
+            }
+            if (!(any && strcmp(any, "True") == 0))
+                m = 1;   // (one card: the first that may be; "reveal a creature card in your hand")
+            for (k = 0; k < m; k++) {
+                Mtg_Event(d, MTG_EV_REVEAL, list[k], p, 0);
+                if (Mtg_Param(ab, "RememberRevealed"))
+                    Mtg_Remember(d, list[k]);
+            }
+        }
+        break;
+    }
     case MTG_API_FLIP_COIN: {   // FlipCoinEffect: its controller flips (the call is a coin's even odds too)
         int won = Mtg_Random(d, 2) == 0;
         d->resFlip = (uint8_t)(won ? 1 : 2);   // (ContinueResolve goes on with the Win / Lose sub-ability)
@@ -1172,10 +1225,118 @@ static int UnlessCost(const MtgDuel *d, const MtgResolveCtx *ctx, const MtgAbili
 
 // one ability of a chain. Its UnlessCost$ first: each payer in turn may pay it, and if one does the ability does
 // nothing (its sub-abilities still resolve). resStage: bit 7 settled, bit 6 paid, the rest the payer asked next.
+static const char *const sRememberMoves[] = {
+    "RememberChanged", "RememberMilled", "RememberDiscarded", "RememberDestroyed", "RememberSacrificed", "RememberDrawn",
+    "RememberTokens",
+};
+static int InList(const char *key, const char *const *list, int n);
+
+// ---- an ability's conditions (SpellAbilityCondition: ConditionDefined$ / ConditionPresent$ / ConditionCompare$,
+// ConditionCheckSVar$ / ConditionSVarCompare$): checked as it starts resolving; not met, it is passed by
+static int CompareParse(const char *s, int *op)   // "GE1", "EQ0", "LTX": the operator, then where the amount starts
+{
+    static const char *const ops[] = {"GE", "GT", "LE", "LT", "EQ", "NE"};
+    int i;
+    for (i = 0; i < 6; i++)
+        if (s && strncmp(s, ops[i], 2) == 0 && s[2]) {
+            *op = i;
+            return 2;
+        }
+    return -1;
+}
+
+static int CompareHolds(int a, int op, int b)
+{
+    return op == 0 ? a >= b : op == 1 ? a > b : op == 2 ? a <= b : op == 3 ? a < b : op == 4 ? a == b : a != b;
+}
+
+static int ConditionKnown(const MtgAbility *ab)
+{
+    const char *def = Mtg_Param(ab, "ConditionDefined"), *pr = Mtg_Param(ab, "ConditionPresent");
+    const char *cmp = Mtg_Param(ab, "ConditionCompare"), *sv = Mtg_Param(ab, "ConditionCheckSVar");
+    const char *svc = Mtg_Param(ab, "ConditionSVarCompare");
+    int op, ok;
+    if (def && !InList(def, sDefinedKnown, (int)(sizeof(sDefinedKnown) / sizeof(sDefinedKnown[0]))))
+        return 0;
+    if ((def || cmp) && !pr)
+        return 0;
+    if (pr && strcmp(pr, "Card") && !Mtg_ValidSpecKnown(pr))
+        return 0;
+    if (cmp && (CompareParse(cmp, &op) < 0 || (Mtg_Amount(NULL, NULL, ab->card, cmp + 2, &ok), !ok)))
+        return 0;
+    if (svc && !sv)
+        return 0;
+    if (sv && (Mtg_Amount(NULL, NULL, ab->card, sv, &ok), !ok))
+        return 0;
+    if (svc && (CompareParse(svc, &op) < 0 || (Mtg_Amount(NULL, NULL, ab->card, svc + 2, &ok), !ok)))
+        return 0;
+    return 1;
+}
+
+static int ConditionMet(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
+{
+    const char *def = Mtg_Param(ab, "ConditionDefined"), *pr = Mtg_Param(ab, "ConditionPresent");
+    const char *cmp = Mtg_Param(ab, "ConditionCompare"), *sv = Mtg_Param(ab, "ConditionCheckSVar");
+    const char *svc = Mtg_Param(ab, "ConditionSVarCompare");
+    int op, ok, i;
+    if (pr) {   // how many of the Defined$ ones (or permanents on the battlefield) are of the spec
+        int n = 0;
+        if (def) {
+            Defined who;
+            DefinedBy(d, ctx, def, &who);
+            for (i = 0; i < who.n; i++)
+                n += who.t[i].kind == MTG_TGT_OBJ
+                  && (strcmp(pr, "Card") == 0 || Mtg_ValidObj(d, who.t[i].id, pr, ctx->source, ctx->controller));
+        } else
+            for (i = 0; i < d->objCount; i++)
+                n += d->objs[i].zone == MTG_ZONE_BATTLEFIELD
+                  && (strcmp(pr, "Card") == 0 || Mtg_ValidObj(d, i, pr, ctx->source, ctx->controller));
+        if (!cmp)
+            cmp = "GE1";
+        CompareParse(cmp, &op);
+        if (!CompareHolds(n, op, Mtg_Amount(d, ctx, ab->card, cmp + 2, &ok)))
+            return 0;
+    }
+    if (sv) {
+        int v = Mtg_Amount(d, ctx, ab->card, sv, &ok);
+        if (!svc)
+            svc = "GE1";
+        CompareParse(svc, &op);
+        if (!CompareHolds(v, op, Mtg_Amount(d, ctx, ab->card, svc + 2, &ok)))
+            return 0;
+    }
+    return 1;
+}
+
+// what of an ability's own moves is remembered (Remember*$): 0xFF every move, a Dig's only into its first zone
+static uint8_t RememberWatch(const MtgAbility *ab)
+{
+    unsigned i;
+    for (i = 0; i < sizeof(sRememberMoves) / sizeof(sRememberMoves[0]); i++)
+        if (Mtg_Param(ab, sRememberMoves[i])) {
+            if (ab->api == MTG_API_DIG)
+                return (uint8_t)(DigZone(Mtg_Param(ab, "DestinationZone"), MTG_ZONE_HAND) + 1);
+            return 0xFF;
+        }
+    return 0;
+}
+
 int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
 {
     const MtgAbility *ab = &gMtgAbilities[ability];
     MtgManaCost cost;
+    if (d->resCondAb != ability) {   // (once as it starts: its Condition*$, then what it remembers first)
+        d->resCondAb = (uint16_t)ability;
+        d->resCondSkip = !ConditionMet(d, ctx, ab);
+        if (!d->resCondSkip) {
+            if (Mtg_Param(ab, "ForgetOtherRemembered"))
+                d->remCount = 0;
+            if (Mtg_Param(ab, "RememberTargets") && (ctx->e->target.kind == MTG_TGT_OBJ))
+                Mtg_Remember(d, ctx->e->target.id);
+        }
+    }
+    if (d->resCondSkip)
+        return 1;   // (its condition isn't met: passed by, the chain goes on)
     if (Mtg_Param(ab, "UnlessCost") && !(d->resStage & 0x80)) {
         Defined payers;
         const char *who = Mtg_Param(ab, "UnlessPayer");
@@ -1217,7 +1378,13 @@ int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
     }
     if (d->resStage & 0x40)
         return 1;
-    return Resolve(d, ctx, ab);
+    {
+        int r;
+        d->remWatch = RememberWatch(ab);
+        r = Resolve(d, ctx, ab);
+        d->remWatch = 0;
+        return r;
+    }
 }
 
 // ---- what a translation understands (else the card stays unsupported)
@@ -1225,6 +1392,9 @@ static const char *const sCommon[] = {
     "SP", "AB", "DB", "Cost", "ValidTgts", "TgtPrompt", "SubAbility", "SpellDescription", "StackDescription",
     "IsCurse", "PrecostDesc", "CostDesc", "TargetType", "Defined", "UnlessCost", "UnlessPayer", "ActivationZone",
     "TargetMin", "TargetMax", "ActivationLimit", "SorcerySpeed", "PlayerTurn", "ActivationPhases",
+    "ConditionDefined", "ConditionPresent", "ConditionCompare", "ConditionCheckSVar", "ConditionSVarCompare",
+    "ConditionDescription", "RememberChanged", "RememberMilled", "RememberDiscarded", "RememberDestroyed",
+    "RememberSacrificed", "RememberDrawn", "RememberTokens", "RememberTargets", "ForgetOtherRemembered",
 };
 static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},
@@ -1243,6 +1413,8 @@ static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_REMOVE_COUNTER] = {"CounterType", "CounterNum"},
     [MTG_API_MILL] = {"NumCards"},
     [MTG_API_FLIP_COIN] = {"WinSubAbility", "LoseSubAbility"},
+    [MTG_API_CLEANUP] = {"ClearRemembered"},
+    [MTG_API_REVEAL] = {"RevealValid", "AnyNumber", "Random", "RememberRevealed"},
     [MTG_API_DELAYED_TRIGGER] = {"Mode", "Phase", "ValidPlayer", "Execute", "RememberObjects", "NextTurn",
                                  "TriggerDescription", "Secondary"},
     [MTG_API_GAIN_LIFE] = {"LifeAmount"},
@@ -1311,6 +1483,14 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
             return 0;
         }
     }
+    if (!ConditionKnown(ab)) {
+        *why = "Condition";
+        return 0;
+    }
+    if (Mtg_Param(ab, "RememberTargets") && !ab->tgt) {
+        *why = "RememberTargets";
+        return 0;
+    }
     v = Mtg_Param(ab, "Defined");
     if (v && !InList(v, sDefinedKnown, (int)(sizeof(sDefinedKnown) / sizeof(sDefinedKnown[0])))
         && !(ab->kind != MTG_AB_SPELL && ab->kind != MTG_AB_ACTIVATED && Mtg_TriggeredDefinedKnown(0, v))) {
@@ -1333,7 +1513,7 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         *why = "UnlessPayer";
         return 0;
     }
-    if (ab->kind == MTG_AB_SUB && ab->tgt) {
+    if (ab->kind == MTG_AB_SUB && ab->tgt && !ab->tgtShared) {
         *why = "a second target";
         return 0;
     }
@@ -1364,6 +1544,10 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return (v = Mtg_Param(ab, "ValidCards")) && Mtg_ValidSpecKnown(v);
     case MTG_API_MILL:
         return AmountKnown(ab, "NumCards", 0);
+    case MTG_API_CLEANUP:
+        return 1;
+    case MTG_API_REVEAL:
+        return !(v = Mtg_Param(ab, "RevealValid")) || Mtg_ValidSpecKnown(v);
     case MTG_API_FLIP_COIN:   // (its branches are checked as they're parsed: mtg_script.c)
         return Mtg_Param(ab, "WinSubAbility") || Mtg_Param(ab, "LoseSubAbility");
     case MTG_API_ANIMATE: {
@@ -1394,7 +1578,8 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         const char *rem = Mtg_Param(ab, "RememberObjects");
         if (!ab->delayed)
             return 0;
-        if (rem && strcmp(rem, "Self") && strcmp(rem, "Targeted") && strcmp(rem, "ParentTarget")
+        if (rem && strcmp(rem, "Self") && strcmp(rem, "Targeted") && strcmp(rem, "ParentTarget") && strcmp(rem, "Remembered")
+            && strcmp(rem, "RememberedLKI") && strcmp(rem, "RememberedCard")
             && !(ab->kind != MTG_AB_SPELL && ab->kind != MTG_AB_ACTIVATED && Mtg_TriggeredDefinedKnown(0, rem)))
             return 0;
         return 1;
