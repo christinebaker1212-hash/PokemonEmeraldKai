@@ -67,6 +67,7 @@ typedef struct MtgCardDef {
     const char *cyclingCost;                 // K:Cycling:COST (Forge's keyword: an ability from the hand)
     uint8_t starPT;                          // PT:*/* (bit 1 power, 2 toughness): a characteristic-defining static sets it
     uint16_t altCost;                        // S:Mode$ AlternativeCost: gMtgAltCosts index + 1 (0: none; mtg_static.c)
+    uint8_t etbKind, etbNum, etbX;           // K:etbCounter:TYPE:N: enters with N (etbX: X, as paid) counters of a kind
     uint8_t staticCount;
     uint16_t statics[4];                     // indexes into the static table (S: lines; mtg_static.c)
     uint16_t svarFirst, svarCount;           // the card's SVar: lines
@@ -116,6 +117,7 @@ typedef struct {
     int8_t tempPower, tempToughness;   // until end of turn (Pump)
     uint32_t tempKeywords;
     int16_t counters11;           // +1/+1 counters (-1/-1 as negative)
+    uint8_t ctrKind[4], ctrNum[4];  // other counters: kind (Mtg_CounterKind, 0: free slot) and how many
     uint16_t attachedTo;          // an Aura: the creature it enchants (MTG_NO_OBJ: none)
     uint8_t regen;                // regeneration shields until end of turn (RegenerateEffect)
     uint8_t prevent;              // "prevent the next n damage" this turn (PreventDamageEffect's shield)
@@ -234,7 +236,8 @@ enum {
     MTG_EV_REGENERATE, // a = the object: destroyed, it regenerated instead (tapped, out of combat, damage gone);
                        // b = 0 that, 1 a shield given (c = its shields now)
     MTG_EV_PREVENTED,  // a = the source, b = what it was dealt to (an object, or -1 - player), c = how much was prevented
-    MTG_EV_CONTROL     // a = the object, b = its new controller
+    MTG_EV_CONTROL,    // a = the object, b = its new controller
+    MTG_EV_KCOUNTERS   // a = the object, b = a counter kind (not +1/+1: MTG_EV_COUNTERS), c = how many it has now
 };
 typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;   // a, b, c by kind (mtg_game.c Mtg_Event)
 

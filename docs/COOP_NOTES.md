@@ -3669,6 +3669,23 @@ asks (U.confirm) and clears all six. Test stadium_clear.
 - Tests: test_rules.c TestControl (THREATEN untapped + haste then back; ALADDIN's artifact back when Aladdin dies);
   scenario mtg_control.
 
+## MAGIC's counters of every kind (1.146.0)
+
+- Kinds are Forge's CounterType names interned by Mtg_CounterKind (mtg_script.c; MTG_CTR_P1P1 / M1M1 stay the old
+  counters11 count). MtgObj ctrKind[4] / ctrNum[4] hold the rest; Mtg_CounterPT reads P/T kinds from the name (P2P2,
+  P1P0, M0M1...) for Mtg_Power / Toughness. Mtg_Counters / Mtg_AddCountersKind (never below 0; MTG_EV_KCOUNTERS, the
+  board's "X gets 2 charge counters." and an amber count in the card's bottom left corner). Zone changes clear them.
+- PutCounter of any kind (no target: on itself), PutCounterAll (ValidCards$), RemoveCounter (CounterNum$ n or All);
+  K:etbCounter:TYPE:N / :X (MtgCardDef.etbKind/etbNum/etbX: on entering, X from the spell's stack entry);
+  cost SubCounter<n/TYPE> (MtgCost.subCtrN/Kind, off the source); amount Count$CardCounters.TYPE; Valid property
+  counters_<GE|LE|EQ|NE|GT|LT><n>_<TYPE>.
+- AI: P/T-raising counters on its own creatures in a main phase, curse / shrinking ones on theirs, charges at the end
+  of the other's turn.
+- Unlocked 44: the Spikes (Spike Feeder, Spike Weaver's kin...), TRISKELION, SERRATED ARROWS, LOTUS BLOSSOM, ICEBERG,
+  TIME BOMB, BOUNTY HUNTER, TORCH SONG, LIVING ARMOR... Still out: SubCounter<X/...>, AddCounter costs, the Mana Batteries
+  (their mana with X), UpTo$, counters moved between permanents.
+- Tests: test_rules.c TestCounters (SPIKE FEEDER, SERRATED ARROWS, counters_ specs); scenario mtg_counters.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

@@ -1,0 +1,6 @@
+# MAGIC's counters on the table: SERRATED ARROWS enters with three arrowhead counters (an amber count on the card), one
+# goes onto the opponent's LLANOWAR ELVES as a -1/-1 counter. Shots cn_cast, cn_target, cn_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Serrated Arrows" "mtg: you: used Serrated Arrows on Llanowar Elves" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Serrated Arrows to focus")

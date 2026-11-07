@@ -227,6 +227,19 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
                 && (!d->objs[tgtObj].tapped || Mtg_Param(ab, "Untap")) ? 8 + Value(d, tgtObj) / 2 : 0;
         return IsCreatureOnField(d, tgtObj) ? 20 + Value(d, tgtObj) : 12 + Mtg_ManaCostTotal(&Mtg_Card(d->objs[tgtObj].def)->cost);
     }
+    case MTG_API_PUT_COUNTER: {   // counters that grow its own creature, curse counters on theirs, charges at their end step
+        int kind = Mtg_CounterKind(Mtg_Param(ab, "CounterType")), pp, tt;
+        Mtg_CounterPT(kind, &pp, &tt);
+        if (kind == MTG_CTR_P1P1)
+            pp = tt = 1;
+        else if (kind == MTG_CTR_M1M1)
+            pp = tt = -1;
+        if (Mtg_Param(ab, "IsCurse") || pp + tt < 0)
+            return main && tgtObj >= 0 && !tgtMine ? 5 + Value(d, tgtObj) / 3 : 0;
+        if (pp + tt > 0)
+            return main && (tgtObj < 0 || tgtMine) ? 6 : 0;
+        return a->kind == MTG_ACT_ACTIVATE && d->active == opp && d->step == MTG_STEP_END ? 4 : 0;
+    }
     case MTG_API_PREVENT_DAMAGE:   // its own creature about to die, or itself low on life in their attack
         if (tgtObj >= 0)
             return tgtMine && AboutToDie(d, tgtObj, me) && !d->objs[tgtObj].prevent ? 22 + Value(d, tgtObj) : 0;

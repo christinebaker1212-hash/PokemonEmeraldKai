@@ -42,6 +42,10 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.146.0)
+- Counters of every kind: COOP_NOTES "MAGIC's counters of every kind". 2366 of 5408. Next by count: replacement effects
+  (96), LibraryPosition (40), RepeatEach (36), Dig (35), ChooseType (32), T:ValidCard (30), RememberChanged (30).
+
 ## Status (2026-11-07: 1.145.0)
 - GainControl effects: COOP_NOTES "MAGIC's control changes". 2322 of 5408. Next by count: replacement effects (96),
   counters beyond +1/+1 (PutCounter 41), LibraryPosition (40), RepeatEach (36), Dig (35), ChooseType (32).

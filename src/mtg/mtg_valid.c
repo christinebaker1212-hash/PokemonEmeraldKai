@@ -112,6 +112,29 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         return !d || (src != MTG_NO_OBJ && o->blocking == src);
     if ((n == 15 && strncmp(p, "blockedBySource", 15) == 0) || (n == 18 && strncmp(p, "blockedBySourceLKI", 18) == 0))
         return !d || (src != MTG_NO_OBJ && src < d->objCount && d->objs[src].blocking == obj);
+    if (n > 13 && strncmp(p, "counters_", 9) == 0) {   // "counters_GE1_FUSE": how many of a kind it has
+        char cmp[3], kname[16];
+        const char *q = p + 11, *us;
+        int want, have, kind;
+        size_t kl;
+        memcpy(cmp, p + 9, 2);
+        cmp[2] = 0;
+        want = atoi(q);
+        while (q < p + n && *q >= '0' && *q <= '9')
+            q++;
+        us = q;
+        if (us >= p + n || *us != '_' || (kl = (size_t)(p + n - us - 1)) == 0 || kl >= sizeof(kname))
+            { *known = 0; return 0; }
+        memcpy(kname, us + 1, kl);
+        kname[kl] = 0;
+        if ((kind = Mtg_CounterKind(kname)) <= 0 || !strstr("GE LE EQ NE GT LT", cmp))
+            { *known = 0; return 0; }
+        if (!d)
+            return 1;
+        have = Mtg_Counters(d, obj, kind);
+        return strcmp(cmp, "GE") == 0 ? have >= want : strcmp(cmp, "LE") == 0 ? have <= want : strcmp(cmp, "EQ") == 0 ? have == want
+             : strcmp(cmp, "NE") == 0 ? have != want : strcmp(cmp, "GT") == 0 ? have > want : have < want;
+    }
     if (n == 22 && strncmp(p, "wasDealtDamageThisTurn", 22) == 0)   // (marked damage lasts the turn)
         return !d || o->damage > 0;
     if (n == 5 && strncmp(p, "Other", 5) == 0)

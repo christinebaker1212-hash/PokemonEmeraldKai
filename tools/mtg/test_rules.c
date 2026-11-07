@@ -1499,6 +1499,42 @@ static void TestControl(void)
     CHECK(Zone(aladdin) == MTG_ZONE_GRAVEYARD && sD.objs[thopter].controller == 1, "Aladdin gone: it goes back");
 }
 
+// counters of every kind: etbCounter, PutCounter of a named kind, SubCounter costs, RemoveCounter, counters_ specs
+static void TestCounters(void)
+{
+    int feeder, arrows, bears, i;
+    static const char *const cards[] = {"Spike Feeder", "Serrated Arrows", "Triskelion", "Lotus Blossom", "Iceberg",
+                                        "Bounty Hunter", "Time Bomb", NULL};
+    printf("counters: enters with, named kinds, removed as a cost\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Spike Feeder: enters with two +1/+1 counters; remove one: gain 2 life
+    Lands(0, "Forest", 3);
+    feeder = Put(0, "Spike Feeder", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, feeder, -1, 0);
+    PassBoth();
+    CHECK(Zone(feeder) == MTG_ZONE_BATTLEFIELD && Mtg_Counters(&sD, feeder, MTG_CTR_P1P1) == 2
+          && Mtg_Power(&sD, feeder) == 2, "a 2/2 with two counters");
+    Do(MTG_ACT_ACTIVATE, feeder, -1, 0);
+    PassBoth();
+    CHECK(Mtg_Counters(&sD, feeder, MTG_CTR_P1P1) == 1 && sD.players[0].life == 22, "one counter off, 2 life");
+
+    Table();   // Serrated Arrows: three arrowhead counters, each one a -1/-1 counter on a creature
+    Lands(0, "Plains", 4);
+    arrows = Put(0, "Serrated Arrows", MTG_ZONE_HAND);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, arrows, -1, 0);
+    PassBoth();
+    CHECK(Mtg_Counters(&sD, arrows, Mtg_CounterKind("ARROWHEAD")) == 3, "three arrowhead counters");
+    Do(MTG_ACT_ACTIVATE, arrows, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Mtg_Counters(&sD, arrows, Mtg_CounterKind("ARROWHEAD")) == 2 && Mtg_Power(&sD, bears) == 1
+          && Mtg_Toughness(&sD, bears) == 1, "one spent: the bears are 1/1");
+    CHECK(Mtg_ValidObj(&sD, arrows, "Artifact.counters_GE2_ARROWHEAD", arrows, 0)
+          && !Mtg_ValidObj(&sD, arrows, "Artifact.counters_GE3_ARROWHEAD", arrows, 0), "counters_ specs count them");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1835,6 +1871,7 @@ int main(int argc, char **argv)
     TestDelayed();
     TestPrevent();
     TestControl();
+    TestCounters();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

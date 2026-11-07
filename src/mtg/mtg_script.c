@@ -346,7 +346,18 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
             out->returnSelf = 1;
         else if (strcmp(tok, "Discard<1/CARDNAME>") == 0)
             out->discardSelf = 1;
-        else if ((r = CostPart(tok, "DamageYou", &n, &spec, &specLen)) != 0) {   // CostDamage
+        else if ((r = CostPart(tok, "SubCounter", &n, &spec, &specLen)) != 0) {   // CostRemoveCounter (from itself)
+            char kname[16];
+            int kind;
+            if (r < 0 || !spec || n < 1 || n > 20 || out->subCtrN || specLen >= sizeof(kname))
+                return 0;
+            memcpy(kname, spec, specLen);
+            kname[specLen] = 0;
+            if ((kind = Mtg_CounterKind(kname)) <= 0)
+                return 0;
+            out->subCtrN = (uint8_t)n;
+            out->subCtrKind = (uint8_t)kind;
+        } else if ((r = CostPart(tok, "DamageYou", &n, &spec, &specLen)) != 0) {   // CostDamage
             if (r < 0 || spec || n < 1 || n > 20 || out->damageYou)
                 return 0;
             out->damageYou = (uint8_t)n;
@@ -608,6 +619,22 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
         if (!Mtg_ValidSpecKnown(c->enchantSpec) || strstr(c->enchantSpec, "inZone"))
             Unsupported(c, "Enchant:");
         c->enchant = 1;
+        return;
+    }
+    if (strncmp(k, "etbCounter:", 11) == 0) {   // "etbCounter:P1P1:3": enters with that many (X: as paid)
+        char buf[40], *num;
+        int kind;
+        if (strlen(k + 11) < sizeof(buf) && (strcpy(buf, k + 11), num = strchr(buf, ':')) && !strchr(num + 1, ':')) {
+            *num++ = 0;
+            kind = Mtg_CounterKind(buf);
+            if (kind > 0 && (strcmp(num, "X") == 0 || (num[0] >= '1' && num[0] <= '9' && strspn(num, "0123456789") == strlen(num)))) {
+                c->etbKind = (uint8_t)kind;
+                c->etbX = num[0] == 'X';
+                c->etbNum = (uint8_t)(c->etbX ? 0 : atoi(num));
+                return;
+            }
+        }
+        Unsupported(c, "etbCounter");
         return;
     }
     if (strncmp(k, "Cycling:", 8) == 0) {   // (Forge's CardFactoryUtil: an ability from the hand, made once the lines are read)
@@ -951,4 +978,42 @@ int Mtg_DbLoad(const void *pak, uint32_t size)
         sCards[i].banned = (uint8_t)((e[3] >> 2) & 1);
     }
     return sCardCount;
+}
+
+// counter kinds: Forge's CounterType names, interned in the order first met (kinds 1 / 2 are +1/+1 / -1/-1)
+static char sCounterNames[64][16] = {"", "P1P1", "M1M1"};
+static int sCounterCount = 3;
+
+int Mtg_CounterKind(const char *name)
+{
+    int i;
+    size_t n;
+    if (!name || !*name)
+        return -1;
+    n = strlen(name);
+    if (n >= sizeof(sCounterNames[0]) || strspn(name, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_") != n)
+        return -1;
+    for (i = 1; i < sCounterCount; i++)
+        if (strcmp(sCounterNames[i], name) == 0)
+            return i;
+    if (sCounterCount >= 64)
+        return -1;
+    strcpy(sCounterNames[sCounterCount], name);
+    return sCounterCount++;
+}
+
+const char *Mtg_CounterName(int kind)
+{
+    return kind > 0 && kind < sCounterCount ? sCounterNames[kind] : "";
+}
+
+void Mtg_CounterPT(int kind, int *p, int *t)
+{
+    const char *s = Mtg_CounterName(kind);
+    *p = *t = 0;
+    if (strlen(s) == 4 && (s[0] == 'P' || s[0] == 'M') && (s[2] == 'P' || s[2] == 'M') && s[1] >= '0' && s[1] <= '9'
+        && s[3] >= '0' && s[3] <= '9') {   // ("P1P0", "M0M1", "P2P2")
+        *p = (s[0] == 'P' ? 1 : -1) * (s[1] - '0');
+        *t = (s[2] == 'P' ? 1 : -1) * (s[3] - '0');
+    }
 }

@@ -35,6 +35,8 @@ enum {
     MTG_API_DELAYED_TRIGGER,  // DelayedTriggerEffect: a one-time trigger set up now (Mode$ Phase: at a later step)
     MTG_API_PREVENT_DAMAGE,   // PreventDamageEffect: the next Amount$ damage to each target this turn is prevented
     MTG_API_GAIN_CONTROL,     // GainControlEffect: each target's controller becomes NewController$ (LoseControl$: until)
+    MTG_API_PUT_COUNTER_ALL,  // CountersPutAllEffect
+    MTG_API_REMOVE_COUNTER,   // CountersRemoveEffect
     MTG_API_COUNT
 };
 
@@ -56,6 +58,7 @@ typedef struct {
     uint8_t exileGraveN;                    // ExileFromGrave<n/Type>: cards from its player's graveyard
     const char *exileGraveSpec;
     uint8_t damageYou;                      // DamageYou<n>: its source deals n damage to its player (CostDamage)
+    uint8_t subCtrN, subCtrKind;            // SubCounter<n/TYPE>: counters of a kind removed from its source
 } MtgCost;
 // what a cost's picks come from (Mtg_CostCandidates): 0 discard (hand), 1 sacrifice, 2 exile from the hand, 3 return
 // to the hand, 4 tap (an untapped permanent), 5 exile from the graveyard
@@ -246,6 +249,13 @@ typedef struct {
 // one ability of a resolving chain: 1 done, 0 waiting for a choice (d->query is set; d->resChoice will hold it)
 int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability);
 void Mtg_AddCounters(MtgDuel *d, int obj, int n);
+// counters of every kind: kinds are interned names (MTG_CTR_P1P1 / M1M1 the +1/+1 ones, kept as counters11)
+enum { MTG_CTR_NONE, MTG_CTR_P1P1, MTG_CTR_M1M1 };
+int Mtg_CounterKind(const char *name);           // the kind for "CHARGE", "P2P2"... (interned; -1: not a name)
+const char *Mtg_CounterName(int kind);
+void Mtg_CounterPT(int kind, int *p, int *t);    // what one counter of the kind adds (P2P2: +2/+2; 0/0 for a named one)
+int Mtg_Counters(const MtgDuel *d, int obj, int kind);
+void Mtg_AddCountersKind(MtgDuel *d, int obj, int kind, int n);   // n < 0 removes (never below 0)
 // a Defined$ name of a triggered ability ("TriggeredCard", "TriggeredTargetController"...) understood for this mode
 int Mtg_TriggeredDefinedKnown(int mode, const char *name);
 void Mtg_Sacrifice(MtgDuel *d, int obj);

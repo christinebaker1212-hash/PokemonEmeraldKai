@@ -709,6 +709,18 @@ static void DrawCard(int obj, const Rect *rc, int count, float x, float y)
             G_RoundFill((int)x - 1, (int)y - 1, 6, 6, 0xf0c040, 255);
             G_RoundFrame((int)x - 1, (int)y - 1, 6, 6, 0x5a3a08, 255);
         }
+        {   // other counters (charge, storage, fuse...): an amber count in the bottom left corner
+            int k, n = 0, w;
+            for (k = 0; k < 4; k++)
+                n += o->ctrKind[k] ? o->ctrNum[k] : 0;
+            if (n) {
+                snprintf(pt, sizeof(pt), "%d", n);
+                w = G_DigitsWidth(pt, 0, 1) + 4;
+                G_RoundFill((int)x - 2, (int)y + rc->h - 9, w, 9, 0x4a2c08, 235);
+                G_RoundFrame((int)x - 2, (int)y + rc->h - 9, w, 9, 0xf0b040, 255);
+                G_Digits((int)x, (int)y + rc->h - 7, pt, 0, 1, 0xffe0a0, 255);
+            }
+        }
         if (o->regen) {   // a regeneration shield: a green shield in the top right corner
             int sx = (int)x + rc->w - 6, sy = (int)y - 1;
             G_RoundFill(sx, sy, 7, 6, 0x50d080, 255);
@@ -1900,6 +1912,41 @@ static int StartEvent(const MtgEvent *e)
         B.leaveColor = MtgGfx_FrameColor(v->objs[obj].def, 0);
         PlaySE(SE_BALL_OPEN);
         return Frames(18);
+    case MTG_EV_KCOUNTERS:   // counters of a kind other than +1/+1: the count it has now
+        if (obj >= 0 && obj < MTG_MAX_OBJS) {
+            MtgObj *vo = &v->objs[obj];
+            int k, slot = -1, before = 0;
+            char kind[16];
+            for (k = 0; k < 4; k++)
+                if (vo->ctrKind[k] == e->b)
+                    slot = k, before = vo->ctrNum[k];
+            for (k = 0; k < 4 && slot < 0; k++)
+                if (!vo->ctrKind[k] || !vo->ctrNum[k])
+                    slot = k;
+            if (slot >= 0) {
+                vo->ctrKind[slot] = (uint8_t)e->b;
+                vo->ctrNum[slot] = (uint8_t)e->c;
+            }
+            B.flash[obj] = 12;
+            Name(a, sizeof(a), obj);
+            {
+                int pp, tt;
+                Mtg_CounterPT(e->b, &pp, &tt);
+                if (pp || tt)   // ("P2P2" -> "+2/+2")
+                    snprintf(kind, sizeof(kind), "%+d/%+d", pp, tt);
+                else {          // ("CHARGE" -> "charge")
+                    for (k = 0; Mtg_CounterName(e->b)[k] && k < 15; k++)
+                        kind[k] = (char)(Mtg_CounterName(e->b)[k] | 0x20);
+                    kind[k] = 0;
+                }
+            }
+            if (e->c > before)
+                Ticker("%s gets %d %s counter%s.", a, e->c - before, kind, e->c - before == 1 ? "" : "s");
+            else
+                Ticker("%s loses %d %s counter%s.", a, before - e->c, kind, before - e->c == 1 ? "" : "s");
+            PlaySE(e->c > before ? SE_USE_ITEM : SE_M_DETECT);
+        }
+        return Frames(14);
     case MTG_EV_PREVENTED:   // a "prevent the next n damage" shield used up
         if (e->b >= 0 && e->b < MTG_MAX_OBJS) {
             Rect r = ObjRect(e->b);

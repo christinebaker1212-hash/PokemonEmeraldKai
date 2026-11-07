@@ -15,13 +15,14 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Regenerate", MTG_API_REGENERATE}, {"Token", MTG_API_TOKEN},
     {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL}, {"Animate", MTG_API_ANIMATE},
     {"DelayedTrigger", MTG_API_DELAYED_TRIGGER}, {"PreventDamage", MTG_API_PREVENT_DAMAGE},
-    {"GainControl", MTG_API_GAIN_CONTROL},
+    {"GainControl", MTG_API_GAIN_CONTROL}, {"PutCounterAll", MTG_API_PUT_COUNTER_ALL},
+    {"RemoveCounter", MTG_API_REMOVE_COUNTER},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
-    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl",
+    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -62,6 +63,14 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
         return d ? ctx->e->lkiPower : 0;
     if (strcmp(sv, "Targeted$CardToughness") == 0)
         return d ? ctx->e->lkiToughness : 0;
+    if (strncmp(sv, "Count$CardCounters.", 19) == 0) {   // the counters of a kind on the card itself
+        int kind = Mtg_CounterKind(sv + 19);
+        if (kind <= 0) {
+            *ok = 0;
+            return 0;
+        }
+        return d ? Mtg_Counters(d, ctx->source, kind) : 0;
+    }
     if (strcmp(sv, "Count$CardPower") == 0)
         return d ? Mtg_Power(d, ctx->source) : 0;
     if (strcmp(sv, "Count$CardToughness") == 0)
@@ -333,6 +342,48 @@ void Mtg_AddCounters(MtgDuel *d, int obj, int n)
         return;
     o->counters11 = (int16_t)(o->counters11 + n);
     Mtg_Event(d, MTG_EV_COUNTERS, obj, n, o->counters11);
+}
+
+int Mtg_Counters(const MtgDuel *d, int obj, int kind)
+{
+    const MtgObj *o = &d->objs[obj];
+    int k;
+    if (kind == MTG_CTR_P1P1)
+        return o->counters11 > 0 ? o->counters11 : 0;
+    if (kind == MTG_CTR_M1M1)
+        return o->counters11 < 0 ? -o->counters11 : 0;
+    for (k = 0; k < 4; k++)
+        if (o->ctrKind[k] == kind)
+            return o->ctrNum[k];
+    return 0;
+}
+
+void Mtg_AddCountersKind(MtgDuel *d, int obj, int kind, int n)
+{
+    MtgObj *o = &d->objs[obj];
+    int k, slot = -1, now;
+    if (!n || kind <= 0)
+        return;
+    if (kind == MTG_CTR_P1P1 || kind == MTG_CTR_M1M1) {   // (+1/+1 and -1/-1 as one count, as before)
+        int have = Mtg_Counters(d, obj, kind);
+        if (n < 0 && -n > have)
+            n = -have;
+        Mtg_AddCounters(d, obj, kind == MTG_CTR_P1P1 ? n : -n);
+        return;
+    }
+    for (k = 0; k < 4; k++)
+        if (o->ctrKind[k] == kind)
+            slot = k;
+    for (k = 0; k < 4 && slot < 0; k++)
+        if (!o->ctrKind[k] || !o->ctrNum[k])
+            slot = k;
+    if (slot < 0)
+        return;
+    now = (o->ctrKind[slot] == kind ? o->ctrNum[slot] : 0) + n;
+    now = now < 0 ? 0 : now > 255 ? 255 : now;
+    o->ctrKind[slot] = (uint8_t)kind;
+    o->ctrNum[slot] = (uint8_t)now;
+    Mtg_Event(d, MTG_EV_KCOUNTERS, obj, kind, now);
 }
 
 void Mtg_Sacrifice(MtgDuel *d, int obj)
@@ -922,14 +973,32 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         return EachChooses(d, ctx, &who, amt ? Mtg_Amount(d, ctx, card, amt, &ok) : 1, MTG_ZONE_BATTLEFIELD, valid,
                            Mtg_Sacrifice);
     }
-    case MTG_API_PUT_COUNTER: {   // CountersPutEffect: +1/+1 and -1/-1 counters
+    case MTG_API_PUT_COUNTER: {   // CountersPutEffect: counters of a kind on each
         int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "CounterNum"), &ok);
-        if (strcmp(Mtg_Param(ab, "CounterType"), "M1M1") == 0)
-            n = -n;
+        int kind = Mtg_CounterKind(Mtg_Param(ab, "CounterType"));
         Targets(d, ctx, ab, DEF_CARD, &who);
         for (i = 0; i < who.n; i++)
             if (OnBattlefield(d, &who.t[i]))
-                Mtg_AddCounters(d, who.t[i].id, n);
+                Mtg_AddCountersKind(d, who.t[i].id, kind, n);
+        break;
+    }
+    case MTG_API_PUT_COUNTER_ALL: {   // CountersPutAllEffect: on every ValidCards$ permanent
+        int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "CounterNum"), &ok);
+        int kind = Mtg_CounterKind(Mtg_Param(ab, "CounterType"));
+        const char *spec = Mtg_Param(ab, "ValidCards");
+        for (i = 0; i < d->objCount; i++)
+            if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_ValidObj(d, i, spec, ctx->source, ctx->controller))
+                Mtg_AddCountersKind(d, i, kind, n);
+        break;
+    }
+    case MTG_API_REMOVE_COUNTER: {   // CountersRemoveEffect: CounterNum$ of a kind (All: every one) off each
+        const char *num = Mtg_Param(ab, "CounterNum");
+        int kind = Mtg_CounterKind(Mtg_Param(ab, "CounterType"));
+        int all = num && strcmp(num, "All") == 0, n = all ? 0 : Mtg_Amount(d, ctx, card, num, &ok);
+        Targets(d, ctx, ab, DEF_CARD, &who);
+        for (i = 0; i < who.n; i++)
+            if (OnBattlefield(d, &who.t[i]))
+                Mtg_AddCountersKind(d, who.t[i].id, kind, -(all ? 255 : n));
         break;
     }
     }
@@ -1018,6 +1087,8 @@ static const char *const sApiParams[MTG_API_COUNT][10] = {
                          "Duration"},
     [MTG_API_PREVENT_DAMAGE] = {"Amount"},
     [MTG_API_GAIN_CONTROL] = {"NewController", "LoseControl", "Untap", "AddKWs"},
+    [MTG_API_PUT_COUNTER_ALL] = {"CounterType", "CounterNum", "ValidCards"},
+    [MTG_API_REMOVE_COUNTER] = {"CounterType", "CounterNum"},
     [MTG_API_DELAYED_TRIGGER] = {"Mode", "Phase", "ValidPlayer", "Execute", "RememberObjects", "NextTurn",
                                  "TriggerDescription", "Secondary"},
     [MTG_API_GAIN_LIFE] = {"LifeAmount"},
@@ -1222,7 +1293,14 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return AmountKnown(ab, "Amount", 0) && !ab->tgt;
     case MTG_API_PUT_COUNTER:
         v = Mtg_Param(ab, "CounterType");
-        return v && (strcmp(v, "P1P1") == 0 || strcmp(v, "M1M1") == 0) && AmountKnown(ab, "CounterNum", 1);
+        return Mtg_CounterKind(v) > 0 && AmountKnown(ab, "CounterNum", 1);   // (no target: on itself)
+    case MTG_API_PUT_COUNTER_ALL:
+        return Mtg_CounterKind(Mtg_Param(ab, "CounterType")) > 0 && AmountKnown(ab, "CounterNum", 1)
+            && (v = Mtg_Param(ab, "ValidCards")) && Mtg_ValidSpecKnown(v);
+    case MTG_API_REMOVE_COUNTER:
+        v = Mtg_Param(ab, "CounterNum");
+        return Mtg_CounterKind(Mtg_Param(ab, "CounterType")) > 0
+            && v && (strcmp(v, "All") == 0 || AmountKnown(ab, "CounterNum", 1));
     case MTG_API_MANA:
         if ((Mtg_Param(ab, "SubAbility") && ab->kind != MTG_AB_ACTIVATED) || !AmountKnown(ab, "Amount", 0))
             return 0;

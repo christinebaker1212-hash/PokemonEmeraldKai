@@ -41,13 +41,27 @@ const MtgEvent *Mtg_EventAt(const MtgDuel *d, uint32_t n)
 }
 
 // (the layers: the printed value or a static's SetPower, then the statics' and pumps' changes, then the counters)
+// what its other counters add to power (which 0) or toughness (1): P2P2, P1P0, M0M1...
+static int CounterPT(const MtgObj *o, int which)
+{
+    int k, sum = 0;
+    for (k = 0; k < 4; k++)
+        if (o->ctrKind[k] && o->ctrNum[k]) {
+            int p, t;
+            Mtg_CounterPT(o->ctrKind[k], &p, &t);
+            sum += (which ? t : p) * o->ctrNum[k];
+        }
+    return sum;
+}
+
 int Mtg_Power(const MtgDuel *d, int obj)
 {
     const MtgObj *o = &d->objs[obj];
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
     int base = o->animUntil && o->animPower != MTG_ANIM_NO_PT ? o->animPower : Mtg_Card(o->def)->power;
-    return (m.setPower != MTG_STATIC_NO_SET ? m.setPower : base) + m.addPower + o->counters11 + o->tempPower;
+    return (m.setPower != MTG_STATIC_NO_SET ? m.setPower : base) + m.addPower + o->counters11 + o->tempPower
+         + CounterPT(o, 0);
 }
 
 int Mtg_Toughness(const MtgDuel *d, int obj)
@@ -57,7 +71,7 @@ int Mtg_Toughness(const MtgDuel *d, int obj)
     Mtg_StaticMods(d, obj, &m);
     int base = o->animUntil && o->animToughness != MTG_ANIM_NO_PT ? o->animToughness : Mtg_Card(o->def)->toughness;
     return (m.setToughness != MTG_STATIC_NO_SET ? m.setToughness : base) + m.addToughness + o->counters11
-         + o->tempToughness;
+         + o->tempToughness + CounterPT(o, 1);
 }
 
 uint32_t Mtg_Keywords(const MtgDuel *d, int obj)
@@ -107,6 +121,8 @@ static void ResetPermanentState(MtgObj *o)
     o->tempPower = o->tempToughness = 0;
     o->tempKeywords = 0;
     o->counters11 = 0;
+    memset(o->ctrKind, 0, sizeof(o->ctrKind));
+    memset(o->ctrNum, 0, sizeof(o->ctrNum));
     o->attachedTo = MTG_NO_OBJ;
     o->regen = 0;
     o->animUntil = 0;
@@ -158,6 +174,8 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
     Mtg_Event(d, MTG_EV_ZONE, obj, from, zone);
     if (zone == MTG_ZONE_BATTLEFIELD && Mtg_StaticForbids(d, MTG_STATIC_ETB_TAPPED, obj, MTG_NO_OBJ))
         Mtg_Tap(d, obj, 1);   // (it enters tapped: ETBTapped)
+    if (zone == MTG_ZONE_BATTLEFIELD && Mtg_Card(o->def)->etbKind && Mtg_Card(o->def)->etbNum)
+        Mtg_AddCountersKind(d, obj, Mtg_Card(o->def)->etbKind, Mtg_Card(o->def)->etbNum);   // (etbCounter:TYPE:N)
     if (from != MTG_ZONE_BATTLEFIELD)
         Mtg_CheckTriggers(d, &ev);
 }
@@ -477,6 +495,8 @@ static void FinishResolve(MtgDuel *d)
         else {
             d->objs[e->source].controller = e->controller;
             Mtg_MoveTo(d, e->source, MTG_ZONE_BATTLEFIELD);
+            if (c->etbKind && c->etbX && e->x > 0)   // (etbCounter:TYPE:X: as many as X was)
+                Mtg_AddCountersKind(d, e->source, c->etbKind, e->x);
             if (c->enchant && e->target.kind == MTG_TGT_OBJ)   // an Aura: attached to what it targeted
                 d->objs[e->source].attachedTo = e->target.id;
         }
@@ -806,6 +826,8 @@ int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, 
     unsigned k;
     if (c->payLife && d->players[player].life < c->payLife)
         return 0;
+    if (c->subCtrN && (source == MTG_NO_OBJ || Mtg_Counters(d, source, c->subCtrKind) < c->subCtrN))
+        return 0;
     for (k = 0; k < sizeof(sKinds); k++) {
         int kind = sKinds[k], need = kind == MTG_COSTK_SAC ? c->sacN : kind == MTG_COSTK_DISCARD ? (c->discardN)
                  : kind == MTG_COSTK_EXILE_HAND ? c->exileHandN : kind == MTG_COSTK_RETURN ? c->returnN
@@ -928,6 +950,8 @@ static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source
         d->players[p].life -= c->payLife;
         Mtg_Event(d, MTG_EV_LIFE, p, -c->payLife, d->players[p].life);
     }
+    if (c->subCtrN)   // (SubCounter<n/TYPE>: off its source)
+        Mtg_AddCountersKind(d, source, c->subCtrKind, -(int)c->subCtrN);
     if (c->damageYou) {
         MtgTarget you;
         you.kind = MTG_TGT_PLAYER;
