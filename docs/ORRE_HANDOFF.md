@@ -96,8 +96,11 @@ rules, and what each tool does. This file is where things stand, what a new sess
    M4_cylinder_colo, M4_bottom_colo, T1_ancient_colo) aren't maps: Kai's battles. The `_ev` and `_bf` copies aren't
    either (a scene's or a battle's).
 4. **Sprites.** Render the character models (orre_data.pak, `.dat`) into GBA-style sprite sheets (the user's
-   decision): their animations (each model set's joint animations, after the root joint) aren't read yet; hsd.py
-   draws the bind pose. tools/sinnoh/build_starter.py pre-draws Platinum's models, as a reference.
+   decision). Dry run shown to the user 2026-11-07 (WES 16x32, RUI 32x32 for her pigtails; awaiting their verdict):
+   tools/orre/hsd_anim.py reads the joint animations (the model set's + 4 list; keyframe values little-endian) and
+   solves the legs' two-bone IK (JOINT1 / JOINT2 / EFFECTOR joints, IK hints = bone lengths, the effector's RObj names
+   the target joint); every field model's table starts idle 1, walk 2, run 3. tools/orre/people_sprites.py renders
+   them (head joint scaled for GBA proportions, 15 colours, outlines); people_sprites_demo.py draws the sheet.
 5. **Words and scripts.** The map scripts (.scd, the GS VM) converted to Kai's (as tools/sinnoh/gen_scripts.py does
    SINNOH's); the text (msg.py) into Kai's charset, controls mapped (`{hero}`, `{rui}`, `{npc}`, `{item}`...). Never
    write ORRE's words or scripts by hand.
