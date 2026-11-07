@@ -5,6 +5,7 @@
 #include <string.h>
 #include "platform/gamepad.h"
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "region_map.h"   // (mapname: GetMapName)
 #include "metatile_behavior.h"
 #include "roamer.h"
@@ -4081,6 +4082,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
         st = Updater_OrreState(&done, &total, &err);
         printf("[test] orre state %d %ld/%ld %s\n", st, done, total, err ? err : "");
     }
+    else if (strcmp(cmd, "shadow") == 0)
+        Orre_Shadow_Debug(arg);   // shadow make|drop|steps|purify|table ... (src/orre/orre_shadow.c)
     else if (strcmp(cmd, "orreworldmap") == 0)
     {
         // orreworldmap: Colosseum's world map, as a place's exit opens it (src/orre/worldmap.c)

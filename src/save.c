@@ -1,5 +1,6 @@
 #include "mp_version.h"
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "mp_region.h"
 #include "mp.h"
 #include "mp_savefix.h"
@@ -962,6 +963,7 @@ u8 LoadGameSave(u8 saveType)
         if (status == SAVE_STATUS_OK)
             MP_Bag_LoadFromSave();   // Moemon Co-op: the bigger pockets (mp_bag.c)
         MP_Life_LoadFromSave();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
+        Orre_Shadow_LoadFromSave();   // Moemon Kai: ORRE's story flags and Shadow Pokémon, "<save>.orre" (src/orre/orre_shadow.c)
         gSaveFileStatus = status;
         gGameContinueCallback = NULL;
         break;

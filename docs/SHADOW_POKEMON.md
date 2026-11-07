@@ -25,6 +25,21 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
    be clingy, selfish, hateful, annoyed, mean and so on, and it lessens as purification nears its end (below,
    "In the A-Life").
 
+## Built so far (in the order docs/ORRE_HANDOFF.md gives)
+- **S1, the data** (2026-11-07): tools/orre/shadow_data.py reads Colosseum's Shadow table, its trainers' Pokémon, the
+  DP sources, the natures' rates and the rate ratios from common_rel into src/data/orre_shadow.h (48 Shadow Pokémon,
+  MAKUHITA to TYRANITAR; species, moves and items are Kai's numbers already: Colosseum keeps Gen 3's). Nature, gender
+  and IVs of 255 are chosen when met. Only the three Johto starters have a second trainer (Colosseum's own second
+  chance). Rerun after a new rip.
+- **S2, the heart gauge** (2026-11-07): src/orre/orre_shadow.c (include/orre_shadow.h): each Shadow Pokémon's record
+  (personality + OT ID: Colosseum id, DP in hundredths as the game keeps it, its step count, stored EXP, room for the
+  A-Life's traits) in "<save>.orre" with Colosseum's story flags (src/orre/orre_story.c: saved at last), written when
+  the game saves and kept with its backups; Orre_Shadow_Drop (the six sources), the gauge's level 0-7,
+  Hyper Mode's and CALL's chances by nature and level, the walking / day care step counts (field_control_avatar.c).
+  `mp shadow make|drop|steps|stepcount|purify|reload|table`; test shadow_gauge (tools/orre/check_shadow.py recomputes
+  every value from the table).
+- Next: S3, battles (Shadow Rush, Hyper Mode, CALL, the aura, EXP stored, the battling drop on sending out).
+
 ## How Colosseum does it (the decomp: christinebaker1212-hash/pkmn-colosseum; Colosseum calls them "dark Pokémon")
 - **The Shadow Pokémon table**: common_rel's .data + 0x1439D8, 97 records of 0x38 bytes (count at + 0x14A6F8; the
   decomp's BattleRangeDef in src/game/battle/battle_range_801ED640.c, ids 1-0x60). Per record: the species (Gen 3
@@ -99,9 +114,10 @@ Pokémon**. While a Pokémon is Shadow:
 - **What still holds**: player inactivity never makes it worse (the Garden's first principle stays); Friendship is
   never lowered by the Garden; its darkness is not the player's fault and the journal never says so. The journal
   writes its behavior plainly, in character, as the Shadow's doing.
-- **The others**: other Pokémon react to it (avoid it, stand up to it, the gentle ones try to calm it); what it did to
-  them is remembered as ordinary moments, and after purification heals through new experiences as the Garden's
-  memories do.
+- **The others**: other Pokémon react to it (avoid it, stand up to it, the gentle ones try to calm it). They understand
+  that a Shadow Pokémon's heart was closed off, and **forgive it at different rates** (the user, 2026-11-07): each by
+  its own temperament and bond (a gentle or close one soon, a proud or often-wronged one slowly), the hurt fading as
+  the gauge opens and after purification, never held against it for good.
 - **On screen**: its emote bubbles in a Shadow look of their own (dark, purple-edged: still round, never like a
   Trainer's), and the Shadow aura over its sprite in the Garden and as a follower in ORRE.
 - Where it applies: the Garden in ORRE and the follower in ORRE (a Shadow Pokémon never leaves ORRE: decision 2).

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "constants/metatile_behaviors.h"
 #include "s3d_underground.h"
 #include "s3d.h"   // Moemon Kai
@@ -702,6 +703,7 @@ static bool8 TryStartStepCountScript(u16 metatileBehavior)
     {
         void Sinnoh_MiscStep(void);
         Sinnoh_MiscStep();   // Moemon Kai: AMITY SQUARE's walker counts its steps (src/sinnoh/s3d_misc.c)
+        Orre_Shadow_Step();   // Moemon Kai: Shadow Pokémon's hearts open as they walk (src/orre/orre_shadow.c)
     }
     if (SafariZoneTakeStep() == TRUE)
         return TRUE;

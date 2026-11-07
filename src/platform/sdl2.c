@@ -19,6 +19,7 @@
 #include "aw_file.h"
 
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "mp_region.h"
 #include "mp.h"
 bool8 MP_BadgeCase_IsActive(void);   // Moemon Co-op: the BADGE CASE (src/mp/mp_badgecase.c)
@@ -475,7 +476,7 @@ static void BackUpSaveFile(void)
 {
     static Uint32 sLastBackup;
     static int sDone;
-    static const char *const sSidecars[] = {"bag", "life", "cards", "ygo", "tt", "region", "boxes"};   // Moemon Co-op: files that belong with the save
+    static const char *const sSidecars[] = {"bag", "life", "cards", "ygo", "tt", "region", "boxes", "orre"};   // Moemon Co-op: files that belong with the save
     char from[600], to[600];
     unsigned char buf[4096];
     size_t n;
@@ -554,6 +555,7 @@ static void StoreSaveFile()
     MP_Life_WriteSidecar();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
     Tcg_WriteSidecar();      // Moemon Kai: the card game's collection (src/tcg/tcg_integration.c)
     MP_Region_WriteSidecar();   // Moemon Kai: Johto / Kanto progress (src/mp/mp_region.c)
+    Orre_Shadow_WriteSidecar();   // Moemon Kai: ORRE's story flags and Shadow Pokémon (src/orre/orre_shadow.c)
     {
         void Maker_Flags_WriteSidecar(void);
         Maker_Flags_WriteSidecar();   // Moemon Maker: flags of what the edits add (src/maker/maker_flags.c)
@@ -1395,6 +1397,7 @@ static void TestHarnessStep(void)
             MP_Life_WriteSidecar();
             Tcg_WriteSidecar();
             MP_Region_WriteSidecar();
+            Orre_Shadow_WriteSidecar();
             MP_SaveData_Set("dev_save_probe", 123);
             printf("[test] saveprobe status %d autosave %d dev %d\n",
                    status, gMpConfig.autosaveMinutes, MOEMON_DEV_BUILD);

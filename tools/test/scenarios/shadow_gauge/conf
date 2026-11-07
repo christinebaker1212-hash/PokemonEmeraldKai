@@ -1,0 +1,11 @@
+# Shadow Pokémon's heart gauge (src/orre/orre_shadow.c, docs/SHADOW_POKEMON.md) at Colosseum's own rates
+# (src/data/orre_shadow.h from tools/orre/shadow_data.py): a Pokémon made Colosseum's Shadow 1 (MAKUHITA's record,
+# a gauge of 30), each source taken once (battle, CALL, a scent of strength 5, the day care), 256 steps counted and the
+# 257th, a real one, taking the walking drop; "<save>.orre" written by a save and read back; another made Shadow 44
+# (gauge 200) and emptied; the first purified. tools/orre/check_shadow.py recomputes every value from the table.
+MODE=1
+TMO=120
+CHECK="python3 -I tools/orre/check_shadow.py"
+EXPECT_A=("[test] shadow table 1 species 335 level 30 gauge 30" "[test] shadow make 0 1: 1" "[test] shadow steps 0: 256"
+          "[test] shadow steps 0: 0" "[test] shadow make 1 44: 1" "[test] shadow 0: id 0 dp -1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

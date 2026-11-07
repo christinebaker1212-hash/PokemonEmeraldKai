@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 30
+mp shadow table
+mp shadow make 0 1
+mp shadow drop 0 0
+mp shadow drop 0 2
+mp shadow drop 0 4 5
+mp shadow drop 0 3
+mp shadow steps 256
+mp shadow stepcount 0
+mp shadow drop 0 9
+press RIGHT 18
+wait 20
+mp shadow stepcount 0
+mp shadow drop 0 9
+saveprobe
+mp shadow reload
+mp shadow drop 0 9
+mp shadow make 1 44
+mp shadow drop 1 5
+mp shadow purify 0
+mp shadow drop 1 9

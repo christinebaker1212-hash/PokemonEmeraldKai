@@ -1,4 +1,5 @@
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "mp_region.h"
 #include "mp.h"
 #include "platform/gamepad.h"
@@ -211,6 +212,7 @@ void NewGameInitData(void)
     gSaveBlock1Ptr->registeredItem = ITEM_NONE;
     ClearBag();
     MP_Life_Reset();   // Moemon Co-op: MOéMON GARDEN, a new game's Pokémon start new lives (mp_life.c)
+    Orre_Shadow_Reset();   // Moemon Kai: ORRE's story flags and Shadow Pokémon (src/orre/orre_shadow.c)
     NewGameInitPCItems();
     ClearPokeblocks();
     ClearDecorationInventories();
