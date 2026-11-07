@@ -87,6 +87,10 @@ AllowSmallTweaks only unlocks the small tweaks, and no dev updates are pushed.
 docs/stadium/RULES.md): data from the user's ROM (tools/stadium/, never commit the ROM), src/mp/mp_stadium*.c (cups and
 battles mp_stadium_cup.c, screens mp_stadium_ui.c, saved teams per server mp_stadium_teams.c, rewards / ribbons /
 achievements mp_stadium_rewards.c), its music as music/stadium_*.kaisong (new tracks by name); tests stadium_*.
+Its announcer (1.165.0): Stadium's own 823 voice clips from the user's ROM (stadium/announcer.s1, never committed:
+tools/stadium/mort/make_voice_pack.py; the release's STADIUM_ROM_URL secret), decoded by SubDrag's MORT decoder (mort/,
+public domain), lines chosen by the battle's messages and only when they fit the time the battle gives them, never cut
+off: src/mp/mp_stadium_announcer.c, docs/STADIUM.md "The announcer"; OPTIONS > BATTLE > ANNOUNCER; test stadium_announcer.
 
 **ORRE** (Pokémon Colosseum's region, started 2026-11-04): **start at `docs/ORRE_HANDOFF.md`** (status, the disc's
 link and the decomp's, setting up a session, next steps, open questions); the user's decisions in

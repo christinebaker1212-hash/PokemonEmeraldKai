@@ -111,6 +111,7 @@ enum
     OPT_FB_BACK,
     OPT_SHADOWS,      // Moemon Kai: DISPLAY > SHADOWS ON / OFF (mp_shadow.c)
     OPT_BGMUTE,       // Moemon Co-op: GAME > MUTE IN BACKGROUND (sdl2.c Platform_QueueAudio)
+    OPT_ANNOUNCER,    // Moemon Kai: BATTLE > ANNOUNCER, POKeMON STADIUM's (mp_stadium_announcer.c)
     OPT_BADGEFADE,    // Moemon Co-op: GAME > BADGE FADING (the BADGE CASE: mp_tcard.c, per save)
     OPT_CARDTITLE,    // Moemon Co-op: GAME > CARD TITLE ON / OFF (the TRAINER CARD's title)
     OPT_SPRITESCALE,  // Moemon Co-op: DISPLAY > SPRITE SCALING (A: its page)
@@ -278,6 +279,7 @@ static const u8 sText_Back[] = _("BACK");
 static const u8 sText_SpriteScale[] = _("SPRITE SCALING");
 static const u8 sText_Shadows[] = _("SHADOWS");
 static const u8 sText_BgMute[] = _("MUTE IN BACKGROUND");
+static const u8 sText_Announcer[] = _("ANNOUNCER");
 static const u8 sText_SsFollowers[] = _("FOLLOWERS");
 static const u8 sText_SsGarden[] = _("GARDEN MOéMON");
 static const u8 sText_Close[] = _("CLOSE");
@@ -447,6 +449,7 @@ static void BuildRows(void)
         AddRow(OPT_BATTLESCENE, 0);
         AddRow(OPT_BATTLESTYLE, 0);
         AddRow(OPT_BATTLEANIMS, 0);
+        AddRow(OPT_ANNOUNCER, 0);
         AddRow(OPT_TYPEICONS, 0);
         AddRow(OPT_LEVELSCALE, 0);
         AddRow(OPT_GENERATION, 0);  // Moemon Kai: which generations' Pokémon, moves and types (mp_region.c)
@@ -543,6 +546,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
     case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SHADOWS: case OPT_CARDTITLE: case OPT_BGMUTE:
+    case OPT_ANNOUNCER:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_BADGEFADE:
@@ -811,6 +815,7 @@ static u8 Current(u8 row)
     case OPT_SINNOHSPRITES: return 2 - gMpConfig.sinnohSprites % 3;
     case OPT_SHADOWS:     return !gMpConfig.noShadows;
     case OPT_BGMUTE:      return gMpConfig.muteInBackground != 0;
+    case OPT_ANNOUNCER:   return !gMpConfig.noAnnouncer;
     case OPT_BADGEFADE:   return MP_TCard_Fade();
     case OPT_CARDTITLE:   return MP_TCard_ShowTitle() != 0;
     }
@@ -892,6 +897,10 @@ static void Change(u8 row, int dir)
     case OPT_FOLLOWSPRITES:
         gMpConfig.followerSprites = Wrap(gMpConfig.followerSprites + dir, MP_FOLLOW_SPRITES_COUNT);
         MPNet_Log("follower sprites: %d", gMpConfig.followerSprites);
+        break;
+    case OPT_ANNOUNCER:
+        gMpConfig.noAnnouncer = !gMpConfig.noAnnouncer;
+        MPNet_Log("announcer: %d", !gMpConfig.noAnnouncer);
         break;
     case OPT_BGMUTE:
         gMpConfig.muteInBackground = !gMpConfig.muteInBackground;
@@ -1024,6 +1033,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_SINNOHSPRITES: return sText_SinnohPeople;
     case OPT_SHADOWS: return sText_Shadows;
     case OPT_BGMUTE:  return sText_BgMute;
+    case OPT_ANNOUNCER: return sText_Announcer;
     case OPT_BADGEFADE:   return sText_BadgeFade;
     case OPT_CARDTITLE:   return sText_CardTitle;
     case OPT_SC_ON:       return sText_LevelScale;
@@ -1209,6 +1219,9 @@ static void DrawHint(void)
         else
             snprintf(ascii, sizeof(ascii), "A: ON/OFF  LEFT/RIGHT: %d%% TO TRUE SIZE", pct);
     }
+    else if (opt == OPT_ANNOUNCER)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.noAnnouncer ? "STADIUM BATTLES WITHOUT THE ANNOUNCER"
+                                                                  : "THE STADIUM'S ANNOUNCER CALLS ITS BATTLES");
     else if (opt == OPT_BGMUTE)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.muteInBackground ? "SILENT WHILE ANOTHER WINDOW IS IN FRONT"
                                                                         : "SOUND PLAYS EVEN WHEN NOT IN FOCUS");

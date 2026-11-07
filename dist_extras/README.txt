@@ -1086,7 +1086,7 @@ GAME      reading, sound and the card games: TEXT SPEED, FRAME, NAME CASE,
                 map's song, and diving keeps the song of the sea above.
   CARD SCALING, CARD ART, CARD BACKS: see the card games below.
 BATTLE    how battles look, then their rules: BATTLE SCENE, BATTLE STYLE,
-          BATTLE ANIMS (below), TYPE ICONS, LEVEL SCALING, GENERATION, MOVE
+          BATTLE ANIMS (below), ANNOUNCER (below), TYPE ICONS, LEVEL SCALING, GENERATION, MOVE
           KIND, MEGA EVOLUTION, Z-MOVES, DYNAMAX, TERASTALLIZE
 DISPLAY   the window, then how the field looks (FOLLOWERS, SPRITE SCALING,
           SHADOWS)
@@ -1120,6 +1120,17 @@ BATTLE ANIMS (on BATTLE): CLASSIC (the original animations) or MODERN (the same
                 screen changes: friends on either setting stay in step, and
                 every animation lasts exactly as long either way. Contests
                 use it too.
+ANNOUNCER (on BATTLE, ON unless turned off): POKeMON STADIUM's own announcer
+                calls the STADIUM's battles on BATTLE ISLAND: the POKeMON
+                sent out, the moves, super effective hits, misses, critical
+                hits, statuses, faints and the win, and introduces the GYM
+                LEADER CASTLE's trainers. Battles here move much faster than
+                in POKeMON STADIUM, so a line is only said when it can finish
+                before the battle moves on (it learns how fast you read and
+                press A), and a line is never cut off by another. The voices
+                come with the game in its stadium folder; if they're missing,
+                putting your own POKeMON STADIUM (USA) ROM there as
+                "Pokemon Stadium (USA).z64" works too.
 CONTROLS
   CONTROLLER    which controller plays. Press A on this row, then press
                 any button on the controller you want; that one is used

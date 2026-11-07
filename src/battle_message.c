@@ -2234,6 +2234,12 @@ void BufferStringBattle(u16 stringID)
         gBattleTextBuff2[i] = gBattleMsgDataPtr->textBuffs[1][i];
         gBattleTextBuff3[i] = gBattleMsgDataPtr->textBuffs[2][i];
     }
+    if (gMpStadiumBattle)
+    {
+        // Moemon Kai: POKéMON STADIUM's announcer takes its cues from the battle's messages, their text buffers set (mp_stadium_announcer.c)
+        void MP_Announcer_OnBattleString(u16 id);
+        MP_Announcer_OnBattleString(stringID);
+    }
 
     switch (stringID)
     {

@@ -3847,3 +3847,13 @@ static u8 MpGimmickTake(void)
     sMpGimmick = GIMMICK_NONE;
     return g;
 }
+
+// Moemon Kai: the player choosing what to do (POKéMON STADIUM's announcer: mp_stadium_announcer.c)
+bool8 MP_BattlePlayer_Choosing(void)
+{
+    u8 b;
+    for (b = 0; b < gBattlersCount; b++)
+        if (gBattlerControllerFuncs[b] == HandleInputChooseAction || gBattlerControllerFuncs[b] == HandleInputChooseMove)
+            return TRUE;
+    return FALSE;
+}

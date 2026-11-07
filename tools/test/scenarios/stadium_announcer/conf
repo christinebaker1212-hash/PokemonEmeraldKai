@@ -1,0 +1,8 @@
+# POKéMON STADIUM's announcer (mp_stadium_announcer.c; needs the voices: stadium/announcer.s1 from
+# tools/stadium/mort/make_voice_pack.py and the user's ROM): the PIKA CUP battle of stadium_win (A mashed through it)
+# with GROWL first (a stat down: "Attack power down!" if it fits), then lines for the send-outs, the moves, the faints and the win where they fit, lines skipped where they don't
+# fit the time the battle gives them (mashing shortens it), never one over another; the windows it learned.
+MODE=1
+TMO=600
+EXPECT_A=("announcer: 823 clips ready to decode" "announcer: battle on" "(send-out," "(the move," "announcer: a stat down" "skipped (nothing fits" "(the win," "announcer: cue 1 window")
+UNEXPECT_A=("crash" "out of memory" "no voices")

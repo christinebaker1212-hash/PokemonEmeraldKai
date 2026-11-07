@@ -441,6 +441,15 @@ ifeq ($(PORTABLE),1)
   OBJS += $(ARCADE_OBJS)
 endif
 
+# Moemon Kai: POKéMON STADIUM's announcer: SubDrag's MORT decoder (mort/, public domain) for its voice clips, which
+# come from the player's own ROM at run time (src/mp/mp_stadium_announcer.c)
+ifeq ($(PORTABLE),1)
+  MORT_SRCS := mort/MORTDecoder.cpp mort/mort_api.cpp
+  MORT_OBJS := $(patsubst %,$(OBJ_DIR)/%.o,$(MORT_SRCS))
+  MORT_CXXFLAGS := -std=c++17 -O2 -m$(BIT_WIDTH) -w -iquote mort
+  OBJS += $(MORT_OBJS)
+endif
+
 # Moemon Maker: the editor (maker/: C++ on Dear ImGui, docs/MOEMON_MAKER.md). It reaches the game only through
 # include/maker_api.h, so it never includes the game's headers.
 ifeq ($(PORTABLE),1)
@@ -614,6 +623,13 @@ $(OBJ_DIR)/maker/%.cpp.o: maker/%.cpp
 
 -include $(MAKER_OBJS:.o=.d)
 $(C_BUILDDIR)/maker/maker_font.o: maker/fonts/LiberationSans-Regular.ttf maker/fonts/LiberationSans-Bold.ttf
+
+# Moemon Kai: the MORT decoder's objects (MORT_OBJS)
+$(OBJ_DIR)/mort/%.cpp.o: mort/%.cpp
+	@echo "$(EDO_CXX) <mort flags> -o $@ $<"
+	@$(EDO_CXX) $(MORT_CXXFLAGS) -MMD -MP -c $< -o $@
+
+-include $(MORT_OBJS:.o=.d)
 
 # Moemon Kai: the arcade boards' objects (ARCADE_OBJS)
 $(OBJ_DIR)/arcade/%.cpp.o: arcade/%.cpp

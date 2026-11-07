@@ -199,6 +199,22 @@ jobs:
           cp android/app/build/outputs/apk/release/app-release.apk dist/MoemonCompanion.apk
           ls -la dist/MoemonCompanion.apk
 
+      # POKeMON STADIUM's announcer (docs/STADIUM.md "The announcer"): the voices from Pokemon Stadium (USA) 1.0, whose
+      # link is the STADIUM_ROM_URL secret (never in this repository: a .z64 or a zip holding one). They go in the
+      # packages as stadium/announcer.s1. Without the secret the release goes out without them (a player can drop their
+      # own ROM in the game's stadium/ folder instead).
+      - name: STADIUM's announcer
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
+        env:
+          STADIUM_ROM_URL: ${{ secrets.STADIUM_ROM_URL }}
+        run: |
+          if [ -n "$STADIUM_ROM_URL" ]; then
+            STADIUM_WORK="$RUNNER_TEMP/stadium_voice" tools/stadium/mort/make_pack.sh || echo "::warning::the STADIUM announcer's voices didn't build"
+            rm -rf "$RUNNER_TEMP/stadium_voice"
+          else
+            echo "::warning::no STADIUM_ROM_URL secret: the release has no STADIUM announcer voices"
+          fi
+
       - name: Packages and update.txt
         if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         run: |

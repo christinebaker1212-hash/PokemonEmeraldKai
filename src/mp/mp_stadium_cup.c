@@ -607,6 +607,10 @@ static void CB2_EndStadiumBattle(void)
     CalculatePlayerPartyCount();
     gSaveBlock2Ptr->optionsBattleStyle = sSavedStyle;
     gMpStadiumBattle = FALSE;
+    {
+        void MP_StadiumAnnouncer_BattleEnd(void);
+        MP_StadiumAnnouncer_BattleEnd();
+    }
     MP_MUSIC_SCENE_RELEASE();
     r->lostNone = won && fainted == 0;
     MPNet_Log("stadium: battle %d %s (%d fainted)", r->trainer + 1, won ? "won" : "lost", fainted);
@@ -696,6 +700,10 @@ void StadiumCup_StartBattle(void (*after)(bool8 won))
             Refresh(&gEnemyParty[i], 0);
         }
     gMpStadiumBattle = TRUE;
+    {
+        void MP_StadiumAnnouncer_BattleStart(void);
+        MP_StadiumAnnouncer_BattleStart();   // (the announcer: mp_stadium_announcer.c)
+    }
     sSavedStyle = gSaveBlock2Ptr->optionsBattleStyle;
     gSaveBlock2Ptr->optionsBattleStyle = OPTIONS_BATTLE_STYLE_SET;
     MPNet_Log("stadium: battle style SET (yours was %s)", sSavedStyle == OPTIONS_BATTLE_STYLE_SET ? "SET" : "SHIFT");

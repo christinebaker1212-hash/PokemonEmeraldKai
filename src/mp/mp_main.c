@@ -472,6 +472,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "battle_anims") == 0) gMpConfig.battleAnims = strcmp(val, "modern") == 0;
         else if (strcmp(key, "shadows") == 0) gMpConfig.noShadows = atoi(val) == 0;
         else if (strcmp(key, "mute_in_background") == 0) gMpConfig.muteInBackground = atoi(val) != 0;
+        else if (strcmp(key, "stadium_announcer") == 0) gMpConfig.noAnnouncer = atoi(val) == 0;
         else if (strcmp(key, "card_back") == 0)
             gMpConfig.cardBack = strcmp(val, "pixel") == 0 ? MP_CARD_BACK_PIXEL : MP_CARD_BACK_PRINTED;
         else if (strcmp(key, "moenav_calls") == 0) gMpConfig.moenavCalls = strcmp(val, "battles") == 0;
@@ -643,6 +644,8 @@ void MP_SaveConfig(void)
         "shadows = %d\n"
         "; OPTIONS > GAME > MUTE IN BACKGROUND: 1 = no sound while the game's window isn't in focus\n"
         "mute_in_background = %d\n"
+        "; OPTIONS > BATTLE > ANNOUNCER: 1 = POKEMON STADIUM's announcer calls its battles, 0 = quiet\n"
+        "stadium_announcer = %d\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
@@ -663,7 +666,7 @@ void MP_SaveConfig(void)
         gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
                                                                                                          : "printed_art",
         gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling,
-        gMpConfig.battleAnims ? "modern" : "classic", !gMpConfig.noShadows, gMpConfig.muteInBackground, gMpConfig.lobby);
+        gMpConfig.battleAnims ? "modern" : "classic", !gMpConfig.noShadows, gMpConfig.muteInBackground, !gMpConfig.noAnnouncer, gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)
@@ -2251,6 +2254,10 @@ void MP_FrameUpdate(void)
         MP_HmRescue_Update();   // HMs a friend's progress made impossible to get (mp_hmrescue.c)
         MP_BattleIsland_Update();   // the BATTLE TICKET's courier (mp_battleisland.c)
         MP_StadiumUi_Update();   // POKéMON STADIUM's screens back after a battle (mp_stadium_ui.c)
+        {
+            void MP_StadiumAnnouncer_Update(void);
+            MP_StadiumAnnouncer_Update();   // POKéMON STADIUM's announcer (mp_stadium_announcer.c)
+        }
     }
     if (sFollowRegion && MP_IsInOverworld() && MP_IsLocalFree())
     {

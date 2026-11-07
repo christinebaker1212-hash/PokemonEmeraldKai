@@ -2046,6 +2046,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
                        (unsigned)GetMonData(&gEnemyParty[i], MON_DATA_LEVEL));
         printf("\n");
     }
+    else if (strcmp(cmd, "announcer") == 0)
+    {
+        // announcer: POKeMON STADIUM's announcer, what it learned of the battle's pace (mp_stadium_announcer.c)
+        void MP_StadiumAnnouncer_Debug(void);
+        MP_StadiumAnnouncer_Debug();
+    }
     else if (strcmp(cmd, "pinhp") == 0)
     {
         // pinhp FOE MINE - every frame of a battle, the foes out at FOE HP at most and ours at MINE at least (their max

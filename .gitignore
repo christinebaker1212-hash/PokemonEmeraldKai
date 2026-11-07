@@ -76,3 +76,6 @@ sim_players.dat
 moemon_mail.dat
 /sinnoh/
 /orre/
+
+# POKeMON STADIUM's announcer voices, from the player's own ROM (tools/stadium/mort/make_voice_pack.py)
+/stadium/

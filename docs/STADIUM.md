@@ -118,6 +118,52 @@ fade in; one screen crossfades into the next (the last picture kept, mp_stadium_
 the SUMMARY) fades them to black first; a battle starts from black (no field transition) and hands back a black field
 (MP_Stadium_FieldStaysBlack) the screens fade in over. Test stadium_fades.
 
+## The announcer (1.165.0)
+
+The user (2026-11-07): "add support for Pokemon Stadium's announcer to fire off voice lines based on the situation ...
+an additional option in the options menu, on by default. Keep in mind the length of the voice lines, as well as the
+animations being different from the original game ... intelligently determine which line could or could not make it in
+time, or may get cut off by another line if the player is mashing the A button to speed up text, and if the text speed
+is on the highest setting."
+
+- The voices: Stadium's speech archive (an S1 container at ROM 0x197C1E0: 165, 1 and 657 MORT streams = clips 0-822,
+  16000 Hz) copied out of Pokemon Stadium (USA) 1.0 into stadium/announcer.s1 (tools/stadium/mort/make_voice_pack.py,
+  6.5 MB; make_pack.sh downloads the ROM from the STADIUM_ROM_URL secret in the release; never committed: stadium/ is
+  ignored). Without the pack the game slices the archive out of the player's own ROM dropped in stadium/
+  ("Pokemon Stadium (USA).z64", .v64 / .n64 too). MOEMON_STADIUM_VOICE=file for tests.
+- Decoding: SubDrag's MORT decoder (mort/, public domain, mort/README.txt), on a worker thread: the clips a battle may
+  want (both teams' send-outs and moves, the generic lines) are asked for when it starts; all 823 decode in about a
+  second. A clip not decoded yet when wanted is skipped. MOEMON_ANNOUNCER_DUMP=folder writes each decoded clip as a WAV
+  (+ MOEMON_ANNOUNCER_DUMPALL=1: every clip).
+- Mixing: src/mp/mp_stadium_announcer.c MP_StadiumAnnouncer_Mix after the game's own sound (music_player.c
+  m4aSoundVSync), resampled to 42048 Hz, each clip's peak brought to the same level, the game's sound lowered to 72%
+  under the voice.
+- The clips (the map and many words from StadiumBattleFX's research, MIT: research/ANNOUNCER.md and
+  announcer_catalog.json; every line used here checked by transcribing the decoded clip): 0-150 short names,
+  151-164 PIKACHU's voice, 166-199 battle state (166 / 167 last one, 181 / 182 first move, 183-188 turn prompts),
+  200-221 tournament introductions, 222 the castle, 223-230 BROCK..GIOVANNI, 231-234 LORELEI..LANCE, 235 the rival,
+  239-244 a gym's first / second / third trainer, 245-255 switches, 261-347 damage, effectiveness, misses, failures
+  and statuses, 348-368 faints and results (365 the win, 366 champion, 367 stage clear, 368 the castle cleared),
+  369-519 "Oh! It's ...!" (368 + dex), 584-748 the moves (583 + move id, Gen I's 165), 749-822 battle flow.
+- Cues: every battle message in a STADIUM battle (battle_message.c BufferStringBattle -> MP_Announcer_OnBattleString):
+  send-outs (dex 1-151), moves (1-165), super / not very effective, critical hits, misses, failures, the six statuses,
+  faints (both down within 150 frames, the last one, both down to the last, the win when the foe's last falls),
+  switches (the player's / the foe's). The player choosing for 150+ frames: the first move / a turn prompt / a
+  heated battle (both under half HP after turn 3); 900+: "What's the matter, trainer?" (battle_controller_player.c
+  MP_BattlePlayer_Choosing). The screens (mp_stadium_ui.c): the castle's introductions on the VS screen, stage clear /
+  the castle / champion on the result screen.
+- Timing (the user's point): each clip's length is in its MORT header (frames x 160 / rate), so nothing is decoded to
+  know it. Each kind of cue has a window: the frames that went by from it to the next battle message, learned as a
+  running average through the battle, kept apart for when A is being pressed (2+ presses in a second: mashing); until
+  learned, a guess from the text speed (SLOW 1.6x, MID 1.25x), the host's animation speed and mashing (0.6x). A line
+  plays only if it fits its window (15% over allowed; none when the hit already took the target's HP, so a faint
+  is next); none fits: a faint or the win may run 40% over, anything else is skipped. A playing line is never cut
+  off: a new cue is dropped, or (a faint, the win) held and said when the line ends if it still fits the time left.
+  Lines said lately aren't repeated while another fits. The log says each decision ("announcer: clip N (why, F
+  frames)", "skipped (nothing fits W frames)", "dropped (a line is playing)", "held"); `mp announcer` prints the
+  windows learned. Test stadium_announcer (needs stadium/announcer.s1).
+- OPTIONS > BATTLE > ANNOUNCER (gMpConfig.noAnnouncer, ini stadium_announcer = 1 / 0), on by default.
+
 Achievements: the STADIUM tab (mp_achieve.c AK_STADIUM, read from the save's wins, so old wins count): a first win,
 each cup, the castle, MEWTWO, the CHALLENGE CUP, ROUND 2, rentals only (1, 10), every restriction (1, all of ROUND 1),
 100 battles. Test stadium_rewards (`mp stadiumwin ROUND CUP CLASS HARDNESS [1 = show the result screen]`).

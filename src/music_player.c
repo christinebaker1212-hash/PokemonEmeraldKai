@@ -790,6 +790,10 @@ void m4aSoundVSync(void)
             void MP_LifeSfx_Mix(float *buffer, s32 count);
             MP_LegacySfx_Mix(audioBuffer, samplesPerFrame);
             MP_LifeSfx_Mix(audioBuffer, samplesPerFrame);   // MOéMON GARDEN's quiet sounds (mp_life_sound.c)
+            {
+                void MP_StadiumAnnouncer_Mix(float *buffer, s32 count);
+                MP_StadiumAnnouncer_Mix(audioBuffer, samplesPerFrame);   // Moemon Kai: POKéMON STADIUM's announcer
+            }
         }
 
         gAudioBufferLen = samplesPerFrame;

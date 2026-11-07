@@ -30,6 +30,7 @@
 #include "pokemon_summary_screen.h"
 #include "overworld.h"
 #include "task.h"
+#include "random.h"
 #include "battle_main.h"
 #include "item.h"
 #include "script.h"
@@ -1855,10 +1856,43 @@ static void OpenSummary(void);
 static void OpenVsSummary(void);
 static void ScrollList(void);
 
+// The announcer's word on the VS screen: the GYM LEADER CASTLE's introductions (mp_stadium_announcer.c; clips 222-244)
+static void AnnounceVs(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    void MP_StadiumAnnouncer_Screen(u16 clip, const char *why);
+    u8 t = r->trainer;
+    if (r->cup != STADIUM_CUP_CASTLE)
+        return;
+    if (t == 0)
+        MP_StadiumAnnouncer_Screen(222, "the castle");            // "Welcome to the Gym Leader Castle..."
+    else if (t < 32 && t % 4 == 3)
+        MP_StadiumAnnouncer_Screen(223 + t / 4, "a leader");      // BROCK .. GIOVANNI
+    else if (t < 32)
+        MP_StadiumAnnouncer_Screen(239 + (t % 4) * 2 + (Random() & 1), "a gym's trainer");   // first / second / third
+    else if (t < 36)
+        MP_StadiumAnnouncer_Screen(231 + t - 32, "the ELITE FOUR");  // LORELEI .. LANCE
+    else
+        MP_StadiumAnnouncer_Screen(235, "the champion");
+}
+
+// ... and on the result screen: a stage of the castle cleared, the castle, a cup's champion (clips 366-368)
+static void AnnounceResult(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    void MP_StadiumAnnouncer_Screen(u16 clip, const char *why);
+    u8 beaten = r->trainer ? r->trainer - 1 : 0;
+    if (U.result == RES_CUP)
+        MP_StadiumAnnouncer_Screen(r->cup == STADIUM_CUP_CASTLE ? 368 : 366, "the cup won");
+    else if (U.result == RES_WON && r->cup == STADIUM_CUP_CASTLE && beaten < 32 && beaten % 4 == 3)
+        MP_StadiumAnnouncer_Screen(367, "a stage cleared");
+}
+
 static void ToVs(void)
 {
     struct StadiumRun *r = StadiumCup_Run();
     U.screen = SCR_VS;
+    AnnounceVs();
     U.vsCursor = 0;
     U.confirm = FALSE;
     memset(r->picks, 0xFF, sizeof(r->picks));
@@ -2045,6 +2079,8 @@ void MP_StadiumUi_Update(void)
         U.screen = U.reopen;
         U.song = 0;   // (the field played the map's song meanwhile)
         MPNet_Log("stadium: screens back (%s)", U.reopen == SCR_RESULT ? "result" : "register");
+        if (U.reopen == SCR_RESULT)
+            AnnounceResult();
         U.prevKeys = 0xFFFF;
         U.age = 0;
         if (U.screen == SCR_REGISTER)

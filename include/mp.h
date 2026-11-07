@@ -264,6 +264,7 @@ struct MpConfig
     u8 scaleFollowersPct;     // SPRITE SCALING (1.63.14): how far toward their POKeDEX height while on, 5-100% (A turns it
     u8 scaleGardenPct;        // on and off, LEFT / RIGHT change it): followers 100 and the GARDEN 50 unless changed
     u8 muteInBackground;      // OPTIONS > GAME > MUTE IN BACKGROUND: 1 = no sound while none of the game's windows has focus
+    u8 noAnnouncer;           // OPTIONS > BATTLE > ANNOUNCER: 0 ON (POKeMON STADIUM's announcer: mp_stadium_announcer.c), 1 OFF
 };
 // SPRITE SCALING's percent now (0: off)
 #define MP_SCALE_FOLLOWERS_NOW() (gMpConfig.scaleFollowers ? gMpConfig.scaleFollowersPct : 0)
