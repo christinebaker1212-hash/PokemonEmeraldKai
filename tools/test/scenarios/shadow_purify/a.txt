@@ -1,0 +1,28 @@
+pressuntil A field 5000
+mp shadow make 0 3
+mp shadow drop 0 5
+mp shadow exp 0 4000
+mp party
+mp shadow relic
+wait 90
+shot menu
+press A 2
+wait 40
+shot purified
+press A 2
+wait 60
+press A 2
+wait 60
+shot exp
+press A 2
+wait 60
+shot ribbon
+press A 2
+wait 90
+shot level
+mash A 12 30
+wait 120
+mp party
+mp shadow state 0
+mp savedata x 0
+quit

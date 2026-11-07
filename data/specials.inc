@@ -781,6 +781,7 @@ gSpecials::
 	def_special MP_Stadium_Open
 	def_special Orre_WorldMap, waitstate=1   @ Moemon Kai: ORRE's world map, Colosseum's own screen (src/orre/worldmap.c)
 	def_special Orre_WorldMapTravel
+	def_special Orre_RelicStone, waitstate=1   @ Moemon Kai: the RELIC STONE purifies a Shadow Pokémon (party_menu.c)
 	def_special Mtg_ClubSetUp   @ Moemon Kai: MOSSDEEP's CARD CLUB, its people (src/mtg/mtg_club.c)
 	def_special Mtg_ClubSeat
 	def_special Mtg_ClubBackDoor

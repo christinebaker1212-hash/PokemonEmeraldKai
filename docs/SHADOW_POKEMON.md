@@ -90,7 +90,17 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
   next trainer battle's POKéMON Shadow; scenario shadow_snag. Not yet: RUI's "There's a SHADOW POKéMON!" when one is
   sent out (0x770A / 0x7717, with the story), Colosseum's own ball-shake lines (0x7710-0x7712, 0x7718) in ORRE, co-op
   (first snag wins: decision 4).
-- Next: purification at the RELIC STONE, ORRE's confinement, the A-Life, then co-op.
+- **S5, purification at the RELIC STONE** (2026-11-07): the special Orre_RelicStone (waitstate; party_menu.c) opens the
+  party menu; a Shadow Pokémon whose heart is open (level 6) is purified as reliveCeremonyAll does: its record goes (its
+  own moves show again, its own colours), friendship up 70, the NATIONAL RIBBON, Colosseum's words (M3_shrine_1F_rl.msg
+  15120 "...opened the door to its heart! ...regained the move X!" with its first move, 15115 the EXP, 15116 the
+  RIBBON), then the EXP it stored given back level by level through the RARE CANDY climb (sMpCandy.relic: its moves
+  at each level, one stats window, evolution last, as _expRecover). One not ready: "It won't have any effect." The
+  RELIC STONE's own script (M3_shrine_1F: 15118 "This is a mystical relic...", 15119 "There's a POKéMON that may open
+  the door to its heart!") calls it once ORRE's scripts are converted. Not yet: the nickname offer (15117; Kai's
+  summary RENAME works meanwhile), Colosseum's pool of friendship gained while Shadow, the purification scene's
+  particles. Tests: `mp shadow exp SLOT N`, `mp shadow relic`; scenario shadow_purify.
+- Next: ORRE's confinement, the A-Life, then co-op.
 - (old note) S3b was: Hyper Mode (each SHADOW RUSH rolls the nature's chance by the gauge's level; not asleep or already in it;
   Colosseum's messages 0x771B / 0x771C), CALL (snaps it out by the CALL chance and takes the CALL drop; wakes a
   sleeper: messages 0x7704-0x7709, 0x771D), the aura, and the dark palettes (below); then the opponents' Shadow

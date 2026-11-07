@@ -1,4 +1,5 @@
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "sinnoh_tower.h"
 #include "mp_region.h"
 #include "mp.h"
@@ -5456,6 +5457,8 @@ static EWRAM_DATA struct
     u8 window, left, used, startLevel;
     u16 count, max, learnResult;
     TaskFunc task;
+    bool8 relic;   // Moemon Kai: the levels come from a purified Shadow Pokémon's stored EXP, not candies (exp: what's left)
+    u32 exp;
 } sMpCandy = {0};
 static const struct WindowTemplate sMpCandyCountWindowTemplate =
 {
@@ -5582,19 +5585,44 @@ static void Task_MpCandyLearnAfterText(u8 taskId)
     }
 }
 
+// Moemon Kai: a purified Shadow Pokémon's stored EXP given back (Colosseum's pokemon_relive.c _expRecover): TRUE when
+// it reached the next level (the rest still to come), FALSE when what's left was added short of one
+static bool8 MpRelicLevel(struct Pokemon *mon)
+{
+    u8 level = GetMonData(mon, MON_DATA_LEVEL);
+    u32 exp = GetMonData(mon, MON_DATA_EXP), next;
+    if (sMpCandy.exp == 0 || level >= MAX_LEVEL)
+        return FALSE;
+    next = gExperienceTables[gSpeciesInfo[GetMonData(mon, MON_DATA_SPECIES)].growthRate][level + 1];
+    if (exp + sMpCandy.exp < next)
+    {
+        exp += sMpCandy.exp;
+        sMpCandy.exp = 0;
+        SetMonData(mon, MON_DATA_EXP, &exp);
+        return FALSE;
+    }
+    sMpCandy.exp -= next - exp;
+    SetMonData(mon, MON_DATA_EXP, &next);
+    CalculateMonStats(mon);
+    return TRUE;
+}
+
 // The next candy, or the end of the climb (back here from PartyMenuTryEvolution after a level's moves)
 static void Task_MpCandyNext(u8 taskId)
 {
     struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
     if (IsPartyMenuTextPrinterActive() == TRUE)
         return;
-    while (sMpCandy.left && MpCandyLevelsLeft(mon))
+    while (sMpCandy.relic ? MpRelicLevel(mon) : (sMpCandy.left && MpCandyLevelsLeft(mon)))
     {
         u16 learn;
-        if (ExecuteTableBasedItemEffect_(gPartyMenu.slotId, ITEM_RARE_CANDY, 0))
-            break;
-        RemoveBagItem(ITEM_RARE_CANDY, 1);
-        sMpCandy.left--;
+        if (!sMpCandy.relic)
+        {
+            if (ExecuteTableBasedItemEffect_(gPartyMenu.slotId, ITEM_RARE_CANDY, 0))
+                break;
+            RemoveBagItem(ITEM_RARE_CANDY, 1);
+            sMpCandy.left--;
+        }
         sMpCandy.used++;
         learn = MonTryLearningNewMove(mon, TRUE);
         if (learn != 0)
@@ -5653,6 +5681,14 @@ static void Task_MpCandyFinish(u8 taskId)
     static const u8 sText_ReturnedMany[] = _("{STR_VAR_3} RARE CANDIES went\nback in the BAG.");
     struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
     u8 *end;
+    if (!sMpCandy.used && sMpCandy.relic)
+    {
+        // (Moemon Kai: the purified one's EXP was short of a level: done)
+        sMpCandy.active = sMpCandy.relic = FALSE;
+        gTasks[taskId].func = sMpCandy.task;
+        return;
+    }
+    sMpCandy.relic = FALSE;
     if (!sMpCandy.used)
     {
         // (nothing could be used after all)
@@ -6510,6 +6546,91 @@ static const u8 *GetFacilityCancelString(void)
 void ChooseMonForTradingBoard(u8 menuType, MainCallback callback)
 {
     InitPartyMenu(menuType, PARTY_LAYOUT_SINGLE, PARTY_ACTION_CHOOSE_MON, FALSE, PARTY_MSG_CHOOSE_MON, Task_HandleChooseMonInput, callback);
+}
+
+// ---- Moemon Kai: the RELIC STONE (Colosseum's pokemon_relive.c reliveCeremonyAll; docs/SHADOW_POKEMON.md "S5"): a
+// Shadow Pokémon whose heart is open is purified: its own first move back, its friendship up 70, the NATIONAL RIBBON,
+// then the EXP it stored given back level by level (the RARE CANDY climb: its moves, one stats window, evolution last)
+static void Task_OrreRelicAfterText(u8 taskId)
+{
+    struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
+    if (IsPartyMenuTextPrinterActive() == TRUE)
+        return;
+    if (sMpCandy.exp == 0)
+    {
+        sMpCandy.relic = FALSE;
+        gTasks[taskId].func = sMpCandy.task;
+        return;
+    }
+    ClearStdWindowAndFrameToTransparent(WIN_MSG, FALSE);
+    ClearWindowTilemap(WIN_MSG);
+    sMpCandy.active = TRUE;
+    sMpCandy.left = 0;
+    sMpCandy.used = 0;
+    sMpCandy.startLevel = GetMonData(mon, MON_DATA_LEVEL);
+    BufferMonStatsToTaskData(mon, sPartyMenuInternal->data);
+    gPartyMenu.data[1] = 1;
+    gTasks[taskId].func = Task_MpCandyNext;
+}
+
+static void ItemUseCB_OrreRelic(u8 taskId, TaskFunc task)
+{
+    // Colosseum's words (M3_shrine_1F_rl.msg 15120, 15115, 15116)
+    static const u8 sText_Purified[] = _("{STR_VAR_1} opened the door to\nits heart!\p{STR_VAR_1} regained the move\n{STR_VAR_2}!\p"
+                                         "{STR_VAR_1} regained {STR_VAR_3}\nEXP Points!\p{STR_VAR_1} obtained a RIBBON!{PAUSE_UNTIL_PRESS}");
+    struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
+    u16 move = GetMonData(mon, MON_DATA_MOVE1);
+    u8 friendship = GetMonData(mon, MON_DATA_FRIENDSHIP), ribbon = TRUE;
+    u32 exp = Orre_Shadow_StoredExp(mon);
+
+    PlaySE(SE_SELECT);
+    sMpCandy.task = task;
+    sMpCandy.relic = FALSE;
+    if (Orre_Shadow_Level(mon) != ORRE_SHADOW_OPEN)
+    {
+        gPartyMenuUseExitCallback = FALSE;
+        DisplayPartyMenuMessage(gText_WontHaveEffect, TRUE);
+        ScheduleBgCopyTilemapToVram(2);
+        gTasks[taskId].func = task;
+        return;
+    }
+    Orre_Shadow_Purified(mon);
+    friendship = friendship > 255 - 70 ? 255 : friendship + 70;
+    SetMonData(mon, MON_DATA_FRIENDSHIP, &friendship);
+    SetMonData(mon, MON_DATA_NATIONAL_RIBBON, &ribbon);
+    UpdateMonDisplayInfoAfterRareCandy(gPartyMenu.slotId, mon);   // (its own colours again)
+    gPartyMenuUseExitCallback = TRUE;
+    PlayFanfare(MUS_HEAL);
+    GetMonNickname(mon, gStringVar1);
+    StringCopy(gStringVar2, gMoveNames[move]);
+    ConvertIntToDecimalStringN(gStringVar3, exp, STR_CONV_MODE_LEFT_ALIGN, 7);
+    StringExpandPlaceholders(gStringVar4, sText_Purified);
+    DisplayPartyMenuMessage(gStringVar4, TRUE);
+    ScheduleBgCopyTilemapToVram(2);
+    sMpCandy.relic = TRUE;
+    sMpCandy.exp = exp;
+    gTasks[taskId].func = Task_OrreRelicAfterText;
+}
+
+static void Task_OrreRelicStone(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        gItemUseCB = ItemUseCB_OrreRelic;
+        gSpecialVar_ItemId = ITEM_NONE;
+        InitPartyMenu(PARTY_MENU_TYPE_FIELD, PARTY_LAYOUT_SINGLE, PARTY_ACTION_USE_ITEM, FALSE, PARTY_MSG_CHOOSE_MON,
+                      Task_HandleChooseMonInput, CB2_ReturnToFieldContinueScriptPlayMapMusic);
+        DestroyTask(taskId);
+    }
+}
+
+// (special, waitstate) the RELIC STONE: choose a POKéMON to purify
+void Orre_RelicStone(void)
+{
+    LockPlayerFieldControls();
+    FadeScreen(FADE_TO_BLACK, 0);
+    CreateTask(Task_OrreRelicStone, 10);
 }
 
 void ChooseMonForMoveTutor(void)

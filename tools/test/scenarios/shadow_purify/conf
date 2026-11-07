@@ -1,0 +1,9 @@
+# Purification at the RELIC STONE (party_menu.c Orre_RelicStone, docs/SHADOW_POKEMON.md "S5"): a QUILAVA made
+# Colosseum's Shadow 3, its heart opened all the way (level 6) and 4000 EXP stored; at the RELIC STONE it's purified
+# with Colosseum's words (its own move back, the EXP, the RIBBON), its friendship up 70, then the EXP given back level by
+# level (Lv. 22 to 24) through the RARE CANDY climb; afterwards it isn't Shadow. Shots *.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=156:22"
+EXPECT_A=("shadow: Shadow 3 (species 156) made" "shadow: Shadow 3 purified" "[test] shadow 0: id 0 dp -1" "friend 140)" "exp 11577 stored 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

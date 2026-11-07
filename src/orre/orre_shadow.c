@@ -813,6 +813,14 @@ void Orre_Shadow_Debug(const char *arg)
             Orre_Shadow_Step();
     else if (strcmp(cmd, "purify") == 0)
         Orre_Shadow_Purified(mon);
+    else if (strcmp(cmd, "exp") == 0)   // exp SLOT N: N EXP earned (stored from the gauge's level 3)
+        Orre_Shadow_TakeExp(mon, a);
+    else if (strcmp(cmd, "relic") == 0)   // relic: the RELIC STONE (party_menu.c Orre_RelicStone)
+    {
+        void Orre_RelicStone(void);
+        Orre_RelicStone();
+        return;
+    }
     else if (strcmp(cmd, "foes") == 0)   // foes: the opponent's party (species, Shadow id)
     {
         u8 i;
