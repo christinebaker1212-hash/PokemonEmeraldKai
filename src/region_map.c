@@ -152,6 +152,7 @@ struct QzFlyDest { mapsec_u16_t mapsec; u8 map; u8 heal; u16 flag; };
 #include "mp_region.h"
 #include "data/region_map/qz_region_maps.h"
 #include "data/region_map/sinnoh_region_map.h"
+#include "data/region_map/orre_region_map.h"   // Moemon Kai: ORRE's place names (tools/orre/gen_maps.py)
 #define IS_SINNOH_PAGE(m) ((m) >= QZMAP_SINNOH_NORTH && (m) <= QZMAP_SINNOH_SOUTH)
 void S3D_TownMapShowOn(u8 page, int bg, s32 offX, s32 offY);   // (src/sinnoh/s3d_townmap.c: the page's picture; 0xFF none)
 #define TOWNMAP_OFF_X 0   // (the full view's BG2 texture point at the screen's top-left)
@@ -2021,6 +2022,10 @@ u8 *GetMapName(u8 *dest, mapsec_u16_t regionMapId, u16 padLength)
     else if (regionMapId >= MAPSEC_SINNOH_FIRST && regionMapId < MAPSEC_SINNOH_END)
     {
         str = StringCopy(dest, gSinnohMapSectionNames[regionMapId - MAPSEC_SINNOH_FIRST]);   // Moemon Kai
+    }
+    else if (regionMapId >= MAPSEC_ORRE_FIRST && regionMapId < MAPSEC_ORRE_END)
+    {
+        str = StringCopy(dest, gOrreMapSectionNames[regionMapId - MAPSEC_ORRE_FIRST]);   // Moemon Kai: ORRE's
     }
     else
     {

@@ -5,6 +5,7 @@
 #include <string.h>
 #include "platform/gamepad.h"
 #include "global.h"
+#include "region_map.h"   // (mapname: GetMapName)
 #include "metatile_behavior.h"
 #include "roamer.h"
 #include "s3d_underground.h"
@@ -4022,6 +4023,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d %d", &x, &y);
         printf("[test] collision %d %d: %d behavior %d\n", x, y, MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET),
                MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET));
+    }
+    else if (strcmp(cmd, "mapname") == 0)
+    {
+        // mapname: this map's section and its name as the game shows it (GetMapName)
+        u8 name[40], ascii[40];
+        u32 k;
+        GetMapName(name, gMapHeader.regionMapSectionId, 0);
+        for (k = 0; k < sizeof(ascii) - 1 && name[k] != EOS; k++)
+            ascii[k] = name[k] == CHAR_SPACE ? ' ' : (name[k] >= CHAR_A && name[k] <= CHAR_Z) ? 'A' + name[k] - CHAR_A : '?';
+        ascii[k] = 0;
+        printf("[test] mapname 0x%X %s\n", (unsigned)gMapHeader.regionMapSectionId, ascii);
     }
     else if (strcmp(cmd, "orrecheck") == 0 || strcmp(cmd, "orredownload") == 0 || strcmp(cmd, "orrestate") == 0)
     {

@@ -10,12 +10,13 @@ rules, and what each tool does. This file is where things stand, what a new sess
   models). Never committed (orre/ is ignored).
 - **Shipping: wired, not switched on.** The release step "ORRE's packs" makes MoemonOrre.zip (78 MB) and an update.txt
   `orre` line; the game downloads it with Updater_Orre* (the DANCE songs' downloader, one `struct Extra` each). It
-  rips only when the `ORRE_DISC_URL` repository secret is set: **the user hasn't added it yet** (Settings -> Secrets
-  and variables -> Actions, the disc's link below). No in-game download screen yet.
+  rips only when the `ORRE_DISC_URL` repository secret is set: the user adds it once ORRE is completable and full
+  (their decision, 2026-11-07). No in-game download screen yet.
 - **Engine: ORRE's own**, src/orre/o3d.c (+ gx_tex.c, orre_maps.h, include/o3d.h), a copy of SINNOH's that goes its
   own way. Never put ORRE code in src/sinnoh/ or s3d.h (the user, 2026-11-04).
 - **One map walks: the OUTSKIRT STAND** (Orre_OutskirtStand, group 45 map 0; `MOEMON_DEBUG_WARP=45,0,25,29` starts
-  at the foot of the diner's ramp). No warps, people, scripts or music of its own yet.
+  at the foot of the diner's ramp), named OUTSKIRT STAND from Colosseum's own text, silent until its song is
+  converted. No warps, people or scripts yet.
 
 ## Resources
 - **The disc** (the user's, 2026-11-04): Pokemon Colosseum (USA), GC6E01, an RVZ inside a zip:
@@ -76,12 +77,22 @@ rules, and what each tool does. This file is where things stand, what a new sess
 7. The in-game download screen when orre/ is missing (as the DANCE machine's rh_screen.c StateNoSongs).
 
 ## Open questions for the user
-- The tile scale: 8 Colosseum units a tile (a person is about two tiles, as Kai's sprites). It looks right on the
-  OUTSKIRT STAND; confirm before more maps.
 - The sky is left out (Platinum's camera looks down at the ground). Keep it that way?
-- Placeholders until ORRE has its own: the music (MUS_DESERT), the map section (MAPSEC_SPECIAL_AREA: no name shown).
-  Colosseum's music is on the disc but not ripped (its sound archives aren't FSYS members); how should ORRE sound?
-- Turning on shipping: add the `ORRE_DISC_URL` secret now, or once ORRE can be reached in the game?
+- Answered 2026-11-07 (docs/ORRE_DECISIONS.md): shipping waits until ORRE is completable and full; the music is
+  converted from the disc and there is none until then; map names come from Colosseum's areas; the tile scale stays 8.
+
+## The game's own tables (tools/orre/colo_data.py)
+- **The floor table**: every room, in common_rel's .data at 0x8BCF4 (196 records of 0x4C bytes, count at .data +
+  0x14A670; the decomp's src/rel/common_rel/common_rel.c prolog publishes both): kind (>> 5), area (+1), the FSYS
+  group id (+4, matching each archive's header + 8), the room id (+0xC, what warps and the game's room changes name).
+  Areas: 1 OUTSKIRT STAND (S1_out, S1_shop_1F), 2 PHENAC, 3 PYRITE, 4 AGATE, 5 THE UNDER, 6 the LABORATORY,
+  7 MT. BATTLE, 8 REALGAM TOWER, 10 the SNAGEM HIDEOUT (S2_); 0 and 9 the battle-field copies (_bf) and menus.
+- **The common text**: common_rel's .data at 0x58044 is a message block in the .msg layout (2,018 strings): the place
+  names (3501-3527), the item, move and Pokemon names, the debug room list (60020-60143: each file's name for the
+  developers, e.g. "INSIDE THE DINER (S1_shop_1F)", not shown to players). The room -> place-name table the PDA uses
+  isn't found yet (a table of (id, name) pairs at .data + 0x2C20 has other ids).
+- **Sound**: common.fsys holds MusyX projects (snd_music_proj / _pool / _sdir, snd_se_*); the songs are the 0x08
+  members (agb_*_song and others). The decomp restored the MusyX library (pkmn-colosseum PR #668).
 
 ## Learned (formats and pitfalls)
 - FSYS member types (byte 2 of the id): 0x02 map model, 0x04 character / object model, 0x06 collision, 0x0A text,
@@ -95,5 +106,12 @@ rules, and what each tool does. This file is where things stand, what a new sess
   diner until it did). The floor goes on past a map's exits: keep only what is reached from the start.
 - Text: 0xFFFF starts a control (an id byte, then its parameters: font, wait, palette, shadow, align, talk sound, line
   space and baseline take 1 byte, colour 4). Ids 10-12, 58-60, 63-64 have no handler; only menu strings use them.
+- Other sessions' work in shared files stays as they left it (the user, 2026-11-07): data/event_scripts_orre.s
+  carries Moemon Maker's `data/maker_globals.inc` include; gen_maps.py only adds missing map includes there. Fetch
+  the default branch before starting.
+- include/constants/region_map_sections.h is generated (ignored): edit its template,
+  src/data/region_map/region_map_sections.constants.json.txt.
+- A fresh container's sinnoh/platinum_scripts.inc can be older than the Maker's label table: if the link misses
+  SinnohP_* labels, regenerate it (`python3 -I tools/sinnoh/gen_scripts.py --auto sinnoh/platinum_scripts.inc`).
 - The build rewrites mugen/processed_assets.idx: restore it before committing. `rm` with an unset variable is
   refused by the session's safety check: write `"${G:?}"/...`.
