@@ -373,7 +373,10 @@ gBattleAnims_Moves::
 	ptrvalue Move_PSYCHO_BOOST
 	.include "data/battle_anim_ptrs_gen4.inc"   @ Moemon Kai: Gen 4 moves
 	.include "data/battle_anim_ptrs_gen58.inc"   @ Moemon Kai: Gen 5-8 moves
+	.rept 64   @ (Moemon Maker's slots: a new move plays its base's, battle_anim.c)
 	ptrvalue Move_COUNT /* cannot be reached */
+	.endr
+	ptrvalue Move_SHADOW_RUSH   @ Moemon Kai: Colosseum's
 
 	.align 2
 gBattleAnims_StatusConditions::
@@ -9530,6 +9533,33 @@ Move_WATER_PULSE:
 	simple_palette_blend selector=F_PAL_BG, delay=1, initial_blend_y=7, target_blend_y=0, color=RGB(0, 25, 28)
 	waitforvisualfinish
 	clearmonbg ANIM_DEF_PARTNER
+	end
+
+@ Moemon Kai: Colosseum's SHADOW RUSH, drawn in Kai's 2D battles: the Shadow Pokémon wrapped in a dark violet glow,
+@ then TAKE DOWN's lunge and blow (Colosseum's own is a 3D sequence)
+Move_SHADOW_RUSH:
+	loadspritegfx ANIM_TAG_IMPACT
+	monbg ANIM_DEF_PARTNER
+	setalpha 12, 8
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_ATTACKER, 2, 0, 12, RGB(10, 0, 14)
+	createvisualtask AnimTask_WindUpLunge, 5, ANIM_ATTACKER, -24, 8, 23, 10, 40, 10
+	delay 35
+	complex_palette_blend unused_anim_battler=ANIM_ATTACKER, unused_subpriority_offset=2, selector=F_PAL_BG | F_PAL_BATTLERS, delay=3, num_blends=1, color1=RGB(6, 0, 10), blend_y1=10, color2=RGB_BLACK, blend_y2=0
+	create_basic_hitsplat_sprite ANIM_ATTACKER, 4, x=-10, y=0, relative_to=ANIM_TARGET, animation=0
+	playsewithpan SE_M_MEGA_KICK2, SOUND_PAN_TARGET
+	delay 1
+	createsprite gSlideMonToOffsetSpriteTemplate, ANIM_ATTACKER, 2, 1, -16, 0, 0, 4
+	waitforvisualfinish
+	createvisualtask AnimTask_ShakeMonInPlace, 2, ANIM_TARGET, 4, 0, 12, 1
+	waitforvisualfinish
+	delay 2
+	createsprite gSlideMonToOriginalPosSpriteTemplate, ANIM_ATTACKER, 2, 0, 0, 5
+	delay 3
+	createsprite gSlideMonToOriginalPosSpriteTemplate, ANIM_ATTACKER, 2, 1, 0, 7
+	createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_ATTACKER, 2, 12, 0, RGB(10, 0, 14)
+	waitforvisualfinish
+	clearmonbg ANIM_DEF_PARTNER
+	blendoff
 	end
 
 Move_PSYCHO_BOOST:

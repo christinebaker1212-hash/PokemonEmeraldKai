@@ -358,4 +358,5 @@ const u8 gMoveNames[MOVES_COUNT][MOVE_NAME_LENGTH + 1] =
     [MOVE_PSYCHO_BOOST] = _("PSYCHO BOOST"),
 #include "move_names_gen4.h"   // Moemon Kai: Gen 4 moves
 #include "move_names_gen58.h"   // Moemon Kai: Gen 5-8 moves
+    [MOVE_SHADOW_RUSH] = _("SHADOW RUSH"),   // Moemon Kai: Colosseum's
 };

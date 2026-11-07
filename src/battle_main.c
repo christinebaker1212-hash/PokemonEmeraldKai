@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "mp_region.h"
 #include "data/text/trainer_class_names_qz.h"   // Moemon Kai: QZ_TRAINER_MONEY
 #include "data/text/trainer_class_names_sinnoh.h"   // Moemon Kai: SINNOH_TRAINER_MONEY
@@ -739,6 +740,7 @@ static void CB2_InitBattleInternal(void)
     s32 i;
 
     MP_Gimmick_ResetPictures();   // Moemon Kai: no MEGA pictures from the last battle
+    Orre_Shadow_BattleStart();    // Moemon Kai: Shadow Pokémon's battling drop, once a battle
 
     extern char *getenv(const char *name);
     if ((gBattleTypeFlags & BATTLE_TYPE_FRONTIER) && getenv("MOEMON_TEST_FOE_HP1"))

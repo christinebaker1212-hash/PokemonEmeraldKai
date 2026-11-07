@@ -4616,4 +4616,18 @@ const struct BattleMove gBattleMoves[MOVES_COUNT] =
     },
 #include "battle_moves_gen4.h"   // Moemon Kai: Gen 4 moves
 #include "battle_moves_gen58.h"   // Moemon Kai: Gen 5-8 moves (the Gen 5-8 fork)
+    // Moemon Kai: Colosseum's SHADOW RUSH, its own row of the game's move table (common_rel, move 356: power 90,
+    // accuracy 100, PP 5, NORMAL, contact, recoil a quarter: effect 48; docs/SHADOW_POKEMON.md)
+    [MOVE_SHADOW_RUSH] =
+    {
+        .effect = EFFECT_RECOIL,
+        .power = 90,
+        .type = TYPE_NORMAL,
+        .accuracy = 100,
+        .pp = 5,
+        .secondaryEffectChance = 0,
+        .target = MOVE_TARGET_SELECTED,
+        .priority = 0,
+        .flags = FLAG_MAKES_CONTACT | FLAG_PROTECT_AFFECTED | FLAG_MIRROR_MOVE_AFFECTED | FLAG_KINGS_ROCK_AFFECTED,
+    },
 };

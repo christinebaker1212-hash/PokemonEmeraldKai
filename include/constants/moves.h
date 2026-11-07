@@ -864,7 +864,9 @@
 #define MOVE_MAKER_LAST (MOVE_MAKER_FIRST + MAKER_MOVE_SLOTS - 1)
 #define IS_MAKER_MOVE(move) ((move) >= MOVE_MAKER_FIRST && (move) <= MOVE_MAKER_LAST)
 #define MAKER_MOVE_RANGE [MOVE_MAKER_FIRST ... MOVE_MAKER_LAST]
-#define MOVES_COUNT 912
+// Moemon Kai: Pokémon Colosseum's SHADOW RUSH (docs/SHADOW_POKEMON.md), after the Maker's slots
+#define MOVE_SHADOW_RUSH (MOVE_MAKER_LAST + 1)
+#define MOVES_COUNT 913
 // end of Gen 5-8 moves
 
 // Used for checks for moves affected by Disable, Mimic, etc.

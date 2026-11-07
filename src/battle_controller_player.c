@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "global.h"
+#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "qz_specials.h"
 #include "battle_gimmick.h"
 #include "mp.h"
@@ -1982,6 +1983,9 @@ static void MoveSelectionDisplayMoveNames(void)
     {
         MoveSelectionDestroyCursorAt(i);
         StringCopy(gDisplayedStringBattle, gMoveNames[moveInfo->moves[i]]);
+        if (moveInfo->moves[i] == MOVE_NONE && !gMpCoopBattle
+         && Orre_Shadow_SlotHidden(&gPlayerParty[gBattlerPartyIndexes[gActiveBattler]], i))
+            StringCopy(gDisplayedStringBattle, gText_Orre_HiddenMove);   // Moemon Kai: a Shadow Pokémon's, Colosseum's "????"
         // Prints on windows B_WIN_MOVE_NAME_1, B_WIN_MOVE_NAME_2, B_WIN_MOVE_NAME_3, B_WIN_MOVE_NAME_4
         BattlePutTextOnWindow(gDisplayedStringBattle, i + B_WIN_MOVE_NAME_1);
         if (moveInfo->moves[i] != MOVE_NONE)
@@ -2209,6 +2213,7 @@ static u32 CopyPlayerMonData(u8 monId, u8 *dst)
             battleMon.moves[size] = GetMonData(&gPlayerParty[monId], MON_DATA_MOVE1 + size);
             battleMon.pp[size] = GetMonData(&gPlayerParty[monId], MON_DATA_PP1 + size);
         }
+        Orre_Shadow_BattleMoves(&gPlayerParty[monId], battleMon.moves, battleMon.pp);   // Moemon Kai: a Shadow Pokémon's
         battleMon.ppBonuses = GetMonData(&gPlayerParty[monId], MON_DATA_PP_BONUSES);
         battleMon.friendship = GetMonData(&gPlayerParty[monId], MON_DATA_FRIENDSHIP);
         battleMon.experience = GetMonData(&gPlayerParty[monId], MON_DATA_EXP);
@@ -2256,6 +2261,7 @@ static u32 CopyPlayerMonData(u8 monId, u8 *dst)
             moveData.moves[size] = GetMonData(&gPlayerParty[monId], MON_DATA_MOVE1 + size);
             moveData.pp[size] = GetMonData(&gPlayerParty[monId], MON_DATA_PP1 + size);
         }
+        Orre_Shadow_BattleMoves(&gPlayerParty[monId], moveData.moves, moveData.pp);   // Moemon Kai: a Shadow Pokémon's
         moveData.ppBonuses = GetMonData(&gPlayerParty[monId], MON_DATA_PP_BONUSES);
         src = (u8 *)(&moveData);
         for (size = 0; size < sizeof(moveData); size++)
@@ -2266,6 +2272,16 @@ static u32 CopyPlayerMonData(u8 monId, u8 *dst)
     case REQUEST_MOVE3_BATTLE:
     case REQUEST_MOVE4_BATTLE:
         data16 = GetMonData(&gPlayerParty[monId], MON_DATA_MOVE1 + gBattleBufferA[gActiveBattler][1] - REQUEST_MOVE1_BATTLE);
+        {
+            u16 m[MAX_MON_MOVES] = {0};
+            u8 p[MAX_MON_MOVES] = {0}, k = gBattleBufferA[gActiveBattler][1] - REQUEST_MOVE1_BATTLE;
+            if (Orre_Shadow_SlotOverlaid(&gPlayerParty[monId], k))   // Moemon Kai: a Shadow Pokémon's
+            {
+                m[k] = data16;
+                Orre_Shadow_BattleMoves(&gPlayerParty[monId], m, p);
+                data16 = m[k];
+            }
+        }
         dst[0] = data16;
         dst[1] = data16 >> 8;
         size = 2;
@@ -2273,6 +2289,10 @@ static u32 CopyPlayerMonData(u8 monId, u8 *dst)
     case REQUEST_PP_DATA_BATTLE:
         for (size = 0; size < MAX_MON_MOVES; size++)
             dst[size] = GetMonData(&gPlayerParty[monId], MON_DATA_PP1 + size);
+        {
+            u16 m[MAX_MON_MOVES] = {0};
+            Orre_Shadow_BattleMoves(&gPlayerParty[monId], m, dst);   // Moemon Kai: a Shadow Pokémon's
+        }
         dst[size] = GetMonData(&gPlayerParty[monId], MON_DATA_PP_BONUSES);
         size++;
         break;
@@ -2281,6 +2301,13 @@ static u32 CopyPlayerMonData(u8 monId, u8 *dst)
     case REQUEST_PPMOVE3_BATTLE:
     case REQUEST_PPMOVE4_BATTLE:
         dst[0] = GetMonData(&gPlayerParty[monId], MON_DATA_PP1 + gBattleBufferA[gActiveBattler][1] - REQUEST_PPMOVE1_BATTLE);
+        {
+            u16 m[MAX_MON_MOVES] = {0};
+            u8 p[MAX_MON_MOVES] = {0}, k = gBattleBufferA[gActiveBattler][1] - REQUEST_PPMOVE1_BATTLE;
+            p[k] = dst[0];
+            Orre_Shadow_BattleMoves(&gPlayerParty[monId], m, p);   // Moemon Kai: a Shadow Pokémon's
+            dst[0] = p[k];
+        }
         size = 1;
         break;
     case REQUEST_OTID_BATTLE:
@@ -2547,6 +2574,8 @@ static void SetPlayerMonData(u8 monId)
             SetMonData(&gPlayerParty[monId], MON_DATA_HELD_ITEM, &battlePokemon->item);
             for (i = 0; i < MAX_MON_MOVES; i++)
             {
+                if (Orre_Shadow_SlotOverlaid(&gPlayerParty[monId], i))
+                    continue;   // Moemon Kai: a Shadow Pokémon's own moves stay under SHADOW RUSH and the hidden ones
                 SetMonData(&gPlayerParty[monId], MON_DATA_MOVE1 + i, &battlePokemon->moves[i]);
                 SetMonData(&gPlayerParty[monId], MON_DATA_PP1 + i, &battlePokemon->pp[i]);
             }
@@ -2586,6 +2615,8 @@ static void SetPlayerMonData(u8 monId)
     case REQUEST_MOVES_PP_BATTLE:
         for (i = 0; i < MAX_MON_MOVES; i++)
         {
+            if (Orre_Shadow_SlotOverlaid(&gPlayerParty[monId], i))
+                continue;   // Moemon Kai: a Shadow Pokémon's own moves stay underneath
             SetMonData(&gPlayerParty[monId], MON_DATA_MOVE1 + i, &moveData->moves[i]);
             SetMonData(&gPlayerParty[monId], MON_DATA_PP1 + i, &moveData->pp[i]);
         }
@@ -2595,20 +2626,21 @@ static void SetPlayerMonData(u8 monId)
     case REQUEST_MOVE2_BATTLE:
     case REQUEST_MOVE3_BATTLE:
     case REQUEST_MOVE4_BATTLE:
-        SetMonData(&gPlayerParty[monId], MON_DATA_MOVE1 + gBattleBufferA[gActiveBattler][1] - REQUEST_MOVE1_BATTLE, &gBattleBufferA[gActiveBattler][3]);
+        if (!Orre_Shadow_SlotOverlaid(&gPlayerParty[monId], gBattleBufferA[gActiveBattler][1] - REQUEST_MOVE1_BATTLE))   // Moemon Kai
+            SetMonData(&gPlayerParty[monId], MON_DATA_MOVE1 + gBattleBufferA[gActiveBattler][1] - REQUEST_MOVE1_BATTLE, &gBattleBufferA[gActiveBattler][3]);
         break;
     case REQUEST_PP_DATA_BATTLE:
-        SetMonData(&gPlayerParty[monId], MON_DATA_PP1, &gBattleBufferA[gActiveBattler][3]);
-        SetMonData(&gPlayerParty[monId], MON_DATA_PP2, &gBattleBufferA[gActiveBattler][4]);
-        SetMonData(&gPlayerParty[monId], MON_DATA_PP3, &gBattleBufferA[gActiveBattler][5]);
-        SetMonData(&gPlayerParty[monId], MON_DATA_PP4, &gBattleBufferA[gActiveBattler][6]);
+        for (i = 0; i < MAX_MON_MOVES; i++)   // (Moemon Kai: a Shadow Pokémon's own PP stays under SHADOW RUSH's)
+            if (!Orre_Shadow_SlotOverlaid(&gPlayerParty[monId], i))
+                SetMonData(&gPlayerParty[monId], MON_DATA_PP1 + i, &gBattleBufferA[gActiveBattler][3 + i]);
         SetMonData(&gPlayerParty[monId], MON_DATA_PP_BONUSES, &gBattleBufferA[gActiveBattler][7]);
         break;
     case REQUEST_PPMOVE1_BATTLE:
     case REQUEST_PPMOVE2_BATTLE:
     case REQUEST_PPMOVE3_BATTLE:
     case REQUEST_PPMOVE4_BATTLE:
-        SetMonData(&gPlayerParty[monId], MON_DATA_PP1 + gBattleBufferA[gActiveBattler][1] - REQUEST_PPMOVE1_BATTLE, &gBattleBufferA[gActiveBattler][3]);
+        if (!Orre_Shadow_SlotOverlaid(&gPlayerParty[monId], gBattleBufferA[gActiveBattler][1] - REQUEST_PPMOVE1_BATTLE))   // Moemon Kai
+            SetMonData(&gPlayerParty[monId], MON_DATA_PP1 + gBattleBufferA[gActiveBattler][1] - REQUEST_PPMOVE1_BATTLE, &gBattleBufferA[gActiveBattler][3]);
         break;
     case REQUEST_OTID_BATTLE:
         SetMonData(&gPlayerParty[monId], MON_DATA_OT_ID, &gBattleBufferA[gActiveBattler][3]);
@@ -2781,6 +2813,8 @@ static void PlayerHandleSwitchInAnim(void)
 static void StartSendOutAnim(u8 battler, bool8 dontClearSubstituteBit)
 {
     u16 species;
+    if (!gMpCoopBattle)
+        Orre_Shadow_SentOut(&gPlayerParty[gBattleBufferA[battler][1]]);   // Moemon Kai: the battling drop, once a battle
 
     ClearTemporarySpeciesSpriteData(battler, dontClearSubstituteBit);
     gBattlerPartyIndexes[battler] = gBattleBufferA[battler][1];

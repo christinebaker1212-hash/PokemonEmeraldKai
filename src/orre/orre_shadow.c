@@ -17,6 +17,8 @@
 #include "pokemon.h"
 #include "orre.h"
 #include "orre_shadow.h"
+#include "battle.h"
+#include "constants/moves.h"
 #include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
 void MPNet_Log(const char *fmt, ...);
@@ -41,7 +43,8 @@ struct OrreShadowRec
     s32 dp;             // the heart gauge, hundredths of DP
     u32 storedExp;      // EXP earned while Shadow, given back when purified
     u16 gauge;          // the gauge's size (DP)
-    u8 traits[10];      // (the A-Life's dark traits: docs/SHADOW_POKEMON.md "In the A-Life")
+    u8 traits[6];       // (the A-Life's dark traits: docs/SHADOW_POKEMON.md "In the A-Life")
+    u32 battle;         // the battle its battling drop was last taken in (not kept between runs: sBattle starts at 0)
 };
 
 #define REC_HYPER 1
@@ -257,6 +260,68 @@ void Orre_Shadow_Step(void)
     }
 }
 
+// ---- in battle
+
+const u8 gText_Orre_HiddenMove[] = _("????");
+
+static const u8 sRevealLevel[MAX_MON_MOVES] = {0xFF, 2, 4, 5};   // (slot 0: SHADOW RUSH while Shadow)
+static u32 sBattle;   // the battle under way (a record's drop is taken once per battle number)
+
+bool8 Orre_Shadow_SlotHidden(struct Pokemon *mon, u8 slot)
+{
+    struct OrreShadowRec *r = RecOf(mon);
+    return r != NULL && slot > 0 && slot < MAX_MON_MOVES && LevelOf(r) < sRevealLevel[slot];
+}
+
+bool8 Orre_Shadow_SlotOverlaid(struct Pokemon *mon, u8 slot)
+{
+    return Orre_Shadow_Is(mon) && (slot == 0 || Orre_Shadow_SlotHidden(mon, slot));
+}
+
+void Orre_Shadow_BattleMoves(struct Pokemon *mon, u16 *moves, u8 *pp)
+{
+    u8 i;
+    if (!Orre_Shadow_Is(mon))
+        return;
+    moves[0] = MOVE_SHADOW_RUSH;
+    pp[0] = gBattleMoves[MOVE_SHADOW_RUSH].pp;
+    for (i = 1; i < MAX_MON_MOVES; i++)
+        if (Orre_Shadow_SlotHidden(mon, i))
+            moves[i] = MOVE_NONE, pp[i] = 0;
+}
+
+void Orre_Shadow_BattleStart(void)
+{
+    sBattle++;
+}
+
+void Orre_Shadow_SentOut(struct Pokemon *mon)
+{
+    struct OrreShadowRec *r = RecOf(mon);
+    if (r == NULL || r->battle == sBattle)
+        return;
+    r->battle = sBattle;
+    DropRec(r, GetNature(mon), ORRE_DP_BATTLE, 0);
+    MPNet_Log("shadow: Shadow %u sent out, gauge %d", r->id, r->dp);
+}
+
+bool8 Orre_Shadow_TakeExp(struct Pokemon *mon, u32 exp)
+{
+    struct OrreShadowRec *r = RecOf(mon);
+    if (r == NULL)
+        return FALSE;
+    if (LevelOf(r) >= 3)
+        r->storedExp = r->storedExp + exp < r->storedExp ? 0xFFFFFFFF : r->storedExp + exp;
+    MPNet_Log("shadow: Shadow %u EXP %u (stored %u)", r->id, exp, r->storedExp);
+    return TRUE;
+}
+
+u32 Orre_Shadow_StoredExp(struct Pokemon *mon)
+{
+    struct OrreShadowRec *r = RecOf(mon);
+    return r ? r->storedExp : 0;
+}
+
 // ---- "<save>.orre": {magic, format, story flag bytes, records}
 
 static void Path(char *out, size_t size, int backup)
@@ -293,6 +358,11 @@ static bool8 LoadFrom(const char *path)
         return FALSE;
     }
     sRecCount = head[3];
+    {
+        u32 i;
+        for (i = 0; i < sRecCount; i++)
+            sRecs[i].battle = 0xFFFFFFFF;   // (a battle number of the run that wrote it)
+    }
     return TRUE;
 }
 
@@ -373,7 +443,12 @@ void Orre_Shadow_Debug(const char *arg)
         return;
     }
     if (strcmp(cmd, "table") != 0 && mon)   // and every command: the slot's state
-        printf("[test] shadow %d: id %u dp %d gauge %u level %u hyper %u call %u nature %u\n", slot,
+        printf("[test] shadow %d: id %u dp %d gauge %u level %u hyper %u call %u nature %u moves %u/%u %u/%u %u/%u %u/%u"
+               " exp %u stored %u\n", slot,
                Orre_Shadow_Id(mon), Orre_Shadow_Dp(mon), Orre_Shadow_Gauge(mon), Orre_Shadow_Level(mon),
-               Orre_Shadow_HyperChance(mon), Orre_Shadow_CallChance(mon), GetNature(mon));
+               Orre_Shadow_HyperChance(mon), Orre_Shadow_CallChance(mon), GetNature(mon),
+               GetMonData(mon, MON_DATA_MOVE1), GetMonData(mon, MON_DATA_PP1), GetMonData(mon, MON_DATA_MOVE2),
+               GetMonData(mon, MON_DATA_PP2), GetMonData(mon, MON_DATA_MOVE3), GetMonData(mon, MON_DATA_PP3),
+               GetMonData(mon, MON_DATA_MOVE4), GetMonData(mon, MON_DATA_PP4), GetMonData(mon, MON_DATA_EXP),
+               Orre_Shadow_StoredExp(mon));
 }

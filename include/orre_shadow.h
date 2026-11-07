@@ -69,6 +69,20 @@ u8 Orre_Shadow_HyperChance(struct Pokemon *mon);        // % (0 not Shadow)
 u8 Orre_Shadow_CallChance(struct Pokemon *mon);
 void Orre_Shadow_Purified(struct Pokemon *mon);         // no longer Shadow (its record goes)
 void Orre_Shadow_Step(void);            // a step taken: the party's (and the day care's) step counts
+
+// ---- in battle (Colosseum's rules: pokemon_data.c pokemonBiosGetPokemonWazaPtr, fight_range_*.c)
+// A Shadow Pokémon's moves in battle: slot 0 is always SHADOW RUSH; slot 1 is "????" until the gauge's level 2, slot 2
+// until 4, slot 3 until 5 (its own moves stay underneath, never written over by the battle)
+bool8 Orre_Shadow_SlotHidden(struct Pokemon *mon, u8 slot);
+bool8 Orre_Shadow_SlotOverlaid(struct Pokemon *mon, u8 slot);   // SHADOW RUSH's or a hidden one
+void Orre_Shadow_BattleMoves(struct Pokemon *mon, u16 *moves, u8 *pp);
+void Orre_Shadow_BattleStart(void);                 // a battle begins (each Shadow Pokémon's drop: once a battle)
+void Orre_Shadow_SentOut(struct Pokemon *mon);      // sent out: the battling drop, the first time this battle
+// EXP a Shadow Pokémon earned: none while its gauge is at level 0-2, stored (given back when purified) from level 3;
+// TRUE when MON is Shadow (it takes no EXP of its own)
+bool8 Orre_Shadow_TakeExp(struct Pokemon *mon, u32 exp);
+u32 Orre_Shadow_StoredExp(struct Pokemon *mon);
+extern const u8 gText_Orre_HiddenMove[];   // "????": a hidden move's name (Colosseum's)
 void Orre_Shadow_Debug(const char *arg);   // `mp shadow ...` (tests)
 
 #endif
