@@ -59,7 +59,7 @@ struct DisplayConfig
     int winW, winH;   // windowed size, restored when leaving fullscreen
     int winX, winY;   // windowed position, POS_UNSET = centered
     int maximized;    // the window was maximized
-    int frameCap;     // DISPLAY_FPS_* (1.170.2; last: the initializer leaves it 0, 60 a second)
+    int frameCap;     // DISPLAY_FPS_* (1.171.4; last: the initializer leaves it 0, 60 a second)
 };
 
 static struct DisplayConfig sCfg = {

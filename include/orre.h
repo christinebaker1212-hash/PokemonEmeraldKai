@@ -21,6 +21,8 @@ bool8 Orre_MapStart(u16 map, s16 *x, s16 *y);   // a map's start (Colosseum's en
 // OUTSKIRT STAND, where the boat's sailor waits to sail back to the port the player came from
 void Orre_Sail(void);        // (special, waitstate) the voyage to ORRE
 void Orre_SailBack(void);    // (special, waitstate) ... and back
-void Orre_ShadowAboard(void);   // (special) VAR_RESULT TRUE: a Shadow Pokémon in the party (it can't leave ORRE)
+void Orre_ShadowAboard(void);
+void Orre_CheckBoat(void);      // (special, waitstate) ORRE's packs here? (VAR_RESULT: orre_ferry.c)
+void Orre_DownloadPacks(void);  // (special, waitstate) ... their download, with its progress   // (special) VAR_RESULT TRUE: a Shadow Pokémon in the party (it can't leave ORRE)
 
 #endif

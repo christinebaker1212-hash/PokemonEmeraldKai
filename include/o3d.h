@@ -8,6 +8,7 @@ struct MapLayout;
 void O3D_Update(void);       // every overworld frame: is this an ORRE map, and from where is it seen
 bool8 O3D_Active(void);      // this frame's field is drawn by ORRE's engine
 bool8 O3D_IsOrreGroup(u8 mapGroup);
+bool8 O3D_PackPresent(void);   // ORRE's pack (orre/orre3d.pak) is here (the boat: src/orre/orre_ferry.c)
 u8 O3D_ArrivalDir(u16 map, s16 x, s16 y);   // the way a player landing on an ORRE room's entry faces (DIR_NONE: none)
 // A field sprite's place on ORRE's 3D ground: (x, feetY) on Emerald's screen -> where the view shows that spot, and its
 // depth (0: not on an ORRE map); spriteId: whose (0xFFFF none)

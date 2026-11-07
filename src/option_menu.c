@@ -78,7 +78,7 @@ enum
     OPT_FILTER,
     OPT_COLOR,        // Moemon Kai: DISPLAY > COLOR, a handheld's screen colors (display.c, 1.63.14)
     OPT_VSYNC,
-    OPT_FRAMERATE,    // Moemon Kai: DISPLAY > FRAME RATE, 60 / 120 / UNCAPPED (display.c Display_PresentSlot, 1.170.2)
+    OPT_FRAMERATE,    // Moemon Kai: DISPLAY > FRAME RATE, 60 / 120 / UNCAPPED (display.c Display_PresentSlot, 1.171.4)
     OPT_CARDART,
     OPT_CARDBACK,
     OPT_BATTLEANIMS,

@@ -50,7 +50,12 @@ mkdir -p "$WORK/unpacked/sound" "$WORK/unpacked/sys"
 cp "$WORK/files/sound/"*.samp "$WORK/unpacked/sound/"
 cp "$WORK/files/main.dol" "$WORK/unpacked/sys/"   # (its menu tables go in the data pack: build_pack.py DOL_TABLES)
 mkdir -p "$REPO/orre"
-python3 -I "$REPO/tools/orre/build_pack.py" "$WORK/unpacked" "$REPO/orre" 2>/dev/null
-[ -n "$ORRE_TEST" ] && python3 -I "$REPO/tools/orre/test_pack.py" "$WORK/unpacked" "$REPO/orre" 2>/dev/null
+# (its warnings go to a log; on a failure the log's end is shown: the release's 1.171.2 failed here without a word)
+python3 -I "$REPO/tools/orre/build_pack.py" "$WORK/unpacked" "$REPO/orre" 2> "$WORK/build_pack.log" \
+    || { echo "build_pack.py failed:"; tail -30 "$WORK/build_pack.log"; exit 1; }
+if [ -n "$ORRE_TEST" ]; then
+    python3 -I "$REPO/tools/orre/test_pack.py" "$WORK/unpacked" "$REPO/orre" 2> "$WORK/test_pack.log" \
+        || { echo "test_pack.py failed:"; tail -30 "$WORK/test_pack.log"; exit 1; }
+fi
 rm -rf "$WORK/files" "$WORK/disc"   # (the unpacked members stay for the conversions; the disc download too)
 ls -la "$REPO/orre"

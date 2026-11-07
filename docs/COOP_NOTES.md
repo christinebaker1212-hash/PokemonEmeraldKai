@@ -622,7 +622,7 @@ Harness: `mp optionstab N`, `mp iconfamily`, `mp matchcalltest N`, `mp mountbike
 MOEMON_CONTROLS_CONFIG). Tests: options_tabs, music_options, spec_menu (the CO-OP tab with real keys).
 
 
-## DISPLAY > FRAME RATE (1.170.2; display.c Display_PresentSlot, option_menu.c OPT_FRAMERATE)
+## DISPLAY > FRAME RATE (1.171.4; display.c Display_PresentSlot, option_menu.c OPT_FRAMERATE)
 The user: "cap framerates at 60, 120, or uncap them entirely. An uncapped player is experiencing screen tearing. ...
 the default be Moemon Emerald Kai's default FPS." The game itself always runs 60 frames a second (sdl2.c
 fixedTimestep); FRAME RATE caps only how often the picture is presented: 60 (DISPLAY_FPS_60, 0, the default: the

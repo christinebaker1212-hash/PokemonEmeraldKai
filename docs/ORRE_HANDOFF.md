@@ -8,10 +8,10 @@ rules, and what each tool does. This file is where things stand, what a new sess
 - **Rip: done and checked.** `tools/orre/make_pack.sh DISC` -> orre/orre3d.pak (174 maps, 764 textures, the grids of
   the maps in the game) and orre/orre_data.pak (text, collision, scripts, floor data, cameras, map tables, character
   models). Never committed (orre/ is ignored).
-- **Shipping: wired, not switched on.** The release step "ORRE's packs" makes MoemonOrre.zip (78 MB) and an update.txt
-  `orre` line; the game downloads it with Updater_Orre* (the DANCE songs' downloader, one `struct Extra` each). It
-  rips only when the `ORRE_DISC_URL` repository secret is set: the user adds it once ORRE is completable and full
-  (their decision, 2026-11-07). No in-game download screen yet.
+- **Shipping: on as soon as the secret is there** (the user, 2026-11-07: "Let's go ahead and ship it"). The release
+  step "ORRE's packs" makes MoemonOrre.zip (78 MB) and an update.txt `orre` line once the `ORRE_DISC_URL` repository
+  secret is set (the disc's link below); the game fetches the packs at launch in the background (updater.c
+  OrrePreWorker) and the boat checks them before sailing (src/orre/orre_ferry.c; ORRE_DECISIONS "As their own zip").
 - **Engine: ORRE's own**, src/orre/o3d.c (+ gx_tex.c, orre_maps.h, include/o3d.h), a copy of SINNOH's that goes its
   own way. Never put ORRE code in src/sinnoh/ or s3d.h (the user, 2026-11-04).
 - **Every map of Orre walks, with every door** (2026-11-07, the user: "the baseline is that all maps will be able to
@@ -85,10 +85,13 @@ rules, and what each tool does. This file is where things stand, what a new sess
    ELITE FOUR, HOENN's ferries and every port, landing at the OUTSKIRT STAND by the sailor: src/orre/orre_ferry.c).
 1. **Music** (the user, 2026-11-07: "Colosseum's own world map screen, then convert the music"): see 6.
    Then the world map's own song (worldmap_song) and the travel scene: the user's plan, "The bike ride" below.
-2. **Where people stand.** Doors and entries are done (below, "Rooms, doors and entries"). The people: each room's
-   characters table (the floor record's + 0x14 slot, floor_data.c floorDataBiosGetCharInfo; records of 36 bytes:
-   flags, u16 angle, u16 model, ..., the talk script at + 0x14 (floorCharacterBiosGetTalkSctID), the move script at
-   + 0x10, x y z at + 0x18; colo_rooms.py reads the slots the same way) for where they stand and which model they are.
+2. **Where people stand: read** (2026-11-07). tools/orre/colo_rooms.py gives each room's `people` (the floor record's
+   + 0x14 slot: 36-byte records, flags (visible 0x80), the angle at + 4, the people info row at + 6, the name at + 8,
+   the move / talk scripts at + 0x10 / + 0x14, x y z at + 0x18) and `people_info()` each row's model file (common_rel
+   + 0x13E440, 0x2C each, the u32 at + 0xC a file id: ken_b1.dat the hero, hizuki_b1/_b2.dat RUI, bag_b1.dat RUI's
+   sack in PHENAC...): 757 people in the field rooms, 116 models. Many start hidden (the OUTSKIRT STAND's all are:
+   the room's script shows them by the story), so placing them waits for the scripts (step 5). Next: their sprites
+   (step 4).
 3. **Maps: done** (all 121 field rooms). The stadiums' battle stages (kind 2 rooms: M1_water_colo, M2_earth_colo,
    M4_cylinder_colo, M4_bottom_colo, T1_ancient_colo) aren't maps: Kai's battles. The `_ev` and `_bf` copies aren't
    either (a scene's or a battle's).

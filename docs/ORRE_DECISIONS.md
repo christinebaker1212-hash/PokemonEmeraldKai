@@ -23,9 +23,15 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
 - **The packs ship with the game** (the user: "completely rip the 3D models and text from the Colosseum ISO so that it
   can be bundled in a download, without requiring the ISO from the user"): players need no disc.
 - **As their own zip** (the user, 2026-11-04: "make it its own zip"): MoemonOrre.zip, like the DANCE machine's songs,
-  downloaded when a player first goes to ORRE, not in the game's own zip.
-- **Shipping waits for a complete ORRE** (the user, 2026-11-07: "Shipping will be turned on when I am confident that
-  the experience is completable, and full"): the `ORRE_DISC_URL` secret is the user's to add, then.
+  not in the game's own zip. **Fetched at launch** (the user, 2026-11-07: "It should be pre-downloaded upon launch as
+  part of the updater. If it can't be downloaded, it skips until next time"): after the launch's update check
+  (src/platform/updater.c OrrePreWorker) the packs download and unpack in the background while the game runs; a
+  failure only waits for the next launch. The boat checks them before it sails (src/orre/orre_ferry.c Orre_CheckBoat):
+  still downloading, it shows the progress; missing, it offers the download; no release with them, it doesn't sail
+  (never an empty ORRE: docs/user_images/74.png). Test tools/test/orre_download_test.sh orre ("the boat", "at launch").
+- **Shipped early** (the user, 2026-11-07, after the boat landed in an empty ORRE without the packs: "Let's go ahead
+  and ship it. My players won't visit until it's ready"): this replaces "shipping waits for a complete ORRE"; the
+  release ships MoemonOrre.zip once the user adds the `ORRE_DISC_URL` repository secret (a link to the disc).
 - **Music: Colosseum's own, converted** (the user, 2026-11-07: "The music cannot be found online, and thus, must be
   converted"), from the disc's sound data into .kaisong songs; never a placeholder: a map without its song yet is
   silent ("Placeholder music - none").
@@ -51,6 +57,18 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
   start) **in front of a sailor** who sails back to the port the player came from (the user's choice: ORRE's one
   person with Kai's words, tools/orre/gen_maps.py KAI_OBJECTS; src/orre/orre_ferry.c), never with a Shadow Pokémon in
   the party (docs/SHADOW_POKEMON.md decision 2). Tests orre_ticket, orre_voyage, orre_lilycove.
+- **The SNAG MACHINE: the player plays Colosseum's opening** (the user, 2026-11-07): on the first boat trip to ORRE,
+  Colosseum's own opening plays with the player's character as the thief: the SNAGEM HIDEOUT (its opening rooms
+  S2_out_1, S2_hallway_1, S2_bossroom_1, S2_snatchroom_1, with their opening cameras `cam_opening_*` and character
+  sets), the SNAG MACHINE taken, the explosion, the escape by bike, then the bike ride to the OUTSKIRT STAND, where
+  Colosseum's story starts as it does in the game. Colosseum's opening has no words, so none are written. The SNAG
+  MACHINE is then ORRE_FLAG_SNAG_MACHINE.
+- **Co-op: every player has a SNAG MACHINE** (the user, 2026-11-07): each player plays the opening on their own first
+  trip, so any of them can snag ("first to snag gets it", docs/SHADOW_POKEMON.md decision 4).
+- **RUI follows the host** (the user, 2026-11-07: "Rei should always follow the host player, not any of the co-op
+  players. She'll follow behind, and the host player's Pokemon will follow behind her"): once she joins, RUI walks
+  right behind the host (alone: the player), never behind a co-op friend, and the host's following Pokémon walks
+  behind her; every player's screen shows her there.
 - **The bike ride between places** (the user, 2026-11-07, for later): a custom version of the SS TIDAL's porthole
   scene, the bike's graphics against the background of Colosseum's original ride, with the SS TIDAL scene's
   animation (ORRE_HANDOFF "The bike ride").
