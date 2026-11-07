@@ -388,6 +388,70 @@ static void CompleteOnBankSpritePosX_0(void)
         PlayerBufferExecCompleted();
 }
 
+// Moemon Kai: AUTO THROW's question (L held at the action menu): YES turns it on and throws now
+#define MP_AUTOTHROW_HOLD 30         // frames L is held to ask
+static u8 sMpLHeld;                  // L held at the action menu (frames; 0xFF: wait for its release)
+static u8 sMpAutoWait;               // frames this action menu has waited before AUTO THROW's throw
+static u8 sMpAutoYes;                // the question's cursor: 0 YES, 1 NO
+static const u8 sText_MpAutoThrowAsk[] = _("Would you like to turn\non Auto Throw?");
+static void MpHandleAutoThrowAsk(void);
+
+static void MpAutoThrowAsk(void)
+{
+    // (the message box and its YES / NO, as the game asks "Switch POKéMON?": the action menu's layer scrolled away)
+    PlaySE(SE_SELECT);
+    gBattle_BG0_X = 0;
+    gBattle_BG0_Y = 0;
+    BattlePutTextOnWindow(sText_MpAutoThrowAsk, B_WIN_MSG);
+    sMpAutoYes = 0xFF;   // (the YES / NO box once the question is printed: they share the text colors)
+    MPNet_Log("autothrow: asked");
+    gBattlerControllerFuncs[gActiveBattler] = MpHandleAutoThrowAsk;
+}
+
+static void MpHandleAutoThrowAsk(void)
+{
+    if (sMpAutoYes == 0xFF)
+    {
+        if (IsTextPrinterActive(B_WIN_MSG))
+            return;
+        HandleBattleWindow(YESNOBOX_X_Y, 0);
+        BattlePutTextOnWindow(gText_BattleYesNoChoice, B_WIN_YESNO);
+        BattleCreateYesNoCursorAt(sMpAutoYes = 0);
+        return;
+    }
+    if (JOY_NEW(DPAD_UP) && sMpAutoYes != 0)
+    {
+        PlaySE(SE_SELECT);
+        BattleDestroyYesNoCursorAt(sMpAutoYes);
+        BattleCreateYesNoCursorAt(sMpAutoYes = 0);
+    }
+    else if (JOY_NEW(DPAD_DOWN) && sMpAutoYes == 0)
+    {
+        PlaySE(SE_SELECT);
+        BattleDestroyYesNoCursorAt(sMpAutoYes);
+        BattleCreateYesNoCursorAt(sMpAutoYes = 1);
+    }
+    else if (JOY_NEW(A_BUTTON | B_BUTTON))
+    {
+        bool8 yes = JOY_NEW(A_BUTTON) && sMpAutoYes == 0;
+        PlaySE(SE_SELECT);
+        HandleBattleWindow(YESNOBOX_X_Y, WINDOW_CLEAR);
+        if (yes && MpQuickBallReady())
+        {
+            MP_AutoThrow_On(MP_SaveData_Get("ball:last"));
+            sMpQuickBall = MP_AutoThrow_Ball();
+            BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_USE_ITEM, 0);
+            PlayerBufferExecCompleted();
+            return;
+        }
+        MPNet_Log("autothrow: declined");
+        BattlePutTextOnWindow(gText_EmptyString3, B_WIN_MSG);
+        gBattle_BG0_Y = DISPLAY_HEIGHT;   // (back to the action menu)
+        MpPrintActionPrompt();
+        gBattlerControllerFuncs[gActiveBattler] = HandleInputChooseAction;
+    }
+}
+
 static void HandleInputChooseAction(void)
 {
     u16 itemId = gBattleBufferA[gActiveBattler][2] | (gBattleBufferA[gActiveBattler][3] << 8);
@@ -412,9 +476,54 @@ static void HandleInputChooseAction(void)
         return;
     }
 
-    // Moemon Co-op QoL: L throws the same kind of ball as last time (wild battles)
-    if (JOY_NEW(L_BUTTON) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_NORMAL && MpQuickBallReady())
+    // Moemon Kai: AUTO THROW on: this turn throws the ball by itself (a moment first, so L can still stop it); out of
+    // that ball, or it can't be thrown here: off, and the menu is the player's (src/mp/mp_autothrow.c)
+    if (MP_AutoThrow_Active())
     {
+        if (!MpQuickBallReady() || MP_SaveData_Get("ball:last") != MP_AutoThrow_Ball())
+            MP_AutoThrow_Off("no more of that ball");
+        else if (JOY_NEW(L_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            MP_AutoThrow_Off("L");
+            sMpLHeld = 0xFF;   // (this press only stops it)
+            return;
+        }
+        else if (++sMpAutoWait >= 20)
+        {
+            sMpQuickBall = MP_AutoThrow_Ball();
+            MPNet_Log("autothrow: throwing");
+            BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_USE_ITEM, 0);
+            PlayerBufferExecCompleted();
+            return;
+        }
+        else
+            return;
+    }
+
+    // Moemon Co-op QoL: L throws the same kind of ball as last time (wild battles): a tap throws it (on release);
+    // Moemon Kai: held, it asks about AUTO THROW
+    if (sMpLHeld == 0xFF)
+    {
+        if (!JOY_HELD(L_BUTTON))
+            sMpLHeld = 0;
+        return;
+    }
+    if (sMpLHeld == 0 && JOY_NEW(L_BUTTON) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_NORMAL
+     && MpQuickBallReady())
+        sMpLHeld = 1;
+    if (sMpLHeld)
+    {
+        if (JOY_HELD(L_BUTTON))
+        {
+            if (++sMpLHeld >= MP_AUTOTHROW_HOLD)
+            {
+                sMpLHeld = 0xFF;
+                MpAutoThrowAsk();
+            }
+            return;
+        }
+        sMpLHeld = 0;
         PlaySE(SE_SELECT);
         sMpQuickBall = MP_SaveData_Get("ball:last");
         BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_USE_ITEM, 0);
@@ -1885,7 +1994,13 @@ static void CompleteWhenChoseItem(void)
         if (gMpCoopWild && value != ITEM_NONE && MP_IsBallItem(value))
         {
             u8 first;
-            if (MpCountBallTargets(&first) >= 2)
+            if (MpCountBallTargets(&first) >= 2 && MP_AutoThrow_Active())
+            {
+                // (AUTO THROW: the one in front, as the picker would start on)
+                if (MpIsBallTarget(BATTLE_OPPOSITE(gActiveBattler)))
+                    first = BATTLE_OPPOSITE(gActiveBattler);
+            }
+            else if (MpCountBallTargets(&first) >= 2)
             {
                 sMpBallItem = value;
                 gMultiUsePlayerCursor = MpIsBallTarget(BATTLE_OPPOSITE(gActiveBattler)) ? BATTLE_OPPOSITE(gActiveBattler) : first;
@@ -3177,6 +3292,9 @@ static void PlayerHandleChooseAction(void)
     s32 i;
 
     gBattlerControllerFuncs[gActiveBattler] = HandleChooseActionAfterDma3;
+    sMpAutoWait = 0;   // Moemon Kai: AUTO THROW waits a moment each turn
+    if (sMpLHeld != 0xFF || !JOY_HELD(L_BUTTON))
+        sMpLHeld = 0;
     BattleTv_ClearExplosionFaintCause();
     BattlePutTextOnWindow(gText_BattleMenu, B_WIN_ACTION_MENU);
 

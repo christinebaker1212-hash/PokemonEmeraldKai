@@ -2172,6 +2172,7 @@ void BattleMainCB2(void)
     RunTextPrinters();
     UpdatePaletteFade();
     RunTasks();
+    MP_AutoThrow_Frame();   // Moemon Kai: L turns AUTO THROW off at any time (src/mp/mp_autothrow.c)
 
     if (JOY_HELD(B_BUTTON) && gBattleTypeFlags & BATTLE_TYPE_RECORDED && RecordedBattle_CanStopPlayback())
     {
@@ -2185,6 +2186,7 @@ void BattleMainCB2(void)
 
 static void FreeRestoreBattleData(void)
 {
+    MP_AutoThrow_Off("battle over");   // Moemon Kai
     gMain.callback1 = gPreBattleCallback1;
     gScanlineEffect.state = 3;
     gMain.inBattle = FALSE;

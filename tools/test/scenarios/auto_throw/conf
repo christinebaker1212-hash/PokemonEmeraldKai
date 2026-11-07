@@ -1,0 +1,8 @@
+# AUTO THROW (1.169.0): L held at the action menu asks; YES throws the last ball (POKé BALL) every turn by itself at a
+# hard-to-catch Pokémon (three POKé BALLS) until that ball runs out (then the menu is the player's); a second battle: NO once (the menu back), then on, then L while
+# the ball flies turns it off and the next turn's menu waits for the player.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("autothrow: asked" "autothrow: on (ball 4)" "autothrow: throwing" "autothrow: off (no more of that ball)" "autothrow: off (L)" "autothrow: declined")
+UNEXPECT_A=("[crash]")

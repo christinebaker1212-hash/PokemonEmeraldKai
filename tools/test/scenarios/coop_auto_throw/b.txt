@@ -1,0 +1,6 @@
+pressuntil A field 5000
+waitfor online 6000
+mp teach 0 45
+waitlog 3000 co-op wild: joining
+mash A 320 20
+quit

@@ -1,0 +1,18 @@
+pressuntil A field 5000
+waitfor online 6000
+mp unitem 4
+mp item 4 3
+mp savedata ball:last 4
+wait 300
+mp wilddouble 0
+mp wild 384:70
+waitlog 2000 co-op wild: battle with player
+pressuntil A action 4000
+wait 10
+press L 40
+wait 90
+press A 2
+pressuntillog B 20000 autothrow: off (
+wait 30
+rendershot c_after
+quit

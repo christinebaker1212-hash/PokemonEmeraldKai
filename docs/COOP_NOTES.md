@@ -6933,3 +6933,28 @@ emphatically talk about the Stadiums themselves, similar to trainers in the BATT
   away from the user's Maker edit (blocks 0-1 x 6-8).
 - Debug: `mp mtg club N` (the room of half hour N, the next time it's entered); logs "mtg: club slot N: ..." and
   "mtg: club talker K says line L". Scenario mtg_club (mtg_shop uses half hour 5 and the mat).
+
+## AUTO THROW (1.169.0)
+
+The user (2026-11-07, verbatim): "When you hold down the L button that throws a Poke Ball when pressed, you are
+prompted, "Would you like to turn on Auto Throw?" If yes, a disclaimer will show at the bottom left - "Auto Throw On",
+and the player will skip their turn to to immediately throw out the last ball they threw of that type. This will
+continue until the Pokemon is caught, or the player runs out of that type of ball, where the menu will return to their
+control. If L is pressed at any time in this interim, Auto Throw will be canceled, and player control will return to
+normal. In a CO-OP battle, it works identically. The player automatically uses their turn to throw the last BALL they
+used."
+- The action menu (battle_controller_player.c HandleInputChooseAction): L where the quick ball works
+  (MpQuickBallReady) now counts frames: let go before MP_AUTOTHROW_HOLD (30) and the ball is thrown as before (on the
+  release); held, MpAutoThrowAsk asks in the message box (gBattle_BG0_Y 0, as "Switch POKéMON?") and draws the YES / NO
+  box once the question is printed (drawing it earlier gives the question the box's colors). YES: MP_AutoThrow_On with
+  ball:last and this turn's throw; NO / B: back to the action menu.
+- On (src/mp/mp_autothrow.c): every action menu waits 20 frames, then throws (sMpQuickBall, the bag skipped as the
+  quick ball does). Off when that ball can't be thrown any more (none left, ball:last changed), the battle ends
+  (FreeRestoreBattleData), or L is pressed: in the action menu, or at any other moment (MP_AutoThrow_Frame in
+  BattleMainCB2); the press that stops it never throws.
+- Co-op: the same on each player's own turns; with two wild Pokémon the target picker is skipped for the one in front
+  (the picker's own first choice).
+- "AUTO THROW ON": the game's small font in a dark, gold-rimmed tag over the battle picture just above the message box
+  (MP_AutoThrow_Composite from MP_BattleOverlay_Composite).
+- Tests: auto_throw (on, three POKé BALLS out, NO, L stopping it), coop_auto_throw (at NA-JP lag).
+

@@ -1,0 +1,14 @@
+# AUTO THROW in a co-op wild battle at NA-JP lag: ALICE holds L, says YES, and every turn of hers throws a POKé BALL
+# by itself (three, at a hard-to-catch Pokémon) while BOB growls on; out of balls, the menu is hers again.
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+DELAY=250
+JIT=80
+FPS=60
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=6:100"
+ENV_B="MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("autothrow: asked" "autothrow: on (ball 4)" "autothrow: throwing" "autothrow: off (")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]")

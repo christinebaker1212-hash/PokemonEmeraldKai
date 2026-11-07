@@ -1,0 +1,46 @@
+pressuntil A field 5000
+mp textspeed 2
+mp unitem 4
+mp item 4 3
+mp savedata ball:last 4
+mp wild 384:70
+pressuntil A action 3000
+wait 10
+press L 40
+wait 90
+rendershot t_ask
+press A 2
+pressuntillog A 3000 autothrow: throwing
+wait 30
+rendershot t_label
+pressuntillog A 12000 autothrow: off
+wait 60
+rendershot t_after
+press DOWN 2
+wait 4
+press RIGHT 2
+wait 4
+press A 2
+pressuntil B field 6000
+mp unitem 4
+mp item 4 3
+mp savedata ball:last 4
+mp wild 384:70
+pressuntil A action 3000
+wait 10
+press L 40
+wait 90
+press DOWN 2
+wait 4
+press A 2
+wait 30
+rendershot t_declined
+press L 40
+wait 90
+press A 2
+wait 60
+press L 2
+wait 30
+wait 300
+rendershot t_cancel
+quit

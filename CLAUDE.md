@@ -226,6 +226,9 @@ COOP_NOTES "Fishing as Gen 1 had it"; test fishing_gen1).
 Also breeding by Gen 9's rules (1.166.0: NIDORAN / VOLBEAT either kind from any pair, no incense, egg moves from both
 parents, the mother's ball and Ability, POWER items: daycare.c, egg_hatch.c; COOP_NOTES "Breeding by Gen 9's rules";
 tests breed_gen9, breed_gen9_hatch).
+Also AUTO THROW (1.169.0: hold L at the action menu, YES throws the last ball every turn until caught / out / L;
+co-op too: src/mp/mp_autothrow.c + battle_controller_player.c MpAutoThrow*; COOP_NOTES "AUTO THROW"; tests auto_throw,
+coop_auto_throw).
 Also PC TAG mode (west button / F: tag Moemon, then MOVE / RELEASE them together; pokemon_storage_system.c end).
 Also the CANDY JAR (mp_candy.c: candies from releases, PROF. BIRCH brings the jar, a physics jar menu, CONVERT to RARE
 CANDY; ITEM_CANDY_JAR 398). Also the shared PC as 14 boxes in the PC box screen (mp_sharedbox.c: a mirror the stock

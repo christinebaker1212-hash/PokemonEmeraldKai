@@ -691,7 +691,11 @@ HANDY EXTRAS (they save time, they don't make the game easier)
 ---------------------------------------------------------------
 * Battle: on the move list, R shows each move's power, accuracy and kind
   (PHYS./SPEC./STATUS). At FIGHT/BAG, L throws the same kind of Ball as last
-  time (wild battles). In a co-op battle, R shows your partner's team.
+  time (wild battles). Hold L instead for AUTO THROW: say YES and every turn
+  throws that Ball by itself until the Moemon is caught or that Ball runs
+  out ("AUTO THROW ON" shows at the bottom left); press L to stop it. It
+  works the same in co-op battles. In a co-op battle, R shows your partner's
+  team.
 * Battles are quicker: messages print twice as fast as your text speed
   setting, stay up a shorter time, and A or B moves on to the next one.
   The low HP alarm beeps three times and then stops. Sending Moemon out and

@@ -1446,6 +1446,13 @@ bool8 MP_TriCards_Place(u8 battler, s16 *left, s16 *right, s16 *top);
 bool8 MP_TypeIcons_On(void);
 void MP_TypeIcons_Composite(u16 *frame);
 void MP_BattleOverlay_Composite(u16 *frame);   // emote pick and bubbles over everything in battle
+// AUTO THROW (src/mp/mp_autothrow.c): hold L in battle; each turn throws the last ball until caught / out / L
+bool8 MP_AutoThrow_Active(void);
+u16 MP_AutoThrow_Ball(void);
+void MP_AutoThrow_On(u16 ball);
+void MP_AutoThrow_Off(const char *why);
+void MP_AutoThrow_Frame(void);
+void MP_AutoThrow_Composite(u16 *frame);
 
 
 // ---------------------------------------------------------------------------

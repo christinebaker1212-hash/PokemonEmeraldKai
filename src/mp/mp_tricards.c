@@ -551,6 +551,7 @@ void MP_BattleOverlay_Composite(u16 *frame)
     u8 ids[16], n, i;
     if (!gMain.inBattle || gMain.callback2 != BattleMainCB2)
         return;
+    MP_AutoThrow_Composite(frame);   // Moemon Kai: "AUTO THROW ON" (mp_autothrow.c)
     n = MP_Emote_BattleOverlaySprites(ids, 12);
     n += MP_BattleChat_OverlaySprites(ids + n, 16 - n);
     for (i = 0; i < n; i++)
