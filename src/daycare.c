@@ -1003,12 +1003,13 @@ static void _GiveEggFromDaycare(struct DayCare *daycare)
 {
     struct Pokemon egg;
 
-    // Moemon Co-op: an EGG made with a friend's DAY CARE POKéMON
+    // Moemon Co-op: an EGG made with a friend's DAY CARE POKéMON before 1.171.5, still waiting (each player's DAY CARE is
+    // their own since: the user, 2026-11-07; no new ones are made)
     if (daycare == &gSaveBlock1Ptr->daycare && MP_Linkx_TakePendingEgg(&egg))
         ;
     else if (CountPokemonInDaycare(daycare) == 1)
     {
-        // The other parent was a friend's but the EGG got lost: make it from ours alone
+        // The other parent was a friend's (before 1.171.5) but the EGG got lost: make it from ours alone
         struct DayCare tmp = *daycare;
         u8 s = GetBoxMonData(&tmp.mons[0].mon, MON_DATA_SANITY_HAS_SPECIES) ? 0 : 1;
         tmp.mons[s ^ 1] = tmp.mons[s];
@@ -1089,15 +1090,17 @@ static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
     }
 
     // Check if an egg should be produced
-    if (daycare->offspringPersonality == 0 && validEggs == DAYCARE_MON_COUNT && (daycare->mons[1].steps & 0xFF) == 0xFF)
+    // Moemon Kai: the DAY CARE MAN's EGG check every 64 steps, not every 256 (the user, 2026-11-07): the same chance each
+    // check (the parents' compatibility), four times as often
+    if (daycare->offspringPersonality == 0 && validEggs == DAYCARE_MON_COUNT && (daycare->mons[1].steps & 0x3F) == 0x3F)
     {
         u8 compatibility = GetDaycareCompatibilityScore(daycare);
-        if (compatibility > (Random() * 100u) / USHRT_MAX)
+        bool8 egg = compatibility > (Random() * 100u) / USHRT_MAX;
+        MPNet_Log("daycare: EGG check at step %u, %u%% chance: %s", (unsigned)daycare->mons[1].steps,
+                  (unsigned)compatibility, egg ? "an EGG" : "none");
+        if (egg)
             TriggerPendingDaycareEgg();
     }
-    // Moemon Co-op: one POKéMON here and one in a friend's DAY CARE can make an EGG
-    else if (daycare == &gSaveBlock1Ptr->daycare && daycare->offspringPersonality == 0 && validEggs == 1)
-        MP_Daycare_TryCoopEgg(daycare);
 
     // Try to hatch Egg
     // Moemon Kai: an egg cycle every 64 steps, not every 256: every EGG hatches in a quarter of the time (half in
@@ -1517,42 +1520,6 @@ u8 MP_Daycare_Compatibility(const struct BoxPokemon *a, const struct BoxPokemon 
     tmp.mons[0].mon = *a;
     tmp.mons[1].mon = *b;
     return GetDaycareCompatibilityScore(&tmp);
-}
-
-// Every 256 steps with one POKéMON left here: maybe an EGG with the best
-// matching friend's DAY CARE POKéMON. Each of you gets your own EGG.
-void MP_Daycare_TryCoopEgg(struct DayCare *daycare)
-{
-    u8 s = GetBoxMonData(&daycare->mons[0].mon, MON_DATA_SANITY_HAS_SPECIES) ? 0 : 1;
-    u8 i, best = 0xFF, bestScore = 0;
-    struct BoxPokemon friendMon;
-    struct DayCare tmp;
-    struct Pokemon egg;
-
-    if ((daycare->mons[s].steps & 0xFF) != 0xFF)
-        return;
-    for (i = 0; i < 4; i++)
-    {
-        u8 score;
-        if (!MP_Linkx_FriendDaycareMon(i, &friendMon))
-            continue;
-        score = MP_Daycare_Compatibility(&daycare->mons[s].mon, &friendMon);
-        if (score > bestScore)
-        {
-            bestScore = score;
-            best = i;
-        }
-    }
-    if (best == 0xFF || bestScore <= (Random() * 100u) / USHRT_MAX)
-        return;
-    MP_Linkx_FriendDaycareMon(best, &friendMon);
-    memset(&tmp, 0, sizeof(tmp));
-    tmp.mons[0] = daycare->mons[s];
-    tmp.mons[1].mon = friendMon;
-    _TriggerPendingDaycareEgg(&tmp);   // also sets FLAG_PENDING_DAYCARE_EGG
-    BuildDaycareEgg(&tmp, &egg);
-    daycare->offspringPersonality = tmp.offspringPersonality;
-    MP_Linkx_SetPendingEgg(&egg, best);
 }
 
 // Moemon Co-op: the phone's walk and LEVEL training gain EXP as the day care does: levels one by one, new moves as the

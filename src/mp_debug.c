@@ -931,18 +931,6 @@ void MP_TestCommand(const char *cmd, const char *arg)
             }
         }
     }
-    else if (strcmp(cmd, "coopegg") == 0)
-    {
-        // coopegg - walk 256 steps' worth until a co-op EGG comes (up to 200 tries)
-        int i;
-        for (i = 0; i < 200 && gSaveBlock1Ptr->daycare.offspringPersonality == 0; i++)
-        {
-            gSaveBlock1Ptr->daycare.mons[0].steps |= 0xFF;
-            gSaveBlock1Ptr->daycare.mons[1].steps |= 0xFF;
-            MP_Daycare_TryCoopEgg(&gSaveBlock1Ptr->daycare);
-        }
-        printf("[test] coopegg after %d tries: pending %d\n", i, gSaveBlock1Ptr->daycare.offspringPersonality != 0);
-    }
     else if (strcmp(cmd, "tcgvariety") == 0)
     {
         // tcgvariety - how many different decks card players bring (tcg_field.c Tcg_DebugVariety)

@@ -1,0 +1,13 @@
+# Each player's DAY CARE is their own (the user, 2026-11-07: "Remove the Co-op day care. Instance each player's day care
+# so they cannot interact."): ALICE and BOB, online, each leave one compatible POKéMON alone at their DAY CARE (ZIGZAGOON
+# / DITTO) and walk 300 steps. Before 1.171.5 that made an EGG for both; now neither DAY CARE gets one (state 2: one
+# POKéMON, no EGG), and nothing about the other's DAY CARE is sent.
+MODE=2
+FPS=60
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=263:15,25:15"
+ENV_B="MOEMON_DEBUG_PARTY=132:15,25:15"
+EXPECT_A=("[test] daycare: 1 in it" "owners 0 state 2")
+EXPECT_B=("[test] daycare: 1 in it" "owners 0 state 2")
+UNEXPECT_A=("had an EGG" "daycare: EGG check" "[crash]")
+UNEXPECT_B=("had an EGG" "daycare: EGG check" "[crash]")

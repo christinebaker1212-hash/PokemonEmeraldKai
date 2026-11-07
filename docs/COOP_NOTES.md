@@ -349,9 +349,9 @@ Tests: coop_run, coop_ball_target, coop_abort_catch(2), coop_trainer (RUN refuse
 
 Batch 3 (mp_linkx.c): record mixing over relay (record_mixing.c MP_RecordMix_*, mp_battle.c
 NetLink_BeginRecordMix fakes a 2-4 player link), friend Secret Base visits (secret_base.c MP_SecretBase_*,
-EventScript_MpVisitSecretBase), link Trainer Cards, Day Care co-op eggs (daycare.c MP_Daycare_TryCoopEgg,
-`<save>.coopegg`), shared roamer/weather, Hall of Fame friend teams. Debug: `mp mkbase 181`, `mp daycare N`,
-`mp coopegg`, `mp takeegg`, `mp hof`, `mp roamer`, `mp world`. All verified with two clients.
+EventScript_MpVisitSecretBase), link Trainer Cards, Day Care co-op eggs (removed in 1.171.5: see "Each player's own DAY CARE";
+`<save>.coopegg` still hands over one made before), shared roamer/weather, Hall of Fame friend teams. Debug: `mp mkbase 181`, `mp daycare N`,
+`mp takeegg`, `mp hof`, `mp roamer`, `mp world`. All verified with two clients.
 Mixing rounds (mp_linkx.c UpdateMix): once every record has arrived (applyPending) the round is never dropped: neither
 the 30 s timeout nor a friend leaving cancels it; it waits until we're free on the field (test mix_leave: menu open
 while the friend quits).
@@ -3495,7 +3495,7 @@ reported Natures not applying correctly, and IVs not being passed down." daycare
 - InheritIVs: three different stats from the parents, five when either holds a DESTINY KNOT (X / Y on). Emerald's
   pick removed list slot i instead of the picked slot, so a stat could be picked twice (BUGFIX isn't defined here:
   MODERN only turns on UBFIX). Parent slots without a POKeMON (a friend's egg made from one) give the other's IV.
-- Every egg goes through these (the DAY CARE, friends' DAY CARE eggs MP_Daycare_TryCoopEgg, the routes' day cares).
+- Every egg goes through these (the DAY CARE, a friend's DAY CARE egg left from before 1.171.5, the routes' day cares).
   `mp breedtest N ITEM_A ITEM_B`: N eggs from party 1 (IVs 31) and 2 (IVs 0); test breed_items.
 
 ## Breeding by Gen 9's rules (1.166.0)
@@ -3523,6 +3523,19 @@ Ditto to allow yields of Nidoran Male and Female." daycare.c, as SCARLET / VIOLE
 - Tests: breed_gen9 (`mp breedtest N ITEM_A ITEM_B BALL_A BALL_B SLOT_A SLOT_B` prints a second "breed2" line: species
   counts, eggs in A's / B's ball, the main parent's Ability slot, a POWER item's stat, A's / B's first move known) and
   breed_gen9_hatch (a real DAY CARE EGG taken and hatched: `mp hatch SLOT`).
+
+## Each player's own DAY CARE, and an EGG check every 64 steps (1.171.5)
+The user (2026-11-07): "reduce the Day Care Man's Egg generation RNG from 256 steps every check to 64 steps every
+check", then "Remove the Co-op day care. Instance each player's day care so they cannot interact."
+- daycare.c TryProduceOrHatchEgg: the EGG check when `(mons[1].steps & 0x3F) == 0x3F` (was 0xFF): the same chance
+  (GetDaycareCompatibilityScore), four times as often, for every DAY CARE on the game's pair (ROUTE 117, FOUR ISLAND,
+  JOHTO's). Log "daycare: EGG check at step N, P% chance: an EGG | none". Egg cycles were already every 64 steps.
+- The co-op DAY CARE is gone: MP_Daycare_TryCoopEgg, mp_linkx.c's lone-POKéMON broadcast (SendDaycare /
+  UpdateDaycare / sFriendDc) and MP_Linkx_SetPendingEgg are removed, and an older game's LX_DAYCARE is ignored (the
+  enum value stays so the relay types keep their numbers). Each DAY CARE reads only its own save. An EGG made with a
+  friend's POKéMON before 1.171.5 ("<save>.coopegg") is still the DAY CARE MAN's to hand over (MP_Linkx_TakePendingEgg,
+  CheckPendingEggOnLoad); no new ones are made. Debug `mp coopegg` removed.
+- Test daycare_egg_check (two MAGNEMITE, never an EGG: checks at steps 63, 127, 191, none at 255).
 
 ## MAGIC's Threshold and picky attackers (1.133.0)
 

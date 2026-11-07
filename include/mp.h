@@ -1382,10 +1382,7 @@ void MP_Linkx_OnPlayerLeft(u8 id);
 void MP_Linkx_OpenUnion(void);   // CO-OP > BERRY GAMES
 void MP_Linkx_OpenFriend(u8 id);  // CO-OP > FRIENDS > a friend
 u16 MP_Linkx_CardPicOr(u16 defaultPic);
-bool8 MP_Linkx_FriendDaycareMon(u8 id, struct BoxPokemon *out);
-void MP_Linkx_SetPendingEgg(const struct Pokemon *egg, u8 friendId);
 bool8 MP_Linkx_TakePendingEgg(struct Pokemon *egg);
-void MP_Daycare_TryCoopEgg(struct DayCare *daycare);
 void MP_Linkx_HofBegin(void);
 u8 MP_Linkx_HofFriendCount(void);
 bool8 MP_Linkx_HofFriend(u8 i, u8 *team, u8 *name, u16 *pic);

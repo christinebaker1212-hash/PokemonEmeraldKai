@@ -1,0 +1,8 @@
+# The DAY CARE MAN's EGG check comes every 64 steps, not every 256 (the user, 2026-11-07; daycare.c
+# TryProduceOrHatchEgg): two MAGNEMITE (no gender, no DITTO: never an EGG, so the checks keep coming) left at the DAY
+# CARE, then 200 steps: a check at steps 63, 127 and 191, none at 255.
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=81:15,81:15,25:15"
+EXPECT_A=("daycare: EGG check at step 63, 0% chance: none" "daycare: EGG check at step 127," "daycare: EGG check at step 191," "[test] daycare: 81/200 81/200")
+UNEXPECT_A=("daycare: EGG check at step 255" "[crash]")

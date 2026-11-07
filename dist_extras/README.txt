@@ -655,9 +655,9 @@ SECRET BASES    CO-OP menu > FRIENDS > pick a friend > VISIT SECRET BASE walks
                 battle its owner). Leaving puts you outside it, on its route.
 TRAINER CARDS   CO-OP menu > FRIENDS > pick a friend > TRAINER CARD (both
                 sides).
-DAY CARE        A MOEMON left alone at your DAY CARE can make an EGG with one
-                left alone at a friend's. Each of you gets your own EGG from
-                the DAY CARE MAN.
+DAY CARE        Each player's DAY CARE is their own: friends' DAY CARE MOEMON
+                never meet yours. The DAY CARE MAN checks for an EGG every 64
+                steps (the original game waited 256).
 BREEDING        Works as in POKEMON SCARLET / VIOLET: NIDORAN and VOLBEAT /
                 ILLUMISE EGGS come as both kinds (with DITTO too), babies hatch
                 without an incense, egg moves come from either parent (TM moves

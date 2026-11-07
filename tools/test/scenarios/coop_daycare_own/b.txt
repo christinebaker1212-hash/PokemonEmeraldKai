@@ -1,0 +1,12 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+mp daycare 0
+barrier left 2
+wait 120
+mp eggsteps 300
+wait 60
+mp daycarestate
+barrier done 2
+wait 30
+quit

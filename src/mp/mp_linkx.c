@@ -9,8 +9,8 @@
 //   * Secret Base visits: walk into a friend's base from anywhere
 //     (CO-OP > FRIENDS > a friend).
 //   * Trainer Cards: look at a friend's card (same place).
-//   * Day Care: a POKéMON alone in your DAY CARE can make an EGG with one alone
-//     in a friend's (daycare.c). Each of you gets your own EGG.
+//   * (Day Care: each player's DAY CARE is their own since 1.171.5; an EGG made
+//     with a friend's POKéMON before then is still handed over: "<save>.coopegg")
 //   * Shared roamers and weather: Latias/Latios roam the same routes for
 //     everyone, and Routes 119/123's weather and the abnormal weather
 //     (Kyogre/Groudon, after the game) are the same for everyone.
@@ -69,7 +69,6 @@ void MP_RecordMix_Receive(void *records, u8 multiplayerId);
 const struct SecretBase *MP_SecretBase_Own(void);
 u8 MP_SecretBase_Store(const struct SecretBase *base, u8 version, u8 language);
 bool8 MP_SecretBase_PrepareVisit(u8 slot);
-u8 MP_Daycare_Compatibility(const struct BoxPokemon *a, const struct BoxPokemon *b);
 bool8 MP_Roamer_Get(u8 *mapGroup, u8 *mapNum);
 void MP_Roamer_Set(u8 mapGroup, u8 mapNum);
 u16 MP_Hof_BuildTeam(u8 *out);
@@ -85,7 +84,7 @@ enum {
     LX_BASE_REQ,                     // -> friend: your Secret Base please
     LX_BASE,                         // -> asker: u8 version, u8 language, struct SecretBase
     LX_WORLD,                        // -> all: weather stage, abnormal weather, roamer
-    LX_DAYCARE,                      // -> all: u8 has, struct BoxPokemon
+    LX_DAYCARE,                      // (retired in 1.171.5: each DAY CARE is its own; older games' are ignored)
     LX_HOF_START,                    // -> all: I'm entering the Hall of Fame
     LX_HOF_TEAM,                     // -> champion: team, u16 pic, name
     LX_TREND,                        // -> all: u16 words[2], u16 rand: Dewford's new trendy phrase
@@ -97,7 +96,6 @@ enum {
 #define MIX_PERIOD    (60 * 60 * 20)   // while friends are online
 #define MIX_TIMEOUT   (60 * 30)
 #define WORLD_PERIOD  (60 * 10)
-#define DAYCARE_PERIOD (60 * 30)
 
 static u32 sFrame;
 
@@ -480,101 +478,15 @@ static void OnBase(u8 from, const u8 *data, u16 len)
 // ---------------------------------------------------------------------------
 // Day Care
 
-struct FriendDaycare
-{
-    bool8 has;
-    struct BoxPokemon mon;
-};
-static struct FriendDaycare sFriendDc[MP_MAX_PLAYERS];
-static u32 sDcSignature, sDcSentFrame;
-static u8 sDcLastMask;
-
-static bool8 MyLoneDaycareMon(struct BoxPokemon *out)
-{
-    u8 i, n = 0;
-    for (i = 0; i < DAYCARE_MON_COUNT; i++)
-        if (GetBoxMonData(&gSaveBlock1Ptr->daycare.mons[i].mon, MON_DATA_SANITY_HAS_SPECIES))
-        {
-            if (out)
-                *out = gSaveBlock1Ptr->daycare.mons[i].mon;
-            n++;
-        }
-    return n == 1;
-}
-
-bool8 MP_Linkx_FriendDaycareMon(u8 id, struct BoxPokemon *out)
-{
-    if (!FriendHere(id) || !sFriendDc[id].has)
-        return FALSE;
-    *out = sFriendDc[id].mon;
-    return TRUE;
-}
-
-static void SendDaycare(void)
-{
-    u8 buf[2 + sizeof(struct BoxPokemon)];
-    struct BoxPokemon mon;
-    memset(buf, 0, sizeof(buf));
-    buf[0] = LX_DAYCARE;
-    buf[1] = MyLoneDaycareMon(&mon);
-    if (buf[1])
-        memcpy(buf + 2, &mon, sizeof(mon));
-    MP_SendRelay(0xFF, buf, sizeof(buf));
-    sDcSentFrame = sFrame;
-}
-
-static void UpdateDaycare(void)
-{
-    struct BoxPokemon mon;
-    u32 sig = MyLoneDaycareMon(&mon) ? GetBoxMonData(&mon, MON_DATA_PERSONALITY) ^ 0x5A5A : 0;
-    u8 mask = PresentMask();
-    if (!MP_IsConnected())
-        return;
-    if (sig != sDcSignature || (mask & ~sDcLastMask) || sFrame - sDcSentFrame > DAYCARE_PERIOD)
-    {
-        sDcSignature = sig;
-        SendDaycare();
-    }
-    sDcLastMask = mask;
-}
-
 // Dev sessions can still receive an egg without persisting or consuming the
 // main game's pending-egg file.
 static struct Pokemon sDevPendingEgg;
 static bool8 sDevHasPendingEgg, sDevEggTaken;
 
-// The EGG made with a friend's POKéMON waits next to the save ("<save>.coopegg")
+// An EGG made with a friend's POKéMON before 1.171.5 waits next to the save ("<save>.coopegg") until taken
 static void EggPath(char *out, size_t size)
 {
     snprintf(out, size, "%s.coopegg", gPlatformSavePath);
-}
-
-void MP_Linkx_SetPendingEgg(const struct Pokemon *egg, u8 friendId)
-{
-    char path[600], name[16], msg[120];
-    u8 species[POKEMON_NAME_LENGTH + 1];
-    FILE *f;
-    EggPath(path, sizeof(path));
-    if (MOEMON_DEV_BUILD)
-    {
-        sDevPendingEgg = *egg;
-        sDevHasPendingEgg = TRUE;
-        sDevEggTaken = FALSE;
-    }
-    f = MOEMON_DEV_BUILD ? NULL : fopen(path, "wb");
-    if (f)
-    {
-        fwrite(egg, sizeof(*egg), 1, f);
-        fclose(f);
-    }
-    Name(friendId, name);
-    GetSpeciesName(species, GetBoxMonData(&sFriendDc[friendId].mon, MON_DATA_SPECIES));
-    {
-        char sp[16];
-        MP_GameToAscii(sp, species, POKEMON_NAME_LENGTH);
-        snprintf(msg, sizeof(msg), "Your DAY CARE POK~MON and %s's %s had an EGG!\nGo and see the DAY CARE MAN.", name, sp);
-    }
-    MP_ShowNotice(msg);
 }
 
 bool8 MP_Linkx_TakePendingEgg(struct Pokemon *egg)
@@ -877,13 +789,7 @@ void MP_Linkx_OnRelay(u8 from, const u8 *data, u16 len)
     case LX_BASE_REQ:  OnBaseReq(from); break;
     case LX_BASE:      OnBase(from, data, len); break;
     case LX_WORLD:     OnWorld(from, data, len); break;
-    case LX_DAYCARE:
-        if (from < MP_MAX_PLAYERS && len >= 2 + sizeof(struct BoxPokemon))
-        {
-            sFriendDc[from].has = data[1];
-            memcpy(&sFriendDc[from].mon, data + 2, sizeof(struct BoxPokemon));
-        }
-        break;
+    case LX_DAYCARE:   break;   // (an older game's lone DAY CARE POKéMON: each DAY CARE is its own now)
     case LX_HOF_START: OnHofStart(from); break;
     case LX_HOF_TEAM:  OnHofTeam(from, data, len); break;
     case LX_TREND:     OnTrend(from, data, len); break;
@@ -894,7 +800,6 @@ void MP_Linkx_OnPlayerLeft(u8 id)
 {
     if (id >= MP_MAX_PLAYERS)
         return;
-    sFriendDc[id].has = FALSE;
     sWorld[id].valid = FALSE;
     // (once every record is here the mix goes ahead: it waits only for us to be free)
     if (sMix.active && !sMix.applyPending && (sMix.mask & (1 << id)))
@@ -915,7 +820,6 @@ void MP_Linkx_Update(void)
         return;
     }
     UpdateMix();
-    UpdateDaycare();
     UpdateWorld();
 }
 
