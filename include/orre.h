@@ -2,10 +2,21 @@
 #ifndef GUARD_ORRE_H
 #define GUARD_ORRE_H
 
-// Colosseum's story flags (std081_flagCheckTrue's numbers), as far as ORRE has them (src/orre/orre_story.c)
-bool8 Orre_Flag(u16 flag);
-void Orre_SetFlag(u16 flag, bool8 on);
-// Kai's own flags past Colosseum's (its scripts' numbers stay below 0xF00)
+// Colosseum's story flags (std081_flagCheckTrue's numbers) kept as Colosseum keeps them: values of 1-32 bits in three
+// levels, from common_rel's table (src/orre/orre_story.c); a number past the table is Kai's own
+#define ORRE_KAI_FLAG_FIRST 0xF00
+#define ORRE_FLAG_LEVEL_WORDS 256
+bool8 Orre_Flag(u16 flag);                       // set (any value but 0)
+void Orre_SetFlag(u16 flag, bool8 on);           // 1 or 0 (std078 / std079)
+u32 Orre_FlagValue(u16 flag);                    // std082_flagGetValue
+void Orre_SetFlagValue(u16 flag, u32 value);     // _flagSet (the low bits that fit)
+u16 Orre_FlagCount(void);                        // Colosseum's flags (0: no pack)
+u8 Orre_FlagWidth(u16 flag);
+void Orre_StoryJump(u16 flag);                   // Colosseum's story jump to FLAG (tests, debug)
+u8 *Orre_StoryState(u32 *size);                  // the values, for "<save>.orre" (orre_shadow.c)
+void Orre_StoryReset(void);
+void Orre_StoryFromOldBits(const u8 *bits, u32 size);   // a format 1 sidecar's flags
+// Kai's own flags (ORRE_KAI_FLAG_FIRST on; Colosseum's numbers stay below)
 #define ORRE_FLAG_SNAG_MACHINE 0xFFF   // the SNAG MACHINE (Colosseum's hero has it from the start: Kai's story gives it)
 
 // Colosseum's world map screen (src/orre/worldmap.c): a 480x320 picture of its own like the BADGE CASE's

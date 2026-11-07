@@ -37,14 +37,12 @@
 
 void MPNet_Log(const char *fmt, ...);
 extern char gPlatformSavePath[];
-u8 *Orre_StoryFlagBytes(u32 *size);
-void Orre_StoryReset(void);
 
 #include "../data/orre_shadow.h"
 #include "../data/orre_shadow_palettes.h"
 
 #define ORRE_MAGIC 0x4552524F   // "ORRE"
-#define ORRE_FORMAT 1
+#define ORRE_FORMAT 2   // 2: the story flags as Colosseum keeps them (orre_story.c); 1: one bit a number
 #define MAX_RECS 128
 #define STEPS_PER_DROP 0x100
 
@@ -752,14 +750,23 @@ static bool8 LoadFrom(const char *path)
 {
     FILE *f = fopen(path, "rb");
     u32 head[4], size;
-    u8 *flags = Orre_StoryFlagBytes(&size);
+    u8 *flags = Orre_StoryState(&size);
     bool8 ok;
     if (f == NULL)
         return FALSE;
-    ok = fread(head, sizeof(head), 1, f) == 1 && head[0] == ORRE_MAGIC && head[1] == ORRE_FORMAT
-      && head[2] == size && head[3] <= MAX_RECS;
+    ok = fread(head, sizeof(head), 1, f) == 1 && head[0] == ORRE_MAGIC && head[3] <= MAX_RECS
+      && ((head[1] == ORRE_FORMAT && head[2] == size) || (head[1] == 1 && head[2] == 0x1000 / 8));
+    if (ok && head[1] == 1)   // format 1: one bit a number (converted: orre_story.c)
+    {
+        u8 old[0x1000 / 8];
+        ok = fread(old, sizeof(old), 1, f) == 1;
+        if (ok)
+            Orre_StoryFromOldBits(old, sizeof(old));
+    }
+    else if (ok)
+        ok = fread(flags, size, 1, f) == 1;
     if (ok)
-        ok = fread(flags, size, 1, f) == 1 && (head[3] == 0 || fread(sRecs, sizeof(sRecs[0]), head[3], f) == head[3]);
+        ok = head[3] == 0 || fread(sRecs, sizeof(sRecs[0]), head[3], f) == head[3];
     fclose(f);
     if (!ok)
     {
@@ -796,7 +803,7 @@ void Orre_Shadow_WriteSidecar(void)
     char path[600];
     AwFile *f;
     u32 head[4], size, i;
-    u8 *flags = Orre_StoryFlagBytes(&size);
+    u8 *flags = Orre_StoryState(&size);
     if (gSaveBlock2Ptr == NULL || MOEMON_DEV_BUILD)   // (a dev build never writes a save or its side files)
         return;
     Path(path, sizeof(path), 0);
