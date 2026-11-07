@@ -1,0 +1,20 @@
+pressuntil A field 5000
+mp orreflag 0x5AE 21
+mp orreflag 0x5AE 99
+mp orreflag 0xA9E 0xDEADBEEF
+mp orreflag 0xD1 0xBEEF
+mp orreflag 0xFFF
+mp orreflag 0x407
+mp orrestory 0xDD3
+mp orreget 0xB57
+mp orreget 0x406
+mp orreget 0xDD3
+mp orreget 0x407
+saveprobe
+mp orreflag 0xA9E 0
+mp shadow reload
+mp orreget 0x5AE
+mp orreget 0xA9E
+mp orreget 0xD1
+mp orreget 0xFFF
+quit

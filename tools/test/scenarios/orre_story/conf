@@ -1,0 +1,12 @@
+# Colosseum's story flags kept as Colosseum keeps them (src/orre/orre_story.c): its table read from ORRE's pack
+# (common_rel), values of their own width (0x5AE 5 bits: 99 keeps its low 5 = 3; 0xA9E 32 bits; 0xD1 16 bits across two
+# words), Kai's own SNAG MACHINE flag apart, Colosseum's story jump (to 0xDD3: the flags before it in the story's
+# order set, it and the ones after cleared), all kept through a save in "<save>.orre" (format 2). Needs ORRE's pack.
+MODE=1
+TMO=90
+EXPECT_A=("[orre] story flags: 3593" "[test] orreflag 0x5AE 21 (width 5)" "[test] orreflag 0x5AE 3 (width 5)"
+          "[test] orreflag 0xA9E 3735928559 (width 32)" "[test] orreflag 0xD1 48879 (width 16)" "[test] orreflag 0xFFF 1 (width 1)"
+          "[test] orre story jump 0xDD3" "[test] orreget 0xB57 1" "[test] orreget 0x406 1" "[test] orreget 0xDD3 0"
+          "[test] orreget 0x407 0" "[test] orreget 0x5AE 3" "[test] orreget 0xA9E 3735928559" "[test] orreget 0xD1 48879"
+          "[test] orreget 0xFFF 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "needs" "more than room")

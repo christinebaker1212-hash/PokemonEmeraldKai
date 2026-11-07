@@ -72,6 +72,16 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
 - **The bike ride between places** (the user, 2026-11-07, for later): a custom version of the SS TIDAL's porthole
   scene, the bike's graphics against the background of Colosseum's original ride, with the SS TIDAL scene's
   animation (ORRE_HANDOFF "The bike ride").
+- **ORRE's people** (the user, 2026-11-07): each Colosseum character model a LOOK > CREATE recipe (field sprite) and
+  the closest Pokemon Showdown trainer sprite (battle picture, at DS size, 80x80, as drawn): ORRE_HANDOFF "Sprites".
+- **The road to the end** (proposed and agreed 2026-11-07; the steps in ORRE_HANDOFF "Next steps"), with the user's
+  answers:
+  - **Double Battles**: ORRE's battles stay Doubles, as Colosseum's are (the user: "Yes").
+  - **Story progress is each player's own save**, as in the other regions (the user: "Own save, like normal regions").
+  - Left to Claude (the user: "Your choice"), decided: **story scenes are faithful** (Colosseum's own scene scripts
+    move the camera and the people, ORRE's engine moving its camera as they say); **Colosseum's P★DA is ORRE's
+    device** (as JOHTO's POKéGEAR is JOHTO's); **level scaling raises Shadow Pokémon with their trainer's team** when
+    it's on (off: Colosseum's levels); **no sky** (the Platinum-style camera looks down, as SINNOH's).
 
 ## Rules to keep
 - The disc image is never committed, and neither are the packs (orre/ is ignored): tools/orre/make_pack.sh builds
@@ -162,7 +172,7 @@ Colosseum's collision. Test: scenario `orre_outskirt_stand` (needs orre/ from ma
   cursor links and which places show, from the game's tables: docs/ORRE_HANDOFF.md "The world map") in a 480x320
   picture of its own (display.c / sdl2.c, as the BADGE CASE's). maps.py `exits` -> gen_maps.py's coord events ->
   data/scripts/orre.inc Orre_EventScript_WorldMap (specials Orre_WorldMap, Orre_WorldMapTravel). Colosseum's story
-  flags: src/orre/orre_story.c (`mp orreflag N [0|1]`; not saved yet). The pack's reader: src/orre/orre_data.c.
+  flags: src/orre/orre_story.c (as Colosseum keeps them, saved in "<save>.orre": ORRE_HANDOFF "Story flags"). The pack's reader: src/orre/orre_data.c.
 
 ## Next (the full list, with what is known of each: docs/ORRE_HANDOFF.md)
 1. The music, converted (the user, 2026-11-07), then the world map's travel scene (the bike ride, as the SS TIDAL's

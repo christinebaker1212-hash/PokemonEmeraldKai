@@ -5,6 +5,7 @@
 #include <string.h>
 #include "platform/gamepad.h"
 #include "global.h"
+#include "orre.h"
 #include "orre_people.h"
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "region_map.h"   // (mapname: GetMapName)
@@ -4126,13 +4127,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "orreflag") == 0)
     {
-        // orreflag N [0|1]: Colosseum's story flag N (hex with 0x) set, or cleared with 0 (src/orre/orre_story.c)
-        bool8 Orre_Flag(u16 flag);
-        void Orre_SetFlag(u16 flag, bool8 on);
-        unsigned long flag = strtoul(arg, NULL, 0);
-        const char *on = strchr(arg, ' ');
-        Orre_SetFlag(flag, on ? atoi(on + 1) != 0 : TRUE);
-        printf("[test] orreflag 0x%lX %d\n", flag, Orre_Flag(flag));
+        // orreflag N [VALUE]: Colosseum's story flag N (hex with 0x) set to 1, or VALUE (src/orre/orre_story.c)
+        char *on;
+        unsigned long flag = strtoul(arg, &on, 0);
+        Orre_SetFlagValue(flag, *on ? strtoul(on, NULL, 0) : 1);
+        printf("[test] orreflag 0x%lX %u (width %u)\n", flag, (unsigned)Orre_FlagValue(flag), Orre_FlagWidth(flag));
+    }
+    else if (strcmp(cmd, "orreget") == 0)   // orreget N: Colosseum's story flag N's value
+        printf("[test] orreget 0x%lX %u\n", strtoul(arg, NULL, 0), (unsigned)Orre_FlagValue(strtoul(arg, NULL, 0)));
+    else if (strcmp(cmd, "orrestory") == 0)
+    {
+        // orrestory N: Colosseum's story jump to flag N (the flags before it in the story's order set)
+        Orre_StoryJump(strtoul(arg, NULL, 0));
     }
     else if (strcmp(cmd, "s3dground") == 0)
     {

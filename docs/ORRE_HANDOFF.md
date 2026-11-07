@@ -34,7 +34,7 @@ rules, and what each tool does. This file is where things stand, what a new sess
 - **Colosseum's own world map** (2026-11-07, src/orre/worldmap.c): stepping on the lot's way out (the trigger loop,
   collision object 2: maps.py `exits`) opens it, all of it the game's own (below, "The world map"). B goes back to the
   field; A on a place travels to Colosseum's entry 0 of its room (all nine are in the game). Only the OUTSKIRT STAND shows until Colosseum's story flags are set: nothing sets them yet but
-  `mp orreflag N` (src/orre/orre_story.c, not saved yet). Tests: scenarios `orre_worldmap`, `orre_worldmap_pan`.
+  `mp orreflag N` (src/orre/orre_story.c: below, "Story flags"). Tests: scenarios `orre_worldmap`, `orre_worldmap_pan`.
   It fills Kai's screen (the user, 2026-11-07: "fit the map to the screen, use zooms and panning"): below, "Drawn".
   No travel scene yet: the user's plan for it is below ("The bike ride").
 
@@ -77,6 +77,17 @@ rules, and what each tool does. This file is where things stand, what a new sess
    sinnoh_feet_row, sinnoh_lift_iron and sinnoh_gym passed with ORRE's hooks in.
 
 ## Next steps (in order)
+The road to the end, agreed with the user 2026-11-07 (their answers: ORRE_DECISIONS "The road to the end"):
+1. **Story state: done** (below, "Story flags"). 2. Colosseum's text, built from the disc (never committed).
+3. Trainers: Colosseum's trainer table -> Kai trainers (teams, prize money, Shadow Pokémon, their person: sprite and
+   picture). 4. **The script converter** (.scd -> Kai scripts at build time, as SINNOH's; the big one).
+5. People on the maps (where Colosseum puts them, shown as its scripts say). 6. Shops, POKéMON CENTERs, the PC.
+7. The opening (the player as the thief, the SNAG MACHINE), then the ride to the OUTSKIRT STAND. 8. RUI follows the host.
+9. The colosseum challenges (PHENAC, PYRITE, THE UNDER, DEEP COLOSSEUM, REALGAM TOWER). 10. Story scenes, faithful.
+11. Shadow Pokémon's open items (SHADOW_POKEMON.md "Still open"). 12. Music (alongside 4). 13. The bike ride.
+14. MT. BATTLE and REALGAM TOWER's post-game, their rewards. 15. Kai's systems (POKéDEX, the card's star,
+   achievements, the P★DA as ORRE's device, the download screen). 16. A full playthrough test, then a release.
+The older notes per part:
 0. **Shadow Pokémon come before the story** (the user, 2026-11-07): their design and the user's decisions are in
    `docs/SHADOW_POKEMON.md`; its open questions are settled with the user as each part is built. Built: the data, the
    gauge, battles, HYPER MODE / CALL, the aura, snagging, purification, the battle confinement (SHADOW_POKEMON.md
@@ -125,6 +136,20 @@ rules, and what each tool does. This file is where things stand, what a new sess
 7. **Snagging and Shadow Pokémon**, in Orre only (state in a sidecar: saves never change layout; Colosseum's story
    flags, src/orre/orre_story.c, go there too).
 8. The in-game download screen when orre/ is missing (as the DANCE machine's rh_screen.c StateNoSongs).
+
+## Story flags (src/orre/orre_story.c, 2026-11-07)
+Colosseum's GS flag module (the decomp: gs_range_8018FE30.c, gs_flag_exact_801908D4.c, gs_flag_get_exact_801906A0.c):
+3593 flags defined in common_rel .data 0x111E04 (count and the story order's head at 0x14A6C0), 8 bytes each: type << 6
+| width (1-32 bits), the story jump's value index (.rodata 0x08: 0, 0, 1, 1, 9, 1023), an item swap (.rodata 0x00:
+{u16 add, u16 remove}), an event (.rodata 0x5C, 24 bytes: party members, P★DA money, a room and a position), the bit
+position (laid out at load: GSflagInitBitPos), the next flag in the story's order. Three levels (1: 40 bits, 2: 207,
+3: 6414), all three in Colosseum's save. The game reads the table from the pack (common/common_rel.rel) and keeps the
+values in "<save>.orre" (format 2; format 1, one bit a number, converted on load). Numbers from 0xF00 are Kai's own
+(ORRE_KAI_FLAG_FIRST: the SNAG MACHINE 0xFFF). **The decomp's setter names are swapped**: std078 ("flagSetFalse")
+sets 1, std079 ("flagSetTrue") sets 0: the script converter must follow what they do. Colosseum's story jump
+(fn_8018FE30: the flags before a flag in the story's order set to their values, it and the rest cleared) is
+`mp orrestory N`, for tests that start at a story point. Debug: `mp orreflag N [VALUE]`, `mp orreget N`. Scenario
+orre_story.
 
 ## Open questions for the user
 - The sky is left out (Platinum's camera looks down at the ground). Keep it that way?
