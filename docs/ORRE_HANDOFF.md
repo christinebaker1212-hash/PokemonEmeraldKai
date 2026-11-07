@@ -101,6 +101,12 @@ rules, and what each tool does. This file is where things stand, what a new sess
    solves the legs' two-bone IK (JOINT1 / JOINT2 / EFFECTOR joints, IK hints = bone lengths, the effector's RObj names
    the target joint); every field model's table starts idle 1, walk 2, run 3. tools/orre/people_sprites.py renders
    them (head joint scaled for GBA proportions, 15 colours, outlines); people_sprites_demo.py draws the sheet.
+   **The user's call (2026-11-07): ORRE's people are LOOK > CREATE recipes instead** ("utilize the character
+   generator for any characters"); the renders above are reference only. First shots shown to the user: WES
+   `010001000a0a0203010000000068` (field hair MORRISON, TRENCH COAT NAVY, PANTS AND BOOTS BLACK; alternate PALMER
+   ...34), RUI `010101030306000104000000005f` (LIZA pigtails, OPEN JACKET, white SHORTS; alternate
+   SHAUNA + RIBBON SKIRT with boots `0101010303060008000000000048`). `mp createddump HEX DIR` dumps a recipe's pictures.
+   Missing from the kit: Wes's goggles and SNAG MACHINE arm, Rui's pink boots and white skirt.
 5. **Words and scripts.** The map scripts (.scd, the GS VM) converted to Kai's (as tools/sinnoh/gen_scripts.py does
    SINNOH's); the text (msg.py) into Kai's charset, controls mapped (`{hero}`, `{rui}`, `{npc}`, `{item}`...). Never
    write ORRE's words or scripts by hand.

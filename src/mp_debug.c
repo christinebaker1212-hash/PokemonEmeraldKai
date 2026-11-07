@@ -2369,6 +2369,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] created %s: bad recipe\n", arg);
     }
+    else if (strcmp(cmd, "createddump") == 0)
+    {
+        // createddump HEX DIR - a CREATE recipe's field frames, front and back pictures as PNGs in DIR
+        struct MpCreated r;
+        char hex[64] = "", dir[400] = ".";
+        void MP_Created_Dump(const struct MpCreated *r, const char *dir);
+        sscanf(arg, "%63s %399s", hex, dir);
+        if (MP_Created_FromHex(hex, &r))
+        {
+            MP_Created_Dump(&r, dir);
+            printf("[test] createddump %s %s\n", hex, dir);
+        }
+        else
+            printf("[test] createddump %s: bad recipe\n", hex);
+    }
     else if (strcmp(cmd, "remoteapp") == 0)
     {
         // remoteapp - each friend's look as we received it (base, CREATE recipe, LOOK > BIKE)
