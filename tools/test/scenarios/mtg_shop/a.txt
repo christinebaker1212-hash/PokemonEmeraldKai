@@ -283,9 +283,9 @@ wait 30
 press A 2
 wait 200
 mp where
-mp warp 14,12,6,5
+mp warp 14,12,7,3
 wait 90
-mp face left
+mp face right
 wait 4
 pressuntillog A 600 mtg: challenge from RHEA
 wait 30
