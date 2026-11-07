@@ -1,0 +1,12 @@
+# Moemon Maker: edits to MAP_MOSSDEEP_CITY_GAME_CORNER_1F (written by the editor; each line has the value it replaced, then the new one)
+map MAP_MOSSDEEP_CITY_GAME_CORNER_1F 12 10
+block 10 0 0x3228 0x3203
+block 10 1 0x0404 0x060B
+block 10 2 0x3230 0x3202
+block 11 2 0x3201 0x3202
+block 10 4 0x320A 0x3215
+block 4 6 0x320A 0x3215
+block 6 6 0x320A 0x3215
+block 4 7 0x320A 0x3215
+block 7 8 0x320A 0x3215
+block 8 8 0x320A 0x3215
