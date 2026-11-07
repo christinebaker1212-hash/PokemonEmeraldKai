@@ -11,8 +11,10 @@
 //   links (lbl_3_data_3B0, 66 of 0x0C): u8 directions (1 up, 2 right, 4 down, 8 left; both for a diagonal), u32 from,
 //     to (menu items): the first link from the cursor's place that has every direction pressed, to a shown place
 // Moving the cursor takes 90 units at 4.5 a frame (the picture and words of the place left fade out over the first
-// half, the new place's in over the second). Drawn at 640x480 by the game, here 2/3 of that in a 480x320 picture of
-// its own, as the BADGE CASE's (display.c, sdl2.c ScreenStep); the game waits while it is open.
+// half, the new place's in over the second). Drawn at 640x480 by the game; here it fills Kai's 480x320 picture (its
+// own, as the BADGE CASE's: display.c, sdl2.c ScreenStep) at 3/4: the screen is a 640x427 window on the game's
+// screen, the boxes held to its corners (the place's picture and words at the bottom, the buttons top right) and the
+// map panned up and down under them to keep the cursor's place clear of the bottom box. The game waits while it is open.
 // A on a place ORRE has a map for travels there (its start: src/orre/orre_maps.h, by Colosseum's room); B cancels.
 #include <math.h>
 #include <stdio.h>
@@ -38,8 +40,11 @@ void MPNet_Log(const char *fmt, ...);
 
 #define CW 480
 #define CH 320
-#define SCALE (320.0f / 480.0f)
-#define OX ((CW - 640 * SCALE) / 2)
+#define SCALE (480.0f / 640.0f)   // (the game's 640 across fills the 480: no bars at the sides)
+#define SH (CH / SCALE)            // the game's screen seen: 640 x 426.7 of its 480 rows
+#define BOX_DY (SH - 480)          // the bottom boxes moved up with the screen's bottom edge
+#define FREE_H (306 + BOX_DY)      // the map left clear above them (the words box's top, 0x91F, at 306)
+#define PAN_MAX (480 - SH)
 
 #define ITEM_FIRST 0x906   // the screen's first menu item (the map)
 #define ITEM_PICTURE 0x91B // the place's picture
@@ -76,10 +81,11 @@ static struct
     s8 chosen;     // sOrreMaps index to travel to, -1 none
     u16 prevKeys;
     u32 frame;
+    float pan;     // how far down the map the screen looks (0..PAN_MAX, in the game's units)
     bool8 enableScript;
     SDL_Renderer *owner;
     SDL_Texture *canvas;
-    SDL_Texture *scene;   // the 640x480 picture the game composes, scaled once onto the canvas
+    SDL_Texture *scene;   // the game's screen as seen (640 x SH), composed 1:1 and scaled once onto the canvas
     struct { u32 id; SDL_Texture *t; } tex[MAX_TEX];
     u32 nTex;
     u16 bigFrame[CW * CH];
@@ -309,6 +315,18 @@ static SDL_Texture *Texture(SDL_Renderer *r, u32 id)
     return t;
 }
 
+// where an item stands on the screen seen: the bottom boxes held to its bottom edge, the buttons' box where the game
+// has it (top right), the map and everything on it panned
+static void ItemShift(u32 i, float *dy)
+{
+    if ((i >= 0x9AC && i <= 0x9B0) || i == ITEM_PICTURE || i == 0xA41 || (i >= ITEM_WORDS && i <= 0x925))
+        *dy = BOX_DY;
+    else if (i >= 0xCA7 && i <= 0xCB3)
+        *dy = 0;
+    else
+        *dy = -W.pan;
+}
+
 // a menu item's sprite at the item's place (moved by dx, dy; a negative width / height mirrors it), on the 640x480
 // screen; picture: another texture in the sprite's rectangle (0: its own)
 static void DrawSprite(SDL_Renderer *r, const Item *it, float dx, float dy, u32 picture, u8 alpha)
@@ -381,8 +399,8 @@ static s32 ShownPlace(u8 *alpha)
     return W.cur;
 }
 
-// the screen's boxes (the place's picture, its words, the buttons' box), in 640x480: the cursor's cross lines stop
-// at them
+// the screen's boxes (the place's picture, its words, the buttons' box), on the screen seen: the cursor's cross lines
+// stop at them
 static const u16 sBoxItems[][2] = {{0x9AD, 0x9B0}, {0x91D, 0x925}, {0xCAB, 0xCB3}};
 static SDL_Rect sBoxes[ARRAY_COUNT(sBoxItems)];
 
@@ -393,9 +411,12 @@ static void FindBoxes(void)
     for (b = 0; b < ARRAY_COUNT(sBoxItems); b++)
     {
         int x0 = 9999, y0 = 9999, x1 = -9999, y1 = -9999;
+        float dy;
         for (i = sBoxItems[b][0]; i <= sBoxItems[b][1]; i++)
             if (GetItem(i, &it))
             {
+                ItemShift(i, &dy);
+                it.y += (s16)roundf(dy);
                 x0 = min(x0, (int)it.x);
                 y0 = min(y0, (int)it.y);
                 x1 = max(x1, it.x + abs(it.w));
@@ -454,7 +475,14 @@ static void DrawLine(SDL_Renderer *r, const Item *it, float dx, float dy, bool8 
     }
 }
 
-// the scene as Colosseum composes it, at 640x480 (no words: they go on the canvas, at its own resolution)
+// the pan that keeps the cursor's place in the middle of the map left clear, as far as the map goes
+static float PanFor(float cy)
+{
+    float p = cy - FREE_H / 2;
+    return p < 0 ? 0 : p > PAN_MAX ? PAN_MAX : p;
+}
+
+// the scene as Colosseum composes it, 1:1 on the screen seen (no words: they go on the canvas, at its own resolution)
 static void DrawScene(SDL_Renderer *r)
 {
     Item it, dot;
@@ -466,37 +494,45 @@ static void DrawScene(SDL_Renderer *r)
     SDL_RenderClear(r);
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
     CursorAt(&cx, &cy);
+    cy -= W.pan;
     // (the cursor's pieces stand round the red diamond: moved with it from where the table puts them)
     GetItem(ITEM_DOT, &dot);
     gx = cx - (dot.x + dot.w / 2.0f);
-    gy = cy - (dot.y + dot.h / 2.0f);
+    gy = cy - (dot.y + dot.h / 2.0f - W.pan);
     spread = W.state == WM_OPEN ? 24.0f * W.t / FADE : 1.5f + 1.5f * sinf(W.frame * 0.12f);
     place = ShownPlace(&alpha);
     while (n++ < 200 && GetItem(i, &it))
     {
         s32 p = PlaceOfItem(i);
+        float dy;
+        ItemShift(i, &dy);
         if (p >= 0)
         {
             if (PlaceShown(p))
-                DrawSprite(r, &it, 0, 0, 0, 255);
+                DrawSprite(r, &it, 0, dy, 0, 255);
         }
         else if (i == ITEM_DOT)
             DrawSprite(r, &it, gx, gy, 0, 255);
         else if (i == ITEM_HLINE)
             DrawLine(r, &it, 0, cy - (it.y + abs(it.h) / 2.0f), TRUE);
         else if (i == ITEM_VLINE)
-            DrawLine(r, &it, cx - (it.x + abs(it.w) / 2.0f), 0, FALSE);
+        {
+            Item down = it;   // (top to bottom of the screen seen)
+            down.y = 0;
+            down.h = (s16)ceilf(SH);
+            DrawLine(r, &down, cx - (it.x + abs(it.w) / 2.0f), 0, FALSE);
+        }
         else if (i >= ITEM_CORNER0 && i <= ITEM_CORNER3)
             DrawSprite(r, &it, gx + (it.w > 0 ? -spread : spread), gy + (it.h > 0 ? -spread : spread), 0, 255);
         else if (i == ITEM_PICTURE)
         {
             if (place >= 0)
-                DrawSprite(r, &it, 0, 0, PlacePicture(place), alpha);
+                DrawSprite(r, &it, 0, dy, PlacePicture(place), alpha);
         }
         // (not drawn: the second picture 0xA41, the one before, which the fade draws in the first's place; and the
         // GameCube's A / B button pictures 0xCA7 / 0xCA8: the canvas draws Kai's own prompts for the controller in use)
         else if (i != 0xA41 && i != ITEM_A && i != ITEM_B)
-            DrawSprite(r, &it, 0, 0, 0, 255);
+            DrawSprite(r, &it, 0, dy, 0, 255);
         if (it.flags & 0x40)
             break;
         i = (u16)it.next;
@@ -515,7 +551,7 @@ static void DrawWords(void)
     if (place >= 0 && GetItem(ITEM_WORDS, &it))
     {
         G_TextAlpha(alpha);
-        G_Text((int)(OX + it.x * SCALE) + 2, (int)(it.y * SCALE) + 10, 0xFFFFFF, 0x303030,
+        G_Text((int)(it.x * SCALE) + 2, (int)((it.y + BOX_DY) * SCALE) + 10, 0xFFFFFF, 0x303030,
                Msg(PlaceWords(place)), (int)(it.w * SCALE) - 4, TF_NORMAL);
         G_TextAlpha(255);
     }
@@ -523,18 +559,18 @@ static void DrawWords(void)
     if (GetItem(ITEM_A, &it))
     {
         snprintf(line, sizeof(line), "{A} %s", Msg(MSG_SELECT));
-        G_Hint((int)(OX + it.x * SCALE), (int)((it.y + it.h / 2.0f) * SCALE) - 8, 0xFFFFFF, 0x303030, line, TF_NORMAL, 1);
+        G_Hint((int)(it.x * SCALE), (int)((it.y + it.h / 2.0f) * SCALE) - 8, 0xFFFFFF, 0x303030, line, TF_NORMAL, 1);
     }
     if (GetItem(ITEM_B, &it))
     {
         snprintf(line, sizeof(line), "{B} %s", Msg(MSG_CANCEL));
-        G_Hint((int)(OX + it.x * SCALE), (int)((it.y + it.h / 2.0f) * SCALE) - 8, 0xFFFFFF, 0x303030, line, TF_NORMAL, 1);
+        G_Hint((int)(it.x * SCALE), (int)((it.y + it.h / 2.0f) * SCALE) - 8, 0xFFFFFF, 0x303030, line, TF_NORMAL, 1);
     }
 }
 
 static void Draw(SDL_Renderer *r)
 {
-    SDL_FRect dst = {OX, 0, 640 * SCALE, 480 * SCALE};
+    SDL_FRect dst = {0, 0, CW, ceilf(SH) * SCALE};
     SDL_SetRenderTarget(r, W.scene);
     DrawScene(r);
     SDL_SetRenderTarget(r, W.canvas);
@@ -579,7 +615,7 @@ SDL_Texture *Orre_WorldMap_Canvas(SDL_Renderer *r)
     }
     if (!W.scene)
     {
-        W.scene = SDL_CreateTexture(r, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 640, 480);
+        W.scene = SDL_CreateTexture(r, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 640, (int)ceilf(SH));
         if (!W.scene)
             return NULL;
         SDL_SetTextureBlendMode(W.scene, SDL_BLENDMODE_NONE);
@@ -673,6 +709,14 @@ bool8 Orre_WorldMap_Step(u16 keys)
     pressed = keys & ~W.prevKeys;
     W.prevKeys = keys;
     W.frame++;
+    {
+        float cx, cy, to;
+        CursorAt(&cx, &cy);
+        to = PanFor(cy);
+        W.pan += (to - W.pan) * 0.2f;   // (eased after the cursor)
+        if (fabsf(to - W.pan) < 0.05f)
+            W.pan = to;
+    }
     switch (W.state)
     {
     case WM_OPEN:
@@ -685,8 +729,13 @@ bool8 Orre_WorldMap_Step(u16 keys)
         if (W.move > 0)
         {
             W.move -= MOVE_STEP;
-            if (W.move < 0)
+            if (W.move <= 0)
+            {
+                float cx, cy;
                 W.move = 0;
+                CursorAt(&cx, &cy);
+                MPNet_Log("orre world map: at room %u, panned %d", PlaceRoom(W.cur), (int)roundf(PanFor(cy)));
+            }
             break;
         }
         if (pressed & A_BUTTON)
@@ -757,6 +806,11 @@ void Orre_WorldMap(void)
     W.cur = CurrentPlace();
     W.prev = -1;
     W.move = 0;
+    {
+        float cx, cy;
+        CursorAt(&cx, &cy);
+        W.pan = PanFor(cy);   // (opened already looking at the place)
+    }
     W.state = WM_OPEN;
     W.t = FADE;
     W.prevKeys = 0xFFFF;   // (the step that opened it isn't a press)

@@ -30,6 +30,11 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
 - **The tile scale is Claude's call** (the user, 2026-11-07): 8 Colosseum units a tile, as the OUTSKIRT STAND has it.
 - **Colosseum's own world map screen** (the user, 2026-11-07): leaving a place through its exits opens Colosseum's
   world map (its own screen, art and travel), never a Kai-style town map. Then the music is converted.
+- **The world map fits the screen** (the user, 2026-11-07: "fit the map to the screen, use zooms and panning if
+  needed"): no bars at the sides; the map fills Kai's 3:2 screen and pans under the boxes (ORRE_HANDOFF "Drawn").
+- **The bike ride between places** (the user, 2026-11-07, for later): a custom version of the SS TIDAL's porthole
+  scene, the bike's graphics against the background of Colosseum's original ride, with the SS TIDAL scene's
+  animation (ORRE_HANDOFF "The bike ride").
 
 ## Rules to keep
 - The disc image is never committed, and neither are the packs (orre/ is ignored): tools/orre/make_pack.sh builds
@@ -121,7 +126,8 @@ Colosseum's collision. Test: scenario `orre_outskirt_stand` (needs orre/ from ma
   flags: src/orre/orre_story.c (`mp orreflag N [0|1]`; not saved yet). The pack's reader: src/orre/orre_data.c.
 
 ## Next (the full list, with what is known of each: docs/ORRE_HANDOFF.md)
-1. The music, converted (the user, 2026-11-07), then the world map's travel scene.
+1. The music, converted (the user, 2026-11-07), then the world map's travel scene (the bike ride, as the SS TIDAL's
+   porthole scene: above).
 2. Colosseum's start positions and people: the map modules' tables (.rel; their records aren't decoded yet: the
    direction / x / y / z records seen in S1_out.rel have no clear stride) for where people stand, and their models.
 3. Sprites: render the character models (with their own animations, still to be read) into GBA-style sprite sheets.

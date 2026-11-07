@@ -22,8 +22,9 @@ rules, and what each tool does. This file is where things stand, what a new sess
   collision object 2: maps.py `exits`) opens it, all of it the game's own (below, "The world map"). B goes back to the
   field; A on a place ORRE has a map for travels to that map's start; a place not in the game yet is refused (a
   buzz). Only the OUTSKIRT STAND shows until Colosseum's story flags are set: nothing sets them yet but
-  `mp orreflag N` (src/orre/orre_story.c, not saved yet). Test: scenario `orre_worldmap`. No travel scene yet (the
-  bike ride: move_demo.map, cam_move_demo_*.cam, lbl_3_data_270).
+  `mp orreflag N` (src/orre/orre_story.c, not saved yet). Tests: scenarios `orre_worldmap`, `orre_worldmap_pan`.
+  It fills Kai's screen (the user, 2026-11-07: "fit the map to the screen, use zooms and panning"): below, "Drawn".
+  No travel scene yet: the user's plan for it is below ("The bike ride").
 
 ## Resources
 - **The disc** (the user's, 2026-11-04): Pokemon Colosseum (USA), GC6E01, an RVZ inside a zip:
@@ -65,8 +66,7 @@ rules, and what each tool does. This file is where things stand, what a new sess
 
 ## Next steps (in order)
 1. **Music, now** (the user, 2026-11-07: "Colosseum's own world map screen, then convert the music"): see 6.
-   Then the world map's own song (worldmap_song) and the travel scene (the bike ride, lbl_3_data_270: per place a
-   camera file, cam_move_demo_01-15, and a speed).
+   Then the world map's own song (worldmap_song) and the travel scene: the user's plan, "The bike ride" below.
 2. **Where people stand, and where doors lead.** The map modules (.rel: REL_M1.md "FieldTable" descriptors) publish
    each room's tables; S1_out.rel has (direction, x, y, z)-like records whose stride isn't decoded. Decode them (the
    decomp's readers of those tables, or XD's decomp) for start positions, people and their models, and for which
@@ -121,14 +121,25 @@ rules, and what each tool does. This file is where things stand, what a new sess
   set; place i's message is msg[order[i]], order = main.dol lbl_802E4F58 = 0 8 6 5 2 1 3 4 7, dol/wm_desc_order.bin),
   the travel scene's cameras (20: lbl_3_data_270) and the cursor's links (66: directions 1 up 2 right 4 down 8 left,
   from, to). THE UNDER's picture is mapsnap008 once flag 0x45D is set.
-- **Drawn** as the game composes it: every piece 1:1 into a 640x480 scene (nearest: stretched pieces never bleed into
+- **Drawn** as the game composes it: every piece 1:1 into a scene (nearest: stretched pieces never bleed into
   their neighbours on the texture), the scene scaled once onto the 480x320 canvas, then the words on top at the
-  canvas's own size. The cursor's cross lines stop at the three boxes (picture, words, buttons). The GameCube's A / B
+  canvas's own size. **Fitted to the screen** (the user, 2026-11-07): the game's 640 across fills Kai's 480 (3/4), so
+  the scene is a 640 x 426.7 window on the game's 640x480 screen; the bottom boxes (picture, words: ItemShift) are
+  held to its bottom edge (53.3 up), the buttons' box stays top right, and the map with its places and cursor pans
+  up and down under them (0-53.3, eased after the cursor: PanFor keeps the cursor's place in the middle of the map
+  left clear above the words box). At the lowest place (PYRITE) the cursor's bottom brackets tuck a little under the
+  words box, as in Colosseum's own layout. No zoom past 3/4 was needed: the places all fit across. The cursor's cross lines stop at the three boxes (picture, words, buttons). The GameCube's A / B
   pictures (0xCA7 / 0xCA8) are left out: Kai's own prompts go there (G_Hint "{A} Select" / "{B} Cancel", the icons
   of the controller in use), as on every other screen of the game.
 - The cursor's pieces (0x91A the red diamond, 0x931-0x934 the brackets, 0x935 / 0x936 the cross lines) are drawn
   round the place's centre here; where Colosseum's code puts them exactly (it moves them from their table places)
   isn't read yet.
+
+## The bike ride (the travel scene: the user's plan, 2026-11-07, for later)
+A custom version of the SS TIDAL's porthole scene (src/field_special_scene.c Task_HandlePorthole /
+ShowSSTidalWhileSailing): the bike's graphics in the ship's place, against the background of Colosseum's original
+ride (move_demo.map, the per-place cameras cam_move_demo_01-15 and speeds of lbl_3_data_270), moving with the SS
+TIDAL scene's animation. Not Colosseum's 3D ride itself.
 
 ## Learned (formats and pitfalls)
 - FSYS member types (byte 2 of the id): 0x02 map model, 0x04 character / object model, 0x06 collision, 0x0A text,
