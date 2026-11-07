@@ -46,8 +46,8 @@ int Mtg_Power(const MtgDuel *d, int obj)
     const MtgObj *o = &d->objs[obj];
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
-    return (m.setPower != MTG_STATIC_NO_SET ? m.setPower : Mtg_Card(o->def)->power) + m.addPower + o->counters11
-         + o->tempPower;
+    int base = o->animUntil && o->animPower != MTG_ANIM_NO_PT ? o->animPower : Mtg_Card(o->def)->power;
+    return (m.setPower != MTG_STATIC_NO_SET ? m.setPower : base) + m.addPower + o->counters11 + o->tempPower;
 }
 
 int Mtg_Toughness(const MtgDuel *d, int obj)
@@ -55,15 +55,23 @@ int Mtg_Toughness(const MtgDuel *d, int obj)
     const MtgObj *o = &d->objs[obj];
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
-    return (m.setToughness != MTG_STATIC_NO_SET ? m.setToughness : Mtg_Card(o->def)->toughness) + m.addToughness
-         + o->counters11 + o->tempToughness;
+    int base = o->animUntil && o->animToughness != MTG_ANIM_NO_PT ? o->animToughness : Mtg_Card(o->def)->toughness;
+    return (m.setToughness != MTG_STATIC_NO_SET ? m.setToughness : base) + m.addToughness + o->counters11
+         + o->tempToughness;
 }
 
 uint32_t Mtg_Keywords(const MtgDuel *d, int obj)
 {
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
-    return Mtg_Card(d->objs[obj].def)->keywords | d->objs[obj].tempKeywords | m.keywords;
+    return Mtg_Card(d->objs[obj].def)->keywords | d->objs[obj].tempKeywords | m.keywords
+         | (d->objs[obj].animUntil ? d->objs[obj].animKeywords : 0);
+}
+
+uint8_t Mtg_ObjTypes(const MtgDuel *d, int obj)
+{
+    const MtgObj *o = &d->objs[obj];
+    return Mtg_Card(o->def)->types | (o->animUntil && o->zone == MTG_ZONE_BATTLEFIELD ? o->animTypes : 0);
 }
 
 uint8_t Mtg_Landwalk(const MtgDuel *d, int obj)
@@ -82,7 +90,7 @@ uint8_t Mtg_Protection(const MtgDuel *d, int obj)
 
 static int IsCreature(const MtgDuel *d, int obj)
 {
-    return d->objs[obj].zone == MTG_ZONE_BATTLEFIELD && (Mtg_Card(d->objs[obj].def)->types & MTG_T_CREATURE);
+    return d->objs[obj].zone == MTG_ZONE_BATTLEFIELD && (Mtg_ObjTypes(d, obj) & MTG_T_CREATURE);
 }
 
 int Mtg_TopOfLibrary(const MtgDuel *d, int player)
@@ -101,6 +109,7 @@ static void ResetPermanentState(MtgObj *o)
     o->counters11 = 0;
     o->attachedTo = MTG_NO_OBJ;
     o->regen = 0;
+    o->animUntil = 0;
 }
 
 // GameAction.changeZone: a card moves (to the library's top when it goes there); a permanent leaving forgets its state
@@ -201,7 +210,7 @@ void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int com
             return;
         if (sourceObj != MTG_NO_OBJ && (Mtg_Protection(d, to.id) & Mtg_ObjColors(d, sourceObj)))
             return;
-        if (!(Mtg_Card(d->objs[to.id].def)->types & MTG_T_CREATURE))
+        if (!(Mtg_ObjTypes(d, to.id) & MTG_T_CREATURE))
             return;   // (planeswalkers: not yet)
         d->objs[to.id].damage += amount;
         Mtg_Event(d, MTG_EV_DAMAGE, sourceObj, to.id, amount);
@@ -707,7 +716,7 @@ static void BuildPriority(MtgDuel *d)
                     continue;   // (mana abilities are used by paying, never on their own; Cycling only from the hand)
                 if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, i, abil[k]))
                     continue;   // (Arrest, Null Rod...)
-                if (ab->cost.tap && (o->tapped || ((c->types & MTG_T_CREATURE) && o->sick
+                if (ab->cost.tap && (o->tapped || ((Mtg_ObjTypes(d, i) & MTG_T_CREATURE) && o->sick
                                                    && !(Mtg_Keywords(d, i) & MTG_KW_BIT(MTG_KW_HASTE)))))
                     continue;
                 if (ab->cost.mana.x) {
@@ -1161,6 +1170,8 @@ static void EndOfTurnCleanup(MtgDuel *d)
         o->tempPower = o->tempToughness = 0;
         o->tempKeywords = 0;
         o->regen = 0;
+        if (o->animUntil == 1)
+            o->animUntil = 0;   // (an Animate until end of turn wears off)
     }
 }
 

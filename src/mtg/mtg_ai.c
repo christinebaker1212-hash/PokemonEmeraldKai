@@ -19,7 +19,7 @@ static int Value(const MtgDuel *d, int obj)   // a creature's rough worth
 
 static int IsCreatureOnField(const MtgDuel *d, int obj)
 {
-    return d->objs[obj].zone == MTG_ZONE_BATTLEFIELD && (Mtg_Card(d->objs[obj].def)->types & MTG_T_CREATURE);
+    return d->objs[obj].zone == MTG_ZONE_BATTLEFIELD && (Mtg_ObjTypes(d, obj) & MTG_T_CREATURE);
 }
 
 static int SideValue(const MtgDuel *d, int player)
@@ -173,6 +173,13 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
     }
     case MTG_API_TAP:
         return 0;
+    case MTG_API_ANIMATE: {   // a land of its own made a creature: before its attack, on its own turn
+        const char *def = Mtg_Param(ab, "Defined");
+        if (!def || strcmp(def, "Self") || d->objs[a->obj].animUntil || d->active != me || d->step != MTG_STEP_MAIN1
+            || d->objs[a->obj].tapped || !Mtg_Param(ab, "Power"))
+            return 0;
+        return 5;
+    }
     case MTG_API_CHANGE_ZONE_ALL: {   // off the battlefield: as DestroyAll; a graveyard's: a little, on its own turn
         const char *o = Mtg_Param(ab, "Origin");
         if (o && strstr(o, "Battlefield"))
@@ -346,7 +353,7 @@ static void TriggerTarget(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
         } else {
             const MtgObj *o = &d->objs[t->id];
             mine = (o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner) == q->player;
-            worth = (Mtg_Card(o->def)->types & MTG_T_CREATURE) ? Mtg_Card(o->def)->power * 2 + Mtg_Card(o->def)->toughness
+            worth = (Mtg_ObjTypes(d, t->id) & MTG_T_CREATURE) ? Mtg_Card(o->def)->power * 2 + Mtg_Card(o->def)->toughness
                                                                 : Mtg_ManaCostTotal(&Mtg_Card(o->def)->cost);
         }
         s = (mine == helps ? 100 : 0) + (mine == helps ? worth : -worth);
@@ -395,7 +402,7 @@ static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
         for (i = 0; i < q->candidateCount; i++) {
             const MtgObj *o = &d->objs[q->candidates[i]];
             int mine = (o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner) == q->player;
-            int worth = o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_Card(o->def)->types & MTG_T_CREATURE)
+            int worth = o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_ObjTypes(d, q->candidates[i]) & MTG_T_CREATURE)
                       ? Value(d, q->candidates[i]) : Mtg_ManaCostTotal(&Mtg_Card(o->def)->cost);
             int sc = mine == helps ? 100 + worth : -worth;
             if (sc > bestS)
@@ -407,7 +414,7 @@ static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
     for (i = 0; i < q->candidateCount; i++) {
         const MtgObj *o = &d->objs[q->candidates[i]];
         const MtgCardDef *c = Mtg_Card(o->def);
-        int v = o->zone == MTG_ZONE_BATTLEFIELD && (c->types & MTG_T_CREATURE) ? Value(d, q->candidates[i])
+        int v = o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_ObjTypes(d, q->candidates[i]) & MTG_T_CREATURE) ? Value(d, q->candidates[i])
               : Mtg_ManaCostTotal(&c->cost) + ((c->types & MTG_T_LAND) ? 2 : 0);
         if (v < bestV) {
             bestV = v;

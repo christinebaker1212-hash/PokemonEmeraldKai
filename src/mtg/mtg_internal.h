@@ -30,7 +30,8 @@ enum {
     MTG_API_REGENERATE,       // RegenerateEffect: a shield on each creature (Defined$ Self or the target)
     MTG_API_TOKEN,            // TokenEffect: TokenAmount$ tokens of TokenScript$ for TokenOwner$ (Mtg_TokenDef)
     MTG_API_CHARM,            // CharmEffect: "choose one" (Choices$): each mode is offered as its own action
-    MTG_API_CHANGE_ZONE_ALL,  // ChangeZoneAllEffect: every ChangeType$ card from Origin$ (a target player's) to Destination$
+    MTG_API_CHANGE_ZONE_ALL,
+    MTG_API_ANIMATE,          // AnimateEffect: becomes Power$/Toughness$ Types$ Colors$ with Keywords$ (until end of turn)  // ChangeZoneAllEffect: every ChangeType$ card from Origin$ (a target player's) to Destination$
     MTG_API_COUNT
 };
 

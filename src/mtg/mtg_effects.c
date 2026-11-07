@@ -13,13 +13,13 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Tap", MTG_API_TAP}, {"Untap", MTG_API_UNTAP}, {"Counter", MTG_API_COUNTER},
     {"Sacrifice", MTG_API_SACRIFICE}, {"PutCounter", MTG_API_PUT_COUNTER}, {"Attach", MTG_API_ATTACH},
     {"Regenerate", MTG_API_REGENERATE}, {"Token", MTG_API_TOKEN},
-    {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL},
+    {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL}, {"Animate", MTG_API_ANIMATE},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
-    "ChangeZoneAll",
+    "ChangeZoneAll", "Animate",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -399,6 +399,57 @@ static int EachChooses(MtgDuel *d, const MtgResolveCtx *ctx, const Defined *who,
 
 static void DiscardOne(MtgDuel *d, int obj) { Mtg_MoveTo(d, obj, MTG_ZONE_GRAVEYARD); }
 
+// Animate's Types$ ("Artifact,Creature,Assembly-Worker": the card types; subtypes are only words) -> MTG_T_* bits
+static int AnimTypes(const char *s, int *ok)
+{
+    static const struct { const char *name; int bit; } sT[] = {
+        {"Creature", MTG_T_CREATURE}, {"Artifact", MTG_T_ARTIFACT}, {"Land", MTG_T_LAND}, {"Enchantment", MTG_T_ENCHANTMENT}};
+    char buf[96], *p = buf, *t;
+    int bits = 0;
+    unsigned k;
+    *ok = 1;
+    if (!s)
+        return 0;
+    if (strlen(s) >= sizeof(buf)) {
+        *ok = 0;
+        return 0;
+    }
+    strcpy(buf, s);
+    while ((t = Mtg_Token(&p, ',')) != NULL) {
+        int found = 0;
+        for (k = 0; k < sizeof(sT) / sizeof(sT[0]); k++)
+            if (strcmp(t, sT[k].name) == 0)
+                bits |= sT[k].bit, found = 1;
+        if (!found && !(t[0] >= 'A' && t[0] <= 'Z'))
+            *ok = 0;   // (a creature type: a word, kept by nothing here)
+    }
+    return bits;
+}
+
+// Colors$ "Red" / "Green,White" -> MTG_COLOR_BIT mask (-1: unknown)
+static int AnimColors(const char *s)
+{
+    static const char *const sNames[5] = {"White", "Blue", "Black", "Red", "Green"};
+    char buf[64], *p = buf, *t;
+    int mask = 0, k;
+    if (!s)
+        return 0;
+    if (strlen(s) >= sizeof(buf))
+        return -1;
+    strcpy(buf, s);
+    while ((t = Mtg_Token(&p, ',')) != NULL) {
+        int found = 0;
+        for (k = 0; k < 5; k++)
+            if (strcmp(t, sNames[k]) == 0)
+                mask |= MTG_COLOR_BIT(k), found = 1;
+        if (strcmp(t, "Colorless") == 0)
+            found = 1;
+        if (!found)
+            return -1;
+    }
+    return mask;
+}
+
 // "Graveyard,Hand" -> zone bits (0: one it doesn't know)
 static unsigned ZoneList(const char *s)
 {
@@ -582,6 +633,27 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         for (i = 0; i < MTG_PLAYERS; i++)
             if (shuffled[i] && sh && strcmp(sh, "True") == 0)
                 Mtg_ShuffleLibrary(d, i);
+        break;
+    }
+    case MTG_API_ANIMATE: {   // it becomes ... until end of turn (Duration$ Permanent: for good)
+        const char *dur = Mtg_Param(ab, "Duration"), *pw = Mtg_Param(ab, "Power"), *tg = Mtg_Param(ab, "Toughness");
+        int types = AnimTypes(Mtg_Param(ab, "Types"), &ok), colors = AnimColors(Mtg_Param(ab, "Colors"));
+        uint32_t kw = KeywordList(Mtg_Param(ab, "Keywords"), &ok);
+        Targets(d, ctx, ab, DEF_CARD, &who);
+        for (i = 0; i < who.n; i++) {
+            MtgObj *o;
+            if (!OnBattlefield(d, &who.t[i]))
+                continue;
+            o = &d->objs[who.t[i].id];
+            o->animUntil = (uint8_t)(dur && strcmp(dur, "Permanent") == 0 ? 2 : 1);
+            o->animTypes = (uint8_t)types;
+            o->animPower = (int8_t)(pw ? Mtg_Amount(d, ctx, card, pw, &ok) : MTG_ANIM_NO_PT);
+            o->animToughness = (int8_t)(tg ? Mtg_Amount(d, ctx, card, tg, &ok) : MTG_ANIM_NO_PT);
+            o->animColors = (uint8_t)(colors > 0 ? colors : 0);
+            o->animOverwrite = (uint8_t)(Mtg_Param(ab, "OverwriteColors") != NULL || (colors >= 0 && Mtg_Param(ab, "Colors")));
+            o->animKeywords = kw & ((1u << MTG_KW_COUNT) - 1);
+            Mtg_Event(d, MTG_EV_COUNTERS, who.t[i].id, 0, o->counters11);   // (the table redraws it)
+        }
         break;
     }
     case MTG_API_REGENERATE:   // a shield on each: the next destruction this turn regenerates it instead
@@ -838,6 +910,8 @@ static const char *const sApiParams[MTG_API_COUNT][10] = {
     [MTG_API_DESTROY] = {"NoRegen"},
     [MTG_API_DESTROY_ALL] = {"ValidCards", "NoRegen"},
     [MTG_API_CHANGE_ZONE_ALL] = {"Origin", "Destination", "ChangeType", "Shuffle", "UseAllOriginZones"},
+    [MTG_API_ANIMATE] = {"Power", "Toughness", "Types", "Colors", "OverwriteColors", "Keywords", "RemoveCreatureTypes",
+                         "Duration"},
     [MTG_API_GAIN_LIFE] = {"LifeAmount"},
     [MTG_API_LOSE_LIFE] = {"LifeAmount"},
     [MTG_API_PUMP] = {"NumAtt", "NumDef", "KW"},
@@ -955,6 +1029,18 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return 1;
     case MTG_API_DESTROY_ALL:
         return (v = Mtg_Param(ab, "ValidCards")) && Mtg_ValidSpecKnown(v);
+    case MTG_API_ANIMATE: {
+        const char *dur = Mtg_Param(ab, "Duration"), *rc = Mtg_Param(ab, "RemoveCreatureTypes");
+        AnimTypes(Mtg_Param(ab, "Types"), &ok);
+        if (!ok || AnimColors(Mtg_Param(ab, "Colors")) < 0 || (dur && strcmp(dur, "Permanent")) || (rc && strcmp(rc, "True")))
+            return 0;
+        KeywordList(Mtg_Param(ab, "Keywords"), &ok);
+        if (!ok || !AmountKnown(ab, "Power", 0) || !AmountKnown(ab, "Toughness", 0))
+            return 0;
+        if (Mtg_Param(ab, "Power") && !Mtg_Param(ab, "Toughness"))
+            return 0;
+        return ab->tgt || Mtg_Param(ab, "Defined");
+    }
     case MTG_API_CHANGE_ZONE_ALL: {
         const char *o = Mtg_Param(ab, "Origin"), *dz = Mtg_Param(ab, "Destination");
         if (!o || !dz || !ZoneList(o) || !ZoneList(dz) || (ZoneList(dz) & (ZoneList(dz) - 1)) || (ZoneList(o) & ZoneList(dz))

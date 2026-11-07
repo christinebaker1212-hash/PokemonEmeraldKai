@@ -44,7 +44,7 @@ int Mtg_ManaAbilityColors(const MtgDuel *d, int obj, int *amount)
     *amount = 1;
     if (o->zone != MTG_ZONE_BATTLEFIELD || o->tapped)
         return 0;
-    if ((c->types & MTG_T_CREATURE) && o->sick && !(Mtg_Keywords(d, obj) & MTG_KW_BIT(MTG_KW_HASTE)))
+    if ((Mtg_ObjTypes(d, obj) & MTG_T_CREATURE) && o->sick && !(Mtg_Keywords(d, obj) & MTG_KW_BIT(MTG_KW_HASTE)))
         return 0;
     uint16_t abil[16];
     int abilCount = Mtg_ObjAbilities(d, obj, abil, 16);   // (Citanul Hierophants' creatures too)

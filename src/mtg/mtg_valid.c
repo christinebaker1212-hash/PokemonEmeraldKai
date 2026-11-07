@@ -9,7 +9,10 @@ static const char *const sColorProps[5] = {"White", "Blue", "Black", "Red", "Gre
 
 uint8_t Mtg_ObjColors(const MtgDuel *d, int obj)
 {
-    return Mtg_Card(d->objs[obj].def)->colors;
+    const MtgObj *o = &d->objs[obj];
+    if (o->animUntil && o->zone == MTG_ZONE_BATTLEFIELD)   // (an Animate's colors: instead, or besides)
+        return o->animOverwrite ? o->animColors : (uint8_t)(Mtg_Card(o->def)->colors | o->animColors);
+    return Mtg_Card(o->def)->colors;
 }
 
 static int TypeBit(const char *t, size_t n)
@@ -86,7 +89,7 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
     if (n == 9 && strncmp(p, "Colorless", 9) == 0)
         return !d || ((Mtg_ObjColors(d, obj) == 0) ^ neg);
     if ((bit = TypeBit(p, n)) != 0 && bit != 0xFF)
-        return !d || (((c->types & bit) != 0) ^ neg);
+        return !d || (((Mtg_ObjTypes(d, obj) & bit) != 0) ^ neg);
     if (n == 5 && strncmp(p, "Basic", 5) == 0)
         return !d || (((c->supertypes & MTG_ST_BASIC) != 0) ^ neg);
     if (n == 9 && strncmp(p, "Legendary", 9) == 0)
@@ -199,7 +202,7 @@ static int Alternative(const MtgDuel *d, int isPlayer, int id, const char *a, si
     if ((tn == 3 && strncmp(a, "Any", 3) == 0) && !dot) {
         if (!d)
             return 1;
-        return isPlayer || (Mtg_Card(d->objs[id].def)->types & (MTG_T_CREATURE | MTG_T_PLANESWALKER));
+        return isPlayer || (Mtg_ObjTypes(d, id) & (MTG_T_CREATURE | MTG_T_PLANESWALKER));
     }
     if ((tn == 6 && strncmp(a, "Player", 6) == 0) || (tn == 8 && strncmp(a, "Opponent", 8) == 0)
         || (tn == 3 && strncmp(a, "You", 3) == 0)) {
@@ -231,7 +234,7 @@ static int Alternative(const MtgDuel *d, int isPlayer, int id, const char *a, si
         return 0;
     if (d) {
         const MtgCardDef *c = Mtg_Card(d->objs[id].def);
-        if (bit && bit != 0xFF && !(c->types & bit))
+        if (bit && bit != 0xFF && !(Mtg_ObjTypes(d, id) & bit))
             return 0;
         if (!bit && !HasSubtype(c, a, tn))
             return 0;

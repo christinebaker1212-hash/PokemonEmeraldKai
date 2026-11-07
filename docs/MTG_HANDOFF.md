@@ -42,6 +42,11 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.140.0)
+- Animate (manlands, Animate Land, Chimeric Staff...): COOP_NOTES "MAGIC's Animate". 2190 of 5408. Still out:
+  RemoveCardTypes / RemoveKeywords / RemoveLandTypes, Abilities$ / Triggers$ / staticAbilities$ granted by an Animate,
+  creature types of animated permanents for Valid specs (Mishra's Factory's Assembly-Worker), UntilYourNextUpkeep.
+
 ## Status (2026-11-07: 1.139.0)
 - ChangeZoneAll, painlands, Pump's landwalk / can't block / can't attack: COOP_NOTES "MAGIC's mass moves, painlands
   and pump extras". 2162 of 5408. Next: counters beyond +1/+1 (CHARGE, STORAGE, P2P2...: PutCounter 41, SubCounter

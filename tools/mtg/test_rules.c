@@ -1302,6 +1302,21 @@ static void TestSearch(void)
         sD.objs[walker].attacking = 1;
         CHECK(!Mtg_CanBlock(&sD, wall, walker), "the bears can't block this turn");
     }
+
+    Table();   // TREETOP VILLAGE: {1}{G}: a 3/3 green Ape with trample until end of turn (still a land)
+    {
+        int factory = Put(0, "Treetop Village", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Forest", 2);
+        CHECK(!(Mtg_ObjTypes(&sD, factory) & MTG_T_CREATURE), "a land, no creature");
+        Do(MTG_ACT_ACTIVATE, factory, -1, 0);
+        PassBoth();
+        CHECK((Mtg_ObjTypes(&sD, factory) & (MTG_T_CREATURE | MTG_T_LAND)) == (MTG_T_CREATURE | MTG_T_LAND)
+                  && Mtg_Power(&sD, factory) == 3 && (Mtg_Keywords(&sD, factory) & MTG_KW_BIT(MTG_KW_TRAMPLE))
+                  && Mtg_ObjColors(&sD, factory) == MTG_COLOR_BIT(MTG_G),
+              "a 3/3 green trampling creature land (power %d)", Mtg_Power(&sD, factory));
+        GoTo(1, MTG_STEP_UPKEEP);
+        CHECK(!(Mtg_ObjTypes(&sD, factory) & MTG_T_CREATURE), "the next turn: a land again");
+    }
 }
 
 static void TestTriggers(void)

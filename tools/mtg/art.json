@@ -468,6 +468,13 @@
 "number": "229",
 "set": "mmq"
 },
+"Ancient Kavu": {
+"artist": "Glen Angus",
+"file": "inv_136",
+"frame": "1997",
+"number": "136",
+"set": "inv"
+},
 "Ancient Runes": {
 "artist": "Susan Van Camp",
 "file": "tmp_161",
@@ -572,6 +579,13 @@
 "frame": "1997",
 "number": "77",
 "set": "jud"
+},
+"Animate Land": {
+"artist": "Rebecca Guay",
+"file": "nem_101",
+"frame": "1997",
+"number": "101",
+"set": "nem"
 },
 "Ankh of Mishra": {
 "artist": "Amy Weber",
@@ -818,6 +832,13 @@
 "number": "119",
 "set": "4ed"
 },
+"Ashnod's Transmogrant": {
+"artist": "Mark Tedin",
+"file": "bchr_93",
+"frame": "1993",
+"number": "93",
+"set": "bchr"
+},
 "Aspect of Wolf": {
 "artist": "Jeff A. Menges",
 "file": "4ed_233",
@@ -915,6 +936,13 @@
 "frame": "1993",
 "number": "225",
 "set": "ice"
+},
+"Aurora Griffin": {
+"artist": "Ciruelo",
+"file": "pls_2",
+"frame": "1997",
+"number": "2",
+"set": "pls"
 },
 "Avatar of Fury": {
 "artist": "rk post",
@@ -2386,6 +2414,13 @@
 "number": "239",
 "set": "inv"
 },
+"Chariot of the Sun": {
+"artist": "Gerry Grace",
+"file": "mir_297",
+"frame": "1997",
+"number": "297",
+"set": "mir"
+},
 "Chastise": {
 "artist": "Carl Critchlow",
 "file": "jud_8",
@@ -2434,6 +2469,13 @@
 "frame": "1997",
 "number": "56",
 "set": "uds"
+},
+"Chimeric Staff": {
+"artist": "Michael Sutfin",
+"file": "usg_288",
+"frame": "1997",
+"number": "288",
+"set": "usg"
 },
 "Chlorophant": {
 "artist": "John Avon",
@@ -3548,6 +3590,13 @@
 "number": "10",
 "set": "usg"
 },
+"Disciple of Kangee": {
+"artist": "Wayne England",
+"file": "pls_3",
+"frame": "1997",
+"number": "3",
+"set": "pls"
+},
 "Disciple of Law": {
 "artist": "Matthew D. Wilson",
 "file": "usg_11",
@@ -4479,6 +4528,13 @@
 "number": "144",
 "set": "ons"
 },
+"Faerie Conclave": {
+"artist": "Val Mayerik",
+"file": "ulg_139",
+"frame": "1997",
+"number": "139",
+"set": "ulg"
+},
 "Fallen Angel": {
 "artist": "Anson Maddocks",
 "file": "bchr_32",
@@ -5081,6 +5137,13 @@
 "number": "236",
 "set": "ice"
 },
+"Forbidding Watchtower": {
+"artist": "Mark Brill",
+"file": "ulg_140",
+"frame": "1997",
+"number": "140",
+"set": "ulg"
+},
 "Force Spike": {
 "artist": "John Matson",
 "file": "5ed_88",
@@ -5249,6 +5312,13 @@
 "number": "87",
 "set": "sth"
 },
+"Fylamarid": {
+"artist": "Una Fricker",
+"file": "tmp_64",
+"frame": "1997",
+"number": "64",
+"set": "tmp"
+},
 "Fyndhorn Bow": {
 "artist": "Rob Alexander",
 "file": "ice_318",
@@ -5395,6 +5465,13 @@
 "frame": "1997",
 "number": "192",
 "set": "mmq"
+},
+"Ghitu Encampment": {
+"artist": "Don Hazeltine",
+"file": "ulg_141",
+"frame": "1997",
+"number": "141",
+"set": "ulg"
 },
 "Ghitu Fire-Eater": {
 "artist": "Melissa A. Benson",
@@ -6936,6 +7013,13 @@
 "number": "199",
 "set": "ody"
 },
+"Kamahl, Fist of Krosa": {
+"artist": "Matthew D. Wilson",
+"file": "ons_268",
+"frame": "1997",
+"number": "268",
+"set": "ons"
+},
 "Kamahl, Pit Fighter": {
 "artist": "Kev Walker",
 "file": "ody_198",
@@ -6949,6 +7033,20 @@
 "frame": "1993",
 "number": "32",
 "set": "4ed"
+},
+"Karn's Touch": {
+"artist": "Alan Pollack",
+"file": "mmq_86",
+"frame": "1997",
+"number": "86",
+"set": "mmq"
+},
+"Karn, Silver Golem": {
+"artist": "Mark Zug",
+"file": "usg_298",
+"frame": "1997",
+"number": "298",
+"set": "usg"
 },
 "Karoo Meerkat": {
 "artist": "Janine Johnston",
@@ -8063,6 +8161,13 @@
 "number": "39",
 "set": "uds"
 },
+"Metathran Transport": {
+"artist": "Glen Angus",
+"file": "inv_62",
+"frame": "1997",
+"number": "62",
+"set": "inv"
+},
 "Metathran Zombie": {
 "artist": "Arnie Swekel",
 "file": "inv_63",
@@ -8209,6 +8314,13 @@
 "frame": "1997",
 "number": "158",
 "set": "ons"
+},
+"Mishra's Groundbreaker": {
+"artist": "Randy Gallegos",
+"file": "all_123",
+"frame": "1993",
+"number": "123",
+"set": "all"
 },
 "Mishra's Helix": {
 "artist": "Berry",
@@ -9869,6 +9981,13 @@
 "number": "118",
 "set": "apc"
 },
+"Quirion Druid": {
+"artist": "John Matson",
+"file": "vis_116",
+"frame": "1997",
+"number": "116",
+"set": "vis"
+},
 "Quirion Dryad": {
 "artist": "Don Hazeltine",
 "file": "pls_89",
@@ -9959,6 +10078,13 @@
 "frame": "1997",
 "number": "262",
 "set": "pinv"
+},
+"Raging Spirit": {
+"artist": "Scott M. Fischer",
+"file": "mir_188",
+"frame": "1997",
+"number": "188",
+"set": "mir"
 },
 "Rain of Blades": {
 "artist": "Rob Alexander",
@@ -11654,6 +11780,13 @@
 "number": "269",
 "set": "ody"
 },
+"Singe": {
+"artist": "John Avon",
+"file": "pls_71",
+"frame": "1997",
+"number": "71",
+"set": "pls"
+},
 "Sisay's Ring": {
 "artist": "Donato Giancola",
 "file": "vis_154",
@@ -12067,6 +12200,13 @@
 "number": "48",
 "set": "mmq"
 },
+"Sorceress Queen": {
+"artist": "Kaja Foglio",
+"file": "4ed_162",
+"frame": "1993",
+"number": "162",
+"set": "4ed"
+},
 "Soul Barrier": {
 "artist": "Harold McNeill",
 "file": "ice_103",
@@ -12410,6 +12550,13 @@
 "number": "163",
 "set": "ody"
 },
+"Stalking Stones": {
+"artist": "Stephen Daniele",
+"file": "tmp_327",
+"frame": "1997",
+"number": "327",
+"set": "tmp"
+},
 "Stamina": {
 "artist": "Paolo Parente",
 "file": "mmq_277",
@@ -12514,6 +12661,13 @@
 "frame": "1997",
 "number": "99",
 "set": "usg"
+},
+"Still Life": {
+"artist": "Matt Cavotta",
+"file": "ody_275",
+"frame": "1997",
+"number": "275",
+"set": "ody"
 },
 "Stinging Barrier": {
 "artist": "Pat Lewis",
@@ -13089,6 +13243,13 @@
 "number": "164",
 "set": "4ed"
 },
+"Testament of Faith": {
+"artist": "Roger Raupp",
+"file": "ody_55",
+"frame": "1997",
+"number": "55",
+"set": "ody"
+},
 "Thaumatog": {
 "artist": "Monte Michael Moore",
 "file": "ody_295",
@@ -13151,6 +13312,13 @@
 "frame": "1997",
 "number": "139",
 "set": "uds"
+},
+"Thran Forge": {
+"artist": "Mark Poole",
+"file": "wth_159",
+"frame": "1997",
+"number": "159",
+"set": "wth"
 },
 "Thran Foundry": {
 "artist": "John Zeleznik",
@@ -13446,6 +13614,13 @@
 "number": "84",
 "set": "lgn"
 },
+"Toymaker": {
+"artist": "Frank Kelly Freas",
+"file": "mmq_314",
+"frame": "1997",
+"number": "314",
+"set": "mmq"
+},
 "Trade Routes": {
 "artist": "Matt Cavotta",
 "file": "mmq_112",
@@ -13557,6 +13732,13 @@
 "frame": "1997",
 "number": "111",
 "set": "ody"
+},
+"Treetop Village": {
+"artist": "Anthony S. Waters",
+"file": "ulg_143",
+"frame": "1997",
+"number": "143",
+"set": "ulg"
 },
 "Tremble": {
 "artist": "Ciruelo",
@@ -14152,6 +14334,13 @@
 "frame": "1997",
 "number": "133",
 "set": "pcy"
+},
+"Vivify": {
+"artist": "Greg Staples",
+"file": "ody_281",
+"frame": "1997",
+"number": "281",
+"set": "ody"
 },
 "Vizzerdrix": {
 "artist": "Eric Peterson",
@@ -14922,6 +15111,13 @@
 "frame": "1997",
 "number": "345",
 "set": "5ed"
+},
+"Xanthic Statue": {
+"artist": "Hannibal King",
+"file": "wth_163",
+"frame": "1997",
+"number": "163",
+"set": "wth"
 },
 "Xira Arien": {
 "artist": "Melissa A. Benson",

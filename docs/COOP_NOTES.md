@@ -3587,6 +3587,19 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   (Mtg_Landwalk), "HIDDEN CARDNAME can't block." / "can't attack." / "can't attack or block." (Mtg_CanBlock, CanAttack).
 - Tests: test_rules.c (EVACUATION, FELDON'S CANE, ADARKAR WASTES, ANCIENT TOMB, UNSEEN WALKER, JAMURAAN LION).
 
+## MAGIC's Animate (1.140.0)
+
+- MtgObj animUntil (1 until end of turn: EndOfTurnCleanup ends it; 2 for good; a zone change ends it), animTypes,
+  animPower / animToughness (MTG_ANIM_NO_PT: its own), animColors + animOverwrite, animKeywords.
+- Mtg_ObjTypes(d, obj): the card's types plus an Animate's on the battlefield. Used by the rules' creature tests
+  (IsCreature, combat, mana sickness, Valid type properties, "any target"), the AI and the board (IsLand: an animated
+  land stands in the creature row; P/T plate, tooltips). Mtg_Power / Toughness take the animated base, Mtg_Keywords the
+  keywords, Mtg_ObjColors the colors.
+- MTG_API_ANIMATE: Power$ / Toughness$ (amounts), Types$ (card types; creature types are words only), Colors$ (names,
+  OverwriteColors$), Keywords$ (KeywordList), RemoveCreatureTypes$ True, Duration$ Permanent; Defined$ or a target.
+  AI: animates its own land (Defined$ Self) in its first main phase.
+- Tests: test_rules.c TREETOP VILLAGE (3/3 green trampler, a land again next turn); scenario mtg_animate.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

@@ -1,0 +1,6 @@
+# MAGIC's Animate on the table: TREETOP VILLAGE's {1}{G} makes it a 3/3 green Ape with trample until end of turn; it stands with
+# the creatures (P/T plate) while it is one. Shots an_menu, an_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Treetop Village to focus")

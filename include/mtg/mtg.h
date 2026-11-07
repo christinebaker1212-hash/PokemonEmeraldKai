@@ -35,6 +35,7 @@ enum {
 #define MTG_KW_BIT(k) (1u << (k))
 // until-end-of-turn extras a Pump$ gives (tempKeywords only, past the keywords): landwalk by basic type (bit 16 +
 // MTG_W..MTG_G), "CARDNAME can't block.", "CARDNAME can't attack."
+#define MTG_ANIM_NO_PT (-128)
 #define MTG_KWX_WALK_SHIFT 16
 #define MTG_KWX_CANT_BLOCK (1u << 21)
 #define MTG_KWX_CANT_ATTACK (1u << 22)
@@ -115,6 +116,10 @@ typedef struct {
     int16_t counters11;           // +1/+1 counters (-1/-1 as negative)
     uint16_t attachedTo;          // an Aura: the creature it enchants (MTG_NO_OBJ: none)
     uint8_t regen;                // regeneration shields until end of turn (RegenerateEffect)
+    uint8_t animUntil;            // Animate: 0 none, 1 until end of turn, 2 for good; then what it became:
+    uint8_t animTypes, animColors, animOverwrite;   // card types added; colors (instead of its own when animOverwrite)
+    int8_t animPower, animToughness;   // its base power / toughness (MTG_ANIM_NO_PT: its own)
+    uint32_t animKeywords;
     uint8_t ctrlBase;             // under a static's control (Control Magic): its controller before + 1 (0: none)
     uint32_t seq;                 // order within its zone (higher = newer; the library's top is the highest)
 } MtgObj;
@@ -262,6 +267,7 @@ const MtgEvent *Mtg_EventAt(const MtgDuel *d, uint32_t n);   // n < eventCount; 
 
 // card state as rules see it (counters, until-end-of-turn effects)
 int Mtg_Power(const MtgDuel *d, int obj);
+uint8_t Mtg_ObjTypes(const MtgDuel *d, int obj);   // its card types now (an Animate's added: a land that became a creature)
 int Mtg_Toughness(const MtgDuel *d, int obj);
 uint32_t Mtg_Keywords(const MtgDuel *d, int obj);
 uint8_t Mtg_Landwalk(const MtgDuel *d, int obj);      // by basic land type W..G (MTG_COLOR_BIT)

@@ -302,7 +302,11 @@ static float HandSpacing(int n)
     return space / (n - 1) > 33 ? 33 : space / (n - 1);
 }
 
-static int IsLand(int obj) { return (Def(obj)->types & MTG_T_LAND) != 0; }
+static int IsLand(int obj)   // (a land animated into a creature stands with the creatures)
+{
+    uint8_t t = B.view.objs[obj].zone == MTG_ZONE_BATTLEFIELD ? Mtg_ObjTypes(&B.view, obj) : Def(obj)->types;
+    return (t & MTG_T_LAND) && !(t & MTG_T_CREATURE);
+}
 
 static void BuildRows(void)
 {
@@ -624,7 +628,7 @@ static const char *WhyCantAttack(int obj)
 {
     const MtgObj *o = &B.duel.objs[obj];
     uint32_t kw = Mtg_Keywords(&B.duel, obj);
-    if (!(Def(obj)->types & MTG_T_CREATURE))
+    if (!(Mtg_ObjTypes(&B.duel, obj) & MTG_T_CREATURE))
         return "Only creatures attack.";
     if (o->tapped)
         return "It's tapped: it can't attack.";
@@ -720,7 +724,7 @@ static void DrawCard(int obj, const Rect *rc, int count, float x, float y)
         G_RoundFrame((int)x + rc->w - w + 3, (int)y + rc->h - 5, w, 9, 0x8ab0e0, 255);
         G_Digits((int)x + rc->w - w + 5, (int)y + rc->h - 3, pt, 0, 1, 0xe0f0ff, 255);
     }
-    if (c->types & MTG_T_CREATURE) {
+    if (Mtg_ObjTypes(&B.view, obj) & MTG_T_CREATURE) {
         int power = Mtg_Power(&B.view, obj), tough = Mtg_Toughness(&B.view, obj) - o->damage;
         unsigned text = o->damage ? 0xffd860 : ((power > c->power && !(c->starPT & 1)) || (tough > c->toughness && !(c->starPT & 2)))
                                                ? 0x9cf0b0 : 0xc8ecff;
@@ -933,7 +937,7 @@ static void Tooltip(void)
         const MtgObj *o = &B.view.objs[f];
         char name[64];
         Name(name, sizeof(name), f);
-        if (c->types & MTG_T_CREATURE) {
+        if (Mtg_ObjTypes(&B.view, f) & MTG_T_CREATURE) {
             if (o->zone == MTG_ZONE_BATTLEFIELD)
                 snprintf(line, sizeof(line), "%s  %d/%d", name, Mtg_Power(&B.view, f), Mtg_Toughness(&B.view, f));
             else
@@ -972,7 +976,7 @@ static void Tooltip(void)
     }
     x = r.x + r.w / 2 - w / 2;
     y = r.y + r.h + 4;
-    if (f != MTG_NO_OBJ && (Def(f)->types & MTG_T_CREATURE) && B.view.objs[f].zone == MTG_ZONE_BATTLEFIELD)
+    if (f != MTG_NO_OBJ && (Mtg_ObjTypes(&B.view, f) & MTG_T_CREATURE) && B.view.objs[f].zone == MTG_ZONE_BATTLEFIELD)
         y += 9;   // (under its plate)
     if (B.row == ROW_HAND && B.pile == PILE_NONE)
         y = r.y - 3 - h;
