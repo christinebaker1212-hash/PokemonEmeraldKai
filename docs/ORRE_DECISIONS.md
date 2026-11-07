@@ -38,6 +38,19 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
   world map (its own screen, art and travel), never a Kai-style town map. Then the music is converted.
 - **The world map fits the screen** (the user, 2026-11-07: "fit the map to the screen, use zooms and panning if
   needed"): no bars at the sides; the map fills Kai's 3:2 screen and pans under the boxes (ORRE_HANDOFF "Drawn").
+- **A post-game place, reached by boat** (the user, 2026-11-07: "Orre will not be selectable as a region to start in,
+  rather, it is always a post-game region, and a special one at that - it goes on the BATTLE FRONTIER, BATTLE ISLAND,
+  FARADAY ISLAND, etc menu. Players who did not unlock Orre in a postgame save will be given the proper ticket"): ORRE
+  is never one of NEW GAME's regions (it isn't one of Kai's REGION_*: it's a shared place like BATTLE ISLAND, the
+  player stays in their region there: mp_region.c MP_Region_IsSharedMap). The **ORRE TICKET** (item 810, after the
+  Maker's slots) comes **after any region's ELITE FOUR** (the user's choice), brought by BATTLE ISLAND's courier after
+  the BATTLE TICKET (SCOTT in HOENN, a sailor in JOHTO / KANTO, a letter in SINNOH; old post-game saves get it the
+  same way: mp_battleisland.c). LILYCOVE's and SLATEPORT's ferry clerks list ORRE among their destinations (the lists
+  built at run time, scrolling when they're too long: script_menu.c), every other region's port offers it before its
+  usual trips (data/scripts/orre.inc EventScript_OrreOffer). The boat **lands at the OUTSKIRT STAND** (Colosseum's own
+  start) **in front of a sailor** who sails back to the port the player came from (the user's choice: ORRE's one
+  person with Kai's words, tools/orre/gen_maps.py KAI_OBJECTS; src/orre/orre_ferry.c), never with a Shadow Pokémon in
+  the party (docs/SHADOW_POKEMON.md decision 2). Tests orre_ticket, orre_voyage, orre_lilycove.
 - **The bike ride between places** (the user, 2026-11-07, for later): a custom version of the SS TIDAL's porthole
   scene, the bike's graphics against the background of Colosseum's original ride, with the SS TIDAL scene's
   animation (ORRE_HANDOFF "The bike ride").

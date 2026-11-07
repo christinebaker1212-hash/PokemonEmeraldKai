@@ -515,6 +515,7 @@ gSpecials::
 	def_special EnableNationalPokedex
 	def_special ScriptMenu_CreateLilycoveSSTidalMultichoice, waitstate=1
 	def_special GetLilycoveSSTidalSelection
+	def_special ScriptMenu_CreateSlateportSSTidalMultichoice, waitstate=1   @ Moemon Kai: SLATEPORT's list, made the same way
 	def_special TurnOnTVScreen
 	def_special SetMewAboveGrass
 	def_special ShouldDistributeEonTicket
@@ -782,6 +783,9 @@ gSpecials::
 	def_special Orre_WorldMap, waitstate=1   @ Moemon Kai: ORRE's world map, Colosseum's own screen (src/orre/worldmap.c)
 	def_special Orre_WorldMapTravel
 	def_special Orre_RelicStone, waitstate=1   @ Moemon Kai: the RELIC STONE purifies a Shadow Pokémon (party_menu.c)
+	def_special Orre_Sail   @ Moemon Kai: the boat to ORRE and back (src/orre/orre_ferry.c; the scripts waitstate)
+	def_special Orre_SailBack
+	def_special Orre_ShadowAboard   @ (VAR_RESULT: a Shadow Pokémon in the party: it can't leave ORRE)
 	def_special Mtg_ClubSetUp   @ Moemon Kai: MOSSDEEP's CARD CLUB, its people (src/mtg/mtg_club.c)
 	def_special Mtg_ClubSeat
 	def_special Mtg_ClubBackDoor

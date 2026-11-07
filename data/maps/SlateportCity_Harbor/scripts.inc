@@ -170,44 +170,17 @@ SlateportCity_Harbor_EventScript_AskForTicket::
 	goto SlateportCity_Harbor_EventScript_ChooseDestination
 	end
 
+@ Moemon Kai: the destinations as a list made at run time (script_menu.c ScriptMenu_CreateSlateportSSTidalMultichoice):
+@ LILYCOVE, the BATTLE FRONTIER once SCOTT was met, BATTLE ISLAND (the BATTLE TICKET), ORRE (the ORRE TICKET)
 SlateportCity_Harbor_EventScript_ChooseDestination::
-	checkitem ITEM_BATTLE_TICKET, 1   @ Moemon Kai: BATTLE ISLAND beside the usual trips
-	goto_if_eq VAR_RESULT, TRUE, SlateportCity_Harbor_EventScript_ChooseDestinationBattleIsland
-	goto_if_set FLAG_MET_SCOTT_ON_SS_TIDAL, SlateportCity_Harbor_EventScript_ChooseDestinationWithBattleFrontier
-	multichoicedefault 18, 8, MULTI_SSTIDAL_SLATEPORT_NO_BF, 2, FALSE
-	switch VAR_RESULT
-	case 0, SlateportCity_Harbor_EventScript_Lilycove
-	case 1, SlateportCity_Harbor_EventScript_CancelDestinationSelect
-	case MULTI_B_PRESSED, SlateportCity_Harbor_EventScript_CancelDestinationSelect
-	end
-
-SlateportCity_Harbor_EventScript_ChooseDestinationWithBattleFrontier::
-	multichoicedefault 17, 6, MULTI_SSTIDAL_SLATEPORT_WITH_BF, 2, FALSE
+	special ScriptMenu_CreateSlateportSSTidalMultichoice
+	special GetLilycoveSSTidalSelection
 	switch VAR_RESULT
 	case 0, SlateportCity_Harbor_EventScript_Lilycove
 	case 1, SlateportCity_Harbor_EventScript_BattleFrontier
-	case 2, SlateportCity_Harbor_EventScript_CancelDestinationSelect
-	case MULTI_B_PRESSED, SlateportCity_Harbor_EventScript_CancelDestinationSelect
-	end
-
-@ Moemon Kai: with the BATTLE TICKET (data/scripts/battle_island.inc)
-SlateportCity_Harbor_EventScript_ChooseDestinationBattleIsland::
-	goto_if_set FLAG_MET_SCOTT_ON_SS_TIDAL, SlateportCity_Harbor_EventScript_ChooseDestinationBattleIslandWithBF
-	multichoicedefault 17, 6, MULTI_SSTIDAL_SLATEPORT_NO_BF_BI, 2, FALSE
-	switch VAR_RESULT
-	case 0, SlateportCity_Harbor_EventScript_Lilycove
-	case 1, EventScript_BattleIslandSail
-	case 2, SlateportCity_Harbor_EventScript_CancelDestinationSelect
-	case MULTI_B_PRESSED, SlateportCity_Harbor_EventScript_CancelDestinationSelect
-	end
-
-SlateportCity_Harbor_EventScript_ChooseDestinationBattleIslandWithBF::
-	multichoicedefault 17, 4, MULTI_SSTIDAL_SLATEPORT_WITH_BF_BI, 3, FALSE
-	switch VAR_RESULT
-	case 0, SlateportCity_Harbor_EventScript_Lilycove
-	case 1, SlateportCity_Harbor_EventScript_BattleFrontier
-	case 2, EventScript_BattleIslandSail
-	case 3, SlateportCity_Harbor_EventScript_CancelDestinationSelect
+	case 6, EventScript_BattleIslandSail
+	case 7, EventScript_OrreSail
+	case 8, SlateportCity_Harbor_EventScript_CancelDestinationSelect
 	case MULTI_B_PRESSED, SlateportCity_Harbor_EventScript_CancelDestinationSelect
 	end
 

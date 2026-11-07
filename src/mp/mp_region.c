@@ -9,7 +9,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "global.h"
-#include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
+#include "orre_shadow.h"
+#include "o3d.h"   // Moemon Kai: Shadow Pokémon
 #include "pokemon_icon.h"   // (GetUnownLetterByPersonality: Crystal's UNOWN dex)
 #include "fieldmap.h"
 #include "metatile_behavior.h"
@@ -134,6 +135,8 @@ bool8 MP_Region_IsSharedMap(u8 group, u8 num)
                                   MAP_BATTLE_FRONTIER_BATTLE_FACTORY_BATTLE_ROOM};
     u32 i;
     if (group == MAP_GROUP(MAP_BATTLE_ISLAND))   // (BATTLE ISLAND: every region's, mp_battleisland.c)
+        return TRUE;
+    if (O3D_IsOrreGroup(group))   // (ORRE: a post-game place every region's boat sails to, src/orre/orre_ferry.c)
         return TRUE;
     for (i = 0; i < ARRAY_COUNT(sShared); i++)
         if (MAP_GROUP(sShared[i]) == group && MAP_NUM(sShared[i]) == num)

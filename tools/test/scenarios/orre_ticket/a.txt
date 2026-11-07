@@ -1,0 +1,10 @@
+pressuntil A field 5000
+mp additem 745 1
+mp warp 0,9,10,10
+wait 60
+mp setflag 0x864
+pressuntillog A 4000 ORRE TICKET handed over
+mash A 30 4
+wait 400
+log orre ticket done
+quit

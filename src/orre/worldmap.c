@@ -829,6 +829,19 @@ void Orre_WorldMap(void)
     MPNet_Log("orre world map: open at room %u, %u of %u places shown", PlaceRoom(W.cur), shown, W.nPlaces);
 }
 
+// a map's start (Colosseum's entry 0: tools/orre/gen_maps.py), FALSE if it isn't ORRE's
+bool8 Orre_MapStart(u16 map, s16 *x, s16 *y)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sOrreMaps); i++)
+        if (sOrreMaps[i].map == map)
+        {
+            *x = sOrreMaps[i].startX, *y = sOrreMaps[i].startY;
+            return TRUE;
+        }
+    return FALSE;
+}
+
 // (special) off to the place chosen: its map's start; VAR_RESULT TRUE when it warps
 void Orre_WorldMapTravel(void)
 {

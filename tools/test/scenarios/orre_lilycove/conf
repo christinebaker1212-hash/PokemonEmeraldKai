@@ -1,0 +1,7 @@
+# LILYCOVE's ferry with every ticket (src/orre/orre_ferry.c, script_menu.c): SLATEPORT, the BATTLE FRONTIER, the four
+# islands, BATTLE ISLAND and ORRE are more than the window holds, so the list scrolls, right-hand side as the ferry's
+# (shot ol_menu); picking ORRE sails there.
+MODE=1
+TMO=400
+EXPECT_A=("orre: sailing from map 13.10" "voyage: arrived" "[test] where map 45.0 xy 33,40" "lilycove orre done")
+UNEXPECT_A=("crash" "out of memory" "TICKET handed over")

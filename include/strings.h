@@ -752,6 +752,7 @@ extern const u8 gText_NavelRock[];
 extern const u8 gText_BirthIsland[];
 extern const u8 gText_FarawayIsland[];
 extern const u8 gText_BattleIsland[];
+extern const u8 gText_Orre[];
 
 extern const u8 gText_BattleTrainers[];
 extern const u8 gText_BattleBasics[];

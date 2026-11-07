@@ -1,0 +1,7 @@
+# The ORRE TICKET (mp_battleisland.c's courier, src/orre/orre_ferry.c): once any ELITE FOUR is beaten (an old post-game
+# save too) and the BATTLE TICKET is in hand, SCOTT walks up in HOENN with the ORRE TICKET; it comes once.
+MODE=1
+TMO=400
+EXPECT_A=("battle island: ORRE TICKET handed over (region 0)" "orre ticket done")
+UNEXPECT_A=("crash" "out of memory" "BATTLE TICKET handed over")
+ENV_A="MOEMON_TEST_COURIER=1"

@@ -102,6 +102,9 @@ SINNOH's in src/orre/; where both hook into the game each has its own line. All 
 (tools/orre/maps.py ORDER), their doors / stairs / elevators and entries from the game's own tables
 (tools/orre/colo_rooms.py; ORRE_HANDOFF "Rooms, doors and entries"; scenarios orre_all_maps, orre_all_doors,
 orre_all_places from tools/orre/gen_tests.py); the ways out open Colosseum's own world map (src/orre/worldmap.c).
+**ORRE is post-game only, reached by boat** (the user, 2026-11-07): never a NEW GAME region; the ORRE TICKET (item 810)
+after any ELITE FOUR (old saves too: mp_battleisland.c's courier), on HOENN's ferry lists and every port, landing at the
+OUTSKIRT STAND by a sailor who sails back (src/orre/orre_ferry.c, data/scripts/orre.inc; ORRE_DECISIONS "A post-game place").
 Shadow Pokémon (designed before the story, the user 2026-11-07): `docs/SHADOW_POKEMON.md`.
 
 **Magic: The Gathering** (a fourth card game): the user's decisions in `docs/MTG_DECISIONS.md`; **start at

@@ -10,6 +10,7 @@
 #include "global.h"
 #include "mp.h"
 #include "mp_region.h"
+#include "o3d.h"
 #include "event_data.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
@@ -99,16 +100,50 @@ void MP_BattleIsland_Return(void)
 static EWRAM_DATA struct
 {
     u8 state, objId, steps, walked, dir, slow;
-    u16 timer, check;
+    u16 timer, check, ticket;
 } sT = {0};
 
-static bool8 TicketOwed(void)
+// the ticket owed once any region's ELITE FOUR is beaten (old saves too): the BATTLE TICKET, then the ORRE TICKET (the
+// boat to ORRE, a post-game place like the island: src/orre/orre_ferry.c; the user, 2026-11-07); ITEM_NONE: none
+static u16 TicketOwed(void)
 {
-    return MP_Region_AnyCleared() && !CheckBagHasItem(ITEM_BATTLE_TICKET, 1);
+    if (!MP_Region_AnyCleared())
+        return ITEM_NONE;
+    if (!CheckBagHasItem(ITEM_BATTLE_TICKET, 1))
+        return ITEM_BATTLE_TICKET;
+    if (!CheckBagHasItem(ITEM_ORRE_TICKET, 1))
+        return ITEM_ORRE_TICKET;
+    return ITEM_NONE;
+}
+
+static const char *HelloOrre(void)
+{
+    switch (MP_Region_Current())
+    {
+    case REGION_JOHTO:
+        return "Ahoy, @! Back from OLIVINE's port\nwith another ticket for the CHAMPION.\f"
+               "Far to the west lies ORRE, a dry land\nwith no wild POKeMON at all. Its\nTRAINERS battle in COLOSSEUMS.\f"
+               "Strange talk comes from there lately.\nShow this ticket at any port!";
+    case REGION_KANTO:
+        return "Ahoy, @! VERMILION again.\f"
+               "Ever heard of ORRE? A desert region,\nfar to the west. Its TRAINERS battle\nin COLOSSEUMS.\f"
+               "This ticket's yours too. Any port's\nboat sails there!";
+    case REGION_SINNOH:
+        return "Another letter from CANALAVE's harbor\nfound @!\f"
+               "\"To the CHAMPION: a boat sails for\nORRE, a desert region far to the west,\nfrom any port.\"\f"
+               "A ticket was inside!";
+    default:
+        return "@! It's SCOTT again!\f"
+               "Far to the west lies ORRE, a desert\nregion with no wild POKeMON at all.\nIts TRAINERS battle in COLOSSEUMS!\f"
+               "I've been hearing odd things about the\nplace... Here, take this ticket.\f"
+               "LILYCOVE's and SLATEPORT's ferries,\nor any port, will take you there!";
+    }
 }
 
 static const char *Hello(void)
 {
+    if (sT.ticket == ITEM_ORRE_TICKET)
+        return HelloOrre();
     switch (MP_Region_Current())
     {
     case REGION_JOHTO:
@@ -233,10 +268,11 @@ static void Task_TicketCourier(u8 taskId)
         if (IsTextPrinterActive(0) || !JOY_NEW(A_BUTTON | B_BUTTON))
             break;
         HideFieldMessageBox();
-        AddBagItem(ITEM_BATTLE_TICKET, 1);
-        MPNet_Log("battle island: BATTLE TICKET handed over (region %d)", MP_Region_Current());
+        AddBagItem(sT.ticket, 1);
+        MPNet_Log("battle island: %s handed over (region %d)", sT.ticket == ITEM_ORRE_TICKET ? "ORRE TICKET" : "BATTLE TICKET",
+                  MP_Region_Current());
         PlayFanfare(MUS_OBTAIN_ITEM);
-        Say("@ received the BATTLE TICKET!");
+        Say(sT.ticket == ITEM_ORRE_TICKET ? "@ received the ORRE TICKET!" : "@ received the BATTLE TICKET!");
         sT.state = 4;
         break;
     case 4:
@@ -282,12 +318,14 @@ void MP_BattleIsland_Update(void)
     if (++sT.slow < 4)
         return;
     sT.slow = 0;
-    if (!TicketOwed() || MP_BattleIsland_IsIsland(gSaveBlock1Ptr->location.mapGroup))
+    if (TicketOwed() == ITEM_NONE || MP_BattleIsland_IsIsland(gSaveBlock1Ptr->location.mapGroup)
+     || O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
         return;
     // (headless tests: only the ones about the ticket, so SCOTT never walks into another scenario)
     if (getenv("MOEMON_TEST") && !getenv("MOEMON_TEST_COURIER"))
         return;
     memset(&sT, 0, sizeof(sT));
+    sT.ticket = TicketOwed();
     LockPlayerFieldControls();
     CreateTask(Task_TicketCourier, 80);
 }

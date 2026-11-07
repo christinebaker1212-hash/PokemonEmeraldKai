@@ -70,6 +70,7 @@
 // Moemon Kai: a list made at run time (SCROLL_MULTI_QZ_DYNAMIC, qz_specials.c)
 const u8 *gQzScrollOptions[QZ_SCROLL_MAX];
 u8 gQzScrollCount;
+bool8 gQzScrollRight;   // (the list on the right, as the ferry's: once)
 u16 (*gQzScrollResult)(u16 choice);   // turns the row picked (or MULTI_B_PRESSED) into VAR_RESULT; NULL: the row
 
 #define TAG_ITEM_ICON 5500
@@ -2432,7 +2433,8 @@ void ShowScrollableMultichoice(void)
     case SCROLL_MULTI_QZ_DYNAMIC:
         task->tMaxItemsOnScreen = gQzScrollCount < MAX_SCROLL_MULTI_ON_SCREEN ? gQzScrollCount : MAX_SCROLL_MULTI_ON_SCREEN;
         task->tNumItems = gQzScrollCount;
-        task->tLeft = 1;
+        task->tLeft = gQzScrollRight ? 19 : 1;
+        gQzScrollRight = FALSE;
         task->tTop = 1;
         task->tWidth = 10;
         task->tHeight = task->tMaxItemsOnScreen * 2;

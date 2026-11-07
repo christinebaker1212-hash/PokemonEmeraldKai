@@ -433,6 +433,7 @@ EventScript_SinnohRegionBoat::
 	lock
 	faceplayer
 	call EventScript_BattleIslandOffer
+	call EventScript_OrreOffer   @ Moemon Kai: ORRE (data/scripts/orre.inc)
 	specialvar VAR_RESULT, QzGetReachableRegionsMask
 	goto_if_eq VAR_RESULT, 0, EventScript_SinnohRegionBoat_NotYet
 	call Quetzal_EventScript_840F954

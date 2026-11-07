@@ -921,7 +921,8 @@ void Sinnoh_PlatinumMapScripts(void)
         return;
     // CANALAVE's ferry sailor: only while the boat can sail (as JOHTO's and KANTO's ports), for the first boat in, and
     // with a BATTLE TICKET (the boat to BATTLE ISLAND: mp_battleisland.c)
-    if (MP_Region_CanSail() || VarGet(VAR_SINNOH_ARRIVAL) == 1 || CheckBagHasItem(ITEM_BATTLE_TICKET, 1))
+    if (MP_Region_CanSail() || VarGet(VAR_SINNOH_ARRIVAL) == 1 || CheckBagHasItem(ITEM_BATTLE_TICKET, 1)
+     || CheckBagHasItem(ITEM_ORRE_TICKET, 1))   // (... and with an ORRE TICKET: the boat to ORRE, data/scripts/orre.inc)
         FlagClear(FLAG_SINNOH_HIDE_REGION_BOAT);
     else
         FlagSet(FLAG_SINNOH_HIDE_REGION_BOAT);

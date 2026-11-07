@@ -31,6 +31,7 @@ Johto_OlivinePort_EventScript_83E6BF3::
 	lock
 	faceplayer
 	call EventScript_BattleIslandOffer   @ Moemon Kai: BATTLE ISLAND (data/scripts/battle_island.inc)
+	call EventScript_OrreOffer   @ Moemon Kai: ORRE (data/scripts/orre.inc)
 	call Quetzal_EventScript_840F954
 	goto_if_eq VAR_RESULT, 127, Johto_OlivinePort_EventScript_83E6C0A
 	goto Quetzal_EventScript_840FA9D

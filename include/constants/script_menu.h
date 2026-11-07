@@ -158,8 +158,9 @@
 #define SSTIDAL_SELECTION_BIRTH_ISLAND     4
 #define SSTIDAL_SELECTION_FARAWAY_ISLAND   5
 #define SSTIDAL_SELECTION_BATTLE_ISLAND    6   // Moemon Kai: with the BATTLE TICKET (mp_battleisland.c)
-#define SSTIDAL_SELECTION_EXIT             7
-#define SSTIDAL_SELECTION_COUNT            8
+#define SSTIDAL_SELECTION_ORRE             7   // Moemon Kai: with the ORRE TICKET (src/orre/orre_ferry.c)
+#define SSTIDAL_SELECTION_EXIT             8
+#define SSTIDAL_SELECTION_COUNT            9
 
 // Std String Ids
 #define STDSTRING_COOL             0

@@ -47,7 +47,8 @@ LilycoveCity_Harbor_EventScript_FerryRegularLocationSelect::
 	case 4, LilycoveCity_Harbor_EventScript_GoToBirthIsland
 	case 5, LilycoveCity_Harbor_EventScript_GoToFarawayIsland
 	case 6, EventScript_BattleIslandSail   @ Moemon Kai: BATTLE ISLAND (data/scripts/battle_island.inc)
-	case 7, LilycoveCity_Harbor_EventScript_ExitSailSelect
+	case 7, EventScript_OrreSail   @ Moemon Kai: ORRE (data/scripts/orre.inc)
+	case 8, LilycoveCity_Harbor_EventScript_ExitSailSelect
 	case MULTI_B_PRESSED, LilycoveCity_Harbor_EventScript_ExitSailSelect
 	end
 
@@ -298,7 +299,7 @@ LilycoveCity_Harbor_EventScript_MultipleEventTicketsFirstTime::
 	case 3, LilycoveCity_Harbor_EventScript_GoToNavelRockFirstTime
 	case 4, LilycoveCity_Harbor_EventScript_GoToBirthIslandFirstTime
 	case 5, LilycoveCity_Harbor_EventScript_GoToFarawayIslandFirstTime
-	case 6, LilycoveCity_Harbor_EventScript_ExitFirstTimeTicketSailSelect
+	case 8, LilycoveCity_Harbor_EventScript_ExitFirstTimeTicketSailSelect   @ (SSTIDAL_SELECTION_EXIT)
 	case MULTI_B_PRESSED, LilycoveCity_Harbor_EventScript_ExitFirstTimeTicketSailSelect
 	release
 	end

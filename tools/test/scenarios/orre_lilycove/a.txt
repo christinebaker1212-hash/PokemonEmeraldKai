@@ -1,0 +1,54 @@
+pressuntil A field 5000
+mp setflag 0x864
+mp setflag 0x1D0
+mp setflag 0x1AE
+mp setflag 0x1AF
+mp setflag 0x1B0
+mp setflag 0x1DB
+mp setflag 0x8B3
+mp setflag 0x8D5
+mp setflag 0x8D6
+mp setflag 0x8E0
+mp additem 275 1
+mp additem 370 1
+mp additem 371 1
+mp additem 376 1
+mp additem 745 1
+mp additem 810 1
+mp warp 13,10,8,11
+wait 80
+mp face up
+wait 10
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+shot ol_menu
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+shot ol_orre
+press A 2
+pressuntillog A 1500 orre: sailing from
+waitlog 3000 voyage: arrived
+wait 120
+mp where
+log lilycove orre done
+quit

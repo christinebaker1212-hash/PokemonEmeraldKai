@@ -78,8 +78,12 @@ rules, and what each tool does. This file is where things stand, what a new sess
 
 ## Next steps (in order)
 0. **Shadow Pokémon come before the story** (the user, 2026-11-07): their design and the user's decisions are in
-   `docs/SHADOW_POKEMON.md`; its open questions are settled with the user as each part is built.
-1. **Music, now** (the user, 2026-11-07: "Colosseum's own world map screen, then convert the music"): see 6.
+   `docs/SHADOW_POKEMON.md`; its open questions are settled with the user as each part is built. Built: the data, the
+   gauge, battles, HYPER MODE / CALL, the aura, snagging, purification, the battle confinement (SHADOW_POKEMON.md
+   "Built so far"). Next (the user agreed, 2026-11-07): the PC and trade confinement, then the people (step 2, 4).
+   **ORRE is a post-game place reached by boat** (ORRE_DECISIONS.md "A post-game place": the ORRE TICKET after any
+   ELITE FOUR, HOENN's ferries and every port, landing at the OUTSKIRT STAND by the sailor: src/orre/orre_ferry.c).
+1. **Music** (the user, 2026-11-07: "Colosseum's own world map screen, then convert the music"): see 6.
    Then the world map's own song (worldmap_song) and the travel scene: the user's plan, "The bike ride" below.
 2. **Where people stand.** Doors and entries are done (below, "Rooms, doors and entries"). The people: each room's
    characters table (the floor record's + 0x14 slot, floor_data.c floorDataBiosGetCharInfo; records of 36 bytes:

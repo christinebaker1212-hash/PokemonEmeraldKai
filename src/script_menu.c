@@ -423,6 +423,8 @@ void ScriptMenu_DisplayPCStartupPrompt(void)
     AddTextPrinterParameterized2(0, FONT_NORMAL, gText_WhichPCShouldBeAccessed, 0, NULL, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_WHITE, TEXT_COLOR_LIGHT_GRAY);
 }
 
+static bool8 sSSTidalFromSlateport;   // Moemon Kai: SLATEPORT's list (its first trip is LILYCOVE)
+
 bool8 ScriptMenu_CreateLilycoveSSTidalMultichoice(void)
 {
     if (FuncIsActiveTask(Task_HandleMultichoiceInput) == TRUE)
@@ -432,9 +434,32 @@ bool8 ScriptMenu_CreateLilycoveSSTidalMultichoice(void)
     else
     {
         gSpecialVar_Result = 0xFF;
+        sSSTidalFromSlateport = FALSE;
         CreateLilycoveSSTidalMultichoice();
         return TRUE;
     }
+}
+
+// Moemon Kai: SLATEPORT's ferry clerk's list, made the same way (it was a fixed menu per set of trips): LILYCOVE, the
+// BATTLE FRONTIER once SCOTT was met, BATTLE ISLAND and ORRE with their tickets; GetLilycoveSSTidalSelection gives
+// the SSTIDAL_SELECTION_* chosen (SSTIDAL_SELECTION_SLATEPORT: LILYCOVE)
+bool8 ScriptMenu_CreateSlateportSSTidalMultichoice(void)
+{
+    if (FuncIsActiveTask(Task_HandleMultichoiceInput) == TRUE)
+        return FALSE;
+    gSpecialVar_Result = 0xFF;
+    gSpecialVar_0x8004 = 0;
+    sSSTidalFromSlateport = TRUE;
+    CreateLilycoveSSTidalMultichoice();
+    return TRUE;
+}
+
+// a trip's name (from SLATEPORT, the first trip is LILYCOVE)
+static const u8 *SSTidalName(u8 selection)
+{
+    if (selection == SSTIDAL_SELECTION_SLATEPORT && sSSTidalFromSlateport)
+        return gText_LilycoveCity;
+    return sLilycoveSSTidalDestinations[selection];
 }
 
 // gSpecialVar_0x8004 is 1 if the Sailor was shown multiple event tickets at the same time
@@ -532,10 +557,15 @@ static void CreateLilycoveSSTidalMultichoice(void)
         }
     }
 
-    // Moemon Kai: BATTLE ISLAND, one more trip for the BATTLE TICKET (mp_battleisland.c)
+    // Moemon Kai: BATTLE ISLAND, one more trip for the BATTLE TICKET (mp_battleisland.c), and ORRE for the ORRE TICKET
     if (gSpecialVar_0x8004 == 0 && CheckBagHasItem(ITEM_BATTLE_TICKET, 1) == TRUE)
     {
         sLilycoveSSTidalSelections[selectionCount] = SSTIDAL_SELECTION_BATTLE_ISLAND;
+        selectionCount++;
+    }
+    if (gSpecialVar_0x8004 == 0 && CheckBagHasItem(ITEM_ORRE_TICKET, 1) == TRUE)
+    {
+        sLilycoveSSTidalSelections[selectionCount] = SSTIDAL_SELECTION_ORRE;
         selectionCount++;
     }
 
@@ -548,9 +578,17 @@ static void CreateLilycoveSSTidalMultichoice(void)
     }
 
     count = selectionCount;
-    if (count == SSTIDAL_SELECTION_COUNT)
+    if (count > 6)
     {
-        gSpecialVar_0x8004 = SCROLL_MULTI_SS_TIDAL_DESTINATION;
+        // (Moemon Kai: more than fit: a scrolling list of exactly these trips; GetLilycoveSSTidalSelection maps it back)
+        extern const u8 *gQzScrollOptions[];
+        extern u8 gQzScrollCount;
+        extern bool8 gQzScrollRight;
+        for (i = 0; i < count; i++)
+            gQzScrollOptions[i] = SSTidalName(sLilycoveSSTidalSelections[i]);
+        gQzScrollCount = count;
+        gQzScrollRight = TRUE;
+        gSpecialVar_0x8004 = SCROLL_MULTI_QZ_DYNAMIC;
         ShowScrollableMultichoice();
     }
     else
@@ -562,7 +600,7 @@ static void CreateLilycoveSSTidalMultichoice(void)
             u8 selection = sLilycoveSSTidalSelections[j];
             if (selection != 0xFF)
             {
-                pixelWidth = DisplayTextAndGetWidth(sLilycoveSSTidalDestinations[selection], pixelWidth);
+                pixelWidth = DisplayTextAndGetWidth(SSTidalName(selection), pixelWidth);
             }
         }
 
@@ -574,7 +612,7 @@ static void CreateLilycoveSSTidalMultichoice(void)
         {
             if (sLilycoveSSTidalSelections[i] != 0xFF)
             {
-                AddTextPrinterParameterized(windowId, FONT_NORMAL, sLilycoveSSTidalDestinations[sLilycoveSSTidalSelections[i]], 8, selectionCount * 16 + 1, TEXT_SKIP_DRAW, NULL);
+                AddTextPrinterParameterized(windowId, FONT_NORMAL, SSTidalName(sLilycoveSSTidalSelections[i]), 8, selectionCount * 16 + 1, TEXT_SKIP_DRAW, NULL);
                 selectionCount++;
             }
         }

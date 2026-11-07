@@ -23,6 +23,16 @@ MAPSEC_FIRST = 0x1C0
 ISO_FILES = os.environ.get("ORRE_ISO_FILES", os.path.expanduser("~/.cache/orre/iso"))   # (the disc's archives: ids)   # ORRE's map sections, after SINNOH's (0x140 to 0x1BA)
 
 
+
+# Kai's own people in ORRE (never Colosseum's, which come with its scripts): the boat's sailor at the OUTSKIRT STAND,
+# beside Colosseum's own start where the boat lands (src/orre/orre_ferry.c; the user, 2026-11-07)
+KAI_OBJECTS = {
+    "S1_out": [{"graphics_id": "OBJ_EVENT_GFX_SAILOR", "x": 34, "y": 40, "elevation": 0,
+                "movement_type": "MOVEMENT_TYPE_FACE_LEFT", "movement_range_x": 0, "movement_range_y": 0,
+                "trainer_type": "TRAINER_TYPE_NONE", "trainer_sight_or_berry_tree_id": "0",
+                "script": "Orre_EventScript_Sailor", "flag": "0"}],
+}
+
 def mapsec(name):
     return "MAPSEC_ORRE_" + "".join(c if c.isalnum() else "_" for c in name.upper()).strip("_").replace("__", "_")
 
@@ -130,7 +140,7 @@ def main(src):
               "map_type": "MAP_TYPE_TOWN" if outdoor else "MAP_TYPE_INDOOR", "allow_cycling": outdoor,
               "allow_escaping": False, "allow_running": True,
               "show_map_name": outdoor, "battle_scene": "MAP_BATTLE_SCENE_NORMAL", "connections": None,
-              "object_events": [], "bg_events": [],
+              "object_events": KAI_OBJECTS.get(m["file"], []), "bg_events": [],
               # (the way out: Colosseum's world map, from the exits' reached tiles)
               "coord_events": [{"type": "trigger", "x": x, "y": y, "elevation": 0, "var": "VAR_TEMP_0",
                                 "var_value": "0", "script": "Orre_EventScript_WorldMap"}

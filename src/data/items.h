@@ -5299,4 +5299,16 @@ const struct Item gItems[] =
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
+
+    [ITEM_ORRE_TICKET] =   // Moemon Kai: the boat to ORRE (HOENN's ferries, any region's port, after any ELITE FOUR)
+    {
+        .name = _("ORRE TICKET"),
+        .itemId = ITEM_ORRE_TICKET,
+        .price = 0,
+        .description = sOrreTicketDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
 };

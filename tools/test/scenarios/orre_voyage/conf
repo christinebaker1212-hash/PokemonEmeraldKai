@@ -1,0 +1,9 @@
+# The boat to ORRE (src/orre/orre_ferry.c, docs/ORRE_DECISIONS.md "A post-game place"): with the ORRE TICKET, SLATEPORT's
+# ferry clerk lists ORRE (shot ov_menu: LILYCOVE, BATTLE ISLAND, ORRE); the voyage lands at the OUTSKIRT STAND in front
+# of the boat's sailor (shot ov_landed); with a Shadow Pokémon in the party the sailor won't sail (it can't leave
+# ORRE); once it's purified, the sailor sails back to SLATEPORT.
+MODE=1
+TMO=500
+EXPECT_A=("orre: sailing from map 9.9" "voyage: arrived" "[test] where map 45.0 xy 33,40" "shadow refused" "orre: sailing back" "orre voyage done")
+UNEXPECT_A=("crash" "out of memory" "TICKET handed over")
+CHECK="python3 -I tools/test/scenarios/orre_voyage/check.py"

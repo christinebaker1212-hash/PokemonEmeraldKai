@@ -748,6 +748,7 @@ const u8 gText_SouthernIsland[] = _("SOUTHERN ISLAND");
 const u8 gText_BirthIsland[] = _("BIRTH ISLAND");
 const u8 gText_FarawayIsland[] = _("FARAWAY ISLAND");
 const u8 gText_BattleIsland[] = _("BATTLE ISLAND");   // Moemon Kai: the boat with the BATTLE TICKET
+const u8 gText_Orre[] = _("ORRE");   // Moemon Kai: the boat with the ORRE TICKET
 const u8 gText_NavelRock[] = _("NAVEL ROCK");
 const u8 gText_ClawFossil[] = _("CLAW FOSSIL");
 const u8 gText_RootFossil[] = _("ROOT FOSSIL");
