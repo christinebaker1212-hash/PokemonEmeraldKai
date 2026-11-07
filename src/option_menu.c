@@ -78,6 +78,7 @@ enum
     OPT_FILTER,
     OPT_COLOR,        // Moemon Kai: DISPLAY > COLOR, a handheld's screen colors (display.c, 1.63.14)
     OPT_VSYNC,
+    OPT_FRAMERATE,    // Moemon Kai: DISPLAY > FRAME RATE, 60 / 120 / UNCAPPED (display.c Display_PresentSlot, 1.170.2)
     OPT_CARDART,
     OPT_CARDBACK,
     OPT_BATTLEANIMS,
@@ -179,6 +180,10 @@ static const u8 sText_Scaling[] = _("SCALING");
 static const u8 sText_Filter[] = _("FILTER");
 static const u8 sText_Color[] = _("COLOR");
 static const u8 sText_VSync[] = _("VSYNC");
+static const u8 sText_FrameRate[] = _("FRAME RATE");
+static const u8 sText_Fps60[] = _("60");
+static const u8 sText_Fps120[] = _("120");
+static const u8 sText_FpsUncapped[] = _("UNCAPPED");
 static const u8 sText_CardArt[] = _("CARD ART");
 static const u8 sText_CardArtPrinted[] = _("PRINTED ART");
 static const u8 sText_CardArtGameBoy[] = _("GAME BOY");
@@ -466,6 +471,7 @@ static void BuildRows(void)
         AddRow(OPT_FILTER, 0);
         AddRow(OPT_COLOR, 0);
         AddRow(OPT_VSYNC, 0);
+        AddRow(OPT_FRAMERATE, 0);
         AddRow(OPT_FOLLOWSPRITES, 0);
         AddRow(OPT_SPRITESCALE, 0);
         AddRow(OPT_SHADOWS, 0);
@@ -583,6 +589,9 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_SCALING:
         names[0] = sText_PixelPerfect, names[1] = sText_SharpFit, names[2] = sText_Stretch;
         return 3;
+    case OPT_FRAMERATE:
+        names[DISPLAY_FPS_60] = sText_Fps60, names[DISPLAY_FPS_120] = sText_Fps120, names[DISPLAY_FPS_UNCAPPED] = sText_FpsUncapped;
+        return DISPLAY_FPS_COUNT;
     case OPT_FR_PLACE:
         {
             u8 i;
@@ -785,6 +794,7 @@ static u8 Current(u8 row)
     case OPT_FILTER:      return 0;   // (one value shown: 1.63.14, eight of them)
     case OPT_COLOR:       return 0;   // (one value shown)
     case OPT_VSYNC:       return Display_GetVSync() != 0;
+    case OPT_FRAMERATE:   return Display_GetFrameCap();
     case OPT_CARDART:     return gMpConfig.cardArt % MP_CARD_ART_COUNT;
     case OPT_CARDBACK:    return gMpConfig.cardBack != 0;
     case OPT_BATTLEANIMS: return gMpConfig.battleAnims != 0;
@@ -865,6 +875,7 @@ static void Change(u8 row, int dir)
     case OPT_FILTER:      Display_SetFilter(Wrap(Display_GetFilter() + dir, DISPLAY_FILTER_COUNT)); break;
     case OPT_COLOR:       Display_SetColor(Wrap(Display_GetColor() + dir, DISPLAY_COLOR_COUNT)); break;
     case OPT_VSYNC:       Display_SetVSync(!Display_GetVSync()); break;
+    case OPT_FRAMERATE:   Display_SetFrameCap(Wrap(Display_GetFrameCap() + dir, DISPLAY_FPS_COUNT)); break;
     case OPT_CARDART:     gMpConfig.cardArt = Wrap(gMpConfig.cardArt % MP_CARD_ART_COUNT + dir, MP_CARD_ART_COUNT); break;
     case OPT_CARDBACK:    gMpConfig.cardBack = !gMpConfig.cardBack; break;
     case OPT_BATTLEANIMS: gMpConfig.battleAnims = !gMpConfig.battleAnims; break;
@@ -1016,6 +1027,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_FILTER:      return sText_Filter;
     case OPT_COLOR:       return sText_Color;
     case OPT_VSYNC:       return sText_VSync;
+    case OPT_FRAMERATE:   return sText_FrameRate;
     case OPT_CARDART:     return sText_CardArt;
     case OPT_CARDBACK:    return sText_CardBacks;
     case OPT_BATTLEANIMS: return sText_BattleAnims;
@@ -1157,6 +1169,13 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "A: CHANGE ITS KEY OR PAD BUTTON");
     else if (opt == OPT_FB_DEFAULTS)
         snprintf(ascii, sizeof(ascii), "ARROWS / WASD / D-PAD / STICK MOVE");
+    else if (opt == OPT_FRAMERATE)
+    {
+        static const char *const hints[DISPLAY_FPS_COUNT] = {
+            "THE GAME'S OWN RATE", "FOR 120 HZ SCREENS", "AS FAST AS THE SCREEN OR PC GOES"};
+        snprintf(ascii, sizeof(ascii), "%s", !Display_GetVSync()
+                 ? "TURN VSYNC ON IF THE PICTURE TEARS" : hints[Display_GetFrameCap()]);
+    }
     else if (opt == OPT_COLOR)
     {
         static const char *const hints[DISPLAY_COLOR_COUNT] = {

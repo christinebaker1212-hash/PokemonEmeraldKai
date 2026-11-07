@@ -73,6 +73,7 @@ double simTime = 0;
 double lastGameTime = 0;
 double curGameTime = 0;
 double fixedTimestep = 1.0 / 60.0; // 16.666667ms
+static int sPresents;   // pictures shown this second (MOEMON_FPS_LOG)
 double timeScale = 1.0;
 bool8 MP_Qol_SkipActive(void);
 struct SiiRtcInfo internalClock;
@@ -315,7 +316,9 @@ int main(int argc, char **argv)
                 sRefresh = Display_GetRefreshRate();
                 sRefreshCheck = 120;
             }
-            if (Display_GetVSync() && timeScale == 1.0 && sRefresh >= 55)
+            // (FRAME RATE below the refresh: not every refresh is presented, so vsync can't pace the loop)
+            if (Display_GetVSync() && timeScale == 1.0 && sRefresh >= 55
+             && (Display_FrameCapHz() == 0 || Display_FrameCapHz() >= sRefresh - 2))
             {
                 int n = (sRefresh + 30) / 60;
                 if (n >= 1 && n <= 4 && abs(sRefresh - 60 * n) <= 2
@@ -357,8 +360,10 @@ int main(int argc, char **argv)
                         sLast = now;
                     if (now - sLast >= SDL_GetPerformanceFrequency())
                     {
-                        printf("[fps] %d game frames/s (refresh %d, lockstep %d)\n", sCount, sRefresh, perGameFrame);
+                        printf("[fps] %d game frames/s, %d shown (refresh %d, lockstep %d, frame rate cap %d)\n", sCount,
+                               sPresents, sRefresh, perGameFrame, Display_FrameCapHz());
                         sCount = 0;
+                        sPresents = 0;
                         sLast = now;
                     }
                 }
@@ -400,8 +405,13 @@ int main(int argc, char **argv)
             if (paused || (fixedTimestep - accumulator) / timeScale > 0.002)
                 SDL_Delay(1);
         }
-        else if (Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || MP_BadgeCase_IsActive() || MP_StadiumUi_IsActive() || MP_CardScreen_IsActive() || Sinnoh_Contest_IsActive() || Sinnoh_Mining_IsActive() || Orre_WorldMap_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
+        // (DISPLAY > FRAME RATE: a present waits for its slot, 60 or 120 a second, or none when UNCAPPED)
+        else if ((Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || MP_BadgeCase_IsActive() || MP_StadiumUi_IsActive() || MP_CardScreen_IsActive() || Sinnoh_Contest_IsActive() || Sinnoh_Mining_IsActive() || Orre_WorldMap_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
+              && Display_PresentSlot())
+        {
             Display_Present();
+            sPresents++;
+        }
         else if (paused || (fixedTimestep - accumulator) / timeScale > 0.002)
             SDL_Delay(1);
     }
@@ -1566,7 +1576,7 @@ static void TestHarnessStep(void)
         }
         else if (strcmp(cmd, "display") == 0)
         {
-            // display fullscreen|scale|mode|filter|vsync|toggle|save VALUE
+            // display fullscreen|scale|mode|filter|vsync|framerate|toggle|save VALUE
             Display_TestCommand(arg, n);
             printf("[test] frame %lu: display %s %d\n", sFrameCounter, arg, n);
             fflush(stdout);

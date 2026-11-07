@@ -621,6 +621,22 @@ Harness: `mp optionstab N`, `mp iconfamily`, `mp matchcalltest N`, `mp mountbike
 `mp ridemusic BIKE SURF`, `mp music [play]`. Test clients each get their own controls ini (run1/run2/runN.sh
 MOEMON_CONTROLS_CONFIG). Tests: options_tabs, music_options, spec_menu (the CO-OP tab with real keys).
 
+
+## DISPLAY > FRAME RATE (1.170.2; display.c Display_PresentSlot, option_menu.c OPT_FRAMERATE)
+The user: "cap framerates at 60, 120, or uncap them entirely. An uncapped player is experiencing screen tearing. ...
+the default be Moemon Emerald Kai's default FPS." The game itself always runs 60 frames a second (sdl2.c
+fixedTimestep); FRAME RATE caps only how often the picture is presented: 60 (DISPLAY_FPS_60, 0, the default: the
+DisplayConfig field is last, so the initializer leaves it 0), 120, UNCAPPED. In the field a picture is shown only when
+there is a new frame (60 a second either way); the card games, fights, DANCE, BADGE CASE, STADIUM screens, contests,
+mining and ORRE's world map present every loop, and with VSYNC off that was over 1,000 a second (the tearing).
+Display_PresentSlot allows one present per 1/cap s, each slot due a little early (step/8, at most 2 ms: refreshes jitter)
+and a long-overdue one restarting the count; sdl2.c's present branch asks it, and falls to the SDL_Delay(1) branch when
+not due (NeedsPresent stays set, so nothing is lost). Lockstep (one game frame per N refreshes with vsync) only when the
+cap reaches the refresh: below it, not every refresh is presented and vsync can't pace the loop. Saved in the display
+settings file as `framerate = 60 | 120 | uncapped`; harness `display framerate N`; log "[display] frame rate X".
+MOEMON_FPS_LOG=1 prints "[fps] 60 game frames/s, N shown" (checked by hand, outside the harness, which never presents:
+60 / 120 / ~1500 with every loop asking to present and VSYNC off). The hint: TURN VSYNC ON IF THE PICTURE TEARS while
+VSYNC is off (only vsync removes tearing; a cap makes it rarer). Test frame_rate (the row, its hints, the saved value).
 ## Ball entrance and recall effects
 
 Per Moemon, next to the ball style: MON_DATA_MP_BALLFX (PokemonSubstruct0's spare `filler` u16: form 0-3, particles

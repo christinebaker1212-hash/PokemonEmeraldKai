@@ -1,0 +1,39 @@
+pressuntil A field 5000
+wait 60
+press START 2
+wait 30
+press UP 2
+wait 10
+press UP 2
+wait 10
+press A 2
+wait 120
+press RIGHT 2
+wait 20
+shot o_game
+press R 2
+wait 20
+shot o_battle
+press R 2
+wait 20
+shot o_display
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+shot fr_60
+press RIGHT 2
+wait 6
+shot fr_120
+press RIGHT 2
+wait 6
+shot fr_unc
+quit

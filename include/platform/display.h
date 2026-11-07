@@ -52,6 +52,14 @@ int Display_GetColor(void);            // DISPLAY_COLOR_*
 void Display_SetColor(int color);
 int Display_GetVSync(void);
 void Display_SetVSync(int on);
+// Moemon Kai: DISPLAY > FRAME RATE, how often the picture is put on screen (the game itself always runs 60 frames a
+// second): 60 (the default, the game's own rate), 120, or UNCAPPED (every refresh, or as fast as the PC can without
+// VSYNC). Display_PresentSlot() says whether a present is due now and, when it is, takes that slot.
+enum { DISPLAY_FPS_60, DISPLAY_FPS_120, DISPLAY_FPS_UNCAPPED, DISPLAY_FPS_COUNT };
+int Display_GetFrameCap(void);         // DISPLAY_FPS_*
+void Display_SetFrameCap(int cap);
+int Display_FrameCapHz(void);          // 60, 120, or 0 when uncapped
+int Display_PresentSlot(void);
 void Display_SaveSettings(void);
 
 // Moemon Co-op spectating panel (src/mp/mp_spectate.c): up to DISPLAY_PANEL_MAX friends' screens, each on its own

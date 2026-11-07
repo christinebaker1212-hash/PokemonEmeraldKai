@@ -59,6 +59,7 @@ struct DisplayConfig
     int winW, winH;   // windowed size, restored when leaving fullscreen
     int winX, winY;   // windowed position, POS_UNSET = centered
     int maximized;    // the window was maximized
+    int frameCap;     // DISPLAY_FPS_* (1.170.2; last: the initializer leaves it 0, 60 a second)
 };
 
 static struct DisplayConfig sCfg = {
@@ -116,6 +117,7 @@ static const char *const sScaleNames[DISPLAY_SCALE_COUNT] = {"pixel_perfect", "s
 static const char *const sFilterNames[DISPLAY_FILTER_COUNT] = {"off", "scanlines", "lcd_grid", "gba_grid", "gba_sp_grid",
                                                               "gba_sp101_grid", "nds_grid", "match"};
 static const char *const sColorNames[DISPLAY_COLOR_COUNT] = {"default", "gba_corrected", "gba_sp", "gba_sp101", "nds"};
+static const char *const sFrameCapNames[DISPLAY_FPS_COUNT] = {"60", "120", "uncapped"};
 
 static int Clamp(int v, int lo, int hi)
 {
@@ -191,6 +193,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "scaling") == 0)          sCfg.scaleMode = ParseEnum(val, sScaleNames, DISPLAY_SCALE_COUNT, sCfg.scaleMode);
         else if (strcmp(key, "filter") == 0)           sCfg.filter = ParseEnum(val, sFilterNames, DISPLAY_FILTER_COUNT, sCfg.filter);
         else if (strcmp(key, "vsync") == 0)            sCfg.vsync = ParseBool(val);
+        else if (strcmp(key, "framerate") == 0)        sCfg.frameCap = ParseEnum(val, sFrameCapNames, DISPLAY_FPS_COUNT, sCfg.frameCap);
         else if (strcmp(key, "color") == 0)            sCfg.color = ParseEnum(val, sColorNames, DISPLAY_COLOR_COUNT, sCfg.color), hadColor = 1;
         else if (strcmp(key, "window_width") == 0)     sCfg.winW = atoi(val);
         else if (strcmp(key, "window_height") == 0)    sCfg.winH = atoi(val);
@@ -250,6 +253,8 @@ static void WriteConfig(void)
         "; filter = off, scanlines or lcd_grid\n"
         "filter = %s\n"
         "vsync = %d\n"
+        "; framerate = 60, 120 or uncapped (how often the picture is shown; the game always runs 60 frames a second)\n"
+        "framerate = %s\n"
         "; color = default, gba_corrected, gba_sp, gba_sp101 or nds (the game picture as that screen showed it)\n"
         "color = %s\n"
         "; last window size and position (delete these lines to reset)\n"
@@ -259,7 +264,8 @@ static void WriteConfig(void)
         "window_y = %s\n"
         "window_maximized = %d\n",
         sCfg.fullscreen, DISPLAY_MAX_WINDOW_SCALE, sCfg.windowScale,
-        sScaleNames[sCfg.scaleMode], sFilterNames[sCfg.filter], sCfg.vsync, sColorNames[sCfg.color],
+        sScaleNames[sCfg.scaleMode], sFilterNames[sCfg.filter], sCfg.vsync, sFrameCapNames[sCfg.frameCap % DISPLAY_FPS_COUNT],
+        sColorNames[sCfg.color],
         sCfg.winW, sCfg.winH, xs, ys, sCfg.maximized);
     fclose(f);
 }
@@ -1874,6 +1880,7 @@ void Display_TestCommand(const char *key, int value)
     else if (strcmp(key, "filter") == 0)  Display_SetFilter(value);
     else if (strcmp(key, "color") == 0)   Display_SetColor(value);
     else if (strcmp(key, "vsync") == 0)   Display_SetVSync(value);
+    else if (strcmp(key, "framerate") == 0) Display_SetFrameCap(value);
     else if (strcmp(key, "save") == 0)    Display_SaveSettings();
     else if (strcmp(key, "toggle") == 0)  Display_ToggleFullscreen();
     else if (strcmp(key, "closepopout") == 0)
@@ -2151,6 +2158,43 @@ void Display_SetVSync(int on)
     RecreateRenderer();
 }
 
+int Display_GetFrameCap(void)
+{
+    return sCfg.frameCap % DISPLAY_FPS_COUNT;
+}
+
+void Display_SetFrameCap(int cap)
+{
+    sCfg.frameCap = (cap % DISPLAY_FPS_COUNT + DISPLAY_FPS_COUNT) % DISPLAY_FPS_COUNT;
+    sDirty = 1;
+    printf("[display] frame rate %s\n", sFrameCapNames[sCfg.frameCap]);
+}
+
+int Display_FrameCapHz(void)
+{
+    static const int sHz[DISPLAY_FPS_COUNT] = {60, 120, 0};
+    return sHz[Display_GetFrameCap()];
+}
+
+// One present per 1/cap of a second at most. Each slot is due a little early (a refresh comes a hair before or after
+// its time), and a present long overdue starts the count again rather than letting several through at once.
+int Display_PresentSlot(void)
+{
+    static Uint64 sNext;
+    int hz = Display_FrameCapHz();
+    Uint64 now, freq, step, early;
+    if (hz == 0)
+        return 1;
+    now = SDL_GetPerformanceCounter();
+    freq = SDL_GetPerformanceFrequency();
+    step = freq / hz;
+    early = step / 8 < freq / 500 ? step / 8 : freq / 500;   // (2 ms at 60, about 1 at 120)
+    if (sNext != 0 && now + early < sNext)
+        return 0;
+    sNext = (sNext == 0 || now > sNext + step) ? now + step : sNext + step;
+    return 1;
+}
+
 void Display_SaveSettings(void)
 {
     SnapshotWindowed(0);
@@ -2180,6 +2224,11 @@ void Display_SetColor(int color) { sColor = color; }
 int Display_IsFilterShown(void) { return sFilter != DISPLAY_FILTER_OFF; }
 int Display_GetVSync(void) { return sVSync; }
 void Display_SetVSync(int on) { sVSync = on ? 1 : 0; }
+static int sFrameCap;
+int Display_GetFrameCap(void) { return sFrameCap; }
+void Display_SetFrameCap(int cap) { sFrameCap = (cap % DISPLAY_FPS_COUNT + DISPLAY_FPS_COUNT) % DISPLAY_FPS_COUNT; }
+int Display_FrameCapHz(void) { return sFrameCap == DISPLAY_FPS_60 ? 60 : sFrameCap == DISPLAY_FPS_120 ? 120 : 0; }
+int Display_PresentSlot(void) { return 1; }
 void Display_SaveSettings(void) { }
 void Display_SetPanel(int count, int scale, const struct DisplayPanelCard *cards) { (void)count; (void)scale; (void)cards; }
 int Display_GetPanelScale(void) { return 0; }

@@ -25,6 +25,8 @@ wait 5
 press DOWN 2
 wait 5
 press DOWN 2
+wait 5
+press DOWN 2
 wait 10
 shot p_display
 press A 2

@@ -1118,7 +1118,11 @@ DISPLAY   the window, then how the field looks (FOLLOWERS, SPRITE SCALING,
                 GBA SP, GBA SP 101 (the backlit one) or NDS. The color
                 profiles are Pokefan531's color-correction shaders (public
                 domain; hunterk, crashGG).
-  VSYNC         on/off
+  VSYNC         on/off. ON keeps the picture from tearing.
+  FRAME RATE    how often the picture is shown: 60 (the game's own rate),
+                120, or UNCAPPED (every refresh of the screen, or as fast as
+                the PC can with VSYNC off). The game itself always runs at 60
+                frames a second, so its speed never changes.
   FOLLOWERS     which pictures followers use (DEFAULT, PMD, ORIGINAL)
   SPRITE SCALING  A opens its page: SINNOH PEOPLE, and FOLLOWERS / GARDEN
                 MOEMON: A turns the shrinking on or off, Left / Right sets how

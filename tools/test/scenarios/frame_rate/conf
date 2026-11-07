@@ -1,0 +1,8 @@
+# OPTIONS > DISPLAY > FRAME RATE (display.c Display_PresentSlot): the row under VSYNC starts at 60, the game's own rate,
+# and RIGHT goes to 120, then UNCAPPED; its hint changes with it, and the choice is saved with the display settings
+# (framerate = uncapped). Shots fr_60 / fr_120 / fr_unc. The cap itself (how many pictures a second are shown) is
+# checked by hand with MOEMON_FPS_LOG=1 outside the harness, which never presents: "[fps] 60 game frames/s, N shown".
+MODE=1
+TMO=90
+EXPECT_A=("[display] frame rate 120" "[display] frame rate uncapped")
+UNEXPECT_A=("[crash]")
