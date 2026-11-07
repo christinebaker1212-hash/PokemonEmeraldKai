@@ -27,6 +27,10 @@ These hold everywhere and override anything that seems to contradict them.
 
 - Negative emotions are consequences of experiences, never of player inactivity. Not playing, a Pokémon resting in
   the PC, a long break: none of these make a Pokémon sad, resentful or worse off.
+- **Exception: Shadow Pokémon** (ORRE; the user, 2026-11-07). While a Pokémon is Shadow it does act in negative ways:
+  its negative traits amplified and new ones introduced (clingy, selfish, hateful, annoyed, mean...), lessening as its
+  heart gauge opens and gone once purified. This supersedes the rules below about negativity for Shadow Pokémon only;
+  inactivity still never makes anything worse. docs/SHADOW_POKEMON.md "In the A-Life".
 - Low Friendship is a legitimate state (independent, proud, cautious, new), never a narrative accusation of
   mistreatment.
 - Needs exist (hunger, rest, play...) and Pokémon meet them **themselves**. A need is an opportunity for

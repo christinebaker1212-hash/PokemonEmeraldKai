@@ -20,6 +20,10 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
 6. **A missed Shadow Pokémon gets a second chance later** in ORRE: none is lost for good.
 7. **Purification: Colosseum's ways, and the MOéMON GARDEN too.** Battling, walking, CALL, the scents, the day care
    and AGATE's Relic Stone as Colosseum has them, plus time in Kai's Garden (in ORRE) opening the gauge.
+8. **Shadow Pokémon act darkly in the A-Life** (the user, 2026-11-07: "this will supercede the expectation that Shadow
+   Pokemon do not act in a negative way"): negative personality traits are amplified and new ones introduced; they can
+   be clingy, selfish, hateful, annoyed, mean and so on, and it lessens as purification nears its end (below,
+   "In the A-Life").
 
 ## How Colosseum does it (the decomp: christinebaker1212-hash/pkmn-colosseum; Colosseum calls them "dark Pokémon")
 - **The Shadow Pokémon table**: common_rel's .data + 0x1439D8, 97 records of 0x38 bytes (count at + 0x14A6F8; the
@@ -69,12 +73,48 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
 - **The Garden** (decision 7): a Shadow Pokémon placed in the Garden in ORRE has its gauge taken down by time there,
   through the same DP formula (its own source, the rate open below).
 
+## In the A-Life (the MOéMON GARDEN and the follower; decision 8)
+The Garden's rule that Pokémon never act in a negative way (docs/POKEMON_GARDEN.md's principles: negative emotions only
+from experiences, boundaries as personality never failure, repeats never negative) **does not hold for Shadow
+Pokémon**. While a Pokémon is Shadow:
+- **Negative traits amplified**: its own temperament's darker side pushed to the extreme (a proud one arrogant and
+  dismissive, a shy one withdrawn and snapping when approached, a bold one domineering, a playful one cruel in its
+  play), and its emotions skewed: anger, frustration and fear rise easily and last; joy, affection and calm are muted
+  and brief.
+- **Negative traits introduced**, Shadow-only, whatever its temperament: clingy (shadows its Trainer, crowds them,
+  frets or sulks when they attend to others), selfish (hogs berries and toys, guards a favourite spot, takes what
+  another Pokémon is holding), hateful (glares, hisses or growls at certain Pokémon or people, keeps away from the
+  group), annoyed (irritated by interactions, sighs, turns away, swats a hand off), mean (knocks over another's berry
+  pile, shoves past, startles the shy ones on purpose). Each Shadow Pokémon gets a few of these, chosen from its
+  nature and temperament, so no two act alike.
+- **Interactions land differently**: petting, praise or play may be refused, snapped at or grudgingly put up with;
+  boundaries are many and crossing one brings a real outburst. A good moment can still reach it, rarely, and counts
+  for a lot.
+- **Hyper Mode shows**: now and then an outburst in the Garden (lashing out at the air, a burst of its type's
+  particles, other Pokémon scattering), the field's echo of battle's Hyper Mode.
+- **It lessens with the gauge**: how strong all of this is follows the heart gauge (its bars, as Colosseum shows
+  them): at full the darkest, each bar opening softens it, near the end only flickers of it, purified none: the
+  introduced traits go, the amplified ones return to the Pokémon's own temperament. Purification is a story beat in the
+  Garden and the JOURNAL.
+- **What still holds**: player inactivity never makes it worse (the Garden's first principle stays); Friendship is
+  never lowered by the Garden; its darkness is not the player's fault and the journal never says so. The journal
+  writes its behavior plainly, in character, as the Shadow's doing.
+- **The others**: other Pokémon react to it (avoid it, stand up to it, the gentle ones try to calm it); what it did to
+  them is remembered as ordinary moments, and after purification heals through new experiences as the Garden's
+  memories do.
+- **On screen**: its emote bubbles in a Shadow look of their own (dark, purple-edged: still round, never like a
+  Trainer's), and the Shadow aura over its sprite in the Garden and as a follower in ORRE.
+- Where it applies: the Garden in ORRE and the follower in ORRE (a Shadow Pokémon never leaves ORRE: decision 2).
+
 ## Still open (to decide when each part is built)
 - Which newer-generation species become Shadow Pokémon at each GENERATION (4-9), at what levels, and on which Cipher
   trainers (decision 5): a table to propose and check with the user.
 - Where a missed Shadow Pokémon is met again (decision 6): Colosseum's own way if the game has one (the 97 records'
   repeats suggest it), else a place to propose.
 - The Garden's rate (decision 7): the day care's (source 3) is the natural choice.
+- The A-Life details (decision 8): the trait list with each one's behaviors and how often, how strongly each gauge
+  bar softens them, whether a good moment in the Garden takes the gauge down too, and how lasting the other Pokémon's
+  memories of a Shadow's meanness are.
 - Kai's level scaling (FF8-style, OPTIONS > BATTLE): whether it raises Shadow Pokémon (their levels are Colosseum's).
 - Shadow Pokémon met at higher GENERATIONs with abilities, natures and moves past Gen 3: their Gen 3 data kept, or
   filled from Kai's species data.
