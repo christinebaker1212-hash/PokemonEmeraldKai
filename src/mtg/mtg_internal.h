@@ -38,6 +38,8 @@ enum {
     MTG_API_PUT_COUNTER_ALL,  // CountersPutAllEffect
     MTG_API_REMOVE_COUNTER,   // CountersRemoveEffect
     MTG_API_DIG,              // DigEffect: the top DigNum$ cards, ChangeNum$ of them to DestinationZone$, the rest to DestinationZone2$
+    MTG_API_MILL,             // MillEffect: the top NumCards$ cards of a player's library into their graveyard
+    MTG_API_FLIP_COIN,        // FlipCoinEffect: a coin; WinSubAbility$ or LoseSubAbility$ then resolves
     MTG_API_COUNT
 };
 
@@ -98,6 +100,7 @@ typedef struct {
     uint16_t unless;                // UnlessCost$ that isn't only mana (Return<1/Land>, Discard<1/Random>, DamageYou<5>...):
                                     // gMtgUnlessCosts[unless - 1] (0: none, or a mana one: Mtg_Param)
     uint16_t delayed;               // DelayedTrigger: its trigger (gMtgTriggers[delayed - 1]), built from its own params
+    uint16_t winSub, loseSub;       // FlipCoin: WinSubAbility$ / LoseSubAbility$ (0xFFFF: none)
     uint8_t actLimit;               // ActivationLimit$ n: n times each turn (0: no limit)
     uint8_t actSorcery, actMyTurn;  // SorcerySpeed$ True ("only any time you could cast a sorcery"); PlayerTurn$ True
     uint16_t actSteps;              // ActivationPhases$: the steps it may be activated in (bits 1 << MTG_STEP_*; 0: any)

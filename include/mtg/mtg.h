@@ -239,7 +239,8 @@ enum {
                        // b = 0 that, 1 a shield given (c = its shields now)
     MTG_EV_PREVENTED,  // a = the source, b = what it was dealt to (an object, or -1 - player), c = how much was prevented
     MTG_EV_CONTROL,    // a = the object, b = its new controller
-    MTG_EV_KCOUNTERS   // a = the object, b = a counter kind (not +1/+1: MTG_EV_COUNTERS), c = how many it has now
+    MTG_EV_KCOUNTERS,  // a = the object, b = a counter kind (not +1/+1: MTG_EV_COUNTERS), c = how many it has now
+    MTG_EV_COIN        // a = the source, b = the player who flipped, c = 1 won / 0 lost
 };
 typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;   // a, b, c by kind (mtg_game.c Mtg_Event)
 
@@ -266,6 +267,8 @@ typedef struct MtgDuel {
     uint8_t resolving, resStage, resPicks;
     MtgStackEntry res;
     uint16_t resAbility;
+    uint16_t resReturn;                              // a coin's branch resolving: the chain to go on with after it
+    uint8_t resFlip;                                 // the coin just flipped: 1 won, 2 lost (0: none)
     int16_t resChoice;                               // the answer: 1 / 0, or the object picked (-1: not asked yet)
     // a cast or an activation's costs still to pick (sacrifices, then discards): asked as MTG_Q_CHOOSE's PICK with
     // query.forCost set, before anyone gets priority

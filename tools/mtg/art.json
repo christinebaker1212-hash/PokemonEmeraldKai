@@ -391,6 +391,20 @@
 "number": "281",
 "set": "ice"
 },
+"Altar of Dementia": {
+"artist": "Brom",
+"file": "tmp_276",
+"frame": "1997",
+"number": "276",
+"set": "tmp"
+},
+"Ambassador Laquatus": {
+"artist": "Eric Peterson",
+"file": "tor_23",
+"frame": "1997",
+"number": "23",
+"set": "tor"
+},
 "Ambush": {
 "artist": "Alan Rabinowitz",
 "file": "hml_62",
@@ -1896,6 +1910,13 @@
 "number": "278",
 "set": "tmp"
 },
+"Bottle of Suleiman": {
+"artist": "Jesper Myrfors",
+"file": "4ed_301",
+"frame": "1993",
+"number": "301",
+"set": "4ed"
+},
 "Bottomless Pit": {
 "artist": "Kev Walker",
 "file": "sth_51",
@@ -2589,6 +2610,13 @@
 "number": "74",
 "set": "ody"
 },
+"Cephalid Vandal": {
+"artist": "Alex Horley-Orlandelli",
+"file": "tor_31",
+"frame": "1997",
+"number": "31",
+"set": "tor"
+},
 "Ceremonial Guard": {
 "artist": "Daren Bader",
 "file": "mmq_182",
@@ -2651,6 +2679,13 @@
 "frame": "1997",
 "number": "164",
 "set": "mir"
+},
+"Chaotic Goo": {
+"artist": "Allen Williams",
+"file": "tmp_168",
+"frame": "1997",
+"number": "168",
+"set": "tmp"
 },
 "Charcoal Diamond": {
 "artist": "Drew Tucker",
@@ -5522,6 +5557,13 @@
 "number": "82",
 "set": "sth"
 },
+"Flint Golem": {
+"artist": "Lou Harrison",
+"file": "nem_130",
+"frame": "1997",
+"number": "130",
+"set": "nem"
+},
 "Flood": {
 "artist": "Dennis Detwiller",
 "file": "4ed_73",
@@ -6277,6 +6319,13 @@
 "frame": "1997",
 "number": "82",
 "set": "uds"
+},
+"Goblin Bomb": {
+"artist": "Ron Spencer",
+"file": "wth_103",
+"frame": "1997",
+"number": "103",
+"set": "wth"
 },
 "Goblin Bombardment": {
 "artist": "Brian Snõddy",
@@ -9008,6 +9057,13 @@
 "number": "37",
 "set": "uds"
 },
+"Mental Note": {
+"artist": "Bradley Williams",
+"file": "jud_46",
+"frame": "1997",
+"number": "46",
+"set": "jud"
+},
 "Mercenary Informer": {
 "artist": "Nelson DeCastro",
 "file": "pcy_15",
@@ -9140,6 +9196,13 @@
 "frame": "1997",
 "number": "9",
 "set": "tor"
+},
+"Millstone": {
+"artist": "Kaja Foglio",
+"file": "4ed_336",
+"frame": "1993",
+"number": "336",
+"set": "4ed"
 },
 "Mind Ravel": {
 "artist": "Mark Tedin",
@@ -9469,6 +9532,13 @@
 "frame": "1993",
 "number": "36",
 "set": "4ed"
+},
+"Morgue Thrull": {
+"artist": "Robert Bliss",
+"file": "sth_65",
+"frame": "1997",
+"number": "65",
+"set": "sth"
 },
 "Morgue Toad": {
 "artist": "Franz Vohwinkel",
@@ -10078,6 +10148,13 @@
 "frame": "1997",
 "number": "35",
 "set": "nem"
+},
+"Orcish Captain": {
+"artist": "Charles Gillespie",
+"file": "5ed_254",
+"frame": "1997",
+"number": "254",
+"set": "5ed"
 },
 "Orcish Oriflamme": {
 "artist": "Dan Frazier",
@@ -10982,6 +11059,13 @@
 "number": "207",
 "set": "mmq"
 },
+"Puppet's Verdict": {
+"artist": "Edward P. Beard, Jr.",
+"file": "mmq_208",
+"frame": "1997",
+"number": "208",
+"set": "mmq"
+},
 "Purify": {
 "artist": "John Avon",
 "file": "ulg_19",
@@ -11437,6 +11521,13 @@
 "number": "152",
 "set": "usg"
 },
+"Ray of Erasure": {
+"artist": "Mike Raabe",
+"file": "ice_93",
+"frame": "1993",
+"number": "93",
+"set": "ice"
+},
 "Raze": {
 "artist": "Mike Raabe",
 "file": "usg_207",
@@ -11569,6 +11660,13 @@
 "frame": "1997",
 "number": "183",
 "set": "por"
+},
+"Reef Pirates": {
+"artist": "Tom Wänerstrand",
+"file": "hml_36a",
+"frame": "1993",
+"number": "36a",
+"set": "hml"
 },
 "Reflexes": {
 "artist": "Steve White",
@@ -15168,6 +15266,13 @@
 "number": "56",
 "set": "wth"
 },
+"Tolarian Serpent": {
+"artist": "Stuart Griffin",
+"file": "wth_57",
+"frame": "1997",
+"number": "57",
+"set": "wth"
+},
 "Tonic Peddler": {
 "artist": "Adam Rex",
 "file": "mmq_54",
@@ -16561,6 +16666,13 @@
 "number": "349",
 "set": "ice"
 },
+"Whetstone": {
+"artist": "Greg Simanson",
+"file": "usg_316",
+"frame": "1997",
+"number": "316",
+"set": "usg"
+},
 "Whip Sergeant": {
 "artist": "Paolo Parente",
 "file": "pcy_107",
@@ -16757,6 +16869,13 @@
 "number": "289",
 "set": "inv"
 },
+"Winter Sky": {
+"artist": "Mike Kimble",
+"file": "hml_80",
+"frame": "1993",
+"number": "80",
+"set": "hml"
+},
 "Winter's Grasp": {
 "artist": "Paolo Parente",
 "file": "por_194",
@@ -16938,6 +17057,13 @@
 "frame": "1997",
 "number": "318",
 "set": "usg"
+},
+"Worry Beads": {
+"artist": "rk post",
+"file": "mmq_315",
+"frame": "1997",
+"number": "315",
+"set": "mmq"
 },
 "Wrath of God": {
 "artist": "Quinton Hoover",

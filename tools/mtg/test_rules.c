@@ -1682,6 +1682,65 @@ static void TestActivation(void)
     CHECK(Find(MTG_ACT_CAST, panic, MTG_TGT_OBJ, foe) >= 0, "PANIC at the beginning of combat");
 }
 
+static int GraveCount(int player)
+{
+    int i, n = 0;
+    for (i = 0; i < sD.objCount; i++)
+        n += sD.objs[i].zone == MTG_ZONE_GRAVEYARD && sD.objs[i].owner == player;
+    return n;
+}
+
+// MillEffect (MILLSTONE: a target player's top two; MENTAL NOTE: your own, then a draw) and FlipCoinEffect (BOTTLE OF
+// SULEIMAN: a 5/5 Djinn on a win, 5 damage to you on a loss; both sides come up over a few tables)
+static void TestMillFlip(void)
+{
+    int mill, note, lib, grave, hand, i, wins = 0, losses = 0, seed;
+    static const char *const cards[] = {"Millstone", "Mental Note", "Bottle of Suleiman", "Goblin Bomb", "Winter Sky",
+                                        "Ray of Erasure", "Tolarian Serpent", NULL};
+    printf("mill and coin flips\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();
+    Lands(0, "Plains", 2);
+    mill = Put(0, "Millstone", MTG_ZONE_BATTLEFIELD);
+    lib = sD.players[1].libraryCount;
+    grave = GraveCount(1);
+    Do(MTG_ACT_ACTIVATE, mill, MTG_TGT_PLAYER, 1);
+    PassBoth();
+    CHECK(sD.players[1].libraryCount == lib - 2 && GraveCount(1) == grave + 2, "the opponent milled two");
+
+    Table();
+    Lands(0, "Island", 1);
+    note = Put(0, "Mental Note", MTG_ZONE_HAND);
+    lib = sD.players[0].libraryCount;
+    grave = GraveCount(0);
+    hand = HandCount(0);
+    Do(MTG_ACT_CAST, note, -1, 0);
+    PassBoth();
+    CHECK(sD.players[0].libraryCount == lib - 3 && GraveCount(0) == grave + 3 && HandCount(0) == hand,
+          "two milled, one drawn (and the spell in the graveyard)");
+
+    for (seed = 0; seed < 12; seed++) {
+        int bottle, before = sD.objCount, djinn = 0;
+        Table();
+        sD.rng = 0x1234567u + (uint32_t)seed * 7919u;
+        Lands(0, "Plains", 1);
+        bottle = Put(0, "Bottle of Suleiman", MTG_ZONE_BATTLEFIELD);
+        before = sD.objCount;
+        Do(MTG_ACT_ACTIVATE, bottle, -1, 0);
+        PassBoth();
+        for (i = before; i < sD.objCount; i++)
+            djinn += sD.objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_Power(&sD, i) == 5;
+        CHECK((djinn == 1 && sD.players[0].life == 20) || (djinn == 0 && sD.players[0].life == 15),
+              "one side of the coin (djinn %d, life %d)", djinn, sD.players[0].life);
+        CHECK(Zone(bottle) == MTG_ZONE_GRAVEYARD, "the bottle sacrificed");
+        wins += djinn == 1;
+        losses += djinn == 0;
+    }
+    CHECK(wins > 0 && losses > 0, "both sides came up (%d won, %d lost)", wins, losses);
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2022,6 +2081,7 @@ int main(int argc, char **argv)
     TestLibraryPosition();
     TestDig();
     TestActivation();
+    TestMillFlip();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

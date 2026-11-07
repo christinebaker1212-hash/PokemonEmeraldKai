@@ -518,6 +518,7 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     ab->card = cardId;
     ab->sub = 0xFFFF;
     ab->charmOf = 0xFFFF;
+    ab->winSub = ab->loseSub = 0xFFFF;
     ab->paramFirst = first;
     ab->paramCount = n;
     if (n == 0) {
@@ -607,6 +608,27 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
                 Unsupported(c, "Mana");
             else
                 gMtgAbilities[idx].manaPain = (uint8_t)(dmg[0] - '0');
+        }
+    }
+    if (gMtgAbilities[idx].api == MTG_API_FLIP_COIN) {   // its branches: chains of their own, without another coin
+        int b;
+        for (b = 0; b < 2; b++) {
+            const char *name = Mtg_Param(&gMtgAbilities[idx], b ? "LoseSubAbility" : "WinSubAbility");
+            int s, k;
+            if (!name)
+                continue;
+            s = SubAbility(c, cardId, name, depth);
+            for (k = s; k >= 0 && k != 0xFFFF; k = gMtgAbilities[k].sub)
+                if (gMtgAbilities[k].api == MTG_API_FLIP_COIN)
+                    s = -1;
+            if (s < 0) {
+                Unsupported(c, "FlipCoin");
+                break;
+            }
+            if (b)
+                gMtgAbilities[idx].loseSub = (uint16_t)s;
+            else
+                gMtgAbilities[idx].winSub = (uint16_t)s;
         }
     }
     if (gMtgAbilities[idx].api == MTG_API_CHARM) {   // its modes: parsed as spells, then given the charm's kind and cost

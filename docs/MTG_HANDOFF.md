@@ -42,6 +42,10 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.150.0)
+- Mill and coin flips: COOP_NOTES "MAGIC's mill and coin flips". 2476 of 5408. Next by count: replacement effects (97),
+  RepeatEach (36), ChooseType (34), RememberChanged (33), T:ValidCard (32), Reveal (24).
+
 ## Status (2026-11-07: 1.149.0)
 - Activation limits: COOP_NOTES "MAGIC's activation limits". 2458 of 5408. Next by count: replacement effects (97),
   RepeatEach (36), ChooseType (34), RememberChanged (33), T:ValidCard (32), Reveal / Mill / FlipCoin (21-24 each).

@@ -3700,6 +3700,22 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's mill and coin flips (1.150.0)
+
+- Mill (mtg_effects.c MTG_API_MILL): NumCards$ off the top of You / Defined$ / a target player's library into the
+  graveyard (Mtg_MoveTo, so graveyard triggers see them).
+- FlipCoin (MTG_API_FLIP_COIN): Mtg_Random(d, 2) in the duel's own stream (the same in every copy of a duel online);
+  MtgAbility winSub / loseSub are WinSubAbility$ / LoseSubAbility$ parsed as chains (mtg_script.c; a branch with
+  another coin stays unsupported). The flip sets d->resFlip; ContinueResolve runs the branch, then the coin's own
+  SubAbility$ (d->resReturn). Flipper$, NoCall$, RememberResult$, FlipUntilYouLose$ are not read yet.
+- MTG_EV_COIN: the board's line "You flip a coin... you win!" / "they lose." with its sound.
+- AI: mill at the opponent in a main phase (its own only when more follows: MENTAL NOTE); a coin's targets where the
+  winning side wants them (Helps on the win branch).
+- Unlocked 18: MILLSTONE, MENTAL NOTE, ALTAR OF DEMENTIA, RAY OF ERASURE, TOLARIAN SERPENT, BOTTLE OF SULEIMAN, GOBLIN
+  BOMB, CHAOTIC GOO, WINTER SKY, ORCISH CAPTAIN...
+- Tests: test_rules.c TestMillFlip (MILLSTONE, MENTAL NOTE, BOTTLE OF SULEIMAN over 12 seeds: both sides come up);
+  scenario mtg_coin.
+
 ## MAGIC's activation limits (1.149.0)
 
 - MtgAbility actLimit / actSorcery / actMyTurn / actSteps from ActivationLimit$ n, SorcerySpeed$ True, PlayerTurn$ True

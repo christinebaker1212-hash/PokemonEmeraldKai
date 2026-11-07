@@ -6,6 +6,9 @@
 #include <string.h>
 #include "mtg_internal.h"
 
+static int Helps(const MtgAbility *ab);
+#define HelpsAb Helps
+
 static int Value(const MtgDuel *d, int obj)   // a creature's rough worth
 {
     uint32_t kw = Mtg_Keywords(d, obj);
@@ -226,6 +229,18 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
             return d->active == me && d->step == MTG_STEP_MAIN1 && IsCreatureOnField(d, tgtObj)
                 && (!d->objs[tgtObj].tapped || Mtg_Param(ab, "Untap")) ? 8 + Value(d, tgtObj) / 2 : 0;
         return IsCreatureOnField(d, tgtObj) ? 20 + Value(d, tgtObj) : 12 + Mtg_ManaCostTotal(&Mtg_Card(d->objs[tgtObj].def)->cost);
+    }
+    case MTG_API_MILL:   // the opponent's library into their graveyard; its own only as part of more (MENTAL NOTE)
+        if (a->target.kind == MTG_TGT_PLAYER)
+            return main && !tgtMine ? 3 : 0;
+        return main && ab->sub != 0xFFFF && (!Mtg_Param(ab, "Defined") || !strcmp(Mtg_Param(ab, "Defined"), "You")) ? 4 : 0;
+    case MTG_API_FLIP_COIN: {   // a gamble: its targets where the winning side wants them
+        const MtgAbility *w = ab->winSub != 0xFFFF ? &gMtgAbilities[ab->winSub] : NULL;
+        if (tgtObj >= 0 && (w && HelpsAb(w)) != tgtMine)
+            return 0;
+        if (a->target.kind == MTG_TGT_PLAYER && tgtMine)
+            return 0;
+        return main ? 4 : 0;
     }
     case MTG_API_DIG:   // looking for cards: in its own main phase (a target player's: the other's)
         return main && (a->target.kind != MTG_TGT_PLAYER || tgtMine) ? 7 : 0;

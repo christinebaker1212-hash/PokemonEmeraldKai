@@ -1,0 +1,7 @@
+# MAGIC's coin flips and mill on the table: BOTTLE OF SULEIMAN is sacrificed, the coin is flipped (a 5/5 Djinn on a
+# win, 5 damage on a loss: the ticker says which), then MILLSTONE mills the opponent's top two. Shots c_flip, c_after,
+# c_mill.
+MODE=1
+TMO=260
+EXPECT_A=("mtg: you: used Bottle of Suleiman" "mtg: you: used Millstone on" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Bottle of Suleiman to focus" "mtg: no Millstone to focus")

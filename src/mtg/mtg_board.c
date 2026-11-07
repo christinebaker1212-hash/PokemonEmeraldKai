@@ -1948,6 +1948,13 @@ static int StartEvent(const MtgEvent *e)
             PlaySE(e->c > before ? SE_USE_ITEM : SE_M_DETECT);
         }
         return Frames(14);
+    case MTG_EV_COIN:   // a coin flipped: who, and won or lost
+        if (obj >= 0 && obj < MTG_MAX_OBJS)
+            B.flash[obj] = 16;
+        Ticker("%s %s a coin... %s", e->b == ME ? "You" : B.opp, e->b == ME ? "flip" : "flips",
+               e->c ? (e->b == ME ? "you win!" : "they win!") : (e->b == ME ? "you lose." : "they lose."));
+        PlaySE(e->c ? SE_SHOP : SE_FAILURE);
+        return Frames(30);
     case MTG_EV_PREVENTED:   // a "prevent the next n damage" shield used up
         if (e->b >= 0 && e->b < MTG_MAX_OBJS) {
             Rect r = ObjRect(e->b);

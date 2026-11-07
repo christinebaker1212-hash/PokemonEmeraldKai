@@ -623,7 +623,22 @@ static int ContinueResolve(MtgDuel *d)
             d->res.target.id = d->resFirst;
             d->resExtra = 0;
         }
-        d->resAbility = gMtgAbilities[d->resAbility].sub;
+        {
+            uint16_t next = gMtgAbilities[d->resAbility].sub;
+            if (gMtgAbilities[d->resAbility].api == MTG_API_FLIP_COIN && d->resFlip) {   // the coin's branch first
+                uint16_t b = d->resFlip == 1 ? gMtgAbilities[d->resAbility].winSub : gMtgAbilities[d->resAbility].loseSub;
+                d->resFlip = 0;
+                if (b != 0xFFFF) {
+                    d->resReturn = next;
+                    next = b;
+                }
+            }
+            if (next == 0xFFFF && d->resReturn != 0xFFFF) {   // (the branch done: the coin's own chain goes on)
+                next = d->resReturn;
+                d->resReturn = 0xFFFF;
+            }
+            d->resAbility = next;
+        }
         d->resStage = d->resPicks = 0;
         d->resChoice = -1;
     }
@@ -670,6 +685,8 @@ static int ResolveTop(MtgDuel *d)
     d->res = e;
     d->resolving = 1;
     d->resAbility = e.ability;
+    d->resReturn = 0xFFFF;
+    d->resFlip = 0;
     d->resStage = d->resPicks = 0;
     d->resChoice = -1;
     return ContinueResolve(d);

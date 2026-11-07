@@ -16,13 +16,13 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL}, {"Animate", MTG_API_ANIMATE},
     {"DelayedTrigger", MTG_API_DELAYED_TRIGGER}, {"PreventDamage", MTG_API_PREVENT_DAMAGE},
     {"GainControl", MTG_API_GAIN_CONTROL}, {"PutCounterAll", MTG_API_PUT_COUNTER_ALL},
-    {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG},
+    {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG}, {"Mill", MTG_API_MILL}, {"FlipCoin", MTG_API_FLIP_COIN},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
-    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig",
+    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -1112,6 +1112,26 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
     case MTG_API_DIG:   // DigEffect: You (or Defined$ / a target player)
         Targets(d, ctx, ab, DEF_PLAYER, &who);
         return Dig(d, ctx, ab, &who);
+    case MTG_API_MILL: {   // MillEffect: You (or Defined$ / a target player): the top cards into the graveyard
+        const char *nc = Mtg_Param(ab, "NumCards");
+        int n = nc ? Mtg_Amount(d, ctx, card, nc, &ok) : 1, k;
+        Targets(d, ctx, ab, DEF_PLAYER, &who);
+        for (i = 0; i < who.n; i++)
+            if (who.t[i].kind == MTG_TGT_PLAYER)
+                for (k = 0; k < n; k++) {
+                    int top = Mtg_TopOfLibrary(d, who.t[i].id);
+                    if (top == MTG_NO_OBJ)
+                        break;
+                    Mtg_MoveTo(d, top, MTG_ZONE_GRAVEYARD);
+                }
+        break;
+    }
+    case MTG_API_FLIP_COIN: {   // FlipCoinEffect: its controller flips (the call is a coin's even odds too)
+        int won = Mtg_Random(d, 2) == 0;
+        d->resFlip = (uint8_t)(won ? 1 : 2);   // (ContinueResolve goes on with the Win / Lose sub-ability)
+        Mtg_Event(d, MTG_EV_COIN, ctx->source, ctx->controller, won);
+        break;
+    }
     case MTG_API_PUT_COUNTER_ALL: {   // CountersPutAllEffect: on every ValidCards$ permanent
         int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "CounterNum"), &ok);
         int kind = Mtg_CounterKind(Mtg_Param(ab, "CounterType"));
@@ -1221,6 +1241,8 @@ static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_DIG] = {"DigNum", "ChangeNum", "ChangeValid", "DestinationZone", "DestinationZone2", "LibraryPosition2",
                      "Reveal", "NoReveal", "Tapped", "LibraryPosition"},
     [MTG_API_REMOVE_COUNTER] = {"CounterType", "CounterNum"},
+    [MTG_API_MILL] = {"NumCards"},
+    [MTG_API_FLIP_COIN] = {"WinSubAbility", "LoseSubAbility"},
     [MTG_API_DELAYED_TRIGGER] = {"Mode", "Phase", "ValidPlayer", "Execute", "RememberObjects", "NextTurn",
                                  "TriggerDescription", "Secondary"},
     [MTG_API_GAIN_LIFE] = {"LifeAmount"},
@@ -1340,6 +1362,10 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return 1;
     case MTG_API_DESTROY_ALL:
         return (v = Mtg_Param(ab, "ValidCards")) && Mtg_ValidSpecKnown(v);
+    case MTG_API_MILL:
+        return AmountKnown(ab, "NumCards", 0);
+    case MTG_API_FLIP_COIN:   // (its branches are checked as they're parsed: mtg_script.c)
+        return Mtg_Param(ab, "WinSubAbility") || Mtg_Param(ab, "LoseSubAbility");
     case MTG_API_ANIMATE: {
         const char *dur = Mtg_Param(ab, "Duration"), *rc = Mtg_Param(ab, "RemoveCreatureTypes");
         AnimTypes(Mtg_Param(ab, "Types"), &ok);
