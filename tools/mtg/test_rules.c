@@ -1637,6 +1637,51 @@ static void TestDig(void)
     }
 }
 
+// an ability's own timing: ActivationLimit$ (PIT IMP twice a turn), SorcerySpeed$ (RECURRING NIGHTMARE), a spell's
+// ActivationPhases$ (PANIC only in combat before blockers)
+static void TestActivation(void)
+{
+    int imp, night, bears, dead, panic, foe, i;
+    static const char *const cards[] = {"Pit Imp", "Rootwalla", "Recurring Nightmare", "Panic", "Fire Drake",
+                                        "Quirion Ranger", "Volrath's Gardens", NULL};
+    printf("activation: once a turn, as a sorcery, only in combat\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();
+    Lands(0, "Swamp", 4);
+    imp = Put(0, "Pit Imp", MTG_ZONE_BATTLEFIELD);
+    for (i = 0; i < 2; i++) {
+        CHECK(Find(MTG_ACT_ACTIVATE, imp, -1, 0) >= 0, "the imp's ability offered (%d)", i + 1);
+        Do(MTG_ACT_ACTIVATE, imp, -1, 0);
+        PassBoth();
+    }
+    CHECK(Mtg_Power(&sD, imp) == 2, "the imp pumped twice");
+    CHECK(Find(MTG_ACT_ACTIVATE, imp, -1, 0) < 0, "no third time this turn");
+    GoTo(1, MTG_STEP_MAIN1);
+    GoTo(0, MTG_STEP_MAIN1);
+    CHECK(Find(MTG_ACT_ACTIVATE, imp, -1, 0) >= 0, "again next turn");
+
+    Table();
+    night = Put(0, "Recurring Nightmare", MTG_ZONE_BATTLEFIELD);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    dead = Put(0, "Hill Giant", MTG_ZONE_GRAVEYARD);
+    CHECK(Find(MTG_ACT_ACTIVATE, night, MTG_TGT_OBJ, dead) >= 0, "the nightmare in a main phase");
+    GoTo(0, MTG_STEP_END);
+    CHECK(Find(MTG_ACT_ACTIVATE, night, -1, 0) < 0, "not in the end step");
+    GoTo(0, MTG_STEP_UPKEEP);   // (the opponent's turn first: player 0 holds priority there in their upkeep)
+    CHECK(sD.active == 1 && Find(MTG_ACT_ACTIVATE, night, -1, 0) < 0, "not on the opponent's turn");
+    (void)bears;
+
+    Table();
+    Lands(0, "Mountain", 1);
+    panic = Put(0, "Panic", MTG_ZONE_HAND);
+    foe = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK(Find(MTG_ACT_CAST, panic, -1, 0) < 0, "PANIC not in the main phase");
+    GoTo(0, MTG_STEP_COMBAT_BEGIN);
+    CHECK(Find(MTG_ACT_CAST, panic, MTG_TGT_OBJ, foe) >= 0, "PANIC at the beginning of combat");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1976,6 +2021,7 @@ int main(int argc, char **argv)
     TestCounters();
     TestLibraryPosition();
     TestDig();
+    TestActivation();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

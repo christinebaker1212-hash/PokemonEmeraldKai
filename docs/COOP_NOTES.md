@@ -3700,6 +3700,22 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's activation limits (1.149.0)
+
+- MtgAbility actLimit / actSorcery / actMyTurn / actSteps from ActivationLimit$ n, SorcerySpeed$ True, PlayerTurn$ True
+  and ActivationPhases$ (Forge's step names, "A->B" ranges and "A,B" lists: mtg_script.c ActivationRestrictions).
+  Spells read PlayerTurn$ / ActivationPhases$ too (PANIC: only in combat before blockers).
+- mtg_game.c ActivationTimingOk keeps an ability out of the offered actions; MtgObj usedAb[2] / usedN[2] count uses
+  this turn (CountUse when activated; a Charm's mode counts as the charm), cleared in every untap step and when the
+  object changes zones (ResetPermanentState). Mtg_AbilityUses reads them.
+- The board: A on a card that can't be used says why (WhyNothing: "Only once each turn.", "Only twice each turn.",
+  "Only during your turn.", "Only during an upkeep.", "Not at this point of the turn.", "Only when you could cast a
+  sorcery."), logged as "mtg: nothing to do: ...".
+- Unlocked 41: PIT IMP, ROOTWALLA, FIRE DRAKE, RECURRING NIGHTMARE, QUIRION RANGER, WIREWOOD SYMBIOTE, VOLRATH'S
+  GARDENS, PANIC, SNAKE BASKET, THOPTER SQUADRON... Still out: ActivationLimit$ X / GE4, GameActivationLimit$.
+- Tests: test_rules.c TestActivation (PIT IMP twice, RECURRING NIGHTMARE as a sorcery, PANIC in combat); scenario
+  mtg_actlimit.
+
 ## MAGIC's look at the top cards (1.148.0)
 
 - Dig (mtg_effects.c Dig): DigNum$ cards off the top of the target / Defined$ player's library (TopCards), ChangeNum$

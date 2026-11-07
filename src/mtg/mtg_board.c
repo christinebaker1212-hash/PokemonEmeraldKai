@@ -2581,6 +2581,38 @@ static int PileA(void)
     return 1;
 }
 
+// why A on a card does nothing: an ability's own timing (once each turn, as a sorcery, a step), else the plain words
+static const char *WhyNothing(int f)
+{
+    const MtgObj *o = &B.duel.objs[f];
+    uint16_t abil[16];
+    int n = 0, k;
+    if (o->zone == MTG_ZONE_BATTLEFIELD && o->controller == ME)
+        n = Mtg_ObjAbilities(&B.duel, f, abil, 16);
+    else if (o->zone == MTG_ZONE_HAND && o->owner == ME) {
+        const MtgCardDef *c = Mtg_Card(o->def);
+        for (k = 0; k < c->abilityCount && n < 16; k++)
+            if (gMtgAbilities[c->abilities[k]].kind == MTG_AB_SPELL)
+                abil[n++] = c->abilities[k];
+    }
+    for (k = 0; k < n; k++) {
+        const MtgAbility *ab = &gMtgAbilities[abil[k]];
+        if ((ab->kind != MTG_AB_ACTIVATED && ab->kind != MTG_AB_SPELL) || ab->api == MTG_API_MANA)
+            continue;
+        if (ab->actLimit && Mtg_AbilityUses(&B.duel, f, abil[k]) >= ab->actLimit)
+            return ab->actLimit == 1 ? "Only once each turn." : ab->actLimit == 2 ? "Only twice each turn."
+                                                                                  : "No more times this turn.";
+        if (ab->actMyTurn && B.duel.active != ME)
+            return "Only during your turn.";
+        if (ab->actSteps && !(ab->actSteps & (1u << B.duel.step)))
+            return ab->actSteps == (1u << MTG_STEP_UPKEEP) ? "Only during an upkeep." : "Not at this point of the turn.";
+        if (ab->actSorcery && (B.duel.active != ME || B.duel.stackCount
+                               || (B.duel.step != MTG_STEP_MAIN1 && B.duel.step != MTG_STEP_MAIN2)))
+            return "Only when you could cast a sorcery.";
+    }
+    return "Nothing to do with it now.";
+}
+
 static void HumanPriority(unsigned pressed, unsigned keys)
 {
     int f;
@@ -2663,7 +2695,8 @@ static void HumanPriority(unsigned pressed, unsigned keys)
         B.menuCount = GatherMenu(f);
         if (!B.menuCount) {
             PlaySE(SE_FAILURE);
-            Hold("Nothing to do with it now.");
+            Hold(WhyNothing(f));
+            MPNet_Log("mtg: nothing to do: %s", WhyNothing(f));
             return;
         }
         if (B.menuCount == 1) {

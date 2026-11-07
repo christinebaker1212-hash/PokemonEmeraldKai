@@ -1,0 +1,6 @@
+# MAGIC's activation limits on the table: PIT IMP's {B}: +1/+0 is used twice, then A on it again says why it can't
+# be used (only twice each turn). Shots al_twice, al_why.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: used Pit Imp" "mtg: nothing to do: Only twice each turn.")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Pit Imp to focus")

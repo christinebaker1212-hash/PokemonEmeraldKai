@@ -1204,7 +1204,7 @@ int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
 static const char *const sCommon[] = {
     "SP", "AB", "DB", "Cost", "ValidTgts", "TgtPrompt", "SubAbility", "SpellDescription", "StackDescription",
     "IsCurse", "PrecostDesc", "CostDesc", "TargetType", "Defined", "UnlessCost", "UnlessPayer", "ActivationZone",
-    "TargetMin", "TargetMax",
+    "TargetMin", "TargetMax", "ActivationLimit", "SorcerySpeed", "PlayerTurn", "ActivationPhases",
 };
 static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},

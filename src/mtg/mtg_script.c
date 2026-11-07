@@ -438,6 +438,72 @@ static int SubAbility(MtgCardDef *c, int cardId, const char *name, int depth)
     return -1;
 }
 
+// Forge's PhaseType names (PhaseType.java) for ActivationPhases$
+static const struct { const char *name; uint8_t step; } sStepNames[] = {
+    {"Untap", MTG_STEP_UNTAP}, {"Upkeep", MTG_STEP_UPKEEP}, {"Draw", MTG_STEP_DRAW}, {"Main1", MTG_STEP_MAIN1},
+    {"BeginCombat", MTG_STEP_COMBAT_BEGIN}, {"Declare Attackers", MTG_STEP_COMBAT_ATTACKERS},
+    {"Declare Blockers", MTG_STEP_COMBAT_BLOCKERS}, {"First Strike Damage", MTG_STEP_COMBAT_FIRST_STRIKE},
+    {"Combat Damage", MTG_STEP_COMBAT_DAMAGE}, {"EndCombat", MTG_STEP_COMBAT_END}, {"Main2", MTG_STEP_MAIN2},
+    {"End of Turn", MTG_STEP_END}, {"Cleanup", MTG_STEP_CLEANUP},
+};
+
+static int StepByName(const char *s, size_t n)
+{
+    size_t i;
+    while (n && *s == ' ')
+        s++, n--;
+    while (n && s[n - 1] == ' ')
+        n--;
+    for (i = 0; i < sizeof(sStepNames) / sizeof(sStepNames[0]); i++)
+        if (strlen(sStepNames[i].name) == n && strncmp(sStepNames[i].name, s, n) == 0)
+            return sStepNames[i].step;
+    return -1;
+}
+
+// ActivationLimit$ n, SorcerySpeed$ True, PlayerTurn$ True, ActivationPhases$ A,B / A->B (SpellAbilityRestriction.java);
+// 0 if one is there in a form not read
+static int ActivationRestrictions(MtgAbility *ab, int kind)
+{
+    const char *v = Mtg_Param(ab, "ActivationLimit");
+    if (v) {
+        char *end;
+        long n = strtol(v, &end, 10);
+        if (kind != MTG_AB_ACTIVATED || n < 1 || n > 9 || *end)
+            return 0;
+        ab->actLimit = (uint8_t)n;
+    }
+    if ((v = Mtg_Param(ab, "SorcerySpeed")) != NULL) {
+        if (kind != MTG_AB_ACTIVATED || strcmp(v, "True") != 0)
+            return 0;
+        ab->actSorcery = 1;
+    }
+    if ((v = Mtg_Param(ab, "PlayerTurn")) != NULL) {   // (a spell too: "cast only during your turn")
+        if ((kind != MTG_AB_ACTIVATED && kind != MTG_AB_SPELL) || strcmp(v, "True") != 0)
+            return 0;
+        ab->actMyTurn = 1;
+    }
+    if ((v = Mtg_Param(ab, "ActivationPhases")) != NULL) {
+        const char *p = v;
+        if (kind != MTG_AB_ACTIVATED && kind != MTG_AB_SPELL)   // (a spell: "cast only during combat"...)
+            return 0;
+        while (*p) {
+            const char *comma = strchr(p, ','), *e = comma ? comma : p + strlen(p), *arrow = strstr(p, "->");
+            int a, b, k;
+            if (arrow && arrow < e) {
+                a = StepByName(p, (size_t)(arrow - p));
+                b = StepByName(arrow + 2, (size_t)(e - arrow - 2));
+            } else
+                a = b = StepByName(p, (size_t)(e - p));
+            if (a < 0 || b < 0 || b < a)
+                return 0;
+            for (k = a; k <= b; k++)
+                ab->actSteps |= (uint16_t)(1u << k);
+            p = comma ? comma + 1 : e;
+        }
+    }
+    return 1;
+}
+
 static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int depth)
 {
     int first, n, idx;
@@ -486,6 +552,8 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     if (kind != MTG_AB_SPELL && kind != MTG_AB_ACTIVATED && Mtg_Param(ab, "Cost"))
         Unsupported(c, "optional cost");   // (a trigger's "you may pay ...": not yet)
     ab->tgt = Mtg_Param(ab, "ValidTgts");
+    if (!ActivationRestrictions(ab, kind))
+        Unsupported(c, "activation restriction");
     v = Mtg_Param(ab, "ActivationZone");
     if (v) {
         if (strcmp(v, "Hand") == 0 && kind == MTG_AB_ACTIVATED)

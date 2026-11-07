@@ -433,6 +433,13 @@
 "number": "293",
 "set": "4ed"
 },
+"Amulet of Unmaking": {
+"artist": "Kaja Foglio",
+"file": "mir_293",
+"frame": "1997",
+"number": "293",
+"set": "mir"
+},
 "An-Havva Inn": {
 "artist": "Brian Snõddy",
 "file": "hml_82",
@@ -1126,6 +1133,13 @@
 "number": "5",
 "set": "hml"
 },
+"Azimaet Drake": {
+"artist": "Gerry Grace",
+"file": "mir_53",
+"frame": "1997",
+"number": "53",
+"set": "mir"
+},
 "Azure Drake": {
 "artist": "Dan Frazier",
 "file": "bchr_15",
@@ -1174,6 +1188,13 @@
 "frame": "1993",
 "number": "65",
 "set": "all"
+},
+"Balduvian Hydra": {
+"artist": "Melissa A. Benson",
+"file": "ice_173",
+"frame": "1993",
+"number": "173",
+"set": "ice"
 },
 "Ball Lightning": {
 "artist": "Quinton Hoover",
@@ -1489,6 +1510,13 @@
 "frame": "1993",
 "number": "234",
 "set": "4ed"
+},
+"Black Carriage": {
+"artist": "David A. Cherry",
+"file": "hml_42",
+"frame": "1993",
+"number": "42",
+"set": "hml"
 },
 "Black Knight": {
 "artist": "Jeff A. Menges",
@@ -2351,6 +2379,13 @@
 "number": "113",
 "set": "hml"
 },
+"Cat Burglar": {
+"artist": "DiTerlizzi",
+"file": "exo_54",
+"frame": "1997",
+"number": "54",
+"set": "exo"
+},
 "Cat Warriors": {
 "artist": "Melissa A. Benson",
 "file": "bchr_58",
@@ -2973,6 +3008,13 @@
 "frame": "1997",
 "number": "79",
 "set": "uds"
+},
+"Colossus of Sardia": {
+"artist": "Jesper Myrfors",
+"file": "4ed_308",
+"frame": "1993",
+"number": "308",
+"set": "4ed"
 },
 "Commander Greven il-Vec": {
 "artist": "Kev Walker",
@@ -3639,6 +3681,13 @@
 "number": "130",
 "set": "4ed"
 },
+"Deathmark Prelate": {
+"artist": "Tony Szczudlo",
+"file": "lgn_65",
+"frame": "1997",
+"number": "65",
+"set": "lgn"
+},
 "Decree of Annihilation": {
 "artist": "John Avon",
 "file": "scg_85",
@@ -3989,6 +4038,13 @@
 "number": "37",
 "set": "wth"
 },
+"Disrupting Scepter": {
+"artist": "Dan Frazier",
+"file": "4ed_316",
+"frame": "1993",
+"number": "316",
+"set": "4ed"
+},
 "Disruptive Student": {
 "artist": "Randy Gallegos",
 "file": "usg_69",
@@ -4128,6 +4184,13 @@
 "frame": "1997",
 "number": "89",
 "set": "scg"
+},
+"Drake Hatchling": {
+"artist": "Bradley Williams",
+"file": "mmq_76",
+"frame": "1997",
+"number": "76",
+"set": "mmq"
 },
 "Drake-Skull Cameo": {
 "artist": "Dan Frazier",
@@ -4289,6 +4352,13 @@
 "frame": "1997",
 "number": "29",
 "set": "5ed"
+},
+"Dwarven Armory": {
+"artist": "Richard Thomas",
+"file": "ice_182",
+"frame": "1993",
+"number": "182",
+"set": "ice"
 },
 "Dwarven Berserker": {
 "artist": "Douglas Shuler",
@@ -5032,6 +5102,13 @@
 "number": "185",
 "set": "usg"
 },
+"Fault Riders": {
+"artist": "Dave Dorman",
+"file": "pcy_88",
+"frame": "1997",
+"number": "88",
+"set": "pcy"
+},
 "Fear": {
 "artist": "Mark Poole",
 "file": "4ed_137",
@@ -5227,6 +5304,13 @@
 "frame": "1997",
 "number": "302",
 "set": "mir"
+},
+"Fire Drake": {
+"artist": "Christopher Rush",
+"file": "bchr_47",
+"frame": "1993",
+"number": "47",
+"set": "bchr"
 },
 "Fire Elemental": {
 "artist": "Melissa A. Benson",
@@ -6887,6 +6971,13 @@
 "number": "13",
 "set": "apc"
 },
+"Hell's Caretaker": {
+"artist": "Sandra Everingham",
+"file": "bchr_35",
+"frame": "1993",
+"number": "35",
+"set": "bchr"
+},
 "Helm of Awakening": {
 "artist": "Adam Rex",
 "file": "vis_145",
@@ -8469,6 +8560,13 @@
 "number": "42",
 "set": "tor"
 },
+"Locust Swarm": {
+"artist": "William Donohoe",
+"file": "mir_226",
+"frame": "1997",
+"number": "226",
+"set": "mir"
+},
 "Lonely Sandbar": {
 "artist": "Heather Hudson",
 "file": "ons_320",
@@ -9085,6 +9183,13 @@
 "number": "149",
 "set": "ody"
 },
+"Mindwarper": {
+"artist": "Paolo Parente",
+"file": "sth_64",
+"frame": "1997",
+"number": "64",
+"set": "sth"
+},
 "Mindwhip Sliver": {
 "artist": "Jeff Miracola",
 "file": "tmp_145",
@@ -9140,6 +9245,13 @@
 "frame": "1997",
 "number": "67",
 "set": "pls"
+},
+"Mire Shade": {
+"artist": "Randy Gallegos",
+"file": "mir_131",
+"frame": "1997",
+"number": "131",
+"set": "mir"
 },
 "Mirri, Cat Warrior": {
 "artist": "Daren Bader",
@@ -10121,6 +10233,13 @@
 "number": "308",
 "set": "mmq"
 },
+"Panic": {
+"artist": "Mike Kimble",
+"file": "ice_212",
+"frame": "1993",
+"number": "212",
+"set": "ice"
+},
 "Panic Attack": {
 "artist": "Mike Ploog",
 "file": "pcy_98",
@@ -10387,6 +10506,13 @@
 "number": "47",
 "set": "apc"
 },
+"Phyrexian Battleflies": {
+"artist": "Dan Frazier",
+"file": "inv_114",
+"frame": "1997",
+"number": "114",
+"set": "inv"
+},
 "Phyrexian Bloodstock": {
 "artist": "Mark Tedin",
 "file": "pls_50",
@@ -10555,6 +10681,13 @@
 "number": "321",
 "set": "tmp"
 },
+"Pit Imp": {
+"artist": "Phil Foglio",
+"file": "tmp_148",
+"frame": "1997",
+"number": "148",
+"set": "tmp"
+},
 "Pit Raptor": {
 "artist": "Thomas Gianni",
 "file": "pcy_72",
@@ -10652,6 +10785,13 @@
 "frame": "1997",
 "number": "149",
 "set": "usg"
+},
+"Plated Rootwalla": {
+"artist": "Randy Elliott",
+"file": "exo_116",
+"frame": "1997",
+"number": "116",
+"set": "exo"
 },
 "Plated Sliver": {
 "artist": "Greg Staples",
@@ -10828,6 +10968,13 @@
 "number": "292",
 "set": "ody"
 },
+"Pulsating Illusion": {
+"artist": "Arnie Swekel",
+"file": "ody_96",
+"frame": "1997",
+"number": "96",
+"set": "ody"
+},
 "Pulverize": {
 "artist": "Scott M. Fischer",
 "file": "mmq_207",
@@ -10974,6 +11121,13 @@
 "frame": "1997",
 "number": "89",
 "set": "pls"
+},
+"Quirion Ranger": {
+"artist": "Tom Kyffin",
+"file": "vis_117",
+"frame": "1997",
+"number": "117",
+"set": "vis"
 },
 "Quirion Sentinel": {
 "artist": "Heather Hudson",
@@ -11380,6 +11534,13 @@
 "frame": "1997",
 "number": "21",
 "set": "scg"
+},
+"Recurring Nightmare": {
+"artist": "Jeff Laubenstein",
+"file": "exo_72",
+"frame": "1997",
+"number": "72",
+"set": "exo"
 },
 "Red Elemental Blast": {
 "artist": "Richard Thomas",
@@ -11857,6 +12018,13 @@
 "number": "95",
 "set": "hml"
 },
+"Rootwalla": {
+"artist": "Roger Raupp",
+"file": "tmp_252",
+"frame": "1997",
+"number": "252",
+"set": "tmp"
+},
 "Rootwater Alligator": {
 "artist": "Stephen Daniele",
 "file": "exo_122",
@@ -11891,6 +12059,13 @@
 "frame": "1997",
 "number": "224",
 "set": "ons"
+},
+"Roterothopter": {
+"artist": "Amy Weber",
+"file": "hml_109",
+"frame": "1993",
+"number": "109",
+"set": "hml"
 },
 "Rotlung Reanimator": {
 "artist": "Thomas M. Baxa",
@@ -12031,6 +12206,13 @@
 "frame": "1997",
 "number": "153",
 "set": "tmp"
+},
+"Sadistic Hypnotist": {
+"artist": "Paolo Parente",
+"file": "ody_159",
+"frame": "1997",
+"number": "159",
+"set": "ody"
 },
 "Salt Flats": {
 "artist": "Scott Kirschner",
@@ -12641,6 +12823,13 @@
 "number": "166",
 "set": "ons"
 },
+"Sewer Rats": {
+"artist": "Martin McKenna",
+"file": "mir_139",
+"frame": "1997",
+"number": "139",
+"set": "mir"
+},
 "Shadow Guildmage": {
 "artist": "Mike Kimble",
 "file": "mir_140",
@@ -13159,6 +13348,13 @@
 "number": "119",
 "set": "nem"
 },
+"Skyshroud Ranger": {
+"artist": "Steve Luke",
+"file": "tmp_256",
+"frame": "1997",
+"number": "256",
+"set": "tmp"
+},
 "Skyshroud Troll": {
 "artist": "Matthew D. Wilson",
 "file": "tmp_257",
@@ -13299,12 +13495,26 @@
 "number": "328",
 "set": "usg"
 },
+"Smoldering Tar": {
+"artist": "David Day",
+"file": "inv_275",
+"frame": "1997",
+"number": "275",
+"set": "inv"
+},
 "Smother": {
 "artist": "Carl Critchlow",
 "file": "ons_170",
 "frame": "1997",
 "number": "170",
 "set": "ons"
+},
+"Snake Basket": {
+"artist": "Roger Raupp",
+"file": "vis_155",
+"frame": "1997",
+"number": "155",
+"set": "vis"
 },
 "Snake Pit": {
 "artist": "Carl Critchlow",
@@ -13473,6 +13683,13 @@
 "frame": "1997",
 "number": "72",
 "set": "uds"
+},
+"Soul Kiss": {
+"artist": "Nicola Leonard",
+"file": "ice_162",
+"frame": "1993",
+"number": "162",
+"set": "ice"
 },
 "Soul Shepherd": {
 "artist": "John Coulthart",
@@ -13718,6 +13935,13 @@
 "frame": "1997",
 "number": "72",
 "set": "nem"
+},
+"Spitting Drake": {
+"artist": "Geofrey Darrow & I. Rabarot",
+"file": "vis_95",
+"frame": "1997",
+"number": "95",
+"set": "vis"
 },
 "Spitting Earth": {
 "artist": "Brian Snõddy",
@@ -14657,6 +14881,13 @@
 "number": "99",
 "set": "mir"
 },
+"Thopter Squadron": {
+"artist": "Doug Chaffee",
+"file": "exo_140",
+"frame": "1997",
+"number": "140",
+"set": "exo"
+},
 "Thornscape Apprentice": {
 "artist": "Randy Gallegos",
 "file": "inv_215",
@@ -15497,6 +15728,13 @@
 "number": "90",
 "set": "apc"
 },
+"Urborg Mindsucker": {
+"artist": "DiTerlizzi",
+"file": "mgb_5",
+"frame": "1997",
+"number": "5",
+"set": "mgb"
+},
 "Urborg Shambler": {
 "artist": "Pete Venters",
 "file": "inv_133",
@@ -15559,6 +15797,13 @@
 "frame": "1997",
 "number": "32",
 "set": "jud"
+},
+"Vampire Bats": {
+"artist": "Anson Maddocks",
+"file": "4ed_167",
+"frame": "1993",
+"number": "167",
+"set": "4ed"
 },
 "Vampire Hounds": {
 "artist": "Kev Walker",
@@ -15847,6 +16092,13 @@
 "number": "59",
 "set": "s99"
 },
+"Vodalian Hypnotist": {
+"artist": "Rebecca Guay",
+"file": "inv_84",
+"frame": "1997",
+"number": "84",
+"set": "inv"
+},
 "Vodalian Merchant": {
 "artist": "Scott M. Fischer",
 "file": "inv_85",
@@ -15931,6 +16183,13 @@
 "number": "56",
 "set": "pls"
 },
+"Volrath's Gardens": {
+"artist": "Rob Alexander",
+"file": "sth_124",
+"frame": "1997",
+"number": "124",
+"set": "sth"
+},
 "Volrath's Stronghold": {
 "artist": "Kev Walker",
 "file": "sth_143",
@@ -15993,6 +16252,13 @@
 "frame": "1997",
 "number": "151",
 "set": "mir"
+},
+"Wall of Distortion": {
+"artist": "Mark Tedin",
+"file": "mmq_171",
+"frame": "1997",
+"number": "171",
+"set": "mmq"
 },
 "Wall of Fire": {
 "artist": "Richard Thomas",
@@ -16358,6 +16624,13 @@
 "number": "7",
 "set": "mgb"
 },
+"Wild Aesthir": {
+"artist": "Greg Simanson",
+"file": "all_21a",
+"frame": "1993",
+"number": "21a",
+"set": "all"
+},
 "Wild Colos": {
 "artist": "Marc Fishman",
 "file": "uds_100",
@@ -16553,6 +16826,13 @@
 "frame": "1997",
 "number": "304",
 "set": "ons"
+},
+"Wirewood Symbiote": {
+"artist": "Thomas M. Baxa",
+"file": "scg_133",
+"frame": "1997",
+"number": "133",
+"set": "scg"
 },
 "Witch Hunter": {
 "artist": "Jesper Myrfors",
@@ -16847,6 +17127,13 @@
 "frame": "1997",
 "number": "51",
 "set": "mir"
+},
+"Zuran Enchanter": {
+"artist": "Douglas Shuler",
+"file": "ice_111",
+"frame": "1993",
+"number": "111",
+"set": "ice"
 },
 "Zuran Orb": {
 "artist": "Sandra Everingham",

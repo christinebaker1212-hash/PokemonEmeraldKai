@@ -98,7 +98,11 @@ typedef struct {
     uint16_t unless;                // UnlessCost$ that isn't only mana (Return<1/Land>, Discard<1/Random>, DamageYou<5>...):
                                     // gMtgUnlessCosts[unless - 1] (0: none, or a mana one: Mtg_Param)
     uint16_t delayed;               // DelayedTrigger: its trigger (gMtgTriggers[delayed - 1]), built from its own params
+    uint8_t actLimit;               // ActivationLimit$ n: n times each turn (0: no limit)
+    uint8_t actSorcery, actMyTurn;  // SorcerySpeed$ True ("only any time you could cast a sorcery"); PlayerTurn$ True
+    uint16_t actSteps;              // ActivationPhases$: the steps it may be activated in (bits 1 << MTG_STEP_*; 0: any)
 } MtgAbility;
+int Mtg_AbilityUses(const MtgDuel *d, int obj, int ability);   // times used this turn (ActivationLimit$)
 extern MtgCost *gMtgUnlessCosts;
 
 // mtg_script.c

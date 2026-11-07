@@ -128,6 +128,60 @@ static void ResetPermanentState(MtgObj *o)
     o->animUntil = 0;
     o->effCtrl = o->effUntil = 0;
     o->effSource = MTG_NO_OBJ;
+    o->usedAb[0] = o->usedAb[1] = 0xFFFF;
+    o->usedN[0] = o->usedN[1] = 0;
+}
+
+// times OBJ's ABILITY (a Charm's mode counts as the charm) was activated this turn
+int Mtg_AbilityUses(const MtgDuel *d, int obj, int ability)
+{
+    const MtgObj *o = &d->objs[obj];
+    int i;
+    if (gMtgAbilities[ability].charmOf != 0xFFFF)
+        ability = gMtgAbilities[ability].charmOf;
+    for (i = 0; i < 2; i++)
+        if (o->usedAb[i] == ability)
+            return o->usedN[i];
+    return 0;
+}
+
+static void CountUse(MtgDuel *d, int obj, int ability)
+{
+    MtgObj *o = &d->objs[obj];
+    int i;
+    if (gMtgAbilities[ability].charmOf != 0xFFFF)
+        ability = gMtgAbilities[ability].charmOf;
+    if (!gMtgAbilities[ability].actLimit)
+        return;
+    for (i = 0; i < 2; i++)
+        if (o->usedAb[i] == ability) {
+            o->usedN[i]++;
+            return;
+        }
+    for (i = 0; i < 2; i++)
+        if (o->usedAb[i] == 0xFFFF || !o->usedN[i]) {
+            o->usedAb[i] = (uint16_t)ability;
+            o->usedN[i] = 1;
+            return;
+        }
+}
+
+// an activated ability's own timing (ActivationLimit$, SorcerySpeed$, PlayerTurn$, ActivationPhases$)
+static int SorceryTiming(const MtgDuel *d, int player);
+static int ActivationTimingOk(const MtgDuel *d, int obj, int ability, int player)
+{
+    const MtgAbility *ab = &gMtgAbilities[ability];
+    if (ab->charmOf != 0xFFFF)
+        ab = &gMtgAbilities[ab->charmOf];
+    if (ab->actLimit && Mtg_AbilityUses(d, obj, ability) >= ab->actLimit)
+        return 0;
+    if (ab->actSorcery && !SorceryTiming(d, player))
+        return 0;
+    if (ab->actMyTurn && d->active != player)
+        return 0;
+    if (ab->actSteps && !(ab->actSteps & (1u << d->step)))
+        return 0;
+    return 1;
 }
 
 // GameAction.changeZone: a card moves (to the library's top when it goes there); a permanent leaving forgets its state
@@ -750,7 +804,8 @@ static void BuildPriority(MtgDuel *d)
             for (k = 0; k < c->abilityCount; k++) {   // abilities from the hand (Cycling): any time with priority
                 const MtgAbility *ab = &gMtgAbilities[c->abilities[k]];
                 if (!ab->fromHand || ab->kind != MTG_AB_ACTIVATED || ab->cost.mana.x
-                    || Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, i, c->abilities[k]))   // (Stabilizer)
+                    || Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, i, c->abilities[k])   // (Stabilizer)
+                    || !ActivationTimingOk(d, i, c->abilities[k], p))
                     continue;
                 if (!Mtg_CanPay(d, p, &ab->cost.mana, 0, MTG_NO_OBJ) || !Mtg_CostPayable(d, p, &ab->cost, i, MTG_NO_OBJ))
                     continue;
@@ -779,6 +834,10 @@ static void BuildPriority(MtgDuel *d)
             ability = MainAbility(c);
             if (ability != 0xFFFF && !Mtg_CostPayable(d, p, &gMtgAbilities[ability].cost, i, i))
                 continue;
+            if (ability != 0xFFFF && ((gMtgAbilities[ability].actMyTurn && d->active != p)
+                                      || (gMtgAbilities[ability].actSteps
+                                          && !(gMtgAbilities[ability].actSteps & (1u << d->step)))))
+                continue;   // ("cast only during combat before blockers are declared"...)
             if (ability != 0xFFFF && gMtgAbilities[ability].api == MTG_API_CHARM) {   // one action per mode
                 const MtgAbility *ch = &gMtgAbilities[ability];
                 for (k = 0; k < ch->choiceCount; k++)
@@ -796,6 +855,8 @@ static void BuildPriority(MtgDuel *d)
                     continue;   // (mana abilities are used by paying, never on their own; Cycling only from the hand)
                 if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, i, abil[k]))
                     continue;   // (Arrest, Null Rod...)
+                if (!ActivationTimingOk(d, i, abil[k], p))
+                    continue;   // (once each turn, only as a sorcery, only during upkeep...)
                 if (ab->cost.tap && (o->tapped || ((Mtg_ObjTypes(d, i) & MTG_T_CREATURE) && o->sick
                                                    && !(Mtg_Keywords(d, i) & MTG_KW_BIT(MTG_KW_HASTE)))))
                     continue;
@@ -1050,6 +1111,7 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
         Mtg_Pay(d, p, &ab->cost.mana, a->x, ab->cost.tap ? a->obj : MTG_NO_OBJ);
         if (ab->cost.tap)
             Mtg_Tap(d, a->obj, 1);
+        CountUse(d, a->obj, a->ability);
     }
     e = &d->stack[d->stackCount++];
     memset(e, 0, sizeof(*e));
@@ -1366,6 +1428,8 @@ static int StartStep(MtgDuel *d)
     d->stepStarted = 1;
     switch (d->step) {
     case MTG_STEP_UNTAP:
+        for (i = 0; i < d->objCount; i++)
+            d->objs[i].usedN[0] = d->objs[i].usedN[1] = 0;   // (ActivationLimit$: each turn)
         for (i = 0; i < d->objCount; i++)
             if (d->objs[i].controller == d->active && d->objs[i].zone == MTG_ZONE_BATTLEFIELD) {
                 if (!d->objs[i].tapped || !Mtg_StaticForbids(d, MTG_STATIC_NO_UNTAP, i, MTG_NO_OBJ))
