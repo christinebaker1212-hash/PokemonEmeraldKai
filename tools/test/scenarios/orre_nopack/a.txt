@@ -1,0 +1,28 @@
+pressuntil A field 5000
+mp setflag 0x864
+mp additem 745 1
+mp additem 810 1
+mp warp 9,9,8,11
+wait 80
+mp face up
+wait 10
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press UP 2
+wait 10
+press A 2
+waitlog 3000 orre: the boat checked
+wait 90
+shot nopack
+mash A 6 40
+wait 60
+log nopack done
+quit

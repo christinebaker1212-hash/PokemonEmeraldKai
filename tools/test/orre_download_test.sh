@@ -79,5 +79,54 @@ mkdir -p "$OUT/again"; cp -r "$OUT/first/orre" "$OUT/again/"
 play again
 check "up to date" has "$OUT/again/log.txt" "[test] orre state 3 "
 check "nothing downloaded" bash -c "! grep -q 'orre: downloading' '$OUT/again/log.txt'"
+# the boat (src/orre/orre_ferry.c): with real packs only (stand-ins aren't a world): a game with no orre/ sails from
+# SLATEPORT with the ORRE TICKET, the clerk offers the download, it's installed, and the boat lands at the OUTSKIRT STAND
+if [ -n "$1" ]; then
+    echo "the boat"
+    manifest "$(sha256sum "$Z" | cut -d' ' -f1)"
+    G="$OUT/boat"; mkdir -p "$G"; cp pokeemerald64 "$G/"
+    cat > "$G/a.txt" <<'SCRIPT'
+pressuntil A field 5000
+mp setflag 0x864
+mp additem 745 1
+mp additem 810 1
+mp warp 9,9,8,11
+wait 80
+mp face up
+wait 10
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press A 2
+wait 150
+press UP 2
+wait 10
+press A 2
+waitlog 3000 orre: the boat checked
+wait 60
+press A 2
+wait 60
+press A 2
+wait 60
+press A 2
+waitlog 9000 ORRE's packs downloaded
+pressuntillog A 1500 orre: sailing from
+waitlog 3000 voyage: arrived
+wait 60
+mp where
+SCRIPT
+    (cd "$G" && env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$G/a.txt" MOEMON_SHOTDIR="$G" \
+        MOEMON_DEBUG_QUICKSTART=1 MOEMON_SKIP_COOP_SETUP=1 MOEMON_COOP_CONFIG="$G/a.ini" MOEMON_SAVE="$G/a.sav" \
+        MOEMON_CONTROLS_CONFIG="$G/a_controls.ini" MOEMON_UPDATE_URL="http://127.0.0.1:$PORT" \
+        timeout -k 10 400 ./pokeemerald64 > "$G/log.txt" 2>&1)
+    check "offered at the boat" has "$G/log.txt" "orre: the boat checked ORRE's packs: 2"
+    check "downloaded" has "$G/log.txt" "orre: ORRE's packs downloaded: 1"
+    check "sailed" has "$G/log.txt" "[test] where map 45.0 xy 33,40"
+fi
 echo "$fails failed"
 exit $fails

@@ -785,6 +785,8 @@ gSpecials::
 	def_special Orre_RelicStone, waitstate=1   @ Moemon Kai: the RELIC STONE purifies a Shadow Pokémon (party_menu.c)
 	def_special Orre_Sail   @ Moemon Kai: the boat to ORRE and back (src/orre/orre_ferry.c; the scripts waitstate)
 	def_special Orre_SailBack
+	def_special Orre_CheckBoat   @ (waitstate in the script: ORRE's packs before the boat sails)
+	def_special Orre_DownloadPacks
 	def_special Orre_ShadowAboard   @ (VAR_RESULT: a Shadow Pokémon in the party: it can't leave ORRE)
 	def_special Mtg_ClubSetUp   @ Moemon Kai: MOSSDEEP's CARD CLUB, its people (src/mtg/mtg_club.c)
 	def_special Mtg_ClubSeat

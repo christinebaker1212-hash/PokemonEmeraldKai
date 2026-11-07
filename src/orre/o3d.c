@@ -441,6 +441,14 @@ static s32 MapIndex(u8 group, u8 num)
     return -1;
 }
 
+// ORRE's pack is here and readable (looked for again while it isn't: the boat's download may have just put it there)
+bool8 O3D_PackPresent(void)
+{
+    if (!sPack.ok)
+        sPack.tried = FALSE;
+    return PackOpen();
+}
+
 bool8 O3D_IsOrreGroup(u8 mapGroup)
 {
     return ARRAY_COUNT(sOrreMaps) > 0 && mapGroup == MAP_GROUP(MAP_ORRE_OUTSKIRT_STAND);

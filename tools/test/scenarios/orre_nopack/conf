@@ -1,0 +1,7 @@
+# The boat without ORRE's packs and no way to fetch them (src/orre/orre_ferry.c Orre_CheckBoat): SLATEPORT's clerk
+# says the boat isn't sailing yet (no release has the packs) or ORRE can't be reached, and the boat stays (never an empty world: docs/user_images/74.png). Shot nopack.
+MODE=1
+TMO=300
+ENV_A="MOEMON_ORRE_PAK=/nonexistent/orre3d.pak"
+EXPECT_A=("orre: the boat checked ORRE's packs: " "nopack done")
+UNEXPECT_A=("crash" "orre: sailing from" "TIMEOUT")

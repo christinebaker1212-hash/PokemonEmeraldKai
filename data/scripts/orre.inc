@@ -26,12 +26,39 @@ EventScript_OrreOffer::
 EventScript_OrreOffer_Return::
 	return
 
-@ HOENN's ferry clerks list ORRE among their destinations (LILYCOVE's SSTIDAL_SELECTION_ORRE, SLATEPORT's list)
+@ HOENN's ferry clerks list ORRE among their destinations (LILYCOVE's SSTIDAL_SELECTION_ORRE, SLATEPORT's list). ORRE's
+@ packs come first (src/orre/orre_ferry.c Orre_CheckBoat): here, downloaded now, or the boat doesn't sail yet
 EventScript_OrreSail::
+	special Orre_CheckBoat
+	waitstate
+	goto_if_eq VAR_RESULT, 2, EventScript_OrreDownload
+	goto_if_eq VAR_RESULT, 3, EventScript_OrreNotYet
+	goto_if_eq VAR_RESULT, 4, EventScript_OrreNoConnection
+EventScript_OrreBoard::
 	msgbox gText_OrreAboard, MSGBOX_DEFAULT
 	closemessage
 	special Orre_Sail
 	waitstate
+	end
+EventScript_OrreDownload::
+	msgbox gText_OrreDownload, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, EventScript_OrreStay
+	special Orre_DownloadPacks
+	waitstate
+	goto_if_eq VAR_RESULT, TRUE, EventScript_OrreBoard
+	msgbox gText_OrreDownloadFailed, MSGBOX_DEFAULT
+	release
+	end
+EventScript_OrreNotYet::
+	msgbox gText_OrreNotYet, MSGBOX_DEFAULT
+	release
+	end
+EventScript_OrreNoConnection::
+	msgbox gText_OrreNoConnection, MSGBOX_DEFAULT
+	release
+	end
+EventScript_OrreStay::
+	release
 	end
 
 @ The OUTSKIRT STAND's sailor (tools/orre/gen_maps.py KAI_OBJECTS): back to the port the player came from, never with a
@@ -60,6 +87,25 @@ Orre_EventScript_SailorShadow::
 gText_OrreOffer::
 	.string "That's an ORRE TICKET! Would you\n"
 	.string "like to sail to ORRE?$"
+
+gText_OrreDownload::
+	.string "Before the boat sails, ORRE has to\n"
+	.string "be downloaded ({STR_VAR_1} MB).\p"
+	.string "Download it now?$"
+
+gText_OrreDownloadFailed::
+	.string "The download didn't finish.\n"
+	.string "({STR_VAR_1})\p"
+	.string "Try again whenever you like.$"
+
+gText_OrreNotYet::
+	.string "Sorry, the boat to ORRE isn't\n"
+	.string "sailing just yet.$"
+
+gText_OrreNoConnection::
+	.string "ORRE has to be downloaded first,\n"
+	.string "but it can't be reached right now.\p"
+	.string "({STR_VAR_1})$"
 
 gText_OrreAboard::
 	.string "Off to ORRE, then.\n"
