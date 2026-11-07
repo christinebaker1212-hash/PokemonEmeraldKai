@@ -37,7 +37,7 @@ public final class StepJob extends JobService {
                 final StepCounter sc = new StepCounter(this, app);
                 final Object lock = new Object();
                 final boolean[] read = {false};
-                if (app.walk() != null && sc.start(() -> {
+                if (app.counting() && sc.start(() -> {
                     synchronized (lock) {
                         read[0] = true;
                         lock.notifyAll();

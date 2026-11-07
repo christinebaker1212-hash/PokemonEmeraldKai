@@ -1939,6 +1939,12 @@ After that the app links by itself whenever the game runs with that save.
   DEX     seen and owned, by number or name.
   SPAWNS  every map's POKéMON by GRASS, SURF, ROCK SMASH and each ROD. Rare
           ones stay a shadow and a hint until you meet them there.
+  WALK    one POKéMON on a walk with your phone (your steps give it EXP,
+          finds and meetings), TRAINING in the boxes, and the EGG
+          INCUBATOR: up to twelve EGGS ride in your phone and hatch with your
+          steps (a cycle every 32). Tap EGGS to choose them, then BRING HOME
+          and pick a box with room for all of them: the ready ones hatch on
+          the way, the rest come back as EGGS closer to hatching.
 The game carries out every change itself, when it's free on the map. A
 change made while the game is busy or away waits (dashed outline) and is
 done on the next link; one that no longer makes sense goes to MENU >

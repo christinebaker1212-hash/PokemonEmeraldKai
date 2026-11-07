@@ -80,6 +80,16 @@ public final class Model {
 
     /** An answer's changed places (and the BAG) */
     public void apply(JSONObject done) {
+        apply(done, true);
+    }
+
+    /**
+     * An order's answer: the places and the BAG it changed. ALL: the answer carries everything the order changed (a move,
+     * a give, a take), so the game's rev is the model's now; any other order (a walk, training, the incubator, cards...)
+     * changes things the answer doesn't carry, so the old rev stays and the next "state" brings a new snapshot (1.172.0:
+     * adopting the rev after "train" left the WALK page's training list as it was until the app linked again).
+     */
+    public void apply(JSONObject done, boolean all) {
         try {
             JSONArray ch = done.optJSONArray("changed");
             for (int i = 0; ch != null && i < ch.length(); i++) {
@@ -94,7 +104,7 @@ public final class Model {
             if (done.has("bag")) {
                 snap.put("bag", done.getJSONArray("bag"));
             }
-            if (done.has("rev")) {
+            if (all && done.has("rev")) {
                 rev = done.getLong("rev");
                 snap.put("rev", rev);
             }

@@ -20,6 +20,7 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/tcginc/constants)
 file(CREATE_LINK ${GAME}/include/constants/songs.h ${CMAKE_BINARY_DIR}/tcginc/constants/songs.h SYMBOLIC)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/ygoinc)
 file(CREATE_LINK ${GAME}/include/ygo ${CMAKE_BINARY_DIR}/ygoinc/ygo SYMBOLIC)
+file(CREATE_LINK ${GAME}/include/aw_file.h ${CMAKE_BINARY_DIR}/ygoinc/aw_file.h SYMBOLIC)   # (aw_file_sync.c)
 
 # EDOPro's engine (the game's Makefile EDO_*): its C++ and its Lua's .c files, all as C++
 file(GLOB EDO_CPP ${EDO}/*.cpp)
@@ -33,7 +34,7 @@ target_include_directories(ocgcore PRIVATE ${EDO}/lua/src)
 target_compile_options(ocgcore PRIVATE -std=c++17 -O2 -fno-rtti -w -include ${EDO}/lua/luaconf-customize.h)
 target_compile_definitions(ocgcore PRIVATE luaP_opmodes=edo_luaP_opmodes lua_ident=edo_lua_ident
     luaT_typenames_=edo_luaT_typenames_ luai_ctype_=edo_luai_ctype_)
-add_library(moemonlink SHARED link_jni.c tt_jni.c tcg_jni.c ygo_jni.c ${GAME_MP}/phone_proto.c ${GAME_MP}/monocypher/monocypher.c
+add_library(moemonlink SHARED link_jni.c tt_jni.c tcg_jni.c ygo_jni.c aw_file_sync.c ${GAME_MP}/phone_proto.c ${GAME_MP}/monocypher/monocypher.c
     ${GAME_TT}/tt_duel.c ${GAME_TT}/tt_ai.c ${GAME_TT}/tt_catalog.c ${GAME_TT}/tt_common.c ${GAME_TT}/tt_hands.c
     ${GAME_TT}/tt_pools.c ${GAME_TT}/tt_rating.c ${GAME_TT}/tt_ratings.c ${GAME_TT}/tt_collection.c
     ${GAME_TCG}/tcg_duel.c ${GAME_TCG}/tcg_effects.c ${GAME_TCG}/tcg_trainers.c ${GAME_TCG}/tcg_powers.c ${GAME_TCG}/tcg_ai.c

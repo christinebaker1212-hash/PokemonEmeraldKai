@@ -199,13 +199,17 @@ public final class GameView extends View {
     }
 
     // ----------------------------------------------------------------------------------- the phone's keyboard
+    private boolean typingOn;   // (a page asked for the keyboard: hardware keys go to it too)
+
     /** Show (or hide) the phone's keyboard; what's typed goes to the page in front (Page.typed) */
     public void keyboard(boolean show) {
         android.view.inputmethod.InputMethodManager im =
                 (android.view.inputmethod.InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        typingOn = show;
         if (show) {
             setFocusableInTouchMode(true);
             requestFocus();
+            im.restartInput(this);   // (a fresh connection: nothing left composing from the last time)
             im.showSoftInput(this, 0);
         } else {
             im.hideSoftInputFromWindow(getWindowToken(), 0);
@@ -217,21 +221,64 @@ public final class GameView extends View {
         return true;
     }
 
+    // Letters to the page: TEXT replaces what the page last got from WAS (a keyboard's word being composed, corrected as
+    // it goes): backspaces for what changed, then the new letters
+    private void retype(String was, String text) {
+        int common = 0;
+        while (common < was.length() && common < text.length() && was.charAt(common) == text.charAt(common)) {
+            common++;
+        }
+        for (int i = common; i < was.length(); i++) {
+            active().backspace();
+        }
+        if (common < text.length()) {
+            active().typed(text.substring(common));
+        }
+        invalidate();
+    }
+
     @Override
     public android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo info) {
         info.inputType = android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
-        info.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH;
+        info.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH
+                | android.view.inputmethod.EditorInfo.IME_FLAG_NO_EXTRACT_UI;
+        // Phone keyboards mostly compose: each letter comes as setComposingText ("p", "pi", "pik"...) and the word is
+        // only committed at a space or when typing ends. Before 1.172.0 only commitText reached the page, and a
+        // composed word came back as one ACTION_MULTIPLE key event the page ignored: nothing was ever typed (the
+        // user: "no text ever gets entered despite the player typing"). Now the composing text reaches the page
+        // letter by letter, and a correction of it backspaces and retypes.
         return new android.view.inputmethod.BaseInputConnection(this, false) {
+            private String composing = "";
+
+            @Override
+            public boolean setComposingText(CharSequence text, int newCursorPosition) {
+                String t = text == null ? "" : text.toString();
+                retype(composing, t);
+                composing = t;
+                return true;
+            }
+
+            @Override
+            public boolean finishComposingText() {
+                composing = "";   // (its letters are the page's already)
+                return true;
+            }
+
             @Override
             public boolean commitText(CharSequence text, int newCursorPosition) {
-                active().typed(text.toString());
-                invalidate();
+                retype(composing, text == null ? "" : text.toString());
+                composing = "";
                 return true;
             }
 
             @Override
             public boolean deleteSurroundingText(int before, int after) {
-                for (int i = 0; i < Math.max(1, before); i++) {
+                if (!composing.isEmpty()) {
+                    retype(composing, "");
+                    composing = "";
+                    before--;
+                }
+                for (int i = 0; i < before; i++) {
                     active().backspace();
                 }
                 invalidate();
@@ -240,6 +287,7 @@ public final class GameView extends View {
 
             @Override
             public boolean performEditorAction(int action) {
+                composing = "";
                 active().typingDone();
                 keyboard(false);
                 invalidate();
@@ -248,20 +296,43 @@ public final class GameView extends View {
 
             @Override
             public boolean sendKeyEvent(android.view.KeyEvent e) {
-                if (e.getAction() == android.view.KeyEvent.ACTION_DOWN) {
-                    if (e.getKeyCode() == android.view.KeyEvent.KEYCODE_DEL) {
-                        active().backspace();
-                    } else if (e.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER) {
-                        active().typingDone();
-                        keyboard(false);
-                    } else if (e.getUnicodeChar() != 0) {
-                        active().typed(String.valueOf((char) e.getUnicodeChar()));
-                    }
-                    invalidate();
+                if (key(e)) {
+                    composing = "";
                 }
                 return true;
             }
         };
+    }
+
+    // A key from the phone's keyboard or a hardware keyboard: a backspace, ENTER, or a letter (ACTION_MULTIPLE carries
+    // a string of them); TRUE when it was one of these
+    private boolean key(android.view.KeyEvent e) {
+        if (e.getAction() == android.view.KeyEvent.ACTION_MULTIPLE && e.getCharacters() != null) {
+            active().typed(e.getCharacters());
+        } else if (e.getAction() != android.view.KeyEvent.ACTION_DOWN) {
+            return false;
+        } else if (e.getKeyCode() == android.view.KeyEvent.KEYCODE_DEL) {
+            active().backspace();
+        } else if (e.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER) {
+            active().typingDone();
+            keyboard(false);
+        } else if (e.getUnicodeChar() != 0) {
+            active().typed(String.valueOf((char) e.getUnicodeChar()));
+        } else {
+            return false;
+        }
+        invalidate();
+        return true;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, android.view.KeyEvent e) {
+        return (typingOn && key(e)) || super.onKeyDown(keyCode, e);
+    }
+
+    @Override
+    public boolean onKeyMultiple(int keyCode, int count, android.view.KeyEvent e) {
+        return (typingOn && key(e)) || super.onKeyMultiple(keyCode, count, e);
     }
 
     public void buzz(boolean strong) {

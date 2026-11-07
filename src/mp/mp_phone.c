@@ -537,6 +537,8 @@ u32 Rev(void)
     h = Fnv(h, &v, 4);
     v = PhoneKai_Hash();     // (achievements, MOEGATCHA pulls, candies)
     h = Fnv(h, &v, 4);
+    v = PhoneWalk_Hash();    // (the walk, training, the EGG INCUBATOR, the daily report: without it the app's WALK page
+    h = Fnv(h, &v, 4);       //  never saw training start or stop until it linked again, 1.172.0)
     return h;
 }
 

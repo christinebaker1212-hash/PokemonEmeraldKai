@@ -220,7 +220,7 @@ public class CoreTest {
             System.out.println("snapshot: party " + m.party().length() + ", rev " + m.rev);
             String dump = System.getenv("SNAP_OUT");   // (the app's screen tests draw a real snapshot)
 
-            // 1. A move: the model applies the answer and its rev is the game's (no new snapshot needed)
+            // 1. A move: the model applies the answer and its rev is the game's (a move carries all it changed: no new snapshot needed)
             JSONObject from = findMon(m, 0, true), to = findMon(m, 3, false);
             JSONObject mon = m.at(from);
             c.order(Model.move(from, mon, to, null));

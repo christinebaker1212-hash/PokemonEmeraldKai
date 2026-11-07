@@ -67,6 +67,9 @@ public final class Companion implements LinkClient.Listener {
     public final java.util.Map<Long, JSONObject> journals = new java.util.HashMap<>();   // personality -> "journal"
     private com.moemon.companion.core.Walk walk;                 // the POKéMON on a walk with this phone (this save's)
     private String walkSave = "";                                 // (the save it's for)
+    private com.moemon.companion.core.Incubator incubator;       // the EGG INCUBATOR's EGGS on this phone (this save's)
+    private String incubatorSave = null;
+    public JSONObject lastHatch;                                  // the last "hatchhome" answer's "hatched" (WALK page)
     public JSONObject lastHome;                                   // the last homecoming ("home" of a done answer)
     public volatile java.util.Map<String, JSONObject> friends = new java.util.HashMap<>();   // save ID -> presence
     public volatile long friendsAt;                               // (when they were read; 0: never)
@@ -923,13 +926,64 @@ public final class Companion implements LinkClient.Listener {
         }
     }
 
-    /** A step counter reading (StepCounter, StepJob) */
+    /** A step counter reading (StepCounter, StepJob): the walk's and the EGG INCUBATOR's */
     public synchronized void walkReading(long counter, long boot, long now) {
         com.moemon.companion.core.Walk w = walk();
+        com.moemon.companion.core.Incubator inc = incubator();
         if (w != null) {
             w.reading(counter, boot, now);
             saveWalk();
+        }
+        if (!inc.empty()) {
+            inc.reading(counter, boot, now);
+            saveIncubator();
+        }
+        if (w != null || !inc.empty()) {
             main.post(this::changed);
+        }
+    }
+
+    /** Is anything counting steps on this phone (a walk, EGGS in the incubator)? */
+    public synchronized boolean counting() {
+        return walk() != null || !incubator().empty();
+    }
+
+    // ------------------------------------------------------------------------------------------ the EGG INCUBATOR
+
+    private String incubatorFile(String save) {
+        return "incubator_" + save + ".json";
+    }
+
+    /** The EGG INCUBATOR for the save in use (empty when none are in) */
+    public synchronized com.moemon.companion.core.Incubator incubator() {
+        String save = client == null ? "" : client.saved().id();
+        if (!save.equals(incubatorSave)) {
+            incubatorSave = save;
+            incubator = com.moemon.companion.core.Incubator.fromJson(readJson(incubatorFile(save)),
+                    java.time.ZoneId.systemDefault());
+        }
+        return incubator;
+    }
+
+    public synchronized void saveIncubator() {
+        if (incubatorSave == null || incubatorSave.isEmpty()) {
+            return;
+        }
+        if (incubator == null || incubator.empty()) {
+            new File(context.getFilesDir(), incubatorFile(incubatorSave)).delete();
+            return;
+        }
+        try {
+            store.write(incubatorFile(incubatorSave), incubator.toJson().toString());
+        } catch (org.json.JSONException ignored) {
+        }
+    }
+
+    // The game's incubator, from a snapshot or an answer: EGGS gone home some other way are dropped, new ones count
+    private synchronized void incubatorFromGame(JSONObject g) {
+        if (g != null) {
+            incubator().fromGame(g);
+            saveIncubator();
         }
     }
 
@@ -1076,6 +1130,9 @@ public final class Companion implements LinkClient.Listener {
             case "empty": return "That deck has no cards yet.";
             case "cantsave": return "The game couldn't save just now. Try again.";
             case "nowalk": return "That walk already ended.";
+            case "notegg": return "Only an EGG goes in the incubator.";
+            case "incfull": return "The incubator is full: twelve EGGS at most.";
+            case "noegg": return "That EGG already came home.";
             case "otherphone": return "That POKéMON is on a walk with another phone.";
             case "trainbox": return "Only POKéMON in the boxes can train.";
             case "slots": return "Every training spot is taken. Earn BADGES for more.";
@@ -1148,6 +1205,7 @@ public final class Companion implements LinkClient.Listener {
     @Override
     public void onModel(Model model) {
         walkFromGame(model.snap, null);
+        incubatorFromGame(model.snap.optJSONObject("incubator"));
         // a game older than the app sends less (stats, places): say so once, the game updates itself on its start
         String game = model.save().optString("game"), app = Updater.version(context);
         if (!game.isEmpty() && Updater.older(game, app) && !game.equals(warnedGame)) {
@@ -1203,6 +1261,27 @@ public final class Companion implements LinkClient.Listener {
                 saveWalk();
             }
             toast = "Home again! The game has it now.";
+            toastGood = true;
+            toastAt = System.currentTimeMillis();
+        } else if (order != null && "incubate".equals(order.optString("op")) && done.has("incubator")) {
+            incubatorFromGame(done.optJSONObject("incubator"));
+            toast = "In the incubator! Its steps count from now.";
+            toastGood = true;
+            toastAt = System.currentTimeMillis();
+        } else if (order != null && "hatchhome".equals(order.optString("op"))) {
+            incubatorFromGame(done.optJSONObject("incubator"));
+            org.json.JSONArray h = done.optJSONArray("hatched");
+            int n = h == null ? 0 : h.length(), hatched = 0;
+            for (int i = 0; i < n; i++) {
+                hatched += h.optJSONArray(i).optInt(2);
+            }
+            synchronized (this) {
+                lastHatch = done;
+            }
+            toast = n == 1 ? (hatched == 1 ? "It hatched on the way home! It's in BOX " : "Home again, still an EGG. It's in BOX ")
+                    + (done.optInt("box") + 1) + "."
+                    : n + " home to BOX " + (done.optInt("box") + 1) + (hatched == n ? ": all hatched!" : hatched > 0
+                    ? ": " + hatched + " hatched!" : ".");
             toastGood = true;
             toastAt = System.currentTimeMillis();
         } else if (order != null && "kind".equals(order.optString("op")) && done.has("line")) {

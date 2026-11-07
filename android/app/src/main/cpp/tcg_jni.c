@@ -422,7 +422,7 @@ JNIEXPORT jstring JNICALL FN(options)(JNIEnv *env, jclass cls, jlong h, jint sea
         Add(&b, "}");
     }
     Add(&b, "],\"attacks\":[");
-    for (i = 0; attacker && i < 2 && attacker->attacks[i].name[0]; i++)
+    for (i = 0; attacker && i < 2 && attacker->attacks[i].name && attacker->attacks[i].name[0]; i++)
     {
         int ok = mine && g->phase == TCG_TURN && TcgFlow_AttackReady(g, me, i, why, sizeof(why));
         if (!mine || g->phase != TCG_TURN)

@@ -25,7 +25,7 @@ import java.util.List;
 public final class DexPage extends Page {
     static final int GREEN = 0xFF31D54A, GREEN_DARK = 0xFF188320, NAVY = 0xFF000029, YELLOW = 0xFFEEF639,
             BORDER = 0xFF293941, BORDER_LIGHT = 0xFF626273, GOLD = 0xFFBD9C5A, MAGENTA = 0xFFFF00BD;
-    private static final String[] FILTERS = {"ALL", "SEEN", "OWNED", "MISSING"};
+    private static final String[] FILTERS = {"ALL", "SEEN", "CAUGHT", "MISSING"};
     private static final int HEAD = 96, CARD_H = 98, GAP = 6;
     private static final String[] SORTS = {"No.", "ABC", "TOTAL"};
     private int filter, sort, typeFilter = -1;   // (remembered: the app's settings)
@@ -102,7 +102,7 @@ public final class DexPage extends Page {
         int end = q.isEmpty() ? Math.max(last, 1) : d.optInt("count");
         for (int n = 1; n <= end; n++) {
             boolean s = bit(seen, n), c = bit(caught, n);
-            if (filter == 1 && !s || filter == 2 && !c || filter == 3 && c) {
+            if (filter == 1 && (!s || c) || filter == 2 && !c || filter == 3 && c) {   // (SEEN: seen and not caught)
                 continue;
             }
             if (typeFilter >= 0) {   // (a type: only the ones seen, as their types are known then)

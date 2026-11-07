@@ -207,6 +207,10 @@ public final class Menu {
                             v.message("A POKéMON is out on a walk with this phone. Bring it home first (WALK > HOME).");
                             return;
                         }
+                        if (app.client != null && app.client.saved() == l && !app.incubator().empty()) {
+                            v.message("EGGS are in this phone's incubator. Bring them home first (WALK > EGG INCUBATOR).");
+                            return;
+                        }
                         v.showMenu(confirm(v, "Forget this save? Pair again to link it.", () -> app.forget(l)));
                     });
                     v.showMenu(one);

@@ -55,6 +55,11 @@ public class LiveTest {
             }
             Thread.sleep(50);
         }
+        // (the game's last lines, to see where it stood)
+        java.util.List<String> tail = new java.util.ArrayList<>(lines);
+        for (String l : tail.subList(Math.max(0, tail.size() - 60), tail.size())) {
+            System.out.println("game: " + l);
+        }
         throw new AssertionError("never: " + what);
     }
 
@@ -97,7 +102,7 @@ public class LiveTest {
                 "mp boxput 1 0 25 5", "mp boxput 1 1 1 5", "mp boxput 1 2 4 5",
                 "mp additem 139 20", "mp shinymon 4 25 20", "mp additem 660 1", "mp regionclear 3", "mp dexcatch 263",
                 "mp additem 13 3", "mp additem 68 2", "mp additem 96 1", "mp additem 693 1", "mp hp 1 5", "mp shinymon 5 16 5", "mp phone pair",
-                "wait 300", "mash B 200 15", "wait 2700", "mp wild 263:3", "wait 2000000", "quit").getBytes());
+                "wait 300", "mash B 360 15", "wait 300", "mp wild 263:3", "wait 2000000", "quit").getBytes());
         ProcessBuilder pb = new ProcessBuilder(game.getPath()).directory(root).redirectErrorStream(true);
         java.util.Map<String, String> env = pb.environment();
         env.put("SDL_VIDEODRIVER", "dummy");

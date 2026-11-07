@@ -13,13 +13,14 @@ JH=${JAVA_HOME:-$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")}
 mkdir -p "$OUT/ttinc" && ln -sfn "$ROOT/include/tt" "$OUT/ttinc/tt"   # (the game's include/ has its own strings.h)
 mkdir -p "$OUT/tcginc/constants" && ln -sfn "$ROOT/include/tcg" "$OUT/tcginc/tcg" && ln -sfn "$ROOT/include/mp_version.h" "$OUT/tcginc/mp_version.h" \
     && ln -sfn "$ROOT/include/constants/songs.h" "$OUT/tcginc/constants/songs.h"
-mkdir -p "$OUT/ygoinc" && ln -sfn "$ROOT/include/ygo" "$OUT/ygoinc/ygo" && ln -sfn "$ROOT/include/mp_version.h" "$OUT/ygoinc/mp_version.h"
+mkdir -p "$OUT/ygoinc" && ln -sfn "$ROOT/include/ygo" "$OUT/ygoinc/ygo" && ln -sfn "$ROOT/include/mp_version.h" "$OUT/ygoinc/mp_version.h" \
+    && ln -sfn "$ROOT/include/aw_file.h" "$OUT/ygoinc/aw_file.h"
 (cd "$ROOT" && EDO_CFLAGS=-fPIC tools/ygo/edo/build_core.sh "$OUT/ocgcore")   # (EDOPro's engine: once, then when it changes)
 TT="$ROOT/src/tt"
 TCG="$ROOT/src/tcg"
 YGO="$ROOT/src/ygo"
 cc -shared -fPIC -O2 -I"$JH/include" -I"$JH/include/linux" -I"$ROOT/src/mp" -I"$OUT/ttinc" -I"$OUT/tcginc" -I"$OUT/ygoinc" -I"$YGO" -DYGO_EDO_PAK_EXTERNAL \
-    -o "$OUT/libmoemonlink.so" "$APP/cpp/link_jni.c" "$APP/cpp/tt_jni.c" "$APP/cpp/tcg_jni.c" "$APP/cpp/ygo_jni.c" "$ROOT/src/mp/phone_proto.c" "$ROOT/src/mp/monocypher/monocypher.c" \
+    -o "$OUT/libmoemonlink.so" "$APP/cpp/link_jni.c" "$APP/cpp/tt_jni.c" "$APP/cpp/tcg_jni.c" "$APP/cpp/ygo_jni.c" "$APP/cpp/aw_file_sync.c" "$ROOT/src/mp/phone_proto.c" "$ROOT/src/mp/monocypher/monocypher.c" \
     "$TT/tt_duel.c" "$TT/tt_ai.c" "$TT/tt_catalog.c" "$TT/tt_common.c" "$TT/tt_hands.c" "$TT/tt_pools.c" \
     "$TT/tt_rating.c" "$TT/tt_ratings.c" "$TT/tt_collection.c" \
     "$TCG/tcg_duel.c" "$TCG/tcg_effects.c" "$TCG/tcg_trainers.c" "$TCG/tcg_powers.c" "$TCG/tcg_ai.c" "$TCG/tcg_catalog.c" \

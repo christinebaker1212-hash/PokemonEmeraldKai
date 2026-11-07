@@ -67,6 +67,12 @@ public final class Notifier {
                 post(c, 2, today, "Your EGG is moving!", "It's ready to hatch. Bring it home to the game.");
             }
         }
+        // EGGS in the incubator ready to hatch (the same kind: once a day)
+        int ready = app.incubator().readyCount();
+        if (ready > 0) {
+            post(c, 2, today, ready == 1 ? "An EGG in your incubator is moving!" : ready + " EGGS in your incubator are moving!",
+                    "Ready to hatch. Bring them home to a box with room (WALK > EGG INCUBATOR).");
+        }
         if (m != null) {
             // BERRIES ready to pick (as of the last link)
             JSONObject t = m.snap.optJSONObject("today");

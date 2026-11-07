@@ -5,6 +5,7 @@ import android.graphics.Paint;
 
 import com.moemon.companion.core.LinkClient;
 import com.moemon.companion.core.Model;
+import com.moemon.companion.core.Incubator;
 import com.moemon.companion.core.Walk;
 
 import org.json.JSONArray;
@@ -28,6 +29,7 @@ public final class WalkPage extends Page {
     private final List<Runnable> actions = new ArrayList<>();
     private final Random random = new Random();
     private int bottom;
+    private final java.util.Set<Long> picked = new java.util.HashSet<>();   // EGGS chosen to bring home
 
     public WalkPage(GameView v) {
         super(v);
@@ -68,13 +70,14 @@ public final class WalkPage extends Page {
         Walk walk = v.app.walk();
         int y = 24 - scroll;
         y = walk != null ? drawWalker(c, w, y, walk) : drawNoWalker(c, w, y);
+        y = drawIncubator(c, w, y + 8);
         y = drawTraining(c, w, y + 8);
         y = drawGarden(c, w, y + 8);
         bottom = y + scroll + 8;
         String right = walk == null ? "" : walk.stepsOn(LocalDate.now()) + " TODAY";
         banner(c, w, "WALK", right);
-        if (walk != null) {
-            v.postInvalidateDelayed(60);   // (it walks)
+        if (walk != null || !v.app.incubator().empty()) {
+            v.postInvalidateDelayed(60);   // (it walks; the EGGS wobble)
         }
     }
 
@@ -400,6 +403,153 @@ public final class WalkPage extends Page {
         }
         v.buzz(false);
         v.app.changed();
+    }
+
+    // ------------------------------------------------------------------------------------------ the EGG INCUBATOR
+
+    private int drawIncubator(Canvas c, int w, int y) {
+        Model m = model();
+        Incubator inc = v.app.incubator();
+        int max = inc.max();
+        sectionBar(c, 8, w - 8, y + 1, 16, "EGG INCUBATOR", inc.count() + "/" + max);
+        y += 22;
+        if (m != null && !m.snap.has("incubator")) {
+            for (String l : wrap("Restart your game to update it: then up to twelve EGGS can hatch here with your steps.", w - 24)) {
+                art.text(c, l, 12, y, GameArt.WHITE_TEXT, 0xFF305060);
+                y += 14;
+            }
+            return y;
+        }
+        JSONArray eggs = inc.eggs();
+        // (the chosen ones that went home some other way are forgotten)
+        picked.removeIf(id -> inc.egg(id) == null);
+        int cols = 6, cw = (w - 24) / cols, ch = 56;
+        long t = System.currentTimeMillis();
+        int eggIcon = art.data.optInt("egg");
+        for (int i = 0; i < max; i++) {
+            int x = 12 + (i % cols) * cw, yy = y + (i / cols) * ch;
+            fill.setColor(0x40182838);
+            c.drawRect(x + 2, yy + 2, x + cw - 2, yy + ch - 2, fill);
+            if (i >= eggs.length()) {
+                continue;
+            }
+            final JSONObject egg = eggs.optJSONObject(i);
+            final long id = egg.optLong("id");
+            boolean ready = inc.ready(egg), sel = picked.contains(id);
+            if (sel) {
+                fill.setColor(0xFFF8D030);
+                c.drawRect(x + 2, yy + 2, x + cw - 2, yy + 4, fill);
+                c.drawRect(x + 2, yy + ch - 4, x + cw - 2, yy + ch - 2, fill);
+                c.drawRect(x + 2, yy + 2, x + 4, yy + ch - 2, fill);
+                c.drawRect(x + cw - 4, yy + 2, x + cw - 2, yy + ch - 2, fill);
+            }
+            // a ready one wobbles, as an EGG does before it hatches
+            int wob = ready && ((t / 120 + i) % 8) < 2 ? ((t / 120) % 2 == 0 ? -2 : 2) : 0;
+            art.icon(c, eggIcon, x + cw / 2 - 16 + wob, yy + 2, GameArt.ICON_PLAIN);
+            long steps = inc.steps(egg), need = inc.need(egg);
+            String s = ready ? "READY" : String.valueOf(need - steps);
+            art.text(c, s, x + (cw - art.width(s)) / 2, yy + 30, ready ? 0xFF209020 : GameArt.WHITE_TEXT,
+                    ready ? GameArt.SHADOW : 0xFF305060);
+            bar(c, x + 5, yy + 46, cw - 10, Math.min(steps, Math.max(1, need)), Math.max(1, need),
+                    ready ? 0xFF58D068 : 0xFF58B8F8);
+            hit(x, yy, cw, ch, () -> {
+                if (!picked.remove(id)) {
+                    picked.add(id);
+                }
+                v.buzz(false);
+                v.invalidate();
+            });
+        }
+        y += ((max + cols - 1) / cols) * ch + 4;
+        if (eggs.length() == 0) {
+            for (String l : wrap("Up to twelve EGGS can ride in your phone. Your real steps hatch them (32 steps a cycle); "
+                    + "bring them home to a box with room.", w - 24)) {
+                art.text(c, l, 12, y, GameArt.WHITE_TEXT, 0xFF305060);
+                y += 14;
+            }
+            y += 4;
+        } else if (!StepCounter.allowed(v.getContext())) {
+            act("ALLOW STEP COUNTING", 12, y, w - 24, true, () -> StepCounter.ask(v));
+            y += 28;
+        }
+        if (v.app.lastHatch != null && eggs.length() < max) {
+            JSONArray h = v.app.lastHatch.optJSONArray("hatched");
+            int n = h == null ? 0 : h.length(), hatched = 0;
+            for (int i = 0; i < n; i++) {
+                hatched += h.optJSONArray(i).optInt(2);
+            }
+            String s = "Last time: " + n + " home to BOX " + (v.app.lastHatch.optInt("box") + 1) + ", " + hatched + " hatched.";
+            art.text(c, s, 12, y, GameArt.WHITE_TEXT, 0xFF305060);
+            y += 16;
+        }
+        int bw = (w - 24) / 2;
+        act("+ ADD EGG", 12, y, bw, m != null && eggs.length() < max, this::pickEgg);
+        int n = picked.isEmpty() ? eggs.length() : picked.size();
+        act(picked.isEmpty() ? "BRING ALL HOME" : "BRING " + n + " HOME", 12 + bw, y, bw, m != null && eggs.length() > 0,
+                this::bringEggsHome);
+        return y + 30;
+    }
+
+    private void pickEgg() {
+        if (model() == null) {
+            return;
+        }
+        if (v.app.locked()) {
+            v.message(Companion.LOCKED);
+            return;
+        }
+        v.showOver(BoxesPage.picker(v, "WHICH EGG?", true,
+                (mon, place) -> mon.optInt("e") != 1 ? "Only an EGG goes in the incubator."
+                        : mon.optInt("off") == 1 ? "It's ON OFFER in a trade." : null,
+                (mon, place) -> {
+                    if (v.app.client == null) {
+                        return;
+                    }
+                    try {
+                        v.app.client.order(new JSONObject().put("op", "incubate").put("at", place)
+                                .put("p", mon.optLong("p")).put("o", mon.optLong("o")));
+                    } catch (JSONException ignored) {
+                    }
+                    StepCounter.ask(v);
+                    v.buzz(true);
+                    v.app.changed();
+                }));
+    }
+
+    private void bringEggsHome() {
+        Incubator inc = v.app.incubator();
+        if (v.app.locked()) {
+            v.message(Companion.LOCKED);
+            return;
+        }
+        final List<Long> ids = new ArrayList<>();
+        JSONArray eggs = inc.eggs();
+        for (int i = 0; i < eggs.length(); i++) {
+            long id = eggs.optJSONObject(i).optLong("id");
+            if (picked.isEmpty() || picked.contains(id)) {
+                ids.add(id);
+            }
+        }
+        if (ids.isEmpty()) {
+            return;
+        }
+        int ready = 0;
+        for (long id : ids) {
+            ready += inc.ready(inc.egg(id)) ? 1 : 0;
+        }
+        String title = ready == ids.size() ? "HATCH IN WHICH BOX?" : "HOME TO WHICH BOX?";
+        v.showOver(new BoxChoosePage(v, title, ids.size(), box -> {
+            if (v.app.client == null) {
+                return;
+            }
+            try {
+                v.app.client.order(inc.homeOrder(ids, box));
+            } catch (JSONException ignored) {
+            }
+            picked.clear();
+            v.buzz(true);
+            v.app.changed();
+        }));
     }
 
     // --------------------------------------------------------------------------------------------- the Garden

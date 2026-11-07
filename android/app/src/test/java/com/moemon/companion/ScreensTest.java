@@ -92,6 +92,23 @@ public class ScreensTest {
             snap.put("kai", new JSONObject("{\"ach\":[37,314],\"pulls\":23,\"tickets\":2,\"free\":3,\"jar\":1,\"gift\":11,"
                     + "\"candy\":[12,3,0,25,0,0,9,0,0,0,31,4,0,0,0,0,0,0,0],\"time\":[42,17],"
                     + "\"farm\":[[133,5,0,6,4],[134,3,95,0,2],[0,0,0,0,0],[140,1,200,0,0],[136,4,30,0,1],[0,0,0,0,0]]}"));
+            // the EGG INCUBATOR: three PICHU EGGS (5, 20 and 10 cycles), 300 steps since the first two went in, 50 since the third
+            JSONObject eggMon = new JSONObject(snap.getJSONArray("boxes").getJSONObject(0).getJSONArray("m").getJSONObject(0)
+                    .toString()).put("s", 172).put("e", 1);
+            long now = System.currentTimeMillis() / 1000;
+            org.json.JSONArray two = new org.json.JSONArray()
+                    .put(new JSONObject().put("id", 11).put("sent", now - 3600).put("mon", new JSONObject(eggMon.toString()).put("f", 5)))
+                    .put(new JSONObject().put("id", 13).put("sent", now - 3600).put("mon", new JSONObject(eggMon.toString()).put("f", 20)));
+            JSONObject inc = new JSONObject().put("max", 12).put("cycle", 32).put("day", 10000).put("now", now).put("eggs", two)
+                    .put("other", 0);
+            com.moemon.companion.core.Incubator in = new com.moemon.companion.core.Incubator(java.time.ZoneId.systemDefault());
+            in.fromGame(new JSONObject(inc.toString()));
+            in.add(java.time.LocalDate.now(), 300);
+            two.put(new JSONObject().put("id", 15).put("sent", now - 600).put("mon", new JSONObject(eggMon.toString()).put("f", 10)));
+            in.fromGame(new JSONObject(inc.toString()));
+            in.add(java.time.LocalDate.now(), 50);
+            snap.put("incubator", inc);
+            write(new File(dir, "incubator_" + id + ".json"), in.toJson().toString());
             write(new File(dir, "model_" + id + ".json"), file.toString());
         }
         // a POKéMON out walking (for WALK's pictures): the snapshot's first box POKéMON
@@ -262,6 +279,28 @@ public class ScreensTest {
         v.page(3).backspace();
         v.page(3).backspace();
         v.page(3).backspace();
+        {
+            // typing as a phone keyboard does: each letter composed, then the word committed (only commits used to
+            // reach the page, so nothing was ever typed)
+            android.view.inputmethod.InputConnection ic = v.onCreateInputConnection(new android.view.inputmethod.EditorInfo());
+            v.select(3);
+            java.lang.reflect.Field f0 = DexPage.class.getDeclaredField("search");
+            f0.setAccessible(true);
+            f0.set(v.page(3), "");   // (an empty search to type into)
+            ic.setComposingText("p", 1);
+            ic.setComposingText("pi", 1);
+            ic.setComposingText("pic", 1);
+            ic.setComposingText("pik", 1);   // (the keyboard corrects a letter: one back, one new)
+            ic.commitText("pika", 1);
+            ic.sendKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_DEL));
+            java.lang.reflect.Field f = DexPage.class.getDeclaredField("search");
+            f.setAccessible(true);
+            org.junit.Assert.assertEquals("PIK", f.get(v.page(3)));
+            shot(v, "dex_typed");
+            ic.deleteSurroundingText(3, 0);
+            org.junit.Assert.assertEquals("", f.get(v.page(3)));
+            v.select(0);
+        }
         v.page(3).backspace();
         // a map's POKéMON, and the box list
         v.select(4);
@@ -275,7 +314,21 @@ public class ScreensTest {
         // WALK: the walker, training and the Garden; a meeting; the day's report; the widget
         v.select(6);
         shot(v, "walk");
-        v.page(6).scrollTo(400);
+        v.page(6).scrollTo(240);
+        shot(v, "walk_incubator");
+        {
+            // the incubator's numbers: 350 steps for the 5-cycle EGG (ready), 350 of 640, 50 of 320
+            com.moemon.companion.core.Incubator in = app.incubator();
+            assertTrue(in.count() == 3 && in.readyCount() == 1);
+            assertTrue(in.steps(in.egg(11)) == 350 && in.steps(in.egg(15)) == 50);
+            org.json.JSONArray order = in.homeOrder(java.util.Arrays.asList(11L, 15L), 2).getJSONArray("eggs");
+            assertTrue(order.getJSONArray(0).getLong(1) == 350 && order.getJSONArray(1).getLong(1) == 50);
+        }
+        final int[] chose = {-1};
+        v.showOver(new BoxChoosePage(v, "HATCH IN WHICH BOX?", 3, b -> chose[0] = b));
+        shot(v, "box_choose");
+        v.showOver(null);
+        v.page(6).scrollTo(560);
         shot(v, "walk_lower");
         v.page(6).scrollTo(0);
         v.showOver(new CatchPage(v, app.walk(), 286, 3));

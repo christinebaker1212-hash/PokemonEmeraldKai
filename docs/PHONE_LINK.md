@@ -252,6 +252,59 @@ across a restart; a week's caps with the walk's start moved back 7 days; home on
 FORGET PHONES), android/coretest WalkCoreTest (a simulated week on the phone's side), LiveTest (send-off, steps, a
 find, homecoming through the app).
 
+### The EGG INCUBATOR (1.172.0)
+
+The user (2026-11-07): "Create the ability for the phone app to house up to 12 eggs in an egg incubator, counting the
+user's steps. The player must choose a box with space for the hatched (or unhatched) Pokemon to return to."
+
+Game side (mp_phone_walk.c, "the EGG INCUBATOR"): `{"op":"incubate","at":PLACE,"p","o"}` takes an EGG (`notegg` for
+any other POKéMON or a BAD EGG, `incfull` past 12, `onoffer` in a trade) out of the save the walk's way:
+"<save>.incubator" (each EGG: an ID, when it went in, its personality / Trainer ID, the phone, the BoxPokemon) written
+first, the save without it saved at once (`cantsave`: it stays). `{"op":"hatchhome","box":B,"eggs":[[id,steps],...]}`
+from the phone that holds them (`noegg`, `otherphone`): box B (0-39) must have room for all of them (`full`); each
+EGG's steps are capped at 10,000 for each calendar day it was out (the PC's clock, DayNumber), take a cycle (its
+Friendship) every 32 steps as daycare.c does, and one with none left hatches on the way (egg_hatch.c MP_HatchEggData:
+AddHatchedMonToParty's data for any POKéMON, met where the player is now, the POKéDEX); the rest come back as EGGS
+with fewer cycles. The save first, then the incubator without them (a restart in between: PhoneWalk_Load drops the
+file's copies already in the save, by personality and either Trainer ID: a hatched one carries the player's). The
+answer: `hatched` [[id, species, hatched 0/1, cycles left, steps counted], ...], `box`, `incubator`; a field toast and
+SE_EGG_HATCH (never a message box: MP_ShowNotice held the field, so the next order waited). FORGET PHONES brings them
+all to the PC as they left. The snapshot's `incubator`: max 12, cycle 32, day 10,000, now, this phone's `eggs`
+[{id, sent, mon}], `other` (another phone's).
+
+App side: core/Incubator.java (Android-free: a Walk used only as the step ledger, each EGG's offset into it, `ready`
+when its steps cover its cycles, the `hatchhome` order), Companion (`incubator_<save>.json`, readings with the walk's,
+`counting()` for StepJob / MainActivity, snapshots and answers), WalkPage's EGG INCUBATOR section (12 places, steps
+left and a bar, READY wobbling, tap to choose, + ADD EGG through the box picker, BRING n / ALL HOME), BoxChoosePage
+(all 40 boxes with their free places; a box without room for all of them is greyed and refused), Notifier (kind EGG:
+"An EGG in your incubator is moving!"). Forgetting a save is refused while EGGS are in.
+
+Tests: tools/phone/incubator_test.py (in and out of the save, custody across restarts, `full`, hatching by steps, the
+day's cap, `noegg`, FORGET), ScreensTest (walk_incubator, box_choose; the steps and the order).
+
+### WALK and training kept in step, typing (1.172.0)
+
+- The snapshot's `rev` (mp_phone.c Rev) never covered the walk, training or the daily report: starting or stopping
+  training changed nothing it hashed, so the app never asked for a new snapshot and WALK showed the old list until it
+  linked again. PhoneWalk_Hash (the walk, every training record, the incubator, the BERRY trees) is in Rev now.
+- An order's answer gave the model the game's new `rev` even when the answer didn't carry all the order changed:
+  LinkClient applies the rev only for `move` / `give` / `take` (Model.apply(done, all)); after any other order the
+  next `state` brings a new snapshot. And an answer moved the model's `asOf` without its snapshot's `now`, so every
+  estimate from the game's clock (training's) fell behind by the time since the snapshot: `now` moves on with it.
+- Typing (GameView.onCreateInputConnection): phone keyboards compose each word (setComposingText "p", "pi", "pik")
+  and commit it only at a space or the end; only commitText reached the page, and a composed word came back as one
+  ACTION_MULTIPLE key event the page ignored, so no text was ever typed. Composing text reaches the page letter by
+  letter now (a correction backspaces and retypes: GameView.retype), ACTION_MULTIPLE and hardware keys too
+  (onKeyDown / onKeyMultiple while a page has the keyboard). ScreensTest types "pika" as a keyboard does (dex_typed).
+- The app didn't build from 1.131.1 to 1.171.6, and the release workflow only warns when it fails, so those releases
+  had no MoemonCompanion.apk: the card games' collection code began writing through the game's aw_file.h, which needs
+  SDL. The app (CMakeLists.txt) and android/coretest/run.sh build android/app/src/main/cpp/aw_file_sync.c, the same
+  calls written at once with stdio. Run android/coretest/run.sh after changing anything in src/tt, src/tcg or src/ygo
+  that the app compiles. The core tests then found a crash in Tcg.options (tcg_jni.c): a Trainer in the Active spot
+  (CLEFAIRY DOLL) has no attack names, NULL rather than "". TcgCoreTest still reports two flow-built actions the
+  rules refuse (POKéMON BREEDER offering a Basic put in play this turn; MOON STONE / THE BOSS'S WAY with an empty deck
+  left out of TcgFlow_TrainerHasUse): tabled by the user (2026-11-07).
+
 ## Phase 4: friends (docs/COMPANION_APP.md "Pillar 4")
 
 ### Presence, invites, linking away from home (1.74.0)

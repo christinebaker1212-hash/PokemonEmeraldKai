@@ -832,6 +832,311 @@ static const char *DoKind(const char *json)
     return NULL;
 }
 
+// --------------------------------------------------------------------------------------------- the EGG INCUBATOR
+
+// The phone's EGG INCUBATOR (the user, 2026-11-07: "the ability for the phone app to house up to 12 eggs in an egg
+// incubator, counting the user's steps. The player must choose a box with space for the hatched (or unhatched)
+// Pokemon to return to."). Up to 12 EGGS leave the save for the phone, each on its own like the walk's POKéMON
+// ("<save>.incubator" written first, then the save without it, saved at once). The phone counts the steps each one
+// has walked since it went in; "hatchhome" brings any of them back to the box the player chose (it must have room for
+// all of them): each EGG's steps (at most 10,000 for each day it was out, the PC's clock) take a cycle every 32 steps
+// as the DAY CARE's do, and one with none left hatches on the way, as it would in the party (egg_hatch.c
+// MP_HatchEggData); the rest come back as EGGS with fewer cycles. FORGET PHONES brings them all home as they left.
+#define INC_MAGIC    0x434E4950   // "PINC"
+#define INC_VERSION  1
+#define INC_MAX      12
+#define INC_CYCLE    32            // steps a cycle (daycare.c's egg cycle)
+
+struct IncEgg
+{
+    u32 id, sentAt, pid, ot;
+    u8 phone[PHONE_ID_SIZE];
+    struct BoxPokemon mon;
+};
+
+struct PhoneIncubator
+{
+    u32 magic, version, count;
+    struct IncEgg egg[INC_MAX];
+};
+
+static struct PhoneIncubator sInc;
+
+void MP_HatchEggData(struct Pokemon *mon);   // egg_hatch.c
+
+static bool8 IncWrite(void)
+{
+    char path[600];
+    AwFile *f;
+    bool8 ok;
+    FilePath(path, sizeof(path), "incubator");
+    if (sInc.count == 0)
+    {
+        AwFile_Remove(path);
+        return TRUE;
+    }
+    f = AwFile_Open(path);
+    if (f == NULL)
+        return FALSE;
+    sInc.magic = INC_MAGIC;
+    sInc.version = INC_VERSION;
+    ok = AwFile_Write(&sInc, sizeof(sInc), 1, f) == 1;
+    return AwFile_Close(f) == 0 && ok;
+}
+
+static void IncDrop(u32 i)
+{
+    for (; i + 1 < sInc.count; i++)
+        sInc.egg[i] = sInc.egg[i + 1];
+    if (sInc.count > 0)
+        memset(&sInc.egg[--sInc.count], 0, sizeof(sInc.egg[0]));
+}
+
+static int IncFind(u32 id)
+{
+    u32 i;
+    for (i = 0; i < sInc.count; i++)
+        if (sInc.egg[i].id == id)
+            return (int)i;
+    return -1;
+}
+
+static u32 IncMine(const u8 *phone)
+{
+    u32 i, n = 0;
+    for (i = 0; i < sInc.count; i++)
+        n += phone != NULL && memcmp(sInc.egg[i].phone, phone, PHONE_ID_SIZE) == 0;
+    return n;
+}
+
+// The incubator in the snapshot and in answers: this phone's EGGS (each its ID, when it went in, the EGG), the rules,
+// how many are another phone's
+static void BufIncubator(struct Buf *b, const u8 *phone)
+{
+    u32 i, n = 0;
+    BufAdd(b, "\"incubator\":{\"max\":%u,\"cycle\":%u,\"day\":%u,\"now\":%u,\"eggs\":[", INC_MAX, INC_CYCLE, STEPS_A_DAY,
+           (unsigned)time(NULL));
+    for (i = 0; i < sInc.count; i++)
+    {
+        if (phone == NULL || memcmp(sInc.egg[i].phone, phone, PHONE_ID_SIZE) != 0)
+            continue;
+        BufAdd(b, "%s{\"id\":%u,\"sent\":%u,\"mon\":", n++ ? "," : "", (unsigned)sInc.egg[i].id, (unsigned)sInc.egg[i].sentAt);
+        BufBoxMon(b, &sInc.egg[i].mon);
+        BufAdd(b, "}");
+    }
+    BufAdd(b, "],\"other\":%u}", (unsigned)(sInc.count - n));
+}
+
+// "incubate": an EGG from PLACE into the incubator
+static const char *DoIncubate(const char *json)
+{
+    struct Loc at;
+    long long p = 0, o = 0;
+    struct BoxPokemon *box;
+    struct IncEgg *e;
+    if (!ParseLoc(json, "at", &at) || !JsonNum(json, "p", &p) || !JsonNum(json, "o", &o))
+        return "bad";
+    if (Empty(&at))
+        return "gone";
+    if (!Is(&at, (u32)p, (u32)o))
+        return "changed";
+    box = BoxAt(&at);
+    if (!GetBoxMonData(box, MON_DATA_IS_EGG) || GetBoxMonData(box, MON_DATA_SANITY_IS_BAD_EGG))
+        return "notegg";
+    if (sInc.count >= INC_MAX)
+        return "incfull";
+    if (MP_Phone_OnOffer((u32)p, (u32)o))
+        return "onoffer";
+    e = &sInc.egg[sInc.count++];
+    memset(e, 0, sizeof(*e));
+    PhoneProto_Random((u8 *)&e->id, sizeof(e->id));
+    e->id |= 1;
+    while (IncFind(e->id) != (int)(e - sInc.egg))   // (a new ID, never one already in)
+        e->id += 2;
+    e->sentAt = (u32)time(NULL);
+    e->pid = (u32)p;
+    e->ot = (u32)o;
+    memcpy(e->phone, PhoneOrderPhone(), PHONE_ID_SIZE);
+    e->mon = *box;
+    // the file first, then the save without it: either the EGG is written down or it never left
+    if (!IncWrite())
+    {
+        IncDrop(sInc.count - 1);
+        return "cantsave";
+    }
+    if (at.kind == LOC_PARTY)
+    {
+        ZeroMonData(&gPlayerParty[at.slot]);
+        CompactPartySlots();
+        CalculatePlayerPartyCount();
+        PartyChanged();
+    }
+    else
+    {
+        ZeroBoxMonData(box);
+        Changed(&at);
+    }
+    if (!SaveNow())
+    {
+        if (at.kind == LOC_PARTY)
+        {
+            BoxMonToMon(&sInc.egg[sInc.count - 1].mon, &gPlayerParty[gPlayerPartyCount]);
+            CalculatePlayerPartyCount();
+            PartyChanged();
+        }
+        else
+        {
+            *box = sInc.egg[sInc.count - 1].mon;
+            Changed(&at);
+        }
+        IncDrop(sInc.count - 1);
+        IncWrite();
+        return "cantsave";
+    }
+    PlaySE(SE_M_TELEPORT);
+    MPNet_Log("phone: an EGG went into the incubator (%u of %u)", (unsigned)sInc.count, INC_MAX);
+    BufIncubator(&sDoneExtra, PhoneOrderPhone());
+    return NULL;
+}
+
+// "hatchhome": EGGS [[id, steps], ...] back to BOX (room for all of them), hatched or not
+static const char *DoHatchHome(const char *json)
+{
+    static long sPairs[INC_MAX * 2 + 2];
+    static struct Pokemon sMon;
+    struct PokemonStorage *st = Storage();
+    long long boxNum = -1;
+    u32 now = (u32)time(NULL), i, k, freeSlots = 0, n, hatched = 0, back = 0, slot = 0;
+    int np, idx[INC_MAX];
+    long steps[INC_MAX];
+    if (!JsonNum(json, "box", &boxNum) || boxNum < 0 || boxNum >= TOTAL_BOXES_COUNT)
+        return "bad";
+    np = JsonNums(json, "eggs", sPairs, ARRAY_COUNT(sPairs));
+    if (np < 2 || (np & 1))
+        return "bad";
+    n = (u32)np / 2;
+    for (i = 0; i < n; i++)
+    {
+        idx[i] = IncFind((u32)sPairs[i * 2]);
+        if (idx[i] < 0)
+            return "noegg";
+        if (memcmp(sInc.egg[idx[i]].phone, PhoneOrderPhone(), PHONE_ID_SIZE) != 0)
+            return "otherphone";
+        for (k = 0; k < i; k++)
+            if (idx[k] == idx[i])
+                return "bad";
+        steps[i] = sPairs[i * 2 + 1] < 0 ? 0 : sPairs[i * 2 + 1];
+    }
+    for (k = 0; k < IN_BOX_COUNT; k++)
+        freeSlots += GetBoxMonData(&st->boxes[boxNum][k], MON_DATA_SPECIES) == SPECIES_NONE;
+    if (freeSlots < n)
+        return "full";
+    BufAdd(&sDoneExtra, "\"hatched\":[");
+    for (i = 0; i < n; i++)
+    {
+        struct IncEgg *e = &sInc.egg[idx[i]];
+        u32 days = DayNumber(now) >= DayNumber(e->sentAt) ? DayNumber(now) - DayNumber(e->sentAt) + 1 : 1;
+        u32 walked = (u32)steps[i] > days * STEPS_A_DAY ? days * STEPS_A_DAY : (u32)steps[i];
+        u32 cycles, done = walked / INC_CYCLE;
+        struct Loc loc;
+        BoxMonToMon(&e->mon, &sMon);
+        cycles = GetMonData(&sMon, MON_DATA_FRIENDSHIP);
+        if (done >= cycles)
+        {
+            MP_HatchEggData(&sMon);   // (none left: it hatches on the way, as it would in the party)
+            hatched++;
+            cycles = 0;
+        }
+        else
+        {
+            cycles -= done;
+            SetMonData(&sMon, MON_DATA_FRIENDSHIP, &cycles);
+        }
+        while (slot < IN_BOX_COUNT && GetBoxMonData(&st->boxes[boxNum][slot], MON_DATA_SPECIES) != SPECIES_NONE)
+            slot++;
+        st->boxes[boxNum][slot] = sMon.box;
+        loc.kind = LOC_BOX, loc.box = (u8)boxNum, loc.slot = (u8)slot;
+        Changed(&loc);
+        BufAdd(&sDoneExtra, "%s[%u,%u,%u,%u,%u]", back++ ? "," : "", (unsigned)e->id,
+               (unsigned)GetMonData(&sMon, MON_DATA_SPECIES), (unsigned)!GetMonData(&sMon, MON_DATA_IS_EGG),
+               (unsigned)cycles, (unsigned)walked);
+    }
+    BufAdd(&sDoneExtra, "],\"box\":%u,", (unsigned)boxNum);
+    // the save with them first, then the incubator without them (a restart in between: the save has them, and the
+    // file's copies are dropped as already home: PhoneWalk_Load)
+    SaveNow();
+    for (i = 0; i < n; i++)
+    {
+        int j = IncFind((u32)sPairs[i * 2]);
+        if (j >= 0)
+            IncDrop((u32)j);
+    }
+    IncWrite();
+    BufIncubator(&sDoneExtra, PhoneOrderPhone());
+    {
+        char msg[96];
+        snprintf(msg, sizeof(msg), "%u EGG%s came home from your phone%s", (unsigned)n, n == 1 ? "" : "S",
+                 hatched == n ? (n == 1 ? " and hatched!" : ", all hatched!") : hatched ? "! Some hatched!" : "!");
+        MP_Events_QueueToast(msg);   // (a toast on the field: never in the way of play)
+        PlaySE(hatched ? SE_EGG_HATCH : SE_M_TELEPORT);
+    }
+    MPNet_Log("phone: %u EGG(s) home from the incubator to box %u, %u hatched", (unsigned)n, (unsigned)boxNum + 1,
+              (unsigned)hatched);
+    return NULL;
+}
+
+// A restart: an EGG still in the save (the game closed between writing the incubator and saving), or already home
+// (hatched: its Trainer ID is the player's now) never left
+static void IncLoad(void)
+{
+    char path[600];
+    FILE *f;
+    u32 i, me = GetTrainerId(gSaveBlock2Ptr->playerTrainerId);
+    bool8 dropped = FALSE;
+    memset(&sInc, 0, sizeof(sInc));
+    FilePath(path, sizeof(path), "incubator");
+    f = fopen(path, "rb");
+    if (f == NULL)
+        return;
+    if (fread(&sInc, sizeof(sInc), 1, f) != 1 || sInc.magic != INC_MAGIC || sInc.version != INC_VERSION
+     || sInc.count > INC_MAX)
+        memset(&sInc, 0, sizeof(sInc));
+    fclose(f);
+    for (i = 0; i < sInc.count;)
+        if (InSave(sInc.egg[i].pid, sInc.egg[i].ot) || InSave(sInc.egg[i].pid, me))
+        {
+            MPNet_Log("phone: incubator EGG %u is in the save already", (unsigned)sInc.egg[i].id);
+            IncDrop(i);
+            dropped = TRUE;
+        }
+        else
+            i++;
+    if (dropped)
+        IncWrite();
+}
+
+// FORGET PHONES: every EGG home as it left, to the PC
+static void IncForgetAll(void)
+{
+    static struct Pokemon sMon;
+    u32 i;
+    if (sInc.count == 0)
+        return;
+    for (i = 0; i < sInc.count;)
+    {
+        BoxMonToMon(&sInc.egg[i].mon, &sMon);
+        if (MP_CopyMonToPC(&sMon) == MON_CANT_GIVE)
+        {
+            i++;   // (the PC is full: it waits in the incubator for room)
+            continue;
+        }
+        IncDrop(i);
+    }
+    SaveNow();
+    IncWrite();
+    MPNet_Log("phone: the incubator's EGGS came home as they left (%u still waiting for room)", (unsigned)sInc.count);
+}
+
 // ---------------------------------------------------------------------------------------------- the link's hooks
 
 const char *PhoneWalk_Apply(const char *op, const char *json)
@@ -848,6 +1153,10 @@ const char *PhoneWalk_Apply(const char *op, const char *json)
         return DoCollect(json, FALSE);
     if (strcmp(op, "kind") == 0)
         return DoKind(json);
+    if (strcmp(op, "incubate") == 0)
+        return DoIncubate(json);
+    if (strcmp(op, "hatchhome") == 0)
+        return DoHatchHome(json);
     return PhoneFriends_Apply(op, json);
 }
 
@@ -862,6 +1171,8 @@ void PhoneWalk_Snapshot(struct Buf *b, const u8 *phone)
     }
     else if (sWalking)
         BufAdd(b, ",\"walkOther\":1");   // (another phone has a POKéMON out)
+    BufAdd(b, ",");
+    BufIncubator(b, phone);
     {
         // the daily report's: today's goals, the BERRY trees ready and growing, MoeGatcha's free pulls and tickets
         static char sGoals[3][64];
@@ -924,6 +1235,32 @@ void PhoneWalk_Load(void)
         fclose(f);
     }
     sTrain.magic = TRAIN_MAGIC;
+    IncLoad();
+}
+
+// What the snapshot's walk, training, incubator and daily report show, as a number: the app takes a new snapshot when
+// it changes (mp_phone.c Rev)
+u32 PhoneWalk_Hash(void)
+{
+    u32 h = 2166136261u, i, v;
+    const u8 *q;
+#define MIX(x) do { v = (u32)(x); for (q = (const u8 *)&v; q < (const u8 *)&v + 4; q++) h = (h ^ *q) * 16777619u; } while (0)
+    MIX(sWalking ? sWalk.id : 0);
+    MIX(sTrain.count);
+    for (i = 0; i < sTrain.count; i++)
+    {
+        MIX(sTrain.rec[i].pid);
+        MIX(sTrain.rec[i].kind | (sTrain.rec[i].stat << 8));
+        MIX(sTrain.rec[i].since);
+        MIX(sTrain.rec[i].last);
+    }
+    MIX(sInc.count);
+    for (i = 0; i < sInc.count; i++)
+        MIX(sInc.egg[i].id);
+    for (i = 1; i < BERRY_TREES_COUNT; i++)
+        MIX(gSaveBlock1Ptr->berryTrees[i].stage);
+#undef MIX
+    return h;
 }
 
 void PhoneWalk_Update(void)
@@ -934,6 +1271,7 @@ void PhoneWalk_Update(void)
 void PhoneWalk_ForgetAll(void)
 {
     static struct Pokemon sMon;
+    IncForgetAll();
     if (!sWalking)
         return;
     BoxMonToMon(&sWalk.mon, &sMon);

@@ -366,16 +366,30 @@ static void CreateHatchedMon(struct Pokemon *egg, struct Pokemon *temp)
     *egg = *temp;
 }
 
+static void HatchMonData(struct Pokemon *mon, struct Pokemon *temp);
+
 static void AddHatchedMonToParty(u8 id)
+{
+    HatchMonData(&gPlayerParty[id], &gEnemyParty[0]);
+}
+
+// Moemon Co-op: an EGG hatched away from the party, with the same data the hatching scene gives it (the phone's EGG
+// INCUBATOR: mp_phone_walk.c), met where the player is now
+void MP_HatchEggData(struct Pokemon *mon)
+{
+    static struct Pokemon sTemp;
+    HatchMonData(mon, &sTemp);
+}
+
+static void HatchMonData(struct Pokemon *mon, struct Pokemon *temp)
 {
     u8 isEgg = 0x46; // ?
     u16 species;
     u8 name[POKEMON_NAME_LENGTH + 1];
     u16 metLevel;
     metloc_u8_t metLocation;
-    struct Pokemon *mon = &gPlayerParty[id];
 
-    CreateHatchedMon(mon, &gEnemyParty[0]);
+    CreateHatchedMon(mon, temp);
     SetMonData(mon, MON_DATA_IS_EGG, &isEgg);
 
     species = GetMonData(mon, MON_DATA_SPECIES);

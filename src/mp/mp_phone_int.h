@@ -21,6 +21,7 @@ const char *PhoneWalk_Apply(const char *op, const char *json);   // "walk", "hom
 void PhoneWalk_Snapshot(struct Buf *b, const u8 *phone);         // the snapshot's "walk", "train" (for that phone)
 void PhoneWalk_Load(void);                                       // a save loaded
 void PhoneWalk_Update(void);                                     // every frame
+u32 PhoneWalk_Hash(void);                                        // (the snapshot's rev: walk, training, incubator, today)
 void PhoneWalk_ForgetAll(void);                                  // FORGET PHONES: a walking POKéMON comes home as it left
 bool8 PhoneWalk_OnSealed(int c, const char *t, const char *json);
 

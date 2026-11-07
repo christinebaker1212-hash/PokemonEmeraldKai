@@ -315,8 +315,18 @@ public final class LinkClient {
             case "done": {
                 JSONObject order = orders.answered(o);
                 if (m != null && o.optInt("ok") == 1) {
-                    m.apply(o);
-                    m.asOf = System.currentTimeMillis();
+                    String op = order == null ? "" : order.optString("op");
+                    m.apply(o, op.equals("move") || op.equals("give") || op.equals("take"));
+                    // (the game's clock in the snapshot moves on with asOf, or every time since the snapshot was lost:
+                    // training estimates fell behind after each order, 1.172.0)
+                    long nowMs = System.currentTimeMillis();
+                    if (m.snap.has("now")) {
+                        try {
+                            m.snap.put("now", m.snap.optLong("now") + Math.max(0, nowMs - m.asOf) / 1000);
+                        } catch (org.json.JSONException ignored) {
+                        }
+                    }
+                    m.asOf = nowMs;
                     store.write(modelFile(), m.toFile());
                     listener.onModel(m);
                 }

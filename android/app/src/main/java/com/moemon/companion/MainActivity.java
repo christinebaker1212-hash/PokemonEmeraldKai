@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
             steps = new StepCounter(this, view.app);
             steps.start(null);
             StepJob.schedule(this);
-            if (android.os.Build.VERSION.SDK_INT >= 33 && view.app.walk() != null
+            if (android.os.Build.VERSION.SDK_INT >= 33 && view.app.counting()
                     && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
                     != android.content.pm.PackageManager.PERMISSION_GRANTED
                     && !getSharedPreferences("moemon", 0).getBoolean("askedNotif", false)) {
