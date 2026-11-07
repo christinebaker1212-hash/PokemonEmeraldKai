@@ -498,6 +498,15 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         if (s < 0)
             Unsupported(c, "SubAbility");
         gMtgAbilities[idx].sub = s < 0 ? 0xFFFF : s;   // (the table may have moved)
+        if (s >= 0 && gMtgAbilities[idx].api == MTG_API_MANA) {   // only a painland's "deals n damage to you"
+            const MtgAbility *pain = &gMtgAbilities[s];
+            const char *def = Mtg_Param(pain, "Defined"), *dmg = Mtg_Param(pain, "NumDmg");
+            if (pain->api != MTG_API_DEAL_DAMAGE || pain->sub != 0xFFFF || !def || strcmp(def, "You") || !dmg
+                || dmg[0] < '1' || dmg[0] > '9' || dmg[1] || pain->tgt)
+                Unsupported(c, "Mana");
+            else
+                gMtgAbilities[idx].manaPain = (uint8_t)(dmg[0] - '0');
+        }
     }
     if (gMtgAbilities[idx].api == MTG_API_CHARM) {   // its modes: parsed as spells, then given the charm's kind and cost
         char buf[160], *tok, *save;

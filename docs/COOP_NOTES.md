@@ -3573,6 +3573,20 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   colors its hand asks for; its own cards back from the graveyard too (ScoreAction).
 - Tests: test_rules.c TestSearch (RAMPANT GROWTH, ELVISH PIPER), scenario mtg_search_lib (DIABOLIC TUTOR).
 
+## MAGIC's mass moves, painlands and pump extras (1.139.0)
+
+- ChangeZoneAll (MTG_API_CHANGE_ZONE_ALL, mtg_effects.c): every ChangeType$ card of Origin$ ("Graveyard,Hand" lists:
+  ZoneList) to Destination$, chosen first and moved together; with ValidTgts$ (a player) only that player's cards;
+  onto the battlefield under each owner's control; Shuffle$ True shuffles each library that got cards. AI: off the
+  battlefield it is weighed like DestroyAll, a graveyard's barely.
+- Painlands: a mana ability's SubAbility$ may be DealDamage | NumDmg$ n | Defined$ You (MtgAbility manaPain, checked
+  in mtg_script.c after the sub-ability is read). Mtg_ManaPain(obj, color) = the least damage that color costs from that
+  source (basic types and painless abilities: 0); Mtg_Pay deals it as the source is tapped and pays generic mana with a
+  painless color first ({C}).
+- Pump extras until end of turn (KeywordList, tempKeywords past the keywords: MTG_KWX_*): Landwalk:<basic>
+  (Mtg_Landwalk), "HIDDEN CARDNAME can't block." / "can't attack." / "can't attack or block." (Mtg_CanBlock, CanAttack).
+- Tests: test_rules.c (EVACUATION, FELDON'S CANE, ADARKAR WASTES, ANCIENT TOMB, UNSEEN WALKER, JAMURAAN LION).
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

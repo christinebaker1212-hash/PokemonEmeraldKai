@@ -42,6 +42,11 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.139.0)
+- ChangeZoneAll, painlands, Pump's landwalk / can't block / can't attack: COOP_NOTES "MAGIC's mass moves, painlands
+  and pump extras". 2162 of 5408. Next: counters beyond +1/+1 (CHARGE, STORAGE, P2P2...: PutCounter 41, SubCounter
+  costs), replacement effects (96), Animate (84), PreventDamage (54), DelayedTrigger (53), UnlessCost forms (49).
+
 ## Status (2026-11-07: 1.138.0)
 - Library and hand searches (ChangeType$): COOP_NOTES "MAGIC's library searches". 2104 of 5408. Still out: Reveal$,
   LibraryPosition$ (to the library's top: Worldly Tutor), searches of other players (DefinedPlayer$), the sideboard

@@ -173,6 +173,12 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
     }
     case MTG_API_TAP:
         return 0;
+    case MTG_API_CHANGE_ZONE_ALL: {   // off the battlefield: as DestroyAll; a graveyard's: a little, on its own turn
+        const char *o = Mtg_Param(ab, "Origin");
+        if (o && strstr(o, "Battlefield"))
+            return main && SideValue(d, opp) > SideValue(d, me) + 6 ? 25 + SideValue(d, opp) - SideValue(d, me) : 0;
+        return main ? 3 : 0;
+    }
     case MTG_API_DESTROY_ALL:
     case MTG_API_DAMAGE_ALL:
         return main && SideValue(d, opp) > SideValue(d, me) + 6 ? 30 + SideValue(d, opp) - SideValue(d, me) : 0;

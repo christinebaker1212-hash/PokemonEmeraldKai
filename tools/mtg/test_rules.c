@@ -1246,6 +1246,62 @@ static void TestSearch(void)
     Do(MTG_ACT_ACTIVATE, piper, -1, 0);
     PassBoth();
     CHECK(Zone(wurm) == MTG_ZONE_BATTLEFIELD && sD.objs[wurm].controller == 0, "the wurm is on the battlefield");
+
+    Table();   // EVACUATION: every creature back to its owner's hand (lands stay)
+    {
+        int evac, b1, b2, land;
+        b1 = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        b2 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Island", 5);
+        land = Put(1, "Forest", MTG_ZONE_BATTLEFIELD);
+        evac = Put(0, "Evacuation", MTG_ZONE_HAND);
+        Do(MTG_ACT_CAST, evac, -1, 0);
+        PassBoth();
+        CHECK(Zone(b1) == MTG_ZONE_HAND && Zone(b2) == MTG_ZONE_HAND && Zone(land) == MTG_ZONE_BATTLEFIELD,
+              "both bears in hand, the Forest stays (%d %d %d)", Zone(b1), Zone(b2), Zone(land));
+    }
+    Table();   // FELDON'S CANE: {T}, exile it: shuffle your graveyard into your library
+    {
+        int cane = Put(0, "Feldon's Cane", MTG_ZONE_BATTLEFIELD), g1, g2, before = sD.players[0].libraryCount;
+        g1 = Put(0, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+        g2 = Put(0, "Lightning Bolt", MTG_ZONE_GRAVEYARD);
+        Do(MTG_ACT_ACTIVATE, cane, -1, 0);
+        PassBoth();
+        CHECK(Zone(g1) == MTG_ZONE_LIBRARY && Zone(g2) == MTG_ZONE_LIBRARY && sD.players[0].libraryCount == before + 2
+              && Zone(cane) == MTG_ZONE_EXILE, "the graveyard in the library, the cane exiled");
+    }
+
+    Table();   // ADARKAR WASTES: {T}: {C}, or {W}/{U} and 1 damage to you
+    {
+        int lions = Put(0, "Savannah Lions", MTG_ZONE_HAND), tome;
+        Put(0, "Adarkar Wastes", MTG_ZONE_BATTLEFIELD);
+        Do(MTG_ACT_CAST, lions, -1, 0);
+        CHECK(sD.players[0].life == 19, "white from the Wastes: 1 damage (life %d)", sD.players[0].life);
+        PassBoth();
+        Table();
+        Lands(0, "Adarkar Wastes", 2);
+        Put(0, "Ancient Tomb", MTG_ZONE_BATTLEFIELD);
+        tome = Put(0, "Jalum Tome", MTG_ZONE_HAND);   // ({3}: the Tomb's two and the Wastes' colorless)
+        Do(MTG_ACT_CAST, tome, -1, 0);
+        CHECK(sD.players[0].life == 18, "generic: the Tomb's 2 damage, the Wastes' colorless free (life %d)",
+              sD.players[0].life);
+    }
+
+    Table();   // UNSEEN WALKER: forestwalk until end of turn; JAMURAAN LION: target creature can't block this turn
+    {
+        int walker = Put(0, "Unseen Walker", MTG_ZONE_BATTLEFIELD), lion = Put(0, "Jamuraan Lion", MTG_ZONE_BATTLEFIELD), wall;
+        sD.objs[walker].sick = sD.objs[lion].sick = 0;
+        wall = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Forest", 3);
+        Lands(0, "Plains", 1);
+        Do(MTG_ACT_ACTIVATE, walker, MTG_TGT_OBJ, walker);
+        PassBoth();
+        CHECK(Mtg_Landwalk(&sD, walker) & MTG_COLOR_BIT(MTG_G), "forestwalk");
+        Do(MTG_ACT_ACTIVATE, lion, MTG_TGT_OBJ, wall);
+        PassBoth();
+        sD.objs[walker].attacking = 1;
+        CHECK(!Mtg_CanBlock(&sD, wall, walker), "the bears can't block this turn");
+    }
 }
 
 static void TestTriggers(void)

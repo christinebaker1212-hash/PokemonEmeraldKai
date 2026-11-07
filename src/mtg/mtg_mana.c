@@ -69,6 +69,25 @@ int Mtg_ManaAbilityColors(const MtgDuel *d, int obj, int *amount)
     return mask;
 }
 
+int Mtg_ManaPain(const MtgDuel *d, int obj, int color)
+{
+    uint16_t abil[16];
+    int n = Mtg_ObjAbilities(d, obj, abil, 16), i, best = -1;
+    if (Mtg_Card(d->objs[obj].def)->intrinsicMana & (1 << color))
+        return 0;   // (a basic land type's)
+    for (i = 0; i < n; i++) {
+        const MtgAbility *ab = &gMtgAbilities[abil[i]];
+        int m;
+        if (ab->kind != MTG_AB_ACTIVATED || ab->api != MTG_API_MANA || !ab->cost.tap || ab->cost.sacSelf
+            || Mtg_ManaCostTotal(&ab->cost.mana))
+            continue;
+        m = Mtg_ProducedColors(Mtg_Param(ab, "Produced"));
+        if (m > 0 && (m & (1 << color)) && (best < 0 || ab->manaPain < best))
+            best = ab->manaPain;
+    }
+    return best < 0 ? 0 : best;
+}
+
 static int Sources(const MtgDuel *d, int player, int exclude, Source *out)
 {
     int i, n = 0;
@@ -214,13 +233,24 @@ int Mtg_Pay(MtgDuel *d, int player, const MtgManaCost *cost, int x, int excludeO
         }
     for (i = 0; i < s.n && generic > 0; i++)
         if (s.chosen[i] < 0) {
-            s.chosen[i] = (int8_t)FirstColor(s.src[i].colors);
+            int c, pick = FirstColor(s.src[i].colors);
+            for (c = MTG_MANA_KINDS - 1; c >= 0; c--)   // (a painless color for generic mana: {C} first)
+                if ((s.src[i].colors & (1 << c)) && !Mtg_ManaPain(d, s.src[i].obj, c)) {
+                    pick = c;
+                    break;
+                }
+            s.chosen[i] = (int8_t)pick;
             generic -= s.src[i].amount;
         }
     for (i = 0; i < s.n; i++)
         if (s.chosen[i] >= 0) {
+            int pain = Mtg_ManaPain(d, s.src[i].obj, s.chosen[i]);
             Mtg_Tap(d, s.src[i].obj, 1);
             p->pool[s.chosen[i]] += s.src[i].amount;
+            if (pain) {   // (a painland: "deals 1 damage to you")
+                p->life -= pain;
+                Mtg_Event(d, MTG_EV_LIFE, player, -pain, p->life);
+            }
         }
     // spend: colored symbols from their color, the generic part from colorless first, then the fullest color
     for (i = 0; i < MTG_MANA_KINDS; i++)

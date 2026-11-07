@@ -30,6 +30,7 @@ enum {
     MTG_API_REGENERATE,       // RegenerateEffect: a shield on each creature (Defined$ Self or the target)
     MTG_API_TOKEN,            // TokenEffect: TokenAmount$ tokens of TokenScript$ for TokenOwner$ (Mtg_TokenDef)
     MTG_API_CHARM,            // CharmEffect: "choose one" (Choices$): each mode is offered as its own action
+    MTG_API_CHANGE_ZONE_ALL,  // ChangeZoneAllEffect: every ChangeType$ card from Origin$ (a target player's) to Destination$
     MTG_API_COUNT
 };
 
@@ -80,6 +81,7 @@ typedef struct {
     uint16_t choices[5];
     uint16_t charmOf;               // a Charm's mode: the charm (0xFFFF: none)
     uint8_t fromHand;               // ActivationZone$ Hand: activated from its owner's hand (Cycling)
+    uint8_t manaPain;               // a mana ability's "CARDNAME deals n damage to you" (SubAbility$ DealDamage, Defined$ You)
     uint8_t tgtMin, tgtMax;         // TargetMin$ / TargetMax$ (objects only; 1 / 1 without them; MTG_TGT_X: X of them)
 } MtgAbility;
 
@@ -201,7 +203,8 @@ int Mtg_CanTarget(const MtgDuel *d, int obj, int sourceObj);     // shroud, prot
 int Mtg_CanPay(const MtgDuel *d, int player, const MtgManaCost *cost, int x, int excludeObj);
 int Mtg_Pay(MtgDuel *d, int player, const MtgManaCost *cost, int x, int excludeObj);
 int Mtg_MaxX(const MtgDuel *d, int player, const MtgManaCost *cost, int excludeObj);
-int Mtg_ManaAbilityColors(const MtgDuel *d, int obj, int *amount);   // a permanent's {T}: add mana (0: none usable)
+int Mtg_ManaAbilityColors(const MtgDuel *d, int obj, int *amount);
+int Mtg_ManaPain(const MtgDuel *d, int obj, int color);   // the least damage its mana of COLOR costs (painlands)   // a permanent's {T}: add mana (0: none usable)
 int Mtg_ProducedColors(const char *produced);                       // Produced$ "G", "Combo W U", "Any" (-1 unknown)
 
 // mtg_game.c: GameAction.java (zone changes, state-based actions), the turn, the stack

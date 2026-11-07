@@ -33,6 +33,11 @@ enum {
     MTG_KW_COUNT
 };
 #define MTG_KW_BIT(k) (1u << (k))
+// until-end-of-turn extras a Pump$ gives (tempKeywords only, past the keywords): landwalk by basic type (bit 16 +
+// MTG_W..MTG_G), "CARDNAME can't block.", "CARDNAME can't attack."
+#define MTG_KWX_WALK_SHIFT 16
+#define MTG_KWX_CANT_BLOCK (1u << 21)
+#define MTG_KWX_CANT_ATTACK (1u << 22)
 
 typedef struct {
     uint8_t generic, x;               // generic mana, X symbols

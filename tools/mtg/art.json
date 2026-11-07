@@ -139,6 +139,13 @@
 "number": "306",
 "set": "ice"
 },
+"Adarkar Wastes": {
+"artist": "Mike Raabe",
+"file": "ice_351",
+"frame": "1993",
+"number": "351",
+"set": "ice"
+},
 "Advance Scout": {
 "artist": "Heather Hudson",
 "file": "tmp_1",
@@ -489,6 +496,13 @@
 "number": "319",
 "set": "inv"
 },
+"Ancient Tomb": {
+"artist": "Colin MacNeil",
+"file": "tmp_315",
+"frame": "1997",
+"number": "315",
+"set": "tmp"
+},
 "Andradite Leech": {
 "artist": "Wayne England",
 "file": "inv_93",
@@ -607,6 +621,13 @@
 "frame": "1997",
 "number": "65",
 "set": "ons"
+},
+"Apocalypse": {
+"artist": "Allen Williams",
+"file": "tmp_162",
+"frame": "1997",
+"number": "162",
+"set": "tmp"
 },
 "Apprentice Wizard": {
 "artist": "Dan Frazier",
@@ -1077,6 +1098,13 @@
 "number": "25",
 "set": "tor"
 },
+"Balthor the Defiled": {
+"artist": "Carl Critchlow",
+"file": "jud_61",
+"frame": "1997",
+"number": "61",
+"set": "jud"
+},
 "Balthor the Stout": {
 "artist": "Ron Spears",
 "file": "tor_91",
@@ -1111,6 +1139,13 @@
 "frame": "1997",
 "number": "105",
 "set": "mir"
+},
+"Barishi": {
+"artist": "Ted Naifeh",
+"file": "wth_119",
+"frame": "1997",
+"number": "119",
+"set": "wth"
 },
 "Barkhide Mauler": {
 "artist": "Iain McCaig",
@@ -1160,6 +1195,13 @@
 "frame": "1997",
 "number": "177",
 "set": "ody"
+},
+"Battlefield Forge": {
+"artist": "Darrell Riche",
+"file": "apc_139",
+"frame": "1997",
+"number": "139",
+"set": "apc"
 },
 "Battlefield Percher": {
 "artist": "Edward P. Beard, Jr.",
@@ -1616,6 +1658,13 @@
 "number": "165",
 "set": "tmp"
 },
+"Bola Warrior": {
+"artist": "Adam Rex",
+"file": "nem_78",
+"frame": "1997",
+"number": "78",
+"set": "nem"
+},
 "Book of Rass": {
 "artist": "Sandra Everingham",
 "file": "bchr_95",
@@ -1777,6 +1826,13 @@
 "number": "216",
 "set": "tmp"
 },
+"Brushland": {
+"artist": "Bryon Wackwitz",
+"file": "ice_352",
+"frame": "1993",
+"number": "352",
+"set": "ice"
+},
 "Brushwagg": {
 "artist": "Ian Miller",
 "file": "mir_208",
@@ -1895,6 +1951,13 @@
 "frame": "1997",
 "number": "7",
 "set": "jud"
+},
+"Caldera Lake": {
+"artist": "Allen Williams",
+"file": "tmp_316",
+"frame": "1997",
+"number": "316",
+"set": "tmp"
 },
 "Call to the Grave": {
 "artist": "Daren Bader",
@@ -2134,6 +2197,13 @@
 "number": "122",
 "set": "ody"
 },
+"Cave People": {
+"artist": "Drew Tucker",
+"file": "4ed_181",
+"frame": "1993",
+"number": "181",
+"set": "4ed"
+},
 "Cave Sense": {
 "artist": "Mark Romanoski",
 "file": "mmq_179",
@@ -2154,6 +2224,13 @@
 "frame": "1997",
 "number": "181",
 "set": "mmq"
+},
+"Caves of Koilos": {
+"artist": "Jim Nelson",
+"file": "apc_140",
+"frame": "1997",
+"number": "140",
+"set": "apc"
 },
 "Celestial Prism": {
 "artist": "Amy Weber",
@@ -2918,6 +2995,13 @@
 "number": "63",
 "set": "lgn"
 },
+"Crystal Chimes": {
+"artist": "Donato Giancola",
+"file": "usg_292",
+"frame": "1997",
+"number": "292",
+"set": "usg"
+},
 "Crystal Quarry": {
 "artist": "Alan Pollack",
 "file": "ody_318",
@@ -3190,6 +3274,13 @@
 "frame": "1993",
 "number": "130",
 "set": "4ed"
+},
+"Decree of Annihilation": {
+"artist": "John Avon",
+"file": "scg_85",
+"frame": "1997",
+"number": "85",
+"set": "scg"
 },
 "Dedicated Martyr": {
 "artist": "Dave Dorman",
@@ -3821,6 +3912,13 @@
 "number": "61",
 "set": "apc"
 },
+"Dwarven Pony": {
+"artist": "Margaret Organ-Kean",
+"file": "hml_70",
+"frame": "1993",
+"number": "70",
+"set": "hml"
+},
 "Dwarven Ruins": {
 "artist": "Mark Poole",
 "file": "ptc_mj94",
@@ -4038,6 +4136,13 @@
 "number": "248",
 "set": "usg"
 },
+"Elvish Pathcutter": {
+"artist": "Todd Lockwood",
+"file": "ons_256",
+"frame": "1997",
+"number": "256",
+"set": "ons"
+},
 "Elvish Pioneer": {
 "artist": "Christopher Rush",
 "file": "ons_257",
@@ -4185,6 +4290,13 @@
 "number": "96",
 "set": "tor"
 },
+"Enslaved Scout": {
+"artist": "Rebecca Guay",
+"file": "all_71a",
+"frame": "1993",
+"number": "71a",
+"set": "all"
+},
 "Envelop": {
 "artist": "Don Hazeltine",
 "file": "jud_39",
@@ -4240,6 +4352,13 @@
 "frame": "1993",
 "number": "190",
 "set": "4ed"
+},
+"Evacuation": {
+"artist": "Rob Alexander",
+"file": "sth_30",
+"frame": "1997",
+"number": "30",
+"set": "sth"
 },
 "Evaporate": {
 "artist": "Alan Rabinowitz",
@@ -4367,6 +4486,13 @@
 "number": "32",
 "set": "bchr"
 },
+"False Prophet": {
+"artist": "Eric Peterson",
+"file": "puds_6",
+"frame": "1997",
+"number": "6",
+"set": "puds"
+},
 "Fanatical Devotion": {
 "artist": "Massimiliano Frezzato",
 "file": "nem_8",
@@ -4422,6 +4548,13 @@
 "frame": "1997",
 "number": "147",
 "set": "ons"
+},
+"Feldon's Cane": {
+"artist": "Mark Tedin",
+"file": "bchr_97",
+"frame": "1993",
+"number": "97",
+"set": "bchr"
 },
 "Femeref Archers": {
 "artist": "William Donohoe",
@@ -5081,6 +5214,13 @@
 "number": "62",
 "set": "exo"
 },
+"Funeral Charm": {
+"artist": "Greg Spalenka",
+"file": "vis_61",
+"frame": "1997",
+"number": "61",
+"set": "vis"
+},
 "Funeral Pyre": {
 "artist": "Carl Critchlow",
 "file": "jud_10",
@@ -5739,6 +5879,13 @@
 "number": "296",
 "set": "usg"
 },
+"Grand Coliseum": {
+"artist": "Carl Critchlow",
+"file": "ons_319",
+"frame": "1997",
+"number": "319",
+"set": "ons"
+},
 "Grandmother Sengir": {
 "artist": "Pete Venters",
 "file": "hml_50",
@@ -6123,6 +6270,13 @@
 "frame": "1997",
 "number": "250",
 "set": "inv"
+},
+"Hibernation": {
+"artist": "Scott Kirschner",
+"file": "usg_79",
+"frame": "1997",
+"number": "79",
+"set": "usg"
 },
 "Hibernation Sliver": {
 "artist": "Scott Kirschner",
@@ -6642,6 +6796,13 @@
 "number": "101",
 "set": "bchr"
 },
+"Jamuraan Lion": {
+"artist": "Stuart Griffin",
+"file": "pmei_1996-3",
+"frame": "1997",
+"number": "1996-3",
+"set": "pmei"
+},
 "Jandor's Saddlebags": {
 "artist": "Dameon Willich",
 "file": "4ed_330",
@@ -6795,6 +6956,13 @@
 "frame": "1997",
 "number": "225",
 "set": "mir"
+},
+"Karplusan Forest": {
+"artist": "Nicola Leonard",
+"file": "ice_356",
+"frame": "1993",
+"number": "356",
+"set": "ice"
 },
 "Kavu Climber": {
 "artist": "Rob Alexander",
@@ -7419,6 +7587,20 @@
 "number": "197",
 "set": "inv"
 },
+"Llanowar Wastes": {
+"artist": "Rob Alexander",
+"file": "apc_141",
+"frame": "1997",
+"number": "141",
+"set": "apc"
+},
+"Llawan, Cephalid Empress": {
+"artist": "Mark Zug",
+"file": "tor_42",
+"frame": "1997",
+"number": "42",
+"set": "tor"
+},
 "Lonely Sandbar": {
 "artist": "Heather Hudson",
 "file": "ons_320",
@@ -7573,6 +7755,13 @@
 "number": "84",
 "set": "4ed"
 },
+"Major Teroh": {
+"artist": "Daren Bader",
+"file": "tor_8",
+"frame": "1997",
+"number": "8",
+"set": "tor"
+},
 "Malevolent Awakening": {
 "artist": "Alex Horley-Orlandelli",
 "file": "ody_147",
@@ -7614,6 +7803,20 @@
 "frame": "1997",
 "number": "308",
 "set": "mir"
+},
+"Manabond": {
+"artist": "Stephen Daniele",
+"file": "exo_113",
+"frame": "1997",
+"number": "113",
+"set": "exo"
+},
+"Manacles of Decay": {
+"artist": "Gary Ruddell",
+"file": "apc_14",
+"frame": "1997",
+"number": "14",
+"set": "apc"
 },
 "Manakin": {
 "artist": "Scott Kirschner",
@@ -8182,6 +8385,13 @@
 "number": "46",
 "set": "pls"
 },
+"Morningtide": {
+"artist": "Tony Szczudlo",
+"file": "tor_10",
+"frame": "1997",
+"number": "10",
+"set": "tor"
+},
 "Morphling": {
 "artist": "rk post",
 "file": "usg_85",
@@ -8251,6 +8461,13 @@
 "frame": "1997",
 "number": "43",
 "set": "apc"
+},
+"Mudhole": {
+"artist": "Gary Ruddell",
+"file": "ody_208",
+"frame": "1997",
+"number": "208",
+"set": "ody"
 },
 "Multani's Harmony": {
 "artist": "Darrell Riche",
@@ -8483,6 +8700,13 @@
 "number": "149",
 "set": "mmq"
 },
+"Netter en-Dal": {
+"artist": "Matt Cavotta",
+"file": "nem_13",
+"frame": "1997",
+"number": "13",
+"set": "nem"
+},
 "Nettletooth Djinn": {
 "artist": "Janine Johnston",
 "file": "mir_232",
@@ -8643,6 +8867,13 @@
 "frame": "1997",
 "number": "77",
 "set": "wth"
+},
+"Off Balance": {
+"artist": "Jeff Miracola",
+"file": "nem_15",
+"frame": "1997",
+"number": "15",
+"set": "nem"
 },
 "Ogre Shaman": {
 "artist": "Paolo Parente",
@@ -8826,12 +9057,26 @@
 "number": "82",
 "set": "bchr"
 },
+"Panic Attack": {
+"artist": "Mike Ploog",
+"file": "pcy_98",
+"frame": "1997",
+"number": "98",
+"set": "pcy"
+},
 "Panther Warriors": {
 "artist": "Cecil Fernando",
 "file": "vis_115",
 "frame": "1997",
 "number": "115",
 "set": "vis"
+},
+"Paradigm Shift": {
+"artist": "Cliff Nielsen",
+"file": "wth_46",
+"frame": "1997",
+"number": "46",
+"set": "wth"
 },
 "Parch": {
 "artist": "Ron Spencer",
@@ -9230,6 +9475,13 @@
 "file": "tmp_244",
 "frame": "1997",
 "number": "244",
+"set": "tmp"
+},
+"Pine Barrens": {
+"artist": "Rebecca Guay",
+"file": "tmp_321",
+"frame": "1997",
+"number": "321",
 "set": "tmp"
 },
 "Pit Raptor": {
@@ -9932,6 +10184,13 @@
 "number": "78",
 "set": "wth"
 },
+"Rebuild": {
+"artist": "Allen Williams",
+"file": "ulg_40",
+"frame": "1997",
+"number": "40",
+"set": "ulg"
+},
 "Reckless Abandon": {
 "artist": "Ron Spears",
 "file": "uds_94",
@@ -10058,6 +10317,13 @@
 "number": "14",
 "set": "uds"
 },
+"Reminisce": {
+"artist": "Bradley Williams",
+"file": "ons_105",
+"frame": "1997",
+"number": "105",
+"set": "ons"
+},
 "Remote Isle": {
 "artist": "Ciruelo",
 "file": "usg_324",
@@ -10092,6 +10358,20 @@
 "frame": "1993",
 "number": "11",
 "set": "bchr"
+},
+"Replenish": {
+"artist": "Jim Nelson",
+"file": "uds_15",
+"frame": "1997",
+"number": "15",
+"set": "uds"
+},
+"Repopulate": {
+"artist": "Una Fricker",
+"file": "ulg_111",
+"frame": "1997",
+"number": "111",
+"set": "ulg"
 },
 "Reprisal": {
 "artist": "Randy Asplund-Faith",
@@ -10513,6 +10793,13 @@
 "number": "153",
 "set": "tmp"
 },
+"Salt Flats": {
+"artist": "Scott Kirschner",
+"file": "tmp_324",
+"frame": "1997",
+"number": "324",
+"set": "tmp"
+},
 "Salt Marsh": {
 "artist": "Jerry Tiritilli",
 "file": "inv_326",
@@ -10576,6 +10863,13 @@
 "number": "306",
 "set": "tmp"
 },
+"Saprazzan Bailiff": {
+"artist": "Ron Spencer",
+"file": "mmq_97",
+"frame": "1997",
+"number": "97",
+"set": "mmq"
+},
 "Saprazzan Legate": {
 "artist": "Andrew Goldhawk",
 "file": "mmq_100",
@@ -10624,6 +10918,13 @@
 "frame": "1993",
 "number": "48",
 "set": "4ed"
+},
+"Scabland": {
+"artist": "Andrew Robinson",
+"file": "tmp_325",
+"frame": "1997",
+"number": "325",
+"set": "tmp"
 },
 "Scalding Tongs": {
 "artist": "Randy Gallegos",
@@ -11192,6 +11493,13 @@
 "number": "91",
 "set": "ulg"
 },
+"Shivan Reef": {
+"artist": "Rob Alexander",
+"file": "apc_142",
+"frame": "1997",
+"number": "142",
+"set": "apc"
+},
 "Shivan Zombie": {
 "artist": "Tony Szczudlo",
 "file": "inv_271",
@@ -11492,6 +11800,13 @@
 "frame": "1997",
 "number": "16",
 "set": "sth"
+},
+"Skyshroud Forest": {
+"artist": "Roger Raupp",
+"file": "tmp_326",
+"frame": "1997",
+"number": "326",
+"set": "tmp"
 },
 "Skyshroud Poacher": {
 "artist": "Ron Spencer",
@@ -12403,6 +12718,13 @@
 "number": "47",
 "set": "nem"
 },
+"Stun": {
+"artist": "Terese Nielsen",
+"file": "tmp_207",
+"frame": "1997",
+"number": "207",
+"set": "tmp"
+},
 "Stupefying Touch": {
 "artist": "Bradley Williams",
 "file": "tor_48",
@@ -12452,12 +12774,26 @@
 "number": "328",
 "set": "inv"
 },
+"Sulfurous Springs": {
+"artist": "Phil Foglio",
+"file": "ice_360",
+"frame": "1993",
+"number": "360",
+"set": "ice"
+},
 "Sun Clasp": {
 "artist": "John Coulthart",
 "file": "vis_21",
 "frame": "1997",
 "number": "21",
 "set": "vis"
+},
+"Sunder": {
+"artist": "Stephen Daniele",
+"file": "usg_101",
+"frame": "1997",
+"number": "101",
+"set": "usg"
 },
 "Sungrass Prairie": {
 "artist": "Ron Spencer",
@@ -12655,6 +12991,13 @@
 "number": "196",
 "set": "mir"
 },
+"Tarnished Citadel": {
+"artist": "David Martin",
+"file": "ody_329",
+"frame": "1997",
+"number": "329",
+"set": "ody"
+},
 "Tarpan": {
 "artist": "Margaret Organ-Kean",
 "file": "ice_267",
@@ -12807,6 +13150,13 @@
 "file": "uds_139",
 "frame": "1997",
 "number": "139",
+"set": "uds"
+},
+"Thran Foundry": {
+"artist": "John Zeleznik",
+"file": "uds_140",
+"frame": "1997",
+"number": "140",
 "set": "uds"
 },
 "Thran Golem": {
@@ -13046,6 +13396,13 @@
 "frame": "1997",
 "number": "22",
 "set": "uds"
+},
+"Tormod's Crypt": {
+"artist": "Christopher Rush",
+"file": "bchr_109",
+"frame": "1993",
+"number": "109",
+"set": "bchr"
 },
 "Torture": {
 "artist": "Mark Tedin",
@@ -13355,6 +13712,13 @@
 "number": "78",
 "set": "scg"
 },
+"Underground River": {
+"artist": "NéNé Thomas",
+"file": "ice_362",
+"frame": "1993",
+"number": "362",
+"set": "ice"
+},
 "Undertaker": {
 "artist": "Jeff Easley",
 "file": "mmq_167",
@@ -13411,6 +13775,13 @@
 "number": "20",
 "set": "all"
 },
+"Unseen Walker": {
+"artist": "Alan Rabinowitz",
+"file": "mir_249",
+"frame": "1997",
+"number": "249",
+"set": "mir"
+},
 "Unspeakable Symbol": {
 "artist": "Arnie Swekel",
 "file": "scg_79",
@@ -13452,6 +13823,13 @@
 "frame": "1997",
 "number": "44",
 "set": "mir"
+},
+"Upheaval": {
+"artist": "Kev Walker",
+"file": "ody_113",
+"frame": "1997",
+"number": "113",
+"set": "ody"
 },
 "Urborg Drake": {
 "artist": "Sam Wood",
@@ -13536,6 +13914,13 @@
 "frame": "1997",
 "number": "77",
 "set": "exo"
+},
+"Veldrane of Sengir": {
+"artist": "Susan Van Camp",
+"file": "hml_60",
+"frame": "1993",
+"number": "60",
+"set": "hml"
 },
 "Vendetta": {
 "artist": "Dan Frazier",
@@ -14104,6 +14489,13 @@
 "number": "102",
 "set": "mir"
 },
+"Wave of Indifference": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "ons_243",
+"frame": "1997",
+"number": "243",
+"set": "ons"
+},
 "Wayfaring Giant": {
 "artist": "Christopher Moeller",
 "file": "inv_44",
@@ -14117,6 +14509,13 @@
 "frame": "1993",
 "number": "170",
 "set": "4ed"
+},
+"Weatherseed Elf": {
+"artist": "Heather Hudson",
+"file": "ulg_115",
+"frame": "1997",
+"number": "115",
+"set": "ulg"
 },
 "Weatherseed Faeries": {
 "artist": "Don Hazeltine",
@@ -14544,6 +14943,13 @@
 "frame": "1997",
 "number": "290",
 "set": "inv"
+},
+"Yavimaya Coast": {
+"artist": "Anthony S. Waters",
+"file": "apc_143",
+"frame": "1997",
+"number": "143",
+"set": "apc"
 },
 "Yavimaya Enchantress": {
 "artist": "Matthew D. Wilson",

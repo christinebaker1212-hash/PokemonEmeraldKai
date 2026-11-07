@@ -13,12 +13,13 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Tap", MTG_API_TAP}, {"Untap", MTG_API_UNTAP}, {"Counter", MTG_API_COUNTER},
     {"Sacrifice", MTG_API_SACRIFICE}, {"PutCounter", MTG_API_PUT_COUNTER}, {"Attach", MTG_API_ATTACH},
     {"Regenerate", MTG_API_REGENERATE}, {"Token", MTG_API_TOKEN},
-    {"Charm", MTG_API_CHARM},
+    {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
+    "ChangeZoneAll",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -398,6 +399,29 @@ static int EachChooses(MtgDuel *d, const MtgResolveCtx *ctx, const Defined *who,
 
 static void DiscardOne(MtgDuel *d, int obj) { Mtg_MoveTo(d, obj, MTG_ZONE_GRAVEYARD); }
 
+// "Graveyard,Hand" -> zone bits (0: one it doesn't know)
+static unsigned ZoneList(const char *s)
+{
+    static const struct { const char *name; int zone; } sZones[] = {
+        {"Battlefield", MTG_ZONE_BATTLEFIELD}, {"Graveyard", MTG_ZONE_GRAVEYARD}, {"Hand", MTG_ZONE_HAND},
+        {"Exile", MTG_ZONE_EXILE}, {"Library", MTG_ZONE_LIBRARY}};
+    unsigned bits = 0, k;
+    char buf[64], *p = buf, *t;
+    if (!s || strlen(s) >= sizeof(buf))
+        return 0;
+    strcpy(buf, s);
+    while ((t = Mtg_Token(&p, ',')) != NULL) {
+        unsigned found = 0;
+        for (k = 0; k < sizeof(sZones) / sizeof(sZones[0]); k++)
+            if (strcmp(t, sZones[k].name) == 0)
+                found = 1u << sZones[k].zone;
+        if (!found)
+            return 0;
+        bits |= found;
+    }
+    return bits;
+}
+
 // a search's find: to its destination (onto the battlefield under the searcher's control, tapped if it says)
 static int sFoundZone, sFoundTapped, sFoundCtrl;
 static void FoundOne(MtgDuel *d, int obj)
@@ -427,9 +451,23 @@ static uint32_t KeywordList(const char *s, int *ok)   // "Flying & First Strike"
         while (e > tok && e[-1] == ' ')
             *--e = 0;
         k = Mtg_KeywordByName(tok);
-        if (k < 0) {
-            *ok = 0;
-            return 0;
+        if (k < 0) {   // (a Pump's own: landwalk, can't block / attack)
+            static const char *const sBasic[5] = {"Plains", "Island", "Swamp", "Mountain", "Forest"};
+            int b, found = 0;
+            for (b = 0; b < 5; b++)
+                if (strncmp(tok, "Landwalk:", 9) == 0 && strcmp(tok + 9, sBasic[b]) == 0)
+                    mask |= 1u << (MTG_KWX_WALK_SHIFT + b), found = 1;
+            if (strcmp(tok, "HIDDEN CARDNAME can't block.") == 0)
+                mask |= MTG_KWX_CANT_BLOCK, found = 1;
+            else if (strcmp(tok, "HIDDEN CARDNAME can't attack.") == 0)
+                mask |= MTG_KWX_CANT_ATTACK, found = 1;
+            else if (strcmp(tok, "HIDDEN CARDNAME can't attack or block.") == 0)
+                mask |= MTG_KWX_CANT_ATTACK | MTG_KWX_CANT_BLOCK, found = 1;
+            if (!found) {
+                *ok = 0;
+                return 0;
+            }
+            continue;
         }
         mask |= MTG_KW_BIT(k);
     }
@@ -512,6 +550,38 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         for (i = 0; i < d->objCount; i++)
             if (doomed[i])
                 Mtg_Destroy(d, i, Mtg_Param(ab, "NoRegen") != NULL);
+        break;
+    }
+    case MTG_API_CHANGE_ZONE_ALL: {   // every ChangeType$ card of Origin$ (a target player's only, with a target) at once
+        unsigned from = ZoneList(Mtg_Param(ab, "Origin")), to = ZoneList(Mtg_Param(ab, "Destination"));
+        const char *spec = Mtg_Param(ab, "ChangeType"), *sh = Mtg_Param(ab, "Shuffle");
+        int zone = 0, only = -1, shuffled[MTG_PLAYERS] = {0, 0};
+        uint8_t moving[MTG_MAX_OBJS];
+        while (!(to & (1u << zone)))
+            zone++;
+        if (ab->tgt) {
+            Targets(d, ctx, ab, DEF_PLAYER, &who);
+            if (!who.n || who.t[0].kind != MTG_TGT_PLAYER)
+                break;
+            only = who.t[0].id;
+        }
+        for (i = 0; i < d->objCount; i++) {
+            const MtgObj *o = &d->objs[i];
+            int whose = o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner;
+            moving[i] = (from & (1u << o->zone)) && (only < 0 || whose == only)
+                        && Mtg_ValidObj(d, i, spec, ctx->source, ctx->controller) && i != ctx->source;
+        }
+        for (i = 0; i < d->objCount; i++)
+            if (moving[i]) {
+                if (zone == MTG_ZONE_BATTLEFIELD)   // (onto the battlefield under its owner's control)
+                    d->objs[i].controller = d->objs[i].owner;
+                if (zone == MTG_ZONE_LIBRARY)
+                    shuffled[d->objs[i].owner] = 1;
+                Mtg_MoveTo(d, i, zone);
+            }
+        for (i = 0; i < MTG_PLAYERS; i++)
+            if (shuffled[i] && sh && strcmp(sh, "True") == 0)
+                Mtg_ShuffleLibrary(d, i);
         break;
     }
     case MTG_API_REGENERATE:   // a shield on each: the next destruction this turn regenerates it instead
@@ -767,6 +837,7 @@ static const char *const sApiParams[MTG_API_COUNT][10] = {
     [MTG_API_DRAW] = {"NumCards"},
     [MTG_API_DESTROY] = {"NoRegen"},
     [MTG_API_DESTROY_ALL] = {"ValidCards", "NoRegen"},
+    [MTG_API_CHANGE_ZONE_ALL] = {"Origin", "Destination", "ChangeType", "Shuffle", "UseAllOriginZones"},
     [MTG_API_GAIN_LIFE] = {"LifeAmount"},
     [MTG_API_LOSE_LIFE] = {"LifeAmount"},
     [MTG_API_PUMP] = {"NumAtt", "NumDef", "KW"},
@@ -884,6 +955,15 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return 1;
     case MTG_API_DESTROY_ALL:
         return (v = Mtg_Param(ab, "ValidCards")) && Mtg_ValidSpecKnown(v);
+    case MTG_API_CHANGE_ZONE_ALL: {
+        const char *o = Mtg_Param(ab, "Origin"), *dz = Mtg_Param(ab, "Destination");
+        if (!o || !dz || !ZoneList(o) || !ZoneList(dz) || (ZoneList(dz) & (ZoneList(dz) - 1)) || (ZoneList(o) & ZoneList(dz))
+            || (ZoneList(dz) & (1u << MTG_ZONE_STACK)) || !(v = Mtg_Param(ab, "ChangeType")) || !Mtg_ValidSpecKnown(v))
+            return 0;
+        if (ab->tgt && (strstr(ab->tgt, "Creature") || strstr(ab->tgt, "Card") || strstr(ab->tgt, "Permanent")))
+            return 0;   // (a target player only: "target player's graveyard")
+        return !(v = Mtg_Param(ab, "Shuffle")) || strcmp(v, "True") == 0;
+    }
     case MTG_API_GAIN_LIFE:
     case MTG_API_LOSE_LIFE:
         return AmountKnown(ab, "LifeAmount", 1);
@@ -929,7 +1009,7 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         v = Mtg_Param(ab, "CounterType");
         return v && (strcmp(v, "P1P1") == 0 || strcmp(v, "M1M1") == 0) && AmountKnown(ab, "CounterNum", 1);
     case MTG_API_MANA:
-        if (Mtg_Param(ab, "SubAbility") || !AmountKnown(ab, "Amount", 0))
+        if ((Mtg_Param(ab, "SubAbility") && ab->kind != MTG_AB_ACTIVATED) || !AmountKnown(ab, "Amount", 0))
             return 0;
         v = Mtg_Param(ab, "Produced");
         if (!v || Mtg_ProducedColors(v) <= 0)

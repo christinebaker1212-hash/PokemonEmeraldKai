@@ -70,7 +70,7 @@ uint8_t Mtg_Landwalk(const MtgDuel *d, int obj)
 {
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
-    return Mtg_Card(d->objs[obj].def)->landwalk | m.landwalk;
+    return Mtg_Card(d->objs[obj].def)->landwalk | m.landwalk | ((d->objs[obj].tempKeywords >> MTG_KWX_WALK_SHIFT) & 0x1F);
 }
 
 uint8_t Mtg_Protection(const MtgDuel *d, int obj)
@@ -1003,7 +1003,7 @@ static int CanAttack(const MtgDuel *d, int obj)
     const MtgObj *o = &d->objs[obj];
     uint32_t kw = Mtg_Keywords(d, obj);
     return IsCreature(d, obj) && o->controller == d->active && !o->tapped
-        && (!o->sick || (kw & MTG_KW_BIT(MTG_KW_HASTE))) && !(kw & MTG_KW_BIT(MTG_KW_DEFENDER))
+        && (!o->sick || (kw & MTG_KW_BIT(MTG_KW_HASTE))) && !(kw & MTG_KW_BIT(MTG_KW_DEFENDER)) && !(kw & MTG_KWX_CANT_ATTACK)
         && !Mtg_StaticForbids(d, MTG_STATIC_CANT_ATTACK, obj, MTG_NO_OBJ);
 }
 
@@ -1023,6 +1023,8 @@ int Mtg_CanBlock(const MtgDuel *d, int blocker, int attacker)
     uint32_t akw = Mtg_Keywords(d, attacker), bkw = Mtg_Keywords(d, blocker);
     const MtgCardDef *ac = Mtg_Card(d->objs[attacker].def), *bc = Mtg_Card(d->objs[blocker].def);
     int i;
+    if (bkw & MTG_KWX_CANT_BLOCK)   // (a Pump's "can't block" this turn)
+        return 0;
     if ((akw & MTG_KW_BIT(MTG_KW_FLYING)) && !(bkw & (MTG_KW_BIT(MTG_KW_FLYING) | MTG_KW_BIT(MTG_KW_REACH))))
         return 0;
     if ((akw & MTG_KW_BIT(MTG_KW_FEAR)) && !(bc->types & MTG_T_ARTIFACT) && !(bc->colors & MTG_COLOR_BIT(MTG_B)))
