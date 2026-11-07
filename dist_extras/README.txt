@@ -1463,6 +1463,12 @@ CASE's third side once you have a MAGIC deck (L and R).
                     rare cards for wins, boosters opened, regulars beaten,
                     a structure deck and whole sets, CARD POINTS for every
                     card.
+  The play room   The clerk lifts the counter and shows you through the
+                  door behind it. The players down there change every half
+                  hour: the regulars and visiting guests, each guest with a
+                  deck of their own choosing, at different tables; fans
+                  chat on the carpet. The mat at the bottom takes you
+                  back up.
   Achievements    A MAGIC tab of their own.
 The MAGIC cards are saved with your game (the save file's .mtg file).
 

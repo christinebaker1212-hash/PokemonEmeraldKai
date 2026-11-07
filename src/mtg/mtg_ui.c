@@ -77,6 +77,7 @@ static struct
     int inspectCard, inspectScroll, inspectMax;
     int zoom, panX, panY;            // the big picture
     int duelist, vs;
+    MtgDuelist who;                  // the one challenging (Mtg_Opponent, kept as they were when they asked)
     uint32_t portrait[64 * 64];      // the duelist as they faced you (their map sprite)
     uint8_t portraitW, portraitH;
     SDL_Texture *portraitTexture;
@@ -1050,7 +1051,7 @@ static void Portrait(int x, int y)
 
 static void ChallengeScreen(void)
 {
-    const MtgDuelist *who = &gMtgDuelists[U.duelist];
+    const MtgDuelist *who = &U.who;
     MtgCollection *c = C();
     char line[200];
     int i, y = 68;
@@ -1079,8 +1080,9 @@ static void ChallengeScreen(void)
                   d == c->activeDeck && c->decks[d].count ? "IN USE" : NULL);
     }
     (void)who->hello;
-    Strip(c->beaten & (1u << U.duelist) ? "WIN: a booster pack, eight cards for your BINDER. (Every time you win.)"
-                                        : "WIN: a booster pack, eight cards for your BINDER.");
+    Strip(U.duelist < MTG_DUELISTS && c->beaten & (1u << U.duelist)
+              ? "WIN: a booster pack, eight cards for your BINDER. (Every time you win.)"
+              : "WIN: a booster pack, eight cards for your BINDER.");
 }
 
 // ---- BOOSTER PACKS (the YU-GI-OH! side's screen): the boosters held by set, the chosen one in the middle; one opened:
@@ -1769,7 +1771,8 @@ void MtgUi_OpenChallenge(unsigned duelist)
     MtgCollection *c = C();
     int k;
     U.returnToGame = NULL;
-    U.duelist = (int)(duelist < MTG_DUELISTS ? duelist : 0);
+    U.duelist = (int)duelist;
+    U.who = *Mtg_Opponent(duelist);
     U.vs = VS_NPC;
     Open(M_CHALLENGE);
     U.fromScript = 1;
@@ -1785,7 +1788,7 @@ void MtgUi_OpenChallenge(unsigned duelist)
                 break;
             }
     U.cursor = c->activeDeck;
-    MPNet_Log("mtg: challenge from %s", gMtgDuelists[U.duelist].name);
+    MPNet_Log("mtg: challenge from %s", U.who.name);
 }
 
 static void StartDuel(const char *const *theirCards, const char *name)
@@ -1829,7 +1832,7 @@ static void Practice(void)   // against a starter deck that isn't yours: nothing
 static void DuelEnded(int result)
 {
     MtgCollection *c = C();
-    const MtgDuelist *who = &gMtgDuelists[U.duelist];
+    const MtgDuelist *who = &U.who;
     char line[320];
     if (U.vs == VS_PRACTICE) {
         MPNet_Log("mtg: practice over: %s", result == 1 ? "won" : result == 2 ? "lost" : "a draw");
@@ -1842,9 +1845,11 @@ static void DuelEnded(int result)
         int set = Mtg_RandomSet(&c->rng), got = Mtg_AwardPack(c, set);
         c->wins++;
         MP_Achieve_Count("mtgwin", 1);
-        if (!(c->beaten & (1u << U.duelist)))
-            MP_Achieve_Count("mtgregulars", 1);
-        c->beaten |= 1u << U.duelist;
+        if (U.duelist < MTG_DUELISTS) {   // (the regulars; the play room's guests don't count)
+            if (!(c->beaten & (1u << U.duelist)))
+                MP_Achieve_Count("mtgregulars", 1);
+            c->beaten |= 1u << U.duelist;
+        }
         if (d->players[0].life >= 20)
             MP_Achieve_Unlock("mtgflawless");
         if (d->players[1].drewFromEmpty && d->players[1].life > 0)
@@ -2503,7 +2508,7 @@ int MtgUi_Step(unsigned keys)
                 Say(ACT_NONE, "%s", Mtg_DeckProblem(c, &c->decks[U.cursor]));
             else {
                 c->activeDeck = (uint8_t)U.cursor;
-                StartDuel(gMtgDuelists[U.duelist].cards, gMtgDuelists[U.duelist].name);
+                StartDuel(U.who.cards, U.who.name);
             }
         }
         break;

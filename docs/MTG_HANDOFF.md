@@ -6,7 +6,10 @@ The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the po
 ## Pick up here (2026-11-07, 1.167.0: the CARD SHOP counter and structure decks)
 **The user's rules from this session (keep them):**
 - **MOSSDEEP's CARD CLUB maps are the user's** (they're editing them): change only the scripts that point there
-  (data/scripts/mtg_shop.inc) and the C behind them. No new map objects / people there without asking.
+  (data/scripts/mtg_shop.inc) and the C behind them. No new map objects / people there without asking. (1.168.0 did
+  what the user then asked for: the counter's door, B1F's exit mat, six rotating chairs, talkers: src/mtg/mtg_club.c.)
+- The play room's guests bring any deck that plays (mtg_club.c Decks): newly playable structure decks show up in
+  guests' hands by themselves too.
 - Structure decks are **curated** ("Let's not overwhelm the player"): tools/mtg/fetch_precons.py CURATED (16 now).
   Add to it sparingly; keep the order (starters, theme decks by era, World Championship decks).
 - "Remember to add them as cards are available": the shop shows a curated deck by itself once its last card plays,

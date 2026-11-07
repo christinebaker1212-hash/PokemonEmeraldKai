@@ -1,9 +1,9 @@
 # MAGIC at MOSSDEEP's CARD SHOP: a regular ignores Magic before the player has a deck; the clerk hands out a starter
 # (EMBER), the CARD CASE opens on its MAGIC side (four tabs, TRIPLE TRIAD last: R goes to it); PIP's challenge, a few turns played by the computer on
 # both sides, then a win (mp mtg win) and the booster it brings into the CARD CASE, opened on BOOSTER PACKS; the clerk's counter sells
-# one for CARD POINTS (its counter: TRADE IN, CARD SHOP, PRIZES); the clerk's way down to the play room, a regular there asks for a duel; the
-# play room's stairs come up by the front door.
+# one for CARD POINTS (its counter: TRADE IN, CARD SHOP, PRIZES); the clerk's way down to the play room (through the
+# counter, onto the mat), a regular there asks for a duel (half hour 5's room); the mat goes back up behind the counter.
 MODE=1
 TMO=300
-EXPECT_A=("mtg: starter screen" "mtg: starter EMBER chosen" "optedIn 1 deck 0 (EMBER, 40 cards)" "mtg: case open" "mtg: deck 0 tray 3" "mtg: challenge from PIP" "mtg: table: you vs PIP" "mtg: duel over: won" "mtg: won against PIP, a " "mtg: opened a " "mtg: card shop" "mtg: bought a " "wins 1 losses 0 beaten 2" "where map 14.12 xy 3,2" "mtg: challenge from RHEA" "where map 14.11 xy 5,9")
+EXPECT_A=("mtg: starter screen" "mtg: starter EMBER chosen" "optedIn 1 deck 0 (EMBER, 40 cards)" "mtg: case open" "mtg: deck 0 tray 3" "mtg: challenge from PIP" "mtg: table: you vs PIP" "mtg: duel over: won" "mtg: won against PIP, a " "mtg: opened a " "mtg: card shop" "mtg: bought a " "wins 1 losses 0 beaten 2" "where map 14.12 xy 5,8" "mtg: challenge from RHEA" "where map 14.11 xy 5,4")
 UNEXPECT_A=("[crash]" "mtg: couldn't write")

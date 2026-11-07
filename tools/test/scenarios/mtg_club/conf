@@ -1,0 +1,7 @@
+# MOSSDEEP's CARD CLUB (1.168.0): the counter lifts and the player walks through the door behind it down to the play
+# room (arriving on its mat), the play room's players for half hour 5 (a guest, ROLAND, challenges; the two standing on
+# the carpet talk), the mat back up (out through the counter, which closes), and half hour 6's different room. Talkers upstairs.
+MODE=1
+TMO=200
+EXPECT_A=("mtg: club talker 1 says line" "mtg: club slot 5: MARLOW 3,3  RHEA 8,6  TESS 3,6  VOSS 11,6  ROLAND 0,3  DAPHNE 0,6  watch 6,6" "where map 14.12 xy 5,8" "mtg: challenge from ROLAND" "mtg: club talker 2 says line" "mtg: club talker 3 says line" "where map 14.11 xy 5,4" "mtg: club slot 6:")
+UNEXPECT_A=("[crash]" "mtg: unknown command")

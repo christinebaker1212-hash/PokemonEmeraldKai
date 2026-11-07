@@ -95,21 +95,19 @@ void Mtg_ShopBoosters(void)
 
 void Mtg_DuelistState(void)
 {
-    unsigned i = gSpecialVar_0x8004;
     gSpecialVar_Result = Mtg_Unlocked();
-    MP_AsciiToGame(gStringVar1, i < MTG_DUELISTS ? gMtgDuelists[i].name : "", 64);
+    MP_AsciiToGame(gStringVar1, Mtg_Opponent(gSpecialVar_0x8004)->name, 64);
 }
 
-// The duelist's words in gStringVar4 for the map's message box (as the other card games' duelists speak before the
-// challenge): broken into lines that fit the box, two to a page
-void Mtg_DuelistHello(void)
+// Words for the map's message box (as the other card games' duelists speak before the challenge) in gStringVar4:
+// broken into lines that fit the box, two to a page
+void Mtg_WrapToVar4(const char *text)
 {
-    unsigned i = gSpecialVar_0x8004;
-    const char *p = i < MTG_DUELISTS ? gMtgDuelists[i].hello : "";
+    const char *p;
     u8 *out = gStringVar4, line[160], word[64];
     int lines = 0, n = 0;
     char plain[400];
-    Mtg_PlainText(plain, sizeof(plain), p);
+    Mtg_PlainText(plain, sizeof(plain), text);
     p = plain;
     line[0] = EOS;
     while (*p) {
@@ -145,6 +143,12 @@ void Mtg_DuelistHello(void)
     (void)n;
 }
 
+// VAR_0x8004 the duelist: their words, in lines, in gStringVar4
+void Mtg_DuelistHello(void)
+{
+    Mtg_WrapToVar4(Mtg_Opponent(gSpecialVar_0x8004)->hello);
+}
+
 void Mtg_DuelistChallenge(void)
 {
     MtgUi_OpenChallenge(gSpecialVar_0x8004);
@@ -172,6 +176,8 @@ void Mtg_Debug(const char *command)
         for (i = 0; i < MTG_DECKS; i++)
             if (c->decks[i].count)
                 MPNet_Log("mtg: deck slot %d %s (%u cards)", i, c->decks[i].name, c->decks[i].count);
+    } else if (strncmp(command, "club", 4) == 0) {   // club N: the play room of half hour N, the next time in
+        Mtg_ClubDebug(command + 4);
     } else if (strncmp(command, "own ", 4) == 0) {   // own N NAME: copies of a card in the collection
         int at = 0, id;
         if (sscanf(command + 4, "%u %n", &n, &at) == 1 && at && (id = Mtg_CardByName(command + 4 + at)) >= 0) {

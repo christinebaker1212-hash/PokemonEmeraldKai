@@ -86,8 +86,8 @@ AllowSmallTweaks only unlocks the small tweaks, and no dev updates are pushed.
 **POKéMON STADIUM** on BATTLE ISLAND (the user's spec and decisions: `docs/STADIUM.md`, the cups' rules
 docs/stadium/RULES.md): data from the user's ROM (tools/stadium/, never commit the ROM), src/mp/mp_stadium*.c (cups and
 battles mp_stadium_cup.c, screens mp_stadium_ui.c, saved teams per server mp_stadium_teams.c, rewards / ribbons /
-achievements mp_stadium_rewards.c), its music as music/stadium_*.kaisong (new tracks by name); tests stadium_*.
-Its announcer (1.165.0): Stadium's own 823 voice clips from the user's ROM (stadium/announcer.s1, never committed:
+achievements mp_stadium_rewards.c), its music as music/stadium_*.kaisong (new tracks by name); tests stadium_*. Its lobby's
+fans (1.168.0, data/maps/BattleIsland_Stadium). Its announcer (1.165.0): Stadium's own 823 voice clips from the user's ROM (stadium/announcer.s1, never committed:
 tools/stadium/mort/make_voice_pack.py; the release's STADIUM_ROM_URL secret), decoded by SubDrag's MORT decoder (mort/,
 public domain), lines chosen by the battle's messages and only when they fit the time the battle gives them, never cut
 off: src/mp/mp_stadium_announcer.c, docs/STADIUM.md "The announcer"; OPTIONS > BATTLE > ANNOUNCER; test stadium_announcer.
@@ -118,7 +118,9 @@ triggers src/mtg/mtg_trigger.c, MAGIC achievements (mp_achieve.c C_MAGIC). The C
 The CARD SHOP counter as POKeMON's (1.167.0: TRADE IN spares, CARD SHOP, PRIZES; mtg_ui.c ShopScreen) and curated
 structure decks from real precons that appear once their cards play (tools/mtg/fetch_precons.py CURATED ->
 src/mtg/mtg_precons_data.c): COOP_NOTES "MAGIC's CARD SHOP counter and structure decks". **MOSSDEEP's CARD CLUB maps
-are the user's (2026-11-07): change only data/scripts/mtg_shop.inc and the C behind it.**
+are the user's (2026-11-07): change only data/scripts/mtg_shop.inc and the C behind it** (and what the user asks for:
+1.168.0's counter door and play room mat). The play room's players change every half hour, the club's talkers too
+(src/mtg/mtg_club.c: COOP_NOTES "MOSSDEEP's CARD CLUB: the counter's door, the play room's players"; scenario mtg_club).
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

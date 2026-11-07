@@ -6887,3 +6887,49 @@ user edits MOSSDEEP's CARD CLUB maps themselves; change only the scripts that po
   in Mtg_MoveTo: GRAVEBANE ZOMBIE). Tests: test_rules.c TestDeckCards, TestCollection (spares, prices, format 5,
   every structure deck's cards in the pool and the playing ones legal); scenarios mtg_counter, mtg_shop.
 - Debug: `mp mtg own N NAME`, `mp mtg shop`, `mp mtg state` (also CP, decks bought, prizes, deck slots).
+
+## MOSSDEEP's CARD CLUB: the counter's door, the play room's players, the STADIUM's fans (1.168.0)
+
+The user (2026-11-07, verbatim): "I noticed that when you exit the MOSSDEEP B2 CARD CLUB, you appear at the entrance
+of the 1F card club. I would like to reincorporate the original MOSSDEEP GAME CORNERS method of letting you step
+inside the minigame room, where the table animates and lifts, and your character walks in. I would like to remove the
+stairwell at the edge wall, and add a warp point and a warp indicator carpet to the map to show that the player can
+walk down. Furthermore, based on any available deck in the game, I would like players of Magic in the B2 card shop to
+rotate every 30 minutes, with new card player positions relative to the tables, as well as more NPCs and players who
+emphatically talk about Magic in the card club. Furthermore, I would like to add more NPCs to Pokemon Stadium, who
+emphatically talk about the Stadiums themselves, similar to trainers in the BATTLE FRONTIER."
+- The way down (data/scripts/mtg_shop.inc EventScript_MtgClerk_Regular): the GAME CORNER's own minigame entry
+  (cable_club.inc): EventScript_OpenMossdeepGameCornerBarrier (the counter at 5,2 / 5,3 lifts, SE_CLICK), the clerk
+  turns to it, the player walks right and up three to the door at 5,1, hideplayer, warp to B1F warp 0.
+- The way up: B1F's stairwell (blocks 2-4 x 0-1) is plain wall now; an exit mat (GenericBuilding 0x208 / 0x209,
+  MB_SOUTH_ARROW_WARP: the arrow shows when standing on it) at 5,8 / 6,8, both warps to 1F warp 3 = the door at 5,1
+  (it used to go to warp 0, the front door). Arriving on that non-animated door steps the player down one (the
+  game's own warp exit); 1F's ON_LOAD (MtgClub_1F_OnLoad: Mtg_ClubBackDoor reads the arrival spot) opens the counter
+  and sets VAR_TEMP_1, and its ON_FRAME walks the player out to 5,4 and closes the counter (as
+  CableClub_EventScript_ExitMinigameRoom). The 1F map scripts point at mtg_shop.inc; CableClub_OnLoad still runs
+  otherwise. Only base tiles the user's Maker edits don't touch changed (their B1F file edits rows 0-7 elsewhere).
+- The play room's players (src/mtg/mtg_club.c): each half hour of the game clock (RtcCalcLocalTime: days * 48 +
+  hours * 2 + minutes / 30; online the room host's clock, so friends see the same room) picks two to four of the four
+  room regulars (RHEA, MARLOW, TESS, NOLAN, gMtgDuelists 2-5) and guests for the rest of six (sGuests: 12, each a look,
+  words with the deck they brought, a win and a loss line), three of the four tables (the user's own tables) and at
+  each the top or the bottom pair of chairs, players facing each other; someone watching one of the games and someone
+  chatting stand on the carpet in the middle (its inner columns 5-6: the user, "Make sure NPC concentration is on
+  the carpet area, not near the tables"; an early build's watcher in the aisle cut off the bottom right table), so
+  the aisle and the tiles in front of the chairs (columns 4 and 7) stay free. B1F's ON_TRANSITION (Mtg_ClubSetUp) keeps the half hour in VAR_TEMP_2 (the room stays as it was
+  while the player is there, saved and loaded too), sets VAR_OBJ_GFX_ID_0-5 (the six chairs are OBJ_EVENT_GFX_VAR_0-5)
+  and moves the templates (SetObjEventTemplateCoords / MovementType), so the room's people stand where the user's
+  Maker edits put them only until the room is set up.
+- A guest's deck: any deck that plays, drawn per half hour: the five starters, the six regulars' decks, the structure
+  decks that play (Mtg_PreconPlays). Mtg_Opponent(id) gives a regular (id < MTG_DUELISTS) or a guest
+  (MTG_DUELISTS + n) with this half hour's deck; MtgUi_OpenChallenge keeps a copy (U.who) for the duel. Guests count
+  for wins, boosters and achievements but not as regulars (beaten bits, the ALL REGULARS milestone).
+- The chairs' scripts: EventScript_MtgDuelist2-5 keep their names (the Maker's edits key on them) and are chairs 0-3
+  now, EventScript_MtgSeat4 / 5 the new two; Mtg_ClubSeat gives VAR_0x8004 from VAR_0x8005. The registered CARD
+  CASE asks them too (tcg_field.c's list).
+- The talkers (Mtg_ClubTalk, sTalk: 16 lines about MAGIC): two upstairs (by the right wall, the notice board) and the
+  two on the play room's carpet; a new line each half hour, four different ones at a time.
+- BATTLE ISLAND's STADIUM lobby: seven fans (data/maps/BattleIsland_Stadium: the PETIT, PIKA, POKé and PRIME CUPS,
+  the CHALLENGE CUP, the GYM LEADER CASTLE and a reporter), each about their cup's own rules (mp_stadium_cup.c sCups),
+  away from the user's Maker edit (blocks 0-1 x 6-8).
+- Debug: `mp mtg club N` (the room of half hour N, the next time it's entered); logs "mtg: club slot N: ..." and
+  "mtg: club talker K says line L". Scenario mtg_club (mtg_shop uses half hour 5 and the mat).

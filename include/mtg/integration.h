@@ -19,7 +19,7 @@ int MtgUi_Step(unsigned keys);
 void MtgUi_Draw(void);
 void MtgUi_OpenCase(void (*returnToGame)(void), int fromScript);
 void MtgUi_OpenStarter(void);                 // the CARD SHOP's clerk: choose a starter deck
-void MtgUi_OpenChallenge(unsigned duelist);   // gMtgDuelists[duelist] asks for a duel
+void MtgUi_OpenChallenge(unsigned duelist);   // Mtg_Opponent(duelist) asks for a duel
 void MtgUi_OpenShop(void);                    // the CARD SHOP's clerk: boosters for CARD POINTS
 unsigned MtgUi_DuelingNow(void);
 
@@ -30,4 +30,14 @@ void Mtg_ShopBoosters(void);                  // (waitstate) the counter: booste
 void Mtg_DuelistState(void);                  // VAR_0x8004 the duelist: VAR_RESULT has a deck; their name in STR_VAR_1
 void Mtg_DuelistHello(void);                  // VAR_0x8004 the duelist: their words, in lines, in gStringVar4
 void Mtg_DuelistChallenge(void);              // (waitstate) their challenge
+void Mtg_WrapToVar4(const char *text);        // words in lines that fit the message box, in gStringVar4
+
+// MOSSDEEP's CARD CLUB, its people (src/mtg/mtg_club.c): the play room's players change every half hour
+const MtgDuelist *Mtg_Opponent(unsigned id);  // id < MTG_DUELISTS: gMtgDuelists[id]; then the visiting guests, with
+                                              // the deck each brings this half hour
+void Mtg_ClubSetUp(void);                     // (the play room's ON_TRANSITION) who sits where
+void Mtg_ClubSeat(void);                      // VAR_0x8005 a chair: VAR_0x8004 who sits there
+void Mtg_ClubBackDoor(void);                  // VAR_RESULT: came up from the play room
+void Mtg_ClubTalk(void);                      // VAR_0x8004 a talker: their words in gStringVar4
+void Mtg_ClubDebug(const char *command);      // "mp mtg club N"
 #endif

@@ -219,3 +219,11 @@ The VS (picks) screen's cursor goes on from the third POKéMON to the fourth wit
 still move by rows. R opens the summary screen on the six (Task_OpenVsSummary), coming back on the one last looked at.
 B / QUIT asks first (U.confirm: B again keeps playing, A quits). Each STADIUM battle sets OPTIONS_BATTLE_STYLE_SET and
 CB2_EndStadiumBattle puts the player's own style back (mp_stadium_cup.c sSavedStyle). Test stadium_picks.
+
+## The lobby's fans (1.168.0)
+
+The user (2026-11-07): "add more NPCs to Pokemon Stadium, who emphatically talk about the Stadiums themselves, similar
+to trainers in the BATTLE FRONTIER." Seven people in the lobby (data/maps/BattleIsland_Stadium), each crazy about one
+part: the PETIT, PIKA, POKé and PRIME CUPS, the CHALLENGE CUP, the GYM LEADER CASTLE, and a reporter. Their words
+follow the cups' own rules in mp_stadium_cup.c (levels, sums, the PETIT CUP's height and weight); change them there
+first if a cup's rules change.
