@@ -1,0 +1,9 @@
+pressuntil A field 5000
+wait 10
+mp teach 2 48
+mp teach 3 85
+mp breedtest 400 436 0 3 2 0 1
+mp breedtest 400 0 0 0 0 5 1
+mp breedtest 400 0 0 1 3 2 3
+mp breedtest 400 0 0 88 2 4 1
+quit

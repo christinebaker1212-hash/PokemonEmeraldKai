@@ -3480,6 +3480,32 @@ reported Natures not applying correctly, and IVs not being passed down." daycare
 - Every egg goes through these (the DAY CARE, friends' DAY CARE eggs MP_Daycare_TryCoopEgg, the routes' day cares).
   `mp breedtest N ITEM_A ITEM_B`: N eggs from party 1 (IVs 31) and 2 (IVs 0); test breed_items.
 
+## Breeding by Gen 9's rules (1.166.0)
+
+The user (2026-11-07): "update the breeding mechanics to Gen 9 by allowing interactions like breeding Nidoran Male with
+Ditto to allow yields of Nidoran Male and Female." daycare.c, as SCARLET / VIOLET breed:
+- DetermineEggSpeciesAndParentSlots: a NIDORAN EGG is NIDORAN F or M, a VOLBEAT / ILLUMISE one either, half and half
+  (offspringPersonality's EGG_GENDER_MALE bit), whichever parent laid it: NIDORAN M (or NIDORINO / NIDOKING) and DITTO
+  give both, as from BLACK / WHITE on.
+- AlterEggSpeciesWithIncenseItem: babies hatch without their incense (MARILL gives AZURILL; SV dropped the incense);
+  the next stage only while the GENERATION setting hasn't reached the baby (MP_Gen_SealedSpecies).
+- BuildEggMoveset: the level-up moves both parents know, then the egg moves either parent knows (X / Y on; Emerald:
+  the father's), last so they stay when more than four; moves from TMs no longer pass down.
+- InheritBall: the mother's POKé BALL, or the one that isn't DITTO's (EggMainParent), half and half between parents of
+  the same species (SUN / MOON on), the MASTER BALL too (SV). Kai's special balls (the ball style's bits 12-15:
+  BoxMonBallItem) pass as they are; the ASTRAL BALL doesn't (a POKé BALL instead, as a CHERISH BALL), it stays its
+  catch's own. egg_hatch.c CreateHatchedMon keeps the EGG's ball, style (special bits only) and Ability slot; it used
+  to put every hatchling in a POKé BALL.
+- InheritAbility: the mother's (or non-DITTO parent's) Ability slot 4 times in 5, the other otherwise (X / Y on). Kai
+  has two slots and no hidden Abilities.
+- InheritIVs: a POWER item passes its holder's stat (HEARTGOLD / SOULSILVER), one of the three (or five with a DESTINY
+  KNOT); both parents holding one: either.
+- Not changed: EGGs still hatch at Lv. 5 (Gen 4 on hatch at Lv. 1; it would also change JOHTO's Crystal gift EGGs), and
+  no MASUDA method (every save's language is the same).
+- Tests: breed_gen9 (`mp breedtest N ITEM_A ITEM_B BALL_A BALL_B SLOT_A SLOT_B` prints a second "breed2" line: species
+  counts, eggs in A's / B's ball, the main parent's Ability slot, a POWER item's stat, A's / B's first move known) and
+  breed_gen9_hatch (a real DAY CARE EGG taken and hatched: `mp hatch SLOT`).
+
 ## MAGIC's Threshold and picky attackers (1.133.0)
 
 src/mtg/mtg_static.c: Condition$ on a static (StaticAbility.checkConditions): Threshold (seven or more cards in its

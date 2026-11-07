@@ -23,6 +23,7 @@
 #include "party_menu.h"
 #include "list_menu.h"
 #include "overworld.h"
+#include "constants/abilities.h"
 #include "constants/items.h"
 #include "constants/moves.h"
 #include "constants/region_map_sections.h"
@@ -649,17 +650,46 @@ static void RemoveIVIndexFromList(u8 *ivs, u8 selectedIv)
 // Moemon Kai: three different IVs from the parents, five when either holds a DESTINY KNOT (X / Y on; the user,
 // 2026-11-06: "IVs not being passed down"). Emerald's own pick could take the same stat twice (it removed list slot
 // i instead of the slot it picked), so an egg often got only one or two of its parents' IVs.
+// Moemon Kai: a POWER item passes its holder's own stat (HEARTGOLD / SOULSILVER on), one of the inherited IVs; both
+// parents holding one: either at random (X / Y on). -1: none.
+static s8 PowerItemStat(u16 item)
+{
+    switch (item)
+    {
+    case ITEM_POWER_WEIGHT: return STAT_HP;
+    case ITEM_POWER_BRACER: return STAT_ATK;
+    case ITEM_POWER_BELT:   return STAT_DEF;
+    case ITEM_POWER_ANKLET: return STAT_SPEED;
+    case ITEM_POWER_LENS:   return STAT_SPATK;
+    case ITEM_POWER_BAND:   return STAT_SPDEF;
+    }
+    return -1;
+}
+
 static void InheritIVs(struct Pokemon *egg, struct DayCare *daycare)
 {
-    u8 i, count = INHERITED_IV_COUNT;
+    u8 i, count = INHERITED_IV_COUNT, start = 0;
     u8 availableIVs[NUM_STATS];
+    s8 power[DAYCARE_MON_COUNT];
     for (i = 0; i < DAYCARE_MON_COUNT; i++)
-        if (GetBoxMonData(&daycare->mons[i].mon, MON_DATA_SANITY_HAS_SPECIES)
-         && GetBoxMonData(&daycare->mons[i].mon, MON_DATA_HELD_ITEM) == ITEM_DESTINY_KNOT)
+    {
+        bool8 here = GetBoxMonData(&daycare->mons[i].mon, MON_DATA_SANITY_HAS_SPECIES);
+        u16 item = here ? GetBoxMonData(&daycare->mons[i].mon, MON_DATA_HELD_ITEM) : ITEM_NONE;
+        if (item == ITEM_DESTINY_KNOT)
             count = 5;
+        power[i] = here ? PowerItemStat(item) : -1;
+    }
     for (i = 0; i < NUM_STATS; i++)
         availableIVs[i] = i;
-    for (i = 0; i < count; i++)
+    if (power[0] >= 0 || power[1] >= 0)
+    {
+        u8 parent = (power[0] >= 0 && power[1] >= 0) ? (Random() & 1) : (power[0] >= 0 ? 0 : 1);
+        u8 stat = power[parent], iv = GetBoxMonData(&daycare->mons[parent].mon, MON_DATA_HP_IV + stat);
+        SetMonData(egg, MON_DATA_HP_IV + stat, &iv);
+        RemoveIVIndexFromList(availableIVs, stat);
+        start = 1;
+    }
+    for (i = start; i < count; i++)
     {
         u8 index = Random() % (NUM_STATS - i), stat = availableIVs[index];
         u8 parent = Random() % DAYCARE_MON_COUNT, iv;
@@ -753,39 +783,9 @@ static void BuildEggMoveset(struct Pokemon *egg, struct BoxPokemon *father, stru
 
     numEggMoves = GetEggMoves(egg, sHatchedEggEggMoves);
 
-    for (i = 0; i < MAX_MON_MOVES; i++)
-    {
-        if (sHatchedEggFatherMoves[i] != MOVE_NONE)
-        {
-            for (j = 0; j < numEggMoves; j++)
-            {
-                if (sHatchedEggFatherMoves[i] == sHatchedEggEggMoves[j])
-                {
-                    if (MP_Gen_MoveAllowed(sHatchedEggFatherMoves[i]) && GiveMoveToMon(egg, sHatchedEggFatherMoves[i]) == MON_HAS_MAX_MOVES)   // Moemon Kai: GENERATION
-                        DeleteFirstMoveAndGiveMoveToMon(egg, sHatchedEggFatherMoves[i]);
-                    break;
-                }
-            }
-        }
-        else
-        {
-            break;
-        }
-    }
-    for (i = 0; i < MAX_MON_MOVES; i++)
-    {
-        if (sHatchedEggFatherMoves[i] != MOVE_NONE)
-        {
-            for (j = 0; j < NUM_TMHMS; j++)   // Moemon Kai: TM51-TM92 too
-            {
-                if (sHatchedEggFatherMoves[i] == ItemIdToBattleMoveId(TMHM_ITEM(j)) && CanMonLearnTMHM(egg, j))
-                {
-                    if (MP_Gen_MoveAllowed(sHatchedEggFatherMoves[i]) && GiveMoveToMon(egg, sHatchedEggFatherMoves[i]) == MON_HAS_MAX_MOVES)   // Moemon Kai: GENERATION
-                        DeleteFirstMoveAndGiveMoveToMon(egg, sHatchedEggFatherMoves[i]);
-                }
-            }
-        }
-    }
+    // Moemon Kai: breeding's moves as in SCARLET / VIOLET: the level-up moves both parents know, then the egg moves
+    // either parent knows (the father's only before X / Y), last so they stay when there are more than four; moves
+    // from TMs no longer pass down (X / Y on)
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
         if (sHatchedEggFatherMoves[i] == MOVE_NONE)
@@ -811,6 +811,22 @@ static void BuildEggMoveset(struct Pokemon *egg, struct BoxPokemon *father, stru
             }
         }
     }
+
+    for (i = 0; i < 2 * MAX_MON_MOVES; i++)
+    {
+        u16 move = i < MAX_MON_MOVES ? sHatchedEggMotherMoves[i] : sHatchedEggFatherMoves[i - MAX_MON_MOVES];
+        if (move == MOVE_NONE)
+            continue;
+        for (j = 0; j < numEggMoves; j++)
+        {
+            if (move == sHatchedEggEggMoves[j])
+            {
+                if (MP_Gen_MoveAllowed(move) && GiveMoveToMon(egg, move) == MON_HAS_MAX_MOVES)   // Moemon Kai: GENERATION
+                    DeleteFirstMoveAndGiveMoveToMon(egg, move);
+                break;
+            }
+        }
+    }
 }
 
 static void RemoveEggFromDayCare(struct DayCare *daycare)
@@ -826,45 +842,31 @@ void RejectEggFromDayCare(void)
     RemoveEggFromDayCare(&gSaveBlock1Ptr->daycare);
 }
 
-// Moemon Kai: Gen 4's babies hatch only with their incense held, else the egg is the next stage
-static const u16 sIncenseBabies[][3] =
+// Moemon Kai: babies hatch without their incense, as in SCARLET / VIOLET (MARILL always gives AZURILL; Emerald and
+// Gen 4 wanted the incense held). The next stage only while the GENERATION setting hasn't reached the baby.
+static const u16 sIncenseBabies[][2] =
 {
-    {SPECIES_BUDEW, ITEM_ROSE_INCENSE, SPECIES_ROSELIA},
-    {SPECIES_CHINGLING, ITEM_PURE_INCENSE, SPECIES_CHIMECHO},
-    {SPECIES_BONSLY, ITEM_ROCK_INCENSE, SPECIES_SUDOWOODO},
-    {SPECIES_MIME_JR, ITEM_ODD_INCENSE, SPECIES_MR_MIME},
-    {SPECIES_HAPPINY, ITEM_LUCK_INCENSE, SPECIES_CHANSEY},
-    {SPECIES_MUNCHLAX, ITEM_FULL_INCENSE, SPECIES_SNORLAX},
-    {SPECIES_MANTYKE, ITEM_WAVE_INCENSE, SPECIES_MANTINE},
+    {SPECIES_AZURILL, SPECIES_MARILL},
+    {SPECIES_WYNAUT, SPECIES_WOBBUFFET},
+    {SPECIES_BUDEW, SPECIES_ROSELIA},
+    {SPECIES_CHINGLING, SPECIES_CHIMECHO},
+    {SPECIES_BONSLY, SPECIES_SUDOWOODO},
+    {SPECIES_MIME_JR, SPECIES_MR_MIME},
+    {SPECIES_HAPPINY, SPECIES_CHANSEY},
+    {SPECIES_MUNCHLAX, SPECIES_SNORLAX},
+    {SPECIES_MANTYKE, SPECIES_MANTINE},
 };
 
 static void AlterEggSpeciesWithIncenseItem(u16 *species, struct DayCare *daycare)
 {
-    u16 motherItem, fatherItem;
     u32 i;
     for (i = 0; i < ARRAY_COUNT(sIncenseBabies); i++)
     {
         if (*species == sIncenseBabies[i][0])
         {
-            motherItem = GetBoxMonData(&daycare->mons[0].mon, MON_DATA_HELD_ITEM);
-            fatherItem = GetBoxMonData(&daycare->mons[1].mon, MON_DATA_HELD_ITEM);
-            if (motherItem != sIncenseBabies[i][1] && fatherItem != sIncenseBabies[i][1])
-                *species = sIncenseBabies[i][2];
+            if (MP_Gen_SealedSpecies(*species))
+                *species = sIncenseBabies[i][1];
             return;
-        }
-    }
-    if (*species == SPECIES_WYNAUT || *species == SPECIES_AZURILL)
-    {
-        motherItem = GetBoxMonData(&daycare->mons[0].mon, MON_DATA_HELD_ITEM);
-        fatherItem = GetBoxMonData(&daycare->mons[1].mon, MON_DATA_HELD_ITEM);
-        if (*species == SPECIES_WYNAUT && motherItem != ITEM_LAX_INCENSE && fatherItem != ITEM_LAX_INCENSE)
-        {
-            *species = SPECIES_WOBBUFFET;
-        }
-
-        if (*species == SPECIES_AZURILL && motherItem != ITEM_SEA_INCENSE && fatherItem != ITEM_SEA_INCENSE)
-        {
-            *species = SPECIES_MARILL;
         }
     }
 }
@@ -905,14 +907,12 @@ static u16 DetermineEggSpeciesAndParentSlots(struct DayCare *daycare, u8 *parent
     eggSpecies = GetEggSpecies(species[parentSlots[0]]);
     if (eggSpecies == SPECIES_MANAPHY)
         eggSpecies = SPECIES_PHIONE;   // Moemon Kai: as in DIAMOND / PEARL
-    if (eggSpecies == SPECIES_NIDORAN_F && daycare->offspringPersonality & EGG_GENDER_MALE)
-    {
-        eggSpecies = SPECIES_NIDORAN_M;
-    }
-    if (eggSpecies == SPECIES_ILLUMISE && daycare->offspringPersonality & EGG_GENDER_MALE)
-    {
-        eggSpecies = SPECIES_VOLBEAT;
-    }
+    // Moemon Kai: Gen 9's rule (BLACK / WHITE on): a NIDORAN or VOLBEAT / ILLUMISE EGG is either one, half and half,
+    // whichever parent laid it (the user, 2026-11-07: NIDORAN M and DITTO gave only NIDORAN M)
+    if (eggSpecies == SPECIES_NIDORAN_F || eggSpecies == SPECIES_NIDORAN_M)
+        eggSpecies = (daycare->offspringPersonality & EGG_GENDER_MALE) ? SPECIES_NIDORAN_M : SPECIES_NIDORAN_F;
+    if (eggSpecies == SPECIES_ILLUMISE || eggSpecies == SPECIES_VOLBEAT)
+        eggSpecies = (daycare->offspringPersonality & EGG_GENDER_MALE) ? SPECIES_VOLBEAT : SPECIES_ILLUMISE;
 
     // Make Ditto the "mother" slot if the other daycare mon is male.
     if (species[parentSlots[1]] == SPECIES_DITTO && GetBoxMonGender(&daycare->mons[parentSlots[0]].mon) != MON_FEMALE)
@@ -925,6 +925,59 @@ static u16 DetermineEggSpeciesAndParentSlots(struct DayCare *daycare, u8 *parent
     return eggSpecies;
 }
 
+// Moemon Kai: the parent a SCARLET / VIOLET EGG takes its POKé BALL and Ability from: the one that isn't DITTO, else
+// the mother
+static u8 EggMainParent(struct DayCare *daycare)
+{
+    u8 i;
+    for (i = 0; i < DAYCARE_MON_COUNT; i++)
+        if (GetBoxMonData(&daycare->mons[i].mon, MON_DATA_SPECIES) == SPECIES_DITTO)
+            return i ^ 1;
+    return GetBoxMonGender(&daycare->mons[1].mon) == MON_FEMALE ? 1 : 0;
+}
+
+// The POKé BALL a POKéMON is in, as an item (the special balls are kept in its ball style: mp_ballstyle.c)
+static u16 BoxMonBallItem(struct BoxPokemon *mon)
+{
+    u8 special = MP_BallStyle_Special(GetBoxMonData(mon, MON_DATA_ENCRYPT_SEPARATOR));
+    return special ? MP_SpecialBall_Item(special) : GetBoxMonData(mon, MON_DATA_POKEBALL);
+}
+
+// Moemon Kai: the EGG comes in its mother's POKé BALL, or the one that isn't DITTO's, half and half between parents of
+// the same species (SUN / MOON on; a MASTER BALL too, as in SCARLET / VIOLET). The ASTRAL BALL stays its catch's own
+// (a POKé BALL instead), as a CHERISH BALL does.
+static void InheritBall(struct Pokemon *egg, struct DayCare *daycare)
+{
+    u8 from = EggMainParent(daycare), special;
+    u16 item, style;
+    u32 ball;
+    if (GetBoxMonData(&daycare->mons[0].mon, MON_DATA_SPECIES) == GetBoxMonData(&daycare->mons[1].mon, MON_DATA_SPECIES)
+     && GetBoxMonData(&daycare->mons[from ^ 1].mon, MON_DATA_SANITY_HAS_SPECIES))
+        from = Random() & 1;
+    item = BoxMonBallItem(&daycare->mons[from].mon);
+    if (item == ITEM_ASTRAL_BALL || !MP_IsBallItem(item))
+        item = ITEM_POKE_BALL;
+    special = MP_SpecialBall_FromItem(item);
+    ball = special ? ITEM_POKE_BALL : item;
+    style = (u16)special << 12;
+    SetMonData(egg, MON_DATA_POKEBALL, &ball);
+    SetMonData(egg, MON_DATA_ENCRYPT_SEPARATOR, &style);
+}
+
+// Moemon Kai: the Ability as in X / Y on: the mother's (or the parent that isn't DITTO's) Ability slot 4 times in 5,
+// the other slot otherwise (Emerald: the personality's, either parent ignored)
+static void InheritAbility(struct Pokemon *egg, struct DayCare *daycare)
+{
+    u16 species = GetMonData(egg, MON_DATA_SPECIES);
+    u8 num;
+    if (gSpeciesInfo[species].abilities[1] == ABILITY_NONE)
+        return;
+    num = GetBoxMonData(&daycare->mons[EggMainParent(daycare)].mon, MON_DATA_ABILITY_NUM);
+    if (Random() % 5 == 0)
+        num ^= 1;
+    SetMonData(egg, MON_DATA_ABILITY_NUM, &num);
+}
+
 static void BuildDaycareEgg(struct DayCare *daycare, struct Pokemon *egg)
 {
     u16 species;
@@ -934,6 +987,8 @@ static void BuildDaycareEgg(struct DayCare *daycare, struct Pokemon *egg)
     species = DetermineEggSpeciesAndParentSlots(daycare, parentSlots);
     AlterEggSpeciesWithIncenseItem(&species, daycare);
     SetInitialEggData(egg, species, daycare);
+    InheritBall(egg, daycare);
+    InheritAbility(egg, daycare);
     InheritIVs(egg, daycare);
     BuildEggMoveset(egg, &daycare->mons[parentSlots[1]].mon, &daycare->mons[parentSlots[0]].mon);
 
@@ -1510,15 +1565,46 @@ void MP_ApplyDaycareExperience(struct Pokemon *mon)
 // Moemon Kai (tests: `mp breedtest N ITEM_A ITEM_B`): party POKéMON 1 and 2 as the parents (A's IVs all 31, B's all 0,
 // holding ITEM_A / ITEM_B), N eggs made as the DAY CARE makes them: how many took a parent's Nature, and how many IVs
 // each egg took from them (an IV of 31 or 0; a random one is that 1 time in 16)
-void MP_Daycare_BreedTest(int n, u16 itemA, u16 itemB)
+// (SLOT_A / SLOT_B: other party POKéMON as the parents.) Then (Gen 9's rules) a second line: the eggs' species, how many came in A's / B's POKé BALL (ballA / ballB, when
+// given, put them in those), took the main parent's Ability slot, got a POWER item's stat, and know A's / B's first move
+static bool8 EggKnows(struct Pokemon *egg, u16 move)
+{
+    u8 i;
+    for (i = 0; i < MAX_MON_MOVES; i++)
+        if (move != MOVE_NONE && GetMonData(egg, MON_DATA_MOVE1 + i) == move)
+            return TRUE;
+    return FALSE;
+}
+
+static void SetBoxMonBall(struct BoxPokemon *mon, u16 item)
+{
+    u8 special = MP_SpecialBall_FromItem(item);
+    u32 ball = special ? ITEM_POKE_BALL : item;
+    u16 style = (u16)special << 12;
+    SetBoxMonData(mon, MON_DATA_POKEBALL, &ball);
+    SetBoxMonData(mon, MON_DATA_ENCRYPT_SEPARATOR, &style);
+}
+
+void MP_Daycare_BreedTest(int n, u16 itemA, u16 itemB, u16 ballA, u16 ballB, u8 slotA, u8 slotB)
 {
     struct DayCare tmp;
     struct Pokemon egg;
     u8 iv, natA, natB;
     int i, k, natureA = 0, natureB = 0, ivTotal = 0, ivMin = 99, ivMax = 0;
+    u16 sp[2] = {0, 0};
+    int spCount[3] = {0, 0, 0}, inBallA = 0, inBallB = 0, sameAbility = 0, twoAbilities = 0, power = 0;
+    int knowsA = 0, knowsB = 0;
+    s8 powerA = PowerItemStat(itemA), powerB = PowerItemStat(itemB);
+    u16 moveA = GetMonData(&gPlayerParty[slotA], MON_DATA_MOVE1), moveB = GetMonData(&gPlayerParty[slotB], MON_DATA_MOVE1);
     memset(&tmp, 0, sizeof(tmp));
-    tmp.mons[0].mon = gPlayerParty[0].box;
-    tmp.mons[1].mon = gPlayerParty[1].box;
+    tmp.mons[0].mon = gPlayerParty[slotA].box;
+    tmp.mons[1].mon = gPlayerParty[slotB].box;
+    if (ballA)
+        SetBoxMonBall(&tmp.mons[0].mon, ballA);
+    if (ballB)
+        SetBoxMonBall(&tmp.mons[1].mon, ballB);
+    ballA = BoxMonBallItem(&tmp.mons[0].mon);
+    ballB = BoxMonBallItem(&tmp.mons[1].mon);
     for (k = 0; k < NUM_STATS; k++)
     {
         iv = 31;
@@ -1547,8 +1633,34 @@ void MP_Daycare_BreedTest(int n, u16 itemA, u16 itemB)
         ivTotal += got;
         if (got < ivMin) ivMin = got;
         if (got > ivMax) ivMax = got;
+        {
+            u16 species = GetMonData(&egg, MON_DATA_SPECIES), ball = BoxMonBallItem(&egg.box);
+            if (sp[0] == 0 || sp[0] == species)
+                sp[0] = species, spCount[0]++;
+            else if (sp[1] == 0 || sp[1] == species)
+                sp[1] = species, spCount[1]++;
+            else
+                spCount[2]++;
+            inBallA += ball == ballA;
+            inBallB += ball == ballB;
+            if (gSpeciesInfo[species].abilities[1] != ABILITY_NONE)
+            {
+                twoAbilities++;
+                sameAbility += GetMonData(&egg, MON_DATA_ABILITY_NUM)
+                            == GetBoxMonData(&tmp.mons[EggMainParent(&tmp)].mon, MON_DATA_ABILITY_NUM);
+            }
+            if (powerA >= 0 && powerB < 0)
+                power += GetMonData(&egg, MON_DATA_HP_IV + powerA) == 31;
+            else if (powerB >= 0 && powerA < 0)
+                power += GetMonData(&egg, MON_DATA_HP_IV + powerB) == 0;
+            knowsA += EggKnows(&egg, moveA);
+            knowsB += EggKnows(&egg, moveB);
+        }
     }
     FlagClear(FLAG_PENDING_DAYCARE_EGG);
     printf("[test] breed %d eggs: natureA %d natureB %d (natures %d %d) ivs avg %d.%02d min %d max %d\n", n, natureA,
            natureB, natA, natB, ivTotal / n, (ivTotal * 100 / n) % 100, ivMin, ivMax);
+    printf("[test] breed2 species %d:%d %d:%d other %d ballA %d ballB %d ability %d/%d power %d knowsA %d knowsB %d\n",
+           sp[0], spCount[0], sp[1], spCount[1], spCount[2], inBallA, inBallB, sameAbility, twoAbilities, power,
+           knowsA, knowsB);
 }

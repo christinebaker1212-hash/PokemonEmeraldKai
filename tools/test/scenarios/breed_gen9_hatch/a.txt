@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 10
+mp ballstyle 0 c000
+mp daycare 0
+mp daycare 0
+mp daycarestate egg
+mp takeegg
+mp party
+mp hatch 1
+mp party
+quit

@@ -1,0 +1,9 @@
+# Breeding by Gen 9's rules, through a real hatch: MARILL in a GENESIS BALL (style c000) and DITTO at the DAY CARE.
+# The EGG is an AZURILL (no SEA INCENSE needed) in MARILL's GENESIS BALL, and the hatched AZURILL keeps that ball and
+# the EGG's Ability slot (egg_hatch.c CreateHatchedMon used to put every hatchling in a POKé BALL)
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=183:15,132:15,280:15"
+EXPECT_A=("hatch: egg 1 species 350 ball 4 style c000" "hatched: egg 0 species 350 ball 4 style c000")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="tools/test/scenarios/breed_gen9_hatch/check.sh"

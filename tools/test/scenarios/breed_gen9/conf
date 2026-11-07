@@ -1,0 +1,14 @@
+# Breeding by Gen 9's rules (the user, 2026-11-07: "breeding Nidoran Male with Ditto to allow yields of Nidoran Male
+# and Female"): daycare.c. check.sh reads the four "breed2" lines:
+# 1 NIDORAN M (GREAT BALL, POWER BRACER) + DITTO (ULTRA BALL): both NIDORAN, all in the GREAT BALL, ATTACK from M
+# 2 VOLBEAT + DITTO: VOLBEAT and ILLUMISE
+# 3 NIDORAN F (MASTER BALL, knows SUPERSONIC, an egg move) + NIDORAN M (knows THUNDERBOLT, a TM): every egg in the
+#   MASTER BALL and knowing SUPERSONIC (the mother's egg move), none THUNDERBOLT (TMs no longer pass down)
+# 4 MARILL (ASTRAL BALL) + DITTO: AZURILL without the SEA INCENSE, in a POKé BALL (never the ASTRAL BALL), MARILL's
+#   Ability slot about 4 times in 5
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=32:15,132:15,29:15,32:15,183:15,386:15"
+EXPECT_A=("breed2 species")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="tools/test/scenarios/breed_gen9/check.sh"

@@ -315,8 +315,8 @@ static void CreateHatchedMon(struct Pokemon *egg, struct Pokemon *temp)
 {
     u16 species;
     u32 personality, pokerus;
-    u8 i, friendship, language, gameMet, markings, isModernFatefulEncounter;
-    u16 moves[MAX_MON_MOVES];
+    u8 i, friendship, language, gameMet, markings, isModernFatefulEncounter, abilityNum, ball;
+    u16 moves[MAX_MON_MOVES], ballStyle;
     u32 ivs[NUM_STATS];
 
     species = GetMonData(egg, MON_DATA_SPECIES);
@@ -335,8 +335,17 @@ static void CreateHatchedMon(struct Pokemon *egg, struct Pokemon *temp)
     markings = GetMonData(egg, MON_DATA_MARKINGS);
     pokerus = GetMonData(egg, MON_DATA_POKERUS);
     isModernFatefulEncounter = GetMonData(egg, MON_DATA_MODERN_FATEFUL_ENCOUNTER);
+    // Moemon Kai: the Ability slot and POKé BALL the EGG took from its parents (daycare.c, Gen 9's rules)
+    abilityNum = GetMonData(egg, MON_DATA_ABILITY_NUM);
+    ball = GetMonData(egg, MON_DATA_POKEBALL);
+    ballStyle = GetMonData(egg, MON_DATA_ENCRYPT_SEPARATOR) & 0xF000;   // (its special ball; no colors)
 
     CreateMon(temp, species, EGG_HATCH_LEVEL, USE_RANDOM_IVS, TRUE, personality, OT_ID_PLAYER_ID, 0);
+    SetMonData(temp, MON_DATA_ABILITY_NUM, &abilityNum);
+    if (ball == ITEM_NONE)
+        ball = ITEM_POKE_BALL;
+    SetMonData(temp, MON_DATA_POKEBALL, &ball);
+    SetMonData(temp, MON_DATA_ENCRYPT_SEPARATOR, &ballStyle);
 
     for (i = 0; i < MAX_MON_MOVES; i++)
         SetMonData(temp, MON_DATA_MOVE1 + i,  &moves[i]);
@@ -362,7 +371,6 @@ static void AddHatchedMonToParty(u8 id)
     u8 isEgg = 0x46; // ?
     u16 species;
     u8 name[POKEMON_NAME_LENGTH + 1];
-    u16 ball;
     u16 metLevel;
     metloc_u8_t metLocation;
     struct Pokemon *mon = &gPlayerParty[id];
@@ -387,8 +395,7 @@ static void AddHatchedMonToParty(u8 id)
         Sinnoh_TvEggHatched(mon);   // Moemon Kai: HAPPY HAPPY EGG CLUB on SINNOH's TV (src/sinnoh/s3d_tv.c)
     }
 
-    ball = ITEM_POKE_BALL;
-    SetMonData(mon, MON_DATA_POKEBALL, &ball);
+    // (Moemon Kai: the POKé BALL is the EGG's own, from its parents: CreateHatchedMon)
 
     // A met level of 0 is interpreted on the summary screen as "hatched at"
     metLevel = 0;

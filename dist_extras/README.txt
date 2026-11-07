@@ -658,6 +658,12 @@ TRAINER CARDS   CO-OP menu > FRIENDS > pick a friend > TRAINER CARD (both
 DAY CARE        A MOEMON left alone at your DAY CARE can make an EGG with one
                 left alone at a friend's. Each of you gets your own EGG from
                 the DAY CARE MAN.
+BREEDING        Works as in POKEMON SCARLET / VIOLET: NIDORAN and VOLBEAT /
+                ILLUMISE EGGS come as both kinds (with DITTO too), babies hatch
+                without an incense, egg moves come from either parent (TM moves
+                don't), the EGG comes in its mother's ball (or the non-DITTO
+                parent's) and takes her Ability 4 times in 5, and a POWER item
+                passes its holder's stat.
 ROAMERS         Latias/Latios roam the same routes for everyone, so you can
                 hunt them together.
 WEATHER         Routes 119 and 123's weather, and the abnormal weather after

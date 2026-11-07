@@ -839,11 +839,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "breedtest") == 0)
     {
-        // breedtest N ITEM_A ITEM_B - N eggs from party 1 and 2 holding those items (daycare.c MP_Daycare_BreedTest)
-        void MP_Daycare_BreedTest(int n, u16 itemA, u16 itemB);
-        int n = 200, a = 0, b = 0;
-        sscanf(arg, "%d %d %d", &n, &a, &b);
-        MP_Daycare_BreedTest(n, a, b);
+        // breedtest N ITEM_A ITEM_B [BALL_A BALL_B [SLOT_A SLOT_B]] - N eggs from party 1 and 2 (or slots SLOT_A /
+        // SLOT_B, 0-5) holding those items, in those balls (daycare.c MP_Daycare_BreedTest)
+        void MP_Daycare_BreedTest(int n, u16 itemA, u16 itemB, u16 ballA, u16 ballB, u8 slotA, u8 slotB);
+        int n = 200, a = 0, b = 0, ba = 0, bb = 0, sa = 0, sb = 1;
+        sscanf(arg, "%d %d %d %d %d %d %d", &n, &a, &b, &ba, &bb, &sa, &sb);
+        if (sa < 0 || sa >= PARTY_SIZE || sb < 0 || sb >= PARTY_SIZE)
+            sa = 0, sb = 1;
+        MP_Daycare_BreedTest(n, a, b, ba, bb, sa, sb);
     }
     else if (strcmp(cmd, "daycarestate") == 0)
     {
@@ -982,6 +985,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // boxicons - the PC box's POKéMON icon sprites (pokemon_storage_system.c)
         void MP_Storage_DebugIcons(void);
         MP_Storage_DebugIcons();
+    }
+    else if (strcmp(cmd, "hatch") == 0)
+    {
+        // hatch SLOT - the party EGG in SLOT hatches now, as the hatching scene's end does (egg_hatch.c); before and
+        // after: species, POKé BALL, ball style, Ability slot
+        void ScriptHatchMon(void);
+        int slot = atoi(arg) % PARTY_SIZE;
+        struct Pokemon *mon = &gPlayerParty[slot];
+        printf("[test] hatch: egg %d species %d ball %d style %04x ability %d\n", (int)GetMonData(mon, MON_DATA_IS_EGG),
+               (int)GetMonData(mon, MON_DATA_SPECIES), (int)GetMonData(mon, MON_DATA_POKEBALL),
+               (int)GetMonData(mon, MON_DATA_ENCRYPT_SEPARATOR), (int)GetMonData(mon, MON_DATA_ABILITY_NUM));
+        gSpecialVar_0x8004 = slot;
+        ScriptHatchMon();
+        printf("[test] hatched: egg %d species %d ball %d style %04x ability %d level %d\n", (int)GetMonData(mon, MON_DATA_IS_EGG),
+               (int)GetMonData(mon, MON_DATA_SPECIES), (int)GetMonData(mon, MON_DATA_POKEBALL),
+               (int)GetMonData(mon, MON_DATA_ENCRYPT_SEPARATOR), (int)GetMonData(mon, MON_DATA_ABILITY_NUM),
+               (int)GetMonData(mon, MON_DATA_LEVEL));
     }
     else if (strcmp(cmd, "takeegg") == 0)
     {
