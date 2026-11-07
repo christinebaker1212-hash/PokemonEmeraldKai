@@ -24,8 +24,9 @@ orre3d.pak (little endian): "ORZ3" u32 version, u32 textures, u32 maps, then
               vertices (triangles; Colosseum's units, Y up)
             (version 2) u32 grid (0: none; 1: the map is in the game, tools/orre/maps.py): u16 w, h (tiles, whole
               blocks of 32), f32 tile (Colosseum units a tile), x0, z0 (the grid's corner); then per tile (row by row):
-              u8 flags (1 walkable, 2 a trigger), s8 the trigger's collision object (-1 none), u8 heights (0-3),
+              u8 flags (1 walkable, 2 a trigger), s8 the trigger's collision id (the game's event id: -1 none), u8 heights (0-3),
               u8 the tile's behavior (the field engine's: 0 plain, 0x60 a warp stepped on: tools/orre/maps.py warps),
+              (2 too: the grid of every field room, all 121)
               f32 heights x3 (the ground's, lowest first; Colosseum units) (tools/orre/grid.py)
   then the data: textures one after another.
 orre_data.pak: "ORDT" u32 version, u32 files, each char name[48] ("<archive>/<member>.<type>"), u32 offset, u32 bytes,
@@ -111,6 +112,7 @@ def mesh_bytes(m, tex_index):
 
 def build(src, out):
     os.makedirs(out, exist_ok=True)
+    map_conf = {m["file"]: m for m in orre_maps.load(src)}
     tex_keys = {}
     tex_list = []
     maps = []
@@ -142,10 +144,9 @@ def build(src, out):
                 body.append(struct.pack("<B3xI", kind, len(s)))
                 for m in s:
                     body.append(mesh_bytes(m, remap[m.tex] if 0 <= m.tex < len(remap) else -1))
-            m_conf = orre_maps.by_file().get(name)
-            colpath = os.path.join(src, arc, name + ".col")
-            if m_conf and os.path.exists(colpath):
-                g = grid.build(grid.read(open(colpath, "rb").read()), grid.TILE, m_conf["start"])
+            m_conf = map_conf.get(name)
+            if m_conf:
+                g = orre_maps.build_grid(src, m_conf)
                 body.append(struct.pack("<IHHfff", 1, g["w"], g["h"], g["tile"], g["x0"], g["z0"]))
                 for y in range(g["h"]):
                     for x in range(g["w"]):

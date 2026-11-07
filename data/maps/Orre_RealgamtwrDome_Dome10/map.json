@@ -1,0 +1,63 @@
+{
+  "id": "MAP_ORRE_REALGAMTWR_DOME_DOME_10",
+  "name": "Orre_RealgamtwrDome_Dome10",
+  "layout": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_10",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_REALGAMTWR_DOME",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 20,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_9",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 20,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_9",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 24,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_11",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 25,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_11",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 21,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_10",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 24,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_10",
+      "dest_warp_id": "5"
+    }
+  ]
+}

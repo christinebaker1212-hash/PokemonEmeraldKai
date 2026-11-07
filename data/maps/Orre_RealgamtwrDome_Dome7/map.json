@@ -1,0 +1,84 @@
+{
+  "id": "MAP_ORRE_REALGAMTWR_DOME_DOME_7",
+  "name": "Orre_RealgamtwrDome_Dome7",
+  "layout": "LAYOUT_ORRE_REALGAMTWR_DOME_DOME_7",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_REALGAMTWR_DOME",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 27,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_8",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 28,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_8",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 27,
+      "y": 45,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_6",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 28,
+      "y": 45,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_6",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 32,
+      "y": 40,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_9",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 32,
+      "y": 41,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_9",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 28,
+      "y": 44,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_7",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 28,
+      "y": 37,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_7",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 31,
+      "y": 40,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAMTWR_DOME_DOME_7",
+      "dest_warp_id": "8"
+    }
+  ]
+}

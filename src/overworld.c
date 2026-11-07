@@ -1002,6 +1002,11 @@ static u8 GetAdjustedInitialTransitionFlags(struct InitialPlayerAvatarState *pla
 
 static u8 GetAdjustedInitialDirection(struct InitialPlayerAvatarState *playerStruct, u8 transitionFlags, u16 metatileBehavior, u8 mapType)
 {
+    u8 orreDir;
+    if (O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup)   // Moemon Kai: ORRE's entries face the way Colosseum's do
+     && (orreDir = O3D_ArrivalDir(gSaveBlock1Ptr->location.mapGroup << 8 | gSaveBlock1Ptr->location.mapNum,
+                                  gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y)) != DIR_NONE)
+        return orreDir;
     if (FlagGet(FLAG_SYS_CRUISE_MODE) && mapType == MAP_TYPE_OCEAN_ROUTE)
         return DIR_EAST;
     else if (MetatileBehavior_IsDeepSouthWarp(metatileBehavior) == TRUE)

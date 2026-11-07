@@ -1,0 +1,65 @@
+{
+  "id": "MAP_ORRE_REALGAM_TOWER",
+  "name": "Orre_RealgamTower",
+  "layout": "LAYOUT_ORRE_REALGAM_TOWER",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_REALGAM_TOWER",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 14,
+      "y": 26,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 15,
+      "y": 26,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 16,
+      "y": 26,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    },
+    {
+      "type": "trigger",
+      "x": 17,
+      "y": 26,
+      "elevation": 0,
+      "var": "VAR_TEMP_0",
+      "var_value": "0",
+      "script": "Orre_EventScript_WorldMap"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 15,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAM_TOWER",
+      "dest_warp_id": "0"
+    }
+  ]
+}

@@ -2850,6 +2850,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] where map %d.%d xy %d,%d\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
                me->currentCoords.x - 7, me->currentCoords.y - 7);
     }
+    else if (strcmp(cmd, "facing") == 0)   // the way the player faces (DIR_SOUTH 1, NORTH 2, WEST 3, EAST 4)
+        printf("[test] facing %d\n", gObjectEvents[gPlayerAvatar.objectEventId].facingDirection);
     else if (strcmp(cmd, "layout") == 0)   // the layout the map shows (setmaplayoutindex can switch it)
         printf("[test] layout %d (map's own %d)\n", gSaveBlock1Ptr->mapLayoutId,
                Overworld_GetMapHeaderByGroupAndId(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum)->mapLayoutId);
@@ -4058,6 +4060,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
             Updater_OrreDownload();
         st = Updater_OrreState(&done, &total, &err);
         printf("[test] orre state %d %ld/%ld %s\n", st, done, total, err ? err : "");
+    }
+    else if (strcmp(cmd, "orreworldmap") == 0)
+    {
+        // orreworldmap: Colosseum's world map, as a place's exit opens it (src/orre/worldmap.c)
+        extern const u8 Orre_EventScript_WorldMap[];
+        ScriptContext_SetupScript(Orre_EventScript_WorldMap);
+        printf("[test] orre world map opened\n");
     }
     else if (strcmp(cmd, "orreflag") == 0)
     {

@@ -1,0 +1,91 @@
+pressuntil A field 5000
+wait 30
+mp orreflag 0xADF
+mp orreflag 0xDCF
+mp orreflag 0x42E
+mp orreflag 0xA59
+mp orreflag 0x3DF
+mp orreflag 0x3F8
+mp orreflag 0x9DF
+mp orreflag 0xA0E
+mp orreworldmap
+wait 50
+press UP 4
+wait 30
+press A 5
+wait 200
+mp where
+mp orreworldmap
+wait 50
+press LEFT 4
+wait 30
+press A 5
+wait 200
+mp where
+mp orreworldmap
+wait 50
+press UP 4
+wait 30
+press A 5
+wait 200
+mp where
+mp orreworldmap
+wait 50
+press DOWN 4
+wait 30
+press DOWN 4
+wait 30
+press A 5
+wait 200
+mp where
+mp orreworldmap
+wait 50
+press RIGHT 4
+wait 30
+press A 5
+wait 200
+mp where
+mp orreworldmap
+wait 50
+press UP 4
+wait 30
+press DOWN+LEFT 4
+wait 30
+press A 5
+wait 200
+mp where
+mp orreworldmap
+wait 50
+press UP 4
+wait 30
+press UP 4
+wait 30
+press A 5
+wait 200
+mp where
+mp orreworldmap
+wait 50
+press DOWN 4
+wait 30
+press A 5
+wait 200
+mp where
+mp orreworldmap
+wait 50
+press UP+RIGHT 4
+wait 30
+press RIGHT+DOWN 4
+wait 30
+press A 5
+wait 200
+mp where
+mp orreflag 0x45D
+mp orreworldmap
+wait 50
+press DOWN 4
+wait 30
+press LEFT 4
+wait 30
+press A 5
+wait 200
+mp where

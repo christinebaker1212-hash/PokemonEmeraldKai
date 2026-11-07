@@ -1,0 +1,70 @@
+{
+  "id": "MAP_ORRE_THE_UNDER_HOUSEA_1F",
+  "name": "Orre_TheUnder_HouseA1F",
+  "layout": "LAYOUT_ORRE_THE_UNDER_HOUSEA_1F",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_THE_UNDER",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER",
+      "dest_warp_id": "39"
+    },
+    {
+      "x": 11,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER",
+      "dest_warp_id": "39"
+    },
+    {
+      "x": 11,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B1",
+      "dest_warp_id": "13"
+    },
+    {
+      "x": 11,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B1",
+      "dest_warp_id": "13"
+    },
+    {
+      "x": 11,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B1",
+      "dest_warp_id": "13"
+    },
+    {
+      "x": 11,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B1",
+      "dest_warp_id": "13"
+    },
+    {
+      "x": 13,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_HOUSEA_1F",
+      "dest_warp_id": "6"
+    }
+  ]
+}

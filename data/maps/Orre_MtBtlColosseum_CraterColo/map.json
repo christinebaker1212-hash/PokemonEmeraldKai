@@ -1,0 +1,42 @@
+{
+  "id": "MAP_ORRE_MT_BTL_COLOSSEUM_CRATER_COLO",
+  "name": "Orre_MtBtlColosseum_CraterColo",
+  "layout": "LAYOUT_ORRE_MT_BTL_COLOSSEUM_CRATER_COLO",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_MT_BTL_COLOSSEUM",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 13,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_4",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 14,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_4",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 17,
+      "y": 30,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BTL_COLOSSEUM_CRATER_COLO",
+      "dest_warp_id": "2"
+    }
+  ]
+}

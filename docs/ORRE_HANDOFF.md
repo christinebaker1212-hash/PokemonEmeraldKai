@@ -14,14 +14,26 @@ rules, and what each tool does. This file is where things stand, what a new sess
   (their decision, 2026-11-07). No in-game download screen yet.
 - **Engine: ORRE's own**, src/orre/o3d.c (+ gx_tex.c, orre_maps.h, include/o3d.h), a copy of SINNOH's that goes its
   own way. Never put ORRE code in src/sinnoh/ or s3d.h (the user, 2026-11-04).
-- **The OUTSKIRT STAND walks, inside and out** (group 45: map 0 Orre_OutskirtStand, `MOEMON_DEBUG_WARP=45,0,25,29`
-  at the foot of the diner's ramp; map 1 Orre_OutskirtStandDiner, S1_shop_1F): the diner's door leads in and its
-  doorway back out. Named OUTSKIRT STAND from Colosseum's own text, silent until its song is converted. No people
-  or scripts yet.
+- **Every map of Orre walks, with every door** (2026-11-07, the user: "the baseline is that all maps will be able to
+  be traveled to and are finished"): all 121 of Colosseum's field rooms are maps of group 45 (tools/orre/maps.py
+  ORDER: map 0 the OUTSKIRT STAND, `MOEMON_DEBUG_WARP=45,0,33,40`), each walkable on Emerald's grid from Colosseum's
+  collision, named from Colosseum's place names, silent until the music is converted. Their doors, staircases,
+  elevators, REALGAM TOWER's lift and the ways out to the world map all come from the game's own tables (below,
+  "Rooms, doors and entries"): 264 links, every one walked through by the test `orre_all_doors`; every map loads and
+  stands (`orre_all_maps`); the world map travels to its nine places (`orre_all_places`). Arriving, the player
+  stands where Colosseum puts them (the room's entry) facing the way it does. No people or scripts yet.
+  - Two rooms only Colosseum's scripts lead into: PYRITE's windmill top (M2_windmill_2F: a person outside carries the
+    player up, M2_out's script 0x20; its lift goes down to THE UNDER) and M1_carde_1 (a story scene at PHENAC
+    STADIUM). They walk, and their own ways out work; they're entered once the scripts are converted (never by a
+    door made up here). `mp warp 45,N,X,Y` visits any map now (N: its place in ORDER; X Y its start: orre_maps.h).
+  - Story gates (collision objects the scripts switch on and off, Room.gates) are left open, so every room can be
+    walked in whole; the converted scripts will close them as Colosseum does.
+  - Story versions: REALGAM TOWER's outside is D4_out until flag 0x45D, then D4_out_2 (with the tower's door), as
+    the world map's travel has it (worldmap.c PlaceDestRoom); PYRITE's colosseum lobby M2_enter_1F_2 is reached by
+    its own links. Rooms a script chooses between (a map-local link) take the event's own arguments for now.
 - **Colosseum's own world map** (2026-11-07, src/orre/worldmap.c): stepping on the lot's way out (the trigger loop,
   collision object 2: maps.py `exits`) opens it, all of it the game's own (below, "The world map"). B goes back to the
-  field; A on a place ORRE has a map for travels to that map's start; a place not in the game yet is refused (a
-  buzz). Only the OUTSKIRT STAND shows until Colosseum's story flags are set: nothing sets them yet but
+  field; A on a place travels to Colosseum's entry 0 of its room (all nine are in the game). Only the OUTSKIRT STAND shows until Colosseum's story flags are set: nothing sets them yet but
   `mp orreflag N` (src/orre/orre_story.c, not saved yet). Tests: scenarios `orre_worldmap`, `orre_worldmap_pan`.
   It fills Kai's screen (the user, 2026-11-07: "fit the map to the screen, use zooms and panning"): below, "Drawn".
   No travel scene yet: the user's plan for it is below ("The bike ride").
@@ -67,12 +79,13 @@ rules, and what each tool does. This file is where things stand, what a new sess
 ## Next steps (in order)
 1. **Music, now** (the user, 2026-11-07: "Colosseum's own world map screen, then convert the music"): see 6.
    Then the world map's own song (worldmap_song) and the travel scene: the user's plan, "The bike ride" below.
-2. **Where people stand, and where doors lead.** The map modules (.rel: REL_M1.md "FieldTable" descriptors) publish
-   each room's tables; S1_out.rel has (direction, x, y, z)-like records whose stride isn't decoded. Decode them (the
-   decomp's readers of those tables, or XD's decomp) for start positions, people and their models, and for which
-   trigger leads to which room (then maps.py's `warps` come from the game instead of by hand).
-3. **More maps**: each one in tools/orre/maps.py (file, id, name, a start point found with gridview.py, its place
-   name, its doors), then gen_maps.py and build_pack.py. PHENAC CITY (M1_out) next, its buildings after.
+2. **Where people stand.** Doors and entries are done (below, "Rooms, doors and entries"). The people: each room's
+   characters table (the floor record's + 0x14 slot, floor_data.c floorDataBiosGetCharInfo; records of 36 bytes:
+   flags, u16 angle, u16 model, ..., the talk script at + 0x14 (floorCharacterBiosGetTalkSctID), the move script at
+   + 0x10, x y z at + 0x18; colo_rooms.py reads the slots the same way) for where they stand and which model they are.
+3. **Maps: done** (all 121 field rooms). The stadiums' battle stages (kind 2 rooms: M1_water_colo, M2_earth_colo,
+   M4_cylinder_colo, M4_bottom_colo, T1_ancient_colo) aren't maps: Kai's battles. The `_ev` and `_bf` copies aren't
+   either (a scene's or a battle's).
 4. **Sprites.** Render the character models (orre_data.pak, `.dat`) into GBA-style sprite sheets (the user's
    decision): their animations (each model set's joint animations, after the root joint) aren't read yet; hsd.py
    draws the bind pose. tools/sinnoh/build_starter.py pre-draws Platinum's models, as a reference.
@@ -135,6 +148,33 @@ rules, and what each tool does. This file is where things stand, what a new sess
   round the place's centre here; where Colosseum's code puts them exactly (it moves them from their table places)
   isn't read yet.
 
+## Rooms, doors and entries (tools/orre/colo_rooms.py, maps.py)
+All from the game's own tables, read from the pack's data (the decomp names them):
+- **The floor table** (colo_data.py): per room its kind (1 a field room), area, archive, room id, the place name
+  (+ 0x24) and four slots its module's _prolog fills (main.dol .sbss addresses, relocated in common_rel's REL: + 0x10
+  the room's record, + 0x14 its characters, + 0x18 its entries, + 0x1C a box table). colo_rooms.py resolves a slot to
+  the module's table by reading the REL's relocations and its _prolog (lis / addi / stw).
+- **Entries**: FieldTable {count *, entries *}, 16 bytes each: u16 angle (degrees about Y, 0 facing +Z = the grid's
+  south), pad, f32 x y z. floorLink(room, entry) puts the player there. Entry 0 is where the world map lands
+  (gs_title.c: floorLink(floor, 0)).
+- **Events** (common_rel .data + 0x146364, 0x1C each, count + 0x14A704; floor_character.c heroDispatchEvent): u8 kind
+  (1 pass, 2 touch, 3 check, 4 ...), u16 room, u32 collision id, u32 script, u32 args x4. The collision id is the u16
+  at + 0x32 of the trigger triangles in the room's .col (not the object's number: one object can hold several).
+  Scripts of the shared bank 0x0596 (common_script_0596.json in the decomp): 4 link_floor_with_sound(room, entry,
+  sound), 5 control_door (opens the door; the pass trigger behind it links), 6 leave_elevator(elevator, room,
+  elevator there), 12 REALGAM's lift (rides through room 123, then on to the args' room), 11 a message, 13 the PC.
+  Bank 0x0100 is the room's own .scd (colo_rooms.py scd_native_calls: the GS VM's constants pushed before each native
+  call; floorLink is native 0x5F, floorLinkWithSE 0x7D, scriptSetCol (a collision object on / off) 0x76; names from
+  main.dol's native table lbl_802E1CF0 in the decomp's data_8027A500.c).
+- **In the game**: maps.py gives each map its warps (collision id -> file, entry or elevator) and exits (room 910, the
+  world map); grid.py reaches from every entry, stopping at those triggers (and only those: a door's touch trigger or
+  a sign's check trigger is walked over), and joins a door the thick walls kept out (a door frame) by the shortest
+  way of up to 3 tiles; gen_maps.py writes a warp event on each reached trigger tile and a landing for every entry
+  (its tile, or the nearest walkable), src/orre/orre_maps.h sOrreArrivals (overworld.c GetAdjustedInitialDirection
+  faces the entry's angle: O3D_ArrivalDir). gen_tests.py writes the three whole-region scenarios from the same data
+  (rerun it after gen_maps.py); check_tests.py checks their logs. `gridview.py --room UNPACKED ROOM out.png` draws a
+  room's grid with its entries and links.
+
 ## The bike ride (the travel scene: the user's plan, 2026-11-07, for later)
 A custom version of the SS TIDAL's porthole scene (src/field_special_scene.c Task_HandlePorthole /
 ShowSSTidalWhileSailing): the bike's graphics in the ship's place, against the background of Colosseum's original
@@ -149,6 +189,10 @@ TIDAL scene's animation. Not Colosseum's 3D ride itself.
   siblings blew one map up to 3.4 million triangles). Envelope vertices bound to one joint at full weight are in that
   joint's space. Baked shadows are see-through black meshes (render mode bit 0x40000000). GX intensity textures (I4,
   I8) carry their intensity as alpha too. Colosseum's baked vertex colours are half strength (128 = white).
+- grid.py's wall tests are numpy (35 times faster than per-segment Python: all 121 rooms in 35 s); gen_maps.py and
+  build_pack.py both build every grid (maps.build_grid).
+- Big 1024 x 1024 atlases (90 of them) look blocky up close under Platinum's camera: that is their own resolution
+  (raising TEX_MAX past 256 changed nothing visible), not a decoding fault.
 - Collision walls lie on tile edges: test steps between tile centres, not tiles (the flood fill leaked behind the
   diner until it did). The floor goes on past a map's exits: keep only what is reached from the start.
 - Text: 0xFFFF starts a control (an id byte, then its parameters: font, wait, palette, shadow, align, talk sound, line

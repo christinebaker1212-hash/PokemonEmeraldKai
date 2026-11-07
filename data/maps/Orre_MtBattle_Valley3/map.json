@@ -1,0 +1,56 @@
+{
+  "id": "MAP_ORRE_MT_BATTLE_VALLEY_3",
+  "name": "Orre_MtBattle_Valley3",
+  "layout": "LAYOUT_ORRE_MT_BATTLE_VALLEY_3",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_MT_BATTLE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 31,
+      "y": 208,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_REST_2",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 32,
+      "y": 208,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_REST_2",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 31,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_REST_3",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 32,
+      "y": 206,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_VALLEY_3",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 31,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_VALLEY_3",
+      "dest_warp_id": "4"
+    }
+  ]
+}

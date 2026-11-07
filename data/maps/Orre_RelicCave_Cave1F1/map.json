@@ -1,0 +1,77 @@
+{
+  "id": "MAP_ORRE_RELIC_CAVE_CAVE_1F_1",
+  "name": "Orre_RelicCave_Cave1F1",
+  "layout": "LAYOUT_ORRE_RELIC_CAVE_CAVE_1F_1",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_RELIC_CAVE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 12,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_AGATE_VILLAGE",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 13,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_AGATE_VILLAGE",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 14,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_AGATE_VILLAGE",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 22,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_AGATE_VILLAGE_SHRINE_1F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 23,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_AGATE_VILLAGE_SHRINE_1F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 24,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_AGATE_VILLAGE_SHRINE_1F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 13,
+      "y": 46,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_RELIC_CAVE_CAVE_1F_1",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 23,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_RELIC_CAVE_CAVE_1F_1",
+      "dest_warp_id": "7"
+    }
+  ]
+}

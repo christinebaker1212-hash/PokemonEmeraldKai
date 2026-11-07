@@ -1,0 +1,56 @@
+{
+  "id": "MAP_ORRE_MT_BATTLE_CLOUD_3",
+  "name": "Orre_MtBattle_Cloud3",
+  "layout": "LAYOUT_ORRE_MT_BATTLE_CLOUD_3",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_MT_BATTLE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 11,
+      "y": 146,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_REST_8",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 12,
+      "y": 146,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_REST_8",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 179,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_REST_9",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 12,
+      "y": 145,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_3",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 179,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_3",
+      "dest_warp_id": "4"
+    }
+  ]
+}

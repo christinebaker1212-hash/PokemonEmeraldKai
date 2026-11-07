@@ -1,0 +1,77 @@
+{
+  "id": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B3",
+  "name": "Orre_TheUnderSubway_SubwayB3",
+  "layout": "LAYOUT_ORRE_THE_UNDER_SUBWAY_SUBWAY_B3",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_ORRE_THE_UNDER_SUBWAY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "bg_events": [],
+  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 46,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_1",
+      "dest_warp_id": "13"
+    },
+    {
+      "x": 47,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_1",
+      "dest_warp_id": "13"
+    },
+    {
+      "x": 48,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B2_1",
+      "dest_warp_id": "13"
+    },
+    {
+      "x": 40,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_TRAIN_1F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 41,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_TRAIN_1F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 27,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_TRAIN_1F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 28,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_TRAIN_1F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 47,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B3",
+      "dest_warp_id": "7"
+    }
+  ]
+}
