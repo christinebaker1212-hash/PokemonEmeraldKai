@@ -608,6 +608,7 @@ void MP_Created_Unpack(const u8 *p, struct MpCreated *r);
 void MP_Created_Default(struct MpCreated *r, bool8 girl);
 void MP_Created_Clamp(struct MpCreated *r);
 const struct MpCreatedGfx *MP_Created_Gfx(u8 cacheSlot, const struct MpCreated *r);
+void MP_Created_BuildField(const struct MpCreated *r, struct MpCreatedGfx *g);   // only g->ow and g->owPal
 void MP_Created_FieldHeadInfo(const struct MpCreated *r, u8 *neck, u16 *skin);   // neck[3], skin[4]
 u8 MP_Created_StyleCount(bool8 girl, u8 cat);
 const char *MP_Created_StyleName(bool8 girl, u8 cat, u8 style);

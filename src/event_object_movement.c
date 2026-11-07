@@ -1,4 +1,5 @@
 #include "global.h"
+#include "orre_people.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's gyms that move
 #include "mp_region.h"
 #include "malloc.h"
@@ -2027,6 +2028,9 @@ static u8 MonObjectLoadPalette(u16 tag);
 #define SINNOH_PAL_TAG 0xB800         // Moemon Kai: + a Platinum sprite's number (SinnohPackInfo)
 #define SINNOH_PAL_TAG_SMALL 0xB900   // ... its smaller copy's (MIXED)
 #define SINNOH_PAL_TAG_CHAR 0xBA00    // ... a character look standing in for it (SinnohGen3Info)
+#define ORRE_PAL_TAG 0xBC00   // Moemon Kai: + an ORRE person (OrreObjectInfo)
+static u8 OrreObjectLoadPalette(u16 tag);
+static const struct ObjectEventGraphicsInfo *OrreObjectInfo(u16 person);
 
 // A Johto / Kanto sprite's own palette: where it already is, else loaded into a free sprite palette
 u8 QzLoadObjectPalette(u16 tag)
@@ -2039,6 +2043,8 @@ u8 QzLoadObjectPalette(u16 tag)
         return SinnohLoadObjectPalette(tag);   // (Platinum's: from the pack)
     if (tag >= MON_OBJ_PAL_TAG && tag < MON_OBJ_PAL_TAG + OBJ_EVENT_GFX_MON_COUNT)
         return MonObjectLoadPalette(tag);   // (a POKéMON on the map: its follower palette)
+    if (tag >= ORRE_PAL_TAG && tag < ORRE_PAL_TAG + OBJ_EVENT_GFX_ORRE_COUNT)
+        return OrreObjectLoadPalette(tag);   // (ORRE's people: their LOOK's palette)
     for (i = 0; sKaiObjectEventPalettes[i].tag != TAG_NONE; i++)   // (the game's own: kai_objects.h)
         if (sKaiObjectEventPalettes[i].tag == tag)
         {
@@ -2191,6 +2197,62 @@ static u8 MonObjectLoadPalette(u16 tag)
     return slot == 0xFF ? 0 : slot;
 }
 
+// Moemon Kai: an ORRE person's field sprite, their LOOK > CREATE recipe's walking frames (src/orre/orre_people.c)
+static const struct ObjectEventGraphicsInfo *OrreObjectInfo(u16 person)
+{
+    static struct ObjectEventGraphicsInfo sInfo[OBJ_EVENT_GFX_ORRE_COUNT];
+    static struct SpriteFrameImage sImages[OBJ_EVENT_GFX_ORRE_COUNT][9];
+    static bool8 sBuilt[OBJ_EVENT_GFX_ORRE_COUNT];
+    const u8 *frames;
+    const u16 *pal;
+    struct ObjectEventGraphicsInfo *info;
+    u8 f;
+    if (!Orre_People_Field(person, &frames, &pal))
+        return gObjectEventGraphicsInfoPointers[OBJ_EVENT_GFX_NINJA_BOY];
+    info = &sInfo[person];
+    if (sBuilt[person])
+        return info;
+    sBuilt[person] = TRUE;
+    for (f = 0; f < 9; f++)
+    {
+        sImages[person][f].data = frames + f * 32 * 32 / 2;
+        sImages[person][f].size = 32 * 32 / 2;
+    }
+    info->tileTag = TAG_NONE;
+    info->paletteTag = ORRE_PAL_TAG + person;
+    info->reflectionPaletteTag = OBJ_EVENT_PAL_TAG_NONE;
+    info->size = 32 * 32 / 2;
+    info->width = 32;
+    info->height = 32;
+    info->paletteSlot = PALSLOT_QZ;
+    info->shadowSize = SHADOW_SIZE_M;
+    info->inanimate = FALSE;
+    info->disableReflectionPaletteLoad = TRUE;
+    info->tracks = TRACKS_FOOT;
+    info->oam = &gObjectEventBaseOam_32x32;
+    info->subspriteTables = sOamTables_32x32;
+    info->anims = sAnimTable_Standard;
+    info->images = sImages[person];
+    info->affineAnims = gDummySpriteAffineAnimTable;
+    return info;
+}
+
+static u8 OrreObjectLoadPalette(u16 tag)
+{
+    const u8 *frames;
+    const u16 *pal;
+    u8 slot;
+    struct SpritePalette sp;
+    if (!Orre_People_Field(tag - ORRE_PAL_TAG, &frames, &pal))
+        return 0;
+    sp.data = pal;
+    sp.tag = tag;
+    slot = LoadSpritePalette(&sp);
+    if (slot != 0xFF)
+        UpdateSpritePaletteWithWeather(slot);
+    return slot == 0xFF ? 0 : slot;
+}
+
 // OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: GEN 4 Platinum's; MIXED a true Gen 3 equivalent, else Platinum's smaller; GEN 3
 // the Gen 3 equivalent, else the closest Gen 3 sprite (the stand-in, also shown without the pack)
 static const struct ObjectEventGraphicsInfo *SinnohGraphicsInfo(u16 i)
@@ -2239,6 +2301,9 @@ const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u16 graphicsId)
 
     if (graphicsId >= OBJ_EVENT_GFX_MON_FIRST && graphicsId < OBJ_EVENT_GFX_MON_FIRST + OBJ_EVENT_GFX_MON_COUNT)
         return MonObjectInfo(graphicsId - OBJ_EVENT_GFX_MON_FIRST);   // Moemon Kai: a POKéMON on the map
+
+    if (graphicsId >= OBJ_EVENT_GFX_ORRE_FIRST && graphicsId < OBJ_EVENT_GFX_ORRE_FIRST + OBJ_EVENT_GFX_ORRE_COUNT)
+        return OrreObjectInfo(graphicsId - OBJ_EVENT_GFX_ORRE_FIRST);   // Moemon Kai: ORRE's people (orre_people.c)
 
     if (graphicsId >= OBJ_EVENT_GFX_QZ_FIRST)   // Moemon Kai: Johto / Kanto sprites (16-bit ids)
         return QzObjectEventGraphicsInfo(graphicsId);

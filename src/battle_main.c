@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "global.h"
+#include "orre_people.h"
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "mp_region.h"
 #include "data/text/trainer_class_names_qz.h"   // Moemon Kai: QZ_TRAINER_MONEY
@@ -5872,6 +5873,7 @@ static void ReturnFromBattleToOverworld(void)
 
     gSpecialVar_Result = gBattleOutcome;
     gMain.inBattle = FALSE;
+    Orre_People_BattleEnd();   // Moemon Kai: ORRE's foe pictures are for one battle
     {
         extern bool8 gMpUncatchableWild;
         gMpUncatchableWild = FALSE;   // Moemon Kai: POKéMON TOWER's MAROWAK (battle_script_commands.c)

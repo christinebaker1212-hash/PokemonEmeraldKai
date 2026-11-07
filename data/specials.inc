@@ -792,3 +792,4 @@ gSpecials::
 	def_special Mtg_ClubSeat
 	def_special Mtg_ClubBackDoor
 	def_special Mtg_ClubTalk
+	def_special Orre_SetFoePerson   @ Moemon Kai: the next battle's foe is an ORRE person (src/orre/orre_people.c)

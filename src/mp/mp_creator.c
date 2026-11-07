@@ -783,6 +783,15 @@ static void BuildBack(const struct MpCreated *r, struct MpCreatedGfx *g)
     }
 }
 
+// Only the field frames (walk, run, Mach Bike) and their palette, into G (ORRE's people: orre_people.c)
+void MP_Created_BuildField(const struct MpCreated *r, struct MpCreatedGfx *g)
+{
+    struct MpCreated clean = *r;
+    MP_Created_Clamp(&clean);
+    clean.made = 1;
+    BuildOverworld(&clean, g);
+}
+
 const struct MpCreatedGfx *MP_Created_Gfx(u8 cacheSlot, const struct MpCreated *r)
 {
     struct MpCreated clean = *r;

@@ -5,6 +5,7 @@
 #include <string.h>
 #include "platform/gamepad.h"
 #include "global.h"
+#include "orre_people.h"
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "region_map.h"   // (mapname: GetMapName)
 #include "metatile_behavior.h"
@@ -2368,6 +2369,26 @@ void MP_TestCommand(const char *cmd, const char *arg)
         }
         else
             printf("[test] created %s: bad recipe\n", arg);
+    }
+    else if (strcmp(cmd, "orrefoe") == 0)
+    {
+        // orrefoe PERSON [1] - the next battle's foe A (or B) shows ORRE person PERSON's picture (in ORRE)
+        int person = 0, which = 0;
+        sscanf(arg, "%d %d", &person, &which);
+        Orre_People_SetFoe(which, person);
+        printf("[test] orrefoe %d %d (%s)\n", person, which, Orre_People_Model(person));
+    }
+    else if (strcmp(cmd, "orrenpc") == 0)
+    {
+        // orrenpc PERSON [DX DY] - ORRE person PERSON stands beside the player (their LOOK field sprite)
+        int person = 0, dx = 1, dy = 0;
+        s16 x, y;
+        u8 id;
+        sscanf(arg, "%d %d %d", &person, &dx, &dy);
+        PlayerGetDestCoords(&x, &y);
+        id = SpawnSpecialObjectEventParameterized(OBJ_EVENT_GFX_ORRE_FIRST + person, MOVEMENT_TYPE_FACE_DOWN,
+                                                  0xE0 + (person & 0xF), x + dx, y + dy, 3);
+        printf("[test] orrenpc %d %s object %d\n", person, Orre_People_Model(person), id);
     }
     else if (strcmp(cmd, "createddump") == 0)
     {
