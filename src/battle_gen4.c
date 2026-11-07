@@ -1099,7 +1099,7 @@ static bool8 WeatherOn(u32 flags)
 
 enum {
     G4E_AQUA_RING, G4E_POISON_HEAL, G4E_WEATHER_ABILITY, G4E_HYDRATION, G4E_BLACK_SLUDGE, G4E_BAD_DREAMS,
-    G4E_ORB, G4E_STICKY_BARB, G4E_EMBARGO, G4E_HEAL_BLOCK, G4E_MAGNET_RISE, G4E_SLOW_START, G4E_DONE,
+    G4E_ORB, G4E_STICKY_BARB, G4E_EMBARGO, G4E_HEAL_BLOCK, G4E_MAGNET_RISE, G4E_SLOW_START, G4E_ORRE, G4E_DONE,
 };
 
 const u8 *MP_Gen4_BattlerEndTurn(u8 battler)
@@ -1221,6 +1221,13 @@ const u8 *MP_Gen4_BattlerEndTurn(u8 battler)
             if (b->slowStart && --b->slowStart == 0 && mon->ability == ABILITY_SLOW_START)
                 return TurnScript(BattleScript_G4TurnMsg, G4T_SLOW_START_END);
             break;
+        case G4E_ORRE:   // Moemon Kai: a Shadow Pokémon's HYPER MODE (src/orre/orre_shadow.c)
+        {
+            const u8 *orre = Orre_Shadow_EndTurn(battler);
+            if (orre != NULL)
+                return orre;
+            break;
+        }
         }
     }
     b->endStep = 0;

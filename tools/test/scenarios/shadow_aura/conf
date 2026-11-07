@@ -1,0 +1,10 @@
+# The Shadow aura (src/orre/orre_aura.c, docs/SHADOW_POKEMON.md "S3c"): a QUILAVA in its own colours (plain), then made
+# Colosseum's Shadow 3 and sent out against a high-level foe that only SPLASHes: a burst on the send-out (sendout*),
+# faint while it's out (faint), crimson and stronger in HYPER MODE (hyper_idle), and at the turn's end Colosseum's
+# "...is in HYPER MODE!" with its aura flaring (turn*). CHECK counts the aura's colours around the QUILAVA.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=156:40"
+EXPECT_A=("shadow: Shadow 3 (species 156) made" "[test] shadow hyper 0: 1" "is in HYPER MODE (end of turn)")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 -I tools/orre/check_shadow_aura.py"

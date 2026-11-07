@@ -59,8 +59,19 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
   Orre_Shadow_Call): in HYPER MODE it brings the Pokémon round by the CALL chance (and the gauge's CALL drop) or "It's
   no good! It's ignoring orders!"; it wakes a sleeper; else "...failed to hear!" (a Shadow Pokémon) or "It's not
   listening!". Tests shadow_hyper, shadow_call. Not yet: a held item actually used in HYPER MODE (Colosseum uses some
-  BERRIES), "won't accept an item" (0x770B), the HYPER MODE reminder at its turn (0x771C).
-- Next, S3c: the aura, then the opponents' Shadow Pokémon (Cipher's, with snagging) and co-op.
+  BERRIES), "won't accept an item" (0x770B).
+- **S3c, the aura** (2026-11-07): src/orre/orre_aura.c draws it over the finished frame (sdl2.c VDraw, like the
+  ASTRAL BALL's effects): a dark halo hugging the Pokémon's outline and tongues of dark smoke licking up from its tops
+  (a smooth noise scrolled upward), violet at their edges with bright flickers, wisps torn from them; never over the
+  Pokémon itself (it comes from behind), found by its sprite palette's colours so the send-out's growing and a move's
+  shake are followed. Faint while a Shadow Pokémon is out; a burst where Colosseum plays its aura
+  (fightOutPokemonDarkPokemonEffect): sent out (the first frame its picture is on screen), entering HYPER MODE,
+  ignoring orders, and the turn's end in HYPER MODE; crimson and stronger in HYPER MODE. The turn's end follows
+  _fightCheckDarkPokemonAppear: "...is in HYPER MODE!" (0x771C) with the aura flaring, or 1 time in 256 it comes to
+  its senses on its own (0x771E) (battle_gen4.c G4E_ORRE -> Orre_Shadow_EndTurn). Either side's Shadow Pokémon shows
+  it (an opponent's once Cipher's are built: Rui's "black aura" lines 0x770A / 0x7717 go with them). Test
+  shadow_aura (tools/orre/check_shadow_aura.py).
+- Next: the opponents' Shadow Pokémon (Cipher's, with snagging) and co-op.
 - (old note) S3b was: Hyper Mode (each SHADOW RUSH rolls the nature's chance by the gauge's level; not asleep or already in it;
   Colosseum's messages 0x771B / 0x771C), CALL (snaps it out by the CALL chance and takes the CALL drop; wakes a
   sleeper: messages 0x7704-0x7709, 0x771D), the aura, and the dark palettes (below); then the opponents' Shadow

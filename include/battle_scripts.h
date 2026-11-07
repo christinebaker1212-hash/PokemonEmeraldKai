@@ -239,6 +239,7 @@ extern const u8 BattleScript_MpCoopBallCaught[];
 extern const u8 BattleScript_MpCoopUseItem[];
 extern const u8 BattleScript_MpCoopLearnMoveLater[];
 extern const u8 BattleScript_MpCoopWantsToRun[];
+extern const u8 BattleScript_OrreTurnMsg[];   // Moemon Kai: HYPER MODE at a turn's end (src/orre/orre_shadow.c)
 extern const u8 BattleScript_OrreCall[];   // Moemon Kai: ORRE's (src/orre/orre_shadow.c)
 extern const u8 BattleScript_OrreHyperIgnored[];
 extern const u8 BattleScript_OrreHyperOwnMove[];

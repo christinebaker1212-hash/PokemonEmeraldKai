@@ -363,7 +363,8 @@ u32 Orre_Shadow_StoredExp(struct Pokemon *mon)
 // fight_range_exact_8022DCB8.c, fight_range_80211A00.c, fight_seq.c)
 
 enum { T_HYPER_ENTER, T_SELFISH, T_ATK_FOE, T_ATK_YOU, T_ATK_SELF, T_CONFUSED, T_ITEM_NOHOW, T_ITEM_NONE,
-       T_CALL, T_CALL_RESPONDED, T_CALL_SENSES, T_CALL_IGNORING, T_CALL_NOT_LISTENING, T_CALL_FAILED, T_COUNT };
+       T_CALL, T_CALL_RESPONDED, T_CALL_SENSES, T_CALL_IGNORING, T_CALL_NOT_LISTENING, T_CALL_FAILED, T_HYPER_STILL,
+       T_SENSES, T_COUNT };
 static const u8 sT_HyperEnter[] = _("{B_ATK_NAME_WITH_PREFIX}'s emotions rose to\na fever pitch!\pIt entered HYPER MODE!");
 static const u8 sT_Selfish[] = _("{B_ATK_NAME_WITH_PREFIX} selfishly used\n{B_BUFF1} without orders!");
 static const u8 sT_AtkFoe[] = _("{B_ATK_NAME_WITH_PREFIX} ignored orders and\nattacked the opposing trainer!");
@@ -378,8 +379,11 @@ static const u8 sT_CallSenses[] = _("{B_ATK_NAME_WITH_PREFIX} came to its senses
 static const u8 sT_CallIgnoring[] = _("It's no good!\nIt's ignoring orders!");
 static const u8 sT_CallNotListening[] = _("It's no good!\nIt's not listening!");
 static const u8 sT_CallFailed[] = _("{B_ATK_NAME_WITH_PREFIX} failed to hear!");
+static const u8 sT_HyperStill[] = _("{B_ATK_NAME_WITH_PREFIX} is in HYPER MODE!");          // (0x771C)
+static const u8 sT_Senses[] = _("{B_ATK_NAME_WITH_PREFIX} came to its senses.");            // (0x771E)
 static const u8 *const sTexts[T_COUNT] = {sT_HyperEnter, sT_Selfish, sT_AtkFoe, sT_AtkYou, sT_AtkSelf, sT_Confused,
-    sT_ItemNoHow, sT_ItemNone, sT_Call, sT_CallResponded, sT_CallSenses, sT_CallIgnoring, sT_CallNotListening, sT_CallFailed};
+    sT_ItemNoHow, sT_ItemNone, sT_Call, sT_CallResponded, sT_CallSenses, sT_CallIgnoring, sT_CallNotListening, sT_CallFailed,
+    sT_HyperStill, sT_Senses};
 static u8 sLine[2];
 
 const u8 gText_Orre_BattleMenuCall[] = _("FIGHT{CLEAR_TO 56}BAG\nMOéMON{CLEAR_TO 56}CALL");
@@ -419,6 +423,7 @@ u8 Orre_Shadow_BattleCommand(u8 mode)
             return 0;
         r->flags |= REC_HYPER;
         sLine[0] = T_HYPER_ENTER;
+        Orre_Aura_Burst(atk, ORRE_AURA_HYPER);
         MPNet_Log("shadow: Shadow %u entered HYPER MODE", r->id);
         return 1;
     }
@@ -449,6 +454,7 @@ u8 Orre_Shadow_HyperDisobedience(void)
     if (way == 0xFF)
         return DISOBEDIENCE_OBEDIENT;
     MPNet_Log("shadow: Shadow %u in HYPER MODE ignores orders (way %u)", r->id, way);
+    Orre_Aura_Burst(atk, ORRE_AURA_HYPER);
     if (way == 0)
     {
         // a usable move of its own choosing (not one it can't use now, not a hidden one), else too confused to act
@@ -483,6 +489,29 @@ u8 Orre_Shadow_HyperDisobedience(void)
              : gBattleMons[atk].item == ITEM_NONE ? T_ITEM_NONE : T_ITEM_NOHOW;
     gBattlescriptCurrInstr = BattleScript_OrreHyperIgnored;
     return DISOBEDIENCE_IGNORED;
+}
+
+// fight_range_exact_8022DCB8.c _fightCheckDarkPokemonAppear: each turn in HYPER MODE it may come to its senses on its
+// own (1 in 256: message 0x771E), else at the turn's end its aura flares and "...is in HYPER MODE!" (0x771C)
+const u8 *Orre_Shadow_EndTurn(u8 battler)
+{
+    struct OrreShadowRec *r = BattlerRec(battler);
+    if (r == NULL || !(r->flags & REC_HYPER) || gBattleMons[battler].hp == 0)
+        return NULL;
+    gBattlerAttacker = battler;
+    if (Random() % 256 == 0)
+    {
+        r->flags &= ~REC_HYPER;
+        sLine[0] = T_SENSES;
+        MPNet_Log("shadow: Shadow %u came to its senses", r->id);
+    }
+    else
+    {
+        sLine[0] = T_HYPER_STILL;
+        Orre_Aura_Burst(battler, ORRE_AURA_PULSE);
+        MPNet_Log("shadow: Shadow %u is in HYPER MODE (end of turn)", r->id);
+    }
+    return BattleScript_OrreTurnMsg;
 }
 
 bool8 Orre_Shadow_CallAvailable(void)

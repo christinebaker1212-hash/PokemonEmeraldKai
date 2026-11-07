@@ -946,6 +946,10 @@ void VDraw(void)
     }
     MP_BattleWeather_Composite(image);   // ... battle weather the whole battle long
     {
+        void Orre_Aura_Composite(u16 *frame);
+        Orre_Aura_Composite(image);      // Moemon Kai: the Shadow aura around Shadow Pokémon (src/orre/orre_aura.c)
+    }
+    {
         void MP_DayTint_Update(void);
         MP_DayTint_Update();             // Moemon Kai: Platinum's time-of-day tint outside SINNOH (mp_daytint.c)
     }
