@@ -3700,6 +3700,21 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's look at the top cards (1.148.0)
+
+- Dig (mtg_effects.c Dig): DigNum$ cards off the top of the target / Defined$ player's library (TopCards), ChangeNum$
+  of them (a number, X, or All with ChangeValid$) to DestinationZone$ (Hand by default; Battlefield with Tapped$,
+  Graveyard, Exile, Library with LibraryPosition$), the rest to DestinationZone2$ (the Library's bottom by default,
+  LibraryPosition2$ 0 = the top). The player picks one card at a time with AskPick (resPicks counts the picks); a
+  ChangeValid$ the cards can't meet leaves the rest for the second zone.
+- The board asks "Take which?" for it (PickVerb; a search of the library still says "Find").
+- The AI casts it in its main phases (7) and takes the most useful card (Choose).
+- Unlocked 21: IMPULSE, ANCESTRAL MEMORIES, SLEIGHT OF HAND, PROPHETIC BOLT, GOBLIN RINGLEADER, WORLDLY COUNSEL, CALL OF
+  THE WILD, BROWSE, DIABOLIC VISION, SEALED FATE, ZOOLOGIST... Still out: Dig with the Library first (Precognition),
+  RememberChanged$, Chooser$, Upto$ / a choose-up-to count, ExileFaceDown$, RandomChange$, SkipReorder$.
+- Tests: test_rules.c TestDig (IMPULSE picks among four, the rest at the bottom; ANCESTRAL MEMORIES two of seven, five
+  to the graveyard); scenario mtg_dig.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

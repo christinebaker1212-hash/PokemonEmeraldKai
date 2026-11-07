@@ -1,0 +1,6 @@
+# MAGIC's look-at-the-top-cards spells on the table: IMPULSE fans the top four cards of the library, RIGHT moves along,
+# A takes one into the hand and the other three go to the bottom. Shots d_pick, d_next, d_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Impulse" "mtg: your move: a pick" "mtg: you: picked" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Impulse to focus")

@@ -1354,7 +1354,8 @@ static const char *PickVerb(void)
     if (q->forCost == 7)
         return "Target";  // (a spell's next target)
     if (q->candidateCount && B.duel.objs[q->candidates[0]].zone == MTG_ZONE_LIBRARY)
-        return "Find";    // (a search of the library)
+        return q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_DIG ? "Take"  // (the top cards)
+                                                                                     : "Find";    // (a search of the library)
     return q->forCost == 1 || (q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_SACRIFICE) ? "Sacrifice"
                                                                                                       : "Choose";
 }

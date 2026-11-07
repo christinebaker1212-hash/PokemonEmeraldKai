@@ -1582,6 +1582,61 @@ static void TestLibraryPosition(void)
     CHECK(sD.players[0].library[sD.players[0].libraryCount - 3] == bears, "2: under two cards");
 }
 
+// a card put on top of its player's library (the test's own set-up)
+static int PutLibTop(int player, const char *name)
+{
+    int obj = Put(player, name, MTG_ZONE_LIBRARY);
+    MtgPlayer *pl = &sD.players[player];
+    pl->library[pl->libraryCount++] = (uint16_t)obj;
+    return obj;
+}
+
+// DigEffect: the top cards looked at, some taken, the rest to the bottom / the graveyard
+static void TestDig(void)
+{
+    int impulse, bears, mem, i, looked[3], lib, grave, hand;
+    const MtgQuery *q;
+    static const char *const cards[] = {"Impulse", "Ancestral Memories", "Sleight of Hand", "Prophetic Bolt",
+                                        "Goblin Ringleader", "Worldly Counsel", "Call of the Wild", NULL};
+    printf("dig: the top cards looked at\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Impulse: one of the top four into the hand, the other three to the bottom
+    Lands(0, "Island", 2);
+    bears = PutLibTop(0, "Grizzly Bears");
+    lib = sD.players[0].libraryCount;
+    for (i = 0; i < 3; i++)
+        looked[i] = sD.players[0].library[lib - 2 - i];
+    impulse = Put(0, "Impulse", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, impulse, -1, 0);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_PICK && q->candidateCount == 4, "four to choose from");
+    ChoosePick(bears);
+    CHECK(Zone(bears) == MTG_ZONE_HAND && sD.players[0].libraryCount == lib - 1, "the bears taken");
+    for (i = 0; i < 3; i++)
+        CHECK(Zone(looked[i]) == MTG_ZONE_LIBRARY && Mtg_TopOfLibrary(&sD, 0) != looked[i], "the rest at the bottom");
+
+    Table();   // Ancestral Memories: two of the top seven, five into the graveyard
+    Lands(0, "Island", 5);
+    mem = Put(0, "Ancestral Memories", MTG_ZONE_HAND);
+    hand = HandCount(0);
+    grave = 0;
+    for (i = 0; i < sD.objCount; i++)
+        grave += sD.objs[i].zone == MTG_ZONE_GRAVEYARD && sD.objs[i].owner == 0;
+    Do(MTG_ACT_CAST, mem, -1, 0);
+    PassBoth();
+    Choose(0);
+    Choose(0);
+    {
+        int g = 0;
+        for (i = 0; i < sD.objCount; i++)
+            g += sD.objs[i].zone == MTG_ZONE_GRAVEYARD && sD.objs[i].owner == 0;
+        CHECK(HandCount(0) == hand - 1 + 2 && g == grave + 5 + 1, "two in hand, five (and the spell) in the graveyard");
+    }
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1920,6 +1975,7 @@ int main(int argc, char **argv)
     TestControl();
     TestCounters();
     TestLibraryPosition();
+    TestDig();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

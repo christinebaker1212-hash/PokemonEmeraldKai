@@ -227,6 +227,8 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
                 && (!d->objs[tgtObj].tapped || Mtg_Param(ab, "Untap")) ? 8 + Value(d, tgtObj) / 2 : 0;
         return IsCreatureOnField(d, tgtObj) ? 20 + Value(d, tgtObj) : 12 + Mtg_ManaCostTotal(&Mtg_Card(d->objs[tgtObj].def)->cost);
     }
+    case MTG_API_DIG:   // looking for cards: in its own main phase (a target player's: the other's)
+        return main && (a->target.kind != MTG_TGT_PLAYER || tgtMine) ? 7 : 0;
     case MTG_API_PUT_COUNTER: {   // counters that grow its own creature, curse counters on theirs, charges at their end step
         int kind = Mtg_CounterKind(Mtg_Param(ab, "CounterType")), pp, tt;
         Mtg_CounterPT(kind, &pp, &tt);
@@ -413,8 +415,9 @@ static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
         out->card = 1;
         return;
     }
-    if (q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_CHANGE_ZONE
-        && Mtg_Param(&gMtgAbilities[q->ability], "ChangeType")) {   // a search: the most useful find
+    if (q->ability != 0xFFFF && ((gMtgAbilities[q->ability].api == MTG_API_CHANGE_ZONE
+                                  && Mtg_Param(&gMtgAbilities[q->ability], "ChangeType"))
+                                 || gMtgAbilities[q->ability].api == MTG_API_DIG)) {   // a search or a dig: the most useful find
         int bestS = -1;
         for (i = 0; i < q->candidateCount; i++) {
             const MtgCardDef *c = Mtg_Card(d->objs[q->candidates[i]].def);

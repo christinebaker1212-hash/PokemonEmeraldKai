@@ -510,6 +510,13 @@
 "number": "229",
 "set": "mmq"
 },
+"Ancestral Memories": {
+"artist": "William Donohoe",
+"file": "mir_52",
+"frame": "1997",
+"number": "52",
+"set": "mir"
+},
 "Ancient Kavu": {
 "artist": "Glen Angus",
 "file": "inv_136",
@@ -1189,6 +1196,13 @@
 "number": "59",
 "set": "mmq"
 },
+"Balshan Beguiler": {
+"artist": "Ray Lago",
+"file": "ody_66",
+"frame": "1997",
+"number": "66",
+"set": "ody"
+},
 "Balshan Collaborator": {
 "artist": "DiTerlizzi",
 "file": "tor_25",
@@ -1209,6 +1223,13 @@
 "frame": "1997",
 "number": "91",
 "set": "tor"
+},
+"Bamboozle": {
+"artist": "Alan Pollack",
+"file": "ody_68",
+"frame": "1997",
+"number": "68",
+"set": "ody"
 },
 "Bandage": {
 "artist": "Rebecca Guay",
@@ -2008,6 +2029,13 @@
 "number": "82",
 "set": "jud"
 },
+"Browse": {
+"artist": "Phil Foglio",
+"file": "all_25",
+"frame": "1993",
+"number": "25",
+"set": "all"
+},
 "Brushland": {
 "artist": "Bryon Wackwitz",
 "file": "ice_352",
@@ -2147,6 +2175,13 @@
 "frame": "1997",
 "number": "316",
 "set": "tmp"
+},
+"Call of the Wild": {
+"artist": "Brom",
+"file": "wth_122",
+"frame": "1997",
+"number": "122",
+"set": "wth"
 },
 "Call to the Grave": {
 "artist": "Daren Bader",
@@ -2763,6 +2798,13 @@
 "frame": "1997",
 "number": "7",
 "set": "usg"
+},
+"Clear the Land": {
+"artist": "Bradley Williams",
+"file": "mmq_235",
+"frame": "1997",
+"number": "235",
+"set": "mmq"
 },
 "Clergy en-Vec": {
 "artist": "Heather Hudson",
@@ -3821,6 +3863,13 @@
 "number": "129",
 "set": "ody"
 },
+"Diabolic Vision": {
+"artist": "Anthony S. Waters",
+"file": "ice_284",
+"frame": "1993",
+"number": "284",
+"set": "ice"
+},
 "Didgeridoo": {
 "artist": "Melissa A. Benson",
 "file": "hml_105",
@@ -4682,6 +4731,13 @@
 "number": "14",
 "set": "mir"
 },
+"Enlistment Officer": {
+"artist": "Wayne England",
+"file": "apc_9",
+"frame": "1997",
+"number": "9",
+"set": "apc"
+},
 "Enormous Baloth": {
 "artist": "Mark Tedin",
 "file": "lgn_125",
@@ -4891,6 +4947,13 @@
 "frame": "1997",
 "number": "294",
 "set": "mmq"
+},
+"Eye of Yawgmoth": {
+"artist": "DiTerlizzi",
+"file": "nem_129",
+"frame": "1997",
+"number": "129",
+"set": "nem"
 },
 "Face of Fear": {
 "artist": "Thomas M. Baxa",
@@ -6292,6 +6355,13 @@
 "number": "103",
 "set": "p02"
 },
+"Goblin Ringleader": {
+"artist": "Mark Romanoski",
+"file": "apc_62",
+"frame": "1997",
+"number": "62",
+"set": "apc"
+},
 "Goblin Scouts": {
 "artist": "Geofrey Darrow",
 "file": "mir_178",
@@ -6466,6 +6536,13 @@
 "frame": "1997",
 "number": "327",
 "set": "mir"
+},
+"Grave Defiler": {
+"artist": "Tony Szczudlo",
+"file": "apc_40",
+"frame": "1997",
+"number": "40",
+"set": "apc"
 },
 "Graveborn Muse": {
 "artist": "Kev Walker",
@@ -7230,6 +7307,13 @@
 "number": "40",
 "set": "ons"
 },
+"Impulse": {
+"artist": "Bryan Talbot",
+"file": "vis_34",
+"frame": "1997",
+"number": "34",
+"set": "vis"
+},
 "Infantry Veteran": {
 "artist": "Christopher Rush",
 "file": "vis_9",
@@ -7683,6 +7767,13 @@
 "file": "apc_64",
 "frame": "1997",
 "number": "64",
+"set": "apc"
+},
+"Kavu Howler": {
+"artist": "Wayne England",
+"file": "apc_79",
+"frame": "1997",
+"number": "79",
 "set": "apc"
 },
 "Kavu Lair": {
@@ -9365,6 +9456,13 @@
 "number": "208",
 "set": "ody"
 },
+"Mulch": {
+"artist": "Rebecca Guay",
+"file": "sth_110",
+"frame": "1997",
+"number": "110",
+"set": "sth"
+},
 "Multani's Harmony": {
 "artist": "Darrell Riche",
 "file": "pls_84",
@@ -10701,6 +10799,13 @@
 "frame": "1997",
 "number": "162",
 "set": "ons"
+},
+"Prophetic Bolt": {
+"artist": "Dave Dorman",
+"file": "apc_116",
+"frame": "1997",
+"number": "116",
+"set": "apc"
 },
 "Prosperity": {
 "artist": "Dan Frazier",
@@ -12291,6 +12396,13 @@
 "number": "115",
 "set": "nem"
 },
+"Sealed Fate": {
+"artist": "Terese Nielsen",
+"file": "mir_282",
+"frame": "1997",
+"number": "282",
+"set": "mir"
+},
 "Searing Flesh": {
 "artist": "Pete Venters",
 "file": "ons_225",
@@ -13088,6 +13200,13 @@
 "frame": "1997",
 "number": "67",
 "set": "ulg"
+},
+"Sleight of Hand": {
+"artist": "Phil Foglio",
+"file": "p02_46",
+"frame": "1997",
+"number": "46",
+"set": "p02"
 },
 "Slice and Dice": {
 "artist": "Mark Brill",
@@ -14300,6 +14419,13 @@
 "number": "52",
 "set": "4ed"
 },
+"Sylvan Messenger": {
+"artist": "Heather Hudson",
+"file": "apc_87",
+"frame": "1997",
+"number": "87",
+"set": "apc"
+},
 "Sylvan Safekeeper": {
 "artist": "Pete Venters",
 "file": "jud_133",
@@ -14684,6 +14810,13 @@
 "frame": "1997",
 "number": "108",
 "set": "mmq"
+},
+"Tidal Courier": {
+"artist": "Wayne England",
+"file": "apc_31",
+"frame": "1997",
+"number": "31",
+"set": "apc"
 },
 "Tidal Kraken": {
 "artist": "Christopher Moeller",
@@ -16505,6 +16638,13 @@
 "number": "142",
 "set": "exo"
 },
+"Worldly Counsel": {
+"artist": "Gary Ruddell",
+"file": "inv_89",
+"frame": "1997",
+"number": "89",
+"set": "inv"
+},
 "Worldly Tutor": {
 "artist": "David O'Connor",
 "file": "mir_255",
@@ -16692,6 +16832,13 @@
 "file": "ody_171",
 "frame": "1997",
 "number": "171",
+"set": "ody"
+},
+"Zoologist": {
+"artist": "Alex Horley-Orlandelli",
+"file": "ody_285",
+"frame": "1997",
+"number": "285",
 "set": "ody"
 },
 "Zuberi, Golden Feather": {

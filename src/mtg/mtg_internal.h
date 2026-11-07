@@ -37,6 +37,7 @@ enum {
     MTG_API_GAIN_CONTROL,     // GainControlEffect: each target's controller becomes NewController$ (LoseControl$: until)
     MTG_API_PUT_COUNTER_ALL,  // CountersPutAllEffect
     MTG_API_REMOVE_COUNTER,   // CountersRemoveEffect
+    MTG_API_DIG,              // DigEffect: the top DigNum$ cards, ChangeNum$ of them to DestinationZone$, the rest to DestinationZone2$
     MTG_API_COUNT
 };
 

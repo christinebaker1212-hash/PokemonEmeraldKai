@@ -16,13 +16,13 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL}, {"Animate", MTG_API_ANIMATE},
     {"DelayedTrigger", MTG_API_DELAYED_TRIGGER}, {"PreventDamage", MTG_API_PREVENT_DAMAGE},
     {"GainControl", MTG_API_GAIN_CONTROL}, {"PutCounterAll", MTG_API_PUT_COUNTER_ALL},
-    {"RemoveCounter", MTG_API_REMOVE_COUNTER},
+    {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
-    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter",
+    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -530,6 +530,97 @@ static unsigned ZoneList(const char *s)
 }
 
 // a search's find: to its destination (onto the battlefield under the searcher's control, tapped if it says)
+static int LibPosKnown(const MtgAbility *ab, int *pos);
+
+// DigEffect's zones: "Hand", "Graveyard", "Exile", "Battlefield", "Library" (-1: not one it knows)
+static int DigZone(const char *s, int deflt)
+{
+    if (!s)
+        return deflt;
+    return strcmp(s, "Hand") == 0 ? MTG_ZONE_HAND : strcmp(s, "Graveyard") == 0 ? MTG_ZONE_GRAVEYARD
+         : strcmp(s, "Exile") == 0 ? MTG_ZONE_EXILE : strcmp(s, "Battlefield") == 0 ? MTG_ZONE_BATTLEFIELD
+         : strcmp(s, "Library") == 0 ? MTG_ZONE_LIBRARY : -1;
+}
+
+// the top n cards of a player's library (top first)
+static int TopCards(const MtgDuel *d, int player, int n, uint16_t *out)
+{
+    const MtgPlayer *pl = &d->players[player];
+    int k, m = 0;
+    for (k = pl->libraryCount - 1; k >= 0 && m < n && m < MTG_MAX_COMBAT; k--)
+        out[m++] = pl->library[k];
+    return m;
+}
+
+static void DigMove(MtgDuel *d, int obj, int zone, int pos, int tapped, int controller)
+{
+    if (zone == MTG_ZONE_LIBRARY) {
+        Mtg_PutInLibrary(d, obj, pos);
+        return;
+    }
+    if (zone == MTG_ZONE_BATTLEFIELD)
+        d->objs[obj].controller = (uint8_t)controller;
+    Mtg_MoveTo(d, obj, zone);
+    if (zone == MTG_ZONE_BATTLEFIELD && tapped)
+        Mtg_Tap(d, obj, 1);
+}
+
+// DigEffect: each player of who looks at their top DigNum$; ChangeNum$ (a number, or All) of the ChangeValid$ ones go
+// to DestinationZone$ (Hand), picked one at a time by the controller; the rest to DestinationZone2$ (the library's
+// bottom, LibraryPosition2$ 0: its top). resPicks counts the picks (player = resPicks / k). 1 when done, 0 while waiting.
+static int Dig(MtgDuel *d, const MtgResolveCtx *ctx, const MtgAbility *ab, const Defined *who)
+{
+    const char *cn = Mtg_Param(ab, "ChangeNum"), *cv = Mtg_Param(ab, "ChangeValid"), *tp = Mtg_Param(ab, "Tapped");
+    int ok, num = Mtg_Amount(d, ctx, ab->card, Mtg_Param(ab, "DigNum"), &ok);
+    int all = cn && strcmp(cn, "All") == 0, k = all ? 1 : cn ? Mtg_Amount(d, ctx, ab->card, cn, &ok) : 1;
+    int z1 = DigZone(Mtg_Param(ab, "DestinationZone"), MTG_ZONE_HAND), z2 = DigZone(Mtg_Param(ab, "DestinationZone2"), MTG_ZONE_LIBRARY);
+    int p1 = 0, p2 = -1, tapped = tp && strcmp(tp, "True") == 0;
+    if (Mtg_Param(ab, "LibraryPosition"))
+        LibPosKnown(ab, &p1);
+    if (Mtg_Param(ab, "LibraryPosition2"))
+        p2 = atoi(Mtg_Param(ab, "LibraryPosition2"));
+    if (k < 1)
+        k = 1;
+    for (;;) {
+        uint16_t top[MTG_MAX_COMBAT], list[MTG_MAX_COMBAT];
+        int pi = d->resPicks / k, picked = d->resPicks % k, p, n, m = 0, i;
+        if (pi >= who->n)
+            return 1;
+        p = who->t[pi].id;
+        if (who->t[pi].kind != MTG_TGT_PLAYER) {
+            d->resPicks = (uint8_t)((pi + 1) * k);
+            continue;
+        }
+        n = TopCards(d, p, num - picked, top);
+        for (i = 0; i < n; i++)
+            if (!cv || Mtg_ValidObj(d, top[i], cv, ctx->source, ctx->controller))
+                list[m++] = top[i];
+        if (all || m <= k - picked || (d->resChoice >= 0)) {
+            if (d->resChoice >= 0 && !all && m > k - picked) {   // (the controller's pick)
+                for (i = 0; i < m && list[i] != d->resChoice; i++)
+                    ;
+                if (i < m)
+                    DigMove(d, list[i], z1, p1, tapped, ctx->controller);
+                d->resChoice = -1;
+                d->resPicks++;
+                if (d->resPicks % k)
+                    continue;
+                picked = k;
+            } else {   // (no choice: every one that may go)
+                for (i = 0; i < m; i++)
+                    DigMove(d, list[i], z1, p1, tapped, ctx->controller);
+                picked += m;
+            }
+            n = TopCards(d, p, num - picked, top);   // (the rest)
+            for (i = 0; i < n; i++)
+                DigMove(d, top[i], z2, p2, 0, ctx->controller);
+            d->resPicks = (uint8_t)((pi + 1) * k);
+            continue;
+        }
+        return AskPick(d, ctx->controller, list, m);
+    }
+}
+
 static int sFoundZone, sFoundTapped, sFoundCtrl, sFoundPos;
 static void FoundOne(MtgDuel *d, int obj)
 {
@@ -1018,6 +1109,9 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                 Mtg_AddCountersKind(d, who.t[i].id, kind, n);
         break;
     }
+    case MTG_API_DIG:   // DigEffect: You (or Defined$ / a target player)
+        Targets(d, ctx, ab, DEF_PLAYER, &who);
+        return Dig(d, ctx, ab, &who);
     case MTG_API_PUT_COUNTER_ALL: {   // CountersPutAllEffect: on every ValidCards$ permanent
         int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "CounterNum"), &ok);
         int kind = Mtg_CounterKind(Mtg_Param(ab, "CounterType"));
@@ -1124,6 +1218,8 @@ static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_PREVENT_DAMAGE] = {"Amount"},
     [MTG_API_GAIN_CONTROL] = {"NewController", "LoseControl", "Untap", "AddKWs"},
     [MTG_API_PUT_COUNTER_ALL] = {"CounterType", "CounterNum", "ValidCards"},
+    [MTG_API_DIG] = {"DigNum", "ChangeNum", "ChangeValid", "DestinationZone", "DestinationZone2", "LibraryPosition2",
+                     "Reveal", "NoReveal", "Tapped", "LibraryPosition"},
     [MTG_API_REMOVE_COUNTER] = {"CounterType", "CounterNum"},
     [MTG_API_DELAYED_TRIGGER] = {"Mode", "Phase", "ValidPlayer", "Execute", "RememberObjects", "NextTurn",
                                  "TriggerDescription", "Secondary"},
@@ -1341,6 +1437,17 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     case MTG_API_PUT_COUNTER:
         v = Mtg_Param(ab, "CounterType");
         return Mtg_CounterKind(v) > 0 && AmountKnown(ab, "CounterNum", 1);   // (no target: on itself)
+    case MTG_API_DIG: {
+        const char *cn = Mtg_Param(ab, "ChangeNum"), *cv = Mtg_Param(ab, "ChangeValid"), *lp2 = Mtg_Param(ab, "LibraryPosition2");
+        int z1 = DigZone(Mtg_Param(ab, "DestinationZone"), MTG_ZONE_HAND), z2 = DigZone(Mtg_Param(ab, "DestinationZone2"), MTG_ZONE_LIBRARY), pos;
+        if (!AmountKnown(ab, "DigNum", 1) || z1 < 0 || z2 < 0 || z1 == MTG_ZONE_LIBRARY || (cv && !Mtg_ValidSpecKnown(cv)))
+            return 0;   // (to the library first: its picks would come back among the top cards)
+        if (cn && strcmp(cn, "All") && !AmountKnown(ab, "ChangeNum", 1))
+            return 0;
+        if (lp2 && strcmp(lp2, "0") && strcmp(lp2, "-1"))
+            return 0;
+        return LibPosKnown(ab, &pos);
+    }
     case MTG_API_PUT_COUNTER_ALL:
         return Mtg_CounterKind(Mtg_Param(ab, "CounterType")) > 0 && AmountKnown(ab, "CounterNum", 1)
             && (v = Mtg_Param(ab, "ValidCards")) && Mtg_ValidSpecKnown(v);
