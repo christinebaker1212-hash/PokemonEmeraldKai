@@ -1,0 +1,6 @@
+# MAGIC's GainControl on the table: THREATEN takes the opponent's LLANOWAR ELVES until end of turn (untapped, haste): it
+# moves to our side ("You gain control of Llanowar Elves."). Shots ct_target, ct_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Threaten on Llanowar Elves" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Threaten to focus")

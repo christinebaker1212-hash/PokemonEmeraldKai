@@ -33,6 +33,8 @@ enum {
     MTG_KW_COUNT
 };
 #define MTG_KW_BIT(k) (1u << (k))
+// GainControlEffect's LoseControl$: back at end of turn, when its source leaves play, changes controller, or untaps
+enum { MTG_CTRL_EOT = 1, MTG_CTRL_LEAVES = 2, MTG_CTRL_LOSE = 4, MTG_CTRL_UNTAP = 8 };
 // until-end-of-turn extras a Pump$ gives (tempKeywords only, past the keywords): landwalk by basic type (bit 16 +
 // MTG_W..MTG_G), "CARDNAME can't block.", "CARDNAME can't attack."
 #define MTG_ANIM_NO_PT (-128)
@@ -122,6 +124,9 @@ typedef struct {
     int8_t animPower, animToughness;   // its base power / toughness (MTG_ANIM_NO_PT: its own)
     uint32_t animKeywords;
     uint8_t ctrlBase;             // under a static's control (Control Magic): its controller before + 1 (0: none)
+    uint8_t effCtrl;              // under a GainControl effect's: its new controller + 1 (0: none; a static still wins)
+    uint8_t effUntil;             // when that ends (MTG_CTRL_*: 0 for good)
+    uint16_t effSource;           // the card the effect lasts by (LeavesPlay / LoseControl / Untap)
     uint32_t seq;                 // order within its zone (higher = newer; the library's top is the highest)
 } MtgObj;
 
@@ -228,7 +233,8 @@ enum {
     MTG_EV_COUNTERS,  // a = the object, b = +1/+1 counters added (negative: -1/-1), c = its counters now
     MTG_EV_REGENERATE, // a = the object: destroyed, it regenerated instead (tapped, out of combat, damage gone);
                        // b = 0 that, 1 a shield given (c = its shields now)
-    MTG_EV_PREVENTED   // a = the source, b = what it was dealt to (an object, or -1 - player), c = how much was prevented
+    MTG_EV_PREVENTED,  // a = the source, b = what it was dealt to (an object, or -1 - player), c = how much was prevented
+    MTG_EV_CONTROL     // a = the object, b = its new controller
 };
 typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;   // a, b, c by kind (mtg_game.c Mtg_Event)
 

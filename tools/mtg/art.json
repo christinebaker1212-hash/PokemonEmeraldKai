@@ -314,6 +314,13 @@
 "number": "2",
 "set": "mmq"
 },
+"Aladdin": {
+"artist": "Julie Baroh",
+"file": "bchr_44",
+"frame": "1993",
+"number": "44",
+"set": "bchr"
+},
 "Aladdin's Ring": {
 "artist": "Dan Frazier",
 "file": "4ed_292",
@@ -2491,6 +2498,13 @@
 "number": "19",
 "set": "apc"
 },
+"Chamber of Manipulation": {
+"artist": "Wayne England",
+"file": "ody_76",
+"frame": "1997",
+"number": "76",
+"set": "ody"
+},
 "Chambered Nautilus": {
 "artist": "John Matson",
 "file": "mmq_64",
@@ -3016,6 +3030,13 @@
 "number": "93",
 "set": "tor"
 },
+"Crag Saurian": {
+"artist": "Matthew D. Wilson",
+"file": "mmq_185",
+"frame": "1997",
+"number": "185",
+"set": "mmq"
+},
 "Crash": {
 "artist": "Doug Chaffee",
 "file": "mmq_186",
@@ -3246,6 +3267,13 @@
 "frame": "1997",
 "number": "299",
 "set": "mir"
+},
+"Custody Battle": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "ons_197",
+"frame": "1997",
+"number": "197",
+"set": "ons"
 },
 "Cyclopean Mummy": {
 "artist": "Edward P. Beard, Jr.",
@@ -4485,6 +4513,13 @@
 "frame": "1997",
 "number": "284",
 "set": "tmp"
+},
+"Empress Galina": {
+"artist": "Matt Cavotta",
+"file": "inv_54",
+"frame": "1997",
+"number": "54",
+"set": "inv"
 },
 "Empyrial Armor": {
 "artist": "D. Alexander Gregory",
@@ -6649,6 +6684,13 @@
 "number": "145",
 "set": "vis"
 },
+"Helm of Possession": {
+"artist": "Janet Aulisio",
+"file": "tmp_291",
+"frame": "1997",
+"number": "291",
+"set": "tmp"
+},
 "Henge Guardian": {
 "artist": "Chippy",
 "file": "mmq_297",
@@ -6732,6 +6774,13 @@
 "frame": "1993",
 "number": "201",
 "set": "4ed"
+},
+"Hivis of the Scale": {
+"artist": "Andrew Robinson",
+"file": "mir_182",
+"frame": "1997",
+"number": "182",
+"set": "mir"
 },
 "Hoar Shade": {
 "artist": "Richard Thomas",
@@ -7299,6 +7348,20 @@
 "frame": "1997",
 "number": "26",
 "set": "mmq"
+},
+"Jinxed Idol": {
+"artist": "John Matson",
+"file": "tmp_293",
+"frame": "1997",
+"number": "293",
+"set": "tmp"
+},
+"Jinxed Ring": {
+"artist": "M. W. Kaluta & DiTerlizzi",
+"file": "sth_137",
+"frame": "1997",
+"number": "137",
+"set": "sth"
 },
 "Jokulhaups": {
 "artist": "Richard Thomas",
@@ -9666,6 +9729,13 @@
 "number": "160",
 "set": "ons"
 },
+"Overtaker": {
+"artist": "Clyde Caldwell",
+"file": "pmmq_89",
+"frame": "1997",
+"number": "89",
+"set": "pmmq"
+},
 "Ovinomancer": {
 "artist": "Kev Walker",
 "file": "mgb_2",
@@ -11297,6 +11367,13 @@
 "number": "36",
 "set": "mir"
 },
+"Ritual of the Machine": {
+"artist": "Anson Maddocks",
+"file": "all_59",
+"frame": "1993",
+"number": "59",
+"set": "all"
+},
 "River Boa": {
 "artist": "Steve White",
 "file": "vis_118",
@@ -11450,6 +11527,13 @@
 "frame": "1993",
 "number": "157",
 "set": "4ed"
+},
+"Rubinia Soulsinger": {
+"artist": "Rob Alexander",
+"file": "bchr_83",
+"frame": "1993",
+"number": "83",
+"set": "bchr"
 },
 "Ruby Leech": {
 "artist": "Jacques Bredy",
@@ -12669,6 +12753,13 @@
 "number": "55",
 "set": "pls"
 },
+"Sleeper Agent": {
+"artist": "Randy Gallegos",
+"file": "usg_159",
+"frame": "1997",
+"number": "159",
+"set": "usg"
+},
 "Sleeper's Guile": {
 "artist": "Daren Bader",
 "file": "ulg_67",
@@ -12717,6 +12808,13 @@
 "frame": "1997",
 "number": "114",
 "set": "ons"
+},
+"Sliver Overlord": {
+"artist": "Tony Szczudlo",
+"file": "scg_139",
+"frame": "1997",
+"number": "139",
+"set": "scg"
 },
 "Sliver Queen": {
 "artist": "Ron Spencer",
@@ -14076,6 +14174,13 @@
 "number": "166",
 "set": "mmq"
 },
+"Threaten": {
+"artist": "Mark Brill",
+"file": "ons_241",
+"frame": "1997",
+"number": "241",
+"set": "ons"
+},
 "Thriss, Nantuko Primus": {
 "artist": "John Avon",
 "file": "jud_134",
@@ -14250,6 +14355,13 @@
 "frame": "1993",
 "number": "87",
 "set": "bchr"
+},
+"Tolarian Entrancer": {
+"artist": "Bryan Talbot",
+"file": "wth_56",
+"frame": "1997",
+"number": "56",
+"set": "wth"
 },
 "Tonic Peddler": {
 "artist": "Adam Rex",
@@ -15524,6 +15636,13 @@
 "frame": "1993",
 "number": "287",
 "set": "4ed"
+},
+"Wellspring": {
+"artist": "Susan Van Camp",
+"file": "mir_288",
+"frame": "1997",
+"number": "288",
+"set": "mir"
 },
 "Wellwisher": {
 "artist": "Christopher Rush",

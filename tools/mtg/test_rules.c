@@ -1461,6 +1461,44 @@ static void TestPrevent(void)
     CHECK(sD.objs[bears].prevent == 0, "gone at end of turn");
 }
 
+// GainControl: Threaten's until end of turn (untapped, haste), Aladdin's for as long as it stays
+static void TestControl(void)
+{
+    int threaten, bears, aladdin, thopter, shock, i;
+    static const char *const cards[] = {"Threaten", "Aladdin", "Jinxed Idol", "Helm of Possession", "Sleeper Agent",
+                                        "Rubinia Soulsinger", NULL};
+    printf("gain control: until end of turn, while its source stays\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Threaten: theirs until end of turn, untapped, with haste
+    Lands(0, "Mountain", 3);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    sD.objs[bears].tapped = 1;
+    threaten = Put(0, "Threaten", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, threaten, MTG_TGT_OBJ, bears);
+    PassBoth();
+    Mtg_RefreshQuery(&sD);
+    CHECK(sD.objs[bears].controller == 0 && !sD.objs[bears].tapped
+          && (Mtg_Keywords(&sD, bears) & MTG_KW_BIT(MTG_KW_HASTE)), "ours, untapped, hasty");
+    GoTo(1, MTG_STEP_DRAW);
+    CHECK(sD.objs[bears].controller == 1, "back to them after the turn");
+
+    Table();   // Aladdin: their artifact for as long as we control Aladdin
+    Lands(0, "Mountain", 4);
+    aladdin = Put(0, "Aladdin", MTG_ZONE_BATTLEFIELD);
+    thopter = Put(1, "Ornithopter", MTG_ZONE_BATTLEFIELD);
+    shock = Put(0, "Shock", MTG_ZONE_HAND);
+    Do(MTG_ACT_ACTIVATE, aladdin, MTG_TGT_OBJ, thopter);
+    PassBoth();
+    Mtg_RefreshQuery(&sD);
+    CHECK(sD.objs[thopter].controller == 0, "the Ornithopter is ours");
+    Do(MTG_ACT_CAST, shock, MTG_TGT_OBJ, aladdin);
+    PassBoth();
+    Mtg_RefreshQuery(&sD);
+    CHECK(Zone(aladdin) == MTG_ZONE_GRAVEYARD && sD.objs[thopter].controller == 1, "Aladdin gone: it goes back");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -1796,6 +1834,7 @@ int main(int argc, char **argv)
     TestUnless();
     TestDelayed();
     TestPrevent();
+    TestControl();
     TestDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
     return sFails != 0;

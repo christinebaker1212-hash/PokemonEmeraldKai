@@ -110,6 +110,8 @@ static void ResetPermanentState(MtgObj *o)
     o->attachedTo = MTG_NO_OBJ;
     o->regen = 0;
     o->animUntil = 0;
+    o->effCtrl = o->effUntil = 0;
+    o->effSource = MTG_NO_OBJ;
 }
 
 // GameAction.changeZone: a card moves (to the library's top when it goes there); a permanent leaving forgets its state
@@ -282,6 +284,46 @@ static uint8_t Mtg_AuraOwnProtection(int def)
 }
 
 // GameAction.checkStateEffects
+// control from statics (Control Magic: layer 2) and GainControl effects, back when they end; 1 if any changed
+static int ControlLayer(MtgDuel *d)
+{
+    int i, changed = 0;
+    for (i = 0; i < d->objCount; i++) {
+        MtgObj *o = &d->objs[i];
+        int want, now;
+        if (o->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        if (o->effCtrl && o->effUntil && o->effSource != MTG_NO_OBJ) {   // (LoseControl$: its source's state)
+            const MtgObj *s = &d->objs[o->effSource];
+            if (((o->effUntil & MTG_CTRL_LEAVES) && s->zone != MTG_ZONE_BATTLEFIELD)
+                || ((o->effUntil & MTG_CTRL_LOSE) && s->zone == MTG_ZONE_BATTLEFIELD && s->controller != o->effCtrl - 1)
+                || ((o->effUntil & MTG_CTRL_UNTAP) && !s->tapped))
+                o->effCtrl = 0;
+        }
+        want = Mtg_StaticController(d, i);
+        if (want < 0 && o->effCtrl)
+            want = o->effCtrl - 1;
+        if (want >= 0 && !o->ctrlBase)
+            o->ctrlBase = (uint8_t)(o->controller + 1);
+        now = want >= 0 ? want : o->ctrlBase ? o->ctrlBase - 1 : o->controller;
+        if (want < 0)
+            o->ctrlBase = 0;
+        if (now != o->controller) {   // (a new controller: out of combat, and sick until their turn)
+            int k;
+            o->controller = (uint8_t)now;
+            o->sick = 1;
+            o->attacking = 0;
+            o->blocking = MTG_NO_OBJ;
+            for (k = 0; k < d->objCount; k++)
+                if (d->objs[k].blocking == i)
+                    d->objs[k].blocking = MTG_NO_OBJ;
+            Mtg_Event(d, MTG_EV_CONTROL, i, now, 0);
+            changed = 1;
+        }
+    }
+    return changed;
+}
+
 static void StateBasedActions(MtgDuel *d)
 {
     int again = 1, i, lost[MTG_PLAYERS] = {0, 0};
@@ -298,29 +340,8 @@ static void StateBasedActions(MtgDuel *d)
             d->winner = (int8_t)(lost[0] && lost[1] ? -1 : lost[0] ? 1 : 0);
             return;
         }
-        for (i = 0; i < d->objCount; i++) {   // control from statics (Control Magic: layer 2), back when they end
-            MtgObj *o = &d->objs[i];
-            int want, now;
-            if (o->zone != MTG_ZONE_BATTLEFIELD)
-                continue;
-            want = Mtg_StaticController(d, i);
-            if (want >= 0 && !o->ctrlBase)
-                o->ctrlBase = (uint8_t)(o->controller + 1);
-            now = want >= 0 ? want : o->ctrlBase ? o->ctrlBase - 1 : o->controller;
-            if (want < 0)
-                o->ctrlBase = 0;
-            if (now != o->controller) {   // (a new controller: out of combat, and sick until their turn)
-                int k;
-                o->controller = (uint8_t)now;
-                o->sick = 1;
-                o->attacking = 0;
-                o->blocking = MTG_NO_OBJ;
-                for (k = 0; k < d->objCount; k++)
-                    if (d->objs[k].blocking == i)
-                        d->objs[k].blocking = MTG_NO_OBJ;
-                again = 1;
-            }
-        }
+        if (ControlLayer(d))
+            again = 1;
         for (i = 0; i < d->objCount; i++)   // a token anywhere but the battlefield ceases to exist (704.5d)
             if (d->objs[i].def >= MTG_TOKEN_BASE && d->objs[i].zone != MTG_ZONE_BATTLEFIELD
                 && d->objs[i].zone != MTG_ZONE_NONE)
@@ -1202,7 +1223,10 @@ static void EndOfTurnCleanup(MtgDuel *d)
         o->prevent = 0;
         if (o->animUntil == 1)
             o->animUntil = 0;   // (an Animate until end of turn wears off)
+        if (o->effUntil & MTG_CTRL_EOT)
+            o->effCtrl = 0;     // ("until end of turn": Threaten's)
     }
+    ControlLayer(d);   // (back before the next untap step)
 }
 
 static void NextStep(MtgDuel *d)

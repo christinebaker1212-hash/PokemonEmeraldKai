@@ -34,6 +34,7 @@ enum {
     MTG_API_ANIMATE,          // AnimateEffect: becomes Power$/Toughness$ Types$ Colors$ with Keywords$ (until end of turn)  // ChangeZoneAllEffect: every ChangeType$ card from Origin$ (a target player's) to Destination$
     MTG_API_DELAYED_TRIGGER,  // DelayedTriggerEffect: a one-time trigger set up now (Mode$ Phase: at a later step)
     MTG_API_PREVENT_DAMAGE,   // PreventDamageEffect: the next Amount$ damage to each target this turn is prevented
+    MTG_API_GAIN_CONTROL,     // GainControlEffect: each target's controller becomes NewController$ (LoseControl$: until)
     MTG_API_COUNT
 };
 

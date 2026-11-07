@@ -42,6 +42,10 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.145.0)
+- GainControl effects: COOP_NOTES "MAGIC's control changes". 2322 of 5408. Next by count: replacement effects (96),
+  counters beyond +1/+1 (PutCounter 41), LibraryPosition (40), RepeatEach (36), Dig (35), ChooseType (32).
+
 ## Status (2026-11-07: 1.144.0)
 - PreventDamage shields: COOP_NOTES "MAGIC's damage prevention". 2305 of 5408. Next by count: replacement effects
   (96), counters beyond +1/+1 (PutCounter 41), GainControl (40), LibraryPosition (39), RepeatEach (36), Dig (35).

@@ -216,6 +216,17 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
         if (Mtg_Param(ab, "TokenOwner") && strcmp(Mtg_Param(ab, "TokenOwner"), "You") != 0)
             return 0;
         return main ? 9 : (a->kind == MTG_ACT_ACTIVATE && d->active == opp && d->step == MTG_STEP_END) ? 6 : 0;
+    case MTG_API_GAIN_CONTROL: {   // their best thing: for good, or as long as its source lasts; Threaten on its own turn
+        const char *nc = Mtg_Param(ab, "NewController"), *lc = Mtg_Param(ab, "LoseControl");
+        if (a->target.kind == MTG_TGT_PLAYER && !tgtMine)   // (giving its own curse away: Jinxed Idol)
+            return main ? 6 : 0;
+        if ((nc && strcmp(nc, "You")) || tgtObj < 0 || tgtMine || !main)
+            return 0;
+        if (lc && strstr(lc, "EOT"))   // (until end of turn: only to attack with it, before combat)
+            return d->active == me && d->step == MTG_STEP_MAIN1 && IsCreatureOnField(d, tgtObj)
+                && (!d->objs[tgtObj].tapped || Mtg_Param(ab, "Untap")) ? 8 + Value(d, tgtObj) / 2 : 0;
+        return IsCreatureOnField(d, tgtObj) ? 20 + Value(d, tgtObj) : 12 + Mtg_ManaCostTotal(&Mtg_Card(d->objs[tgtObj].def)->cost);
+    }
     case MTG_API_PREVENT_DAMAGE:   // its own creature about to die, or itself low on life in their attack
         if (tgtObj >= 0)
             return tgtMine && AboutToDie(d, tgtObj, me) && !d->objs[tgtObj].prevent ? 22 + Value(d, tgtObj) : 0;

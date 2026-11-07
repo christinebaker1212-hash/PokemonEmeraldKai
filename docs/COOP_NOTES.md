@@ -3652,6 +3652,23 @@ asks (U.confirm) and clears all six. Test stadium_clear.
 - Tests: test_rules.c TestPrevent (SHOCK into a 1-damage shield, CONSERVATOR on its player, gone at end of turn);
   scenario mtg_prevent.
 
+## MAGIC's control changes (1.145.0)
+
+- MTG_API_GAIN_CONTROL (GainControlEffect): sets MtgObj.effCtrl (new controller + 1), effUntil (LoseControl$ as
+  MTG_CTRL_EOT / LEAVES / LOSE / UNTAP) and effSource; Untap$ True untaps, AddKWs$ (Haste) goes on tempKeywords.
+  NewController$ You (default), ParentTarget or a Triggered... player; a target player with Defined$ ("target opponent
+  gains control of CARDNAME": Jinxed Idol, Custody Battle) is the new controller of the Defined$ card.
+- mtg_game.c ControlLayer (from StateBasedActions and the end of EndOfTurnCleanup, so a Threaten ends before the next
+  untap step): a static's controller (Control Magic) first, else effCtrl, else back to ctrlBase; an effect ends when its
+  source leaves play / changes controller / untaps (its bits), EOT ones at cleanup. A new controller: sick, out of
+  combat, MTG_EV_CONTROL (the board's "You gain control of X."). Zone changes reset it (ResetPermanentState).
+- AI: their best creature for good / while its source lasts in a main phase; Threaten only in its own first main phase
+  on something that can attack; a curse given to the opponent (6).
+- Unlocked 17: THREATEN, ALADDIN, HELM OF POSSESSION, SLEEPER AGENT, RUBINIA SOULSINGER, JINXED IDOL / RING, CUSTODY
+  BATTLE, WELLSPRING... Still out: AllValid$, TargetsForEachPlayer$, Dominate's cmcLEX targets, a second target.
+- Tests: test_rules.c TestControl (THREATEN untapped + haste then back; ALADDIN's artifact back when Aladdin dies);
+  scenario mtg_control.
+
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64

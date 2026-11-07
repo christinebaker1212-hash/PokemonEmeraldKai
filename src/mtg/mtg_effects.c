@@ -15,12 +15,13 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Regenerate", MTG_API_REGENERATE}, {"Token", MTG_API_TOKEN},
     {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL}, {"Animate", MTG_API_ANIMATE},
     {"DelayedTrigger", MTG_API_DELAYED_TRIGGER}, {"PreventDamage", MTG_API_PREVENT_DAMAGE},
+    {"GainControl", MTG_API_GAIN_CONTROL},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
-    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage",
+    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -488,6 +489,33 @@ static void FoundOne(MtgDuel *d, int obj)
         Mtg_Tap(d, obj, 1);
 }
 
+// GainControlEffect's LoseControl$ ("EOT", "LeavesPlay,LoseControl", "Untap,...") as MTG_CTRL_* bits; -1: not known
+static int LoseControlBits(const char *s)
+{
+    char buf[64], *tok, *save;
+    int bits = 0;
+    if (!s)
+        return 0;
+    if (strlen(s) >= sizeof(buf))
+        return -1;
+    strcpy(buf, s);
+    for (save = buf, tok = Mtg_Token(&save, ','); tok; tok = Mtg_Token(&save, ',')) {
+        while (*tok == ' ')
+            tok++;
+        if (strcmp(tok, "EOT") == 0)
+            bits |= MTG_CTRL_EOT;
+        else if (strcmp(tok, "LeavesPlay") == 0)
+            bits |= MTG_CTRL_LEAVES;
+        else if (strcmp(tok, "LoseControl") == 0)
+            bits |= MTG_CTRL_LOSE;
+        else if (strcmp(tok, "Untap") == 0)
+            bits |= MTG_CTRL_UNTAP;
+        else
+            return -1;
+    }
+    return bits;
+}
+
 static uint32_t KeywordList(const char *s, int *ok)   // "Flying & First Strike"
 {
     uint32_t mask = 0;
@@ -657,6 +685,36 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
             o->animOverwrite = (uint8_t)(Mtg_Param(ab, "OverwriteColors") != NULL || (colors >= 0 && Mtg_Param(ab, "Colors")));
             o->animKeywords = kw & ((1u << MTG_KW_COUNT) - 1);
             Mtg_Event(d, MTG_EV_COUNTERS, who.t[i].id, 0, o->counters11);   // (the table redraws it)
+        }
+        break;
+    }
+    case MTG_API_GAIN_CONTROL: {   // GainControlEffect: control changes in the control layer (state-based check)
+        const char *nc = Mtg_Param(ab, "NewController"), *un = Mtg_Param(ab, "Untap");
+        int bits = LoseControlBits(Mtg_Param(ab, "LoseControl")), p = ctx->controller;
+        uint32_t kw = KeywordList(Mtg_Param(ab, "AddKWs"), &ok);
+        if (nc && strcmp(nc, "You")) {
+            Defined np;
+            DefinedBy(d, ctx, nc, &np);
+            if (!np.n)
+                break;
+            p = np.t[0].kind == MTG_TGT_PLAYER ? np.t[0].id : d->objs[np.t[0].id].controller;
+        }
+        if (ab->tgt && ctx->e->target.kind == MTG_TGT_PLAYER && Mtg_Param(ab, "Defined")) {
+            p = ctx->e->target.id;   // ("target opponent gains control of CARDNAME": the target is the new controller)
+            DefinedBy(d, ctx, Mtg_Param(ab, "Defined"), &who);
+        } else
+            Targets(d, ctx, ab, DEF_CARD, &who);
+        for (i = 0; i < who.n; i++) {
+            MtgObj *o;
+            if (!OnBattlefield(d, &who.t[i]))
+                continue;
+            o = &d->objs[who.t[i].id];
+            o->effCtrl = (uint8_t)(p + 1);
+            o->effUntil = (uint8_t)(bits < 0 ? 0 : bits);
+            o->effSource = (uint16_t)ctx->source;
+            if (un)
+                Mtg_Tap(d, who.t[i].id, 0);
+            o->tempKeywords |= kw;
         }
         break;
     }
@@ -959,6 +1017,7 @@ static const char *const sApiParams[MTG_API_COUNT][10] = {
     [MTG_API_ANIMATE] = {"Power", "Toughness", "Types", "Colors", "OverwriteColors", "Keywords", "RemoveCreatureTypes",
                          "Duration"},
     [MTG_API_PREVENT_DAMAGE] = {"Amount"},
+    [MTG_API_GAIN_CONTROL] = {"NewController", "LoseControl", "Untap", "AddKWs"},
     [MTG_API_DELAYED_TRIGGER] = {"Mode", "Phase", "ValidPlayer", "Execute", "RememberObjects", "NextTurn",
                                  "TriggerDescription", "Secondary"},
     [MTG_API_GAIN_LIFE] = {"LifeAmount"},
@@ -1092,6 +1151,16 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     }
     case MTG_API_PREVENT_DAMAGE:
         return AmountKnown(ab, "Amount", 1) && (ab->tgt || Mtg_Param(ab, "Defined"));
+    case MTG_API_GAIN_CONTROL: {
+        const char *nc = Mtg_Param(ab, "NewController"), *un = Mtg_Param(ab, "Untap");
+        KeywordList(Mtg_Param(ab, "AddKWs"), &ok);
+        if (!ok || LoseControlBits(Mtg_Param(ab, "LoseControl")) < 0 || (un && strcmp(un, "True")))
+            return 0;
+        if (nc && strcmp(nc, "You") && strcmp(nc, "ParentTarget")
+            && !(ab->kind != MTG_AB_SPELL && ab->kind != MTG_AB_ACTIVATED && Mtg_TriggeredDefinedKnown(0, nc)))
+            return 0;
+        return ab->tgt || Mtg_Param(ab, "Defined");
+    }
     case MTG_API_DELAYED_TRIGGER: {
         const char *rem = Mtg_Param(ab, "RememberObjects");
         if (!ab->delayed)

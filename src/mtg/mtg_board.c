@@ -1932,6 +1932,15 @@ static int StartEvent(const MtgEvent *e)
             PlaySE(SE_SHINY);
         }
         return Frames(22);
+    case MTG_EV_CONTROL:   // a permanent changes sides
+        if (obj >= 0 && obj < MTG_MAX_OBJS) {
+            v->objs[obj].controller = (uint8_t)e->b;
+            B.flash[obj] = 16;
+            Name(a, sizeof(a), obj);
+            Ticker(e->b == ME ? "You gain control of %s." : "%s gains control of %s.", e->b == ME ? a : B.opp, a);
+            PlaySE(SE_M_TELEPORT);
+        }
+        return Frames(20);
     case MTG_EV_TAP:
         if (obj >= 0 && obj < MTG_MAX_OBJS) {
             v->objs[obj].tapped = (uint8_t)e->b;
