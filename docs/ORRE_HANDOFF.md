@@ -8,10 +8,10 @@ rules, and what each tool does. This file is where things stand, what a new sess
 - **Rip: done and checked.** `tools/orre/make_pack.sh DISC` -> orre/orre3d.pak (174 maps, 764 textures, the grids of
   the maps in the game) and orre/orre_data.pak (text, collision, scripts, floor data, cameras, map tables, character
   models). Never committed (orre/ is ignored).
-- **Shipping: wired, not switched on.** The release step "ORRE's packs" makes MoemonOrre.zip (78 MB) and an update.txt
-  `orre` line; the game downloads it with Updater_Orre* (the DANCE songs' downloader, one `struct Extra` each). It
-  rips only when the `ORRE_DISC_URL` repository secret is set: the user adds it once ORRE is completable and full
-  (their decision, 2026-11-07). No in-game download screen yet.
+- **Shipping: on as soon as the secret is there** (the user, 2026-11-07: "Let's go ahead and ship it"). The release
+  step "ORRE's packs" makes MoemonOrre.zip (78 MB) and an update.txt `orre` line once the `ORRE_DISC_URL` repository
+  secret is set (the disc's link below); the game fetches the packs at launch in the background (updater.c
+  OrrePreWorker) and the boat checks them before sailing (src/orre/orre_ferry.c; ORRE_DECISIONS "As their own zip").
 - **Engine: ORRE's own**, src/orre/o3d.c (+ gx_tex.c, orre_maps.h, include/o3d.h), a copy of SINNOH's that goes its
   own way. Never put ORRE code in src/sinnoh/ or s3d.h (the user, 2026-11-04).
 - **Every map of Orre walks, with every door** (2026-11-07, the user: "the baseline is that all maps will be able to
