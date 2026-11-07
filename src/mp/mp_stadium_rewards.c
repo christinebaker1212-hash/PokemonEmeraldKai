@@ -5,14 +5,16 @@
 //
 // A class won for the first time at a hardness (StadiumSave.cleared keeps a bit for each of the 16) gives:
 // - a prize POKéMON with perfect IVs: 3 of them, one more for each restriction in place (all six from three on), shiny
-//   when won with rentals only or with every restriction; from the cup's rental list (STADIUM's own POKéMON, moves and
+//   in a MASTER BALL class won with rentals only or with every restriction (the user, 2026-11-07); from the cup's rental list (STADIUM's own POKéMON, moves and
 //   nature), the castle's and the CHALLENGE CUP's from STADIUM's gift POKéMON, MEWTWO (Round 1) and MEW (Round 2) for
 //   beating MEWTWO;
 // - RARE CANDIES and PP MAXes, money (more for the higher classes and each restriction), a MASTER BALL for rentals only,
-//   an ASTRAL BALL with every restriction;
-// - the STADIUM RIBBONS on the registered team (the save's three spare gift ribbon slots, MARINE / LAND / SKY: their
-//   words are STADIUM's, gift_ribbon_descriptions.h).
+//   an ASTRAL BALL in a MASTER BALL class with every restriction.
 // Winning again at a hardness already won gives money and a RARE CANDY.
+// Every win (a first one or not) puts the STADIUM RIBBONS on the registered team's own POKéMON that don't have them yet
+// (the save's three spare gift ribbon slots, MARINE / LAND / SKY: their words are STADIUM's,
+// gift_ribbon_descriptions.h): the LEGEND RIBBON with the three restrictions a team of one's own can have (LEVEL CAP,
+// SPECIES, HELD ITEMS; rentals can't carry ribbons, so RENTALS ONLY isn't asked).
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
@@ -136,7 +138,7 @@ static void Give(u16 item, u16 count)
     Line(count > 1 ? "%s x%d" : "%s", name, count);
 }
 
-// The STADIUM RIBBON (slot 0), MASTER (1), LEGEND (2) on the registered team's own POKéMON (the party's and the PC's;
+// The STADIUM RIBBON (slot 0), MASTER (1), LEGEND (2) on the registered team's own POKéMON (how many got it now) (the party's and the PC's;
 // rentals are STADIUM's, the shared and global PCs' copies are friends' to keep as they are)
 static u8 RibbonTeam(u8 cup, u8 slotIndex)
 {
@@ -149,14 +151,16 @@ static u8 RibbonTeam(u8 cup, u8 slotIndex)
     {
         struct StadiumTeamSlot *t = &s->team[cup].slot[i];
         u32 pid = GetBoxMonData(&t->mon, MON_DATA_PERSONALITY), ot = GetBoxMonData(&t->mon, MON_DATA_OT_ID);
-        bool8 found = FALSE;
+        bool8 found = FALSE, had;
         if (t->source != STADIUM_SRC_PARTY && t->source != STADIUM_SRC_BOX)
             continue;
+        had = GetBoxMonData(&t->mon, MON_DATA_MARINE_RIBBON + slotIndex) != 0;
         SetBoxMonData(&t->mon, MON_DATA_MARINE_RIBBON + slotIndex, &one);
         for (j = 0; j < PARTY_SIZE && !found; j++)
             if (GetMonData(&gPlayerParty[j], MON_DATA_SPECIES) != SPECIES_NONE
              && GetMonData(&gPlayerParty[j], MON_DATA_PERSONALITY) == pid && GetMonData(&gPlayerParty[j], MON_DATA_OT_ID) == ot)
             {
+                had = had && GetMonData(&gPlayerParty[j], MON_DATA_MARINE_RIBBON + slotIndex) != 0;
                 SetMonData(&gPlayerParty[j], MON_DATA_MARINE_RIBBON + slotIndex, &one);
                 found = TRUE;
             }
@@ -166,10 +170,11 @@ static u8 RibbonTeam(u8 cup, u8 slotIndex)
                  && GetBoxMonData(&own->boxes[b][p], MON_DATA_PERSONALITY) == pid
                  && GetBoxMonData(&own->boxes[b][p], MON_DATA_OT_ID) == ot)
                 {
+                    had = had && GetBoxMonData(&own->boxes[b][p], MON_DATA_MARINE_RIBBON + slotIndex) != 0;
                     SetBoxMonData(&own->boxes[b][p], MON_DATA_MARINE_RIBBON + slotIndex, &one);
                     found = TRUE;
                 }
-        given += found;
+        given += found && !had;   // (only the ones that didn't have it yet: the result screen's line)
     }
     return given;
 }
@@ -181,6 +186,8 @@ void StadiumRewards_CupWon(u8 round, u8 cup, u8 tier, u8 hardness, bool8 first)
     u8 points = Points(hardness), perfect, k;
     bool8 rentals = (hardness & STADIUM_HARD_RENTALS) != 0, all = hardness == STADIUM_HARD_ALL;
     bool8 challenge = cup == STADIUM_CUP_CHALLENGE;
+    bool8 masterClass = tier == 3 && StadiumCup_Info(cup)->tiers == 4;   // (the shiny and the ASTRAL BALL: the user)
+    const u8 ownHard = STADIUM_HARD_LEVEL | STADIUM_HARD_SPECIES | STADIUM_HARD_ITEMS;
     u32 money;
     memset(&sPrize, 0, sizeof(sPrize));
     sPrize.first = first;
@@ -191,6 +198,20 @@ void StadiumRewards_CupWon(u8 round, u8 cup, u8 tier, u8 hardness, bool8 first)
     money = money * (round + 1) * (first ? 1 + points : 1) / (first ? 1 : 5);
     AddMoney(&gSaveBlock1Ptr->money, money);
     snprintf(sPrize.line[sPrize.count++], sizeof(sPrize.line[0]), "MONEY %u", (unsigned)money);
+    // the ribbons, on every win: the team's own POKéMON that don't have them yet
+    if (!challenge)
+    {
+        bool8 master = tier == 3 || cup == STADIUM_CUP_CASTLE || cup == STADIUM_CUP_MEWTWO;
+        bool8 legend = (hardness & ownHard) == ownHard;
+        for (k = 0; k < 3; k++)
+            if (k == 0 || (k == 1 && master) || (k == 2 && legend))
+            {
+                u8 n = RibbonTeam(cup, k);
+                if (n)
+                    Line("%s x%d", sRibbonNames[k] + (k ? 8 : 0), n);   // ("MASTER RIBBON x6": the panel's column)
+                MPNet_Log("stadium: %s for %d", sRibbonNames[k], n);
+            }
+    }
     if (!first)
     {
         Give(ITEM_RARE_CANDY, 1);
@@ -202,7 +223,7 @@ void StadiumRewards_CupWon(u8 round, u8 cup, u8 tier, u8 hardness, bool8 first)
     {
         struct Pokemon mon;
         char name[16];
-        bool8 shiny = rentals || all || challenge;
+        bool8 shiny = masterClass && (rentals || all);   // (the CHALLENGE CUP counts as every restriction)
         BuildPrize(&mon, round, cup, perfect, shiny);
         sPrize.species = GetMonData(&mon, MON_DATA_SPECIES);
         sPrize.personality = GetMonData(&mon, MON_DATA_PERSONALITY);
@@ -220,21 +241,8 @@ void StadiumRewards_CupWon(u8 round, u8 cup, u8 tier, u8 hardness, bool8 first)
     Give(ITEM_PP_MAX, points);
     if (rentals)
         Give(ITEM_MASTER_BALL, 1);
-    if (all)
+    if (all && masterClass)
         Give(ITEM_ASTRAL_BALL, 1);
-    // the ribbons
-    if (!challenge)
-    {
-        bool8 master = tier == 3 || cup == STADIUM_CUP_CASTLE || cup == STADIUM_CUP_MEWTWO;
-        for (k = 0; k < 3; k++)
-            if (k == 0 || (k == 1 && master) || (k == 2 && all))
-            {
-                u8 n = RibbonTeam(cup, k);
-                if (n)
-                    Line("%s x%d", sRibbonNames[k] + (k ? 8 : 0), n);   // ("MASTER RIBBON x6": the panel's column)
-                MPNet_Log("stadium: %s for %d", sRibbonNames[k], n);
-            }
-    }
 }
 
 const struct StadiumPrize *StadiumRewards_Last(void)

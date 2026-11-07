@@ -100,7 +100,20 @@ static struct
     u32 spriteAge;
     u16 frame[240 * 160];
     bool8 frameRead;
+    // fades (the user, 2026-11-07: "so that it doesn't seem too janky"): the field fades to black before the screens
+    // fade in (opening, back from a battle or the SUMMARY), the screens fade to black before leaving (closing, a battle,
+    // the SUMMARY), and one screen crossfades into the next (the last picture kept in `snap`)
+    bool8 opening;          // the field fading to black; the screens come once it's done (MP_StadiumUi_Update)
+    u8 black;               // 0 .. FADE_STEPS: how far the screens are faded to black
+    u8 leave;               // LEAVE_*: fading out, then this
+    u8 xfade;               // XFADE_STEPS .. 0: the last screen's picture over the new one
+    u8 drawnKey;            // the screen last drawn (a change starts the crossfade)
+    SDL_Texture *snap;
 } U;
+
+#define FADE_STEPS 10
+#define XFADE_STEPS 8
+enum { LEAVE_NONE, LEAVE_CLOSE, LEAVE_BATTLE, LEAVE_SUMMARY, LEAVE_VS_SUMMARY };
 
 // ---------------------------------------------------------------------------------------------------------------
 // Pictures
@@ -1670,6 +1683,7 @@ SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r)
         memset(U.greyBalls, 0, sizeof(U.greyBalls));
         memset(U.sprites, 0, sizeof(U.sprites));
         U.canvas = NULL;
+        U.snap = NULL;
         U.owner = r;
     }
     if (!U.canvas)
@@ -1681,11 +1695,31 @@ SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r)
         SDL_SetTextureScaleMode(U.canvas, SDL_ScaleModeLinear);
         MakePics(r);
     }
+    if (!U.snap)
+    {
+        U.snap = SDL_CreateTexture(r, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SU_W, SU_H);
+        if (U.snap)
+            SDL_SetTextureBlendMode(U.snap, SDL_BLENDMODE_BLEND);
+    }
     previous = SDL_GetRenderTarget(r);
     SDL_RenderGetViewport(r, &oldViewport);
     clipped = SDL_RenderIsClipEnabled(r);
     SDL_RenderGetClipRect(r, &oldClip);
     SDL_RenderGetScale(r, &oldX, &oldY);
+    {
+        // a new screen: the canvas still holds the last one's picture, kept for the crossfade
+        u8 key = U.screen | (U.rules ? 0x10 : 0);
+        if (key != U.drawnKey && U.drawnKey != 0xFF && U.snap && U.black == 0)
+        {
+            SDL_SetRenderTarget(r, U.snap);
+            SDL_RenderSetViewport(r, NULL);
+            SDL_RenderSetClipRect(r, NULL);
+            SDL_RenderSetScale(r, 1, 1);
+            SDL_RenderCopy(r, U.canvas, NULL, NULL);
+            U.xfade = XFADE_STEPS;
+        }
+        U.drawnKey = key;
+    }
     SDL_SetRenderTarget(r, U.canvas);
     SDL_RenderSetViewport(r, NULL);
     SDL_RenderSetClipRect(r, NULL);
@@ -1703,6 +1737,18 @@ SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r)
     case SCR_VS: DrawVs(); break;
     case SCR_RESULT: DrawResult(); break;
     case SCR_TEAMS: DrawTeams(); break;
+    }
+    SDL_RenderSetScale(r, 1, 1);
+    if (U.xfade && U.snap)
+    {
+        SDL_SetTextureAlphaMod(U.snap, (u8)(255 * U.xfade / (XFADE_STEPS + 1)));
+        SDL_RenderCopy(r, U.snap, NULL, NULL);
+    }
+    if (U.black)
+    {
+        SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(r, 0, 0, 0, U.black >= FADE_STEPS ? 255 : (u8)(255 * U.black / FADE_STEPS));
+        SDL_RenderFillRect(r, NULL);
     }
     U.frameRead = FALSE;
     SDL_SetRenderTarget(r, previous);
@@ -1743,6 +1789,20 @@ bool8 MP_StadiumUi_IsActive(void)
 // ---------------------------------------------------------------------------------------------------------------
 // Input
 
+// Leaving: the screens fade to black first (MP_StadiumUi_Step), then this
+static void StartLeave(u8 what)
+{
+    if (U.leave == LEAVE_NONE)
+        U.leave = what;
+}
+
+// The field back from a battle or the SUMMARY: it stays black, the screens fade in over it (MP_StadiumUi_Update)
+void MP_Stadium_FieldStaysBlack(void)
+{
+    LockPlayerFieldControls();
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 16, RGB_BLACK);
+}
+
 static void Close(void)
 {
     StadiumCup_SaveNow();
@@ -1753,6 +1813,7 @@ static void Close(void)
     U.active = FALSE;
     U.draining = TRUE;
     PlaySE(SE_PC_OFF);
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);   // (the field comes back from black)
     MPNet_Log("stadium: screens closed");
     UnlockPlayerFieldControls();
     ScriptContext_Enable();   // (the attendant's script goes on: data/maps/BattleIsland_Stadium/scripts.inc)
@@ -1764,7 +1825,13 @@ void MP_StadiumUi_Open(void)
     memset(U.note, 0, sizeof(U.note));
     U.mapSong = GetCurrentMapMusic();
     U.song = 0;
-    U.active = TRUE;
+    U.active = FALSE;   // (the field fades to black first: MP_StadiumUi_Update)
+    U.opening = TRUE;
+    U.black = FADE_STEPS;
+    U.leave = LEAVE_NONE;
+    U.xfade = 0;
+    U.drawnKey = 0xFF;
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
     U.screen = SCR_SELECT;
     U.cup = s->lastCup < STADIUM_CUP_COUNT ? s->lastCup : 0;
     U.round = 0;
@@ -1838,6 +1905,11 @@ static void Battle(void)
         snprintf(U.note, sizeof(U.note), "Their levels add up to more than %d.", c->levelSum);
         return;
     }
+    StartLeave(LEAVE_BATTLE);   // (the screens fade out, then the battle: DoLeave)
+}
+
+static void DoBattle(void)
+{
     U.active = FALSE;   // (the battle; the screens come back after it: MP_StadiumUi_Update)
     U.draining = TRUE;
     StadiumCup_StartBattle(AfterBattle);
@@ -1881,6 +1953,7 @@ static void CB2_StadiumSummaryDone(void)
     MPNet_Log("stadium: back from the summary at %d", U.listCursor);
     U.reopen = SCR_REGISTER;
     U.pending = TRUE;
+    gFieldCallback = MP_Stadium_FieldStaysBlack;
     SetMainCallback2(CB2_ReturnToField);
 }
 
@@ -1909,6 +1982,7 @@ static void CB2_StadiumVsSummaryDone(void)
     MPNet_Log("stadium: back from the picks' summary at %d", U.vsCursor);
     U.reopen = SCR_VS;
     U.pending = TRUE;
+    gFieldCallback = MP_Stadium_FieldStaysBlack;
     SetMainCallback2(CB2_ReturnToField);
 }
 
@@ -1930,10 +2004,7 @@ static void Task_OpenVsSummary(u8 taskId)
 static void OpenVsSummary(void)
 {
     PlaySE(SE_SELECT);
-    U.active = FALSE;
-    U.draining = TRUE;
-    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
-    CreateTask(Task_OpenVsSummary, 0);
+    StartLeave(LEAVE_VS_SUMMARY);
 }
 
 static void OpenSummary(void)
@@ -1941,19 +2012,36 @@ static void OpenSummary(void)
     if (U.listCursor >= U.listCount)
         return;
     PlaySE(SE_SELECT);
-    U.active = FALSE;   // (the field fades under nothing; the screens come back after: MP_StadiumUi_Update)
+    StartLeave(LEAVE_SUMMARY);
+}
+
+// The screens are black: away to the summary (the field under them is black already, and stays so)
+static void DoSummary(bool8 vs)
+{
+    U.active = FALSE;   // (the screens come back after: MP_StadiumUi_Update)
     U.draining = TRUE;
-    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
-    CreateTask(Task_OpenSummary, 0);
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 16, RGB_BLACK);
+    CreateTask(vs ? Task_OpenVsSummary : Task_OpenSummary, 0);
 }
 
 // Every frame (MP_FrameUpdate): back to the screens once the battle has handed the field back
 void MP_StadiumUi_Update(void)
 {
-    if (U.pending && MP_IsInOverworld() && !gMain.inBattle)
+    if (U.opening && !gPaletteFade.active)
+    {
+        U.opening = FALSE;   // (the field is black: the screens fade in)
+        U.active = TRUE;
+        U.black = FADE_STEPS;
+        U.drawnKey = 0xFF;
+    }
+    if (U.pending && MP_IsInOverworld() && !gMain.inBattle && !gPaletteFade.active)
     {
         U.pending = FALSE;
         U.active = TRUE;
+        U.black = FADE_STEPS;
+        U.leave = LEAVE_NONE;
+        U.xfade = 0;
+        U.drawnKey = 0xFF;
         U.screen = U.reopen;
         U.song = 0;   // (the field played the map's song meanwhile)
         MPNet_Log("stadium: screens back (%s)", U.reopen == SCR_RESULT ? "result" : "register");
@@ -1998,6 +2086,33 @@ bool8 MP_StadiumUi_Step(u16 keys)
     if (!U.active)
         return FALSE;
     U.age++;
+    if (U.xfade)
+        U.xfade--;
+    if (U.leave != LEAVE_NONE)
+    {
+        // fading out; once black, away
+        U.prevKeys = keys;
+        if (U.black < FADE_STEPS)
+        {
+            U.black++;
+            return TRUE;
+        }
+        switch (U.leave)
+        {
+        case LEAVE_CLOSE: Close(); break;
+        case LEAVE_BATTLE: DoBattle(); break;
+        case LEAVE_SUMMARY: DoSummary(FALSE); break;
+        case LEAVE_VS_SUMMARY: DoSummary(TRUE); break;
+        }
+        U.leave = LEAVE_NONE;
+        return U.active;
+    }
+    if (U.black)
+    {
+        U.black--;   // (fading in: the buttons wait)
+        U.prevKeys = keys;
+        return TRUE;
+    }
     pressed = keys & ~U.prevKeys;
     U.prevKeys = keys;
     if (pressed)
@@ -2006,7 +2121,7 @@ bool8 MP_StadiumUi_Step(u16 keys)
     {
     case SCR_SELECT:
         if (pressed & B_BUTTON)
-            Close();
+            StartLeave(LEAVE_CLOSE);
         else if (pressed & (L_BUTTON | R_BUTTON))
         {
             U.round ^= 1;

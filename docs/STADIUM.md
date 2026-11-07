@@ -92,18 +92,31 @@ results stadium_won / stadium_cup_won / castle / MEWTWO won / stadium_lost. Play
 
 src/mp/mp_stadium_rewards.c. A class won for the first time at a hardness (16 of them: each switch's hard side, so a
 class can be won again harder for more) gives: a prize POKéMON with perfect IVs (3, one more for each restriction in
-place; the others no lower than 15-31), shiny when won with rentals only or with every restriction; from the cup's
-rental list (STADIUM's own POKéMON, moves and nature), the castle's and CHALLENGE CUP's from STADIUM's gift POKéMON
-(BULBASAUR, CHARMANDER, SQUIRTLE, HITMONLEE, HITMONCHAN, EEVEE, OMANYTE, KABUTO), MEWTWO (Round 1) / MEW (Round 2) for
-beating MEWTWO; RARE CANDIES and PP MAXes, money (the class, the round, each restriction); a MASTER BALL for rentals
-only, an ASTRAL BALL with every restriction. The CHALLENGE CUP counts as every restriction (its six are given). A win
-already won at that hardness: money and a RARE CANDY. The result screen lists them (StadiumRewards_Last).
+place; the others no lower than 15-31), shiny only in a MASTER BALL class (POKé / PRIME / CHALLENGE CUP) won with rentals
+only or with every restriction (the user, 2026-11-07); from the cup's rental list (STADIUM's own POKéMON, moves and
+nature), the castle's and CHALLENGE CUP's from STADIUM's gift POKéMON (BULBASAUR, CHARMANDER, SQUIRTLE, HITMONLEE,
+HITMONCHAN, EEVEE, OMANYTE, KABUTO), MEWTWO (Round 1) / MEW (Round 2) for beating MEWTWO; RARE CANDIES and PP MAXes,
+money (the class, the round, each restriction); a MASTER BALL for rentals only, an ASTRAL BALL only in a MASTER BALL
+class with every restriction. The CHALLENGE CUP counts as every restriction (its six are given). A win already won at
+that hardness: money and a RARE CANDY. The result screen lists them (StadiumRewards_Last).
 
 The STADIUM RIBBONS go on the registered team's own POKéMON (party and PC; rentals are STADIUM's, the shared / global
-PCs' copies stay as their owners keep them), in the save's spare gift ribbon slots, so the summary and the POKéNAV show
-them with their own words (gift_ribbon_descriptions.h 65-67, MAX_GIFT_RIBBON 67): STADIUM RIBBON (MARINE's slot, any
-cup), STADIUM MASTER RIBBON (LAND's: a MASTER BALL class, the castle or MEWTWO), STADIUM LEGEND RIBBON (SKY's: every
-restriction).
+PCs' copies stay as their owners keep them) on every win, a repeat one too, so a POKéMON new to the team gets them
+(the result screen counts only the ones that didn't have them yet), in the save's spare gift ribbon slots, so the
+summary and the POKéNAV show them with their own words (gift_ribbon_descriptions.h 65-67, MAX_GIFT_RIBBON 67): STADIUM
+RIBBON (MARINE's slot, any cup but the CHALLENGE CUP), STADIUM MASTER RIBBON (LAND's: a MASTER BALL class, the castle or
+MEWTWO), STADIUM LEGEND RIBBON (SKY's: LEVEL CAP off, SPECIES on and HELD ITEMS off; RENTALS ONLY isn't asked, as
+rentals can't carry ribbons: before 1.164.0 it was, so the ribbon reached no one).
+
+The opponents pick their three by a weighted draw (mp_stadium_cup.c StadiumCup_FoePicks): each of their six weighs by
+how its types do against the player's six, squared (cubed in the ULTRA / MASTER BALL classes, the castle and MEWTWO),
+so good matchups come most often but any can; the draw mixes the PC's clock into the game's random numbers (before
+1.164.0 the matchups decided and the same three came every time: the user, "too predictable"). Log "stadium: foe picks".
+
+The screens fade (1.164.0, the user: "so that it doesn't seem too janky"): the field fades to black, then the screens
+fade in; one screen crossfades into the next (the last picture kept, mp_stadium_ui.c U.snap); leaving (B, a battle,
+the SUMMARY) fades them to black first; a battle starts from black (no field transition) and hands back a black field
+(MP_Stadium_FieldStaysBlack) the screens fade in over. Test stadium_fades.
 
 Achievements: the STADIUM tab (mp_achieve.c AK_STADIUM, read from the save's wins, so old wins count): a first win,
 each cup, the castle, MEWTWO, the CHALLENGE CUP, ROUND 2, rentals only (1, 10), every restriction (1, all of ROUND 1),

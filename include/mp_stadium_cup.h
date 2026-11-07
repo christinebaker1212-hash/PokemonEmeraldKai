@@ -111,6 +111,7 @@ void StadiumCup_Begin(u8 round, u8 cup, u8 tier, u8 options);
 bool8 StadiumCup_Advance(void);
 bool8 StadiumCup_UseContinue(void);
 void StadiumCup_StartBattle(void (*after)(bool8 won));
+void MP_Stadium_FieldStaysBlack(void);   // the field back from a battle / the SUMMARY stays black (mp_stadium_ui.c)
 
 // The rewards (src/mp/mp_stadium_rewards.c): what the last cup won gave, for the result screen
 struct StadiumPrize

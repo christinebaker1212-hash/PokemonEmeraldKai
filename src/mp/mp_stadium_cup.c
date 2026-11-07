@@ -2,6 +2,7 @@
 // registered teams, the records ("<save>.stadium"), a run of eight trainers, and its battles on Kai's battle system.
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "global.h"
 #include "mp.h"
 #include "mp_region.h"
@@ -17,6 +18,8 @@
 #include "event_data.h"
 #include "main.h"
 #include "overworld.h"
+#include "palette.h"
+#include "constants/rgb.h"
 #include "pokedex.h"
 #include "pokemon.h"
 #include "pokemon_storage_system.h"
@@ -486,19 +489,34 @@ void StadiumCup_PrepareFoe(void)
     sFoeCount = i;
 }
 
-// STADIUM's opponents pick their three after seeing the player's six: the ones whose types do best against them
+// STADIUM's opponents pick their three after seeing the player's six: a draw weighted by how well each one's types do
+// against them (the better the matchup, the likelier; any of the six can come), sharper in the higher classes, the
+// castle and MEWTWO. The draw mixes the PC's clock into the game's random numbers, so the same six against the same
+// opponent don't always bring the same three (the user, 2026-11-07: "too predictable").
+static u32 PickRandom(void)
+{
+    static u32 sState;
+    if (sState == 0)
+        sState = (u32)clock() * 2654435761u ^ (u32)time(NULL) ^ 0x9E3779B9u;
+    sState ^= Random32() + (u32)clock();
+    sState ^= sState << 13, sState ^= sState >> 17, sState ^= sState << 5;
+    return sState;
+}
+
 void StadiumCup_FoePicks(void)
 {
     struct StadiumRun *r = &sRun;
-    s32 score[PARTY_SIZE];
+    s32 score[PARTY_SIZE], lo = 0;
+    u32 weight[PARTY_SIZE];
     u8 i, j, n = StadiumCup_EntryCount(), want = sFoeCount < STADIUM_PICK ? sFoeCount : STADIUM_PICK;
+    u8 sharp = (r->tier >= 2 || r->cup >= STADIUM_CUP_CASTLE) ? 3 : 2;
     struct Pokemon mine[PARTY_SIZE];
     for (i = 0; i < n; i++)
         StadiumCup_Entry(&mine[i], i);
     for (i = 0; i < sFoeCount; i++)
     {
         u16 fs = GetMonData(&sFoeTeam[i], MON_DATA_SPECIES);
-        score[i] = (Random() % 3);
+        score[i] = 0;
         for (j = 0; j < n; j++)
         {
             u16 ms = GetMonData(&mine[j], MON_DATA_SPECIES);
@@ -508,9 +526,21 @@ void StadiumCup_FoePicks(void)
                     score[i] += GetTypeEffectiveness_Mp(gSpeciesInfo[fs].types[a], gSpeciesInfo[ms].types[b])
                               - GetTypeEffectiveness_Mp(gSpeciesInfo[ms].types[b], gSpeciesInfo[fs].types[a]);
         }
+        if (i == 0 || score[i] < lo)
+            lo = score[i];
+    }
+    for (i = 0; i < sFoeCount; i++)
+    {
+        u32 w = (u32)(score[i] - lo) + 3, k;
+        if (w > 60)
+            w = 60;
+        weight[i] = 1;
+        for (k = 0; k < sharp; k++)
+            weight[i] *= w;
     }
     for (i = 0; i < want; i++)
     {
+        u32 total = 0, roll;
         u8 best = 0xFF;
         for (j = 0; j < sFoeCount; j++)
         {
@@ -518,13 +548,28 @@ void StadiumCup_FoePicks(void)
             bool8 taken = FALSE;
             for (k = 0; k < i; k++)
                 taken |= r->foePicks[k] == j;
-            if (!taken && (best == 0xFF || score[j] > score[best]))
+            if (!taken)
+                total += weight[j];
+        }
+        roll = total ? PickRandom() % total : 0;
+        for (j = 0; j < sFoeCount && best == 0xFF; j++)
+        {
+            u8 k;
+            bool8 taken = FALSE;
+            for (k = 0; k < i; k++)
+                taken |= r->foePicks[k] == j;
+            if (taken)
+                continue;
+            if (roll < weight[j])
                 best = j;
+            else
+                roll -= weight[j];
         }
         r->foePicks[i] = best;
     }
     for (; i < STADIUM_PICK; i++)
         r->foePicks[i] = 0xFF;
+    MPNet_Log("stadium: foe picks %d %d %d", r->foePicks[0], r->foePicks[1], r->foePicks[2]);
 }
 
 // Start a run (the switches, and the CHALLENGE CUP's six for the player)
@@ -572,6 +617,7 @@ static void CB2_EndStadiumBattle(void)
         if (r->lostNone && r->continues < 9)
             r->continues++;
     }
+    gFieldCallback = MP_Stadium_FieldStaysBlack;   // (the screens fade in from black: no field in between)
     SetMainCallback2(CB2_ReturnToField);
     if (sAfterBattle)
         sAfterBattle(won);
@@ -617,9 +663,11 @@ bool8 StadiumCup_UseContinue(void)
     return FALSE;
 }
 
+// The screens faded to black over a field already black (MP_StadiumUi): the battle starts from black, no field
+// transition (it showed the field for a moment)
 static void Task_StartStadiumBattle(u8 taskId)
 {
-    if (IsBattleTransitionDone() == TRUE)
+    if (!gPaletteFade.active && ++gTasks[taskId].data[0] > 2)
     {
         gMain.savedCallback = CB2_EndStadiumBattle;
         SetMainCallback2(CB2_InitBattle);
@@ -657,7 +705,7 @@ void StadiumCup_StartBattle(void (*after)(bool8 won))
     CreateTask(Task_StartStadiumBattle, 1);
     MP_MUSIC_SCENE_HOLD(MUS_VS_TRAINER, MUS_VICTORY_TRAINER);
     PlayMapChosenOrBattleBGM(0);
-    BattleTransition_StartOnField(GetSpecialBattleTransition(B_TRANSITION_GROUP_E_READER));
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 16, RGB_BLACK);   // (it was black already: the screens' fade)
     MPNet_Log("stadium: battle %d against %s", r->trainer + 1, sFoe ? "a STADIUM trainer" : "a CHALLENGE CUP trainer");
 }
 

@@ -1,0 +1,7 @@
+# POKéMON STADIUM's fades: the field fades to black and the screens fade in, a screen crossfades into the next, the
+# screens fade out before a battle (which starts from black, no field transition), and after it the field stays black
+# while the screens fade back in (the PIKA CUP run of stadium_win, with shots along the way).
+MODE=1
+TMO=600
+EXPECT_A=("stadium: screens opened" "stadium: battle 1 against a STADIUM trainer" "stadium: battle 1 won (0 fainted)" "stadium: screens back (result)")
+UNEXPECT_A=("crash" "out of memory")

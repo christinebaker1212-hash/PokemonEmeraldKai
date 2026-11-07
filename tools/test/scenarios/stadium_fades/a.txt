@@ -1,0 +1,125 @@
+pressuntil A field 5000
+mp additem 398 1
+mp battlestyle 1
+mp warp 46,1,9,3
+wait 80
+press UP 4
+wait 10
+rendershotburst open 240 4
+pressuntillog A 3000 screens opened
+wait 60
+rendershotburst cls 300 3
+press DOWN 4
+wait 6
+press DOWN 4
+wait 30
+press DOWN 4
+wait 6
+press DOWN 4
+wait 30
+press DOWN 4
+wait 30
+press DOWN 4
+wait 30
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 4
+press UP 4
+wait 10
+press A 4
+wait 20
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press A 4
+wait 6
+press DOWN 4
+wait 4
+press A 4
+wait 20
+wait 20
+press A 4
+wait 10
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 10
+press SELECT 4
+wait 200
+press RIGHT 4
+wait 60
+press B 4
+wait 300
+press B 4
+wait 10
+press RIGHT 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 40
+press A 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 10
+press SELECT 4
+wait 10
+press B 4
+wait 6
+rendershotburst start 90 3
+press START 4
+pressuntil A action 20000
+mp foehp 1
+mp bmove 98
+pressuntillog A 20000 battle 1 won
+rendershotburst back 500 6
+wait 400
+wait 300
+wait 30
+press A 4
+wait 40
+quit

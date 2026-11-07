@@ -1,5 +1,5 @@
-# POKéMON STADIUM: a PIKA CUP run with six rentals (RENTALS ONLY on) wins its first battle (the foe's team at 1 HP, SWIFT,
-# which never misses); a flawless win earns a continue and the screens come back on the next opponent. The CANDY JAR gets a candy for each foe fainted.
+# POKéMON STADIUM: a PIKA CUP run with six rentals (RENTALS ONLY on) wins its first battle (the foe's team at 1 HP, QUICK ATTACK,
+# which never misses and goes first: the foe picks its three at random); a flawless win earns a continue and the screens come back on the next opponent. The CANDY JAR gets a candy for each foe fainted.
 MODE=1
 TMO=600
 EXPECT_A=("stadium: battle 1 against a STADIUM trainer" "stadium: battle 1 won (0 fainted)" "stadium: screens back (result)" "candy: facility foe species")

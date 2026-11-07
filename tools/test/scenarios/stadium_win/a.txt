@@ -111,7 +111,7 @@ wait 6
 press START 4
 pressuntil A action 20000
 mp foehp 1
-mp bmove 129
+mp bmove 98
 pressuntillog A 20000 battle 1 won
 wait 400
 wait 300

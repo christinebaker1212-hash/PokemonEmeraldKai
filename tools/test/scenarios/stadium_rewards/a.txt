@@ -3,12 +3,14 @@ mp stadiumwin 0 0 0 0
 wait 10
 mp stadiumwin 0 0 0 0
 wait 10
+mp stadiumwin 0 3 0 7
+wait 10
 mp stadiumwin 0 2 3 15
 wait 10
 mp stadiumwin 0 6 0 8 1
-wait 70
+wait 90
 rendershot prizes
 press A 4
-wait 20
+wait 40
 log stadium rewards done
 quit
