@@ -1,0 +1,31 @@
+pressuntil A field 5000
+mp monid 0
+mp monid 1
+mp monid 2
+mp monid 3
+mp monid 4
+mp monid 5
+mp evotarget 2
+mp item 68 9
+mp useitemon 0 68
+mp evolve 0
+mash A 60 15
+mash B 20 15
+pressuntil B field 3000
+mp useitemon 1 68
+mp evolve 1
+mash A 60 15
+mash B 20 15
+pressuntil B field 3000
+mp useitemon 5 68
+mp evolve 5
+mash A 60 15
+mash B 20 15
+pressuntil B field 3000
+mp monid 0
+mp monid 1
+mp monid 2
+mp monid 3
+mp monid 4
+mp monid 5
+quit

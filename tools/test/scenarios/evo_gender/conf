@@ -1,0 +1,10 @@
+# A POKeMON keeps its gender when it evolves (the user, 2026-11-07: a female ESPURR became a male MEOWSTIC). The
+# species split into male and female forms (MEOWSTIC, OINKOLOGNE, BASCULEGION, INDEEDEE) are half and half, not
+# "always male" (tools/moemon_gen59/gen_species.py gender_ratio), and a male SALANDIT no longer becomes an
+# always-female SALAZZLE. A female ESPURR and LECHONK each take a RARE CANDY and evolve in the real scene (mp evolve: the game's own check and scene); check.py
+# reads every slot's gender before and after (MOEMON_DEBUG_PARTY's F / M suffix makes the gender).
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=702:24F,940:17F,782:40M,927:30F,901:30F,702:24M"
+EXPECT_A=("[test] evotarget 2 item 0: 0" "[test] useitemon 0 item 68: used" "[test] useitemon 1 item 68: used" "[test] evolve 0: 703" "[test] evolve 1: 941")
+CHECK="python3 tools/test/scenarios/evo_gender/check.py"

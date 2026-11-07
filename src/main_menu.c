@@ -2200,7 +2200,7 @@ static void Task_NewGameBirchSpeech_WaitAskSkip(u8 taskId)
 
 // Moemon Kai: a new game can start in any region (docs/REGIONS_PLAN.md). JOHTO and KANTO start at home in NEW BARK /
 // PALLET (mp_region.c MP_Region_StartNewGame); SKIP THE INTRO is HOENN's.
-static const u8 sText_Birch_AskRegion[] = _("Now, where will your journey begin?\pIn KANTO, in JOHTO, here in HOENN,\nor in SINNOH?");
+static const u8 sText_Birch_AskRegion[] = _("Now, where will your journey begin?\pIn KANTO or in JOHTO, here in\nHOENN, or in SINNOH?");
 static const u8 sText_Hoenn[] = _("HOENN");
 static const u8 sText_Johto[] = _("JOHTO");
 static const u8 sText_Kanto[] = _("KANTO");

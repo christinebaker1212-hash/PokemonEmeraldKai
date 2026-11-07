@@ -28,6 +28,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `hgss_balls` | shots only (looked at by hand): the HGSS balls' send-out spin, a thrown MASTER BALL, a blue POKé BALL with a STAR, a GENESIS BALL, the summary's ball |
 | `astral_ball` | the ASTRAL BALL: four full-HP catches (one a RAYQUAZA) on the first throw, each shiny with nature, gender, UNOWN letter and WURMPLE evolution kept (check.py); shots of the sheen and sparkles, the click (fade to grey, sparkles drawn in), the summary's plain ball |
 | `fishing_gen1` | fishing as Gen 1 had it: with no button pressed, a cast with no bite ends on "Not even a nibble!", a SUPER ROD bite says "Oh! A bite!" and the battle starts by itself (the bite roll rigged with `mp fishbite`) |
+| `evo_gender` | a POKeMON keeps its gender when it evolves: a female and a male ESPURR, a female LECHONK (RARE CANDY, `mp evolve`: the real scene), a male SALANDIT at 40 that can't evolve, a female BASCULEGION and INDEEDEE (the debug party's F / M suffix); check.py |
 | `tri_rain` | wild triple at NA-JP lag in the leader's rain, one friend's field dry: rain on all three screens, turns go on to the win |
 | `coop_life_emote` | NA-JP lag: a partner save; each game's Pokemon emote shows on the other game over the same Pokemon (check.sh) |
 | `coop_spot_join` / `coop_spot_alone` | ROUTE 116: JERRY, battling ALICE, spots BOB: "join their battle, or battle alone?"; JOIN BATTLE (ALICE lets him in, both win, JERRY beaten on both) / BATTLE ALONE |

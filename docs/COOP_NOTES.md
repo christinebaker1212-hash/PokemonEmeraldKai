@@ -3498,6 +3498,21 @@ reported Natures not applying correctly, and IVs not being passed down." daycare
 - Every egg goes through these (the DAY CARE, a friend's DAY CARE egg left from before 1.171.5, the routes' day cares).
   `mp breedtest N ITEM_A ITEM_B`: N eggs from party 1 (IVs 31) and 2 (IVs 0); test breed_items.
 
+## Gender kept through evolution (1.174.2)
+
+A POKeMON's gender is read from its personality against its species' genderRatio every time (GetMonGender), so an
+evolution keeps it only where both species have the same ratio. The user (2026-11-07) saw a female ESPURR become a male
+MEOWSTIC: tools/moemon_gen59/gen_species.py took each species from pokeemerald-expansion's first form, and for the four
+split into male and female forms (MEOWSTIC_M / _F, INDEEDEE, BASCULEGION, OINKOLOGNE) that's the male one, "always
+male". gender_ratio() gives a species whose expansion key ends in _M / _MALE half and half (127). Evolutions: where a
+gendered method (EVO_LEVEL_FEMALE...) leads to a species, no ungendered row into it stays (SALANDIT had a plain level 40
+into the always-female SALAZZLE, a form change the generator had no method for). Every species' ratio was checked
+against PokeAPI's pokemon_species.csv gender_rate (eighths): all match but OINKOLOGNE, where PokeAPI has it wrong (0;
+the games make it half and half). Saves need nothing: the gender is computed, so evolved ones read right at once.
+The female forms' own pictures aren't in the game (one picture set each). Debug: MOEMON_DEBUG_PARTY's F / M suffix
+("702:24F"), `mp evolve SLOT` (the game's evolution check and scene). Test evo_gender. The intro's region question
+was rewrapped (its first line ran past the box and left "N," behind).
+
 ## Breeding by Gen 9's rules (1.166.0)
 
 The user (2026-11-07): "update the breeding mechanics to Gen 9 by allowing interactions like breeding Nidoran Male with

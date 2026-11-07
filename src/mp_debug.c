@@ -179,7 +179,7 @@ void MP_DebugSetupNameAndGender(void)
 // Called at the end of NewGameInitData in quick-start mode
 void MP_DebugQuickStartNewGame(void)
 {
-    const char *partyEnv = getenv("MOEMON_DEBUG_PARTY"); // e.g. "258:20,280:18+" (+ = about to level up, * = shiny)
+    const char *partyEnv = getenv("MOEMON_DEBUG_PARTY"); // e.g. "258:20,280:18+" (+ = about to level up, * = shiny, F / M = female / male)
     const char *mapEnv = getenv("MOEMON_DEBUG_WARP");     // "group,num,x,y"
     int group = MAP_GROUP(MAP_OLDALE_TOWN), num = MAP_NUM(MAP_OLDALE_TOWN), x = 10, y = 10;
     char buf[256];
@@ -249,6 +249,9 @@ void MP_DebugQuickStartNewGame(void)
             else if (getenv("MOEMON_DEBUG_PID_SALT"))   // tests with two players: Pokémon of their own (MOéMON GARDEN keys)
                 CreateMon(&gPlayerParty[slot], species, level, USE_RANDOM_IVS, TRUE,
                           (u32)strtoul(getenv("MOEMON_DEBUG_PID_SALT"), NULL, 0) * 2654435761u + slot, OT_ID_PLAYER_ID, 0);
+            else if (strchr(tok, 'F') || strchr(tok, 'M'))   // "702:24F" = a female, "702:24M" = a male (gender tests)
+                CreateMonWithGenderNatureLetter(&gPlayerParty[slot], species, level, USE_RANDOM_IVS,
+                                                strchr(tok, 'F') ? MON_FEMALE : MON_MALE, slot * 7 % NUM_NATURES, 0);
             else
                 CreateMon(&gPlayerParty[slot], species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
             if (strchr(tok, '+') && level < MAX_LEVEL) // "280:15+" = one exp point short of the next level
@@ -3538,6 +3541,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void QzRuinsEscapeRope(void);
         QzRuinsEscapeRope();
         printf("[test] ruinsmark: flash %d\n", QzRuinsFlash());
+    }
+    else if (strcmp(cmd, "evolve") == 0)
+    {
+        // evolve SLOT - the party POKeMON evolves now if leveling up would evolve it (the game's own check and scene)
+        int slot = atoi(arg);
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            u16 target = GetEvolutionTargetSpecies(&gPlayerParty[slot], EVO_MODE_NORMAL, 0);
+            extern void (*gCB2_AfterEvolution)(void);
+            printf("[test] evolve %d: %u\n", slot, target);
+            if (target != SPECIES_NONE)
+            {
+                void BeginEvolutionScene(struct Pokemon *mon, u16 postEvoSpecies, bool8 canStopEvo, u8 partyId);
+                gCB2_AfterEvolution = CB2_ReturnToField;
+                BeginEvolutionScene(&gPlayerParty[slot], target, FALSE, slot);
+            }
+        }
     }
     else if (strcmp(cmd, "useitemon") == 0)
     {

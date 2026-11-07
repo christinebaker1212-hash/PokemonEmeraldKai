@@ -332,6 +332,19 @@ def kai_defines(rel, prefix):
     return out
 
 
+GENDERED_EVOS = ('EVO_LEVEL_MALE', 'EVO_LEVEL_FEMALE', 'EVO_ITEM_MALE', 'EVO_ITEM_FEMALE')
+
+
+def gender_ratio(e):
+    """The species' gender ratio. Where the expansion splits a species into a male and a female form (MEOWSTIC_M /
+    _F, INDEEDEE, BASCULEGION, OINKOLOGNE), its first form is the male one and says "always male": the species is
+    both, half and half, as in the games. (Taking the male form's ratio made a female ESPURR evolve into a male
+    MEOWSTIC: the gender is read from the personality against the species' ratio.)"""
+    if re.search(r'_M(ALE)?$', e.get('expansion_key', '')):
+        return '127'
+    return e['genderRatio']
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--rom')
@@ -445,7 +458,7 @@ def main():
 ''' % (e['const'], e['baseHP'], e['baseAttack'], e['baseDefense'], e['baseSpeed'], e['baseSpAttack'], e['baseSpDefense'],
             types[0], types[1], e['catchRate'], min(255, e['expYield']), e['ev_HP'], e['ev_Attack'], e['ev_Defense'],
             e['ev_Speed'], e['ev_SpAttack'], e['ev_SpDefense'], kitem(e['itemCommon']), kitem(e['itemRare']),
-            e['genderRatio'], e['eggCycles'], friend, e['growthRate'], eggs[0], eggs[1], abil[0], abil[1],
+            gender_ratio(e), e['eggCycles'], friend, e['growthRate'], eggs[0], eggs[1], abil[0], abil[1],
             e['bodyColor'], e['noFlip'] if e['noFlip'] in ('TRUE', 'FALSE') else 'FALSE'))
     write('src/data/pokemon/species_info_gen59.h', ''.join(out))
     write('src/data/text/species_names_gen59.h', GEN + ''.join(
@@ -537,6 +550,11 @@ def main():
                 rows.append(('EVO_FRIENDSHIP', '0', tgt))
             else:   # EVO_SCRIPT_TRIGGER and the like
                 rows.append(('EVO_LEVEL', '40', tgt))
+        # a gendered evolution into a species keeps the gender: no other way into it for the other gender (the
+        # expansion's other paths that Kai has no method for became plain levels above, so a male SALANDIT
+        # became a SALAZZLE, which is always female)
+        gendered = {r[2] for r in rows if r[0] in GENDERED_EVOS}
+        rows = [r for r in rows if r[0] in GENDERED_EVOS or r[2] not in gendered]
         rows = list(dict.fromkeys(rows))[:8]
         if rows:
             evo.append('    [%s] = {%s},\n' % (e['const'], ', '.join('{%s, %s, %s}' % r for r in rows)))
