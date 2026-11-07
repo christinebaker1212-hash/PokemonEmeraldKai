@@ -980,6 +980,7 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                 o->owner = o->controller = (uint8_t)p;
                 o->zone = MTG_ZONE_NONE;
                 o->blocking = o->attachedTo = MTG_NO_OBJ;
+                o->damagedBy[0] = o->damagedBy[1] = o->damagedBy[2] = MTG_NO_OBJ;
                 Mtg_MoveTo(d, obj, MTG_ZONE_BATTLEFIELD);
             }
         }

@@ -51,6 +51,7 @@ static int Put(int player, const char *name, int zone)
     o->zone = (uint8_t)zone;
     o->blocking = MTG_NO_OBJ;
     o->attachedTo = MTG_NO_OBJ;
+    o->damagedBy[0] = o->damagedBy[1] = o->damagedBy[2] = MTG_NO_OBJ;
     o->seq = ++sD.seq;
     return sD.objCount++;
 }
@@ -1932,6 +1933,47 @@ static void TestAiLookahead(void)
           "ACIDIC SOIL kept when it hurts its caster more");
 }
 
+// what an Aura is attached to (Valid AttachedBy: ELEPHANT GUIDE's creature dies, a 3/3 Elephant) and who a creature was
+// dealt damage by this turn (DamagedBy: SENGIR VAMPIRE's +1/+1 counter)
+static void TestAttachedDamaged(void)
+{
+    int bears, guide, terror, vamp, foe, i, before, elephants = 0;
+    MtgTarget t;
+    static const char *const cards[] = {"Elephant Guide", "Sengir Vampire", "Venomous Fangs", "Rewards of Diversity",
+                                        "Squee's Embrace", "Funeral March", NULL};
+    printf("attached to, damaged by\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();
+    Lands(0, "Forest", 3);
+    Lands(1, "Swamp", 2);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    guide = Put(0, "Elephant Guide", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, guide, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Zone(guide) == MTG_ZONE_BATTLEFIELD && Mtg_Power(&sD, bears) == 5, "the guide on the bears (5/5)");
+    GoTo(1, MTG_STEP_MAIN1);
+    terror = Put(1, "Terror", MTG_ZONE_HAND);
+    before = sD.objCount;
+    Do(MTG_ACT_CAST, terror, MTG_TGT_OBJ, bears);
+    PassBoth();   // the bears die: the guide's trigger
+    PassBoth();
+    for (i = before; i < sD.objCount; i++)
+        elephants += sD.objs[i].zone == MTG_ZONE_BATTLEFIELD && sD.objs[i].controller == 0 && Mtg_Power(&sD, i) == 3;
+    CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && elephants == 1, "a 3/3 Elephant for the guide's player");
+
+    Table();
+    vamp = Put(0, "Sengir Vampire", MTG_ZONE_BATTLEFIELD);
+    foe = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    t.kind = MTG_TGT_OBJ;
+    t.id = (uint16_t)foe;
+    Mtg_DealDamage(&sD, vamp, t, 2, 1);
+    PassBoth();   // state-based: the bears die, the vampire's trigger
+    PassBoth();
+    CHECK(Zone(foe) == MTG_ZONE_GRAVEYARD && Mtg_Power(&sD, vamp) == 5, "the vampire grew (%d)", Mtg_Power(&sD, vamp));
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2331,6 +2373,7 @@ int main(int argc, char **argv)
     TestHidden();
     TestRepeat();
     TestAiLookahead();
+    TestAttachedDamaged();
     TestDuels();
     TestRandomDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

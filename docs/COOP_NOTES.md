@@ -3700,6 +3700,18 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's Auras that watch their creature, "damaged by" (1.155.0)
+
+- Valid AttachedBy (as EnchantedBy): the object its source, an Aura, is attached to; a trigger's ValidCard$
+  Card.AttachedBy watches the enchanted creature (dies, attacks, deals damage, is blocked...).
+- MtgObj damagedBy[3]: the sources that dealt it damage this turn (Mtg_DealDamage), cleared at cleanup and when it
+  changes zones; Valid DamagedBy reads it (a ChangesZone trigger looks before the move: SENGIR VAMPIRE). New cards
+  and tokens start with MTG_NO_OBJ there.
+- Valid MultiColor (two or more colors).
+- Unlocked 33: ELEPHANT GUIDE, SENGIR VAMPIRE, BARON SENGIR, VENOMOUS FANGS, SQUEE'S EMBRACE, FUNERAL MARCH, CURIOSITY,
+  SHADE'S FORM, REWARDS OF DIVERSITY... Still out: gotBlockedThisTurn, wasCastFromYourHandByYou, kicked.
+- Tests: test_rules.c TestAttachedDamaged; scenario mtg_aura_trig.
+
 ## MAGIC's AI look-ahead and random-deck duels (1.154.0)
 
 - mtg_ai.c Lookahead: an action whose kind ScoreBase has no score for (RepeatEach, SetLife, a Reveal's chain...) is

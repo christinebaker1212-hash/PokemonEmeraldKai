@@ -2350,6 +2350,7 @@ void MtgBoard_DebugPut(int player, const char *zone, const char *name)
     o->zone = (uint8_t)z;
     o->blocking = MTG_NO_OBJ;
     o->attachedTo = MTG_NO_OBJ;
+    o->damagedBy[0] = o->damagedBy[1] = o->damagedBy[2] = MTG_NO_OBJ;
     o->seq = ++B.duel.seq;
     B.duel.objCount++;
     Mtg_RefreshQuery(&B.duel);

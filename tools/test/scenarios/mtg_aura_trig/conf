@@ -1,0 +1,6 @@
+# MAGIC's Auras that watch their creature: ELEPHANT GUIDE goes on GRIZZLY BEARS (5/5), TERROR destroys them and the
+# guide's trigger makes a 3/3 Elephant. Shots at_guide, at_after.
+MODE=1
+TMO=260
+EXPECT_A=("mtg: you: cast Elephant Guide on Grizzly Bears" "mtg: you: cast Terror on Grizzly Bears" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Elephant Guide to focus" "mtg: no Terror to focus")

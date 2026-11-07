@@ -129,6 +129,7 @@ typedef struct {
     uint8_t effCtrl;              // under a GainControl effect's: its new controller + 1 (0: none; a static still wins)
     uint8_t effUntil;             // when that ends (MTG_CTRL_*: 0 for good)
     uint16_t effSource;           // the card the effect lasts by (LeavesPlay / LoseControl / Untap)
+    uint16_t damagedBy[3];        // sources that dealt it damage this turn (MTG_NO_OBJ: free; Valid DamagedBy)
     uint16_t usedAb[2];           // abilities with an ActivationLimit$ used this turn (0xFFFF: free slot) ...
     uint8_t usedN[2];             // ... and how many times
     uint32_t seq;                 // order within its zone (higher = newer; the library's top is the highest)

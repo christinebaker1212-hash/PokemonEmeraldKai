@@ -20,6 +20,13 @@
 "number": "2a",
 "set": "hml"
 },
+"Abduction": {
+"artist": "Colin MacNeil",
+"file": "wth_30",
+"frame": "1997",
+"number": "30",
+"set": "wth"
+},
 "Abjure": {
 "artist": "Ted Naifeh",
 "file": "wth_31",
@@ -1147,6 +1154,13 @@
 "number": "2",
 "set": "nem"
 },
+"Axelrod Gunnarson": {
+"artist": "Scott Kirschner",
+"file": "bchr_72",
+"frame": "1993",
+"number": "72",
+"set": "bchr"
+},
 "Aysen Abbey": {
 "artist": "Liz Danforth",
 "file": "hml_112",
@@ -1188,6 +1202,13 @@
 "frame": "1997",
 "number": "62",
 "set": "usg"
+},
+"Backfire": {
+"artist": "Brian Snõddy",
+"file": "4ed_62",
+"frame": "1993",
+"number": "62",
+"set": "4ed"
 },
 "Bad Moon": {
 "artist": "Jesper Myrfors",
@@ -1335,6 +1356,13 @@
 "frame": "1997",
 "number": "246",
 "set": "ons"
+},
+"Baron Sengir": {
+"artist": "Pete Venters",
+"file": "hml_41",
+"frame": "1993",
+"number": "41",
+"set": "hml"
 },
 "Barren Moor": {
 "artist": "Heather Hudson",
@@ -1518,12 +1546,33 @@
 "number": "257",
 "set": "mir"
 },
+"Bequeathal": {
+"artist": "D. Alexander Gregory",
+"file": "exo_106",
+"frame": "1997",
+"number": "106",
+"set": "exo"
+},
 "Bereavement": {
 "artist": "Andrew Goldhawk",
 "file": "usg_117",
 "frame": "1997",
 "number": "117",
 "set": "usg"
+},
+"Bestial Fury": {
+"artist": "Mike Raabe",
+"file": "all_67a",
+"frame": "1993",
+"number": "67a",
+"set": "all"
+},
+"Betrothed of Fire": {
+"artist": "Clint Langley",
+"file": "wth_89",
+"frame": "1997",
+"number": "89",
+"set": "wth"
 },
 "Binding Grasp": {
 "artist": "Ruth Thompson",
@@ -2442,6 +2491,13 @@
 "number": "107",
 "set": "exo"
 },
+"Casting of Bones": {
+"artist": "Anson Maddocks",
+"file": "all_44a",
+"frame": "1993",
+"number": "44a",
+"set": "all"
+},
 "Castle": {
 "artist": "Dameon Willich",
 "file": "4ed_12",
@@ -2777,6 +2833,13 @@
 "frame": "1997",
 "number": "297",
 "set": "mir"
+},
+"Charisma": {
+"artist": "Terese Nielsen",
+"file": "mmq_66",
+"frame": "1997",
+"number": "66",
+"set": "mmq"
 },
 "Chastise": {
 "artist": "Carl Critchlow",
@@ -3527,6 +3590,13 @@
 "number": "127",
 "set": "sth"
 },
+"Curiosity": {
+"artist": "Val Mayerik",
+"file": "exo_29",
+"frame": "1997",
+"number": "29",
+"set": "exo"
+},
 "Cursed Flesh": {
 "artist": "Ron Spencer",
 "file": "exo_56",
@@ -4269,6 +4339,13 @@
 "number": "79",
 "set": "nem"
 },
+"Dragon Arch": {
+"artist": "Dana Knutson",
+"file": "apc_135",
+"frame": "1997",
+"number": "135",
+"set": "apc"
+},
 "Dragon Blood": {
 "artist": "Greg Simanson",
 "file": "usg_293",
@@ -4577,6 +4654,13 @@
 "number": "72a",
 "set": "hml"
 },
+"Dying Wail": {
+"artist": "Brian Snõddy",
+"file": "uds_58",
+"frame": "1997",
+"number": "58",
+"set": "uds"
+},
 "Eager Cadet": {
 "artist": "Scott M. Fischer",
 "file": "s99_15",
@@ -4681,6 +4765,13 @@
 "frame": "1997",
 "number": "224",
 "set": "tmp"
+},
+"Elephant Guide": {
+"artist": "Jim Nelson",
+"file": "jud_111",
+"frame": "1997",
+"number": "111",
+"set": "jud"
 },
 "Elfhame Palace": {
 "artist": "Jerry Tiritilli",
@@ -5200,6 +5291,13 @@
 "number": "126",
 "set": "wth"
 },
+"False Demise": {
+"artist": "Randy Gallegos",
+"file": "all_27a",
+"frame": "1993",
+"number": "27a",
+"set": "all"
+},
 "False Memories": {
 "artist": "Ron Spencer",
 "file": "tor_37",
@@ -5332,6 +5430,13 @@
 "frame": "1997",
 "number": "122",
 "set": "mir"
+},
+"Ferocity": {
+"artist": "Pete Venters",
+"file": "mmq_245",
+"frame": "1997",
+"number": "245",
+"set": "mmq"
 },
 "Feroz's Ban": {
 "artist": "Heather Hudson",
@@ -6040,6 +6145,13 @@
 "number": "61",
 "set": "vis"
 },
+"Funeral March": {
+"artist": "Melissa A. Benson",
+"file": "hml_48",
+"frame": "1993",
+"number": "48",
+"set": "hml"
+},
 "Funeral Pyre": {
 "artist": "Carl Critchlow",
 "file": "jud_10",
@@ -6355,6 +6467,13 @@
 "number": "219",
 "set": "mir"
 },
+"Gift of the Woods": {
+"artist": "Susan Van Camp",
+"file": "all_92a",
+"frame": "1993",
+"number": "92a",
+"set": "all"
+},
 "Gilded Light": {
 "artist": "John Avon",
 "file": "scg_16",
@@ -6634,6 +6753,13 @@
 "frame": "1997",
 "number": "207",
 "set": "ons"
+},
+"Goblin Shrine": {
+"artist": "Ron Spencer",
+"file": "bchr_50",
+"frame": "1993",
+"number": "50",
+"set": "bchr"
 },
 "Goblin Sky Raider": {
 "artist": "Daren Bader",
@@ -7600,6 +7726,13 @@
 "frame": "1997",
 "number": "34",
 "set": "vis"
+},
+"Incendiary": {
+"artist": "Jeff Laubenstein",
+"file": "uds_89",
+"frame": "1997",
+"number": "89",
+"set": "uds"
 },
 "Infantry Veteran": {
 "artist": "Christopher Rush",
@@ -10044,6 +10177,13 @@
 "number": "275",
 "set": "ons"
 },
+"Nature's Chosen": {
+"artist": "Rebecca Guay",
+"file": "all_97",
+"frame": "1993",
+"number": "97",
+"set": "all"
+},
 "Nature's Lore": {
 "artist": "Rick Emond",
 "file": "ice_255",
@@ -10330,6 +10470,13 @@
 "frame": "1993",
 "number": "75",
 "set": "all"
+},
+"One with Nature": {
+"artist": "Daren Bader",
+"file": "scg_125",
+"frame": "1997",
+"number": "125",
+"set": "scg"
 },
 "Onslaught": {
 "artist": "Paolo Parente",
@@ -11255,6 +11402,13 @@
 "number": "49",
 "set": "lgn"
 },
+"Private Research": {
+"artist": "Scott M. Fischer",
+"file": "uds_41",
+"frame": "1997",
+"number": "41",
+"set": "uds"
+},
 "Prodigal Sorcerer": {
 "artist": "Douglas Shuler",
 "file": "4ed_94",
@@ -12128,6 +12282,13 @@
 "file": "inv_31",
 "frame": "1997",
 "number": "31",
+"set": "inv"
+},
+"Rewards of Diversity": {
+"artist": "Darrell Riche",
+"file": "inv_32",
+"frame": "1997",
+"number": "32",
 "set": "inv"
 },
 "Reya Dawnbringer": {
@@ -13082,6 +13243,20 @@
 "number": "211",
 "set": "mmq"
 },
+"Sengir Bats": {
+"artist": "Dan Frazier",
+"file": "hml_57a",
+"frame": "1993",
+"number": "57a",
+"set": "hml"
+},
+"Sengir Vampire": {
+"artist": "Anson Maddocks",
+"file": "4ed_160",
+"frame": "1993",
+"number": "160",
+"set": "4ed"
+},
 "Serene Heart": {
 "artist": "D. Alexander Gregory",
 "file": "mir_242",
@@ -13242,6 +13417,13 @@
 "frame": "1997",
 "number": "139",
 "set": "mir"
+},
+"Shade's Form": {
+"artist": "Clyde Caldwell",
+"file": "tor_81",
+"frame": "1997",
+"number": "81",
+"set": "tor"
 },
 "Shadow Guildmage": {
 "artist": "Mike Kimble",
@@ -13837,6 +14019,13 @@
 "frame": "1997",
 "number": "67",
 "set": "ulg"
+},
+"Sleeper's Robe": {
+"artist": "Alan Pollack",
+"file": "inv_273",
+"frame": "1997",
+"number": "273",
+"set": "inv"
 },
 "Sleight of Hand": {
 "artist": "Phil Foglio",
@@ -14474,6 +14663,13 @@
 "frame": "1997",
 "number": "143",
 "set": "s99"
+},
+"Squee's Embrace": {
+"artist": "Rebecca Guay",
+"file": "apc_122",
+"frame": "1997",
+"number": "122",
+"set": "apc"
 },
 "Squee's Toy": {
 "artist": "Heather Hudson",
@@ -16295,6 +16491,13 @@
 "number": "343",
 "set": "ice"
 },
+"Urza's Filter": {
+"artist": "Dave Dorman",
+"file": "inv_318",
+"frame": "1997",
+"number": "318",
+"set": "inv"
+},
 "Urza's Guilt": {
 "artist": "Paolo Parente",
 "file": "pls_130",
@@ -16344,6 +16547,20 @@
 "number": "77",
 "set": "exo"
 },
+"Vampiric Dragon": {
+"artist": "Gary Ruddell",
+"file": "ody_296",
+"frame": "1997",
+"number": "296",
+"set": "ody"
+},
+"Vampiric Embrace": {
+"artist": "Thomas M. Baxa",
+"file": "usg_164",
+"frame": "1997",
+"number": "164",
+"set": "usg"
+},
 "Vampirism": {
 "artist": "Gary Leach",
 "file": "mgb_6",
@@ -16386,12 +16603,26 @@
 "number": "36",
 "set": "por"
 },
+"Venom": {
+"artist": "Tom Wänerstrand",
+"file": "4ed_280",
+"frame": "1993",
+"number": "280",
+"set": "4ed"
+},
 "Venomous Dragonfly": {
 "artist": "Tom Wänerstrand",
 "file": "mmq_282",
 "frame": "1997",
 "number": "282",
 "set": "mmq"
+},
+"Venomous Fangs": {
+"artist": "Lawrence Snelly",
+"file": "usg_280",
+"frame": "1997",
+"number": "280",
+"set": "usg"
 },
 "Venomous Vines": {
 "artist": "Ron Spencer",

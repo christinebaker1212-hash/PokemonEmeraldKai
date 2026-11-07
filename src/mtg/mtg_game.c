@@ -130,6 +130,7 @@ static void ResetPermanentState(MtgObj *o)
     o->effSource = MTG_NO_OBJ;
     o->usedAb[0] = o->usedAb[1] = 0xFFFF;
     o->usedN[0] = o->usedN[1] = 0;
+    o->damagedBy[0] = o->damagedBy[1] = o->damagedBy[2] = MTG_NO_OBJ;
 }
 
 void Mtg_Remember(MtgDuel *d, int obj)
@@ -321,6 +322,14 @@ void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int com
         if (!(Mtg_ObjTypes(d, to.id) & MTG_T_CREATURE))
             return;   // (planeswalkers: not yet)
         d->objs[to.id].damage += amount;
+        if (sourceObj != MTG_NO_OBJ) {   // (who dealt it damage this turn: "a creature dealt damage by CARDNAME")
+            uint16_t *by = d->objs[to.id].damagedBy;
+            int k;
+            for (k = 0; k < 3 && by[k] != sourceObj && by[k] != MTG_NO_OBJ; k++)
+                ;
+            if (k < 3)
+                by[k] = (uint16_t)sourceObj;
+        }
         Mtg_Event(d, MTG_EV_DAMAGE, sourceObj, to.id, amount);
     } else if (to.kind == MTG_TGT_PLAYER) {
         d->players[to.id].life -= amount;
@@ -488,6 +497,7 @@ void Mtg_DuelInit(MtgDuel *d, const MtgDeck *deck0, const MtgDeck *deck1, uint32
             o->zone = MTG_ZONE_LIBRARY;
             o->blocking = MTG_NO_OBJ;
             o->attachedTo = MTG_NO_OBJ;
+            o->damagedBy[0] = o->damagedBy[1] = o->damagedBy[2] = MTG_NO_OBJ;
             o->seq = ++d->seq;
             pl->library[pl->libraryCount++] = d->objCount++;
         }
@@ -1399,6 +1409,7 @@ static void EndOfTurnCleanup(MtgDuel *d)
     for (i = 0; i < d->objCount; i++) {
         MtgObj *o = &d->objs[i];
         o->damage = 0;
+        o->damagedBy[0] = o->damagedBy[1] = o->damagedBy[2] = MTG_NO_OBJ;
         o->tempPower = o->tempToughness = 0;
         o->tempKeywords = 0;
         o->regen = 0;
