@@ -362,7 +362,10 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
     case MTG_API_LOSE_LIFE:
     case MTG_API_DISCARD:
         return main && (a->target.kind == MTG_TGT_PLAYER ? !tgtMine : 1) ? 6 : 0;
-    case MTG_API_COUNTER:
+    case MTG_API_COUNTER:   // (not at a spell that can't be countered)
+        if (Mtg_Card(d->objs[a->target.id].def)->cantBeCountered
+            || Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_COUNTERED, a->target.id, MTG_NO_OBJ))
+            return 0;
         if (d->stackCount && d->stack[d->stackCount - 1].controller == opp && a->target.id == d->stack[d->stackCount - 1].source)
             return Mtg_ManaCostTotal(&Mtg_Card(d->objs[a->target.id].def)->cost) >= 3 ? 40 : 0;
         return 0;

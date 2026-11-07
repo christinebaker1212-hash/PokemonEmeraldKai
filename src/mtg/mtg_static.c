@@ -587,7 +587,8 @@ static int ParseRepl(MtgCardDef *c, int cardId, char *text, MtgStatic *out)
     static const char *const sKnown[] = {"Event", "ValidCard", "Destination", "ReplaceWith", "ReplacementResult",
                                          "Description", "ActiveZones", "Layer", "ValidStepTurnToController",
                                          "Prevent", "ValidTarget", "ValidSource", "IsCombat", "Secondary", "IsPresent",
-                                         "PresentCompare", "CheckSVar", "SVarCompare", "DamageAmount", "PreventionEffect"};
+                                         "PresentCompare", "CheckSVar", "SVarCompare", "DamageAmount", "PreventionEffect",
+                                         "ValidSA", "AddSVar"};
     MtgStatic st;
     int first, count, i;
     const char *s, *ev, *zones;
@@ -670,8 +671,48 @@ static int ParseRepl(MtgCardDef *c, int cardId, char *text, MtgStatic *out)
         return 0;
     }
     if (ParamOf(first, count, "Prevent") || ParamOf(first, count, "ValidTarget")
-        || ParamOf(first, count, "ValidSource") || ParamOf(first, count, "IsCombat") || ParamOf(first, count, "IsPresent")
-        || ParamOf(first, count, "CheckSVar") || ParamOf(first, count, "DamageAmount"))
+        || ParamOf(first, count, "ValidSource") || ParamOf(first, count, "IsCombat") || ParamOf(first, count, "DamageAmount"))
+        return 0;
+    if ((s = ParamOf(first, count, "IsPresent"))) {   // (only while the battlefield has one: Untap's)
+        const char *cmp = ParamOf(first, count, "PresentCompare");
+        if (!Mtg_ValidSpecKnown(s) || (cmp && (strncmp(cmp, "GE", 2) || cmp[2] < '0' || cmp[2] > '9' || cmp[3])))
+            return 0;
+        st.present = s;
+        st.presentNum = (uint8_t)(cmp ? cmp[2] - '0' : 1);
+    } else if (ParamOf(first, count, "PresentCompare"))
+        return 0;
+    if ((s = ParamOf(first, count, "CheckSVar"))) {
+        st.check = s;
+        st.compare = ParamOf(first, count, "SVarCompare");
+        if (!Mtg_CheckSvarKnown(cardId, st.check, st.compare))
+            return 0;
+    } else if (ParamOf(first, count, "SVarCompare"))
+        return 0;
+    if ((st.present || st.check) && strcmp(ev, "Untap") != 0)
+        return 0;
+    if (strcmp(ev, "Counter") == 0) {   // "can't be countered": the spell itself, or spells of a kind (from the battlefield)
+        const char *sa = ParamOf(first, count, "ValidSA"), *vc = ParamOf(first, count, "ValidCard");
+        if (sReplForEffect || !(s = ParamOf(first, count, "Layer")) || strcmp(s, "CantHappen") || !sa
+            || ParamOf(first, count, "ReplaceWith") || ParamOf(first, count, "Destination")
+            || ParamOf(first, count, "ValidStepTurnToController"))
+            return 0;
+        if (vc && strcmp(vc, "Card.Self") == 0 && strcmp(sa, "Spell") == 0 && !zones) {
+            c->cantBeCountered = 1;
+            return 2;   // (on the card: no static)
+        }
+        if (vc || !zones)
+            return 0;
+        if (strncmp(sa, "Spell.", 6) == 0) {
+            st.affected = sa + 6;
+            if (!Mtg_ValidSpecKnown(st.affected))
+                return 0;
+        } else if (strcmp(sa, "Spell") != 0)
+            return 0;
+        st.mode = MTG_STATIC_CANT_BE_COUNTERED;
+        *out = st;
+        return 1;
+    }
+    if (ParamOf(first, count, "ValidSA"))
         return 0;
     st.affected = ParamOf(first, count, "ValidCard");
     if (!st.affected || !Mtg_ValidSpecKnown(st.affected))
@@ -721,7 +762,8 @@ static int AddStatic(MtgCardDef *c, const MtgStatic *st)
 void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text)
 {
     MtgStatic st;
-    if (!ParseRepl(c, cardId, text, &st) || !AddStatic(c, &st))
+    int r = ParseRepl(c, cardId, text, &st);
+    if (!r || (r == 1 && !AddStatic(c, &st)))
         Mtg_Unsupported(c, "replacement effect");
 }
 
@@ -733,7 +775,7 @@ int Mtg_ParseEffectReplacement(MtgCardDef *c, int cardId, char *text)
     sReplForEffect = 1;
     ok = ParseRepl(c, cardId, text, &st);
     sReplForEffect = 0;
-    if (!ok || !AddStatic(c, &st)) {
+    if (ok != 1 || !AddStatic(c, &st)) {
         Mtg_Unsupported(c, "ReplacementEffects");
         return -1;
     }

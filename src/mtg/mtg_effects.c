@@ -795,6 +795,9 @@ static void Pump(MtgDuel *d, int obj, int att, int def, uint32_t kw)
 static void CounterSpell(MtgDuel *d, int sourceObj)
 {
     int i;
+    if (Mtg_Card(d->objs[sourceObj].def)->cantBeCountered
+        || Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_COUNTERED, sourceObj, MTG_NO_OBJ))
+        return;   // ("can't be countered": it stays on the stack)
     for (i = 0; i < d->stackCount; i++)
         if (d->stack[i].source == sourceObj && d->stack[i].isSpell) {
             memmove(&d->stack[i], &d->stack[i + 1], (d->stackCount - i - 1) * sizeof(d->stack[0]));

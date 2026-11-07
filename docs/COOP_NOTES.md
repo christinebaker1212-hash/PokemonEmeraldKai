@@ -3700,6 +3700,17 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's "can't be countered" (1.159.0)
+
+- R: Event$ Counter | Layer$ CantHappen: ValidCard$ Card.Self with ValidSA$ Spell is MtgCardDef.cantBeCountered (the
+  spell on the stack); from the battlefield (ActiveZones$) ValidSA$ Spell.<kind> is a static MTG_STATIC_CANT_BE_COUNTERED
+  over that kind. CounterSpell leaves such a spell on the stack; the AI never aims a counter at one.
+- Untap replacements read IsPresent$ / CheckSVar$ too (WALKING DREAM); Valid inZoneBattlefield ("by creatures": a
+  permanent, not a spell). ParseRepl's IsPresent / CheckSVar are read for every event (only Untap and DamageDone use them).
+- Unlocked 11: BLURRED MONGOOSE, GAEA'S HERALD, ROOT SLIVER, OBLITERATE, SCRAGNOTH, VEXING BEETLE, NO MERCY, TEPHRADERM,
+  UNCLE ISTVAN, ARGOTHIAN PIXIES, WALKING DREAM.
+- Tests: test_rules.c TestCantCounter.
+
 ## MAGIC's "a source of your choice" (1.158.0)
 
 - ChooseSource (MTG_API_CHOOSE_SOURCE): a permanent or a spell on the stack of the Choices$ kind (Emblem alternatives

@@ -42,6 +42,11 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.159.0)
+- "Can't be countered", Untap with conditions, inZoneBattlefield: COOP_NOTES "MAGIC's can't be countered". 2678 of 5408.
+  Next by count: replacement effects left (DamageDone ReplaceWith 28, Moved 22), ChooseType (37: needs a type menu on the
+  table), T:Execute (52).
+
 ## Status (2026-11-07: 1.158.0)
 - "A source of your choice" (ChooseSource; the Circles of Protection): COOP_NOTES "MAGIC's a source of your choice".
   2667 of 5408. Next by count: replacement effects left (ReplaceWith$ DealDamage redirects, Moved, Draw), ChooseType (37),

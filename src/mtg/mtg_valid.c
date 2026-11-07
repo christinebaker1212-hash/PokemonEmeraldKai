@@ -91,6 +91,8 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
             return !d || (Mtg_ObjColors(d, obj) & MTG_COLOR_BIT(i)) != 0;
     if ((n == 10 && strncmp(p, "ChosenCard", 10) == 0) || (n == 16 && strncmp(p, "ChosenCardStrict", 16) == 0))
         return !d || obj == Mtg_ChosenCard(d);   // (ChooseSource's pick)
+    if (n == 17 && strncmp(p, "inZoneBattlefield", 17) == 0)   // ("by creatures": on the battlefield, not a spell)
+        return !d || o->zone == MTG_ZONE_BATTLEFIELD;
     if (n == 10 && strncmp(p, "MultiColor", 10) == 0)
         return !d || (__builtin_popcount(Mtg_ObjColors(d, obj)) > 1);
     if (n == 9 && strncmp(p, "DamagedBy", 9) == 0) {   // dealt damage by the source this turn

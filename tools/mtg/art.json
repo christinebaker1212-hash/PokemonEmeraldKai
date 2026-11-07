@@ -839,6 +839,13 @@
 "number": "234",
 "set": "usg"
 },
+"Argothian Pixies": {
+"artist": "Amy Weber",
+"file": "bchr_57",
+"frame": "1993",
+"number": "57",
+"set": "bchr"
+},
 "Argothian Swine": {
 "artist": "Randy Elliott",
 "file": "usg_235",
@@ -1881,6 +1888,13 @@
 "frame": "1993",
 "number": "10",
 "set": "4ed"
+},
+"Blurred Mongoose": {
+"artist": "Heather Hudson",
+"file": "inv_183",
+"frame": "1997",
+"number": "183",
+"set": "inv"
 },
 "Boa Constrictor": {
 "artist": "Carl Critchlow",
@@ -6460,6 +6474,13 @@
 "number": "255",
 "set": "usg"
 },
+"Gaea's Herald": {
+"artist": "Dan Frazier",
+"file": "pls_80",
+"frame": "1997",
+"number": "80",
+"set": "pls"
+},
 "Gaea's Might": {
 "artist": "Ron Spencer",
 "file": "pls_81",
@@ -10702,6 +10723,13 @@
 "number": "258",
 "set": "ody"
 },
+"No Mercy": {
+"artist": "Mark Tedin",
+"file": "ulg_56",
+"frame": "1997",
+"number": "56",
+"set": "ulg"
+},
 "Noble Panther": {
 "artist": "Matt Cavotta",
 "file": "inv_257",
@@ -10799,6 +10827,13 @@
 "frame": "1993",
 "number": "104",
 "set": "bchr"
+},
+"Obliterate": {
+"artist": "Kev Walker",
+"file": "inv_156",
+"frame": "1997",
+"number": "156",
+"set": "inv"
 },
 "Obsianus Golem": {
 "artist": "Jesper Myrfors",
@@ -12998,6 +13033,13 @@
 "number": "250",
 "set": "tmp"
 },
+"Root Sliver": {
+"artist": "Matt Thompson",
+"file": "lgn_137",
+"frame": "1997",
+"number": "137",
+"set": "lgn"
+},
 "Root Spider": {
 "artist": "Mike Kimble",
 "file": "hml_94",
@@ -13585,6 +13627,13 @@
 "frame": "1997",
 "number": "101",
 "set": "pcy"
+},
+"Scragnoth": {
+"artist": "Jeff Laubenstein",
+"file": "tmp_253",
+"frame": "1997",
+"number": "253",
+"set": "tmp"
 },
 "Scrap": {
 "artist": "Donato Giancola",
@@ -16106,6 +16155,13 @@
 "number": "83",
 "set": "wth"
 },
+"Tephraderm": {
+"artist": "Paolo Parente",
+"file": "ons_239",
+"frame": "1997",
+"number": "239",
+"set": "ons"
+},
 "Terminal Moraine": {
 "artist": "Scott Bailey",
 "file": "pls_142",
@@ -16932,6 +16988,13 @@
 "number": "77",
 "set": "scg"
 },
+"Uncle Istvan": {
+"artist": "Daniel Gelon",
+"file": "4ed_165",
+"frame": "1993",
+"number": "165",
+"set": "4ed"
+},
 "Undead Warchief": {
 "artist": "Greg Hildebrandt",
 "file": "scg_78",
@@ -17303,6 +17366,13 @@
 "number": "84a",
 "set": "all"
 },
+"Vexing Beetle": {
+"artist": "Matt Thompson",
+"file": "lgn_143",
+"frame": "1997",
+"number": "143",
+"set": "lgn"
+},
 "Viashino Cutthroat": {
 "artist": "Edward P. Beard, Jr.",
 "file": "ulg_94",
@@ -17624,6 +17694,13 @@
 "frame": "1997",
 "number": "74",
 "set": "vis"
+},
+"Walking Dream": {
+"artist": "Richard Kane Ferguson",
+"file": "sth_49",
+"frame": "1997",
+"number": "49",
+"set": "sth"
 },
 "Wall of Air": {
 "artist": "Richard Thomas",

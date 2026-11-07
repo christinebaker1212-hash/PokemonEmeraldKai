@@ -185,7 +185,7 @@ enum { MTG_STATIC_CONTINUOUS, MTG_STATIC_CANT_BLOCK, MTG_STATIC_CANT_ATTACK, MTG
        MTG_STATIC_RAISE_COST, MTG_STATIC_REDUCE_COST,
        MTG_STATIC_MUST_ATTACK, MTG_STATIC_CANT_BE_CAST, MTG_STATIC_CANT_TARGET, MTG_STATIC_CANT_PLAY_LAND, MTG_STATIC_CANT_BE_ACTIVATED,
        MTG_STATIC_ETB_TAPPED, MTG_STATIC_NO_UNTAP, MTG_STATIC_CANT_REGENERATE,
-       MTG_STATIC_PREVENT_DAMAGE };   // (PREVENT_DAMAGE: Event$ DamageDone | Prevent$ True, another R: line)   // (two replacement effects, R: lines, kept here: they test alike)
+       MTG_STATIC_PREVENT_DAMAGE, MTG_STATIC_CANT_BE_COUNTERED };   // (PREVENT_DAMAGE: Event$ DamageDone | Prevent$ True, another R: line)   // (two replacement effects, R: lines, kept here: they test alike)
 typedef struct {
     uint16_t card;
     uint8_t mode;                   // MTG_STATIC_*

@@ -2218,6 +2218,57 @@ static void TestChooseSource(void)
     CHECK(sD.players[0].life == 20, "only the next time (%d)", sD.players[0].life);
 }
 
+static void TestCantCounter(void)
+{
+    int mongoose, bears, cs, herald, istvan, bolt, i;
+    MtgTarget t;
+    static const char *const cards[] = {"Blurred Mongoose", "Gaea's Herald", "Root Sliver", "Uncle Istvan",
+                                        "Argothian Pixies", "Walking Dream", NULL};
+    printf("can't be countered, damage from creatures\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Blurred Mongoose: Counterspell does nothing to it
+    Lands(0, "Forest", 2);
+    Lands(1, "Island", 2);
+    mongoose = Put(0, "Blurred Mongoose", MTG_ZONE_HAND);
+    cs = Put(1, "Counterspell", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, mongoose, -1, 0);
+    Pass();
+    Do(MTG_ACT_CAST, cs, MTG_TGT_STACK, mongoose);
+    PassBoth();
+    CHECK(Zone(mongoose) == MTG_ZONE_STACK && Zone(cs) == MTG_ZONE_GRAVEYARD, "the mongoose still on the stack");
+    PassBoth();
+    CHECK(Zone(mongoose) == MTG_ZONE_BATTLEFIELD, "and it resolves");
+
+    Table();   // Gaea's Herald: creature spells can't be countered; others can
+    herald = Put(0, "Gaea's Herald", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Forest", 2);
+    Lands(1, "Island", 2);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_HAND);
+    cs = Put(1, "Counterspell", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bears, -1, 0);
+    Pass();
+    Do(MTG_ACT_CAST, cs, MTG_TGT_STACK, bears);
+    PassBoth();
+    PassBoth();
+    CHECK(Zone(bears) == MTG_ZONE_BATTLEFIELD, "the bears resolve under the herald");
+    (void)herald;
+
+    Table();   // Uncle Istvan: no damage from creatures, a Bolt's still counts
+    istvan = Put(1, "Uncle Istvan", MTG_ZONE_BATTLEFIELD);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Mountain", 1);
+    bolt = Put(0, "Lightning Bolt", MTG_ZONE_HAND);
+    t.kind = MTG_TGT_OBJ;
+    t.id = (uint16_t)istvan;
+    Mtg_DealDamage(&sD, bears, t, 2, 1);
+    CHECK(sD.objs[istvan].damage == 0, "a creature's damage prevented (%d)", sD.objs[istvan].damage);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, istvan);
+    PassBoth();
+    CHECK(sD.objs[istvan].damage == 3 || Zone(istvan) == MTG_ZONE_GRAVEYARD, "the bolt's isn't");
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2621,6 +2672,7 @@ int main(int argc, char **argv)
     TestEffect();
     TestPreventAll();
     TestChooseSource();
+    TestCantCounter();
     TestDuels();
     TestRandomDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);
