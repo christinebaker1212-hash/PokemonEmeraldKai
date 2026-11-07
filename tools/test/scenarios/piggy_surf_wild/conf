@@ -1,0 +1,12 @@
+# PETALBURG's pond: BOB hops on ALICE's back, ALICE surfs out with him; a wild Pokemon on the water pulls BOB into a co-op
+# wild battle (riders always come along, surfing too). Both win.
+MODE=2
+WARP=0,0,7,20
+WARP_B=0,0,8,20
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=280:46"
+EXPECT_A=("piggy: player 2 hopped on" "co-op wild: asking player 2" "co-op wild: battle with player 2" "co-op: battle over, outcome 1")
+EXPECT_B=("co-op: battle over, outcome 1")
+UNEXPECT_A=("crash" "BAD EGG")
+UNEXPECT_B=("crash" "BAD EGG")

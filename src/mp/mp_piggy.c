@@ -184,6 +184,22 @@ static void Follow(void)
 
 // The carrier's walking speed, sent as our own while we ride so friends'
 // screens move us at the same pace
+// The friend we ride (-1: none), and the friends riding on our back (the n-th one, -1: no more)
+s8 MP_Piggy_Carrier(void)
+{
+    return CarrierValid() ? sCarrier : -1;
+}
+
+s8 MP_Piggy_Rider(u8 n)
+{
+    u8 i;
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+        if (i != gMpLocalId && sRidingMe[i] && gMpPlayers[i].present && gMpPlayers[i].hasState
+            && (gMpPlayers[i].state.flags & MPF_RIDING) && n-- == 0)
+            return (s8)i;
+    return -1;
+}
+
 u8 MP_Piggy_CarrierSpeed(void)
 {
     return CarrierValid() ? gMpPlayers[sCarrier].state.speed : MP_SPEED_WALK;
@@ -228,9 +244,11 @@ void MP_Piggy_Update(void)
                 s->y2 = 0;
             }
         }
-        sRemoteRiding[i] = riding;
-        if (!riding)
+        // (their PIG_ON can arrive a frame before their state says they ride: only a ride that ended, or a friend
+        // who left, takes them off my back)
+        if (!riding && (sRemoteRiding[i] || !gMpPlayers[i].present))
             sRidingMe[i] = FALSE;
+        sRemoteRiding[i] = riding;
     }
     if (sCarrier < 0)
         return;

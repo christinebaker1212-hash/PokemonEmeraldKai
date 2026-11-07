@@ -1184,6 +1184,26 @@ u16 MP_RadarWildMon(u16 chain, bool8 shiny)
     return GetMonData(&gEnemyParty[0], MON_DATA_SPECIES);
 }
 
+// Moemon Co-op: the same on the water (a co-op wild battle while surfing with a friend on our back)
+bool8 MP_RollExtraWaterMon(struct Pokemon *out)
+{
+    u16 headerId = GetCurrentMapWildMonHeaderId();
+    const struct WildPokemonInfo *info;
+    struct Pokemon keep;
+    u8 index, level;
+
+    if (headerId == HEADER_NONE || (info = gWildMonHeaders[headerId].waterMonsInfo) == NULL)
+        return FALSE;
+    info = MP_Region_WildInfo(info);
+    keep = gEnemyParty[0];
+    index = ChooseWildMonIndex_WaterRock();
+    level = ChooseWildMonLevel(&info->wildPokemon[index]);
+    CreateWildMon(MP_Events_MaybeOutbreak(MP_WildSlotSpecies(info, index)), level);
+    *out = gEnemyParty[0];
+    gEnemyParty[0] = keep;
+    return TRUE;
+}
+
 bool8 MP_RollExtraLandMon(struct Pokemon *out)
 {
     u16 headerId = GetCurrentMapWildMonHeaderId();

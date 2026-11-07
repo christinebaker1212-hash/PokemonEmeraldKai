@@ -55,6 +55,13 @@ Piggyback (mp_piggy.c, A facing a friend, B hops off): the rider copies each ste
 left the map or got 3+ tiles ahead, and sends the carrier's speed as its own; the carrier draws a rider on its back at its own
 sprite position. MPF_RIDING is recomputed every state (it used to stick and leave riders drawn 12 px up). Test: run2.sh
 WARP=0,16,10,3 WARP_B=0,16,11,3, B faces A (LEFT), A + mash A, A runs B+UP into Oldale, `mp objs` (also dumps followers).
+Riders join the carrier's battles (1.141.0): a trainer spotting the carrier pulls the rider in as the co-op partner with no
+questions (mp_coop.c Task_JoinCheck JOIN_START: MP_Piggy_Rider(0/1), RiderCanJoin; a second rider makes a Triple Battle where
+TripleEligible; the rider's side takes the carrier's MPR_COOP_ACCEPT unasked, MP_Piggy_Carrier() == from), and a wild
+encounter asks riders first (MP_Coop_TryWildTeamUp), surfing too: water battles roll their extra Pokémon from the water table
+(wild_encounter.c MP_RollExtraWaterMon, sCoop.wildWater); while surfing only riders can join (nobody else is on the water).
+The carrier keeps sRidingMe until the rider's state says the ride ended (their PIG_ON arrives before their state shows
+MPF_RIDING: clearing on "not riding" forgot them a frame after hopping on). Tests piggy_trainer, piggy_surf_wild.
 Crash report (src/platform/crash_log.c, installed first thing in main): Windows SEH filter / Linux signals append to
 crash_log.txt: exception, exe+offset of the faulting address, callbacks, map, and exe+offsets found on the stack (resolve with
 x86_64-w64-mingw32-nm on the same exe; keep a copy of each shipped exe). Debug `mp crash` forces one.

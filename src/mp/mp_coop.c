@@ -150,6 +150,7 @@ enum {
 u8 gMpWildDoublePercent = 60;   // co-op wild battles that are 2 on 2 (debug: mp wilddouble N)
 u8 gMpEnemyLevelBonus;          // added to trainer Pokemon levels while a co-op party is built
 bool8 MP_RollExtraLandMon(struct Pokemon *out);   // wild_encounter.c
+bool8 MP_RollExtraWaterMon(struct Pokemon *out);  // wild_encounter.c (surfing)
 
 struct LearnLater
 {
@@ -379,6 +380,7 @@ static struct
     struct Pokemon wildMon2;  // a second one (2-on-2), or nothing
     struct Pokemon wildMon3;  // a triple's third
     bool8 wildDouble;
+    bool8 wildWater;       // met while surfing (a friend on our back): the extra wild Pokémon come from the water
     u8 wildExtra;          // a triple: extra wild Pokémon rolled (0-2)
     s8 wildTarget2;        // a triple: the second friend asked, -1 = none
     u8 wildReply2;
@@ -1046,6 +1048,7 @@ static void FinishJoinCheck(u8 taskId)
     DestroyTask(taskId);
 }
 
+static bool8 RiderCanJoin(s8 i);
 static bool8 sAloneChosen;   // BATTLE ALONE picked when this trainer walked up (no "wait for a partner?" then)
 
 static void Task_JoinCheck(u8 taskId)
@@ -1070,6 +1073,26 @@ static void Task_JoinCheck(u8 taskId)
         }
         if (sCoop.twoTrainers)
             MPNet_Log("co-op: two trainers (%d and %d): the team-up steps", sCoop.trainerId, sCoop.trainerIdB);
+        if (!PlayerValid(sCoop.requester) && RiderCanJoin(MP_Piggy_Rider(0)) && CoopTrainerTeamSize(sCoop.trainerId) > 1)
+        {
+            // A friend riding on our back (piggyback, surfing or not): they're in, no questions asked (a second
+            // rider makes it a Triple Battle when the trainer allows one)
+            s8 r2 = MP_Piggy_Rider(1);
+            sCoop.requester = MP_Piggy_Rider(0);
+            if (RiderCanJoin(r2) && TripleEligible())
+                sCoop.requester2 = r2;
+            {
+                char name[16], msg[48];
+                MP_GameToAscii(name, gMpPlayers[sCoop.requester].name, PLAYER_NAME_LENGTH);
+                snprintf(msg, sizeof(msg), "%s jumps into the battle!", name);
+                MP_Events_QueueToast(msg);
+            }
+            MPNet_Log("co-op: rider player %d joins the battle automatically%s", sCoop.requester + 1,
+                      PlayerValid(sCoop.requester2) ? " (and another rider: triple)" : "");
+            AcceptRequester();
+            FinishJoinCheck(taskId);
+            break;
+        }
         if (!PlayerValid(sCoop.requester))
         {
             // Nobody asked yet: offer to wait for a friend on this map
@@ -2924,6 +2947,14 @@ static bool8 OnLandEncounterTile(s16 x, s16 y)
     return MetatileBehavior_IsLandWildEncounter(MapGridGetMetatileBehaviorAt(x, y));
 }
 
+// A friend riding on our back (piggyback, on land or while we surf) who can be pulled into our battle right now
+static bool8 RiderCanJoin(s8 i)
+{
+    const u16 needed = MPF_IN_OVERWORLD | MPF_FREE;
+    const u16 busy = MPF_IN_BATTLE | MPF_ENGAGED | MPF_TRAINER_MODE | MPF_CHALLENGED;
+    return i >= 0 && PlayerValid(i) && (gMpPlayers[i].state.flags & needed) == needed && !(gMpPlayers[i].state.flags & busy);
+}
+
 static bool8 FriendCanJoinWild(u8 i, s16 myX, s16 myY, u16 *distance)
 {
     const u16 needed = MPF_IN_OVERWORLD | MPF_FREE;
@@ -2951,24 +2982,37 @@ static bool8 FriendCanJoinWild(u8 i, s16 myX, s16 myY, u16 *distance)
 bool8 MP_Coop_TryWildTeamUp(void)
 {
     struct ObjectEvent *me;
+    bool8 surfing;
     u16 best = 0xFFFF, best2 = 0xFFFF;
     s8 target = -1, target2 = -1;
     u8 i;
 
     if (!MP_IsConnected() || gMpLocalId < 0 || gMpCoopBattle || MP_Coop_IsBusy() || sCoop.challenged)
         return FALSE;
-    if (gPlayerAvatar.objectEventId >= OBJECT_EVENTS_COUNT || TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING))
+    if (gPlayerAvatar.objectEventId >= OBJECT_EVENTS_COUNT)
         return FALSE;
     if (MP_Trainer_IsActive() || MP_Trainer_IsEngaged() || CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
         return FALSE;
     me = &gObjectEvents[gPlayerAvatar.objectEventId];
-    if (!OnLandEncounterTile(me->currentCoords.x, me->currentCoords.y))
+    surfing = TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING) != 0;
+    // Friends riding on our back always come along (on the water too: they're with us)
+    for (i = 0; i < 2; i++)
+    {
+        s8 r = MP_Piggy_Rider(i);
+        if (!RiderCanJoin(r))
+            continue;
+        if (target < 0)
+            target = r, best = 0;
+        else if (target2 < 0)
+            target2 = r, best2 = 0;
+    }
+    if (target < 0 && (surfing || !OnLandEncounterTile(me->currentCoords.x, me->currentCoords.y)))
         return FALSE;
     // the two closest (ties: the lower player id)
-    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    for (i = 0; i < MP_MAX_PLAYERS && !surfing && target2 < 0; i++)
     {
         u16 d;
-        if (!FriendCanJoinWild(i, me->currentCoords.x, me->currentCoords.y, &d))
+        if (i == target || !FriendCanJoinWild(i, me->currentCoords.x, me->currentCoords.y, &d))
             continue;
         if (d < best)
         {
@@ -2985,7 +3029,9 @@ bool8 MP_Coop_TryWildTeamUp(void)
     sCoop.wildMon = gEnemyParty[0];
     // Now and then a second Pokémon jumps out too: 2 on 2 (1 on 1 each is more common).
     // A triple (rolled when the battle starts) usually has three.
-    sCoop.wildDouble = (Random() % 100) < gMpWildDoublePercent && MP_RollExtraLandMon(&sCoop.wildMon2);
+    sCoop.wildWater = surfing;
+    sCoop.wildDouble = (Random() % 100) < gMpWildDoublePercent
+                    && (surfing ? MP_RollExtraWaterMon(&sCoop.wildMon2) : MP_RollExtraLandMon(&sCoop.wildMon2));
 
     LockPlayerFieldControls();
     FreezeObjectEvents();
@@ -3014,11 +3060,12 @@ static void StartWildCoop(const u8 *players, u8 count)
     if (count == 3)
     {
         // usually three wild Pokémon: the extra rolls can fail
+        bool8 (*roll)(struct Pokemon *) = sCoop.wildWater ? MP_RollExtraWaterMon : MP_RollExtraLandMon;
         sCoop.wildExtra = 0;
-        if (MP_RollExtraLandMon(&sCoop.wildMon2))
+        if (roll(&sCoop.wildMon2))
         {
             sCoop.wildExtra++;
-            if (MP_RollExtraLandMon(&sCoop.wildMon3))
+            if (roll(&sCoop.wildMon3))
                 sCoop.wildExtra++;
         }
     }
@@ -3869,6 +3916,17 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
             sCoop.requester2 = -1;
         break;
     case MPR_COOP_ACCEPT:
+        if (sCoop.role == ROLE_NONE && !gMpCoopBattle && MP_Piggy_Carrier() == from)
+        {
+            // We ride on their back and a trainer spotted them: we're pulled into the battle with them
+            sCoop.role = ROLE_ASKING;
+            sCoop.target = from;
+            StringCopyN(sCoop.targetName, gMpPlayers[from].name, MP_NAME_LEN);
+            sCoop.targetName[MP_NAME_LEN] = EOS;
+            LockPlayerFieldControls();
+            MP_Events_QueueToast("A trainer spotted your ride! You jump in!");
+            MPNet_Log("co-op: our ride's trainer battle: we're in");
+        }
         if (sCoop.role == ROLE_ASKING && from == sCoop.target)
             OnAccepted(from, data, len);
         break;

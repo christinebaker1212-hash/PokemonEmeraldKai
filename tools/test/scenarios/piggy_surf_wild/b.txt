@@ -1,0 +1,14 @@
+pressuntil A field 5000
+mp teach 0 55
+waitfor online 6000
+wait 300
+press LEFT 2
+wait 30
+press A 2
+wait 40
+mash A 6 30
+waitfor battle 4000
+pressuntillog A 25000 co-op: battle over
+pressuntil A field 8000
+wait 300
+quit

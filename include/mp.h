@@ -827,6 +827,8 @@ bool8 MP_Emote_LoadUiPalette(void);   // the sprite palette shared by bubbles, t
 // mp_piggy.c
 bool8 MP_Piggy_IsRiding(void);
 u8 MP_Piggy_CarrierSpeed(void);
+s8 MP_Piggy_Carrier(void);     // the friend we ride (-1: none)
+s8 MP_Piggy_Rider(u8 n);       // the n-th friend riding on our back (-1: no more): they join our battles
 void MP_Piggy_FieldInput(u16 newKeys);
 void MP_Piggy_Update(void);
 void MP_Piggy_OnRelay(u8 from, const u8 *data, u16 len);

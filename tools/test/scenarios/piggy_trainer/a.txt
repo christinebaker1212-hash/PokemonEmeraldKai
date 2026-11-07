@@ -1,0 +1,14 @@
+pressuntil A field 5000
+mp moves 0 45
+waitfor online 6000
+waitlog 6000 piggy: player 2 hopped on
+wait 120
+press LEFT 12
+wait 60
+pressuntil A battle 6000
+pressuntillog A 25000 co-op: battle over
+pressuntil A field 6000
+wait 120
+mp trainerflag 273
+wait 200
+quit

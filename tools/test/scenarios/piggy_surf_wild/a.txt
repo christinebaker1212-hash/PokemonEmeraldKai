@@ -1,0 +1,27 @@
+pressuntil A field 5000
+mp givebadges
+mp teach 0 57
+mp wilddouble 0
+waitfor online 6000
+waitlog 6000 piggy: player 2 hopped on
+wait 600
+mp where
+press LEFT 2
+wait 30
+shot a_faced
+press A 2
+wait 60
+shot a_pressed
+pressuntil A yesno 900
+wait 30
+press A 2
+pressuntil A surfing 900
+wait 120
+mp where
+shot a_surfing
+mp wild 288:3
+waitfor battle 2000
+pressuntillog A 25000 co-op: battle over
+pressuntil A field 8000
+wait 300
+quit

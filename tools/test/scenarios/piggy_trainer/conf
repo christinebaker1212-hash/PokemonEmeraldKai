@@ -1,0 +1,12 @@
+# ROUTE 116: BOB rides on ALICE's back; JERRY spots ALICE and BOB is pulled into the battle with no questions (a co-op
+# Double Battle with his own Pokemon). They win; JERRY counts as beaten on both games.
+MODE=2
+WARP=0,31,29,4
+WARP_B=0,31,30,4
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=280:46"
+EXPECT_A=("piggy: player 2 hopped on" "rider player 2 joins the battle automatically" "co-op: battle over, outcome 1")
+EXPECT_B=("our ride's trainer battle: we're in" "co-op: battle over, outcome 1")
+UNEXPECT_A=("crash" "BAD EGG")
+UNEXPECT_B=("crash" "BAD EGG")
