@@ -3700,6 +3700,24 @@ asks (U.confirm) and clears all six. Test stadium_clear.
   ConditionCheckSVar$ choices (Ether Well), Chooser$.
 - Tests: test_rules.c TestLibraryPosition (AURA EXTRACTION, ENLIGHTENED TUTOR, bottom / 2 down); scenario mtg_libtop.
 
+## MAGIC's "a source of your choice" (1.158.0)
+
+- ChooseSource (MTG_API_CHOOSE_SOURCE): a permanent or a spell on the stack of the Choices$ kind (Emblem alternatives
+  dropped), picked by its controller (AskPick when more than one; MTG_EV_CHOSEN: "You choose Lightning Bolt.") into
+  MtgDuel.chosen1 / chosenSeq; Cleanup ClearChosenCard$; Defined$ ChosenCard; Valid ChosenCard / ChosenCardStrict
+  (Mtg_ChosenCard: the Effect's own pick while gMtgEffCtx is set, else the duel's) and <Color>Source.
+- An Effect keeps the pick it began with (MtgEffect.chosen1). Its "the next time ..." replacement: ReplaceWith$ an SVar
+  exiling the Effect with PreventionEffect$ True (MtgStatic.oneShot: prevented once, MtgEffect.used, gone at the next
+  check), or gaining that much life first ("DB$ GainLife | ... LifeAmount$ X" with X ReplaceCount$DamageAmount:
+  gainLife). ConditionPresent$ Card,Emblem reads as Card.
+- AI (AILogic NeedsPrevention): ThreatFrom / BestThreat, the source of the kind about to deal it the most damage (their
+  damage spell or ability at it on the stack, an unblocked attacker once blockers are declared; not one an Effect of its
+  own names already); used at 2 or more, and that source picked.
+- Unlocked 26: the CIRCLES and RUNES OF PROTECTION, PENTAGRAM OF THE AGES, REVERSE DAMAGE, CHO-ARRIM ALCHEMIST, RIGHTEOUS
+  AURA, SANCTUM GUARDIAN, PILGRIM OF JUSTICE / VIRTUE... Still out: redirecting damage (REFLECT DAMAGE, JADE MONOLITH,
+  BEACON OF DESTINY: ReplaceWith$ DealDamage), ImprintCards$ (SAMITE BLESSING).
+- Tests: test_rules.c TestChooseSource; scenario mtg_choosesrc.
+
 ## MAGIC's damage prevention and "doesn't untap" for a while (1.157.0)
 
 - Replacement effects R: Event$ DamageDone | Prevent$ True (Forge's ReplacePreventDamage) as statics of mode

@@ -611,9 +611,25 @@ static int ParseRepl(MtgCardDef *c, int cardId, char *text, MtgStatic *out)
         return 0;
     if (strcmp(ev, "DamageDone") == 0) {   // ReplacePreventDamage (Prevent$ True: all of it, nothing in its place)
         const char *tgt = ParamOf(first, count, "ValidTarget"), *srcSpec = ParamOf(first, count, "ValidSource");
-        if (!(s = ParamOf(first, count, "Prevent")) || strcmp(s, "True") != 0 || ParamOf(first, count, "ValidCard")
-            || ParamOf(first, count, "ReplaceWith") || ParamOf(first, count, "Destination") || ParamOf(first, count, "Layer")
-            || ParamOf(first, count, "ValidStepTurnToController") || ParamOf(first, count, "PreventionEffect"))
+        const char *rw = ParamOf(first, count, "ReplaceWith"), *sv;
+        if (rw) {   // "the next time ...": prevented once, then the Effect exiles itself (an Effect's only)
+            static const char sExileSelf[] = "DB$ ChangeZone | Defined$ Self | Origin$ Command | Destination$ Exile";
+            static const char sGain[] = "DB$ GainLife | Defined$ You | LifeAmount$ X | SubAbility$ ";
+            if (!sReplForEffect || ParamOf(first, count, "Prevent") || !(s = ParamOf(first, count, "PreventionEffect"))
+                || strcmp(s, "True") || !(sv = Mtg_Svar(cardId, rw)))
+                return 0;
+            if (strncmp(sv, sGain, sizeof(sGain) - 1) == 0) {   // (and its controller gains that much life: REVERSE DAMAGE)
+                const char *ex = Mtg_Svar(cardId, sv + sizeof(sGain) - 1), *x = Mtg_Svar(cardId, "X");
+                if (!ex || strcmp(ex, sExileSelf) || !x || strcmp(x, "ReplaceCount$DamageAmount"))
+                    return 0;
+                st.gainLife = 1;
+            } else if (strcmp(sv, sExileSelf))
+                return 0;
+            st.oneShot = 1;
+        } else if (!(s = ParamOf(first, count, "Prevent")) || strcmp(s, "True") != 0 || ParamOf(first, count, "PreventionEffect"))
+            return 0;
+        if (ParamOf(first, count, "ValidCard") || ParamOf(first, count, "Destination") || ParamOf(first, count, "Layer")
+            || ParamOf(first, count, "ValidStepTurnToController"))
             return 0;
         if (tgt) {
             if (!SplitTarget(tgt, &st.affected, &st.targetPlayer))
@@ -1091,7 +1107,7 @@ static int PreventBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, int
     return Present(d, st, s);
 }
 
-int Mtg_DamagePrevented(const MtgDuel *d, int src, MtgTarget to, int combat, int amount)
+int Mtg_DamagePrevented(MtgDuel *d, int src, MtgTarget to, int combat, int amount)
 {
     int s, k, prevent = 0;
     if (sDepth)
@@ -1107,13 +1123,18 @@ int Mtg_DamagePrevented(const MtgDuel *d, int src, MtgTarget to, int combat, int
             prevent = PreventBy(d, &gMtgStatics[c->statics[k]], s, o->controller, src, to, combat, amount);
     }
     for (s = 0; s < d->effCount && !prevent; s++) {
-        const MtgEffect *e = &d->effects[s];
+        MtgEffect *e = &d->effects[s];
         if (!Mtg_EffectAlive(d, e))
             continue;
         gMtgEffCtx = e;
-        for (k = 0; k < gMtgAbilities[e->ability].effStaticCount && !prevent; k++)
-            prevent = PreventBy(d, &gMtgStatics[gMtgAbilities[e->ability].effStatics[k]], e->source, e->controller, src, to,
-                                combat, amount);
+        for (k = 0; k < gMtgAbilities[e->ability].effStaticCount && !prevent; k++) {
+            const MtgStatic *st = &gMtgStatics[gMtgAbilities[e->ability].effStatics[k]];
+            prevent = PreventBy(d, st, e->source, e->controller, src, to, combat, amount);
+            if (prevent && st->gainLife)
+                Mtg_GainLife(d, e->controller, amount);   // ("you gain life equal to the damage prevented this way")
+            if (prevent && st->oneShot)
+                e->used = 1;   // ("the next time": done, the Effect gone at the next check)
+        }
         gMtgEffCtx = NULL;
     }
     sDepth--;

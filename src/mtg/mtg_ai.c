@@ -3,6 +3,7 @@
 // ComputerUtil*, the ability AIs: docs/MTG_HANDOFF.md), under the AI levels the three card games share.
 // It plays a land, casts what helps most, removes the opponent's best creature, attacks when no blocker eats the
 // attacker, blocks when it kills or survives, chump-blocks only to live.
+#include <stdlib.h>
 #include <string.h>
 #include "mtg_internal.h"
 
@@ -120,6 +121,53 @@ static int EffectPrevents(const MtgAbility *ab, int *by, int *to)
             *to = 1;
     }
     return any;
+}
+
+// the damage OBJ is about to deal ME: their damage spell or ability on top of the stack aimed at it, or an unblocked
+// attacker in their combat (blockers declared); 0 when none, or a prevention Effect of its own names it already
+static int ThreatFrom(const MtgDuel *d, int obj, int me)
+{
+    int k;
+    for (k = 0; k < d->effCount; k++)
+        if (d->effects[k].controller == me && d->effects[k].chosen1 == obj + 1 && Mtg_EffectAlive(d, &d->effects[k]))
+            return 0;
+    if (d->stackCount) {
+        const MtgStackEntry *e = &d->stack[d->stackCount - 1];
+        const MtgAbility *ab = e->ability != 0xFFFF ? &gMtgAbilities[e->ability] : NULL;
+        const char *n;
+        if (e->controller == me || e->source != obj || !ab || ab->api != MTG_API_DEAL_DAMAGE)
+            return 0;
+        if (!(e->target.kind == MTG_TGT_PLAYER && e->target.id == me))
+            return 0;
+        n = Mtg_Param(ab, "NumDmg");
+        return n && n[0] >= '1' && n[0] <= '9' ? atoi(n) : 3;
+    }
+    if (d->active == me || d->step != MTG_STEP_COMBAT_BLOCKERS || !IsCreatureOnField(d, obj) || !d->objs[obj].attacking)
+        return 0;
+    for (k = 0; k < d->objCount; k++)
+        if (d->objs[k].zone == MTG_ZONE_BATTLEFIELD && d->objs[k].blocking == obj)
+            return 0;
+    return Mtg_Power(d, obj);
+}
+
+// ChooseSource's best pick for ME: the source of the kind that threatens the most damage (*dmg)
+static int BestThreat(const MtgDuel *d, const MtgAbility *ab, int src, int me, int *dmg)
+{
+    const char *ch = Mtg_Param(ab, "Choices");
+    int i, best = -1;
+    *dmg = 0;
+    if (ch && strncmp(ch, "Card,Emblem", 11) == 0)
+        ch = "Card";
+    for (i = 0; i < d->objCount; i++) {
+        int t;
+        if (d->objs[i].zone != MTG_ZONE_BATTLEFIELD && d->objs[i].zone != MTG_ZONE_STACK)
+            continue;
+        if (ch && !Mtg_ValidObj(d, i, ch, src, me))
+            continue;
+        if ((t = ThreatFrom(d, i, me)) > *dmg)
+            *dmg = t, best = i;
+    }
+    return best;
 }
 
 // "prevent all combat damage" in their attack, blockers declared: worth the damage coming to it and its creatures
@@ -386,6 +434,12 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
             return main && (tgtObj < 0 || tgtMine) ? 6 : 0;
         return a->kind == MTG_ACT_ACTIVATE && d->active == opp && d->step == MTG_STEP_END ? 4 : 0;
     }
+    case MTG_API_CHOOSE_SOURCE: {   // "the next time a source of your choice would deal damage": one about to
+        int dmg;
+        if (BestThreat(d, ab, a->obj, me, &dmg) < 0 || dmg < 2)
+            return 0;
+        return 6 + 3 * dmg + (dmg >= d->players[me].life ? 30 : 0);
+    }
     case MTG_API_FOG:   // their attack, blockers declared: the damage coming to itself and its creatures about to die
         return d->fog ? 0 : FogScore(d, me);
     case MTG_API_PREVENT_DAMAGE:   // its own creature about to die, or itself low on life in their attack
@@ -595,6 +649,18 @@ static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
             }
             if (sc > bestS)
                 bestS = sc, best = i;
+        }
+        out->card = (uint8_t)best;
+        return;
+    }
+    if (q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_CHOOSE_SOURCE) {   // the biggest threat
+        int dmg, b = BestThreat(d, &gMtgAbilities[q->ability], q->source, q->player, &dmg), bestP = -1;
+        for (i = 0; i < q->candidateCount; i++) {
+            const MtgObj *o = &d->objs[q->candidates[i]];
+            int p = q->candidates[i] == b ? 1000 : (o->controller != q->player && IsCreatureOnField(d, q->candidates[i]))
+                                                 ? Mtg_Power(d, q->candidates[i]) : -1;
+            if (p > bestP)
+                bestP = p, best = i;
         }
         out->card = (uint8_t)best;
         return;

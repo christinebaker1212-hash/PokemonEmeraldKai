@@ -183,6 +183,9 @@ typedef struct {
     uint8_t controller, until, exileOnMoved, remCount;
     uint16_t rem[4];                // (a player: 0xFF00 + the player)
     uint32_t remSeq[4];
+    uint16_t chosen1;               // the source chosen as it began (ChooseSource: object + 1, 0 none) and its seq
+    uint32_t chosenSeq;
+    uint8_t used;                   // a one-time replacement of its own happened: over
 } MtgEffect;
 #define MTG_MAX_EFFECTS 12
 
@@ -259,7 +262,8 @@ enum {
     MTG_EV_CONTROL,    // a = the object, b = its new controller
     MTG_EV_KCOUNTERS,  // a = the object, b = a counter kind (not +1/+1: MTG_EV_COUNTERS), c = how many it has now
     MTG_EV_COIN,       // a = the source, b = the player who flipped, c = 1 won / 0 lost
-    MTG_EV_REVEAL      // a = the card revealed (from a hand), b = the player revealing it
+    MTG_EV_REVEAL,     // a = the card revealed (from a hand), b = the player revealing it
+    MTG_EV_CHOSEN      // a = the source chosen (ChooseSource), b = the player choosing it
 };
 typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;
 #define MTG_REM_PLAYER 0xFF00   // a remembered player in MtgDuel.rem / repItems   // a, b, c by kind (mtg_game.c Mtg_Event)
@@ -302,6 +306,8 @@ typedef struct MtgDuel {
     uint8_t effCount;                                // Effects in force (EffectEffect)
     MtgEffect effects[MTG_MAX_EFFECTS];
     uint8_t fog;                                     // a Fog resolved: combat damage this turn is prevented
+    uint16_t chosen1;                                // ChooseSource's pick (object + 1; 0: none) and its seq
+    uint32_t chosenSeq;
     uint8_t resFlip;                                 // the coin just flipped: 1 won, 2 lost (0: none)
     int16_t resChoice;                               // the answer: 1 / 0, or the object picked (-1: not asked yet)
     // a cast or an activation's costs still to pick (sacrifices, then discards): asked as MTG_Q_CHOOSE's PICK with

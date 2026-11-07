@@ -86,6 +86,11 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
     for (i = 0; i < 5; i++)
         if (strlen(sColorProps[i]) == n && strncmp(p, sColorProps[i], n) == 0)
             return !d || (((Mtg_ObjColors(d, obj) & MTG_COLOR_BIT(i)) != 0) ^ neg);
+    for (i = 0; i < 5; i++)   // ("RedSource": a source of that color)
+        if (strlen(sColorProps[i]) + 6 == n && strncmp(p, sColorProps[i], n - 6) == 0 && strncmp(p + n - 6, "Source", 6) == 0)
+            return !d || (Mtg_ObjColors(d, obj) & MTG_COLOR_BIT(i)) != 0;
+    if ((n == 10 && strncmp(p, "ChosenCard", 10) == 0) || (n == 16 && strncmp(p, "ChosenCardStrict", 16) == 0))
+        return !d || obj == Mtg_ChosenCard(d);   // (ChooseSource's pick)
     if (n == 10 && strncmp(p, "MultiColor", 10) == 0)
         return !d || (__builtin_popcount(Mtg_ObjColors(d, obj)) > 1);
     if (n == 9 && strncmp(p, "DamagedBy", 9) == 0) {   // dealt damage by the source this turn

@@ -147,9 +147,20 @@ int Mtg_IsRememberedPlayer(const MtgDuel *d, int player)
 
 const MtgEffect *gMtgEffCtx;
 
+int Mtg_ChosenCard(const MtgDuel *d)
+{
+    uint16_t c1 = gMtgEffCtx ? gMtgEffCtx->chosen1 : d->chosen1;
+    uint32_t seq = gMtgEffCtx ? gMtgEffCtx->chosenSeq : d->chosenSeq;
+    if (!c1 || d->objs[c1 - 1].seq != seq)
+        return MTG_NO_OBJ;   // (none, or it has changed zones since: a new object)
+    return c1 - 1;
+}
+
 int Mtg_EffectAlive(const MtgDuel *d, const MtgEffect *e)
 {
     int k;
+    if (e->used)
+        return 0;
     if (e->until == MTG_EFF_HOST_OR_EOT || e->until == MTG_EFF_HOST || e->until == MTG_EFF_UNTIL_UNTAPS) {
         const MtgObj *s = &d->objs[e->source];   // (its source left the battlefield, or untapped: over)
         if (s->zone != MTG_ZONE_BATTLEFIELD || s->seq != e->sourceSeq || (e->until == MTG_EFF_UNTIL_UNTAPS && !s->tapped))

@@ -42,6 +42,11 @@ tools/test/regress.sh mtg_shop mtg_play mtg_show mtg_triggers ach_hooks` and loo
 the table: `mp mtg put PLAYER hand|field|grave NAME` (scenario mtg_triggers shows how), `mp mtg points N`,
 `mp mtg pack CODE N`. Forge's Java: `tools/mtg/fetch_forge.sh` (~/.cache/moemon/forge).
 
+## Status (2026-11-07: 1.158.0)
+- "A source of your choice" (ChooseSource; the Circles of Protection): COOP_NOTES "MAGIC's a source of your choice".
+  2667 of 5408. Next by count: replacement effects left (ReplaceWith$ DealDamage redirects, Moved, Draw), ChooseType (37),
+  T:Execute (52).
+
 ## Status (2026-11-07: 1.157.0)
 - Damage prevention (R: DamageDone Prevent$, Fog, Effects with ReplacementEffects$) and "doesn't untap" for a while:
   COOP_NOTES "MAGIC's damage prevention and doesn't untap". 2641 of 5408. Next by count: replacement effects left

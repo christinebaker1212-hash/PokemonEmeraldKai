@@ -1,0 +1,6 @@
+# MAGIC's "a source of your choice" on the table: REVERSE DAMAGE asks which source (every permanent and spell is one);
+# the pick is made on the table and "You choose ..." shows. Shots cs_pick, cs_chosen.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Reverse Damage" "mtg: you: picked" "mtg: ready")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Reverse Damage to focus")

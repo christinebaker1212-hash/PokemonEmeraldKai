@@ -16,13 +16,13 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"Charm", MTG_API_CHARM}, {"ChangeZoneAll", MTG_API_CHANGE_ZONE_ALL}, {"Animate", MTG_API_ANIMATE},
     {"DelayedTrigger", MTG_API_DELAYED_TRIGGER}, {"PreventDamage", MTG_API_PREVENT_DAMAGE},
     {"GainControl", MTG_API_GAIN_CONTROL}, {"PutCounterAll", MTG_API_PUT_COUNTER_ALL},
-    {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG}, {"Mill", MTG_API_MILL}, {"FlipCoin", MTG_API_FLIP_COIN}, {"Cleanup", MTG_API_CLEANUP}, {"Reveal", MTG_API_REVEAL}, {"RepeatEach", MTG_API_REPEAT_EACH}, {"SetLife", MTG_API_SET_LIFE}, {"Effect", MTG_API_EFFECT}, {"Fog", MTG_API_FOG},
+    {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG}, {"Mill", MTG_API_MILL}, {"FlipCoin", MTG_API_FLIP_COIN}, {"Cleanup", MTG_API_CLEANUP}, {"Reveal", MTG_API_REVEAL}, {"RepeatEach", MTG_API_REPEAT_EACH}, {"SetLife", MTG_API_SET_LIFE}, {"Effect", MTG_API_EFFECT}, {"Fog", MTG_API_FOG}, {"ChooseSource", MTG_API_CHOOSE_SOURCE},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
-    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal", "RepeatEach", "SetLife", "Effect", "Fog",
+    "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal", "RepeatEach", "SetLife", "Effect", "Fog", "ChooseSource",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -209,7 +209,7 @@ typedef struct { int n; MtgTarget t[MTG_MAX_DEFINED]; } Defined;
 static const char *const sDefinedKnown[] = {
     "You", "Opponent", "Player", "Self", "Targeted", "ParentTarget", "TargetedController", "TargetedPlayer",
     "Enchanted", "DelayTriggerRemembered", "DelayTriggerRememberedLKI", "Remembered", "RememberedLKI", "RememberedCard",
-    "Player.IsRemembered",
+    "Player.IsRemembered", "ChosenCard",
 };
 
 // what set a triggered ability off (SpellAbility.getTriggeringObject: "Triggered" + the AbilityKey's name, its
@@ -337,6 +337,10 @@ static void DefinedBy(const MtgDuel *d, const MtgResolveCtx *ctx, const char *de
             if (cardOnly)
                 break;
         }
+    } else if (strcmp(def, "ChosenCard") == 0) {   // (ChooseSource's pick)
+        int c = Mtg_ChosenCard(d);
+        if (c != MTG_NO_OBJ)
+            Add(out, MTG_TGT_OBJ, c);
     } else if (strcmp(def, "You") == 0)
         Add(out, MTG_TGT_PLAYER, ctx->controller);
     else if (strcmp(def, "Opponent") == 0)
@@ -423,6 +427,31 @@ void Mtg_Sacrifice(MtgDuel *d, int obj)
 {
     if (d->objs[obj].zone == MTG_ZONE_BATTLEFIELD)
         Mtg_MoveTo(d, obj, MTG_ZONE_GRAVEYARD);
+}
+
+// a spec without its Emblem alternatives (there are none here): "Card,Emblem" is "Card"; NULL when only those
+static const char *CardsOnly(const char *spec)
+{
+    static char buf[128];
+    char *o = buf;
+    const char *p = spec;
+    if (!spec || strlen(spec) >= sizeof(buf))
+        return spec;
+    while (*p) {
+        const char *comma = strchr(p, ',');
+        size_t n = comma ? (size_t)(comma - p) : strlen(p);
+        if (strncmp(p, "Emblem", 6) != 0) {
+            if (o != buf)
+                *o++ = ',';
+            memcpy(o, p, n);
+            o += n;
+        }
+        if (!comma)
+            break;
+        p = comma + 1;
+    }
+    *o = 0;
+    return o == buf ? NULL : buf;
 }
 
 static int AskPick(MtgDuel *d, int player, const uint16_t *list, int n)
@@ -1004,6 +1033,8 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                   : strcmp(du, "UntilTheEndOfYourNextUntap") == 0 ? MTG_EFF_AFTER_UNTAP
                   : strcmp(du, "UntilUntaps") == 0 ? MTG_EFF_UNTIL_UNTAPS : MTG_EFF_HOST;
         ef->exileOnMoved = Mtg_Param(ab, "ExileOnMoved") != NULL;
+        ef->chosen1 = d->chosen1;   // (ChooseSource's pick: ChosenCard in its statics)
+        ef->chosenSeq = d->chosenSeq;
         if (rem) {
             DefinedBy(d, ctx, rem, &who);
             for (i = 0; i < who.n && ef->remCount < 4; i++) {
@@ -1235,7 +1266,29 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
     case MTG_API_CLEANUP:   // CleanupEffect: ClearRemembered$
         if (Mtg_Param(ab, "ClearRemembered"))
             d->remCount = 0;
+        if (Mtg_Param(ab, "ClearChosenCard"))
+            d->chosen1 = 0;
         break;
+    case MTG_API_CHOOSE_SOURCE: {   // ChooseSourceEffect: a permanent or a spell of the kind, picked by its controller
+        uint16_t list[MTG_MAX_COMBAT];
+        int n = 0;
+        const char *spec = CardsOnly(Mtg_Param(ab, "Choices"));
+        for (i = 0; i < d->objCount && n < MTG_MAX_COMBAT; i++)
+            if ((d->objs[i].zone == MTG_ZONE_BATTLEFIELD || d->objs[i].zone == MTG_ZONE_STACK)
+                && (!spec || Mtg_ValidObj(d, i, spec, ctx->source, ctx->controller)))
+                list[n++] = (uint16_t)i;
+        d->chosen1 = 0;
+        if (n > 1 && d->resChoice < 0)
+            return AskPick(d, ctx->controller, list, n);
+        for (i = 0; i < n; i++)
+            if (n == 1 || list[i] == d->resChoice) {
+                d->chosen1 = (uint16_t)(list[i] + 1);
+                d->chosenSeq = d->objs[list[i]].seq;
+                Mtg_Event(d, MTG_EV_CHOSEN, list[i], ctx->controller, 0);
+            }
+        d->resChoice = -1;
+        break;
+    }
     case MTG_API_REVEAL: {   // RevealEffect: cards of a hand shown and remembered (AnyNumber$: every one that may be)
         const char *valid = Mtg_Param(ab, "RevealValid"), *any = Mtg_Param(ab, "AnyNumber"), *rnd = Mtg_Param(ab, "Random");
         int k;
@@ -1348,7 +1401,7 @@ static int ConditionKnown(const MtgAbility *ab)
         return 0;
     if ((def || cmp) && !pr)
         return 0;
-    if (pr && strcmp(pr, "Card") && !Mtg_ValidSpecKnown(pr))
+    if (pr && strcmp(pr, "Card") && strcmp(pr, "Card,Emblem") && !Mtg_ValidSpecKnown(pr))
         return 0;
     if (cmp && (CompareParse(cmp, &op) < 0 || (Mtg_Amount(NULL, NULL, ab->card, cmp + 2, &ok), !ok)))
         return 0;
@@ -1367,6 +1420,8 @@ static int ConditionMet(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
     const char *cmp = Mtg_Param(ab, "ConditionCompare"), *sv = Mtg_Param(ab, "ConditionCheckSVar");
     const char *svc = Mtg_Param(ab, "ConditionSVarCompare");
     int op, ok, i;
+    if (pr && strcmp(pr, "Card,Emblem") == 0)
+        pr = "Card";   // (no emblems here)
     if (pr) {   // how many of the Defined$ ones (or permanents on the battlefield) are of the spec
         int n = 0;
         if (def) {
@@ -1501,7 +1556,8 @@ static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_REMOVE_COUNTER] = {"CounterType", "CounterNum"},
     [MTG_API_MILL] = {"NumCards"},
     [MTG_API_FLIP_COIN] = {"WinSubAbility", "LoseSubAbility"},
-    [MTG_API_CLEANUP] = {"ClearRemembered"},
+    [MTG_API_CLEANUP] = {"ClearRemembered", "ClearChosenCard"},
+    [MTG_API_CHOOSE_SOURCE] = {"Choices"},
     [MTG_API_REVEAL] = {"RevealValid", "AnyNumber", "Random", "RememberRevealed"},
     [MTG_API_REPEAT_EACH] = {"RepeatSubAbility", "RepeatPlayers", "RepeatCards", "Zone", "DamageMap", "ChangeZoneTable"},
     [MTG_API_SET_LIFE] = {"LifeAmount"},
@@ -1640,6 +1696,8 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return 1;
     case MTG_API_FOG:
         return 1;
+    case MTG_API_CHOOSE_SOURCE:
+        return (v = CardsOnly(Mtg_Param(ab, "Choices"))) && Mtg_ValidSpecKnown(v);
     case MTG_API_EFFECT: {   // (its statics and replacements are parsed as it's loaded: mtg_script.c)
         const char *du = Mtg_Param(ab, "Duration"), *rem = Mtg_Param(ab, "RememberObjects");
         if (!Mtg_Param(ab, "StaticAbilities") && !Mtg_Param(ab, "ReplacementEffects"))

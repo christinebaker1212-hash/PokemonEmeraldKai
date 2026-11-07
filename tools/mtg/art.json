@@ -2974,6 +2974,13 @@
 "number": "234",
 "set": "ody"
 },
+"Cho-Arrim Alchemist": {
+"artist": "Scott M. Fischer",
+"file": "mmq_8",
+"frame": "1997",
+"number": "8",
+"set": "mmq"
+},
 "Cho-Arrim Legate": {
 "artist": "rk post",
 "file": "mmq_10",
@@ -3036,6 +3043,55 @@
 "frame": "1997",
 "number": "94",
 "set": "wth"
+},
+"Circle of Despair": {
+"artist": "Scott M. Fischer",
+"file": "mir_259",
+"frame": "1997",
+"number": "259",
+"set": "mir"
+},
+"Circle of Protection: Artifacts": {
+"artist": "Pete Venters",
+"file": "4ed_13",
+"frame": "1993",
+"number": "13",
+"set": "4ed"
+},
+"Circle of Protection: Black": {
+"artist": "Jesper Myrfors",
+"file": "4ed_14",
+"frame": "1993",
+"number": "14",
+"set": "4ed"
+},
+"Circle of Protection: Blue": {
+"artist": "Dameon Willich",
+"file": "4ed_15",
+"frame": "1993",
+"number": "15",
+"set": "4ed"
+},
+"Circle of Protection: Green": {
+"artist": "Sandra Everingham",
+"file": "4ed_16",
+"frame": "1993",
+"number": "16",
+"set": "4ed"
+},
+"Circle of Protection: Red": {
+"artist": "Mark Tedin",
+"file": "4ed_17",
+"frame": "1993",
+"number": "17",
+"set": "4ed"
+},
+"Circle of Protection: White": {
+"artist": "Douglas Shuler",
+"file": "4ed_18",
+"frame": "1993",
+"number": "18",
+"set": "4ed"
 },
 "Citanul Hierophants": {
 "artist": "Vincent Evans",
@@ -7132,6 +7188,13 @@
 "number": "257",
 "set": "usg"
 },
+"Greater Realm of Preservation": {
+"artist": "Steve Luke",
+"file": "5ed_31",
+"frame": "1997",
+"number": "31",
+"set": "5ed"
+},
 "Greater Werewolf": {
 "artist": "Dennis Detwiller",
 "file": "hml_51",
@@ -9575,6 +9638,13 @@
 "number": "144",
 "set": "tmp"
 },
+"Martyr's Cause": {
+"artist": "Jeff Laubenstein",
+"file": "ulg_13",
+"frame": "1997",
+"number": "13",
+"set": "ulg"
+},
 "Martyrs' Tomb": {
 "artist": "Anthony S. Waters",
 "file": "apc_110",
@@ -11094,6 +11164,13 @@
 "number": "314",
 "set": "mir"
 },
+"Pay No Heed": {
+"artist": "Adam Rex",
+"file": "tor_12",
+"frame": "1997",
+"number": "12",
+"set": "tor"
+},
 "Peace and Quiet": {
 "artist": "Don Hazeltine",
 "file": "ulg_17",
@@ -11163,6 +11240,13 @@
 "frame": "1997",
 "number": "47",
 "set": "wth"
+},
+"Pentagram of the Ages": {
+"artist": "Douglas Shuler",
+"file": "ice_332",
+"frame": "1993",
+"number": "332",
+"set": "ice"
 },
 "Penumbra Bobcat": {
 "artist": "Heather Hudson",
@@ -11422,6 +11506,20 @@
 "frame": "1993",
 "number": "41",
 "set": "4ed"
+},
+"Pilgrim of Justice": {
+"artist": "Dany Orizio",
+"file": "ody_40",
+"frame": "1997",
+"number": "40",
+"set": "ody"
+},
+"Pilgrim of Virtue": {
+"artist": "Massimiliano Frezzato",
+"file": "ody_41",
+"frame": "1997",
+"number": "41",
+"set": "ody"
 },
 "Pillage": {
 "artist": "Richard Kane Ferguson",
@@ -12613,6 +12711,13 @@
 "number": "43",
 "set": "mmq"
 },
+"Reverse Damage": {
+"artist": "Dameon Willich",
+"file": "4ed_45",
+"frame": "1993",
+"number": "45",
+"set": "4ed"
+},
 "Revive": {
 "artist": "Matthew D. Wilson",
 "file": "mmq_262",
@@ -12640,6 +12745,13 @@
 "frame": "1997",
 "number": "33",
 "set": "inv"
+},
+"Rhystic Circle": {
+"artist": "Alan Pollack",
+"file": "pcy_19",
+"frame": "1997",
+"number": "19",
+"set": "pcy"
 },
 "Rhystic Deluge": {
 "artist": "Pete Venters",
@@ -12689,6 +12801,13 @@
 "frame": "1997",
 "number": "143",
 "set": "jud"
+},
+"Righteous Aura": {
+"artist": "Jeff Miracola",
+"file": "vis_20",
+"frame": "1997",
+"number": "20",
+"set": "vis"
 },
 "Righteous Cause": {
 "artist": "Scott M. Fischer",
@@ -12759,6 +12878,13 @@
 "frame": "1997",
 "number": "310",
 "set": "inv"
+},
+"Rith's Charm": {
+"artist": "David Martin",
+"file": "pls_122",
+"frame": "1997",
+"number": "122",
+"set": "pls"
 },
 "Rith's Grove": {
 "artist": "Scott Bailey",
@@ -13005,6 +13131,55 @@
 "number": "bl100",
 "set": "ptc"
 },
+"Rune of Protection: Artifacts": {
+"artist": "Scott M. Fischer",
+"file": "usg_35",
+"frame": "1997",
+"number": "35",
+"set": "usg"
+},
+"Rune of Protection: Black": {
+"artist": "Scott M. Fischer",
+"file": "usg_36",
+"frame": "1997",
+"number": "36",
+"set": "usg"
+},
+"Rune of Protection: Blue": {
+"artist": "Scott M. Fischer",
+"file": "usg_37",
+"frame": "1997",
+"number": "37",
+"set": "usg"
+},
+"Rune of Protection: Green": {
+"artist": "Scott M. Fischer",
+"file": "usg_38",
+"frame": "1997",
+"number": "38",
+"set": "usg"
+},
+"Rune of Protection: Lands": {
+"artist": "Scott M. Fischer",
+"file": "usg_39",
+"frame": "1997",
+"number": "39",
+"set": "usg"
+},
+"Rune of Protection: Red": {
+"artist": "Scott M. Fischer",
+"file": "usg_40",
+"frame": "1997",
+"number": "40",
+"set": "usg"
+},
+"Rune of Protection: White": {
+"artist": "Scott M. Fischer",
+"file": "usg_41",
+"frame": "1997",
+"number": "41",
+"set": "usg"
+},
 "Rupture": {
 "artist": "Gao Yan",
 "file": "nem_97",
@@ -13150,6 +13325,13 @@
 "file": "usg_42",
 "frame": "1997",
 "number": "42",
+"set": "usg"
+},
+"Sanctum Guardian": {
+"artist": "Donato Giancola",
+"file": "usg_43",
+"frame": "1997",
+"number": "43",
 "set": "usg"
 },
 "Sand Squid": {

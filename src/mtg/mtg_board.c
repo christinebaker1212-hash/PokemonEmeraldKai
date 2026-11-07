@@ -1968,6 +1968,14 @@ static int StartEvent(const MtgEvent *e)
                e->c ? (e->b == ME ? "you win!" : "they win!") : (e->b == ME ? "you lose." : "they lose."));
         PlaySE(e->c ? SE_SHOP : SE_FAILURE);
         return Frames(30);
+    case MTG_EV_CHOSEN:   // a source chosen ("prevent the damage it would deal")
+        if (obj >= 0 && obj < MTG_MAX_OBJS) {
+            B.flash[obj] = 16;
+            Name(a, sizeof(a), obj);
+            Ticker("%s %s %s.", e->b == ME ? "You" : B.opp, e->b == ME ? "choose" : "chooses", a);
+        }
+        PlaySE(SE_SELECT);
+        return Frames(18);
     case MTG_EV_PREVENTED:   // a "prevent the next n damage" shield used up, or a prevention in force (Fog...)
         if (e->b >= 0 && e->b < MTG_MAX_OBJS) {
             Rect r = ObjRect(e->b);

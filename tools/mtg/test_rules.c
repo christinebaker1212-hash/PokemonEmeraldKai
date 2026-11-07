@@ -2167,6 +2167,57 @@ static void TestPreventAll(void)
     CHECK(!sD.objs[bears].tapped, "untapped the one after");
 }
 
+static void TestChooseSource(void)
+{
+    int cop, bolt, goblin, rev, i;
+    const MtgQuery *q;
+    MtgTarget t;
+    static const char *const cards[] = {"Circle of Protection: Red", "Circle of Protection: White", "Rune of Protection: Black",
+                                        "Reverse Damage", "Pentagram of the Ages", "Sanctum Guardian", NULL};
+    printf("a source of your choice\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Circle of Protection: Red names their Lightning Bolt on the stack (the goblin was a choice too)
+    cop = Put(0, "Circle of Protection: Red", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Plains", 1);
+    goblin = Put(1, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    Lands(1, "Mountain", 1);
+    bolt = Put(1, "Lightning Bolt", MTG_ZONE_HAND);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_PLAYER, 0);
+    Pass();
+    Do(MTG_ACT_ACTIVATE, cop, -1, 0);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_PICK && q->candidateCount == 2 && q->player == 0,
+          "the circle asks which red source (%d, %d candidates)", q->kind, q->candidateCount);
+    ChoosePick(bolt);
+    CHECK(sD.effCount == 1 && Mtg_ChosenCard(&sD) == MTG_NO_OBJ, "an effect in force, the choice cleared");
+    PassBoth();
+    CHECK(sD.players[0].life == 20, "the bolt's damage prevented (%d)", sD.players[0].life);
+    CHECK(sD.effCount == 0, "used up: gone (%d)", sD.effCount);
+    t.kind = MTG_TGT_PLAYER;
+    t.id = 0;
+    Mtg_DealDamage(&sD, goblin, t, 1, 1);
+    CHECK(sD.players[0].life == 19, "the goblin wasn't chosen (%d)", sD.players[0].life);
+
+    Table();   // Reverse Damage: the goblin chosen, its damage prevented and gained as life
+    Lands(0, "Plains", 3);
+    rev = Put(0, "Reverse Damage", MTG_ZONE_HAND);
+    goblin = Put(1, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, rev, -1, 0);
+    PassBoth();
+    if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE)
+        ChoosePick(goblin);
+    t.kind = MTG_TGT_PLAYER;
+    t.id = 0;
+    Mtg_DealDamage(&sD, goblin, t, 1, 1);
+    CHECK(sD.players[0].life == 21, "prevented and gained (%d)", sD.players[0].life);
+    Mtg_DealDamage(&sD, goblin, t, 1, 1);
+    CHECK(sD.players[0].life == 20, "only the next time (%d)", sD.players[0].life);
+}
+
 static void TestTriggers(void)
 {
     const MtgQuery *q;
@@ -2569,6 +2620,7 @@ int main(int argc, char **argv)
     TestAttachedDamaged();
     TestEffect();
     TestPreventAll();
+    TestChooseSource();
     TestDuels();
     TestRandomDuels();
     printf("%d checks, %d failed\n", sChecks, sFails);

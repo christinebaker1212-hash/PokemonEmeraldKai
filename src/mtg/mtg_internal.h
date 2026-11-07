@@ -46,6 +46,7 @@ enum {
     MTG_API_SET_LIFE,         // SetLifeEffect: a player's life total becomes LifeAmount$
     MTG_API_EFFECT,           // EffectEffect: StaticAbilities$ in force for a while (MtgDuel.effects)
     MTG_API_FOG,              // FogEffect: all combat damage this turn is prevented (MtgDuel.fog)
+    MTG_API_CHOOSE_SOURCE,    // ChooseSourceEffect: its controller picks a source (Choices$): MtgDuel.chosen1
     MTG_API_COUNT
 };
 
@@ -221,6 +222,8 @@ typedef struct {
     // target, 1 cards only, 2 players only, 3 both as said; combatOnly IsCombat$ True (2: False); damageMax DamageAmount$ LEn
     const char *targetPlayer;
     uint8_t tgtKind, combatOnly, damageMax;
+    uint8_t gainLife;               // ... and its controller gains the damage prevented as life
+    uint8_t oneShot;                // an Effect's "the next time ...": ReplaceWith$ exiling the Effect (PreventionEffect$)
 } MtgStatic;
 typedef struct {
     int addPower, addToughness, setPower, setToughness;
@@ -231,7 +234,8 @@ extern MtgStatic *gMtgStatics;
 void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text);
 void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text);
 int Mtg_ParseEffectReplacement(MtgCardDef *c, int cardId, char *text);   // an Effect's ReplacementEffects$ line (-1: not known)
-int Mtg_DamagePrevented(const MtgDuel *d, int src, MtgTarget to, int combat, int amount);   // a PreventDamage in force says so   // R: lines (only the forms above)
+int Mtg_DamagePrevented(MtgDuel *d, int src, MtgTarget to, int combat, int amount);   // (a one-time one is used up)
+int Mtg_ChosenCard(const MtgDuel *d);   // ChooseSource's pick (the Effect's own while one is read), MTG_NO_OBJ: none   // a PreventDamage in force says so   // R: lines (only the forms above)
 void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m);
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other);
 // a permanent's abilities now: its card's, then those statics give it (AddAbility$); returns how many (at most max)
