@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 200
+mp orrenpc 0 -1 1
+mp orrenpc 1 1 1
+mp orrenpc 40 0 2
+wait 30
+shot p_field
+mp battlestyle 1
+mp orrefoe 40
+mp trainer 333
+shotburst p_i 500 25
+wait 500
+pressuntil A action 4000
+wait 20
+shot p_battle
+quit

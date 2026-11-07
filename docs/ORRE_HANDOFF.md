@@ -96,8 +96,26 @@ rules, and what each tool does. This file is where things stand, what a new sess
    M4_cylinder_colo, M4_bottom_colo, T1_ancient_colo) aren't maps: Kai's battles. The `_ev` and `_bf` copies aren't
    either (a scene's or a battle's).
 4. **Sprites.** Render the character models (orre_data.pak, `.dat`) into GBA-style sprite sheets (the user's
-   decision): their animations (each model set's joint animations, after the root joint) aren't read yet; hsd.py
-   draws the bind pose. tools/sinnoh/build_starter.py pre-draws Platinum's models, as a reference.
+   decision). Dry run shown to the user 2026-11-07 (WES 16x32, RUI 32x32 for her pigtails; awaiting their verdict):
+   tools/orre/hsd_anim.py reads the joint animations (the model set's + 4 list; keyframe values little-endian) and
+   solves the legs' two-bone IK (JOINT1 / JOINT2 / EFFECTOR joints, IK hints = bone lengths, the effector's RObj names
+   the target joint); every field model's table starts idle 1, walk 2, run 3. tools/orre/people_sprites.py renders
+   them (head joint scaled for GBA proportions, 15 colours, outlines); people_sprites_demo.py draws the sheet.
+   **ORRE's people (built 2026-11-07, the user's calls): every Colosseum character model is a LOOK > CREATE recipe
+   (its field sprite) and a Pokemon Showdown trainer sprite chosen to look like the model (its battle picture, shown at
+   DS size, 80x80, as drawn; fan art never recoloured: 8 bpp where it has more than 15 colors).** The renders above
+   are reference only. tools/orre/people.py: the PEOPLE table (styles and pictures picked by eye from each model's
+   render, hair colours by eye, the top / bottom colours sampled from the model), `build` writes
+   src/data/orre_people.h + graphics/orre/people_pics.bin (Showdown's art, committed like Kai's other Showdown
+   pictures; credits in dist_extras/README.txt), `sheet OUT.png` a review sheet (needs the game built). The game:
+   src/orre/orre_people.c (include/orre_people.h): object graphics OBJ_EVENT_GFX_ORRE_FIRST (0xF00) + person, palettes
+   tag 0xBC00 + person (event_object_movement.c OrreObjectInfo, built from mp_creator.c MP_Created_BuildField); the
+   battle picture by ORRE's own line after SINNOH's in the battle controllers, for the foe a script names first
+   (special Orre_SetFoePerson: VAR_0x8004 person, VAR_0x8005 A / B; in ORRE only, cleared when the battle ends).
+   92 people (agent_m_b1-b6 the Cipher Peons' colours), 73 pictures; the Pokemon and props in the people tables
+   (pikachu, casey = ABRA, makunoshita = MAKUHITA, truck, bag...) aren't people: they'll be POKeMON objects / props.
+   Debug: `mp orrenpc PERSON [DX DY]`, `mp orrefoe PERSON [1]`, `mp createddump HEX DIR`. Scenario orre_people.
+   Next: place the people on the maps from colo_rooms.py's `people` (model -> person), shown by their scripts (step 5).
 5. **Words and scripts.** The map scripts (.scd, the GS VM) converted to Kai's (as tools/sinnoh/gen_scripts.py does
    SINNOH's); the text (msg.py) into Kai's charset, controls mapped (`{hero}`, `{rui}`, `{npc}`, `{item}`...). Never
    write ORRE's words or scripts by hand.

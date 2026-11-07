@@ -1056,6 +1056,12 @@ used with credit for this non-commercial project as the artist allows.
 A few are fan art, used as drawn: BATTLE GIRL G6, EXPERT F G6, PRESCHOOLER
 G6, SCHOOL KID G8 and SWIMMER G6 by kyledove, KRIS by Selena, YOUNGSTER G7
 by Beliot419.
+ORRE's people show Showdown trainer pictures at their own size; the fan art
+among them, used as drawn: LUSAMINE, OFFICE WORKER by Beliot419; ACE TRAINER
+G6, BODY BUILDER F G9, BODY BUILDER G9, BUTLER, COOK, FLARE GRUNT, FLARE
+GRUNT F, KURT, LASS G6, MADAME G6, OFFICE WORKER F, POLICEMAN G7, PUNK GIRL,
+PUNK GIRL G7, PUNK GUY, PUNK GUY G7, RICH BOY G6, ROLLERSKATER, SCHOOL BOY,
+TOURIST, VETERAN G6, WORKER G7 by kyledove.
 
 The POKé BALLS thrown and sent out in battle (and on the summary) are the
 HEARTGOLD / SOULSILVER ones, ripped by Sunday-Doneko.

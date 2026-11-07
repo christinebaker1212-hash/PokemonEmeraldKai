@@ -783,6 +783,15 @@ static void BuildBack(const struct MpCreated *r, struct MpCreatedGfx *g)
     }
 }
 
+// Only the field frames (walk, run, Mach Bike) and their palette, into G (ORRE's people: orre_people.c)
+void MP_Created_BuildField(const struct MpCreated *r, struct MpCreatedGfx *g)
+{
+    struct MpCreated clean = *r;
+    MP_Created_Clamp(&clean);
+    clean.made = 1;
+    BuildOverworld(&clean, g);
+}
+
 const struct MpCreatedGfx *MP_Created_Gfx(u8 cacheSlot, const struct MpCreated *r)
 {
     struct MpCreated clean = *r;
@@ -810,4 +819,51 @@ void MP_Created_FieldHeadInfo(const struct MpCreated *r, u8 *neck, u16 *skin)
         neck[i] = sOw3Band[g][i][0];
     for (i = 0; i < 4; i++)
         skin[i] = sOw3Skin[r->skin & 3][i];
+}
+
+// Debug: a recipe's pictures as PNGs (DIR/field.png 288x96: walk, run, Mach Bike rows; front.png 64x64;
+// back.png the 4 throw frames) for looking at recipes outside the game (`mp createddump HEX DIR`)
+bool8 MP_WritePng(const char *path, const u8 *rgba, int w, int h, const char *text);   // mp_pack.c
+
+static void TilesToRgba(u8 *rgba, int stride, int x0, int y0, const u8 *tiles, int w, int h, const u16 *pal)
+{
+    int tx, ty, y, x;
+    for (ty = 0; ty < h / 8; ty++)
+        for (tx = 0; tx < w / 8; tx++)
+            for (y = 0; y < 8; y++)
+                for (x = 0; x < 8; x++)
+                {
+                    u8 b = tiles[((ty * (w / 8) + tx) * 64 + y * 8 + x) / 2];
+                    u8 ix = (x & 1) ? b >> 4 : b & 15;
+                    u8 *d = rgba + ((y0 + ty * 8 + y) * stride + x0 + tx * 8 + x) * 4;
+                    u16 c = pal[ix];
+                    d[0] = (c & 31) << 3; d[1] = ((c >> 5) & 31) << 3; d[2] = ((c >> 10) & 31) << 3;
+                    d[3] = ix ? 255 : 0;
+                }
+}
+
+void MP_Created_Dump(const struct MpCreated *r, const char *dir)
+{
+    static u8 sRgba[MP_BACK_PIC_WIDTH * 4 * 64 * 4];
+    const struct MpCreatedGfx *g = MP_Created_Gfx(MP_CR_CACHE_LOCAL, r);
+    char path[512];
+    int f;
+    memset(sRgba, 0, sizeof(sRgba));
+    for (f = 0; f < 27; f++)
+        TilesToRgba(sRgba, 288, (f % 9) * 32, (f / 9) * 32, g->ow[f], 32, 32, g->owPal);
+    snprintf(path, sizeof(path), "%s/field.png", dir);
+    MP_WritePng(path, sRgba, 288, 96, NULL);
+    memset(sRgba, 0, sizeof(sRgba));
+    TilesToRgba(sRgba, 64, 0, 0, g->front, 64, 64, g->frontPal);
+    snprintf(path, sizeof(path), "%s/front.png", dir);
+    MP_WritePng(path, sRgba, 64, 64, NULL);
+    memset(sRgba, 0, sizeof(sRgba));
+    for (f = 0; f < 4; f++)
+    {
+        TilesToRgba(sRgba, MP_BACK_PIC_WIDTH * 4, f * MP_BACK_PIC_WIDTH, 0, g->back[f], 64, 64, g->backPal);
+        TilesToRgba(sRgba, MP_BACK_PIC_WIDTH * 4, f * MP_BACK_PIC_WIDTH + 64, 0, g->back[f] + 64 * 64 / 2,
+                    MP_BACK_PIC_WIDTH - 64, 64, g->backPal);
+    }
+    snprintf(path, sizeof(path), "%s/back.png", dir);
+    MP_WritePng(path, sRgba, MP_BACK_PIC_WIDTH * 4, 64, NULL);
 }
