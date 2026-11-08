@@ -322,7 +322,8 @@ The older notes per part:
   reached; story_order.txt: the game's `mp orreorder`): `python3 -I tools/orre/gen_story_tests.py
   tools/orre/story_order.txt` writes **orre_scenes_NN** (25 steps each, every step on its own from `mp orrestory`:
   probes, not committed, many need what earlier steps leave; tools/orre/check_scenes.py lists the ones that didn't
-  set their flag) and **orre_story_chain** (every step in order from the landing, the story never jumped: the harness's
+  set their flag) and **orre_story_chain** (not committed either: hours long; ORRE_CHAIN_FROM=N writes
+  orre_story_chain_from, starting at flag N by Colosseum's story jump; every step in order from the landing, the story never jumped: the harness's
   `skipif orreflag:N K` passes over a step the story already did; in the room already, it walks (`skipif inmap:G,N`, `walkto`) instead of warping in again, which would set the room up afresh; at a main loop's step it presses A to each side, as a player looks around; the first "TIMEOUT waiting for log orre: flag N"
   is where the story stops). Flags change in the log with MOEMON_ORRE_FLAG_LOG=1 ("orre: flag N = V").
 - **A walk that can't start** (a scene cut off mid-walk still holds its movement slot) puts the person where the
