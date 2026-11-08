@@ -1,8 +1,11 @@
 # Moemon Maker: edits to MAP_BATTLE_ISLAND_STADIUM (written by the editor; each line has the value it replaced, then the new one)
 map MAP_BATTLE_ISLAND_STADIUM 19 12
+block 8 0 0x06B3 0x06B0
+block 8 1 0x06BB 0x06B8
+block 8 2 0x32C3 0x32C0
 block 0 6 0x3280 0x3220
 block 1 6 0x3281 0x3240
-block 0 7 0x3688 0x3620
+block 0 7 0x3688 0x3220
 block 1 7 0x4289 0x4240
 block 0 8 0x3290 0x3220
 block 1 8 0x3291 0x3240
