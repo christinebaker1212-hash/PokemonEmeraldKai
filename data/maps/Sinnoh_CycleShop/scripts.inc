@@ -22,11 +22,11 @@ Sinnoh_CycleShop_EventScript_Person1::
 	lock
 	faceplayer
 	goto_if_set 0x3DA6, Sinnoh_CycleShop_EventScript_Person1_Given
-	checkitem ITEM_BICYCLE
+	checkitem ITEM_MTN_BIKE
 	goto_if_eq VAR_RESULT, TRUE, Sinnoh_CycleShop_EventScript_Person1_Given
 	msgbox Sinnoh_CycleShop_Text_Person1, MSGBOX_DEFAULT
 	msgbox Sinnoh_CycleShop_Text_Person1Gift, MSGBOX_DEFAULT
-	giveitem ITEM_BICYCLE, 1
+	giveitem ITEM_MTN_BIKE, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
 	setflag 0x3DA6
 	release

@@ -5311,4 +5311,18 @@ const struct Item gItems[] =
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
+    // Moemon Kai: SINNOH's bike (Platinum's two gears: src/sinnoh/s3d_bike.c), as the BICYCLE elsewhere
+    [ITEM_MTN_BIKE] =
+    {
+        .name = _("MTN. BIKE"),
+        .itemId = ITEM_MTN_BIKE,
+        .price = 0,
+        .description = sMtnBikeDesc,
+        .importance = 1,
+        .registrability = TRUE,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_FIELD,
+        .fieldUseFunc = ItemUseOutOfBattle_Bike,   // Moemon Kai: JOHTO's / KANTO's BICYCLE rides as FireRed's, one speed
+        .secondaryId = MACH_BIKE,
+    },
 };

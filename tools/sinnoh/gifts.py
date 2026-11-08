@@ -18,7 +18,7 @@ GIFT_FLAGS = 0x3DA0   # (free: the legendaries' added objects' 0x3D80-0x3D8F; th
 GIFT_FLAGS_END = 0x3E00
 SKIP = {'ITEM_EXPLORER_KIT', 'ITEM_JOURNAL', 'ITEM_PARCEL', 'ITEM_TOWN_MAP', 'ITEM_HM06', 'ITEM_COUPON_1', 'ITEM_COUPON_2', 'ITEM_COUPON_3'}   # (the TOWN MAP is the game's own already; the POKéTCH campaign's coupons: the POKéTCH is this game's key item; HMs
 #   come from the HOENN story: no HM restrictions; the EXPLORER KIT: the UNDERGROUND MAN's own script gives it)
-KEY = {'ITEM_COIN_CASE', 'ITEM_OLD_ROD', 'ITEM_GOOD_ROD', 'ITEM_SUPER_ROD', 'ITEM_POKE_RADAR', 'ITEM_BICYCLE'}   # (one is enough: not given to a player who has it)
+KEY = {'ITEM_COIN_CASE', 'ITEM_OLD_ROD', 'ITEM_GOOD_ROD', 'ITEM_SUPER_ROD', 'ITEM_POKE_RADAR', 'ITEM_BICYCLE', 'ITEM_MTN_BIKE'}   # (one is enough: not given to a player who has it)
 
 
 # What each says as their item changes hands (the person's own words come first: tools/sinnoh/words.py)

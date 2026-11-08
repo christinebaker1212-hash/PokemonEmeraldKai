@@ -7089,3 +7089,12 @@ were already earned by the time a player reached another region. Now each region
   data/scripts/qz/kanto_shared.inc and johto_shared.inc.
 - Tests: ach_per_region (KANTO's copies earned, HOENN's not; the tabs), ach_regions, ach_retro (key ach:retro4),
   ach_sinnoh, ach_hooks. Harness: `mp addstat N COUNT`, `mp achcount NAME N`, `mp dexcatch FIRST [LAST]`.
+
+## Key items stay in their region (1.183.0)
+
+The user's rules and answers: docs/REGION_ITEMS.md. src/mp/mp_regionitems.c: customs leaves a region's KEY ITEMS in
+its stash (side file chunk "KIST") but the travellers (CARD CASE, CANDY JAR, BATTLE FLAG, ORRE / BATTLE tickets) and
+tools from beaten regions; HMs wait in the GLOBAL PC until their region falls; free items merge into one in the BAG
+(MP_RegionItems_Update on every map load, mp_region.c MP_Region_GiveDevices). SINNOH's bike is the MTN. BIKE (811).
+Its "here" is gRegionState.current: during a trip the map is still the old region's. Test region_key_items
+(check.py: the BAG step by step); harness `mp regionitems`.

@@ -807,3 +807,4 @@ gSpecials::
 	def_special Orre_VmTouch
 	def_special Orre_Opening   @ Moemon Kai: ORRE's opening (src/orre/orre_opening.c), waitstate
 	def_special Orre_OpeningNeeded
+	def_special MP_RegionKeyItemsStay   @ Moemon Kai: customs, a region's own KEY ITEMS stay (src/mp/mp_regionitems.c)

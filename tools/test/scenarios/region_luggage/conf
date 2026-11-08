@@ -1,8 +1,8 @@
 # Items stay in their region (1.101.0): a trip takes the BAG's POTIONs and POKé BALLs (with the quick start's own: 10 and 8) to the GLOBAL PC (the MACH BIKE,
-# a KEY ITEM, boards); HOENN's item PC (2 ANTIDOTEs) waits in HOENN while JOHTO's starts empty; JOHTO's item PC gets
+# HOENN's own KEY ITEM, waits in HOENN until its LEAGUE is beaten: region_key_items); HOENN's item PC (2 ANTIDOTEs) waits in HOENN while JOHTO's starts empty; JOHTO's item PC gets
 # the GLOBAL PC's items only once JOHTO's LEAGUE is beaten; back in HOENN its own item PC is there again
 MODE=1
 TMO=200
 ENV_A="MOEMON_DEBUG_PARTY=6:50"
-EXPECT_A=("travel 1: 1" "bagqty 13: 0" "bagqty 4: 0" "bagqty 259: 1" "pc item 14 x0" "global item slots 2" "global items delivered 0" "global items delivered 2" "pc item 13 x10" "pc item 4 x8" "travel 0: 1" "pc item 14 x2" "region: customs: 2 kinds of items")
+EXPECT_A=("travel 1: 1" "bagqty 13: 0" "bagqty 4: 0" "bagqty 259: 0" "pc item 14 x0" "global item slots 2" "global items delivered 0" "global items delivered 2" "pc item 13 x10" "pc item 4 x8" "travel 0: 1" "pc item 14 x2" "region: customs: 2 kinds of items")
 UNEXPECT_A=("[crash]")

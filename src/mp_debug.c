@@ -4537,6 +4537,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // tripok - whether this game may lead the way to another region (online: the room's host only)
         printf("[test] trip allowed %d\n", MP_RegionTripAllowed());
     }
+    else if (strcmp(cmd, "regionitems") == 0)
+    {
+        // regionitems - the key items' sorting run now (as on a map load); each region's stash
+        MP_RegionItems_Update();
+        printf("[test] region items stashes %u %u %u %u\n", MP_RegionItems_StashCount(0), MP_RegionItems_StashCount(1),
+               MP_RegionItems_StashCount(2), MP_RegionItems_StashCount(3));
+    }
     else if (strcmp(cmd, "travel") == 0)
     {
         // travel R: go to region R now, as a trip does (customs keeps the first POKeMON)

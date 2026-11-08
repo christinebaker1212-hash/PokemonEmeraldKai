@@ -818,7 +818,8 @@
 #define IS_MAKER_ITEM(item) ((item) >= ITEM_MAKER_FIRST && (item) <= ITEM_MAKER_LAST)
 #define MAKER_ITEM_RANGE [ITEM_MAKER_FIRST ... ITEM_MAKER_LAST]
 #define ITEM_ORRE_TICKET (ITEM_MAKER_LAST + 1)   // Moemon Kai: the boat to ORRE (810: after the Maker's slots), after any ELITE FOUR
-#define ITEMS_COUNT (ITEM_ORRE_TICKET + 1)
+#define ITEM_MTN_BIKE (ITEM_ORRE_TICKET + 1)   // Moemon Kai: SINNOH's bike (Platinum's BICYCLE: the BICYCLE is KANTO's / JOHTO's)
+#define ITEMS_COUNT (ITEM_MTN_BIKE + 1)
 // end of Gen 5-9 items
 #define FIRST_PLATINUM_KEY_ITEM ITEM_GALACTIC_KEY
 #define LAST_PLATINUM_ITEM ITEM_GOOEY_MULCH

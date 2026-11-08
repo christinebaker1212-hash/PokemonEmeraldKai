@@ -496,7 +496,7 @@ class FileConverter:
             x = {'ITEM_SECRETPOTION': 'ITEM_SECRET_POTION', 'ITEM_BLACKGLASSES': 'ITEM_BLACK_GLASSES',
                  'ITEM_SILVERPOWDER': 'ITEM_SILVER_POWDER', 'ITEM_NEVERMELTICE': 'ITEM_NEVER_MELT_ICE',
                  'ITEM_THUNDERSTONE': 'ITEM_THUNDER_STONE',
-                 'ITEM_PARCEL': 'ITEM_SINNOH_PARCEL',
+                 'ITEM_PARCEL': 'ITEM_SINNOH_PARCEL', 'ITEM_BICYCLE': 'ITEM_MTN_BIKE',   # (SINNOH's own bike)
                  'ITEM_HM05': 'ITEM_HM_DEFOG', 'ITEM_HM08': 'ITEM_HM_ROCK_CLIMB'}.get(x, x)   # (Platinum's HM05 / HM08)   # (ITEM_PARCEL here is KANTO's OAK'S PARCEL)
             if x in self.dec.ours:
                 return x

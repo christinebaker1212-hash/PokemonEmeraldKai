@@ -1,6 +1,6 @@
-# Key items between regions (design, the user's rules of 2026-11-08)
+# Key items between regions (the user's rules of 2026-11-08)
 
-Status: designed, not built. The open points at the end need the user's answer first.
+Status: built in 1.183.0 (src/mp/mp_regionitems.c; scenario region_key_items).
 
 ## The user's rules (their words, 2026-11-08)
 
@@ -13,38 +13,31 @@ Status: designed, not built. The open points at the end need the user's answer f
 - "items with identical function, like identical number HMs, the Item Finder, the Coin Case, the Rods, etc, are merged
   into one item upon a region's defeat, with the Global PC counterparts being merged into the current Bag."
 
-## Today (1.101.0's rule)
+The open points, answered (2026-11-08):
+1. The devices (MOéNAV, POKéGEAR, KANTO's TOWN MAP / FAME CHECKER / TEACHY TV, POKéTCH, POKé RADAR, VS SEEKER,
+   JOURNAL): each region gives its own; it stays there, travelling once that region is beaten. "Yes, precisely."
+2. "Once a region is beaten": "The region the item came from only."
+3. HMs: "They stay in the Global PC until region defeat, merging after."
+4. Containers (TM CASE, BERRY POUCH, POKéBLOCK CASE, POFFIN CASE, SEAL CASE...): "like the devices".
 
-Customs (mp_region.c MP_Region_SendLuggage) sends every BAG item outside the KEY ITEMS pocket to the GLOBAL PC; every
-key item travels. The GLOBAL PC hands its items over in a region whose LEAGUE is beaten.
+## How it works
 
-## Proposed
-
-Each region keeps a stash of key items (a new region chunk "KI0 ".."KI3 ", like the item PCs' "PI0 "..).
-
-- **Leaving region R** (customs): every key item goes into R's stash, except the travellers below. Arriving in region S,
-  S's stash comes back into the BAG.
-- **Travellers** (always with the player): CARD CASE, CANDY JAR, and Kai's own co-op items (BATTLE FLAG). Open point 1
-  for the devices.
-- **Regional versions** (same purpose, different item): HOENN's MACH BIKE / ACRO BIKE, KANTO / JOHTO's BICYCLE, SINNOH's
-  MTN. BIKE (a new item: SINNOH's bike is the BICYCLE today). Each stays in its region until that region's LEAGUE is
-  beaten; from then on it travels and works everywhere.
-- **Identical items** (the same item in every region: OLD / GOOD / SUPER ROD, COIN CASE, ITEMFINDER, and the HMs):
-  stay in their region like the rest. When a region's LEAGUE is beaten, every copy in the stashes and the GLOBAL PC is
-  merged into one in the current BAG, and from then on it travels.
-- **Story items** (tickets, fossils, keys, letters, scopes, orbs, region quest items): always stay in their region.
-
-Save format: a sidecar chunk (no change to the save's layout: tools/test/save_layout.py), converted on load from
-MP_SAVE_FORMAT's older sidecars (a save's current BAG is its current region's).
-
-## Open points (the user's answer needed)
-
-1. **The devices**: MOéNAV (HOENN), POKéGEAR (JOHTO), the KANTO TOWN MAP / FAME CHECKER / TEACHY TV, POKéTCH (SINNOH),
-   POKé RADAR, VS SEEKER, JOURNAL. Proposed: each stays in its region like a regional version (each region gives its
-   own), travelling once that region is beaten.
-2. **"Once a region is beaten"**: proposed meaning, the region the item came from (HOENN beaten: the MACH and ACRO BIKE
-   come along to KANTO). Or every region's versions once any region is beaten?
-3. **The HMs** sit in the TMs & HMs pocket, which customs already sends to the GLOBAL PC with the other pockets.
-   Proposed: they stay in the region's stash (with the key items) instead, merged on the region's defeat.
-4. **Containers**: TM CASE, BERRY POUCH (KANTO's), the POKéBLOCK CASE, POFFIN CASE, SEAL CASE: proposed regional
-   versions (stay until beaten).
+- **Customs** (mp_region.c MP_Region_SendLuggage, every trip and the VICTORY ROAD gate): the BAG's other pockets go to
+  the GLOBAL PC as before (1.101.0). The KEY ITEMS pocket: what doesn't travel waits in the region's stash (chunk
+  "KIST" of the region side file); HMs that don't travel go to the GLOBAL PC with the region they came from noted.
+  Customs says so (data/scripts/mp_region.inc gText_RegionKeyItemsStay).
+- **Back in a region** (MP_Region_Travel): its stash returns to the BAG.
+- **Always along** (sTravel): the CARD CASE, the CANDY JAR, the BATTLE FLAG, the ORRE and BATTLE ISLAND tickets.
+- **Tools** (sTools: bikes, devices, containers, and what every region has: rods, COIN CASE, ITEMFINDER, S.S. TICKET):
+  stay until the region they came from is beaten (the player is in it with the tool in the BAG: MP_RegionItems_Update,
+  on every map load), then travel for good. A tool with the same name elsewhere is the same item: every copy in the
+  stashes and the GLOBAL PC merges into the one in the BAG.
+- **HMs**: in the GLOBAL PC until the region they came from is beaten, then merged into the BAG (one each) and they
+  travel; an HM in the BAG in a beaten region travels too. The GLOBAL PC never hands HMs to an item PC.
+- **Story items** (everything else in the KEY ITEMS pocket: tickets, fossils, keys, letters, scopes, orbs...): always
+  stay in their region.
+- **SINNOH's bike** is the MTN. BIKE (item 811, Platinum's BICYCLE in its converted scripts: tools/sinnoh/gen_scripts.py,
+  items.py); the BICYCLE is KANTO's and JOHTO's. How a bike rides still follows the map (SINNOH's two gears there).
+- **Saves from before** (no "KIST" chunk): the BAG's key items are sorted once: a tool from a beaten region (or one
+  every region has, once any is beaten) travels; a story item or tool from another region goes to its home's stash
+  (sStoryHome / sTools); a save begun in SINNOH that hasn't seen KANTO or JOHTO has its BICYCLE as the MTN. BIKE.

@@ -470,6 +470,8 @@ progress made impossible to get (mp_hmrescue.c: the giver walks up; tests hm_res
 Also achievements for each region (1.182.0: BATTLE / CATCHING / TOGETHER / EXTRAS copied per region and counted only
 there, HOENN's rows count the rest; numbers region * 1024 + row, never reorder or delete rows (TRAINER CARD titles are
 numbers: retired rows stay as C_GONE); src/mp/mp_achieve.c, chunk "ACHR"; COOP_NOTES "Achievements for each region").
+Also key items by region (1.183.0: a region's own KEY ITEMS wait in its stash, tools travel once their region is beaten
+and merge into one, HMs wait in the GLOBAL PC; SINNOH's MTN. BIKE; src/mp/mp_regionitems.c, docs/REGION_ITEMS.md).
 Saves never change layout: tools/test/save_layout.py (gcc + MinGW, run by regress.sh and the release) must pass; old
 formats are converted on load by src/mp/mp_savefix.c (MP_SAVE_FORMAT in the sidecar; COOP_NOTES "Save layout and
 migration"; tools/test/save_compat.sh).

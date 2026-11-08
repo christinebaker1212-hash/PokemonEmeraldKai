@@ -122,6 +122,7 @@ u16 MP_Region_SendLuggage(void);          // customs: the BAG but its KEY ITEMS 
 u16 MP_Region_DeliverGlobalItems(void);   // the item PC: what the GLOBAL PC holds, in a region whose LEAGUE is beaten
 u16 MP_Region_GlobalItemCount(void);
 u16 MP_RegionHasLuggage(void);
+u16 MP_RegionKeyItemsStay(void);
 bool8 MP_Region_FitBoxMon(struct BoxPokemon *b, u8 region);   // its EXP for that region (Lv 5 the first time)
 void MP_Region_FitMon(struct Pokemon *mon, u8 region);
 void MP_Region_LeagueLevels(u8 region);              // a League beaten: its Pokemon at their best level everywhere

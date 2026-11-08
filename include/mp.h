@@ -1054,7 +1054,21 @@ struct Pokemon;
 void MP_Achieve_Count(const char *name, s32 n);
 s32 MP_Achieve_GetCount(const char *name);
 void MP_Achieve_Unlock(const char *id);
-void MP_Achieve_OnStat(u8 index, u32 value, bool8 set);     // overworld.c: a game stat counted per region
+void MP_Achieve_OnStat(u8 index, u32 value, bool8 set);
+// Key items kept by region (src/mp/mp_regionitems.c, docs/REGION_ITEMS.md)
+bool8 MP_RegionItems_Travels(u16 item);
+u16 MP_RegionItems_Leave(u8 from);
+void MP_RegionItems_Arrive(u8 to);
+void MP_RegionItems_NoteHm(u16 item, u8 from);
+void MP_RegionItems_Update(void);
+void MP_RegionItems_SetFree(u16 item);
+u16 MP_RegionItems_StashCount(u8 region);
+void MP_RegionItems_Reset(void);
+void MP_RegionItems_NewGame(void);
+const void *MP_RegionItems_Save(u32 *size);
+void MP_RegionItems_Load(const void *data, u32 size);
+bool8 MP_Region_GlobalItemTake(u16 item);
+bool8 MP_Region_GlobalItemHas(u16 item);     // overworld.c: a game stat counted per region
 void MP_Achieve_OnDex(u16 nationalNum, bool8 caught);       // pokedex.c: seen / caught in the region the player is in
 void MP_Achieve_RegionalReset(void);                        // mp_region.c: the region side file's "ACHR" chunk
 const void *MP_Achieve_RegionalSave(u32 *size);

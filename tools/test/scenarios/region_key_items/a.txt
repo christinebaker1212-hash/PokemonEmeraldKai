@@ -1,0 +1,41 @@
+pressuntil A field 5000
+wait 30
+mp item 259 1
+mp item 262 1
+mp item 399 1
+mp item 339 1
+mp item 275 1
+mp travel 1
+wait 300
+echo [ki] in JOHTO
+mp bagqty 259
+mp bagqty 262
+mp bagqty 399
+mp bagqty 339
+mp bagqty 275
+mp item 262 1
+mp regionclear 1
+mp regionitems
+echo [ki] JOHTO beaten
+mp bagqty 262
+mp bagqty 339
+mp travel 0
+wait 300
+echo [ki] back in HOENN
+mp bagqty 259
+mp bagqty 262
+mp bagqty 339
+mp bagqty 275
+mp regionclear 0
+mp regionitems
+echo [ki] HOENN beaten
+mp bagqty 339
+mp travel 2
+wait 300
+echo [ki] in KANTO
+mp bagqty 259
+mp bagqty 262
+mp bagqty 339
+mp bagqty 275
+mp bagqty 399
+quit

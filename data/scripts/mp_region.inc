@@ -21,12 +21,17 @@ EventScript_RegionCustoms_Done::
 	call EventScript_RegionLuggage
 	return
 
-@ Moemon Kai (1.101.0): only the KEY ITEMS board; customs sends the rest of the BAG to the GLOBAL PC (qz_specials.c
-@ TravelNow, mp_region.c MP_Region_SendLuggage)
+@ Moemon Kai (1.101.0): customs sends the BAG to the GLOBAL PC but for the KEY ITEMS; 1.183.0: a region's own KEY
+@ ITEMS wait here until its LEAGUE is beaten, HMs in the GLOBAL PC (qz_specials.c TravelNow, mp_region.c
+@ MP_Region_SendLuggage, mp_regionitems.c; docs/REGION_ITEMS.md)
 EventScript_RegionLuggage::
 	specialvar VAR_RESULT, MP_RegionHasLuggage
-	goto_if_eq VAR_RESULT, FALSE, EventScript_RegionLuggage_None
+	goto_if_eq VAR_RESULT, FALSE, EventScript_RegionLuggage_Keys
 	msgbox gText_RegionLuggage, MSGBOX_DEFAULT
+EventScript_RegionLuggage_Keys::
+	specialvar VAR_RESULT, MP_RegionKeyItemsStay
+	goto_if_eq VAR_RESULT, FALSE, EventScript_RegionLuggage_None
+	msgbox gText_RegionKeyItemsStay, MSGBOX_DEFAULT
 EventScript_RegionLuggage_None::
 	return
 
@@ -36,7 +41,16 @@ gText_RegionLuggage::
 	.string "Everything but your KEY ITEMS will\n"
 	.string "wait for you in the GLOBAL PC.\p"
 	.string "It reaches any PC in a region whose\n"
-	.string "POKéMON LEAGUE you've beaten.$"
+	.string "POKéMON LEAGUE you've beaten.\p"
+	.string "HMs wait there too, until the LEAGUE\n"
+	.string "of the region they came from falls.$"
+
+gText_RegionKeyItemsStay::
+	.string "CUSTOMS: This region's own KEY ITEMS\n"
+	.string "stay here for your return: its bike,\l"
+	.string "its tools and its story items.\p"
+	.string "Beat this region's POKéMON LEAGUE,\n"
+	.string "and its tools may go anywhere!$"
 
 @ Moemon Kai: online, only the room's host leads the way to another region (the user, 2026-11-05); everyone follows
 EventScript_RegionHostOnly::

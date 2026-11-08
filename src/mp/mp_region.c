@@ -268,6 +268,7 @@ void MP_Region_NewGame(void)
     sGlobalItemCount = 0;
     MP_Achieve_RegionalReset();
     MP_Achieve_RegionalTrackReset();
+    MP_RegionItems_NewGame();
 }
 
 // The region a new game starts in (PROF. BIRCH asks, main_menu.c), applied by MP_Region_StartNewGame
@@ -530,6 +531,15 @@ void MP_Region_WriteSidecar(void)
             AwFile_Write(rib, size, 1, f);
         }
         {
+            // the key items each region keeps (src/mp/mp_regionitems.c)
+            u32 size;
+            const void *ki = MP_RegionItems_Save(&size);
+            c[0] = CHUNK('K', 'I', 'S', 'T');
+            c[1] = size;
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(ki, size, 1, f);
+        }
+        {
             // each region's own achievement counts (src/mp/mp_achieve.c struct AchRegional)
             u32 size;
             const void *ach = MP_Achieve_RegionalSave(&size);
@@ -685,6 +695,7 @@ static bool8 LoadFrom(const char *path)
     if (!f)
         return FALSE;
     MP_Achieve_RegionalReset();   // (a side file without the chunk: from before 1.182.0)
+    MP_RegionItems_Reset();       // (... from before 1.183.0: its BAG sorted out once)
     memset(&gRegionState, 0, sizeof(gRegionState));
     MP_Route5Daycare_Clear();
     sSaveFormat = 1;   // a side file without the format: 1.60.0
@@ -840,6 +851,12 @@ static bool8 LoadFrom(const char *path)
             {
                 if (fread(&sJohtoUnownCaught, sizeof(sJohtoUnownCaught), 1, f) != 1)
                     sJohtoUnownCaught = 0;
+            }
+            else if (c[0] == CHUNK('K', 'I', 'S', 'T') && c[1] <= 8192)
+            {
+                static u8 buf[8192];
+                if (fread(buf, c[1], 1, f) == 1)
+                    MP_RegionItems_Load(buf, c[1]);
             }
             else if (c[0] == CHUNK('A', 'C', 'H', 'R') && c[1] <= 8192)
             {
@@ -1130,11 +1147,15 @@ bool8 MP_Region_DeviceHere(u8 home)
 void MP_Region_GiveDevices(void)
 {
     if (FlagGet(FLAG_SYS_POKENAV_GET) && MP_Region_Cleared(REGION_HOENN) && !CheckBagHasItem(ITEM_MOENAV, 1))
+    {
         AddBagItem(ITEM_MOENAV, 1);
+        MP_RegionItems_SetFree(ITEM_MOENAV);
+    }
     // JOHTO's POKéGEAR: MOM gives it as the player sets out (Johto_PlayersHouse1F); a save from before has it in
     // JOHTO once that scene is behind it (VAR_QZ_0x5003 2+)
     if (MP_Region_Current() == REGION_JOHTO && VarGet(0x5003) >= 2 && !CheckBagHasItem(ITEM_POKEGEAR, 1))
         AddBagItem(ITEM_POKEGEAR, 1);
+    MP_RegionItems_Update();   // (key items: tools and HMs from beaten regions travel, mp_regionitems.c)
 }
 
 // Moemon Kai: MY ROOM in JOHTO has decorations of its own (Crystal's room; the Secret Base / bedroom logic of
@@ -1431,6 +1452,8 @@ void MP_Region_Travel(u8 from, u8 to)
         MP_Region_FitMon(&gPlayerParty[i], to);
     gRegionState.current = to;
     gRegionState.started |= 1 << to;
+    MP_RegionItems_Arrive(to);   // (the key items left here last time)
+    MP_RegionItems_Update();
     MP_Region_Arrive(to);
     MP_SendRoomRules();   // a host's room goes with them: friends still in the old region are told and leave
     MPNet_Log("region: travel %d -> %d (PC boxes swapped, party at its levels there)", from, to);
@@ -1476,9 +1499,36 @@ static bool8 AddGlobalItem(u16 item, u16 qty)
     return qty == 0;
 }
 
+// What goes along (1.183.0, docs/REGION_ITEMS.md): Kai's own travel items, tools and HMs from beaten regions
+// (src/mp/mp_regionitems.c); the other KEY ITEMS wait in the region's stash, the other HMs in the GLOBAL PC
 static bool8 StaysWithPlayer(u16 item)
 {
-    return GetItemPocket(item) == POCKET_KEY_ITEMS;
+    return MP_RegionItems_Travels(item);
+}
+
+// The GLOBAL PC's ITEM, all of it, taken out (a free HM merged into the BAG: mp_regionitems.c). Anything taken
+bool8 MP_Region_GlobalItemTake(u16 item)
+{
+    u32 i, kept = 0;
+    bool8 took = FALSE;
+    for (i = 0; i < sGlobalItemCount; i++)
+    {
+        if (sGlobalItems[i].itemId == item)
+            took = TRUE;
+        else
+            sGlobalItems[kept++] = sGlobalItems[i];
+    }
+    sGlobalItemCount = kept;
+    return took;
+}
+
+bool8 MP_Region_GlobalItemHas(u16 item)
+{
+    u32 i;
+    for (i = 0; i < sGlobalItemCount; i++)
+        if (sGlobalItems[i].itemId == item)
+            return TRUE;
+    return FALSE;
 }
 
 // The BAG has something customs keeps (EventScript_RegionCustoms' luggage line)
@@ -1490,7 +1540,7 @@ u16 MP_RegionHasLuggage(void)
         for (i = 0; i < gBagPockets[p].capacity; i++)
         {
             u16 item = gBagPockets[p].itemSlots[i].itemId;
-            if (item != ITEM_NONE && !StaysWithPlayer(item))
+            if (item != ITEM_NONE && p != KEYITEMS_POCKET && !StaysWithPlayer(item))   // (KEY ITEMS: MP_RegionKeyItemsStay)
                 return gSpecialVar_Result = TRUE;
         }
     return gSpecialVar_Result = FALSE;
@@ -1502,11 +1552,12 @@ u16 MP_Region_SendLuggage(void)
     static u16 items[1024];
     u32 n = 0, i, j, moved = 0;
     u8 p;
+    MP_RegionItems_Leave(MP_Region_Current());   // (the KEY ITEMS that don't travel: the region's stash)
     for (p = 0; p < POCKETS_COUNT; p++)
         for (i = 0; i < gBagPockets[p].capacity; i++)
         {
             u16 item = gBagPockets[p].itemSlots[i].itemId;
-            if (item == ITEM_NONE || StaysWithPlayer(item))
+            if (item == ITEM_NONE || StaysWithPlayer(item) || p == KEYITEMS_POCKET)
                 continue;
             for (j = 0; j < n && items[j] != item; j++)
                 ;
@@ -1528,6 +1579,8 @@ u16 MP_Region_SendLuggage(void)
             continue;
         }
         RemoveBagItem(items[i], qty);
+        if (IS_ITEM_HM(items[i]))
+            MP_RegionItems_NoteHm(items[i], MP_Region_Current());   // (back once that region is beaten)
         moved++;
     }
     if (moved)
@@ -1544,7 +1597,9 @@ u16 MP_Region_DeliverGlobalItems(void)
         return 0;
     for (i = 0; i < sGlobalItemCount; i++)
     {
-        if (AddPCItem(sGlobalItems[i].itemId, sGlobalItems[i].quantity))
+        if (IS_ITEM_HM(sGlobalItems[i].itemId))   // (HMs: into the BAG once their region is beaten, mp_regionitems.c)
+            sGlobalItems[kept++] = sGlobalItems[i];
+        else if (AddPCItem(sGlobalItems[i].itemId, sGlobalItems[i].quantity))
             given++;
         else
             sGlobalItems[kept++] = sGlobalItems[i];
