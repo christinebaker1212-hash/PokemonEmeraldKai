@@ -7048,3 +7048,10 @@ the box screen is steady. Its buffer was sized without the box byte, one byte sh
 box was dropped, never counted as loaded, and the shared PC stayed on "Connecting..." for everyone from 1.7.0 on, as
 soon as one box filled. BOX_MSG_MAX now counts it; a message that still doesn't fit is logged. Test shared_pc_full
 (a server file with all 40 boxes full).
+
+## The GYM LEADER CASTLE in gyms (1.174.3)
+
+The STADIUM's castle is eight gym runs (three trainers and the leader, each won for its badge, any order, a new team at
+each) and then the ELITE FOUR and the RIVAL in one run once all eight badges are won (before, one run of 37 battles).
+Badges in the castle's unused class slot of "<save>.stadium" (no layout change); a castle already won counts as all
+eight. Details: docs/STADIUM.md "The GYM LEADER CASTLE's gyms". Test stadium_castle_gyms.

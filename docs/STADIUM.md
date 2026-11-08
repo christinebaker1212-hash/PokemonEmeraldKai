@@ -289,3 +289,24 @@ first, never when nearly gone anyway. A switch is the trainer's action for the t
 (BtlController_EmitTwoReturnValues B_ACTION_SWITCH), as the game's own switching checks do: 1.173.0 left it out and
 the battle waited for the trainer forever (1.173.1). `mp stadiumai` runs fixed matchups (test stadium_ai); `mp stadiumai
 force` makes trainers take every switch (test stadium_switch: a real battle, the move menu back after each switch).
+
+## The GYM LEADER CASTLE's gyms (1.174.3)
+
+Before 1.174.3 the castle was one run of 37 battles (the eight gyms' four, the ELITE FOUR, the RIVAL); the user,
+2026-11-08: "Gym Leader Castle isn't split between Gyms, it's just one 37 match long gauntlet. This isn't intended at
+all." As Stadium's own castle and docs/stadium/RULES.md have it now: each gym (three trainers and the leader) is a run
+of its own, chosen on the castle's screen (mp_stadium_ui.c DrawCastle: the eight gyms with their leaders and badges,
+then the ELITE FOUR row; the gyms open from the start in any order, a won one can be fought again), registered and
+started as any cup (a new team at each gym: the castle's team is registered again between runs). Beating the leader
+wins the gym's badge (BADGE WON!, announcer clip 367) and the run ends; the badges are bits 0-7 of
+`cleared[round][STADIUM_CUP_CASTLE][3]` in "<save>.stadium" (the castle has one class, so the other three were free:
+no layout change). With all eight badges the ELITE FOUR row opens: LORELEI, BRUNO, AGATHA, LANCE and the RIVAL (picked
+against the player's six) in one run, the same team throughout; beating the RIVAL wins the castle (class 0's cleared
+bits, the rewards and clip 368, as before). A castle won before 1.174.3 counts as all eight badges.
+
+mp_stadium_cup.c: `StadiumCastle_SetStage` (the stage chosen; `StadiumCup_Begin` copies it into `StadiumRun.stage`),
+`StadiumCastle_Index` (stage * 4 + trainer: the old 0-36 numbering every castle table, song and announcer clip still
+reads), `StadiumCup_TrainerCount` (4 a gym, 5 the ELITE FOUR stage), `StadiumCup_Advance` returning STADIUM_NEXT /
+STADIUM_STAGE_WON / STADIUM_CUP_WON (the screens' RES_STAGE). `StadiumCup_WinsTotal` counts only a cup's own classes
+(the badges aren't cups). Tests: `mp stadiumbadges ROUND MASK`, `mp stadiumskip N` (the next run starts at its trainer
+N); scenario stadium_castle_gyms.

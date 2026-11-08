@@ -1,0 +1,158 @@
+pressuntil A field 5000
+mp additem 398 1
+mp battlestyle 1
+mp stadiumbadges 0 127
+mp warp 46,1,9,3
+wait 80
+press UP 4
+wait 10
+pressuntillog A 3000 screens opened
+wait 40
+press DOWN 4
+wait 6
+press DOWN 4
+wait 6
+press DOWN 4
+wait 6
+press DOWN 4
+wait 6
+press DOWN 4
+wait 20
+rendershot select_pre
+wait 10
+rendershot select
+press A 4
+wait 40
+rendershot castle_pre
+wait 10
+rendershot castle
+press DOWN 4
+wait 10
+press A 4
+wait 10
+rendershot castle_e4_pre
+wait 10
+rendershot castle_e4
+press UP 4
+wait 10
+press A 4
+wait 30
+rendershot options_pre
+wait 10
+rendershot options
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press A 4
+wait 6
+press DOWN 4
+wait 4
+rendershot options2_pre
+wait 10
+rendershot options2
+mp stadiumskip 3
+press A 4
+wait 20
+wait 20
+press A 4
+wait 10
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 6
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press A 4
+wait 10
+rendershot registered_pre
+wait 10
+rendershot registered
+press B 4
+wait 20
+press RIGHT 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 40
+rendershot vs_leader_pre
+wait 10
+rendershot vs_leader
+press A 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 10
+press START 4
+pressuntil A action 20000
+mp foehp 1
+mp bmove 98
+pressuntillog A 20000 battle 4 won
+wait 400
+wait 300
+rendershot badge_won_pre
+wait 10
+rendershot badge_won
+press A 4
+wait 60
+rendershot castle_after_pre
+wait 10
+rendershot castle_after
+press A 4
+wait 30
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press RIGHT 4
+wait 4
+press RIGHT 4
+wait 4
+press A 4
+wait 40
+rendershot vs_e4_pre
+wait 10
+rendershot vs_e4
+quit

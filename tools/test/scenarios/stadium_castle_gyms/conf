@@ -1,0 +1,10 @@
+# The GYM LEADER CASTLE in gyms (the user, 2026-11-08: "it's just one 37 match long gauntlet"): with seven badges set
+# (`mp stadiumbadges`), the castle's own screen opens on VIRIDIAN GYM; the ELITE FOUR row is locked ("Win all eight
+# badges first."); VIRIDIAN's run with six rentals starts at its leader (`mp stadiumskip 3`), the win is the gym's
+# badge (BADGE WON!, the run over), and back on the castle's screen the ELITE FOUR is open: its run starts at LORELEI.
+# Shots castle, castle_e4, vs_leader, badge_won, castle_after, vs_e4 (each after a *_pre one: headless, the screens are
+# drawn only for a shot, so the first crossfades from the last shot).
+MODE=1
+TMO=900
+EXPECT_A=("stadium: castle badges set to 7" "stadium: castle ELITE FOUR locked (7 badges)" "stadium: castle stage VIRIDIAN GYM chosen" "stadium: castle VIRIDIAN GYM (7 badges)" "stadium: battle 4 won" "stadium: castle VIRIDIAN GYM won: the EARTH BADGE (8 badges)" "stadium: castle stage ELITE FOUR chosen" "stadium: castle ELITE FOUR (8 badges)")
+UNEXPECT_A=("crash" "out of memory" "stadium: battle 5 against")

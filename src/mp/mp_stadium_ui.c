@@ -60,7 +60,7 @@ const u16 *MP_CardScreen_Halve(SDL_Renderer *r, SDL_Texture *canvas, u16 *out);
 
 enum { SCR_SELECT, SCR_CLASS, SCR_OPTIONS, SCR_REGISTER, SCR_VS, SCR_RESULT, SCR_TEAMS };
 enum { SRC_TAB_PARTY, SRC_TAB_BOXES, SRC_TAB_SHARED, SRC_TAB_GLOBAL, SRC_TAB_RENTALS, SRC_TAB_COUNT };
-enum { RES_WON, RES_LOST, RES_CONTINUE, RES_CUP, RES_OVER };
+enum { RES_WON, RES_LOST, RES_CONTINUE, RES_CUP, RES_OVER, RES_STAGE };   // (RES_STAGE: a castle gym won)
 
 #define LIST_MAX 512
 #define SPRITE_CACHE 48
@@ -73,6 +73,7 @@ static struct
     u16 prevKeys;
     u8 screen;
     u8 round, cup, tier;
+    u8 stage;               // the castle's gym under the cursor (0-7) or STADIUM_CASTLE_E4
     u8 opt;                 // the switches (STADIUM_OPT_*)
     u8 optCursor;
     u8 tab, listCursor;
@@ -935,6 +936,112 @@ static void DrawClass(void)
     Footer("{A} CHOOSE  {B} BACK");
 }
 
+// The GYM LEADER CASTLE's own screen: its eight gyms and the ELITE FOUR as rows (each gym's leader and badge), on the
+// right the one under the cursor's trainers and the badges won. Each gym is its own run; the ELITE FOUR and the RIVAL
+// open once all eight badges are won.
+static const unsigned sBadgeRgb[STADIUM_CASTLE_GYMS] = {0xa8a8b0, 0x58a0f0, 0xf0a030, 0x70c868, 0xe878b8, 0xe0c040,
+                                                        0xe85038, 0x48a870};
+
+static void Badge(int cx, int cy, u8 gym, bool8 won)
+{
+    if (won)
+    {
+        G_Circle(cx, cy, 4.5f, 0x000000, 120);
+        G_Circle(cx, cy, 4, sBadgeRgb[gym], 255);
+        G_Circle(cx - 1, cy - 1, 1.5f, 0xffffff, 200);
+    }
+    else
+    {
+        G_Circle(cx, cy, 4, 0x606878, 255);
+        G_Circle(cx, cy, 3, 0x1a2034, 255);
+    }
+}
+
+static const struct StadiumTrainer *CastleFace(u8 stage)
+{
+    return stage < STADIUM_CASTLE_GYMS ? Stadium_Trainer(U.round, STADIUM_GYM_1 + stage, 3)
+                                       : Stadium_Trainer(U.round, STADIUM_ELITE_FOUR, 0);
+}
+
+static void DrawCastle(void)
+{
+    u8 i, badges = StadiumCastle_Badges(U.round), n;
+    char line[64];
+    Header(StadiumCup_Info(STADIUM_CUP_CASTLE)->name, U.round ? "ROUND 2" : "ROUND 1");
+    for (i = 0; i < STADIUM_CASTLE_STAGES; i++)
+    {
+        int y = 19 + i * 14;
+        bool8 open = StadiumCastle_StageOpen(U.round, i), focus = U.stage == i;
+        const struct StadiumTrainer *face = CastleFace(i);
+        char who[16] = "";
+        if (focus)
+        {
+            Panel(3, y, 146, 13, C_GOLD, 0xf8e080);
+            G_FillAdd(4 + (U.age * 2) % 142, y + 1, 6, 11, 0xffffff, 60);
+        }
+        else
+            Panel(3, y, 146, 13, open ? 0x22345c : 0x1a2034, open ? 0x5a70a8 : 0x3a4058);
+        if (face && face->pic)
+            BlitPart(TrainerTex(face->pic), 14, 4, 36, 26, 5, y + 1, 15, 11, open ? 255 : 80);
+        G_Text(23, y + 1, focus ? C_INK : open ? G_WHITE : C_LOCK, focus ? G_NO_SHADOW : 0x000000,
+               StadiumCastle_StageName(i), 70, TF_NARROW);
+        if (i < STADIUM_CASTLE_GYMS)
+        {
+            if (face)
+                Ascii(who, face->name, sizeof(who));
+            G_Text(92, y + 2, focus ? C_INK : C_SOFT, G_NO_SHADOW, who, 46, TF_SMALL);
+            Badge(141, y + 6, i, (badges >> i) & 1);
+        }
+        else if (!open)
+            G_Text(92, y + 2, C_LOCK, G_NO_SHADOW, "LOCKED", 50, TF_SMALL);
+        else if (StadiumCup_Cleared(U.round, STADIUM_CUP_CASTLE, 0))
+            Chip(118, y + 1, "WON", 0xc09020);
+    }
+    // the stage under the cursor
+    Panel(153, 18, 84, 126, C_PANEL, 0xb0a888);
+    G_Text(157, 20, C_INK, G_NO_SHADOW, StadiumCastle_StageName(U.stage), 78, TF_SMALL);
+    n = U.stage < STADIUM_CASTLE_GYMS ? 4 : 5;
+    G_Text(157, 32, C_SOFT, G_NO_SHADOW, U.stage < STADIUM_CASTLE_GYMS ? "4 BATTLES" : "5 BATTLES",
+           78, TF_NARROW);
+    for (i = 0; i < n; i++)
+    {
+        const struct StadiumTrainer *tr = U.stage < STADIUM_CASTLE_GYMS ? Stadium_Trainer(U.round, STADIUM_GYM_1 + U.stage, i)
+                                        : i < 4 ? Stadium_Trainer(U.round, STADIUM_ELITE_FOUR, i)
+                                                : Stadium_Trainer(U.round, STADIUM_RIVAL, 0);
+        int x = 156 + (i % 4) * 20, y = 43 + (i / 4) * 24;
+        bool8 last = i == n - 1;
+        G_RoundFill(x, y, 19, 22, last ? 0xe8c070 : 0xe0d8c0, 255);
+        if (tr && tr->pic)
+            BlitPart(TrainerTex(tr->pic), 8, 0, 48, 56, x, y + 1, 19, 21,
+                     StadiumCastle_StageOpen(U.round, U.stage) ? 255 : 80);
+        if (last && U.stage == STADIUM_CASTLE_E4)   // (the RIVAL's team is picked against the player's six)
+            G_Text(x + 23, y + 6, C_SOFT, G_NO_SHADOW, "?", 0, TF_NORMAL);
+    }
+    // the badges won
+    G_FillA(156, 95, 78, 1, 0xb0a888, 255);
+    snprintf(line, sizeof(line), "BADGES %d/8", StadiumCastle_BadgeCount(U.round));
+    G_Text(157, 97, C_INK, G_NO_SHADOW, line, 0, TF_NARROW);
+    for (i = 0; i < STADIUM_CASTLE_GYMS; i++)
+        Badge(162 + (i % 4) * 11, 113 + (i / 4) * 11, i, (badges >> i) & 1);
+    if (U.stage < STADIUM_CASTLE_GYMS)
+        snprintf(line, sizeof(line), "%s", (badges >> U.stage) & 1 ? "Won. Try it again?" : StadiumCastle_BadgeName(U.stage));
+    else
+        snprintf(line, sizeof(line), "%s", StadiumCastle_StageOpen(U.round, U.stage) ? "Then, the castle!"
+                                                                                     : "Needs 8 badges.");
+    G_Text(157, 131, C_SOFT, G_NO_SHADOW, line, 78, TF_SMALL);
+    Footer("{A} CHOOSE  {B} BACK");
+}
+
+// The castle's first stage to try: the first gym without its badge, else the ELITE FOUR
+static u8 CastleFirstStage(void)
+{
+    u8 i, badges = StadiumCastle_Badges(U.round);
+    for (i = 0; i < STADIUM_CASTLE_GYMS; i++)
+        if (!((badges >> i) & 1))
+            return i;
+    return STADIUM_CASTLE_E4;
+}
+
 static const char *const sOptNames[3] = {"LEVEL CAP", "SPECIES", "HELD ITEMS"};
 
 static u8 HardCount(void)
@@ -1273,7 +1380,14 @@ static void DrawVs(void)
         Ascii(name, StadiumCc_Trainer(r->tier, r->trainer)->name, sizeof(name));
     }
     if (r->cup == STADIUM_CUP_CASTLE)
-        snprintf(line, sizeof(line), "BATTLE %d OF %d", r->trainer + 1, StadiumCup_TrainerCount(r->round, r->cup, r->tier));
+    {
+        if (r->stage == STADIUM_CASTLE_E4 && r->trainer == 4)
+            snprintf(line, sizeof(line), "THE RIVAL");
+        else if (r->stage < STADIUM_CASTLE_GYMS && r->trainer == 3)
+            snprintf(line, sizeof(line), "THE LEADER");
+        else
+            snprintf(line, sizeof(line), "BATTLE %d OF %d", r->trainer + 1, r->stage == STADIUM_CASTLE_E4 ? 5 : 4);
+    }
     else
         snprintf(line, sizeof(line), r->trainer == 6 ? "SEMI-FINAL" : r->trainer == 7 ? "FINAL BATTLE" : "BATTLE %d",
                  r->trainer + 1);
@@ -1284,7 +1398,8 @@ static void DrawVs(void)
         G_TextAlign(234, 3, TA_RIGHT, G_WHITE, 0x000000, line, TF_SMALL);
     }
     else
-        G_TextAlign(234, 3, TA_RIGHT, G_WHITE, 0x000000, StadiumCup_Info(r->cup)->name, TF_SMALL);
+        G_TextAlign(234, 3, TA_RIGHT, G_WHITE, 0x000000, r->cup == STADIUM_CUP_CASTLE ? StadiumCastle_StageName(r->stage)
+                    : StadiumCup_Info(r->cup)->name, TF_SMALL);
     // the opponent
     {
         int slide = U.age < 16 ? (16 - U.age) * 8 : 0;
@@ -1433,9 +1548,12 @@ static void DrawResult(void)
 {
     struct StadiumRun *r = StadiumCup_Run();
     bool8 lost = U.result == RES_LOST || U.result == RES_OVER || U.result == RES_CONTINUE;
-    const char *big = U.result == RES_CUP ? "CUP WON!" : U.result == RES_WON ? "YOU WIN!" : U.result == RES_CONTINUE ? "CONTINUE?" : "GAME OVER";
+    const char *big = U.result == RES_CUP ? (r->cup == STADIUM_CUP_CASTLE ? "CASTLE WON!" : "CUP WON!")
+                    : U.result == RES_STAGE ? "BADGE WON!" : U.result == RES_WON ? "YOU WIN!"
+                    : U.result == RES_CONTINUE ? "CONTINUE?" : "GAME OVER";
     SDL_Texture *pic = CupPic(r->cup);
-    u8 i, total = StadiumCup_TrainerCount(r->round, r->cup, r->tier);
+    u8 i, total = r->cup == STADIUM_CUP_CASTLE ? (r->stage == STADIUM_CASTLE_E4 ? 5 : 4)
+                                               : StadiumCup_TrainerCount(r->round, r->cup, r->tier);
     extern u16 MP_StadiumBattle_TrainerPic(void);
     Header(StadiumCup_Info(r->cup)->name, NULL);
     if (pic)
@@ -1451,10 +1569,21 @@ static void DrawResult(void)
     Panel(20, 92, 136, 22, 0x0c1424, 0x4a5c88);
     for (i = 0; i < total; i++)
     {
-        bool8 beaten = U.result == RES_CUP || i < r->trainer;   // (after a win the run is on the next one already)
+        bool8 beaten = U.result == RES_CUP || U.result == RES_STAGE || i < r->trainer;   // (after a win the run is on the next one already)
         ItemBall(32 + i * 16, 103, beaten ? 255 : 90);
     }
-    if (r->cup != STADIUM_CUP_CASTLE)
+    if (U.result == RES_STAGE)
+    {
+        char line[48];
+        u8 badges = StadiumCastle_Badges(r->round);
+        Badge(150, 103, r->stage, TRUE);
+        snprintf(line, sizeof(line), "The %s!", StadiumCastle_BadgeName(r->stage));
+        G_TextAlign(88, 118, TA_CENTER, G_WHITE, 0x000000, line, TF_SMALL);
+        snprintf(line, sizeof(line), badges == 0xFF ? "All eight! The ELITE FOUR await." : "%d of 8 badges.",
+                 __builtin_popcount(badges));
+        G_TextAlign(88, 129, TA_CENTER, 0xf8e8a0, 0x000000, line, TF_SMALL);
+    }
+    else if (r->cup != STADIUM_CUP_CASTLE)
     {
         char line[48];
         snprintf(line, sizeof(line), "CONTINUES %d", r->continues);
@@ -1661,7 +1790,7 @@ static void ScreenMusic(void)
     case SCR_RESULT:
         name = U.result == RES_CUP ? (r->cup == STADIUM_CUP_CASTLE ? "stadium_castle_won" : r->cup == STADIUM_CUP_MEWTWO
                                       ? "stadium_mewtwo_won" : "stadium_cup_won")
-             : U.result == RES_WON ? "stadium_select" : "stadium_lost";
+             : U.result == RES_STAGE ? "stadium_castle_menu" : U.result == RES_WON ? "stadium_select" : "stadium_lost";
         break;
     case SCR_SELECT:
         name = "stadium_menu";
@@ -1745,7 +1874,7 @@ SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r)
     switch (U.screen)
     {
     case SCR_SELECT: DrawSelect(); break;
-    case SCR_CLASS: DrawClass(); break;
+    case SCR_CLASS: if (U.cup == STADIUM_CUP_CASTLE) DrawCastle(); else DrawClass(); break;
     case SCR_OPTIONS: DrawOptions(); break;
     case SCR_REGISTER: DrawRegister(); break;
     case SCR_VS: DrawVs(); break;
@@ -1874,7 +2003,7 @@ static void AnnounceVs(void)
 {
     struct StadiumRun *r = StadiumCup_Run();
     void MP_StadiumAnnouncer_Screen(u16 clip, const char *why);
-    u8 t = r->trainer;
+    u8 t = StadiumCastle_Index();
     if (r->cup != STADIUM_CUP_CASTLE)
         return;
     if (t == 0)
@@ -1894,10 +2023,9 @@ static void AnnounceResult(void)
 {
     struct StadiumRun *r = StadiumCup_Run();
     void MP_StadiumAnnouncer_Screen(u16 clip, const char *why);
-    u8 beaten = r->trainer ? r->trainer - 1 : 0;
     if (U.result == RES_CUP)
         MP_StadiumAnnouncer_Screen(r->cup == STADIUM_CUP_CASTLE ? 368 : 366, "the cup won");
-    else if (U.result == RES_WON && r->cup == STADIUM_CUP_CASTLE && beaten < 32 && beaten % 4 == 3)
+    else if (U.result == RES_STAGE)
         MP_StadiumAnnouncer_Screen(367, "a stage cleared");
 }
 
@@ -1921,6 +2049,8 @@ static void StartRun(void)
         snprintf(U.note, sizeof(U.note), "%s", problem);
         return;
     }
+    if (U.cup == STADIUM_CUP_CASTLE)
+        StadiumCastle_SetStage(U.stage);
     StadiumCup_Begin(U.round, U.cup, U.tier, U.opt);
     PlaySE(SE_SUCCESS);
     ToVs();
@@ -1969,7 +2099,10 @@ static void AfterBattle(bool8 won)
     U.reopen = SCR_RESULT;
     U.lastFoePic = MP_StadiumBattle_TrainerPic();
     if (won)
-        U.result = StadiumCup_Advance() ? RES_CUP : RES_WON;
+    {
+        u8 next = StadiumCup_Advance();
+        U.result = next == STADIUM_CUP_WON ? RES_CUP : next == STADIUM_STAGE_WON ? RES_STAGE : RES_WON;
+    }
     else
         U.result = StadiumCup_Run()->continues > 0 ? RES_CONTINUE : RES_OVER;
     if (U.result == RES_OVER)
@@ -2185,6 +2318,13 @@ bool8 MP_StadiumUi_Step(u16 keys)
                 PlaySE(SE_FAILURE);
                 snprintf(U.note, sizeof(U.note), "Not open yet.");
             }
+            else if (U.cup == STADIUM_CUP_CASTLE)
+            {
+                U.screen = SCR_CLASS;   // (the castle's own: DrawCastle)
+                U.tier = 0;
+                U.stage = CastleFirstStage();
+                PlaySE(SE_SELECT);
+            }
             else if (StadiumCup_Info(U.cup)->tiers > 1)
             {
                 U.screen = SCR_CLASS;
@@ -2202,6 +2342,31 @@ bool8 MP_StadiumUi_Step(u16 keys)
         }
         break;
     case SCR_CLASS:
+        if (U.cup == STADIUM_CUP_CASTLE)
+        {
+            if (pressed & B_BUTTON)
+                U.screen = SCR_SELECT, PlaySE(SE_SELECT);
+            else if (pressed & DPAD_UP && U.stage > 0)
+                U.stage--, PlaySE(SE_SELECT);
+            else if (pressed & DPAD_DOWN && U.stage + 1 < STADIUM_CASTLE_STAGES)
+                U.stage++, PlaySE(SE_SELECT);
+            else if (pressed & A_BUTTON)
+            {
+                if (StadiumCastle_StageOpen(U.round, U.stage))
+                {
+                    StadiumCastle_SetStage(U.stage);
+                    MPNet_Log("stadium: castle stage %s chosen", StadiumCastle_StageName(U.stage));
+                    EnterOptions(), PlaySE(SE_SELECT);
+                }
+                else
+                {
+                    PlaySE(SE_FAILURE);
+                    snprintf(U.note, sizeof(U.note), "Win all eight badges first.");
+                    MPNet_Log("stadium: castle ELITE FOUR locked (%d badges)", StadiumCastle_BadgeCount(U.round));
+                }
+            }
+            break;
+        }
         if (pressed & B_BUTTON)
             U.screen = SCR_SELECT, PlaySE(SE_SELECT);
         else if (pressed & DPAD_UP && U.tier > 0)
@@ -2223,7 +2388,7 @@ bool8 MP_StadiumUi_Step(u16 keys)
     {
         u8 rows = U.cup == STADIUM_CUP_CHALLENGE ? 0 : 4;
         if (pressed & B_BUTTON)
-            U.screen = StadiumCup_Info(U.cup)->tiers > 1 ? SCR_CLASS : SCR_SELECT, PlaySE(SE_SELECT);
+            U.screen = StadiumCup_Info(U.cup)->tiers > 1 || U.cup == STADIUM_CUP_CASTLE ? SCR_CLASS : SCR_SELECT, PlaySE(SE_SELECT);
         else if (pressed & DPAD_UP && U.optCursor > (rows ? 0 : 2))
             U.optCursor--, PlaySE(SE_SELECT);
         else if (pressed & DPAD_DOWN && U.optCursor < rows)
@@ -2523,7 +2688,7 @@ bool8 MP_StadiumUi_Step(u16 keys)
             else if (pressed & B_BUTTON)
             {
                 r->active = FALSE;
-                U.screen = SCR_SELECT;
+                U.screen = r->cup == STADIUM_CUP_CASTLE ? SCR_CLASS : SCR_SELECT;
                 PlaySE(SE_SELECT);
             }
         }
@@ -2533,6 +2698,11 @@ bool8 MP_StadiumUi_Step(u16 keys)
                 MPNet_Log("stadium: prizes read (%d frames), on", U.age);
             if (U.result == RES_WON)
                 ToVs();
+            else if (r->cup == STADIUM_CUP_CASTLE && U.result != RES_CUP)
+            {
+                U.screen = SCR_CLASS;   // (back to the castle's gyms: the next one under the cursor)
+                U.stage = U.result == RES_STAGE ? CastleFirstStage() : r->stage;
+            }
             else
                 U.screen = SCR_SELECT;
             PlaySE(SE_SELECT);

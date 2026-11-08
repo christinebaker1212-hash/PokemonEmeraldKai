@@ -550,6 +550,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (show)   // (then the result screen with the prizes)
             MP_StadiumUi_DebugResult(r, c, t);
     }
+    else if (strcmp(cmd, "stadiumskip") == 0)   // mp stadiumskip N: the next STADIUM run starts at its trainer N (mp_stadium_cup.c)
+    {
+        void MP_StadiumCup_DebugSkip(u8 n);
+        MP_StadiumCup_DebugSkip(atoi(arg));
+    }
+    else if (strcmp(cmd, "stadiumbadges") == 0)   // mp stadiumbadges ROUND MASK: the GYM LEADER CASTLE's badges (mp_stadium_cup.c)
+    {
+        void MP_StadiumCup_DebugBadges(u8 round, u8 mask);
+        int r = 0, m = 0;
+        sscanf(arg, "%d %d", &r, &m);
+        MP_StadiumCup_DebugBadges(r, m);
+    }
     else if (strcmp(cmd, "ccteam") == 0)   // mp ccteam CLASS ROUND TRAINER (255: the player): a CHALLENGE CUP team (mp_stadium.c)
     {
         void MP_StadiumCc_Debug(u8 cls, u8 round, u8 trainer);

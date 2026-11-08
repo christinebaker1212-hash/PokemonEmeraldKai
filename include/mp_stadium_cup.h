@@ -84,7 +84,19 @@ struct StadiumRun
     u8 picks[STADIUM_PICK];   // the team's slots chosen for this battle, in order
     u8 foePicks[STADIUM_PICK];
     bool8 lostNone;        // this battle won without a faint (a continue)
+    u8 stage;              // the castle's gym (0-7) or STADIUM_CASTLE_E4 (the ELITE FOUR and the RIVAL)
 };
+
+// The GYM LEADER CASTLE (docs/stadium/RULES.md): eight gyms of three trainers and the leader, each its own run won
+// for a badge (a new team allowed at each), then the ELITE FOUR and the RIVAL in one run once all eight are won.
+// The badges: bits 0-7 of cleared[round][STADIUM_CUP_CASTLE][3] (the castle has one class, so its other three are free)
+#define STADIUM_CASTLE_GYMS 8
+#define STADIUM_CASTLE_E4   8
+#define STADIUM_CASTLE_STAGES 9
+#define STADIUM_CASTLE_BADGE_SLOT 3
+
+// StadiumCup_Advance: on to the next trainer, a castle gym won (its badge), the cup won (its rewards)
+enum { STADIUM_NEXT, STADIUM_STAGE_WON, STADIUM_CUP_WON };
 
 const struct StadiumCupInfo *StadiumCup_Info(u8 cup);
 u16 StadiumCup_RentalCount(u8 round, u8 cup);
@@ -108,7 +120,15 @@ struct Pokemon *StadiumCup_FoeTeam(u8 *count);
 void StadiumCup_PrepareFoe(void);
 void StadiumCup_FoePicks(void);
 void StadiumCup_Begin(u8 round, u8 cup, u8 tier, u8 options);
-bool8 StadiumCup_Advance(void);
+u8 StadiumCup_Advance(void);
+void StadiumCastle_SetStage(u8 stage);   // the castle's next run (before StadiumCup_Begin)
+u8 StadiumCastle_Stage(void);
+u8 StadiumCastle_Badges(u8 round);       // bit g: gym g won
+u8 StadiumCastle_BadgeCount(u8 round);
+bool8 StadiumCastle_StageOpen(u8 round, u8 stage);
+u8 StadiumCastle_Index(void);            // the battle now in the castle's order: gym * 4 + n, the ELITE FOUR 32-35, the RIVAL 36
+const char *StadiumCastle_StageName(u8 stage);   // "PEWTER GYM" .. "ELITE FOUR"
+const char *StadiumCastle_BadgeName(u8 gym);     // "BOULDER BADGE" ..
 bool8 StadiumCup_UseContinue(void);
 void StadiumCup_StartBattle(void (*after)(bool8 won));
 void MP_Stadium_FieldStaysBlack(void);   // the field back from a battle / the SUMMARY stays black (mp_stadium_ui.c)

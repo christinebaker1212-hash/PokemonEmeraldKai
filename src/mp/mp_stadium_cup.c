@@ -295,7 +295,7 @@ u16 StadiumCup_WinsTotal(void)
     Load();
     for (r = 0; r < STADIUM_ROUNDS; r++)
         for (c = 0; c < STADIUM_CUP_COUNT; c++)
-            for (t = 0; t < 4; t++)
+            for (t = 0; t < sCups[c].tiers; t++)   // (the castle's badges sit in a class it doesn't have)
                 n += sSave.cleared[r][c][t] != 0;
     return n;
 }
@@ -314,9 +314,68 @@ void StadiumRecords_News(char *out, size_t size)
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// A run: eight trainers (the castle: every gym's four, the ELITE FOUR, the RIVAL; MEWTWO: one), then the cup
+// A run: eight trainers (the castle: a gym's four, or the ELITE FOUR and the RIVAL; MEWTWO: one), then the cup
 
 static struct StadiumRun sRun;
+static u8 sCastleStage;   // the castle's gym chosen (mp_stadium_ui.c), copied into the run by StadiumCup_Begin
+
+static const char *const sCastleStages[STADIUM_CASTLE_STAGES] = {
+    "PEWTER GYM", "CERULEAN GYM", "VERMILION GYM", "CELADON GYM", "FUCHSIA GYM", "SAFFRON GYM", "CINNABAR GYM",
+    "VIRIDIAN GYM", "ELITE FOUR",
+};
+static const char *const sCastleBadges[STADIUM_CASTLE_GYMS] = {
+    "BOULDER BADGE", "CASCADE BADGE", "THUNDER BADGE", "RAINBOW BADGE", "SOUL BADGE", "MARSH BADGE", "VOLCANO BADGE",
+    "EARTH BADGE",
+};
+
+void StadiumCastle_SetStage(u8 stage)
+{
+    sCastleStage = stage < STADIUM_CASTLE_STAGES ? stage : 0;
+}
+
+u8 StadiumCastle_Stage(void)
+{
+    return sCastleStage;
+}
+
+const char *StadiumCastle_StageName(u8 stage)
+{
+    return sCastleStages[stage < STADIUM_CASTLE_STAGES ? stage : 0];
+}
+
+const char *StadiumCastle_BadgeName(u8 gym)
+{
+    return sCastleBadges[gym < STADIUM_CASTLE_GYMS ? gym : 0];
+}
+
+// The badges won in ROUND (a castle won before the gyms were split counts as all eight)
+u8 StadiumCastle_Badges(u8 round)
+{
+    Load();
+    if (round >= STADIUM_ROUNDS)
+        return 0;
+    if (sSave.cleared[round][STADIUM_CUP_CASTLE][0])
+        return 0xFF;
+    return sSave.cleared[round][STADIUM_CUP_CASTLE][STADIUM_CASTLE_BADGE_SLOT] & 0xFF;
+}
+
+u8 StadiumCastle_BadgeCount(u8 round)
+{
+    return __builtin_popcount(StadiumCastle_Badges(round));
+}
+
+// Every gym is open from the start; the ELITE FOUR once all eight badges are won
+bool8 StadiumCastle_StageOpen(u8 round, u8 stage)
+{
+    if (stage < STADIUM_CASTLE_GYMS)
+        return TRUE;
+    return StadiumCastle_Badges(round) == 0xFF;
+}
+
+u8 StadiumCastle_Index(void)
+{
+    return sRun.stage * 4 + sRun.trainer;
+}
 
 struct StadiumRun *StadiumCup_Run(void)
 {
@@ -329,11 +388,12 @@ u8 StadiumCup_TrainerCount(u8 round, u8 cup, u8 tier)
     if (cup == STADIUM_CUP_CHALLENGE)
         return 8;
     if (cup == STADIUM_CUP_CASTLE)
-        return 8 * 4 + 4 + 1;
+        return sCastleStage == STADIUM_CASTLE_E4 ? 4 + 1 : 4;
     return Stadium_TrainerCount(round, c->division[tier & 3]);
 }
 
-// The castle's trainer n: the gyms' four in order, the ELITE FOUR, the RIVAL (one of seven, by the player's six)
+// The castle's trainer n (StadiumCastle_Index): the gyms' four in order, the ELITE FOUR, the RIVAL (one of seven, by
+// the player's six)
 const struct StadiumTrainer *StadiumCup_CastleTrainer(u8 round, u8 n, u8 rival)
 {
     if (n < 32)
@@ -470,7 +530,7 @@ void StadiumCup_PrepareFoe(void)
     }
     if (r->cup == STADIUM_CUP_CASTLE)
     {
-        if (r->trainer == 36)
+        if (StadiumCastle_Index() == 36)
         {
             struct Pokemon team[PARTY_SIZE];
             u8 n = StadiumCup_EntryCount();
@@ -478,7 +538,7 @@ void StadiumCup_PrepareFoe(void)
                 StadiumCup_Entry(&team[i], i);
             r->rival = StadiumCup_PickRival(r->round, team, n);
         }
-        sFoe = StadiumCup_CastleTrainer(r->round, r->trainer, r->rival);
+        sFoe = StadiumCup_CastleTrainer(r->round, StadiumCastle_Index(), r->rival);
     }
     else
         sFoe = Stadium_Trainer(r->round, StadiumCup_Info(r->cup)->division[r->tier], r->trainer);
@@ -572,6 +632,25 @@ void StadiumCup_FoePicks(void)
     MPNet_Log("stadium: foe picks %d %d %d", r->foePicks[0], r->foePicks[1], r->foePicks[2]);
 }
 
+static u8 sDebugSkip;
+
+// Tests (mp stadiumskip N): the next run starts at its trainer N
+void MP_StadiumCup_DebugSkip(u8 n)
+{
+    sDebugSkip = n;
+}
+
+// Tests (mp stadiumbadges ROUND MASK): the castle's badges
+void MP_StadiumCup_DebugBadges(u8 round, u8 mask)
+{
+    struct StadiumSave *s = StadiumCup_Save();
+    if (round >= STADIUM_ROUNDS)
+        return;
+    s->cleared[round][STADIUM_CUP_CASTLE][STADIUM_CASTLE_BADGE_SLOT] = mask;
+    StadiumCup_SaveNow();
+    MPNet_Log("stadium: castle badges set to %d", StadiumCastle_BadgeCount(round));
+}
+
 // Start a run (the switches, and the CHALLENGE CUP's six for the player)
 void StadiumCup_Begin(u8 round, u8 cup, u8 tier, u8 options)
 {
@@ -581,6 +660,7 @@ void StadiumCup_Begin(u8 round, u8 cup, u8 tier, u8 options)
     memset(r, 0, sizeof(*r));
     r->active = TRUE;
     r->round = round, r->cup = cup, r->tier = tier, r->options = options;
+    r->stage = cup == STADIUM_CUP_CASTLE ? sCastleStage : 0;
     r->rentalsOnly = cup != STADIUM_CUP_CHALLENGE && (options & STADIUM_OPT_RENTALS) && s->team[cup].count > 0;
     for (i = 0; i < s->team[cup].count; i++)
         if (s->team[cup].slot[i].source != STADIUM_SRC_RENTAL)
@@ -588,9 +668,13 @@ void StadiumCup_Begin(u8 round, u8 cup, u8 tier, u8 options)
     if (cup == STADIUM_CUP_CHALLENGE)
         StadiumCc_MakeTeam(sCcTeam, tier, round, STADIUM_CC_PLAYER);
     s->options[cup] = options | 0x80;
+    if (sDebugSkip)   // (tests: mp stadiumskip)
+        r->trainer = sDebugSkip, sDebugSkip = 0;
     StadiumCup_PrepareFoe();
     MPNet_Log("stadium: %s class %d round %d begins (options %d, rentals only %d)", StadiumCup_Info(cup)->name, tier,
               round + 1, options, r->rentalsOnly);
+    if (cup == STADIUM_CUP_CASTLE)
+        MPNet_Log("stadium: castle %s (%d badges)", StadiumCastle_StageName(r->stage), StadiumCastle_BadgeCount(round));
 }
 
 static void (*sAfterBattle)(bool8 won);
@@ -627,17 +711,30 @@ static void CB2_EndStadiumBattle(void)
         sAfterBattle(won);
 }
 
-// The run's opponent beaten: on to the next, or the cup won. TRUE: the cup is won (rewards given)
-bool8 StadiumCup_Advance(void)
+// The run's opponent beaten: on to the next (STADIUM_NEXT), a castle gym won (STADIUM_STAGE_WON: its badge), or the
+// cup won (STADIUM_CUP_WON: rewards given)
+u8 StadiumCup_Advance(void)
 {
     struct StadiumRun *r = &sRun;
     struct StadiumSave *s = StadiumCup_Save();
-    u8 hard, total = StadiumCup_TrainerCount(r->round, r->cup, r->tier);
+    u8 hard, total;
+    if (r->cup == STADIUM_CUP_CASTLE)
+        sCastleStage = r->stage;   // (the count by the run's own gym)
+    total = StadiumCup_TrainerCount(r->round, r->cup, r->tier);
     r->trainer++;
     if (r->trainer < total)
     {
         StadiumCup_PrepareFoe();
-        return FALSE;
+        return STADIUM_NEXT;
+    }
+    if (r->cup == STADIUM_CUP_CASTLE && r->stage < STADIUM_CASTLE_GYMS)
+    {
+        s->cleared[r->round][STADIUM_CUP_CASTLE][STADIUM_CASTLE_BADGE_SLOT] |= 1 << r->stage;
+        StadiumCup_SaveNow();
+        MPNet_Log("stadium: castle %s won: the %s (%d badges)", StadiumCastle_StageName(r->stage),
+                  StadiumCastle_BadgeName(r->stage), StadiumCastle_BadgeCount(r->round));
+        r->active = FALSE;
+        return STADIUM_STAGE_WON;
     }
     hard = Hardness(r->options, r->rentalsOnly);
     if (r->cup == STADIUM_CUP_CHALLENGE)
@@ -651,7 +748,7 @@ bool8 StadiumCup_Advance(void)
         StadiumRewards_CupWon(r->round, r->cup, r->tier, hard, first);
     }
     r->active = FALSE;
-    return TRUE;
+    return STADIUM_CUP_WON;
 }
 
 // A lost battle: a continue if there's one (TRUE), else the run ends
@@ -742,8 +839,10 @@ const u8 *MP_StadiumBattle_ClassName(void)
     if (sRun.cup == STADIUM_CUP_CHALLENGE)
         return StadiumCc_Trainer(sCcFoeClass, sRun.trainer)->className;
     if (sRun.cup == STADIUM_CUP_CASTLE)
-        return sRun.trainer >= 36 ? sText_Champion : sRun.trainer >= 32 ? sText_EliteFour
-             : sRun.trainer % 4 == 3 ? sText_Leader : sText_Stadium;
+    {
+        u8 t = StadiumCastle_Index();
+        return t >= 36 ? sText_Champion : t >= 32 ? sText_EliteFour : t % 4 == 3 ? sText_Leader : sText_Stadium;
+    }
     return sText_Stadium;
 }
 
@@ -818,6 +917,8 @@ u16 MP_StadiumBattle_Music(void)
     static const char *const sCup[4] = {"pika", "petit", "poke", "prime"};
     char name[40];
     u8 t = sRun.trainer;
+    if (sRun.cup == STADIUM_CUP_CASTLE)
+        t = StadiumCastle_Index();
     switch (sRun.cup)
     {
     case STADIUM_CUP_PIKA: case STADIUM_CUP_PETIT: case STADIUM_CUP_POKE: case STADIUM_CUP_PRIME:
@@ -841,7 +942,7 @@ u16 MP_StadiumBattle_Music(void)
 
 u16 MP_StadiumBattle_Victory(u16 song)
 {
-    u8 t = sRun.trainer;
+    u8 t = StadiumCastle_Index();
     if (sRun.cup == STADIUM_CUP_MEWTWO)
         return MP_Stadium_Track("stadium_mewtwo_won", song);
     if (sRun.cup == STADIUM_CUP_CASTLE && (t % 4 == 3 || t >= 32))
