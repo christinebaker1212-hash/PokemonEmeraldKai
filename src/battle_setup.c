@@ -1,4 +1,5 @@
 #include "global.h"
+#include "orre.h"   // Moemon Kai: ORRE's battles
 #include "mp_region.h"
 #include "s3d.h"
 #include "pokemon_storage_system.h"
@@ -1695,6 +1696,29 @@ void MP_Debug_TrainerBattle(u16 id)
     sTrainerBattleEndScript = NULL;
     gNoOfApproachingTrainers = 0;
     BattleSetup_StartTrainerBattle();
+}
+
+// Moemon Kai: ORRE's battles (src/orre/orre_battle.c Orre_PrepareBattle set the opponents): Colosseum's, so no trainer
+// flags or rematches; a loss whites out only where Colosseum's battle says (its zenmetu flag), else the script goes on
+static void CB2_EndOrreBattle(void)
+{
+    bool8 lost = IsPlayerDefeated(gBattleOutcome) == TRUE;
+    Orre_BattleEnded(!lost);
+    if (lost && Orre_BattleLossWhitesOut() && !MP_Rescue_TryStart())
+        SetMainCallback2(CB2_WhiteOut);
+    else
+        SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+    if (!lost)
+        MP_Events_OnTrainerWin(); // Moemon Co-op: team goals
+}
+
+void BattleSetup_StartOrreBattle(void)
+{
+    gNoOfApproachingTrainers = 0;
+    gWhichTrainerToFaceAfterBattle = 0;
+    gMain.savedCallback = CB2_EndOrreBattle;
+    DoTrainerBattle();
+    ScriptContext_Stop();
 }
 
 static void CB2_EndTrainerBattle(void)

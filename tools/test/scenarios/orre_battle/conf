@@ -1,0 +1,13 @@
+# ORRE's battles (src/orre/orre_battle.c; docs/ORRE_HANDOFF.md "Trainers and battles"): Colosseum's battle 10 (needs
+# orre/orre_data.pak and orre_text.pak from tools/orre/make_pack.sh) at the OUTSKIRT STAND, as a script starts it:
+# WILLIE, a RIDER (Colosseum's class name and his name from its text), his two ZIGZAGOON at Lv 24 with Colosseum's
+# genders and moves (TACKLE, GROWL), a Double Battle whose loss whites out (Colosseum's flag), won with a never-missing move (the foes at 1 HP), Colosseum's
+# prize (the class's rate 5 x level 24 x 2), the result for the script. Shots b_*.png.
+MODE=1
+TMO=300
+WARP=45,0,33,40
+ENV_A="MOEMON_DEBUG_PARTY=280:50,280:50"
+EXPECT_A=("orre: trainer A 2221 (Colosseum's 10): 2 POKeMON, double" "orre: battle 10 (kind 2, field 5): 1 opponent, a loss whites out"
+          "orre: battle 10 won" "[test] orre battle result 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "no battle 10")
+CHECK="python3 tools/test/scenarios/orre_battle/check.py"

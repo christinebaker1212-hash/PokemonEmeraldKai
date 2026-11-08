@@ -367,6 +367,12 @@
 #define TRAINER_JOHTO_SAGE_KOJI 1663
 // any trainer of the three regions (HOENN's, then JOHTO's and KANTO's)
 #include "constants/trainers_sinnoh.h"   // Moemon Kai: SINNOH's (tools/sinnoh/gen_trainers.py)
+// Moemon Kai: ORRE's battles (src/orre/orre_battle.c): two trainers after SINNOH's, filled from Colosseum's own
+// tables before each battle (their name, class, items, team); their class's name is the Colosseum trainer's
+#define TRAINER_ORRE_A 2221
+#define TRAINER_ORRE_B 2222
+#define IS_ORRE_TRAINER(id) ((id) == TRAINER_ORRE_A || (id) == TRAINER_ORRE_B)
+#define TRAINER_CLASS_ORRE 107
 #define IS_REAL_TRAINER(id) (((id) != 0 && (id) < TRAINERS_COUNT) || ((id) >= FIRST_QZ_TRAINER && (id) < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT) \
                           || ((id) >= FIRST_SINNOH_TRAINER && (id) < FIRST_SINNOH_TRAINER + SINNOH_TRAINERS_COUNT))
 #define TRAINER_CLASS_QZ_BURGLAR 66

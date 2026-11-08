@@ -1,0 +1,19 @@
+pressuntil A field 5000
+mp money 0
+wait 30
+mp orrebattle 10 29
+wait 330
+rendershot b_intro_pre
+wait 10
+rendershot b_intro
+pressuntil A action 4000
+wait 10
+rendershot b_action
+mp party
+mp foehp 1
+mp bmove 98
+pressuntil A field 12000
+wait 30
+mp orreresult
+mp money
+quit

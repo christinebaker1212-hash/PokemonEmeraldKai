@@ -30,6 +30,7 @@
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 const char *Maker_ReadDir(void);
 extern const struct Trainer gTrainersBase[];
+extern const u32 gTrainersBaseCount;
 
 static struct Trainer *sTable;   // the patched copy (NULL: the game's own)
 static u16 sEdited;
@@ -74,9 +75,11 @@ int Maker_SetTrainers(const char *text)
     struct Trainer *cur = NULL;
     struct TrainerMonItemCustomMoves party[PARTY_SIZE];
     int count = 0, partyCount = 0;
+    // (the whole table: JOHTO's, KANTO's, SINNOH's and ORRE's trainers come after TRAINERS_COUNT, and the game reads
+    // them through this copy too)
     if (!sTable)
-        sTable = malloc(sizeof(struct Trainer) * TRAINERS_COUNT);
-    memcpy(sTable, gTrainersBase, sizeof(struct Trainer) * TRAINERS_COUNT);
+        sTable = malloc(sizeof(struct Trainer) * gTrainersBaseCount);
+    memcpy(sTable, gTrainersBase, sizeof(struct Trainer) * gTrainersBaseCount);
     sEdited = 0;
 #define FINISH()                                                                                                       \
     if (cur && partyCount)                                                                                             \

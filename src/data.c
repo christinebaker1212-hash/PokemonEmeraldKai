@@ -338,6 +338,7 @@ const u32 gMonArtCounts2_Moe[3] = {ARRAY_COUNT(gMonFrontPicCoords_Moe), ARRAY_CO
 #undef gTrainers
 #define gTrainers gTrainersTable
 const struct Trainer *gTrainersTable = gTrainersBase;
+const u32 gTrainersBaseCount = ARRAY_COUNT(gTrainersBase);   // (every trainer id: HOENN's, JOHTO's / KANTO's, SINNOH's, ORRE's)
 #undef gSpeciesNames
 #undef gMoveNames
 #define gSpeciesNames gSpeciesNamesBase   // (Moemon Maker: the built tables; the game reads the pointers, include/data.h)

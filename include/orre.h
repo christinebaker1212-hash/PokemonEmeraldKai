@@ -50,4 +50,21 @@ const u8 *Orre_StrVar(u8 ctl);
 void Orre_ClearStrVars(void);
 const u8 *Orre_ExpandPlaceholder(u8 id, const u8 *src, u8 **dest);   // (string_util.c)
 
+// Colosseum's battles (src/orre/orre_battle.c): its battle, trainer and team tables from the pack, fought as Kai's
+// trainer battles through TRAINER_ORRE_A / _B
+struct Pokemon;
+#define ORRE_BATTLE_WON  1
+#define ORRE_BATTLE_LOST 2
+u16 Orre_BattleCount(void);
+bool8 Orre_PrepareBattle(u16 battle);          // the battle's opponents set (gTrainerBattleOpponent_A / _B, flags)
+bool8 Orre_IsTrainer(u16 trainerId);
+const u8 *Orre_ClassName(u16 trainerId);       // (battle_message.c)
+u8 Orre_Party(struct Pokemon *party, u16 trainerId, bool8 firstTrainer);   // (battle_main.c CreateNPCTrainerParty)
+u32 Orre_Money(u16 trainerId);                 // (battle_script_commands.c)
+bool8 Orre_BattleLossWhitesOut(void);
+void Orre_BattleEnded(bool8 won);              // (battle_setup.c)
+u8 Orre_BattleResult(void);                    // ORRE_BATTLE_WON / _LOST
+void Orre_StartBattle(void);                   // (special) battle VAR_0x8004, its foe's picture VAR_0x8005's person
+void Orre_BattleResultToVar(void);             // (special) VAR_RESULT = the last battle's result
+
 #endif

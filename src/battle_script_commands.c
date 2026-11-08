@@ -1,4 +1,5 @@
 #include "global.h"
+#include "orre.h"   // Moemon Kai: ORRE's battles
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 bool8 MP_StadiumClause_Blocks(u8 battler, u8 moveEffect);   // Moemon Kai: mp_stadium_cup.c
 bool8 MP_StadiumClause_SelfKo(void);
@@ -6175,6 +6176,10 @@ static u32 GetTrainerMoneyToGive(u16 trainerId)
     if (trainerId == TRAINER_SECRET_BASE)
     {
         moneyReward = 20 * gBattleResources->secretBase->party.levels[0] * gBattleStruct->moneyMultiplier;
+    }
+    else if (Orre_IsTrainer(trainerId))
+    {
+        moneyReward = Orre_Money(trainerId);   // Moemon Kai: Colosseum's prize (src/orre/orre_battle.c)
     }
     else
     {

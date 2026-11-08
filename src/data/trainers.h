@@ -10270,4 +10270,9 @@ const struct Trainer gTrainers[] = {
     KAI_SAGE(TRAINER_JOHTO_SAGE_KOJI, "KOJI", sParty_JohtoSageKoji)
 #undef KAI_SAGE
 #include "trainers_sinnoh.h"   // Moemon Kai: SINNOH's trainers (tools/sinnoh/gen_trainers.py)
+    // Moemon Kai: ORRE's two battle trainers, filled from Colosseum's tables before each battle (src/orre/orre_battle.c)
+    [TRAINER_ORRE_A] = {.trainerClass = TRAINER_CLASS_ORRE, .trainerPic = TRAINER_PIC_RS_BRENDAN, .trainerName = _("ORRE"),
+                        .doubleBattle = TRUE, .party = NO_ITEM_DEFAULT_MOVES(sParty_BrendanLinkPlaceholder)},
+    [TRAINER_ORRE_B] = {.trainerClass = TRAINER_CLASS_ORRE, .trainerPic = TRAINER_PIC_RS_BRENDAN, .trainerName = _("ORRE"),
+                        .doubleBattle = TRUE, .party = NO_ITEM_DEFAULT_MOVES(sParty_BrendanLinkPlaceholder)},
 };

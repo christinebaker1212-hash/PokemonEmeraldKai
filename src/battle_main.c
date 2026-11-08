@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "global.h"
+#include "orre.h"   // Moemon Kai: ORRE's battles
 #include "orre_people.h"
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "mp_region.h"
@@ -2301,6 +2302,8 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
 
     if (trainerNum == TRAINER_SECRET_BASE)
         return 0;
+    if (Orre_IsTrainer(trainerNum))
+        return Orre_Party(party, trainerNum, firstTrainer);   // Moemon Kai: Colosseum's team (src/orre/orre_battle.c)
     trainer = MP_Region_TrainerData(trainerNum);   // Moemon Kai: JOHTO / KANTO teams before Gen 4 (mp_region.c)
 
     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER

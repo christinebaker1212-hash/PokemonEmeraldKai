@@ -69,4 +69,5 @@ const u8 gTrainerClassNames[][13] = {
     [TRAINER_CLASS_RS_PROTAG] = _("{PKMN} TRAINER"),
     QZ_TRAINER_CLASS_NAMES   // Moemon Kai: Johto / Kanto
     SINNOH_TRAINER_CLASS_NAMES   // Moemon Kai: SINNOH
+    [TRAINER_CLASS_ORRE] = _("ORRE"),   // Moemon Kai: ORRE's (each battle's own class name: src/orre/orre_battle.c)
 };
