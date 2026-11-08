@@ -86,7 +86,9 @@ static bool8 Load(void)
     if (sTried)
         return sData != NULL;
     sTried = TRUE;
-    if ((sRel = OrreData_Read("common/common_rel.rel", &size)) == NULL || size < 0x40)
+    if ((sRel = OrreData_Read("common/common_rel.rel", &size)) == NULL)
+        return sTried = FALSE;   // (no data pack yet: looked for again next time: OrreData_Read keeps the pace)
+    if (size < 0x40)
         return FALSE;
     st = Be32(sRel + 0x10);
     if (Be32(sRel + 0x0C) < 5 || st + 8 * 5 > size)
@@ -289,6 +291,7 @@ bool8 Orre_PrepareBattle(u16 battle)
 {
     const u8 *b = Rec(BATTLES, BATTLE_COUNT, BATTLE_SIZE, battle);
     u8 perSide, i, n = 0;
+    bool8 doubles;
     u16 foes[2] = {0, 0};
     if (b == NULL)
     {
@@ -301,13 +304,31 @@ bool8 Orre_PrepareBattle(u16 battle)
             foes[n++] = Be16(b + 0x18 + 8 * i);
     if (n == 0)
         return FALSE;
-    // (ORRE's battles are Doubles, as Colosseum's are: the user's decision; a single POKéMON against them stands alone)
+    // (ORRE's battles are Doubles, as Colosseum's are: the user's decision. With only one POKéMON able to fight the
+    // player can't fill both places (the engine would send the same one out twice): a Single Battle then, the second
+    // trainer's team after the first's)
+    {
+        u8 able = 0;
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
+             && GetMonData(&gPlayerParty[i], MON_DATA_HP) != 0)
+                able++;
+        doubles = able >= 2;
+    }
     for (i = 0; i < n; i++)
-        SetTrainer(i, foes[i], TRUE);
+        SetTrainer(i, foes[i], doubles);
+    if (!doubles && n > 1)
+    {
+        for (i = 0; i < sTeamCount[1] && sTeamCount[0] < PARTY_SIZE; i++)
+            sTeam[0][sTeamCount[0]++] = sTeam[1][i];
+        if (Slot(TRAINER_ORRE_A) != NULL)
+            Slot(TRAINER_ORRE_A)->partySize = sTeamCount[0];
+        n = 1;
+    }
     sBattle = battle;
     gTrainerBattleOpponent_A = TRAINER_ORRE_A;
     gTrainerBattleOpponent_B = n > 1 ? TRAINER_ORRE_B : 0;
-    gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | (n > 1 ? BATTLE_TYPE_TWO_OPPONENTS : 0);
+    gBattleTypeFlags = BATTLE_TYPE_TRAINER | (doubles ? BATTLE_TYPE_DOUBLE : 0) | (n > 1 ? BATTLE_TYPE_TWO_OPPONENTS : 0);
     MPNet_Log("orre: battle %d (kind %d, field %d): %d opponent%s, a loss %s", battle, b[0], Be16(b + 4), n,
               n == 1 ? "" : "s", b[2] ? "whites out" : "goes on");
     return TRUE;

@@ -1,6 +1,7 @@
 // Moemon Kai: ORRE's data pack (orre/orre_data.pak, tools/orre/build_pack.py): "ORDT" u32 version, u32 files, each
 // char name[48], u32 offset, u32 bytes, u32 deflated bytes (0: stored); offsets from the data start
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 #include "orre_data.h"
@@ -42,11 +43,15 @@ static int Open(void)
     FILE *f;
     uint8_t head[12], *table;
     uint32_t i;
+    static time_t sLast;
     if (sPak.e)
         return 1;
-    if (sPak.tried)
+    // (not there or not readable: looked for again, every few seconds at most: a pack put there while the game runs,
+    // the boat's download, is read then)
+    if (sPak.tried && time(NULL) - sLast < 3)
         return 0;
     sPak.tried = 1;
+    sLast = time(NULL);
     if ((f = fopen(OrreData_Path(), "rb")) == NULL)
     {
         printf("[orre] no data pack at %s\n", sPak.path);

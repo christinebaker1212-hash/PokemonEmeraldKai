@@ -6,6 +6,7 @@
 // Colosseum control (PLACEHOLDER_ID_ORRE_VAR + its id: tools/orre/msg.py CONTROLS), set as Colosseum's scripts set
 // them (Orre_SetStrVar). Never ORRE's words written here: only "Message missing" when a line isn't in the pack.
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
@@ -74,8 +75,14 @@ static void Load(void)
 
 u32 Orre_TextCount(void)
 {
-    if (!sTried)
+    static time_t sLast;
+    // (not there or not readable: looked for again every few seconds at most, so a pack put there while the game runs
+    // is read then: "Message missing" never stays for the session)
+    if (sText == NULL && (!sTried || time(NULL) - sLast >= 3))
+    {
+        sLast = time(NULL);
         Load();
+    }
     return sText ? Get32(8) : 0;
 }
 

@@ -31,6 +31,7 @@ void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
 extern float gO3dSpriteDepth[];
 extern s16 gO3dSpriteFeet[];
 void O3D_NoteOam(u16 spriteId, u16 first, u16 end);
+u16 O3D_SpriteScale(u16 spriteId);   // under a shot: how big the sprite is where it stands (Q8; 0: as drawn)
 void O3D_CommitOam(void);
 // ORRE's tiles carry their behavior in their metatile id (O3D_METATILE_BEHAVIOR + behavior: src/orre/o3d.c)
 #define O3D_METATILE_BEHAVIOR 0x300

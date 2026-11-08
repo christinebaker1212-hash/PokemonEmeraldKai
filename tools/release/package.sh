@@ -3,7 +3,7 @@
 #   windows: needs pokeemerald64.exe (make winwsl) and SDL2.dll (SDL2_DLL, default ./SDL2/x86_64-w64-mingw32/bin/SDL2.dll)
 #   linux:   needs pokeemerald64 (make linux)
 # Writes OUTDIR/MoemonEmeraldKaiCoop-<platform>.zip: one folder, MoemonEmeraldKaiCoop/, with the game, the
-# player docs, the VS cabinet's mugen/ folder, custom music (music/), SINNOH's 3D pack (sinnoh/), the standalone server and moemon_release.txt (the updater only runs in a folder that has it).
+# player docs, the VS cabinet's mugen/ folder, custom music (music/), SINNOH's 3D pack (sinnoh/), ORRE's packs (orre/), the standalone server and moemon_release.txt (the updater only runs in a folder that has it).
 set -e
 cd "$(dirname "$0")/../.."
 PLAT=${1:?usage: package.sh windows|linux OUTDIR}
@@ -63,6 +63,12 @@ fi
 if [ -f sinnoh/platinum_gfx.pak ]; then   # (SINNOH's people as Platinum draws them, tools/sinnoh/build_gfx.py)
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum_gfx.pak "$P/sinnoh/"
+fi
+# ORRE's packs (tools/orre/make_pack.sh rips them from the disc; the release runs it first): in the game's own zip, so
+# every update replaces them with the game (docs/ORRE_DECISIONS.md)
+if [ -f orre/orre3d.pak ] && [ -f orre/orre_data.pak ] && [ -f orre/orre_text.pak ]; then
+    mkdir -p "$P/orre"
+    cp orre/orre3d.pak orre/orre_data.pak orre/orre_text.pak "$P/orre/"
 fi
 # POKeMON STADIUM's announcer voices (tools/stadium/mort/make_pack.sh, from the user's ROM; the release runs it first)
 for v in announcer.s1 announcer_jp.s1; do   # (English, Japanese)

@@ -9,9 +9,9 @@ rules, and what each tool does. This file is where things stand, what a new sess
   the maps in the game) and orre/orre_data.pak (text, collision, scripts, floor data, cameras, map tables, character
   models). Never committed (orre/ is ignored).
 - **Shipping: on as soon as the secret is there** (the user, 2026-11-07: "Let's go ahead and ship it"). The release
-  step "ORRE's packs" makes MoemonOrre.zip (78 MB) and an update.txt `orre` line once the `ORRE_DISC_URL` repository
-  secret is set (the disc's link below); the game fetches the packs at launch in the background (updater.c
-  OrrePreWorker) and the boat checks them before sailing (src/orre/orre_ferry.c; ORRE_DECISIONS "As their own zip").
+  step "ORRE's packs" rips them at every release once the `ORRE_DISC_URL` repository secret is set (the disc's link
+  below) and package.sh puts them in orre/ in the game's own zips, replaced with every update; the boat checks them
+  before sailing (src/orre/orre_ferry.c; ORRE_DECISIONS "In the game's own zip, replaced with every update").
 - **Engine: ORRE's own**, src/orre/o3d.c (+ gx_tex.c, orre_maps.h, include/o3d.h), a copy of SINNOH's that goes its
   own way. Never put ORRE code in src/sinnoh/ or s3d.h (the user, 2026-11-04).
 - **Every map of Orre walks, with every door** (2026-11-07, the user: "the baseline is that all maps will be able to
@@ -250,6 +250,10 @@ The older notes per part:
 - Seen, not yet looked into: PHENAC's mart floor draws as blue speckles (a texture of that room's model).
 
 ## Colosseum's cameras (src/orre/o3d_cam.c, 2026-11-08)
+- **People under a shot stand in the world** (the user's playthrough, 2026-11-08: "Billboard them at the position their
+  respective models would be"): o3d.c O3D_PlaceSprite projects each person through the shot's camera, hides one behind
+  it, and scales it by its depth against the field camera's (O3D_SpriteScale, applied in mp_bigsprite.c
+  MP_BigSprite_NoteScale). Scenario orre_camera.
 - **A shot** (.cam, in orre_data.pak as the disc's bytes; resource ids in index/ids.txt) is an HSD scene: root
   "scene_data" = SceneDesc {model sets, **the camera set** (one, not a list), light sets, fog}; the camera set =
   {CObjDesc, CameraAnim list}. CObjDesc (perspective): class name, u16 flags, u16 projection, 8 u16 viewport and
@@ -379,10 +383,13 @@ The older notes per part:
   (ORRE_BATTLE_*; what the scripts' std103_battleGetResult will answer).
 - Debug: `mp orrebattle BATTLE [PERSON]`, `mp orreresult`; scenario orre_battle (WILLIE, battle 10: RIDER WILLIE, two
   ZIGZAGOON at Lv 24, the prize 240).
+- A player with one POKéMON able to fight gets a Single Battle (the two trainers' teams one after the other): a Double
+  would send that one out in both places (the user's playthrough, 2026-11-08). Scenario orre_battle_single (battle 17,
+  MIROR B.PEON TRUDLY: three POKéMON, a Shadow MAKUHITA among them).
 
 ## Colosseum's text (src/orre/orre_text.c, 2026-11-08)
 - **The pack**: orre/orre_text.pak, made by tools/orre/build_text.py from the unpacked disc (make_pack.sh runs it;
-  package_orre.sh ships it in MoemonOrre.zip beside the other two; never committed). Every .msg file plus common_rel's
+  package.sh ships it in the game's zips beside the other two; never committed). Every .msg file plus common_rel's
   own block (place, item, move and POKeMON names): 8,229 lines. Colosseum's message ids are **one numbering across its
   files** (6,726 ids; an id in several files is the same line copied into each module's archive; the eight that differ
   are menu copies and the developers' move viewer, which goes last), so the pack is one table by id.

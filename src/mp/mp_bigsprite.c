@@ -4,6 +4,7 @@
 // buffer to OAM, so the two always match (a frame whose OAM load is skipped keeps the old list too).
 #include <string.h>
 #include "global.h"
+#include "o3d.h"
 #include "main.h"
 #include "sprite.h"
 #include "mp_bigsprite.h"
@@ -79,8 +80,11 @@ void MP_BigSprite_NoteScale(struct Sprite *sprite, u16 first, u16 end)
 {
     s32 x0 = 0x7FFF, y0 = 0x7FFF, x1 = -0x7FFF, y1 = -0x7FFF, a, b, c, d;
     s16 feet;
-    u16 i;
-    if (sprite->mpScale == 0 || sprite->mpScale >= 256 || first >= end)
+    u16 i, scale = sprite->mpScale, o3d = O3D_SpriteScale(sprite - gSprites);
+    // (Moemon Kai: under a shot of ORRE's, as big as the shot sees it where it stands: src/orre/o3d.c)
+    if (o3d)
+        scale = scale ? (u16)((u32)scale * o3d / 256) : o3d;
+    if (scale == 0 || scale == 256 || (o3d == 0 && scale > 256) || first >= end)
         return;
     if (!sPendingAnyScale)
     {
@@ -117,7 +121,7 @@ void MP_BigSprite_NoteScale(struct Sprite *sprite, u16 first, u16 end)
     }
     for (i = first; i < end && i < OAM_ENTRY_COUNT; i++)
     {
-        sPendingScale[i].scale = sprite->mpScale;
+        sPendingScale[i].scale = scale;
         sPendingScale[i].ax = (x0 + x1) / 2;
         sPendingScale[i].ay = y1;
     }

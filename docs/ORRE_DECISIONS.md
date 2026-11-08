@@ -22,16 +22,18 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
   teams from GENERATION 4, added on top; missed ones met again later; the Garden opens the gauge too).
 - **The packs ship with the game** (the user: "completely rip the 3D models and text from the Colosseum ISO so that it
   can be bundled in a download, without requiring the ISO from the user"): players need no disc.
-- **As their own zip** (the user, 2026-11-04: "make it its own zip"): MoemonOrre.zip, like the DANCE machine's songs,
-  not in the game's own zip. **Fetched at launch** (the user, 2026-11-07: "It should be pre-downloaded upon launch as
-  part of the updater. If it can't be downloaded, it skips until next time"): after the launch's update check
-  (src/platform/updater.c OrrePreWorker) the packs download and unpack in the background while the game runs; a
-  failure only waits for the next launch. The boat checks them before it sails (src/orre/orre_ferry.c Orre_CheckBoat):
-  still downloading, it shows the progress; missing, it offers the download; no release with them, it doesn't sail
-  (never an empty ORRE: docs/user_images/74.png). Test tools/test/orre_download_test.sh orre ("the boat", "at launch").
+- **In the game's own zip, replaced with every update** (the user, 2026-11-08: "Every time there's a new update, we
+  need to make sure stale or old data is replaced for Orre. Put Orre's files into the main updater, so it doesn't have
+  to be a weird background file download"). This replaces "As their own zip" (2026-11-04) and "Fetched at launch"
+  (2026-11-07): a pack fetched after the game had started left the text and the trainers' teams reading "Message
+  missing" until the next launch. The release rips them at every release (step "ORRE's packs") and
+  tools/release/package.sh puts them in orre/ in both game zips; the updater replaces them with the game. The game's
+  pack readers still look again (every 3 seconds at most) while a pack is missing (orre_data.c, orre_text.c), and the
+  boat still checks them before it sails (src/orre/orre_ferry.c Orre_CheckBoat: never an empty ORRE,
+  docs/user_images/74.png). Test tools/test/orre_download_test.sh orre ("the boat", "not fetched at launch").
 - **Shipped early** (the user, 2026-11-07, after the boat landed in an empty ORRE without the packs: "Let's go ahead
   and ship it. My players won't visit until it's ready"): this replaces "shipping waits for a complete ORRE"; the
-  release ships MoemonOrre.zip once the user adds the `ORRE_DISC_URL` repository secret (a link to the disc).
+  release ships the packs once the user adds the `ORRE_DISC_URL` repository secret (a link to the disc).
 - **Music: Colosseum's own, converted** (the user, 2026-11-07: "The music cannot be found online, and thus, must be
   converted"), from the disc's sound data into .kaisong songs; never a placeholder: a map without its song yet is
   silent ("Placeholder music - none").
@@ -91,13 +93,11 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
 
 ## Rules to keep
 - The disc image is never committed, and neither are the packs (orre/ is ignored): tools/orre/make_pack.sh builds
-  them. The release (step "ORRE's packs") puts them in MoemonOrre.zip (tools/release/package_orre.sh) with an
-  update.txt line "orre <tag> <zip> <bytes> <sha256> <id>"; the id is a hash of tools/orre/, so while those tools
-  stay the same the last release's line is kept and the disc isn't fetched at all. When they change, it rips them
-  from the disc whose link is the `ORRE_DISC_URL` repository secret (a Google Drive share link works); without the
-  secret the last release's packs stay (a warning).
-- The game: src/platform/updater.c Updater_Orre* (Check / Download / Cancel / State / Root: the songs' code, one
-  `struct Extra` each) unpacks it into orre/ next to the exe, the id in orre/orre_version.txt. Debug commands
+  them. The release (step "ORRE's packs") rips them at every release from the disc whose link is the `ORRE_DISC_URL`
+  repository secret (a Google Drive share link works) and package.sh ships them in the game's zips; without the
+  secret the release has none (a warning).
+- The game: the updater replaces orre/ with the rest of the game. src/platform/updater.c Updater_Orre* (Check /
+  Download / Cancel / State / Root: the songs' code) stays only for the boat's check when a folder has no packs. Debug commands
   `mp orrecheck`, `mp orredownload`, `mp orrestate`; test tools/test/orre_download_test.sh [ORRE_DIR].
 - Only the disc the decomp matches: make_pack.sh checks main.dol's SHA-1 (870e8b96...).
 - Saves never change layout: Orre's state (heart gauges, Shadow flags) goes in a sidecar.
@@ -189,4 +189,4 @@ Colosseum's collision. Test: scenario `orre_outskirt_stand` (needs orre/ from ma
 4. Words and scripts: the map scripts (.scd, the GS VM: the decomp's gs_vm.c) converted to Kai's, like SINNOH's.
 5. Snagging and Shadow Pokémon, in Orre only.
 - The download screen in the game when ORRE's packs are missing (as the DANCE machine's StateNoSongs), shown where a
-  player first travels to ORRE. MoemonOrre.zip is 78 MB.
+  player first travels to ORRE. The packs are 78 MB zipped.

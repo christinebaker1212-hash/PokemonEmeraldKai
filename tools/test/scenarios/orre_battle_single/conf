@@ -1,0 +1,9 @@
+# A story trainer's own team, its Shadow POKéMON among it (src/orre/orre_battle.c, orre_shadow.c), against a player with
+# one POKéMON: Colosseum's battle 17 (its trainer 15: three POKéMON, the third a Shadow MAKUHITA at Lv 30) as a Single
+# Battle (one POKéMON can't fill a Double's two places: never sent out twice). Shots b_*.png.
+MODE=1
+TMO=200
+WARP=45,0,33,40
+ENV_A="MOEMON_ORRE_SCRIPTS=0 MOEMON_DEBUG_PARTY=280:50"
+EXPECT_A=("(Colosseum's 15): 3 POKeMON, single" "orre: battle 17 (kind 2, field" "shadow: Shadow")
+UNEXPECT_A=("[crash]" "TIMEOUT" "no battle 17" ", double")

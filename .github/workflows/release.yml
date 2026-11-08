@@ -131,39 +131,20 @@ jobs:
           cat dist/songs.txt
 
       # ORRE's packs (docs/ORRE_DECISIONS.md): Pokemon Colosseum's maps, text, collision, scripts and character models,
-      # their own zip (MoemonOrre.zip), which the game downloads when a player first goes to ORRE. Its id comes from the
-      # ripping tools (tools/orre): when they are the last release's, that release's line is kept and the disc isn't
-      # even fetched. Otherwise the packs are ripped from the disc whose link is the ORRE_DISC_URL secret (never in this
-      # repository); without the secret the release has no ORRE line (and the last one's zip stays where it is).
+      # ripped from the disc whose link is the ORRE_DISC_URL secret (never in this repository) into orre/ at every
+      # release, and shipped inside the game's own zips (tools/release/package.sh), so every update replaces them with
+      # the game (the user, 2026-11-08: no separate download). Without the secret the release has no ORRE packs.
       - name: ORRE's packs
         if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
           ORRE_DISC_URL: ${{ secrets.ORRE_DISC_URL }}
         run: |
-          TAG=${{ steps.ver.outputs.tag }}
-          mkdir -p dist
-          ID=$(tools/release/package_orre.sh --id)
-          PREV=""
-          if gh release download --pattern update.txt --dir "$RUNNER_TEMP/prev_orre" > /dev/null 2>&1; then
-            PREV=$(grep '^orre ' "$RUNNER_TEMP/prev_orre/update.txt" || true)
-          fi
-          if [ -n "$PREV" ] && [ "$(echo "$PREV" | awk '{print $6}')" = "$ID" ]; then
-            echo "ORRE's packs are the same as on $(echo "$PREV" | awk '{print $2}'): not ripped or uploaded again"
-            echo "$PREV" > dist/orre.txt
-          elif [ -n "$ORRE_DISC_URL" ]; then
+          if [ -n "$ORRE_DISC_URL" ]; then
             ORRE_WORK="$RUNNER_TEMP/orre_work" tools/orre/make_pack.sh
             rm -rf "$RUNNER_TEMP/orre_work"
-            tools/release/package_orre.sh "$RUNNER_TEMP/orre_zip"
-            mv "$RUNNER_TEMP/orre_zip/MoemonOrre.zip" dist/
-            echo "orre $TAG MoemonOrre.zip $(stat -c %s dist/MoemonOrre.zip) $(sha256sum dist/MoemonOrre.zip | cut -d' ' -f1) $ID" > dist/orre.txt
-          elif [ -n "$PREV" ]; then
-            echo "::warning::the ORRE tools changed but there is no ORRE_DISC_URL secret: the last release's packs stay"
-            echo "$PREV" > dist/orre.txt
           else
-            echo "no ORRE_DISC_URL secret: no ORRE packs yet"
+            echo "::warning::no ORRE_DISC_URL secret: this release has no ORRE packs"
           fi
-          [ -f dist/orre.txt ] && cat dist/orre.txt || true
 
       # The Moemon Companion app (android/, docs/PHONE_LINK.md): the game's art exported by the Linux build, then the
       # APK signed with the release key from the repository's secrets (MOEMON_APK_KEYSTORE_B64: the keystore in base64,
@@ -248,7 +229,6 @@ jobs:
           if [ -n "$TITLE" ]; then NAME="$NAME: $TITLE"; fi
           SONGS=""
           [ -f dist/MoemonDanceSongs.zip ] && SONGS=dist/MoemonDanceSongs.zip
-          [ -f dist/MoemonOrre.zip ] && SONGS="$SONGS dist/MoemonOrre.zip"
           [ -f dist/MoemonCompanion.apk ] && SONGS="$SONGS dist/MoemonCompanion.apk"
           gh release create "$TAG" dist/MoemonEmeraldKaiCoop-windows.zip dist/MoemonEmeraldKaiCoop-linux.zip dist/update.txt $SONGS \
             --target "$GITHUB_SHA" --title "$NAME" --notes-file "$NOTES" --latest

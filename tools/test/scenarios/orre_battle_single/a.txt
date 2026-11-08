@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 30
+mp orrebattle 17
+wait 330
+rendershot b_intro
+pressuntil A action 4000
+wait 10
+rendershot b_action
+mp party
+mp enemyparty
+quit

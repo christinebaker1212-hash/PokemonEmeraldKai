@@ -20,7 +20,6 @@ OUT=${1:?usage: manifest.sh OUTDIR}
     # the DANCE machine's songs: a line the release workflow made (songs.txt: "songs <tag> <zip> <bytes> <sha256>
     # <id>", the tag of the release that has the zip: the last one whose songs were different)
     if [ -f "$OUT/songs.txt" ]; then cat "$OUT/songs.txt"; fi
-    # ORRE's packs, the same way (orre.txt: "orre <tag> <zip> <bytes> <sha256> <id>")
-    if [ -f "$OUT/orre.txt" ]; then cat "$OUT/orre.txt"; fi
+    # (ORRE's packs are in the game's zips: package.sh)
 } > "$OUT/update.txt"
 cat "$OUT/update.txt"

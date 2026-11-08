@@ -3,7 +3,9 @@
 # against a local web server that plays the GitHub release. usage: tools/test/orre_download_test.sh [ORRE_DIR]
 #   (NOBUILD=1 skips make, OUT=dir; ORRE_DIR: real packs, from tools/orre/make_pack.sh; without them small stand-ins.)
 #   A game folder with no orre/: the release's MoemonOrre.zip is found, downloaded and unpacked next to the exe, byte
-#   for byte; a damaged download is refused; a game that already has those packs isn't offered them again.
+#   for byte; a damaged download is refused; a game that already has those packs isn't offered them again. Since
+#   1.176.0 ORRE's packs are in the game's own zip (tools/release/package.sh): the boat's download is the fallback
+#   for a game folder without them, and nothing is fetched at launch.
 #   Exit code = number of failed checks.
 cd "$(dirname "$0")/../.." || exit 99
 OUT=${OUT:-/tmp/moemon_orre_download_test}
@@ -129,23 +131,17 @@ SCRIPT
     check "downloaded" has "$G/log.txt" "orre: ORRE's packs downloaded: 1"
     check "sailed" has "$G/log.txt" "[test] where map 45.0 xy 33,40"
 fi
-# at launch (updater.c OrrePreWorker): a release folder with no orre/ and no game update waiting fetches ORRE's packs
-# in the background by itself; with the release unreachable it only logs it (next launch)
+# at launch: no download of its own (ORRE's packs come in the game's zip with every update: docs/ORRE_DECISIONS.md)
 echo "at launch"
 VER=$(grep -o 'MOEMON_VERSION "[0-9.]*"' include/mp_version.h | head -1 | cut -d'"' -f2)
 printf 'version %s\ntag v%s\nchannel main\norre v%s MoemonOrre.zip %s %s %s\n' "$VER" "$VER" "$VER" "$(stat -c %s "$Z")" \
     "$(sha256sum "$Z" | cut -d' ' -f1)" "$ID" > "$OUT/srv/update.txt"
-for case in launch offline; do
-    G="$OUT/$case"; mkdir -p "$G"; cp pokeemerald64 "$G/"; echo release > "$G/moemon_release.txt"
-    printf 'pressuntil A field 5000\nwait 1800\nquit\n' > "$G/a.txt"
-    URL="http://127.0.0.1:$PORT"; [ "$case" = offline ] && URL="http://127.0.0.1:1"
-    (cd "$G" && env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$G/a.txt" MOEMON_SHOTDIR="$G" \
-        MOEMON_DEBUG_QUICKSTART=1 MOEMON_SKIP_COOP_SETUP=1 MOEMON_COOP_CONFIG="$G/a.ini" MOEMON_SAVE="$G/a.sav" \
-        MOEMON_CONTROLS_CONFIG="$G/a_controls.ini" MOEMON_UPDATE_URL="$URL" \
-        timeout -k 10 300 ./pokeemerald64 > "$G/log.txt" 2>&1)
-done
-check "fetched at launch" has "$OUT/launch/log.txt" "orre: fetching ORRE's packs in the background"
-check "installed at launch" cmp -s "$OUT/launch/orre/orre3d.pak" "$SRC/orre3d.pak"
-check "offline: skipped" bash -c "! test -e '$OUT/offline/orre/orre3d.pak' && ! grep -q 'crash' '$OUT/offline/log.txt'"
+G="$OUT/launch"; mkdir -p "$G"; cp pokeemerald64 "$G/"; echo release > "$G/moemon_release.txt"
+printf 'pressuntil A field 5000\nwait 600\nquit\n' > "$G/a.txt"
+(cd "$G" && env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$G/a.txt" MOEMON_SHOTDIR="$G" \
+    MOEMON_DEBUG_QUICKSTART=1 MOEMON_SKIP_COOP_SETUP=1 MOEMON_COOP_CONFIG="$G/a.ini" MOEMON_SAVE="$G/a.sav" \
+    MOEMON_CONTROLS_CONFIG="$G/a_controls.ini" MOEMON_UPDATE_URL="http://127.0.0.1:$PORT" \
+    timeout -k 10 300 ./pokeemerald64 > "$G/log.txt" 2>&1)
+check "not fetched at launch" bash -c "! test -e '$G/orre/orre3d.pak' && ! grep -q 'crash' '$G/log.txt'"
 echo "$fails failed"
 exit $fails

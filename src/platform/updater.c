@@ -71,7 +71,6 @@ void Display_Present(void);
 // stb_image's raw deflate decoder (compiled in mp_avatar.c)
 char *stbi_zlib_decode_noheader_malloc(const char *buffer, int len, int *outlen);
 static int MakerPackWorker(void *arg);   // Moemon Maker: the published pack (below)
-static int OrrePreWorker(void *arg);     // Moemon Kai: ORRE's packs fetched at launch (below)
 
 unsigned char MP_ConfigAllowsTweaks(void);
 static int sWantDev;
@@ -1691,12 +1690,7 @@ int Updater_Run(int argc, char **argv)
     phase = SDL_AtomicGet(&U.phase);
     if (phase == PH_INSTALLED)
         return Relaunch(argc, argv);
-    if (!quit)
-    {
-        // Moemon Kai: ORRE's packs, fetched in the background while the game runs (OrrePreWorker)
-        SDL_Thread *orre = SDL_CreateThread(OrrePreWorker, "orre-pre", NULL);
-        (void)orre;
-    }
+    // (Moemon Kai: ORRE's packs come in the game's own zip, replaced with every update: docs/ORRE_DECISIONS.md)
     return quit;
 }
 
@@ -2332,25 +2326,3 @@ void Updater_OrreDownload(void) { ExtraDownload(&sOrre); }
 void Updater_OrreCancel(void) { SDL_AtomicSet(&sOrre.cancel, 1); }
 int Updater_OrreState(long *done, long *total, const char **error) { return ExtraState(&sOrre, done, total, error); }
 
-// Moemon Kai: ORRE's packs at launch (the user, 2026-11-07: "It should be pre-downloaded upon launch as part of the
-// updater. If it can't be downloaded, it skips until next time"): once the launch check has found no game update, the
-// latest release is asked for MoemonOrre.zip and, when this folder doesn't have those packs, they're downloaded and
-// unpacked in the background while the game runs (sOrre, as the DANCE machine's songs). A failure (no connection, a
-// damaged download, the game closed halfway) is only logged: the next launch tries again. The boat to ORRE
-// (src/orre/orre_ferry.c) shows the download's progress if a player gets there first.
-static int OrrePreWorker(void *arg)
-{
-    int st;
-    (void)arg;
-    ExtraCheck(&sOrre);
-    while ((st = SDL_AtomicGet(&sOrre.state)) == SONGS_CHECKING)
-        SDL_Delay(50);
-    if (st == SONGS_AVAILABLE)
-    {
-        Log("orre: fetching ORRE's packs in the background");
-        ExtraDownload(&sOrre);
-    }
-    else if (st == SONGS_FAILED)
-        Log("orre: ORRE's packs couldn't be checked (%s): next launch", sOrre.error);
-    return 0;
-}

@@ -146,7 +146,9 @@ static bool8 LoadData(void)
     if (sDataTried)
         return sData != NULL;
     sDataTried = TRUE;
-    if ((sRel = OrreData_Read("common/common_rel.rel", &size)) == NULL || size < 0x40)
+    if ((sRel = OrreData_Read("common/common_rel.rel", &size)) == NULL)
+        return sDataTried = FALSE;   // (no data pack yet: looked for again next time)
+    if (size < 0x40)
         return FALSE;
     st = Be32(sRel + 0x10);
     if (Be32(sRel + 0x0C) < 5 || st + 8 * 5 > size)

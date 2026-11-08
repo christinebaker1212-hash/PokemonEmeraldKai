@@ -61,7 +61,7 @@ static bool8 Load(void)
         return sOk;
     sTried = TRUE;
     if ((rel = OrreData_Read("common/common_rel.rel", &size)) == NULL)
-        return FALSE;
+        return sTried = FALSE;   // (no data pack yet: looked for again next time)
     sOk = Parse(rel, size, next);
     free(rel);
     if (sOk)

@@ -724,10 +724,21 @@ static bool8 Project(float x, float y, float z, float *sx, float *sy, float *dep
 static float sSpriteH[MAX_SPRITES];
 static u8 sSpriteHFrame[MAX_SPRITES];
 
+// While a shot plays, a field sprite stands in the scene as a card where its spot on the ground is, as big as the shot
+// sees it there (Q8, 0: as drawn: the field's own camera); one behind the shot's camera isn't drawn
+static u16 sSpriteScale[MAX_SPRITES];
+
+u16 O3D_SpriteScale(u16 spriteId)
+{
+    return sView.active && O3D_CamActive() && spriteId < MAX_SPRITES ? sSpriteScale[spriteId] : 0;
+}
+
 void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float *depth)
 {
     float sx, sy, d, h, near = sView.ty;
     float wx = sView.camX + x, wz = sView.camY + feetY - 8;
+    if (spriteId < MAX_SPRITES)
+        sSpriteScale[spriteId] = 0;
     if (!sView.active)
     {
         *outX = x;
@@ -745,10 +756,26 @@ void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
     }
     if (!Project(wx, h, wz, &sx, &sy, &d))
     {
+        if (O3D_CamActive())
+        {
+            // (behind a shot's camera: not in the picture at all, never left floating where the field had it)
+            *outX = -400;
+            *outY = -400;
+            *depth = 0.0f;
+            return;
+        }
         *outX = x;
         *outY = feetY;
         *depth = 0.0f;
         return;
+    }
+    if (O3D_CamActive() && spriteId < MAX_SPRITES)
+    {
+        // (the field's camera draws a sprite 1:1 at its own distance: a shot as much bigger or smaller as it's nearer
+        // or farther, against the field camera's focal length)
+        float field = (96.0f / tanf(HALF_FOV * 3.14159265f / 180.0f)) / CAM_DIST;
+        float s = (sView.focal / d) / field * 256.0f;
+        sSpriteScale[spriteId] = (u16)(s < 16.0f ? 16 : s > 2048.0f ? 2048 : s);
     }
     *outX = (s32)floorf(sx + 0.5f);
     *outY = (s32)floorf(sy + 0.5f) + 8;
