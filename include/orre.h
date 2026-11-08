@@ -84,6 +84,8 @@ void Orre_Npc_SetShown(u32 index, bool8 show);
 void Orre_Npc_SetPosition(u32 group, u32 index, float x, float z);
 void Orre_Npc_SetAngle(u32 group, u32 index, float degrees);
 void Orre_Npc_FaceOther(u32 group, u32 index, u32 tgroup, u32 tindex);
+void Orre_Npc_FacePoint(u32 group, u32 index, float x, float z);   // peopleTurnToPoint
+void Orre_Npc_SetSpeed(u32 group, u32 index, float speed);           // peopleSetWalkSpeed
 void Orre_Npc_MoveTo(u32 group, u32 index, float x, float z);
 void Orre_Npc_MoveToOther(u32 group, u32 index, u32 tgroup, u32 tindex);
 bool8 Orre_Npc_Done(u32 group, u32 index);

@@ -66,7 +66,14 @@ struct Npc
     u8 walkCount;        // its walk list (peopleReserveWalkList / AddWalkList: the tiles it walks through)
     bool8 walkLoop;      // ... gone round and round (peopleStartWalkList's loop)
     s16 walkX[8], walkY[8];
+    u8 speed;            // peopleSetWalkSpeed's, as Kai's steps (SPEED_*)
+    u8 pending, pendWait;   // a walk of PENDING steps (in path) waiting for its object (shown this frame: no slot yet)
+    s16 pendX, pendY;    // ... where it ends
 };
+
+// peopleSetWalkSpeed (Colosseum's 1.0 a walk, 2.0 a run) as Kai's step speeds (Step)
+enum { SPEED_NORMAL, SPEED_SLOW, SPEED_FAST, SPEED_FASTER };
+static u8 sHeroSpeed;
 
 static struct Npc sNpc[NPC_MAX];
 static u8 sCount;
@@ -121,6 +128,7 @@ static struct ObjectEvent *Object(const struct Npc *n)
 // keep their place and facing in their record, as the engine's own people do off screen
 #define NPC_RANGE_X 10
 #define NPC_RANGE_Y 8
+#define NPC_SCENE_RANGE 32
 
 static u32 Dist(const struct Npc *n)
 {
@@ -135,6 +143,9 @@ static bool8 InRange(const struct Npc *n)
 {
     s16 px = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET;
     s16 py = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET;
+    // (a scene's camera looks anywhere in the room: everyone it shows is there, as far as the slots go)
+    if (O3D_CamActive())
+        return abs(n->x - px) <= NPC_SCENE_RANGE && abs(n->y - py) <= NPC_SCENE_RANGE;
     return abs(n->x - px) <= NPC_RANGE_X && abs(n->y - py) <= NPC_RANGE_Y;
 }
 
@@ -205,6 +216,7 @@ void Orre_Npcs_RoomEntered(u16 room)
     sCount = 0;
     sRoom = room;
     sHeroWalking = FALSE;
+    sHeroSpeed = SPEED_NORMAL;
     sPartner.p = NULL;
     for (i = 0; i < ORRE_ROOM_PEOPLE_COUNT && sCount < NPC_MAX; i++)
     {
@@ -260,6 +272,7 @@ void Orre_Npcs_Clear(void)
     sCount = 0;
     sRoom = 0;
     sHeroWalking = FALSE;
+    sHeroSpeed = SPEED_NORMAL;
 }
 
 // ---- what the scripts do with them (orre_vm.c)
@@ -344,6 +357,29 @@ static bool8 Where(u32 group, u32 index, s16 *x, s16 *y)
     return TRUE;
 }
 
+// (Colosseum's speeds in its scripts: 0.1-6.0)
+
+static u8 Step(u8 speed, u32 dir)
+{
+    switch (speed)
+    {
+    case SPEED_SLOW: return GetWalkSlowMovementAction(dir);
+    case SPEED_FAST: return GetWalkFastMovementAction(dir);
+    case SPEED_FASTER: return GetWalkFasterMovementAction(dir);
+    default: return GetWalkNormalMovementAction(dir);
+    }
+}
+
+void Orre_Npc_SetSpeed(u32 group, u32 index, float speed)
+{
+    struct Npc *n;
+    u8 s = speed < 0.75f ? SPEED_SLOW : speed < 1.5f ? SPEED_NORMAL : speed < 2.75f ? SPEED_FAST : SPEED_FASTER;
+    if (group == 0 && index == NPC_HERO)
+        sHeroSpeed = s;
+    else if ((n = Of(index)) != NULL)
+        n->speed = s;
+}
+
 static u8 DirTo(s16 fx, s16 fy, s16 tx, s16 ty)
 {
     s16 dx = tx - fx, dy = ty - fy;
@@ -360,6 +396,14 @@ void Orre_Npc_FaceOther(u32 group, u32 index, u32 tgroup, u32 tindex)
         Face(group, index, DirTo(x, y, tx, ty));
 }
 
+// peopleTurnToPoint(group, index, x, y, z, seconds): faces Colosseum's point (x, z)
+void Orre_Npc_FacePoint(u32 group, u32 index, float px, float pz)
+{
+    s16 x, y, tx, ty;
+    if (Where(group, index, &x, &y) && O3D_ColoToTile(px, pz, &tx, &ty) && (x != tx || y != ty))
+        Face(group, index, DirTo(x, y, tx, ty));
+}
+
 // Someone's scripted walk is under way (the player's too)
 static bool8 AnyWalking(void)
 {
@@ -373,6 +417,8 @@ static bool8 AnyWalking(void)
 }
 
 // Walk to tile (TX, TY): along x, then along y, stopping a tile short when STOPSHORT (walking up to someone)
+static void StartPath(struct Npc *n, u32 index, u8 localId, u8 *path, u8 k, s16 tx, s16 ty);
+
 static void WalkTo(u32 group, u32 index, s16 tx, s16 ty, bool8 stopShort)
 {
     s16 x, y;
@@ -402,18 +448,31 @@ static void WalkTo(u32 group, u32 index, s16 tx, s16 ty, bool8 stopShort)
     }
     while (x != tx && k < NPC_PATH_MAX - 1)
     {
-        path[k++] = GetWalkNormalMovementAction(tx > x ? DIR_EAST : DIR_WEST);
+        path[k++] = Step(n ? n->speed : sHeroSpeed, tx > x ? DIR_EAST : DIR_WEST);
         x += tx > x ? 1 : -1;
     }
     while (y != ty && k < NPC_PATH_MAX - 1)
     {
-        path[k++] = GetWalkNormalMovementAction(ty > y ? DIR_SOUTH : DIR_NORTH);
+        path[k++] = Step(n ? n->speed : sHeroSpeed, ty > y ? DIR_SOUTH : DIR_NORTH);
         y += ty > y ? 1 : -1;
     }
     path[k] = MOVEMENT_ACTION_STEP_END;
     MPNet_Log("orre npcs: %u walks %u steps to %d,%d", index, k, tx, ty);
+    StartPath(n, index, localId, path, k, tx, ty);
+}
+
+// Kai's scripted movement of PATH (K steps, ending at TX, TY) for N (NULL: the player)
+static void StartPath(struct Npc *n, u32 index, u8 localId, u8 *path, u8 k, s16 tx, s16 ty)
+{
     if (k == 0)
         return;
+    if (n && n->shown && Object(n) == NULL && path == n->path)
+    {
+        // (just shown, its object not made yet: the walk starts with it, from where it stands: Orre_Npcs_Frame)
+        n->pending = k, n->pendWait = 0, n->pendX = tx, n->pendY = ty;
+        n->walking = TRUE;
+        return;
+    }
     if (ScriptMovement_StartObjectMovementScript(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup,
                                                  path)
      && !(!AnyWalking() && (ScriptMovement_UnfreezeObjectEvents(),   // (stale walks of people since parked: cleared)
@@ -468,6 +527,8 @@ bool8 Orre_Npc_Done(u32 group, u32 index)
     {
         if ((n = Of(index)) == NULL || !n->walking)
             return TRUE;
+        if (n->pending)
+            return FALSE;   // (its walk hasn't started yet)
         localId = LocalId(n);
     }
     if (!ScriptMovement_IsObjectMovementFinished(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup))
@@ -593,29 +654,30 @@ void Orre_Npc_WalkListAdd(u32 index, float x, float z)
         n->walkX[n->walkCount] = tx, n->walkY[n->walkCount] = ty, n->walkCount++;
 }
 
-// Its walk through the list's points as one path (each leg along x, then along y)
-static void WalkList(struct Npc *n)
+// Its walk through the list's points as one path (each leg along x, then along y); hidden, or not yet on the map (its
+// slot comes as the player nears it), it's simply at the list's end (as WalkTo)
+static void WalkList(struct Npc *n, u32 index)
 {
     s16 x, y;
     u32 i, k = 0;
-    if (!n->shown || !Object(n) || n->walkCount == 0)
+    if (n->walkCount == 0 || !Where(1, index, &x, &y))
         return;
-    x = Object(n)->currentCoords.x - MAP_OFFSET, y = Object(n)->currentCoords.y - MAP_OFFSET;
+    if (!n->shown)
+    {
+        n->x = n->walkX[n->walkCount - 1], n->y = n->walkY[n->walkCount - 1];
+        return;
+    }
     for (i = 0; i < n->walkCount && k < NPC_PATH_MAX - 1; i++)
     {
         s16 tx = n->walkX[i], ty = n->walkY[i];
         while (x != tx && k < NPC_PATH_MAX - 1)
-            n->path[k++] = GetWalkNormalMovementAction(tx > x ? DIR_EAST : DIR_WEST), x += tx > x ? 1 : -1;
+            n->path[k++] = Step(n->speed, tx > x ? DIR_EAST : DIR_WEST), x += tx > x ? 1 : -1;
         while (y != ty && k < NPC_PATH_MAX - 1)
-            n->path[k++] = GetWalkNormalMovementAction(ty > y ? DIR_SOUTH : DIR_NORTH), y += ty > y ? 1 : -1;
+            n->path[k++] = Step(n->speed, ty > y ? DIR_SOUTH : DIR_NORTH), y += ty > y ? 1 : -1;
     }
     n->path[k] = MOVEMENT_ACTION_STEP_END;
-    if (k == 0)
-        return;
-    ScriptMovement_StartObjectMovementScript(LocalId(n), gSaveBlock1Ptr->location.mapNum,
-                                             gSaveBlock1Ptr->location.mapGroup, n->path);
-    n->walking = TRUE;
-    n->x = x, n->y = y;
+    MPNet_Log("orre npcs: %u walks %u steps through %u points to %d,%d", index, k, n->walkCount, x, y);
+    StartPath(n, index, LocalId(n), n->path, k, x, y);
 }
 
 void Orre_Npc_WalkListStart(u32 index, bool8 loop)
@@ -624,7 +686,7 @@ void Orre_Npc_WalkListStart(u32 index, bool8 loop)
     if (n == NULL)
         return;
     n->walkLoop = loop;
-    WalkList(n);
+    WalkList(n, index);
 }
 
 // Every frame (orre_vm.c): looped walks go round again; a walk of Kai's scripted movement ends when it's over
@@ -645,6 +707,19 @@ void Orre_Npcs_Frame(void)
         if (!n->shown)
             continue;
         o = Object(n);
+        if (n->pending && o != NULL)
+        {
+            u8 k = n->pending;   // (its object is here: the walk it was given starts)
+            n->pending = 0;
+            StartPath(n, n->p->index, LocalId(n), n->path, k, n->pendX, n->pendY);
+            continue;
+        }
+        if (n->pending && ++n->pendWait > 30)
+        {
+            n->pending = 0, n->walking = FALSE;   // (no object for it: it's simply there)
+            n->x = n->pendX, n->y = n->pendY;
+            MPNet_Log("orre npcs: %u put at %d,%d (no slot to walk in)", n->p->index, n->x, n->y);
+        }
         if (o != NULL && !n->walking && !n->talkTurned && !InRange(n))
         {
             // (far off: its slot for someone nearer; it keeps its place and facing)
@@ -657,7 +732,8 @@ void Orre_Npcs_Frame(void)
         {
             // (near, or the field came back from a battle or a screen without it: there again; no slot free, the
             // farthest one with one gives up its own)
-            n->walking = FALSE;
+            if (!n->pending)
+                n->walking = FALSE;
             if (!Spawn(n))
             {
                 u32 j, far = sCount;
@@ -682,7 +758,7 @@ void Orre_Npcs_Frame(void)
                                                     gSaveBlock1Ptr->location.mapGroup))
         {
             n->walking = FALSE;
-            WalkList(n);
+            WalkList(n, n->p->index);
         }
     }
 }

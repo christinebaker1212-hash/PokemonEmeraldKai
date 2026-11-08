@@ -628,6 +628,8 @@ static float sDepth[H][W];
 static s8 sIds[H][W];
 static s32 sFadeA[3], sFadeB[3];
 
+static float sFieldEye[3], sFieldFwd[3];   // the field camera this frame (O3D_FieldView)
+
 static void FindCamera(void)
 {
     u8 tileX, tileY;
@@ -702,7 +704,27 @@ static void SetupView(void)
     sView.right[0] = 1.0f, sView.right[1] = 0.0f, sView.right[2] = 0.0f;
     sView.up[0] = 0.0f, sView.up[1] = cp, sView.up[2] = -sp;
     sView.focal = 96.0f / tanf(HALF_FOV * 3.14159265f / 180.0f);
+    memcpy(sFieldEye, sView.eye, sizeof(sFieldEye));
+    memcpy(sFieldFwd, sView.fwd, sizeof(sFieldFwd));
     ShotView();
+}
+
+// The field camera (as SetupView made it this frame, before a shot's) in Colosseum's units: the scene's own camera
+// starts from it and goes back to it (o3d_cam.c sFree)
+void O3D_FieldView(float eye[3], float rot[3])
+{
+    const OMap *g = Drawn();
+    float S = g ? 16.0f / g->tile : 1.0f;
+    eye[0] = sFieldEye[0] / S + (g ? g->x0 : 0), eye[1] = sFieldEye[1] / S, eye[2] = sFieldEye[2] / S + (g ? g->z0 : 0);
+    rot[0] = asinf(sFieldFwd[1]);
+    rot[1] = atan2f(-sFieldFwd[0], -sFieldFwd[2]);
+    rot[2] = 0.0f;
+}
+
+float O3D_FieldFov(void)
+{
+    // (SetupView's focal: 96 pixels at HALF_FOV, over the 80 lines above the centre)
+    return 2.0f * atanf(80.0f * tanf(HALF_FOV * 3.14159265f / 180.0f) / 96.0f) * 180.0f / 3.14159265f;
 }
 
 // World -> screen x, y and depth (FALSE: behind the camera)
@@ -754,7 +776,9 @@ void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         sSpriteH[spriteId] = h;
         sSpriteHFrame[spriteId] = sView.frame;
     }
-    if (!Project(wx, h, wz, &sx, &sy, &d))
+    // (a scene's camera: one nearer than a tile and a half is past its near edge, as Colosseum's models get cut off,
+    // never a giant card over the picture)
+    if (!Project(wx, h, wz, &sx, &sy, &d) || (O3D_CamActive() && d < 24.0f))
     {
         if (O3D_CamActive())
         {

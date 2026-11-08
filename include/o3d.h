@@ -12,6 +12,15 @@ void O3D_ShopPicture(bool8 on, s16 dx, s16 dy);
 bool8 O3D_CamPlay(const char *name, float frame, bool8 loop);
 bool8 O3D_CamPlayId(u32 id, float frame, bool8 loop);
 void O3D_CamStop(void);
+void O3D_CamStopShot(void);                  // a shot ends, the scene's own camera stays
+// The scene's own camera (o3d_cam.c sFree: GSscene_SetMode(3)): its eye / rotation set or moved over SECONDS
+void O3D_FreeMode(bool8 on);
+void O3D_FreeSet(u8 which, const float v[3], float seconds);   // WHICH 0 the eye, 1 the rotation (radians X Y Z)
+void O3D_FreeFov(float fov);
+void O3D_FreeReturn(float seconds);           // cameraReturn: back to the field's camera
+bool8 O3D_FreeMoving(void);
+void O3D_FieldView(float eye[3], float rot[3]);
+float O3D_FieldFov(void);                    // ... its vertical field of view (degrees)   // the field camera's eye and rotation in Colosseum's units (o3d.c)
 bool8 O3D_CamActive(void);
 bool8 O3D_CamDone(void);
 bool8 O3D_CamKeep(void);

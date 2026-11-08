@@ -250,6 +250,27 @@ The older notes per part:
 - Seen, not yet looked into: PHENAC's mart floor draws as blue speckles (a texture of that room's model).
 
 ## Colosseum's cameras (src/orre/o3d_cam.c, 2026-11-08)
+- **The scene's own camera** (the user's playthrough, 2026-11-08: scenes "snap" where they should fade and change
+  angles): GSscene_SetMode(3) is Colosseum's free camera (the decomp's camera.c, mode 3): std040_cameraSetPosition
+  (the eye), cameraSetRotation (radians: X up and down, Y round, Z the roll; the look along -Z turned Z, X, then Y, as
+  camera.c's _cameraLookAtUpdate inverts it: rot.y = atan2(eye - target x, z)), cameraMovePositionXYZ /
+  cameraMoveRotationXYZ (a straight line over seconds), cameraMoveEndCheck, cameraSetFov, cameraReturn (back to the
+  field's camera over its seconds, the field's narrower view in step), mode 0 (back at once): o3d_cam.c sFree
+  (O3D_FreeSet / Return / Moving), drawn by ShotView like a shot; o3d.c O3D_FieldView gives the field camera in
+  Colosseum's units. **Fades**: fadeSet(3 / 2, SECONDS) (to black / back; the only two its room scripts use) as Kai's
+  palette fade, fadeCheck(WAIT) waits; a scene that ends black is faded back (orre_vm.c Fade / FadeBack). **Seconds**:
+  std157_sleep, the camera's moves and fades count Colosseum's time over its refresh rate (fn_800D37CC: 50 or 60), so
+  their numbers are seconds (sleeps of 0.2-2 in its scripts), 60 of Kai's frames each.
+- **The TV's news** (std182_tvNewsEvent, gs_range_801C766C.c): by the story's flags (0xADA, 0xADB, 0x42C, 0xAD3,
+  0xAD0, 0xACF) a line (0x426E-0x4272, or two: 0x439D-0x43A0), each waiting for A, the flag it marks set (orre_vm.c
+  NewsEvent, W_NEWS). Its picture on the TV (std171 / std211's texture change) isn't drawn yet.
+- **People in scenes**: off the field's screen isn't off a scene's picture (event_object_movement.c
+  UpdateObjectEventOffscreen keeps them shown while ORRE's scene camera is on); a scene gives everyone within 32 tiles
+  an object (orre_npcs.c InRange, NPC_SCENE_RANGE; 16 slots); a walk given to someone whose object isn't made yet
+  starts with it (StartPath's pending walk; after 30 frames without one, they're simply there); walk lists
+  (peopleStartWalkList) start like single walks; peopleSetWalkSpeed (1.0 a walk, 2.0 a run) picks Kai's slow / normal /
+  fast / faster steps; peopleTurnToPoint turns them; a sprite nearer the scene's camera than a tile and a half isn't
+  drawn (a model past the near edge). Character animations (std051's motions) aren't drawn: a sprite's frames stand in.
 - **People under a shot stand in the world** (the user's playthrough, 2026-11-08: "Billboard them at the position their
   respective models would be"): o3d.c O3D_PlaceSprite projects each person through the shot's camera, hides one behind
   it, and scales it by its depth against the field camera's (O3D_SpriteScale, applied in mp_bigsprite.c

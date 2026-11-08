@@ -28,6 +28,7 @@
 #include "orre.h"
 #include "orre_data.h"
 #include "palette.h"
+#include "constants/rgb.h"
 #include "battle_setup.h"
 #include "script.h"
 #include "string_util.h"
@@ -78,7 +79,7 @@ struct Bank
 };
 
 enum { T_FREE, T_RUN, T_WAIT, T_DONE };
-enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE, W_MOVE, W_SCREEN, W_FANFARE, W_CAMERA, W_THREAD };
+enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE, W_MOVE, W_SCREEN, W_FANFARE, W_CAMERA, W_THREAD, W_FADE, W_NEWS, W_CAM_MOVE };
 
 // Kai's screens a scene opens (W_SCREEN): Orre_EventScript_VmHoldLoop goes to them while the scene waits
 enum { SCREEN_NONE, SCREEN_SHOP, SCREEN_PC, SCREEN_WARP, SCREEN_CHOICE, SCREEN_RELIC };
@@ -113,6 +114,9 @@ struct Thread
     u32 handle;           // its task number (scriptExecTask's, for std006_threadWaitForCompletion)
     u32 childId;
     bool8 screenOpen;     // W_SCREEN: the hold script went to it
+    u32 news[2];          // W_NEWS: std182_tvNewsEvent's lines still to show (NewsEvent)
+    u8 newsLen, newsAt;
+    bool8 newsHeld;       // ... it took the player for them
     V st[VM_STACK];
 };
 
@@ -340,9 +344,14 @@ static struct Thread *Start(u32 scriptId, u32 argc, const u32 *args, bool8 room)
     return t;
 }
 
+static void FadeBack(void);
+static bool8 sScriptBlack;
+
 static void Finish(struct Thread *t)
 {
     t->state = T_DONE;
+    if (t->holds)
+        FadeBack();   // (a scene that faded out and ended without fading in)
     if (t->debug)
         MPNet_Log("orre vm: debug scene %08X ends", t->scriptId);
     if (t->holds && sHolder == t)
@@ -379,7 +388,8 @@ enum
     N_RUN_SCRIPT = 209, N_THREAD_WAIT = 6, N_SCENE_MODE = 36, N_CAMERA_TARGET = 37, N_PARTY_STATUS = 216,
     N_GET_PREMIUM = 187, N_SET_PREMIUM = 188, N_CHECK_TEMOCHI = 226, N_WIN_OPEN_SE = 224, N_SHADOW_COUNT = 124,
     N_PARTY_COUNT = 123, N_NAME_ENTRY = 22, N_GIFT_POKEMON = 217, N_RELIVE = 194, N_SHADOW_OPEN_COUNT = 242,
-    N_MT_BATTLE_LEAVE = 229, N_PARTNER_FOLLOW = 35,
+    N_MT_BATTLE_LEAVE = 229, N_PARTNER_FOLLOW = 35, N_TV_NEWS = 182, N_CAM_SET_EYE = 40, N_CAM_SET_ROT = 41,
+    N_CAM_MOVE_EYE = 140, N_CAM_MOVE_ROT = 141, N_CAM_SET_FOV = 150, N_WALK_SPEED = 69, N_TURN_TO_POINT = 164,
 };
 
 // Natives that change nothing Kai shows yet, with what Colosseum's scripts expect back: sounds and music (until the
@@ -388,14 +398,14 @@ enum
 // doors and elevators (the maps' own links), the P★DA's mail, the TV's channel
 static const struct { u16 n; u8 ret; } sQuiet[] = {
     {104, 0}, {105, 0}, {106, 0}, {109, 0}, {130, 0}, {137, 0}, {138, 0}, {153, 0}, {218, 0}, {228, 0},
-    {38, 0}, {39, 0}, {40, 0}, {41, 0}, {48, 0}, {127, 0}, {140, 0}, {141, 0}, {147, 0},
-    {148, 0}, {149, 0}, {150, 0}, {156, 0}, {170, 1}, {126, 0},
+    {38, 0}, {39, 0}, {48, 0}, {127, 0}, {147, 0},
+    {148, 0}, {149, 0}, {156, 0}, {170, 1}, {126, 0},
     {113, 0}, {114, 0}, {115, 0}, {116, 0}, {117, 1}, {154, 0}, {171, 0}, {178, 1}, {190, 0}, {191, 0},
     {193, 1}, {221, 0}, {244, 0}, {70, 0}, {168, 0}, {231, 0},
-    {63, 0}, {64, 0}, {66, 0}, {67, 0}, {69, 0}, {76, 0}, {77, 0}, {151, 0}, {155, 1}, {164, 0},
+    {63, 0}, {64, 0}, {66, 0}, {67, 0}, {76, 0}, {77, 0}, {151, 0}, {155, 1},
     {118, 0}, {96, 0}, {97, 0}, {197, 0}, {161, 0}, {162, 0}, {136, 0}, {144, 0},
     {173, 0}, {211, 0}, {17, 0},
-    {2, 0}, {243, 0}, {111, 0}, {182, 0}, {49, 0}, {189, 0}, {214, 0}, {186, 0}, {234, 0},
+    {2, 0}, {243, 0}, {111, 0}, {49, 0}, {189, 0}, {214, 0}, {186, 0}, {234, 0},
     {196, 0}, {166, 0},
     {225, 0}, {246, 0},   // (the party noted for a challenge's check; the save's continue point: Kai's save)
     {223, 0}, {236, 0}, {239, 0},   // (MT. BATTLE's rest stops: save and quit (Kai saves any time); POKe COUPONS: not yet)
@@ -540,6 +550,72 @@ static void LetGo(struct Thread *t)
 }
 
 // Call native N with ARGS (A[0] the first): its result; the thread may be left waiting
+// fadeSet(MODE, SECONDS): Colosseum's whole-screen fade (its scripts use 3, to black, and 2, back from it), as Kai's
+// palette fade (the 3D picture follows it: o3d.c FindFade) in about the same time: 8 steps of DELAY + 1 frames, a
+// whole-screen fade 30% quicker (palette.c sQuickFade). A scene that ends black is given back (FadeBack)
+
+static void Fade(u32 mode, f32 seconds)
+{
+    s32 delay = (s32)(seconds * 60.0f / 5.6f + 0.5f) - 1;
+    if (mode != 2 && mode != 3)
+        return;
+    delay = delay < 0 ? 0 : delay > 15 ? 15 : delay;
+    BeginNormalPaletteFade(PALETTES_ALL, delay, mode == 3 ? 0 : 16, mode == 3 ? 16 : 0, RGB_BLACK);
+    sScriptBlack = mode == 3;
+    MPNet_Log("orre vm: fade %s (%d)", mode == 3 ? "out" : "in", (int)delay);
+}
+
+static void FadeBack(void)
+{
+    if (sScriptBlack)
+    {
+        sScriptBlack = FALSE;
+        BeginNormalPaletteFade(PALETTES_ALL, 4, 16, 0, RGB_BLACK);
+        MPNet_Log("orre vm: fade in (the scene ended black)");
+    }
+}
+
+// std182_tvNewsEvent (the decomp's gs_range_801C766C.c): the TV's news by the story's flags, after 3 frames, each
+// line waiting for A; flags it marks as seen (std078 sets: orre_story.c). The TV's own picture (std171 / std211's
+// texture change) isn't drawn yet
+static void NewsEvent(struct Thread *t)
+{
+    u8 mode;
+    t->newsLen = t->newsAt = 0;
+    if (Orre_Flag(0xADA))
+    {
+        Orre_SetFlag(0xA0F, TRUE);
+        t->news[0] = 0x439F, t->news[1] = 0x43A0, t->newsLen = 2;
+    }
+    else if (Orre_Flag(0xADB))
+    {
+        Orre_SetFlag(0x483, TRUE);
+        t->news[0] = 0x439D, t->news[1] = 0x439E, t->newsLen = 2;
+    }
+    else
+    {
+        // (darkPokemonCheckFlag12(0x43), a late Shadow POKeMON's mark, isn't kept by Kai's records: the story's flag
+        // 0x42C comes with it)
+        if (Orre_Flag(0x42C))
+            Orre_SetFlag(0x42D, TRUE), mode = 4;
+        else if (Orre_Flag(0xAD3))
+            Orre_SetFlag(0xA08, TRUE), mode = 3;
+        else if (Orre_Flag(0xAD0))
+            Orre_SetFlag(0xA07, TRUE), mode = 2;
+        else if (Orre_Flag(0xACF))
+            Orre_SetFlag(0xA06, TRUE), mode = 1;
+        else
+            Orre_SetFlag(0xA05, TRUE), mode = 0;
+        t->news[0] = 0x426E + mode, t->newsLen = 1;
+    }
+    t->newsHeld = !t->holds;
+    if (t->newsHeld)
+        Hold(t);
+    t->frames = 3;
+    t->wait = W_NEWS;
+    MPNet_Log("orre vm: the TV's news (%u lines)", t->newsLen);
+}
+
 static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
 {
     V z = {0};
@@ -547,8 +623,9 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
     if (sTrace < 0)
         sTrace = getenv("MOEMON_ORRE_VM_TRACE") != NULL;
     if (sTrace && n != N_HERO_MAIN)
-        MPNet_Log("orre vm: %08X native %u (%d args: %u %u %u)", t->scriptId, n, count, count > 0 ? a[0].u : 0,
-                  count > 1 ? a[1].u : 0, count > 2 ? a[2].u : 0);
+        MPNet_Log("orre vm: %08X native %u (%d args: %u %u %u %u %u %u)", t->scriptId, n, count, count > 0 ? a[0].u : 0,
+                  count > 1 ? a[1].u : 0, count > 2 ? a[2].u : 0, count > 3 ? a[3].u : 0, count > 4 ? a[4].u : 0,
+                  count > 5 ? a[5].u : 0);
 #define ARG(i) ((i) < count ? a[i] : z)
     switch (n)
     {
@@ -576,8 +653,8 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
         DisplayYesNoMenuDefaultYes();
         t->wait = W_YESNO;
         return 0;
-    case N_SLEEP:
-        t->frames = (s32)ARG(0).f;
+    case N_SLEEP:   // std157_sleep(SECONDS): its time over the refresh rate (gs_range_801C766C.c)
+        t->frames = (s32)(ARG(0).f * 60.0f + 0.5f);
         t->wait = W_FRAMES;
         return 0;
     case N_HERO_INIT_EVENT: Hold(t); return 0;
@@ -611,16 +688,45 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
         if (O3D_CamPlayId(ARG(1).u, (float)ARG(2).s, ARG(3).u != 0) && !t->holds)
             Hold(t), t->camHold = TRUE;
         return 0;
-    case N_SCENE_MODE:   // GSscene_SetMode: 0 the field's (its camera back), the others a scene's
+    case N_SCENE_MODE:   // GSscene_SetMode: 0 the field's (its camera back), 3 the scene's own (o3d_cam.c sFree)
+        if (ARG(0).u == 3)
+            O3D_FreeMode(TRUE);
         if (ARG(0).u != 0)
             return 0;
-        // fall through
-    case N_CAMERA_TARGET:   // cameraSetTarget(group, person): the field's camera on the hero again
-    case N_CAMERA_STOP: case N_CAMERA_STOP2: case N_CAMERA_RETURN:   // (back to the field's camera)
         O3D_CamStop();
         if (t->camHold)
             t->camHold = FALSE, LetGo(t);
         return 0;
+    case N_CAMERA_RETURN:   // cameraReturn(SECONDS, WAIT) (its natives.json order: 0x0201): back to the field's camera
+        O3D_CamStopShot();
+        O3D_FreeReturn(ARG(0).f);
+        if (ARG(1).u && O3D_FreeMoving())
+            t->wait = W_CAM_MOVE;
+        if (t->camHold)
+            t->camHold = FALSE, LetGo(t);
+        return 0;
+    case N_CAMERA_TARGET:   // cameraSetTarget(group, person): the field's camera on the hero again (after a shot)
+    case N_CAMERA_STOP: case N_CAMERA_STOP2:   // (a shot ends: the scene's own camera, if any, stays)
+        O3D_CamStopShot();
+        if (t->camHold)
+            t->camHold = FALSE, LetGo(t);
+        return 0;
+    case N_CAM_SET_EYE: case N_CAM_SET_ROT: case N_CAM_MOVE_EYE: case N_CAM_MOVE_ROT:
+    {
+        // std040_cameraSetPosition / cameraSetRotation (X Y Z), cameraMovePositionXYZ / cameraMoveRotationXYZ (an int its
+        // C function never reads (natives.json: 0x01020202 0x02), X Y Z, SECONDS)
+        bool8 move = n == N_CAM_MOVE_EYE || n == N_CAM_MOVE_ROT;
+        float v[3] = {ARG(move).f, ARG(move + 1).f, ARG(move + 2).f};
+        O3D_FreeSet(n == N_CAM_SET_ROT || n == N_CAM_MOVE_ROT, v, move ? ARG(4).f : 0.0f);
+        MPNet_Log("orre vm: camera %s %s %.2f %.2f %.2f (%.2f s)", n == N_CAM_SET_ROT || n == N_CAM_MOVE_ROT ? "rot" : "eye",
+                  move ? "to" : "at", v[0], v[1], v[2], move ? ARG(4).f : 0.0f);
+        return 0;
+    }
+    case N_CAM_SET_FOV: O3D_FreeFov(ARG(0).f); return 0;
+    case N_CAMERA_END_CHECK:   // cameraMoveEndCheck(WAIT): whether the scene's camera still moves; WAIT: until it stops
+        if (ARG(0).u && O3D_FreeMoving())
+            t->wait = W_CAM_MOVE;
+        return O3D_FreeMoving();
     case N_CAMERA_WAIT:   // cameraWaitSyncAnime: until the shot has played
         if (ARG(0).u)
             t->wait = W_CAMERA;
@@ -815,8 +921,13 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
             Hold(t);
         return 0;
     case N_BATTLE_RESULT: return Orre_BattleResult();
-    case N_FADE_SET: case N_FADE_CHECK: return 0;
-    case N_PEOPLE_WAIT_SYNC: case N_CAMERA_END_CHECK: case N_CHAR_SET_ANIM: return 1;
+    case N_FADE_SET: Fade(ARG(0).u, ARG(1).f); return 0;
+    case N_FADE_CHECK:   // fadeCheck(WAIT): whether a fade runs; WAIT: until it's done
+        if (ARG(0).u && gPaletteFade.active)
+            t->wait = W_FADE;
+        return gPaletteFade.active;
+    case N_TV_NEWS: NewsEvent(t); return 1;
+    case N_PEOPLE_WAIT_SYNC: case N_CHAR_SET_ANIM: return 1;
     // ---- the room's people (orre_npcs.c)
     case N_PEOPLE_VISIBLE: Orre_Npc_SetShown(ARG(1).u, ARG(2).u != 0); return 0;
     case N_FLOOR_CHAR_DISP: Orre_Npc_SetDisp(ARG(0).u, ARG(1).u != 0); return 0;
@@ -825,6 +936,8 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
     case N_SET_POSITION: Orre_Npc_SetPosition(ARG(0).u, ARG(1).u, ARG(2).f, ARG(4).f); return 0;
     case N_SET_ROTATION: Orre_Npc_SetAngle(ARG(0).u, ARG(1).u, ARG(3).f); return 0;
     case N_TURN_TO_ANGLE: Orre_Npc_SetAngle(ARG(0).u, ARG(1).u, ARG(2).f); return 0;
+    case N_WALK_SPEED: Orre_Npc_SetSpeed(ARG(0).u, ARG(1).u, ARG(2).f); return 0;   // peopleSetWalkSpeed
+    case N_TURN_TO_POINT: Orre_Npc_FacePoint(ARG(0).u, ARG(1).u, ARG(2).f, ARG(4).f); return 0;   // peopleTurnToPoint
     case N_MOVE_TO: Orre_Npc_MoveTo(ARG(0).u, ARG(1).u, ARG(3).f, ARG(5).f); return 0;
     case N_MOVE_TO_CHARACTER: Orre_Npc_MoveToOther(ARG(0).u, ARG(1).u, ARG(2).u, ARG(3).u); return 0;
     case N_APPROACH_PLAYER:
@@ -1079,6 +1192,31 @@ static void Poll(struct Thread *t)
         {
             PlaySE(SE_SELECT);
             t->wait = W_NONE;
+            if (t->newsLen)   // (the TV's news: its next line, or its end)
+                t->wait = W_NEWS;
+        }
+        break;
+    case W_FADE:
+        if (!gPaletteFade.active)
+            t->wait = W_NONE;
+        break;
+    case W_CAM_MOVE:
+        if (!O3D_FreeMoving())
+            t->wait = W_NONE;
+        break;
+    case W_NEWS:
+        if (t->frames > 0 && --t->frames > 0)
+            break;
+        if (t->newsAt < t->newsLen)
+            ShowMessage(t, t->news[t->newsAt++], TRUE);
+        else
+        {
+            if (!IsFieldMessageBoxHidden())
+                HideFieldMessageBox();
+            t->newsLen = t->newsAt = 0;
+            t->wait = W_NONE;
+            if (t->newsHeld)
+                t->newsHeld = FALSE, LetGo(t);
         }
         break;
     case W_YESNO:
@@ -1200,6 +1338,7 @@ void Orre_Vm_Warped(void)
             Run(t);
         MPNet_Log("orre vm: warped: room %u's scripts stop", sRoom);
     }
+    sScriptBlack = FALSE;   // (the warp's own fade brings the next room in)
     Orre_Vm_Stop();
 }
 

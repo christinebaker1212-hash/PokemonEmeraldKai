@@ -1,6 +1,7 @@
 #include "global.h"
 #include "orre_people.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's gyms that move
+#include "o3d.h"   // Moemon Kai: ORRE's scenes (UpdateObjectEventOffscreen)
 #include "mp_region.h"
 #include "malloc.h"
 #include "battle_pyramid.h"
@@ -2836,7 +2837,10 @@ void SetObjectEventDirection(struct ObjectEvent *objectEvent, u8 direction)
 
 static const u8 *GetObjectEventScriptPointerByLocalIdAndMap(u8 localId, u8 mapNum, u8 mapGroup)
 {
-    return GetObjectEventTemplateByLocalIdAndMap(localId, mapNum, mapGroup)->script;
+    // Moemon Kai: an object with no template (ORRE's people with nothing to say, spawned by src/orre/orre_npcs.c) has
+    // no script, never a read through NULL
+    const struct ObjectEventTemplate *obj = GetObjectEventTemplateByLocalIdAndMap(localId, mapNum, mapGroup);
+    return obj != NULL ? obj->script : NULL;
 }
 
 const u8 *GetObjectEventScriptPointerByObjectEventId(u8 objectEventId)
@@ -7933,6 +7937,10 @@ static void UpdateObjectEventOffscreen(struct ObjectEvent *objectEvent, struct S
 
     if ((s16)y >= DISPLAY_HEIGHT + 16 || (s16)y2 < -16)
         objectEvent->offScreen = TRUE;
+    // Moemon Kai: while one of ORRE's scenes looks through its own camera, off the field's screen isn't off the
+    // picture: the sprite stands where it is in the scene (o3d.c O3D_PlaceSprite hides it behind the camera)
+    if (O3D_Active() && O3D_CamActive())
+        objectEvent->offScreen = FALSE;
 }
 
 static void UpdateObjectEventSpriteVisibility(struct ObjectEvent *objectEvent, struct Sprite *sprite)

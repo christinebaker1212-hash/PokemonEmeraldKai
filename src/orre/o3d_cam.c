@@ -140,13 +140,137 @@ static void Tracks(u32 aobj, const s8 *map, u32 mapLen)
     }
 }
 
-void O3D_CamStop(void)
+static void StopShot(void)
 {
     u32 i;
     for (i = 0; i < TR_COUNT; i++)
         free(sCam.tr[i].k);
     free(sCam.d);
     memset(&sCam, 0, sizeof(sCam));
+}
+
+// ---- the scene's own camera (GSscene_SetMode(3): Colosseum's camera.c, mode 3): an eye and a rotation the scripts
+// set (std040_cameraSetPosition, cameraSetRotation) or move to in a straight line over seconds (cameraMovePositionXYZ,
+// cameraMoveRotationXYZ: _cameraPadMoveUpdate's lerps), the rotation as HSD's camera takes it: radians about X (up
+// and down), Y (round) and Z (the roll), applied Z, X then Y to a camera looking down -Z. cameraReturn moves it back
+// to the field's camera; mode 0 ends it at once
+static struct
+{
+    bool8 on, back;          // back: going back to the field's camera (cameraReturn), then off
+    float eye[3], rot[3], fov, fov0, fov1;
+    float e0[3], e1[3], et, ed;
+    float r0[3], r1[3], rt, rd;
+} sFree;
+
+void O3D_CamStop(void)
+{
+    StopShot();
+    memset(&sFree, 0, sizeof(sFree));
+}
+
+void O3D_CamStopShot(void)
+{
+    StopShot();
+}
+
+static void FreeBegin(void)
+{
+    if (sFree.on)
+        return;
+    memset(&sFree, 0, sizeof(sFree));
+    O3D_FieldView(sFree.eye, sFree.rot);
+    sFree.fov = 30.0f;   // (Colosseum's camera's own, lbl_8047D720)
+    sFree.on = TRUE;
+}
+
+void O3D_FreeMode(bool8 on)
+{
+    if (on)
+        FreeBegin();
+    else
+        memset(&sFree, 0, sizeof(sFree));
+}
+
+// WHICH: 0 the eye, 1 the rotation; SECONDS 0: at once
+void O3D_FreeSet(u8 which, const float v[3], float seconds)
+{
+    FreeBegin();
+    sFree.back = FALSE;
+    if (seconds <= 0.0f)
+    {
+        memcpy(which ? sFree.rot : sFree.eye, v, sizeof(float) * 3);
+        if (which)
+            sFree.rd = 0;
+        else
+            sFree.ed = 0;
+        return;
+    }
+    if (which)
+        memcpy(sFree.r0, sFree.rot, sizeof(sFree.r0)), memcpy(sFree.r1, v, sizeof(sFree.r1)), sFree.rt = 0, sFree.rd = seconds;
+    else
+        memcpy(sFree.e0, sFree.eye, sizeof(sFree.e0)), memcpy(sFree.e1, v, sizeof(sFree.e1)), sFree.et = 0, sFree.ed = seconds;
+}
+
+void O3D_FreeFov(float fov)
+{
+    if (fov > 1.0f && fov < 170.0f)
+        sFree.fov = fov;
+}
+
+// cameraReturn: back to the field's camera over SECONDS
+void O3D_FreeReturn(float seconds)
+{
+    float eye[3], rot[3];
+    if (!sFree.on)
+        return;
+    if (seconds <= 0.0f)
+    {
+        memset(&sFree, 0, sizeof(sFree));
+        return;
+    }
+    O3D_FieldView(eye, rot);
+    // (the yaw the short way round)
+    while (rot[1] - sFree.rot[1] > 3.14159265f)
+        rot[1] -= 2 * 3.14159265f;
+    while (rot[1] - sFree.rot[1] < -3.14159265f)
+        rot[1] += 2 * 3.14159265f;
+    O3D_FreeSet(0, eye, seconds);
+    O3D_FreeSet(1, rot, seconds);
+    sFree.fov0 = sFree.fov, sFree.fov1 = O3D_FieldFov();
+    sFree.back = TRUE;
+}
+
+// cameraMoveEndCheck: a move still going
+bool8 O3D_FreeMoving(void)
+{
+    return sFree.on && (sFree.ed > 0 || sFree.rd > 0);
+}
+
+static void FreeTick(void)
+{
+    u32 i;
+    if (!sFree.on)
+        return;
+    if (sFree.ed > 0)
+    {
+        sFree.et += 1.0f / 60.0f;
+        for (i = 0; i < 3; i++)
+            sFree.eye[i] = sFree.et >= sFree.ed ? sFree.e1[i] : sFree.e0[i] + (sFree.e1[i] - sFree.e0[i]) * sFree.et / sFree.ed;
+        if (sFree.back)   // (the field's narrower view, in step)
+            sFree.fov = sFree.et >= sFree.ed ? sFree.fov1 : sFree.fov0 + (sFree.fov1 - sFree.fov0) * sFree.et / sFree.ed;
+        if (sFree.et >= sFree.ed)
+            sFree.ed = 0;
+    }
+    if (sFree.rd > 0)
+    {
+        sFree.rt += 1.0f / 60.0f;
+        for (i = 0; i < 3; i++)
+            sFree.rot[i] = sFree.rt >= sFree.rd ? sFree.r1[i] : sFree.r0[i] + (sFree.r1[i] - sFree.r0[i]) * sFree.rt / sFree.rd;
+        if (sFree.rt >= sFree.rd)
+            sFree.rd = 0;
+    }
+    if (sFree.back && sFree.ed == 0 && sFree.rd == 0)
+        memset(&sFree, 0, sizeof(sFree));
 }
 
 // Plays the shot NAME of the data pack ("S1_out/cam_s1_out_shot_01.cam") from FRAME; FALSE: no such shot
@@ -156,9 +280,9 @@ bool8 O3D_CamPlay(const char *name, float frame, bool8 loop)
     static const s8 sTgt[] = {-1, -1, -1, -1, -1, TR_TGT_X, TR_TGT_Y, TR_TGT_Z};
     static const s8 sCObj[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, TR_ROLL, TR_FOV};
     u32 scene = 0, cset, cobj, anims, ca, eye, tgt, i, nroots, off;
-    O3D_CamStop();
+    StopShot();
     if ((sCam.d = OrreData_Read(name, &sCam.size)) == NULL || sCam.size < 0x20)
-        return MPNet_Log("o3d cam: no %s", name), O3D_CamStop(), FALSE;
+        return MPNet_Log("o3d cam: no %s", name), StopShot(), FALSE;
     // the root "scene_data" (an HSD archive: data, relocations, roots: offset, name)
     {
         const u8 *h = sCam.d;
@@ -177,7 +301,7 @@ bool8 O3D_CamPlay(const char *name, float frame, bool8 loop)
     }
     cset = scene ? U32(scene + 4) : 0;
     if (!cset || !(cobj = U32(cset)))
-        return MPNet_Log("o3d cam: %s has no camera", name), O3D_CamStop(), FALSE;
+        return MPNet_Log("o3d cam: %s has no camera", name), StopShot(), FALSE;
     // (CObjDesc: eye + 0x18, target + 0x1C (WObjDesc: x y z at + 4), roll + 0x20, fov + 0x30)
     eye = U32(cobj + 0x18), tgt = U32(cobj + 0x1C);
     for (i = 0; i < 3; i++)
@@ -225,7 +349,7 @@ void O3D_CamSetKeep(bool8 keep)
 
 bool8 O3D_CamActive(void)
 {
-    return sCam.on;
+    return sCam.on || sFree.on;
 }
 
 // The shot has played to its end (cameraWaitSyncAnime)
@@ -237,6 +361,7 @@ bool8 O3D_CamDone(void)
 // Every frame (o3d.c): the shot moves on, Colosseum's 60 frames a second as Kai's
 void O3D_CamTick(void)
 {
+    FreeTick();
     if (!sCam.on)
         return;
     sCam.frame += 1.0f;
@@ -252,6 +377,19 @@ bool8 O3D_CamGet(float eye[3], float tgt[3], float *roll, float *fov)
 {
     float v[TR_COUNT];
     u32 i;
+    if (!sCam.on && sFree.on)
+    {
+        // (the scene's camera: looking down -Z turned by Z, X, then Y)
+        float cx = cosf(sFree.rot[0]), sx = sinf(sFree.rot[0]), cy = cosf(sFree.rot[1]), sy = sinf(sFree.rot[1]);
+        for (i = 0; i < 3; i++)
+            eye[i] = sFree.eye[i];
+        tgt[0] = eye[0] - cx * sy * 10.0f;
+        tgt[1] = eye[1] + sx * 10.0f;
+        tgt[2] = eye[2] - cx * cy * 10.0f;
+        *roll = sFree.rot[2];
+        *fov = sFree.fov;
+        return TRUE;
+    }
     if (!sCam.on)
         return FALSE;
     for (i = 0; i < TR_COUNT; i++)
