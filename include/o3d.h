@@ -19,6 +19,7 @@ void O3D_FreeSet(u8 which, const float v[3], float seconds);   // WHICH 0 the ey
 void O3D_FreeFov(float fov);
 void O3D_FreeReturn(float seconds);           // cameraReturn: back to the field's camera
 bool8 O3D_FreeMoving(void);
+bool8 O3D_FreeActive(void);                   // the scene's camera is on (not on its way back)
 void O3D_FieldView(float eye[3], float rot[3]);
 float O3D_FieldFov(void);                    // ... its vertical field of view (degrees)   // the field camera's eye and rotation in Colosseum's units (o3d.c)
 bool8 O3D_CamActive(void);

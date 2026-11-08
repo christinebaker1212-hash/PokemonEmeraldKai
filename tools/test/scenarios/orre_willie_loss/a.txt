@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 30
+mp orreflag 986 1
+mp orreflag 988 1
+mp warp 45,0,25,28
+wait 200
+pressuntillog A 6000 orre vm: message 20807
+wait 60
+press A 4
+pressuntillog A 20000 orre vm: the scene's battle lost
+mp orreget 989
+mp orreget 990
+pressuntillog A 6000 orre vm: message 20792
+wait 30
+rendershot s_again
+quit

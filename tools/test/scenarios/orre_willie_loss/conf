@@ -1,0 +1,11 @@
+# Losing to WILLIE (Colosseum's battle 10: a loss ends Colosseum's game, its "zenmetu" flag): Kai whites out, the story
+# goes back to before his scene (orre_vm.c KeepStory / Orre_Vm_LossWhiteOut: Colosseum goes back to the save), the
+# player wakes at the OUTSKIRT STAND (no ORRE POKeMON CENTER healed at yet) and his scene plays again. A Lv 2 party.
+MODE=1
+TMO=600
+WARP=45,0,33,40
+ENV_A="MOEMON_DEBUG_PARTY=280:2 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1 MOEMON_ORRE_FLAG_LOG=1"
+EXPECT_A=("orre: battle 10 (kind 2" "orre: battle 10 lost" "orre vm: the scene's battle lost: the story as it was before it"
+          "[test] orreget 0x3DD 0" "[test] orreget 0x3DE 0")
+CHECK="python3 tools/test/scenarios/orre_willie_loss/check.py"
+UNEXPECT_A=("[crash]" "TIMEOUT" "unknown code")

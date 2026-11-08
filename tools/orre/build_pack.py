@@ -44,12 +44,21 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hsd  # noqa: E402
 import grid  # noqa: E402
 import maps as orre_maps  # noqa: E402
+import hsd_anim  # noqa: E402
 
 VERSION = 2
 DATA_TYPES = ("msg", "col", "scd", "flr", "cam", "rel", "dat", "snd", "samp")
 
 
 TEX_ARCHIVES = ("world_map",)   # archives whose textures (.tex) are kept: the screens ORRE draws from them
+
+
+def prop_models():
+    """The props' models (src/data/orre_props.h, tools/orre/gen_people.py), each once"""
+    import re
+    p = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "src", "data",
+                     "orre_props.h")
+    return sorted(set(re.findall(r'\{\d+, "([^"]+)"\}', open(p).read()))) if os.path.exists(p) else []
 
 
 def is_data(arc, fn):
@@ -159,6 +168,29 @@ def build(src, out):
                 body.append(struct.pack("<I", 0))
             raw_body = b"".join(body)
             maps.append((name, zlib.compress(raw_body, 9), len(raw_body)))
+    # the props (src/data/orre_props.h: the rooms' people with no ORRE person: a sack, a truck, a statue, a POKeMON):
+    # Colosseum's own model as a map entry "*<model>" with no grid, posed at its first animation's first frame, in its
+    # own units about its feet (src/orre/o3d.c draws it where its person stands, turned as it's turned)
+    for stem in prop_models():
+        found = sorted(p_ for arc in os.listdir(src) for p_ in [os.path.join(src, arc, stem + ".dat")] if os.path.exists(p_))
+        if not found:
+            print("note: no model %s.dat for a prop" % stem)
+            continue
+        f, root, anims = hsd_anim.model(found[0])
+        ms = hsd_anim.load_posed(f, root, anims[0], 0) if anims else [m for st in hsd.model_sets(f) for m in st]
+        remap = []
+        for raw in f.raw_images:
+            k = hashlib.sha1(repr(raw[:3]).encode() + raw[3] + bytes([raw[4]]) + raw[5]).digest()
+            if k not in tex_keys:
+                tex_keys[k] = len(tex_list)
+                tex_list.append(raw)
+            remap.append(tex_keys[k])
+        body = [struct.pack("<I", 1), struct.pack("<B3xI", 0, len(ms))]
+        for m in ms:
+            body.append(mesh_bytes(m, remap[m.tex] if 0 <= m.tex < len(remap) else -1))
+        body.append(struct.pack("<I", 0))
+        raw_body = b"".join(body)
+        maps.append(("*" + stem, zlib.compress(raw_body, 9), len(raw_body)))
     # orre3d.pak
     head = struct.pack("<4sIII", b"ORZ3", VERSION, len(tex_list), len(maps))
     tex_table, tex_data = [], []

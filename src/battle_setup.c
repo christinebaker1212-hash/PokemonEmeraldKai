@@ -1703,9 +1703,13 @@ void MP_Debug_TrainerBattle(u16 id)
 static void CB2_EndOrreBattle(void)
 {
     bool8 lost = IsPlayerDefeated(gBattleOutcome) == TRUE;
+    bool8 whiteOut = lost && Orre_BattleLossWhitesOut();   // (before Orre_BattleEnded forgets which battle it was)
     Orre_BattleEnded(!lost);
-    if (lost && Orre_BattleLossWhitesOut() && !MP_Rescue_TryStart())
+    if (whiteOut && !MP_Rescue_TryStart())
+    {
+        Orre_Vm_LossWhiteOut();   // (the story back to before the scene; an ORRE POKeMON CENTER to wake at)
         SetMainCallback2(CB2_WhiteOut);
+    }
     else
         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
     if (!lost)

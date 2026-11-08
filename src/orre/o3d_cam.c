@@ -240,6 +240,11 @@ void O3D_FreeReturn(float seconds)
     sFree.back = TRUE;
 }
 
+bool8 O3D_FreeActive(void)
+{
+    return sFree.on && !sFree.back;
+}
+
 // cameraMoveEndCheck: a move still going
 bool8 O3D_FreeMoving(void)
 {

@@ -2835,6 +2835,14 @@ void SetObjectEventDirection(struct ObjectEvent *objectEvent, u8 direction)
     objectEvent->movementDirection = direction;
 }
 
+// Moemon Kai: the sprite's pictures are Kai's four-sided sets (face / walk / run in fours, south north west east), which
+// ORRE's scenes turn to the side their camera sees (src/orre/o3d.c SceneFacing); props and one-picture objects aren't
+bool8 MP_SpriteHasFourSides(const struct Sprite *sprite, bool8 *runs)
+{
+    *runs = sprite->anims == sAnimTable_BrendanMayNormal;
+    return sprite->anims == sAnimTable_Standard || *runs;
+}
+
 static const u8 *GetObjectEventScriptPointerByLocalIdAndMap(u8 localId, u8 mapNum, u8 mapGroup)
 {
     // Moemon Kai: an object with no template (ORRE's people with nothing to say, spawned by src/orre/orre_npcs.c) has

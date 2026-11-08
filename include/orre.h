@@ -26,7 +26,8 @@ bool8 Orre_WorldMap_Step(u16 keys);
 // (specials) Orre_WorldMap (waitstate): the screen; Orre_WorldMapTravel: off to the place chosen (VAR_RESULT TRUE)
 void Orre_WorldMap(void);
 void Orre_WorldMapTravel(void);
-bool8 Orre_MapStart(u16 map, s16 *x, s16 *y);   // a map's start (Colosseum's entry 0)
+bool8 Orre_MapStart(u16 map, s16 *x, s16 *y);
+void Orre_Vm_LossWhiteOut(void);   // a scene's battle lost where Colosseum's game ends (battle_setup.c)   // a map's start (Colosseum's entry 0)
 
 // The boat to ORRE (src/orre/orre_ferry.c; docs/ORRE_DECISIONS.md "A post-game place"): ORRE is reached by boat with
 // the ORRE TICKET, given after any region's ELITE FOUR, from HOENN's ferries and every region's port, landing at the
@@ -86,6 +87,7 @@ void Orre_Npc_SetAngle(u32 group, u32 index, float degrees);
 void Orre_Npc_FaceOther(u32 group, u32 index, u32 tgroup, u32 tindex);
 void Orre_Npc_FacePoint(u32 group, u32 index, float x, float z);   // peopleTurnToPoint
 void Orre_Npc_SetSpeed(u32 group, u32 index, float speed);           // peopleSetWalkSpeed
+u32 Orre_Npc_Props(const char **model, float *x, float *z, float *angle, u32 max);   // the props shown (o3d.c)
 void Orre_Npc_MoveTo(u32 group, u32 index, float x, float z);
 void Orre_Npc_MoveToOther(u32 group, u32 index, u32 tgroup, u32 tindex);
 bool8 Orre_Npc_Done(u32 group, u32 index);

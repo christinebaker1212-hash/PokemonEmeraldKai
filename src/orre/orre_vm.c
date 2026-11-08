@@ -42,6 +42,9 @@
 #include "pokemon.h"
 #include "orre_shadow.h"
 #include "overworld.h"
+#include "fieldmap.h"
+#include "map_name_popup.h"
+#include "constants/maps.h"
 #include "field_screen_effect.h"
 #include "field_player_avatar.h"
 #include "script_menu.h"
@@ -91,6 +94,11 @@ struct OrreShop
     u16 items[20];
 };
 #include "../data/orre_shops.h"
+
+// The story's gates (scriptSetCol: a collision object a room's scripts switch on and off), the tiles each closes:
+// tools/orre/gen_gates.py
+struct OrreGate { u16 room; u8 gate; u16 first, count; bool8 closed; };   // (closed: at the room's start)
+#include "../data/orre_gates.h"
 
 struct Thread
 {
@@ -389,7 +397,7 @@ enum
     N_GET_PREMIUM = 187, N_SET_PREMIUM = 188, N_CHECK_TEMOCHI = 226, N_WIN_OPEN_SE = 224, N_SHADOW_COUNT = 124,
     N_PARTY_COUNT = 123, N_NAME_ENTRY = 22, N_GIFT_POKEMON = 217, N_RELIVE = 194, N_SHADOW_OPEN_COUNT = 242,
     N_MT_BATTLE_LEAVE = 229, N_PARTNER_FOLLOW = 35, N_TV_NEWS = 182, N_CAM_SET_EYE = 40, N_CAM_SET_ROT = 41,
-    N_CAM_MOVE_EYE = 140, N_CAM_MOVE_ROT = 141, N_CAM_SET_FOV = 150, N_WALK_SPEED = 69, N_TURN_TO_POINT = 164,
+    N_CAM_MOVE_EYE = 140, N_CAM_MOVE_ROT = 141, N_CAM_SET_FOV = 150, N_WALK_SPEED = 69, N_TURN_TO_POINT = 164, N_SET_COL = 118,
 };
 
 // Natives that change nothing Kai shows yet, with what Colosseum's scripts expect back: sounds and music (until the
@@ -403,7 +411,7 @@ static const struct { u16 n; u8 ret; } sQuiet[] = {
     {113, 0}, {114, 0}, {115, 0}, {116, 0}, {117, 1}, {154, 0}, {171, 0}, {178, 1}, {190, 0}, {191, 0},
     {193, 1}, {221, 0}, {244, 0}, {70, 0}, {168, 0}, {231, 0},
     {63, 0}, {64, 0}, {66, 0}, {67, 0}, {76, 0}, {77, 0}, {151, 0}, {155, 1},
-    {118, 0}, {96, 0}, {97, 0}, {197, 0}, {161, 0}, {162, 0}, {136, 0}, {144, 0},
+    {96, 0}, {97, 0}, {197, 0}, {161, 0}, {162, 0}, {136, 0}, {144, 0},
     {173, 0}, {211, 0}, {17, 0},
     {2, 0}, {243, 0}, {111, 0}, {49, 0}, {189, 0}, {214, 0}, {186, 0}, {234, 0},
     {196, 0}, {166, 0},
@@ -476,6 +484,8 @@ u32 MP_TextPrinterDebug(u8 id);
 static void ShowMessage(struct Thread *t, u32 msg, bool8 key)
 {
     static u8 sPlaceholder[6];
+    // (the place's name banner shares BG0's scroll with the message box: it goes first, or its slide carries the box)
+    HideMapNamePopUpWindow();
     if (!IsFieldMessageBoxHidden())
         HideFieldMessageBox();
     Orre_TextPlaceholder(sPlaceholder, msg);
@@ -523,11 +533,39 @@ static void TryHold(void)
     }
 }
 
+// Kai's whiteout comes back to the save's last heal place (overworld.c SetWarpDestinationToLastHealLocation)
+static void HealAt(s8 group, s8 num, s8 warpId, s16 x, s16 y)
+{
+    struct WarpData *w = &gSaveBlock1Ptr->lastHealLocation;
+    w->mapGroup = group, w->mapNum = num, w->warpId = warpId, w->x = x, w->y = y;
+}
+
+// The story as a scene found it (Colosseum's "a loss ends the game": back to the save, the scene to play again): the
+// flags kept when a scene takes the player, put back when one of its battles is lost that way (Orre_Vm_LossWhiteOut)
+static u8 *sSceneStory;
+static u32 sSceneStorySize;
+static bool8 sLossPending;
+
+static void KeepStory(void)
+{
+    u32 size;
+    u8 *st = Orre_StoryState(&size);
+    if (sSceneStory == NULL || sSceneStorySize != size)
+    {
+        free(sSceneStory);
+        sSceneStory = malloc(size);
+        sSceneStorySize = sSceneStory ? size : 0;
+    }
+    if (sSceneStory)
+        memcpy(sSceneStory, st, size);
+}
+
 static void Hold(struct Thread *t)
 {
     t->holds = TRUE;
     if (sHolder == NULL)
     {
+        KeepStory();
         sHolder = t;
         sHoldPending = TRUE;
         TryHold();
@@ -540,6 +578,10 @@ static void LetGo(struct Thread *t)
     if (sHolder == t)
     {
         sHolder = NULL;
+        // (the player walks again: a scene camera left where the scene put it goes back to the field's, as the user
+        // asked, 2026-11-08: PHENAC's sack scene leaves it on the sack)
+        if (O3D_FreeActive() && !O3D_FreeMoving())
+            O3D_FreeReturn(0.6f);
         if (sHolding)
         {
             sHolding = FALSE;
@@ -616,6 +658,24 @@ static void NewsEvent(struct Thread *t)
     MPNet_Log("orre vm: the TV's news (%u lines)", t->newsLen);
 }
 
+// scriptSetCol(GATE, ON): GScolsys2SetObjEnable: the gate's tiles impassable while it's on (the maps are built with
+// every gate open: tools/orre/maps.py)
+static void SetGate(u32 gate, bool8 on)
+{
+    u32 i, k;
+    for (i = 0; i < ORRE_GATE_COUNT; i++)
+        if (sOrreGates[i].room == sRoom && sOrreGates[i].gate == gate)
+        {
+            for (k = 0; k < sOrreGates[i].count; k++)
+            {
+                const u8 *tile = sOrreGateTiles[sOrreGates[i].first + k];
+                MapGridSetMetatileImpassabilityAt(tile[0] + MAP_OFFSET, tile[1] + MAP_OFFSET, on);
+            }
+            MPNet_Log("orre vm: gate %u %s (%u tiles)", gate, on ? "closed" : "open", sOrreGates[i].count);
+            return;
+        }
+}
+
 static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
 {
     V z = {0};
@@ -682,6 +742,9 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
         HealPlayerParty();
         PlayFanfare(MUS_HEAL);
         t->wait = W_FANFARE;
+        // (a whiteout comes back here, as Kai's POKeMON CENTERs: the player at the counter)
+        HealAt( gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
+                    WARP_ID_NONE, gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y);
         MPNet_Log("orre vm: party healed");
         return 0;
     case N_CAMERA_PLAY:   // cameraPlayAnime(group, shot, frame, loop): Colosseum's shot in ORRE's view (o3d_cam.c)
@@ -936,6 +999,7 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
     case N_SET_POSITION: Orre_Npc_SetPosition(ARG(0).u, ARG(1).u, ARG(2).f, ARG(4).f); return 0;
     case N_SET_ROTATION: Orre_Npc_SetAngle(ARG(0).u, ARG(1).u, ARG(3).f); return 0;
     case N_TURN_TO_ANGLE: Orre_Npc_SetAngle(ARG(0).u, ARG(1).u, ARG(2).f); return 0;
+    case N_SET_COL: SetGate(ARG(0).u, ARG(1).u != 0); return ARG(0).u;
     case N_WALK_SPEED: Orre_Npc_SetSpeed(ARG(0).u, ARG(1).u, ARG(2).f); return 0;   // peopleSetWalkSpeed
     case N_TURN_TO_POINT: Orre_Npc_FacePoint(ARG(0).u, ARG(1).u, ARG(2).f, ARG(4).f); return 0;   // peopleTurnToPoint
     case N_MOVE_TO: Orre_Npc_MoveTo(ARG(0).u, ARG(1).u, ARG(3).f, ARG(5).f); return 0;
@@ -1339,6 +1403,16 @@ void Orre_Vm_Warped(void)
         MPNet_Log("orre vm: warped: room %u's scripts stop", sRoom);
     }
     sScriptBlack = FALSE;   // (the warp's own fade brings the next room in)
+    if (sLossPending)
+    {
+        // (the whiteout's warp: the story as the scene found it, so it plays again)
+        u32 size;
+        u8 *st = Orre_StoryState(&size);
+        sLossPending = FALSE;
+        if (sSceneStory && sSceneStorySize == size)
+            memcpy(st, sSceneStory, size);
+        MPNet_Log("orre vm: the scene's battle lost: the story as it was before it");
+    }
     Orre_Vm_Stop();
 }
 
@@ -1382,6 +1456,14 @@ void Orre_Vm_RoomEntered(void)
     Orre_Npcs_RoomEntered(room);
     if ((floor = FloorOf(room)) == NULL || sRoomBank.d == NULL)
         return;
+    {
+        // (Colosseum's collision objects start on: a gate its scripts only ever open starts closed, as its set-up
+        // finds it, the set-up opening what the story has opened: tools/orre/gen_gates.py)
+        u32 i;
+        for (i = 0; i < ORRE_GATE_COUNT; i++)
+            if (sOrreGates[i].room == room && sOrreGates[i].closed)
+                SetGate(sOrreGates[i].gate, TRUE);
+    }
     for (k = 0x2C; k <= 0x34; k += 4)
     {
         u32 id = Be32(floor + k);
@@ -1554,4 +1636,19 @@ bool8 Orre_Vm_Debug(u16 bank, u16 func, const u32 *args)
     if (t)
         t->debug = TRUE;
     return t != NULL;
+}
+
+// battle_setup.c CB2_EndOrreBattle: a battle lost where Colosseum's game ends (its zenmetu flag) whites out: the story
+// goes back to before the scene (Colosseum goes back to the save), the whiteout to the last POKeMON CENTER healed at in
+// ORRE (Orre_Vm's N_POKEMON_CENTER), else the OUTSKIRT STAND where the boat lands
+void Orre_Vm_LossWhiteOut(void)
+{
+    sLossPending = TRUE;
+    if (!O3D_IsOrreGroup(gSaveBlock1Ptr->lastHealLocation.mapGroup))
+    {
+        s16 x = 33, y = 40;
+        Orre_MapStart(MAP_ORRE_OUTSKIRT_STAND, &x, &y);
+        HealAt( MAP_GROUP(MAP_ORRE_OUTSKIRT_STAND),
+                    MAP_NUM(MAP_ORRE_OUTSKIRT_STAND), WARP_ID_NONE, x, y);
+    }
 }

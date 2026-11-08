@@ -48,6 +48,10 @@ struct OrreRoomCheck
 };
 #include "../data/orre_room_checks.h"
 
+// The props (src/data/orre_props.h: people with no ORRE person, drawn as Colosseum's own model: src/orre/o3d.c)
+struct OrreProp { u16 row; const char *model; };
+#include "../data/orre_props.h"
+
 #define NPC_MAX 48
 #define NPC_LOCAL_FIRST 0x40   // (a person's object: local id 0x40 + its index; the maps' own objects are below)
 #define NPC_HERO 100
@@ -69,6 +73,8 @@ struct Npc
     u8 speed;            // peopleSetWalkSpeed's, as Kai's steps (SPEED_*)
     u8 pending, pendWait;   // a walk of PENDING steps (in path) waiting for its object (shown this frame: no slot yet)
     s16 pendX, pendY;    // ... where it ends
+    const char *model;   // a prop's model (src/data/orre_props.h), drawn by o3d.c; NULL: a sprite
+    s16 angle;           // its angle (degrees, as Colosseum's: 0 facing +Z)
 };
 
 // peopleSetWalkSpeed (Colosseum's 1.0 a walk, 2.0 a run) as Kai's step speeds (Step)
@@ -230,6 +236,13 @@ void Orre_Npcs_RoomEntered(u16 room)
         if (!O3D_ColoToTile(cx, cz, &n->x, &n->y))
             n->x = n->y = 0;
         n->dir = DirOfAngle(n->p->angle);
+        n->angle = n->p->angle;
+        {
+            u32 k;
+            for (k = 0; k < ORRE_PROP_COUNT; k++)
+                if (sOrreProps[k].row == (u32)(n->p - sOrreRoomPeople))
+                    n->model = sOrreProps[k].model;
+        }
     }
 }
 
@@ -333,7 +346,33 @@ static void Face(u32 group, u32 index, u8 dir)
 
 void Orre_Npc_SetAngle(u32 group, u32 index, float degrees)
 {
+    struct Npc *n;
+    if (group != 0 || index != NPC_HERO)
+        if ((n = Of(index)) != NULL)
+            n->angle = (s16)degrees;
     Face(group, index, DirOfAngle((s32)degrees));
+}
+
+// The props shown now (o3d.c draws their models): each one's model, where it stands (Colosseum's x, z: its own spot
+// while it's on its starting tile, else its tile's middle) and its angle; at most MAX
+u32 Orre_Npc_Props(const char **model, float *x, float *z, float *angle, u32 max)
+{
+    u32 i, k = 0;
+    for (i = 0; i < sCount && k < max; i++)
+    {
+        struct Npc *n = &sNpc[i];
+        s16 tx, ty;
+        if (!n->shown || n->model == NULL)
+            continue;
+        model[k] = n->model;
+        angle[k] = n->angle;
+        if (O3D_ColoToTile(n->p->x, n->p->z, &tx, &ty) && tx == n->x && ty == n->y)
+            x[k] = n->p->x, z[k] = n->p->z;
+        else if (!O3D_TileToColo(n->x, n->y, &x[k], &z[k]))
+            continue;
+        k++;
+    }
+    return k;
 }
 
 static bool8 Where(u32 group, u32 index, s16 *x, s16 *y)
@@ -622,6 +661,23 @@ const u8 *Orre_Check_InFront(void)
         {
             gSpecialVar_0x8004 = i;
             return Orre_EventScript_Check;
+        }
+    }
+    {
+        // (a prop with something to say, two tiles ahead: its collision, a story gate, may cover the tile between, as
+        // RUI's sack in PHENAC does; Colosseum checks the model, not a tile)
+        s16 x = p->currentCoords.x - MAP_OFFSET, y = p->currentCoords.y - MAP_OFFSET;
+        s16 dx = p->facingDirection == DIR_EAST ? 1 : p->facingDirection == DIR_WEST ? -1 : 0;
+        s16 dy = p->facingDirection == DIR_SOUTH ? 1 : p->facingDirection == DIR_NORTH ? -1 : 0;
+        for (i = 0; i < sCount; i++)
+        {
+            struct Npc *n = &sNpc[i];
+            if (n->shown && n->p->person == ORRE_PERSON_NONE && n->p->talk && n->x == x + 2 * dx && n->y == y + 2 * dy
+             && MapGridGetCollisionAt(x + dx + MAP_OFFSET, y + dy + MAP_OFFSET))
+            {
+                gSpecialVar_0x8004 = n->p->index;
+                return Orre_EventScript_Talk;
+            }
         }
     }
     return NULL;

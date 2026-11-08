@@ -64,6 +64,7 @@ typedef struct
     s16 tex;
     u8 rs, rt, fs, ft, alpha, pid;
     u8 sky;        // the map's sky: drawn only while a shot of Colosseum's plays (the field camera looks down)
+    u8 solid;      // a prop's model (DrawProps): texels drawn whole or not at all, and outlined (sPropMask)
     u32 count;     // vertices (3 a triangle)
     OVtx *v;
     float c[3], r; // the mesh's centre and radius (skipped off screen)
@@ -626,6 +627,7 @@ static struct
 static u16 sColor[H][W];
 static float sDepth[H][W];
 static s8 sIds[H][W];
+static u8 sPropMask[H][W];   // the props' pixels this frame: their soft outline (OutlineProps)
 static s32 sFadeA[3], sFadeB[3];
 
 static float sFieldEye[3], sFieldFwd[3];   // the field camera this frame (O3D_FieldView)
@@ -750,9 +752,57 @@ static u8 sSpriteHFrame[MAX_SPRITES];
 // sees it there (Q8, 0: as drawn: the field's own camera); one behind the shot's camera isn't drawn
 static u16 sSpriteScale[MAX_SPRITES];
 
+static u8 sSpriteScaleFrame[MAX_SPRITES];
+
+// (only a sprite O3D_PlaceSprite placed this frame on ORRE's field: never a battle's, whose sprites reuse the slots)
+// While a scene's camera looks from another side than the field's (which looks north), a person's sprite shows the
+// side of them that camera sees: facing east under a camera looking south is facing its left (the field's west). Their
+// facing itself stays as the scripts set it; only the picture turns, by quarter turns (the sprites' four sides), and
+// turns back when the field's camera returns. The player and ORRE's people (Kai's standard picture sets: face, walk,
+// run in fours, south / north / west / east)
+static bool8 sTurned[OBJECT_EVENTS_COUNT];
+bool8 MP_SpriteHasFourSides(const struct Sprite *sprite, bool8 *runs);   // event_object_movement.c
+
+static void SceneFacing(void)
+{
+    static const u8 sYawOfDir[] = {[DIR_NORTH] = 0, [DIR_WEST] = 1, [DIR_SOUTH] = 2, [DIR_EAST] = 3};
+    static const u8 sAnimOfYaw[4] = {1, 2, 0, 3};   // (north, west, south, east as the anims' S N W E order)
+    s32 q = 0;
+    u32 i;
+    if (O3D_CamActive())
+    {
+        float yaw = atan2f(-sView.fwd[0], -sView.fwd[2]);
+        q = ((s32)floorf(yaw / (3.14159265f / 2) + 0.5f) % 4 + 4) % 4;
+    }
+    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+    {
+        struct ObjectEvent *o = &gObjectEvents[i];
+        struct Sprite *sp;
+        u8 dir, group, target, limit;
+        bool8 runs;
+        if (!o->active || o->spriteId >= MAX_SPRITES || (!o->isPlayer && o->localId < 0x40))
+            continue;
+        if (q == 0 && !sTurned[i])
+            continue;
+        sp = &gSprites[o->spriteId];
+        if (!MP_SpriteHasFourSides(sp, &runs))
+            continue;
+        dir = o->facingDirection;
+        limit = runs ? ANIM_STD_COUNT + 4 : ANIM_STD_COUNT;   // (the player's runs too)
+        if (dir < DIR_SOUTH || dir > DIR_EAST || sp->animNum >= limit)
+            continue;
+        group = sp->animNum / 4;
+        target = group * 4 + sAnimOfYaw[(sYawOfDir[dir] - q + 4) % 4];
+        sTurned[i] = q != 0;
+        if (sp->animNum != target)
+            StartSpriteAnim(sp, target);
+    }
+}
+
 u16 O3D_SpriteScale(u16 spriteId)
 {
-    return sView.active && O3D_CamActive() && spriteId < MAX_SPRITES ? sSpriteScale[spriteId] : 0;
+    return O3D_Active() && O3D_CamActive() && spriteId < MAX_SPRITES && sSpriteScaleFrame[spriteId] == sView.frame
+         ? sSpriteScale[spriteId] : 0;
 }
 
 void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float *depth)
@@ -799,7 +849,9 @@ void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         // or farther, against the field camera's focal length)
         float field = (96.0f / tanf(HALF_FOV * 3.14159265f / 180.0f)) / CAM_DIST;
         float s = (sView.focal / d) / field * 256.0f;
-        sSpriteScale[spriteId] = (u16)(s < 16.0f ? 16 : s > 2048.0f ? 2048 : s);
+        // (at most 3x: the field's 16 x 32 people never fill the picture as a wall of pixels, the user 2026-11-08)
+        sSpriteScale[spriteId] = (u16)(s < 16.0f ? 16 : s > 768.0f ? 768 : s);
+        sSpriteScaleFrame[spriteId] = sView.frame;
     }
     *outX = (s32)floorf(sx + 0.5f);
     *outY = (s32)floorf(sy + 0.5f) + 8;
@@ -929,7 +981,7 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const OMes
                 s32 tv = Wrap((s32)floorf((w0 * a->v + w1 * b->v + w2 * c->v) * z), t->h, g->rt, g->ft);
                 u32 texel = t->px[tv * t->w + tu];
                 u32 ta = texel >> 24;
-                if (ta == 0)
+                if (ta == 0 || (g->solid && ta < 128))
                     continue;
                 for (ch = 0; ch < 3; ch++)
                 {
@@ -944,6 +996,9 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const OMes
                     out[ch] = col[ch];
             }
             al *= g->alpha / 31.0f;
+            if (g->solid)
+                al = 1.0f;
+            sPropMask[y][x] = g->solid;
             {
                 u16 old = sColor[y][x];
                 u16 pxl = 0;
@@ -1058,6 +1113,127 @@ static void DrawMesh(const OMesh *g, int pass)
     }
 }
 
+// ---- the props: the rooms' people with no ORRE person, drawn as Colosseum's own model (tools/orre/build_pack.py packs
+// each as "*<model>", posed, about its feet) where its person stands on the ground, turned as it's turned
+#define PROP_MODELS 32
+#define PROPS_SHOWN 24
+static struct { char name[24]; OMap m; } sPropModel[PROP_MODELS];
+static OMesh sPropMesh;
+static u32 sPropMeshCap;
+
+static const OMap *PropModel(const char *model)
+{
+    u32 i;
+    char file[32];
+    for (i = 0; i < PROP_MODELS; i++)
+    {
+        if (sPropModel[i].name[0] == 0)
+        {
+            snprintf(sPropModel[i].name, sizeof(sPropModel[i].name), "%s", model);
+            snprintf(file, sizeof(file), "*%s", model);
+            if (RoomLoad(&sPropModel[i].m, file, -1))
+            {
+                // (a character's materials are marked see-through for their edges: whole, as the game draws them)
+                u32 k;
+                for (k = 0; k < sPropModel[i].m.nmesh; k++)
+                    sPropModel[i].m.mesh[k].alpha = 31, sPropModel[i].m.mesh[k].solid = TRUE;
+            }
+        }
+        if (strcmp(sPropModel[i].name, model) == 0)
+            return sPropModel[i].m.ok ? &sPropModel[i].m : NULL;
+    }
+    return NULL;
+}
+
+// A soft outline round the props' models (the user, 2026-11-08: "to differentiate them better"): each pixel just
+// outside one, where nothing nearer covers the edge, darkened halfway
+static void OutlineProps(void)
+{
+    static const s8 sNear[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    static u8 sEdge[H][W];
+    u32 x, y, k;
+    for (y = 0; y < H; y++)
+        for (x = 0; x < W; x++)
+        {
+            sEdge[y][x] = 0;
+            if (sPropMask[y][x])
+                continue;
+            for (k = 0; k < 4; k++)
+            {
+                s32 nx = (s32)x + sNear[k][0], ny = (s32)y + sNear[k][1];
+                if (nx >= 0 && ny >= 0 && nx < W && ny < H && sPropMask[ny][nx] && sDepth[ny][nx] <= sDepth[y][x])
+                {
+                    sEdge[y][x] = 1;
+                    break;
+                }
+            }
+        }
+    for (y = 0; y < H; y++)
+        for (x = 0; x < W; x++)
+            if (sEdge[y][x])
+            {
+                u16 c = sColor[y][x];
+                sColor[y][x] = (((c & 31) / 2) | (((c >> 5) & 31) / 2) << 5 | (((c >> 10) & 31) / 2) << 10);
+            }
+}
+
+static void DrawProps(const OMap *g)
+{
+    const char *model[PROPS_SHOWN];
+    float x[PROPS_SHOWN], z[PROPS_SHOWN], angle[PROPS_SHOWN];
+    u32 n = Orre_Npc_Props(model, x, z, angle, PROPS_SHOWN), i, k, j, pass;
+    float S = 16.0f / g->tile;
+    for (i = 0; i < n; i++)
+    {
+        const OMap *pm = PropModel(model[i]);
+        float a = angle[i] * 3.14159265f / 180.0f, c = cosf(a), sn = sinf(a);
+        float wx = (x[i] - g->x0) * S, wz = (z[i] - g->z0) * S, wy;
+        if (pm == NULL)
+            continue;
+        wy = GroundAt(wx, wz, sView.ty);
+        for (pass = 0; pass < 2; pass++)
+            for (k = 0; k < pm->nmesh; k++)
+            {
+                const OMesh *src = &pm->mesh[k];
+                float lo[3] = {1e30f, 1e30f, 1e30f}, hi[3] = {-1e30f, -1e30f, -1e30f};
+                if (src->sky)
+                    continue;
+                if (src->count > sPropMeshCap)
+                {
+                    sPropMeshCap = src->count + 256;
+                    sPropMesh.v = realloc(sPropMesh.v, sizeof(OVtx) * sPropMeshCap);
+                }
+                {
+                    OVtx *keep = sPropMesh.v;
+                    sPropMesh = *src;
+                    sPropMesh.v = keep;
+                }
+                for (j = 0; j < src->count; j++)
+                {
+                    const OVtx *v = &src->v[j];
+                    OVtx *d = &sPropMesh.v[j];
+                    u32 ch;
+                    *d = *v;
+                    // (turned about Y: 0 faces +Z, 90 +X, as Colosseum's angles)
+                    d->x = wx + v->x * c + v->z * sn;
+                    d->z = wz - v->x * sn + v->z * c;
+                    d->y = wy + v->y;
+                    for (ch = 0; ch < 3; ch++)
+                    {
+                        float q = ch == 0 ? d->x : ch == 1 ? d->y : d->z;
+                        lo[ch] = q < lo[ch] ? q : lo[ch];
+                        hi[ch] = q > hi[ch] ? q : hi[ch];
+                    }
+                }
+                for (j = 0; j < 3; j++)
+                    sPropMesh.c[j] = (lo[j] + hi[j]) / 2;
+                sPropMesh.r = sqrtf((hi[0] - lo[0]) * (hi[0] - lo[0]) + (hi[1] - lo[1]) * (hi[1] - lo[1])
+                                    + (hi[2] - lo[2]) * (hi[2] - lo[2])) / 2;
+                DrawMesh(&sPropMesh, pass);
+            }
+    }
+}
+
 static void Render(void)
 {
     u32 i, pass;
@@ -1066,6 +1242,7 @@ static void Render(void)
         (&sColor[0][0])[i] = 0;
         (&sDepth[0][0])[i] = 1e30f;
         (&sIds[0][0])[i] = -1;
+        (&sPropMask[0][0])[i] = 0;
     }
     const OMap *g = Drawn();
     if (g == NULL)
@@ -1084,6 +1261,11 @@ static void Render(void)
         for (i = 0; i < g->nmesh; i++)
             if (!g->mesh[i].sky)
                 DrawMesh(&g->mesh[i], pass);
+    if (g == sCur)
+    {
+        DrawProps(g);   // (the room's props: not in a scene room of the opening's)
+        OutlineProps();
+    }
 }
 
 // ------------------------------------------------------------------------------------------------ the picture
@@ -1226,6 +1408,7 @@ void O3D_Update(void)
     gMpO3dOamHidden = sView.active && !getenv("MOEMON_O3D_NOHIDE") ? OamHidden : NULL;
     Orre_Vm_Frame();   // (Colosseum's scripts: src/orre/orre_vm.c; they stop off ORRE)
     O3D_CamTick();     // (a shot of Colosseum's playing: o3d_cam.c)
+    SceneFacing();     // (people's sides as a scene's camera sees them)
     if (!sView.active)
     {
         sCur = NULL;

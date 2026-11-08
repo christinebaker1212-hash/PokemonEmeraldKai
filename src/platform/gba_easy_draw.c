@@ -1,4 +1,5 @@
 #ifdef RENDERER_EASY_DRAW
+#include <math.h>
 #include "global.h"
 #include "mp.h"
 #include "palette.h"
@@ -671,6 +672,58 @@ static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct 
 // covers (shrunk around the sprite's bottom middle), kept where at least half of it is covered: smooth, nothing dropped.
 // FETCH gives a texel's colour (FALSE: transparent) in the entry's own w x h picture.
 typedef bool (*TexelFetch)(const void *ctx, int tx, int ty, uint16_t *color);
+
+// Moemon Kai: an entry drawn bigger (ORRE's scenes: src/orre/o3d.c, at most 3x) isn't a grid of squares: its picture
+// is smoothed the pixel-art way, Scale2x twice (Scale4x: each texel split in four by its neighbours' edges, then again),
+// so lines and curves come out round with the picture's own colours and nothing blurred. A texel as a colour, or
+// TRANSPARENT (0x8000: no GBA colour has the top bit)
+#define SMOOTH_NONE 0x8000
+static uint16_t SmoothTexel(TexelFetch fetch, const void *ctx, int w, int h, int tx, int ty)
+{
+    uint16_t c;
+    if (tx < 0 || ty < 0 || tx >= w || ty >= h || !fetch(ctx, tx, ty, &c))
+        return SMOOTH_NONE;
+    return c & 0x7FFF;
+}
+
+// Scale2x on the original picture: the 2x texel (x2, y2)
+static uint16_t Smooth2x(TexelFetch fetch, const void *ctx, int w, int h, int x2, int y2)
+{
+    int tx = x2 >> 1, ty = y2 >> 1;
+    uint16_t p = SmoothTexel(fetch, ctx, w, h, tx, ty);
+    uint16_t a = SmoothTexel(fetch, ctx, w, h, tx, ty - 1), b = SmoothTexel(fetch, ctx, w, h, tx + 1, ty);
+    uint16_t cc = SmoothTexel(fetch, ctx, w, h, tx - 1, ty), d = SmoothTexel(fetch, ctx, w, h, tx, ty + 1);
+    bool right = x2 & 1, down = y2 & 1;
+    if (a == d || cc == b)
+        return p;
+    if (!right && !down)
+        return cc == a ? cc : p;
+    if (right && !down)
+        return a == b ? b : p;
+    if (!right && down)
+        return d == cc ? cc : p;
+    return b == d ? d : p;
+}
+
+// ... and on that: the 4x texel (x4, y4)
+static uint16_t Smooth4x(TexelFetch fetch, const void *ctx, int w, int h, int x4, int y4)
+{
+    int tx = x4 >> 1, ty = y4 >> 1;
+    uint16_t p = Smooth2x(fetch, ctx, w, h, tx, ty);
+    uint16_t a = Smooth2x(fetch, ctx, w, h, tx, ty - 1), b = Smooth2x(fetch, ctx, w, h, tx + 1, ty);
+    uint16_t cc = Smooth2x(fetch, ctx, w, h, tx - 1, ty), d = Smooth2x(fetch, ctx, w, h, tx, ty + 1);
+    bool right = x4 & 1, down = y4 & 1;
+    if (a == d || cc == b)
+        return p;
+    if (!right && !down)
+        return cc == a ? cc : p;
+    if (right && !down)
+        return a == b ? b : p;
+    if (!right && down)
+        return d == cc ? cc : p;
+    return b == d ? d : p;
+}
+
 static void DrawScaledEntry(struct scanlineData *scanline, uint16_t *pixels, struct OamData *oam, uint16_t vcount,
                             bool windowsEnabled, unsigned int blendMode, bool isSemiTransparent, bool isObjWin,
                             int x0, int y0, int w, int h, u16 scale, s16 ax, s16 ay, TexelFetch fetch, const void *ctx)
@@ -690,6 +743,26 @@ static void DrawScaledEntry(struct scanlineData *scanline, uint16_t *pixels, str
         gx0 = 0;
     if (gx1 > DISPLAY_WIDTH)
         gx1 = DISPLAY_WIDTH;
+    if (scale > 256)
+    {
+        // (bigger: each screen pixel's middle in the smoothed 4x picture)
+        float cy = (sy0 + sy1) * 0.5f;
+        int y4 = (int)floorf(cy * 4.0f);
+        if (cy < 0 || cy >= h)
+            return;
+        for (gx = gx0; gx < gx1; gx++)
+        {
+            float cx = ax + ((float)gx + 0.5f - ax) * inv - x0;
+            uint16_t c;
+            if (cx < 0 || cx >= w)
+                continue;
+            c = Smooth4x(fetch, ctx, w, h, (int)floorf(cx * 4.0f), y4);
+            if (c != SMOOTH_NONE)
+                PutObjPixel(scanline, pixels, oam, c, gx, vcount, windowsEnabled, blendMode, isSemiTransparent, isObjWin,
+                            FALSE);
+        }
+        return;
+    }
     for (gx = gx0; gx < gx1; gx++)
     {
         float sx0 = ax + ((float)gx - ax) * inv - x0, sx1 = sx0 + inv;

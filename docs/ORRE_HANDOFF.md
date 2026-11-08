@@ -250,6 +250,37 @@ The older notes per part:
 - Seen, not yet looked into: PHENAC's mart floor draws as blue speckles (a texture of that room's model).
 
 ## Colosseum's cameras (src/orre/o3d_cam.c, 2026-11-08)
+- **Props as Colosseum's models** (the user, 2026-11-08: "any 3D model like the sack that does not have an appropriate
+  sprite... use the original model"; "a soft outline to sprite models to differentiate them"): the rooms' people with
+  no ORRE person (src/data/orre_props.h from tools/orre/gen_people.py: 55, 25 models) are packed by
+  tools/orre/build_pack.py as "*<model>" entries (posed at their first animation's first frame by hsd_anim, no grid)
+  and drawn by o3d.c DrawProps where their person stands (its own spot while on its starting tile), turned by its
+  angle (Orre_Npc_Props), on the ground; their texels drawn whole or not at all (OMesh.solid), then a soft outline:
+  each pixel just outside one, nothing nearer covering the edge, darkened halfway (OutlineProps).
+- **Sprites under a scene's camera** (the user's playthrough, 2026-11-08: giant blocks in close shots; their choice:
+  "smooth + cap the zoom"): a person is drawn at most 3x (o3d.c O3D_PlaceSprite, 768 Q8), enlarged the pixel-art
+  way, Scale2x twice (gba_easy_draw.c Smooth4x in DrawScaledEntry: round edges, the picture's own colours, nothing
+  blurred); the scale only reaches sprites O3D_PlaceSprite placed this frame on ORRE's field (sSpriteScaleFrame:
+  a battle's sprites reuse the slots: the zoom before a battle once blew up the back picture and the HP box). A
+  person's side follows the scene's camera (o3d.c SceneFacing: their facing kept, the picture turned by quarter turns
+  of the camera's yaw against the field's; only Kai's four-sided picture sets: event_object_movement.c
+  MP_SpriteHasFourSides). A scene that gives the field back with its camera still parked eases it back to the field's
+  (orre_vm.c LetGo: PHENAC's hunters scene leaves it on the sack). The place's name banner closes before a script's
+  message (they share BG0's scroll).
+- **A lost battle** where Colosseum's game ends (its zenmetu flag: WILLIE's): the whiteout's check reads the battle
+  before Orre_BattleEnded forgets it (battle_setup.c CB2_EndOrreBattle); the story goes back to how the scene found it
+  (orre_vm.c KeepStory when a scene takes the player, put back at the whiteout's warp: Colosseum goes back to the save,
+  so the scene plays again); the player wakes at the last ORRE POKeMON CENTER healed at (N_POKEMON_CENTER sets the
+  save's lastHealLocation) or the OUTSKIRT STAND (Orre_Vm_LossWhiteOut). Scenario orre_willie_loss.
+- **Story gates** (scriptSetCol, GScolsys2SetObjEnable: 169 calls in the rooms' scripts): the maps are built with
+  every gate open; tools/orre/gen_gates.py lists each gate's tiles (its walls crossing a walkable tile at a person's
+  height, or the step between two, closing the one farther from the gate's middle) in src/data/orre_gates.h; Colosseum's
+  objects start on, so a gate the room's scripts only ever open (16 of 41) closes as the room is entered and its
+  set-up opens it; one they switch both ways starts open (the story state that switched it on can't be told from a
+  fresh load: the subway's gate 17 blocked a story walk) (orre_vm.c SetGate, OrreGate.closed). PHENAC:
+  gate 26 is RUI's sack, gate 40 the fence round it until she's out (so the player can't leave before). A prop with
+  something to say answers A from two tiles away when its collision covers the tile between (orre_npcs.c
+  Orre_Check_InFront).
 - **The scene's own camera** (the user's playthrough, 2026-11-08: scenes "snap" where they should fade and change
   angles): GSscene_SetMode(3) is Colosseum's free camera (the decomp's camera.c, mode 3): std040_cameraSetPosition
   (the eye), cameraSetRotation (radians: X up and down, Y round, Z the roll; the look along -Z turned Z, X, then Y, as
