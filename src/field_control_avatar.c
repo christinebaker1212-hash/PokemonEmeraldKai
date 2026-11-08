@@ -41,6 +41,8 @@
 #include "constants/map_types.h"
 #include "constants/songs.h"
 #include "constants/trainer_hill.h"
+#include "o3d.h"   // Moemon Kai: ORRE's people
+#include "orre.h"
 
 static EWRAM_DATA u8 sWildEncounterImmunitySteps = 0;
 static EWRAM_DATA u16 sPrevMetatileBehavior = 0;
@@ -380,6 +382,11 @@ static const u8 *GetInteractedObjectEventScript(struct MapPosition *position, u8
     gSelectedObjectEvent = objectEventId;
     gSpecialVar_LastTalked = gObjectEvents[objectEventId].localId;
     gSpecialVar_Facing = direction;
+
+    // Moemon Kai: an ORRE person: their own talk script, Colosseum's (src/orre/orre_npcs.c)
+    if (O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup)
+     && (script = Orre_Npc_TalkScript(gObjectEvents[objectEventId].localId)) != NULL)
+        return script;
 
     if (InTrainerHill() == TRUE)
         script = GetTrainerHillTrainerScript();

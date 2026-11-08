@@ -73,6 +73,24 @@ void Orre_Vm_RoomEntered(void);
 void Orre_Vm_Stop(void);
 void Orre_Vm_Warped(void);         // (overworld.c LoadMapFromWarp)
 void Orre_VmHold(void);            // (special, waitstate) Orre_EventScript_VmHold
+void Orre_VmTalk(void);            // (special) Orre_EventScript_Talk: person VAR_0x8004's talk script
+// The rooms' people (src/orre/orre_npcs.c): Colosseum's characters as object events, driven by its scripts
+void Orre_Npcs_RoomEntered(u16 room);
+void Orre_Npcs_Clear(void);
+void Orre_Npcs_Place(void);
+void Orre_Npc_SetDisp(u32 index, bool8 show);
+void Orre_Npc_SetShown(u32 index, bool8 show);
+void Orre_Npc_SetPosition(u32 group, u32 index, float x, float z);
+void Orre_Npc_SetAngle(u32 group, u32 index, float degrees);
+void Orre_Npc_FaceOther(u32 group, u32 index, u32 tgroup, u32 tindex);
+void Orre_Npc_MoveTo(u32 group, u32 index, float x, float z);
+void Orre_Npc_MoveToOther(u32 group, u32 index, u32 tgroup, u32 tindex);
+bool8 Orre_Npc_Done(u32 group, u32 index);
+u16 Orre_Npc_Name(u32 index);
+void Orre_Npc_TalkStart(u32 group, u32 index);
+void Orre_Npc_TalkEnd(u32 group, u32 index);
+const u8 *Orre_Npc_TalkScript(u8 localId);      // (field_control_avatar.c)
+u32 Orre_Npc_TalkScriptId(u32 index);
 u16 Orre_VmHolding(void);          // (specialvar) a scene still holds the player
 void Orre_VmBattleDone(void);      // (orre_battle.c) its battle is over
 bool8 Orre_Vm_Debug(u16 bank, u16 func);

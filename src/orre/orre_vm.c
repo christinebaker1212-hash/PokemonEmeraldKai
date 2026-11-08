@@ -67,7 +67,7 @@ struct Bank
 };
 
 enum { T_FREE, T_RUN, T_WAIT, T_DONE };
-enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE };
+enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE, W_MOVE };
 
 struct Thread
 {
@@ -80,6 +80,7 @@ struct Thread
     s32 frames;           // W_FRAMES: frames left
     u32 message;          // W_MESSAGE*: the line shown (shown again if the field hid it)
     u16 battle;           // W_BATTLE: the battle asked for
+    u32 moveGroup, moveIndex;   // W_MOVE: the person whose walk it waits for
     V st[VM_STACK];
 };
 
@@ -322,6 +323,9 @@ enum
     N_HERO_INIT_EVENT = 32, N_HERO_TERM_EVENT = 33, N_PEOPLE_MOVE_CHECK = 62, N_FLAG_SET1 = 78, N_FLAG_SET0 = 79,
     N_FLAG_SET = 80, N_FLAG_CHECK = 81, N_FLAG_GET = 82, N_ROOM_ID = 92, N_GROUP_ID = 93, N_FIGHT_START = 102,
     N_BATTLE_RESULT = 103, N_SET_VALUE = 132, N_FIELD_START = 152, N_SLEEP = 157, N_CAMERA_END_CHECK = 160,
+    N_PEOPLE_VISIBLE = 50, N_PEOPLE_OPEN = 56, N_PEOPLE_CLOSE = 57, N_SET_POSITION = 59, N_SET_ROTATION = 60,
+    N_MOVE_TO = 61, N_LOOK_AT_PLAYER = 65, N_TURN_TO_ANGLE = 68, N_FLOOR_CHAR_DISP = 100, N_FACE_CHARACTER = 165,
+    N_MOVE_TO_CHARACTER = 177, N_TURN_HEAD_TO = 181, N_APPROACH_PLAYER = 232,
 };
 
 static void WordsOf(u8 *out, u8 ctl, u32 value)
@@ -358,11 +362,20 @@ static void ShowMessage(struct Thread *t, u32 msg, bool8 key)
     MPNet_Log("orre vm: message %u", msg);
 }
 
-// The person a talk names: their name's message, as Colosseum's std054 puts it in {npc} (the room's people come with
-// step 5: until then the name a script set stays)
+// The person a talk names: their name's message in {npc}, as Colosseum's std054 puts it: the name table's row (common_rel
+// .data 0x1A34, 8 bytes: u16 the story flag that tells it's known, u32 its message), "???" (message 0xFA3) until then
 static void SpeakerName(u32 group, u32 index)
 {
-    (void)group, (void)index;
+    u16 row = Orre_Npc_Name(index);
+    u32 msg = 0xFA3;
+    (void)group;
+    if (row != 0xFFFF && LoadData() && row < Be32(sData + NAME_COUNT) && NAMES + 8 * (row + 1) <= sDataSize)
+    {
+        u16 hear = Be16(sData + NAMES + 8 * row);
+        if (hear == 0 || Orre_Flag(hear))
+            msg = Be32(sData + NAMES + 8 * row + 4);
+    }
+    Orre_SetStrVar(0x59, Orre_Text(msg));
 }
 
 static bool8 HeroInBox(f32 x0, f32 z0, f32 x1, f32 z1)
@@ -432,6 +445,7 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
     case N_FLAG_SET0: Orre_SetFlag(ARG(0).u, FALSE); return 0;
     case N_FLAG_SET: Orre_SetFlagValue(ARG(0).u, ARG(1).u); return 0;
     case N_TALK:
+        Orre_Npc_TalkStart(ARG(0).u, ARG(1).u);
         SpeakerName(ARG(0).u, ARG(1).u);
         ShowMessage(t, ARG(2).u, TRUE);
         return 0;
@@ -439,6 +453,8 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
         ShowMessage(t, ARG(0).u, ARG(1).u != 0);
         return 0;
     case N_END_SPEECH:
+        Orre_Npc_TalkEnd(ARG(0).u, ARG(1).u);
+        // fall through
     case N_WIN_CLOSE:
         if (!IsFieldMessageBoxHidden())
             HideFieldMessageBox();
@@ -476,7 +492,30 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
         return 0;
     case N_BATTLE_RESULT: return Orre_BattleResult();
     case N_FADE_SET: case N_FADE_CHECK: return 0;
-    case N_PEOPLE_MOVE_CHECK: case N_PEOPLE_WAIT_SYNC: case N_CAMERA_END_CHECK: case N_CHAR_SET_ANIM: return 1;
+    case N_PEOPLE_WAIT_SYNC: case N_CAMERA_END_CHECK: case N_CHAR_SET_ANIM: return 1;
+    // ---- the room's people (orre_npcs.c)
+    case N_PEOPLE_VISIBLE: Orre_Npc_SetShown(ARG(1).u, ARG(2).u != 0); return 0;
+    case N_FLOOR_CHAR_DISP: Orre_Npc_SetDisp(ARG(0).u, ARG(1).u != 0); return 0;
+    case N_PEOPLE_OPEN: Orre_Npc_SetShown(ARG(1).u, TRUE); return 0;
+    case N_PEOPLE_CLOSE: Orre_Npc_SetShown(ARG(1).u, FALSE); return 0;
+    case N_SET_POSITION: Orre_Npc_SetPosition(ARG(0).u, ARG(1).u, ARG(2).f, ARG(4).f); return 0;
+    case N_SET_ROTATION: Orre_Npc_SetAngle(ARG(0).u, ARG(1).u, ARG(3).f); return 0;
+    case N_TURN_TO_ANGLE: Orre_Npc_SetAngle(ARG(0).u, ARG(1).u, ARG(2).f); return 0;
+    case N_MOVE_TO: Orre_Npc_MoveTo(ARG(0).u, ARG(1).u, ARG(3).f, ARG(5).f); return 0;
+    case N_MOVE_TO_CHARACTER: Orre_Npc_MoveToOther(ARG(0).u, ARG(1).u, ARG(2).u, ARG(3).u); return 0;
+    case N_APPROACH_PLAYER:
+        Orre_Npc_MoveToOther(ARG(0).u, ARG(1).u, 0, 100);
+        t->moveGroup = ARG(0).u, t->moveIndex = ARG(1).u;
+        t->wait = W_MOVE;
+        return 0;
+    case N_PEOPLE_MOVE_CHECK:
+        if (ARG(2).u == 0)
+            return Orre_Npc_Done(ARG(0).u, ARG(1).u);
+        t->moveGroup = ARG(0).u, t->moveIndex = ARG(1).u;
+        t->wait = W_MOVE;
+        return 1;
+    case N_FACE_CHARACTER: case N_TURN_HEAD_TO: Orre_Npc_FaceOther(ARG(0).u, ARG(1).u, ARG(2).u, ARG(3).u); return 0;
+    case N_LOOK_AT_PLAYER: Orre_Npc_FaceOther(ARG(0).u, ARG(1).u, 0, 100); return 0;
     }
 #undef ARG
     if (n < ARRAY_COUNT(sLogged) && !sLogged[n])
@@ -697,6 +736,10 @@ static void Poll(struct Thread *t)
         if (--t->frames <= 0)
             t->wait = W_NONE;
         break;
+    case W_MOVE:
+        if (Orre_Npc_Done(t->moveGroup, t->moveIndex))
+            t->wait = W_NONE;
+        break;
     case W_MESSAGE:
         if (!IsTextPrinterActive(0))
             t->wait = W_NONE;
@@ -794,6 +837,7 @@ void Orre_Vm_Stop(void)
     sHolder = NULL;
     sHoldPending = FALSE;
     sRoom = 0;
+    Orre_Npcs_Clear();
 }
 
 // The player arrived in an ORRE room: its bank, its set-up, its main loop (Colosseum's floor record)
@@ -810,12 +854,15 @@ void Orre_Vm_RoomEntered(void)
         return;
     sRoom = room;
     LoadRoomBank(file);
+    Orre_Npcs_RoomEntered(room);
     if ((floor = FloorOf(room)) == NULL || sRoomBank.d == NULL)
         return;
     for (k = 0x2C; k <= 0x34; k += 4)
     {
         u32 id = Be32(floor + k);
         struct Thread *t;
+        if (k == 0x30)
+            Orre_Npcs_Place();   // (Colosseum's order: + 0x2C, the people, + 0x30)
         if (id == 0)
             continue;
         if ((t = Start(id, 0, NULL, TRUE)) != NULL && k < 0x34)
@@ -835,6 +882,20 @@ void Orre_VmHold(void)
         return;
     }
     sHolding = TRUE;
+}
+
+// (special) Orre_EventScript_Talk: the person VAR_0x8004 was talked to: their talk script runs as the scene that holds
+// the field (Colosseum's peopleStartScript: its arguments the group, the person, 0, 0)
+void Orre_VmTalk(void)
+{
+    u32 args[4] = {1, gSpecialVar_0x8004, 0, 0};
+    u32 id = Orre_Npc_TalkScriptId(gSpecialVar_0x8004);
+    struct Thread *t;
+    if (id == 0 || sHolder != NULL || (t = Start(id, 4, args, FALSE)) == NULL)
+        return;
+    t->holds = TRUE;
+    sHolder = t;
+    MPNet_Log("orre vm: talk to person %u: %08X", gSpecialVar_0x8004, id);
 }
 
 // (specialvar) a scene still holds the player

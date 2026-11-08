@@ -81,7 +81,7 @@ The road to the end, agreed with the user 2026-11-07 (their answers: ORRE_DECISI
 1. **Story state: done** (below, "Story flags"). 2. **Colosseum's text: done** (below, "Colosseum's text").
 3. **Trainers: done** (below, "Trainers and battles"). 4. **Colosseum's scripts: running** (below, "Colosseum's scripts": its GS VM in the game; more natives as each
    part needs them).
-5. People on the maps (where Colosseum puts them, shown as its scripts say). 6. Shops, POKéMON CENTERs, the PC.
+5. **People on the maps: done** (below, "People on the maps"). 6. Shops, POKéMON CENTERs, the PC.
 7. The opening (the player as the thief, the SNAG MACHINE), then the ride to the OUTSKIRT STAND. 8. RUI follows the host.
 9. The colosseum challenges (PHENAC, PYRITE, THE UNDER, DEEP COLOSSEUM, REALGAM TOWER). 10. Story scenes, faithful.
 11. Shadow Pokémon's open items (SHADOW_POKEMON.md "Still open"). 12. Music (alongside 4). 13. The bike ride.
@@ -126,7 +126,7 @@ The older notes per part:
    92 people (agent_m_b1-b6 the Cipher Peons' colours), 73 pictures; the Pokemon and props in the people tables
    (pikachu, casey = ABRA, makunoshita = MAKUHITA, truck, bag...) aren't people: they'll be POKeMON objects / props.
    Debug: `mp orrenpc PERSON [DX DY]`, `mp orrefoe PERSON [1]`, `mp createddump HEX DIR`. Scenario orre_people.
-   Next: place the people on the maps from colo_rooms.py's `people` (model -> person), shown by their scripts (step 5).
+   Placed on the maps since 2026-11-08 (below, "People on the maps").
 5. **Words and scripts.** The map scripts (.scd, the GS VM) converted to Kai's (as tools/sinnoh/gen_scripts.py does
    SINNOH's); the text is done (above, "Colosseum's text": a line is its id's placeholder, the words it fills in ORRE's
    string slots). Never write ORRE's words or scripts by hand.
@@ -163,18 +163,54 @@ The older notes per part:
   open / close, 55 end of speech: Colosseum's line by id through orre_text.c, waiting for A where Colosseum's wait
   says), 11 YES / NO (0 YES), 132 msgctrlSetValue (a control's value made words: names by message, items, species,
   moves, numbers), 157 sleep and the yield, 58 the hero in a box, 92 / 93 room and group, 102 / 152 battles, 103 the
-  result, 31 / 32 / 33 the hero. **Not yet**: the people (50 visible, 59 position, 60 / 68 facing, 61 / 177 walking,
-  51 animation, 165 / 181 looking: step 5), the camera (36 / 37 / 40 / 41 / 140 / 141 / 179: Platinum's camera stays,
+  result, 31 / 32 / 33 the hero, the people (below, "People on the maps"). **Not yet**: 51 animation (a sprite has
+  none of the model's poses), the camera (36 / 37 / 40 / 41 / 140 / 141 / 179: Platinum's camera stays,
   maybe never), sounds and music (104 / 105 / 109: with the music), story gates (118 scriptSetCol), map objects
-  (114 / 115), items and money, menus, shops, the PC; the people's own talk scripts and the rooms' event triggers (the
-  floor's events: pass / touch / check) start scenes too once people stand on the maps. An unconverted native logs once
+  (114 / 115), items and money, menus, shops, the PC; the rooms' event triggers (the floor's events: pass / touch /
+  check) start scenes too. An unconverted native logs once
   ("native N not converted yet") and does nothing.
-- **Off in players' games** until step 5 (people) works: MOEMON_ORRE_SCRIPTS=1 turns the rooms' scripts on (tests,
-  development); without it nothing runs. MOEMON_ORRE_VM_TRACE=1 logs every native call and the threads' state.
+- **Off in players' games** until the opening (step 7) gives a boat arrival its own start: MOEMON_ORRE_SCRIPTS=1
+  turns the rooms' scripts on (tests, development); without it nothing runs and no one stands on the maps. (On, the
+  OUTSKIRT STAND's main loop would play Colosseum's arrival on the bike, flag 986, with the camera unconverted.) MOEMON_ORRE_VM_TRACE=1 logs every native call and the threads' state.
 - Tools: `python3 -I tools/orre/gsvm.py ROOM.scd [FUNC]` lists a bank (natives named, their constant arguments);
   `gsvm.py common UNPACKED` the shared one. Debug `mp orrescript BANK FUNC` runs a function as a scene. Scenario
   orre_scene_willie: WILLIE's scene at the OUTSKIRT STAND (flags 986 / 988 set: past the arrival) from the main loop,
   his lines, YES / NO, battle 10, his loss line, the flags it sets (990, 2650, 991).
+
+## People on the maps (src/orre/orre_npcs.c, 2026-11-08)
+- **Each room's people are Colosseum's own**: tools/orre/gen_people.py (`python3 -I tools/orre/gen_people.py
+  [UNPACKED]`, from the unpacked disc: run it again after colo_rooms.py or people.py changes) writes
+  src/data/orre_room_people.h, committed: 757 rows {room, index, flags, talk types, angle, ORRE person, name row,
+  move / talk scripts, x, z}. The person is people.py's for the row's model (0xFFFF: a POKeMON or a prop, not placed
+  yet: truck_b1, casey, pikachu...; hizuki_b2, RUI's other clothes, is RUI).
+- **On the map as Kai objects**: local id 0x40 + the index (the maps' own objects stay below), graphics
+  OBJ_EVENT_GFX_ORRE_FIRST + person, standing on the tile of Colosseum's x / z (O3D_ColoToTile: 8 units a tile),
+  facing its angle (0 south, 90 east, 180 north, 270 west), MOVEMENT_TYPE_NONE.
+- **Who shows: Colosseum's order** (floor.c _floorInitialize): the room's first set-up (+ 0x2C, run at once) may
+  change a person's 0x80 (scriptFloorCharSetDisp, native 100: it writes Colosseum's table in memory, so it holds for
+  the session: sDisp), then the people are placed (Orre_Npcs_Place: those with 0x80), then the second set-up
+  (+ 0x30) and the main loop. At the OUTSKIRT STAND no one shows until the story does: WILLIE (3) once flag 990 is set.
+- **Natives**: 50 peopleSetVisible / 56 peopleOpen / 57 peopleCloseByID (now), 59 position, 60 rotation, 68 turn,
+  165 / 181 face a person, 65 look at the player, 61 moveToPosition and 177 moveToCharacter / 232 (a tile short of
+  them) as Kai's scripted movement (along x, then along y: the walk goes on while the field is locked), 62
+  peopleMoveCheck (its wait holds the thread until the walk is over: W_MOVE). The hero is (0, 100): their position
+  is never set by a script (Kai's camera follows the player), their turns and walks are. 54 characterTalk turns the
+  speaker to the player as Colosseum does (the record's talk start type, byte + 1 >> 6: 1 the head, 2 the body), 55
+  end of speech turns them back (always for 1, for 2 when the end type, >> 4 & 3, is 1).
+- **The speaker's name** (std054): the name table row (common_rel .data 0x1A34, 8 bytes: a hear flag, the name's
+  message): its name once the flag is set (or with none), else "???" (0xFA3), into control 0x59.
+- **Talking to them**: A in front of a person with a talk script (field_control_avatar.c
+  GetInteractedObjectEventScript -> Orre_Npc_TalkScript) runs data/scripts/orre.inc Orre_EventScript_Talk: lockall,
+  special Orre_VmTalk starts the talk script with Colosseum's arguments (1, index, 0, 0) as the scene holding the
+  field, then the hold loop.
+- Logs: "orre npcs: room R, N people, M shown", "N shown at X,Y", "N walks K steps to X,Y", "N walked to X,Y".
+- **Not yet**: the people's move scripts (+ 0x10: wandering, set-up per person), the record's move types (2 wander,
+  3...), look-at-the-player while near (flag 0x20: a sprite would turn as the player passes), animations (51), the
+  floor's other objects (floorInitPeople: treasure and props), POKeMON and props as objects, more than Kai's 16
+  objects on a map at once (a room has up to 48 people: those past the limit don't show).
+- Scenario orre_scene_willie: WILLIE shown by his scene, walking in and stopping two steps south of the player (the
+  test puts the player at 25,28, where Colosseum's hero stands for it), the battle, then the room's set-up showing him
+  at his place and A in front of him running his talk script (0x0100000D: 20790).
 
 ## Trainers and battles (src/orre/orre_battle.c, 2026-11-08)
 - **Read at run time** from common_rel in the data pack (nothing generated or committed): battles (fightEncount: .data

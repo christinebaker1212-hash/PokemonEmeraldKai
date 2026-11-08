@@ -24,6 +24,12 @@ Orre_EventScript_VmHoldLoop:
 	releaseall
 	end
 
+@ A person talked to: their talk script (Colosseum's) runs, holding the field as a scene does
+Orre_EventScript_Talk::
+	lockall
+	special Orre_VmTalk
+	goto Orre_EventScript_VmHoldLoop
+
 @ ---- The boat to ORRE (src/orre/orre_ferry.c; docs/ORRE_DECISIONS.md "A post-game place"). Kai's own words: the boat
 @ and its sailor aren't Colosseum's (the user's choice, 2026-11-07).
 
