@@ -586,8 +586,10 @@ static const struct Achievement sAch[] = {
     {"sthard", "NO HANDICAPS", "Win a cup with every restriction in place.", AK_STADIUM, STADIUM_ACH_HARD, 1, 1, C_STADIUM},
     {"sthard12", "STADIUM LEGEND", "Win every class of ROUND 1 with every restriction.", AK_STADIUM, STADIUM_ACH_HARD_R1, 12, 2, C_STADIUM},
     {"stbattles", "STADIUM REGULAR", "Win 100 battles at the STADIUM.", AK_STADIUM, STADIUM_ACH_BATTLES, 100, 1, C_STADIUM},
-    {"karceus", "ARCEUS TRIALS", "Complete all seventeen ARCEUS trials in KANTO.", AK_FLAGS, FL_ARCEUS_TRIALS, 17, 2, C_KANTO},
-    {"karceusn", "THE ORIGINAL ONE", "Face the Normal-type ARCEUS in ALTERING CAVE.", AK_FLAG, 0x2E16, 1, 2, C_KANTO},
+    // (the ARCEUS trials were Moemon Quetzal's, removed from KANTO (docs/REGIONS_AUDIT.md case 19): unlisted rows, the
+    // user 2026-11-08)
+    {"karceus", "ARCEUS TRIALS", "Complete all seventeen ARCEUS trials in KANTO.", AK_FLAGS, FL_ARCEUS_TRIALS, 17, 2, C_GONE},
+    {"karceusn", "THE ORIGINAL ONE", "Face the Normal-type ARCEUS in ALTERING CAVE.", AK_FLAG, 0x2E16, 1, 2, C_GONE},
     // (1.182.0: KANTO, JOHTO and SINNOH at par with HOENN, the user 2026-11-08; their tabs also copy HOENN's own that
     // every region has: steps, POKéMON CENTERS, shopping... sTabCopy)
     {"kssanne", "ALL ABOARD", "Get HM01 from the S.S. ANNE's captain.", AK_FLAG, 0x214E, 1, 0, C_KANTO},
