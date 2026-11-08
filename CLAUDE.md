@@ -110,7 +110,9 @@ OUTSKIRT STAND by a sailor who sails back (src/orre/orre_ferry.c, data/scripts/o
 Shadow Pokémon (designed before the story, the user 2026-11-07): `docs/SHADOW_POKEMON.md`.
 ORRE's words: orre/orre_text.pak (tools/orre/build_text.py, from the disc by make_pack.sh, never committed), a line by
 Colosseum's own message id through PLACEHOLDER_ID_ORRE_TEXT, the words it fills in ORRE's string slots
-(src/orre/orre_text.c; ORRE_HANDOFF "Colosseum's text"; scenario orre_text).
+(src/orre/orre_text.c; ORRE_HANDOFF "Colosseum's text"; scenario orre_text). ORRE's battles: Colosseum's battle /
+trainer / team tables read from the pack at run time, fought as Kai trainer battles through TRAINER_ORRE_A / _B
+(src/orre/orre_battle.c; ORRE_HANDOFF "Trainers and battles"; scenario orre_battle).
 ORRE's people (the user, 2026-11-07): each Colosseum character model is a LOOK > CREATE recipe (field sprite) and the
 closest Pokemon Showdown trainer sprite (battle picture, 80x80 as drawn): tools/orre/people.py, src/orre/orre_people.c,
 ORRE_HANDOFF "Sprites"; scenario orre_people.

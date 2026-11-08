@@ -79,8 +79,7 @@ rules, and what each tool does. This file is where things stand, what a new sess
 ## Next steps (in order)
 The road to the end, agreed with the user 2026-11-07 (their answers: ORRE_DECISIONS "The road to the end"):
 1. **Story state: done** (below, "Story flags"). 2. **Colosseum's text: done** (below, "Colosseum's text").
-3. Trainers: Colosseum's trainer table -> Kai trainers (teams, prize money, Shadow Pokémon, their person: sprite and
-   picture). 4. **The script converter** (.scd -> Kai scripts at build time, as SINNOH's; the big one).
+3. **Trainers: done** (below, "Trainers and battles"). 4. **The script converter** (.scd -> Kai scripts at build time, as SINNOH's; the big one).
 5. People on the maps (where Colosseum puts them, shown as its scripts say). 6. Shops, POKéMON CENTERs, the PC.
 7. The opening (the player as the thief, the SNAG MACHINE), then the ride to the OUTSKIRT STAND. 8. RUI follows the host.
 9. The colosseum challenges (PHENAC, PYRITE, THE UNDER, DEEP COLOSSEUM, REALGAM TOWER). 10. Story scenes, faithful.
@@ -136,6 +135,29 @@ The older notes per part:
 7. **Snagging and Shadow Pokémon**, in Orre only (state in a sidecar: saves never change layout; Colosseum's story
    flags, src/orre/orre_story.c, go there too).
 8. The in-game download screen when orre/ is missing (as the DANCE machine's rh_screen.c StateNoSongs).
+
+## Trainers and battles (src/orre/orre_battle.c, 2026-11-08)
+- **Read at run time** from common_rel in the data pack (nothing generated or committed): battles (fightEncount: .data
+  0x109FBC, 0x38 each, 566), trainers (0x91684, 0x34, 820), classes (fightTrainerKind: 0x8F724, 0xC, 41: + 0 the prize
+  rate, + 4 the name), trainer Pokémon (0x9E5DC, 0x50, 5510; moves at + 0x36 + 8n, 0 = the level's own moves). A battle
+  record: + 0 kind, + 1 trainers a side, + 2 zenmetu (a loss is game over: Kai's whiteout), + 4 field, + 8 name, + 0xC
+  song, + 0x18 four slots {u16 trainer, u32 1 = the player} (the first "a side" slots the player's side).
+- **Fought as Kai's trainer battles** through two placeholder trainers after SINNOH's, TRAINER_ORRE_A / _B (2221 /
+  2222, class TRAINER_CLASS_ORRE 107), filled before each battle in a writable copy of the trainer table (gTrainersTable;
+  the Moemon Maker's patched copy is copied as it is, and the Maker's copy now covers every trainer id:
+  gTrainersBaseCount; it stopped at TRAINERS_COUNT 855 before, past which JOHTO / KANTO / SINNOH's trainers were read
+  out of bounds while the Maker had trainer edits). Name and class name from Colosseum's text (battle_message.c asks
+  Orre_ClassName), up to four of its items, Doubles always (ORRE_DECISIONS), the team by battle_main.c's
+  CreateNPCTrainerParty asking Orre_Party: Colosseum's natures, genders, IVs, EVs, Ability slots, moves, balls, held items
+  (Shadow Pokémon by orre_shadow.c Orre_Shadow_MakeEnemy), raised by level scaling as any trainer's. The prize is
+  Colosseum's (fight_range_exact_8021D9C0.c): the class's rate x the highest level x 2 in a Double Battle.
+- **The picture** is the person a script names (the trainer records' model ids are Colosseum's 3D battle models, not
+  the field people): special Orre_StartBattle takes VAR_0x8004 the battle, VAR_0x8005 the person (0xFFFF none).
+  battle_setup.c BattleSetup_StartOrreBattle / CB2_EndOrreBattle: no trainer flags (Colosseum's scripts keep their own),
+  a loss whites out only where zenmetu says, else the script goes on; Orre_BattleResultToVar: VAR_RESULT 1 won, 2 lost
+  (ORRE_BATTLE_*; what the scripts' std103_battleGetResult will answer).
+- Debug: `mp orrebattle BATTLE [PERSON]`, `mp orreresult`; scenario orre_battle (WILLIE, battle 10: RIDER WILLIE, two
+  ZIGZAGOON at Lv 24, the prize 240).
 
 ## Colosseum's text (src/orre/orre_text.c, 2026-11-08)
 - **The pack**: orre/orre_text.pak, made by tools/orre/build_text.py from the unpacked disc (make_pack.sh runs it;
