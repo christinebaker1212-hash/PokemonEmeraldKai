@@ -801,3 +801,7 @@ gSpecials::
 	def_special Orre_VmScreen   @ Moemon Kai: ORRE: the Kai screen a scene opens (src/orre/orre_vm.c)
 	def_special Orre_VmShop
 	def_special Orre_VmCheck   @ Moemon Kai: ORRE: a check spot of Colosseum's
+	def_special Orre_VmWarp   @ Moemon Kai: ORRE: floorLink's warp, its choices (src/orre/orre_vm.c)
+	def_special Orre_VmChoice
+	def_special Orre_VmChoiceDone
+	def_special Orre_VmTouch

@@ -275,6 +275,52 @@ void MP_DebugQuickStartNewGame(void)
 // Test harness conditions (src/platform/sdl2.c: waitfor / pressuntil)
 bool8 MP_Setup_IsReady(void);
 bool8 MP_Setup_ScreenIs(int screen);
+// The harness's "walkto X Y": the D-pad key toward map tile (X, Y) by the shortest walkable way (collision and people
+// in the way), 0 once there, 0xFFFF when no way leads there or the player can't walk now
+u16 MP_TestWalkKey(s32 tx, s32 ty)
+{
+    static s16 sFrom[160 * 160];
+    static u16 sQueue[160 * 160];
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s32 w = gMapHeader.mapLayout->width, h = gMapHeader.mapLayout->height, px, py, head = 0, tail = 0, i, at;
+    static const s8 dx[4] = {0, 0, -1, 1}, dy[4] = {1, -1, 0, 0};
+    static const u16 keys[4] = {DPAD_DOWN, DPAD_UP, DPAD_LEFT, DPAD_RIGHT};
+    if (!MP_IsInOverworld() || w * h > (s32)ARRAY_COUNT(sFrom) || ScriptContext_IsEnabled())
+        return 0xFFFF;
+    px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
+    if (px == tx && py == ty)
+        return 0;
+    if (tx < 0 || ty < 0 || tx >= w || ty >= h)
+        return 0xFFFF;
+    for (i = 0; i < w * h; i++)
+        sFrom[i] = -1;
+    // (from the target back: the first step out of the player's tile toward it)
+    sFrom[ty * w + tx] = ty * w + tx;
+    sQueue[tail++] = ty * w + tx;
+    while (head < tail)
+    {
+        s32 c = sQueue[head++], cx = c % w, cy = c / w, d;
+        for (d = 0; d < 4; d++)
+        {
+            s32 nx = cx + dx[d], ny = cy + dy[d], n = ny * w + nx;
+            if (nx < 0 || ny < 0 || nx >= w || ny >= h || sFrom[n] >= 0)
+                continue;
+            if (nx == px && ny == py)
+            {
+                // the player steps from (nx, ny) to (cx, cy): the opposite of d
+                return keys[d ^ 1];
+            }
+            if (MapGridGetCollisionAt(nx + MAP_OFFSET, ny + MAP_OFFSET)
+             || GetObjectEventIdByXY(nx + MAP_OFFSET, ny + MAP_OFFSET) != OBJECT_EVENTS_COUNT)
+                continue;
+            sFrom[n] = c;
+            sQueue[tail++] = n;
+        }
+    }
+    (void)at;
+    return 0xFFFF;
+}
+
 int MP_TestCondition(const char *name)
 {
     if (strcmp(name, "cards") == 0)

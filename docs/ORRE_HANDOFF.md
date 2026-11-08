@@ -286,6 +286,33 @@ The older notes per part:
   thief (ORRE_DECISIONS), the explosion, then the ride and the OUTSKIRT STAND's arrival (flag 986's scene) and the
   boat's first landing starting it; then MOEMON_ORRE_SCRIPTS on for everyone.
 
+## The story runs (2026-11-08: toward a finishable ORRE)
+- **More natives** (orre_vm.c): 95 floorLink / 125 floorLinkWithSE (a script's room change: o3d.c O3D_RoomEntry finds
+  room R's entry K, the K-th of its map's sOrreArrivals; the hold script warps: SCREEN_WARP), 94 floorGetPrevFloorID,
+  195 floorGetNextPosIndex (the entry come in by: floorLink's, else the arrival tile's), 180; 199 the choice menu
+  (the script's array of message ids through its address; Kai's ScriptMenu_MultichoiceList; B the last row), 245
+  YES / NO; 119 scriptGetItem (Colosseum's item fanfare and lines 0x3CB8 / 0x3CBD, a full bag to the PC 0x3CBA / BB);
+  Colosseum's own items past 348 (its key items) as Kai-side ORRE flags (ORRE_KEY_ITEM_FLAG: 120 / 219 too); 131 the
+  "!" over someone; 72 / 73 / 74 walk lists (looped ones go round: Orre_Npcs_Frame); 172 a person's position written
+  through the script's address; 169 the person sees the player (right in front of them); 71 yield; 3 scriptExecTask
+  (a thread alongside, its handle for 6 std006_threadWaitForCompletion), 209 (a script run to its end first);
+  36 GSscene_SetMode(0) / 37 cameraSetTarget: the field camera back. A shot played by a thread that doesn't hold
+  the field holds it until then (Colosseum's hero only moves when the main loop calls heroMoveMain).
+- **Quiet natives** (sQuiet: what they return, nothing shown yet): sounds and music (until it's converted), the
+  scene's own camera moves (40 / 41 / 140 / 141 / 127 / 170...), models' animations, lights, people's internal flags
+  and walking speed, story gates (118: left open), doors and elevators (the maps' links), mail, the TV.
+- **The leave script**: the floor record's + 0x38 runs as the player warps out (Orre_Vm_Warped): the diner's sets 988.
+- **Touch spots**: gen_checks.py also writes sOrreRoomTouches (28: floor events of kind 2 but the doors' and
+  elevators' shared scripts 5 / 6 / 12; the trigger slot + 0x2C, ids at + 0x32); stepping onto a new tile inside
+  one runs its script holding the field (orre_npcs.c Orre_Touch_Frame, Orre_EventScript_Touch).
+- **Tests walk as players do**: the harness's `walkto X Y [FRAMES]` holds the D-pad toward a tile by the shortest
+  way (mp_debug.c MP_TestWalkKey), stopping when a script takes the player ("stopped (a script)").
+- Scenario orre_story_stand: the landing to WILLIE's scene. The chain: walking near the stand (the main loop's box)
+  plays the arrival (function 8, flag 986); the diner's news; leaving it (988); WILLIE (function 9).
+- **Still to do for a finishable ORRE**: the colosseum challenges (std223 then menu room 917: not converted), the
+  rest of the story room by room (probe with MOEMON_ORRE_VM_TRACE=1 for "not converted" natives), the opening and
+  RUI (steps 7, 8), then scripts on for everyone and a full playthrough test.
+
 ## Trainers and battles (src/orre/orre_battle.c, 2026-11-08)
 - **Read at run time** from common_rel in the data pack (nothing generated or committed): battles (fightEncount: .data
   0x109FBC, 0x38 each, 566), trainers (0x91684, 0x34, 820), classes (fightTrainerKind: 0x8F724, 0xC, 41: + 0 the prize

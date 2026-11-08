@@ -92,6 +92,7 @@ static int sTestWait = 0;
 static int sMashCount = 0, sMashInterval = 0;
 // waitfor / pressuntil: wait for a named game state (see MP_TestCondition)
 static char sUntilName[32];
+static int sWalkX, sWalkY, sWalkFrames;   // walkto
 static int sUntilFrames = 0;
 static u16 sUntilKeys = 0;
 extern int MP_TestCondition(const char *name);
@@ -1312,6 +1313,27 @@ static void TestHarnessStep(void)
         sBarrierName[0] = 0;
     }
 
+    if (sWalkFrames > 0)
+    {
+        // walkto X Y [FRAMES]: the key toward the tile each frame (mp_debug.c MP_TestWalkKey), as a player walks
+        u16 MP_TestWalkKey(s32 tx, s32 ty);
+        u16 k = MP_TestWalkKey(sWalkX, sWalkY);
+        bool8 ScriptContext_IsEnabled(void);
+        bool8 taken = ScriptContext_IsEnabled();   // (a script took the player on the way: the walk stops)
+        if (k == 0 || taken || --sWalkFrames == 0)
+        {
+            printf("[test] frame %lu: walkto %d %d %s\n", sFrameCounter, sWalkX, sWalkY,
+                   k == 0 ? "there" : taken ? "stopped (a script)" : "TIMEOUT");
+            fflush(stdout);
+            sWalkFrames = 0;
+            sTestKeys = 0;
+        }
+        else
+        {
+            sTestKeys = k == 0xFFFF ? 0 : k;
+            return;
+        }
+    }
     if (sUntilName[0])
     {
         if (MP_TestCondition(sUntilName))
@@ -1383,6 +1405,13 @@ static void TestHarnessStep(void)
             MP_Fight_TestPress(ParseFightKeys(arg));
             sFightKeysHeld = true;
             sTestWait = n > 0 ? n : 1;
+            return;
+        }
+        else if (strcmp(cmd, "walkto") == 0)
+        {
+            // walkto X Y [FRAMES]: walk to map tile (X, Y) as a player does (warps, doors and events on the way fire)
+            sWalkFrames = 1200;
+            sscanf(line, "%*s %d %d %d", &sWalkX, &sWalkY, &sWalkFrames);
             return;
         }
         else if (strcmp(cmd, "press") == 0)

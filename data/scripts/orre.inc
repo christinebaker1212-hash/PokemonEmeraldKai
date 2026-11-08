@@ -22,6 +22,8 @@ Orre_EventScript_VmHoldLoop::
 	specialvar VAR_RESULT, Orre_VmScreen    @ (a screen of Kai's the scene opens: Colosseum's shop, the PC)
 	goto_if_eq VAR_RESULT, 1, Orre_EventScript_VmShop
 	goto_if_eq VAR_RESULT, 2, EventScript_PC   @ (Kai's own PC; turning it off comes back here: pc.inc)
+	goto_if_eq VAR_RESULT, 3, Orre_EventScript_VmWarp
+	goto_if_eq VAR_RESULT, 4, Orre_EventScript_VmChoice
 	specialvar VAR_RESULT, Orre_VmHolding   @ (still held: back from a battle the scene started)
 	goto_if_eq VAR_RESULT, TRUE, Orre_EventScript_VmHoldLoop
 	releaseall
@@ -30,6 +32,20 @@ Orre_EventScript_VmHoldLoop::
 Orre_EventScript_VmShop:
 	special Orre_VmShop
 	waitstate
+	goto Orre_EventScript_VmHoldLoop
+
+@ floorLink: the warp (the room's scripts stop; the next room's start)
+Orre_EventScript_VmWarp:
+	special Orre_VmWarp
+	waitstate
+	releaseall
+	end
+
+@ std199_menuDisplayCustomMenu: Colosseum's choices as Kai's menu
+Orre_EventScript_VmChoice:
+	special Orre_VmChoice
+	waitstate
+	special Orre_VmChoiceDone
 	goto Orre_EventScript_VmHoldLoop
 
 @ A person talked to: their talk script (Colosseum's) runs, holding the field as a scene does
@@ -42,6 +58,12 @@ Orre_EventScript_Talk::
 Orre_EventScript_Check::
 	lockall
 	special Orre_VmCheck
+	goto Orre_EventScript_VmHoldLoop
+
+@ A touch spot of Colosseum's (stepping into its trigger: src/orre/orre_npcs.c Orre_Touch_Frame): its own script
+Orre_EventScript_Touch::
+	lockall
+	special Orre_VmTouch
 	goto Orre_EventScript_VmHoldLoop
 
 @ ---- The boat to ORRE (src/orre/orre_ferry.c; docs/ORRE_DECISIONS.md "A post-game place"). Kai's own words: the boat

@@ -1,0 +1,12 @@
+# ORRE's story from the boat's landing, by Colosseum's own scripts (src/orre/orre_vm.c; docs/ORRE_HANDOFF.md "The
+# story runs"): at the OUTSKIRT STAND (45,0) the player walks toward the stand (`walkto`, as a player walks) into the
+# main loop's box: the arrival scene (function 8: the two hunters walk up, 20829...) sets flag 986; in the diner (45,1)
+# its main loop plays the TV news shot holding the player; walking out of its door runs its leave script (the floor
+# record's + 0x38), which sets 988; back outside the main loop starts WILLIE's scene (20792). Needs ORRE's packs.
+MODE=1
+TMO=300
+WARP=45,0,33,40
+ENV_A="MOEMON_DEBUG_PARTY=280:50,280:50 MOEMON_ORRE_SCRIPTS=1"
+EXPECT_A=("walkto 25 30 stopped (a script)" "orre vm: message 20829" "[test] orreget 0x3DA 1"
+          "o3d cam: S1_shop_1F/S1_shop_1F_news.cam" "walkto 10 18 there" "orre vm: message 20792")
+UNEXPECT_A=("[crash]" "TIMEOUT waiting")

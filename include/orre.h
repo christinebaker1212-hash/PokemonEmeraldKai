@@ -90,7 +90,20 @@ u16 Orre_Npc_Name(u32 index);
 const u8 *Orre_Check_InFront(void);                // (field_control_avatar.c) a check spot in front of the player
 u32 Orre_Check_Script(u32 row, u32 *args);
 bool8 Orre_Vm_Running(void);
+void Orre_VmWarp(void);
+void Orre_VmTouch(void);
+void Orre_Touch_Frame(void);
+u32 Orre_Touch_Script(u32 row, u32 *args);
+void Orre_VmChoice(void);
+void Orre_VmChoiceDone(void);
 void Orre_Npc_TalkStart(u32 group, u32 index);
+void Orre_Npc_WalkListReset(u32 index);
+void Orre_Npc_WalkListAdd(u32 index, float x, float z);
+void Orre_Npc_WalkListStart(u32 index, bool8 loop);
+void Orre_Npcs_Frame(void);
+void Orre_Npc_Surprise(u32 group, u32 index);
+bool8 Orre_Npc_GetColo(u32 group, u32 index, float *x, float *z);
+bool8 Orre_Npc_SeesHero(u32 index);
 void Orre_Npc_TalkEnd(u32 group, u32 index);
 const u8 *Orre_Npc_TalkScript(u8 localId);      // (field_control_avatar.c)
 u32 Orre_Npc_TalkScriptId(u32 index);

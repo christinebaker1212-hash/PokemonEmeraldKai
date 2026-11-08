@@ -468,6 +468,49 @@ u8 O3D_ArrivalDir(u16 map, s16 x, s16 y)
     return DIR_NONE;
 }
 
+// Colosseum's room ROOM, entry ENTRY (floorLink's): its map and the tile it lands on (sOrreArrivals lists each map's
+// entries in Colosseum's order); FALSE: the room isn't a map
+bool8 O3D_RoomEntry(u16 room, u32 entry, u16 *map, s16 *x, s16 *y)
+{
+    u32 i, k = 0, first = ARRAY_COUNT(sOrreArrivals);
+    *map = 0xFFFF;
+    for (i = 0; i < ARRAY_COUNT(sOrreMaps); i++)
+        if (sOrreMaps[i].room == room)
+            *map = sOrreMaps[i].map;
+    if (*map == 0xFFFF)
+        return FALSE;
+    for (i = 0; i < ARRAY_COUNT(sOrreArrivals); i++)
+        if (sOrreArrivals[i].map == *map)
+        {
+            if (first == ARRAY_COUNT(sOrreArrivals))
+                first = i;
+            if (k++ == entry)
+            {
+                *x = sOrreArrivals[i].x, *y = sOrreArrivals[i].y;
+                return TRUE;
+            }
+        }
+    if (first == ARRAY_COUNT(sOrreArrivals))
+        return FALSE;
+    *x = sOrreArrivals[first].x, *y = sOrreArrivals[first].y;   // (no such entry: the first)
+    return TRUE;
+}
+
+// The entry of the current map the player stands on (floorGetNextPosIndex after a door); 0 when none
+u32 O3D_EntryAt(s16 x, s16 y)
+{
+    u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    u32 i, k = 0;
+    for (i = 0; i < ARRAY_COUNT(sOrreArrivals); i++)
+        if (sOrreArrivals[i].map == map)
+        {
+            if (sOrreArrivals[i].x == x && sOrreArrivals[i].y == y)
+                return k;
+            k++;
+        }
+    return 0;
+}
+
 // ------------------------------------------------------------------------------------------------ map blocks
 const u16 *O3D_LayoutBlocks(const struct MapLayout *layout)
 {

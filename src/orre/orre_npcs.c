@@ -11,17 +11,21 @@
 #include "event_object_movement.h"
 #include "event_data.h"
 #include "fieldmap.h"
+#include "field_effect.h"
 #include "field_player_avatar.h"
 #include "o3d.h"
 #include "orre.h"
 #include "orre_people.h"
+#include "script.h"
 #include "script_movement.h"
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
+#include "constants/field_effects.h"
 
 void MPNet_Log(const char *fmt, ...);
 extern const u8 Orre_EventScript_Talk[];
 extern const u8 Orre_EventScript_Check[];
+extern const u8 Orre_EventScript_Touch[];
 
 struct OrreRoomPerson
 {
@@ -57,6 +61,9 @@ struct Npc
     bool8 walking;
     bool8 talkTurned;    // turned to the player for its words (std054), facing talkDir before
     u8 talkDir;
+    u8 walkCount;        // its walk list (peopleReserveWalkList / AddWalkList: the tiles it walks through)
+    bool8 walkLoop;      // ... gone round and round (peopleStartWalkList's loop)
+    s16 walkX[8], walkY[8];
 };
 
 static struct Npc sNpc[NPC_MAX];
@@ -470,4 +477,158 @@ u32 Orre_Check_Script(u32 row, u32 *args)
         return 0;
     memcpy(args, sOrreRoomChecks[row].args, sizeof(sOrreRoomChecks[row].args));
     return sOrreRoomChecks[row].script;
+}
+
+// ---- walk lists (Colosseum's peopleReserveWalkList, peopleAddWalkList, peopleStartWalkList: a person walks through
+// points; looped, round and round)
+
+void Orre_Npc_WalkListReset(u32 index)
+{
+    struct Npc *n = Of(index);
+    if (n)
+        n->walkCount = 0, n->walkLoop = FALSE;
+}
+
+void Orre_Npc_WalkListAdd(u32 index, float x, float z)
+{
+    struct Npc *n = Of(index);
+    s16 tx, ty;
+    if (n && n->walkCount < ARRAY_COUNT(n->walkX) && O3D_ColoToTile(x, z, &tx, &ty))
+        n->walkX[n->walkCount] = tx, n->walkY[n->walkCount] = ty, n->walkCount++;
+}
+
+// Its walk through the list's points as one path (each leg along x, then along y)
+static void WalkList(struct Npc *n)
+{
+    s16 x, y;
+    u32 i, k = 0;
+    if (!n->shown || !Object(n) || n->walkCount == 0)
+        return;
+    x = Object(n)->currentCoords.x - MAP_OFFSET, y = Object(n)->currentCoords.y - MAP_OFFSET;
+    for (i = 0; i < n->walkCount && k < NPC_PATH_MAX - 1; i++)
+    {
+        s16 tx = n->walkX[i], ty = n->walkY[i];
+        while (x != tx && k < NPC_PATH_MAX - 1)
+            n->path[k++] = GetWalkNormalMovementAction(tx > x ? DIR_EAST : DIR_WEST), x += tx > x ? 1 : -1;
+        while (y != ty && k < NPC_PATH_MAX - 1)
+            n->path[k++] = GetWalkNormalMovementAction(ty > y ? DIR_SOUTH : DIR_NORTH), y += ty > y ? 1 : -1;
+    }
+    n->path[k] = MOVEMENT_ACTION_STEP_END;
+    if (k == 0)
+        return;
+    ScriptMovement_StartObjectMovementScript(LocalId(n), gSaveBlock1Ptr->location.mapNum,
+                                             gSaveBlock1Ptr->location.mapGroup, n->path);
+    n->walking = TRUE;
+    n->x = x, n->y = y;
+}
+
+void Orre_Npc_WalkListStart(u32 index, bool8 loop)
+{
+    struct Npc *n = Of(index);
+    if (n == NULL)
+        return;
+    n->walkLoop = loop;
+    WalkList(n);
+}
+
+// Every frame (orre_vm.c): looped walks go round again; a walk of Kai's scripted movement ends when it's over
+void Orre_Npcs_Frame(void)
+{
+    u32 i;
+    for (i = 0; i < sCount; i++)
+    {
+        struct Npc *n = &sNpc[i];
+        if (n->walkLoop && n->walking
+         && ScriptMovement_IsObjectMovementFinished(LocalId(n), gSaveBlock1Ptr->location.mapNum,
+                                                    gSaveBlock1Ptr->location.mapGroup))
+        {
+            n->walking = FALSE;
+            WalkList(n);
+        }
+    }
+}
+
+// std131_characterSurpriseAnimation: the "!" over them
+void Orre_Npc_Surprise(u32 group, u32 index)
+{
+    struct Npc *n;
+    if (group == 0 && index == NPC_HERO)
+        gFieldEffectArguments[0] = LOCALID_PLAYER;
+    else if ((n = Of(index)) != NULL && n->shown)
+        gFieldEffectArguments[0] = LocalId(n);
+    else
+        return;
+    gFieldEffectArguments[1] = gSaveBlock1Ptr->location.mapNum;
+    gFieldEffectArguments[2] = gSaveBlock1Ptr->location.mapGroup;
+    FieldEffectStart(FLDEFF_EXCLAMATION_MARK_ICON);
+}
+
+// std172_characterGetPosition: where they stand, in Colosseum's units (their tile's centre); FALSE: no such person
+bool8 Orre_Npc_GetColo(u32 group, u32 index, float *x, float *z)
+{
+    s16 tx, ty;
+    return Where(group, index, &tx, &ty) && O3D_TileToColo(tx, ty, x, z);
+}
+
+// peopleGazeHeroCheck: the player stands right in front of them, where they look (Colosseum: within 3 units, 30
+// degrees either side of their facing)
+bool8 Orre_Npc_SeesHero(u32 index)
+{
+    struct Npc *n = Of(index);
+    s16 x, y, hx, hy;
+    if (n == NULL || !n->shown || !Object(n) || !Where(0, NPC_HERO, &hx, &hy))
+        return FALSE;
+    x = Object(n)->currentCoords.x - MAP_OFFSET, y = Object(n)->currentCoords.y - MAP_OFFSET;
+    switch (Object(n)->facingDirection)
+    {
+    case DIR_NORTH: return hx == x && hy == y - 1;
+    case DIR_SOUTH: return hx == x && hy == y + 1;
+    case DIR_WEST: return hy == y && hx == x - 1;
+    case DIR_EAST: return hy == y && hx == x + 1;
+    }
+    return FALSE;
+}
+
+// ---- touch spots (Colosseum's floor events of kind 2: stepping into the trigger runs its script)
+
+// Every frame (orre_vm.c, nothing running): the player stepped onto a new tile inside a touch spot's box: its script,
+// once until they've left it
+void Orre_Touch_Frame(void)
+{
+    static s16 sX = -1, sY = -1;
+    static s16 sInside = -1;
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s16 x = p->currentCoords.x - MAP_OFFSET, y = p->currentCoords.y - MAP_OFFSET;
+    float cx, cz;
+    s32 i, at = -1;
+    if (x == sX && y == sY)
+        return;
+    sX = x, sY = y;
+    if (!O3D_TileToColo(x, y, &cx, &cz))
+        return;
+    for (i = 0; i < ORRE_ROOM_TOUCH_COUNT; i++)
+    {
+        const struct OrreRoomCheck *c = &sOrreRoomTouches[i];
+        if (c->room == sRoom && cx >= c->x0 - CHECK_SLACK && cx <= c->x1 + CHECK_SLACK && cz >= c->z0 - CHECK_SLACK
+         && cz <= c->z1 + CHECK_SLACK)
+        {
+            at = i;
+            break;
+        }
+    }
+    if (at >= 0 && at != sInside && !ScriptContext_IsEnabled())
+    {
+        gSpecialVar_0x8004 = at;
+        ScriptContext_SetupScript(Orre_EventScript_Touch);
+        MPNet_Log("orre npcs: touch %d (room %u, collision %u)", at, sRoom, sOrreRoomTouches[at].col);
+    }
+    sInside = at;
+}
+
+u32 Orre_Touch_Script(u32 row, u32 *args)
+{
+    if (row >= ORRE_ROOM_TOUCH_COUNT)
+        return 0;
+    memcpy(args, sOrreRoomTouches[row].args, sizeof(sOrreRoomTouches[row].args));
+    return sOrreRoomTouches[row].script;
 }

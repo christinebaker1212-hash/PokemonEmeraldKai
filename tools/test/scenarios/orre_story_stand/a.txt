@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 60
+walkto 25 30
+pressuntillog A 3000 orre vm: message 20829
+pressuntil A field 4000
+wait 60
+mp orreget 986
+mp warp 45,1,10,16
+wait 600
+walkto 10 18
+pressuntillog A 3000 orre vm: message 20792
+wait 60
+rendershot s_willie
+quit

@@ -38,5 +38,7 @@ float O3D_TestGround(s32 mapX, s32 mapY, float near);   // tests: the ground's h
 bool8 O3D_TileToColo(s16 x, s16 y, float *cx, float *cz);
 bool8 O3D_ColoToTile(float cx, float cz, s16 *x, s16 *y);
 const char *O3D_RoomFile(u16 *room);
+bool8 O3D_RoomEntry(u16 room, u32 entry, u16 *map, s16 *x, s16 *y);   // floorLink's destination
+u32 O3D_EntryAt(s16 x, s16 y);
 
 #endif

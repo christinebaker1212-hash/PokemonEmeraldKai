@@ -38,6 +38,11 @@
 #include "constants/songs.h"
 #include "sound.h"
 #include "money.h"
+#include "overworld.h"
+#include "field_screen_effect.h"
+#include "field_player_avatar.h"
+#include "script_menu.h"
+#include "constants/songs.h"
 #include "script_pokemon_util.h"
 #include "shop.h"
 #include "constants/items.h"
@@ -71,10 +76,10 @@ struct Bank
 };
 
 enum { T_FREE, T_RUN, T_WAIT, T_DONE };
-enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE, W_MOVE, W_SCREEN, W_FANFARE, W_CAMERA };
+enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE, W_MOVE, W_SCREEN, W_FANFARE, W_CAMERA, W_THREAD };
 
 // Kai's screens a scene opens (W_SCREEN): Orre_EventScript_VmHoldLoop goes to them while the scene waits
-enum { SCREEN_NONE, SCREEN_SHOP, SCREEN_PC };
+enum { SCREEN_NONE, SCREEN_SHOP, SCREEN_PC, SCREEN_WARP, SCREEN_CHOICE };
 
 // Colosseum's shops (menuShopOpen N): tools/orre/gen_shops.py
 struct OrreShop
@@ -97,6 +102,13 @@ struct Thread
     u16 battle;           // W_BATTLE: the battle asked for
     u32 moveGroup, moveIndex;   // W_MOVE: the person whose walk it waits for
     u8 screen, shop;      // W_SCREEN: the screen asked for (SCREEN_*), Colosseum's shop number
+    u32 choices[8];       // SCREEN_CHOICE: the choices' messages (std199_menuDisplayCustomMenu)
+    u8 nchoices;
+    u32 result;           // SCREEN_CHOICE: the row chosen
+    struct Thread *child; // W_THREAD: the script it runs to its end (std209_threadRunScriptMode4)
+    bool8 camHold;        // it holds the field for a shot it plays (a room's main loop: Colosseum's hero stands still)
+    u32 handle;           // its task number (scriptExecTask's, for std006_threadWaitForCompletion)
+    u32 childId;
     bool8 screenOpen;     // W_SCREEN: the hold script went to it
     V st[VM_STACK];
 };
@@ -111,6 +123,13 @@ static u16 sRoom;          // the Colosseum room the threads belong to (0: none)
 static bool8 sHolding;     // Orre_EventScript_VmHold is waiting (special Orre_VmHold)
 static struct Thread *sHolder;
 static u8 sScreen, sShop;  // the screen the hold script goes to next (Orre_VmScreen), the shop it opens
+static struct Thread *sScreenThread;
+static u32 sHandles;   // ... the thread that asked (its choices)
+static u16 sWarpMap;       // SCREEN_WARP: floorLink's destination
+static s16 sWarpX, sWarpY;
+static u16 sLastRoom, sPrevRoom;   // floorGetPrevFloorID: the room before this one
+static u32 sEntry, sLinkEntry;     // floorGetNextPosIndex: the entry the player came in by (floorLink's, else found)
+static bool8 sLinked;
 static bool8 sLogged[256];
 
 static u32 Be32(const u8 *p) { return (u32)p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]; }
@@ -346,8 +365,33 @@ enum
     N_MOVE_TO_CHARACTER = 177, N_TURN_HEAD_TO = 181, N_APPROACH_PLAYER = 232,
     N_SHOP_OPEN = 25, N_POKEMON_CENTER = 83, N_WARP_MENU_ROOM = 98, N_HAVE_ITEM = 120, N_ADD_MONEY = 133,
     N_GET_MONEY = 134, N_ADD_ITEM = 219, N_CAMERA_PLAY = 42, N_CAMERA_STOP = 43, N_CAMERA_STOP2 = 44,
-    N_CAMERA_WAIT = 46, N_CAMERA_RETURN = 179,
+    N_CAMERA_WAIT = 46, N_CAMERA_RETURN = 179, N_FLOOR_LINK = 95, N_FLOOR_LINK_SE = 125, N_PREV_FLOOR = 94,
+    N_NEXT_FLOOR = 180, N_NEXT_POS = 195, N_CHOICE = 199, N_SUB_YESNO = 245, N_CUSTOM43 = 158, N_SURPRISE = 131,
+    N_WALK_RESERVE = 72, N_WALK_ADD = 73, N_WALK_START = 74, N_GET_POSITION = 172, N_GAZE_HERO = 169,
+    N_THREAD_YIELD = 71, N_GET_ITEM = 119, N_MODEL_RES = 112, N_SAVE_COLOSSEUM = 223, N_EXEC_TASK = 3,
+    N_RUN_SCRIPT = 209, N_THREAD_WAIT = 6, N_SCENE_MODE = 36, N_CAMERA_TARGET = 37,
 };
+
+// Natives that change nothing Kai shows yet, with what Colosseum's scripts expect back: sounds and music (until the
+// music is converted), the scene's own camera moves and modes (the field camera stays; shots play: o3d_cam.c),
+// models' and map objects' animations, lights, people's internal flags and walking speed, story gates (left open),
+// doors and elevators (the maps' own links), the P★DA's mail, the TV's channel
+static const struct { u16 n; u8 ret; } sQuiet[] = {
+    {104, 0}, {105, 0}, {106, 0}, {109, 0}, {130, 0}, {137, 0}, {138, 0}, {153, 0}, {218, 0}, {228, 0},
+    {38, 0}, {39, 0}, {40, 0}, {41, 0}, {48, 0}, {127, 0}, {140, 0}, {141, 0}, {147, 0},
+    {148, 0}, {149, 0}, {150, 0}, {156, 0}, {170, 1}, {126, 0},
+    {113, 0}, {114, 0}, {115, 0}, {116, 0}, {117, 1}, {154, 0}, {171, 0}, {178, 1}, {190, 0}, {191, 0},
+    {193, 1}, {221, 0}, {244, 0}, {70, 0}, {168, 0}, {231, 0},
+    {63, 0}, {64, 0}, {66, 0}, {67, 0}, {69, 0}, {76, 0}, {77, 0}, {151, 0}, {155, 1}, {164, 0},
+    {118, 0}, {96, 0}, {97, 0}, {197, 0}, {161, 0}, {162, 0}, {136, 0}, {144, 0},
+    {173, 0}, {211, 0}, {17, 0},
+};
+
+// Colosseum's own items past Gen 3's (its key items: the story's keys, DNA samples...) as Kai-side ORRE flags: what a
+// script asks (scriptHaveItem) and gives (scriptAddItem / scriptGetItem); Kai's bag has Gen 3's (to 348)
+#define ORRE_KEY_ITEM_FIRST 349
+#define ORRE_KEY_ITEM_FLAG(item) (ORRE_KAI_FLAG_FIRST + 0x10 + ((item) - ORRE_KEY_ITEM_FIRST))
+#define IS_ORRE_KEY_ITEM(item) ((item) >= ORRE_KEY_ITEM_FIRST && ORRE_KEY_ITEM_FLAG(item) < ORRE_FLAG_SNAG_MACHINE)
 
 #define ROOM_PCBOX_MENU 913    // (Colosseum's menu rooms: the PC's boxes)
 #define LAST_COLO_ITEM 348     // (Colosseum's items to here are Gen 3's numbers, Kai's own)
@@ -524,10 +568,18 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
         MPNet_Log("orre vm: party healed");
         return 0;
     case N_CAMERA_PLAY:   // cameraPlayAnime(group, shot, frame, loop): Colosseum's shot in ORRE's view (o3d_cam.c)
-        O3D_CamPlayId(ARG(1).u, (float)ARG(2).s, ARG(3).u != 0);
+        if (O3D_CamPlayId(ARG(1).u, (float)ARG(2).s, ARG(3).u != 0) && !t->holds)
+            Hold(t), t->camHold = TRUE;
         return 0;
+    case N_SCENE_MODE:   // GSscene_SetMode: 0 the field's (its camera back), the others a scene's
+        if (ARG(0).u != 0)
+            return 0;
+        // fall through
+    case N_CAMERA_TARGET:   // cameraSetTarget(group, person): the field's camera on the hero again
     case N_CAMERA_STOP: case N_CAMERA_STOP2: case N_CAMERA_RETURN:   // (back to the field's camera)
         O3D_CamStop();
+        if (t->camHold)
+            t->camHold = FALSE, LetGo(t);
         return 0;
     case N_CAMERA_WAIT:   // cameraWaitSyncAnime: until the shot has played
         if (ARG(0).u)
@@ -541,14 +593,114 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
             RemoveMoney(&gSaveBlock1Ptr->money, -ARG(0).s);
         return GetMoney(&gSaveBlock1Ptr->money);
     case N_HAVE_ITEM:
+        if (IS_ORRE_KEY_ITEM(ARG(0).u))
+            return Orre_Flag(ORRE_KEY_ITEM_FLAG(ARG(0).u));
         return KaiItem(ARG(0).u) && CheckBagHasItem(KaiItem(ARG(0).u), 1);
     case N_ADD_ITEM:
+        if (IS_ORRE_KEY_ITEM(ARG(0).u))
+        {
+            Orre_SetFlag(ORRE_KEY_ITEM_FLAG(ARG(0).u), ARG(1).s > 0);
+            return 0;
+        }
         if (!KaiItem(ARG(0).u))
             return 0;
         if (ARG(1).s > 0)
             return AddBagItem(KaiItem(ARG(0).u), ARG(1).s);
         if (ARG(1).s < 0)
             return RemoveBagItem(KaiItem(ARG(0).u), -ARG(1).s);
+        return 0;
+    case N_GET_ITEM:   // scriptGetItem(item, count): floorEventGetTresure(4): the fanfare, the item, its line
+        {
+            u32 item = ARG(0).u, count = ARG(1).s > 0 ? ARG(1).u : 1, msg = count == 1 ? 0x3CB8 : 0x3CBD;
+            u8 words[ORRE_STR_VAR_SIZE];
+            WordsOf(words, 0x2D, item);
+            Orre_SetStrVar(0x2D, words);
+            WordsOf(words, 0x2F, count);
+            Orre_SetStrVar(0x2F, words);
+            if (IS_ORRE_KEY_ITEM(item))
+                Orre_SetFlag(ORRE_KEY_ITEM_FLAG(item), TRUE);
+            else if (KaiItem(item) && !AddBagItem(KaiItem(item), count))
+                AddPCItem(KaiItem(item), count), msg = count == 1 ? 0x3CBA : 0x3CBB;   // (a full bag: the PC)
+            PlayFanfare(MUS_OBTAIN_ITEM);
+            ShowMessage(t, msg, TRUE);
+            MPNet_Log("orre vm: item %u x%u", item, count);
+            return 0;
+        }
+    case N_FLOOR_LINK:      // floorLink(room, entry): to Colosseum's room ROOM, landing on its entry ENTRY
+    case N_FLOOR_LINK_SE:   // floorLinkWithSE(room, entry, sound)
+        if (ARG(0).u && O3D_RoomEntry(ARG(0).u, ARG(1).u, &sWarpMap, &sWarpX, &sWarpY))
+        {
+            sLinked = TRUE, sLinkEntry = ARG(1).u;
+            t->wait = W_SCREEN, t->screen = SCREEN_WARP, t->screenOpen = FALSE;
+            if (!t->holds)
+                Hold(t);
+            MPNet_Log("orre vm: floorLink %u entry %u", ARG(0).u, ARG(1).u);
+        }
+        else if (ARG(0).u)
+            MPNet_Log("orre vm: floorLink %u: not a map", ARG(0).u);
+        return 0;
+    case N_PREV_FLOOR: return sPrevRoom;
+    case N_NEXT_FLOOR: return sRoom;
+    case N_NEXT_POS: return sEntry;
+    case N_CHOICE:   // std199_menuDisplayCustomMenu(the choices' messages, count, x, y, flags): the row chosen
+        {
+            u32 i;
+            t->nchoices = ARG(1).u < ARRAY_COUNT(t->choices) ? ARG(1).u : ARRAY_COUNT(t->choices);
+            for (i = 0; i < t->nchoices; i++)
+                t->choices[i] = Load(t, Deref(t, ARG(0).u + i)).u;
+            t->wait = W_SCREEN, t->screen = SCREEN_CHOICE, t->screenOpen = FALSE;
+            if (!t->holds)
+                Hold(t);
+            return 0;   // (its result comes when the menu closes: Orre_VmChoiceDone)
+        }
+    case N_SUB_YESNO:   // menuSubOpenYesNo(type, x, y, the cursor's start): 0 YES, as std011
+        DisplayYesNoMenuDefaultYes();
+        t->wait = W_YESNO;
+        return 0;
+    case N_CUSTOM43: return 0;
+    case N_SURPRISE: Orre_Npc_Surprise(ARG(0).u, ARG(1).u); return 0;
+    case N_WALK_RESERVE: Orre_Npc_WalkListReset(ARG(1).u); return 1;
+    case N_WALK_ADD: Orre_Npc_WalkListAdd(ARG(1).u, ARG(2).f, ARG(4).f); return 1;
+    case N_WALK_START: Orre_Npc_WalkListStart(ARG(1).u, ARG(2).u != 0); return 1;
+    case N_GET_POSITION:   // std172_characterGetPosition(group, index, &vec): x, y, z written through the address
+        {
+            float cx = 0, cz = 0;
+            V v;
+            Orre_Npc_GetColo(ARG(0).u, ARG(1).u, &cx, &cz);
+            v.f = cx, Store(t, Deref(t, ARG(2).u), v);
+            v.f = 0, Store(t, Deref(t, ARG(2).u + 1), v);
+            v.f = cz, Store(t, Deref(t, ARG(2).u + 2), v);
+            return 0;
+        }
+    case N_GAZE_HERO: return Orre_Npc_SeesHero(ARG(1).u);
+    case N_THREAD_YIELD:
+        t->frames = 1, t->wait = W_FRAMES;
+        return 0;
+    case N_MODEL_RES: return ARG(0).u;
+    case N_EXEC_TASK:   // scriptExecTask(script, priority, 4 arguments): a script alongside this one
+    case N_RUN_SCRIPT:  // std209_threadRunScriptMode4(script, 4 arguments): one run to its end before this goes on
+        {
+            u32 args[4], i, first = n == N_EXEC_TASK ? 2 : 1;
+            struct Thread *c;
+            for (i = 0; i < 4; i++)
+                args[i] = ARG(first + i).u;
+            if ((c = Start(ARG(0).u, 4, args, t->room)) == NULL)
+                return 0;
+            if (n == N_RUN_SCRIPT)
+                t->child = c, t->childId = c->scriptId, t->wait = W_THREAD;
+            c->handle = ++sHandles ? sHandles : ++sHandles;
+            return c->handle;   // (std006_threadWaitForCompletion's)
+        }
+    case N_THREAD_WAIT:   // std006_threadWaitForCompletion(the task scriptExecTask gave): until it has run
+        {
+            u32 i;
+            for (i = 0; i < VM_THREADS; i++)
+                if (sThreads[i].state == T_RUN && sThreads[i].handle == ARG(0).u && ARG(0).u)
+                    t->child = &sThreads[i], t->childId = sThreads[i].scriptId, t->wait = W_THREAD;
+            return 0;
+        }
+    case N_SAVE_COLOSSEUM:   // std223_askYesNoThenWarp395: save, then a colosseum's challenge (menu room 917)
+        MPNet_Log("orre vm: a colosseum's challenge (not converted yet)");
         return 0;
     case N_IN_BOUNDS:
         if (ARG(0).u == 0 && ARG(1).u == 100)   // (the hero)
@@ -598,6 +750,12 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
     case N_LOOK_AT_PLAYER: Orre_Npc_FaceOther(ARG(0).u, ARG(1).u, 0, 100); return 0;
     }
 #undef ARG
+    {
+        u32 i;
+        for (i = 0; i < ARRAY_COUNT(sQuiet); i++)
+            if (sQuiet[i].n == n)
+                return sQuiet[i].ret;
+    }
     if (n < ARRAY_COUNT(sLogged) && !sLogged[n])
     {
         sLogged[n] = TRUE;
@@ -838,6 +996,10 @@ static void Poll(struct Thread *t)
             Resume(t, c == 0 ? 0 : 1);
         break;
     }
+    case W_THREAD:
+        if (t->child == NULL || t->child->state != T_RUN || t->child->scriptId != t->childId)
+            t->wait = W_NONE, t->child = NULL;
+        break;
     case W_CAMERA:
         if (O3D_CamDone())
             t->wait = W_NONE;
@@ -852,13 +1014,18 @@ static void Poll(struct Thread *t)
             t->wait = W_NONE;
         else if (!t->screenOpen && sHolding)
         {
-            sScreen = t->screen, sShop = t->shop;
+            sScreen = t->screen, sShop = t->shop, sScreenThread = t;
             t->screenOpen = TRUE;
             sHolding = FALSE;
             ScriptContext_Enable();
         }
         else if (t->screenOpen && sHolding)
-            t->wait = W_NONE;
+        {
+            if (t->screen == SCREEN_CHOICE)
+                Resume(t, t->result);
+            else
+                t->wait = W_NONE;
+        }
         break;
     case W_BATTLE:
         if (sHolding && sHolder == t)
@@ -905,6 +1072,9 @@ void Orre_Vm_Frame(void)
     if (gPaletteFade.active)
         return;   // (the field comes back: the scripts wait until it's there, as Colosseum's fades do)
     TryHold();
+    Orre_Npcs_Frame();   // (people's looped walk lists)
+    if (sHolder == NULL && !sHoldPending && !ScriptContext_IsEnabled() && sRoom)
+        Orre_Touch_Frame();   // (the touch spots: orre_npcs.c)
     for (i = 0; i < VM_THREADS; i++)
     {
         struct Thread *t = &sThreads[i];
@@ -927,7 +1097,14 @@ void Orre_Vm_Frame(void)
 void Orre_Vm_Warped(void)
 {
     if (sRoom)
+    {
+        // (the room's script on leaving first: its floor record's + 0x38, run through at once)
+        const u8 *floor = FloorOf(sRoom);
+        struct Thread *t;
+        if (floor && Be32(floor + 0x38) && (t = Start(Be32(floor + 0x38), 0, NULL, TRUE)) != NULL)
+            Run(t);
         MPNet_Log("orre vm: warped: room %u's scripts stop", sRoom);
+    }
     Orre_Vm_Stop();
 }
 
@@ -957,6 +1134,11 @@ void Orre_Vm_RoomEntered(void)
     if (file == NULL || !getenv("MOEMON_ORRE_SCRIPTS"))
         return;
     sRoom = room;
+    // (floorGetPrevFloorID, floorGetNextPosIndex: the room before, the entry the player came in by)
+    if (sLastRoom != room)
+        sPrevRoom = sLastRoom, sLastRoom = room;
+    sEntry = sLinked ? sLinkEntry : O3D_EntryAt(gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y);
+    sLinked = FALSE;
     LoadRoomBank(file);
     Orre_Npcs_RoomEntered(room);
     if ((floor = FloorOf(room)) == NULL || sRoomBank.d == NULL)
@@ -1010,6 +1192,37 @@ u16 Orre_VmScreen(void)
     return s;
 }
 
+// (special, waitstate) SCREEN_WARP: floorLink's warp (the scripts stop and the next room's start: Orre_Vm_Warped)
+void Orre_VmWarp(void)
+{
+    SetWarpDestination(sWarpMap >> 8, sWarpMap & 0xFF, WARP_ID_NONE, sWarpX, sWarpY);
+    DoWarp();
+    ResetInitialPlayerAvatarState();
+}
+
+// (special, waitstate) SCREEN_CHOICE: the choices as Kai's menu (B: the last, as Colosseum's cancel row is)
+void Orre_VmChoice(void)
+{
+    static struct MenuAction sActions[8];
+    struct Thread *t = sScreenThread;
+    u32 i, n = t ? t->nchoices : 0;
+    for (i = 0; i < n; i++)
+        sActions[i].text = Orre_Text(t->choices[i]), sActions[i].func.void_u8 = NULL;
+    if (n == 0 || !ScriptMenu_MultichoiceList(1, 1, sActions, n, FALSE))
+    {
+        gSpecialVar_Result = 0;
+        ScriptContext_Enable();
+    }
+}
+
+// (special) ... its row for the thread (B: the last row)
+void Orre_VmChoiceDone(void)
+{
+    struct Thread *t = sScreenThread;
+    if (t && t->state == T_RUN && t->wait == W_SCREEN && t->screen == SCREEN_CHOICE)
+        t->result = gSpecialVar_Result == MULTI_B_PRESSED ? (t->nchoices ? t->nchoices - 1 : 0) : gSpecialVar_Result;
+}
+
 // (special, waitstate) Colosseum's shop sShop as Kai's POKeMART (it lets the script go on when it closes)
 void Orre_VmShop(void)
 {
@@ -1019,6 +1232,17 @@ void Orre_VmShop(void)
 // (special) Orre_EventScript_Check: the player checked the spot VAR_0x8004 (a row of src/data/orre_room_checks.h,
 // orre_npcs.c): its script runs with its four arguments as the scene holding the field (floor_character.c
 // heroDispatchEvent, cmsRunSync)
+void Orre_VmTouch(void)
+{
+    u32 args[4], id = Orre_Touch_Script(gSpecialVar_0x8004, args);
+    struct Thread *t;
+    if (id == 0 || sHolder != NULL || (t = Start(id, 4, args, FALSE)) == NULL)
+        return;
+    t->holds = TRUE;
+    sHolder = t;
+    MPNet_Log("orre vm: touch %u: %08X", gSpecialVar_0x8004, id);
+}
+
 void Orre_VmCheck(void)
 {
     u32 args[4], id = Orre_Check_Script(gSpecialVar_0x8004, args);
