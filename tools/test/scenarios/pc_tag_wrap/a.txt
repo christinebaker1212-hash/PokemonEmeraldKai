@@ -1,0 +1,67 @@
+pressuntil A field 5000
+wait 60
+mp boxput 1 0 1 5
+mp boxput 1 1 4 5
+mp boxput 1 2 7 5
+mp pc
+wait 120
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 240
+mp gpuregs
+mp pctag
+wait 10
+press RIGHT 2
+wait 20
+mp pctag
+wait 10
+press RIGHT 2
+wait 20
+mp pctag
+wait 20
+press A 2
+wait 40
+press A 2
+wait 120
+mp pctags
+press UP 2
+wait 30
+mp pctags
+shot up_buttons
+press UP 2
+wait 30
+mp pctags
+shot up_back
+press DOWN 2
+wait 20
+press DOWN 2
+wait 20
+press DOWN 2
+wait 20
+press DOWN 2
+wait 20
+mp pctags
+press DOWN 2
+wait 30
+mp pctags
+press DOWN 2
+wait 30
+mp pctags
+shot down_back
+press DOWN 2
+wait 30
+mp pctags
+press A 2
+wait 180
+mp pctags
+mp boxmons 1
+mp gpuregs
+shot party
+press A 2
+wait 40
+mp gpuregs
+shot party_menu
+quit

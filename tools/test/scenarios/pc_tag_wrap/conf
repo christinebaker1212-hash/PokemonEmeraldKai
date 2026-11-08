@@ -1,0 +1,11 @@
+# PC TAG mode, a held group and the buttons (the user, 2026-11-08): three tagged in BOX 1's top row, MOVE; UP past the
+# group's top goes round to the buttons (it buzzed), UP again back to the group; down to the bottom row, DOWN to the
+# buttons, DOWN back; DOWN to the buttons once more and A on PARTY POKéMON: the group joins the party, and the PC's
+# text layer (bg 0: its messages and menus) shows again (it stayed hidden: the menus were invisible). A on a party
+# POKéMON then opens its menu (shot party_menu). check.py reads the display registers.
+MODE=1
+TMO=200
+EXPECT_A=("pc tag: holding 3 from a box" "[test] pctags: area 0 box 1 mask 0 holding 1 count 3 buttons 1 cursor 3,0"
+          "pc tag: 3 joined the party (5 now)")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 tools/test/scenarios/pc_tag_wrap/check.py"

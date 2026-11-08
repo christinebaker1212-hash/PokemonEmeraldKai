@@ -3553,6 +3553,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] boxput %d %d: %d\n", box, pos, species);
         }
     }
+    else if (strcmp(cmd, "boxnick") == 0)
+    {
+        // boxnick BOX POS NAME - nickname a boxed Moemon (BOX from 1; NAME up to 10 letters): its Stadium hue
+        int box = 1, pos = 0, n = 0;
+        sscanf(arg, "%d %d %n", &box, &pos, &n);
+        if (n > 0 && box >= 1 && box <= TOTAL_BOXES_COUNT && pos >= 0 && pos < IN_BOX_COUNT)
+        {
+            struct BoxPokemon *b = GetBoxedMonPtr(box - 1, pos);
+            u8 name[POKEMON_NAME_LENGTH + 2];
+            memset(name, EOS, sizeof(name));
+            MP_AsciiToGame(name, arg + n, POKEMON_NAME_LENGTH);
+            SetBoxMonData(b, MON_DATA_NICKNAME, name);
+            printf("[test] boxnick %d %d: hue %d\n", box, pos, MP_Hue_OfBoxMon(b));
+        }
+    }
     else if (strcmp(cmd, "curbox") == 0)
     {
         // curbox [BOX] - the PC's box in use (BOX from 1: set it first), its name and wallpaper

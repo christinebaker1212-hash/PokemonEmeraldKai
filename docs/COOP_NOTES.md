@@ -1387,7 +1387,10 @@ inBoxMovingMode MOVE_MODE_MULTIPLE_MOVING moves them with the cursor. A: MultiMo
 placement, else Tag_TryPlace's assorted targets (empty slots from the cursor on) -> MULTIMOVE_TAG_PLACE_ASSORTED, else
 a buzz (no message: bg 0 is the 256-color group layer). R, or DOWN past the group to the buttons (Tag_InputOnButtons,
 bg 0 hidden) and A on PARTY POKeMON: Tag_GroupToParty, then Task_TagShowParty slides the party in (its icons are made
-from the party; don't touch party sprites or slot tilemaps while it's hidden: TilemapUtil crashed). RELEASE: no EGG,
+from the party; don't touch party sprites or slot tilemaps while it's hidden: TilemapUtil crashed) and shows bg 0
+again at its end (1.179.1: it stayed hidden, and every message and menu after was invisible). UP past the group's top
+goes to the buttons too, and UP or DOWN on them goes back to the group (1.179.1, the user: "more seamless"; test
+pc_tag_wrap, check.py reads DISPCNT's BG0 bit). RELEASE: no EGG,
 no MAIL, a battler left in the party, two Moemon left in all; held HMs back (MP_ReturnHeldHm). Renderer fix
 (gba_easy_draw.c, the renderer the game uses): a 256-color text BG's color 0 is transparent (the stock SELECT group
 move blacked out the screen). Tests pc_tags, pc_tags_last (mp pctag, pctags, boxput, boxmons; gpuregs, bgshow,
@@ -6677,6 +6680,11 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   MP_Storage_BoxSettled, the live box grows back from its cell over the backdrop kept from the grid), B goes back to the box it came from. Drawn over the frame
   (MP_BoxGrid_Composite; every pixel with bit 15 set: the frame is ABGR1555 and a clear bit is see-through black).
   Test qol_box_grid.
+  1.179.1: the cells' icons take the colors the PC's own icons have (IconColors: a nicknamed Moemon's Stadium hue,
+  MP_Hue_OfBoxMon, a Shadow Pokemon's icon as it is; SEALED gray from pokemon_icon.c MP_GrayIconColors). The zoom in
+  covers the box's whole place (the backdrop kept for 160x144 from 80,16, the title plate drawn as the grid has it):
+  the top row's icons reach 14 px above the box and showed there at full size the moment a box was picked. `mp boxnick
+  BOX POS NAME`; test qol_box_grid_hue (log "box grid: box B slot S hue H / sealed", shots zin_*).
 
 ## Card players' decks: variety (1.112.0, the user, 2026-11-05: "the same two decks over and over")
 - **POKéMON** (src/tcg/tcg_field.c Tcg_FitOpponent): the candidates are as before (their kind's Game Boy decks of every

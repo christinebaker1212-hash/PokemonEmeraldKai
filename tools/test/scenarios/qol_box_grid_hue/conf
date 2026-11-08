@@ -1,0 +1,10 @@
+# The PC box grid in the PC's own colors (the user, 2026-11-08): BOX 1 holds a nicknamed BULBASAUR (its Stadium hue)
+# and a SEALED one (past GENERATION 3: faded gray), and the grid's small BOX 1 shows them so (the log's "box grid: ...
+# hue" / "sealed", shots box1 / grid). Then BOX 2, whose top row reaches above the box: picked from the grid, it grows
+# back from its cell with nothing of it shown at full size outside the growing box first (shots zin_*).
+MODE=1
+TMO=200
+GEN=3
+EXPECT_A=("[test] boxnick 1 0: hue" "box grid: open on box 1" "box grid: box 1 slot 0 hue" "box grid: box 1 slot 2 sealed"
+          "box grid: picked box 2" "box grid: closed on box 2")
+UNEXPECT_A=("[crash]" "TIMEOUT" "boxnick 1 0: hue 0" "box grid: box 1 slot 1")

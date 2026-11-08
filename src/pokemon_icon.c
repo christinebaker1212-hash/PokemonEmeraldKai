@@ -1057,22 +1057,28 @@ void MP_FreeUnusedGrayIconPalettes(void)
     }
 }
 
-u16 MP_GrayIconPaletteTag(u8 index)
+// A SEALED Pokemon's faded icon colors (16), from icon palette `index` (0-5)
+void MP_GrayIconColors(u8 index, u16 *pal)
 {
-    struct SpritePalette sp;
-    u16 pal[16], tag = MP_GRAY_ICON_TAG + index;
     u32 i;
-    if (index >= 6)
-        return POKE_ICON_BASE_PAL_TAG;
-    if (IndexOfSpritePaletteTag(tag) != 0xFF)
-        return tag;
     for (i = 0; i < 16; i++)
     {
-        u16 c = gMonIconPaletteTable[index].data[i];
+        u16 c = gMonIconPaletteTable[index < 6 ? index : 0].data[i];
         u32 r = c & 31, g = (c >> 5) & 31, b = (c >> 10) & 31, y = (r * 30 + g * 59 + b * 11) / 100;
         y = (y * 3 + 20) / 4;   // faded: lighter and flatter
         pal[i] = y | (y << 5) | (y << 10);
     }
+}
+
+u16 MP_GrayIconPaletteTag(u8 index)
+{
+    struct SpritePalette sp;
+    u16 pal[16], tag = MP_GRAY_ICON_TAG + index;
+    if (index >= 6)
+        return POKE_ICON_BASE_PAL_TAG;
+    if (IndexOfSpritePaletteTag(tag) != 0xFF)
+        return tag;
+    MP_GrayIconColors(index, pal);
     sp.data = pal;
     sp.tag = tag;
     if (LoadSpritePalette(&sp) == 0xFF)

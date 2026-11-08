@@ -21,6 +21,7 @@
 #include "constants/rgb.h"
 #include "platform/gamepad.h"
 #include "mp.h"
+#include "mp_region.h"
 
 extern u16 gMpExtraHeld;   // main.c ReadKeys: the keys past the GBA's ten (PLATFORM_KEY_SEARCH = L2, _INSPECT = R2)
 u8 MP_RenderSmallGlyph(u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor);   // text.c
@@ -33,6 +34,8 @@ u8 MP_RenderSmallGlyph(u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor);   /
 // itself (where the POKéMON are) the 156x116 below
 #define WALL_X 80
 #define WALL_Y 16
+#define WALL_W 160
+#define WALL_H 144
 #define HEAD_H 26
 #define BOX_X 82
 #define BOX_Y 42
@@ -61,7 +64,7 @@ static struct
     u8 origin, sel, target;
     s16 scroll;        // the first row shown, in pixels (eases toward the cursor's row)
     u16 shot[DISPLAY_WIDTH * DISPLAY_HEIGHT];   // the PC as it was before the grid (the zoom out starts from it)
-    u16 back[BOX_W * BOX_H];                     // the PC's backdrop where the box is (under the zoom in)
+    u16 back[WALL_W * WALL_H];                   // the PC's backdrop over the box's whole place (under the zoom in)
     u16 cells[TOTAL_BOXES_COUNT][CELL_W * CELL_H];   // each box made small
     u16 head[160 * HEAD_H];                      // the title plate of the box under the hand...
     u8 title[64 * 16];                           // ... its name ...
@@ -113,6 +116,26 @@ void MP_BoxGrid_Reset(void)
 
 // ---- what the cells show, made in the game's own time (pokemon_storage_system.c draws the wallpapers) ----
 
+// An icon's colors as the PC's own icon has them (pokemon_storage_system.c CreateMonIconSprite): a SEALED Pokémon's
+// faded gray, a nicknamed one's Stadium hue (mp_hue.c; a Shadow Pokémon's icon keeps its colors there too)
+static void IconColors(u8 box, u8 pos, u16 species, u16 *out)
+{
+    u8 index = GetMonIconPaletteIndexFromSpecies(species);
+    s16 hue;
+    if (MP_Gen_SealedSpecies(species))
+    {
+        MP_GrayIconColors(index, out);
+        MPNet_Log("box grid: box %d slot %d sealed", box + 1, pos);
+        return;
+    }
+    memcpy(out, gMonIconPalettes[index], 16 * sizeof(u16));
+    hue = MP_Hue_OfBoxMon(GetBoxedMonPtr(box, pos));
+    if (hue == MP_HUE_SHADOW || hue == 0)
+        return;
+    MP_Hue_ShiftPalette(out, 0, hue);
+    MPNet_Log("box grid: box %d slot %d hue %d", box + 1, pos, hue);
+}
+
 // A box as the PC shows it (its wallpaper and its POKéMON's icons where the PC puts them), BOX_W x BOX_H, then made
 // CELL_W x CELL_H: each small pixel the mean of the pixels it covers, the icons' where they cover enough of it
 static void BuildCell(u8 box, const u16 *wall)
@@ -132,14 +155,16 @@ static void BuildCell(u8 box, const u16 *wall)
         u16 sp = GetBoxMonDataAt(box, i, MON_DATA_SPECIES_OR_EGG);
         const u8 *tiles;
         const u16 *pal;
+        u16 colors[16];
         // (CreateBoxMonIconAtPos: a 32x32 icon centered at 100 + 24 * column, 44 + 24 * row)
         int x0 = 84 + 24 * (i % IN_BOX_COLUMNS) - BOX_X, y0 = 28 + 24 * (i / IN_BOX_COLUMNS) - BOX_Y;
         if (sp == SPECIES_NONE)
             continue;
         tiles = GetMonIconTiles(sp, FALSE);
-        pal = gMonIconPalettes[GetMonIconPaletteIndexFromSpecies(sp)];
         if (tiles == NULL)
             continue;
+        IconColors(box, i, sp, colors);
+        pal = colors;
         for (y = 0; y < 32; y++)
             for (x = 0; x < 32; x++)
             {
@@ -412,11 +437,12 @@ static void ZoomRect(u8 box, int t, int *x, int *y, int *w, int *h)
     *h = BOX_H + (CELL_H - BOX_H) * k / 256;
 }
 
+// The backdrop over the box's whole place (its title plate too: the box is hidden while this is kept)
 static void SaveBack(const u16 *f)
 {
     int y;
-    for (y = 0; y < BOX_H; y++)
-        memcpy(&sG.back[y * BOX_W], &f[(BOX_Y + y) * DISPLAY_WIDTH + BOX_X], BOX_W * 2);
+    for (y = 0; y < WALL_H; y++)
+        memcpy(&sG.back[y * WALL_W], &f[(WALL_Y + y) * DISPLAY_WIDTH + WALL_X], WALL_W * 2);
 }
 
 bool8 MP_BoxGrid_HideBox(void)
@@ -466,13 +492,15 @@ void MP_BoxGrid_Composite(u16 *frame)
         break;
     case PHASE_ZOOM_IN:
         // the box as it is now (on the picked box, shown again), growing from its cell back to its place, over
-        // the backdrop kept from the grid (its page in place)
+        // the backdrop kept from the grid (its page in place). The whole place is covered, the title plate too
+        // (drawn as the grid has it): the top row's icons reach above the box, and they'd show there at full size
+        // before the box had grown back
         sG.scroll = WantScroll(sG.target);
         for (y = 0; y < BOX_H; y++)
-        {
             memcpy(&sLive[y * BOX_W], &frame[(BOX_Y + y) * DISPLAY_WIDTH + BOX_X], BOX_W * 2);
-            memcpy(&frame[(BOX_Y + y) * DISPLAY_WIDTH + BOX_X], &sG.back[y * BOX_W], BOX_W * 2);
-        }
+        for (y = 0; y < WALL_H; y++)
+            memcpy(&frame[(WALL_Y + y) * DISPLAY_WIDTH + WALL_X], &sG.back[y * WALL_W], WALL_W * 2);
+        DrawHead(frame);
         DrawCells(frame, sG.target);
         ZoomRect(sG.target, ZOOM_FRAMES - sG.t, &x, &y, &w, &h);
         Scaled(frame, sLive, BOX_W, BOX_H, BOX_W, x, y, w, h);

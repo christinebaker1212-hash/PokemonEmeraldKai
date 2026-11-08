@@ -34,5 +34,6 @@ u8 GetMonIconPaletteIndexFromSpecies(u16 species);
 
 u16 MP_GrayIconPaletteTag(u8 index);        // Moemon Kai: a SEALED Pokemon's faded icon palette (pokemon_icon.c)
 void MP_FreeUnusedGrayIconPalettes(void);
+void MP_GrayIconColors(u8 index, u16 *pal);   // ... and its 16 colors (the PC box grid: mp_boxgrid.c)
 
 #endif // GUARD_POKEMON_ICON_H

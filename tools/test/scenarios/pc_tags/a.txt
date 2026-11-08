@@ -201,8 +201,6 @@ press DOWN 2
 wait 30
 press DOWN 2
 wait 30
-press DOWN 2
-wait 30
 mp pctags
 shot buttons
 press A 2

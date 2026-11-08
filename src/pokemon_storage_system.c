@@ -7698,6 +7698,10 @@ static u8 InBoxInput_MovingMultiple(void)
             SetCursorPosition(CURSOR_AREA_IN_BOX, sCursorPosition - IN_BOX_COLUMNS);
             return INPUT_MULTIMOVE_MOVE_MONS;
         }
+        else if (sMpTag.holding)
+        {
+            return Tag_ToButtons(); // Moemon Co-op: UP past the group's top goes round to the buttons, as DOWN does
+        }
         else
         {
             return INPUT_MULTIMOVE_UNABLE;
@@ -11335,16 +11339,25 @@ static void Task_TagShowParty(u8 taskId)
         {
             UpdatePartySlotColors();
             RefreshDisplayMon();
-            SetPokeStorageTask(Task_PokeStorageMain);
+            sStorage->state++;
         }
+        break;
+    case 2:
+        // the text layer the group was drawn on (Tag_GroupToParty hid it and emptied it) shows again: the PC's
+        // messages and menus are on it (as MultiMove_Cancel's end)
+        if (IsDma3ManagerBusyWithBgCopy())
+            break;
+        ShowBg(0);
+        SetPokeStorageTask(Task_PokeStorageMain);
         break;
     }
 }
 
-// Input on the buttons while holding the group there (the group hidden)
+// Input on the buttons while holding the group there (the group hidden): UP or DOWN goes back to the group, as
+// the buttons go round to the box either way
 static u8 Tag_InputOnButtons(void)
 {
-    if (JOY_REPEAT(DPAD_UP))
+    if (JOY_REPEAT(DPAD_UP | DPAD_DOWN))
     {
         sMpTag.onButtons = FALSE;
         ShowBg(0);
@@ -11366,7 +11379,7 @@ static u8 Tag_InputOnButtons(void)
     return INPUT_NONE;
 }
 
-// DOWN past the group's bottom: to the buttons (the group waits, hidden)
+// UP past the group's top or DOWN past its bottom: to the buttons (the group waits, hidden)
 static u8 Tag_ToButtons(void)
 {
     sMpTag.onButtons = TRUE;

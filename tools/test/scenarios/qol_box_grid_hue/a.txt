@@ -1,0 +1,31 @@
+pressuntil A field 5000
+wait 60
+mp boxput 1 0 1 5
+mp boxnick 1 0 LEAFY
+mp boxput 1 1 1 5
+mp boxput 1 2 600 5
+mp boxput 2 0 4 5
+mp boxput 2 1 7 5
+mp boxput 2 2 25 5
+mp boxput 2 3 133 5
+mp boxput 2 4 152 5
+mp boxput 2 5 155 5
+mp pc
+wait 120
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 240
+shot box1
+press INSPECT 30
+wait 30
+shot grid
+press RIGHT 2
+wait 20
+press A 2
+shotburst zin_ 40 1
+wait 120
+shot box2
+quit
