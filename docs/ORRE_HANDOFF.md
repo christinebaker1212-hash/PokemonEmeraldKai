@@ -347,9 +347,15 @@ The older notes per part:
   battles; scenes move, turn and place her as 101 (orre_npcs.c PartnerAppear, Orre_Npc_PartnerFollow). Scenario
   orre_rui (PHENAC: the hunters' battle, the sack opened, RUI joins). Co-op (she follows the host on every screen):
   not yet; each player's own game shows her behind them.
-- **Still to do for a finishable ORRE**: the colosseum challenges (std223 then menu room 917: not converted), the
-  rest of the story room by room (probe with MOEMON_ORRE_VM_TRACE=1 for "not converted" natives), the opening and
-  RUI (steps 7, 8), then scripts on for everyone and a full playthrough test.
+- **Where the story stands (2026-11-08, 1.175.0)**: scripts on for players; the opening, RUI following, the RELIC
+  STONE built. The chained run (orre_story_chain, three passes) plays from the landing through WILLIE, PHENAC (the
+  hunters, the sack, RUI, the MAYOR, the STADIUM's entry) and into PYRITE TOWN, 100+ story flags set by Colosseum's own
+  scenes. Colosseum's flag order isn't play order (PHENAC STADIUM's registration, 2487, waits for PYRITE's 2464), hence
+  the passes. Next: let the chain finish all passes, then fix each first story step it can't set, room by room, to
+  the end (REALGAM TOWER's last battle, D4_tower_2F: fieldStartEncount 427 / 560, flag 2540, then the ending), and
+  check the ending (Colosseum's staff roll is its C code: not converted). MT. BATTLE (optional in Colosseum) has its
+  rest stops; its challenge menu room (917) isn't converted. The opening's characters (the hero, GONZAP, the peons, the
+  bike) and its explosion aren't drawn yet.
 
 ## Trainers and battles (src/orre/orre_battle.c, 2026-11-08)
 - **Read at run time** from common_rel in the data pack (nothing generated or committed): battles (fightEncount: .data
