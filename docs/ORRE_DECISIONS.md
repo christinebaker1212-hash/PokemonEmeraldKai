@@ -83,6 +83,12 @@ Orre as a real playable region, ported from Pokémon Colosseum (GC6E01, NTSC-U) 
     device** (as JOHTO's POKéGEAR is JOHTO's); **level scaling raises Shadow Pokémon with their trainer's team** when
     it's on (off: Colosseum's levels); **no sky** (the Platinum-style camera looks down, as SINNOH's).
 
+- **Colosseum's scripts run as they are** (Claude's call, 2026-11-08, within "Colosseum's own words and scripts"):
+  rather than translating its 175 script banks (1 MB of GS VM bytecode, 200 natives) into Kai's script language at
+  build time, the game has Colosseum's VM and runs them, each native mapped to what Kai does (src/orre/orre_vm.c;
+  ORRE_HANDOFF "Colosseum's scripts"). Its control flow, timing and story checks stay Colosseum's exactly; the work is
+  in the natives.
+
 ## Rules to keep
 - The disc image is never committed, and neither are the packs (orre/ is ignored): tools/orre/make_pack.sh builds
   them. The release (step "ORRE's packs") puts them in MoemonOrre.zip (tools/release/package_orre.sh) with an

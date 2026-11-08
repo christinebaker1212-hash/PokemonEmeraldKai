@@ -53,8 +53,8 @@ const u8 *Orre_ExpandPlaceholder(u8 id, const u8 *src, u8 **dest);   // (string_
 // Colosseum's battles (src/orre/orre_battle.c): its battle, trainer and team tables from the pack, fought as Kai's
 // trainer battles through TRAINER_ORRE_A / _B
 struct Pokemon;
-#define ORRE_BATTLE_WON  1
-#define ORRE_BATTLE_LOST 2
+#define ORRE_BATTLE_WON  2   // (Colosseum's own: std103_battleGetResult, its scripts compare with 2)
+#define ORRE_BATTLE_LOST 1
 u16 Orre_BattleCount(void);
 bool8 Orre_PrepareBattle(u16 battle);          // the battle's opponents set (gTrainerBattleOpponent_A / _B, flags)
 bool8 Orre_IsTrainer(u16 trainerId);
@@ -66,5 +66,15 @@ void Orre_BattleEnded(bool8 won);              // (battle_setup.c)
 u8 Orre_BattleResult(void);                    // ORRE_BATTLE_WON / _LOST
 void Orre_StartBattle(void);                   // (special) battle VAR_0x8004, its foe's picture VAR_0x8005's person
 void Orre_BattleResultToVar(void);             // (special) VAR_RESULT = the last battle's result
+
+// Colosseum's scripts (src/orre/orre_vm.c): its GS VM running the rooms' own script banks
+void Orre_Vm_Frame(void);          // every overworld frame (O3D_Update)
+void Orre_Vm_RoomEntered(void);
+void Orre_Vm_Stop(void);
+void Orre_Vm_Warped(void);         // (overworld.c LoadMapFromWarp)
+void Orre_VmHold(void);            // (special, waitstate) Orre_EventScript_VmHold
+u16 Orre_VmHolding(void);          // (specialvar) a scene still holds the player
+void Orre_VmBattleDone(void);      // (orre_battle.c) its battle is over
+bool8 Orre_Vm_Debug(u16 bank, u16 func);
 
 #endif

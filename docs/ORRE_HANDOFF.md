@@ -79,7 +79,8 @@ rules, and what each tool does. This file is where things stand, what a new sess
 ## Next steps (in order)
 The road to the end, agreed with the user 2026-11-07 (their answers: ORRE_DECISIONS "The road to the end"):
 1. **Story state: done** (below, "Story flags"). 2. **Colosseum's text: done** (below, "Colosseum's text").
-3. **Trainers: done** (below, "Trainers and battles"). 4. **The script converter** (.scd -> Kai scripts at build time, as SINNOH's; the big one).
+3. **Trainers: done** (below, "Trainers and battles"). 4. **Colosseum's scripts: running** (below, "Colosseum's scripts": its GS VM in the game; more natives as each
+   part needs them).
 5. People on the maps (where Colosseum puts them, shown as its scripts say). 6. Shops, POKéMON CENTERs, the PC.
 7. The opening (the player as the thief, the SNAG MACHINE), then the ride to the OUTSKIRT STAND. 8. RUI follows the host.
 9. The colosseum challenges (PHENAC, PYRITE, THE UNDER, DEEP COLOSSEUM, REALGAM TOWER). 10. Story scenes, faithful.
@@ -136,6 +137,45 @@ The older notes per part:
    flags, src/orre/orre_story.c, go there too).
 8. The in-game download screen when orre/ is missing (as the DANCE machine's rh_screen.c StateNoSongs).
 
+## Colosseum's scripts (src/orre/orre_vm.c, 2026-11-08)
+- **Run, not translated** (Claude's call, ORRE_DECISIONS "Colosseum's scripts run as they are"): the game has Colosseum's
+  GS VM, opcode for opcode from the decomp (src/game/gs_vm.c: operand descriptors 0x80 on the stack / 0x40 a frame
+  variable / else a global, 0x20 / 0x100 an address; low six bits the type, 2 int else float; native frames: the
+  result's slot, the native's index, the arguments, then the frame and the count; script calls and returns as
+  cms_op04 / cms_op05; the first frame as cms_ScriptCreateThread). Addresses a script takes are tagged indices
+  (VM_REF_*) and code offsets bank-relative, so nothing depends on the PC's pointer size. Banks: the room's .scd
+  from the data pack (id 0x0100) and the shared bank 0x0596 (common_rel .data 0x89CFC, 8120 bytes).
+- **Rooms**: Colosseum's floor record (common_rel .data 0x8BCF4, 0x4C each; + 0xC the room id) holds + 0x28 the sound
+  script, + 0x2C / + 0x30 the set-up (who's shown), + 0x34 the main loop (the default 0x05960003: the shared bank's
+  hero loop), + 0x38 what runs on leaving. Arriving (overworld.c LoadMapFromWarp -> Orre_Vm_Warped; the next
+  O3D_Update frame), the set-up runs through and the main loop starts; every overworld frame the threads run until
+  they wait (none while the screen fades: a scene waits for the field to be back). The main loop watches the story
+  flags and the player (std058_characterCheckWithinBounds of person (0, 100), the hero: O3D_TileToColo gives the
+  player's place in Colosseum's units) and starts the room's scenes.
+- **A scene takes the player** (heroMoveInitEvent): Kai's script data/scripts/orre.inc Orre_EventScript_VmHold locks
+  the field (started as soon as Kai's script engine is free) and waits (special Orre_VmHold); its battles start while it
+  waits (fieldStartEncount / fightStartEncount: orre_battle.c), the battle's end hands the thread its result
+  (Orre_VmBattleDone; std103_battleGetResult: 2 the player won, as Colosseum's scripts compare), the hold goes on
+  while the scene still holds (specialvar Orre_VmHolding: VAR_RESULT isn't safe across a battle) and ends with
+  heroMoveTermEvent.
+- **Natives converted** (tools/orre/natives.json, from the decomp's table lbl_802E1CF0, names its indices): the flags
+  (78 sets 1, 79 sets 0: the decomp's names are swapped; 80, 81, 82), messages (54 characterTalk, 7 / 8 winMsg
+  open / close, 55 end of speech: Colosseum's line by id through orre_text.c, waiting for A where Colosseum's wait
+  says), 11 YES / NO (0 YES), 132 msgctrlSetValue (a control's value made words: names by message, items, species,
+  moves, numbers), 157 sleep and the yield, 58 the hero in a box, 92 / 93 room and group, 102 / 152 battles, 103 the
+  result, 31 / 32 / 33 the hero. **Not yet**: the people (50 visible, 59 position, 60 / 68 facing, 61 / 177 walking,
+  51 animation, 165 / 181 looking: step 5), the camera (36 / 37 / 40 / 41 / 140 / 141 / 179: Platinum's camera stays,
+  maybe never), sounds and music (104 / 105 / 109: with the music), story gates (118 scriptSetCol), map objects
+  (114 / 115), items and money, menus, shops, the PC; the people's own talk scripts and the rooms' event triggers (the
+  floor's events: pass / touch / check) start scenes too once people stand on the maps. An unconverted native logs once
+  ("native N not converted yet") and does nothing.
+- **Off in players' games** until step 5 (people) works: MOEMON_ORRE_SCRIPTS=1 turns the rooms' scripts on (tests,
+  development); without it nothing runs. MOEMON_ORRE_VM_TRACE=1 logs every native call and the threads' state.
+- Tools: `python3 -I tools/orre/gsvm.py ROOM.scd [FUNC]` lists a bank (natives named, their constant arguments);
+  `gsvm.py common UNPACKED` the shared one. Debug `mp orrescript BANK FUNC` runs a function as a scene. Scenario
+  orre_scene_willie: WILLIE's scene at the OUTSKIRT STAND (flags 986 / 988 set: past the arrival) from the main loop,
+  his lines, YES / NO, battle 10, his loss line, the flags it sets (990, 2650, 991).
+
 ## Trainers and battles (src/orre/orre_battle.c, 2026-11-08)
 - **Read at run time** from common_rel in the data pack (nothing generated or committed): battles (fightEncount: .data
   0x109FBC, 0x38 each, 566), trainers (0x91684, 0x34, 820), classes (fightTrainerKind: 0x8F724, 0xC, 41: + 0 the prize
@@ -154,7 +194,7 @@ The older notes per part:
 - **The picture** is the person a script names (the trainer records' model ids are Colosseum's 3D battle models, not
   the field people): special Orre_StartBattle takes VAR_0x8004 the battle, VAR_0x8005 the person (0xFFFF none).
   battle_setup.c BattleSetup_StartOrreBattle / CB2_EndOrreBattle: no trainer flags (Colosseum's scripts keep their own),
-  a loss whites out only where zenmetu says, else the script goes on; Orre_BattleResultToVar: VAR_RESULT 1 won, 2 lost
+  a loss whites out only where zenmetu says, else the script goes on; Orre_BattleResultToVar: VAR_RESULT 2 won, 1 lost (Colosseum's numbers)
   (ORRE_BATTLE_*; what the scripts' std103_battleGetResult will answer).
 - Debug: `mp orrebattle BATTLE [PERSON]`, `mp orreresult`; scenario orre_battle (WILLIE, battle 10: RIDER WILLIE, two
   ZIGZAGOON at Lv 24, the prize 240).

@@ -4106,6 +4106,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         gSpecialVar_0x8005 = person;
         Orre_StartBattle();
     }
+    else if (strcmp(cmd, "orrescript") == 0)
+    {
+        // orrescript BANK FUNC: a function of a Colosseum script bank (0x100 the room's, 0x596 the shared one) run as
+        // a scene now (src/orre/orre_vm.c)
+        unsigned bank = 0x100, func = 0;
+        sscanf(arg, "%x %u", &bank, &func);
+        printf("[test] orrescript %x %u: %s\n", bank, func, Orre_Vm_Debug(bank, func) ? "started" : "no such script");
+    }
     else if (strcmp(cmd, "orreresult") == 0)
         printf("[test] orre battle result %d\n", Orre_BattleResult());
     else if (strcmp(cmd, "orrevar") == 0)

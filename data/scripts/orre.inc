@@ -12,6 +12,18 @@ Orre_EventScript_WorldMap::
 Orre_EventScript_WorldMapGone:
 	end
 
+@ ---- Colosseum's scenes (src/orre/orre_vm.c): a room's script took the player (heroMoveInitEvent); the field stays
+@ locked until it lets go (its battles start while this waits; it goes on holding after them)
+Orre_EventScript_VmHold::
+	lockall
+Orre_EventScript_VmHoldLoop:
+	special Orre_VmHold
+	waitstate
+	specialvar VAR_RESULT, Orre_VmHolding   @ (still held: back from a battle the scene started)
+	goto_if_eq VAR_RESULT, TRUE, Orre_EventScript_VmHoldLoop
+	releaseall
+	end
+
 @ ---- The boat to ORRE (src/orre/orre_ferry.c; docs/ORRE_DECISIONS.md "A post-game place"). Kai's own words: the boat
 @ and its sailor aren't Colosseum's (the user's choice, 2026-11-07).
 

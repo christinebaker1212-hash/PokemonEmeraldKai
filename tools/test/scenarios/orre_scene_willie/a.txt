@@ -1,0 +1,29 @@
+pressuntil A field 5000
+wait 30
+mp orreflag 986 1
+mp orreflag 988 1
+mp warp 45,0,33,40
+wait 200
+rendershot s_pre
+wait 10
+rendershot s_willie
+pressuntillog A 6000 orre vm: message 20807
+wait 120
+rendershot s_ask_pre
+wait 10
+rendershot s_ask
+press A 4
+wait 60
+pressuntil A action 6000
+mp foehp 1
+mp bmove 98
+pressuntillog A 12000 orre vm: message 20805
+wait 120
+rendershot s_lost_pre
+wait 10
+rendershot s_lost
+pressuntillog A 6000 native 78 (1 args: 991
+wait 60
+mp orreget 990
+mp orreget 2650
+quit

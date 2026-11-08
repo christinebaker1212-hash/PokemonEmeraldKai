@@ -795,3 +795,5 @@ gSpecials::
 	def_special Orre_SetFoePerson   @ Moemon Kai: the next battle's foe is an ORRE person (src/orre/orre_people.c)
 	def_special Orre_StartBattle   @ Moemon Kai: Colosseum's battle VAR_0x8004 (src/orre/orre_battle.c)
 	def_special Orre_BattleResultToVar   @ Moemon Kai: VAR_RESULT = the last ORRE battle's result
+	def_special Orre_VmHold   @ Moemon Kai: a Colosseum scene holds the field (src/orre/orre_vm.c)
+	def_special Orre_VmHolding   @ Moemon Kai: ... TRUE while it still does

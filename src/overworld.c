@@ -1,4 +1,5 @@
 #include "global.h"
+#include "orre.h"   // Moemon Kai: ORRE's scripts
 #include "qz_specials.h"
 #include "mp_region.h"
 #include "mp_kaisong.h"
@@ -890,6 +891,7 @@ static void LoadMapFromWarp(bool32 a1)
 {
     bool8 isOutdoors;
     bool8 isIndoors;
+    Orre_Vm_Warped();   // Moemon Kai: an ORRE room is entered anew: its scripts start again (src/orre/orre_vm.c)
 
     LoadCurrentMapData();
     MP_Region_OnMapLoaded();   // Moemon Kai: another region by a gate or a warp: its PC boxes and levels (mp_region.c)

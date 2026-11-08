@@ -31,6 +31,7 @@
 #include "main.h"
 #include "overworld.h"
 #include "o3d.h"
+#include "orre.h"
 #include "gx_tex.h"
 #include "palette.h"
 #include "sprite.h"
@@ -77,6 +78,7 @@ typedef struct
     float (*hgt)[3];          // ... lowest first
     u32 nmesh;
     OMesh *mesh;
+    float tile, x0, z0;       // Colosseum's units: a tile's size, the grid's corner (O3D_TileToColo)
 } OMap;
 
 typedef struct { u8 fmt, tfmt; u16 w, h, n; u32 off, size; } OTexEntry;
@@ -318,6 +320,7 @@ static bool8 MapLoad(u32 i)
     }
     S = 16.0f / tile;
     om->w = gw, om->h = gh;
+    om->tile = tile, om->x0 = x0, om->z0 = z0;
     om->blocks = malloc(sizeof(u16) * gw * gh);
     om->hn = calloc((u32)gw * gh, 1);
     om->hgt = calloc((u32)gw * gh, sizeof(*om->hgt));
@@ -944,6 +947,7 @@ void O3D_Update(void)
     sView.active = map >= 0 && MapLoad((u32)map);
     gMpO3dLine = sView.active ? O3dLine : NULL;
     gMpO3dOamHidden = sView.active && !getenv("MOEMON_O3D_NOHIDE") ? OamHidden : NULL;
+    Orre_Vm_Frame();   // (Colosseum's scripts: src/orre/orre_vm.c; they stop off ORRE)
     if (!sView.active)
     {
         sCur = NULL;
@@ -956,4 +960,41 @@ void O3D_Update(void)
     sView.frame++;
     FindCamera();
     SetupView();
+}
+
+// Colosseum's units on the current ORRE map (its scripts' positions: src/orre/orre_vm.c): a tile's centre, and the tile
+// a point is on. FALSE: not on a loaded ORRE map
+bool8 O3D_TileToColo(s16 x, s16 y, float *cx, float *cz)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    const OMap *om;
+    if (map < 0 || !MapLoad(map))
+        return FALSE;
+    om = &sPack.map[map];
+    *cx = om->x0 + (x + 0.5f) * om->tile;
+    *cz = om->z0 + (y + 0.5f) * om->tile;
+    return TRUE;
+}
+
+bool8 O3D_ColoToTile(float cx, float cz, s16 *x, s16 *y)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    const OMap *om;
+    if (map < 0 || !MapLoad(map))
+        return FALSE;
+    om = &sPack.map[map];
+    *x = (s16)floorf((cx - om->x0) / om->tile);
+    *y = (s16)floorf((cz - om->z0) / om->tile);
+    return TRUE;
+}
+
+// The current ORRE map's file ("S1_out") and Colosseum room (sOrreMaps), NULL / 0 off ORRE
+const char *O3D_RoomFile(u16 *room)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    if (map < 0)
+        return NULL;
+    if (room)
+        *room = sOrreMaps[map].room;
+    return sOrreMaps[map].file;
 }

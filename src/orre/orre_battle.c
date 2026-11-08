@@ -325,6 +325,7 @@ void Orre_BattleEnded(bool8 won)
     MPNet_Log("orre: battle %d %s", sBattle, won ? "won" : "lost");
     sBattle = 0;
     Orre_People_BattleEnd();
+    Orre_VmBattleDone();   // (a scene's battle: its script goes on with the result, src/orre/orre_vm.c)
 }
 
 u8 Orre_BattleResult(void)

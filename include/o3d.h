@@ -24,5 +24,9 @@ void O3D_CommitOam(void);
 // The blocks of a map's layout: an ORRE map's come from its pack (Colosseum's collision), others are the layout's
 const u16 *O3D_LayoutBlocks(const struct MapLayout *layout);
 float O3D_TestGround(s32 mapX, s32 mapY, float near);   // tests: the ground's height at a map pixel, NaN none
+// Colosseum's units on the current ORRE map (its scripts' positions), and its file and room (src/orre/orre_vm.c)
+bool8 O3D_TileToColo(s16 x, s16 y, float *cx, float *cz);
+bool8 O3D_ColoToTile(float cx, float cz, s16 *x, s16 *y);
+const char *O3D_RoomFile(u16 *room);
 
 #endif

@@ -1,0 +1,12 @@
+# Colosseum's own scripts (src/orre/orre_vm.c; docs/ORRE_HANDOFF.md "Colosseum's scripts"): at the OUTSKIRT STAND the
+# room's main loop (its floor record's + 0x34, function 11 of S1_out.scd) sees story flag 986 set (`mp orreflag`, the
+# arrival scene's) and starts WILLIE's scene (function 9) as Colosseum does: his words (20792 "Yo! Wait! Wait up!", the
+# battle question 20807 with its YES / NO), battle 10 through Kai's battle, his loss lines (20805) and the flags the
+# scene sets (990, 2650, 991). Needs ORRE's packs. Shots s_*.png.
+MODE=1
+TMO=600
+WARP=45,0,33,40
+ENV_A="MOEMON_DEBUG_PARTY=280:50,280:50 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_VM_TRACE=1"
+EXPECT_A=("orre vm: room 1 (S1_out): main 0100000B" "orre vm: message 20792" "orre vm: message 20807"
+          "orre: battle 10 (kind 2" "orre: battle 10 won" "orre vm: message 20805" "[test] orreget 0x3DE 1" "[test] orreget 0xA5A 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "unknown code")
