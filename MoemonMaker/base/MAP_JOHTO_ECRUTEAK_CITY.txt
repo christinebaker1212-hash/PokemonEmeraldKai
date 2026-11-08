@@ -1,0 +1,6 @@
+# Moemon Maker: edits to MAP_JOHTO_ECRUTEAK_CITY (written by the editor; each line has the value it replaced, then the new one)
+map MAP_JOHTO_ECRUTEAK_CITY 66 61
+person Quetzal_EventScript_83C2D48@38,32 removed 0 1
+person Quetzal_EventScript_83C2D48@39,31 removed 0 1
+person Quetzal_EventScript_83C2D48@39,32 removed 0 1
+person Quetzal_EventScript_83C2D48@40,32 removed 0 1
