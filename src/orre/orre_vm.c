@@ -460,6 +460,7 @@ static void WordsOf(u8 *out, u8 ctl, u32 value)
     }
 }
 
+u32 MP_TextPrinterDebug(u8 id);
 static void ShowMessage(struct Thread *t, u32 msg, bool8 key)
 {
     static u8 sPlaceholder[6];
@@ -1154,9 +1155,9 @@ void Orre_Vm_Frame(void)
         if (++sTick % 120 == 0)
             for (i = 0; i < VM_THREADS; i++)
                 if (sThreads[i].state == T_RUN)
-                    MPNet_Log("orre vm: thread %u %08X wait %u holds %u (holding %u, printer %u, box hidden %u, fade %u, script %u)", i,
+                    MPNet_Log("orre vm: thread %u %08X wait %u holds %u (holding %u, printer %u, box hidden %u, fade %u, script %u, state %08X)", i,
                               sThreads[i].scriptId, sThreads[i].wait, sThreads[i].holds, sHolding,
-                              IsTextPrinterActive(0), IsFieldMessageBoxHidden(), gPaletteFade.active, ScriptContext_IsEnabled());
+                              IsTextPrinterActive(0), IsFieldMessageBoxHidden(), gPaletteFade.active, ScriptContext_IsEnabled(), MP_TextPrinterDebug(0));
     }
     if (gPaletteFade.active)
         return;   // (the field comes back: the scripts wait until it's there, as Colosseum's fades do)
@@ -1211,6 +1212,13 @@ void Orre_Vm_Stop(void)
 }
 
 // The player arrived in an ORRE room: its bank, its set-up, its main loop (Colosseum's floor record)
+// Colosseum's scripts run in ORRE's rooms (off in players' games until the story plays through: MOEMON_ORRE_SCRIPTS=1
+// for tests and development)
+bool8 Orre_Vm_ScriptsOn(void)
+{
+    return getenv("MOEMON_ORRE_SCRIPTS") != NULL;
+}
+
 void Orre_Vm_RoomEntered(void)
 {
     u16 room = 0;
@@ -1220,7 +1228,7 @@ void Orre_Vm_RoomEntered(void)
     Orre_Vm_Stop();
     // (off in players' games until the rooms' people walk and the cameras move: ORRE_HANDOFF step 5; on for tests and
     // development with MOEMON_ORRE_SCRIPTS=1)
-    if (file == NULL || !getenv("MOEMON_ORRE_SCRIPTS"))
+    if (file == NULL || !Orre_Vm_ScriptsOn())
         return;
     sRoom = room;
     // (floorGetPrevFloorID, floorGetNextPosIndex: the room before, the entry the player came in by)
@@ -1267,7 +1275,11 @@ void Orre_VmTalk(void)
     u32 id = Orre_Npc_TalkScriptId(gSpecialVar_0x8004);
     struct Thread *t;
     if (id == 0 || sHolder != NULL || (t = Start(id, 4, args, FALSE)) == NULL)
+    {
+        MPNet_Log("orre vm: talk to person %u: not now (%08X, %s)", gSpecialVar_0x8004, id,
+                  sHolder ? "a scene holds the field" : "no script");
         return;
+    }
     t->holds = TRUE;
     sHolder = t;
     MPNet_Log("orre vm: talk to person %u: %08X", gSpecialVar_0x8004, id);
@@ -1326,7 +1338,11 @@ void Orre_VmTouch(void)
     u32 args[4], id = Orre_Touch_Script(gSpecialVar_0x8004, args);
     struct Thread *t;
     if (id == 0 || sHolder != NULL || (t = Start(id, 4, args, FALSE)) == NULL)
+    {
+        MPNet_Log("orre vm: talk to person %u: not now (%08X, %s)", gSpecialVar_0x8004, id,
+                  sHolder ? "a scene holds the field" : "no script");
         return;
+    }
     t->holds = TRUE;
     sHolder = t;
     MPNet_Log("orre vm: touch %u: %08X", gSpecialVar_0x8004, id);
@@ -1337,7 +1353,11 @@ void Orre_VmCheck(void)
     u32 args[4], id = Orre_Check_Script(gSpecialVar_0x8004, args);
     struct Thread *t;
     if (id == 0 || sHolder != NULL || (t = Start(id, 4, args, FALSE)) == NULL)
+    {
+        MPNet_Log("orre vm: talk to person %u: not now (%08X, %s)", gSpecialVar_0x8004, id,
+                  sHolder ? "a scene holds the field" : "no script");
         return;
+    }
     t->holds = TRUE;
     sHolder = t;
     MPNet_Log("orre vm: check %u: %08X", gSpecialVar_0x8004, id);

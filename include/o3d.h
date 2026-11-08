@@ -15,6 +15,9 @@ void O3D_CamStop(void);
 bool8 O3D_CamActive(void);
 bool8 O3D_CamDone(void);
 bool8 O3D_CamKeep(void);
+void O3D_CamSetKeep(bool8 keep);   // the shot outlives the room's scripts (the opening's)
+// A room that isn't a map (its pack name: the opening's) drawn instead of the field while shots play; NULL: the field
+bool8 O3D_SceneRoom(const char *file);
 void O3D_CamTick(void);
 bool8 O3D_CamGet(float eye[3], float tgt[3], float *roll, float *fov);   // a mart's BUY screen shows the field's last picture (shop.c)
 bool8 O3D_IsOrreGroup(u8 mapGroup);

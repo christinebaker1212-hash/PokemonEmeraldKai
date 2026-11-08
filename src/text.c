@@ -363,6 +363,13 @@ void RunTextPrinters(void)
     }
 }
 
+// Moemon Kai: a printer's state and its sub state, for ORRE's VM trace (src/orre/orre_vm.c)
+u32 MP_TextPrinterDebug(u8 id)
+{
+    return sTextPrinters[id].state | sTextPrinters[id].subStructFields[0] << 8 | sTextPrinters[id].delayCounter << 16
+         | sTextPrinters[id].textSpeed << 24;
+}
+
 bool16 IsTextPrinterActive(u8 id)
 {
     return sTextPrinters[id].active;

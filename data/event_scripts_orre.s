@@ -4,6 +4,7 @@
 #include "constants/vars.h"
 #include "constants/comparison_operators.h"
 #include "constants/items.h"
+#include "constants/map_scripts.h"
 	.include "asm/macros.inc"
 	.include "constants/constants.inc"
 	.include "asm/macros/event.inc"

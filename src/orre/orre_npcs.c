@@ -104,6 +104,51 @@ static struct ObjectEvent *Object(const struct Npc *n)
     return &gObjectEvents[id];
 }
 
+// The field engine has 16 object slots (the save's layout keeps them), fewer than a busy room's people (PHENAC shows 19):
+// a person who shows has an object only while near the player, the nearest first (Orre_Npcs_Frame); far off they
+// keep their place and facing in their record, as the engine's own people do off screen
+#define NPC_RANGE_X 10
+#define NPC_RANGE_Y 8
+
+static u32 Dist(const struct Npc *n)
+{
+    s16 px = gSaveBlock1Ptr->pos.x, py = gSaveBlock1Ptr->pos.y;   // (the camera's corner: the player at + 7, + 7)
+    if (gPlayerAvatar.objectEventId < OBJECT_EVENTS_COUNT)
+        px = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET,
+        py = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET;
+    return (u32)(abs(n->x - px) + abs(n->y - py));
+}
+
+static bool8 InRange(const struct Npc *n)
+{
+    s16 px = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET;
+    s16 py = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET;
+    return abs(n->x - px) <= NPC_RANGE_X && abs(n->y - py) <= NPC_RANGE_Y;
+}
+
+// Its object made (FALSE: no slot free)
+static bool8 Spawn(struct Npc *n)
+{
+    u8 id;
+    if (n->p->person == ORRE_PERSON_NONE)
+    {
+        // (a prop or a POKéMON with no sprite yet: RUI's sack in PHENAC, the hunters' truck...) there all the same,
+        // unseen, so it stands in the way and can be looked at: its talk script is the story's
+        id = SpawnSpecialObjectEventParameterized(OBJ_EVENT_GFX_ITEM_BALL, MOVEMENT_TYPE_NONE, LocalId(n),
+                                                  n->x + MAP_OFFSET, n->y + MAP_OFFSET, 3);
+        if (id >= OBJECT_EVENTS_COUNT)
+            return FALSE;
+        gObjectEvents[id].invisible = TRUE;
+        return TRUE;
+    }
+    id = SpawnSpecialObjectEventParameterized(OBJ_EVENT_GFX_ORRE_FIRST + n->p->person, MOVEMENT_TYPE_NONE, LocalId(n),
+                                              n->x + MAP_OFFSET, n->y + MAP_OFFSET, 3);
+    if (id >= OBJECT_EVENTS_COUNT)
+        return FALSE;
+    ObjectEventTurn(&gObjectEvents[id], n->dir);
+    return TRUE;
+}
+
 static void Show(struct Npc *n, bool8 show)
 {
     if (show == n->shown)
@@ -114,17 +159,11 @@ static void Show(struct Npc *n, bool8 show)
         n->shown = FALSE;
         return;
     }
-    if (n->p->person == ORRE_PERSON_NONE)
-        return;   // (a POKéMON or a prop: not a person yet)
-    SpawnSpecialObjectEventParameterized(OBJ_EVENT_GFX_ORRE_FIRST + n->p->person, MOVEMENT_TYPE_NONE, LocalId(n),
-                                         n->x + MAP_OFFSET, n->y + MAP_OFFSET, 3);
     n->shown = TRUE;
-    MPNet_Log("orre npcs: %u shown at %d,%d", n->p->index, n->x, n->y);
-    {
-        struct ObjectEvent *o = Object(n);
-        if (o)
-            ObjectEventTurn(o, n->dir);
-    }
+    MPNet_Log("orre npcs: %u shown at %d,%d%s", n->p->index, n->x, n->y,
+              n->p->person == ORRE_PERSON_NONE ? " (a prop: unseen)" : "");
+    if (InRange(n))
+        Spawn(n);   // (no slot: Orre_Npcs_Frame gives it the farthest one's)
 }
 
 // Who a room shows when the player arrives: the record's 0x80, which the rooms' first set-up scripts change
@@ -549,6 +588,42 @@ void Orre_Npcs_Frame(void)
     for (i = 0; i < sCount; i++)
     {
         struct Npc *n = &sNpc[i];
+        struct ObjectEvent *o;
+        if (!n->shown)
+            continue;
+        o = Object(n);
+        if (o != NULL && !n->walking && !n->talkTurned && !InRange(n))
+        {
+            // (far off: its slot for someone nearer; it keeps its place and facing)
+            n->x = o->currentCoords.x - MAP_OFFSET, n->y = o->currentCoords.y - MAP_OFFSET, n->dir = o->facingDirection;
+            RemoveObjectEventByLocalIdAndMap(LocalId(n), gSaveBlock1Ptr->location.mapNum,
+                                             gSaveBlock1Ptr->location.mapGroup);
+            continue;
+        }
+        if (o == NULL && InRange(n))
+        {
+            // (near, or the field came back from a battle or a screen without it: there again; no slot free, the
+            // farthest one with one gives up its own)
+            n->walking = FALSE;
+            if (!Spawn(n))
+            {
+                u32 j, far = sCount;
+                for (j = 0; j < sCount; j++)
+                    if (sNpc[j].shown && !sNpc[j].walking && !sNpc[j].talkTurned && Dist(&sNpc[j]) > Dist(n)
+                     && Object(&sNpc[j]) != NULL && (far == sCount || Dist(&sNpc[j]) > Dist(&sNpc[far])))
+                        far = j;
+                if (far < sCount)
+                {
+                    struct ObjectEvent *fo = Object(&sNpc[far]);
+                    sNpc[far].x = fo->currentCoords.x - MAP_OFFSET, sNpc[far].y = fo->currentCoords.y - MAP_OFFSET;
+                    sNpc[far].dir = fo->facingDirection;
+                    RemoveObjectEventByLocalIdAndMap(LocalId(&sNpc[far]), gSaveBlock1Ptr->location.mapNum,
+                                                     gSaveBlock1Ptr->location.mapGroup);
+                    Spawn(n);
+                }
+            }
+            continue;
+        }
         if (n->walkLoop && n->walking
          && ScriptMovement_IsObjectMovementFinished(LocalId(n), gSaveBlock1Ptr->location.mapNum,
                                                     gSaveBlock1Ptr->location.mapGroup))

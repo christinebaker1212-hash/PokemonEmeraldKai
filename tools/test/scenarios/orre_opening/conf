@@ -1,0 +1,9 @@
+# ORRE's opening (src/orre/orre_opening.c; docs/ORRE_HANDOFF.md "The opening"): landing at the OUTSKIRT STAND without
+# the SNAG MACHINE plays Colosseum's 31 opening shots over the SNAGEM HIDEOUT's rooms (scene rooms: not maps), then
+# gives the SNAG MACHINE (flag 0xFFF). Needs ORRE's packs.
+MODE=1
+TMO=300
+WARP=45,0,33,40
+ENV_A="MOEMON_DEBUG_PARTY=280:50 MOEMON_ORRE_SCRIPTS=1"
+EXPECT_A=("orre opening: scene 30" "orre opening: done, the SNAG MACHINE" "[test] orreget 0xFFF 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

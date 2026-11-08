@@ -122,7 +122,7 @@ ORRE's POKéMON CENTERs, PCs and marts: Colosseum's scripts opening Kai's screen
 Colosseum's lists src/data/orre_shops.h from tools/orre/gen_shops.py), check spots src/data/orre_room_checks.h
 (tools/orre/gen_checks.py); ORRE_HANDOFF "Shops, POKéMON CENTERs, the PC"; scenario orre_center. Colosseum's camera
 shots (.cam) play in ORRE's engine (src/orre/o3d_cam.c, tools/orre/hsd_cam.py; ORRE_HANDOFF "Colosseum's cameras";
-scenario orre_camera); the opening (step 7): ORRE_HANDOFF "The opening".
+scenario orre_camera); the opening (step 7: its shots over the hideout as scene rooms, then the SNAG MACHINE: src/orre/orre_opening.c, ORRE_HANDOFF "The opening"; scenario orre_opening).
 ORRE's people (the user, 2026-11-07): each Colosseum character model is a LOOK > CREATE recipe (field sprite) and the
 closest Pokemon Showdown trainer sprite (battle picture, 80x80 as drawn): tools/orre/people.py, src/orre/orre_people.c,
 ORRE_HANDOFF "Sprites"; scenario orre_people.

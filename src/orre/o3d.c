@@ -246,9 +246,10 @@ static const u8 *Skip(Reader *r, u32 n)
 }
 
 // A map's world: its grid, then its meshes in the grid's world ((x - x0, y, z - z0) * 16 / tile)
-static bool8 MapLoad(u32 i)
+// A room's model from the pack: map I's (its grid too: the field's blocks), or, I < 0, a scene room's (a room only shots
+// look at: the opening's; its grid if it has one, else Colosseum's units as they are at the tile scale)
+static bool8 RoomLoad(OMap *om, const char *file, s32 i)
 {
-    OMap *om = &sPack.map[i];
     u32 m, set, ns, nm, mi, has, x, y;
     s32 pm = -1;
     unsigned long rawSize;
@@ -257,19 +258,17 @@ static bool8 MapLoad(u32 i)
     u16 gw, gh;
     float tile, x0, z0, S;
     const u8 *cells;
-    if (i >= ARRAY_COUNT(sOrreMaps))
-        return FALSE;
     if (om->tried)
         return om->ok;
     om->tried = TRUE;
     if (!PackOpen())
         return FALSE;
     for (m = 0; m < sPack.nmaps; m++)
-        if (strcmp(sPack.maps[m].name, sOrreMaps[i].file) == 0)
+        if (strcmp(sPack.maps[m].name, file) == 0)
             pm = (s32)m;
     if (pm < 0 || (z = PackRead(sPack.maps[pm].off, sPack.maps[pm].zsize)) == NULL)
     {
-        printf("[o3d] ORRE's pack has no %s\n", sOrreMaps[i].file);
+        printf("[o3d] ORRE's pack has no %s\n", file);
         return FALSE;
     }
     rawSize = sPack.maps[pm].size;
@@ -278,7 +277,7 @@ static bool8 MapLoad(u32 i)
     {
         free(z);
         free(b);
-        printf("[o3d] ORRE's %s won't inflate\n", sOrreMaps[i].file);
+        printf("[o3d] ORRE's %s won't inflate\n", file);
         return FALSE;
     }
     free(z);
@@ -306,26 +305,31 @@ static bool8 MapLoad(u32 i)
     Take(&r, &tile, 4);
     Take(&r, &x0, 4);
     Take(&r, &z0, 4);
-    cells = Skip(&r, (u32)gw * gh * 16);
-    if (r.bad || has != 1 || tile <= 0.0f)
+    cells = has == 1 ? Skip(&r, (u32)gw * gh * 16) : NULL;
+    if (i < 0 && (r.bad || has != 1 || tile <= 0.0f))
+    {
+        has = 0, gw = gh = 0, tile = 8.0f, x0 = z0 = 0.0f;   // (a scene room without a grid)
+        r.bad = FALSE;
+    }
+    if (r.bad || (i >= 0 && (has != 1 || tile <= 0.0f)))
     {
         free(b);
-        printf("[o3d] ORRE's %s has no grid\n", sOrreMaps[i].file);
+        printf("[o3d] ORRE's %s has no grid\n", file);
         return FALSE;
     }
-    if (gw != sOrreMaps[i].bw * 32 || gh != sOrreMaps[i].bh * 32)
+    if (i >= 0 && (gw != sOrreMaps[i].bw * 32 || gh != sOrreMaps[i].bh * 32))
     {
         free(b);
-        printf("[o3d] ORRE's %s isn't the size of its map (tools/orre/gen_maps.py)\n", sOrreMaps[i].file);
+        printf("[o3d] ORRE's %s isn't the size of its map (tools/orre/gen_maps.py)\n", file);
         return FALSE;
     }
     S = 16.0f / tile;
     om->w = gw, om->h = gh;
     om->tile = tile, om->x0 = x0, om->z0 = z0;
-    om->blocks = malloc(sizeof(u16) * gw * gh);
+    om->blocks = malloc(sizeof(u16) * ((u32)gw * gh + 1));
     om->hn = calloc((u32)gw * gh, 1);
     om->hgt = calloc((u32)gw * gh, sizeof(*om->hgt));
-    for (y = 0; y < gh; y++)
+    for (y = 0; y < gh && cells; y++)
         for (x = 0; x < gw; x++)
         {
             const u8 *t = cells + ((u32)y * gw + x) * 16;
@@ -339,7 +343,7 @@ static bool8 MapLoad(u32 i)
                 om->hgt[k][j] = hh * S;
             }
         }
-    // the meshes (the sky left out: Platinum's camera looks down)
+    // the meshes (the sky's marked: drawn only under a shot)
     for (set = 0; set < ns && !meshes.bad; set++)
     {
         u8 kind[4];
@@ -429,12 +433,58 @@ static bool8 MapLoad(u32 i)
     free(b);
     if (meshes.bad)
     {
-        printf("[o3d] ORRE's %s is cut short\n", sOrreMaps[i].file);
+        printf("[o3d] ORRE's %s is cut short\n", file);
         return FALSE;
     }
     om->ok = TRUE;
-    printf("[o3d] ORRE's %s: %u meshes\n", sOrreMaps[i].file, om->nmesh);
+    printf("[o3d] ORRE's %s: %u meshes\n", file, om->nmesh);
     return TRUE;
+}
+
+static bool8 MapLoad(u32 i)
+{
+    return i < ARRAY_COUNT(sOrreMaps) && RoomLoad(&sPack.map[i], sOrreMaps[i].file, (s32)i);
+}
+
+// ---- a scene room: drawn instead of the field's map while a shot plays (the opening's rooms aren't maps)
+static const OMap *sCur;   // the map the player is on
+static OMap sScene;
+static char sSceneFile[32];
+static bool8 sSceneOn;
+
+static void SceneFree(void)
+{
+    u32 k;
+    for (k = 0; k < sScene.nmesh; k++)
+        free(sScene.mesh[k].v);
+    free(sScene.mesh);
+    free(sScene.blocks);
+    free(sScene.hn);
+    free(sScene.hgt);
+    memset(&sScene, 0, sizeof(sScene));
+}
+
+// The room FILE (its pack name) drawn under the shots from now on; NULL: the field's map again
+bool8 O3D_SceneRoom(const char *file)
+{
+    if (file == NULL)
+    {
+        sSceneOn = FALSE;
+        return TRUE;
+    }
+    if (strcmp(file, sSceneFile) != 0)
+    {
+        SceneFree();
+        snprintf(sSceneFile, sizeof(sSceneFile), "%s", file);
+    }
+    sSceneOn = RoomLoad(&sScene, file, -1);
+    return sSceneOn;
+}
+
+// The room the picture shows: a scene room while one is set, else the field's map
+static const OMap *Drawn(void)
+{
+    return sSceneOn && sScene.ok ? &sScene : sCur;
 }
 
 static s32 MapIndex(u8 group, u8 num)
@@ -530,7 +580,6 @@ const u16 *O3D_LayoutBlocks(const struct MapLayout *layout)
 }
 
 // ------------------------------------------------------------------------------------------------ the ground's height
-static const OMap *sCur;   // the map the player is on
 
 // A tile's ground height (16 units a tile): of its heights, the one nearest `near` (an object on a bridge stays on
 // it); `near` itself where it has none
@@ -596,11 +645,12 @@ static void ShotView(void)
 {
     float eye[3], tgt[3], roll, fov, S, f[3], r[3], u[3], len, cr, sr;
     u32 i;
-    if (!sCur || !O3D_CamGet(eye, tgt, &roll, &fov))
+    const OMap *g = Drawn();
+    if (!g || !O3D_CamGet(eye, tgt, &roll, &fov))
         return;
-    S = 16.0f / sCur->tile;
-    eye[0] = (eye[0] - sCur->x0) * S, eye[1] *= S, eye[2] = (eye[2] - sCur->z0) * S;
-    tgt[0] = (tgt[0] - sCur->x0) * S, tgt[1] *= S, tgt[2] = (tgt[2] - sCur->z0) * S;
+    S = 16.0f / g->tile;
+    eye[0] = (eye[0] - g->x0) * S, eye[1] *= S, eye[2] = (eye[2] - g->z0) * S;
+    tgt[0] = (tgt[0] - g->x0) * S, tgt[1] *= S, tgt[2] = (tgt[2] - g->z0) * S;
     for (i = 0; i < 3; i++)
         f[i] = tgt[i] - eye[i];
     len = sqrtf(f[0] * f[0] + f[1] * f[1] + f[2] * f[2]);
@@ -755,6 +805,8 @@ static bool OamHidden(int oamIndex, int x, int line)
 {
     const OamDepth *o;
     float d;
+    if (sSceneOn)
+        return TRUE;   // (a scene room under a shot: the field's sprites aren't in it)
     if (!sLiveAny || oamIndex < 0 || oamIndex >= OAM_ENTRY_COUNT || x < 0 || x >= W || line < 0 || line >= H)
         return FALSE;
     o = &sLiveOam[oamIndex];
@@ -869,6 +921,52 @@ static u8 *sScratchOk;
 static u32 sScratchSize;
 
 // pass 0 draws the opaque meshes, 1 the see-through ones
+// A triangle partly behind the camera, cut at the near plane (depth NEAR_Z): the part in front drawn as a fan
+#define NEAR_Z 1.5f
+static void DrawClipped(const OVtx *tri, const OMesh *g)
+{
+    OVtx in[3], out[4];
+    float d[3];
+    u32 i, n = 0;
+    SVtx sv[4];
+    for (i = 0; i < 3; i++)
+    {
+        float dx = tri[i].x - sView.eye[0], dy = tri[i].y - sView.eye[1], dz = tri[i].z - sView.eye[2];
+        in[i] = tri[i];
+        d[i] = dx * sView.fwd[0] + dy * sView.fwd[1] + dz * sView.fwd[2];
+    }
+    for (i = 0; i < 3 && n < 4; i++)
+    {
+        u32 j = (i + 1) % 3;
+        if (d[i] >= NEAR_Z)
+            out[n++] = in[i];
+        if ((d[i] >= NEAR_Z) != (d[j] >= NEAR_Z) && n < 4)
+        {
+            float t = (NEAR_Z - d[i]) / (d[j] - d[i]);
+            OVtx *o = &out[n++];
+            o->x = in[i].x + (in[j].x - in[i].x) * t, o->y = in[i].y + (in[j].y - in[i].y) * t;
+            o->z = in[i].z + (in[j].z - in[i].z) * t, o->u = in[i].u + (in[j].u - in[i].u) * t;
+            o->v = in[i].v + (in[j].v - in[i].v) * t;
+            o->r = (u8)(in[i].r + (in[j].r - in[i].r) * t), o->g = (u8)(in[i].g + (in[j].g - in[i].g) * t);
+            o->b = (u8)(in[i].b + (in[j].b - in[i].b) * t);
+        }
+    }
+    if (n < 3)
+        return;
+    for (i = 0; i < n; i++)
+    {
+        float depth;
+        if (!Project(out[i].x, out[i].y, out[i].z, &sv[i].x, &sv[i].y, &depth))
+            depth = NEAR_Z, sv[i].x = sView.ax, sv[i].y = sView.ay;   // (on the plane: as near as it gets)
+        sv[i].iz = 1.0f / depth;
+        sv[i].u = out[i].u * sv[i].iz, sv[i].v = out[i].v * sv[i].iz;
+        sv[i].c[0] = out[i].r * sv[i].iz, sv[i].c[1] = out[i].g * sv[i].iz, sv[i].c[2] = out[i].b * sv[i].iz;
+    }
+    DrawTriangle(&sv[0], &sv[1], &sv[2], g);
+    if (n == 4)
+        DrawTriangle(&sv[0], &sv[2], &sv[3], g);
+}
+
 static void DrawMesh(const OMesh *g, int pass)
 {
     u32 i;
@@ -901,8 +999,12 @@ static void DrawMesh(const OMesh *g, int pass)
         s->c[0] = v->r * s->iz, s->c[1] = v->g * s->iz, s->c[2] = v->b * s->iz;
     }
     for (i = 0; i + 2 < g->count; i += 3)
+    {
         if (sScratchOk[i] && sScratchOk[i + 1] && sScratchOk[i + 2])
             DrawTriangle(&sScratch[i], &sScratch[i + 1], &sScratch[i + 2], g);
+        else if (sScratchOk[i] || sScratchOk[i + 1] || sScratchOk[i + 2])
+            DrawClipped(&g->v[i], g);   // (partly behind the camera: a shot's ground passing under it)
+    }
 }
 
 static void Render(void)
@@ -914,22 +1016,23 @@ static void Render(void)
         (&sDepth[0][0])[i] = 1e30f;
         (&sIds[0][0])[i] = -1;
     }
-    if (sCur == NULL)
+    const OMap *g = Drawn();
+    if (g == NULL)
         return;
     if (O3D_CamActive())
     {
         // (a shot of Colosseum's: its sky first, behind everything: the depth cleared after it)
         for (pass = 0; pass < 2; pass++)
-            for (i = 0; i < sCur->nmesh; i++)
-                if (sCur->mesh[i].sky)
-                    DrawMesh(&sCur->mesh[i], pass);
+            for (i = 0; i < g->nmesh; i++)
+                if (g->mesh[i].sky)
+                    DrawMesh(&g->mesh[i], pass);
         for (i = 0; i < W * H; i++)
             (&sDepth[0][0])[i] = 1e30f;
     }
     for (pass = 0; pass < 2; pass++)
-        for (i = 0; i < sCur->nmesh; i++)
-            if (!sCur->mesh[i].sky)
-                DrawMesh(&sCur->mesh[i], pass);
+        for (i = 0; i < g->nmesh; i++)
+            if (!g->mesh[i].sky)
+                DrawMesh(&g->mesh[i], pass);
 }
 
 // ------------------------------------------------------------------------------------------------ the picture

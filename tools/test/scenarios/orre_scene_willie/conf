@@ -9,7 +9,7 @@
 MODE=1
 TMO=600
 WARP=45,0,33,40
-ENV_A="MOEMON_DEBUG_PARTY=280:50,280:50 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_VM_TRACE=1"
+ENV_A="MOEMON_DEBUG_PARTY=280:50,280:50 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1 MOEMON_ORRE_VM_TRACE=1"
 EXPECT_A=("orre vm: room 1 (S1_out): main 0100000B" "orre vm: message 20792" "orre vm: message 20807"
           "orre: battle 10 (kind 2" "orre: battle 10 won" "orre vm: message 20805" "[test] orreget 0x3DE 1" "[test] orreget 0xA5A 1"
           "orre npcs: 3 shown at 31,32" "orre npcs: 3 walked to 25,30" "orre npcs: room 1, 7 people, 1 shown"

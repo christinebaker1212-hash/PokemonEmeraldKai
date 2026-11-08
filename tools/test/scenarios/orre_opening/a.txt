@@ -1,0 +1,23 @@
+pressuntillog A 6000 orre opening: scene 0 
+wait 200
+rendershot o_00
+waitlog 900 orre opening: scene 2 
+wait 30
+rendershot o_02
+waitlog 1200 orre opening: scene 7 
+wait 60
+rendershot o_07
+waitlog 1500 orre opening: scene 11 
+wait 40
+rendershot o_11
+waitlog 1500 orre opening: scene 14 
+wait 60
+rendershot o_14
+waitlog 2500 orre opening: scene 22 
+wait 40
+rendershot o_22
+waitlog 4000 orre opening: done
+wait 60
+rendershot o_done
+mp orreget 4095
+quit

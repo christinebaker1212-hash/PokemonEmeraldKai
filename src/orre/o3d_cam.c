@@ -218,6 +218,11 @@ bool8 O3D_CamKeep(void)
     return sCam.keep;
 }
 
+void O3D_CamSetKeep(bool8 keep)
+{
+    sCam.keep = keep;
+}
+
 bool8 O3D_CamActive(void)
 {
     return sCam.on;

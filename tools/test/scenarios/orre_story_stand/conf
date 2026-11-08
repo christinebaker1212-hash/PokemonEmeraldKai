@@ -6,7 +6,7 @@
 MODE=1
 TMO=300
 WARP=45,0,33,40
-ENV_A="MOEMON_DEBUG_PARTY=280:50,280:50 MOEMON_ORRE_SCRIPTS=1"
+ENV_A="MOEMON_DEBUG_PARTY=280:50,280:50 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1"
 EXPECT_A=("walkto 25 30 stopped (a script)" "orre vm: message 20829" "[test] orreget 0x3DA 1"
           "o3d cam: S1_shop_1F/S1_shop_1F_news.cam" "walkto 10 18 there" "orre vm: message 20792")
 UNEXPECT_A=("[crash]" "TIMEOUT waiting")

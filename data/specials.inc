@@ -805,3 +805,5 @@ gSpecials::
 	def_special Orre_VmChoice
 	def_special Orre_VmChoiceDone
 	def_special Orre_VmTouch
+	def_special Orre_Opening   @ Moemon Kai: ORRE's opening (src/orre/orre_opening.c), waitstate
+	def_special Orre_OpeningNeeded

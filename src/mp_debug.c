@@ -2473,6 +2473,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
                                                   0xE0 + (person & 0xF), x + dx, y + dy, 3);
         printf("[test] orrenpc %d %s object %d\n", person, Orre_People_Model(person), id);
     }
+    else if (strcmp(cmd, "objs") == 0)
+    {
+        // objs - the active object events: id, local id, tile, elevation, graphics, unseen
+        u32 i;
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+            if (gObjectEvents[i].active)
+                printf("[test] obj %u local %u at %d,%d elev %u gfx %u%s\n", i, gObjectEvents[i].localId,
+                       gObjectEvents[i].currentCoords.x, gObjectEvents[i].currentCoords.y,
+                       gObjectEvents[i].currentElevation, OBJ_GFX_ID(&gObjectEvents[i]),
+                       gObjectEvents[i].invisible ? " unseen" : "");
+    }
     else if (strcmp(cmd, "createddump") == 0)
     {
         // createddump HEX DIR - a CREATE recipe's field frames, front and back pictures as PNGs in DIR

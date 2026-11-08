@@ -282,10 +282,19 @@ The older notes per part:
   nothing but wait.
 - **Those four rooms aren't Kai maps yet** (maps.py ORDER has the 121 field rooms: S2_out_2, S2_building_* only); their
   models are in orre3d.pak. To play the opening they need maps (or a scene mode drawing a room without one).
-- Next: the scenes as data (which room, shot, characters and their animation per scene, the waits), the characters
-  as sprites moved along their animations' root paths (tools/orre/hsd_anim.py reads them), the player's look as the
-  thief (ORRE_DECISIONS), the explosion, then the ride and the OUTSKIRT STAND's arrival (flag 986's scene) and the
-  boat's first landing starting it; then MOEMON_ORRE_SCRIPTS on for everyone.
+- **Built (2026-11-08): src/orre/orre_opening.c.** The 31 scenes in order (demoScene00-30: each scene's room is the
+  one its shot's archive is in, S2_out_1 -> S2_bossroom_1 -> S2_out_3 -> S2_snatchroom_1 -> S2_hallway_1 -> S2_out_3's
+  19-shot bike escape; the last asks for room 1, the OUTSKIRT STAND), each shot played by its resource id and waited
+  to its end, cuts within a room straight on, a new room through black (floorRequestChange's fade), START skips.
+  The rooms aren't maps: ORRE's engine draws a **scene room** (o3d.c O3D_SceneRoom: any room of orre3d.pak by name, its
+  grid if it has one, else Colosseum's units at the tile scale) instead of the field's map while a shot plays, the
+  field's sprites hidden (OamHidden); triangles crossing the near plane are cut, not dropped (DrawClipped: a shot's
+  ground passes under its camera). At its end the SNAG MACHINE (ORRE_FLAG_SNAG_MACHINE). It plays on the first
+  landing at the OUTSKIRT STAND without the SNAG MACHINE while ORRE's story is on (data/maps/Orre_OutskirtStand/
+  scripts.inc: ON_TRANSITION Orre_OpeningNeeded, ON_FRAME Orre_EventScript_Opening; Kai's glue, no words: the
+  opening has none). Tests that start after it set MOEMON_ORRE_NO_OPENING=1. Scenario orre_opening.
+- **Not yet**: the characters (the hero as the player's look, GONZAP, the peons, the bike: their models' root paths
+  from opening_characters_NN.dat as sprites), the explosion's map-object animations and particles.
 
 ## The story runs (2026-11-08: toward a finishable ORRE)
 - **More natives** (orre_vm.c): 95 floorLink / 125 floorLinkWithSE (a script's room change: o3d.c O3D_RoomEntry finds
@@ -325,6 +334,12 @@ The older notes per part:
   the coupon counters aren't open yet). Quiet too: 225 (the party noted for a challenge), 246 (the save's continue
   point). Left: the day care (84 / 85), a move tutor (86), 87, the e-Reader's DNA samples (203-208, Japan's), the GBA
   link (200-220), the P★DA and pocket menus (Kai's own).
+- **Props**: a room's "people" without a character model (RUI's sack in PHENAC, the hunters' truck, POKéMON with no
+  sprite yet) are placed unseen (an invisible object), so they block and can be examined: PHENAC's story needs the
+  sack examined (its talk script, function 33, arms the main loop's scene).
+- **16 object slots** (the save keeps 16 object events): a room's shown people have objects only near the player
+  (±10 x ±8 tiles), the nearest first; far off they keep their place and facing in their record (orre_npcs.c
+  Orre_Npcs_Frame), and anyone missing after a battle or a screen comes back.
 - **Still to do for a finishable ORRE**: the colosseum challenges (std223 then menu room 917: not converted), the
   rest of the story room by room (probe with MOEMON_ORRE_VM_TRACE=1 for "not converted" natives), the opening and
   RUI (steps 7, 8), then scripts on for everyone and a full playthrough test.
