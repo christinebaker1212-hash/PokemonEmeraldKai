@@ -36,4 +36,18 @@ void Orre_ShadowAboard(void);
 void Orre_CheckBoat(void);      // (special, waitstate) ORRE's packs here? (VAR_RESULT: orre_ferry.c)
 void Orre_DownloadPacks(void);  // (special, waitstate) ... their download, with its progress   // (special) VAR_RESULT TRUE: a Shadow Pokémon in the party (it can't leave ORRE)
 
+// Colosseum's words (src/orre/orre_text.c: orre/orre_text.pak from tools/orre/build_text.py): a line by Colosseum's own
+// message id, through PLACEHOLDER_ID_ORRE_TEXT; the words it fills in are ORRE's string slots, one per Colosseum
+// control id (tools/orre/msg.py CONTROLS: 89 npc, 45 item, 50 pokemon, 47 digit, 75 money...)
+#define ORRE_STR_VARS 0x60
+#define ORRE_STR_VAR_SIZE 48
+u32 Orre_TextCount(void);
+bool8 Orre_HasText(u32 id);
+const u8 *Orre_Text(u32 id);
+void Orre_TextPlaceholder(u8 *out, u32 id);   // OUT: 6 bytes
+void Orre_SetStrVar(u8 ctl, const u8 *str);
+const u8 *Orre_StrVar(u8 ctl);
+void Orre_ClearStrVars(void);
+const u8 *Orre_ExpandPlaceholder(u8 id, const u8 *src, u8 **dest);   // (string_util.c)
+
 #endif

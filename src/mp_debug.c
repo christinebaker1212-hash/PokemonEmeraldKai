@@ -4096,6 +4096,33 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] s3dtext %d %d: %d characters\n", bank, msg, (int)StringLength(gStringVar4));
         ShowFieldMessage(sPlaceholder);
     }
+    else if (strcmp(cmd, "orrevar") == 0)
+    {
+        // orrevar CTL WORDS: ORRE's string slot for Colosseum's control CTL (89 npc, 45 item, 75 money...), as a
+        // converted script sets it (src/orre/orre_text.c)
+        int ctl = 0, at = 0;
+        u8 words[ORRE_STR_VAR_SIZE];
+        sscanf(arg, "%d %n", &ctl, &at);
+        MP_AsciiToGame(words, arg + at, ORRE_STR_VAR_SIZE - 1);
+        Orre_SetStrVar(ctl, words);
+    }
+    else if (strcmp(cmd, "orretext") == 0)
+    {
+        // orretext ID: Colosseum's message ID from ORRE's text pack through the placeholder scripts use, in a message
+        // box; the log has it as text
+        static u8 sPlaceholder[6];
+        static u8 sExpanded[1000];   // (not gStringVar4: the box prints from it)
+        char ascii[1000];
+        u32 id = strtoul(arg, NULL, 0);
+        if (!IsFieldMessageBoxHidden())
+            HideFieldMessageBox();   // (the last one's box)
+        Orre_TextPlaceholder(sPlaceholder, id);
+        StringExpandPlaceholders(sExpanded, sPlaceholder);
+        MP_GameToAscii(ascii, sExpanded, sizeof(ascii) - 1);
+        printf("[test] orretext %u (%s, %u lines in the pack): %s\n", id, Orre_HasText(id) ? "found" : "missing",
+               Orre_TextCount(), ascii);
+        ShowFieldMessage(sPlaceholder);
+    }
     else if (strcmp(cmd, "collisionmap") == 0)
     {
         // collisionmap X Y W H: the map grid's walls in a rectangle ('#' wall, '.' open), a row a line

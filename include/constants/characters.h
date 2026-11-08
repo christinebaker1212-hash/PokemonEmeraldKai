@@ -272,6 +272,8 @@
 #define PLACEHOLDER_ID_SINNOH_TEXT   0x40   // Moemon Kai: + bank, message (2 bytes of 7 bits each): SINNOH's text (src/sinnoh/s3d_text.c)
 #define PLACEHOLDER_ID_SINNOH_VAR4   0x41   // Moemon Kai: SINNOH's text's string slots 3-5 (Platinum's messages have six): gSinnohStrVar4-6
 #define PLACEHOLDER_ID_SINNOH_VAR6   0x43
+#define PLACEHOLDER_ID_ORRE_TEXT     0x44   // Moemon Kai: + Colosseum's message id (3 bytes of 7 bits): ORRE's text (src/orre/orre_text.c)
+#define PLACEHOLDER_ID_ORRE_VAR      0x80   // Moemon Kai: + Colosseum's control id (up to 0x5F): ORRE's string slots (orre_text.c)
 
 // battle placeholders are located in battle_message.h
 

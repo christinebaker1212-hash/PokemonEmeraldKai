@@ -108,6 +108,9 @@ orre_all_places from tools/orre/gen_tests.py); the ways out open Colosseum's own
 after any ELITE FOUR (old saves too: mp_battleisland.c's courier), on HOENN's ferry lists and every port, landing at the
 OUTSKIRT STAND by a sailor who sails back (src/orre/orre_ferry.c, data/scripts/orre.inc; ORRE_DECISIONS "A post-game place").
 Shadow Pokémon (designed before the story, the user 2026-11-07): `docs/SHADOW_POKEMON.md`.
+ORRE's words: orre/orre_text.pak (tools/orre/build_text.py, from the disc by make_pack.sh, never committed), a line by
+Colosseum's own message id through PLACEHOLDER_ID_ORRE_TEXT, the words it fills in ORRE's string slots
+(src/orre/orre_text.c; ORRE_HANDOFF "Colosseum's text"; scenario orre_text).
 ORRE's people (the user, 2026-11-07): each Colosseum character model is a LOOK > CREATE recipe (field sprite) and the
 closest Pokemon Showdown trainer sprite (battle picture, 80x80 as drawn): tools/orre/people.py, src/orre/orre_people.c,
 ORRE_HANDOFF "Sprites"; scenario orre_people.

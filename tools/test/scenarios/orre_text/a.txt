@@ -1,0 +1,25 @@
+pressuntil A field 5000
+wait 60
+mp orretext 21065
+wait 240
+rendershot t_rui
+mp orretext 20805
+wait 240
+rendershot t_willie1
+press A 4
+wait 240
+rendershot t_willie2
+press A 4
+wait 240
+rendershot t_willie3
+mp orrevar 75 500
+mp orrevar 45 TM01
+mp orretext 20727
+wait 240
+rendershot t_money
+mp orretext 3501
+wait 60
+mp orretext 99999
+wait 120
+rendershot t_missing
+quit

@@ -10,10 +10,11 @@ ID=o$(find tools/orre -type f \( -name '*.py' -o -name '*.sh' \) -print0 | LC_AL
 if [ "$1" = "--id" ]; then echo "$ID"; exit 0; fi
 OUT=$(mkdir -p "${1:?usage: package_orre.sh OUTDIR [ORRE_DIR]}" && cd "$1" && pwd)
 SRC=$(cd "${2:-orre}" && pwd)
-[ -f "$SRC/orre3d.pak" ] && [ -f "$SRC/orre_data.pak" ] || { echo "no ORRE packs in $SRC (tools/orre/make_pack.sh)"; exit 1; }
+[ -f "$SRC/orre3d.pak" ] && [ -f "$SRC/orre_data.pak" ] && [ -f "$SRC/orre_text.pak" ] \
+    || { echo "no ORRE packs in $SRC (tools/orre/make_pack.sh)"; exit 1; }
 STAGE=$(mktemp -d)
 mkdir -p "$STAGE/orre"
-cp "$SRC/orre3d.pak" "$SRC/orre_data.pak" "$STAGE/orre/"
+cp "$SRC/orre3d.pak" "$SRC/orre_data.pak" "$SRC/orre_text.pak" "$STAGE/orre/"
 rm -f "$OUT/MoemonOrre.zip"
 (cd "$STAGE" && zip -9 -qrX "$OUT/MoemonOrre.zip" orre)
 rm -rf "$STAGE"

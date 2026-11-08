@@ -1,5 +1,6 @@
 #include "global.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's text
+#include "orre.h"  // Moemon Kai: ORRE's text
 #include "string_util.h"
 #include "text.h"
 #include "strings.h"
@@ -351,6 +352,13 @@ u8 *StringExpandPlaceholders(u8 *dest, const u8 *src)
                 u16 bank = (src[0] & 0x7F) << 7 | (src[1] & 0x7F), msg = (src[2] & 0x7F) << 7 | (src[3] & 0x7F);
                 src += 4;
                 dest = StringExpandPlaceholders(dest, S3D_Text(bank, msg));
+                break;
+            }
+            if (placeholderId == PLACEHOLDER_ID_ORRE_TEXT
+             || (placeholderId >= PLACEHOLDER_ID_ORRE_VAR && placeholderId < PLACEHOLDER_ID_ORRE_VAR + ORRE_STR_VARS))
+            {
+                // Moemon Kai: a line of ORRE's text pack, or one of its string slots (src/orre/orre_text.c)
+                src = Orre_ExpandPlaceholder(placeholderId, src, &dest);
                 break;
             }
             if (placeholderId >= PLACEHOLDER_ID_SINNOH_VAR4 && placeholderId <= PLACEHOLDER_ID_SINNOH_VAR6)

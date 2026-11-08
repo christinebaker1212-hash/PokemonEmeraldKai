@@ -20,6 +20,7 @@ if [ -z "$SRC" ]; then   # stand-ins: the download doesn't read what's inside
     SRC="$OUT/src"
     head -c 3000000 /dev/urandom > "$SRC/orre3d.pak"
     head -c 500000 /dev/urandom > "$SRC/orre_data.pak"
+    head -c 100000 /dev/urandom > "$SRC/orre_text.pak"
 fi
 tools/release/package_orre.sh "$OUT/srv" "$SRC" > /dev/null || { echo "package failed"; exit 99; }
 ID=$(cat "$OUT/srv/orre_id.txt")

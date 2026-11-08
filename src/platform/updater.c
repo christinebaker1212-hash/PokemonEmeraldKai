@@ -1763,7 +1763,7 @@ const char *Updater_SongsRoot(void)
     return ExtraRoot(&sSongs, root, sizeof(root));
 }
 
-// ORRE's packs: orre/ next to the game (orre3d.pak, orre_data.pak)
+// ORRE's packs: orre/ next to the game (orre3d.pak, orre_data.pak, orre_text.pak)
 const char *Updater_OrreRoot(void)
 {
     static char root[1100];

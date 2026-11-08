@@ -78,7 +78,7 @@ rules, and what each tool does. This file is where things stand, what a new sess
 
 ## Next steps (in order)
 The road to the end, agreed with the user 2026-11-07 (their answers: ORRE_DECISIONS "The road to the end"):
-1. **Story state: done** (below, "Story flags"). 2. Colosseum's text, built from the disc (never committed).
+1. **Story state: done** (below, "Story flags"). 2. **Colosseum's text: done** (below, "Colosseum's text").
 3. Trainers: Colosseum's trainer table -> Kai trainers (teams, prize money, Shadow Pokémon, their person: sprite and
    picture). 4. **The script converter** (.scd -> Kai scripts at build time, as SINNOH's; the big one).
 5. People on the maps (where Colosseum puts them, shown as its scripts say). 6. Shops, POKéMON CENTERs, the PC.
@@ -128,14 +128,33 @@ The older notes per part:
    Debug: `mp orrenpc PERSON [DX DY]`, `mp orrefoe PERSON [1]`, `mp createddump HEX DIR`. Scenario orre_people.
    Next: place the people on the maps from colo_rooms.py's `people` (model -> person), shown by their scripts (step 5).
 5. **Words and scripts.** The map scripts (.scd, the GS VM) converted to Kai's (as tools/sinnoh/gen_scripts.py does
-   SINNOH's); the text (msg.py) into Kai's charset, controls mapped (`{hero}`, `{rui}`, `{npc}`, `{item}`...). Never
-   write ORRE's words or scripts by hand.
+   SINNOH's); the text is done (above, "Colosseum's text": a line is its id's placeholder, the words it fills in ORRE's
+   string slots). Never write ORRE's words or scripts by hand.
 6. **Music** (the user, 2026-11-07: converted, it can't be found online; next): the MusyX projects in common.fsys
    (snd_music_proj / _pool / _sdir) and the songs (0x08 members), to .kaisong; the decomp's MusyX library is the
    reference. Each map gets its song as its song converts.
 7. **Snagging and Shadow Pokémon**, in Orre only (state in a sidecar: saves never change layout; Colosseum's story
    flags, src/orre/orre_story.c, go there too).
 8. The in-game download screen when orre/ is missing (as the DANCE machine's rh_screen.c StateNoSongs).
+
+## Colosseum's text (src/orre/orre_text.c, 2026-11-08)
+- **The pack**: orre/orre_text.pak, made by tools/orre/build_text.py from the unpacked disc (make_pack.sh runs it;
+  package_orre.sh ships it in MoemonOrre.zip beside the other two; never committed). Every .msg file plus common_rel's
+  own block (place, item, move and POKeMON names): 8,229 lines. Colosseum's message ids are **one numbering across its
+  files** (6,726 ids; an id in several files is the same line copied into each module's archive; the eight that differ
+  are menu copies and the developers' move viewer, which goes last), so the pack is one table by id.
+- **Converted**: Kai's character set with MOeMON's words (moe_words.py, as HOENN and SINNOH); "‱" -> "???" (a speaker not
+  yet named), "$" -> Kai's money sign (Kai's "$" is EOS!), straight quotes -> curly, the P★DA's star -> "·" (no star in
+  Kai's font); Japanese lines (633, cut events) left out ("Message missing"). **Re-wrapped** to Kai's box (200 px of the
+  normal font): {wait_key} is a new box (Kai's page); within a box a line ending a sentence stays a break and the rest
+  flow; two lines a box, then the box scrolls. Speaker names stay in the line as Colosseum writes them ("WILLIE: ...").
+- **Placeholders** (include/constants/characters.h): PLACEHOLDER_ID_ORRE_TEXT 0x44 + the id as three 7-bit bytes
+  (build_text.py orre_text_bytes, Orre_TextPlaceholder); {hero} the player's name; {rui} "RUI"; every other word the game
+  fills in is ORRE's string slot PLACEHOLDER_ID_ORRE_VAR (0x80) + Colosseum's control id (msg.py CONTROLS: 89 npc the
+  speaker, 45 item, 50 pokemon, 47 digit, 75 money, 13-14 str0 / str1...): Orre_SetStrVar(ctl, words) is what the script
+  converter will emit where Colosseum's scripts fill them. {wait:N} is Kai's PAUSE; fonts, colours, sounds go.
+- Debug: `mp orretext ID` (the line in a message box, as text in the log), `mp orrevar CTL WORDS`; scenario orre_text;
+  `python3 -I tools/orre/build_text.py UNPACKED OUT.pak --dump out.txt` writes every converted line as text.
 
 ## Story flags (src/orre/orre_story.c, 2026-11-07)
 Colosseum's GS flag module (the decomp: gs_range_8018FE30.c, gs_flag_exact_801908D4.c, gs_flag_get_exact_801906A0.c):

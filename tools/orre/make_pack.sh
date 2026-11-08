@@ -1,7 +1,7 @@
 #!/bin/bash
 # ORRE's packs (docs/ORRE_DECISIONS.md), ripped from Pokemon Colosseum's disc (GC6E01, the one the Colosseum decomp
-# matches) into orre/: orre3d.pak (every map's model) and orre_data.pak (text, collision, scripts, floor data, cameras,
-# map tables, character models). The game reads only these: no disc. Nothing of the disc or the packs is in the
+# matches) into orre/: orre3d.pak (every map's model), orre_data.pak (text, collision, scripts, floor data, cameras,
+# map tables, character models) and orre_text.pak (the text in Kai's character set). The game reads only these: no disc. Nothing of the disc or the packs is in the
 # repository (orre/ is ignored); the release builds them and ships them.
 # usage: tools/orre/make_pack.sh DISC          (a .rvz / .iso / .gcm, or a .zip holding one)
 #        ORRE_DISC_URL=URL tools/orre/make_pack.sh   (the release: downloads the disc first)
@@ -53,6 +53,9 @@ mkdir -p "$REPO/orre"
 # (its warnings go to a log; on a failure the log's end is shown: the release's 1.171.2 failed here without a word)
 python3 -I "$REPO/tools/orre/build_pack.py" "$WORK/unpacked" "$REPO/orre" 2> "$WORK/build_pack.log" \
     || { echo "build_pack.py failed:"; tail -30 "$WORK/build_pack.log"; exit 1; }
+# Colosseum's words in Kai's character set (orre_text.pak: tools/orre/build_text.py)
+python3 -I "$REPO/tools/orre/build_text.py" "$WORK/unpacked" "$REPO/orre/orre_text.pak" 2> "$WORK/build_text.log" \
+    || { echo "build_text.py failed:"; tail -30 "$WORK/build_text.log"; exit 1; }
 if [ -n "$ORRE_TEST" ]; then
     python3 -I "$REPO/tools/orre/test_pack.py" "$WORK/unpacked" "$REPO/orre" 2> "$WORK/test_pack.log" \
         || { echo "test_pack.py failed:"; tail -30 "$WORK/test_pack.log"; exit 1; }
