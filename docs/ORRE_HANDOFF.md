@@ -324,7 +324,7 @@ The older notes per part:
   tools/orre/story_order.txt` writes **orre_scenes_NN** (25 steps each, every step on its own from `mp orrestory`:
   probes, not committed, many need what earlier steps leave; tools/orre/check_scenes.py lists the ones that didn't
   set their flag) and **orre_story_chain** (every step in order from the landing, the story never jumped: the harness's
-  `skipif orreflag:N K` passes over a step the story already did; the first "TIMEOUT waiting for log orre: flag N"
+  `skipif orreflag:N K` passes over a step the story already did; in the room already, it walks (`skipif inmap:G,N`, `walkto`) instead of warping in again, which would set the room up afresh; at a main loop's step it presses A to each side, as a player looks around; the first "TIMEOUT waiting for log orre: flag N"
   is where the story stops). Flags change in the log with MOEMON_ORRE_FLAG_LOG=1 ("orre: flag N = V").
 - **A walk that can't start** (a scene cut off mid-walk still holds its movement slot) puts the person where the
   walk ends, so the scene waiting for them goes on (orre_npcs.c WalkTo).

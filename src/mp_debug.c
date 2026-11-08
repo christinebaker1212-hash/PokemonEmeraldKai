@@ -334,6 +334,12 @@ int MP_TestCondition(const char *name)
         return MP_Setup_IsReady();
     if (strncmp(name, "orreflag:", 9) == 0)   // ORRE's story flag N is set (tools/orre/gen_story_tests.py's chain)
         return Orre_Flag(atoi(name + 9));
+    if (strncmp(name, "inmap:", 6) == 0)   // the player is on map GROUP,NUM
+    {
+        int g = -1, m = -1;
+        sscanf(name + 6, "%d,%d", &g, &m);
+        return gSaveBlock1Ptr->location.mapGroup == g && gSaveBlock1Ptr->location.mapNum == m;
+    }
     if (strcmp(name, "field") == 0)
         return MP_IsLocalFree();
     if (strcmp(name, "down") == 0)

@@ -60,7 +60,10 @@ def chain(out, steps, maps):
         mi, x, y = maps[tag]
         if at:
             x, y = at
-        block = ['mp warp 45,%d,%d,%d' % (mi, x, y), 'wait 150']
+        # (already in the room: walked to, as a player would; warping in again would set the room up afresh, and a
+        # room's set-up can take back what a scene left for the player: PHENAC's sack)
+        block = ['skipif inmap:45,%d 2' % mi, 'mp warp 45,%d,%d,%d' % (mi, x, y), 'wait 150',
+                 'pressuntil A field 3000', 'walkto %d %d 900' % (x, y)]
         if not main:
             block.append('mp orrescript 100 %d%s' % (fn, args))
         else:   # (a main loop's scene can wait on something looked at there: PHENAC's sack; A to each side)
