@@ -453,6 +453,17 @@ The older notes per part:
   rest stops; its challenge menu room (917) isn't converted. The opening's characters (the hero, GONZAP, the peons, the
   bike) and its explosion aren't drawn yet.
 
+- **The walk-only run (1.182.0)**: tools/orre/gen_story_tests.py walk_chain writes orre_story_walk (committed; hours
+  long, run it on its own): no warps and no scripts started by the test, only what a player does. The harness's
+  `goto G,N X Y [FRAMES]` walks room to room through doors and the world map (mp_debug.c MP_TestGotoKey: BFS over
+  group 45's warps, worldmap.c Orre_WorldMapTestPick), `approach person|touch|check N` walks up to a room's person
+  or spot, `echo TEXT`; MOEMON_TEST_STAY=1 keeps the sailor from sailing home. Its first run stopped after the PRE
+  GYM (flag 998): **PHENAC STADIUM couldn't be walked to**. The tile grid joined its plaza to the city only at two
+  corners (Colosseum's hero walks any way; Kai's four). tools/orre/grid.py `_join_diagonals` now opens one tile beside
+  every such corner (the one whose floor lies nearest both sides): 18 rooms had one (PYRITE's cave, the lab, AGATE,
+  MT. BATTLE...); afterwards every walkable area of every room with a door has an entry in it. Scenario
+  orre_phenac_stadium_walk. Takes a pack rebuild (make_pack.sh), which the release does.
+
 ## Trainers and battles (src/orre/orre_battle.c, 2026-11-08)
 - **Read at run time** from common_rel in the data pack (nothing generated or committed): battles (fightEncount: .data
   0x109FBC, 0x38 each, 566), trainers (0x91684, 0x34, 820), classes (fightTrainerKind: 0x8F724, 0xC, 41: + 0 the prize

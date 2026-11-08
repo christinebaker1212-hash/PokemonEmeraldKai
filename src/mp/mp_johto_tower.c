@@ -13,6 +13,7 @@
 // MP_JohtoTower_InBattle): no EXP, no money, nothing stolen, as Crystal's BATTLE TOWER battles.
 #include <stdio.h>
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_setup.h"
 #include "battle_transition.h"
@@ -432,6 +433,7 @@ static void GiveReward(void)
 {
     u16 item = sRewards[((State() & ST_REWARD) >> ST_REWARD_SHIFT) % ARRAY_COUNT(sRewards)];
     SetField(ST_CHALLENGE, 0, JBT_WON_CHALLENGE);
+    MP_Achieve_Unlock("jtower");   // (JOHTO's achievement: seven wins in a row)
     if (!CheckBagHasSpace(item, BATTLETOWER_REWARD_QUANTITY))
     {
         gSpecialVar_Result = 1;

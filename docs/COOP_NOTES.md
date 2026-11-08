@@ -7063,3 +7063,29 @@ The STADIUM's castle is eight gym runs (three trainers and the leader, each won 
 each) and then the ELITE FOUR and the RIVAL in one run once all eight badges are won (before, one run of 37 battles).
 Badges in the castle's unused class slot of "<save>.stadium" (no layout change); a castle already won counts as all
 eight. Details: docs/STADIUM.md "The GYM LEADER CASTLE's gyms". Test stadium_castle_gyms.
+
+## Achievements for each region (1.182.0)
+
+The user (2026-11-08): HOENN had most of the achievements, and its general ones (BATTLE, CATCHING, TOGETHER, EXTRAS)
+were already earned by the time a player reached another region. Now each region has its own (src/mp/mp_achieve.c):
+- **The table's rows are HOENN's.** JOHTO, KANTO and SINNOH each get a copy of every BATTLE / CATCHING / TOGETHER /
+  EXTRAS row (sGroupCats, BuildCopies), except what only HOENN has (sNoCopy: its BATTLE TOWER, outbreaks, BERRY BLENDERS,
+  SECRET BASES, gym rematches...). A copy's number is region * 1024 + the row, so later rows never move a TRAINER CARD
+  title (titles are numbers). Rows that leave the list stay as C_GONE (MELOETTA's, DARKRAI's) for the same reason.
+- **A copy counts only what happens in its region**: game stats (overworld.c IncrementGameStat / SetGameStat ->
+  MP_Achieve_OnStat; the two streak stats as records), counters (MP_Achieve_Count adds "acnt:<j|k|s>.<name>" too), POKéDEX
+  kinds seen / caught there (pokedex.c GetSetPokedexFlag -> MP_Achieve_OnDex), and from the party each frame
+  (TrackRegion): levels and friendship gained, money earned, POKé BALL looks / the follower / the look changed, POKéMON
+  owned (that region's own PC), days with friends. Kept in the region side file, chunk "ACHR" (struct AchRegional).
+- **HOENN's rows count the rest**: the global count minus the other regions' (so a save's progress before 1.182.0 stays
+  HOENN's), HOENN's POKéDEX lists start as the save's (SeedHoenn), and HOENN's "have it now" rows (team levels, money,
+  POKéMON owned) are earned only while in HOENN.
+- **Region tabs at par**: each takes HOENN's tab rows every region has (sTabCopy: steps, POKéMON CENTERS, shopping,
+  money earned, ledges, jackpots...; per region by what its play counts) plus its own story feats (flags from the port's
+  scripts, vars by AK_VARGE, flag runs by AK_FLAGRANGE, its code by AK_FUNC; KANTO / JOHTO COMPLETE by AK_NATRANGE).
+- The menu (mp_events.c): L / R go JOURNEY, the region's tab, its BATTLE, CATCHING, TOGETHER, EXTRAS, then the games';
+  a region's tabs open on the region the player is in, SELECT goes round the regions. The phone lists every tab.
+- KANTO's and JOHTO's nurses counted a ledge jump (Quetzal's stat 0x2B) instead of a POKéMON CENTER visit: fixed in
+  data/scripts/qz/kanto_shared.inc and johto_shared.inc.
+- Tests: ach_per_region (KANTO's copies earned, HOENN's not; the tabs), ach_regions, ach_retro (key ach:retro4),
+  ach_sinnoh, ach_hooks. Harness: `mp addstat N COUNT`, `mp achcount NAME N`, `mp dexcatch FIRST [LAST]`.

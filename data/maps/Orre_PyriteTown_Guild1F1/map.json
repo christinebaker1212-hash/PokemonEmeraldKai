@@ -32,13 +32,6 @@
       "dest_warp_id": "30"
     },
     {
-      "x": 12,
-      "y": 11,
-      "elevation": 0,
-      "dest_map": "MAP_ORRE_PYRITE_TOWN_GUILD_1F_2",
-      "dest_warp_id": "2"
-    },
-    {
       "x": 13,
       "y": 11,
       "elevation": 0,
@@ -57,7 +50,7 @@
       "y": 19,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN_GUILD_1F_1",
-      "dest_warp_id": "5"
+      "dest_warp_id": "4"
     }
   ]
 }

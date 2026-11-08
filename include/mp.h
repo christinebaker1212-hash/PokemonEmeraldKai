@@ -1054,6 +1054,16 @@ struct Pokemon;
 void MP_Achieve_Count(const char *name, s32 n);
 s32 MP_Achieve_GetCount(const char *name);
 void MP_Achieve_Unlock(const char *id);
+void MP_Achieve_OnStat(u8 index, u32 value, bool8 set);     // overworld.c: a game stat counted per region
+void MP_Achieve_OnDex(u16 nationalNum, bool8 caught);       // pokedex.c: seen / caught in the region the player is in
+void MP_Achieve_RegionalReset(void);                        // mp_region.c: the region side file's "ACHR" chunk
+const void *MP_Achieve_RegionalSave(u32 *size);
+void MP_Achieve_RegionalLoad(const void *data, u32 size);
+void MP_Achieve_RegionalTrackReset(void);
+u16 MP_Achieve_ListedTotal(void);                           // achievements listed in the menu
+bool8 MP_Achieve_CatHasRegions(u8 cat);                     // a tab each region has its own of (SELECT: the next)
+u8 MP_Achieve_MenuNext(u8 cat, s8 dir);
+u8 MP_Achieve_MenuRegion(u8 cat, s8 dir);
 void MP_Achieve_Update(void);
 void MP_Achieve_OnTrainerWin(u16 trainerId);
 void MP_Achieve_OnCatch(struct Pokemon *mon, bool8 outbreak);

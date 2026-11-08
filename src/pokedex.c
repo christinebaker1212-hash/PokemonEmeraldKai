@@ -4733,6 +4733,8 @@ s8 GetSetPokedexFlag(u16 nationalDexNo, u8 caseID)
     bit = nationalDexNo % 8;
     mask = 1 << bit;
     retVal = 0;
+    if (caseID == FLAG_SET_SEEN || caseID == FLAG_SET_CAUGHT)
+        MP_Achieve_OnDex(nationalDexNo + 1, caseID == FLAG_SET_CAUGHT);   // Moemon Kai: seen / caught in this region
     if (index >= NUM_DEX_FLAG_BYTES)   // Moemon Kai: Gen 4 on
     {
         if ((caseID == FLAG_SET_SEEN || caseID == FLAG_SET_CAUGHT) && !GetSetPokedexFlagExt(index, mask, caseID == FLAG_SET_SEEN ? FLAG_GET_SEEN : FLAG_GET_CAUGHT))

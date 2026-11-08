@@ -28,11 +28,16 @@
 #include "constants/species.h"
 #include "constants/flags.h"
 #include "constants/game_stat.h"
+#include "mp_qzphone.h"
+#include "s3d_contest.h"
+#include "s3d_underground.h"
 
 s32 MP_Gatcha_Pulls(void);
 void MP_Gatcha_AddPulls(s32 n);
 void MP_Events_QueueToast(const char *ascii);
 s32 MP_Events_StreakDays(void);
+s32 MP_DayNumber(s32 yyyymmdd);
+s32 MP_Today(void);
 
 enum {
     AK_FLAG, AK_STAT, AK_COUNT, AK_CAUGHT, AK_SEEN, AK_LEVEL, AK_EVENT, AK_STREAK, AK_BADGES,
@@ -47,15 +52,54 @@ enum {
     AK_CLEARED,  // regions whose League is beaten (arg: one region + 1, or 0 for how many)
     AK_STARTED,  // regions the player has been to
     AK_STADIUM,  // POKéMON STADIUM (arg: STADIUM_ACH_*, mp_stadium_rewards.c)
+    AK_NATRANGE, // caught POKéMON numbered 1 to arg in the national POKéDEX (KANTO's 151, JOHTO's 251)
+    AK_VARGE,    // a var at a value or past it (arg: VC_*)
+    AK_FLAGRANGE,// how many flags of a run are set (arg: FR_*)
+    AK_FUNC,     // counted by a region's own code (arg: FN_*)
 };
 
-// The menu's tabs
-enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_MAGIC, C_TRIAD, C_DANCE, C_JOHTO, C_KANTO, C_SINNOH, C_STADIUM, NUM_ACH_CATS };
-static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "MAGIC", "TRIPLE TRIAD", "DANCE", "JOHTO", "KANTO", "SINNOH", "STADIUM"};
+// The menu's tabs. BATTLE, CATCHING, TOGETHER and EXTRAS are each region's own (the user, 2026-11-08: what HOENN
+// earned shouldn't leave nothing to earn in the others): the table's rows are HOENN's, and JOHTO / KANTO / SINNOH
+// each get a copy counted only there (RegionCopy below); the region tabs (HOENN, JOHTO...) hold its own feats.
+enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_MAGIC, C_TRIAD, C_DANCE, C_JOHTO, C_KANTO, C_SINNOH, C_STADIUM,
+       C_BATTLE_J, C_CATCH_J, C_TOGETHER_J, C_EXTRAS_J, C_BATTLE_K, C_CATCH_K, C_TOGETHER_K, C_EXTRAS_K,
+       C_BATTLE_S, C_CATCH_S, C_TOGETHER_S, C_EXTRAS_S, NUM_ACH_CATS };
+#define C_GONE 0xFF   // a row kept only so later rows keep their number (TRAINER CARD titles are numbers): never listed
+static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "HOENN BATTLE", "HOENN CATCHING", "HOENN", "HOENN TOGETHER", "HOENN EXTRAS", "CARDS", "YU-GI-OH!", "MAGIC", "TRIPLE TRIAD", "DANCE", "JOHTO", "KANTO", "SINNOH", "STADIUM",
+                                                    "JOHTO BATTLE", "JOHTO CATCHING", "JOHTO TOGETHER", "JOHTO EXTRAS", "KANTO BATTLE", "KANTO CATCHING", "KANTO TOGETHER", "KANTO EXTRAS",
+                                                    "SINNOH BATTLE", "SINNOH CATCHING", "SINNOH TOGETHER", "SINNOH EXTRAS"};
+// The tabs a region has: its own, then its BATTLE, CATCHING, TOGETHER and EXTRAS (G_*), by region
+enum { G_REGION, G_BATTLE, G_CATCH, G_TOGETHER, G_EXTRAS, NUM_ACH_GROUPS };
+static const u8 sGroupCats[NUM_ACH_GROUPS][REGION_COUNT] = {
+    [G_REGION]   = {C_HOENN, C_JOHTO, C_KANTO, C_SINNOH},
+    [G_BATTLE]   = {C_BATTLE, C_BATTLE_J, C_BATTLE_K, C_BATTLE_S},
+    [G_CATCH]    = {C_CATCH, C_CATCH_J, C_CATCH_K, C_CATCH_S},
+    [G_TOGETHER] = {C_TOGETHER, C_TOGETHER_J, C_TOGETHER_K, C_TOGETHER_S},
+    [G_EXTRAS]   = {C_EXTRAS, C_EXTRAS_J, C_EXTRAS_K, C_EXTRAS_S},
+};
 
 enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD, FL_JOHTO_BEASTS, FL_KANTO_BIRDS, FL_JOHTO_BADGES, FL_KANTO_BADGES,
-       FL_ALPH, FL_ARCEUS_TRIALS, FL_SINNOH_BADGES, FL_SINNOH_LAKES, FL_SINNOH_CREATION };
-enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS };
+       FL_ALPH, FL_ARCEUS_TRIALS, FL_SINNOH_BADGES, FL_SINNOH_LAKES, FL_SINNOH_CREATION,
+       FL_KANTO_SNORLAX, FL_KANTO_DRINKS, FL_KANTO_RODS, FL_KANTO_SEAFOAM, FL_KANTO_GEMS, FL_JOHTO_TOGEPI, FL_SINNOH_BARRY };
+// Vars at a value (JOHTO's and SINNOH's own scripts set them: tools/quetzal_port, tools/sinnoh/ids.py)
+enum { VC_JOHTO_RADIO, VC_JOHTO_SHUCKIE, VC_JOHTO_MOOMOO, VC_JOHTO_RIVAL, VC_SINNOH_SILVER, VC_SINNOH_GOLD };
+static const struct { u16 var, value; } sVarChecks[] = {
+    [VC_JOHTO_RADIO]   = {0x500C, 0x11},   // the RADIO TOWER freed (the CLEAR BELL given: Johto_RadioTower5F)
+    [VC_JOHTO_SHUCKIE] = {0x501D, 3},      // SHUCKIE lent by the MANIA (Johto_ManiasHouse)
+    [VC_JOHTO_MOOMOO]  = {0x501B, 5},      // MOOMOO's seventh ORAN BERRY (Johto_Route39Barn)
+    [VC_JOHTO_RIVAL]   = {0x5029, 3},      // the rival beaten in VICTORY ROAD (Johto_VictoryRoad3F)
+    [VC_SINNOH_SILVER] = {0x51A3, 2},      // Platinum's BATTLE TOWER print: silver
+    [VC_SINNOH_GOLD]   = {0x51A3, 4},      // ... gold
+};
+// Runs of flags: JOHTO's 57 hidden items (constants/kai_regions.h), the VILLA's 20 pieces of furniture
+enum { FR_JOHTO_HIDDEN, FR_SINNOH_VILLA };
+static const struct { u16 first, count; } sFlagRanges[] = {
+    [FR_JOHTO_HIDDEN] = {0x1601, 57},
+    [FR_SINNOH_VILLA] = {0x3748, 20},
+};
+// Counted by a region's own code
+enum { FN_JOHTO_PHONE, FN_SINNOH_PLATES, FN_SINNOH_CONTESTS, FN_SINNOH_STUDIO };
+enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS, DL_STARTERS_J, DL_STARTERS_K, DL_STARTERS_S, DL_FOSSILS_K, DL_FOSSILS_S };
 
 struct Achievement
 {
@@ -108,7 +152,24 @@ static const u16 sFlagsArceusTrials[] = {0x2E19, 0x2E1B, 0x2E1D, 0x2E1F, 0x2E21,
 static const u16 sFlagsSinnohBadges[] = {0x3320, 0x3321, 0x3322, 0x3323, 0x3324, 0x3325, 0x3326, 0x3327};
 static const u16 sFlagsSinnohLakes[] = {0x3D00, 0x3D01, 0x3D02};    // UXIE, AZELF, MESPRIT
 static const u16 sFlagsSinnohCreation[] = {0x3D0A, 0x3D0B};        // DIALGA, PALKIA
+// KANTO's (FireRed's flags as Quetzal kept them: tools/quetzal_rip/kanto_frlg_flags.json)
+static const u16 sFlagsKantoSnorlax[] = {0x21AF, 0x21B0};          // ROUTE 12's and ROUTE 16's
+static const u16 sFlagsKantoDrinks[] = {0x2169, 0x216B, 0x2170};   // the CELADON roof girl's three drinks
+static const u16 sFlagsKantoRods[] = {0x215B, 0x214B, 0x2164};     // OLD, GOOD, SUPER ROD
+static const u16 sFlagsKantoSeafoam[] = {0x2208, 0x2209};          // SEAFOAM's two currents stopped
+static const u16 sFlagsKantoGems[] = {0x2161, 0x220A};             // the RUBY found, the SAPPHIRE brought to CELIO
+static const u16 sFlagsJohtoTogepi[] = {0x1080, 0x154B};           // ELM's EGG taken, a TOGEPI hatched
+static const u16 sFlagsSinnohBarry[] = {TRAINER_FLAG(TRAINER_SINNOH_RIVAL_POKEMON_LEAGUE_CHIMCHAR),
+                                        TRAINER_FLAG(TRAINER_SINNOH_RIVAL_POKEMON_LEAGUE_PIPLUP),
+                                        TRAINER_FLAG(TRAINER_SINNOH_RIVAL_POKEMON_LEAGUE_TURTWIG)};
 static const struct { const u16 *list; u8 count; } sFlagLists[] = {
+    [FL_KANTO_SNORLAX] = {sFlagsKantoSnorlax, ARRAY_COUNT(sFlagsKantoSnorlax)},
+    [FL_KANTO_DRINKS] = {sFlagsKantoDrinks, ARRAY_COUNT(sFlagsKantoDrinks)},
+    [FL_KANTO_RODS] = {sFlagsKantoRods, ARRAY_COUNT(sFlagsKantoRods)},
+    [FL_KANTO_SEAFOAM] = {sFlagsKantoSeafoam, ARRAY_COUNT(sFlagsKantoSeafoam)},
+    [FL_KANTO_GEMS] = {sFlagsKantoGems, ARRAY_COUNT(sFlagsKantoGems)},
+    [FL_JOHTO_TOGEPI] = {sFlagsJohtoTogepi, ARRAY_COUNT(sFlagsJohtoTogepi)},
+    [FL_SINNOH_BARRY] = {sFlagsSinnohBarry, ARRAY_COUNT(sFlagsSinnohBarry)},
     [FL_SINNOH_BADGES] = {sFlagsSinnohBadges, ARRAY_COUNT(sFlagsSinnohBadges)},
     [FL_SINNOH_LAKES] = {sFlagsSinnohLakes, ARRAY_COUNT(sFlagsSinnohLakes)},
     [FL_SINNOH_CREATION] = {sFlagsSinnohCreation, ARRAY_COUNT(sFlagsSinnohCreation)},
@@ -131,11 +192,25 @@ static const u16 sDexLegends[] = {
     SPECIES_ARTICUNO, SPECIES_ZAPDOS, SPECIES_MOLTRES, SPECIES_MEWTWO, SPECIES_MEW, SPECIES_RAIKOU, SPECIES_ENTEI,
     SPECIES_SUICUNE, SPECIES_LUGIA, SPECIES_HO_OH, SPECIES_CELEBI, SPECIES_REGIROCK, SPECIES_REGICE, SPECIES_REGISTEEL,
     SPECIES_LATIAS, SPECIES_LATIOS, SPECIES_KYOGRE, SPECIES_GROUDON, SPECIES_RAYQUAZA, SPECIES_JIRACHI, SPECIES_DEOXYS,
+    // SINNOH's (and ARCEUS, met in KANTO too)
+    SPECIES_UXIE, SPECIES_MESPRIT, SPECIES_AZELF, SPECIES_DIALGA, SPECIES_PALKIA, SPECIES_HEATRAN, SPECIES_REGIGIGAS,
+    SPECIES_GIRATINA, SPECIES_CRESSELIA, SPECIES_ARCEUS,
 };
+// The other regions' starters and fossils (their CATCHING tabs' STARTER SET and FOSSIL REVIVAL)
+static const u16 sDexStartersJ[] = {SPECIES_CHIKORITA, SPECIES_CYNDAQUIL, SPECIES_TOTODILE};
+static const u16 sDexStartersK[] = {SPECIES_BULBASAUR, SPECIES_CHARMANDER, SPECIES_SQUIRTLE};
+static const u16 sDexStartersS[] = {SPECIES_TURTWIG, SPECIES_CHIMCHAR, SPECIES_PIPLUP};
+static const u16 sDexFossilsK[] = {SPECIES_OMANYTE, SPECIES_KABUTO, SPECIES_AERODACTYL};
+static const u16 sDexFossilsS[] = {SPECIES_CRANIDOS, SPECIES_SHIELDON};
 static const struct { const u16 *list; u8 count; } sDexLists[] = {
     [DL_STARTERS] = {sDexStarters, ARRAY_COUNT(sDexStarters)},
     [DL_FOSSILS] = {sDexFossils, ARRAY_COUNT(sDexFossils)},
     [DL_LEGENDS] = {sDexLegends, ARRAY_COUNT(sDexLegends)},
+    [DL_STARTERS_J] = {sDexStartersJ, ARRAY_COUNT(sDexStartersJ)},
+    [DL_STARTERS_K] = {sDexStartersK, ARRAY_COUNT(sDexStartersK)},
+    [DL_STARTERS_S] = {sDexStartersS, ARRAY_COUNT(sDexStartersS)},
+    [DL_FOSSILS_K] = {sDexFossilsK, ARRAY_COUNT(sDexFossilsK)},
+    [DL_FOSSILS_S] = {sDexFossilsS, ARRAY_COUNT(sDexFossilsS)},
 };
 
 static u8 AchPulls(u8 tier)
@@ -455,8 +530,10 @@ static const struct Achievement sAch[] = {
     {"jcelebi", "VOICE OF THE FOREST", "Face CELEBI in JOHTO.", AK_FLAG, 0x11FA, 1, 1, C_JOHTO},
     {"jalph", "ANCIENT PUZZLES", "Solve all four RUINS OF ALPH puzzles.", AK_FLAGS, FL_ALPH, 4, 1, C_JOHTO},
     {"jbugwin", "BUG-CATCHING CHAMP", "Win first place in the Bug-Catching Contest.", AK_EVENT, 0, 1, 1, C_JOHTO},
-    {"jmeloetta", "THE MELODY", "Face MELOETTA in JOHTO.", AK_FLAG, 0x1263, 1, 1, C_JOHTO},
-    {"jdarkrai", "A BAD DREAM", "Face DARKRAI in JOHTO.", AK_FLAG, 0x1239, 1, 1, C_JOHTO},
+    // (MELOETTA and DARKRAI were Moemon Quetzal's: no longer met in JOHTO or KANTO, their achievements went with them,
+    // the user 2026-11-08: unlisted rows, one already earned stays a TRAINER CARD title)
+    {"jmeloetta", "THE MELODY", "Face MELOETTA in JOHTO.", AK_FLAG, 0x1263, 1, 1, C_GONE},
+    {"jdarkrai", "A BAD DREAM", "Face DARKRAI in JOHTO.", AK_FLAG, 0x1239, 1, 1, C_GONE},
     {"kstart", "PALLET BEGINNINGS", "Get your first POK~MON from PROF. OAK.", AK_FLAG, 0x21E8, 1, 0, C_KANTO},
     {"kbadge1", "BOULDER BADGE", "Beat BROCK in PEWTER CITY.", AK_FLAG, 0x2100, 1, 0, C_KANTO},
     {"kbadge2", "CASCADE BADGE", "Beat MISTY in CERULEAN CITY.", AK_FLAG, 0x2101, 1, 0, C_KANTO},
@@ -471,8 +548,8 @@ static const struct Achievement sAch[] = {
     {"kbirds", "LEGENDARY BIRDS", "Face ARTICUNO, ZAPDOS and MOLTRES in KANTO.", AK_FLAGS, FL_KANTO_BIRDS, 3, 2, C_KANTO},
     {"kmewtwo", "GENETIC MASTERPIECE", "Face MEWTWO in KANTO.", AK_FLAG, 0x2137, 1, 2, C_KANTO},
     {"kmew", "UNDER THE TRUCK", "Find MEW in KANTO.", AK_FLAG, 0x292F, 1, 2, C_KANTO},
-    {"kmeloetta", "CHANSEY DANCE", "Face MELOETTA in KANTO.", AK_FLAG, 0x2922, 1, 1, C_KANTO},
-    {"kdarkrai", "NIGHTMARE AT SEA", "Face DARKRAI in KANTO.", AK_FLAG, 0x2929, 1, 1, C_KANTO},
+    {"kmeloetta", "CHANSEY DANCE", "Face MELOETTA in KANTO.", AK_FLAG, 0x2922, 1, 1, C_GONE},
+    {"kdarkrai", "NIGHTMARE AT SEA", "Face DARKRAI in KANTO.", AK_FLAG, 0x2929, 1, 1, C_GONE},
     {"travel4", "WORLD TOUR", "Visit HOENN, JOHTO, KANTO and SINNOH.", AK_STARTED, 0xFF, 4, 1, C_JOURNEY},
     {"champion4", "GRAND CHAMPION", "Become CHAMPION of all four regions.", AK_CLEARED, 0xFF, 4, 2, C_JOURNEY},
     {"sarrive", "ACROSS THE SEA", "Arrive in SINNOH at CANALAVE's port.", AK_STARTED, 3 + 1, 1, 0, C_SINNOH},
@@ -511,18 +588,376 @@ static const struct Achievement sAch[] = {
     {"stbattles", "STADIUM REGULAR", "Win 100 battles at the STADIUM.", AK_STADIUM, STADIUM_ACH_BATTLES, 100, 1, C_STADIUM},
     {"karceus", "ARCEUS TRIALS", "Complete all seventeen ARCEUS trials in KANTO.", AK_FLAGS, FL_ARCEUS_TRIALS, 17, 2, C_KANTO},
     {"karceusn", "THE ORIGINAL ONE", "Face the Normal-type ARCEUS in ALTERING CAVE.", AK_FLAG, 0x2E16, 1, 2, C_KANTO},
+    // (1.182.0: KANTO, JOHTO and SINNOH at par with HOENN, the user 2026-11-08; their tabs also copy HOENN's own that
+    // every region has: steps, POKéMON CENTERS, shopping... sTabCopy)
+    {"kssanne", "ALL ABOARD", "Get HM01 from the S.S. ANNE's captain.", AK_FLAG, 0x214E, 1, 0, C_KANTO},
+    {"kbill", "POK~MANIAC", "Help BILL at his SEA COTTAGE.", AK_FLAG, 0x2177, 1, 0, C_KANTO},
+    {"kbike", "BIKE VOUCHER", "Get a BICYCLE in CERULEAN CITY.", AK_FLAG, 0x2141, 1, 0, C_KANTO},
+    {"kfossil", "OLD AMBER AGE", "Take a fossil from MT. MOON.", AK_FLAG, 0x2149, 1, 0, C_KANTO},
+    {"khideout", "GAME OVER, ROCKET", "Beat GIOVANNI in the ROCKET HIDEOUT.", AK_FLAG, 0x217C, 1, 1, C_KANTO},
+    {"kfuji", "LAVENDER'S GHOST", "Rescue MR. FUJI from the POK~MON TOWER.", AK_FLAG, 0x21ED, 1, 1, C_KANTO},
+    {"kflute", "WAKE-UP CALL", "Get the POK~ FLUTE.", AK_FLAG, 0x215D, 1, 0, C_KANTO},
+    {"ksnorlax", "ROADBLOCKS", "Wake both SNORLAX.", AK_FLAGS, FL_KANTO_SNORLAX, 2, 1, C_KANTO},
+    {"ksilph", "HOSTILE TAKEOVER", "Free SILPH CO. from TEAM ROCKET.", AK_FLAG, 0x21BA, 1, 1, C_KANTO},
+    {"kmaster", "PRESIDENT'S THANKS", "Get a MASTER BALL from SILPH's president.", AK_FLAG, 0x2156, 1, 1, C_KANTO},
+    {"klapras", "A GENTLE GIANT", "Get LAPRAS in SILPH CO.", AK_FLAG, 0x2155, 1, 0, C_KANTO},
+    {"keevee", "ROOFTOP SURPRISE", "Get EEVEE in CELADON CITY.", AK_FLAG, 0x2145, 1, 0, C_KANTO},
+    {"kdojo", "DOJO PRIZE", "Win a POK~MON at SAFFRON's FIGHTING DOJO.", AK_FLAG, 0x214D, 1, 0, C_KANTO},
+    {"kthirsty", "THIRST QUENCHER", "Give the girl on CELADON's roof all three drinks.", AK_FLAGS, FL_KANTO_DRINKS, 3, 0, C_KANTO},
+    {"ksafari", "SECRET HOUSE", "Reach the SAFARI ZONE's SECRET HOUSE.", AK_FLAG, 0x2150, 1, 1, C_KANTO},
+    {"krods", "KANTO ANGLER", "Get KANTO's OLD ROD, GOOD ROD and SUPER ROD.", AK_FLAGS, FL_KANTO_RODS, 3, 1, C_KANTO},
+    {"kseafoam", "CURRENT AFFAIRS", "Stop both currents in the SEAFOAM ISLANDS.", AK_FLAGS, FL_KANTO_SEAFOAM, 2, 1, C_KANTO},
+    {"kgems", "THE NETWORK", "Bring CELIO the RUBY and SAPPHIRE.", AK_FLAGS, FL_KANTO_GEMS, 2, 2, C_KANTO},
+    {"kwarehouse", "WAREHOUSE RAID", "Beat TEAM ROCKET in FIVE ISLAND's warehouse.", AK_FLAG, 0x2124, 1, 1, C_KANTO},
+    {"klostelle", "LOST IN THE WOODS", "Find LOSTELLE in the BERRY FOREST.", AK_FLAG, 0x21EC, 1, 0, C_KANTO},
+    {"ktogepi", "LABYRINTH EGG", "Get the EGG in the WATER LABYRINTH.", AK_FLAG, 0x2175, 1, 1, C_KANTO},
+    {"ktanoby", "TANOBY'S SECRET", "Open the TANOBY RUINS.", AK_FLAG, 0x2216, 1, 1, C_KANTO},
+    {"kdex", "KANTO COMPLETE", "Catch all 151 POK~MON of the KANTO POK~DEX.", AK_NATRANGE, 151, 151, 2, C_KANTO},
+    {"jsprout", "SWAYING TOWER", "Beat the ELDER at the top of SPROUT TOWER.", AK_FLAG, 0x1004, 1, 0, C_JOHTO},
+    {"jwell", "SLOWPOKE RESCUE", "Drive TEAM ROCKET out of SLOWPOKE WELL.", AK_FLAG, 0x1084, 1, 0, C_JOHTO},
+    {"jsudowoodo", "ODD TREE", "Face the odd tree on ROUTE 36.", AK_FLAG, 0x102E, 1, 0, C_JOHTO},
+    {"jamphy", "LIGHT OF OLIVINE", "Bring AMPHY the SECRETPOTION.", AK_FLAG, 0x10B7, 1, 1, C_JOHTO},
+    {"jgyarados", "THE RED GYARADOS", "Face the red GYARADOS at the LAKE OF RAGE.", AK_FLAG, 0x104C, 1, 1, C_JOHTO},
+    {"jhideout", "MAHOGANY SECRETS", "Clear TEAM ROCKET's hideout in MAHOGANY TOWN.", AK_FLAG, 0x104E, 1, 1, C_JOHTO},
+    {"jradio", "ON THE AIRWAVES", "Free the RADIO TOWER from TEAM ROCKET.", AK_VARGE, VC_JOHTO_RADIO, 1, 1, C_JOHTO},
+    {"jtogepi", "SPIKY SURPRISE", "Hatch the EGG from PROF. ELM's aide.", AK_FLAGS, FL_JOHTO_TOGEPI, 2, 0, C_JOHTO},
+    {"jdratini", "DRAGON'S BLESSING", "Earn the DRATINI at the DRAGON SHRINE.", AK_FLAG, 0x105A, 1, 1, C_JOHTO},
+    {"jshuckle", "SHUCKIE SITTER", "Look after the MANIA's SHUCKIE.", AK_VARGE, VC_JOHTO_SHUCKIE, 1, 0, C_JOHTO},
+    {"jeevee", "BILL'S GIFT", "Get EEVEE from BILL's family.", AK_FLAG, 0x103B, 1, 0, C_JOHTO},
+    {"jtyrogue", "KARATE KING", "Beat the KARATE KING in MT. MORTAR.", AK_FLAG, 0x10BA, 1, 1, C_JOHTO},
+    {"jmoomoo", "MOOMOO MILK", "Nurse MOOMOO back to health.", AK_VARGE, VC_JOHTO_MOOMOO, 1, 0, C_JOHTO},
+    {"jradiocard", "TUNED IN", "Get the RADIO CARD.", AK_FLAG, 0x1064, 1, 0, C_JOHTO},
+    {"jbluecard", "BUENA'S PASSWORD", "Get BUENA's BLUE CARD.", AK_FLAG, 0x155D, 1, 0, C_JOHTO},
+    {"jmagikarp", "ONE THAT GOT AWAY", "Show off a record MAGIKARP at the LAKE OF RAGE.", AK_FLAG, 0x104A, 1, 0, C_JOHTO},
+    {"jitemfinder", "FINDERS KEEPERS", "Get the ITEMFINDER in ECRUTEAK CITY.", AK_FLAG, 0x10A3, 1, 0, C_JOHTO},
+    {"jhidden", "SHARP EYES", "Find 30 hidden items in JOHTO.", AK_FLAGRANGE, FR_JOHTO_HIDDEN, 30, 1, C_JOHTO},
+    {"jphone", "PHONE BOOK", "Register 10 trainers in your POK~GEAR.", AK_FUNC, FN_JOHTO_PHONE, 10, 1, C_JOHTO},
+    {"jkurt", "MADE BY KURT", "Have KURT make a ball from an APRICORN.", AK_EVENT, 0, 1, 0, C_JOHTO},
+    {"jtower", "TOWER TAMER", "Win seven battles in a row in JOHTO's BATTLE TOWER.", AK_EVENT, 0, 1, 1, C_JOHTO},
+    {"jrival", "LAST STAND", "Beat your rival in VICTORY ROAD.", AK_VARGE, VC_JOHTO_RIVAL, 1, 1, C_JOHTO},
+    {"jred", "THE SUMMIT", "Face RED at the top of MT. SILVER.", AK_FLAG, 0x11B0, 1, 2, C_JOHTO},
+    {"jdex", "JOHTO COMPLETE", "Catch all 251 POK~MON of the JOHTO POK~DEX.", AK_NATRANGE, 251, 251, 2, C_JOHTO},
+    {"spoketch", "POK~TCH", "Get a POK~TCH in JUBILIFE CITY.", AK_FLAG, 0x36D9, 1, 0, C_SINNOH},
+    {"swindworks", "WINDWORKS", "Beat COMMANDER MARS at the VALLEY WINDWORKS.", AK_FLAG, TRAINER_FLAG(TRAINER_SINNOH_COMMANDER_MARS_VALLEY_WINDWORKS), 1, 0, C_SINNOH},
+    {"seterna", "ETERNA'S BUILDING", "Beat COMMANDER JUPITER in ETERNA CITY.", AK_FLAG, TRAINER_FLAG(TRAINER_SINNOH_COMMANDER_JUPITER_TEAM_GALACTIC_ETERNA_BUILDING), 1, 0, C_SINNOH},
+    {"shq", "GALACTIC HQ", "Beat CYRUS in TEAM GALACTIC's HQ.", AK_FLAG, TRAINER_FLAG(TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_GALACTIC_HQ), 1, 1, C_SINNOH},
+    {"sdistortion", "DISTORTION WORLD", "Beat CYRUS in the DISTORTION WORLD.", AK_FLAG, TRAINER_FLAG(TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_DISTORTION_WORLD), 1, 2, C_SINNOH},
+    {"sbarry", "BEST OF FRIENDS", "Beat BARRY on the way to the POK~MON LEAGUE.", AK_FLAGS, FL_SINNOH_BARRY, 1, 1, C_SINNOH},
+    {"sdig", "UNDERGROUND", "Dig up treasure in the Underground.", AK_FLAG, 0x3393, 1, 0, C_SINNOH},
+    {"splates", "PLATE COLLECTOR", "Dig up all 16 plates in the Underground.", AK_FUNC, FN_SINNOH_PLATES, 16, 2, C_SINNOH},
+    {"scontest", "SUPER STAR", "Win a SUPER CONTEST.", AK_FUNC, FN_SINNOH_CONTESTS, 1, 0, C_SINNOH},
+    {"scontest5", "ALL-AROUND STAR", "Win a SUPER CONTEST in all five conditions.", AK_FUNC, FN_SINNOH_CONTESTS, 5, 2, C_SINNOH},
+    {"sstudio", "DRESSED UP", "Have a photo taken at JUBILIFE TV's studio.", AK_FUNC, FN_SINNOH_STUDIO, 1, 0, C_SINNOH},
+    {"samity", "AMITY STROLL", "Visit HEARTHOME's AMITY SQUARE.", AK_FLAG, 0x339B, 1, 0, C_SINNOH},
+    {"srotom", "CHATEAU GHOST", "Catch the ghost in the OLD CHATEAU.", AK_FLAG, 0x3340, 1, 1, C_SINNOH},
+    {"sdarkrai", "NEW MOON", "Face DARKRAI on NEWMOON ISLAND.", AK_FLAG, 0x3D07, 1, 1, C_SINNOH},
+    {"sshaymin", "GRATITUDE", "Face SHAYMIN at the FLOWER PARADISE.", AK_FLAG, 0x3D08, 1, 1, C_SINNOH},
+    {"sbattlezone", "BATTLE ZONE", "Sail to the BATTLE ZONE.", AK_FLAG, 0x36FE, 1, 0, C_SINNOH},
+    {"sprint", "PALMER'S PRINT", "Earn the BATTLE TOWER's silver print.", AK_VARGE, VC_SINNOH_SILVER, 1, 1, C_SINNOH},
+    {"sprintgold", "TOWER TYCOON PRINT", "Earn the BATTLE TOWER's gold print.", AK_VARGE, VC_SINNOH_GOLD, 1, 2, C_SINNOH},
+    {"svilla", "DREAM VILLA", "Furnish the VILLA with all 20 pieces.", AK_FLAGRANGE, FR_SINNOH_VILLA, 20, 2, C_SINNOH},
+    {"sdex", "SINNOH COMPLETE", "Show PROF. ROWAN a complete SINNOH POK~DEX.", AK_FLAG, 0x3700, 1, 2, C_SINNOH},
 };
 
 #define NUM_ACH ARRAY_COUNT(sAch)
 
-static void UnlockKey(char *out, const struct Achievement *a)
+// ---------------------------------------------------------------------------------------------------- each region's own
+// An achievement's number: HOENN's are their row in sAch; JOHTO's, KANTO's and SINNOH's copies of a row are
+// region * ACH_REGION_STRIDE + the row, so a row added later never moves one (TRAINER CARD titles are numbers).
+// A copy counts only what happens in its region: game stats, counters, the POKéDEX kinds caught and seen there,
+// levels gained there... (struct AchRegional, kept in the region side file: mp_region.c chunk "ACHR"). HOENN's own
+// rows count the rest (what the save counted before 1.182.0 included), so nothing earned so far is lost.
+#define ACH_REGION_STRIDE 1024
+#define ACH_SPACE (ACH_REGION_STRIDE * REGION_COUNT)
+#define NO_COPY 0xFF
+
+#define RB(r) (1 << (r))
+#define RB_OTHERS (RB(REGION_JOHTO) | RB(REGION_KANTO) | RB(REGION_SINNOH))
+// HOENN's BATTLE / CATCHING / TOGETHER / EXTRAS rows a region has no copy of: what only HOENN has (its BATTLE TOWER,
+// outbreaks on its routes, its BERRY BLENDERS, SECRET BASES, BERRY CRUSH, contests with friends, gym rematches)
+static const struct { const char *id; u8 regions; } sNoCopy[] = {
+    {"tower", RB_OTHERS}, {"tower7", RB_OTHERS}, {"tower50", RB_OTHERS}, {"hoenn", RB_OTHERS}, {"outbreak", RB_OTHERS},
+    {"fossil", RB(REGION_JOHTO)}, {"rematch", RB_OTHERS}, {"rematch20", RB_OTHERS}, {"blend", RB_OTHERS},
+    {"blend25", RB_OTHERS}, {"base", RB_OTHERS}, {"crush10", RB_OTHERS}, {"linkcontest", RB_OTHERS},
+    {"daycare", RB(REGION_SINNOH)},   // (SOLACEON's DAY-CARE isn't the game's)
+};
+// The HOENN tab's rows a region copies into its own tab: what every region has
+static const struct { const char *id; u8 regions; } sTabCopy[] = {
+    {"steps10k", RB_OTHERS}, {"steps60k", RB_OTHERS}, {"steps150k", RB_OTHERS},
+    {"center10", RB_OTHERS}, {"center100", RB_OTHERS}, {"shop10", RB_OTHERS}, {"shop100", RB_OTHERS},
+    {"money100k", RB_OTHERS}, {"money999k", RB_OTHERS}, {"ledges", RB_OTHERS}, {"jackpot", RB_OTHERS},
+    {"finder", RB_OTHERS}, {"ribbons", RB_OTHERS}, {"ribbons30", RB_OTHERS},
+    {"roulette", RB(REGION_JOHTO)}, {"rain", RB(REGION_JOHTO)},   // (GOLDENROD's roulette; JOHTO's rainy towns)
+    {"berries", RB(REGION_JOHTO) | RB(REGION_SINNOH)}, {"berries100", RB(REGION_JOHTO) | RB(REGION_SINNOH)},
+    {"safari", RB(REGION_KANTO) | RB(REGION_SINNOH)},                // (the SAFARI ZONE, the GREAT MARSH)
+    {"contest1", RB(REGION_SINNOH)}, {"contest10", RB(REGION_SINNOH)}, {"contests20", RB(REGION_SINNOH)},
+    {"cut50", RB(REGION_SINNOH)}, {"smash50", RB(REGION_SINNOH)},    // (KANTO's / JOHTO's trees and rocks: their own)
+};
+// A copy's own words (and list) where HOENN's don't fit; region 0xFF: every region's copy
+static const struct { const char *id; u8 region; const char *desc; u16 arg; } sCopyText[] = {
+    {"starters", REGION_JOHTO, "Catch CHIKORITA, CYNDAQUIL and TOTODILE.", DL_STARTERS_J},
+    {"starters", REGION_KANTO, "Catch BULBASAUR, CHARMANDER and SQUIRTLE.", DL_STARTERS_K},
+    {"starters", REGION_SINNOH, "Catch TURTWIG, CHIMCHAR and PIPLUP.", DL_STARTERS_S},
+    {"fossil", REGION_KANTO, "Catch OMANYTE, KABUTO or AERODACTYL.", DL_FOSSILS_K},
+    {"fossil", REGION_SINNOH, "Catch CRANIDOS or SHIELDON.", DL_FOSSILS_S},
+    {"team30", 0xFF, "Raise six POK~MON to Lv 30 or higher.", 0},
+    {"team50", 0xFF, "Raise six POK~MON to Lv 50 or higher.", 0},
+    {"team100", 0xFF, "Raise six POK~MON to Lv 100.", 0},
+    {"friend", 0xFF, "Make a POK~MON love you completely.", 0},
+    {"streak7", 0xFF, "Play with friends on 7 different days.", 0},
+    {"streak30", 0xFF, "Play with friends on 30 different days.", 0},
+    {"streak100", 0xFF, "Play with friends on 100 different days.", 0},
+    {"money100k", 0xFF, "Earn $100,000.", 0},
+    {"money999k", 0xFF, "Earn $999,999.", 0},
+};
+static const char sRegionLetter[REGION_COUNT] = {'h', 'j', 'k', 's'};
+static const u8 sTeamLevels[] = {30, 50, 100};
+
+#define DEX_WORDS ((NATIONAL_DEX_COUNT + 31) / 32)
+#define ACHR_VERSION 1
+struct AchRegional
 {
-    snprintf(out, 48, "av:%s", a->id);
+    u32 version;
+    u32 stat[REGION_COUNT][NUM_USED_GAME_STATS];   // game stats counted there (records: the best there)
+    u32 seen[REGION_COUNT][DEX_WORDS];             // national numbers seen / caught there
+    u32 caught[REGION_COUNT][DEX_WORDS];
+    u32 earned[REGION_COUNT];                      // money earned there
+    s32 lastDay[REGION_COUNT];                     // the last day played with friends there
+    u16 team[REGION_COUNT][ARRAY_COUNT(sTeamLevels)];   // POKéMON raised there to Lv 30 / 50 / 100
+    u16 owned[REGION_COUNT];                       // the most POKéMON owned there (party and that region's PC)
+    u16 days[REGION_COUNT];                        // days played with friends there
+    u16 friends[REGION_COUNT];                     // POKéMON that came to love the player there
+    u8 top[REGION_COUNT];                          // the highest level a POKéMON reached there
+};
+static struct AchRegional sReg;
+static bool8 sRegSeed;          // no record came with the save: HOENN's POKéDEX lists start as the game's
+static u8 sCopyCat[REGION_COUNT][NUM_ACH];   // each row's copy's tab in a region (NO_COPY: none)
+static bool8 sCopiesBuilt;
+static s32 sDoneCount = -1;   // MP_Achieve_DoneCount's (counted again after a grant or another save: the phone asks often)
+
+static u8 GroupOf(u8 cat)   // the group a HOENN tab heads (0xFF: none)
+{
+    u8 g;
+    for (g = 0; g < NUM_ACH_GROUPS; g++)
+        if (sGroupCats[g][REGION_HOENN] == cat)
+            return g;
+    return 0xFF;
+}
+
+static void BuildCopies(void)
+{
+    u16 row;
+    u8 r, k, g;
+    if (sCopiesBuilt)
+        return;
+    sCopiesBuilt = TRUE;
+    memset(sCopyCat, NO_COPY, sizeof(sCopyCat));
+    for (row = 0; row < NUM_ACH; row++)
+    {
+        g = GroupOf(sAch[row].cat);
+        if (g == 0xFF)
+            continue;
+        for (r = REGION_HOENN + 1; r < REGION_COUNT; r++)
+        {
+            bool8 copy = g != G_REGION;
+            for (k = 0; k < ARRAY_COUNT(sNoCopy); k++)
+                if ((sNoCopy[k].regions & RB(r)) && strcmp(sNoCopy[k].id, sAch[row].id) == 0)
+                    copy = FALSE;
+            for (k = 0; k < ARRAY_COUNT(sTabCopy); k++)
+                if ((sTabCopy[k].regions & RB(r)) && strcmp(sTabCopy[k].id, sAch[row].id) == 0)
+                    copy = TRUE;
+            if (copy)
+                sCopyCat[r][row] = sGroupCats[g][r];
+        }
+    }
+}
+
+// An achievement by number, as the menu shows it
+struct AchView
+{
+    const struct Achievement *a;
+    u16 row;
+    u8 region;     // HOENN: the table's own row
+    u8 cat;
+    const char *desc;
+    u16 arg;
+};
+
+static bool8 View(u16 idx, struct AchView *v)
+{
+    u8 r = idx / ACH_REGION_STRIDE, k;
+    u16 row = idx % ACH_REGION_STRIDE;
+    BuildCopies();
+    if (r >= REGION_COUNT || row >= NUM_ACH || (r != REGION_HOENN && sCopyCat[r][row] == NO_COPY))
+        return FALSE;
+    v->a = &sAch[row];
+    v->row = row;
+    v->region = r;
+    v->cat = r == REGION_HOENN ? sAch[row].cat : sCopyCat[r][row];
+    v->desc = sAch[row].desc;
+    v->arg = sAch[row].arg;
+    if (r != REGION_HOENN)
+        for (k = 0; k < ARRAY_COUNT(sCopyText); k++)
+            if ((sCopyText[k].region == r || sCopyText[k].region == 0xFF) && strcmp(sCopyText[k].id, sAch[row].id) == 0)
+            {
+                v->desc = sCopyText[k].desc;
+                if (sCopyText[k].arg)
+                    v->arg = sCopyText[k].arg;
+            }
+    return TRUE;
+}
+
+// HOENN's rows that share their count with the other regions' copies (HOENN counts what the others don't)
+static bool8 Split(const struct AchView *v)
+{
+    return v->region == REGION_HOENN && GroupOf(v->a->cat) != 0xFF;
+}
+
+static bool8 IsRecordStat(u16 stat)
+{
+    return stat == GAME_STAT_BATTLE_TOWER_SINGLES_STREAK || stat == GAME_STAT_CONSECUTIVE_ROULETTE_WINS;
+}
+
+static u8 Here(void)
+{
+    u8 r = MP_Region_Current();
+    return r < REGION_COUNT ? r : REGION_HOENN;
+}
+
+// A game stat moved (overworld.c IncrementGameStat / SetGameStat): counted for the region the player is in
+void MP_Achieve_OnStat(u8 index, u32 value, bool8 set)
+{
+    u8 r;
+    if (index >= NUM_USED_GAME_STATS || gSaveBlock1Ptr == NULL)
+        return;
+    r = Here();
+    if (IsRecordStat(index))
+    {
+        if (set && value > sReg.stat[r][index])
+            sReg.stat[r][index] = value;
+    }
+    else if (!set && sReg.stat[r][index] < 0xFFFFFF)
+        sReg.stat[r][index]++;
+}
+
+// A POKéDEX flag was set (pokedex.c GetSetPokedexFlag): seen / caught in the region the player is in
+void MP_Achieve_OnDex(u16 nationalNum, bool8 caught)
+{
+    u8 r;
+    if (nationalNum == 0 || nationalNum > NATIONAL_DEX_COUNT || gSaveBlock1Ptr == NULL)
+        return;
+    r = Here();
+    nationalNum--;
+    sReg.seen[r][nationalNum / 32] |= 1u << (nationalNum % 32);
+    if (caught)
+        sReg.caught[r][nationalNum / 32] |= 1u << (nationalNum % 32);
+}
+
+// The region side file (mp_region.c): its "ACHR" chunk
+void MP_Achieve_RegionalReset(void)
+{
+    memset(&sReg, 0, sizeof(sReg));
+    sReg.version = ACHR_VERSION;
+    sRegSeed = TRUE;
+}
+
+const void *MP_Achieve_RegionalSave(u32 *size)
+{
+    sReg.version = ACHR_VERSION;
+    *size = sizeof(sReg);
+    return &sReg;
+}
+
+void MP_Achieve_RegionalLoad(const void *data, u32 size)
+{
+    memset(&sReg, 0, sizeof(sReg));
+    memcpy(&sReg, data, size < sizeof(sReg) ? size : sizeof(sReg));
+    sReg.version = ACHR_VERSION;
+    sRegSeed = FALSE;
+}
+
+// A save from before 1.182.0: everything its POKéDEX shows was HOENN's
+static void SeedHoenn(void)
+{
+    u16 n;
+    if (!sRegSeed)
+        return;
+    sRegSeed = FALSE;
+    for (n = 1; n <= NATIONAL_DEX_COUNT; n++)
+    {
+        if (GetSetPokedexFlag(n, FLAG_GET_SEEN))
+            sReg.seen[REGION_HOENN][(n - 1) / 32] |= 1u << ((n - 1) % 32);
+        if (GetSetPokedexFlag(n, FLAG_GET_CAUGHT))
+            sReg.caught[REGION_HOENN][(n - 1) / 32] |= 1u << ((n - 1) % 32);
+    }
+    MPNet_Log("achievements: HOENN's POKéDEX lists started from the save's");
+}
+
+static bool8 InDex(const u32 *bits, u16 nationalNum)
+{
+    return nationalNum && nationalNum <= NATIONAL_DEX_COUNT && ((bits[(nationalNum - 1) / 32] >> ((nationalNum - 1) % 32)) & 1);
+}
+
+static s32 DexCount(const u32 *bits)
+{
+    s32 n = 0;
+    u16 w;
+    for (w = 0; w < DEX_WORDS; w++)
+    {
+        u32 x = bits[w];
+        while (x)
+        {
+            x &= x - 1;
+            n++;
+        }
+    }
+    return n;
+}
+
+static s32 DexTypes(const u32 *bits)
+{
+    u32 mask = 0;
+    u16 n;
+    s32 count = 0, t;
+    for (n = 1; n <= NATIONAL_DEX_COUNT; n++)
+    {
+        u16 species;
+        if (!InDex(bits, n))
+            continue;
+        species = NationalPokedexNumToSpecies(n);
+        mask |= 1u << gSpeciesInfo[species].types[0];
+        mask |= 1u << gSpeciesInfo[species].types[1];
+    }
+    mask &= ~(1u << TYPE_MYSTERY);
+    for (t = 0; t < NUMBER_OF_MON_TYPES; t++)
+        count += (mask >> t) & 1;
+    return count;
+}
+
+static s32 DexListIn(const u32 *bits, u16 list)
+{
+    s32 i, n = 0;
+    for (i = 0; i < sDexLists[list].count; i++)
+        n += InDex(bits, SpeciesToNationalPokedexNum(sDexLists[list].list[i]));
+    return n;
+}
+
+static void UnlockKey(char *out, const struct AchView *v)
+{
+    if (v->region == REGION_HOENN)
+        snprintf(out, 48, "av:%s", v->a->id);
+    else
+        snprintf(out, 48, "av:%c.%s", sRegionLetter[v->region], v->a->id);
 }
 
 static void CountKey(char *out, const char *name)
 {
     snprintf(out, 48, "acnt:%s", name);
+}
+
+static void RegionCountKey(char *out, u8 region, const char *name)
+{
+    snprintf(out, 48, "acnt:%c.%s", sRegionLetter[region], name);
 }
 
 static u8 TopLevel(void)
@@ -559,25 +994,14 @@ static s32 DexListCaught(u16 list)
     return n;
 }
 
-// Types among every caught species (TYPE_MYSTERY isn't one)
-static s32 TypesCaught(void)
+// Every caught species with a national number up to LAST (the KANTO / JOHTO POKéDEX)
+static s32 CaughtUpTo(u16 last)
 {
-    u32 mask = 0;
-    u16 n;
-    s32 count = 0, t;
-    for (n = 1; n <= NATIONAL_DEX_COUNT; n++)
-    {
-        u16 species;
-        if (!GetSetPokedexFlag(n, FLAG_GET_CAUGHT))
-            continue;
-        species = NationalPokedexNumToSpecies(n);
-        mask |= 1u << gSpeciesInfo[species].types[0];
-        mask |= 1u << gSpeciesInfo[species].types[1];
-    }
-    mask &= ~(1u << TYPE_MYSTERY);
-    for (t = 0; t < NUMBER_OF_MON_TYPES; t++)
-        count += (mask >> t) & 1;
-    return count;
+    s32 n = 0;
+    u16 i;
+    for (i = 1; i <= last; i++)
+        n += GetSetPokedexFlag(i, FLAG_GET_CAUGHT) ? 1 : 0;
+    return n;
 }
 
 static bool8 PartyMon(u8 i)
@@ -593,6 +1017,15 @@ static s32 TeamAtLevel(u8 level)
         if (PartyMon(i) && GetMonData(&gPlayerParty[i], MON_DATA_LEVEL) >= level)
             n++;
     return n;
+}
+
+static u8 TeamIndex(u16 level)
+{
+    u8 k;
+    for (k = 0; k < ARRAY_COUNT(sTeamLevels); k++)
+        if (sTeamLevels[k] == level)
+            return k;
+    return 0;
 }
 
 static s32 Owned(void)
@@ -620,56 +1053,131 @@ static s32 FullFriendship(void)
     return 0;
 }
 
-// Progress toward an achievement (for the menu); unlocked ones read as done
-static s32 Progress(const struct Achievement *a)
+// Counted by a region's own code (AK_FUNC)
+static s32 FuncCount(u16 fn)
 {
-    char key[48];
+    s32 n = 0;
+    u16 i;
+    switch (fn)
+    {
+    case FN_JOHTO_PHONE:
+    {
+        u8 numbers[64];
+        return MP_QzPhone_Numbers(numbers, ARRAY_COUNT(numbers));
+    }
+    case FN_SINNOH_PLATES:   // (each of the 16 dug once: s3d_underground.c)
+        for (i = 0; i < 16; i++)
+            n += Sinnoh_UndergroundPlateDug(i) ? 1 : 0;
+        return n;
+    case FN_SINNOH_CONTESTS:   // (a photo kept for each condition won: s3d_contest.c)
+        for (i = 0; i < PHOTO_STUDIO; i++)
+            n += Sinnoh_ContestPhoto(i) != NULL;
+        return n;
+    case FN_SINNOH_STUDIO:
+        return Sinnoh_ContestPhoto(PHOTO_STUDIO) != NULL;
+    }
+    return 0;
+}
+
+// What the save shows right now rather than a count: HOENN's rows of these are earned only in HOENN
+static bool8 StateKind(u8 kind)
+{
+    return kind == AK_TEAM || kind == AK_OWNED || kind == AK_FRIEND || kind == AK_LEVEL || kind == AK_MONEY;
+}
+
+// "coop25" counts "coop": tiers of one counter share it
+static void CounterName(const char *id, char *name)
+{
+    int n = 0;
+    while (id[n] && (id[n] < '0' || id[n] > '9') && n < 23)
+    {
+        name[n] = id[n];
+        n++;
+    }
+    name[n] = 0;
+}
+
+static s32 Clamp0(s64 n)
+{
+    return n < 0 ? 0 : (s32)n;
+}
+
+// Progress toward an achievement (for the menu); unlocked ones read as done
+static s32 Progress(const struct AchView *v)
+{
+    const struct Achievement *a = v->a;
+    u8 r = v->region;
+    bool8 split = Split(v);
+    char key[48], name[24];
     switch (a->kind)
     {
-    case AK_FLAGS:   return FlagsSet(a->arg);
-    case AK_DEXLIST: return DexListCaught(a->arg);
+    case AK_FLAGS:   return FlagsSet(v->arg);
+    case AK_DEXLIST: return r != REGION_HOENN || split ? DexListIn(sReg.caught[r], v->arg) : DexListCaught(v->arg);
     case AK_HOENN:   return GetHoennPokedexCount(FLAG_GET_CAUGHT);
-    case AK_TYPES:   return TypesCaught();
-    case AK_TEAM:    return TeamAtLevel(a->arg);
-    case AK_OWNED:   return Owned();
-    case AK_FRIEND:  return FullFriendship();
-    case AK_MONEY:   return GetMoney(&gSaveBlock1Ptr->money);
+    case AK_NATRANGE: return CaughtUpTo(v->arg);
+    case AK_VARGE:   return VarGet(sVarChecks[v->arg].var) >= sVarChecks[v->arg].value ? 1 : 0;
+    case AK_FLAGRANGE:
+    {
+        s32 n = 0;
+        u16 f;
+        for (f = 0; f < sFlagRanges[v->arg].count; f++)
+            n += FlagGet(sFlagRanges[v->arg].first + f) ? 1 : 0;
+        return n;
+    }
+    case AK_FUNC:    return FuncCount(v->arg);
+    case AK_TYPES:   return r != REGION_HOENN || split ? DexTypes(sReg.caught[r]) : 0;
+    case AK_TEAM:    return r != REGION_HOENN ? sReg.team[r][TeamIndex(v->arg)] : TeamAtLevel(v->arg);
+    case AK_OWNED:   return r != REGION_HOENN ? sReg.owned[r] : Owned();
+    case AK_FRIEND:  return r != REGION_HOENN ? (sReg.friends[r] ? 1 : 0) : FullFriendship();
+    case AK_MONEY:   return r != REGION_HOENN ? (s32)sReg.earned[r] : (s32)GetMoney(&gSaveBlock1Ptr->money);
     case AK_CLEARED:
-        if (a->arg == 0xFF)   // (all four)
+        if (v->arg == 0xFF)   // (all four)
             return MP_Region_Cleared(REGION_HOENN) + MP_Region_Cleared(REGION_JOHTO) + MP_Region_Cleared(REGION_KANTO)
                  + MP_Region_Cleared(REGION_SINNOH);
-        if (a->arg)
-            return MP_Region_Cleared(a->arg - 1) ? 1 : 0;
+        if (v->arg)
+            return MP_Region_Cleared(v->arg - 1) ? 1 : 0;
         return MP_Region_Cleared(REGION_HOENN) + MP_Region_Cleared(REGION_JOHTO) + MP_Region_Cleared(REGION_KANTO);
     case AK_STARTED:   // (arg: one region + 1, 0xFF all four, 0 the first three)
-        if (a->arg == 0xFF)
+        if (v->arg == 0xFF)
             return ((gRegionState.started >> REGION_HOENN) & 1) + ((gRegionState.started >> REGION_JOHTO) & 1)
                  + ((gRegionState.started >> REGION_KANTO) & 1) + ((gRegionState.started >> REGION_SINNOH) & 1);
-        if (a->arg)
-            return (gRegionState.started >> (a->arg - 1)) & 1;
+        if (v->arg)
+            return (gRegionState.started >> (v->arg - 1)) & 1;
         return ((gRegionState.started >> REGION_HOENN) & 1) + ((gRegionState.started >> REGION_JOHTO) & 1)
              + ((gRegionState.started >> REGION_KANTO) & 1);
-    case AK_STADIUM: return StadiumRewards_Progress(a->arg);
-    case AK_FLAG:   return FlagGet(a->arg) ? 1 : 0;
-    case AK_STAT:   return GetGameStat(a->arg);
-    case AK_CAUGHT: return GetNationalPokedexCount(FLAG_GET_CAUGHT);
-    case AK_SEEN:   return GetNationalPokedexCount(FLAG_GET_SEEN);
-    case AK_LEVEL:  return TopLevel();
-    case AK_STREAK: return MP_Events_StreakDays();
+    case AK_STADIUM: return StadiumRewards_Progress(v->arg);
+    case AK_FLAG:   return FlagGet(v->arg) ? 1 : 0;
+    case AK_STAT:
+        if (r != REGION_HOENN)
+            return sReg.stat[r][v->arg];
+        if (split && !IsRecordStat(v->arg))
+            return Clamp0((s64)GetGameStat(v->arg) - sReg.stat[REGION_JOHTO][v->arg] - sReg.stat[REGION_KANTO][v->arg]
+                          - sReg.stat[REGION_SINNOH][v->arg]);
+        return GetGameStat(v->arg);
+    case AK_CAUGHT: return r != REGION_HOENN || split ? DexCount(sReg.caught[r]) : GetNationalPokedexCount(FLAG_GET_CAUGHT);
+    case AK_SEEN:   return r != REGION_HOENN || split ? DexCount(sReg.seen[r]) : GetNationalPokedexCount(FLAG_GET_SEEN);
+    case AK_LEVEL:  return r != REGION_HOENN ? sReg.top[r] : TopLevel();
+    case AK_STREAK: return r != REGION_HOENN ? sReg.days[r] : MP_Events_StreakDays();
     case AK_COUNT:
-        // Tiers of one counter share it ("coop1" and "coop25" both count "coop")
+        CounterName(a->id, name);
+        if (r != REGION_HOENN)
         {
-            char name[24];
-            int n = 0;
-            while (a->id[n] && (a->id[n] < '0' || a->id[n] > '9') && n < 23)
-            {
-                name[n] = a->id[n];
-                n++;
-            }
-            name[n] = 0;
-            CountKey(key, name);
+            RegionCountKey(key, r, name);
             return MP_SaveData_Get(key);
         }
+        CountKey(key, name);
+        if (split)
+        {
+            s64 n = MP_SaveData_Get(key);
+            u8 o;
+            for (o = REGION_HOENN + 1; o < REGION_COUNT; o++)
+            {
+                RegionCountKey(key, o, name);
+                n -= MP_SaveData_Get(key);
+            }
+            return Clamp0(n);
+        }
+        return MP_SaveData_Get(key);
     }
     return 0;
 }
@@ -695,36 +1203,45 @@ const char *MP_Achieve_NameById(const char *id)
     return i >= 0 ? sAch[i].name : id;
 }
 
-bool8 MP_Achieve_IsDone(u16 i)
+static bool8 DoneView(const struct AchView *v)
 {
     char key[48];
-    if (i >= NUM_ACH)
-        return FALSE;
-    UnlockKey(key, &sAch[i]);
+    UnlockKey(key, v);
     return MP_SaveData_Get(key) != 0;
 }
 
+bool8 MP_Achieve_IsDone(u16 i)
+{
+    struct AchView v;
+    return View(i, &v) && DoneView(&v);
+}
+
 // Unlocks it and gives its pulls; returns the pulls given (0: it was unlocked already)
-static s32 GrantQuiet(u16 i)
+static s32 GrantQuiet(const struct AchView *v)
 {
     char key[48];
-    const struct Achievement *a = &sAch[i];
-    UnlockKey(key, a);
+    UnlockKey(key, v);
     if (MP_SaveData_Get(key))
         return 0;
     MP_SaveData_Set(key, 1);
-    MP_Gatcha_AddPulls(AchPulls(a->tier));
-    MPNet_Log("achievement: %s (+%d pulls)", a->id, AchPulls(a->tier));
-    return AchPulls(a->tier);
+    sDoneCount = -1;
+    MP_Gatcha_AddPulls(AchPulls(v->a->tier));
+    if (v->region != REGION_HOENN)
+        MPNet_Log("achievement: %c.%s (+%d pulls)", sRegionLetter[v->region], v->a->id, AchPulls(v->a->tier));
+    else
+        MPNet_Log("achievement: %s (+%d pulls)", v->a->id, AchPulls(v->a->tier));
+    return AchPulls(v->a->tier);
 }
 
-// ", BALL COLOR: SAND" for the ball pieces it unlocks (mp_ballunlock.c), or ""
-static void UnlockText(const char *id, char *out, u32 size)
+// ", BALL COLOR: SAND" for the ball pieces it unlocks (mp_ballunlock.c: HOENN's rows), or ""
+static void UnlockText(const struct AchView *v, char *out, u32 size)
 {
     u8 kinds[2], indexes[2], n, k;
     u32 len;
     out[0] = 0;
-    n = MP_BallUnlock_ForAchievement(id, kinds, indexes, 2);
+    if (v->region != REGION_HOENN)
+        return;
+    n = MP_BallUnlock_ForAchievement(v->a->id, kinds, indexes, 2);
     for (k = 0; k < n; k++)
     {
         len = strlen(out);
@@ -735,38 +1252,49 @@ static void UnlockText(const char *id, char *out, u32 size)
     }
 }
 
-static void Grant(u16 i)
+static const char *const sRegionWord[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
+
+static void Grant(const struct AchView *v)
 {
     char msg[128], unlock[64];
-    if (GrantQuiet(i))
+    if (GrantQuiet(v))
     {
-        UnlockText(sAch[i].id, unlock, sizeof(unlock));
-        snprintf(msg, sizeof(msg), "Achievement: %s!\n+%d MOEGATCHA pulls%s", sAch[i].name, AchPulls(sAch[i].tier), unlock);
+        UnlockText(v, unlock, sizeof(unlock));
+        if (v->region != REGION_HOENN)
+            snprintf(msg, sizeof(msg), "%s achievement: %s!\n+%d MOEGATCHA pulls", sRegionWord[v->region], v->a->name, AchPulls(v->a->tier));
+        else
+            snprintf(msg, sizeof(msg), "Achievement: %s!\n+%d MOEGATCHA pulls%s", v->a->name, AchPulls(v->a->tier), unlock);
         MP_Events_QueueToast(msg);
     }
 }
 
+static bool8 CheckView(const struct AchView *v);
+
 // Once per version that adds achievements: everything the save has already done, with one message
-#define RETRO_KEY "ach:retro3"
+#define RETRO_KEY "ach:retro4"
 static void GrantEarnedSoFar(void)
 {
-    u16 i, n = 0;
+    u16 n = 0;
+    u8 r;
+    u16 row;
     s32 pulls = 0, got;
     char msg[96];
     if (MP_SaveData_Get(RETRO_KEY))
         return;
     MP_SaveData_Set(RETRO_KEY, 1);
-    for (i = 0; i < NUM_ACH; i++)
-    {
-        if (sAch[i].kind == AK_EVENT || MP_Achieve_IsDone(i) || Progress(&sAch[i]) < (s32)sAch[i].target)
-            continue;
-        got = GrantQuiet(i);
-        if (got)
+    for (r = 0; r < REGION_COUNT; r++)
+        for (row = 0; row < NUM_ACH; row++)
         {
-            n++;
-            pulls += got;
+            struct AchView v;
+            if (!View(r * ACH_REGION_STRIDE + row, &v) || !CheckView(&v))
+                continue;
+            got = GrantQuiet(&v);
+            if (got)
+            {
+                n++;
+                pulls += got;
+            }
         }
-    }
     MPNet_Log("achievements: %d already earned by this save, +%d pulls", n, (int)pulls);
     if (n == 0)
         return;
@@ -774,12 +1302,18 @@ static void GrantEarnedSoFar(void)
     MP_Events_QueueToast(msg);
 }
 
-// A counted achievement: name like "coop", "trade", "lend"...
+// A counted achievement: name like "coop", "trade", "lend"... (counted for the region the player is in too)
 void MP_Achieve_Count(const char *name, s32 n)
 {
     char key[48];
+    u8 r = Here();
     CountKey(key, name);
     MP_SaveData_Add(key, n);
+    if (r != REGION_HOENN)
+    {
+        RegionCountKey(key, r, name);
+        MP_SaveData_Add(key, n);
+    }
 }
 
 s32 MP_Achieve_GetCount(const char *name)
@@ -789,13 +1323,22 @@ s32 MP_Achieve_GetCount(const char *name)
     return MP_SaveData_Get(key);
 }
 
-// A feat (AK_EVENT achievements: "flawless", "shiny"...)
+// A feat (AK_EVENT achievements: "flawless", "shiny"...): the region's own where it has one
 void MP_Achieve_Unlock(const char *id)
 {
-    u16 i;
-    for (i = 0; i < NUM_ACH; i++)
-        if (strcmp(sAch[i].id, id) == 0)
-            Grant(i);
+    u16 row;
+    u8 r = Here();
+    struct AchView v;
+    BuildCopies();
+    for (row = 0; row < NUM_ACH; row++)
+        if (strcmp(sAch[row].id, id) == 0)
+        {
+            if (r != REGION_HOENN && sCopyCat[r][row] != NO_COPY)
+                View(r * ACH_REGION_STRIDE + row, &v);
+            else
+                View(row, &v);
+            Grant(&v);
+        }
 }
 
 static void TopUpOldRewards(void);
@@ -815,34 +1358,156 @@ static bool8 PartyBallStyled(void)
     return FALSE;
 }
 
-// Every frame on the field: a few achievements checked each frame
+// What changes in the region the player is in: levels and friendship gained, POKé BALL looks, the follower and the
+// look changed, money earned, POKéMON owned, days with friends (the save's state is noted first, then followed)
+static struct
+{
+    bool8 init;
+    u32 pid[PARTY_SIZE];
+    u8 level[PARTY_SIZE];
+    u8 friendship[PARTY_SIZE];
+    u16 ball[PARTY_SIZE];
+    u32 money, follower;
+    struct MpAppearance look;
+    u16 ownedWait;
+} sTrack;
+
+static void TrackRegion(void)
+{
+    u8 r = Here(), i, j, k;
+    u32 money = GetMoney(&gSaveBlock1Ptr->money);
+    if (!sTrack.init)
+    {
+        sTrack.init = TRUE;
+        sTrack.money = money;
+        sTrack.follower = gMpConfig.followerPersonality;
+        sTrack.look = gMpConfig.app;
+        for (i = 0; i < PARTY_SIZE; i++)
+            sTrack.pid[i] = 0;
+    }
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        u32 pid;
+        u8 level, friendship;
+        u16 ball;
+        if (!PartyMon(i))
+            continue;
+        pid = GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY);
+        level = GetMonData(&gPlayerParty[i], MON_DATA_LEVEL);
+        friendship = GetMonData(&gPlayerParty[i], MON_DATA_FRIENDSHIP);
+        ball = MP_BallStyle_OfMon(&gPlayerParty[i]);
+        for (j = 0; j < PARTY_SIZE; j++)
+            if (sTrack.pid[j] == pid && pid != 0)
+                break;
+        if (j < PARTY_SIZE)
+        {
+            if (level > sTrack.level[j])
+            {
+                if (level > sReg.top[r])
+                    sReg.top[r] = level;
+                for (k = 0; k < ARRAY_COUNT(sTeamLevels); k++)
+                    if (sTrack.level[j] < sTeamLevels[k] && level >= sTeamLevels[k] && sReg.team[r][k] < 0xFFFF)
+                        sReg.team[r][k]++;
+            }
+            if (friendship >= MAX_FRIENDSHIP && sTrack.friendship[j] < MAX_FRIENDSHIP && sReg.friends[r] < 0xFFFF)
+                sReg.friends[r]++;
+            if (ball != sTrack.ball[j] && ball != 0)
+                MP_Achieve_Unlock("ballstyle");
+        }
+    }
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        sTrack.pid[i] = PartyMon(i) ? GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY) : 0;
+        sTrack.level[i] = sTrack.pid[i] ? GetMonData(&gPlayerParty[i], MON_DATA_LEVEL) : 0;
+        sTrack.friendship[i] = sTrack.pid[i] ? GetMonData(&gPlayerParty[i], MON_DATA_FRIENDSHIP) : 0;
+        sTrack.ball[i] = sTrack.pid[i] ? MP_BallStyle_OfMon(&gPlayerParty[i]) : 0;
+    }
+    if (money > sTrack.money)
+        sReg.earned[r] += money - sTrack.money;
+    sTrack.money = money;
+    if (gMpConfig.followerPersonality != sTrack.follower)
+    {
+        if (gMpConfig.followerPersonality)
+            MP_Achieve_Unlock("follower");
+        sTrack.follower = gMpConfig.followerPersonality;
+    }
+    if (memcmp(&sTrack.look, &gMpConfig.app, sizeof(sTrack.look)) != 0)
+    {
+        MP_Achieve_Unlock("newlook");
+        sTrack.look = gMpConfig.app;
+    }
+    if (r != REGION_HOENN && ++sTrack.ownedWait >= 600)   // (every 10 seconds: the PC is 1,200 POKéMON to look at)
+    {
+        s32 owned = Owned();
+        sTrack.ownedWait = 0;
+        if (owned > sReg.owned[r])
+            sReg.owned[r] = owned > 0xFFFF ? 0xFFFF : owned;
+    }
+    if (MP_ConnectedCount() >= 2)
+    {
+        s32 today = MP_DayNumber(MP_Today());
+        if (today != sReg.lastDay[r])
+        {
+            sReg.lastDay[r] = today;
+            if (sReg.days[r] < 0xFFFF)
+                sReg.days[r]++;
+        }
+    }
+}
+
+// A new save or the region side file read again: the save's state is noted afresh
+void MP_Achieve_RegionalTrackReset(void)
+{
+    sTrack.init = FALSE;
+    sDoneCount = -1;
+}
+
+// Is it time to grant this one here?
+static bool8 CheckView(const struct AchView *v)
+{
+    if (v->cat == C_GONE || v->a->kind == AK_EVENT || DoneView(v))
+        return FALSE;
+    if (Split(v) && StateKind(v->a->kind) && Here() != REGION_HOENN)   // (HOENN's "have six at Lv 50": in HOENN)
+        return FALSE;
+    return Progress(v) >= (s32)v->a->target;
+}
+
+// Every frame on the field: a few achievements checked each frame (HOENN's rows, and the region's copies)
 void MP_Achieve_Update(void)
 {
-    static u16 sNext;
-    u8 k;
+    static u16 sNext, sNextCopy;
+    u8 k, r;
+    struct AchView v;
     if (!MP_IsInOverworld())
         return;
+    BuildCopies();
+    SeedHoenn();
+    TrackRegion();
     TopUpOldRewards();
     GrantEarnedSoFar();
+    r = Here();
     if (FlagGet(FLAG_DEFEATED_REGIROCK) && FlagGet(FLAG_DEFEATED_REGICE) && FlagGet(FLAG_DEFEATED_REGISTEEL))
         MP_Achieve_Unlock("regis");
     if (MP_ConnectedCount() >= 4)
         MP_Achieve_Unlock("fullhouse");
-    // feats that show in the save too: a follower out, a changed look, a styled POKé BALL in the party
-    if (gMpConfig.followerPersonality)
-        MP_Achieve_Unlock("follower");
-    if (LookChanged())
-        MP_Achieve_Unlock("newlook");
-    if (PartyBallStyled())
-        MP_Achieve_Unlock("ballstyle");
-    for (k = 0; k < 4; k++, sNext = (sNext + 1) % NUM_ACH)
+    // feats that show in the save too, in HOENN (elsewhere a change made there: TrackRegion): a follower out, a
+    // changed look, a styled POKé BALL in the party
+    if (r == REGION_HOENN)
     {
-        const struct Achievement *a = &sAch[sNext];
-        if (a->kind == AK_EVENT || MP_Achieve_IsDone(sNext))
-            continue;
-        if (Progress(a) >= (s32)a->target)
-            Grant(sNext);
+        if (gMpConfig.followerPersonality)
+            MP_Achieve_Unlock("follower");
+        if (LookChanged())
+            MP_Achieve_Unlock("newlook");
+        if (PartyBallStyled())
+            MP_Achieve_Unlock("ballstyle");
     }
+    for (k = 0; k < 4; k++, sNext = (sNext + 1) % NUM_ACH)
+        if (View(sNext, &v) && CheckView(&v))
+            Grant(&v);
+    if (r != REGION_HOENN)
+        for (k = 0; k < 8; k++, sNextCopy = (sNextCopy + 1) % NUM_ACH)
+            if (View(r * ACH_REGION_STRIDE + sNextCopy, &v) && CheckView(&v))
+                Grant(&v);
 }
 
 // ---- Feats noticed at the end of battles (battle_setup.c, mp_events.c)
@@ -898,9 +1563,10 @@ void MP_Achieve_OnCatch(struct Pokemon *mon, bool8 outbreak)
 
 // ---- For the menu
 
+// The numbers achievements can have (TRAINER CARD titles go round them; most aren't one: MP_Achieve_IsDone is FALSE)
 u16 MP_Achieve_Total(void)
 {
-    return NUM_ACH;
+    return ACH_SPACE;
 }
 
 u8 MP_Achieve_CatCount(void)
@@ -913,51 +1579,151 @@ const char *MP_Achieve_CatName(u8 cat)
     return cat < NUM_ACH_CATS ? sCatNames[cat] : "";
 }
 
+// Every listed achievement in order (HOENN's rows, then each region's copies): the next number after IDX
+// (ACH_SPACE to start), ACH_SPACE when past the last
+static u16 NextListed(u16 idx)
+{
+    u8 r;
+    u16 row;
+    BuildCopies();
+    if (idx == ACH_SPACE)
+    {
+        r = REGION_HOENN;
+        row = 0;
+    }
+    else
+    {
+        r = idx / ACH_REGION_STRIDE;
+        row = idx % ACH_REGION_STRIDE + 1;
+    }
+    for (; r < REGION_COUNT; r++, row = 0)
+        for (; row < NUM_ACH; row++)
+            if (r == REGION_HOENN ? sAch[row].cat != C_GONE : sCopyCat[r][row] != NO_COPY)
+                return r * ACH_REGION_STRIDE + row;
+    return ACH_SPACE;
+}
+
+#define FOR_EACH_LISTED(idx) for (idx = NextListed(ACH_SPACE); idx != ACH_SPACE; idx = NextListed(idx))
+
+// How many achievements are listed (the menu's "ALL n/m")
+u16 MP_Achieve_ListedTotal(void)
+{
+    u16 n = 0, idx;
+    FOR_EACH_LISTED(idx)
+        n++;
+    return n;
+}
+
+u16 MP_Achieve_DoneCount(void)
+{
+    u16 n = 0, idx;
+    if (sDoneCount >= 0)
+        return sDoneCount;
+    FOR_EACH_LISTED(idx)
+        n += MP_Achieve_IsDone(idx);
+    sDoneCount = n;
+    return n;
+}
+
+// The index of a tab's row-th achievement (the table's rows, then the region copies'), 0 when none
+u16 MP_Achieve_IndexIn(u8 cat, u16 row)
+{
+    u16 idx;
+    struct AchView v;
+    FOR_EACH_LISTED(idx)
+        if (View(idx, &v) && v.cat == cat && row-- == 0)
+            return idx;
+    return 0;
+}
+
 // How many achievements a tab has, and how many of them are done
 u16 MP_Achieve_CountIn(u8 cat, u16 *done)
 {
-    u16 i, n = 0, d = 0;
-    for (i = 0; i < NUM_ACH; i++)
+    u16 n = 0, d = 0, idx;
+    struct AchView v;
+    FOR_EACH_LISTED(idx)
     {
-        if (sAch[i].cat != cat)
+        if (!View(idx, &v) || v.cat != cat)
             continue;
         n++;
-        d += MP_Achieve_IsDone(i);
+        if (done)
+            d += DoneView(&v);
     }
     if (done)
         *done = d;
     return n;
 }
 
-// The index of a tab's row-th achievement (table order)
-u16 MP_Achieve_IndexIn(u8 cat, u16 row)
+// The menu's tabs, L / R: JOURNEY, a region's own, its BATTLE / CATCHING / TOGETHER / EXTRAS, then the games'.
+// A region's tabs show the region the player is in first; SELECT goes round the regions (MP_Achieve_MenuRegion).
+static const u8 sMenuTabs[] = {C_JOURNEY, 0x80 | G_REGION, 0x80 | G_BATTLE, 0x80 | G_CATCH, 0x80 | G_TOGETHER,
+                               0x80 | G_EXTRAS, C_CARDS, C_YUGIOH, C_MAGIC, C_TRIAD, C_DANCE, C_STADIUM};
+
+static bool8 CatPlace(u8 cat, u8 *group, u8 *region)
 {
-    u16 i;
-    for (i = 0; i < NUM_ACH; i++)
-        if (sAch[i].cat == cat && row-- == 0)
-            return i;
-    return 0;
+    u8 g, r;
+    for (g = 0; g < NUM_ACH_GROUPS; g++)
+        for (r = 0; r < REGION_COUNT; r++)
+            if (sGroupCats[g][r] == cat)
+            {
+                *group = g;
+                *region = r;
+                return TRUE;
+            }
+    return FALSE;
 }
 
-u16 MP_Achieve_DoneCount(void)
+bool8 MP_Achieve_CatHasRegions(u8 cat)
 {
-    u16 i, n = 0;
-    for (i = 0; i < NUM_ACH; i++)
-        n += MP_Achieve_IsDone(i);
-    return n;
+    u8 g, r;
+    return CatPlace(cat, &g, &r);
+}
+
+// The tab after (DIR 1) or before (-1) CAT
+u8 MP_Achieve_MenuNext(u8 cat, s8 dir)
+{
+    u8 g, r, at = 0, i, t;
+    if (!CatPlace(cat, &g, &r))
+    {
+        g = 0xFF;
+        r = Here();
+    }
+    for (i = 0; i < ARRAY_COUNT(sMenuTabs); i++)
+        if (sMenuTabs[i] == (g != 0xFF ? (0x80 | g) : cat))
+            at = i;
+    t = sMenuTabs[(at + ARRAY_COUNT(sMenuTabs) + dir) % ARRAY_COUNT(sMenuTabs)];
+    return (t & 0x80) ? sGroupCats[t & 0x7F][r] : t;
+}
+
+// The same tab of the next region (a tab without regions: itself)
+u8 MP_Achieve_MenuRegion(u8 cat, s8 dir)
+{
+    u8 g, r;
+    if (!CatPlace(cat, &g, &r))
+        return cat;
+    return sGroupCats[g][(r + REGION_COUNT + dir) % REGION_COUNT];
 }
 
 // name, description, "12/25" or "DONE", reward ("+10 MOEGATCHA pulls")
 void MP_Achieve_Info(u16 i, const char **name, const char **desc, char *status, int statusLen, char *reward, int rewardLen)
 {
-    const struct Achievement *a = &sAch[i];
+    struct AchView v;
+    const struct Achievement *a;
+    if (!View(i, &v))
+    {
+        *name = *desc = "";
+        snprintf(status, statusLen, "-");
+        snprintf(reward, rewardLen, "-");
+        return;
+    }
+    a = v.a;
     *name = a->name;
-    *desc = a->desc;
-    if (MP_Achieve_IsDone(i))
+    *desc = v.desc;
+    if (DoneView(&v))
         snprintf(status, statusLen, "DONE");
     else if (a->target > 1)
     {
-        s32 p = Progress(a);
+        s32 p = Progress(&v);
         if (p > (s32)a->target)
             p = a->target;
         if (a->target >= 10000)   // money, steps: in thousands so the column stays short
@@ -969,7 +1735,7 @@ void MP_Achieve_Info(u16 i, const char **name, const char **desc, char *status, 
         snprintf(status, statusLen, "-");
     {
         char unlock[64];
-        UnlockText(a->id, unlock, sizeof(unlock));
+        UnlockText(&v, unlock, sizeof(unlock));
         snprintf(reward, rewardLen, "+%d MOEGATCHA pulls%s", AchPulls(a->tier), unlock);
     }
 }

@@ -12,7 +12,7 @@ mp setflag 123
 mp gamestat 7 120
 mp gamestat 11 12
 mp money 150000
-mp savedata ach:retro3 0
+mp savedata ach:retro4 0
 wait 120
 mp ach
 mp achmenu 0

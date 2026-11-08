@@ -321,6 +321,137 @@ u16 MP_TestWalkKey(s32 tx, s32 ty)
     return 0xFFFF;
 }
 
+// The harness's "goto G,N X Y": the key toward tile (X, Y) of ORRE map G.N as a player gets there: through the rooms'
+// doors (their warps) and ORRE's world map (its ways out; the place picked as the world map opens:
+// worldmap.c Orre_WorldMapTestPick), by the fewest rooms. 0 once there, 0xFFFF when it can't go on now
+bool8 Orre_WorldMapShows(u16 map);
+void Orre_WorldMapTestPick(u16 map);
+#define ORRE_TEST_MAPS ((MAP_ORRE_PYRITE_COLOSSEUM_ENTER_1F_2 & 0xFF) + 1)
+static bool8 OrreHasWayOut(const struct MapHeader *h)
+{
+    extern const u8 Orre_EventScript_WorldMap[];
+    u32 i;
+    for (i = 0; h && h->events && i < h->events->coordEventCount; i++)
+        if (h->events->coordEvents[i].script == Orre_EventScript_WorldMap)
+            return TRUE;
+    return FALSE;
+}
+
+u16 MP_TestGotoKey(u8 group, u8 num, s32 tx, s32 ty)
+{
+    static s16 sPrev[ORRE_TEST_MAPS];
+    static u8 sQ[ORRE_TEST_MAPS];
+    u8 here = gSaveBlock1Ptr->location.mapNum, hop;
+    s32 head = 0, tail = 0, m, i;
+    const struct MapHeader *h;
+    if (gSaveBlock1Ptr->location.mapGroup == group && here == num)
+        return MP_TestWalkKey(tx, ty);
+    if (group != 45 || gSaveBlock1Ptr->location.mapGroup != 45 || num >= ORRE_TEST_MAPS || here >= ORRE_TEST_MAPS)
+        return 0xFFFF;
+    for (i = 0; i < ORRE_TEST_MAPS; i++)
+        sPrev[i] = -1;
+    sPrev[here] = here;
+    sQ[tail++] = here;
+    while (head < tail && sPrev[num] < 0)
+    {
+        u8 c = sQ[head++];
+        h = Overworld_GetMapHeaderByGroupAndId(45, c);
+        for (i = 0; h && h->events && i < h->events->warpCount; i++)
+        {
+            const struct WarpEvent *w = &h->events->warps[i];
+            if (w->mapGroup == 45 && w->mapNum < ORRE_TEST_MAPS && sPrev[w->mapNum] < 0)
+                sPrev[w->mapNum] = c, sQ[tail++] = w->mapNum;
+        }
+        if (OrreHasWayOut(h))
+            for (m = 0; m < ORRE_TEST_MAPS; m++)
+                if (sPrev[m] < 0 && Orre_WorldMapShows((45 << 8) | m))
+                    sPrev[m] = c, sQ[tail++] = m;
+    }
+    if (sPrev[num] < 0)
+        return 0xFFFF;
+    for (hop = num; sPrev[hop] != here; hop = sPrev[hop])
+        ;
+    // (the way to the next room from here: one of its warps' tiles a step can reach, else a way out to the world map)
+    h = &gMapHeader;
+    for (i = 0; h->events && i < h->events->warpCount; i++)
+    {
+        const struct WarpEvent *w = &h->events->warps[i];
+        u16 k;
+        if (w->mapGroup != 45 || w->mapNum != hop || (k = MP_TestWalkKey(w->x, w->y)) == 0xFFFF)
+            continue;
+        return k == 0 ? 0xFFFF : k;   // (on it already: its warp on its way)
+    }
+    for (i = 0; h->events && i < h->events->coordEventCount; i++)
+    {
+        extern const u8 Orre_EventScript_WorldMap[];
+        const struct CoordEvent *c = &h->events->coordEvents[i];
+        u16 k;
+        if (c->script != Orre_EventScript_WorldMap || (k = MP_TestWalkKey(c->x, c->y)) == 0xFFFF)
+            continue;
+        Orre_WorldMapTestPick((45 << 8) | hop);
+        return k == 0 ? 0xFFFF : k;
+    }
+    return 0xFFFF;
+}
+
+// The harness's "approach KIND N": up to ORRE person N (KIND 0), into touch spot N (1) or up to check spot N (2) of the
+// current room (N: a spot's collision id), as a player walks; for a person or a check, facing it. *DONE: there (a
+// person's / a check's A is the harness's to press)
+bool8 Orre_TestPersonTile(u32 index, s16 *x, s16 *y);
+bool8 Orre_TestSpotTiles(bool8 touch, u32 col, s16 *x0, s16 *y0, s16 *x1, s16 *y1);
+u16 MP_TestApproachKey(u8 kind, u32 n, bool8 *done)
+{
+    static const s8 dx[4] = {0, 0, -1, 1}, dy[4] = {1, -1, 0, 0};
+    static const u16 toward[4] = {DPAD_UP, DPAD_DOWN, DPAD_RIGHT, DPAD_LEFT};   // (from the side, facing the thing)
+    static const u8 facing[4] = {DIR_NORTH, DIR_SOUTH, DIR_EAST, DIR_WEST};
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s16 x0, y0, x1, y1, x, y;
+    s32 d;
+    u16 best = 0xFFFF;
+    *done = FALSE;
+    if (kind == 0)
+    {
+        if (!Orre_TestPersonTile(n, &x0, &y0))
+            return 0xFFFF;
+        x1 = x0, y1 = y0;
+    }
+    else if (!Orre_TestSpotTiles(kind == 1, n, &x0, &y0, &x1, &y1))
+        return 0xFFFF;
+    if (kind == 1)
+    {
+        for (y = y0; y <= y1; y++)
+            for (x = x0; x <= x1; x++)
+            {
+                u16 k = MP_TestWalkKey(x, y);
+                if (k == 0)
+                    return *done = TRUE, 0;
+                if (k != 0xFFFF && best == 0xFFFF)
+                    best = k;
+            }
+        return best;
+    }
+    // (beside it, a side a step reaches, facing it)
+    for (y = y0; y <= y1; y++)
+        for (x = x0; x <= x1; x++)
+            for (d = 0; d < 4; d++)
+            {
+                s16 sx = x + dx[d], sy = y + dy[d];
+                u16 k;
+                if (sx >= x0 && sx <= x1 && sy >= y0 && sy <= y1)
+                    continue;
+                k = MP_TestWalkKey(sx, sy);
+                if (k == 0)
+                {
+                    if (p->facingDirection == facing[d])
+                        return *done = TRUE, 0;
+                    return toward[d];   // (a tap turns the player to face it)
+                }
+                if (k != 0xFFFF && best == 0xFFFF)
+                    best = k;
+            }
+    return best;
+}
+
 int MP_TestCondition(const char *name)
 {
     if (strcmp(name, "cards") == 0)
@@ -738,11 +869,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "dexcatch") == 0 || strcmp(cmd, "dexsee") == 0)
     {
-        // dexcatch NATIONAL_NUMBER: as if you caught (or saw) it
-        u16 nat = (u16)atoi(arg);
-        GetSetPokedexFlag(nat, FLAG_SET_SEEN);
-        if (cmd[3] == 'c')
-            GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
+        // dexcatch NATIONAL_NUMBER [LAST]: as if you caught (or saw) it (or each up to LAST)
+        int first = 0, last = 0, k;
+        u16 nat;
+        if (sscanf(arg, "%d %d", &first, &last) < 2)
+            last = first;
+        for (k = first; k <= last; k++)
+        {
+            nat = (u16)k;
+            GetSetPokedexFlag(nat, FLAG_SET_SEEN);
+            if (cmd[3] == 'c')
+                GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
+        }
+        nat = (u16)first;
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
     }
     else if (strcmp(cmd, "shadows") == 0)   // shadows [0|1] - OPTIONS > DISPLAY > SHADOWS; prints how many are up (mp_shadow.c)
@@ -2686,7 +2825,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // ach - achievements done, in all and per tab
         s32 MP_Gatcha_Pulls(void);
         u8 c;
-        printf("[test] achievements %d/%d:", MP_Achieve_DoneCount(), MP_Achieve_Total());
+        printf("[test] achievements %d/%d:", MP_Achieve_DoneCount(), MP_Achieve_ListedTotal());
         for (c = 0; c < MP_Achieve_CatCount(); c++)
         {
             u16 done, n = MP_Achieve_CountIn(c, &done);
@@ -2710,6 +2849,22 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int n = 0, v = 0;
         sscanf(arg, "%d %d", &n, &v);
         SetGameStat(n, v);
+    }
+    else if (strcmp(cmd, "addstat") == 0)
+    {
+        // addstat N COUNT - a game stat counted up COUNT times, as play does (achievements count it per region)
+        int n = 0, c = 1, k;
+        sscanf(arg, "%d %d", &n, &c);
+        for (k = 0; k < c; k++)
+            IncrementGameStat(n);
+    }
+    else if (strcmp(cmd, "achcount") == 0)
+    {
+        // achcount NAME N - an achievement counter ("coop", "trade"...) counted as play does
+        char name[24] = "";
+        int n = 1;
+        sscanf(arg, "%23s %d", name, &n);
+        MP_Achieve_Count(name, n);
     }
     else if (strcmp(cmd, "money") == 0)
     {

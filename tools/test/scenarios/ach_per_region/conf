@@ -1,0 +1,8 @@
+# BATTLE / CATCHING / TOGETHER / EXTRAS are each region's own (mp_achieve.c sGroupCats): in KANTO, 10 trainer
+# battles, 10,000 steps, 12 kinds caught and a co-op win earn KANTO's FIRST CHALLENGERS, ON THE ROAD, FIRST PAGES and
+# BETTER TOGETHER, and HOENN's stay unearned. Shots: KANTO BATTLE, then SELECT to SINNOH BATTLE, L to SINNOH's tab.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("achievement: k.trainers10" "achievement: k.steps10k" "achievement: k.dex10" "achievement: k.coop1" " KANTO BATTLE ")
+UNEXPECT_A=("[crash]" "achievement: trainers10 " "achievement: steps10k " "achievement: dex10 " "achievement: coop1 " "achievement: j." "achievement: s.")

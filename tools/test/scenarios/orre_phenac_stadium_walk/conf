@@ -1,0 +1,9 @@
+# PHENAC STADIUM on foot: its plaza met the city only at two corners in the tile grid (Colosseum's player walks any
+# way; Kai's four), so no one could walk up to it after the PRE GYM (the walk-only story run). tools/orre/grid.py
+# _join_diagonals opens one tile beside such a corner. From the PRE GYM's door up to the stadium's.
+MODE=1
+TMO=200
+WARP=45,2,48,65
+ENV_A="MOEMON_ORRE_SCRIPTS=0"
+EXPECT_A=("where map 45.12 ")
+UNEXPECT_A=("[crash]")

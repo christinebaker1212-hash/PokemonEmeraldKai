@@ -469,7 +469,7 @@ Quetzal_EventScript_84569F1::
 	goto Quetzal_EventScript_8456A07
 
 Quetzal_EventScript_8456A07::
-	incrementgamestat 0x2B
+	incrementgamestat GAME_STAT_USED_POKECENTER   @ Moemon Kai: Quetzal had 0x2B (JUMPED_DOWN_LEDGES here)
 	message Quetzal_Text_84566B6
 	waitmessage
 	call Quetzal_EventScript_8456A1D

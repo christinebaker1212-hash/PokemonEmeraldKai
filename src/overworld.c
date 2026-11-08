@@ -459,6 +459,7 @@ void IncrementGameStat(u8 index)
             statVal = 0xFFFFFF;
 
         SetGameStat(index, statVal);
+        MP_Achieve_OnStat(index, statVal, FALSE);   // Moemon Kai: counted per region for the achievements too
     }
 }
 
@@ -473,7 +474,10 @@ u32 GetGameStat(u8 index)
 void SetGameStat(u8 index, u32 value)
 {
     if (index < NUM_USED_GAME_STATS)
+    {
         gSaveBlock1Ptr->gameStats[index] = value ^ gSaveBlock2Ptr->encryptionKey;
+        MP_Achieve_OnStat(index, value, TRUE);   // Moemon Kai: a record (a streak) per region for the achievements
+    }
 }
 
 void ApplyNewEncryptionKeyToGameStats(u32 newKey)

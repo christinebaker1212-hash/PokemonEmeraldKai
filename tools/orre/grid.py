@@ -333,9 +333,68 @@ def build(col, tile=TILE, start=None, stops=None):
                                 walk[ny, nx] = False
                             else:
                                 walk[y, x] = False
+        _join_diagonals(walk, heights, trig)
         if stops:
             _connect(walk, heights, trig, stops)
     return {"w": w, "h": h, "tile": tile, "x0": x0, "z0": z0, "walk": walk, "heights": heights, "trigger": trig}
+
+
+def _components(walk):
+    """Each walkable tile's 4-connected area (-1: not walkable)."""
+    from collections import deque
+    h, w = walk.shape
+    comp = np.full((h, w), -1, dtype=np.int32)
+    n = 0
+    for y0, x0_ in np.argwhere(walk):
+        if comp[y0, x0_] >= 0:
+            continue
+        comp[y0, x0_] = n
+        q = deque([(y0, x0_)])
+        while q:
+            cy, cx = q.popleft()
+            for ny, nx in ((cy + 1, cx), (cy - 1, cx), (cy, cx + 1), (cy, cx - 1)):
+                if 0 <= ny < h and 0 <= nx < w and walk[ny, nx] and comp[ny, nx] < 0:
+                    comp[ny, nx] = n
+                    q.append((ny, nx))
+        n += 1
+    return comp
+
+
+def _join_diagonals(walk, heights, trig):
+    """Colosseum's player walks any way; Emerald's steps are up, down, left and right. Where the flood reached two
+    areas that touch only at a corner (a stair's turn, a plaza's angled edge: PHENAC's stadium plaza), one of the two
+    tiles beside that corner is opened, the one whose floor lies nearest both areas' (or, floorless, given theirs),
+    so the two are one walk apart."""
+    h, w = walk.shape
+    changed = True
+    while changed:
+        changed = False
+        comp = _components(walk)
+        for y in range(h - 1):
+            for x in range(w - 1):
+                for (ay, ax), (by, bx), cands in (((y, x), (y + 1, x + 1), ((y, x + 1), (y + 1, x))),
+                                                  ((y, x + 1), (y + 1, x), ((y, x), (y + 1, x + 1)))):
+                    if not (walk[ay, ax] and walk[by, bx]) or comp[ay, ax] == comp[by, bx]:
+                        continue
+                    if any(walk[cy, cx] for cy, cx in cands):
+                        continue
+                    ga, gb = heights[ay][ax][0], heights[by][bx][0]
+                    best, cost = None, None
+                    for cy, cx in cands:
+                        if trig[cy, cx] >= 0:
+                            continue
+                        hs = heights[cy][cx]
+                        c = min(abs(hh - ga) + abs(hh - gb) for hh in hs) if hs else abs(ga - gb) + 1.0
+                        if cost is None or c < cost:
+                            best, cost = (cy, cx), c
+                    if best is None or abs(ga - gb) > 6.0:   # (a ledge or a floor above another: not a corner)
+                        continue
+                    cy, cx = best
+                    if not heights[cy][cx]:
+                        heights[cy][cx] = [(ga + gb) / 2]
+                    walk[cy, cx] = True
+                    changed = True
+                    comp = _components(walk)
 
 
 CONNECT = 3   # tiles: how far a door's trigger may lie from what is reached and still be joined to it

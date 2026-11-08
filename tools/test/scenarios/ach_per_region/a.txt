@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 120
+mp ach
+mp addstat 9 10
+mp addstat 5 10000
+mp dexcatch 1 12
+mp achcount coop 1
+wait 400
+mp ach
+mp achmenu 19
+wait 60
+shot kanto_battle
+press SELECT 2
+wait 20
+shot sinnoh_battle
+press L 2
+wait 20
+shot sinnoh_tab
+quit

@@ -93,6 +93,7 @@ static struct
 } W;
 
 static s8 sChosen = -1;
+static u16 sTestPick;   // (tests: the place the harness's goto travels to, picked as the world map opens)
 static void FindBoxes(void);
 
 static u32 Be32(const u8 *p) { return (u32)p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]; }
@@ -827,6 +828,33 @@ void Orre_WorldMap(void)
     for (i = 0; i < W.nPlaces; i++)
         shown += PlaceShown(i);
     MPNet_Log("orre world map: open at room %u, %u of %u places shown", PlaceRoom(W.cur), shown, W.nPlaces);
+    if (sTestPick)
+    {
+        // (tests: the harness's goto picks a shown place, as a player's cursor would: mp_debug.c MP_TestGotoKey)
+        for (i = 0; i < W.nPlaces; i++)
+            if (PlaceShown(i) && PlaceMap(i) >= 0 && sOrreMaps[PlaceMap(i)].map == sTestPick)
+                W.chosen = (s8)i;
+        MPNet_Log("orre world map: the test picks %s", W.chosen >= 0 ? "its place" : "no place (not shown)");
+        sTestPick = 0;
+        Close();
+    }
+}
+
+// (tests) the world map lists MAP's place now (shown by the story); the next opening picks it
+bool8 Orre_WorldMapShows(u16 map)
+{
+    u32 i;
+    if (!LoadData())
+        return FALSE;
+    for (i = 0; i < W.nPlaces; i++)
+        if (PlaceShown(i) && PlaceMap(i) >= 0 && sOrreMaps[PlaceMap(i)].map == map)
+            return TRUE;
+    return FALSE;
+}
+
+void Orre_WorldMapTestPick(u16 map)
+{
+    sTestPick = map;
 }
 
 // a map's start (Colosseum's entry 0: tools/orre/gen_maps.py), FALSE if it isn't ORRE's

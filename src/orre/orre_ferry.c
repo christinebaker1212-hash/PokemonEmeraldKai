@@ -1,3 +1,4 @@
+#include <stdlib.h>
 // Moemon Kai: the boat to ORRE (docs/ORRE_DECISIONS.md "A post-game place", the user 2026-11-07: "Orre will not be
 // selectable as a region to start in, rather, it is always a post-game region, and a special one at that - it goes on
 // the BATTLE FRONTIER, BATTLE ISLAND, FARADAY ISLAND, etc menu"). The ORRE TICKET comes after any region's ELITE FOUR
@@ -58,6 +59,8 @@ void Orre_SailBack(void)
 void Orre_ShadowAboard(void)
 {
     gSpecialVar_Result = Orre_Shadow_PartyHasShadow();
+    if (getenv("MOEMON_TEST_STAY"))
+        gSpecialVar_Result = TRUE;   // (tests that press A everywhere: the sailor won't take them home)
 }
 
 // ---- ORRE's packs before the boat sails (the user, 2026-11-07: "Let's go ahead and ship it"): the world, text and

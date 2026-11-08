@@ -467,6 +467,9 @@ laid out on the pass's own grid (label line, P emblem, notch: docs/user_images/6
 signature, stars per region; friends' cards by LX_CARD's add-on, the album; spectated;
 COOP_NOTES "The TRAINER CARD, the BADGE CASE"; tests badge_case, card_design, card_designs, card_friends, spec_card). Also HMs a friend's
 progress made impossible to get (mp_hmrescue.c: the giver walks up; tests hm_rescue*).
+Also achievements for each region (1.182.0: BATTLE / CATCHING / TOGETHER / EXTRAS copied per region and counted only
+there, HOENN's rows count the rest; numbers region * 1024 + row, never reorder or delete rows (TRAINER CARD titles are
+numbers: retired rows stay as C_GONE); src/mp/mp_achieve.c, chunk "ACHR"; COOP_NOTES "Achievements for each region").
 Saves never change layout: tools/test/save_layout.py (gcc + MinGW, run by regress.sh and the release) must pass; old
 formats are converted on load by src/mp/mp_savefix.c (MP_SAVE_FORMAT in the sidecar; COOP_NOTES "Save layout and
 migration"; tools/test/save_compat.sh).

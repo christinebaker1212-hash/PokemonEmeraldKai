@@ -1,0 +1,8 @@
+pressuntil A field 6000
+wait 60
+mp where
+walkto 47 31 3000
+wait 120
+mp where
+shot stadium
+quit

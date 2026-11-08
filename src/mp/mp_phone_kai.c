@@ -30,6 +30,7 @@
 extern u16 gMpCandies[NUMBER_OF_MON_TYPES];
 u16 BerryTypeToItemId(u16 berry);
 u16 MP_Achieve_Total(void);
+u16 MP_Achieve_ListedTotal(void);
 u16 MP_Achieve_DoneCount(void);
 u8 MP_Achieve_CatCount(void);
 const char *MP_Achieve_CatName(u8 cat);
@@ -67,7 +68,7 @@ void PhoneKai_Snapshot(struct Buf *b)
 {
     u8 t;
     BufAdd(b, ",\"kai\":{\"ach\":[%u,%u],\"pulls\":%d,\"tickets\":%d,\"free\":%d,\"jar\":%u,\"candy\":[",
-           MP_Achieve_DoneCount(), MP_Achieve_Total(), (int)MP_Gatcha_Pulls(), (int)MP_Gatcha_Tickets(),
+           MP_Achieve_DoneCount(), MP_Achieve_ListedTotal(), (int)MP_Gatcha_Pulls(), (int)MP_Gatcha_Tickets(),
            (int)MP_Gatcha_FreeWaiting(), HasJar());
     for (t = 0; t < NUMBER_OF_MON_TYPES; t++)
         BufAdd(b, "%s%u", t ? "," : "", gMpCandies[t]);

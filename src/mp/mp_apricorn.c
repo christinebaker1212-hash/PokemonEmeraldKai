@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "global.h"
+#include "mp.h"
 #include "berry.h"
 #include "event_data.h"
 #include "event_object_movement.h"
@@ -215,6 +216,7 @@ u16 QzKurtBallState(void)
 
 u16 QzKurtBallTaken(void)
 {
+    MP_Achieve_Unlock("jkurt");   // (JOHTO's achievement: KURT made a ball)
     VarSet(VAR_KURT_ITEM, 0);
     VarSet(VAR_KURT_COUNT, 0);
     return 0;

@@ -938,3 +938,34 @@ void Orre_Npc_PartnerFollow(bool8 on)
         MPNet_Log("orre npcs: RUI no longer follows");
     }
 }
+
+// ---- tests (the harness's approach: src/platform/sdl2.c, mp_debug.c MP_TestApproachKey)
+
+// Where person INDEX of the current room stands, FALSE when not shown
+bool8 Orre_TestPersonTile(u32 index, s16 *x, s16 *y)
+{
+    struct Npc *n = Of(index);
+    if (n == NULL || !n->shown || Object(n) == NULL)
+        return FALSE;
+    *x = Object(n)->currentCoords.x - MAP_OFFSET;
+    *y = Object(n)->currentCoords.y - MAP_OFFSET;
+    return TRUE;
+}
+
+// The tiles under the current room's touch (TOUCH) or check spot with collision id COL: its box's corners' tiles
+bool8 Orre_TestSpotTiles(bool8 touch, u32 col, s16 *x0, s16 *y0, s16 *x1, s16 *y1)
+{
+    const struct OrreRoomCheck *t = touch ? sOrreRoomTouches : sOrreRoomChecks;
+    u32 i, n = touch ? ORRE_ROOM_TOUCH_COUNT : ORRE_ROOM_CHECK_COUNT;
+    for (i = 0; i < n; i++)
+        if (t[i].room == sRoom && t[i].col == col)
+        {
+            s16 ax, ay, bx, by;
+            if (!O3D_ColoToTile(t[i].x0, t[i].z0, &ax, &ay) || !O3D_ColoToTile(t[i].x1, t[i].z1, &bx, &by))
+                return FALSE;
+            *x0 = ax < bx ? ax : bx, *x1 = ax < bx ? bx : ax;
+            *y0 = ay < by ? ay : by, *y1 = ay < by ? by : ay;
+            return TRUE;
+        }
+    return FALSE;
+}

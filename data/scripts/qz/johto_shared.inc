@@ -160,7 +160,7 @@ Quetzal_EventScript_835F95C::
 	goto Quetzal_EventScript_835F97F
 
 Quetzal_EventScript_835F97F::
-	incrementgamestat 0x2B
+	incrementgamestat GAME_STAT_USED_POKECENTER   @ Moemon Kai: Quetzal had 0x2B (JUMPED_DOWN_LEDGES here)
 	call_if_eq VAR_0x8004, 0, Quetzal_EventScript_835F9AC
 	call_if_eq VAR_0x8004, 1, Quetzal_EventScript_835F9B2
 	waitmessage

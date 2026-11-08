@@ -1522,7 +1522,10 @@ static void DrawAchievements(void)
     u8 right[48];
     snprintf(title, sizeof(title), "{L} %s {R}", MP_Achieve_CatName(sDaily.achTab));
     MpUi_Begin(title);
-    snprintf(title, sizeof(title), "%d/%d  ALL %d/%d", done, count, MP_Achieve_DoneCount(), MP_Achieve_Total());
+    if (MP_Achieve_CatHasRegions(sDaily.achTab))   // (each region has its own: SELECT goes round them)
+        snprintf(title, sizeof(title), "%d/%d  {SELECT} REGION", done, count);
+    else
+        snprintf(title, sizeof(title), "%d/%d  ALL %d/%d", done, count, MP_Achieve_DoneCount(), MP_Achieve_ListedTotal());
     MP_AsciiToGame(right, title, 40);
     MpUi_TitleRight(right);
     first = MpUi_ScrollFor(sDaily.cursor, count, &sDaily.scroll);
@@ -1609,9 +1612,16 @@ static void Task_Daily(u8 taskId)
         }
         if (sDaily.screen == DS_ACHIEVEMENTS && JOY_NEW(L_BUTTON | R_BUTTON))
         {
-            u8 n = MP_Achieve_CatCount();
             PlaySE(SE_SELECT);
-            sDaily.achTab = (sDaily.achTab + (JOY_NEW(R_BUTTON) ? 1 : n - 1)) % n;
+            sDaily.achTab = MP_Achieve_MenuNext(sDaily.achTab, JOY_NEW(R_BUTTON) ? 1 : -1);
+            sDaily.cursor = sDaily.scroll = 0;
+            Draw();
+            return;
+        }
+        if (sDaily.screen == DS_ACHIEVEMENTS && JOY_NEW(SELECT_BUTTON) && MP_Achieve_CatHasRegions(sDaily.achTab))
+        {
+            PlaySE(SE_SELECT);
+            sDaily.achTab = MP_Achieve_MenuRegion(sDaily.achTab, 1);
             sDaily.cursor = sDaily.scroll = 0;
             Draw();
             return;

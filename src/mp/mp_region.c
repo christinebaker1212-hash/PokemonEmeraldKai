@@ -266,6 +266,8 @@ void MP_Region_NewGame(void)
     sLevelCount = 0;
     sAwayItemsValid = 0;
     sGlobalItemCount = 0;
+    MP_Achieve_RegionalReset();
+    MP_Achieve_RegionalTrackReset();
 }
 
 // The region a new game starts in (PROF. BIRCH asks, main_menu.c), applied by MP_Region_StartNewGame
@@ -528,6 +530,15 @@ void MP_Region_WriteSidecar(void)
             AwFile_Write(rib, size, 1, f);
         }
         {
+            // each region's own achievement counts (src/mp/mp_achieve.c struct AchRegional)
+            u32 size;
+            const void *ach = MP_Achieve_RegionalSave(&size);
+            c[0] = CHUNK('A', 'C', 'H', 'R');
+            c[1] = size;
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(ach, size, 1, f);
+        }
+        {
             // KANTO's ROUTE 5 DAY-CARE: FireRed's one-POKéMON day care (daycare.c)
             u32 size;
             const void *dc = MP_Route5Daycare_Data(&size);
@@ -673,6 +684,7 @@ static bool8 LoadFrom(const char *path)
     sGlobalItemCount = 0;
     if (!f)
         return FALSE;
+    MP_Achieve_RegionalReset();   // (a side file without the chunk: from before 1.182.0)
     memset(&gRegionState, 0, sizeof(gRegionState));
     MP_Route5Daycare_Clear();
     sSaveFormat = 1;   // a side file without the format: 1.60.0
@@ -829,6 +841,12 @@ static bool8 LoadFrom(const char *path)
                 if (fread(&sJohtoUnownCaught, sizeof(sJohtoUnownCaught), 1, f) != 1)
                     sJohtoUnownCaught = 0;
             }
+            else if (c[0] == CHUNK('A', 'C', 'H', 'R') && c[1] <= 8192)
+            {
+                static u8 buf[8192];
+                if (fread(buf, c[1], 1, f) == 1)
+                    MP_Achieve_RegionalLoad(buf, c[1]);
+            }
             else if (c[0] == CHUNK('U', 'N', 'D', 'G') && c[1] <= 1024)
             {
                 u8 buf[1024];
@@ -929,6 +947,8 @@ void MP_Region_LoadFromSave(void)
 {
     char path[600];
     int i;
+    MP_Achieve_RegionalReset();
+    MP_Achieve_RegionalTrackReset();
     Sinnoh_HoneyReset();
     Sinnoh_HallReset();
     Sinnoh_TowerReset();

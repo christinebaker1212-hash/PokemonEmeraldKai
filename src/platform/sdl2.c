@@ -93,6 +93,8 @@ static int sMashCount = 0, sMashInterval = 0;
 // waitfor / pressuntil: wait for a named game state (see MP_TestCondition)
 static char sUntilName[32];
 static int sWalkX, sWalkY, sWalkFrames;   // walkto
+static int sGotoG, sGotoN, sGotoX, sGotoY, sGotoFrames, sGotoBusy;   // goto
+static int sApproachKind, sApproachN, sApproachFrames;   // approach
 static int sUntilFrames = 0;
 static u16 sUntilKeys = 0;
 extern int MP_TestCondition(const char *name);
@@ -1313,6 +1315,55 @@ static void TestHarnessStep(void)
         sBarrierName[0] = 0;
     }
 
+    if (sGotoFrames > 0 || sApproachFrames > 0)
+    {
+        // goto G,N X Y / approach KIND N: as a player gets there (mp_debug.c MP_TestGotoKey / MP_TestApproachKey);
+        // a scene on the way is pressed through (A every so often), the way picked again after it
+        u16 MP_TestGotoKey(u8 group, u8 num, s32 tx, s32 ty);
+        u16 MP_TestApproachKey(u8 kind, u32 n, bool8 *done);
+        bool8 ScriptContext_IsEnabled(void);
+        bool8 done = FALSE;
+        bool8 go = sGotoFrames > 0;
+        u16 k = go ? MP_TestGotoKey(sGotoG, sGotoN, sGotoX, sGotoY) : MP_TestApproachKey(sApproachKind, sApproachN, &done);
+        if (go ? k == 0 : done)
+        {
+            if (go)
+                printf("[test] frame %lu: goto %d,%d %d %d there\n", sFrameCounter, sGotoG, sGotoN, sGotoX, sGotoY);
+            else
+                printf("[test] frame %lu: approach %d %d there\n", sFrameCounter, sApproachKind, sApproachN);
+            fflush(stdout);
+            sGotoFrames = sApproachFrames = 0;
+            sTestKeys = (!go && sApproachKind != 1) ? A_BUTTON : 0;   // (a person / a check: A, as a player talks)
+            sTestWait = 1;
+            return;
+        }
+        if ((go ? --sGotoFrames : --sApproachFrames) == 0)
+        {
+            printf("[test] frame %lu: %s TIMEOUT\n", sFrameCounter, go ? "goto" : "approach");
+            fflush(stdout);
+            sGotoFrames = sApproachFrames = 0;
+            sTestKeys = 0;
+        }
+        else if (k == 0xFFFF)
+        {
+            static int sIdle;
+            bool8 busy = ScriptContext_IsEnabled();
+            sTestKeys = (busy && (++sGotoBusy & 15) == 0) ? A_BUTTON : 0;
+            // (no way from here and nothing going on for 5 seconds: no way there yet)
+            sIdle = busy ? 0 : sIdle + 1;
+            if (sIdle > 300)
+            {
+                printf("[test] frame %lu: %s NO WAY\n", sFrameCounter, go ? "goto" : "approach");
+                fflush(stdout);
+                sGotoFrames = sApproachFrames = 0;
+                sTestKeys = 0;
+                sIdle = 0;
+            }
+        }
+        else
+            sTestKeys = k;
+        return;
+    }
     if (sWalkFrames > 0)
     {
         // walkto X Y [FRAMES]: the key toward the tile each frame (mp_debug.c MP_TestWalkKey), as a player walks
@@ -1405,6 +1456,30 @@ static void TestHarnessStep(void)
             MP_Fight_TestPress(ParseFightKeys(arg));
             sFightKeysHeld = true;
             sTestWait = n > 0 ? n : 1;
+            return;
+        }
+        else if (strcmp(cmd, "echo") == 0)
+        {
+            printf("%s\n", line + 4 + strspn(line + 4, " "));   // (echo TEXT: a line in the log)
+            fflush(stdout);
+            return;
+        }
+        else if (strcmp(cmd, "goto") == 0)
+        {
+            // goto G,N X Y [FRAMES]: to tile (X, Y) of ORRE map G.N as a player gets there (doors, the world map),
+            // pressing through scenes on the way
+            sGotoFrames = 6000;
+            sscanf(line, "%*s %d,%d %d %d %d", &sGotoG, &sGotoN, &sGotoX, &sGotoY, &sGotoFrames);
+            return;
+        }
+        else if (strcmp(cmd, "approach") == 0)
+        {
+            // approach person|touch|check N [FRAMES]: up to ORRE person N (A pressed facing them), into touch spot N,
+            // or up to check spot N (A pressed facing it) of the room, as a player walks
+            char what[16] = "";
+            sApproachFrames = 1500;
+            sscanf(line, "%*s %15s %d %d", what, &sApproachN, &sApproachFrames);
+            sApproachKind = strcmp(what, "touch") == 0 ? 1 : strcmp(what, "check") == 0 ? 2 : 0;
             return;
         }
         else if (strcmp(cmd, "walkto") == 0)
