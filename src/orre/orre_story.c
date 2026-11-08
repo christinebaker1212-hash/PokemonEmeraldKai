@@ -8,6 +8,7 @@
 // The decomp's names of the setters are swapped: std078 ("flagSetFalse") sets 1 and std079 ("flagSetTrue") 0.
 #include <stdio.h>
 #include <stdlib.h>
+void MPNet_Log(const char *fmt, ...);
 #include <string.h>
 #include "global.h"
 #include "orre.h"
@@ -171,6 +172,9 @@ void Orre_SetFlagValue(u16 flag, u32 value)
     }
 }
 
+static s8 sLogFlagsInit = -1;
+#define sLogFlags (sLogFlagsInit < 0 ? (sLogFlagsInit = getenv("MOEMON_ORRE_FLAG_LOG") != NULL) : sLogFlagsInit)
+
 bool8 Orre_Flag(u16 flag)
 {
     return Orre_FlagValue(flag) != 0;
@@ -178,7 +182,10 @@ bool8 Orre_Flag(u16 flag)
 
 void Orre_SetFlag(u16 flag, bool8 on)
 {
+    bool8 was = Orre_Flag(flag);
     Orre_SetFlagValue(flag, on ? 1 : 0);
+    if (was != on && sLogFlags)
+        MPNet_Log("orre: flag %u = %u", flag, on);   // (MOEMON_ORRE_FLAG_LOG: tests follow the story by it)
 }
 
 u16 Orre_FlagCount(void)
@@ -213,6 +220,18 @@ void Orre_StoryJump(u16 flag)
     if (sDefs[flag].event)
         printf("[orre] story jump: flag 0x%X has scene %u\n", flag, sDefs[flag].event);
     printf("[test] orre story jump 0x%X\n", flag);
+}
+
+// Debug: the story's flags in their order (mp orreorder): each with its jump value and scene
+void Orre_StoryPrintOrder(void)
+{
+    s16 cur;
+    u32 guard = 0;
+    if (!Load())
+        return;
+    for (cur = sHead; cur >= 0 && cur < sCount && guard++ < MAX_FLAGS; cur = sDefs[cur].next)
+        printf("[test] orre order %u flag %u jump %u event %u value %u\n", guard, cur, sDefs[cur].jump, sDefs[cur].event,
+               Orre_FlagValue(cur));
 }
 
 // ---- "<save>.orre" (src/orre/orre_shadow.c)

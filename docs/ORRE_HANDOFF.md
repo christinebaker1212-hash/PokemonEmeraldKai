@@ -268,8 +268,9 @@ The older notes per part:
   mode, 170 focus on a character.
 - Tools: `python3 -I tools/orre/hsd_cam.py FILE.cam [STEP]` prints a shot frame by frame. Debug `mp orrecam NAME|ID
   [FRAME]`, `mp orrecam stop`. Scenario orre_camera.
-- **No sky**: the pack keeps skies (kind 2 sets) but the engine leaves them out (the field camera looks down); a shot
-  looking up shows black above the horizon (the open question "the sky" now matters for scenes).
+- **Skies during shots only** (the user, 2026-11-08: "Draw Colosseum's own skies during story scenes and keep the
+  field view as it is"): the pack's sky meshes (model sets of kind 2) load with the room (OMesh.sky); o3d.c's Render
+  draws them first, depth cleared after, only while O3D_CamActive(); the field camera never shows them.
 
 ## The opening (step 7: found so far, 2026-11-08)
 - Colosseum's opening is **its C code, not scripts**: the decomp's demoScene00-30 (src/game/gbaCommunication_*.c,
@@ -309,6 +310,21 @@ The older notes per part:
   way (mp_debug.c MP_TestWalkKey), stopping when a script takes the player ("stopped (a script)").
 - Scenario orre_story_stand: the landing to WILLIE's scene. The chain: walking near the stand (the main loop's box)
   plays the arrival (function 8, flag 986); the diner's news; leaving it (988); WILLIE (function 9).
+- **The story, step by step** (tools/orre/story_route.py: which room function sets each story flag and how it's
+  reached; story_order.txt: the game's `mp orreorder`): `python3 -I tools/orre/gen_story_tests.py
+  tools/orre/story_order.txt` writes **orre_scenes_NN** (25 steps each, every step on its own from `mp orrestory`:
+  probes, not committed, many need what earlier steps leave; tools/orre/check_scenes.py lists the ones that didn't
+  set their flag) and **orre_story_chain** (every step in order from the landing, the story never jumped: the harness's
+  `skipif orreflag:N K` passes over a step the story already did; the first "TIMEOUT waiting for log orre: flag N"
+  is where the story stops). Flags change in the log with MOEMON_ORRE_FLAG_LOG=1 ("orre: flag N = V").
+- **A walk that can't start** (a scene cut off mid-walk still holds its movement slot) puts the person where the
+  walk ends, so the scene waiting for them goes on (orre_npcs.c WalkTo).
+- **The RELIC STONE**: 194 preReliveSetParameter(0, 0) opens Kai's purification (party_menu.c Orre_RelicStone, the
+  hold script's screen 5); 242 the party's Shadow Pokémon whose heart is open. MT. BATTLE's rest stops: 229 leaving
+  the course (back to its reception, room 75); 223 save and quit, 236 / 239 POKé COUPONS: quiet (Kai saves any time;
+  the coupon counters aren't open yet). Quiet too: 225 (the party noted for a challenge), 246 (the save's continue
+  point). Left: the day care (84 / 85), a move tutor (86), 87, the e-Reader's DNA samples (203-208, Japan's), the GBA
+  link (200-220), the P★DA and pocket menus (Kai's own).
 - **Still to do for a finishable ORRE**: the colosseum challenges (std223 then menu room 917: not converted), the
   rest of the story room by room (probe with MOEMON_ORRE_VM_TRACE=1 for "not converted" natives), the opening and
   RUI (steps 7, 8), then scripts on for everyone and a full playthrough test.
@@ -370,7 +386,7 @@ sets 1, std079 ("flagSetTrue") sets 0: the script converter must follow what the
 orre_story.
 
 ## Open questions for the user
-- The sky is left out (Platinum's camera looks down at the ground). Keep it that way?
+- Answered 2026-11-08: Colosseum's skies show during story scenes' shots only; the field view stays as it is.
 - Answered 2026-11-07 (docs/ORRE_DECISIONS.md): shipping waits until ORRE is completable and full; the music is
   converted from the disc and there is none until then; map names come from Colosseum's areas; the tile scale stays 8.
 

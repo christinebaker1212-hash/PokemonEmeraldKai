@@ -332,6 +332,8 @@ int MP_TestCondition(const char *name)
     }
     if (strcmp(name, "setup") == 0)
         return MP_Setup_IsReady();
+    if (strncmp(name, "orreflag:", 9) == 0)   // ORRE's story flag N is set (tools/orre/gen_story_tests.py's chain)
+        return Orre_Flag(atoi(name + 9));
     if (strcmp(name, "field") == 0)
         return MP_IsLocalFree();
     if (strcmp(name, "down") == 0)
@@ -4158,8 +4160,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // orrescript BANK FUNC: a function of a Colosseum script bank (0x100 the room's, 0x596 the shared one) run as
         // a scene now (src/orre/orre_vm.c)
         unsigned bank = 0x100, func = 0;
-        sscanf(arg, "%x %u", &bank, &func);
-        printf("[test] orrescript %x %u: %s\n", bank, func, Orre_Vm_Debug(bank, func) ? "started" : "no such script");
+        u32 args[4] = {0};
+        int n = sscanf(arg, "%x %u %u %u %u %u", &bank, &func, &args[0], &args[1], &args[2], &args[3]);
+        // (orrescript BANK FUNC A0 A1 A2 A3: with its four arguments, as a talk script's (1, person, 0, 0))
+        printf("[test] orrescript %x %u: %s\n", bank, func,
+               Orre_Vm_Debug(bank, func, n > 2 ? args : NULL) ? "started" : "no such script");
     }
     else if (strcmp(cmd, "orrecam") == 0)
     {
@@ -4285,6 +4290,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "orreget") == 0)   // orreget N: Colosseum's story flag N's value
         printf("[test] orreget 0x%lX %u\n", strtoul(arg, NULL, 0), (unsigned)Orre_FlagValue(strtoul(arg, NULL, 0)));
+    else if (strcmp(cmd, "orreorder") == 0)
+    {
+        void Orre_StoryPrintOrder(void);
+        Orre_StoryPrintOrder();   // orreorder: Colosseum's story flags in their order
+    }
     else if (strcmp(cmd, "orrestory") == 0)
     {
         // orrestory N: Colosseum's story jump to flag N (the flags before it in the story's order set)

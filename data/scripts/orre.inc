@@ -24,6 +24,7 @@ Orre_EventScript_VmHoldLoop::
 	goto_if_eq VAR_RESULT, 2, EventScript_PC   @ (Kai's own PC; turning it off comes back here: pc.inc)
 	goto_if_eq VAR_RESULT, 3, Orre_EventScript_VmWarp
 	goto_if_eq VAR_RESULT, 4, Orre_EventScript_VmChoice
+	goto_if_eq VAR_RESULT, 5, Orre_EventScript_VmRelic
 	specialvar VAR_RESULT, Orre_VmHolding   @ (still held: back from a battle the scene started)
 	goto_if_eq VAR_RESULT, TRUE, Orre_EventScript_VmHoldLoop
 	releaseall
@@ -31,6 +32,12 @@ Orre_EventScript_VmHoldLoop::
 
 Orre_EventScript_VmShop:
 	special Orre_VmShop
+	waitstate
+	goto Orre_EventScript_VmHoldLoop
+
+@ preReliveSetParameter: the RELIC STONE purifies a Shadow Pokémon (party_menu.c)
+Orre_EventScript_VmRelic:
+	special Orre_RelicStone
 	waitstate
 	goto Orre_EventScript_VmHoldLoop
 

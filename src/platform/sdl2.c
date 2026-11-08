@@ -1618,6 +1618,20 @@ static void TestHarnessStep(void)
             sscanf(line, "%*s %*s %d", &v);
             Gamepad_TestCommand(cmd, arg, v);
         }
+        else if (strcmp(cmd, "skipif") == 0)
+        {
+            // skipif STATE N: when STATE (a pressuntil state) already holds, the next N lines are skipped (a chained
+            // story test passes over a step the story has already done)
+            if (MP_TestCondition(arg))
+            {
+                char skipped[512];
+                int i;
+                for (i = 0; i < n && fgets(skipped, sizeof(skipped), sTestScript); i++)
+                    ;
+                printf("[test] frame %lu: skipped %d lines (%s)\n", sFrameCounter, i, arg);
+                fflush(stdout);
+            }
+        }
         else if (strcmp(cmd, "barrier") == 0)
         {
             char path[600];

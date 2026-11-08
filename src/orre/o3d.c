@@ -63,6 +63,7 @@ typedef struct
 {
     s16 tex;
     u8 rs, rt, fs, ft, alpha, pid;
+    u8 sky;        // the map's sky: drawn only while a shot of Colosseum's plays (the field camera looks down)
     u32 count;     // vertices (3 a triangle)
     OVtx *v;
     float c[3], r; // the mesh's centre and radius (skipped off screen)
@@ -365,11 +366,12 @@ static bool8 MapLoad(u32 i)
             vtx = Skip(&meshes, nv * 28);
             idx = Skip(&meshes, ni * (nv > 65535 ? 4 : 2));
             (void)rm;
-            if (meshes.bad || kind[0] == 2 || ni < 3)
+            if (meshes.bad || ni < 3)
                 continue;
             om->mesh = realloc(om->mesh, sizeof(OMesh) * (om->nmesh + 1));
             me = &om->mesh[om->nmesh++];
             memset(me, 0, sizeof(*me));
+            me->sky = kind[0] == 2;
             me->tex = tex >= 0 ? Texture(tex) : -1;
             me->rs = wrap[0] != 0, me->rt = wrap[1] != 0, me->fs = wrap[0] == 2, me->ft = wrap[1] == 2;
             me->count = ni - ni % 3;
@@ -914,9 +916,20 @@ static void Render(void)
     }
     if (sCur == NULL)
         return;
+    if (O3D_CamActive())
+    {
+        // (a shot of Colosseum's: its sky first, behind everything: the depth cleared after it)
+        for (pass = 0; pass < 2; pass++)
+            for (i = 0; i < sCur->nmesh; i++)
+                if (sCur->mesh[i].sky)
+                    DrawMesh(&sCur->mesh[i], pass);
+        for (i = 0; i < W * H; i++)
+            (&sDepth[0][0])[i] = 1e30f;
+    }
     for (pass = 0; pass < 2; pass++)
         for (i = 0; i < sCur->nmesh; i++)
-            DrawMesh(&sCur->mesh[i], pass);
+            if (!sCur->mesh[i].sky)
+                DrawMesh(&sCur->mesh[i], pass);
 }
 
 // ------------------------------------------------------------------------------------------------ the picture

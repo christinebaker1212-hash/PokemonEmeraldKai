@@ -332,8 +332,19 @@ static void WalkTo(u32 group, u32 index, s16 tx, s16 ty, bool8 stopShort)
     MPNet_Log("orre npcs: %u walks %u steps to %d,%d", index, k, tx, ty);
     if (k == 0)
         return;
-    ScriptMovement_StartObjectMovementScript(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup,
-                                             path);
+    if (ScriptMovement_StartObjectMovementScript(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup,
+                                                 path))
+    {
+        // (its movement couldn't start: one cut off before, a scene stopped mid-walk, still holds its slot) it's
+        // simply there, so the scene waiting for it goes on
+        struct ObjectEvent *o = n ? Object(n) : &gObjectEvents[gPlayerAvatar.objectEventId];
+        MPNet_Log("orre npcs: %u can't walk: put at %d,%d", index, tx, ty);
+        if (o)
+            MoveObjectEventToMapCoords(o, tx + MAP_OFFSET, ty + MAP_OFFSET);
+        if (n)
+            n->x = tx, n->y = ty;
+        return;
+    }
     if (n)
     {
         n->walking = TRUE;

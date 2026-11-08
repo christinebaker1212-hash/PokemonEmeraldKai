@@ -79,3 +79,6 @@ moemon_mail.dat
 
 # POKeMON STADIUM's announcer voices, from the player's own ROM (tools/stadium/mort/make_voice_pack.py)
 /stadium/
+
+# ORRE story probes (tools/orre/gen_story_tests.py writes them on demand)
+tools/test/scenarios/orre_scenes_*/

@@ -38,6 +38,8 @@
 #include "constants/songs.h"
 #include "sound.h"
 #include "money.h"
+#include "pokemon.h"
+#include "orre_shadow.h"
 #include "overworld.h"
 #include "field_screen_effect.h"
 #include "field_player_avatar.h"
@@ -79,7 +81,7 @@ enum { T_FREE, T_RUN, T_WAIT, T_DONE };
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE, W_MOVE, W_SCREEN, W_FANFARE, W_CAMERA, W_THREAD };
 
 // Kai's screens a scene opens (W_SCREEN): Orre_EventScript_VmHoldLoop goes to them while the scene waits
-enum { SCREEN_NONE, SCREEN_SHOP, SCREEN_PC, SCREEN_WARP, SCREEN_CHOICE };
+enum { SCREEN_NONE, SCREEN_SHOP, SCREEN_PC, SCREEN_WARP, SCREEN_CHOICE, SCREEN_RELIC };
 
 // Colosseum's shops (menuShopOpen N): tools/orre/gen_shops.py
 struct OrreShop
@@ -106,7 +108,8 @@ struct Thread
     u8 nchoices;
     u32 result;           // SCREEN_CHOICE: the row chosen
     struct Thread *child; // W_THREAD: the script it runs to its end (std209_threadRunScriptMode4)
-    bool8 camHold;        // it holds the field for a shot it plays (a room's main loop: Colosseum's hero stands still)
+    bool8 camHold;
+    bool8 debug;          // started by Orre_Vm_Debug (tests: its end is logged)        // it holds the field for a shot it plays (a room's main loop: Colosseum's hero stands still)
     u32 handle;           // its task number (scriptExecTask's, for std006_threadWaitForCompletion)
     u32 childId;
     bool8 screenOpen;     // W_SCREEN: the hold script went to it
@@ -338,6 +341,8 @@ static struct Thread *Start(u32 scriptId, u32 argc, const u32 *args, bool8 room)
 static void Finish(struct Thread *t)
 {
     t->state = T_DONE;
+    if (t->debug)
+        MPNet_Log("orre vm: debug scene %08X ends", t->scriptId);
     if (t->holds && sHolder == t)
     {
         // (the scene ended without letting go: the field is given back)
@@ -369,7 +374,10 @@ enum
     N_NEXT_FLOOR = 180, N_NEXT_POS = 195, N_CHOICE = 199, N_SUB_YESNO = 245, N_CUSTOM43 = 158, N_SURPRISE = 131,
     N_WALK_RESERVE = 72, N_WALK_ADD = 73, N_WALK_START = 74, N_GET_POSITION = 172, N_GAZE_HERO = 169,
     N_THREAD_YIELD = 71, N_GET_ITEM = 119, N_MODEL_RES = 112, N_SAVE_COLOSSEUM = 223, N_EXEC_TASK = 3,
-    N_RUN_SCRIPT = 209, N_THREAD_WAIT = 6, N_SCENE_MODE = 36, N_CAMERA_TARGET = 37,
+    N_RUN_SCRIPT = 209, N_THREAD_WAIT = 6, N_SCENE_MODE = 36, N_CAMERA_TARGET = 37, N_PARTY_STATUS = 216,
+    N_GET_PREMIUM = 187, N_SET_PREMIUM = 188, N_CHECK_TEMOCHI = 226, N_WIN_OPEN_SE = 224, N_SHADOW_COUNT = 124,
+    N_PARTY_COUNT = 123, N_NAME_ENTRY = 22, N_GIFT_POKEMON = 217, N_RELIVE = 194, N_SHADOW_OPEN_COUNT = 242,
+    N_MT_BATTLE_LEAVE = 229,
 };
 
 // Natives that change nothing Kai shows yet, with what Colosseum's scripts expect back: sounds and music (until the
@@ -385,6 +393,10 @@ static const struct { u16 n; u8 ret; } sQuiet[] = {
     {63, 0}, {64, 0}, {66, 0}, {67, 0}, {69, 0}, {76, 0}, {77, 0}, {151, 0}, {155, 1}, {164, 0},
     {118, 0}, {96, 0}, {97, 0}, {197, 0}, {161, 0}, {162, 0}, {136, 0}, {144, 0},
     {173, 0}, {211, 0}, {17, 0},
+    {35, 0}, {2, 0}, {243, 0}, {111, 0}, {182, 0}, {49, 0}, {189, 0}, {214, 0}, {186, 0}, {234, 0},
+    {196, 0}, {166, 0},
+    {225, 0}, {246, 0},   // (the party noted for a challenge's check; the save's continue point: Kai's save)
+    {223, 0}, {236, 0}, {239, 0},   // (MT. BATTLE's rest stops: save and quit (Kai saves any time); POKe COUPONS: not yet)
 };
 
 // Colosseum's own items past Gen 3's (its key items: the story's keys, DNA samples...) as Kai-side ORRE flags: what a
@@ -393,8 +405,33 @@ static const struct { u16 n; u8 ret; } sQuiet[] = {
 #define ORRE_KEY_ITEM_FLAG(item) (ORRE_KAI_FLAG_FIRST + 0x10 + ((item) - ORRE_KEY_ITEM_FIRST))
 #define IS_ORRE_KEY_ITEM(item) ((item) >= ORRE_KEY_ITEM_FIRST && ORRE_KEY_ITEM_FLAG(item) < ORRE_FLAG_SNAG_MACHINE)
 
+#define ROOM_MT_BATTLE_PC 75   // (D2_pc_1F: MT. BATTLE's reception)
 #define ROOM_PCBOX_MENU 913    // (Colosseum's menu rooms: the PC's boxes)
 #define LAST_COLO_ITEM 348     // (Colosseum's items to here are Gen 3's numbers, Kai's own)
+
+// std217's gifts as Colosseum makes them (heroPokemonGetPrasle / GetHouou): species, level, its OT's name (a message)
+// and number; to the party, else the PC
+static void Orre_GiveGift(u32 kind)
+{
+    static const struct { u16 species; u8 level; u16 otMsg; u32 otId; } sGifts[] = {
+        [3] = {SPECIES_PLUSLE, 13, 0x12AC, 0x911D},
+        [4] = {SPECIES_HO_OH, 70, 0x12AD, 0x2740},
+    };
+    struct Pokemon mon;
+    u8 name[PLAYER_NAME_LENGTH + 1];
+    if (kind >= ARRAY_COUNT(sGifts) || sGifts[kind].species == 0)
+    {
+        MPNet_Log("orre vm: gift %u (Colosseum's hero's own: not given)", kind);
+        return;
+    }
+    CreateMon(&mon, sGifts[kind].species, sGifts[kind].level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PRESET, sGifts[kind].otId);
+    StringExpandPlaceholders(gStringVar4, Orre_Text(sGifts[kind].otMsg));
+    memcpy(name, gStringVar4, PLAYER_NAME_LENGTH);
+    name[PLAYER_NAME_LENGTH] = EOS;
+    SetMonData(&mon, MON_DATA_OT_NAME, name);
+    GiveMonToPlayer(&mon);
+    MPNet_Log("orre vm: gift %u: species %u", kind, sGifts[kind].species);
+}
 
 static u16 KaiItem(u32 coloItem)
 {
@@ -639,6 +676,15 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
         else if (ARG(0).u)
             MPNet_Log("orre vm: floorLink %u: not a map", ARG(0).u);
         return 0;
+    case N_MT_BATTLE_LEAVE:   // std229_mapLoad395: leaving MT. BATTLE's course (its menu room 917 sends the player back
+        if (O3D_RoomEntry(ROOM_MT_BATTLE_PC, 0, &sWarpMap, &sWarpX, &sWarpY))   // to the reception)
+        {
+            sLinked = TRUE, sLinkEntry = 0;
+            t->wait = W_SCREEN, t->screen = SCREEN_WARP, t->screenOpen = FALSE;
+            if (!t->holds)
+                Hold(t);
+        }
+        return 0;
     case N_PREV_FLOOR: return sPrevRoom;
     case N_NEXT_FLOOR: return sRoom;
     case N_NEXT_POS: return sEntry;
@@ -677,6 +723,46 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
         t->frames = 1, t->wait = W_FRAMES;
         return 0;
     case N_MODEL_RES: return ARG(0).u;
+    case N_PARTY_STATUS:   // std216_partyStatusUpdate_8ae: mode 0 the party healed and counted (between a colosseum's
+        if (ARG(0).u == 0)   // rounds); 1 the battle's own states cleared
+        {
+            HealPlayerParty();
+            return CalculatePlayerPartyCount();
+        }
+        return 0;
+    case N_GET_PREMIUM: return Orre_FlagValue(0xA9E);   // (the colosseum's prize: flag 0xA9E)
+    case N_SET_PREMIUM: Orre_SetFlagValue(0xA9E, ARG(0).u); return 0;
+    case N_CHECK_TEMOCHI: return 1;   // (the party fits a challenge's rules: Kai's own rules apply)
+    case N_WIN_OPEN_SE:
+        ShowMessage(t, ARG(0).u, ARG(1).u != 0);
+        return 0;
+    case N_SHADOW_COUNT:   // scriptGetDarkPokemonNum: Shadow Pokémon in the party
+        {
+            u32 i, c = 0;
+            for (i = 0; i < PARTY_SIZE; i++)
+                if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && Orre_Shadow_Is(&gPlayerParty[i]))
+                    c++;
+            return c;
+        }
+    case N_PARTY_COUNT: return CalculatePlayerPartyCount();
+    case N_SHADOW_OPEN_COUNT:   // scriptGetDarkPointZeroPokemonNum: the party's Shadow Pokémon whose heart is open
+        {
+            u32 i, c = 0;
+            for (i = 0; i < PARTY_SIZE; i++)
+                if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && Orre_Shadow_Level(&gPlayerParty[i]) == ORRE_SHADOW_OPEN)
+                    c++;
+            return c;
+        }
+    case N_RELIVE:   // preReliveSetParameter(0, 0): the RELIC STONE's purification: Kai's (party_menu.c Orre_RelicStone)
+        if (ARG(0).u == 0)
+            t->wait = W_SCREEN, t->screen = SCREEN_RELIC, t->screenOpen = FALSE;
+        else
+            MPNet_Log("orre vm: relive mode %u (%u) not converted yet", ARG(0).u, ARG(1).u);
+        return 0;
+    case N_NAME_ENTRY: return 1;   // (menuNameEntryOpen(1): the hero's name: Kai's player has theirs)
+    case N_GIFT_POKEMON:   // std217_playerReceiveGiftPokemon: 3 DUKING's PLUSLE, 4 HO-OH (1, 2: Colosseum's hero's own)
+        Orre_GiveGift(ARG(0).u);
+        return 0;
     case N_EXEC_TASK:   // scriptExecTask(script, priority, 4 arguments): a script alongside this one
     case N_RUN_SCRIPT:  // std209_threadRunScriptMode4(script, 4 arguments): one run to its end before this goes on
         {
@@ -993,7 +1079,10 @@ static void Poll(struct Thread *t)
     {
         s8 c = Menu_ProcessInputNoWrapClearOnChoose();
         if (c != MENU_NOTHING_CHOSEN)
+        {
+            MPNet_Log("orre vm: yes/no %s", c == 0 ? "YES" : "NO");
             Resume(t, c == 0 ? 0 : 1);
+        }
         break;
     }
     case W_THREAD:
@@ -1274,7 +1363,7 @@ void Orre_VmBattleDone(void)
 }
 
 // Tests and debugging: run function FUNC of bank BANK (0x100 the room's, 0x596 the shared one) as a scene
-bool8 Orre_Vm_Debug(u16 bank, u16 func)
+bool8 Orre_Vm_Debug(u16 bank, u16 func, const u32 *args)
 {
     struct Thread *t;
     u16 room = 0;
@@ -1287,6 +1376,17 @@ bool8 Orre_Vm_Debug(u16 bank, u16 func)
         sRoom = room;
         LoadRoomBank(file);
     }
-    t = Start((u32)bank << 16 | func, 0, NULL, FALSE);
+    {
+        // (alone: the room's own threads stop, so its main loop doesn't start the same scene)
+        u32 i;
+        for (i = 0; i < VM_THREADS; i++)
+            if (sThreads[i].state == T_RUN && sThreads[i].room && &sThreads[i] != sHolder)
+                sThreads[i].state = T_FREE;
+        if (sHolder != NULL)
+            return FALSE;   // (a scene of the room's own holds the player: it runs, not a second one)
+    }
+    t = Start((u32)bank << 16 | func, args ? 4 : 0, args, FALSE);
+    if (t)
+        t->debug = TRUE;
     return t != NULL;
 }
