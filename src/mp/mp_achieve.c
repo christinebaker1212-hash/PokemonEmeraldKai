@@ -99,7 +99,7 @@ static const struct { u16 first, count; } sFlagRanges[] = {
 };
 // Counted by a region's own code
 enum { FN_JOHTO_PHONE, FN_SINNOH_PLATES, FN_SINNOH_CONTESTS, FN_SINNOH_STUDIO };
-enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS, DL_STARTERS_J, DL_STARTERS_K, DL_STARTERS_S, DL_FOSSILS_K, DL_FOSSILS_S };
+enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS, DL_STARTERS_J, DL_STARTERS_K, DL_STARTERS_S, DL_FOSSILS_K, DL_FOSSILS_S, DL_JOHTO_BEASTS };
 
 struct Achievement
 {
@@ -202,6 +202,7 @@ static const u16 sDexStartersK[] = {SPECIES_BULBASAUR, SPECIES_CHARMANDER, SPECI
 static const u16 sDexStartersS[] = {SPECIES_TURTWIG, SPECIES_CHIMCHAR, SPECIES_PIPLUP};
 static const u16 sDexFossilsK[] = {SPECIES_OMANYTE, SPECIES_KABUTO, SPECIES_AERODACTYL};
 static const u16 sDexFossilsS[] = {SPECIES_CRANIDOS, SPECIES_SHIELDON};
+static const u16 sDexJohtoBeasts[] = {SPECIES_RAIKOU, SPECIES_ENTEI, SPECIES_SUICUNE};   // (Crystal's: two roam, one at TIN TOWER)
 static const struct { const u16 *list; u8 count; } sDexLists[] = {
     [DL_STARTERS] = {sDexStarters, ARRAY_COUNT(sDexStarters)},
     [DL_FOSSILS] = {sDexFossils, ARRAY_COUNT(sDexFossils)},
@@ -211,6 +212,7 @@ static const struct { const u16 *list; u8 count; } sDexLists[] = {
     [DL_STARTERS_S] = {sDexStartersS, ARRAY_COUNT(sDexStartersS)},
     [DL_FOSSILS_K] = {sDexFossilsK, ARRAY_COUNT(sDexFossilsK)},
     [DL_FOSSILS_S] = {sDexFossilsS, ARRAY_COUNT(sDexFossilsS)},
+    [DL_JOHTO_BEASTS] = {sDexJohtoBeasts, ARRAY_COUNT(sDexJohtoBeasts)},
 };
 
 static u8 AchPulls(u8 tier)
@@ -524,10 +526,11 @@ static const struct Achievement sAch[] = {
     {"jbadge8", "RISING BADGE", "Earn CLAIR's badge in BLACKTHORN CITY.", AK_FLAG, 0x11B9, 1, 1, C_JOHTO},
     {"jbadges", "JOHTO'S EIGHT", "Hold all eight JOHTO badges.", AK_FLAGS, FL_JOHTO_BADGES, 8, 1, C_JOHTO},
     {"jchampion", "JOHTO CHAMPION", "Beat JOHTO's ELITE FOUR and CHAMPION.", AK_CLEARED, 1 + 1, 1, 2, C_JOHTO},
-    {"jbeasts", "LEGENDARY BEASTS", "Face RAIKOU, ENTEI and SUICUNE in JOHTO.", AK_FLAGS, FL_JOHTO_BEASTS, 3, 2, C_JOHTO},
+    // (jbeasts / jcelebi counted Moemon Quetzal's standing beasts and CELEBI, gone from JOHTO: Crystal's own now)
+    {"jbeasts", "LEGENDARY BEASTS", "Catch RAIKOU, ENTEI and SUICUNE.", AK_DEXLIST, DL_JOHTO_BEASTS, 3, 2, C_JOHTO},
     {"jlugia", "SILVER WING", "Face LUGIA in JOHTO.", AK_FLAG, 0x11F4, 1, 1, C_JOHTO},
     {"jhooh", "RAINBOW WING", "Face HO-OH in JOHTO.", AK_FLAG, 0x11F7, 1, 1, C_JOHTO},
-    {"jcelebi", "VOICE OF THE FOREST", "Face CELEBI in JOHTO.", AK_FLAG, 0x11FA, 1, 1, C_JOHTO},
+    {"jcelebi", "VOICE OF THE FOREST", "Catch CELEBI at ILEX FOREST's shrine.", AK_FLAG, 0x1150, 1, 1, C_JOHTO},
     {"jalph", "ANCIENT PUZZLES", "Solve all four RUINS OF ALPH puzzles.", AK_FLAGS, FL_ALPH, 4, 1, C_JOHTO},
     {"jbugwin", "BUG-CATCHING CHAMP", "Win first place in the Bug-Catching Contest.", AK_EVENT, 0, 1, 1, C_JOHTO},
     // (MELOETTA and DARKRAI were Moemon Quetzal's: no longer met in JOHTO or KANTO, their achievements went with them,
@@ -1215,7 +1218,7 @@ static bool8 DoneView(const struct AchView *v)
 bool8 MP_Achieve_IsDone(u16 i)
 {
     struct AchView v;
-    return View(i, &v) && DoneView(&v);
+    return View(i, &v) && v.cat != C_GONE && DoneView(&v);   // (a retired row: no TRAINER CARD title either)
 }
 
 // Unlocks it and gives its pulls; returns the pulls given (0: it was unlocked already)

@@ -1164,8 +1164,9 @@ u8 MP_Gen59_Command(u8 mode)
         return AfterHit();
     case G59_STATUS_MOVE:
         return StatusMove();
-    case G59_HALF_RECOIL:
-        if (gBattleMons[atk].hp == 0 || gBattleMons[atk].ability == ABILITY_MAGIC_GUARD)
+    case G59_HALF_RECOIL:   // (MIND BLOWN: once a move, not for each POKéMON it goes on to: Cmd_moveend's spread)
+        if (gBattleMons[atk].hp == 0 || gBattleMons[atk].ability == ABILITY_MAGIC_GUARD
+         || (gHitMarker & HITMARKER_NO_ATTACKSTRING))
             return 1;
         gBattleMoveDamage = (gBattleMons[atk].maxHP + 1) / 2;
         return 0;

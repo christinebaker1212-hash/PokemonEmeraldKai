@@ -353,10 +353,19 @@ static void FindMapsWithMon(u16 species)
 }
 
 // Moemon Kai: an area on JOHTO's / KANTO's maps: a glow where the map's layout has its section, a marker elsewhere
+// Moemon Kai: Moemon Quetzal's JOHTO places west of CIANWOOD (SAFARI ZONE GATE, ROUTE 47 / 48, CLIFF CAVE, SAFARI
+// ZONE, EMBEDDED TOWER: not Crystal's, off the map since the user's 2026-11-08 clean-up) aren't anyone's habitat
+static bool8 QzAreaIsQuetzalOnly(mapsec_u16_t sec)
+{
+    return sec == 0x108 || sec == 0x116 || sec == 0x117 || sec == 0x11D || sec == 0x128 || sec == 0x12B;
+}
+
 static void SetQzAreaHasMon(u16 mapGroup, u16 mapNum)
 {
     mapsec_u16_t sec = GetRegionMapSectionId(mapGroup, mapNum);
     u16 x, y, i;
+    if (QzAreaIsQuetzalOnly(sec))
+        return;
     for (y = 0; y < AREA_SCREEN_HEIGHT; y++)
         for (x = 0; x < AREA_SCREEN_WIDTH; x++)
             if (GetRegionMapSecIdAt(x, y) == sec)

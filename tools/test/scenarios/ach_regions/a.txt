@@ -2,9 +2,7 @@ pressuntil A field 5000
 wait 120
 mp setflag 0x11B2
 mp setflag 0x2100
-mp setflag 0x11EB
-mp setflag 0x11EE
-mp setflag 0x11F1
+mp dexcatch 243 245
 mp setflag 0x1076
 mp setflag 0x1077
 mp setflag 0x1078

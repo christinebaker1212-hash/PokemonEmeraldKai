@@ -4725,6 +4725,34 @@ static u8 MpNextSpreadTarget(void)
     return MAX_BATTLERS_COUNT;
 }
 
+// Moemon Kai: a move that hits everyone but the user (DISCHARGE, LAVA PLUME, SLUDGE WAVE, BOOMBURST, BULLDOZE...):
+// the next battler it hasn't hit, the foes first, then the user's side; MAX_BATTLERS_COUNT when every one is done.
+// Gen 3's own (EARTHQUAKE, MAGNITUDE, EXPLOSION, TEETER DANCE) go round their targets in their own scripts
+static bool8 MpHitsAllOwnLoop(u16 effect)
+{
+    return effect == EFFECT_EARTHQUAKE || effect == EFFECT_MAGNITUDE || effect == EFFECT_EXPLOSION
+        || effect == EFFECT_TEETER_DANCE;
+}
+
+static u8 MpNextAllTarget(void)
+{
+    u8 b, pass, foe = GetBattlerSide(gBattlerAttacker) ^ 1;
+    if (!(gHitMarker & HITMARKER_NO_ATTACKSTRING))
+        gMpSpreadDone = gBitTable[gBattlerAttacker];
+    gMpSpreadDone |= gBitTable[gBattlerTarget];
+    for (pass = 0; pass < 2; pass++)
+        for (b = 0; b < gBattlersCount; b++)
+        {
+            if ((GetBattlerSide(b) == foe) != (pass == 0) || (gMpSpreadDone & gBitTable[b])
+             || (gAbsentBattlerFlags & gBitTable[b]) || gBattleMons[b].hp == 0)
+                continue;
+            gMpSpreadDone |= gBitTable[b];
+            return b;
+        }
+    gMpSpreadDone = 0;
+    return MAX_BATTLERS_COUNT;
+}
+
 static void Cmd_moveend(void)
 {
     s32 i;
@@ -4987,6 +5015,28 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_NEXT_TARGET: // For moves hitting two opposing Pokémon.
+            // Moemon Kai: everyone but the user (MOVE_TARGET_FOES_AND_ALLY) when the move's script doesn't go round
+            // them itself: the next one not hit yet (MpNextAllTarget), in Double and Triple Battles alike
+            if (!(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE) && gBattleTypeFlags & BATTLE_TYPE_DOUBLE
+                && !gProtectStructs[gBattlerAttacker].chargingTurn
+                && gBattleMoves[gCurrentMove].target == MOVE_TARGET_FOES_AND_ALLY
+                && !MpHitsAllOwnLoop(gBattleMoves[gCurrentMove].effect)
+                && (!(gHitMarker & HITMARKER_NO_ATTACKSTRING) || gMpSpreadDone != 0))
+            {
+                u8 battler = MpNextAllTarget();
+                if (battler < gBattlersCount)
+                {
+                    MPNet_Log("battle: move %u goes on to battler %u", gCurrentMove, battler);
+                    gBattlerTarget = battler;
+                    gHitMarker |= HITMARKER_NO_ATTACKSTRING;
+                    gBattleScripting.moveendState = 0;
+                    MoveValuesCleanUp();
+                    BattleScriptPush(gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect]);
+                    gBattlescriptCurrInstr = BattleScript_FlushMessageBox;
+                    return;
+                }
+                gHitMarker |= HITMARKER_NO_ATTACKSTRING;
+            }
             // (Moemon Co-op: a Triple Battle goes on to every foe not hit yet, MpNextSpreadTarget)
             if (!(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE) && gBattleTypeFlags & BATTLE_TYPE_DOUBLE
                 && !gProtectStructs[gBattlerAttacker].chargingTurn && gBattleMoves[gCurrentMove].target == MOVE_TARGET_BOTH
@@ -4995,6 +5045,7 @@ static void Cmd_moveend(void)
                 u8 battler = IS_TRIPLE_BATTLE() ? MpNextSpreadTarget() : GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gBattlerTarget)));
                 if (battler < gBattlersCount && gBattleMons[battler].hp != 0)
                 {
+                    MPNet_Log("battle: move %u goes on to battler %u", gCurrentMove, battler);
                     gBattlerTarget = battler;
                     gHitMarker |= HITMARKER_NO_ATTACKSTRING;
                     gBattleScripting.moveendState = 0;

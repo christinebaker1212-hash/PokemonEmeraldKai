@@ -2354,6 +2354,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
                    (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE2), (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE3),
                    (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE4));
     }
+    else if (strcmp(cmd, "battlers") == 0)
+    {
+        // battlers - each battler's species and HP in the running battle
+        int b;
+        printf("[test] battlers:");
+        for (b = 0; gMain.inBattle && b < gBattlersCount; b++)
+            printf(" %d=%d:%d/%d", b, gBattleMons[b].species, gBattleMons[b].hp, gBattleMons[b].maxHP);
+        printf("\n");
+    }
     else if (strcmp(cmd, "battlerhp") == 0)
     {
         // battlerhp BATTLER HP - a battler's HP in the running battle (and its party slot's): 0 = it faints at the turn's

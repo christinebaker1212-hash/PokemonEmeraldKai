@@ -1,0 +1,9 @@
+# Moves that hit everyone but the user (DISCHARGE here; LAVA PLUME, SLUDGE WAVE, BOOMBURST, BULLDOZE...) hit every
+# target in a Double Battle, not only the first (battle_script_commands.c MOVEEND_NEXT_TARGET, MpNextAllTarget): the
+# animation already showed all of them (the user, 2026-11-08). GABBY & TY's double battle: the lead's DISCHARGE goes on
+# to the second foe and to its own partner (its partner only SPLASHes).
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=26:60,130:60"
+EXPECT_A=("battle: move 435 goes on to battler 3" "battle: move 435 goes on to battler 2")
+UNEXPECT_A=("[crash]")
