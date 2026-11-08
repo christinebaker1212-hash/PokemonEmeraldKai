@@ -14,6 +14,7 @@
 #include "field_effect.h"
 #include "field_player_avatar.h"
 #include "o3d.h"
+#include "overworld.h"
 void MoveCameraAndRedrawMap(int deltaX, int deltaY);   // (field_camera.c)
 #include "orre.h"
 #include "orre_people.h"
@@ -82,9 +83,19 @@ static u8 DirOfAngle(s32 angle)
     return sDirs[((angle + 45) / 90) % 4];
 }
 
+// RUI as she follows the player: Colosseum's character 101 (the hero's "member": heroMoveDismissMember), a walking
+// partner (MOVEMENT_TYPE_FOLLOW_PLAYER: the player's POKéMON follower walks behind her, mp_follower.c) while
+// ORRE_FLAG_RUI_FOLLOWS is set; the scenes move and turn her as character 101
+#define NPC_PARTNER 101
+#define ORRE_PERSON_RUI 1   // (src/data/orre_people.h: hizuki_b1)
+static const struct OrreRoomPerson sRuiPerson = {0, NPC_PARTNER, 0x80, 0, 0, ORRE_PERSON_RUI, 0, 0, 0, 0.0f, 0.0f};
+static struct Npc sPartner;
+
 static struct Npc *Of(u32 index)
 {
     u32 i;
+    if (index == NPC_PARTNER)
+        return sPartner.p != NULL ? &sPartner : NULL;
     for (i = 0; i < sCount; i++)
         if (sNpc[i].p->index == index)
             return &sNpc[i];
@@ -142,8 +153,9 @@ static bool8 Spawn(struct Npc *n)
         gObjectEvents[id].invisible = TRUE;
         return TRUE;
     }
-    id = SpawnSpecialObjectEventParameterized(OBJ_EVENT_GFX_ORRE_FIRST + n->p->person, MOVEMENT_TYPE_NONE, LocalId(n),
-                                              n->x + MAP_OFFSET, n->y + MAP_OFFSET, 3);
+    id = SpawnSpecialObjectEventParameterized(OBJ_EVENT_GFX_ORRE_FIRST + n->p->person,
+                                              n == &sPartner ? MOVEMENT_TYPE_FOLLOW_PLAYER : MOVEMENT_TYPE_NONE,
+                                              LocalId(n), n->x + MAP_OFFSET, n->y + MAP_OFFSET, 3);
     if (id >= OBJECT_EVENTS_COUNT)
         return FALSE;
     ObjectEventTurn(&gObjectEvents[id], n->dir);
@@ -193,6 +205,7 @@ void Orre_Npcs_RoomEntered(u16 room)
     sCount = 0;
     sRoom = room;
     sHeroWalking = FALSE;
+    sPartner.p = NULL;
     for (i = 0; i < ORRE_ROOM_PEOPLE_COUNT && sCount < NPC_MAX; i++)
     {
         struct Npc *n;
@@ -210,9 +223,13 @@ void Orre_Npcs_RoomEntered(u16 room)
 
 // Colosseum's _floorInitCharacters: after the room's first set-up script (its floor record's + 0x2C), each person is
 // put where their record says and shown as their 0x80 says
+static void PartnerAppear(void);
+
 void Orre_Npcs_Place(void)
 {
     u32 i, shown = 0;
+    if (Orre_Flag(ORRE_FLAG_RUI_FOLLOWS))
+        PartnerAppear();   // (first: her object before the room's people take the slots)
     for (i = 0; i < sCount; i++)
         if (Disp(sNpc[i].p - sOrreRoomPeople))
         {
@@ -239,6 +256,7 @@ void Orre_Npc_SetDisp(u32 index, bool8 show)
 
 void Orre_Npcs_Clear(void)
 {
+    sPartner.p = NULL;
     sCount = 0;
     sRoom = 0;
     sHeroWalking = FALSE;
@@ -613,6 +631,13 @@ void Orre_Npc_WalkListStart(u32 index, bool8 loop)
 void Orre_Npcs_Frame(void)
 {
     u32 i;
+    if (sPartner.p != NULL && sPartner.shown && Object(&sPartner) == NULL)
+    {
+        struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+        sPartner.x = pl->currentCoords.x - MAP_OFFSET, sPartner.y = pl->currentCoords.y - MAP_OFFSET;
+        sPartner.walking = FALSE;
+        Spawn(&sPartner);   // (after a battle or a screen: there again, at the player's side as they go on)
+    }
     for (i = 0; i < sCount; i++)
     {
         struct Npc *n = &sNpc[i];
@@ -745,4 +770,38 @@ u32 Orre_Touch_Script(u32 row, u32 *args)
         return 0;
     memcpy(args, sOrreRoomTouches[row].args, sizeof(sOrreRoomTouches[row].args));
     return sOrreRoomTouches[row].script;
+}
+
+// RUI behind the player: on the tile behind them (the way they face), else on theirs (the player walks through her)
+static void PartnerAppear(void)
+{
+    struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s16 x = pl->currentCoords.x, y = pl->currentCoords.y;
+    s16 bx = x - gDirectionToVectors[pl->facingDirection].x, by = y - gDirectionToVectors[pl->facingDirection].y;
+    if (sPartner.p != NULL && sPartner.shown && Object(&sPartner) != NULL)
+        return;
+    memset(&sPartner, 0, sizeof(sPartner));
+    sPartner.p = &sRuiPerson;
+    if (!MapGridGetCollisionAt(bx, by))
+        x = bx, y = by;
+    sPartner.x = x - MAP_OFFSET, sPartner.y = y - MAP_OFFSET;
+    sPartner.dir = pl->facingDirection;
+    sPartner.shown = TRUE;
+    Spawn(&sPartner);
+    MPNet_Log("orre npcs: RUI follows (at %d,%d)", sPartner.x, sPartner.y);
+}
+
+// std035_setPartnerFollowing: RUI joins the player (or leaves: the scene shows her where it wants her)
+void Orre_Npc_PartnerFollow(bool8 on)
+{
+    Orre_SetFlag(ORRE_FLAG_RUI_FOLLOWS, on);
+    if (on)
+        PartnerAppear();
+    else if (sPartner.p != NULL)
+    {
+        RemoveObjectEventByLocalIdAndMap(LocalId(&sPartner), gSaveBlock1Ptr->location.mapNum,
+                                         gSaveBlock1Ptr->location.mapGroup);
+        sPartner.p = NULL;
+        MPNet_Log("orre npcs: RUI no longer follows");
+    }
 }

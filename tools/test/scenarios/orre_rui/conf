@@ -1,0 +1,9 @@
+# RUI follows the player once she's out of the sack in PHENAC (std035_setPartnerFollowing: src/orre/orre_npcs.c,
+# character 101; docs/ORRE_DECISIONS.md "RUI follows the host"): she walks the tile behind them, the POKéMON follower
+# behind her. Needs ORRE's packs.
+MODE=1
+TMO=600
+WARP=45,0,33,40
+ENV_A="MOEMON_DEBUG_PARTY=150:100,150:100 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1 MOEMON_ORRE_FLAG_LOG=1"
+EXPECT_A=("orre npcs: RUI follows" "[test] orreget 0xFFE 1")
+UNEXPECT_A=("[crash]")

@@ -377,7 +377,7 @@ enum
     N_RUN_SCRIPT = 209, N_THREAD_WAIT = 6, N_SCENE_MODE = 36, N_CAMERA_TARGET = 37, N_PARTY_STATUS = 216,
     N_GET_PREMIUM = 187, N_SET_PREMIUM = 188, N_CHECK_TEMOCHI = 226, N_WIN_OPEN_SE = 224, N_SHADOW_COUNT = 124,
     N_PARTY_COUNT = 123, N_NAME_ENTRY = 22, N_GIFT_POKEMON = 217, N_RELIVE = 194, N_SHADOW_OPEN_COUNT = 242,
-    N_MT_BATTLE_LEAVE = 229,
+    N_MT_BATTLE_LEAVE = 229, N_PARTNER_FOLLOW = 35,
 };
 
 // Natives that change nothing Kai shows yet, with what Colosseum's scripts expect back: sounds and music (until the
@@ -393,7 +393,7 @@ static const struct { u16 n; u8 ret; } sQuiet[] = {
     {63, 0}, {64, 0}, {66, 0}, {67, 0}, {69, 0}, {76, 0}, {77, 0}, {151, 0}, {155, 1}, {164, 0},
     {118, 0}, {96, 0}, {97, 0}, {197, 0}, {161, 0}, {162, 0}, {136, 0}, {144, 0},
     {173, 0}, {211, 0}, {17, 0},
-    {35, 0}, {2, 0}, {243, 0}, {111, 0}, {182, 0}, {49, 0}, {189, 0}, {214, 0}, {186, 0}, {234, 0},
+    {2, 0}, {243, 0}, {111, 0}, {182, 0}, {49, 0}, {189, 0}, {214, 0}, {186, 0}, {234, 0},
     {196, 0}, {166, 0},
     {225, 0}, {246, 0},   // (the party noted for a challenge's check; the save's continue point: Kai's save)
     {223, 0}, {236, 0}, {239, 0},   // (MT. BATTLE's rest stops: save and quit (Kai saves any time); POKe COUPONS: not yet)
@@ -746,6 +746,9 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
             return c;
         }
     case N_PARTY_COUNT: return CalculatePlayerPartyCount();
+    case N_PARTNER_FOLLOW:   // std035_setPartnerFollowing: RUI walks behind the player (orre_npcs.c, character 101)
+        Orre_Npc_PartnerFollow(ARG(0).u != 0);
+        return 0;
     case N_SHADOW_OPEN_COUNT:   // scriptGetDarkPointZeroPokemonNum: the party's Shadow Pokémon whose heart is open
         {
             u32 i, c = 0;

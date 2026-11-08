@@ -17,6 +17,7 @@ u8 *Orre_StoryState(u32 *size);                  // the values, for "<save>.orre
 void Orre_StoryReset(void);
 void Orre_StoryFromOldBits(const u8 *bits, u32 size);   // a format 1 sidecar's flags
 // Kai's own flags (ORRE_KAI_FLAG_FIRST on; Colosseum's numbers stay below)
+#define ORRE_FLAG_RUI_FOLLOWS 0xFFE    // RUI walks behind the player (std035_setPartnerFollowing: Colosseum's hero status 0x18)
 #define ORRE_FLAG_SNAG_MACHINE 0xFFF   // the SNAG MACHINE (Colosseum's hero has it from the start: Kai's story gives it)
 
 // Colosseum's world map screen (src/orre/worldmap.c): a 480x320 picture of its own like the BADGE CASE's
@@ -111,4 +112,5 @@ u16 Orre_VmHolding(void);          // (specialvar) a scene still holds the playe
 void Orre_VmBattleDone(void);      // (orre_battle.c) its battle is over
 bool8 Orre_Vm_Debug(u16 bank, u16 func, const u32 *args);
 
+void Orre_Npc_PartnerFollow(bool8 on);   // src/orre/orre_npcs.c: RUI behind the player (character 101)
 #endif

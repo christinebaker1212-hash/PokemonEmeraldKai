@@ -340,6 +340,13 @@ The older notes per part:
 - **16 object slots** (the save keeps 16 object events): a room's shown people have objects only near the player
   (±10 x ±8 tiles), the nearest first; far off they keep their place and facing in their record (orre_npcs.c
   Orre_Npcs_Frame), and anyone missing after a battle or a screen comes back.
+- **RUI follows** (step 8): Colosseum's scripts call 35 std035_setPartnerFollowing (heroSetStatus 0x18; the partner
+  is their character 101, the hero 100). Kai keeps it as ORRE_FLAG_RUI_FOLLOWS (0xFFE) and shows RUI (person 1,
+  hizuki_b1) as character 101 with MOVEMENT_TYPE_FOLLOW_PLAYER (the walking partner SINNOH's BARRY uses: the tile the
+  player left; Kai's POKéMON follower walks behind her), placed first on every room so she has a slot, back after
+  battles; scenes move, turn and place her as 101 (orre_npcs.c PartnerAppear, Orre_Npc_PartnerFollow). Scenario
+  orre_rui (PHENAC: the hunters' battle, the sack opened, RUI joins). Co-op (she follows the host on every screen):
+  not yet; each player's own game shows her behind them.
 - **Still to do for a finishable ORRE**: the colosseum challenges (std223 then menu room 917: not converted), the
   rest of the story room by room (probe with MOEMON_ORRE_VM_TRACE=1 for "not converted" natives), the opening and
   RUI (steps 7, 8), then scripts on for everyone and a full playthrough test.

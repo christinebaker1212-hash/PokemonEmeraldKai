@@ -1,0 +1,24 @@
+pressuntil A field 5000
+wait 30
+mp teach 0 94
+mp teach 1 94
+mp orrestory 993
+mp warp 45,2,48,107
+wait 150
+pressuntillog A 12000 orre: flag 993 = 1
+pressuntil A field 9000
+walkto 48 105 400
+mp face up
+wait 10
+pressuntillog A 9000 orre npcs: RUI follows
+pressuntil A field 9000
+wait 30
+rendershot r0
+walkto 48 98 400
+wait 30
+rendershot r1
+walkto 48 101 400
+wait 30
+rendershot r2
+mp orreget 4094
+quit
