@@ -337,6 +337,109 @@ static bool8 OrreHasWayOut(const struct MapHeader *h)
     return FALSE;
 }
 
+// The harness's goto anywhere but ORRE: the fewest maps through warps and map connections (KANTO, JOHTO, SINNOH,
+// HOENN's walk-only runs). Next hop: one of this map's warps into it (walked onto; an arrow warp is pressed into), else
+// the edge it joins at (walked to, then stepped over). 0 once there, 0xFFFF when it can't go on now
+#define GOTO_MAX_MAPS 256
+static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
+{
+    static u16 sPrev[MAP_GROUPS_COUNT][GOTO_MAX_MAPS];   // (the map it was reached from + 1; 0 none)
+    static u16 sQ[MAP_GROUPS_COUNT * GOTO_MAX_MAPS];
+    u8 hg = gSaveBlock1Ptr->location.mapGroup, hn = gSaveBlock1Ptr->location.mapNum;
+    u16 here = (hg << 8) | hn, target = (group << 8) | num, hop;
+    s32 head = 0, tail = 0, i;
+    const struct MapHeader *h;
+    if (hg == group && hn == num)
+        return MP_TestWalkKey(tx, ty);
+    if (group >= MAP_GROUPS_COUNT || num >= GOTO_MAX_MAPS || hg >= MAP_GROUPS_COUNT || hn >= GOTO_MAX_MAPS)
+        return 0xFFFF;
+    memset(sPrev, 0, sizeof(sPrev));
+    sPrev[hg][hn] = here + 1;
+    sQ[tail++] = here;
+    while (head < tail && !sPrev[group][num])
+    {
+        u16 c = sQ[head++];
+        h = Overworld_GetMapHeaderByGroupAndId(c >> 8, c & 0xFF);
+        for (i = 0; h && h->events && i < h->events->warpCount; i++)
+        {
+            const struct WarpEvent *w = &h->events->warps[i];
+            if (w->mapGroup >= MAP_GROUPS_COUNT || w->mapNum >= GOTO_MAX_MAPS || sPrev[w->mapGroup][w->mapNum])
+                continue;
+            sPrev[w->mapGroup][w->mapNum] = c + 1;
+            sQ[tail++] = (w->mapGroup << 8) | w->mapNum;
+        }
+        for (i = 0; h && h->connections && i < h->connections->count; i++)
+        {
+            const struct MapConnection *m = &h->connections->connections[i];
+            if (m->direction < CONNECTION_SOUTH || m->direction > CONNECTION_EAST || m->mapGroup >= MAP_GROUPS_COUNT
+             || m->mapNum >= GOTO_MAX_MAPS || sPrev[m->mapGroup][m->mapNum])
+                continue;
+            sPrev[m->mapGroup][m->mapNum] = c + 1;
+            sQ[tail++] = (m->mapGroup << 8) | m->mapNum;
+        }
+    }
+    if (!sPrev[group][num])
+        return 0xFFFF;
+    for (hop = target; sPrev[hop >> 8][hop & 0xFF] - 1 != here; hop = sPrev[hop >> 8][hop & 0xFF] - 1)
+        ;
+    // a warp into the next map
+    h = &gMapHeader;
+    for (i = 0; h->events && i < h->events->warpCount; i++)
+    {
+        const struct WarpEvent *w = &h->events->warps[i];
+        struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+        u16 k;
+        if (((w->mapGroup << 8) | w->mapNum) != hop)
+            continue;
+        if (p->currentCoords.x - MAP_OFFSET == w->x && p->currentCoords.y - MAP_OFFSET == w->y)
+        {
+            u8 b = MapGridGetMetatileBehaviorAt(w->x + MAP_OFFSET, w->y + MAP_OFFSET);
+            if (MetatileBehavior_IsNorthArrowWarp(b)) return DPAD_UP;
+            if (MetatileBehavior_IsSouthArrowWarp(b)) return DPAD_DOWN;
+            if (MetatileBehavior_IsEastArrowWarp(b)) return DPAD_RIGHT;
+            if (MetatileBehavior_IsWestArrowWarp(b)) return DPAD_LEFT;
+            return 0xFFFF;   // (on it: its warp on its way)
+        }
+        if ((k = MP_TestWalkKey(w->x, w->y)) != 0xFFFF)
+            return k;
+    }
+    // the edge joining the next map: a tile on it whose neighbour across is open, then the step over
+    for (i = 0; h->connections && i < h->connections->count; i++)
+    {
+        const struct MapConnection *m = &h->connections->connections[i];
+        s32 w = gMapHeader.mapLayout->width, hh = gMapHeader.mapLayout->height, k2, best = -1;
+        struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+        s32 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
+        u16 key = 0xFFFF, step;
+        if (((m->mapGroup << 8) | m->mapNum) != hop)
+            continue;
+        step = m->direction == CONNECTION_NORTH ? DPAD_UP : m->direction == CONNECTION_SOUTH ? DPAD_DOWN
+             : m->direction == CONNECTION_WEST ? DPAD_LEFT : DPAD_RIGHT;
+        for (k2 = 0; k2 < ((m->direction == CONNECTION_NORTH || m->direction == CONNECTION_SOUTH) ? w : hh); k2++)
+        {
+            s32 ex, ey, ox, oy;
+            u16 kk;
+            switch (m->direction)
+            {
+            case CONNECTION_NORTH: ex = k2, ey = 0, ox = k2, oy = -1; break;
+            case CONNECTION_SOUTH: ex = k2, ey = hh - 1, ox = k2, oy = hh; break;
+            case CONNECTION_WEST:  ex = 0, ey = k2, ox = -1, oy = k2; break;
+            default:               ex = w - 1, ey = k2, ox = w, oy = k2; break;
+            }
+            if (MapGridGetCollisionAt(ox + MAP_OFFSET, oy + MAP_OFFSET))
+                continue;
+            if (px == ex && py == ey)
+                return step;   // (on the edge: over it)
+            kk = MP_TestWalkKey(ex, ey);
+            if (kk != 0xFFFF && (best < 0 || abs(ex - px) + abs(ey - py) < best))
+                best = abs(ex - px) + abs(ey - py), key = kk;
+        }
+        if (key != 0xFFFF)
+            return key;
+    }
+    return 0xFFFF;
+}
+
 u16 MP_TestGotoKey(u8 group, u8 num, s32 tx, s32 ty)
 {
     static s16 sPrev[ORRE_TEST_MAPS];
@@ -346,6 +449,8 @@ u16 MP_TestGotoKey(u8 group, u8 num, s32 tx, s32 ty)
     const struct MapHeader *h;
     if (gSaveBlock1Ptr->location.mapGroup == group && here == num)
         return MP_TestWalkKey(tx, ty);
+    if (group != 45 && gSaveBlock1Ptr->location.mapGroup != 45)
+        return GotoKeyAnywhere(group, num, tx, ty);
     if (group != 45 || gSaveBlock1Ptr->location.mapGroup != 45 || num >= ORRE_TEST_MAPS || here >= ORRE_TEST_MAPS)
         return 0xFFFF;
     for (i = 0; i < ORRE_TEST_MAPS; i++)
