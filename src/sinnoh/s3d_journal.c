@@ -1012,6 +1012,10 @@ static void Close(void)
     sUi = NULL;
     if (continuing)
         Sinnoh_JournalMapChanged(TRUE);   // (Platinum: the journal shown first, then today's page)
+    // (back to the field: its input again. CONTINUE opened the JOURNAL with no field callback, as the field isn't up
+    // yet, and the field coming back doesn't set one: the player stood still after closing it, the user 2026-11-08)
+    if (back == CB2_ReturnToField)
+        SetMainCallback1(CB1_Overworld);
     SetMainCallback2(back);
 }
 

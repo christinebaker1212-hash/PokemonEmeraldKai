@@ -68,6 +68,14 @@ typedef struct
     u32 count;     // vertices (3 a triangle)
     OVtx *v;
     float c[3], r; // the mesh's centre and radius (skipped off screen)
+    // What moves (tools/orre/build_pack.py set_anims, played in a loop at 60 a second): 1 the texture slides
+    // (anim: du dv a sample, in its coordinates; su sv: those to texels), 2 the mesh moves with its joint (anim: a 3x4
+    // matrix a sample, Colosseum's units; v0 the mesh at rest)
+    u8 animKind;
+    u32 animPeriod, animCount;
+    float *anim;
+    OVtx *v0;
+    float c0[3], su, sv, du, dv;
 } OMesh;
 typedef struct { u16 w, h; u32 *px; } OTex;   // r | g << 8 | b << 16 | a << 24
 
@@ -252,8 +260,9 @@ static const u8 *Skip(Reader *r, u32 n)
 // look at: the opening's; its grid if it has one, else Colosseum's units as they are at the tile scale)
 static bool8 RoomLoad(OMap *om, const char *file, s32 i)
 {
-    u32 m, set, ns, nm, mi, has, x, y;
-    s32 pm = -1;
+    u32 m, set, ns, nm, mi, has, x, y, fileMesh = 0;
+    s32 pm = -1, *fileToMesh = NULL;
+    Reader afterHas, anims;
     unsigned long rawSize;
     u8 *z, *b;
     Reader r, meshes;
@@ -302,12 +311,14 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
         }
     }
     Take(&r, &has, 4);
+    afterHas = r;
     Take(&r, &gw, 2);
     Take(&r, &gh, 2);
     Take(&r, &tile, 4);
     Take(&r, &x0, 4);
     Take(&r, &z0, 4);
     cells = has == 1 ? Skip(&r, (u32)gw * gh * 16) : NULL;
+    anims = has == 1 ? r : afterHas;   // (what moves: after the grid, or after a scene room's "no grid")
     if (i < 0 && (r.bad || has != 1 || tile <= 0.0f))
     {
         has = 0, gw = gh = 0, tile = 8.0f, x0 = z0 = 0.0f;   // (a scene room without a grid)
@@ -364,6 +375,9 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
             float us, vs, alpha, lo[3] = {1e30f, 1e30f, 1e30f}, hi[3] = {-1e30f, -1e30f, -1e30f};
             const u8 *vtx, *idx;
             OMesh *me;
+            u32 thisFile = fileMesh++;
+            fileToMesh = realloc(fileToMesh, sizeof(s32) * fileMesh);
+            fileToMesh[thisFile] = -1;
             Take(&meshes, &tex, 4);
             Take(&meshes, &rm, 4);   // (HSD's render mode; see-through is in flags)
             Take(&meshes, &flags, 1);
@@ -380,10 +394,13 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
             if (meshes.bad || ni < 3)
                 continue;
             om->mesh = realloc(om->mesh, sizeof(OMesh) * (om->nmesh + 1));
+            fileToMesh[thisFile] = (s32)om->nmesh;
             me = &om->mesh[om->nmesh++];
             memset(me, 0, sizeof(*me));
             me->sky = kind[0] == 2;
             me->tex = tex >= 0 ? Texture(tex) : -1;
+            me->su = me->tex >= 0 ? us * sPack.tex[me->tex].w : 0.0f;
+            me->sv = me->tex >= 0 ? vs * sPack.tex[me->tex].h : 0.0f;
             me->rs = wrap[0] != 0, me->rt = wrap[1] != 0, me->fs = wrap[0] == 2, me->ft = wrap[1] == 2;
             me->count = ni - ni % 3;
             me->v = malloc(sizeof(OVtx) * me->count);
@@ -437,6 +454,42 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
                           + (hi[2] - lo[2]) * (hi[2] - lo[2])) / 2;
         }
     }
+    // what moves (a pack from before has none: the map stands still)
+    if (!anims.bad && anims.left >= 4 && !meshes.bad)
+    {
+        u32 n, k, moving = 0;
+        Take(&anims, &n, 4);
+        for (k = 0; k < n && !anims.bad; k++)
+        {
+            u32 mesh, period, count, per;
+            u8 kind[4];
+            const u8 *data;
+            Take(&anims, &mesh, 4);
+            Take(&anims, kind, 4);
+            Take(&anims, &period, 4);
+            Take(&anims, &count, 4);
+            per = kind[0] == 1 ? 2 : 12;
+            data = Skip(&anims, count * per * 4);
+            if (data && mesh < fileMesh && fileToMesh[mesh] >= 0 && (kind[0] == 1 || kind[0] == 2) && count && period)
+            {
+                OMesh *me = &om->mesh[fileToMesh[mesh]];
+                me->anim = malloc(count * per * 4);
+                memcpy(me->anim, data, count * per * 4);
+                me->animKind = kind[0], me->animPeriod = period, me->animCount = count;
+                if (kind[0] == 2)
+                {
+                    me->v0 = malloc(sizeof(OVtx) * me->count);
+                    memcpy(me->v0, me->v, sizeof(OVtx) * me->count);
+                    memcpy(me->c0, me->c, sizeof(me->c0));
+                    me->r *= 1.5f;   // (room to move: culled by its rest centre's moved place)
+                }
+                moving++;
+            }
+        }
+        if (moving)
+            printf("[o3d] ORRE's %s: %u meshes move\n", file, moving);
+    }
+    free(fileToMesh);
     free(b);
     if (meshes.bad)
     {
@@ -463,7 +516,11 @@ static void SceneFree(void)
 {
     u32 k;
     for (k = 0; k < sScene.nmesh; k++)
+    {
         free(sScene.mesh[k].v);
+        free(sScene.mesh[k].v0);
+        free(sScene.mesh[k].anim);
+    }
     free(sScene.mesh);
     free(sScene.blocks);
     free(sScene.hn);
@@ -1171,7 +1228,7 @@ static void DrawClipped(const OVtx *tri, const OMesh *g)
         if (!Project(out[i].x, out[i].y, out[i].z, &sv[i].x, &sv[i].y, &depth))
             depth = NEAR_Z, sv[i].x = sView.ax, sv[i].y = sView.ay;   // (on the plane: as near as it gets)
         sv[i].iz = 1.0f / depth;
-        sv[i].u = out[i].u * sv[i].iz, sv[i].v = out[i].v * sv[i].iz;
+        sv[i].u = (out[i].u + g->du) * sv[i].iz, sv[i].v = (out[i].v + g->dv) * sv[i].iz;
         sv[i].c[0] = out[i].r * sv[i].iz, sv[i].c[1] = out[i].g * sv[i].iz, sv[i].c[2] = out[i].b * sv[i].iz;
     }
     DrawTriangle(&sv[0], &sv[1], &sv[2], g);
@@ -1206,8 +1263,8 @@ static void DrawMesh(const OMesh *g, int pass)
         if (!sScratchOk[i])
             continue;
         s->iz = 1.0f / depth;
-        s->u = v->u * s->iz;
-        s->v = v->v * s->iz;
+        s->u = (v->u + g->du) * s->iz;
+        s->v = (v->v + g->dv) * s->iz;
         s->c[0] = v->r * s->iz, s->c[1] = v->g * s->iz, s->c[2] = v->b * s->iz;
     }
     for (i = 0; i + 2 < g->count; i += 3)
@@ -1340,6 +1397,39 @@ static void DrawProps(const OMap *g)
     }
 }
 
+// This frame of what moves in map G (60 a second, each animation in its own loop)
+static u32 sAnimTick;
+
+static void Animate(OMap *g)
+{
+    u32 i, k;
+    float S = 16.0f / g->tile;
+    for (i = 0; i < g->nmesh; i++)
+    {
+        OMesh *me = &g->mesh[i];
+        const float *a;
+        if (!me->animKind)
+            continue;
+        a = me->anim + (u64)(sAnimTick % me->animPeriod) * me->animCount / me->animPeriod * (me->animKind == 1 ? 2 : 12);
+        if (me->animKind == 1)
+        {
+            me->du = a[0] * me->su;
+            me->dv = a[1] * me->sv;
+            continue;
+        }
+        for (k = 0; k <= me->count; k++)
+        {
+            // (the map's world back to Colosseum's, the joint's move, and back)
+            const float *src = k < me->count ? &me->v0[k].x : me->c0;
+            float *dst = k < me->count ? &me->v[k].x : me->c;
+            float px = src[0] / S + g->x0, py = src[1] / S, pz = src[2] / S + g->z0;
+            dst[0] = (a[0] * px + a[1] * py + a[2] * pz + a[3] - g->x0) * S;
+            dst[1] = (a[4] * px + a[5] * py + a[6] * pz + a[7]) * S;
+            dst[2] = (a[8] * px + a[9] * py + a[10] * pz + a[11] - g->z0) * S;
+        }
+    }
+}
+
 static void Render(void)
 {
     u32 i, pass;
@@ -1353,6 +1443,8 @@ static void Render(void)
     const OMap *g = Drawn();
     if (g == NULL)
         return;
+    sAnimTick++;
+    Animate((OMap *)g);   // (the water sliding, the wheels turning: Colosseum's own animations)
     if (O3D_CamActive())
     {
         // (a shot of Colosseum's: its sky first, behind everything: the depth cleared after it)

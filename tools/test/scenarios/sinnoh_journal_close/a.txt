@@ -1,0 +1,17 @@
+pressuntil A field 5000
+wait 30
+mp additem 677 1
+mp warp 40,1,10,20
+wait 200
+mash B 10 10
+wait 60
+mp where
+mp journal open
+wait 90
+press B 1
+wait 90
+mp where
+press DOWN 20
+wait 30
+mp where
+quit

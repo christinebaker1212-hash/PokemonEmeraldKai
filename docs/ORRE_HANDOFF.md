@@ -250,6 +250,13 @@ The older notes per part:
 - Seen, not yet looked into: PHENAC's mart floor draws as blue speckles (a texture of that room's model).
 
 ## Colosseum's cameras (src/orre/o3d_cam.c, 2026-11-08)
+- **What moves in the maps** (the user, 2026-11-08: "none of Phenac City's beautiful water is animated... every 3D
+  element that has animations"): build_pack.py set_anims samples each model set's MatAnimJoint (a mesh's colour map
+  TexAnim, by GXTexMapID: TRAU / TRAV, the slides: 127 maps have them, none swap whole pictures) and AnimJoint (a mesh's
+  joint's world move against its rest place; envelope-skinned meshes left still) every frame of their length (at most
+  600 samples), after the grid; o3d.c Animate plays them each frame (du dv added to the texture coordinates, kind 2
+  meshes moved from their rest copy v0). PHENAC: 19 slides + 14 joints; the lab's front 240 meshes (2-6 ms a frame).
+  Not yet: the TexAnims' scale / rotation tracks and KONST colours, the MatAnims' own colour tracks.
 - **Playtest fixes after 1.179.0** (the user's playthrough):
   - Gates overlap: PHENAC's 42 is the bottom row of 40 (RUI's pen) and the place's way out. orre_vm.c SetGate keeps a
     tile shut while any closed gate covers it, and KeepGates lays the closed ones again every frame (a battle's

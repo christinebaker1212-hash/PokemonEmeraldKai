@@ -321,12 +321,15 @@ def material(f, mobj):
             out["uvscale"] = (f.f32(t + 0x1C), f.f32(t + 0x20))
             out["uvtrans"] = (f.f32(t + 0x28), f.f32(t + 0x2C))
             out["texflags"] = tf
+            out["texid"] = f.u32(t + 8)   # (its GXTexMapID: which TexAnim of a MatAnim moves it)
         t = f.u32(t + 4)
     if out["tex"] < 0 and tobj:
         out["tex"] = f.texture(tobj)
         out["wrap"] = (f.u32(tobj + 0x34), f.u32(tobj + 0x38))
         out["repeat"] = (f.u8(tobj + 0x3C), f.u8(tobj + 0x3D))
         out["uvscale"] = (f.f32(tobj + 0x1C), f.f32(tobj + 0x20))
+        out["uvtrans"] = (f.f32(tobj + 0x28), f.f32(tobj + 0x2C))
+        out["texid"] = f.u32(tobj + 8)
     return out
 
 
@@ -390,6 +393,8 @@ def load_model(f, root_joint):
                 return base
         me = Mesh()
         me.joint = j
+        me.dobj = d
+        me.jm = jm
         me.flags = pflags
         me.jflags = jflags
         if mat:

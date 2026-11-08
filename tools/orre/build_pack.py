@@ -28,6 +28,11 @@ orre3d.pak (little endian): "ORZ3" u32 version, u32 textures, u32 maps, then
               u8 the tile's behavior (the field engine's: 0 plain, 0x60 a warp stepped on: tools/orre/maps.py warps),
               (2 too: the grid of every field room, all 121)
               f32 heights x3 (the ground's, lowest first; Colosseum units) (tools/orre/grid.py)
+            then what moves (anim_bytes, after the grid, so a game from before reads none of it): u32 count; each
+              u32 mesh (its record's place among the map's meshes, every set's in order), u8 kind (1 the texture
+              slides: f32 du dv a sample, its coordinates' own; 2 the mesh moves with its joint: f32 x12 a sample, a
+              3x4 matrix's rows from its rest place, Colosseum units), 3 pad, u32 period (frames, 60 a second, looped),
+              u32 samples (at most ANIM_MAX, spread over the period), the samples
   then the data: textures one after another.
 orre_data.pak: "ORDT" u32 version, u32 files, each char name[48] ("<archive>/<member>.<type>"), u32 offset, u32 bytes,
   u32 deflated bytes (0: stored); offsets from the data start (files that are the same share one copy).
@@ -119,6 +124,131 @@ def mesh_bytes(m, tex_index):
     return head + uniq.tobytes() + idx.tobytes()
 
 
+# ---- what moves in a map (Colosseum's model sets' animations, played in a loop by src/orre/o3d.c):
+#   a mesh's texture sliding (its MatAnim's TexAnim for the colour map's GXTexMapID: TRAU / TRAV, the water) and a
+#   mesh's joint moving (the set's AnimJoint: wheels, fans, machines). Sampled every frame (60 a second) of the
+#   animation's length, at most ANIM_MAX samples (longer ones stretched over them)
+ANIM_MAX = 600
+HSD_A_T_TRAU, HSD_A_T_TRAV = 2, 3
+
+
+def _tex_anims(f, root, mat_list):
+    """{dobj: [texanim, ...]}: the model set's first MatAnimJoint tree paired with its joints"""
+    out = {}
+
+    def pair(j, a):
+        while j and a:
+            d = f.u32(j + 0x10) if not f.u32(j + 4) & (hsd.JOBJ_PTCL | hsd.JOBJ_SPLINE) else 0
+            m = f.u32(a + 8)
+            while d and m:
+                tas, ta = [], f.u32(m + 8)
+                while ta:
+                    tas.append(ta)
+                    ta = f.u32(ta)
+                if tas:
+                    out[d] = tas
+                d, m = f.u32(d + 4), f.u32(m)
+            if f.u32(j + 8) and f.u32(a):
+                pair(f.u32(j + 8), f.u32(a))
+            j, a = f.u32(j + 0x0C), f.u32(a + 4)
+
+    lst = f.ptr_list(mat_list) if mat_list else []
+    if lst:
+        pair(root, lst[0])
+    return out
+
+
+def _samples(end):
+    period = max(1, int(round(end)))
+    n = min(period, ANIM_MAX)
+    return period, [k * period / n for k in range(n)]
+
+
+def _uv_anim(f, tas, texid, base):
+    """The colour map's slide, (period, [(du, dv)]) in its coordinates, or None"""
+    for ta in tas:
+        if f.u32(ta + 4) != texid or not f.u32(ta + 8):
+            continue
+        aobj = f.u32(ta + 8)
+        tracks, fo = {}, f.u32(aobj + 8)
+        while fo:
+            typ, keys = hsd_anim.decode_fobj(f, fo)
+            tracks[typ] = keys
+            fo = f.u32(fo)
+        if HSD_A_T_TRAU not in tracks and HSD_A_T_TRAV not in tracks:
+            return None
+        period, frames = _samples(f.f32(aobj + 4))
+        out = []
+        for t in frames:
+            tu = hsd_anim.sample(tracks.get(HSD_A_T_TRAU), t)
+            tv = hsd_anim.sample(tracks.get(HSD_A_T_TRAV), t)
+            # (HSD's texture matrix takes the translation off the coordinates: they slide the other way)
+            out.append((-((tu if tu is not None else base[0]) - base[0]), -((tv if tv is not None else base[1]) - base[1])))
+        if all(abs(a) < 1e-6 and abs(b) < 1e-6 for a, b in out):
+            return None
+        return period, out
+    return None
+
+
+def _joint_worlds(f, root, pose, frame):
+    """{joint: world matrix} with the pose at FRAME (None: the rest pose)"""
+    out = {}
+
+    def walk(j, parent, path):
+        while j and j not in path:
+            m = parent @ (hsd_anim.posed_srt(f, j, pose, frame) if pose else hsd.srt(j, f))
+            out.setdefault(j, m)
+            c = f.u32(j + 8)
+            if c and not f.u32(j + 4) & hsd.JOBJ_INSTANCE:
+                walk(c, m, path + (j,))
+            j = f.u32(j + 0x0C)
+
+    walk(root, np.eye(4), ())
+    return out
+
+
+def set_anims(f, ms, meshes):
+    """[(mesh index in the set, kind, period, samples)]: kind 1 a texture slide (du, dv), 2 a joint's move (3x4 rows)"""
+    root, aj, mj = f.u32(ms), f.u32(ms + 4), f.u32(ms + 8)
+    out = []
+    tex = _tex_anims(f, root, mj) if mj else {}
+    for i, m in enumerate(meshes):
+        mat = m.material or {}
+        tas = tex.get(getattr(m, "dobj", None))
+        if tas and "texid" in mat:
+            a = _uv_anim(f, tas, mat["texid"], mat.get("uvtrans", (0.0, 0.0)))
+            if a:
+                out.append((i, 1, a[0], a[1]))
+    lst = f.ptr_list(aj) if aj else []
+    if lst:
+        pose = hsd_anim.anim_tree(f, root, lst[0], {})
+        if pose:
+            end = max(e for _, e in pose.values())
+            period, frames = _samples(end)
+            rest = _joint_worlds(f, root, None, 0)
+            worlds = [_joint_worlds(f, root, pose, t) for t in frames]
+            for i, m in enumerate(meshes):
+                j = getattr(m, "joint", None)
+                if j not in rest or (m.flags & hsd.POBJ_TYPE_MASK) == hsd.POBJ_ENVELOPE:
+                    continue
+                inv = np.linalg.inv(rest[j])
+                mats = [w.get(j, rest[j]) @ inv for w in worlds]
+                if all(np.allclose(x, np.eye(4), atol=1e-4) for x in mats):
+                    continue
+                out.append((i, 2, period, [tuple(x[:3, :].reshape(-1)) for x in mats]))
+    return out
+
+
+def anim_bytes(entries):
+    """u32 count; each: u32 mesh (its record's place among the map's meshes), u8 kind, 3 pad, u32 period, u32 samples,
+    the samples (kind 1: f32 du dv; kind 2: f32 x12, a 3x4 matrix's rows)"""
+    body = [struct.pack("<I", len(entries))]
+    for mesh, kind, period, samples in entries:
+        body.append(struct.pack("<IB3xII", mesh, kind, period, len(samples)))
+        body.append(np.array(samples, dtype="<f4").tobytes())
+    return b"".join(body)
+
+
 def build(src, out):
     os.makedirs(out, exist_ok=True)
     map_conf = {m["file"]: m for m in orre_maps.load(src)}
@@ -148,11 +278,16 @@ def build(src, out):
                     tex_list.append(raw)
                 remap.append(tex_keys[k])
             body = [struct.pack("<I", len(sets))]
-            for s in sets:
+            anims, first = [], 0
+            ms_list = f.ptr_list(f.u32(f.roots["scene_data"])) if "scene_data" in f.roots else []
+            for si, s in enumerate(sets):
                 kind = 2 if hsd.is_sky(s) else 0
                 body.append(struct.pack("<B3xI", kind, len(s)))
                 for m in s:
                     body.append(mesh_bytes(m, remap[m.tex] if 0 <= m.tex < len(remap) else -1))
+                if si < len(ms_list) and f.u32(ms_list[si]):
+                    anims += [(first + i, k, p, smp) for i, k, p, smp in set_anims(f, ms_list[si], s)]
+                first += len(s)
             m_conf = map_conf.get(name)
             if m_conf:
                 g = orre_maps.build_grid(src, m_conf)
@@ -166,6 +301,7 @@ def build(src, out):
                         body.append(struct.pack("<BbBBfff", fl, tid, len(g["heights"][y][x][:3]), beh, *hs))
             else:
                 body.append(struct.pack("<I", 0))
+            body.append(anim_bytes(anims))   # (after the grid: a game from before reads none of it)
             raw_body = b"".join(body)
             maps.append((name, zlib.compress(raw_body, 9), len(raw_body)))
     # the props (src/data/orre_props.h: the rooms' people with no ORRE person: a sack, a truck, a statue, a POKeMON):

@@ -1,0 +1,8 @@
+# SINNOH's JOURNAL closed back to the field (as on CONTINUE, which opens it before the field is up): the player walks
+# again (s3d_journal.c Close sets the field's input callback; it stood still before: the user, 2026-11-08). Needs
+# both packs.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=150:100"
+EXPECT_A=("where map 40.1 xy 10,22")
+UNEXPECT_A=("[crash]" "TIMEOUT")
