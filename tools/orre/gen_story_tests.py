@@ -63,6 +63,10 @@ def chain(out, steps, maps):
         block = ['mp warp 45,%d,%d,%d' % (mi, x, y), 'wait 150']
         if not main:
             block.append('mp orrescript 100 %d%s' % (fn, args))
+        else:   # (a main loop's scene can wait on something looked at there: PHENAC's sack; A to each side)
+            block += ['pressuntil A field 3000']
+            for way in ('UP', 'LEFT', 'RIGHT', 'DOWN'):
+                block += ['press %s 1' % way, 'wait 6', 'press A 2', 'wait 60']
         # (a scene can run on well past its flag: its battles, its next lines; the next step waits for the field)
         block += ['pressuntillog A 4000 orre: flag %d = 1' % flag, 'pressuntil A field 9000', 'wait 30']
         lines += ['skipif orreflag:%d %d' % (flag, len(block))] + block

@@ -14,6 +14,7 @@
 #include "field_effect.h"
 #include "field_player_avatar.h"
 #include "o3d.h"
+void MoveCameraAndRedrawMap(int deltaX, int deltaY);   // (field_camera.c)
 #include "orre.h"
 #include "orre_people.h"
 #include "script.h"
@@ -260,7 +261,19 @@ void Orre_Npc_SetPosition(u32 group, u32 index, float x, float z)
     if (!O3D_ColoToTile(x, z, &tx, &ty))
         return;
     if (group == 0 && index == NPC_HERO)
-        return;   // (the player stays where they stand: Kai's camera follows them)
+    {
+        // (the scene puts the player there: a battle's stance, a talk's place; the camera with them, as a jump's
+        // landing moves it: never onto a wall)
+        struct ObjectEvent *o = &gObjectEvents[gPlayerAvatar.objectEventId];
+        s32 dx = tx + MAP_OFFSET - o->currentCoords.x, dy = ty + MAP_OFFSET - o->currentCoords.y;
+        if ((dx || dy) && !MapGridGetCollisionAt(tx + MAP_OFFSET, ty + MAP_OFFSET))
+        {
+            MoveCameraAndRedrawMap(dx, dy);
+            MoveObjectEventToMapCoords(o, tx + MAP_OFFSET, ty + MAP_OFFSET);
+            MPNet_Log("orre npcs: the player put at %d,%d", tx, ty);
+        }
+        return;
+    }
     if ((n = Of(index)) == NULL)
         return;
     n->x = tx, n->y = ty;
@@ -329,6 +342,18 @@ void Orre_Npc_FaceOther(u32 group, u32 index, u32 tgroup, u32 tindex)
         Face(group, index, DirTo(x, y, tx, ty));
 }
 
+// Someone's scripted walk is under way (the player's too)
+static bool8 AnyWalking(void)
+{
+    u32 i;
+    if (sHeroWalking)
+        return TRUE;
+    for (i = 0; i < sCount; i++)
+        if (sNpc[i].walking)
+            return TRUE;
+    return FALSE;
+}
+
 // Walk to tile (TX, TY): along x, then along y, stopping a tile short when STOPSHORT (walking up to someone)
 static void WalkTo(u32 group, u32 index, s16 tx, s16 ty, bool8 stopShort)
 {
@@ -372,7 +397,10 @@ static void WalkTo(u32 group, u32 index, s16 tx, s16 ty, bool8 stopShort)
     if (k == 0)
         return;
     if (ScriptMovement_StartObjectMovementScript(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup,
-                                                 path))
+                                                 path)
+     && !(!AnyWalking() && (ScriptMovement_UnfreezeObjectEvents(),   // (stale walks of people since parked: cleared)
+                            !ScriptMovement_StartObjectMovementScript(localId, gSaveBlock1Ptr->location.mapNum,
+                                                                      gSaveBlock1Ptr->location.mapGroup, path))))
     {
         // (its movement couldn't start: one cut off before, a scene stopped mid-walk, still holds its slot) it's
         // simply there, so the scene waiting for it goes on
