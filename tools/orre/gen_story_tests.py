@@ -19,6 +19,7 @@ sys.path.insert(0, HERE)
 import story_route  # noqa: E402
 
 PER = 25
+PASSES = 3   # (orre_story_chain: tools/orre/gen_story_tests.py chain)
 
 
 def listing(unpacked, tag):
@@ -51,12 +52,21 @@ def chain(out, steps, maps):
     """orre_story_chain: every step in the story's order from the landing, the story never jumped, so each one starts
     from what the ones before it left (as a player's game does); a step the story has already done is passed over
     (`skipif orreflag:N`). The first "TIMEOUT waiting for log orre: flag N = 1" is where the story stops."""
-    d = os.path.join(out, 'orre_story_chain')
+    name = 'orre_story_chain'
+    start = os.environ.get('ORRE_CHAIN_FROM')   # (a later start: Colosseum's story jump to it, then the chain on)
+    if start:
+        name += '_from'
+        steps = steps[[s[0] for s in steps].index(int(start)):]
+    d = os.path.join(out, name)
     if os.path.isdir(d):
         shutil.rmtree(d)
     os.makedirs(d)
     lines = ['pressuntil A field 5000', 'wait 30', 'mp teach 0 94', 'mp teach 1 94']
-    for flag, tag, fn, args, main, at in steps:
+    if start:
+        lines += ['mp orrestory %d' % int(start)]
+    # (Colosseum's flag order isn't the order a player meets them: PHENAC STADIUM's entry waits for PYRITE TOWN's.
+    # Several passes: a step done is passed over at once; one not possible yet is tried again in the next)
+    for flag, tag, fn, args, main, at in steps * PASSES:
         mi, x, y = maps[tag]
         if at:
             x, y = at
@@ -69,10 +79,11 @@ def chain(out, steps, maps):
             block.append('mp orrescript 100 %d%s' % (fn, args))
         else:   # (a main loop's scene can wait on something looked at there: PHENAC's sack; A to each side)
             block += ['pressuntil A field 3000']
-            for way in ('UP', 'LEFT', 'RIGHT', 'DOWN'):
-                block += ['press %s 1' % way, 'wait 6', 'press A 2', 'wait 60']
+            for way in ('up', 'left', 'right', 'down'):   # (turned only: a tap the way it faces would step)
+                block += ['mp face %s' % way, 'wait 6', 'press A 2', 'wait 60']
         # (a scene can run on well past its flag: its battles, its next lines; the next step waits for the field)
-        block += ['pressuntillog A 9000 orre: flag %d = 1' % flag, 'pressuntil A field 9000', 'wait 30']
+        # (a scene still running when the wait ends runs on: the field's wait lets it finish)
+        block += ['pressuntillog A 2500 orre: flag %d = 1' % flag, 'pressuntil A field 9000', 'wait 30']
         lines += ['skipif orreflag:%d %d' % (flag, len(block))] + block
     lines += ['mp orreget %d' % steps[-1][0], 'quit']
     open(os.path.join(d, 'a.txt'), 'w').write('\n'.join(lines) + '\n')
@@ -81,7 +92,7 @@ def chain(out, steps, maps):
         '# each from what the ones before left; the first TIMEOUT is where the story stops (docs/ORRE_HANDOFF.md "The\n'
         '# story runs"). Long: run it on its own.\nMODE=1\nTMO=%d\nWARP=45,0,33,40\n'
         'ENV_A="MOEMON_DEBUG_PARTY=150:100,150:100 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1 MOEMON_ORRE_FLAG_LOG=1"\nEXPECT_A=()\n'
-        'UNEXPECT_A=("[crash]")\n' % (250 * len(steps) + 60))
+        'UNEXPECT_A=("[crash]")\n' % (120 * PASSES * len(steps) + 60))
 
 
 def main():
