@@ -1,0 +1,11 @@
+# Colosseum's camera shots in ORRE's engine (src/orre/o3d_cam.c; docs/ORRE_HANDOFF.md "Colosseum's cameras"): at the
+# OUTSKIRT STAND (45,0) its own shot cam_s1_out_shot_01.cam (150 frames: the eye's and target's keyframed paths, the
+# field of view) plays from the data pack (`mp orrecam`), the view looking through it, and stopping it gives the field
+# camera back. Needs ORRE's packs. Shots c_*.png (c_field and c_back the field's own view; c_000-c_150 the shot).
+MODE=1
+TMO=120
+WARP=45,0,33,40
+ENV_A="MOEMON_DEBUG_PARTY=280:50"
+EXPECT_A=("o3d cam: S1_out/cam_s1_out_shot_01.cam, 150 frames" "[test] orrecam S1_out/cam_s1_out_shot_01.cam: playing"
+          "[test] orrecam stopped")
+UNEXPECT_A=("[crash]" "TIMEOUT" "o3d cam: no ")

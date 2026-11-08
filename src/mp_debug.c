@@ -6,6 +6,7 @@
 #include "platform/gamepad.h"
 #include "global.h"
 #include "orre.h"
+#include "o3d.h"
 #include "orre_people.h"
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "region_map.h"   // (mapname: GetMapName)
@@ -4113,6 +4114,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         unsigned bank = 0x100, func = 0;
         sscanf(arg, "%x %u", &bank, &func);
         printf("[test] orrescript %x %u: %s\n", bank, func, Orre_Vm_Debug(bank, func) ? "started" : "no such script");
+    }
+    else if (strcmp(cmd, "orrecam") == 0)
+    {
+        // orrecam NAME|ID [FRAME] | stop: a camera shot of Colosseum's played on this ORRE map ("S1_out/cam_s1_out_shot_01.cam"
+        // or its resource id in hex: src/orre/o3d_cam.c)
+        char name[128] = "";
+        float frame = 0;
+        unsigned id;
+        sscanf(arg, "%127s %f", name, &frame);
+        if (strcmp(name, "stop") == 0)
+            O3D_CamStop(), printf("[test] orrecam stopped\n");
+        else if (strchr(name, '/'))
+            printf("[test] orrecam %s: %s\n", name, O3D_CamPlay(name, frame, FALSE) ? "playing" : "none");
+        else if (sscanf(name, "%x", &id) == 1)
+            printf("[test] orrecam %08X: %s\n", id, O3D_CamPlayId(id, frame, FALSE) ? "playing" : "none");
     }
     else if (strcmp(cmd, "orreresult") == 0)
         printf("[test] orre battle result %d\n", Orre_BattleResult());

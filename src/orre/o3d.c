@@ -545,6 +545,41 @@ static void FindCamera(void)
     sView.camY = (gSaveBlock1Ptr->pos.y - 7) * 16 + voffs;
 }
 
+// A shot of Colosseum's playing (o3d_cam.c): the view looks through its camera, in the map's world ((x - x0, y,
+// z - z0) * 16 / tile), the picture's centre the screen's, its vertical field of view over Kai's 160 lines
+static void ShotView(void)
+{
+    float eye[3], tgt[3], roll, fov, S, f[3], r[3], u[3], len, cr, sr;
+    u32 i;
+    if (!sCur || !O3D_CamGet(eye, tgt, &roll, &fov))
+        return;
+    S = 16.0f / sCur->tile;
+    eye[0] = (eye[0] - sCur->x0) * S, eye[1] *= S, eye[2] = (eye[2] - sCur->z0) * S;
+    tgt[0] = (tgt[0] - sCur->x0) * S, tgt[1] *= S, tgt[2] = (tgt[2] - sCur->z0) * S;
+    for (i = 0; i < 3; i++)
+        f[i] = tgt[i] - eye[i];
+    len = sqrtf(f[0] * f[0] + f[1] * f[1] + f[2] * f[2]);
+    if (len < 1e-4f)
+        return;
+    for (i = 0; i < 3; i++)
+        f[i] /= len;
+    // right = forward x world up, up = right x forward (the field camera's own axes, as SetupView makes them)
+    r[0] = -f[2], r[1] = 0.0f, r[2] = f[0];
+    len = sqrtf(r[0] * r[0] + r[2] * r[2]);
+    if (len < 1e-4f)
+        r[0] = 1.0f, r[2] = 0.0f, len = 1.0f;
+    r[0] /= len, r[2] /= len;
+    u[0] = r[1] * f[2] - r[2] * f[1], u[1] = r[2] * f[0] - r[0] * f[2], u[2] = r[0] * f[1] - r[1] * f[0];
+    cr = cosf(roll), sr = sinf(roll);   // (HSD's roll: radians about the line of sight)
+    for (i = 0; i < 3; i++)
+    {
+        float ri = r[i] * cr + u[i] * sr, ui = u[i] * cr - r[i] * sr;
+        sView.right[i] = ri, sView.up[i] = ui, sView.fwd[i] = f[i], sView.eye[i] = eye[i];
+    }
+    sView.ax = DISPLAY_WIDTH / 2, sView.ay = DISPLAY_HEIGHT / 2;
+    sView.focal = (DISPLAY_HEIGHT / 2) / tanf(fov * 0.5f * 3.14159265f / 180.0f);
+}
+
 static void SetupView(void)
 {
     const struct Sprite *s = &gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId];
@@ -572,6 +607,7 @@ static void SetupView(void)
     sView.right[0] = 1.0f, sView.right[1] = 0.0f, sView.right[2] = 0.0f;
     sView.up[0] = 0.0f, sView.up[1] = cp, sView.up[2] = -sp;
     sView.focal = 96.0f / tanf(HALF_FOV * 3.14159265f / 180.0f);
+    ShotView();
 }
 
 // World -> screen x, y and depth (FALSE: behind the camera)
@@ -979,13 +1015,20 @@ void O3D_Update(void)
     gMpO3dLine = sView.active ? O3dLine : NULL;
     gMpO3dOamHidden = sView.active && !getenv("MOEMON_O3D_NOHIDE") ? OamHidden : NULL;
     Orre_Vm_Frame();   // (Colosseum's scripts: src/orre/orre_vm.c; they stop off ORRE)
+    O3D_CamTick();     // (a shot of Colosseum's playing: o3d_cam.c)
     if (!sView.active)
     {
         sCur = NULL;
+        if (O3D_CamActive())
+            O3D_CamStop();   // (off ORRE: no shot)
         return;
     }
     if (sView.map != map)
+    {
         sView.havePlayerH = FALSE;   // (a new map: its own ground)
+        if (O3D_CamActive() && !O3D_CamKeep())
+            O3D_CamStop();   // (a shot belongs to its room)
+    }
     sView.map = map;
     sCur = &sPack.map[map];
     sView.frame++;

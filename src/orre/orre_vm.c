@@ -71,7 +71,7 @@ struct Bank
 };
 
 enum { T_FREE, T_RUN, T_WAIT, T_DONE };
-enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE, W_MOVE, W_SCREEN, W_FANFARE };
+enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE, W_MOVE, W_SCREEN, W_FANFARE, W_CAMERA };
 
 // Kai's screens a scene opens (W_SCREEN): Orre_EventScript_VmHoldLoop goes to them while the scene waits
 enum { SCREEN_NONE, SCREEN_SHOP, SCREEN_PC };
@@ -345,7 +345,8 @@ enum
     N_MOVE_TO = 61, N_LOOK_AT_PLAYER = 65, N_TURN_TO_ANGLE = 68, N_FLOOR_CHAR_DISP = 100, N_FACE_CHARACTER = 165,
     N_MOVE_TO_CHARACTER = 177, N_TURN_HEAD_TO = 181, N_APPROACH_PLAYER = 232,
     N_SHOP_OPEN = 25, N_POKEMON_CENTER = 83, N_WARP_MENU_ROOM = 98, N_HAVE_ITEM = 120, N_ADD_MONEY = 133,
-    N_GET_MONEY = 134, N_ADD_ITEM = 219,
+    N_GET_MONEY = 134, N_ADD_ITEM = 219, N_CAMERA_PLAY = 42, N_CAMERA_STOP = 43, N_CAMERA_STOP2 = 44,
+    N_CAMERA_WAIT = 46, N_CAMERA_RETURN = 179,
 };
 
 #define ROOM_PCBOX_MENU 913    // (Colosseum's menu rooms: the PC's boxes)
@@ -521,6 +522,16 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
         PlayFanfare(MUS_HEAL);
         t->wait = W_FANFARE;
         MPNet_Log("orre vm: party healed");
+        return 0;
+    case N_CAMERA_PLAY:   // cameraPlayAnime(group, shot, frame, loop): Colosseum's shot in ORRE's view (o3d_cam.c)
+        O3D_CamPlayId(ARG(1).u, (float)ARG(2).s, ARG(3).u != 0);
+        return 0;
+    case N_CAMERA_STOP: case N_CAMERA_STOP2: case N_CAMERA_RETURN:   // (back to the field's camera)
+        O3D_CamStop();
+        return 0;
+    case N_CAMERA_WAIT:   // cameraWaitSyncAnime: until the shot has played
+        if (ARG(0).u)
+            t->wait = W_CAMERA;
         return 0;
     case N_GET_MONEY: return GetMoney(&gSaveBlock1Ptr->money);
     case N_ADD_MONEY:
@@ -827,6 +838,10 @@ static void Poll(struct Thread *t)
             Resume(t, c == 0 ? 0 : 1);
         break;
     }
+    case W_CAMERA:
+        if (O3D_CamDone())
+            t->wait = W_NONE;
+        break;
     case W_FANFARE:
         if (WaitFanfare(FALSE))
             t->wait = W_NONE;
@@ -919,6 +934,8 @@ void Orre_Vm_Warped(void)
 void Orre_Vm_Stop(void)
 {
     u32 i;
+    if (sRoom && O3D_CamActive() && !O3D_CamKeep())
+        O3D_CamStop();   // (a scene's shot ends with its room's scripts)
     for (i = 0; i < VM_THREADS; i++)
         sThreads[i].state = T_FREE;
     sHolder = NULL;

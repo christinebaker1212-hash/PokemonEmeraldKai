@@ -82,7 +82,8 @@ The road to the end, agreed with the user 2026-11-07 (their answers: ORRE_DECISI
 3. **Trainers: done** (below, "Trainers and battles"). 4. **Colosseum's scripts: running** (below, "Colosseum's scripts": its GS VM in the game; more natives as each
    part needs them).
 5. **People on the maps: done** (below, "People on the maps"). 6. **Shops, POKéMON CENTERs, the PC: done** (below).
-7. The opening (the player as the thief, the SNAG MACHINE), then the ride to the OUTSKIRT STAND. 8. RUI follows the host.
+7. The opening (the player as the thief, the SNAG MACHINE), then the ride to the OUTSKIRT STAND: **started** (below,
+   "Colosseum's cameras" and "The opening"). 8. RUI follows the host.
 9. The colosseum challenges (PHENAC, PYRITE, THE UNDER, DEEP COLOSSEUM, REALGAM TOWER). 10. Story scenes, faithful.
 11. Shadow Pokémon's open items (SHADOW_POKEMON.md "Still open"). 12. Music (alongside 4). 13. The bike ride.
 14. MT. BATTLE and REALGAM TOWER's post-game, their rewards. 15. Kai's systems (POKéDEX, the card's star,
@@ -248,6 +249,42 @@ The older notes per part:
 - Scenario orre_center: PHENAC's POKéMON CENTER (45,3): the nurse heals (HP 10 -> full), the PC opens and closes;
   PHENAC's mart (45,8): a POTION bought (¥3000 -> ¥2700).
 - Seen, not yet looked into: PHENAC's mart floor draws as blue speckles (a texture of that room's model).
+
+## Colosseum's cameras (src/orre/o3d_cam.c, 2026-11-08)
+- **A shot** (.cam, in orre_data.pak as the disc's bytes; resource ids in index/ids.txt) is an HSD scene: root
+  "scene_data" = SceneDesc {model sets, **the camera set** (one, not a list), light sets, fog}; the camera set =
+  {CObjDesc, CameraAnim list}. CObjDesc (perspective): class name, u16 flags, u16 projection, 8 u16 viewport and
+  scissor, the eye's WObjDesc + 0x18, the target's + 0x1C (WObjDesc: class name, f32 x y z), roll + 0x20, up + 0x24,
+  near + 0x28, far + 0x2C, fov + 0x30 (vertical, degrees). CameraAnim: its AObjDesc (tracks 9 roll in radians, 10 the
+  field of view, 11 / 12 near / far), the eye's WObjAnim, the target's (each an AObjDesc first: tracks 5 6 7 x y z;
+  4, rare: a path, not read yet). FObj keys as hsd_anim.py decodes them (little-endian values). 60 frames a second.
+- **In ORRE's engine** (its own code, never SINNOH's): O3D_CamPlay / PlayId / Stop / Done; while a shot plays,
+  o3d.c ShotView looks through it (Colosseum's units into the map's world: (x - x0, y, z - z0) * 16 / tile, the
+  picture's centre the screen's, the vertical field of view over 160 lines); people stand where their tiles project.
+  A shot ends with its room's scripts (orre_vm.c Orre_Vm_Stop) or the room (unless kept: the opening's).
+- **Natives**: 42 cameraPlayAnime (group, shot id, frame, loop), 43 / 44 stop, 179 cameraReturn (the field's camera
+  back), 46 cameraWaitSyncAnime (W_CAMERA: until it has played). **Not yet**: 40 / 41 / 140 / 141 the camera set and
+  moved by position and rotation (their rotation's convention to be checked against a scene), 36 / 37 the scene's
+  mode, 170 focus on a character.
+- Tools: `python3 -I tools/orre/hsd_cam.py FILE.cam [STEP]` prints a shot frame by frame. Debug `mp orrecam NAME|ID
+  [FRAME]`, `mp orrecam stop`. Scenario orre_camera.
+- **No sky**: the pack keeps skies (kind 2 sets) but the engine leaves them out (the field camera looks down); a shot
+  looking up shows black above the horizon (the open question "the sky" now matters for scenes).
+
+## The opening (step 7: found so far, 2026-11-08)
+- Colosseum's opening is **its C code, not scripts**: the decomp's demoScene00-30 (src/game/gbaCommunication_*.c,
+  table lbl_802EEC70 of 32), each a shot: map-object animations (std115_mapObjectPlayAnimation: the explosion's
+  model 0x0B631000 and its particles .ptl), the characters' skeletal animations attached to their models
+  (std070_characterAttachToCharacter: opening_characters_NN.dat's animations on snach_zako (the Cipher Peons),
+  boss_s (GONZAP), ken_c1 (the hero)), cameraPlayAnime(cam_opening_NN), waits, then floorRequestChange(next room:
+  0x82, 0x83, 0x87, 0x89...). The rooms' own scripts (S2_out_1, S2_hallway_1, S2_bossroom_1, S2_snatchroom_1) do
+  nothing but wait.
+- **Those four rooms aren't Kai maps yet** (maps.py ORDER has the 121 field rooms: S2_out_2, S2_building_* only); their
+  models are in orre3d.pak. To play the opening they need maps (or a scene mode drawing a room without one).
+- Next: the scenes as data (which room, shot, characters and their animation per scene, the waits), the characters
+  as sprites moved along their animations' root paths (tools/orre/hsd_anim.py reads them), the player's look as the
+  thief (ORRE_DECISIONS), the explosion, then the ride and the OUTSKIRT STAND's arrival (flag 986's scene) and the
+  boat's first landing starting it; then MOEMON_ORRE_SCRIPTS on for everyone.
 
 ## Trainers and battles (src/orre/orre_battle.c, 2026-11-08)
 - **Read at run time** from common_rel in the data pack (nothing generated or committed): battles (fightEncount: .data

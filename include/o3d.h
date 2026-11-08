@@ -7,7 +7,16 @@ struct MapLayout;
 
 void O3D_Update(void);       // every overworld frame: is this an ORRE map, and from where is it seen
 bool8 O3D_Active(void);      // this frame's field is drawn by ORRE's engine
-void O3D_ShopPicture(bool8 on, s16 dx, s16 dy);   // a mart's BUY screen shows the field's last picture (shop.c)
+void O3D_ShopPicture(bool8 on, s16 dx, s16 dy);
+// Colosseum's camera shots (src/orre/o3d_cam.c): the view looks through one while it plays
+bool8 O3D_CamPlay(const char *name, float frame, bool8 loop);
+bool8 O3D_CamPlayId(u32 id, float frame, bool8 loop);
+void O3D_CamStop(void);
+bool8 O3D_CamActive(void);
+bool8 O3D_CamDone(void);
+bool8 O3D_CamKeep(void);
+void O3D_CamTick(void);
+bool8 O3D_CamGet(float eye[3], float tgt[3], float *roll, float *fov);   // a mart's BUY screen shows the field's last picture (shop.c)
 bool8 O3D_IsOrreGroup(u8 mapGroup);
 bool8 O3D_PackPresent(void);   // ORRE's pack (orre/orre3d.pak) is here (the boat: src/orre/orre_ferry.c)
 u8 O3D_ArrivalDir(u16 map, s16 x, s16 y);   // the way a player landing on an ORRE room's entry faces (DIR_NONE: none)

@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 60
+rendershot c_field
+mp orrecam S1_out/cam_s1_out_shot_01.cam
+wait 2
+rendershot c_000
+wait 50
+rendershot c_050
+wait 50
+rendershot c_100
+wait 48
+rendershot c_150
+mp orrecam stop
+wait 2
+rendershot c_back
+quit
