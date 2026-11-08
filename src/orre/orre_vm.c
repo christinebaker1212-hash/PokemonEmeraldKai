@@ -37,6 +37,10 @@
 #include "constants/species.h"
 #include "constants/songs.h"
 #include "sound.h"
+#include "money.h"
+#include "script_pokemon_util.h"
+#include "shop.h"
+#include "constants/items.h"
 
 void MPNet_Log(const char *fmt, ...);
 extern const u8 Orre_EventScript_VmHold[];
@@ -67,7 +71,18 @@ struct Bank
 };
 
 enum { T_FREE, T_RUN, T_WAIT, T_DONE };
-enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE, W_MOVE };
+enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE, W_MOVE, W_SCREEN, W_FANFARE };
+
+// Kai's screens a scene opens (W_SCREEN): Orre_EventScript_VmHoldLoop goes to them while the scene waits
+enum { SCREEN_NONE, SCREEN_SHOP, SCREEN_PC };
+
+// Colosseum's shops (menuShopOpen N): tools/orre/gen_shops.py
+struct OrreShop
+{
+    u8 kind;
+    u16 items[20];
+};
+#include "../data/orre_shops.h"
 
 struct Thread
 {
@@ -81,6 +96,8 @@ struct Thread
     u32 message;          // W_MESSAGE*: the line shown (shown again if the field hid it)
     u16 battle;           // W_BATTLE: the battle asked for
     u32 moveGroup, moveIndex;   // W_MOVE: the person whose walk it waits for
+    u8 screen, shop;      // W_SCREEN: the screen asked for (SCREEN_*), Colosseum's shop number
+    bool8 screenOpen;     // W_SCREEN: the hold script went to it
     V st[VM_STACK];
 };
 
@@ -93,6 +110,7 @@ static bool8 sDataTried;
 static u16 sRoom;          // the Colosseum room the threads belong to (0: none)
 static bool8 sHolding;     // Orre_EventScript_VmHold is waiting (special Orre_VmHold)
 static struct Thread *sHolder;
+static u8 sScreen, sShop;  // the screen the hold script goes to next (Orre_VmScreen), the shop it opens
 static bool8 sLogged[256];
 
 static u32 Be32(const u8 *p) { return (u32)p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]; }
@@ -326,7 +344,17 @@ enum
     N_PEOPLE_VISIBLE = 50, N_PEOPLE_OPEN = 56, N_PEOPLE_CLOSE = 57, N_SET_POSITION = 59, N_SET_ROTATION = 60,
     N_MOVE_TO = 61, N_LOOK_AT_PLAYER = 65, N_TURN_TO_ANGLE = 68, N_FLOOR_CHAR_DISP = 100, N_FACE_CHARACTER = 165,
     N_MOVE_TO_CHARACTER = 177, N_TURN_HEAD_TO = 181, N_APPROACH_PLAYER = 232,
+    N_SHOP_OPEN = 25, N_POKEMON_CENTER = 83, N_WARP_MENU_ROOM = 98, N_HAVE_ITEM = 120, N_ADD_MONEY = 133,
+    N_GET_MONEY = 134, N_ADD_ITEM = 219,
 };
+
+#define ROOM_PCBOX_MENU 913    // (Colosseum's menu rooms: the PC's boxes)
+#define LAST_COLO_ITEM 348     // (Colosseum's items to here are Gen 3's numbers, Kai's own)
+
+static u16 KaiItem(u32 coloItem)
+{
+    return coloItem <= LAST_COLO_ITEM ? coloItem : ITEM_NONE;
+}
 
 static void WordsOf(u8 *out, u8 ctl, u32 value)
 {
@@ -470,6 +498,47 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
     case N_HERO_INIT_EVENT: Hold(t); return 0;
     case N_HERO_TERM_EVENT: LetGo(t); return 0;
     case N_HERO_MAIN: return 0;          // (Kai's field moves the player)
+    case N_SHOP_OPEN:   // menuShopOpen(N): Kai's POKeMART with Colosseum's list N (the coupon counters: not yet)
+        if (ARG(0).u < ORRE_SHOP_COUNT && sOrreShops[ARG(0).u].kind <= 1 && sOrreShops[ARG(0).u].items[0])
+        {
+            t->wait = W_SCREEN, t->screen = SCREEN_SHOP, t->shop = ARG(0).u, t->screenOpen = FALSE;
+            MPNet_Log("orre vm: shop %u", ARG(0).u);
+        }
+        else
+            MPNet_Log("orre vm: shop %u not opened (POKe COUPONS)", ARG(0).u);
+        return 0;
+    case N_WARP_MENU_ROOM:   // std098_mapWarpToMenuRoom: the PC's boxes are Kai's PC; the other menus aren't yet
+        if (ARG(0).u == ROOM_PCBOX_MENU)
+        {
+            t->wait = W_SCREEN, t->screen = SCREEN_PC, t->screenOpen = FALSE;
+            MPNet_Log("orre vm: the PC");
+        }
+        else
+            MPNet_Log("orre vm: menu room %u not converted yet", ARG(0).u);
+        return 0;
+    case N_POKEMON_CENTER:   // std083: the POKeMON CENTER's ball machine (mode 0) or its heal (1-3): the party healed
+        HealPlayerParty();
+        PlayFanfare(MUS_HEAL);
+        t->wait = W_FANFARE;
+        MPNet_Log("orre vm: party healed");
+        return 0;
+    case N_GET_MONEY: return GetMoney(&gSaveBlock1Ptr->money);
+    case N_ADD_MONEY:
+        if (ARG(0).s >= 0)
+            AddMoney(&gSaveBlock1Ptr->money, ARG(0).s);
+        else
+            RemoveMoney(&gSaveBlock1Ptr->money, -ARG(0).s);
+        return GetMoney(&gSaveBlock1Ptr->money);
+    case N_HAVE_ITEM:
+        return KaiItem(ARG(0).u) && CheckBagHasItem(KaiItem(ARG(0).u), 1);
+    case N_ADD_ITEM:
+        if (!KaiItem(ARG(0).u))
+            return 0;
+        if (ARG(1).s > 0)
+            return AddBagItem(KaiItem(ARG(0).u), ARG(1).s);
+        if (ARG(1).s < 0)
+            return RemoveBagItem(KaiItem(ARG(0).u), -ARG(1).s);
+        return 0;
     case N_IN_BOUNDS:
         if (ARG(0).u == 0 && ARG(1).u == 100)   // (the hero)
             return HeroInBox(ARG(2).f, ARG(3).f, ARG(4).f, ARG(5).f);
@@ -758,6 +827,24 @@ static void Poll(struct Thread *t)
             Resume(t, c == 0 ? 0 : 1);
         break;
     }
+    case W_FANFARE:
+        if (WaitFanfare(FALSE))
+            t->wait = W_NONE;
+        break;
+    case W_SCREEN:
+        // (the hold script goes to the screen, Orre_VmScreen tells it which; back from it, it holds again)
+        if (sHolder != t)
+            t->wait = W_NONE;
+        else if (!t->screenOpen && sHolding)
+        {
+            sScreen = t->screen, sShop = t->shop;
+            t->screenOpen = TRUE;
+            sHolding = FALSE;
+            ScriptContext_Enable();
+        }
+        else if (t->screenOpen && sHolding)
+            t->wait = W_NONE;
+        break;
     case W_BATTLE:
         if (sHolding && sHolder == t)
         {
@@ -896,6 +983,39 @@ void Orre_VmTalk(void)
     t->holds = TRUE;
     sHolder = t;
     MPNet_Log("orre vm: talk to person %u: %08X", gSpecialVar_0x8004, id);
+}
+
+// (specialvar) Orre_EventScript_VmHoldLoop: the Kai screen the scene asks for (SCREEN_*: 1 the shop, 2 the PC), once
+u16 Orre_VmScreen(void)
+{
+    u16 s = sScreen;
+    sScreen = SCREEN_NONE;
+    return s;
+}
+
+// (special, waitstate) Colosseum's shop sShop as Kai's POKeMART (it lets the script go on when it closes)
+void Orre_VmShop(void)
+{
+    CreatePokemartMenu(sOrreShops[sShop < ORRE_SHOP_COUNT ? sShop : 0].items);
+}
+
+// (special) Orre_EventScript_Check: the player checked the spot VAR_0x8004 (a row of src/data/orre_room_checks.h,
+// orre_npcs.c): its script runs with its four arguments as the scene holding the field (floor_character.c
+// heroDispatchEvent, cmsRunSync)
+void Orre_VmCheck(void)
+{
+    u32 args[4], id = Orre_Check_Script(gSpecialVar_0x8004, args);
+    struct Thread *t;
+    if (id == 0 || sHolder != NULL || (t = Start(id, 4, args, FALSE)) == NULL)
+        return;
+    t->holds = TRUE;
+    sHolder = t;
+    MPNet_Log("orre vm: check %u: %08X", gSpecialVar_0x8004, id);
+}
+
+bool8 Orre_Vm_Running(void)
+{
+    return sRoom != 0;
 }
 
 // (specialvar) a scene still holds the player

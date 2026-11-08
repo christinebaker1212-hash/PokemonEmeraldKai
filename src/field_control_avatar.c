@@ -311,6 +311,10 @@ static const u8 *GetInteractionScript(struct MapPosition *position, u8 metatileB
     if (script != NULL)
         return script;
 
+    // Moemon Kai: a check spot of Colosseum's in front of the player (a PC, a sign: src/orre/orre_npcs.c)
+    if (O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup) && (script = Orre_Check_InFront()) != NULL)
+        return script;
+
     script = GetInteractedBackgroundEventScript(position, metatileBehavior, direction);
     if (script != NULL)
     {
@@ -370,7 +374,10 @@ static const u8 *GetInteractedObjectEventScript(struct MapPosition *position, u8
     objectEventId = GetObjectEventIdByPosition(position->x, position->y, position->elevation);
     if (objectEventId == OBJECT_EVENTS_COUNT || gObjectEvents[objectEventId].localId == LOCALID_PLAYER)
     {
-        if (MetatileBehavior_IsCounter(metatileBehavior) != TRUE)
+        // Moemon Kai: ORRE's maps have no counters: someone behind a blocked tile is talked to across it, as
+        // Colosseum reaches people a little way off (people.c peopleFindTalkTarget)
+        if (MetatileBehavior_IsCounter(metatileBehavior) != TRUE
+         && !(O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup) && MapGridGetCollisionAt(position->x, position->y)))
             return NULL;
 
         // Look for an object event on the other side of the counter.

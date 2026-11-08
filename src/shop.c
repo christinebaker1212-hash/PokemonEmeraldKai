@@ -32,6 +32,7 @@
 #include "scanline_effect.h"
 #include "script.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's 3D maps behind the BUY screen
+#include "o3d.h"   // Moemon Kai: ORRE's, its own engine
 #include "shop.h"
 #include "sound.h"
 #include "sprite.h"
@@ -419,14 +420,16 @@ static void Task_ShopMenu(u8 taskId)
 #define tItemId     data[5]
 #define tListTaskId data[7]
 
-// Moemon Kai: on a SINNOH 3D map the BUY screen shows the field's last 3D picture (s3d.c S3D_ShopPicture) and its
+// Moemon Kai: on a SINNOH or ORRE 3D map the BUY screen shows the field's last 3D picture (s3d.c S3D_ShopPicture,
+// o3d.c O3D_ShopPicture: each region's own engine) and its
 // people where that picture had them, all moved as Emerald moves the map so the player stands where it puts them
-static struct { bool8 on; s16 x[OBJECT_EVENTS_COUNT], y[OBJECT_EVENTS_COUNT]; u8 shown[OBJECT_EVENTS_COUNT]; s16 dx, dy; } sMp3d;
+static struct { bool8 on, orre; s16 x[OBJECT_EVENTS_COUNT], y[OBJECT_EVENTS_COUNT]; u8 shown[OBJECT_EVENTS_COUNT]; s16 dx, dy; } sMp3d;
 
 static void Mp3dRecord(void)
 {
     u32 i;
-    sMp3d.on = S3D_Active();
+    sMp3d.orre = O3D_Active();
+    sMp3d.on = S3D_Active() || sMp3d.orre;
     for (i = 0; i < OBJECT_EVENTS_COUNT && sMp3d.on; i++)
     {
         const struct ObjectEvent *e = &gObjectEvents[i];
@@ -830,7 +833,9 @@ static void BuyMenuDrawMapGraphics(void)
             }
     }
     BuyMenuDrawObjectEvents();
-    if (sMp3d.on)
+    if (sMp3d.on && sMp3d.orre)
+        O3D_ShopPicture(TRUE, sMp3d.dx, sMp3d.dy);
+    else if (sMp3d.on)
         S3D_ShopPicture(TRUE, sMp3d.dx, sMp3d.dy);
     else
         BuyMenuDrawMapBg();

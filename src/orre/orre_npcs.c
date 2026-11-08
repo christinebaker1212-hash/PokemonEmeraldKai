@@ -21,6 +21,7 @@
 
 void MPNet_Log(const char *fmt, ...);
 extern const u8 Orre_EventScript_Talk[];
+extern const u8 Orre_EventScript_Check[];
 
 struct OrreRoomPerson
 {
@@ -32,6 +33,14 @@ struct OrreRoomPerson
     float x, z;
 };
 #include "../data/orre_room_people.h"
+
+struct OrreRoomCheck
+{
+    u16 room, col;
+    u32 script, args[4];
+    float x0, z0, x1, z1;
+};
+#include "../data/orre_room_checks.h"
 
 #define NPC_MAX 48
 #define NPC_LOCAL_FIRST 0x40   // (a person's object: local id 0x40 + its index; the maps' own objects are below)
@@ -424,4 +433,41 @@ u32 Orre_Npc_TalkScriptId(u32 index)
 {
     struct Npc *n = Of(index);
     return n ? n->p->talk : 0;
+}
+
+// ---- the rooms' check spots (Colosseum's floor events of kind 3: tools/orre/gen_checks.py)
+
+#define CHECK_REACH 6.0f   // (Colosseum's units: how far in front of the player's tile centre a spot is checked)
+#define CHECK_SLACK 4.0f   // (half a tile: a spot's box is often a flat face on a counter or a wall)
+
+// The check spot in front of the player when A is pressed: Orre_EventScript_Check with VAR_0x8004 its row, else NULL
+const u8 *Orre_Check_InFront(void)
+{
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    float cx, cz;
+    u32 i;
+    if (!Orre_Vm_Running() || !O3D_TileToColo(p->currentCoords.x - MAP_OFFSET, p->currentCoords.y - MAP_OFFSET, &cx, &cz))
+        return NULL;
+    cx += p->facingDirection == DIR_EAST ? CHECK_REACH : p->facingDirection == DIR_WEST ? -CHECK_REACH : 0;
+    cz += p->facingDirection == DIR_SOUTH ? CHECK_REACH : p->facingDirection == DIR_NORTH ? -CHECK_REACH : 0;
+    for (i = 0; i < ORRE_ROOM_CHECK_COUNT; i++)
+    {
+        const struct OrreRoomCheck *c = &sOrreRoomChecks[i];
+        if (c->room == sRoom && cx >= c->x0 - CHECK_SLACK && cx <= c->x1 + CHECK_SLACK && cz >= c->z0 - CHECK_SLACK
+         && cz <= c->z1 + CHECK_SLACK)
+        {
+            gSpecialVar_0x8004 = i;
+            return Orre_EventScript_Check;
+        }
+    }
+    return NULL;
+}
+
+// Check spot ROW's script and its four arguments
+u32 Orre_Check_Script(u32 row, u32 *args)
+{
+    if (row >= ORRE_ROOM_CHECK_COUNT)
+        return 0;
+    memcpy(args, sOrreRoomChecks[row].args, sizeof(sOrreRoomChecks[row].args));
+    return sOrreRoomChecks[row].script;
 }

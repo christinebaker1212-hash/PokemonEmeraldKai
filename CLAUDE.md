@@ -118,6 +118,9 @@ Orre_EventScript_VmHold, natives mapped to Kai; off unless MOEMON_ORRE_SCRIPTS=1
 tools/orre/gsvm.py lists a bank; ORRE_HANDOFF "Colosseum's scripts"; scenario orre_scene_willie). ORRE's rooms' people:
 Colosseum's own (src/data/orre_room_people.h from tools/orre/gen_people.py) as Kai objects shown, moved, turned and
 talked to through the VM (src/orre/orre_npcs.c; A on one runs its talk script; ORRE_HANDOFF "People on the maps").
+ORRE's POKéMON CENTERs, PCs and marts: Colosseum's scripts opening Kai's screens (the heal, Kai's PC, its POKéMART with
+Colosseum's lists src/data/orre_shops.h from tools/orre/gen_shops.py), check spots src/data/orre_room_checks.h
+(tools/orre/gen_checks.py); ORRE_HANDOFF "Shops, POKéMON CENTERs, the PC"; scenario orre_center.
 ORRE's people (the user, 2026-11-07): each Colosseum character model is a LOOK > CREATE recipe (field sprite) and the
 closest Pokemon Showdown trainer sprite (battle picture, 80x80 as drawn): tools/orre/people.py, src/orre/orre_people.c,
 ORRE_HANDOFF "Sprites"; scenario orre_people.

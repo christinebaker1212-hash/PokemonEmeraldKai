@@ -87,6 +87,9 @@ void Orre_Npc_MoveTo(u32 group, u32 index, float x, float z);
 void Orre_Npc_MoveToOther(u32 group, u32 index, u32 tgroup, u32 tindex);
 bool8 Orre_Npc_Done(u32 group, u32 index);
 u16 Orre_Npc_Name(u32 index);
+const u8 *Orre_Check_InFront(void);                // (field_control_avatar.c) a check spot in front of the player
+u32 Orre_Check_Script(u32 row, u32 *args);
+bool8 Orre_Vm_Running(void);
 void Orre_Npc_TalkStart(u32 group, u32 index);
 void Orre_Npc_TalkEnd(u32 group, u32 index);
 const u8 *Orre_Npc_TalkScript(u8 localId);      // (field_control_avatar.c)

@@ -53,6 +53,8 @@ EventScript_TurnOffPC::
 	setvar VAR_0x8004, PC_LOCATION_OTHER
 	playse SE_PC_OFF
 	special DoPCTurnOffEffect
+	specialvar VAR_RESULT, Orre_VmHolding   @ Moemon Kai: ORRE's PC, opened by Colosseum's script (orre.inc)
+	goto_if_eq VAR_RESULT, TRUE, Orre_EventScript_VmHoldLoop
 	releaseall
 	end
 

@@ -16,18 +16,32 @@ Orre_EventScript_WorldMapGone:
 @ locked until it lets go (its battles start while this waits; it goes on holding after them)
 Orre_EventScript_VmHold::
 	lockall
-Orre_EventScript_VmHoldLoop:
+Orre_EventScript_VmHoldLoop::
 	special Orre_VmHold
 	waitstate
+	specialvar VAR_RESULT, Orre_VmScreen    @ (a screen of Kai's the scene opens: Colosseum's shop, the PC)
+	goto_if_eq VAR_RESULT, 1, Orre_EventScript_VmShop
+	goto_if_eq VAR_RESULT, 2, EventScript_PC   @ (Kai's own PC; turning it off comes back here: pc.inc)
 	specialvar VAR_RESULT, Orre_VmHolding   @ (still held: back from a battle the scene started)
 	goto_if_eq VAR_RESULT, TRUE, Orre_EventScript_VmHoldLoop
 	releaseall
 	end
 
+Orre_EventScript_VmShop:
+	special Orre_VmShop
+	waitstate
+	goto Orre_EventScript_VmHoldLoop
+
 @ A person talked to: their talk script (Colosseum's) runs, holding the field as a scene does
 Orre_EventScript_Talk::
 	lockall
 	special Orre_VmTalk
+	goto Orre_EventScript_VmHoldLoop
+
+@ A check spot of Colosseum's (a PC, a sign, a machine: src/orre/orre_npcs.c Orre_Check_InFront): its own script
+Orre_EventScript_Check::
+	lockall
+	special Orre_VmCheck
 	goto Orre_EventScript_VmHoldLoop
 
 @ ---- The boat to ORRE (src/orre/orre_ferry.c; docs/ORRE_DECISIONS.md "A post-game place"). Kai's own words: the boat

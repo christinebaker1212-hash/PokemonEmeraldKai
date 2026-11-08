@@ -76,11 +76,11 @@ def listing(d, func, names):
             del st[max(0, len(st) - k):]
             txt = 'pop %d' % k
         elif op in (16, 19, 15, 17, 18):
-            if op == 16:
+            if op == 16:   # (the value before it and the operand: one argument a native sees, k times)
                 k = struct.unpack_from('>H', a, 1)[0]
                 if st:
                     st.pop()
-                st += [None] * (2 * k)
+                st += [None] * k
             else:
                 if st:
                     st.pop()

@@ -21,6 +21,7 @@ import msg  # noqa: E402
 DATA_SECTION = 4                    # common_rel's .data
 FLOOR_TABLE, FLOOR_COUNT, FLOOR_SIZE = 0x8BCF4, 0x14A670, 0x4C
 TEXT_BLOCK = 0x58044
+TEXT_BLOCK2 = 0x647B4                # a second table: the menus' and the POKeMON CENTERs' words (ids 1-17646)
 PLACE_NAMES = range(3501, 3528)     # the game's place names
 
 
@@ -66,7 +67,12 @@ def floors(unpacked, iso_files=None):
 
 
 def common_text(unpacked):
-    return msg.parse(_data(unpacked)[TEXT_BLOCK:])
+    """common_rel's two message tables, as one (the first's line wins: they share no id)"""
+    d = _data(unpacked)
+    out = msg.parse(d[TEXT_BLOCK:])
+    for k, parts in msg.parse(d[TEXT_BLOCK2:]).items():
+        out.setdefault(k, parts)
+    return out
 
 
 def plain(parts):

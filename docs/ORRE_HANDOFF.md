@@ -81,7 +81,7 @@ The road to the end, agreed with the user 2026-11-07 (their answers: ORRE_DECISI
 1. **Story state: done** (below, "Story flags"). 2. **Colosseum's text: done** (below, "Colosseum's text").
 3. **Trainers: done** (below, "Trainers and battles"). 4. **Colosseum's scripts: running** (below, "Colosseum's scripts": its GS VM in the game; more natives as each
    part needs them).
-5. **People on the maps: done** (below, "People on the maps"). 6. Shops, POKéMON CENTERs, the PC.
+5. **People on the maps: done** (below, "People on the maps"). 6. **Shops, POKéMON CENTERs, the PC: done** (below).
 7. The opening (the player as the thief, the SNAG MACHINE), then the ride to the OUTSKIRT STAND. 8. RUI follows the host.
 9. The colosseum challenges (PHENAC, PYRITE, THE UNDER, DEEP COLOSSEUM, REALGAM TOWER). 10. Story scenes, faithful.
 11. Shadow Pokémon's open items (SHADOW_POKEMON.md "Still open"). 12. Music (alongside 4). 13. The bike ride.
@@ -172,7 +172,8 @@ The older notes per part:
 - **Off in players' games** until the opening (step 7) gives a boat arrival its own start: MOEMON_ORRE_SCRIPTS=1
   turns the rooms' scripts on (tests, development); without it nothing runs and no one stands on the maps. (On, the
   OUTSKIRT STAND's main loop would play Colosseum's arrival on the bike, flag 986, with the camera unconverted.) MOEMON_ORRE_VM_TRACE=1 logs every native call and the threads' state.
-- Tools: `python3 -I tools/orre/gsvm.py ROOM.scd [FUNC]` lists a bank (natives named, their constant arguments);
+- Tools: `python3 -I tools/orre/gsvm.py ROOM.scd [FUNC]` lists a bank (natives named, their constant arguments; a
+  `pushn` argument, from a frame variable, shows as ?);
   `gsvm.py common UNPACKED` the shared one. Debug `mp orrescript BANK FUNC` runs a function as a scene. Scenario
   orre_scene_willie: WILLIE's scene at the OUTSKIRT STAND (flags 986 / 988 set: past the arrival) from the main loop,
   his lines, YES / NO, battle 10, his loss line, the flags it sets (990, 2650, 991).
@@ -211,6 +212,42 @@ The older notes per part:
 - Scenario orre_scene_willie: WILLIE shown by his scene, walking in and stopping two steps south of the player (the
   test puts the player at 25,28, where Colosseum's hero stands for it), the battle, then the room's set-up showing him
   at his place and A in front of him running his talk script (0x0100000D: 20790).
+
+## Shops, POKéMON CENTERs, the PC (2026-11-08)
+- **Colosseum's own, through Kai's screens.** Nothing is written by hand: the nurse, the clerks and the PCs run their
+  own scripts (orre_vm.c), and the natives open Kai's screens.
+- **The nurse** (pc_b1, a person with a talk script: 15102 "Hello, and welcome to the POKéMON CENTER...", YES / NO,
+  15104, 15106, 15108). Her std083 (Colosseum's pokemonCenterBallMachineSequence / HealSequence) heals the party
+  (HealPlayerParty) with Kai's healing jingle (W_FANFARE). Those lines are in a **second message table of
+  common_rel** (.data 0x647B4, 684 lines, ids 1-17646: the menus' and the centers' words), now in the text pack too
+  (colo_data.py TEXT_BLOCK2, common_text).
+- **People behind counters** are talked to across them: on an ORRE map, A on a blocked tile reaches the one past it,
+  as Kai does over counters (field_control_avatar.c GetInteractedObjectEventScript; Colosseum reaches people a little
+  way off: peopleFindTalkTarget).
+- **Check spots** (Colosseum's floor events of kind 3: the PCs, signs, TVs, machines): tools/orre/gen_checks.py writes
+  src/data/orre_room_checks.h (132 rows: the room, the collision id, the script and its four arguments, the box of its
+  check triangles: each .col collision object's + 0x30 slot, a triangle's id at + 0x30; the trigger slot + 0x2C keeps
+  its id at + 0x32). A with a spot's box half a tile around the point 6 units in front of the player's tile
+  (orre_npcs.c Orre_Check_InFront, after the people) runs data/scripts/orre.inc Orre_EventScript_Check: special
+  Orre_VmCheck starts its script with its arguments (heroDispatchEvent's cmsRunSync) holding the field.
+- **The PC**: the shared script 0x0596000D warps to the menu room 913 (pcbox_menu); std098_mapWarpToMenuRoom(913) opens
+  Kai's own PC (EventScript_PC: the boxes, the items, the GLOBAL PC), and turning it off goes back to the scene
+  (pc.inc EventScript_TurnOffPC: specialvar Orre_VmHolding). The other menu rooms (the bag, the P★DA, the name entry...)
+  log "menu room N not converted yet".
+- **Shops**: menuShopOpen(N) opens Kai's POKéMART with Colosseum's list N. tools/orre/gen_shops.py writes
+  src/data/orre_shops.h from pocket_menu.rel (its _prolog publishes the shops at .sbss 0x80478E54: u8 name, u8 kind,
+  u16 the list's start; the lists at 0x80478E44, 0-ended; the count at 0x80478E50): 14 shops. Items are Kai's numbers
+  to 348; Colosseum's own past it (its SCENTS 543-545) are left out until Kai has them (SHADOW_POKEMON.md:
+  purification). Kinds 2-4 are the POKé COUPON counters: not opened yet (the coupons aren't converted). On ORRE's maps
+  the BUY screen shows the field's last 3D picture (o3d.c O3D_ShopPicture, ORRE's own copy of SINNOH's).
+- **Screens from a scene** (W_SCREEN): the thread asks for a screen; while the hold script waits, specialvar
+  Orre_VmScreen tells it which (1 the shop: special Orre_VmShop, waitstate; 2 the PC) and back in the hold loop the
+  thread goes on.
+- Natives also converted: 133 / 134 money (scriptAddPokedoru / GetPokedoru), 120 / 219 items (scriptHaveItem /
+  scriptAddItem, to 348).
+- Scenario orre_center: PHENAC's POKéMON CENTER (45,3): the nurse heals (HP 10 -> full), the PC opens and closes;
+  PHENAC's mart (45,8): a POTION bought (¥3000 -> ¥2700).
+- Seen, not yet looked into: PHENAC's mart floor draws as blue speckles (a texture of that room's model).
 
 ## Trainers and battles (src/orre/orre_battle.c, 2026-11-08)
 - **Read at run time** from common_rel in the data pack (nothing generated or committed): battles (fightEncount: .data

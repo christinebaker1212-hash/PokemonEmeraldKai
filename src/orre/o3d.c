@@ -887,9 +887,31 @@ static bool8 OnField(void)
     return gMain.callback2 == CB2_Overworld || gMain.callback2 == CB2_OverworldBasic;
 }
 
+// The BUY screen of a mart on an ORRE map (shop.c): the field's last 3D picture, moved by DX DY as Emerald moves its map
+// so the player stands where the screen puts them (SINNOH's engine does the same for its own maps)
+static struct { bool8 on; s16 dx, dy; } sShopPic;
+
+static void ShopLine(int line, u16 layers[4][DISPLAY_WIDTH])
+{
+    s32 x, sy = line - sShopPic.dy;
+    if (line == 0)
+        FindFade();
+    for (x = 0; x < W; x++)
+    {
+        s32 sx = x - sShopPic.dx;
+        layers[3][x] = (sy >= 0 && sy < H && sx >= 0 && sx < W) ? Faded(sColor[sy][sx]) : Faded(0);
+        layers[2][x] = 0;
+    }
+}
+
 static void O3dLine(int line, u16 layers[4][DISPLAY_WIDTH])
 {
     s32 x;
+    if (sShopPic.on && !OnField())
+    {
+        ShopLine(line, layers);
+        return;
+    }
     if (!sView.active || !OnField())
         return;
     if (line == 0)
@@ -941,10 +963,19 @@ bool8 O3D_Active(void)
     return sView.active && OnField();
 }
 
+void O3D_ShopPicture(bool8 on, s16 dx, s16 dy)
+{
+    sShopPic.on = on && sView.active;
+    sShopPic.dx = dx, sShopPic.dy = dy;
+    if (sShopPic.on)
+        gMpO3dLine = O3dLine;
+}
+
 void O3D_Update(void)
 {
     s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
     sView.active = map >= 0 && MapLoad((u32)map);
+    sShopPic.on = FALSE;   // (back on the field)
     gMpO3dLine = sView.active ? O3dLine : NULL;
     gMpO3dOamHidden = sView.active && !getenv("MOEMON_O3D_NOHIDE") ? OamHidden : NULL;
     Orre_Vm_Frame();   // (Colosseum's scripts: src/orre/orre_vm.c; they stop off ORRE)

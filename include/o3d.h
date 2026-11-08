@@ -7,6 +7,7 @@ struct MapLayout;
 
 void O3D_Update(void);       // every overworld frame: is this an ORRE map, and from where is it seen
 bool8 O3D_Active(void);      // this frame's field is drawn by ORRE's engine
+void O3D_ShopPicture(bool8 on, s16 dx, s16 dy);   // a mart's BUY screen shows the field's last picture (shop.c)
 bool8 O3D_IsOrreGroup(u8 mapGroup);
 bool8 O3D_PackPresent(void);   // ORRE's pack (orre/orre3d.pak) is here (the boat: src/orre/orre_ferry.c)
 u8 O3D_ArrivalDir(u16 map, s16 x, s16 y);   // the way a player landing on an ORRE room's entry faces (DIR_NONE: none)

@@ -798,3 +798,6 @@ gSpecials::
 	def_special Orre_VmHold   @ Moemon Kai: a Colosseum scene holds the field (src/orre/orre_vm.c)
 	def_special Orre_VmHolding   @ Moemon Kai: ... TRUE while it still does
 	def_special Orre_VmTalk   @ Moemon Kai: an ORRE person's talk script (src/orre/orre_vm.c)
+	def_special Orre_VmScreen   @ Moemon Kai: ORRE: the Kai screen a scene opens (src/orre/orre_vm.c)
+	def_special Orre_VmShop
+	def_special Orre_VmCheck   @ Moemon Kai: ORRE: a check spot of Colosseum's
