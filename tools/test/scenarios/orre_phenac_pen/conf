@@ -1,0 +1,11 @@
+# PHENAC's pen round RUI's sack (gate 40) holds until she's free: its bottom row is also gate 42 and the place's way
+# out, and opening 42 at the set-up used to clear the tiles 40 keeps shut (orre_vm.c SetGate: a tile stays shut while
+# any closed gate covers it; closed gates laid again every frame). A save that left before, coming back with RUI in
+# the sack (a state Colosseum's set-up has no case for), gets the kidnappers' scene again and can free her (the user,
+# 2026-11-08). check.py: still in the pen after pressing down into the way out. Needs ORRE's packs.
+MODE=1
+TMO=900
+WARP=45,0,33,40
+ENV_A="MOEMON_DEBUG_PARTY=150:100,150:100 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1 MOEMON_ORRE_FLAG_LOG=1"
+EXPECT_A=("where map 45.2 xy 47,108" "the kidnappers' scene plays again" "orre npcs: RUI follows" "orre vm: gate 40 open")
+UNEXPECT_A=("[crash]" "TIMEOUT")

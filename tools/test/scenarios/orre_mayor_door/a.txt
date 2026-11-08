@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 30
+mp orrestory 2466
+mp warp 45,2,30,64
+wait 150
+pressuntil A field 3000
+walkto 29 60 600
+pressuntil A field 9000
+wait 30
+mp where
+
+wait 10
+press UP 40
+wait 120
+mp where
+quit

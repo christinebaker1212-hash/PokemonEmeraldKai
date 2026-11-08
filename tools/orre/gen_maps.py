@@ -87,7 +87,7 @@ def main(src):
             ws += [(tid, x, y) for y, x in tiles]
         walk = [(y, x) for y in range(g["h"]) for x in range(g["w"]) if g["walk"][y, x]]
         land = []
-        for ex, ez, ang in m["entries"]:
+        for (ex, ez, ang), ey in zip(m["entries"], m["entry_ys"]):
             tx, ty = int((ex - g["x0"]) // g["tile"]), int((ez - g["z0"]) // g["tile"])
             y, x = min(walk, key=lambda p: (abs(p[0] - ty) + abs(p[1] - tx), p))
             at = [i for i, w in enumerate(ws) if (w[1], w[2]) == (x, y)]
@@ -95,7 +95,7 @@ def main(src):
                 ws.append((None, x, y))
                 at = [len(ws) - 1]
             land.append(at[0])
-            arrivals.append((m["id"], x, y, ang))
+            arrivals.append((m["id"], x, y, ang, ey * 16.0 / g["tile"]))
         warps[m["file"]], landing[m["file"]] = ws, land
 
     def dest_warp(file, entry):
@@ -196,10 +196,11 @@ def main(src):
                 "// Colosseum's floor table (tools/orre/colo_data.py: what the world map's destinations name)\n")
         f.write("static const struct { u16 map; const char *file; u8 bw, bh, startX, startY; u16 room; } sOrreMaps[] = {\n")
         f.write("\n".join(table) + "\n};\n")
-        f.write("\n// where each entry of Colosseum's rooms lands, and the way the player faces there (the entry's angle)\n")
-        f.write("static const struct { u16 map; u8 x, y, dir; } sOrreArrivals[] __attribute__((unused)) = {\n")
-        for mid, x, y, ang in arrivals:
-            f.write("    {%s, %d, %d, %s},\n" % (mid, x, y, facing(ang)))
+        f.write("\n// where each entry of Colosseum's rooms lands, the way the player faces there (the entry's angle) and its\n"
+                "// height in Kai's units (the ground the player stands on there, where a tile has more than one)\n")
+        f.write("static const struct { u16 map; u8 x, y, dir; s16 h; } sOrreArrivals[] __attribute__((unused)) = {\n")
+        for mid, x, y, ang, h in arrivals:
+            f.write("    {%s, %d, %d, %s, %d},\n" % (mid, x, y, facing(ang), int(round(h))))
         f.write("};\n")
     print("%d ORRE maps" % len(maps))
 

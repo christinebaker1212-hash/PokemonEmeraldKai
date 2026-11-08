@@ -77,6 +77,7 @@ typedef struct
     u16 w, h;                 // tiles
     u16 *blocks;              // the field engine's map blocks (metatile | collision << 10 | elevation << 12)
     u8 *hn;                   // the ground's heights at each tile's centre: how many (more than one: a bridge)
+    s8 *trig;                 // each tile's trigger: Colosseum's collision id (-1 none: a door's, a way out's...)
     float (*hgt)[3];          // ... lowest first
     u32 nmesh;
     OMesh *mesh;
@@ -330,6 +331,9 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
     om->blocks = malloc(sizeof(u16) * ((u32)gw * gh + 1));
     om->hn = calloc((u32)gw * gh, 1);
     om->hgt = calloc((u32)gw * gh, sizeof(*om->hgt));
+    om->trig = malloc((u32)gw * gh + 1);
+    if (om->trig)
+        memset(om->trig, -1, (u32)gw * gh + 1);
     for (y = 0; y < gh && cells; y++)
         for (x = 0; x < gw; x++)
         {
@@ -337,6 +341,8 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
             u32 k = (u32)y * gw + x, n = t[2] > 3 ? 3 : t[2], j;
             om->blocks[k] = (t[0] & 1) ? (WALK + t[3]) : BLOCKED;   // (t[3]: the tile's behavior: a warp's)
             om->hn[k] = (u8)n;
+            if (om->trig)
+                om->trig[k] = (s8)t[1];
             for (j = 0; j < n; j++)
             {
                 float hh;
@@ -462,6 +468,7 @@ static void SceneFree(void)
     free(sScene.blocks);
     free(sScene.hn);
     free(sScene.hgt);
+    free(sScene.trig);
     memset(&sScene, 0, sizeof(sScene));
 }
 
@@ -679,6 +686,21 @@ static void ShotView(void)
     sView.focal = (DISPLAY_HEIGHT / 2) / tanf(fov * 0.5f * 3.14159265f / 180.0f);
 }
 
+// A player just arrived on a map: the ground of the entry they land on, where its tile has more than one (PHENAC's
+// PRE GYM door is over the level under the plaza: the lower one hid the player in it, the user 2026-11-08); 0 else
+static float ArrivalHeight(void)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    u16 id = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    s16 x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
+    u32 i;
+    (void)map;
+    for (i = 0; i < ARRAY_COUNT(sOrreArrivals); i++)
+        if (sOrreArrivals[i].map == id && sOrreArrivals[i].x == x && sOrreArrivals[i].y == y)
+            return sOrreArrivals[i].h;
+    return 0.0f;
+}
+
 static void SetupView(void)
 {
     const struct Sprite *s = &gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId];
@@ -696,7 +718,7 @@ static void SetupView(void)
     sView.ay = s->y + s->y2 + gSpriteCoordOffsetY - s->centerToCornerVecY - 8;
     sView.tx = sView.camX + sView.ax;
     sView.tz = sView.camY + sView.ay;
-    sView.ty = GroundAt(sView.tx, sView.tz, sView.havePlayerH ? sView.playerH : 0.0f);
+    sView.ty = GroundAt(sView.tx, sView.tz, sView.havePlayerH ? sView.playerH : ArrivalHeight());
     sView.playerH = sView.ty;
     sView.havePlayerH = TRUE;
     sView.eye[0] = sView.tx;
@@ -760,6 +782,15 @@ static u8 sSpriteScaleFrame[MAX_SPRITES];
 static u8 sSpriteOffFrame[MAX_SPRITES];
 static bool8 sSpriteOff[MAX_SPRITES];
 
+static s16 sSpriteLift[MAX_SPRITES];
+static u8 sSpriteLiftFrame[MAX_SPRITES];
+
+void O3D_LiftSprite(u16 spriteId, s32 lift)
+{
+    if (spriteId < MAX_SPRITES)
+        sSpriteLift[spriteId] = (s16)lift, sSpriteLiftFrame[spriteId] = sView.frame;
+}
+
 static void SpriteOff(u16 spriteId, bool8 off)
 {
     if (spriteId < MAX_SPRITES)
@@ -819,7 +850,7 @@ u16 O3D_SpriteScale(u16 spriteId)
 
 void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float *depth)
 {
-    float sx, sy, d, h, near = sView.ty;
+    float sx, sy, d, h, fy, near = sView.ty;
     float wx = sView.camX + x, wz = sView.camY + feetY - 8;
     if (spriteId < MAX_SPRITES)
         sSpriteScale[spriteId] = 0;
@@ -857,16 +888,25 @@ void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         *depth = 0.0f;
         return;
     }
+    fy = sy + 8.0f;
     if (spriteId < MAX_SPRITES)
     {
-        // (wholly beside the picture, as big as it's drawn: anchored at its feet, scaled about them)
+        // (wholly beside the picture, as big as it's drawn: anchored at its feet, scaled about them; one held to 3x
+        // keeps its head where the head is and gives up its feet: a close shot frames a face, and RUI's, from a camera
+        // at her knees, sank under the message box with her feet: the user, 2026-11-08)
         const struct Sprite *sp = &gSprites[spriteId];
-        float sc = 1.0f, hw = -sp->centerToCornerVecX, ht = -2 * sp->centerToCornerVecY, fy = sy + 8.0f;
+        float sc = 1.0f, hw = -sp->centerToCornerVecX, ht = -2 * sp->centerToCornerVecY;
+        bool8 lifted = (u8)(sView.frame - sSpriteLiftFrame[spriteId]) <= 1;
         if (O3D_CamActive())
         {
             float field = (96.0f / tanf(HALF_FOV * 3.14159265f / 180.0f)) / CAM_DIST, s = (sView.focal / d) / field;
             sc = s < 1.0f / 16 ? 1.0f / 16 : s > 3.0f ? 3.0f : s;
+            // (a lifted one keeps to its owner's head: the owner's height, its lift and the 8 its bottom overlaps)
+            if (s > 3.0f)
+                fy -= (lifted ? sSpriteLift[spriteId] + 8 : ht) * (s - 3.0f);
         }
+        if (lifted)
+            fy -= sSpriteLift[spriteId] * sc;   // (over its owner's head, as big as the spot is drawn)
         SpriteOff(spriteId, sx + hw * sc < -8.0f || sx - hw * sc > DISPLAY_WIDTH + 8.0f || fy < -8.0f
                          || fy - ht * sc > DISPLAY_HEIGHT + 8.0f);
     }
@@ -881,7 +921,7 @@ void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         sSpriteScaleFrame[spriteId] = sView.frame;
     }
     *outX = (s32)floorf(sx + 0.5f);
-    *outY = (s32)floorf(sy + 0.5f) + 8;
+    *outY = (s32)floorf(fy + 0.5f);
     *depth = d;
 }
 
@@ -912,7 +952,10 @@ s32 O3D_DepthSubpriority(const struct Sprite *sprite)
 // A sprite is an upright card standing at its spot: a pixel dy above its feet is dy * tan(pitch) nearer the camera
 float gO3dSpriteDepth[MAX_SPRITES];
 s16 gO3dSpriteFeet[MAX_SPRITES];
-typedef struct { float d0; s16 feet; u8 flat, refl; } OamDepth;   // flat: a shadow on the ground; refl: a reflection
+// slope: how much nearer the camera the card is a screen line above its feet: the field's camera, 1:1, tan(59.05);
+// a scene's camera from its own pitch and the size it draws the sprite at (a level camera: about none, so its upper
+// body never counts as in front of a handrail it stands behind: the user, 2026-11-08)
+typedef struct { float d0, slope; s16 feet; u8 flat, refl; } OamDepth;   // flat: a shadow on the ground; refl: a reflection
 static OamDepth sPendingOam[OAM_ENTRY_COUNT], sLiveOam[OAM_ENTRY_COUNT];
 static bool8 sLiveAny;
 
@@ -920,9 +963,19 @@ void O3D_NoteOam(u16 spriteId, u16 first, u16 end)
 {
     u16 i;
     bool8 on = sView.active && spriteId < MAX_SPRITES && gSprites[spriteId].coordOffsetEnabled;
+    float slope = 1.6652f;   // (the field's camera: tan(59.05 degrees))
+    if (on && O3D_CamActive())
+    {
+        // (a world unit up the card is fwd.y nearer and up.y lines higher at the sprite's own drawn size)
+        float sc = O3D_SpriteScale(spriteId) / 256.0f;
+        if (sc <= 0.0f)
+            sc = 1.0f;
+        slope = sView.up[1] > 0.05f ? -sView.fwd[1] / (sView.up[1] * sc) : 0.0f;
+    }
     for (i = first; i < end && i < OAM_ENTRY_COUNT; i++)
     {
         sPendingOam[i].d0 = on ? gO3dSpriteDepth[spriteId] : 0.0f;
+        sPendingOam[i].slope = on ? slope : 0.0f;
         sPendingOam[i].feet = on ? gO3dSpriteFeet[spriteId] : 0;
         sPendingOam[i].flat = on && gSprites[spriteId].mpShadow;
         sPendingOam[i].refl = on && FieldEffect_IsReflectionSprite(&gSprites[spriteId]);
@@ -972,7 +1025,7 @@ static bool OamHidden(int oamIndex, int x, int line)
         return TRUE;
     if (o->flat)   // (a shadow lies on the ground: only a wall in front hides it)
         return sDepth[line][x] < o->d0 - 16.0f;
-    d = o->d0 - (o->feet - line) * 1.6652f;   // tan(59.05 degrees)
+    d = o->d0 - (o->feet - line) * o->slope;
     return sDepth[line][x] < d - 6.0f;
 }
 
@@ -1439,6 +1492,19 @@ float O3D_TestGround(s32 mapX, s32 mapY, float near)
     return GroundAt((float)mapX, (float)mapY, near);
 }
 
+// The trigger (Colosseum's collision id) on tile X, Y of the current ORRE map (map coordinates, no MAP_OFFSET); -1 none
+s32 O3D_TriggerAt(s32 x, s32 y)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    const OMap *g;
+    if (map < 0 || !MapLoad((u32)map))
+        return -1;
+    g = &sPack.map[map];
+    if (g->trig == NULL || x < 0 || y < 0 || x >= g->w || y >= g->h)
+        return -1;
+    return g->trig[(u32)y * g->w + x];
+}
+
 bool8 O3D_Active(void)
 {
     return sView.active && OnField();
@@ -1471,7 +1537,12 @@ void O3D_Update(void)
     }
     if (sView.map != map)
     {
+        u32 i;
         sView.havePlayerH = FALSE;   // (a new map: its own ground)
+        // (and every sprite's last height forgotten: the PRE GYM's floor, 0, put the player on PHENAC's lower level
+        // under the plaza by its door, hidden in it until they walked off the two-level tiles: the user, 2026-11-08)
+        for (i = 0; i < MAX_SPRITES; i++)
+            sSpriteHFrame[i] = (u8)(sView.frame - 100);
         if (O3D_CamActive() && !O3D_CamKeep())
             O3D_CamStop();   // (a shot belongs to its room)
     }

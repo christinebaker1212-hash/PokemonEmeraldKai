@@ -46,12 +46,16 @@ void O3D_NoteOam(u16 spriteId, u16 first, u16 end);
 // event_object_movement.c SetObjectSubpriorityByElevation on an ORRE map: the subpriority a field sprite's distance
 // from the camera gives (nearer in front, whatever way the camera looks); -1: not on ORRE's field
 s32 O3D_DepthSubpriority(const struct Sprite *sprite);
-u16 O3D_SpriteScale(u16 spriteId);   // under a shot: how big the sprite is where it stands (Q8; 0: as drawn)
+u16 O3D_SpriteScale(u16 spriteId);
+// This frame, the sprite stands on its owner's spot and is drawn LIFT texel rows above it (scaled as the spot is):
+// an emotion bubble over a person's head (trainer_see.c SpriteCB_TrainerIcons)
+void O3D_LiftSprite(u16 spriteId, s32 lift);   // under a shot: how big the sprite is where it stands (Q8; 0: as drawn)
 void O3D_CommitOam(void);
 // ORRE's tiles carry their behavior in their metatile id (O3D_METATILE_BEHAVIOR + behavior: src/orre/o3d.c)
 #define O3D_METATILE_BEHAVIOR 0x300
 // The blocks of a map's layout: an ORRE map's come from its pack (Colosseum's collision), others are the layout's
 const u16 *O3D_LayoutBlocks(const struct MapLayout *layout);
+s32 O3D_TriggerAt(s32 x, s32 y);   // a tile's trigger (Colosseum's collision id) on the current ORRE map; -1 none
 float O3D_TestGround(s32 mapX, s32 mapY, float near);   // tests: the ground's height at a map pixel, NaN none
 // Colosseum's units on the current ORRE map (its scripts' positions), and its file and room (src/orre/orre_vm.c)
 bool8 O3D_TileToColo(s16 x, s16 y, float *cx, float *cz);

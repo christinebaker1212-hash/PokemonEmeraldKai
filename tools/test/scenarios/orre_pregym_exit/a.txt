@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 30
+mp orrestory 2467
+mp warp 45,10,33,39
+wait 150
+pressuntil A field 3000
+press DOWN 30
+wait 120
+mp where
+rendershot out0
+press DOWN 8
+wait 20
+mp where
+rendershot out1
+quit

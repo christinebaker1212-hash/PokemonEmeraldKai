@@ -250,6 +250,24 @@ The older notes per part:
 - Seen, not yet looked into: PHENAC's mart floor draws as blue speckles (a texture of that room's model).
 
 ## Colosseum's cameras (src/orre/o3d_cam.c, 2026-11-08)
+- **Playtest fixes after 1.179.0** (the user's playthrough):
+  - Gates overlap: PHENAC's 42 is the bottom row of 40 (RUI's pen) and the place's way out. orre_vm.c SetGate keeps a
+    tile shut while any closed gate covers it, and KeepGates lays the closed ones again every frame (a battle's
+    return rebuilds the map). PHENAC's set-up has no case for "the kidnappers gone, RUI in the sack" (Colosseum's pen
+    never let anyone out): entering the room in that state (a save that left, or saved in the pen) clears 993-995 so
+    the kidnappers' scene plays again (Orre_Vm_RoomEntered). Scenario orre_phenac_pen.
+  - Wide doors: a door's trigger can be wider than the tiles a person reaches in it (the MAYOR's: three, one
+    reached). Walking into an unreachable part of a door's trigger takes the door its reached tile takes, unless a
+    gate shuts that tile (field_control_avatar.c TryOrreWideDoor, o3d.c O3D_TriggerAt from the pack's cells).
+    Scenario orre_mayor_door.
+  - Occlusion under a scene's camera: a sprite row's depth above its feet follows that camera's pitch and the drawn
+    scale (o3d.c O3D_NoteOam slope), not the field's 59 degrees (the hunters stood in front of the diner's rails).
+  - A sprite held to 3x keeps its head where its head is (a close shot frames faces; RUI's knee-high shot sank her
+    under the message box). Emotion bubbles stand on their person's spot, lifted over the head at the spot's scale
+    (trainer_see.c SpriteCB_TrainerIcons -> O3D_LiftSprite).
+  - Heights across maps: sprites forget their last ground height on a new map and an arrival starts on its entry's
+    own height (sOrreArrivals.h from Colosseum's entry y: tools/orre/gen_maps.py); the PRE GYM's door is on a tile with
+    two grounds and the gym floor's 0 picked the lower. Scenario orre_pregym_exit.
 - **Sprites in depth, out of the picture, cameras handed back** (the user's playthrough after 1.178.0: far people over
   near ones; the diner's waitress and the player standing on the TV in its news shot; PHENAC's "please untie RUI"
   still under a cinematic angle):

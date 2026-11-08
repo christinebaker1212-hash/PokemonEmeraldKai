@@ -69,6 +69,7 @@ static bool8 IsArrowWarpMetatileBehavior(u16, u8);
 static s8 GetWarpEventAtMapPosition(struct MapHeader *, struct MapPosition *);
 static void SetupWarp(struct MapHeader *, s8, struct MapPosition *);
 static bool8 TryDoorWarp(struct MapPosition *, u16, u8);
+static bool8 TryOrreWideDoor(struct MapPosition *);
 static s8 GetWarpEventAtPosition(struct MapHeader *, u16, u16, u8);
 static const u8 *GetCoordEventScriptAtPosition(struct MapHeader *, u16, u16, u8);
 static const struct BgEvent *GetBackgroundEventAtPosition(struct MapHeader *, u16, u16, u8);
@@ -235,6 +236,8 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     if (input->heldDirection2 && input->dpadDirection == playerDirection)
     {
         if (TryDoorWarp(&position, metatileBehavior, playerDirection) == TRUE)
+            return TRUE;
+        if (TryOrreWideDoor(&position) == TRUE)
             return TRUE;
     }
     if (input->pressedAButton && TrySetupDiveDownScript() == TRUE)
@@ -1038,6 +1041,37 @@ static void SetupWarp(struct MapHeader *unused, s8 warpEventId, struct MapPositi
         MP_Garden_RedirectWarp(warpEvent->mapGroup, warpEvent->mapNum);
         MP_Region_SharedExit(warpEvent->mapGroup, warpEvent->mapNum);   // Moemon Kai: out of the GARDEN / GAME CENTER in JOHTO / KANTO
     }
+}
+
+// Moemon Kai: an ORRE door is wider than the tiles a person can stand on in it (the MAYOR's in PHENAC: three tiles of
+// its trigger, one reached). Walking into a part of a door's trigger no one can stand on takes the door its reached
+// tile takes, unless that tile is shut (a story gate: orre_vm.c SetGate), the user 2026-11-08
+static bool8 TryOrreWideDoor(struct MapPosition *position)
+{
+    s32 tid, dx, dy;
+    if (!O3D_Active() || MapGridGetCollisionAt(position->x, position->y) == 0)
+        return FALSE;
+    tid = O3D_TriggerAt(position->x - MAP_OFFSET, position->y - MAP_OFFSET);
+    if (tid < 0)
+        return FALSE;
+    for (dy = -3; dy <= 3; dy++)
+        for (dx = -3; dx <= 3; dx++)
+        {
+            struct MapPosition at = {position->x + dx, position->y + dy, position->elevation};
+            s8 warpEventId;
+            u16 behavior;
+            if (O3D_TriggerAt(at.x - MAP_OFFSET, at.y - MAP_OFFSET) != tid || MapGridGetCollisionAt(at.x, at.y) != 0)
+                continue;
+            behavior = MapGridGetMetatileBehaviorAt(at.x, at.y);
+            warpEventId = GetWarpEventAtMapPosition(&gMapHeader, &at);
+            if (warpEventId == WARP_ID_NONE || !IsWarpMetatileBehavior(behavior))
+                continue;
+            StoreInitialPlayerAvatarState();
+            SetupWarp(&gMapHeader, warpEventId, &at);
+            DoWarp();
+            return TRUE;
+        }
+    return FALSE;
 }
 
 static bool8 TryDoorWarp(struct MapPosition *position, u16 metatileBehavior, u8 direction)

@@ -102,7 +102,7 @@ def load(unpacked):
                     entry = 0   # (REALGAM's lift to its casino names an entry the room hasn't: its only one)
                 warps[col] = (to.file, entry)
         out.append({"file": file, "id": ident, "name": name, "room": r.room, "place": r.place, "place_name": place,
-                    "entries": [(e[1], e[3], e[0]) for e in r.entries], "start": (r.entries[0][1], r.entries[0][3]),
+                    "entries": [(e[1], e[3], e[0]) for e in r.entries], "entry_ys": [e[2] for e in r.entries], "start": (r.entries[0][1], r.entries[0][3]),
                     "gates": sorted(r.gates), "warps": warps, "exits": exits,
                     "elevators": {col: l[3] for col, l in r.links.items() if l[0] == "elevator"}})
     return out

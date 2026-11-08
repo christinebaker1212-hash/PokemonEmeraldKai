@@ -832,6 +832,7 @@ void Orre_Npc_Surprise(u32 group, u32 index)
     gFieldEffectArguments[1] = gSaveBlock1Ptr->location.mapNum;
     gFieldEffectArguments[2] = gSaveBlock1Ptr->location.mapGroup;
     FieldEffectStart(FLDEFF_EXCLAMATION_MARK_ICON);
+    MPNet_Log("orre npcs: %u surprised", index);
 }
 
 // std172_characterGetPosition: where they stand, in Colosseum's units (their tile's centre); FALSE: no such person

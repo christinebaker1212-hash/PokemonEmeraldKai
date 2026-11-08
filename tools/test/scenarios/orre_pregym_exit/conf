@@ -1,0 +1,11 @@
+# Out of PHENAC's PRE GYM: its door lands on a tile with two grounds (the plaza's ramp and the level under it); a
+# sprite kept its height from the room it left (the gym's floor, 0) and stood on the lower one, hidden in the plaza
+# until it walked off the two-level tiles (the user, 2026-11-08). Sprites forget their heights on a new map and an
+# arrival starts on its entry's own height (sOrreArrivals.h). check.py: the player's white cap in the picture.
+MODE=1
+TMO=300
+WARP=45,0,33,40
+ENV_A="MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1"
+EXPECT_A=("where map 45.2 xy 48,65")
+UNEXPECT_A=("[crash]")
+CHECK="python3 tools/test/scenarios/orre_pregym_exit/check.py"

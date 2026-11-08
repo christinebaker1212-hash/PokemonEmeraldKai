@@ -1,4 +1,5 @@
 #include "global.h"
+#include "o3d.h"
 #include "s3d.h"   // Moemon Kai
 #include "mp.h"
 #include "battle_setup.h"
@@ -926,6 +927,14 @@ static void SpriteCB_TrainerIcons(struct Sprite *sprite)
         sprite->y = objEventSprite->y - 16;
         sprite->x2 = objEventSprite->x2;
         sprite->y2 = objEventSprite->y2 + sprite->sYOffset;
+        if (O3D_Active())
+        {
+            // Moemon Kai: on ORRE's 3D maps the bubble stands on its person's spot, lifted over their head as tall as
+            // they're drawn (16 up the screen is a spot behind them under a scene's camera: the user, 2026-11-08)
+            sprite->y = objEventSprite->y - objEventSprite->centerToCornerVecY + sprite->centerToCornerVecY;
+            sprite->y2 = objEventSprite->y2;
+            O3D_LiftSprite(sprite - gSprites, -2 * objEventSprite->centerToCornerVecY - 8 - sprite->sYOffset);
+        }
         // Moemon Co-op: a friend's icon hides with them (far away its place on the screen would wrap round onto ours)
         if (MP_IsMpObjectEvent(&gObjectEvents[objEventId]))
             sprite->invisible = objEventSprite->invisible;

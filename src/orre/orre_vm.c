@@ -659,21 +659,52 @@ static void NewsEvent(struct Thread *t)
 }
 
 // scriptSetCol(GATE, ON): GScolsys2SetObjEnable: the gate's tiles impassable while it's on (the maps are built with
-// every gate open: tools/orre/maps.py)
+// every gate open: tools/orre/maps.py). Gates overlap (PHENAC's 42 is the bottom row of 40, RUI's pen, and the place's
+// way out): a tile stays shut while any closed gate covers it, or opening 42 let the player out of the pen before
+// RUI was free (the user, 2026-11-08). Closed gates are laid again every frame: a battle's return rebuilds the map
+static bool8 sGateClosed[ORRE_GATE_COUNT];
+
+static void LayGate(u32 i, bool8 on)
+{
+    u32 k, j, m;
+    for (k = 0; k < sOrreGates[i].count; k++)
+    {
+        const u8 *tile = sOrreGateTiles[sOrreGates[i].first + k];
+        bool8 shut = on;
+        for (j = 0; j < ORRE_GATE_COUNT && !shut; j++)
+            if (j != i && sGateClosed[j] && sOrreGates[j].room == sRoom)
+                for (m = 0; m < sOrreGates[j].count && !shut; m++)
+                {
+                    const u8 *o = sOrreGateTiles[sOrreGates[j].first + m];
+                    shut = o[0] == tile[0] && o[1] == tile[1];
+                }
+        MapGridSetMetatileImpassabilityAt(tile[0] + MAP_OFFSET, tile[1] + MAP_OFFSET, shut);
+    }
+}
+
 static void SetGate(u32 gate, bool8 on)
 {
-    u32 i, k;
+    u32 i;
     for (i = 0; i < ORRE_GATE_COUNT; i++)
         if (sOrreGates[i].room == sRoom && sOrreGates[i].gate == gate)
         {
-            for (k = 0; k < sOrreGates[i].count; k++)
-            {
-                const u8 *tile = sOrreGateTiles[sOrreGates[i].first + k];
-                MapGridSetMetatileImpassabilityAt(tile[0] + MAP_OFFSET, tile[1] + MAP_OFFSET, on);
-            }
+            sGateClosed[i] = on;
+            LayGate(i, on);
             MPNet_Log("orre vm: gate %u %s (%u tiles)", gate, on ? "closed" : "open", sOrreGates[i].count);
             return;
         }
+}
+
+static void KeepGates(void)
+{
+    u32 i, k;
+    for (i = 0; i < ORRE_GATE_COUNT; i++)
+        if (sGateClosed[i] && sOrreGates[i].room == sRoom)
+            for (k = 0; k < sOrreGates[i].count; k++)
+            {
+                const u8 *tile = sOrreGateTiles[sOrreGates[i].first + k];
+                MapGridSetMetatileImpassabilityAt(tile[0] + MAP_OFFSET, tile[1] + MAP_OFFSET, TRUE);
+            }
 }
 
 static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
@@ -1369,6 +1400,7 @@ void Orre_Vm_Frame(void)
     if (gPaletteFade.active)
         return;   // (the field comes back: the scripts wait until it's there, as Colosseum's fades do)
     TryHold();
+    KeepGates();
     Orre_Npcs_Frame();   // (people's looped walk lists)
     if (sHolder == NULL && !sHoldPending && !ScriptContext_IsEnabled() && sRoom)
         Orre_Touch_Frame();   // (the touch spots: orre_npcs.c)
@@ -1460,6 +1492,17 @@ void Orre_Vm_RoomEntered(void)
         sPrevRoom = sLastRoom, sLastRoom = room;
     sEntry = sLinked ? sLinkEntry : O3D_EntryAt(gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y);
     sLinked = FALSE;
+    if (room == 3 && Orre_Flag(993) && !Orre_Flag(996))
+    {
+        // (PHENAC, the kidnappers gone and RUI still in the sack: a state Colosseum's set-up has no case for, its
+        // pen never let the player out; a save that left it before 1.180.0, or saved in it, found no sack and the
+        // pen shut for good (the user, 2026-11-08). The story goes back to before the kidnappers' scene, which
+        // plays again)
+        Orre_SetFlag(993, FALSE);
+        Orre_SetFlag(994, FALSE);
+        Orre_SetFlag(995, FALSE);
+        MPNet_Log("orre vm: PHENAC with RUI still in the sack: the kidnappers' scene plays again");
+    }
     LoadRoomBank(file);
     Orre_Npcs_RoomEntered(room);
     if ((floor = FloorOf(room)) == NULL || sRoomBank.d == NULL)
@@ -1468,6 +1511,7 @@ void Orre_Vm_RoomEntered(void)
         // (Colosseum's collision objects start on: a gate its scripts only ever open starts closed, as its set-up
         // finds it, the set-up opening what the story has opened: tools/orre/gen_gates.py)
         u32 i;
+        memset(sGateClosed, 0, sizeof(sGateClosed));   // (a room entered anew: built with every gate open)
         for (i = 0; i < ORRE_GATE_COUNT; i++)
             if (sOrreGates[i].room == room && sOrreGates[i].closed)
                 SetGate(sOrreGates[i].gate, TRUE);
