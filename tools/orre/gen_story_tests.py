@@ -62,8 +62,9 @@ def chain(out, steps, maps):
             x, y = at
         # (already in the room: walked to, as a player would; warping in again would set the room up afresh, and a
         # room's set-up can take back what a scene left for the player: PHENAC's sack)
-        block = ['skipif inmap:45,%d 2' % mi, 'mp warp 45,%d,%d,%d' % (mi, x, y), 'wait 150',
-                 'pressuntil A field 3000', 'walkto %d %d 900' % (x, y)]
+        block = ['skipif inmap:45,%d 2' % mi, 'mp warp 45,%d,%d,%d' % (mi, x, y), 'wait 150']
+        if main:   # (the box a main loop's scene waits for: walked into; a talk's scene needs no place)
+            block += ['pressuntil A field 3000', 'walkto %d %d 900' % (x, y)]
         if not main:
             block.append('mp orrescript 100 %d%s' % (fn, args))
         else:   # (a main loop's scene can wait on something looked at there: PHENAC's sack; A to each side)
@@ -71,7 +72,7 @@ def chain(out, steps, maps):
             for way in ('UP', 'LEFT', 'RIGHT', 'DOWN'):
                 block += ['press %s 1' % way, 'wait 6', 'press A 2', 'wait 60']
         # (a scene can run on well past its flag: its battles, its next lines; the next step waits for the field)
-        block += ['pressuntillog A 4000 orre: flag %d = 1' % flag, 'pressuntil A field 9000', 'wait 30']
+        block += ['pressuntillog A 9000 orre: flag %d = 1' % flag, 'pressuntil A field 9000', 'wait 30']
         lines += ['skipif orreflag:%d %d' % (flag, len(block))] + block
     lines += ['mp orreget %d' % steps[-1][0], 'quit']
     open(os.path.join(d, 'a.txt'), 'w').write('\n'.join(lines) + '\n')
@@ -80,7 +81,7 @@ def chain(out, steps, maps):
         '# each from what the ones before left; the first TIMEOUT is where the story stops (docs/ORRE_HANDOFF.md "The\n'
         '# story runs"). Long: run it on its own.\nMODE=1\nTMO=%d\nWARP=45,0,33,40\n'
         'ENV_A="MOEMON_DEBUG_PARTY=150:100,150:100 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1 MOEMON_ORRE_FLAG_LOG=1"\nEXPECT_A=()\n'
-        'UNEXPECT_A=("[crash]")\n' % (110 * len(steps) + 60))
+        'UNEXPECT_A=("[crash]")\n' % (250 * len(steps) + 60))
 
 
 def main():

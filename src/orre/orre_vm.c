@@ -1405,7 +1405,10 @@ bool8 Orre_Vm_Debug(u16 bank, u16 func, const u32 *args)
         if (sHolder != NULL)
             return FALSE;   // (a scene of the room's own holds the player: it runs, not a second one)
     }
-    t = Start((u32)bank << 16 | func, args ? 4 : 0, args, FALSE);
+    {
+        static const u32 sNone[4] = {0, 0, 0, 0};   // (four as every scene gets: its return value has its slot)
+        t = Start((u32)bank << 16 | func, 4, args ? args : sNone, FALSE);
+    }
     if (t)
         t->debug = TRUE;
     return t != NULL;
