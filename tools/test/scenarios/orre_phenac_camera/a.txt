@@ -1,0 +1,12 @@
+pressuntil A field 5000
+wait 30
+mp teach 0 94
+mp teach 1 94
+mp orrestory 992
+mp warp 45,2,48,107
+wait 150
+pressuntillog A 12000 orre: flag 992 = 1
+pressuntil A field 9000
+wait 60
+rendershot field
+quit

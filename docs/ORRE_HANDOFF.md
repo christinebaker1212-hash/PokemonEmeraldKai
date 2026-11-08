@@ -250,6 +250,21 @@ The older notes per part:
 - Seen, not yet looked into: PHENAC's mart floor draws as blue speckles (a texture of that room's model).
 
 ## Colosseum's cameras (src/orre/o3d_cam.c, 2026-11-08)
+- **Sprites in depth, out of the picture, cameras handed back** (the user's playthrough after 1.178.0: far people over
+  near ones; the diner's waitress and the player standing on the TV in its news shot; PHENAC's "please untie RUI"
+  still under a cinematic angle):
+  - Order: on an ORRE map SetObjectSubpriorityByElevation takes its row term from the camera's depth
+    (o3d.c O3D_DepthSubpriority: 20 + 2 a quarter tile to 15 tiles, then 2 a tile), not Emerald's screen rows, which wrap
+    at 256 pixels (ORRE's view shows more) and can't follow a scene's camera; effects keyed to their owner (grass,
+    shadows, reflections) keep their +-1 against it, and the same spot gives the same depth.
+  - Out of the picture: a sprite behind the camera, past its near edge or wholly beside the picture (its drawn size)
+    has its OAM entries switched off (o3d.c SpriteOff -> O3D_NoteOam, ST_OAM_AFFINE_ERASE), never moved far off: OAM
+    keeps 9 bits of x and 8 of y, so -327 came back as 185 (scenario orre_news_offscreen).
+  - A shot held on its last frame used to outrank the scene's own camera (sCam before sFree in O3D_CamGet): PHENAC's
+    arrival shot hid the kidnappers' whole camera work and stayed for the player. The scene's camera set or moved
+    after a shot now starts from what the shot shows and replaces it (o3d_cam.c ShotToFree); and whenever no scene
+    holds the player and the field isn't locked, any camera left on eases back to the field's in 0.6 s
+    (orre_vm.c Orre_Vm_Frame -> O3D_CamEaseBack; scenario orre_phenac_camera).
 - **Props as Colosseum's models** (the user, 2026-11-08: "any 3D model like the sack that does not have an appropriate
   sprite... use the original model"; "a soft outline to sprite models to differentiate them"): the rooms' people with
   no ORRE person (src/data/orre_props.h from tools/orre/gen_people.py: 55, 25 models) are packed by

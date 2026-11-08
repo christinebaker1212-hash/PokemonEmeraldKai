@@ -20,6 +20,8 @@ void O3D_FreeFov(float fov);
 void O3D_FreeReturn(float seconds);           // cameraReturn: back to the field's camera
 bool8 O3D_FreeMoving(void);
 bool8 O3D_FreeActive(void);                   // the scene's camera is on (not on its way back)
+bool8 O3D_FreeBack(void);                     // ... on its way back
+void O3D_CamEaseBack(float seconds);          // the player walks: a held shot or the scene's camera back to the field's
 void O3D_FieldView(float eye[3], float rot[3]);
 float O3D_FieldFov(void);                    // ... its vertical field of view (degrees)   // the field camera's eye and rotation in Colosseum's units (o3d.c)
 bool8 O3D_CamActive(void);
@@ -41,6 +43,9 @@ void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
 extern float gO3dSpriteDepth[];
 extern s16 gO3dSpriteFeet[];
 void O3D_NoteOam(u16 spriteId, u16 first, u16 end);
+// event_object_movement.c SetObjectSubpriorityByElevation on an ORRE map: the subpriority a field sprite's distance
+// from the camera gives (nearer in front, whatever way the camera looks); -1: not on ORRE's field
+s32 O3D_DepthSubpriority(const struct Sprite *sprite);
 u16 O3D_SpriteScale(u16 spriteId);   // under a shot: how big the sprite is where it stands (Q8; 0: as drawn)
 void O3D_CommitOam(void);
 // ORRE's tiles carry their behavior in their metatile id (O3D_METATILE_BEHAVIOR + behavior: src/orre/o3d.c)

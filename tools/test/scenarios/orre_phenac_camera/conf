@@ -1,0 +1,12 @@
+# PHENAC's kidnappers (TRUDLY and FOLLY carry RUI's sack in, the double battle, they run): the arrival shot
+# (M1_out_intro.cam) held on its last frame used to outrank the scene's own camera, which never showed and stayed for
+# the player after it ("please untie RUI" under a cinematic angle: the user, 2026-11-08). The scene's camera set
+# after a shot replaces it (o3d_cam.c ShotToFree); once the player walks, any camera left on eases back to the
+# field's (orre_vm.c Orre_Vm_Frame). check.py: the field's camera is back after the scene's last camera line.
+MODE=1
+TMO=600
+WARP=45,0,33,40
+ENV_A="MOEMON_DEBUG_PARTY=150:100,150:100 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1 MOEMON_ORRE_FLAG_LOG=1"
+EXPECT_A=("orre: flag 992 = 1" "orre: flag 993 = 1" "o3d cam: the held shot becomes the scene's camera")
+UNEXPECT_A=("[crash]")
+CHECK="python3 tools/test/scenarios/orre_phenac_camera/check.py"

@@ -754,6 +754,18 @@ static u16 sSpriteScale[MAX_SPRITES];
 
 static u8 sSpriteScaleFrame[MAX_SPRITES];
 
+// A sprite out of the picture this frame (behind the camera, past its near edge, or wholly beside the picture): its OAM
+// entries are switched off (O3D_NoteOam). Never a far-off position: OAM keeps 9 bits of x and 8 of y, so -327 came
+// back as 185 and people behind a shot's camera stood on the diner's TV (the user, 2026-11-08)
+static u8 sSpriteOffFrame[MAX_SPRITES];
+static bool8 sSpriteOff[MAX_SPRITES];
+
+static void SpriteOff(u16 spriteId, bool8 off)
+{
+    if (spriteId < MAX_SPRITES)
+        sSpriteOff[spriteId] = off, sSpriteOffFrame[spriteId] = sView.frame;
+}
+
 // (only a sprite O3D_PlaceSprite placed this frame on ORRE's field: never a battle's, whose sprites reuse the slots)
 // While a scene's camera looks from another side than the field's (which looks north), a person's sprite shows the
 // side of them that camera sees: facing east under a camera looking south is facing its left (the field's west). Their
@@ -833,15 +845,30 @@ void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         if (O3D_CamActive())
         {
             // (behind a shot's camera: not in the picture at all, never left floating where the field had it)
-            *outX = -400;
-            *outY = -400;
+            SpriteOff(spriteId, TRUE);
+            *outX = DISPLAY_WIDTH + 64;
+            *outY = DISPLAY_HEIGHT + 32;
             *depth = 0.0f;
             return;
         }
+        SpriteOff(spriteId, FALSE);
         *outX = x;
         *outY = feetY;
         *depth = 0.0f;
         return;
+    }
+    if (spriteId < MAX_SPRITES)
+    {
+        // (wholly beside the picture, as big as it's drawn: anchored at its feet, scaled about them)
+        const struct Sprite *sp = &gSprites[spriteId];
+        float sc = 1.0f, hw = -sp->centerToCornerVecX, ht = -2 * sp->centerToCornerVecY, fy = sy + 8.0f;
+        if (O3D_CamActive())
+        {
+            float field = (96.0f / tanf(HALF_FOV * 3.14159265f / 180.0f)) / CAM_DIST, s = (sView.focal / d) / field;
+            sc = s < 1.0f / 16 ? 1.0f / 16 : s > 3.0f ? 3.0f : s;
+        }
+        SpriteOff(spriteId, sx + hw * sc < -8.0f || sx - hw * sc > DISPLAY_WIDTH + 8.0f || fy < -8.0f
+                         || fy - ht * sc > DISPLAY_HEIGHT + 8.0f);
     }
     if (O3D_CamActive() && spriteId < MAX_SPRITES)
     {
@@ -856,6 +883,30 @@ void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
     *outX = (s32)floorf(sx + 0.5f);
     *outY = (s32)floorf(sy + 0.5f) + 8;
     *depth = d;
+}
+
+// A field sprite's subpriority from how far its spot is from the camera (the view as last drawn: a frame behind at
+// most): 20 + 2 a quarter tile, to 60 quarters, then 2 a tile, so the field's own +-1 offsets (a shadow under its
+// owner, grass over feet) stay between neighbours; one behind the camera last. The same spot gives the same depth,
+// so an effect at its owner's feet keeps its place against them
+s32 O3D_DepthSubpriority(const struct Sprite *sprite)
+{
+    u16 id = sprite - gSprites;
+    float sx, sy, d, h, wx, wz;
+    s32 q;
+    if (!O3D_Active() || !sprite->coordOffsetEnabled || id >= MAX_SPRITES)
+        return -1;
+    wx = sView.camX + sprite->x + sprite->x2 + gSpriteCoordOffsetX;
+    wz = sView.camY + sprite->y + sprite->y2 - sprite->centerToCornerVecY + gSpriteCoordOffsetY - 8;
+    h = (u8)(sView.frame - sSpriteHFrame[id]) <= 2 ? sSpriteH[id] : sView.ty;
+    if (!Project(wx, h, wz, &sx, &sy, &d))
+        return 230;
+    q = d <= 0.0f ? 0 : (s32)(d / 4.0f);
+    if (q > 60)
+        q = 60 + (q - 60) / 4;
+    if (q > 104)
+        q = 104;
+    return 20 + 2 * q;
 }
 
 // A sprite is an upright card standing at its spot: a pixel dy above its feet is dy * tan(pitch) nearer the camera
@@ -875,6 +926,8 @@ void O3D_NoteOam(u16 spriteId, u16 first, u16 end)
         sPendingOam[i].feet = on ? gO3dSpriteFeet[spriteId] : 0;
         sPendingOam[i].flat = on && gSprites[spriteId].mpShadow;
         sPendingOam[i].refl = on && FieldEffect_IsReflectionSprite(&gSprites[spriteId]);
+        if (on && sSpriteOffFrame[spriteId] == (u8)sView.frame && sSpriteOff[spriteId])
+            gMain.oamBuffer[i].affineMode = ST_OAM_AFFINE_ERASE;   // (out of the picture: switched off)
     }
 }
 

@@ -173,8 +173,44 @@ void O3D_CamStopShot(void)
     StopShot();
 }
 
+bool8 O3D_CamGet(float eye[3], float tgt[3], float *roll, float *fov);
+
+// A shot still held (on its last frame, or playing) becomes the scene's own camera where it is: the scene's camera
+// set or moved after a shot starts from what the shot shows and replaces it (PHENAC's arrival shot outranked the
+// kidnappers' scene, whose camera never showed and stayed for the player: the user, 2026-11-08)
+static void ShotToFree(void)
+{
+    float eye[3], tgt[3], f[3], roll, fov, len;
+    u32 i;
+    if (!sCam.on || !O3D_CamGet(eye, tgt, &roll, &fov))
+        return;
+    for (i = 0; i < 3; i++)
+        f[i] = tgt[i] - eye[i];
+    len = sqrtf(f[0] * f[0] + f[1] * f[1] + f[2] * f[2]);
+    StopShot();
+    if (len < 1e-4f)
+        return;
+    memset(&sFree, 0, sizeof(sFree));
+    memcpy(sFree.eye, eye, sizeof(sFree.eye));
+    sFree.rot[0] = asinf(f[1] / len);
+    sFree.rot[1] = atan2f(-f[0], -f[2]);
+    sFree.rot[2] = roll;
+    sFree.fov = fov;
+    sFree.on = TRUE;
+    MPNet_Log("o3d cam: the held shot becomes the scene's camera");
+}
+
+// The player walks with a scene's camera left on (a shot held, or the scene's own): it eases back to the field's
+void O3D_CamEaseBack(float seconds)
+{
+    ShotToFree();
+    if (sFree.on && !sFree.back)
+        O3D_FreeReturn(seconds);
+}
+
 static void FreeBegin(void)
 {
+    ShotToFree();
     if (sFree.on)
         return;
     memset(&sFree, 0, sizeof(sFree));
@@ -245,6 +281,12 @@ bool8 O3D_FreeActive(void)
     return sFree.on && !sFree.back;
 }
 
+// The scene's camera on its way back to the field's (cameraReturn)
+bool8 O3D_FreeBack(void)
+{
+    return sFree.on && sFree.back;
+}
+
 // cameraMoveEndCheck: a move still going
 bool8 O3D_FreeMoving(void)
 {
@@ -275,7 +317,10 @@ static void FreeTick(void)
             sFree.rd = 0;
     }
     if (sFree.back && sFree.ed == 0 && sFree.rd == 0)
+    {
         memset(&sFree, 0, sizeof(sFree));
+        MPNet_Log("o3d cam: back to the field's camera");
+    }
 }
 
 // Plays the shot NAME of the data pack ("S1_out/cam_s1_out_shot_01.cam") from FRAME; FALSE: no such shot

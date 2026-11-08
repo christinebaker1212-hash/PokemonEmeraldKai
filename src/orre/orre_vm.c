@@ -581,7 +581,7 @@ static void LetGo(struct Thread *t)
         // (the player walks again: a scene camera left where the scene put it goes back to the field's, as the user
         // asked, 2026-11-08: PHENAC's sack scene leaves it on the sack)
         if (O3D_FreeActive() && !O3D_FreeMoving())
-            O3D_FreeReturn(0.6f);
+            O3D_CamEaseBack(0.6f);
         if (sHolding)
         {
             sHolding = FALSE;
@@ -1386,6 +1386,14 @@ void Orre_Vm_Frame(void)
             Poll(t);
         if (t->wait == W_NONE)
             Run(t);
+    }
+    // (the player walks: no scene holds them and nothing locks the field. A scene's camera left where the scene put
+    // it (PHENAC's kidnappers end by finishing, never letting go) eases back to the field's, the user 2026-11-08)
+    if (sHolder == NULL && !sHoldPending && !sHolding && !ScriptContext_IsEnabled() && !ArePlayerFieldControlsLocked()
+     && O3D_CamActive() && !O3D_FreeBack() && !O3D_FreeMoving())
+    {
+        MPNet_Log("orre vm: the player walks: the scene's camera goes back to the field's");
+        O3D_CamEaseBack(0.6f);
     }
 }
 

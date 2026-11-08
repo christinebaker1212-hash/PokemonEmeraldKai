@@ -1,0 +1,11 @@
+# The diner's TV news shot (S1_shop_1F_news.cam) ends close on the TV, the diner's people behind the camera or beside
+# the picture: their sprites are switched off (src/orre/o3d.c SpriteOff), never given far-off coordinates the GBA's
+# 9-bit x / 8-bit y wrap back onto the screen (the player and the waitress stood on the TV's glass: the user,
+# 2026-11-08). check.py: no white of the player's hair above the message box in the last frame. Needs ORRE's packs.
+MODE=1
+TMO=300
+WARP=45,0,33,40
+ENV_A="MOEMON_DEBUG_PARTY=280:50,280:50 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1"
+EXPECT_A=("o3d cam: S1_shop_1F/S1_shop_1F_news.cam" "orre vm: the TV's news (1 lines)")
+UNEXPECT_A=("[crash]" "TIMEOUT waiting")
+CHECK="python3 tools/test/scenarios/orre_news_offscreen/check.py"

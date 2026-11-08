@@ -8350,6 +8350,15 @@ void ObjectEventUpdateElevation(struct ObjectEvent *objEvent)
 void SetObjectSubpriorityByElevation(u8 elevation, struct Sprite *sprite, u8 subpriority)
 {
     u16 y = (sprite->y - sprite->centerToCornerVecY + gSpriteCoordOffsetY + 8) & 0xFF;
+    s32 depth = O3D_DepthSubpriority(sprite);
+    if (depth >= 0)
+    {
+        // Moemon Kai: on ORRE's 3D maps the nearer in front by the camera's own depth (src/orre/o3d.c): the rows
+        // above, wrapped at 256 pixels, put people far up the view in front of nearer ones, and a scene's camera
+        // can look from any side
+        sprite->subpriority = depth + subpriority;
+        return;
+    }
     y = (16 - (y >> 4)) << 1;
 
     sprite->subpriority = sElevationToSubpriority[elevation] + y + subpriority;
