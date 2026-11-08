@@ -11,3 +11,4 @@ EXPECT_A=("[o3d] ORRE's S1_out: 147 meshes" "[test] collision 25 29: 0 behavior 
           "[test] where map 45.0 xy 25,28" "ORRE's S1_shop_1F: 71 meshes"
           "[test] mapname 0x1C0 OUTSKIRT STAND" "[test] music 65535")
 UNEXPECT_A=("[crash]" "TIMEOUT" "no ORRE pack" "where map 45.0 xy 26,29")
+ENV_A="MOEMON_ORRE_SCRIPTS=0"

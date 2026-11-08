@@ -7,3 +7,4 @@ WARP=45,0,33,40
 CHECK="python3 -I tools/orre/check_tests.py tools/test/scenarios/orre_all_maps/expect.txt"
 EXPECT_A=("[test] where map 45.120 xy")
 UNEXPECT_A=("[crash]" "TIMEOUT" "has no grid" "isn't the size of its map" "no ORRE pack")
+ENV_A="MOEMON_ORRE_SCRIPTS=0"

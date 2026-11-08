@@ -6,7 +6,7 @@
 MODE=1
 TMO=300
 WARP=45,0,33,40
-ENV_A="MOEMON_DEBUG_PARTY=280:50,280:50"
+ENV_A="MOEMON_ORRE_SCRIPTS=0 MOEMON_DEBUG_PARTY=280:50,280:50"
 EXPECT_A=("orre: trainer A 2221 (Colosseum's 10): 2 POKeMON, double" "orre: battle 10 (kind 2, field 5): 1 opponent, a loss whites out"
           "orre: battle 10 won" "[test] orre battle result 2")
 UNEXPECT_A=("[crash]" "TIMEOUT" "no battle 10")

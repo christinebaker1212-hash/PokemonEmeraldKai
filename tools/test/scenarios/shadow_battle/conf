@@ -5,7 +5,7 @@
 # moves and their PP are the party's still after both battles (SHADOW RUSH never writes over them).
 MODE=1
 TMO=200
-ENV_A="MOEMON_DEBUG_PARTY=280:30"
+ENV_A="MOEMON_ORRE_SCRIPTS=0 MOEMON_DEBUG_PARTY=280:30"
 EXPECT_A=("shadow: Shadow 1 (species 335) made" "shadow: Shadow 1 sent out, gauge" "shadow: Shadow 1 EXP")
 UNEXPECT_A=("[crash]" "TIMEOUT")
 CHECK="python3 -I tools/orre/check_shadow_battle.py"

@@ -8,3 +8,4 @@ WARP=45,0,25,29
 EXPECT_A=("[test] orrenpc 0 ken_b1 object" "[test] orrenpc 1 hizuki_b1 object" "[test] orrenpc 40 agent_m_b1 object"
           "[test] orrefoe 40 0 (agent_m_b1)" "[test] orre battle picture: agent_m_b1 (flaregrunt,")
 UNEXPECT_A=("[crash]" "TIMEOUT" "no ORRE pack" "people_pics.bin: another table")
+ENV_A="MOEMON_ORRE_SCRIPTS=0"

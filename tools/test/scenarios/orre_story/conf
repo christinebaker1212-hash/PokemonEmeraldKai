@@ -10,3 +10,4 @@ EXPECT_A=("[orre] story flags: 3593" "[test] orreflag 0x5AE 21 (width 5)" "[test
           "[test] orreget 0x407 0" "[test] orreget 0x5AE 3" "[test] orreget 0xA9E 3735928559" "[test] orreget 0xD1 48879"
           "[test] orreget 0xFFF 1")
 UNEXPECT_A=("[crash]" "TIMEOUT" "needs" "more than room")
+ENV_A="MOEMON_ORRE_SCRIPTS=0"

@@ -11,3 +11,4 @@ EXPECT_A=("orre world map: open at room 1, 1 of 9 places shown" "orre world map:
           "orre world map: open at room 1, 2 of 9 places shown" "orre world map: to M1_out"
           "[test] where map 45.2 xy 48,107" "PHENAC CITY")
 UNEXPECT_A=("[crash]" "TIMEOUT" "won't load" "isn't in ORRE's pack")
+ENV_A="MOEMON_ORRE_SCRIPTS=0"

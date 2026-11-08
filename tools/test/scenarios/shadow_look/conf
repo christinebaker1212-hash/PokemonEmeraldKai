@@ -5,7 +5,7 @@
 # picture on the summary screen.
 MODE=1
 TMO=200
-ENV_A="MOEMON_DEBUG_PARTY=156:40"
+ENV_A="MOEMON_ORRE_SCRIPTS=0 MOEMON_DEBUG_PARTY=156:40"
 EXPECT_A=("shadow: Shadow 3 (species 156) made" "shadow: Shadow 3 purified")
 UNEXPECT_A=("[crash]" "TIMEOUT")
 CHECK="python3 -I tools/orre/check_shadow_look.py"

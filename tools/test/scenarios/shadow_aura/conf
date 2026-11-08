@@ -4,7 +4,7 @@
 # "...is in HYPER MODE!" with its aura flaring (turn*). CHECK counts the aura's colours around the QUILAVA.
 MODE=1
 TMO=300
-ENV_A="MOEMON_DEBUG_PARTY=156:40"
+ENV_A="MOEMON_ORRE_SCRIPTS=0 MOEMON_DEBUG_PARTY=156:40"
 EXPECT_A=("shadow: Shadow 3 (species 156) made" "[test] shadow hyper 0: 1" "is in HYPER MODE (end of turn)")
 UNEXPECT_A=("[crash]" "TIMEOUT")
 CHECK="python3 -I tools/orre/check_shadow_aura.py"

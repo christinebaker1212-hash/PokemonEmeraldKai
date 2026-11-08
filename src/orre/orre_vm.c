@@ -1215,11 +1215,11 @@ void Orre_Vm_Stop(void)
 }
 
 // The player arrived in an ORRE room: its bank, its set-up, its main loop (Colosseum's floor record)
-// Colosseum's scripts run in ORRE's rooms (off in players' games until the story plays through: MOEMON_ORRE_SCRIPTS=1
-// for tests and development)
+// Colosseum's scripts run in ORRE's rooms: the story (MOEMON_ORRE_SCRIPTS=0 leaves them off: tests of the maps alone)
 bool8 Orre_Vm_ScriptsOn(void)
 {
-    return getenv("MOEMON_ORRE_SCRIPTS") != NULL;
+    const char *e = getenv("MOEMON_ORRE_SCRIPTS");
+    return e == NULL || strcmp(e, "0") != 0;
 }
 
 void Orre_Vm_RoomEntered(void)
@@ -1229,8 +1229,6 @@ void Orre_Vm_RoomEntered(void)
     const u8 *floor;
     u32 k;
     Orre_Vm_Stop();
-    // (off in players' games until the rooms' people walk and the cameras move: ORRE_HANDOFF step 5; on for tests and
-    // development with MOEMON_ORRE_SCRIPTS=1)
     if (file == NULL || !Orre_Vm_ScriptsOn())
         return;
     sRoom = room;

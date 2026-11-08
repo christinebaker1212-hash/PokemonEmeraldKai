@@ -7,3 +7,4 @@ TMO=300
 WARP=45,0,33,40
 CHECK="python3 -I tools/orre/check_tests.py tools/test/scenarios/orre_all_places/expect.txt"
 UNEXPECT_A=("[crash]" "TIMEOUT" "isn't in the game yet" "won't load")
+ENV_A="MOEMON_ORRE_SCRIPTS=0"

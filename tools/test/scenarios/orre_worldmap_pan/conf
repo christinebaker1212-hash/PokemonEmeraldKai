@@ -7,3 +7,4 @@ TMO=120
 WARP=45,0,25,43
 EXPECT_A=("orre world map: open at room 1, 9 of 9 places shown" "panned 0" "panned 53" "orre world map: cancelled")
 UNEXPECT_A=("[crash]" "TIMEOUT" "won't load" "isn't in ORRE's pack")
+ENV_A="MOEMON_ORRE_SCRIPTS=0"

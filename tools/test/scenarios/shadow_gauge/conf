@@ -9,3 +9,4 @@ CHECK="python3 -I tools/orre/check_shadow.py"
 EXPECT_A=("[test] shadow table 1 species 335 level 30 gauge 30" "[test] shadow make 0 1: 1" "[test] shadow steps 0: 256"
           "[test] shadow steps 0: 0" "[test] shadow make 1 44: 1" "[test] shadow 0: id 0 dp -1")
 UNEXPECT_A=("[crash]" "TIMEOUT")
+ENV_A="MOEMON_ORRE_SCRIPTS=0"

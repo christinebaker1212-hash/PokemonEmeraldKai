@@ -9,3 +9,4 @@ WARP=45,0,33,40
 EXPECT_A=("lines of ORRE's text" "orretext 21065 (found" "RUI: TEST. I'm going" "orretext 20805 (found" "WILLIE: But, yeah, you"
           "orretext 20727 (found" "500! TEST obtained the" "TM01!" "orretext 3501 (found" "AGATE VILLAGE" "orretext 99999 (missing" "Message missing")
 UNEXPECT_A=("[crash]" "TIMEOUT" "no text pack")
+ENV_A="MOEMON_ORRE_SCRIPTS=0"

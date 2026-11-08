@@ -114,7 +114,7 @@ Colosseum's own message id through PLACEHOLDER_ID_ORRE_TEXT, the words it fills 
 trainer / team tables read from the pack at run time, fought as Kai trainer battles through TRAINER_ORRE_A / _B
 (src/orre/orre_battle.c; ORRE_HANDOFF "Trainers and battles"; scenario orre_battle). ORRE's scripts: Colosseum's
 own GS VM bytecode run by src/orre/orre_vm.c (rooms' main loops, scenes holding the field through
-Orre_EventScript_VmHold, natives mapped to Kai; off unless MOEMON_ORRE_SCRIPTS=1 until the opening is done;
+Orre_EventScript_VmHold, natives mapped to Kai; on for players since 2026-11-08, MOEMON_ORRE_SCRIPTS=0 turns them off;
 tools/orre/gsvm.py lists a bank; ORRE_HANDOFF "Colosseum's scripts"; scenario orre_scene_willie). ORRE's rooms' people:
 Colosseum's own (src/data/orre_room_people.h from tools/orre/gen_people.py) as Kai objects shown, moved, turned and
 talked to through the VM (src/orre/orre_npcs.c; A on one runs its talk script; ORRE_HANDOFF "People on the maps").

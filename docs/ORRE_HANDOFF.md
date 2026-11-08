@@ -170,9 +170,8 @@ The older notes per part:
   (114 / 115), items and money, menus, shops, the PC; the rooms' event triggers (the floor's events: pass / touch /
   check) start scenes too. An unconverted native logs once
   ("native N not converted yet") and does nothing.
-- **Off in players' games** until the opening (step 7) gives a boat arrival its own start: MOEMON_ORRE_SCRIPTS=1
-  turns the rooms' scripts on (tests, development); without it nothing runs and no one stands on the maps. (On, the
-  OUTSKIRT STAND's main loop would play Colosseum's arrival on the bike, flag 986, with the camera unconverted.) MOEMON_ORRE_VM_TRACE=1 logs every native call and the threads' state.
+- **On in players' games** (2026-11-08, with the opening built): the rooms' scripts run; MOEMON_ORRE_SCRIPTS=0 turns
+  them off (the maps alone: the maps' and Shadow Pokémon's own tests set it). MOEMON_ORRE_VM_TRACE=1 logs every native call and the threads' state.
 - Tools: `python3 -I tools/orre/gsvm.py ROOM.scd [FUNC]` lists a bank (natives named, their constant arguments; a
   `pushn` argument, from a frame variable, shows as ?);
   `gsvm.py common UNPACKED` the shared one. Debug `mp orrescript BANK FUNC` runs a function as a scene. Scenario

@@ -7,3 +7,4 @@ TMO=500
 EXPECT_A=("orre: sailing from map 9.9" "voyage: arrived" "[test] where map 45.0 xy 33,40" "shadow refused" "orre: sailing back" "orre voyage done")
 UNEXPECT_A=("crash" "out of memory" "TICKET handed over")
 CHECK="python3 -I tools/test/scenarios/orre_voyage/check.py"
+ENV_A="MOEMON_ORRE_SCRIPTS=0"
