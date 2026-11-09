@@ -779,6 +779,10 @@ static void CB2_InitBattleInternal(void)
             SetMonData(&gPlayerParty[i], MON_DATA_ATK, &strong);
             SetMonData(&gPlayerParty[i], MON_DATA_SPATK, &strong);
             SetMonData(&gPlayerParty[i], MON_DATA_SPEED, &strong);
+            // (and Defense / Sp. Def 999: in a battle beside a partner against two foes both can hit one POKéMON
+            // before it moves, and a fainted one leaves the test at the party screen: ETERNA FOREST beside CHERYL)
+            SetMonData(&gPlayerParty[i], MON_DATA_DEF, &strong);
+            SetMonData(&gPlayerParty[i], MON_DATA_SPDEF, &strong);
         }
     }
 
