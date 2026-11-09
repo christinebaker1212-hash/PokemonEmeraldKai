@@ -11,6 +11,7 @@
 #include "event_object_lock.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
+#include "field_control_avatar.h"
 #include "field_screen_effect.h"
 #include "field_special_scene.h"
 #include "field_weather.h"
@@ -472,6 +473,19 @@ static void Task_ExitNonAnimDoor(u8 taskId)
         {
             UnfreezeObjectEvents();
             task->tState = 3;
+            // Moemon Kai: SINNOH's step out of a cave mouth or gate is a step as Platinum takes it: a trigger on the
+            // tile it lands on runs (ETERNA FOREST's CHERYL, waiting one tile in from ROUTE 205: the player arrived
+            // past her trigger and she never joined)
+            if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+            {
+                struct MapPosition pos;
+                const u8 *script;
+                PlayerGetDestCoords(&pos.x, &pos.y);
+                pos.elevation = PlayerGetElevation();
+                script = GetCoordEventScriptAtMapPosition(&pos);
+                if (script != NULL)
+                    ScriptContext_SetupScript(script);
+            }
         }
         break;
     case 3:
