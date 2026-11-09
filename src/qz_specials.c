@@ -277,9 +277,14 @@ u16 QzSetGiovanniModeFlag14A4(void)
     return 0;
 }
 
+// The ROCKET on RADIO TOWER 1F's stairs (flag 0x14A3 hides him) is the past's, like GOLDENROD's above: this only
+// cleared the flag, so he stood on the stairs from a new game on and nobody could climb the tower (1.185.5)
 u16 QzClearRadioTowerFlag14A3(void)
 {
-    FlagClear(FLAG_QZ_0x14A3);
+    if (FlagGet(FLAG_QZ_0x1318))   // GIOVANNI_PAST, below
+        FlagClear(FLAG_QZ_0x14A3);
+    else
+        FlagSet(FLAG_QZ_0x14A3);
     return 0;
 }
 

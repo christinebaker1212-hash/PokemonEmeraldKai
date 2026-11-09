@@ -7143,3 +7143,10 @@ onto (field_control_avatar.c TryStartWarpEventScript), so none could be entered 
 reach. field_player_avatar.c IsSolidHoleWarp: outside HOENN, the player's collision check lets them walk into a solid
 MB_MT_PYRE_HOLE that has a warp, and the warp drops them as in Crystal (HOENN's MT. PYRE holes are open floor already).
 Test johto_holes.
+
+## RADIO TOWER 1F's stairs (1.185.5)
+RADIO TOWER 1F's map script (special QzClearRadioTowerFlag14A3) cleared flag 0x14A3 on every entry, and that flag hides
+object 7, a ROCKET with an empty script standing on the 1F stairs (22,5, an east arrow warp): Quetzal's CELEBI past
+(GIOVANNI's story), like GOLDENROD's 0x14A4 ROCKETs (1.63.11). So the tower could never be climbed and JOHTO stopped at
+the takeover after the 7th badge. qz_specials.c: the flag is cleared only in the past (FLAG_QZ_0x1318), set otherwise.
+The takeover's own stairs grunt (object 3, flag 0x10A5) is a trainer who leaves after his battle. Test johto_radio_stairs.

@@ -1,0 +1,9 @@
+# RADIO TOWER 1F's map script cleared flag 0x14A3 on every entry, which shows Quetzal's past-only ROCKET on the stairs
+# (22,5) for good: nobody could climb the tower, so the takeover (and JOHTO past the 7th badge) couldn't be finished.
+# The flag now follows the CELEBI past (qz_specials.c QzClearRadioTowerFlag14A3, as GOLDENROD's 0x14A4); the stairs'
+# own story grunt (flag 0x10A5) is set aside here
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("flag 5283 = 1" "where map 34.79 xy 22,7" "where map 34.79 xy 22,5" "where map 34.80 ")
+UNEXPECT_A=("[crash]")

@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 60
+mp setflag 0x10A5
+mp warp 34,79,22,7
+wait 120
+mp getflag 0x14A3
+mp where
+mp face up
+wait 4
+press UP 40
+wait 30
+mp where
+mp face right
+wait 4
+press RIGHT 30
+wait 240
+mp where
+quit
