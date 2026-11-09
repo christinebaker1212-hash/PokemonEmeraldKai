@@ -1257,7 +1257,18 @@ u8 GetFirstInactiveObjectEventId(void)
 u8 GetObjectEventIdByLocalIdAndMap(u8 localId, u8 mapNum, u8 mapGroupId)
 {
     if (localId < LOCALID_PLAYER)
-        return GetObjectEventIdByLocalIdAndMapInternal(localId, mapNum, mapGroupId);
+    {
+        u8 id = GetObjectEventIdByLocalIdAndMapInternal(localId, mapNum, mapGroupId);
+        // Moemon Kai: a person talked to across a map's edge belongs to the neighbouring map (KANTO's CUT trees stand
+        // past their own map's edge, a twin of the next map's: CERULEAN's object 10 is the tree on ROUTE 9); a script
+        // naming them by VAR_LAST_TALKED on this map means them
+        struct ObjectEvent *o = &gObjectEvents[gSelectedObjectEvent];
+        if (id == OBJECT_EVENTS_COUNT && gSelectedObjectEvent < OBJECT_EVENTS_COUNT && o->active && !o->isPlayer
+         && o->localId == localId && localId == gSpecialVar_LastTalked
+         && mapNum == gSaveBlock1Ptr->location.mapNum && mapGroupId == gSaveBlock1Ptr->location.mapGroup)
+            id = gSelectedObjectEvent;
+        return id;
+    }
 
     return GetObjectEventIdByLocalId(localId);
 }
@@ -1470,8 +1481,18 @@ void RemoveObjectEventByLocalIdAndMap(u8 localId, u8 mapNum, u8 mapGroup)
     u8 objectEventId;
     if (!TryGetObjectEventIdByLocalIdAndMap(localId, mapNum, mapGroup, &objectEventId))
     {
-        FlagSet(GetObjectEventFlagIdByObjectEventId(objectEventId));
+        u16 flag = GetObjectEventFlagIdByObjectEventId(objectEventId);
+        s16 x = gObjectEvents[objectEventId].currentCoords.x, y = gObjectEvents[objectEventId].currentCoords.y;
+        u8 i;
+        FlagSet(flag);
         RemoveObjectEventFading(&gObjectEvents[objectEventId]);
+        // Moemon Kai: its twin from the neighbouring map on the same tile, gone by the same flag (KANTO's CUT trees
+        // past a map's edge), goes with it
+        for (i = 0; flag != 0 && i < OBJECT_EVENTS_COUNT; i++)
+            if (i != objectEventId && gObjectEvents[i].active && !gObjectEvents[i].isPlayer
+             && gObjectEvents[i].currentCoords.x == x && gObjectEvents[i].currentCoords.y == y
+             && GetObjectEventFlagIdByObjectEventId(i) == flag)
+                RemoveObjectEventFading(&gObjectEvents[i]);
     }
 }
 

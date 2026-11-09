@@ -1,0 +1,9 @@
+# The CUT tree on ROUTE 9 has a twin past CERULEAN's east edge (CERULEAN's object 10, the same flag): walked over from
+# CERULEAN onto ROUTE 9 and cut from there, the twin the player faces belongs to CERULEAN, and the tree's script names
+# it as ROUTE 9's object 10 (event_object_movement.c GetObjectEventIdByLocalIdAndMap: the person talked to across a
+# map's edge; RemoveObjectEventByLocalIdAndMap: the twin on the same tile goes too). The tree goes and the way east opens.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("[test] flag 18 = 1" "goto 37,84 6 8 there" "where map 37.84 xy 6,8")
+UNEXPECT_A=("[crash]" "goto TIMEOUT")

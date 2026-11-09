@@ -7098,3 +7098,13 @@ tools from beaten regions; HMs wait in the GLOBAL PC until their region falls; f
 (MP_RegionItems_Update on every map load, mp_region.c MP_Region_GiveDevices). SINNOH's bike is the MTN. BIKE (811).
 Its "here" is gRegionState.current: during a trip the map is still the old region's. Test region_key_items
 (check.py: the BAG step by step); harness `mp regionitems`.
+
+## People past a map's edge: KANTO's twin CUT trees (1.185.1)
+FireRed's (and Quetzal's) CUT trees where two maps meet stand in both: CERULEAN's object 10 sits at x 50, past its
+48-tile edge, on the tile of ROUTE 9's own object 10, both behind FLAG_TEMP_12 (the same at CELADON / ROUTE 7, ROUTE 2,
+ROUTE 15, FIVE ISLAND). Walking east from CERULEAN the player is on ROUTE 9 before the tree, and the twin they face is
+CERULEAN's (spawned first, found first by GetObjectEventIdByXY): the tree script's `applymovement` / `removeobject
+VAR_LAST_TALKED` looked for ROUTE 9's object 10, so the tree stayed and the way to ROCK TUNNEL was shut.
+event_object_movement.c: GetObjectEventIdByLocalIdAndMap falls back to the person talked to (gSelectedObjectEvent,
+same local id as VAR_LAST_TALKED) when this map has no such person; RemoveObjectEventByLocalIdAndMap also removes any
+twin on the same tile behind the same flag. Test kanto_cut_twin (kanto_cut_tree cuts it from CERULEAN's side).

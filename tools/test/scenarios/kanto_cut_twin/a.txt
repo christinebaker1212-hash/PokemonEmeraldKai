@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 30
+mp givebadges 2
+mp teach 0 15
+mp warp 37,60,44,18
+wait 200
+goto 37,84 1 8 900
+mp face right
+press A 2
+pressuntil A yesno 900
+wait 10
+press A 2
+wait 200
+pressuntil B field 900
+mp getflag 0x12
+goto 37,84 6 8 900
+mp where
+shot twin_cut
+quit

@@ -700,7 +700,12 @@ u16 MP_TestGotoKey(u8 group, u8 num, s32 tx, s32 ty)
     s32 head = 0, tail = 0, m, i;
     const struct MapHeader *h;
     if (gSaveBlock1Ptr->location.mapGroup == group && here == num)
-        return MP_TestWalkKey(tx, ty);
+    {
+        u16 k = MP_TestWalkKey(tx, ty);
+        if (getenv("MOEMON_GOTO_DEBUG") && (Platform_FrameCount() % 60) == 0)
+            printf("[test] goto: here, key %04x\n", k);
+        return k;
+    }
     if (group != 45 && gSaveBlock1Ptr->location.mapGroup != 45)
         return GotoKeyAnywhere(group, num, tx, ty);
     if (group != 45 || gSaveBlock1Ptr->location.mapGroup != 45 || num >= ORRE_TEST_MAPS || here >= ORRE_TEST_MAPS)
