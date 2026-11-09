@@ -1,0 +1,13 @@
+pressuntil A field 5000
+wait 30
+mp battlestyle 1
+mp warp 36,45,20,24
+wait 120
+approach obj 6 4000
+pressuntil A field 6000
+approach obj 5 4000
+pressuntil A field 6000
+approach obj 1 4000
+wait 30
+mp where
+quit

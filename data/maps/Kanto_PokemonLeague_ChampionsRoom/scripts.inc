@@ -19,7 +19,7 @@ Kanto_PokemonLeague_ChampionsRoom_EventScript_8412840::
 	end
 
 Kanto_PokemonLeague_ChampionsRoom_EventScript_8412850::
-	checktrainerflag 0x21B6
+	checktrainerflag TRAINER_QZ_8630
 	goto_if_eq Kanto_PokemonLeague_ChampionsRoom_EventScript_841286E
 	return
 

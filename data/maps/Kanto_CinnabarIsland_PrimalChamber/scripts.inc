@@ -9,7 +9,7 @@ Kanto_CinnabarIsland_PrimalChamber_EventScript_8422176::
 
 @ Kanto_CinnabarIsland_PrimalChamber object 1 (local id 1, gfx 0xC4) at 10,14
 Kanto_CinnabarIsland_PrimalChamber_EventScript_8422180::
-	checktrainerflag 0x22E7
+	checktrainerflag TRAINER_QZ_8935
 	goto_if_eq Kanto_CinnabarIsland_PrimalChamber_EventScript_84221DE
 	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT, TRAINER_QZ_8935, 0, Kanto_CinnabarIsland_PrimalChamber_Text_8422341, Kanto_CinnabarIsland_PrimalChamber_Text_84223FD, Kanto_CinnabarIsland_PrimalChamber_EventScript_842219D
 	release
@@ -59,7 +59,7 @@ Kanto_CinnabarIsland_PrimalChamber_EventScript_8422214::
 
 @ Kanto_CinnabarIsland_PrimalChamber object 2 (local id 2, gfx 0xC3) at 40,14
 Kanto_CinnabarIsland_PrimalChamber_EventScript_8422242::
-	checktrainerflag 0x22E8
+	checktrainerflag TRAINER_QZ_8936
 	goto_if_eq Kanto_CinnabarIsland_PrimalChamber_EventScript_84222A4
 	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT, TRAINER_QZ_8936, 0, Kanto_CinnabarIsland_PrimalChamber_Text_84225A9, Kanto_CinnabarIsland_PrimalChamber_Text_8422657, Kanto_CinnabarIsland_PrimalChamber_EventScript_842225F
 	release

@@ -27,7 +27,7 @@ Kanto_MtEmber_Exterior_EventScript_84136CE::
 Kanto_MtEmber_Exterior_EventScript_84136E1::
 	lock
 	goto_if_unset FLAG_QZ_0x2108, Kanto_MtEmber_Exterior_EventScript_84136FF
-	checktrainerflag 0x2219
+	checktrainerflag TRAINER_QZ_8729
 	goto_if_eq Kanto_MtEmber_Exterior_EventScript_8413709
 	goto_if_eq VAR_QZ_0x5117, 4, Kanto_MtEmber_Exterior_EventScript_8413713
 
@@ -48,7 +48,7 @@ Kanto_MtEmber_Exterior_EventScript_8413713::
 	msgbox Kanto_MtEmber_Exterior_Text_842B10F, MSGBOX_DEFAULT
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_8729, 0, Kanto_MtEmber_Exterior_Text_842B13D
 	msgbox Kanto_MtEmber_Exterior_Text_842B148, MSGBOX_DEFAULT
-	checktrainerflag 0x221A
+	checktrainerflag TRAINER_QZ_8730
 	goto_if_eq Kanto_MtEmber_Exterior_EventScript_8413746
 	release
 	end
@@ -68,7 +68,7 @@ Kanto_MtEmber_Exterior_EventScript_841375B::
 	lock
 	faceplayer
 	goto_if_unset FLAG_QZ_0x2108, Kanto_MtEmber_Exterior_EventScript_841377A
-	checktrainerflag 0x221A
+	checktrainerflag TRAINER_QZ_8730
 	goto_if_eq Kanto_MtEmber_Exterior_EventScript_841378F
 	goto_if_eq VAR_QZ_0x5117, 4, Kanto_MtEmber_Exterior_EventScript_8413799
 
@@ -90,7 +90,7 @@ Kanto_MtEmber_Exterior_EventScript_8413799::
 	msgbox Kanto_MtEmber_Exterior_Text_842B15F, MSGBOX_DEFAULT
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_8730, 0, Kanto_MtEmber_Exterior_Text_842B193
 	msgbox Kanto_MtEmber_Exterior_Text_842B1A2, MSGBOX_DEFAULT
-	checktrainerflag 0x2219
+	checktrainerflag TRAINER_QZ_8729
 	goto_if_eq Kanto_MtEmber_Exterior_EventScript_8413746
 	release
 	end

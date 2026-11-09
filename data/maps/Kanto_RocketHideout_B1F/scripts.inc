@@ -18,7 +18,7 @@ Kanto_RocketHideout_B1F_EventScript_840FBFF::
 	end
 
 Kanto_RocketHideout_B1F_EventScript_8410E47::
-	checktrainerflag 0x216A
+	checktrainerflag TRAINER_QZ_8554
 	call_if_lt Kanto_RocketHideout_B1F_EventScript_8410EDF
 	end
 

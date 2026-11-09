@@ -1,0 +1,12 @@
+pressuntil A field 5000
+wait 30
+mp warp 36,44,8,10
+wait 120
+press DOWN 12
+wait 40
+mp where
+mp warp 36,44,18,3
+wait 120
+goto 36,45 11 14 8000
+mp where
+quit

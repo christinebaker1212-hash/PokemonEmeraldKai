@@ -5,6 +5,7 @@
 #include <string.h>
 #include "platform/gamepad.h"
 #include "global.h"
+#include "menu.h"   // (menucursor)
 #include "orre.h"
 #include "o3d.h"
 #include "orre_people.h"
@@ -530,15 +531,24 @@ static bool8 OrreHasWayOut(const struct MapHeader *h)
 // there, 0xFFFF when it can't go on now
 #define GOTO_MAX_MAPS 256
 static u16 sMapDist[MAP_GROUPS_COUNT][GOTO_MAX_MAPS], sMapDistTarget = 0xFFFF;
+// a warp's map; MAP_DYNAMIC (an elevator's doors) goes where the save's dynamic warp says
+static u16 WarpDestMap(const struct WarpEvent *w)
+{
+    if (w->mapGroup == MAP_GROUP(MAP_DYNAMIC) && w->mapNum == MAP_NUM(MAP_DYNAMIC))
+        return (gSaveBlock1Ptr->dynamicWarp.mapGroup << 8) | gSaveBlock1Ptr->dynamicWarp.mapNum;
+    return (w->mapGroup << 8) | w->mapNum;
+}
 static u16 MapDist(u16 from, u16 target)
 {
     static u16 sSeen[MAP_GROUPS_COUNT][GOTO_MAX_MAPS], sQ[MAP_GROUPS_COUNT * GOTO_MAX_MAPS], sD[MAP_GROUPS_COUNT * GOTO_MAX_MAPS];
     static u16 sStamp;
     s32 head = 0, tail = 0, i;
-    if (target != sMapDistTarget)
+    static u16 sDyn;
+    u16 dyn = (gSaveBlock1Ptr->dynamicWarp.mapGroup << 8) | gSaveBlock1Ptr->dynamicWarp.mapNum;
+    if (target != sMapDistTarget || dyn != sDyn)
     {
         memset(sMapDist, 0xFF, sizeof(sMapDist));
-        sMapDistTarget = target;
+        sMapDistTarget = target, sDyn = dyn;
     }
     if ((from >> 8) >= MAP_GROUPS_COUNT || (from & 0xFF) >= GOTO_MAX_MAPS)
         return 0xFFFF;
@@ -560,11 +570,11 @@ static u16 MapDist(u16 from, u16 target)
         h = Overworld_GetMapHeaderByGroupAndId(c >> 8, c & 0xFF);
         for (i = 0; h && h->events && i < h->events->warpCount; i++)
         {
-            const struct WarpEvent *w = &h->events->warps[i];
-            if (w->mapGroup >= MAP_GROUPS_COUNT || w->mapNum >= GOTO_MAX_MAPS || sSeen[w->mapGroup][w->mapNum] == sStamp)
+            u16 to = WarpDestMap(&h->events->warps[i]);
+            if ((to >> 8) >= MAP_GROUPS_COUNT || (to & 0xFF) >= GOTO_MAX_MAPS || sSeen[to >> 8][to & 0xFF] == sStamp)
                 continue;
-            sSeen[w->mapGroup][w->mapNum] = sStamp;
-            sQ[tail] = (w->mapGroup << 8) | w->mapNum, sD[tail++] = dist + 1;
+            sSeen[to >> 8][to & 0xFF] = sStamp;
+            sQ[tail] = to, sD[tail++] = dist + 1;
         }
         for (i = 0; h && h->connections && i < h->connections->count; i++)
         {
@@ -624,7 +634,7 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
     for (i = 0; gMapHeader.events && i < gMapHeader.events->warpCount; i++)
     {
         const struct WarpEvent *wp = &gMapHeader.events->warps[i];
-        u16 d = (wp->mapGroup << 8) | wp->mapNum, md = d == target ? 0 : MapDist(d, target), key;
+        u16 d = WarpDestMap(wp), md = d == target ? 0 : MapDist(d, target), key;
         u32 score;
         if (md == 0xFFFF)
             continue;
@@ -3703,6 +3713,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // startmenu - the START menu's rows now (POKEDEX / POKEMON by name, others by action number) and the NATIONAL DEX
         void MP_StartMenuDebug(void);
         MP_StartMenuDebug();
+    }
+    else if (strcmp(cmd, "menucursor") == 0)
+    {
+        // menucursor N - put an open menu's cursor (a script's multichoice, an elevator's floors) on row N
+        int n = atoi(arg);
+        Menu_MoveCursor(n - Menu_GetCursorPos());
+        printf("[test] menu cursor %d\n", Menu_GetCursorPos());
     }
     else if (strcmp(cmd, "menu") == 0)
     {

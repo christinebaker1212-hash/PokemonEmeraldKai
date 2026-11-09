@@ -1379,6 +1379,10 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
         blocked = VillaSlotAt(toX - MAP_OFFSET, toY - MAP_OFFSET) >= 0;
         break;
     }
+    // (the rest is SINNOH's ground only: KANTO's FireRed arrow tiles share behaviors 0x54-0x57 with the bike
+    // bridges, and ROCKET HIDEOUT B3F's floor walled the player in)
+    if (!S3D_Active())
+        return blocked;
     // Platinum's bridges (the pack's behavior 0x1D, tools/sinnoh/build_pack.py S3D_BRIDGE): up on the deck, a step
     // off its side onto ground far below is blocked (CYCLING ROAD's lanes over ROUTE 206's valley)
     if (!blocked && MapGridGetMetatileBehaviorAt(fromX, fromY) == MB_UNUSED_1D

@@ -3,7 +3,9 @@
 Quetzal, whose numbers can differ): every `bufferstdstring VAR, N` has an entry N in gStdStrings. And no command
 that scripts use with arguments runs as nop / nop1, which read no arguments, so the arguments would run as commands
 (FireRed's `textcolor 3` was a `return`). And `setmaplayoutindex` names a layout (LAYOUT_...): Quetzal's own layout
-numbers are not this game's (GOLDENROD's roof drew black on another layout's number).
+numbers are not this game's (GOLDENROD's roof drew black on another layout's number). And check / set /
+cleartrainerflag name a TRAINER_: Quetzal's own trainer numbers (0x216E) are not this game's (ROCKET HIDEOUT B4F's
+door never opened).
 
     python3 tools/test/check_scripts.py
 """
@@ -31,6 +33,11 @@ def main():
             if m and not m.group(1).startswith('LAYOUT_'):
                 print('%s:%d: setmaplayoutindex %s: a number, not a LAYOUT_ (tools/quetzal_port: quetzal_rip/layouts quetzal_layout_id)'
                       % (os.path.relpath(f, REPO), n, m.group(1)))
+                bad += 1
+            m = re.match(r'\s*(check|set|clear)trainerflag\s+(0x[0-9A-Fa-f]+|\d+)\b', line)
+            if m:
+                print('%s:%d: %strainerflag %s: a number, not a TRAINER_ (Quetzal\'s trainer %d is TRAINER_QZ_%d)'
+                      % (os.path.relpath(f, REPO), n, m.group(1), m.group(2), int(m.group(2), 0), int(m.group(2), 0)))
                 bad += 1
             m = re.match(r'\s*bufferstdstring\s+\w+,\s*(\w+)', line)
             if m:

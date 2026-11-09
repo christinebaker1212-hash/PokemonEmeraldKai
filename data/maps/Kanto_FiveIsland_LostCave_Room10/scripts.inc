@@ -8,7 +8,7 @@ Kanto_FiveIsland_LostCave_Room10_OnFrame_8414A09:
 	.2byte 0
 
 Kanto_FiveIsland_LostCave_Room10_EventScript_84149F9::
-	checktrainerflag 0x225E
+	checktrainerflag TRAINER_QZ_8798
 	call_if_eq Kanto_FiveIsland_LostCave_Room10_EventScript_8414A03
 	end
 

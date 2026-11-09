@@ -1,0 +1,8 @@
+# ROCKET HIDEOUT B4F: the door to GIOVANNI opens once both guards in front of it are beaten (its scripts' trainer
+# checks named Quetzal's numbers, 0x216E / 0x216F, and never saw them beaten: tools/test/check_scripts.py). Both
+# guards from the elevator side, then up to GIOVANNI through the door.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:60 MOEMON_TEST_STRONG=1 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("approach 3 6 there" "approach 3 5 there" "approach 3 1 there" "talk started")
+UNEXPECT_A=("[crash]" "approach NO WAY" "approach TIMEOUT")

@@ -270,7 +270,7 @@ Kanto_CinnabarIsland_Gym_EventScript_841DE87::
 
 Kanto_CinnabarIsland_Gym_EventScript_841DE89::
 	call Kanto_CinnabarIsland_Gym_EventScript_841DE53
-	checktrainerflag 0x20D5
+	checktrainerflag TRAINER_QZ_8405
 	goto_if_lt Kanto_CinnabarIsland_Gym_EventScript_841DE99
 	releaseall
 	end
@@ -334,7 +334,7 @@ Kanto_CinnabarIsland_Gym_EventScript_841DF50::
 
 Kanto_CinnabarIsland_Gym_EventScript_841DF60::
 	call Kanto_CinnabarIsland_Gym_EventScript_841DE53
-	checktrainerflag 0x20B2
+	checktrainerflag TRAINER_QZ_8370
 	goto_if_lt Kanto_CinnabarIsland_Gym_EventScript_841DF70
 	releaseall
 	end
@@ -398,7 +398,7 @@ Kanto_CinnabarIsland_Gym_EventScript_841E02E::
 
 Kanto_CinnabarIsland_Gym_EventScript_841E03E::
 	call Kanto_CinnabarIsland_Gym_EventScript_841DE53
-	checktrainerflag 0x20D6
+	checktrainerflag TRAINER_QZ_8406
 	goto_if_lt Kanto_CinnabarIsland_Gym_EventScript_841E04E
 	releaseall
 	end
@@ -462,7 +462,7 @@ Kanto_CinnabarIsland_Gym_EventScript_841E105::
 
 Kanto_CinnabarIsland_Gym_EventScript_841E115::
 	call Kanto_CinnabarIsland_Gym_EventScript_841DE53
-	checktrainerflag 0x20B3
+	checktrainerflag TRAINER_QZ_8371
 	goto_if_lt Kanto_CinnabarIsland_Gym_EventScript_841E125
 	releaseall
 	end
@@ -526,7 +526,7 @@ Kanto_CinnabarIsland_Gym_EventScript_841E1DC::
 
 Kanto_CinnabarIsland_Gym_EventScript_841E1EC::
 	call Kanto_CinnabarIsland_Gym_EventScript_841DE53
-	checktrainerflag 0x20D7
+	checktrainerflag TRAINER_QZ_8407
 	goto_if_lt Kanto_CinnabarIsland_Gym_EventScript_841E1FC
 	releaseall
 	end
@@ -590,7 +590,7 @@ Kanto_CinnabarIsland_Gym_EventScript_841E2B3::
 
 Kanto_CinnabarIsland_Gym_EventScript_841E2C3::
 	call Kanto_CinnabarIsland_Gym_EventScript_841DE53
-	checktrainerflag 0x20B4
+	checktrainerflag TRAINER_QZ_8372
 	goto_if_lt Kanto_CinnabarIsland_Gym_EventScript_841E2D3
 	releaseall
 	end

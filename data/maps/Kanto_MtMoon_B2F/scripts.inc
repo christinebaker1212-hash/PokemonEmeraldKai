@@ -26,7 +26,7 @@ Kanto_MtMoon_B2F_EventScript_8410007::
 	lock
 	faceplayer
 	goto_if_set FLAG_QZ_0x2149, Kanto_MtMoon_B2F_EventScript_841004C
-	checktrainerflag 0x20AA
+	checktrainerflag TRAINER_QZ_8362
 	goto_if_eq Kanto_MtMoon_B2F_EventScript_8410056
 	call Kanto_MtMoon_B2F_EventScript_8410022
 	release

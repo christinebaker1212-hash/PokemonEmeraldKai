@@ -7108,3 +7108,19 @@ VAR_LAST_TALKED` looked for ROUTE 9's object 10, so the tree stayed and the way 
 event_object_movement.c: GetObjectEventIdByLocalIdAndMap falls back to the person talked to (gSelectedObjectEvent,
 same local id as VAR_LAST_TALKED) when this map has no such person; RemoveObjectEventByLocalIdAndMap also removes any
 twin on the same tile behind the same flag. Test kanto_cut_twin (kanto_cut_tree cuts it from CERULEAN's side).
+
+## FireRed's arrow tiles are not SINNOH's bike bridges (1.185.2)
+KANTO's kanto_silph_co (ROCKET HIDEOUT, SILPH CO.) and kanto_viridian_gym tilesets carry FireRed's arrow behaviors
+0x54-0x57, which are also SINNOH's bike-bridge / ramp behaviors (MB_UNUSED_54-57, src/sinnoh/s3d_bike.c). Since
+1.132.0 S3D_Gyms_StepBlocked ran SINNOH's bridge, bike-slope and bike-tile rules on every map, so in KANTO the arrows
+were walls (ROCKET HIDEOUT B3F at 8,10: boxed in; its B4F stairs out of reach). The rules after the gym switch now
+apply only while S3D_Active(), and item_use.c's "can't get off the bike here" on 0x54/0x55 too. The arrows are plain
+floor, as before 1.132.0 (FireRed's spinning slide isn't ported). Test kanto_hideout_arrows.
+
+## KANTO's trainer checks by Quetzal's numbers (1.185.2)
+25 `checktrainerflag` lines in KANTO's maps (ROCKET HIDEOUT B1F / B4F, CINNABAR GYM, MT. EMBER, FIVE ISLAND's
+ROCKET WAREHOUSE and LOST CAVE, MT. MOON B2F, CERULEAN, the CHAMPION's room) kept Quetzal's own trainer numbers in hex
+(0x216E = Quetzal's 8558 = TRAINER_QZ_8558): HasTrainerBeenFought looked at a flag nothing sets, so B4F's door to
+GIOVANNI (both guards beaten) never opened. They name TRAINER_QZ_<n> now; tools/test/check_scripts.py fails on a
+numeric check / set / cleartrainerflag. Saves that beat the guards before get the door on B4F's next load (its
+ON_LOAD script reads the same flags).

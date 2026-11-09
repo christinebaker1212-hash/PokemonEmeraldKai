@@ -87,7 +87,7 @@ Kanto_CeruleanCity_EventScript_84161F6::
 Kanto_CeruleanCity_EventScript_8416244::
 	lock
 	faceplayer
-	checktrainerflag 0x2163
+	checktrainerflag TRAINER_QZ_8547
 	goto_if_eq Kanto_CeruleanCity_EventScript_841626F
 	message Kanto_CeruleanCity_Text_842EED4
 	waitmessage

@@ -5,12 +5,12 @@ Kanto_RocketHideout_B4F_MapScripts::
 
 Kanto_RocketHideout_B4F_EventScript_8410F9F::
 	setvar VAR_TEMP_1, 0
-	checktrainerflag 0x216E
+	checktrainerflag TRAINER_QZ_8558
 	call_if_eq Kanto_RocketHideout_B4F_EventScript_8410FE3
-	checktrainerflag 0x216F
+	checktrainerflag TRAINER_QZ_8559
 	call_if_eq Kanto_RocketHideout_B4F_EventScript_8410FE3
 	call_if_ne VAR_TEMP_1, 2, Kanto_RocketHideout_B4F_EventScript_8411165
-	checktrainerflag 0x215C
+	checktrainerflag TRAINER_QZ_8540
 	call_if_eq Kanto_RocketHideout_B4F_EventScript_8410FCB
 	end
 
@@ -112,9 +112,9 @@ Kanto_RocketHideout_B4F_EventScript_84110C9::
 
 Kanto_RocketHideout_B4F_EventScript_84110E4::
 	setvar VAR_TEMP_1, 0
-	checktrainerflag 0x216E
+	checktrainerflag TRAINER_QZ_8558
 	call_if_eq Kanto_RocketHideout_B4F_EventScript_8410FE3
-	checktrainerflag 0x216F
+	checktrainerflag TRAINER_QZ_8559
 	call_if_eq Kanto_RocketHideout_B4F_EventScript_8410FE3
 	call_if_eq VAR_TEMP_1, 2, Kanto_RocketHideout_B4F_EventScript_841119C
 	call_if_eq VAR_TEMP_1, 2, Kanto_RocketHideout_B4F_EventScript_841115D
@@ -129,9 +129,9 @@ Kanto_RocketHideout_B4F_EventScript_8411113::
 
 Kanto_RocketHideout_B4F_EventScript_841112E::
 	setvar VAR_TEMP_1, 0
-	checktrainerflag 0x216E
+	checktrainerflag TRAINER_QZ_8558
 	call_if_eq Kanto_RocketHideout_B4F_EventScript_8410FE3
-	checktrainerflag 0x216F
+	checktrainerflag TRAINER_QZ_8559
 	call_if_eq Kanto_RocketHideout_B4F_EventScript_8410FE3
 	call_if_eq VAR_TEMP_1, 2, Kanto_RocketHideout_B4F_EventScript_841119C
 	call_if_eq VAR_TEMP_1, 2, Kanto_RocketHideout_B4F_EventScript_841115D

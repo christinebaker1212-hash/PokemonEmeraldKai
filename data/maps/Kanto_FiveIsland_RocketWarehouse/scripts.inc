@@ -10,7 +10,7 @@ Kanto_FiveIsland_RocketWarehouse_EventScript_8413CE2::
 
 Kanto_FiveIsland_RocketWarehouse_EventScript_8413CEB::
 	setvar VAR_TEMP_F, 0
-	checktrainerflag 0x221F
+	checktrainerflag TRAINER_QZ_8735
 	call_if_eq Kanto_FiveIsland_RocketWarehouse_EventScript_8413CFA
 	end
 

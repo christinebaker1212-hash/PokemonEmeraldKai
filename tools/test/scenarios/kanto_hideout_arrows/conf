@@ -1,0 +1,9 @@
+# FireRed's arrow tiles (ROCKET HIDEOUT, SILPH CO., VIRIDIAN GYM: behaviors 0x54-0x57) are SINNOH's bike-bridge
+# behaviors too; SINNOH's rules (src/sinnoh/s3d_gyms.c S3D_Gyms_StepBlocked) walled them off in KANTO and B3F's floor
+# shut the player in (8,10: every way out an arrow). They're SINNOH's only now: down the arrows at 8,10, and across B3F
+# from its stairs to B4F's.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:40 MOEMON_TEST_STRONG=1 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("where map 36.44 xy 8,11" "goto 36,45 11 14 there")
+UNEXPECT_A=("[crash]" "goto TIMEOUT" "goto NO WAY")
