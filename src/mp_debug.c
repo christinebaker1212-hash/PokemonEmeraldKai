@@ -7,6 +7,7 @@
 #include "global.h"
 #include "menu.h"   // (menucursor)
 #include "constants/metatile_behaviors.h"
+#include "constants/event_bg.h"
 #include "orre.h"
 #include "o3d.h"
 #include "orre_people.h"
@@ -416,6 +417,27 @@ static bool8 UnseenStanderAt(s16 x, s16 y)
     return FALSE;
 }
 
+// a locked door the CARD KEY opens (SILPH CO.'s: a sign on the door's tiles whose script goes on to Quetzal's door
+// opening, Quetzal_EventScript_8458FE6), at map (x, y): A facing it, with the key in the BAG
+static bool8 KeyDoorAt(s16 x, s16 y)
+{
+    extern const u8 Quetzal_EventScript_8458FE6[];
+    u32 i, j;
+    if (!gMapHeader.events || !CheckBagHasItem(ITEM_CARD_KEY, 1))
+        return FALSE;
+    for (i = 0; i < gMapHeader.events->bgEventCount; i++)
+    {
+        const struct BgEvent *b = &gMapHeader.events->bgEvents[i];
+        uintptr_t want = (uintptr_t)Quetzal_EventScript_8458FE6;
+        if (b->x != x || b->y != y || b->kind > BG_EVENT_PLAYER_FACING_WEST || !b->bgUnion.script)
+            continue;
+        for (j = 0; j + sizeof(uintptr_t) < 48; j++)
+            if (memcmp(b->bgUnion.script + j, &want, sizeof(want)) == 0)
+                return TRUE;
+    }
+    return FALSE;
+}
+
 static bool8 IsArrowWarpBehavior(u8 b)
 {
     return MetatileBehavior_IsNorthArrowWarp(b) || MetatileBehavior_IsSouthArrowWarp(b)
@@ -424,6 +446,7 @@ static bool8 IsArrowWarpBehavior(u8 b)
         || (b == MB_NORMAL && gSaveBlock1Ptr->location.mapGroup != 45);
 }
 
+static s16 sWFromX = -1, sWFromY = -1;
 static void WalkSearch(void)
 {
     static const s8 dx[4] = {0, 0, -1, 1}, dy[4] = {1, -1, 0, 0};
@@ -433,12 +456,21 @@ static void WalkSearch(void)
     bool8 surfing = TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING);
     bool8 canSurf = surfing || (MP_Region_HasFieldMoveBadge(4) && PartyHasMonWithSurf());
     s16 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
+    u8 pe = p->currentElevation;
+    if (sWFromX >= 0)
+    {
+        // (from another spot: where a warp pad lands, PadPlan)
+        px = sWFromX, py = sWFromY, surfing = FALSE;
+        pe = MapGridGetElevationAt(px + MAP_OFFSET, py + MAP_OFFSET);
+        if (pe == 0 || pe == 15)
+            pe = p->currentElevation;
+    }
     for (i = 0; i < w * h; i++)
         sWStep[i] = WS_NONE, sWDist[i] = 0xFFFF;
     memset(sWSeen, 0, sizeof(sWSeen));
     sWStep[py * w + px] = 0, sWDist[py * w + px] = 0;
-    sWQueue[tail++] = ((u32)(py * w + px) << 8) | (p->currentElevation << 4) | (surfing ? 1 : 0) | 2;
-    sWSeen[((py * w + px) * 16 + p->currentElevation) >> 3] |= 1 << (((py * w + px) * 16 + p->currentElevation) & 7);
+    sWQueue[tail++] = ((u32)(py * w + px) << 8) | (pe << 4) | (surfing ? 1 : 0) | 2;
+    sWSeen[((py * w + px) * 16 + pe) >> 3] |= 1 << (((py * w + px) * 16 + pe) & 7);
     t = *p;
     t.trackedByCamera = FALSE;
     // (the player stands nowhere in its own way: as a copy, it would meet itself on the tile it last left)
@@ -488,6 +520,8 @@ static void WalkSearch(void)
                 else if (col == COLLISION_OBJECT_EVENT && PassingObjectAt(nx + MAP_OFFSET, ny + MAP_OFFSET))
                     ne = ElevationAfter(e, nx + MAP_OFFSET, ny + MAP_OFFSET, cx + MAP_OFFSET, cy + MAP_OFFSET);
                     // (someone who wanders, or the tile someone just left: a player waits for them to move on)
+                else if (col == COLLISION_IMPASSABLE && !surf && KeyDoorAt(nx, ny))
+                    how |= WS_A;   // (the CARD KEY's door: A facing it opens it)
                 else if (col == COLLISION_OBJECT_EVENT && ClearableAt(nx + MAP_OFFSET, ny + MAP_OFFSET))
                     how |= WS_A, ne = ElevationAfter(e, nx + MAP_OFFSET, ny + MAP_OFFSET, cx + MAP_OFFSET, cy + MAP_OFFSET);
                 else if (col != COLLISION_OBJECT_EVENT && !surf && IsWarpAt(nx, ny)
@@ -519,6 +553,54 @@ static void WalkSearchNow(void)
     unsigned long Platform_FrameCount(void);
     if (sWStamp != (u32)Platform_FrameCount())
         WalkSearch(), sWStamp = (u32)Platform_FrameCount();
+}
+
+// A maze of warp pads on one map (SAFFRON's gym): the pad to step on first so that, pad after pad, the player lands
+// where (tx, ty) can be walked to; -1 if none. Searched from the player, then from each pad's landing in turn
+#define W_PADS 64
+static s32 PadPlan(s32 tx, s32 ty)
+{
+    unsigned long Platform_FrameCount(void);
+    static u16 sMap = 0xFFFF;
+    static s16 sX = -1, sY = -1, sTx = -1, sTy = -1;
+    static s32 sPlan = -1;
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u16 here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    s32 w = gMapHeader.mapLayout->width, n = gMapHeader.events ? gMapHeader.events->warpCount : 0, i, j;
+    s16 lx[W_PADS], ly[W_PADS];
+    s8 first[W_PADS];
+    u8 q[W_PADS], head = 0, tail = 0;
+    if (sMap == here && sX == p->currentCoords.x && sY == p->currentCoords.y && sTx == tx && sTy == ty)
+        return sPlan;
+    sMap = here, sX = p->currentCoords.x, sY = p->currentCoords.y, sTx = tx, sTy = ty, sPlan = -1;
+    if (n > W_PADS)
+        n = W_PADS;
+    for (i = 0; i < n; i++)
+    {
+        const struct WarpEvent *wp = &gMapHeader.events->warps[i];
+        first[i] = -1, lx[i] = -1;
+        if (((wp->mapGroup << 8) | wp->mapNum) == here && wp->warpId < gMapHeader.events->warpCount)
+            lx[i] = gMapHeader.events->warps[wp->warpId].x, ly[i] = gMapHeader.events->warps[wp->warpId].y;
+    }
+    WalkSearch();
+    for (i = 0; i < n; i++)
+        if (lx[i] >= 0 && sWStep[gMapHeader.events->warps[i].y * w + gMapHeader.events->warps[i].x] != WS_NONE)
+            first[i] = i, q[tail++] = i;
+    while (head < tail && sPlan < 0)
+    {
+        i = q[head++];
+        sWFromX = lx[i], sWFromY = ly[i];
+        WalkSearch();
+        sWFromX = sWFromY = -1;
+        if (sWStep[ty * w + tx] != WS_NONE)
+            sPlan = first[i];
+        for (j = 0; j < n && sPlan < 0; j++)
+            if (lx[j] >= 0 && first[j] < 0 && sWStep[gMapHeader.events->warps[j].y * w + gMapHeader.events->warps[j].x] != WS_NONE)
+                first[j] = first[i], q[tail++] = j;
+    }
+    WalkSearch();   // (the player's own again)
+    sWStamp = (u32)Platform_FrameCount();
+    return sPlan;
 }
 
 // the key for the first step toward (tx, ty) as WalkSearch found it: a D-pad key, or A once facing a step that needs it
@@ -741,8 +823,17 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
     {
         // (on the map already: the way there, else round through another map: ROUTE 12's gatehouse joins its halves)
         u16 k = MP_TestWalkKey(tx, ty);
+        s32 pad;
         if (k != 0xFFFF || !MP_IsInOverworld() || ScriptContext_IsEnabled())
             return k;
+        if (tx >= 0 && w * hh <= W_MAXT && (pad = PadPlan(tx, ty)) >= 0)
+        {
+            // (a pad, then another: SAFFRON's gym)
+            const struct WarpEvent *wp = &gMapHeader.events->warps[pad];
+            k = WalkStepKey(wp->x, wp->y);
+            if (k != 0xFFFF)
+                return k;
+        }
     }
     if (!MP_IsInOverworld() || w * hh > W_MAXT || ScriptContext_IsEnabled())
         return 0xFFFF;
@@ -3161,6 +3252,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "save") == 0)
     {
         u8 TrySavingData(u8 saveType);
+        void SaveMapView(void);
+        SaveMapView();   // (as the START menu's save: the tiles around the player as they are now, never an older save's)
         TrySavingData(SAVE_NORMAL);
     }
     else if (strcmp(cmd, "fishbite") == 0)
