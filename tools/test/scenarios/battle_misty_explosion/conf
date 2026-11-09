@@ -1,0 +1,8 @@
+# MISTY EXPLOSION: EXPLOSION's script (the user faints; DAMP stops it), hitting both foes and the user's partner,
+# its power still raised on MISTY TERRAIN (data/battle_scripts_gen58.inc BattleScript_EffectTerrainBoost). GABBY & TY's
+# double battle: the lead's MISTY EXPLOSION, its partner only SPLASHes.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=26:60,130:60"
+EXPECT_A=(" 0=26:0/145")
+UNEXPECT_A=("[crash]" "battle: move 730 goes on to battler")

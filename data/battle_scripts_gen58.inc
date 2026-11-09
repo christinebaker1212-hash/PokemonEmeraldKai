@@ -404,6 +404,8 @@ BattleScript_EffectEternabeam::
 	goto BattleScript_EffectRecharge
 
 BattleScript_EffectTerrainBoost::
+	@ MISTY EXPLOSION: EXPLOSION's script (the user faints, DAMP stops it), its power still the terrain's
+	jumpifhalfword CMP_EQUAL, gCurrentMove, MOVE_MISTY_EXPLOSION, BattleScript_EffectExplosion
 	goto BattleScript_G59Hit
 
 BattleScript_EffectSteelRoller::

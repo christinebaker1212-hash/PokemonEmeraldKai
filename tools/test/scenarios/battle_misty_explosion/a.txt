@@ -1,0 +1,23 @@
+pressuntil A field 5000
+wait 30
+mp battlestyle 1
+mp teach 0 730
+mp teach 1 150
+mp trainer 51
+pressuntil A action 6000
+mp battlers
+press A 4
+wait 20
+press A 4
+wait 30
+press A 4
+wait 20
+press A 4
+wait 30
+press A 4
+wait 600
+mp battlers
+mash A 30 20
+wait 60
+mp battlers
+quit

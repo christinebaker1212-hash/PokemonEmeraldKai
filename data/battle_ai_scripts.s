@@ -104,6 +104,7 @@ AI_CheckBadMove_CheckSoundproof:
 AI_CheckBadMove_CheckEffect:
 	if_effect EFFECT_SLEEP, AI_CBM_Sleep
 	if_effect EFFECT_EXPLOSION, AI_CBM_Explosion
+	if_move MOVE_MISTY_EXPLOSION, AI_CBM_Explosion
 	if_effect EFFECT_DREAM_EATER, AI_CBM_DreamEater
 	if_effect EFFECT_ATTACK_UP, AI_CBM_AttackUp
 	if_effect EFFECT_DEFENSE_UP, AI_CBM_DefenseUp
@@ -654,6 +655,7 @@ AI_CheckViability:
 	if_effect EFFECT_SLEEP, AI_CV_Sleep
 	if_effect EFFECT_ABSORB, AI_CV_Absorb
 	if_effect EFFECT_EXPLOSION, AI_CV_SelfKO
+	if_move MOVE_MISTY_EXPLOSION, AI_CV_SelfKO
 	if_effect EFFECT_DREAM_EATER, AI_CV_DreamEater
 	if_effect EFFECT_MIRROR_MOVE, AI_CV_MirrorMove
 	if_effect EFFECT_ATTACK_UP, AI_CV_AttackUp

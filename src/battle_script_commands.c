@@ -4730,6 +4730,8 @@ static u8 MpNextSpreadTarget(void)
 // Gen 3's own (EARTHQUAKE, MAGNITUDE, EXPLOSION, TEETER DANCE) go round their targets in their own scripts
 static bool8 MpHitsAllOwnLoop(u16 effect)
 {
+    if (gCurrentMove == MOVE_MISTY_EXPLOSION)   // (EXPLOSION's script: data/battle_scripts_gen58.inc)
+        return TRUE;
     return effect == EFFECT_EARTHQUAKE || effect == EFFECT_MAGNITUDE || effect == EFFECT_EXPLOSION
         || effect == EFFECT_TEETER_DANCE;
 }
