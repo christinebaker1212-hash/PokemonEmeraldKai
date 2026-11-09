@@ -446,7 +446,13 @@ static bool8 IsArrowWarpBehavior(u8 b)
         // (a plain wall with a warp on it is none either, outside ORRE: FUCHSIA's WARDEN's house has one beside its mat)
         || (b == MB_NORMAL && gSaveBlock1Ptr->location.mapGroup != 45)
         // (nor a solid hole: only a boulder goes down it, KANTO's VICTORY ROAD 3F. A door that isn't walked into)
-        || (MetatileBehavior_IsNonAnimDoor(b) && gSaveBlock1Ptr->location.mapGroup != 45 && !S3D_Active());
+        || (MetatileBehavior_IsNonAnimDoor(b) && gSaveBlock1Ptr->location.mapGroup != 45 && !S3D_Active())
+        // (nor a solid tile whose warp is only stepped on. A solid hole is walked into: field_player_avatar.c
+        // IsSolidHoleWarp)
+        || ((MetatileBehavior_IsLadder(b) || MetatileBehavior_IsEscalator(b)
+          || MetatileBehavior_IsLavaridgeB1FWarp(b) || MetatileBehavior_IsLavaridge1FWarp(b)
+          || MetatileBehavior_IsAquaHideoutWarp(b) || MetatileBehavior_IsMossdeepGymWarp(b))
+         && gSaveBlock1Ptr->location.mapGroup != 45 && !S3D_Active());
 }
 
 // A warp on floor the player walks over that the game never takes: walking on warps only on these behaviors
@@ -501,8 +507,9 @@ static void WalkSearch(void)
     {
         u32 q = sWQueue[head++], c = q >> 8, e = (q >> 4) & 15, surf = q & 1, first = (q & 2) != 0, d;
         s16 cx = c % w, cy = c / w;
-        if (!first && IsWarpAt(cx, cy))
-            continue;   // (a warp takes the player away: an end, never a way through)
+        if (!first && IsWarpAt(cx, cy) && !LandingOnlyWarp(cx, cy))
+            continue;   // (a warp takes the player away: an end, never a way through. Not one the game never takes:
+                        // ECRUTEAK GYM's landing square on the way in)
         for (d = 0; d < 4; d++)
         {
             s16 nx = cx + dx[d], ny = cy + dy[d], lx = nx, ly = ny;
@@ -601,7 +608,8 @@ static s32 PadPlan(s32 tx, s32 ty)
     {
         const struct WarpEvent *wp = &gMapHeader.events->warps[i];
         first[i] = -1, lx[i] = -1;
-        if (((wp->mapGroup << 8) | wp->mapNum) == here && wp->warpId < gMapHeader.events->warpCount)
+        if (((wp->mapGroup << 8) | wp->mapNum) == here && wp->warpId < gMapHeader.events->warpCount
+         && !LandingOnlyWarp(wp->x, wp->y))   // (a landing square the game never takes: no pad)
             lx[i] = gMapHeader.events->warps[wp->warpId].x, ly[i] = gMapHeader.events->warps[wp->warpId].y;
     }
     WalkSearch();
@@ -878,7 +886,17 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         {
             // (a pad, then another: SAFFRON's gym)
             const struct WarpEvent *wp = &gMapHeader.events->warps[pad];
-            k = WalkStepKey(wp->x, wp->y);
+            s16 px2 = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET;
+            s16 py2 = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET;
+            if (px2 == wp->x && py2 == wp->y)
+            {
+                // (stood on an arrow warp: its direction takes it. The OLIVINE LIGHTHOUSE's stairs)
+                u8 b = MapGridGetMetatileBehaviorAt(wp->x + MAP_OFFSET, wp->y + MAP_OFFSET);
+                k = MetatileBehavior_IsNorthArrowWarp(b) ? DPAD_UP : MetatileBehavior_IsSouthArrowWarp(b) ? DPAD_DOWN
+                  : MetatileBehavior_IsEastArrowWarp(b) ? DPAD_RIGHT : MetatileBehavior_IsWestArrowWarp(b) ? DPAD_LEFT : 0xFFFF;
+            }
+            else
+                k = WalkStepKey(wp->x, wp->y);
             if (k != 0xFFFF)
                 return k;
         }
