@@ -478,14 +478,50 @@ static bool8 IsArrowWarpBehavior(u8 b)
 // A warp on floor the player walks over that the game never takes: walking on warps only on these behaviors
 // (field_control_avatar.c IsWarpMetatileBehavior) or an arrow warp. HOENN / KANTO / JOHTO only: ORRE and SINNOH warp
 // their own ways
+static bool8 TakenWarpBehavior(u8 b);
 static bool8 LandingOnlyWarp(s16 x, s16 y)
 {
-    u8 b;
     if (gSaveBlock1Ptr->location.mapGroup == 45 || S3D_Active()
      || MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET) != 0)
         return FALSE;
-    b = MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET);
-    return !(MetatileBehavior_IsWarpDoor(b) || MetatileBehavior_IsLadder(b) || MetatileBehavior_IsEscalator(b)
+    return !TakenWarpBehavior(MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET));
+}
+
+// the same for a warp of another map, from its layout (MapDist: ECRUTEAK's landing square from NEW BARK at 39,46 is
+// no way there)
+static bool8 HeaderLandingOnlyWarp(u16 map, const struct MapHeader *h, const struct WarpEvent *wp)
+{
+    const struct MapLayout *l = h ? h->mapLayout : NULL;
+    u16 block, id, split;
+    const u16 *attrs;
+    if ((map >> 8) == 45 || S3D_IsSinnohGroup(map >> 8) || !l || !l->map || wp->x < 0 || wp->y < 0
+     || wp->x >= l->width || wp->y >= l->height)
+        return FALSE;
+    block = l->map[wp->y * l->width + wp->x];
+    id = block & MAPGRID_METATILE_ID_MASK;
+    split = Fieldmap_PrimaryMetatiles(l);
+    if (id < split)
+        attrs = l->primaryTileset ? l->primaryTileset->metatileAttributes : NULL;
+    else
+        attrs = l->secondaryTileset ? l->secondaryTileset->metatileAttributes : NULL, id -= split;
+    if (!attrs)
+        return FALSE;
+    if (block & MAPGRID_COLLISION_MASK)
+    {
+        // (solid: a door walked into, a hole or an arrow warp; a plain wall with a warp on it is none: ECRUTEAK's
+        // 39,46 to NEW BARK)
+        u8 b = attrs[id] & METATILE_ATTR_BEHAVIOR_MASK;
+        return !(MetatileBehavior_IsWarpDoor(b) || MetatileBehavior_IsNonAnimDoor(b) || MetatileBehavior_IsMtPyreHole(b)
+              || MetatileBehavior_IsNorthArrowWarp(b) || MetatileBehavior_IsSouthArrowWarp(b)
+              || MetatileBehavior_IsEastArrowWarp(b) || MetatileBehavior_IsWestArrowWarp(b)
+              || MetatileBehavior_IsLadder(b) || MetatileBehavior_IsEscalator(b));
+    }
+    return !TakenWarpBehavior(attrs[id] & METATILE_ATTR_BEHAVIOR_MASK);
+}
+
+static bool8 TakenWarpBehavior(u8 b)
+{
+    return (MetatileBehavior_IsWarpDoor(b) || MetatileBehavior_IsLadder(b) || MetatileBehavior_IsEscalator(b)
           || MetatileBehavior_IsNonAnimDoor(b) || MetatileBehavior_IsLavaridgeB1FWarp(b)
           || MetatileBehavior_IsLavaridge1FWarp(b) || MetatileBehavior_IsAquaHideoutWarp(b)
           || MetatileBehavior_IsMtPyreHole(b) || MetatileBehavior_IsMossdeepGymWarp(b)
@@ -887,6 +923,8 @@ static u16 MapDist(u16 from, u16 target)
         for (i = 0; h && h->events && i < h->events->warpCount; i++)
         {
             u16 to = WarpDestMap(&h->events->warps[i]);
+            if (HeaderLandingOnlyWarp(c, h, &h->events->warps[i]))
+                continue;
             if ((to >> 8) >= MAP_GROUPS_COUNT || (to & 0xFF) >= GOTO_MAX_MAPS || sSeen[to >> 8][to & 0xFF] == sStamp)
                 continue;
             sSeen[to >> 8][to & 0xFF] = sStamp;
