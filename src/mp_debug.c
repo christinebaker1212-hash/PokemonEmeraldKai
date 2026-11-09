@@ -3364,6 +3364,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] partyhp %d: hp %u status %u\n", i, (unsigned)GetMonData(&gPlayerParty[i], MON_DATA_HP),
                    (unsigned)GetMonData(&gPlayerParty[i], MON_DATA_STATUS));
     }
+    else if (strcmp(cmd, "weatherpal") == 0)
+    {
+        // weatherpal N: the field moves' PreservePaletteInWeather for palette N (16+ sprite slots: Kai has 64, past the
+        // weather table's 32), then the map's width, which a write past the table used to zero (CUT in ETERNA CITY)
+        void PreservePaletteInWeather(u8 preservedPalIndex);
+        void ResetPreservedPalettesInWeather(void);
+        s32 before = gBackupMapLayout.width;
+        PreservePaletteInWeather(atoi(arg));
+        printf("[test] weatherpal %d: map width %d -> %d\n", atoi(arg), (int)before, (int)gBackupMapLayout.width);
+        ResetPreservedPalettesInWeather();
+    }
     else if (strcmp(cmd, "givebadges") == 0)
     {
         // givebadges [REGION] - all 8 badges (HOENN's, or region 1 JOHTO / 2 KANTO's)

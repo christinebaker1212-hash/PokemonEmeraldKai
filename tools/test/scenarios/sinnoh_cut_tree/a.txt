@@ -1,0 +1,32 @@
+pressuntil A field 5000
+mp textspeed 2
+mp platinumstory
+mp givebadges 3
+mp setvar 0x51B6 2
+mp additem 339 1
+mp teachhm 0 339
+wait 30
+mp warp 40,5,16,11
+wait 60
+waitfor field 1000
+wait 30
+press UP 16
+wait 30
+mp where
+press A 4
+pressuntil A yesno 600
+press A 4
+mash A 30 15
+pressuntil A field 6000
+wait 60
+press UP 16
+wait 30
+mp where
+press UP 16
+wait 30
+mp where
+shot cut
+mp weatherpal 56
+mp weatherpal 40
+mp where
+quit

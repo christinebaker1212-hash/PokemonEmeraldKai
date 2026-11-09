@@ -1,0 +1,10 @@
+# CUT on one of ETERNA CITY's trees by TEAM GALACTIC's building, then walking through. The field move's POKéMON
+# picture marks its sprite palette in the weather's table of 32 (PreservePaletteInWeather); a palette in a slot past it
+# (Kai has 64) was written past the table's end into gBackupMapLayout's width, so every tile around the player read
+# as a wall and the player could not move. The tree goes and the player walks on through its tile;
+# mp weatherpal checks the high slots directly (a fresh test save's palettes sit low).
+MODE=1
+TMO=200
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[test] where map 40.5 xy 16,10" "[test] where map 40.5 xy 16,9" "[test] where map 40.5 xy 16,8" "[test] weatherpal 56: map width 79 -> 79" "[test] weatherpal 40: map width 79 -> 79")
+UNEXPECT_A=("[crash]" "TIMEOUT")

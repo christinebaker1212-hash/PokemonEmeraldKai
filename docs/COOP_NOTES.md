@@ -7175,3 +7175,12 @@ ETERNA FOREST's CHERYL waits on exactly that tile (28-29,85, VAR_ETERNA_FOREST_F
 joined. Once the step ends on a SINNOH map, the coord event under the player (GetCoordEventScriptAtMapPosition) runs.
 Test sinnoh_cheryl_forest. (The walk harness's MOEMON_TEST_STRONG also gives Defense / Sp. Def 999: beside a partner
 two foes could knock one POKéMON out, leaving the test at the party screen.)
+
+## Field moves past the weather's palette table (1.185.9)
+A field move's POKéMON picture (CUT, ROCK SMASH...: field_effect.c FldEff_FieldMoveShowMon) has the weather leave its
+sprite palette untinted: field_weather.c PreservePaletteInWeather marks it in sFieldEffectPaletteColorMapTypes, a
+table of 32 (16 BG + 16 sprite palettes). Kai has 64 sprite palette slots, so with many palettes loaded the index ran
+past the table; the bytes after it are gBackupMapLayout, and slot 24 (index 40) zeroed the map's width: every tile read
+as the border (walls), and the player could not move a step (SINNOH: CUT on the trees by ETERNA CITY's TEAM GALACTIC
+building). A palette past the table is now kept apart (sPreservedHighPal, honored by ColorMapType). Test
+sinnoh_cut_tree (mp weatherpal N checks a slot directly).

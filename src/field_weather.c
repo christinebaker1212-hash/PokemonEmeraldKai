@@ -154,9 +154,12 @@ static const u8 ALIGNED(2) sBasePaletteColorMapTypes[32] =
 u8 MP_FindSpritePaletteTag(u16 tag, u8 minSlot);
 // Moemon PC: sprite palettes 16+ (OBJ_PAL_SLOTS) are tinted like the game's dynamic ones
 #define WEATHER_PAL_COUNT (16 + OBJ_PAL_SLOTS)
+static u8 sPreservedHighPal = 0xFF;   // (PreservePaletteInWeather's, past the table)
 static u8 ColorMapType(u8 palIndex)
 {
     if (palIndex >= 16 && MP_FindSpritePaletteTag(0x53C0, 0) == palIndex - 16)
+        return COLOR_MAP_NONE;
+    if (palIndex == sPreservedHighPal && sPaletteColorMapTypes == sFieldEffectPaletteColorMapTypes)
         return COLOR_MAP_NONE;
     if (palIndex >= 32)
         return palIndex < WEATHER_PAL_COUNT ? COLOR_MAP_DARK_CONTRAST : COLOR_MAP_NONE;
@@ -1109,11 +1112,19 @@ void SetWeatherPalStateIdle(void)
 void PreservePaletteInWeather(u8 preservedPalIndex)
 {
     CpuCopy16(sBasePaletteColorMapTypes, sFieldEffectPaletteColorMapTypes, 32);
-    sFieldEffectPaletteColorMapTypes[preservedPalIndex] = COLOR_MAP_NONE;
+    // Moemon PC: a sprite palette past the table's 32 (slots 16+ of the 64) is kept apart: written into the table it
+    // ran past its end into gBackupMapLayout's width, and the map turned to walls around the player (SINNOH's CUT
+    // with many palettes loaded: ETERNA CITY)
+    sPreservedHighPal = 0xFF;
+    if (preservedPalIndex < ARRAY_COUNT(sFieldEffectPaletteColorMapTypes))
+        sFieldEffectPaletteColorMapTypes[preservedPalIndex] = COLOR_MAP_NONE;
+    else
+        sPreservedHighPal = preservedPalIndex;
     sPaletteColorMapTypes = sFieldEffectPaletteColorMapTypes;
 }
 
 void ResetPreservedPalettesInWeather(void)
 {
     sPaletteColorMapTypes = sBasePaletteColorMapTypes;
+    sPreservedHighPal = 0xFF;
 }
