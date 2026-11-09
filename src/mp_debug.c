@@ -494,9 +494,10 @@ static bool8 HeaderLandingOnlyWarp(u16 map, const struct MapHeader *h, const str
     const struct MapLayout *l = h ? h->mapLayout : NULL;
     u16 block, id, split;
     const u16 *attrs;
-    if ((map >> 8) == 45 || S3D_IsSinnohGroup(map >> 8) || !l || !l->map || wp->x < 0 || wp->y < 0
-     || wp->x >= l->width || wp->y >= l->height)
+    if ((map >> 8) == 45 || S3D_IsSinnohGroup(map >> 8) || !l || !l->map)
         return FALSE;
+    if (wp->x < 0 || wp->y < 0 || wp->x >= l->width || wp->y >= l->height)
+        return TRUE;   // (off the map: ROUTE 26 SOUTH's 12,-24)
     block = l->map[wp->y * l->width + wp->x];
     id = block & MAPGRID_METATILE_ID_MASK;
     split = Fieldmap_PrimaryMetatiles(l);
@@ -709,7 +710,8 @@ static bool8 OutwardWarpReached(u16 here)
     for (i = 0; gMapHeader.events && i < gMapHeader.events->warpCount; i++)
     {
         const struct WarpEvent *wp = &gMapHeader.events->warps[i];
-        if (((wp->mapGroup << 8) | wp->mapNum) != here && sWStep[wp->y * w + wp->x] != WS_NONE)
+        if (((wp->mapGroup << 8) | wp->mapNum) != here && wp->x >= 0 && wp->y >= 0 && wp->x < w
+         && wp->y < gMapHeader.mapLayout->height && sWStep[wp->y * w + wp->x] != WS_NONE)
             return TRUE;
     }
     return FALSE;
@@ -1087,8 +1089,9 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         u16 d = WarpDestMap(wp), md = d == target ? 0 : MapDist(d, target), key;
         bool8 pen = FALSE;
         u32 score;
-        if (md == 0xFFFF || d == here)
-            continue;   // (this map's own stairs and holes: PadPlan(-1, -1) below when they're the only way on)
+        if (md == 0xFFFF || d == here || wp->x < 0 || wp->y < 0 || wp->x >= w || wp->y >= hh)
+            continue;   // (this map's own stairs and holes: PadPlan(-1, -1) below when they're the only way on.
+                        // A warp off the map's edge is none: ROUTE 26 SOUTH's 12,-24)
         if (d == target)
             ;   // (back the way the player came is the way when it leads to the map sought: the ICE PATH's HM07)
         else if (sArrMap == here && IsWarpAt(sArrX, sArrY))
