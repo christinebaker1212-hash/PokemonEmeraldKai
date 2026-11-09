@@ -504,6 +504,7 @@ static void WalkSearch(void)
     bool8 surfing = TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING);
     bool8 canSurf = surfing || (MP_Region_HasFieldMoveBadge(4) && PartyHasMonWithSurf());
     bool8 canWhirl = MP_Region_HasFieldMoveBadge(8) && MP_PartyCanUseFieldMove(MOVE_WHIRLPOOL);
+    bool8 canFall = MP_Region_HasFieldMoveBadge(7) && MP_PartyCanUseFieldMove(MOVE_WATERFALL);
     s16 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
     u8 pe = p->currentElevation;
     if (sWFromX >= 0)
@@ -540,7 +541,20 @@ static void WalkSearch(void)
                 continue;
             t.currentCoords.x = cx + MAP_OFFSET, t.currentCoords.y = cy + MAP_OFFSET, t.currentElevation = e;
             t.currentMetatileBehavior = MapGridGetMetatileBehaviorAt(cx + MAP_OFFSET, cy + MAP_OFFSET);   // (one-way tiles: from here)
-            if (surf && canWhirl && WhirlpoolAt(nx, ny))
+            if (surf && canFall && d == 1
+             && MetatileBehavior_IsWaterfall(MapGridGetMetatileBehaviorAt(nx + MAP_OFFSET, ny + MAP_OFFSET)))
+            {
+                // (up a waterfall: A facing it while surfing north, the player rides up to its top. MT. MORTAR,
+                // TOHJO FALLS)
+                lx = nx, ly = ny;
+                while (ly > 0 && MetatileBehavior_IsWaterfall(MapGridGetMetatileBehaviorAt(lx + MAP_OFFSET, ly + MAP_OFFSET)))
+                    ly--;
+                if (MapGridGetCollisionAt(lx + MAP_OFFSET, ly + MAP_OFFSET)
+                 || !MetatileBehavior_IsSurfableWaterOrUnderwater(MapGridGetMetatileBehaviorAt(lx + MAP_OFFSET, ly + MAP_OFFSET)))
+                    continue;
+                how |= WS_A;
+            }
+            else if (surf && canWhirl && WhirlpoolAt(nx, ny))
             {
                 // (JOHTO's whirlpools, two deep: A facing one slides the player three tiles on, over them.
                 // DRAGON'S DEN B1F's way to the SHRINE)
@@ -612,6 +626,15 @@ static void WalkSearch(void)
                     if (!MetatileBehavior_IsIce(MapGridGetMetatileBehaviorAt(lx + MAP_OFFSET, ly + MAP_OFFSET)))
                         break;
                 }
+            }
+            // (onto a waterfall from above or its side: it carries the player down to its foot)
+            if (nsurf && !(how & WS_A)
+             && MetatileBehavior_IsWaterfall(MapGridGetMetatileBehaviorAt(lx + MAP_OFFSET, ly + MAP_OFFSET)))
+            {
+                while (ly + 1 < h && MetatileBehavior_IsWaterfall(MapGridGetMetatileBehaviorAt(lx + MAP_OFFSET, ly + MAP_OFFSET)))
+                    ly++;
+                if (MapGridGetCollisionAt(lx + MAP_OFFSET, ly + MAP_OFFSET))
+                    continue;
             }
             n = ly * w + lx;
             if (sWSeen[(n * 16 + ne) >> 3] & (1 << ((n * 16 + ne) & 7)))
