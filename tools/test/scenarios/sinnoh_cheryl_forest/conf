@@ -1,0 +1,8 @@
+# ETERNA FOREST from ROUTE 205: the step in from the forest's mouth lands on CHERYL's trigger (Platinum's coord event
+# at 28-29,85, VAR_ETERNA_FOREST_FOLLOWER_CHERYL_STATE 0) and she comes to join the player, state 1. The automatic
+# step out of a SINNOH cave mouth used to be a scripted movement that ran no trigger, and she never joined.
+MODE=1
+TMO=200
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[test] where map 41.61" "[test] var 0x51B8 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

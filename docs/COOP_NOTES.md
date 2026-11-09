@@ -7167,3 +7167,11 @@ movement started earlier went on past the script's end, and releaseall (ScriptMo
 the movement task) cut it short: ROUTE 205 SOUTH's grunt who pushes the player back off the bridge (local 14, 24,77)
 was left at 25,77, so the west half of the bridge was open and the VALLEY WINDWORKS story could be skipped. Scenes
 now run as long as Platinum's (sinnoh_dw_b1f's waits lengthened). Test sinnoh_route205_bridge.
+
+## SINNOH: the step out of a cave mouth or gate runs its trigger (1.185.8)
+Arriving through a SINNOH warp the player takes one step out (field_screen_effect.c Task_ExitNonAnimDoor,
+SinnohArrivalDir). That step is a held movement, which never ran a coord event; Platinum's arrival step does, and
+ETERNA FOREST's CHERYL waits on exactly that tile (28-29,85, VAR_ETERNA_FOREST_FOLLOWER_CHERYL_STATE 0), so she never
+joined. Once the step ends on a SINNOH map, the coord event under the player (GetCoordEventScriptAtMapPosition) runs.
+Test sinnoh_cheryl_forest. (The walk harness's MOEMON_TEST_STRONG also gives Defense / Sp. Def 999: beside a partner
+two foes could knock one POKéMON out, leaving the test at the party screen.)

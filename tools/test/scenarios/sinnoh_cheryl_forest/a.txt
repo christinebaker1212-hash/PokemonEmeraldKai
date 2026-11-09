@@ -1,0 +1,21 @@
+pressuntil A field 5000
+mp platinumstory
+mp setvar 0x524E 2
+mp setvar 0x524F 3
+mp setvar 0x51B8 0
+wait 30
+mp warp 40,25,14,7
+wait 60
+waitfor field 1000
+wait 30
+press UP 16
+wait 20
+press UP 16
+wait 200
+mp where
+mash A 60 15
+pressuntil A field 9000
+mp where
+mp getvar 0x51B8
+shot cheryl
+quit
