@@ -508,7 +508,9 @@ static void LoadSavedMapView(void)
 
         for (j = x; j < x + MAP_OFFSET_W; j++)
         {
-            if (!SkipCopyingMetatileFromSavedMap(&sBackupMapData[j + width * i], width, yMode))
+            // (Moemon PC: never an undefined tile: a view saved while the map's width was overwritten (a field move
+            // past the weather's palette table, 1.185.9) held nothing but those, and walled the player in on load)
+            if (*mapView != MAPGRID_UNDEFINED && !SkipCopyingMetatileFromSavedMap(&sBackupMapData[j + width * i], width, yMode))
                 sBackupMapData[j + width * i] = *mapView;
             mapView++;
         }

@@ -7182,5 +7182,7 @@ sprite palette untinted: field_weather.c PreservePaletteInWeather marks it in sF
 table of 32 (16 BG + 16 sprite palettes). Kai has 64 sprite palette slots, so with many palettes loaded the index ran
 past the table; the bytes after it are gBackupMapLayout, and slot 24 (index 40) zeroed the map's width: every tile read
 as the border (walls), and the player could not move a step (SINNOH: CUT on the trees by ETERNA CITY's TEAM GALACTIC
-building). A palette past the table is now kept apart (sPreservedHighPal, honored by ColorMapType). Test
-sinnoh_cut_tree (mp weatherpal N checks a slot directly).
+building). A palette past the table is now kept apart (sPreservedHighPal, honored by ColorMapType). A save made while
+stuck kept a map view of undefined tiles (SaveMapView read the buffer with width 0) that walled the player in again
+on load: fieldmap.c LoadSavedMapView never copies an undefined tile back. Test sinnoh_cut_tree (mp weatherpal N checks
+a slot directly).
