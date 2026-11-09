@@ -7150,3 +7150,11 @@ object 7, a ROCKET with an empty script standing on the 1F stairs (22,5, an east
 (GIOVANNI's story), like GOLDENROD's 0x14A4 ROCKETs (1.63.11). So the tower could never be climbed and JOHTO stopped at
 the takeover after the 7th badge. qz_specials.c: the flag is cleared only in the past (FLAG_QZ_0x1318), set otherwise.
 The takeover's own stairs grunt (object 3, flag 0x10A5) is a trainer who leaves after his battle. Test johto_radio_stairs.
+
+## JOHTO's VICTORY ROAD 2F boulder (1.185.6)
+Quetzal's VICTORY ROAD (1F -> 2F -> 3F -> ROUTE 23) only goes on from 2F's lower half through the one-tile corridor
+x9 rows 9-11 to the ladder at 5,2 (3F 4,6, the exit 28,2); 2F's other warps up lead to a 3F pocket whose hole drops
+back down, and 2F's warps 5-9 are holes' landing squares. Its STRENGTH boulder stood at 9,11: pushed from below it
+stops at 9,10 against 9,9's wall with the player behind it, so the LEAGUE was out of reach for everyone. The boulder
+(object 1) starts at 10,10, the corridor's side pocket: pushed east to 11,10 it clears the way. A save that jammed it
+gets it back on entering the floor (object templates load with the map). Test johto_victory_road.

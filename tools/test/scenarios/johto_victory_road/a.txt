@@ -1,0 +1,39 @@
+pressuntil A field 5000
+wait 60
+mp setflag 0x11B2
+mp setflag 0x11B3
+mp setflag 0x11B4
+mp setflag 0x11B5
+mp setflag 0x11B6
+mp setflag 0x11B7
+mp setflag 0x11B8
+mp setflag 0x11B9
+mp additem 342 1
+mp teachhm 0 342
+mp warp 35,100,9,13
+wait 120
+mp face up
+wait 4
+press UP 50
+wait 30
+mp where
+mp face right
+wait 10
+press A 4
+pressuntil A yesno 3000
+wait 30
+press A 4
+pressuntil B field 3000
+mp face right
+wait 4
+press RIGHT 8
+wait 28
+wait 30
+mp objat 11 10
+goto 35,100 5 3 3000
+mp where
+goto 35,99 -1 -1 3000
+mp where
+goto 35,24 -1 -1 6000
+mp where
+quit

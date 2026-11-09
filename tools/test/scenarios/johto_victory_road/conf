@@ -1,0 +1,8 @@
+# JOHTO's VICTORY ROAD 2F (Quetzal's) had its STRENGTH boulder at 9,11, the one corridor from the floor 1F's ladder
+# reaches to the ladder up at 5,2: pushed from below it jammed at 9,10 against the wall and the player with it, so the
+# LEAGUE couldn't be reached. The boulder starts at 10,10 now, the corridor's side: pushed east, the way opens (1.185.6)
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_TEST_STRONG=1"
+EXPECT_A=("where map 35.100 xy 9,10" "objat 11,10: local 1" "where map 35.100 xy 5,3" "where map 35.99 " "where map 35.24 ")
+UNEXPECT_A=("[crash]")
