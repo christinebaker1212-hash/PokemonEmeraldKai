@@ -1,0 +1,9 @@
+# ROUTE 205's TEAM GALACTIC grunts keep the bridge to the VALLEY WINDWORKS closed: stepping between them, the west one
+# pushes the player back and walks back to his post (Platinum's WaitMovement waits for every movement started: the
+# converted waitmovement used to wait for the player's short step only, the script ended and cut his walk short,
+# leaving 24,77 open). After the push the player tries the west half of the bridge and stays on it.
+MODE=1
+TMO=200
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[test] var 0x524E = 1" "[test] npc local 14 gfx 1070 xy 24,77" "[test] where map 40.25 xy 24,78")
+UNEXPECT_A=("[crash]" "xy 24,76")

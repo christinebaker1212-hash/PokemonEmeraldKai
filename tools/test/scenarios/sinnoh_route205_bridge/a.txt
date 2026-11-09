@@ -1,0 +1,22 @@
+pressuntil A field 5000
+mp platinumstory
+mp setvar 0x524E 1
+wait 30
+mp warp 40,25,25,80
+wait 60
+waitfor field 1000
+wait 30
+mp getvar 0x524E
+press UP 48
+mash A 30 15
+pressuntil A field 9000
+wait 60
+mp npcs
+press LEFT 16
+wait 20
+press UP 64
+mash A 30 15
+pressuntil A field 9000
+wait 60
+mp where
+quit

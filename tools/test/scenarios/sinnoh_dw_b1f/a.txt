@@ -22,9 +22,9 @@ wait 50
 shot b_ride
 wait 120
 shot b_ride2
-wait 250
+wait 900
 shot b_b1f
-mash A 10 30
+mash A 40 30
 wait 120
 shot b_after
 mp getvar 0x51B0

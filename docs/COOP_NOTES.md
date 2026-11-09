@@ -7158,3 +7158,12 @@ back down, and 2F's warps 5-9 are holes' landing squares. Its STRENGTH boulder s
 stops at 9,10 against 9,9's wall with the player behind it, so the LEAGUE was out of reach for everyone. The boulder
 (object 1) starts at 10,10, the corridor's side pocket: pushed east to 11,10 it clears the way. A save that jammed it
 gets it back on entering the floor (object templates load with the map). Test johto_victory_road.
+
+## SINNOH: WaitMovement waits for everyone (1.185.7)
+Platinum's WaitMovement waits until every ApplyMovement started has ended; Kai's `waitmovement 0` waits only for the
+last object given a movement. gen_scripts.py now converts it to `waitmovement LOCALID_ALL_MOVING` (254), which
+scrcmd.c WaitForMovementFinish answers with script_movement.c ScriptMovement_AllFinished. Without it a longer
+movement started earlier went on past the script's end, and releaseall (ScriptMovement_UnfreezeObjectEvents destroys
+the movement task) cut it short: ROUTE 205 SOUTH's grunt who pushes the player back off the bridge (local 14, 24,77)
+was left at 25,77, so the west half of the bridge was open and the VALLEY WINDWORKS story could be skipped. Scenes
+now run as long as Platinum's (sinnoh_dw_b1f's waits lengthened). Test sinnoh_route205_bridge.
