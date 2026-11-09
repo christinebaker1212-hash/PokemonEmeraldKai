@@ -14,12 +14,26 @@ if [ -z "$DISC" ]; then
     [ -n "$ORRE_DISC_URL" ] || { echo "usage: $0 DISC  (or ORRE_DISC_URL=...)"; exit 1; }
     DISC="$WORK/disc.download"
     if [ ! -s "$DISC" ]; then
-        URL="$ORRE_DISC_URL"
-        # a Google Drive share link: its direct download
-        if [[ "$URL" =~ drive\.google\.com/file/d/([^/]+) ]]; then
-            URL="https://drive.usercontent.google.com/download?id=${BASH_REMATCH[1]}&export=download&confirm=t"
+        URLS=("$ORRE_DISC_URL")
+        # a Google Drive share link: its direct download, and Drive's older address for it (tried in turn)
+        if [[ "$ORRE_DISC_URL" =~ drive\.google\.com/file/d/([^/]+) ]]; then
+            URLS=("https://drive.usercontent.google.com/download?id=${BASH_REMATCH[1]}&export=download&confirm=t"
+                  "https://drive.google.com/uc?export=download&id=${BASH_REMATCH[1]}&confirm=t")
         fi
-        curl -sSfL --retry 4 -o "$DISC" "$URL"
+        # (Drive answers a big file with 504s for minutes at a time: tries spread over ~10 minutes; an HTML page
+        # instead of the file counts as a failed try)
+        ok=
+        for try in 1 2 3 4 5 6 7 8; do
+            URL="${URLS[$(( (try - 1) % ${#URLS[@]} ))]}"
+            if curl -sSfL --retry 2 --retry-all-errors --retry-delay 10 --connect-timeout 30 -o "$DISC.part" "$URL" \
+               && [ "$(stat -c %s "$DISC.part")" -gt 10000000 ] && ! head -c 512 "$DISC.part" | grep -qi '<html'; then
+                mv "$DISC.part" "$DISC"; ok=1; break
+            fi
+            echo "the disc's download failed (try $try): waiting $((try * 20)) s"
+            rm -f "$DISC.part"
+            sleep $((try * 20))
+        done
+        [ -n "$ok" ] || { echo "the disc couldn't be downloaded"; exit 1; }
     fi
 fi
 # a zip holding the image
