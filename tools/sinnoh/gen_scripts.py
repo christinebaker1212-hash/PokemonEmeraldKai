@@ -1647,7 +1647,9 @@ class FileConverter:
         if cmd == 'ApplyMovement':
             return ['applymovement %s, %s' % (self.localid(a[0]), self.movement_label(a[1]))]
         if cmd == 'WaitMovement':
-            return ['waitmovement 0']
+            # (every movement started, as Platinum waits: not only the last one, which Kai's waitmovement 0 is. A longer
+            # one went on past the script's end and was cut short: ROUTE 205's grunt never got back to his post)
+            return ['waitmovement LOCALID_ALL_MOVING']
         if cmd == 'ShakeObject':
             # (the object shakes side to side TIMES times by XOFFSET pixels: s3d_misc.c op 26; the script waits)
             times, xoff = int(self.value(a[1])), int(self.value(a[3]))

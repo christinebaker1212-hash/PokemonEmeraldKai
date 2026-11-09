@@ -1073,6 +1073,9 @@ bool8 ScrCmd_applymovementat(struct ScriptContext *ctx)
 
 static bool8 WaitForMovementFinish(void)
 {
+    bool8 ScriptMovement_AllFinished(void);
+    if (sMovingNpcId == LOCALID_ALL_MOVING)
+        return ScriptMovement_AllFinished();   // Moemon Kai: everyone's (SINNOH's converted WaitMovement)
     return ScriptMovement_IsObjectMovementFinished(sMovingNpcId, sMovingNpcMapNum, sMovingNpcMapGroup);
 }
 

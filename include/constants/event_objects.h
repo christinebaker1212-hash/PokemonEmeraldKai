@@ -323,6 +323,7 @@
 #define LOCALID_CAMERA                     127
 #define LOCALID_BERRY_BLENDER_PLAYER_END   240 // This will use 5 (MAX_RFU_PLAYERS) IDs ending at 240, i.e. 236-240
 #define LOCALID_PLAYER                     255
+#define LOCALID_ALL_MOVING                 254 // Moemon Kai: waitmovement waits for every script movement (Platinum's WaitMovement)
 
 // Aliases for old names. "object event id" normally refers to an index into gObjectEvents, which these are not.
 #define OBJ_EVENT_ID_CAMERA LOCALID_CAMERA

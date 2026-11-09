@@ -11,6 +11,7 @@ static u8 GetMoveObjectsTaskId(void);
 static bool8 ScriptMovement_TryAddNewMovement(u8 taskId, u8 objEventId, const u8 *movementScript);
 static u8 GetMovementScriptIdFromObjectEventId(u8 taskId, u8 objEventId);
 static bool8 IsMovementScriptFinished(u8 taskId, u8 moveScrId);
+static void LoadObjectEventIdFromMovementScript(u8 taskId, u8 moveScrId, u8 *objEventId);
 static void ScriptMovement_AddNewMovement(u8 taskId, u8 moveScrId, u8 objEventId, const u8 *movementScript);
 static void ScriptMovement_UnfreezeActiveObjects(u8 taskId);
 static void ScriptMovement_MoveObjects(u8 taskId);
@@ -42,6 +43,23 @@ bool8 ScriptMovement_IsObjectMovementFinished(u8 localId, u8 mapNum, u8 mapGroup
     if (moveScrId == OBJECT_EVENTS_COUNT)
         return TRUE;
     return IsMovementScriptFinished(taskId, moveScrId);
+}
+
+// Moemon Kai: every movement a script started has ended (Platinum's WaitMovement waits for all of them, not only the
+// last one started: ROUTE 205's grunt pushing the player back walked to his post after the player's shorter step ended,
+// and the script's end cut his walk short, leaving the bridge open)
+bool8 ScriptMovement_AllFinished(void)
+{
+    u8 taskId = GetMoveObjectsTaskId(), i, objEventId;
+    if (taskId == TASK_NONE)
+        return TRUE;
+    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+    {
+        LoadObjectEventIdFromMovementScript(taskId, i, &objEventId);
+        if (objEventId != 0xFF && !IsMovementScriptFinished(taskId, i))
+            return FALSE;
+    }
+    return TRUE;
 }
 
 void ScriptMovement_UnfreezeObjectEvents(void)
