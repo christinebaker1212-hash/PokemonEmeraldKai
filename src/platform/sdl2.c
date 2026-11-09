@@ -94,7 +94,7 @@ static int sMashCount = 0, sMashInterval = 0;
 static char sUntilName[32];
 static int sWalkX, sWalkY, sWalkFrames;   // walkto
 static int sGotoG, sGotoN, sGotoX, sGotoY, sGotoFrames, sGotoBusy;   // goto
-static int sApproachKind, sApproachN, sApproachFrames;   // approach
+static int sApproachKind, sApproachN, sApproachN2, sApproachFrames;   // approach (kinds 3 obj / 4 tile: any region's maps)
 static int sUntilFrames = 0;
 static u16 sUntilKeys = 0;
 extern int MP_TestCondition(const char *name);
@@ -1321,10 +1321,13 @@ static void TestHarnessStep(void)
         // a scene on the way is pressed through (A every so often), the way picked again after it
         u16 MP_TestGotoKey(u8 group, u8 num, s32 tx, s32 ty);
         u16 MP_TestApproachKey(u8 kind, u32 n, bool8 *done);
+        u16 MP_TestApproachMapKey(bool8 obj, s32 a, s32 b, bool8 *done);
         bool8 ScriptContext_IsEnabled(void);
         bool8 done = FALSE;
         bool8 go = sGotoFrames > 0;
-        u16 k = go ? MP_TestGotoKey(sGotoG, sGotoN, sGotoX, sGotoY) : MP_TestApproachKey(sApproachKind, sApproachN, &done);
+        u16 k = go ? MP_TestGotoKey(sGotoG, sGotoN, sGotoX, sGotoY)
+              : sApproachKind >= 3 ? MP_TestApproachMapKey(sApproachKind == 3, sApproachN, sApproachN2, &done)
+              : MP_TestApproachKey(sApproachKind, sApproachN, &done);
         if (go ? k == 0 : done)
         {
             if (go)
@@ -1347,8 +1350,12 @@ static void TestHarnessStep(void)
         else if (k == 0xFFFF)
         {
             static int sIdle;
-            bool8 busy = ScriptContext_IsEnabled();
+            bool8 MP_IsInOverworld(void);
+            bool8 NamingScreen_IsActive(void);
+            bool8 busy = ScriptContext_IsEnabled() || !MP_IsInOverworld();   // (a scene, a battle, a menu on the way)
             sTestKeys = (busy && (++sGotoBusy & 15) == 0) ? A_BUTTON : 0;
+            if (NamingScreen_IsActive() && (sGotoBusy & 15) == 0)
+                sTestKeys = (sGotoBusy & 16) ? START_BUTTON : A_BUTTON;   // (a nickname asked for: OK)
             // (no way from here and nothing going on for 5 seconds: no way there yet)
             sIdle = busy ? 0 : sIdle + 1;
             if (sIdle > 300)
@@ -1475,11 +1482,19 @@ static void TestHarnessStep(void)
         else if (strcmp(cmd, "approach") == 0)
         {
             // approach person|touch|check N [FRAMES]: up to ORRE person N (A pressed facing them), into touch spot N,
-            // or up to check spot N (A pressed facing it) of the room, as a player walks
+            // or up to check spot N (A pressed facing it) of the room, as a player walks.
+            // approach obj N [FRAMES] / approach tile X Y [FRAMES]: any region's maps: up to the person with local id N,
+            // or beside tile X, Y (a sign, a machine; across a counter too), facing it, and A
             char what[16] = "";
             sApproachFrames = 1500;
-            sscanf(line, "%*s %15s %d %d", what, &sApproachN, &sApproachFrames);
-            sApproachKind = strcmp(what, "touch") == 0 ? 1 : strcmp(what, "check") == 0 ? 2 : 0;
+            sscanf(line, "%*s %15s", what);
+            if (strcmp(what, "tile") == 0)
+                sscanf(line, "%*s %*s %d %d %d", &sApproachN, &sApproachN2, &sApproachFrames), sApproachKind = 4;
+            else
+            {
+                sscanf(line, "%*s %*s %d %d", &sApproachN, &sApproachFrames);
+                sApproachKind = strcmp(what, "touch") == 0 ? 1 : strcmp(what, "check") == 0 ? 2 : strcmp(what, "obj") == 0 ? 3 : 0;
+            }
             return;
         }
         else if (strcmp(cmd, "walkto") == 0)

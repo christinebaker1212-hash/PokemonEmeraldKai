@@ -269,6 +269,30 @@ public class ScreensTest {
         shot(v, "types_defense");
         v.showOver(new TypeChartPage(v).attacking(10));
         shot(v, "types_attack");
+        // BREEDING: the snapshot's first box POKéMON (its IVs) to CHARMANDER across egg groups, an egg move planned
+        {
+            JSONObject mon = file.getJSONObject("snap").getJSONArray("boxes").getJSONObject(0).getJSONArray("m").getJSONObject(0);
+            GameArt art = v.art;
+            BreedPage breed = new BreedPage(v).from(mon).to(art.speciesOfDex(4));   // (to CHARMANDER: across egg groups)
+            v.showOver(breed);
+            shot(v, "breed_route");
+            breed.tap(14, 26 + 76 + 6 + 20 + 13 + 4);   // (the first egg move)
+            breed.scrollTo(240);
+            shot(v, "breed_route_lower");
+            breed.scrollTo(100000);
+            shot(v, "breed_moves_plan");
+            v.showOver(new BreedPage(v).from(mon).to(art.speciesOfDex(128)));   // (TAUROS: males only)
+            shot(v, "breed_none");
+            BreedPage pick = new BreedPage(v);
+            v.showOver(pick);
+            shot(v, "breed_empty");
+            pick.tap(20, 60);   // (FROM: MY POKéMON)
+            shot(v, "breed_pick_from");
+            pick.back();
+            shot(v, "breed_empty");
+            pick.tap(v.width() - 40, 60);   // (TO: every kind)
+            shot(v, "breed_pick_to");
+        }
         v.showOver(null);
         v.showMenu(Look.menu(v));
         shot(v, "look_menu");

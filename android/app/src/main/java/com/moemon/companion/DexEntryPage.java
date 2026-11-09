@@ -137,6 +137,7 @@ public final class DexEntryPage extends Page {
         art.text(c, where, (w - art.width(where)) / 2, 2, 0xFFFFFFFF, 0xFF000000);
         DexPage.chip(c, art, fill, ">", w - 26, 4, true);
         DexPage.chip(c, art, fill, "<", w - 50, 4, true);
+        DexPage.chip(c, art, fill, "BREED", w - 56 - art.width("BREED") - 12, 4, false);   // (the BREEDING page, to it)
         // the hero: its picture, twice the size, on its type's color
         JSONArray t = seen ? art.species(sp).optJSONArray("t") : null;
         int tc = t != null ? art.typeColor(t.optInt(0)) : 0xFF909090;
@@ -755,6 +756,9 @@ public final class DexEntryPage extends Page {
                 swipe(1);
             } else if (x >= w - 50) {
                 swipe(-1);
+            } else if (x >= w - 56 - art.width("BREED") - 12) {
+                v.buzz(false);
+                v.showOver(new BreedPage(v).to(art.speciesOfDex(nums.get(index))));
             }
             return;
         }

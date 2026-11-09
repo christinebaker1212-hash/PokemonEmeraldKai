@@ -290,6 +290,9 @@ public final class DexPage extends Page {
         } else {
             chip(c, art, fill, "TYPE", cx - 4 - art.width("TYPE") - 12, 72, picking);
         }
+        // the BREEDING page (how IVs and egg moves reach another kind)
+        int bx = cx - 4 - Math.max(40, art.width("TYPE") + 12) - 4 - art.width("BREED") - 12;
+        chip(c, art, fill, "BREED", bx, 72, false);
         if (picking) {
             typePicker(c, w);
         }
@@ -384,8 +387,12 @@ public final class DexPage extends Page {
         if (y < HEAD) {
             if (y >= 70 && y < 90) {
                 int cx = w - 6 - art.width("CHART") - 12;
+                int bx = cx - 4 - Math.max(40, art.width("TYPE") + 12) - 4 - art.width("BREED") - 12;
                 if (x >= cx) {
                     v.showOver(new TypeChartPage(v));
+                } else if (x >= bx && x < bx + art.width("BREED") + 12) {
+                    v.buzz(false);
+                    v.showOver(new BreedPage(v));
                 } else if (x >= cx - 4 - Math.max(40, art.width("TYPE") + 12)) {
                     if (typeFilter >= 0 && x >= cx - 40) {
                         typeFilter = -1;   // (the chosen type's icon: tap again for all of them)

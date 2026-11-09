@@ -115,6 +115,9 @@ public final class SummaryPage extends Page {
             DexPage.chip(c, art, fill, ">", w - 26, 2, true);
             DexPage.chip(c, art, fill, "<", w - 50, 2, true);
         }
+        if (!egg) {   // (the BREEDING page, from this POKéMON: its IVs and gender)
+            DexPage.chip(c, art, fill, "BREED", w - 56 - art.width("BREED") - 12, 2, false);
+        }
     }
 
     private void drawTop(Canvas c, int w, JSONObject mon) {
@@ -456,6 +459,9 @@ public final class SummaryPage extends Page {
                 swipe(1);
             } else if (x >= w - 50) {
                 swipe(-1);
+            } else if (x >= w - 56 - art.width("BREED") - 12 && mon != null && mon.optInt("e") != 1) {
+                v.buzz(false);
+                v.showOver(new BreedPage(v).from(mon));
             }
             return;
         }

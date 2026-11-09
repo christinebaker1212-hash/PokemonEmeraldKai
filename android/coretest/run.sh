@@ -9,6 +9,12 @@ JSON=$CACHE/json-20240303.jar
 mkdir -p "$OUT/classes" "$CACHE"
 [ -f "$JSON" ] || curl -sSfL -o "$JSON" \
     https://maven-central.storage-download.googleapis.com/maven2/org/json/json/20240303/json-20240303.jar
+# the BREEDING page's calculator on the game's own data.json (no game or engines needed): ONLY=breed runs just this one
+if [ "$ONLY" = breed ]; then
+    javac -nowarn -d "$OUT/classes" -cp "$JSON" "$APP/java/com/moemon/companion/core/Breeding.java" \
+        "$APP/java/com/moemon/companion/core/Hex.java" "$ROOT/android/coretest/BreedTest.java"
+    cd "$ROOT" && exec java -cp "$OUT/classes:$JSON" BreedTest
+fi
 JH=${JAVA_HOME:-$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")}
 mkdir -p "$OUT/ttinc" && ln -sfn "$ROOT/include/tt" "$OUT/ttinc/tt"   # (the game's include/ has its own strings.h)
 mkdir -p "$OUT/tcginc/constants" && ln -sfn "$ROOT/include/tcg" "$OUT/tcginc/tcg" && ln -sfn "$ROOT/include/mp_version.h" "$OUT/tcginc/mp_version.h" \
@@ -37,7 +43,9 @@ javac -nowarn -d "$OUT/classes" -cp "$JSON" "$APP"/java/com/moemon/companion/cor
     "$APP/java/com/moemon/companion/Ygo.java" "$ROOT/android/coretest/YgoCoreTest.java" \
     "$APP/java/com/moemon/companion/YgoFriendGame.java" \
     "$ROOT/android/coretest/YgoFriendsTest.java" \
+    "$ROOT/android/coretest/BreedTest.java" \
     "$ROOT/android/coretest/CoreTest.java" "$ROOT/android/coretest/WalkCoreTest.java" "$ROOT/android/coretest/FriendsTest.java" "$ROOT/android/coretest/TradeTest.java" "$ROOT/android/coretest/TtCoreTest.java" "$ROOT/android/coretest/TtFriendsTest.java"
+(cd "$ROOT" && java -cp "$OUT/classes:$JSON" BreedTest)
 java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" YgoCoreTest "$ROOT"
 bash -c "source '$ROOT/tools/test/common.sh' && build_server"
 java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" YgoFriendsTest "$ROOT/tools/test/.bin/moemon_server" "$ROOT"

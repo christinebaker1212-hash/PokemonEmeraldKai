@@ -14,6 +14,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "global.h"
+#include "constants/daycare.h"
 #include "mp.h"
 #include "battle_main.h"
 #include "data.h"
@@ -675,6 +676,15 @@ static void ExportData(const char *dir)
                 for (e = 0; gLevelUpLearnsets[base] != NULL && gLevelUpLearnsets[base][e] != LEVEL_UP_END && e < 128; e++)
                     fprintf(f, "%s[%u,%u]", e ? "," : "", (gLevelUpLearnsets[base][e] & LEVEL_UP_MOVE_LV) >> 16,
                             gLevelUpLearnsets[base][e] & LEVEL_UP_MOVE_ID);
+                // (its egg moves: what an egg of it takes from either parent, Gen 9's rule: daycare.c; the BREEDING page)
+                {
+                    u8 MP_SpeciesEggMoves(u16 species, u16 *out);
+                    static u16 egm[EGG_MOVES_ARRAY_COUNT];
+                    u8 ne = MP_SpeciesEggMoves(base, egm);
+                    fprintf(f, "],\"egm\":[");
+                    for (e = 0; e < ne; e++)
+                        fprintf(f, "%s%u", e ? "," : "", egm[e]);
+                }
                 fprintf(f, "],\"tm\":\"");
                 for (tm = 0; tm < NUM_TMHMS; tm += 4)
                 {

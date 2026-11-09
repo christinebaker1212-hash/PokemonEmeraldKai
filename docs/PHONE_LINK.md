@@ -701,4 +701,22 @@ Look.creatures, "look_art"; Look.pokemonArt sets GameArt.pokemonArt every frame,
   light as they turn. Every page paints its table opaque first (a faded card's alpha left in the shared Paint washed
   the next frame). Tests ScreensTest film_tcg_*, film_ygo_*, film_tt_* (frames of AI moves on both sides).
 
+### BREEDING (1.185.0, the user 2026-11-09)
+
+"A breeding calculator: enter a Pokemon you have and the target, and trace the bridge Pokemon that lead to it" (for
+moving a 6 IV POKéMON's IVs into another egg group), "and show potential egg moves, desired egg moves in the TO
+selection". The POKéDEX's BREED chip, a POKéDEX entry's (that kind as TO) and a summary's (that POKéMON as FROM) open
+BreedPage.java; the search is core/Breeding.java, by the game's own rules (daycare.c): an egg is the mother's family
+at its first stage (DITTO's partner's), parents share an egg group and are a male and a female, UNDISCOVERED never
+breeds, genderless kinds only with DITTO, NIDORAN's and VOLBEAT / ILLUMISE's eggs are either kind, MANAPHY's is PHIONE.
+The IVs' carrier is the father, so a route is breadth first over families (a hatchling may be evolved before it
+breeds) to the target's: the fewest eggs, then the most mothers the player has caught (the snapshot's POKéDEX); two
+more routes without the first's bridges. A female FROM lays the first egg herself; DITTO goes straight into any egg;
+kinds that only breed with DITTO (TAUROS, MAGNEMITE...) or hatch from none (MEWTWO) say why. Egg moves (data.json's
+"egm" per species, mp_export.c from MP_SpeciesEggMoves): SCARLET / VIOLET's rule, either parent passes an egg move it
+knows, TMs' moves don't pass; for up to four wanted moves, the fathers sharing a group with the target's mothers that
+learn it by level or TM (else one egg further back), bred onto a daughter of the target one move per egg, then the IV
+route's last father with her. Tests: android/coretest BreedTest (ONLY=breed: routes, the impossible ones, timing),
+ScreensTest breed_* pictures.
+
 Next: T11, the KANTO / JOHTO audit.

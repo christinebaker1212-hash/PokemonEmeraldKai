@@ -275,50 +275,223 @@ void MP_DebugQuickStartNewGame(void)
 // Test harness conditions (src/platform/sdl2.c: waitfor / pressuntil)
 bool8 MP_Setup_IsReady(void);
 bool8 MP_Setup_ScreenIs(int screen);
-// The harness's "walkto X Y": the D-pad key toward map tile (X, Y) by the shortest walkable way (collision and people
-// in the way), 0 once there, 0xFFFF when no way leads there or the player can't walk now
+// The harness's walking (walkto / goto / approach): every tile the player can get to from where they stand, by the
+// game's own rules: collision, one-way tiles, heights (GetCollisionAtCoords with the height carried along the way, as
+// ObjectEventUpdateElevation keeps it), ledges jumped down, SURF onto water and off it again, and the obstacles a
+// field move clears (CUT trees, ROCK SMASH rocks: A facing them). sWStep: the first step toward each tile (its key,
+// and WS_A when that step is A facing it first); sWDist: how many steps
+#define W_MAXT (160 * 160)
+#define WS_NONE 0xFF
+#define WS_A 0x10
+static u8 sWStep[W_MAXT], sWSeen[W_MAXT * 16 / 8];
+static u16 sWDist[W_MAXT];
+static u32 sWQueue[W_MAXT * 4];
+static u32 sWStamp = 0xFFFFFFFF;
+
+static bool8 PartyKnows(u16 move)
+{
+    u32 i;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_NONE)
+            break;
+        if (!GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
+         && (MonKnowsMove(&gPlayerParty[i], move) || MP_HeldHmMove(&gPlayerParty[i]) == move))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+// a field move's obstacle at (x, y) (map coordinates) that A clears: KANTO / JOHTO's (Quetzal's shared scripts) and
+// HOENN's own CUT trees and ROCK SMASH rocks
+static bool8 ClearableAt(s16 x, s16 y)
+{
+    extern const u8 Quetzal_EventScript_846B413[], Quetzal_EventScript_846B4F2[], EventScript_CutTree[], EventScript_RockSmash[];
+    u8 id = GetObjectEventIdByXY(x, y);
+    const u8 *script;
+    if (id == OBJECT_EVENTS_COUNT)
+        return FALSE;
+    script = GetObjectEventScriptPointerByObjectEventId(id);
+    if (script == Quetzal_EventScript_846B413 || script == EventScript_CutTree)
+        return PartyKnows(MOVE_CUT);
+    if (script == Quetzal_EventScript_846B4F2 || script == EventScript_RockSmash)
+        return PartyKnows(MOVE_ROCK_SMASH);
+    return FALSE;
+}
+
+static u8 ElevationAfter(u8 e, s16 x, s16 y, s16 fromX, s16 fromY)
+{
+    u8 cur = MapGridGetElevationAt(x, y), prev = MapGridGetElevationAt(fromX, fromY);
+    return (cur == 15 || prev == 15) ? e : cur;
+}
+
+static bool8 IsWarpAt(s16 x, s16 y)
+{
+    u32 i;
+    for (i = 0; gMapHeader.events && i < gMapHeader.events->warpCount; i++)
+        if (gMapHeader.events->warps[i].x == x && gMapHeader.events->warps[i].y == y)
+            return TRUE;
+    return FALSE;
+}
+
+static void WalkSearch(void)
+{
+    static const s8 dx[4] = {0, 0, -1, 1}, dy[4] = {1, -1, 0, 0};
+    static const u8 dirs[4] = {DIR_SOUTH, DIR_NORTH, DIR_WEST, DIR_EAST};
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId], t;
+    s32 w = gMapHeader.mapLayout->width, h = gMapHeader.mapLayout->height, head = 0, tail = 0, i;
+    bool8 surfing = TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING);
+    bool8 canSurf = surfing || (MP_Region_HasFieldMoveBadge(4) && PartyHasMonWithSurf());
+    s16 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
+    for (i = 0; i < w * h; i++)
+        sWStep[i] = WS_NONE, sWDist[i] = 0xFFFF;
+    memset(sWSeen, 0, sizeof(sWSeen));
+    sWStep[py * w + px] = 0, sWDist[py * w + px] = 0;
+    sWQueue[tail++] = ((u32)(py * w + px) << 8) | (p->currentElevation << 4) | (surfing ? 1 : 0) | 2;
+    sWSeen[((py * w + px) * 16 + p->currentElevation) >> 3] |= 1 << (((py * w + px) * 16 + p->currentElevation) & 7);
+    t = *p;
+    t.trackedByCamera = FALSE;
+    while (head < tail)
+    {
+        u32 q = sWQueue[head++], c = q >> 8, e = (q >> 4) & 15, surf = q & 1, first = (q & 2) != 0, d;
+        s16 cx = c % w, cy = c / w;
+        if (!first && IsWarpAt(cx, cy))
+            continue;   // (a warp takes the player away: an end, never a way through)
+        for (d = 0; d < 4; d++)
+        {
+            s16 nx = cx + dx[d], ny = cy + dy[d], lx = nx, ly = ny;
+            u8 col, ne = e, nsurf = surf, how = d;
+            u32 n;
+            if (nx < 0 || ny < 0 || nx >= w || ny >= h)
+                continue;
+            t.currentCoords.x = cx + MAP_OFFSET, t.currentCoords.y = cy + MAP_OFFSET, t.currentElevation = e;
+            if (!surf && GetLedgeJumpDirection(nx + MAP_OFFSET, ny + MAP_OFFSET, dirs[d]) != DIR_NONE)
+            {
+                lx = nx + dx[d], ly = ny + dy[d];   // (over the ledge: two tiles on)
+                if (lx < 0 || ly < 0 || lx >= w || ly >= h || MapGridGetCollisionAt(lx + MAP_OFFSET, ly + MAP_OFFSET)
+                 || GetObjectEventIdByXY(lx + MAP_OFFSET, ly + MAP_OFFSET) != OBJECT_EVENTS_COUNT)
+                    continue;
+                ne = ElevationAfter(e, lx + MAP_OFFSET, ly + MAP_OFFSET, nx + MAP_OFFSET, ny + MAP_OFFSET);
+            }
+            else
+            {
+                col = GetCollisionAtCoords(&t, nx + MAP_OFFSET, ny + MAP_OFFSET, dirs[d]);
+                if (col == COLLISION_NONE)
+                {
+                    if (surf && !MetatileBehavior_IsSurfableWaterOrUnderwater(MapGridGetMetatileBehaviorAt(nx + MAP_OFFSET, ny + MAP_OFFSET)))
+                        nsurf = 0;
+                    ne = ElevationAfter(e, nx + MAP_OFFSET, ny + MAP_OFFSET, cx + MAP_OFFSET, cy + MAP_OFFSET);
+                }
+                else if (col == COLLISION_ELEVATION_MISMATCH && surf
+                      && MapGridGetElevationAt(nx + MAP_OFFSET, ny + MAP_OFFSET) == 3
+                      && GetObjectEventIdByXY(nx + MAP_OFFSET, ny + MAP_OFFSET) == OBJECT_EVENTS_COUNT)
+                    nsurf = 0, ne = 3;   // (off the water: CanStopSurfing)
+                else if (col == COLLISION_ELEVATION_MISMATCH && !surf && canSurf
+                      && MetatileBehavior_IsSurfableWaterOrUnderwater(MapGridGetMetatileBehaviorAt(nx + MAP_OFFSET, ny + MAP_OFFSET))
+                      && GetObjectEventIdByXY(nx + MAP_OFFSET, ny + MAP_OFFSET) == OBJECT_EVENTS_COUNT)
+                    nsurf = 1, ne = 1, how |= WS_A;   // (onto the water: A facing it, SURF)
+                else if (col == COLLISION_OBJECT_EVENT && ClearableAt(nx + MAP_OFFSET, ny + MAP_OFFSET))
+                    how |= WS_A, ne = ElevationAfter(e, nx + MAP_OFFSET, ny + MAP_OFFSET, cx + MAP_OFFSET, cy + MAP_OFFSET);
+                else
+                    continue;
+            }
+            n = ly * w + lx;
+            if (sWSeen[(n * 16 + ne) >> 3] & (1 << ((n * 16 + ne) & 7)))
+                continue;
+            sWSeen[(n * 16 + ne) >> 3] |= 1 << ((n * 16 + ne) & 7);
+            if (sWStep[n] == WS_NONE)
+            {
+                sWStep[n] = first ? how : sWStep[c];
+                sWDist[n] = sWDist[c] + 1;
+            }
+            if (tail < (s32)ARRAY_COUNT(sWQueue))
+                sWQueue[tail++] = (n << 8) | (ne << 4) | nsurf;
+        }
+    }
+}
+
+// (once a frame at most)
+static void WalkSearchNow(void)
+{
+    unsigned long Platform_FrameCount(void);
+    if (sWStamp != (u32)Platform_FrameCount())
+        WalkSearch(), sWStamp = (u32)Platform_FrameCount();
+}
+
+// the key for the first step toward (tx, ty) as WalkSearch found it: a D-pad key, or A once facing a step that needs it
+static u16 WalkStepKey(s32 tx, s32 ty)
+{
+    static const u16 keys[4] = {DPAD_DOWN, DPAD_UP, DPAD_LEFT, DPAD_RIGHT};
+    static const u8 dirs[4] = {DIR_SOUTH, DIR_NORTH, DIR_WEST, DIR_EAST};
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u8 s = sWStep[ty * gMapHeader.mapLayout->width + tx];
+    if (s == WS_NONE)
+        return 0xFFFF;
+    if ((s & WS_A) && p->facingDirection == dirs[s & 3])
+        return A_BUTTON;
+    return keys[s & 3];
+}
+
+// The harness's "walkto X Y": the D-pad key toward map tile (X, Y) by the shortest way a player has (WalkSearch), A
+// where a step needs it, 0 once there, 0xFFFF when no way leads there or the player can't walk now
 u16 MP_TestWalkKey(s32 tx, s32 ty)
 {
-    static s16 sFrom[160 * 160];
-    static u16 sQueue[160 * 160];
     struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
-    s32 w = gMapHeader.mapLayout->width, h = gMapHeader.mapLayout->height, px, py, head = 0, tail = 0, i, at;
-    static const s8 dx[4] = {0, 0, -1, 1}, dy[4] = {1, -1, 0, 0};
-    static const u16 keys[4] = {DPAD_DOWN, DPAD_UP, DPAD_LEFT, DPAD_RIGHT};
-    if (!MP_IsInOverworld() || w * h > (s32)ARRAY_COUNT(sFrom) || ScriptContext_IsEnabled())
+    s32 w = gMapHeader.mapLayout->width, h = gMapHeader.mapLayout->height;
+    if (!MP_IsInOverworld() || w * h > W_MAXT || ScriptContext_IsEnabled())
         return 0xFFFF;
-    px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
-    if (px == tx && py == ty)
+    if (p->currentCoords.x - MAP_OFFSET == tx && p->currentCoords.y - MAP_OFFSET == ty)
         return 0;
     if (tx < 0 || ty < 0 || tx >= w || ty >= h)
         return 0xFFFF;
-    for (i = 0; i < w * h; i++)
-        sFrom[i] = -1;
-    // (from the target back: the first step out of the player's tile toward it)
-    sFrom[ty * w + tx] = ty * w + tx;
-    sQueue[tail++] = ty * w + tx;
-    while (head < tail)
+    WalkSearchNow();
+    return WalkStepKey(tx, ty);
+}
+
+// The harness's "approach obj N" / "approach tile X Y" on any region's maps (ORRE's own kinds: MP_TestApproachKey):
+// beside person N of this map (its local id) or tile (X, Y) (a sign, a machine: what A reads), facing it; across a
+// counter too (a POKéMON CENTER's nurse). *DONE once there and facing it
+u16 MP_TestApproachMapKey(bool8 obj, s32 a, s32 b, bool8 *done)
+{
+    static const s8 dx[4] = {0, 0, -1, 1}, dy[4] = {1, -1, 0, 0};
+    static const u16 toward[4] = {DPAD_UP, DPAD_DOWN, DPAD_RIGHT, DPAD_LEFT};   // (from below / above / left / right of it)
+    static const u8 facing[4] = {DIR_NORTH, DIR_SOUTH, DIR_EAST, DIR_WEST};
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s32 w = gMapHeader.mapLayout->width, h = gMapHeader.mapLayout->height, tx, ty, d, r, best = -1;
+    s16 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
+    u16 key = 0xFFFF;
+    *done = FALSE;
+    if (!MP_IsInOverworld() || w * h > W_MAXT || ScriptContext_IsEnabled())
+        return 0xFFFF;
+    if (obj)
     {
-        s32 c = sQueue[head++], cx = c % w, cy = c / w, d;
+        u8 id = GetObjectEventIdByLocalIdAndMap(a, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+        if (id >= OBJECT_EVENTS_COUNT || gObjectEvents[id].invisible)
+            return 0xFFFF;
+        tx = gObjectEvents[id].currentCoords.x - MAP_OFFSET, ty = gObjectEvents[id].currentCoords.y - MAP_OFFSET;
+    }
+    else
+        tx = a, ty = b;
+    WalkSearchNow();
+    for (r = 1; r <= 2; r++)
         for (d = 0; d < 4; d++)
         {
-            s32 nx = cx + dx[d], ny = cy + dy[d], n = ny * w + nx;
-            if (nx < 0 || ny < 0 || nx >= w || ny >= h || sFrom[n] >= 0)
+            s32 sx = tx + dx[d] * r, sy = ty + dy[d] * r, n;
+            if (sx < 0 || sy < 0 || sx >= w || sy >= h)
                 continue;
-            if (nx == px && ny == py)
+            if (r == 2 && !MetatileBehavior_IsCounter(MapGridGetMetatileBehaviorAt(tx + dx[d] + MAP_OFFSET, ty + dy[d] + MAP_OFFSET)))
+                continue;   // (two away only across a counter)
+            if (sx == px && sy == py)
             {
-                // the player steps from (nx, ny) to (cx, cy): the opposite of d
-                return keys[d ^ 1];
+                if (p->facingDirection == facing[d])
+                    return *done = TRUE, 0;
+                return toward[d];   // (a tap turns the player to face it)
             }
-            if (MapGridGetCollisionAt(nx + MAP_OFFSET, ny + MAP_OFFSET)
-             || GetObjectEventIdByXY(nx + MAP_OFFSET, ny + MAP_OFFSET) != OBJECT_EVENTS_COUNT)
-                continue;
-            sFrom[n] = c;
-            sQueue[tail++] = n;
+            n = sy * w + sx;
+            if (sWStep[n] != WS_NONE && (best < 0 || sWDist[n] < best))
+                best = sWDist[n], key = WalkStepKey(sx, sy);
         }
-    }
-    (void)at;
-    return 0xFFFF;
+    return key;
 }
 
 // The harness's "goto G,N X Y": the key toward tile (X, Y) of ORRE map G.N as a player gets there: through the rooms'
@@ -337,88 +510,113 @@ static bool8 OrreHasWayOut(const struct MapHeader *h)
     return FALSE;
 }
 
-// The harness's goto anywhere but ORRE: the fewest maps through warps and map connections (KANTO, JOHTO, SINNOH,
-// HOENN's walk-only runs). Next hop: one of this map's warps into it (walked onto; an arrow warp is pressed into), else
-// the edge it joins at (walked to, then stepped over). 0 once there, 0xFFFF when it can't go on now
+// The harness's goto anywhere but ORRE (KANTO, JOHTO, SINNOH, HOENN's walk-only runs): of this map's ways out a
+// player can reach now (WalkSearch: a warp walked onto, an arrow warp pressed into; a map edge stepped over), the one
+// whose map is the fewest maps from the target's by warps and connections (MapDist), the nearest of those. 0 once
+// there, 0xFFFF when it can't go on now
 #define GOTO_MAX_MAPS 256
-static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
+static u16 sMapDist[MAP_GROUPS_COUNT][GOTO_MAX_MAPS], sMapDistTarget = 0xFFFF;
+static u16 MapDist(u16 from, u16 target)
 {
-    static u16 sPrev[MAP_GROUPS_COUNT][GOTO_MAX_MAPS];   // (the map it was reached from + 1; 0 none)
-    static u16 sQ[MAP_GROUPS_COUNT * GOTO_MAX_MAPS];
-    u8 hg = gSaveBlock1Ptr->location.mapGroup, hn = gSaveBlock1Ptr->location.mapNum;
-    u16 here = (hg << 8) | hn, target = (group << 8) | num, hop;
+    static u16 sSeen[MAP_GROUPS_COUNT][GOTO_MAX_MAPS], sQ[MAP_GROUPS_COUNT * GOTO_MAX_MAPS], sD[MAP_GROUPS_COUNT * GOTO_MAX_MAPS];
+    static u16 sStamp;
     s32 head = 0, tail = 0, i;
-    const struct MapHeader *h;
-    if (hg == group && hn == num)
-        return MP_TestWalkKey(tx, ty);
-    if (group >= MAP_GROUPS_COUNT || num >= GOTO_MAX_MAPS || hg >= MAP_GROUPS_COUNT || hn >= GOTO_MAX_MAPS)
-        return 0xFFFF;
-    memset(sPrev, 0, sizeof(sPrev));
-    sPrev[hg][hn] = here + 1;
-    sQ[tail++] = here;
-    while (head < tail && !sPrev[group][num])
+    if (target != sMapDistTarget)
     {
-        u16 c = sQ[head++];
+        memset(sMapDist, 0xFF, sizeof(sMapDist));
+        sMapDistTarget = target;
+    }
+    if ((from >> 8) >= MAP_GROUPS_COUNT || (from & 0xFF) >= GOTO_MAX_MAPS)
+        return 0xFFFF;
+    if (sMapDist[from >> 8][from & 0xFF] != 0xFFFF)
+        return sMapDist[from >> 8][from & 0xFF] == 0xFFFE ? 0xFFFF : sMapDist[from >> 8][from & 0xFF];
+    if (++sStamp == 0)
+        memset(sSeen, 0, sizeof(sSeen)), sStamp = 1;
+    sSeen[from >> 8][from & 0xFF] = sStamp;
+    sQ[tail] = from, sD[tail++] = 0;
+    while (head < tail)
+    {
+        u16 c = sQ[head], dist = sD[head++];
+        const struct MapHeader *h;
+        if (c == target)
+        {
+            sMapDist[from >> 8][from & 0xFF] = dist;
+            return dist;
+        }
         h = Overworld_GetMapHeaderByGroupAndId(c >> 8, c & 0xFF);
         for (i = 0; h && h->events && i < h->events->warpCount; i++)
         {
             const struct WarpEvent *w = &h->events->warps[i];
-            if (w->mapGroup >= MAP_GROUPS_COUNT || w->mapNum >= GOTO_MAX_MAPS || sPrev[w->mapGroup][w->mapNum])
+            if (w->mapGroup >= MAP_GROUPS_COUNT || w->mapNum >= GOTO_MAX_MAPS || sSeen[w->mapGroup][w->mapNum] == sStamp)
                 continue;
-            sPrev[w->mapGroup][w->mapNum] = c + 1;
-            sQ[tail++] = (w->mapGroup << 8) | w->mapNum;
+            sSeen[w->mapGroup][w->mapNum] = sStamp;
+            sQ[tail] = (w->mapGroup << 8) | w->mapNum, sD[tail++] = dist + 1;
         }
         for (i = 0; h && h->connections && i < h->connections->count; i++)
         {
             const struct MapConnection *m = &h->connections->connections[i];
             if (m->direction < CONNECTION_SOUTH || m->direction > CONNECTION_EAST || m->mapGroup >= MAP_GROUPS_COUNT
-             || m->mapNum >= GOTO_MAX_MAPS || sPrev[m->mapGroup][m->mapNum])
+             || m->mapNum >= GOTO_MAX_MAPS || sSeen[m->mapGroup][m->mapNum] == sStamp)
                 continue;
-            sPrev[m->mapGroup][m->mapNum] = c + 1;
-            sQ[tail++] = (m->mapGroup << 8) | m->mapNum;
+            sSeen[m->mapGroup][m->mapNum] = sStamp;
+            sQ[tail] = (m->mapGroup << 8) | m->mapNum, sD[tail++] = dist + 1;
         }
     }
-    if (!sPrev[group][num])
+    sMapDist[from >> 8][from & 0xFF] = 0xFFFE;
+    return 0xFFFF;
+}
+
+static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
+{
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s32 w = gMapHeader.mapLayout->width, hh = gMapHeader.mapLayout->height, i, k2;
+    s16 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
+    u16 target = (group << 8) | num, bestKey = 0xFFFF;
+    u32 best = 0xFFFFFFFF;
+    if (gSaveBlock1Ptr->location.mapGroup == group && gSaveBlock1Ptr->location.mapNum == num)
+        return MP_TestWalkKey(tx, ty);
+    if (!MP_IsInOverworld() || w * hh > W_MAXT || ScriptContext_IsEnabled())
         return 0xFFFF;
-    for (hop = target; sPrev[hop >> 8][hop & 0xFF] - 1 != here; hop = sPrev[hop >> 8][hop & 0xFF] - 1)
-        ;
-    // a warp into the next map
-    h = &gMapHeader;
-    for (i = 0; h->events && i < h->events->warpCount; i++)
+    WalkSearchNow();
+    for (i = 0; gMapHeader.events && i < gMapHeader.events->warpCount; i++)
     {
-        const struct WarpEvent *w = &h->events->warps[i];
-        struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
-        u16 k;
-        if (((w->mapGroup << 8) | w->mapNum) != hop)
+        const struct WarpEvent *wp = &gMapHeader.events->warps[i];
+        u16 d = (wp->mapGroup << 8) | wp->mapNum, md = d == target ? 0 : MapDist(d, target), key;
+        u32 score;
+        if (md == 0xFFFF)
             continue;
-        if (p->currentCoords.x - MAP_OFFSET == w->x && p->currentCoords.y - MAP_OFFSET == w->y)
+        if (px == wp->x && py == wp->y)
         {
-            u8 b = MapGridGetMetatileBehaviorAt(w->x + MAP_OFFSET, w->y + MAP_OFFSET);
-            if (MetatileBehavior_IsNorthArrowWarp(b)) return DPAD_UP;
-            if (MetatileBehavior_IsSouthArrowWarp(b)) return DPAD_DOWN;
-            if (MetatileBehavior_IsEastArrowWarp(b)) return DPAD_RIGHT;
-            if (MetatileBehavior_IsWestArrowWarp(b)) return DPAD_LEFT;
-            return 0xFFFF;   // (on it: its warp on its way)
+            u8 b = MapGridGetMetatileBehaviorAt(wp->x + MAP_OFFSET, wp->y + MAP_OFFSET);
+            key = MetatileBehavior_IsNorthArrowWarp(b) ? DPAD_UP : MetatileBehavior_IsSouthArrowWarp(b) ? DPAD_DOWN
+                : MetatileBehavior_IsEastArrowWarp(b) ? DPAD_RIGHT : MetatileBehavior_IsWestArrowWarp(b) ? DPAD_LEFT : 0xFFFF;
+            score = (u32)md << 16;
         }
-        if ((k = MP_TestWalkKey(w->x, w->y)) != 0xFFFF)
-            return k;
+        else
+        {
+            if (sWStep[wp->y * w + wp->x] == WS_NONE)
+                continue;
+            key = WalkStepKey(wp->x, wp->y);
+            score = ((u32)md << 16) | sWDist[wp->y * w + wp->x];
+        }
+        if (score < best)
+            best = score, bestKey = key;
     }
-    // the edge joining the next map: a tile on it whose neighbour across is open, then the step over
-    for (i = 0; h->connections && i < h->connections->count; i++)
+    for (i = 0; gMapHeader.connections && i < gMapHeader.connections->count; i++)
     {
-        const struct MapConnection *m = &h->connections->connections[i];
-        s32 w = gMapHeader.mapLayout->width, hh = gMapHeader.mapLayout->height, k2, best = -1;
-        struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
-        s32 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
-        u16 key = 0xFFFF, step;
-        if (((m->mapGroup << 8) | m->mapNum) != hop)
+        const struct MapConnection *m = &gMapHeader.connections->connections[i];
+        u16 d = (m->mapGroup << 8) | m->mapNum, md, step;
+        if (m->direction < CONNECTION_SOUTH || m->direction > CONNECTION_EAST)
+            continue;
+        md = d == target ? 0 : MapDist(d, target);
+        if (md == 0xFFFF)
             continue;
         step = m->direction == CONNECTION_NORTH ? DPAD_UP : m->direction == CONNECTION_SOUTH ? DPAD_DOWN
              : m->direction == CONNECTION_WEST ? DPAD_LEFT : DPAD_RIGHT;
         for (k2 = 0; k2 < ((m->direction == CONNECTION_NORTH || m->direction == CONNECTION_SOUTH) ? w : hh); k2++)
         {
             s32 ex, ey, ox, oy;
-            u16 kk;
+            u32 score;
             switch (m->direction)
             {
             case CONNECTION_NORTH: ex = k2, ey = 0, ox = k2, oy = -1; break;
@@ -429,15 +627,20 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             if (MapGridGetCollisionAt(ox + MAP_OFFSET, oy + MAP_OFFSET))
                 continue;
             if (px == ex && py == ey)
-                return step;   // (on the edge: over it)
-            kk = MP_TestWalkKey(ex, ey);
-            if (kk != 0xFFFF && (best < 0 || abs(ex - px) + abs(ey - py) < best))
-                best = abs(ex - px) + abs(ey - py), key = kk;
+            {
+                score = (u32)md << 16;
+                if (score < best)
+                    best = score, bestKey = step;   // (on the edge: over it)
+                continue;
+            }
+            if (sWStep[ey * w + ex] == WS_NONE)
+                continue;
+            score = ((u32)md << 16) | sWDist[ey * w + ex];
+            if (score < best)
+                best = score, bestKey = WalkStepKey(ex, ey);
         }
-        if (key != 0xFFFF)
-            return key;
     }
-    return 0xFFFF;
+    return bestKey;
 }
 
 u16 MP_TestGotoKey(u8 group, u8 num, s32 tx, s32 ty)
@@ -570,6 +773,20 @@ int MP_TestCondition(const char *name)
         return MP_Setup_IsReady();
     if (strncmp(name, "orreflag:", 9) == 0)   // ORRE's story flag N is set (tools/orre/gen_story_tests.py's chain)
         return Orre_Flag(atoi(name + 9));
+    if (strncmp(name, "flag:", 5) == 0)   // story flag N (hex or decimal) is set
+        return FlagGet(strtol(name + 5, NULL, 0));
+    if (strncmp(name, "noflag:", 7) == 0)
+        return !FlagGet(strtol(name + 7, NULL, 0));
+    if (strncmp(name, "var:", 4) == 0)   // var:N=V or var:N>=V
+    {
+        char *e;
+        u16 v = VarGet(strtol(name + 4, &e, 0));
+        if (e[0] == '>' && e[1] == '=')
+            return v >= strtol(e + 2, NULL, 0);
+        return e[0] == '=' && v == strtol(e + 1, NULL, 0);
+    }
+    if (strncmp(name, "item:", 5) == 0)   // the BAG holds item N
+        return CheckBagHasItem(strtol(name + 5, NULL, 0), 1);
     if (strncmp(name, "inmap:", 6) == 0)   // the player is on map GROUP,NUM
     {
         int g = -1, m = -1;
@@ -2278,6 +2495,28 @@ void MP_TestCommand(const char *cmd, const char *arg)
             SetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + which, &m);
             SetMonData(&gPlayerParty[slot], MON_DATA_PP1 + which, &pp);
             printf("[test] teach: slot %d move %d\n", slot, move);
+        }
+    }
+    else if (strcmp(cmd, "teachhm") == 0)
+    {
+        // mp teachhm SLOT ITEM: as a player teaches an HM or TM from the BAG (the walk-only runs: only once it's had);
+        // its move in the first free move slot, else the last
+        int slot = atoi(arg), item = 0, i;
+        const char *sp = strchr(arg, ' ');
+        if (sp)
+            item = strtol(sp + 1, NULL, 0);
+        if (slot < 0 || slot >= PARTY_SIZE || !CheckBagHasItem(item, 1) || GetPocketByItemId(item) != POCKET_TM_HM)
+            printf("[test] teachhm: CANNOT (item %d not in the BAG)\n", item);
+        else
+        {
+            u16 m = ItemIdToBattleMoveId(item);
+            u8 pp = gBattleMoves[m].pp;
+            for (i = 0; i < MAX_MON_MOVES - 1 && GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + i) != MOVE_NONE
+                        && GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + i) != m; i++)
+                ;
+            SetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + i, &m);
+            SetMonData(&gPlayerParty[slot], MON_DATA_PP1 + i, &pp);
+            printf("[test] teachhm: slot %d move %d (item %d)\n", slot, m, item);
         }
     }
     else if (strcmp(cmd, "bmove") == 0)
