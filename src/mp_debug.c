@@ -828,7 +828,8 @@ u16 MP_TestApproachMapKey(bool8 obj, s32 a, s32 b, bool8 *done)
     if (obj)
     {
         u8 id = GetObjectEventIdByLocalIdAndMap(a, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
-        if (id < OBJECT_EVENTS_COUNT && !gObjectEvents[id].invisible)
+        // (where they are now, also when drawn invisible: SINNOH's engine hides people far from the camera)
+        if (id < OBJECT_EVENTS_COUNT)
             tx = gObjectEvents[id].currentCoords.x - MAP_OFFSET, ty = gObjectEvents[id].currentCoords.y - MAP_OFFSET;
         else
         {
@@ -837,7 +838,7 @@ u16 MP_TestApproachMapKey(bool8 obj, s32 a, s32 b, bool8 *done)
             for (i = 0; gMapHeader.events && i < gMapHeader.events->objectEventCount; i++)
                 if (gMapHeader.events->objectEvents[i].localId == a)
                     break;
-            if (!gMapHeader.events || i >= gMapHeader.events->objectEventCount || id < OBJECT_EVENTS_COUNT)
+            if (!gMapHeader.events || i >= gMapHeader.events->objectEventCount)
                 return 0xFFFF;
             tx = gMapHeader.events->objectEvents[i].x, ty = gMapHeader.events->objectEvents[i].y;
         }
@@ -863,6 +864,10 @@ u16 MP_TestApproachMapKey(bool8 obj, s32 a, s32 b, bool8 *done)
             if (sWStep[n] != WS_NONE && (best < 0 || sWDist[n] < best))
                 best = sWDist[n], key = WalkStepKey(sx, sy);
         }
+    if (getenv("MOEMON_GOTO_DEBUG") && (gMain.vblankCounter1 % 60) == 0)
+        printf("[test] approach: to %d,%d from %d,%d best %d key %04x\n", (int)tx, (int)ty, px, py, (int)best, key);
+    if (key != 0xFFFF)
+        NoteBump(key);   // (someone standing in the way and staying: a wall for a while, as goto has it)
     return key;
 }
 
@@ -965,6 +970,34 @@ static s32 sStickX = -1, sStickY = -1;
 static u16 sArrMap = 0xFFFF;
 static s16 sArrX, sArrY;
 static u16 sStickMap = 0xFFFF;
+// a SINNOH cave mouth / gate entrance beside warp tile (x, y): the key pushing into it from the warp tile
+// (field_control_avatar.c SinnohEntranceToward: Platinum's entrance is an arrow tile with no warp of its own, beside
+// the warp; ROUTE 203's way into OREBURGH GATE). 0xFFFF: none
+static u16 SinnohEntranceKey(s16 x, s16 y)
+{
+    static const s8 dx[3] = {1, -1, 0}, dy[3] = {0, 0, -1};
+    static const u16 keys[3] = {DPAD_RIGHT, DPAD_LEFT, DPAD_UP};
+    u32 d, i;
+    if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        return 0xFFFF;
+    for (d = 0; d < 3; d++)
+    {
+        s16 nx = x + dx[d], ny = y + dy[d];
+        u8 b = MapGridGetMetatileBehaviorAt(nx + MAP_OFFSET, ny + MAP_OFFSET);
+        bool8 warp = FALSE;
+        if (MetatileBehavior_IsSinnohStairs(b))
+            continue;
+        for (i = 0; gMapHeader.events && i < gMapHeader.events->warpCount; i++)
+            if (gMapHeader.events->warps[i].x == nx && gMapHeader.events->warps[i].y == ny)
+                warp = TRUE;
+        if (warp)
+            continue;
+        if ((d == 0 && MetatileBehavior_IsEastArrowWarp(b)) || (d == 1 && MetatileBehavior_IsWestArrowWarp(b))
+         || (d == 2 && MetatileBehavior_IsNorthArrowWarp(b)))
+            return keys[d];
+    }
+    return 0xFFFF;
+}
 // the key toward pad (a warp of this map to this map): a step there, or once on an arrow warp its direction (the
 // OLIVINE LIGHTHOUSE's stairs)
 static u16 PadKey(s32 pad)
@@ -976,7 +1009,8 @@ static u16 PadKey(s32 pad)
     {
         u8 b = MapGridGetMetatileBehaviorAt(wp->x + MAP_OFFSET, wp->y + MAP_OFFSET);
         return MetatileBehavior_IsNorthArrowWarp(b) ? DPAD_UP : MetatileBehavior_IsSouthArrowWarp(b) ? DPAD_DOWN
-             : MetatileBehavior_IsEastArrowWarp(b) ? DPAD_RIGHT : MetatileBehavior_IsWestArrowWarp(b) ? DPAD_LEFT : 0xFFFF;
+             : MetatileBehavior_IsEastArrowWarp(b) ? DPAD_RIGHT : MetatileBehavior_IsWestArrowWarp(b) ? DPAD_LEFT
+             : SinnohEntranceKey(wp->x, wp->y);
     }
     return WalkStepKey(wp->x, wp->y);
 }
@@ -1117,7 +1151,8 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         {
             u8 b = MapGridGetMetatileBehaviorAt(wp->x + MAP_OFFSET, wp->y + MAP_OFFSET);
             key = MetatileBehavior_IsNorthArrowWarp(b) ? DPAD_UP : MetatileBehavior_IsSouthArrowWarp(b) ? DPAD_DOWN
-                : MetatileBehavior_IsEastArrowWarp(b) ? DPAD_RIGHT : MetatileBehavior_IsWestArrowWarp(b) ? DPAD_LEFT : 0xFFFF;
+                : MetatileBehavior_IsEastArrowWarp(b) ? DPAD_RIGHT : MetatileBehavior_IsWestArrowWarp(b) ? DPAD_LEFT
+                : SinnohEntranceKey(wp->x, wp->y);   // (or a SINNOH cave mouth beside it)
             if (key == 0xFFFF)
                 continue;   // (stood on, and no key takes it: a way out only by stepping off and back on)
             score = (u32)md << 16;
