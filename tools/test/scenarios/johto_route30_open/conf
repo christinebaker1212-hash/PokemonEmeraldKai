@@ -1,0 +1,8 @@
+# Crystal's ElmAfterTheftScript: handing ELM the MYSTERY EGG ends ROUTE 30's battle (FLAG_QZ_0x106D, the way north to
+# VIOLET) and shows YOUNGSTER JOEY (FLAG_QZ_0x107D), without first going home to MOM (she only did it before: a player
+# who walked past NEW BARK's teacher was shut in between the battle and ROUTE 30's CUT tree). Then ROUTE 30 on foot.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("flag 4205 = 0" "var 0x5004 = 5" "flag 4205 = 1" "flag 4221 = 0" "goto 35,37 -1 -1 there")
+UNEXPECT_A=("[crash]" "TIMEOUT" "NO WAY")

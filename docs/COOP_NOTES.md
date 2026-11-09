@@ -7124,3 +7124,12 @@ ROCKET WAREHOUSE and LOST CAVE, MT. MOON B2F, CERULEAN, the CHAMPION's room) kep
 GIOVANNI (both guards beaten) never opened. They name TRAINER_QZ_<n> now; tools/test/check_scripts.py fails on a
 numeric check / set / cleartrainerflag. Saves that beat the guards before get the door on B4F's next load (its
 ON_LOAD script reads the same flags).
+
+## ROUTE 30's battle ends at ELM's (1.185.3)
+Crystal's ElmAfterTheftScript (the MYSTERY EGG handed over) sets EVENT_ROUTE_30_BATTLE and clears
+EVENT_ROUTE_30_YOUNGSTER_JOEY. Quetzal moved both to MOM's leaving talk (Johto_PlayersHouse1F 83E3B83: FLAG_QZ_0x106D
+hides ROUTE 30's two youngsters and their POKéMON at 23,23-25, FLAG_QZ_0x107D shows JOEY), with NEW BARK's teacher
+turning the player back at the west edge ("tell your mom") at VAR_QZ_0x5003 4. Her triggers cover rows 12-14 and the
+edge is open at row 11 too, so a player could leave without going home and find ROUTE 30 shut between the battle and
+its CUT tree (VIOLET out of reach). ELM's egg scene (Johto_ElmsLab 83E2124's end) sets / clears the two flags now, as
+Crystal; MOM's talk still does (no change for her BANK offer). Test johto_route30_open.

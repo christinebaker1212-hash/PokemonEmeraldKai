@@ -444,6 +444,10 @@ Johto_ElmsLab_EventScript_83E2124::
 	clearflag FLAG_QZ_0x1075
 	setflag FLAG_QZ_0x14A0
 	setflag FLAG_QZ_0x115F
+	@ Moemon Kai: Crystal's ElmAfterTheftScript: ROUTE 30's battle is over (the way north to VIOLET) and YOUNGSTER
+	@ JOEY stands by the path, without first going home to MOM
+	setflag FLAG_QZ_0x106D
+	clearflag FLAG_QZ_0x107D
 	removeitem ITEM_MYSTERY_EGG, 1
 	release
 	end
