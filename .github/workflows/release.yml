@@ -68,8 +68,15 @@ jobs:
       - name: SDL2 for Windows (2.30.9, checked)
         if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         run: |
-          curl -sSL -o "$RUNNER_TEMP/sdl2.tar.gz" https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-mingw.tar.gz
-          echo "b188d165dc4a0372042bff3d0c18e9bb90772581e92a7b8b47b521b47714f75c  $RUNNER_TEMP/sdl2.tar.gz" | sha256sum -c
+          # (a download can fail or come back as an error page: tried again, the file checked each time)
+          ok=
+          for wait in 0 5 15 30 60; do
+            sleep $wait
+            curl -fsSL --retry 3 -o "$RUNNER_TEMP/sdl2.tar.gz" https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-mingw.tar.gz || continue
+            if echo "b188d165dc4a0372042bff3d0c18e9bb90772581e92a7b8b47b521b47714f75c  $RUNNER_TEMP/sdl2.tar.gz" | sha256sum -c; then ok=1; break; fi
+            ls -l "$RUNNER_TEMP/sdl2.tar.gz"; head -c 300 "$RUNNER_TEMP/sdl2.tar.gz" | od -c | head -5
+          done
+          [ -n "$ok" ] || { echo "SDL2 download failed its checksum every time"; exit 1; }
           tar xzf "$RUNNER_TEMP/sdl2.tar.gz" -C "$RUNNER_TEMP"
 
       - name: Song table (custom music in music/, every song and where it plays)
