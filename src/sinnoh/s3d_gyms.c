@@ -1154,6 +1154,21 @@ void S3D_Gyms_RedirectWarp(s16 x, s16 y)
         }
 }
 
+// A wrong door of HEARTHOME's trainer room the player is in (map coords): the walk harness's player has read the clue
+bool8 S3D_Gyms_WrongDoor(s16 x, s16 y)
+{
+    const u8 (*doors)[3];
+    u32 i, n;
+    if (sG.gym != GYM_HEARTHOME || sHearth.room < 0)
+        return FALSE;
+    doors = sHearth.room == 0 ? sHearthDoors1 : sHearthDoors2;
+    n = sHearth.room == 0 ? ARRAY_COUNT(sHearthDoors1) : ARRAY_COUNT(sHearthDoors2);
+    for (i = 0; i < n; i++)
+        if (doors[i][0] == x && doors[i][1] == y)
+            return doors[i][2] != sHearth.door;
+    return FALSE;
+}
+
 // The GREAT MARSH's tram, Platinum's run-time prop (s3d_tram.c)
 void S3D_Gyms_TramProp(float x, float y, float z)
 {

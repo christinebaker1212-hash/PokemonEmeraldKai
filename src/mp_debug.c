@@ -1123,8 +1123,8 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         u16 d = WarpDestMap(wp), md = d == target ? 0 : MapDist(d, target), key;
         bool8 pen = FALSE;
         u32 score;
-        if (md == 0xFFFF || d == here || wp->x < 0 || wp->y < 0 || wp->x >= w || wp->y >= hh)
-            continue;   // (this map's own stairs and holes: PadPlan(-1, -1) below when they're the only way on.
+        if (md == 0xFFFF || d == here || wp->x < 0 || wp->y < 0 || wp->x >= w || wp->y >= hh || S3D_Gyms_WrongDoor(wp->x, wp->y))
+            continue;   // (HEARTHOME's gym: the door the floor's clue rules out. This map's own stairs and holes: PadPlan(-1, -1) below when they're the only way on.
                         // A warp off the map's edge is none: ROUTE 26 SOUTH's 12,-24)
         if (d == target)
             ;   // (back the way the player came is the way when it leads to the map sought: the ICE PATH's HM07)
@@ -3112,6 +3112,30 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 printf(" w%d(%d,%d->%d.%d)", (int)i, wp->x, wp->y, wp->mapGroup, wp->mapNum);
         }
         printf("\n");
+    }
+    else if (strcmp(cmd, "stepmap") == 0)
+    {
+        // mp stepmap X0 Y0 X1 Y1: the walk's search over a block of the map ('.' reached, '#' wall, '-' open but not
+        // reached, 'w' a warp reached, 'W' one not, '@' the player)
+        int x0 = 0, y0 = 0, x1 = 0, y1 = 0, x, y;
+        s32 w = gMapHeader.mapLayout->width, hh = gMapHeader.mapLayout->height, px, py;
+        char row[256];
+        sscanf(arg, "%d %d %d %d", &x0, &y0, &x1, &y1);
+        WalkSearchNow();
+        px = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET;
+        py = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET;
+        for (y = y0; y <= y1 && y < hh; y++)
+        {
+            int n = 0;
+            for (x = x0; x <= x1 && x < w && n < 250; x++)
+            {
+                bool8 reached = sWStep[y * w + x] != WS_NONE, warp = IsWarpAt(x, y);
+                row[n++] = x == px && y == py ? '@' : warp ? (reached ? 'w' : 'W') : reached ? '.'
+                         : MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET) ? '#' : '-';
+            }
+            row[n] = 0;
+            printf("[test] stepmap %3d %s\n", y, row);
+        }
     }
     else if (strcmp(cmd, "tile") == 0)
     {
