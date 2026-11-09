@@ -587,6 +587,30 @@ static void WalkSearchNow(void)
 // A maze of warp pads on one map (SAFFRON's gym): the pad to step on first so that, pad after pad, the player lands
 // where (tx, ty) can be walked to; -1 if none. Searched from the player, then from each pad's landing in turn
 #define W_PADS 64
+// a warp off this map that the last WalkSearch reaches
+static bool8 OutwardWarpReached(u16 here)
+{
+    s32 w = gMapHeader.mapLayout->width, i;
+    for (i = 0; gMapHeader.events && i < gMapHeader.events->warpCount; i++)
+    {
+        const struct WarpEvent *wp = &gMapHeader.events->warps[i];
+        if (((wp->mapGroup << 8) | wp->mapNum) != here && sWStep[wp->y * w + wp->x] != WS_NONE)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+static bool8 OnArrowWarp(const struct WarpEvent *wp)
+{
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u8 b;
+    if (p->currentCoords.x - MAP_OFFSET != wp->x || p->currentCoords.y - MAP_OFFSET != wp->y)
+        return FALSE;
+    b = MapGridGetMetatileBehaviorAt(wp->x + MAP_OFFSET, wp->y + MAP_OFFSET);
+    return MetatileBehavior_IsNorthArrowWarp(b) || MetatileBehavior_IsSouthArrowWarp(b)
+        || MetatileBehavior_IsEastArrowWarp(b) || MetatileBehavior_IsWestArrowWarp(b);
+}
+
 static s32 PadPlan(s32 tx, s32 ty)
 {
     unsigned long Platform_FrameCount(void);
@@ -614,16 +638,17 @@ static s32 PadPlan(s32 tx, s32 ty)
     }
     WalkSearch();
     for (i = 0; i < n; i++)
-        if (lx[i] >= 0 && sWStep[gMapHeader.events->warps[i].y * w + gMapHeader.events->warps[i].x] != WS_NONE)
-            first[i] = i, q[tail++] = i;
+        if (lx[i] >= 0 && (sWStep[gMapHeader.events->warps[i].y * w + gMapHeader.events->warps[i].x] != WS_NONE
+                        || OnArrowWarp(&gMapHeader.events->warps[i])))
+            first[i] = i, q[tail++] = i;   // (or stood on, an arrow warp: its direction takes it)
     while (head < tail && sPlan < 0)
     {
         i = q[head++];
         sWFromX = lx[i], sWFromY = ly[i];
         WalkSearch();
         sWFromX = sWFromY = -1;
-        if (sWStep[ty * w + tx] != WS_NONE)
-            sPlan = first[i];
+        if (tx >= 0 ? sWStep[ty * w + tx] != WS_NONE : OutwardWarpReached(here))
+            sPlan = first[i];   // (tx < 0: any way off this map, PadPlanOut)
         for (j = 0; j < n && sPlan < 0; j++)
             if (lx[j] >= 0 && first[j] < 0 && sWStep[gMapHeader.events->warps[j].y * w + gMapHeader.events->warps[j].x] != WS_NONE)
                 first[j] = first[i], q[tail++] = j;
@@ -821,6 +846,22 @@ static s32 sStickX = -1, sStickY = -1;
 static u16 sArrMap = 0xFFFF;
 static s16 sArrX, sArrY;
 static u16 sStickMap = 0xFFFF;
+// the key toward pad (a warp of this map to this map): a step there, or once on an arrow warp its direction (the
+// OLIVINE LIGHTHOUSE's stairs)
+static u16 PadKey(s32 pad)
+{
+    const struct WarpEvent *wp = &gMapHeader.events->warps[pad];
+    s16 px = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET;
+    s16 py = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET;
+    if (px == wp->x && py == wp->y)
+    {
+        u8 b = MapGridGetMetatileBehaviorAt(wp->x + MAP_OFFSET, wp->y + MAP_OFFSET);
+        return MetatileBehavior_IsNorthArrowWarp(b) ? DPAD_UP : MetatileBehavior_IsSouthArrowWarp(b) ? DPAD_DOWN
+             : MetatileBehavior_IsEastArrowWarp(b) ? DPAD_RIGHT : MetatileBehavior_IsWestArrowWarp(b) ? DPAD_LEFT : 0xFFFF;
+    }
+    return WalkStepKey(wp->x, wp->y);
+}
+
 // a warp leading where the one at x,y leads (the same map and warp there)
 static bool8 SameWayAsArrival(const struct WarpEvent *wp, s16 x, s16 y)
 {
@@ -885,18 +926,7 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         if (tx >= 0 && w * hh <= W_MAXT && (pad = PadPlan(tx, ty)) >= 0)
         {
             // (a pad, then another: SAFFRON's gym)
-            const struct WarpEvent *wp = &gMapHeader.events->warps[pad];
-            s16 px2 = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET;
-            s16 py2 = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET;
-            if (px2 == wp->x && py2 == wp->y)
-            {
-                // (stood on an arrow warp: its direction takes it. The OLIVINE LIGHTHOUSE's stairs)
-                u8 b = MapGridGetMetatileBehaviorAt(wp->x + MAP_OFFSET, wp->y + MAP_OFFSET);
-                k = MetatileBehavior_IsNorthArrowWarp(b) ? DPAD_UP : MetatileBehavior_IsSouthArrowWarp(b) ? DPAD_DOWN
-                  : MetatileBehavior_IsEastArrowWarp(b) ? DPAD_RIGHT : MetatileBehavior_IsWestArrowWarp(b) ? DPAD_LEFT : 0xFFFF;
-            }
-            else
-                k = WalkStepKey(wp->x, wp->y);
+            k = PadKey(pad);
             if (k != 0xFFFF)
                 return k;
         }
@@ -909,8 +939,8 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         const struct WarpEvent *wp = &gMapHeader.events->warps[i];
         u16 d = WarpDestMap(wp), md = d == target ? 0 : MapDist(d, target), key;
         u32 score;
-        if (md == 0xFFFF)
-            continue;
+        if (md == 0xFFFF || d == here)
+            continue;   // (this map's own stairs and holes: PadPlan(-1, -1) below when they're the only way on)
         if (sArrMap == here && IsWarpAt(sArrX, sArrY))
         {
             // (come in by a door: back out of that door only when nothing else goes on. A gatehouse's two doors
@@ -993,6 +1023,18 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             if (score < best)
                 best = score, bestKey = WalkStepKey(ex, ey), sChosen = 0x80 | i, bx = ex, by = ey;
         }
+    }
+    // (no way off this map from here, only its own stairs and holes: the ones that lead to a way off, as a player
+    // finds the way down the OLIVINE LIGHTHOUSE)
+    if (best == 0xFFFFFFFF && !OutwardWarpReached(here) && w * hh <= W_MAXT)
+    {
+        s32 pad = PadPlan(-1, -1);
+        u16 k = pad >= 0 ? PadKey(pad) : 0xFFFF;
+        if (getenv("MOEMON_GOTO_DEBUG") && (Platform_FrameCount() % 60) == 0)
+            printf("[test] goto: map %d.%d at %d,%d out by pad %d key %04x\n", gSaveBlock1Ptr->location.mapGroup,
+                   gSaveBlock1Ptr->location.mapNum, px, py, (int)pad, k);   // (as the line below)
+        if (k != 0xFFFF)
+            return k;
     }
     // (the way out chosen before is kept while it's nearly as good: two ways out about as far, chosen in turn from
     // tile to tile, would have the player step back and forth)
