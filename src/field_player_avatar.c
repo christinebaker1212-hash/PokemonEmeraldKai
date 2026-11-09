@@ -15,6 +15,7 @@
 #include "fieldmap.h"
 #include "menu.h"
 #include "metatile_behavior.h"
+#include "mp_region.h"   // Moemon Kai: (holes outside HOENN)
 #include "overworld.h"
 #include "party_menu.h"
 #include "random.h"
@@ -753,6 +754,21 @@ static u8 CheckForPlayerAvatarStaticCollision(u8 direction)
     return CheckForObjectEventStaticCollision(playerObjEvent, x, y, direction, MapGridGetMetatileBehaviorAt(x, y));
 }
 
+// Moemon Kai: Quetzal's holes (JOHTO's OLIVINE LIGHTHOUSE, ECRUTEAK GYM, ICE PATH, VICTORY ROAD, the RUINS OF ALPH)
+// are solid blocks with MB_MT_PYRE_HOLE and a warp, and this engine falls only through a hole stepped onto: the player
+// walks into one (field_control_avatar.c TryStartWarpEventScript then drops them, as in Crystal). Outside HOENN only:
+// MT. PYRE's are open floor
+static bool8 IsSolidHoleWarp(s16 x, s16 y, u8 behavior)
+{
+    s32 i;
+    if (!MetatileBehavior_IsMtPyreHole(behavior) || MP_Region_Current() == REGION_HOENN || !gMapHeader.events)
+        return FALSE;
+    for (i = 0; i < gMapHeader.events->warpCount; i++)
+        if (gMapHeader.events->warps[i].x == x - MAP_OFFSET && gMapHeader.events->warps[i].y == y - MAP_OFFSET)
+            return TRUE;
+    return FALSE;
+}
+
 u8 CheckForObjectEventCollision(struct ObjectEvent *objectEvent, s16 x, s16 y, u8 direction, u8 metatileBehavior)
 {
     u8 collision;
@@ -761,6 +777,8 @@ u8 CheckForObjectEventCollision(struct ObjectEvent *objectEvent, s16 x, s16 y, u
                                       && gPlayerAvatar.bikeSpeed >= 1)))
         S3D_Gyms_BreakAt(x, y);   // Moemon Kai: SNOWPOINT's snowballs break when run into fast
     collision = GetCollisionAtCoords(objectEvent, x, y, direction);
+    if (collision == COLLISION_IMPASSABLE && objectEvent->isPlayer && IsSolidHoleWarp(x, y, metatileBehavior))
+        collision = COLLISION_NONE;   // Moemon Kai: JOHTO's / KANTO's holes are walked into (below)
     if (collision == COLLISION_NONE && objectEvent->isPlayer && MP_Garden_ActorAt(x, y))
         collision = COLLISION_OBJECT_EVENT;   // Moemon Co-op: a MOéMON GARDEN Pokémon stands there
     if (collision == COLLISION_ELEVATION_MISMATCH && CanStopSurfing(x, y, direction))

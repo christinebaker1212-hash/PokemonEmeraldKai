@@ -7133,3 +7133,13 @@ turning the player back at the west edge ("tell your mom") at VAR_QZ_0x5003 4. H
 edge is open at row 11 too, so a player could leave without going home and find ROUTE 30 shut between the battle and
 its CUT tree (VIOLET out of reach). ELM's egg scene (Johto_ElmsLab 83E2124's end) sets / clears the two flags now, as
 Crystal; MOM's talk still does (no change for her BANK offer). Test johto_route30_open.
+
+## Holes you fall through in JOHTO and KANTO (1.185.4)
+Quetzal draws its holes as solid blocks (collision 1) with MB_MT_PYRE_HOLE and a warp: the OLIVINE LIGHTHOUSE (all its
+floors are one map: the holes at 107-108,11, 136-137,7 and 166-167,7 are the way to JASMINE and AMPHY at the top),
+ECRUTEAK GYM's pits (back to the entrance), ICE PATH B1F, the RUINS OF ALPH chambers and word rooms, JOHTO's VICTORY ROAD
+3F (tools: a scan of every Johto_ / Kanto_ map's warps for behavior 0x0F). This engine falls only through a hole stepped
+onto (field_control_avatar.c TryStartWarpEventScript), so none could be entered and the LIGHTHOUSE's top was out of
+reach. field_player_avatar.c IsSolidHoleWarp: outside HOENN, the player's collision check lets them walk into a solid
+MB_MT_PYRE_HOLE that has a warp, and the warp drops them as in Crystal (HOENN's MT. PYRE holes are open floor already).
+Test johto_holes.

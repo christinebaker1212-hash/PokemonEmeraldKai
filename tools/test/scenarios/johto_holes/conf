@@ -1,0 +1,9 @@
+# Quetzal's holes are solid blocks with MB_MT_PYRE_HOLE and a warp; this engine falls only through a hole stepped onto,
+# so none could be fallen through and the OLIVINE LIGHTHOUSE's top (JASMINE, AMPHY) was out of reach. The player walks
+# into one now (field_player_avatar.c IsSolidHoleWarp): the LIGHTHOUSE's 136,7 drops to 107,7, an ECRUTEAK GYM pit back
+# to its entrance (10,43), as in Crystal
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("where map 35.9 xy 136,6" "where map 35.9 xy 107,7" "where map 34.37 xy 10,43")
+UNEXPECT_A=("[crash]")
