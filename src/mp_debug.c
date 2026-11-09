@@ -884,6 +884,22 @@ static bool8 WarpNear(s16 x, s16 y)
     return FALSE;
 }
 
+// the tile (x, y) just past a map's edge, stepped onto going (dx, dy): nowhere on from there (all three tiles on are
+// solid) is a dead end
+static bool8 DeadEndAcross(s32 x, s32 y, s32 dx, s32 dy)
+{
+    s32 k;
+    for (k = 0; k < 3; k++)
+    {
+        s32 nx = x + (k == 0 ? dx : dy != 0 ? (k == 1 ? -1 : 1) : 0);
+        s32 ny = y + (k == 0 ? dy : dx != 0 ? (k == 1 ? -1 : 1) : 0);
+        if (!MapGridGetCollisionAt(nx + MAP_OFFSET, ny + MAP_OFFSET)
+         && GetMapBorderIdAt(nx + MAP_OFFSET, ny + MAP_OFFSET) != CONNECTION_INVALID)
+            return FALSE;
+    }
+    return TRUE;
+}
+
 static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
 {
     struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
@@ -1008,6 +1024,8 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             if (MapGridGetCollisionAt(ox + MAP_OFFSET, oy + MAP_OFFSET)
              || GetMapBorderIdAt(ox + MAP_OFFSET, oy + MAP_OFFSET) == CONNECTION_INVALID)
                 continue;   // (past the edge: a connected map's ground, not the border's scenery)
+            if (DeadEndAcross(ox, oy, ox - ex, oy - ey))
+                continue;   // (and not a pocket shut in by rocks there: ROUTE 41's west edge by CIANWOOD)
             if (px == ex && py == ey)
             {
                 score = (u32)md << 16;
