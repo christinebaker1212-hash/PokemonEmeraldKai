@@ -311,14 +311,15 @@ static bool8 PartyKnows(u16 move)
 static bool8 ClearableAt(s16 x, s16 y)
 {
     extern const u8 Quetzal_EventScript_846B413[], Quetzal_EventScript_846B4F2[], EventScript_CutTree[], EventScript_RockSmash[];
+    extern const u8 Quetzal_EventScript_837EEDF[], Quetzal_EventScript_837EF35[];   // (JOHTO's own CUT tree / rock)
     u8 id = GetObjectEventIdByXY(x, y);
     const u8 *script;
     if (id == OBJECT_EVENTS_COUNT)
         return FALSE;
     script = GetObjectEventScriptPointerByObjectEventId(id);
-    if (script == Quetzal_EventScript_846B413 || script == EventScript_CutTree)
+    if (script == Quetzal_EventScript_846B413 || script == Quetzal_EventScript_837EEDF || script == EventScript_CutTree)
         return PartyKnows(MOVE_CUT);
-    if (script == Quetzal_EventScript_846B4F2 || script == EventScript_RockSmash)
+    if (script == Quetzal_EventScript_846B4F2 || script == Quetzal_EventScript_837EF35 || script == EventScript_RockSmash)
         return PartyKnows(MOVE_ROCK_SMASH);
     return FALSE;
 }
