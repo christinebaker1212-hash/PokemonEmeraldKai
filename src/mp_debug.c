@@ -813,6 +813,19 @@ static s32 sStickX = -1, sStickY = -1;
 static u16 sArrMap = 0xFFFF;
 static s16 sArrX, sArrY;
 static u16 sStickMap = 0xFFFF;
+// a warp leading where the one at x,y leads (the same map and warp there)
+static bool8 SameWayAsArrival(const struct WarpEvent *wp, s16 x, s16 y)
+{
+    s32 i;
+    for (i = 0; gMapHeader.events && i < gMapHeader.events->warpCount; i++)
+    {
+        const struct WarpEvent *a = &gMapHeader.events->warps[i];
+        if (a->x == x && a->y == y)
+            return a->mapGroup == wp->mapGroup && a->mapNum == wp->mapNum && a->warpId == wp->warpId;
+    }
+    return FALSE;
+}
+
 static bool8 WarpNear(s16 x, s16 y)
 {
     s32 i;
@@ -885,8 +898,8 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             // (come in by a door: back out of that door only when nothing else goes on. A gatehouse's two doors
             // lead to the same map, and the far one is the way through. The door is where the player stood on
             // first coming: the save's warp number is stale after CONTINUE, and a script's warp names none)
-            if (abs(sArrX - wp->x) + abs(sArrY - wp->y) <= 1)
-                md += 8;   // (a double door's two halves are one door)
+            if (abs(sArrX - wp->x) + abs(sArrY - wp->y) <= 1 || SameWayAsArrival(wp, sArrX, sArrY))
+                md += 8;   // (a double door's two halves are one door; a wide one's every tile: the NATIONAL PARK's 4)
         }
         else if (sArrMap == here && WarpNear(sArrX, sArrY))
         {
