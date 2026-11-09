@@ -1,4 +1,5 @@
 #include "global.h"
+extern char *getenv(const char *name);   // Moemon Kai: tests
 #include "orre.h"   // Moemon Kai: ORRE's battles
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 bool8 MP_StadiumClause_Blocks(u8 battler, u8 moveEffect);   // Moemon Kai: mp_stadium_cup.c
@@ -6051,6 +6052,13 @@ static void Cmd_yesnoboxlearnmove(void)
         BattleCreateYesNoCursorAt(0);
         break;
     case 1:
+        if (getenv("MOEMON_TEST_STRONG"))
+        {
+            // Moemon Kai (tests only): a test that means to win keeps its strong first move; a level up mid-battle
+            // with A mashed would otherwise forget it for the new move
+            gBattleScripting.learnMoveState = 5;
+            break;
+        }
         if (JOY_NEW(DPAD_UP) && gBattleCommunication[CURSOR_POSITION] != 0)
         {
             PlaySE(SE_SELECT);

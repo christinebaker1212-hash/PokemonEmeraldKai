@@ -94,7 +94,7 @@ static int sMashCount = 0, sMashInterval = 0;
 static char sUntilName[32];
 static int sWalkX, sWalkY, sWalkFrames;   // walkto
 static int sGotoG, sGotoN, sGotoX, sGotoY, sGotoFrames, sGotoBusy;   // goto
-static int sApproachKind, sApproachN, sApproachN2, sApproachFrames;   // approach (kinds 3 obj / 4 tile: any region's maps)
+static int sApproachKind, sApproachN, sApproachN2, sApproachFrames, sTalkFrames;   // approach (kinds 3 obj / 4 tile: any region's maps)
 static int sUntilFrames = 0;
 static u16 sUntilKeys = 0;
 extern int MP_TestCondition(const char *name);
@@ -1315,6 +1315,23 @@ static void TestHarnessStep(void)
         sBarrierName[0] = 0;
     }
 
+    if (sTalkFrames > 0)
+    {
+        // after an approach: A every 12 frames (one pressed while the last step finishes is lost) until a script runs
+        bool8 ScriptContext_IsEnabled(void);
+        if (ScriptContext_IsEnabled() || --sTalkFrames == 0)
+        {
+            printf("[test] frame %lu: talk %s\n", sFrameCounter, sTalkFrames ? "started" : "NOTHING");
+            fflush(stdout);
+            sTalkFrames = 0;
+            sTestKeys = 0;
+        }
+        else
+        {
+            sTestKeys = (sTalkFrames % 12) < 2 ? A_BUTTON : 0;
+            return;
+        }
+    }
     if (sGotoFrames > 0 || sApproachFrames > 0)
     {
         // goto G,N X Y / approach KIND N: as a player gets there (mp_debug.c MP_TestGotoKey / MP_TestApproachKey);
@@ -1336,8 +1353,10 @@ static void TestHarnessStep(void)
                 printf("[test] frame %lu: approach %d %d there\n", sFrameCounter, sApproachKind, sApproachN);
             fflush(stdout);
             sGotoFrames = sApproachFrames = 0;
-            sTestKeys = (!go && sApproachKind != 1) ? A_BUTTON : 0;   // (a person / a check: A, as a player talks)
-            sTestWait = 1;
+            sTestKeys = 0;
+            if (!go && sApproachKind != 1)
+                sTalkFrames = 120;   // (a person / a check: A, as a player talks, until their script starts)
+            sTestWait = go || sApproachKind == 1 ? 24 : 1;   // (a trigger where it arrives: its scene starts first)
             return;
         }
         if ((go ? --sGotoFrames : --sApproachFrames) == 0)
@@ -1368,7 +1387,7 @@ static void TestHarnessStep(void)
             }
         }
         else
-            sTestKeys = k;
+            sTestKeys = (k == A_BUTTON && (sFrameCounter & 8)) ? 0 : k;   // (A pulsed: one held down presses only once)
         return;
     }
     if (sWalkFrames > 0)
@@ -1388,7 +1407,7 @@ static void TestHarnessStep(void)
         }
         else
         {
-            sTestKeys = k == 0xFFFF ? 0 : k;
+            sTestKeys = k == 0xFFFF ? 0 : (k == A_BUTTON && (sFrameCounter & 8)) ? 0 : k;
             return;
         }
     }

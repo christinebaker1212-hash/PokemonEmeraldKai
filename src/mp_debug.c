@@ -72,6 +72,7 @@ unsigned int SDL_GetTicks(void);
 #include "gpu_regs.h"
 #include "bg.h"
 #include "party_menu.h"
+#include "script_pokemon_util.h"
 #include "constants/items.h"
 #include "constants/flags.h"
 #include "constants/heal_locations.h"
@@ -365,6 +366,7 @@ static void WalkSearch(void)
             if (nx < 0 || ny < 0 || nx >= w || ny >= h)
                 continue;
             t.currentCoords.x = cx + MAP_OFFSET, t.currentCoords.y = cy + MAP_OFFSET, t.currentElevation = e;
+            t.currentMetatileBehavior = MapGridGetMetatileBehaviorAt(cx + MAP_OFFSET, cy + MAP_OFFSET);   // (one-way tiles: from here)
             if (!surf && GetLedgeJumpDirection(nx + MAP_OFFSET, ny + MAP_OFFSET, dirs[d]) != DIR_NONE)
             {
                 lx = nx + dx[d], ly = ny + dy[d];   // (over the ledge: two tiles on)
@@ -392,6 +394,8 @@ static void WalkSearch(void)
                     nsurf = 1, ne = 1, how |= WS_A;   // (onto the water: A facing it, SURF)
                 else if (col == COLLISION_OBJECT_EVENT && ClearableAt(nx + MAP_OFFSET, ny + MAP_OFFSET))
                     how |= WS_A, ne = ElevationAfter(e, nx + MAP_OFFSET, ny + MAP_OFFSET, cx + MAP_OFFSET, cy + MAP_OFFSET);
+                else if (col != COLLISION_OBJECT_EVENT && !surf && IsWarpAt(nx, ny))
+                    ;   // (a door: solid, walked into it warps; an end, as every warp)
                 else
                     continue;
             }
@@ -466,9 +470,19 @@ u16 MP_TestApproachMapKey(bool8 obj, s32 a, s32 b, bool8 *done)
     if (obj)
     {
         u8 id = GetObjectEventIdByLocalIdAndMap(a, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
-        if (id >= OBJECT_EVENTS_COUNT || gObjectEvents[id].invisible)
-            return 0xFFFF;
-        tx = gObjectEvents[id].currentCoords.x - MAP_OFFSET, ty = gObjectEvents[id].currentCoords.y - MAP_OFFSET;
+        if (id < OBJECT_EVENTS_COUNT && !gObjectEvents[id].invisible)
+            tx = gObjectEvents[id].currentCoords.x - MAP_OFFSET, ty = gObjectEvents[id].currentCoords.y - MAP_OFFSET;
+        else
+        {
+            // (off the screen, not loaded yet: where the map puts them, until they're near enough to show)
+            u32 i;
+            for (i = 0; gMapHeader.events && i < gMapHeader.events->objectEventCount; i++)
+                if (gMapHeader.events->objectEvents[i].localId == a)
+                    break;
+            if (!gMapHeader.events || i >= gMapHeader.events->objectEventCount || id < OBJECT_EVENTS_COUNT)
+                return 0xFFFF;
+            tx = gMapHeader.events->objectEvents[i].x, ty = gMapHeader.events->objectEvents[i].y;
+        }
     }
     else
         tx = a, ty = b;
@@ -566,13 +580,42 @@ static u16 MapDist(u16 from, u16 target)
     return 0xFFFF;
 }
 
+unsigned long Platform_FrameCount(void);
+static u16 sLast = 0xFFFF, sPrev = 0xFFFF, sFor = 0xFFFF, sChosen = 0xFFFF, sTakenMap[64];
+static u8 sTakenExit[64], sTakenCount[64], sTakenN;
+static u32 TakenCount(u16 map, u16 exit)
+{
+    u32 t;
+    for (t = 0; t < sTakenN; t++)
+        if (sTakenMap[t] == map && sTakenExit[t] == (u8)exit)
+            return sTakenCount[t];
+    return 0;
+}
+
 static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
 {
     struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
     s32 w = gMapHeader.mapLayout->width, hh = gMapHeader.mapLayout->height, i, k2;
     s16 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
-    u16 target = (group << 8) | num, bestKey = 0xFFFF;
+    u16 target = (group << 8) | num, bestKey = 0xFFFF, here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
     u32 best = 0xFFFFFFFF;
+    // (the map just left, while going to one target: back there only when nothing else goes on. The fewest maps
+    // counts a map as a whole, though a fence or trees may split it: ROUTE 2 from VIRIDIAN goes on through the forest)
+    // (and each way out already taken on this trip counts against itself, so a cave's ladders are tried in turn, as a
+    // player finds the way through a maze)
+    u32 t;
+    if (sFor != target)
+        sFor = target, sLast = here, sPrev = 0xFFFF, sTakenN = 0, sChosen = 0xFFFF;
+    else if (here != sLast)
+    {
+        for (t = 0; t < sTakenN && (sTakenMap[t] != sLast || sTakenExit[t] != sChosen); t++)
+            ;
+        if (t == sTakenN && sTakenN < ARRAY_COUNT(sTakenMap))
+            sTakenMap[t] = sLast, sTakenExit[t] = sChosen, sTakenCount[t] = 0, sTakenN++;
+        if (t < sTakenN && sTakenCount[t] < 200)
+            sTakenCount[t]++;
+        sPrev = sLast, sLast = here;
+    }
     if (gSaveBlock1Ptr->location.mapGroup == group && gSaveBlock1Ptr->location.mapNum == num)
         return MP_TestWalkKey(tx, ty);
     if (!MP_IsInOverworld() || w * hh > W_MAXT || ScriptContext_IsEnabled())
@@ -585,6 +628,8 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         u32 score;
         if (md == 0xFFFF)
             continue;
+        if (d == sPrev)
+            md += 8;
         if (px == wp->x && py == wp->y)
         {
             u8 b = MapGridGetMetatileBehaviorAt(wp->x + MAP_OFFSET, wp->y + MAP_OFFSET);
@@ -600,7 +645,7 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             score = ((u32)md << 16) | sWDist[wp->y * w + wp->x];
         }
         if (score < best)
-            best = score, bestKey = key;
+            best = score, bestKey = key, sChosen = i;
     }
     for (i = 0; gMapHeader.connections && i < gMapHeader.connections->count; i++)
     {
@@ -611,6 +656,8 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         md = d == target ? 0 : MapDist(d, target);
         if (md == 0xFFFF)
             continue;
+        if (d == sPrev)
+            md += 8;
         step = m->direction == CONNECTION_NORTH ? DPAD_UP : m->direction == CONNECTION_SOUTH ? DPAD_DOWN
              : m->direction == CONNECTION_WEST ? DPAD_LEFT : DPAD_RIGHT;
         for (k2 = 0; k2 < ((m->direction == CONNECTION_NORTH || m->direction == CONNECTION_SOUTH) ? w : hh); k2++)
@@ -630,16 +677,18 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             {
                 score = (u32)md << 16;
                 if (score < best)
-                    best = score, bestKey = step;   // (on the edge: over it)
+                    best = score, bestKey = step, sChosen = 0x80 | i;   // (on the edge: over it)
                 continue;
             }
             if (sWStep[ey * w + ex] == WS_NONE)
                 continue;
             score = ((u32)md << 16) | sWDist[ey * w + ex];
             if (score < best)
-                best = score, bestKey = WalkStepKey(ex, ey);
+                best = score, bestKey = WalkStepKey(ex, ey), sChosen = 0x80 | i;
         }
     }
+    if (getenv("MOEMON_GOTO_DEBUG") && (Platform_FrameCount() % 60) == 0)
+        printf("[test] goto: map %d.%d at %d,%d best %08x key %04x\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, px, py, (unsigned)best, bestKey);
     return bestKey;
 }
 
@@ -2496,6 +2545,53 @@ void MP_TestCommand(const char *cmd, const char *arg)
             SetMonData(&gPlayerParty[slot], MON_DATA_PP1 + which, &pp);
             printf("[test] teach: slot %d move %d\n", slot, move);
         }
+    }
+    else if (strcmp(cmd, "reach") == 0)
+    {
+        // mp reach: which of this map's warps a player standing here can walk to (planning the walk-only runs)
+        s32 w = gMapHeader.mapLayout->width, i;
+        WalkSearchNow();
+        printf("[test] reach %d.%d from %d,%d:", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
+               gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET,
+               gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET);
+        for (i = 0; gMapHeader.events && i < gMapHeader.events->warpCount; i++)
+        {
+            const struct WarpEvent *wp = &gMapHeader.events->warps[i];
+            if (sWStep[wp->y * w + wp->x] != WS_NONE)
+                printf(" w%d(%d,%d->%d.%d)", (int)i, wp->x, wp->y, wp->mapGroup, wp->mapNum);
+        }
+        printf("\n");
+    }
+    else if (strcmp(cmd, "tile") == 0)
+    {
+        // mp tile X Y: a tile's collision, height, behavior and the walk's search there (and the player's height)
+        int x = 0, y = 0;
+        struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+        sscanf(arg, "%d %d", &x, &y);
+        WalkSearchNow();
+        printf("[test] tile %d,%d: col %d elev %d behavior 0x%02x step %d dist %d (player %d,%d elev %d flags %x)\n", x, y,
+               MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET), MapGridGetElevationAt(x + MAP_OFFSET, y + MAP_OFFSET),
+               MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET), sWStep[y * gMapHeader.mapLayout->width + x],
+               sWDist[y * gMapHeader.mapLayout->width + x], p->currentCoords.x - MAP_OFFSET, p->currentCoords.y - MAP_OFFSET,
+               p->currentElevation, gPlayerAvatar.flags);
+        {
+            struct ObjectEvent t = *p;
+            static const u8 dirs[4] = {DIR_SOUTH, DIR_NORTH, DIR_WEST, DIR_EAST};
+            static const s8 dx[4] = {0, 0, -1, 1}, dy[4] = {1, -1, 0, 0};
+            int d;
+            t.trackedByCamera = FALSE;
+            t.currentCoords.x = x + MAP_OFFSET, t.currentCoords.y = y + MAP_OFFSET;
+            for (d = 0; d < 4; d++)
+                printf("[test]   to %d,%d: collision %d, object %d, range %d,%d\n", x + dx[d], y + dy[d],
+                       GetCollisionAtCoords(&t, x + dx[d] + MAP_OFFSET, y + dy[d] + MAP_OFFSET, dirs[d]),
+                       GetObjectEventIdByXY(x + dx[d] + MAP_OFFSET, y + dy[d] + MAP_OFFSET), t.range.rangeX, t.range.rangeY);
+        }
+    }
+    else if (strcmp(cmd, "heal") == 0)
+    {
+        // mp heal: the party healed as at a POKéMON CENTER (the walk-only runs: a stop at one along the way)
+        HealPlayerParty();
+        printf("[test] heal: the party is healed\n");
     }
     else if (strcmp(cmd, "teachhm") == 0)
     {
