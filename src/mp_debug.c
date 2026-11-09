@@ -443,7 +443,28 @@ static bool8 IsArrowWarpBehavior(u8 b)
     return MetatileBehavior_IsNorthArrowWarp(b) || MetatileBehavior_IsSouthArrowWarp(b)
         || MetatileBehavior_IsEastArrowWarp(b) || MetatileBehavior_IsWestArrowWarp(b)
         // (a plain wall with a warp on it is none either, outside ORRE: FUCHSIA's WARDEN's house has one beside its mat)
-        || (b == MB_NORMAL && gSaveBlock1Ptr->location.mapGroup != 45);
+        || (b == MB_NORMAL && gSaveBlock1Ptr->location.mapGroup != 45)
+        // (nor a solid hole: only a boulder goes down it, KANTO's VICTORY ROAD 3F. A door that isn't walked into)
+        || (MetatileBehavior_IsNonAnimDoor(b) && gSaveBlock1Ptr->location.mapGroup != 45 && !S3D_Active());
+}
+
+// A warp on floor the player walks over that the game never takes: walking on warps only on these behaviors
+// (field_control_avatar.c IsWarpMetatileBehavior) or an arrow warp. HOENN / KANTO / JOHTO only: ORRE and SINNOH warp
+// their own ways
+static bool8 LandingOnlyWarp(s16 x, s16 y)
+{
+    u8 b;
+    if (gSaveBlock1Ptr->location.mapGroup == 45 || S3D_Active()
+     || MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET) != 0)
+        return FALSE;
+    b = MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET);
+    return !(MetatileBehavior_IsWarpDoor(b) || MetatileBehavior_IsLadder(b) || MetatileBehavior_IsEscalator(b)
+          || MetatileBehavior_IsNonAnimDoor(b) || MetatileBehavior_IsLavaridgeB1FWarp(b)
+          || MetatileBehavior_IsLavaridge1FWarp(b) || MetatileBehavior_IsAquaHideoutWarp(b)
+          || MetatileBehavior_IsMtPyreHole(b) || MetatileBehavior_IsMossdeepGymWarp(b)
+          || MetatileBehavior_IsUnionRoomWarp(b) || MetatileBehavior_IsNorthArrowWarp(b)
+          || MetatileBehavior_IsSouthArrowWarp(b) || MetatileBehavior_IsEastArrowWarp(b)
+          || MetatileBehavior_IsWestArrowWarp(b));
 }
 
 static s16 sWFromX = -1, sWFromY = -1;
@@ -788,7 +809,18 @@ static u32 TakenCount(u16 map, u16 exit)
 }
 
 static s32 sStickX = -1, sStickY = -1;
+static u16 sArrMap = 0xFFFF;
+static s16 sArrX, sArrY;
 static u16 sStickMap = 0xFFFF;
+static bool8 WarpNear(s16 x, s16 y)
+{
+    s32 i;
+    for (i = 0; gMapHeader.events && i < gMapHeader.events->warpCount; i++)
+        if (abs(gMapHeader.events->warps[i].x - x) + abs(gMapHeader.events->warps[i].y - y) <= 2)
+            return TRUE;
+    return FALSE;
+}
+
 static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
 {
     struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
@@ -817,6 +849,8 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             sTakenCount[t]++;
         sPrev = sLast, sLast = here;
     }
+    if (sArrMap != here && MP_IsInOverworld() && !ScriptContext_IsEnabled() && MP_IsLocalFree())
+        sArrMap = here, sArrX = px, sArrY = py;   // (once free on the new map: before, the coords are the old map's)
     if (tx < 0 && here == target)
         return 0;   // (goto G,N -1 -1: anywhere on that map, a waypoint)
     if (gSaveBlock1Ptr->location.mapGroup == group && gSaveBlock1Ptr->location.mapNum == num)
@@ -825,7 +859,7 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         u16 k = MP_TestWalkKey(tx, ty);
         s32 pad;
         if (k != 0xFFFF || !MP_IsInOverworld() || ScriptContext_IsEnabled())
-            return k;
+            return ArePlayerFieldControlsLocked() ? 0xFFFF : k;   // (a YES / NO waiting with no script running: CHERRYGROVE's guide)
         if (tx >= 0 && w * hh <= W_MAXT && (pad = PadPlan(tx, ty)) >= 0)
         {
             // (a pad, then another: SAFFRON's gym)
@@ -835,7 +869,7 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
                 return k;
         }
     }
-    if (!MP_IsInOverworld() || w * hh > W_MAXT || ScriptContext_IsEnabled())
+    if (!MP_IsInOverworld() || w * hh > W_MAXT || ScriptContext_IsEnabled() || ArePlayerFieldControlsLocked())
         return 0xFFFF;
     WalkSearchNow();
     for (i = 0; gMapHeader.events && i < gMapHeader.events->warpCount; i++)
@@ -845,17 +879,20 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         u32 score;
         if (md == 0xFFFF)
             continue;
-        if ((u8)gSaveBlock1Ptr->location.warpId < gMapHeader.events->warpCount
-         || (gSaveBlock1Ptr->location.x >= 0 && IsWarpAt(gSaveBlock1Ptr->location.x, gSaveBlock1Ptr->location.y)))
+        if (sArrMap == here && IsWarpAt(sArrX, sArrY))
         {
             // (come in by a door: back out of that door only when nothing else goes on. A gatehouse's two doors
-            // lead to the same map, and the far one is the way through. A script's warp names no door: the spot)
-            s16 ax = gSaveBlock1Ptr->location.x, ay = gSaveBlock1Ptr->location.y;
-            if ((u8)gSaveBlock1Ptr->location.warpId < gMapHeader.events->warpCount)
-                ax = gMapHeader.events->warps[gSaveBlock1Ptr->location.warpId].x,
-                ay = gMapHeader.events->warps[gSaveBlock1Ptr->location.warpId].y;
-            if (abs(ax - wp->x) + abs(ay - wp->y) <= 1)
+            // lead to the same map, and the far one is the way through. The door is where the player stood on
+            // first coming: the save's warp number is stale after CONTINUE, and a script's warp names none)
+            if (abs(sArrX - wp->x) + abs(sArrY - wp->y) <= 1)
                 md += 8;   // (a double door's two halves are one door)
+        }
+        else if (sArrMap == here && WarpNear(sArrX, sArrY))
+        {
+            // (come in beside a warp, stepped off it on arriving: that one only. VICTORY ROAD 2F's other ladder up
+            // to 3F is the way on)
+            if (abs(sArrX - wp->x) + abs(sArrY - wp->y) <= 2)
+                md += 8;
         }
         else if (d == sPrev)
             md += 8;
@@ -864,12 +901,16 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             u8 b = MapGridGetMetatileBehaviorAt(wp->x + MAP_OFFSET, wp->y + MAP_OFFSET);
             key = MetatileBehavior_IsNorthArrowWarp(b) ? DPAD_UP : MetatileBehavior_IsSouthArrowWarp(b) ? DPAD_DOWN
                 : MetatileBehavior_IsEastArrowWarp(b) ? DPAD_RIGHT : MetatileBehavior_IsWestArrowWarp(b) ? DPAD_LEFT : 0xFFFF;
+            if (key == 0xFFFF)
+                continue;   // (stood on, and no key takes it: a way out only by stepping off and back on)
             score = (u32)md << 16;
         }
         else
         {
             if (sWStep[wp->y * w + wp->x] == WS_NONE)
                 continue;
+            if (LandingOnlyWarp(wp->x, wp->y))
+                continue;   // (a hole's landing spot on plain floor: the POKéMON MANSION 1F under 3F's hole)
             key = WalkStepKey(wp->x, wp->y);
             score = ((u32)md << 16) | sWDist[wp->y * w + wp->x];
         }
@@ -929,7 +970,7 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         sStickX = bx, sStickY = by, sStickMap = here;
     NoteBump(bestKey);
     if (getenv("MOEMON_GOTO_DEBUG") && (Platform_FrameCount() % 60) == 0)
-        printf("[test] goto: map %d.%d (in by warp %d, %d,%d) at %d,%d best %08x key %04x\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.warpId, gSaveBlock1Ptr->location.x, gSaveBlock1Ptr->location.y, px, py, (unsigned)best, bestKey);
+        printf("[test] goto: map %d.%d (prev %04x arr %04x %d,%d) (in by warp %d, %d,%d) at %d,%d best %08x key %04x\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, sPrev, sArrMap, sArrX, sArrY, gSaveBlock1Ptr->location.warpId, gSaveBlock1Ptr->location.x, gSaveBlock1Ptr->location.y, px, py, (unsigned)best, bestKey);
     return bestKey;
 }
 

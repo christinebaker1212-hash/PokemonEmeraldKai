@@ -1371,7 +1371,9 @@ static void TestHarnessStep(void)
             static int sIdle;
             bool8 MP_IsInOverworld(void);
             bool8 NamingScreen_IsActive(void);
-            bool8 busy = ScriptContext_IsEnabled() || !MP_IsInOverworld();   // (a scene, a battle, a menu on the way)
+            bool8 ArePlayerFieldControlsLocked(void);
+            bool8 busy = ScriptContext_IsEnabled() || !MP_IsInOverworld()   // (a scene, a battle, a menu on the way)
+                      || ArePlayerFieldControlsLocked();   // (a YES / NO a script waits on)
             sTestKeys = (busy && (++sGotoBusy & 15) == 0) ? A_BUTTON : 0;
             if (NamingScreen_IsActive() && (sGotoBusy & 15) == 0)
                 sTestKeys = (sGotoBusy & 16) ? START_BUTTON : A_BUTTON;   // (a nickname asked for: OK)
