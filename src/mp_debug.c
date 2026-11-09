@@ -1086,7 +1086,9 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         u32 score;
         if (md == 0xFFFF || d == here)
             continue;   // (this map's own stairs and holes: PadPlan(-1, -1) below when they're the only way on)
-        if (sArrMap == here && IsWarpAt(sArrX, sArrY))
+        if (d == target)
+            ;   // (back the way the player came is the way when it leads to the map sought: the ICE PATH's HM07)
+        else if (sArrMap == here && IsWarpAt(sArrX, sArrY))
         {
             // (come in by a door: back out of that door only when nothing else goes on. A gatehouse's two doors
             // lead to the same map, and the far one is the way through. The door is where the player stood on
@@ -1138,7 +1140,7 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         md = d == target ? 0 : MapDist(d, target);
         if (md == 0xFFFF)
             continue;
-        if (d == sPrev)
+        if (d == sPrev && d != target)
             md += 8, pen = TRUE;
         step = m->direction == CONNECTION_NORTH ? DPAD_UP : m->direction == CONNECTION_SOUTH ? DPAD_DOWN
              : m->direction == CONNECTION_WEST ? DPAD_LEFT : DPAD_RIGHT;
@@ -1196,7 +1198,7 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         sStickX = bx, sStickY = by, sStickMap = here;
     NoteBump(bestKey);
     if (getenv("MOEMON_GOTO_DEBUG") && (Platform_FrameCount() % 60) == 0)
-        printf("[test] goto: map %d.%d (prev %04x arr %04x %d,%d) (in by warp %d, %d,%d) at %d,%d best %08x key %04x\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, sPrev, sArrMap, sArrX, sArrY, gSaveBlock1Ptr->location.warpId, gSaveBlock1Ptr->location.x, gSaveBlock1Ptr->location.y, px, py, (unsigned)best, bestKey);
+        printf("[test] goto: map %d.%d (prev %04x arr %04x %d,%d) (in by warp %d, %d,%d) at %d,%d best %08x key %04x via %04x\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, sPrev, sArrMap, sArrX, sArrY, gSaveBlock1Ptr->location.warpId, gSaveBlock1Ptr->location.x, gSaveBlock1Ptr->location.y, px, py, (unsigned)best, bestKey, sChosen);
     return bestKey;
 }
 
