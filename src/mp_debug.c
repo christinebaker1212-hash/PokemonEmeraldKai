@@ -588,7 +588,7 @@ static void WalkSearch(void)
                       && MapGridGetElevationAt(nx + MAP_OFFSET, ny + MAP_OFFSET) == 3
                       && GetObjectEventIdByXY(nx + MAP_OFFSET, ny + MAP_OFFSET) == OBJECT_EVENTS_COUNT)
                     nsurf = 0, ne = 3;   // (off the water: CanStopSurfing)
-                else if (col == COLLISION_ELEVATION_MISMATCH && !surf && canSurf
+                else if (col == COLLISION_ELEVATION_MISMATCH && !surf && canSurf && e == 3   // (as the game: from level 3 only)
                       && MetatileBehavior_IsSurfableWaterOrUnderwater(MapGridGetMetatileBehaviorAt(nx + MAP_OFFSET, ny + MAP_OFFSET))
                       && GetObjectEventIdByXY(nx + MAP_OFFSET, ny + MAP_OFFSET) == OBJECT_EVENTS_COUNT)
                     nsurf = 1, ne = 1, how |= WS_A;   // (onto the water: A facing it, SURF)
