@@ -616,7 +616,10 @@ static void WalkSearch(void)
                     continue;
                 if (col == COLLISION_NONE)
                 {
-                    if (surf && !MetatileBehavior_IsSurfableWaterOrUnderwater(MapGridGetMetatileBehaviorAt(nx + MAP_OFFSET, ny + MAP_OFFSET)))
+                    // (surfing goes on over any tile at the water's level, as the game: a waterfall's foot that
+                    // isn't water, TOHJO FALLS 31,18; off the water only onto level 3, below)
+                    if (surf && !MetatileBehavior_IsSurfableWaterOrUnderwater(MapGridGetMetatileBehaviorAt(nx + MAP_OFFSET, ny + MAP_OFFSET))
+                     && MapGridGetElevationAt(nx + MAP_OFFSET, ny + MAP_OFFSET) != 1)
                         nsurf = 0;
                     ne = ElevationAfter(e, nx + MAP_OFFSET, ny + MAP_OFFSET, cx + MAP_OFFSET, cy + MAP_OFFSET);
                 }
