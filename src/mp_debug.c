@@ -324,6 +324,26 @@ static bool8 ClearableAt(s16 x, s16 y)
     return FALSE;
 }
 
+// a whirlpool (Quetzal's object, its script sliding the player over it) at map (x, y): out on the field or not
+// yet (off the screen)
+bool8 MP_PartyCanUseFieldMove(u16 move);   // (mp_region.c)
+static bool8 WhirlpoolAt(s16 x, s16 y)
+{
+    extern const u8 Quetzal_EventScript_837F567[];
+    u32 i, n = gMapHeader.events ? gMapHeader.events->objectEventCount : 0;
+    u8 id = GetObjectEventIdByXY(x + MAP_OFFSET, y + MAP_OFFSET);
+    if (id != OBJECT_EVENTS_COUNT)
+        return GetObjectEventScriptPointerByObjectEventId(id) == Quetzal_EventScript_837F567;
+    for (i = 0; i < n && i < OBJECT_EVENT_TEMPLATES_COUNT; i++)
+    {
+        const struct ObjectEventTemplate *o = &gSaveBlock1Ptr->objectEventTemplates[i];
+        if (o->x == x && o->y == y && o->localId != 0 && !(o->flagId && FlagGet(o->flagId))
+         && o->script == Quetzal_EventScript_837F567)
+            return TRUE;
+    }
+    return FALSE;
+}
+
 static u8 ElevationAfter(u8 e, s16 x, s16 y, s16 fromX, s16 fromY)
 {
     u8 cur = MapGridGetElevationAt(x, y), prev = MapGridGetElevationAt(fromX, fromY);
@@ -483,6 +503,7 @@ static void WalkSearch(void)
     s32 w = gMapHeader.mapLayout->width, h = gMapHeader.mapLayout->height, head = 0, tail = 0, i;
     bool8 surfing = TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING);
     bool8 canSurf = surfing || (MP_Region_HasFieldMoveBadge(4) && PartyHasMonWithSurf());
+    bool8 canWhirl = MP_Region_HasFieldMoveBadge(8) && MP_PartyCanUseFieldMove(MOVE_WHIRLPOOL);
     s16 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
     u8 pe = p->currentElevation;
     if (sWFromX >= 0)
@@ -519,7 +540,18 @@ static void WalkSearch(void)
                 continue;
             t.currentCoords.x = cx + MAP_OFFSET, t.currentCoords.y = cy + MAP_OFFSET, t.currentElevation = e;
             t.currentMetatileBehavior = MapGridGetMetatileBehaviorAt(cx + MAP_OFFSET, cy + MAP_OFFSET);   // (one-way tiles: from here)
-            if (!surf && GetLedgeJumpDirection(nx + MAP_OFFSET, ny + MAP_OFFSET, dirs[d]) != DIR_NONE)
+            if (surf && canWhirl && WhirlpoolAt(nx, ny))
+            {
+                // (JOHTO's whirlpools, two deep: A facing one slides the player three tiles on, over them.
+                // DRAGON'S DEN B1F's way to the SHRINE)
+                lx = cx + 3 * dx[d], ly = cy + 3 * dy[d];
+                if (lx < 0 || ly < 0 || lx >= w || ly >= h || MapGridGetCollisionAt(lx + MAP_OFFSET, ly + MAP_OFFSET)
+                 || GetObjectEventIdByXY(lx + MAP_OFFSET, ly + MAP_OFFSET) != OBJECT_EVENTS_COUNT
+                 || UnseenStanderAt(lx, ly) || WhirlpoolAt(lx, ly))
+                    continue;
+                how |= WS_A;
+            }
+            else if (!surf && GetLedgeJumpDirection(nx + MAP_OFFSET, ny + MAP_OFFSET, dirs[d]) != DIR_NONE)
             {
                 lx = nx + dx[d], ly = ny + dy[d];   // (over the ledge: two tiles on)
                 if (lx < 0 || ly < 0 || lx >= w || ly >= h || MapGridGetCollisionAt(lx + MAP_OFFSET, ly + MAP_OFFSET)
@@ -559,6 +591,27 @@ static void WalkSearch(void)
                         // an arrow warp is stood on, the SAFARI ZONE's edges)
                 else
                     continue;
+            }
+            // (onto ice: the player slides on until something stops them, and only there can they turn. MAHOGANY's
+            // GYM, the ICE PATH)
+            if (!nsurf && lx == nx && ly == ny && !(how & WS_A)
+             && MetatileBehavior_IsIce(MapGridGetMetatileBehaviorAt(lx + MAP_OFFSET, ly + MAP_OFFSET)))
+            {
+                for (;;)
+                {
+                    s16 sx = lx + dx[d], sy = ly + dy[d];
+                    if (sx < 0 || sy < 0 || sx >= w || sy >= h)
+                        break;
+                    t.currentCoords.x = lx + MAP_OFFSET, t.currentCoords.y = ly + MAP_OFFSET, t.currentElevation = ne;
+                    t.currentMetatileBehavior = MapGridGetMetatileBehaviorAt(lx + MAP_OFFSET, ly + MAP_OFFSET);
+                    if (GetCollisionAtCoords(&t, sx + MAP_OFFSET, sy + MAP_OFFSET, dirs[d]) != COLLISION_NONE
+                     || UnseenStanderAt(sx, sy))
+                        break;
+                    ne = ElevationAfter(ne, sx + MAP_OFFSET, sy + MAP_OFFSET, lx + MAP_OFFSET, ly + MAP_OFFSET);
+                    lx = sx, ly = sy;
+                    if (!MetatileBehavior_IsIce(MapGridGetMetatileBehaviorAt(lx + MAP_OFFSET, ly + MAP_OFFSET)))
+                        break;
+                }
             }
             n = ly * w + lx;
             if (sWSeen[(n * 16 + ne) >> 3] & (1 << ((n * 16 + ne) & 7)))
@@ -875,6 +928,19 @@ static bool8 SameWayAsArrival(const struct WarpEvent *wp, s16 x, s16 y)
     return FALSE;
 }
 
+// a warp leading to the map the one at x,y leads to
+static bool8 SameMapAsArrival(const struct WarpEvent *wp, s16 x, s16 y)
+{
+    s32 i;
+    for (i = 0; gMapHeader.events && i < gMapHeader.events->warpCount; i++)
+    {
+        const struct WarpEvent *a = &gMapHeader.events->warps[i];
+        if (a->x == x && a->y == y)
+            return a->mapGroup == wp->mapGroup && a->mapNum == wp->mapNum;
+    }
+    return TRUE;
+}
+
 static bool8 WarpNear(s16 x, s16 y)
 {
     s32 i;
@@ -907,6 +973,7 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
     s16 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
     u16 target = (group << 8) | num, bestKey = 0xFFFF, here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
     u32 best = 0xFFFFFFFF, stick = 0xFFFFFFFF;
+    bool8 bestPen = FALSE;
     u16 stickKey = 0xFFFF;
     s32 bx = -1, by = -1;
     // (the map just left, while going to one target: back there only when nothing else goes on. The fewest maps
@@ -954,6 +1021,7 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
     {
         const struct WarpEvent *wp = &gMapHeader.events->warps[i];
         u16 d = WarpDestMap(wp), md = d == target ? 0 : MapDist(d, target), key;
+        bool8 pen = FALSE;
         u32 score;
         if (md == 0xFFFF || d == here)
             continue;   // (this map's own stairs and holes: PadPlan(-1, -1) below when they're the only way on)
@@ -962,18 +1030,20 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             // (come in by a door: back out of that door only when nothing else goes on. A gatehouse's two doors
             // lead to the same map, and the far one is the way through. The door is where the player stood on
             // first coming: the save's warp number is stale after CONTINUE, and a script's warp names none)
-            if (abs(sArrX - wp->x) + abs(sArrY - wp->y) <= 1 || SameWayAsArrival(wp, sArrX, sArrY))
-                md += 8;   // (a double door's two halves are one door; a wide one's every tile: the NATIONAL PARK's 4)
+            if ((abs(sArrX - wp->x) + abs(sArrY - wp->y) <= 1 && SameMapAsArrival(wp, sArrX, sArrY))
+             || SameWayAsArrival(wp, sArrX, sArrY))
+                md += 8, pen = TRUE;   // (a double door's two halves are one door; a wide one's every tile: the NATIONAL PARK's 4.
+                           // Not a ladder beside it to another floor: ICE PATH B2F's 16,15 and 16,16)
         }
         else if (sArrMap == here && WarpNear(sArrX, sArrY))
         {
             // (come in beside a warp, stepped off it on arriving: that one only. VICTORY ROAD 2F's other ladder up
             // to 3F is the way on)
             if (abs(sArrX - wp->x) + abs(sArrY - wp->y) <= 2)
-                md += 8;
+                md += 8, pen = TRUE;
         }
         else if (d == sPrev)
-            md += 8;
+            md += 8, pen = TRUE;
         if (px == wp->x && py == wp->y)
         {
             u8 b = MapGridGetMetatileBehaviorAt(wp->x + MAP_OFFSET, wp->y + MAP_OFFSET);
@@ -995,19 +1065,20 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         if (wp->x == sStickX && wp->y == sStickY && here == sStickMap)
             stick = score, stickKey = key;
         if (score < best)
-            best = score, bestKey = key, sChosen = i, bx = wp->x, by = wp->y;
+            best = score, bestKey = key, sChosen = i, bx = wp->x, by = wp->y, bestPen = pen;
     }
     for (i = 0; gMapHeader.connections && i < gMapHeader.connections->count; i++)
     {
         const struct MapConnection *m = &gMapHeader.connections->connections[i];
         u16 d = (m->mapGroup << 8) | m->mapNum, md, step;
+        bool8 pen = FALSE;
         if (m->direction < CONNECTION_SOUTH || m->direction > CONNECTION_EAST)
             continue;
         md = d == target ? 0 : MapDist(d, target);
         if (md == 0xFFFF)
             continue;
         if (d == sPrev)
-            md += 8;
+            md += 8, pen = TRUE;
         step = m->direction == CONNECTION_NORTH ? DPAD_UP : m->direction == CONNECTION_SOUTH ? DPAD_DOWN
              : m->direction == CONNECTION_WEST ? DPAD_LEFT : DPAD_RIGHT;
         for (k2 = 0; k2 < ((m->direction == CONNECTION_NORTH || m->direction == CONNECTION_SOUTH) ? w : hh); k2++)
@@ -1030,7 +1101,7 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             {
                 score = (u32)md << 16;
                 if (score < best)
-                    best = score, bestKey = step, sChosen = 0x80 | i;   // (on the edge: over it)
+                    best = score, bestKey = step, sChosen = 0x80 | i, bestPen = pen;   // (on the edge: over it)
                 continue;
             }
             if (sWStep[ey * w + ex] == WS_NONE)
@@ -1039,12 +1110,14 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             if (ex == sStickX && ey == sStickY && here == sStickMap)
                 stick = score, stickKey = WalkStepKey(ex, ey);
             if (score < best)
-                best = score, bestKey = WalkStepKey(ex, ey), sChosen = 0x80 | i, bx = ex, by = ey;
+                best = score, bestKey = WalkStepKey(ex, ey), sChosen = 0x80 | i, bx = ex, by = ey, bestPen = pen;
         }
     }
     // (no way off this map from here, only its own stairs and holes: the ones that lead to a way off, as a player
     // finds the way down the OLIVINE LIGHTHOUSE)
-    if (best == 0xFFFFFFFF && !OutwardWarpReached(here) && w * hh <= W_MAXT)
+    // (nor when the only way off is back the way the player came: DRAGON'S DEN 1F, whose ladder up lands by the
+    // way down)
+    if (((best == 0xFFFFFFFF && !OutwardWarpReached(here)) || bestPen) && w * hh <= W_MAXT)
     {
         s32 pad = PadPlan(-1, -1);
         u16 k = pad >= 0 ? PadKey(pad) : 0xFFFF;
