@@ -1644,6 +1644,7 @@ static void HidePeople(void)
                     gObjectEvents[j].invisible = TRUE;
 }
 
+static void FreePersonMatrices(void);
 void S3D_Dw_OnMapLoad(void)
 {
     u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
@@ -1674,6 +1675,7 @@ void S3D_Dw_OnMapLoad(void)
         FreeOamMatrix(sDw.matrix);
         sDw.matrix = 0xFF;
     }
+    FreePersonMatrices();
     if (f != NULL && DW_HAVE_DATA)
         PlatformTiles();
     GhostsLoad();
@@ -1736,8 +1738,13 @@ void S3D_Dw_OnMapLoad(void)
 // as on arriving, the world kept as the save left it (its platforms, puzzle and progress are in the save's vars)
 void S3D_Dw_SavedMapLoaded(void)
 {
+    extern void LoadObjEventTemplatesFromHeader(void);
     S3D_Dw_OnMapLoad();
     sFromOutside = FALSE;
+    if (sDw.floor != NULL)
+        LoadObjEventTemplatesFromHeader();   // (the floor's people as its story has them now: the save's list was made with
+                                             // the arrival's, CYNTHIA off the elevator as one more, so B7F's CYRUS was past
+                                             // the end of the list the map now gives, never found to come out)
 }
 
 // Someone of this floor standing at a tile of its stacked world (their map place, and the height the floor's list
@@ -1887,6 +1894,8 @@ void S3D_Dw_Update(void)
         RideUpdate();
         return;
     }
+    if (DW_HAVE_DATA)
+        PlatformTiles();   // (a platform a script brings, B6F's to B7F once CYNTHIA sees the puzzle done: stepped on at once)
     if (sEv.cmd != NULL)
     {
         if (sDw.jump != NULL)
@@ -1996,29 +2005,18 @@ bool8 S3D_Dw_View(float *pitch, float *yaw, float *target)
 
 // The player's sprite on a wall, a ceiling or mid-jump (s3d.c S3D_PlaceSprite): stands at the 3D position, turned to
 // its surface (an affine matrix on the sprite); FALSE: the ground's usual placement
-bool8 S3D_Dw_PlayerSprite(u16 spriteId, s32 *outX, s32 *outY, float *depth)
+// A sprite stood at a 3D point of the floor, its "up" out of its surface turned by ROT degrees (the player's, and people
+// standing on a wall or a ceiling): its place on the screen, the affine matrix MATRIX turning it (allocated if 0xFF)
+static bool8 SurfaceSprite(struct Sprite *s, const float *pos, float rot, u8 *matrix, s32 *outX, s32 *outY, float *depth)
 {
-    struct Sprite *s;
-    float fx, fy, fd, ux, uy, a, len, n[3] = {0, 1, 0}, head[3];
+    float fx, fy, fd, ux, uy, a, len, n[3], head[3];
     s32 i;
-    if (!Off() || spriteId >= MAX_SPRITES || spriteId != gObjectEvents[gPlayerAvatar.objectEventId].spriteId)
-    {
-        if (spriteId < MAX_SPRITES && spriteId == gObjectEvents[gPlayerAvatar.objectEventId].spriteId && sDw.matrix != 0xFF)
-        {
-            gSprites[spriteId].oam.affineMode = ST_OAM_AFFINE_OFF;
-            FreeOamMatrix(sDw.matrix);
-            sDw.matrix = 0xFF;
-        }
+    if (!S3D_ProjectWorld(pos[0], pos[1], pos[2], &fx, &fy, &fd))
         return FALSE;
-    }
-    s = &gSprites[spriteId];
-    if (!S3D_ProjectWorld(sDw.pos[0], sDw.pos[1], sDw.pos[2], &fx, &fy, &fd))
-        return FALSE;
-    // the sprite's "up": out of its surface, turned by the jump's angle on the way (a rotation about the z axis)
-    a = sDw.rot * 3.14159265f / 180.0f;
+    a = rot * 3.14159265f / 180.0f;
     n[0] = sinf(a), n[1] = cosf(a), n[2] = 0;
     for (i = 0; i < 3; i++)
-        head[i] = sDw.pos[i] + n[i] * 16.0f;
+        head[i] = pos[i] + n[i] * 16.0f;
     if (!S3D_ProjectWorld(head[0], head[1], head[2], &ux, &uy, &len))
         ux = fx, uy = fy - 16;
     ux -= fx, uy -= fy;
@@ -2026,17 +2024,14 @@ bool8 S3D_Dw_PlayerSprite(u16 spriteId, s32 *outX, s32 *outY, float *depth)
     if (len < 0.01f)
         ux = 0, uy = -1, len = 1;
     ux /= len, uy /= len;
-    if (sDw.matrix == 0xFF)
-        sDw.matrix = AllocOamMatrix();
-    if (sDw.matrix != 0xFF)
+    if (*matrix == 0xFF)
+        *matrix = AllocOamMatrix();
+    if (*matrix != 0xFF)
     {
-        // screen up (0, -1) turned to (ux, uy): the angle, and the matrix that maps the screen back to the sprite
         float ang = atan2f(ux, -uy), c = cosf(ang), sn = sinf(ang);
-        SetOamMatrix(sDw.matrix, (s16)(c * 256), (s16)(sn * 256), (s16)(-sn * 256), (s16)(c * 256));
+        SetOamMatrix(*matrix, (s16)(c * 256), (s16)(sn * 256), (s16)(-sn * 256), (s16)(c * 256));
         s->oam.affineMode = ST_OAM_AFFINE_DOUBLE;
-        s->oam.matrixNum = sDw.matrix;
-        // (double size: the box's corner is its centre less the sprite's size; the centre half a body up the turned
-        // sprite from its feet)
+        s->oam.matrixNum = *matrix;
         *outX = (s32)floorf(fx + ux * 16 + 0.5f) + s->centerToCornerVecX;
         *outY = (s32)floorf(fy + uy * 16 + 0.5f);
     }
@@ -2047,6 +2042,78 @@ bool8 S3D_Dw_PlayerSprite(u16 spriteId, s32 *outX, s32 *outY, float *depth)
     }
     *depth = fd;
     return TRUE;
+}
+
+// People of the floor standing on a wall or a ceiling (Platinum's B2F CYNTHIA): drawn there, turned as the player is,
+// while they stand where the floor's list puts them
+static u8 sPersonMatrix[OBJECT_EVENTS_COUNT];   // (matrix + 1; 0: none)
+static void FreePersonMatrices(void)
+{
+    u32 i;
+    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+        if (sPersonMatrix[i])
+        {
+            FreeOamMatrix(sPersonMatrix[i] - 1);
+            sPersonMatrix[i] = 0;
+            if (gObjectEvents[i].active && gObjectEvents[i].spriteId < MAX_SPRITES)
+                gSprites[gObjectEvents[i].spriteId].oam.affineMode = ST_OAM_AFFINE_OFF;
+        }
+}
+
+static bool8 PersonSprite(u16 spriteId, s32 *outX, s32 *outY, float *depth)
+{
+    u32 o;
+    for (o = 0; o < OBJECT_EVENTS_COUNT; o++)
+    {
+        struct ObjectEvent *obj = &gObjectEvents[o];
+        const struct DwPerson *p;
+        s32 i, pl;
+        float pos[3];
+        u8 m;
+        if (!obj->active || obj->isPlayer || obj->spriteId != spriteId)
+            continue;
+        i = PersonOf(sDw.floor->hid, obj->localId);
+        p = i >= 0 ? &sDwPeople[i] : NULL;
+        pl = p != NULL ? PlatAt(p->pos[0], p->pos[1], p->pos[2], -1) : -1;
+        if (pl < 0 || Plat(pl)->kind == KIND_FLOOR || obj->currentCoords.x - MAP_OFFSET + sDw.floor->off[0] != p->pos[0]
+         || obj->currentCoords.y - MAP_OFFSET + sDw.floor->off[2] != p->pos[2])
+        {
+            if (sPersonMatrix[o])
+            {
+                FreeOamMatrix(sPersonMatrix[o] - 1);
+                sPersonMatrix[o] = 0;
+                gSprites[spriteId].oam.affineMode = ST_OAM_AFFINE_OFF;
+            }
+            return FALSE;
+        }
+        TileWorld(p->pos[0], p->pos[1], p->pos[2], pos);
+        m = sPersonMatrix[o] ? sPersonMatrix[o] - 1 : 0xFF;
+        if (!SurfaceSprite(&gSprites[spriteId], pos, sKindRot[Plat(pl)->kind], &m, outX, outY, depth))
+            return FALSE;
+        sPersonMatrix[o] = m != 0xFF ? m + 1 : 0;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+bool8 S3D_Dw_PlayerSprite(u16 spriteId, s32 *outX, s32 *outY, float *depth)
+{
+    if (sDw.floor != NULL && DW_HAVE_DATA && spriteId < MAX_SPRITES && spriteId != gObjectEvents[gPlayerAvatar.objectEventId].spriteId)
+        return PersonSprite(spriteId, outX, outY, depth);
+    if (!Off() || spriteId >= MAX_SPRITES || spriteId != gObjectEvents[gPlayerAvatar.objectEventId].spriteId)
+    {
+        if (spriteId < MAX_SPRITES && spriteId == gObjectEvents[gPlayerAvatar.objectEventId].spriteId && sDw.matrix != 0xFF)
+        {
+            gSprites[spriteId].oam.affineMode = ST_OAM_AFFINE_OFF;
+            FreeOamMatrix(sDw.matrix);
+            sDw.matrix = 0xFF;
+        }
+        return FALSE;
+    }
+    // the sprite's "up": out of its surface, turned by the jump's angle on the way (a rotation about the z axis); the
+    // matrix maps the screen back to the sprite (double size: the box's corner is its centre less the sprite's size, the
+    // centre half a body up the turned sprite from its feet)
+    return SurfaceSprite(&gSprites[spriteId], sDw.pos, sDw.rot, &sDw.matrix, outX, outY, depth);
 }
 
 // For tests: where the player is (mp dw)
@@ -2082,14 +2149,14 @@ void S3D_Dw_Print(void)
 // (S3D_Dw_PlayerStep: platform tiles, walls, ceilings, jump points; the map's own ground by its collision), solved
 // again each frame the player stands still. 0: there; 0xFFFF: busy (a step, a jump, a ride, an event) or no way
 #define DW_SEARCH_MAX 32768
-static struct DwNode { s16 x, y, z; s8 plat; u8 kind, first; s32 from; } sDwSearch[DW_SEARCH_MAX];
+static struct DwNode { s16 x, y, z; s8 plat; u8 kind, first, surf; s32 from; } sDwSearch[DW_SEARCH_MAX];   // (first: the first move's direction, | 0x10 when it's SURF that way)
 static u32 sDwSeen[DW_SEARCH_MAX * 2];
 static bool8 sDwTestCarried;
 void MP_TestDwStart(void) { sDwTestCarried = FALSE; }   // (an open hash of node keys + 1; 0: empty)
 
-static u32 DwKey(s32 plat, s32 x, s32 y, s32 z)
+static u32 DwKey(s32 plat, s32 x, s32 y, s32 z, u8 surf)
 {
-    return ((u32)(plat + 1) << 24 | (u32)(x & 0xFF) << 16 | (u32)(y & 0xFF) << 8 | (u32)(z & 0xFF)) + 1;
+    return ((u32)surf << 31 | (u32)((plat + 1) & 0x7F) << 24 | (u32)(x & 0xFF) << 16 | (u32)(y & 0xFF) << 8 | (u32)(z & 0xFF)) + 1;
 }
 
 static bool8 DwSeen(u32 key)
@@ -2107,7 +2174,7 @@ static bool8 DwSeen(u32 key)
 
 static s32 DwLandY(s32 x, s32 z, s32 nearY)
 {
-    float g = S3D_TestGround(x - sDw.floor->off[0], z - sDw.floor->off[2], (nearY - sDw.floor->off[1]) * 16.0f);
+    float g = S3D_TestGround((x - sDw.floor->off[0]) * 16 + 8, (z - sDw.floor->off[2]) * 16 + 8, (nearY - sDw.floor->off[1]) * 16.0f);
     return isnan(g) ? nearY : sDw.floor->off[1] + (s32)floorf(g / 16.0f + 0.5f);
 }
 
@@ -2118,12 +2185,14 @@ u16 MP_TestDwKey(s32 tx, s32 ty, s32 tz)
     struct ObjectEvent *obj = &gObjectEvents[gPlayerAvatar.objectEventId];
     u32 head = 0, tail = 0;
     s32 x, y, z;
+    bool8 canSurf;
     if (sEv.cmd != NULL)
         sDwTestCarried = TRUE;   // (an event's platform carries the player: once it's over, the walk is where it took them)
     if (sDw.floor == NULL || !DW_HAVE_DATA || sDw.jump != NULL || sDw.riding || sEv.cmd != NULL || sFall.on
      || (sDw.kind != KIND_LAND && sDw.moving) || gPlayerAvatar.tileTransitionState != T_NOT_MOVING
      || (ObjectEventIsMovementOverridden(obj) && !ObjectEventClearHeldMovementIfFinished(obj)))
         return 0xFFFF;
+    canSurf = TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING) || PartyHasMonWithSurf();
     if (sDwTestCarried)
     {
         sDwTestCarried = FALSE;
@@ -2134,8 +2203,9 @@ u16 MP_TestDwKey(s32 tx, s32 ty, s32 tz)
     else
         x = sDw.x, y = sDw.y, z = sDw.z;
     memset(sDwSeen, 0, sizeof(sDwSeen));
-    sDwSearch[tail++] = (struct DwNode){x, y, z, sDw.kind == KIND_LAND ? -1 : sDw.plat, sDw.kind, 0xFF, -1};
-    DwSeen(DwKey(sDwSearch[0].plat, x, y, z));
+    sDwSearch[tail++] = (struct DwNode){x, y, z, sDw.kind == KIND_LAND ? -1 : sDw.plat, sDw.kind, 0xFF,
+                                        sDw.kind == KIND_LAND ? TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING) != 0 : sSurfing, -1};
+    DwSeen(DwKey(sDwSearch[0].plat, x, y, z, sDwSearch[0].surf));
     while (head < tail)
     {
         struct DwNode n = sDwSearch[head];
@@ -2144,6 +2214,9 @@ u16 MP_TestDwKey(s32 tx, s32 ty, s32 tz)
         {
             if (n.first == 0xFF)
                 return 0;
+            if (n.first & 0x10)   // (SURF: facing the water, A)
+                return (sDw.kind == KIND_LAND ? obj->facingDirection == FromPlatDir(n.first & 3) : sDw.dir == (n.first & 3))
+                     ? A_BUTTON : keys[n.first & 3];
             return keys[n.first];
         }
         for (d = 0; d < 4 && tail < DW_SEARCH_MAX; d++)
@@ -2165,7 +2238,7 @@ u16 MP_TestDwKey(s32 tx, s32 ty, s32 tz)
                 static bool8 (*const jump[4])(u8) = {MetatileBehavior_IsJumpNorth, MetatileBehavior_IsJumpSouth,
                                                        MetatileBehavior_IsJumpWest, MetatileBehavior_IsJumpEast};
                 static const u8 back[4] = {1, 0, 3, 2};
-                if (jump[d](b))
+                if (!n.surf && jump[d](b))
                 {
                     // (a ledge: hopped over to the tile past it; Platinum's ledges jumped twice hop one tile on from
                     // there: TwiceLedge)
@@ -2176,12 +2249,25 @@ u16 MP_TestDwKey(s32 tx, s32 ty, s32 tz)
                         continue;
                     m.x = hx - MAP_OFFSET + sDw.floor->off[0], m.z = hy - MAP_OFFSET + sDw.floor->off[2];
                     m.y = DwLandY(m.x, m.z, n.y);
-                    if (!DwSeen(DwKey(m.plat, m.x, m.y, m.z)))
+                    if (!DwSeen(DwKey(m.plat, m.x, m.y, m.z, m.surf)))
                         sDwSearch[tail++] = m;
                     continue;
                 }
-                if (MapGridGetCollisionAt(mx, my) || (e != pe && e != 0 && e != 15 && pe != 0 && pe != 15)
-                 || (id != OBJECT_EVENTS_COUNT && id != gPlayerAvatar.objectEventId))
+                if (MapGridGetCollisionAt(mx, my) || (id != OBJECT_EVENTS_COUNT && id != gPlayerAvatar.objectEventId))
+                    continue;
+                if (MetatileBehavior_IsSurfableWaterOrUnderwater(b) != n.surf)
+                {
+                    // (onto the water: SURF, A facing it; off it onto the ground: a step, whatever the heights)
+                    if (!n.surf)
+                    {
+                        if (!canSurf)
+                            continue;
+                        if (n.first == 0xFF)
+                            m.first = d | 0x10;
+                    }
+                    m.surf = !n.surf;
+                }
+                else if (e != pe && e != 0 && e != 15 && pe != 0 && pe != 15)
                     continue;
                 m.x += ldx[d], m.z += ldz[d];
                 m.y = DwLandY(m.x, m.z, n.y);
@@ -2197,11 +2283,24 @@ u16 MP_TestDwKey(s32 tx, s32 ty, s32 tz)
                     if (other >= 0)
                         m.plat = other, attr = PlatAttr(Plat(other), nx, ny, nz);
                 }
-                if (attr == 0xFFFF || (attr & ATTR_COLLISION) || ATTR_WATER(attr) != sSurfing || PersonAt(nx, ny, nz))
+                if (attr == 0xFFFF || (attr & ATTR_COLLISION) || PersonAt(nx, ny, nz))
                     continue;
+                if (ATTR_WATER(attr) && !n.surf)
+                {
+                    // (onto the water: SURF, A facing it, from a platform; S3D_Dw_FacingWater)
+                    if (!canSurf)
+                        continue;
+                    m.surf = TRUE;
+                    if (n.first == 0xFF)
+                        m.first = d | 0x10;
+                }
+                else if (!ATTR_WATER(attr))
+                    m.surf = FALSE;   // (out of the water onto the platform)
                 m.x = nx, m.y = ny, m.z = nz;
             }
-            if (!DwSeen(DwKey(m.plat, m.x, m.y, m.z)))
+            if (ElevatorAt(m.x, m.y, m.z) != NULL && !(m.x == tx && m.z == tz))
+                continue;   // (an elevator: a step onto it rides it, so only as where the walk goes)
+            if (!DwSeen(DwKey(m.plat, m.x, m.y, m.z, m.surf)))
                 sDwSearch[tail++] = m;
         }
         head++;
@@ -2219,7 +2318,19 @@ u16 MP_TestDwKey(s32 tx, s32 ty, s32 tz)
             printf("[dw] search: jump at %d,%d,%d (+%d,%d,%d) dir %d to kind %d plat %d\n", j->b.x, j->b.y, j->b.z, j->b.sx, j->b.sy, j->b.sz, j->dir, j->kind, j->idx);
         }
         for (i = 0; i < sDw.floor->nplat; i++)
-            printf("[dw] search: plat %d kind %d at %d,%d,%d (+%d,%d,%d)\n", (int)i, Plat(i)->kind, Plat(i)->b.x, Plat(i)->b.y, Plat(i)->b.z, Plat(i)->b.sx, Plat(i)->b.sy, Plat(i)->b.sz);
+        {
+            const struct DwPlatform *pl = Plat(i);
+            printf("[dw] search: plat %d kind %d at %d,%d,%d (+%d,%d,%d)\n", (int)i, pl->kind, pl->b.x, pl->b.y, pl->b.z, pl->b.sx, pl->b.sy, pl->b.sz);
+            if (getenv("MOEMON_DW_DEBUG")[0] == '2')
+                for (z = pl->b.z; z <= pl->b.z + pl->b.sz; z++)
+                {
+                    printf("[dw] attrs plat %d z %d:", (int)i, (int)z);
+                    for (x = pl->b.x; x <= pl->b.x + pl->b.sx; x++)
+                        for (y = pl->b.y; y <= pl->b.y + pl->b.sy; y++)
+                            printf(" %04x", PlatAttr(pl, x, y, z));
+                    printf("\n");
+                }
+        }
         for (i = 0; i < tail && i < 400; i++)
             printf("[dw]   %d,%d,%d kind %d plat %d\n", sDwSearch[i].x, sDwSearch[i].y, sDwSearch[i].z, sDwSearch[i].kind, sDwSearch[i].plat);
         for (y = 0; y < gMapHeader.mapLayout->height; y++)

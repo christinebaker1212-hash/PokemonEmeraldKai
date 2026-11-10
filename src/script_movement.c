@@ -3,6 +3,8 @@
 #include "event_object_movement.h"
 #include "task.h"
 #include "util.h"
+#include "event_data.h"
+#include "s3d.h"
 #include "constants/event_objects.h"
 #include "constants/event_object_movement.h"
 
@@ -24,7 +26,15 @@ bool8 ScriptMovement_StartObjectMovementScript(u8 localId, u8 mapNum, u8 mapGrou
     u8 objEventId;
 
     if (TryGetObjectEventIdByLocalIdAndMap(localId, mapNum, mapGroup, &objEventId))
-        return TRUE;
+    {
+        // Moemon Kai: Platinum keeps every person of a map on it, so its scenes move people still too far off to have
+        // come out here (the DISTORTION WORLD B7F's CYRUS): one of SINNOH's not hidden by its flag comes out for the move
+        const struct ObjectEventTemplate *t;
+        if (!S3D_IsSinnohGroup(mapGroup) || mapGroup != gSaveBlock1Ptr->location.mapGroup || mapNum != gSaveBlock1Ptr->location.mapNum
+         || (t = GetObjectEventTemplateByLocalIdAndMap(localId, mapNum, mapGroup)) == NULL || FlagGet(t->flagId)
+         || (objEventId = TrySpawnObjectEvent(localId, mapNum, mapGroup)) == OBJECT_EVENTS_COUNT)
+            return TRUE;
+    }
     if (!FuncIsActiveTask(ScriptMovement_MoveObjects))
         ScriptMovement_StartMoveObjects(50);
     return ScriptMovement_TryAddNewMovement(GetMoveObjectsTaskId(), objEventId, movementScript);

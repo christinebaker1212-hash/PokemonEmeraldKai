@@ -1,0 +1,15 @@
+pressuntil A field 5000
+mp platinumstory
+mp setvar 0x51B0 6
+wait 30
+mp warp 41,42,49,25
+wait 60
+waitfor field 1000
+wait 30
+mp dw
+dwgoto 96 -1 43 3000
+wait 400
+waitfor field 1000
+mp dw
+shot chain
+quit

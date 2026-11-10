@@ -7284,3 +7284,27 @@ MOVES` replays moves; the harness's `gymwalk [FRAMES]` walks to CANDICE solving 
   it up and opens 1F's doors with it. (tools/moemon_gen59/item_audit.py: a Platinum key item in a file put a set where a
   list was expected.)
 
+
+## The DISTORTION WORLD walked through (1.185.19)
+The walk-only SINNOH run went through the DISTORTION WORLD from SPEAR PILLAR to SENDOFF SPRING; what it found:
+- Continuing a save made on a floor: the continue path doesn't load the map the way a warp does, so the floor was never
+  set up (no platforms, the elevator tiles as they were stored): CB2_ContinueSavedGame -> S3D_Dw_SavedMapLoaded sets it
+  up without starting the world over. It also takes the floor's people list fresh from the map
+  (LoadObjEventTemplatesFromHeader): a save made right after arriving on B7F with CYNTHIA (the arrival adds her as one
+  more person) kept a list one longer than the map now gives, and CYRUS, past its end, could never come out.
+- People on platforms block a step (S3D_Dw_PlayerStep PersonAt: their map place and the height the floor's list gives
+  them), and a bump turns the player the way the step goes on the map, so A talks to them: B2F's CYNTHIA on her wall
+  (Platinum's progress 5 is her talk).
+- Chained elevators (sDwPaths next): Platinum changes floors at each leg's point (ChangeMaps -> LoadFloor, the
+  platform's own flags only on the last). B3F's large platform rides through B4F to B5F; it used to change once, on its
+  last leg, from B3F to B4F, and left the player on B4F off the platforms. A floor passed through keeps the ridden
+  platform (sRideNext.mid); the ridden platform is drawn where the ride has it, and stays drawn where it stopped
+  (keepRide: Platinum's animator, PreventDeletion), on B5F where that floor's own isn't there.
+- Elevator tiles follow their platforms every frame (PlatformTiles in S3D_Dw_Update): B6F's to B7F, which CYNTHIA's talk
+  brings (FLAG_DISTORTION_WORLD_STEPPING_STONES), couldn't be stepped on until the floor was left and entered again.
+- On SINNOH maps a script moving a person who hasn't come out yet (too far off for the game's spawn range) spawns them
+  first (script_movement.c): Platinum keeps a map's people all on it, and B7F's scene walks CYRUS from 7 tiles up.
+- Harness: `dwgoto X Y Z [FRAMES]` (s3d_distortion.c MP_TestDwKey), a search over the floor's platforms, walls,
+  ceilings, jumps, SURF (A facing water, on a platform or the ground), the ground's ledges (Platinum's jumped twice) and
+  people, solved again each frame; elevators only as where it goes; MOEMON_DW_DEBUG=1 prints what it reached, the
+  floor's jumps and platforms and the ground's collision (=2: each platform's tiles). Test sinnoh_dw_chain.

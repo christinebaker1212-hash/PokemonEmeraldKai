@@ -1,0 +1,9 @@
+# The DISTORTION WORLD's chained elevator (B3F's large platform, Platinum's paths 8 then 9): it changes floors at
+# each leg's point, through B4F to B5F, where it stops on B5F's platform tile with the player (it used to stop on
+# B4F, the player left off the platforms); its platform drawn all the way and where it stops. Walked by the
+# harness's dwgoto (the floor's platforms, walls and jumps). Needs the packs and the decomp. Shot chain.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[dw] elevator 3 on floor 576 (path 8, down)" "[dw] elevator stopped on floor 579 at 96,129,43" "[dw] floor 579 at 96,128,43 kind 4")
+UNEXPECT_A=("[crash]" "TIMEOUT" "NO WAY")
