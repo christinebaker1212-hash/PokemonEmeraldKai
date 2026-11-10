@@ -106,6 +106,7 @@ static int sMashCount = 0, sMashInterval = 0;
 // waitfor / pressuntil: wait for a named game state (see MP_TestCondition)
 static char sUntilName[32];
 static int sWalkX, sWalkY, sWalkFrames;   // walkto
+static int sGymFrames;   // gymwalk
 static int sGotoG, sGotoN, sGotoX, sGotoY, sGotoFrames, sGotoBusy;   // goto
 static int sPickFrames, sPickPhase;   // partypick
 static int sApproachKind, sApproachN, sApproachN2, sApproachFrames, sTalkFrames;   // approach (kinds 3 obj / 4 tile: any region's maps)
@@ -1437,6 +1438,27 @@ static void TestHarnessStep(void)
             sTestKeys = (k == A_BUTTON && (sFrameCounter & 8)) ? 0 : k;   // (A pulsed: one held down presses only once)
         return;
     }
+    if (sGymFrames > 0)
+    {
+        // gymwalk [FRAMES]: SNOWPOINT's gym to CANDICE, each move solved again from where the player stands
+        // (src/sinnoh/s3d_gyms.c MP_TestGymKey); a trainer's script on the way stops it
+        u16 MP_TestGymKey(void);
+        bool8 ScriptContext_IsEnabled(void);
+        u16 k = MP_TestGymKey();
+        bool8 taken = ScriptContext_IsEnabled();
+        if (k == 0 || taken || --sGymFrames == 0)
+        {
+            printf("[test] frame %lu: gymwalk %s\n", sFrameCounter, k == 0 ? "there" : taken ? "stopped (a script)" : "TIMEOUT");
+            fflush(stdout);
+            sGymFrames = 0;
+            sTestKeys = 0;
+        }
+        else
+        {
+            sTestKeys = k == 0xFFFF ? 0 : k;
+            return;
+        }
+    }
     if (sWalkFrames > 0)
     {
         // walkto X Y [FRAMES]: the key toward the tile each frame (mp_debug.c MP_TestWalkKey), as a player walks
@@ -1567,6 +1589,12 @@ static void TestHarnessStep(void)
                 sscanf(line, "%*s %*s %d %d", &sApproachN, &sApproachFrames);
                 sApproachKind = strcmp(what, "touch") == 0 ? 1 : strcmp(what, "check") == 0 ? 2 : strcmp(what, "obj") == 0 ? 3 : 0;
             }
+            return;
+        }
+        else if (strcmp(cmd, "gymwalk") == 0)
+        {
+            sGymFrames = 3000;
+            sscanf(line, "%*s %d", &sGymFrames);
             return;
         }
         else if (strcmp(cmd, "walkto") == 0)

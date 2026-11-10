@@ -7244,3 +7244,16 @@ HM ROCK CLIMB / DEFOG / WHIRLPOOL (items 694-696, the move in the item's name) w
 message, which adds the move's name: "found one HM ROCK CLIMB ROCK CLIMB!". field_specials.c BufferTMHMMoveName answers
 FALSE for them, so they read as items do ("found one HM ROCK CLIMB!"). The walk-only runs: SINNOH's ROCK CLIMB is item
 694, not HM08 (346).
+
+## SNOWPOINT's ice: a slide back stops at the foot (1.185.16)
+field_player_avatar.c SnowpointSlip: a slide that runs out of speed going up a slope slides back (speed 0). On level
+ice between two slopes (the column at x 17, the dip at 7,3 / 8,3 under CANDICE) that sent the player up the other
+slope, back again, for ever, the player never getting control back; the gym's trainers had hidden it in the walk-only
+run (one sees the column and the battle stopped the slide). Now a slide that has slid back stops once it is on level
+ice or would climb again (sBack, carried over the step back by the tile it lands on: that step is a walk, so the
+forced move ends there), and stays stopped on that tile until the player moves (sIceStopX / Y; the caller runs the
+ice every frame while the player stands on it). tools/sinnoh/gen_gyms.py snow_slide has the same rule (its check:
+everyone reached). Test sinnoh_snowpoint_slide_stop. Trace: MOEMON_GYM_TRACE=1 ("[slip]" lines).
+The walk-only runs: `mp gym solve` in SNOWPOINT searches with the game's own collision, slopes and ice
+(s3d_gyms.c SnowSimMove, SnowpointSlip line for line; the gym's people from the templates, loaded or not); `mp gym sim
+MOVES` replays moves; the harness's `gymwalk [FRAMES]` walks to CANDICE solving again after every stop and battle.

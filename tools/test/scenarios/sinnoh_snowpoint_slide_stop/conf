@@ -1,0 +1,8 @@
+# SNOWPOINT's gym (field_player_avatar.c SnowpointSlip, 1.185.16): a slide that can't climb a slope slides back and stops
+# at its foot. Before, the level ice between two slopes (here the dip at 7,3 / 8,3 under CANDICE, with the gym's
+# trainers beaten) sent the player back and forth for ever, out of the player's control.
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("where map 43.65 xy 7,3" "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "where map 43.65 xy 8,3")

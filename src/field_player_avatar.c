@@ -51,6 +51,7 @@ static void MovePlayerAvatarUsingKeypadInput(u8, u16, u16);
 static void PlayerAllowForcedMovementIfMovingSameDirection(void);
 static bool8 TryDoMetatileBehaviorForcedMovement(void);
 static u8 sIceSpeed;   // Moemon Kai: SNOWPOINT's gym ice (Platinum's): a slide's speed, 0-3 (SnowpointSlip)
+static s16 sIceStopX = -1, sIceStopY;   // (1.185.16: where a slide stopped at the foot of a slope, until the player moves)
 static u8 GetForcedMovementByMetatileBehavior(void);
 
 static bool8 ForcedMovement_None(void);
@@ -352,6 +353,8 @@ void PlayerStep(u8 direction, u16 newKeys, u16 heldKeys)
             DoPlayerAvatarTransition();
             if (TryDoMetatileBehaviorForcedMovement() == 0)
             {
+                if (direction != DIR_NONE)
+                    sIceStopX = -1;   // (Moemon Kai: SNOWPOINT's ice, the player moves on: SnowpointSlip)
                 MovePlayerAvatarUsingKeypadInput(direction, newKeys, heldKeys);
                 PlayerAllowForcedMovementIfMovingSameDirection();
             }
@@ -491,16 +494,40 @@ static bool8 DoForcedMovementInCurrentDirection(void (*moveFunc)(u8))
 // speed left it slides back down (facing on up the slope); a collision going up a slope sends it back too
 static bool8 SnowpointSlip(void)
 {
+    static bool8 sBack;          // (1.185.16: this slide has slid back off a slope)
+    static s16 sBackX, sBackY;   // (the tile that step back lands on: the walk step ends the forced move there)
     struct ObjectEvent *obj = &gObjectEvents[gPlayerAvatar.objectEventId];
     u8 dir = obj->movementDirection, collision;
     s8 slope = S3D_Gyms_IceSlope(obj->currentCoords.x, obj->currentCoords.y, dir);
     bool8 back = FALSE;
 
     if (!(gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_FORCED_MOVE))
-        sIceSpeed = 0;   // (a slide starts)
+    {
+        sIceSpeed = 0;   // (a slide starts, or goes on from its step back)
+        if (!(sBack && obj->currentCoords.x == sBackX && obj->currentCoords.y == sBackY))
+            sBack = FALSE;
+    }
+    if (obj->currentCoords.x == sIceStopX && obj->currentCoords.y == sIceStopY)
+        return ForcedMovement_None();   // (stopped at the foot of a slope: the player's own step goes on, not the ice)
+    sIceStopX = -1;
     obj->disableAnim = TRUE;
     collision = CheckForPlayerAvatarCollision(dir);
+    extern char *getenv(const char *);
+    extern int printf(const char *, ...);
+    if (getenv("MOEMON_GYM_TRACE"))
+        printf("[slip] at %d,%d dir %d slope %d speed %d back %d collision %d forced %d\n", obj->currentCoords.x - 7,
+               obj->currentCoords.y - 7, dir, slope, sIceSpeed, sBack, collision,
+               (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_FORCED_MOVE) != 0);
     gPlayerAvatar.flags |= PLAYER_AVATAR_FLAG_FORCED_MOVE;
+    if (sBack && !collision && slope >= 0)
+    {
+        // (1.185.16) Slid back down a slope it couldn't climb, it stops at the foot: before, the level ice between two
+        // slopes sent it up and back down the other one again and again, and the player never had control back
+        // (SNOWPOINT's column at x 17 once its trainers were beaten)
+        sIceSpeed = 0, sBack = FALSE;
+        sIceStopX = obj->currentCoords.x, sIceStopY = obj->currentCoords.y;
+        return ForcedMovement_None();
+    }
     if (collision)
     {
         if (slope <= 0 || collision >= COLLISION_STOP_SURFING)
@@ -525,7 +552,9 @@ static bool8 SnowpointSlip(void)
     {
         u8 face = obj->facingDirection;
         dir = GetOppositeDirection(dir);
-        sIceSpeed = 0;
+        sIceSpeed = 0, sBack = TRUE;
+        sBackX = obj->currentCoords.x, sBackY = obj->currentCoords.y;
+        MoveCoords(dir, &sBackX, &sBackY);
         if (CheckForPlayerAvatarCollision(dir))
             return DoForcedMovement(GetOppositeDirection(dir), PlayerWalkFast);
         gPlayerAvatar.runningState = MOVING;

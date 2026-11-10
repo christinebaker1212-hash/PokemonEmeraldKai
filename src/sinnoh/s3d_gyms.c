@@ -29,6 +29,7 @@ void Sinnoh_Tram_Update(void);
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "fieldmap.h"
+#include "metatile_behavior.h"
 #include "constants/metatile_behaviors.h"
 #include "mp.h"
 #include "script.h"
@@ -1521,6 +1522,181 @@ bool8 S3D_Gyms_SeesPlayer(u8 localId)
 
 // (tests: `mp gym`: the gym's state; `mp gym solve`: PASTORIA walked from the door by every step and button, with the
 // gym's own rules and the map's walls: which trainers and the leader are reached, after how many buttons)
+// ------------------------------------------------------------------------------------------------- `mp gym solve`
+// SNOWPOINT for the walk-only runs: every step and slide as the game makes them (field_player_avatar.c SnowpointSlip,
+// line for line, with the game's own collision, slopes and ice), from where the player stands and the snowballs
+// broken now, to CANDICE: the moves and where each ends. The player's coords and the snowballs are the search's while
+// it asks the game, and put back.
+static bool8 SnowSimIce(s16 x, s16 y)
+{
+    return MetatileBehavior_IsIce_2(MapGridGetMetatileBehaviorAt(x, y));
+}
+
+static u8 SnowSimCollide(struct ObjectEvent *pl, s16 x, s16 y, u8 dir)
+{
+    s16 nx = x, ny = y;
+    u32 i;
+    pl->previousCoords = pl->currentCoords;
+    pl->currentCoords.x = x, pl->currentCoords.y = y;
+    ObjectEventUpdateElevation(pl);   // (as the game does with each step: SINNOH's floors change it)
+    MoveCoords(dir, &nx, &ny);
+    // (the gym's people, loaded or not: CANDICE, the guide, the trainers; its other objects are the snowballs' places)
+    for (i = 0; i < gMapHeader.events->objectEventCount && i < 8; i++)
+        if (gMapHeader.events->objectEvents[i].x + MAP_OFFSET == nx && gMapHeader.events->objectEvents[i].y + MAP_OFFSET == ny)
+            return COLLISION_OBJECT_EVENT;
+    return GetCollisionAtCoords(pl, nx, ny, dir);
+}
+
+// A move DIR from X, Y (map coords + 7) with the snowballs *BROKEN: where it ends (FALSE: no step at all)
+static bool8 SnowSimMove(struct ObjectEvent *pl, s16 *x, s16 *y, u32 *broken, u8 dir)
+{
+    s32 speed = 0, steps, first = TRUE, backed = FALSE;
+    s16 cx = *x, cy = *y;
+    sSnow.broken = *broken;
+    if (SnowSimCollide(pl, cx, cy, dir))
+        return FALSE;
+    MoveCoords(dir, &cx, &cy);   // (a step, as the player walks; then the ice takes over)
+    for (steps = 0; steps < 200 && SnowSimIce(cx, cy); steps++)
+    {
+        s8 slope = S3D_Gyms_IceSlope(cx, cy, dir);
+        bool8 back = FALSE;
+        if (getenv("MOEMON_SNOW_TRACE"))
+            printf("[snow] top %d,%d dir %d steps %d\n", cx - MAP_OFFSET, cy - MAP_OFFSET, dir, (int)steps);
+        u8 collision;
+        s16 nx = cx, ny = cy;
+        MoveCoords(dir, &nx, &ny);
+        if (!first && speed >= 1)
+        {
+            s32 i = SnowBallAt(nx - MAP_OFFSET, ny - MAP_OFFSET);
+            if (i >= 0)
+                sSnow.broken |= 1u << i;   // (CheckForObjectEventCollision: run into fast)
+        }
+        first = FALSE;
+        collision = SnowSimCollide(pl, cx, cy, dir);
+        if (getenv("MOEMON_SNOW_TRACE"))
+            printf("[snow] at %d,%d dir %d slope %d speed %d collision %d elev %d\n", cx - MAP_OFFSET, cy - MAP_OFFSET, dir,
+                   slope, (int)speed, collision, pl->currentElevation);
+        if (backed && !collision && slope >= 0)
+            break;   // (slid back to the foot of the slope: SnowpointSlip)
+        if (collision)
+        {
+            if (slope <= 0 || collision >= COLLISION_STOP_SURFING)
+                break;
+            back = TRUE;
+        }
+        else if (slope > 0)
+        {
+            if (speed == 0)
+                back = TRUE;
+            else
+                speed--;
+        }
+        else if (slope < 0 && speed < 3)
+            speed++;
+        if (back)
+        {
+            dir = GetOppositeDirection(dir);
+            speed = 0, backed = TRUE;
+            collision = SnowSimCollide(pl, cx, cy, dir);
+            if (getenv("MOEMON_SNOW_TRACE"))
+                printf("[snow] back from %d,%d dir %d: collision %d\n", cx - MAP_OFFSET, cy - MAP_OFFSET, dir, collision);
+            if (collision)
+                break;
+        }
+        MoveCoords(dir, &cx, &cy);
+        if (getenv("MOEMON_SNOW_TRACE"))
+            printf("[snow] to %d,%d ice %d behavior %02X\n", cx - MAP_OFFSET, cy - MAP_OFFSET, SnowSimIce(cx, cy),
+                   MapGridGetMetatileBehaviorAt(cx, cy));
+    }
+    *x = cx, *y = cy, *broken = sSnow.broken;
+    return TRUE;
+}
+
+static u8 SnowpointSolveRoute(bool8 print);
+static void SnowpointSolve(void)
+{
+    SnowpointSolveRoute(TRUE);
+}
+
+// The first move of the way to CANDICE (0: beside her already, 0xFF: no way)
+static u8 SnowpointSolveRoute(bool8 print)
+{
+    enum { SQ = 1 << 16, SH = 1 << 18 };
+    static struct { u8 x, y, dir; u32 broken, parent; } sQ[SQ];
+    static u32 sHash[SH];
+    struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+    struct Coords16 keepCur = pl->currentCoords, keepPrev = pl->previousCoords;
+    u8 keepElev = pl->currentElevation, keepPrevElev = pl->previousElevation;
+    u32 keepBroken = sSnow.broken, head = 0, tail = 1, best = 0xFFFFFFFF, i, n = 0, path[256];
+    const struct ObjectEventTemplate *goal = &gMapHeader.events->objectEvents[0];   // (CANDICE)
+    memset(sHash, 0xFF, sizeof(sHash));
+    sQ[0].x = keepCur.x, sQ[0].y = keepCur.y, sQ[0].dir = 0, sQ[0].broken = sSnow.broken, sQ[0].parent = 0xFFFFFFFF;
+#define SKEY(x, y, b) (((u32)(x) - MAP_OFFSET) | ((u32)(y) - MAP_OFFSET) << 5 | (b) << 10)
+#define SSEEN(k) ({ u32 hh = ((k) * 2654435761u) >> 14, hit = 0; while (sHash[hh] != 0xFFFFFFFFu) { \
+        if (sHash[hh] == (k)) { hit = 1; break; } hh = (hh + 1) & (SH - 1); } if (!hit) sHash[hh] = (k); hit; })
+    SSEEN(SKEY(sQ[0].x, sQ[0].y, sQ[0].broken));
+    while (head < tail && tail < SQ - 4 && best == 0xFFFFFFFF)
+    {
+        u32 q = head++;
+        u8 d;
+        if (abs(sQ[q].x - MAP_OFFSET - goal->x) + abs(sQ[q].y - MAP_OFFSET - goal->y) == 1)
+        {
+            best = q;
+            break;
+        }
+        for (d = DIR_SOUTH; d <= DIR_EAST; d++)
+        {
+            s16 x = sQ[q].x, y = sQ[q].y;
+            u32 b = sQ[q].broken;
+            if (!SnowSimMove(pl, &x, &y, &b, d) || SSEEN(SKEY(x, y, b)))
+                continue;
+            sQ[tail].x = x, sQ[tail].y = y, sQ[tail].dir = d, sQ[tail].broken = b, sQ[tail].parent = q;
+            tail++;
+        }
+    }
+#undef SKEY
+#undef SSEEN
+    pl->currentCoords = keepCur, pl->previousCoords = keepPrev;
+    pl->currentElevation = keepElev, pl->previousElevation = keepPrevElev;
+    sSnow.broken = keepBroken;
+    if (print)
+        printf("[test] gym solve: %u states\n", (unsigned)tail);
+    if (best == 0xFFFFFFFF)
+    {
+        if (print)
+            printf("[test] gym route to CANDICE: NOT reached\n");
+        return 0xFF;
+    }
+    for (i = best; i != 0xFFFFFFFF && n < ARRAY_COUNT(path); i = sQ[i].parent)
+        path[n++] = i;
+    if (print)
+    {
+        printf("[test] gym route to CANDICE:");
+        for (i = n - 1; i-- > 0;)
+            printf(" %c%d,%d", "?SNWE"[sQ[path[i]].dir], sQ[path[i]].x - MAP_OFFSET, sQ[path[i]].y - MAP_OFFSET);
+        printf("\n");
+    }
+    return n >= 2 ? sQ[path[n - 2]].dir : 0;
+}
+
+// The harness's "gymwalk" (SNOWPOINT): the key toward CANDICE whenever the player stands still in the field (0: beside
+// her, 0xFFFF: none now, moving or a script), solved again each time from where the player is and what's broken
+u16 MP_TestGymKey(void)
+{
+    static const u16 sKeys[5] = {0, DPAD_DOWN, DPAD_UP, DPAD_LEFT, DPAD_RIGHT};
+    struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u8 d;
+    if (sG.gym != GYM_SNOWPOINT)
+        return 0;
+    if (!MP_IsInOverworld() || ScriptContext_IsEnabled() || (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_FORCED_MOVE)
+     || (pl->heldMovementActive && !pl->heldMovementFinished))
+        return 0xFFFF;
+    d = SnowpointSolveRoute(FALSE);
+    if (d == 0xFF)
+        return 0xFFFF;
+    return sKeys[d];
+}
+
 void S3D_Gyms_Debug(const char *arg)
 {
     printf("[test] gym %d: water %.0f (level %d) room %d turn %d floor %d moved %06X clock %d\n", sG.gym, sG.water,
@@ -1695,6 +1871,31 @@ void S3D_Gyms_Debug(const char *arg)
         }
 #undef CKEY
 #undef CSEEN
+    }
+    if (sG.gym == GYM_SNOWPOINT && strcmp(arg, "solve") == 0)
+        SnowpointSolve();
+    if (sG.gym == GYM_SNOWPOINT && strncmp(arg, "sim ", 4) == 0)
+    {
+        // (mp gym sim MOVES: the search's own moves from here, N S W E, to check them against the game's)
+        struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+        struct Coords16 keepCur = pl->currentCoords, keepPrev = pl->previousCoords;
+        u8 keepElev = pl->currentElevation, keepPrevElev = pl->previousElevation;
+        u32 keep = sSnow.broken, b = sSnow.broken;
+        s16 x = keepCur.x, y = keepCur.y;
+        const char *m;
+        printf("[test] gym sim:");
+        for (m = arg + 4; *m; m++)
+        {
+            u8 d = *m == 'N' ? DIR_NORTH : *m == 'S' ? DIR_SOUTH : *m == 'W' ? DIR_WEST : *m == 'E' ? DIR_EAST : 0;
+            if (d == 0)
+                continue;
+            SnowSimMove(pl, &x, &y, &b, d);
+            printf(" %c%d,%d", *m, x - MAP_OFFSET, y - MAP_OFFSET);
+        }
+        printf(" (broken %05X)\n", b);
+        pl->currentCoords = keepCur, pl->previousCoords = keepPrev;
+        pl->currentElevation = keepElev, pl->previousElevation = keepPrevElev;
+        sSnow.broken = keep;
     }
     if (sG.gym == GYM_SUNYSHORE && strcmp(arg, "solve") == 0)
     {

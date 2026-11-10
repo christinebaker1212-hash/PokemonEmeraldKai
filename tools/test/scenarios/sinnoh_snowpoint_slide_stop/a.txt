@@ -1,0 +1,33 @@
+pressuntil A field 5000
+mp setflag 0x3781
+mp setflag 0x3784
+mp setflag 0x378A
+mp setflag 0x3798
+mp setflag 0x37B1
+mp setflag 0x37B2
+mp warp 43,65,7,3
+wait 120
+waitfor field 1000
+mp where
+mp face right
+wait 4
+press RIGHT 6
+wait 60
+wait 7
+mp where
+wait 7
+mp where
+wait 7
+mp where
+wait 7
+mp where
+wait 7
+mp where
+wait 7
+mp where
+wait 7
+mp where
+wait 7
+mp where
+mp ctx
+quit

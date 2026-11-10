@@ -354,7 +354,7 @@ def snow_slide(walls, ice, slopes, fences, balls, x, y, d):
     """A slide from X, Y going D (just stepped onto ice), as field_player_avatar.c SnowpointSlip slides: where it stops
     and the snowballs it breaks"""
     dx, dy = VEIL_DIRS[d]
-    s, broke, steps = 0, set(), 0
+    s, broke, steps, backed = 0, set(), 0, False
 
     def blocked(fx, fy, tx, ty):
         a, b = fences.get((fx, fy)), fences.get((tx, ty))
@@ -369,6 +369,8 @@ def snow_slide(walls, ice, slopes, fences, balls, x, y, d):
         if s >= 1 and steps > 1 and (x + dx, y + dy) in balls:
             broke.add((x + dx, y + dy))
         back = False
+        if backed and sl >= 0 and not blocked(x, y, x + dx, y + dy):
+            break   # (slid back off a slope it couldn't climb: it stops at the foot, SnowpointSlip since 1.185.16)
         if blocked(x, y, x + dx, y + dy):
             if sl <= 0:
                 break
@@ -381,7 +383,7 @@ def snow_slide(walls, ice, slopes, fences, balls, x, y, d):
         elif sl < 0:
             s = min(3, s + 1)
         if back:
-            dx, dy, s = -dx, -dy, 0
+            dx, dy, s, backed = -dx, -dy, 0, True
             if blocked(x, y, x + dx, y + dy):
                 break
         x, y = x + dx, y + dy
