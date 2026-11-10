@@ -1539,7 +1539,7 @@ void S3D_Gyms_Debug(const char *arg)
     if (sG.gym == GYM_PASTORIA && strcmp(arg, "solve") == 0)
     {
         static u8 sSeen[3][64][32];
-        static struct { u8 x, y, level, presses; float h; } sQueue[3 * 64 * 32];
+        static struct { u8 x, y, level, presses; float h; u16 parent; } sQueue[3 * 64 * 32];
         static const s8 sDir[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
         u32 head = 0, tail = 0, i;
         s32 w = gBackupMapLayout.width - 2 * MAP_OFFSET, hgt = gBackupMapLayout.height - 2 * MAP_OFFSET;
@@ -1547,6 +1547,7 @@ void S3D_Gyms_Debug(const char *arg)
         // from the door (13, 41), the water as Platinum starts it (middle)
         sQueue[tail].x = 13, sQueue[tail].y = 41, sQueue[tail].level = 1, sQueue[tail].presses = 0;
         sQueue[tail].h = S3D_TileFloor(13, 41, 64.0f);
+        sQueue[tail].parent = 0xFFFF;
         tail++;
         sSeen[1][41][13] = 1;
         while (head < tail)
@@ -1574,10 +1575,32 @@ void S3D_Gyms_Debug(const char *arg)
                 sSeen[nl][ny][nx] = presses + (nl != level) + 1;
                 sQueue[tail].x = nx, sQueue[tail].y = ny, sQueue[tail].level = nl;
                 sQueue[tail].presses = presses + (nl != level), sQueue[tail].h = nh;
+                sQueue[tail].parent = head - 1;
                 tail++;
             }
         }
         ReportReached(&sSeen[0][0][0], 3);
+        // (and the way to each: the buttons in the order they're stepped on, then the tile beside the person; a walk
+        // goes button to button, the water at one level between them)
+        for (i = 0; i < gMapHeader.events->objectEventCount; i++)
+        {
+            const struct ObjectEventTemplate *t = &gMapHeader.events->objectEvents[i];
+            u32 q, best = 0xFFFF, n = 0, k;
+            u16 path[64];
+            for (q = 0; q < tail; q++)
+                if (abs(sQueue[q].x - t->x) + abs(sQueue[q].y - t->y) == 1
+                 && (best == 0xFFFF || sQueue[q].presses < sQueue[best].presses))
+                    best = q;
+            if (best == 0xFFFF || t->flagId == 0x3FFF)
+                continue;
+            for (q = best; q != 0xFFFF && n < ARRAY_COUNT(path); q = sQueue[q].parent)
+                if (q == best || (sQueue[q].parent != 0xFFFF && sQueue[sQueue[q].parent].level != sQueue[q].level))
+                    path[n++] = q;
+            printf("[test] gym route to person %u:", (unsigned)i + 1);
+            for (k = n; k-- > 0;)
+                printf(" %d,%d", sQueue[path[k]].x, sQueue[path[k]].y);
+            printf("\n");
+        }
     }
     if (sG.gym == GYM_SUNYSHORE && strcmp(arg, "solve") == 0)
     {
