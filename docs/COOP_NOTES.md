@@ -7257,3 +7257,23 @@ everyone reached). Test sinnoh_snowpoint_slide_stop. Trace: MOEMON_GYM_TRACE=1 (
 The walk-only runs: `mp gym solve` in SNOWPOINT searches with the game's own collision, slopes and ice
 (s3d_gyms.c SnowSimMove, SnowpointSlip line for line; the gym's people from the templates, loaded or not); `mp gym sim
 MOVES` replays moves; the harness's `gymwalk [FRAMES]` walks to CANDICE solving again after every stop and battle.
+
+## GALACTIC HQ's doors and bollards; Platinum's map entry scripts after the map's own (1.185.17)
+- Platinum's objects the converter took for no one to see (tools/sinnoh/sprites.py HIDDEN) included the GALACTIC HQ
+  security doors (OBJ_EVENT_GFX_GALACTIC_HQ_DOOR, the GALACTIC / STORAGE KEY doors of HQ 1F, 3F, 4F, B2F and the
+  warehouse) and the bollards (HQ 4F, HEARTHOME CITY and FANTINA's room, the FIGHT AREA, FULLMOON / NEWMOON ISLAND).
+  Both are Platinum's own 2D sprites (res/graphics/field_sprites/objects): they're shown now and stand in the way. The
+  door is 16 x 32, packed in the middle of a 32 x 32 frame (build_gfx.py Padded), and taken last (build_gfx.py LATER)
+  so every sprite before keeps its number: saves keep some (VAR_SINNOH_PARTNER_GFX). Without them the 1F warp panel
+  by the front door landed on 4F beside the laboratory: the walk-only run reached the control room with no battle.
+- FLAG_HIDE_GALACTIC_HQ_TEAM_GALACTIC is set by nothing of Platinum's (its grunts and the 4F bollards stay for good):
+  gen_scripts.py SHOWN_FOR_GOOD puts the bollards in the map's people table under it.
+- Platinum's map entry scripts (ON_TRANSITION / ON_LOAD / ON_RESUME) on the 21 maps that have one of their own too
+  never ran: the generated wrapper `call`ed the map's own script, whose `end` ended the whole script. The wrapper now
+  holds a copy of the map's own script (gen_scripts.py inline_ours: its labels renamed, each end / return a goto into
+  Platinum's). Among them GALACTIC HQ 1F's first arrival, LAKE VERITY's and ROUTE 201's counterpart look, CANALAVE's and
+  PASTORIA's people, the LEAGUE's ELITE FOUR door flags (their doors, OBJ_EVENT_GFX_ELITE_FOUR_ROOM_DOOR, are a
+  3D field effect model in Platinum, still left out), VALOR CAVERN's warp (as its ON_LOAD already did).
+- Save format 4 (src/mp/mp_savefix.c): a save made inside the HQ or its warehouse gets their doors' flags set (it may be
+  inside without the GALACTIC KEY). Test: sinnoh_galactic_doors.
+

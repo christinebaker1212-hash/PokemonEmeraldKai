@@ -2439,6 +2439,38 @@ def init_scripts(root, low):
     return once, frame
 
 
+def inline_ours(name, lab, prefix, then):
+    """the map's own map script LAB as lines that go on to THEN where it ends: a copy, its own labels renamed under
+    PREFIX. (A 'call' of it never came back: its 'end' ends the whole script, so Platinum's own transition scripts never
+    ran after it: GALACTIC HQ's first arrival, LAKE VERITY's, ROUTE 201's...)"""
+    path = os.path.join(ROOT, 'data/maps', name, 'scripts.inc')
+    raw = [ln.rstrip('\n') for ln in open(path, encoding='utf-8')]
+    code = [ln.split('@')[0].rstrip() for ln in raw]
+    start = next(k for k, ln in enumerate(code) if re.match(r'^%s::?$' % re.escape(lab), ln.strip()))
+    body = []
+    for ln in code[start + 1:]:
+        t = ln.strip()
+        if not t:
+            break                                  # (a map's scripts are kept apart by an empty line)
+        body.append(t)
+    local = [t[:-1].rstrip(':') for t in body if re.match(r'^\w+::?$', t)]
+    out, ends = [], 0
+    for t in body:
+        for k, l in enumerate(local):
+            t = re.sub(r'\b%s\b' % re.escape(l), '%s_Own%d' % (prefix, k), t)
+        if re.match(r'^\w+::?$', t):
+            out.append(t.rstrip(':') + ':')
+        elif t in ('end', 'return'):
+            out.append('\tgoto %s' % then)
+            ends += 1
+        else:
+            assert not re.match(r'^(goto|call)\b(?!_if)', t) or any('_Own' in w for w in t.split()), \
+                '%s: %s leaves the script (%s)' % (name, lab, t)
+            out.append('\t' + t)
+    assert ends and out[-1] == '\tgoto %s' % then, '%s: %s doesn\'t end where it can go on' % (name, lab)
+    return out
+
+
 def our_map_scripts(name):
     """this game's own map script table of map NAME (data/maps/NAME/scripts.inc): [(kind, label)] and, for the frame
     tables, {label: [(var, value, label)]}"""
@@ -2562,6 +2594,9 @@ def _replaceable(body):
 # deliveryman, the S.S. SPIRAL's sailor): Platinum hides them by scripts that check for the event, which don't convert
 CLOSED_STORY_PEOPLE = {'FLAG_HIDE_MART_MYSTERY_GIFT_DELIVERYMAN', 'FLAG_HIDE_ROUTE_224_SHAYMIN',
                        'FLAG_HIDE_SNOWPOINT_CITY_SAILOR_SS_SPIRAL'}
+# hide flags nothing of Platinum's ever sets, whose people Platinum shows for good: GALACTIC HQ's TEAM GALACTIC, its 4F
+# bollards with them (the warp panel from 1F lands behind them: the way in is the warehouse's)
+SHOWN_FOR_GOOD = {'FLAG_HIDE_GALACTIC_HQ_TEAM_GALACTIC'}
 _PLAT_SCRIPTS = {}
 
 
@@ -2583,6 +2618,8 @@ def _story_shows(root, hide, name, o, c):
     if o.get('script') in CLOSED_PEOPLE.get(name, ()) or hide in CLOSED_STORY_PEOPLE:
         return False
     if _platinum_sets(root, hide):
+        return True
+    if hide in SHOWN_FOR_GOOD:
         return True
     lid = o.get('id')
     return bool(lid) and any(lid in a for lab in c.labels.values() for _, a in lab)
@@ -2726,7 +2763,8 @@ def emit_map_tables(root, tables, done):
         for kind, lab in ours:
             plat = next((k for k, v in INIT_KIND.items() if v == kind), None)
             if plat in ok:
-                lines += ['%s_%s:' % (base, plat), '\tcall %s' % lab, '\tgoto %s' % c.entry_label(ok[plat])]
+                lines += ['%s_%s:' % (base, plat)] + inline_ours(name, lab, '%s_%s' % (base, plat),
+                                                                c.entry_label(ok[plat]))
                 table.append((kind, '%s_%s' % (base, plat)))
                 kinds_done.add(plat)
             elif kind == 'MAP_SCRIPT_ON_FRAME_TABLE' and rows:

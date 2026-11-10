@@ -36,6 +36,9 @@ SMALL = 0.84   # MIXED's Platinum sprites: about Gen 3's size (Emerald's people 
 SHEETS = ('npc', 'pokemon', 'objects', 'player')   # (player: only DAWN's and LUCAS's own, PLAYER_ONLY; after the rest, so
                                                     # the others keep their numbers)
 PLAYER_ONLY = ('player_f', 'player_m')
+# sheets taken after the first pack's: last of all, so every sprite before keeps its number (saves keep some: the
+# partner's look, VAR_SINNOH_PARTNER_GFX)
+LATER = ('galactic_hq_door',)
 # the game's own sprites stay for these (their breaking / cutting animations, the item ball's)
 KEEP_OWN = {'rock_smash', 'cut_tree', 'strength_boulder', 'pokeball', 'ice_rock', 'moss_rock', 'surf_wake'}
 # Platinum's frame for each of the game's nine: down, up, left standing; down x2, up x2, left x2 stepping
@@ -174,6 +177,20 @@ def tiles_of(rows, w, h):
     return bytes(out)
 
 
+class Padded:
+    """A 16 x 32 still sprite drawn in the middle of a 32 x 32 frame"""
+    mode = 'P'
+
+    def __init__(self, im):
+        self.im, self.size = im, (32, im.size[1])
+
+    def px(self, x, y):
+        return self.im.px(x - 8, y) if 8 <= x < 24 and 0 <= y < self.size[1] else 0
+
+    def getpalette(self):
+        return self.im.getpalette()
+
+
 def sheets(root):
     """[(name, kind, image)] in a fixed order (by name within npc, pokemon, objects)"""
     out, seen = [], set()
@@ -191,13 +208,15 @@ def sheets(root):
             if im.mode != 'P':
                 continue
             w, h = im.size
+            if (w, h) == (16, 32):
+                im, w = Padded(im), 32   # (a 16-wide still sprite in the middle of 32: GALACTIC HQ's security doors)
             kind = 3 if w == 32 and h >= 544 else 0 if w == 32 and h >= 512 else 1 if w == 32 and h in (32, 64, 128) \
                 else 2 if (w, h) == (16, 16) else 4 if w == 64 and h in (64, 128) else None   # (1, 4: the first frame)
             if kind is None:
                 continue
             seen.add(name)
             out.append((name, kind, im))
-    return out
+    return [e for e in out if e[0] not in LATER] + [e for n in LATER for e in out if e[0] == n]
 
 
 # DAWN's and LUCAS's action sheets the game uses for the DAWN / LUCAS looks (surfing, a field move's POKé BALL, fishing)

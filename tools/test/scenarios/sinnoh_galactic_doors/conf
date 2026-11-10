@@ -1,0 +1,9 @@
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=66:30"
+UNEXPECT_A=("[crash]" "TIMEOUT" "22,3->41.89")
+# GALACTIC HQ: 4F's bollards stand between the warp panel from 1F and the laboratory (its door 22,3 not reached), 1F's
+# security doors stand (Platinum's sprite, OBJ_EVENT_GFX_SINNOH_GALACTIC_HQ_DOOR = 0x400 + 166), and 1F's own entry
+# script runs on to Platinum's, which sets FLAG_FIRST_ARRIVAL_GALACTIC_HQ (0x33A8; tools/sinnoh/gen_scripts.py
+# inline_ours)
+EXPECT_A=("gfx 1190 xy 22,18 invisible 0" "gfx 1190 xy 23,18 invisible 0" "flag 13224 = 1" "reach 41.84")

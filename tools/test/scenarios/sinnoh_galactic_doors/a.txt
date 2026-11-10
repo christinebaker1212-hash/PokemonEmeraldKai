@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp warp 41,84,21,16
+wait 90
+mp where
+mp npcs
+mp reach
+mp warp 41,81,42,21
+wait 90
+mp where
+mp getflag 0x33A8
+mp npcs
+shot after
+quit

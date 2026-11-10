@@ -72,7 +72,8 @@ GEN3 = {
 # kinds of thing that are no person to see (Platinum draws them, or they mean nothing here yet); SIGNS are read where they
 # stand (gen_maps.py turns them into the map's signs)
 SIGNS = re.compile(r'SIGNPOST|SIGNBOARD|MAILBOX|BOOK$')
-HIDDEN = re.compile(r'SIGN|VENT|BOLLARD|SNOWBALL|WIFI|INVISIBLE|BERRY_SOIL|MAILBOX|BOOK$|DOOR|CAVE_PAINTING|_ROCK$|'
+# (GALACTIC HQ's security doors and the bollards are Platinum's own sprites that stand in the way: shown, solid)
+HIDDEN = re.compile(r'SIGN|VENT|SNOWBALL|WIFI|INVISIBLE|BERRY_SOIL|MAILBOX|BOOK$|(?<!GALACTIC_HQ_)DOOR|CAVE_PAINTING|_ROCK$|'
                     r'ROTOM|WALL_|BABY_IN_PRAM|^VAR_[1-9A-F]$|GIRATINA_ORIGIN')
 # (the legendaries stand where Platinum puts them: tools/sinnoh/legends.py gives them their battles and when they show)
 

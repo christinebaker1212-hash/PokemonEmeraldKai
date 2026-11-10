@@ -28,7 +28,7 @@
       "flag": "0x3424"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GALACTIC_HQ_DOOR",
       "x": 8,
       "y": 14,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GALACTIC_HQ_DOOR",
       "x": 9,
       "y": 14,
       "elevation": 3,
@@ -54,7 +54,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BOLLARD",
       "x": 18,
       "y": 14,
       "elevation": 3,
@@ -67,7 +67,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BOLLARD",
       "x": 19,
       "y": 14,
       "elevation": 3,

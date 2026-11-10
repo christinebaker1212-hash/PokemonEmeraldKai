@@ -5,6 +5,7 @@
 #include "mp_savefix.h"
 #include "mp_region.h"
 #include "event_data.h"
+#include "constants/map_groups.h"
 
 static u8 sRaw[sizeof(struct SaveBlock1) + MP_SAVE_WIN160_EXTRA];
 static bool8 sWin160;         // the save was 1.60.0's Windows layout (converted)
@@ -111,6 +112,24 @@ void MP_SaveFix_Migrate(u8 fromFormat)
         }
         // the first boat's arrival (a frame script's, never kept past the port): 0x52FD is JOHTO's rival name's again
         VarSet(VAR_REGION_ARRIVAL, 0);
+    }
+    if (fromFormat < 4)
+    {
+        // Saved inside GALACTIC HQ or its warehouse while their doors weren't there, maybe without the GALACTIC KEY:
+        // the doors open, as their GALACTIC KEY scripts leave them (FLAG_HIDE_..._DOOR, tools/sinnoh/ids.py numbers:
+        // 1F, 3F, 4F, B2F and the warehouse's). (Platinum's first arrival flag, FLAG_FIRST_ARRIVAL_GALACTIC_HQ, was
+        // never set then: GALACTIC HQ 1F's own entry script didn't run, tools/sinnoh/gen_scripts.py inline_ours)
+        static const u16 sDoors[] = {0x3421, 0x3423, 0x3425, 0x3426, 0x3507};
+        static const u16 sInside[] = {MAP_SINNOH_GALACTIC_HQ1F, MAP_SINNOH_GALACTIC_HQ2F, MAP_SINNOH_GALACTIC_HQ3F,
+            MAP_SINNOH_GALACTIC_HQ4F, MAP_SINNOH_GALACTIC_HQ_B1F, MAP_SINNOH_GALACTIC_HQ_B2F,
+            MAP_SINNOH_GALACTIC_HQ_CONTROL_ROOM, MAP_SINNOH_GALACTIC_HQ_HALL, MAP_SINNOH_GALACTIC_HQ_LABORATORY,
+            MAP_SINNOH_VEILSTONE_CITY_GALACTIC_WAREHOUSE};
+        u16 here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+        for (i = 0; i < ARRAY_COUNT(sInside) && sInside[i] != here; i++)
+            ;
+        if (i < ARRAY_COUNT(sInside))
+            for (i = 0; i < ARRAY_COUNT(sDoors); i++)
+                FlagSet(sDoors[i]);
     }
     MPNet_Log("save: format %d -> %d%s", fromFormat, MP_SAVE_FORMAT, sWin160 ? " (1.60.0's Windows layout)" : "");
 }

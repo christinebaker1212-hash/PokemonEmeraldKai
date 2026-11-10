@@ -10,7 +10,9 @@
 //      word's padding (the same on every platform; tools/test/save_layout.py checks it)
 //   3  1.185.10: JOHTO's phone state at region vars 0x5260-0x5278 (it was 0x5240-0x5258, which SINNOH's Platinum vars
 //      use too: src/mp/mp_qzphone.c), the first boat's VAR_REGION_ARRIVAL at 0x52EC (0x52FD, in JOHTO's rival name)
-#define MP_SAVE_FORMAT 3
+//   4  1.185.17: GALACTIC HQ's security doors and bollards stand where Platinum has them (they were left out, and the
+//      warp panel from 1F led round them): a save made inside the HQ or its warehouse finds the doors open
+#define MP_SAVE_FORMAT 4
 #define MP_SAVE_WIN160_EXTRA 64   // 16 object events x 4 bytes more in 1.60.0's Windows build
 
 void MP_SaveFix_BeginSaveBlock1(void);          // save.c: SaveBlock1's sectors are gathered whole ...

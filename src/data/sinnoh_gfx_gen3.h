@@ -168,4 +168,5 @@ static const u16 sSinnohGen3[SINNOH_SPRITE_COUNT] = {
     0,
     0,
     0,
+    0,
 };

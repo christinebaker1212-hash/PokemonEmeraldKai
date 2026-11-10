@@ -168,4 +168,5 @@ static const u16 sSinnohStandIns[SINNOH_SPRITE_COUNT] = {
     OBJ_EVENT_GFX_MAN_1,
     OBJ_EVENT_GFX_MAN_1,
     OBJ_EVENT_GFX_MAN_1,
+    OBJ_EVENT_GFX_MAN_1,
 };
