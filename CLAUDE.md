@@ -155,8 +155,13 @@ game's updater reads releases/latest; the workflow checks a `v<ver>` game releas
 src/mp/mp_kaisong.c, tools/kaisong/gen.py (docs/SONG_TABLE.md, the studio's place picker data; the release runs it),
 scenes (`@tcg`, `@sim`...: a source file / src folder that names songs, found by gen.py; new music-playing code needs no
 list edit, a scene using the battle code holds the music: MP_MUSIC_SCENE_HOLD), the BGM player at 64 tracks / 64
-voices; loudness: tools/kaisong/loudness.py (INFO gain=, so each song plays as loud as the one it replaces; by hand only:
-the release workflows no longer run it, the user's call in 1.62.1, it never worked there and hung the release), the same music in two files plays on (MP_Kaisong_SameMusic); COOP_NOTES "Custom music"; tools/test/kaisong_test.sh, tools/kaisong/test_scenes.py.
+voices; loudness (the user, 2026-11-10: fast, at build time, dynamics kept, every added song equally loud):
+tools/kaisong/normalize.py, run by the release after the Linux build and by hand after adding a song (commit
+tools/kaisong/loudness_cache.json and music/kaisong_gains.txt): the game renders each new or changed song as fast as it
+runs (MOEMON_MEASURE_MUSIC, mp_export_sound.c), one gain a file to the median of the songs replaced, peaks under -1 dBFS;
+the game reads the gains (mp_kaisong.c ReadGainTable, over INFO gain=); the old real-time loudness.py stays for reports
+only; COOP_NOTES "Music loudness at build time". The MAGIC table's two duel songs: music/*@mtg.kaisong (one picked a
+duel, mtg_board.c). The same music in two files plays on (MP_Kaisong_SameMusic); COOP_NOTES "Custom music"; tools/test/kaisong_test.sh, tools/kaisong/test_scenes.py.
 
 Read `BUILDING_COOP.md` first for the architecture and build steps. The player
 docs are in `dist_extras/README.txt` (shipped next to the exe).

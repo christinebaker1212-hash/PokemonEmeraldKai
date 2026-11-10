@@ -95,9 +95,15 @@ jobs:
         if: steps.ver.outputs.skip != 'true'
         run: make linux -j"$(nproc)"
 
-      # Custom music (music/*.kaisong) plays as loud as the songs it replaces: each one measured in the game just
-      # built, the difference written into the copies this release ships (INFO gain=; nothing is committed). Files
-      # holding the same music share one gain. If it can't run, the gains in the repository ship as they are.
+      # Custom music (music/*.kaisong) all equally loud (tools/kaisong/normalize.py): each song measured in the game
+      # just built, rendered as fast as it runs, one gain a file (dynamics untouched) into music/kaisong_gains.txt,
+      # which package.sh ships. Measurements are cached by file content in the repository, so only new or changed songs
+      # are measured: well under a second with nothing new, about a second a new song. If it can't run, the committed
+      # gains ship as they are.
+      - name: Music loudness
+        if: steps.ver.outputs.skip != 'true'
+        run: python3 tools/kaisong/normalize.py --bin ./pokeemerald64 || echo "normalize.py failed: the committed gains ship"
+
       - name: Windows build
         if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         run: tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"

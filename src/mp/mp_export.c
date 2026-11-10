@@ -874,6 +874,10 @@ void MP_Export_IfAsked(void)
 {
     static bool8 sDone;
     const char *dir = getenv("MOEMON_EXPORT_APP");
+    {
+        void MP_MeasureMusic_IfAsked(void);   // MOEMON_MEASURE_MUSIC: how loud songs play (mp_export_sound.c), then quit
+        MP_MeasureMusic_IfAsked();
+    }
     if (sDone || dir == NULL || dir[0] == '\0')
         return;
     sDone = TRUE;

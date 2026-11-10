@@ -21,6 +21,7 @@
 #include "constants/songs.h"
 #include "mp.h"
 #include "mp_kaisong_scene.h"
+#include "random.h"
 #include "tcg/tcg.h"
 #include "tcg/integration.h"
 #include "mtg/integration.h"
@@ -208,7 +209,8 @@ void MtgBoard_Start(const MtgDeck *mine, const MtgDeck *theirs, uint32_t seed, c
     B.row = ROW_HAND;
     B.trayWanted = 1;
     B.mapMusic = GetCurrentMapMusic();
-    B.music = MUS_RG_VS_TRAINER;
+    // (the table's two duel songs, one picked for each duel: music/mus_rg_vs_trainer@mtg and mus_vs_trainer@mtg)
+    B.music = (Random() & 1) ? MUS_VS_TRAINER : MUS_RG_VS_TRAINER;
     PlayBGM(B.music);
     B.aiWait = 30;
     MPNet_Log("mtg: table: you vs %s, seed %u, %s first", opponent, seed, Who(B.duel.startingPlayer));

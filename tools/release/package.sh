@@ -43,6 +43,7 @@ mkdir -p "$P/mugen"
 # custom music (.kaisong songs that play instead of the game's, src/mp/mp_kaisong.c) and the page of every song and place
 mkdir -p "$P/music"
 cp music/*.kaisong "$P/music/" 2>/dev/null || true
+cp music/kaisong_gains.txt "$P/music/" 2>/dev/null || true   # (every file's gain: tools/kaisong/normalize.py)
 cp docs/SONG_TABLE.md "$P/music/SONG_TABLE.md"
 # Moemon Maker's published pack (the repository's MoemonMaker/: the user's edits and music) as MoemonMakerPack/, so a
 # fresh install has it without a download (src/platform/updater.c MakerPackWorker keeps it current between releases).

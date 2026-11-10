@@ -90,7 +90,7 @@ WORLD = re.compile(r'^(overworld|sound|m4a|music_player|scrcmd|script.*|field_.*
                    r'battle_(?!dome|pike|pyramid|factory|palace|arena|tower|tent|records).*|pokemon|trainer_see|'
                    r'wild_encounter|bike|text|roamer|item_use|start_menu|option_menu|daycare|mp_debug|'
                    r'coop|battle|join|trainer|net|main|ballfx|levelscale|follow.*|life.*|kaisong|spectate)$')
-SUBDIR_SCENES = {'tcg': 'POKéMON TCG card duels', 'ygo': 'YU-GI-OH! duels', 'tt': 'TRIPLE TRIAD', 'rhythm': 'DANCE machine'}
+SUBDIR_SCENES = {'tcg': 'POKéMON TCG card duels', 'ygo': 'YU-GI-OH! duels', 'mtg': 'MAGIC duels', 'tt': 'TRIPLE TRIAD', 'rhythm': 'DANCE machine'}
 
 def scene_key(path, top=()):
     """src/x.c -> x, src/mp/mp_x.c -> x (mp_x when src/x.c exists too), src/<dir>/... -> <dir>. The game finds a file's

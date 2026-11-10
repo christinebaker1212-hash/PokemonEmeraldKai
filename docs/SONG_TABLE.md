@@ -79,6 +79,7 @@ Files in this repository's `music` folder ship with every update.
 | `mus_johto_vs_trainer.kaisong` | mus_johto_vs_trainer | everywhere | Battle! Trainer (Johto) |
 | `mus_johto_vs_wild.kaisong` | mus_johto_vs_wild | everywhere | Battle! Wild Pokemon (Johto) |
 | `mus_poke_mart@rustboro_city_game_center_2f.kaisong` | mus_poke_mart | Rustboro City Game Center 2F | Lamb Chop |
+| `mus_rg_vs_trainer@mtg.kaisong` | mus_rg_vs_trainer | mtg | 0017 SEQ_DU3_4 |
 | `mus_rg_vs_trainer@tt.kaisong` | mus_rg_vs_trainer | tt | Shuffle or Boogie |
 | `mus_sinnoh_amity_square.kaisong` | mus_sinnoh_amity_square | everywhere | Amity Square |
 | `mus_sinnoh_arceus.kaisong` | mus_sinnoh_arceus | everywhere | Beginning Dimension - Arceus |
@@ -235,6 +236,7 @@ Files in this repository's `music` folder ship with every update.
 | `mus_vs_rival@tt.kaisong` | mus_vs_rival | tt | Shuffle or Boogie |
 | `mus_vs_rival@ygo.kaisong` | mus_vs_rival | ygo | 0044 SEQ_DU_D_09 |
 | `mus_vs_trainer@cable_club.kaisong` | mus_vs_trainer | cable_club | 0044 SEQ_DU_D_09 |
+| `mus_vs_trainer@mtg.kaisong` | mus_vs_trainer | mtg | 0014 SEQ_DU3_1 |
 | `mus_vs_trainer@ygo.kaisong` | mus_vs_trainer | ygo | 003E SEQ_DU_D_03 |
 | `stadium_castle_e4.kaisong` | stadium_castle_e4 | POKéMON STADIUM (its own track) | Gym Leader Castle (Elite Four) |
 | `stadium_castle_leader.kaisong` | stadium_castle_leader | POKéMON STADIUM (its own track) | Gym Leader Battle |
@@ -425,7 +427,6 @@ Custom: `mus_poke_mart@rustboro_city_game_center_2f.kaisong`
 - Map music: 20 places<details><summary>show</summary>Lilycove City [lilycove_city], Lilycove City Cove Lily Motel 1F [lilycove_city_cove_lily_motel_1f], Lilycove City Cove Lily Motel 2F [lilycove_city_cove_lily_motel_2f], Lilycove City Department Store 1F [lilycove_city_department_store_1f], Lilycove City Department Store Elevator [lilycove_city_department_store_elevator], Lilycove City Department Store Rooftop [lilycove_city_department_store_rooftop], Lilycove City Harbor [lilycove_city_harbor], Lilycove City House 1 [lilycove_city_house1], Lilycove City House 2 [lilycove_city_house2], Lilycove City House 3 [lilycove_city_house3], Lilycove City House 4 [lilycove_city_house4], Lilycove City Move Deleters House [lilycove_city_move_deleters_house], Lilycove City Pokemon Trainer Fan Club [lilycove_city_pokemon_trainer_fan_club], Pacifidlog Town [pacifidlog_town], Pacifidlog Town House 1 [pacifidlog_town_house1], Pacifidlog Town House 2 [pacifidlog_town_house2], Pacifidlog Town House 3 [pacifidlog_town_house3], Pacifidlog Town House 4 [pacifidlog_town_house4], Pacifidlog Town House 5 [pacifidlog_town_house5], Route 124 Diving Treasure Hunters House [route124_diving_treasure_hunters_house]</details>
 
 ### mus_route111 (409)
-- Map music: Orre Outskirt Stand [orre_outskirt_stand]
 - Events: Route 111 [route111]
 - Field and battle code (by map): Overworld
 
@@ -437,7 +438,7 @@ Custom: `mus_poke_mart@rustboro_city_game_center_2f.kaisong`
 
 ### mus_victory_trainer (412)
 Custom: `mus_victory_trainer@tt.kaisong`
-- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Export sound [export_sound], Mtg [mtg], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], Stadium cup [stadium_cup], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
+- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Export sound [export_sound], MAGIC duels [mtg], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], Stadium cup [stadium_cup], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
 - Field and battle code (by map): Battles, Coop
 
 ### mus_title (413)
@@ -645,8 +646,8 @@ Custom: `mus_vs_aqua_magma@ygo.kaisong`
 - Battles: 28 places<details><summary>show</summary>Aqua Hideout 1F (Grunt) [aqua_hideout_1f], Aqua Hideout B1F (Grunt) [aqua_hideout_b1f], Aqua Hideout B2F (Grunt) [aqua_hideout_b2f], Aqua Hideout B2F (Matt) [aqua_hideout_b2f], Jagged Pass (Grunt) [jagged_pass], Magma Hideout 1F (Grunt) [magma_hideout_1f], Magma Hideout 2F 1R (Grunt) [magma_hideout_2f_1r], Magma Hideout 2F 2R (Grunt) [magma_hideout_2f_2r], Magma Hideout 3F 1R (Grunt) [magma_hideout_3f_1r], Magma Hideout 3F 2R (Grunt) [magma_hideout_3f_2r], Magma Hideout 4F (Grunt) [magma_hideout_4f], Magma Hideout 4F (Tabitha) [magma_hideout_4f], Mossdeep City Space Center 1F (Grunt) [mossdeep_city_space_center_1f], Mossdeep City Space Center 2F (Grunt) [mossdeep_city_space_center_2f], Mossdeep City Space Center 2F (Tabitha) [mossdeep_city_space_center_2f], Mt Chimney (Grunt) [mt_chimney], Mt Chimney (Tabitha) [mt_chimney], Mt Pyre Summit (Grunt) [mt_pyre_summit], Petalburg Woods (Grunt) [petalburg_woods], Route 119 Weather Institute 1F (Grunt) [route119_weather_institute_1f], Route 119 Weather Institute 2F (Grunt) [route119_weather_institute_2f], Route 119 Weather Institute 2F (Shelly) [route119_weather_institute_2f], Rusturf Tunnel (Grunt) [rusturf_tunnel], Seafloor Cavern Room 1 (Grunt) [seafloor_cavern_room1], Seafloor Cavern Room 3 (Grunt) [seafloor_cavern_room3], Seafloor Cavern Room 3 (Shelly) [seafloor_cavern_room3], Seafloor Cavern Room 4 (Grunt) [seafloor_cavern_room4], Slateport City Oceanic Museum 2F (Grunt) [slateport_city_oceanic_museum_2f]</details>
 
 ### mus_vs_trainer (476)
-Custom: `mus_vs_trainer@cable_club.kaisong`, `mus_vs_trainer@ygo.kaisong`
-- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Export sound [export_sound], Link battles (CABLE CLUB) [cable_club], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], Stadium cup [stadium_cup], YU-GI-OH! duels [ygo]
+Custom: `mus_vs_trainer@cable_club.kaisong`, `mus_vs_trainer@mtg.kaisong`, `mus_vs_trainer@ygo.kaisong`
+- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Export sound [export_sound], Link battles (CABLE CLUB) [cable_club], MAGIC duels [mtg], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], Stadium cup [stadium_cup], YU-GI-OH! duels [ygo]
 - Battles: 70 places<details><summary>show</summary>Abandoned Ship Corridors 1F [abandoned_ship_corridors_1f], Abandoned Ship Corridors B1F [abandoned_ship_corridors_b1f], Abandoned Ship Rooms 1F [abandoned_ship_rooms_1f], Abandoned Ship Rooms 2 1F [abandoned_ship_rooms2_1f], Battle Frontier Battle Pyramid Floor [battle_frontier_battle_pyramid_floor], Dewford Town Gym [dewford_town_gym], Fortree City Gym [fortree_city_gym], Jagged Pass [jagged_pass], Lavaridge Town Gym 1F [lavaridge_town_gym_1f], Mauville City (Wally) [mauville_city], Mauville City Gym [mauville_city_gym], Meteor Falls 1F 2R [meteor_falls_1f_2r], Mossdeep City Gym [mossdeep_city_gym], Mt Chimney [mt_chimney], Mt Pyre 2F [mt_pyre_2f], Mt Pyre 3F [mt_pyre_3f], Mt Pyre 4F [mt_pyre_4f], Mt Pyre 5F [mt_pyre_5f], Mt Pyre 6F [mt_pyre_6f], Petalburg City Gym [petalburg_city_gym], Petalburg Woods [petalburg_woods], Route 102 [route102], Route 103 [route103], Route 104 [route104], Route 105 [route105], Route 106 [route106], Route 107 [route107], Route 108 [route108], Route 109 [route109], Route 109 Seashore House [route109_seashore_house], Route 110 [route110], Route 110 Trick House Puzzle 1 [route110_trick_house_puzzle1], Route 110 Trick House Puzzle 2 [route110_trick_house_puzzle2], Route 110 Trick House Puzzle 3 [route110_trick_house_puzzle3], Route 110 Trick House Puzzle 4 [route110_trick_house_puzzle4], Route 110 Trick House Puzzle 6 [route110_trick_house_puzzle6], Route 110 Trick House Puzzle 7 [route110_trick_house_puzzle7], Route 110 Trick House Puzzle 8 [route110_trick_house_puzzle8], Route 111 [route111], Route 112 [route112], Route 113 [route113], Route 114 [route114], Route 115 [route115], Route 116 [route116], Route 117 [route117], Route 118 [route118], Route 119 [route119], Route 120 [route120], Route 121 [route121], Route 123 [route123], Route 124 [route124], Route 125 [route125], Route 126 [route126], Route 127 [route127], Route 128 [route128], Route 129 [route129], Route 130 [route130], Route 131 [route131], Route 132 [route132], Route 133 [route133], Route 134 [route134], Rustboro City Gym [rustboro_city_gym], Rusturf Tunnel [rusturf_tunnel], SS Tidal Lower Deck [ss_tidal_lower_deck], SS Tidal Rooms [ss_tidal_rooms], Sootopolis City Gym B1F [sootopolis_city_gym_b1f], Victory Road 1F [victory_road_1f], Victory Road 1F (Wally) [victory_road_1f], Victory Road B1F [victory_road_b1f], Victory Road B2F [victory_road_b2f]</details>
 - Field and battle code (by map): Battle
 
@@ -758,8 +759,8 @@ Custom: `mus_vs_aqua_magma_leader@ygo.kaisong`
 - Field and battle code (by map): Battles
 
 ### mus_rg_vs_trainer (509)
-Custom: `mus_rg_vs_trainer@tt.kaisong`
-- Scenes: Export sound [export_sound], Mtg [mtg], TRIPLE TRIAD [tt]
+Custom: `mus_rg_vs_trainer@mtg.kaisong`, `mus_rg_vs_trainer@tt.kaisong`
+- Scenes: Export sound [export_sound], MAGIC duels [mtg], TRIPLE TRIAD [tt]
 - Field and battle code (by map): Battles
 
 ### mus_rg_vs_wild (510)
@@ -1592,27 +1593,27 @@ Custom: `mus_sinnoh_vs_gym_leader.kaisong`
 
 ### mus_sinnoh_vs_galactic (787)
 Custom: `mus_sinnoh_vs_galactic.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_galactic_commander (788)
 Custom: `mus_sinnoh_vs_galactic_commander.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_galactic_boss (789)
 Custom: `mus_sinnoh_vs_galactic_boss.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_dialga_palkia (790)
 Custom: `mus_sinnoh_vs_dialga_palkia.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_lake_guardians (791)
 Custom: `mus_sinnoh_vs_lake_guardians.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_legendary (792)
 Custom: `mus_sinnoh_vs_legendary.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_elite_four (793)
 Custom: `mus_sinnoh_vs_elite_four.kaisong`
@@ -1626,19 +1627,19 @@ Custom: `mus_sinnoh_vs_champion.kaisong`
 
 ### mus_sinnoh_vs_arceus (795)
 Custom: `mus_sinnoh_vs_arceus.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_giratina (796)
 Custom: `mus_sinnoh_vs_giratina.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_regis (797)
 Custom: `mus_sinnoh_vs_regis.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_frontier_brain (798)
 Custom: `mus_sinnoh_vs_frontier_brain.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_sinnoh_victory_wild (799)
 Custom: `mus_sinnoh_victory_wild.kaisong`

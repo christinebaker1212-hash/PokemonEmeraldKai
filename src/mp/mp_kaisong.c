@@ -62,7 +62,9 @@ struct KaiFile
     u8 variant;             // 0 everywhere, 1-63 a hash of the place (spectating)
     u8 failed;
     u8 voices;
-    u16 gain;               // INFO gain= (dB) as a factor in 256ths: the song plays as loud as the one it replaces
+    u16 gain;               // its gain as a factor in 256ths: music/kaisong_gains.txt's (tools/kaisong/normalize.py),
+                            // else INFO gain= (dB)
+    s16 tableGain;          // music/kaisong_gains.txt's, tenths of a dB (KAI_NO_GAIN: not in it)
     u32 music;              // a hash of everything but INFO: files with the same music (MP_Kaisong_SameMusic)
     struct SongHeader *header;
 };
@@ -157,6 +159,53 @@ static const char *MusicDir(void)
     return env && env[0] ? env : Updater_ExeFile("music");
 }
 
+#define KAI_NO_GAIN 0x7FFF
+
+// dB, -12 to +12, to a factor in 256ths without libm: 10^(dB/20) by steps of a tenth of a dB
+static u16 GainFactor(int tenths)
+{
+    double g = 1.0;
+    int i;
+    tenths = tenths < -120 ? -120 : tenths > 120 ? 120 : tenths;
+    for (i = 0; i < (tenths < 0 ? -tenths : tenths); i++)
+        g *= tenths < 0 ? 0.98855309 : 1.01157945;   // 10^(-0.1/20), 10^(0.1/20)
+    return (u16)(g * 256.0 + 0.5);
+}
+
+// music/kaisong_gains.txt (tools/kaisong/normalize.py, at build time): "<file>\t<dB>" a line, every music/ file's gain so
+// all play equally loud (measured in this game's own sound engine: MOEMON_MEASURE_MUSIC, mp_export_sound.c). It wins
+// over a file's INFO gain=; files not in it (MoemonMaker/music/, one added since) keep their INFO's
+static void ReadGainTable(void)
+{
+    char path[600], line[200];
+    FILE *fp;
+    int i, n = 0;
+    for (i = 0; i < sKai.count; i++)
+        sKai.files[i].tableGain = KAI_NO_GAIN;
+    snprintf(path, sizeof(path), "%s/kaisong_gains.txt", MusicDir());
+    fp = fopen(path, "r");
+    if (fp == NULL)
+        return;
+    while (fgets(line, sizeof(line), fp))
+    {
+        char *tab = strchr(line, '\t');
+        double db;
+        if (line[0] == '#' || tab == NULL)
+            continue;
+        *tab = 0;
+        db = atof(tab + 1);
+        for (i = 0; i < sKai.count; i++)
+            if (!sKai.files[i].maker && strcmp(sKai.files[i].file, line) == 0)
+                sKai.files[i].tableGain = (s16)(db * 10.0 + (db < 0 ? -0.5 : 0.5)), n++;
+    }
+    fclose(fp);
+    MPNet_Log("kaisong: %d gains from kaisong_gains.txt", n);
+}
+
+// Tools (MOEMON_MEASURE_MUSIC): the gain a file is measured at, whatever its table's or INFO's (KAI_NO_GAIN: theirs)
+static const char *sMeasureFile;
+static int sMeasureTenths = KAI_NO_GAIN;
+
 static u8 PlaceVariant(const char *place)
 {
     u32 h = 2166136261u;
@@ -222,6 +271,7 @@ static void Scan(void)
     ScanDir(MusicDir(), FALSE);
     ScanDir(MakerMusicDir(), TRUE);
     qsort(sKai.files, sKai.count, sizeof(sKai.files[0]), CmpFiles);
+    ReadGainTable();
     if (sKai.count)
         MPNet_Log("kaisong: %d custom songs in %s", sKai.count, MusicDir());
 }
@@ -559,18 +609,16 @@ static bool8 Load(struct KaiFile *f)
             }
             else if (!strncmp(line, "gain=", 5))
             {
-                // dB, -12 to +12, to a factor without libm: 10^(dB/20) by steps of a tenth of a dB
-                double db = atof(line + 5), g = 1.0;
-                int i, steps;
-                db = db < -12.0 ? -12.0 : db > 12.0 ? 12.0 : db;
-                steps = (int)(db * 10.0 + (db < 0 ? -0.5 : 0.5));
-                for (i = 0; i < (steps < 0 ? -steps : steps); i++)
-                    g *= steps < 0 ? 0.98855309 : 1.01157945;   // 10^(-0.1/20), 10^(0.1/20)
-                f->gain = (u16)(g * 256.0 + 0.5);
+                double db = atof(line + 5);
+                f->gain = GainFactor((int)(db * 10.0 + (db < 0 ? -0.5 : 0.5)));
             }
             a = b + 1;
         }
     }
+    if (f->tableGain != KAI_NO_GAIN)
+        f->gain = GainFactor(f->tableGain);
+    if (sMeasureFile != NULL && strcmp(sMeasureFile, f->file) == 0 && sMeasureTenths != KAI_NO_GAIN)
+        f->gain = GainFactor(sMeasureTenths);
 
     // NAME: the game's samples and waves
     c.p = names; c.end = names + namesLen; c.bad = FALSE;
@@ -947,6 +995,35 @@ bool8 MP_Kaisong_PlayFile(const char *file)
         }
     }
     return FALSE;
+}
+
+// Tools (MOEMON_MEASURE_MUSIC, mp_export_sound.c): FILE's song started on its player at TENTHS of a dB, whatever its
+// table's or INFO's gain; its player, NULL when it can't play
+struct MusicPlayerInfo *MP_Kaisong_MeasureStart(const char *file, int tenths)
+{
+    int i;
+    if (!sKai.scanned)
+        Scan();
+    for (i = 0; i < sKai.count; i++)
+    {
+        struct KaiFile *f = &sKai.files[i];
+        if (strcmp(f->file, file) == 0 && !f->maker)
+        {
+            struct MusicPlayerInfo *mp = gMPlayTable[gSongTable[MP_Kaisong_TableIndex(f->song)].ms].info;
+            struct SongHeader *h;
+            sMeasureFile = f->file;
+            sMeasureTenths = tenths;
+            h = HeaderOf(f, NULL);
+            if (h)
+                f->gain = GainFactor(tenths);   // (loaded before: set again)
+            sMeasureFile = NULL;
+            if (!h)
+                return NULL;
+            MPlayStart(mp, h);
+            return mp;
+        }
+    }
+    return NULL;
 }
 
 void MP_Kaisong_Log(void)

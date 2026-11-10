@@ -7308,3 +7308,21 @@ The walk-only SINNOH run went through the DISTORTION WORLD from SPEAR PILLAR to 
   ceilings, jumps, SURF (A facing water, on a platform or the ground), the ground's ledges (Platinum's jumped twice) and
   people, solved again each frame; elevators only as where it goes; MOEMON_DW_DEBUG=1 prints what it reached, the
   floor's jumps and platforms and the ground's collision (=2: each platform's tiles). Test sinnoh_dw_chain.
+
+## Music loudness at build time; the MAGIC table's songs (1.185.20)
+- The user (2026-11-10): some songs still louder or quieter than others; a fast method that keeps dynamics, adds no
+  more than a few seconds to a build, and makes every added .kaisong equally loud. tools/kaisong/loudness.py played
+  each song in a real-time game for 120 s (minutes per song; it hung the release and was by hand only).
+- tools/kaisong/normalize.py: the game measures songs in its own sound engine rendered as fast as it runs
+  (MOEMON_MEASURE_MUSIC=OUT with MOEMON_MEASURE_LIST: "<file> <dB>" or "song:<n>" lines; mp_export_sound.c, the phone
+  app's sound recorder's loop with no sound device: one pass of the song's loop or 60 s, about 0.25 s a minute of music),
+  as loudness.py measured (RMS of 400 ms blocks, EBU R 128's two gates) plus the peak. One static gain a file (no
+  compression: the dynamics stay), to the median of the game's own songs these files replace (-19.4 dB), never past a
+  -1 dBFS peak, a raised song measured again at its gain and corrected once (notes already at full volume can't go
+  louder). Measurements are cached by file content (tools/kaisong/loudness_cache.json): a build with nothing new takes
+  0.1 s, every song from scratch 33 s on 4 cores. Gains go to music/kaisong_gains.txt, which the game reads
+  (mp_kaisong.c ReadGainTable: it wins over INFO gain=; MoemonMaker/music/ keeps its INFO) and package.sh ships.
+  Measured at their gains, the 261 songs went from -37.7..-9.4 dB (deviation 3.7 dB) to deviation 0.55 dB, 248 within
+  1 dB; the rest are held by the peak ceiling or the 12 dB limit (SINNOH's music box).
+- The MAGIC table (mtg_board.c) picks one of two duel songs a duel: MUS_RG_VS_TRAINER or MUS_VS_TRAINER, each with the
+  user's own file as its `@mtg` scene file (Magic Battle 1 and 2). gen.py names the scene MAGIC duels.

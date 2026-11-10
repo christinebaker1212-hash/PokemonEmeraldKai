@@ -615,3 +615,116 @@ void MP_Export_Sounds(const char *dir)
     R.buf = NULL;
     R.len = R.cap = 0;
 }
+
+// ------------------------------------------------------------------------------------------------- loudness
+// MOEMON_MEASURE_MUSIC=OUT (tools/kaisong/normalize.py, at build time): how loud songs play in the game's own sound
+// engine, rendered as fast as it runs (no waiting for the sound device: a minute of music in well under a second).
+// MOEMON_MEASURE_LIST=FILE names them, a line each: "<file>.kaisong <dB>" (a music/ file at that gain) or "song:<n>"
+// (the game's own song n, as made). Each plays from silence for one pass of its loop (its first track's GOTO), at most
+// MEASURE_SECONDS, or until it ends; OUT gets "<item>\t<dB>\t<loudness>\t<peak>\t<seconds>" a line: loudness as the
+// VS cabinet's music cap measures it (RMS of 400 ms blocks, EBU R 128's two gates: -70 dBFS absolute and 10 dB under
+// the gated mean; no weighting), the peak in dBFS, both of the mixed stereo signal. Then the game quits.
+#define MEASURE_SECONDS 60
+struct MusicPlayerInfo *MP_Kaisong_MeasureStart(const char *file, int tenths);
+
+static void Loudness(u32 from, u32 to, double *loud, double *peak)
+{
+    const u32 block = MIXER_RATE * 2 / 5;
+    double sum = 0, gated = 0, *ms = NULL;
+    u32 n = 0, i, b, kept = 0;
+    float p = 0;
+    for (i = from; i < to; i++)
+    {
+        float l = fabsf(R.buf[i * 2]), r = fabsf(R.buf[i * 2 + 1]);
+        p = l > p ? l : p;
+        p = r > p ? r : p;
+    }
+    *peak = p > 0 ? 20.0 * log10(p) : -120.0;
+    ms = malloc(((to - from) / block + 1) * sizeof(double));
+    for (b = from; ms != NULL && b + block <= to; b += block)
+    {
+        double s = 0;
+        for (i = b; i < b + block; i++)
+            s += (double)R.buf[i * 2] * R.buf[i * 2] + (double)R.buf[i * 2 + 1] * R.buf[i * 2 + 1];
+        s /= block * 2;
+        if (s > 1e-7)   // (-70 dBFS)
+            ms[n++] = s, sum += s;
+    }
+    if (n == 0)
+    {
+        *loud = -120.0;
+        free(ms);
+        return;
+    }
+    for (i = 0; i < n; i++)
+        if (ms[i] > sum / n * 0.1)   // (10 dB under the gated mean)
+            gated += ms[i], kept++;
+    *loud = 10.0 * log10(kept ? gated / kept : sum / n);
+    free(ms);
+}
+
+static void MeasureOne(FILE *out, const char *item, int tenths)
+{
+    struct MusicPlayerInfo *mp;
+    u32 most = MEASURE_SECONDS * 60, start, end;
+    double loud, peak;
+    Silence();
+    if (!strncmp(item, "song:", 5))
+    {
+        u16 song = (u16)atoi(item + 5);
+        mp = gMPlayTable[gSongTable[song].ms].info;
+        MPlayStart(mp, gSongTable[song].header);
+    }
+    else if ((mp = MP_Kaisong_MeasureStart(item, tenths)) == NULL)
+    {
+        fprintf(out, "%s\t%.1f\tfailed\n", item, tenths / 10.0);
+        return;
+    }
+    sSongPlayer = mp;
+    R.watched = ((struct MP2KPlayerState *)mp)->tracks;
+    gMpGotoWatch = GotoWatch;
+    while (R.frame < most && R.endFrame == 0 && (R.frame < 4 || SongPlaying()))
+        Frame();
+    gMpGotoWatch = NULL;
+    start = FirstSound();
+    end = R.endFrame ? R.frameStart[R.endFrame - 1] : R.frame >= most ? R.len : LastSound();
+    if (end <= start)
+        end = R.len;
+    Loudness(start, end, &loud, &peak);
+    fprintf(out, "%s\t%.1f\t%.2f\t%.2f\t%.1f\n", item, tenths / 10.0, loud, peak, (end - start) / (double)MIXER_RATE);
+    fflush(out);
+    m4aMPlayAllStop();
+    R.watched = NULL;
+}
+
+void MP_MeasureMusic_IfAsked(void)
+{
+    static bool8 sDone;
+    static struct SaveBlock1 sNoSave;
+    const char *outPath = getenv("MOEMON_MEASURE_MUSIC"), *listPath = getenv("MOEMON_MEASURE_LIST");
+    FILE *out, *list;
+    char line[256];
+    if (sDone || outPath == NULL || outPath[0] == '\0' || listPath == NULL)
+        return;
+    sDone = TRUE;
+    out = fopen(outPath, "w");
+    list = fopen(listPath, "r");
+    if (out == NULL || list == NULL)
+        exit(1);
+    if (gSaveBlock1Ptr == NULL)
+        gSaveBlock1Ptr = &sNoSave;
+    gSaveBlock1Ptr->location.mapGroup = 0x7F;   // (no place's own music)
+    gSaveBlock1Ptr->location.mapNum = 0x7F;
+    gMpAudioCapture = Capture;
+    while (fgets(line, sizeof(line), list))
+    {
+        char item[200];
+        double db = 0;
+        if (sscanf(line, "%199s %lf", item, &db) >= 1)
+            MeasureOne(out, item, (int)(db * 10.0 + (db < 0 ? -0.5 : 0.5)));
+    }
+    gMpAudioCapture = NULL;
+    fclose(list);
+    fclose(out);
+    exit(0);
+}
