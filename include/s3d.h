@@ -61,6 +61,7 @@ extern float (*gS3dObjectHeightHook)(u8 localId, float h);   // a gym's people's
 void S3D_PlayerWorld(float *x, float *z);       // the player in the map's matrix world
 void Sinnoh_StoryRefresh(void);                   // shows / hides SINNOH's story people by the story (s3d_legends.c)
 void S3D_Gyms_SavedMapLoaded(void);               // ... the map a save was made on, loaded with it
+void S3D_Dw_SavedMapLoaded(void);                 // ... a DISTORTION WORLD floor a save was made on, set up again
 void S3D_Gyms_MapLoaded(void);                    // a map's grid is (re)built: a gym's state on it (s3d_gyms.c)
 void S3D_Gyms_Update(void);                       // every overworld frame
 // The DISTORTION WORLD as Platinum's (src/sinnoh/s3d_distortion.c)

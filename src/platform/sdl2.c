@@ -107,6 +107,7 @@ static int sMashCount = 0, sMashInterval = 0;
 static char sUntilName[32];
 static int sWalkX, sWalkY, sWalkFrames;   // walkto
 static int sGymFrames;   // gymwalk
+static int sDwFrames, sDwX, sDwY, sDwZ, sDwBusy, sDwIdle;   // dwgoto
 static int sGotoG, sGotoN, sGotoX, sGotoY, sGotoFrames, sGotoBusy;   // goto
 static int sPickFrames, sPickPhase;   // partypick
 static int sApproachKind, sApproachN, sApproachN2, sApproachFrames, sTalkFrames;   // approach (kinds 3 obj / 4 tile: any region's maps)
@@ -1438,6 +1439,31 @@ static void TestHarnessStep(void)
             sTestKeys = (k == A_BUTTON && (sFrameCounter & 8)) ? 0 : k;   // (A pulsed: one held down presses only once)
         return;
     }
+    if (sDwFrames > 0)
+    {
+        // dwgoto X Y Z [FRAMES]: to a tile of the DISTORTION WORLD's stacked world as a player walks its platforms,
+        // walls and jumps (src/sinnoh/s3d_distortion.c MP_TestDwKey); scenes on the way pressed through with A
+        u16 MP_TestDwKey(s32 tx, s32 ty, s32 tz);
+        bool8 ScriptContext_IsEnabled(void);
+        bool8 MP_IsInOverworld(void);
+        bool8 ArePlayerFieldControlsLocked(void);
+        bool8 busy = ScriptContext_IsEnabled() || !MP_IsInOverworld() || ArePlayerFieldControlsLocked();
+        u16 k = busy ? 0xFFFF : MP_TestDwKey(sDwX, sDwY, sDwZ);
+        sDwIdle = k == 0xFFFF && !busy ? sDwIdle + 1 : 0;
+        if (k == 0 || --sDwFrames == 0 || sDwIdle > 300)
+        {
+            printf("[test] frame %lu: dwgoto %d %d %d %s\n", sFrameCounter, sDwX, sDwY, sDwZ,
+                   k == 0 ? "there (or carried on by an event)" : sDwIdle > 300 ? "NO WAY" : "TIMEOUT");
+            fflush(stdout);
+            sDwFrames = sDwIdle = 0;
+            sTestKeys = 0;
+            if (k == 0)
+                sTestWait = 24;
+        }
+        else
+            sTestKeys = busy ? ((++sDwBusy & 15) == 0 ? A_BUTTON : 0) : k == 0xFFFF ? 0 : k;
+        return;
+    }
     if (sGymFrames > 0)
     {
         // gymwalk [FRAMES]: SNOWPOINT's gym to CANDICE, each move solved again from where the player stands
@@ -1589,6 +1615,14 @@ static void TestHarnessStep(void)
                 sscanf(line, "%*s %*s %d %d", &sApproachN, &sApproachFrames);
                 sApproachKind = strcmp(what, "touch") == 0 ? 1 : strcmp(what, "check") == 0 ? 2 : strcmp(what, "obj") == 0 ? 3 : 0;
             }
+            return;
+        }
+        else if (strcmp(cmd, "dwgoto") == 0)
+        {
+            void MP_TestDwStart(void);
+            sDwFrames = 3000;
+            sscanf(line, "%*s %d %d %d %d", &sDwX, &sDwY, &sDwZ, &sDwFrames);
+            MP_TestDwStart();
             return;
         }
         else if (strcmp(cmd, "gymwalk") == 0)

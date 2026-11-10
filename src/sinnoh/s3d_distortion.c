@@ -124,6 +124,9 @@ static struct
     float vib, rideBase[3];
     s16 rideTile[3];               // the tile the current path starts from (a chained path goes on from the last's end)
     u8 ridePath;
+    bool8 rideChanged;             // (this leg has changed floors already: a chained path changes at each leg's point)
+    bool8 keepRide;                // (the ride over, its platform still drawn where it stopped: Platinum's animator
+                                   // stays on the floor it rode to, PreventDeletion, though that floor's own isn't there)
 } sDw = {.matrix = 0xFF};
 
 // An event's commands running (Platinum's DistWorldLoadedEvent), and the moving platforms' offsets on this floor
@@ -141,7 +144,7 @@ static struct
 static float sPlatOff[64][3];      // (each moving platform of this floor moved from its tile, world units)
 
 // A ride carried over the change of floors (the warp): the path and where along it
-static struct { bool8 on; u16 destHid; u8 destIndex, path, dir; s32 off[3]; } sRideNext;
+static struct { bool8 on, mid; u16 destHid; u8 destIndex, path, dir; s32 off[3]; s16 tile[3]; struct DwMoving ride; } sRideNext;
 // CYNTHIA riding an elevator along (Platinum's passengerMapObj: 1F's down to B1F, B6F's down to B7F): who rides on
 // this floor, and on the floor reached, where she stands as that floor's local id 128 while its arrival scene plays
 // SURF on a floating platform's water (B4F's channel on its ceiling), and a waterfall carried across floors
@@ -478,18 +481,21 @@ static void DrawPlatforms(void)
         const struct DwProp *p;
         if (m->hid != sDw.floor->hid || !Present(m) || m->kind >= ARRAY_COUNT(sDwProps))
             continue;
+        if ((sDw.riding || sDw.keepRide) && (sDw.ride == m || (sDw.ride->hid == m->hid && sDw.ride->index == m->index)))
+            continue;   // (the ridden one: drawn below, where the ride has it)
         p = &sDwProps[m->kind];
         TileWorld(m->t[0], m->t[1], m->t[2], w);
         if (i < ARRAY_COUNT(sPlatOff))
             w[0] += sPlatOff[i][0], w[1] += sPlatOff[i][1], w[2] += sPlatOff[i][2];
-        if (sDw.riding && (sDw.ride == m || (sDw.ride->hid == m->hid && sDw.ride->index == m->index)))
-            TileWorld(sDw.rideTile[0], sDw.rideTile[1], sDw.rideTile[2], w);
-        if (sDw.riding && (sDw.ride == m || (sDw.ride->hid == m->hid && sDw.ride->index == m->index)))
-        {
-            w[0] += sDw.rideOff[0] / 4096.0f;
-            w[1] += sDw.rideOff[1] / 4096.0f + sDw.vib;
-            w[2] += sDw.rideOff[2] / 4096.0f;
-        }
+        S3D_DynPropScaled(slot++, p->model, w[0] + p->off[0], w[1] + p->off[1], w[2] + p->off[2], 0, p->scale);
+    }
+    if ((sDw.riding || sDw.keepRide) && sDw.ride != NULL && sDw.ride->kind < ARRAY_COUNT(sDwProps) && slot < SHADOW_SLOT)
+    {
+        // the ridden platform with the player (on a floor it passes through or rides to, too)
+        const struct DwProp *p = &sDwProps[sDw.ride->kind];
+        float w[3];
+        TileWorld(sDw.rideTile[0], sDw.rideTile[1], sDw.rideTile[2], w);
+        w[0] += sDw.rideOff[0] / 4096.0f, w[1] += sDw.rideOff[1] / 4096.0f + sDw.vib, w[2] += sDw.rideOff[2] / 4096.0f;
         S3D_DynPropScaled(slot++, p->model, w[0] + p->off[0], w[1] + p->off[1], w[2] + p->off[2], 0, p->scale);
     }
     slot = DrawGhosts(slot);
@@ -594,6 +600,7 @@ static void StartRide(const struct DwMoving *m, s32 startOff[3], bool8 vibrate)
     sDw.x = m->t[0], sDw.y = m->t[1], sDw.z = m->t[2];
     sDw.rideTile[0] = m->t[0], sDw.rideTile[1] = m->t[1], sDw.rideTile[2] = m->t[2];
     sDw.ridePath = m->path;
+    sDw.rideChanged = FALSE;
     LockPlayerFieldControls();
     sRider = 0;
     sRiderBaseSet = FALSE;
@@ -637,25 +644,35 @@ static void RideUpdate(void)
         for (i = 0; i < 3; i++)
             if (sDw.rideOff[i] != (sDw.ridePhase == 3 ? 0 : p->fin[i] * 16 * 4096))
                 sDw.rideOff[i] += p->delta[i], done = FALSE;
-        if (sDw.ridePhase == 1 && sDw.rideOff[0] == p->chg[0] * 16 * 4096 && sDw.rideOff[1] == p->chg[1] * 16 * 4096
-         && sDw.rideOff[2] == p->chg[2] * 16 * 4096 && p->next >= ARRAY_COUNT(sDwPaths))   // (a chained path changes floors on its last leg)
+        if (sDw.ridePhase == 1 && !sDw.rideChanged && sDw.rideOff[0] == p->chg[0] * 16 * 4096
+         && sDw.rideOff[1] == p->chg[1] * 16 * 4096 && sDw.rideOff[2] == p->chg[2] * 16 * 4096)
         {
-            // the change of floors: the platform's flags, then the next floor with the platform it becomes there
+            // the change of floors (ChangeMaps -> LoadFloor), at each leg's point: a chained path goes through a floor
+            // (B3F's large elevator to B5F, past B4F); on the last leg the platform's flags, then the next floor with the
+            // platform it becomes there
+            bool8 last = p->next >= ARRAY_COUNT(sDwPaths);
             u16 dest = ConnectedFloor(sDw.floor->hid, sDw.ride->dir == ELEV_DOWN);
             const struct DwFloor *f = FloorOfHid(dest);
-            const struct DwMoving *to = MovingOf(dest, sDw.ride->dest);
-            SetPlatformFlag(p->set, TRUE);
-            SetPlatformFlag(p->clr, FALSE);
-            if (f != NULL && to != NULL)
+            const struct DwMoving *to = last ? MovingOf(dest, sDw.ride->dest) : NULL;
+            if (last)
+            {
+                SetPlatformFlag(p->set, TRUE);
+                SetPlatformFlag(p->clr, FALSE);
+            }
+            if (f != NULL && (to != NULL || !last))
             {
                 s32 fx = sDw.rideTile[0] + p->fin[0], fz = sDw.rideTile[2] + p->fin[2];
                 sRideNext.on = TRUE;
+                sRideNext.mid = !last;
+                sRideNext.ride = *sDw.ride;
+                for (i = 0; i < 3; i++)
+                    sRideNext.tile[i] = sDw.rideTile[i];
                 sRideNext.destHid = dest;
                 sRideNext.destIndex = sDw.ride->dest;
                 sRideNext.path = sDw.ridePath;
                 sRideNext.dir = sDw.ride->dir;
                 for (i = 0; i < 3; i++)
-                    sRideNext.off[i] = sDw.rideOff[i] - p->fin[i] * 16 * 4096;
+                    sRideNext.off[i] = last ? sDw.rideOff[i] - p->fin[i] * 16 * 4096 : sDw.rideOff[i];
                 sArrival.on = FALSE;
                 if (sRider)
                 {
@@ -683,12 +700,14 @@ static void RideUpdate(void)
             for (i = 0; i < 3; i++)
                 sDw.rideTile[i] += p->fin[i], sDw.rideOff[i] = 0;
             sDw.ridePath = p->next;
+            sDw.rideChanged = FALSE;
             done = FALSE;
         }
         if (done)
         {
             // the end of the ride: the player on the platform's tile, free to go
             sDw.riding = FALSE;
+            sDw.keepRide = TRUE;
             PlatformTiles();
             UnlockPlayerFieldControls();
             if (getenv("MOEMON_TEST"))
@@ -1646,6 +1665,7 @@ void S3D_Dw_OnMapLoad(void)
     sDw.moving = FALSE;
     sDw.rot = 0;
     sDw.riding = FALSE;
+    sDw.keepRide = FALSE;
     sDw.last[0] = sDw.last[1] = sDw.last[2] = -1;
     memset(sPlatOff, 0, sizeof(sPlatOff));
     memset(&sEv, 0, sizeof(sEv));
@@ -1673,6 +1693,23 @@ void S3D_Dw_OnMapLoad(void)
             sDw.rot = sKindRot[sCascadeNext.up ? KIND_LAND : KIND_CEILING] + 90;
         }
     }
+    if (sRideNext.on && sRideNext.mid)
+    {
+        // a chained ride passing through this floor: the same platform on, from where it was (its next leg changes
+        // floors again)
+        static struct DwMoving sThrough;
+        u32 i;
+        sRideNext.on = FALSE;
+        if (f != NULL && f->hid == sRideNext.destHid)
+        {
+            sThrough = sRideNext.ride;
+            StartRide(&sThrough, sRideNext.off, FALSE);
+            for (i = 0; i < 3; i++)
+                sDw.rideTile[i] = sRideNext.tile[i];
+            sDw.ridePath = sRideNext.path;
+            sDw.rideChanged = TRUE;
+        }
+    }
     if (sRideNext.on)
     {
         // the second half of an elevator ride, on the floor it goes to (MoveSecondHalf)
@@ -1688,10 +1725,31 @@ void S3D_Dw_OnMapLoad(void)
             sDw.ride = &sRidden;
             sDw.ridePath = sRideNext.path;
             sDw.ridePhase = 3;
+            sDw.rideChanged = TRUE;
             sRider = sArrival.on && sArrival.hid == f->hid ? 128 : 0;
             sRiderBaseSet = FALSE;
         }
     }
+}
+
+// A save continued on a floor (overworld.c CB2_ContinueSavedGame: no warp, so no map load above): the floor set up
+// as on arriving, the world kept as the save left it (its platforms, puzzle and progress are in the save's vars)
+void S3D_Dw_SavedMapLoaded(void)
+{
+    S3D_Dw_OnMapLoad();
+    sFromOutside = FALSE;
+}
+
+// Someone of this floor standing at a tile of its stacked world (their map place, and the height the floor's list
+// puts them at): a platform step there is blocked
+static bool8 PersonAt(s32 x, s32 y, s32 z)
+{
+    u8 id = GetObjectEventIdByXY(x - sDw.floor->off[0] + MAP_OFFSET, z - sDw.floor->off[2] + MAP_OFFSET);
+    s32 i;
+    if (id == OBJECT_EVENTS_COUNT || id == gPlayerAvatar.objectEventId || gObjectEvents[id].invisible)
+        return FALSE;
+    i = PersonOf(sDw.floor->hid, gObjectEvents[id].localId);
+    return i >= 0 && sDwPeople[i].pos[1] == y;
 }
 
 // The player's input on a DISTORTION WORLD floor (field_player_avatar.c PlayerStep): TRUE when handled here
@@ -1776,15 +1834,18 @@ bool8 S3D_Dw_PlayerStep(u8 dir, u16 heldKeys)
             else
                 attr = ATTR_COLLISION;   // (water without SURF: A in front of it asks: S3D_Dw_FacingWater)
         }
+        if (attr != 0xFFFF && !(attr & ATTR_COLLISION) && PersonAt(nx, ny, nz))
+            attr = ATTR_COLLISION;   // (someone stands there: Platinum's map objects block the way on a platform too)
         if (attr == 0xFFFF || (attr & ATTR_COLLISION))
         {
-            // a bump: walking on the spot, slowly, with the sound (as the game's own collisions)
+            // a bump: walking on the spot, slowly, with the sound (as the game's own collisions); turned the way the
+            // step goes on the map, so A then talks to whoever is there (B2F's CYNTHIA on her wall)
             TileWorld(sDw.x, sDw.y, sDw.z, sDw.from);
             memcpy(sDw.to, sDw.from, sizeof(sDw.to));
             sDw.t = 0;
             sDw.dur = 32;
             sDw.moving = TRUE;
-            ObjectEventSetHeldMovement(obj, GetWalkInPlaceSlowMovementAction(dir));
+            ObjectEventSetHeldMovement(obj, GetWalkInPlaceSlowMovementAction(mdir));
             PlaySE(SE_WALL_HIT);
             return TRUE;
         }
@@ -2013,4 +2074,162 @@ void S3D_Dw_Print(void)
         x = sDw.x, y = sDw.y, z = sDw.z;
     printf("[dw] floor %d at %d,%d,%d kind %d platform %d camera %d %d %d\n", sDw.floor->hid, x, y, z, sDw.kind, sDw.plat,
            (int)(sDw.cam[0] / 256), (int)(sDw.cam[1] / 256), (int)(sDw.cam[2] / 256));
+}
+
+// ------------------------------------------------------------------------------------------- the walk harness
+// The harness's "dwgoto X Y Z": the key toward tile X, Y, Z of the stacked world (as `mp dw` prints it; Y -1: any
+// height) as a player walks this floor: a search over the same surfaces, steps and jumps the player's own steps take
+// (S3D_Dw_PlayerStep: platform tiles, walls, ceilings, jump points; the map's own ground by its collision), solved
+// again each frame the player stands still. 0: there; 0xFFFF: busy (a step, a jump, a ride, an event) or no way
+#define DW_SEARCH_MAX 32768
+static struct DwNode { s16 x, y, z; s8 plat; u8 kind, first; s32 from; } sDwSearch[DW_SEARCH_MAX];
+static u32 sDwSeen[DW_SEARCH_MAX * 2];
+static bool8 sDwTestCarried;
+void MP_TestDwStart(void) { sDwTestCarried = FALSE; }   // (an open hash of node keys + 1; 0: empty)
+
+static u32 DwKey(s32 plat, s32 x, s32 y, s32 z)
+{
+    return ((u32)(plat + 1) << 24 | (u32)(x & 0xFF) << 16 | (u32)(y & 0xFF) << 8 | (u32)(z & 0xFF)) + 1;
+}
+
+static bool8 DwSeen(u32 key)
+{
+    u32 h = (key * 2654435761u) & (ARRAY_COUNT(sDwSeen) - 1);
+    while (sDwSeen[h] != 0)
+    {
+        if (sDwSeen[h] == key)
+            return TRUE;
+        h = (h + 1) & (ARRAY_COUNT(sDwSeen) - 1);
+    }
+    sDwSeen[h] = key;
+    return FALSE;
+}
+
+static s32 DwLandY(s32 x, s32 z, s32 nearY)
+{
+    float g = S3D_TestGround(x - sDw.floor->off[0], z - sDw.floor->off[2], (nearY - sDw.floor->off[1]) * 16.0f);
+    return isnan(g) ? nearY : sDw.floor->off[1] + (s32)floorf(g / 16.0f + 0.5f);
+}
+
+u16 MP_TestDwKey(s32 tx, s32 ty, s32 tz)
+{
+    static const u16 keys[4] = {DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT};
+    static const s8 ldx[4] = {0, 0, -1, 1}, ldz[4] = {-1, 1, 0, 0};
+    struct ObjectEvent *obj = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u32 head = 0, tail = 0;
+    s32 x, y, z;
+    if (sEv.cmd != NULL)
+        sDwTestCarried = TRUE;   // (an event's platform carries the player: once it's over, the walk is where it took them)
+    if (sDw.floor == NULL || !DW_HAVE_DATA || sDw.jump != NULL || sDw.riding || sEv.cmd != NULL || sFall.on
+     || (sDw.kind != KIND_LAND && sDw.moving) || gPlayerAvatar.tileTransitionState != T_NOT_MOVING
+     || (ObjectEventIsMovementOverridden(obj) && !ObjectEventClearHeldMovementIfFinished(obj)))
+        return 0xFFFF;
+    if (sDwTestCarried)
+    {
+        sDwTestCarried = FALSE;
+        return 0;
+    }
+    if (sDw.kind == KIND_LAND)
+        LandTile(&x, &y, &z);
+    else
+        x = sDw.x, y = sDw.y, z = sDw.z;
+    memset(sDwSeen, 0, sizeof(sDwSeen));
+    sDwSearch[tail++] = (struct DwNode){x, y, z, sDw.kind == KIND_LAND ? -1 : sDw.plat, sDw.kind, 0xFF, -1};
+    DwSeen(DwKey(sDwSearch[0].plat, x, y, z));
+    while (head < tail)
+    {
+        struct DwNode n = sDwSearch[head];
+        u8 d;
+        if (n.x == tx && n.z == tz && (ty < 0 || n.y == ty))
+        {
+            if (n.first == 0xFF)
+                return 0;
+            return keys[n.first];
+        }
+        for (d = 0; d < 4 && tail < DW_SEARCH_MAX; d++)
+        {
+            const struct DwJump *j = JumpAt(n.x, n.y, n.z, d);
+            struct DwNode m = n;
+            m.from = head, m.first = n.first == 0xFF ? d : n.first;
+            if (j != NULL)
+            {
+                m.x += j->d[0], m.y += j->d[1], m.z += j->d[2];
+                m.plat = j->idx >= 0 && j->idx < sDw.floor->nplat && j->kind < KIND_LAND ? j->idx : -1;
+                m.kind = m.plat < 0 ? KIND_LAND : j->kind;
+            }
+            else if (n.kind == KIND_LAND)
+            {
+                s32 mx = n.x + ldx[d] - sDw.floor->off[0] + MAP_OFFSET, my = n.z + ldz[d] - sDw.floor->off[2] + MAP_OFFSET;
+                u8 e = MapGridGetElevationAt(mx, my), pe = MapGridGetElevationAt(n.x - sDw.floor->off[0] + MAP_OFFSET, n.z - sDw.floor->off[2] + MAP_OFFSET);
+                u8 id = GetObjectEventIdByXY(mx, my), b = MapGridGetMetatileBehaviorAt(mx, my);
+                static bool8 (*const jump[4])(u8) = {MetatileBehavior_IsJumpNorth, MetatileBehavior_IsJumpSouth,
+                                                       MetatileBehavior_IsJumpWest, MetatileBehavior_IsJumpEast};
+                static const u8 back[4] = {1, 0, 3, 2};
+                if (jump[d](b))
+                {
+                    // (a ledge: hopped over to the tile past it; Platinum's ledges jumped twice hop one tile on from
+                    // there: TwiceLedge)
+                    s32 hx = mx + ldx[d], hy = my + ldz[d];
+                    if (jump[back[d]](MapGridGetMetatileBehaviorAt(hx, hy)))
+                        hx += ldx[d], hy += ldz[d];
+                    if (MapGridGetCollisionAt(hx, hy))
+                        continue;
+                    m.x = hx - MAP_OFFSET + sDw.floor->off[0], m.z = hy - MAP_OFFSET + sDw.floor->off[2];
+                    m.y = DwLandY(m.x, m.z, n.y);
+                    if (!DwSeen(DwKey(m.plat, m.x, m.y, m.z)))
+                        sDwSearch[tail++] = m;
+                    continue;
+                }
+                if (MapGridGetCollisionAt(mx, my) || (e != pe && e != 0 && e != 15 && pe != 0 && pe != 15)
+                 || (id != OBJECT_EVENTS_COUNT && id != gPlayerAvatar.objectEventId))
+                    continue;
+                m.x += ldx[d], m.z += ldz[d];
+                m.y = DwLandY(m.x, m.z, n.y);
+            }
+            else
+            {
+                const s8 *s = sStep[n.kind][d];
+                s32 nx = n.x + s[0], ny = n.y + s[1], nz = n.z + s[2];
+                u16 attr = PlatAttr(Plat(n.plat), nx, ny, nz);
+                if (attr == 0xFFFF)
+                {
+                    s32 other = PlatAt(nx, ny, nz, n.kind);
+                    if (other >= 0)
+                        m.plat = other, attr = PlatAttr(Plat(other), nx, ny, nz);
+                }
+                if (attr == 0xFFFF || (attr & ATTR_COLLISION) || ATTR_WATER(attr) != sSurfing || PersonAt(nx, ny, nz))
+                    continue;
+                m.x = nx, m.y = ny, m.z = nz;
+            }
+            if (!DwSeen(DwKey(m.plat, m.x, m.y, m.z)))
+                sDwSearch[tail++] = m;
+        }
+        head++;
+    }
+    if (getenv("MOEMON_DW_DEBUG"))
+    {
+        u32 i;
+        printf("[dw] search: %u tiles reached, none is %d,%d,%d\n", tail, tx, ty, tz);
+        for (i = 0; i < tail; i++)
+            if (EventAt(sDwSearch[i].x, sDwSearch[i].y, sDwSearch[i].z) != NULL)
+                printf("[dw] search: event tile %d,%d,%d reached\n", sDwSearch[i].x, sDwSearch[i].y, sDwSearch[i].z);
+        for (i = 0; i < sDw.floor->njump; i++)
+        {
+            const struct DwJump *j = &sDwJumps[sDw.floor->jump + i];
+            printf("[dw] search: jump at %d,%d,%d (+%d,%d,%d) dir %d to kind %d plat %d\n", j->b.x, j->b.y, j->b.z, j->b.sx, j->b.sy, j->b.sz, j->dir, j->kind, j->idx);
+        }
+        for (i = 0; i < sDw.floor->nplat; i++)
+            printf("[dw] search: plat %d kind %d at %d,%d,%d (+%d,%d,%d)\n", (int)i, Plat(i)->kind, Plat(i)->b.x, Plat(i)->b.y, Plat(i)->b.z, Plat(i)->b.sx, Plat(i)->b.sy, Plat(i)->b.sz);
+        for (i = 0; i < tail && i < 400; i++)
+            printf("[dw]   %d,%d,%d kind %d plat %d\n", sDwSearch[i].x, sDwSearch[i].y, sDwSearch[i].z, sDwSearch[i].kind, sDwSearch[i].plat);
+        for (y = 0; y < gMapHeader.mapLayout->height; y++)
+        {
+            char row[256];
+            for (x = 0; x < gMapHeader.mapLayout->width && x < 255; x++)
+                row[x] = MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET) ? '#' : "0123456789abcdef"[MapGridGetElevationAt(x + MAP_OFFSET, y + MAP_OFFSET)];
+            row[x] = 0;
+            printf("[dw] %2d %s\n", (int)y, row);
+        }
+    }
+    return 0xFFFF;
 }
