@@ -37,7 +37,7 @@ cp "$OUT/base.sav" "$OUT/ref.sav"; rm -f "$OUT/ref.sav.region"
 run "$OUT/ref" "$OUT/ref.sav" "wait 200\nmp savesum\nmp save\nwait 60\nquit\n"
 REF0=$(sum "$OUT/ref")
 [ -n "$REF0" ] || { echo "FAIL: no reference summary"; exit 1; }
-grep -q "save: format 0 -> 2" "$OUT/ref/log.txt" || { echo "FAIL: format 0 not migrated"; fail=1; }
+grep -q "save: format 0 -> 3" "$OUT/ref/log.txt" || { echo "FAIL: format 0 not migrated"; fail=1; }
 # today's save as today's build wrote it (its side file has the format): read again, the same game
 run "$OUT/ref2" "$OUT/ref.sav" "wait 200\nmp savesum\nquit\n"
 REF=$(sum "$OUT/ref2"); echo "reference: $REF"
@@ -62,7 +62,7 @@ for kind in linux160 win160; do
     run "$OUT/$kind" "$OUT/$kind.sav" "wait 200\nmp savesum\npressuntil A field 6000\nwait 120\nmp badges\nshot cont\nquit\n"
     S=$(sum "$OUT/$kind")
     if [ "$S" = "$REF" ]; then echo "ok   $kind"; else echo "FAIL $kind: $S"; fail=1; fi
-    grep -q "save: format 1 -> 2" "$OUT/$kind/log.txt" || { echo "FAIL $kind: not migrated from format 1"; fail=1; }
+    grep -q "save: format 1 -> 3" "$OUT/$kind/log.txt" || { echo "FAIL $kind: not migrated from format 1"; fail=1; }
     grep -q "\[crash\]\|crash report" "$OUT/$kind/log.txt" && { echo "FAIL $kind: crashed"; fail=1; }
 done
 exit $fail

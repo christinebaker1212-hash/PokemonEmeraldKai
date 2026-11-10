@@ -3,7 +3,7 @@ Johto_OlivinePort_MapScripts::
 	.byte 0
 
 Johto_OlivinePort_OnFrame:
-	map_script_2 0x52FD, 1, EventScript_RegionArrivalJohto   @ (VAR_REGION_ARRIVAL: mp_region.c MP_Region_FirstBoatIn)
+	map_script_2 0x52EC, 1, EventScript_RegionArrivalJohto   @ (VAR_REGION_ARRIVAL: mp_region.c MP_Region_FirstBoatIn)
 	.2byte 0
 
 @ Johto_OlivinePort object 3 (local id 3, gfx 0x3E8F) at 12,12

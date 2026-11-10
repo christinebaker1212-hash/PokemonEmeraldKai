@@ -3,6 +3,8 @@
 #include "global.h"
 #include "mp.h"
 #include "mp_savefix.h"
+#include "mp_region.h"
+#include "event_data.h"
 
 static u8 sRaw[sizeof(struct SaveBlock1) + MP_SAVE_WIN160_EXTRA];
 static bool8 sWin160;         // the save was 1.60.0's Windows layout (converted)
@@ -90,6 +92,25 @@ void MP_SaveFix_Migrate(u8 fromFormat)
             }
         }
 #endif
+    }
+    if (fromFormat < 3)
+    {
+        // JOHTO's phone kept its state in region vars 0x5240-0x5258, where SINNOH's Platinum vars 0x5180-0x525D also
+        // are (every region shares 0x5000-0x52FF): its own block now, 0x5260. What was there goes to the phone if the
+        // player has been to JOHTO; it stays for SINNOH's story only if they have been to SINNOH (a JOHTO-only save's
+        // phone numbers there would have read as SINNOH's story already played)
+        u16 old[25];
+        bool8 johto = (gRegionState.started >> REGION_JOHTO) & 1, sinnoh = (gRegionState.started >> REGION_SINNOH) & 1;
+        for (i = 0; i < ARRAY_COUNT(old); i++)
+            old[i] = VarGet(0x5240 + i);
+        for (i = 0; i < ARRAY_COUNT(old); i++)
+        {
+            VarSet(0x5260 + i, johto ? old[i] : 0);
+            if (!sinnoh)
+                VarSet(0x5240 + i, 0);
+        }
+        // the first boat's arrival (a frame script's, never kept past the port): 0x52FD is JOHTO's rival name's again
+        VarSet(VAR_REGION_ARRIVAL, 0);
     }
     MPNet_Log("save: format %d -> %d%s", fromFormat, MP_SAVE_FORMAT, sWin160 ? " (1.60.0's Windows layout)" : "");
 }

@@ -610,7 +610,7 @@ Johto_Text_FruitBagFull:
 Johto_Text_NothingHere::
 	.string "There’s nothing here…$"
 
-@ The first boat to KANTO / JOHTO (MP_Region_FirstBoatIn, VAR_REGION_ARRIVAL 0x52FD = the region): off the boat at
+@ The first boat to KANTO / JOHTO (MP_Region_FirstBoatIn, VAR_REGION_ARRIVAL 0x52EC = the region): off the boat at
 @ VERMILION / OLIVINE, the port's sailor meets the player and takes them to the region's first town, where a room
 @ waits (PALLET TOWN, NEW BARK TOWN). The ports' frame scripts run these.
 EventScript_RegionArrivalKanto::
@@ -619,7 +619,7 @@ EventScript_RegionArrivalKanto::
 	turnobject 4, DIR_NORTH
 	msgbox gText_RegionArrivalKanto, MSGBOX_DEFAULT
 	closemessage
-	setvar 0x52FD, 0
+	setvar 0x52EC, 0
 	warp MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F, 6, 6
 	waitstate
 	releaseall
@@ -631,7 +631,7 @@ EventScript_RegionArrivalJohto::
 	turnobject 1, DIR_NORTH
 	msgbox gText_RegionArrivalJohto, MSGBOX_DEFAULT
 	closemessage
-	setvar 0x52FD, 0
+	setvar 0x52EC, 0
 	warp MAP_JOHTO_PLAYERS_HOUSE2F, 4, 4
 	waitstate
 	releaseall

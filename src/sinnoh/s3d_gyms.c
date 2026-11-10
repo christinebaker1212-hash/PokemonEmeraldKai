@@ -53,6 +53,14 @@ u16 S3D_Gyms_HealBallModel(void)   // (the healing machine's balls: s3d_heal.c)
 #define VAR_SINNOH_CANALAVE_LO 0x52F5   // the platforms moved from where they start (bits 0-15)
 #define VAR_SINNOH_CANALAVE_HI 0x52F6   // (bits 16-23)
 #define VAR_SINNOH_CANALAVE_FLOOR 0x52F7   // the floor the player is on
+// VEILSTONE's bags and stacks and SNOWPOINT's snowballs, kept with the save as Platinum's persisted map features are: a
+// save made in the gym loads with them where the player left them (they were put back, and the bags walled in a player
+// who saved beside MAYLENE). Walking in from another map puts them back as Platinum does.
+#define VAR_SINNOH_VEIL_TIRES 0x52A0   // the stacks standing (bits) | 0x8000: kept
+#define VAR_SINNOH_VEIL_BAGS  0x52A1   // .. 0x52A9: each bag's x | y << 5
+#define VAR_SINNOH_SNOW_LO    0x52AA   // the snowballs broken (bits 0-15)
+#define VAR_SINNOH_SNOW_HI    0x52AB   // (bits 16-19) | 0x8000: kept
+static bool8 sFromSave;   // S3D_Gyms_SavedMapLoaded: the map is the one a save was made on
 
 enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA, GYM_VEILSTONE, GYM_SNOWPOINT, GYM_HEARTHOME,
        GYM_VILLA };
@@ -788,16 +796,45 @@ static void VeilProps(void)
     }
 }
 
+static void VeilStore(void)
+{
+    u32 i;
+    VarSet(VAR_SINNOH_VEIL_TIRES, sVeil.tires | 0x8000);
+    for (i = 0; i < ARRAY_COUNT(sVeilstoneBags); i++)
+        VarSet(VAR_SINNOH_VEIL_BAGS + i, sVeil.x[i] | sVeil.y[i] << 5);
+}
+
 static void VeilLoad(u16 map)
 {
     u32 i;
-    if (sVeil.lastMap != map)
+    if (sFromSave && (VarGet(VAR_SINNOH_VEIL_TIRES) & 0x8000))
+    {
+        // (a save made here: everything where the player left it)
+        for (i = 0; i < ARRAY_COUNT(sVeilstoneBags); i++)
+        {
+            u16 v = VarGet(VAR_SINNOH_VEIL_BAGS + i);
+            sVeil.x[i] = v & 31, sVeil.y[i] = (v >> 5) & 31;
+        }
+        sVeil.tires = VarGet(VAR_SINNOH_VEIL_TIRES) & ((1 << ARRAY_COUNT(sVeilstoneTires)) - 1);
+    }
+    else if (sFromSave)
+    {
+        // (a save made here by a build that didn't keep them: the bags as the puzzle's solution leaves them, every
+        // stack they knock over down, so wherever the player stands they can walk to the door and to MAYLENE)
+        static const u8 sSolved[ARRAY_COUNT(sVeilstoneBags)][2] = {{7, 14}, {7, 12}, {11, 7}, {3, 20}, {19, 26}, {9, 10},
+                                                                    {20, 12}, {21, 24}, {23, 27}};
+        for (i = 0; i < ARRAY_COUNT(sVeilstoneBags); i++)
+            sVeil.x[i] = sSolved[i][0], sVeil.y[i] = sSolved[i][1];
+        sVeil.tires = 0x240;   // (the stacks at 19,10 and 22,7, out of everyone's way)
+    }
+    else if (sVeil.lastMap != map)
     {
         // (in from somewhere else: everything back where Platinum puts it)
         for (i = 0; i < ARRAY_COUNT(sVeilstoneBags); i++)
             sVeil.x[i] = sVeilstoneBags[i][0], sVeil.y[i] = sVeilstoneBags[i][1];
         sVeil.tires = (1 << ARRAY_COUNT(sVeilstoneTires)) - 1;
     }
+    VeilStore();
     sVeil.lastMap = map;
     sVeil.bag = sVeil.tire = -1;
     VeilProps();
@@ -867,6 +904,7 @@ static void Task_VeilBag(u8 taskId)
         {
             sVeil.tires &= ~(1 << sVeil.tire);
             MPNet_Log("gym: VEILSTONE's stack %d knocked over", sVeil.tire);
+            VeilStore();
             sVeil.tire = -1;
         }
         if (sVeil.frames >= 36 && sVeil.tire < 0)
@@ -876,6 +914,7 @@ static void Task_VeilBag(u8 taskId)
     return;
 done:
     MPNet_Log("gym: VEILSTONE's bag %d at %d,%d", i, sVeil.x[i], sVeil.y[i]);
+    VeilStore();
     sVeil.bag = -1;
     sVeil.swing = 0;
     VeilProps();
@@ -964,10 +1003,22 @@ static void SnowProps(void)
     }
 }
 
+static void SnowStore(void)
+{
+    VarSet(VAR_SINNOH_SNOW_LO, sSnow.broken & 0xFFFF);
+    VarSet(VAR_SINNOH_SNOW_HI, ((sSnow.broken >> 16) & 0x7FFF) | 0x8000);
+}
+
 static void SnowLoad(u16 map)
 {
-    if (sSnow.lastMap != map)
+    if (sFromSave && (VarGet(VAR_SINNOH_SNOW_HI) & 0x8000))
+        sSnow.broken = VarGet(VAR_SINNOH_SNOW_LO) | (u32)(VarGet(VAR_SINNOH_SNOW_HI) & 0x7FFF) << 16;   // (a save made here)
+    else if (sFromSave)
+        sSnow.broken = (1 << ARRAY_COUNT(sSnowpointBalls)) - 1;   // (a save made here by a build that didn't keep them:
+                                                                  // every snowball broken, so nothing walls the player in)
+    else if (sSnow.lastMap != map)
         sSnow.broken = 0;
+    SnowStore();
     sSnow.lastMap = map;
     memset(sSnow.frames, 0, sizeof(sSnow.frames));
     sSnow.task = 0xFF;
@@ -1038,6 +1089,7 @@ void S3D_Gyms_BreakAt(s16 x, s16 y)
         return;
     MPNet_Log("gym: SNOWPOINT's snowball %d broken", i);
     sSnow.broken |= 1 << i;   // (out of the way at once; the pieces sink as the player goes through)
+    SnowStore();
     sSnow.frames[i] = 1;
     PlaySE(SE_M_ROCK_THROW);
     if (sSnow.task == 0xFF || !FuncIsActiveTask(Task_SnowBreak))
@@ -1239,6 +1291,15 @@ const u8 *S3D_Gyms_VillaScript(s16 x, s16 y, u8 direction)
 }
 
 void Sinnoh_Signs_MapLoaded(float ox, float oz);
+
+// The map a save was made on, loaded with it (overworld.c's continue): the gyms that keep their state with the save
+// take it from there
+void S3D_Gyms_SavedMapLoaded(void)
+{
+    sFromSave = TRUE;
+    S3D_Gyms_MapLoaded();
+    sFromSave = FALSE;
+}
 
 void S3D_Gyms_MapLoaded(void)
 {

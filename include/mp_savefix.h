@@ -8,7 +8,9 @@
 //      object events with the id's high byte at 0x23 (Linux) or 40 bytes long (Windows: SaveBlock1 64 bytes longer)
 //   2  1.60.1: templates graphicsIdLo 0x01 / kind 0x02 / graphicsIdHi 0x03, object events' high bits in the first
 //      word's padding (the same on every platform; tools/test/save_layout.py checks it)
-#define MP_SAVE_FORMAT 2
+//   3  1.185.10: JOHTO's phone state at region vars 0x5260-0x5278 (it was 0x5240-0x5258, which SINNOH's Platinum vars
+//      use too: src/mp/mp_qzphone.c), the first boat's VAR_REGION_ARRIVAL at 0x52EC (0x52FD, in JOHTO's rival name)
+#define MP_SAVE_FORMAT 3
 #define MP_SAVE_WIN160_EXTRA 64   // 16 object events x 4 bytes more in 1.60.0's Windows build
 
 void MP_SaveFix_BeginSaveBlock1(void);          // save.c: SaveBlock1's sectors are gathered whole ...

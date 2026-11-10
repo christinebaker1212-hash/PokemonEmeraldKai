@@ -11,7 +11,8 @@
 // - for the POKéGEAR (MP_QzPhone_Call): the words of a call, as lines for its screen;
 // - silent, to see how a call would go before it rings (OPTIONS > CO-OP > MOENAV CALLS: BATTLES keeps only the calls
 //   that ask for a battle, as the MOENAV in HOENN): the same seed plays the same call again for real.
-// State (region vars 0x5240-0x527F, saved with the region): numbers registered, Crystal's flags and events for the
+// State (region vars 0x5260-0x5278, saved with the region; 0x5240-0x5258 until save format 3, where SINNOH's
+// Platinum vars are: mp_savefix.c moved them): numbers registered, Crystal's flags and events for the
 // phone, each contact's fight count, the step count to the next call.
 #include "global.h"
 #include "battle_setup.h"
@@ -48,12 +49,12 @@ extern char *getenv(const char *);
 #include <string.h>
 
 // ---- state (region vars)
-#define VAR_QZPHONE_NUMBERS 0x5240   // 3 words: the contacts registered (by Crystal's PHONE_* number)
-#define VAR_QZPHONE_FLAGS   0x5243   // 10 words: Crystal's phone flags and events (QZPHONE_FLAGS of them)
-#define VAR_QZPHONE_FIGHTS  0x524D   // 8 words: each contact's fight count, 3 bits each
-#define VAR_QZPHONE_STEPS   0x5256   // steps to the next call
-#define VAR_QZPHONE_KENJI   0x5257   // KENJI's break countdown
-#define VAR_QZPHONE_SWARM   0x5258   // 1: QWILFISH on ROUTE 32, 2: REMORAID on ROUTE 44 (RALPH's / WILTON's news)
+#define VAR_QZPHONE_NUMBERS 0x5260   // 3 words: the contacts registered (by Crystal's PHONE_* number)
+#define VAR_QZPHONE_FLAGS   0x5263   // 10 words: Crystal's phone flags and events (QZPHONE_FLAGS of them)
+#define VAR_QZPHONE_FIGHTS  0x526D   // 8 words: each contact's fight count, 3 bits each
+#define VAR_QZPHONE_STEPS   0x5276   // steps to the next call
+#define VAR_QZPHONE_KENJI   0x5277   // KENJI's break countdown
+#define VAR_QZPHONE_SWARM   0x5278   // 1: QWILFISH on ROUTE 32, 2: REMORAID on ROUTE 44 (RALPH's / WILTON's news)
 #define QZPHONE_STATE_WORDS (VAR_QZPHONE_SWARM + 1 - VAR_QZPHONE_NUMBERS)
 STATIC_ASSERT(QZPHONE_FLAGS <= 10 * 16, qzPhoneFlagsFit);
 STATIC_ASSERT(QZPHONE_CONTACT_SLOTS <= 3 * 16, qzPhoneContactsFit);

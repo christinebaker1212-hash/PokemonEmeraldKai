@@ -13,7 +13,8 @@ import re
 FLAGS_START = 0x3328          # REGION_SINNOH_FLAGS (0x3320) + the 8 badges (JOHTO / KANTO trainers' flags end at 0x3319)
 FLAGS_END = 0x3770            # then the gym leaders' TMs given (tools/sinnoh/gen_words.py), the trainers' from 0x3780
 VARS_START = 0x5180           # past Quetzal's region vars (up to 0x514A)
-VARS_END = 0x52F0             # (then the game's own SINNOH vars: VAR_SINNOH_ARRIVAL 0x52F0, include/mp_region.h)
+VARS_END = 0x5260             # (then JOHTO's phone from 0x5260, src/mp/mp_qzphone.c, and the game's own vars: every region
+                              # shares 0x5000-0x52FF, include/mp_region.h)
 SPECIAL_VAR = re.compile(r'^VAR_(0x8[0-9A-Fa-f]{3}|RESULT|FACING|SPECIAL_\w+)$')
 
 _cache = {}

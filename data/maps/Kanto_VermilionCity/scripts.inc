@@ -6,7 +6,7 @@ Kanto_VermilionCity_MapScripts::
 	.byte 0
 
 Kanto_VermilionCity_OnFrame_8416570:
-	map_script_2 0x52FD, 2, EventScript_RegionArrivalKanto   @ Moemon Kai: the first boat in (VAR_REGION_ARRIVAL)
+	map_script_2 0x52EC, 2, EventScript_RegionArrivalKanto   @ Moemon Kai: the first boat in (VAR_REGION_ARRIVAL)
 	map_script_2 VAR_QZ_0x5135, 2, Kanto_VermilionCity_EventScript_841657A
 	.2byte 0
 

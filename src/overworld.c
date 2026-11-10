@@ -1934,7 +1934,7 @@ void CB2_ContinueSavedGame(void)
         InitTrainerHillMap();
     else
         InitMapFromSavedGame();
-        S3D_Gyms_MapLoaded();   // Moemon Kai (src/sinnoh/s3d_gyms.c)
+        S3D_Gyms_SavedMapLoaded();   // Moemon Kai: a gym's state kept with the save (src/sinnoh/s3d_gyms.c)
         Maker_ModelsMapLoaded();   // Moemon Maker M5: the user's 3D models on the map (src/maker/maker_models.c)
     
     #ifdef UBFIX

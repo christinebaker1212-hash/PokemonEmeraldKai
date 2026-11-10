@@ -32,7 +32,7 @@
 #define FLAG_SINNOH_HIDE_REGION_BOAT 0x3D3D   // CANALAVE's ferry sailor hidden (set on each SINNOH map load: s3d_scrcmd.c; shown when the boat can sail)
 #define FLAG_SINNOH_HAS_PARTNER 0x3D3C   // Platinum's walking partner (SetHasPartner)
 #define FLAG_SINNOH_PLATINUM_STORY 0x3D3B   // this save plays Platinum's own story (its converted map scripts, triggers and story people: tools/sinnoh/gen_scripts.py)
-#define VAR_REGION_ARRIVAL  0x52FD   // the region (JOHTO 1, KANTO 2) of a first boat just in: its port's sailor takes the player to the first town (MP_Region_FirstBoatIn)
+#define VAR_REGION_ARRIVAL  0x52EC   // the region (JOHTO 1, KANTO 2) of a first boat just in: its port's sailor takes the player to the first town (MP_Region_FirstBoatIn; 0x52FD until save format 3, inside JOHTO's rival name 0x52FC-0x52FF)
 #define VAR_SINNOH_ARRIVAL  0x52F0   // 1: just off the first boat to SINNOH (the harbor sailor takes them to TWINLEAF), 2: in SINNOH, 3: BARRY's mom's visit played (TWINLEAF's house 1F)
 u8 MP_Region_TotalBadges(void);   // every region's badges (BADGES on the continue screen and in SAVE)
 #define FLAG_KANTO_TUTOR_MEGA_PUNCH 0x21DF   // FireRed's ROUTE 4 tutors (free in Quetzal's KANTO flags)

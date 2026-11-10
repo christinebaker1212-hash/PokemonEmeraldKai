@@ -7186,3 +7186,20 @@ building). A palette past the table is now kept apart (sPreservedHighPal, honore
 stuck kept a map view of undefined tiles (SaveMapView read the buffer with width 0) that walled the player in again
 on load: fieldmap.c LoadSavedMapView never copies an undefined tile back. Test sinnoh_cut_tree (mp weatherpal N checks
 a slot directly).
+
+## Region vars that two regions shared, and SINNOH's gyms kept with the save (1.185.10)
+Every region's vars share one block, 0x5000-0x52FF (mp_region.c sVars, the "<save>.region" file). JOHTO's phone
+(mp_qzphone.c) kept its state at 0x5240-0x5258, inside SINNOH's Platinum vars (tools/sinnoh/ids.py: 0x5180-0x525D,
+TWINLEAF's rival trigger, VALLEY WINDWORKS, VEILSTONE, LAKE VERITY, the VILLA...): JOHTO's phone numbers read as SINNOH
+story already played, and SINNOH's story wrote over the phone. VAR_REGION_ARRIVAL (0x52FD) sat inside JOHTO's rival
+name (0x52FC-0x52FF): a first boat to KANTO blanked two of its letters. The phone is at 0x5260-0x5278 now,
+VAR_REGION_ARRIVAL at 0x52EC, and ids.py stops SINNOH's vars at 0x5260 (it asserts). Save format 3 (mp_savefix.c):
+what was at 0x5240 goes to the phone if the player has been to JOHTO and stays for SINNOH only if they have been to
+SINNOH (gRegionState.started). Free in the block: 0x525E-0x525F, 0x5279-0x529F, 0x52AC-0x52BF, 0x52C6-0x52CF,
+0x52DC-0x52DF, 0x52E6-0x52E7, 0x52EB, 0x52ED-0x52EF, 0x52FE-0x52FF are the rival name's.
+VEILSTONE's bags and stacks (VAR_SINNOH_VEIL_TIRES / _BAGS, 0x52A0-0x52A9) and SNOWPOINT's snowballs
+(VAR_SINNOH_SNOW_LO / _HI, 0x52AA-0x52AB) are kept with the save as Platinum's persisted map features are: overworld.c's
+continue calls S3D_Gyms_SavedMapLoaded, and the gym takes them from there; walking in from another map still puts
+them back. A save made in VEILSTONE's gym after solving it used to load with the bags back, walling the player in
+beside MAYLENE. A save made in either gym by an older build loads them solved (VEILSTONE's bags as the walk's
+solution leaves them, every snowball broken), so nobody is walled in.
