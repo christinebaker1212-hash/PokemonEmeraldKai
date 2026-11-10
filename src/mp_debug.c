@@ -428,10 +428,12 @@ static bool8 UnseenStanderAt(s16 x, s16 y)
     {
         const struct ObjectEventTemplate *o = &gSaveBlock1Ptr->objectEventTemplates[i];
         u8 id;
-        if (o->x != x || o->y != y || o->localId == 0 || (o->flagId && FlagGet(o->flagId)) || WandersType(o->movementType)
-         || o->script == Quetzal_EventScript_846B413 || o->script == Quetzal_EventScript_846B4F2
-         || o->script == EventScript_CutTree || o->script == EventScript_RockSmash)
+        if (o->x != x || o->y != y || o->localId == 0 || (o->flagId && FlagGet(o->flagId)) || WandersType(o->movementType))
             continue;
+        if (((o->script == Quetzal_EventScript_846B413 || o->script == EventScript_CutTree) && PartyKnows(MOVE_CUT))
+         || ((o->script == Quetzal_EventScript_846B4F2 || o->script == EventScript_RockSmash) && PartyKnows(MOVE_ROCK_SMASH)))
+            continue;   // (only when the party can clear it, as ClearableAt once it's out: ROUTE 212 SOUTH's CUT tree at
+                        // 15,16, a wall off the screen too, or the way flips as it comes and goes)
         if (!TryGetObjectEventIdByLocalIdAndMap(o->localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &id))
             continue;   // (out on the field: the field's own collision has them where they are)
         return TRUE;
@@ -1314,7 +1316,7 @@ u16 MP_TestGotoKey(u8 group, u8 num, s32 tx, s32 ty)
     if (S3D_Active() && MP_IsInOverworld() && !ScriptContext_IsEnabled() && Overworld_IsBikingAllowed()
      && !(gPlayerAvatar.flags & (PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE | PLAYER_AVATAR_FLAG_SURFING
                                  | PLAYER_AVATAR_FLAG_UNDERWATER))
-     && CheckBagHasItem(ITEM_BICYCLE, 1))
+     && (CheckBagHasItem(ITEM_BICYCLE, 1) || CheckBagHasItem(ITEM_MTN_BIKE, 1)))   // (SINNOH's is the MTN. BIKE)
     {
         // (stopping first, and choosing the way only once on it: the way on foot is another, ROUTE 207 from OREBURGH
         // turned back down before the slope)
