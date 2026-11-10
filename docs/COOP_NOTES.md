@@ -7238,3 +7238,9 @@ logs "[arcade] sound: N dry spells, N extra board frames". Tests (with the sets,
 MOEMON_TEST_AUDIO_EXTRA=N (sdl2.c: one more sound call every N game frames, a slow PC), MOEMON_ARCADE_NO_CATCHUP=1
 (the old way), MOEMON_ARCADE_AUDIO_LOG=1 (the mixer's state, each dry spell). Measured: PUZZLE BOBBLE 10% slow 72 dry
 spells in 44 s before, 0 after (25% slow: 0); TGM2 87 before, 0 after.
+
+## SINNOH's named HMs found (1.185.15)
+HM ROCK CLIMB / DEFOG / WHIRLPOOL (items 694-696, the move in the item's name) went through obtain_item.inc's TM / HM
+message, which adds the move's name: "found one HM ROCK CLIMB ROCK CLIMB!". field_specials.c BufferTMHMMoveName answers
+FALSE for them, so they read as items do ("found one HM ROCK CLIMB!"). The walk-only runs: SINNOH's ROCK CLIMB is item
+694, not HM08 (346).

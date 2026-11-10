@@ -1686,6 +1686,10 @@ u16 GetMysteryGiftCardStat(void)
 
 bool8 BufferTMHMMoveName(void)
 {
+    // (1.185.15: the HMs named after their move, HM ROCK CLIMB / DEFOG / WHIRLPOOL, read "found one HM ROCK CLIMB!" as
+    // an item does, not "HM ROCK CLIMB ROCK CLIMB")
+    if (gSpecialVar_0x8004 >= ITEM_HM_ROCK_CLIMB && gSpecialVar_0x8004 <= ITEM_HM_WHIRLPOOL)
+        return FALSE;
     if (IS_ITEM_TMHM(gSpecialVar_0x8004))   // Moemon Kai: TM51-TM92 too
     {
         StringCopy(gStringVar2, gMoveNames[ItemIdToBattleMoveId(gSpecialVar_0x8004)]);
