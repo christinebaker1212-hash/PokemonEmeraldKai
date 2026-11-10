@@ -1,6 +1,7 @@
 pressuntil A field 5000
 wait 30
 mp setflag 0x3320
+mp setvar 0x524E 2
 mp warp 40,62,17,21
 wait 60
 waitfor field 1000

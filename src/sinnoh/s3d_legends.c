@@ -23,11 +23,17 @@
 #define FRIDAYS 0xFE   // (tools/sinnoh/legends.py)
 
 // The PC's calendar (the room host's online): day 1 is 1 January 2000, a Saturday
+// the day of the week, Sunday 0 (s3d_scrcmd.c SINNOH_DAY_OF_WEEK: Platinum's own scripts' too)
+u8 Sinnoh_DayOfWeek(void)
+{
+    if (getenv("MOEMON_TEST_FRIDAY") != NULL)   // (tests: a Friday, or a Thursday)
+        return atoi(getenv("MOEMON_TEST_FRIDAY")) != 0 ? 5 : 4;
+    return (RtcGetLocalDayCount() + 5) % 7;
+}
+
 static bool8 IsFriday(void)
 {
-    if (getenv("MOEMON_TEST_FRIDAY") != NULL)   // (tests)
-        return atoi(getenv("MOEMON_TEST_FRIDAY")) != 0;
-    return (RtcGetLocalDayCount() + 5) % 7 == 5;
+    return Sinnoh_DayOfWeek() == 5;
 }
 
 u16 Sinnoh_FridayMet(void)

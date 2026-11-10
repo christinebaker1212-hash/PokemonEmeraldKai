@@ -6,7 +6,7 @@ wait 90
 mp where
 mp npcs
 mp reach
-mp warp 41,81,42,21
+mp warp 41,81,24,19
 wait 90
 mp where
 mp getflag 0x33A8

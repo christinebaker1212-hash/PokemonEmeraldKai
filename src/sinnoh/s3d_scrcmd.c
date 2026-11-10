@@ -66,7 +66,7 @@ enum {
     SINNOH_FIRST_NON_EGG,           // ARG: a variable <- the first party slot that isn't an EGG
     SINNOH_COUNT_ALIVE_EXCEPT,      // ARG: a variable <- the party's POKéMON able to battle, ARG2's slot left out
     SINNOH_HAS_SPECIES,             // ARG: a variable <- the party has ARG2's species
-    SINNOH_DAY_OF_WEEK,             // ARG: a variable <- the PC's day of the week (Sunday 0)
+    SINNOH_DAY_OF_WEEK,             // ARG: a variable <- the game calendar's day of the week (Sunday 0)
     SINNOH_TIME_OF_DAY,             // ARG: a variable <- Platinum's time of day (morning 0, day, twilight, night, late night 4)
     SINNOH_ON_BIKE,                 // ARG: a variable <- the player rides a bike
     SINNOH_STARTER,                 // ARG: a variable <- the player's SINNOH starter (by the party's lines; TURTWIG else)
@@ -481,9 +481,8 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
     }
     case SINNOH_DAY_OF_WEEK:
     {
-        time_t now = time(NULL);
-        struct tm *tm = localtime(&now);
-        VarSet(arg, tm ? tm->tm_wday : 0);
+        u8 Sinnoh_DayOfWeek(void);
+        VarSet(arg, Sinnoh_DayOfWeek());   // (the game's calendar, as the rest of the game's: the room host's online)
         break;
     }
     case SINNOH_TIME_OF_DAY:

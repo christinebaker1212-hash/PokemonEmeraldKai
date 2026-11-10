@@ -7276,4 +7276,7 @@ MOVES` replays moves; the harness's `gymwalk [FRAMES]` walks to CANDICE solving 
   3D field effect model in Platinum, still left out), VALOR CAVERN's warp (as its ON_LOAD already did).
 - Save format 4 (src/mp/mp_savefix.c): a save made inside the HQ or its warehouse gets their doors' flags set (it may be
   inside without the GALACTIC KEY). Test: sinnoh_galactic_doors.
+- Platinum's SINNOH_DAY_OF_WEEK (s3d_scrcmd.c) reads the game's calendar (s3d_legends.c Sinnoh_DayOfWeek, as the
+  DRIFLOON Friday check; MOEMON_TEST_FRIDAY in tests) rather than the PC's time(). VALLEY WINDWORKS' own entry script
+  now running shows DRIFLOON only once the WINDWORKS is freed (0x524E 2): sinnoh_drifloon sets it.
 

@@ -1,4 +1,5 @@
-# DRIFLOON at the VALLEY WINDWORKS on Fridays (tools/sinnoh/legends.py FRIDAYS, s3d_legends.c): with a SINNOH BADGE it
+# DRIFLOON at the VALLEY WINDWORKS on Fridays (tools/sinnoh/legends.py FRIDAYS, s3d_legends.c, and Platinum's own entry
+# script there: shown once the WINDWORKS is freed, VAR_VALLEY_WINDWORKS_STATE 0x524E 2): with a SINNOH BADGE it
 # floats by the door on a Friday (Lv. 15) and not on other days. Needs the 3D pack.
 MODE=1
 TMO=90
