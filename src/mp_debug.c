@@ -1188,6 +1188,17 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
             key = WalkStepKey(wp->x, wp->y);
             score = ((u32)md << 16) | sWDist[wp->y * w + wp->x];
         }
+        if (d == target && tx >= 0)
+        {
+            // (into the map sought by several doors: the one that lets out nearest the tile sought. GRAND LAKE's lobby
+            // on ROUTE 213: its north door is the way to the route's north half, the beach's door goes back down)
+            const struct MapHeader *dh = Overworld_GetMapHeaderByGroupAndId(wp->mapGroup, wp->mapNum);
+            if (dh && dh->events && wp->warpId < dh->events->warpCount)
+            {
+                u32 far = abs(dh->events->warps[wp->warpId].x - tx) + abs(dh->events->warps[wp->warpId].y - ty);
+                score += (far > 255 ? 255 : far) << 8;
+            }
+        }
         if (wp->x == sStickX && wp->y == sStickY && here == sStickMap)
             stick = score, stickKey = key;
         if (score < best)
@@ -4895,6 +4906,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int id = 1, qty = 1;
         sscanf(arg, "%d %d", &id, &qty);
         printf("[test] item %d x%d: %s\n", id, qty, AddBagItem(id, qty) ? "ok" : "FAILED");
+    }
+    else if (strcmp(cmd, "hasitem") == 0)
+    {
+        // hasitem ID - how many the bag holds (0: none)
+        int id = 1, n;
+        sscanf(arg, "%d", &id);
+        for (n = 0; n < 999 && CheckBagHasItem(id, n + 1); n++)
+            ;
+        printf("[test] hasitem %d: %d\n", id, n);
     }
     else if (strcmp(cmd, "unitem") == 0)
     {
