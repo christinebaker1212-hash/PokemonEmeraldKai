@@ -75,6 +75,19 @@ double curGameTime = 0;
 double fixedTimestep = 1.0 / 60.0; // 16.666667ms
 static int sPresents;   // pictures shown this second (MOEMON_FPS_LOG)
 double timeScale = 1.0;
+// (tests, MOEMON_TEST_AUDIO_EXTRA=N: one more sound call every N game frames, the sound card running ahead of a game
+// that can't hold 60 frames a second: the arcade's sound test, 1.185.14)
+static void TestAudioExtra(void)
+{
+    static int sExtra = -1, sCount;
+    if (sExtra < 0)
+        sExtra = getenv("MOEMON_TEST_AUDIO_EXTRA") ? atoi(getenv("MOEMON_TEST_AUDIO_EXTRA")) : 0;
+    if (sExtra > 0 && ++sCount >= sExtra)
+    {
+        sCount = 0;
+        AudioUpdate();
+    }
+}
 bool8 MP_Qol_SkipActive(void);
 struct SiiRtcInfo internalClock;
 
@@ -288,6 +301,7 @@ int main(int argc, char **argv)
             if (ScreenStep())
             {
                 AudioUpdate();
+                TestAudioExtra();
                 sFrameCounter++;
                 lastGameTime = curGameTime;
                 continue;
@@ -298,6 +312,7 @@ int main(int argc, char **argv)
             VDraw();
             RunDMAsAndVBlank();
             AudioUpdate();
+            TestAudioExtra();
             sFrameCounter++;
             lastGameTime = curGameTime;
             continue;

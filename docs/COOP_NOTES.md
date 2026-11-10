@@ -7223,3 +7223,18 @@ library (VAR_CANALAVE_CITY_STATE 0x51A4 stayed 3). StartLibraryTV now holds the 
 (docs/SINNOH_CHECKLIST.md). Test sinnoh_library_explosion. To list every Platinum map script that doesn't convert (the
 `--report` skips them): converter(root, low).check(n) over entries named OnTransition / OnFrame / OnLoad / OnResume.
 The harness's `mp gym solve` in CANALAVE's gym prints the way to each person and door ("+" a platform ridden).
+
+## Arcade sound on a PC that can't hold 60 frames (1.185.14)
+The user (2026-11-10): "performance issues in the arcade - audio is bad on all CPS cores and" PUZZLE BOBBLE. A board's
+sound comes only from its frames, one a game frame (mp_fight.c), while the sound card asks at its own pace; the game's
+own music is made per sound call, so a PC that falls short of 60 game frames a second only hurts the arcade: the
+stream (1.132.1's queue and its 3% nudge) ran dry, with gaps and clicks. src/platform/arcade_fight.c ArcFight_Step: played
+alone (no rollback), the board runs an extra frame, at most two, whenever less than three sound calls' worth would be
+waiting (sAudioPerFrame: the board's pairs a frame, averaged; sAudioCall: a sound call's); online the frames stay
+locked to the other player's. TGM2's board is 61.68 Hz, so it now also runs at its own speed (a few extra frames a
+second). Boards faster than the sound card (PUZZLE BOBBLE's 55.5 kHz) are brought down with a box filter (the pairs
+each sample covers averaged) instead of two neighbours, which folded the high notes back as noise. The session's end
+logs "[arcade] sound: N dry spells, N extra board frames". Tests (with the sets, scratch only):
+MOEMON_TEST_AUDIO_EXTRA=N (sdl2.c: one more sound call every N game frames, a slow PC), MOEMON_ARCADE_NO_CATCHUP=1
+(the old way), MOEMON_ARCADE_AUDIO_LOG=1 (the mixer's state, each dry spell). Measured: PUZZLE BOBBLE 10% slow 72 dry
+spells in 44 s before, 0 after (25% slow: 0); TGM2 87 before, 0 after.

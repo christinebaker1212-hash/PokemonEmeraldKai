@@ -59,6 +59,11 @@ static size_t sStateSize, sPutSize;
 
 static int16_t sAudio[8192 * 2];
 static int sAudioPairs;
+static double sAudioPos;       // (ArcFight_MixAudio: the next pair read, fractional)
+static int sAudioPrimed;
+static double sAudioCall;      // the board's pairs one sound call uses (0: no call yet)
+static double sAudioPerFrame;  // the board's pairs a board frame makes (averaged)
+static unsigned int sAudioDry, sAudioExtra;   // dry spells and extra board frames this session (logged at the end)
 static void AudioRestart(void);
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -203,6 +208,9 @@ static void Forget(void)
 
 static void End(int result)
 {
+    if (sAudioDry || sAudioExtra || getenv("MOEMON_ARCADE_AUDIO_LOG"))
+        printf("[arcade] sound: %u dry spells, %u extra board frames in %u frames\n", sAudioDry, sAudioExtra, sFrames);
+    sAudioDry = sAudioExtra = 0;
     sResult = result;
     sActive = 0;
     Arcade_Close();
@@ -217,7 +225,7 @@ static void RunFrame(const unsigned short buttons[2], int quiet)
 
     Arcade_Frame(p1, p2);
     sFrames++;
-    if (quiet)
+    if (quiet == 1)
     {
         while (Arcade_TakeAudio(scratch, 2048) > 0)
             ;
@@ -230,8 +238,13 @@ static void RunFrame(const unsigned short buttons[2], int quiet)
             AudioRestart();   // nobody's taking it (the sound is off): start again
             room = (int)(sizeof(sAudio) / sizeof(sAudio[0]) / 2);
         }
-        sAudioPairs += Arcade_TakeAudio(sAudio + sAudioPairs * 2, room);
-        Picture();
+        {
+            int got = Arcade_TakeAudio(sAudio + sAudioPairs * 2, room);
+            sAudioPairs += got;
+            sAudioPerFrame = sAudioPerFrame > 0 ? sAudioPerFrame * 0.9 + got * 0.1 : got;
+        }
+        if (quiet != 2)
+            Picture();
     }
     Keep();
 }
@@ -276,10 +289,34 @@ int ArcFight_IsActive(void)
     return sActive;
 }
 
+// (tests: MOEMON_ARCADE_NO_CATCHUP=1, the board one frame a game frame as before 1.185.14)
+static int NoCatchUp(void)
+{
+    static int sNo = -1;
+    if (sNo < 0)
+        sNo = getenv("MOEMON_ARCADE_NO_CATCHUP") != NULL;
+    return sNo;
+}
+
 int ArcFight_Step(const unsigned short buttons[2])
 {
     if (!sActive)
         return 0;
+    // (1.185.14, the user: "performance issues in the arcade - audio is bad on all CPS cores and" PUZZLE BOBBLE) The
+    // board's sound only comes from its frames, one a game frame, so a PC that falls short of 60 game frames a second
+    // (the game's own music is made per sound call and never notices) ran the board's sound dry: gaps and clicks.
+    // Played alone, the board now keeps up with the sound card: an extra frame (or two) whenever less than three sound
+    // calls' worth would be waiting. Online the frames stay locked to the other player's (rollback).
+    if (!sRollback && sAudioPrimed && sAudioCall > 0 && sAudioPerFrame > 0 && !NoCatchUp())
+    {
+        int extra = 0;
+        while (extra < 2 && (sAudioPairs - sAudioPos) + sAudioPerFrame * (extra + 1) < sAudioCall * 3.0)
+        {
+            RunFrame(buttons, 2);
+            extra++;
+        }
+        sAudioExtra += extra;
+    }
     RunFrame(buttons, 0);
     if (sPads.leaveAt != 0 && sFrames >= sPads.leaveAt + (sRollback ? LEAVE_SURE : 0))
         End(MF_RESULT_CANCELLED);
@@ -462,12 +499,11 @@ const char *ArcFight_Error(void)
 // read at its own rate (Arcade_SampleRate) with linear interpolation, the speed nudged by up to 3% to keep about three
 // calls' worth waiting (the board runs a frame per game frame, a little faster or slower than its own clock); it
 // starts once that much is in, and running dry holds the last sample, fading, instead of dropping to silence.
-static double sAudioPos;    // the next sample to read, in pairs from sAudio's start (fractional)
-static int sAudioPrimed;
 static short sAudioLast[2];
 
 static void AudioRestart(void)
 {
+    sAudioPerFrame = 0;
     sAudioPairs = 0;
     sAudioPos = 0;
     sAudioPrimed = 0;
@@ -480,6 +516,15 @@ void ArcFight_MixAudio(short *stereo, int frames, int rate)
 
     if (frames <= 0)
         return;
+    sAudioCall = step * frames;
+    {
+        static int sLog = -1, sN;
+        if (sLog < 0)
+            sLog = getenv("MOEMON_ARCADE_AUDIO_LOG") != NULL;
+        if (sLog && ++sN % 300 == 0)
+            printf("[arcade] mix: call %d, %d frames at %d, waiting %.0f pairs (call %.0f, board frame %.0f), primed %d\n",
+                   sN, frames, rate, sAudioPairs - sAudioPos, sAudioCall, sAudioPerFrame, sAudioPrimed);
+    }
     want = step * frames * 3.0;
     have = sAudioPairs - sAudioPos;
     if (!sAudioPrimed)
@@ -498,7 +543,22 @@ void ArcFight_MixAudio(short *stereo, int frames, int rate)
     {
         int a = (int)sAudioPos;
         double t = sAudioPos - a;
-        if (a + 1 < sAudioPairs)
+        if (step > 1.0 && (int)(sAudioPos + step) < sAudioPairs)
+        {
+            // (a board faster than the sound card, PUZZLE BOBBLE's 55.5 kHz: the pairs this sample covers averaged, a
+            // box filter, so the high notes don't fold back as noise the way picking two neighbours did)
+            int b = (int)(sAudioPos + step), k;
+            long l = 0, r = 0;
+            for (k = a; k < b; k++)
+                l += sAudio[k * 2], r += sAudio[k * 2 + 1];
+            if (b > a)
+            {
+                sAudioLast[0] = (short)(l / (b - a));
+                sAudioLast[1] = (short)(r / (b - a));
+            }
+            sAudioPos += step;
+        }
+        else if (a + 1 < sAudioPairs)
         {
             sAudioLast[0] = (short)(sAudio[a * 2] * (1 - t) + sAudio[a * 2 + 2] * t);
             sAudioLast[1] = (short)(sAudio[a * 2 + 1] * (1 - t) + sAudio[a * 2 + 3] * t);
@@ -508,6 +568,13 @@ void ArcFight_MixAudio(short *stereo, int frames, int rate)
         {
             sAudioLast[0] = (short)(sAudioLast[0] * 15 / 16);   // (dry: the last sample, fading)
             sAudioLast[1] = (short)(sAudioLast[1] * 15 / 16);
+            if (sAudioPrimed)
+            {
+                sAudioDry++;
+                if (getenv("MOEMON_ARCADE_AUDIO_LOG") && sAudioDry < 6)
+                    printf("[arcade] dry at sample %d of %d: pos %.1f of %d pairs, step %.3f, had %.0f\n", i, frames,
+                           sAudioPos, sAudioPairs, step, have);
+            }
             sAudioPrimed = 0;
         }
         stereo[i * 2] = sAudioLast[0];
