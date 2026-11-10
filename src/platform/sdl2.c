@@ -94,6 +94,7 @@ static int sMashCount = 0, sMashInterval = 0;
 static char sUntilName[32];
 static int sWalkX, sWalkY, sWalkFrames;   // walkto
 static int sGotoG, sGotoN, sGotoX, sGotoY, sGotoFrames, sGotoBusy;   // goto
+static int sPickFrames, sPickPhase;   // partypick
 static int sApproachKind, sApproachN, sApproachN2, sApproachFrames, sTalkFrames;   // approach (kinds 3 obj / 4 tile: any region's maps)
 static int sUntilFrames = 0;
 static u16 sUntilKeys = 0;
@@ -1332,6 +1333,35 @@ static void TestHarnessStep(void)
             return;
         }
     }
+    if (sPickFrames > 0)
+    {
+        // partypick [FRAMES]: the screen that picks the POKéMON for a battle beside a partner, as a player picks them
+        // (party_menu.c MP_TestPartyPickKey): A through the talk before it, then a key every 10 frames until it's gone
+        u16 MP_TestPartyPickKey(void);
+        u16 k = MP_TestPartyPickKey();
+        sPickFrames--;
+        if (sPickPhase == 0 && k != 0xFFFF)
+            sPickPhase = 1;
+        if (sPickPhase == 1 && k == 0xFFFF)
+        {
+            printf("[test] frame %lu: partypick done\n", sFrameCounter);
+            fflush(stdout);
+            sPickFrames = 0, sTestKeys = 0;
+            return;
+        }
+        if (sPickFrames == 0)
+        {
+            printf("[test] frame %lu: partypick TIMEOUT\n", sFrameCounter);
+            fflush(stdout);
+            sTestKeys = 0;
+            return;
+        }
+        if (sPickPhase == 0)
+            sTestKeys = (sFrameCounter % 16) < 2 ? A_BUTTON : 0;
+        else
+            sTestKeys = (sFrameCounter % 10) < 2 && k != 0xFFFF ? k : 0;
+        return;
+    }
     if (sGotoFrames > 0 || sApproachFrames > 0)
     {
         // goto G,N X Y / approach KIND N: as a player gets there (mp_debug.c MP_TestGotoKey / MP_TestApproachKey);
@@ -1490,6 +1520,12 @@ static void TestHarnessStep(void)
         {
             printf("%s\n", line + 4 + strspn(line + 4, " "));   // (echo TEXT: a line in the log)
             fflush(stdout);
+            return;
+        }
+        else if (strcmp(cmd, "partypick") == 0)
+        {
+            sPickFrames = 3000, sPickPhase = 0;
+            sscanf(line, "%*s %d", &sPickFrames);
             return;
         }
         else if (strcmp(cmd, "goto") == 0)

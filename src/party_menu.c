@@ -572,6 +572,39 @@ bool8 MP_PartyMenuOpen(void)
     return gMain.callback2 == CB2_UpdatePartyMenu;
 }
 
+// Moemon Kai (tests: the harness's partypick, src/platform/sdl2.c): the key a player presses next on the screen that
+// picks the POKéMON for a battle (a tag battle beside a partner): the first that can enter until there are enough,
+// then CONFIRM. 0xFFFF: no such screen; 0: wait (a fade, a slide)
+u16 MP_TestPartyPickKey(void)
+{
+    u8 max, n = 0, i, j, target = PARTY_SIZE;   // (PARTY_SIZE: CONFIRM)
+    if (gMain.callback2 != CB2_UpdatePartyMenu || gPartyMenu.action != PARTY_ACTION_CHOOSE_MON)
+        return 0xFFFF;
+    max = GetMaxBattleEntries();
+    for (i = 0; i < max; i++)
+        if (gSelectedOrderFromParty[i])
+            n++;
+    for (i = 0; n < max && i < gPlayerPartyCount; i++)
+    {
+        bool8 chosen = FALSE;
+        for (j = 0; j < max; j++)
+            if (gSelectedOrderFromParty[j] == i + 1)
+                chosen = TRUE;
+        if (!chosen && GetBattleEntryEligibility(&gPlayerParty[i]))
+        {
+            target = i;
+            break;
+        }
+    }
+    if (FuncIsActiveTask(Task_HandleSelectionMenuInput))
+        return (gPartyMenu.slotId == target && target < PARTY_SIZE && Menu_GetCursorPos() == 0) ? A_BUTTON : B_BUTTON;
+    if (FuncIsActiveTask(Task_HandleChooseMonInput))
+        return gPartyMenu.slotId == target ? A_BUTTON : DPAD_DOWN;   // (the cursor goes round: party, CONFIRM, CANCEL)
+    if (FuncIsActiveTask(Task_ReturnToChooseMonAfterText))
+        return A_BUTTON;
+    return 0;
+}
+
 // Moemon Co-op: test harness condition "partymenu"
 bool8 MP_PartyMenu_IsOpen(void)
 {

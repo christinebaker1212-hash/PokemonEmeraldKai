@@ -854,14 +854,15 @@ u16 MP_TestApproachMapKey(bool8 obj, s32 a, s32 b, bool8 *done)
             tx = gObjectEvents[id].currentCoords.x - MAP_OFFSET, ty = gObjectEvents[id].currentCoords.y - MAP_OFFSET;
         else
         {
-            // (off the screen, not loaded yet: where the map puts them, until they're near enough to show)
+            // (off the screen, not loaded yet: where the map puts them, until they're near enough to show. The save's
+            // copy of the map's people, which a story script moves: VEILSTONE's DAWN by the warehouse, setobjectxyperm)
             u32 i;
-            for (i = 0; gMapHeader.events && i < gMapHeader.events->objectEventCount; i++)
-                if (gMapHeader.events->objectEvents[i].localId == a)
+            for (i = 0; i < OBJECT_EVENT_TEMPLATES_COUNT; i++)
+                if (gSaveBlock1Ptr->objectEventTemplates[i].localId == a)
                     break;
-            if (!gMapHeader.events || i >= gMapHeader.events->objectEventCount)
+            if (i >= OBJECT_EVENT_TEMPLATES_COUNT)
                 return 0xFFFF;
-            tx = gMapHeader.events->objectEvents[i].x, ty = gMapHeader.events->objectEvents[i].y;
+            tx = gSaveBlock1Ptr->objectEventTemplates[i].x, ty = gSaveBlock1Ptr->objectEventTemplates[i].y;
         }
     }
     else
