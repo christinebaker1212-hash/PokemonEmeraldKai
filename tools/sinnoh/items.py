@@ -3,8 +3,8 @@ as the game's own item constants. Read from pret/pokeplatinum: the visible items
 is 7000 + its place in that list) and the hidden items' table (a hidden item's is 8000 + its place); only the item and
 how many reach the repository.
 
-TM51-TM92 are the game's own (items 618-659, tools/moemon_tms/gen_tm2.py). Story keys (the GALACTIC KEY, the SUITE
-KEY, the LUNAR WING) wait for their scenes.
+TM51-TM92 are the game's own (items 618-659, tools/moemon_tms/gen_tm2.py). Story keys (the SUITE KEY, the LUNAR WING)
+wait for their scenes; the GALACTIC KEY lies on GALACTIC HQ B2F as in Platinum (its doors stand since 1.185.17).
 """
 import functools
 import os
@@ -19,7 +19,7 @@ RENAME = {'ITEM_PARLYZ_HEAL': 'ITEM_PARALYZE_HEAL', 'ITEM_ENERGYPOWDER': 'ITEM_E
           'ITEM_X_DEFENSE': 'ITEM_X_DEFEND',
           'ITEM_HM05': 'ITEM_HM_DEFOG', 'ITEM_HM08': 'ITEM_HM_ROCK_CLIMB',
           'ITEM_BICYCLE': 'ITEM_MTN_BIKE'}   # (SINNOH's own bike: the BICYCLE is KANTO's / JOHTO's)   # (Platinum's HM05 / HM08: this game's are FLASH / DIVE)
-STORY = {'ITEM_GALACTIC_KEY', 'ITEM_SUITE_KEY', 'ITEM_LUNAR_WING'}
+STORY = {'ITEM_SUITE_KEY', 'ITEM_LUNAR_WING'}
 
 _own = None
 

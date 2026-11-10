@@ -7279,4 +7279,8 @@ MOVES` replays moves; the harness's `gymwalk [FRAMES]` walks to CANDICE solving 
 - Platinum's SINNOH_DAY_OF_WEEK (s3d_scrcmd.c) reads the game's calendar (s3d_legends.c Sinnoh_DayOfWeek, as the
   DRIFLOON Friday check; MOEMON_TEST_FRIDAY in tests) rather than the PC's time(). VALLEY WINDWORKS' own entry script
   now running shows DRIFLOON only once the WINDWORKS is freed (0x524E 2): sinnoh_drifloon sets it.
+- 1.185.18: the GALACTIC KEY's item ball (HQ B2F 20,5, flag 0x3575) was held back with the other story keys
+  (tools/sinnoh/items.py STORY): with the doors standing it has to lie there, as in Platinum. sinnoh_galactic_doors picks
+  it up and opens 1F's doors with it. (tools/moemon_gen59/item_audit.py: a Platinum key item in a file put a set where a
+  list was expected.)
 

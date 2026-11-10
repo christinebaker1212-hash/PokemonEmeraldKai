@@ -111,7 +111,7 @@ def sources():
     if first and last:
         for n, i in ids.items():
             if ids[first.group(1)] <= i <= ids[last.group(1)]:
-                found.setdefault(n, []).append('Platinum\'s scripts')
+                found.setdefault(n, set()).add('Platinum\'s scripts')
     return found
 
 

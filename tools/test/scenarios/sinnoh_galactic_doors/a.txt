@@ -6,10 +6,28 @@ wait 90
 mp where
 mp npcs
 mp reach
-mp warp 41,81,24,19
+mp warp 41,86,20,6
+wait 90
+mp face up
+wait 10
+press A 4
+wait 30
+mash A 20 15
+pressuntil A field 3000
+mp hasitem 662
+mp warp 41,81,22,19
 wait 90
 mp where
 mp getflag 0x33A8
+mp npcs
+mp face up
+wait 10
+press A 4
+wait 40
+mash A 30 15
+pressuntil A field 3000
+wait 60
+mp getflag 0x3421
 mp npcs
 shot after
 quit

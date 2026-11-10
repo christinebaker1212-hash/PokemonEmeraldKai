@@ -149,6 +149,11 @@ Sinnoh_EventScript_FullRestore::
 	sinnoh 64, 18, ITEM_FULL_RESTORE, 0
 	end
 
+Sinnoh_EventScript_GalacticKey::
+	finditem ITEM_GALACTIC_KEY, 1
+	sinnoh 64, 18, ITEM_GALACTIC_KEY, 0
+	end
+
 Sinnoh_EventScript_GreatBall::
 	finditem ITEM_GREAT_BALL, 1
 	sinnoh 64, 18, ITEM_GREAT_BALL, 0
