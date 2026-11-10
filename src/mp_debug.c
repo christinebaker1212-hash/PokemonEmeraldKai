@@ -1283,6 +1283,16 @@ u16 MP_TestGotoKey(u8 group, u8 num, s32 tx, s32 ty)
     u8 here = gSaveBlock1Ptr->location.mapNum, hop;
     s32 head = 0, tail = 0, m, i;
     const struct MapHeader *h;
+    // (SINNOH: on foot outdoors with the BICYCLE in the BAG, the walk gets on it, as a player does: a building puts the
+    // player on foot, and ROUTE 207's mud slope is only climbed on the bike)
+    if (S3D_Active() && MP_IsInOverworld() && !ScriptContext_IsEnabled() && Overworld_IsBikingAllowed()
+     && !(gPlayerAvatar.flags & (PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE | PLAYER_AVATAR_FLAG_SURFING
+                                 | PLAYER_AVATAR_FLAG_UNDERWATER))
+     && CheckBagHasItem(ITEM_BICYCLE, 1) && gPlayerAvatar.runningState == NOT_MOVING)
+    {
+        extern void SetPlayerAvatarTransitionFlags(u16 flags);
+        SetPlayerAvatarTransitionFlags(PLAYER_AVATAR_FLAG_MACH_BIKE);
+    }
     if (group != 45 && gSaveBlock1Ptr->location.mapGroup != 45)
         return GotoKeyAnywhere(group, num, tx, ty);
     if (gSaveBlock1Ptr->location.mapGroup == group && here == num)
