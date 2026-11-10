@@ -3257,9 +3257,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         {
             u16 m = ItemIdToBattleMoveId(item);
             u8 pp = gBattleMoves[m].pp;
-            for (i = 0; i < MAX_MON_MOVES - 1 && GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + i) != MOVE_NONE
+            for (i = 0; i < MAX_MON_MOVES && GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + i) != MOVE_NONE
                         && GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + i) != m; i++)
                 ;
+            if (i == MAX_MON_MOVES)
+            {
+                // (all four known: the last that no HM teaches, as a player keeps the field moves the way needs)
+                for (i = MAX_MON_MOVES - 1; i > 0; i--)
+                {
+                    u16 k = GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + i), h;
+                    for (h = 0; h < 8 && ItemIdToBattleMoveId(ITEM_HM01 + h) != k; h++)
+                        ;
+                    if (h == 8 && k != MOVE_ROCK_CLIMB && k != MOVE_DEFOG && k != MOVE_WHIRLPOOL)
+                        break;
+                }
+            }
             SetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + i, &m);
             SetMonData(&gPlayerParty[slot], MON_DATA_PP1 + i, &pp);
             printf("[test] teachhm: slot %d move %d (item %d)\n", slot, m, item);
