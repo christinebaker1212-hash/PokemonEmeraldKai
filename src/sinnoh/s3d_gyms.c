@@ -1699,6 +1699,7 @@ static u8 SunyshoreSolveRoute(void)
     static const s8 sDir[4][2] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};   // (down, up, left, right: sKeys' order - 1)
     u32 head = 0, tail = 0, i;
     s16 px, py, gx = sSnowGoalX, gy = sSnowGoalY;
+    bool8 out = FALSE;
     if (gx < 0)
     {
         // (no tile asked for: the room's far door, the warp nearest the top; in the last room the tile below VOLKNER,
@@ -1708,6 +1709,7 @@ static u8 SunyshoreSolveRoute(void)
         if (FlagGet(MP_Region_BadgeFlag(REGION_SINNOH, 7)))
         {
             // (VOLKNER beaten: the way out, the room's door nearest the bottom, back through the gears)
+            out = TRUE;
             for (w = 0, gy = -1; w < gMapHeader.events->warpCount; w++)
                 if (gMapHeader.events->warps[w].y > gy)
                     gx = gMapHeader.events->warps[w].x, gy = gMapHeader.events->warps[w].y;
@@ -1727,7 +1729,7 @@ static u8 SunyshoreSolveRoute(void)
     PlayerGetDestCoords(&px, &py);
     sQ[0].x = px - MAP_OFFSET, sQ[0].y = py - MAP_OFFSET, sQ[0].turn = SunyshoreTurn(), sQ[0].dir = 0, sQ[0].parent = 0xFFFF;
     if (sQ[0].x == gx && sQ[0].y == gy)
-        return 0;
+        return out ? 1 : 0;   // (on the way out's door: down onto it, as a player leaves by it)
     sFrom[sQ[0].turn][sQ[0].y][sQ[0].x] = 1;
     tail = 1;
     while (head < tail)
