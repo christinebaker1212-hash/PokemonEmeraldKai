@@ -1689,17 +1689,83 @@ static u8 SnowpointSolveRoute(bool8 print)
 
 // The harness's "gymwalk" (SNOWPOINT): the key toward CANDICE whenever the player stands still in the field (0: beside
 // her, 0xFFFF: none now, moving or a script), solved again each time from where the player is and what's broken
+// SUNYSHORE (gymwalk FRAMES X Y): the first move toward tile X, Y of the room, every step and button (a button turns
+// the room's gears as its script does) from where the player stands at the room's turn now. 0: there, 0xFF: no way
+static u8 SunyshoreSolveRoute(void)
+{
+    static u16 sFrom[4][64][32];   // (parent + 1: index into the queue; 0 not reached)
+    static struct { u8 x, y, turn, dir; u16 parent; } sQ[4 * 64 * 32];
+    static const s8 sDir[4][2] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};   // (down, up, left, right: sKeys' order - 1)
+    u32 head = 0, tail = 0, i;
+    s16 px, py, gx = sSnowGoalX, gy = sSnowGoalY;
+    if (gx < 0)
+    {
+        // (no tile asked for: the room's far door, the warp nearest the top; in the last room the tile below VOLKNER,
+        // the leader: the room's person nearest the top)
+        u32 w;
+        gy = 0x7FFF;
+        if (sG.room < 2)
+            for (w = 0; w < gMapHeader.events->warpCount; w++)
+            {
+                if (gMapHeader.events->warps[w].y < gy)
+                    gx = gMapHeader.events->warps[w].x, gy = gMapHeader.events->warps[w].y;
+            }
+        else
+            for (w = 0; w < gMapHeader.events->objectEventCount; w++)
+                if (gMapHeader.events->objectEvents[w].y + 1 < gy)
+                    gx = gMapHeader.events->objectEvents[w].x, gy = gMapHeader.events->objectEvents[w].y + 1;
+    }
+    memset(sFrom, 0, sizeof(sFrom));
+    PlayerGetDestCoords(&px, &py);
+    sQ[0].x = px - MAP_OFFSET, sQ[0].y = py - MAP_OFFSET, sQ[0].turn = SunyshoreTurn(), sQ[0].dir = 0, sQ[0].parent = 0xFFFF;
+    if (sQ[0].x == gx && sQ[0].y == gy)
+        return 0;
+    sFrom[sQ[0].turn][sQ[0].y][sQ[0].x] = 1;
+    tail = 1;
+    while (head < tail)
+    {
+        u8 x = sQ[head].x, y = sQ[head].y, turn = sQ[head].turn;
+        for (i = 0; i < 4; i++)
+        {
+            s32 nx = x + sDir[i][0], ny = y + sDir[i][1], q, nt;
+            u8 id;
+            if (nx < 0 || ny < 0 || nx >= 32 || ny >= 64 || MapGridGetCollisionAt(nx + MAP_OFFSET, ny + MAP_OFFSET)
+             || SunyshoreBlocked(nx, ny, turn))
+                continue;
+            id = GetObjectEventIdByXY(nx + MAP_OFFSET, ny + MAP_OFFSET);
+            if (id != OBJECT_EVENTS_COUNT && id != gPlayerAvatar.objectEventId)
+                continue;
+            q = SunyshoreButtonAt(nx, ny);
+            nt = q > 0 ? (turn + q) % 4 : turn;
+            if (sFrom[nt][ny][nx])
+                continue;
+            sFrom[nt][ny][nx] = head + 1;
+            sQ[tail].x = nx, sQ[tail].y = ny, sQ[tail].turn = nt, sQ[tail].dir = i + 1, sQ[tail].parent = head;
+            if (nx == gx && ny == gy)
+            {
+                u32 at = tail;
+                while (sQ[at].parent != 0)
+                    at = sQ[at].parent;
+                return sQ[at].dir;
+            }
+            tail++;
+        }
+        head++;
+    }
+    return 0xFF;
+}
+
 u16 MP_TestGymKey(void)
 {
     static const u16 sKeys[5] = {0, DPAD_DOWN, DPAD_UP, DPAD_LEFT, DPAD_RIGHT};
     struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
     u8 d;
-    if (sG.gym != GYM_SNOWPOINT)
+    if (sG.gym != GYM_SNOWPOINT && sG.gym != GYM_SUNYSHORE)
         return 0;
     if (!MP_IsInOverworld() || ScriptContext_IsEnabled() || (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_FORCED_MOVE)
      || (pl->heldMovementActive && !pl->heldMovementFinished))
         return 0xFFFF;
-    d = SnowpointSolveRoute(FALSE);
+    d = sG.gym == GYM_SUNYSHORE ? SunyshoreSolveRoute() : SnowpointSolveRoute(FALSE);
     if (d == 0xFF)
         return 0xFFFF;
     return sKeys[d];
