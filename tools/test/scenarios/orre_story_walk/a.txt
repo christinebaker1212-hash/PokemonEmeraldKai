@@ -289,6 +289,13 @@ wait 60
 pressuntillog A 2500 orre: flag 993 = 1
 pressuntil A field 9000
 wait 30
+skipif orreflag:4094 6
+walkto 48 106 600
+mp face up
+wait 10
+pressuntillog A 9000 orre npcs: RUI follows
+pressuntil A field 9000
+wait 30
 skipif orreflag:994 21
 goto 45,2 48 107 12000
 pressuntil A field 3000
@@ -8679,6 +8686,13 @@ wait 60
 pressuntillog A 2500 orre: flag 993 = 1
 pressuntil A field 9000
 wait 30
+skipif orreflag:4094 6
+walkto 48 106 600
+mp face up
+wait 10
+pressuntillog A 9000 orre npcs: RUI follows
+pressuntil A field 9000
+wait 30
 skipif orreflag:994 21
 goto 45,2 48 107 12000
 pressuntil A field 3000
@@ -17067,6 +17081,13 @@ wait 6
 press A 2
 wait 60
 pressuntillog A 2500 orre: flag 993 = 1
+pressuntil A field 9000
+wait 30
+skipif orreflag:4094 6
+walkto 48 106 600
+mp face up
+wait 10
+pressuntillog A 9000 orre npcs: RUI follows
 pressuntil A field 9000
 wait 30
 skipif orreflag:994 21

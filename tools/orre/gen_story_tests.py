@@ -85,6 +85,13 @@ def chain(out, steps, maps):
         # (a scene still running when the wait ends runs on: the field's wait lets it finish)
         block += ['pressuntillog A 2500 orre: flag %d = 1' % flag, 'pressuntil A field 9000', 'wait 30']
         lines += ['skipif orreflag:%d %d' % (flag, len(block))] + block
+        if flag == 993:
+            # (PHENAC: the kidnappers beaten, the sack is examined as a player does it: RUI out, the gate's pen open.
+            # Kai's own flag 4094, RUI follows: no Colosseum flag tells it)
+            sack = ['skipif inmap:45,2 0', 'walkto 48 106 600', 'mp face up', 'wait 10',
+                    'pressuntillog A 9000 orre npcs: RUI follows', 'pressuntil A field 9000', 'wait 30']
+            sack[0] = 'skipif orreflag:4094 %d' % (len(sack) - 1)
+            lines += sack
     lines += ['mp orreget %d' % steps[-1][0], 'quit']
     open(os.path.join(d, 'a.txt'), 'w').write('\n'.join(lines) + '\n')
     open(os.path.join(d, 'conf'), 'w').write(

@@ -104,6 +104,10 @@ def mesh_bytes(m, tex_index):
     flags = 0
     if rm & 0x40000000 or mat.get("alpha", 1.0) < 1.0:
         flags |= 1
+    # (see-through by its vertices alone: HSD's alpha from the vertex colours (RENDER_ALPHA_VTX / _BOTH) with
+    # vertices that aren't solid: AGATE's shrine's tree shadows over the grove, PYRITE's: 7 meshes)
+    if m.has_clr and ((rm >> 13) & 3) >= 2 and len(m.col) and int(m.col[:, 3].min()) < 250:
+        flags |= 1
     if m.flags & 0x8000:
         flags |= 2
     if m.flags & 0x4000:
@@ -284,6 +288,12 @@ def build(src, out):
                 kind = 2 if hsd.is_sky(s) else 0
                 body.append(struct.pack("<B3xI", kind, len(s)))
                 for m in s:
+                    # (a wall screen: a set of one mesh with an 8 x 8 test card, red or a checkerboard, which
+                    # Colosseum draws its picture over at run time: a dark, switched-off screen here)
+                    if len(s) == 1 and 0 <= m.tex < len(f.raw_images) and f.raw_images[m.tex][1:3] == (8, 8):
+                        m.tex = -1
+                        m.material = dict(m.material or {}, diffuse=(14, 18, 26, 255), tex=-1)
+                        m.has_clr = False   # (the material's colour alone)
                     body.append(mesh_bytes(m, remap[m.tex] if 0 <= m.tex < len(remap) else -1))
                 if si < len(ms_list) and f.u32(ms_list[si]):
                     anims += [(first + i, k, p, smp) for i, k, p, smp in set_anims(f, ms_list[si], s)]

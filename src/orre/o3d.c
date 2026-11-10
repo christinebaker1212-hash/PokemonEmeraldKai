@@ -709,6 +709,7 @@ static void FindCamera(void)
 
 // A shot of Colosseum's playing (o3d_cam.c): the view looks through its camera, in the map's world ((x - x0, y,
 // z - z0) * 16 / tile), the picture's centre the screen's, its vertical field of view over Kai's 160 lines
+#define SHOT_LINES 114   // (160 less the message box and its frame)
 static void ShotView(void)
 {
     float eye[3], tgt[3], roll, fov, S, f[3], r[3], u[3], len, cr, sr;
@@ -739,8 +740,11 @@ static void ShotView(void)
         float ri = r[i] * cr + u[i] * sr, ui = u[i] * cr - r[i] * sr;
         sView.right[i] = ri, sView.up[i] = ui, sView.fwd[i] = f[i], sView.eye[i] = eye[i];
     }
-    sView.ax = DISPLAY_WIDTH / 2, sView.ay = DISPLAY_HEIGHT / 2;
-    sView.focal = (DISPLAY_HEIGHT / 2) / tanf(fov * 0.5f * 3.14159265f / 180.0f);
+    // (the shot's picture is the screen above Kai's message box, SHOT_LINES of the 160: Colosseum frames its people
+    // over the whole picture and speaks in bubbles; under Kai's box their bodies, and often all of them, were out of
+    // sight: the user, 2026-11-10. What the shot sees below its own picture lies under the box)
+    sView.ax = DISPLAY_WIDTH / 2, sView.ay = SHOT_LINES / 2;
+    sView.focal = (SHOT_LINES / 2) / tanf(fov * 0.5f * 3.14159265f / 180.0f);
 }
 
 // A player just arrived on a map: the ground of the entry they land on, where its tile has more than one (PHENAC's
