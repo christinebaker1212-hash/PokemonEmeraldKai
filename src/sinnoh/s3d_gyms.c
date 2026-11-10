@@ -1690,7 +1690,8 @@ static u8 SnowpointSolveRoute(bool8 print)
 // The harness's "gymwalk" (SNOWPOINT): the key toward CANDICE whenever the player stands still in the field (0: beside
 // her, 0xFFFF: none now, moving or a script), solved again each time from where the player is and what's broken
 // SUNYSHORE (gymwalk FRAMES X Y): the first move toward tile X, Y of the room, every step and button (a button turns
-// the room's gears as its script does) from where the player stands at the room's turn now. 0: there, 0xFF: no way
+// the room's gears as its script does) from where the player stands at the room's turn now. 0: there, 0xFF: no way.
+// With no tile: on toward VOLKNER, or once his badge is won, back out room by room
 static u8 SunyshoreSolveRoute(void)
 {
     static u16 sFrom[4][64][32];   // (parent + 1: index into the queue; 0 not reached)
@@ -1704,7 +1705,14 @@ static u8 SunyshoreSolveRoute(void)
         // the leader: the room's person nearest the top)
         u32 w;
         gy = 0x7FFF;
-        if (sG.room < 2)
+        if (FlagGet(MP_Region_BadgeFlag(REGION_SINNOH, 7)))
+        {
+            // (VOLKNER beaten: the way out, the room's door nearest the bottom, back through the gears)
+            for (w = 0, gy = -1; w < gMapHeader.events->warpCount; w++)
+                if (gMapHeader.events->warps[w].y > gy)
+                    gx = gMapHeader.events->warps[w].x, gy = gMapHeader.events->warps[w].y;
+        }
+        else if (sG.room < 2)
             for (w = 0; w < gMapHeader.events->warpCount; w++)
             {
                 if (gMapHeader.events->warps[w].y < gy)
