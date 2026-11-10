@@ -546,6 +546,40 @@ static bool8 WalkUpper(s16 x, s16 y, float h)
 #define WSEEN_GET(n, e, up) (sWSeen[WSEEN_BIT(n, e, up) >> 3] & (1 << (WSEEN_BIT(n, e, up) & 7)))
 #define WSEEN_SET(n, e, up) (sWSeen[WSEEN_BIT(n, e, up) >> 3] |= 1 << (WSEEN_BIT(n, e, up) & 7))
 
+// a STRENGTH boulder of this map at (x, y) (map coordinates) that isn't out on the field (off the screen)
+static bool8 UnseenBoulderAt(s16 x, s16 y)
+{
+    extern const u8 EventScript_StrengthBoulder[];
+    u32 i, n = gMapHeader.events ? gMapHeader.events->objectEventCount : 0;
+    u8 id;
+    for (i = 0; i < n && i < OBJECT_EVENT_TEMPLATES_COUNT; i++)
+    {
+        const struct ObjectEventTemplate *o = &gSaveBlock1Ptr->objectEventTemplates[i];
+        if (o->x == x && o->y == y && o->localId != 0 && !(o->flagId && FlagGet(o->flagId))
+         && o->script == EventScript_StrengthBoulder
+         && TryGetObjectEventIdByLocalIdAndMap(o->localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &id))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+static bool8 UnseenStanderAt(s16 x, s16 y);
+
+// a STRENGTH boulder at map (x, y) that a push on (dx, dy) moves: the tile beyond it open and free
+static bool8 PushableAt(s16 x, s16 y, s8 dx, s8 dy, s32 w, s32 h)
+{
+    extern const u8 EventScript_StrengthBoulder[];
+    u8 id = GetObjectEventIdByXY(x + MAP_OFFSET, y + MAP_OFFSET);
+    s16 bx = x + dx, by = y + dy;
+    if ((id == OBJECT_EVENTS_COUNT ? !UnseenBoulderAt(x, y) : GetObjectEventScriptPointerByObjectEventId(id) != EventScript_StrengthBoulder)
+     || bx < 0 || by < 0 || bx >= w || by >= h)
+        return FALSE;
+    return !MapGridGetCollisionAt(bx + MAP_OFFSET, by + MAP_OFFSET)
+        && GetObjectEventIdByXY(bx + MAP_OFFSET, by + MAP_OFFSET) == OBJECT_EVENTS_COUNT && !UnseenStanderAt(bx, by)
+        && !IsWarpAt(bx, by)
+        && !MetatileBehavior_IsSurfableWaterOrUnderwater(MapGridGetMetatileBehaviorAt(bx + MAP_OFFSET, by + MAP_OFFSET));
+}
+
 static bool8 RockWallAt(s32 x, s32 y)
 {
     u8 b = MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET);
@@ -562,6 +596,7 @@ static void WalkSearch(void)
     bool8 canSurf = surfing || (MP_Region_HasFieldMoveBadge(4) && PartyHasMonWithSurf());
     bool8 canWhirl = MP_Region_HasFieldMoveBadge(8) && MP_PartyCanUseFieldMove(MOVE_WHIRLPOOL);
     bool8 canFall = MP_Region_HasFieldMoveBadge(7) && MP_PartyCanUseFieldMove(MOVE_WATERFALL);
+    bool8 canPush = MP_Region_HasFieldMoveBadge(3) && MP_PartyCanUseFieldMove(MOVE_STRENGTH);
     // (SINNOH's rock walls: Platinum's ROCK CLIMB, with the ICICLE BADGE: src/sinnoh/s3d_misc.c S3D_RockClimbSlot)
     bool8 canClimb = S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)
                   && FlagGet(MP_Region_BadgeFlag(REGION_SINNOH, 6)) && MP_PartyCanUseFieldMove(MOVE_ROCK_CLIMB);
@@ -659,7 +694,11 @@ static void WalkSearch(void)
             {
                 col = GetCollisionAtCoords(&t, nx + MAP_OFFSET, ny + MAP_OFFSET, dirs[d]);
                 if (col == COLLISION_NONE && UnseenStanderAt(nx, ny))
-                    continue;
+                {
+                    if (surf || !canPush || !PushableAt(nx, ny, dx[d], dy[d], w, h))
+                        continue;
+                    col = COLLISION_OBJECT_EVENT;   // (a boulder off the screen: pushed on as one out, below)
+                }
                 if (col == COLLISION_NONE)
                 {
                     // (surfing goes on over any tile at the water's level, as the game: a waterfall's foot that
@@ -684,6 +723,14 @@ static void WalkSearch(void)
                     how |= WS_A;   // (the CARD KEY's door: A facing it opens it)
                 else if (col == COLLISION_OBJECT_EVENT && ClearableAt(nx + MAP_OFFSET, ny + MAP_OFFSET))
                     how |= WS_A, ne = ElevationAfter(e, nx + MAP_OFFSET, ny + MAP_OFFSET, cx + MAP_OFFSET, cy + MAP_OFFSET);
+                else if (col == COLLISION_OBJECT_EVENT && !surf && canPush && PushableAt(nx, ny, dx[d], dy[d], w, h))
+                {
+                    // (a STRENGTH boulder with room beyond it: A facing it once to use STRENGTH, then walking into it
+                    // pushes it on. Planned as gone once pushed; the way is planned again from where it stops)
+                    if (!FlagGet(FLAG_SYS_USE_STRENGTH))
+                        how |= WS_A;
+                    ne = ElevationAfter(e, nx + MAP_OFFSET, ny + MAP_OFFSET, cx + MAP_OFFSET, cy + MAP_OFFSET);
+                }
                 else if (col != COLLISION_OBJECT_EVENT && !surf && IsWarpAt(nx, ny)
                       && !IsArrowWarpBehavior(MapGridGetMetatileBehaviorAt(nx + MAP_OFFSET, ny + MAP_OFFSET)))
                     ;   // (a door: solid, walked into it warps; an end, as every warp. A solid arrow warp is no way:
@@ -740,6 +787,57 @@ static void WalkSearch(void)
 }
 
 // (once a frame at most)
+// the walk's view of this map from where the player stands (mp walkdump, MOEMON_GOTO_DUMP): '.' reached, ',' open
+// but not reached, '#' solid, C a ROCK CLIMB wall, F a waterfall, ~ water, B / b a STRENGTH boulder (out / off the
+// screen), R a ROCK SMASH rock, o someone, u someone off the screen, W a warp, @ the player
+static void WalkDump(void)
+{
+    extern const u8 EventScript_StrengthBoulder[], EventScript_RockSmash[];
+    s32 w = gMapHeader.mapLayout->width, h = gMapHeader.mapLayout->height, x, y;
+    for (y = 0; y < h && y < 96; y++)
+    {
+        char line[200];
+        for (x = 0; x < w && x < 190; x++)
+        {
+            u8 id = GetObjectEventIdByXY(x + MAP_OFFSET, y + MAP_OFFSET);
+            const u8 *sc = id < OBJECT_EVENTS_COUNT ? GetObjectEventScriptPointerByObjectEventId(id) : NULL;
+            u8 b = MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET);
+            char c = sWStep[y * w + x] != WS_NONE ? '.' : RockWallAt(x, y) ? 'C'
+                   : MetatileBehavior_IsWaterfall(b) ? 'F' : MetatileBehavior_IsSurfableWaterOrUnderwater(b) ? '~'
+                   : MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET) ? '#' : ',';
+            if (id == gPlayerAvatar.objectEventId)
+                c = '@';
+            else if (sc == EventScript_StrengthBoulder || (id == OBJECT_EVENTS_COUNT && UnseenBoulderAt(x, y)))
+                c = id == OBJECT_EVENTS_COUNT ? 'b' : 'B';
+            else if (sc == EventScript_RockSmash)
+                c = 'R';
+            else if (id < OBJECT_EVENTS_COUNT)
+                c = 'o';
+            else if (UnseenStanderAt(x, y))
+                c = 'u';
+            else if (IsWarpAt(x, y))
+                c = 'W';
+            line[x] = c;
+        }
+        line[x] = 0;
+        printf("[test] walkdump %2d %s\n", (int)y, line);
+    }
+    for (y = 0; y < h; y++)
+        for (x = 0; x < w; x++)
+        {
+            u8 id = GetObjectEventIdByXY(x + MAP_OFFSET, y + MAP_OFFSET);
+            if (id < OBJECT_EVENTS_COUNT && id != gPlayerAvatar.objectEventId
+             && GetObjectEventScriptPointerByObjectEventId(id) == EventScript_RockSmash)
+            {
+                struct ObjectEvent t = gObjectEvents[gPlayerAvatar.objectEventId];
+                t.currentCoords.x = x + MAP_OFFSET, t.currentCoords.y = y - 1 + MAP_OFFSET, t.currentElevation = 3;
+                printf("[test] walkdump rock %d,%d: col from above %d, elev %d/%d, clearable %d\n", (int)x, (int)y,
+                       GetCollisionAtCoords(&t, x + MAP_OFFSET, y + MAP_OFFSET, DIR_SOUTH), gObjectEvents[id].currentElevation,
+                       MapGridGetElevationAt(x + MAP_OFFSET, y + MAP_OFFSET), ClearableAt(x + MAP_OFFSET, y + MAP_OFFSET));
+            }
+        }
+}
+
 static void WalkSearchNow(void)
 {
     unsigned long Platform_FrameCount(void);
@@ -1299,6 +1397,16 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
     else if (best != 0xFFFFFFFF)
         sStickX = bx, sStickY = by, sStickMap = here;
     NoteBump(bestKey);
+    if (getenv("MOEMON_GOTO_DUMP"))
+    {
+        static u32 sDumpMd = 0xFFFFFFFF;
+        if ((best >> 16) != sDumpMd)
+        {
+            printf("[test] goto dump: at %d,%d md %u -> %u\n", px, py, (unsigned)sDumpMd, (unsigned)(best >> 16));
+            sDumpMd = best >> 16;
+            WalkDump();
+        }
+    }
     if (getenv("MOEMON_GOTO_DEBUG") && (Platform_FrameCount() % 60) == 0)
         printf("[test] goto: map %d.%d (prev %04x arr %04x %d,%d) (in by warp %d, %d,%d) at %d,%d best %08x key %04x via %04x\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, sPrev, sArrMap, sArrX, sArrY, gSaveBlock1Ptr->location.warpId, gSaveBlock1Ptr->location.x, gSaveBlock1Ptr->location.y, px, py, (unsigned)best, bestKey, sChosen);
     return bestKey;
@@ -3242,6 +3350,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // mp heal: the party healed as at a POKéMON CENTER (the walk-only runs: a stop at one along the way)
         HealPlayerParty();
         printf("[test] heal: the party is healed\n");
+    }
+    else if (strcmp(cmd, "walkdump") == 0)
+    {
+        // mp walkdump: this map as the walk sees it from where the player stands (WalkDump)
+        WalkSearch();
+        WalkDump();
     }
     else if (strcmp(cmd, "teachhm") == 0)
     {
