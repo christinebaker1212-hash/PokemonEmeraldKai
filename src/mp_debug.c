@@ -537,7 +537,7 @@ static s16 sWFromX = -1, sWFromY = -1;
 // ground nearest the height the player comes at, s3d.c S3D_TileFloor)
 static bool8 WalkUpper(s16 x, s16 y, float h)
 {
-    float lo = S3D_TileFloor(x, y, -1e9f), at = S3D_TileFloor(x, y, h);
+    float lo = S3D_TileFloor(x, y, -1e5f), at = S3D_TileFloor(x, y, h);
     return lo == lo && at == at && at > lo + 8.0f;
 }
 #define WSEEN_BIT(n, e, up) (((n) * 16 + (e)) * 2 + ((up) ? 1 : 0))
@@ -582,7 +582,7 @@ static void WalkSearch(void)
             layer = (q & 4) != 0, step = q >> 24, d;   // (the state's own first step: a tile's other states, the deck
                                                        // over it or the ground under it, may have come another way)
         s16 cx = c % w, cy = c / w;
-        float hc = s3d ? S3D_TileFloor(cx, cy, layer ? 1e9f : -1e9f) : NAN;
+        float hc = s3d ? S3D_TileFloor(cx, cy, layer ? 1e5f : -1e5f) : NAN;
         gS3dPlanHeight = hc;   // (SINNOH's bridges and slopes: the step from here at the plan's height, s3d_gyms.c)
         if (!first && IsWarpAt(cx, cy) && !LandingOnlyWarp(cx, cy))
             continue;   // (a warp takes the player away: an end, never a way through. Not one the game never takes:

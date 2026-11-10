@@ -113,7 +113,7 @@ bool8 Sinnoh_MovePlayerOnBike(u8 direction, u16 newKeys, u16 heldKeys)
 // layers do. ROUTE 210 NORTH's lower bridge crosses under the bike bridge on the way to CELESTIC TOWN)
 static bool8 UnderTop(s16 x, s16 y, float h)
 {
-    float top = S3D_TileFloor(x - MAP_OFFSET, y - MAP_OFFSET, 1e9f), at = S3D_TileFloor(x - MAP_OFFSET, y - MAP_OFFSET, h);
+    float top = S3D_TileFloor(x - MAP_OFFSET, y - MAP_OFFSET, 1e5f), at = S3D_TileFloor(x - MAP_OFFSET, y - MAP_OFFSET, h);
     return h == h && top == top && at == at && top - at > 12.0f;
 }
 

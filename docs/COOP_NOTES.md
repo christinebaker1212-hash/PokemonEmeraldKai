@@ -7211,3 +7211,6 @@ more than 12 below) is on the ground beneath and the tile counts as plain there:
 BICYCLE's own turn check, and getting off (item_use.c via Sinnoh_OnBikeBridge). ROUTE 210 NORTH's lower bridge
 (row 18, height 64) crosses under the bike bridge at x 21 (height 128) on the way to CELESTIC TOWN; the player
 could only turn north / south there and never got across. Test sinnoh_bike_under.
+1.185.12: UnderTop asks S3D_TileFloor for the top ground nearest 1e5, not 1e9. A float near 1e9 is spaced 64 apart,
+so |h - 1e9| came out equal for a deck and the ground under it and the first height stored won, sometimes the lower
+one: the tile then never read as under its bridge. Never pass S3D_TileFloor a sentinel past about 1e5.
