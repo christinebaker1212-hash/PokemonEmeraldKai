@@ -6,6 +6,8 @@
 #include "o3d.h"
 #include "orre_sound.h"
 
+bool8 Orre_BattleSongOn(void);   // orre_battle.c
+
 void Orre_AudioFrame(float *buffer, s32 count)
 {
     static bool8 sWasInOrre;
@@ -14,5 +16,6 @@ void Orre_AudioFrame(float *buffer, s32 count)
     if (sWasInOrre && !inOrre)
         OrreSound_Silence();
     sWasInOrre = inOrre;
-    OrreSound_Mix(buffer, count, 42048, inOrre && !gMain.inBattle);
+    // (a battle: Colosseum's own song for it when it has one, orre_battle.c; else Kai's, the room's song waiting)
+    OrreSound_Mix(buffer, count, 42048, inOrre && (!gMain.inBattle || Orre_BattleSongOn()));
 }

@@ -7013,10 +7013,14 @@ u16 GetBattleBGM(void)
     }
 }
 
+bool8 Orre_BattleMusic(void);   // Moemon Kai: src/orre/orre_battle.c: an ORRE battle's own song, Colosseum's
+
 void PlayBattleBGM(void)
 {
     ResetMapMusic();
     m4aMPlayAllStop();
+    if (Orre_BattleMusic())
+        return;
     PlayBGM(GetBattleBGM());
 }
 
@@ -7024,6 +7028,8 @@ void PlayMapChosenOrBattleBGM(u16 songId)
 {
     ResetMapMusic();
     m4aMPlayAllStop();
+    if (Orre_BattleMusic())
+        return;
     if (songId)
         PlayNewMapMusic(songId);
     else

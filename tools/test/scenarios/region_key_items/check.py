@@ -5,10 +5,13 @@ import sys
 log = open(sys.argv[1] + "/a.log", errors="replace").read()
 want = {
     "in JOHTO": {259: 0, 262: 0, 399: 1, 339: 0, 275: 0},   # (HOENN unbeaten: its tools, story item and HM stay)
-    "JOHTO beaten": {262: 1, 339: 0},                         # (JOHTO's rod travels for good; HM01 is HOENN's)
-    "back in HOENN": {259: 1, 262: 1, 339: 0, 275: 1},        # (the stash back; one rod: HOENN's merged)
+    "JOHTO beaten": {262: 1, 339: 1},                         # (JOHTO's rod travels for good; HM01 back from the GLOBAL PC:
+                                                              # the region the player is in is beaten)
+    "back in HOENN": {259: 1, 262: 1, 339: 0, 275: 1},        # (the stash back; one rod: HOENN's merged; the HM in the
+                                                              # GLOBAL PC again: HOENN isn't beaten)
     "HOENN beaten": {339: 1},                                 # (HM01 out of the GLOBAL PC)
-    "in KANTO": {259: 1, 262: 1, 339: 1, 275: 0, 399: 1},     # (HOENN beaten: its bike travels, its ticket stays)
+    "in KANTO": {259: 1, 262: 1, 339: 0, 275: 0, 399: 1},     # (HOENN beaten: its bike travels, its ticket stays; an HM
+                                                              # never travels: KANTO isn't beaten)
 }
 parts = re.split(r"\[walk\] |\[ki\] ", log)
 bad = 0

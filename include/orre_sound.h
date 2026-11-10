@@ -12,6 +12,7 @@
 int OrreSound_Play(uint32_t id, uint32_t volume, int bgm);
 void OrreSound_Stop(uint32_t id, uint32_t fadeMs);       // (that sound; a song fades)
 void OrreSound_StopBgm(uint32_t fadeMs);                 // (the song playing, whichever it is)
+void OrreSound_StopAmbient(uint32_t fadeMs);             // (the second song: the wind, started as an effect)
 void OrreSound_Volume(uint32_t id, uint32_t volume, uint32_t fadeMs);
 void OrreSound_MasterVolume(uint32_t volume, uint32_t fadeMs);
 uint32_t OrreSound_Bgm(void);                            // (the song playing: its id, 0 none)

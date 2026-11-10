@@ -44,6 +44,10 @@
 #include "constants/species.h"
 #include "constants/trainers.h"
 #include "mp.h"
+#include "sound.h"
+#include "orre_sound.h"
+
+void Orre_Vm_RoomSound(void);   // orre_vm.c
 
 #define BATTLES 0x109FBC
 #define BATTLE_COUNT 0x14A6B8
@@ -334,6 +338,61 @@ bool8 Orre_PrepareBattle(u16 battle)
     return TRUE;
 }
 
+// ---- the battle's song, Colosseum's own (fightEncountGetBgmSndDataId): the battle's (+ 0xC), else its battle
+// floor's (+ 4 its row of the battle floors, .data 0x8F974, 24 bytes: + 0xC), else its first trainer's kind's
+// (+ 8), else none. A sound id of Colosseum's table (include/orre_sound.h)
+#define FIGHT_FLOORS 0x8F974
+#define FIGHT_FLOOR_SIZE 24
+#define FIGHT_FLOOR_ROWS 50
+static bool8 sBattleSong;
+
+static u32 BattleSong(void)
+{
+    const u8 *b = Rec(BATTLES, BATTLE_COUNT, BATTLE_SIZE, sBattle), *t, *k;
+    u32 id, i;
+    if (b == NULL || sBattle == 0)
+        return 0;
+    if ((id = Be32(b + 0xC)) != 0)
+        return id;
+    if (Be16(b + 4) < FIGHT_FLOOR_ROWS && sData != NULL
+     && (id = Be32(sData + FIGHT_FLOORS + Be16(b + 4) * FIGHT_FLOOR_SIZE + 0xC)) != 0)
+        return id;
+    for (i = 0; i < 4; i++)
+    {
+        u16 tr = Be16(b + 0x18 + 8 * i);
+        if (tr != 0 && (t = Rec(TRAINERS, TRAINER_COUNT, TRAINER_SIZE, tr)) != NULL
+         && (k = Rec(KINDS, KIND_COUNT, KIND_SIZE, Be16(t + 2))) != NULL && (id = Be32(k + 8)) != 0)
+            return id;
+    }
+    return 0;
+}
+
+// pokemon.c PlayBattleBGM / PlayMapChosenOrBattleBGM: an ORRE battle starts Colosseum's song for it in place of
+// Kai's (TRUE: Kai plays none). The wind and the room's song give way; the room's sound script brings them back
+bool8 Orre_BattleMusic(void)
+{
+    u32 id = BattleSong();
+    if (id <= 1)
+        return FALSE;
+    OrreSound_StopAmbient(300);
+    if (!OrreSound_Play(id, 127, TRUE))
+        return FALSE;
+    MPNet_Log("orre: battle %d plays Colosseum's song %u", sBattle, id);
+    return sBattleSong = TRUE;
+}
+
+// the audio frame (orre_audio.c): Colosseum's song plays through this battle; Kai's own music starting in it (the
+// victory fanfare) ends the song
+bool8 Orre_BattleSongOn(void)
+{
+    if (sBattleSong && gMain.inBattle && IsBGMPlaying())
+    {
+        OrreSound_StopBgm(150);
+        sBattleSong = FALSE;
+    }
+    return sBattleSong;
+}
+
 bool8 Orre_BattleLossWhitesOut(void)
 {
     const u8 *b = Rec(BATTLES, BATTLE_COUNT, BATTLE_SIZE, sBattle);
@@ -345,6 +404,8 @@ void Orre_BattleEnded(bool8 won)
     sResult = won ? ORRE_BATTLE_WON : ORRE_BATTLE_LOST;
     MPNet_Log("orre: battle %d %s", sBattle, won ? "won" : "lost");
     sBattle = 0;
+    sBattleSong = FALSE;
+    Orre_Vm_RoomSound();   // (Colosseum's floorStartSoundScript: the room's song and wind again)
     Orre_People_BattleEnd();
     Orre_VmBattleDone();   // (a scene's battle: its script goes on with the result, src/orre/orre_vm.c)
 }

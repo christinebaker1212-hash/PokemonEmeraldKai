@@ -133,6 +133,10 @@ void MP_RegionItems_SetFree(u16 item)
 bool8 MP_RegionItems_Travels(u16 item)
 {
     u8 k = Kind(item);
+    // (an HM never goes along: customs puts it in the GLOBAL PC, and it's back, merged with the region's own, once
+    // the region the player is in is beaten: the user, 2026-11-10. Before, one from a beaten region travelled)
+    if (IS_ITEM_HM(item))
+        return FALSE;
     if (k == KI_TRAVEL || IsFree(item))
         return TRUE;
     return k == KI_TOOL && MP_Region_Cleared(Here());
@@ -328,25 +332,22 @@ void MP_RegionItems_Update(void)
             if (item != ITEM_NONE && Kind(item) == KI_TOOL)
                 MP_RegionItems_SetFree(item);
         }
-        for (i = 0; i < gBagPockets[TMHM_POCKET].capacity; i++)
-        {
-            u16 item = gBagPockets[TMHM_POCKET].itemSlots[i].itemId;
-            if (IS_ITEM_HM(item))
-                MP_RegionItems_SetFree(item);
-        }
-    }
-    for (i = ITEM_HM01; i < ITEMS_COUNT; i++)
-    {
-        u8 from;
-        if (!IS_ITEM_HM(i) || IsFree(i) || !MP_Region_GlobalItemHas(i))
-            continue;
-        from = HmRegions(i);
-        if ((from & cleared) || (from == 0 && (cleared & (1 << here))))
-            MP_RegionItems_SetFree(i);
+        // (the GLOBAL PC's HMs: back in a beaten region, each merged with the BAG's own into one)
+        for (i = ITEM_HM01; i < ITEMS_COUNT; i++)
+            if (IS_ITEM_HM(i) && MP_Region_GlobalItemHas(i))
+            {
+                Merge(i);
+                MPNet_Log("region items: HM %u back from the GLOBAL PC (region %u is beaten)", i, here);
+            }
     }
     for (i = 0; i < FREE_SLOTS; i++)
+    {
+        // (an HM freed by the rule before: no longer; it follows the rule above)
+        if (IS_ITEM_HM(sKi.free[i]))
+            sKi.free[i] = ITEM_NONE;
         if (sKi.free[i] != ITEM_NONE)
             Merge(sKi.free[i]);
+    }
 }
 
 // The key items waiting in REGION's stash (the test harness, the customs line)

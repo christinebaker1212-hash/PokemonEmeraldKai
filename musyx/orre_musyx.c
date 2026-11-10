@@ -197,6 +197,11 @@ void OrreSound_StopBgm(uint32_t fadeMs)
     StopSlot(1, fadeMs);
 }
 
+void OrreSound_StopAmbient(uint32_t fadeMs)
+{
+    StopSlot(0, fadeMs);
+}
+
 void OrreSound_Stop(uint32_t id, uint32_t fadeMs)
 {
     if (!s.ok || id == 0 || id >= SOUND_COUNT)

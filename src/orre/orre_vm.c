@@ -1662,6 +1662,18 @@ u16 Orre_VmHolding(void)
     return sHolder != NULL;
 }
 
+// The room's sound script again (its floor record's + 0x28), as Colosseum runs it after a battle
+void Orre_Vm_RoomSound(void)
+{
+    u16 room = 0;
+    const u8 *floor;
+    struct Thread *t;
+    if (O3D_RoomFile(&room) == NULL || (floor = FloorOf(room)) == NULL || Be32(floor + 0x28) == 0)
+        return;
+    if ((t = Start(Be32(floor + 0x28), 0, NULL, TRUE)) != NULL)
+        Run(t);
+}
+
 // After the battle the hold script started: the thread goes on with its result
 void Orre_VmBattleDone(void)
 {

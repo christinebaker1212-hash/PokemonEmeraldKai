@@ -161,7 +161,13 @@ The older notes per part:
   228 the song playing; a room's sound script (its floor record's + 0x28) runs first on arriving.
   MOEMON_ORRE_SOUND_LOG=1 logs every start. Every room's song starts (orre_all_maps with the log: 89 starts, none
   refused).
-- **Not yet**: Colosseum's battle songs (145 fightStartBgm: Kai's play), reverb, the fanfares' pause of the music
+- **Battle songs** (the user, 2026-11-10: "the cries aren't necessary, but the battle songs are"): an ORRE battle
+  plays Colosseum's song for it (orre_battle.c BattleSong, as fightEncountGetBgmSndDataId: the battle's + 0xC, else
+  its battle floor's (.data 0x8F974, 24 bytes a row) + 0xC, else its trainer's kind's + 8) in place of Kai's
+  (pokemon.c PlayBattleBGM / PlayMapChosenOrBattleBGM ask Orre_BattleMusic first); Kai's victory fanfare starting ends
+  it (Orre_BattleSongOn); after the battle the room's sound script runs again (Orre_Vm_RoomSound: Colosseum's
+  floorStartSoundScript).
+- **Not yet**: reverb, the fanfares' pause of the music
   (130), 3D positions of effects, the opening's and world map's songs (their C code's calls), the cries in scenes.
 
 ## Colosseum's scripts (src/orre/orre_vm.c, 2026-11-08)

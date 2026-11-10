@@ -32,8 +32,11 @@ The open points, answered (2026-11-08):
   stay until the region they came from is beaten (the player is in it with the tool in the BAG: MP_RegionItems_Update,
   on every map load), then travel for good. A tool with the same name elsewhere is the same item: every copy in the
   stashes and the GLOBAL PC merges into the one in the BAG.
-- **HMs**: in the GLOBAL PC until the region they came from is beaten, then merged into the BAG (one each) and they
-  travel; an HM in the BAG in a beaten region travels too. The GLOBAL PC never hands HMs to an item PC.
+- **HMs** (the user, 2026-11-10: "they're put into the GLOBAL PC, and like-HMs are merged in the bag after the Elite
+  Four"): customs always puts them in the GLOBAL PC, from a beaten region too; they come back, each merged with the
+  BAG's own into one, once the region the player is in is beaten (MP_RegionItems_Update, on every map load). Until
+  1.187.1 an HM from a beaten region travelled, so a champion arrived with SURF. The GLOBAL PC never hands HMs to an
+  item PC.
 - **Story items** (everything else in the KEY ITEMS pocket: tickets, fossils, keys, letters, scopes, orbs...): always
   stay in their region.
 - **SINNOH's bike** is the MTN. BIKE (item 811, Platinum's BICYCLE in its converted scripts: tools/sinnoh/gen_scripts.py,
