@@ -373,6 +373,8 @@ def load_model(f, root_joint):
             inv[j] = m
     meshes = []
     for j, d, p, mat, jflags, jm in items:
+        if jflags & JOBJ_HIDDEN:
+            continue   # (a joint Colosseum never draws: the mirror floors' blue planes, a test card: 33 in the rooms)
         corners = decode_pobj(f, p, None)
         if not corners:
             continue

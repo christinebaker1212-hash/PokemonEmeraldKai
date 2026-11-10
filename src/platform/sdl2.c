@@ -1293,6 +1293,21 @@ static void TestHarnessStep(void)
 {
     char line[1200];
 
+    {
+        // MOEMON_AUTOSHOT=N: a screenshot every N frames of the whole run (auto_<frame>_<group>_<map>.bmp), for
+        // looking through a long walk afterwards
+        static int sAuto = -1;
+        if (sAuto < 0)
+            sAuto = getenv("MOEMON_AUTOSHOT") ? atoi(getenv("MOEMON_AUTOSHOT")) : 0;
+        if (sAuto > 0 && sFrameCounter % sAuto == 0 && gSaveBlock1Ptr != NULL)
+        {
+            char name[96];
+            snprintf(name, sizeof(name), "auto_%08lu_%d_%d", sFrameCounter,
+                     gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+            Platform_SaveScreenshot(name);
+        }
+    }
+
     if (sBurstLeft > 0)
     {
         if ((sBurstLeft-- % sBurstStep) == 0)

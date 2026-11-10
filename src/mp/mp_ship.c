@@ -578,7 +578,7 @@ void MP_Hoenn_SettleIn(bool8 male);
 bool8 MP_IsInOverworld(void);
 bool8 MP_IsLocalFree(void);
 
-static const u8 sProfNames[REGION_COUNT][12] = {_("PROF. BIRCH"), _("PROF. OAK"), _("PROF. ELM"), _("PROF. ROWAN")};
+static const u8 sProfNames[REGION_COUNT][12] = {_("PROF. BIRCH"), _("PROF. ELM"), _("PROF. OAK"), _("PROF. ROWAN")};   // (HOENN, JOHTO, KANTO, SINNOH)
 // where the sailor comes to at the pier (beside where the ship lets the player off: sRegionPorts / MP_Region_FirstBoatIn)
 static const struct { u16 gfx; s8 x, y; } sPierGuide[REGION_COUNT] = {
     {OBJ_EVENT_GFX_SAILOR, 12, 11}, {OBJ_EVENT_GFX_QZ_49, 8, 13}, {OBJ_EVENT_GFX_QZ_16193, 24, 29}, {OBJ_EVENT_GFX_SINNOH_SAILOR, 8, 20},

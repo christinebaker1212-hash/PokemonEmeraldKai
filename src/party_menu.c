@@ -1470,6 +1470,12 @@ static void HandleChooseMonSelection(u8 taskId, s8 *slotPtr)
     {
         gPartyMenu.task(taskId);
     }
+    else if (*slotPtr >= 0 && *slotPtr < PARTY_SIZE && GetMonData(&gPlayerParty[*slotPtr], MON_DATA_SPECIES) == SPECIES_NONE)
+    {
+        // Moemon Kai: an empty slot (an empty party's screen, reached from the BAG): nothing to choose, never its
+        // SUMMARY (a crash: the user, 2026-11-10)
+        PlaySE(SE_FAILURE);
+    }
     else
     {
         switch (gPartyMenu.action)

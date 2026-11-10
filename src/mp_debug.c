@@ -484,6 +484,17 @@ static bool8 IsArrowWarpBehavior(u8 b)
 static bool8 TakenWarpBehavior(u8 b);
 static bool8 LandingOnlyWarp(s16 x, s16 y)
 {
+    if (gSaveBlock1Ptr->location.mapGroup == 45 && gMapHeader.events)
+    {
+        // (ORRE: an entry's landing spot is a warp to itself, never taken: the diner's door is past one)
+        s32 i;
+        for (i = 0; i < gMapHeader.events->warpCount; i++)
+        {
+            const struct WarpEvent *wp = &gMapHeader.events->warps[i];
+            if (wp->x == x && wp->y == y)
+                return wp->warpId == i && wp->mapGroup == 45 && wp->mapNum == gSaveBlock1Ptr->location.mapNum;
+        }
+    }
     if (gSaveBlock1Ptr->location.mapGroup == 45 || S3D_Active()
      || MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET) != 0)
         return FALSE;

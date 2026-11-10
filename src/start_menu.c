@@ -360,7 +360,9 @@ static void BuildNormalStartMenu(void)
     }
     // Moemon Kai: in the added regions also whenever the party has someone (Platinum shows it from the starter on; a
     // POKeMON given by a script that sets no flag shouldn't leave the party out of reach)
-    if (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE
+    // (never with an empty party: a newcomer's partner waits at the professor's lab until the region's first POKeMON,
+    // src/mp/mp_ship.c, and the empty screen's SUMMARY crashed: the user, 2026-11-10)
+    if ((FlagGet(FLAG_SYS_POKEMON_GET) == TRUE && CalculatePlayerPartyCount() > 0)
      || (MP_Region_Current() != REGION_HOENN && CalculatePlayerPartyCount() > 0))
     {
         AddStartMenuAction(MENU_ACTION_POKEMON);
