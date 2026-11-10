@@ -57,6 +57,8 @@ int GameClear(void)
         SetContinueGameWarpToHealLocation(HEAL_LOCATION_JOHTO_NEW_BARK_TOWN);
     else if (MP_Region_Current() == REGION_KANTO)
         SetContinueGameWarpToHealLocation(HEAL_LOCATION_KANTO_PALLET_TOWN);
+    else if (MP_Region_Current() == REGION_SINNOH)
+        SetContinueGameWarpToHealLocation(HEAL_LOCATION_SINNOH_TWINLEAF_TOWN);
     else if (gSaveBlock2Ptr->playerGender == MALE)
         SetContinueGameWarpToHealLocation(HEAL_LOCATION_LITTLEROOT_TOWN_BRENDANS_HOUSE_2F);
     else
