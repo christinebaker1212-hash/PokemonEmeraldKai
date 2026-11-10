@@ -18,6 +18,7 @@
 #include "s3d_underground.h"
 unsigned int SDL_GetTicks(void);
 #include "arcade.h"   // Moemon Kai: the GAME CENTER's arcade boards
+#include <math.h>
 #include "s3d.h"   // Moemon Kai: SINNOH's 3D engine (tests)
 #include "field_message_box.h"
 #include "mp_region.h"
@@ -287,7 +288,7 @@ bool8 MP_Setup_ScreenIs(int screen);
 #define W_MAXT (160 * 160)
 #define WS_NONE 0xFF
 #define WS_A 0x10
-static u8 sWStep[W_MAXT], sWSeen[W_MAXT * 16 / 8];
+static u8 sWStep[W_MAXT], sWSeen[W_MAXT * 32 / 8];   // (seen: tile x elevation x SINNOH's layer, the deck or below it)
 static u16 sWDist[W_MAXT];
 static u32 sWQueue[W_MAXT * 4];
 static u32 sWStamp = 0xFFFFFFFF;
@@ -532,6 +533,17 @@ static bool8 TakenWarpBehavior(u8 b)
 }
 
 static s16 sWFromX = -1, sWFromY = -1;
+// (SINNOH: on a tile with a deck over the ground, whether a step at height H lands on the deck: the field picks the
+// ground nearest the height the player comes at, s3d.c S3D_TileFloor)
+static bool8 WalkUpper(s16 x, s16 y, float h)
+{
+    float lo = S3D_TileFloor(x, y, -1e9f), at = S3D_TileFloor(x, y, h);
+    return lo == lo && at == at && at > lo + 8.0f;
+}
+#define WSEEN_BIT(n, e, up) (((n) * 16 + (e)) * 2 + ((up) ? 1 : 0))
+#define WSEEN_GET(n, e, up) (sWSeen[WSEEN_BIT(n, e, up) >> 3] & (1 << (WSEEN_BIT(n, e, up) & 7)))
+#define WSEEN_SET(n, e, up) (sWSeen[WSEEN_BIT(n, e, up) >> 3] |= 1 << (WSEEN_BIT(n, e, up) & 7))
+
 static void WalkSearch(void)
 {
     static const s8 dx[4] = {0, 0, -1, 1}, dy[4] = {1, -1, 0, 0};
@@ -544,6 +556,7 @@ static void WalkSearch(void)
     bool8 canFall = MP_Region_HasFieldMoveBadge(7) && MP_PartyCanUseFieldMove(MOVE_WATERFALL);
     s16 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
     u8 pe = p->currentElevation;
+    bool8 s3d = S3D_Active(), up;
     if (sWFromX >= 0)
     {
         // (from another spot: where a warp pad lands, PadPlan)
@@ -556,16 +569,21 @@ static void WalkSearch(void)
         sWStep[i] = WS_NONE, sWDist[i] = 0xFFFF;
     memset(sWSeen, 0, sizeof(sWSeen));
     sWStep[py * w + px] = 0, sWDist[py * w + px] = 0;
-    sWQueue[tail++] = ((u32)(py * w + px) << 8) | (pe << 4) | (surfing ? 1 : 0) | 2;
-    sWSeen[((py * w + px) * 16 + pe) >> 3] |= 1 << (((py * w + px) * 16 + pe) & 7);
+    up = s3d && WalkUpper(px, py, S3D_PlayerHeight());
+    sWQueue[tail++] = ((u32)(py * w + px) << 8) | (pe << 4) | (up ? 4 : 0) | (surfing ? 1 : 0) | 2;
+    WSEEN_SET((py * w + px), pe, up);
     t = *p;
     t.trackedByCamera = FALSE;
     // (the player stands nowhere in its own way: as a copy, it would meet itself on the tile it last left)
     p->active = FALSE;
     while (head < tail)
     {
-        u32 q = sWQueue[head++], c = q >> 8, e = (q >> 4) & 15, surf = q & 1, first = (q & 2) != 0, d;
+        u32 q = sWQueue[head++], c = (q >> 8) & 0xFFFF, e = (q >> 4) & 15, surf = q & 1, first = (q & 2) != 0,
+            layer = (q & 4) != 0, step = q >> 24, d;   // (the state's own first step: a tile's other states, the deck
+                                                       // over it or the ground under it, may have come another way)
         s16 cx = c % w, cy = c / w;
+        float hc = s3d ? S3D_TileFloor(cx, cy, layer ? 1e9f : -1e9f) : NAN;
+        gS3dPlanHeight = hc;   // (SINNOH's bridges and slopes: the step from here at the plan's height, s3d_gyms.c)
         if (!first && IsWarpAt(cx, cy) && !LandingOnlyWarp(cx, cy))
             continue;   // (a warp takes the player away: an end, never a way through. Not one the game never takes:
                         // ECRUTEAK GYM's landing square on the way in)
@@ -573,6 +591,7 @@ static void WalkSearch(void)
         {
             s16 nx = cx + dx[d], ny = cy + dy[d], lx = nx, ly = ny;
             u8 col, ne = e, nsurf = surf, how = d;
+            bool8 nup;
             u32 n;
             if (nx < 0 || ny < 0 || nx >= w || ny >= h)
                 continue;
@@ -677,18 +696,20 @@ static void WalkSearch(void)
                     continue;
             }
             n = ly * w + lx;
-            if (sWSeen[(n * 16 + ne) >> 3] & (1 << ((n * 16 + ne) & 7)))
+            nup = s3d && hc == hc && WalkUpper(lx, ly, hc);
+            if (WSEEN_GET(n, ne, nup))
                 continue;
-            sWSeen[(n * 16 + ne) >> 3] |= 1 << ((n * 16 + ne) & 7);
+            WSEEN_SET(n, ne, nup);
             if (sWStep[n] == WS_NONE)
             {
-                sWStep[n] = first ? how : sWStep[c];
+                sWStep[n] = first ? how : step;
                 sWDist[n] = sWDist[c] + 1;
             }
             if (tail < (s32)ARRAY_COUNT(sWQueue))
-                sWQueue[tail++] = (n << 8) | (ne << 4) | nsurf;
+                sWQueue[tail++] = ((u32)(first ? how : step) << 24) | (n << 8) | (ne << 4) | (nup ? 4 : 0) | nsurf;
         }
     }
+    gS3dPlanHeight = NAN;
     p->active = TRUE;
 }
 

@@ -702,7 +702,7 @@ bool8 S3D_BikeSlopeBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
         if (Sinnoh_BikeGear() == 4)
             return FALSE;   // (Platinum: up a muddy slope in 4th gear only)
     }
-    h = S3D_PlayerHeight();
+    h = S3D_StepFromHeight(fromX, fromY);   // (the player's, or a step the walk harness's search plans: s3d_gyms.c)
     f = S3D_TileFloor(toX - MAP_OFFSET, toY - MAP_OFFSET, isnan(h) ? 0.0f : h);
     if (isnan(h) || isnan(f))
         return TRUE;

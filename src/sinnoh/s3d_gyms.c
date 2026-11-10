@@ -1367,6 +1367,19 @@ void S3D_Gyms_Update(void)
     }
 }
 
+// The height a step starts from: the player's, or for a step the walk harness's search plans from another tile, the
+// height its plan has there (gS3dPlanHeight: NaN when no plan is being made)
+float gS3dPlanHeight = NAN;
+
+float S3D_StepFromHeight(s16 fromX, s16 fromY)
+{
+    if (gS3dPlanHeight == gS3dPlanHeight
+     && (fromX != gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x
+      || fromY != gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y))
+        return gS3dPlanHeight;
+    return S3D_PlayerHeight();
+}
+
 bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
 {
     bool8 blocked = FALSE;
@@ -1403,7 +1416,7 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
     if (!blocked && MapGridGetMetatileBehaviorAt(fromX, fromY) == MB_UNUSED_1D
      && MapGridGetMetatileBehaviorAt(toX, toY) != MB_UNUSED_1D)
     {
-        float h = S3D_PlayerHeight(), f = S3D_TileFloor(toX - MAP_OFFSET, toY - MAP_OFFSET, h);
+        float h = S3D_StepFromHeight(fromX, fromY), f = S3D_TileFloor(toX - MAP_OFFSET, toY - MAP_OFFSET, h);
         if (!isnan(h) && (isnan(f) || h - f > 12))
             blocked = TRUE;
     }
@@ -1411,20 +1424,22 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
     // (ROUTE 211's high bridge over the river bank: (15, 21) has no ground under the deck in Platinum's BDHC, so the
     // player climbed onto it from below)
     if (!blocked && MapGridGetMetatileBehaviorAt(toX, toY) == MB_UNUSED_1D
-     && fromX == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x
-     && fromY == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y)
+     && ((fromX == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x
+       && fromY == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y) || gS3dPlanHeight == gS3dPlanHeight))
     {
-        float h = S3D_PlayerHeight(), f = S3D_TileFloor(toX - MAP_OFFSET, toY - MAP_OFFSET, h);
+        float h = S3D_StepFromHeight(fromX, fromY), f = S3D_TileFloor(toX - MAP_OFFSET, toY - MAP_OFFSET, h);
         if (!isnan(h) && !isnan(f) && f - h > 12)
             blocked = TRUE;
     }
-    if (!blocked && fromX == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x
-     && fromY == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y)
+    if (!blocked)
     {
         bool8 S3D_BikeSlopeBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY);
         bool8 Sinnoh_BikeTileBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY);
-        blocked = S3D_BikeSlopeBlocked(fromX, fromY, toX, toY)    // (Platinum's bike slopes: s3d_misc.c)
-               || Sinnoh_BikeTileBlocked(fromX, fromY, toX, toY);  // (its bike bridges and ramps: s3d_bike.c)
+        blocked = S3D_BikeSlopeBlocked(fromX, fromY, toX, toY);   // (Platinum's bike slopes: s3d_misc.c; also a step the
+                                                                  // walk's search plans, from that step's own floor)
+        if (!blocked && fromX == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x
+         && fromY == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y)
+            blocked = Sinnoh_BikeTileBlocked(fromX, fromY, toX, toY);   // (its bike bridges and ramps: s3d_bike.c)
     }
     if (getenv("MOEMON_GYM_TRACE"))
         printf("[gym] step %d,%d -> %d,%d: %s (player at %.0f)\n", fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET,

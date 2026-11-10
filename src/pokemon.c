@@ -2941,6 +2941,13 @@ static u16 CalculateBoxMonChecksum(struct BoxPokemon *boxMon)
     SetMonData(mon, field, &n);                                 \
 }
 
+// Moemon Kai (tests only): MOEMON_TEST_STRONG is set (battle_main.c)
+static bool8 MP_TestStrong(void)
+{
+    extern char *getenv(const char *name);
+    return getenv("MOEMON_TEST_STRONG") != NULL;
+}
+
 void CalculateMonStats(struct Pokemon *mon)
 {
     s32 oldMaxHP = GetMonData(mon, MON_DATA_MAX_HP, NULL);
@@ -2984,6 +2991,18 @@ void CalculateMonStats(struct Pokemon *mon)
     CALC_STAT(baseSpeed, speedIV, speedEV, STAT_SPEED, MON_DATA_SPEED)
     CALC_STAT(baseSpAttack, spAttackIV, spAttackEV, STAT_SPATK, MON_DATA_SPATK)
     CALC_STAT(baseSpDefense, spDefenseIV, spDefenseEV, STAT_SPDEF, MON_DATA_SPDEF)
+
+    if (gMain.inBattle && mon >= gPlayerParty && mon < gPlayerParty + PARTY_SIZE && MP_TestStrong())
+    {
+        // Moemon Kai (tests only): a level up mid-battle keeps battle_main.c's MOEMON_TEST_STRONG stats (it recomputed
+        // them, and a POKéMON hit by both foes of a double battle fainted, leaving the test at the party screen)
+        s32 strong = 999;
+        SetMonData(mon, MON_DATA_ATK, &strong);
+        SetMonData(mon, MON_DATA_DEF, &strong);
+        SetMonData(mon, MON_DATA_SPEED, &strong);
+        SetMonData(mon, MON_DATA_SPATK, &strong);
+        SetMonData(mon, MON_DATA_SPDEF, &strong);
+    }
 
     if (species == SPECIES_SHEDINJA)
     {
