@@ -99,6 +99,10 @@ static const u8 sStoryText[LIFE_STORY_COUNT][44] = {
     [LIFE_STORY_SOOTOPOLIS]   = _("Saw the skies over SOOTOPOLIS clear."),
     [LIFE_STORY_ELITE_FOUR]   = _("Faced the ELITE FOUR."),
     [LIFE_STORY_CHAMPION]     = _("Became CHAMPION with {STR_VAR_1}!"),
+    [LIFE_STORY_SAIL_HOENN]   = _("Sailed to HOENN with {STR_VAR_1}."),
+    [LIFE_STORY_SAIL_JOHTO]   = _("Sailed to JOHTO with {STR_VAR_1}."),
+    [LIFE_STORY_SAIL_KANTO]   = _("Sailed to KANTO with {STR_VAR_1}."),
+    [LIFE_STORY_SAIL_SINNOH]  = _("Sailed to SINNOH with {STR_VAR_1}."),
 };
 
 static const u8 sTxt_MetCaught[] = _("Met {STR_VAR_1} in {STR_VAR_2}.");

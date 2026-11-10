@@ -79,6 +79,30 @@ static void GiveStarter(u16 rivalSpecies)
     GetSetPokedexFlag(dex, FLAG_SET_CAUGHT);
 }
 
+// The moving truck, the house, the clock and the TV done (SKIP THE INTRO; a newcomer by boat: mp_region.c
+// MP_RegionArriveHoenn)
+void MP_Hoenn_SettleIn(bool8 male)
+{
+    // The moving truck (it still brings you: hidden after you step off), the house, the clock and the TV
+    FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_TRUCK : FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_TRUCK);
+    FlagSet(FLAG_MP_SKIP_TRUCK);
+    FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_MOM : FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_MOM);
+    FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_RIVAL_MOM : FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_RIVAL_MOM);
+    FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_RIVAL_SIBLING : FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_RIVAL_SIBLING);
+    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_2F_POKE_BALL);
+    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_2F_POKE_BALL);
+    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_MOM_OUTSIDE);
+    FlagClear(FLAG_HIDE_LITTLEROOT_TOWN_FAT_MAN);
+    FlagClear(FLAG_HIDE_MAP_NAME_POPUP);
+    FlagSet(FLAG_SET_WALL_CLOCK);
+    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_PLAYERS_HOUSE_VIGOROTH_1);
+    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_PLAYERS_HOUSE_VIGOROTH_2);
+    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_PLAYERS_BEDROOM_MOM);
+    FlagSet(FLAG_SYS_TV_HOME);
+    VarSet(VAR_LITTLEROOT_INTRO_STATE, 7);
+    VarSet(male ? VAR_LITTLEROOT_HOUSES_STATE_BRENDAN : VAR_LITTLEROOT_HOUSES_STATE_MAY, 2);
+}
+
 // Called at the end of NewGameInitData. Everything the intro's scripts change
 // on the way (InsideOfTruck, LittlerootTown and both houses, players_house.inc,
 // Route101, ProfessorBirchsLab, Route103, OldaleTown), in the end state.
@@ -102,24 +126,7 @@ void MP_QuickStart_Apply(void)
     GetSetPokedexFlag(SpeciesToNationalPokedexNum(SPECIES_ZIGZAGOON), FLAG_SET_SEEN);
     GetSetPokedexFlag(SpeciesToNationalPokedexNum(sRivalSpecies[starter]), FLAG_SET_SEEN);
 
-    // The moving truck (it still brings you: hidden after you step off), the house, the clock and the TV
-    FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_TRUCK : FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_TRUCK);
-    FlagSet(FLAG_MP_SKIP_TRUCK);
-    FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_MOM : FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_MOM);
-    FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_RIVAL_MOM : FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_RIVAL_MOM);
-    FlagSet(male ? FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_RIVAL_SIBLING : FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_RIVAL_SIBLING);
-    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_2F_POKE_BALL);
-    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_2F_POKE_BALL);
-    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_MOM_OUTSIDE);
-    FlagClear(FLAG_HIDE_LITTLEROOT_TOWN_FAT_MAN);
-    FlagClear(FLAG_HIDE_MAP_NAME_POPUP);
-    FlagSet(FLAG_SET_WALL_CLOCK);
-    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_PLAYERS_HOUSE_VIGOROTH_1);
-    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_PLAYERS_HOUSE_VIGOROTH_2);
-    FlagSet(FLAG_HIDE_LITTLEROOT_TOWN_PLAYERS_BEDROOM_MOM);
-    FlagSet(FLAG_SYS_TV_HOME);
-    VarSet(VAR_LITTLEROOT_INTRO_STATE, 7);
-    VarSet(male ? VAR_LITTLEROOT_HOUSES_STATE_BRENDAN : VAR_LITTLEROOT_HOUSES_STATE_MAY, 2);
+    MP_Hoenn_SettleIn(male);
 
     // Meeting the rival next door
     FlagSet(FLAG_MET_RIVAL_MOM);

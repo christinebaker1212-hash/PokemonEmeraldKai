@@ -1624,6 +1624,13 @@ static void PartyLives(u8 kind, u16 param, u8 strength)
     }
 }
 
+// The first voyage to a region (mp_ship.c): the one who came along remembers the crossing
+void MP_Life_Voyage(u8 region)
+{
+    if (region < 4)
+        PartyLives(MEM_STORY, LIFE_STORY_SAIL_HOENN + region, 200);
+}
+
 static void StoryTick(void)
 {
     u32 story, badges, changed;

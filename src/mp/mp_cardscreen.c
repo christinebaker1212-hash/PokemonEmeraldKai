@@ -922,6 +922,8 @@ static void DrawProfile(SDL_Renderer *r)
     }
 }
 
+u8 MP_Ship_Stamps(void);
+
 static void DrawBadges(SDL_Renderer *r)
 {
     const struct MpCardView *v = &C.view;
@@ -942,6 +944,14 @@ static void DrawBadges(SDL_Renderer *r)
         }
         G_Text(GRID_L + 6, y + 1, ink.text, ink.shadow, sRegionNames[region], 0, TF_NARROW);
         Stars(GRID_L + 6, y + 12, 7, MP_CardView_Stars(v, region));
+        if (v->own && (MP_Ship_Stamps() & (1 << region)))
+        {
+            // (the stamp of a first voyage there, mp_ship.c: a postmark's rings in the card's accent)
+            u32 a = Accent(), paper = ink.text == 0xf8f8f8 ? 0x283040 : 0xf0f0f4;
+            RoundRect(GRID_L + 33, y + 11, 10, 10, 5, a, 255);
+            RoundRect(GRID_L + 34, y + 12, 8, 8, 4, paper, 255);
+            RoundRect(GRID_L + 36, y + 14, 4, 4, 2, a, 255);
+        }
         SDL_RenderSetScale(r, 1, 1);
         MP_BadgeCase_HollowShade(ink.text == 0xf8f8f8 ? 255 : 0);   // (badges not won yet: seen on dark panels too)
         for (b = 0; b < TCARD_BADGES_PER_REGION; b++)

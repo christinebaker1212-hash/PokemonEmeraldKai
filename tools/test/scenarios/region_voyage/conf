@@ -1,8 +1,10 @@
+# (1.186.0: the first trip is sailed aboard the ship, mp_ship.c: scenario ship_voyage walks it; here it's hurried)
 # The voyage between regions (src/mp/mp_voyage.c, FireRed's ferry scene): HOENN -> KANTO sails east, the first trip
 # comes in at VERMILION, where the port's sailor meets the player and takes them to PALLET TOWN (VAR_REGION_ARRIVAL,
 # data/scripts/mp_region.inc EventScript_RegionArrivalKanto); back to HOENN sails west
 MODE=1
-TMO=300
+SHIP=1
+TMO=400
 ENV_A="MOEMON_DEBUG_REGION=0 MOEMON_DEBUG_PARTY=258:30,255:25"
-EXPECT_A=("region: travel 0 -> 2" "voyage: east" "voyage: arrived" "where map 37.120 xy 6,6" "region: travel 2 -> 0" "voyage: west" "where map 9.9 ")
+EXPECT_A=("region: travel 0 -> 2" "voyage: east" "voyage: arrived" "ship: aboard for region 2" "ship: off at region 2's port" "where map 37.120 xy 6,6" "region: travel 2 -> 0" "voyage: west" "where map 9.9 ")
 UNEXPECT_A=("[crash]" "not ported")

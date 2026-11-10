@@ -7332,3 +7332,41 @@ The walk-only SINNOH run went through the DISTORTION WORLD from SPEAR PILLAR to 
   MAP_HEADER_UNKNOWN_266, a header without a name: SPRING PATH, found by the tiles) was unsupported, and gen_scripts.py
   leaves out a whole script it can't convert. It is `setescapewarp` now (CANALAVE's harbor inn dream converts too).
   A save that already left the spring plays it on coming back. Found by the walk-only run.
+
+## The first voyage's ship, arrivals as scenes, HOST MOM (1.186.0)
+The user's design, 2026-11-10 ("like the boarding of the S.S. TIDAL to the BATTLE FRONTIER"; "all of the arrivals need
+more of a scene"; "every game expects you to not have a Pokemon when you begin").
+- src/mp/mp_ship.c, data/maps/VoyageShip_Corridor / _Rooms / _Deck (map group 47, a shared map: mp_region.c
+  MP_Region_IsSharedMap; the S.S. TIDAL's corridor and cabins' layouts, the S.S. ANNE's deck: one ship, the user fixes
+  looks with the Maker). qz_specials.c TravelNow boards it (MP_Ship_Board) when the trip is the player's first to that
+  region, HOENN too for a save begun elsewhere; the MAGNET TRAIN doesn't. No battles; FLY / TELEPORT / START > GARDEN
+  are off aboard (MP_Ship_Aboard).
+- State in gRegionState (the ".region" side file, out of its filler: no save layout change): home (the region the save
+  began in: MP_Region_Home works it out for older saves), shipTo / shipState / shipFrom / shipTalked, shipGift, stamps,
+  hostMet, heldFor / heldPid / heldOt.
+- Ten passengers (mp_ship.c P_*; every word in C by where the ship is bound, sLines, fitted to the box by MP_Text_Wrap:
+  write them without line breaks). The trainer shows a POKeMON of the region (sShowSpecies), the granny gives its treat
+  once (sKeepsakes), the lookout's spyglass plays the sea scene (mp_voyage.c MP_Voyage_Look; the coast drawn on BG2
+  once land is in sight: DrawCoast). Five talked to: the announcement, SHIP_NEAR. The bed in CABIN 2 then rests the
+  player and brings the ship in (SHIP_DOCKED, the first town's song from there on); the gangway's sailor lets them off
+  (MP_ShipLeave -> MP_Region_FirstBoatIn). Co-op: MPR_SHIP 18 (protocol 80) tells friends aboard who was talked to.
+- Arrivals (data/scripts/mp_region.inc EventScript_RegionArrival*): a sailor of the scene only (local id 0x7D,
+  SpawnSpecialObjectEventParameterized) comes up to the player at the pier (SLATEPORT harbor 8,11; OLIVINE port;
+  VERMILION; CANALAVE's open quay 5,20), welcomes them, takes the one POKeMON that sailed with them ahead to the
+  professor's lab (MP_ArrivalHold: it waits in the GLOBAL PC, found again by personality and OT) and leads them off
+  (SINNOH: in his boat, the sea scene). VAR_REGION_ARRIVAL 10 + region: in the first town outside the house
+  (MP_Ship_Update starts EventScript_RegionArrivalTown) he shows the door and leaves; the player goes in and is in their
+  room, where the region's own opening starts with an empty party, as those games expect. HOENN: MP_Hoenn_SettleIn
+  (mp_quickstart.c: the house lived in, no truck).
+- The hand-back: in the professor's lab (sLabs) with a first POKeMON of the region in the party, MP_Ship_Update runs
+  EventScript_RegionPartnerBack: the professor's own words per region, the kept one back at the region's level.
+  Only a trip off the ship keeps it (gRegionState.pad[0]); scenarios without SHIP=1 come straight in with their party.
+- HOST MOM: MP_HostFamily_Filter (field_message_box.c, after the placeholders): away from the home region, in the
+  player's house there and HOENN's PETALBURG GYM (LITTLEROOT outdoors: MOM's own lines only), MOM / Mom / mom and
+  DAD / Dad / dad as whole words get HOST before them, and paragraphs that no longer fit are broken again. The first
+  time the region's MOM speaks she welcomes the player first (SINNOH, whose Platinum words name no speaker: the
+  first words in the house's 1F). Not covered: the phone's MOM contacts.
+- The JOURNAL: LIFE_STORY_SAIL_* ("Sailed to KANTO with <Trainer>."); the TRAINER CARD's BADGES page: a postmark by
+  the region's stars (mp_cardscreen.c, own card only).
+- Harness: `mp shiptalk MASK`, `mp walkdump`, MOEMON_TEST_NO_SHIP (regress.sh sets it unless the scenario's conf has
+  SHIP=1). Scenarios ship_voyage, ship_host_hoenn, region_voyage.

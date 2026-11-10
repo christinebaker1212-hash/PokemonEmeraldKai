@@ -50,9 +50,29 @@ struct RegionState
     u8 current;      // the region of the last trip (the boat's maps take it from here)
     u8 originGroup, originNum, originX, originY;   // where the player stepped into a shared map from (MP_Region_IsSharedMap)
     u8 originValid;
-    u8 filler[56];   // room for later fields without a format change
+    // (1.186.0, out of the filler) the first voyage to a region, sailed on the ship's maps (src/mp/mp_ship.c)
+    u8 home;         // the region the save began in + 1 (0: not known yet, MP_Region_Home works it out): only its
+                     // MOM is MOM, the others' are the player's HOST MOM (HOENN's NORMAN: HOST DAD)
+    u8 shipTo;       // aboard: the region the ship sails to + 1 (0: not aboard)
+    u8 shipState;    // SHIP_AT_SEA, SHIP_NEAR (half the passengers talked to: the bed's rest brings it in), SHIP_DOCKED
+    u8 shipFrom;     // the region left + 1
+    u16 shipTalked;  // bit per passenger talked to (co-op: friends' talks too)
+    u8 shipGift;     // bit per region: its keepsake had on the way there
+    u8 stamps;       // bit per region: arrived there by sea for the first time (the TRAINER CARD's stamps)
+    u8 hostMet;      // bit per region: its HOST MOM has welcomed the player
+    u8 heldFor;      // the region + 1 whose professor keeps the POKéMON that sailed there with the player, until
+                     // their first POKéMON of the region (it waits in the GLOBAL PC: heldPid / heldOt find it)
+    u8 pad[2];
+    u32 heldPid, heldOt;
+    u8 filler[36];   // room for later fields without a format change
 };
 extern struct RegionState gRegionState;
+enum { SHIP_AT_SEA, SHIP_NEAR, SHIP_DOCKED };
+u8 MP_Region_Home(void);                 // the region the save began in
+bool8 MP_Ship_Aboard(void);              // on the voyage ship's maps
+void MP_Ship_Board(u8 from, u8 to);      // qz_specials.c TravelNow: the first voyage to a region goes by the ship
+void MP_Ship_FriendTalked(u16 mask);     // co-op: a friend aboard talked to these passengers
+void MP_HostFamily_Filter(u8 *text);     // field_message_box.c: MOM -> HOST MOM away from home
 
 u8 MP_Region_OfGroup(u8 group);
 u8 *MP_RoomDecorations(void);           // MY ROOM's decorations: JOHTO's room its own (JOHTO's vars), else the save's

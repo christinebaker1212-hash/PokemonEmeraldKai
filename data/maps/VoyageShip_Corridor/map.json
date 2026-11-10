@@ -1,0 +1,221 @@
+{
+  "id": "MAP_VOYAGE_SHIP_CORRIDOR",
+  "name": "VoyageShip_Corridor",
+  "layout": "LAYOUT_SS_TIDAL_CORRIDOR",
+  "music": "MUS_SAILING",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_SAILOR",
+      "x": 1,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "VoyageShip_EventScript_ExitSailor",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_EXPERT_M",
+      "x": 9,
+      "y": 2,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "VoyageShip_EventScript_OldSalt",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_LITTLE_BOY",
+      "x": 9,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT",
+      "movement_range_x": 3,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "VoyageShip_EventScript_Kid",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 4,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_VOYAGE_SHIP_ROOMS",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 7,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_VOYAGE_SHIP_ROOMS",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 10,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_VOYAGE_SHIP_ROOMS",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 13,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_VOYAGE_SHIP_ROOMS",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 4,
+      "y": 3,
+      "elevation": 3,
+      "dest_map": "MAP_VOYAGE_SHIP_ROOMS",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 7,
+      "y": 3,
+      "elevation": 3,
+      "dest_map": "MAP_VOYAGE_SHIP_ROOMS",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 10,
+      "y": 3,
+      "elevation": 3,
+      "dest_map": "MAP_VOYAGE_SHIP_ROOMS",
+      "dest_warp_id": "10"
+    },
+    {
+      "x": 13,
+      "y": 3,
+      "elevation": 3,
+      "dest_map": "MAP_VOYAGE_SHIP_ROOMS",
+      "dest_warp_id": "11"
+    },
+    {
+      "x": 16,
+      "y": 2,
+      "elevation": 3,
+      "dest_map": "MAP_VOYAGE_SHIP_DECK",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 2,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_Porthole"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_Porthole"
+    },
+    {
+      "type": "sign",
+      "x": 6,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_Porthole"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_Porthole"
+    },
+    {
+      "type": "sign",
+      "x": 10,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_Porthole"
+    },
+    {
+      "type": "sign",
+      "x": 12,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_Porthole"
+    },
+    {
+      "type": "sign",
+      "x": 14,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_Porthole"
+    },
+    {
+      "type": "sign",
+      "x": 16,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_Porthole"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_CabinSign"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_YourCabinSign"
+    },
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_CabinSign"
+    },
+    {
+      "type": "sign",
+      "x": 14,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "VoyageShip_EventScript_CabinSign"
+    }
+  ]
+}

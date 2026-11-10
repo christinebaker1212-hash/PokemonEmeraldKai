@@ -1,0 +1,12 @@
+# The first voyage to a region is sailed aboard the ship (src/mp/mp_ship.c, data/maps/VoyageShip_*): HOENN -> KANTO.
+# The gangway's sailor welcomes the player; passengers talk about KANTO (the trainer shows a GROWLITHE, the granny
+# gives PEWTER CRUNCHIES); at five talks the announcement says land is in sight; the lookout's spyglass shows the coast;
+# the bed in CABIN 2 brings the ship in; off at VERMILION a sailor comes up the dock, takes the POKeMON that came along
+# ahead to OAK's lab and leads the player to PALLET TOWN, to the house's door; MOM downstairs is the HOST MOM and
+# welcomes them; with a first POKeMON in hand in OAK's lab, the one kept comes back (here given by the harness).
+MODE=1
+SHIP=1
+TMO=500
+ENV_A="MOEMON_DEBUG_REGION=0 MOEMON_DEBUG_PARTY=258:30,255:25"
+EXPECT_A=("ship: aboard for region 2" "ship: passenger 0 talked to (1 of 10)" "ship: passenger 4 talked to" "ship: 5 passengers talked to, land in sight" "voyage: east" "ship: docked at region 2's port" "ship: off at region 2's port" "species 258 goes ahead to region 2's lab" "ship: home, to the room in region 2" "where map 37.120 " "party: 0 0 0 0 0 0" "species 258 is back with the player" "host: region 2's HOST MOM welcomes the player" "hasitem 396: 1")
+UNEXPECT_A=("[crash]" "not ported" "TIMEOUT" "NO WAY")

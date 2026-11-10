@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "menu.h"
 #include "string_util.h"
@@ -88,6 +89,7 @@ bool8 ShowPokenavFieldMessage(const u8 *str)
     if (sFieldMessageBoxMode != FIELD_MESSAGE_BOX_HIDDEN)
         return FALSE;
     StringExpandPlaceholders(gStringVar4, str);
+    MP_HostFamily_Filter(gStringVar4);   // Moemon Kai: MOM is HOST MOM away from home (src/mp/mp_ship.c)
     CreateTask(Task_HidePokenavMessageWhenDone, 0);
     StartMatchCallFromScript(str);
     sFieldMessageBoxMode = FIELD_MESSAGE_BOX_NORMAL;
@@ -153,6 +155,7 @@ static void MpFinishPageNow(void)
 static void ExpandStringAndStartDrawFieldMessage(const u8 *str, bool32 allowSkippingDelayWithButtonPress)
 {
     StringExpandPlaceholders(gStringVar4, str);
+    MP_HostFamily_Filter(gStringVar4);   // Moemon Kai: MOM is HOST MOM away from home (src/mp/mp_ship.c)
     MpAddFieldTextPrinter(allowSkippingDelayWithButtonPress);
     CreateTask_DrawFieldMessage();
 }

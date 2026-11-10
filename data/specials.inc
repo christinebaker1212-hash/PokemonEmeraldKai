@@ -808,3 +808,27 @@ gSpecials::
 	def_special Orre_Opening   @ Moemon Kai: ORRE's opening (src/orre/orre_opening.c), waitstate
 	def_special Orre_OpeningNeeded
 	def_special MP_RegionKeyItemsStay   @ Moemon Kai: customs, a region's own KEY ITEMS stay (src/mp/mp_regionitems.c)
+	@ Moemon Kai: the first voyage's ship (src/mp/mp_ship.c)
+	def_special MP_ShipGreetDue
+	def_special MP_ShipGreet
+	def_special MP_ShipTalk
+	def_special MP_ShipCheckNear
+	def_special MP_ShipShowMon
+	def_special MP_ShipGiftDone
+	def_special MP_ShipAnnounce
+	def_special MP_ShipBed
+	def_special MP_ShipDock
+	def_special MP_ShipExit
+	def_special MP_ShipPorthole
+	def_special MP_ShipSpyglassAsk
+	def_special MP_ShipLeave, waitstate=1
+	def_special MP_ShipSpyglass, waitstate=1
+	def_special MP_ArrivalGuideSpawn
+	def_special MP_ArrivalGuideRemove
+	def_special MP_ArrivalText
+	def_special MP_ArrivalCanHold
+	def_special MP_ArrivalHold
+	def_special MP_ArrivalPartnerBack
+	def_special MP_ArrivalFaceProf
+	def_special MP_ArrivalToTown, waitstate=1
+	def_special MP_ArrivalToRoom, waitstate=1

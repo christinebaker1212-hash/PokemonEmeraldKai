@@ -27,9 +27,12 @@ run_one() {
     [ -f "$src/conf" ] || { echo "?? $n: no such scenario"; return 1; }
     rm -rf "$d"; mkdir -p "$d"; cp "$src"/*.txt "$d/"; cp "$src"/*.dat "$d/" 2>/dev/null   # .dat: a server storage file to start from
     unset MODE DELAY JIT FPS TMO WARP WARP_B WARP_C WARP_D EXPECT_A EXPECT_B EXPECT_C EXPECT_D UNEXPECT_A UNEXPECT_B UNEXPECT_C \
-          UNEXPECT_D ENV_A ENV_B ENV_C ENV_D CHECK NAME_A NAME_B NAME_C NAME_D GEN HOUR
+          UNEXPECT_D ENV_A ENV_B ENV_C ENV_D CHECK NAME_A NAME_B NAME_C NAME_D GEN HOUR SHIP
     . "$src/conf"
     export MOEMON_GENERATION=${GEN:-9}   # GENERATION: every generation unless the scenario sets GEN
+    # a first trip to a region is sailed aboard the ship (mp_ship.c) only in the scenarios about it (SHIP=1): the
+    # others come straight in at the port
+    if [ -n "$SHIP" ]; then unset MOEMON_TEST_NO_SHIP; else export MOEMON_TEST_NO_SHIP=1; fi
     # the clock's hour (the Garden, day and night): 5 unless the scenario sets HOUR ("now": the PC's own), so a run
     # doesn't depend on the time of day it was started at
     if [ "${HOUR:-5}" = now ]; then unset MOEMON_DEBUG_HOUR; else export MOEMON_DEBUG_HOUR=${HOUR:-5}; fi

@@ -33,14 +33,41 @@ wait 70
 shot voyage_east
 watchlog voyage: arrived
 waitlog 600 voyage: arrived
-shotburst land 100 25
-wait 220
-shot guide
-pressuntil B field 3000
+wait 200
+pressuntil A field 3000
+mp shiptalk 1023
+walkto 7 9 900
+wait 90
+approach tile 15 11 600
 wait 60
+pressuntil A yesno 600
+press A 4
+watchlog ship: docked
+waitlog 900 ship: docked
+pressuntil A field 3000
+walkto 13 16 600
+wait 40
+press DOWN 30
+wait 90
+approach obj 1 900
+wait 60
+watchlog ship: off
+pressuntillog A 2000 ship: off
+watchlog goes ahead
+pressuntillog A 3000 goes ahead
+shot guide
+watchlog ship: home
+pressuntillog A 9000 ship: home
+wait 300
 shot out_arrived
 mp where
 mp regioninfo
+mp giveforeign 1:5
+mp warp 37,122,6,6
+wait 300
+watchlog is back with the player
+pressuntillog A 1500 is back with the player
+pressuntil A field 3000
 mp regionclear 2
 mp setvar 20789 3
 mp warp 37,62,24,34

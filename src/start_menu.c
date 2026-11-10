@@ -382,7 +382,7 @@ static void BuildNormalStartMenu(void)
         AddStartMenuAction(MENU_ACTION_SAVE);
     AddStartMenuAction(MENU_ACTION_OPTION);
     // Moemon Co-op: CO-OP isn't here; its own button opens it (C, or Y/Triangle). GARDEN once it's been found.
-    if (MP_Garden_QuickTravelShown())
+    if (MP_Garden_QuickTravelShown() && !MP_Ship_Aboard())   // (not from the first voyage's ship: mp_ship.c)
         AddStartMenuAction(MENU_ACTION_GARDEN);
     AddStartMenuAction(MENU_ACTION_EXIT);
 }

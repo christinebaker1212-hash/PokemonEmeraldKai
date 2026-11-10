@@ -1,0 +1,50 @@
+pressuntil A field 5000
+wait 60
+mp where
+mp travel 0
+watchlog voyage: arrived
+waitlog 900 voyage: arrived
+wait 200
+shot greet
+pressuntil A field 3000
+wait 30
+mp shiptalk 1023
+walkto 7 9 900
+wait 90
+approach tile 15 11 600
+wait 60
+pressuntil A yesno 600
+press A 4
+watchlog ship: docked
+waitlog 900 ship: docked
+pressuntil A field 3000
+walkto 13 16 600
+wait 40
+press DOWN 30
+wait 90
+approach obj 1 900
+wait 60
+watchlog ship: off
+pressuntillog A 2000 ship: off
+watchlog goes ahead
+pressuntillog A 3000 goes ahead
+shot pier
+watchlog ship: home
+pressuntillog A 9000 ship: home
+wait 300
+mp where
+shot room
+walkto 7 2 900
+wait 30
+press UP 30
+wait 200
+approach obj 1 900
+wait 150
+shot host_mom
+press A 4
+wait 150
+press A 4
+wait 150
+shot host_mom_welcome
+pressuntil A field 3000
+quit

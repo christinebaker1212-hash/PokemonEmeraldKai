@@ -135,6 +135,10 @@ enum
     LIFE_STORY_SOOTOPOLIS,      // the crisis was calmed
     LIFE_STORY_ELITE_FOUR,
     LIFE_STORY_CHAMPION,
+    LIFE_STORY_SAIL_HOENN,      // the first voyage to a region (mp_ship.c): HOENN, JOHTO, KANTO, SINNOH
+    LIFE_STORY_SAIL_JOHTO,
+    LIFE_STORY_SAIL_KANTO,
+    LIFE_STORY_SAIL_SINNOH,
     LIFE_STORY_COUNT
 };
 

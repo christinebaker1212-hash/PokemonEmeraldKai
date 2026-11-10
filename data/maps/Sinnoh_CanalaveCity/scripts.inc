@@ -14,26 +14,8 @@ Sinnoh_CanalaveCity_OnFrame:
 @ The first time in SINNOH: the harbor sailor (Person15) meets the player at the dock and sails them to TWINLEAF TOWN,
 @ where the journey starts (CANALAVE's GYM is the sixth). MP_Region_GoToStartHouse sets VAR_SINNOH_ARRIVAL 1.
 Sinnoh_CanalaveCity_EventScript_Arrival::
-	lockall
-	turnobject 15, DIR_SOUTH
-	msgbox Sinnoh_CanalaveCity_Text_Arrival, MSGBOX_DEFAULT
-	closemessage
 	setvar 0x52F0, 2
-	warp MAP_SINNOH_TWINLEAF_TOWN_PLAYER_HOUSE2F, 8, 5
-	waitstate
-	releaseall
-	end
-
-Sinnoh_CanalaveCity_Text_Arrival:
-	.string "Ahoy! You must be the TRAINER from\n"
-	.string "overseas. Welcome to SINNOH!\p"
-	.string "PROF. ROWAN asked me to watch for\n"
-	.string "you. Every journey in SINNOH starts\l"
-	.string "in TWINLEAF TOWN, down south.\p"
-	.string "A friend of the professor's has a\n"
-	.string "room ready for you there.\p"
-	.string "Hop in my little boat! I'll have you\n"
-	.string "there before the tide turns.$"
+	goto EventScript_RegionArrivalSinnoh   @ (the pier's scene, as every region's: data/scripts/mp_region.inc)
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_CanalaveCity_EventScript_Bg1::

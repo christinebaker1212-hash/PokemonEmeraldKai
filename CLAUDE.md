@@ -436,6 +436,10 @@ Gen 5+ legendaries MOEGATCHA only): docs/REGIONS_AUDIT.md (work list), findings 
 **Finished 2026-11-05 (1.111.0): all 158 cases; `docs/AUDIT_HANDOFF.md`** (how each case was done, what was learned).
 JOHTO's phone, Crystal's 28 trainer contacts (numbers, calls, rematches, gifts: tools/quetzal_port/gen_phone.py ->
 src/data/qz_phone.h, src/mp/mp_qzphone.c, data/scripts/qz_phone.inc; COOP_NOTES "JOHTO's phone, Crystal's").
+The first voyage to a region (1.186.0, the user's design): aboard a ship with passengers (src/mp/mp_ship.c,
+data/maps/VoyageShip_*), arrivals as scenes at the pier and the first town, the POKéMON that came along kept at the
+professor's lab until the region's first, HOST MOM / HOST DAD away from the home region: COOP_NOTES "The first voyage's
+ship, arrivals as scenes, HOST MOM"; scenarios ship_voyage, ship_host_hoenn (conf SHIP=1). ORRE's own first trip is next.
 The voyage between regions and the SEAGALLOP ferries: FireRed's ferry scene, src/mp/mp_voyage.c; the first boat to
 JOHTO / KANTO lands at the port, where a sailor takes the player home (COOP_NOTES "Voyages between regions").
 JOHTO's POKéGEAR (src/mp/mp_pokegear.c) and its radio: Crystal's stations with Crystal's own songs, built from

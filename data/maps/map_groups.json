@@ -46,7 +46,8 @@
     "gMapGroup_SinnohIndoor3",
     "gMapGroup_SinnohIndoor4",
     "gMapGroup_Orre",
-    "gMapGroup_BattleIsland"
+    "gMapGroup_BattleIsland",
+    "gMapGroup_VoyageShip"
   ],
   "gMapGroup_TownsAndRoutes": [
     "PetalburgCity",
@@ -2029,5 +2030,10 @@
   "gMapGroup_BattleIsland": [
     "BattleIsland",
     "BattleIsland_Stadium"
+  ],
+  "gMapGroup_VoyageShip": [
+    "VoyageShip_Corridor",
+    "VoyageShip_Rooms",
+    "VoyageShip_Deck"
   ]
 }

@@ -1,6 +1,11 @@
 SlateportCity_Harbor_MapScripts::
 	map_script MAP_SCRIPT_ON_TRANSITION, SlateportCity_Harbor_OnTransition
+	map_script MAP_SCRIPT_ON_FRAME_TABLE, SlateportCity_Harbor_OnFrame   @ Moemon Kai: the first boat in
 	.byte 0
+
+SlateportCity_Harbor_OnFrame:
+	map_script_2 0x52EC, 4, EventScript_RegionArrivalHoenn   @ (VAR_REGION_ARRIVAL: mp_region.c MP_Region_FirstBoatIn)
+	.2byte 0
 
 SlateportCity_Harbor_OnTransition:
 	setescapewarp MAP_SLATEPORT_CITY, 28, 13

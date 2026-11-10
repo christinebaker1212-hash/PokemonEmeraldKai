@@ -1504,6 +1504,11 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         void PhoneFriends_OnRelay(u8 from, const u8 *data, u16 len);
         PhoneFriends_OnRelay(from, data, len);
     }
+    else if (data[0] == MPR_SHIP)   // a friend aboard the first voyage's ship talked to passengers (mp_ship.c)
+    {
+        if (len >= 3)
+            MP_Ship_FriendTalked(data[1] | (data[2] << 8));
+    }
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }
@@ -2256,6 +2261,10 @@ void MP_FrameUpdate(void)
         void MP_StadiumUi_Update(void);
         MP_HmRescue_Update();   // HMs a friend's progress made impossible to get (mp_hmrescue.c)
         MP_BattleIsland_Update();   // the BATTLE TICKET's courier (mp_battleisland.c)
+        {
+            void MP_Ship_Update(void);
+            MP_Ship_Update();   // a first arrival's scene in the town; the POKéMON kept at the lab comes back (mp_ship.c)
+        }
         MP_StadiumUi_Update();   // POKéMON STADIUM's screens back after a battle (mp_stadium_ui.c)
         {
             void MP_StadiumAnnouncer_Update(void);

@@ -615,45 +615,187 @@ Johto_Text_NothingHere::
 @ waits (PALLET TOWN, NEW BARK TOWN). The ports' frame scripts run these.
 EventScript_RegionArrivalKanto::
 	lockall
-	turnobject OBJ_EVENT_ID_PLAYER, DIR_SOUTH
-	turnobject 4, DIR_NORTH
-	msgbox gText_RegionArrivalKanto, MSGBOX_DEFAULT
-	closemessage
-	setvar 0x52EC, 0
-	warp MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F, 6, 6
-	waitstate
-	releaseall
-	end
+	call EventScript_RegionArrivalSailorAppears
+	applymovement 0x7D, EventScript_RegionArrival_Down2
+	waitmovement 0
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_NORTH
+	call EventScript_RegionArrivalTalk
+	applymovement 0x7D, EventScript_RegionArrival_Up2Right
+	applymovement OBJ_EVENT_ID_PLAYER, EventScript_RegionArrival_Up2
+	goto EventScript_RegionArrivalLeave
 
 EventScript_RegionArrivalJohto::
 	lockall
-	turnobject OBJ_EVENT_ID_PLAYER, DIR_SOUTH
-	turnobject 1, DIR_NORTH
-	msgbox gText_RegionArrivalJohto, MSGBOX_DEFAULT
-	closemessage
+	call EventScript_RegionArrivalSailorAppears
+	applymovement 0x7D, EventScript_RegionArrival_Down2
+	waitmovement 0
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_NORTH
+	call EventScript_RegionArrivalTalk
+	applymovement 0x7D, EventScript_RegionArrival_Up2Left
+	applymovement OBJ_EVENT_ID_PLAYER, EventScript_RegionArrival_Up2
+	goto EventScript_RegionArrivalLeave
+
+@ A save begun elsewhere, in HOENN for the first time (VAR_REGION_ARRIVAL 4): at SLATEPORT's harbor
+EventScript_RegionArrivalHoenn::
+	lockall
+	call EventScript_RegionArrivalSailorAppears
+	applymovement 0x7D, EventScript_RegionArrival_Left3
+	waitmovement 0
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_EAST
+	call EventScript_RegionArrivalTalk
+	applymovement 0x7D, EventScript_RegionArrival_Right3
+	applymovement OBJ_EVENT_ID_PLAYER, EventScript_RegionArrival_Right2
+	goto EventScript_RegionArrivalLeave
+
+@ SINNOH, at CANALAVE's dock (data/maps/Sinnoh_CanalaveCity/scripts.inc): the sailor's own boat takes them on
+EventScript_RegionArrivalSinnoh::
+	lockall
+	call EventScript_RegionArrivalSailorAppears
+	applymovement 0x7D, EventScript_RegionArrival_Left2
+	waitmovement 0
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_EAST
+	call EventScript_RegionArrivalTalk
+	applymovement 0x7D, EventScript_RegionArrival_Right3
+	applymovement OBJ_EVENT_ID_PLAYER, EventScript_RegionArrival_Right2
+	goto EventScript_RegionArrivalLeave
+
+@ The pier's sailor (a person of the scene only, local id 0x7D: mp_ship.c MP_ArrivalGuideSpawn) spots the player
+EventScript_RegionArrivalSailorAppears::
 	setvar 0x52EC, 0
-	warp MAP_JOHTO_PLAYERS_HOUSE2F, 4, 4
+	delay 30
+	setvar VAR_0x8004, 0
+	special MP_ArrivalGuideSpawn
+	delay 20
+	playse SE_PIN
+	applymovement 0x7D, Common_Movement_ExclamationMark
+	waitmovement 0
+	applymovement 0x7D, Common_Movement_Delay48
+	waitmovement 0
+	return
+
+@ His welcome; the POKéMON that sailed with the player goes ahead to the professor's lab; "follow me"
+EventScript_RegionArrivalTalk::
+	setvar VAR_0x8004, 0
+	special MP_ArrivalText
+	call VoyageShip_EventScript_Say
+	specialvar VAR_RESULT, MP_ArrivalCanHold
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionArrivalTalkFollow
+	setvar VAR_0x8004, 1
+	special MP_ArrivalText
+	call VoyageShip_EventScript_Say
+	setvar VAR_0x8004, 2
+	special MP_ArrivalText
+	special MP_ArrivalHold
+	playse SE_BALL
+	call VoyageShip_EventScript_Say
+EventScript_RegionArrivalTalkFollow::
+	setvar VAR_0x8004, 3
+	special MP_ArrivalText
+	call VoyageShip_EventScript_Say
+	closemessage
+	return
+
+EventScript_RegionArrivalLeave::
+	delay 40
+	special MP_ArrivalToTown
 	waitstate
 	releaseall
 	end
 
-gText_RegionArrivalKanto::
-	.string "Ahoy! You're the TRAINER from\n"
-	.string "overseas, aren't you?\p"
-	.string "Welcome to KANTO! PROF. OAK asked\n"
-	.string "me to watch for your boat.\p"
-	.string "A room's ready for you in PALLET\n"
-	.string "TOWN, where his POKéMON LAB is.\p"
-	.string "Follow me, I'll take you there!$"
+@ In the first town, outside the house (mp_ship.c MP_Ship_Update starts it): the sailor shows the door and takes his
+@ leave; the player goes in, and wakes in their room to the region's own opening
+EventScript_RegionArrivalTown::
+	lockall
+	setvar VAR_0x8004, 1
+	special MP_ArrivalGuideSpawn
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_EAST
+	delay 40
+	setvar VAR_0x8004, 4
+	special MP_ArrivalText
+	call VoyageShip_EventScript_Say
+	closemessage
+	applymovement 0x7D, EventScript_RegionArrival_Right3
+	waitmovement 0
+	special MP_ArrivalGuideRemove
+	delay 20
+	applymovement OBJ_EVENT_ID_PLAYER, EventScript_RegionArrival_Up1
+	waitmovement 0
+	special MP_ArrivalToRoom
+	waitstate
+	releaseall
+	end
 
-gText_RegionArrivalJohto::
-	.string "Ahoy! You're the TRAINER from\n"
-	.string "overseas, aren't you?\p"
-	.string "Welcome to JOHTO! PROF. ELM asked\n"
-	.string "me to watch for your boat.\p"
-	.string "A room's ready for you in NEW BARK\n"
-	.string "TOWN, where his POKéMON LAB is.\p"
-	.string "Follow me, I'll take you there!$"
+@ In the professor's lab, the region's first POKéMON in hand: the one that sailed with the player comes back
+EventScript_RegionPartnerBack::
+	lockall
+	specialvar VAR_RESULT, MP_ArrivalFaceProf
+	call_if_eq VAR_RESULT, 1, EventScript_RegionPartnerBackFace
+	setvar VAR_0x8004, 0
+	special MP_ArrivalPartnerBack
+	call VoyageShip_EventScript_Say
+	setvar VAR_0x8004, 1
+	special MP_ArrivalPartnerBack
+	playfanfare MUS_OBTAIN_ITEM
+	special ShowFieldMessageStringVar4
+	waitmessage
+	waitfanfare
+	waitbuttonpress
+	setvar VAR_0x8004, 2
+	special MP_ArrivalPartnerBack
+	call VoyageShip_EventScript_Say
+	closemessage
+	releaseall
+	end
+
+EventScript_RegionPartnerBackFace::
+	applymovement VAR_LAST_TALKED, Common_Movement_FacePlayer
+	waitmovement 0
+	playse SE_PIN
+	applymovement VAR_LAST_TALKED, Common_Movement_ExclamationMark
+	waitmovement 0
+	return
+
+EventScript_RegionArrival_Down2:
+	walk_down
+	walk_down
+	step_end
+EventScript_RegionArrival_Up1:
+	walk_up
+	step_end
+EventScript_RegionArrival_Up2:
+	walk_up
+	walk_up
+	step_end
+EventScript_RegionArrival_Up2Right:
+	walk_up
+	walk_up
+	walk_right
+	walk_right
+	step_end
+EventScript_RegionArrival_Up2Left:
+	walk_up
+	walk_up
+	walk_left
+	walk_left
+	step_end
+EventScript_RegionArrival_Left2:
+	walk_left
+	walk_left
+	step_end
+EventScript_RegionArrival_Left3:
+	walk_left
+	walk_left
+	walk_left
+	step_end
+EventScript_RegionArrival_Right2:
+	walk_right
+	walk_right
+	step_end
+EventScript_RegionArrival_Right3:
+	walk_right
+	walk_right
+	walk_right
+	step_end
 
 @ The walk between JOHTO's VICTORY ROAD gate and KANTO's ROUTE 22 gate (docs/REGIONS_AUDIT.md cases 43, 70): Crystal's
 @ way through, for champions of both LEAGUES, with Kai's customs as on the boats (qz_specials.c MP_RegionGateCross)

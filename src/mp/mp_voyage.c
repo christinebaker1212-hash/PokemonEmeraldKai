@@ -37,10 +37,48 @@ static const u16 sWakeTiles[] = INCGFX_U16("graphics/moemon/voyage/wake.png", ".
 
 static EWRAM_DATA void *sTilemap = NULL;
 static bool8 sEastbound;
+static bool8 sLook;    // MP_Voyage_Look: a look at the sea from the ship (the music plays on, back to where the player stood)
+static bool8 sCoast;   // ... with the coast on the horizon
 
 static const struct BgTemplate sBgTemplate[] = {
     {.bg = 3, .charBaseIndex = 3, .mapBaseIndex = 30, .screenSize = 0, .paletteMode = 0, .priority = 3, .baseTile = 0},
+    {.bg = 2, .charBaseIndex = 2, .mapBaseIndex = 29, .screenSize = 0, .paletteMode = 0, .priority = 2, .baseTile = 0},
 };
+
+// The coast on the horizon (the ship's spyglass once land is in sight): a far shore along the top of the scene, drawn
+// here: hills in haze over a pale strand, 256 pixels round, drifting by slower than the sea
+static void DrawCoast(void)
+{
+    static const u8 sHill[32] = {5, 6, 8, 9, 9, 8, 6, 5, 4, 4, 5, 7, 10, 12, 13, 12, 10, 8, 7, 7, 8, 9, 9, 7, 5, 4, 3, 3, 4, 5, 5, 5};
+    static const u16 sPal[16] = {0, RGB(9, 15, 15), RGB(12, 19, 16), RGB(25, 26, 20), RGB(20, 24, 27)};
+    u8 *tiles = AllocZeroed(65 * 32);
+    u16 *map = AllocZeroed(0x800);
+    u32 tx, x, y;
+    if (tiles == NULL || map == NULL)
+        return;
+    for (tx = 0; tx < 32; tx++)
+        for (x = 0; x < 8; x++)
+        {
+            // (the hill's height here, between the table's points; 16 rows: the top tile and the one under it)
+            u32 a = sHill[tx], b = sHill[(tx + 1) % 32], hgt = (a * (8 - x) + b * x + 4) / 8;
+            for (y = 0; y < 16; y++)
+            {
+                u8 c = y >= 14 ? 3 : y >= 16 - 2 - hgt ? (y >= 16 - 2 - hgt + 3 ? 1 : 2) : 0;   // (strand, hill, its lit top)
+                u8 *t = tiles + (1 + tx * 2 + y / 8) * 32 + (y % 8) * 4 + x / 2;
+                *t |= c << ((x & 1) * 4);
+            }
+        }
+    for (tx = 0; tx < 32; tx++)
+    {
+        map[3 * 32 + tx] = (5 << 12) | (1 + tx * 2);
+        map[4 * 32 + tx] = (5 << 12) | (2 + tx * 2);
+    }
+    LoadBgTiles(2, tiles, 65 * 32, 0);
+    CopyToBgTilemapBufferRect(2, map, 0, 0, 32, 32);
+    LoadPalette(sPal, BG_PLTT_ID(5), PLTT_SIZE_4BPP);
+    Free(tiles);
+    Free(map);
+}
 
 static const union AnimCmd sAnim_FerryWest[] = {ANIMCMD_FRAME(0, 10), ANIMCMD_END};
 static const union AnimCmd sAnim_FerryEast[] = {ANIMCMD_FRAME(0, 10, .hFlip = TRUE), ANIMCMD_END};
@@ -99,12 +137,14 @@ static void CB2_Voyage(void)
 static void Scroll(void)
 {
     ChangeBgX(3, 0x600, sEastbound ? 1 : 2);
+    if (sCoast)
+        ChangeBgX(2, 0x60, sEastbound ? 1 : 2);
 }
 
 static void Task_VoyageEnd(u8 taskId)
 {
     Scroll();
-    if (BGMusicStopped() && !gPaletteFade.active)
+    if ((sLook || BGMusicStopped()) && !gPaletteFade.active)
     {
         DestroyTask(taskId);
         FreeSpriteTilesByTag(TAG_FERRY);
@@ -112,6 +152,9 @@ static void Task_VoyageEnd(u8 taskId)
         FreeSpritePaletteByTag(TAG_FERRY);
         Free(sTilemap);
         sTilemap = NULL;
+        if (sCoast)
+            Free(GetBgTilemapBuffer(2));
+        sLook = sCoast = FALSE;
         SetVBlankCallback(NULL);
         PlaySE(SE_EXIT);
         gFieldCallback = FieldCB_DefaultWarpExit;
@@ -127,7 +170,8 @@ static void Task_Voyage(u8 taskId)
     Scroll();
     if (++gTasks[taskId].data[1] == 140)
     {
-        Overworld_FadeOutMapMusic();
+        if (!sLook)
+            Overworld_FadeOutMapMusic();
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
         gTasks[taskId].func = Task_VoyageEnd;
     }
@@ -162,11 +206,20 @@ static void CB2_SetUpVoyage(void)
     }
     CopyBgTilemapBufferToVram(3);
     ShowBg(3);
+    if (sCoast)
+    {
+        SetBgTilemapBuffer(2, AllocZeroed(0x800));
+        ChangeBgX(2, 0, 0);
+        ChangeBgY(2, 0, 0);
+        DrawCoast();
+        CopyBgTilemapBufferToVram(2);
+        ShowBg(2);
+    }
     LoadSpriteSheets(sheets);
     LoadSpritePalettes(pals);
     BlendPalettes(PALETTES_ALL, 16, RGB_BLACK);
     BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
-    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG3_ON | DISPCNT_OBJ_ON | DISPCNT_WIN0_ON);
+    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_MODE_0 | DISPCNT_OBJ_1D_MAP | DISPCNT_BG3_ON | (sCoast ? DISPCNT_BG2_ON : 0) | DISPCNT_OBJ_ON | DISPCNT_WIN0_ON);
     SetGpuReg(REG_OFFSET_WININ, 0x3F);   // (FireRed's letterbox: the scene between rows 24 and 136)
     SetGpuReg(REG_OFFSET_WINOUT, 0x00);
     SetGpuReg(REG_OFFSET_WIN0H, 0x00F0);
@@ -203,9 +256,19 @@ static void Task_FieldFadeOut(u8 taskId)
 void MP_Voyage_Begin(bool8 eastbound, bool8 faded)
 {
     sEastbound = eastbound;
+    sLook = sCoast = FALSE;
     LockPlayerFieldControls();
     FreezeObjectEvents();
     if (!faded)   // (the port's music plays on through the voyage, as FireRed's)
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
     CreateTask(Task_FieldFadeOut, 10);
+}
+
+// A look at the sea from the first voyage's ship (mp_ship.c: the lookout's spyglass): the same scene, the ship's music
+// playing on, then back to where the player stood (SetWarpDestination to there before it); COAST: land in sight
+void MP_Voyage_Look(bool8 eastbound, bool8 coast)
+{
+    MP_Voyage_Begin(eastbound, FALSE);
+    sLook = TRUE;
+    sCoast = coast;
 }

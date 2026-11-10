@@ -134,6 +134,8 @@ bool8 MP_Region_IsSharedMap(u8 group, u8 num)
                                   MAP_BATTLE_FRONTIER_BATTLE_FACTORY_LOBBY, MAP_BATTLE_FRONTIER_BATTLE_FACTORY_PRE_BATTLE_ROOM,
                                   MAP_BATTLE_FRONTIER_BATTLE_FACTORY_BATTLE_ROOM};
     u32 i;
+    if (group == MAP_GROUP(MAP_VOYAGE_SHIP_CORRIDOR))   // (the first voyage's ship: mp_ship.c)
+        return TRUE;
     if (group == MAP_GROUP(MAP_BATTLE_ISLAND))   // (BATTLE ISLAND: every region's, mp_battleisland.c)
         return TRUE;
     if (O3D_IsOrreGroup(group))   // (ORRE: a post-game place every region's boat sails to, src/orre/orre_ferry.c)
@@ -298,7 +300,7 @@ void MP_Region_GoToStartHouse(u8 region)
         // SINNOH: the boat comes in at CANALAVE's dock, where the harbor sailor meets the player and takes them to
         // TWINLEAF TOWN, where the journey starts (CANALAVE's is the sixth GYM): VAR_SINNOH_ARRIVAL 1 runs that
         // (data/maps/Sinnoh_CanalaveCity/scripts.inc)
-        SetWarpDestination(MAP_GROUP(MAP_SINNOH_CANALAVE_CITY), MAP_NUM(MAP_SINNOH_CANALAVE_CITY), WARP_ID_NONE, 11, 22);
+        SetWarpDestination(MAP_GROUP(MAP_SINNOH_CANALAVE_CITY), MAP_NUM(MAP_SINNOH_CANALAVE_CITY), WARP_ID_NONE, 5, 20);   // (the open quay by the moored boats: under the drawbridge at 11,22 the scene was hidden)
         SetLastHealLocationWarp(HEAL_LOCATION_SINNOH_TWINLEAF_TOWN);
         VarSet(VAR_SINNOH_ARRIVAL, 1);
         Sinnoh_PlatinumStoryBegin();   // (Platinum's story begins at home in TWINLEAF, where the sailor takes them)
@@ -321,6 +323,13 @@ void MP_Region_FirstBoatIn(u8 region)
         SetWarpDestination(MAP_GROUP(MAP_KANTO_VERMILION_CITY), MAP_NUM(MAP_KANTO_VERMILION_CITY), WARP_ID_NONE, 24, 32);
         SetLastHealLocationWarp(HEAL_LOCATION_KANTO_PALLET_TOWN);
         VarSet(VAR_REGION_ARRIVAL, REGION_KANTO);
+    }
+    else if (region == REGION_HOENN)
+    {
+        // (a save begun elsewhere: SLATEPORT's harbor, whose sailor takes the player to LITTLEROOT: VAR_REGION_ARRIVAL 4,
+        // data/scripts/mp_region.inc EventScript_RegionArrivalHoenn, mp_ship.c)
+        SetWarpDestination(MAP_GROUP(MAP_SLATEPORT_CITY_HARBOR), MAP_NUM(MAP_SLATEPORT_CITY_HARBOR), WARP_ID_NONE, 8, 11);
+        VarSet(VAR_REGION_ARRIVAL, REGION_COUNT);
     }
     else
         MP_Region_GoToStartHouse(region);
@@ -361,6 +370,7 @@ void MP_Region_StartNewGame(void)
         sStartRegion = atoi(env) % REGION_COUNT;
     gRegionState.current = sStartRegion;
     gRegionState.started = 1 << sStartRegion;
+    gRegionState.home = sStartRegion + 1;   // (only its MOM is MOM: mp_ship.c)
     Sinnoh_HoneyReset();
     Sinnoh_HallReset();
     Sinnoh_TowerReset();
@@ -407,12 +417,11 @@ void MP_Region_StartNewGame(void)
 // The ports' customs: TRUE when the trip to VAR_0x8004 is the player's first there (gStringVar4: what happens)
 u16 MP_RegionFirstVisit(void)
 {
-    static const u8 sJohto[] = _("It's your first voyage to JOHTO!\pA guide will meet you at OLIVINE and\ntake you to NEW BARK TOWN, home of\lPROF. ELM's POKéMON LAB.\pYou'll have a room there while you\nstay in JOHTO.$");
-    static const u8 sKanto[] = _("It's your first voyage to KANTO!\pA guide will meet you at VERMILION\nand take you to PALLET TOWN, home of\lPROF. OAK's POKéMON LAB.\pYou'll have a room there while you\nstay in KANTO.$");
+    void MP_Ship_FirstVisitText(u8 to);
     u8 to = gSpecialVar_0x8004;
-    if (to == REGION_HOENN || to >= REGION_COUNT || (gRegionState.started & (1 << to)))
+    if (to >= REGION_COUNT || (gRegionState.started & (1 << to)))
         return gSpecialVar_Result = FALSE;
-    StringCopy(gStringVar4, to == REGION_JOHTO ? sJohto : sKanto);
+    MP_Ship_FirstVisitText(to);
     return gSpecialVar_Result = TRUE;
 }
 

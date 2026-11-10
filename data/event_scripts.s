@@ -471,6 +471,9 @@ gStdScripts_End::
 	.include "data/maps/SSTidalCorridor/scripts.inc"
 	.include "data/maps/SSTidalLowerDeck/scripts.inc"
 	.include "data/maps/SSTidalRooms/scripts.inc"
+	.include "data/maps/VoyageShip_Corridor/scripts.inc"   @ Moemon Kai: the first voyage's ship (src/mp/mp_ship.c)
+	.include "data/maps/VoyageShip_Rooms/scripts.inc"
+	.include "data/maps/VoyageShip_Deck/scripts.inc"
 	.include "data/maps/BattlePyramidSquare01/scripts.inc"
 	.include "data/maps/UnionRoom/scripts.inc"
 	.include "data/maps/SafariZone_Northwest/scripts.inc"

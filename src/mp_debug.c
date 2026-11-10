@@ -3351,6 +3351,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         HealPlayerParty();
         printf("[test] heal: the party is healed\n");
     }
+    else if (strcmp(cmd, "shiptalk") == 0)
+    {
+        // shiptalk MASK: aboard the first voyage's ship, as if a friend had talked to these passengers (mp_ship.c)
+        MP_Ship_FriendTalked(strtol(arg, NULL, 0));
+        printf("[test] ship: talked %04x state %d to %d\n", gRegionState.shipTalked, gRegionState.shipState, gRegionState.shipTo);
+    }
     else if (strcmp(cmd, "walkdump") == 0)
     {
         // mp walkdump: this map as the walk sees it from where the player stands (WalkDump)
@@ -5802,6 +5808,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "travel") == 0)
     {
         // travel R: go to region R now, as a trip does (customs keeps the first POKeMON)
+        // (a first trip there is sailed aboard the ship, mp_ship.c, unless MOEMON_TEST_NO_SHIP)
         bool8 MP_Region_FollowHost(u8 to);
         printf("[test] travel %d: %d\n", atoi(arg), MP_Region_FollowHost(atoi(arg)));
     }

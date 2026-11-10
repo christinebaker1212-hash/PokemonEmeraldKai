@@ -1500,6 +1500,8 @@ bool8 IsMapTypeOutdoors(u8 mapType)
 
 bool8 Overworld_MapTypeAllowsTeleportAndFly(u8 mapType)
 {
+    if (MP_Ship_Aboard())   // Moemon Kai: the first voyage's ship is at sea (its deck is open air: mp_ship.c)
+        return FALSE;
     if (mapType == MAP_TYPE_ROUTE
      || mapType == MAP_TYPE_TOWN
      || mapType == MAP_TYPE_OCEAN_ROUTE

@@ -1,0 +1,117 @@
+pressuntil A field 5000
+wait 60
+mp travel 2
+watchlog voyage: arrived
+waitlog 900 voyage: arrived
+wait 200
+shot greet
+pressuntil A field 3000
+wait 30
+approach obj 1 600
+wait 60
+shot exit_at_sea
+pressuntil A field 2000
+approach obj 2 900
+pressuntil A field 2000
+approach obj 3 900
+pressuntil A field 2000
+walkto 4 3 900
+wait 40
+press DOWN 30
+wait 90
+approach obj 1 600
+wait 90
+shot homecomer
+pressuntil A field 2000
+walkto 4 1 600
+wait 40
+press UP 30
+wait 90
+walkto 10 9 900
+wait 90
+approach obj 3 600
+wait 240
+shot trainer_shows
+pressuntil A field 2000
+walkto 22 16 600
+wait 40
+press DOWN 30
+wait 90
+walkto 13 3 900
+wait 40
+press DOWN 30
+wait 90
+approach obj 4 600
+wait 60
+pressuntil A field 3000
+wait 60
+mp hasitem 396
+walkto 31 1 600
+wait 40
+press UP 30
+wait 90
+walkto 16 2 900
+wait 40
+press RIGHT 30
+wait 150
+shot deck
+approach obj 1 900
+wait 60
+watchlog voyage: east
+pressuntillog A 1500 voyage: east
+wait 100
+shot spyglass_coast
+watchlog voyage: arrived
+waitlog 900 voyage: arrived
+wait 150
+pressuntil A field 2000
+walkto 16 8 900
+wait 40
+press RIGHT 30
+wait 150
+mp where
+walkto 7 9 900
+wait 90
+approach tile 15 11 600
+wait 60
+pressuntil A yesno 600
+shot bed
+press A 4
+watchlog ship: docked
+waitlog 900 ship: docked
+wait 200
+shot announcement
+pressuntil A field 3000
+walkto 13 16 600
+wait 40
+press DOWN 30
+wait 90
+approach obj 1 900
+wait 60
+shot exit_docked
+watchlog ship: off
+pressuntillog A 2000 ship: off
+watchlog goes ahead
+pressuntillog A 3000 goes ahead
+shot pier
+watchlog ship: home
+pressuntillog A 9000 ship: home
+wait 300
+mp where
+mp party
+shot room
+goto 37,119 -1 -1 1500
+wait 60
+approach obj 1 900
+wait 150
+shot host_mom
+pressuntil A field 3000
+mp giveforeign 1:5
+mp warp 37,122,6,6
+wait 300
+shot partner_back
+watchlog is back with the player
+pressuntillog A 1500 is back with the player
+pressuntil A field 3000
+mp party
+quit

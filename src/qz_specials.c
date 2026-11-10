@@ -2,6 +2,7 @@
 // did in Quetzal). The ones not here yet are stubs in src/qz_specials_stub.c (tools/quetzal_port/import.py leaves out
 // every name this file defines).
 #include <stdio.h>
+#include <stdlib.h>
 #include "global.h"
 #include "constants/moves.h"
 #include "constants/party_menu.h"
@@ -1287,11 +1288,14 @@ static u16 TravelNow(u8 to, u8 keep, bool8 train)
     }
     CompactPartySlots();
     MP_Region_SendLuggage();   // only the KEY ITEMS board (1.101.0)
-    first = !(gRegionState.started & (1 << to)) && to != REGION_HOENN;
+    first = !(gRegionState.started & (1 << to));   // (HOENN too, for a save begun elsewhere: 1.186.0)
     MP_Region_Travel(from, to);
     HealPlayerParty();
-    if (first && !train)
-        MP_Region_FirstBoatIn(to);   // the first visit: in at the port, where a guide takes the player to the first town
+    if (first && !train && getenv("MOEMON_TEST_NO_SHIP"))
+        MP_Region_FirstBoatIn(to);   // (the harness's scenarios that aren't about the ship: straight in at the port)
+    else if (first && !train)
+        MP_Ship_Board(from, to);   // the first visit: the crossing aboard the ship (src/mp/mp_ship.c), then in at the
+                                   // port, where a guide takes the player to the first town (MP_Region_FirstBoatIn)
     else if (first)
         MP_Region_GoToStartHouse(to);
     else if (train)   // GOLDENROD <-> SAFFRON
