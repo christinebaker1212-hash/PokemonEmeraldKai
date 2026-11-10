@@ -5989,10 +5989,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
             if (!o->active)
                 continue;
             // (and where its sprite is drawn: OAM x, y and, on a SINNOH map, its feet's screen row)
-            printf("[test] npc local %d gfx %d xy %d,%d invisible %d offscreen %d oam %d,%d feet %d%s\n", o->localId,
+            printf("[test] npc local %d gfx %d xy %d,%d invisible %d offscreen %d oam %d,%d feet %d%s (was %d,%d)\n", o->localId,
                    OBJ_GFX_ID(o), o->currentCoords.x - MAP_OFFSET, o->currentCoords.y - MAP_OFFSET, o->invisible,
                    o->offScreen, gSprites[o->spriteId].oam.x, gSprites[o->spriteId].oam.y, gS3dSpriteFeet[o->spriteId],
-                   o->isPlayer ? " player" : "");
+                   o->isPlayer ? " player" : "", o->previousCoords.x - MAP_OFFSET, o->previousCoords.y - MAP_OFFSET);
         }
     }
     else if (strcmp(cmd, "objs") == 0)
