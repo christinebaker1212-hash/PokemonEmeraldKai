@@ -791,6 +791,11 @@ void m4aSoundVSync(void)
             MP_LegacySfx_Mix(audioBuffer, samplesPerFrame);
             MP_LifeSfx_Mix(audioBuffer, samplesPerFrame);   // MOéMON GARDEN's quiet sounds (mp_life_sound.c)
             {
+                // Moemon Kai: ORRE's own songs and sounds (include/orre_sound.h), on while ORRE's field shows
+                void Orre_AudioFrame(float *buffer, s32 count);
+                Orre_AudioFrame(audioBuffer, samplesPerFrame);
+            }
+            {
                 void MP_StadiumAnnouncer_Mix(float *buffer, s32 count);
                 MP_StadiumAnnouncer_Mix(audioBuffer, samplesPerFrame);   // Moemon Kai: POKéMON STADIUM's announcer
             }

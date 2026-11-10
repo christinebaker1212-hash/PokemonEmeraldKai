@@ -138,6 +138,32 @@ The older notes per part:
    flags, src/orre/orre_story.c, go there too).
 8. The in-game download screen when orre/ is missing (as the DANCE machine's rh_screen.c StateNoSongs).
 
+## Sound (2026-11-10: musyx/, include/orre_sound.h)
+- **Colosseum's own songs and sound effects play, from the disc's own data** (the user, 2026-11-10: "go ahead and use
+  the MusyX runtime. Compress songs down to a GBA sound filter"). Colosseum's music is MusyX sequences (78 song files in
+  bgm_archive, the projects / pools / sample directories in common.fsys, the samples in the disc's sound/*.samp: all
+  in orre_data.pak since the first rip). The game has the MusyX runtime itself: **musyx/** is AxioDL's decompilation
+  with its PC renderer (github.com/AxioDL/musyx at musyx/COMMIT, CC0; the Colosseum decomp's own src/musyx is the same
+  code for the GameCube), built by the Makefile's MUSYX_* rules as C11 beside the game (never with the game's
+  headers: MusyX has its own u8 / bool).
+- **The bridge: musyx/orre_musyx.c** (OrreSound_*). A sound id is a row of Colosseum's sound table (common_rel .data
+  0x13FE08, 1236 rows of 12 bytes: flags (0x80 an effect), the song's group, reverb, the song table's row, the MusyX
+  id); a song's file is the song table's resource id (.data 0x111B8C, 79 rows) through the pack's index. The groups
+  pushed: snd_music (0), snd_music_atmos (1), snd_se (6), snd_se_motion (8), the cries (4, 9); not the battle
+  effects (Kai's battles). Two songs at once as Colosseum has them: the music (std104) and a song started as an
+  effect (std105: the wind's loop at the OUTSKIRT STAND). One of the music's samples has loop start -1 (no loop):
+  made plain before MusyX reads the directory, which refuses it otherwise.
+- **The GBA filter**: MusyX mixes at 13379 Hz, the mix is cut to 8 bits and held up to the game's 42048 Hz with a
+  light low-pass; GAIN 0.85 puts the OUTSKIRT STAND at a HOENN town's loudness (RMS 0.09 on MOEMON_AUDIO_DUMP).
+- **In the game**: src/orre/orre_audio.c Orre_AudioFrame (music_player.c's frame): on while the player is in ORRE,
+  menus too; a battle has Kai's music (the song waits where it is); leaving ORRE silences everything. The scripts'
+  natives (orre_vm.c): 104 music, 105 / 138 effects, 106 / 153 stops, 137 a sound's volume, 109 the master volume,
+  228 the song playing; a room's sound script (its floor record's + 0x28) runs first on arriving.
+  MOEMON_ORRE_SOUND_LOG=1 logs every start. Every room's song starts (orre_all_maps with the log: 89 starts, none
+  refused).
+- **Not yet**: Colosseum's battle songs (145 fightStartBgm: Kai's play), reverb, the fanfares' pause of the music
+  (130), 3D positions of effects, the opening's and world map's songs (their C code's calls), the cries in scenes.
+
 ## Colosseum's scripts (src/orre/orre_vm.c, 2026-11-08)
 - **Run, not translated** (Claude's call, ORRE_DECISIONS "Colosseum's scripts run as they are"): the game has Colosseum's
   GS VM, opcode for opcode from the decomp (src/game/gs_vm.c: operand descriptors 0x80 on the stack / 0x40 a frame

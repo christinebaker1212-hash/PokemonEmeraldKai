@@ -1,0 +1,90 @@
+#ifndef _ASSERT
+#define _ASSERT
+#include "musyx/platform.h"
+#include "musyx/version.h"
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-value"
+#endif
+
+#if MUSY_TARGET == MUSY_TARGET_DOLPHIN
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern void OSPanic(const char* file, int line, const char* msg, ...);
+extern void OSReport(const char* msg, ...);
+#ifdef __cplusplus
+}
+#endif
+
+#ifndef MUSY_PANIC
+#define MUSY_PANIC OSPanic
+#endif
+#ifndef MUSY_REPORT
+#define MUSY_REPORT OSReport
+#endif
+#elif MUSY_TARGET == MUSY_TARGET_PC
+#include <assert.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static inline void panic(const char* file, int line, const char* msg, ...) {
+  va_list list;
+  va_start(list, msg);
+  vprintf(msg, list);
+  va_end(list);
+  printf(" in \"%s\" on line %d.\n", file, line);
+  abort();
+}
+
+#ifndef MUSY_PANIC
+#define MUSY_PANIC panic
+#endif
+#ifndef MUSY_REPORT
+#define MUSY_REPORT printf
+#endif
+#endif
+
+#ifndef MUSY_FILE
+#define MUSY_FILE __FILE__
+#endif
+
+#ifndef MUSY_ASSERT
+#ifdef MUSY_BUILD_DEBUG
+#define MUSY_ASSERT(cond) ((cond) || (MUSY_PANIC(MUSY_FILE, __LINE__, "Failed assertion " #cond), 0))
+#else
+#define MUSY_ASSERT(cond)
+#endif
+#endif
+
+#ifndef MUSY_ASSERT_MSG
+#ifdef MUSY_BUILD_DEBUG
+#define MUSY_ASSERT_MSG(cond, msg) ((cond) || (MUSY_PANIC(MUSY_FILE, __LINE__, msg), 0))
+#else
+#define MUSY_ASSERT_MSG(cond, msg)
+#endif
+#endif
+
+#ifndef MUSY_DEBUG
+#ifdef MUSY_BUILD_DEBUG
+#define MUSY_DEBUG MUSY_REPORT
+#else
+#define MUSY_DEBUG
+#endif
+#endif
+
+#ifndef MUSY_FATAL
+#ifdef MUSY_BUILD_DEBUG
+#define MUSY_FATAL(msg) MUSY_ASSERT_MSG(FALSE, msg)
+#else
+#define MUSY_FATAL
+#endif
+#endif
+
+// Code that might trigger the warning
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+#endif // _ASSERT

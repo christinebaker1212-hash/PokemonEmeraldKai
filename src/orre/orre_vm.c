@@ -25,6 +25,7 @@
 #include "main.h"
 #include "menu.h"
 #include "o3d.h"
+#include "orre_sound.h"
 #include "orre.h"
 #include "orre_data.h"
 #include "palette.h"
@@ -405,7 +406,7 @@ enum
 // models' and map objects' animations, lights, people's internal flags and walking speed, story gates (left open),
 // doors and elevators (the maps' own links), the P★DA's mail, the TV's channel
 static const struct { u16 n; u8 ret; } sQuiet[] = {
-    {104, 0}, {105, 0}, {106, 0}, {109, 0}, {130, 0}, {137, 0}, {138, 0}, {153, 0}, {218, 0}, {228, 0},
+    {130, 0}, {218, 0},
     {38, 0}, {39, 0}, {48, 0}, {127, 0}, {147, 0},
     {148, 0}, {149, 0}, {156, 0}, {170, 1}, {126, 0},
     {113, 0}, {114, 0}, {115, 0}, {116, 0}, {117, 1}, {154, 0}, {171, 0}, {178, 1}, {190, 0}, {191, 0},
@@ -720,6 +721,17 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
 #define ARG(i) ((i) < count ? a[i] : z)
     switch (n)
     {
+    // Colosseum's sounds, its own (include/orre_sound.h: the MusyX runtime on the disc's data). std104 the music
+    // (id, fade, volume), std105 / 138 an effect or a second song (the wind), 106 / 153 stops, 137 a sound's volume,
+    // 109 the master volume, 228 the music playing, 108 whether a sound plays
+    case 104: return OrreSound_Play(ARG(0).u, ARG(2).u, TRUE);
+    case 105: return OrreSound_Play(ARG(0).u, ARG(2).u, FALSE);
+    case 138: return OrreSound_Play(ARG(0).u, ARG(2).u, FALSE);
+    case 106: OrreSound_Stop(ARG(0).u, ARG(1).u); return 0;
+    case 153: OrreSound_StopBgm(ARG(0).u); return 0;
+    case 137: OrreSound_Volume(ARG(0).u, ARG(1).u, ARG(2).u); return 0;
+    case 109: OrreSound_MasterVolume(ARG(0).u, ARG(1).u); return 1;
+    case 228: return OrreSound_Bgm();
     case N_FLAG_CHECK: return Orre_Flag(ARG(0).u);
     case N_FLAG_GET: return Orre_FlagValue(ARG(0).u);
     case N_FLAG_SET1: Orre_SetFlag(ARG(0).u, TRUE); return 0;   // (the decomp's names are swapped: orre_story.c)
@@ -1516,7 +1528,7 @@ void Orre_Vm_RoomEntered(void)
             if (sOrreGates[i].room == room && sOrreGates[i].closed)
                 SetGate(sOrreGates[i].gate, TRUE);
     }
-    for (k = 0x2C; k <= 0x34; k += 4)
+    for (k = 0x28; k <= 0x34; k += 4)   // (+ 0x28 the room's sound script: its song, its wind)
     {
         u32 id = Be32(floor + k);
         struct Thread *t;

@@ -450,6 +450,16 @@ ifeq ($(PORTABLE),1)
   OBJS += $(MORT_OBJS)
 endif
 
+# Moemon Kai: ORRE's sound: the MusyX runtime (musyx/: AxioDL's decompilation with its PC renderer, CC0) and ORRE's
+# bridge to it (musyx/orre_musyx.c, include/orre_sound.h); the songs and samples come from ORRE's data pack
+ifeq ($(PORTABLE),1)
+  MUSYX_SRCS := $(wildcard musyx/src/*.c) $(wildcard musyx/src/*/*.c) musyx/orre_musyx.c
+  MUSYX_OBJS := $(patsubst %,$(OBJ_DIR)/%.o,$(MUSYX_SRCS))
+  MUSYX_CFLAGS := -std=gnu11 -O2 -m$(BIT_WIDTH) -w -Imusyx/include -DMUSY_TARGET=MUSY_TARGET_PC \
+                  -DMUSY_VERSION_MAJOR=2 -DMUSY_VERSION_MINOR=0 -DMUSY_VERSION_PATCH=0
+  OBJS += $(MUSYX_OBJS)
+endif
+
 # Moemon Maker: the editor (maker/: C++ on Dear ImGui, docs/MOEMON_MAKER.md). It reaches the game only through
 # include/maker_api.h, so it never includes the game's headers.
 ifeq ($(PORTABLE),1)
@@ -623,6 +633,14 @@ $(OBJ_DIR)/maker/%.cpp.o: maker/%.cpp
 
 -include $(MAKER_OBJS:.o=.d)
 $(C_BUILDDIR)/maker/maker_font.o: maker/fonts/LiberationSans-Regular.ttf maker/fonts/LiberationSans-Bold.ttf
+
+# Moemon Kai: the MusyX runtime's objects (MUSYX_OBJS)
+$(OBJ_DIR)/musyx/%.c.o: musyx/%.c
+	@mkdir -p $(dir $@)
+	@echo "$(PREFIX)gcc <musyx flags> -o $@ $<"
+	@$(PREFIX)gcc $(MUSYX_CFLAGS) -MMD -MP -c $< -o $@
+
+-include $(MUSYX_OBJS:.o=.d)
 
 # Moemon Kai: the MORT decoder's objects (MORT_OBJS)
 $(OBJ_DIR)/mort/%.cpp.o: mort/%.cpp
