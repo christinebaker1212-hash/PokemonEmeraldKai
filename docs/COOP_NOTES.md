@@ -7326,3 +7326,9 @@ The walk-only SINNOH run went through the DISTORTION WORLD from SPEAR PILLAR to 
   1 dB; the rest are held by the peak ceiling or the 12 dB limit (SINNOH's music box).
 - The MAGIC table (mtg_board.c) picks one of two duel songs a duel: MUS_RG_VS_TRAINER or MUS_VS_TRAINER, each with the
   user's own file as its `@mtg` scene file (Magic Battle 1 and 2). gen.py names the scene MAGIC duels.
+- SENDOFF SPRING's arrival (Platinum's OnFrame after the DISTORTION WORLD: CYNTHIA's talk, VAR_EXITED_DISTORTION_WORLD_STATE
+  and VAR_SANDGEM_TOWN_LAB_STATE 2, which ROWAN's lab scene and so ROUTE 222's way to SUNYSHORE wait on) never converted:
+  its ScrCmd_2B5 (the exit location an ESCAPE ROPE / DIG takes the player to, set by world tiles; here
+  MAP_HEADER_UNKNOWN_266, a header without a name: SPRING PATH, found by the tiles) was unsupported, and gen_scripts.py
+  leaves out a whole script it can't convert. It is `setescapewarp` now (CANALAVE's harbor inn dream converts too).
+  A save that already left the spring plays it on coming back. Found by the walk-only run.

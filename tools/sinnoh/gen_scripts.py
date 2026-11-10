@@ -1169,6 +1169,22 @@ class FileConverter:
             go = '%s%s__docked%d' % (PREFIX, self.low, self.next_local())
             return ['fadescreen FADE_TO_BLACK', 'playse SE_SHIP', self.sinnoh(SINNOH_WARP_CONTINUE), 'goto %s' % go,
                     'warp %s, %d, %d' % dock, 'waitstate', '%s:' % go]
+        if cmd == 'ScrCmd_2B5':
+            # Platinum's exit location (FieldOverworldState_GetExitLocation: where an ESCAPE ROPE or DIG takes the player)
+            # set to a place by its world tiles: the game's own escape warp. SENDOFF SPRING's arrival puts it on the
+            # SPRING PATH (MAP_HEADER_UNKNOWN_266, a header the decomp has no name for: found by the tiles), and that
+            # scene must run: it tells ROWAN the story goes on (VAR_SANDGEM_TOWN_LAB_STATE 2), which opens ROUTE 222
+            x, z = int(self.value(a[1])), int(self.value(a[2]))
+            low = a[0][len('MAP_HEADER_'):].lower() if a[0].startswith('MAP_HEADER_') else None
+            o = self.dec.origins().get(low)
+            if o is None:
+                for pl in self.dec.places:
+                    if pl['matrix'] == 0 and pl['x0'] <= x // 32 <= pl['x1'] and pl['z0'] <= z // 32 <= pl['z1']:
+                        o = (pl['id'], pl['x0'] * 32, pl['z0'] * 32)
+                        break
+            if o is None:
+                raise Unsupported('exit location %s' % a[0])
+            return ['setescapewarp %s, %d, %d' % (o[0], x - o[1], z - o[2])]
         if cmd == 'Warp':
             low = a[0][len('MAP_HEADER_'):].lower() if a[0].startswith('MAP_HEADER_') else None
             o = self.dec.origins().get(low)
