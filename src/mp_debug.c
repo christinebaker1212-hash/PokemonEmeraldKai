@@ -283,7 +283,7 @@ bool8 MP_Setup_ScreenIs(int screen);
 // The harness's walking (walkto / goto / approach): every tile the player can get to from where they stand, by the
 // game's own rules: collision, one-way tiles, heights (GetCollisionAtCoords with the height carried along the way, as
 // ObjectEventUpdateElevation keeps it), ledges jumped down, SURF onto water and off it again, and the obstacles a
-// field move clears (CUT trees, ROCK SMASH rocks: A facing them). sWStep: the first step toward each tile (its key,
+// field move clears (CUT trees, ROCK SMASH rocks: A facing them), SINNOH's rock walls (ROCK CLIMB). sWStep: the first step toward each tile (its key,
 // and WS_A when that step is A facing it first); sWDist: how many steps
 #define W_MAXT (160 * 160)
 #define WS_NONE 0xFF
@@ -544,6 +544,12 @@ static bool8 WalkUpper(s16 x, s16 y, float h)
 #define WSEEN_GET(n, e, up) (sWSeen[WSEEN_BIT(n, e, up) >> 3] & (1 << (WSEEN_BIT(n, e, up) & 7)))
 #define WSEEN_SET(n, e, up) (sWSeen[WSEEN_BIT(n, e, up) >> 3] |= 1 << (WSEEN_BIT(n, e, up) & 7))
 
+static bool8 RockWallAt(s32 x, s32 y)
+{
+    u8 b = MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET);
+    return b == MB_UNUSED_4B || b == MB_UNUSED_4C;   // (Platinum's ROCK_CLIMB_N_S / E_W: s3d_misc.c IsRockWall)
+}
+
 static void WalkSearch(void)
 {
     static const s8 dx[4] = {0, 0, -1, 1}, dy[4] = {1, -1, 0, 0};
@@ -554,6 +560,9 @@ static void WalkSearch(void)
     bool8 canSurf = surfing || (MP_Region_HasFieldMoveBadge(4) && PartyHasMonWithSurf());
     bool8 canWhirl = MP_Region_HasFieldMoveBadge(8) && MP_PartyCanUseFieldMove(MOVE_WHIRLPOOL);
     bool8 canFall = MP_Region_HasFieldMoveBadge(7) && MP_PartyCanUseFieldMove(MOVE_WATERFALL);
+    // (SINNOH's rock walls: Platinum's ROCK CLIMB, with the ICICLE BADGE: src/sinnoh/s3d_misc.c S3D_RockClimbSlot)
+    bool8 canClimb = S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)
+                  && FlagGet(MP_Region_BadgeFlag(REGION_SINNOH, 6)) && MP_PartyCanUseFieldMove(MOVE_ROCK_CLIMB);
     s16 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
     u8 pe = p->currentElevation;
     bool8 s3d = S3D_Active(), up;
@@ -619,6 +628,21 @@ static void WalkSearch(void)
                  || GetObjectEventIdByXY(lx + MAP_OFFSET, ly + MAP_OFFSET) != OBJECT_EVENTS_COUNT
                  || UnseenStanderAt(lx, ly) || WhirlpoolAt(lx, ly))
                     continue;
+                how |= WS_A;
+            }
+            else if (!surf && canClimb && RockWallAt(nx, ny))
+            {
+                // (up or down a rock wall: A facing it, the player climbs on the way they face to the first tile past
+                // the wall. MT. CORONET 1F's way to 2F, ROUTE 217's, LAKE ACUITY's)
+                lx = nx, ly = ny;
+                while (lx >= 0 && ly >= 0 && lx < w && ly < h && RockWallAt(lx, ly))
+                    lx += dx[d], ly += dy[d];
+                if (lx < 0 || ly < 0 || lx >= w || ly >= h || MapGridGetCollisionAt(lx + MAP_OFFSET, ly + MAP_OFFSET)
+                 || GetObjectEventIdByXY(lx + MAP_OFFSET, ly + MAP_OFFSET) != OBJECT_EVENTS_COUNT)
+                    continue;
+                ne = MapGridGetElevationAt(lx + MAP_OFFSET, ly + MAP_OFFSET);
+                if (ne == 0 || ne == 15)
+                    ne = e;
                 how |= WS_A;
             }
             else if (!surf && GetLedgeJumpDirection(nx + MAP_OFFSET, ny + MAP_OFFSET, dirs[d]) != DIR_NONE)
