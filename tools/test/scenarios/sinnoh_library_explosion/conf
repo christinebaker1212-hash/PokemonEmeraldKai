@@ -1,0 +1,8 @@
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=66:30"
+UNEXPECT_A=("[crash]" "TIMEOUT")
+# CANALAVE LIBRARY 3F: Platinum's meeting with PROF. ROWAN, the explosion at LAKE VALOR and the library's TV news (its
+# frame script runs on arriving while VAR_CANALAVE_LIBRARY_STATE 0x51A5 is 1); it ends with the city's state 4 and
+# the library's 2 (tools/sinnoh/gen_scripts.py StartLibraryTV)
+EXPECT_A=("var 0x51A4 = 4" "var 0x51A5 = 2")

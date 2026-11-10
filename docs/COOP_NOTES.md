@@ -7214,3 +7214,12 @@ could only turn north / south there and never got across. Test sinnoh_bike_under
 1.185.12: UnderTop asks S3D_TileFloor for the top ground nearest 1e5, not 1e9. A float near 1e9 is spaced 64 apart,
 so |h - 1e9| came out equal for a deck and the ground under it and the first height stored won, sometimes the lower
 one: the tile then never read as under its bridge. Never pass S3D_TileFloor a sentinel past about 1e5.
+
+## CANALAVE LIBRARY's meeting (1.185.13)
+Platinum's CanalaveLibrary3F_OnFrame_Explosion (the meeting with PROF. ROWAN, the explosion at LAKE VALOR, the TV news)
+never converted: StartLibraryTV wasn't known, so gen_scripts.py left the frame script out and the story stopped at the
+library (VAR_CANALAVE_CITY_STATE 0x51A4 stayed 3). StartLibraryTV now holds the faded-out field for the TV's own length
+(Platinum's LIBRARY_TV_DURATION 240 frames and its fades: `delay 252`); the TV's picture is still to be drawn
+(docs/SINNOH_CHECKLIST.md). Test sinnoh_library_explosion. To list every Platinum map script that doesn't convert (the
+`--report` skips them): converter(root, low).check(n) over entries named OnTransition / OnFrame / OnLoad / OnResume.
+The harness's `mp gym solve` in CANALAVE's gym prints the way to each person and door ("+" a platform ridden).

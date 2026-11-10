@@ -1603,6 +1603,99 @@ void S3D_Gyms_Debug(const char *arg)
             printf("\n");
         }
     }
+    if (sG.gym == GYM_CANALAVE && strcmp(arg, "solve") == 0)
+    {
+        // from where the player stands, as the gym moves (each floor's walls; a platform stepped on carries the player
+        // to its other end): the way to each person as the tiles a walk aims for, the corners of each straight run
+        // (one way only to each) and each platform's tile ("+": it rides from there)
+        enum { CQ = 1 << 16, CH = 1 << 18 };
+        static struct { u8 x, y, fl, ride; u32 moved, parent; } sQ[CQ];
+        static u64 sHash[CH];
+        static const s8 sDir[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+        u32 head = 0, tail = 0, i, o;
+        s16 px, py;
+        memset(sHash, 0xFF, sizeof(sHash));
+        PlayerGetDestCoords(&px, &py);
+        sQ[0].x = px - MAP_OFFSET, sQ[0].y = py - MAP_OFFSET, sQ[0].fl = CanalaveFloor(), sQ[0].ride = 0;
+        sQ[0].moved = CanalaveMoved(), sQ[0].parent = 0xFFFFFFFF;
+        tail = 1;
+#define CKEY(x, y, f, m) ((u64)(x) | (u64)(y) << 5 | (u64)(f) << 10 | (u64)(m) << 12)
+#define CSEEN(k, add) ({ u32 hh = (u32)(((k) * 0x9E3779B97F4A7C15ull) >> 46), hit = 0; \
+        while (sHash[hh] != ~0ull) { if (sHash[hh] == (k)) { hit = 1; break; } hh = (hh + 1) & (CH - 1); } \
+        if (!hit && (add)) sHash[hh] = (k); hit; })
+        CSEEN(CKEY(sQ[0].x, sQ[0].y, sQ[0].fl, sQ[0].moved), 1);
+        while (head < tail && tail < CQ - 4)
+        {
+            u8 x = sQ[head].x, y = sQ[head].y, fl = sQ[head].fl;
+            u32 moved = sQ[head].moved;
+            head++;
+            for (i = 0; i < 4; i++)
+            {
+                s32 nx = x + sDir[i][0], ny = y + sDir[i][1], k, lx, ly, lf = fl, ride = 0;
+                u32 nm = moved;
+                if (CanalaveWall(fl, nx, ny))
+                    continue;
+                lx = nx, ly = ny;
+                for (k = 0; k < (s32)ARRAY_COUNT(sCanalavePlatforms); k++)
+                {
+                    const struct CanalavePlatform *p = &sCanalavePlatforms[k];
+                    bool8 b = p->startB ^ ((moved >> k) & 1);
+                    if ((b ? p->bx : p->ax) == nx && (b ? p->bz : p->az) == ny && (b ? p->by : p->ay) / 10 == fl)
+                    {
+                        lx = b ? p->ax : p->bx, ly = b ? p->az : p->bz, lf = (b ? p->ay : p->by) / 10;
+                        nm = moved ^ (1u << k), ride = 1;
+                        break;
+                    }
+                }
+                if (CSEEN(CKEY(lx, ly, lf, nm), 1))
+                    continue;
+                sQ[tail].x = lx, sQ[tail].y = ly, sQ[tail].fl = lf, sQ[tail].moved = nm, sQ[tail].parent = head - 1;
+                sQ[tail].ride = ride ? 1 + i : 0;   // (the step that rode: its direction + 1)
+                tail++;
+            }
+        }
+        printf("[test] gym solve: %u states\n", (unsigned)tail);
+        // (each person: a tile beside them on their floor; then each door: its own tile on the ground floor)
+        for (o = 0; o < gMapHeader.events->objectEventCount + gMapHeader.events->warpCount; o++)
+        {
+            bool8 door = o >= gMapHeader.events->objectEventCount;
+            const struct ObjectEventTemplate *t = door ? NULL : &gMapHeader.events->objectEvents[o];
+            const struct WarpEvent *e = door ? &gMapHeader.events->warps[o - gMapHeader.events->objectEventCount] : NULL;
+            s32 tx = door ? e->x : t->x, ty = door ? e->y : t->y;
+            u8 f = door ? 0 : o < ARRAY_COUNT(sCanalaveFloorOf) ? sCanalaveFloorOf[o] : 0;
+            u32 q, best = 0xFFFFFFFF, n = 0, path[256], k, num = door ? o - gMapHeader.events->objectEventCount : o + 1;
+            for (q = 0; q < tail && best == 0xFFFFFFFF; q++)
+                if (sQ[q].fl == f && (door ? abs(sQ[q].x - tx) + abs(sQ[q].y - ty) <= 1 : abs(sQ[q].x - tx) + abs(sQ[q].y - ty) == 1))
+                    best = q;
+            if (best == 0xFFFFFFFF)
+            {
+                printf("[test] gym route to %s %u: NOT reached\n", door ? "door" : "person", (unsigned)num);
+                continue;
+            }
+            for (q = best; q != 0xFFFFFFFF && n < ARRAY_COUNT(path); q = sQ[q].parent)
+                path[n++] = q;
+            printf("[test] gym route to %s %u (floor %u):", door ? "door" : "person", (unsigned)num, f);
+            // (path[n-1] the start ... path[0] the end)
+            for (k = n - 1; k-- > 0;)
+            {
+                u32 s = path[k], prev = path[k + 1];
+                if (sQ[s].ride)
+                {
+                    // the platform's tile: one step from the last state, the way it rode
+                    printf(" %d,%d+", sQ[prev].x + sDir[sQ[s].ride - 1][0], sQ[prev].y + sDir[sQ[s].ride - 1][1]);
+                    continue;
+                }
+                // a corner: where the next step turns, rides, or the end
+                if (k == 0 || sQ[path[k - 1]].ride
+                 || (sQ[path[k - 1]].x - sQ[s].x) != (sQ[s].x - sQ[prev].x)
+                 || (sQ[path[k - 1]].y - sQ[s].y) != (sQ[s].y - sQ[prev].y))
+                    printf(" %d,%d", sQ[s].x, sQ[s].y);
+            }
+            printf("\n");
+        }
+#undef CKEY
+#undef CSEEN
+    }
     if (sG.gym == GYM_SUNYSHORE && strcmp(arg, "solve") == 0)
     {
         // from the room's entrance at turn 0, every step and button

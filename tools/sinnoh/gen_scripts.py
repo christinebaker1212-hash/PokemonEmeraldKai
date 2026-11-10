@@ -1254,6 +1254,10 @@ class FileConverter:
             return ['copyvar 0x%X, VAR_RESULT' % VAR_SINNOH_STARTER, 'setflag 0x3D39', 'setflag FLAG_SYS_POKEMON_GET']
         if cmd == 'ReturnToField':
             return []                       # (the briefcase went back to the field itself)
+        if cmd == 'StartLibraryTV':
+            # CANALAVE LIBRARY's news of LAKE VALOR (Platinum's src/library_tv: a fade in, LIBRARY_TV_DURATION 240
+            # frames, a fade out) while the field is faded out; its picture isn't drawn yet (docs/SINNOH_CHECKLIST.md)
+            return ['delay 252']
         if cmd in ('BufferRivalStarterSpeciesName', 'BufferRivalStarterSpeciesNameWithArticle'):
             return [self.sinnoh(SINNOH_BUFFER_RIVAL_STARTER, self.value(a[0]))]
         if cmd in ('BufferPlayerCounterpartStarterSpeciesName', 'BufferPlayerCounterpartStarterSpeciesNameWithArticle'):

@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp setvar 0x51A4 3
+mp setvar 0x51A5 1
+mp warp 41,29,4,4
+wait 90
+mash A 300 10
+pressuntil A field 6000
+mp where
+mp getvar 0x51A4
+mp getvar 0x51A5
+shot after
+quit
