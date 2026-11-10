@@ -31,6 +31,8 @@ static bool8 OnSinnohBicycle(void)
     return S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) && (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_MACH_BIKE);
 }
 
+static bool8 UnderTop(s16 x, s16 y, float h);
+
 static bool8 AlongBridge(u8 behavior, u8 direction)
 {
     if (behavior == MB_UNUSED_54)
@@ -67,7 +69,7 @@ bool8 Sinnoh_MovePlayerOnBike(u8 direction, u16 newKeys, u16 heldKeys)
         Still(pl->facingDirection);
         return TRUE;
     }
-    if (!AlongBridge(pl->currentMetatileBehavior, direction))
+    if (!UnderTop(x, y, S3D_PlayerHeight()) && !AlongBridge(pl->currentMetatileBehavior, direction))
     {
         Still(pl->facingDirection);   // (on a bike bridge: only along it)
         return TRUE;
@@ -107,10 +109,30 @@ bool8 Sinnoh_MovePlayerOnBike(u8 direction, u16 newKeys, u16 heldKeys)
 
 // s3d_gyms.c S3D_Gyms_StepBlocked, for the player's own steps: the bike bridges (on a bike and along them only) and
 // the ramps (not on foot)
+// (a tile's bike bridge or ramp is its top ground's: a step at H on the ground far below it passes under, as Platinum's
+// layers do. ROUTE 210 NORTH's lower bridge crosses under the bike bridge on the way to CELESTIC TOWN)
+static bool8 UnderTop(s16 x, s16 y, float h)
+{
+    float top = S3D_TileFloor(x - MAP_OFFSET, y - MAP_OFFSET, 1e9f), at = S3D_TileFloor(x - MAP_OFFSET, y - MAP_OFFSET, h);
+    return h == h && top == top && at == at && top - at > 12.0f;
+}
+
+// The player is on a bike bridge's deck (not on the ground under it: item_use.c, getting off)
+bool8 Sinnoh_OnBikeBridge(s16 x, s16 y)
+{
+    u8 b = MapGridGetMetatileBehaviorAt(x, y);
+    return (b == MB_UNUSED_54 || b == MB_UNUSED_55) && !UnderTop(x, y, S3D_PlayerHeight());
+}
+
 bool8 Sinnoh_BikeTileBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
 {
     u8 to = MapGridGetMetatileBehaviorAt(toX, toY), from = MapGridGetMetatileBehaviorAt(fromX, fromY), dir;
     bool8 biking = TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE);
+    float h = S3D_StepFromHeight(fromX, fromY);
+    if (UnderTop(fromX, fromY, h))
+        from = MB_NORMAL;
+    if (UnderTop(toX, toY, h))
+        to = MB_NORMAL;
     if (toX > fromX)
         dir = DIR_EAST;
     else if (toX < fromX)

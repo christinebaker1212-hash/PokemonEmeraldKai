@@ -1,0 +1,7 @@
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=66:30"
+UNEXPECT_A=("[crash]" "TIMEOUT")
+# ROUTE 210 NORTH: the lower bridge (row 18) crosses under the narrow bike bridge at x 21; a ride along the lower
+# bridge passes under it both ways (the bike bridge's only-along rule is its deck's: s3d_bike.c UnderTop)
+EXPECT_A=("where map 40.30 xy 27,18" "where map 40.30 xy 17,18")

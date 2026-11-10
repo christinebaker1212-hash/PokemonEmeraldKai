@@ -243,6 +243,7 @@ void ItemUseOutOfBattle_Mail(u8 taskId)
 }
 
 bool8 S3D_Active(void);   // Moemon Kai (src/sinnoh/s3d.c)
+bool8 Sinnoh_OnBikeBridge(s16 x, s16 y);   // Moemon Kai (src/sinnoh/s3d_bike.c)
 void ItemUseOutOfBattle_Bike(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
@@ -251,7 +252,7 @@ void ItemUseOutOfBattle_Bike(u8 taskId)
     u8 behavior;
     PlayerGetDestCoords(&coordsX, &coordsY);
     behavior = MapGridGetMetatileBehaviorAt(coordsX, coordsY);
-    if (FlagGet(FLAG_SYS_CYCLING_ROAD) == TRUE || ((behavior == MB_UNUSED_54 || behavior == MB_UNUSED_55) && S3D_Active())   // Moemon Kai: (a SINNOH bike bridge)
+    if (FlagGet(FLAG_SYS_CYCLING_ROAD) == TRUE || (S3D_Active() && Sinnoh_OnBikeBridge(coordsX, coordsY))   // Moemon Kai: (a SINNOH bike bridge)
      || MetatileBehavior_IsVerticalRail(behavior) == TRUE || MetatileBehavior_IsHorizontalRail(behavior) == TRUE || MetatileBehavior_IsIsolatedVerticalRail(behavior) == TRUE || MetatileBehavior_IsIsolatedHorizontalRail(behavior) == TRUE)
     {
         DisplayCannotDismountBikeMessage(taskId, tUsingRegisteredKeyItem);

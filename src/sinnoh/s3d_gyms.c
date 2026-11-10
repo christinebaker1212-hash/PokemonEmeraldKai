@@ -1498,9 +1498,10 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
         bool8 Sinnoh_BikeTileBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY);
         blocked = S3D_BikeSlopeBlocked(fromX, fromY, toX, toY);   // (Platinum's bike slopes: s3d_misc.c; also a step the
                                                                   // walk's search plans, from that step's own floor)
-        if (!blocked && fromX == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x
-         && fromY == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y)
-            blocked = Sinnoh_BikeTileBlocked(fromX, fromY, toX, toY);   // (its bike bridges and ramps: s3d_bike.c)
+        if (!blocked && ((fromX == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x
+                       && fromY == gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y) || gS3dPlanHeight == gS3dPlanHeight))
+            blocked = Sinnoh_BikeTileBlocked(fromX, fromY, toX, toY);   // (its bike bridges and ramps: s3d_bike.c; the
+                                                                        // player's steps and the walk's search's)
     }
     if (getenv("MOEMON_GYM_TRACE"))
         printf("[gym] step %d,%d -> %d,%d: %s (player at %.0f)\n", fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET,

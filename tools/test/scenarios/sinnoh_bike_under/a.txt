@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 30
+mp warp 40,30,19,18
+wait 90
+waitfor field 1000
+mp bike
+wait 20
+mp where
+press RIGHT 30
+wait 30
+mp where
+press LEFT 40
+wait 30
+mp where
+quit

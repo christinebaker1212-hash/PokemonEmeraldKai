@@ -7203,3 +7203,11 @@ continue calls S3D_Gyms_SavedMapLoaded, and the gym takes them from there; walki
 them back. A save made in VEILSTONE's gym after solving it used to load with the bags back, walling the player in
 beside MAYLENE. A save made in either gym by an older build loads them solved (VEILSTONE's bags as the walk's
 solution leaves them, every snowball broken), so nobody is walled in.
+
+## Under SINNOH's bike bridges (1.185.11)
+A narrow bike bridge's rules (ridden only along it, never got off on: behaviors 0x54 / 0x55, and the jump ramps
+0x56 / 0x57) belong to its deck, the tile's top ground. A step at a height well under the top (s3d_bike.c UnderTop:
+more than 12 below) is on the ground beneath and the tile counts as plain there: Sinnoh_BikeTileBlocked, the
+BICYCLE's own turn check, and getting off (item_use.c via Sinnoh_OnBikeBridge). ROUTE 210 NORTH's lower bridge
+(row 18, height 64) crosses under the bike bridge at x 21 (height 128) on the way to CELESTIC TOWN; the player
+could only turn north / south there and never got across. Test sinnoh_bike_under.

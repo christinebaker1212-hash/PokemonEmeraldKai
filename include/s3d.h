@@ -96,6 +96,7 @@ bool8 S3D_Gyms_PushAt(s16 x, s16 y, u8 direction);   // walking into it hits it 
 void S3D_Gyms_RedirectWarp(s16 x, s16 y);       // a warp from there (map coords + 7): a gym's wrong door
 extern float gS3dPlanHeight;                    // (the walk harness's search: the height its plan has, NaN none)
 float S3D_StepFromHeight(s16 fromX, s16 fromY);  // a step's height to start from (the player's, or the plan's)
+bool8 Sinnoh_OnBikeBridge(s16 x, s16 y);         // (map coords + 7) on a SINNOH bike bridge's deck, not under it (s3d_bike.c)
 bool8 S3D_Gyms_WrongDoor(s16 x, s16 y);         // (map coords) HEARTHOME's gym: a door its floor's clue rules out
 void S3D_Gyms_BreakAt(s16 x, s16 y);              // something runs into it fast (SNOWPOINT's snowballs)
 s8 S3D_Gyms_IceSlope(s16 x, s16 y, u8 direction);   // SNOWPOINT's ice: +1 a slide goes up a slope there, -1 down
