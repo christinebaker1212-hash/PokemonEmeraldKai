@@ -1618,7 +1618,14 @@ static void SnowpointSolve(void)
     SnowpointSolveRoute(TRUE);
 }
 
-// The first move of the way to CANDICE (0: beside her already, 0xFF: no way)
+static s16 sSnowGoalX = -1, sSnowGoalY;   // (gymwalk X Y: that tile; else beside CANDICE)
+
+void MP_TestGymGoal(s16 x, s16 y)
+{
+    sSnowGoalX = x, sSnowGoalY = y;
+}
+
+// The first move of the way to CANDICE, or to the tile gymwalk asked for (0: there already, 0xFF: no way)
 static u8 SnowpointSolveRoute(bool8 print)
 {
     enum { SQ = 1 << 16, SH = 1 << 18 };
@@ -1639,7 +1646,8 @@ static u8 SnowpointSolveRoute(bool8 print)
     {
         u32 q = head++;
         u8 d;
-        if (abs(sQ[q].x - MAP_OFFSET - goal->x) + abs(sQ[q].y - MAP_OFFSET - goal->y) == 1)
+        if (sSnowGoalX >= 0 ? (sQ[q].x - MAP_OFFSET == sSnowGoalX && sQ[q].y - MAP_OFFSET == sSnowGoalY)
+                            : abs(sQ[q].x - MAP_OFFSET - goal->x) + abs(sQ[q].y - MAP_OFFSET - goal->y) == 1)
         {
             best = q;
             break;

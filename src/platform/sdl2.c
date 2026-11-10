@@ -1593,8 +1593,12 @@ static void TestHarnessStep(void)
         }
         else if (strcmp(cmd, "gymwalk") == 0)
         {
+            // gymwalk [FRAMES [X Y]]: to CANDICE, or to tile X, Y (the door)
+            void MP_TestGymGoal(s16 x, s16 y);
+            int gx = -1, gy = -1;
             sGymFrames = 3000;
-            sscanf(line, "%*s %d", &sGymFrames);
+            sscanf(line, "%*s %d %d %d", &sGymFrames, &gx, &gy);
+            MP_TestGymGoal(gx, gy);
             return;
         }
         else if (strcmp(cmd, "walkto") == 0)
