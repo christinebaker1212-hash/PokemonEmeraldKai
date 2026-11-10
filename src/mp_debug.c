@@ -1145,6 +1145,8 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         u16 d = WarpDestMap(wp), md = d == target ? 0 : MapDist(d, target), key;
         bool8 pen = FALSE;
         u32 score;
+        if (getenv("MOEMON_GOTO_DEBUG2"))   // (each way out of the map weighed: the map it leads to, how many maps from the target, reached)
+            printf("[test] goto: cand warp %d at %d,%d to %04x md %d step %d\n", (int)i, wp->x, wp->y, d, md, (wp->x >= 0 && wp->y >= 0 && wp->x < w && wp->y < hh) ? sWStep[wp->y * w + wp->x] : -1);
         if (md == 0xFFFF || d == here || wp->x < 0 || wp->y < 0 || wp->x >= w || wp->y >= hh || S3D_Gyms_WrongDoor(wp->x, wp->y))
             continue;   // (HEARTHOME's gym: the door the floor's clue rules out. This map's own stairs and holes: PadPlan(-1, -1) below when they're the only way on.
                         // A warp off the map's edge is none: ROUTE 26 SOUTH's 12,-24)
@@ -1288,10 +1290,14 @@ u16 MP_TestGotoKey(u8 group, u8 num, s32 tx, s32 ty)
     if (S3D_Active() && MP_IsInOverworld() && !ScriptContext_IsEnabled() && Overworld_IsBikingAllowed()
      && !(gPlayerAvatar.flags & (PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE | PLAYER_AVATAR_FLAG_SURFING
                                  | PLAYER_AVATAR_FLAG_UNDERWATER))
-     && CheckBagHasItem(ITEM_BICYCLE, 1) && gPlayerAvatar.runningState == NOT_MOVING)
+     && CheckBagHasItem(ITEM_BICYCLE, 1))
     {
+        // (stopping first, and choosing the way only once on it: the way on foot is another, ROUTE 207 from OREBURGH
+        // turned back down before the slope)
         extern void SetPlayerAvatarTransitionFlags(u16 flags);
-        SetPlayerAvatarTransitionFlags(PLAYER_AVATAR_FLAG_MACH_BIKE);
+        if (gPlayerAvatar.runningState == NOT_MOVING && !gPlayerAvatar.tileTransitionState)
+            SetPlayerAvatarTransitionFlags(PLAYER_AVATAR_FLAG_MACH_BIKE);
+        return 0xFFFF;
     }
     if (group != 45 && gSaveBlock1Ptr->location.mapGroup != 45)
         return GotoKeyAnywhere(group, num, tx, ty);
