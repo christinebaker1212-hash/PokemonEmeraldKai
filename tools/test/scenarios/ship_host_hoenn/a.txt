@@ -26,8 +26,7 @@ approach obj 1 900
 wait 60
 watchlog ship: off
 pressuntillog A 2000 ship: off
-watchlog goes ahead
-pressuntillog A 3000 goes ahead
+wait 300
 shot pier
 watchlog ship: home
 pressuntillog A 9000 ship: home

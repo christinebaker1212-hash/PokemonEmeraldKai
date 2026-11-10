@@ -693,6 +693,10 @@ u16 MP_ArrivalText(void)
 u16 MP_ArrivalCanHold(void)
 {
     struct Pokemon *mon = &gPlayerParty[0];
+    // (HOENN with PROF. BIRCH's rescue already behind the save, as SKIP THE INTRO leaves it: no first POKéMON is
+    // coming there, so the one that sailed along stays with the player)
+    if (ArrivalRegion() == REGION_HOENN && FlagGet(FLAG_RESCUED_BIRCH))
+        return gSpecialVar_Result = 0;
     return gSpecialVar_Result = gRegionState.pad[0] && gRegionState.heldFor == 0 && CalculatePlayerPartyCount() == 1
         && GetMonData(mon, MON_DATA_SANITY_HAS_SPECIES) && !GetMonData(mon, MON_DATA_IS_EGG) && MP_Region_GlobalFree() >= 1;
 }

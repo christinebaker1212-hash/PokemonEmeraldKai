@@ -5,5 +5,5 @@ MODE=1
 SHIP=1
 TMO=400
 ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=390:30"
-EXPECT_A=("ship: aboard for region 0" "voyage: west" "ship: docked at region 0's port" "ship: off at region 0's port" "goes ahead to region 0's lab" "ship: home, to the room in region 0" "where map 1.1 xy 4,4" "host: region 0's HOST MOM welcomes the player")
+EXPECT_A=("ship: aboard for region 0" "voyage: west" "ship: docked at region 0's port" "ship: off at region 0's port" "ship: home, to the room in region 0" "where map 1.1 xy 4,4" "host: region 0's HOST MOM welcomes the player")
 UNEXPECT_A=("[crash]" "not ported" "TIMEOUT" "NO WAY")

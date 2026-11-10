@@ -31,7 +31,9 @@ watchlog region: travel 0 -> 1
 pressuntillog A 3000 region: travel 0 -> 1
 watchlog voyage: arrived
 waitlog 1500 voyage: arrived
-wait 40
+watchlog ship: home
+pressuntillog A 9000 ship: home
+wait 300
 pressuntil B field 3000
 wait 60
 shot out_arrived
