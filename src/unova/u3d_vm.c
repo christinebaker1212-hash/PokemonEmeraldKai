@@ -60,10 +60,12 @@ void MPNet_Log(const char *fmt, ...);
 static u8 *sPack;
 static u32 sPackSize;
 static bool8 sTried;
-static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt;
+static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt;
 
 static u32 Get32(u32 at) { return at + 4 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 | sPack[at + 2] << 16 | (u32)sPack[at + 3] << 24 : 0; }
 static u16 Get16(u32 at) { return at + 2 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 : 0; }
+
+static u32 ZoneSize(void) { return Get32(4) >= 4 ? 18 : 16; }   // (a zone's record: 9 u16 from version 4)
 
 // (a block's files follow their table, each padded to 4 bytes: the next block starts after the last one)
 static u32 BlockEnd(u32 at)
@@ -102,7 +104,7 @@ static void Load(void)
     sPack = malloc(raw ? raw : 1);
     sPackSize = raw;
     if (sPack == NULL || uncompress(sPack, &raw, data + 8, (unsigned long)(size - 8)) != 0 || memcmp(sPack, "U3DS", 4) != 0
-     || Get32(4) < 1 || Get32(4) > 3)
+     || Get32(4) < 1 || Get32(4) > 4)
     {
         printf("[u3d] %s: can't read UNOVA's scripts\n", path);
         free(sPack);
@@ -115,13 +117,15 @@ static void Load(void)
     sFilesAt = 8;
     sRangesAt = BlockEnd(sFilesAt);
     sZonesAt = sRangesAt + 4 + 10 * Get32(sRangesAt);
-    sEventsAt = sZonesAt + 4 + 16 * Get32(sZonesAt);
+    sEventsAt = (sZonesAt + 4 + ZoneSize() * Get32(sZonesAt) + 3) & ~3;
     if (Get32(4) >= 2)   // (version 2: Black's trainers and their teams)
     {
         sTrainersAt = BlockEnd(sEventsAt);
         sTeamsAt = BlockEnd(sTrainersAt);
         if (Get32(4) >= 3)   // (version 3: each trainer's battle song kind)
             sSongKindsAt = BlockEnd(sTeamsAt);
+        if (Get32(4) >= 4)   // (version 4: the wild POKéMON)
+            sEncountAt = (sSongKindsAt + 4 + Get32(sSongKindsAt) + 3) & ~3;
     }
     printf("[u3d] UNOVA's scripts: %u files, %u zones\n", Get32(sFilesAt), Get32(sZonesAt));
 }
@@ -161,13 +165,33 @@ u8 U3D_Vm_TrainerSongKind(u16 id)
     return Ready() && sSongKindsAt && id < Get32(sSongKindsAt) ? sPack[sSongKindsAt + 4 + id] : 0;
 }
 
-enum { Z_SCRIPT, Z_INIT, Z_MSG, Z_EVENT, Z_MATRIX, Z_PARENT, Z_TYPE, Z_PLACE };
+enum { Z_SCRIPT, Z_INIT, Z_MSG, Z_EVENT, Z_MATRIX, Z_PARENT, Z_TYPE, Z_PLACE, Z_ENCOUNT };
 static u16 ZoneField(u16 zone, u32 field)
 {
     if (!Ready() || zone >= Get32(sZonesAt))
         return 0xFFFF;
-    return Get16(sZonesAt + 4 + 16 * zone + 2 * field);
+    if (field == Z_ENCOUNT && Get32(4) < 4)
+        return 0xFFFF;
+    return Get16(sZonesAt + 4 + ZoneSize() * zone + 2 * field);
 }
+
+// The zone's wild POKéMON row for SEASON (0xE8 bytes; tools/unova/build_scripts.py), NULL none
+const u8 *U3D_Vm_WildRow(u16 zone, u8 season)
+{
+    u32 size;
+    u16 id;
+    const u8 *d;
+    if (!Ready() || !sEncountAt)
+        return NULL;
+    id = ZoneField(zone, Z_ENCOUNT);
+    if (id == 0xFFFF)
+        return NULL;
+    d = FileOf(sEncountAt, id, &size);
+    if (d == NULL || (size != 0xE8 && size != 4 * 0xE8))
+        return NULL;
+    return size == 0xE8 ? d : d + 0xE8 * (season & 3);
+}
+
 
 // ------------------------------------------------------------------------------------------------ Black's event work
 // (zonedata.c: works 0x4000 on, then the flags 1-0xB5F; 0x4000+ flags are temporary, 0x8000+ works the script's own)

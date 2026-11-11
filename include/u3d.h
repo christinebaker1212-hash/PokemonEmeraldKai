@@ -61,4 +61,8 @@ u8 U3D_BattleResult(void);
 u16 U3D_BattleSong(void);               // pokemon.c GetBattleBGM on an UNOVA map: Black's own
 u16 U3D_VictorySong(u16 song);          // ... MP_RegionVictorySong
 
+// UNOVA's wild POKéMON (src/unova/u3d_wild.c: Black's encounter tables)
+struct WildPokemonInfo;
+bool8 U3D_WildInfo(u16 behavior, const struct WildPokemonInfo **info, u8 *area);
+
 #endif

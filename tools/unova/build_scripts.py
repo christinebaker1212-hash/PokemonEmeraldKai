@@ -10,7 +10,8 @@ Made from the user's Black ROM when the release is built; nothing of it is in th
 File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little endian): "U3DS" u32 version 1, then
   u32 script files: u32 offset, u32 size each (from the pack's start), the files (a/0/5/7)
   u32 ranges: u16 first id, last id, file, text arc, text file each (ov010's table)
-  u32 zones: u16 script file, init file, message file, event file, matrix, parent zone, map type, place name each
+  u32 zones: u16 script file, init file, message file, event file, matrix, parent zone, map type, place name, (version 4)
+             the encounter id each
   u32 event files: u32 offset, u32 size each, the files (a/1/2/5)
   (version 2) the trainers (a/0/9/2: 20 bytes, u8 flags (1 moves, 2 items), class, battle kind (0 single, 1 double,
   2 triple, 3 rotation), count, u16 items x 4, u32 AI, u8 healer, cash, u16 prize item) and their teams (a/0/9/3: per
@@ -18,6 +19,10 @@ File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little e
   [u16 moves x 4]), as two more file blocks
   (version 3) u32 trainers, u8 each: the song kind of its battle (song_kinds(): 0 a trainer, 1 a Gym Leader, 2 CHEREN
   or BIANCA, 3 Team Plasma, 4 the Elite Four, 5 the Champion, 6 N, 7 Ghetsis, 8 a Subway Boss), from its class and name
+  (version 4) the wild POKéMON (a/1/2/6, by a zone's encounter id: one 0xE8-byte row, or four, a season each: u8 rates
+  of grass, dark grass, rustling grass, surfing, rippling water, fishing, rippling fishing, pad; then 4-byte slots,
+  u16 species (11 bits) and form (5), u8 lowest and highest level: grass 12, dark grass 12, rustling 12, surfing 5,
+  rippling 5, fishing 5, rippling fishing 5), as a file block
 """
 import os
 import struct
@@ -30,7 +35,8 @@ import narc  # noqa: E402
 import scripts as scr  # noqa: E402
 import zones as zr  # noqa: E402
 
-VERSION = 3
+VERSION = 4
+ENCOUNT_ARC = 'a/1/2/6'   # (version 4: the zones' wild POKéMON)
 EVENT_ARC = 'a/1/2/5'
 TRDATA_ARC, TRPOKE_ARC = 'a/0/9/2', 'a/0/9/3'   # (Black's trainers and their teams: version 2)
 
@@ -86,12 +92,14 @@ def main():
     zs = zr.zones()
     pack += struct.pack('<I', len(zs))
     for z in zs:
-        pack += struct.pack('<8H', z['script'], z['init_script'], z['msg'], z['event'], z['matrix'], z['parent'],
-                            z['type'], z['place'])
+        pack += struct.pack('<9H', z['script'], z['init_script'], z['msg'], z['event'], z['matrix'], z['parent'],
+                            z['type'], z['place'], z['encount'])
+    pack += b'\0' * (-len(pack) % 4)   # (the next block starts on 4 bytes)
     pack += files_block(narc.arc(EVENT_ARC), len(pack))
     pack += files_block(narc.arc(TRDATA_ARC), len(pack))
     pack += files_block(narc.arc(TRPOKE_ARC), len(pack))
     pack += song_kinds()
+    pack += files_block(narc.arc(ENCOUNT_ARC), len(pack))
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(b'U3SZ' + struct.pack('<I', len(pack)) + zlib.compress(bytes(pack), 6))
     print('%s: %d script files, %d zones, %d event files, %d bytes' % (out_path, len(narc.arc(scr.ARC)), len(zs),

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "u3d.h"   // Moemon Kai: UNOVA's wild POKéMON
 #include "mp_region.h"
 #include "mp.h"
 #include "battle_setup.h"
@@ -596,6 +597,23 @@ bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
         return FALSE;
     if (CalculatePlayerPartyCount() == 0)
         return FALSE;   // Moemon Kai: no POKéMON yet (a new game in SINNOH, before ROUTE 201's briefcase)
+
+    if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+    {
+        // Moemon Kai: UNOVA's own wild POKéMON, Black's tables by zone and season (src/unova/u3d_wild.c)
+        const struct WildPokemonInfo *info;
+        u8 area;
+        if (!U3D_WildInfo(curMetatileBehavior, &info, &area))
+            return FALSE;
+        if (prevMetatileBehavior != curMetatileBehavior && !AllowWildCheckOnNewMetatile())
+            return FALSE;
+        if (WildEncounterCheck(info->encounterRate, FALSE) != TRUE)
+            return FALSE;
+        if (TryGenerateWildMon(info, area == 1 ? WILD_AREA_WATER : WILD_AREA_LAND, WILD_CHECK_REPEL | WILD_CHECK_KEEN_EYE) != TRUE)
+            return FALSE;
+        BattleSetup_StartWildBattle();
+        return TRUE;
+    }
 
     headerId = GetCurrentMapWildMonHeaderId();
     if (headerId == HEADER_NONE)
