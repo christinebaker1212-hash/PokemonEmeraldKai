@@ -13,40 +13,23 @@ shot exit_at_sea
 pressuntil A field 2000
 approach obj 2 900
 pressuntil A field 2000
-approach obj 3 900
+approach obj 8 900
+wait 60
+shot couple
+pressuntil A field 2000
+approach obj 9 900
 pressuntil A field 2000
 walkto 4 3 900
 wait 40
 press DOWN 30
 wait 90
-approach obj 1 600
-wait 90
-shot homecomer
-pressuntil A field 2000
-walkto 4 1 600
-wait 40
-press UP 30
-wait 90
-walkto 10 9 900
-wait 90
-approach obj 3 600
-wait 240
-shot trainer_shows
-pressuntil A field 2000
-walkto 22 16 600
-wait 40
-press DOWN 30
-wait 90
-walkto 13 3 900
-wait 40
-press DOWN 30
-wait 90
-approach obj 4 600
+approach obj 6 600
 wait 60
+shot granny
 pressuntil A field 3000
 wait 60
 mp hasitem 396
-walkto 31 1 600
+walkto 4 1 600
 wait 40
 press UP 30
 wait 90
@@ -55,7 +38,12 @@ wait 40
 press RIGHT 30
 wait 150
 shot deck
-approach obj 1 900
+approach obj 5 900
+wait 240
+shot trainer_shows
+pressuntil A field 3000
+wait 60
+approach obj 9 900
 wait 60
 watchlog voyage: east
 pressuntillog A 1500 voyage: east

@@ -196,6 +196,97 @@ void MP_Text_Wrap(u8 *text, bool8 all)
     }
 }
 
+// ------------------------------------------------------------------------------------------------ the cast
+// Each voyage has its own passengers (the user, 2026-11-11: "the same NPCs show up in all of the exact same places - it
+// feels stilted"): by where the ship is bound, who each of the ten is (their look) and where they pass the crossing
+// (corridor, cabins or deck, standing how). The three maps each hold all ten (looks OBJ_EVENT_GFX_VAR_0-9, hidden by
+// FLAG_TEMP_1-A); MP_ShipArrange, each map's ON_TRANSITION, shows the ones in that map and puts them in their places.
+// The crew keep their posts: the gangway's sailor, and the lookout somewhere along the deck's rail. KANTO's couple
+// are the other way round (its lines: she shops, he slips off).
+static u8 Dest(void);
+enum { SHIP_CORRIDOR, SHIP_ROOMS, SHIP_DECK };
+struct ShipSpot { u8 map, x, y, movement, range; u16 gfx; };
+static const struct ShipSpot sCast[REGION_COUNT][SHIP_PASSENGERS] = {
+    {   // HOENN
+        {0, 9, 2, MOVEMENT_TYPE_FACE_DOWN, 0, OBJ_EVENT_GFX_EXPERT_M},
+        {0, 9, 10, MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT, 3, OBJ_EVENT_GFX_LITTLE_BOY},
+        {1, 4, 7, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_POKEFAN_M},
+        {1, 21, 5, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_GENTLEMAN},
+        {1, 22, 11, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_RICH_BOY},
+        {1, 28, 5, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_EXPERT_F},
+        {1, 5, 14, MOVEMENT_TYPE_FACE_LEFT, 0, OBJ_EVENT_GFX_MAN_4},
+        {1, 4, 14, MOVEMENT_TYPE_FACE_RIGHT, 0, OBJ_EVENT_GFX_WOMAN_4},
+        {2, 11, 5, MOVEMENT_TYPE_FACE_UP, 0, OBJ_EVENT_GFX_SAILOR},
+        {2, 6, 9, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_SCIENTIST_1},
+    },
+    {   // JOHTO
+        {2, 13, 6, MOVEMENT_TYPE_FACE_UP, 0, OBJ_EVENT_GFX_FISHERMAN},
+        {2, 8, 10, MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT, 2, OBJ_EVENT_GFX_LITTLE_GIRL},
+        {0, 16, 6, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_WOMAN_2},
+        {1, 3, 5, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_FAT_MAN},
+        {0, 6, 2, MOVEMENT_TYPE_FACE_DOWN, 0, OBJ_EVENT_GFX_LASS},
+        {1, 20, 14, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_OLD_WOMAN},
+        {1, 30, 5, MOVEMENT_TYPE_FACE_RIGHT, 0, OBJ_EVENT_GFX_MAN_3},
+        {1, 31, 5, MOVEMENT_TYPE_FACE_LEFT, 0, OBJ_EVENT_GFX_WOMAN_1},
+        {2, 9, 5, MOVEMENT_TYPE_FACE_UP, 0, OBJ_EVENT_GFX_SAILOR},
+        {1, 30, 14, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_SCIENTIST_2},
+    },
+    {   // KANTO
+        {0, 16, 8, MOVEMENT_TYPE_FACE_LEFT, 0, OBJ_EVENT_GFX_OLD_MAN},
+        {1, 21, 4, MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT, 2, OBJ_EVENT_GFX_TWIN},
+        {2, 4, 9, MOVEMENT_TYPE_FACE_LEFT, 0, OBJ_EVENT_GFX_MAN_1},
+        {2, 12, 10, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_CAMPER},
+        {2, 8, 6, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_YOUNGSTER},
+        {1, 2, 5, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_POKEFAN_F},
+        {0, 11, 2, MOVEMENT_TYPE_FACE_RIGHT, 0, OBJ_EVENT_GFX_BEAUTY},
+        {0, 12, 2, MOVEMENT_TYPE_FACE_LEFT, 0, OBJ_EVENT_GFX_MAN_2},
+        {2, 13, 5, MOVEMENT_TYPE_FACE_UP, 0, OBJ_EVENT_GFX_SAILOR},
+        {1, 11, 4, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_MANIAC},
+    },
+    {   // SINNOH
+        {1, 33, 14, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_MAN_5},
+        {0, 7, 11, MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT, 3, OBJ_EVENT_GFX_SCHOOL_KID_M},
+        {2, 10, 8, MOVEMENT_TYPE_FACE_UP, 0, OBJ_EVENT_GFX_HIKER},
+        {0, 2, 6, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_MAN_3},
+        {1, 3, 14, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_PICNICKER},
+        {1, 23, 4, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_WOMAN_3},
+        {2, 6, 10, MOVEMENT_TYPE_FACE_RIGHT, 0, OBJ_EVENT_GFX_ARTIST},
+        {2, 7, 10, MOVEMENT_TYPE_FACE_LEFT, 0, OBJ_EVENT_GFX_BEAUTY},
+        {2, 12, 5, MOVEMENT_TYPE_FACE_UP, 0, OBJ_EVENT_GFX_SAILOR},
+        {0, 14, 2, MOVEMENT_TYPE_FACE_DOWN, 0, OBJ_EVENT_GFX_PSYCHIC_M},
+    },
+};
+
+// special: VAR_0x8004 = the map (SHIP_*)
+u16 MP_ShipArrange(void)
+{
+    static const u8 sFirstId[] = {[SHIP_CORRIDOR] = 2, [SHIP_ROOMS] = 1, [SHIP_DECK] = 1};   // (the corridor's 1: the gangway's sailor)
+    u8 map = gSpecialVar_0x8004 % ARRAY_COUNT(sFirstId), to = Dest();
+    struct ObjectEventTemplate *t = gSaveBlock1Ptr->objectEventTemplates;
+    u32 who, i;
+    for (who = 0; who < SHIP_PASSENGERS; who++)
+    {
+        const struct ShipSpot *s = &sCast[to][who];
+        VarSet(VAR_OBJ_GFX_ID_0 + who, s->gfx);
+        if (s->map != map)
+        {
+            FlagSet(FLAG_TEMP_1 + who);
+            continue;
+        }
+        FlagClear(FLAG_TEMP_1 + who);
+        for (i = 0; i < OBJECT_EVENT_TEMPLATES_COUNT; i++)
+            if (t[i].localId == sFirstId[map] + who)
+            {
+                t[i].x = s->x, t[i].y = s->y;
+                t[i].movementType = s->movement;
+                t[i].movementRangeX = s->range;
+                t[i].movementRangeY = 0;
+                break;
+            }
+    }
+    return 0;
+}
+
 // ------------------------------------------------------------------------------------------------ the ship
 bool8 MP_Ship_Aboard(void)
 {

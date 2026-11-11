@@ -15,9 +15,35 @@
   "connections": null,
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_POKEFAN_M",
-      "x": 4,
-      "y": 7,
+      "graphics_id": "OBJ_EVENT_GFX_VAR_0",
+      "x": 1,
+      "y": 2,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "VoyageShip_EventScript_OldSalt",
+      "flag": "FLAG_TEMP_1"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_VAR_1",
+      "x": 2,
+      "y": 2,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "VoyageShip_EventScript_Kid",
+      "flag": "FLAG_TEMP_2"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_VAR_2",
+      "x": 3,
+      "y": 2,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
       "movement_range_x": 0,
@@ -25,12 +51,12 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "VoyageShip_EventScript_Homecomer",
-      "flag": "0"
+      "flag": "FLAG_TEMP_3"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_GENTLEMAN",
-      "x": 21,
-      "y": 5,
+      "graphics_id": "OBJ_EVENT_GFX_VAR_3",
+      "x": 4,
+      "y": 2,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
       "movement_range_x": 0,
@@ -38,12 +64,12 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "VoyageShip_EventScript_Tourist",
-      "flag": "0"
+      "flag": "FLAG_TEMP_4"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_RICH_BOY",
-      "x": 22,
-      "y": 11,
+      "graphics_id": "OBJ_EVENT_GFX_VAR_4",
+      "x": 5,
+      "y": 2,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
       "movement_range_x": 0,
@@ -51,12 +77,12 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "VoyageShip_EventScript_Trainer",
-      "flag": "0"
+      "flag": "FLAG_TEMP_5"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_EXPERT_F",
-      "x": 28,
-      "y": 5,
+      "graphics_id": "OBJ_EVENT_GFX_VAR_5",
+      "x": 6,
+      "y": 2,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
       "movement_range_x": 0,
@@ -64,33 +90,59 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "VoyageShip_EventScript_Granny",
-      "flag": "0"
+      "flag": "FLAG_TEMP_6"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
-      "x": 5,
-      "y": 14,
+      "graphics_id": "OBJ_EVENT_GFX_VAR_6",
+      "x": 7,
+      "y": 2,
       "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "VoyageShip_EventScript_CoupleHim",
-      "flag": "0"
+      "flag": "FLAG_TEMP_7"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_4",
-      "x": 4,
-      "y": 14,
+      "graphics_id": "OBJ_EVENT_GFX_VAR_7",
+      "x": 8,
+      "y": 2,
       "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "VoyageShip_EventScript_CoupleHer",
-      "flag": "0"
+      "flag": "FLAG_TEMP_8"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_VAR_8",
+      "x": 9,
+      "y": 2,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "VoyageShip_EventScript_Lookout",
+      "flag": "FLAG_TEMP_9"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_VAR_9",
+      "x": 10,
+      "y": 2,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "VoyageShip_EventScript_Researcher",
+      "flag": "FLAG_TEMP_A"
     }
   ],
   "warp_events": [

@@ -1,5 +1,12 @@
 VoyageShip_Deck_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, VoyageShip_Deck_OnTransition
 	.byte 0
+
+@ Who is in here this voyage, where and looking how: mp_ship.c sCast, by where the ship is bound
+VoyageShip_Deck_OnTransition:
+	setvar VAR_0x8004, 2
+	special MP_ShipArrange
+	end
 
 @ The lookout: his spyglass shows the ship under way, and the coast once it's in sight
 VoyageShip_EventScript_Lookout::

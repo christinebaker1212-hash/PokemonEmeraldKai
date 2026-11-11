@@ -1,4 +1,5 @@
 # The first voyage to a region is sailed aboard the ship (src/mp/mp_ship.c, data/maps/VoyageShip_*): HOENN -> KANTO.
+# Each voyage has its own passengers in their own places (mp_ship.c sCast: KANTO's here).
 # The gangway's sailor welcomes the player; passengers talk about KANTO (the trainer shows a GROWLITHE, the granny
 # gives PEWTER CRUNCHIES); at five talks the announcement says land is in sight; the lookout's spyglass shows the coast;
 # the bed in CABIN 2 brings the ship in; off at VERMILION a sailor comes up the dock, takes the POKeMON that came along

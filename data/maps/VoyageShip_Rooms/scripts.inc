@@ -1,5 +1,12 @@
 VoyageShip_Rooms_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, VoyageShip_Rooms_OnTransition
 	.byte 0
+
+@ Who is in here this voyage, where and looking how: mp_ship.c sCast, by where the ship is bound
+VoyageShip_Rooms_OnTransition:
+	setvar VAR_0x8004, 1
+	special MP_ShipArrange
+	end
 
 VoyageShip_EventScript_Homecomer::
 	setvar VAR_0x8004, 2

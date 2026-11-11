@@ -811,6 +811,7 @@ gSpecials::
 	def_special MP_RegionKeyItemsStay   @ Moemon Kai: customs, a region's own KEY ITEMS stay (src/mp/mp_regionitems.c)
 	@ Moemon Kai: the first voyage's ship (src/mp/mp_ship.c)
 	def_special MP_ShipGreetDue
+	def_special MP_ShipArrange
 	def_special MP_ShipGreet
 	def_special MP_ShipTalk
 	def_special MP_ShipCheckNear

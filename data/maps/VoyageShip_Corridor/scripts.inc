@@ -6,6 +6,8 @@ VoyageShip_Corridor_MapScripts::
 	.byte 0
 
 VoyageShip_Corridor_OnTransition:
+	setvar VAR_0x8004, 0
+	special MP_ShipArrange
 	specialvar VAR_TEMP_1, MP_ShipGreetDue
 	end
 

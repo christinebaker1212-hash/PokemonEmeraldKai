@@ -7350,6 +7350,13 @@ more of a scene"; "every game expects you to not have a Pokemon when you begin")
   once land is in sight: DrawCoast). Five talked to: the announcement, SHIP_NEAR. The bed in CABIN 2 then rests the
   player and brings the ship in (SHIP_DOCKED, the first town's song from there on); the gangway's sailor lets them off
   (MP_ShipLeave -> MP_Region_FirstBoatIn). Co-op: MPR_SHIP 18 (protocol 80) tells friends aboard who was talked to.
+- Each voyage's own cast (1.190.9, the user: "the same NPCs show up in all of the exact same places - it feels
+  stilted"): mp_ship.c sCast, by where the ship is bound: each of the ten's look and where they pass the crossing
+  (corridor, cabins or deck; standing, looking about or wandering). The three maps each hold all ten (looks
+  OBJ_EVENT_GFX_VAR_0-9, hidden by FLAG_TEMP_1-A; local ids: the corridor's 2-11, the others' 1-10 = P_* + first);
+  MP_ShipArrange (each map's ON_TRANSITION, VAR_0x8004 the map) shows that map's and writes their places into the
+  object templates. The gangway's sailor and the bed stay put; the lookout moves along the rail. KANTO's couple are
+  the other way round (its lines). HOENN-bound is the first arrangement.
 - Arrivals (data/scripts/mp_region.inc EventScript_RegionArrival*): a sailor of the scene only (local id 0x7D,
   SpawnSpecialObjectEventParameterized) comes up to the player at the pier (SLATEPORT harbor 8,11; OLIVINE port;
   VERMILION; CANALAVE's open quay 5,20), welcomes them, takes the one POKeMON that sailed with them ahead to the
