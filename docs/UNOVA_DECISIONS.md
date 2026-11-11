@@ -68,3 +68,5 @@ docs/SINNOH_HANDOFF.md: whatever was decided or adjusted for SINNOH holds here u
 - Battle mechanics: **Kai's GENERATION / MOVE KIND settings** (UNOVA's at least Gen 5).
 - The ROM: the user's is Pokemon - Black Version (USA, Europe) (NDSi Enhanced), SHA-1
   26ad0b9967aa279c4a266ee69f52b9b2332399a5 (aletheia's `black` target). Kept in ~/.cache/moemon/unova/black.nds.
+- Items (the user, 2026-11-11): an item Kai already has is **Kai's own** (its number, picture, words); an item Kai
+  doesn't have yet is **added from Black** (its picture, name and description as Black has them).
