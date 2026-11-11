@@ -451,11 +451,11 @@ static const struct { u16 n; u8 ret; } sQuiet[] = {
     {130, 0}, {218, 0},
     {38, 0}, {39, 0}, {48, 0}, {127, 0}, {147, 0},
     {148, 0}, {149, 0}, {156, 0}, {170, 1}, {126, 0},
-    {113, 0}, {114, 0}, {115, 0}, {116, 0}, {117, 1}, {154, 0}, {171, 0}, {178, 1}, {190, 0}, {191, 0},
+    {113, 0}, {114, 0}, {115, 0}, {116, 0}, {117, 1}, {154, 0}, {178, 1}, {190, 0}, {191, 0},
     {193, 1}, {221, 0}, {244, 0}, {70, 0}, {168, 0}, {231, 0},
     {63, 0}, {64, 0}, {66, 0}, {67, 0}, {76, 0}, {77, 0}, {151, 0}, {155, 1},
     {97, 0}, {197, 0}, {161, 0}, {162, 0}, {136, 0}, {144, 0},
-    {173, 0}, {211, 0}, {17, 0},
+    {173, 0}, {17, 0},
     {2, 0}, {243, 0}, {111, 0}, {49, 0}, {189, 0}, {214, 0}, {186, 0}, {234, 0},
     {196, 0}, {166, 0},
     {225, 0}, {246, 0},   // (the party noted for a challenge's check; the save's continue point: Kai's save)
@@ -667,6 +667,27 @@ static void FadeBack(void)
 // std182_tvNewsEvent (the decomp's gs_range_801C766C.c): the TV's news by the story's flags, after 3 frames, each
 // line waiting for A; flags it marks as seen (std078 sets: orre_story.c). The TV's own picture (std171 / std211's
 // texture change) isn't drawn yet
+// std211_tvSetChannelByStory: the room's TV on the channel the story is at (the news not yet watched, or after it)
+static void TvByStory(void)
+{
+    s32 ch;
+    if (Orre_Flag(0xADA))
+        ch = Orre_Flag(0xA0F) ? 12 : 11;
+    else if (Orre_Flag(0xADB))
+        ch = Orre_Flag(0x483) ? 12 : 11;
+    else if (Orre_Flag(0x42C))
+        ch = Orre_Flag(0x42D) ? 4 : 3;
+    else if (Orre_Flag(0xAD3))
+        ch = Orre_Flag(0xA08) ? 4 : 3;
+    else if (Orre_Flag(0xAD0))
+        ch = Orre_Flag(0xA07) ? 4 : 3;
+    else if (Orre_Flag(0xACF))
+        ch = Orre_Flag(0xA06) ? 2 : 1;
+    else
+        ch = 0;
+    O3D_TvSet(sRoom, ch);
+}
+
 static void NewsEvent(struct Thread *t)
 {
     u8 mode;
@@ -675,11 +696,13 @@ static void NewsEvent(struct Thread *t)
     {
         Orre_SetFlag(0xA0F, TRUE);
         t->news[0] = 0x439F, t->news[1] = 0x43A0, t->newsLen = 2;
+        O3D_TvSet(sRoom, 12);
     }
     else if (Orre_Flag(0xADB))
     {
         Orre_SetFlag(0x483, TRUE);
         t->news[0] = 0x439D, t->news[1] = 0x439E, t->newsLen = 2;
+        O3D_TvSet(sRoom, 12);
     }
     else
     {
@@ -696,6 +719,7 @@ static void NewsEvent(struct Thread *t)
         else
             Orre_SetFlag(0xA05, TRUE), mode = 0;
         t->news[0] = 0x426E + mode, t->newsLen = 1;
+        TvByStory();
     }
     t->newsHeld = !t->holds;
     if (t->newsHeld)
@@ -1221,6 +1245,8 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
             t->wait = W_FADE;
         return gPaletteFade.active;
     case N_TV_NEWS: NewsEvent(t); return 1;
+    case 171: O3D_TvSet(sRoom, ARG(0).s); return 1;   // std171_mapSetTextureChange(CHANNEL): the room's TV
+    case 211: TvByStory(); return 1;                 // std211_tvSetChannelByStory
     case N_PEOPLE_WAIT_SYNC: case N_CHAR_SET_ANIM: return 1;
     // ---- the room's people (orre_npcs.c)
     case N_PEOPLE_VISIBLE: Orre_Npc_SetShown(ARG(1).u, ARG(2).u != 0); return 0;
@@ -1517,9 +1543,15 @@ static void Poll(struct Thread *t)
         if (t->frames > 0 && --t->frames > 0)
             break;
         if (t->newsAt < t->newsLen)
+        {
+            if (t->newsAt == 1 && t->newsLen == 2)   // (the two-line reports' second picture)
+                O3D_TvSet(sRoom, t->news[1] == 0x43A0 ? 15 : 14);
             ShowMessage(t, t->news[t->newsAt++], TRUE);
+        }
         else
         {
+            if (t->newsLen == 2)
+                TvByStory();
             if (!IsFieldMessageBoxHidden())
                 HideFieldMessageBox();
             t->newsLen = t->newsAt = 0;

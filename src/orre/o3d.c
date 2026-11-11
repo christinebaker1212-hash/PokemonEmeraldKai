@@ -32,6 +32,7 @@
 #include "overworld.h"
 #include "o3d.h"
 #include "orre.h"
+#include "orre_data.h"
 #include "gx_tex.h"
 #include "palette.h"
 #include "sprite.h"
@@ -117,6 +118,7 @@ typedef struct
     float tile, x0, z0;       // Colosseum's units: a tile's size, the grid's corner (O3D_TileToColo)
 } OMap;
 
+#define TV_SIZE 64   // a TV's picture (tools/orre/tv.py SIZE)
 typedef struct { u8 fmt, tfmt; u16 w, h, n; u32 off, size; } OTexEntry;
 static struct
 {
@@ -446,9 +448,10 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
             me = &om->mesh[om->nmesh++];
             memset(me, 0, sizeof(*me));
             me->sky = kind[0] == 2;
-            me->tex = tex >= 0 ? Texture(tex) : -1;
-            me->su = me->tex >= 0 ? us * sPack.tex[me->tex].w : 0.0f;
-            me->sv = me->tex >= 0 ? vs * sPack.tex[me->tex].h : 0.0f;
+            // (-(2 + set): a TV's screen, no texture of its own: its set kept for the picture, O3D_TvSet)
+            me->tex = tex >= 0 ? Texture(tex) : tex <= -2 && tex > -0x1000 ? tex : -1;
+            me->su = me->tex >= 0 ? us * sPack.tex[me->tex].w : me->tex <= -2 ? us * TV_SIZE : 0.0f;
+            me->sv = me->tex >= 0 ? vs * sPack.tex[me->tex].h : me->tex <= -2 ? vs * TV_SIZE : 0.0f;
             me->rs = wrap[0] != 0, me->rt = wrap[1] != 0, me->fs = wrap[0] == 2, me->ft = wrap[1] == 2;
             me->count = ni - ni % 3;
             me->v = malloc(sizeof(OVtx) * me->count);
@@ -471,8 +474,8 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
                 v = vtx + vi * 28;
                 memcpy(p, v, 20);
                 d->x = (p[0] - x0) * S, d->y = p[1] * S, d->z = (p[2] - z0) * S;
-                d->u = me->tex >= 0 ? p[3] * us * sPack.tex[me->tex].w : 0.0f;
-                d->v = me->tex >= 0 ? p[4] * vs * sPack.tex[me->tex].h : 0.0f;
+                d->u = me->tex >= 0 ? p[3] * us * sPack.tex[me->tex].w : me->tex <= -2 ? p[3] * us * TV_SIZE : 0.0f;
+                d->v = me->tex >= 0 ? p[4] * vs * sPack.tex[me->tex].h : me->tex <= -2 ? p[4] * vs * TV_SIZE : 0.0f;
                 // Colosseum's colours are lit (baked) at half strength: 128 is white (GX's TEV doubles them)
                 for (ch = 0; ch < 3; ch++)
                 {
@@ -1162,6 +1165,56 @@ static bool OamHidden(int oamIndex, int x, int line)
     return sDepth[line][x] < d - 6.0f;
 }
 
+// ------------------------------------------------------------------------------------------------ the TVs
+// Colosseum's TVs (std171_mapSetTextureChange: the decomp's field_camera_exact_80117AE4.c): a room's channel is a
+// programme's model drawn through its own camera onto the screen's texture, every frame. Here a still of each
+// programme, drawn when the pack is built (tools/orre/tv.py, "tv/<name>.bin" in the data pack, 64 x 64 RGBA), put on
+// the screen's meshes (the room model's set the table names: their texture number is -(2 + set), build_pack.py)
+struct OrreTv { u16 room; u8 id, set; const char *pic; };
+#include "../data/orre_tv.h"
+
+static struct
+{
+    bool8 on;
+    s16 mark;                 // the screen meshes' texture number
+    u16 room;
+    s16 id;
+    OTex tex;
+    u32 px[TV_SIZE * TV_SIZE];
+} sTv;
+
+// The room's TV shows channel ID (a negative one, or one the room hasn't: off, the dark screen)
+void O3D_TvSet(u16 room, s32 id)
+{
+    u32 i, size = 0;
+    char name[64];
+    u8 *d;
+    if (sTv.on && sTv.room == room && sTv.id == id)
+        return;
+    sTv.on = FALSE;
+    sTv.room = room, sTv.id = (s16)id;
+    for (i = 0; i < ARRAY_COUNT(sOrreTv); i++)
+        if (sOrreTv[i].room == room && sOrreTv[i].id == id)
+            break;
+    if (id < 0 || i == ARRAY_COUNT(sOrreTv))
+        return;
+    snprintf(name, sizeof(name), "tv/%s.bin", sOrreTv[i].pic);
+    if ((d = OrreData_Read(name, &size)) == NULL || size < sizeof(sTv.px))
+    {
+        free(d);
+        return;   // (a pack from before the TVs' pictures: the dark screen, as it was)
+    }
+    memcpy(sTv.px, d, sizeof(sTv.px));
+    free(d);
+    sTv.tex.w = sTv.tex.h = TV_SIZE;
+    sTv.tex.px = sTv.px;
+    sTv.tex.mip[0] = sTv.px;
+    sTv.tex.nmip = 1;
+    sTv.mark = -(2 + sOrreTv[i].set);
+    sTv.on = TRUE;
+    printf("[o3d] room %u's TV shows %s\n", room, sOrreTv[i].pic);
+}
+
 // ------------------------------------------------------------------------------------------------ rasterizer
 typedef struct { float x, y, iz, u, v, c[3]; } SVtx;   // u, v and c over z (perspective)
 
@@ -1182,7 +1235,7 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const OMes
 {
     float area = (b->x - a->x) * (c->y - a->y) - (c->x - a->x) * (b->y - a->y);
     s32 minx, maxx, miny, maxy, x, y;
-    const OTex *t = g->tex >= 0 ? &sPack.tex[g->tex] : NULL;
+    const OTex *t = g->tex >= 0 ? &sPack.tex[g->tex] : sTv.on && g->tex == sTv.mark ? &sTv.tex : NULL;
     bool8 clear = g->alpha < 31, smooth = FALSE;
     s32 lod = 0, tw = 0, th = 0;
     const u32 *tex = NULL;
@@ -1384,6 +1437,8 @@ static void DrawMesh(const OMesh *g, int pass)
         s->u = (v->u + g->du) * s->iz;
         s->v = (v->v + g->dv) * s->iz;
         s->c[0] = v->r * s->iz, s->c[1] = v->g * s->iz, s->c[2] = v->b * s->iz;
+        if (sTv.on && g->tex == sTv.mark)   // (a lit screen: the picture as it is, not under the dark glass's colour)
+            s->c[0] = s->c[1] = s->c[2] = 31.0f * s->iz;
     }
     for (i = 0; i + 2 < g->count; i += 3)
     {

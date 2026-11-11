@@ -339,6 +339,8 @@ def build(src, out):
     tex_list = []
     maps = []
     seen = {}
+    import tv
+    tv_sets = {room: {r[1] for r in rows} for room, (_n, rows) in tv.tables(src).items()}
     for arc in sorted(os.listdir(src)):
         for fn in sorted(os.listdir(os.path.join(src, arc))):
             if not fn.endswith(".map"):
@@ -374,10 +376,15 @@ def build(src, out):
                         light_mesh(m, lights)
                     # (a wall screen: a set of one mesh with an 8 x 8 test card, red or a checkerboard, which
                     # Colosseum draws its picture over at run time: a dark, switched-off screen here)
-                    if len(s) == 1 and 0 <= m.tex < len(f.raw_images) and f.raw_images[m.tex][1:3] == (8, 8):
+                    if (len(s) == 1 and 0 <= m.tex < len(f.raw_images) and f.raw_images[m.tex][1:3] == (8, 8)) \
+                            or si in tv_sets.get(name, ()):
                         m.tex = -1
                         m.material = dict(m.material or {}, diffuse=(14, 18, 26, 255), tex=-1)
                         m.has_clr = False   # (the material's colour alone)
+                        # (which set it is, for the game to put a TV's picture on it: -(2 + set), no texture to a
+                        # game from before: src/orre/o3d.c O3D_TvSet)
+                        body.append(mesh_bytes(m, -(2 + si)))
+                        continue
                     body.append(mesh_bytes(m, remap[m.tex] if 0 <= m.tex < len(remap) else -1))
                 if si < len(ms_list) and f.u32(ms_list[si]):
                     anims += [(first + i, k, p, smp, dr) for i, k, p, smp, dr in set_anims(f, ms_list[si], s, door_sets.get(si))]
@@ -448,6 +455,10 @@ def build(src, out):
                 if len(z) >= len(data):
                     z = None
                 files.append(("%s/%s" % (arc, fn), data, z))
+    # the TVs' pictures (tools/orre/tv.py: a still of each programme, 64 x 64 RGBA)
+    for name, pic in sorted(tv.pictures(src).items()):
+        data = pic.tobytes()
+        files.append(("tv/%s.bin" % name, data, zlib.compress(data, 9)))
     # every member's resource id (fsys.py's _ids.txt), and main.dol's menu tables
     ids = []
     for arc in sorted(os.listdir(src)):

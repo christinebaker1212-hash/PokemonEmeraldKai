@@ -49,6 +49,7 @@ void O3D_NoteOam(u16 spriteId, u16 first, u16 end);
 // from the camera gives (nearer in front, whatever way the camera looks); -1: not on ORRE's field
 s32 O3D_DepthSubpriority(const struct Sprite *sprite);
 u16 O3D_SpriteScale(u16 spriteId);
+void O3D_TvSet(u16 room, s32 id);   // the room's TV shows channel ID (negative: off): Colosseum's std171_mapSetTextureChange
 // This frame, the sprite stands on its owner's spot and is drawn LIFT texel rows above it (scaled as the spot is):
 // an emotion bubble over a person's head (trainer_see.c SpriteCB_TrainerIcons)
 void O3D_LiftSprite(u16 spriteId, s32 lift);   // under a shot: how big the sprite is where it stands (Q8; 0: as drawn)
