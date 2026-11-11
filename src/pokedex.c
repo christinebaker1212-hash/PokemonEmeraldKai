@@ -855,7 +855,7 @@ static const struct BgTemplate sPokedex_BgTemplate[] =
 #define MP_FIND_TILE   272
 #define MP_FIND_Y      152   // how far the layer scrolls to show it all
 #define WIN_MORE       4
-#define MP_MORE_W      27
+#define MP_MORE_W      28
 #define MP_MORE_H      16
 #define MP_MORE_TILE   320   // (after the menu's 256 tiles and the tab bar's 60)
 #define TAG_MP_DEX_A   4200
@@ -1203,7 +1203,7 @@ static const struct WindowTemplate sInfoScreen_WindowTemplates[] =
     {
         .bg = 1,
         .tilemapLeft = 1,
-        .tilemapTop = 2,
+        .tilemapTop = 3,
         .width = MP_MORE_W,
         .height = MP_MORE_H,
         .paletteNum = MP_DEX_PAL,
@@ -4098,6 +4098,8 @@ static void MpDexMoreShow(u16 monSpriteId)
     {
         ClearWindowTilemap(WIN_MORE);
         CopyBgTilemapBufferToVram(1);
+        CopyToBgTilemapBuffer(3, gPokedexInfoScreen_Tilemap, 0, 0);   // (the entry's frames back)
+        CopyBgTilemapBufferToVram(3);
         SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_BG2_ON);
         if (monSpriteId < MAX_SPRITES)
             gSprites[monSpriteId].invisible = FALSE;
@@ -4105,11 +4107,19 @@ static void MpDexMoreShow(u16 monSpriteId)
     }
     LoadPalette(MP_DexDraw_Palette(), BG_PLTT_ID(MP_DEX_PAL), PLTT_SIZE_4BPP);
     sMpDexMoreScroll = MP_DexDraw_Info(sPokedexListItem->dexNum, sPokedexListItem->seen, sPokedexListItem->owned, sMpDexMorePage, sMpDexMoreScroll);
-    MP_DexDraw_Tiles(8, 16, MP_MORE_W, MP_MORE_H, sTiles);
+    MP_DexDraw_Tiles(4, 16, MP_MORE_W, MP_MORE_H, sTiles);   // (the card in the middle of the screen under the tabs)
     CopyToWindowPixelBuffer(WIN_MORE, sTiles, sizeof(sTiles), 0);
     PutWindowTilemap(WIN_MORE);
     CopyWindowToVram(WIN_MORE, COPYWIN_FULL);
     ClearGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_BG2_ON);   // (the entry's words: the card stands in their place)
+    {
+        // (and its frames: only the backdrop's stripes around the card)
+        u16 *map = GetBgTilemapBuffer(3);
+        u32 i;
+        for (i = 2 * 32; i < 20 * 32; i++)
+            map[i] = map[3 * 32];
+        CopyBgTilemapBufferToVram(3);
+    }
     if (monSpriteId < MAX_SPRITES)
         gSprites[monSpriteId].invisible = TRUE;
 }
@@ -4127,7 +4137,7 @@ void MP_DexAreaDetails(bool8 show)
     }
     LoadPalette(MP_DexDraw_Palette(), BG_PLTT_ID(MP_DEX_PAL), PLTT_SIZE_4BPP);
     MP_DexDraw_Info(sPokedexListItem->dexNum, sPokedexListItem->seen, sPokedexListItem->owned, MP_DEXPAGE_WHERE, 0);
-    MP_DexDraw_Tiles(8, 16, MP_MORE_W, MP_MORE_H, sTiles);
+    MP_DexDraw_Tiles(4, 16, MP_MORE_W, MP_MORE_H, sTiles);   // (the card in the middle of the screen under the tabs)
     CopyToWindowPixelBuffer(WIN_MORE, sTiles, sizeof(sTiles), 0);
     PutWindowTilemap(WIN_MORE);
     CopyWindowToVram(WIN_MORE, COPYWIN_FULL);
