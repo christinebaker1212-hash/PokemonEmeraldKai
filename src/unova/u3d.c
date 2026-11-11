@@ -357,6 +357,14 @@ bool8 U3D_IsUnovaGroup(u8 mapGroup)
     return mapGroup >= MAP_GROUP(MAP_UNOVA_BLACKCITY) && mapGroup < MAP_GROUP(MAP_UNOVA_BLACKCITY) + UNOVA_GROUPS;
 }
 
+s32 U3D_MapIndex(void)
+{
+    return gSaveBlock1Ptr ? MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum) : -1;
+}
+
+u8 U3D_MapCellX(s32 index) { return index >= 0 && index < (s32)ARRAY_COUNT(sUnovaMaps) ? sUnovaMaps[index].cx : 0; }
+u8 U3D_MapCellZ(s32 index) { return index >= 0 && index < (s32)ARRAY_COUNT(sUnovaMaps) ? sUnovaMaps[index].cz : 0; }
+
 u16 U3D_CurrentZone(void)
 {
     s32 i;

@@ -1,2 +1,3 @@
 Unova_AbyssalRuins_Z248_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Unova_EventScript_MapLoad
 	.byte 0

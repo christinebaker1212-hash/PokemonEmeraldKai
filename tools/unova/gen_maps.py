@@ -52,6 +52,49 @@ def ascii_name(name):
     return name.replace('É', 'é')   # (the game's font has é only in lower case: POKéMON)
 
 
+# Black's people as the map's object events, in its event data's order (UNOVA's VM finds a person's local id by its
+# place: u3d_vm.c LocalId), their signs and trigger spots; Black's own scripts run for them (data/scripts/unova.inc).
+# Their pictures are stand-ins until Black's own come (the sprites pack)
+STAND_IN = 'OBJ_EVENT_GFX_YOUNGSTER'
+BLACK_DIR = {0: 'UP', 1: 'DOWN', 2: 'LEFT', 3: 'RIGHT'}
+
+
+def events_of(m, w, h):
+    evs = ev.events(m['zone'])
+    ox, oz = (m['rect'][0] * 32, m['rect'][1] * 32) if m['outdoor'] else (0, 0)
+    objs, coords, bgs = [], [], []
+    for p in evs['people']:
+        x, z = p['x'] - ox, p['z'] - oz
+        inside = 0 <= x < w and 0 <= z < h and not p['rail']
+        face = BLACK_DIR.get(p['dir'], 'DOWN')
+        wander = p['move'] == 3 and (p['limit'][0] or p['limit'][1])
+        objs.append({'graphics_id': STAND_IN, 'x': x if inside else 0, 'y': z if inside else 0, 'elevation': 3,
+                     'movement_type': 'MOVEMENT_TYPE_WANDER_AROUND' if wander else 'MOVEMENT_TYPE_FACE_' + face,
+                     'movement_range_x': max(0, p['limit'][0]) if wander else 0,
+                     'movement_range_y': max(0, p['limit'][1]) if wander else 0,
+                     'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
+                     'script': 'Unova_EventScript_Talk',
+                     # (one whose spot is another map's: u3d_vm.c U3D_Vm_ObjectHidden keeps it hidden here; its
+                     # place in the list is kept for the VM's ids)
+                     'flag': '0'})
+    for b in evs['bg']:
+        x, z = b['x'] - ox, b['z'] - oz
+        if 0 <= x < w and 0 <= z < h and not b['rail']:
+            bgs.append({'type': 'sign', 'x': x, 'y': z, 'elevation': 0,
+                        'player_facing_dir': 'BG_EVENT_PLAYER_FACING_ANY', 'script': 'Unova_EventScript_Sign'})
+    for q in evs['pos']:
+        if q['rail'] or q['check'] != 0:
+            continue
+        for dz in range(max(1, q['h'])):
+            for dx in range(max(1, q['w'])):
+                x, z = q['x'] + dx - ox, q['z'] + dz - oz
+                if 0 <= x < w and 0 <= z < h:
+                    coords.append({'type': 'trigger', 'x': x, 'y': z, 'elevation': 0,
+                                   'var': '0x%X' % (0xB000 + q['work'] - 0x4000) if q['work'] >= 0x4000 else 'VAR_TEMP_0',
+                                   'var_value': str(q['value']), 'script': 'Unova_EventScript_Pos'})
+    return objs, coords, bgs
+
+
 def zone_maps():
     """[{zone, name, id, matrix, rect (x0, z0, x1, z1 in cells), place, outdoor}] in zone order: an indoor zone's blocks
     as one map, each outdoor block (a matrix with its own zone grid) a map"""
@@ -170,6 +213,7 @@ def main():
                     conns.append({'map': o['id'], 'offset': (ox0 - x0) * 32, 'direction': 'down'})
                 elif oz1 == z0 - 1 and ox0 <= x1 and ox1 >= x0:
                     conns.append({'map': o['id'], 'offset': (ox0 - x0) * 32, 'direction': 'up'})
+        objs, coords, bgs = events_of(m, w, h)
         mdir = 'data/maps/%s' % m['name']
         os.makedirs(mdir, exist_ok=True)
         mj = {'id': m['id'], 'name': m['name'], 'layout': lid, 'music': 'MUS_NONE',
@@ -177,13 +221,14 @@ def main():
               'weather': 'WEATHER_NONE', 'map_type': 'MAP_TYPE_TOWN' if m['outdoor'] else 'MAP_TYPE_INDOOR',
               'allow_cycling': m['outdoor'], 'allow_escaping': False, 'allow_running': True,
               'show_map_name': m['outdoor'], 'battle_scene': 'MAP_BATTLE_SCENE_NORMAL',
-              'connections': conns or None, 'object_events': [], 'warp_events': we, 'coord_events': [],
-              'bg_events': []}
+              'connections': conns or None, 'object_events': objs, 'warp_events': we, 'coord_events': coords,
+              'bg_events': bgs}
         json.dump(mj, open(mdir + '/map.json', 'w'), indent=2)
         open(mdir + '/map.json', 'a').write('\n')
         sp = mdir + '/scripts.inc'
-        if not os.path.exists(sp):   # (Black's own scripts come with their converter: never written by hand)
-            open(sp, 'w').write('%s_MapScripts::\n\t.byte 0\n' % m['name'])
+        # (Black's own scripts run in UNOVA's VM, src/unova/u3d_vm.c: a map only says when)
+        open(sp, 'w').write('%s_MapScripts::\n\tmap_script MAP_SCRIPT_ON_TRANSITION, Unova_EventScript_MapLoad\n'
+                            '\t.byte 0\n' % m['name'])
         groups[group].append(m['name'])
         table.append('    {%s, %d, %d, %d, %d, %d, %d},' % (m['id'], m['zone'], m['matrix'], m['rect'][0], m['rect'][1],
                                                         m['rect'][2] - m['rect'][0] + 1, m['rect'][3] - m['rect'][1] + 1))

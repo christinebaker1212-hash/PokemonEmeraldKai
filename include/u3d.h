@@ -24,6 +24,19 @@ float U3D_TestGround(s32 mapX, s32 mapY, float near);         // tests: the grou
 void U3D_ShopPicture(bool8 on, s16 dx, s16 dy);               // shop.c's BUY screen: the field's last picture behind
 u8 U3D_Season(void);                                          // Black's season now: 0 spring .. 3 winter
 u16 U3D_CurrentZone(void);                                    // the Black zone the player is on (0xFFFF: not UNOVA)
+s32 U3D_MapIndex(void);                                       // the player's map's row of u3d_maps.h (-1: not UNOVA)
+u8 U3D_MapCellX(s32 index);                                   // ... where it lies on its Black matrix (blocks)
+u8 U3D_MapCellZ(s32 index);
+// UNOVA's scripts (src/unova/u3d_vm.c: Black's own bytecode)
+#define U3D_VAR_BASE 0xB000                                   // Emerald vars 0xB000 + n are Black's works 0x4000 + n
+#define U3D_VAR_COUNT 0x140
+u16 *U3D_Vm_VarPointer(u16 id);
+bool8 U3D_Vm_ObjectHidden(u8 localId);                        // a person hidden by Black's flag
+bool8 U3D_Vm_SceneStart(void);                                // script.c TryRunOnFrameMapScript: a scene starts
+bool8 U3D_VmRunning(void);
+void U3D_Vm_ResetWork(void);
+const void *U3D_Vm_WorkData(u32 *size);                       // Black's event work, saved (mp_region.c chunk UNEW)
+void U3D_Vm_WorkLoad(const void *data, u32 size);
 
 // UNOVA's words (src/unova/u3d_text.c: Black's own, unova/black_text.pak from tools/unova/build_text.py)
 #define UNOVA_STR_VARS 32

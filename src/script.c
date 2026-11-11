@@ -1,4 +1,5 @@
 #include "global.h"
+#include "u3d.h"   // Moemon Kai: UNOVA's scripts
 #include "mp.h"
 #include "script.h"
 #include "maker.h"
@@ -401,6 +402,9 @@ bool8 TryRunOnFrameMapScript(void)
             return TRUE;
         }
     }
+    // Moemon Kai: an UNOVA map's scenes, Black's own (src/unova/u3d_vm.c: its zone's scene table)
+    if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) && U3D_Vm_SceneStart())
+        return TRUE;
     ptr = MapHeaderCheckScriptTable(MAP_SCRIPT_ON_FRAME_TABLE);
 
     if (!ptr)

@@ -9,6 +9,7 @@
 	.include "constants/constants.inc"
 	.include "asm/macros/event.inc"
 	.section script_data, "aw"
+	.include "data/scripts/unova.inc"
 	.include "data/maps/Unova_BlackCity/scripts.inc"
 	.include "data/maps/Unova_BlackCity_Z1/scripts.inc"
 	.include "data/maps/Unova_BlackCity_Z2/scripts.inc"

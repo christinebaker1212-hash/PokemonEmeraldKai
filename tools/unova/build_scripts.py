@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""UNOVA's scripts: Black's own script files, its shared script ranges, its zones' script / init / message / event ids
+and its event files, as unova/black_scripts.pak beside the game (docs/UNOVA_HANDOFF.md "Black's words and scripts").
+Made from the user's Black ROM when the release is built; nothing of it is in this repository. UNOVA's VM
+(src/unova/u3d_vm.c) runs the scripts as Black does, its commands' arguments from tools/unova/scrcmd.py
+(src/unova/u3d_cmds.h).
+
+    python3 -I tools/unova/build_scripts.py OUT.pak
+
+File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little endian): "U3DS" u32 version 1, then
+  u32 script files: u32 offset, u32 size each (from the pack's start), the files (a/0/5/7)
+  u32 ranges: u16 first id, last id, file, text arc, text file each (ov010's table)
+  u32 zones: u16 script file, init file, message file, event file, matrix, parent zone, map type, place name each
+  u32 event files: u32 offset, u32 size each, the files (a/1/2/5)
+"""
+import os
+import struct
+import sys
+import zlib
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import narc  # noqa: E402
+import scripts as scr  # noqa: E402
+import zones as zr  # noqa: E402
+
+VERSION = 1
+EVENT_ARC = 'a/1/2/5'
+
+
+def files_block(files, base):
+    """u32 count, (offset, size) each from the pack's start (BASE: where this block begins), the files"""
+    head = struct.pack('<I', len(files))
+    at = base + len(head) + 8 * len(files)
+    table, body = bytearray(), bytearray()
+    for f in files:
+        table += struct.pack('<II', at + len(body), len(f))
+        body += f
+        body += b'\0' * (-len(body) % 4)
+    return head + bytes(table) + bytes(body)
+
+
+def main():
+    out_path = sys.argv[1]
+    pack = bytearray(b'U3DS' + struct.pack('<I', VERSION))
+    pack += files_block(narc.arc(scr.ARC), len(pack))
+    rs = scr.ranges()
+    pack += struct.pack('<I', len(rs)) + b''.join(struct.pack('<5H', *r) for r in rs)
+    zs = zr.zones()
+    pack += struct.pack('<I', len(zs))
+    for z in zs:
+        pack += struct.pack('<8H', z['script'], z['init_script'], z['msg'], z['event'], z['matrix'], z['parent'],
+                            z['type'], z['place'])
+    pack += files_block(narc.arc(EVENT_ARC), len(pack))
+    os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+    open(out_path, 'wb').write(b'U3SZ' + struct.pack('<I', len(pack)) + zlib.compress(bytes(pack), 6))
+    print('%s: %d script files, %d zones, %d event files, %d bytes' % (out_path, len(narc.arc(scr.ARC)), len(zs),
+                                                                       len(narc.arc(EVENT_ARC)), len(pack)))
+
+
+if __name__ == '__main__':
+    main()

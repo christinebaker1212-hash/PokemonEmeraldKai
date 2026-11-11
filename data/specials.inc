@@ -834,3 +834,8 @@ gSpecials::
 	def_special MP_ArrivalFaceProf
 	def_special MP_ArrivalToTown, waitstate=1
 	def_special MP_ArrivalToRoom, waitstate=1
+	def_special U3D_VmMapLoad   @ Moemon Kai: UNOVA: Black's zone-change and field-init scripts (src/unova/u3d_vm.c)
+	def_special U3D_VmTalk   @ Moemon Kai: UNOVA: the person talked to runs Black's script (waitstate)
+	def_special U3D_VmSign   @ Moemon Kai: ... the sign looked at
+	def_special U3D_VmPos   @ Moemon Kai: ... the trigger spot stepped on
+	def_special U3D_VmHold   @ Moemon Kai: ... a scene holds the field until it ends

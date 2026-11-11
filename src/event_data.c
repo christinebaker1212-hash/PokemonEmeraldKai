@@ -1,4 +1,5 @@
 #include "global.h"
+#include "u3d.h"   // Moemon Kai: UNOVA's scripts
 #include "maker.h"   // Moemon Maker
 #include "mp_region.h"
 #include "event_data.h"
@@ -175,6 +176,8 @@ u16 *GetVarPointer(u16 id)
         return &gSaveBlock1Ptr->vars[id - VARS_START];
     else if (id <= SPECIAL_VARS_END)
         return gSpecialVars[id - SPECIAL_VARS_START];
+    else if (id >= U3D_VAR_BASE && id < U3D_VAR_BASE + U3D_VAR_COUNT)
+        return U3D_Vm_VarPointer(id);   // Moemon Kai: Black's works (src/unova/u3d_vm.c): UNOVA's trigger spots read them
     else
         return NULL;   // Moemon Kai: past the table (Quetzal's scripts write -1 as "the warp's own spot"): the value itself
 }

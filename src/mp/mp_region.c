@@ -15,6 +15,7 @@
 #include "fieldmap.h"
 #include "metatile_behavior.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's map groups
+#include "u3d.h"   // Moemon Kai: UNOVA's event work
 #include "s3d_underground.h"
 #include "sinnoh_tower.h"   // (SINNOH's BATTLE TOWER: chunk TOWR)   // (SINNOH's Underground: chunk UNDG)
 const void *Sinnoh_UnownData(u32 *size);   // (the UNOWN letters seen: chunk UNOF, s3d_legends.c)
@@ -271,6 +272,7 @@ void MP_Region_NewGame(void)
     MP_Achieve_RegionalReset();
     MP_Achieve_RegionalTrackReset();
     MP_RegionItems_NewGame();
+    U3D_Vm_ResetWork();   // (UNOVA's event work: Black's flags and works)
 }
 
 // The region a new game starts in (PROF. BIRCH asks, main_menu.c), applied by MP_Region_StartNewGame
@@ -661,6 +663,15 @@ void MP_Region_WriteSidecar(void)
             AwFile_Write(sm, size, 1, f);
         }
         {
+            // UNOVA's event work, Black's flags and works as Black keeps them (src/unova/u3d_vm.c)
+            u32 size;
+            const void *uw = U3D_Vm_WorkData(&size);
+            c[0] = CHUNK('U', 'N', 'E', 'W');
+            c[1] = size;
+            AwFile_Write(c, sizeof(c), 1, f);
+            AwFile_Write(uw, size, 1, f);
+        }
+        {
             // SINNOH's JOURNAL (src/sinnoh/s3d_journal.c)
             u32 size;
             const void *jr = Sinnoh_JournalData(&size);
@@ -704,6 +715,7 @@ static bool8 LoadFrom(const char *path)
     if (!f)
         return FALSE;
     MP_Achieve_RegionalReset();   // (a side file without the chunk: from before 1.182.0)
+    U3D_Vm_ResetWork();           // (... UNEW: before UNOVA)
     MP_RegionItems_Reset();       // (... from before 1.183.0: its BAG sorted out once)
     memset(&gRegionState, 0, sizeof(gRegionState));
     MP_Route5Daycare_Clear();
@@ -825,6 +837,12 @@ static bool8 LoadFrom(const char *path)
                 u8 buf[256];
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_MiscLoad(buf, c[1]);
+            }
+            else if (c[0] == CHUNK('U', 'N', 'E', 'W') && c[1] <= 2048)
+            {
+                u8 buf[2048];
+                if (fread(buf, c[1], 1, f) == 1)
+                    U3D_Vm_WorkLoad(buf, c[1]);
             }
             else if (c[0] == CHUNK('J', 'R', 'N', 'L') && c[1] <= 2048)
             {

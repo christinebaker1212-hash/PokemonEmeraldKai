@@ -1,4 +1,5 @@
 #include "global.h"
+#include "u3d.h"   // Moemon Kai: UNOVA's scripts
 #include "orre_people.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's gyms that move
 #include "o3d.h"   // Moemon Kai: ORRE's scenes (UpdateObjectEventOffscreen)
@@ -1384,7 +1385,7 @@ u8 Unref_TryInitLocalObjectEvent(u8 localId)
         for (i = 0; i < objectEventCount; i++)
         {
             template = &gSaveBlock1Ptr->objectEventTemplates[i];
-            if (template->localId == localId && !FlagGet(template->flagId) && !MP_Gen_ObjectHidden(localId))   // Moemon Kai
+            if (template->localId == localId && !FlagGet(template->flagId) && !MP_Gen_ObjectHidden(localId) && !U3D_Vm_ObjectHidden(localId))   // Moemon Kai
                 return InitObjectEventStateFromTemplate(template, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
         }
     }
@@ -1778,7 +1779,8 @@ void TrySpawnObjectEvents(s16 cameraX, s16 cameraY)
             s16 npcY = template->y + MAP_OFFSET;
 
             if (top <= npcY && bottom >= npcY && left <= npcX && right >= npcX
-                && !FlagGet(template->flagId) && !MP_Gen_ObjectHidden(template->localId))   // Moemon Kai
+                && !FlagGet(template->flagId) && !MP_Gen_ObjectHidden(template->localId)
+                && !U3D_Vm_ObjectHidden(template->localId))   // Moemon Kai (UNOVA: Black's flags, u3d_vm.c)
                 TrySpawnObjectEventTemplate(template, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, cameraX, cameraY);
         }
     }
