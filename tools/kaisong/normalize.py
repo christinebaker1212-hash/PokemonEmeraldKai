@@ -138,8 +138,13 @@ def main():
         for name in files:
             if name in gains:
                 f.write('%s\t%.1f\n' % (name, gains[name]))
-    print('normalize.py: %d songs, target %.1f dB, %d measured now (%d again at their gain), %.1f s'
-          % (len(gains), target, len(want), len(again), time.time() - t0))
+    # (said so it can't be read as a failure: "0 measured now" is every song already measured, its gain shipped)
+    if not want:
+        print('normalize.py: OK, all %d songs already measured (nothing new or changed): gains written, target %.1f dB, %.1f s'
+              % (len(gains), target, time.time() - t0))
+    else:
+        print('normalize.py: OK, %d songs, target %.1f dB: %d new or changed measured now (%d again at their gain), %.1f s'
+              % (len(gains), target, len(want), len(again), time.time() - t0))
     return 0
 
 
