@@ -117,6 +117,17 @@ class Conv:
         self.question = self.cmap.get('?', 0xAC)
         self.unmapped = {}
 
+    @staticmethod
+    def next_text(parts, part):
+        """The text after this part of the line, past a line break only"""
+        i = next(k for k, q in enumerate(parts) if q is part)
+        for q in parts[i + 1:]:
+            if isinstance(q, str):
+                return q
+            if q[0] != 'br':
+                break
+        return ''
+
     # A line's pieces: ('t', text) | ('p', bytes, width) | ('br',) | ('page',) | ('pause', n)
     def pieces(self, parts):
         out = []
@@ -126,7 +137,9 @@ class Conv:
                 while '"' in t:   # (straight quotes as Kai's opening and closing ones: it has no straight double quote)
                     t = t.replace('"', '“' if self.quote_open else '”', 1)
                     self.quote_open = not self.quote_open
-                out.append(('t', moe(t)))
+                # (POKé BALL keeps its name, as everywhere: also where Colosseum breaks the line between its words)
+                tail = t[-4:] in ('POKé', 'Poké') and self.next_text(parts, p).lstrip().upper().startswith('BALL')
+                out.append(('t', moe(t[:-4]) + t[-4:] if tail else moe(t)))
                 continue
             name, prm = p
             if name == 'br':
