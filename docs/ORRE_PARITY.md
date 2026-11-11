@@ -59,6 +59,12 @@ walk can make are not ticked here until a walk with plain key presses (no planne
   there (1.190.11: the player waits from a room's first frame until its loop first steps them, as Colosseum's
   player does: LoopNotStarted, Orre_Vm_Warped).
 
+- **A follower's legs were cut off at the ground** (1.190.10 / 1.190.12): a PMD picture was drawn from the sprite's
+  flat-map spot (1.190.10: it goes with the 3D placing, sprite.c gMpPlaceDx), and any sprite line under its feet
+  line was put under the ground by the card's slope (1.190.12: o3d.c OamHidden, lines under the feet lie at the
+  feet's depth). Checked by a look at PHENAC with each follower style: the one kind of ORRE run made here, a
+  picture of a reported fault.
+
 ## Area by area (the user, 2026-11-11: "one area at a time")
 
 Read from the disc's scripts (tools/orre/gsvm.py), not from a run: the user tests ORRE.
@@ -66,6 +72,7 @@ Read from the disc's scripts (tools/orre/gsvm.py), not from a run: the user test
 | Area | Rooms | Script commands | Found |
 |---|---|---|---|
 | OUTSKIRT STAND | S1_out, S1_shop_1F | all run or deliberately quiet (21 quiet: sounds' details, look-at, map objects' animations, mail) | the diner's TV scene walked out of during the fade (fixed, above) |
+| PHENAC CITY | M1_* (13 rooms) | all run or quiet but the e-Reader room's and the PC basement's link commands (closed: the hardware's, Kai's co-op) | town POKeMON's cries (scriptSetPokemonNakigoe) were silent and fadeEffectGetRandom gave 0 every time, in every area (1.190.12); open: what peopleSetFlagsByIndex's bits 2 / 16 / 32 / 1792 do (quiet now) |
 
 ## What the walking tests did not prove
 

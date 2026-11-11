@@ -18,6 +18,7 @@
 #include <string.h>
 #include <math.h>
 #include "global.h"
+#include "random.h"
 #include "data.h"
 #include "event_data.h"
 #include "field_message_box.h"
@@ -448,7 +449,7 @@ enum
 // models' and map objects' animations, lights, people's internal flags and walking speed, story gates (left open),
 // doors and elevators (the maps' own links), the P★DA's mail, the TV's channel
 static const struct { u16 n; u8 ret; } sQuiet[] = {
-    {130, 0}, {218, 0},
+    {130, 0},
     {38, 0}, {39, 0}, {48, 0}, {127, 0}, {147, 0},
     {148, 0}, {149, 0}, {156, 0}, {170, 1}, {126, 0},
     {113, 0}, {114, 0}, {115, 0}, {116, 0}, {117, 1}, {154, 0}, {178, 1}, {190, 0}, {191, 0},
@@ -456,7 +457,7 @@ static const struct { u16 n; u8 ret; } sQuiet[] = {
     {63, 0}, {64, 0}, {66, 0}, {67, 0}, {76, 0}, {77, 0}, {151, 0}, {155, 1},
     {97, 0}, {197, 0}, {161, 0}, {162, 0}, {136, 0}, {144, 0},
     {173, 0}, {17, 0},
-    {2, 0}, {243, 0}, {111, 0}, {49, 0}, {189, 0}, {214, 0}, {186, 0}, {234, 0},
+    {243, 0}, {111, 0}, {49, 0}, {189, 0}, {214, 0}, {186, 0}, {234, 0},
     {196, 0}, {166, 0},
     {225, 0}, {246, 0},   // (the party noted for a challenge's check; the save's continue point: Kai's save)
     {223, 0}, {236, 0}, {239, 0},   // (MT. BATTLE's rest stops: save and quit (Kai saves any time); POKe COUPONS: not yet)
@@ -1297,6 +1298,14 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
     case N_SET_POSITION: Orre_Npc_SetPosition(ARG(0).u, ARG(1).u, ARG(2).f, ARG(4).f); return 0;
     case N_SET_ROTATION: Orre_Npc_SetAngle(ARG(0).u, ARG(1).u, ARG(3).f); return 0;
     case N_TURN_TO_ANGLE: Orre_Npc_SetAngle(ARG(0).u, ARG(1).u, ARG(2).f); return 0;
+    case 218:   // scriptSetPokemonNakigoe(species): a town's POKeMON talked to cries (Colosseum's numbers are Gen 3's
+                // own, as Kai's). It was silent: the user's parity ask, 2026-11-11
+        if (ARG(0).u > 0 && ARG(0).u < NUM_SPECIES && !IsCryPlayingOrClearCrySongs())
+            PlayCry_Normal(ARG(0).u, 0);
+        return 0;
+    case 2:     // fadeEffectGetRandom(n): 0 to n - 1 (it gave 0 every time: PHENAC's and the LAB's outside picked
+                // the same one of their lines or people each visit)
+        return ARG(0).u > 1 ? Random() % ARG(0).u : 0;
     case N_SET_COL: SetGate(ARG(0).u, ARG(1).u != 0); return ARG(0).u;
     case 96: return CtrlDoor(ARG(1).u, ARG(2).u);   // floorEventCtrlDoor(room, door, mode)
     case N_WALK_SPEED: Orre_Npc_SetSpeed(ARG(0).u, ARG(1).u, ARG(2).f); return 0;   // peopleSetWalkSpeed

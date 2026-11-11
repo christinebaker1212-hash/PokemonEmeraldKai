@@ -1161,6 +1161,12 @@ static bool OamHidden(int oamIndex, int x, int line)
         return TRUE;
     if (o->flat)   // (a shadow lies on the ground: only a wall in front hides it)
         return sDepth[line][x] < o->d0 - 16.0f;
+    // (lines under its feet line: a follower's picture, a PMD one's or its own, is drawn a few lines lower than the
+    // sprite's own bottom edge. The card's slope carried on under the feet put those lines under the ground, and the
+    // ground in front of them cut the follower off at the legs (the user, 2026-11-11). They lie at the feet's depth,
+    // as a shadow does: only something well in front, a wall or a counter, hides them)
+    if (line > o->feet)
+        return sDepth[line][x] < o->d0 - 16.0f - (line - o->feet) * 1.5f;
     d = o->d0 - (o->feet - line) * o->slope;
     return sDepth[line][x] < d - 6.0f;
 }
