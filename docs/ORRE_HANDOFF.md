@@ -238,6 +238,14 @@ The older notes per part:
   A scene that asked for the hold and ended before Kai's script engine was free leaves none pending (TryHold: a stale
   sHoldPending switched off the room's touch spots and main loop boxes until the player left: PHENAC after RUI's
   rescue, 1.189.1; MOEMON_ORRE_TOUCH_DEBUG=1 logs the hold's state every two seconds).
+  The player also waits while a room's loop is off in a scene of its own (1.189.2): Colosseum's player only moves
+  while the loop steps them (heroMoveMain every frame), so a scene the loop runs itself with no heroMoveInitEvent
+  (GSscene_SetMode(3) scenes: PHENAC's three from TEAM SNAGEM) holds them all the same: a room thread whose
+  function calls heroMoveMain (Start: StepsHero) and hasn't for a few frames, or not yet on its first pass, takes the
+  hold ("is off in a scene" in the log) until it steps them again.
+- **The story walk, resumed**: a walk's autosave (its DIR/a.sav and side files) copied into a new folder runs on from
+  there without MOEMON_DEBUG_QUICKSTART / WARP / PARTY (the game run directly, as tools/test/run1.sh does but keeping
+  a.sav): the walk's `skipif orreflag` lines pass over what the save has done. Minutes instead of the walk from the start.
 - **Natives converted** (tools/orre/natives.json, from the decomp's table lbl_802E1CF0, names its indices): the flags
   (78 sets 1, 79 sets 0: the decomp's names are swapped; 80, 81, 82), messages (54 characterTalk, 7 / 8 winMsg
   open / close, 55 end of speech: Colosseum's line by id through orre_text.c, waiting for A where Colosseum's wait
