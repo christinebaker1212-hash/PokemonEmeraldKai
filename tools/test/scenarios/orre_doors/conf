@@ -1,0 +1,11 @@
+# ORRE's doors as Colosseum has them (its door table: src/orre/orre_vm.c CtrlDoor). PYRITE's hideout house: the
+# bookshelf in front of the stairs to the kids' room is a door only its button opens. Coming up from the kids' room the
+# player stood behind it with no way on (a leaf was a wall for good); now A on it (the kid who guards it gone: flag
+# 3532) asks "Press it?" and it opens. Then
+# the police station: the doors to its back rooms open when walked up to.
+MODE=1
+TMO=200
+WARP=45,14,20,19
+ENV_A="MOEMON_DEBUG_PARTY=150:100 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1"
+EXPECT_A=("orre vm: gate 1 open" "orre vm: gate 5 closed" "orre vm: gate 5 open" "[doors] in the room" "[doors] in the police station's back")
+UNEXPECT_A=("[crash]" "TIMEOUT" "NO WAY")

@@ -25,7 +25,28 @@
       "dest_warp_id": "7"
     },
     {
+      "x": 22,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B3",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 23,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B3",
+      "dest_warp_id": "7"
+    },
+    {
       "x": 8,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B3",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 9,
       "y": 19,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_SUBWAY_B3",
@@ -36,14 +57,14 @@
       "y": 18,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_TRAIN_1F",
-      "dest_warp_id": "2"
+      "dest_warp_id": "5"
     },
     {
       "x": 23,
       "y": 18,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_TRAIN_1F",
-      "dest_warp_id": "3"
+      "dest_warp_id": "6"
     }
   ]
 }

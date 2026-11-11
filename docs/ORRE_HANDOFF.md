@@ -410,6 +410,18 @@ The older notes per part:
   (orre_vm.c KeepStory when a scene takes the player, put back at the whiteout's warp: Colosseum goes back to the save,
   so the scene plays again); the player wakes at the last ORRE POKeMON CENTER healed at (N_POKEMON_CENTER sets the
   save's lastHealLocation) or the OUTSKIRT STAND (Orre_Vm_LossWhiteOut). Scenario orre_willie_loss.
+- **Doors** (2026-11-11; Colosseum's door table: the decomp's FloorDoorEntry, floor_event.c floorEventCtrlDoor,
+  common_rel .data + 0x8FE24, 0x18 each, count + 0x14A690; tools/orre/colo_rooms.py Room.doors): 154 doors, each with
+  a leaf's collision object (off while the door is open), a flag set while it's open and, for some, a lock flag that
+  must be set before it opens. Until then every leaf was a wall for good: the police station's back, the labs' rooms,
+  the cave behind MIROR B.'s door, the subway's and hotels' rooms (75 doors' worth of floor) couldn't be reached, and a
+  player coming up behind PYRITE's hideout bookshelf (door 28, opened by its button: the room's script 12) was penned
+  in. Now the maps are built with every door open (maps.py door_objects), gen_gates.py lists the leaves' tiles as
+  gates and the doors as sOrreDoors, and orre_vm.c shuts each door as its room starts unless its flag is set
+  (InitDoors), opens it on floorEventCtrlDoor (native 96, CtrlDoor: modes 0-3 as the decomp) and, for the doors a
+  touch trigger opens in Colosseum (the shared script 0x05960005), when the player stands beside a closed leaf's tiles
+  (TouchDoors). The leaves' models don't move yet (they're drawn shut and walked through): a next step. The tests'
+  walker plans through a door that will open (Orre_Vm_DoorWillOpen). Scenario orre_doors.
 - **Story gates** (scriptSetCol, GScolsys2SetObjEnable: 169 calls in the rooms' scripts): the maps are built with
   every gate open; tools/orre/gen_gates.py lists each gate's tiles (its walls crossing a walkable tile at a person's
   height, or the step between two, closing the one farther from the gate's middle) in src/data/orre_gates.h; Colosseum's

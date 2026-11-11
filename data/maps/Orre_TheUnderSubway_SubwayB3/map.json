@@ -43,28 +43,28 @@
       "y": 21,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_TRAIN_1F",
-      "dest_warp_id": "3"
+      "dest_warp_id": "6"
     },
     {
       "x": 41,
       "y": 21,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_TRAIN_1F",
-      "dest_warp_id": "3"
+      "dest_warp_id": "6"
     },
     {
       "x": 27,
       "y": 21,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_TRAIN_1F",
-      "dest_warp_id": "2"
+      "dest_warp_id": "5"
     },
     {
       "x": 28,
       "y": 21,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SUBWAY_TRAIN_1F",
-      "dest_warp_id": "2"
+      "dest_warp_id": "5"
     },
     {
       "x": 47,

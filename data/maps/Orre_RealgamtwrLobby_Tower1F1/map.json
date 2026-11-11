@@ -67,6 +67,13 @@
       "dest_warp_id": "2"
     },
     {
+      "x": 40,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_REALGAM_TOWER_TOWER_1F_3",
+      "dest_warp_id": "3"
+    },
+    {
       "x": 41,
       "y": 32,
       "elevation": 0,
@@ -85,28 +92,28 @@
       "y": 48,
       "elevation": 0,
       "dest_map": "MAP_ORRE_REALGAMTWR_LOBBY_TOWER_1F_1",
-      "dest_warp_id": "9"
+      "dest_warp_id": "10"
     },
     {
       "x": 32,
       "y": 34,
       "elevation": 0,
       "dest_map": "MAP_ORRE_REALGAMTWR_LOBBY_TOWER_1F_1",
-      "dest_warp_id": "10"
+      "dest_warp_id": "11"
     },
     {
       "x": 22,
       "y": 33,
       "elevation": 0,
       "dest_map": "MAP_ORRE_REALGAMTWR_LOBBY_TOWER_1F_1",
-      "dest_warp_id": "11"
+      "dest_warp_id": "12"
     },
     {
       "x": 41,
       "y": 33,
       "elevation": 0,
       "dest_map": "MAP_ORRE_REALGAMTWR_LOBBY_TOWER_1F_1",
-      "dest_warp_id": "12"
+      "dest_warp_id": "13"
     }
   ]
 }

@@ -132,6 +132,20 @@
       "dest_warp_id": "3"
     },
     {
+      "x": 46,
+      "y": 62,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_1F",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 47,
+      "y": 62,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_1F",
+      "dest_warp_id": "6"
+    },
+    {
       "x": 45,
       "y": 63,
       "elevation": 0,
@@ -252,6 +266,20 @@
     },
     {
       "x": 30,
+      "y": 122,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_TOWN_URANAI_1F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 29,
+      "y": 123,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_TOWN_URANAI_1F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 30,
       "y": 123,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN_URANAI_1F",
@@ -272,6 +300,27 @@
       "dest_warp_id": "2"
     },
     {
+      "x": 34,
+      "y": 105,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_TOWN_HOUSEA_1F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 11,
+      "y": 113,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_TOWN_GUILD_1F_1",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 12,
+      "y": 113,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_TOWN_GUILD_1F_1",
+      "dest_warp_id": "4"
+    },
+    {
       "x": 11,
       "y": 114,
       "elevation": 0,
@@ -280,6 +329,13 @@
     },
     {
       "x": 24,
+      "y": 103,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_TOWN_SHOP_1F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 25,
       "y": 103,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN_SHOP_1F",
@@ -297,91 +353,91 @@
       "y": 134,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "25"
+      "dest_warp_id": "33"
     },
     {
       "x": 38,
       "y": 112,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "26"
+      "dest_warp_id": "34"
     },
     {
       "x": 14,
       "y": 100,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "27"
+      "dest_warp_id": "35"
     },
     {
       "x": 30,
       "y": 124,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "28"
+      "dest_warp_id": "36"
     },
     {
       "x": 33,
       "y": 106,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "29"
+      "dest_warp_id": "37"
     },
     {
       "x": 12,
       "y": 115,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "30"
+      "dest_warp_id": "38"
     },
     {
       "x": 24,
       "y": 104,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "31"
+      "dest_warp_id": "39"
     },
     {
       "x": 28,
       "y": 65,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "32"
+      "dest_warp_id": "40"
     },
     {
       "x": 27,
       "y": 69,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "33"
+      "dest_warp_id": "41"
     },
     {
       "x": 46,
       "y": 65,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "34"
+      "dest_warp_id": "42"
     },
     {
       "x": 52,
       "y": 55,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "35"
+      "dest_warp_id": "43"
     },
     {
       "x": 56,
       "y": 56,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "36"
+      "dest_warp_id": "44"
     },
     {
       "x": 44,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "37"
+      "dest_warp_id": "45"
     }
   ]
 }

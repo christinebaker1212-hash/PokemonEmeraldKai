@@ -91,6 +91,15 @@ bool8 MP_DebugQuickStartEnabled(void)
 // animall FIRST LAST ATK TGT [TURN]: every move animation from FIRST to LAST in a row, ATK attacking TGT (in a battle,
 // at the action menu); with MOEMON_ANIMCHECK the log lists every sprite animation started (tools/test/check_anims.py)
 #include "task.h"
+
+// The walker's own view of a tile: one shut only by an ORRE door that opens when the player walks up to it is open
+// (src/orre/orre_vm.c TouchDoors)
+static inline u8 MpTest_CollisionAt(s32 x, s32 y)
+{
+    u8 c = MapGridGetCollisionAt(x, y);
+    return c && Orre_Vm_DoorWillOpen(x - MAP_OFFSET, y - MAP_OFFSET) ? 0 : c;
+}
+#define MapGridGetCollisionAt MpTest_CollisionAt
 extern const u8 *const gBattleAnims_Moves[];
 static u8 sUgFace = DIR_NORTH;   // (mp ugspot / ugface: the way to a dig spot)
 
@@ -704,6 +713,8 @@ static void WalkSearch(void)
             else
             {
                 col = GetCollisionAtCoords(&t, nx + MAP_OFFSET, ny + MAP_OFFSET, dirs[d]);
+                if (col == COLLISION_IMPASSABLE && Orre_Vm_DoorWillOpen(nx, ny))
+                    col = COLLISION_NONE;   // (an ORRE door that opens as the player walks up to it)
                 if (col == COLLISION_NONE && UnseenStanderAt(nx, ny))
                 {
                     if (surf || !canPush || !PushableAt(nx, ny, dx[d], dy[d], w, h))

@@ -45,6 +45,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import colo_data  # noqa: E402
 
 EVENTS, EVENT_COUNT, EVENT_SIZE = 0x146364, 0x14A704, 0x1C
+# the doors (the decomp's FloorDoorEntry, floor_event.c floorEventCtrlDoor: common_rel .data lbl_125_data_8FE24, 0x18
+# each, count at + 0x14A690): s8 open / close animations x4 ... u8 type at 7, s16 collision object at 0xA (the leaf's
+# walls, off while the door is open), u16 room at 0xC, u16 open flag at 0xE (set while open), u16 lock flag at 0x10
+# (0, or the flag that must be set before it opens), u32 model at 0x14
+DOORS, DOOR_COUNT, DOOR_SIZE = 0x8FE24, 0x14A690, 0x18
 WORLD_MAP = 910
 KIND_FIELD = 1     # the floor table's kinds: 1 a field room, 2 a stadium's battle stage, 5 / 6 menus and scenes
 PASS, TOUCH, CHECK = 1, 2, 3
@@ -193,6 +198,7 @@ class Room:
     def __init__(self, room, file, area, kind, place):
         self.room, self.file, self.area, self.kind, self.place = room, file, area, kind, place
         self.entries, self.events, self.links, self.gates, self.people = [], [], {}, set(), []
+        self.doors = []   # (index in the game's table, collision object, open flag, lock flag, type, opens by touch)
 
     def __repr__(self):
         return "Room(%d %s)" % (self.room, self.file)
@@ -247,6 +253,11 @@ def rooms(unpacked):
         kind, room, col, script, a, b, c, e = struct.unpack_from(">BxHIIIIII", data, EVENTS + i * EVENT_SIZE)
         if room in out:
             out[room].events.append((kind, col, script, (a, b, c, e)))
+    for i in range(struct.unpack_from(">I", data, DOOR_COUNT)[0]):
+        kind, col, room, opened, lock = struct.unpack_from(">BxxhHHH", data, DOORS + i * DOOR_SIZE + 7)
+        if room in out and (col >= 0 or opened or lock):
+            touch = any(e[0] == TOUCH and e[2] == 0x05960000 + FN_DOOR and e[3][0] == i for e in out[room].events)
+            out[room].doors.append((i, col, opened, lock, kind, touch))
     for r in out.values():
         _links(unpacked, r, out)
     return out

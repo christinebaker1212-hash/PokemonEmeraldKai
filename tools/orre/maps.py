@@ -103,9 +103,14 @@ def load(unpacked):
                 warps[col] = (to.file, entry)
         out.append({"file": file, "id": ident, "name": name, "room": r.room, "place": r.place, "place_name": place,
                     "entries": [(e[1], e[3], e[0]) for e in r.entries], "entry_ys": [e[2] for e in r.entries], "start": (r.entries[0][1], r.entries[0][3]),
-                    "gates": sorted(r.gates), "warps": warps, "exits": exits,
+                    "gates": sorted(r.gates), "doors": list(r.doors), "warps": warps, "exits": exits,
                     "elevators": {col: l[3] for col, l in r.links.items() if l[0] == "elevator"}})
     return out
+
+
+def door_objects(m):
+    """The collision objects that are doors' leaves (Colosseum's door table: tools/orre/colo_rooms.py Room.doors)"""
+    return {d[1] for d in m["doors"] if d[1] >= 0}
 
 
 def stops(m):
@@ -117,7 +122,8 @@ def build_grid(unpacked, m):
     """The map's tile grid (tools/orre/grid.py), as gen_maps.py and build_pack.py both make it."""
     import grid
     p = os.path.join(unpacked, m["file"], m["file"] + ".col")
-    return grid.build(grid.read(open(p, "rb").read(), set(m["gates"])), grid.TILE,
+    # (built with every story gate and every door open: src/orre/orre_vm.c shuts their tiles while they're closed)
+    return grid.build(grid.read(open(p, "rb").read(), set(m["gates"]) | door_objects(m)), grid.TILE,
                       [(x, z) for x, z, _ in m["entries"]], stops(m))
 
 

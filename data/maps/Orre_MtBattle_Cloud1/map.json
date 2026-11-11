@@ -39,18 +39,32 @@
       "dest_warp_id": "6"
     },
     {
+      "x": 202,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_REST_7",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 203,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MT_BATTLE_REST_7",
+      "dest_warp_id": "6"
+    },
+    {
       "x": 24,
       "y": 138,
       "elevation": 0,
       "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_1",
-      "dest_warp_id": "3"
+      "dest_warp_id": "5"
     },
     {
       "x": 202,
       "y": 19,
       "elevation": 0,
       "dest_map": "MAP_ORRE_MT_BATTLE_CLOUD_1",
-      "dest_warp_id": "4"
+      "dest_warp_id": "6"
     }
   ]
 }

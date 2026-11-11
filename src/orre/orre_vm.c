@@ -99,6 +99,7 @@ struct OrreShop
 // The story's gates (scriptSetCol: a collision object a room's scripts switch on and off), the tiles each closes:
 // tools/orre/gen_gates.py
 struct OrreGate { u16 room; u8 gate; u16 first, count; bool8 closed; };   // (closed: at the room's start)
+struct OrreDoor { u16 room; u8 index; s8 col; u16 open, lock; u8 type; bool8 touch; };
 #include "../data/orre_gates.h"
 
 struct Thread
@@ -435,7 +436,7 @@ static const struct { u16 n; u8 ret; } sQuiet[] = {
     {113, 0}, {114, 0}, {115, 0}, {116, 0}, {117, 1}, {154, 0}, {171, 0}, {178, 1}, {190, 0}, {191, 0},
     {193, 1}, {221, 0}, {244, 0}, {70, 0}, {168, 0}, {231, 0},
     {63, 0}, {64, 0}, {66, 0}, {67, 0}, {76, 0}, {77, 0}, {151, 0}, {155, 1},
-    {96, 0}, {97, 0}, {197, 0}, {161, 0}, {162, 0}, {136, 0}, {144, 0},
+    {97, 0}, {197, 0}, {161, 0}, {162, 0}, {136, 0}, {144, 0},
     {173, 0}, {211, 0}, {17, 0},
     {2, 0}, {243, 0}, {111, 0}, {49, 0}, {189, 0}, {214, 0}, {186, 0}, {234, 0},
     {196, 0}, {166, 0},
@@ -721,6 +722,110 @@ static void SetGate(u32 gate, bool8 on)
             MPNet_Log("orre vm: gate %u %s (%u tiles)", gate, on ? "closed" : "open", sOrreGates[i].count);
             return;
         }
+}
+
+// Colosseum's doors (the decomp's floor_event.c floorEventCtrlDoor; the table: tools/orre/colo_rooms.py Room.doors).
+// A door's leaf is a collision object, off while the door is open: its tiles are a gate here. MODE 0 opens it (unless
+// it's open already, or locked: its lock flag not yet set), 1 has it open at once, 2 closes it (if open), 3 has it
+// closed at once; its flag remembers. The rooms' maps are built with every door open (tools/orre/maps.py): before
+// this, a closed leaf was a wall for good and what lay behind it (the police station's cells, the labs' rooms, the
+// bookshelf in front of PYRITE's hideout) couldn't be reached (2026-11-11).
+static const struct OrreDoor *DoorOf(u32 index)
+{
+    u32 i;
+    for (i = 0; i < ORRE_DOOR_COUNT; i++)
+        if (sOrreDoors[i].index == index)
+            return &sOrreDoors[i];
+    return NULL;
+}
+
+static u32 CtrlDoor(u32 index, u32 mode)
+{
+    const struct OrreDoor *d = DoorOf(index);
+    if (d == NULL)
+        return (u32)-1;
+    switch (mode)
+    {
+    case 0:
+        if (d->open && Orre_Flag(d->open))
+            return 0;
+        if (d->lock && !Orre_Flag(d->lock))
+            return 1;
+        OrreSound_Play(d->type == 3 ? 0x4BE : 0x44, 100, FALSE);
+        // fallthrough
+    case 1:
+        if (d->open && !Orre_Flag(d->open))
+            Orre_SetFlag(d->open, TRUE);
+        if (d->col >= 0 && d->room == sRoom)
+            SetGate(d->col, FALSE);
+        break;
+    case 2:
+        if (d->open && !Orre_Flag(d->open))
+            return 0;
+        OrreSound_Play(d->type == 3 ? 0x4BE : 0x44, 100, FALSE);
+        // fallthrough
+    case 3:
+        if (d->open && Orre_Flag(d->open))
+            Orre_SetFlag(d->open, FALSE);
+        if (d->col >= 0 && d->room == sRoom)
+            SetGate(d->col, TRUE);
+        break;
+    }
+    return 0;
+}
+
+// A room's start (the decomp's floorInitDoors): each door open or closed by its flag
+static void InitDoors(u32 room)
+{
+    u32 i;
+    for (i = 0; i < ORRE_DOOR_COUNT; i++)
+        if (sOrreDoors[i].room == room)
+            CtrlDoor(sOrreDoors[i].index, sOrreDoors[i].type != 2 && sOrreDoors[i].open && Orre_Flag(sOrreDoors[i].open) ? 1 : 3);
+}
+
+// The closed gate that covers tile X, Y in this room: its row + 1, 0 none
+static u32 ClosedGateAt(s16 x, s16 y, s16 reach, u8 col)
+{
+    u32 i, k;
+    for (i = 0; i < ORRE_GATE_COUNT; i++)
+        if (sGateClosed[i] && sOrreGates[i].room == sRoom && sOrreGates[i].gate == col)
+            for (k = 0; k < sOrreGates[i].count; k++)
+            {
+                const u8 *tile = sOrreGateTiles[sOrreGates[i].first + k];
+                if (abs(tile[0] - x) <= reach && abs(tile[1] - y) <= reach)
+                    return i + 1;
+            }
+    return 0;
+}
+
+// Doors that open when someone walks up to them (Colosseum's touch triggers in front of a door run the shared script
+// 0x05960005: door mode 0): the player beside a closed leaf's tiles opens it
+static void TouchDoors(void)
+{
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s16 x = p->currentCoords.x - MAP_OFFSET, y = p->currentCoords.y - MAP_OFFSET;
+    u32 i;
+    for (i = 0; i < ORRE_DOOR_COUNT; i++)
+    {
+        const struct OrreDoor *d = &sOrreDoors[i];
+        if (d->room == sRoom && d->touch && d->col >= 0 && ClosedGateAt(x, y, 1, d->col))
+            CtrlDoor(d->index, 0);
+    }
+}
+
+// Tests' walker: tile X, Y is shut only by a door that opens when the player walks up to it
+bool8 Orre_Vm_DoorWillOpen(s16 x, s16 y)
+{
+    u32 i;
+    if (!sRoom)
+        return FALSE;
+    for (i = 0; i < ORRE_DOOR_COUNT; i++)
+    {
+        const struct OrreDoor *d = &sOrreDoors[i];
+        if (d->room == sRoom && d->touch && d->col >= 0 && !(d->lock && !Orre_Flag(d->lock)) && ClosedGateAt(x, y, 0, d->col))
+            return TRUE;
+    }
+    return FALSE;
 }
 
 static void KeepGates(void)
@@ -1077,6 +1182,7 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
     case N_SET_ROTATION: Orre_Npc_SetAngle(ARG(0).u, ARG(1).u, ARG(3).f); return 0;
     case N_TURN_TO_ANGLE: Orre_Npc_SetAngle(ARG(0).u, ARG(1).u, ARG(2).f); return 0;
     case N_SET_COL: SetGate(ARG(0).u, ARG(1).u != 0); return ARG(0).u;
+    case 96: return CtrlDoor(ARG(1).u, ARG(2).u);   // floorEventCtrlDoor(room, door, mode)
     case N_WALK_SPEED: Orre_Npc_SetSpeed(ARG(0).u, ARG(1).u, ARG(2).f); return 0;   // peopleSetWalkSpeed
     case N_TURN_TO_POINT: Orre_Npc_FacePoint(ARG(0).u, ARG(1).u, ARG(2).f, ARG(4).f); return 0;   // peopleTurnToPoint
     case N_MOVE_TO: Orre_Npc_MoveTo(ARG(0).u, ARG(1).u, ARG(3).f, ARG(5).f); return 0;
@@ -1468,6 +1574,8 @@ void Orre_Vm_Frame(void)
         return;   // (the field comes back: the scripts wait until it's there, as Colosseum's fades do)
     TryHold();
     KeepGates();
+    if (sRoom)
+        TouchDoors();
     Orre_Npcs_Frame();   // (people's looped walk lists)
     if (sHolder == NULL && !sHoldPending && !ScriptContext_IsEnabled() && sRoom)
         Orre_Touch_Frame();   // (the touch spots: orre_npcs.c)
@@ -1600,6 +1708,7 @@ void Orre_Vm_RoomEntered(void)
         for (i = 0; i < ORRE_GATE_COUNT; i++)
             if (sOrreGates[i].room == room && sOrreGates[i].closed)
                 SetGate(sOrreGates[i].gate, TRUE);
+        InitDoors(room);
     }
     for (k = 0x28; k <= 0x34; k += 4)   // (+ 0x28 the room's sound script: its song, its wind)
     {

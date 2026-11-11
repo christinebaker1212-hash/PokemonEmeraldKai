@@ -26,31 +26,52 @@
     },
     {
       "x": 16,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_DEEP_COLOSSEUM_ENTER_B1",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 17,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_DEEP_COLOSSEUM_ENTER_B1",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 18,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_DEEP_COLOSSEUM_ENTER_B1",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 16,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "43"
+      "dest_warp_id": "48"
     },
     {
       "x": 17,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "43"
+      "dest_warp_id": "48"
     },
     {
       "x": 16,
       "y": 21,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_BOTTOM_1F",
-      "dest_warp_id": "3"
+      "dest_warp_id": "6"
     },
     {
       "x": 16,
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_BOTTOM_1F",
-      "dest_warp_id": "4"
+      "dest_warp_id": "7"
     }
   ]
 }

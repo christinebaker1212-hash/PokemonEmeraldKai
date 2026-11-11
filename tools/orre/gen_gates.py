@@ -105,19 +105,23 @@ def set_calls(unpacked, file):
 
 def main():
     unpacked = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser('~/.cache/moemon/orre/unpacked')
-    rows, tiles = [], []
+    rows, tiles, doors = [], [], []
     for m in maps.load(unpacked):
-        if not m['gates']:
+        for d in m['doors']:
+            doors.append('    {%d, %d, %d, %d, %d, %d, %d},   // %s' % (m['room'], d[0], d[1], d[2], d[3], d[4], d[5], m['file']))
+        objects = sorted(set(m['gates']) | maps.door_objects(m))
+        if not objects:
             continue
         p = os.path.join(unpacked, m['file'], m['file'] + '.col')
         data = open(p, 'rb').read()
         g = maps.build_grid(unpacked, m)
         calls = set_calls(unpacked, m['file'])
-        for gate in m['gates']:
+        for gate in objects:
             ts = gate_tiles(g, gate_walls(data, gate))
             if not ts:
                 continue
-            closed = calls.get(gate) == {0}
+            # (a door's leaf is shut or open by its own flag when the room starts: orre_vm.c InitDoors)
+            closed = calls.get(gate) == {0} and gate not in maps.door_objects(m)
             rows.append('    {%d, %d, %d, %d, %d},   // %s' % (m['room'], gate, len(tiles), len(ts), closed, m['file']))
             tiles.extend(ts)
     lines = ['// ORRE\'s story gates: the walkable tiles each collision object a room\'s scripts switch (scriptSetCol) closes',
@@ -127,9 +131,14 @@ def main():
              'static const u8 sOrreGateTiles[ORRE_GATE_TILE_COUNT][2] = {']
     for i in range(0, len(tiles), 12):
         lines.append('    ' + ' '.join('{%d, %d},' % t for t in tiles[i:i + 12]))
-    lines += ['};', '']
+    lines += ['};', '',
+              '// Colosseum\'s doors (its door table: tools/orre/colo_rooms.py Room.doors): {room, the door\'s number in the',
+              '// table, its leaf\'s collision object (-1 none), the flag set while it\'s open, the flag that unlocks it (0 none),',
+              '// its type, whether walking up to it opens it (the shared script 0x05960005 on a touch trigger)}', '',
+              '#define ORRE_DOOR_COUNT %d' % len(doors), '',
+              'static const struct OrreDoor sOrreDoors[ORRE_DOOR_COUNT] = {'] + doors + ['};', '']
     open(OUT, 'w').write('\n'.join(lines))
-    print('%s: %d gates, %d tiles' % (OUT, len(rows), len(tiles)))
+    print('%s: %d gates, %d tiles, %d doors' % (OUT, len(rows), len(tiles), len(doors)))
 
 
 if __name__ == '__main__':

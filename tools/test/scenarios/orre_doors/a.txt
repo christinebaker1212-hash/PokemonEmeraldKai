@@ -1,0 +1,18 @@
+pressuntil A field 3000
+wait 60
+goto 45,14 20 18 1500
+echo [doors] in the police station's back
+shot police_back
+mp orreflag 3532 1
+mp warp 45,18,13,12
+wait 120
+pressuntil B field 600
+mp face down
+wait 10
+pressuntillog A 900 orre vm: gate 5 open
+pressuntil B field 600
+wait 20
+goto 45,18 16 18 900
+echo [doors] in the room
+shot guild_open
+quit

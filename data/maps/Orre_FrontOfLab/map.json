@@ -1595,7 +1595,28 @@
       "dest_warp_id": "9"
     },
     {
+      "x": 32,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_GARAGE_1F",
+      "dest_warp_id": "9"
+    },
+    {
       "x": 38,
+      "y": 29,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_1F",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 39,
+      "y": 29,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_1F",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 40,
       "y": 29,
       "elevation": 0,
       "dest_map": "MAP_ORRE_LABORATORY_LABO_1F",
@@ -1606,21 +1627,21 @@
       "y": 50,
       "elevation": 0,
       "dest_map": "MAP_ORRE_FRONT_OF_LAB",
-      "dest_warp_id": "5"
+      "dest_warp_id": "8"
     },
     {
       "x": 39,
       "y": 30,
       "elevation": 0,
       "dest_map": "MAP_ORRE_FRONT_OF_LAB",
-      "dest_warp_id": "6"
+      "dest_warp_id": "9"
     },
     {
       "x": 30,
       "y": 29,
       "elevation": 0,
       "dest_map": "MAP_ORRE_FRONT_OF_LAB",
-      "dest_warp_id": "7"
+      "dest_warp_id": "10"
     }
   ]
 }

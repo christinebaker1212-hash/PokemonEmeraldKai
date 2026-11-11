@@ -125,6 +125,20 @@
       "dest_warp_id": "6"
     },
     {
+      "x": 29,
+      "y": 87,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PHENAC_CITY_PC_1F",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 30,
+      "y": 87,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PHENAC_CITY_PC_1F",
+      "dest_warp_id": "6"
+    },
+    {
       "x": 36,
       "y": 75,
       "elevation": 0,
@@ -147,6 +161,20 @@
     },
     {
       "x": 29,
+      "y": 56,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MAYORS_HOUSE_HOUSEA_1F",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 30,
+      "y": 56,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_MAYORS_HOUSE_HOUSEA_1F",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 31,
       "y": 56,
       "elevation": 0,
       "dest_map": "MAP_ORRE_MAYORS_HOUSE_HOUSEA_1F",
@@ -196,6 +224,13 @@
     },
     {
       "x": 61,
+      "y": 54,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PHENAC_CITY_HOUSEB_1F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 62,
       "y": 54,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY_HOUSEB_1F",
@@ -262,70 +297,70 @@
       "y": 107,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY",
-      "dest_warp_id": "20"
+      "dest_warp_id": "25"
     },
     {
       "x": 29,
       "y": 89,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY",
-      "dest_warp_id": "21"
+      "dest_warp_id": "26"
     },
     {
       "x": 63,
       "y": 89,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY",
-      "dest_warp_id": "22"
+      "dest_warp_id": "27"
     },
     {
       "x": 48,
       "y": 65,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY",
-      "dest_warp_id": "23"
+      "dest_warp_id": "28"
     },
     {
       "x": 37,
       "y": 76,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY",
-      "dest_warp_id": "24"
+      "dest_warp_id": "29"
     },
     {
       "x": 62,
       "y": 56,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY",
-      "dest_warp_id": "25"
+      "dest_warp_id": "30"
     },
     {
       "x": 30,
       "y": 58,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY",
-      "dest_warp_id": "26"
+      "dest_warp_id": "31"
     },
     {
       "x": 48,
       "y": 35,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY",
-      "dest_warp_id": "27"
+      "dest_warp_id": "32"
     },
     {
       "x": 28,
       "y": 59,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY",
-      "dest_warp_id": "28"
+      "dest_warp_id": "33"
     },
     {
       "x": 66,
       "y": 59,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY",
-      "dest_warp_id": "29"
+      "dest_warp_id": "34"
     }
   ]
 }

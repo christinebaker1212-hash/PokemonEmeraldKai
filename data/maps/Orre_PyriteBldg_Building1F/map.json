@@ -29,21 +29,21 @@
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "34"
+      "dest_warp_id": "42"
     },
     {
       "x": 7,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "34"
+      "dest_warp_id": "42"
     },
     {
       "x": 8,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN",
-      "dest_warp_id": "34"
+      "dest_warp_id": "42"
     },
     {
       "x": 11,
@@ -57,7 +57,7 @@
       "y": 14,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "29"
+      "dest_warp_id": "32"
     },
     {
       "x": 7,
