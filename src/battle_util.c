@@ -348,7 +348,8 @@ void HandleAction_UseItem(void)
     gLastUsedItem = gBattleBufferB[gBattlerAttacker][1] | (gBattleBufferB[gBattlerAttacker][2] << 8);
 
     // Moemon Co-op: a ball carries its chosen wild target (bit 15 + battler in bits 12-14)
-    if (gMpCoopBattle && (gLastUsedItem & MP_BALL_TARGET_FLAG))
+    // (Moemon Kai: and a snag's, with two Shadow Pokémon out: battle_controller_player.c)
+    if ((gMpCoopBattle || (gBattleTypeFlags & BATTLE_TYPE_TRAINER)) && (gLastUsedItem & MP_BALL_TARGET_FLAG))
     {
         gMpCoopBallTarget = (gLastUsedItem >> 12) & 7;
         gLastUsedItem &= 0xFFF;

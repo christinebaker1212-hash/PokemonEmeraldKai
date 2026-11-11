@@ -1919,8 +1919,17 @@ static void OpenBagAndChooseItem(void)
 static u16 sMpBallItem;
 static const u8 sText_MpBallWhich[] = _("Throw it at\nwhich one?");
 
+// Moemon Kai: in ORRE's trainer battles the same picker chooses between two Shadow Pokémon out at once (Colosseum's
+// fight menu asks which one: only a Shadow Pokémon is a target there)
+static bool8 MpSnagPicker(void)
+{
+    return (gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && !gMpCoopBattle;
+}
+
 static bool8 MpIsBallTarget(u8 battler)
 {
+    if (MpSnagPicker())
+        return battler < gBattlersCount && Orre_Shadow_Snaggable(battler);
     return battler < gBattlersCount && GetBattlerSide(battler) == B_SIDE_OPPONENT
         && !(gAbsentBattlerFlags & gBitTable[battler])
         && GetMonData(&gEnemyParty[gBattlerPartyIndexes[battler]], MON_DATA_HP) != 0;
@@ -1951,9 +1960,10 @@ static void HandleInputChooseBallTarget(void)
     {
         PlaySE(SE_SELECT);
         MpEndBallTarget();
-        MPNet_Log("co-op: ball %d at battler %d", sMpBallItem, gMultiUsePlayerCursor);
+        MPNet_Log("%s: ball %d at battler %d", MpSnagPicker() ? "snag" : "co-op", sMpBallItem, gMultiUsePlayerCursor);
         BtlController_EmitOneReturnValue(B_COMM_TO_ENGINE, sMpBallItem | MP_BALL_TARGET_FLAG | (gMultiUsePlayerCursor << 12));
-        MP_Coop_SetIntent(MP_INTENT_BALL, sMpBallItem, gMultiUsePlayerCursor);
+        if (!MpSnagPicker())
+            MP_Coop_SetIntent(MP_INTENT_BALL, sMpBallItem, gMultiUsePlayerCursor);
         PlayerBufferExecCompleted();
     }
     else if (JOY_NEW(B_BUTTON))
@@ -1994,7 +2004,7 @@ static void CompleteWhenChoseItem(void)
         u16 value = gSpecialVar_ItemId;
         // Moemon Co-op: a ball in a co-op wild battle names its target; with two
         // wild Pokémon out the player picks one first
-        if (gMpCoopWild && value != ITEM_NONE && MP_IsBallItem(value))
+        if ((gMpCoopWild || MpSnagPicker()) && value != ITEM_NONE && MP_IsBallItem(value))
         {
             u8 first;
             if (MpCountBallTargets(&first) >= 2 && MP_AutoThrow_Active())
@@ -2008,13 +2018,14 @@ static void CompleteWhenChoseItem(void)
                 sMpBallItem = value;
                 gMultiUsePlayerCursor = MpIsBallTarget(BATTLE_OPPOSITE(gActiveBattler)) ? BATTLE_OPPOSITE(gActiveBattler) : first;
                 gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_ShowAsMoveTarget;
-                BattlePutTextOnWindow(sText_MpBallWhich, B_WIN_ACTION_PROMPT);
-                MPNet_Log("co-op: picking a ball target");
+                BattlePutTextOnWindow(sText_MpBallWhich, B_WIN_MSG);   // (the message window: back from the BAG the action prompt's isn't on screen)
+                MPNet_Log("%s: picking a ball target", MpSnagPicker() ? "snag" : "co-op");
                 gBattlerControllerFuncs[gActiveBattler] = HandleInputChooseBallTarget;
                 return;
             }
             value |= MP_BALL_TARGET_FLAG | (first << 12);
-            MP_Coop_SetIntent(MP_INTENT_BALL, gSpecialVar_ItemId, first);
+            if (!MpSnagPicker())
+                MP_Coop_SetIntent(MP_INTENT_BALL, gSpecialVar_ItemId, first);
         }
         else if (gMpCoopBattle && value != ITEM_NONE && gMpCoopItemSlot < PARTY_SIZE)
         {

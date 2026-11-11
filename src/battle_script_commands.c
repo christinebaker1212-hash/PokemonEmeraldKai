@@ -10923,6 +10923,14 @@ static void Cmd_handleballthrow(void)
             gBattlerTarget = BATTLE_PARTNER(gBattlerTarget);
     }
 
+    // Moemon Kai: the Shadow Pokémon the player picked for this ball (two out at once: the BAG's target picker,
+    // battle_controller_player.c). If it's gone by now, the line below finds the one still out
+    if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && gMpCoopBallTarget < MAX_BATTLERS_COUNT)
+    {
+        gBattlerTarget = gMpCoopBallTarget;
+        gMpCoopBallTarget = 0xFF;
+    }
+
     // Moemon Kai: a snag in ORRE's Double Battles: the ball goes for the Shadow Pokémon still standing, whichever side
     // of the field it's on. It went for the one straight across even when that one had fainted or wasn't a Shadow
     // Pokémon: RUI's "No, wait!" with the Shadow Pokémon right there (the user, 2026-11-11)
