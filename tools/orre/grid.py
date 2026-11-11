@@ -430,7 +430,9 @@ def _tiles_from_flood(centre_walk, heights, trig, wall_between):
             # (a door's frame: its trigger is stepped onto across it, the thickened walls keeping the flood out of
             # it; but never through a wall that stands across the step: the OUTSKIRT STAND's ramp railing beside
             # the diner's door)
-            if heights[y][x] and heights[ny][nx] and wall_between(x, y, nx, ny) is not None:
+            # (a wall across it and no ground at one height on both sides; a door frame's own wall is level ground)
+            if (heights[y][x] and heights[ny][nx] and wall_between(x, y, nx, ny) is not None
+                    and min(abs(a - b) for a in heights[y][x] for b in heights[ny][nx]) > 2.0):
                 return False
             return True
         if (y, x) not in own or (ny, nx) not in own:
