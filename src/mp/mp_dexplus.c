@@ -211,6 +211,9 @@ void MP_DexView_Set(bool8 shared, u8 filter, u16 last)
 
 // ------------------------------------------------------------------------------------------------ the list's header
 static void DrawPanel(u16 *frame);
+static void DrawInfo(u16 *frame);
+static bool8 InfoFresh(void);
+static const char *const sEggNames[16];
 static bool8 PanelIsOpen(void);
 static const char *const sShowNames[MP_DEXSHOW_COUNT];
 static struct MpDexHud sHud;
@@ -301,6 +304,11 @@ void MP_DexHud_Composite(u16 *frame)
 {
     char buf[40];
     s32 x, y, w, own, all;
+    if (InfoFresh() && !gPaletteFade.active)
+    {
+        DrawInfo(frame);
+        return;
+    }
     if (!sHudOn || gMain.vblankCounter1 - sHudFrame > 2 || gPaletteFade.active)
         return;
     if (PanelIsOpen())
@@ -720,4 +728,228 @@ static void DrawPanel(u16 *frame)
         Text(frame, 28, 26 + 11 * ROW_COUNT - 1, sPanel.typing ? "TYPE A NAME OR A NUMBER" : "A: TYPE IT   LEFT RIGHT: A LETTER", RGB(18, 22, 26), 0);
     else if (sPanel.row == ROW_ABILITY || sPanel.row == ROW_MOVE)
         Text(frame, 28, 26 + 11 * ROW_COUNT - 1, "L R: NEXT LETTER   CAUGHT ONES ONLY", RGB(18, 22, 26), 0);
+}
+
+// ------------------------------------------------------------------------------------------------ an entry's MORE
+// R on an entry (the user's picks, 2026-11-11): three pages over it. STATS for a POKéMON caught (its types, Abilities,
+// egg groups and base stats), its EVOLUTION line (the ones not seen yet as ?????), and WHERE it's found in the wild
+// in the region the player is in (the game's own encounter tables).
+#include "overworld.h"
+#include "region_map.h"
+#include "wild_encounter.h"
+#include "mp_region.h"
+#include "constants/maps.h"
+
+extern const struct Evolution gEvolutionTable[NUM_SPECIES][EVOS_PER_MON];
+
+static struct { u16 nat; bool8 seen, owned; u8 page; u32 frame; bool8 on; } sInfo;
+
+void MP_DexInfo_Show(u16 nat, bool8 seen, bool8 owned, u8 page)
+{
+    sInfo.nat = nat, sInfo.seen = seen, sInfo.owned = owned, sInfo.page = page;
+    sInfo.frame = gMain.vblankCounter1;
+    sInfo.on = TRUE;
+}
+
+static bool8 ViewSeen(u16 species)
+{
+    u16 nat = SpeciesToNationalPokedexNum(species);
+    return sOwn.shared ? GetSetPokedexFlag(nat, FLAG_GET_SEEN) : MP_DexOwn_Has(nat, FALSE);
+}
+
+static void SpeciesAscii(u16 species, char *out, int size)
+{
+    u8 name[POKEMON_NAME_LENGTH + 1];
+    GetSpeciesName(name, species);
+    MP_GameToAscii(out, name, size - 1);
+}
+
+static void EvoHow(const struct Evolution *e, char *out, int size)
+{
+    char item[24];
+    item[0] = 0;
+    switch (e->method)
+    {
+    case EVO_FRIENDSHIP:        snprintf(out, size, "FRIENDSHIP"); break;
+    case EVO_FRIENDSHIP_DAY:    snprintf(out, size, "FRIENDSHIP, DAY"); break;
+    case EVO_FRIENDSHIP_NIGHT:  snprintf(out, size, "FRIENDSHIP, NIGHT"); break;
+    case EVO_LEVEL: case EVO_LEVEL_ATK_GT_DEF: case EVO_LEVEL_ATK_EQ_DEF: case EVO_LEVEL_ATK_LT_DEF:
+    case EVO_LEVEL_SILCOON: case EVO_LEVEL_CASCOON: case EVO_LEVEL_NINJASK: case EVO_LEVEL_SHEDINJA:
+    case EVO_LEVEL_MALE: case EVO_LEVEL_FEMALE:
+        snprintf(out, size, "LV %u", e->param);
+        break;
+    case EVO_TRADE:             snprintf(out, size, "TRADE"); break;
+    case EVO_BEAUTY:            snprintf(out, size, "BEAUTY"); break;
+    case EVO_TRADE_ITEM: case EVO_ITEM: case EVO_ITEM_MALE: case EVO_ITEM_FEMALE:
+    case EVO_ITEM_HOLD: case EVO_ITEM_HOLD_DAY: case EVO_ITEM_HOLD_NIGHT:
+        MP_GameToAscii(item, GetItemName(e->param), sizeof(item) - 1);
+        snprintf(out, size, "%s%s", e->method == EVO_TRADE_ITEM ? "TRADE + " : e->method >= EVO_ITEM_HOLD_DAY && e->method <= EVO_ITEM_HOLD ? "HOLD " : "", item);
+        break;
+    case EVO_MOVE:
+        MP_GameToAscii(item, gMoveNames[e->param], sizeof(item) - 1);
+        snprintf(out, size, "KNOW %s", item);
+        break;
+    case EVO_SPECIES_IN_PARTY:  snprintf(out, size, "WITH A FRIEND"); break;
+    default:                    snprintf(out, size, "SPECIAL"); break;
+    }
+}
+
+static s32 EvoLines(u16 *frame, u16 species, s32 depth, s32 y, const char *how)
+{
+    char name[16], line[48];
+    u32 i;
+    if (y > 128 || depth > 3)
+        return y;
+    if (ViewSeen(species))
+        SpeciesAscii(species, name, sizeof(name));
+    else
+        snprintf(name, sizeof(name), "?????");
+    Text(frame, 24 + depth * 10, y, name, NationalPokedexNumToSpecies(sInfo.nat) == species ? RGB(31, 28, 10) : RGB(31, 31, 31), 0);
+    if (how[0])
+    {
+        snprintf(line, sizeof(line), "%s", how);
+        Text(frame, 124, y, line, RGB(20, 26, 31), 0);
+    }
+    y += 10;
+    for (i = 0; i < EVOS_PER_MON; i++)
+        if (gEvolutionTable[species][i].method && gEvolutionTable[species][i].targetSpecies)
+        {
+            char next[40];
+            EvoHow(&gEvolutionTable[species][i], next, sizeof(next));
+            y = EvoLines(frame, gEvolutionTable[species][i].targetSpecies, depth + 1, y, next);
+        }
+    return y;
+}
+
+static bool8 InTable(const struct WildPokemonInfo *info, u32 count, u16 species)
+{
+    u32 i;
+    if (info == NULL)
+        return FALSE;
+    for (i = 0; i < count; i++)
+        if (info->wildPokemon[i].species == species)
+            return TRUE;
+    return FALSE;
+}
+
+static void DrawInfo(u16 *frame)
+{
+    static const char *const sPages[3] = {"STATS", "EVOLUTION", "WHERE"};
+    u16 species = NationalPokedexNumToSpecies(sInfo.nat);
+    const struct SpeciesInfo *info = &gSpeciesInfo[species];
+    char buf[64], a[24], b[24];
+    s32 y = 30, i;
+    if (sInfo.page == 0)
+    {
+        Box(frame, 184, 79, 226, 90, RGB(3, 5, 9), 12);
+        Key(frame, 187, 80, "R", "MORE", RGB(31, 31, 31));
+        return;
+    }
+    Box(frame, 16, 12, 223, 142, RGB(3, 5, 9), 15);
+    Box(frame, 17, 13, 222, 24, RGB(8, 16, 26), 16);
+    SpeciesAscii(species, a, sizeof(a));
+    snprintf(buf, sizeof(buf), "%s  %s", a, sPages[(sInfo.page - 1) % 3]);
+    Text(frame, 22, 14, buf, RGB(31, 31, 31), 0);
+    Text(frame, 150, 14, "L R: PAGE  B", RGB(22, 28, 31), 0);
+    if (sInfo.page == 1)
+    {
+        static const char *const sStat[6] = {"HP", "ATTACK", "DEFENSE", "SP. ATK", "SP. DEF", "SPEED"};
+        u8 v[6] = {info->baseHP, info->baseAttack, info->baseDefense, info->baseSpAttack, info->baseSpDefense, info->baseSpeed};
+        s32 total = 0;
+        if (!sInfo.owned)
+        {
+            Text(frame, 24, 60, "CATCH IT TO SEE ITS STATS.", RGB(31, 31, 31), 0);
+            return;
+        }
+        MP_GameToAscii(a, gTypeNames[info->types[0]], sizeof(a) - 1);
+        MP_GameToAscii(b, gTypeNames[info->types[1]], sizeof(b) - 1);
+        snprintf(buf, sizeof(buf), info->types[0] == info->types[1] ? "TYPE     %s" : "TYPE     %s / %s", a, b);
+        Text(frame, 24, y, buf, RGB(31, 31, 31), 0), y += 10;
+        MP_GameToAscii(a, gAbilityNames[info->abilities[0]], sizeof(a) - 1);
+        MP_GameToAscii(b, gAbilityNames[info->abilities[1]], sizeof(b) - 1);
+        snprintf(buf, sizeof(buf), info->abilities[1] && info->abilities[1] != info->abilities[0] ? "ABILITY  %s / %s" : "ABILITY  %s", a, b);
+        Text(frame, 24, y, buf, RGB(31, 31, 31), 0), y += 10;
+        snprintf(buf, sizeof(buf), info->eggGroups[0] == info->eggGroups[1] ? "EGGS     %s" : "EGGS     %s / %s",
+                 sEggNames[info->eggGroups[0] % 16], sEggNames[info->eggGroups[1] % 16]);
+        Text(frame, 24, y, buf, RGB(31, 31, 31), 0), y += 13;
+        for (i = 0; i < 6; i++)
+        {
+            s32 w = v[i] * 96 / 200, x;
+            Text(frame, 24, y, sStat[i], RGB(22, 26, 30), 0);
+            snprintf(buf, sizeof(buf), "%d", v[i]);
+            Text(frame, 78, y, buf, RGB(31, 31, 31), 0);
+            if (w > 110)
+                w = 110;
+            Box(frame, 100, y + 2, 100 + 110, y + 6, RGB(0, 0, 0), 10);
+            for (x = 0; x < w; x++)
+                frame[(y + 3) * DISPLAY_WIDTH + 101 + x] = frame[(y + 4) * DISPLAY_WIDTH + 101 + x] = frame[(y + 5) * DISPLAY_WIDTH + 101 + x]
+                    = (v[i] >= 110 ? RGB(8, 28, 12) : v[i] >= 70 ? RGB(31, 26, 6) : RGB(31, 12, 8)) | 0x8000;
+            total += v[i];
+            y += 10;
+        }
+        snprintf(buf, sizeof(buf), "TOTAL    %d", (int)total);
+        Text(frame, 24, y + 2, buf, RGB(31, 28, 10), 0);
+    }
+    else if (sInfo.page == 2)
+    {
+        // (back to the first of its line: whoever evolves into it, three steps at most)
+        u16 base = species, s;
+        for (i = 0; i < 3; i++)
+        {
+            bool8 found = FALSE;
+            u32 k;
+            for (s = 1; s < NUM_SPECIES && !found; s++)
+                for (k = 0; k < EVOS_PER_MON; k++)
+                    if (gEvolutionTable[s][k].method && gEvolutionTable[s][k].targetSpecies == base)
+                    {
+                        base = s, found = TRUE;
+                        break;
+                    }
+            if (!found)
+                break;
+        }
+        if (EvoLines(frame, base, 0, y, "") == y + 10)
+            Text(frame, 24, y + 14, "IT DOESN'T EVOLVE.", RGB(22, 26, 30), 0);
+    }
+    else
+    {
+        struct { u16 sec; u8 kinds; } place[10];
+        u32 n = 0, k, h;
+        u8 region = MP_Region_Current();
+        for (h = 0; gWildMonHeaders[h].mapGroup != MAP_GROUP(MAP_UNDEFINED); h++)
+        {
+            const struct WildPokemonHeader *w = &gWildMonHeaders[h];
+            u8 kinds = (InTable(w->landMonsInfo, 12, species) ? 1 : 0) | (InTable(w->waterMonsInfo, 5, species) ? 2 : 0)
+                     | (InTable(w->fishingMonsInfo, 10, species) ? 4 : 0) | (InTable(w->rockSmashMonsInfo, 5, species) ? 8 : 0);
+            u16 sec;
+            if (!kinds || MP_Region_OfGroup(w->mapGroup) != region)
+                continue;
+            sec = Overworld_GetMapHeaderByGroupAndId(w->mapGroup, w->mapNum)->regionMapSectionId;
+            for (k = 0; k < n; k++)
+                if (place[k].sec == sec)
+                    break;
+            if (k == n && n < ARRAY_COUNT(place))
+                place[n].sec = sec, place[n].kinds = 0, n++;
+            if (k < ARRAY_COUNT(place))
+                place[k].kinds |= kinds;
+        }
+        if (n == 0)
+            Text(frame, 24, 60, "NOT FOUND IN THE WILD IN THIS REGION.", RGB(31, 31, 31), 0);
+        for (k = 0; k < n; k++)
+        {
+            u8 name[32];
+            GetMapName(name, place[k].sec, 0);
+            MP_GameToAscii(a, name, sizeof(a) - 1);
+            Text(frame, 24, y, a, RGB(31, 31, 31), 0);
+            snprintf(buf, sizeof(buf), "%s%s%s%s", place[k].kinds & 1 ? "GRASS " : "", place[k].kinds & 2 ? "WATER " : "",
+                     place[k].kinds & 4 ? "ROD " : "", place[k].kinds & 8 ? "ROCKS" : "");
+            Text(frame, 124, y, buf, RGB(20, 26, 31), 0);
+            y += 10;
+        }
+    }
+}
+
+static bool8 InfoFresh(void)
+{
+    return sInfo.on && gMain.vblankCounter1 - sInfo.frame <= 2;
 }

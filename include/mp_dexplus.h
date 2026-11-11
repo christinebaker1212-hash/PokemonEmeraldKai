@@ -39,5 +39,7 @@ s32 MP_DexQuery_SortKey(u16 nat);
 void MP_DexPanel_Open(u8 order);
 int MP_DexPanel_Step(void);
 const char *MP_DexPanel_Jump(void);
+// An entry's MORE (R on it): PAGE 0 its hint, 1 STATS, 2 EVOLUTION, 3 WHERE
+void MP_DexInfo_Show(u16 nat, bool8 seen, bool8 owned, u8 page);
 
 #endif

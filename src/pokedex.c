@@ -126,6 +126,7 @@ static EWRAM_DATA u16 sLastSelectedPokemon = 0;
 static u16 sMpDexKeepNum;   // Moemon Kai: the entry (a national number) to be on once the list is made again
 static u16 MpDexCount(bool8 hoenn, u8 caseID, bool8 own);
 static bool8 sMpDexJumpNow;
+static u8 sMpDexMorePage;   // an entry's MORE page (0: shut)
 static bool8 sMpDexNothing;
 
 static EWRAM_DATA u8 sPokeBallRotation = 0;
@@ -3953,6 +3954,7 @@ static void Task_HandleInfoScreenInput(u8 taskId)
     if (gTasks[taskId].tScrolling)
     {
         // Scroll up/down
+        sMpDexMorePage = 0;
         sMpDexReading = FALSE;
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
         gTasks[taskId].func = Task_LoadInfoScreenWaitForFade;
@@ -3962,6 +3964,16 @@ static void Task_HandleInfoScreenInput(u8 taskId)
     if (MpDexReadInput()) // Moemon Co-op: TEXT is open
         return;
     if (MpDexFormsInput(taskId)) // Moemon Kai: Platinum's FORMS
+        return;
+    // Moemon Kai: MORE, three pages over the entry (mp_dexplus.c): R opens it and goes on, L back, B closes it
+    if (JOY_NEW(R_BUTTON))
+        sMpDexMorePage = (sMpDexMorePage + 1) % 4, PlaySE(SE_SELECT);
+    else if (sMpDexMorePage && JOY_NEW(L_BUTTON))
+        sMpDexMorePage = (sMpDexMorePage + 3) % 4, PlaySE(SE_SELECT);
+    else if (sMpDexMorePage && JOY_NEW(B_BUTTON))
+        sMpDexMorePage = 0, PlaySE(SE_SELECT), gMain.newKeys &= ~B_BUTTON;
+    MP_DexInfo_Show(sPokedexListItem->dexNum, sPokedexListItem->seen, sPokedexListItem->owned, sMpDexMorePage);
+    if (sMpDexMorePage)
         return;
     if (JOY_NEW(B_BUTTON))
     {
