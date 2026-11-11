@@ -33,3 +33,38 @@ docs/SINNOH_HANDOFF.md: whatever was decided or adjusted for SINNOH holds here u
   wireless).
 - Port: **CASTELIA CITY**.
 - Sailing there: **as JOHTO / KANTO / SINNOH** (the same ticket, ferries and voyage scenes).
+
+## The second set of answers (2026-11-11, after UNOVA_ROM_URL was added)
+
+- People: Black's own overworld sprites and trainer battle pictures (as SINNOH's are Platinum's), HILBERT / HILDA as
+  LOOKs with Black's action frames; OPTIONS > DISPLAY > SPRITE SCALING gets UNOVA PEOPLE, **MIXED by default** (resized
+  to Gen 3's standards, as SINNOH PEOPLE).
+- Music: **converted from the ROM** at build time (never committed), through the game's own engine.
+- Wild POKéMON: **Black's own tables** (Gen 5 POKéMON before the credits, Black's post-game additions after); they don't
+  grow with GENERATION.
+- ROTATION trainers: fought as **TRIPLE BATTLES** with the same teams.
+- New game: **Black's whole opening** (JUNIPER's speech, waking with CHEREN, BIANCA and the gift box), Kai's own steps
+  (name, LOOK, settings) kept.
+- The GARDEN: **a door added** to each UNOVA POKéMON CENTER's back wall, in Black's style.
+- Tag battles: **Black's partner** (CHEREN / BIANCA / N); friends JOIN as a third, as with other trainers.
+- The XTRANSCEIVER: **Black's story calls, and video calls to co-op friends** (their screen and yours, like SPECTATE).
+- The CARD CLUB: **CASTELIA CITY** (a building Black leaves empty), sellers in centers as elsewhere.
+- The shared GAME CENTER's door: **NIMBASA CITY**.
+- The C-GEAR's buttons: **co-op equivalents** (IR: trade / battle the friend in front; WIRELESS: the CO-OP menu;
+  ENTRALINK: go there); skins kept.
+- The ENTRALINK forest: **Black's own forest list** (Hidden Abilities).
+- Releases: **area by area**, each playable; UNOVA offered once the first towns play through.
+- Testing: **walk-through story tests run here** (as SINNOH's and KANTO's), plus the user's playthroughs.
+- POKéDEX: **JUNIPER's is the NATIONAL DEX** (as KANTO / JOHTO).
+- Liberty Garden: **kept**, like FRLG's and Emerald's event islands (the LIBERTY PASS from the same source; VICTINI;
+  after the credits).
+- Battle backgrounds: **Black's own**, each place's, fitted to Kai's battle screen.
+- Seasons in co-op: **the room host's** month (as the time of day); alone, the PC's.
+- MUSICALS: **up to four on stage** with co-op friends.
+- PASS POWERS: **as Black, shareable** with co-op friends in the room.
+- EXP: **Kai's** everywhere.
+- Catching: **Black's** in UNOVA (critical captures by the POKéDEX count, the dark grass rate).
+- The camera: **Black's own moves while walking** (CASTELIA, the bridges), fitted to 240x160.
+- Battle mechanics: **Kai's GENERATION / MOVE KIND settings** (UNOVA's at least Gen 5).
+- The ROM: the user's is Pokemon - Black Version (USA, Europe) (NDSi Enhanced), SHA-1
+  26ad0b9967aa279c4a266ee69f52b9b2332399a5 (aletheia's `black` target). Kept in ~/.cache/moemon/unova/black.nds.
