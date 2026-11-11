@@ -323,12 +323,26 @@ static u8 LocalId(u16 obj)
     return (u8)(obj + 1);
 }
 
-static struct ObjectEvent *ObjectOf(u16 obj)
+// The object event of a local id: on the player's map, else on any map (Black's people live by zone, and a scene's
+// people walk with the player over a map's edge, or were added on the map before: AddMmdl)
+static u8 ObjEventId(u8 localId)
 {
     u8 id;
-    if (TryGetObjectEventIdByLocalIdAndMap(LocalId(obj), gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &id))
-        return NULL;
-    return &gObjectEvents[id];
+    if (!TryGetObjectEventIdByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &id))
+        return id;
+    // (only a scene's own people, Black's object ids from 0x80: AddMmdl's; never a person of the map left behind,
+    // whose sprite may be gone as the next map loads)
+    for (id = 0; localId > 0x80 && id < OBJECT_EVENTS_COUNT; id++)
+        if (gObjectEvents[id].active && !gObjectEvents[id].isPlayer && gObjectEvents[id].localId == localId
+         && U3D_IsUnovaGroup(gObjectEvents[id].mapGroup) && gSprites[gObjectEvents[id].spriteId].inUse)
+            return id;
+    return OBJECT_EVENTS_COUNT;
+}
+
+static struct ObjectEvent *ObjectOf(u16 obj)
+{
+    u8 id = ObjEventId(LocalId(obj));
+    return id < OBJECT_EVENTS_COUNT ? &gObjectEvents[id] : NULL;
 }
 
 // event_object_movement.c: a person of the map hidden by Black's flag (its event data's vanish flag)
@@ -382,6 +396,57 @@ static s32 MapZ(u16 z) { s32 i = U3D_MapIndex(); return i < 0 ? z : z - 32 * U3D
 #define MAX_MOVE 96
 static u8 sMoves[OBJECT_EVENTS_COUNT][MAX_MOVE];
 static u8 sMoving[OBJECT_EVENTS_COUNT];   // local ids moving for the script
+static u16 sPendingScript;                 // Black's SetProcAction: a script to run next
+
+// ---- people a script added (Black's AddMmdl): kept until the map changes or the script deletes them, and put on the
+// field once it is up (a zone's field-init script adds them while the map loads, before the map's people are set out)
+static struct { u8 local, dir; u16 code, x, z; } sAdded[8];
+static u8 sAddedCount;
+
+static u8 BlackToDir(u16 d);
+static s32 MapX(u16 x);
+static s32 MapZ(u16 z);
+
+static void SpawnAdded(void)
+{
+    u32 i;
+    if (gMain.callback2 != CB2_Overworld)
+        return;
+    for (i = 0; i < sAddedCount; i++)
+    {
+        u8 id;
+        if (ObjEventId(sAdded[i].local) < OBJECT_EVENTS_COUNT)
+            continue;
+        id = SpawnSpecialObjectEventParameterized(OBJ_EVENT_GFX_UNOVA_FIRST + sAdded[i].code, MOVEMENT_TYPE_FACE_DOWN,
+                                                  sAdded[i].local, MapX(sAdded[i].x) + MAP_OFFSET,
+                                                  MapZ(sAdded[i].z) + MAP_OFFSET, 3);
+        if (id < OBJECT_EVENTS_COUNT)
+            ObjectEventTurn(&gObjectEvents[id], BlackToDir(sAdded[i].dir));
+    }
+}
+
+static void AddPerson(u8 local, u16 code, u16 x, u16 z, u16 dir)
+{
+    u32 i;
+    for (i = 0; i < sAddedCount && sAdded[i].local != local; i++)
+        ;
+    if (i == sAddedCount && sAddedCount < ARRAY_COUNT(sAdded))
+        sAddedCount++;
+    if (i < ARRAY_COUNT(sAdded))
+        sAdded[i].local = local, sAdded[i].code = code, sAdded[i].x = x, sAdded[i].z = z, sAdded[i].dir = dir;
+    SpawnAdded();
+}
+
+static void ForgetPerson(u8 local)
+{
+    u32 i;
+    for (i = 0; i < sAddedCount; i++)
+        if (sAdded[i].local == local)
+        {
+            sAdded[i] = sAdded[--sAddedCount];
+            return;
+        }
+}
 
 static u8 Dir4(u8 code, u8 base)   // Black's U D L R at code - base -> Emerald's D U L R offset
 {
@@ -497,7 +562,7 @@ static void StartMoves(u16 obj, const u8 *list, const u8 *end)
     u8 slot, localId = LocalId(obj);
     u32 n = 0;
     u8 *out;
-    if (TryGetObjectEventIdByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &slot))
+    if ((slot = ObjEventId(localId)) >= OBJECT_EVENTS_COUNT)
         return;
     out = sMoves[slot];
     while (list + 4 <= end)
@@ -511,7 +576,7 @@ static void StartMoves(u16 obj, const u8 *list, const u8 *end)
     }
     out[n] = MOVEMENT_ACTION_STEP_END;
     sMoving[slot] = localId;
-    ScriptMovement_StartObjectMovementScript(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, out);
+    ScriptMovement_StartObjectMovementScript(localId, gObjectEvents[slot].mapNum, gObjectEvents[slot].mapGroup, out);
 }
 
 static bool8 MovesDone(void)
@@ -522,7 +587,8 @@ static bool8 MovesDone(void)
     {
         if (sMoving[slot] == 0)
             continue;
-        if (ScriptMovement_IsObjectMovementFinished(sMoving[slot], gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup))
+        if (!gObjectEvents[slot].active || gObjectEvents[slot].localId != sMoving[slot]
+         || ScriptMovement_IsObjectMovementFinished(sMoving[slot], gObjectEvents[slot].mapNum, gObjectEvents[slot].mapGroup))
             sMoving[slot] = 0;
         else
             done = FALSE;
@@ -531,7 +597,7 @@ static bool8 MovesDone(void)
 }
 
 // ------------------------------------------------------------------------------------------------ the VM
-enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE };
+enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA };
 
 // ---- Black's songs: its sound archive's sequence numbers as the game's song slots (tools/kaisong/unova_songs.py);
 // a pushed song comes back when the one played over it ends (a fanfare: Black's PushAndPlayBgm, StartWaitBgmThenPop)
@@ -917,6 +983,68 @@ static void Step(struct Thread *t)
         case U3C_BufferSpeciesName:
             GetSpeciesName(Slot(a[0]), Species(V(1)));
             break;
+        // ---- Black's scene cameras (u3d.c): to a place and back; the player's view is the one "saved"
+        case U3C_PROC_FLD_SaveCamera:
+        case U3C_PROC_FLD_StopCameraTargetTrace:
+        case U3C_PROC_FLD_ResumeCameraTargetTrace:
+            break;
+        case U3C_PROC_FLD_StartCameraMoveFromStream:   // pitch, yaw, distance, x, y, z, frames
+            U3D_CameraMoveTo(a[0], a[1], a[2], a[3], a[4], a[5], a[6]);
+            break;
+        case U3C_PROC_FLD_StartCameraMoveToSaved:
+        case U3C_PROC_FLD_StartCameraMoveToSetting:
+            U3D_CameraMoveBack(a[0]);
+            break;
+        case U3C_PROC_FLD_RestoreCameraCmd:
+            if (!U3D_CameraMoving())
+                U3D_CameraReset();
+            break;
+        case U3C_PROC_FLD_WaitCameraIdle:
+            t->wait = W_CAMERA;
+            break;
+        // ---- the save's misc bytes (Black's Wi-Fi and event slots: none here)
+        case U3C_WORK_CmdSetMiscByte:
+            break;
+        case U3C_WORK_CmdGetMiscByte:
+        case U3C_WORK_CmdCheckMiscByte:
+            *WorkPtr(a[1]) = 0;
+            break;
+        case U3C_StartFld3dCi:   // (Black's 3D cut-ins: the POKéDEX's, a Gym Leader's... not drawn yet)
+        case U3C_StartFld3dCiByTable:
+            break;
+        case U3C_PROC_GetMonParamIfListed:   // result, party slot, Black's param (POKE_PARA: its 12 a script may read)
+        {
+            struct Pokemon *mon = V(1) < PARTY_SIZE ? &gPlayerParty[V(1)] : NULL;
+            u32 v = 0;
+            if (mon && GetMonData(mon, MON_DATA_SANITY_HAS_SPECIES))
+            {
+                switch (V(2))
+                {
+                case 5:    // species (National Dex number)
+                    v = SpeciesToNationalPokedexNum(GetMonData(mon, MON_DATA_SPECIES));
+                    break;
+                case 111:  // gender: 0 male, 1 female, 2 none
+                {
+                    u8 g = GetMonGender(mon);
+                    v = g == MON_MALE ? 0 : g == MON_FEMALE ? 1 : 2;
+                    break;
+                }
+                case 117:  // nicknamed
+                {
+                    u8 nick[POKEMON_NAME_LENGTH + 1], name[POKEMON_NAME_LENGTH + 1];
+                    GetMonData(mon, MON_DATA_NICKNAME, nick);
+                    GetSpeciesName(name, GetMonData(mon, MON_DATA_SPECIES));
+                    v = StringCompare(nick, name) != 0;
+                    break;
+                }
+                case 154:  // POKéRUS
+                    v = GetMonData(mon, MON_DATA_POKERUS);
+                    break;
+                }
+            }
+            *WorkPtr(a[0]) = v;
+            break;
+        }
         case U3C_BufferShortEntryName:   // (bank 0x37: Black's bag pockets)
             StringCopy(Slot(a[0]), U3D_Text(55, V(1)));
             break;
@@ -1102,8 +1230,22 @@ static void Step(struct Thread *t)
         case U3C_WaitAnimeTasks:
             t->wait = W_MOVES;
             break;
+        case U3C_AddMmdl:   // x, z (Black's tiles), direction, object id, Black's object code, move code
+            AddPerson(LocalId(V(3)), V(4), V(0), V(1), V(2));
+            break;
+        case U3C_SetMmdlZoneDeleteOff:      // (a person who stays as the player crosses zones: ObjEventId finds it)
+        case U3C_SCREENEFFECTS_ShowPlaceName:   // (the game shows a map's name as it is entered)
+            break;
+        case U3C_SetProcAction:   // a script to run once this one has ended, by its id in the zone the player is then in
+            sPendingScript = a[0];
+            break;
         case U3C_DeleteMmdl:
-            RemoveObjectEventByLocalIdAndMap(LocalId(V(0)), gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+        {
+            ForgetPerson(LocalId(V(0)));
+            u8 id = ObjEventId(LocalId(V(0)));
+            if (id < OBJECT_EVENTS_COUNT && !gObjectEvents[id].isPlayer)
+                RemoveObjectEventByLocalIdAndMap(gObjectEvents[id].localId, gObjectEvents[id].mapNum, gObjectEvents[id].mapGroup);
+        }
             break;
         case U3C_InitMmdlGridPosition:   // person, x, y, z, direction
         {
@@ -1114,7 +1256,7 @@ static void Step(struct Thread *t)
                 SetObjEventTemplateCoords(LocalId(obj), x, z);
             if (o)
             {
-                TryMoveObjectEventToMapCoords(LocalId(obj), gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, x, z);
+                TryMoveObjectEventToMapCoords(o->localId, o->mapNum, o->mapGroup, x, z);
                 ObjectEventTurn(o, BlackToDir(V(4)));
             }
             break;
@@ -1184,6 +1326,16 @@ static void Step(struct Thread *t)
         case U3C_SCREENEFFECTS_WaitBrightness:
             t->wait = W_FADE;
             break;
+        case U3C_SCREENEFFECTS_StartBrightnessChange:   // screens, from, to (Black's brightness, 16 = gone), speed
+        {
+            s16 from = (s16)a[1], to = (s16)a[2];
+            BeginNormalPaletteFade(PALETTES_ALL, a[3] > 1 ? a[3] - 1 : 0, from < 0 ? -from : from, to < 0 ? -to : to, RGB_BLACK);
+            break;
+        }
+        case U3C_PROC_CallFieldOpenEvent:    // (Black reopens its field after a screen: the game's own does that)
+        case U3C_PROC_CallFieldCloseEvent:
+        case U3C_RESEARCH_CmdSetSurveyAnswer:   // (the Xtransceiver survey: Wi-Fi's)
+            break;
         default:
             if (!(sLogged[op / 16] & (1 << (op % 16))))
             {
@@ -1226,6 +1378,10 @@ static void Wait(struct Thread *t)
         break;
     case W_SE:
         if (!IsSEPlaying())
+            t->wait = W_NONE;
+        break;
+    case W_CAMERA:
+        if (!U3D_CameraMoving())
             t->wait = W_NONE;
         break;
     case W_SONG_THEN_POP:
@@ -1386,6 +1542,7 @@ void U3D_VmMapLoad(void)
     static u16 sLastZone = 0xFFFF;
     if (zone == 0xFFFF || !Ready())
         return;
+    sAddedCount = 0;   // (a new map: its field-init script adds its own)
     if (!sWork.began)
     {
         sWork.began = TRUE;
@@ -1407,6 +1564,17 @@ bool8 U3D_Vm_SceneStart(void)
     const u8 *d;
     if (zone == 0xFFFF || sThread.alive || !Ready())
         return FALSE;
+    SpawnAdded();
+    if (sPendingScript)   // (a script's SetProcAction: FIELD_EVENT_CHECK_StartPendingScript)
+    {
+        u16 id = sPendingScript;
+        sPendingScript = 0;
+        if (Run(id, 0xFFFF, TRUE))
+        {
+            ScriptContext_SetupScript(Unova_EventScript_Scene);
+            return TRUE;
+        }
+    }
     d = InitFile(zone, &size);
     for (o = 0; d && o + 6 <= size && Le16(d + o) != 0; o += 6)
     {

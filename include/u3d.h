@@ -20,6 +20,12 @@ void U3D_CommitOam(void);
 // GetMetatileAttributesById), tools/unova/build_pack.py
 #define U3D_METATILE_BEHAVIOR 0x300
 const u16 *U3D_LayoutBlocks(const struct MapLayout *layout);   // a UNOVA map's from the pack, others the layout's
+// Black's scene cameras (u3d.c, played by u3d_vm.c): to a target (Black's world units, fx32), pitch / yaw (65536ths of a
+// turn) and distance over Black's frames, back to the player's view, at once back, still moving?
+void U3D_CameraMoveTo(u16 pitch, u16 yaw, s32 dist, s32 x, s32 y, s32 z, u16 frames);
+void U3D_CameraMoveBack(u16 frames);
+void U3D_CameraReset(void);
+bool8 U3D_CameraMoving(void);
 float U3D_TestGround(s32 mapX, s32 mapY, float near);         // tests: the ground's height (map pixels), NaN none
 void U3D_ShopPicture(bool8 on, s16 dx, s16 dy);               // shop.c's BUY screen: the field's last picture behind
 u8 U3D_Season(void);                                          // Black's season now: 0 spring .. 3 winter

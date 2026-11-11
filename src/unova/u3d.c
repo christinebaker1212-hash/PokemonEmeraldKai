@@ -466,6 +466,50 @@ static void FindCamera(void)
     sView.camY = (gSaveBlock1Ptr->pos.y - 7) * 16 + voffs;
 }
 
+// Black's scene cameras (its scripts' PROC_FLD_StartCameraMove*: u3d_vm.c): the view moves to a target, pitch, yaw
+// and distance over some frames, holds there, and comes back to the player's view the same way
+static struct
+{
+    u8 mode;                          // CAM_FOLLOW, CAM_TO (to the target, then holding), CAM_BACK (to the player's)
+    u16 t, frames;
+    float from[6], to[6];             // target x, y, z, pitch, yaw (degrees), distance
+    float cur[6];
+} sCam;
+enum { CAM_FOLLOW, CAM_TO, CAM_BACK };
+
+static void CamStart(u8 mode, const float *to, u16 frames)
+{
+    memcpy(sCam.from, sCam.cur, sizeof(sCam.from));
+    if (to)
+        memcpy(sCam.to, to, sizeof(sCam.to));
+    sCam.mode = mode, sCam.t = 0, sCam.frames = frames ? frames : 1;
+}
+
+// target in Black's world units (16 a tile, the zone's matrix), angles in 65536ths of a turn
+void U3D_CameraMoveTo(u16 pitch, u16 yaw, s32 dist, s32 x, s32 y, s32 z, u16 frames)
+{
+    float to[6];
+    to[0] = x / 4096.0f, to[1] = y / 4096.0f, to[2] = z / 4096.0f;
+    to[3] = pitch * 360.0f / 65536.0f, to[4] = yaw * 360.0f / 65536.0f, to[5] = dist / 4096.0f;
+    CamStart(CAM_TO, to, frames * 2);   // (Black's frames are its field's 30 a second)
+}
+
+void U3D_CameraMoveBack(u16 frames)
+{
+    if (sCam.mode != CAM_FOLLOW)
+        CamStart(CAM_BACK, NULL, frames * 2);
+}
+
+void U3D_CameraReset(void)
+{
+    sCam.mode = CAM_FOLLOW;
+}
+
+bool8 U3D_CameraMoving(void)
+{
+    return sCam.mode != CAM_FOLLOW && sCam.t < sCam.frames;
+}
+
 static void SetupView(void)
 {
     const struct Sprite *s = &gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId];
@@ -487,15 +531,40 @@ static void SetupView(void)
     sView.ty = GroundAt(sView.tx, sView.tz, sView.havePlayerH ? sView.playerH : 0.0f);
     sView.playerH = sView.ty;
     sView.havePlayerH = TRUE;
-    // (Black aims a little above the ground; the player's tile stays where Emerald's camera puts it on the screen)
-    aim = sView.ty + CAM_LIFT;
-    sView.eye[0] = sView.tx;
-    sView.eye[1] = aim + CAM_DIST * sp;
-    sView.eye[2] = sView.tz + CAM_DIST * cp;
-    sView.fwd[0] = 0.0f, sView.fwd[1] = -sp, sView.fwd[2] = -cp;
-    sView.right[0] = 1.0f, sView.right[1] = 0.0f, sView.right[2] = 0.0f;
-    sView.up[0] = 0.0f, sView.up[1] = cp, sView.up[2] = -sp;
-    sView.focal = CAM_DIST;   // (one unit a pixel at the target)
+    {
+        // the player's view, or a scene's camera on the way to (or back from) its own
+        float follow[6], *v = sCam.cur, f, sy, cy;
+        u32 i;
+        follow[0] = sView.tx, follow[1] = sView.ty, follow[2] = sView.tz;
+        follow[3] = CAM_PITCH, follow[4] = 0.0f, follow[5] = CAM_DIST;
+        if (sCam.mode == CAM_FOLLOW)
+            memcpy(v, follow, sizeof(follow));
+        else
+        {
+            const float *to = sCam.mode == CAM_TO ? sCam.to : follow;
+            if (sCam.t < sCam.frames)
+                sCam.t++;
+            f = (float)sCam.t / sCam.frames;
+            f = f * f * (3.0f - 2.0f * f);   // (eased at both ends, as Black's)
+            for (i = 0; i < 6; i++)
+                v[i] = sCam.from[i] + (to[i] - sCam.from[i]) * f;
+            if (sCam.mode == CAM_BACK && sCam.t >= sCam.frames)
+                sCam.mode = CAM_FOLLOW;
+        }
+        p = v[3] * 3.14159265f / 180.0f;
+        sp = sinf(p), cp = cosf(p);
+        sy = sinf(v[4] * 3.14159265f / 180.0f), cy = cosf(v[4] * 3.14159265f / 180.0f);
+        // (Black aims a little above the ground; the player's tile stays where Emerald's camera puts it on the screen,
+        // and a scene's target there too)
+        aim = v[1] + CAM_LIFT;
+        sView.eye[0] = v[0] + v[5] * cp * sy;
+        sView.eye[1] = aim + v[5] * sp;
+        sView.eye[2] = v[2] + v[5] * cp * cy;
+        sView.fwd[0] = -cp * sy, sView.fwd[1] = -sp, sView.fwd[2] = -cp * cy;
+        sView.right[0] = cy, sView.right[1] = 0.0f, sView.right[2] = -sy;
+        sView.up[0] = -sp * sy, sView.up[1] = cp, sView.up[2] = -sp * cy;
+        sView.focal = CAM_DIST;   // (one unit a pixel at the player's distance)
+    }
     sView.ay -= CAM_LIFT * cp;   // (the aim's point 4 up shows a little above the player's feet on the screen)
 }
 
@@ -985,6 +1054,7 @@ void U3D_Update(void)
     if (sView.map != map)
     {
         sView.havePlayerH = FALSE;
+        sCam.mode = CAM_FOLLOW;   // (a scene's camera stays on its map)
         sSeason = U3D_Season();   // (Black changes the season as a map is entered)
     }
     sView.map = map;
