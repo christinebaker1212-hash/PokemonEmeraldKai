@@ -12,8 +12,27 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   53.2 degrees down), its seasons (the month: spring, summer, autumn, winter, round again), its lights by area and
   season with its time zones' hours, doors walked into and mats walked off (warps from Black's connections), its
   collision grids as the maps' blocks. Test by hand: `MOEMON_U3D_PAK=unova/black3d.pak` (+ MOEMON_U3D_HOUR,
-  MOEMON_U3D_SEASON), `mp warp 52,12,16,16` (NUVEMA TOWN). No people, words, scripts or music yet; no way in for
-  players (the region choice and the boat come with the first area).
+  MOEMON_U3D_SEASON), `mp warp 52,12,16,16` (NUVEMA TOWN), `mp warp 52,14,5,6` (the player's room: Black's
+  opening plays). No music, battles or way in for players yet (the region choice and the boat come with the first
+  area).
+- Black's scripts run in UNOVA's VM (src/unova/u3d_vm.c, 2026-11-11): unova/black_scripts.pak
+  (tools/unova/build_scripts.py: the script files, the shared ranges, the zones, the event files). Black's people,
+  signs and trigger spots are the maps' object / bg / coord events (gen_maps.py events_of: a person's local id is
+  its place in the event data + 1; coord events compare Emerald vars 0xB000 + n = Black's works 0x4000 + n), all
+  running data/scripts/unova.inc, whose specials start Black's script and wait; screens (the gift box's choice:
+  Kai's starter table for now) are opened from Unova_EventScript_Screen and the VM resumes after. Scenes from the
+  zones' scene tables start from script.c TryRunOnFrameMapScript (U3D_Vm_SceneStart); the field-init and
+  zone-change scripts on ON_TRANSITION; Black's new-game script (9600) the first time. Black's event work (works,
+  flags, as Black lays them out) is the region side file's chunk UNEW. Commands not played yet are logged
+  ("u3d vm: NNN not played yet") and read past: their arguments are known. Done: control flow, works / flags,
+  messages (balloon, info, plain, board: Black's own words), yes / no, word slots (player, species, numbers,
+  party), people (movement lists as the game's movements, turning, placing, removing), fades, POKéMON (heal, give,
+  party count, cries), money. Next: trainer battles, BGM / SE, camera moves, items, the naming screen, warps.
+- Black's people: unova/black_gfx.pak (tools/unova/build_gfx.py, about two minutes: 759 of the 799 object codes),
+  src/unova/u3d_gfx.c; graphics ids OBJ_EVENT_GFX_UNOVA_FIRST (0x600) + Black's object code (an object event keeps
+  12 bits of its graphics id: 0x1000+ would wrap), palettes by tag 0xD000 / 0xD400 + code (event_object_movement.c
+  UnovaObjectInfo); OPTIONS > DISPLAY > SPRITE SCALING > UNOVA PEOPLE: MIXED (Black's shrunk to 0.84, the default)
+  or GEN 5.
 - The ROM: the user's Pokemon Black (USA, Europe) (NDSi Enhanced), SHA-1 26ad0b9967aa279c4a266ee69f52b9b2332399a5,
   from their Google Drive (the link in docs/UNOVA_DECISIONS.md's source message; the release fetches it through the
   UNOVA_ROM_URL secret, added by the user 2026-11-11). Never committed; locally in ~/.cache/moemon/unova/black.nds.
