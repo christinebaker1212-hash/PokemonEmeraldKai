@@ -1535,6 +1535,14 @@ static void TestHarnessStep(void)
         }
         else
         {
+            // (MOEMON_TEST_IDLE_OUT=N: a wait for a log line gives up once the field has been the player's for N frames
+            // on end: nothing is going on that could print it. A long story walk's steps that aren't open yet)
+            static int sIdleOut = -1, sIdle;
+            if (sIdleOut < 0)
+                sIdleOut = getenv("MOEMON_TEST_IDLE_OUT") ? atoi(getenv("MOEMON_TEST_IDLE_OUT")) : 0;
+            sIdle = (sIdleOut && strcmp(sUntilName, "log") == 0 && MP_TestCondition("field")) ? sIdle + 1 : 0;
+            if (sIdleOut && sIdle > sIdleOut)
+                sUntilFrames = 1, sIdle = 0;
             if (--sUntilFrames <= 0)
             {
                 extern char gMpLogWatch[96];
