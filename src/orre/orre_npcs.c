@@ -1060,3 +1060,142 @@ bool8 Orre_TestSpotTiles(bool8 touch, u32 col, s16 *x0, s16 *y0, s16 *x1, s16 *y
         }
     return FALSE;
 }
+
+// ---------------------------------------------------------------------------------------- RUI lets the POKeMON past
+// RUI walks between the player and their POKeMON, so turning round faced her and A talked to her: the POKeMON couldn't
+// be reached (the user, 2026-11-11). A tapped on her: her words, as before. A held: she steps aside, the POKeMON walks
+// up in front of the player and the usual tap / hold (mp_life_interact.c) follows; then it goes back behind.
+#include "task.h"
+#include "sound.h"
+#include "constants/songs.h"
+#include "mp.h"
+#include "mp_life_field.h"
+
+#define PAST_HOLD 20   // (mp_life_interact.c HOLD_FOR_WHEEL)
+#define tState data[0]
+#define tTimer data[1]
+#define tObj data[2]
+#define tX data[3]
+#define tY data[4]
+
+static void Task_FollowerPast(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    struct ObjectEvent *rui = &gObjectEvents[tObj], *me = &gObjectEvents[gPlayerAvatar.objectEventId];
+    switch (tState)
+    {
+    case 0:   // A tapped or held?
+        if (JOY_HELD(A_BUTTON) && ++tTimer < PAST_HOLD)
+            break;
+        if (tTimer < PAST_HOLD)
+        {
+            // (tapped: her own words, as A on anyone)
+            const u8 *script = Orre_Npc_TalkScript(rui->localId);
+            UnlockPlayerFieldControls();
+            DestroyTask(taskId);
+            if (script != NULL)
+            {
+                gSelectedObjectEvent = tObj;
+                gSpecialVar_LastTalked = rui->localId;
+                gSpecialVar_Facing = me->facingDirection;
+                PlaySE(SE_SELECT);
+                ScriptContext_SetupScript(script);
+            }
+            return;
+        }
+        {
+            // (held: a free tile beside her, across the way the player looks)
+            static const u8 sSide[5][2] = {{0}, [DIR_SOUTH] = {DIR_WEST, DIR_EAST}, [DIR_NORTH] = {DIR_EAST, DIR_WEST},
+                                           [DIR_WEST] = {DIR_NORTH, DIR_SOUTH}, [DIR_EAST] = {DIR_SOUTH, DIR_NORTH}};
+            s16 fx = -1, fy = -1;
+            u32 i;
+            MP_Follower_LocalTile(&fx, &fy);
+            for (i = 0; i < 2; i++)
+            {
+                u8 dir = sSide[me->facingDirection][i];
+                s16 x = rui->currentCoords.x, y = rui->currentCoords.y;
+                MoveCoords(dir, &x, &y);
+                if (MapGridGetCollisionAt(x, y) || GetObjectEventIdByXY(x, y) != OBJECT_EVENTS_COUNT
+                 || (x == fx && y == fy) || O3D_StepBlocked(rui->currentCoords.x, rui->currentCoords.y, x, y))
+                    continue;
+                ObjectEventClearHeldMovementIfActive(rui);
+                ObjectEventSetHeldMovement(rui, GetWalkNormalMovementAction(dir));
+                tState = 1;
+                return;
+            }
+            PlaySE(SE_FAILURE);   // (nowhere for her to go)
+            UnlockPlayerFieldControls();
+            DestroyTask(taskId);
+        }
+        break;
+    case 1:   // she steps aside; then the POKeMON comes up
+        if (!ObjectEventClearHeldMovementIfFinished(rui))
+            break;
+        ObjectEventTurnByLocalIdAndMap(rui->localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup,
+                                       GetOppositeDirection(me->facingDirection));
+        if (!MP_Follower_AutoActive() && !MP_Follower_AutoStart())
+        {
+            UnlockPlayerFieldControls();
+            DestroyTask(taskId);
+            return;
+        }
+        MP_Follower_AutoTarget(tX, tY, 1);
+        tTimer = 0;
+        tState = 2;
+        break;
+    case 2:
+        if (MP_Follower_AutoArrived())
+        {
+            MP_Follower_AutoFaceTile(me->currentCoords.x, me->currentCoords.y);
+            UnlockPlayerFieldControls();   // (the interaction locks the field again itself)
+            if (!MP_LifeInteract_StartFollower())
+                MP_Follower_AutoReturn(), tState = 4;
+            else
+                tState = 3;
+        }
+        else if (MP_Follower_AutoStuck() || ++tTimer > 180)
+        {
+            MP_Follower_AutoReturn();
+            UnlockPlayerFieldControls();
+            tState = 4;
+        }
+        break;
+    case 3:   // the interaction plays; then back behind
+        if (MP_LifeInteract_Busy())
+            break;
+        MP_Follower_AutoReturn();
+        tState = 4;
+        break;
+    case 4:
+        if (MP_Follower_AutoFinishReturn() || !MP_Follower_AutoActive() || ++tTimer > 600)
+            DestroyTask(taskId);
+        break;
+    }
+}
+
+// A pressed in front of RUI while she follows and a POKeMON follows too (field_control_avatar.c): TRUE taken
+bool8 Orre_Npc_TryFollowerPast(void)
+{
+    struct ObjectEvent *rui, *me;
+    s16 x, y, fx, fy;
+    u8 taskId;
+    if (!Orre_Flag(ORRE_FLAG_RUI_FOLLOWS) || (rui = Object(&sPartner)) == NULL || FuncIsActiveTask(Task_FollowerPast)
+     || !MP_Follower_LocalTile(&fx, &fy))
+        return FALSE;
+    me = &gObjectEvents[gPlayerAvatar.objectEventId];
+    x = me->currentCoords.x, y = me->currentCoords.y;
+    MoveCoords(me->facingDirection, &x, &y);
+    if (rui->currentCoords.x != x || rui->currentCoords.y != y)
+        return FALSE;
+    LockPlayerFieldControls();
+    taskId = CreateTask(Task_FollowerPast, 80);
+    gTasks[taskId].tObj = rui - gObjectEvents;
+    gTasks[taskId].tX = x;
+    gTasks[taskId].tY = y;
+    return TRUE;
+}
+#undef tState
+#undef tTimer
+#undef tObj
+#undef tX
+#undef tY

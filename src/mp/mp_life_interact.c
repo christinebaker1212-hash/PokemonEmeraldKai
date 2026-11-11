@@ -599,6 +599,22 @@ bool8 MP_LifeInteract_TryFollower(void)
     return TRUE;
 }
 
+// The follower's tap / hold without the A press and the tile checks: it came up in front of the player on its own (ORRE:
+// RUI stepped aside for it, src/orre/orre_npcs.c Orre_Npc_TryFollowerPast); A still held opens the wheel
+bool8 MP_LifeInteract_StartFollower(void)
+{
+    if (FuncIsActiveTask(Task_Interact) || FollowerMon() == NULL)
+        return FALSE;
+    LockPlayerFieldControls();
+    CreateTask(Task_Interact, 80);
+    return TRUE;
+}
+
+bool8 MP_LifeInteract_Busy(void)
+{
+    return FuncIsActiveTask(Task_Interact);
+}
+
 // A in front of a Garden Pokémon (mp_garden_life.c): the same tap / hold, with that Pokémon
 bool8 MP_LifeInteract_StartFor(struct Pokemon *mon, s8 actor)
 {

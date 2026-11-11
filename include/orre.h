@@ -119,6 +119,7 @@ bool8 Orre_Npc_GetColo(u32 group, u32 index, float *x, float *z);
 bool8 Orre_Npc_SeesHero(u32 index);
 void Orre_Npc_TalkEnd(u32 group, u32 index);
 const u8 *Orre_Npc_TalkScript(u8 localId);      // (field_control_avatar.c)
+bool8 Orre_Npc_TryFollowerPast(void);   // A on RUI while she and a POKeMON follow: tap talks, hold lets it past
 u32 Orre_Npc_TalkScriptId(u32 index);
 u16 Orre_VmHolding(void);          // (specialvar) a scene still holds the player
 void Orre_VmBattleDone(void);      // (orre_battle.c) its battle is over

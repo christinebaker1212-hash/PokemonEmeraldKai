@@ -230,6 +230,9 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     metatileBehavior = MapGridGetMetatileBehaviorAt(position.x, position.y);
     if (input->pressedAButton)
         MP_Underground_TryTalk();   // Moemon Kai: SPIRITOMB's counter, a friend talked to in SINNOH's Underground
+    // Moemon Kai: RUI between the player and their POKeMON: A held lets it past (src/orre/orre_npcs.c)
+    if (input->pressedAButton && O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup) && Orre_Npc_TryFollowerPast())
+        return TRUE;
     if (input->pressedAButton && TryStartInteractionScript(&position, metatileBehavior, playerDirection) == TRUE)
         return TRUE;
 

@@ -93,6 +93,8 @@ void MP_LifeField_Reaction(u8 emote, u8 pose, u16 frames);   // a short reaction
 // mp_life_interact.c: talking to and doing things with Pokémon
 bool8 MP_LifeInteract_TryFollower(void);   // A in front of the follower (the smart action) or held A (the wheel)
 void MP_LifeInteract_Update(void);
+bool8 MP_LifeInteract_StartFollower(void);   // the follower came up in front on its own (ORRE: RUI stepped aside)
+bool8 MP_LifeInteract_Busy(void);
 bool8 MP_LifeInteract_StartFor(struct Pokemon *mon, s8 actor);   // a Garden Pokémon (mp_garden_life.c)
 
 #endif // GUARD_MP_LIFE_FIELD_H
