@@ -994,6 +994,10 @@ void VDraw(void)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)
     MP_AstralFx_Composite(image);   // ... the ASTRAL BALL's silver sparkles
     MP_Compass_Composite(image);    // ... arrows toward friends off screen
+    {
+        void MP_DexHud_Composite(u16 *frame);
+        MP_DexHud_Composite(image);      // Moemon Kai: the POKéDEX list's header (src/mp/mp_dexplus.c)
+    }
     MP_BallFx_Composite(image);          // ... ball effects (not bound by the GBA's sprites or palettes)
     {
         void MP_Poketch_Composite(u16 *frame);

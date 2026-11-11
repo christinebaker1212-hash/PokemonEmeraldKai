@@ -1,4 +1,6 @@
 #include "global.h"
+#include "mp_dexplus.h"   // Moemon Kai: OWN / SHARED, the list's view and header
+#include "platform/gamepad.h"
 #include "aw_file.h"
 #include "mp.h"
 #include "mp_region.h"
@@ -121,6 +123,9 @@ enum {
 
 static EWRAM_DATA struct PokedexView *sPokedexView = NULL;
 static EWRAM_DATA u16 sLastSelectedPokemon = 0;
+static u16 sMpDexKeepNum;   // Moemon Kai: the entry (a national number) to be on once the list is made again
+static u16 MpDexCount(bool8 hoenn, u8 caseID, bool8 own);
+
 static EWRAM_DATA u8 sPokeBallRotation = 0;
 static EWRAM_DATA struct PokedexListItem *sPokedexListItem = NULL;
 
@@ -1750,6 +1755,7 @@ void ResetPokedex(void)
         gSaveBlock1Ptr->seen2[i] = 0;
     }
     MP_DexExt_Reset();   // Moemon Kai
+    MP_DexOwn_Reset();   // Moemon Kai: the player's own side (mp_dexplus.c)
 }
 
 void ResetPokedexScrollPositions(void)
@@ -1849,16 +1855,17 @@ void CB2_OpenPokedex(void)
         sPokedexView->dexOrder = gSaveBlock2Ptr->pokedex.order;
         sPokedexView->selectedPokemon = sLastSelectedPokemon;
         sPokedexView->pokeBallRotation = sPokeBallRotation;
+        sMpDexKeepNum = MP_DexView_Last();   // Moemon Kai: the entry it was left on, kept with the save
         sPokedexView->selectedScreen = TEXT_SCREEN; // Moemon Co-op: the cursor starts on TEXT
         if (!IsNationalPokedexEnabled())
         {
-            sPokedexView->seenCount = GetHoennPokedexCount(FLAG_GET_SEEN);
-            sPokedexView->ownCount = GetHoennPokedexCount(FLAG_GET_CAUGHT);
+            sPokedexView->seenCount = MpDexCount(TRUE, FLAG_GET_SEEN, FALSE);   // Moemon Kai: in the view (OWN / SHARED)
+            sPokedexView->ownCount = MpDexCount(TRUE, FLAG_GET_CAUGHT, FALSE);
         }
         else
         {
-            sPokedexView->seenCount = GetNationalPokedexCount(FLAG_GET_SEEN);
-            sPokedexView->ownCount = GetNationalPokedexCount(FLAG_GET_CAUGHT);
+            sPokedexView->seenCount = MpDexCount(FALSE, FLAG_GET_SEEN, FALSE);
+            sPokedexView->ownCount = MpDexCount(FALSE, FLAG_GET_CAUGHT, FALSE);
         }
         sPokedexView->initialVOffset = 8;
         gMain.state++;
@@ -1889,6 +1896,69 @@ void Task_OpenPokedexMainPage(u8 taskId)
 }
 
 #define tLoadScreenTaskId data[0]
+
+// LT / F newly pressed (a key past the GBA's ten: main.c gMpExtraHeld)
+extern u16 gMpExtraHeld;
+static bool8 MpDexSearchKey(void)
+{
+    static u16 sPrev;
+    bool8 pressed = (gMpExtraHeld & PLATFORM_KEY_SEARCH) && !(sPrev & PLATFORM_KEY_SEARCH);
+    sPrev = gMpExtraHeld;
+    return pressed;
+}
+
+// Moemon Kai: the list's header (drawn over the frame: mp_dexplus.c MP_DexHud_Composite)
+static void MpDexHud(void)
+{
+    struct MpDexHud hud;
+    bool8 hoenn = sPokedexView->dexMode == DEX_MODE_HOENN || !IsNationalPokedexEnabled();
+    static u16 sTotal, sOwn, sAll;
+    static u8 sFor = 0xFF;
+    u8 key = hoenn | MP_DexView_Shared() << 1;
+    if (sFor != key || (gMain.vblankCounter1 & 63) == 0)
+    {
+        sFor = key;
+        sTotal = hoenn ? HOENN_DEX_COUNT : MP_Gen_DexCount();
+        sOwn = MpDexCount(hoenn, FLAG_GET_CAUGHT, TRUE);
+        sAll = hoenn ? GetHoennPokedexCount(FLAG_GET_CAUGHT) : GetNationalPokedexCount(FLAG_GET_CAUGHT);
+    }
+    hud.nationalOn = IsNationalPokedexEnabled();
+    hud.national = !hoenn;
+    hud.shared = MP_DexView_Shared();
+    hud.filter = MP_DexView_Filter();
+    hud.total = sTotal, hud.ownCaught = sOwn, hud.allCaught = sAll;
+    MP_DexHud_Show(&hud);
+}
+
+// The entry the list is on, kept with the save for the next time it opens
+static void MpDexRemember(void)
+{
+    u16 num = sPokedexView->selectedPokemon < sPokedexView->pokemonListCount
+            ? sPokedexView->pokedexList[sPokedexView->selectedPokemon].dexNum : 0;
+    MP_DexView_Set(MP_DexView_Shared(), MP_DexView_Filter(), num == 0xFFFF ? 0 : num);
+}
+
+// The list made again for a changed view, on the entry it was on
+static void Task_MpDexReload(u8 taskId)
+{
+    if (gPaletteFade.active)
+        return;
+    ClearMonSprites();
+    FreeWindowAndBgBuffers();
+    gMain.state = 0;
+    gTasks[taskId].func = Task_OpenPokedexMainPage;
+}
+
+static void MpDexReload(u8 taskId)
+{
+    if (sPokedexView->selectedPokemon < sPokedexView->pokemonListCount)
+        sMpDexKeepNum = sPokedexView->pokedexList[sPokedexView->selectedPokemon].dexNum;
+    if (sMpDexKeepNum == 0xFFFF)
+        sMpDexKeepNum = 0;
+    PlaySE(SE_DEX_PAGE);
+    BeginNormalPaletteFade(PALETTES_ALL, -2, 0, 16, RGB_BLACK);
+    gTasks[taskId].func = Task_MpDexReload;
+}
 
 static void Task_HandlePokedexInput(u8 taskId)
 {
@@ -1933,9 +2003,33 @@ static void Task_HandlePokedexInput(u8 taskId)
         }
         else if (JOY_NEW(B_BUTTON))
         {
+            MpDexRemember();
             BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_BLACK);
             gTasks[taskId].func = Task_ClosePokedex;
             PlaySE(SE_PC_OFF);
+        }
+        // Moemon Kai: L REGION / NATIONAL, R OWN / SHARED, LT (F) what the list shows
+        else if (JOY_NEW(L_BUTTON) && IsNationalPokedexEnabled())
+        {
+            sPokedexView->dexMode = sPokedexView->dexMode == DEX_MODE_HOENN ? DEX_MODE_NATIONAL : DEX_MODE_HOENN;
+            gSaveBlock2Ptr->pokedex.mode = sPokedexView->dexMode;
+            MpDexReload(taskId);
+        }
+        else if (JOY_NEW(R_BUTTON))
+        {
+            u8 filter = MP_DexView_Filter();
+            if (MP_DexView_Shared() && filter == MP_DEXSHOW_FRIENDS)
+                filter = MP_DEXSHOW_ALL;
+            MP_DexView_Set(!MP_DexView_Shared(), filter, MP_DexView_Last());
+            MpDexReload(taskId);
+        }
+        else if (MpDexSearchKey())
+        {
+            u8 filter = (MP_DexView_Filter() + 1) % MP_DEXSHOW_COUNT;
+            if (filter == MP_DEXSHOW_FRIENDS && !MP_DexView_Shared())
+                filter = MP_DEXSHOW_ALL;
+            MP_DexView_Set(MP_DexView_Shared(), filter, MP_DexView_Last());
+            MpDexReload(taskId);
         }
         else
         {
@@ -1944,6 +2038,7 @@ static void Task_HandlePokedexInput(u8 taskId)
             if (sPokedexView->scrollTimer)
                 gTasks[taskId].func = Task_WaitForScroll;
         }
+        MpDexHud();
     }
 }
 
@@ -2321,6 +2416,13 @@ static bool8 LoadPokedexListPage(u8 page)
         gReservedSpritePaletteCount = 8;
         LoadCompressedSpriteSheet(&sInterfaceSpriteSheet[0]);
         LoadSpritePalettes(sInterfaceSpritePalette);
+        if (page == PAGE_MAIN)
+        {
+            // Moemon Kai: the counts in the view the list has now (OWN / SHARED)
+            bool8 hoenn = !IsNationalPokedexEnabled();
+            sPokedexView->seenCount = MpDexCount(hoenn, FLAG_GET_SEEN, FALSE);
+            sPokedexView->ownCount = MpDexCount(hoenn, FLAG_GET_CAUGHT, FALSE);
+        }
         CreateInterfaceSprites(page);
         gMain.state++;
         break;
@@ -2402,6 +2504,78 @@ static void FreeWindowAndBgBuffers(void)
         Free(tilemapBuffer);
 }
 
+// Moemon Kai: the list's view (the user, 2026-11-11): OWN (what the player saw and caught themselves) or SHARED (the
+// group's POKéDEX: the save's flags), R on the list; REGION or NATIONAL, L; the SHOW filter, LT / F (mp_dexplus.c)
+static s8 MpDexGet(u16 nat, u8 caseID)
+{
+    if (MP_DexView_Shared())
+        return GetSetPokedexFlag(nat, caseID);
+    return MP_DexOwn_Has(nat, caseID == FLAG_GET_CAUGHT);
+}
+
+static bool8 MpDexShows(u16 nat, bool8 seen, bool8 owned)
+{
+    switch (MP_DexView_Filter())
+    {
+    case MP_DEXSHOW_NOT_SEEN:   return !seen;
+    case MP_DEXSHOW_NOT_CAUGHT: return seen && !owned;
+    case MP_DEXSHOW_CAUGHT:     return owned;
+    case MP_DEXSHOW_FRIENDS:    return GetSetPokedexFlag(nat, FLAG_GET_CAUGHT) && !MP_DexOwn_Has(nat, TRUE);
+    default:                    return TRUE;
+    }
+}
+
+// How many of the dex shown (REGION's or NATIONAL's) are seen / caught: in the view, or the player's own
+static u16 MpDexCount(bool8 hoenn, u8 caseID, bool8 own)
+{
+    u16 i, n = hoenn ? HOENN_DEX_COUNT : MP_Gen_DexCount(), count = 0;
+    for (i = 0; i < n; i++)
+    {
+        u16 nat = hoenn ? HoennToNationalOrder(i + 1) : i + 1;
+        if (own ? MP_DexOwn_Has(nat, caseID == FLAG_GET_CAUGHT) : MpDexGet(nat, caseID))
+            count++;
+    }
+    return count;
+}
+
+// The SHOW filter over the list just made: by number every entry of the dex that fits (the ones not seen too, as
+// their numbers), any other order what it lists. Nothing fits: the filter goes back to ALL
+static void MpDexFilterList(u8 order, bool8 hoenn, u16 dexCount)
+{
+    u16 i, n = 0;
+    static struct PokedexListItem sKeep[NATIONAL_DEX_COUNT + 1];
+    if (MP_DexView_Filter() == MP_DEXSHOW_ALL)
+        return;
+    if (MP_DexView_Filter() == MP_DEXSHOW_FRIENDS && !MP_DexView_Shared())
+    {
+        MP_DexView_Set(FALSE, MP_DEXSHOW_ALL, MP_DexView_Last());
+        return;
+    }
+    if (order == ORDER_NUMERICAL)
+    {
+        for (i = 0; i < dexCount && n < NATIONAL_DEX_COUNT; i++)
+        {
+            u16 nat = hoenn ? HoennToNationalOrder(i + 1) : i + 1;
+            bool8 seen = MpDexGet(nat, FLAG_GET_SEEN), owned = MpDexGet(nat, FLAG_GET_CAUGHT);
+            if (MpDexShows(nat, seen, owned))
+                sKeep[n].dexNum = nat, sKeep[n].seen = seen, sKeep[n].owned = owned, n++;
+        }
+    }
+    else
+    {
+        for (i = 0; i < sPokedexView->pokemonListCount; i++)
+            if (MpDexShows(sPokedexView->pokedexList[i].dexNum, sPokedexView->pokedexList[i].seen, sPokedexView->pokedexList[i].owned))
+                sKeep[n++] = sPokedexView->pokedexList[i];
+    }
+    if (n == 0)
+    {
+        MP_DexView_Set(MP_DexView_Shared(), MP_DEXSHOW_ALL, MP_DexView_Last());
+        return;
+    }
+    memcpy(sPokedexView->pokedexList, sKeep, n * sizeof(sKeep[0]));
+    sPokedexView->pokemonListCount = n;
+}
+
 static void CreatePokedexList(u8 dexMode, u8 order)
 {
     u16 vars[3]; //I have no idea why three regular variables are stored in an array, but whatever.
@@ -2442,8 +2616,8 @@ static void CreatePokedexList(u8 dexMode, u8 order)
             {
                 temp_dexNum = HoennToNationalOrder(i + 1);
                 sPokedexView->pokedexList[i].dexNum = temp_dexNum;
-                sPokedexView->pokedexList[i].seen = GetSetPokedexFlag(temp_dexNum, FLAG_GET_SEEN);
-                sPokedexView->pokedexList[i].owned = GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT);
+                sPokedexView->pokedexList[i].seen = MpDexGet(temp_dexNum, FLAG_GET_SEEN);
+                sPokedexView->pokedexList[i].owned = MpDexGet(temp_dexNum, FLAG_GET_CAUGHT);
                 if (sPokedexView->pokedexList[i].seen)
                     sPokedexView->pokemonListCount = i + 1;
             }
@@ -2454,13 +2628,13 @@ static void CreatePokedexList(u8 dexMode, u8 order)
             for (i = 0, r5 = 0, r10 = 0; i < temp_dexCount; i++)
             {
                 temp_dexNum = i + 1;
-                if (GetSetPokedexFlag(temp_dexNum, FLAG_GET_SEEN))
+                if (MpDexGet(temp_dexNum, FLAG_GET_SEEN))
                     r10 = 1;
                 if (r10)
                 {
                     sPokedexView->pokedexList[r5].dexNum = temp_dexNum;
-                    sPokedexView->pokedexList[r5].seen = GetSetPokedexFlag(temp_dexNum, FLAG_GET_SEEN);
-                    sPokedexView->pokedexList[r5].owned = GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT);
+                    sPokedexView->pokedexList[r5].seen = MpDexGet(temp_dexNum, FLAG_GET_SEEN);
+                    sPokedexView->pokedexList[r5].owned = MpDexGet(temp_dexNum, FLAG_GET_CAUGHT);
                     if (sPokedexView->pokedexList[r5].seen)
                         sPokedexView->pokemonListCount = r5 + 1;
                     r5++;
@@ -2473,11 +2647,11 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         {
             temp_dexNum = gPokedexOrder_Alphabetical[i];
 
-            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && GetSetPokedexFlag(temp_dexNum, FLAG_GET_SEEN))
+            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && MpDexGet(temp_dexNum, FLAG_GET_SEEN))
             {
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].dexNum = temp_dexNum;
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].seen = TRUE;
-                sPokedexView->pokedexList[sPokedexView->pokemonListCount].owned = GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT);
+                sPokedexView->pokedexList[sPokedexView->pokemonListCount].owned = MpDexGet(temp_dexNum, FLAG_GET_CAUGHT);
                 sPokedexView->pokemonListCount++;
             }
         }
@@ -2487,7 +2661,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         {
             temp_dexNum = gPokedexOrder_Weight[i];
 
-            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
+            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && MpDexGet(temp_dexNum, FLAG_GET_CAUGHT))
             {
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].dexNum = temp_dexNum;
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].seen = TRUE;
@@ -2501,7 +2675,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         {
             temp_dexNum = gPokedexOrder_Weight[i];
 
-            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
+            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && MpDexGet(temp_dexNum, FLAG_GET_CAUGHT))
             {
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].dexNum = temp_dexNum;
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].seen = TRUE;
@@ -2515,7 +2689,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         {
             temp_dexNum = gPokedexOrder_Height[i];
 
-            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
+            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && MpDexGet(temp_dexNum, FLAG_GET_CAUGHT))
             {
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].dexNum = temp_dexNum;
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].seen = TRUE;
@@ -2529,7 +2703,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         {
             temp_dexNum = gPokedexOrder_Height[i];
 
-            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
+            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && MpDexGet(temp_dexNum, FLAG_GET_CAUGHT))
             {
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].dexNum = temp_dexNum;
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].seen = TRUE;
@@ -2539,6 +2713,22 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         }
         break;
     }
+
+    MpDexFilterList(order, temp_isHoennDex, temp_dexCount);   // Moemon Kai: the SHOW filter
+    // (the entry the list was on, wherever it is in the list as it is now)
+    if (sMpDexKeepNum != 0)
+    {
+        for (i = 0; i < sPokedexView->pokemonListCount; i++)
+            if (sPokedexView->pokedexList[i].dexNum == sMpDexKeepNum)
+                break;
+        if (i >= sPokedexView->pokemonListCount)
+            i = sPokedexView->selectedPokemon;
+        sMpDexKeepNum = 0;
+        sPokedexView->selectedPokemon = i;
+    }
+    if (sPokedexView->pokemonListCount && sPokedexView->selectedPokemon >= sPokedexView->pokemonListCount)
+        sPokedexView->selectedPokemon = sPokedexView->pokemonListCount - 1;
+    sPokedexView->pokeBallRotation = POKEBALL_ROTATION_TOP + 16 * sPokedexView->selectedPokemon;
 
     for (i = sPokedexView->pokemonListCount; i < NATIONAL_DEX_COUNT; i++)
     {
@@ -2840,21 +3030,21 @@ static u16 TryDoPokedexScroll(u16 selectedMon, u16 ignored)
         CreateMonListEntry(2, selectedMon, ignored);
         PlaySE(SE_DEX_SCROLL);
     }
-    else if (JOY_NEW(DPAD_LEFT) && (selectedMon > 0))
+    else if (JOY_REPEAT(DPAD_LEFT) && (selectedMon > 0))   // Moemon Kai: ten entries, and again while it's held
     {
         startingPos = selectedMon;
 
-        for (i = 0; i < 7; i++)
+        for (i = 0; i < 10; i++)
             selectedMon = GetNextPosition(1, selectedMon, 0, sPokedexView->pokemonListCount - 1);
         sPokedexView->pokeBallRotation += 16 * (selectedMon - startingPos);
         ClearMonSprites();
         CreateMonSpritesAtPos(selectedMon, 0xE);
         PlaySE(SE_DEX_PAGE);
     }
-    else if (JOY_NEW(DPAD_RIGHT) && (selectedMon < sPokedexView->pokemonListCount - 1))
+    else if (JOY_REPEAT(DPAD_RIGHT) && (selectedMon < sPokedexView->pokemonListCount - 1))
     {
         startingPos = selectedMon;
-        for (i = 0; i < 7; i++)
+        for (i = 0; i < 10; i++)
             selectedMon = GetNextPosition(0, selectedMon, 0, sPokedexView->pokemonListCount - 1);
         sPokedexView->pokeBallRotation += 16 * (selectedMon - startingPos);
         ClearMonSprites();
@@ -3130,7 +3320,7 @@ static void CreateInterfaceSprites(u8 page)
             StartSpriteAnim(&gSprites[spriteId], 1);
 
             // Hoenn seen value - 100s
-            seenOwnedCount = GetHoennPokedexCount(FLAG_GET_SEEN);
+            seenOwnedCount = MpDexCount(TRUE, FLAG_GET_SEEN, FALSE);
             drawNextDigit = FALSE;
             spriteId = CreateSprite(&sNationalDexSeenOwnNumberSpriteTemplate, 40, 45, 1);
             digitNum = seenOwnedCount / 100;
@@ -3176,7 +3366,7 @@ static void CreateInterfaceSprites(u8 page)
             digitNum = (sPokedexView->seenCount % 100) % 10;
             StartSpriteAnim(&gSprites[spriteId], digitNum);
 
-            seenOwnedCount = GetHoennPokedexCount(FLAG_GET_CAUGHT);
+            seenOwnedCount = MpDexCount(TRUE, FLAG_GET_CAUGHT, FALSE);
 
             // Hoenn owned value - 100s
             drawNextDigit = FALSE;
@@ -4734,7 +4924,10 @@ s8 GetSetPokedexFlag(u16 nationalDexNo, u8 caseID)
     mask = 1 << bit;
     retVal = 0;
     if (caseID == FLAG_SET_SEEN || caseID == FLAG_SET_CAUGHT)
+    {
         MP_Achieve_OnDex(nationalDexNo + 1, caseID == FLAG_SET_CAUGHT);   // Moemon Kai: seen / caught in this region
+        MP_DexOwn_Mark(nationalDexNo + 1, caseID == FLAG_SET_CAUGHT);     // Moemon Kai: the player's own POKéDEX (mp_dexplus.c)
+    }
     if (index >= NUM_DEX_FLAG_BYTES)   // Moemon Kai: Gen 4 on
     {
         if ((caseID == FLAG_SET_SEEN || caseID == FLAG_SET_CAUGHT) && !GetSetPokedexFlagExt(index, mask, caseID == FLAG_SET_SEEN ? FLAG_GET_SEEN : FLAG_GET_CAUGHT))

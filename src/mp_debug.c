@@ -2009,6 +2009,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             SetMainCallback2(CB2_OpenFlyMap);
     }
+    else if (strcmp(cmd, "dexfriend") == 0)
+    {
+        // dexfriend NATIONAL_NUMBER [LAST]: as if a friend caught it (the shared POKéDEX's side: not the player's own)
+        extern bool8 gMpDexApplying;
+        int first = 0, last = 0, k;
+        if (sscanf(arg, "%d %d", &first, &last) < 2)
+            last = first;
+        gMpDexApplying = TRUE;
+        for (k = first; k <= last; k++)
+            GetSetPokedexFlag((u16)k, FLAG_SET_SEEN), GetSetPokedexFlag((u16)k, FLAG_SET_CAUGHT);
+        gMpDexApplying = FALSE;
+        printf("[test] dexfriend %d-%d\n", first, last);
+    }
     else if (strcmp(cmd, "dexcatch") == 0 || strcmp(cmd, "dexsee") == 0)
     {
         // dexcatch NATIONAL_NUMBER [LAST]: as if you caught (or saw) it (or each up to LAST)
