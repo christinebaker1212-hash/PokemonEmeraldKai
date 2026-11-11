@@ -1,0 +1,10 @@
+# PHENAC's PRE GYM as Colosseum has it: JUSTY's words, then his trainers come up and battle one after another. The
+# room's loop runs the whole thing itself with no heroMoveInitEvent: the player waits ("is off in a scene": orre_vm.c
+# Orre_Vm_Frame), and the first trainer's line, said right after JUSTY's scene let the player go, is shown again when
+# Kai's hold script's releaseall cut its printing off (Poll W_MESSAGE*: the script waited on it for good, no battle).
+MODE=1
+TMO=300
+WARP=45,10,33,39
+ENV_A="MOEMON_DEBUG_PARTY=150:100,150:100 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1 MOEMON_ORRE_FLAG_LOG=1"
+EXPECT_A=("orre: flag 1010 = 1" "is off in a scene: the player waits" "orre: battle 22 won" "orre: flag 1011 = 1" "orre: battle 23 won" "orre: flag 1012 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

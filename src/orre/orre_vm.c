@@ -1325,10 +1325,23 @@ static void Poll(struct Thread *t)
             t->wait = W_NONE;
         break;
     case W_MESSAGE:
-        if (!IsTextPrinterActive(0))
-            t->wait = W_NONE;
-        break;
     case W_MESSAGE_KEY:
+        // (the field closed the box under the line: a scene that lets the player go and says its next line at once
+        // has Kai's hold script end a frame later, its releaseall hiding the box. The line again, or the thread waited
+        // for good on words nobody saw: the PRE GYM's first trainer never battled)
+        // (the box's task gone with its text still printing: nothing runs the printer any more. A finished line
+        // reads "hidden" too, its printer done)
+        if (IsFieldMessageBoxHidden() && IsTextPrinterActive(0) && t->message && !ScriptContext_IsEnabled())
+        {
+            ShowMessage(t, t->message, t->wait == W_MESSAGE_KEY);
+            break;
+        }
+        if (t->wait == W_MESSAGE)
+        {
+            if (!IsTextPrinterActive(0))
+                t->wait = W_NONE;
+            break;
+        }
         if (!IsTextPrinterActive(0) && JOY_NEW(A_BUTTON | B_BUTTON))
         {
             PlaySE(SE_SELECT);
@@ -1483,7 +1496,7 @@ void Orre_Vm_Frame(void)
                 away = TRUE;   // (about to wait: the scene's camera stays the scene's)
             // (a scene on its first pass, before it ever stepped them: at once, or the field took the scene's camera
             // back; later a few frames' grace, the loop's own wait between steps)
-            if (t->sinceHero > (t->stepped ? 6 : 0))
+            if (t->sinceHero > (t->stepped ? 6 : 0) && !getenv("MOEMON_ORRE_NO_LOOP_HOLD"))
             {
                 t->loopHold = TRUE;
                 Hold(t);

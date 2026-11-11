@@ -242,7 +242,10 @@ The older notes per part:
   while the loop steps them (heroMoveMain every frame), so a scene the loop runs itself with no heroMoveInitEvent
   (GSscene_SetMode(3) scenes: PHENAC's three from TEAM SNAGEM) holds them all the same: a room thread whose
   function calls heroMoveMain (Start: StepsHero) and hasn't for a few frames, or not yet on its first pass, takes the
-  hold ("is off in a scene" in the log) until it steps them again.
+  hold ("is off in a scene" in the log) until it steps them again. MOEMON_ORRE_NO_LOOP_HOLD=1 turns it off (to tell its
+  doing from a script's own wait). A line the field closed while it still printed is shown again (Poll W_MESSAGE*:
+  Kai's hold script's releaseall, a frame after heroMoveTermEvent, hid the next line's box and its printer never ran
+  on: the PRE GYM's first trainer; scenario orre_pregym_trainers).
 - **The story walk, resumed**: a walk's autosave (its DIR/a.sav and side files) copied into a new folder runs on from
   there without MOEMON_DEBUG_QUICKSTART / WARP / PARTY (the game run directly, as tools/test/run1.sh does but keeping
   a.sav): the walk's `skipif orreflag` lines pass over what the save has done. Minutes instead of the walk from the start.

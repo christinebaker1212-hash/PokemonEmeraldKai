@@ -1,0 +1,10 @@
+pressuntil A field 3000
+wait 30
+mp teach 0 94
+mp teach 1 94
+mp orrestory 1010
+wait 10
+goto 45,10 31 29 900
+pressuntillog A 9000 orre: flag 1012 = 1
+wait 60
+quit
