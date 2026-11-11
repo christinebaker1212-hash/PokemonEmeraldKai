@@ -135,7 +135,7 @@ static const u16 sUnovaItems[] = {
     ITEM_NONE,   // 131 ???
     ITEM_NONE,   // 132 ???
     ITEM_NONE,   // 133 ???
-    ITEM_NONE,   // 134 Sweet Heart
+    ITEM_SWEET_HEART,   // 134 Sweet Heart
     ITEM_ADAMANT_ORB,   // 135 Adamant Orb
     ITEM_LUSTROUS_ORB,   // 136 Lustrous Orb
     ITEM_NONE,   // 137 Greet Mail
@@ -329,104 +329,104 @@ static const u16 sUnovaItems[] = {
     ITEM_REAPER_CLOTH,   // 325 Reaper Cloth
     ITEM_RAZOR_CLAW,   // 326 Razor Claw
     ITEM_RAZOR_FANG,   // 327 Razor Fang
-    ITEM_TM01,   // 328 TM01
-    ITEM_TM02,   // 329 TM02
-    ITEM_TM03,   // 330 TM03
-    ITEM_TM04,   // 331 TM04
-    ITEM_TM05,   // 332 TM05
-    ITEM_TM06,   // 333 TM06
-    ITEM_TM07,   // 334 TM07
-    ITEM_TM08,   // 335 TM08
-    ITEM_TM09,   // 336 TM09
-    ITEM_TM10,   // 337 TM10
-    ITEM_TM11,   // 338 TM11
-    ITEM_TM12,   // 339 TM12
-    ITEM_TM13,   // 340 TM13
-    ITEM_TM14,   // 341 TM14
-    ITEM_TM15,   // 342 TM15
-    ITEM_TM16,   // 343 TM16
-    ITEM_TM17,   // 344 TM17
-    ITEM_TM18,   // 345 TM18
-    ITEM_TM19,   // 346 TM19
-    ITEM_TM20,   // 347 TM20
-    ITEM_TM21,   // 348 TM21
-    ITEM_TM22,   // 349 TM22
-    ITEM_TM23,   // 350 TM23
-    ITEM_TM24,   // 351 TM24
-    ITEM_TM25,   // 352 TM25
-    ITEM_TM26,   // 353 TM26
-    ITEM_TM27,   // 354 TM27
-    ITEM_TM28,   // 355 TM28
-    ITEM_TM29,   // 356 TM29
-    ITEM_TM30,   // 357 TM30
-    ITEM_TM31,   // 358 TM31
-    ITEM_TM32,   // 359 TM32
-    ITEM_TM33,   // 360 TM33
-    ITEM_TM34,   // 361 TM34
-    ITEM_TM35,   // 362 TM35
-    ITEM_TM36,   // 363 TM36
-    ITEM_TM37,   // 364 TM37
-    ITEM_TM38,   // 365 TM38
-    ITEM_TM39,   // 366 TM39
-    ITEM_TM40,   // 367 TM40
-    ITEM_TM41,   // 368 TM41
-    ITEM_TM42,   // 369 TM42
-    ITEM_TM43,   // 370 TM43
-    ITEM_TM44,   // 371 TM44
-    ITEM_TM45,   // 372 TM45
-    ITEM_TM46,   // 373 TM46
-    ITEM_TM47,   // 374 TM47
-    ITEM_TM48,   // 375 TM48
-    ITEM_TM49,   // 376 TM49
-    ITEM_TM50,   // 377 TM50
-    ITEM_TM51,   // 378 TM51
-    ITEM_TM52,   // 379 TM52
-    ITEM_TM53,   // 380 TM53
-    ITEM_TM54,   // 381 TM54
-    ITEM_TM55,   // 382 TM55
-    ITEM_TM56,   // 383 TM56
-    ITEM_TM57,   // 384 TM57
-    ITEM_TM58,   // 385 TM58
-    ITEM_TM59,   // 386 TM59
-    ITEM_TM60,   // 387 TM60
-    ITEM_TM61,   // 388 TM61
-    ITEM_TM62,   // 389 TM62
-    ITEM_TM63,   // 390 TM63
-    ITEM_TM64,   // 391 TM64
-    ITEM_TM65,   // 392 TM65
-    ITEM_TM66,   // 393 TM66
-    ITEM_TM67,   // 394 TM67
-    ITEM_TM68,   // 395 TM68
-    ITEM_TM69,   // 396 TM69
-    ITEM_TM70,   // 397 TM70
-    ITEM_TM71,   // 398 TM71
-    ITEM_TM72,   // 399 TM72
-    ITEM_TM73,   // 400 TM73
-    ITEM_TM74,   // 401 TM74
-    ITEM_TM75,   // 402 TM75
-    ITEM_TM76,   // 403 TM76
-    ITEM_TM77,   // 404 TM77
-    ITEM_TM78,   // 405 TM78
-    ITEM_TM79,   // 406 TM79
-    ITEM_TM80,   // 407 TM80
-    ITEM_TM81,   // 408 TM81
-    ITEM_TM82,   // 409 TM82
-    ITEM_TM83,   // 410 TM83
-    ITEM_TM84,   // 411 TM84
-    ITEM_TM85,   // 412 TM85
-    ITEM_TM86,   // 413 TM86
-    ITEM_TM87,   // 414 TM87
-    ITEM_TM88,   // 415 TM88
-    ITEM_TM89,   // 416 TM89
-    ITEM_TM90,   // 417 TM90
-    ITEM_TM91,   // 418 TM91
-    ITEM_TM92,   // 419 TM92
-    ITEM_HM01,   // 420 HM01
-    ITEM_HM02,   // 421 HM02
-    ITEM_HM03,   // 422 HM03
-    ITEM_HM04,   // 423 HM04
-    ITEM_HM05,   // 424 HM05
-    ITEM_HM06,   // 425 HM06
+    ITEM_NONE,   // 328 TM01 Hone Claws
+    ITEM_TM01 + 1,   // 329 TM02 Dragon Claw
+    ITEM_NONE,   // 330 TM03 Psyshock
+    ITEM_TM01 + 3,   // 331 TM04 Calm Mind
+    ITEM_TM01 + 4,   // 332 TM05 Roar
+    ITEM_TM01 + 5,   // 333 TM06 Toxic
+    ITEM_TM01 + 6,   // 334 TM07 Hail
+    ITEM_TM01 + 7,   // 335 TM08 Bulk Up
+    ITEM_NONE,   // 336 TM09 Venoshock
+    ITEM_TM01 + 9,   // 337 TM10 Hidden Power
+    ITEM_TM01 + 10,   // 338 TM11 Sunny Day
+    ITEM_TM01 + 11,   // 339 TM12 Taunt
+    ITEM_TM01 + 12,   // 340 TM13 Ice Beam
+    ITEM_TM01 + 13,   // 341 TM14 Blizzard
+    ITEM_TM01 + 14,   // 342 TM15 Hyper Beam
+    ITEM_TM01 + 15,   // 343 TM16 Light Screen
+    ITEM_TM01 + 16,   // 344 TM17 Protect
+    ITEM_TM01 + 17,   // 345 TM18 Rain Dance
+    ITEM_NONE,   // 346 TM19 Telekinesis
+    ITEM_TM01 + 19,   // 347 TM20 Safeguard
+    ITEM_TM01 + 20,   // 348 TM21 Frustration
+    ITEM_TM01 + 21,   // 349 TM22 SolarBeam
+    ITEM_NONE,   // 350 TM23 Smack Down
+    ITEM_TM01 + 23,   // 351 TM24 Thunderbolt
+    ITEM_TM01 + 24,   // 352 TM25 Thunder
+    ITEM_TM01 + 25,   // 353 TM26 Earthquake
+    ITEM_TM01 + 26,   // 354 TM27 Return
+    ITEM_TM01 + 27,   // 355 TM28 Dig
+    ITEM_TM01 + 28,   // 356 TM29 Psychic
+    ITEM_TM01 + 29,   // 357 TM30 Shadow Ball
+    ITEM_TM01 + 30,   // 358 TM31 Brick Break
+    ITEM_TM01 + 31,   // 359 TM32 Double Team
+    ITEM_TM01 + 32,   // 360 TM33 Reflect
+    ITEM_NONE,   // 361 TM34 Sludge Wave
+    ITEM_TM01 + 34,   // 362 TM35 Flamethrower
+    ITEM_TM01 + 35,   // 363 TM36 Sludge Bomb
+    ITEM_TM01 + 36,   // 364 TM37 Sandstorm
+    ITEM_TM01 + 37,   // 365 TM38 Fire Blast
+    ITEM_TM01 + 38,   // 366 TM39 Rock Tomb
+    ITEM_TM01 + 39,   // 367 TM40 Aerial Ace
+    ITEM_TM01 + 40,   // 368 TM41 Torment
+    ITEM_TM01 + 41,   // 369 TM42 Facade
+    ITEM_NONE,   // 370 TM43 Flame Charge
+    ITEM_TM01 + 43,   // 371 TM44 Rest
+    ITEM_TM01 + 44,   // 372 TM45 Attract
+    ITEM_TM01 + 45,   // 373 TM46 Thief
+    ITEM_NONE,   // 374 TM47 Low Sweep
+    ITEM_NONE,   // 375 TM48 Round
+    ITEM_NONE,   // 376 TM49 Echoed Voice
+    ITEM_TM01 + 49,   // 377 TM50 Overheat
+    ITEM_NONE,   // 378 TM51 Ally Switch
+    ITEM_TM51 + 1,   // 379 TM52 Focus Blast
+    ITEM_TM51 + 2,   // 380 TM53 Energy Ball
+    ITEM_TM51 + 3,   // 381 TM54 False Swipe
+    ITEM_NONE,   // 382 TM55 Scald
+    ITEM_TM51 + 5,   // 383 TM56 Fling
+    ITEM_TM51 + 6,   // 384 TM57 Charge Beam
+    ITEM_NONE,   // 385 TM58 Sky Drop
+    ITEM_NONE,   // 386 TM59 Incinerate
+    ITEM_NONE,   // 387 TM60 Quash
+    ITEM_TM51 + 10,   // 388 TM61 Will-O-Wisp
+    ITEM_NONE,   // 389 TM62 Acrobatics
+    ITEM_TM51 + 12,   // 390 TM63 Embargo
+    ITEM_TM51 + 13,   // 391 TM64 Explosion
+    ITEM_TM51 + 14,   // 392 TM65 Shadow Claw
+    ITEM_TM51 + 15,   // 393 TM66 Payback
+    ITEM_NONE,   // 394 TM67 Retaliate
+    ITEM_TM51 + 17,   // 395 TM68 Giga Impact
+    ITEM_TM51 + 18,   // 396 TM69 Rock Polish
+    ITEM_HM01 + 4,   // 397 TM70 Flash
+    ITEM_TM51 + 20,   // 398 TM71 Stone Edge
+    ITEM_NONE,   // 399 TM72 Volt Switch
+    ITEM_TM51 + 22,   // 400 TM73 Thunder Wave
+    ITEM_TM51 + 23,   // 401 TM74 Gyro Ball
+    ITEM_TM51 + 24,   // 402 TM75 Swords Dance
+    ITEM_NONE,   // 403 TM76 Struggle Bug
+    ITEM_TM51 + 26,   // 404 TM77 Psych Up
+    ITEM_NONE,   // 405 TM78 Bulldoze
+    ITEM_NONE,   // 406 TM79 Frost Breath
+    ITEM_TM51 + 29,   // 407 TM80 Rock Slide
+    ITEM_TM51 + 30,   // 408 TM81 X-Scissor
+    ITEM_NONE,   // 409 TM82 Dragon Tail
+    ITEM_NONE,   // 410 TM83 Work Up
+    ITEM_TM51 + 33,   // 411 TM84 Poison Jab
+    ITEM_TM51 + 34,   // 412 TM85 Dream Eater
+    ITEM_TM51 + 35,   // 413 TM86 Grass Knot
+    ITEM_TM51 + 36,   // 414 TM87 Swagger
+    ITEM_TM51 + 37,   // 415 TM88 Pluck
+    ITEM_TM51 + 38,   // 416 TM89 U-turn
+    ITEM_TM51 + 39,   // 417 TM90 Substitute
+    ITEM_TM51 + 40,   // 418 TM91 Flash Cannon
+    ITEM_TM51 + 41,   // 419 TM92 Trick Room
+    ITEM_HM01,   // 420 HM01 Cut
+    ITEM_HM01 + 1,   // 421 HM02 Fly
+    ITEM_HM01 + 2,   // 422 HM03 Surf
+    ITEM_HM01 + 3,   // 423 HM04 Strength
+    ITEM_HM01 + 6,   // 424 HM05 Waterfall
+    ITEM_HM01 + 7,   // 425 HM06 Dive
     ITEM_NONE,   // 426 ???
     ITEM_NONE,   // 427 ???
     ITEM_EXPLORER_KIT,   // 428 Explorer Kit
@@ -472,7 +472,7 @@ static const u16 sUnovaItems[] = {
     ITEM_NONE,   // 468 Apricorn Box
     ITEM_NONE,   // 469 Unown Report
     ITEM_NONE,   // 470 Berry Pots
-    ITEM_NONE,   // 471 Dowsing MCHN
+    ITEM_ITEMFINDER,   // 471 Dowsing MCHN
     ITEM_BLUE_CARD,   // 472 Blue Card
     ITEM_NONE,   // 473 SlowpokeTail
     ITEM_CLEAR_BELL,   // 474 Clear Bell
@@ -538,60 +538,60 @@ static const u16 sUnovaItems[] = {
     ITEM_RED_ORB,   // 534 Red Orb
     ITEM_BLUE_ORB,   // 535 Blue Orb
     ITEM_NONE,   // 536 Enigma Stone
-    ITEM_NONE,   // 537 Prism Scale
+    ITEM_PRISM_SCALE,   // 537 Prism Scale
     ITEM_EVIOLITE,   // 538 Eviolite
     ITEM_FLOAT_STONE,   // 539 Float Stone
     ITEM_ROCKY_HELMET,   // 540 Rocky Helmet
     ITEM_AIR_BALLOON,   // 541 Air Balloon
-    ITEM_NONE,   // 542 Red Card
-    ITEM_NONE,   // 543 Ring Target
-    ITEM_NONE,   // 544 Binding Band
+    ITEM_RED_CARD,   // 542 Red Card
+    ITEM_RING_TARGET,   // 543 Ring Target
+    ITEM_BINDING_BAND,   // 544 Binding Band
     ITEM_ABSORB_BULB,   // 545 Absorb Bulb
     ITEM_CELL_BATTERY,   // 546 Cell Battery
-    ITEM_NONE,   // 547 Eject Button
-    ITEM_NONE,   // 548 Fire Gem
-    ITEM_NONE,   // 549 Water Gem
-    ITEM_NONE,   // 550 Electric Gem
-    ITEM_NONE,   // 551 Grass Gem
-    ITEM_NONE,   // 552 Ice Gem
-    ITEM_NONE,   // 553 Fighting Gem
-    ITEM_NONE,   // 554 Poison Gem
-    ITEM_NONE,   // 555 Ground Gem
-    ITEM_NONE,   // 556 Flying Gem
-    ITEM_NONE,   // 557 Psychic Gem
-    ITEM_NONE,   // 558 Bug Gem
-    ITEM_NONE,   // 559 Rock Gem
-    ITEM_NONE,   // 560 Ghost Gem
-    ITEM_NONE,   // 561 Dragon Gem
-    ITEM_NONE,   // 562 Dark Gem
-    ITEM_NONE,   // 563 Steel Gem
-    ITEM_NONE,   // 564 Normal Gem
-    ITEM_NONE,   // 565 Health Wing
-    ITEM_NONE,   // 566 Muscle Wing
-    ITEM_NONE,   // 567 Resist Wing
-    ITEM_NONE,   // 568 Genius Wing
-    ITEM_NONE,   // 569 Clever Wing
-    ITEM_NONE,   // 570 Swift Wing
-    ITEM_NONE,   // 571 Pretty Wing
-    ITEM_NONE,   // 572 Cover Fossil
-    ITEM_NONE,   // 573 Plume Fossil
-    ITEM_NONE,   // 574 Liberty Pass
-    ITEM_NONE,   // 575 Pass Orb
+    ITEM_EJECT_BUTTON,   // 547 Eject Button
+    ITEM_FIRE_GEM,   // 548 Fire Gem
+    ITEM_WATER_GEM,   // 549 Water Gem
+    ITEM_ELECTRIC_GEM,   // 550 Electric Gem
+    ITEM_GRASS_GEM,   // 551 Grass Gem
+    ITEM_ICE_GEM,   // 552 Ice Gem
+    ITEM_FIGHTING_GEM,   // 553 Fighting Gem
+    ITEM_POISON_GEM,   // 554 Poison Gem
+    ITEM_GROUND_GEM,   // 555 Ground Gem
+    ITEM_FLYING_GEM,   // 556 Flying Gem
+    ITEM_PSYCHIC_GEM,   // 557 Psychic Gem
+    ITEM_BUG_GEM,   // 558 Bug Gem
+    ITEM_ROCK_GEM,   // 559 Rock Gem
+    ITEM_GHOST_GEM,   // 560 Ghost Gem
+    ITEM_DRAGON_GEM,   // 561 Dragon Gem
+    ITEM_DARK_GEM,   // 562 Dark Gem
+    ITEM_STEEL_GEM,   // 563 Steel Gem
+    ITEM_NORMAL_GEM,   // 564 Normal Gem
+    ITEM_HEALTH_WING,   // 565 Health Wing
+    ITEM_MUSCLE_WING,   // 566 Muscle Wing
+    ITEM_RESIST_WING,   // 567 Resist Wing
+    ITEM_GENIUS_WING,   // 568 Genius Wing
+    ITEM_CLEVER_WING,   // 569 Clever Wing
+    ITEM_SWIFT_WING,   // 570 Swift Wing
+    ITEM_PRETTY_WING,   // 571 Pretty Wing
+    ITEM_COVER_FOSSIL,   // 572 Cover Fossil
+    ITEM_PLUME_FOSSIL,   // 573 Plume Fossil
+    ITEM_LIBERTY_PASS,   // 574 Liberty Pass
+    ITEM_PASS_ORB,   // 575 Pass Orb
     ITEM_DREAM_BALL,   // 576 Dream Ball
-    ITEM_NONE,   // 577 Poké Toy
-    ITEM_NONE,   // 578 Prop Case
-    ITEM_NONE,   // 579 Dragon Skull
-    ITEM_NONE,   // 580 BalmMushroom
-    ITEM_NONE,   // 581 Big Nugget
-    ITEM_NONE,   // 582 Pearl String
-    ITEM_NONE,   // 583 Comet Shard
-    ITEM_NONE,   // 584 Relic Copper
-    ITEM_NONE,   // 585 Relic Silver
-    ITEM_NONE,   // 586 Relic Gold
-    ITEM_NONE,   // 587 Relic Vase
-    ITEM_NONE,   // 588 Relic Band
-    ITEM_NONE,   // 589 Relic Statue
-    ITEM_NONE,   // 590 Relic Crown
+    ITEM_POKE_TOY,   // 577 Poké Toy
+    ITEM_PROP_CASE,   // 578 Prop Case
+    ITEM_DRAGON_SKULL,   // 579 Dragon Skull
+    ITEM_BALM_MUSHROOM,   // 580 BalmMushroom
+    ITEM_BIG_NUGGET,   // 581 Big Nugget
+    ITEM_PEARL_STRING,   // 582 Pearl String
+    ITEM_COMET_SHARD,   // 583 Comet Shard
+    ITEM_RELIC_COPPER,   // 584 Relic Copper
+    ITEM_RELIC_SILVER,   // 585 Relic Silver
+    ITEM_RELIC_GOLD,   // 586 Relic Gold
+    ITEM_RELIC_VASE,   // 587 Relic Vase
+    ITEM_RELIC_BAND,   // 588 Relic Band
+    ITEM_RELIC_STATUE,   // 589 Relic Statue
+    ITEM_RELIC_CROWN,   // 590 Relic Crown
     ITEM_CASTELIACONE,   // 591 Casteliacone
     ITEM_NONE,   // 592 Dire Hit 2
     ITEM_NONE,   // 593 X Speed 2
@@ -617,17 +617,17 @@ static const u16 sUnovaItems[] = {
     ITEM_NONE,   // 613 Item Urge
     ITEM_NONE,   // 614 Reset Urge
     ITEM_NONE,   // 615 Dire Hit 3
-    ITEM_NONE,   // 616 Light Stone
-    ITEM_NONE,   // 617 Dark Stone
-    ITEM_NONE,   // 618 TM93
-    ITEM_NONE,   // 619 TM94
-    ITEM_NONE,   // 620 TM95
-    ITEM_NONE,   // 621 Xtransceiver
+    ITEM_LIGHT_STONE,   // 616 Light Stone
+    ITEM_DARK_STONE,   // 617 Dark Stone
+    ITEM_NONE,   // 618 TM93 Wild Charge
+    ITEM_HM01 + 5,   // 619 TM94 Rock Smash
+    ITEM_NONE,   // 620 TM95 Snarl
+    ITEM_XTRANSCEIVER,   // 621 Xtransceiver
     ITEM_NONE,   // 622 ???
-    ITEM_NONE,   // 623 Gram 1
-    ITEM_NONE,   // 624 Gram 2
-    ITEM_NONE,   // 625 Gram 3
-    ITEM_NONE,   // 626 Xtransceiver
+    ITEM_GRAM_1,   // 623 Gram 1
+    ITEM_GRAM_2,   // 624 Gram 2
+    ITEM_GRAM_3,   // 625 Gram 3
+    ITEM_XTRANSCEIVER,   // 626 Xtransceiver
 };
 static const u8 sUnovaItemPockets[] = {   // (Black's bag pocket of each)
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

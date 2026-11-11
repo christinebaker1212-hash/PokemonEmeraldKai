@@ -5325,4 +5325,5 @@ const struct Item gItems[] =
         .fieldUseFunc = ItemUseOutOfBattle_Bike,   // Moemon Kai: JOHTO's / KANTO's BICYCLE rides as FireRed's, one speed
         .secondaryId = MACH_BIKE,
     },
+#include "items_unova.h"   // Moemon Kai: UNOVA's new items (tools/unova/gen_new_items.py)
 };

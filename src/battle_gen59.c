@@ -178,7 +178,8 @@ static EWRAM_DATA bool8 sStatDown = FALSE;
     X(FOES_STAT_DOWN, "The foes' {B_BUFF1}\nfell!") \
     X(HEAVY_RAIN, "A heavy rain began to fall!") \
     X(HARSH_SUN, "The sunlight turned\nextremely harsh!") \
-    X(STRONG_WINDS, "Mysterious strong winds are\nprotecting FLYING POKéMON!")
+    X(STRONG_WINDS, "Mysterious strong winds are\nprotecting FLYING POKéMON!") \
+    X(GEM, "The {B_LAST_ITEM} strengthened\n{B_CURRENT_MOVE}'s power!")
 
 #define G59_ENUM(name, text) G59_MSG_##name,
 enum { G59_TEXTS(G59_ENUM) G59_MSG_COUNT };
@@ -965,6 +966,13 @@ s32 MP_Gen59_FinalDamage(s32 damage, u16 move, u8 type, u8 attacker, u8 target, 
         damage = damage * 5 / 4;   // (its second hit at a quarter, as part of the one)
     if (type == TYPE_FIRE && gGen59Battlers[target].tarShot)
         damage *= 2;
+    // UNOVA's gems (Black's): a move of the gem's type at half again its power, once
+    if (IS_UNOVA_GEM(gBattleMons[attacker].item) && type == GetItemHoldEffectParam(gBattleMons[attacker].item)
+     && gBattleMoves[move].power > 1 && attacker != target)
+    {
+        damage = damage * 3 / 2;
+        gGen59Battlers[attacker].gemUsed = TRUE;
+    }
     // AURORA VEIL: like REFLECT and LIGHT SCREEN at once (not on top of them; INFILTRATOR goes through)
     if (gGen59Sides[GetBattlerSide(target)].auroraVeil && gCritMultiplier == 1 && gBattleMons[attacker].ability != ABILITY_INFILTRATOR
      && !(gSideStatuses[GetBattlerSide(target)] & (SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN)))
@@ -2399,6 +2407,18 @@ const u8 *MP_Gen59_MoveEnd(void)
                 return ItemStatUp(def, STAT_ATK, 0);
             if ((MP_Gen59_HoldsItem(def, ITEM_SNOWBALL) && type == TYPE_ICE && gBattleMons[def].statStages[STAT_ATK] < MAX_STAT_STAGE))
                 return ItemStatUp(def, STAT_ATK, 0);
+        }
+    }
+    if (gGen59Battlers[atk].gemUsed)
+    {
+        gGen59Battlers[atk].gemUsed = FALSE;
+        if (IS_UNOVA_GEM(gBattleMons[atk].item))
+        {
+            gLastUsedItem = gBattleMons[atk].item;
+            gBattleScripting.battler = atk;
+            SetItem(atk, ITEM_NONE);
+            Say(G59_MSG_GEM);
+            return BattleScript_G59AbilitySayMoveEnd;
         }
     }
     if (!(gGen59Field.moveEndDone & G59M_HELMET))

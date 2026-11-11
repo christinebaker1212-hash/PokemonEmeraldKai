@@ -382,6 +382,8 @@ const u8 gItemEffect_TamatoBerry[10] = {
     EV_BERRY_FRIENDSHIP_CHANGE,
 };
 
+#include "item_effects_unova.h"   // Moemon Kai: UNOVA's wings and SWEET HEART
+
 const u8 *const gItemEffectTable[] =
 {
     [ITEM_POTION - ITEM_POTION]        = gItemEffect_Potion,
@@ -468,5 +470,6 @@ const u8 *const gItemEffectTable[] =
     [ITEM_PEWTER_CRUNCHIES - ITEM_POTION] = gItemEffect_LavaCookie,
     [ITEM_RAGE_CANDY_BAR - ITEM_POTION] = gItemEffect_LavaCookie,
     // Moemon Kai: the table covers every item (it is read by item - ITEM_POTION; NULL = no effect)
+    ITEM_EFFECTS_UNOVA
     [ITEMS_COUNT - ITEM_POTION] = NULL,
 };

@@ -819,7 +819,67 @@
 #define MAKER_ITEM_RANGE [ITEM_MAKER_FIRST ... ITEM_MAKER_LAST]
 #define ITEM_ORRE_TICKET (ITEM_MAKER_LAST + 1)   // Moemon Kai: the boat to ORRE (810: after the Maker's slots), after any ELITE FOUR
 #define ITEM_MTN_BIKE (ITEM_ORRE_TICKET + 1)   // Moemon Kai: SINNOH's bike (Platinum's BICYCLE: the BICYCLE is KANTO's / JOHTO's)
-#define ITEMS_COUNT (ITEM_MTN_BIKE + 1)
+// Moemon Kai: UNOVA's new items (tools/unova/gen_new_items.py)
+#define ITEM_XTRANSCEIVER        812
+#define ITEM_GRAM_1              813
+#define ITEM_GRAM_2              814
+#define ITEM_GRAM_3              815
+#define ITEM_PROP_CASE           816
+#define ITEM_LIBERTY_PASS        817
+#define ITEM_PASS_ORB            818
+#define ITEM_DRAGON_SKULL        819
+#define ITEM_LIGHT_STONE         820
+#define ITEM_DARK_STONE          821
+#define ITEM_BIG_NUGGET          822
+#define ITEM_PEARL_STRING        823
+#define ITEM_COMET_SHARD         824
+#define ITEM_BALM_MUSHROOM       825
+#define ITEM_RELIC_COPPER        826
+#define ITEM_RELIC_SILVER        827
+#define ITEM_RELIC_GOLD          828
+#define ITEM_RELIC_VASE          829
+#define ITEM_RELIC_BAND          830
+#define ITEM_RELIC_STATUE        831
+#define ITEM_RELIC_CROWN         832
+#define ITEM_COVER_FOSSIL        833
+#define ITEM_PLUME_FOSSIL        834
+#define ITEM_HEALTH_WING         835
+#define ITEM_MUSCLE_WING         836
+#define ITEM_RESIST_WING         837
+#define ITEM_GENIUS_WING         838
+#define ITEM_CLEVER_WING         839
+#define ITEM_SWIFT_WING          840
+#define ITEM_PRETTY_WING         841
+#define ITEM_FIRE_GEM            842
+#define ITEM_WATER_GEM           843
+#define ITEM_ELECTRIC_GEM        844
+#define ITEM_GRASS_GEM           845
+#define ITEM_ICE_GEM             846
+#define ITEM_FIGHTING_GEM        847
+#define ITEM_POISON_GEM          848
+#define ITEM_GROUND_GEM          849
+#define ITEM_FLYING_GEM          850
+#define ITEM_PSYCHIC_GEM         851
+#define ITEM_BUG_GEM             852
+#define ITEM_ROCK_GEM            853
+#define ITEM_GHOST_GEM           854
+#define ITEM_DRAGON_GEM          855
+#define ITEM_DARK_GEM            856
+#define ITEM_STEEL_GEM           857
+#define ITEM_NORMAL_GEM          858
+#define ITEM_PRISM_SCALE         859
+#define ITEM_RED_CARD            860
+#define ITEM_RING_TARGET         861
+#define ITEM_BINDING_BAND        862
+#define ITEM_EJECT_BUTTON        863
+#define ITEM_SWEET_HEART         864
+#define ITEM_POKE_TOY            865
+#define FIRST_UNOVA_ITEM ITEM_XTRANSCEIVER
+#define LAST_UNOVA_ITEM ITEM_POKE_TOY
+#define IS_UNOVA_GEM(item) ((item) >= ITEM_FIRE_GEM && (item) <= ITEM_NORMAL_GEM)
+#define IS_UNOVA_WING(item) ((item) >= ITEM_HEALTH_WING && (item) <= ITEM_SWIFT_WING)
+// end of UNOVA's new items
+#define ITEMS_COUNT (LAST_UNOVA_ITEM + 1)
 // end of Gen 5-9 items
 #define FIRST_PLATINUM_KEY_ITEM ITEM_GALACTIC_KEY
 #define LAST_PLATINUM_ITEM ITEM_GOOEY_MULCH

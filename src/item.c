@@ -25,6 +25,7 @@ EWRAM_DATA struct BagPocket gBagPockets[POCKETS_COUNT] = {0};
 #include "data/text/item_descriptions_gen4.h"   // Moemon Kai: Gen 4 items
 #include "data/text/item_descriptions_gen4_berries.h"   // Moemon Kai: Gen 4 berries
 #include "data/text/item_descriptions_gen59.h"   // Moemon Kai: Gen 5-9 items
+#include "data/text/item_descriptions_unova.h"   // Moemon Kai: UNOVA's new items
 #include "data/text/item_descriptions_tm2.h"   // Moemon Kai: TM51-TM92
 #include "data/text/item_descriptions_tm3.h"   // Moemon Kai: TM93 on
 #include "data/text/item_descriptions_qz.h"   // Moemon Kai: Johto / Kanto items

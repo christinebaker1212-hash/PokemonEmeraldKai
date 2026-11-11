@@ -33,6 +33,7 @@ struct Gen59Battler
     u8 throatChop;         // turns left without sound moves
     u8 laserFocus;         // its next hit is critical
     u8 tarShot:1;          // FIRE hurts it twice as much
+    u8 gemUsed:1;          // UNOVA's gems: its gem powered this move up (used up at the move's end)
     u8 noRetreat:1;
     u8 octolock:1;
     u8 thirdType;          // TRICK-OR-TREAT / FOREST'S CURSE (TYPE_MYSTERY = none)
