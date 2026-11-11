@@ -945,8 +945,13 @@ void Orre_Npc_PartnerFollow(bool8 on)
 bool8 Orre_TestPersonTile(u32 index, s16 *x, s16 *y)
 {
     struct Npc *n = Of(index);
-    if (n == NULL || !n->shown || Object(n) == NULL)
+    if (n == NULL || !n->shown)
         return FALSE;
+    if (Object(n) == NULL)
+    {
+        *x = n->x, *y = n->y;   // (too far off for Kai to have made their object yet: where they stand)
+        return TRUE;
+    }
     *x = Object(n)->currentCoords.x - MAP_OFFSET;
     *y = Object(n)->currentCoords.y - MAP_OFFSET;
     return TRUE;
