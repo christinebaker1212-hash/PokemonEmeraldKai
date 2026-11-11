@@ -21,6 +21,7 @@ const char *Orre_People_PicArtist(u16 person);                 // ... its artist
 // The battle picture: the next battle's foe A / B is PERSON (the converted scripts set it before a trainer battle;
 // in ORRE only, until the battle ends)
 void Orre_People_SetFoe(u8 which, u16 person);
+void Orre_People_SetFoeDefault(u8 which, u16 person);          // ... if none is set
 void Orre_SetFoePerson(void);                                  // (special) VAR_0x8004 person, VAR_0x8005 0 A / 1 B
 void Orre_People_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn);   // the battle controllers' hook
 void Orre_People_DrawPic(struct Sprite *sprite, u16 person, u16 standIn);           // PERSON's picture on SPRITE

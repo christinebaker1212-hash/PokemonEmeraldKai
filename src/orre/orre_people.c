@@ -152,6 +152,13 @@ void Orre_People_SetFoe(u8 which, u16 person)
     sFoe[which & 1] = person < ORRE_PEOPLE_COUNT ? person : ORRE_PERSON_NONE;
 }
 
+// ... unless a script has named one already (orre_battle.c: the trainer's own look)
+void Orre_People_SetFoeDefault(u8 which, u16 person)
+{
+    if (sFoe[which & 1] == ORRE_PERSON_NONE)
+        Orre_People_SetFoe(which, person);
+}
+
 void Orre_SetFoePerson(void)
 {
     Orre_People_SetFoe(gSpecialVar_0x8005, gSpecialVar_0x8004);

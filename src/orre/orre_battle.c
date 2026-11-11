@@ -226,6 +226,85 @@ static u8 BuildTeam(u8 which, u16 coloTrainer, u16 trainerId)
     return n;
 }
 
+// A trainer's look in battle: Colosseum's trainer record names its battle model by number (+ 0x13), and the person
+// whose picture stands for it here is the field model of the same kind of trainer (by each number's trainer class
+// and its named owners: 15 is MIROR B.'s, 38 WILLIE's, 39 the RIDERs'). Battles the scripts start never said whose
+// picture to show, and every foe was the stand-in's, BRENDAN (the user, 2026-11-11)
+static const char *const sTrainerLook[76] = {
+    [1] = "ken_b1",
+    [2] = "snach_zako_b1",
+    [3] = "snach_zako_b2",
+    [4] = "agent_f_b1",
+    [5] = "agent_m_b1",
+    [6] = "agent_m_b2",
+    [7] = "agent_m_b3",
+    [8] = "agent_m_b4",
+    [9] = "agent_m_b5",
+    [10] = "hizuki_b1",
+    [11] = "snach_zako_b3",
+    [12] = "baba_a_b1",
+    [13] = "boss_s_b1",
+    [14] = "ginzaru_b1",
+    [15] = "boss555_b1",
+    [16] = "boss777_b1",
+    [17] = "kuro_b1",
+    [18] = "caster_a_b1",
+    [19] = "geinin_b1",
+    [20] = "grandpa_b1",
+    [21] = "gym_a_b2",
+    [22] = "gym_b_b1",
+    [23] = "gym_b_b2",
+    [24] = "gym_a_b1",
+    [25] = "thief_f_b1",
+    [26] = "thief_f_b2",
+    [27] = "hunter_m_b1",
+    [28] = "thief_m_b1",
+    [29] = "info_b1",
+    [30] = "mania_b1",
+    [31] = "jiji_a_b1",
+    [32] = "niku_f_b1",
+    [33] = "niku_m_b1",
+    [34] = "obo_b1",
+    [35] = "ippan_m_b1",
+    [36] = "ojo_b1",
+    [37] = "rider_f_b1",
+    [38] = "rider_m_b1",
+    [39] = "rider_m_b2",
+    [40] = "sensei_b1",
+    [41] = "sityo_b2",
+    [42] = "snach_zako_b1",
+    [43] = "sport_f_b1",
+    [44] = "sport_m_b1",
+    [45] = "boss999_b1",
+    [46] = "hunter_f_b3",
+    [47] = "hunter_m_b2",
+    [48] = "warugaki_b1",
+    [49] = "worker_m_b1",
+    [51] = "obo_b2",
+    [52] = "ojo_b3",
+    [53] = "traner_m_b1",
+    [54] = "traner_f_b1",
+    [55] = "gym_a_b4",
+    [56] = "thief_m_b2",
+    [57] = "kenkyuin_b1",
+    [58] = "hunter_f_b1",
+    [59] = "battleyama_b1",
+    [60] = "niku_m_b2",
+    [61] = "syotyou_b1",
+    [63] = "grandpa_b2",
+    [64] = "grandpa_b3",
+    [65] = "gym_a_b3",
+    [67] = "snach_zako_b2",
+    [68] = "snach_zako_b3",
+    [69] = "agent_m_b6",
+    [70] = "gym_b_b3",
+    [71] = "gym_b_b2",
+    [72] = "gym_b_b1",
+    [73] = "thief_m_b1",
+    [74] = "hunter_m_b3",
+    [75] = "gym_c_b1",
+};
+
 // Fill TRAINER_ORRE_A + WHICH as Colosseum's trainer COLOTRAINER (FALSE: no such trainer)
 static bool8 SetTrainer(u8 which, u16 coloTrainer, bool8 doubles)
 {
@@ -246,6 +325,8 @@ static bool8 SetTrainer(u8 which, u16 coloTrainer, bool8 doubles)
     sTeamCount[which] = BuildTeam(which, coloTrainer, id);
     s->partySize = sTeamCount[which];
     sColoTrainer[which] = coloTrainer;
+    if (t[0x13] < ARRAY_COUNT(sTrainerLook) && sTrainerLook[t[0x13]] != NULL)
+        Orre_People_SetFoeDefault(which, Orre_People_Find(sTrainerLook[t[0x13]]));
     k = Rec(KINDS, KIND_COUNT, KIND_SIZE, Be16(t + 2));
     if (k)
         TextInto(sClassName[which], Be32(k + 4), TRAINER_NAME_LENGTH + 2);

@@ -700,6 +700,7 @@ const u16 *O3D_LayoutBlocks(const struct MapLayout *layout)
 
 // ------------------------------------------------------------------------------------------------ the ground's height
 
+#define HEADROOM 24.0f   // (a tile and a half: under less, a floor isn't one to stand on)
 // A tile's ground height (16 units a tile): of its heights, the one nearest `near` (an object on a bridge stays on
 // it); `near` itself where it has none
 static float TileHeight(s32 tx, s32 tz, float near)
@@ -713,6 +714,21 @@ static float TileHeight(s32 tx, s32 tz, float near)
     for (i = 1; i < sCur->hn[t] && i < 3; i++)
         if (fabsf(sCur->hgt[t][i] - near) < fabsf(sCur->hgt[t][best] - near))
             best = i;
+    // (no one stands on a floor with another less than a person's height over it: the ground that runs on under a
+    // flight of stairs. Going up PHENAC's stairs the first step is a step's rise away and the ground under it no
+    // distance at all, so the nearest was the ground, and from there on everyone walked up inside the stairs with
+    // only their heads out; going down was right, the steps being the nearer all the way: the user, 2026-11-11)
+    {
+        bool8 again = getenv("MOEMON_ORRE_NO_HEADROOM") == NULL;   // (tests: the old choice, to see the fault)
+        while (again)
+        {
+            again = FALSE;
+            for (i = 0; i < sCur->hn[t] && i < 3; i++)
+                if (sCur->hgt[t][i] > sCur->hgt[t][best] && sCur->hgt[t][i] - sCur->hgt[t][best] < HEADROOM
+                 && sCur->hgt[t][i] - near < HEADROOM)
+                    best = i, again = TRUE;
+        }
+    }
     return sCur->hgt[t][best];
 }
 

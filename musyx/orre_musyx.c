@@ -39,6 +39,8 @@ static struct
     SND_SEQID seq[2];
     uint32_t bgm[2];       // (each one's sound id)
     uint8_t bgmVolume[2];
+    uint8_t roomVolume;      // a room's own quiet (the scripts' std109: indoors 80 of 127): on its song while walking about
+    uint8_t roomSet, loud;   // loud: a scene or a battle is on, where the room's quiet has no place
     SND_VOICEID fx[SOUND_COUNT];
     // the filter's state
     int16_t held[2];
@@ -141,6 +143,32 @@ static uint8_t *Song(uint32_t row)
     return s.song[row];
 }
 
+// A song's volume as it sounds: its own, under the room's quiet while the player walks about (never in a scene or a
+// battle: the user, 2026-11-11. The room's quiet was the whole mix's master volume and stayed on through both)
+static uint8_t Heard(int k)
+{
+    uint32_t room = s.roomSet ? s.roomVolume : 127;
+    if (k != 1 || s.loud)
+        return s.bgmVolume[k];
+    return (uint8_t)(s.bgmVolume[k] * room / 127);
+}
+
+static void Rehear(uint32_t fadeMs)
+{
+    if (s.ok && s.seq[1] != SND_SEQ_ERROR_ID)
+        sndSeqVolume(Heard(1), (uint16_t)(fadeMs > 60000 ? 60000 : fadeMs), s.seq[1], SND_SEQVOL_CONTINUE);
+}
+
+// A scene's camera or a battle is on (orre_audio.c, every frame)
+void OrreSound_Loud(int on)
+{
+    if (s.loud != (uint8_t)(on != 0))
+    {
+        s.loud = on != 0;
+        Rehear(400);
+    }
+}
+
 int OrreSound_Play(uint32_t id, uint32_t volume, int bgm)
 {
     const uint8_t *e;
@@ -167,7 +195,10 @@ int OrreSound_Play(uint32_t id, uint32_t volume, int bgm)
         if (s.bgm[k] == id && s.seq[k] != SND_SEQ_ERROR_ID)
         {
             if (vol != s.bgmVolume[k])
-                sndSeqVolume(s.bgmVolume[k] = vol, 500, s.seq[k], SND_SEQVOL_CONTINUE);
+            {
+                s.bgmVolume[k] = vol;
+                sndSeqVolume(Heard(k), 500, s.seq[k], SND_SEQVOL_CONTINUE);
+            }
             return 1;   // (the same song goes on)
         }
         if (s.seq[k] != SND_SEQ_ERROR_ID)
@@ -177,7 +208,8 @@ int OrreSound_Play(uint32_t id, uint32_t volume, int bgm)
             return 0;   // (the silent row: the music stops)
         memset(&para, 0, sizeof(para));
         para.flags = SND_PLAYPARA_VOLUME;
-        para.volume.time = 0, para.volume.target = vol;
+        s.bgmVolume[k] = vol;
+        para.volume.time = 0, para.volume.target = Heard(k);
         s.seq[k] = sndSeqPlay(e[1], Be16(e + 4), song, &para);
         if (getenv("MOEMON_ORRE_SOUND_LOG"))
             printf("[orre] sound: song %u (file %u, group %u song %u) vol %u slot %d -> %s\n", id, e[3], e[1],
@@ -247,7 +279,8 @@ void OrreSound_Volume(uint32_t id, uint32_t volume, uint32_t fadeMs)
     for (k = 0; k < 2; k++)
         if (id == s.bgm[k] && s.seq[k] != SND_SEQ_ERROR_ID)
         {
-            sndSeqVolume(s.bgmVolume[k] = vol, (uint16_t)(fadeMs > 60000 ? 60000 : fadeMs), s.seq[k], SND_SEQVOL_CONTINUE);
+            s.bgmVolume[k] = vol;
+            sndSeqVolume(Heard(k), (uint16_t)(fadeMs > 60000 ? 60000 : fadeMs), s.seq[k], SND_SEQVOL_CONTINUE);
             return;
         }
     if (s.fx[id] != SND_ID_ERROR && sndFXCheck(s.fx[id]) != SND_ID_ERROR)
@@ -256,8 +289,9 @@ void OrreSound_Volume(uint32_t id, uint32_t volume, uint32_t fadeMs)
 
 void OrreSound_MasterVolume(uint32_t volume, uint32_t fadeMs)
 {
-    if (s.ok)
-        sndMasterVolume(volume > 127 ? 127 : (uint8_t)volume, (uint16_t)(fadeMs > 60000 ? 60000 : fadeMs), 1, 1);
+    // (the room's quiet: on its song, not the whole mix)
+    s.roomVolume = volume > 127 ? 127 : (uint8_t)volume, s.roomSet = 1;
+    Rehear(fadeMs);
 }
 
 uint32_t OrreSound_Bgm(void)

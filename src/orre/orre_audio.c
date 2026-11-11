@@ -42,6 +42,8 @@ void Orre_AudioFrame(float *buffer, s32 count)
     if (sWasInOrre && !inOrre)
         OrreSound_Silence();
     sWasInOrre = inOrre;
+    // (a room's quiet is for walking about it: not a scene's shot, not a battle)
+    OrreSound_Loud(gMain.inBattle || (inOrre && O3D_CamActive()));
     // (a battle: Colosseum's own song for it when it has one, orre_battle.c; else Kai's, the room's song waiting)
     OrreSound_Mix(buffer, count, 42048, inOrre && (!gMain.inBattle || Orre_BattleSongOn()));
 }

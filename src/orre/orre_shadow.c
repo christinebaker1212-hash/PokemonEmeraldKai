@@ -667,9 +667,11 @@ bool8 Orre_Shadow_WrongSnag(void)
 // the snag done (the battle script's ORRE_SNAGGED, after givecaughtmon gave it to the player): its record becomes the
 // player's (its OT is the player's now), the POKéDEX knows it, and it leaves the battle as if it had fainted (no EXP:
 // the catch's was given), so the trainer sends out the next one or has lost. TRUE: it went into the party (no PC line)
+u8 MP_CatchBattler(void);   // battle_script_commands.c
+
 static u8 Snagged(void)
 {
-    u8 target = gBattlerTarget;
+    u8 target = MP_CatchBattler();   // (the one the ball was thrown at: gBattlerTarget has moved on by now)
     struct Pokemon *mon = &gEnemyParty[gBattlerPartyIndexes[target]];
     u32 personality = GetMonData(mon, MON_DATA_PERSONALITY), i;
     u16 zero = 0, species = GetMonData(mon, MON_DATA_SPECIES);

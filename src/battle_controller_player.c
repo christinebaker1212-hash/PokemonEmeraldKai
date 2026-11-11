@@ -3189,7 +3189,7 @@ static void PlayerHandleSuccessBallThrowAnim(void)
 {
     gBattleSpritesDataPtr->animationData->ballThrowCaseId = BALL_3_SHAKES_SUCCESS;
     gDoingBattleAnim = TRUE;
-    InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, gMpCoopWild ? gBattlerTarget : GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT), B_ANIM_BALL_THROW); // Moemon Co-op
+    InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, (gMpCoopWild || (gBattleTypeFlags & BATTLE_TYPE_TRAINER)) ? gBattlerTarget : GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT), B_ANIM_BALL_THROW); // Moemon Co-op; Moemon Kai: a snag flies at the one it's for
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnSpecialAnimDone;
 }
 
@@ -3201,7 +3201,7 @@ static void PlayerHandleBallThrowAnim(void)
         MP_Coop_NoteOwnCatch(gBattlerTarget);   // Moemon Co-op: kept if the battle is called off
     gBattleSpritesDataPtr->animationData->ballThrowCaseId = ballThrowCaseId;
     gDoingBattleAnim = TRUE;
-    InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, gMpCoopWild ? gBattlerTarget : GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT), B_ANIM_BALL_THROW); // Moemon Co-op
+    InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, (gMpCoopWild || (gBattleTypeFlags & BATTLE_TYPE_TRAINER)) ? gBattlerTarget : GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT), B_ANIM_BALL_THROW); // Moemon Co-op; Moemon Kai: a snag flies at the one it's for
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnSpecialAnimDone;
 }
 

@@ -190,6 +190,8 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   session or a hook names one (they were meant to be deleted).
 - Publishing needs no permission (the user, 2026-11-02): once the tests pass, release; ask first only when the user
   says to pause and check.
+  **But gather fixes into larger batches** (the user, 2026-11-11: "a waste of my Github actions"; "don't just push
+  every single update"): one release for a group of fixes, or when the user asks for one; not one per fix.
 - Dev updates: the dev channel ended (the user, 2026-11-03, with Moemon Maker's first update): every update is a main
   update; don't push dev updates.
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)

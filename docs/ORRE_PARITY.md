@@ -65,6 +65,25 @@ walk can make are not ticked here until a walk with plain key presses (no planne
   feet's depth). Checked by a look at PHENAC with each follower style: the one kind of ORRE run made here, a
   picture of a reported fault.
 
+- **Going up stairs, everyone sank into them** (1.190.13): where the ground runs on under a flight of stairs a tile
+  has both heights, and the nearest to where a sprite stood was the ground at the first step (no distance at all
+  against a step's rise), so it stayed on that level all the way up; going down the steps were the nearer all the
+  way. A floor with another less than a person's height over it isn't stood on (o3d.c TileHeight, HEADROOM).
+  Seen and checked on the stairwell to PHENAC's stadium, old choice against new (MOEMON_ORRE_NO_HEADROOM=1).
+
+- **A snag in a Double Battle caught the wrong POKéMON** (1.190.13; first tried in 1.189.9, which only moved the
+  ball's odds): the hand-over, the POKéDEX, the nickname and the throw's animation all took the battler straight
+  across from the thrower, and the catch's EXP script between the throw and the hand-over pointed gBattlerTarget at
+  the player's own, so the snag's removal ran on the wrong one too. The throw keeps its own target now
+  (battle_script_commands.c sMpCatchBattler / MP_CatchBattler) and every step of the catch uses it: a snag is a wild
+  catch of that one POKéMON (the user's rule). Played: a Double Battle, the partner knocked out, the ball at the
+  Shadow MAKUHITA: caught, in the party.
+- **Every trainer had the stand-in's picture** (1.190.13): only test scripts ever named a battle's person. A trainer
+  record's model number (+ 0x13) now picks the field character of the same kind (orre_battle.c sTrainerLook: by
+  class and named owners, a best match, not Colosseum's battle models themselves).
+- **A room's quiet stayed on through scenes and battles** (1.190.13): the scripts' std109 was the whole mix's master
+  volume. It is the room's song's own level while walking about (orre_musyx.c Heard / OrreSound_Loud).
+
 ## Area by area (the user, 2026-11-11: "one area at a time")
 
 Read from the disc's scripts (tools/orre/gsvm.py), not from a run: the user tests ORRE.
