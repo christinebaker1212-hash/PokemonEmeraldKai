@@ -247,6 +247,19 @@ static void Box(u16 *frame, s32 x0, s32 y0, s32 x1, s32 y1, u16 color, s32 t)
         }
 }
 
+// The POKéDEX's own look (the user, 2026-11-11: "not like an addition added on top, but something that was always
+// there"): its START menu's blue box and white letters with their grey shadow, the pink buttons beside START and
+// SELECT, the entry's pale card with dark letters
+#define NO_SHADOW 0x7FFE
+#define C_MENU    RGB(6, 17, 31)
+#define C_MENU_HI RGB(22, 25, 30)
+#define C_WHITE   RGB(31, 31, 31)
+#define C_SHADOW  RGB(12, 12, 14)
+#define C_PINK    RGB(31, 0, 23)
+#define C_CARD    RGB(27, 27, 27)
+#define C_INK     RGB(2, 2, 2)
+#define C_INK_SH  RGB(23, 23, 23)
+
 // ASCII in the game's small font; returns where it ends
 static s32 Text(u16 *frame, s32 x, s32 y, const char *ascii, u16 color, u16 shadow)
 {
@@ -270,7 +283,12 @@ static s32 Text(u16 *frame, s32 x, s32 y, const char *ascii, u16 color, u16 shad
                 u8 c = (rows[(gx < 8 ? 0 : 8) + (gy % 8)] >> ((gx % 8) * 4)) & 0xF;
                 s32 px = x + gx, py = y + gy - 1;
                 if ((c == 1 || c == 2) && px >= 0 && py >= 0 && px < DISPLAY_WIDTH && py < DISPLAY_HEIGHT)
-                    frame[py * DISPLAY_WIDTH + px] = c == 1 ? (u16)(color | 0x8000) : Mix(frame[py * DISPLAY_WIDTH + px], shadow, 10);
+                    {
+                    if (c == 1)
+                        frame[py * DISPLAY_WIDTH + px] = (u16)(color | 0x8000);
+                    else if (shadow != NO_SHADOW)
+                        frame[py * DISPLAY_WIDTH + px] = (u16)(shadow | 0x8000);
+                }
             }
         }
         x += w;
@@ -289,13 +307,31 @@ static s32 Width(const char *ascii)
     return w;
 }
 
-// A key's name in a small dark tab, then its label
-static s32 Key(u16 *frame, s32 x, s32 y, const char *key, const char *label, u16 ink)
+// A button as the list's own START and SELECT are drawn: a pink pill with its name in white, then what it does
+static s32 Key(u16 *frame, s32 x, s32 y, const char *key, const char *label, u16 ink, u16 shadow)
 {
     s32 w = Width(key);
-    Box(frame, x, y, x + w + 3, y + 9, RGB(6, 7, 10), 14);
-    Text(frame, x + 2, y, key, RGB(31, 31, 31), 0);
-    return Text(frame, x + w + 6, y, label, ink, RGB(31, 31, 31)) + 5;
+    Box(frame, x, y, x + w + 4, y + 9, RGB(0, 0, 5), 16);
+    Box(frame, x + 1, y + 1, x + w + 3, y + 8, C_PINK, 16);
+    Text(frame, x + 3, y, key, C_WHITE, NO_SHADOW);
+    return Text(frame, x + w + 7, y, label, ink, shadow) + 5;
+}
+
+// The START menu's box
+static void MenuBox(u16 *frame, s32 x0, s32 y0, s32 x1, s32 y1)
+{
+    Box(frame, x0, y0, x1, y1, RGB(0, 0, 5), 16);
+    Box(frame, x0 + 1, y0 + 1, x1 - 1, y1 - 1, C_MENU_HI, 16);
+    Box(frame, x0 + 2, y0 + 2, x1 - 2, y1 - 2, C_MENU, 16);
+}
+
+// Its cursor: the pink arrow
+static void Cursor(u16 *frame, s32 x, s32 y)
+{
+    s32 i, k;
+    for (i = 0; i < 4; i++)
+        for (k = i; k < 7 - i; k++)
+            frame[(y + k) * DISPLAY_WIDTH + x + i] = C_PINK | 0x8000;
 }
 
 static const char *const sShowNames[MP_DEXSHOW_COUNT] = {"ALL", "NOT SEEN", "NOT CAUGHT", "CAUGHT", "FRIENDS'"};
@@ -316,42 +352,20 @@ void MP_DexHud_Composite(u16 *frame)
         DrawPanel(frame);
         return;
     }
-    // the title's strip: which POKéDEX, whose
-    Box(frame, 8, 0, 127, 15, RGB(31, 31, 31), 16);
-    x = 12;
+    // under the picture, beside the list's own START and SELECT: which POKéDEX (L), whose (R); FIND (LT / F)
     if (sHud.nationalOn)
-        x = Key(frame, x, 3, "L", sHud.national ? "NATIONAL" : "REGION", RGB(4, 6, 12));
-    else
-        x = Text(frame, x, 3, "REGION", RGB(4, 6, 12), RGB(31, 31, 31)) + 6;
-    Key(frame, x, 3, "R", sHud.shared ? "SHARED" : "OWN", sHud.shared ? RGB(3, 12, 22) : RGB(20, 6, 4));
-    // under the picture: what the list shows, how much of it is caught
-    Box(frame, 64, 138, 128, 158, RGB(2, 6, 4), 11);
-    snprintf(buf, sizeof(buf), "%s", sShowNames[sHud.filter < MP_DEXSHOW_COUNT ? sHud.filter : 0]);
-    Key(frame, 66, 139, "LT", buf, RGB(31, 31, 31));
-    if (sHud.nothing)
-    {
-        Box(frame, 134, 2, 226, 13, RGB(20, 4, 4), 14);
-        Text(frame, 138, 3, "NOTHING FOUND", RGB(31, 31, 31), 0);
-    }
-    else if (sHud.narrowed)
-    {
-        Box(frame, 134, 2, 226, 13, RGB(3, 5, 9), 13);
-        Text(frame, 138, 3, "FIND AND SORT ON", RGB(31, 28, 10), 0);
-    }
-    own = sHud.total ? sHud.ownCaught * 100 / sHud.total : 0;
-    all = sHud.total ? sHud.allCaught * 100 / sHud.total : 0;
-    snprintf(buf, sizeof(buf), "%d%%", sHud.shared ? all : own);
-    Text(frame, 66, 149, buf, RGB(31, 31, 31), 0);
-    w = 38;
-    y = 152;
-    Box(frame, 88, y, 88 + w + 1, y + 4, RGB(0, 0, 0), 12);
-    if (sHud.shared)   // (the friends' part behind the player's own)
-        for (x = 0; x < w * sHud.allCaught / (sHud.total ? sHud.total : 1); x++)
-            frame[(y + 1) * DISPLAY_WIDTH + 89 + x] = frame[(y + 2) * DISPLAY_WIDTH + 89 + x]
-                = frame[(y + 3) * DISPLAY_WIDTH + 89 + x] = RGB(9, 20, 31) | 0x8000;
-    for (x = 0; x < w * sHud.ownCaught / (sHud.total ? sHud.total : 1); x++)
-        frame[(y + 1) * DISPLAY_WIDTH + 89 + x] = frame[(y + 2) * DISPLAY_WIDTH + 89 + x]
-            = frame[(y + 3) * DISPLAY_WIDTH + 89 + x] = RGB(31, 26, 6) | 0x8000;
+        Key(frame, 65, 138, "L", sHud.national ? "NATIONAL" : "REGION", C_WHITE, RGB(0, 0, 5));
+    Key(frame, 65, 149, "R", sHud.shared ? "SHARED" : "OWN", C_WHITE, RGB(0, 0, 5));
+    Key(frame, 134, 149, "LT", sHud.nothing ? "NONE FOUND" : sHud.narrowed || sHud.filter ? "FIND ON" : "FIND", C_INK, C_INK_SH);
+    // how much of the list is caught: a line along the picture's frame (the friends' part behind the player's own)
+    w = 60;
+    y = 133;
+    own = w * sHud.ownCaught / (sHud.total ? sHud.total : 1);
+    all = w * sHud.allCaught / (sHud.total ? sHud.total : 1);
+    for (x = 0; x < w; x++)
+        frame[y * DISPLAY_WIDTH + 66 + x] = frame[(y + 1) * DISPLAY_WIDTH + 66 + x]
+            = (x < own ? RGB(31, 26, 6) : sHud.shared && x < all ? RGB(9, 20, 31) : RGB(12, 12, 14)) | 0x8000;
+    (void)buf;
 }
 
 // ------------------------------------------------------------------------------------------------ FIND & SORT
@@ -372,7 +386,7 @@ void MP_DexHud_Composite(u16 *frame)
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 u16 ItemIdToBattleMoveId(u16 item);
 
-enum { ROW_JUMP, ROW_SORT, ROW_SHOW, ROW_GEN, ROW_TYPE1, ROW_TYPE2, ROW_ABILITY, ROW_MOVE, ROW_EGG, ROW_CLASSIC, ROW_CLEAR, ROW_COUNT };
+enum { ROW_JUMP, ROW_SORT, ROW_SHOW, ROW_GEN, ROW_TYPE1, ROW_TYPE2, ROW_ABILITY, ROW_MOVE, ROW_EGG, ROW_CLEAR, ROW_COUNT };
 
 static struct MpDexQuery sQuery = {0, 0, 0xFF, 0xFF, 0, 0, 0};
 static struct
@@ -473,6 +487,15 @@ s32 MP_DexQuery_SortKey(u16 nat)
         return -(s32)(NATIONAL_DEX_COUNT + nat);   // (caught by a friend, or before the order was kept: after, by number)
     }
     return 0;
+}
+
+int MP_DexPanel_Close(void)
+{
+    if (sPanel.typing)
+        return 0;
+    sPanel.open = FALSE;
+    PlaySE(SE_PC_OFF);
+    return 1;
 }
 
 const char *MP_DexPanel_Jump(void)
@@ -675,11 +698,6 @@ int MP_DexPanel_Step(void)
             while (Platform_PopTypedChar())
                 ;
         }
-        else if (sPanel.row == ROW_CLASSIC)
-        {
-            sPanel.open = FALSE;
-            return 2;
-        }
         else if (sPanel.row == ROW_CLEAR)
         {
             sQuery.gen = 0, sQuery.type1 = sQuery.type2 = 0xFF, sQuery.ability = sQuery.move = 0, sQuery.egg = 0;
@@ -698,36 +716,29 @@ int MP_DexPanel_Step(void)
 static void DrawPanel(u16 *frame)
 {
     static const char *const sLabels[ROW_COUNT] = {
-        "JUMP TO", "SORT BY", "SHOW", "GENERATION", "TYPE", "AND TYPE", "ABILITY", "MOVE", "EGG GROUP",
-        "NAME AND COLOR SEARCH", "CLEAR ALL",
+        "JUMP TO", "ORDER", "SHOW", "GENERATION", "TYPE", "TYPE 2", "ABILITY", "MOVE", "EGG GROUP", "CLEAR ALL",
     };
     s32 i, y;
     char buf[40];
-    Box(frame, 20, 10, 219, 158, RGB(3, 5, 9), 15);
-    Box(frame, 21, 11, 218, 22, RGB(8, 16, 26), 16);
-    Text(frame, 26, 12, "FIND AND SORT", RGB(31, 31, 31), 0);
-    Text(frame, 150, 12, sPanel.typing ? "ENTER: GO" : "B: DONE", RGB(22, 28, 31), 0);
+    MenuBox(frame, 28, 20, 211, 158);
     for (i = 0; i < ROW_COUNT; i++)
     {
         bool8 on = i == sPanel.row;
         y = 26 + 11 * i;
         if (on)
-            Box(frame, 22, y - 1, 217, y + 9, RGB(31, 26, 6), 5);
-        Text(frame, 28, y, sLabels[i], on ? RGB(31, 31, 31) : RGB(22, 24, 27), 0);
+            Cursor(frame, 34, y + 1);
+        Text(frame, 42, y, sLabels[i], C_WHITE, C_SHADOW);
         NameOf((u8)i, buf, sizeof(buf));
         if (buf[0])
-        {
-            if (on && i != ROW_JUMP)
-                Text(frame, 108, y, "<", RGB(31, 26, 6), 0);
-            Text(frame, 116, y, buf, on ? RGB(31, 30, 20) : RGB(26, 27, 29), 0);
-            if (on && i != ROW_JUMP)
-                Text(frame, 116 + Width(buf) + 3, y, ">", RGB(31, 26, 6), 0);
-        }
+            Text(frame, 116, y, buf, on ? RGB(31, 30, 14) : C_WHITE, C_SHADOW);
     }
-    if (sPanel.row == ROW_JUMP)
-        Text(frame, 28, 26 + 11 * ROW_COUNT - 1, sPanel.typing ? "TYPE A NAME OR A NUMBER" : "A: TYPE IT   LEFT RIGHT: A LETTER", RGB(18, 22, 26), 0);
+    y = 26 + 11 * ROW_COUNT + 3;
+    if (sPanel.typing)
+        Text(frame, 42, y, "TYPE A NAME OR A NUMBER", RGB(22, 25, 30), C_SHADOW);
+    else if (sPanel.row == ROW_JUMP)
+        Text(frame, 42, y, "A: TYPE IT   LEFT RIGHT: A LETTER", RGB(22, 25, 30), C_SHADOW);
     else if (sPanel.row == ROW_ABILITY || sPanel.row == ROW_MOVE)
-        Text(frame, 28, 26 + 11 * ROW_COUNT - 1, "L R: NEXT LETTER   CAUGHT ONES ONLY", RGB(18, 22, 26), 0);
+        Text(frame, 42, y, "L R: NEXT LETTER", RGB(22, 25, 30), C_SHADOW);
 }
 
 // ------------------------------------------------------------------------------------------------ an entry's MORE
@@ -804,11 +815,11 @@ static s32 EvoLines(u16 *frame, u16 species, s32 depth, s32 y, const char *how)
         SpeciesAscii(species, name, sizeof(name));
     else
         snprintf(name, sizeof(name), "?????");
-    Text(frame, 24 + depth * 10, y, name, NationalPokedexNumToSpecies(sInfo.nat) == species ? RGB(31, 28, 10) : RGB(31, 31, 31), 0);
+    Text(frame, 24 + depth * 10, y, name, NationalPokedexNumToSpecies(sInfo.nat) == species ? RGB(24, 4, 4) : C_INK, C_INK_SH);
     if (how[0])
     {
         snprintf(line, sizeof(line), "%s", how);
-        Text(frame, 124, y, line, RGB(20, 26, 31), 0);
+        Text(frame, 124, y, line, RGB(4, 10, 22), C_INK_SH);
     }
     y += 10;
     for (i = 0; i < EVOS_PER_MON; i++)
@@ -838,19 +849,22 @@ static void DrawInfo(u16 *frame)
     u16 species = NationalPokedexNumToSpecies(sInfo.nat);
     const struct SpeciesInfo *info = &gSpeciesInfo[species];
     char buf[64], a[24], b[24];
-    s32 y = 30, i;
+    s32 y = 36, i;
     if (sInfo.page == 0)
     {
-        Box(frame, 184, 79, 226, 90, RGB(3, 5, 9), 12);
-        Key(frame, 187, 80, "R", "MORE", RGB(31, 31, 31));
+        Key(frame, 188, 80, "R", "MORE", C_INK, C_INK_SH);
         return;
     }
-    Box(frame, 16, 12, 223, 142, RGB(3, 5, 9), 15);
-    Box(frame, 17, 13, 222, 24, RGB(8, 16, 26), 16);
+    // (the entry's own card: pale, a grey strip for its heading, dark letters)
+    Box(frame, 12, 18, 227, 142, RGB(0, 0, 5), 16);
+    Box(frame, 13, 19, 226, 141, C_WHITE, 16);
+    Box(frame, 15, 21, 224, 139, C_CARD, 16);
+    Box(frame, 15, 21, 224, 31, RGB(23, 23, 23), 16);
     SpeciesAscii(species, a, sizeof(a));
     snprintf(buf, sizeof(buf), "%s  %s", a, sPages[(sInfo.page - 1) % 3]);
-    Text(frame, 22, 14, buf, RGB(31, 31, 31), 0);
-    Text(frame, 150, 14, "L R: PAGE  B", RGB(22, 28, 31), 0);
+    Text(frame, 20, 21, buf, C_INK, C_WHITE);
+    Key(frame, 176, 21, "L", "", C_INK, NO_SHADOW);
+    Key(frame, 190, 21, "R", "PAGE", C_INK, C_WHITE);
     if (sInfo.page == 1)
     {
         static const char *const sStat[6] = {"HP", "ATTACK", "DEFENSE", "SP. ATK", "SP. DEF", "SPEED"};
@@ -858,29 +872,29 @@ static void DrawInfo(u16 *frame)
         s32 total = 0;
         if (!sInfo.owned)
         {
-            Text(frame, 24, 60, "CATCH IT TO SEE ITS STATS.", RGB(31, 31, 31), 0);
+            Text(frame, 24, 60, "CATCH IT TO SEE ITS STATS.", C_INK, C_INK_SH);
             return;
         }
         MP_GameToAscii(a, gTypeNames[info->types[0]], sizeof(a) - 1);
         MP_GameToAscii(b, gTypeNames[info->types[1]], sizeof(b) - 1);
         snprintf(buf, sizeof(buf), info->types[0] == info->types[1] ? "TYPE     %s" : "TYPE     %s / %s", a, b);
-        Text(frame, 24, y, buf, RGB(31, 31, 31), 0), y += 10;
+        Text(frame, 24, y, buf, C_INK, C_INK_SH), y += 10;
         MP_GameToAscii(a, gAbilityNames[info->abilities[0]], sizeof(a) - 1);
         MP_GameToAscii(b, gAbilityNames[info->abilities[1]], sizeof(b) - 1);
         snprintf(buf, sizeof(buf), info->abilities[1] && info->abilities[1] != info->abilities[0] ? "ABILITY  %s / %s" : "ABILITY  %s", a, b);
-        Text(frame, 24, y, buf, RGB(31, 31, 31), 0), y += 10;
+        Text(frame, 24, y, buf, C_INK, C_INK_SH), y += 10;
         snprintf(buf, sizeof(buf), info->eggGroups[0] == info->eggGroups[1] ? "EGGS     %s" : "EGGS     %s / %s",
                  sEggNames[info->eggGroups[0] % 16], sEggNames[info->eggGroups[1] % 16]);
-        Text(frame, 24, y, buf, RGB(31, 31, 31), 0), y += 13;
+        Text(frame, 24, y, buf, C_INK, C_INK_SH), y += 13;
         for (i = 0; i < 6; i++)
         {
             s32 w = v[i] * 96 / 200, x;
-            Text(frame, 24, y, sStat[i], RGB(22, 26, 30), 0);
+            Text(frame, 24, y, sStat[i], RGB(9, 9, 11), C_INK_SH);
             snprintf(buf, sizeof(buf), "%d", v[i]);
-            Text(frame, 78, y, buf, RGB(31, 31, 31), 0);
+            Text(frame, 78, y, buf, C_INK, C_INK_SH);
             if (w > 110)
                 w = 110;
-            Box(frame, 100, y + 2, 100 + 110, y + 6, RGB(0, 0, 0), 10);
+            Box(frame, 100, y + 2, 100 + 110, y + 6, RGB(19, 19, 20), 16);
             for (x = 0; x < w; x++)
                 frame[(y + 3) * DISPLAY_WIDTH + 101 + x] = frame[(y + 4) * DISPLAY_WIDTH + 101 + x] = frame[(y + 5) * DISPLAY_WIDTH + 101 + x]
                     = (v[i] >= 110 ? RGB(8, 28, 12) : v[i] >= 70 ? RGB(31, 26, 6) : RGB(31, 12, 8)) | 0x8000;
@@ -888,7 +902,7 @@ static void DrawInfo(u16 *frame)
             y += 10;
         }
         snprintf(buf, sizeof(buf), "TOTAL    %d", (int)total);
-        Text(frame, 24, y + 2, buf, RGB(31, 28, 10), 0);
+        Text(frame, 24, y + 2, buf, RGB(24, 4, 4), C_INK_SH);
     }
     else if (sInfo.page == 2)
     {
@@ -909,7 +923,7 @@ static void DrawInfo(u16 *frame)
                 break;
         }
         if (EvoLines(frame, base, 0, y, "") == y + 10)
-            Text(frame, 24, y + 14, "IT DOESN'T EVOLVE.", RGB(22, 26, 30), 0);
+            Text(frame, 24, y + 14, "IT DOESN'T EVOLVE.", RGB(9, 9, 11), C_INK_SH);
     }
     else
     {
@@ -934,16 +948,16 @@ static void DrawInfo(u16 *frame)
                 place[k].kinds |= kinds;
         }
         if (n == 0)
-            Text(frame, 24, 60, "NOT FOUND IN THE WILD IN THIS REGION.", RGB(31, 31, 31), 0);
+            Text(frame, 24, 60, "NOT FOUND IN THE WILD IN THIS REGION.", C_INK, C_INK_SH);
         for (k = 0; k < n; k++)
         {
             u8 name[32];
             GetMapName(name, place[k].sec, 0);
             MP_GameToAscii(a, name, sizeof(a) - 1);
-            Text(frame, 24, y, a, RGB(31, 31, 31), 0);
+            Text(frame, 24, y, a, C_INK, C_INK_SH);
             snprintf(buf, sizeof(buf), "%s%s%s%s", place[k].kinds & 1 ? "GRASS " : "", place[k].kinds & 2 ? "WATER " : "",
                      place[k].kinds & 4 ? "ROD " : "", place[k].kinds & 8 ? "ROCKS" : "");
-            Text(frame, 124, y, buf, RGB(20, 26, 31), 0);
+            Text(frame, 124, y, buf, RGB(4, 10, 22), C_INK_SH);
             y += 10;
         }
     }

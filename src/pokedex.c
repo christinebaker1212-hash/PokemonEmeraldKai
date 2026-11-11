@@ -1960,25 +1960,11 @@ static void MpDexReload(u8 taskId);
 static void Task_MpDexPanel(u8 taskId)
 {
     int r = MP_DexPanel_Step();
+    if (r == 0 && MpDexSearchKey())   // (the key that opened it shuts it too)
+        r = MP_DexPanel_Close();
     MpDexHud();
     if (r == 0)
         return;
-    if (r == 2)
-    {
-        // (the game's own SEARCH: by name's first letter, colour and type)
-        PlaySE(SE_SELECT);
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_BLACK);
-        gTasks[taskId].tLoadScreenTaskId = LoadSearchMenu();
-        sPokedexView->screenSwitchState = 0;
-        sPokedexView->pokeBallRotationBackup = sPokedexView->pokeBallRotation;
-        sPokedexView->selectedPokemonBackup = sPokedexView->selectedPokemon;
-        sPokedexView->dexModeBackup = sPokedexView->dexMode;
-        sPokedexView->dexOrderBackup = sPokedexView->dexOrder;
-        gTasks[taskId].func = Task_WaitForExitSearch;
-        PlaySE(SE_PC_LOGIN);
-        FreeWindowAndBgBuffers();
-        return;
-    }
     // (the list in the order and with the entries asked for)
     sPokedexView->dexOrder = MP_DexQuery()->sort < MP_DEXSORT_HP ? MP_DexQuery()->sort : ORDER_NUMERICAL;
     gSaveBlock2Ptr->pokedex.order = sPokedexView->dexOrder;
@@ -2026,9 +2012,17 @@ static void Task_HandlePokedexInput(u8 taskId)
         }
         else if (JOY_NEW(SELECT_BUTTON))
         {
-            // Moemon Kai: FIND & SORT, a panel over the list (mp_dexplus.c); the game's own SEARCH is a row of it
-            MP_DexPanel_Open(sPokedexView->dexOrder);
-            gTasks[taskId].func = Task_MpDexPanel;
+            PlaySE(SE_SELECT);
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_BLACK);
+            gTasks[taskId].tLoadScreenTaskId = LoadSearchMenu();
+            sPokedexView->screenSwitchState = 0;
+            sPokedexView->pokeBallRotationBackup = sPokedexView->pokeBallRotation;
+            sPokedexView->selectedPokemonBackup = sPokedexView->selectedPokemon;
+            sPokedexView->dexModeBackup = sPokedexView->dexMode;
+            sPokedexView->dexOrderBackup = sPokedexView->dexOrder;
+            gTasks[taskId].func = Task_WaitForExitSearch;
+            PlaySE(SE_PC_LOGIN);
+            FreeWindowAndBgBuffers();
         }
         else if (JOY_NEW(B_BUTTON))
         {
@@ -2054,11 +2048,10 @@ static void Task_HandlePokedexInput(u8 taskId)
         }
         else if (MpDexSearchKey())
         {
-            u8 filter = (MP_DexView_Filter() + 1) % MP_DEXSHOW_COUNT;
-            if (filter == MP_DEXSHOW_FRIENDS && !MP_DexView_Shared())
-                filter = MP_DEXSHOW_ALL;
-            MP_DexView_Set(MP_DexView_Shared(), filter, MP_DexView_Last());
-            MpDexReload(taskId);
+            // Moemon Kai: FIND (LT / F): a menu over the list, as START's is (mp_dexplus.c). SELECT is the game's own
+            // SEARCH, as it always was
+            MP_DexPanel_Open(sPokedexView->dexOrder);
+            gTasks[taskId].func = Task_MpDexPanel;
         }
         else
         {
