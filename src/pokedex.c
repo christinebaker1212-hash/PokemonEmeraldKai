@@ -125,6 +125,8 @@ static EWRAM_DATA struct PokedexView *sPokedexView = NULL;
 static EWRAM_DATA u16 sLastSelectedPokemon = 0;
 static u16 sMpDexKeepNum;   // Moemon Kai: the entry (a national number) to be on once the list is made again
 static u16 MpDexCount(bool8 hoenn, u8 caseID, bool8 own);
+static bool8 sMpDexJumpNow;
+static bool8 sMpDexNothing;
 
 static EWRAM_DATA u8 sPokeBallRotation = 0;
 static EWRAM_DATA struct PokedexListItem *sPokedexListItem = NULL;
@@ -1927,6 +1929,8 @@ static void MpDexHud(void)
     hud.shared = MP_DexView_Shared();
     hud.filter = MP_DexView_Filter();
     hud.total = sTotal, hud.ownCaught = sOwn, hud.allCaught = sAll;
+    hud.nothing = sMpDexNothing;
+    hud.narrowed = MP_DexQuery_Active();
     MP_DexHud_Show(&hud);
 }
 
@@ -1947,6 +1951,38 @@ static void Task_MpDexReload(u8 taskId)
     FreeWindowAndBgBuffers();
     gMain.state = 0;
     gTasks[taskId].func = Task_OpenPokedexMainPage;
+}
+
+static void MpDexReload(u8 taskId);
+#define tLoadScreenTaskId data[0]
+
+static void Task_MpDexPanel(u8 taskId)
+{
+    int r = MP_DexPanel_Step();
+    MpDexHud();
+    if (r == 0)
+        return;
+    if (r == 2)
+    {
+        // (the game's own SEARCH: by name's first letter, colour and type)
+        PlaySE(SE_SELECT);
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_BLACK);
+        gTasks[taskId].tLoadScreenTaskId = LoadSearchMenu();
+        sPokedexView->screenSwitchState = 0;
+        sPokedexView->pokeBallRotationBackup = sPokedexView->pokeBallRotation;
+        sPokedexView->selectedPokemonBackup = sPokedexView->selectedPokemon;
+        sPokedexView->dexModeBackup = sPokedexView->dexMode;
+        sPokedexView->dexOrderBackup = sPokedexView->dexOrder;
+        gTasks[taskId].func = Task_WaitForExitSearch;
+        PlaySE(SE_PC_LOGIN);
+        FreeWindowAndBgBuffers();
+        return;
+    }
+    // (the list in the order and with the entries asked for)
+    sPokedexView->dexOrder = MP_DexQuery()->sort < MP_DEXSORT_HP ? MP_DexQuery()->sort : ORDER_NUMERICAL;
+    gSaveBlock2Ptr->pokedex.order = sPokedexView->dexOrder;
+    sMpDexJumpNow = TRUE;
+    MpDexReload(taskId);
 }
 
 static void MpDexReload(u8 taskId)
@@ -1989,17 +2025,9 @@ static void Task_HandlePokedexInput(u8 taskId)
         }
         else if (JOY_NEW(SELECT_BUTTON))
         {
-            PlaySE(SE_SELECT);
-            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_BLACK);
-            gTasks[taskId].tLoadScreenTaskId = LoadSearchMenu();
-            sPokedexView->screenSwitchState = 0;
-            sPokedexView->pokeBallRotationBackup = sPokedexView->pokeBallRotation;
-            sPokedexView->selectedPokemonBackup = sPokedexView->selectedPokemon;
-            sPokedexView->dexModeBackup = sPokedexView->dexMode;
-            sPokedexView->dexOrderBackup = sPokedexView->dexOrder;
-            gTasks[taskId].func = Task_WaitForExitSearch;
-            PlaySE(SE_PC_LOGIN);
-            FreeWindowAndBgBuffers();
+            // Moemon Kai: FIND & SORT, a panel over the list (mp_dexplus.c); the game's own SEARCH is a row of it
+            MP_DexPanel_Open(sPokedexView->dexOrder);
+            gTasks[taskId].func = Task_MpDexPanel;
         }
         else if (JOY_NEW(B_BUTTON))
         {
@@ -2504,6 +2532,41 @@ static void FreeWindowAndBgBuffers(void)
         Free(tilemapBuffer);
 }
 
+// FIND & SORT's JUMP TO: the first entry whose name starts with what was typed, or the entry of that number
+static void MpDexJump(void)
+{
+    const char *text = MP_DexPanel_Jump();
+    u8 want[16], name[POKEMON_NAME_LENGTH + 1];
+    u16 i, len, num = 0;
+    void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+    if (!sMpDexJumpNow || text[0] == 0)
+        return;
+    sMpDexJumpNow = FALSE;
+    for (i = 0; text[i] >= '0' && text[i] <= '9'; i++)
+        num = num * 10 + (text[i] - '0');
+    if (text[i] != 0)
+        num = 0;
+    MP_AsciiToGame(want, text, sizeof(want) - 1);
+    len = StringLength(want);
+    for (i = 0; i < sPokedexView->pokemonListCount; i++)
+    {
+        u16 nat = sPokedexView->pokedexList[i].dexNum;
+        if (num)
+        {
+            if ((sPokedexView->dexMode == DEX_MODE_HOENN ? NationalToHoennOrder(nat) : nat) == num)
+                break;
+            continue;
+        }
+        if (!sPokedexView->pokedexList[i].seen)
+            continue;
+        GetSpeciesName(name, NationalPokedexNumToSpecies(nat));
+        if (StringLength(name) >= len && memcmp(name, want, len) == 0)
+            break;
+    }
+    if (i < sPokedexView->pokemonListCount)
+        sMpDexKeepNum = sPokedexView->pokedexList[i].dexNum;
+}
+
 // Moemon Kai: the list's view (the user, 2026-11-11): OWN (what the player saw and caught themselves) or SHARED (the
 // group's POKéDEX: the save's flags), R on the list; REGION or NATIONAL, L; the SHOW filter, LT / F (mp_dexplus.c)
 static s8 MpDexGet(u16 nat, u8 caseID)
@@ -2538,40 +2601,49 @@ static u16 MpDexCount(bool8 hoenn, u8 caseID, bool8 own)
     return count;
 }
 
+void qsort(void *base, size_t n, size_t size, int (*cmp)(const void *, const void *));
+
+static int MpDexCmp(const void *a, const void *b)
+{
+    const struct PokedexListItem *x = a, *y = b;
+    s32 kx = MP_DexQuery_SortKey(x->dexNum), ky = MP_DexQuery_SortKey(y->dexNum);
+    return kx != ky ? (ky > kx) - (ky < kx) : (int)x->dexNum - (int)y->dexNum;
+}
+
 // The SHOW filter over the list just made: by number every entry of the dex that fits (the ones not seen too, as
 // their numbers), any other order what it lists. Nothing fits: the filter goes back to ALL
 static void MpDexFilterList(u8 order, bool8 hoenn, u16 dexCount)
 {
     u16 i, n = 0;
     static struct PokedexListItem sKeep[NATIONAL_DEX_COUNT + 1];
-    if (MP_DexView_Filter() == MP_DEXSHOW_ALL)
-        return;
     if (MP_DexView_Filter() == MP_DEXSHOW_FRIENDS && !MP_DexView_Shared())
-    {
         MP_DexView_Set(FALSE, MP_DEXSHOW_ALL, MP_DexView_Last());
+    if (MP_DexView_Filter() == MP_DEXSHOW_ALL && !MP_DexQuery_Active())
         return;
-    }
     if (order == ORDER_NUMERICAL)
     {
         for (i = 0; i < dexCount && n < NATIONAL_DEX_COUNT; i++)
         {
             u16 nat = hoenn ? HoennToNationalOrder(i + 1) : i + 1;
             bool8 seen = MpDexGet(nat, FLAG_GET_SEEN), owned = MpDexGet(nat, FLAG_GET_CAUGHT);
-            if (MpDexShows(nat, seen, owned))
+            if (MpDexShows(nat, seen, owned) && MP_DexQuery_Match(nat, seen, owned))
                 sKeep[n].dexNum = nat, sKeep[n].seen = seen, sKeep[n].owned = owned, n++;
         }
     }
     else
     {
         for (i = 0; i < sPokedexView->pokemonListCount; i++)
-            if (MpDexShows(sPokedexView->pokedexList[i].dexNum, sPokedexView->pokedexList[i].seen, sPokedexView->pokedexList[i].owned))
+            if (MpDexShows(sPokedexView->pokedexList[i].dexNum, sPokedexView->pokedexList[i].seen, sPokedexView->pokedexList[i].owned)
+             && MP_DexQuery_Match(sPokedexView->pokedexList[i].dexNum, sPokedexView->pokedexList[i].seen, sPokedexView->pokedexList[i].owned))
                 sKeep[n++] = sPokedexView->pokedexList[i];
     }
     if (n == 0)
     {
-        MP_DexView_Set(MP_DexView_Shared(), MP_DEXSHOW_ALL, MP_DexView_Last());
+        sMpDexNothing = TRUE;   // (nothing fits: the list as it was, and the header says so)
         return;
     }
+    if (MP_DexQuery()->sort >= MP_DEXSORT_HP)
+        qsort(sKeep, n, sizeof(sKeep[0]), MpDexCmp);   // (the stat orders, FIRST CAUGHT)
     memcpy(sPokedexView->pokedexList, sKeep, n * sizeof(sKeep[0]));
     sPokedexView->pokemonListCount = n;
 }
@@ -2714,7 +2786,9 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         break;
     }
 
-    MpDexFilterList(order, temp_isHoennDex, temp_dexCount);   // Moemon Kai: the SHOW filter
+    sMpDexNothing = FALSE;
+    MpDexFilterList(order, temp_isHoennDex, temp_dexCount);   // Moemon Kai: the SHOW filter, FIND & SORT
+    MpDexJump();
     // (the entry the list was on, wherever it is in the list as it is now)
     if (sMpDexKeepNum != 0)
     {
