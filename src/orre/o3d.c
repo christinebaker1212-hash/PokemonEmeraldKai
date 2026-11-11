@@ -85,6 +85,7 @@ typedef struct
     u16 w, h;                 // tiles
     u16 *blocks;              // the field engine's map blocks (metatile | collision << 10 | elevation << 12)
     u8 *hn;                   // the ground's heights at each tile's centre: how many (more than one: a bridge)
+    u8 *edge;                 // each tile's sides a step can't cross (1 N, 2 E, 4 S, 8 W: tools/orre/grid.py EDGE_*)
     s8 *trig;                 // each tile's trigger: Colosseum's collision id (-1 none: a door's, a way out's...)
     float (*hgt)[3];          // ... lowest first
     u32 nmesh;
@@ -341,6 +342,7 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
     om->tile = tile, om->x0 = x0, om->z0 = z0;
     om->blocks = malloc(sizeof(u16) * ((u32)gw * gh + 1));
     om->hn = calloc((u32)gw * gh, 1);
+    om->edge = calloc((u32)gw * gh, 1);
     om->hgt = calloc((u32)gw * gh, sizeof(*om->hgt));
     om->trig = malloc((u32)gw * gh + 1);
     if (om->trig)
@@ -352,6 +354,8 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
             u32 k = (u32)y * gw + x, n = t[2] > 3 ? 3 : t[2], j;
             om->blocks[k] = (t[0] & 1) ? (WALK + t[3]) : BLOCKED;   // (t[3]: the tile's behavior: a warp's)
             om->hn[k] = (u8)n;
+            if (om->edge)
+                om->edge[k] = t[0] >> 4;
             if (om->trig)
                 om->trig[k] = (s8)t[1];
             for (j = 0; j < n; j++)
@@ -524,6 +528,7 @@ static void SceneFree(void)
     free(sScene.mesh);
     free(sScene.blocks);
     free(sScene.hn);
+    free(sScene.edge);
     free(sScene.hgt);
     free(sScene.trig);
     memset(&sScene, 0, sizeof(sScene));
@@ -810,6 +815,23 @@ float O3D_FieldFov(void)
 {
     // (SetupView's focal: 96 pixels at HALF_FOV, over the 80 lines above the centre)
     return 2.0f * atanf(80.0f * tanf(HALF_FOV * 3.14159265f / 180.0f) / 96.0f) * 180.0f / 3.14159265f;
+}
+
+// A step from one tile to the one beside it that a wall of Colosseum's stands across (map tiles, the field's own:
+// with MAP_OFFSET). Colosseum's player walks at any angle wherever a person fits, so a tile is walkable for the floor
+// reached inside it and its walls are its sides' (tools/orre/grid.py _tiles_from_flood)
+bool8 O3D_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
+{
+    const OMap *g;
+    s32 x = fromX - MAP_OFFSET, y = fromY - MAP_OFFSET, dx = toX - fromX, dy = toY - fromY;
+    u8 bit;
+    if (gSaveBlock1Ptr == NULL || !O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
+        return FALSE;
+    g = sCur;
+    if (g == NULL || g->edge == NULL || x < 0 || y < 0 || x >= g->w || y >= g->h)
+        return FALSE;
+    bit = dy < 0 ? 1 : dx > 0 ? 2 : dy > 0 ? 4 : dx < 0 ? 8 : 0;
+    return (g->edge[(u32)y * g->w + x] & bit) != 0;
 }
 
 // World -> screen x, y and depth (FALSE: behind the camera)

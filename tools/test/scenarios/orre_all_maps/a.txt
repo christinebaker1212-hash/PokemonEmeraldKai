@@ -117,7 +117,7 @@ mp where
 mp warp 45,38,16,19
 wait 70
 mp where
-mp warp 45,39,16,18
+mp warp 45,39,16,19
 wait 70
 mp where
 mp warp 45,40,20,20
@@ -126,7 +126,7 @@ mp where
 mp warp 45,41,15,19
 wait 70
 mp where
-mp warp 45,42,17,19
+mp warp 45,42,16,19
 wait 70
 mp where
 mp warp 45,43,14,18
@@ -354,7 +354,7 @@ mp where
 mp warp 45,117,29,18
 wait 70
 mp where
-mp warp 45,118,17,17
+mp warp 45,118,17,18
 wait 70
 mp where
 mp warp 45,119,35,36

@@ -18,6 +18,13 @@
   "coord_events": [],
   "warp_events": [
     {
+      "x": 15,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PHENAC_CITY_SHOP_1F",
+      "dest_warp_id": "9"
+    },
+    {
       "x": 16,
       "y": 15,
       "elevation": 0,
@@ -43,7 +50,7 @@
       "y": 13,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PHENAC_CITY_SHOP_2F",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     }
   ]
 }

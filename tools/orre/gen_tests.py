@@ -56,6 +56,7 @@ def main(src):
 # a warp to each map's start (the landing of Colosseum's entry 0), where the player is (tools/orre/check_tests.py
 # against expect.txt). Needs orre/ (tools/orre/make_pack.sh).
 MODE=1
+ENV_A="MOEMON_ORRE_SCRIPTS=0"
 TMO=600
 WARP=45,0,33,40
 CHECK="python3 -I tools/orre/check_tests.py tools/test/scenarios/orre_all_maps/expect.txt"
@@ -100,6 +101,7 @@ UNEXPECT_A=("[crash]" "TIMEOUT" "has no grid" "isn't the size of its map" "no OR
 # then where the player comes out (tools/orre/check_tests.py against expect.txt: the entry's tile, or a tile off an
 # elevator). Needs orre/ (tools/orre/make_pack.sh). About 4 minutes.
 MODE=1
+ENV_A="MOEMON_ORRE_SCRIPTS=0"
 TMO=1500
 WARP=45,0,33,40
 CHECK="python3 -I tools/orre/check_tests.py tools/test/scenarios/orre_all_doors/expect.txt"
@@ -176,6 +178,7 @@ def places(src, maps, num, mj, hdr):
 # entry 0 of the place's room; REALGAM TOWER before and after its flag 0x45D: its first outside, then the one with the
 # tower's door). tools/orre/check_tests.py against expect.txt. Needs orre/ (tools/orre/make_pack.sh).
 MODE=1
+ENV_A="MOEMON_ORRE_SCRIPTS=0"
 TMO=300
 WARP=45,0,33,40
 CHECK="python3 -I tools/orre/check_tests.py tools/test/scenarios/orre_all_places/expect.txt"

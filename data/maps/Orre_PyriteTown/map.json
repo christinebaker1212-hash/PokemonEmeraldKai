@@ -122,14 +122,14 @@
       "y": 64,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN_WINDMILL_1F",
-      "dest_warp_id": "2"
+      "dest_warp_id": "3"
     },
     {
       "x": 28,
       "y": 64,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN_WINDMILL_1F",
-      "dest_warp_id": "2"
+      "dest_warp_id": "3"
     },
     {
       "x": 45,
@@ -262,7 +262,7 @@
       "y": 111,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_TOWN_POLICE_1F",
-      "dest_warp_id": "2"
+      "dest_warp_id": "3"
     },
     {
       "x": 33,

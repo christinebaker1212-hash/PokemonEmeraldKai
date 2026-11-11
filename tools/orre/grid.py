@@ -143,6 +143,7 @@ def _cross_many(a0, a1, B0, B1):
     return ((d1 > 0) != (d2 > 0)) & ((d3 > 0) != (d4 > 0))
 
 
+_LAST = None
 FINE = 1.0   # the reach is worked out on a grid of FINE Colosseum units, walls thickened by RADIUS
 
 
@@ -220,6 +221,8 @@ def _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs):
                     continue
                 seen[nz, nx] = True
                 q.append((nz, nx))
+    global _LAST
+    _LAST = (seen, k, block, trigf)   # (the fine flood, for build's edges and tools/orre/grid_check.py)
     out = np.zeros((h, w), dtype=bool)
     c = k // 2
     near = max(1, int(round(2.0 / FINE)))
@@ -315,28 +318,236 @@ def build(col, tile=TILE, start=None, stops=None):
                 return (SA[hit[0]], SB[hit[0]])
         return None
 
+    edges = np.zeros((h, w), dtype=np.uint8)
     if start is not None:
         starts = [start] if isinstance(start[0], (int, float)) else list(start)
-        walk = _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs)
-        # Emerald's grid has no walls between tiles: where one still parts two walkable tiles, the tile nearer the
-        # wall is blocked
-        for y in range(h):
-            for x in range(w):
-                for nx, ny in ((x + 1, y), (x, y + 1)):
-                    if nx < w and ny < h and walk[y, x] and walk[ny, nx]:
-                        if trig[y, x] >= 0 or trig[ny, nx] >= 0:
-                            continue   # (a door's frame: its trigger is stepped onto across it)
-                        wseg = wall_between(x, y, nx, ny)
-                        if wseg:
-                            da, db = _dist(centre(x, y), *wseg), _dist(centre(nx, ny), *wseg)
-                            if db <= da:
-                                walk[ny, nx] = False
-                            else:
-                                walk[y, x] = False
-        _join_diagonals(walk, heights, trig)
+        centre_walk = _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs)
+        walk, edges = _tiles_from_flood(centre_walk, heights, trig, wall_between)
         if stops:
+            before = walk.copy()
             _connect(walk, heights, trig, stops)
-    return {"w": w, "h": h, "tile": tile, "x0": x0, "z0": z0, "walk": walk, "heights": heights, "trigger": trig}
+            edges[walk & ~before] = 0   # (a door frame opened to its trigger: no walls of its own)
+    return {"w": w, "h": h, "tile": tile, "x0": x0, "z0": z0, "walk": walk, "heights": heights, "trigger": trig,
+            "edges": edges}
+
+
+FAR = 6            # fine cells: reached floor this far from every walkable tile's piece opens its own tile
+AREA = 16          # fine cells (of a tile's 64) a person reaches in a tile for it to be walkable by its area alone
+EDGE_N, EDGE_E, EDGE_S, EDGE_W = 1, 2, 4, 8   # a walkable tile's sides a step can't cross (Emerald's grid has no walls
+                                              # between tiles: the engine checks these, o3d.c O3D_StepBlocked)
+
+
+def _tile_parts(seen, k, y, x):
+    """The reached fine cells of tile (y, x) as 4-connected parts, largest first: each a set of (fz, fx)."""
+    win = seen[y * k:(y + 1) * k, x * k:(x + 1) * k]
+    left = {(int(a), int(b)) for a, b in np.argwhere(win)}
+    parts = []
+    while left:
+        st = [left.pop()]
+        part = set(st)
+        while st:
+            cz, cx = st.pop()
+            for n in ((cz + 1, cx), (cz - 1, cx), (cz, cx + 1), (cz, cx - 1)):
+                if n in left:
+                    left.remove(n)
+                    part.add(n)
+                    st.append(n)
+        parts.append({(y * k + a, x * k + b) for a, b in part})
+    parts.sort(key=len, reverse=True)
+    return parts
+
+
+def _tiles_from_flood(centre_walk, heights, trig, wall_between):
+    """Colosseum's player walks any way, at any angle, wherever a person fits; Emerald's walk tile to tile, up, down,
+    left and right (the user, 2026-11-10: "any area deemed walkable in the original game must be walkable here").
+    From the fine flood (_LAST: what a person reaches in Colosseum):
+    - a tile is walkable when the flood passes its centre (as before) or reaches AREA of its cells in one piece: the
+      slivers along walls and furniture count, and a narrow way that runs between tile centres;
+    - a wall between two walkable tiles closes the step between them (EDGE_* bits), never a tile: a step is open
+      where the two tiles' reached pieces touch across their shared side;
+    - whatever the flood joins, the tiles join: a piece of floor the tile graph can't get to (a diagonal corridor, a
+      stair's turn, a corner two areas meet at) has the tiles along the flood's own way to it opened.
+    -> walk, edges"""
+    from collections import deque
+    seen, k, _block, _trigf = _LAST
+    h, w = centre_walk.shape
+    walk = np.zeros((h, w), dtype=bool)
+    main = np.zeros_like(seen)          # the fine cells that belong to walkable tiles' own pieces
+    own = {}
+    for y in range(h):
+        for x in range(w):
+            if not heights[y][x]:
+                continue
+            parts = _tile_parts(seen, k, y, x)
+            if not parts:
+                if centre_walk[y, x] and trig[y, x] >= 0:
+                    walk[y, x] = True   # (a door's trigger the flood touched from outside)
+                continue
+            if centre_walk[y, x] or len(parts[0]) >= AREA:
+                walk[y, x] = True
+                # (the piece at the centre if the flood passes there, else the biggest)
+                c = (y * k + k // 2, x * k + k // 2)
+                pick = next((p for p in parts if any(abs(a - c[0]) <= 2 and abs(b - c[1]) <= 2 for a, b in p)), parts[0])
+                own[(y, x)] = pick
+                for a, b in pick:
+                    main[a, b] = True
+    # floor farther than FAR from every walkable tile's piece (a narrow way that never fills a quarter of a tile: a
+    # diagonal aisle, a nook): its tiles are walkable too, so nothing a person reaches in Colosseum is out of reach
+    for _ in range(64):
+        dist = np.full(seen.shape, -1, dtype=np.int32)
+        q = deque()
+        for a_, b_ in np.argwhere(main):
+            dist[a_, b_] = 0
+            q.append((int(a_), int(b_)))
+        while q:
+            cz, cx = q.popleft()
+            for nz, nx in ((cz + 1, cx), (cz - 1, cx), (cz, cx + 1), (cz, cx - 1)):
+                if 0 <= nz < seen.shape[0] and 0 <= nx < seen.shape[1] and seen[nz, nx] and dist[nz, nx] < 0:
+                    dist[nz, nx] = dist[cz, cx] + 1
+                    q.append((nz, nx))
+        far = np.argwhere(seen & ((dist > FAR) | (dist < 0)))
+        if not len(far):
+            break
+        opened = False
+        for fz, fx in far:
+            t = (int(fz) // k, int(fx) // k)
+            if walk[t] or not heights[t[0]][t[1]]:
+                continue
+            parts = _tile_parts(seen, k, t[0], t[1])
+            walk[t] = True
+            own[t] = parts[0]
+            for a_, b_ in parts[0]:
+                main[a_, b_] = True
+            opened = True
+        if not opened:
+            break
+    forced = set()   # steps opened whatever the pieces say (the flood's own way between two tiles)
+
+    def step_open(y, x, ny, nx):
+        if ((y, x), (ny, nx)) in forced or ((ny, nx), (y, x)) in forced:
+            return True
+        if trig[y, x] >= 0 or trig[ny, nx] >= 0:
+            return True   # (a door's frame: its trigger is stepped onto across it, as before)
+        if (y, x) not in own or (ny, nx) not in own:
+            # (a tile with no piece of its own: a trigger, an opened tile: open unless a wall crosses the step)
+            if not heights[y][x] or not heights[ny][nx]:
+                return True
+            return wall_between(x, y, nx, ny) is None or trig[y, x] >= 0 or trig[ny, nx] >= 0
+        if ny == y:
+            fx = max(x, nx) * k
+            return bool((main[y * k:(y + 1) * k, fx - 1] & main[y * k:(y + 1) * k, fx]).any())
+        fz = max(y, ny) * k
+        return bool((main[fz - 1, x * k:(x + 1) * k] & main[fz, x * k:(x + 1) * k]).any())
+
+    def comps():
+        comp = np.full((h, w), -1, dtype=np.int32)
+        n = 0
+        for y0_, x0_ in np.argwhere(walk):
+            if comp[y0_, x0_] >= 0:
+                continue
+            comp[y0_, x0_] = n
+            q = deque([(int(y0_), int(x0_))])
+            while q:
+                cy, cx = q.popleft()
+                for ny, nx in ((cy + 1, cx), (cy - 1, cx), (cy, cx + 1), (cy, cx - 1)):
+                    if 0 <= ny < h and 0 <= nx < w and walk[ny, nx] and comp[ny, nx] < 0 and step_open(cy, cx, ny, nx):
+                        comp[ny, nx] = n
+                        q.append((ny, nx))
+            n += 1
+        return comp, n
+
+    # whatever the flood joins, the tiles join: from each area that isn't the biggest, the flood's way to another
+    # area, its tiles opened and its steps forced
+    settled = set()
+    for _ in range(400):
+        comp, n = comps()
+        if n <= 1:
+            break
+        sizes = np.bincount(comp[comp >= 0], minlength=n)
+        big = int(sizes.argmax())
+        src = next((c for c in range(n) if c != big and any((int(y), int(x)) in own and (int(y), int(x)) not in settled
+                                                            for y, x in np.argwhere(comp == c))), None)
+        if src is None:
+            break
+        prev = {}
+        q = deque()
+        for y, x in np.argwhere(comp == src):
+            for cell in own.get((int(y), int(x)), ()):
+                prev[cell] = None
+                q.append(cell)
+        hit = None
+        while q and hit is None:
+            cz, cx = q.popleft()
+            for nz, nx in ((cz + 1, cx), (cz - 1, cx), (cz, cx + 1), (cz, cx - 1)):
+                if 0 <= nz < seen.shape[0] and 0 <= nx < seen.shape[1] and seen[nz, nx] and (nz, nx) not in prev:
+                    prev[(nz, nx)] = (cz, cx)
+                    ty, tx = nz // k, nx // k
+                    if walk[ty, tx] and comp[ty, tx] != src and main[nz, nx]:
+                        hit = (nz, nx)
+                        break
+                    q.append((nz, nx))
+        if hit is None:
+            # (nothing of the flood leads on: this area is its own in Colosseum too)
+            for y, x in np.argwhere(comp == src):
+                settled.add((int(y), int(x)))
+            continue
+        path = []
+        c = hit
+        while c is not None:
+            path.append(c)
+            c = prev[c]
+        last = None
+        for cz, cx in path:
+            t = (cz // k, cx // k)
+            if not walk[t]:
+                walk[t] = True
+                if not heights[t[0]][t[1]]:
+                    heights[t[0]][t[1]] = list(heights[last[0]][last[1]]) if last else [0.0]
+            if last is not None and t != last:
+                forced.add((last, t))
+            last = t
+    # two areas that touch only at a corner (a stair's turn, a plaza's angled edge: PHENAC's stadium plaza, where the
+    # way through is narrower than the flood's person): one of the two tiles beside the corner is opened, the one
+    # whose floor lies nearest both areas', and the steps through it
+    changed = True
+    while changed:
+        changed = False
+        comp, _n = comps()
+        for y in range(h - 1):
+            for x in range(w - 1):
+                for (ay, ax), (by, bx), cands in (((y, x), (y + 1, x + 1), ((y, x + 1), (y + 1, x))),
+                                                  ((y, x + 1), (y + 1, x), ((y, x), (y + 1, x + 1)))):
+                    if not (walk[ay, ax] and walk[by, bx]) or comp[ay, ax] == comp[by, bx]:
+                        continue
+                    if any(walk[cy, cx] for cy, cx in cands):
+                        continue
+                    ga, gb = heights[ay][ax][0], heights[by][bx][0]
+                    best, cost = None, None
+                    for cy, cx in cands:
+                        if trig[cy, cx] >= 0:
+                            continue
+                        hs = heights[cy][cx]
+                        c = min(abs(hh - ga) + abs(hh - gb) for hh in hs) if hs else abs(ga - gb) + 1.0
+                        if cost is None or c < cost:
+                            best, cost = (cy, cx), c
+                    if best is None or abs(ga - gb) > 6.0:   # (a ledge or a floor above another: not a corner)
+                        continue
+                    if not heights[best[0]][best[1]]:
+                        heights[best[0]][best[1]] = [(ga + gb) / 2]
+                    walk[best] = True
+                    forced.add(((ay, ax), best))
+                    forced.add((best, (by, bx)))
+                    changed = True
+                    comp, _n = comps()
+    edges = np.zeros((h, w), dtype=np.uint8)
+    for y in range(h):
+        for x in range(w):
+            if not walk[y, x]:
+                continue
+            for bit, ny, nx in ((EDGE_N, y - 1, x), (EDGE_E, y, x + 1), (EDGE_S, y + 1, x), (EDGE_W, y, x - 1)):
+                if 0 <= ny < h and 0 <= nx < w and walk[ny, nx] and not step_open(y, x, ny, nx):
+                    edges[y, x] |= bit
+    return walk, edges
 
 
 def _components(walk):

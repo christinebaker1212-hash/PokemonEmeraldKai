@@ -41,10 +41,10 @@ static const struct { u16 map; const char *file; u8 bw, bh, startX, startY; u16 
     {MAP_ORRE_AGATE_VILLAGE_SHRINE_1F, "M3_shrine_1F", 1, 1, 17, 24, 39},   // start (entry 0) 17, 24; Colosseum's room 39
     {MAP_ORRE_AGATE_VILLAGE_HOUSEA_1F, "M3_houseA_1F", 1, 1, 16, 19, 40},   // start (entry 0) 16, 19; Colosseum's room 40
     {MAP_ORRE_AGATE_VILLAGE_HOUSEB_1F, "M3_houseB_1F", 1, 1, 16, 19, 41},   // start (entry 0) 16, 19; Colosseum's room 41
-    {MAP_ORRE_AGATE_VILLAGE_PC_1F, "M3_pc_1F", 1, 1, 16, 18, 42},   // start (entry 0) 16, 18; Colosseum's room 42
+    {MAP_ORRE_AGATE_VILLAGE_PC_1F, "M3_pc_1F", 1, 1, 16, 19, 42},   // start (entry 0) 16, 19; Colosseum's room 42
     {MAP_ORRE_AGATE_VILLAGE_SHOP_1F, "M3_shop_1F", 1, 1, 20, 20, 43},   // start (entry 0) 20, 20; Colosseum's room 43
     {MAP_ORRE_AGATE_VILLAGE_HOUSEC_1F, "M3_houseC_1F", 1, 1, 15, 19, 44},   // start (entry 0) 15, 19; Colosseum's room 44
-    {MAP_ORRE_AGATE_VILLAGE_HOUSEC_2F, "M3_houseC_2F", 1, 1, 17, 19, 45},   // start (entry 0) 17, 19; Colosseum's room 45
+    {MAP_ORRE_AGATE_VILLAGE_HOUSEC_2F, "M3_houseC_2F", 1, 1, 16, 19, 45},   // start (entry 0) 16, 19; Colosseum's room 45
     {MAP_ORRE_AGATE_VILLAGE_HOUSED_1F, "M3_houseD_1F", 1, 1, 14, 18, 46},   // start (entry 0) 14, 18; Colosseum's room 46
     {MAP_ORRE_THE_UNDER, "M4_out", 3, 4, 80, 63, 47},   // start (entry 0) 80, 63; Colosseum's room 47
     {MAP_ORRE_THE_UNDER_JUNK_1F, "M4_junk_1F", 1, 1, 15, 18, 48},   // start (entry 0) 15, 18; Colosseum's room 48
@@ -120,7 +120,7 @@ static const struct { u16 map; const char *file; u8 bw, bh, startX, startY; u16 
     {MAP_ORRE_PHENAC_CITY_CARDE_1, "M1_carde_1", 1, 1, 16, 20, 128},   // start (entry 0) 16, 20; Colosseum's room 128
     {MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_1F_2, "S2_building_1F_2", 1, 2, 7, 47, 132},   // start (entry 0) 7, 47; Colosseum's room 132
     {MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_2F_2, "S2_building_2F_2", 2, 2, 29, 18, 133},   // start (entry 0) 29, 18; Colosseum's room 133
-    {MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_3F_2, "S2_building_3F_2", 1, 1, 17, 17, 134},   // start (entry 0) 17, 17; Colosseum's room 134
+    {MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_3F_2, "S2_building_3F_2", 1, 1, 17, 18, 134},   // start (entry 0) 17, 18; Colosseum's room 134
     {MAP_ORRE_SNAGEM_HIDEOUT_OUT_2, "S2_out_2", 2, 2, 35, 36, 136},   // start (entry 0) 35, 36; Colosseum's room 136
     {MAP_ORRE_PYRITE_COLOSSEUM_ENTER_1F_2, "M2_enter_1F_2", 1, 1, 17, 19, 142},   // start (entry 0) 17, 19; Colosseum's room 142
 };
@@ -152,7 +152,7 @@ static const struct { u16 map; u8 x, y, dir; s16 h; } sOrreArrivals[] __attribut
     {MAP_ORRE_MAYORS_HOUSE_HOUSEA_1F, 16, 18, DIR_NORTH, 0},
     {MAP_ORRE_MAYORS_HOUSE_HOUSEA_1F, 16, 10, DIR_WEST, 0},
     {MAP_ORRE_MAYORS_HOUSE_HOUSEA_2F, 19, 14, DIR_EAST, 0},
-    {MAP_ORRE_MAYORS_HOUSE_HOUSEA_2F, 15, 16, DIR_NORTH, 0},
+    {MAP_ORRE_MAYORS_HOUSE_HOUSEA_2F, 15, 17, DIR_NORTH, 0},
     {MAP_ORRE_PHENAC_CITY_HOUSEB_1F, 13, 19, DIR_NORTH, 0},
     {MAP_ORRE_PHENAC_CITY_HOUSEC_1F, 15, 17, DIR_NORTH, 0},
     {MAP_ORRE_PHENAC_CITY_SHOP_1F, 16, 22, DIR_NORTH, 0},
@@ -184,7 +184,7 @@ static const struct { u16 map; u8 x, y, dir; s16 h; } sOrreArrivals[] __attribut
     {MAP_ORRE_PYRITE_TOWN_URANAI_1F, 15, 18, DIR_NORTH, 0},
     {MAP_ORRE_PYRITE_TOWN_HOUSEA_1F, 16, 18, DIR_NORTH, 0},
     {MAP_ORRE_PYRITE_TOWN_GUILD_1F_1, 20, 19, DIR_NORTH, -4},
-    {MAP_ORRE_PYRITE_TOWN_GUILD_1F_1, 13, 11, DIR_SOUTH, -4},
+    {MAP_ORRE_PYRITE_TOWN_GUILD_1F_1, 13, 12, DIR_SOUTH, -4},
     {MAP_ORRE_PYRITE_TOWN_GUILD_1F_2, 17, 17, DIR_NORTH, 0},
     {MAP_ORRE_PYRITE_TOWN_SHOP_1F, 16, 20, DIR_NORTH, 0},
     {MAP_ORRE_PYRITE_TOWN_WINDMILL_1F, 16, 19, DIR_NORTH, 0},
@@ -234,12 +234,12 @@ static const struct { u16 map; u8 x, y, dir; s16 h; } sOrreArrivals[] __attribut
     {MAP_ORRE_AGATE_VILLAGE_SHRINE_1F, 17, 24, DIR_NORTH, 0},
     {MAP_ORRE_AGATE_VILLAGE_HOUSEA_1F, 16, 19, DIR_NORTH, 0},
     {MAP_ORRE_AGATE_VILLAGE_HOUSEB_1F, 16, 19, DIR_NORTH, 0},
-    {MAP_ORRE_AGATE_VILLAGE_PC_1F, 16, 18, DIR_NORTH, 0},
+    {MAP_ORRE_AGATE_VILLAGE_PC_1F, 16, 19, DIR_NORTH, 0},
     {MAP_ORRE_AGATE_VILLAGE_PC_1F, 19, 13, DIR_NORTH, 0},
     {MAP_ORRE_AGATE_VILLAGE_SHOP_1F, 20, 20, DIR_NORTH, 0},
     {MAP_ORRE_AGATE_VILLAGE_HOUSEC_1F, 15, 19, DIR_NORTH, 0},
     {MAP_ORRE_AGATE_VILLAGE_HOUSEC_1F, 13, 16, DIR_WEST, 0},
-    {MAP_ORRE_AGATE_VILLAGE_HOUSEC_2F, 17, 19, DIR_EAST, 0},
+    {MAP_ORRE_AGATE_VILLAGE_HOUSEC_2F, 16, 19, DIR_EAST, 0},
     {MAP_ORRE_AGATE_VILLAGE_HOUSED_1F, 14, 18, DIR_NORTH, 0},
     {MAP_ORRE_AGATE_VILLAGE_HOUSED_1F, 17, 14, DIR_NORTH, 0},
     {MAP_ORRE_THE_UNDER, 80, 63, DIR_SOUTH, 50},
@@ -441,7 +441,7 @@ static const struct { u16 map; u8 x, y, dir; s16 h; } sOrreArrivals[] __attribut
     {MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_2F_2, 23, 18, DIR_WEST, 0},
     {MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_2F_2, 34, 37, DIR_SOUTH, 0},
     {MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_2F_2, 27, 38, DIR_SOUTH, 0},
-    {MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_3F_2, 17, 17, DIR_NORTH, 0},
+    {MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_3F_2, 17, 18, DIR_NORTH, 0},
     {MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_3F_2, 11, 18, DIR_NORTH, 0},
     {MAP_ORRE_SNAGEM_HIDEOUT_OUT_2, 35, 36, DIR_NORTH, 0},
     {MAP_ORRE_SNAGEM_HIDEOUT_OUT_2, 35, 17, DIR_SOUTH, 0},

@@ -47,6 +47,13 @@
     },
     {
       "x": 4,
+      "y": 29,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_LABORATORY_LABO_B3",
+      "dest_warp_id": "17"
+    },
+    {
+      "x": 4,
       "y": 30,
       "elevation": 0,
       "dest_map": "MAP_ORRE_LABORATORY_LABO_B3",
@@ -64,14 +71,14 @@
       "y": 17,
       "elevation": 0,
       "dest_map": "MAP_ORRE_LABORATORY_LABO_B2",
-      "dest_warp_id": "6"
+      "dest_warp_id": "7"
     },
     {
       "x": 6,
       "y": 30,
       "elevation": 0,
       "dest_map": "MAP_ORRE_LABORATORY_LABO_B2",
-      "dest_warp_id": "7"
+      "dest_warp_id": "8"
     }
   ]
 }

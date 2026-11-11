@@ -3,8 +3,8 @@
 # then where the player comes out (tools/orre/check_tests.py against expect.txt: the entry's tile, or a tile off an
 # elevator). Needs orre/ (tools/orre/make_pack.sh). About 4 minutes.
 MODE=1
+ENV_A="MOEMON_ORRE_SCRIPTS=0"
 TMO=1500
 WARP=45,0,33,40
 CHECK="python3 -I tools/orre/check_tests.py tools/test/scenarios/orre_all_doors/expect.txt"
 UNEXPECT_A=("[crash]" "TIMEOUT" "has no grid" "isn't the size of its map" "no ORRE pack")
-ENV_A="MOEMON_ORRE_SCRIPTS=0"

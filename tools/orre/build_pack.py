@@ -305,7 +305,7 @@ def build(src, out):
                 for y in range(g["h"]):
                     for x in range(g["w"]):
                         hs = (g["heights"][y][x] + [0.0, 0.0, 0.0])[:3]
-                        fl = (1 if g["walk"][y, x] else 0) | (2 if g["trigger"][y, x] >= 0 else 0)
+                        fl = (1 if g["walk"][y, x] else 0) | (2 if g["trigger"][y, x] >= 0 else 0) | (int(g["edges"][y, x]) << 4)
                         tid = int(g["trigger"][y, x])
                         beh = orre_maps.STEP_WARP if g["walk"][y, x] and tid in m_conf.get("warps", {}) else 0
                         body.append(struct.pack("<BbBBfff", fl, tid, len(g["heights"][y][x][:3]), beh, *hs))

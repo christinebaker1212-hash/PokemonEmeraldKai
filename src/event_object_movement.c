@@ -5244,6 +5244,8 @@ u8 GetCollisionAtCoords(struct ObjectEvent *objectEvent, s16 x, s16 y, u32 dir)
         return COLLISION_IMPASSABLE;
     else if (S3D_Gyms_StepBlocked(objectEvent->currentCoords.x, objectEvent->currentCoords.y, x, y))
         return COLLISION_IMPASSABLE;   // Moemon Kai: a SINNOH gym's moving parts (src/sinnoh/s3d_gyms.c)
+    else if (O3D_StepBlocked(objectEvent->currentCoords.x, objectEvent->currentCoords.y, x, y))
+        return COLLISION_IMPASSABLE;   // Moemon Kai: ORRE: a wall of Colosseum's between two walkable tiles (src/orre/o3d.c)
     else if (S3D_DoorLocked(x, y))
         return COLLISION_IMPASSABLE;   // Moemon Kai: a SINNOH door its script keeps locked (src/sinnoh/s3d.c)
     else if (objectEvent->trackedByCamera && !CanCameraMoveInDirection(direction))

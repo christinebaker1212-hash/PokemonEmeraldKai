@@ -39,7 +39,7 @@
 45.13 xy 33,106   # M2_houseA_1F collision 6 -> M2_out
 45.13 xy 12,115   # M2_guild_1F_1 collision 3 -> M2_out
 45.19 xy 17,17   # M2_guild_1F_1 collision 4 -> M2_guild_1F_2
-45.18 xy 13,11 ~1   # M2_guild_1F_2 collision 0 -> M2_guild_1F_1
+45.18 xy 13,12   # M2_guild_1F_2 collision 0 -> M2_guild_1F_1
 45.13 xy 24,104   # M2_shop_1F collision 0 -> M2_out
 45.13 xy 28,65   # M2_windmill_1F collision 6 -> M2_out
 45.44 xy 54,48   # M2_windmill_2F collision 0 -> M4_out
@@ -76,7 +76,7 @@
 45.35 xy 20,15   # M3_out collision 4 -> M3_cave_1F_2
 45.41 xy 15,19   # M3_out collision 5 -> M3_houseC_1F
 45.34 xy 13,46   # M3_out collision 6 -> M3_cave_1F_1
-45.39 xy 16,18   # M3_out collision 7 -> M3_pc_1F
+45.39 xy 16,19   # M3_out collision 7 -> M3_pc_1F
 45.43 xy 14,18   # M3_out collision 8 -> M3_houseD_1F
 45.33 xy 43,28 ~1   # M3_cave_1F_1 collision 0 -> M3_out
 45.36 xy 17,24   # M3_cave_1F_1 collision 1 -> M3_shrine_1F
@@ -87,7 +87,7 @@
 45.33 xy 57,40   # M3_pc_1F collision 0 -> M3_out
 45.33 xy 27,21   # M3_shop_1F collision 0 -> M3_out
 45.33 xy 45,24   # M3_houseC_1F collision 0 -> M3_out
-45.42 xy 17,19   # M3_houseC_1F collision 1 -> M3_houseC_2F
+45.42 xy 16,19   # M3_houseC_1F collision 1 -> M3_houseC_2F
 45.41 xy 13,16   # M3_houseC_2F collision 0 -> M3_houseC_1F
 45.33 xy 64,23   # M3_houseD_1F collision 0 -> M3_out
 45.49 xy 14,20   # M4_out collision 2 -> M4_shop_1F
@@ -255,7 +255,7 @@
 45.116 xy 12,19   # S2_building_2F_2 collision 1 -> S2_building_1F_2
 45.116 xy 15,22   # S2_building_2F_2 collision 2 -> S2_building_1F_2
 45.116 xy 28,25   # S2_building_2F_2 collision 3 -> S2_building_1F_2
-45.118 xy 17,17   # S2_building_2F_2 collision 4 -> S2_building_3F_2
+45.118 xy 17,18   # S2_building_2F_2 collision 4 -> S2_building_3F_2
 45.116 xy 28,45   # S2_building_2F_2 collision 5 -> S2_building_1F_2
 45.117 xy 34,37   # S2_building_3F_2 collision 0 -> S2_building_2F_2
 45.117 xy 27,38   # S2_building_3F_2 collision 1 -> S2_building_2F_2

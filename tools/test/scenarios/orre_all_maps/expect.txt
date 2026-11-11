@@ -37,10 +37,10 @@
 45.36 xy 17,24   # M3_shrine_1F
 45.37 xy 16,19   # M3_houseA_1F
 45.38 xy 16,19   # M3_houseB_1F
-45.39 xy 16,18   # M3_pc_1F
+45.39 xy 16,19   # M3_pc_1F
 45.40 xy 20,20   # M3_shop_1F
 45.41 xy 15,19   # M3_houseC_1F
-45.42 xy 17,19   # M3_houseC_2F
+45.42 xy 16,19   # M3_houseC_2F
 45.43 xy 14,18   # M3_houseD_1F
 45.44 xy 80,63   # M4_out
 45.45 xy 15,18   # M4_junk_1F
@@ -116,6 +116,6 @@
 45.115 xy 16,20   # M1_carde_1
 45.116 xy 7,47   # S2_building_1F_2
 45.117 xy 29,18   # S2_building_2F_2
-45.118 xy 17,17   # S2_building_3F_2
+45.118 xy 17,18   # S2_building_3F_2
 45.119 xy 35,36   # S2_out_2
 45.120 xy 17,19   # M2_enter_1F_2

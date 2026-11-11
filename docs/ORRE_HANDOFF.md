@@ -138,6 +138,29 @@ The older notes per part:
    flags, src/orre/orre_story.c, go there too).
 8. The in-game download screen when orre/ is missing (as the DANCE machine's rh_screen.c StateNoSongs).
 
+## The grids: everything Colosseum lets a person walk (2026-11-10: tools/orre/grid.py _tiles_from_flood)
+- The user, 2026-11-10: "The pre-existing grids for movement do not account for diagonal movement or the 360 based
+  movement of the original game... Any area deemed walkable in the original game must be walkable here."
+- Colosseum's hero walks at any angle wherever a person fits; Emerald's steps go tile to tile. grid.py works out
+  where a person fits on a fine grid (1 unit; `_reach`: walls at a person's height thickened by RADIUS), then:
+  - **a tile is walkable** when that flood passes its centre or reaches AREA (16 of 64) of its cells in one piece,
+    or its floor lies farther than FAR (6 units) from every other walkable tile's piece (a narrow diagonal aisle, a
+    nook). Before, only the centre counted and 1.6% of the floor (15% in small rooms) lay in closed tiles; now 0.57%,
+    all of it slivers beside a walkable tile;
+  - **a wall closes a step, never a tile**: each walkable tile has its sides a step can't cross (g["edges"],
+    EDGE_N / E / S / W: the pack's cell flags' high four bits; o3d.c O3D_StepBlocked, asked by
+    event_object_movement.c GetCollisionAtCoords, so the player, the people and the test harness all obey it).
+    Before, a wall between two walkable tiles closed the tile nearer to it;
+  - **whatever the flood joins, the tiles join**: an area the tile graph can't get to has the tiles along the
+    flood's own way opened and those steps forced; areas that touch only at a corner are joined through one of the
+    two tiles beside it (PHENAC's stadium plaza: the way there is narrower than the flood's person).
+- `python3 -I tools/orre/grid_check.py` checks every room: the floor lost to closed tiles, and that the walkable
+  tiles are no more separate areas than Colosseum's floor is. Run it after touching grid.py, then gen_maps.py,
+  gen_gates.py, gen_checks.py, gen_tests.py and the pack (make_pack.sh or build_pack.py).
+- Not checked against Colosseum's own collision code (GScolsys2Walk): the flood is this project's reading of it
+  (RADIUS 2.5, Colosseum's people records say 4.0; walls from 1 to 10 units over the ground). Movement itself stays
+  four-way.
+
 ## Sound (2026-11-10: musyx/, include/orre_sound.h)
 - **Colosseum's own songs and sound effects play, from the disc's own data** (the user, 2026-11-10: "go ahead and use
   the MusyX runtime. Compress songs down to a GBA sound filter"). Colosseum's music is MusyX sequences (78 song files in
