@@ -286,8 +286,10 @@ def _joint_worlds(f, root, pose, frame):
     return out
 
 
-def set_anims(f, ms, meshes):
-    """[(mesh index in the set, kind, period, samples)]: kind 1 a texture slide (du, dv), 2 a joint's move (3x4 rows)"""
+def set_anims(f, ms, meshes, door=None):
+    """[(mesh index in the set, kind, period, samples, door)]: kind 1 a texture slide (du, dv), 2 a joint's move (3x4
+    rows), 3 a door's leaf opening (DOOR: (its number in Colosseum's door table, its opening animation's number in the
+    set): the joints' move through that animation, played once as the door opens: src/orre/o3d.c O3D_DoorMode)"""
     root, aj, mj = f.u32(ms), f.u32(ms + 4), f.u32(ms + 8)
     out = []
     tex = _tex_anims(f, root, mj) if mj else {}
@@ -297,10 +299,12 @@ def set_anims(f, ms, meshes):
         if tas and "texid" in mat:
             a = _uv_anim(f, tas, mat["texid"], mat.get("uvtrans", (0.0, 0.0)))
             if a:
-                out.append((i, 1, a[0], a[1]))
+                out.append((i, 1, a[0], a[1], 0))
     lst = f.ptr_list(aj) if aj else []
+    if door and not 0 <= door[1] < len(lst):
+        return out   # (a door with no opening animation: it stands as it is)
     if lst:
-        pose = hsd_anim.anim_tree(f, root, lst[0], {})
+        pose = hsd_anim.anim_tree(f, root, lst[door[1] if door else 0], {})
         if pose:
             end = max(e for _, e in pose.values())
             period, frames = _samples(end)
@@ -314,16 +318,16 @@ def set_anims(f, ms, meshes):
                 mats = [w.get(j, rest[j]) @ inv for w in worlds]
                 if all(np.allclose(x, np.eye(4), atol=1e-4) for x in mats):
                     continue
-                out.append((i, 2, period, [tuple(x[:3, :].reshape(-1)) for x in mats]))
+                out.append((i, 3 if door else 2, period, [tuple(x[:3, :].reshape(-1)) for x in mats], door[0] if door else 0))
     return out
 
 
 def anim_bytes(entries):
-    """u32 count; each: u32 mesh (its record's place among the map's meshes), u8 kind, 3 pad, u32 period, u32 samples,
-    the samples (kind 1: f32 du dv; kind 2: f32 x12, a 3x4 matrix's rows)"""
+    """u32 count; each: u32 mesh (its record's place among the map's meshes), u8 kind, u8 door, 2 pad, u32 period,
+    u32 samples, the samples (kind 1: f32 du dv; kinds 2 and 3: f32 x12, a 3x4 matrix's rows)"""
     body = [struct.pack("<I", len(entries))]
-    for mesh, kind, period, samples in entries:
-        body.append(struct.pack("<IB3xII", mesh, kind, period, len(samples)))
+    for mesh, kind, period, samples, door in entries:
+        body.append(struct.pack("<IBB2xII", mesh, kind, door, period, len(samples)))
         body.append(np.array(samples, dtype="<f4").tobytes())
     return b"".join(body)
 
@@ -359,6 +363,8 @@ def build(src, out):
             body = [struct.pack("<I", len(sets))]
             anims, first = [], 0
             ms_list = f.ptr_list(f.u32(f.roots["scene_data"])) if "scene_data" in f.roots else []
+            # (the room's doors: a door's model is the room's model set 0x1000 + n: colo_rooms.py Room.doors)
+            door_sets = {d[6] & 0xFFF: (d[0], d[7]) for d in (map_conf.get(name) or {}).get("doors", []) if d[6]}
             for si, s in enumerate(sets):
                 kind = 2 if hsd.is_sky(s) else 0
                 body.append(struct.pack("<B3xI", kind, len(s)))
@@ -374,7 +380,7 @@ def build(src, out):
                         m.has_clr = False   # (the material's colour alone)
                     body.append(mesh_bytes(m, remap[m.tex] if 0 <= m.tex < len(remap) else -1))
                 if si < len(ms_list) and f.u32(ms_list[si]):
-                    anims += [(first + i, k, p, smp) for i, k, p, smp in set_anims(f, ms_list[si], s)]
+                    anims += [(first + i, k, p, smp, dr) for i, k, p, smp, dr in set_anims(f, ms_list[si], s, door_sets.get(si))]
                 first += len(s)
             m_conf = map_conf.get(name)
             if m_conf:

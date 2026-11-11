@@ -420,8 +420,14 @@ The older notes per part:
   gates and the doors as sOrreDoors, and orre_vm.c shuts each door as its room starts unless its flag is set
   (InitDoors), opens it on floorEventCtrlDoor (native 96, CtrlDoor: modes 0-3 as the decomp) and, for the doors a
   touch trigger opens in Colosseum (the shared script 0x05960005), when the player stands beside a closed leaf's tiles
-  (TouchDoors). The leaves' models don't move yet (they're drawn shut and walked through): a next step. The tests'
-  walker plans through a door that will open (Orre_Vm_DoorWillOpen). Scenario orre_doors.
+  (TouchDoors: on its touch trigger's box, sOrreDoors x0..z1, or beside its leaf's tiles); such a door starts shut
+  every time its room is entered. On screen: a door's model is the room's model set 0x1000 + n with an opening and a
+  closing animation; build_pack.py set_anims packs the opening one as kind 3 with the door's number, and o3d.c plays
+  it by the door's state (O3D_DoorMode, sDoorPos) - until then every set's first animation looped, so every door in
+  ORRE flapped open three times a second. A shut door or gate with a check spot of its own answers A before a person
+  two tiles beyond it (field_control_avatar.c: the bookshelf's button, the lookout kid behind it). The tests' walker
+  plans through a door that will open (Orre_Vm_DoorWillOpen) and presses A at one with a button
+  (Orre_TestButtonDoor). Scenario orre_doors.
 - **Story gates** (scriptSetCol, GScolsys2SetObjEnable: 169 calls in the rooms' scripts): the maps are built with
   every gate open; tools/orre/gen_gates.py lists each gate's tiles (its walls crossing a walkable tile at a person's
   height, or the step between two, closing the one farther from the gate's middle) in src/data/orre_gates.h; Colosseum's

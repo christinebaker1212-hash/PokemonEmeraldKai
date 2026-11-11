@@ -95,6 +95,9 @@ u16 Orre_Npc_Name(u32 index);
 const u8 *Orre_Check_InFront(void);                // (field_control_avatar.c) a check spot in front of the player
 u32 Orre_Check_Script(u32 row, u32 *args);
 bool8 Orre_Vm_Running(void);
+bool8 Orre_Vm_GateShutAt(s16 x, s16 y);     // a closed gate or door covers this tile
+bool8 Orre_TestButtonDoor(s16 fromX, s16 fromY, u8 dir, s16 toX, s16 toY);   // (tests' walker: orre_npcs.c)
+bool8 Orre_Check_SpotInFront(void);         // a check spot of Colosseum's is in front of the player
 bool8 Orre_Vm_DoorWillOpen(s16 x, s16 y);   // (tests' walker: a tile shut only by a door that opens when walked up to)
 void Orre_VmWarp(void);
 void Orre_VmTouch(void);

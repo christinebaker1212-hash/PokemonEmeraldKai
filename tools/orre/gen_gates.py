@@ -107,8 +107,19 @@ def main():
     unpacked = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser('~/.cache/moemon/orre/unpacked')
     rows, tiles, doors = [], [], []
     for m in maps.load(unpacked):
+        if m['doors']:
+            import gen_checks
+            trig = gen_checks.check_triangles(open(os.path.join(unpacked, m['file'], m['file'] + '.col'), 'rb').read(),
+                                              0x2C, 0x32)
         for d in m['doors']:
-            doors.append('    {%d, %d, %d, %d, %d, %d, %d},   // %s' % (m['room'], d[0], d[1], d[2], d[3], d[4], d[5], m['file']))
+            # (its touch triggers' box: where Colosseum opens it)
+            T = [t for c in d[8] for t in trig.get(c, [])]
+            box = (0.0, 0.0, 0.0, 0.0)
+            if T:
+                P = np.concatenate(T).reshape(-1, 3)
+                box = (P[:, 0].min(), P[:, 2].min(), P[:, 0].max(), P[:, 2].max())
+            doors.append('    {%d, %d, %d, %d, %d, %d, %d, %.2ff, %.2ff, %.2ff, %.2ff},   // %s'
+                         % (m['room'], d[0], d[1], d[2], d[3], d[4], d[5], box[0], box[1], box[2], box[3], m['file']))
         objects = sorted(set(m['gates']) | maps.door_objects(m))
         if not objects:
             continue
@@ -134,7 +145,8 @@ def main():
     lines += ['};', '',
               '// Colosseum\'s doors (its door table: tools/orre/colo_rooms.py Room.doors): {room, the door\'s number in the',
               '// table, its leaf\'s collision object (-1 none), the flag set while it\'s open, the flag that unlocks it (0 none),',
-              '// its type, whether walking up to it opens it (the shared script 0x05960005 on a touch trigger)}', '',
+              '// its type, whether walking up to it opens it (the shared script 0x05960005 on a touch trigger), that',
+              '// trigger\'s box x0, z0, x1, z1 in Colosseum\'s units}', '',
               '#define ORRE_DOOR_COUNT %d' % len(doors), '',
               'static const struct OrreDoor sOrreDoors[ORRE_DOOR_COUNT] = {'] + doors + ['};', '']
     open(OUT, 'w').write('\n'.join(lines))

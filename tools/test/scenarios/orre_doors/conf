@@ -1,7 +1,7 @@
 # ORRE's doors as Colosseum has them (its door table: src/orre/orre_vm.c CtrlDoor). PYRITE's hideout house: the
 # bookshelf in front of the stairs to the kids' room is a door only its button opens. Coming up from the kids' room the
-# player stood behind it with no way on (a leaf was a wall for good); now A on it (the kid who guards it gone: flag
-# 3532) asks "Press it?" and it opens. Then
+# player stood behind it with no way on (a leaf was a wall for good); now A on it asks (not the
+# lookout kid two tiles beyond it, who took every A: field_control_avatar.c) "Press it?" and it opens. Then
 # the police station: the doors to its back rooms open when walked up to.
 MODE=1
 TMO=200

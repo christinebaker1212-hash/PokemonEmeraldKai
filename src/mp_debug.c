@@ -741,8 +741,9 @@ static void WalkSearch(void)
                 else if (col == COLLISION_OBJECT_EVENT && PassingObjectAt(nx + MAP_OFFSET, ny + MAP_OFFSET))
                     ne = ElevationAfter(e, nx + MAP_OFFSET, ny + MAP_OFFSET, cx + MAP_OFFSET, cy + MAP_OFFSET);
                     // (someone who wanders, or the tile someone just left: a player waits for them to move on)
-                else if (col == COLLISION_IMPASSABLE && !surf && KeyDoorAt(nx, ny))
-                    how |= WS_A;   // (the CARD KEY's door: A facing it opens it)
+                else if (col == COLLISION_IMPASSABLE && !surf
+                      && (KeyDoorAt(nx, ny) || Orre_TestButtonDoor(cx, cy, dirs[d], nx, ny)))
+                    how |= WS_A;   // (the CARD KEY's door, an ORRE door with a button: A facing it opens it)
                 else if (col == COLLISION_OBJECT_EVENT && ClearableAt(nx + MAP_OFFSET, ny + MAP_OFFSET))
                     how |= WS_A, ne = ElevationAfter(e, nx + MAP_OFFSET, ny + MAP_OFFSET, cx + MAP_OFFSET, cy + MAP_OFFSET);
                 else if (col == COLLISION_OBJECT_EVENT && !surf && canPush && PushableAt(nx, ny, dx[d], dy[d], w, h))

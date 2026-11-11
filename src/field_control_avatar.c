@@ -382,6 +382,11 @@ static const u8 *GetInteractedObjectEventScript(struct MapPosition *position, u8
         if (MetatileBehavior_IsCounter(metatileBehavior) != TRUE
          && !(O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup) && MapGridGetCollisionAt(position->x, position->y)))
             return NULL;
+        // (... but a shut door or gate with a check spot of its own answers first: PYRITE's hideout bookshelf has its
+        // button, and the lookout kid two tiles beyond it took every A from behind it)
+        if (O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup)
+         && Orre_Vm_GateShutAt(position->x - MAP_OFFSET, position->y - MAP_OFFSET) && Orre_Check_SpotInFront())
+            return NULL;
 
         // Look for an object event on the other side of the counter.
         objectEventId = GetObjectEventIdByPosition(position->x + gDirectionToVectors[direction].x, position->y + gDirectionToVectors[direction].y, position->elevation);

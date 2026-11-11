@@ -198,7 +198,9 @@ class Room:
     def __init__(self, room, file, area, kind, place):
         self.room, self.file, self.area, self.kind, self.place = room, file, area, kind, place
         self.entries, self.events, self.links, self.gates, self.people = [], [], {}, set(), []
-        self.doors = []   # (index in the game's table, collision object, open flag, lock flag, type, opens by touch)
+        # (index in the game's table, collision object, open flag, lock flag, type, opens by touch, its model (the
+        # room's model set 0x1000 + n), its opening animation's number in that set, its touch triggers' collision ids)
+        self.doors = []
 
     def __repr__(self):
         return "Room(%d %s)" % (self.room, self.file)
@@ -255,9 +257,13 @@ def rooms(unpacked):
             out[room].events.append((kind, col, script, (a, b, c, e)))
     for i in range(struct.unpack_from(">I", data, DOOR_COUNT)[0]):
         kind, col, room, opened, lock = struct.unpack_from(">BxxhHHH", data, DOORS + i * DOOR_SIZE + 7)
+        open_anim = struct.unpack_from(">b", data, DOORS + i * DOOR_SIZE)[0]
+        res = struct.unpack_from(">I", data, DOORS + i * DOOR_SIZE + 0x14)[0]
         if room in out and (col >= 0 or opened or lock):
-            touch = any(e[0] == TOUCH and e[2] == 0x05960000 + FN_DOOR and e[3][0] == i for e in out[room].events)
-            out[room].doors.append((i, col, opened, lock, kind, touch))
+            # (the touch triggers that open it: the shared script's door mode 0 with this door's number)
+            cols = [e[1] for e in out[room].events
+                    if e[0] == TOUCH and e[2] == 0x05960000 + FN_DOOR and e[3][0] == i]
+            out[room].doors.append((i, col, opened, lock, kind, bool(cols), res, open_anim, cols))
     for r in out.values():
         _links(unpacked, r, out)
     return out

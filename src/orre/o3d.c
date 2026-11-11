@@ -71,12 +71,30 @@ typedef struct
     // What moves (tools/orre/build_pack.py set_anims, played in a loop at 60 a second): 1 the texture slides
     // (anim: du dv a sample, in its coordinates; su sv: those to texels), 2 the mesh moves with its joint (anim: a 3x4
     // matrix a sample, Colosseum's units; v0 the mesh at rest)
-    u8 animKind;
+    u8 animKind, animDoor;   // (kind 3: a door's leaf, animDoor its number in Colosseum's door table)
     u32 animPeriod, animCount;
     float *anim;
     OVtx *v0;
     float c0[3], su, sv, du, dv;
 } OMesh;
+
+// Colosseum's doors (src/orre/orre_vm.c CtrlDoor), by their number in its door table: open or shut, how far along
+// the opening animation (frames), and that animation's length
+static u8 sDoorOpen[256];
+static u16 sDoorPos[256], sDoorLen[256];
+
+// floorEventCtrlDoor's modes: 0 it opens, 1 it's open at once, 2 it closes, 3 it's shut at once
+void O3D_DoorMode(u8 door, u8 mode)
+{
+    sDoorOpen[door] = mode < 2;
+    if (mode == 1)
+        sDoorPos[door] = sDoorLen[door] ? sDoorLen[door] : 0xFFFF;
+    else if (mode == 3)
+        sDoorPos[door] = 0;
+    else if (sDoorPos[door] > sDoorLen[door])
+        sDoorPos[door] = sDoorLen[door];
+}
+
 // r | g << 8 | b << 16 | a << 24. mip[0] is px; each level after it half the one before (alpha-weighted), down to 2
 // texels: a surface far off or seen at a slant is drawn from the level whose texels are about a pixel wide, so it no
 // longer speckles, and one nearer than a texel a pixel is smoothed between its four nearest texels (Colosseum's own
@@ -499,13 +517,15 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
             Take(&anims, &count, 4);
             per = kind[0] == 1 ? 2 : 12;
             data = Skip(&anims, count * per * 4);
-            if (data && mesh < fileMesh && fileToMesh[mesh] >= 0 && (kind[0] == 1 || kind[0] == 2) && count && period)
+            if (data && mesh < fileMesh && fileToMesh[mesh] >= 0 && kind[0] >= 1 && kind[0] <= 3 && count && period)
             {
                 OMesh *me = &om->mesh[fileToMesh[mesh]];
                 me->anim = malloc(count * per * 4);
                 memcpy(me->anim, data, count * per * 4);
-                me->animKind = kind[0], me->animPeriod = period, me->animCount = count;
-                if (kind[0] == 2)
+                me->animKind = kind[0], me->animDoor = kind[1], me->animPeriod = period, me->animCount = count;
+                if (kind[0] == 3 && period > sDoorLen[kind[1]])
+                    sDoorLen[kind[1]] = period > 0xFFFF ? 0xFFFF : period;
+                if (kind[0] >= 2)
                 {
                     me->v0 = malloc(sizeof(OVtx) * me->count);
                     memcpy(me->v0, me->v, sizeof(OVtx) * me->count);
@@ -1490,7 +1510,7 @@ static void DrawProps(const OMap *g)
     }
 }
 
-// This frame of what moves in map G (60 a second, each animation in its own loop)
+// This frame of what moves in map G (60 a second, each animation in its own loop; a door's leaf by its door)
 static u32 sAnimTick;
 
 static void Animate(OMap *g)
@@ -1503,6 +1523,13 @@ static void Animate(OMap *g)
         const float *a;
         if (!me->animKind)
             continue;
+        if (me->animKind == 3)
+        {
+            // (a door's leaf: shut at the opening animation's first frame, open at its last)
+            u32 at = (u64)sDoorPos[me->animDoor] * me->animCount / me->animPeriod;
+            a = me->anim + (at < me->animCount ? at : me->animCount - 1) * 12;
+        }
+        else
         a = me->anim + (u64)(sAnimTick % me->animPeriod) * me->animCount / me->animPeriod * (me->animKind == 1 ? 2 : 12);
         if (me->animKind == 1)
         {
@@ -1537,6 +1564,16 @@ static void Render(void)
     if (g == NULL)
         return;
     sAnimTick++;
+    {
+        u32 d;
+        for (d = 0; d < 256; d++)
+        {
+            if (sDoorOpen[d] && sDoorPos[d] < sDoorLen[d])
+                sDoorPos[d]++;
+            else if (!sDoorOpen[d] && sDoorPos[d])
+                sDoorPos[d]--;
+        }
+    }
     Animate((OMap *)g);   // (the water sliding, the wheels turning: Colosseum's own animations)
     if (O3D_CamActive())
     {

@@ -99,7 +99,7 @@ struct OrreShop
 // The story's gates (scriptSetCol: a collision object a room's scripts switch on and off), the tiles each closes:
 // tools/orre/gen_gates.py
 struct OrreGate { u16 room; u8 gate; u16 first, count; bool8 closed; };   // (closed: at the room's start)
-struct OrreDoor { u16 room; u8 index; s8 col; u16 open, lock; u8 type; bool8 touch; };
+struct OrreDoor { u16 room; u8 index; s8 col; u16 open, lock; u8 type; bool8 touch; float x0, z0, x1, z1; };
 #include "../data/orre_gates.h"
 
 struct Thread
@@ -758,6 +758,7 @@ static u32 CtrlDoor(u32 index, u32 mode)
             Orre_SetFlag(d->open, TRUE);
         if (d->col >= 0 && d->room == sRoom)
             SetGate(d->col, FALSE);
+        O3D_DoorMode(d->index, mode);
         break;
     case 2:
         if (d->open && !Orre_Flag(d->open))
@@ -769,18 +770,23 @@ static u32 CtrlDoor(u32 index, u32 mode)
             Orre_SetFlag(d->open, FALSE);
         if (d->col >= 0 && d->room == sRoom)
             SetGate(d->col, TRUE);
+        O3D_DoorMode(d->index, mode);
         break;
     }
     return 0;
 }
 
-// A room's start (the decomp's floorInitDoors): each door open or closed by its flag
+// A room's start (the decomp's floorInitDoors): each door open or closed by its flag. A door that opens when walked
+// up to starts shut every time (its flag is one of Colosseum's first 150, the ones a room's stay lasts)
 static void InitDoors(u32 room)
 {
     u32 i;
     for (i = 0; i < ORRE_DOOR_COUNT; i++)
-        if (sOrreDoors[i].room == room)
-            CtrlDoor(sOrreDoors[i].index, sOrreDoors[i].type != 2 && sOrreDoors[i].open && Orre_Flag(sOrreDoors[i].open) ? 1 : 3);
+    {
+        const struct OrreDoor *d = &sOrreDoors[i];
+        if (d->room == room)
+            CtrlDoor(d->index, d->type != 2 && !d->touch && d->open && Orre_Flag(d->open) ? 1 : 3);
+    }
 }
 
 // The closed gate that covers tile X, Y in this room: its row + 1, 0 none
@@ -804,13 +810,33 @@ static void TouchDoors(void)
 {
     struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
     s16 x = p->currentCoords.x - MAP_OFFSET, y = p->currentCoords.y - MAP_OFFSET;
+    float cx = 0, cz = 0;
+    bool8 at = O3D_TileToColo(x, y, &cx, &cz);
     u32 i;
     for (i = 0; i < ORRE_DOOR_COUNT; i++)
     {
         const struct OrreDoor *d = &sOrreDoors[i];
-        if (d->room == sRoom && d->touch && d->col >= 0 && ClosedGateAt(x, y, 1, d->col))
+        if (d->room != sRoom || !d->touch || (d->open && Orre_Flag(d->open)))
+            continue;
+        // (on its touch trigger, half a tile's slack: a tile's centre seldom lies in a thin trigger; or beside its
+        // shut leaf's tiles)
+        if ((at && d->x1 > d->x0 - 0.01f && (d->x0 != 0 || d->x1 != 0 || d->z0 != 0 || d->z1 != 0)
+             && cx >= d->x0 - 4.0f && cx <= d->x1 + 4.0f && cz >= d->z0 - 4.0f && cz <= d->z1 + 4.0f)
+         || (d->col >= 0 && ClosedGateAt(x, y, 1, d->col)))
             CtrlDoor(d->index, 0);
     }
+}
+
+// Tile X, Y is shut by a closed gate or door of this room
+bool8 Orre_Vm_GateShutAt(s16 x, s16 y)
+{
+    u32 i, k;
+    for (i = 0; i < ORRE_GATE_COUNT; i++)
+        if (sGateClosed[i] && sOrreGates[i].room == sRoom)
+            for (k = 0; k < sOrreGates[i].count; k++)
+                if (sOrreGateTiles[sOrreGates[i].first + k][0] == x && sOrreGateTiles[sOrreGates[i].first + k][1] == y)
+                    return TRUE;
+    return FALSE;
 }
 
 // Tests' walker: tile X, Y is shut only by a door that opens when the player walks up to it

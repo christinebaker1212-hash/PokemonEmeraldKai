@@ -644,25 +644,55 @@ u32 Orre_Npc_TalkScriptId(u32 index)
 #define CHECK_REACH 6.0f   // (Colosseum's units: how far in front of the player's tile centre a spot is checked)
 #define CHECK_SLACK 4.0f   // (half a tile: a spot's box is often a flat face on a counter or a wall)
 
-// The check spot in front of the player when A is pressed: Orre_EventScript_Check with VAR_0x8004 its row, else NULL
-const u8 *Orre_Check_InFront(void)
+// The check spot in front of someone on tile X, Y facing DIR: its row + 1, 0 none
+static u32 CheckSpotFrom(s16 x, s16 y, u8 dir)
 {
-    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
     float cx, cz;
     u32 i;
-    if (!Orre_Vm_Running() || !O3D_TileToColo(p->currentCoords.x - MAP_OFFSET, p->currentCoords.y - MAP_OFFSET, &cx, &cz))
-        return NULL;
-    cx += p->facingDirection == DIR_EAST ? CHECK_REACH : p->facingDirection == DIR_WEST ? -CHECK_REACH : 0;
-    cz += p->facingDirection == DIR_SOUTH ? CHECK_REACH : p->facingDirection == DIR_NORTH ? -CHECK_REACH : 0;
+    if (!Orre_Vm_Running() || !O3D_TileToColo(x, y, &cx, &cz))
+        return 0;
+    cx += dir == DIR_EAST ? CHECK_REACH : dir == DIR_WEST ? -CHECK_REACH : 0;
+    cz += dir == DIR_SOUTH ? CHECK_REACH : dir == DIR_NORTH ? -CHECK_REACH : 0;
     for (i = 0; i < ORRE_ROOM_CHECK_COUNT; i++)
     {
         const struct OrreRoomCheck *c = &sOrreRoomChecks[i];
         if (c->room == sRoom && cx >= c->x0 - CHECK_SLACK && cx <= c->x1 + CHECK_SLACK && cz >= c->z0 - CHECK_SLACK
          && cz <= c->z1 + CHECK_SLACK)
-        {
-            gSpecialVar_0x8004 = i;
-            return Orre_EventScript_Check;
-        }
+            return i + 1;
+    }
+    return 0;
+}
+
+static u32 CheckSpotInFront(void)
+{
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    return CheckSpotFrom(p->currentCoords.x - MAP_OFFSET, p->currentCoords.y - MAP_OFFSET, p->facingDirection);
+}
+
+bool8 Orre_Check_SpotInFront(void)
+{
+    return CheckSpotInFront() != 0;
+}
+
+// Tests' walker: the step from FROMX, FROMY towards DIR is shut by a door or gate that a check spot there with the
+// room's own script (its button: PYRITE's hideout bookshelf) may open: A facing it
+bool8 Orre_TestButtonDoor(s16 fromX, s16 fromY, u8 dir, s16 toX, s16 toY)
+{
+    u32 row = CheckSpotFrom(fromX, fromY, dir);
+    return row && (sOrreRoomChecks[row - 1].script >> 16) == 0x0100 && Orre_Vm_GateShutAt(toX, toY);
+}
+
+// The check spot in front of the player when A is pressed: Orre_EventScript_Check with VAR_0x8004 its row, else NULL
+const u8 *Orre_Check_InFront(void)
+{
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u32 i;
+    if (!Orre_Vm_Running())
+        return NULL;
+    if ((i = CheckSpotInFront()) != 0)
+    {
+        gSpecialVar_0x8004 = i - 1;
+        return Orre_EventScript_Check;
     }
     {
         // (a prop with something to say, two tiles ahead: its collision, a story gate, may cover the tile between, as

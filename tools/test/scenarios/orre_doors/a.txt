@@ -3,7 +3,6 @@ wait 60
 goto 45,14 20 18 1500
 echo [doors] in the police station's back
 shot police_back
-mp orreflag 3532 1
 mp warp 45,18,13,12
 wait 120
 pressuntil B field 600
