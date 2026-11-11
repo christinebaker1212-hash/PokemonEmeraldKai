@@ -109,7 +109,20 @@ static struct Npc *Of(u32 index)
 {
     u32 i;
     if (index == NPC_PARTNER)
+    {
+        // (before she follows, a scene shows her itself: PHENAC's, out of the sack, places character 101 and has her
+        // shown: she was no one, so not there until she joined: the user, 2026-11-11)
+        if (sPartner.p == NULL && sRoom != 0)
+        {
+            memset(&sPartner, 0, sizeof(sPartner));
+            sPartner.p = &sRuiPerson;
+            sPartner.dir = DIR_SOUTH;
+            if (gPlayerAvatar.objectEventId < OBJECT_EVENTS_COUNT)
+                sPartner.x = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET,
+                sPartner.y = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET;
+        }
         return sPartner.p != NULL ? &sPartner : NULL;
+    }
     for (i = 0; i < sCount; i++)
         if (sNpc[i].p->index == index)
             return &sNpc[i];
@@ -172,7 +185,7 @@ static bool8 Spawn(struct Npc *n)
         return TRUE;
     }
     id = SpawnSpecialObjectEventParameterized(OBJ_EVENT_GFX_ORRE_FIRST + n->p->person,
-                                              n == &sPartner ? MOVEMENT_TYPE_FOLLOW_PLAYER : MOVEMENT_TYPE_NONE,
+                                              n == &sPartner && Orre_Flag(ORRE_FLAG_RUI_FOLLOWS) ? MOVEMENT_TYPE_FOLLOW_PLAYER : MOVEMENT_TYPE_NONE,
                                               LocalId(n), n->x + MAP_OFFSET, n->y + MAP_OFFSET, 3);
     if (id >= OBJECT_EVENTS_COUNT)
         return FALSE;
@@ -783,7 +796,8 @@ void Orre_Npcs_Frame(void)
     if (sPartner.p != NULL && sPartner.shown && Object(&sPartner) == NULL)
     {
         struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
-        sPartner.x = pl->currentCoords.x - MAP_OFFSET, sPartner.y = pl->currentCoords.y - MAP_OFFSET;
+        if (Orre_Flag(ORRE_FLAG_RUI_FOLLOWS))   // (one a scene placed stays where it put her)
+            sPartner.x = pl->currentCoords.x - MAP_OFFSET, sPartner.y = pl->currentCoords.y - MAP_OFFSET;
         sPartner.walking = FALSE;
         Spawn(&sPartner);   // (after a battle or a screen: there again, at the player's side as they go on)
     }
@@ -974,6 +988,14 @@ static void PartnerAppear(void)
 // std035_setPartnerFollowing: RUI joins the player (or leaves: the scene shows her where it wants her)
 void Orre_Npc_PartnerFollow(bool8 on)
 {
+    if (on && !Orre_Flag(ORRE_FLAG_RUI_FOLLOWS) && sPartner.p != NULL)
+    {
+        // (the scene had her standing about as one of its people: she starts over as the one who follows)
+        if (sPartner.shown)
+            RemoveObjectEventByLocalIdAndMap(LocalId(&sPartner), gSaveBlock1Ptr->location.mapNum,
+                                             gSaveBlock1Ptr->location.mapGroup);
+        sPartner.p = NULL;
+    }
     Orre_SetFlag(ORRE_FLAG_RUI_FOLLOWS, on);
     if (on)
         PartnerAppear();

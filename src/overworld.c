@@ -1006,9 +1006,19 @@ static u8 GetAdjustedInitialTransitionFlags(struct InitialPlayerAvatarState *pla
         return PLAYER_AVATAR_FLAG_ACRO_BIKE;
 }
 
+static u8 sMpNewGameDir;   // Moemon Kai: the way a new game's player faces as it begins (DIR_NONE: the usual rules)
+
 static u8 GetAdjustedInitialDirection(struct InitialPlayerAvatarState *playerStruct, u8 transitionFlags, u16 metatileBehavior, u8 mapType)
 {
     u8 orreDir;
+    if (sMpNewGameDir != DIR_NONE)
+    {
+        // Moemon Kai: a new game's own start (SINNOH's: watching the TV). The direction set in CB2_NewGame was
+        // lost here to the default, facing south: the player had their back to the TV (the user, 2026-11-11)
+        u8 dir = sMpNewGameDir;
+        sMpNewGameDir = DIR_NONE;
+        return dir;
+    }
     if (O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup)   // Moemon Kai: ORRE's entries face the way Colosseum's do
      && (orreDir = O3D_ArrivalDir(gSaveBlock1Ptr->location.mapGroup << 8 | gSaveBlock1Ptr->location.mapNum,
                                   gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y)) != DIR_NONE)
@@ -1700,8 +1710,9 @@ void CB2_NewGame(void)
     ResetSafariZoneFlag_();
     NewGameInitData();
     ResetInitialPlayerAvatarState();
+    sMpNewGameDir = DIR_NONE;
     if (MP_Region_Current() == REGION_SINNOH)
-        sInitialPlayerAvatarState.direction = DIR_NORTH;   // Moemon Kai: SINNOH's start: watching the TV, as Platinum's
+        sMpNewGameDir = sInitialPlayerAvatarState.direction = DIR_NORTH;   // Moemon Kai: SINNOH's start: watching the TV, as Platinum's
     PlayTimeCounter_Start();
     ScriptContext_Init();
     UnlockPlayerFieldControls();

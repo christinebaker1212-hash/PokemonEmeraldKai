@@ -25,6 +25,7 @@ Orre_EventScript_VmHoldLoop::
 	goto_if_eq VAR_RESULT, 3, Orre_EventScript_VmWarp
 	goto_if_eq VAR_RESULT, 4, Orre_EventScript_VmChoice
 	goto_if_eq VAR_RESULT, 5, Orre_EventScript_VmRelic
+	goto_if_eq VAR_RESULT, 6, Orre_EventScript_VmName
 	specialvar VAR_RESULT, Orre_VmHolding   @ (still held: back from a battle the scene started)
 	goto_if_eq VAR_RESULT, TRUE, Orre_EventScript_VmHoldLoop
 	releaseall
@@ -38,6 +39,12 @@ Orre_EventScript_VmShop:
 @ preReliveSetParameter: the RELIC STONE purifies a Shadow Pokémon (party_menu.c)
 Orre_EventScript_VmRelic:
 	special Orre_RelicStone
+	waitstate
+	goto Orre_EventScript_VmHoldLoop
+
+@ menuNameEntryOpen(1): the partner's name on Kai's naming screen
+Orre_EventScript_VmName:
+	special Orre_VmName
 	waitstate
 	goto Orre_EventScript_VmHoldLoop
 

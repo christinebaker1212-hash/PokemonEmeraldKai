@@ -804,6 +804,7 @@ gSpecials::
 	def_special Orre_VmWarp   @ Moemon Kai: ORRE: floorLink's warp, its choices (src/orre/orre_vm.c)
 	def_special Orre_VmChoice
 	def_special Orre_VmChoiceDone
+	def_special Orre_VmName   @ Moemon Kai: ORRE: the partner's name (Colosseum's menuNameEntryOpen)
 	def_special Orre_VmTouch
 	def_special Orre_Opening   @ Moemon Kai: ORRE's opening (src/orre/orre_opening.c), waitstate
 	def_special Orre_OpeningNeeded

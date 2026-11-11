@@ -1839,6 +1839,7 @@ static void (*const sDrawTextEntryBoxFuncs[])(void) =
     [NAMING_SCREEN_COOP_NOTE1]    = DrawNormalTextEntryBox,
     [NAMING_SCREEN_COOP_NOTE2]    = DrawNormalTextEntryBox,
     [NAMING_SCREEN_RIVAL]         = DrawNormalTextEntryBox,
+    [NAMING_SCREEN_ORRE_PARTNER]  = DrawNormalTextEntryBox,
 };
 
 static void DrawTextEntryBox(void)
@@ -2353,6 +2354,25 @@ static const struct NamingScreenTemplate sRivalNamingTemplate =
     .title = sText_RivalsName,
 };
 
+// Moemon Kai: ORRE's partner (Colosseum's menuNameEntryOpen(1): "Her name is..."); the title is Colosseum's own line,
+// set by the scene that opens it (src/orre/orre_vm.c Orre_VmName); the name as it was is there to start with
+static u8 sOrrePartnerTitle[32] = _("NAME?");
+static const struct NamingScreenTemplate sOrrePartnerTemplate =
+{
+    .copyExistingString = TRUE,
+    .maxChars = PLAYER_NAME_LENGTH,
+    .iconFunction = 5,
+    .addGenderIcon = FALSE,
+    .initialPage = KBPAGE_LETTERS_UPPER,
+    .unused = 35,
+    .title = sOrrePartnerTitle,
+};
+
+void NamingScreen_SetOrreTitle(const u8 *title)
+{
+    *StringCopyN(sOrrePartnerTitle, title, sizeof(sOrrePartnerTitle) - 1) = EOS;
+}
+
 static const struct NamingScreenTemplate sCoopRoomTemplate =
 {
     .copyExistingString = TRUE,
@@ -2413,6 +2433,7 @@ static const struct NamingScreenTemplate *const sNamingScreenTemplates[] =
     [NAMING_SCREEN_COOP_NOTE1]    = &sCoopNote1Template,
     [NAMING_SCREEN_COOP_NOTE2]    = &sCoopNote2Template,
     [NAMING_SCREEN_RIVAL]         = &sRivalNamingTemplate,
+    [NAMING_SCREEN_ORRE_PARTNER]  = &sOrrePartnerTemplate,
 };
 
 static const struct OamData sOam_8x8 =

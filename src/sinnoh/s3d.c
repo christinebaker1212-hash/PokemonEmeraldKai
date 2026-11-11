@@ -673,7 +673,10 @@ void S3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         sSpriteH[spriteId] = h;
         sSpriteHFrame[spriteId] = sView.frame;
     }
-    if (!Project(wx, h, wz, &sx, &sy, &d))
+    // (Platinum stands a person's billboard 6 units toward the camera from its tile's middle, its feet on the ground
+    // there. The GBA's rule, feet at the tile's bottom edge, drew everyone 3 lines low: a clerk's body came out of
+    // the middle of the counter: the user, 2026-11-11)
+    if (!Project(wx, h, wz + 6.0f, &sx, &sy, &d))
     {
         *outX = x;
         *outY = feetY;
@@ -681,7 +684,7 @@ void S3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         return;
     }
     *outX = (s32)floorf(sx + 0.5f);
-    *outY = (s32)floorf(sy + 0.5f) + 8;
+    *outY = (s32)floorf(sy + 0.5f);
     *depth = d;
 }
 

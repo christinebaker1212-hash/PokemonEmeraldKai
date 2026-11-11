@@ -50,6 +50,7 @@ int uncompress(unsigned char *dest, unsigned long *destLen, const unsigned char 
 #define H DISPLAY_HEIGHT
 #define CAM_DIST 666.922119140625f
 #define CAM_PITCH 59.051513671875f
+#define FEET_Z 6.0f   // where a person's card stands, from its tile's middle toward the field's camera (Platinum's)
 #define HALF_FOV 8.0914306640625f
 #define TEX_MAX 256
 #define BLOCKED (0x0001 | (1 << 10) | (3 << 12))            // metatile 1, collision, elevation 3
@@ -999,7 +1000,11 @@ void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
     }
     // (a scene's camera: one nearer than a tile and a half is past its near edge, as Colosseum's models get cut off,
     // never a giant card over the picture)
-    if (!Project(wx, h, wz, &sx, &sy, &d) || (O3D_CamActive() && d < 24.0f))
+    // (a person's card stands 6 units toward the field's camera from its tile's middle, its feet on the ground there:
+    // Platinum's own rule for its people, which ORRE's camera is. The GBA's rule, the feet at the tile's bottom edge
+    // 8 lines under its middle, put them 3 lines low (a body out of the middle of a counter) and, under a shot's
+    // camera along the ground, 8 lines into it: a small follower to its middle: the user, 2026-11-11)
+    if (!Project(wx, h, wz + FEET_Z, &sx, &sy, &d) || (O3D_CamActive() && d < 24.0f))
     {
         if (O3D_CamActive())
         {
@@ -1016,7 +1021,7 @@ void O3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         *depth = 0.0f;
         return;
     }
-    fy = sy + 8.0f;
+    fy = sy;
     if (spriteId < MAX_SPRITES)
     {
         // (wholly beside the picture, as big as it's drawn: anchored at its feet, scaled about them; one held to 3x

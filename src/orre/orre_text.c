@@ -144,8 +144,47 @@ void Orre_SetStrVar(u8 ctl, const u8 *str)
         *StringCopyN(sStrVar[ctl], str, ORRE_STR_VAR_SIZE - 1) = EOS;
 }
 
+// The partner's name ({rui}, Colosseum's control 44): the player's to give at PHENAC (orre_vm.c Orre_VmName), RUI
+// until then or left empty. Kept with the story, as 56 of Kai's own flags (each letter's bits turned over, so none
+// set is no name): no side file changes its layout
+#define RUI_CTL 44
+static const u8 sRui[] = _("RUI");
+
+const u8 *Orre_PartnerName(void)
+{
+    static u8 name[PLAYER_NAME_LENGTH + 1];
+    u32 i, b;
+    for (i = 0; i < PLAYER_NAME_LENGTH; i++)
+    {
+        u8 c = 0;
+        for (b = 0; b < 8; b++)
+            if (Orre_Flag(ORRE_FLAG_RUI_NAME + i * 8 + b))
+                c |= 1 << b;
+        name[i] = c ^ 0xFF;
+    }
+    name[PLAYER_NAME_LENGTH] = EOS;
+    return name[0] == EOS ? sRui : name;
+}
+
+void Orre_SetPartnerName(const u8 *name)
+{
+    u32 i, b;
+    bool8 end = FALSE;
+    for (i = 0; i < PLAYER_NAME_LENGTH; i++)
+    {
+        u8 c;
+        if (name[i] == EOS)
+            end = TRUE;
+        c = (end ? EOS : name[i]) ^ 0xFF;
+        for (b = 0; b < 8; b++)
+            Orre_SetFlag(ORRE_FLAG_RUI_NAME + i * 8 + b, c >> b & 1);
+    }
+}
+
 const u8 *Orre_StrVar(u8 ctl)
 {
+    if (ctl == RUI_CTL)
+        return Orre_PartnerName();
     return ctl < ORRE_STR_VARS ? sStrVar[ctl] : sEmpty;
 }
 

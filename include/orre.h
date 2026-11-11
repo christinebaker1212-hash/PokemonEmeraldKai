@@ -6,6 +6,8 @@
 // levels, from common_rel's table (src/orre/orre_story.c); a number past the table is Kai's own
 #define ORRE_KAI_FLAG_FIRST 0xF00
 #define ORRE_FLAG_LEVEL_WORDS 256
+const u8 *Orre_PartnerName(void);                // the partner's name (RUI unless the player gave another)
+void Orre_SetPartnerName(const u8 *name);
 bool8 Orre_Flag(u16 flag);                       // set (any value but 0)
 void Orre_SetFlag(u16 flag, bool8 on);           // 1 or 0 (std078 / std079)
 u32 Orre_FlagValue(u16 flag);                    // std082_flagGetValue
@@ -17,6 +19,7 @@ u8 *Orre_StoryState(u32 *size);                  // the values, for "<save>.orre
 void Orre_StoryReset(void);
 void Orre_StoryFromOldBits(const u8 *bits, u32 size);   // a format 1 sidecar's flags
 // Kai's own flags (ORRE_KAI_FLAG_FIRST on; Colosseum's numbers stay below)
+#define ORRE_FLAG_RUI_NAME 0xF40       // 56 flags: the partner's name, the player's to give (orre_text.c Orre_PartnerName)
 #define ORRE_FLAG_RUI_FOLLOWS 0xFFE    // RUI walks behind the player (std035_setPartnerFollowing: Colosseum's hero status 0x18)
 #define ORRE_FLAG_SNAG_MACHINE 0xFFF   // the SNAG MACHINE (Colosseum's hero has it from the start: Kai's story gives it)
 

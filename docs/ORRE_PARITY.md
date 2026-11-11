@@ -37,7 +37,19 @@ walk can make are not ticked here until a walk with plain key presses (no planne
   (1.189.7): they're Colosseum's own lines from the pack now (0x7702 / 0x7716). The boat's "There's a SHADOW ...
   with you" (Kai's own line: the boat is Kai's) uses Kai's word.
 - **Doors** (1.189.4 / 1.189.5): Colosseum's 154 doors were walls for good, and their models looped their opening.
-- **Two floors in one tile** (1.189.8): see below.
+- **Two floors in one tile** (1.189.7): see below.
+- **RUI's naming was skipped** (1.189.8): PHENAC's scene calls menuNameEntryOpen(1, 0) once she's out of the sack;
+  it was taken for the hero's name and passed over. It opens Kai's naming screen under Colosseum's "Her name is..."
+  (15688) now; the name is kept with the story (56 of Kai's flags from 0xF40: orre_text.c Orre_PartnerName) and
+  `{rui}` in the text pack is a slot, not the letters RUI (tools/orre/build_text.py).
+- **RUI was invisible from the sack until she joined** (1.189.8): the scene places and shows character 101, who was
+  no one until std035_setPartnerFollowing. She is a scene person before that (orre_npcs.c Of), the follower after.
+- **A scene's second part let the player walk** (1.189.8): when the thread holding the player let go or ended while
+  another still held them (a room's loop back to stepping the player while the scene it started plays on), the
+  field was given back. The hold passes on now (orre_vm.c PassHold).
+- **Sprites under a scene's camera** (1.189.8): feet were drawn 8 lines under the spot stood on, whatever the camera
+  (the GBA's rule): into the ground under a low camera. A card stands 6 units toward the field's camera from its
+  tile's middle with its feet there (Platinum's rule, o3d.c FEET_Z), from any camera.
 
 ## What the walking tests did not prove
 
@@ -82,3 +94,5 @@ animations, lights, the P★DA):
 4. RUI's call once per Shadow Pokémon ever, as Colosseum; 0x772B.
 5. The natives in the table above.
 6. The opening's people (its scene rooms show no one).
+7. The TV's picture (std171_mapSetTextureChange / tvRender: a model drawn through its own camera onto the TV's
+   texture; the table is the floor record's + 0x48). The OUTSKIRT STAND's TV is blank until then.

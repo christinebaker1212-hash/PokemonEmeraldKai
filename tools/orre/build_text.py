@@ -159,7 +159,9 @@ class Conv:
             elif name == 'hero':
                 out.append(('p', bytes([PLACEHOLDER_BEGIN, PLACEHOLDER_ID_PLAYER]), PLAYER_WIDTH))
             elif name == 'rui':
-                out.append(('t', RUI))
+                # (her name is the player's to give, menuNameEntryOpen(1) at PHENAC: ORRE's string slot 44,
+                # src/orre/orre_text.c Orre_StrVar; RUI until then)
+                out.append(('p', bytes([PLACEHOLDER_BEGIN, PLACEHOLDER_ID_ORRE_VAR + CTL_ID['rui']]), PLAYER_WIDTH))
             elif name in DROPPED:
                 continue
             else:

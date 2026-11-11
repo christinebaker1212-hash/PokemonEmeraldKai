@@ -24,6 +24,8 @@
 #include "item.h"
 #include "main.h"
 #include "menu.h"
+#include "naming_screen.h"
+#include "task.h"
 #include "o3d.h"
 #include "orre_sound.h"
 #include "orre.h"
@@ -86,7 +88,7 @@ enum { T_FREE, T_RUN, T_WAIT, T_DONE };
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_YESNO, W_BATTLE, W_MOVE, W_SCREEN, W_FANFARE, W_CAMERA, W_THREAD, W_FADE, W_NEWS, W_CAM_MOVE };
 
 // Kai's screens a scene opens (W_SCREEN): Orre_EventScript_VmHoldLoop goes to them while the scene waits
-enum { SCREEN_NONE, SCREEN_SHOP, SCREEN_PC, SCREEN_WARP, SCREEN_CHOICE, SCREEN_RELIC };
+enum { SCREEN_NONE, SCREEN_SHOP, SCREEN_PC, SCREEN_WARP, SCREEN_CHOICE, SCREEN_RELIC, SCREEN_NAME };
 
 // Colosseum's shops (menuShopOpen N): tools/orre/gen_shops.py
 struct OrreShop
@@ -380,6 +382,22 @@ static struct Thread *Start(u32 scriptId, u32 argc, const u32 *args, bool8 room)
 static void FadeBack(void);
 static bool8 sScriptBlack;
 
+// The scene that held the player lets go or ends while another still holds them (a room's loop that went back to
+// stepping the player while the scene it started plays on): the hold passes to that one. The player walked about in
+// the middle of such scenes (the user, 2026-11-11). TRUE: someone else holds on
+static bool8 PassHold(struct Thread *from)
+{
+    u32 i;
+    for (i = 0; i < VM_THREADS; i++)
+        if (&sThreads[i] != from && sThreads[i].state == T_RUN && sThreads[i].holds)
+        {
+            sHolder = &sThreads[i];
+            MPNet_Log("orre vm: %08X lets go, %08X still holds the player", from->scriptId, sHolder->scriptId);
+            return TRUE;
+        }
+    return FALSE;
+}
+
 static void Finish(struct Thread *t)
 {
     t->state = T_DONE;
@@ -387,7 +405,7 @@ static void Finish(struct Thread *t)
         FadeBack();   // (a scene that faded out and ended without fading in)
     if (t->debug)
         MPNet_Log("orre vm: debug scene %08X ends", t->scriptId);
-    if (t->holds && sHolder == t)
+    if (t->holds && sHolder == t && !PassHold(t))
     {
         // (the scene ended without letting go: the field is given back)
         sHolder = NULL;
@@ -604,7 +622,7 @@ static void Hold(struct Thread *t)
 static void LetGo(struct Thread *t)
 {
     t->holds = FALSE;
-    if (sHolder == t)
+    if (sHolder == t && !PassHold(t))
     {
         sHolder = NULL;
         // (the player walks again: a scene camera left where the scene put it goes back to the field's, as the user
@@ -1142,7 +1160,12 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
         else
             MPNet_Log("orre vm: relive mode %u (%u) not converted yet", ARG(0).u, ARG(1).u);
         return 0;
-    case N_NAME_ENTRY: return 1;   // (menuNameEntryOpen(1): the hero's name: Kai's player has theirs)
+    case N_NAME_ENTRY:   // menuNameEntryOpen(MODE, N): 0 the hero's name (Kai's player has theirs), 1 the partner's:
+        // PHENAC's scene, once she's out of the sack: Kai's naming screen under Colosseum's "Her name is..."
+        // (it was skipped, taken for the hero's: the user, 2026-11-11)
+        if (ARG(0).u == 1 && sHolder == t)
+            t->wait = W_SCREEN, t->screen = SCREEN_NAME, t->screenOpen = FALSE;
+        return 1;
     case N_GIFT_POKEMON:   // std217_playerReceiveGiftPokemon: 3 DUKING's PLUSLE, 4 HO-OH (1, 2: Colosseum's hero's own)
         Orre_GiveGift(ARG(0).u);
         return 0;
@@ -1817,6 +1840,32 @@ void Orre_VmWarp(void)
     SetWarpDestination(sWarpMap >> 8, sWarpMap & 0xFF, WARP_ID_NONE, sWarpX, sWarpY);
     DoWarp();
     ResetInitialPlayerAvatarState();
+}
+
+// (special, waitstate) SCREEN_NAME: the partner's name on Kai's naming screen (left empty: RUI, Colosseum's own)
+static u8 sPartnerNameBuf[PLAYER_NAME_LENGTH + 1];
+
+static void CB2_PartnerNamed(void)
+{
+    Orre_SetPartnerName(sPartnerNameBuf);
+    SetMainCallback2(CB2_ReturnToFieldContinueScript);
+}
+
+static void Task_PartnerName(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        DestroyTask(taskId);
+        NamingScreen_SetOrreTitle(Orre_Text(15688));   // ("Her name is...")
+        *StringCopyN(sPartnerNameBuf, Orre_PartnerName(), PLAYER_NAME_LENGTH) = EOS;
+        DoNamingScreen(NAMING_SCREEN_ORRE_PARTNER, sPartnerNameBuf, 0, 0, 0, CB2_PartnerNamed);
+    }
+}
+
+void Orre_VmName(void)
+{
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+    CreateTask(Task_PartnerName, 10);
 }
 
 // (special, waitstate) SCREEN_CHOICE: the choices as Kai's menu (B: the last, as Colosseum's cancel row is)
