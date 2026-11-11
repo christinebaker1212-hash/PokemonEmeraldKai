@@ -7272,9 +7272,8 @@ static void Cmd_various(void)
         gBattleMons[gBattlerTarget].hp = 0;
         SetMonData(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], MON_DATA_HP, &zero);
         gAbsentBattlerFlags |= gBitTable[gBattlerTarget];
-        // Both screens: its health bar goes (2 = the co-op "caught" value), the battle music comes back
-        BtlController_EmitPlayFanfareOrBGM(B_COMM_TO_CONTROLLER, GetBattleBGM(), TRUE);
-        MarkBattlerForControllerExec(gActiveBattler);
+        // Both screens: its health bar goes (2 = the co-op "caught" value); the battle's song went on under the
+        // catch's jingle (src/mp/mp_catchjingle.c), never started again
         gActiveBattler = gBattlerTarget;
         BtlController_EmitSpriteInvisibility(B_COMM_TO_CONTROLLER, 2);
         MarkBattlerForControllerExec(gActiveBattler);

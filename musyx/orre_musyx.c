@@ -51,7 +51,8 @@ static struct
     // sounds stays as it is
     float songDb[SOUND_COUNT], fxDb, gain;
     int measure, gainSet;
-} s;
+    float duck;   // the whole of ORRE's sound under a catch's jingle (OrreSound_Duck): 1 none
+} s = {.duck = 1.0f};
 
 static uint32_t Be32(const uint8_t *p) { return (uint32_t)p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]; }
 static uint16_t Be16(const uint8_t *p) { return (uint16_t)(p[0] << 8 | p[1]); }
@@ -334,6 +335,11 @@ int OrreSound_IsSong(uint32_t id)
     return !(e[0] & 0x80) && Song(e[3]) != NULL;
 }
 
+void OrreSound_Duck(float level)
+{
+    s.duck = level < 0.0f ? 0.0f : level > 1.0f ? 1.0f : level;
+}
+
 void OrreSound_Mix(float *buffer, int32_t count, int32_t rate, int on)
 {
     const double step = (double)GBA_RATE / rate;
@@ -347,7 +353,7 @@ void OrreSound_Mix(float *buffer, int32_t count, int32_t rate, int on)
         int k;
         for (k = 1; k < 12; k++)
             term *= x / k, lin += term;
-        want = lin;
+        want = lin * s.duck;
         if (!s.gainSet)
             s.gain = want, s.gainSet = 1;
     }

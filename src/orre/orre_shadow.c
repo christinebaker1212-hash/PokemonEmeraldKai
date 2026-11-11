@@ -714,10 +714,7 @@ static u8 Snagged(void)
     gBattleMons[target].hp = 0;
     SetMonData(mon, MON_DATA_HP, &zero);
     gBattleStruct->givenExpMons |= gBitTable[gBattlerPartyIndexes[target]];
-    // its health bar goes, the battle music comes back
-    gActiveBattler = gBattlerAttacker;
-    BtlController_EmitPlayFanfareOrBGM(B_COMM_TO_CONTROLLER, GetBattleBGM(), TRUE);
-    MarkBattlerForControllerExec(gActiveBattler);
+    // its health bar goes (the battle's song went on under the catch's jingle: src/mp/mp_catchjingle.c)
     gActiveBattler = target;
     BtlController_EmitSpriteInvisibility(B_COMM_TO_CONTROLLER, 2);
     MarkBattlerForControllerExec(gActiveBattler);

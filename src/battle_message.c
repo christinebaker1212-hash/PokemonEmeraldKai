@@ -574,6 +574,8 @@ static const u8 *MpBuildExpText(bool8 grew)
 
 const u16 gMpCoopItemStringIds[] = {STRINGID_MPCOOP_ITEM_HP, STRINGID_MPCOOP_ITEM_CURED, STRINGID_MPCOOP_ITEM_REVIVED, STRINGID_MPCOOP_ITEM_HP_CURED};
 static const u8 sText_MpCoopGotchaGoOn[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}\p");
+// Moemon Kai: ORRE's snag in a trainer battle that goes on: the one snagged by name (either foe), the song kept (mp_catchjingle.c)
+static const u8 sText_MpGotchaFoeGoOn[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}\p");
 static const u8 sText_TwoWildPkmnAppeared[] = _("Wild {B_OPPONENT_MON1_NAME} and\n{B_OPPONENT_MON2_NAME} appeared!\p");
 // Moemon Co-op: Triple Battles, named left to right as on screen (the center one is in B_BUFF1)
 static const u8 sText_MpThreeWildAppeared[] = _("Wild {B_OPPONENT_MON2_NAME}, {B_BUFF1}\nand {B_OPPONENT_MON1_NAME} appeared!");
@@ -2602,24 +2604,37 @@ void BufferStringBattle(u16 stringID)
         stringPtr = GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER ? sText_MpGroupPartyNoLower : sText_MpGroupFoesNoLower;
         break;
     case STRINGID_GOTCHAPKMNCAUGHTPLAYER:
+    {
+        // Moemon Kai: a battle that goes on after the catch (a co-op wild battle with the other still out, ORRE's
+        // snag in a trainer battle): its song goes quieter under the catch's jingle and comes back where it got to
+        bool8 goesOn = (gMpCoopWild && MP_Coop_OtherWildOut(gBattlerTarget)) || (gBattleTypeFlags & BATTLE_TYPE_TRAINER);
+        bool8 legacy = MP_LegacyBall_String(stringID) != NULL;
         // Moemon Co-op: a GENESIS / EPOCH BALL catch says it like Red / Crystal
-        if (MP_LegacyBall_String(stringID))
+        if (legacy)
         {
             // its own game's catch jingle, with the message (sound_caught_mon)
             MP_LegacyBall_PlayCaughtJingle();
-            if (!(gMpCoopWild && MP_Coop_OtherWildOut(gBattlerTarget)))
+            if (!goesOn)
             {
                 stringPtr = MP_LegacyBall_String(stringID);
                 break;
             }
         }
-        // Moemon Co-op: in a co-op wild battle the caught one may be either wild Pokemon,
-        // and with the other still out the battle goes on (no caught music)
-        if (gMpCoopWild)
-            stringPtr = MP_Coop_OtherWildOut(gBattlerTarget) ? sText_MpCoopGotchaGoOn : sText_MpCoopGotcha;
+        if (goesOn)
+        {
+            void MP_CatchJingle_Start(bool8 ownJingle);
+            MP_CatchJingle_Start(legacy);
+            if (!gMpCoopWild)   // (the co-op battle names it in its own script: VARIOUS_MP_COOP_OTHER_OUT)
+                PREPARE_MON_NICK_BUFFER(gBattleTextBuff1, gBattlerTarget, gBattlerPartyIndexes[gBattlerTarget]);
+            stringPtr = gMpCoopWild ? sText_MpCoopGotchaGoOn : sText_MpGotchaFoeGoOn;
+        }
+        // Moemon Co-op: in a co-op wild battle the caught one may be either wild Pokemon
+        else if (gMpCoopWild)
+            stringPtr = sText_MpCoopGotcha;
         else
             stringPtr = sText_GotchaPkmnCaughtPlayer;
         break;
+    }
     case STRINGID_PLAYERGOTMONEY:   // Moemon Kai: "Sent some to MOM!" when she kept a share (mp_mombank.c)
         stringPtr = gMpMomShared ? sText_PlayerGotMoneySentSomeToMom : sText_PlayerGotMoney;
         break;

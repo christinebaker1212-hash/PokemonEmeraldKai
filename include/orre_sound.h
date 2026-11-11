@@ -16,6 +16,7 @@ void OrreSound_StopEffects(void);                         // (every effect still
 void OrreSound_StopAmbient(uint32_t fadeMs);             // (the second song: the wind, started as an effect)
 void OrreSound_Volume(uint32_t id, uint32_t volume, uint32_t fadeMs);
 void OrreSound_MasterVolume(uint32_t volume, uint32_t fadeMs);   // (a room's quiet, on its song while walking about)
+void OrreSound_Duck(float level);                         // all of it at LEVEL (1 full): a catch's jingle over a battle's song
 void OrreSound_Loud(int on);                             // a scene or a battle is on: no room's quiet
 uint32_t OrreSound_Bgm(void);                            // (the song playing: its id, 0 none)
 void OrreSound_Silence(void);                            // (leaving ORRE: everything off)
