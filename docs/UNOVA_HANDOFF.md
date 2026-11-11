@@ -34,6 +34,19 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   camera moves (0x13F-0x147), the room's mess (build-model nodes 0x127-0x12A), 0x101, the whiteout command 0x8C,
   items (Black's numbers to the game's by name), the naming screen (0x105), warps (0xC2), Black's gift box screen
   in place of Kai's starter table, the trainers' battle pictures, then the region choice and the boat.
+- UNOVA is the game's fifth region (REGION_UNOVA 4, REGION_COUNT 5; 2026-11-11): the new game's region menu
+  (the player's room in NUVEMA: `MOEMON_DEBUG_REGION=4`), the boat lists (CASTELIA (UNOVA), MULTI_REGIONS_FROM_UNOVA;
+  the first boat lands in the room for now: no pier scene at CASTELIA yet), the ship's crossing (its passengers,
+  PROF. JUNIPER's lab for the partner held there: Z396, local id 1), achievements' UNOVA tabs (C_UNOVA...), the BADGE
+  CASE (Black's eight, PokeAPI badges 33-40: tools/moemon_badges/build_badges.py), the TRAINER CARD's time,
+  UNOVA's badges as flags FLAG_UNOVA_BADGE01 + n (0x7F00, kept with Black's event work: event_data.c routes them).
+  Side files from before convert on loading: ACHR 2, KIST 2, LVL5, TRAINER CARD 5. HOENN's harbor arrival keeps
+  VAR_REGION_ARRIVAL 4 (its frame script's number). save_compat.sh's "format 0" summary mismatch is older than this
+  (the build before it fails the same way).
+- Music: Black's whole soundtrack (204 songs: tools/kaisong/unova_songs.py slots / convert; MUS_UNOVA_* from 831,
+  named after Black's own sequences; src/data/unova_songs.h maps Black's sequence numbers), the zones' songs as the
+  maps' music (spring's), the scripts' song commands (u3d_vm.c: fanfares pushed and popped), Black's battle and
+  victory songs by its trainers' classes and names (scripts pack v3 song kinds; u3d_battle.c U3D_BattleSong).
 - Black's people: unova/black_gfx.pak (tools/unova/build_gfx.py, about two minutes: 759 of the 799 object codes),
   src/unova/u3d_gfx.c; graphics ids OBJ_EVENT_GFX_UNOVA_FIRST (0x600) + Black's object code (an object event keeps
   12 bits of its graphics id: 0x1000+ would wrap), palettes by tag 0xD000 / 0xD400 + code (event_object_movement.c
