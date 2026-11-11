@@ -955,6 +955,8 @@ u8 LoadGameSave(u8 saveType)
         if (status == SAVE_STATUS_OK)
             MP_Region_LoadFromSave();   // Moemon Kai: Johto / Kanto flags and vars (mp_region.c); older save layouts
                                         // are brought up to date here (mp_savefix.c), before anything is copied out
+        if (status == SAVE_STATUS_OK)
+            MP_GameOptions_Apply(TRUE);   // Moemon Kai: the options as the settings have them (File 1's unless changed)
         {
             void Maker_Flags_LoadFromSave(void);
             Maker_Flags_LoadFromSave();   // Moemon Maker: flags of what the edits add (src/maker/maker_flags.c)

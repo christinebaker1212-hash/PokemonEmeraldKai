@@ -15,6 +15,8 @@
 #include "mp_region.h"
 #include "mp.h"
 #include "mp_tcard.h"
+#include "text_window.h"
+#include "gba/m4a_internal.h"
 #include "mp_spritescale.h"
 #include "mp_fight.h"
 #include "mp_pmd.h"
@@ -359,6 +361,147 @@ static u8 ScalePercent(int v)
     return (u8)((v + MP_SCALE_STEP / 2) / MP_SCALE_STEP * MP_SCALE_STEP);
 }
 
+// The save's own options in the settings file (MP_GAMEOPT_*): their keys and values
+static const char *const sGameOptKey[MP_GAMEOPT_COUNT] = {"text_speed", "window_frame", "name_case", "creatures",
+    "button_mode", "sound", "battle_scene", "battle_style", "type_icons", "badge_fade", "card_title"};
+static const char *const sTextSpeedNames[] = {"slow", "mid", "fast"};
+static const char *const sNameCaseNames[] = {"uncorrected", "caps", "mixed"};
+static const char *const sCreatureNames[] = {"moemon", "pokemon"};
+static const char *const sButtonModeNames[] = {"normal", "lr", "l_equals_a"};
+static const char *const sSoundNames[] = {"mono", "stereo"};
+static const char *const sStyleNames[] = {"shift", "set"};
+static const char *const sFadeNames[] = {"platinum", "slow", "off"};
+
+static const char *const *GameOptNames(u8 opt, u8 *count)
+{
+    switch (opt)
+    {
+    case MP_GAMEOPT_TEXTSPEED:   *count = 3; return sTextSpeedNames;
+    case MP_GAMEOPT_NAMECASE:    *count = MP_NAMECASE_COUNT; return sNameCaseNames;
+    case MP_GAMEOPT_CREATURES:   *count = 2; return sCreatureNames;
+    case MP_GAMEOPT_BUTTONMODE:  *count = 3; return sButtonModeNames;
+    case MP_GAMEOPT_SOUND:       *count = 2; return sSoundNames;
+    case MP_GAMEOPT_BATTLESTYLE: *count = 2; return sStyleNames;
+    case MP_GAMEOPT_BADGEFADE:   *count = TCARD_FADE_COUNT; return sFadeNames;
+    }
+    *count = 0;
+    return NULL;
+}
+
+static bool8 GameOptParse(const char *key, const char *val)
+{
+    u8 opt, count, i;
+    for (opt = 0; opt < MP_GAMEOPT_COUNT; opt++)
+        if (strcmp(key, sGameOptKey[opt]) == 0)
+            break;
+    if (opt == MP_GAMEOPT_COUNT)
+        return FALSE;
+    {
+        const char *const *names = GameOptNames(opt, &count);
+        int v = -1;
+        for (i = 0; names != NULL && i < count; i++)
+            if (strcmp(val, names[i]) == 0)
+                v = i;
+        if (names == NULL && opt == MP_GAMEOPT_FRAME)
+            v = atoi(val) >= 1 && atoi(val) <= WINDOW_FRAMES_COUNT ? atoi(val) - 1 : -1;   // (FRAME: TYPE 1-20)
+        else if (names == NULL)
+            v = atoi(val) != 0;   // (ON / OFF)
+        if (v < 0)
+            return TRUE;
+        gMpConfig.gameOpt[opt] = (u8)v;
+        gMpConfig.gameOptSet |= 1 << opt;
+    }
+    return TRUE;
+}
+
+static void GameOptWrite(FILE *f)
+{
+    u8 opt, count;
+    fprintf(f, "; OPTIONS the save holds (TEXT SPEED, FRAME 1-20, BATTLE SCENE 1 = on...) and the TRAINER CARD's\n");
+    for (opt = 0; opt < MP_GAMEOPT_COUNT; opt++)
+    {
+        const char *const *names = GameOptNames(opt, &count);
+        if (!(gMpConfig.gameOptSet & (1 << opt)))
+            continue;
+        if (names != NULL)
+            fprintf(f, "%s = %s\n", sGameOptKey[opt], names[gMpConfig.gameOpt[opt] < count ? gMpConfig.gameOpt[opt] : 0]);
+        else
+            fprintf(f, "%s = %d\n", sGameOptKey[opt], gMpConfig.gameOpt[opt] + (opt == MP_GAMEOPT_FRAME));
+    }
+}
+
+// the save's value of option OPT
+static u8 GameOptOfSave(u8 opt)
+{
+    switch (opt)
+    {
+    case MP_GAMEOPT_TEXTSPEED:   return gSaveBlock2Ptr->optionsTextSpeed;
+    case MP_GAMEOPT_FRAME:       return gSaveBlock2Ptr->optionsWindowFrameType;
+    case MP_GAMEOPT_NAMECASE:    return gSaveBlock2Ptr->optionsNameCase % MP_NAMECASE_COUNT;
+    case MP_GAMEOPT_CREATURES:   return gSaveBlock2Ptr->optionsPokemonArt != 0;
+    case MP_GAMEOPT_BUTTONMODE:  return gSaveBlock2Ptr->optionsButtonMode;
+    case MP_GAMEOPT_SOUND:       return gSaveBlock2Ptr->optionsSound;
+    case MP_GAMEOPT_BATTLESCENE: return !gSaveBlock2Ptr->optionsBattleSceneOff;
+    case MP_GAMEOPT_BATTLESTYLE: return gSaveBlock2Ptr->optionsBattleStyle;
+    case MP_GAMEOPT_TYPEICONS:   return gSaveBlock2Ptr->optionsTypeIcons != 0;
+    case MP_GAMEOPT_BADGEFADE:   return MP_TCard_Fade();
+    case MP_GAMEOPT_CARDTITLE:   return MP_TCard_ShowTitle() != 0;
+    }
+    return 0;
+}
+
+void MP_GameOptions_Apply(bool8 takeUnset)
+{
+    u8 opt, v;
+    bool8 took = FALSE;
+    if (gSaveBlock2Ptr == NULL)
+        return;
+    for (opt = 0; opt < MP_GAMEOPT_COUNT; opt++)
+    {
+        if (!(gMpConfig.gameOptSet & (1 << opt)))
+        {
+            if (takeUnset)
+            {
+                gMpConfig.gameOpt[opt] = GameOptOfSave(opt);
+                gMpConfig.gameOptSet |= 1 << opt;
+                took = TRUE;
+            }
+            continue;
+        }
+        v = gMpConfig.gameOpt[opt];
+        switch (opt)
+        {
+        case MP_GAMEOPT_TEXTSPEED:   gSaveBlock2Ptr->optionsTextSpeed = v % 3; break;
+        case MP_GAMEOPT_FRAME:       gSaveBlock2Ptr->optionsWindowFrameType = v % WINDOW_FRAMES_COUNT; break;
+        case MP_GAMEOPT_NAMECASE:    gSaveBlock2Ptr->optionsNameCase = v % MP_NAMECASE_COUNT; break;
+        case MP_GAMEOPT_CREATURES:   gSaveBlock2Ptr->optionsPokemonArt = v != 0; break;
+        case MP_GAMEOPT_BUTTONMODE:  gSaveBlock2Ptr->optionsButtonMode = v % 3; break;
+        case MP_GAMEOPT_SOUND:       gSaveBlock2Ptr->optionsSound = v != 0; SetPokemonCryStereo(v != 0); break;
+        case MP_GAMEOPT_BATTLESCENE: gSaveBlock2Ptr->optionsBattleSceneOff = v == 0; break;
+        case MP_GAMEOPT_BATTLESTYLE: gSaveBlock2Ptr->optionsBattleStyle = v != 0; break;
+        case MP_GAMEOPT_TYPEICONS:   gSaveBlock2Ptr->optionsTypeIcons = v != 0; break;
+        case MP_GAMEOPT_BADGEFADE:   break;   // (the TRAINER CARD reads these from the settings: mp_tcard.c)
+        case MP_GAMEOPT_CARDTITLE:   break;
+        }
+    }
+    if (took)
+        MP_SaveConfig();   // (a save from before: its own options kept in its settings from now on)
+    MPNet_Log("options: text speed %d, frame %d, sound %d, battle scene %d, style %d, name case %d, creatures %d",
+              gSaveBlock2Ptr->optionsTextSpeed, gSaveBlock2Ptr->optionsWindowFrameType + 1, gSaveBlock2Ptr->optionsSound,
+              !gSaveBlock2Ptr->optionsBattleSceneOff, gSaveBlock2Ptr->optionsBattleStyle, gSaveBlock2Ptr->optionsNameCase,
+              gSaveBlock2Ptr->optionsPokemonArt);
+}
+
+void MP_GameOptions_Capture(void)
+{
+    u8 opt;
+    if (gSaveBlock2Ptr == NULL)
+        return;
+    for (opt = 0; opt < MP_GAMEOPT_COUNT; opt++)
+        gMpConfig.gameOpt[opt] = GameOptOfSave(opt);
+    gMpConfig.gameOptSet = (1 << MP_GAMEOPT_COUNT) - 1;
+}
+
 static void LoadConfig(void)
 {
     FILE *f;
@@ -528,6 +671,7 @@ static void LoadConfig(void)
             int v = atoi(val);
             gMpConfig.animSpeed = v >= 30 ? 30 : (v >= 25 ? 25 : 0);
         }
+        else if (GameOptParse(key, val)) {}
         else if (strcasecmp(key, "AllowSmallTweaks") == 0) gMpConfig.smallTweaks = atoi(val) == 1;
         else if (strcmp(key, "follower") == 0) gMpConfig.followerPersonality = (u32)strtoul(val, NULL, 16);
         else if (strcmp(key, "quick_stock") == 0)
@@ -700,8 +844,11 @@ void MP_SaveConfig(void)
                         gMpConfig.specFriends[i].size, gMpConfig.specFriends[i].popout, gMpConfig.specFriends[i].show,
                         gMpConfig.specFriends[i].name);
     }
+    GameOptWrite(f);
     fprintf(f, "AllowSmallTweaks = %d\n", gMpConfig.smallTweaks ? 1 : 0);
     fclose(f);
+    if (!getenv("MOEMON_COOP_CONFIG"))
+        SaveSlots_Written(CONFIG_FILE);   // Moemon Kai: another save file than File 1 keeps what it changed
 }
 
 const char *MP_OnlineLobbyAddress(void)

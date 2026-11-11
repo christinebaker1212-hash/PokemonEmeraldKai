@@ -1789,6 +1789,7 @@ static void Task_OptionMenuSave(u8 taskId)
     }
     Display_SaveSettings();
     Gamepad_SaveSettings();
+    MP_GameOptions_Capture();   // (the save's own options kept with the settings: save_slots.c)
     MP_SaveConfig();
     if (sArrowTask != TASK_NONE)
         RemoveScrollIndicatorArrowPair(sArrowTask);

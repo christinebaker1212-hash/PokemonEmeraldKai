@@ -458,6 +458,9 @@ Also NEW on cards in the three BINDERs and the centered BOOSTER PACKS row (1.63.
 COOP_NOTES "NEW in the BINDER"; tests cards_new, cards_packs_center).
 Also settings per save file and SAVE FILE switching in place (1.63.5: save_slots.c SaveSlots_File / SaveSlots_Switch,
 mp_main.c MP_SaveSlotChanged, main_menu.c MpReloadSave; COOP_NOTES "Settings per save file"; tools/test/save_slots.sh).
+Settings follow File 1 (the user, 2026-11-11): another file keeps only what it changed ("<name>.own"), File 1's are
+everyone's start, a brand-new game gets the user's canonical list (save_slots.c sCanonical*), the save's own options
+are settings keys too (MP_GAMEOPT_*); ERASE on A or SELECT: COOP_NOTES "Settings that follow File 1".
 Also drop shadows (1.63.4: OPTIONS > DISPLAY > SHADOWS, src/mp/mp_shadow.c, sprite->mpShadow darkening in
 gba_easy_draw.c ShadowPixel; COOP_NOTES "Drop shadows and followers in grass and puddles"; test shadows).
 Also the lab's starter table in KANTO / JOHTO and BLUE's teams as FireRed's (1.63.2: starter_choose.c table mode,

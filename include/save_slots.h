@@ -18,7 +18,9 @@ int SaveSlots_Current(void);        // 1-SAVE_SLOT_COUNT, 0 with --save / MOEMON
 void SaveSlots_WriteSummary(void);  // with every save
 bool8 SaveSlots_Summary(int slot, struct SaveSlotSummary *out);
 void SaveSlots_Switch(int slot);    // goes on with that save file in place (main_menu.c reloads the save)
-const char *SaveSlots_File(const char *name, const char *shared);   // that save file's own settings file NAME
+const char *SaveSlots_File(const char *name, const char *shared);   // that save file's settings file NAME (File 1's
+                                                                    // with the file's own changes over it)
+void SaveSlots_Written(const char *name);   // after writing it: another file than File 1 keeps what it changed
 int SaveSlots_Erase(int slot);       // every file of that save file gone (how many)
 
 #endif

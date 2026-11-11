@@ -266,7 +266,17 @@ struct MpConfig
     u8 muteInBackground;      // OPTIONS > GAME > MUTE IN BACKGROUND: 1 = no sound while none of the game's windows has focus
     u8 noAnnouncer;           // OPTIONS > BATTLE > ANNOUNCER: 0 ON (POKeMON STADIUM's announcer: mp_stadium_announcer.c), 1 OFF
     u8 announcerJp;           // ... its voices: 0 ENGLISH (Pokemon Stadium's), 1 JAPANESE (POKEMON STADIUM 2's)
+    // The options the save itself holds (TEXT SPEED, FRAME...) and the TRAINER CARD's two, kept with the other settings
+    // so another save file follows File 1's (save_slots.c; the user, 2026-11-11). gameOptSet: which ones the file has
+    u8 gameOpt[16];           // MP_GAMEOPT_*
+    u16 gameOptSet;
 };
+enum { MP_GAMEOPT_TEXTSPEED, MP_GAMEOPT_FRAME, MP_GAMEOPT_NAMECASE, MP_GAMEOPT_CREATURES, MP_GAMEOPT_BUTTONMODE,
+       MP_GAMEOPT_SOUND, MP_GAMEOPT_BATTLESCENE, MP_GAMEOPT_BATTLESTYLE, MP_GAMEOPT_TYPEICONS, MP_GAMEOPT_BADGEFADE,
+       MP_GAMEOPT_CARDTITLE, MP_GAMEOPT_COUNT };
+void MP_GameOptions_Apply(bool8 takeUnset);   // the settings' options into the save (takeUnset: the save's own, where
+                                              // the settings have none, kept in them)
+void MP_GameOptions_Capture(void);            // the save's options into the settings (OPTIONS closed)
 // SPRITE SCALING's percent now (0: off)
 #define MP_SCALE_FOLLOWERS_NOW() (gMpConfig.scaleFollowers ? gMpConfig.scaleFollowersPct : 0)
 #define MP_SCALE_GARDEN_NOW() (gMpConfig.scaleGarden ? gMpConfig.scaleGardenPct : 0)

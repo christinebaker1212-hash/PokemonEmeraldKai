@@ -268,6 +268,11 @@ static void WriteConfig(void)
         sColorNames[sCfg.color],
         sCfg.winW, sCfg.winH, xs, ys, sCfg.maximized);
     fclose(f);
+    if (!getenv("MOEMON_DISPLAY_CONFIG"))
+    {
+        void SaveSlots_Written(const char *name);
+        SaveSlots_Written(CONFIG_NAME);   // Moemon Kai: another save file than File 1 keeps what it changed
+    }
 }
 
 // ---------------------------------------------------------------------------

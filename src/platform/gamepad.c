@@ -81,9 +81,13 @@ void Gamepad_SetIconSet(int set)
     sIconSet = (set % GAMEPAD_ICONSET_COUNT + GAMEPAD_ICONSET_COUNT) % GAMEPAD_ICONSET_COUNT;
 }
 
+static int sSettingsRead;   // (a save file's never written unless read: tests, which don't read them, keep them)
+
 static void LoadSettings(void)
 {
-    FILE *f = fopen(ConfigPath(), "r");
+    FILE *f;
+    sSettingsRead = 1;
+    f = fopen(ConfigPath(), "r");
     char line[128];
     if (!f)
         return;
@@ -117,7 +121,10 @@ static void LoadSettings(void)
 void Gamepad_SaveSettings(void)
 {
     static const char *const names[] = {"auto", "standard", "nintendo"};
-    FILE *f = fopen(ConfigPath(), "w");
+    FILE *f;
+    if (!sSettingsRead && !getenv("MOEMON_CONTROLS_CONFIG"))
+        return;   // (a save file's settings never written unread: tests don't read them)
+    f = fopen(ConfigPath(), "w");
     if (!f)
         return;
     fprintf(f, "; Moemon Emerald Kai controller settings (OPTIONS > CONTROLS)\n"
@@ -130,6 +137,11 @@ void Gamepad_SaveSettings(void)
                sIconSetNames[sIconSet]);
     Fight_BindWrite(f);
     fclose(f);
+    if (!getenv("MOEMON_CONTROLS_CONFIG"))
+    {
+        void SaveSlots_Written(const char *name);
+        SaveSlots_Written("moemon_controls.ini");   // Moemon Kai: another save file than File 1 keeps what it changed
+    }
 }
 
 static void OpenPad(int deviceIndex)

@@ -114,6 +114,7 @@ static void SetDefaultOptions(void)
     gSaveBlock2Ptr->optionsBattleStyle = OPTIONS_BATTLE_STYLE_SHIFT;
     gSaveBlock2Ptr->optionsBattleSceneOff = FALSE;
     gSaveBlock2Ptr->regionMapZoom = FALSE;
+    MP_GameOptions_Apply(TRUE);   // Moemon Kai: a new game's options are the settings' (File 1's, or a new game's own)
 }
 
 static void ClearPokedexFlags(void)
@@ -227,9 +228,8 @@ void NewGameInitData(void)
         MP_DebugQuickStartNewGame();
     MP_QuickStart_Apply();   // Moemon Co-op: SKIP THE INTRO (mp_quickstart.c)
     MP_Region_StartNewGame();   // Moemon Kai: a new game in JOHTO or KANTO starts there (mp_region.c)
-    // Moemon Co-op QoL: a new game starts with STICK RUN off and no extra item buttons
-    Gamepad_SetAnalogRun(0);
-    Gamepad_SaveSettings();
+    // Moemon Co-op QoL: a new game starts with no extra item buttons (STICK RUN is a setting: File 1's, or off in a
+    // new game's own: save_slots.c)
     MP_SaveData_Set("tm:refund", 1);   // TMs are reusable: a new game never used one up (mp_tmrefund.c)
     MP_SaveData_Set("reg:L", 0);
     MP_SaveData_Set("reg:R", 0);

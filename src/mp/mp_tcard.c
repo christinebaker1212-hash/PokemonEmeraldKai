@@ -326,7 +326,7 @@ static bool8 FadeDays(void)
         return FALSE;
     days = today - sT.lastDay;
     sT.lastDay = today;
-    switch (sT.fade)
+    switch (MP_TCard_Fade())
     {
     case TCARD_FADE_OFF:
         return TRUE;
@@ -459,9 +459,22 @@ bool8 MP_TCard_Rub(u8 region, u8 badge)
     return MP_TCard_PolishLevel(b->polish) != before;
 }
 
-u8 MP_TCard_Fade(void) { Check(); return sT.fade; }
+// BADGE FADING and CARD TITLE are settings (moemon_coop.ini: another save file follows File 1's, save_slots.c; the user,
+// 2026-11-11): the settings' value when they have one, else this file's own (a card from before)
+u8 MP_TCard_Fade(void)
+{
+    if (gMpConfig.gameOptSet & (1 << MP_GAMEOPT_BADGEFADE))
+        return gMpConfig.gameOpt[MP_GAMEOPT_BADGEFADE] % TCARD_FADE_COUNT;
+    Check();
+    return sT.fade;
+}
 void MP_TCard_SetFade(u8 fade)
 {
+    if (fade < TCARD_FADE_COUNT)
+    {
+        gMpConfig.gameOpt[MP_GAMEOPT_BADGEFADE] = fade;
+        gMpConfig.gameOptSet |= 1 << MP_GAMEOPT_BADGEFADE;
+    }
     Check();
     if (fade < TCARD_FADE_COUNT && fade != sT.fade)
     {
@@ -470,9 +483,17 @@ void MP_TCard_SetFade(u8 fade)
         Save();
     }
 }
-bool8 MP_TCard_ShowTitle(void) { Check(); return sT.showTitle; }
+bool8 MP_TCard_ShowTitle(void)
+{
+    if (gMpConfig.gameOptSet & (1 << MP_GAMEOPT_CARDTITLE))
+        return gMpConfig.gameOpt[MP_GAMEOPT_CARDTITLE] != 0;
+    Check();
+    return sT.showTitle;
+}
 void MP_TCard_SetShowTitle(bool8 show)
 {
+    gMpConfig.gameOpt[MP_GAMEOPT_CARDTITLE] = show != 0;
+    gMpConfig.gameOptSet |= 1 << MP_GAMEOPT_CARDTITLE;
     Check();
     if ((show != 0) != (sT.showTitle != 0))
     {
@@ -538,7 +559,7 @@ const char *MP_TCard_TitleText(void)
     u16 t;
     Check();
     t = sT.title;
-    if (!sT.showTitle || t == 0 || t > MP_Achieve_Total() || !MP_Achieve_IsDone(t - 1))
+    if (!MP_TCard_ShowTitle() || t == 0 || t > MP_Achieve_Total() || !MP_Achieve_IsDone(t - 1))
         return NULL;
     MP_Achieve_Info(t - 1, &name, &desc, status, sizeof(status), reward, sizeof(reward));
     return name;

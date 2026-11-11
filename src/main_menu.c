@@ -1168,7 +1168,8 @@ static bool8 HandleMainMenuInput(u8 taskId)
         }
         return FALSE;
     }
-    if (MpSlotsOn(tMenuType) && tCurrItem == MpSlotItem(tMenuType) && JOY_NEW(SELECT_BUTTON))
+    // (A or SELECT on SAVE FILE: ERASE it. A used to do nothing there: the file shown is always the one in use)
+    if (MpSlotsOn(tMenuType) && tCurrItem == MpSlotItem(tMenuType) && JOY_NEW(SELECT_BUTTON | A_BUTTON))
     {
         struct SaveSlotSummary sum;
         SaveSlots_Summary(sMpSlotShown, &sum);

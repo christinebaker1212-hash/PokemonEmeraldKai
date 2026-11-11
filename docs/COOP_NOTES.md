@@ -4172,6 +4172,32 @@ follow_behind, follow_ground.
   nothing and kept the last file's sectors in the buffer ("erased due to corruption" after switching to an empty one).
 - tools/test/save_slots.sh covers it (the switch in place, file 2's own settings copy).
 
+## Settings that follow File 1, a new game's own settings, ERASE on A (2026-11-11)
+- The user: "File 1 determines the default options for every subsequent save file, with changes only being made if the
+  file changes them". save_slots.c SaveSlots_File: saves/slot1/<name> is the whole file; another slot keeps only what
+  it changed in saves/slotN/<name>.own and reads saves/slotN/<name>, made again each time from File 1's with .own laid
+  over it (MergeSet). The game writes the whole settings there as before and SaveSlots_Written (mp_main.c
+  MP_SaveConfig, display.c WriteConfig, gamepad.c Gamepad_SaveSettings) keeps in .own the lines that differ from File
+  1's (DiffSet; a repeated key such as spectate_friend is one setting). A file from before (no .own) keeps what it set
+  that File 1 doesn't, once. Tests (--save / MOEMON_SAVE, the MOEMON_*_CONFIG files) don't use any of it.
+- The options the save holds (TEXT SPEED, FRAME, NAME CASE, CREATURES, BUTTON MODE, SOUND, BATTLE SCENE, BATTLE STYLE,
+  TYPE ICONS) and the TRAINER CARD's BADGE FADING / CARD TITLE are moemon_coop.ini keys too (gMpConfig.gameOpt,
+  MP_GAMEOPT_*): applied to the save when it loads (save.c) and at a new game (new_game.c SetDefaultOptions), taken
+  from the save when the settings have none (a save from before), written when OPTIONS closes (MP_GameOptions_Capture);
+  mp_tcard.c reads its two from the settings. Log line "options: text speed ...".
+- A brand-new game (File 1 without the file and nothing beside the game): the user's canonical list (save_slots.c
+  sCanonicalCoop / Display / Controls): TEXT SPEED FAST, FRAME 1, NAME CASE UNCORRECTED, MOEMON, BUTTON MODE NORMAL,
+  STEREO, MUTE IN BACKGROUND on, BIKE / SURF MUSIC on, BADGE FADING PLATINUM, CARD TITLE / SCALING on, PRINTED ART /
+  backs, BATTLE SCENE on, SHIFT, MODERN anims, ENGLISH announcer, TYPE ICONS off, LEVEL SCALING on (MEDIUM, EVEN, AUTO,
+  caps on, TO LEAGUE), GEN 4, MOVE KIND GEN 4, MEGA AUTO and Z / DYNAMAX / TERA off, FULLSCREEN, x4, SHARP FIT, no
+  filter, DEFAULT color, VSYNC, 60, FOLLOWERS PMD, SINNOH PEOPLE MIXED, followers / GARDEN 80%, SHADOWS on, all
+  controllers, A = RIGHT, STICK RUN off, RUMBLE on, icons AUTO, friends' screens on at 2x (BELOW: every new friend's
+  place), AUTOSAVE 5, FLAG RANGE 5, MOENAV CALLS BATTLES, FRIEND FINDER BOTH, STREAMER off. A new game no longer turns
+  STICK RUN off itself (the setting decides). Controller settings are never written unread (tests don't read them).
+- ERASE: A on SAVE FILE asks too (SELECT did; A did nothing there). Erasing a file other than File 1 takes its own
+  settings with it (it follows File 1's again); File 1's stay, every file's starting point.
+- tools/test/save_slots.sh steps 6 and 7.
+
 ## NEW in the BINDER, centered booster packs (1.63.6)
 - src/tcg/tcg_new.c ("<save>.cardnew", per game a byte per card: the copies the BINDER has shown; owner = the POKeMON
   collection's, a new game on the save starts again): a card owned more times than that shows NEW in its game's
