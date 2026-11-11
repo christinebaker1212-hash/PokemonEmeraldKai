@@ -42,5 +42,11 @@ int MP_DexPanel_Close(void);
 const char *MP_DexPanel_Jump(void);
 // An entry's MORE (R on it): PAGE 0 its hint, 1 STATS, 2 EVOLUTION, 3 WHERE
 void MP_DexInfo_Show(u16 nat, bool8 seen, bool8 owned, u8 page);
+// The pictures of the POKéDEX's own layers (pokedex.c puts them there): drawn into a sheet, taken as 4bpp tiles
+const u16 *MP_DexDraw_Palette(void);
+void MP_DexDraw_Tiles(s32 x0, s32 y0, s32 w, s32 h, u8 *out);
+void MP_DexDraw_Buttons(const struct MpDexHud *hud);
+void MP_DexDraw_Panel(void);
+void MP_DexDraw_Info(u16 nat, bool8 seen, bool8 owned, u8 page);
 
 #endif

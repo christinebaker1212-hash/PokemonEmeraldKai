@@ -218,6 +218,7 @@ static const char *const sEggNames[16];
 static bool8 PanelIsOpen(void);
 static const char *const sShowNames[MP_DEXSHOW_COUNT];
 static struct MpDexHud sHud;
+static struct { u16 nat; bool8 seen, owned; u8 page; u32 frame; bool8 on; } sInfo;
 static u32 sHudFrame;
 static bool8 sHudOn;
 
@@ -347,22 +348,60 @@ static void Cursor(u16 *frame, s32 x, s32 y)
 
 static const char *const sShowNames[MP_DEXSHOW_COUNT] = {"ALL", "NOT SEEN", "NOT CAUGHT", "CAUGHT", "FRIENDS'"};
 
+// Nothing is drawn over the frame: the list's buttons are sprites, FIND a window on the START menu's layer and MORE a
+// window on the entry's (pokedex.c). The pictures are drawn here into a 240 x 160 sheet (0: see-through) and handed
+// over as tiles in the POKéDEX's own palette (MP_DexDraw_*)
 void MP_DexHud_Composite(u16 *frame)
 {
-    char buf[40];
+    (void)frame;
+}
+
+static u16 sSheet[DISPLAY_WIDTH * DISPLAY_HEIGHT];
+
+// One palette for the three: index 0 see-through
+static const u16 sDexPal[16] = {
+    0, RGB(31, 31, 31), RGB(12, 12, 14), RGB(6, 17, 31), RGB(22, 25, 30), RGB(0, 0, 5), RGB(31, 0, 23), RGB(31, 28, 10),
+    RGB(27, 27, 27), RGB(2, 2, 2), RGB(23, 23, 23), RGB(24, 4, 4), RGB(4, 10, 22), RGB(8, 28, 12), RGB(19, 19, 20),
+    RGB(31, 12, 8),
+};
+
+const u16 *MP_DexDraw_Palette(void)
+{
+    return sDexPal;
+}
+
+// The sheet's W x H tiles from (X0, Y0) as 4bpp tiles, a row of tiles after another (a window's or a sprite's)
+void MP_DexDraw_Tiles(s32 x0, s32 y0, s32 w, s32 h, u8 *out)
+{
+    s32 x, y, i;
+    memset(out, 0, (size_t)(w * h * 32));
+    for (y = 0; y < h * 8; y++)
+        for (x = 0; x < w * 8; x++)
+        {
+            u16 c = y0 + y < DISPLAY_HEIGHT && x0 + x < DISPLAY_WIDTH ? sSheet[(y0 + y) * DISPLAY_WIDTH + x0 + x] : 0;
+            s32 best = 0, bestD = 1 << 30;
+            if (c == 0)
+                continue;
+            for (i = 1; i < 16; i++)
+            {
+                s32 dr = (c & 31) - (sDexPal[i] & 31), dg = ((c >> 5) & 31) - ((sDexPal[i] >> 5) & 31);
+                s32 db = ((c >> 10) & 31) - ((sDexPal[i] >> 10) & 31), d = dr * dr + dg * dg + db * db;
+                if (d < bestD)
+                    bestD = d, best = i;
+            }
+            out[((y / 8) * w + x / 8) * 32 + (y % 8) * 4 + (x % 8) / 2] |= (u8)(best << ((x & 1) * 4));
+        }
+}
+
+// The list's buttons (two sprites: under the picture, and beside the list's arrow)
+void MP_DexDraw_Buttons(const struct MpDexHud *hud)
+{
+    u16 *frame = sSheet;
+    char buf[8];
     s32 x, y, w, own, all;
-    if (InfoFresh() && !gPaletteFade.active)
-    {
-        DrawInfo(frame);
-        return;
-    }
-    if (!sHudOn || gMain.vblankCounter1 - sHudFrame > 2 || gPaletteFade.active)
-        return;
-    if (PanelIsOpen())
-    {
-        DrawPanel(frame);
-        return;
-    }
+    memset(sSheet, 0, sizeof(sSheet));
+    sHud = *hud;
+    buf[0] = 0;
     // under the picture, beside the list's own START and SELECT: which POKéDEX (L), whose (R); FIND (LT / F)
     sFont = FONT_NARROW;
     if (sHud.nationalOn)
@@ -379,6 +418,19 @@ void MP_DexHud_Composite(u16 *frame)
             = (x < own ? RGB(31, 26, 6) : sHud.shared && x < all ? RGB(9, 20, 31) : RGB(12, 12, 14)) | 0x8000;
     (void)buf;
     sFont = FONT_SMALL;
+}
+
+void MP_DexDraw_Panel(void)
+{
+    memset(sSheet, 0, sizeof(sSheet));
+    DrawPanel(sSheet);
+}
+
+void MP_DexDraw_Info(u16 nat, bool8 seen, bool8 owned, u8 page)
+{
+    memset(sSheet, 0, sizeof(sSheet));
+    sInfo.nat = nat, sInfo.seen = seen, sInfo.owned = owned, sInfo.page = page;
+    DrawInfo(sSheet);
 }
 
 // ------------------------------------------------------------------------------------------------ FIND & SORT
@@ -654,19 +706,8 @@ int MP_DexPanel_Step(void)
         return 1;
     if (sPanel.closing)
     {
-        // (down and away, as START's menu goes)
-        sPanel.slide += 20;
-        if (sPanel.slide >= 160)
-        {
-            sPanel.open = sPanel.closing = FALSE;
-            return 1;
-        }
-        return 0;
-    }
-    if (sPanel.slide > 0)
-    {
-        sPanel.slide = sPanel.slide > 20 ? sPanel.slide - 20 : 0;
-        return 0;
+        sPanel.open = sPanel.closing = FALSE;   // (pokedex.c slides its layer down and away, as START's menu goes)
+        return 1;
     }
     if (sPanel.typing)
     {
@@ -749,10 +790,10 @@ static void DrawPanel(u16 *frame)
     static const char *const sLabels[ROW_COUNT] = {
         "JUMP TO", "ORDER", "SHOW", "GENERATION", "TYPE", "TYPE 2", "ABILITY", "MOVE", "EGG GROUP", "CLEAR ALL",
     };
-    s32 i, y, o = sPanel.slide;
+    s32 i, y, o = 0;
     char buf[40];
     // (the START menu's own box and letters, as tall as its rows need)
-    MenuBox(frame, 22, 6 + o, 217, 156 + o);
+    MenuBox(frame, 24, 6 + o, 215, 157 + o);
     sFont = FONT_NORMAL;
     for (i = 0; i < ROW_COUNT; i++)
     {
@@ -780,7 +821,7 @@ static void DrawPanel(u16 *frame)
 
 extern const struct Evolution gEvolutionTable[NUM_SPECIES][EVOS_PER_MON];
 
-static struct { u16 nat; bool8 seen, owned; u8 page; u32 frame; bool8 on; } sInfo;
+
 
 void MP_DexInfo_Show(u16 nat, bool8 seen, bool8 owned, u8 page)
 {
@@ -836,13 +877,13 @@ static s32 EvoLines(u16 *frame, u16 species, s32 depth, s32 y, const char *how)
 {
     char name[16], line[48];
     u32 i;
-    if (y > 134 || depth > 3)
+    if (y > 124 || depth > 3)
         return y;
     if (ViewSeen(species))
         SpeciesAscii(species, name, sizeof(name));
     else
         snprintf(name, sizeof(name), "?????");
-    Text(frame, 24 + depth * 10, y, name, NationalPokedexNumToSpecies(sInfo.nat) == species ? RGB(24, 4, 4) : C_INK, C_INK_SH);
+    Text(frame, 18 + depth * 10, y, name, NationalPokedexNumToSpecies(sInfo.nat) == species ? RGB(24, 4, 4) : C_INK, C_INK_SH);
     if (how[0])
     {
         snprintf(line, sizeof(line), "%s", how);
@@ -876,24 +917,18 @@ static void DrawInfo(u16 *frame)
     u16 species = NationalPokedexNumToSpecies(sInfo.nat);
     const struct SpeciesInfo *info = &gSpeciesInfo[species];
     char buf[64], a[24], b[24];
-    s32 y = 31, i;
+    s32 y = 33, i;
     sFont = FONT_NARROW;
-    if (sInfo.page == 0)
-    {
-        Key(frame, 184, 78, "R", "MORE", C_INK, C_INK_SH);
-        sFont = FONT_SMALL;
-        return;
-    }
     // (the entry's own card: pale, a grey strip for its heading, dark letters)
-    Box(frame, 12, 14, 227, 150, RGB(0, 0, 5), 16);
-    Box(frame, 13, 15, 226, 149, C_WHITE, 16);
-    Box(frame, 15, 17, 224, 147, C_CARD, 16);
-    Box(frame, 15, 17, 224, 29, RGB(23, 23, 23), 16);
+    Box(frame, 8, 16, 223, 143, RGB(0, 0, 5), 16);
+    Box(frame, 9, 17, 222, 142, C_WHITE, 16);
+    Box(frame, 11, 19, 220, 140, C_CARD, 16);
+    Box(frame, 11, 19, 220, 31, RGB(23, 23, 23), 16);
     SpeciesAscii(species, a, sizeof(a));
     snprintf(buf, sizeof(buf), "%s  %s", a, sPages[(sInfo.page - 1) % 3]);
-    Text(frame, 20, 17, buf, C_INK, C_WHITE);
-    Key(frame, 172, 17, "L", "", C_INK, NO_SHADOW);
-    Key(frame, 186, 17, "R", "PAGE", C_INK, C_WHITE);
+    Text(frame, 16, 19, buf, C_INK, C_WHITE);
+    Key(frame, 168, 19, "L", "", C_INK, NO_SHADOW);
+    Key(frame, 182, 19, "R", "PAGE", C_INK, C_WHITE);
     if (sInfo.page == 1)
     {
         static const char *const sStat[6] = {"HP", "ATTACK", "DEFENSE", "SP. ATK", "SP. DEF", "SPEED"};
@@ -901,38 +936,38 @@ static void DrawInfo(u16 *frame)
         s32 total = 0;
         if (!sInfo.owned)
         {
-            Text(frame, 24, 60, "CATCH IT TO SEE ITS STATS.", C_INK, C_INK_SH);
+            Text(frame, 18, 60, "CATCH IT TO SEE ITS STATS.", C_INK, C_INK_SH);
             sFont = FONT_SMALL;
             return;
         }
         MP_GameToAscii(a, gTypeNames[info->types[0]], sizeof(a) - 1);
         MP_GameToAscii(b, gTypeNames[info->types[1]], sizeof(b) - 1);
         snprintf(buf, sizeof(buf), info->types[0] == info->types[1] ? "TYPE     %s" : "TYPE     %s / %s", a, b);
-        Text(frame, 24, y, buf, C_INK, C_INK_SH), y += 11;
+        Text(frame, 18, y, buf, C_INK, C_INK_SH), y += 11;
         MP_GameToAscii(a, gAbilityNames[info->abilities[0]], sizeof(a) - 1);
         MP_GameToAscii(b, gAbilityNames[info->abilities[1]], sizeof(b) - 1);
         snprintf(buf, sizeof(buf), info->abilities[1] && info->abilities[1] != info->abilities[0] ? "ABILITY  %s / %s" : "ABILITY  %s", a, b);
-        Text(frame, 24, y, buf, C_INK, C_INK_SH), y += 11;
+        Text(frame, 18, y, buf, C_INK, C_INK_SH), y += 11;
         snprintf(buf, sizeof(buf), info->eggGroups[0] == info->eggGroups[1] ? "EGGS     %s" : "EGGS     %s / %s",
                  sEggNames[info->eggGroups[0] % 16], sEggNames[info->eggGroups[1] % 16]);
-        Text(frame, 24, y, buf, C_INK, C_INK_SH), y += 12;
+        Text(frame, 18, y, buf, C_INK, C_INK_SH), y += 12;
         for (i = 0; i < 6; i++)
         {
             s32 w = v[i] * 96 / 200, x;
-            Text(frame, 24, y, sStat[i], RGB(9, 9, 11), C_INK_SH);
+            Text(frame, 18, y, sStat[i], C_INK, C_INK_SH);
             snprintf(buf, sizeof(buf), "%d", v[i]);
-            Text(frame, 80, y, buf, C_INK, C_INK_SH);
+            Text(frame, 74, y, buf, C_INK, C_INK_SH);
             if (w > 110)
                 w = 110;
-            Box(frame, 104, y + 4, 104 + 110, y + 8, RGB(19, 19, 20), 16);
+            Box(frame, 100, y + 4, 100 + 110, y + 8, RGB(19, 19, 20), 16);
             for (x = 0; x < w; x++)
-                frame[(y + 5) * DISPLAY_WIDTH + 105 + x] = frame[(y + 6) * DISPLAY_WIDTH + 105 + x] = frame[(y + 7) * DISPLAY_WIDTH + 105 + x]
+                frame[(y + 5) * DISPLAY_WIDTH + 101 + x] = frame[(y + 6) * DISPLAY_WIDTH + 101 + x] = frame[(y + 7) * DISPLAY_WIDTH + 101 + x]
                     = (v[i] >= 110 ? RGB(8, 28, 12) : v[i] >= 70 ? RGB(31, 26, 6) : RGB(31, 12, 8)) | 0x8000;
             total += v[i];
-            y += 11;
+            y += 10;
         }
         snprintf(buf, sizeof(buf), "TOTAL    %d", (int)total);
-        Text(frame, 24, y, buf, RGB(24, 4, 4), C_INK_SH);
+        Text(frame, 18, y, buf, RGB(24, 4, 4), C_INK_SH);
     }
     else if (sInfo.page == 2)
     {
@@ -953,7 +988,7 @@ static void DrawInfo(u16 *frame)
                 break;
         }
         if (EvoLines(frame, base, 0, y, "") == y + 11)
-            Text(frame, 24, y + 14, "IT DOESN'T EVOLVE.", RGB(9, 9, 11), C_INK_SH);
+            Text(frame, 18, y + 14, "IT DOESN'T EVOLVE.", C_INK, C_INK_SH);
     }
     else
     {
@@ -978,13 +1013,13 @@ static void DrawInfo(u16 *frame)
                 place[k].kinds |= kinds;
         }
         if (n == 0)
-            Text(frame, 24, 60, "NOT FOUND IN THE WILD IN THIS REGION.", C_INK, C_INK_SH);
+            Text(frame, 18, 60, "NOT FOUND IN THE WILD IN THIS REGION.", C_INK, C_INK_SH);
         for (k = 0; k < n; k++)
         {
             u8 name[32];
             GetMapName(name, place[k].sec, 0);
             MP_GameToAscii(a, name, sizeof(a) - 1);
-            Text(frame, 24, y, a, C_INK, C_INK_SH);
+            Text(frame, 18, y, a, C_INK, C_INK_SH);
             snprintf(buf, sizeof(buf), "%s%s%s%s", place[k].kinds & 1 ? "GRASS " : "", place[k].kinds & 2 ? "WATER " : "",
                      place[k].kinds & 4 ? "ROD " : "", place[k].kinds & 8 ? "ROCKS" : "");
             Text(frame, 124, y, buf, RGB(4, 10, 22), C_INK_SH);

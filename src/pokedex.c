@@ -843,6 +843,22 @@ static const struct BgTemplate sPokedex_BgTemplate[] =
     }
 };
 
+// Moemon Kai: the POKéDEX's additions in its own layers (mp_dexplus.c draws their pictures): a palette slot the screens
+// leave free, FIND's window on the list screen, MORE's on an entry
+#define MP_DEX_PAL     13
+#define MP_FIND_WIN    1
+#define MP_FIND_LEFT   3
+#define MP_FIND_W      24
+#define MP_FIND_H      19
+#define MP_FIND_TILE   272
+#define MP_FIND_Y      152   // how far the layer scrolls to show it all
+#define WIN_MORE       4
+#define MP_MORE_W      27
+#define MP_MORE_H      16
+#define MP_MORE_TILE   320   // (after the menu's 256 tiles and the tab bar's 60)
+#define TAG_MP_DEX_A   4200
+#define TAG_MP_DEX_B   4201
+
 static const struct WindowTemplate sPokemonList_WindowTemplate[] =
 {
     {
@@ -853,6 +869,17 @@ static const struct WindowTemplate sPokemonList_WindowTemplate[] =
         .height = 32,
         .paletteNum = 0,
         .baseBlock = 1,
+    },
+    // Moemon Kai: FIND (LT / F), on the START menu's layer: its tiles after the menu's, its place set as it
+    // slides (MpFindRows: the layer is 32 tiles high and the menu 19, so its rows go round)
+    {
+        .bg = 0,
+        .tilemapLeft = MP_FIND_LEFT,
+        .tilemapTop = 0,
+        .width = MP_FIND_W,
+        .height = MP_FIND_H,
+        .paletteNum = MP_DEX_PAL,
+        .baseBlock = MP_FIND_TILE,
     },
     DUMMY_WIN_TEMPLATE
 };
@@ -1169,6 +1196,16 @@ static const struct WindowTemplate sInfoScreen_WindowTemplates[] =
         .height = 8,
         .paletteNum = 9,
         .baseBlock = 869,
+    },
+    [WIN_MORE] =   // Moemon Kai: an entry's MORE, on the tab bar's layer over the entry
+    {
+        .bg = 1,
+        .tilemapLeft = 1,
+        .tilemapTop = 2,
+        .width = MP_MORE_W,
+        .height = MP_MORE_H,
+        .paletteNum = MP_DEX_PAL,
+        .baseBlock = MP_MORE_TILE,
     },
     DUMMY_WIN_TEMPLATE
 };
@@ -1910,29 +1947,53 @@ static bool8 MpDexSearchKey(void)
     return pressed;
 }
 
-// Moemon Kai: the list's header (drawn over the frame: mp_dexplus.c MP_DexHud_Composite)
+// Moemon Kai: the list's own buttons for L, R and LT, sprites as its START and SELECT are (their pictures:
+// mp_dexplus.c MP_DexDraw_Buttons), made with the list
+static const struct OamData sOamData_MpDexButtons =
+{
+    .y = DISPLAY_HEIGHT,
+    .affineMode = ST_OAM_AFFINE_OFF,
+    .objMode = ST_OAM_OBJ_NORMAL,
+    .bpp = ST_OAM_4BPP,
+    .shape = SPRITE_SHAPE(64x32),
+    .size = SPRITE_SIZE(64x32),
+    .priority = 0,
+};
+
+static const struct SpriteTemplate sMpDexButtonsTemplate[2] =
+{
+    {TAG_MP_DEX_A, TAG_MP_DEX_A, &sOamData_MpDexButtons, gDummySpriteAnimTable, NULL, gDummySpriteAffineAnimTable, SpriteCB_DexListInterfaceText},
+    {TAG_MP_DEX_B, TAG_MP_DEX_A, &sOamData_MpDexButtons, gDummySpriteAnimTable, NULL, gDummySpriteAffineAnimTable, SpriteCB_DexListInterfaceText},
+};
+
 static void MpDexHud(void)
 {
+    static u8 sTiles[2][8 * 4 * 32];
     struct MpDexHud hud;
+    struct SpriteSheet sheet;
+    struct SpritePalette pal;
     bool8 hoenn = sPokedexView->dexMode == DEX_MODE_HOENN || !IsNationalPokedexEnabled();
-    static u16 sTotal, sOwn, sAll;
-    static u8 sFor = 0xFF;
-    u8 key = hoenn | MP_DexView_Shared() << 1;
-    if (sFor != key || (gMain.vblankCounter1 & 63) == 0)
-    {
-        sFor = key;
-        sTotal = hoenn ? HOENN_DEX_COUNT : MP_Gen_DexCount();
-        sOwn = MpDexCount(hoenn, FLAG_GET_CAUGHT, TRUE);
-        sAll = hoenn ? GetHoennPokedexCount(FLAG_GET_CAUGHT) : GetNationalPokedexCount(FLAG_GET_CAUGHT);
-    }
+    u32 i;
+    static const s16 sAt[2][2] = {{64, 132}, {128, 136}};
     hud.nationalOn = IsNationalPokedexEnabled();
     hud.national = !hoenn;
     hud.shared = MP_DexView_Shared();
     hud.filter = MP_DexView_Filter();
-    hud.total = sTotal, hud.ownCaught = sOwn, hud.allCaught = sAll;
+    hud.total = hoenn ? HOENN_DEX_COUNT : MP_Gen_DexCount();
+    hud.ownCaught = MpDexCount(hoenn, FLAG_GET_CAUGHT, TRUE);
+    hud.allCaught = hoenn ? GetHoennPokedexCount(FLAG_GET_CAUGHT) : GetNationalPokedexCount(FLAG_GET_CAUGHT);
     hud.nothing = sMpDexNothing;
     hud.narrowed = MP_DexQuery_Active();
-    MP_DexHud_Show(&hud);
+    MP_DexDraw_Buttons(&hud);
+    pal.data = MP_DexDraw_Palette(), pal.tag = TAG_MP_DEX_A;
+    LoadSpritePalette(&pal);
+    for (i = 0; i < 2; i++)
+    {
+        MP_DexDraw_Tiles(sAt[i][0], sAt[i][1], 8, 4, sTiles[i]);
+        sheet.data = sTiles[i], sheet.size = sizeof(sTiles[i]), sheet.tag = TAG_MP_DEX_A + i;
+        LoadSpriteSheet(&sheet);
+        CreateSprite(&sMpDexButtonsTemplate[i], sAt[i][0] + 32, sAt[i][1] + 16, 0);
+    }
 }
 
 // The entry the list is on, kept with the save for the next time it opens
@@ -1957,19 +2018,99 @@ static void Task_MpDexReload(u8 taskId)
 static void MpDexReload(u8 taskId);
 #define tLoadScreenTaskId data[0]
 
+// FIND's picture into its window
+static void MpFindDraw(void)
+{
+    static u8 sTiles[MP_FIND_W * MP_FIND_H * 32];
+    MP_DexDraw_Panel();
+    MP_DexDraw_Tiles(MP_FIND_LEFT * 8, 6, MP_FIND_W, MP_FIND_H, sTiles);
+    CopyToWindowPixelBuffer(MP_FIND_WIN, sTiles, sizeof(sTiles), 0);
+    CopyWindowToVram(MP_FIND_WIN, COPYWIN_GFX);
+}
+
+// Its rows FROM to TO on the layer, from the row under the screen on and round to the top (ON), or taken off
+static void MpFindRows(u32 from, u32 to, bool8 on)
+{
+    u32 r;
+    for (r = from; r < to; r++)
+    {
+        if (on)
+            WriteSequenceToBgTilemapBuffer(0, MP_FIND_TILE + r * MP_FIND_W, MP_FIND_LEFT, (20 + r) % 32, MP_FIND_W, 1, MP_DEX_PAL, 1);
+        else
+            FillBgTilemapBufferRect(0, 0, MP_FIND_LEFT, (20 + r) % 32, MP_FIND_W, 1, 0);
+    }
+    CopyBgTilemapBufferToVram(0);
+}
+
+#define tFindState data[5]
+#define tFindTop   data[6]   // its last rows are on the layer (they come round to its top: only while off screen)
+
+// FIND slides up on the START menu's layer, as that menu does, and back down
 static void Task_MpDexPanel(u8 taskId)
 {
-    int r = MP_DexPanel_Step();
-    if (r == 0 && MpDexSearchKey())   // (the key that opened it shuts it too)
-        r = MP_DexPanel_Close();
-    MpDexHud();
-    if (r == 0)
-        return;
-    // (the list in the order and with the entries asked for)
-    sPokedexView->dexOrder = MP_DexQuery()->sort < MP_DEXSORT_HP ? MP_DexQuery()->sort : ORDER_NUMERICAL;
-    gSaveBlock2Ptr->pokedex.order = sPokedexView->dexOrder;
-    sMpDexJumpNow = TRUE;
-    MpDexReload(taskId);
+    switch (gTasks[taskId].tFindState)
+    {
+    case 0:   // up
+        if (sPokedexView->menuY == 0)
+        {
+            MpFindDraw();
+            FillBgTilemapBufferRect(0, 0, 0, 20, 32, 12, 0);   // (the START menu's picture off its layer meanwhile)
+            MpFindRows(0, 12, TRUE);
+            gTasks[taskId].tFindTop = FALSE;
+            // (the screen's first window over the menu's place: the layers show there, the sprites don't, so the
+            // list's numbers and buttons don't stand in front of it)
+            SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG_ALL | WININ_WIN1_ALL);
+            SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON);
+        }
+        sPokedexView->menuY = sPokedexView->menuY + 16 > MP_FIND_Y ? MP_FIND_Y : sPokedexView->menuY + 16;
+        if (!gTasks[taskId].tFindTop && sPokedexView->menuY >= 64)
+            MpFindRows(12, MP_FIND_H, TRUE), gTasks[taskId].tFindTop = TRUE;
+        if (sPokedexView->menuY == MP_FIND_Y)
+            gTasks[taskId].tFindState = 1;
+        break;
+    case 1:
+    {
+        int r = MP_DexPanel_Step();
+        if (r == 0 && MpDexSearchKey())   // (the key that opened it shuts it too)
+            MP_DexPanel_Close(), r = MP_DexPanel_Step();
+        if (r)
+            gTasks[taskId].tFindState = 2;
+        else
+            MpFindDraw();
+        break;
+    }
+    case 2:   // down and away
+        sPokedexView->menuY = sPokedexView->menuY > 16 ? sPokedexView->menuY - 16 : 0;
+        if (gTasks[taskId].tFindTop && sPokedexView->menuY <= 88)
+            MpFindRows(12, MP_FIND_H, FALSE), gTasks[taskId].tFindTop = FALSE;
+        if (sPokedexView->menuY == 0)
+        {
+            // (the START menu's own picture back on its layer)
+            MpFindRows(0, 12, FALSE);
+            CopyToBgTilemapBuffer(0, gPokedexStartMenuMain_Tilemap, 0, 0x280);
+            CopyBgTilemapBufferToVram(0);
+            SetGpuReg(REG_OFFSET_BG0VOFS, 0);
+            ClearGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON);
+            SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_ALL | WININ_WIN1_ALL);
+            SetGpuReg(REG_OFFSET_WIN0H, 0);
+            SetGpuReg(REG_OFFSET_WIN0V, 0);
+            gTasks[taskId].tFindState = 0;
+            // (the list in the order and with the entries asked for)
+            sPokedexView->dexOrder = MP_DexQuery()->sort < MP_DEXSORT_HP ? MP_DexQuery()->sort : ORDER_NUMERICAL;
+            gSaveBlock2Ptr->pokedex.order = sPokedexView->dexOrder;
+            sMpDexJumpNow = TRUE;
+            MpDexReload(taskId);
+            return;
+        }
+        break;
+    }
+    SetGpuReg(REG_OFFSET_BG0VOFS, sPokedexView->menuY);
+    {
+        // (the window follows the menu up and down)
+        s32 top = 8 + MP_FIND_Y - sPokedexView->menuY;
+        SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(MP_FIND_LEFT * 8, (MP_FIND_LEFT + MP_FIND_W) * 8));
+        SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(top > DISPLAY_HEIGHT ? DISPLAY_HEIGHT : top, DISPLAY_HEIGHT));
+    }
 }
 
 static void MpDexReload(u8 taskId)
@@ -2051,6 +2192,8 @@ static void Task_HandlePokedexInput(u8 taskId)
             // Moemon Kai: FIND (LT / F): a menu over the list, as START's is (mp_dexplus.c). SELECT is the game's own
             // SEARCH, as it always was
             MP_DexPanel_Open(sPokedexView->dexOrder);
+            sPokedexView->menuY = 0;
+            gTasks[taskId].tFindState = 0;
             gTasks[taskId].func = Task_MpDexPanel;
         }
         else
@@ -2060,7 +2203,6 @@ static void Task_HandlePokedexInput(u8 taskId)
             if (sPokedexView->scrollTimer)
                 gTasks[taskId].func = Task_WaitForScroll;
         }
-        MpDexHud();
     }
 }
 
@@ -2453,7 +2595,10 @@ static bool8 LoadPokedexListPage(u8 page)
         break;
     case 3:
         if (page == PAGE_MAIN)
+        {
             CreatePokedexList(sPokedexView->dexMode, sPokedexView->dexOrder);
+            MpDexHud();   // Moemon Kai: the L / R / LT buttons (sprites, as START and SELECT)
+        }
         CreateMonSpritesAtPos(sPokedexView->selectedPokemon, 0xE);
         sPokedexView->menuIsOpen = FALSE;
         sPokedexView->menuY = 0;
@@ -2505,6 +2650,7 @@ static void LoadPokedexBgPalette(bool8 isSearchResults)
     else
         LoadPalette(gPokedexBgNational_Pal + 1, BG_PLTT_ID(0) + 1, PLTT_SIZEOF(6 * 16 - 1));
     LoadPalette(GetOverworldTextboxPalettePtr(), BG_PLTT_ID(15), PLTT_SIZE_4BPP);
+    LoadPalette(MP_DexDraw_Palette(), BG_PLTT_ID(MP_DEX_PAL), PLTT_SIZE_4BPP);   // Moemon Kai: FIND's (mp_dexplus.c)
 }
 
 static void FreeWindowAndBgBuffers(void)
@@ -3941,6 +4087,29 @@ static bool8 MpDexFormsInput(u8 taskId)
     return TRUE;   // (the rest of the page waits while the forms are shown)
 }
 
+// Moemon Kai: an entry's MORE page in its window (the tab bar's layer, over the entry; the entry's picture, a sprite
+// that would stand in front of it, put away meanwhile), or the window taken off
+static void MpDexMoreShow(u16 monSpriteId)
+{
+    static u8 sTiles[MP_MORE_W * MP_MORE_H * 32];
+    if (sMpDexMorePage == 0)
+    {
+        ClearWindowTilemap(WIN_MORE);
+        CopyBgTilemapBufferToVram(1);
+        if (monSpriteId < MAX_SPRITES)
+            gSprites[monSpriteId].invisible = FALSE;
+        return;
+    }
+    LoadPalette(MP_DexDraw_Palette(), BG_PLTT_ID(MP_DEX_PAL), PLTT_SIZE_4BPP);
+    MP_DexDraw_Info(sPokedexListItem->dexNum, sPokedexListItem->seen, sPokedexListItem->owned, sMpDexMorePage);
+    MP_DexDraw_Tiles(8, 16, MP_MORE_W, MP_MORE_H, sTiles);
+    CopyToWindowPixelBuffer(WIN_MORE, sTiles, sizeof(sTiles), 0);
+    PutWindowTilemap(WIN_MORE);
+    CopyWindowToVram(WIN_MORE, COPYWIN_FULL);
+    if (monSpriteId < MAX_SPRITES)
+        gSprites[monSpriteId].invisible = TRUE;
+}
+
 static void Task_HandleInfoScreenInput(u8 taskId)
 {
     MpUpdateCategoryLine();
@@ -3959,13 +4128,17 @@ static void Task_HandleInfoScreenInput(u8 taskId)
     if (MpDexFormsInput(taskId)) // Moemon Kai: Platinum's FORMS
         return;
     // Moemon Kai: MORE, three pages over the entry (mp_dexplus.c): R opens it and goes on, L back, B closes it
-    if (JOY_NEW(R_BUTTON))
-        sMpDexMorePage = (sMpDexMorePage + 1) % 4, PlaySE(SE_SELECT);
-    else if (sMpDexMorePage && JOY_NEW(L_BUTTON))
-        sMpDexMorePage = (sMpDexMorePage + 3) % 4, PlaySE(SE_SELECT);
-    else if (sMpDexMorePage && JOY_NEW(B_BUTTON))
-        sMpDexMorePage = 0, PlaySE(SE_SELECT), gMain.newKeys &= ~B_BUTTON;
-    MP_DexInfo_Show(sPokedexListItem->dexNum, sPokedexListItem->seen, sPokedexListItem->owned, sMpDexMorePage);
+    {
+        u8 was = sMpDexMorePage;
+        if (JOY_NEW(R_BUTTON))
+            sMpDexMorePage = (sMpDexMorePage + 1) % 4, PlaySE(SE_SELECT);
+        else if (sMpDexMorePage && JOY_NEW(L_BUTTON))
+            sMpDexMorePage = (sMpDexMorePage + 3) % 4, PlaySE(SE_SELECT);
+        else if (sMpDexMorePage && JOY_NEW(B_BUTTON))
+            sMpDexMorePage = 0, PlaySE(SE_SELECT), gMain.newKeys &= ~B_BUTTON;
+        if (was != sMpDexMorePage)
+            MpDexMoreShow(gTasks[taskId].tMonSpriteId);
+    }
     if (sMpDexMorePage)
         return;
     if (JOY_NEW(B_BUTTON))
@@ -4801,6 +4974,12 @@ static void PrintMonInfo(u32 num, u32 value, u32 owned, u32 newEntry)
     {
         PrintMonHeight(gPokedexEntries[num].height, 0x81, 0x39);
         PrintMonWeight(gPokedexEntries[num].weight, 0x81, 0x49);
+        {
+            // Moemon Kai: MORE's button, in the entry's own letters
+            static const u8 sText_RMore[] = _("R: MORE");
+            u8 color[3] = {TEXT_COLOR_TRANSPARENT, TEXT_DYNAMIC_COLOR_6, TEXT_COLOR_LIGHT_GRAY};
+            AddTextPrinterParameterized4(0, FONT_SMALL, 187, 81, 0, 0, color, TEXT_SKIP_DRAW, sText_RMore);
+        }
     }
     else
     {
