@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_STRIATONCITY_Z8",
   "name": "Unova_StriatonCity_Z8",
   "layout": "LAYOUT_UNOVA_STRIATONCITY_Z8",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_POKECEN",
   "region_map_section": "MAPSEC_UNOVA_STRIATON_CITY",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

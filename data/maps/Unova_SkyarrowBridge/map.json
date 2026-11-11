@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_SKYARROWBRIDGE",
   "name": "Unova_SkyarrowBridge",
   "layout": "LAYOUT_UNOVA_SKYARROWBRIDGE",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_H_01",
   "region_map_section": "MAPSEC_UNOVA_SKYARROW_BRIDGE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

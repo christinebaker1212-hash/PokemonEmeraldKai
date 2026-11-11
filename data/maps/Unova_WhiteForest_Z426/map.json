@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_WHITEFOREST_Z426",
   "name": "Unova_WhiteForest_Z426",
   "layout": "LAYOUT_UNOVA_WHITEFOREST_Z426",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_C_10_W",
   "region_map_section": "MAPSEC_UNOVA_WHITE_FOREST",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

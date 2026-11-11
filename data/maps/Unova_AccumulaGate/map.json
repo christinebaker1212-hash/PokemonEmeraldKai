@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ACCUMULAGATE",
   "name": "Unova_AccumulaGate",
   "layout": "LAYOUT_UNOVA_ACCUMULAGATE",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_GATE",
   "region_map_section": "MAPSEC_UNOVA_ACCUMULA_GATE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

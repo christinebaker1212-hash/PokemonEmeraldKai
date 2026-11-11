@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ROUTEGATE_Z318",
   "name": "Unova_RouteGate_Z318",
   "layout": "LAYOUT_UNOVA_ROUTEGATE_Z318",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_GATE",
   "region_map_section": "MAPSEC_UNOVA_ROUTE_GATE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

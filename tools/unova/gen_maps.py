@@ -97,6 +97,19 @@ def events_of(m, w, h):
     return objs, coords, bgs
 
 
+def songs():
+    """{Black's sequence number: its song slot's name} (tools/kaisong/unova_songs.py)"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('unova_songs', os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), 'kaisong', 'unova_songs.py'))
+    us = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(us)
+    try:
+        return {i: us.slot_name(n).upper() for i, n in us.sequences()}
+    except OSError:
+        return {}
+
+
 def zone_maps():
     """[{zone, name, id, matrix, rect (x0, z0, x1, z1 in cells), place, outdoor}] in zone order: an indoor zone's blocks
     as one map, each outdoor block (a matrix with its own zone grid) a map"""
@@ -175,6 +188,7 @@ def main():
                     warps[m['name']].append((tx + dx - m['rect'][0] * 32, tz + dz - m['rect'][1] * 32, c['zone'],
                                              c['exit'], c['dir']))
     table = []
+    song_of = songs()
     for k, m in enumerate(maps):
         group = GROUP % (k // PER_GROUP + 1)
         w = (m['rect'][2] - m['rect'][0] + 1) * 32
@@ -218,7 +232,8 @@ def main():
         objs, coords, bgs = events_of(m, w, h)
         mdir = 'data/maps/%s' % m['name']
         os.makedirs(mdir, exist_ok=True)
-        mj = {'id': m['id'], 'name': m['name'], 'layout': lid, 'music': 'MUS_NONE',
+        bgm = zr.zones()[m['zone']]['bgm'][0]   # (spring's: the VM plays the season's, u3d_vm.c U3D_ZoneSong)
+        mj = {'id': m['id'], 'name': m['name'], 'layout': lid, 'music': song_of.get(bgm, 'MUS_NONE'),
               'region_map_section': 'MAPSEC_UNOVA_' + snake(m['place']), 'requires_flash': False,
               'weather': 'WEATHER_NONE', 'map_type': 'MAP_TYPE_TOWN' if m['outdoor'] else 'MAP_TYPE_INDOOR',
               'allow_cycling': m['outdoor'], 'allow_escaping': False, 'allow_running': True,

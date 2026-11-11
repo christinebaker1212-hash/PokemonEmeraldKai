@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_POKMONLEAGUE_Z142",
   "name": "Unova_PokMonLeague_Z142",
   "layout": "LAYOUT_UNOVA_POKMONLEAGUE_Z142",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_POKEMON_LEAGUE",
   "region_map_section": "MAPSEC_UNOVA_POKEMON_LEAGUE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

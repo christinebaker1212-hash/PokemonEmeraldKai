@@ -223,6 +223,210 @@ Files in this repository's `music` folder ship with every update.
 | `mus_sinnoh_vs_rival.kaisong` | mus_sinnoh_vs_rival | everywhere | Battle! Rival |
 | `mus_sinnoh_vs_trainer.kaisong` | mus_sinnoh_vs_trainer | everywhere | Battle! Trainer |
 | `mus_sinnoh_vs_wild.kaisong` | mus_sinnoh_vs_wild | everywhere | Battle! Wild Pokemon |
+| `mus_unova_battle_subway.kaisong` | mus_unova_battle_subway | everywhere | SEQ_BGM_BATTLE_SUBWAY |
+| `mus_unova_battlepinch.kaisong` | mus_unova_battlepinch | everywhere | SEQ_BGM_BATTLEPINCH |
+| `mus_unova_battlesuperior.kaisong` | mus_unova_battlesuperior | everywhere | SEQ_BGM_BATTLESUPERIOR |
+| `mus_unova_bicycle.kaisong` | mus_unova_bicycle | everywhere | SEQ_BGM_BICYCLE |
+| `mus_unova_c_01.kaisong` | mus_unova_c_01 | everywhere | SEQ_BGM_C_01 |
+| `mus_unova_c_02.kaisong` | mus_unova_c_02 | everywhere | SEQ_BGM_C_02 |
+| `mus_unova_c_03.kaisong` | mus_unova_c_03 | everywhere | SEQ_BGM_C_03 |
+| `mus_unova_c_04.kaisong` | mus_unova_c_04 | everywhere | SEQ_BGM_C_04 |
+| `mus_unova_c_05.kaisong` | mus_unova_c_05 | everywhere | SEQ_BGM_C_05 |
+| `mus_unova_c_06.kaisong` | mus_unova_c_06 | everywhere | SEQ_BGM_C_06 |
+| `mus_unova_c_07.kaisong` | mus_unova_c_07 | everywhere | SEQ_BGM_C_07 |
+| `mus_unova_c_08_b.kaisong` | mus_unova_c_08_b | everywhere | SEQ_BGM_C_08_B |
+| `mus_unova_c_08_w.kaisong` | mus_unova_c_08_w | everywhere | SEQ_BGM_C_08_W |
+| `mus_unova_c_10_b.kaisong` | mus_unova_c_10_b | everywhere | SEQ_BGM_C_10_B |
+| `mus_unova_c_10_w.kaisong` | mus_unova_c_10_w | everywhere | SEQ_BGM_C_10_W |
+| `mus_unova_d_01.kaisong` | mus_unova_d_01 | everywhere | SEQ_BGM_D_01 |
+| `mus_unova_d_02.kaisong` | mus_unova_d_02 | everywhere | SEQ_BGM_D_02 |
+| `mus_unova_d_03.kaisong` | mus_unova_d_03 | everywhere | SEQ_BGM_D_03 |
+| `mus_unova_d_04.kaisong` | mus_unova_d_04 | everywhere | SEQ_BGM_D_04 |
+| `mus_unova_d_05.kaisong` | mus_unova_d_05 | everywhere | SEQ_BGM_D_05 |
+| `mus_unova_d_06.kaisong` | mus_unova_d_06 | everywhere | SEQ_BGM_D_06 |
+| `mus_unova_d_07.kaisong` | mus_unova_d_07 | everywhere | SEQ_BGM_D_07 |
+| `mus_unova_d_champroad.kaisong` | mus_unova_d_champroad | everywhere | SEQ_BGM_D_CHAMPROAD |
+| `mus_unova_diving.kaisong` | mus_unova_diving | everywhere | SEQ_BGM_DIVING |
+| `mus_unova_e_champion.kaisong` | mus_unova_e_champion | everywhere | SEQ_BGM_E_CHAMPION |
+| `mus_unova_e_dendouiri.kaisong` | mus_unova_e_dendouiri | everywhere | SEQ_BGM_E_DENDOUIRI |
+| `mus_unova_e_doctor.kaisong` | mus_unova_e_doctor | everywhere | SEQ_BGM_E_DOCTOR |
+| `mus_unova_e_doctor2.kaisong` | mus_unova_e_doctor2 | everywhere | SEQ_BGM_E_DOCTOR2 |
+| `mus_unova_e_emotion.kaisong` | mus_unova_e_emotion | everywhere | SEQ_BGM_E_EMOTION |
+| `mus_unova_e_epirogue.kaisong` | mus_unova_e_epirogue | everywhere | SEQ_BGM_E_EPIROGUE |
+| `mus_unova_e_epirogue_w.kaisong` | mus_unova_e_epirogue_w | everywhere | SEQ_BGM_E_EPIROGUE_W |
+| `mus_unova_e_friend.kaisong` | mus_unova_e_friend | everywhere | SEQ_BGM_E_FRIEND |
+| `mus_unova_e_g_cis.kaisong` | mus_unova_e_g_cis | everywhere | SEQ_BGM_E_G_CIS |
+| `mus_unova_e_gl_union.kaisong` | mus_unova_e_gl_union | everywhere | SEQ_BGM_E_GL_UNION |
+| `mus_unova_e_handsome.kaisong` | mus_unova_e_handsome | everywhere | SEQ_BGM_E_HANDSOME |
+| `mus_unova_e_inishie.kaisong` | mus_unova_e_inishie | everywhere | SEQ_BGM_E_INISHIE |
+| `mus_unova_e_kanransya.kaisong` | mus_unova_e_kanransya | everywhere | SEQ_BGM_E_KANRANSYA |
+| `mus_unova_e_last.kaisong` | mus_unova_e_last | everywhere | SEQ_BGM_E_LAST |
+| `mus_unova_e_legend_born_b.kaisong` | mus_unova_e_legend_born_b | everywhere | SEQ_BGM_E_LEGEND_BORN_B |
+| `mus_unova_e_legend_born_w.kaisong` | mus_unova_e_legend_born_w | everywhere | SEQ_BGM_E_LEGEND_BORN_W |
+| `mus_unova_e_legend_come_b.kaisong` | mus_unova_e_legend_come_b | everywhere | SEQ_BGM_E_LEGEND_COME_B |
+| `mus_unova_e_legend_come_w.kaisong` | mus_unova_e_legend_come_w | everywhere | SEQ_BGM_E_LEGEND_COME_W |
+| `mus_unova_e_n.kaisong` | mus_unova_e_n | everywhere | SEQ_BGM_E_N |
+| `mus_unova_e_n_castle.kaisong` | mus_unova_e_n_castle | everywhere | SEQ_BGM_E_N_CASTLE |
+| `mus_unova_e_opening.kaisong` | mus_unova_e_opening | everywhere | SEQ_BGM_E_OPENING |
+| `mus_unova_e_plasma.kaisong` | mus_unova_e_plasma | everywhere | SEQ_BGM_E_PLASMA |
+| `mus_unova_e_rival.kaisong` | mus_unova_e_rival | everywhere | SEQ_BGM_E_RIVAL |
+| `mus_unova_e_sage.kaisong` | mus_unova_e_sage | everywhere | SEQ_BGM_E_SAGE |
+| `mus_unova_e_shirona.kaisong` | mus_unova_e_shirona | everywhere | SEQ_BGM_E_SHIRONA |
+| `mus_unova_e_sound_designer.kaisong` | mus_unova_e_sound_designer | everywhere | SEQ_BGM_E_SOUND_DESIGNER |
+| `mus_unova_e_support.kaisong` | mus_unova_e_support | everywhere | SEQ_BGM_E_SUPPORT |
+| `mus_unova_e_trouble.kaisong` | mus_unova_e_trouble | everywhere | SEQ_BGM_E_TROUBLE |
+| `mus_unova_e_tsureteke1.kaisong` | mus_unova_e_tsureteke1 | everywhere | SEQ_BGM_E_TSURETEKE1 |
+| `mus_unova_e_tsureteke2.kaisong` | mus_unova_e_tsureteke2 | everywhere | SEQ_BGM_E_TSURETEKE2 |
+| `mus_unova_ending.kaisong` | mus_unova_ending | everywhere | SEQ_BGM_ENDING |
+| `mus_unova_eye_01.kaisong` | mus_unova_eye_01 | everywhere | SEQ_BGM_EYE_01 |
+| `mus_unova_eye_02.kaisong` | mus_unova_eye_02 | everywhere | SEQ_BGM_EYE_02 |
+| `mus_unova_eye_03.kaisong` | mus_unova_eye_03 | everywhere | SEQ_BGM_EYE_03 |
+| `mus_unova_eye_04.kaisong` | mus_unova_eye_04 | everywhere | SEQ_BGM_EYE_04 |
+| `mus_unova_eye_05.kaisong` | mus_unova_eye_05 | everywhere | SEQ_BGM_EYE_05 |
+| `mus_unova_eye_06.kaisong` | mus_unova_eye_06 | everywhere | SEQ_BGM_EYE_06 |
+| `mus_unova_eye_07.kaisong` | mus_unova_eye_07 | everywhere | SEQ_BGM_EYE_07 |
+| `mus_unova_eye_08.kaisong` | mus_unova_eye_08 | everywhere | SEQ_BGM_EYE_08 |
+| `mus_unova_eye_09.kaisong` | mus_unova_eye_09 | everywhere | SEQ_BGM_EYE_09 |
+| `mus_unova_eye_10.kaisong` | mus_unova_eye_10 | everywhere | SEQ_BGM_EYE_10 |
+| `mus_unova_eye_11.kaisong` | mus_unova_eye_11 | everywhere | SEQ_BGM_EYE_11 |
+| `mus_unova_eye_12.kaisong` | mus_unova_eye_12 | everywhere | SEQ_BGM_EYE_12 |
+| `mus_unova_eye_13.kaisong` | mus_unova_eye_13 | everywhere | SEQ_BGM_EYE_13 |
+| `mus_unova_eye_plasma.kaisong` | mus_unova_eye_plasma | everywhere | SEQ_BGM_EYE_PLASMA |
+| `mus_unova_fs.kaisong` | mus_unova_fs | everywhere | SEQ_BGM_FS |
+| `mus_unova_game_sync.kaisong` | mus_unova_game_sync | everywhere | SEQ_BGM_GAME_SYNC |
+| `mus_unova_gate.kaisong` | mus_unova_gate | everywhere | SEQ_BGM_GATE |
+| `mus_unova_gear_station.kaisong` | mus_unova_gear_station | everywhere | SEQ_BGM_GEAR_STATION |
+| `mus_unova_gf_logo.kaisong` | mus_unova_gf_logo | everywhere | SEQ_BGM_GF_LOGO |
+| `mus_unova_glterminal.kaisong` | mus_unova_glterminal | everywhere | SEQ_BGM_GLTERMINAL |
+| `mus_unova_gts.kaisong` | mus_unova_gts | everywhere | SEQ_BGM_GTS |
+| `mus_unova_guruguru.kaisong` | mus_unova_guruguru | everywhere | SEQ_BGM_GURUGURU |
+| `mus_unova_gym.kaisong` | mus_unova_gym | everywhere | SEQ_BGM_GYM |
+| `mus_unova_gym_c05.kaisong` | mus_unova_gym_c05 | everywhere | SEQ_BGM_GYM_C05 |
+| `mus_unova_h_01.kaisong` | mus_unova_h_01 | everywhere | SEQ_BGM_H_01 |
+| `mus_unova_h_02.kaisong` | mus_unova_h_02 | everywhere | SEQ_BGM_H_02 |
+| `mus_unova_h_03.kaisong` | mus_unova_h_03 | everywhere | SEQ_BGM_H_03 |
+| `mus_unova_h_04.kaisong` | mus_unova_h_04 | everywhere | SEQ_BGM_H_04 |
+| `mus_unova_h_05.kaisong` | mus_unova_h_05 | everywhere | SEQ_BGM_H_05 |
+| `mus_unova_koukan.kaisong` | mus_unova_koukan | everywhere | SEQ_BGM_KOUKAN |
+| `mus_unova_labo.kaisong` | mus_unova_labo | everywhere | SEQ_BGM_LABO |
+| `mus_unova_me_02.kaisong` | mus_unova_me_02 | everywhere | SEQ_ME_02 |
+| `mus_unova_me_acce.kaisong` | mus_unova_me_acce | everywhere | SEQ_ME_ACCE |
+| `mus_unova_me_aishou_h.kaisong` | mus_unova_me_aishou_h | everywhere | SEQ_ME_AISHOU_H |
+| `mus_unova_me_aishou_kidou.kaisong` | mus_unova_me_aishou_kidou | everywhere | SEQ_ME_AISHOU_KIDOU |
+| `mus_unova_me_aishou_l.kaisong` | mus_unova_me_aishou_l | everywhere | SEQ_ME_AISHOU_L |
+| `mus_unova_me_aishou_m.kaisong` | mus_unova_me_aishou_m | everywhere | SEQ_ME_AISHOU_M |
+| `mus_unova_me_asa.kaisong` | mus_unova_me_asa | everywhere | SEQ_ME_ASA |
+| `mus_unova_me_badge.kaisong` | mus_unova_me_badge | everywhere | SEQ_ME_BADGE |
+| `mus_unova_me_bpget.kaisong` | mus_unova_me_bpget | everywhere | SEQ_ME_BPGET |
+| `mus_unova_me_call.kaisong` | mus_unova_me_call | everywhere | SEQ_ME_CALL |
+| `mus_unova_me_del_power.kaisong` | mus_unova_me_del_power | everywhere | SEQ_ME_DEL_POWER |
+| `mus_unova_me_end.kaisong` | mus_unova_me_end | everywhere | SEQ_ME_END |
+| `mus_unova_me_hyouka1.kaisong` | mus_unova_me_hyouka1 | everywhere | SEQ_ME_HYOUKA1 |
+| `mus_unova_me_hyouka2.kaisong` | mus_unova_me_hyouka2 | everywhere | SEQ_ME_HYOUKA2 |
+| `mus_unova_me_hyouka3.kaisong` | mus_unova_me_hyouka3 | everywhere | SEQ_ME_HYOUKA3 |
+| `mus_unova_me_hyouka4.kaisong` | mus_unova_me_hyouka4 | everywhere | SEQ_ME_HYOUKA4 |
+| `mus_unova_me_hyouka5.kaisong` | mus_unova_me_hyouka5 | everywhere | SEQ_ME_HYOUKA5 |
+| `mus_unova_me_hyouka6.kaisong` | mus_unova_me_hyouka6 | everywhere | SEQ_ME_HYOUKA6 |
+| `mus_unova_me_item.kaisong` | mus_unova_me_item | everywhere | SEQ_ME_ITEM |
+| `mus_unova_me_item_mystery.kaisong` | mus_unova_me_item_mystery | everywhere | SEQ_ME_ITEM_MYSTERY |
+| `mus_unova_me_keyitem.kaisong` | mus_unova_me_keyitem | everywhere | SEQ_ME_KEYITEM |
+| `mus_unova_me_kinomi.kaisong` | mus_unova_me_kinomi | everywhere | SEQ_ME_KINOMI |
+| `mus_unova_me_lvup.kaisong` | mus_unova_me_lvup | everywhere | SEQ_ME_LVUP |
+| `mus_unova_me_mission_clear.kaisong` | mus_unova_me_mission_clear | everywhere | SEQ_ME_MISSION_CLEAR |
+| `mus_unova_me_mission_failed.kaisong` | mus_unova_me_mission_failed | everywhere | SEQ_ME_MISSION_FAILED |
+| `mus_unova_me_mission_start.kaisong` | mus_unova_me_mission_start | everywhere | SEQ_ME_MISSION_START |
+| `mus_unova_me_pokeget.kaisong` | mus_unova_me_pokeget | everywhere | SEQ_ME_POKEGET |
+| `mus_unova_me_quiz.kaisong` | mus_unova_me_quiz | everywhere | SEQ_ME_QUIZ |
+| `mus_unova_me_shinkaome.kaisong` | mus_unova_me_shinkaome | everywhere | SEQ_ME_SHINKAOME |
+| `mus_unova_me_tamago_get.kaisong` | mus_unova_me_tamago_get | everywhere | SEQ_ME_TAMAGO_GET |
+| `mus_unova_me_wasure.kaisong` | mus_unova_me_wasure | everywhere | SEQ_ME_WASURE |
+| `mus_unova_me_waza.kaisong` | mus_unova_me_waza | everywhere | SEQ_ME_WAZA |
+| `mus_unova_msl_01.kaisong` | mus_unova_msl_01 | everywhere | SEQ_BGM_MSL_01 |
+| `mus_unova_msl_02.kaisong` | mus_unova_msl_02 | everywhere | SEQ_BGM_MSL_02 |
+| `mus_unova_msl_03.kaisong` | mus_unova_msl_03 | everywhere | SEQ_BGM_MSL_03 |
+| `mus_unova_msl_04.kaisong` | mus_unova_msl_04 | everywhere | SEQ_BGM_MSL_04 |
+| `mus_unova_msl_before.kaisong` | mus_unova_msl_before | everywhere | SEQ_BGM_MSL_BEFORE |
+| `mus_unova_msl_dl_01.kaisong` | mus_unova_msl_dl_01 | everywhere | SEQ_BGM_MSL_DL_01 |
+| `mus_unova_msl_dl_02.kaisong` | mus_unova_msl_dl_02 | everywhere | SEQ_BGM_MSL_DL_02 |
+| `mus_unova_msl_dl_03.kaisong` | mus_unova_msl_dl_03 | everywhere | SEQ_BGM_MSL_DL_03 |
+| `mus_unova_msl_dl_04.kaisong` | mus_unova_msl_dl_04 | everywhere | SEQ_BGM_MSL_DL_04 |
+| `mus_unova_msl_dressup.kaisong` | mus_unova_msl_dressup | everywhere | SEQ_BGM_MSL_DRESSUP |
+| `mus_unova_msl_field.kaisong` | mus_unova_msl_field | everywhere | SEQ_BGM_MSL_FIELD |
+| `mus_unova_n_castle.kaisong` | mus_unova_n_castle | everywhere | SEQ_BGM_N_CASTLE |
+| `mus_unova_n_castle_bridge.kaisong` | mus_unova_n_castle_bridge | everywhere | SEQ_BGM_N_CASTLE_BRIDGE |
+| `mus_unova_n_room.kaisong` | mus_unova_n_room | everywhere | SEQ_BGM_N_ROOM |
+| `mus_unova_naminori.kaisong` | mus_unova_naminori | everywhere | SEQ_BGM_NAMINORI |
+| `mus_unova_palace.kaisong` | mus_unova_palace | everywhere | SEQ_BGM_PALACE |
+| `mus_unova_palace2.kaisong` | mus_unova_palace2 | everywhere | SEQ_BGM_PALACE2 |
+| `mus_unova_palpark.kaisong` | mus_unova_palpark | everywhere | SEQ_BGM_PALPARK |
+| `mus_unova_pleasure_boat.kaisong` | mus_unova_pleasure_boat | everywhere | SEQ_BGM_PLEASURE_BOAT |
+| `mus_unova_pokecen.kaisong` | mus_unova_pokecen | everywhere | SEQ_BGM_POKECEN |
+| `mus_unova_pokemon_league.kaisong` | mus_unova_pokemon_league | everywhere | SEQ_BGM_POKEMON_LEAGUE |
+| `mus_unova_pokemon_league2.kaisong` | mus_unova_pokemon_league2 | everywhere | SEQ_BGM_POKEMON_LEAGUE2 |
+| `mus_unova_pokemon_theme.kaisong` | mus_unova_pokemon_theme | everywhere | SEQ_BGM_POKEMON_THEME |
+| `mus_unova_r_a.kaisong` | mus_unova_r_a | everywhere | SEQ_BGM_R_A |
+| `mus_unova_r_b_au.kaisong` | mus_unova_r_b_au | everywhere | SEQ_BGM_R_B_AU |
+| `mus_unova_r_b_sp.kaisong` | mus_unova_r_b_sp | everywhere | SEQ_BGM_R_B_SP |
+| `mus_unova_r_b_su.kaisong` | mus_unova_r_b_su | everywhere | SEQ_BGM_R_B_SU |
+| `mus_unova_r_b_wi.kaisong` | mus_unova_r_b_wi | everywhere | SEQ_BGM_R_B_WI |
+| `mus_unova_r_c_au.kaisong` | mus_unova_r_c_au | everywhere | SEQ_BGM_R_C_AU |
+| `mus_unova_r_c_sp.kaisong` | mus_unova_r_c_sp | everywhere | SEQ_BGM_R_C_SP |
+| `mus_unova_r_c_su.kaisong` | mus_unova_r_c_su | everywhere | SEQ_BGM_R_C_SU |
+| `mus_unova_r_c_wi.kaisong` | mus_unova_r_c_wi | everywhere | SEQ_BGM_R_C_WI |
+| `mus_unova_r_d_au.kaisong` | mus_unova_r_d_au | everywhere | SEQ_BGM_R_D_AU |
+| `mus_unova_r_d_sp.kaisong` | mus_unova_r_d_sp | everywhere | SEQ_BGM_R_D_SP |
+| `mus_unova_r_d_su.kaisong` | mus_unova_r_d_su | everywhere | SEQ_BGM_R_D_SU |
+| `mus_unova_r_d_wi.kaisong` | mus_unova_r_d_wi | everywhere | SEQ_BGM_R_D_WI |
+| `mus_unova_r_e_au.kaisong` | mus_unova_r_e_au | everywhere | SEQ_BGM_R_E_AU |
+| `mus_unova_r_e_sp.kaisong` | mus_unova_r_e_sp | everywhere | SEQ_BGM_R_E_SP |
+| `mus_unova_r_e_su.kaisong` | mus_unova_r_e_su | everywhere | SEQ_BGM_R_E_SU |
+| `mus_unova_r_e_wi.kaisong` | mus_unova_r_e_wi | everywhere | SEQ_BGM_R_E_WI |
+| `mus_unova_r_f.kaisong` | mus_unova_r_f | everywhere | SEQ_BGM_R_F |
+| `mus_unova_shinka.kaisong` | mus_unova_shinka | everywhere | SEQ_BGM_SHINKA |
+| `mus_unova_starting.kaisong` | mus_unova_starting | everywhere | SEQ_BGM_STARTING |
+| `mus_unova_starting2.kaisong` | mus_unova_starting2 | everywhere | SEQ_BGM_STARTING2 |
+| `mus_unova_t_01.kaisong` | mus_unova_t_01 | everywhere | SEQ_BGM_T_01 |
+| `mus_unova_t_02.kaisong` | mus_unova_t_02 | everywhere | SEQ_BGM_T_02 |
+| `mus_unova_t_03.kaisong` | mus_unova_t_03 | everywhere | SEQ_BGM_T_03 |
+| `mus_unova_t_04.kaisong` | mus_unova_t_04 | everywhere | SEQ_BGM_T_04 |
+| `mus_unova_t_05_au.kaisong` | mus_unova_t_05_au | everywhere | SEQ_BGM_T_05_AU |
+| `mus_unova_t_05_sp.kaisong` | mus_unova_t_05_sp | everywhere | SEQ_BGM_T_05_SP |
+| `mus_unova_t_05_su.kaisong` | mus_unova_t_05_su | everywhere | SEQ_BGM_T_05_SU |
+| `mus_unova_t_05_wi.kaisong` | mus_unova_t_05_wi | everywhere | SEQ_BGM_T_05_WI |
+| `mus_unova_title.kaisong` | mus_unova_title | everywhere | SEQ_BGM_TITLE |
+| `mus_unova_title01.kaisong` | mus_unova_title01 | everywhere | SEQ_BGM_TITLE01 |
+| `mus_unova_united_nations.kaisong` | mus_unova_united_nations | everywhere | SEQ_BGM_UNITED_NATIONS |
+| `mus_unova_vs_champ.kaisong` | mus_unova_vs_champ | everywhere | SEQ_BGM_VS_CHAMP |
+| `mus_unova_vs_g_cis.kaisong` | mus_unova_vs_g_cis | everywhere | SEQ_BGM_VS_G_CIS |
+| `mus_unova_vs_gymleader.kaisong` | mus_unova_vs_gymleader | everywhere | SEQ_BGM_VS_GYMLEADER |
+| `mus_unova_vs_movepoke.kaisong` | mus_unova_vs_movepoke | everywhere | SEQ_BGM_VS_MOVEPOKE |
+| `mus_unova_vs_mu.kaisong` | mus_unova_vs_mu | everywhere | SEQ_BGM_VS_MU |
+| `mus_unova_vs_n.kaisong` | mus_unova_vs_n | everywhere | SEQ_BGM_VS_N |
+| `mus_unova_vs_n_2.kaisong` | mus_unova_vs_n_2 | everywhere | SEQ_BGM_VS_N_2 |
+| `mus_unova_vs_norapoke.kaisong` | mus_unova_vs_norapoke | everywhere | SEQ_BGM_VS_NORAPOKE |
+| `mus_unova_vs_plasma.kaisong` | mus_unova_vs_plasma | everywhere | SEQ_BGM_VS_PLASMA |
+| `mus_unova_vs_rai.kaisong` | mus_unova_vs_rai | everywhere | SEQ_BGM_VS_RAI |
+| `mus_unova_vs_rival.kaisong` | mus_unova_vs_rival | everywhere | SEQ_BGM_VS_RIVAL |
+| `mus_unova_vs_setpoke.kaisong` | mus_unova_vs_setpoke | everywhere | SEQ_BGM_VS_SETPOKE |
+| `mus_unova_vs_shin.kaisong` | mus_unova_vs_shin | everywhere | SEQ_BGM_VS_SHIN |
+| `mus_unova_vs_shirona.kaisong` | mus_unova_vs_shirona | everywhere | SEQ_BGM_VS_SHIRONA |
+| `mus_unova_vs_shitenno.kaisong` | mus_unova_vs_shitenno | everywhere | SEQ_BGM_VS_SHITENNO |
+| `mus_unova_vs_subway_trainer.kaisong` | mus_unova_vs_subway_trainer | everywhere | SEQ_BGM_VS_SUBWAY_TRAINER |
+| `mus_unova_vs_trainer.kaisong` | mus_unova_vs_trainer | everywhere | SEQ_BGM_VS_TRAINER |
+| `mus_unova_vs_trainer_m.kaisong` | mus_unova_vs_trainer_m | everywhere | SEQ_BGM_VS_TRAINER_M |
+| `mus_unova_vs_trainer_s.kaisong` | mus_unova_vs_trainer_s | everywhere | SEQ_BGM_VS_TRAINER_S |
+| `mus_unova_vs_trainer_wifi.kaisong` | mus_unova_vs_trainer_wifi | everywhere | SEQ_BGM_VS_TRAINER_WIFI |
+| `mus_unova_vs_tsuyopoke.kaisong` | mus_unova_vs_tsuyopoke | everywhere | SEQ_BGM_VS_TSUYOPOKE |
+| `mus_unova_vs_wcs.kaisong` | mus_unova_vs_wcs | everywhere | SEQ_BGM_VS_WCS |
+| `mus_unova_wcs.kaisong` | mus_unova_wcs | everywhere | SEQ_BGM_WCS |
+| `mus_unova_wifi_access.kaisong` | mus_unova_wifi_access | everywhere | SEQ_BGM_WIFI_ACCESS |
+| `mus_unova_wifi_present.kaisong` | mus_unova_wifi_present | everywhere | SEQ_BGM_WIFI_PRESENT |
+| `mus_unova_win1.kaisong` | mus_unova_win1 | everywhere | SEQ_BGM_WIN1 |
+| `mus_unova_win2.kaisong` | mus_unova_win2 | everywhere | SEQ_BGM_WIN2 |
+| `mus_unova_win3.kaisong` | mus_unova_win3 | everywhere | SEQ_BGM_WIN3 |
+| `mus_unova_win4.kaisong` | mus_unova_win4 | everywhere | SEQ_BGM_WIN4 |
+| `mus_unova_win5.kaisong` | mus_unova_win5 | everywhere | SEQ_BGM_WIN5 |
+| `mus_unova_win6.kaisong` | mus_unova_win6 | everywhere | SEQ_BGM_WIN6 |
 | `mus_victory_trainer@tt.kaisong` | mus_victory_trainer | tt | The Winner |
 | `mus_vs_aqua_magma@ygo.kaisong` | mus_vs_aqua_magma | ygo | 003C SEQ_DU_D_01 |
 | `mus_vs_aqua_magma_leader@ygo.kaisong` | mus_vs_aqua_magma_leader | ygo | 0042 SEQ_DU_D_07 |
@@ -415,6 +619,7 @@ Custom: `mus_poke_mart@rustboro_city_game_center_2f.kaisong`
 
 ### mus_littleroot (405)
 - Map music: Littleroot Town [littleroot_town], Littleroot Town Brendans House 1F [littleroot_town_brendans_house_1f], Littleroot Town Brendans House 2F [littleroot_town_brendans_house_2f], Littleroot Town Mays House 1F [littleroot_town_mays_house_1f], Littleroot Town Mays House 2F [littleroot_town_mays_house_2f], Moemon Garden [moemon_garden]
+- Scenes: Ship [ship]
 
 ### mus_mt_chimney (406)
 - Map music: 24 places<details><summary>show</summary>Desert Underpass [desert_underpass], Mirage Tower 1F [mirage_tower_1f], Mirage Tower 2F [mirage_tower_2f], Mirage Tower 3F [mirage_tower_3f], Mirage Tower 4F [mirage_tower_4f], Mt Chimney [mt_chimney], Seafloor Cavern Entrance [seafloor_cavern_entrance], Seafloor Cavern Room 1 [seafloor_cavern_room1], Seafloor Cavern Room 2 [seafloor_cavern_room2], Seafloor Cavern Room 3 [seafloor_cavern_room3], Seafloor Cavern Room 4 [seafloor_cavern_room4], Seafloor Cavern Room 5 [seafloor_cavern_room5], Seafloor Cavern Room 6 [seafloor_cavern_room6], Seafloor Cavern Room 7 [seafloor_cavern_room7], Seafloor Cavern Room 8 [seafloor_cavern_room8], Seafloor Cavern Room 9 [seafloor_cavern_room9], Sky Pillar 1F [sky_pillar_1f], Sky Pillar 2F [sky_pillar_2f], Sky Pillar 3F [sky_pillar_3f], Sky Pillar 4F [sky_pillar_4f], Sky Pillar 5F [sky_pillar_5f], Sky Pillar Entrance [sky_pillar_entrance], Sky Pillar Outside [sky_pillar_outside], Sky Pillar Top [sky_pillar_top]</details>
@@ -500,7 +705,7 @@ Custom: `mus_game_corner@rustboro_city_game_center_1f.kaisong`, `mus_game_corner
 - Map music: 14 places<details><summary>show</summary>Aqua Hideout 1F [aqua_hideout_1f], Aqua Hideout B1F [aqua_hideout_b1f], Aqua Hideout B2F [aqua_hideout_b2f], Aqua Hideout Unused Ruby Map 1 [aqua_hideout_unused_ruby_map1], Aqua Hideout Unused Ruby Map 2 [aqua_hideout_unused_ruby_map2], Aqua Hideout Unused Ruby Map 3 [aqua_hideout_unused_ruby_map3], Magma Hideout 1F [magma_hideout_1f], Magma Hideout 2F 1R [magma_hideout_2f_1r], Magma Hideout 2F 2R [magma_hideout_2f_2r], Magma Hideout 2F 3R [magma_hideout_2f_3r], Magma Hideout 3F 1R [magma_hideout_3f_1r], Magma Hideout 3F 2R [magma_hideout_3f_2r], Magma Hideout 3F 3R [magma_hideout_3f_3r], Magma Hideout 4F [magma_hideout_4f]</details>
 
 ### mus_sailing (431)
-- Map music: SS Tidal Corridor [ss_tidal_corridor], SS Tidal Lower Deck [ss_tidal_lower_deck], SS Tidal Rooms [ss_tidal_rooms]
+- Map music: SS Tidal Corridor [ss_tidal_corridor], SS Tidal Lower Deck [ss_tidal_lower_deck], SS Tidal Rooms [ss_tidal_rooms], Voyage Ship Corridor [voyage_ship_corridor], Voyage Ship Deck [voyage_ship_deck], Voyage Ship Rooms [voyage_ship_rooms]
 - Events: anywhere: Event scripts
 
 ### mus_mt_pyre (432)
@@ -771,6 +976,7 @@ Custom: `mus_rg_vs_trainer@mtg.kaisong`, `mus_rg_vs_trainer@tt.kaisong`
 
 ### mus_rg_pallet (512)
 - Map music: Kanto Pallet Town [kanto_pallet_town], Kanto Pallet Town Players House 1F [kanto_pallet_town_players_house_1f], Kanto Pallet Town Players House 2F [kanto_pallet_town_players_house_2f], Kanto Pallet Town Rivals House [kanto_pallet_town_rivals_house]
+- Scenes: Ship [ship]
 
 ### mus_rg_oak_lab (513)
 - Map music: Kanto Pallet Town Professor Oaks Lab [kanto_pallet_town_professor_oaks_lab]
@@ -902,7 +1108,7 @@ Custom: `mus_rg_vs_trainer@mtg.kaisong`, `mus_rg_vs_trainer@tt.kaisong`
 
 ### mus_johto_new_bark (611)
 Custom: `mus_johto_new_bark.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Scenes: Ship [ship]
 
 ### mus_johto_cherrygrove (612)
 Custom: `mus_johto_cherrygrove.kaisong`
@@ -1155,6 +1361,7 @@ Custom: `mus_johto_victory_gym_leader.kaisong`
 ### mus_sinnoh_twinleaf (678)
 Custom: `mus_sinnoh_twinleaf.kaisong`
 - Map music: Sinnoh Contest Hall Lobby [sinnoh_contest_hall_lobby], Sinnoh Contest Hall Stage No Contest [sinnoh_contest_hall_stage_no_contest], Sinnoh Contest Hall Stage Ongoing Contest [sinnoh_contest_hall_stage_ongoing_contest], Sinnoh Pastoria City Dp Great Marsh [sinnoh_pastoria_city_dp_great_marsh], Sinnoh Poffin House [sinnoh_poffin_house], Sinnoh Twinleaf Town [sinnoh_twinleaf_town], Sinnoh Twinleaf Town Northeast House [sinnoh_twinleaf_town_northeast_house], Sinnoh Twinleaf Town Player House 1f [sinnoh_twinleaf_town_player_house1f], Sinnoh Twinleaf Town Player House 2f [sinnoh_twinleaf_town_player_house2f], Sinnoh Twinleaf Town Rival House 1f [sinnoh_twinleaf_town_rival_house1f], Sinnoh Twinleaf Town Rival House 2f [sinnoh_twinleaf_town_rival_house2f], Sinnoh Twinleaf Town Southwest House [sinnoh_twinleaf_town_southwest_house]
+- Scenes: Ship [ship]
 
 ### mus_sinnoh_twinleaf_night (679)
 Custom: `mus_sinnoh_twinleaf_night.kaisong`
@@ -1768,4 +1975,829 @@ Custom: `mus_sinnoh_opening.kaisong`
 
 ### mus_sinnoh_music_box (830)
 Custom: `mus_sinnoh_music_box.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_title (831)
+Custom: `mus_unova_title.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_title01 (832)
+Custom: `mus_unova_title01.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_opening_title_b (833)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_opening_title_w (834)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_pokemon_theme (835)
+Custom: `mus_unova_pokemon_theme.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_starting (836)
+Custom: `mus_unova_starting.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_starting2 (837)
+Custom: `mus_unova_starting2.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_shinka (838)
+Custom: `mus_unova_shinka.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_koukan (839)
+Custom: `mus_unova_koukan.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_bicycle (840)
+Custom: `mus_unova_bicycle.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_naminori (841)
+Custom: `mus_unova_naminori.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_diving (842)
+Custom: `mus_unova_diving.kaisong`
+- Map music: Unova Abyssal Ruins [unova_abyssalruins], Unova Abyssal Ruins Z242 [unova_abyssalruins_z242], Unova Abyssal Ruins Z243 [unova_abyssalruins_z243], Unova Abyssal Ruins Z244 [unova_abyssalruins_z244], Unova Abyssal Ruins Z245 [unova_abyssalruins_z245], Unova Abyssal Ruins Z246 [unova_abyssalruins_z246], Unova Abyssal Ruins Z247 [unova_abyssalruins_z247], Unova Abyssal Ruins Z248 [unova_abyssalruins_z248]
+
+### mus_unova_e_dendouiri (843)
+Custom: `mus_unova_e_dendouiri.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_ending (844)
+Custom: `mus_unova_ending.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_ending2 (845)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_t_01 (846)
+Custom: `mus_unova_t_01.kaisong`
+- Map music: Unova Nuvema Town [unova_nuvematown], Unova Nuvema Town Z390 [unova_nuvematown_z390], Unova Nuvema Town Z391 [unova_nuvematown_z391], Unova Nuvema Town Z392 [unova_nuvematown_z392], Unova Nuvema Town Z393 [unova_nuvematown_z393], Unova Nuvema Town Z394 [unova_nuvematown_z394], Unova Nuvema Town Z395 [unova_nuvematown_z395]
+
+### mus_unova_t_02 (847)
+Custom: `mus_unova_t_02.kaisong`
+- Map music: Unova Accumula Town [unova_accumulatown], Unova Accumula Town Z399 [unova_accumulatown_z399], Unova Accumula Town Z400 [unova_accumulatown_z400], Unova Accumula Town Z401 [unova_accumulatown_z401], Unova Accumula Town Z402 [unova_accumulatown_z402], Unova Accumula Town Z403 [unova_accumulatown_z403], Unova Accumula Town Z404 [unova_accumulatown_z404], Unova Accumula Town Z405 [unova_accumulatown_z405]
+
+### mus_unova_t_03 (848)
+Custom: `mus_unova_t_03.kaisong`
+- Map music: Unova Anville Town [unova_anvilletown], Unova Anville Town Z419 [unova_anvilletown_z419], Unova Anville Town Z420 [unova_anvilletown_z420], Unova Anville Town Z421 [unova_anvilletown_z421]
+
+### mus_unova_t_04 (849)
+Custom: `mus_unova_t_04.kaisong`
+- Map music: Unova Lacunosa Town Z406 [unova_lacunosatown_z406], Unova Lacunosa Town Z408 [unova_lacunosatown_z408], Unova Lacunosa Town Z409 [unova_lacunosatown_z409], Unova Lacunosa Town Z410 [unova_lacunosatown_z410], Unova Lacunosa Town Z411 [unova_lacunosatown_z411]
+
+### mus_unova_t_05_sp (850)
+Custom: `mus_unova_t_05_sp.kaisong`
+- Map music: Unova Undella Town Z412 22 9 [unova_undellatown_z412_22_9], Unova Undella Town Z412 23 9 [unova_undellatown_z412_23_9], Unova Undella Town Z414 [unova_undellatown_z414], Unova Undella Town Z415 [unova_undellatown_z415], Unova Undella Town Z416 [unova_undellatown_z416], Unova Undella Town Z417 [unova_undellatown_z417]
+
+### mus_unova_t_05_su (851)
+Custom: `mus_unova_t_05_su.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_t_05_au (852)
+Custom: `mus_unova_t_05_au.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_t_05_wi (853)
+Custom: `mus_unova_t_05_wi.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_c_01 (854)
+Custom: `mus_unova_c_01.kaisong`
+- Map music: Unova Striaton City 23 18 [unova_striatoncity_23_18], Unova Striaton City 24 18 [unova_striatoncity_24_18], Unova Striaton City 25 18 [unova_striatoncity_25_18], Unova Striaton City Z10 [unova_striatoncity_z10], Unova Striaton City Z11 [unova_striatoncity_z11], Unova Striaton City Z12 [unova_striatoncity_z12], Unova Striaton City Z13 [unova_striatoncity_z13], Unova Striaton City Z14 [unova_striatoncity_z14], Unova Striaton City Z15 [unova_striatoncity_z15], Unova Striaton City Z9 [unova_striatoncity_z9]
+
+### mus_unova_c_02 (855)
+Custom: `mus_unova_c_02.kaisong`
+- Map music: Unova Nacrene City 19 18 [unova_nacrenecity_19_18], Unova Nacrene City 20 18 [unova_nacrenecity_20_18], Unova Nacrene City Z17 [unova_nacrenecity_z17], Unova Nacrene City Z21 [unova_nacrenecity_z21], Unova Nacrene City Z22 [unova_nacrenecity_z22], Unova Nacrene City Z23 [unova_nacrenecity_z23], Unova Nacrene City Z24 [unova_nacrenecity_z24], Unova Nacrene City Z25 [unova_nacrenecity_z25], Unova Nacrene City Z26 [unova_nacrenecity_z26]
+
+### mus_unova_c_03 (856)
+Custom: `mus_unova_c_03.kaisong`
+- Map music: 30 places<details><summary>show</summary>Unova Castelia City [unova_casteliacity], Unova Castelia City Z30 [unova_casteliacity_z30], Unova Castelia City Z31 [unova_casteliacity_z31], Unova Castelia City Z32 [unova_casteliacity_z32], Unova Castelia City Z33 [unova_casteliacity_z33], Unova Castelia City Z34 [unova_casteliacity_z34], Unova Castelia City Z35 [unova_casteliacity_z35], Unova Castelia City Z36 [unova_casteliacity_z36], Unova Castelia City Z37 [unova_casteliacity_z37], Unova Castelia City Z38 [unova_casteliacity_z38], Unova Castelia City Z39 [unova_casteliacity_z39], Unova Castelia City Z40 [unova_casteliacity_z40], Unova Castelia City Z42 [unova_casteliacity_z42], Unova Castelia City Z43 [unova_casteliacity_z43], Unova Castelia City Z44 [unova_casteliacity_z44], Unova Castelia City Z45 [unova_casteliacity_z45], Unova Castelia City Z46 [unova_casteliacity_z46], Unova Castelia City Z47 [unova_casteliacity_z47], Unova Castelia City Z48 [unova_casteliacity_z48], Unova Castelia City Z49 [unova_casteliacity_z49], Unova Castelia City Z50 [unova_casteliacity_z50], Unova Castelia City Z53 [unova_casteliacity_z53], Unova Castelia City Z54 [unova_casteliacity_z54], Unova Castelia City Z55 [unova_casteliacity_z55], Unova Castelia City Z56 [unova_casteliacity_z56], Unova Castelia City Z57 [unova_casteliacity_z57], Unova Castelia City Z58 [unova_casteliacity_z58], Unova Castelia City Z59 [unova_casteliacity_z59], Unova Castelia City Z60 [unova_casteliacity_z60], Unova Castelia City Z61 [unova_casteliacity_z61]</details>
+
+### mus_unova_c_04 (857)
+Custom: `mus_unova_c_04.kaisong`
+- Map music: 19 places<details><summary>show</summary>Unova Nimbasa City 12 13 [unova_nimbasacity_12_13], Unova Nimbasa City 12 14 [unova_nimbasacity_12_14], Unova Nimbasa City 13 13 [unova_nimbasacity_13_13], Unova Nimbasa City 13 14 [unova_nimbasacity_13_14], Unova Nimbasa City Z64 [unova_nimbasacity_z64], Unova Nimbasa City Z79 [unova_nimbasacity_z79], Unova Nimbasa City Z80 [unova_nimbasacity_z80], Unova Nimbasa City Z81 [unova_nimbasacity_z81], Unova Nimbasa City Z82 [unova_nimbasacity_z82], Unova Nimbasa City Z83 [unova_nimbasacity_z83], Unova Nimbasa City Z84 [unova_nimbasacity_z84], Unova Nimbasa City Z85 [unova_nimbasacity_z85], Unova Nimbasa City Z86 [unova_nimbasacity_z86], Unova Nimbasa City Z87 [unova_nimbasacity_z87], Unova Nimbasa City Z88 [unova_nimbasacity_z88], Unova Nimbasa City Z89 [unova_nimbasacity_z89], Unova Nimbasa City Z93 [unova_nimbasacity_z93], Unova Nimbasa City Z94 [unova_nimbasacity_z94], Unova Nimbasa City Z95 [unova_nimbasacity_z95]</details>
+
+### mus_unova_c_05 (858)
+Custom: `mus_unova_c_05.kaisong`
+- Map music: 14 places<details><summary>show</summary>Unova Cold Storage 5 14 [unova_coldstorage_5_14], Unova Cold Storage 6 14 [unova_coldstorage_6_14], Unova Driftveil City 5 12 [unova_driftveilcity_5_12], Unova Driftveil City 5 13 [unova_driftveilcity_5_13], Unova Driftveil City 6 12 [unova_driftveilcity_6_12], Unova Driftveil City 6 13 [unova_driftveilcity_6_13], Unova Driftveil City 7 13 [unova_driftveilcity_7_13], Unova Driftveil City Z100 [unova_driftveilcity_z100], Unova Driftveil City Z101 [unova_driftveilcity_z101], Unova Driftveil City Z102 [unova_driftveilcity_z102], Unova Driftveil City Z103 [unova_driftveilcity_z103], Unova Driftveil City Z104 [unova_driftveilcity_z104], Unova Driftveil City Z105 [unova_driftveilcity_z105], Unova Driftveil City Z106 [unova_driftveilcity_z106]</details>
+
+### mus_unova_c_06 (859)
+Custom: `mus_unova_c_06.kaisong`
+- Map music: Unova Mistralton City 2 10 [unova_mistraltoncity_2_10], Unova Mistralton City 2 8 [unova_mistraltoncity_2_8], Unova Mistralton City 2 9 [unova_mistraltoncity_2_9], Unova Mistralton City 3 9 [unova_mistraltoncity_3_9], Unova Mistralton City Z110 [unova_mistraltoncity_z110], Unova Mistralton City Z111 [unova_mistraltoncity_z111], Unova Mistralton City Z112 [unova_mistraltoncity_z112]
+
+### mus_unova_c_07 (860)
+Custom: `mus_unova_c_07.kaisong`
+- Map music: Unova Icirrus City 5 5 [unova_icirruscity_5_5], Unova Icirrus City 5 6 [unova_icirruscity_5_6], Unova Icirrus City 6 6 [unova_icirruscity_6_6], Unova Icirrus City Z116 [unova_icirruscity_z116], Unova Icirrus City Z117 [unova_icirruscity_z117], Unova Icirrus City Z118 [unova_icirruscity_z118], Unova Icirrus City Z119 [unova_icirruscity_z119]
+
+### mus_unova_c_08_b (861)
+Custom: `mus_unova_c_08_b.kaisong`
+- Map music: 14 places<details><summary>show</summary>Unova Opelucid City 12 4 [unova_opelucidcity_12_4], Unova Opelucid City 12 5 [unova_opelucidcity_12_5], Unova Opelucid City 13 4 [unova_opelucidcity_13_4], Unova Opelucid City 13 5 [unova_opelucidcity_13_5], Unova Opelucid City Z123 [unova_opelucidcity_z123], Unova Opelucid City Z124 [unova_opelucidcity_z124], Unova Opelucid City Z125 [unova_opelucidcity_z125], Unova Opelucid City Z126 [unova_opelucidcity_z126], Unova Opelucid City Z127 [unova_opelucidcity_z127], Unova Opelucid City Z128 [unova_opelucidcity_z128], Unova Opelucid City Z129 [unova_opelucidcity_z129], Unova Opelucid City Z130 [unova_opelucidcity_z130], Unova Opelucid City Z134 [unova_opelucidcity_z134], Unova Opelucid City Z135 [unova_opelucidcity_z135]</details>
+
+### mus_unova_c_08_w (862)
+Custom: `mus_unova_c_08_w.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_c_10_b (863)
+Custom: `mus_unova_c_10_b.kaisong`
+- Map music: Unova Black City [unova_blackcity], Unova Black City Z2 [unova_blackcity_z2], Unova Black City Z3 [unova_blackcity_z3], Unova Black City Z4 [unova_blackcity_z4], Unova Black City Z5 [unova_blackcity_z5]
+
+### mus_unova_c_10_w (864)
+Custom: `mus_unova_c_10_w.kaisong`
+- Map music: Unova White Forest Z424 [unova_whiteforest_z424], Unova White Forest Z426 [unova_whiteforest_z426]
+
+### mus_unova_r_a (865)
+Custom: `mus_unova_r_a.kaisong`
+- Map music: Unova Route 1 23 22 [unova_route1_23_22], Unova Route 1 23 23 [unova_route1_23_23], Unova Route 1 24 21 [unova_route1_24_21], Unova Route 1 24 22 [unova_route1_24_22]
+
+### mus_unova_r_b_sp (866)
+Custom: `mus_unova_r_b_sp.kaisong`
+- Map music: 14 places<details><summary>show</summary>Unova Bridge Gate [unova_bridgegate], Unova Pinwheel Forest 18 18 [unova_pinwheelforest_18_18], Unova Pinwheel Forest 18 19 [unova_pinwheelforest_18_19], Unova Pinwheel Forest 19 19 [unova_pinwheelforest_19_19], Unova Route 2 23 19 [unova_route2_23_19], Unova Route 2 23 20 [unova_route2_23_20], Unova Route 2 24 19 [unova_route2_24_19], Unova Route 3 21 17 [unova_route3_21_17], Unova Route 3 21 18 [unova_route3_21_18], Unova Route 3 22 17 [unova_route3_22_17], Unova Route 3 22 18 [unova_route3_22_18], Unova Route 3 23 17 [unova_route3_23_17], Unova Route 3 Z322 [unova_route3_z322], Unova Route 3 Z323 [unova_route3_z323]</details>
+
+### mus_unova_r_b_su (867)
+Custom: `mus_unova_r_b_su.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_b_au (868)
+Custom: `mus_unova_r_b_au.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_b_wi (869)
+Custom: `mus_unova_r_b_wi.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_c_sp (870)
+Custom: `mus_unova_r_c_sp.kaisong`
+- Map music: 17 places<details><summary>show</summary>Unova Desert Resort 11 15 [unova_desertresort_11_15], Unova Desert Resort 12 15 [unova_desertresort_12_15], Unova Route 16 Z383 14 13 [unova_route16_z383_14_13], Unova Route 16 Z383 15 13 [unova_route16_z383_15_13], Unova Route 4 12 16 [unova_route4_12_16], Unova Route 4 12 17 [unova_route4_12_17], Unova Route 4 12 18 [unova_route4_12_18], Unova Route 4 13 15 [unova_route4_13_15], Unova Route 4 13 16 [unova_route4_13_16], Unova Route 4 13 17 [unova_route4_13_17], Unova Route 4 13 18 [unova_route4_13_18], Unova Route 4 Z327 [unova_route4_z327], Unova Route 4 Z328 [unova_route4_z328], Unova Route 5 Z329 10 13 [unova_route5_z329_10_13], Unova Route 5 Z329 11 13 [unova_route5_z329_11_13], Unova Route 5 Z330 [unova_route5_z330], Unova Unity Tower [unova_unitytower]</details>
+
+### mus_unova_r_c_su (871)
+Custom: `mus_unova_r_c_su.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_c_au (872)
+Custom: `mus_unova_r_c_au.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_c_wi (873)
+Custom: `mus_unova_r_c_wi.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_d_sp (874)
+Custom: `mus_unova_r_d_sp.kaisong`
+- Map music: 27 places<details><summary>show</summary>Unova Chargestone Cave [unova_chargestonecave], Unova Dragonspiral Tower [unova_dragonspiraltower], Unova Liberty Garden [unova_libertygarden], Unova P2 Laboratory [unova_p2laboratory], Unova Route 17 21 22 [unova_route17_21_22], Unova Route 17 21 23 [unova_route17_21_23], Unova Route 17 22 23 [unova_route17_22_23], Unova Route 18 19 22 [unova_route18_19_22], Unova Route 18 19 23 [unova_route18_19_23], Unova Route 18 20 22 [unova_route18_20_22], Unova Route 18 20 23 [unova_route18_20_23], Unova Route 18 Z388 [unova_route18_z388], Unova Route 6 Z331 3 11 [unova_route6_z331_3_11], Unova Route 6 Z331 4 11 [unova_route6_z331_4_11], Unova Route 6 Z331 4 12 [unova_route6_z331_4_12], Unova Route 6 Z332 [unova_route6_z332], Unova Route 6 Z336 [unova_route6_z336], Unova Route 7 Z337 3 7 [unova_route7_z337_3_7], Unova Route 7 Z337 3 8 [unova_route7_z337_3_8], Unova Route 7 Z337 4 7 [unova_route7_z337_4_7], Unova Route 7 Z343 [unova_route7_z343], Unova Route 7 Z344 [unova_route7_z344], Unova Route 8 Z345 6 5 [unova_route8_z345_6_5], Unova Route 8 Z345 7 5 [unova_route8_z345_7_5], Unova Route 9 Z348 10 5 [unova_route9_z348_10_5], Unova Route 9 Z348 11 5 [unova_route9_z348_11_5], Unova Twist Mountain [unova_twistmountain]</details>
+
+### mus_unova_r_d_su (875)
+Custom: `mus_unova_r_d_su.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_d_au (876)
+Custom: `mus_unova_r_d_au.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_d_wi (877)
+Custom: `mus_unova_r_d_wi.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_e_sp (878)
+Custom: `mus_unova_r_e_sp.kaisong`
+- Map music: 27 places<details><summary>show</summary>Unova Giant Chasm [unova_giantchasm], Unova Route 11 Z365 14 5 [unova_route11_z365_14_5], Unova Route 11 Z365 15 5 [unova_route11_z365_15_5], Unova Route 11 Z367 [unova_route11_z367], Unova Route 12 Z368 18 5 [unova_route12_z368_18_5], Unova Route 12 Z368 19 5 [unova_route12_z368_19_5], Unova Route 13 Z370 20 6 [unova_route13_z370_20_6], Unova Route 13 Z370 21 5 [unova_route13_z370_21_5], Unova Route 13 Z370 21 6 [unova_route13_z370_21_6], Unova Route 13 Z370 21 7 [unova_route13_z370_21_7], Unova Route 13 Z370 21 8 [unova_route13_z370_21_8], Unova Route 13 Z370 22 7 [unova_route13_z370_22_7], Unova Route 13 Z370 22 8 [unova_route13_z370_22_8], Unova Route 13 Z370 23 8 [unova_route13_z370_23_8], Unova Route 13 Z371 [unova_route13_z371], Unova Route 13 Z373 [unova_route13_z373], Unova Route 14 Z374 21 11 [unova_route14_z374_21_11], Unova Route 14 Z374 22 10 [unova_route14_z374_22_10], Unova Route 14 Z374 22 11 [unova_route14_z374_22_11], Unova Route 14 Z374 23 10 [unova_route14_z374_23_10], Unova Route 15 Z378 18 13 [unova_route15_z378_18_13], Unova Route 15 Z378 19 13 [unova_route15_z378_19_13], Unova Route 15 Z382 [unova_route15_z382], Unova Undella Bay 24 8 [unova_undellabay_24_8], Unova Undella Bay 24 9 [unova_undellabay_24_9], Unova Undella Bay 25 8 [unova_undellabay_25_8], Unova Undella Bay 25 9 [unova_undellabay_25_9]</details>
+
+### mus_unova_r_e_su (879)
+Custom: `mus_unova_r_e_su.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_e_au (880)
+Custom: `mus_unova_r_e_au.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_e_wi (881)
+Custom: `mus_unova_r_e_wi.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_r_f (882)
+Custom: `mus_unova_r_f.kaisong`
+- Map music: Unova Route 10 13 3 [unova_route10_13_3], Unova Route 10 14 3 [unova_route10_14_3], Unova Route 10 15 3 [unova_route10_15_3]
+
+### mus_unova_h_01 (883)
+Custom: `mus_unova_h_01.kaisong`
+- Map music: Unova Skyarrow Bridge [unova_skyarrowbridge]
+
+### mus_unova_h_02 (884)
+Custom: `mus_unova_h_02.kaisong`
+- Map music: Unova Driftveil Drawbridge [unova_driftveildrawbridge]
+
+### mus_unova_h_03 (885)
+Custom: `mus_unova_h_03.kaisong`
+- Map music: Unova Tubeline Bridge [unova_tubelinebridge]
+
+### mus_unova_h_04 (886)
+Custom: `mus_unova_h_04.kaisong`
+- Map music: Unova Village Bridge [unova_villagebridge], Unova Village Bridge Z256 [unova_villagebridge_z256], Unova Village Bridge Z257 [unova_villagebridge_z257], Unova Village Bridge Z258 [unova_villagebridge_z258], Unova Village Bridge Z259 [unova_villagebridge_z259], Unova Village Bridge Z260 [unova_villagebridge_z260], Unova Village Bridge Z261 [unova_villagebridge_z261], Unova Village Bridge Z262 [unova_villagebridge_z262]
+
+### mus_unova_h_05 (887)
+Custom: `mus_unova_h_05.kaisong`
+- Map music: Unova Marvelous Bridge [unova_marvelousbridge]
+
+### mus_unova_pokecen (888)
+Custom: `mus_unova_pokecen.kaisong`
+- Map music: 16 places<details><summary>show</summary>Unova Accumula Town Z398 [unova_accumulatown_z398], Unova Black City Z1 [unova_blackcity_z1], Unova Castelia City Z41 [unova_casteliacity_z41], Unova Driftveil City Z99 [unova_driftveilcity_z99], Unova Icirrus City Z115 [unova_icirruscity_z115], Unova Lacunosa Town Z407 [unova_lacunosatown_z407], Unova Mistralton City Z109 [unova_mistraltoncity_z109], Unova Nacrene City Z20 [unova_nacrenecity_z20], Unova Nimbasa City Z65 [unova_nimbasacity_z65], Unova Opelucid City Z122 [unova_opelucidcity_z122], Unova Place [unova_place], Unova Place Z151 [unova_place_z151], Unova Place Z422 [unova_place_z422], Unova Striaton City Z8 [unova_striatoncity_z8], Unova Undella Town Z413 [unova_undellatown_z413], Unova White Forest Z425 [unova_whiteforest_z425]</details>
+
+### mus_unova_fs (889)
+Custom: `mus_unova_fs.kaisong`
+- Map music: Unova Shopping Mall [unova_shoppingmall], Unova Shopping Mall Z351 [unova_shoppingmall_z351]
+
+### mus_unova_gym (890)
+Custom: `mus_unova_gym.kaisong`
+- Map music: Unova Castelia City Z29 [unova_casteliacity_z29], Unova Icirrus City Z114 [unova_icirruscity_z114], Unova Mistralton City Z108 [unova_mistraltoncity_z108], Unova Nacrene City Z18 [unova_nacrenecity_z18], Unova Nacrene City Z19 [unova_nacrenecity_z19], Unova Nimbasa City Z63 [unova_nimbasacity_z63], Unova Opelucid City Z121 [unova_opelucidcity_z121], Unova Striaton City Z7 [unova_striatoncity_z7]
+
+### mus_unova_gym_c05 (891)
+Custom: `mus_unova_gym_c05.kaisong`
+- Map music: Unova Driftveil City Z97 [unova_driftveilcity_z97], Unova Driftveil City Z98 [unova_driftveilcity_z98]
+
+### mus_unova_labo (892)
+Custom: `mus_unova_labo.kaisong`
+- Map music: Unova Nuvema Town Z396 [unova_nuvematown_z396]
+
+### mus_unova_gate (893)
+Custom: `mus_unova_gate.kaisong`
+- Map music: 22 places<details><summary>show</summary>Unova Accumula Gate [unova_accumulagate], Unova Black Gate [unova_blackgate], Unova Black Gate Z379 [unova_blackgate_z379], Unova Bridge Gate Z251 [unova_bridgegate_z251], Unova Bridge Gate Z252 [unova_bridgegate_z252], Unova Bridge Gate Z347 [unova_bridgegate_z347], Unova Bridge Gate Z349 [unova_bridgegate_z349], Unova Bridge Gate Z366 [unova_bridgegate_z366], Unova Bridge Gate Z369 [unova_bridgegate_z369], Unova Bridge Gate Z380 [unova_bridgegate_z380], Unova Bridge Gate Z384 [unova_bridgegate_z384], Unova Castelia Gate [unova_casteliagate], Unova Nacrene Gate [unova_nacrenegate], Unova Nimbasa Gate [unova_nimbasagate], Unova Nimbasa Gate Z91 [unova_nimbasagate_z91], Unova Nimbasa Gate Z92 [unova_nimbasagate_z92], Unova Opelucid Gate [unova_opelucidgate], Unova Opelucid Gate Z132 [unova_opelucidgate_z132], Unova Opelucid Gate Z133 [unova_opelucidgate_z133], Unova Route Gate [unova_routegate], Unova Route Gate Z318 [unova_routegate_z318], Unova Undella Gate [unova_undellagate]</details>
+
+### mus_unova_gear_station (894)
+Custom: `mus_unova_gear_station.kaisong`
+- Map music: Unova Battle Subway Z76 [unova_battlesubway_z76], Unova Gear Station [unova_gearstation], Unova Gear Station Z67 [unova_gearstation_z67], Unova Gear Station Z68 [unova_gearstation_z68], Unova Gear Station Z69 [unova_gearstation_z69], Unova Gear Station Z70 [unova_gearstation_z70], Unova Gear Station Z71 [unova_gearstation_z71], Unova Gear Station Z72 [unova_gearstation_z72], Unova Gear Station Z73 [unova_gearstation_z73], Unova Gear Station Z74 [unova_gearstation_z74]
+
+### mus_unova_battle_subway (895)
+Custom: `mus_unova_battle_subway.kaisong`
+- Map music: Unova Battle Subway [unova_battlesubway]
+
+### mus_unova_palpark (896)
+Custom: `mus_unova_palpark.kaisong`
+- Map music: Unova Pok Transfer Lab [unova_poktransferlab]
+
+### mus_unova_pleasure_boat (897)
+Custom: `mus_unova_pleasure_boat.kaisong`
+- Map music: Unova Royal Unova [unova_royalunova]
+
+### mus_unova_palace (898)
+Custom: `mus_unova_palace.kaisong`
+- Map music: Unova Entralink [unova_entralink], Unova Entree Forest [unova_entreeforest], Unova Entree Forest Z281 [unova_entreeforest_z281], Unova Entree Forest Z282 [unova_entreeforest_z282], Unova Entree Forest Z283 [unova_entreeforest_z283], Unova Entree Forest Z284 [unova_entreeforest_z284], Unova Entree Forest Z285 [unova_entreeforest_z285], Unova Entree Forest Z286 [unova_entreeforest_z286], Unova Entree Forest Z287 [unova_entreeforest_z287], Unova Entree Forest Z288 [unova_entreeforest_z288]
+
+### mus_unova_palace2 (899)
+Custom: `mus_unova_palace2.kaisong`
+- Map music: 65 places<details><summary>show</summary>Unova Black City Z294 [unova_blackcity_z294], Unova Chargestone Cave Z297 [unova_chargestonecave_z297], Unova Cold Storage Z296 5 14 [unova_coldstorage_z296_5_14], Unova Cold Storage Z296 6 14 [unova_coldstorage_z296_6_14], Unova Dragonspiral Tower Z299 [unova_dragonspiraltower_z299], Unova Driftveil City Z290 5 12 [unova_driftveilcity_z290_5_12], Unova Driftveil City Z290 5 13 [unova_driftveilcity_z290_5_13], Unova Driftveil City Z290 6 12 [unova_driftveilcity_z290_6_12], Unova Driftveil City Z290 6 13 [unova_driftveilcity_z290_6_13], Unova Driftveil City Z290 7 13 [unova_driftveilcity_z290_7_13], Unova Driftveil Drawbridge Z301 [unova_driftveildrawbridge_z301], Unova Icirrus City Z292 5 5 [unova_icirruscity_z292_5_5], Unova Icirrus City Z292 5 6 [unova_icirruscity_z292_5_6], Unova Icirrus City Z292 6 6 [unova_icirruscity_z292_6_6], Unova Lacunosa Town [unova_lacunosatown], Unova Marvelous Bridge Z303 [unova_marvelousbridge_z303], Unova Mistralton City Z291 2 10 [unova_mistraltoncity_z291_2_10], Unova Mistralton City Z291 2 8 [unova_mistraltoncity_z291_2_8], Unova Mistralton City Z291 2 9 [unova_mistraltoncity_z291_2_9], Unova Mistralton City Z291 3 9 [unova_mistraltoncity_z291_3_9], Unova Nimbasa City Z289 12 13 [unova_nimbasacity_z289_12_13], Unova Nimbasa City Z289 12 14 [unova_nimbasacity_z289_12_14], Unova Nimbasa City Z289 13 13 [unova_nimbasacity_z289_13_13], Unova Nimbasa City Z289 13 14 [unova_nimbasacity_z289_13_14], Unova Opelucid City Z293 12 4 [unova_opelucidcity_z293_12_4], Unova Opelucid City Z293 12 5 [unova_opelucidcity_z293_12_5], Unova Opelucid City Z293 13 4 [unova_opelucidcity_z293_13_4], Unova Opelucid City Z293 13 5 [unova_opelucidcity_z293_13_5], Unova Route 11 14 5 [unova_route11_14_5], Unova Route 11 15 5 [unova_route11_15_5], Unova Route 12 18 5 [unova_route12_18_5], Unova Route 12 19 5 [unova_route12_19_5], Unova Route 13 20 6 [unova_route13_20_6], Unova Route 13 21 5 [unova_route13_21_5], Unova Route 13 21 6 [unova_route13_21_6], Unova Route 13 21 7 [unova_route13_21_7], Unova Route 13 21 8 [unova_route13_21_8], Unova Route 13 22 7 [unova_route13_22_7], Unova Route 13 22 8 [unova_route13_22_8], Unova Route 13 23 8 [unova_route13_23_8], Unova Route 14 21 11 [unova_route14_21_11], Unova Route 14 22 10 [unova_route14_22_10], Unova Route 14 22 11 [unova_route14_22_11], Unova Route 14 23 10 [unova_route14_23_10], Unova Route 15 18 13 [unova_route15_18_13], Unova Route 15 19 13 [unova_route15_19_13], Unova Route 16 14 13 [unova_route16_14_13], Unova Route 16 15 13 [unova_route16_15_13], Unova Route 5 10 13 [unova_route5_10_13], Unova Route 5 11 13 [unova_route5_11_13], Unova Route 6 3 11 [unova_route6_3_11], Unova Route 6 4 11 [unova_route6_4_11], Unova Route 6 4 12 [unova_route6_4_12], Unova Route 7 3 7 [unova_route7_3_7], Unova Route 7 3 8 [unova_route7_3_8], Unova Route 7 4 7 [unova_route7_4_7], Unova Route 8 6 5 [unova_route8_6_5], Unova Route 8 7 5 [unova_route8_7_5], Unova Route 9 10 5 [unova_route9_10_5], Unova Route 9 11 5 [unova_route9_11_5], Unova Tubeline Bridge Z302 [unova_tubelinebridge_z302], Unova Twist Mountain Z298 [unova_twistmountain_z298], Unova Undella Town 22 9 [unova_undellatown_22_9], Unova Undella Town 23 9 [unova_undellatown_23_9], Unova White Forest [unova_whiteforest]</details>
+
+### mus_unova_united_nations (900)
+Custom: `mus_unova_united_nations.kaisong`
+- Map music: Unova Unity Tower Z148 [unova_unitytower_z148], Unova Unity Tower Z149 [unova_unitytower_z149]
+
+### mus_unova_pokemon_league (901)
+Custom: `mus_unova_pokemon_league.kaisong`
+- Map music: Unova Pok Mon League [unova_pokmonleague], Unova Pok Mon League Z137 [unova_pokmonleague_z137], Unova Pok Mon League Z138 [unova_pokmonleague_z138], Unova Pok Mon League Z140 [unova_pokmonleague_z140], Unova Pok Mon League Z141 [unova_pokmonleague_z141], Unova Pok Mon League Z142 [unova_pokmonleague_z142], Unova Pok Mon League Z143 [unova_pokmonleague_z143], Unova Pok Mon League Z144 [unova_pokmonleague_z144], Unova Pok Mon League Z146 [unova_pokmonleague_z146]
+
+### mus_unova_pokemon_league2 (902)
+Custom: `mus_unova_pokemon_league2.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_n_castle_bridge (903)
+Custom: `mus_unova_n_castle_bridge.kaisong`
+- Map music: Unova Pok Mon League Z139 [unova_pokmonleague_z139]
+
+### mus_unova_n_castle (904)
+Custom: `mus_unova_n_castle.kaisong`
+- Map music: 14 places<details><summary>show</summary>Unova Ns Castle [unova_nscastle], Unova Ns Castle Z265 [unova_nscastle_z265], Unova Ns Castle Z266 [unova_nscastle_z266], Unova Ns Castle Z267 [unova_nscastle_z267], Unova Ns Castle Z268 [unova_nscastle_z268], Unova Ns Castle Z269 [unova_nscastle_z269], Unova Ns Castle Z270 [unova_nscastle_z270], Unova Ns Castle Z271 [unova_nscastle_z271], Unova Ns Castle Z272 [unova_nscastle_z272], Unova Ns Castle Z273 [unova_nscastle_z273], Unova Ns Castle Z275 [unova_nscastle_z275], Unova Ns Castle Z276 [unova_nscastle_z276], Unova Ns Castle Z277 [unova_nscastle_z277], Unova Ns Castle Z278 [unova_nscastle_z278]</details>
+
+### mus_unova_d_01 (905)
+Custom: `mus_unova_d_01.kaisong`
+- Map music: Unova Dreamyard [unova_dreamyard], Unova Dreamyard Z153 [unova_dreamyard_z153], Unova Moor Of Icirrus [unova_mooroficirrus], Unova Pinwheel Forest Z155 [unova_pinwheelforest_z155], Unova Rumination Field [unova_ruminationfield]
+
+### mus_unova_d_02 (906)
+Custom: `mus_unova_d_02.kaisong`
+- Map music: Unova Challengers Cave [unova_challengerscave], Unova Challengers Cave Z353 [unova_challengerscave_z353], Unova Challengers Cave Z354 [unova_challengerscave_z354], Unova Chargestone Cave Z195 [unova_chargestonecave_z195], Unova Chargestone Cave Z196 [unova_chargestonecave_z196], Unova Chargestone Cave Z197 [unova_chargestonecave_z197], Unova Desert Resort Z158 [unova_desertresort_z158], Unova Guidance Chamber [unova_guidancechamber], Unova Mistralton Cave [unova_mistraltoncave], Unova Mistralton Cave Z334 [unova_mistraltoncave_z334], Unova Wellspring Cave [unova_wellspringcave], Unova Wellspring Cave Z325 [unova_wellspringcave_z325]
+
+### mus_unova_d_03 (907)
+Custom: `mus_unova_d_03.kaisong`
+- Map music: Unova Cold Storage Z192 [unova_coldstorage_z192], Unova Cold Storage Z193 [unova_coldstorage_z193], Unova Liberty Garden Z236 [unova_libertygarden_z236], Unova Liberty Garden Z237 [unova_libertygarden_z237], Unova P2 Laboratory Z239 [unova_p2laboratory_z239], Unova Twist Mountain Z199 [unova_twistmountain_z199], Unova Twist Mountain Z200 [unova_twistmountain_z200], Unova Twist Mountain Z201 [unova_twistmountain_z201], Unova Twist Mountain Z202 [unova_twistmountain_z202], Unova Twist Mountain Z203 [unova_twistmountain_z203], Unova Twist Mountain Z204 [unova_twistmountain_z204]
+
+### mus_unova_d_04 (908)
+Custom: `mus_unova_d_04.kaisong`
+- Map music: 31 places<details><summary>show</summary>Unova Relic Castle [unova_reliccastle], Unova Relic Castle Z161 [unova_reliccastle_z161], Unova Relic Castle Z162 [unova_reliccastle_z162], Unova Relic Castle Z163 [unova_reliccastle_z163], Unova Relic Castle Z164 [unova_reliccastle_z164], Unova Relic Castle Z165 [unova_reliccastle_z165], Unova Relic Castle Z166 [unova_reliccastle_z166], Unova Relic Castle Z167 [unova_reliccastle_z167], Unova Relic Castle Z168 [unova_reliccastle_z168], Unova Relic Castle Z169 [unova_reliccastle_z169], Unova Relic Castle Z170 [unova_reliccastle_z170], Unova Relic Castle Z171 [unova_reliccastle_z171], Unova Relic Castle Z172 [unova_reliccastle_z172], Unova Relic Castle Z173 [unova_reliccastle_z173], Unova Relic Castle Z174 [unova_reliccastle_z174], Unova Relic Castle Z175 [unova_reliccastle_z175], Unova Relic Castle Z176 [unova_reliccastle_z176], Unova Relic Castle Z177 [unova_reliccastle_z177], Unova Relic Castle Z178 [unova_reliccastle_z178], Unova Relic Castle Z179 [unova_reliccastle_z179], Unova Relic Castle Z180 [unova_reliccastle_z180], Unova Relic Castle Z181 [unova_reliccastle_z181], Unova Relic Castle Z182 [unova_reliccastle_z182], Unova Relic Castle Z183 [unova_reliccastle_z183], Unova Relic Castle Z184 [unova_reliccastle_z184], Unova Relic Castle Z185 [unova_reliccastle_z185], Unova Relic Castle Z186 [unova_reliccastle_z186], Unova Relic Castle Z187 [unova_reliccastle_z187], Unova Relic Castle Z188 [unova_reliccastle_z188], Unova Relic Castle Z189 [unova_reliccastle_z189], Unova Relic Castle Z190 [unova_reliccastle_z190]</details>
+
+### mus_unova_d_05 (909)
+Custom: `mus_unova_d_05.kaisong`
+- Map music: 15 places<details><summary>show</summary>Unova Celestial Tower [unova_celestialtower], Unova Celestial Tower Z339 [unova_celestialtower_z339], Unova Celestial Tower Z340 [unova_celestialtower_z340], Unova Celestial Tower Z341 [unova_celestialtower_z341], Unova Celestial Tower Z342 [unova_celestialtower_z342], Unova Dragonspiral Tower Z206 [unova_dragonspiraltower_z206], Unova Dragonspiral Tower Z207 [unova_dragonspiraltower_z207], Unova Dragonspiral Tower Z208 [unova_dragonspiraltower_z208], Unova Dragonspiral Tower Z209 [unova_dragonspiraltower_z209], Unova Dragonspiral Tower Z210 [unova_dragonspiraltower_z210], Unova Dragonspiral Tower Z211 [unova_dragonspiraltower_z211], Unova Dragonspiral Tower Z212 [unova_dragonspiraltower_z212], Unova Giant Chasm Z231 [unova_giantchasm_z231], Unova Giant Chasm Z232 [unova_giantchasm_z232], Unova Giant Chasm Z234 [unova_giantchasm_z234]</details>
+
+### mus_unova_d_06 (910)
+Custom: `mus_unova_d_06.kaisong`
+- Map music: Unova Abundant Shrine [unova_abundantshrine], Unova Abundant Shrine Z377 [unova_abundantshrine_z377], Unova Lostlorn Forest [unova_lostlornforest], Unova Lostlorn Forest Z386 [unova_lostlornforest_z386]
+
+### mus_unova_d_07 (911)
+Custom: `mus_unova_d_07.kaisong`
+- Map music: Unova Dragonspiral Tower Z213 [unova_dragonspiraltower_z213]
+
+### mus_unova_d_champroad (912)
+Custom: `mus_unova_d_champroad.kaisong`
+- Map music: 25 places<details><summary>show</summary>Unova Route 10 Z356 [unova_route10_z356], Unova Route 10 Z357 [unova_route10_z357], Unova Route 10 Z358 [unova_route10_z358], Unova Route 10 Z359 [unova_route10_z359], Unova Route 10 Z360 [unova_route10_z360], Unova Route 10 Z361 [unova_route10_z361], Unova Route 10 Z362 [unova_route10_z362], Unova Route 10 Z363 [unova_route10_z363], Unova Route 10 Z364 [unova_route10_z364], Unova Trial Chamber [unova_trialchamber], Unova Victory Road [unova_victoryroad], Unova Victory Road Z215 [unova_victoryroad_z215], Unova Victory Road Z216 [unova_victoryroad_z216], Unova Victory Road Z217 [unova_victoryroad_z217], Unova Victory Road Z218 [unova_victoryroad_z218], Unova Victory Road Z219 [unova_victoryroad_z219], Unova Victory Road Z220 [unova_victoryroad_z220], Unova Victory Road Z221 [unova_victoryroad_z221], Unova Victory Road Z222 [unova_victoryroad_z222], Unova Victory Road Z223 [unova_victoryroad_z223], Unova Victory Road Z224 [unova_victoryroad_z224], Unova Victory Road Z225 [unova_victoryroad_z225], Unova Victory Road Z226 [unova_victoryroad_z226], Unova Victory Road Z227 [unova_victoryroad_z227], Unova Victory Road Z228 [unova_victoryroad_z228]</details>
+
+### mus_unova_e_tsureteke1 (913)
+Custom: `mus_unova_e_tsureteke1.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_tsureteke2 (914)
+Custom: `mus_unova_e_tsureteke2.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_rival (915)
+Custom: `mus_unova_e_rival.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_support (916)
+Custom: `mus_unova_e_support.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_doctor (917)
+Custom: `mus_unova_e_doctor.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_doctor2 (918)
+Custom: `mus_unova_e_doctor2.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_plasma (919)
+Custom: `mus_unova_e_plasma.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_n (920)
+Custom: `mus_unova_e_n.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_sage (921)
+Custom: `mus_unova_e_sage.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_g_cis (922)
+Custom: `mus_unova_e_g_cis.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_gl_union (923)
+Custom: `mus_unova_e_gl_union.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_inishie (924)
+Custom: `mus_unova_e_inishie.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_emotion (925)
+Custom: `mus_unova_e_emotion.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_trouble (926)
+Custom: `mus_unova_e_trouble.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_last (927)
+Custom: `mus_unova_e_last.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_handsome (928)
+Custom: `mus_unova_e_handsome.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_champion (929)
+Custom: `mus_unova_e_champion.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_opening (930)
+Custom: `mus_unova_e_opening.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_kanransya (931)
+Custom: `mus_unova_e_kanransya.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_n_castle (932)
+Custom: `mus_unova_e_n_castle.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_legend_born_b (933)
+Custom: `mus_unova_e_legend_born_b.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_legend_born_w (934)
+Custom: `mus_unova_e_legend_born_w.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_msl_field (935)
+Custom: `mus_unova_msl_field.kaisong`
+- Map music: Unova Musical Theater [unova_musicaltheater], Unova Musical Theater Z78 [unova_musicaltheater_z78]
+
+### mus_unova_msl_dressup (936)
+Custom: `mus_unova_msl_dressup.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_msl_before (937)
+Custom: `mus_unova_msl_before.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_msl_01 (938)
+Custom: `mus_unova_msl_01.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_msl_02 (939)
+Custom: `mus_unova_msl_02.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_msl_03 (940)
+Custom: `mus_unova_msl_03.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_msl_04 (941)
+Custom: `mus_unova_msl_04.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_01 (942)
+Custom: `mus_unova_eye_01.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_02 (943)
+Custom: `mus_unova_eye_02.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_03 (944)
+Custom: `mus_unova_eye_03.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_04 (945)
+Custom: `mus_unova_eye_04.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_05 (946)
+Custom: `mus_unova_eye_05.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_06 (947)
+Custom: `mus_unova_eye_06.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_07 (948)
+Custom: `mus_unova_eye_07.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_08 (949)
+Custom: `mus_unova_eye_08.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_09 (950)
+Custom: `mus_unova_eye_09.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_10 (951)
+Custom: `mus_unova_eye_10.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_11 (952)
+Custom: `mus_unova_eye_11.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_12 (953)
+Custom: `mus_unova_eye_12.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_13 (954)
+Custom: `mus_unova_eye_13.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_eye_plasma (955)
+Custom: `mus_unova_eye_plasma.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_norapoke (956)
+Custom: `mus_unova_vs_norapoke.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_tsuyopoke (957)
+Custom: `mus_unova_vs_tsuyopoke.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_trainer (958)
+Custom: `mus_unova_vs_trainer.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_subway_trainer (959)
+Custom: `mus_unova_vs_subway_trainer.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_gymleader (960)
+Custom: `mus_unova_vs_gymleader.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_rival (961)
+Custom: `mus_unova_vs_rival.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_plasma (962)
+Custom: `mus_unova_vs_plasma.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_shitenno (963)
+Custom: `mus_unova_vs_shitenno.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_champ (964)
+Custom: `mus_unova_vs_champ.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_n (965)
+Custom: `mus_unova_vs_n.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_n_2 (966)
+Custom: `mus_unova_vs_n_2.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_g_cis (967)
+Custom: `mus_unova_vs_g_cis.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_shin (968)
+Custom: `mus_unova_vs_shin.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_mu (969)
+Custom: `mus_unova_vs_mu.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_rai (970)
+Custom: `mus_unova_vs_rai.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_movepoke (971)
+Custom: `mus_unova_vs_movepoke.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_setpoke (972)
+Custom: `mus_unova_vs_setpoke.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_shirona (973)
+Custom: `mus_unova_vs_shirona.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_battlepinch (974)
+Custom: `mus_unova_battlepinch.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_battlesuperior (975)
+Custom: `mus_unova_battlesuperior.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_win1 (976)
+Custom: `mus_unova_win1.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_win2 (977)
+Custom: `mus_unova_win2.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_win3 (978)
+Custom: `mus_unova_win3.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_win4 (979)
+Custom: `mus_unova_win4.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_win5 (980)
+Custom: `mus_unova_win5.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_wifi_access (981)
+Custom: `mus_unova_wifi_access.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_wifi_present (982)
+Custom: `mus_unova_wifi_present.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_game_sync (983)
+Custom: `mus_unova_game_sync.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_glterminal (984)
+Custom: `mus_unova_glterminal.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_guruguru (985)
+Custom: `mus_unova_guruguru.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_gts (986)
+Custom: `mus_unova_gts.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_wcs (987)
+Custom: `mus_unova_wcs.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_shirona (988)
+Custom: `mus_unova_e_shirona.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_friend (989)
+Custom: `mus_unova_e_friend.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_sound_designer (990)
+Custom: `mus_unova_e_sound_designer.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_trainer_m (991)
+Custom: `mus_unova_vs_trainer_m.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_trainer_s (992)
+Custom: `mus_unova_vs_trainer_s.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_wcs (993)
+Custom: `mus_unova_vs_wcs.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_legend_come_b (994)
+Custom: `mus_unova_e_legend_come_b.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_legend_come_w (995)
+Custom: `mus_unova_e_legend_come_w.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_vs_trainer_wifi (996)
+Custom: `mus_unova_vs_trainer_wifi.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_win6 (997)
+Custom: `mus_unova_win6.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_n_room (998)
+Custom: `mus_unova_n_room.kaisong`
+- Map music: Unova Ns Castle Z274 [unova_nscastle_z274]
+
+### mus_unova_e_epirogue (999)
+Custom: `mus_unova_e_epirogue.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_e_epirogue_w (1000)
+Custom: `mus_unova_e_epirogue_w.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_gf_logo (1001)
+Custom: `mus_unova_gf_logo.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_msl_dl_01 (1002)
+Custom: `mus_unova_msl_dl_01.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_msl_dl_02 (1003)
+Custom: `mus_unova_msl_dl_02.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_msl_dl_03 (1004)
+Custom: `mus_unova_msl_dl_03.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_msl_dl_04 (1005)
+Custom: `mus_unova_msl_dl_04.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_asa (1006)
+Custom: `mus_unova_me_asa.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_lvup (1007)
+Custom: `mus_unova_me_lvup.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_item (1008)
+Custom: `mus_unova_me_item.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_keyitem (1009)
+Custom: `mus_unova_me_keyitem.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_pokeget (1010)
+Custom: `mus_unova_me_pokeget.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_shinkaome (1011)
+Custom: `mus_unova_me_shinkaome.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_badge (1012)
+Custom: `mus_unova_me_badge.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_waza (1013)
+Custom: `mus_unova_me_waza.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_acce (1014)
+Custom: `mus_unova_me_acce.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_wasure (1015)
+Custom: `mus_unova_me_wasure.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_kinomi (1016)
+Custom: `mus_unova_me_kinomi.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_hyouka1 (1017)
+Custom: `mus_unova_me_hyouka1.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_hyouka2 (1018)
+Custom: `mus_unova_me_hyouka2.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_hyouka3 (1019)
+Custom: `mus_unova_me_hyouka3.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_hyouka4 (1020)
+Custom: `mus_unova_me_hyouka4.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_hyouka5 (1021)
+Custom: `mus_unova_me_hyouka5.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_hyouka6 (1022)
+Custom: `mus_unova_me_hyouka6.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_tamago_get (1023)
+Custom: `mus_unova_me_tamago_get.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_bpget (1024)
+Custom: `mus_unova_me_bpget.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_aishou_h (1025)
+Custom: `mus_unova_me_aishou_h.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_aishou_m (1026)
+Custom: `mus_unova_me_aishou_m.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_aishou_l (1027)
+Custom: `mus_unova_me_aishou_l.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_aishou_kidou (1028)
+Custom: `mus_unova_me_aishou_kidou.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_mission_start (1029)
+Custom: `mus_unova_me_mission_start.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_mission_clear (1030)
+Custom: `mus_unova_me_mission_clear.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_mission_failed (1031)
+Custom: `mus_unova_me_mission_failed.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_item_mystery (1032)
+Custom: `mus_unova_me_item_mystery.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_call (1033)
+Custom: `mus_unova_me_call.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_quiz (1034)
+Custom: `mus_unova_me_quiz.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_del_power (1035)
+Custom: `mus_unova_me_del_power.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_02 (1036)
+Custom: `mus_unova_me_02.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_unova_me_end (1037)
+Custom: `mus_unova_me_end.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).

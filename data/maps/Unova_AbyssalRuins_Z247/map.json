@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ABYSSALRUINS_Z247",
   "name": "Unova_AbyssalRuins_Z247",
   "layout": "LAYOUT_UNOVA_ABYSSALRUINS_Z247",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_DIVING",
   "region_map_section": "MAPSEC_UNOVA_ABYSSAL_RUINS",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_OPELUCIDCITY_Z124",
   "name": "Unova_OpelucidCity_Z124",
   "layout": "LAYOUT_UNOVA_OPELUCIDCITY_Z124",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_C_08_B",
   "region_map_section": "MAPSEC_UNOVA_OPELUCID_CITY",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

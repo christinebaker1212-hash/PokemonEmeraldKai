@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_DREAMYARD_Z153",
   "name": "Unova_Dreamyard_Z153",
   "layout": "LAYOUT_UNOVA_DREAMYARD_Z153",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_01",
   "region_map_section": "MAPSEC_UNOVA_DREAMYARD",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

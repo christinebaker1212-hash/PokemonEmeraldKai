@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_OPELUCIDGATE",
   "name": "Unova_OpelucidGate",
   "layout": "LAYOUT_UNOVA_OPELUCIDGATE",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_GATE",
   "region_map_section": "MAPSEC_UNOVA_OPELUCID_GATE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

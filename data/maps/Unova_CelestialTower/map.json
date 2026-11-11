@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_CELESTIALTOWER",
   "name": "Unova_CelestialTower",
   "layout": "LAYOUT_UNOVA_CELESTIALTOWER",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_05",
   "region_map_section": "MAPSEC_UNOVA_CELESTIAL_TOWER",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

@@ -1012,6 +1012,422 @@ gSongTable::
 	song mus_sinnoh_opening, MUSIC_PLAYER_BGM, 0
 	song mus_sinnoh_music_box, MUSIC_PLAYER_BGM, 0
 @ end of SINNOH's songs from Platinum's sound data
+@ Moemon Kai: UNOVA's songs, Black's own (tools/kaisong/unova_songs.py)
+	.set mus_unova_title, mus_route101
+	.set mus_unova_title01, mus_route101
+	.set mus_unova_opening_title_b, mus_route101
+	.set mus_unova_opening_title_w, mus_route101
+	.set mus_unova_pokemon_theme, mus_route101
+	.set mus_unova_starting, mus_route101
+	.set mus_unova_starting2, mus_route101
+	.set mus_unova_shinka, mus_route101
+	.set mus_unova_koukan, mus_route101
+	.set mus_unova_bicycle, mus_route101
+	.set mus_unova_naminori, mus_route101
+	.set mus_unova_diving, mus_route101
+	.set mus_unova_e_dendouiri, mus_route101
+	.set mus_unova_ending, mus_route101
+	.set mus_unova_ending2, mus_route101
+	.set mus_unova_t_01, mus_route101
+	.set mus_unova_t_02, mus_route101
+	.set mus_unova_t_03, mus_route101
+	.set mus_unova_t_04, mus_route101
+	.set mus_unova_t_05_sp, mus_route101
+	.set mus_unova_t_05_su, mus_route101
+	.set mus_unova_t_05_au, mus_route101
+	.set mus_unova_t_05_wi, mus_route101
+	.set mus_unova_c_01, mus_route101
+	.set mus_unova_c_02, mus_route101
+	.set mus_unova_c_03, mus_route101
+	.set mus_unova_c_04, mus_route101
+	.set mus_unova_c_05, mus_route101
+	.set mus_unova_c_06, mus_route101
+	.set mus_unova_c_07, mus_route101
+	.set mus_unova_c_08_b, mus_route101
+	.set mus_unova_c_08_w, mus_route101
+	.set mus_unova_c_10_b, mus_route101
+	.set mus_unova_c_10_w, mus_route101
+	.set mus_unova_r_a, mus_route101
+	.set mus_unova_r_b_sp, mus_route101
+	.set mus_unova_r_b_su, mus_route101
+	.set mus_unova_r_b_au, mus_route101
+	.set mus_unova_r_b_wi, mus_route101
+	.set mus_unova_r_c_sp, mus_route101
+	.set mus_unova_r_c_su, mus_route101
+	.set mus_unova_r_c_au, mus_route101
+	.set mus_unova_r_c_wi, mus_route101
+	.set mus_unova_r_d_sp, mus_route101
+	.set mus_unova_r_d_su, mus_route101
+	.set mus_unova_r_d_au, mus_route101
+	.set mus_unova_r_d_wi, mus_route101
+	.set mus_unova_r_e_sp, mus_route101
+	.set mus_unova_r_e_su, mus_route101
+	.set mus_unova_r_e_au, mus_route101
+	.set mus_unova_r_e_wi, mus_route101
+	.set mus_unova_r_f, mus_route101
+	.set mus_unova_h_01, mus_route101
+	.set mus_unova_h_02, mus_route101
+	.set mus_unova_h_03, mus_route101
+	.set mus_unova_h_04, mus_route101
+	.set mus_unova_h_05, mus_route101
+	.set mus_unova_pokecen, mus_route101
+	.set mus_unova_fs, mus_route101
+	.set mus_unova_gym, mus_route101
+	.set mus_unova_gym_c05, mus_route101
+	.set mus_unova_labo, mus_route101
+	.set mus_unova_gate, mus_route101
+	.set mus_unova_gear_station, mus_route101
+	.set mus_unova_battle_subway, mus_route101
+	.set mus_unova_palpark, mus_route101
+	.set mus_unova_pleasure_boat, mus_route101
+	.set mus_unova_palace, mus_route101
+	.set mus_unova_palace2, mus_route101
+	.set mus_unova_united_nations, mus_route101
+	.set mus_unova_pokemon_league, mus_route101
+	.set mus_unova_pokemon_league2, mus_route101
+	.set mus_unova_n_castle_bridge, mus_route101
+	.set mus_unova_n_castle, mus_route101
+	.set mus_unova_d_01, mus_route101
+	.set mus_unova_d_02, mus_route101
+	.set mus_unova_d_03, mus_route101
+	.set mus_unova_d_04, mus_route101
+	.set mus_unova_d_05, mus_route101
+	.set mus_unova_d_06, mus_route101
+	.set mus_unova_d_07, mus_route101
+	.set mus_unova_d_champroad, mus_route101
+	.set mus_unova_e_tsureteke1, mus_route101
+	.set mus_unova_e_tsureteke2, mus_route101
+	.set mus_unova_e_rival, mus_route101
+	.set mus_unova_e_support, mus_route101
+	.set mus_unova_e_doctor, mus_route101
+	.set mus_unova_e_doctor2, mus_route101
+	.set mus_unova_e_plasma, mus_route101
+	.set mus_unova_e_n, mus_route101
+	.set mus_unova_e_sage, mus_route101
+	.set mus_unova_e_g_cis, mus_route101
+	.set mus_unova_e_gl_union, mus_route101
+	.set mus_unova_e_inishie, mus_route101
+	.set mus_unova_e_emotion, mus_route101
+	.set mus_unova_e_trouble, mus_route101
+	.set mus_unova_e_last, mus_route101
+	.set mus_unova_e_handsome, mus_route101
+	.set mus_unova_e_champion, mus_route101
+	.set mus_unova_e_opening, mus_route101
+	.set mus_unova_e_kanransya, mus_route101
+	.set mus_unova_e_n_castle, mus_route101
+	.set mus_unova_e_legend_born_b, mus_route101
+	.set mus_unova_e_legend_born_w, mus_route101
+	.set mus_unova_msl_field, mus_route101
+	.set mus_unova_msl_dressup, mus_route101
+	.set mus_unova_msl_before, mus_route101
+	.set mus_unova_msl_01, mus_route101
+	.set mus_unova_msl_02, mus_route101
+	.set mus_unova_msl_03, mus_route101
+	.set mus_unova_msl_04, mus_route101
+	.set mus_unova_eye_01, mus_route101
+	.set mus_unova_eye_02, mus_route101
+	.set mus_unova_eye_03, mus_route101
+	.set mus_unova_eye_04, mus_route101
+	.set mus_unova_eye_05, mus_route101
+	.set mus_unova_eye_06, mus_route101
+	.set mus_unova_eye_07, mus_route101
+	.set mus_unova_eye_08, mus_route101
+	.set mus_unova_eye_09, mus_route101
+	.set mus_unova_eye_10, mus_route101
+	.set mus_unova_eye_11, mus_route101
+	.set mus_unova_eye_12, mus_route101
+	.set mus_unova_eye_13, mus_route101
+	.set mus_unova_eye_plasma, mus_route101
+	.set mus_unova_vs_norapoke, mus_route101
+	.set mus_unova_vs_tsuyopoke, mus_route101
+	.set mus_unova_vs_trainer, mus_route101
+	.set mus_unova_vs_subway_trainer, mus_route101
+	.set mus_unova_vs_gymleader, mus_route101
+	.set mus_unova_vs_rival, mus_route101
+	.set mus_unova_vs_plasma, mus_route101
+	.set mus_unova_vs_shitenno, mus_route101
+	.set mus_unova_vs_champ, mus_route101
+	.set mus_unova_vs_n, mus_route101
+	.set mus_unova_vs_n_2, mus_route101
+	.set mus_unova_vs_g_cis, mus_route101
+	.set mus_unova_vs_shin, mus_route101
+	.set mus_unova_vs_mu, mus_route101
+	.set mus_unova_vs_rai, mus_route101
+	.set mus_unova_vs_movepoke, mus_route101
+	.set mus_unova_vs_setpoke, mus_route101
+	.set mus_unova_vs_shirona, mus_route101
+	.set mus_unova_battlepinch, mus_route101
+	.set mus_unova_battlesuperior, mus_route101
+	.set mus_unova_win1, mus_route101
+	.set mus_unova_win2, mus_route101
+	.set mus_unova_win3, mus_route101
+	.set mus_unova_win4, mus_route101
+	.set mus_unova_win5, mus_route101
+	.set mus_unova_wifi_access, mus_route101
+	.set mus_unova_wifi_present, mus_route101
+	.set mus_unova_game_sync, mus_route101
+	.set mus_unova_glterminal, mus_route101
+	.set mus_unova_guruguru, mus_route101
+	.set mus_unova_gts, mus_route101
+	.set mus_unova_wcs, mus_route101
+	.set mus_unova_e_shirona, mus_route101
+	.set mus_unova_e_friend, mus_route101
+	.set mus_unova_e_sound_designer, mus_route101
+	.set mus_unova_vs_trainer_m, mus_route101
+	.set mus_unova_vs_trainer_s, mus_route101
+	.set mus_unova_vs_wcs, mus_route101
+	.set mus_unova_e_legend_come_b, mus_route101
+	.set mus_unova_e_legend_come_w, mus_route101
+	.set mus_unova_vs_trainer_wifi, mus_route101
+	.set mus_unova_win6, mus_route101
+	.set mus_unova_n_room, mus_route101
+	.set mus_unova_e_epirogue, mus_route101
+	.set mus_unova_e_epirogue_w, mus_route101
+	.set mus_unova_gf_logo, mus_route101
+	.set mus_unova_msl_dl_01, mus_route101
+	.set mus_unova_msl_dl_02, mus_route101
+	.set mus_unova_msl_dl_03, mus_route101
+	.set mus_unova_msl_dl_04, mus_route101
+	.set mus_unova_me_asa, mus_level_up
+	.set mus_unova_me_lvup, mus_level_up
+	.set mus_unova_me_item, mus_level_up
+	.set mus_unova_me_keyitem, mus_level_up
+	.set mus_unova_me_pokeget, mus_level_up
+	.set mus_unova_me_shinkaome, mus_level_up
+	.set mus_unova_me_badge, mus_level_up
+	.set mus_unova_me_waza, mus_level_up
+	.set mus_unova_me_acce, mus_level_up
+	.set mus_unova_me_wasure, mus_level_up
+	.set mus_unova_me_kinomi, mus_level_up
+	.set mus_unova_me_hyouka1, mus_level_up
+	.set mus_unova_me_hyouka2, mus_level_up
+	.set mus_unova_me_hyouka3, mus_level_up
+	.set mus_unova_me_hyouka4, mus_level_up
+	.set mus_unova_me_hyouka5, mus_level_up
+	.set mus_unova_me_hyouka6, mus_level_up
+	.set mus_unova_me_tamago_get, mus_level_up
+	.set mus_unova_me_bpget, mus_level_up
+	.set mus_unova_me_aishou_h, mus_level_up
+	.set mus_unova_me_aishou_m, mus_level_up
+	.set mus_unova_me_aishou_l, mus_level_up
+	.set mus_unova_me_aishou_kidou, mus_level_up
+	.set mus_unova_me_mission_start, mus_level_up
+	.set mus_unova_me_mission_clear, mus_level_up
+	.set mus_unova_me_mission_failed, mus_level_up
+	.set mus_unova_me_item_mystery, mus_level_up
+	.set mus_unova_me_call, mus_level_up
+	.set mus_unova_me_quiz, mus_level_up
+	.set mus_unova_me_del_power, mus_level_up
+	.set mus_unova_me_02, mus_level_up
+	.set mus_unova_me_end, mus_level_up
+	song mus_unova_title, MUSIC_PLAYER_BGM, 0
+	song mus_unova_title01, MUSIC_PLAYER_BGM, 0
+	song mus_unova_opening_title_b, MUSIC_PLAYER_BGM, 0
+	song mus_unova_opening_title_w, MUSIC_PLAYER_BGM, 0
+	song mus_unova_pokemon_theme, MUSIC_PLAYER_BGM, 0
+	song mus_unova_starting, MUSIC_PLAYER_BGM, 0
+	song mus_unova_starting2, MUSIC_PLAYER_BGM, 0
+	song mus_unova_shinka, MUSIC_PLAYER_BGM, 0
+	song mus_unova_koukan, MUSIC_PLAYER_BGM, 0
+	song mus_unova_bicycle, MUSIC_PLAYER_BGM, 0
+	song mus_unova_naminori, MUSIC_PLAYER_BGM, 0
+	song mus_unova_diving, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_dendouiri, MUSIC_PLAYER_BGM, 0
+	song mus_unova_ending, MUSIC_PLAYER_BGM, 0
+	song mus_unova_ending2, MUSIC_PLAYER_BGM, 0
+	song mus_unova_t_01, MUSIC_PLAYER_BGM, 0
+	song mus_unova_t_02, MUSIC_PLAYER_BGM, 0
+	song mus_unova_t_03, MUSIC_PLAYER_BGM, 0
+	song mus_unova_t_04, MUSIC_PLAYER_BGM, 0
+	song mus_unova_t_05_sp, MUSIC_PLAYER_BGM, 0
+	song mus_unova_t_05_su, MUSIC_PLAYER_BGM, 0
+	song mus_unova_t_05_au, MUSIC_PLAYER_BGM, 0
+	song mus_unova_t_05_wi, MUSIC_PLAYER_BGM, 0
+	song mus_unova_c_01, MUSIC_PLAYER_BGM, 0
+	song mus_unova_c_02, MUSIC_PLAYER_BGM, 0
+	song mus_unova_c_03, MUSIC_PLAYER_BGM, 0
+	song mus_unova_c_04, MUSIC_PLAYER_BGM, 0
+	song mus_unova_c_05, MUSIC_PLAYER_BGM, 0
+	song mus_unova_c_06, MUSIC_PLAYER_BGM, 0
+	song mus_unova_c_07, MUSIC_PLAYER_BGM, 0
+	song mus_unova_c_08_b, MUSIC_PLAYER_BGM, 0
+	song mus_unova_c_08_w, MUSIC_PLAYER_BGM, 0
+	song mus_unova_c_10_b, MUSIC_PLAYER_BGM, 0
+	song mus_unova_c_10_w, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_a, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_b_sp, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_b_su, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_b_au, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_b_wi, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_c_sp, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_c_su, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_c_au, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_c_wi, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_d_sp, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_d_su, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_d_au, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_d_wi, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_e_sp, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_e_su, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_e_au, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_e_wi, MUSIC_PLAYER_BGM, 0
+	song mus_unova_r_f, MUSIC_PLAYER_BGM, 0
+	song mus_unova_h_01, MUSIC_PLAYER_BGM, 0
+	song mus_unova_h_02, MUSIC_PLAYER_BGM, 0
+	song mus_unova_h_03, MUSIC_PLAYER_BGM, 0
+	song mus_unova_h_04, MUSIC_PLAYER_BGM, 0
+	song mus_unova_h_05, MUSIC_PLAYER_BGM, 0
+	song mus_unova_pokecen, MUSIC_PLAYER_BGM, 0
+	song mus_unova_fs, MUSIC_PLAYER_BGM, 0
+	song mus_unova_gym, MUSIC_PLAYER_BGM, 0
+	song mus_unova_gym_c05, MUSIC_PLAYER_BGM, 0
+	song mus_unova_labo, MUSIC_PLAYER_BGM, 0
+	song mus_unova_gate, MUSIC_PLAYER_BGM, 0
+	song mus_unova_gear_station, MUSIC_PLAYER_BGM, 0
+	song mus_unova_battle_subway, MUSIC_PLAYER_BGM, 0
+	song mus_unova_palpark, MUSIC_PLAYER_BGM, 0
+	song mus_unova_pleasure_boat, MUSIC_PLAYER_BGM, 0
+	song mus_unova_palace, MUSIC_PLAYER_BGM, 0
+	song mus_unova_palace2, MUSIC_PLAYER_BGM, 0
+	song mus_unova_united_nations, MUSIC_PLAYER_BGM, 0
+	song mus_unova_pokemon_league, MUSIC_PLAYER_BGM, 0
+	song mus_unova_pokemon_league2, MUSIC_PLAYER_BGM, 0
+	song mus_unova_n_castle_bridge, MUSIC_PLAYER_BGM, 0
+	song mus_unova_n_castle, MUSIC_PLAYER_BGM, 0
+	song mus_unova_d_01, MUSIC_PLAYER_BGM, 0
+	song mus_unova_d_02, MUSIC_PLAYER_BGM, 0
+	song mus_unova_d_03, MUSIC_PLAYER_BGM, 0
+	song mus_unova_d_04, MUSIC_PLAYER_BGM, 0
+	song mus_unova_d_05, MUSIC_PLAYER_BGM, 0
+	song mus_unova_d_06, MUSIC_PLAYER_BGM, 0
+	song mus_unova_d_07, MUSIC_PLAYER_BGM, 0
+	song mus_unova_d_champroad, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_tsureteke1, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_tsureteke2, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_rival, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_support, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_doctor, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_doctor2, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_plasma, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_n, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_sage, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_g_cis, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_gl_union, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_inishie, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_emotion, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_trouble, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_last, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_handsome, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_champion, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_opening, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_kanransya, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_n_castle, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_legend_born_b, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_legend_born_w, MUSIC_PLAYER_BGM, 0
+	song mus_unova_msl_field, MUSIC_PLAYER_BGM, 0
+	song mus_unova_msl_dressup, MUSIC_PLAYER_BGM, 0
+	song mus_unova_msl_before, MUSIC_PLAYER_BGM, 0
+	song mus_unova_msl_01, MUSIC_PLAYER_BGM, 0
+	song mus_unova_msl_02, MUSIC_PLAYER_BGM, 0
+	song mus_unova_msl_03, MUSIC_PLAYER_BGM, 0
+	song mus_unova_msl_04, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_01, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_02, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_03, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_04, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_05, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_06, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_07, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_08, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_09, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_10, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_11, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_12, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_13, MUSIC_PLAYER_BGM, 0
+	song mus_unova_eye_plasma, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_norapoke, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_tsuyopoke, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_trainer, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_subway_trainer, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_gymleader, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_rival, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_plasma, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_shitenno, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_champ, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_n, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_n_2, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_g_cis, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_shin, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_mu, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_rai, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_movepoke, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_setpoke, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_shirona, MUSIC_PLAYER_BGM, 0
+	song mus_unova_battlepinch, MUSIC_PLAYER_BGM, 0
+	song mus_unova_battlesuperior, MUSIC_PLAYER_BGM, 0
+	song mus_unova_win1, MUSIC_PLAYER_BGM, 0
+	song mus_unova_win2, MUSIC_PLAYER_BGM, 0
+	song mus_unova_win3, MUSIC_PLAYER_BGM, 0
+	song mus_unova_win4, MUSIC_PLAYER_BGM, 0
+	song mus_unova_win5, MUSIC_PLAYER_BGM, 0
+	song mus_unova_wifi_access, MUSIC_PLAYER_BGM, 0
+	song mus_unova_wifi_present, MUSIC_PLAYER_BGM, 0
+	song mus_unova_game_sync, MUSIC_PLAYER_BGM, 0
+	song mus_unova_glterminal, MUSIC_PLAYER_BGM, 0
+	song mus_unova_guruguru, MUSIC_PLAYER_BGM, 0
+	song mus_unova_gts, MUSIC_PLAYER_BGM, 0
+	song mus_unova_wcs, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_shirona, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_friend, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_sound_designer, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_trainer_m, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_trainer_s, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_wcs, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_legend_come_b, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_legend_come_w, MUSIC_PLAYER_BGM, 0
+	song mus_unova_vs_trainer_wifi, MUSIC_PLAYER_BGM, 0
+	song mus_unova_win6, MUSIC_PLAYER_BGM, 0
+	song mus_unova_n_room, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_epirogue, MUSIC_PLAYER_BGM, 0
+	song mus_unova_e_epirogue_w, MUSIC_PLAYER_BGM, 0
+	song mus_unova_gf_logo, MUSIC_PLAYER_BGM, 0
+	song mus_unova_msl_dl_01, MUSIC_PLAYER_BGM, 0
+	song mus_unova_msl_dl_02, MUSIC_PLAYER_BGM, 0
+	song mus_unova_msl_dl_03, MUSIC_PLAYER_BGM, 0
+	song mus_unova_msl_dl_04, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_asa, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_lvup, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_item, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_keyitem, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_pokeget, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_shinkaome, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_badge, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_waza, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_acce, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_wasure, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_kinomi, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_hyouka1, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_hyouka2, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_hyouka3, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_hyouka4, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_hyouka5, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_hyouka6, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_tamago_get, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_bpget, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_aishou_h, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_aishou_m, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_aishou_l, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_aishou_kidou, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_mission_start, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_mission_clear, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_mission_failed, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_item_mystery, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_call, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_quiz, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_del_power, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_02, MUSIC_PLAYER_BGM, 0
+	song mus_unova_me_end, MUSIC_PLAYER_BGM, 0
+@ end of UNOVA's songs
 
 	.align 2
 dummy_song_header:

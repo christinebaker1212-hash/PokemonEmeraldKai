@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_VICTORYROAD_Z220",
   "name": "Unova_VictoryRoad_Z220",
   "layout": "LAYOUT_UNOVA_VICTORYROAD_Z220",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_CHAMPROAD",
   "region_map_section": "MAPSEC_UNOVA_VICTORY_ROAD",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

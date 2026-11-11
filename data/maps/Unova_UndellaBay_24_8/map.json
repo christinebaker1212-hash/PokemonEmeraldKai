@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_UNDELLABAY_24_8",
   "name": "Unova_UndellaBay_24_8",
   "layout": "LAYOUT_UNOVA_UNDELLABAY_24_8",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_R_E_SP",
   "region_map_section": "MAPSEC_UNOVA_UNDELLA_BAY",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

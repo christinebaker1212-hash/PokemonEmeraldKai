@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_PINWHEELFOREST_18_18",
   "name": "Unova_PinwheelForest_18_18",
   "layout": "LAYOUT_UNOVA_PINWHEELFOREST_18_18",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_R_B_SP",
   "region_map_section": "MAPSEC_UNOVA_PINWHEEL_FOREST",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

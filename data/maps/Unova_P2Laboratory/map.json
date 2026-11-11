@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_P2LABORATORY",
   "name": "Unova_P2Laboratory",
   "layout": "LAYOUT_UNOVA_P2LABORATORY",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_R_D_SP",
   "region_map_section": "MAPSEC_UNOVA_P2_LABORATORY",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

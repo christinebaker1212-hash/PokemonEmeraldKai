@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ICIRRUSCITY_Z116",
   "name": "Unova_IcirrusCity_Z116",
   "layout": "LAYOUT_UNOVA_ICIRRUSCITY_Z116",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_C_07",
   "region_map_section": "MAPSEC_UNOVA_ICIRRUS_CITY",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

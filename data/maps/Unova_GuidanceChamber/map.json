@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_GUIDANCECHAMBER",
   "name": "Unova_GuidanceChamber",
   "layout": "LAYOUT_UNOVA_GUIDANCECHAMBER",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_02",
   "region_map_section": "MAPSEC_UNOVA_GUIDANCE_CHAMBER",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

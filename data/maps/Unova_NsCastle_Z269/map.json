@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_NSCASTLE_Z269",
   "name": "Unova_NsCastle_Z269",
   "layout": "LAYOUT_UNOVA_NSCASTLE_Z269",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_N_CASTLE",
   "region_map_section": "MAPSEC_UNOVA_N_S_CASTLE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_RUMINATIONFIELD",
   "name": "Unova_RuminationField",
   "layout": "LAYOUT_UNOVA_RUMINATIONFIELD",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_01",
   "region_map_section": "MAPSEC_UNOVA_RUMINATION_FIELD",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_UNITYTOWER_Z149",
   "name": "Unova_UnityTower_Z149",
   "layout": "LAYOUT_UNOVA_UNITYTOWER_Z149",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_UNITED_NATIONS",
   "region_map_section": "MAPSEC_UNOVA_UNITY_TOWER",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

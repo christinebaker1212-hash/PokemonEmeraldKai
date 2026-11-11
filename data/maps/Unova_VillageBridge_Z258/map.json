@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_VILLAGEBRIDGE_Z258",
   "name": "Unova_VillageBridge_Z258",
   "layout": "LAYOUT_UNOVA_VILLAGEBRIDGE_Z258",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_H_04",
   "region_map_section": "MAPSEC_UNOVA_VILLAGE_BRIDGE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

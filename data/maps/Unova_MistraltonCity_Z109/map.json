@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_MISTRALTONCITY_Z109",
   "name": "Unova_MistraltonCity_Z109",
   "layout": "LAYOUT_UNOVA_MISTRALTONCITY_Z109",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_POKECEN",
   "region_map_section": "MAPSEC_UNOVA_MISTRALTON_CITY",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

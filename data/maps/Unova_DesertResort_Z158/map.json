@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_DESERTRESORT_Z158",
   "name": "Unova_DesertResort_Z158",
   "layout": "LAYOUT_UNOVA_DESERTRESORT_Z158",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_02",
   "region_map_section": "MAPSEC_UNOVA_DESERT_RESORT",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

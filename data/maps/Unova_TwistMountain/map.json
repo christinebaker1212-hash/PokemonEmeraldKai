@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_TWISTMOUNTAIN",
   "name": "Unova_TwistMountain",
   "layout": "LAYOUT_UNOVA_TWISTMOUNTAIN",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_R_D_SP",
   "region_map_section": "MAPSEC_UNOVA_TWIST_MOUNTAIN",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

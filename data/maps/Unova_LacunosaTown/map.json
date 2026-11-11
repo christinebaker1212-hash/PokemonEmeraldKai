@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_LACUNOSATOWN",
   "name": "Unova_LacunosaTown",
   "layout": "LAYOUT_UNOVA_LACUNOSATOWN",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_PALACE2",
   "region_map_section": "MAPSEC_UNOVA_LACUNOSA_TOWN",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

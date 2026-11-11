@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_UNITYTOWER",
   "name": "Unova_UnityTower",
   "layout": "LAYOUT_UNOVA_UNITYTOWER",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_R_C_SP",
   "region_map_section": "MAPSEC_UNOVA_UNITY_TOWER",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

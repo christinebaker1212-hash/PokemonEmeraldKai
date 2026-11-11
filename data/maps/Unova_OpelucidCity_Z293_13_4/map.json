@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_OPELUCIDCITY_Z293_13_4",
   "name": "Unova_OpelucidCity_Z293_13_4",
   "layout": "LAYOUT_UNOVA_OPELUCIDCITY_Z293_13_4",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_PALACE2",
   "region_map_section": "MAPSEC_UNOVA_OPELUCID_CITY",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ACCUMULATOWN",
   "name": "Unova_AccumulaTown",
   "layout": "LAYOUT_UNOVA_ACCUMULATOWN",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_T_02",
   "region_map_section": "MAPSEC_UNOVA_ACCUMULA_TOWN",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

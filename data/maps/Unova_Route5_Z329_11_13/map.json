@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ROUTE5_Z329_11_13",
   "name": "Unova_Route5_Z329_11_13",
   "layout": "LAYOUT_UNOVA_ROUTE5_Z329_11_13",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_R_C_SP",
   "region_map_section": "MAPSEC_UNOVA_ROUTE_5",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

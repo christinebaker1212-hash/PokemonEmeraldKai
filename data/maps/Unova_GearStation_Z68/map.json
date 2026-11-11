@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_GEARSTATION_Z68",
   "name": "Unova_GearStation_Z68",
   "layout": "LAYOUT_UNOVA_GEARSTATION_Z68",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_GEAR_STATION",
   "region_map_section": "MAPSEC_UNOVA_GEAR_STATION",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

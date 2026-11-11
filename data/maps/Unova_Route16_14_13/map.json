@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ROUTE16_14_13",
   "name": "Unova_Route16_14_13",
   "layout": "LAYOUT_UNOVA_ROUTE16_14_13",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_PALACE2",
   "region_map_section": "MAPSEC_UNOVA_ROUTE_16",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

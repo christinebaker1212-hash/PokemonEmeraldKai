@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_LIBERTYGARDEN_Z237",
   "name": "Unova_LibertyGarden_Z237",
   "layout": "LAYOUT_UNOVA_LIBERTYGARDEN_Z237",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_03",
   "region_map_section": "MAPSEC_UNOVA_LIBERTY_GARDEN",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

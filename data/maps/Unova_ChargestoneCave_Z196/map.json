@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_CHARGESTONECAVE_Z196",
   "name": "Unova_ChargestoneCave_Z196",
   "layout": "LAYOUT_UNOVA_CHARGESTONECAVE_Z196",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_02",
   "region_map_section": "MAPSEC_UNOVA_CHARGESTONE_CAVE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

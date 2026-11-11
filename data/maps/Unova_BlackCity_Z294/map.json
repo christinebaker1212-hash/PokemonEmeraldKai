@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_BLACKCITY_Z294",
   "name": "Unova_BlackCity_Z294",
   "layout": "LAYOUT_UNOVA_BLACKCITY_Z294",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_PALACE2",
   "region_map_section": "MAPSEC_UNOVA_BLACK_CITY",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

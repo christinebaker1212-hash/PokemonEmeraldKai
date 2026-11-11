@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ABUNDANTSHRINE_Z377",
   "name": "Unova_AbundantShrine_Z377",
   "layout": "LAYOUT_UNOVA_ABUNDANTSHRINE_Z377",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_06",
   "region_map_section": "MAPSEC_UNOVA_ABUNDANT_SHRINE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

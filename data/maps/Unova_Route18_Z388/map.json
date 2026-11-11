@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ROUTE18_Z388",
   "name": "Unova_Route18_Z388",
   "layout": "LAYOUT_UNOVA_ROUTE18_Z388",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_R_D_SP",
   "region_map_section": "MAPSEC_UNOVA_ROUTE_18",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

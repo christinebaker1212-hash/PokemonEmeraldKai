@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_TUBELINEBRIDGE_Z302",
   "name": "Unova_TubelineBridge_Z302",
   "layout": "LAYOUT_UNOVA_TUBELINEBRIDGE_Z302",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_PALACE2",
   "region_map_section": "MAPSEC_UNOVA_TUBELINE_BRIDGE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

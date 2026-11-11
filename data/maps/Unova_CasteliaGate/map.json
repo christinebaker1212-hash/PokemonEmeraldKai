@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_CASTELIAGATE",
   "name": "Unova_CasteliaGate",
   "layout": "LAYOUT_UNOVA_CASTELIAGATE",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_GATE",
   "region_map_section": "MAPSEC_UNOVA_CASTELIA_GATE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

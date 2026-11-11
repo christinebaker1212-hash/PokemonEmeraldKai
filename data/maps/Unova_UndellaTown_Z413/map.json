@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_UNDELLATOWN_Z413",
   "name": "Unova_UndellaTown_Z413",
   "layout": "LAYOUT_UNOVA_UNDELLATOWN_Z413",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_POKECEN",
   "region_map_section": "MAPSEC_UNOVA_UNDELLA_TOWN",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

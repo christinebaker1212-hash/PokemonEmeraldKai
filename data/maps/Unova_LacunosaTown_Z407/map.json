@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_LACUNOSATOWN_Z407",
   "name": "Unova_LacunosaTown_Z407",
   "layout": "LAYOUT_UNOVA_LACUNOSATOWN_Z407",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_POKECEN",
   "region_map_section": "MAPSEC_UNOVA_LACUNOSA_TOWN",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

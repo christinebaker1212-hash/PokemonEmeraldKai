@@ -37,6 +37,7 @@
 #include "constants/event_objects.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
+#include "constants/songs.h"
 #include "u3d_cmds.h"
 #include "u3d_maps.h"
 #include "script_pokemon_util.h"
@@ -488,7 +489,34 @@ static bool8 MovesDone(void)
 }
 
 // ------------------------------------------------------------------------------------------------ the VM
-enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN };
+enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP };
+
+// ---- Black's songs: its sound archive's sequence numbers as the game's song slots (tools/kaisong/unova_songs.py);
+// a pushed song comes back when the one played over it ends (a fanfare: Black's PushAndPlayBgm, StartWaitBgmThenPop)
+#include "../data/unova_songs.h"
+static u16 sSongStack[4];
+static u8 sSongDepth;
+
+static u16 SongOf(u16 seq)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sUnovaSongs); i++)
+        if (sUnovaSongs[i].seq == seq)
+            return sUnovaSongs[i].song;
+    return MUS_NONE;
+}
+
+static void PushSong(void)
+{
+    if (sSongDepth < ARRAY_COUNT(sSongStack))
+        sSongStack[sSongDepth++] = GetCurrentMapMusic();
+}
+
+static void PopSong(void)
+{
+    if (sSongDepth)
+        PlayNewMapMusic(sSongStack[--sSongDepth]);
+}
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
 enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE };
 static u8 sScreen;
@@ -937,6 +965,35 @@ static void Step(struct Thread *t)
             *WorkPtr(a[1]) = gSaveBlock1Ptr->pos.y + (i < 0 ? 0 : 32 * U3D_MapCellZ(i));
             break;
         }
+        // ---- music
+        case U3C_FadeOutPlayBgm:
+        case U3C_FadeOutPlayBgmWithFade:
+        case U3C_FadeOutPlayFixedBgm:
+            if (SongOf(a[0]) != MUS_NONE)
+                FadeOutAndPlayNewMapMusic(SongOf(a[0]), 4);
+            break;
+        case U3C_PushAndPlayBgm:
+            PushSong();
+            if (SongOf(a[0]) != MUS_NONE)
+                PlayNewMapMusic(SongOf(a[0]));
+            break;
+        case U3C_StartWaitBgmThenPop:   // (the fanfare to its end, then the song it played over)
+            t->waitFrames = 60 * 20;
+            t->wait = W_SONG_THEN_POP;
+            break;
+        case U3C_PushBgm:
+            PushSong();
+            break;
+        case U3C_PopBgm:
+            PopSong();
+            break;
+        case U3C_ResumeZoneBgm:
+        case U3C_ResumeZoneBgmWithFade:
+        case U3C_ResumeBgmSlots:
+            sSongDepth = 0;
+            if (GetCurrentMapMusic() != GetCurrLocationDefaultMusic())
+                FadeOutAndPlayNewMapMusic(GetCurrLocationDefaultMusic(), 4);
+            break;
         // ---- sound
         case U3C_PlaySe:
             if (V(0) == 547)   // (the talk sound)
@@ -1002,6 +1059,13 @@ static void Wait(struct Thread *t)
     case W_FADE:
         if (!gPaletteFade.active)
             t->wait = W_NONE;
+        break;
+    case W_SONG_THEN_POP:
+        if (IsBGMStopped() || t->waitFrames == 0 || --t->waitFrames == 0)
+        {
+            PopSong();
+            t->wait = W_NONE;
+        }
         break;
     case W_YESNO:
     {

@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_CASTELIACITY",
   "name": "Unova_CasteliaCity",
   "layout": "LAYOUT_UNOVA_CASTELIACITY",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_C_03",
   "region_map_section": "MAPSEC_UNOVA_CASTELIA_CITY",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

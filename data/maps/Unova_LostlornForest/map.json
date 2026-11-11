@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_LOSTLORNFOREST",
   "name": "Unova_LostlornForest",
   "layout": "LAYOUT_UNOVA_LOSTLORNFOREST",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_06",
   "region_map_section": "MAPSEC_UNOVA_LOSTLORN_FOREST",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

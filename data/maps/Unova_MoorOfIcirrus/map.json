@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_MOOROFICIRRUS",
   "name": "Unova_MoorOfIcirrus",
   "layout": "LAYOUT_UNOVA_MOOROFICIRRUS",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_01",
   "region_map_section": "MAPSEC_UNOVA_MOOR_OF_ICIRRUS",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

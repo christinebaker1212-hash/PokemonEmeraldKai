@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_RELICCASTLE",
   "name": "Unova_RelicCastle",
   "layout": "LAYOUT_UNOVA_RELICCASTLE",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_04",
   "region_map_section": "MAPSEC_UNOVA_RELIC_CASTLE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

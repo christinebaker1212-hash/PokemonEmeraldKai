@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_NIMBASACITY_Z64",
   "name": "Unova_NimbasaCity_Z64",
   "layout": "LAYOUT_UNOVA_NIMBASACITY_Z64",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_C_04",
   "region_map_section": "MAPSEC_UNOVA_NIMBASA_CITY",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

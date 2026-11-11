@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_NUVEMATOWN_Z390",
   "name": "Unova_NuvemaTown_Z390",
   "layout": "LAYOUT_UNOVA_NUVEMATOWN_Z390",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_T_01",
   "region_map_section": "MAPSEC_UNOVA_NUVEMA_TOWN",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

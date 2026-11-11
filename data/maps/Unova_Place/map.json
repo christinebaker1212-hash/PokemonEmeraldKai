@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_PLACE",
   "name": "Unova_Place",
   "layout": "LAYOUT_UNOVA_PLACE",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_POKECEN",
   "region_map_section": "MAPSEC_UNOVA_NONE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

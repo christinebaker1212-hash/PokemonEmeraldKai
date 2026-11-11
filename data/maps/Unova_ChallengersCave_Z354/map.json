@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_CHALLENGERSCAVE_Z354",
   "name": "Unova_ChallengersCave_Z354",
   "layout": "LAYOUT_UNOVA_CHALLENGERSCAVE_Z354",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_02",
   "region_map_section": "MAPSEC_UNOVA_CHALLENGER_S_CAVE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

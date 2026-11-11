@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ROYALUNOVA",
   "name": "Unova_RoyalUnova",
   "layout": "LAYOUT_UNOVA_ROYALUNOVA",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_PLEASURE_BOAT",
   "region_map_section": "MAPSEC_UNOVA_ROYAL_UNOVA",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

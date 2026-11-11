@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_POKTRANSFERLAB",
   "name": "Unova_PokTransferLab",
   "layout": "LAYOUT_UNOVA_POKTRANSFERLAB",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_PALPARK",
   "region_map_section": "MAPSEC_UNOVA_POKE_TRANSFER_LAB",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

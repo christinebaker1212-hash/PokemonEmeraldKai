@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_TRIALCHAMBER",
   "name": "Unova_TrialChamber",
   "layout": "LAYOUT_UNOVA_TRIALCHAMBER",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_CHAMPROAD",
   "region_map_section": "MAPSEC_UNOVA_TRIAL_CHAMBER",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

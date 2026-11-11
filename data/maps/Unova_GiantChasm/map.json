@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_GIANTCHASM",
   "name": "Unova_GiantChasm",
   "layout": "LAYOUT_UNOVA_GIANTCHASM",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_R_E_SP",
   "region_map_section": "MAPSEC_UNOVA_GIANT_CHASM",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

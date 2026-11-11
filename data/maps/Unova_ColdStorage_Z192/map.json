@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_COLDSTORAGE_Z192",
   "name": "Unova_ColdStorage_Z192",
   "layout": "LAYOUT_UNOVA_COLDSTORAGE_Z192",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_03",
   "region_map_section": "MAPSEC_UNOVA_COLD_STORAGE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

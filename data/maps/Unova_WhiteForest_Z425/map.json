@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_WHITEFOREST_Z425",
   "name": "Unova_WhiteForest_Z425",
   "layout": "LAYOUT_UNOVA_WHITEFOREST_Z425",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_POKECEN",
   "region_map_section": "MAPSEC_UNOVA_WHITE_FOREST",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

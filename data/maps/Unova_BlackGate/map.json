@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_BLACKGATE",
   "name": "Unova_BlackGate",
   "layout": "LAYOUT_UNOVA_BLACKGATE",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_GATE",
   "region_map_section": "MAPSEC_UNOVA_BLACK_GATE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

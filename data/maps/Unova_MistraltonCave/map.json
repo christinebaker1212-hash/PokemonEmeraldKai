@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_MISTRALTONCAVE",
   "name": "Unova_MistraltonCave",
   "layout": "LAYOUT_UNOVA_MISTRALTONCAVE",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_02",
   "region_map_section": "MAPSEC_UNOVA_MISTRALTON_CAVE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ENTREEFOREST_Z283",
   "name": "Unova_EntreeForest_Z283",
   "layout": "LAYOUT_UNOVA_ENTREEFOREST_Z283",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_PALACE",
   "region_map_section": "MAPSEC_UNOVA_ENTREE_FOREST",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

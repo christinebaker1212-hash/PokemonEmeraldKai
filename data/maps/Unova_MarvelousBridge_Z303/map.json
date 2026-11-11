@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_MARVELOUSBRIDGE_Z303",
   "name": "Unova_MarvelousBridge_Z303",
   "layout": "LAYOUT_UNOVA_MARVELOUSBRIDGE_Z303",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_PALACE2",
   "region_map_section": "MAPSEC_UNOVA_MARVELOUS_BRIDGE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_OPELUCIDCITY_Z122",
   "name": "Unova_OpelucidCity_Z122",
   "layout": "LAYOUT_UNOVA_OPELUCIDCITY_Z122",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_POKECEN",
   "region_map_section": "MAPSEC_UNOVA_OPELUCID_CITY",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

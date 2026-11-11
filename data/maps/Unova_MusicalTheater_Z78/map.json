@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_MUSICALTHEATER_Z78",
   "name": "Unova_MusicalTheater_Z78",
   "layout": "LAYOUT_UNOVA_MUSICALTHEATER_Z78",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_MSL_FIELD",
   "region_map_section": "MAPSEC_UNOVA_MUSICAL_THEATER",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

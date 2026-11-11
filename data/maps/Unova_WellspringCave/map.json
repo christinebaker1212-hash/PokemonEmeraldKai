@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_WELLSPRINGCAVE",
   "name": "Unova_WellspringCave",
   "layout": "LAYOUT_UNOVA_WELLSPRINGCAVE",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_D_02",
   "region_map_section": "MAPSEC_UNOVA_WELLSPRING_CAVE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

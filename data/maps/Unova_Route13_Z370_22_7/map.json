@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_ROUTE13_Z370_22_7",
   "name": "Unova_Route13_Z370_22_7",
   "layout": "LAYOUT_UNOVA_ROUTE13_Z370_22_7",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_R_E_SP",
   "region_map_section": "MAPSEC_UNOVA_ROUTE_13",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

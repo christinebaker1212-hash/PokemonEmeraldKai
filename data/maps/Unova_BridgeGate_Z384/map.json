@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_BRIDGEGATE_Z384",
   "name": "Unova_BridgeGate_Z384",
   "layout": "LAYOUT_UNOVA_BRIDGEGATE_Z384",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_GATE",
   "region_map_section": "MAPSEC_UNOVA_BRIDGE_GATE",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

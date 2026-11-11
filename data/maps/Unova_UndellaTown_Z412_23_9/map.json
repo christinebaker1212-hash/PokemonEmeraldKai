@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_UNDELLATOWN_Z412_23_9",
   "name": "Unova_UndellaTown_Z412_23_9",
   "layout": "LAYOUT_UNOVA_UNDELLATOWN_Z412_23_9",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_T_05_SP",
   "region_map_section": "MAPSEC_UNOVA_UNDELLA_TOWN",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

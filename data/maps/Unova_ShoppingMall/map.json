@@ -2,7 +2,7 @@
   "id": "MAP_UNOVA_SHOPPINGMALL",
   "name": "Unova_ShoppingMall",
   "layout": "LAYOUT_UNOVA_SHOPPINGMALL",
-  "music": "MUS_NONE",
+  "music": "MUS_UNOVA_FS",
   "region_map_section": "MAPSEC_UNOVA_SHOPPING_MALL",
   "requires_flash": false,
   "weather": "WEATHER_NONE",
