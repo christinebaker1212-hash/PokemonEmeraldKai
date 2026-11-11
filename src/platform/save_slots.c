@@ -23,6 +23,7 @@
 #include <SDL2/SDL.h>
 #include "global.h"
 #include "save_slots.h"
+#include "aw_file.h"
 #include "mp_region.h"
 
 extern char gPlatformSavePath[512];
@@ -231,6 +232,12 @@ int SaveSlots_Erase(int slot)
     if (slot < 1 || slot > SAVE_SLOT_COUNT || sSlot == 0)
         return 0;
     SlotDir(slot, dir, sizeof(dir));
+    AwFile_Flush();   // (a side file still being written would come back after it's gone)
+    if (slot == sSlot)
+    {
+        void Platform_CloseSaveFile(void);
+        Platform_CloseSaveFile();   // (Windows deletes no open file; SaveSlots_Switch opens it again, empty)
+    }
     d = opendir(dir);
     if (d == NULL)
         return 0;

@@ -333,8 +333,15 @@ def material(f, mobj):
     return out
 
 
-def envelope_mtx(f, p, joints, inv):
-    """Envelope PObj: per PNMTXIDX/3 the weighted joint matrices (bind pose: world @ inverse bind)."""
+JOBJ_SKELETON_ROOT = 0x2
+
+
+def envelope_mtx(f, p, joints, inv, owner_flags=JOBJ_SKELETON_ROOT):
+    """Envelope PObj: per PNMTXIDX/3 the weighted joint matrices (bind pose: world @ inverse bind). A vertex bound to
+    one joint at full weight is in that joint's own space when the mesh's joint is a skeleton's root (the people);
+    otherwise it is in the bind pose like a blended one (the POKeMON: their leaves, fins and ears were left where the
+    bind put them, the user 2026-11-11)."""
+    single_local = bool(owner_flags & JOBJ_SKELETON_ROOT)
     lst = f.ptr_list(f.u32(p + 0x14))
     out = []
     for e in lst:
@@ -346,7 +353,7 @@ def envelope_mtx(f, p, joints, inv):
                 break
             ws.append((jt, f.f32(o + 4)))
             o += 8
-        if len(ws) == 1 and abs(ws[0][1] - 1.0) < 1e-6:
+        if len(ws) == 1 and abs(ws[0][1] - 1.0) < 1e-6 and (single_local or inv.get(ws[0][0]) is None):
             # one joint at full weight: the vertex is in that joint's own space
             out.append(joints.get(ws[0][0], np.eye(4)))
             continue
@@ -381,7 +388,7 @@ def load_model(f, root_joint):
         pflags = f.u16(p + 0x0C)
         kind = pflags & POBJ_TYPE_MASK
         if kind == POBJ_ENVELOPE:
-            mtxs = envelope_mtx(f, p, joints, inv)
+            mtxs = envelope_mtx(f, p, joints, inv, jflags)
 
             def xf(v):
                 k = v["mtx"] // 3

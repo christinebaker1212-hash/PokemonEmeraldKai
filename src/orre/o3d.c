@@ -748,7 +748,10 @@ const u16 *O3D_LayoutBlocks(const struct MapLayout *layout)
 
 // ------------------------------------------------------------------------------------------------ the ground's height
 
-#define HEADROOM 24.0f   // (a tile and a half: under less, a floor isn't one to stand on)
+// A person's height (Colosseum's people stand 16 to 18 of its units: 17.5, in the map's units): a floor with another
+// less than that over it isn't one to stand on. 24 (a tile and a half) let PHENAC's plaza count under its stadium's
+// ring 26 above, and everyone walked round the ring inside it with their heads out (the user, 2026-11-11)
+#define HEADROOM (sCur->tile > 0.0f ? 17.5f * 16.0f / sCur->tile : 34.0f)
 // A tile's ground height (16 units a tile): of its heights, the one nearest `near` (an object on a bridge stays on
 // it); `near` itself where it has none
 static float TileHeight(s32 tx, s32 tz, float near)

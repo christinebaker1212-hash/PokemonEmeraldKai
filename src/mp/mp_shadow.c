@@ -19,6 +19,7 @@
 #include "field_effect_helpers.h"
 #include "constants/event_objects.h"
 #include "s3d.h"
+#include "o3d.h"
 
 #define TAG_SHADOW 0x5AD0
 #define SHADOW_MAGIC 0x5AD0
@@ -335,7 +336,8 @@ static bool8 FeetCovered(s16 x, s16 y, const struct Sprite *o)
     const struct MapLayout *layout = gMapHeader.mapLayout;
     const u16 *tiles;
     u32 id, k, row, opaque = 0;
-    if (o->oam.priority <= 1 || layout == NULL || S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+    if (o->oam.priority <= 1 || layout == NULL || S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)
+     || O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))   // (3D maps: their stand-in tiles cover nothing)
         return FALSE;
     if (MP_MapPic_CoversFeet(x, y))   // (the GAME CENTER's counters: its pictures' over layer, not tiles)
         return TRUE;

@@ -691,7 +691,15 @@ static void CloseSaveFile()
     if (sSaveFile != NULL)
     {
         fclose(sSaveFile);
+        sSaveFile = NULL;
     }
+}
+
+// Moemon Kai: ERASE (save_slots.c SaveSlots_Erase): the save in use closed before its files go. Windows deletes no
+// open file: the save stayed, and read again it loaded as before (the user, 2026-11-11)
+void Platform_CloseSaveFile(void)
+{
+    CloseSaveFile();
 }
 
 // Key mappings
