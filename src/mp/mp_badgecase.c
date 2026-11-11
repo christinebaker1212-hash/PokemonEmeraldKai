@@ -28,9 +28,9 @@
 extern const u8 gMpBadgeData[];
 bool8 Platform_PoketchMouse(s32 *x, s32 *y, bool8 *down);
 
-static const char *const sRegionNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
+static const char *const sRegionNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH", "UNOVA"};
 // the tabs left to right: the regions in the order they're travelled
-static const u8 sTabRegion[REGION_COUNT] = {REGION_HOENN, REGION_KANTO, REGION_JOHTO, REGION_SINNOH};
+static const u8 sTabRegion[REGION_COUNT] = {REGION_HOENN, REGION_KANTO, REGION_JOHTO, REGION_SINNOH, REGION_UNOVA};
 
 struct BadgeInfo
 {
@@ -77,6 +77,16 @@ static const struct BadgeInfo sBadges[REGION_COUNT][TCARD_BADGES_PER_REGION] = {
         {"MINE BADGE", "BYRON", "CANALAVE CITY"},
         {"ICICLE BADGE", "CANDICE", "SNOWPOINT CITY"},
         {"BEACON BADGE", "VOLKNER", "SUNYSHORE CITY"},
+    },
+    [REGION_UNOVA] = {   // (Black's)
+        {"TRIO BADGE", "CILAN", "STRIATON CITY"},
+        {"BASIC BADGE", "LENORA", "NACRENE CITY"},
+        {"INSECT BADGE", "BURGH", "CASTELIA CITY"},
+        {"BOLT BADGE", "ELESA", "NIMBASA CITY"},
+        {"QUAKE BADGE", "CLAY", "DRIFTVEIL CITY"},
+        {"JET BADGE", "SKYLA", "MISTRALTON CITY"},
+        {"FREEZE BADGE", "BRYCEN", "ICIRRUS CITY"},
+        {"LEGEND BADGE", "DRAYDEN", "OPELUCID CITY"},
     },
 };
 

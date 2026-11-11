@@ -17,7 +17,7 @@
 #define STASH_SLOTS 64
 #define FREE_SLOTS 64
 #define HM_SLOTS 16
-#define KIST_VERSION 1
+#define KIST_VERSION 2   // (2: UNOVA's region; version 1 had four regions' stashes, struct RegionItems4: converted)
 
 struct RegionItems
 {
@@ -25,6 +25,13 @@ struct RegionItems
     struct { u16 item, qty; } stash[REGION_COUNT][STASH_SLOTS];   // each region's key items left behind
     u16 free[FREE_SLOTS];                                         // the items that travel for good
     struct { u16 item; u8 regions, pad; } hmFrom[HM_SLOTS];       // where the GLOBAL PC's HMs came from
+};
+struct RegionItems4
+{
+    u32 version;
+    struct { u16 item, qty; } stash[REGION_COUNT_BEFORE_UNOVA][STASH_SLOTS];
+    u16 free[FREE_SLOTS];
+    struct { u16 item; u8 regions, pad; } hmFrom[HM_SLOTS];
 };
 static struct RegionItems sKi;
 static bool8 sMigrate;   // the save had no record: its BAG is sorted out once (old saves let every key item travel)
@@ -390,7 +397,18 @@ const void *MP_RegionItems_Save(u32 *size)
 void MP_RegionItems_Load(const void *data, u32 size)
 {
     memset(&sKi, 0, sizeof(sKi));
-    memcpy(&sKi, data, size < sizeof(sKi) ? size : sizeof(sKi));
+    if (size >= 4 && *(const u32 *)data == 1)
+    {
+        // a record from before UNOVA: four regions' stashes, then the rest
+        struct RegionItems4 old;
+        memset(&old, 0, sizeof(old));
+        memcpy(&old, data, size < sizeof(old) ? size : sizeof(old));
+        memcpy(sKi.stash, old.stash, sizeof(old.stash));
+        memcpy(sKi.free, old.free, sizeof(old.free));
+        memcpy(sKi.hmFrom, old.hmFrom, sizeof(old.hmFrom));
+    }
+    else
+        memcpy(&sKi, data, size < sizeof(sKi) ? size : sizeof(sKi));
     sKi.version = KIST_VERSION;
     sMigrate = FALSE;
 }

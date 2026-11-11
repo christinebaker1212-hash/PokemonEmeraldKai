@@ -173,7 +173,12 @@ static u16 ZoneField(u16 zone, u32 field)
 // (zonedata.c: works 0x4000 on, then the flags 1-0xB5F; 0x4000+ flags are temporary, 0x8000+ works the script's own)
 #define WORKS 0x140
 #define FLAG_BYTES 0x16C
-static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began; } sWork;   // (began: Black's new-game script has run)
+static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges; } sWork;   // (began: Black's new-game script
+                                                                                        // has run; badges: UNOVA's, a bit each)
+u8 *U3D_Vm_BadgeFlags(void)
+{
+    return &sWork.badges;
+}
 static u8 sTempFlags[8];
 static u16 sLocal[0x40];
 

@@ -1189,8 +1189,9 @@ static u16 QzGetReachableRegionsMask_(void)
 // goes to region VAR_0x8001 from here, its name in STR_VAR_1
 static u16 MP_RegionBoatAsk_(void)
 {
-    static const u8 sHoenn[] = _("HOENN"), sJohto[] = _("JOHTO"), sKanto[] = _("KANTO"), sSinnoh[] = _("SINNOH");
-    static const u8 *const sNames[REGION_COUNT] = {sHoenn, sJohto, sKanto, sSinnoh};
+    static const u8 sHoenn[] = _("HOENN"), sJohto[] = _("JOHTO"), sKanto[] = _("KANTO"), sSinnoh[] = _("SINNOH"),
+                    sUnova[] = _("UNOVA");
+    static const u8 *const sNames[REGION_COUNT] = {sHoenn, sJohto, sKanto, sSinnoh, sUnova};
     u16 r = gSpecialVar_0x8001;
     if (r == 0xFF)
         return MP_Region_Current();   // (EventScript_RegionPickAll: which menu)
@@ -1209,6 +1210,7 @@ static const struct {u16 map; s8 x, y;} sRegionPorts[REGION_COUNT] = {
     {MAP_JOHTO_OLIVINE_PORT, 8, 16},
     {MAP_KANTO_VERMILION_CITY, 23, 32},
     {MAP_SINNOH_CANALAVE_CITY, 11, 22},   // (CANALAVE's dock, beside the harbor sailor: tools/sinnoh/words.py)
+    {MAP_UNOVA_CASTELIACITY, 16, 16},     // (CASTELIA's piers)
 };
 
 // Moemon Kai: a region's port (BATTLE ISLAND's boat back when the port it came from is unknown: mp_battleisland.c)
@@ -1338,15 +1340,16 @@ u16 MP_RegionBoatAsk(void) { return gSpecialVar_Result = MP_RegionBoatAsk_(); }
 // EventScript_RegionPickAll: the menu's choice (RESULT) -> the region (src/data/script_menu.h MULTI_REGIONS_FROM_*)
 u16 MP_RegionBoatPick(void)
 {
-    static const u8 sTo[REGION_COUNT][3] = {
-        [REGION_HOENN] = {REGION_KANTO, REGION_JOHTO, REGION_SINNOH},
-        [REGION_JOHTO] = {REGION_KANTO, REGION_HOENN, REGION_SINNOH},
-        [REGION_KANTO] = {REGION_JOHTO, REGION_HOENN, REGION_SINNOH},
-        [REGION_SINNOH] = {REGION_HOENN, REGION_JOHTO, REGION_KANTO},
+    static const u8 sTo[REGION_COUNT][REGION_COUNT - 1] = {   // (src/data/script_menu.h MultichoiceList_RegionsFrom*)
+        [REGION_HOENN] = {REGION_KANTO, REGION_JOHTO, REGION_SINNOH, REGION_UNOVA},
+        [REGION_JOHTO] = {REGION_KANTO, REGION_HOENN, REGION_SINNOH, REGION_UNOVA},
+        [REGION_KANTO] = {REGION_JOHTO, REGION_HOENN, REGION_SINNOH, REGION_UNOVA},
+        [REGION_SINNOH] = {REGION_HOENN, REGION_JOHTO, REGION_KANTO, REGION_UNOVA},
+        [REGION_UNOVA] = {REGION_HOENN, REGION_JOHTO, REGION_KANTO, REGION_SINNOH},
     };
     u16 choice = gSpecialVar_Result;
     u8 cur = MP_Region_Current();
-    return gSpecialVar_Result = (choice < 3 && cur < REGION_COUNT) ? sTo[cur][choice] : 0x7F;
+    return gSpecialVar_Result = (choice < REGION_COUNT - 1 && cur < REGION_COUNT) ? sTo[cur][choice] : 0x7F;
 }
 u16 QzTravelToRegion(void) { return gSpecialVar_Result = QzTravelToRegion_(); }
 u16 QzSaveLeagueVictoryRecord(void) { return gSpecialVar_Result = QzSaveLeagueVictoryRecord_(); }

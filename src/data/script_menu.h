@@ -792,15 +792,18 @@ static const u8 sRegionPortSlateport[] = _("SLATEPORT (HOENN)");
 static const u8 sRegionPortOlivine[] = _("OLIVINE (JOHTO)");
 static const u8 sRegionPortVermilion[] = _("VERMILION (KANTO)");
 static const u8 sRegionPortCanalave[] = _("CANALAVE (SINNOH)");
+static const u8 sRegionPortCastelia[] = _("CASTELIA (UNOVA)");
 // (the first two as the menus without SINNOH had them; src/qz_specials.c MP_RegionBoatPick follows this order)
 static const struct MenuAction MultichoiceList_RegionsFromHoenn[] = {
-    {sRegionPortVermilion}, {sRegionPortOlivine}, {sRegionPortCanalave}, {gText_Exit}};
+    {sRegionPortVermilion}, {sRegionPortOlivine}, {sRegionPortCanalave}, {sRegionPortCastelia}, {gText_Exit}};
 static const struct MenuAction MultichoiceList_RegionsFromJohto[] = {
-    {sRegionPortVermilion}, {sRegionPortSlateport}, {sRegionPortCanalave}, {gText_Exit}};
+    {sRegionPortVermilion}, {sRegionPortSlateport}, {sRegionPortCanalave}, {sRegionPortCastelia}, {gText_Exit}};
 static const struct MenuAction MultichoiceList_RegionsFromKanto[] = {
-    {sRegionPortOlivine}, {sRegionPortSlateport}, {sRegionPortCanalave}, {gText_Exit}};
+    {sRegionPortOlivine}, {sRegionPortSlateport}, {sRegionPortCanalave}, {sRegionPortCastelia}, {gText_Exit}};
 static const struct MenuAction MultichoiceList_RegionsFromSinnoh[] = {
-    {sRegionPortSlateport}, {sRegionPortOlivine}, {sRegionPortVermilion}, {gText_Exit}};
+    {sRegionPortSlateport}, {sRegionPortOlivine}, {sRegionPortVermilion}, {sRegionPortCastelia}, {gText_Exit}};
+static const struct MenuAction MultichoiceList_RegionsFromUnova[] = {
+    {sRegionPortSlateport}, {sRegionPortOlivine}, {sRegionPortVermilion}, {sRegionPortCanalave}, {gText_Exit}};
 
 // Moemon Kai: Crystal's BANK OF MOM (pokecrystal engine/events/mom.asm BankOfMom_MenuHeader)
 static const u8 sMomBankGet[] = _("GET");
@@ -1017,6 +1020,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_REGIONS_FROM_JOHTO]         = MULTICHOICE(MultichoiceList_RegionsFromJohto),
     [MULTI_REGIONS_FROM_KANTO]         = MULTICHOICE(MultichoiceList_RegionsFromKanto),
     [MULTI_REGIONS_FROM_SINNOH]        = MULTICHOICE(MultichoiceList_RegionsFromSinnoh),
+    [MULTI_REGIONS_FROM_UNOVA]         = MULTICHOICE(MultichoiceList_RegionsFromUnova),
     [MULTI_MOM_BANK]                   = MULTICHOICE(MultichoiceList_MomBank),
     [MULTI_TRAINER_CARD_ICON_TINT]     = MULTICHOICE(MultichoiceList_TrainerCardIconTint),
     [MULTI_HOF_QUIT]                   = MULTICHOICE(MultichoiceList_HofQuit),

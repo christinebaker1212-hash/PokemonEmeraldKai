@@ -414,6 +414,7 @@ EventScript_RegionPickAll::
 	goto_if_eq VAR_0x8002, 1, EventScript_RegionPickAll_Johto
 	goto_if_eq VAR_0x8002, 2, EventScript_RegionPickAll_Kanto
 	goto_if_eq VAR_0x8002, 3, EventScript_RegionPickAll_Sinnoh
+	goto_if_eq VAR_0x8002, 4, EventScript_RegionPickAll_Unova
 	multichoice 12, 2, MULTI_REGIONS_FROM_HOENN, FALSE
 	goto EventScript_RegionPickAll_Pick
 
@@ -427,6 +428,10 @@ EventScript_RegionPickAll_Kanto::
 
 EventScript_RegionPickAll_Sinnoh::
 	multichoice 12, 2, MULTI_REGIONS_FROM_SINNOH, FALSE
+	goto EventScript_RegionPickAll_Pick
+
+EventScript_RegionPickAll_Unova::
+	multichoice 12, 2, MULTI_REGIONS_FROM_UNOVA, FALSE
 EventScript_RegionPickAll_Pick::
 	specialvar VAR_RESULT, MP_RegionBoatPick   @ (the choice -> the region, 0x7F: EXIT)
 	return

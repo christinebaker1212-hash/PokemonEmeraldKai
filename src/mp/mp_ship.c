@@ -45,12 +45,15 @@ void MP_Ship_NoteArrival(u8 region);
 
 enum { P_OLD_SALT, P_KID, P_HOMECOMER, P_TOURIST, P_TRAINER, P_GRANNY, P_HIM, P_HER, P_LOOKOUT, P_RESEARCHER };
 
-static const u8 sRegionNames[REGION_COUNT][8] = {_("HOENN"), _("JOHTO"), _("KANTO"), _("SINNOH")};
-static const u8 sPortNames[REGION_COUNT][16] = {_("SLATEPORT CITY"), _("OLIVINE CITY"), _("VERMILION CITY"), _("CANALAVE CITY")};
-static const u8 sTownNames[REGION_COUNT][16] = {_("LITTLEROOT TOWN"), _("NEW BARK TOWN"), _("PALLET TOWN"), _("TWINLEAF TOWN")};
-static const u16 sShowSpecies[REGION_COUNT] = {SPECIES_SKITTY, SPECIES_MAREEP, SPECIES_GROWLITHE, SPECIES_SHINX};
-static const u16 sKeepsakes[REGION_COUNT] = {ITEM_LAVA_COOKIE, ITEM_RAGE_CANDY_BAR, ITEM_PEWTER_CRUNCHIES, ITEM_OLD_GATEAU};
-static const u16 sTownSongs[REGION_COUNT] = {MUS_LITTLEROOT, MUS_JOHTO_NEW_BARK, MUS_RG_PALLET, MUS_SINNOH_TWINLEAF};
+static const u8 sRegionNames[REGION_COUNT][8] = {_("HOENN"), _("JOHTO"), _("KANTO"), _("SINNOH"), _("UNOVA")};
+static const u8 sPortNames[REGION_COUNT][16] = {_("SLATEPORT CITY"), _("OLIVINE CITY"), _("VERMILION CITY"), _("CANALAVE CITY"),
+                                                _("CASTELIA CITY")};
+static const u8 sTownNames[REGION_COUNT][16] = {_("LITTLEROOT TOWN"), _("NEW BARK TOWN"), _("PALLET TOWN"), _("TWINLEAF TOWN"),
+                                                _("NUVEMA TOWN")};
+static const u16 sShowSpecies[REGION_COUNT] = {SPECIES_SKITTY, SPECIES_MAREEP, SPECIES_GROWLITHE, SPECIES_SHINX, SPECIES_LILLIPUP};
+static const u16 sKeepsakes[REGION_COUNT] = {ITEM_LAVA_COOKIE, ITEM_RAGE_CANDY_BAR, ITEM_PEWTER_CRUNCHIES, ITEM_OLD_GATEAU,
+                                             ITEM_CASTELIACONE};
+static const u16 sTownSongs[REGION_COUNT] = {MUS_LITTLEROOT, MUS_JOHTO_NEW_BARK, MUS_RG_PALLET, MUS_SINNOH_TWINLEAF, MUS_UNOVA_T_01};
 
 // What the passengers say, by where the ship is bound. Written without line breaks: MP_Text_Wrap fits them to the box
 // ({STR_VAR_1} the region, {STR_VAR_2} its port, {STR_VAR_3} the first town)
@@ -94,11 +97,22 @@ static const u8 sS6[] = _("We're going to watch a SUPER CONTEST in HEARTHOME CIT
 static const u8 sS7[] = _("And a walk in AMITY SQUARE after.\pI packed our POKéMON's best ribbon for it.");
 static const u8 sS9[] = _("PROF. ROWAN studies how POKéMON evolve. A stern man, they say, but kinder than he looks.\pHis lab is in SANDGEM TOWN, one town over from TWINLEAF.");
 
+static const u8 sU0[] = _("CASTELIA is where we dock. Skyscrapers right up to the water, and piers full of ships from everywhere.\pYou'll never have seen so many people in one place.");
+static const u8 sU1[] = _("In UNOVA the seasons change every month! Snow in one, blossoms in the next!\pI'm going to see all four before I go home!");
+static const u8 sU2[] = _("I'm from DRIFTVEIL. Our drawbridge rises for the big ships, and the market sells everything you can think of.");
+static const u8 sU3[] = _("They say NIMBASA CITY has a theater where POKéMON dance on stage in costumes.\p...And an amusement park with a FERRIS WHEEL!");
+static const u8 sU4[] = _("Ever seen one of these? You won't find it where we sailed from.\pIt's a LILLIPUP! It never leaves my side.");
+static const u8 sU5[] = _("Take this, dear. A CASTELIACONE: the ice cream CASTELIA queues up for.\pA taste of UNOVA before you even land.");
+static const u8 sU6[] = _("We're going to ride the BATTLE SUBWAY in NIMBASA. Battles from one station to the next!");
+static const u8 sU7[] = _("I'm going to watch the MUSICAL.\pHe can ride the trains all day if he likes.");
+static const u8 sU9[] = _("PROF. JUNIPER studies where POKéMON first came from. She's out in the field more than in her lab, they say.\pHer lab is in NUVEMA TOWN, at the very south of UNOVA.");
+
 static const u8 *const sLines[REGION_COUNT][SHIP_PASSENGERS] = {
     {sH0, sH1, sH2, sH3, sH4, sH5, sH6, sH7, NULL, sH9},
     {sJ0, sJ1, sJ2, sJ3, sJ4, sJ5, sJ6, sJ7, NULL, sJ9},
     {sK0, sK1, sK2, sK3, sK4, sK5, sK6, sK7, NULL, sK9},
     {sS0, sS1, sS2, sS3, sS4, sS5, sS6, sS7, NULL, sS9},
+    {sU0, sU1, sU2, sU3, sU4, sU5, sU6, sU7, NULL, sU9},
 };
 static const u8 sGrannyAfter[] = _("Did you like it, dear? There's plenty more where we're going.\pYou'll find {STR_VAR_1} is good to those who visit.");
 static const u8 sLookoutSea[] = _("Nothing but blue from here to the horizon. We've a good way to go yet.\pHave you met the other passengers? Half the joy of a crossing is the company.");
@@ -254,6 +268,18 @@ static const struct ShipSpot sCast[REGION_COUNT][SHIP_PASSENGERS] = {
         {2, 7, 10, MOVEMENT_TYPE_FACE_LEFT, 0, OBJ_EVENT_GFX_BEAUTY},
         {2, 12, 5, MOVEMENT_TYPE_FACE_UP, 0, OBJ_EVENT_GFX_SAILOR},
         {0, 14, 2, MOVEMENT_TYPE_FACE_DOWN, 0, OBJ_EVENT_GFX_PSYCHIC_M},
+    },
+    {   // UNOVA (the SINNOH crossing's spots, other passengers)
+        {1, 33, 14, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_EXPERT_M},
+        {0, 7, 11, MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT, 3, OBJ_EVENT_GFX_LASS},
+        {2, 10, 8, MOVEMENT_TYPE_FACE_UP, 0, OBJ_EVENT_GFX_MAN_4},
+        {0, 2, 6, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_SCHOOL_KID_M},
+        {1, 3, 14, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_TWIN},
+        {1, 23, 4, MOVEMENT_TYPE_LOOK_AROUND, 0, OBJ_EVENT_GFX_OLD_WOMAN},
+        {2, 6, 10, MOVEMENT_TYPE_FACE_RIGHT, 0, OBJ_EVENT_GFX_MAN_2},
+        {2, 7, 10, MOVEMENT_TYPE_FACE_LEFT, 0, OBJ_EVENT_GFX_WOMAN_2},
+        {2, 12, 5, MOVEMENT_TYPE_FACE_UP, 0, OBJ_EVENT_GFX_SAILOR},
+        {0, 14, 2, MOVEMENT_TYPE_FACE_DOWN, 0, OBJ_EVENT_GFX_SCIENTIST_1},
     },
 };
 
@@ -669,10 +695,11 @@ void MP_Hoenn_SettleIn(bool8 male);
 bool8 MP_IsInOverworld(void);
 bool8 MP_IsLocalFree(void);
 
-static const u8 sProfNames[REGION_COUNT][12] = {_("PROF. BIRCH"), _("PROF. ELM"), _("PROF. OAK"), _("PROF. ROWAN")};   // (HOENN, JOHTO, KANTO, SINNOH)
+static const u8 sProfNames[REGION_COUNT][14] = {_("PROF. BIRCH"), _("PROF. ELM"), _("PROF. OAK"), _("PROF. ROWAN"), _("PROF. JUNIPER")};   // (HOENN, JOHTO, KANTO, SINNOH, UNOVA)
 // where the sailor comes to at the pier (beside where the ship lets the player off: sRegionPorts / MP_Region_FirstBoatIn)
 static const struct { u16 gfx; s8 x, y; } sPierGuide[REGION_COUNT] = {
     {OBJ_EVENT_GFX_SAILOR, 12, 11}, {OBJ_EVENT_GFX_QZ_49, 8, 13}, {OBJ_EVENT_GFX_QZ_16193, 24, 29}, {OBJ_EVENT_GFX_SINNOH_SAILOR, 8, 20},
+    {OBJ_EVENT_GFX_SAILOR, 17, 16},
 };
 // the first town: the house's door (the player stands under it, the sailor to their right), and the room upstairs
 static const struct { u16 town; s8 doorX, doorY; u16 room; s8 roomX, roomY; } sHomes[REGION_COUNT + 1] = {
@@ -680,6 +707,7 @@ static const struct { u16 town; s8 doorX, doorY; u16 room; s8 roomX, roomY; } sH
     {MAP_JOHTO_NEW_BARK_TOWN, 20, 11, MAP_JOHTO_PLAYERS_HOUSE2F, 4, 4},
     {MAP_KANTO_PALLET_TOWN, 6, 7, MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F, 6, 6},
     {MAP_SINNOH_TWINLEAF_TOWN, 20, 21, MAP_SINNOH_TWINLEAF_TOWN_PLAYER_HOUSE2F, 8, 5},
+    {MAP_UNOVA_NUVEMATOWN, 14, 12, MAP_UNOVA_NUVEMATOWN_Z391, 5, 6},   // (the player's room: Black's opening plays there)
     {MAP_LITTLEROOT_TOWN, 14, 8, MAP_LITTLEROOT_TOWN_MAYS_HOUSE_2F, 4, 4},   // (HOENN, a girl's house)
 };
 
@@ -691,8 +719,8 @@ static const u8 sArrFollow[] = _("Now then. A family in {STR_VAR_2} has a room r
 static const u8 sArrFollowSinnoh[] = _("Now then. A family in TWINLEAF TOWN has a room ready for you. Your HOST MOM is expecting you.\pTWINLEAF is down the coast, so hop in my little boat. I'll have you there before the tide turns!");
 static const u8 sArrTown[] = _("Here we are: {STR_VAR_1}!\pThis is the house. Your room is upstairs, and your HOST MOM has been looking forward to this all week.\p{STR_VAR_3}'s lab is {STR_VAR_2}. Rest first, though. You've come a long way.\pGood luck out there, {PLAYER}!");
 static const u8 sLabHoenn[] = _("just down the road"), sLabJohto[] = _("just up the road"), sLabKanto[] = _("right over there"),
-                sLabSinnoh[] = _("in SANDGEM TOWN, up ROUTE 201");
-static const u8 *const sLabWhere[REGION_COUNT] = {sLabHoenn, sLabJohto, sLabKanto, sLabSinnoh};
+                sLabSinnoh[] = _("in SANDGEM TOWN, up ROUTE 201"), sLabUnova[] = _("at the top of town");
+static const u8 *const sLabWhere[REGION_COUNT] = {sLabHoenn, sLabJohto, sLabKanto, sLabSinnoh, sLabUnova};
 
 static const u8 sBackHoenn[] = _("PROF. BIRCH: Oh, {PLAYER}! I nearly forgot. The harbor sent this POKé BALL up from SLATEPORT.\pIt's the partner that sailed here with you. Every newcomer's POKéMON gets a checkup at my lab, and yours is in fine shape!");
 static const u8 sBackHoenn2[] = _("PROF. BIRCH: A partner from home and a new one from HOENN. You're off to a great start!");
@@ -702,12 +730,16 @@ static const u8 sBackKanto[] = _("OAK: Ah, one more thing, {PLAYER}! The sailor 
 static const u8 sBackKanto2[] = _("OAK: Travel with both of them, and you'll learn twice as much about KANTO!");
 static const u8 sBackSinnoh[] = _("Hm. One more matter. The sailor from CANALAVE brought this to my lab.\pIt is the POKéMON that crossed the sea with you. I examined it, as I do for every newcomer to SINNOH. It is well.");
 static const u8 sBackSinnoh2[] = _("It waited for you patiently. See that you do not keep it waiting again.");
+static const u8 sBackUnova[] = _("JUNIPER: Oh, {PLAYER}! Before you go, the port in CASTELIA sent this up for you.\pIt's the POKéMON that crossed the sea with you! I gave it a checkup, as I do for every newcomer to UNOVA. It's in great shape!");
+static const u8 sBackUnova2[] = _("JUNIPER: Two partners, two places they come from! I'd love to hear what you learn about UNOVA together.");
 static const u8 sBackTogether[] = _("{PLAYER} and {STR_VAR_2} are together again!");
-static const u8 *const sBack[REGION_COUNT][2] = {{sBackHoenn, sBackHoenn2}, {sBackJohto, sBackJohto2}, {sBackKanto, sBackKanto2}, {sBackSinnoh, sBackSinnoh2}};
+static const u8 *const sBack[REGION_COUNT][2] = {{sBackHoenn, sBackHoenn2}, {sBackJohto, sBackJohto2}, {sBackKanto, sBackKanto2}, {sBackSinnoh, sBackSinnoh2},
+                                                 {sBackUnova, sBackUnova2}};
 // the labs, and the professor there (local id)
 static const struct { u16 map; u8 prof; } sLabs[REGION_COUNT] = {
     {MAP_LITTLEROOT_TOWN_PROFESSOR_BIRCHS_LAB, 2}, {MAP_JOHTO_ELMS_LAB, 2}, {MAP_KANTO_PALLET_TOWN_PROFESSOR_OAKS_LAB, 4},
     {MAP_SINNOH_SANDGEM_TOWN_POKEMON_RESEARCH_LAB, 1},
+    {MAP_UNOVA_NUVEMATOWN_Z396, 1},
 };
 
 static u8 ArrivalRegion(void)

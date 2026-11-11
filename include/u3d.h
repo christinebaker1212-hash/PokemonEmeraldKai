@@ -34,6 +34,7 @@ u16 *U3D_Vm_VarPointer(u16 id);
 bool8 U3D_Vm_ObjectHidden(u8 localId);                        // a person hidden by Black's flag
 bool8 U3D_Vm_SceneStart(void);                                // script.c TryRunOnFrameMapScript: a scene starts
 bool8 U3D_VmRunning(void);
+u8 *U3D_Vm_BadgeFlags(void);                                  // UNOVA's 8 badges, FLAG_UNOVA_BADGE01 + n
 void U3D_Vm_ResetWork(void);
 const void *U3D_Vm_WorkData(u32 *size);                       // Black's event work, saved (mp_region.c chunk UNEW)
 void U3D_Vm_WorkLoad(const void *data, u32 size);

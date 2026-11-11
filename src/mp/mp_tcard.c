@@ -27,8 +27,8 @@
 extern char gPlatformSavePath[512];
 
 #define TCARD_MAGIC 0x44524354   // "TCRD"
-#define TCARD_VERSION 4   // 2: friends (what was done together, the album); 3: the card's look, showcase, signature, time per region;
-                          // 4: FOUR ISLAND's stickers
+#define TCARD_VERSION 5   // 2: friends (what was done together, the album); 3: the card's look, showcase, signature, time per region;
+                          // 4: FOUR ISLAND's stickers; 5: UNOVA's badges and time (before: four regions' of each)
 #define NUM_TCARD_BADGES (REGION_COUNT * TCARD_BADGES_PER_REGION)
 // a badge counts the co-op battle that ended this many frames before it (time for the leader's words and the badge)
 #define PARTNER_FRAMES (60 * 60 * 10)
@@ -173,7 +173,7 @@ static bool8 Read(FILE *f)
     if (!Get(f, &sT.known, 4) || !Get(f, &sT.lastDay, 4) || !Get(f, &sT.slowCarry, 1) || !Get(f, &sT.fade, 1)
      || !Get(f, &sT.showTitle, 1) || !Get(f, &sT.title, 2))
         return FALSE;
-    for (i = 0; i < NUM_TCARD_BADGES; i++)
+    for (i = 0; i < (head[1] >= 5 ? NUM_TCARD_BADGES : REGION_COUNT_BEFORE_UNOVA * TCARD_BADGES_PER_REGION); i++)
     {
         struct MpTCardBadge *b = &sT.badges[i];
         if (!Get(f, &b->when, 4) || !Get(f, &b->leadSpecies, 2) || !Get(f, &b->leadLevel, 1) || !Get(f, &b->polish, 1)
@@ -209,7 +209,8 @@ static bool8 Read(FILE *f)
                 break;
             }
         if (!Get(f, &sT.style, sizeof(sT.style)) || !Get(f, &sT.showcase, sizeof(sT.showcase)) || !Get(f, &sT.hasSig, 1)
-         || !Get(f, sT.sig, sizeof(sT.sig)) || !Get(f, sT.regionSeconds, sizeof(sT.regionSeconds)))
+         || !Get(f, sT.sig, sizeof(sT.sig))
+         || !Get(f, sT.regionSeconds, head[1] >= 5 ? sizeof(sT.regionSeconds) : REGION_COUNT_BEFORE_UNOVA * sizeof(u32)))
             DefaultStyle();
         if (head[1] >= 4 && !Get(f, &sT.stickers, 2))
             sT.stickers = 0;

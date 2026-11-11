@@ -237,6 +237,8 @@ u8 *GetFlagPointer(u16 id)
         return NULL;
     else if (id >= REGION_FLAGS_START && id < SPECIAL_FLAGS_START)
         return MP_Region_FlagPointer(id);   // Moemon Kai: Johto / Kanto flags (mp_region.c)
+    else if (id >= FLAG_UNOVA_BADGE01 && id < FLAG_UNOVA_BADGE01 + 8)
+        return U3D_Vm_BadgeFlags();   // Moemon Kai: UNOVA's badges (src/unova/u3d_vm.c), one byte of 8
     else if (id >= MAKER_FLAGS_START)
         return Maker_FlagPointer(id);   // Moemon Maker: flags of what the edits add (src/maker/maker_flags.c)
     else if (id < SPECIAL_FLAGS_START)

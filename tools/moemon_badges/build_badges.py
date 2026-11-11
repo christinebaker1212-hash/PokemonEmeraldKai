@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The BADGE CASE's badge pictures (graphics/moemon/badges/badges.bin, built in by src/mp/mp_badge_data.c): the
-official artwork of the 32 badges of HOENN, JOHTO, KANTO and SINNOH, from PokeAPI's sprites repository at a pinned
-commit (sprites/badges/1-8 KANTO, 9-16 JOHTO, 17-24 HOENN, 25-32 SINNOH; each region's in its gyms' order, which is
+official artwork of the 40 badges of HOENN, JOHTO, KANTO, SINNOH and UNOVA, from PokeAPI's sprites repository at a
+pinned commit (sprites/badges/1-8 KANTO, 9-16 JOHTO, 17-24 HOENN, 25-32 SINNOH, 33-40 UNOVA (Black's); each region's in its gyms' order, which is
 also the order of its badge flags: mp_region.c MP_Region_BadgeFlag).
 
 The artwork's white stroke around each badge's dark outline is taken off (a flood from outside the badge through
@@ -12,8 +12,8 @@ sizes the case draws it at (its 480x320 picture: CASE in a tray, BIG on the page
   python3 tools/moemon_badges/build_badges.py [SPRITES_DIR]
 SPRITES_DIR: a checkout of github.com/PokeAPI/sprites (fetched at the pinned commit into ~/.cache when not given).
 
-badges.bin: "MBDG", u16 version 1, u16 count 32, u16 CASE, u16 BIG, then per badge (region-major: HOENN, JOHTO,
-KANTO, SINNOH) CASE*CASE then BIG*BIG pixels, each u32 0xAARRGGBB (SDL_PIXELFORMAT_ARGB8888, little-endian),
+badges.bin: "MBDG", u16 version 1, u16 count (40), u16 CASE, u16 BIG, then per badge (region-major: HOENN, JOHTO,
+KANTO, SINNOH, UNOVA) CASE*CASE then BIG*BIG pixels, each u32 0xAARRGGBB (SDL_PIXELFORMAT_ARGB8888, little-endian),
 straight alpha."""
 import os, struct, subprocess, sys
 from collections import deque
@@ -24,12 +24,12 @@ URL = 'https://github.com/PokeAPI/sprites'
 COMMIT = '1dd55c0436d2a5b6e324c0b780e1b1b416fbfb64'
 CASE, BIG = 64, 128
 # the game's regions in mp_region.h order -> PokeAPI's first badge number
-REGION_FIRST = {'HOENN': 17, 'JOHTO': 9, 'KANTO': 1, 'SINNOH': 25}
-REGIONS = ['HOENN', 'JOHTO', 'KANTO', 'SINNOH']
+REGION_FIRST = {'HOENN': 17, 'JOHTO': 9, 'KANTO': 1, 'SINNOH': 25, 'UNOVA': 33}
+REGIONS = ['HOENN', 'JOHTO', 'KANTO', 'SINNOH', 'UNOVA']
 
 
 def fetch(dest):
-    if os.path.exists(os.path.join(dest, 'sprites', 'badges', '32.png')):
+    if os.path.exists(os.path.join(dest, 'sprites', 'badges', '40.png')):
         return
     os.makedirs(dest, exist_ok=True)
     run = lambda *a: subprocess.check_call(['git', '-C', dest] + list(a), stdout=subprocess.DEVNULL)
@@ -99,7 +99,7 @@ def main():
     src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
         os.environ.get('XDG_CACHE_HOME', os.path.expanduser('~/.cache')), 'moemon', 'pokeapi_sprites')
     fetch(src)
-    out = bytearray(b'MBDG' + struct.pack('<HHHH', 1, 32, CASE, BIG))
+    out = bytearray(b'MBDG' + struct.pack('<HHHH', 1, 8 * len(REGIONS), CASE, BIG))
     for region in REGIONS:
         for k in range(8):
             im = without_halo(Image.open(os.path.join(src, 'sprites', 'badges', '%d.png' % (REGION_FIRST[region] + k))))
@@ -109,7 +109,7 @@ def main():
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     with open(dst, 'wb') as f:
         f.write(out)
-    print('%s: 32 badges, %d bytes' % (os.path.relpath(dst, REPO), len(out)))
+    print('%s: %d badges, %d bytes' % (os.path.relpath(dst, REPO), 8 * len(REGIONS), len(out)))
 
 
 if __name__ == '__main__':

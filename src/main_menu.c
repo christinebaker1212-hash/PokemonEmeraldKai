@@ -418,12 +418,12 @@ static const struct WindowTemplate sNewGameBirchSpeechTextWindows[] =
         .paletteNum = 15,
         .baseBlock = 0x85
     },
-    {   // Moemon Kai: HOENN / JOHTO / KANTO / SINNOH
+    {   // Moemon Kai: HOENN / JOHTO / KANTO / SINNOH / UNOVA
         .bg = 0,
         .tilemapLeft = 3,
         .tilemapTop = 3,
         .width = 7,
-        .height = 8,
+        .height = 10,
         .paletteNum = 15,
         .baseBlock = 0x110
     },
@@ -760,7 +760,7 @@ static u16 MpWinV(u8 win, bool8 scrolled)
 }
 static void MpDrawSlotItem(u8 menuType)
 {
-    static const char *const sRegions[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
+    static const char *const sRegions[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH", "UNOVA"};
     struct SaveSlotSummary sum;
     char text[64];
     u8 buf[64];
@@ -2206,6 +2206,7 @@ static const u8 sText_Hoenn[] = _("HOENN");
 static const u8 sText_Johto[] = _("JOHTO");
 static const u8 sText_Kanto[] = _("KANTO");
 static const u8 sText_Sinnoh[] = _("SINNOH");
+static const u8 sText_Unova[] = _("UNOVA");
 // (the user's order: KANTO, JOHTO, HOENN, SINNOH; sRegionMenuRegions maps each row to its region; the cursor starts on
 // HOENN, the game's own)
 static const struct MenuAction sMenuActions_Region[] = {
@@ -2213,8 +2214,9 @@ static const struct MenuAction sMenuActions_Region[] = {
     {sText_Johto, {NULL}},
     {sText_Hoenn, {NULL}},
     {sText_Sinnoh, {NULL}},   // (SINNOH starts in TWINLEAF's house: mp_region.c MP_Region_StartNewGame)
+    {sText_Unova, {NULL}},    // (UNOVA in the player's room in NUVEMA TOWN: Black's opening plays there)
 };
-static const u8 sRegionMenuRegions[] = {REGION_KANTO, REGION_JOHTO, REGION_HOENN, REGION_SINNOH};
+static const u8 sRegionMenuRegions[] = {REGION_KANTO, REGION_JOHTO, REGION_HOENN, REGION_SINNOH, REGION_UNOVA};
 #define REGION_MENU_FIRST_ROW 2
 #define WIN_REGION 3
 

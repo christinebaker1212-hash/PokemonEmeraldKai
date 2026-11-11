@@ -149,6 +149,7 @@
 #define MULTI_BUENA_PASSWORD               243   // Moemon Kai: BUENA's three choices, STR_VAR_1..3 (mp_buena.c, case 141)
 #define MULTI_SSTIDAL_SLATEPORT_NO_BF_BI   244   // Moemon Kai: SLATEPORT's boat with BATTLE ISLAND (the BATTLE TICKET)
 #define MULTI_SSTIDAL_SLATEPORT_WITH_BF_BI 245
+#define MULTI_REGIONS_FROM_UNOVA           246   // Moemon Kai: UNOVA's port (CASTELIA)
 
 // Lilycove SS Tidal Multichoice Selections
 #define SSTIDAL_SELECTION_SLATEPORT        0

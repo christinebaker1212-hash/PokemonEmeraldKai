@@ -2425,7 +2425,7 @@ void MP_FrameUpdate(void)
     if (sFollowRegion && MP_IsInOverworld() && MP_IsLocalFree())
     {
         // Moemon Kai: the host's trip: everyone in the room follows (docs/REGIONS_PLAN.md "Co-op")
-        static const char *const sNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
+        static const char *const sNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH", "UNOVA"};
         u8 to = sFollowRegion - 1;
         sFollowRegion = 0;
         if (to != MP_Region_Current())
@@ -2444,7 +2444,7 @@ void MP_FrameUpdate(void)
     if (sLeaveForRegion)
     {
         // Moemon Kai: a room is in its host's region (docs/REGIONS_PLAN.md "Co-op")
-        static const char *const sNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
+        static const char *const sNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH", "UNOVA"};
         char msg[96];
         snprintf(msg, sizeof(msg), "This room is in %s.\fTravel there to join it.", sNames[sLeaveForRegion - 1]);
         MPNet_Log("region: the room is in %s, we're in %s: leaving", sNames[sLeaveForRegion - 1], sNames[MP_Region_Current()]);

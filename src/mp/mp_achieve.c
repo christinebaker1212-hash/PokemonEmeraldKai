@@ -63,19 +63,21 @@ enum {
 // each get a copy counted only there (RegionCopy below); the region tabs (HOENN, JOHTO...) hold its own feats.
 enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_MAGIC, C_TRIAD, C_DANCE, C_JOHTO, C_KANTO, C_SINNOH, C_STADIUM,
        C_BATTLE_J, C_CATCH_J, C_TOGETHER_J, C_EXTRAS_J, C_BATTLE_K, C_CATCH_K, C_TOGETHER_K, C_EXTRAS_K,
-       C_BATTLE_S, C_CATCH_S, C_TOGETHER_S, C_EXTRAS_S, NUM_ACH_CATS };
+       C_BATTLE_S, C_CATCH_S, C_TOGETHER_S, C_EXTRAS_S, C_UNOVA, C_BATTLE_U, C_CATCH_U, C_TOGETHER_U, C_EXTRAS_U,
+       NUM_ACH_CATS };
 #define C_GONE 0xFF   // a row kept only so later rows keep their number (TRAINER CARD titles are numbers): never listed
 static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "HOENN BATTLE", "HOENN CATCHING", "HOENN", "HOENN TOGETHER", "HOENN EXTRAS", "CARDS", "YU-GI-OH!", "MAGIC", "TRIPLE TRIAD", "DANCE", "JOHTO", "KANTO", "SINNOH", "STADIUM",
                                                     "JOHTO BATTLE", "JOHTO CATCHING", "JOHTO TOGETHER", "JOHTO EXTRAS", "KANTO BATTLE", "KANTO CATCHING", "KANTO TOGETHER", "KANTO EXTRAS",
-                                                    "SINNOH BATTLE", "SINNOH CATCHING", "SINNOH TOGETHER", "SINNOH EXTRAS"};
+                                                    "SINNOH BATTLE", "SINNOH CATCHING", "SINNOH TOGETHER", "SINNOH EXTRAS",
+                                                    "UNOVA", "UNOVA BATTLE", "UNOVA CATCHING", "UNOVA TOGETHER", "UNOVA EXTRAS"};
 // The tabs a region has: its own, then its BATTLE, CATCHING, TOGETHER and EXTRAS (G_*), by region
 enum { G_REGION, G_BATTLE, G_CATCH, G_TOGETHER, G_EXTRAS, NUM_ACH_GROUPS };
 static const u8 sGroupCats[NUM_ACH_GROUPS][REGION_COUNT] = {
-    [G_REGION]   = {C_HOENN, C_JOHTO, C_KANTO, C_SINNOH},
-    [G_BATTLE]   = {C_BATTLE, C_BATTLE_J, C_BATTLE_K, C_BATTLE_S},
-    [G_CATCH]    = {C_CATCH, C_CATCH_J, C_CATCH_K, C_CATCH_S},
-    [G_TOGETHER] = {C_TOGETHER, C_TOGETHER_J, C_TOGETHER_K, C_TOGETHER_S},
-    [G_EXTRAS]   = {C_EXTRAS, C_EXTRAS_J, C_EXTRAS_K, C_EXTRAS_S},
+    [G_REGION]   = {C_HOENN, C_JOHTO, C_KANTO, C_SINNOH, C_UNOVA},
+    [G_BATTLE]   = {C_BATTLE, C_BATTLE_J, C_BATTLE_K, C_BATTLE_S, C_BATTLE_U},
+    [G_CATCH]    = {C_CATCH, C_CATCH_J, C_CATCH_K, C_CATCH_S, C_CATCH_U},
+    [G_TOGETHER] = {C_TOGETHER, C_TOGETHER_J, C_TOGETHER_K, C_TOGETHER_S, C_TOGETHER_U},
+    [G_EXTRAS]   = {C_EXTRAS, C_EXTRAS_J, C_EXTRAS_K, C_EXTRAS_S, C_EXTRAS_U},
 };
 
 enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD, FL_JOHTO_BEASTS, FL_KANTO_BIRDS, FL_JOHTO_BADGES, FL_KANTO_BADGES,
@@ -677,7 +679,7 @@ static const struct Achievement sAch[] = {
 #define NO_COPY 0xFF
 
 #define RB(r) (1 << (r))
-#define RB_OTHERS (RB(REGION_JOHTO) | RB(REGION_KANTO) | RB(REGION_SINNOH))
+#define RB_OTHERS (RB(REGION_JOHTO) | RB(REGION_KANTO) | RB(REGION_SINNOH) | RB(REGION_UNOVA))
 // HOENN's BATTLE / CATCHING / TOGETHER / EXTRAS rows a region has no copy of: what only HOENN has (its BATTLE TOWER,
 // outbreaks on its routes, its BERRY BLENDERS, SECRET BASES, BERRY CRUSH, contests with friends, gym rematches)
 static const struct { const char *id; u8 regions; } sNoCopy[] = {
@@ -715,25 +717,28 @@ static const struct { const char *id; u8 region; const char *desc; u16 arg; } sC
     {"money100k", 0xFF, "Earn $100,000.", 0},
     {"money999k", 0xFF, "Earn $999,999.", 0},
 };
-static const char sRegionLetter[REGION_COUNT] = {'h', 'j', 'k', 's'};
+static const char sRegionLetter[REGION_COUNT] = {'h', 'j', 'k', 's', 'u'};
 static const u8 sTeamLevels[] = {30, 50, 100};
 
 #define DEX_WORDS ((NATIONAL_DEX_COUNT + 31) / 32)
-#define ACHR_VERSION 1
-struct AchRegional
-{
-    u32 version;
-    u32 stat[REGION_COUNT][NUM_USED_GAME_STATS];   // game stats counted there (records: the best there)
-    u32 seen[REGION_COUNT][DEX_WORDS];             // national numbers seen / caught there
-    u32 caught[REGION_COUNT][DEX_WORDS];
-    u32 earned[REGION_COUNT];                      // money earned there
-    s32 lastDay[REGION_COUNT];                     // the last day played with friends there
-    u16 team[REGION_COUNT][ARRAY_COUNT(sTeamLevels)];   // POKéMON raised there to Lv 30 / 50 / 100
-    u16 owned[REGION_COUNT];                       // the most POKéMON owned there (party and that region's PC)
-    u16 days[REGION_COUNT];                        // days played with friends there
-    u16 friends[REGION_COUNT];                     // POKéMON that came to love the player there
-    u8 top[REGION_COUNT];                          // the highest level a POKéMON reached there
+#define ACHR_VERSION 2   // (2: UNOVA's region; version 1's records had four, ACHR_REGIONAL(4): converted on loading)
+#define ACHR_REGIONAL(name, regions)                                                                                  \
+struct name                                                                                                           \
+{                                                                                                                     \
+    u32 version;                                                                                                      \
+    u32 stat[regions][NUM_USED_GAME_STATS];   /* game stats counted there (records: the best there) */                \
+    u32 seen[regions][DEX_WORDS];             /* national numbers seen / caught there */                              \
+    u32 caught[regions][DEX_WORDS];                                                                                   \
+    u32 earned[regions];                      /* money earned there */                                                \
+    s32 lastDay[regions];                     /* the last day played with friends there */                            \
+    u16 team[regions][ARRAY_COUNT(sTeamLevels)];   /* POKéMON raised there to Lv 30 / 50 / 100 */                      \
+    u16 owned[regions];                       /* the most POKéMON owned there (party and that region's PC) */         \
+    u16 days[regions];                        /* days played with friends there */                                    \
+    u16 friends[regions];                     /* POKéMON that came to love the player there */                        \
+    u8 top[regions];                          /* the highest level a POKéMON reached there */                         \
 };
+ACHR_REGIONAL(AchRegional, REGION_COUNT)
+ACHR_REGIONAL(AchRegional4, REGION_COUNT_BEFORE_UNOVA)
 static struct AchRegional sReg;
 static bool8 sRegSeed;          // no record came with the save: HOENN's POKéDEX lists start as the game's
 static u8 sCopyCat[REGION_COUNT][NUM_ACH];   // each row's copy's tab in a region (NO_COPY: none)
@@ -876,7 +881,29 @@ const void *MP_Achieve_RegionalSave(u32 *size)
 void MP_Achieve_RegionalLoad(const void *data, u32 size)
 {
     memset(&sReg, 0, sizeof(sReg));
-    memcpy(&sReg, data, size < sizeof(sReg) ? size : sizeof(sReg));
+    if (size >= 4 && *(const u32 *)data == 1)
+    {
+        // a record from before UNOVA: four regions' counts, the fifth's start at nothing
+        struct AchRegional4 old;
+        u32 r;
+        memset(&old, 0, sizeof(old));
+        memcpy(&old, data, size < sizeof(old) ? size : sizeof(old));
+        for (r = 0; r < REGION_COUNT_BEFORE_UNOVA; r++)
+        {
+            memcpy(sReg.stat[r], old.stat[r], sizeof(old.stat[r]));
+            memcpy(sReg.seen[r], old.seen[r], sizeof(old.seen[r]));
+            memcpy(sReg.caught[r], old.caught[r], sizeof(old.caught[r]));
+            memcpy(sReg.team[r], old.team[r], sizeof(old.team[r]));
+            sReg.earned[r] = old.earned[r];
+            sReg.lastDay[r] = old.lastDay[r];
+            sReg.owned[r] = old.owned[r];
+            sReg.days[r] = old.days[r];
+            sReg.friends[r] = old.friends[r];
+            sReg.top[r] = old.top[r];
+        }
+    }
+    else
+        memcpy(&sReg, data, size < sizeof(sReg) ? size : sizeof(sReg));
     sReg.version = ACHR_VERSION;
     sRegSeed = FALSE;
 }
@@ -1257,7 +1284,7 @@ static void UnlockText(const struct AchView *v, char *out, u32 size)
     }
 }
 
-static const char *const sRegionWord[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
+static const char *const sRegionWord[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH", "UNOVA"};
 
 static void Grant(const struct AchView *v)
 {

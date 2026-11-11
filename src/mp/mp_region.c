@@ -100,6 +100,14 @@ struct RegionLevel
     u8 cur;
     u16 filler;
 };
+struct RegionLevel4   // (the side file's LVL4 records before UNOVA: 4 regions)
+{
+    u32 pers, otid;
+    u32 exp[REGION_COUNT_BEFORE_UNOVA];
+    u8 has;
+    u8 cur;
+    u16 filler;
+};
 struct RegionLevel3   // (the side file's LVLS records before SINNOH: 3 regions)
 {
     u32 pers, otid;
@@ -122,6 +130,8 @@ u8 MP_Region_OfGroup(u8 group)
         return REGION_KANTO;
     if (S3D_IsSinnohGroup(group))
         return REGION_SINNOH;
+    if (U3D_IsUnovaGroup(group))
+        return REGION_UNOVA;
     return REGION_HOENN;
 }
 
@@ -188,8 +198,9 @@ u16 MP_Region_GameCenterOtherFloor(void)
 // The region the player is in, by name, into STR_VAR_1 (the CARD CLUB's people: data/scripts/card_club.inc)
 void MP_Region_BufferName(void)
 {
-    static const u8 sHoenn[] = _("HOENN"), sJohto[] = _("JOHTO"), sKanto[] = _("KANTO"), sSinnoh[] = _("SINNOH");
-    static const u8 *const sNames[REGION_COUNT] = {sHoenn, sJohto, sKanto, sSinnoh};
+    static const u8 sHoenn[] = _("HOENN"), sJohto[] = _("JOHTO"), sKanto[] = _("KANTO"), sSinnoh[] = _("SINNOH"),
+                    sUnova[] = _("UNOVA");
+    static const u8 *const sNames[REGION_COUNT] = {sHoenn, sJohto, sKanto, sSinnoh, sUnova};
     u8 region = MP_Region_Current();
     StringCopy(gStringVar1, sNames[region < REGION_COUNT ? region : REGION_HOENN]);
 }
@@ -203,6 +214,7 @@ void MP_Region_GameCenterLooks(void)
         [REGION_JOHTO]  = {OBJ_EVENT_GFX_QZ_16002, OBJ_EVENT_GFX_QZ_16004, OBJ_EVENT_GFX_QZ_16003, OBJ_EVENT_GFX_QZ_47},
         [REGION_KANTO]  = {OBJ_EVENT_GFX_QZ_16134, OBJ_EVENT_GFX_QZ_16137, OBJ_EVENT_GFX_QZ_16102, OBJ_EVENT_GFX_QZ_16173},
         [REGION_SINNOH] = {OBJ_EVENT_GFX_GAMEBOY_KID, OBJ_EVENT_GFX_NINJA_BOY, OBJ_EVENT_GFX_MAN_3, OBJ_EVENT_GFX_GIRL_3},
+        [REGION_UNOVA]  = {OBJ_EVENT_GFX_GAMEBOY_KID, OBJ_EVENT_GFX_NINJA_BOY, OBJ_EVENT_GFX_MAN_3, OBJ_EVENT_GFX_GIRL_3},
     };
     u8 region = MP_Region_Current() < REGION_COUNT ? MP_Region_Current() : REGION_HOENN;
     u32 i;
@@ -214,8 +226,8 @@ void MP_Region_GameCenterLooks(void)
 void MP_Region_BufferGameCorner(void)
 {
     static const u8 sHoenn[] = _("MAUVILLE CITY"), sJohto[] = _("GOLDENROD CITY"), sKanto[] = _("CELADON CITY"),
-                    sSinnoh[] = _("VEILSTONE CITY");
-    static const u8 *const sNames[REGION_COUNT] = {sHoenn, sJohto, sKanto, sSinnoh};
+                    sSinnoh[] = _("VEILSTONE CITY"), sUnova[] = _("CASTELIA CITY");
+    static const u8 *const sNames[REGION_COUNT] = {sHoenn, sJohto, sKanto, sSinnoh, sUnova};
     u8 region = MP_Region_Current();
     StringCopy(gStringVar1, sNames[region < REGION_COUNT ? region : REGION_HOENN]);
 }
@@ -307,6 +319,11 @@ void MP_Region_GoToStartHouse(u8 region)
         VarSet(VAR_SINNOH_ARRIVAL, 1);
         Sinnoh_PlatinumStoryBegin();   // (Platinum's story begins at home in TWINLEAF, where the sailor takes them)
     }
+    else if (region == REGION_UNOVA)
+    {
+        // UNOVA: the player's room in NUVEMA TOWN, where Black's own opening plays (src/unova/u3d_vm.c)
+        SetWarpDestination(MAP_GROUP(MAP_UNOVA_NUVEMATOWN_Z391), MAP_NUM(MAP_UNOVA_NUVEMATOWN_Z391), WARP_ID_NONE, 5, 6);
+    }
 }
 
 // The first boat to JOHTO / KANTO comes in at the region's port like every other (OLIVINE, VERMILION): its sailor meets
@@ -331,7 +348,7 @@ void MP_Region_FirstBoatIn(u8 region)
         // (a save begun elsewhere: SLATEPORT's harbor, whose sailor takes the player to LITTLEROOT: VAR_REGION_ARRIVAL 4,
         // data/scripts/mp_region.inc EventScript_RegionArrivalHoenn, mp_ship.c)
         SetWarpDestination(MAP_GROUP(MAP_SLATEPORT_CITY_HARBOR), MAP_NUM(MAP_SLATEPORT_CITY_HARBOR), WARP_ID_NONE, 8, 11);
-        VarSet(VAR_REGION_ARRIVAL, REGION_COUNT);
+        VarSet(VAR_REGION_ARRIVAL, 4);   // (SlateportCity_Harbor's frame script compares 4: kept when UNOVA became region 4)
     }
     else
         MP_Region_GoToStartHouse(region);
@@ -406,6 +423,13 @@ void MP_Region_StartNewGame(void)
         VarSet(VAR_SINNOH_ARRIVAL, 2);
         FlagSet(FLAG_SINNOH_NEW_GAME);
         Sinnoh_PlatinumStoryBegin();   // (Platinum's own story from its start: mom gives the Running Shoes later)
+        WarpIntoMap();
+    }
+    else if (sStartRegion == REGION_UNOVA)
+    {
+        // UNOVA: in the player's room in NUVEMA TOWN, where Black starts (zone 391's start: 5, 6); Black's new-game
+        // script and its opening scene run there (src/unova/u3d_vm.c)
+        SetWarpDestination(MAP_GROUP(MAP_UNOVA_NUVEMATOWN_Z391), MAP_NUM(MAP_UNOVA_NUVEMATOWN_Z391), WARP_ID_NONE, 5, 6);
         WarpIntoMap();
     }
     else if (sStartRegion != REGION_HOENN)
@@ -491,7 +515,8 @@ void MP_Region_WriteSidecar(void)
             AwFile_Write(c, sizeof(c), 1, f);
             AwFile_Write(sGlobalItems, sizeof(struct ItemSlot), sGlobalItemCount, f);
         }
-        c[0] = CHUNK('L', 'V', 'L', '4');   // (LVLS before SINNOH: 3 regions' EXP a record, read and converted)
+        c[0] = CHUNK('L', 'V', 'L', '5');   // (LVLS before SINNOH: 3 regions' EXP a record, LVL4 before UNOVA: 4;
+                                            // both read and converted)
         c[1] = sLevelCount * sizeof(sLevels[0]);
         AwFile_Write(c, sizeof(c), 1, f);
         AwFile_Write(sLevels, sizeof(sLevels[0]), sLevelCount, f);
@@ -903,7 +928,25 @@ static bool8 LoadFrom(const char *path)
                 if (fread(&format, sizeof(format), 1, f) == 1)
                     sSaveFormat = format > 255 ? 255 : format;
             }
-            else if (c[0] == CHUNK('L', 'V', 'L', '4') && c[1] % sizeof(sLevels[0]) == 0)
+            else if (c[0] == CHUNK('L', 'V', 'L', '4') && c[1] % sizeof(struct RegionLevel4) == 0)
+            {
+                // a side file from before UNOVA: 4 regions' EXP a record
+                u32 n = c[1] / sizeof(struct RegionLevel4), i;
+                struct RegionLevel4 old;
+                if (n > MAX_REGION_LEVELS)
+                    n = MAX_REGION_LEVELS;
+                for (i = 0; i < n && fread(&old, sizeof(old), 1, f) == 1; i++)
+                {
+                    memset(&sLevels[i], 0, sizeof(sLevels[i]));
+                    sLevels[i].pers = old.pers;
+                    sLevels[i].otid = old.otid;
+                    memcpy(sLevels[i].exp, old.exp, sizeof(old.exp));
+                    sLevels[i].has = old.has;
+                    sLevels[i].cur = old.cur;
+                }
+                sLevelCount = i;
+            }
+            else if (c[0] == CHUNK('L', 'V', 'L', '5') && c[1] % sizeof(sLevels[0]) == 0)
             {
                 u32 n = c[1] / sizeof(sLevels[0]);
                 if (n > MAX_REGION_LEVELS)
@@ -1051,7 +1094,8 @@ void MP_Region_LoadFromSave(void)
 }
 
 // ---------------------------------------------------------------------------------------------------- progress
-static const u16 sBadgeFlags[REGION_COUNT] = {FLAG_BADGE01_GET, FLAG_QZ_0x11B2, FLAG_QZ_0x2100, FLAG_SINNOH_BADGE01};
+static const u16 sBadgeFlags[REGION_COUNT] = {FLAG_BADGE01_GET, FLAG_QZ_0x11B2, FLAG_QZ_0x2100, FLAG_SINNOH_BADGE01,
+                                              FLAG_UNOVA_BADGE01};
 
 u16 MP_Region_BadgeFlag(u8 region, u8 badge)
 {

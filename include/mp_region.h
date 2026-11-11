@@ -7,7 +7,10 @@
 #define REGION_JOHTO 1
 #define REGION_KANTO 2
 #define REGION_SINNOH 3   // Pokémon Platinum's (src/sinnoh/, docs/SINNOH_HANDOFF.md): groups 40-44
-#define REGION_COUNT 4
+#define REGION_UNOVA 4    // Pokémon Black's (src/unova/, docs/UNOVA_HANDOFF.md): gMapGroup_Unova1-5
+#define REGION_COUNT 5
+#define REGION_COUNT_BEFORE_UNOVA 4   // (side-file records from before UNOVA: read and converted)
+#define FLAG_UNOVA_BADGE01 0x7F00     // .. + 7: UNOVA's badges, kept with Black's event work (src/unova/u3d_vm.c)
 
 // A Pokémon met in JOHTO: its MET_GAME (MON_DATA_MET_LOCATION holds the low byte of the JOHTO map section)
 #define MP_METGAME_JOHTO 14

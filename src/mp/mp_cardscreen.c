@@ -49,9 +49,9 @@ void MP_BadgeCase_Open(u8 region);
 bool8 MP_BadgeCase_IsActive(void);
 const u16 *MP_CardScreen_Halve(SDL_Renderer *r, SDL_Texture *canvas, u16 *out);
 
-static const char *const sRegionNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
+static const char *const sRegionNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH", "UNOVA"};
 // the regions in the order they're travelled (the BADGE CASE's tabs)
-static const u8 sRegionOrder[REGION_COUNT] = {REGION_HOENN, REGION_KANTO, REGION_JOHTO, REGION_SINNOH};
+static const u8 sRegionOrder[REGION_COUNT] = {REGION_HOENN, REGION_KANTO, REGION_JOHTO, REGION_SINNOH, REGION_UNOVA};
 
 static const u32 sAccents[TCARD_ACCENTS] = {
     0xe04848, 0xf08830, 0xe8c030, 0x80c838, 0x30a860, 0x30b0b0,
