@@ -45,6 +45,7 @@
 #include "money.h"
 #include "mp_region.h"
 #include "rtc.h"
+#include "platform.h"
 #include "save.h"
 #include "field_screen_effect.h"
 #include "constants/flags.h"
@@ -328,6 +329,10 @@ static u8 LocalId(u16 obj)
 static u8 ObjEventId(u8 localId)
 {
     u8 id;
+    // (while a map loads, its people aren't set out yet: those in the table are the last map's, sprites gone; a
+    // script moves their templates then: InitMmdlGridPosition)
+    if (gMain.callback2 != CB2_Overworld && gMain.callback2 != CB2_OverworldBasic)
+        return OBJECT_EVENTS_COUNT;
     if (!TryGetObjectEventIdByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &id))
         return id;
     // (only a scene's own people, Black's object ids from 0x80: AddMmdl's; never a person of the map left behind,
@@ -397,6 +402,7 @@ static s32 MapZ(u16 z) { s32 i = U3D_MapIndex(); return i < 0 ? z : z - 32 * U3D
 static u8 sMoves[OBJECT_EVENTS_COUNT][MAX_MOVE];
 static u8 sMoving[OBJECT_EVENTS_COUNT];   // local ids moving for the script
 static u16 sPendingScript;                 // Black's SetProcAction: a script to run next
+static u8 sSubText[400], sSubCount;        // Black's side windows' words (AddSubWinMsg)
 
 // ---- people a script added (Black's AddMmdl): kept until the map changes or the script deletes them, and put on the
 // field once it is up (a zone's field-init script adds them while the map loads, before the map's people are set out)
@@ -1185,6 +1191,44 @@ static void Step(struct Thread *t)
             FlagSet(FLAG_SYS_POKEDEX_GET);
             EnableNationalPokedex();
             break;
+        case U3C_WORK_CmdGetTimeZone:   // Black's time of day: 0 morning, 1 day, 2 evening, 3 night, 4 late night
+        {
+            u8 h;
+            RtcCalcLocalTime();
+            h = gLocalTime.hours;
+            *WorkPtr(a[0]) = h < 5 ? 4 : h < 10 ? 0 : h < 17 ? 1 : h < 20 ? 2 : 3;
+            break;
+        }
+        case U3C_WORK_CmdGetTrainerCardStars:   // (Black's card's stars: the game's TRAINER CARD keeps its own)
+            *WorkPtr(a[0]) = 0;
+            break;
+        case U3C_WORK_CmdGetMonthAndDay:   // month, day (the PC's clock)
+        {
+            struct SiiRtcInfo r;
+            Platform_GetDateTime(&r);
+            *WorkPtr(a[0]) = ConvertBcdToBinary(r.month);
+            *WorkPtr(a[1]) = ConvertBcdToBinary(r.day);
+            break;
+        }
+        case U3C_WORK_CmdGetBirthday:   // (the DS's owner's birthday: none here, so the nurse never says it)
+            *WorkPtr(a[0]) = 0;
+            *WorkPtr(a[1]) = 0;
+            break;
+        case U3C_POKEMON_FLD_CheckPartyFlagged:   // a POKeMON of the party has POKeRUS
+            *WorkPtr(a[0]) = CheckPartyPokerus(gPlayerParty, 0x3F) != 0;
+            break;
+        case U3C_POKEMON_FLD_HandleMysteryGift:   // (Black's Mystery Gift deliveryman: none to give)
+            *WorkPtr(a[1]) = 0;
+            break;
+        case U3C_StartPlayerFormChangeAndWait:   // (Black turns the player to the counter and back)
+        case U3C_AddTrainerRecordValue:
+            break;
+        case U3C_SCREENEFFECTS_StartRecoveryBallsEvent:   // the healing machine: its tune, the song after
+            PushSong();
+            PlayNewMapMusic(MUS_UNOVA_ME_ASA);
+            t->waitFrames = 60 * 6;
+            t->wait = W_SONG_THEN_POP;
+            break;
         case U3C_WORK_CmdGetWeek:
             RtcCalcLocalTime();
             *WorkPtr(a[0]) = gLocalTime.days % 7;
@@ -1213,8 +1257,32 @@ static void Step(struct Thread *t)
         case U3C_WORK_CmdEnableNationalDex:
             EnableNationalPokedex();
             break;
-        case U3C_WaitMsgKey:
-            t->wait = W_KEY;
+        case U3C_WaitMsgKey:   // (once the message has printed)
+            t->wait = W_MESSAGE_KEY;
+            break;
+        // ---- Black's small side windows (a crowd's murmurs) shown together in the message box, the script going on;
+        // its WaitMsgKey / close end them
+        case U3C_AddSubWinMsg:   // message, x, y, window
+        {
+            static u8 sLine[160];
+            u16 bank = t->bank;
+            const u8 *text = U3D_Text(bank, a[0]);
+            StringExpandPlaceholders(sLine, text);
+            if (sSubCount && sSubCount % 2)
+                StringAppend(sSubText, (const u8[]){CHAR_NEWLINE, EOS});
+            else if (sSubCount)
+                StringAppend(sSubText, (const u8[]){CHAR_PROMPT_SCROLL, EOS});
+            if (StringLength(sSubText) + StringLength(sLine) < sizeof(sSubText) - 4)
+                StringAppend(sSubText, sLine);
+            sSubCount++;
+            if (!IsFieldMessageBoxHidden())
+                HideFieldMessageBox();
+            ShowFieldMessage(sSubText);
+            break;
+        }
+        case U3C_DeleteSubWinMsg:
+            sSubCount = 0;
+            sSubText[0] = EOS;
             break;
         // ---- people
         case U3C_TurnTargetMmdlToPlayer:
@@ -1305,22 +1373,54 @@ static void Step(struct Thread *t)
             if (V(0) == 547)   // (the talk sound)
                 PlaySE(SE_SELECT);
             break;
-        // ---- screen
+        // ---- screen (a fade waits for the one before it to end: the game ignores one started over another)
+        case U3C_SCREENEFFECTS_WaitScriptEffect:
+            t->wait = W_FADE;
+            break;
+        case U3C_PROC_FLD_StartFieldMapFadeIn:   // (after a screen Black opens over the field)
+            if (gPaletteFade.active)
+            {
+                t->pc = here, t->wait = W_FADE;
+                break;
+            }
+            if (gPaletteFade.y != 0)
+                BeginNormalPaletteFade(PALETTES_ALL, 2, 16, 0, RGB_BLACK);
+            break;
         case U3C_SCREENEFFECTS_FadeOutSlow:
         case U3C_SCREENEFFECTS_FadeOutSlowAltScreens:
+            if (gPaletteFade.active)
+            {
+                t->pc = here, t->wait = W_FADE;
+                break;
+            }
             BeginNormalPaletteFade(PALETTES_ALL, 2, 0, 16, RGB_BLACK);
             break;
         case U3C_SCREENEFFECTS_FadeOutFast:
         case U3C_SCREENEFFECTS_FadeOutFastAltScreens:
+            if (gPaletteFade.active)
+            {
+                t->pc = here, t->wait = W_FADE;
+                break;
+            }
             BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
             break;
         case U3C_SCREENEFFECTS_FadeInSlow:
         case U3C_SCREENEFFECTS_FadeInSlowAgain:
         case U3C_SCREENEFFECTS_FadeInSlowAltScreens:
+            if (gPaletteFade.active)
+            {
+                t->pc = here, t->wait = W_FADE;
+                break;
+            }
             BeginNormalPaletteFade(PALETTES_ALL, 2, 16, 0, RGB_BLACK);
             break;
         case U3C_SCREENEFFECTS_FadeInFast:
         case U3C_SCREENEFFECTS_FadeInFastAltScreens:
+            if (gPaletteFade.active)
+            {
+                t->pc = here, t->wait = W_FADE;
+                break;
+            }
             BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
             break;
         case U3C_SCREENEFFECTS_WaitBrightness:
@@ -1329,6 +1429,11 @@ static void Step(struct Thread *t)
         case U3C_SCREENEFFECTS_StartBrightnessChange:   // screens, from, to (Black's brightness, 16 = gone), speed
         {
             s16 from = (s16)a[1], to = (s16)a[2];
+            if (gPaletteFade.active)
+            {
+                t->pc = here, t->wait = W_FADE;
+                break;
+            }
             BeginNormalPaletteFade(PALETTES_ALL, a[3] > 1 ? a[3] - 1 : 0, from < 0 ? -from : from, to < 0 ? -to : to, RGB_BLACK);
             break;
         }

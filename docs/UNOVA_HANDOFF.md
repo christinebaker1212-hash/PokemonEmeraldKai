@@ -29,11 +29,18 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   party), people (movement lists as the game's movements, turning, placing, removing), fades, POKéMON (heal, give,
   party count, cries), money, trainer battles (src/unova/u3d_battle.c: Black's trainers, a/0/9/2 and a/0/9/3 in the
   scripts pack v2, fought through TRAINER_UNOVA_A / _B; names bank 190, classes 191; Black's script decides what a
-  loss means). The opening plays to BIANCA's battle and after it (`mp warp 52,14,5,6`, mash A; then
-  `mp warp 52,14,5,7`, DOWN, A: the gift box). Next for the first area: BGM / SE (the music from Black's SDAT), the
-  camera moves (0x13F-0x147), the room's mess (build-model nodes 0x127-0x12A), 0x101, the whiteout command 0x8C,
-  items (Black's numbers to the game's by name), the naming screen (0x105), warps (0xC2), Black's gift box screen
-  in place of Kai's starter table, the trainers' battle pictures, then the region choice and the boat.
+  loss means). The story plays from the opening to the end of ACCUMULA TOWN's opening (2026-11-11): the room, the
+  mom scene and the Xtransceiver, BIANCA's house, JUNIPER's lab and the POKéDEX, the TOWN MAP, ROUTE 1 with JUNIPER
+  ("One, two!"), ROUTE 1's north end, ACCUMULA's POKéMON CENTER tour and the nurse's heal, GHETSIS's speech, N and
+  his battle. Also played: Black's scripts calling scripts (a frame stack), scene cameras (u3d.c U3D_CameraMoveTo:
+  target, pitch, yaw, distance, eased), people a script adds (AddMmdl: set out once the field is up, so a zone's
+  field-init script's survive loading), SetProcAction (the script run next, in the zone the player is then in:
+  JUNIPER's ROUTE 1 scene), fades that wait for the fade before, a crowd's side windows (AddSubWinMsg) in the message
+  box, the healing machine's tune, a POKéMON's params. Tested by a harness script that warps from trigger to
+  trigger (a scene's trigger is one of its zone's Pos events: tools/unova/events.py) and mashes A. Not yet: Black's 3D cut-ins (0x19F, 0x240), the catch demo battle (0x17D), build-model
+  animations (doors: 0x127-0x12A), map replacements (0xDA), warp destinations / whiteout points (0xD9), the value
+  screen (0x155), people following the player (0x06B), the naming screen, Black's gift box screen, trainers' battle
+  pictures, the region choice's boat and CASTELIA's pier.
 - UNOVA is the game's fifth region (REGION_UNOVA 4, REGION_COUNT 5; 2026-11-11): the new game's region menu
   (the player's room in NUVEMA: `MOEMON_DEBUG_REGION=4`), the boat lists (CASTELIA (UNOVA), MULTI_REGIONS_FROM_UNOVA;
   the first boat lands in the room for now: no pier scene at CASTELIA yet), the ship's crossing (its passengers,
@@ -46,11 +53,16 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
 - Wild POKéMON (src/unova/u3d_wild.c): Black's encounter tables (scripts pack v4: a/1/2/6 by the zone's encounter
   id, the zones' records 18 bytes from v4), the season's row, grass / dark grass / surfing at their own rates, fed to
   wild_encounter.c StandardWildEncounter (its UNOVA line). Dark grass is still one POKéMON (Black: two).
-- Items (tools/unova/gen_items.py -> src/data/unova_items.h): Black's numbers to the game's by name / constant; 146
-  of Black's 627 aren't in the game yet (Gen 5's: gems, the C-GEAR, the XTRANSCEIVER, Data Cards, Light / Dark Stone,
-  Red Card, Eject Button...): the user's rule is that new items come from Black, so they're to be added (icons from
-  Black's item icons). The VM's AddItem / RemoveItem / CanAddItem / HasItem / GetItemQuantity / BufferItemName use it
-  (an item the game lacks: logged, the script goes on, Black's own name shown).
+- Items (tools/unova/gen_items.py -> src/data/unova_items.h, with Black's bag pocket of each): Black's numbers to
+  the game's by name / constant; a TM by the move it teaches (Black's TM01 HONE CLAWS is not FOCUS PUNCH). The user's
+  rule: an item the game has is the game's, a new one is Black's: tools/unova/gen_new_items.py added Black's 54 new
+  ones (812-865: the Xtransceiver, GRAM 1-3, PROP CASE, passes, DRAGON SKULL, LIGHT / DARK STONE, treasures, relics,
+  COVER / PLUME FOSSIL, wings, the 17 gems (battle_gen59.c: half again the power once), PRISM SCALE, RED CARD, RING
+  TARGET, BINDING BAND, EJECT BUTTON, SWEET HEART, POKé TOY) from PokeAPI's names, texts and icons, and
+  tools/moemon_tms/gen_tm4.py the 25 TMs whose moves had no TM here (TM140-TM164, items 866-890, gTm4Learnsets).
+  Still ITEM_NONE (87): HeartGold's / Platinum's own (Data Cards, Apricorn Box...: Black never gives them), Gen 5's
+  mails, the Entralink's X items 2 / 3 / 6, Dire Hit 2 / 3 and Urges, the CHERISH BALL and the Drives (events).
+  RED CARD / EJECT BUTTON / RING TARGET / BINDING BAND are held but do nothing in battle yet.
 - Music: Black's whole soundtrack (204 songs: tools/kaisong/unova_songs.py slots / convert; MUS_UNOVA_* from 831,
   named after Black's own sequences; src/data/unova_songs.h maps Black's sequence numbers), the zones' songs as the
   maps' music (spring's), the scripts' song commands (u3d_vm.c: fanfares pushed and popped), Black's battle and
