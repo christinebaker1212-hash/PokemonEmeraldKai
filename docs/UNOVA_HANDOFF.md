@@ -5,7 +5,15 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
 
 ## Where things stand (2026-11-11)
 
-- Groundwork only. Nothing of UNOVA is in the game yet.
+- The engine draws UNOVA (2026-11-11): src/unova/u3d.c (include/u3d.h) reads unova/black3d.pak, which
+  tools/unova/build_pack.py builds from the ROM (every matrix: 238, about 30 s, 19 MB; `build_pack.py OUT [MATRIX...]`
+  for a few). 533 maps from Black's zones (tools/unova/gen_maps.py: one a block outdoors, one a zone indoors, groups
+  gMapGroup_Unova1-5, MAPSEC_UNOVA_* from 0x200 with Black's place names). Black's camera (setting 0: 237 units away,
+  53.2 degrees down), its seasons (the month: spring, summer, autumn, winter, round again), its lights by area and
+  season with its time zones' hours, doors walked into and mats walked off (warps from Black's connections), its
+  collision grids as the maps' blocks. Test by hand: `MOEMON_U3D_PAK=unova/black3d.pak` (+ MOEMON_U3D_HOUR,
+  MOEMON_U3D_SEASON), `mp warp 52,12,16,16` (NUVEMA TOWN). No people, words, scripts or music yet; no way in for
+  players (the region choice and the boat come with the first area).
 - The ROM: the user's Pokemon Black (USA, Europe) (NDSi Enhanced), SHA-1 26ad0b9967aa279c4a266ee69f52b9b2332399a5,
   from their Google Drive (the link in docs/UNOVA_DECISIONS.md's source message; the release fetches it through the
   UNOVA_ROM_URL secret, added by the user 2026-11-11). Never committed; locally in ~/.cache/moemon/unova/black.nds.
@@ -48,6 +56,28 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   permissions, heights), area data (textures, animations, lights per season), the event data (people, warps,
   triggers), the scripts (ov010 scrcmd_*), the message banks (encrypted: msgdata.c), encounters, trainers, the
   camera tables (and Black's "rail" maps, which move the camera along a rail: ZONEDATA_IsRailMap).
+
+## Black's words and scripts
+
+- Words: tools/unova/build_text.py -> unova/black_text.pak (760 banks: the 288 system banks, then the 472 story banks;
+  56,700 messages, about a second). src/unova/u3d_text.c reads it; a script's text is PLACEHOLDER_ID_UNOVA_TEXT +
+  bank + message (7-bit bytes), Black's word slots 0-2 gStringVar1-3, 3 and up PLACEHOLDER_ID_UNOVA_VAR + slot
+  (gUnovaStrVar). {BE00} is "\\l", {BE01} "\\p", {BE02:n} a wait.
+- Commands: tools/unova/scrcmd.py reads the field VM's table from overlay 10 (609 commands at 0x0217062C), names each
+  from the decomp's symbols (the field overlays' first: overlays share addresses) and reads its arguments from its
+  decompiled body (v work-or-constant u16, p work u16, h u16, w u32, b u8; White's branches dropped). Every one of
+  the 471 code files of a/0/5/7 decodes end to end with them (tools/unova/scripts.py check; file 865 is data).
+- Script ids: a zone's 1.. are its file's (the zone header's script id) 0..; 46 shared ranges (ov010 0x021701A8:
+  first, last, file, text arc 3, text file: 2000 the common talk scripts, 3000-6999 trainers...). A file: u32 offsets
+  to FD13, script n at 4n + 4 + offset. Jumps / calls: u32 from after the offset. Comparisons push and compare on a
+  stack: PushWorkValue / PushConst / CompareStack k / IfJump 0xFF (pop).
+- Init files (the zone header's init id, same archive): 6-byte entries u16 kind, u32 value to 0: 1 the scene table
+  (value: offset from after the 0 to u16 work, value, script triples to 0: run when the work holds the value, as
+  Emerald's ON_FRAME), 2 the zone-change script, 3 the recover script, 4 the field-init script (each load: people
+  placed by the story's works).
+- Event work (zonedata.c): 0x3EA bytes a save: works 0x4000.. (ZONEDATA_GetEventWorkAddress), 0x16C bytes of flags
+  (0x0001-0x0B5F; 0xAA0-0xB5F cleared each day), 8 bytes of temporary flags 0x4000+; 0x8000+ the script's own works.
+  Object 0xFF is the player.
 
 ## The plan
 

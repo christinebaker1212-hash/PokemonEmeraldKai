@@ -1,6 +1,7 @@
 #include "global.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's text
 #include "orre.h"  // Moemon Kai: ORRE's text
+#include "u3d.h"   // Moemon Kai: UNOVA's text
 #include "string_util.h"
 #include "text.h"
 #include "strings.h"
@@ -359,6 +360,13 @@ u8 *StringExpandPlaceholders(u8 *dest, const u8 *src)
             {
                 // Moemon Kai: a line of ORRE's text pack, or one of its string slots (src/orre/orre_text.c)
                 src = Orre_ExpandPlaceholder(placeholderId, src, &dest);
+                break;
+            }
+            if (placeholderId == PLACEHOLDER_ID_UNOVA_TEXT
+             || (placeholderId >= PLACEHOLDER_ID_UNOVA_VAR && placeholderId < PLACEHOLDER_ID_UNOVA_VAR + UNOVA_STR_VARS))
+            {
+                // Moemon Kai: a message of UNOVA's text pack, or one of Black's word slots (src/unova/u3d_text.c)
+                src = U3D_ExpandPlaceholder(placeholderId, src, &dest);
                 break;
             }
             if (placeholderId >= PLACEHOLDER_ID_SINNOH_VAR4 && placeholderId <= PLACEHOLDER_ID_SINNOH_VAR6)
