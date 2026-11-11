@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Moemon Co-op: the Pokedex info page's top bar with a TEXT tab.
 
-The stock bar has four 7-tile buttons (AREA CRY SIZE CANCEL). This builds five buttons in the
-30 visible tiles, from the stock bar's own pixels: TEXT 6 tiles, AREA 6, CRY 5, SIZE 6 and the
-stock CANCEL button (7). Buttons are narrowed by dropping plain middle columns; the labels are
+The stock bar has four 7-tile buttons (AREA CRY SIZE CANCEL). This builds six buttons in the
+30 visible tiles, from the stock bar's own pixels: TEXT 5 tiles, AREA 5, CRY 4, SIZE 5, DATA 5 and
+CANCEL 6. Buttons are narrowed by dropping plain middle columns; the labels are
 the stock ones, and TEXT is drawn in the same 5x9 letter style (E from AREA; T and X drawn here,
 shadowed with the stock rule: a shadow pixel right of, below, or down-right of a letter pixel).
 
@@ -19,7 +19,7 @@ OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(REPO, 'src/data/pokemon
 PREVIEW = sys.argv[3] if len(sys.argv) > 3 else None
 
 # The slots: (first column, width in tiles). Must match sMpDexBarSlots in pokedex.c.
-SLOTS = [(0, 6), (6, 6), (12, 5), (17, 6), (23, 7)]
+SLOTS = [(0, 5), (5, 5), (10, 4), (14, 5), (19, 5), (24, 6)]   # TEXT AREA CRY SIZE DATA CANCEL
 LETTER, SHADOW, FILL = 15, 13, 12
 
 
@@ -135,17 +135,27 @@ def place(button, label_pixels):
     return button
 
 
-labels = [shadowed(word([T, E, X, T]), LETTER, SHADOW)]
-for k in range(3):                      # the stock labels, letter and shadow pixels as they are
+def stock_label(k):
     sl = stock_slot(k)
     m, a = label_of(sl, LETTER)
-    labels.append([[v if v in (LETTER, SHADOW) else None for v in sl[y][a:a + len(m[0]) + 1]] for y in range(4, 14)])
+    return [[v if v in (LETTER, SHADOW) else None for v in sl[y][a:a + len(m[0]) + 1]] for y in range(4, 14)]
+
+
+labels = [shadowed(word([T, E, X, T]), LETTER, SHADOW)]
+for k in range(3):                      # the stock labels, letter and shadow pixels as they are
+    labels.append(stock_label(k))
+# DATA (the entry's own pages: pokedex.c DATA_SCREEN): D drawn here, A from AREA, T as TEXT's
+A = [r[0:5] for r in area]
+D = glyph(['####.'] + ['#...#'] * 7 + ['####.'])
+labels.append(shadowed(word([D, A, T, A]), LETTER, SHADOW))
+labels.append(stock_label(3))           # CANCEL
 
 bar = [[None] * 240 for _ in range(16)]
 plain = erase_label(stock_slot(0), FILL)
+cancel_plain = erase_label(stock_slot(3), stock_slot(3)[8][8])
 for i, (col, w) in enumerate(SLOTS):
-    if i == 4:
-        button = stock_slot(3)          # CANCEL as it is
+    if i == 5:
+        button = place(narrow(cancel_plain, w * 8), labels[i])   # CANCEL, a tile narrower
     else:
         button = place(narrow(plain, w * 8), labels[i])
     for y in range(16):

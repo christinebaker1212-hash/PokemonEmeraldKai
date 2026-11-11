@@ -734,6 +734,9 @@ static void Task_ShowPokedexAreaScreen(u8 taskId)
     gTasks[taskId].tState++;
 }
 
+void MP_DexAreaDetails(bool8 show);
+static bool8 sMpAreaDetails;
+
 static void Task_HandlePokedexAreaScreenInput(u8 taskId)
 {
     DoAreaGlow();
@@ -747,6 +750,27 @@ static void Task_HandlePokedexAreaScreenInput(u8 taskId)
             return;
         break;
     case 1:
+        // Moemon Kai: A on the map: the places themselves and how it's found there (pokedex.c MP_DexAreaDetails), over
+        // the map; A or B back to the map
+        if (sMpAreaDetails)
+        {
+            if (JOY_NEW(A_BUTTON | B_BUTTON))
+            {
+                sMpAreaDetails = FALSE;
+                MP_DexAreaDetails(FALSE);
+                SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON);
+                PlaySE(SE_PC_OFF);
+            }
+            return;
+        }
+        if (JOY_NEW(A_BUTTON))
+        {
+            sMpAreaDetails = TRUE;
+            ClearGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON);   // (the map's marks would stand in front of it)
+            MP_DexAreaDetails(TRUE);
+            PlaySE(SE_PIN);
+            return;
+        }
         if (JOY_NEW(B_BUTTON))
         {
             gTasks[taskId].data[1] = 1;

@@ -52,6 +52,7 @@ enum
     AREA_SCREEN,
     CRY_SCREEN,
     SIZE_SCREEN,
+    DATA_SCREEN, // Moemon Kai: DATA (its profile, stats, evolution line and moves: mp_dexplus.c)
     CANCEL_SCREEN,
     SCREEN_COUNT
 };
@@ -126,7 +127,8 @@ static EWRAM_DATA u16 sLastSelectedPokemon = 0;
 static u16 sMpDexKeepNum;   // Moemon Kai: the entry (a national number) to be on once the list is made again
 static u16 MpDexCount(bool8 hoenn, u8 caseID, bool8 own);
 static bool8 sMpDexJumpNow;
-static u8 sMpDexMorePage;   // an entry's MORE page (0: shut)
+static u8 sMpDexMorePage;   // an entry's DATA page (MP_DEXPAGE_*, 0: shut)
+static s16 sMpDexMoreScroll;
 static bool8 sMpDexNothing;
 
 static EWRAM_DATA u8 sPokeBallRotation = 0;
@@ -914,7 +916,7 @@ static void PrintInfoScreenText(const u8 *str, u8 left, u8 top);
 #define MP_DEX_TEXT_MAXLINES 48
 
 // The TEXT / AREA / CRY / SIZE / CANCEL buttons: first column and width in tiles (tools/moemon_dex/gen_bar.py)
-static const u8 sMpDexBarSlots[SCREEN_COUNT][2] = {{0, 6}, {6, 6}, {12, 5}, {17, 6}, {23, 7}};
+static const u8 sMpDexBarSlots[SCREEN_COUNT][2] = {{0, 5}, {5, 5}, {10, 4}, {14, 5}, {19, 5}, {24, 6}};
 #define MP_DEX_BAR_TILE 256   // the bar's tiles go after the 256 menu tiles in the BG's char block
 
 static u8 sMpDexText[MP_DEX_MORE_MAX_LEN + 16];
@@ -3308,7 +3310,7 @@ static bool8 TryDoInfoScreenScroll(void)
     u16 nextPokemon;
     u16 selectedPokemon = sPokedexView->selectedPokemon;
 
-    if (sMpDexReading) // Moemon Co-op: UP/DOWN scroll the TEXT instead
+    if (sMpDexReading || sMpDexMorePage) // Moemon Co-op: UP/DOWN scroll the TEXT (or DATA's list) instead
         return FALSE;
 
     if (JOY_NEW(DPAD_UP) && selectedPokemon)
@@ -4096,18 +4098,39 @@ static void MpDexMoreShow(u16 monSpriteId)
     {
         ClearWindowTilemap(WIN_MORE);
         CopyBgTilemapBufferToVram(1);
+        SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_BG2_ON);
         if (monSpriteId < MAX_SPRITES)
             gSprites[monSpriteId].invisible = FALSE;
         return;
     }
     LoadPalette(MP_DexDraw_Palette(), BG_PLTT_ID(MP_DEX_PAL), PLTT_SIZE_4BPP);
-    MP_DexDraw_Info(sPokedexListItem->dexNum, sPokedexListItem->seen, sPokedexListItem->owned, sMpDexMorePage);
+    sMpDexMoreScroll = MP_DexDraw_Info(sPokedexListItem->dexNum, sPokedexListItem->seen, sPokedexListItem->owned, sMpDexMorePage, sMpDexMoreScroll);
     MP_DexDraw_Tiles(8, 16, MP_MORE_W, MP_MORE_H, sTiles);
     CopyToWindowPixelBuffer(WIN_MORE, sTiles, sizeof(sTiles), 0);
     PutWindowTilemap(WIN_MORE);
     CopyWindowToVram(WIN_MORE, COPYWIN_FULL);
+    ClearGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_BG2_ON);   // (the entry's words: the card stands in their place)
     if (monSpriteId < MAX_SPRITES)
         gSprites[monSpriteId].invisible = TRUE;
+}
+
+// Moemon Kai: the AREA screen's A (pokedex_area_screen.c): the places behind the map's marks, a card on the tab bar's
+// layer as DATA's pages are; SHOW off takes it away
+void MP_DexAreaDetails(bool8 show)
+{
+    static u8 sTiles[MP_MORE_W * MP_MORE_H * 32];
+    if (!show)
+    {
+        ClearWindowTilemap(WIN_MORE);
+        CopyBgTilemapBufferToVram(1);
+        return;
+    }
+    LoadPalette(MP_DexDraw_Palette(), BG_PLTT_ID(MP_DEX_PAL), PLTT_SIZE_4BPP);
+    MP_DexDraw_Info(sPokedexListItem->dexNum, sPokedexListItem->seen, sPokedexListItem->owned, MP_DEXPAGE_WHERE, 0);
+    MP_DexDraw_Tiles(8, 16, MP_MORE_W, MP_MORE_H, sTiles);
+    CopyToWindowPixelBuffer(WIN_MORE, sTiles, sizeof(sTiles), 0);
+    PutWindowTilemap(WIN_MORE);
+    CopyWindowToVram(WIN_MORE, COPYWIN_FULL);
 }
 
 static void Task_HandleInfoScreenInput(u8 taskId)
@@ -4127,20 +4150,29 @@ static void Task_HandleInfoScreenInput(u8 taskId)
         return;
     if (MpDexFormsInput(taskId)) // Moemon Kai: Platinum's FORMS
         return;
-    // Moemon Kai: MORE, three pages over the entry (mp_dexplus.c): R opens it and goes on, L back, B closes it
+    // Moemon Kai: DATA open (its tab + A): LEFT / RIGHT its pages, UP / DOWN a list, B back to the entry
+    if (sMpDexMorePage)
     {
         u8 was = sMpDexMorePage;
-        if (JOY_NEW(R_BUTTON))
-            sMpDexMorePage = (sMpDexMorePage + 1) % 4, PlaySE(SE_SELECT);
-        else if (sMpDexMorePage && JOY_NEW(L_BUTTON))
-            sMpDexMorePage = (sMpDexMorePage + 3) % 4, PlaySE(SE_SELECT);
-        else if (sMpDexMorePage && JOY_NEW(B_BUTTON))
-            sMpDexMorePage = 0, PlaySE(SE_SELECT), gMain.newKeys &= ~B_BUTTON;
-        if (was != sMpDexMorePage)
+        s16 scroll = sMpDexMoreScroll;
+        if (JOY_REPEAT(DPAD_RIGHT) || JOY_NEW(R_BUTTON))
+            sMpDexMorePage = sMpDexMorePage % (MP_DEXPAGE_WHERE - 1) + 1, sMpDexMoreScroll = 0;
+        else if (JOY_REPEAT(DPAD_LEFT) || JOY_NEW(L_BUTTON))
+            sMpDexMorePage = (sMpDexMorePage + MP_DEXPAGE_WHERE - 3) % (MP_DEXPAGE_WHERE - 1) + 1, sMpDexMoreScroll = 0;
+        else if (JOY_REPEAT(DPAD_DOWN))
+            sMpDexMoreScroll++;
+        else if (JOY_REPEAT(DPAD_UP) && sMpDexMoreScroll > 0)
+            sMpDexMoreScroll--;
+        else if (JOY_NEW(B_BUTTON | A_BUTTON))
+            sMpDexMorePage = 0;
+        if (was != sMpDexMorePage || scroll != sMpDexMoreScroll)
+        {
             MpDexMoreShow(gTasks[taskId].tMonSpriteId);
-    }
-    if (sMpDexMorePage)
+            if (was != sMpDexMorePage || scroll != sMpDexMoreScroll)
+                PlaySE(sMpDexMorePage ? SE_DEX_PAGE : SE_PC_OFF);
+        }
         return;
+    }
     if (JOY_NEW(B_BUTTON))
     {
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
@@ -4190,6 +4222,11 @@ static void Task_HandleInfoScreenInput(u8 taskId)
                 gTasks[taskId].func = Task_SwitchScreensFromInfoScreen;
                 PlaySE(SE_PIN);
             }
+            break;
+        case DATA_SCREEN:   // Moemon Kai
+            sMpDexMorePage = MP_DEXPAGE_PROFILE, sMpDexMoreScroll = 0;
+            MpDexMoreShow(gTasks[taskId].tMonSpriteId);
+            PlaySE(SE_PIN);
             break;
         case CANCEL_SCREEN:
             BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_BLACK);
@@ -4974,12 +5011,6 @@ static void PrintMonInfo(u32 num, u32 value, u32 owned, u32 newEntry)
     {
         PrintMonHeight(gPokedexEntries[num].height, 0x81, 0x39);
         PrintMonWeight(gPokedexEntries[num].weight, 0x81, 0x49);
-        {
-            // Moemon Kai: MORE's button, in the entry's own letters
-            static const u8 sText_RMore[] = _("R: MORE");
-            u8 color[3] = {TEXT_COLOR_TRANSPARENT, TEXT_DYNAMIC_COLOR_6, TEXT_COLOR_LIGHT_GRAY};
-            AddTextPrinterParameterized4(0, FONT_SMALL, 187, 81, 0, 0, color, TEXT_SKIP_DRAW, sText_RMore);
-        }
     }
     else
     {

@@ -217,8 +217,9 @@ static bool8 InfoFresh(void);
 static const char *const sEggNames[16];
 static bool8 PanelIsOpen(void);
 static const char *const sShowNames[MP_DEXSHOW_COUNT];
+#define INFO_ROWS_MAX 9   // (a page's list rows: DrawInfo's INFO_ROWS)
 static struct MpDexHud sHud;
-static struct { u16 nat; bool8 seen, owned; u8 page; u32 frame; bool8 on; } sInfo;
+static struct { u16 nat; bool8 seen, owned; u8 page; u32 frame; bool8 on; s16 scroll, rows; } sInfo;
 static u32 sHudFrame;
 static bool8 sHudOn;
 
@@ -426,11 +427,28 @@ void MP_DexDraw_Panel(void)
     DrawPanel(sSheet);
 }
 
-void MP_DexDraw_Info(u16 nat, bool8 seen, bool8 owned, u8 page)
+// An entry's page (MP_DEXPAGE_*) from row SCROLL of its list; returns the row it starts from (kept inside the list)
+s32 MP_DexDraw_Info(u16 nat, bool8 seen, bool8 owned, u8 page, s32 scroll)
 {
-    memset(sSheet, 0, sizeof(sSheet));
+    u32 pass;
     sInfo.nat = nat, sInfo.seen = seen, sInfo.owned = owned, sInfo.page = page;
-    DrawInfo(sSheet);
+    sInfo.scroll = (s16)(scroll < 0 ? 0 : scroll);
+    for (pass = 0; pass < 2; pass++)
+    {
+        memset(sSheet, 0, sizeof(sSheet));
+        DrawInfo(sSheet);
+        if (sInfo.rows <= INFO_ROWS_MAX)
+        {
+            if (sInfo.scroll == 0)
+                break;
+            sInfo.scroll = 0;
+        }
+        else if (sInfo.scroll + INFO_ROWS_MAX > sInfo.rows)
+            sInfo.scroll = sInfo.rows - INFO_ROWS_MAX;
+        else
+            break;
+    }
+    return sInfo.scroll;
 }
 
 // ------------------------------------------------------------------------------------------------ FIND & SORT
@@ -443,6 +461,7 @@ void MP_DexDraw_Info(u16 nat, bool8 seen, bool8 owned, u8 page)
 #include "pokemon.h"
 #include "sound.h"
 #include "constants/items.h"
+#include "constants/pokemon.h"
 #include "constants/moves.h"
 #include "constants/abilities.h"
 #include "constants/songs.h"
@@ -877,7 +896,7 @@ static s32 EvoLines(u16 *frame, u16 species, s32 depth, s32 y, const char *how)
 {
     char name[16], line[48];
     u32 i;
-    if (y > 124 || depth > 3)
+    if (y > 126 || depth > 3)
         return y;
     if (ViewSeen(species))
         SpeciesAscii(species, name, sizeof(name));
@@ -911,13 +930,24 @@ static bool8 InTable(const struct WildPokemonInfo *info, u32 count, u16 species)
     return FALSE;
 }
 
+// A list's rows from the scroll on: TRUE while row K is one to draw, at *Y
+#define INFO_ROWS 9
+static bool8 Row(s32 k, s32 *y)
+{
+    if (k < sInfo.scroll || k >= sInfo.scroll + INFO_ROWS)
+        return FALSE;
+    *y = 34 + (k - sInfo.scroll) * 11;
+    return TRUE;
+}
+
 static void DrawInfo(u16 *frame)
 {
-    static const char *const sPages[3] = {"STATS", "EVOLUTION", "WHERE"};
+    static const char *const sPages[MP_DEXPAGE_WHERE] = {"PROFILE", "STATS", "EVOLUTION", "MOVES BY LEVEL", "MOVES BY TM", "WHERE"};
     u16 species = NationalPokedexNumToSpecies(sInfo.nat);
     const struct SpeciesInfo *info = &gSpeciesInfo[species];
     char buf[64], a[24], b[24];
-    s32 y = 33, i;
+    s32 y = 34, i;
+    sInfo.rows = 0;
     sFont = FONT_NARROW;
     // (the entry's own card: pale, a grey strip for its heading, dark letters)
     Box(frame, 8, 16, 223, 143, RGB(0, 0, 5), 16);
@@ -925,35 +955,67 @@ static void DrawInfo(u16 *frame)
     Box(frame, 11, 19, 220, 140, C_CARD, 16);
     Box(frame, 11, 19, 220, 31, RGB(23, 23, 23), 16);
     SpeciesAscii(species, a, sizeof(a));
-    snprintf(buf, sizeof(buf), "%s  %s", a, sPages[(sInfo.page - 1) % 3]);
+    snprintf(buf, sizeof(buf), "%s  %s", a, sPages[(sInfo.page - 1) % MP_DEXPAGE_WHERE]);
     Text(frame, 16, 19, buf, C_INK, C_WHITE);
-    Key(frame, 168, 19, "L", "", C_INK, NO_SHADOW);
-    Key(frame, 182, 19, "R", "PAGE", C_INK, C_WHITE);
-    if (sInfo.page == 1)
+    if (sInfo.page < MP_DEXPAGE_WHERE)
+    {
+        snprintf(buf, sizeof(buf), "< %d/%d >", sInfo.page, MP_DEXPAGE_WHERE - 1);
+        Text(frame, 216 - Width(buf), 19, buf, C_INK, C_WHITE);
+    }
+    if (!sInfo.owned && (sInfo.page == MP_DEXPAGE_PROFILE || sInfo.page == MP_DEXPAGE_STATS || sInfo.page == MP_DEXPAGE_LEVEL
+                         || sInfo.page == MP_DEXPAGE_TM))
+    {
+        // (nothing of one not caught is given away)
+        Text(frame, 18, 62, "CATCH IT TO FILL IN THIS PAGE.", C_INK, C_INK_SH);
+        sFont = FONT_SMALL;
+        return;
+    }
+    switch (sInfo.page)
+    {
+    case MP_DEXPAGE_PROFILE:
+        MP_GameToAscii(a, gTypeNames[info->types[0]], sizeof(a) - 1);
+        MP_GameToAscii(b, gTypeNames[info->types[1]], sizeof(b) - 1);
+        snprintf(buf, sizeof(buf), info->types[0] == info->types[1] ? "%s" : "%s / %s", a, b);
+        Text(frame, 18, y, "TYPE", C_INK, C_INK_SH), Text(frame, 84, y, buf, RGB(4, 10, 22), C_INK_SH), y += 13;
+        MP_GameToAscii(a, gAbilityNames[info->abilities[0]], sizeof(a) - 1);
+        MP_GameToAscii(b, gAbilityNames[info->abilities[1]], sizeof(b) - 1);
+        snprintf(buf, sizeof(buf), info->abilities[1] && info->abilities[1] != info->abilities[0] ? "%s / %s" : "%s", a, b);
+        Text(frame, 18, y, "ABILITY", C_INK, C_INK_SH), Text(frame, 84, y, buf, RGB(4, 10, 22), C_INK_SH), y += 13;
+        if (info->genderRatio == MON_GENDERLESS)
+            snprintf(buf, sizeof(buf), "NONE");
+        else if (info->genderRatio == MON_MALE)
+            snprintf(buf, sizeof(buf), "ALWAYS MALE");
+        else if (info->genderRatio == MON_FEMALE)
+            snprintf(buf, sizeof(buf), "ALWAYS FEMALE");
+        else
+        {
+            // (the game's own rule: female when the low byte of its number is under the ratio)
+            s32 tenths = info->genderRatio * 1000 / 256;
+            tenths = tenths > 120 && tenths < 130 ? 125 : tenths > 870 && tenths < 880 ? 875 : (tenths + 2) / 5 * 5;
+            snprintf(buf, sizeof(buf), "MALE %d.%d%%  FEMALE %d.%d%%", (int)(1000 - tenths) / 10, (int)(1000 - tenths) % 10,
+                     (int)tenths / 10, (int)tenths % 10);
+        }
+        Text(frame, 18, y, "GENDER", C_INK, C_INK_SH), Text(frame, 84, y, buf, RGB(4, 10, 22), C_INK_SH), y += 13;
+        snprintf(buf, sizeof(buf), info->eggGroups[0] == info->eggGroups[1] ? "%s" : "%s / %s",
+                 sEggNames[info->eggGroups[0] % 16], sEggNames[info->eggGroups[1] % 16]);
+        Text(frame, 18, y, "EGG GROUPS", C_INK, C_INK_SH), Text(frame, 84, y, buf, RGB(4, 10, 22), C_INK_SH), y += 13;
+        // (an EGG's count goes down one every 32 steps: daycare.c)
+        if (info->eggGroups[0] == EGG_GROUP_NO_EGGS_DISCOVERED)
+            snprintf(buf, sizeof(buf), "NO EGGS");
+        else
+            snprintf(buf, sizeof(buf), "%d STEPS", info->eggCycles * 32);
+        Text(frame, 18, y, "EGG HATCHES", C_INK, C_INK_SH), Text(frame, 84, y, buf, RGB(4, 10, 22), C_INK_SH), y += 13;
+        snprintf(buf, sizeof(buf), "%d OF 255", info->catchRate);
+        Text(frame, 18, y, "CATCH RATE", C_INK, C_INK_SH), Text(frame, 84, y, buf, RGB(4, 10, 22), C_INK_SH), y += 13;
+        break;
+    case MP_DEXPAGE_STATS:
     {
         static const char *const sStat[6] = {"HP", "ATTACK", "DEFENSE", "SP. ATK", "SP. DEF", "SPEED"};
         u8 v[6] = {info->baseHP, info->baseAttack, info->baseDefense, info->baseSpAttack, info->baseSpDefense, info->baseSpeed};
-        s32 total = 0;
-        if (!sInfo.owned)
-        {
-            Text(frame, 18, 60, "CATCH IT TO SEE ITS STATS.", C_INK, C_INK_SH);
-            sFont = FONT_SMALL;
-            return;
-        }
-        MP_GameToAscii(a, gTypeNames[info->types[0]], sizeof(a) - 1);
-        MP_GameToAscii(b, gTypeNames[info->types[1]], sizeof(b) - 1);
-        snprintf(buf, sizeof(buf), info->types[0] == info->types[1] ? "TYPE     %s" : "TYPE     %s / %s", a, b);
-        Text(frame, 18, y, buf, C_INK, C_INK_SH), y += 11;
-        MP_GameToAscii(a, gAbilityNames[info->abilities[0]], sizeof(a) - 1);
-        MP_GameToAscii(b, gAbilityNames[info->abilities[1]], sizeof(b) - 1);
-        snprintf(buf, sizeof(buf), info->abilities[1] && info->abilities[1] != info->abilities[0] ? "ABILITY  %s / %s" : "ABILITY  %s", a, b);
-        Text(frame, 18, y, buf, C_INK, C_INK_SH), y += 11;
-        snprintf(buf, sizeof(buf), info->eggGroups[0] == info->eggGroups[1] ? "EGGS     %s" : "EGGS     %s / %s",
-                 sEggNames[info->eggGroups[0] % 16], sEggNames[info->eggGroups[1] % 16]);
-        Text(frame, 18, y, buf, C_INK, C_INK_SH), y += 12;
+        s32 total = 0, x;
         for (i = 0; i < 6; i++)
         {
-            s32 w = v[i] * 96 / 200, x;
+            s32 w = v[i] * 96 / 200;
             Text(frame, 18, y, sStat[i], C_INK, C_INK_SH);
             snprintf(buf, sizeof(buf), "%d", v[i]);
             Text(frame, 74, y, buf, C_INK, C_INK_SH);
@@ -964,24 +1026,25 @@ static void DrawInfo(u16 *frame)
                 frame[(y + 5) * DISPLAY_WIDTH + 101 + x] = frame[(y + 6) * DISPLAY_WIDTH + 101 + x] = frame[(y + 7) * DISPLAY_WIDTH + 101 + x]
                     = (v[i] >= 110 ? RGB(8, 28, 12) : v[i] >= 70 ? RGB(31, 26, 6) : RGB(31, 12, 8)) | 0x8000;
             total += v[i];
-            y += 10;
+            y += 13;
         }
-        snprintf(buf, sizeof(buf), "TOTAL    %d", (int)total);
-        Text(frame, 18, y, buf, RGB(24, 4, 4), C_INK_SH);
+        snprintf(buf, sizeof(buf), "%d", (int)total);
+        Text(frame, 18, y + 3, "TOTAL", RGB(24, 4, 4), C_INK_SH), Text(frame, 74, y + 3, buf, RGB(24, 4, 4), C_INK_SH);
+        break;
     }
-    else if (sInfo.page == 2)
+    case MP_DEXPAGE_EVO:
     {
         // (back to the first of its line: whoever evolves into it, three steps at most)
-        u16 base = species, s;
+        u16 base = species, sp;
         for (i = 0; i < 3; i++)
         {
             bool8 found = FALSE;
             u32 k;
-            for (s = 1; s < NUM_SPECIES && !found; s++)
+            for (sp = 1; sp < NUM_SPECIES && !found; sp++)
                 for (k = 0; k < EVOS_PER_MON; k++)
-                    if (gEvolutionTable[s][k].method && gEvolutionTable[s][k].targetSpecies == base)
+                    if (gEvolutionTable[sp][k].method && gEvolutionTable[sp][k].targetSpecies == base)
                     {
-                        base = s, found = TRUE;
+                        base = sp, found = TRUE;
                         break;
                     }
             if (!found)
@@ -989,10 +1052,45 @@ static void DrawInfo(u16 *frame)
         }
         if (EvoLines(frame, base, 0, y, "") == y + 11)
             Text(frame, 18, y + 14, "IT DOESN'T EVOLVE.", C_INK, C_INK_SH);
+        break;
     }
-    else
+    case MP_DEXPAGE_LEVEL:
+        for (i = 0; gLevelUpLearnsets[species][i] != LEVEL_UP_END; i++)
+        {
+            u32 e = gLevelUpLearnsets[species][i];
+            if (Row(i, &y))
+            {
+                snprintf(buf, sizeof(buf), "LV %d", (int)(e >> 16));
+                MP_GameToAscii(a, gMoveNames[e & LEVEL_UP_MOVE_ID], sizeof(a) - 1);
+                Text(frame, 18, y, buf, RGB(4, 10, 22), C_INK_SH), Text(frame, 64, y, a, C_INK, C_INK_SH);
+            }
+        }
+        sInfo.rows = i;
+        break;
+    case MP_DEXPAGE_TM:
     {
-        struct { u16 sec; u8 kinds; } place[10];
+        s32 n = 0;
+        for (i = 0; i < NUM_TMHMS; i++)
+        {
+            u16 item = TMHM_ITEM(i);
+            if (!CanSpeciesLearnTMHM(species, i))
+                continue;
+            if (Row(n, &y))
+            {
+                MP_GameToAscii(b, GetItemName(item), sizeof(b) - 1);
+                MP_GameToAscii(a, gMoveNames[ItemIdToBattleMoveId(item)], sizeof(a) - 1);
+                Text(frame, 18, y, b, RGB(4, 10, 22), C_INK_SH), Text(frame, 64, y, a, C_INK, C_INK_SH);
+            }
+            n++;
+        }
+        sInfo.rows = n;
+        if (n == 0)
+            Text(frame, 18, 62, "IT LEARNS NONE.", C_INK, C_INK_SH);
+        break;
+    }
+    case MP_DEXPAGE_WHERE:
+    {
+        struct { u16 sec; u8 kinds; } place[INFO_ROWS];
         u32 n = 0, k, h;
         u8 region = MP_Region_Current();
         for (h = 0; gWildMonHeaders[h].mapGroup != MAP_GROUP(MAP_UNDEFINED); h++)
@@ -1013,7 +1111,7 @@ static void DrawInfo(u16 *frame)
                 place[k].kinds |= kinds;
         }
         if (n == 0)
-            Text(frame, 18, 60, "NOT FOUND IN THE WILD IN THIS REGION.", C_INK, C_INK_SH);
+            Text(frame, 18, 62, "NOT FOUND IN THE WILD IN THIS REGION.", C_INK, C_INK_SH);
         for (k = 0; k < n; k++)
         {
             u8 name[32];
@@ -1025,6 +1123,16 @@ static void DrawInfo(u16 *frame)
             Text(frame, 124, y, buf, RGB(4, 10, 22), C_INK_SH);
             y += 11;
         }
+        break;
+    }
+    }
+    // (a list longer than the card: which way there is more)
+    if (sInfo.rows > INFO_ROWS)
+    {
+        if (sInfo.scroll > 0)
+            Text(frame, 206, 34, "^", RGB(24, 4, 4), C_INK_SH);
+        if (sInfo.scroll + INFO_ROWS < sInfo.rows)
+            Text(frame, 206, 124, "v", RGB(24, 4, 4), C_INK_SH);
     }
     sFont = FONT_SMALL;
 }
