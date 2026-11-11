@@ -11,6 +11,7 @@
 #include "event_object_movement.h"
 #include "event_data.h"
 #include "fieldmap.h"
+#include "field_control_avatar.h"
 #include "field_effect.h"
 #include "field_player_avatar.h"
 #include "o3d.h"
@@ -875,6 +876,22 @@ void Orre_Touch_Frame(void)
     s32 i, at = -1;
     if (x == sX && y == sY)
         return;
+    // (a way out's tile: Kai's trigger there, the world map, goes first: it starts as the step ends, later in the frame
+    // than this. Colosseum's exits are the floor's own, and the spot's script only speaks when the story keeps the
+    // player in: starting first, it had the trigger never fire. PHENAC's west and east ways out never opened the map)
+    // (the object's tile changes as its step begins: the trigger only fires once the step is done, so the spot waits
+    // for the player to have stood there two frames)
+    {
+        static u8 sStood;
+        struct MapPosition pos = {p->currentCoords.x, p->currentCoords.y, 0};
+        if (GetCoordEventScriptAtMapPosition(&pos) != NULL)
+        {
+            sStood = gPlayerAvatar.tileTransitionState == T_TILE_TRANSITION ? 0 : sStood + 1;
+            if (sStood < 3)
+                return;
+        }
+        sStood = 0;
+    }
     sX = x, sY = y;
     if (!O3D_TileToColo(x, y, &cx, &cz))
         return;

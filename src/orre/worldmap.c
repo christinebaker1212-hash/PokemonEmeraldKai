@@ -826,7 +826,11 @@ void Orre_WorldMap(void)
     W.prevKeys = 0xFFFF;   // (the step that opened it isn't a press)
     W.frame = 0;
     for (i = 0; i < W.nPlaces; i++)
+    {
         shown += PlaceShown(i);
+        if (getenv("MOEMON_ORRE_PLACES"))   // (tests: what each place waits for)
+            MPNet_Log("orre world map: place %u room %u flag %u %s", (unsigned)i, PlaceRoom(i), PlaceFlag(i), PlaceShown(i) ? "shown" : "hidden");
+    }
     MPNet_Log("orre world map: open at room %u, %u of %u places shown", PlaceRoom(W.cur), shown, W.nPlaces);
     if (sTestPick)
     {
