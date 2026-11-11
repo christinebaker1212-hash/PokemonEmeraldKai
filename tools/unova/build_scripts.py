@@ -12,6 +12,10 @@ File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little e
   u32 ranges: u16 first id, last id, file, text arc, text file each (ov010's table)
   u32 zones: u16 script file, init file, message file, event file, matrix, parent zone, map type, place name each
   u32 event files: u32 offset, u32 size each, the files (a/1/2/5)
+  (version 2) the trainers (a/0/9/2: 20 bytes, u8 flags (1 moves, 2 items), class, battle kind (0 single, 1 double,
+  2 triple, 3 rotation), count, u16 items x 4, u32 AI, u8 healer, cash, u16 prize item) and their teams (a/0/9/3: per
+  POKéMON u8 strength (IVs 0-255), u8 Ability / gender, u8 level, u8 pad, u16 species, u16 form, [u16 item],
+  [u16 moves x 4]), as two more file blocks
 """
 import os
 import struct
@@ -24,8 +28,9 @@ import narc  # noqa: E402
 import scripts as scr  # noqa: E402
 import zones as zr  # noqa: E402
 
-VERSION = 1
+VERSION = 2
 EVENT_ARC = 'a/1/2/5'
+TRDATA_ARC, TRPOKE_ARC = 'a/0/9/2', 'a/0/9/3'   # (Black's trainers and their teams: version 2)
 
 
 def files_block(files, base):
@@ -52,6 +57,8 @@ def main():
         pack += struct.pack('<8H', z['script'], z['init_script'], z['msg'], z['event'], z['matrix'], z['parent'],
                             z['type'], z['place'])
     pack += files_block(narc.arc(EVENT_ARC), len(pack))
+    pack += files_block(narc.arc(TRDATA_ARC), len(pack))
+    pack += files_block(narc.arc(TRPOKE_ARC), len(pack))
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(b'U3SZ' + struct.pack('<I', len(pack)) + zlib.compress(bytes(pack), 6))
     print('%s: %d script files, %d zones, %d event files, %d bytes' % (out_path, len(narc.arc(scr.ARC)), len(zs),

@@ -18,8 +18,26 @@ import narc  # noqa: E402
 SYSTEM, STORY = 'a/0/0/2', 'a/0/0/3'
 
 
+def decompress(units):
+    """A 0xF100 line: 9-bit characters packed into the units (low bits first), 0x1FF ending it (msgdata.c)"""
+    out, bits, acc = [], 0, 0
+    for u in units[1:]:
+        acc |= u << bits
+        bits += 16
+        while bits >= 9:
+            c = acc & 0x1FF
+            acc >>= 9
+            bits -= 9
+            if c == 0x1FF:
+                return out
+            out.append(c)
+    return out
+
+
 def decode(units):
     """Black's units as text: controls (0xF000 + params) as {ctrl:...}, 0xFFFE a new line"""
+    if units and units[0] == 0xF100:
+        units = decompress(units)
     out, i = [], 0
     while i < len(units):
         u = units[i]

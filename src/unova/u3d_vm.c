@@ -42,6 +42,7 @@
 #include "script_pokemon_util.h"
 #include "random.h"
 #include "money.h"
+#include "battle_setup.h"
 #include "constants/items.h"
 #include "constants/species.h"
 void MP_StarterTable_Open(const u16 *species, MainCallback back);
@@ -58,12 +59,19 @@ void MPNet_Log(const char *fmt, ...);
 static u8 *sPack;
 static u32 sPackSize;
 static bool8 sTried;
-static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt;
+static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt;
 
 static u32 Get32(u32 at) { return at + 4 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 | sPack[at + 2] << 16 | (u32)sPack[at + 3] << 24 : 0; }
 static u16 Get16(u32 at) { return at + 2 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 : 0; }
 
-static u32 SkipFiles(u32 at) { return at + 4 + 8 * Get32(at); }
+// (a block's files follow their table, each padded to 4 bytes: the next block starts after the last one)
+static u32 BlockEnd(u32 at)
+{
+    u32 n = Get32(at), end = at + 4 + 8 * n;
+    if (n)
+        end = Get32(at + 4 + 8 * (n - 1)) + Get32(at + 8 + 8 * (n - 1));
+    return (end + 3) & ~3;
+}
 
 static void Load(void)
 {
@@ -93,7 +101,7 @@ static void Load(void)
     sPack = malloc(raw ? raw : 1);
     sPackSize = raw;
     if (sPack == NULL || uncompress(sPack, &raw, data + 8, (unsigned long)(size - 8)) != 0 || memcmp(sPack, "U3DS", 4) != 0
-     || Get32(4) != 1)
+     || Get32(4) < 1 || Get32(4) > 2)
     {
         printf("[u3d] %s: can't read UNOVA's scripts\n", path);
         free(sPack);
@@ -104,13 +112,14 @@ static void Load(void)
     if (sPack == NULL)
         return;
     sFilesAt = 8;
-    // (the files' bodies follow their table: the next block starts after the last one)
-    {
-        u32 n = Get32(sFilesAt), last = n ? Get32(sFilesAt + 4 + 8 * (n - 1)) + Get32(sFilesAt + 8 + 8 * (n - 1)) : SkipFiles(sFilesAt);
-        sRangesAt = (last + 3) & ~3;
-    }
+    sRangesAt = BlockEnd(sFilesAt);
     sZonesAt = sRangesAt + 4 + 10 * Get32(sRangesAt);
     sEventsAt = sZonesAt + 4 + 16 * Get32(sZonesAt);
+    if (Get32(4) >= 2)   // (version 2: Black's trainers and their teams)
+    {
+        sTrainersAt = BlockEnd(sEventsAt);
+        sTeamsAt = BlockEnd(sTrainersAt);
+    }
     printf("[u3d] UNOVA's scripts: %u files, %u zones\n", Get32(sFilesAt), Get32(sZonesAt));
 }
 
@@ -130,6 +139,17 @@ static const u8 *FileOf(u32 block, u32 index, u32 *size)
     }
     *size = Get32(block + 8 + 8 * index);
     return sPack + Get32(block + 4 + 8 * index);
+}
+
+// Black's trainer ID's record (20 bytes) and team (u3d_battle.c); NULL without them
+const u8 *U3D_Vm_Trainer(u16 id, u32 *size)
+{
+    return Ready() && sTrainersAt ? FileOf(sTrainersAt, id, size) : (*size = 0, NULL);
+}
+
+const u8 *U3D_Vm_TrainerTeam(u16 id, u32 *size)
+{
+    return Ready() && sTeamsAt ? FileOf(sTeamsAt, id, size) : (*size = 0, NULL);
 }
 
 enum { Z_SCRIPT, Z_INIT, Z_MSG, Z_EVENT, Z_MATRIX, Z_PARENT, Z_TYPE, Z_PLACE };
@@ -470,7 +490,7 @@ static bool8 MovesDone(void)
 // ------------------------------------------------------------------------------------------------ the VM
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN };
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
-enum { SCREEN_NONE, SCREEN_STARTER };
+enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE };
 static u8 sScreen;
 static u16 sScreenVar;
 #define STACK 48
@@ -820,6 +840,12 @@ static void Step(struct Thread *t)
         case U3C_PROC_CallWordScreen:   // (ov223: the gift box's three POKé BALLS; the ball picked 0-2 in the work)
             OpenScreen(t, SCREEN_STARTER, a[0]);
             break;
+        case U3C_StartTrainerBattle:   // trainer, a second, a third (u3d_battle.c: Black's trainers)
+            if (U3D_PrepareBattle(V(0), V(1)))
+                OpenScreen(t, SCREEN_BATTLE, 0);
+            else
+                MPNet_Log("u3d vm: no trainer %u", V(0));
+            break;
         // ---- POKéMON
         case U3C_PROC_HealParty:
             HealPlayerParty();
@@ -857,7 +883,7 @@ static void Step(struct Thread *t)
             *WorkPtr(a[0]) = gSaveBlock2Ptr->playerGender;
             break;
         case U3C_WORK_CmdCheckLastBattleResultA:
-            *WorkPtr(a[0]) = 1;   // (won, or a battle the player lost goes on: as Black's "not silent")
+            *WorkPtr(a[0]) = U3D_BattleResult() != 2;   // (Black: 1 won, 0 the player lost)
             break;
         case U3C_WORK_CmdGetRandom:
             *WorkPtr(a[0]) = V(1) ? Random() % V(1) : 0;
@@ -1197,6 +1223,9 @@ void U3D_VmOpenScreen(void)
         for (i = 0; i < 3; i++)
             sSpecies[i] = Species(sGiftBox[i]);
         MP_StarterTable_Open(sSpecies, CB2_ScreenDone);
+        break;
+    case SCREEN_BATTLE:
+        BattleSetup_StartUnovaBattle();   // (back to the field and this script when it ends)
         break;
     default:
         NothingToRun();

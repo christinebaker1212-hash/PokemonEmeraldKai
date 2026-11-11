@@ -1,4 +1,5 @@
 #include "global.h"
+#include "u3d.h"   // Moemon Kai: UNOVA's battles
 extern char *getenv(const char *name);   // Moemon Kai: tests
 #include "orre.h"   // Moemon Kai: ORRE's battles
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
@@ -6245,6 +6246,10 @@ static u32 GetTrainerMoneyToGive(u16 trainerId)
     else if (Orre_IsTrainer(trainerId))
     {
         moneyReward = Orre_Money(trainerId);   // Moemon Kai: Colosseum's prize (src/orre/orre_battle.c)
+    }
+    else if (U3D_IsTrainer(trainerId))
+    {
+        moneyReward = U3D_Money(trainerId);   // Moemon Kai: Black's prize (src/unova/u3d_battle.c)
     }
     else
     {

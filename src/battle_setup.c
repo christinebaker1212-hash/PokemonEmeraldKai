@@ -1,4 +1,5 @@
 #include "global.h"
+#include "u3d.h"   // Moemon Kai: UNOVA's battles
 #include "orre.h"   // Moemon Kai: ORRE's battles
 #include "mp_region.h"
 #include "s3d.h"
@@ -1714,6 +1715,25 @@ static void CB2_EndOrreBattle(void)
         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
     if (!lost)
         MP_Events_OnTrainerWin(); // Moemon Co-op: team goals
+}
+
+// Moemon Kai: UNOVA's battle (src/unova/u3d_battle.c): Black's script decides what a loss means (it asks the result)
+static void CB2_EndUnovaBattle(void)
+{
+    bool8 lost = IsPlayerDefeated(gBattleOutcome) == TRUE;
+    U3D_BattleEnded(!lost);
+    SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+    if (!lost)
+        MP_Events_OnTrainerWin(); // Moemon Co-op: team goals
+}
+
+void BattleSetup_StartUnovaBattle(void)
+{
+    gNoOfApproachingTrainers = 0;
+    gWhichTrainerToFaceAfterBattle = 0;
+    gMain.savedCallback = CB2_EndUnovaBattle;
+    DoTrainerBattle();
+    ScriptContext_Stop();
 }
 
 void BattleSetup_StartOrreBattle(void)

@@ -48,4 +48,14 @@ const u8 *U3D_ExpandPlaceholder(u8 id, const u8 *src, u8 **dest);   // string_ut
 // UNOVA's people (src/unova/u3d_gfx.c: Black's own sprites, unova/black_gfx.pak from tools/unova/build_gfx.py)
 bool8 U3D_Gfx_Sprite(u16 code, bool8 small, u8 *kind, const u16 **pal, const u8 **frames);
 
+// UNOVA's battles (src/unova/u3d_battle.c: Black's trainers through TRAINER_UNOVA_A / _B)
+struct Pokemon;
+bool8 U3D_IsTrainer(u16 trainerId);
+const u8 *U3D_ClassName(u16 trainerId);
+u8 U3D_Party(struct Pokemon *party, u16 trainerId, bool8 firstTrainer);
+u32 U3D_Money(u16 trainerId);
+bool8 U3D_PrepareBattle(u16 first, u16 second);
+void U3D_BattleEnded(bool8 won);
+u8 U3D_BattleResult(void);
+
 #endif

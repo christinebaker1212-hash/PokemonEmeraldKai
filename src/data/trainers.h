@@ -10275,4 +10275,9 @@ const struct Trainer gTrainers[] = {
                         .doubleBattle = TRUE, .party = NO_ITEM_DEFAULT_MOVES(sParty_BrendanLinkPlaceholder)},
     [TRAINER_ORRE_B] = {.trainerClass = TRAINER_CLASS_ORRE, .trainerPic = TRAINER_PIC_RS_BRENDAN, .trainerName = _("ORRE"),
                         .doubleBattle = TRUE, .party = NO_ITEM_DEFAULT_MOVES(sParty_BrendanLinkPlaceholder)},
+    // Moemon Kai: UNOVA's two battle trainers, filled from Black's tables before each battle (src/unova/u3d_battle.c)
+    [TRAINER_UNOVA_A] = {.trainerClass = TRAINER_CLASS_UNOVA, .trainerPic = TRAINER_PIC_RS_BRENDAN, .trainerName = _("UNOVA"),
+                         .party = NO_ITEM_DEFAULT_MOVES(sParty_BrendanLinkPlaceholder)},
+    [TRAINER_UNOVA_B] = {.trainerClass = TRAINER_CLASS_UNOVA, .trainerPic = TRAINER_PIC_RS_BRENDAN, .trainerName = _("UNOVA"),
+                         .party = NO_ITEM_DEFAULT_MOVES(sParty_BrendanLinkPlaceholder)},
 };

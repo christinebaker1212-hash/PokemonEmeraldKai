@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "global.h"
+#include "u3d.h"   // Moemon Kai: UNOVA's battles
 #include "orre.h"   // Moemon Kai: ORRE's battles
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 const u8 *MP_JohtoRivalTrainerName(u16 trainerNum);   // Moemon Kai (qz_specials.c)
@@ -2970,6 +2971,8 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                     toCpy = gTrainerClassNames[GetEreaderTrainerClassId()];
                 else if (Orre_IsTrainer(gTrainerBattleOpponent_A))   // Moemon Kai: Colosseum's class (orre_battle.c)
                     toCpy = Orre_ClassName(gTrainerBattleOpponent_A);
+                else if (U3D_IsTrainer(gTrainerBattleOpponent_A))   // Moemon Kai: Black's class (u3d_battle.c)
+                    toCpy = U3D_ClassName(gTrainerBattleOpponent_A);
                 else
                     toCpy = gTrainerClassNames[gTrainers[gTrainerBattleOpponent_A].trainerClass];
                 break;
@@ -3136,6 +3139,8 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                     toCpy = gTrainerClassNames[GetTrainerHillOpponentClass(gTrainerBattleOpponent_B)];
                 else if (Orre_IsTrainer(gTrainerBattleOpponent_B))   // Moemon Kai: Colosseum's class (orre_battle.c)
                     toCpy = Orre_ClassName(gTrainerBattleOpponent_B);
+                else if (U3D_IsTrainer(gTrainerBattleOpponent_B))   // Moemon Kai: Black's class (u3d_battle.c)
+                    toCpy = U3D_ClassName(gTrainerBattleOpponent_B);
                 else
                     toCpy = gTrainerClassNames[gTrainers[gTrainerBattleOpponent_B].trainerClass];
                 break;
