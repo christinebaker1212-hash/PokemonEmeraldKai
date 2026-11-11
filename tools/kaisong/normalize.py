@@ -180,6 +180,13 @@ def main():
     with open(CACHE, 'w') as f:
         json.dump(cache, f, indent=0, sort_keys=True)
         f.write('\n')
+    gains_path = os.path.join(args.music, 'kaisong_gains.txt')
+    before = {}
+    if os.path.exists(gains_path):
+        for line in open(gains_path):
+            if not line.startswith('#') and '\t' in line:
+                k, v = line.rstrip('\n').split('\t')[:2]
+                before[k] = float(v)
     with open(os.path.join(args.music, 'kaisong_gains.txt'), 'w') as f:
         f.write('# Every music/ file\'s gain in dB, so all play %.1f dBFS loud (tools/kaisong/normalize.py; generated)\n'
                 % target)
@@ -188,10 +195,38 @@ def main():
                 f.write('%s\t%.1f\n' % (name, gains[name]))
     total = len(want) - orre_parts + len(again)
     done = measured[0] - len(orre_new)
-    print('normalize.py: OK, %d songs, target %.1f dB: %d of %d measurements made now (%d new or changed, %d again at '
-          'their gain), %d of Colosseum\'s songs, %.1f s%s'
-          % (len(gains), target, done, total, len(new), len(again), len(orre_new), time.time() - t0,
-             '' if done >= total else ': the %.0f s limit cut the run short, the rest keep their last measurement' % args.limit))
+    # What the run did, in the songs' own terms (the user, 2026-11-11: a line that reads as "nothing happened" is
+    # no report): how loud the files are as made, what their gains do to that, and what this run changed in the file
+    # the game reads against the one it found
+    made = {f: cached(f, 0.0)[0] for f in gains if cached(f, 0.0)}
+    after = {}
+    for f, g in gains.items():
+        m = cached(f, g) if g > 0.3 else None
+        after[f] = (m[0] if m else made[f] + g) if f in made else None
+    offs = [after[f] - target for f in after if after[f] is not None]
+    down = [g for g in gains.values() if g < -0.3]
+    up = [g for g in gains.values() if g > 0.3]
+    changed = sorted(f for f in gains if f not in before or abs(before[f] - gains[f]) > 0.05)
+    short = sorted((after[f] - target, f) for f in after if after[f] is not None and after[f] - target < -1.0)
+    print('normalize.py: OK, %d songs measured again and set to %.1f dB (%d measurements, %.1f s%s)'
+          % (len(gains), target, done, time.time() - t0,
+             '' if done >= total else '; the %.0f s limit cut the run short: %d kept their last measurement'
+             % (args.limit, total - done)))
+    if made:
+        print('  as made they are %.1f dB under to %.1f dB over that; with their gains %.1f dB under to %.1f dB over'
+              % (-min(v - target for v in made.values()), max(v - target for v in made.values()), -min(offs), max(offs)))
+    print('  %d turned down (as far as %.1f dB), %d turned up (as far as +%.1f dB), %d left as made'
+          % (len(down), min(down) if down else 0.0, len(up), max(up) if up else 0.0, len(gains) - len(down) - len(up)))
+    if short:
+        print('  %d stay under it (their loudest moment is at the -1 dB ceiling already, or their notes at full volume): %s'
+              % (len(short), ', '.join('%s %.1f dB under' % (f[:-8], -o) for o, f in short[:6])
+                 + (' ...' if len(short) > 6 else '')))
+    print('  the gains the game reads: %s'
+          % ('the same as the last run\'s (no song was added or changed)' if not changed else
+             '%d changed since the last run: %s%s' % (len(changed), ', '.join(c[:-8] for c in changed[:8]),
+                                                       ' ...' if len(changed) > 8 else '')))
+    if orre_new:
+        print('  Colosseum\'s %d songs measured again too (music/orre_gains.txt)' % len(orre_new))
     return 0
 
 
