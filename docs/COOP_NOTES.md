@@ -7420,3 +7420,19 @@ more of a scene"; "every game expects you to not have a Pokemon when you begin")
   the region's stars (mp_cardscreen.c, own card only).
 - Harness: `mp shiptalk MASK`, `mp walkdump`, MOEMON_TEST_NO_SHIP (regress.sh sets it unless the scenario's conf has
   SHIP=1). Scenarios ship_voyage, ship_host_hoenn, region_voyage.
+
+## Exit mats, the catch jingle, ERASE on Windows (1.190.16)
+
+- Exit mats: FireRed's mats inside KANTO / JOHTO are three south-arrow warps under a one-tile mat. A row of three or
+  more same-way arrow warps to one map leaves by its inner tiles only (field_control_avatar.c IsWideMatEdge, indoor
+  KANTO / JOHTO maps; the story runner skips those tiles: MP_ArrowWarpIsMatEdge). SINNOH's are Platinum's own, left
+  as they are. ORRE: o3d.c TrimDoors trims a door's row of warp tiles the same way at load, and the trigger outside
+  what's kept is no door for TryOrreWideDoor.
+- The catch jingle (src/mp/mp_catchjingle.c): a catch in a battle that goes on (a co-op wild battle with the other
+  still out, ORRE's snags in trainer battles) ducks the battle's song (m4a BGM volume, OrreSound_Duck for
+  Colosseum's) and plays FireRed's MUS_RG_CAUGHT_INTRO on the SE2 player; the song is never stopped or restarted
+  (VARIOUS_MP_COOP_REMOVE_CAUGHT and the snag no longer send PlayBGM(GetBattleBGM())).
+- ERASE: the save in use is closed before its files go (Platform_CloseSaveFile): Windows deletes no open file. The
+  slot's settings come back as empty "<name>.own" files (an empty one: the file follows File 1), and "<save>.pals"
+  is made anew with new keys as the slot is read again.
+- Shadows on ORRE's maps: mp_shadow.c FeetCovered skips ORRE's stand-in tiles as it does SINNOH's.

@@ -728,6 +728,22 @@ ShowSSTidalWhileSailing): the bike's graphics in the ship's place, against the b
 ride (move_demo.map, the per-place cameras cam_move_demo_01-15 and speeds of lbl_3_data_270), moving with the SS
 TIDAL scene's animation. Not Colosseum's 3D ride itself.
 
+## Fixes of 1.190.16 (the user's playthrough, 2026-11-11)
+
+- POKeMON models (props): tools/orre/hsd.py envelope_mtx: a vertex bound to one joint at full weight is in that
+  joint's space only when the mesh's joint is a skeleton's root (JOBJ_SKELETON_ROOT 0x2: the people); otherwise it is
+  in the bind pose (world @ inverse bind), as a blended one. Without it ODDISH, MAGIKARP, ARON... were left in pieces.
+  The pack must be rebuilt (make_pack.sh; the release does).
+- Heights: o3d.c HEADROOM is a person's height (17.5 of Colosseum's units on the map's scale): PHENAC's plaza 26
+  under the stadium's ring counted as ground and walkers went round the ring inside it.
+- Snags set the Shadow table's "snagged" story flag (+ 0x12: flags[2]); the story checks them 326 times (TRUDLY's
+  "You Snagged my MO~MON!", 0x84E). The + 0x14 flag (96 checks) isn't set: its meaning isn't known yet.
+- Touch spots (tools/orre/gen_checks.py sOrreRoomTouchObjects): each one's collision object; its trigger is there
+  only while the object is on (orre_vm.c Orre_Vm_ColOn: all on at a room's start, scriptSetCol). PHENAC's "Please! We
+  need your help!" lies on RUI's pen (40).
+- The world map's cursor: cy is on the panned map already (the pan was taken off twice).
+- RUI lets the POKeMON past: A held on her (orre_npcs.c Orre_Npc_TryFollowerPast).
+
 ## Learned (formats and pitfalls)
 - FSYS member types (byte 2 of the id): 0x02 map model, 0x04 character / object model, 0x06 collision, 0x0A text,
   0x0C floor data (not HSD), 0x0E map script, 0x18 camera shot, 0x1C map module (REL), 0x1E Pokémon models, 0x20 move
