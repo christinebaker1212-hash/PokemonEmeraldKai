@@ -10,8 +10,8 @@ text is first shown (src/unova/u3d_text.c); scripts point at a message by bank a
 Banks: the system banks (a/0/0/2) first, then the story banks (a/0/0/3: a zone's messages): bank_number(). A message:
 MOéMON's words (tools/moemon_text/moe_words.py, as HOENN's and SINNOH's text), Black's breaks as Emerald's: a new line,
 {BE00} (wait, then the next line scrolls up) "\\l", {BE01} (wait, then a new box) "\\p", a box ending in {BE01} waits for
-A at its end; {BE02:n} / {BE09:n} wait n frames; a word slot ({01xx:n} / {02xx:n}: a name, a number...) slot n: 0-2 the
-game's STR_VAR_1-3, 3 and up UNOVA's own (gUnovaStrVar); colours, sounds and positions are left out; a character the
+A at its end; {BE02:n} / {BE09:n} wait n frames; a word slot ({01xx:n} / {02xx:n}: a name, a number...) UNOVA's own
+slot n (gUnovaStrVar); Black's POKéMON glyphs (⒆⒇) the game's PKMN; colours, sounds and positions are left out; a character the
 game has no glyph for is a '?'.
 
 File: "U3TZ", u32 the size of the pack, the pack deflated (zlib). Pack (little endian): "U3DT" u32 version 1, u32 banks,
@@ -43,9 +43,8 @@ EOS, NEWLINE, SCROLL, PAGE = 0xFF, 0xFE, 0xFA, 0xFB
 PAUSE_UNTIL_PRESS = (0xFC, 0x09)
 PAUSE = 0x08                      # (0xFC 0x08 n: wait n frames)
 PLACEHOLDER_BEGIN = 0xFD
-STR_VAR = (0x02, 0x03, 0x04)      # (Black's slots 0-2)
 PLACEHOLDER_ID_UNOVA_TEXT = 0x45  # include/constants/characters.h
-PLACEHOLDER_ID_UNOVA_VAR = 0x50   # + slot (3-31): gUnovaStrVar
+PLACEHOLDER_ID_UNOVA_VAR = 0x50   # + slot (0-31): gUnovaStrVar
 SLOTS = 32
 _CTRL = re.compile(r'\{([0-9A-F]{4}):([0-9A-F,]*)\}')
 
@@ -66,8 +65,8 @@ def unova_text_bytes(bank, msg):
 
 
 def slot_bytes(slot):
-    if slot < len(STR_VAR):
-        return [PLACEHOLDER_BEGIN, STR_VAR[slot]]
+    """Black's word slot: UNOVA's own buffers, every one (the game's STR_VAR_1-3 are rewritten by its battles, which
+    Black's slots outlive: a name set before a battle is said after it)"""
     return [PLACEHOLDER_BEGIN, PLACEHOLDER_ID_UNOVA_VAR + min(slot, SLOTS - 1)]
 
 
@@ -99,6 +98,8 @@ def convert(line, cmap, wait_at_end=True):
             out.append(cmap.get(' ', 0x00))
         elif ch == '"':
             out.append(cmap.get('”', unknown))   # (Black closes its quotes with a straight one)
+        elif ch in '⒆⒇':
+            out.append(0x53 if ch == '⒆' else 0x54)   # (Black's POKéMON glyphs: the game's PK and MN, charmap.txt)
         else:
             out.append(cmap.get(ch, unknown))
     wait = bool(out) and out[-1] in (SCROLL, PAGE)

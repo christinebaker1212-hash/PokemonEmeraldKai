@@ -40,7 +40,7 @@ void U3D_Vm_WorkLoad(const void *data, u32 size);
 
 // UNOVA's words (src/unova/u3d_text.c: Black's own, unova/black_text.pak from tools/unova/build_text.py)
 #define UNOVA_STR_VARS 32
-extern u8 gUnovaStrVar[UNOVA_STR_VARS][64];          // Black's word slots (0-2 unused: gStringVar1-3 are those)
+extern u8 gUnovaStrVar[UNOVA_STR_VARS][64];          // Black's word slots, all its own
 const u8 *U3D_Text(u16 bank, u16 msg);
 u16 U3D_TextBanks(void);
 const u8 *U3D_ExpandPlaceholder(u8 id, const u8 *src, u8 **dest);   // string_util.c StringExpandPlaceholders

@@ -598,10 +598,9 @@ static void Message(struct Thread *t, u16 file, u16 msg)
     t->wait = W_MESSAGE;
 }
 
-static u8 *Slot(u8 slot)
+static u8 *Slot(u8 slot)   // (Black's word slots, UNOVA's own: the game's battles rewrite gStringVar1-3)
 {
-    static u8 *const sVars[3] = {gStringVar1, gStringVar2, gStringVar3};
-    return slot < 3 ? sVars[slot] : gUnovaStrVar[slot % UNOVA_STR_VARS];
+    return gUnovaStrVar[slot % UNOVA_STR_VARS];
 }
 
 static u16 Species(u16 national)

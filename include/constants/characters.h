@@ -274,7 +274,7 @@
 #define PLACEHOLDER_ID_SINNOH_VAR6   0x43
 #define PLACEHOLDER_ID_ORRE_TEXT     0x44   // Moemon Kai: + Colosseum's message id (3 bytes of 7 bits): ORRE's text (src/orre/orre_text.c)
 #define PLACEHOLDER_ID_UNOVA_TEXT    0x45   // Moemon Kai: + bank, message (2 bytes of 7 bits each): UNOVA's text (src/unova/u3d_text.c)
-#define PLACEHOLDER_ID_UNOVA_VAR     0x50   // Moemon Kai: + Black's word slot 3-31: gUnovaStrVar (slots 0-2 are gStringVar1-3)
+#define PLACEHOLDER_ID_UNOVA_VAR     0x50   // Moemon Kai: + Black's word slot 0-31: gUnovaStrVar
 #define PLACEHOLDER_ID_ORRE_VAR      0x80   // Moemon Kai: + Colosseum's control id (up to 0x5F): ORRE's string slots (orre_text.c)
 
 // battle placeholders are located in battle_message.h
