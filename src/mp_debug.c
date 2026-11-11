@@ -743,6 +743,7 @@ static void WalkSearch(void)
                     ne = ElevationAfter(e, nx + MAP_OFFSET, ny + MAP_OFFSET, cx + MAP_OFFSET, cy + MAP_OFFSET);
                 }
                 else if (col != COLLISION_OBJECT_EVENT && !surf && IsWarpAt(nx, ny)
+                      && !O3D_StepBlocked(cx + MAP_OFFSET, cy + MAP_OFFSET, nx + MAP_OFFSET, ny + MAP_OFFSET)   // (ORRE: a railing beside a door's tile)
                       && !IsArrowWarpBehavior(MapGridGetMetatileBehaviorAt(nx + MAP_OFFSET, ny + MAP_OFFSET)))
                     ;   // (a door: solid, walked into it warps; an end, as every warp. A solid arrow warp is no way:
                         // an arrow warp is stood on, the SAFARI ZONE's edges)
@@ -1586,6 +1587,12 @@ int MP_TestCondition(const char *name)
         int g = -1, m = -1;
         sscanf(name + 6, "%d,%d", &g, &m);
         return gSaveBlock1Ptr->location.mapGroup == g && gSaveBlock1Ptr->location.mapNum == m;
+    }
+    if (strncmp(name, "notmap:", 7) == 0)   // the player isn't on map GROUP,NUM (a `goto` that found no way there)
+    {
+        int g = -1, m = -1;
+        sscanf(name + 7, "%d,%d", &g, &m);
+        return gSaveBlock1Ptr->location.mapGroup != g || gSaveBlock1Ptr->location.mapNum != m;
     }
     if (strcmp(name, "field") == 0)
         return MP_IsLocalFree();

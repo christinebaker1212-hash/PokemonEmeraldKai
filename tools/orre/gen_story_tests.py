@@ -130,6 +130,9 @@ def walk_chain(out, steps, maps, ent):
                 kind, n = (m.group(1), m.group(2)) if m.group(1) else (m.group(3), m.group(4))
                 block += ['approach %s %s 3000' % (kind, n)]
         block += ['pressuntillog A 2500 orre: flag %d = 1' % flag, 'pressuntil A field 9000', 'wait 30']
+        # (no way to the room yet: nothing is pressed where the player stands instead: the landing's sailor would
+        # sail them back)
+        block = block[:1] + ['skipif notmap:45,%d %d' % (mi, len(block) - 1)] + block[1:]
         lines += ['skipif orreflag:%d %d' % (flag, len(block))] + block
     lines += ['mp orreget %d' % steps[-1][0], 'quit']
     open(os.path.join(d, 'a.txt'), 'w').write('\n'.join(lines) + '\n')
