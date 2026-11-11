@@ -1553,9 +1553,11 @@ static void TestHarnessStep(void)
             }
             else if (sUntilKeys)
             {
-                // tap the keys every 45 frames
+                // tap the keys every 45 frames (a POKeMART a scene opened on the way to the field: B, out of it. A would
+                // go on buying: ORRE's diner after the news)
+                bool8 MP_Shop_Open(void);
                 int phase = sUntilFrames % 45;
-                sTestKeys = (phase < 3) ? sUntilKeys : 0;
+                sTestKeys = (phase < 3) ? ((strcmp(sUntilName, "field") == 0 && MP_Shop_Open()) ? B_BUTTON : sUntilKeys) : 0;
             }
             return;
         }

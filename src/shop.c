@@ -399,6 +399,13 @@ static void SetShopItemsForSale(const u16 *items)
     }
 }
 
+// Moemon Kai (tests): a POKeMART is open, its menu or its list of things to buy
+static void CB2_BuyMenu(void);
+bool8 MP_Shop_Open(void)
+{
+    return FuncIsActiveTask(Task_ShopMenu) || gMain.callback2 == CB2_BuyMenu;
+}
+
 static void Task_ShopMenu(u8 taskId)
 {
     s8 inputCode = Menu_ProcessInputNoWrap();
