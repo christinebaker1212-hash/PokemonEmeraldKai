@@ -294,10 +294,11 @@ def main():
             values['SPECIAL_WAITSTATE_' + m.group(1)] = int(m.group(2))
             k += 1
     # the TMs and HMs by move (constants/tms_hms.inc: ITEM_TM_<MOVE> counts up from ITEM_TM01, the HMs from ITEM_HM01;
-    # Kai's TM51-92 / TM93-139 from ITEM_TM51 / ITEM_TM93 when their lists say so)
+    # Kai's TM51-92 / TM93-139 / TM140 on from ITEM_TM51 / ITEM_TM93 / ITEM_TM140 when their lists say so)
     for hdr, macro, base, prefix in (('tms_hms.h', 'FOREACH_TM', 'ITEM_TM01', 'ITEM_TM_'), ('tms_hms.h', 'FOREACH_HM', 'ITEM_HM01', 'ITEM_HM_'),
                                      ('tms_hms_tm2.h', 'FOREACH_TM2', 'ITEM_TM51', 'ITEM_TM_'),
-                                     ('tms_hms_tm3.h', 'FOREACH_TM3', 'ITEM_TM93', 'ITEM_TM_')):
+                                     ('tms_hms_tm3.h', 'FOREACH_TM3', 'ITEM_TM93', 'ITEM_TM_'),
+                                     ('tms_hms_tm4.h', 'FOREACH_TM4', 'ITEM_TM140', 'ITEM_TM_')):
         text = read('include/constants/' + hdr)
         m = re.search(r'#define\s+%s\(F\)((?:\s*\\\s*\n\s*F\(\w+\))+)' % macro, text)
         if not m or base not in values:

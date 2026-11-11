@@ -1421,6 +1421,7 @@ const s8 gNatureStatTable[NUM_NATURES][NUM_NATURE_STATS] =
 #include "data/pokemon/tmhm_learnsets.h"
 #include "data/pokemon/tm2_learnsets.h"   // Moemon Kai: TM51-TM92
 #include "data/pokemon/tm3_learnsets.h"   // Moemon Kai: TM93 on
+#include "data/pokemon/tm4_learnsets.h"   // Moemon Kai: TM140 on
 #include "data/pokemon/trainer_class_lookups.h"
 #include "data/pokemon/cry_ids.h"
 #include "data/pokemon/experience_tables.h"
@@ -6607,6 +6608,8 @@ u32 CanMonLearnTMHM(struct Pokemon *mon, u8 tm)
         return 0;
     }
 
+    if (tm >= TMHM_INDEX_TM4)   // Moemon Kai: TM140 on
+        return tm < NUM_TMHMS && species < NUM_SPECIES && ((gTm4Learnsets[species] >> (tm - TMHM_INDEX_TM4)) & 1);
     if (tm >= TMHM_INDEX_TM3)   // Moemon Kai: TM93 on
         return tm < NUM_TMHMS && species < NUM_SPECIES && ((gTm3Learnsets[species] >> (tm - TMHM_INDEX_TM3)) & 1);
     if (tm >= NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES)   // Moemon Kai: TM51-TM92
@@ -6641,6 +6644,8 @@ u32 CanSpeciesLearnTMHM(u16 species, u8 tm)
     {
         return 0;
     }
+    if (tm >= TMHM_INDEX_TM4)   // Moemon Kai: TM140 on
+        return tm < NUM_TMHMS && species < NUM_SPECIES && ((gTm4Learnsets[species] >> (tm - TMHM_INDEX_TM4)) & 1);
     if (tm >= TMHM_INDEX_TM3)   // Moemon Kai: TM93 on
         return tm < NUM_TMHMS && species < NUM_SPECIES && ((gTm3Learnsets[species] >> (tm - TMHM_INDEX_TM3)) & 1);
     if (tm >= NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES)   // Moemon Kai: TM51-TM92

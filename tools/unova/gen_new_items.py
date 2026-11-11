@@ -214,7 +214,7 @@ def main():
     h = os.path.join(REPO, 'include', 'constants', 'items.h')
     text = open(h, encoding='utf-8').read()
     text = replace_block(text, body, '#define ITEMS_COUNT')
-    text = re.sub(r'#define ITEMS_COUNT \([A-Z_]+ \+ 1\)', '#define ITEMS_COUNT (LAST_UNOVA_ITEM + 1)', text)
+    text = text.replace('#define ITEMS_COUNT (ITEM_MTN_BIKE + 1)', '#define ITEMS_COUNT (LAST_UNOVA_ITEM + 1)')   # (TM140 on: after)
     open(h, 'w', encoding='utf-8').write(text)
 
     def write(rel, s):

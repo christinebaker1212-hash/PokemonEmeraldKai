@@ -75,7 +75,7 @@ def game_machines():
     out = {}
     lists = [('tms_hms.h', 'FOREACH_TM', 'ITEM_TM01'), ('tms_hms.h', 'FOREACH_HM', 'ITEM_HM01'),
              ('tms_hms_tm2.h', 'FOREACH_TM2', 'ITEM_TM51'), ('tms_hms_tm2.h', 'FOREACH_HM2', 'ITEM_HM_ROCK_CLIMB'),
-             ('tms_hms_tm3.h', 'FOREACH_TM3', 'ITEM_TM93')]
+             ('tms_hms_tm3.h', 'FOREACH_TM3', 'ITEM_TM93'), ('tms_hms_tm4.h', 'FOREACH_TM4', 'ITEM_TM140')]
     for f, macro, first in lists:
         text = open(os.path.join(ROOT, 'include/constants', f), encoding='utf-8').read()
         m = re.search(r'#define %s\(F\)(.*?)(?:\n\n|\n#|$)' % macro, text, re.S)

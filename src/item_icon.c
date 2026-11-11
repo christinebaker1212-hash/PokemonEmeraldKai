@@ -19,6 +19,7 @@ EWRAM_DATA u8 *gItemIcon4x4Buffer = NULL;
 #include "data/item_icons_unova.h"   // Moemon Kai: UNOVA's new items
 #include "data/item_icons_tm2.h"   // Moemon Kai: TM51-TM92
 #include "data/item_icons_tm3.h"   // Moemon Kai: TM93 on
+#include "data/item_icons_tm4.h"   // Moemon Kai: TM140 on
 #include "data/berries_gen4.h"   // Moemon Kai: Gen 4 berries
 #include "data/item_icon_table.h"
 

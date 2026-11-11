@@ -329,15 +329,15 @@ static const u16 sUnovaItems[] = {
     ITEM_REAPER_CLOTH,   // 325 Reaper Cloth
     ITEM_RAZOR_CLAW,   // 326 Razor Claw
     ITEM_RAZOR_FANG,   // 327 Razor Fang
-    ITEM_NONE,   // 328 TM01 Hone Claws
+    ITEM_TM140,   // 328 TM01 Hone Claws
     ITEM_TM01 + 1,   // 329 TM02 Dragon Claw
-    ITEM_NONE,   // 330 TM03 Psyshock
+    ITEM_TM140 + 1,   // 330 TM03 Psyshock
     ITEM_TM01 + 3,   // 331 TM04 Calm Mind
     ITEM_TM01 + 4,   // 332 TM05 Roar
     ITEM_TM01 + 5,   // 333 TM06 Toxic
     ITEM_TM01 + 6,   // 334 TM07 Hail
     ITEM_TM01 + 7,   // 335 TM08 Bulk Up
-    ITEM_NONE,   // 336 TM09 Venoshock
+    ITEM_TM140 + 2,   // 336 TM09 Venoshock
     ITEM_TM01 + 9,   // 337 TM10 Hidden Power
     ITEM_TM01 + 10,   // 338 TM11 Sunny Day
     ITEM_TM01 + 11,   // 339 TM12 Taunt
@@ -347,11 +347,11 @@ static const u16 sUnovaItems[] = {
     ITEM_TM01 + 15,   // 343 TM16 Light Screen
     ITEM_TM01 + 16,   // 344 TM17 Protect
     ITEM_TM01 + 17,   // 345 TM18 Rain Dance
-    ITEM_NONE,   // 346 TM19 Telekinesis
+    ITEM_TM140 + 3,   // 346 TM19 Telekinesis
     ITEM_TM01 + 19,   // 347 TM20 Safeguard
     ITEM_TM01 + 20,   // 348 TM21 Frustration
     ITEM_TM01 + 21,   // 349 TM22 SolarBeam
-    ITEM_NONE,   // 350 TM23 Smack Down
+    ITEM_TM140 + 4,   // 350 TM23 Smack Down
     ITEM_TM01 + 23,   // 351 TM24 Thunderbolt
     ITEM_TM01 + 24,   // 352 TM25 Thunder
     ITEM_TM01 + 25,   // 353 TM26 Earthquake
@@ -362,7 +362,7 @@ static const u16 sUnovaItems[] = {
     ITEM_TM01 + 30,   // 358 TM31 Brick Break
     ITEM_TM01 + 31,   // 359 TM32 Double Team
     ITEM_TM01 + 32,   // 360 TM33 Reflect
-    ITEM_NONE,   // 361 TM34 Sludge Wave
+    ITEM_TM140 + 5,   // 361 TM34 Sludge Wave
     ITEM_TM01 + 34,   // 362 TM35 Flamethrower
     ITEM_TM01 + 35,   // 363 TM36 Sludge Bomb
     ITEM_TM01 + 36,   // 364 TM37 Sandstorm
@@ -371,47 +371,47 @@ static const u16 sUnovaItems[] = {
     ITEM_TM01 + 39,   // 367 TM40 Aerial Ace
     ITEM_TM01 + 40,   // 368 TM41 Torment
     ITEM_TM01 + 41,   // 369 TM42 Facade
-    ITEM_NONE,   // 370 TM43 Flame Charge
+    ITEM_TM140 + 6,   // 370 TM43 Flame Charge
     ITEM_TM01 + 43,   // 371 TM44 Rest
     ITEM_TM01 + 44,   // 372 TM45 Attract
     ITEM_TM01 + 45,   // 373 TM46 Thief
-    ITEM_NONE,   // 374 TM47 Low Sweep
-    ITEM_NONE,   // 375 TM48 Round
-    ITEM_NONE,   // 376 TM49 Echoed Voice
+    ITEM_TM140 + 7,   // 374 TM47 Low Sweep
+    ITEM_TM140 + 8,   // 375 TM48 Round
+    ITEM_TM140 + 9,   // 376 TM49 Echoed Voice
     ITEM_TM01 + 49,   // 377 TM50 Overheat
-    ITEM_NONE,   // 378 TM51 Ally Switch
+    ITEM_TM140 + 10,   // 378 TM51 Ally Switch
     ITEM_TM51 + 1,   // 379 TM52 Focus Blast
     ITEM_TM51 + 2,   // 380 TM53 Energy Ball
     ITEM_TM51 + 3,   // 381 TM54 False Swipe
-    ITEM_NONE,   // 382 TM55 Scald
+    ITEM_TM140 + 11,   // 382 TM55 Scald
     ITEM_TM51 + 5,   // 383 TM56 Fling
     ITEM_TM51 + 6,   // 384 TM57 Charge Beam
-    ITEM_NONE,   // 385 TM58 Sky Drop
-    ITEM_NONE,   // 386 TM59 Incinerate
-    ITEM_NONE,   // 387 TM60 Quash
+    ITEM_TM140 + 12,   // 385 TM58 Sky Drop
+    ITEM_TM140 + 13,   // 386 TM59 Incinerate
+    ITEM_TM140 + 14,   // 387 TM60 Quash
     ITEM_TM51 + 10,   // 388 TM61 Will-O-Wisp
-    ITEM_NONE,   // 389 TM62 Acrobatics
+    ITEM_TM140 + 15,   // 389 TM62 Acrobatics
     ITEM_TM51 + 12,   // 390 TM63 Embargo
     ITEM_TM51 + 13,   // 391 TM64 Explosion
     ITEM_TM51 + 14,   // 392 TM65 Shadow Claw
     ITEM_TM51 + 15,   // 393 TM66 Payback
-    ITEM_NONE,   // 394 TM67 Retaliate
+    ITEM_TM140 + 16,   // 394 TM67 Retaliate
     ITEM_TM51 + 17,   // 395 TM68 Giga Impact
     ITEM_TM51 + 18,   // 396 TM69 Rock Polish
     ITEM_HM01 + 4,   // 397 TM70 Flash
     ITEM_TM51 + 20,   // 398 TM71 Stone Edge
-    ITEM_NONE,   // 399 TM72 Volt Switch
+    ITEM_TM140 + 17,   // 399 TM72 Volt Switch
     ITEM_TM51 + 22,   // 400 TM73 Thunder Wave
     ITEM_TM51 + 23,   // 401 TM74 Gyro Ball
     ITEM_TM51 + 24,   // 402 TM75 Swords Dance
-    ITEM_NONE,   // 403 TM76 Struggle Bug
+    ITEM_TM140 + 18,   // 403 TM76 Struggle Bug
     ITEM_TM51 + 26,   // 404 TM77 Psych Up
-    ITEM_NONE,   // 405 TM78 Bulldoze
-    ITEM_NONE,   // 406 TM79 Frost Breath
+    ITEM_TM140 + 19,   // 405 TM78 Bulldoze
+    ITEM_TM140 + 20,   // 406 TM79 Frost Breath
     ITEM_TM51 + 29,   // 407 TM80 Rock Slide
     ITEM_TM51 + 30,   // 408 TM81 X-Scissor
-    ITEM_NONE,   // 409 TM82 Dragon Tail
-    ITEM_NONE,   // 410 TM83 Work Up
+    ITEM_TM140 + 21,   // 409 TM82 Dragon Tail
+    ITEM_TM140 + 22,   // 410 TM83 Work Up
     ITEM_TM51 + 33,   // 411 TM84 Poison Jab
     ITEM_TM51 + 34,   // 412 TM85 Dream Eater
     ITEM_TM51 + 35,   // 413 TM86 Grass Knot
@@ -619,9 +619,9 @@ static const u16 sUnovaItems[] = {
     ITEM_NONE,   // 615 Dire Hit 3
     ITEM_LIGHT_STONE,   // 616 Light Stone
     ITEM_DARK_STONE,   // 617 Dark Stone
-    ITEM_NONE,   // 618 TM93 Wild Charge
+    ITEM_TM140 + 23,   // 618 TM93 Wild Charge
     ITEM_HM01 + 5,   // 619 TM94 Rock Smash
-    ITEM_NONE,   // 620 TM95 Snarl
+    ITEM_TM140 + 24,   // 620 TM95 Snarl
     ITEM_XTRANSCEIVER,   // 621 Xtransceiver
     ITEM_NONE,   // 622 ???
     ITEM_GRAM_1,   // 623 Gram 1
