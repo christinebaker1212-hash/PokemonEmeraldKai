@@ -526,6 +526,10 @@ static bool8 sHoldPending;
 
 static void TryHold(void)
 {
+    if (sHolder == NULL)
+        sHoldPending = FALSE;   // (the scene that asked ended before Kai's script engine was free: nothing left to hold.
+                                // Left set, the room's touch spots and main loop boxes stayed off until the player left:
+                                // PHENAC after RUI's rescue, the MAYOR's house never reached)
     if (sHoldPending && sHolder && !sHolding && !ScriptContext_IsEnabled())
     {
         sHoldPending = FALSE;
@@ -1408,6 +1412,13 @@ void Orre_Vm_Frame(void)
                     MPNet_Log("orre vm: thread %u %08X wait %u holds %u (holding %u, printer %u, box hidden %u, fade %u, script %u, state %08X)", i,
                               sThreads[i].scriptId, sThreads[i].wait, sThreads[i].holds, sHolding,
                               IsTextPrinterActive(0), IsFieldMessageBoxHidden(), gPaletteFade.active, ScriptContext_IsEnabled(), MP_TextPrinterDebug(0));
+    }
+    if (getenv("MOEMON_ORRE_TOUCH_DEBUG"))
+    {
+        static u32 sTick2;
+        if (++sTick2 % 120 == 0)
+            MPNet_Log("orre vm: state: holder %08X pending %u holding %u script %u fade %u locked %u", sHolder ? sHolder->scriptId : 0,
+                      sHoldPending, sHolding, ScriptContext_IsEnabled(), gPaletteFade.active, ArePlayerFieldControlsLocked());
     }
     if (gPaletteFade.active)
         return;   // (the field comes back: the scripts wait until it's there, as Colosseum's fades do)
