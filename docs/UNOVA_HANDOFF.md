@@ -24,6 +24,25 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   0xF000 runs ({0100:0}: the player's name; BE01 / BE00: wait for a key / scroll), 0xFFFE a new line.
 - Zones: tools/unova/zones.py lists the 427 with their names: NUVEMA TOWN 389 (its houses 390-396), ROUTE 1 317
   (outdoors share matrix 0, UNOVA's one big map), CASTELIA's 32.
+- Archives by number: the game's _ArcPathTable (0x020A6C58 in the decompressed ARM9, 235 entries) names archive N
+  a/<N as three digits> (0xE6 = a/2/3/0). The ARM9 and overlays are BLZ-compressed: aletheia's tools/blz.py.
+- Matrices: a/0/0/9 (tools/unova/matrix.py; map_matrix.c): u16 mode, u16, u16 width, u16 height, then u32 a/0/0/8 block
+  per cell and, in mode 1, u32 zone ids. Matrix 0 is UNOVA's land (29 x 27 blocks); CASTELIA and others have their own.
+- Map blocks: a/0/0/8, "WB" (3 sections) or "GC" (4): u16 magic, u16 count, u32 offsets (field_g3d_map_block.c
+  FieldG3dMapBlockHeader): the model (BMD0, read by tools/sinnoh/nitro.py as it is), the collision grid(s), the
+  placed buildings, the end. Collision (field_g3d_tile_plane.c): u16 width, u16 height, then 8-byte tiles (u16 type:2 |
+  normal index:14, u16 distance index, u32 attribute:31 | diagonal:1; type 2: a split record after the grid, one plane
+  a triangle); the normals (329 triples, x4096) and distances are tables in overlay 21 (0x021DB9A0 / 0x021DC158).
+  A block is 32 x 32 tiles of 16 units (512).
+- Areas: a/0/1/3, 282 records of 10 bytes (model set, texture set, animations, inside / outside, light type, edge
+  marking, billboard colour); areas 2..0xD1 come in fours, one per season (record = area + season).
+- Map textures: a/0/1/4 (BTX0 by the area's texture set).
+- Buildings (field_buildmodel.c): archive 0xE5 / 0xE6 (a/2/2/9 inside, a/2/3/0 outside), member (area - 2) / 4 (area
+  - 0xD2 past the seasons' areas); an "AB" offset table: n = byte 2, the first n / 2 entries model definitions (u16
+  table id first), the rest their BMD0s; their textures 0xB0 / 0xB1 (a/1/7/6 / a/1/7/7, the same member). A block's
+  building section: u32 count, then 16-byte records (s32 x, y, z fx32, u16 rotation in 1/65536 turns, u8 id high,
+  u8 id low); the world position is x, y, -z from the block's centre.
+- tools/unova/render_ref.py draws a zone from all this (SINNOH's offline rasterizer): NUVEMA TOWN comes out right.
 - docs/ASSETS.md in aletheia inventories every NARC, with guesses; the code (ZONEDATA_*, MSGDATA_*, SCRCMD_*) names the
   real uses. Still to pin down from the code: the map matrix, the map containers ("WB" files in a/0/0/8: model,
   permissions, heights), area data (textures, animations, lights per season), the event data (people, warps,
