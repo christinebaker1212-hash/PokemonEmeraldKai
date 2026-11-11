@@ -699,11 +699,12 @@ static void MeasureOne(FILE *out, const char *item, int tenths)
 }
 
 // "orre:all": every song of Colosseum's (ORRE's sound, musyx/orre_musyx.c), each ORRE_SECONDS from its start at no gain,
-// through the same filter the game plays it through; a line each, "orre:<sound id>". Nothing without ORRE's packs
+// through the same filter the game plays it through; a line each, "orre:<sound id>". Nothing without ORRE's packs.
+// "orre:K/N": every Nth of them from the Kth, so N games side by side measure them all
 #define ORRE_SECONDS 45
-static void MeasureOrre(FILE *out)
+static void MeasureOrre(FILE *out, u32 part, u32 parts)
 {
-    u32 id, pairs = ORRE_SECONDS * MIXER_RATE, i;
+    u32 id, pairs = ORRE_SECONDS * MIXER_RATE, i, nth = 0;
     float *keep = R.buf, *buf = calloc(pairs * 2, sizeof(float));
     u32 keepLen = R.len;
     if (buf == NULL)
@@ -713,7 +714,7 @@ static void MeasureOrre(FILE *out)
     {
         double loud, peak;
         u32 first = pairs, last = 0;
-        if (!OrreSound_IsSong(id))
+        if (!OrreSound_IsSong(id) || nth++ % parts != part)
             continue;
         OrreSound_Silence();
         memset(buf, 0, pairs * 2 * sizeof(float));
@@ -765,8 +766,11 @@ void MP_MeasureMusic_IfAsked(void)
         double db = 0;
         if (sscanf(line, "%199s %lf", item, &db) >= 1)
         {
+            unsigned part = 0, parts = 1;
             if (strcmp(item, "orre:all") == 0)
-                MeasureOrre(out);
+                MeasureOrre(out, 0, 1);
+            else if (sscanf(item, "orre:%u/%u", &part, &parts) == 2 && parts > 0)
+                MeasureOrre(out, part % parts, parts);
             else
                 MeasureOne(out, item, (int)(db * 10.0 + (db < 0 ? -0.5 : 0.5)));
         }

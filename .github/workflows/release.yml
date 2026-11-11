@@ -95,11 +95,12 @@ jobs:
         if: steps.ver.outputs.skip != 'true'
         run: make linux -j"$(nproc)"
 
-      # Custom music (music/*.kaisong) all equally loud (tools/kaisong/normalize.py): each song measured in the game
-      # just built, rendered as fast as it runs, one gain a file (dynamics untouched) into music/kaisong_gains.txt,
-      # which package.sh ships. Measurements are cached by file content in the repository, so only new or changed songs
-      # are measured: well under a second with nothing new, about a second a new song. If it can't run, the committed
-      # gains ship as they are.
+      # Custom music (music/*.kaisong) and Colosseum's songs all equally loud (tools/kaisong/normalize.py): every song
+      # measured in the game just built, every run (the user, 2026-11-11: never skipped because it was measured before),
+      # rendered as fast as it runs in a game per core, one gain a file (dynamics untouched) into
+      # music/kaisong_gains.txt and orre_gains.txt, which package.sh ships. About 45 s; it stops itself at 55 s (--limit)
+      # so it never adds more than a minute: what it didn't reach keeps its last measurement from the committed cache.
+      # If it can't run, the committed gains ship as they are.
       - name: Music loudness
         if: steps.ver.outputs.skip != 'true'
         run: |

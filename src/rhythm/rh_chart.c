@@ -569,6 +569,15 @@ int RhSong_Load(struct RhSong *song, const char *path, const char *group)
         song->displayBpmLo = lo < 1e9 ? lo : song->bpms[0].bpm;
         song->displayBpmHi = hi > 0 ? hi : song->bpms[0].bpm;
     }
+    // (a title with letters the game's fonts lack, shown as '?': the song's own title in plain letters instead)
+    if (song->titleTranslit[0])
+    {
+        const unsigned char *c;
+        for (c = (const unsigned char *)song->title; *c && *c < 0x80; c++)
+            ;
+        if (*c)
+            snprintf(song->title, sizeof(song->title), "%s", song->titleTranslit);
+    }
     return 1;
 }
 

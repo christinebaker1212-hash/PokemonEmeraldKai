@@ -160,7 +160,7 @@ scenes (`@tcg`, `@sim`...: a source file / src folder that names songs, found by
 list edit, a scene using the battle code holds the music: MP_MUSIC_SCENE_HOLD), the BGM player at 64 tracks / 64
 voices; loudness (the user, 2026-11-10: fast, at build time, dynamics kept, every added song equally loud):
 tools/kaisong/normalize.py, run by the release after the Linux build and by hand after adding a song (commit
-tools/kaisong/loudness_cache.json and music/kaisong_gains.txt): the game renders each new or changed song as fast as it
+tools/kaisong/loudness_cache.json and music/kaisong_gains.txt); it measures every song every run (the user, 2026-11-11: never skipped for having been measured before), a game per core, and stops itself at --limit 55 s so it never adds a minute (what it didn't reach keeps the cache's last measurement): the game renders each new or changed song as fast as it
 runs (MOEMON_MEASURE_MUSIC, mp_export_sound.c), one gain a file to the median of the songs replaced, peaks under -1 dBFS;
 the game reads the gains (mp_kaisong.c ReadGainTable, over INFO gain=); the old real-time loudness.py stays for reports
 only; COOP_NOTES "Music loudness at build time". The MAGIC table's two duel songs: music/*@mtg.kaisong (one picked a
@@ -426,7 +426,7 @@ StepMania's .sm / .ssc read by rh_chart.c, judged by Beware's EXTREME rules in r
 sdl2.c ScreenStep, mixed by Platform_QueueAudio; art and announcer graphics/rhythm/rhythm.bin from tools/rhythm/gen_assets.py;
 the 240 songs in stepmania/Songs, shipped as their own release zip the machine downloads (updater.c Updater_Songs*,
 tools/release/package_songs.sh); VERSUS online by RN_* messages, records server-wide in mp_scores.c, DANCE achievements;
-docs/RHYTHM_DECISIONS.md, COOP_NOTES "The DANCE machine"; tests dance_*, tools/test/dance_songs_test.sh, tools/rhythm/test.sh).
+docs/RHYTHM_DECISIONS.md, COOP_NOTES "The DANCE machine"; tests dance_*, tools/test/dance_songs_test.sh, tools/rhythm/test.sh; songs the user adds go in stepmania/Songs/ex21, sortorder's NEW SONGS: six on 2026-11-11).
 
 Also BATTLE ANIMS > MODERN (mp_modernanim.c: glows, trails and hit bursts drawn over the Classic animation, which always runs:
 same frame count, test anim_modern checks all 716; 1.120.0 rebuilt it: every move's own family effect, never over the UI,

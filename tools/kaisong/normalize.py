@@ -10,13 +10,17 @@ limiting). The target is the median loudness of the game's own songs these files
 the rest of the game's sound. A gain never takes a song's peak over -1 dBFS; a song raised is measured again at its
 gain (a note already at full volume can't go louder) and corrected once.
 
-Measurements are kept by each file's content (tools/kaisong/loudness_cache.json, committed): only new or changed
-songs are measured, so a build with nothing new takes well under a second and a new song about one. The gains go
+Every song is measured every run (the user, 2026-11-11), never skipped because it was measured before: a game per
+core renders them side by side, about 45 s for everything on four cores. The run stops itself at --limit (55 s) so
+it never adds more than a minute to a build; the new or changed songs go first, and what the limit cut off keeps its
+last measurement (tools/kaisong/loudness_cache.json, committed, kept by each file's content). The gains go
 to music/kaisong_gains.txt ("<file>\\t<dB>"), which the game reads (src/mp/mp_kaisong.c ReadGainTable; it wins over a
 file's INFO gain=) and the release ships beside the songs.
 
-  normalize.py [--bin ./pokeemerald64] [--music music] [--jobs N] [--fresh] [--check]
-      --fresh   measure everything again (after a change to the sound engine)
+  normalize.py [--bin ./pokeemerald64] [--music music] [--jobs N] [--fresh] [--check] [--limit SECONDS]
+      every song is measured every run; the cache only keeps the last measurements, for what --limit (55 s)
+      cuts off, and for --check
+      --fresh   forget the last measurements first
       --check   only report: exit 1 if a file has no measurement in the cache (nothing is run or written)
 The release runs it after the Linux build; run it after adding a song and commit the cache and the gains.
 """
@@ -37,9 +41,10 @@ def song_numbers():
     return nums
 
 
-def measure(binary, items, jobs):
-    """{item: (loudness, peak)} for items [(name, gain dB)], run in `jobs` games side by side."""
-    if not items:
+def measure(binary, items, jobs, deadline):
+    """{item: (loudness, peak)} for items [(name, gain dB)], run in `jobs` games side by side; whatever isn't
+    measured by `deadline` (time.time()) is left out: the games write a line as each song is done."""
+    if not items or time.time() >= deadline:
         return {}
     tmp = tempfile.mkdtemp(prefix='kaisong_measure')
     chunks = [items[i::jobs] for i in range(jobs) if items[i::jobs]]
@@ -57,10 +62,14 @@ def measure(binary, items, jobs):
                                        stderr=subprocess.DEVNULL), out))
     got = {}
     for p, out in procs:
-        p.wait(timeout=1800)
+        try:
+            p.wait(timeout=max(0.1, deadline - time.time()))
+        except subprocess.TimeoutExpired:
+            p.kill()
+            p.wait()
         for line in open(out) if os.path.exists(out) else []:
             f = line.rstrip('\n').split('\t')
-            if len(f) >= 4 and f[2] != 'failed':
+            if len(f) >= 5 and f[2] != 'failed':   # (five fields: a whole line, not one cut off by the limit)
                 got[(f[0], round(float(f[1]), 1))] = (float(f[2]), float(f[3]))
     return got
 
@@ -73,8 +82,10 @@ def main():
     ap.add_argument('--jobs', type=int, default=max(1, os.cpu_count() or 1))
     ap.add_argument('--fresh', action='store_true')
     ap.add_argument('--check', action='store_true')
+    ap.add_argument('--limit', type=float, default=55.0)
     args = ap.parse_args()
     t0 = time.time()
+    deadline = t0 + args.limit
     cache = {'files': {}, 'songs': {}}
     if os.path.exists(CACHE) and not args.fresh:
         cache = json.load(open(CACHE))
@@ -86,23 +97,39 @@ def main():
     def cached(f, g):
         return cache['files'].get(key[f], {}).get('%.1f' % g)
 
-    want = [(f, 0.0) for f in files if cached(f, 0.0) is None]
-    want += [('song:%d' % n, 0.0) for n in refs if str(n) not in cache['songs']]
+    new = [(f, 0.0) for f in files if cached(f, 0.0) is None]
+    new += [('song:%d' % n, 0.0) for n in refs if str(n) not in cache['songs']]
     if args.check:
-        print('%d songs not measured' % len(want))
-        return 1 if want else 0
-    if want and not os.path.exists(args.bin):
-        print('normalize.py: no game binary (%s) to measure %d songs; gains kept as they are' % (args.bin, len(want)))
+        print('%d songs not measured' % len(new))
+        return 1 if new else 0
+    if not os.path.exists(args.bin):
+        print('normalize.py: no game binary (%s) to measure with; gains kept as they are' % args.bin)
         return 0
+    # Everything is measured every run (the user, 2026-11-11), the new or changed first: should the time limit cut
+    # the run short, what it didn't reach keeps its last measurement
+    want = new + [(f, 0.0) for f in files if (f, 0.0) not in new]
+    want += [('song:%d' % n, 0.0) for n in refs if ('song:%d' % n, 0.0) not in new]
+    pack = os.path.join(ROOT, 'orre', 'orre_data.pak')
+    orre = cache.get('orre') or {}
+    orre_parts = max(1, args.jobs) if os.path.exists(pack) else 0
+    orre_new = {}
+    # (Colosseum's songs beside them, a share in each game: an item every `jobs`, so each list gets one)
+    for k in range(orre_parts):
+        want.insert(k, ('orre:%d/%d' % (k, orre_parts), 0.0))
+    measured = [0]
 
     def store(got):
         for (name, g), (loud, peak) in got.items():
             if name.startswith('song:'):
                 cache['songs'][name[5:]] = [loud, peak]
+            elif name.startswith('orre:'):
+                orre_new[name[5:]] = [loud, peak]
             elif name in key:
                 cache['files'].setdefault(key[name], {})['%.1f' % g] = [loud, peak]
+            measured[0] += 1
 
-    store(measure(args.bin, want, args.jobs))
+    store(measure(args.bin, want, args.jobs, deadline))
+    first = measured[0] - len(orre_new)
     levels = [cache['songs'][str(n)][0] for n in refs if str(n) in cache['songs']]
     target = statistics.median(levels) if levels else -18.0
 
@@ -118,9 +145,10 @@ def main():
             continue
         g = gain_for(*m)
         gains[f] = g
-        if g > 0.3 and cached(f, g) is None:
+        if g > 0.3:
             again.append((f, g))
-    store(measure(args.bin, again, args.jobs))
+    again.sort(key=lambda fg: cached(*fg) is not None)   # (the ones never measured at their gain first)
+    store(measure(args.bin, again, args.jobs, deadline))
     for f, g in list(gains.items()):
         m = cached(f, g)
         if g > 0.3 and m is not None and m[0] < target - 0.3:
@@ -130,17 +158,11 @@ def main():
     # the song playing, so its sound effects keep Colosseum's own balance with its music; "fx" is the gain while no
     # song plays: the songs' median. Needs ORRE's pack (orre/orre_data.pak, from the disc); without it the gains kept
     # are shipped as they are. Kept by the pack's own content
-    orre_new = 0
-    pack = os.path.join(ROOT, 'orre', 'orre_data.pak')
-    orre = cache.get('orre') or {}
-    if os.path.exists(pack) and os.path.exists(args.bin):
+    if orre_new:
         h = hashlib.sha1(open(pack, 'rb').read()).hexdigest()
-        if orre.get('pack') != h or args.fresh:
-            got = measure(args.bin, [('orre:all', 0.0)], 1)
-            songs = {name[5:]: [loud, peak] for (name, _g), (loud, peak) in got.items() if name.startswith('orre:')}
-            if songs:
-                orre = {'pack': h, 'songs': songs}
-                orre_new = len(songs)
+        songs = dict(orre.get('songs') or {}) if orre.get('pack') == h else {}
+        songs.update(orre_new)
+        orre = {'pack': h, 'songs': songs}
     if orre.get('songs'):
         cache['orre'] = orre
         # (6 dB either way at most: a track made quiet, the wind over the desert, stays a quiet one)
@@ -164,15 +186,12 @@ def main():
         for name in files:
             if name in gains:
                 f.write('%s\t%.1f\n' % (name, gains[name]))
-    # (said so it can't be read as a failure: "0 measured now" is every song already measured, its gain shipped)
-    if orre_new:
-        print('normalize.py: ORRE: %d of Colosseum\'s songs measured' % orre_new)
-    if not want:
-        print('normalize.py: OK, all %d songs already measured (nothing new or changed): gains written, target %.1f dB, %.1f s'
-              % (len(gains), target, time.time() - t0))
-    else:
-        print('normalize.py: OK, %d songs, target %.1f dB: %d new or changed measured now (%d again at their gain), %.1f s'
-              % (len(gains), target, len(want), len(again), time.time() - t0))
+    total = len(want) - orre_parts + len(again)
+    done = measured[0] - len(orre_new)
+    print('normalize.py: OK, %d songs, target %.1f dB: %d of %d measurements made now (%d new or changed, %d again at '
+          'their gain), %d of Colosseum\'s songs, %.1f s%s'
+          % (len(gains), target, done, total, len(new), len(again), len(orre_new), time.time() - t0,
+             '' if done >= total else ': the %.0f s limit cut the run short, the rest keep their last measurement' % args.limit))
     return 0
 
 
