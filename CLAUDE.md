@@ -130,6 +130,11 @@ ORRE's people (the user, 2026-11-07): each Colosseum character model is a LOOK >
 closest Pokemon Showdown trainer sprite (battle picture, 80x80 as drawn): tools/orre/people.py, src/orre/orre_people.c,
 ORRE_HANDOFF "Sprites"; scenario orre_people.
 
+**UNOVA** (Pokémon Black as a playable region, the user 2026-11-11: "every decision that stood for Platinum will stand
+for Unova"): the user's decisions in `docs/UNOVA_DECISIONS.md` (Black only, at least Gen 5 there, to N's Castle and the
+credits, its own engine in src/unova/, the C-GEAR, MUSICALS, seasons, the ENTRALINK, the port CASTELIA). Decomp:
+Project-Holon/aletheia (code only); assets from the user's ROM (never committed; secret UNOVA_ROM_URL).
+
 **Magic: The Gathering** (a fourth card game): the user's decisions in `docs/MTG_DECISIONS.md`; **start at
 `docs/MTG_HANDOFF.md`**. Forge translated into C (src/mtg/, include/mtg/mtg.h; its AI too, later), reading Forge's own
 card scripts for the Premodern pool (graphics/mtg/forge.pak from tools/mtg/build_pack.py at the pinned Forge commit;
