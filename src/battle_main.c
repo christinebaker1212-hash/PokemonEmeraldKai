@@ -4333,6 +4333,9 @@ static void TryDoEventsBeforeFirstTurn(void)
     // Check all switch in abilities happening from the fastest mon to slowest.
     while (gBattleStruct->switchInAbilitiesCounter < gBattlersCount)
     {
+        // Moemon Kai: RUI sees an opponent's Shadow Pokémon (once each: this comes back for the battler's ability)
+        if (Orre_Shadow_AuraCall(gBattlerByTurnOrder[gBattleStruct->switchInAbilitiesCounter]))
+            return;
         if (AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN, gBattlerByTurnOrder[gBattleStruct->switchInAbilitiesCounter], 0, 0, 0) != 0)
             effect++;
 

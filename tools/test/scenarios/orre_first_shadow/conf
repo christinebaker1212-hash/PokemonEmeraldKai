@@ -1,0 +1,11 @@
+# The first Shadow Pokémon, as Colosseum has it: the Mayor's house scene on entering (it never played: a room was
+# entered a frame before its map loaded, the scene set its first flag, and the load stopped it for good:
+# orre_vm.c Orre_Vm_Frame), FOLLY's battle, then TRUDLY's with the Shadow MAKUHITA (a story trainer's Shadow records
+# were dropped as the battle started: orre_shadow.c PurgeEnemies): RUI calls it out ("It's that one! ... I can see a
+# black aura coming from it."), a ball snags it into the party, and the battle is won.
+MODE=1
+TMO=500
+WARP=45,3,48,64
+ENV_A="MOEMON_DEBUG_PARTY=150:100 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1 MOEMON_ORRE_FLAG_LOG=1"
+EXPECT_A=("orre: flag 1002 = 1" "orre: battle 15 won" "shadow: Shadow 1 (species 335) made" "shadow: RUI calls out Shadow 1 (battler 1, the first)" "Shadow 1 snagged (party)" "orre: battle 17 won" "[test] shadow 1: id 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "warped: room 5's scripts stop")

@@ -87,8 +87,16 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
   sends out the next one, or has lost (battle_scripts_2.s BattleScript_OrreSnagged, ORRE_SNAGGED). A ball at one that
   isn't Shadow, with the SNAG MACHINE in ORRE: RUI's "No, wait! That POKéMON doesn't have a black aura!" (0x7716,
   before flag 0x99F) or "No! Stop! That's not a SHADOW POKéMON!" (0x7702). Tests: `mp shadow foe SLOT ID` makes the
-  next trainer battle's POKéMON Shadow; scenario shadow_snag. Not yet: RUI's "There's a SHADOW POKéMON!" when one is
-  sent out (0x770A / 0x7717, with the story), Colosseum's own ball-shake lines (0x7710-0x7712, 0x7718) in ORRE, co-op
+  next trainer battle's POKéMON Shadow; scenario shadow_snag. **In the story (2026-11-11, 1.189.6)**: a story
+  trainer's team is built before its battle starts (orre_battle.c SetTrainer), and the battle's start dropped every
+  opponent's record (PurgeEnemies), so no story trainer's Shadow Pokémon was Shadow in battle (no aura, no snag); the
+  records made for the coming battle are kept now (REC_FRESH). RUI's words when an opponent's Shadow Pokémon comes
+  out (Orre_Shadow_AuraCall, from the switch-in effects in battle_main.c / battle_script_commands.c; once a battle
+  each, with RUI along: ORRE_FLAG_RUI_FOLLOWS): Colosseum's battle 17 (TRUDLY in the Mayor's house, the first)
+  0x7729 then 0x772A; else 0x7717 until flag 0x9A0, then 0x770A (the decomp's fight_range_exact_8022DCB8.c; it
+  says them the first time ever each is seen (its record's 0xD1): here each battle). Scenario orre_first_shadow
+  (the Mayor's house scene, FOLLY, TRUDLY, RUI's call, the snag). Not yet: RUI's "Why don't you have any POKé
+  BALLS" (0x772B) in that first battle, Colosseum's own ball-shake lines (0x7710-0x7712, 0x7718) in ORRE, co-op
   (first snag wins: decision 4).
 - **S5, purification at the RELIC STONE** (2026-11-07): the special Orre_RelicStone (waitstate; party_menu.c) opens the
   party menu; a Shadow Pokémon whose heart is open (level 6) is purified as reliveCeremonyAll does: its record goes (its

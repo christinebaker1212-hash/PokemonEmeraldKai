@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "string_util.h"
 #include "pokemon.h"
 #include "orre.h"
 #include "orre_shadow.h"
@@ -62,6 +63,8 @@ struct OrreShadowRec
 
 #define REC_HYPER 1
 #define REC_ENEMY 2     // an opponent's Shadow Pokémon in this battle (never saved; a snag makes it the player's)
+#define REC_CALLED 4    // RUI has called it out this battle (Orre_Shadow_AuraCall)
+#define REC_FRESH 8     // made for the battle about to start (kept by that battle's start: PurgeEnemies)
 
 static struct OrreShadowRec sRecs[MAX_RECS];
 static u16 sRecCount;
@@ -324,11 +327,14 @@ void Orre_Shadow_BattleMoves(struct Pokemon *mon, u16 *moves, u8 *pp)
 static void PurgeEnemies(void)
 {
     u32 i;
+    // (the last battle's opponents go. A story trainer's team is built before its battle starts (orre_battle.c
+    // SetTrainer): those records are this battle's, and stay. They went too until 2026-11-11, so every story
+    // trainer's Shadow Pokémon fought as an ordinary one: no aura, only its four moves, no snag)
     for (i = 0; i < sRecCount; )
-        if (sRecs[i].flags & REC_ENEMY)
+        if ((sRecs[i].flags & (REC_ENEMY | REC_FRESH)) == REC_ENEMY)
             sRecs[i] = sRecs[--sRecCount];
         else
-            i++;
+            sRecs[i++].flags &= ~REC_FRESH;
 }
 
 void Orre_Shadow_BattleStart(void)
@@ -376,7 +382,7 @@ u32 Orre_Shadow_StoredExp(struct Pokemon *mon)
 
 enum { T_HYPER_ENTER, T_SELFISH, T_ATK_FOE, T_ATK_YOU, T_ATK_SELF, T_CONFUSED, T_ITEM_NOHOW, T_ITEM_NONE,
        T_CALL, T_CALL_RESPONDED, T_CALL_SENSES, T_CALL_IGNORING, T_CALL_NOT_LISTENING, T_CALL_FAILED, T_HYPER_STILL,
-       T_SENSES, T_WRONG_TARGET, T_COUNT };
+       T_SENSES, T_WRONG_TARGET, T_AURA, T_COUNT };
 static const u8 sT_HyperEnter[] = _("{B_ATK_NAME_WITH_PREFIX}'s emotions rose to\na fever pitch!\pIt entered HYPER MODE!");
 static const u8 sT_Selfish[] = _("{B_ATK_NAME_WITH_PREFIX} selfishly used\n{B_BUFF1} without orders!");
 static const u8 sT_AtkFoe[] = _("{B_ATK_NAME_WITH_PREFIX} ignored orders and\nattacked the opposing trainer!");
@@ -398,6 +404,7 @@ static const u8 *const sTexts[T_COUNT] = {sT_HyperEnter, sT_Selfish, sT_AtkFoe, 
     sT_HyperStill, sT_Senses, NULL};
 static u8 sLine[2];
 static const u8 *sWrongTarget;   // (RUI's words: Orre_Shadow_WrongSnag)
+static u8 sAuraText[2][400];      // (RUI's words when a Shadow Pokémon comes out: Orre_Shadow_AuraCall)
 static u8 Snagged(void);
 
 const u8 gText_Orre_BattleMenuCall[] = _("FIGHT{CLEAR_TO 56}BAG\nMOéMON{CLEAR_TO 56}CALL");
@@ -406,6 +413,8 @@ const u8 *Orre_Shadow_BattleText(u8 line)
 {
     if (sLine[line & 1] == T_WRONG_TARGET)
         return sWrongTarget;
+    if (sLine[line & 1] == T_AURA)
+        return sAuraText[line & 1];
     return sTexts[sLine[line & 1] < T_COUNT ? sLine[line & 1] : 0];
 }
 
@@ -547,7 +556,7 @@ bool8 Orre_Shadow_MakeEnemy(struct Pokemon *mon, u8 id)
     CalculateMonStats(mon);
     if (!Orre_Shadow_Make(mon, id) || (r = RecOf(mon)) == NULL)
         return FALSE;
-    r->flags |= REC_ENEMY;
+    r->flags |= REC_ENEMY | REC_FRESH;
     return TRUE;
 }
 
@@ -610,6 +619,36 @@ u8 Orre_Shadow_SnagRate(u8 battler)
     return data ? data->catchRate : gSpeciesInfo[gBattleMons[battler].species].catchRate;
 }
 
+// RUI sees an opponent's Shadow Pokémon come out (Colosseum's fight code, the decomp's fight_range_exact_8022DCB8.c:
+// the first time each comes out, with RUI along): in the first such battle (Colosseum's battle 17: TRUDLY in the
+// Mayor's house) "It's that one! That POKéMON! ... I can see a black aura coming from it." and "...Get that POKéMON
+// back from the bad guys!" (0x7729, 0x772A); after it "Oh! PLAYER! There's a POKéMON with a black aura!" (0x7717)
+// until flag 0x9A0, then "Oh! There's a SHADOW POKéMON!" (0x770A). Colosseum's own words (orre_text.c), their
+// field placeholders filled in here (a battle's are other codes). TRUE: its script was pushed (the caller comes back)
+bool8 Orre_Shadow_AuraCall(u8 battler)
+{
+    struct OrreShadowRec *r;
+    bool8 first;
+    if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) || (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
+     || (r = EnemyRec(battler)) == NULL || (r->flags & REC_CALLED) || gBattleMons[battler].hp == 0)
+        return FALSE;
+    r->flags |= REC_CALLED;
+    if (!Orre_Flag(ORRE_FLAG_RUI_FOLLOWS) || !O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
+        return FALSE;
+    first = Orre_BattleCurrent() == 17;
+    StringExpandPlaceholders(sAuraText[0], Orre_Text(first ? 0x7729 : Orre_Flag(0x9A0) ? 0x770A : 0x7717));
+    sLine[0] = T_AURA;
+    if (first)
+    {
+        StringExpandPlaceholders(sAuraText[1], Orre_Text(0x772A));
+        sLine[1] = T_AURA;
+    }
+    gBattleScripting.battler = battler;
+    BattleScriptPushCursorAndCallback(first ? BattleScript_OrreAuraCallFirst : BattleScript_OrreAuraCall);
+    MPNet_Log("shadow: RUI calls out Shadow %u (battler %u%s)", r->id, battler, first ? ", the first" : "");
+    return TRUE;
+}
+
 // a ball thrown at a trainer's POKéMON that isn't Shadow, with the SNAG MACHINE: RUI's words (fight_menu.c: 0x7716
 // before flag 0x99F, else 0x7702); NULL: the usual "The TRAINER blocked the BALL!"
 static const u8 sT_NoAura[] = _("RUI: No, wait!\nThat POKéMON doesn't have a\lblack aura!");
@@ -636,7 +675,7 @@ static u8 Snagged(void)
     for (i = 0; i < sRecCount; i++)
         if ((sRecs[i].flags & REC_ENEMY) && sRecs[i].personality == personality)
         {
-            sRecs[i].flags &= ~REC_ENEMY;
+            sRecs[i].flags &= ~(REC_ENEMY | REC_CALLED | REC_FRESH);
             sRecs[i].otId = GetMonData(mon, MON_DATA_OT_ID);
             MPNet_Log("shadow: Shadow %u snagged (%s)", sRecs[i].id, toParty ? "party" : "PC");
             break;

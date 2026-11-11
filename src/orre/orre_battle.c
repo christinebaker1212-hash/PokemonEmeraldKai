@@ -112,6 +112,12 @@ static const u8 *Rec(u32 table, u32 countAt, u32 size, u32 i)
     return sData + table + i * size;
 }
 
+// Colosseum's battle under way (0: none)
+u16 Orre_BattleCurrent(void)
+{
+    return sBattle;
+}
+
 u16 Orre_BattleCount(void)
 {
     return Load() ? Be32(sData + BATTLE_COUNT) : 0;

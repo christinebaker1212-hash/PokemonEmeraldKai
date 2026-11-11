@@ -241,6 +241,8 @@ extern const u8 BattleScript_MpCoopLearnMoveLater[];
 extern const u8 BattleScript_MpCoopWantsToRun[];
 extern const u8 BattleScript_OrreSnagged[];    // Moemon Kai: a trainer's Shadow Pokémon snagged
 extern const u8 BattleScript_OrreSnagWrong[];  // ... a ball at one that isn't Shadow (RUI)
+extern const u8 BattleScript_OrreAuraCall[];        // Moemon Kai: RUI sees a Shadow Pokémon (src/orre/orre_shadow.c)
+extern const u8 BattleScript_OrreAuraCallFirst[];
 extern const u8 BattleScript_OrreTurnMsg[];   // Moemon Kai: HYPER MODE at a turn's end (src/orre/orre_shadow.c)
 extern const u8 BattleScript_OrreCall[];   // Moemon Kai: ORRE's (src/orre/orre_shadow.c)
 extern const u8 BattleScript_OrreHyperIgnored[];

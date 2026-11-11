@@ -410,6 +410,13 @@ The older notes per part:
   (orre_vm.c KeepStory when a scene takes the player, put back at the whiteout's warp: Colosseum goes back to the save,
   so the scene plays again); the player wakes at the last ORRE POKeMON CENTER healed at (N_POKEMON_CENTER sets the
   save's lastHealLocation) or the OUTSKIRT STAND (Orre_Vm_LossWhiteOut). Scenario orre_willie_loss.
+- **A room is entered once, when its map is loaded** (2026-11-11, 1.189.6): a warp's task calls WarpIntoMap (the
+  save is on the next map) and Orre_Vm_Frame runs after the tasks in that same field frame, so the next room was
+  entered, its set-up and a frame of its main loop ran, and the map's load (Orre_Vm_Warped) stopped them and started
+  the room again. A scene that begins as its room is entered had set its first flag by then and never played: the
+  Mayor's house (script 7: flag 1002, the Mayor, FOLLY's battle 15, TRUDLY's battle 17 with the first Shadow
+  Pokémon). Orre_Vm_Frame enters a room only under the field's own callbacks now; a save with 1002 and without
+  2481 (and before 1017) has 1002 cleared on entering the house, so the scene plays. Scenario orre_first_shadow.
 - **Doors** (2026-11-11; Colosseum's door table: the decomp's FloorDoorEntry, floor_event.c floorEventCtrlDoor,
   common_rel .data + 0x8FE24, 0x18 each, count + 0x14A690; tools/orre/colo_rooms.py Room.doors): 154 doors, each with
   a leaf's collision object (off while the door is open), a flag set while it's open and, for some, a lock flag that

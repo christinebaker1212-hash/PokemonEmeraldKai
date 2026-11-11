@@ -107,6 +107,7 @@ void Orre_Shadow_Debug(const char *arg);   // `mp shadow ...` (tests)
 bool8 Orre_Shadow_MakeEnemy(struct Pokemon *mon, u8 id);
 void Orre_Shadow_EnemyParty(void);           // the trainer's party just built (battle_main.c): its Shadow Pokémon
 bool8 Orre_Shadow_HasSnagMachine(void);
+bool8 Orre_Shadow_AuraCall(u8 battler);   // RUI's words as an opponent's Shadow Pokémon comes out (TRUE: script pushed)
 // ---- ORRE's confinement (decisions 2, 3)
 bool8 Orre_Shadow_Barred(struct Pokemon *mon);   // in this battle it can't battle (outside ORRE, PvP, facilities)
 bool8 Orre_Shadow_PartyHasShadow(void);          // (the voyage out of ORRE refuses then)

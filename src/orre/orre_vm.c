@@ -1578,7 +1578,16 @@ void Orre_Vm_Frame(void)
         return;
     }
     if (room != sRoom)
+    {
+        // (a warp's last field frame: WarpIntoMap has put the save on the next map already, in the warp's task, and
+        // this runs after the tasks in that same frame. The room isn't loaded yet: entered then, its set-up and the
+        // first frame of its main loop ran, the map's load (Orre_Vm_Warped) stopped them and the room started again.
+        // A scene that starts as its room is entered had set its first flag by then and was never seen: the Mayor's
+        // house, with FOLLY's and TRUDLY's battles and the first Shadow Pokémon (2026-11-11))
+        if (gMain.callback2 != CB2_Overworld && gMain.callback2 != CB2_OverworldBasic)
+            return;
         Orre_Vm_RoomEntered();
+    }
     if (getenv("MOEMON_ORRE_VM_TRACE"))
     {
         static u32 sTick;
@@ -1711,6 +1720,14 @@ void Orre_Vm_RoomEntered(void)
         sPrevRoom = sLastRoom, sLastRoom = room;
     sEntry = sLinked ? sLinkEntry : O3D_EntryAt(gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y);
     sLinked = FALSE;
+    if (room == 5 && Orre_Flag(1002) && !Orre_Flag(2481) && !Orre_Flag(1017))
+    {
+        // (the Mayor's house, its scene begun (1002) and TRUDLY never beaten (2481): the scene was cut off as it
+        // started until 1.189.6 (Orre_Vm_Frame), so a save from before has never met the Mayor, FOLLY and TRUDLY
+        // here, or the first Shadow Pokémon. Before PYRITE's story (1017) the scene plays again)
+        Orre_SetFlag(1002, FALSE);
+        MPNet_Log("orre vm: the Mayor's house scene never played: it plays again");
+    }
     if (room == 3 && Orre_Flag(993) && !Orre_Flag(996))
     {
         // (PHENAC, the kidnappers gone and RUI still in the sack: a state Colosseum's set-up has no case for, its

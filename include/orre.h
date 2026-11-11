@@ -58,6 +58,7 @@ struct Pokemon;
 #define ORRE_BATTLE_WON  2   // (Colosseum's own: std103_battleGetResult, its scripts compare with 2)
 #define ORRE_BATTLE_LOST 1
 u16 Orre_BattleCount(void);
+u16 Orre_BattleCurrent(void);   // Colosseum's battle under way (0: none)
 bool8 Orre_PrepareBattle(u16 battle);          // the battle's opponents set (gTrainerBattleOpponent_A / _B, flags)
 bool8 Orre_IsTrainer(u16 trainerId);
 const u8 *Orre_ClassName(u16 trainerId);       // (battle_message.c)

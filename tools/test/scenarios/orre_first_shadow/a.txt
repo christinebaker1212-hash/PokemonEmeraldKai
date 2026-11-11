@@ -1,0 +1,28 @@
+pressuntil A field 3000
+wait 30
+mp teach 0 94
+mp battlestyle 1
+mp orrestory 1002
+mp orreflag 0xFFF 1
+mp orreflag 0xFFE 1
+mp item 1 5
+mp savedata ball:last 1
+mp warp 45,4,16,19
+wait 300
+pressuntillog A 9000 orre: battle 15
+pressuntillog A 9000 orre: battle 17
+pressuntillog A 9000 RUI calls out
+wait 90
+shot rui
+pressuntil A action 4000
+wait 30
+press L 2
+pressuntillog A 6000 snagged
+wait 30
+shot snagged
+wait 30
+pressuntillog A 9000 orre: battle 17 won
+pressuntil A field 6000
+mp party
+mp shadow state 1
+quit

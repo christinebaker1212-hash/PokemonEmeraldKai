@@ -150,6 +150,20 @@ BattleScript_OrreSnagWrong::
 	waitmessage B_WAIT_TIME_LONG
 	finishaction
 
+BattleScript_OrreAuraCall::
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_ORRE_TEXT
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_OrreAuraCallFirst::
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_ORRE_TEXT
+	waitmessage B_WAIT_TIME_LONG
+	printstring STRINGID_ORRE_TEXT2
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
 BattleScript_OrreTurnMsg::
 	printstring STRINGID_ORRE_TEXT
 	waitmessage B_WAIT_TIME_LONG

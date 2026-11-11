@@ -5892,6 +5892,9 @@ static void Cmd_switchineffects(void)
 
         gDisableStructs[gActiveBattler].truantSwitchInHack = 0;
 
+        // Moemon Kai: RUI sees an opponent's Shadow Pokémon sent in (once each: this command runs again after it)
+        if (Orre_Shadow_AuraCall(gActiveBattler))
+            return;
         if (!AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN, gActiveBattler, 0, 0, 0)
             && !ItemBattleEffects(ITEMEFFECT_ON_SWITCH_IN, gActiveBattler, FALSE))
         {
