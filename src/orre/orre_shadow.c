@@ -707,6 +707,13 @@ static u8 Snagged(void)
             sRecs[i].flags &= ~(REC_ENEMY | REC_CALLED | REC_FRESH);
             sRecs[i].otId = GetMonData(mon, MON_DATA_OT_ID);
             MPNet_Log("shadow: Shadow %u snagged (%s)", sRecs[i].id, toParty ? "party" : "PC");
+            {
+                // (its "snagged" story flag, as Colosseum's battle sets it (the Shadow table's + 0x12): the story asks it
+                // after the battle. PHENAC's MAKUHITA, 0x84E: without it TRUDLY said it was knocked out, the user 2026-11-11)
+                const struct OrreShadowMon *data = Orre_Shadow_Data(sRecs[i].id);
+                if (data != NULL && data->flags[2] != 0)
+                    Orre_SetFlag(data->flags[2], TRUE);
+            }
             break;
         }
     GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_SEEN);
