@@ -22,28 +22,56 @@
       "y": 20,
       "elevation": 0,
       "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_2F_2",
-      "dest_warp_id": "14"
+      "dest_warp_id": "20"
+    },
+    {
+      "x": 18,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_2F_2",
+      "dest_warp_id": "20"
+    },
+    {
+      "x": 19,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_2F_2",
+      "dest_warp_id": "20"
     },
     {
       "x": 9,
       "y": 20,
       "elevation": 0,
       "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_2F_2",
-      "dest_warp_id": "15"
+      "dest_warp_id": "21"
+    },
+    {
+      "x": 10,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_2F_2",
+      "dest_warp_id": "21"
+    },
+    {
+      "x": 11,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_2F_2",
+      "dest_warp_id": "21"
     },
     {
       "x": 17,
       "y": 18,
       "elevation": 0,
       "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_3F_2",
-      "dest_warp_id": "2"
+      "dest_warp_id": "6"
     },
     {
       "x": 11,
       "y": 18,
       "elevation": 0,
       "dest_map": "MAP_ORRE_SNAGEM_HIDEOUT_BUILDING_3F_2",
-      "dest_warp_id": "3"
+      "dest_warp_id": "7"
     }
   ]
 }

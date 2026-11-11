@@ -5630,6 +5630,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] s3dtext %d %d: %d characters\n", bank, msg, (int)StringLength(gStringVar4));
         ShowFieldMessage(sPlaceholder);
     }
+    else if (strcmp(cmd, "orreaudit") == 0)
+    {
+        void Orre_BattleAudit(void);
+        Orre_BattleAudit();   // orreaudit: every Colosseum battle's teams and Shadow Pokémon as the game makes them
+    }
     else if (strcmp(cmd, "orrebattle") == 0)
     {
         // orrebattle BATTLE [PERSON]: Colosseum's battle BATTLE now, as a script starts it (src/orre/orre_battle.c);

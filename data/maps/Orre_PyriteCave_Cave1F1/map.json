@@ -57,42 +57,42 @@
       "y": 94,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_CAVE_CAVE_2F_2",
-      "dest_warp_id": "10"
+      "dest_warp_id": "12"
     },
     {
       "x": 77,
       "y": 95,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_CAVE_CAVE_2F_2",
-      "dest_warp_id": "10"
+      "dest_warp_id": "12"
     },
     {
       "x": 77,
       "y": 96,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_CAVE_CAVE_2F_2",
-      "dest_warp_id": "10"
+      "dest_warp_id": "12"
     },
     {
       "x": 77,
       "y": 97,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_CAVE_CAVE_2F_2",
-      "dest_warp_id": "10"
+      "dest_warp_id": "12"
     },
     {
       "x": 15,
       "y": 130,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_CAVE_CAVE_2F_2",
-      "dest_warp_id": "8"
+      "dest_warp_id": "10"
     },
     {
       "x": 15,
       "y": 131,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_CAVE_CAVE_2F_2",
-      "dest_warp_id": "8"
+      "dest_warp_id": "10"
     },
     {
       "x": 78,
@@ -127,28 +127,28 @@
       "y": 58,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_CAVE_CAVE_2F_2",
-      "dest_warp_id": "9"
+      "dest_warp_id": "11"
     },
     {
       "x": 15,
       "y": 59,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_CAVE_CAVE_2F_2",
-      "dest_warp_id": "9"
+      "dest_warp_id": "11"
     },
     {
       "x": 15,
       "y": 60,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_CAVE_CAVE_2F_2",
-      "dest_warp_id": "9"
+      "dest_warp_id": "11"
     },
     {
       "x": 15,
       "y": 61,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_CAVE_CAVE_2F_2",
-      "dest_warp_id": "9"
+      "dest_warp_id": "11"
     },
     {
       "x": 19,

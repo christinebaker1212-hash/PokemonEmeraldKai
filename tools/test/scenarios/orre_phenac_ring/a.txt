@@ -1,0 +1,29 @@
+pressuntil A field 3000
+wait 60
+mp orrestory 1003
+mp orreflag 2481 1
+mp orreflag 2482 1
+mp orreflag 2483 1
+mp orreflag 2484 1
+mp warp 45,2,57,56
+wait 200
+pressuntil B field 600
+press UP 200
+press LEFT 200
+press UP 120
+wait 10
+mp where
+echo [ring] east side to the top
+mp warp 45,2,39,56
+wait 200
+pressuntil B field 600
+press UP 200
+press RIGHT 200
+press UP 60
+press RIGHT 40
+wait 10
+mp where
+echo [ring] west side up: now the stairs
+pressuntillog UP 1500 orre vm: room 13 (M1_stadium_1F)
+wait 60
+quit

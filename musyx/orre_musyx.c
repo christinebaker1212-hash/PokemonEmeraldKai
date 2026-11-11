@@ -218,6 +218,21 @@ void OrreSound_Stop(uint32_t id, uint32_t fadeMs)
     }
 }
 
+// Every effect still sounding ends (a room's loops: machines, water, a crowd): the room is left, or a battle begins
+void OrreSound_StopEffects(void)
+{
+    uint32_t i;
+    if (!s.ok)
+        return;
+    for (i = 0; i < SOUND_COUNT; i++)
+        if (s.fx[i] != SND_ID_ERROR)
+        {
+            if (sndFXCheck(s.fx[i]) != SND_ID_ERROR)
+                sndFXKeyOff(s.fx[i]);
+            s.fx[i] = SND_ID_ERROR;
+        }
+}
+
 void OrreSound_Volume(uint32_t id, uint32_t volume, uint32_t fadeMs)
 {
     uint8_t vol = volume > 127 ? 127 : (uint8_t)volume;

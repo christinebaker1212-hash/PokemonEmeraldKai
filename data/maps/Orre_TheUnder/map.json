@@ -22,42 +22,49 @@
       "y": 63,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SHOP_1F",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 64,
       "y": 63,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SHOP_1F",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 65,
       "y": 63,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SHOP_1F",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 69,
       "y": 58,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SHOP_1F",
-      "dest_warp_id": "4"
+      "dest_warp_id": "5"
     },
     {
       "x": 69,
       "y": 59,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SHOP_1F",
-      "dest_warp_id": "4"
+      "dest_warp_id": "5"
     },
     {
       "x": 69,
       "y": 60,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_SHOP_1F",
-      "dest_warp_id": "4"
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 47,
+      "y": 85,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_HOTEL_B1",
+      "dest_warp_id": "6"
     },
     {
       "x": 48,
@@ -239,14 +246,14 @@
       "y": 62,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_1F",
-      "dest_warp_id": "5"
+      "dest_warp_id": "7"
     },
     {
       "x": 80,
       "y": 62,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_1F",
-      "dest_warp_id": "5"
+      "dest_warp_id": "7"
     },
     {
       "x": 53,
@@ -288,91 +295,91 @@
       "y": 63,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "38"
+      "dest_warp_id": "39"
     },
     {
       "x": 49,
       "y": 87,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "39"
+      "dest_warp_id": "40"
     },
     {
       "x": 49,
       "y": 84,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "40"
+      "dest_warp_id": "41"
     },
     {
       "x": 64,
       "y": 64,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "41"
+      "dest_warp_id": "42"
     },
     {
       "x": 67,
       "y": 59,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "42"
+      "dest_warp_id": "43"
     },
     {
       "x": 38,
       "y": 66,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "43"
+      "dest_warp_id": "44"
     },
     {
       "x": 71,
       "y": 33,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "44"
+      "dest_warp_id": "45"
     },
     {
       "x": 66,
       "y": 41,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "45"
+      "dest_warp_id": "46"
     },
     {
       "x": 53,
       "y": 32,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "46"
+      "dest_warp_id": "47"
     },
     {
       "x": 54,
       "y": 33,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "47"
+      "dest_warp_id": "48"
     },
     {
       "x": 54,
       "y": 48,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "48"
+      "dest_warp_id": "49"
     },
     {
       "x": 38,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "49"
+      "dest_warp_id": "50"
     },
     {
       "x": 16,
       "y": 41,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "50"
+      "dest_warp_id": "51"
     }
   ]
 }

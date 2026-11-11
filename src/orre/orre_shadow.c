@@ -651,13 +651,14 @@ bool8 Orre_Shadow_AuraCall(u8 battler)
 
 // a ball thrown at a trainer's POKéMON that isn't Shadow, with the SNAG MACHINE: RUI's words (fight_menu.c: 0x7716
 // before flag 0x99F, else 0x7702); NULL: the usual "The TRAINER blocked the BALL!"
-static const u8 sT_NoAura[] = _("RUI: No, wait!\nThat POKéMON doesn't have a\lblack aura!");
-static const u8 sT_NotShadow[] = _("RUI: No! Stop!\nThat's not a SHADOW POKéMON!");
+// (Colosseum's own lines from ORRE's text: they carry Kai's word for the creatures, which OPTIONS > CREATURES swaps as
+// it's shown. Written out here they said POKéMON whatever the option: the user, 2026-11-11)
 bool8 Orre_Shadow_WrongSnag(void)
 {
     if (!Orre_Shadow_HasSnagMachine() || !O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
         return FALSE;
-    sWrongTarget = Orre_Flag(0x99F) ? sT_NotShadow : sT_NoAura;
+    StringExpandPlaceholders(sAuraText[0], Orre_Text(Orre_Flag(0x99F) ? 0x7702 : 0x7716));
+    sWrongTarget = sAuraText[0];
     sLine[0] = T_WRONG_TARGET;
     return TRUE;
 }

@@ -30,6 +30,7 @@
 #include "event_data.h"
 #include "main.h"
 #include "orre.h"
+#include "o3d.h"
 #include "orre_data.h"
 #include "orre_people.h"
 #include "orre_shadow.h"
@@ -293,6 +294,72 @@ u32 Orre_Money(u16 trainerId)
     return rate * best * ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) ? 2 : 1) * gBattleStruct->moneyMultiplier;
 }
 
+// ---- tests: every battle of Colosseum's against what the game makes of it (`mp orreaudit`: docs/ORRE_PARITY.md).
+// A battle's opponents, each one's POKéMON kept or left out (a species Kai's ORRE doesn't read), and every Shadow
+// Pokémon made as its Shadow row (the species the row names, in the opponent's team, known as an opponent's Shadow).
+void Orre_BattleAudit(void)
+{
+    u32 battles = Orre_BattleCount(), b, i, k, shadows = 0, made = 0, left = 0, mons = 0, seen[4] = {0, 0, 0, 0};
+    for (b = 1; b < battles; b++)
+    {
+        const u8 *rec = Rec(BATTLES, BATTLE_COUNT, BATTLE_SIZE, b);
+        u8 perSide;
+        if (rec == NULL)
+            continue;
+        perSide = rec[1] ? rec[1] : 1;
+        for (i = perSide; i < 2 * perSide && i < 4; i++)
+        {
+            u16 tr = Be16(rec + 0x18 + 8 * i);
+            const u8 *t;
+            if (tr == 0 || Be32(rec + 0x1C + 8 * i) == 1 || (t = Rec(TRAINERS, TRAINER_COUNT, TRAINER_SIZE, tr)) == NULL)
+                continue;
+            for (k = 0; k < PARTY_SIZE; k++)
+            {
+                const u8 *r = Rec(TMONS, TMON_COUNT, TMON_SIZE, Be16(t + 4) + k);
+                u16 species;
+                if (r == NULL || (species = Be16(r + 0xA)) == SPECIES_NONE)
+                    continue;
+                mons++;
+                if (species > SPECIES_CHIMECHO)
+                {
+                    left++;
+                    printf("[audit] battle %u trainer %u slot %u: species %u left out\n", (unsigned)b, tr, (unsigned)k, species);
+                    continue;
+                }
+                if (r[3])
+                {
+                    struct Pokemon mon;
+                    const struct OrreShadowMon *data = Orre_Shadow_Data(r[3]);
+                    bool8 ok;
+                    shadows++;
+                    ZeroMonData(&mon);
+                    BuildMon(&mon, r, TRAINER_ORRE_A, r[4]);
+                    ok = data != NULL && GetMonData(&mon, MON_DATA_SPECIES) == data->species && Orre_Shadow_Id(&mon) == r[3];
+                    made += ok;
+                    if (ok && r[3] < 128)
+                        seen[r[3] / 32] |= 1u << (r[3] % 32);
+                    printf("[audit] battle %u trainer %u: Shadow %u species %u level %u: %s\n", (unsigned)b, tr, r[3], species,
+                           (unsigned)GetMonData(&mon, MON_DATA_LEVEL), ok ? "made" : data ? "NOT MADE" : "NO SHADOW ROW");
+                }
+            }
+        }
+    }
+    for (i = 0, k = 0; i < Orre_Shadow_Count(); i++)
+    {
+        const struct OrreShadowMon *d = Orre_Shadow_DataAt(i);
+        if (d && d->species != SPECIES_NONE)
+        {
+            bool8 met = d->id < 128 && (seen[d->id / 32] >> (d->id % 32)) & 1;
+            k += met;
+            if (!met)
+                printf("[audit] Shadow %u (species %u): in no battle's team\n", d->id, d->species);
+        }
+    }
+    printf("[audit] %u battles: %u opponents' POKeMON, %u left out; %u Shadow slots, %u made; %u of %u Shadow rows met\n",
+           (unsigned)battles, (unsigned)mons, (unsigned)left, (unsigned)shadows, (unsigned)made, (unsigned)k,
+           (unsigned)Orre_Shadow_Count());
+}
+
 // ---- a battle
 
 // Set up Colosseum's battle BATTLE (its opponents in TRAINER_ORRE_A / _B): FALSE if there's no such battle or no
@@ -378,9 +445,15 @@ static u32 BattleSong(void)
 bool8 Orre_BattleMusic(void)
 {
     u32 id = BattleSong();
+    if (sBattle != 0 || O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
+    {
+        // (a battle begins: the room's looping effects and its wind end, whichever music the battle has; they went on
+        // under the battle's song (the user, 2026-11-11). The room's sound script starts them again after it)
+        OrreSound_StopEffects();
+        OrreSound_StopAmbient(300);
+    }
     if (id <= 1)
         return FALSE;
-    OrreSound_StopAmbient(300);
     if (!OrreSound_Play(id, 127, TRUE))
         return FALSE;
     MPNet_Log("orre: battle %d plays Colosseum's song %u", sBattle, id);

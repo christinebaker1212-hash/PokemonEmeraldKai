@@ -1669,6 +1669,11 @@ void Orre_Vm_Warped(void)
         if (floor && Be32(floor + 0x38) && (t = Start(Be32(floor + 0x38), 0, NULL, TRUE)) != NULL)
             Run(t);
         MPNet_Log("orre vm: warped: room %u's scripts stop", sRoom);
+        // (the room's own sounds end with it, as Colosseum's floor change ends them: its looping effects and its wind
+        // went on into the next room, which has its own or none (the user, 2026-11-11). Its song stays: the next
+        // room's sound script keeps it if it's the same, or fades it into its own)
+        OrreSound_StopEffects();
+        OrreSound_StopAmbient(400);
     }
     sScriptBlack = FALSE;   // (the warp's own fade brings the next room in)
     if (sLossPending)

@@ -22,7 +22,7 @@
       "y": 10,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_3F",
-      "dest_warp_id": "2"
+      "dest_warp_id": "6"
     },
     {
       "x": 6,
@@ -47,45 +47,59 @@
     },
     {
       "x": 11,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_2F",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 11,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_2F",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 11,
       "y": 15,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_2F",
-      "dest_warp_id": "2"
+      "dest_warp_id": "8"
     },
     {
       "x": 25,
       "y": 14,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER",
-      "dest_warp_id": "32"
+      "dest_warp_id": "33"
     },
     {
       "x": 7,
       "y": 22,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_1F",
-      "dest_warp_id": "6"
+      "dest_warp_id": "8"
     },
     {
       "x": 13,
       "y": 13,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_1F",
-      "dest_warp_id": "7"
+      "dest_warp_id": "9"
     },
     {
       "x": 25,
       "y": 15,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_1F",
-      "dest_warp_id": "8"
+      "dest_warp_id": "10"
     },
     {
       "x": 16,
       "y": 18,
       "elevation": 0,
       "dest_map": "MAP_ORRE_PYRITE_BLDG_BUILDING_1F",
-      "dest_warp_id": "9"
+      "dest_warp_id": "11"
     }
   ]
 }

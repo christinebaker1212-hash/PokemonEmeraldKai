@@ -66,7 +66,8 @@ DROPPED = {'font', 'color', 'palette', 'shadow', 'align', 'talk_se', 'line_space
 SENTENCE_END = tuple('.!?…)”"~:')
 SUBSTITUTE = {'‱': '???', '‥': '..', '−': '-', '‘': "'", '’': "'",
               '$': '¥',     # (Kai's money sign; its '$' is the end of a string)
-              '★': '·'}     # (the P★DA: Kai's font has no star)
+              '★': '·',     # (the P★DA: Kai's font has no star)
+              ' ～♪': '…', '～♪': '…', ' ～': '…', '～': '…', '♪': ''}   # (a sung line's tail: no note in Kai's font)
 
 
 def charmap():
@@ -99,7 +100,9 @@ def japanese(parts):
     for p in parts:
         if isinstance(p, tuple) and p[0] == 'end':
             break
-        if isinstance(p, str) and any(ord(c) > 0x3000 for c in p):
+        # (the wave dash of a sung line, "Oh, thirty long years of cranking gears ～♪", is in English lines too: eleven
+        # were dropped for it, PYRITE's windmill man's songs and the KIDS GRID song among them)
+        if isinstance(p, str) and any(ord(c) > 0x3000 and c != '～' for c in p):
             return True
     return False
 
@@ -133,7 +136,10 @@ class Conv:
         out = []
         for p in parts:
             if isinstance(p, str):
-                t = ''.join(SUBSTITUTE.get(c, c) for c in p)
+                t = p
+                for k in sorted((k for k in SUBSTITUTE if len(k) > 1), key=len, reverse=True):
+                    t = t.replace(k, SUBSTITUTE[k])
+                t = ''.join(SUBSTITUTE.get(c, c) for c in t)
                 while '"' in t:   # (straight quotes as Kai's opening and closing ones: it has no straight double quote)
                     t = t.replace('"', '“' if self.quote_open else '”', 1)
                     self.quote_open = not self.quote_open

@@ -19,6 +19,13 @@
   "warp_events": [
     {
       "x": 17,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_ORRE_THE_UNDER_JUNK_1F",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 17,
       "y": 12,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_JUNK_1F",
@@ -29,7 +36,7 @@
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_ORRE_THE_UNDER_JUNK_B1",
-      "dest_warp_id": "1"
+      "dest_warp_id": "2"
     }
   ]
 }

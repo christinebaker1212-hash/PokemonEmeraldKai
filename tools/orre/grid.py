@@ -147,7 +147,7 @@ _LAST = None
 FINE = 1.0   # the reach is worked out on a grid of FINE Colosseum units, walls thickened by RADIUS
 
 
-def _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs):
+def _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs, floor=None):
     """The tiles a person reaches from STARTS: a flood fill on a fine grid where every wall at a person's height is
     RADIUS thick (a gap passes only if a person fits through it), the floor's tiles only, no step over 6 units;
     trigger cells (doors, exits) are reached, not walked through. A tile is reached when the flood comes within 2
@@ -164,6 +164,10 @@ def _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs):
     def cell(px, pz):
         return int((pz - z0) // FINE), int((px - x0) // FINE)
 
+    # (two floors in a tile, a terrace's edge over a basin, a bridge over a way under it: the walls that stand at
+    # the lowest floor's height (block) and at the highest's (block_top), each for the person walking that floor)
+    top = np.array([[heights[y][x][-1] if heights[y][x] else np.nan for x in range(w)] for y in range(h)])
+    block_top = np.zeros((H, W), dtype=bool)
     for p0, p1, y0, y1 in segs:
         L = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
         for t in np.linspace(0.0, 1.0, max(2, int(L / (FINE * 0.5)) + 1)):
@@ -172,16 +176,23 @@ def _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs):
             if not (0 <= cx < W and 0 <= cz < H):
                 continue
             g = ground[cz // k, cx // k]
-            if g != g or y1 < g + 1.0 or y0 > g + PERSON:
-                continue
-            block[cz, cx] = True
+            if g == g and y1 >= g + 1.0 and y0 <= g + PERSON:
+                block[cz, cx] = True
+            g = top[cz // k, cx // k]
+            if g == g and y1 >= g + 1.0 and y0 <= g + PERSON:
+                block_top[cz, cx] = True
     r = int(math.ceil(RADIUS / FINE))
-    grown = block.copy()
-    for dz in range(-r, r + 1):
-        for dx in range(-r, r + 1):
-            if dx * dx + dz * dz <= (RADIUS / FINE) ** 2 and (dx or dz):
-                grown |= np.roll(np.roll(block, dz, 0), dx, 1)
-    block = grown
+
+    def grow(b):
+        grown = b.copy()
+        for dz in range(-r, r + 1):
+            for dx in range(-r, r + 1):
+                if dx * dx + dz * dz <= (RADIUS / FINE) ** 2 and (dx or dz):
+                    grown |= np.roll(np.roll(b, dz, 0), dx, 1)
+        return grown
+
+    block = grow(block)
+    block_top = grow(block_top)
     for p0, p1, tid in tsegs:
         L = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
         for t in np.linspace(0.0, 1.0, max(2, int(L / (FINE * 0.5)) + 1)):
@@ -194,33 +205,81 @@ def _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs):
         for x in range(w):
             if not (heights[y][x]) or not usable[y, x]:
                 block[y * k:(y + 1) * k, x * k:(x + 1) * k] = True
+                block_top[y * k:(y + 1) * k, x * k:(x + 1) * k] = True
+    # Where the floor changes level (a tile with two floors under its centre, or one beside a tile whose floor is
+    # more than a step off), a tile's one height is the wrong one for part of it: PHENAC's walk round its fountain
+    # runs through tiles whose centre is over the basin, 13 units down; taken at the basin's height the walk was a
+    # drop, and the ring was cut on both sides of the stairs to the stadium (the user, 2026-11-11: "an arbitrary
+    # invisible wall"). There each fine cell has the floor's own heights under it; elsewhere the tile's.
+    edge = np.zeros((h, w), dtype=bool)
+    if floor is not None:
+        for y in range(h):
+            for x in range(w):
+                if not heights[y][x]:
+                    continue
+                if len(heights[y][x]) > 1:
+                    edge[y, x] = True
+                    continue
+                for ny in range(max(0, y - 1), min(h, y + 2)):
+                    for nx in range(max(0, x - 1), min(w, x + 2)):
+                        if heights[ny][nx] and any(abs(a_ - heights[y][x][0]) > 3.0 for a_ in heights[ny][nx]):
+                            edge[y, x] = True
+    cell_hs = {}
+
+    def floors(cz, cx):
+        """The floor's heights under fine cell (cz, cx)"""
+        ty, tx = cz // k, cx // k
+        if not edge[ty, tx]:
+            return (ground[ty, tx],) if usable[ty, tx] else ()
+        v = cell_hs.get((cz, cx))
+        if v is None:
+            v = tuple(hh for hh, flat in _heights(floor, x0 + (cx + 0.5) * FINE, z0 + (cz + 0.5) * FINE) if flat)
+            cell_hs[(cz, cx)] = v
+        return v
+
+    def walled(cz, cx, hh):
+        """A wall stands at fine cell (cz, cx) for a person on the floor at height HH"""
+        ty, tx = cz // k, cx // k
+        if ground[ty, tx] != ground[ty, tx]:
+            return True
+        return block_top[cz, cx] if abs(hh - top[ty, tx]) < abs(hh - ground[ty, tx]) else block[cz, cx]
+
     seen = np.zeros((H, W), dtype=bool)
+    done = set()    # (fine cell, height) pairs the flood stood on
     q = deque()
     for start in starts:
         sz, sx = cell(*start)
         if not (0 <= sz < H and 0 <= sx < W):
             continue
-        if block[sz, sx]:   # (an entry against a railing: the nearest spot a person fits, a few units off)
-            near = [(abs(dz) + abs(dx), sz + dz, sx + dx) for dz in range(-6, 7) for dx in range(-6, 7)
-                    if 0 <= sz + dz < H and 0 <= sx + dx < W and not block[sz + dz, sx + dx]]
-            if not near:
-                continue   # (an entry in a wall or off the floor: a place only a scene uses)
-            _, sz, sx = min(near)
-        seen[sz, sx] = True
-        q.append((sz, sx))
+        spots = [(abs(dz) + abs(dx), sz + dz, sx + dx, hh) for dz in range(-6, 7) for dx in range(-6, 7)
+                 if 0 <= sz + dz < H and 0 <= sx + dx < W
+                 for hh in floors(sz + dz, sx + dx) if not walled(sz + dz, sx + dx, hh)]
+        if not spots:
+            continue   # (an entry in a wall or off the floor: a place only a scene uses)
+        # (an entry against a railing: the nearest spot a person fits, a few units off; every floor under it)
+        d0 = min(spots)[0]
+        for d, cz, cx, hh in spots:
+            if d == d0 and (cz, cx, hh) not in done:
+                done.add((cz, cx, hh))
+                seen[cz, cx] = True
+                q.append((cz, cx, hh))
     if not q:
         raise ValueError("every start is in a wall or off the floor: %s" % (starts,))
     while q:
-        cz, cx = q.popleft()
+        cz, cx, g0 = q.popleft()
         if trigf[cz, cx] >= 0:
             continue
-        g0 = ground[cz // k, cx // k]
         for nz, nx in ((cz + 1, cx), (cz - 1, cx), (cz, cx + 1), (cz, cx - 1)):
-            if 0 <= nz < H and 0 <= nx < W and not seen[nz, nx] and (not block[nz, nx] or trigf[nz, nx] >= 0):
-                if abs(ground[nz // k, nx // k] - g0) > 6.0:
+            if not (0 <= nz < H and 0 <= nx < W):
+                continue
+            for hh in floors(nz, nx):
+                if (nz, nx, hh) in done or abs(hh - g0) > 6.0:
                     continue
+                if walled(nz, nx, hh) and trigf[nz, nx] < 0:
+                    continue
+                done.add((nz, nx, hh))
                 seen[nz, nx] = True
-                q.append((nz, nx))
+                q.append((nz, nx, hh))
     global _LAST
     _LAST = (seen, k, block, trigf)   # (the fine flood, for build's edges and tools/orre/grid_check.py)
     out = np.zeros((h, w), dtype=bool)
@@ -321,7 +380,7 @@ def build(col, tile=TILE, start=None, stops=None):
     edges = np.zeros((h, w), dtype=np.uint8)
     if start is not None:
         starts = [start] if isinstance(start[0], (int, float)) else list(start)
-        centre_walk = _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs)
+        centre_walk = _reach(starts, tile, x0, z0, w, h, walk, heights, trig, segs, tsegs, fl)
         walk, edges = _tiles_from_flood(centre_walk, heights, trig, wall_between)
         if stops:
             before = walk.copy()
@@ -550,6 +609,73 @@ def _tiles_from_flood(centre_walk, heights, trig, wall_between):
                     forced.add((best, (by, bx)))
                     changed = True
                     comp, _n = comps()
+    # a way the flood takes straight on that the tiles only take the long way round (or through a door): a thin walk
+    # that curves between tile centres. PHENAC's ring round the fountain was cut on both sides of the stairs to its
+    # stadium: the tiles joined only through a glass door three screens off, and the player met an invisible wall
+    # (the user, 2026-11-11). Two walkable tiles a few steps apart, joined by the flood within NEAR_FINE cells and
+    # by the tiles only past NEAR_TILES steps: the tiles along the flood's way are opened and its steps forced
+    NEAR_FINE, NEAR_TILES = 3 * k, 6
+
+    def tile_far(src, dst):
+        """dst isn't within NEAR_TILES steps of src on the tile graph"""
+        d = {src: 0}
+        q = deque([src])
+        while q:
+            c = q.popleft()
+            if c == dst:
+                return False
+            if d[c] >= NEAR_TILES:
+                continue
+            for n in ((c[0] + 1, c[1]), (c[0] - 1, c[1]), (c[0], c[1] + 1), (c[0], c[1] - 1)):
+                if 0 <= n[0] < h and 0 <= n[1] < w and walk[n] and n not in d and step_open(c[0], c[1], n[0], n[1]):
+                    d[n] = d[c] + 1
+                    q.append(n)
+        return True
+
+    for _ in range(40):
+        opened = False
+        for (ty, tx), piece in sorted(own.items()):
+            near = [(uy, ux) for uy in range(ty - 2, ty + 3) for ux in range(tx - 2, tx + 3)
+                    if (uy, ux) > (ty, tx) and (uy, ux) in own and tile_far((ty, tx), (uy, ux))]
+            if not near:
+                continue
+            prev = {c: None for c in piece}
+            depth = {c: 0 for c in piece}
+            q = deque(piece)
+            hit = None
+            want = set(near)
+            while q and hit is None:
+                cz, cx = q.popleft()
+                if depth[(cz, cx)] >= NEAR_FINE:
+                    continue
+                for nz, nx in ((cz + 1, cx), (cz - 1, cx), (cz, cx + 1), (cz, cx - 1)):
+                    if 0 <= nz < seen.shape[0] and 0 <= nx < seen.shape[1] and seen[nz, nx] and (nz, nx) not in prev:
+                        prev[(nz, nx)] = (cz, cx)
+                        depth[(nz, nx)] = depth[(cz, cx)] + 1
+                        if (nz // k, nx // k) in want and (nz, nx) in own[(nz // k, nx // k)]:
+                            hit = (nz, nx)
+                            break
+                        q.append((nz, nx))
+            if hit is None:
+                continue
+            path = []
+            c = hit
+            while c is not None:
+                path.append(c)
+                c = prev[c]
+            last = None
+            for cz, cx in path:
+                t = (cz // k, cx // k)
+                if not walk[t]:
+                    walk[t] = True
+                    if not heights[t[0]][t[1]]:
+                        heights[t[0]][t[1]] = list(heights[last[0]][last[1]]) if last else [0.0]
+                if last is not None and t != last:
+                    forced.add((last, t))
+                last = t
+            opened = True
+        if not opened:
+            break
     edges = np.zeros((h, w), dtype=np.uint8)
     for y in range(h):
         for x in range(w):

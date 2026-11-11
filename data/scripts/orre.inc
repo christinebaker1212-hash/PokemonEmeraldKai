@@ -198,7 +198,7 @@ gText_OrreTakeYourTime::
 	.string "with the boat.$"
 
 gText_OrreShadowStays::
-	.string "Hold on! There's a SHADOW POKéMON\n"
+	.string "Hold on! There's a SHADOW MOéMON\n"
 	.string "with you.\p"
 	.string "One like that can't leave ORRE until\n"
 	.string "its heart is open and it's purified.$"

@@ -53,7 +53,7 @@
 45.24 xy 14,19   # M2_building_3F collision 8 -> M2_building_2F
 45.23 xy 7,10 ~1   # M2_building_3F collision 9 -> M2_building_1F
 45.13 xy 52,55   # M2_building_3F collision 10 -> M2_out
-45.13 xy 46,59 ~1   # M2_building_4F collision 3 -> M2_out
+45.13 xy 46,60   # M2_building_4F collision 3 -> M2_out
 45.25 xy 6,14   # M2_building_4F collision 4 -> M2_building_3F
 45.28 xy 16,60   # M2_cave_1F_1 collision 0 -> M2_cave_1F_2
 45.30 xy 101,45   # M2_cave_1F_1 collision 1 -> M2_cave_2F_2

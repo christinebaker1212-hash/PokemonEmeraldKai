@@ -125,9 +125,9 @@ wait 60
 press UP 24
 wait 150
 mp where
-mp warp 45,13,48,59
+mp warp 45,13,47,60
 wait 60
-press LEFT 24
+press UP 24
 wait 150
 mp where
 mp warp 45,13,50,54
@@ -235,7 +235,7 @@ wait 60
 press DOWN 24
 wait 150
 mp where
-mp warp 45,23,12,15
+mp warp 45,23,12,14
 wait 60
 press LEFT 24
 wait 150
@@ -245,22 +245,22 @@ wait 60
 press UP 24
 wait 150
 mp where
-mp warp 45,24,9,13
+mp warp 45,24,8,16
+wait 60
+press RIGHT 24
+wait 150
+mp where
+mp warp 45,24,13,19
+wait 60
+press LEFT 24
+wait 150
+mp where
+mp warp 45,25,6,15
 wait 60
 press DOWN 24
 wait 150
 mp where
-mp warp 45,24,12,16
-wait 60
-press DOWN 24
-wait 150
-mp where
-mp warp 45,25,5,15
-wait 60
-press DOWN 24
-wait 150
-mp where
-mp warp 45,25,9,19
+mp warp 45,25,9,20
 wait 60
 press RIGHT 24
 wait 150
@@ -270,9 +270,9 @@ wait 60
 press UP 24
 wait 150
 mp where
-mp warp 45,25,21,14
+mp warp 45,25,20,12
 wait 60
-press UP 24
+press RIGHT 24
 wait 150
 mp where
 mp warp 45,26,16,19
@@ -280,7 +280,7 @@ wait 60
 press DOWN 24
 wait 150
 mp where
-mp warp 45,26,14,15
+mp warp 45,26,13,15
 wait 60
 press UP 24
 wait 150
@@ -330,9 +330,9 @@ wait 60
 press LEFT 24
 wait 150
 mp where
-mp warp 45,30,33,95
+mp warp 45,30,32,97
 wait 60
-press DOWN 24
+press RIGHT 24
 wait 150
 mp where
 mp warp 45,30,39,38
@@ -375,9 +375,9 @@ wait 60
 press UP 24
 wait 150
 mp where
-mp warp 45,33,16,18
+mp warp 45,33,18,19
 wait 60
-press RIGHT 24
+press LEFT 24
 wait 150
 mp where
 mp warp 45,33,45,23
@@ -445,9 +445,9 @@ wait 60
 press DOWN 24
 wait 150
 mp where
-mp warp 45,41,15,18
+mp warp 45,41,14,16
 wait 60
-press UP 24
+press RIGHT 24
 wait 150
 mp where
 mp warp 45,42,14,20
@@ -470,7 +470,7 @@ wait 60
 press RIGHT 24
 wait 150
 mp where
-mp warp 45,44,50,86
+mp warp 45,44,49,86
 wait 60
 press UP 24
 wait 150
@@ -555,7 +555,7 @@ wait 60
 press DOWN 24
 wait 150
 mp where
-mp warp 45,49,19,11
+mp warp 45,49,19,12
 wait 60
 press LEFT 24
 wait 150
@@ -730,9 +730,9 @@ wait 60
 press RIGHT 24
 wait 150
 mp where
-mp warp 45,62,5,30
+mp warp 45,62,4,28
 wait 60
-press LEFT 24
+press DOWN 24
 wait 150
 mp where
 mp warp 45,63,18,38
@@ -1280,7 +1280,7 @@ wait 60
 press DOWN 24
 wait 150
 mp where
-mp warp 45,117,42,19
+mp warp 45,117,43,19
 wait 60
 press DOWN 24
 wait 150
@@ -1290,19 +1290,19 @@ wait 60
 press UP 24
 wait 150
 mp where
-mp warp 45,117,44,34
+mp warp 45,117,45,34
 wait 60
 press DOWN 24
 wait 150
 mp where
-mp warp 45,118,17,19
+mp warp 45,118,18,19
 wait 60
 press DOWN 24
 wait 150
 mp where
-mp warp 45,118,9,21
+mp warp 45,118,10,19
 wait 60
-press UP 24
+press DOWN 24
 wait 150
 mp where
 mp warp 45,119,35,16

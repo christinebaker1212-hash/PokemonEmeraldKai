@@ -1,0 +1,11 @@
+# PHENAC's walk round the fountain, as a player walks it: plain key presses, never the tests' planner (which finds
+# any route there is: it "passed" here by a one-tile sidestep and a way round through a glass door while the
+# player met an invisible wall on both sides of the stairs to the stadium; the user, 2026-11-11). From the ring's
+# west side: up, right along its top, up the stairs into the stadium. Then from its east side: up, left to its top.
+# (tools/orre/grid.py _reach: the floor's own heights where a raised walk and the basin share a tile.)
+MODE=1
+TMO=200
+WARP=45,14,20,19
+ENV_A="MOEMON_DEBUG_PARTY=150:100 MOEMON_ORRE_SCRIPTS=1 MOEMON_ORRE_NO_OPENING=1"
+EXPECT_A=("[test] where map 45.2 xy 53,50" "[ring] west side up: " "orre vm: room 13 (M1_stadium_1F)" "[ring] east side to the top")
+UNEXPECT_A=("[crash]" "TIMEOUT")
