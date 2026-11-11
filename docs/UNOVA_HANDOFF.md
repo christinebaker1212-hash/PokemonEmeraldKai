@@ -43,6 +43,14 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   Side files from before convert on loading: ACHR 2, KIST 2, LVL5, TRAINER CARD 5. HOENN's harbor arrival keeps
   VAR_REGION_ARRIVAL 4 (its frame script's number). save_compat.sh's "format 0" summary mismatch is older than this
   (the build before it fails the same way).
+- Wild POKéMON (src/unova/u3d_wild.c): Black's encounter tables (scripts pack v4: a/1/2/6 by the zone's encounter
+  id, the zones' records 18 bytes from v4), the season's row, grass / dark grass / surfing at their own rates, fed to
+  wild_encounter.c StandardWildEncounter (its UNOVA line). Dark grass is still one POKéMON (Black: two).
+- Items (tools/unova/gen_items.py -> src/data/unova_items.h): Black's numbers to the game's by name / constant; 146
+  of Black's 627 aren't in the game yet (Gen 5's: gems, the C-GEAR, the XTRANSCEIVER, Data Cards, Light / Dark Stone,
+  Red Card, Eject Button...): the user's rule is that new items come from Black, so they're to be added (icons from
+  Black's item icons). The VM's AddItem / RemoveItem / CanAddItem / HasItem / GetItemQuantity / BufferItemName use it
+  (an item the game lacks: logged, the script goes on, Black's own name shown).
 - Music: Black's whole soundtrack (204 songs: tools/kaisong/unova_songs.py slots / convert; MUS_UNOVA_* from 831,
   named after Black's own sequences; src/data/unova_songs.h maps Black's sequence numbers), the zones' songs as the
   maps' music (spring's), the scripts' song commands (u3d_vm.c: fanfares pushed and popped), Black's battle and

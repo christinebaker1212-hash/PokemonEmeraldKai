@@ -43,6 +43,7 @@
 #include "script_pokemon_util.h"
 #include "random.h"
 #include "money.h"
+#include "item.h"
 #include "battle_setup.h"
 #include "constants/items.h"
 #include "constants/species.h"
@@ -668,6 +669,13 @@ static u8 *Slot(u8 slot)   // (Black's word slots, UNOVA's own: the game's battl
     return gUnovaStrVar[slot % UNOVA_STR_VARS];
 }
 
+// Black's item numbers as the game's (tools/unova/gen_items.py: by name; ITEM_NONE where the game has no such item yet)
+#include "../data/unova_items.h"
+static u16 Item(u16 black)
+{
+    return black < ARRAY_COUNT(sUnovaItems) ? sUnovaItems[black] : ITEM_NONE;
+}
+
 static u16 Species(u16 national)
 {
     return national ? NationalPokedexNumToSpecies(national) : SPECIES_NONE;
@@ -954,6 +962,32 @@ static void Step(struct Thread *t)
             break;
         case U3C_PROC_AddMoney:
             AddMoney(&gSaveBlock1Ptr->money, V(0));
+            break;
+        // ---- items (Black's numbers: Item())
+        case U3C_AddItem:   // item, count, result (1: it fit)
+            if (Item(V(0)) == ITEM_NONE)
+                MPNet_Log("u3d vm: Black's item %u isn't in the game yet", V(0));
+            *WorkPtr(a[2]) = Item(V(0)) == ITEM_NONE || AddBagItem(Item(V(0)), V(1));
+            break;
+        case U3C_RemoveItem:
+            *WorkPtr(a[2]) = Item(V(0)) != ITEM_NONE && RemoveBagItem(Item(V(0)), V(1));
+            break;
+        case U3C_CanAddItem:
+            *WorkPtr(a[2]) = Item(V(0)) == ITEM_NONE || CheckBagHasSpace(Item(V(0)), V(1));
+            break;
+        case U3C_HasItem:
+            *WorkPtr(a[2]) = Item(V(0)) != ITEM_NONE && CheckBagHasItem(Item(V(0)), V(1));
+            break;
+        case U3C_GetItemQuantity:
+            *WorkPtr(a[1]) = Item(V(0)) == ITEM_NONE ? 0 : CountTotalItemQuantityInBag(Item(V(0)));
+            break;
+        case U3C_BufferItemName:
+        case U3C_BufferItemNameAlt:
+        case U3C_BufferItemNameWithCount:
+            if (Item(V(1)) != ITEM_NONE)
+                CopyItemName(Item(V(1)), Slot(a[0]));
+            else
+                StringCopy(Slot(a[0]), U3D_Text(54, V(1)));   // (Black's own name for an item the game lacks)
             break;
         case U3C_WORK_CmdEnableNationalDex:
             EnableNationalPokedex();
