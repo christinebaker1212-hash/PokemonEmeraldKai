@@ -125,6 +125,32 @@ def main():
         m = cached(f, g)
         if g > 0.3 and m is not None and m[0] < target - 0.3:
             gains[f] = gain_for(m[0], m[1], g)   # (raised less than asked: notes at full volume; once more)
+    # Colosseum's songs (ORRE's sound: musyx/orre_musyx.c), measured the same way and brought to the same target: a
+    # gain each into music/orre_gains.txt (src/orre/orre_audio.c reads it). The whole of ORRE's mix takes the gain of
+    # the song playing, so its sound effects keep Colosseum's own balance with its music; "fx" is the gain while no
+    # song plays: the songs' median. Needs ORRE's pack (orre/orre_data.pak, from the disc); without it the gains kept
+    # are shipped as they are. Kept by the pack's own content
+    orre_new = 0
+    pack = os.path.join(ROOT, 'orre', 'orre_data.pak')
+    orre = cache.get('orre') or {}
+    if os.path.exists(pack) and os.path.exists(args.bin):
+        h = hashlib.sha1(open(pack, 'rb').read()).hexdigest()
+        if orre.get('pack') != h or args.fresh:
+            got = measure(args.bin, [('orre:all', 0.0)], 1)
+            songs = {name[5:]: [loud, peak] for (name, _g), (loud, peak) in got.items() if name.startswith('orre:')}
+            if songs:
+                orre = {'pack': h, 'songs': songs}
+                orre_new = len(songs)
+    if orre.get('songs'):
+        cache['orre'] = orre
+        # (6 dB either way at most: a track made quiet, the wind over the desert, stays a quiet one)
+        og = {int(k): max(-6.0, min(6.0, gain_for(*v))) for k, v in orre['songs'].items()}
+        with open(os.path.join(args.music, 'orre_gains.txt'), 'w') as f:
+            f.write('# Colosseum\'s songs in ORRE: each sound id\'s gain in dB, so all play %.1f dBFS loud; fx: while no song '
+                    'plays (tools/kaisong/normalize.py; generated)\n' % target)
+            f.write('fx\t%.1f\n' % statistics.median(og.values()))
+            for k in sorted(og):
+                f.write('%d\t%.1f\n' % (k, og[k]))
     os.makedirs(os.path.dirname(CACHE), exist_ok=True)
     keep = set(key.values())
     cache['files'] = {k: v for k, v in cache['files'].items() if k in keep}
@@ -139,6 +165,8 @@ def main():
             if name in gains:
                 f.write('%s\t%.1f\n' % (name, gains[name]))
     # (said so it can't be read as a failure: "0 measured now" is every song already measured, its gain shipped)
+    if orre_new:
+        print('normalize.py: ORRE: %d of Colosseum\'s songs measured' % orre_new)
     if not want:
         print('normalize.py: OK, all %d songs already measured (nothing new or changed): gains written, target %.1f dB, %.1f s'
               % (len(gains), target, time.time() - t0))

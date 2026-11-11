@@ -609,7 +609,8 @@ bool8 Orre_Shadow_HasSnagMachine(void)
 bool8 Orre_Shadow_Snaggable(u8 battler)
 {
     return (gBattleTypeFlags & BATTLE_TYPE_TRAINER) && Orre_Shadow_HasSnagMachine() && EnemyRec(battler) != NULL
-        && gBattleMons[battler].hp != 0 && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK));
+        && gBattleMons[battler].hp != 0 && !(gAbsentBattlerFlags & gBitTable[battler])   // (one that fainted isn't there to snag)
+        && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK));
 }
 
 u8 Orre_Shadow_SnagRate(u8 battler)

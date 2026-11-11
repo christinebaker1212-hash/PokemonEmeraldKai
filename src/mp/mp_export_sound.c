@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "orre_sound.h"
 #include "m4a.h"
 #include "sound.h"
 #include "music_player.h"
@@ -697,6 +698,48 @@ static void MeasureOne(FILE *out, const char *item, int tenths)
     R.watched = NULL;
 }
 
+// "orre:all": every song of Colosseum's (ORRE's sound, musyx/orre_musyx.c), each ORRE_SECONDS from its start at no gain,
+// through the same filter the game plays it through; a line each, "orre:<sound id>". Nothing without ORRE's packs
+#define ORRE_SECONDS 45
+static void MeasureOrre(FILE *out)
+{
+    u32 id, pairs = ORRE_SECONDS * MIXER_RATE, i;
+    float *keep = R.buf, *buf = calloc(pairs * 2, sizeof(float));
+    u32 keepLen = R.len;
+    if (buf == NULL)
+        return;
+    OrreSound_Measure(1);
+    for (id = 1; id < 1236; id++)
+    {
+        double loud, peak;
+        u32 first = pairs, last = 0;
+        if (!OrreSound_IsSong(id))
+            continue;
+        OrreSound_Silence();
+        memset(buf, 0, pairs * 2 * sizeof(float));
+        if (!OrreSound_Play(id, 127, 1))
+            continue;
+        OrreSound_Mix(buf, (s32)(pairs * 2), MIXER_RATE, 1);
+        for (i = 0; i < pairs; i++)
+            if (fabsf(buf[i * 2]) > 0.001f || fabsf(buf[i * 2 + 1]) > 0.001f)
+            {
+                if (first == pairs)
+                    first = i;
+                last = i + 1;
+            }
+        if (first >= last)
+            continue;   // (a silent row)
+        R.buf = buf, R.len = pairs;
+        Loudness(first, last, &loud, &peak);
+        R.buf = keep, R.len = keepLen;
+        fprintf(out, "orre:%u\t0.0\t%.2f\t%.2f\t%.1f\n", id, loud, peak, (last - first) / (double)MIXER_RATE);
+        fflush(out);
+    }
+    OrreSound_Silence();
+    OrreSound_Measure(0);
+    free(buf);
+}
+
 void MP_MeasureMusic_IfAsked(void)
 {
     static bool8 sDone;
@@ -721,7 +764,12 @@ void MP_MeasureMusic_IfAsked(void)
         char item[200];
         double db = 0;
         if (sscanf(line, "%199s %lf", item, &db) >= 1)
-            MeasureOne(out, item, (int)(db * 10.0 + (db < 0 ? -0.5 : 0.5)));
+        {
+            if (strcmp(item, "orre:all") == 0)
+                MeasureOrre(out);
+            else
+                MeasureOne(out, item, (int)(db * 10.0 + (db < 0 ? -0.5 : 0.5)));
+        }
     }
     gMpAudioCapture = NULL;
     fclose(list);

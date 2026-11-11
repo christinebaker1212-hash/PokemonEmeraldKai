@@ -125,6 +125,7 @@ shots (.cam) play in ORRE's engine (src/orre/o3d_cam.c, tools/orre/hsd_cam.py; O
 scenario orre_camera); the opening (step 7: its shots over the hideout as scene rooms, then the SNAG MACHINE: src/orre/orre_opening.c, ORRE_HANDOFF "The opening"; scenario orre_opening).
 ORRE's doors (2026-11-11): Colosseum's door table as gates that start shut and open when walked up to, by their scripts or once unlocked (orre_vm.c CtrlDoor / TouchDoors, tools/orre/gen_gates.py sOrreDoors; ORRE_HANDOFF "Doors"; scenario orre_doors).
 ORRE's sound (2026-11-10): Colosseum's own songs and effects from the disc's MusyX data, played by the MusyX runtime in musyx/ (AxioDL's, CC0) through a GBA filter; bridge musyx/orre_musyx.c, include/orre_sound.h, src/orre/orre_audio.c; ORRE_HANDOFF "Sound".
+ORRE's TVs (1.189.9): a still of each programme drawn as the pack is built (tools/orre/tv.py, table src/data/orre_tv.h from gen_tv.py), on the screen by std171 / std211 (o3d.c O3D_TvSet). ORRE's loudness: tools/kaisong/normalize.py measures Colosseum's songs too (music/orre_gains.txt, the whole mix takes the playing song's gain: musyx/orre_musyx.c); RUI's name is the player's (orre_text.c Orre_PartnerName). **Don't run ORRE's tests: the user tests ORRE (2026-11-11).**
 ORRE's people (the user, 2026-11-07): each Colosseum character model is a LOOK > CREATE recipe (field sprite) and the
 closest Pokemon Showdown trainer sprite (battle picture, 80x80 as drawn): tools/orre/people.py, src/orre/orre_people.c,
 ORRE_HANDOFF "Sprites"; scenario orre_people.

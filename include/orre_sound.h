@@ -21,4 +21,10 @@ void OrreSound_Silence(void);                            // (leaving ORRE: every
 // the game's audio frame (stereo float, COUNT floats at RATE Hz): ORRE's sound added while ON, else held as it is
 void OrreSound_Mix(float *buffer, int32_t count, int32_t rate, int on);
 
+// Loudness (tools/kaisong/normalize.py, music/orre_gains.txt): song ID's gain in dB (0: the effects' when no song plays);
+// measuring: every gain off; whether ID is a song the pack has
+void OrreSound_SetGain(uint32_t id, float db);
+void OrreSound_Measure(int on);
+int OrreSound_IsSong(uint32_t id);
+
 #endif

@@ -44,6 +44,11 @@ static struct
     int16_t held[2];
     double phase;
     float lp[2];
+    // loudness (tools/kaisong/normalize.py: music/orre_gains.txt): each song's gain in dB, the effects' when no song
+    // plays; the whole mix takes the gain of the song playing, so Colosseum's own balance of its music and its
+    // sounds stays as it is
+    float songDb[SOUND_COUNT], fxDb, gain;
+    int measure, gainSet;
 } s;
 
 static uint32_t Be32(const uint8_t *p) { return (uint32_t)p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]; }
@@ -272,15 +277,50 @@ void OrreSound_Silence(void)
     sndMasterVolume(127, 0, 1, 1);
 }
 
+void OrreSound_SetGain(uint32_t id, float db)
+{
+    if (id == 0)
+        s.fxDb = db;
+    else if (id < SOUND_COUNT)
+        s.songDb[id] = db;
+}
+
+void OrreSound_Measure(int on)
+{
+    s.measure = on;
+    s.gainSet = 0;
+}
+
+int OrreSound_IsSong(uint32_t id)
+{
+    const uint8_t *e;
+    if (!Init() || id == 0 || id >= SOUND_COUNT)
+        return 0;
+    e = s.data + SOUND_TABLE + id * 12;
+    return !(e[0] & 0x80) && Song(e[3]) != NULL;
+}
+
 void OrreSound_Mix(float *buffer, int32_t count, int32_t rate, int on)
 {
     const double step = (double)GBA_RATE / rate;
     int32_t n;
+    float want;
     if (!s.ok || !on)
         return;   // (off the field: nothing rendered, so the song waits where it is)
+    {
+        float db = s.measure ? 0.0f : s.bgm[1] ? s.songDb[s.bgm[1]] : s.fxDb;
+        float lin = 1.0f, x = db / 20.0f * 2.302585f, term = 1.0f;   // (10^(db/20) without libm: e^x by its series)
+        int k;
+        for (k = 1; k < 12; k++)
+            term *= x / k, lin += term;
+        want = lin;
+        if (!s.gainSet)
+            s.gain = want, s.gainSet = 1;
+    }
     for (n = 0; n + 1 < count; n += 2)
     {
         int c;
+        s.gain += (want - s.gain) * 0.0002f;   // (a song's gain to the next's over about a tenth of a second)
         s.phase += step;
         if (s.phase >= 1.0)
         {
@@ -295,7 +335,7 @@ void OrreSound_Mix(float *buffer, int32_t count, int32_t rate, int on)
         }
         for (c = 0; c < 2; c++)
         {
-            float v = s.held[c] * (GAIN / 32768.0f);
+            float v = s.held[c] * (GAIN / 32768.0f) * s.gain;
             s.lp[c] += (v - s.lp[c]) * 0.55f;
             v = buffer[n + c] + s.lp[c];
             buffer[n + c] = v > 1.0f ? 1.0f : v < -1.0f ? -1.0f : v;

@@ -94,5 +94,5 @@ animations, lights, the P★DA):
 4. RUI's call once per Shadow Pokémon ever, as Colosseum; 0x772B.
 5. The natives in the table above.
 6. The opening's people (its scene rooms show no one).
-7. The TV's picture (std171_mapSetTextureChange / tvRender: a model drawn through its own camera onto the TV's
-   texture; the table is the floor record's + 0x48). The OUTSKIRT STAND's TV is blank until then.
+7. The TVs' pictures move in Colosseum (the programme's model animates); here each is a still (1.189.9:
+   tools/orre/tv.py draws them as the pack is built; o3d.c O3D_TvSet, orre_vm.c natives 171 / 211).

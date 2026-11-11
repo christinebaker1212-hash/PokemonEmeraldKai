@@ -10922,6 +10922,20 @@ static void Cmd_handleballthrow(void)
             gBattlerTarget = BATTLE_PARTNER(gBattlerTarget);
     }
 
+    // Moemon Kai: a snag in ORRE's Double Battles: the ball goes for the Shadow Pokémon still standing, whichever side
+    // of the field it's on. It went for the one straight across even when that one had fainted or wasn't a Shadow
+    // Pokémon: RUI's "No, wait!" with the Shadow Pokémon right there (the user, 2026-11-11)
+    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild && !Orre_Shadow_Snaggable(gBattlerTarget))
+    {
+        u8 b;
+        for (b = 0; b < gBattlersCount; b++)
+            if (GetBattlerSide(b) == B_SIDE_OPPONENT && Orre_Shadow_Snaggable(b))
+            {
+                gBattlerTarget = b;
+                break;
+            }
+    }
+
     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild && !Orre_Shadow_Snaggable(gBattlerTarget))
     {
         BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_TRAINER_BLOCK);

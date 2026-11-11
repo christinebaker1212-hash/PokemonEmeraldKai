@@ -44,6 +44,7 @@ mkdir -p "$P/mugen"
 mkdir -p "$P/music"
 cp music/*.kaisong "$P/music/" 2>/dev/null || true
 cp music/kaisong_gains.txt "$P/music/" 2>/dev/null || true   # (every file's gain: tools/kaisong/normalize.py)
+cp music/orre_gains.txt "$P/music/" 2>/dev/null || true      # (Colosseum's songs' gains in ORRE: the same script)
 cp docs/SONG_TABLE.md "$P/music/SONG_TABLE.md"
 # Moemon Maker's published pack (the repository's MoemonMaker/: the user's edits and music) as MoemonMakerPack/, so a
 # fresh install has it without a download (src/platform/updater.c MakerPackWorker keeps it current between releases).

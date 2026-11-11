@@ -159,6 +159,11 @@ static const char *MusicDir(void)
     return env && env[0] ? env : Updater_ExeFile("music");
 }
 
+const char *MP_Kaisong_MusicDir(void)   // (ORRE's gains live there too: src/orre/orre_audio.c)
+{
+    return MusicDir();
+}
+
 #define KAI_NO_GAIN 0x7FFF
 
 // dB, -12 to +12, to a factor in 256ths without libm: 10^(dB/20) by steps of a tenth of a dB
