@@ -357,6 +357,30 @@ bool8 U3D_IsUnovaGroup(u8 mapGroup)
     return mapGroup >= MAP_GROUP(MAP_UNOVA_BLACKCITY) && mapGroup < MAP_GROUP(MAP_UNOVA_BLACKCITY) + UNOVA_GROUPS;
 }
 
+// The map of Black's ZONE holding its tile (X, Z: the zone's matrix's tiles), and the tile on that map; FALSE none
+bool8 U3D_MapOfZoneTile(u16 zone, u16 x, u16 z, u8 *group, u8 *num, s16 *mapX, s16 *mapY)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sUnovaMaps); i++)
+    {
+        u32 cx = x / 32, cz = z / 32;
+        if (sUnovaMaps[i].zone != zone)
+            continue;
+        if (sUnovaMaps[i].bw > 1 || sUnovaMaps[i].bh > 1 || cx >= sUnovaMaps[i].cx)
+        {
+            if (cx < sUnovaMaps[i].cx || cz < sUnovaMaps[i].cz || cx >= sUnovaMaps[i].cx + sUnovaMaps[i].bw
+             || cz >= sUnovaMaps[i].cz + sUnovaMaps[i].bh)
+                continue;
+        }
+        *group = sUnovaMaps[i].map >> 8;
+        *num = sUnovaMaps[i].map & 0xFF;
+        *mapX = x - 32 * sUnovaMaps[i].cx;
+        *mapY = z - 32 * sUnovaMaps[i].cz;
+        return TRUE;
+    }
+    return FALSE;
+}
+
 s32 U3D_MapIndex(void)
 {
     return gSaveBlock1Ptr ? MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum) : -1;

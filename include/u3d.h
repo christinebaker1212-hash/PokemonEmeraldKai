@@ -24,7 +24,8 @@ float U3D_TestGround(s32 mapX, s32 mapY, float near);         // tests: the grou
 void U3D_ShopPicture(bool8 on, s16 dx, s16 dy);               // shop.c's BUY screen: the field's last picture behind
 u8 U3D_Season(void);                                          // Black's season now: 0 spring .. 3 winter
 u16 U3D_CurrentZone(void);                                    // the Black zone the player is on (0xFFFF: not UNOVA)
-s32 U3D_MapIndex(void);                                       // the player's map's row of u3d_maps.h (-1: not UNOVA)
+s32 U3D_MapIndex(void);
+bool8 U3D_MapOfZoneTile(u16 zone, u16 x, u16 z, u8 *group, u8 *num, s16 *mapX, s16 *mapY);                                       // the player's map's row of u3d_maps.h (-1: not UNOVA)
 u8 U3D_MapCellX(s32 index);                                   // ... where it lies on its Black matrix (blocks)
 u8 U3D_MapCellZ(s32 index);
 // UNOVA's scripts (src/unova/u3d_vm.c: Black's own bytecode)

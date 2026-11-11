@@ -8,13 +8,14 @@
 #include <string.h>
 #include "global.h"
 #include "string_util.h"
+#include "mp.h"
 #include "u3d.h"
 #include "constants/characters.h"
 
 const char *Updater_ExeFile(const char *name);
 int uncompress(unsigned char *dest, unsigned long *destLen, const unsigned char *source, unsigned long sourceLen);
 
-u8 gUnovaStrVar[UNOVA_STR_VARS][64];
+u8 gUnovaStrVar[UNOVA_STR_VARS][64] = {[0 ... UNOVA_STR_VARS - 1] = {EOS}};   // (empty: an EOS, never the 0 that is a space)
 
 static u8 *sText;
 static unsigned long sTextSize;
@@ -89,12 +90,25 @@ const u8 *U3D_Text(u16 bank, u16 msg)
 // StringExpandPlaceholders: ID (after PLACEHOLDER_BEGIN), SRC just past it; writes at *DEST, returns where SRC goes on
 const u8 *U3D_ExpandPlaceholder(u8 id, const u8 *src, u8 **dest)
 {
+    static u8 depth;   // (a word slot holding a text that names that slot again stops here, never loops)
     if (id == PLACEHOLDER_ID_UNOVA_TEXT)
     {
         u16 bank = (src[0] & 0x7F) << 7 | (src[1] & 0x7F), msg = (src[2] & 0x7F) << 7 | (src[3] & 0x7F);
-        *dest = StringExpandPlaceholders(*dest, U3D_Text(bank, msg));
+        if (depth < 4)
+        {
+            depth++;
+            *dest = StringExpandPlaceholders(*dest, U3D_Text(bank, msg));
+            depth--;
+        }
         return src + 4;
     }
-    *dest = StringExpandPlaceholders(*dest, gUnovaStrVar[(id - PLACEHOLDER_ID_UNOVA_VAR) % UNOVA_STR_VARS]);
+    if (depth < 4)
+    {
+        depth++;
+        *dest = StringExpandPlaceholders(*dest, gUnovaStrVar[(id - PLACEHOLDER_ID_UNOVA_VAR) % UNOVA_STR_VARS]);
+        depth--;
+    }
+    else
+        MPNet_Log("u3d text: word slot %u names itself", id - PLACEHOLDER_ID_UNOVA_VAR);
     return src;
 }

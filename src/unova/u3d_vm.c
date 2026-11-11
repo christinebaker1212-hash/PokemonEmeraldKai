@@ -43,6 +43,11 @@
 #include "script_pokemon_util.h"
 #include "random.h"
 #include "money.h"
+#include "mp_region.h"
+#include "rtc.h"
+#include "save.h"
+#include "field_screen_effect.h"
+#include "constants/flags.h"
 #include "item.h"
 #include "battle_setup.h"
 #include "constants/items.h"
@@ -487,13 +492,12 @@ static u32 AddMoves(u8 *out, u32 n, u16 code)
 
 static void StartMoves(u16 obj, const u8 *list, const u8 *end)
 {
+    // (a buffer per object event, never shared: the game's movement task keeps pointing into a finished list, so a
+    // list written over another's buffer would walk that person too)
     u8 slot, localId = LocalId(obj);
     u32 n = 0;
     u8 *out;
-    for (slot = 0; slot < OBJECT_EVENTS_COUNT; slot++)
-        if (sMoving[slot] == localId || sMoving[slot] == 0)
-            break;
-    if (slot == OBJECT_EVENTS_COUNT || ObjectOf(obj) == NULL)
+    if (TryGetObjectEventIdByLocalIdAndMap(localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &slot))
         return;
     out = sMoves[slot];
     while (list + 4 <= end)
@@ -527,7 +531,7 @@ static bool8 MovesDone(void)
 }
 
 // ------------------------------------------------------------------------------------------------ the VM
-enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP };
+enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE };
 
 // ---- Black's songs: its sound archive's sequence numbers as the game's song slots (tools/kaisong/unova_songs.py);
 // a pushed song comes back when the one played over it ends (a fanfare: Black's PushAndPlayBgm, StartWaitBgmThenPop)
@@ -561,8 +565,13 @@ static u8 sScreen;
 static u16 sScreenVar;
 #define STACK 48
 
+struct Frame { const u8 *code; u32 size, pc; u16 bank; u8 sp; };   // (a script that called another: CallScript)
+#define FRAMES 6
+
 struct Thread
 {
+    struct Frame frames[FRAMES];
+    u8 depth;
     const u8 *code;
     u32 size, pc;
     u32 stack[STACK];
@@ -728,6 +737,12 @@ static void Step(struct Thread *t)
             break;
         case U3C_Halt:
         case U3C_End:
+            if (t->depth)   // (a called script's end: back to the one that called it)
+            {
+                struct Frame *f = &t->frames[--t->depth];
+                t->code = f->code, t->size = f->size, t->pc = f->pc, t->bank = f->bank, t->sp = f->sp;
+                break;
+            }
             Finish(t);
             return;
         case U3C_TimeWait:
@@ -829,29 +844,26 @@ static void Step(struct Thread *t)
         case U3C_LoadWorkConst: *WorkPtr(a[0]) = a[1]; break;
         case U3C_LoadWorkValue: *WorkPtr(a[0]) = V(1); break;
         case U3C_CopyWork: *WorkPtr(a[0]) = *WorkPtr(a[1]); break;
-        case U3C_ChangeScript:
-        case U3C_CallScript:
+        case U3C_ChangeScript:   // (another script in this one's place)
+        case U3C_CallScript:     // (another script run to its end, then this one goes on: SCRIPT_WORK_WaitChildScript)
         {
             const u8 *code;
             u32 size, pc;
             u16 bank;
+            if (!Locate(t->zone, a[0], &code, &size, &pc, &bank))
+            {
+                MPNet_Log("u3d vm: no script %u", a[0]);
+                break;
+            }
             if (op == U3C_CallScript)
             {
-                // (the script runs to its end and this one goes on: kept on the stack as a return into this file)
-                MPNet_Log("u3d vm: CallScript %u (run in place)", a[0]);
+                struct Frame *f;
+                if (t->depth >= FRAMES)
+                    break;
+                f = &t->frames[t->depth++];
+                f->code = t->code, f->size = t->size, f->pc = t->pc, f->bank = t->bank, f->sp = t->sp;
             }
-            if (Locate(t->zone, a[0], &code, &size, &pc, &bank))
-            {
-                if (op == U3C_CallScript && code == t->code)
-                {
-                    Push(t, t->pc);   // (the same file: a call)
-                    t->pc = pc;
-                }
-                else if (op == U3C_ChangeScript || code != t->code)
-                {
-                    t->code = code, t->size = size, t->pc = pc, t->bank = bank, t->sp = 0;
-                }
-            }
+            t->code = code, t->size = size, t->pc = pc, t->bank = bank;
             break;
         }
         case U3C_CallFieldCommand:   // (the people stop: Emerald's lock did it)
@@ -904,6 +916,9 @@ static void Step(struct Thread *t)
             break;
         case U3C_BufferSpeciesName:
             GetSpeciesName(Slot(a[0]), Species(V(1)));
+            break;
+        case U3C_BufferShortEntryName:   // (bank 0x37: Black's bag pockets)
+            StringCopy(Slot(a[0]), U3D_Text(55, V(1)));
             break;
         case U3C_BufferNumber:
             ConvertIntToDecimalStringN(Slot(a[0]), V(1), STR_CONV_MODE_LEFT_ALIGN, 6);
@@ -978,6 +993,9 @@ static void Step(struct Thread *t)
         case U3C_HasItem:
             *WorkPtr(a[2]) = Item(V(0)) != ITEM_NONE && CheckBagHasItem(Item(V(0)), V(1));
             break;
+        case U3C_GetItemPocket:   // (Black's pocket: 0 ITEMS, 1 MEDICINE, 2 TMs & HMs, 3 BERRIES, 4 KEY ITEMS)
+            *WorkPtr(a[1]) = V(0) < ARRAY_COUNT(sUnovaItemPockets) ? sUnovaItemPockets[V(0)] : 0;
+            break;
         case U3C_GetItemQuantity:
             *WorkPtr(a[1]) = Item(V(0)) == ITEM_NONE ? 0 : CountTotalItemQuantityInBag(Item(V(0)));
             break;
@@ -988,6 +1006,81 @@ static void Step(struct Thread *t)
                 CopyItemName(Item(V(1)), Slot(a[0]));
             else
                 StringCopy(Slot(a[0]), U3D_Text(54, V(1)));   // (Black's own name for an item the game lacks)
+            break;
+        // ---- warps (Black's zone and tile: the map holding it, u3d.c)
+        case U3C_WarpToPosition:
+        case U3C_WarpToPositionPlain:
+        case U3C_WarpToPositionFixedExit:
+        {
+            u8 group, num;
+            s16 x, y;
+            if (U3D_MapOfZoneTile(a[0], a[1], a[2], &group, &num, &x, &y))
+            {
+                MPNet_Log("u3d vm: warp to zone %u (%d.%d at %d,%d)", a[0], group, num, x, y);
+                sHolding = FALSE;   // (the map's load starts the field's scripts afresh)
+                t->alive = FALSE;
+                SetWarpDestination(group, num, WARP_ID_NONE, x, y);
+                DoWarp();
+                return;
+            }
+            MPNet_Log("u3d vm: no map for zone %u at %u,%u", a[0], a[1], a[2]);
+            break;
+        }
+        case U3C_WORK_CmdEndScriptWhiteOutA:   // (a loss the story doesn't go on from)
+            sHolding = FALSE;
+            t->alive = FALSE;
+            SetMainCallback2(CB2_WhiteOut);
+            return;
+        // ---- the game's state
+        case U3C_WORK_CmdGetRomVersion:
+            *WorkPtr(a[0]) = 21;   // (Black: PM_VERSION_ID; White's branches aren't taken)
+            break;
+        case U3C_WORK_CmdCheckBadge:
+            *WorkPtr(a[0]) = V(1) < 8 && FlagGet(FLAG_UNOVA_BADGE01 + V(1));
+            break;
+        case U3C_WORK_CmdSetBadge:
+            if (V(0) < 8)
+                FlagSet(FLAG_UNOVA_BADGE01 + V(0));
+            break;
+        case U3C_WORK_CmdGetBadgeCount:
+        {
+            u32 i, n = 0;
+            for (i = 0; i < 8; i++)
+                n += FlagGet(FLAG_UNOVA_BADGE01 + i);
+            *WorkPtr(a[0]) = n;
+            break;
+        }
+        case U3C_WORK_CmdGetZukanNationalFlag:
+            *WorkPtr(a[0]) = FlagGet(FLAG_SYS_NATIONAL_DEX);
+            break;
+        case U3C_WORK_CmdSetZukanObtained:   // (JUNIPER's POKéDEX: the user's decision, the NATIONAL DEX)
+            FlagSet(FLAG_SYS_POKEDEX_GET);
+            EnableNationalPokedex();
+            break;
+        case U3C_WORK_CmdGetWeek:
+            RtcCalcLocalTime();
+            *WorkPtr(a[0]) = gLocalTime.days % 7;
+            break;
+        case U3C_PROC_CheckMonHpNotFullOrEgg:   // (result 1: full HP or an EGG)
+        {
+            u16 i = V(1);
+            *WorkPtr(a[0]) = i < PARTY_SIZE && GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES)
+                          && (GetMonData(&gPlayerParty[i], MON_DATA_HP) == GetMonData(&gPlayerParty[i], MON_DATA_MAX_HP)
+                              || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG));
+            break;
+        }
+        case U3C_StartWaitSeStopped:
+            t->wait = W_SE;
+            break;
+        case U3C_FadeInField:
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
+            t->wait = W_FADE;
+            break;
+        case U3C_ReportSave:   // (result: 1 saved)
+            *WorkPtr(a[0]) = TrySavingData(SAVE_NORMAL) == SAVE_STATUS_OK;
+            break;
+        case U3C_POKEMON_FLD_StartSelectEvent:   // (nickname the POKéMON? Black asks; the game's own naming comes later)
+            *WorkPtr(a[0]) = 0;
             break;
         case U3C_WORK_CmdEnableNationalDex:
             EnableNationalPokedex();
@@ -1131,6 +1224,10 @@ static void Wait(struct Thread *t)
         if (!gPaletteFade.active)
             t->wait = W_NONE;
         break;
+    case W_SE:
+        if (!IsSEPlaying())
+            t->wait = W_NONE;
+        break;
     case W_SONG_THEN_POP:
         if (IsBGMStopped() || t->waitFrames == 0 || --t->waitFrames == 0)
         {
@@ -1176,6 +1273,7 @@ static bool8 Run(u16 scriptId, u16 target, bool8 hold)
     if (t->alive || zone == 0xFFFF || !Locate(zone, scriptId, &t->code, &t->size, &t->pc, &t->bank))
         return FALSE;
     t->sp = 0, t->cmp = 0, t->wait = W_NONE, t->alive = TRUE, t->zone = zone, t->target = target, t->result = NULL;
+    t->depth = 0;
     memset(sLocal, 0, sizeof(sLocal));
     sLocal[0x11] = target;   // (0x8011: the person talked to, SCRIPT_WORK_SetTargetObj)
     memset(sMoving, 0, sizeof(sMoving));

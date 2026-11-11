@@ -2,7 +2,8 @@
 """UNOVA's items (docs/UNOVA_DECISIONS.md: an item the game already has is the game's; a new one is Black's): Black's
 item numbers as the game's, matched by name (Black's item names, bank 54, against src/data/items.h: letters only, case
 and spaces aside; the game's names are cut to 13 letters, so a Black name may match a game name it starts with), into
-src/data/unova_items.h (ITEM_NONE where the game has no such item yet).
+src/data/unova_items.h (ITEM_NONE where the game has no such item yet), with each item's pocket in Black's bag
+(a/0/2/4's records: 0 ITEMS, 1 MEDICINE, 2 TMs & HMs, 3 BERRIES, 4 KEY ITEMS; the names are bank 55).
 
     python3 -I tools/unova/gen_items.py          (writes the table, prints Black's items the game lacks)
 """
@@ -17,6 +18,15 @@ import narc  # noqa: E402
 import text as tx  # noqa: E402
 
 BANK_ITEM_NAMES = 54
+ITEM_DATA_ARC = 'a/0/2/4'
+
+
+def pockets(count):
+    """Black's pocket of each item (ItemRecord: u16 at 8, bits 7-10)"""
+    import struct
+    recs = narc.arc(ITEM_DATA_ARC)
+    return [(struct.unpack_from('<H', recs[i], 8)[0] >> 7) & 0xF if i < len(recs) and len(recs[i]) >= 10 else 0
+            for i in range(count)]
 # names the two games write differently (Black's -> the game's)
 ALIASES = {'THUNDERSTONE': 'THUNDERSTONE', 'PARLYZHEAL': 'PARALYZEHEAL', 'XSPDEF': 'XSPDEF', 'XSPECIAL': 'XSPECIAL',
            'XDEFEND': 'XDEFEND', 'XDEFENSE': 'XDEFEND', 'BICYCLE': 'BICYCLE',
@@ -61,6 +71,11 @@ def main():
                 '// game yet)\nstatic const u16 sUnovaItems[] = {\n')
         for i, r in enumerate(rows):
             f.write('    %s,   // %d %s\n' % (r, i, names[i].replace('*/', '')))
+        f.write('};\n')
+        f.write('static const u8 sUnovaItemPockets[] = {   // (Black\'s bag pocket of each)\n')
+        ps = pockets(len(rows))
+        for k in range(0, len(ps), 32):
+            f.write('    %s,\n' % ', '.join(str(x) for x in ps[k:k + 32]))
         f.write('};\n')
     print('%d of Black\'s items, %d not in the game yet' % (len(names), len(missing)))
     for i, n in missing:
