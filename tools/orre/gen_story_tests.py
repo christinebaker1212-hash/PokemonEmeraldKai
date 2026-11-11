@@ -135,6 +135,12 @@ def walk_chain(out, steps, maps, ent):
         # (and a scene the way there set off has the flag already: nothing left to wait for)
         block = block[:1] + ['skipif notmap:45,%d %d' % (mi, len(block)), 'skipif orreflag:%d %d' % (flag, len(block) - 1)] + block[1:]
         lines += ['skipif orreflag:%d %d' % (flag, len(block))] + block
+        if flag == 993:
+            # (PHENAC: the sack examined as a player does it, as the chain above)
+            sack = ['', 'walkto 48 106 600', 'mp face up', 'wait 10',
+                    'pressuntillog A 9000 orre npcs: RUI follows', 'pressuntil A field 9000', 'wait 30']
+            sack[0] = 'skipif orreflag:4094 %d' % (len(sack) - 1)
+            lines += sack
     lines += ['mp orreget %d' % steps[-1][0], 'quit']
     open(os.path.join(d, 'a.txt'), 'w').write('\n'.join(lines) + '\n')
     open(os.path.join(d, 'conf'), 'w').write(

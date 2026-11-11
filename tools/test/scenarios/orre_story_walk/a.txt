@@ -315,6 +315,13 @@ wait 60
 pressuntillog A 2500 orre: flag 993 = 1
 pressuntil A field 9000
 wait 30
+skipif orreflag:4094 6
+walkto 48 106 600
+mp face up
+wait 10
+pressuntillog A 9000 orre npcs: RUI follows
+pressuntil A field 9000
+wait 30
 skipif orreflag:994 23
 goto 45,2 48 107 12000
 skipif notmap:45,2 21
@@ -1033,7 +1040,7 @@ skipif orreflag:2486 7
 goto 45,4 16 18 12000
 skipif notmap:45,4 5
 skipif orreflag:2486 4
-approach person 2 3000
+approach person 1 3000
 pressuntillog A 2500 orre: flag 2486 = 1
 pressuntil A field 9000
 wait 30
@@ -5589,7 +5596,7 @@ pressuntillog A 2500 orre: flag 1093 = 1
 pressuntil A field 9000
 wait 30
 skipif orreflag:1094 23
-goto 45,44 75 78 12000
+goto 45,44 74 63 12000
 skipif notmap:45,44 21
 skipif orreflag:1094 20
 pressuntil A field 3000
@@ -6604,7 +6611,7 @@ pressuntillog A 2500 orre: flag 2638 = 1
 pressuntil A field 9000
 wait 30
 skipif orreflag:2639 23
-goto 45,62 21 47 12000
+goto 45,62 15 33 12000
 skipif notmap:45,62 21
 skipif orreflag:2639 20
 pressuntil A field 3000
@@ -6772,7 +6779,7 @@ pressuntillog A 2500 orre: flag 2642 = 1
 pressuntil A field 9000
 wait 30
 skipif orreflag:2643 23
-goto 45,62 21 47 12000
+goto 45,62 15 33 12000
 skipif notmap:45,62 21
 skipif orreflag:2643 20
 pressuntil A field 3000
@@ -8189,7 +8196,7 @@ skipif orreflag:2873 7
 goto 45,116 7 47 12000
 skipif notmap:45,116 5
 skipif orreflag:2873 4
-approach person 8 3000
+approach person 10 3000
 pressuntillog A 2500 orre: flag 2873 = 1
 pressuntil A field 9000
 wait 30
@@ -8197,7 +8204,7 @@ skipif orreflag:2816 7
 goto 45,116 7 47 12000
 skipif notmap:45,116 5
 skipif orreflag:2816 4
-approach person 8 3000
+approach person 10 3000
 pressuntillog A 2500 orre: flag 2816 = 1
 pressuntil A field 9000
 wait 30
@@ -8205,7 +8212,7 @@ skipif orreflag:2817 7
 goto 45,116 7 47 12000
 skipif notmap:45,116 5
 skipif orreflag:2817 4
-approach person 8 3000
+approach person 10 3000
 pressuntillog A 2500 orre: flag 2817 = 1
 pressuntil A field 9000
 wait 30
@@ -9795,6 +9802,13 @@ wait 60
 pressuntillog A 2500 orre: flag 993 = 1
 pressuntil A field 9000
 wait 30
+skipif orreflag:4094 6
+walkto 48 106 600
+mp face up
+wait 10
+pressuntillog A 9000 orre npcs: RUI follows
+pressuntil A field 9000
+wait 30
 skipif orreflag:994 23
 goto 45,2 48 107 12000
 skipif notmap:45,2 21
@@ -10513,7 +10527,7 @@ skipif orreflag:2486 7
 goto 45,4 16 18 12000
 skipif notmap:45,4 5
 skipif orreflag:2486 4
-approach person 2 3000
+approach person 1 3000
 pressuntillog A 2500 orre: flag 2486 = 1
 pressuntil A field 9000
 wait 30
@@ -15069,7 +15083,7 @@ pressuntillog A 2500 orre: flag 1093 = 1
 pressuntil A field 9000
 wait 30
 skipif orreflag:1094 23
-goto 45,44 75 78 12000
+goto 45,44 74 63 12000
 skipif notmap:45,44 21
 skipif orreflag:1094 20
 pressuntil A field 3000
@@ -16084,7 +16098,7 @@ pressuntillog A 2500 orre: flag 2638 = 1
 pressuntil A field 9000
 wait 30
 skipif orreflag:2639 23
-goto 45,62 21 47 12000
+goto 45,62 15 33 12000
 skipif notmap:45,62 21
 skipif orreflag:2639 20
 pressuntil A field 3000
@@ -16252,7 +16266,7 @@ pressuntillog A 2500 orre: flag 2642 = 1
 pressuntil A field 9000
 wait 30
 skipif orreflag:2643 23
-goto 45,62 21 47 12000
+goto 45,62 15 33 12000
 skipif notmap:45,62 21
 skipif orreflag:2643 20
 pressuntil A field 3000
@@ -17669,7 +17683,7 @@ skipif orreflag:2873 7
 goto 45,116 7 47 12000
 skipif notmap:45,116 5
 skipif orreflag:2873 4
-approach person 8 3000
+approach person 10 3000
 pressuntillog A 2500 orre: flag 2873 = 1
 pressuntil A field 9000
 wait 30
@@ -17677,7 +17691,7 @@ skipif orreflag:2816 7
 goto 45,116 7 47 12000
 skipif notmap:45,116 5
 skipif orreflag:2816 4
-approach person 8 3000
+approach person 10 3000
 pressuntillog A 2500 orre: flag 2816 = 1
 pressuntil A field 9000
 wait 30
@@ -17685,7 +17699,7 @@ skipif orreflag:2817 7
 goto 45,116 7 47 12000
 skipif notmap:45,116 5
 skipif orreflag:2817 4
-approach person 8 3000
+approach person 10 3000
 pressuntillog A 2500 orre: flag 2817 = 1
 pressuntil A field 9000
 wait 30
@@ -19275,6 +19289,13 @@ wait 60
 pressuntillog A 2500 orre: flag 993 = 1
 pressuntil A field 9000
 wait 30
+skipif orreflag:4094 6
+walkto 48 106 600
+mp face up
+wait 10
+pressuntillog A 9000 orre npcs: RUI follows
+pressuntil A field 9000
+wait 30
 skipif orreflag:994 23
 goto 45,2 48 107 12000
 skipif notmap:45,2 21
@@ -19993,7 +20014,7 @@ skipif orreflag:2486 7
 goto 45,4 16 18 12000
 skipif notmap:45,4 5
 skipif orreflag:2486 4
-approach person 2 3000
+approach person 1 3000
 pressuntillog A 2500 orre: flag 2486 = 1
 pressuntil A field 9000
 wait 30
@@ -24549,7 +24570,7 @@ pressuntillog A 2500 orre: flag 1093 = 1
 pressuntil A field 9000
 wait 30
 skipif orreflag:1094 23
-goto 45,44 75 78 12000
+goto 45,44 74 63 12000
 skipif notmap:45,44 21
 skipif orreflag:1094 20
 pressuntil A field 3000
@@ -25564,7 +25585,7 @@ pressuntillog A 2500 orre: flag 2638 = 1
 pressuntil A field 9000
 wait 30
 skipif orreflag:2639 23
-goto 45,62 21 47 12000
+goto 45,62 15 33 12000
 skipif notmap:45,62 21
 skipif orreflag:2639 20
 pressuntil A field 3000
@@ -25732,7 +25753,7 @@ pressuntillog A 2500 orre: flag 2642 = 1
 pressuntil A field 9000
 wait 30
 skipif orreflag:2643 23
-goto 45,62 21 47 12000
+goto 45,62 15 33 12000
 skipif notmap:45,62 21
 skipif orreflag:2643 20
 pressuntil A field 3000
@@ -27149,7 +27170,7 @@ skipif orreflag:2873 7
 goto 45,116 7 47 12000
 skipif notmap:45,116 5
 skipif orreflag:2873 4
-approach person 8 3000
+approach person 10 3000
 pressuntillog A 2500 orre: flag 2873 = 1
 pressuntil A field 9000
 wait 30
@@ -27157,7 +27178,7 @@ skipif orreflag:2816 7
 goto 45,116 7 47 12000
 skipif notmap:45,116 5
 skipif orreflag:2816 4
-approach person 8 3000
+approach person 10 3000
 pressuntillog A 2500 orre: flag 2816 = 1
 pressuntil A field 9000
 wait 30
@@ -27165,7 +27186,7 @@ skipif orreflag:2817 7
 goto 45,116 7 47 12000
 skipif notmap:45,116 5
 skipif orreflag:2817 4
-approach person 8 3000
+approach person 10 3000
 pressuntillog A 2500 orre: flag 2817 = 1
 pressuntil A field 9000
 wait 30
