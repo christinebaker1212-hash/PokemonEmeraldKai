@@ -12,6 +12,8 @@
 // A Pokémon met in JOHTO: its MET_GAME (MON_DATA_MET_LOCATION holds the low byte of the JOHTO map section)
 #define MP_METGAME_JOHTO 14
 #define MP_METGAME_SINNOH 13   // (... and SINNOH's: the low byte of its map section past MAPSEC_SINNOH_FIRST)
+#define MP_METGAME_ORRE 9      // (... and ORRE's: n past MAPSEC_ORRE_FIRST; 9 is no game's number)
+u16 MP_Region_MetMapSec(u8 metGame, u8 metLocation);   // the whole map section a POKeMON was met at
 
 // Johto / Kanto flags and vars past the save block's (tools/quetzal_port/import.py places them, up to 0x2EB7; their
 // trainers' "beaten" flags 0x3000-0x3319, QZ_TRAINER_FLAGS_START); SINNOH's from 0x3320 (REGION_SINNOH_FLAGS: its 8

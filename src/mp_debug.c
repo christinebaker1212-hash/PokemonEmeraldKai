@@ -3968,6 +3968,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] sprite %s: no such look\n", arg);
     }
+    else if (strcmp(cmd, "nearesttown") == 0)   // nearesttown MAPSEC - where GO TO FRIEND would land for a friend there
+    {
+        u16 MP_RegionMap_NearestVisitedTown(u16 mapsec);
+        unsigned sec = (unsigned)strtoul(arg, NULL, 0);
+        printf("[test] nearesttown %u: %u\n", sec, (unsigned)MP_RegionMap_NearestVisitedTown(sec));
+    }
     else if (strcmp(cmd, "saveconfig") == 0)   // saveconfig - write the co-op settings (moemon_coop.ini, the save file's own)
     {
         char name[64];

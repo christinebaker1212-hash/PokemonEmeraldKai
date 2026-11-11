@@ -59,3 +59,4 @@ AUTO_GEN_TARGETS += $(DATA_SRC_SUBDIR)/mp_map_group_sizes.h
 $(DATA_SRC_SUBDIR)/mp_map_group_sizes.h: tools/phone/gen_map_sizes.py data/maps/map_groups.json
 	python3 tools/phone/gen_map_sizes.py $@ data/maps/map_groups.json
 $(C_BUILDDIR)/mp/mp_phone_dev.o: c_dep += $(DATA_SRC_SUBDIR)/mp_map_group_sizes.h
+$(C_BUILDDIR)/mp/mp_friends.o: c_dep += $(DATA_SRC_SUBDIR)/mp_map_group_sizes.h

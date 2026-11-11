@@ -2497,6 +2497,26 @@ void MP_Region_TagMet(struct BoxPokemon *b)
         SetBoxMonData(b, MON_DATA_MET_GAME, &game);
         SetBoxMonData(b, MON_DATA_MET_LOCATION, &loc);
     }
+    if (gMapHeader.regionMapSectionId >= MAPSEC_ORRE_FIRST && gMapHeader.regionMapSectionId < MAPSEC_ORRE_END)
+    {
+        u8 loc = gMapHeader.regionMapSectionId - MAPSEC_ORRE_FIRST;   // (ORRE's: its map sections are past one byte too)
+        game = MP_METGAME_ORRE;
+        SetBoxMonData(b, MON_DATA_MET_GAME, &game);
+        SetBoxMonData(b, MON_DATA_MET_LOCATION, &loc);
+    }
+}
+
+// The map section a POKeMON was met at, whole: JOHTO's, SINNOH's and ORRE's are past one byte, so MET_LOCATION holds
+// how far past their first and MET_GAME says whose (MP_Region_TagMet). MAPSEC_NONE: none known
+u16 MP_Region_MetMapSec(u8 metGame, u8 metLocation)
+{
+    if (metGame == MP_METGAME_JOHTO && metLocation < MAPSEC_JOHTO_END - MAPSEC_JOHTO_FIRST)
+        return MAPSEC_JOHTO_FIRST + metLocation;
+    if (metGame == MP_METGAME_SINNOH && metLocation < MAPSEC_SINNOH_END - MAPSEC_SINNOH_FIRST)
+        return MAPSEC_SINNOH_FIRST + metLocation;
+    if (metGame == MP_METGAME_ORRE && metLocation < MAPSEC_ORRE_END - MAPSEC_ORRE_FIRST)
+        return MAPSEC_ORRE_FIRST + metLocation;
+    return metLocation < MAPSEC_NONE ? metLocation : MAPSEC_NONE;
 }
 
 // A map of another region was entered without the boat (ROUTE 22's gate, the debug warp): the same change of PC

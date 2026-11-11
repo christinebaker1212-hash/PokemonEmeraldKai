@@ -8,6 +8,7 @@
 #include "s3d.h"
 #include "constants/map_groups.h"
 #include "mp.h"
+#include "fieldmap.h"
 #include "../data/sinnoh_signs.h"
 
 #define FIRST_SLOT 96
@@ -31,6 +32,9 @@ void Sinnoh_Signs_MapLoaded(float ox, float oz)
         h = S3D_TestGround(s->x * 16 + 8, s->y * 16 + 8, 0);
         if (h != h)   // (no ground there: NaN)
             h = 0;
+        // (Platinum's signs are people: they stand in the way. Here they're read as signs where they stand, so the tile
+        // is made solid; the player walked through them: the user, 2026-11-11)
+        MapGridSetMetatileImpassabilityAt(s->x + MAP_OFFSET, s->y + MAP_OFFSET, TRUE);
         if (S3D_DynProp(FIRST_SLOT + sShown, s->model, x, h, z, 0))   // (Platinum draws them unturned, whatever their facing)
             sShown++;
     }

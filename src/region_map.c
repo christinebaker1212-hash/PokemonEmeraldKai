@@ -2530,12 +2530,51 @@ static bool8 MpTownVisited(mapsec_u16_t town)
 }
 
 // Returns MAPSEC_NONE when no visited town is near (unknown place, nothing visited)
+// Moemon Co-op: GO TO FRIEND in KANTO, JOHTO or SINNOH: the friend's town when FLY could go there, else the nearest
+// town FLY could go to on the same town map (FLY's own list and rules: QzFlyDestOf / QzCanFlyTo). It knew only HOENN's
+// towns, so a friend in any other region could never be gone to (the user, 2026-11-11)
+static u8 QzRegionOfPage(u8 page)
+{
+    return page == QZMAP_JOHTO ? 1 : (page >= QZMAP_KANTO && page < QZMAP_KANTO_END) ? 2 : IS_SINNOH_PAGE(page) ? 3 : 0;
+}
+
+static mapsec_u16_t QzNearestVisitedTown(mapsec_u16_t mapsec)
+{
+    const struct QzFlyDest *d = QzFlyDestOf(mapsec);
+    const struct QzMapPlace *p = QzPlace(mapsec, QZMAP_COUNT), *q;
+    mapsec_u16_t best = MAPSEC_NONE;
+    s32 bestDist = 0x7FFFFFFF;
+    u32 i, n = ARRAY_COUNT(sQzFlyDests) + ARRAY_COUNT(sSinnohFlyDests);
+    if (d != NULL && QzCanFlyTo(d))
+        return mapsec;
+    if (p == NULL)
+        return MAPSEC_NONE;
+    for (i = 0; i < n; i++)
+    {
+        const struct QzFlyDest *t = i < ARRAY_COUNT(sQzFlyDests) ? &sQzFlyDests[i] : &sSinnohFlyDests[i - ARRAY_COUNT(sQzFlyDests)];
+        s32 dx, dy, dist;
+        if (!QzCanFlyTo(t) || (q = QzPlace(t->mapsec, QZMAP_COUNT)) == NULL || QzRegionOfPage(q->map) != QzRegionOfPage(p->map))
+            continue;
+        dx = q->x * 2 + q->width - (p->x * 2 + p->width);
+        dy = q->y * 2 + q->height - (p->y * 2 + p->height);
+        dist = dx * dx + dy * dy + (q->map != p->map ? 0x100000 : 0);   // (another page of the region: only when needed)
+        if (dist < bestDist)
+        {
+            bestDist = dist;
+            best = t->mapsec;
+        }
+    }
+    return best;
+}
+
 mapsec_u16_t MP_RegionMap_NearestVisitedTown(mapsec_u16_t mapsec)
 {
     mapsec_u16_t town, best = MAPSEC_NONE;
     s32 bestDist = 0x7FFFFFFF, cx, cy;
     const struct RegionMapLocation *loc;
 
+    if (QzPlace(mapsec, QZMAP_COUNT) != NULL || QzFlyDestOf(mapsec) != NULL)
+        return QzNearestVisitedTown(mapsec);
     if (mapsec >= MAPSEC_NONE)
         return MAPSEC_NONE;
     if (MpTownVisited(mapsec))
@@ -2561,6 +2600,11 @@ mapsec_u16_t MP_RegionMap_NearestVisitedTown(mapsec_u16_t mapsec)
 
 void MP_RegionMap_SetFlyWarp(mapsec_u16_t town)
 {
+    if (QzFlyDestOf(town) != NULL)
+    {
+        SetWarpDestinationToHealLocation(QzFlyDestOf(town)->heal);   // (KANTO's, JOHTO's, SINNOH's: as FLY lands)
+        return;
+    }
     switch (town)
     {
     case MAPSEC_LITTLEROOT_TOWN:

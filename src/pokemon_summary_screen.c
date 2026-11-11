@@ -4299,14 +4299,10 @@ static void BufferMonTrainerMemo(void)
         u8 *metLocationString = Alloc(32);
         GetMetLevelString(metLevelString);
 
-        if (sum->metGame == MP_METGAME_JOHTO && sum->metLocation < MAPSEC_JOHTO_END - MAPSEC_JOHTO_FIRST)
+        if (MP_Region_MetMapSec(sum->metGame, sum->metLocation) > MAPSEC_NONE)
         {
-            GetMapName(metLocationString, MAPSEC_JOHTO_FIRST + sum->metLocation, 0);   // Moemon Kai: met in JOHTO
-            DynamicPlaceholderTextUtil_SetPlaceholderPtr(4, metLocationString);
-        }
-        else if (sum->metGame == MP_METGAME_SINNOH && sum->metLocation < MAPSEC_SINNOH_END - MAPSEC_SINNOH_FIRST)
-        {
-            GetMapName(metLocationString, MAPSEC_SINNOH_FIRST + sum->metLocation, 0);   // Moemon Kai: met in SINNOH
+            // Moemon Kai: met in JOHTO, SINNOH or ORRE (their map sections are past one byte: mp_region.c)
+            GetMapName(metLocationString, MP_Region_MetMapSec(sum->metGame, sum->metLocation), 0);
             DynamicPlaceholderTextUtil_SetPlaceholderPtr(4, metLocationString);
         }
         else if (sum->metLocation < MAPSEC_NONE)

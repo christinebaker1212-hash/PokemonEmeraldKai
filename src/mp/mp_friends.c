@@ -11,6 +11,8 @@
 #include "field_screen_effect.h"
 #include "overworld.h"
 #include "region_map.h"
+#include "mp_region.h"
+#include "o3d.h"
 #include "sound.h"
 #include "string_util.h"
 #include "constants/flags.h"
@@ -23,8 +25,10 @@ mapsec_u16_t MP_RegionMap_NearestVisitedTown(mapsec_u16_t mapsec);
 void MP_RegionMap_SetFlyWarp(mapsec_u16_t town);
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
-// Maps per group (include/constants/map_groups.h), to check map numbers from the network
-static const u8 sMapGroupSizes[MAP_GROUPS_COUNT] = {57, 5, 5, 6, 7, 8, 9, 7, 7, 14, 8, 17, 10, 23, 13, 15, 15, 2, 2, 2, 3, 1, 1, 1, 108, 61, 89, 2, 1, 13, 1, 1, 3, 1};
+// Maps per group, to check map numbers from the network: generated from data/maps/map_groups.json (sMapGroupSizes,
+// tools/phone/gen_map_sizes.py). It was written by hand and knew only HOENN's 34 groups: every friend in KANTO, JOHTO,
+// SINNOH or ORRE was "?" and GO TO FRIEND couldn't go (the user, 2026-11-11)
+#include "../data/mp_map_group_sizes.h"
 
 bool8 MP_IsValidMap(u8 mapGroup, u8 mapNum)
 {
@@ -93,9 +97,19 @@ static bool8 CanFlyFromHere(void)
     return TRUE;
 }
 
-// The town GO TO FRIEND would take you to (MAPSEC_NONE: nowhere)
+// The town GO TO FRIEND would take you to (MAPSEC_NONE: nowhere). Never into or out of ORRE (the user, 2026-11-11:
+// it's reached by boat only), and only a friend in the region you're in (another region is a voyage away)
 mapsec_u16_t MP_Friends_Destination(u8 id)
 {
+    const struct MpState *st;
+    if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].hasState)
+        return MAPSEC_NONE;
+    st = &gMpPlayers[id].state;
+    if (!MP_IsValidMap(st->mapGroup, st->mapNum) || O3D_IsOrreGroup(st->mapGroup)
+     || O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
+        return MAPSEC_NONE;
+    if (!MP_Region_IsSharedMap(st->mapGroup, st->mapNum) && MP_Region_OfGroup(st->mapGroup) != MP_Region_Current())
+        return MAPSEC_NONE;
     return MP_RegionMap_NearestVisitedTown(MP_Friends_Mapsec(id));
 }
 

@@ -18,6 +18,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "mp_life.h"
 #include "daycare.h"
 #include "event_data.h"
@@ -1041,7 +1042,7 @@ static void RememberHowWeMet(struct MpLifeRec *rec, struct BoxPokemon *box)
     m = MP_Life_Remember(rec, MEM_MET, 200, TIER_PART, MP_Life_LocalTrainerKey(), how);
     if (m)
     {
-        m->place = metLoc < MAPSEC_NONE ? metLoc : MAPSEC_NONE;
+        m->place = MP_Region_MetMapSec(GetBoxMonData(box, MON_DATA_MET_GAME), metLoc);   // (JOHTO's, SINNOH's, ORRE's too)
         MP_Life_Reveal(rec, 28 + (m - rec->mem));
     }
     if (metLoc < MAPSEC_NONE && (p = MP_Life_Place(rec, metLoc, TRUE)) != NULL)

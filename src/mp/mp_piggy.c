@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "global.h"
 #include "mp.h"
+#include "o3d.h"
 #include "event_object_lock.h"
 #include "event_object_movement.h"
 #include "field_message_box.h"
@@ -116,6 +117,13 @@ void MP_Piggy_FieldInput(u16 newKeys)
 static void WarpToCarrier(void)
 {
     struct MpState *st = &gMpPlayers[sCarrier].state;
+    if (O3D_IsOrreGroup(st->mapGroup) != O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
+    {
+        // (never carried into or out of ORRE: it's reached by boat only, the user 2026-11-11)
+        StopRiding(TRUE);
+        MP_Events_QueueToast("Can't follow them there!");
+        return;
+    }
     sWarping = TRUE;
     SetWarpDestination(st->mapGroup, st->mapNum, WARP_ID_NONE, st->x - MAP_OFFSET, st->y - MAP_OFFSET);
     LockPlayerFieldControls();

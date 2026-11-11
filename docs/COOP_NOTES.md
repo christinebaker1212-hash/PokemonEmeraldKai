@@ -4198,6 +4198,23 @@ follow_behind, follow_ground.
   settings with it (it follows File 1's again); File 1's stay, every file's starting point.
 - tools/test/save_slots.sh steps 6 and 7.
 
+## Places outside HOENN: friends' places, GO TO FRIEND, where a POKéMON was met; SINNOH's signs solid (2026-11-11)
+- mp_friends.c MP_IsValidMap checked a friend's map against a hand-written count of maps per group that knew HOENN's
+  first 34 groups only (and was out of date for two of those): every friend in KANTO, JOHTO, SINNOH or ORRE showed "?"
+  and GO TO FRIEND refused. It reads the generated src/data/mp_map_group_sizes.h now (tools/phone/gen_map_sizes.py).
+- GO TO FRIEND outside HOENN (region_map.c QzNearestVisitedTown): the friend's town when FLY could go there, else the
+  nearest one FLY could go to on the same town map (FLY's own sQzFlyDests / sSinnohFlyDests and QzCanFlyTo), landing as
+  FLY does (its heal location). Never into or out of ORRE, and only a friend in the region you're in
+  (MP_Friends_Destination); the piggyback ride hops off instead of following its carrier into or out of ORRE
+  (mp_piggy.c WarpToCarrier). `mp nearesttown MAPSEC` prints where it would land.
+- Where a POKéMON was met: MET_LOCATION is one byte, and JOHTO's, SINNOH's and ORRE's map sections are past 255, so
+  MET_GAME says whose and MET_LOCATION holds how far past the region's first (mp_region.c MP_Region_TagMet; ORRE's
+  MP_METGAME_ORRE 9 is new: ORRE's catches and snags read as other places before). MP_Region_MetMapSec gives the whole
+  section: the summary, the GARDEN's first-meeting memory and the phone link (whose place-name table now goes up to
+  ORRE's) use it.
+- SINNOH's signposts, signboards and mailboxes (Platinum's people, read here as signs where they stand) make their
+  tile solid as they're placed (s3d_signs.c: MapGridSetMetatileImpassabilityAt); the player walked through them.
+
 ## NEW in the BINDER, centered booster packs (1.63.6)
 - src/tcg/tcg_new.c ("<save>.cardnew", per game a byte per card: the copies the BINDER has shown; owner = the POKeMON
   collection's, a new game on the save starts again): a card owned more times than that shows NEW in its game's

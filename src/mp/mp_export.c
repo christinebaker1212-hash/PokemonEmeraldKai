@@ -16,6 +16,7 @@
 #include "global.h"
 #include "constants/daycare.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "battle_main.h"
 #include "data.h"
 #include "decompress.h"
@@ -760,13 +761,14 @@ static void ExportData(const char *dir)
     for (i = 0; i < NUM_NATURES; i++)
         fprintf(f, "%s[%d,%d,%d,%d,%d]", i ? "," : "", gNatureStatTable[i][0], gNatureStatTable[i][1],
                 gNatureStatTable[i][2], gNatureStatTable[i][3], gNatureStatTable[i][4]);
-    // the places a POKeMON was met (MON_DATA_MET_LOCATION: a map section)
+    // the places a POKeMON was met (a whole map section: the phone link decodes JOHTO's, SINNOH's and ORRE's)
     fprintf(f, "],\"mapsecs\":[");
-    for (i = 0; i < MAPSEC_SINNOH_END; i++)
+    for (i = 0; i < MAPSEC_ORRE_END; i++)
     {
         u8 name[40];
         name[0] = EOS;
-        if (i < MAPSEC_NONE || (i >= MAPSEC_JOHTO_FIRST && i < MAPSEC_JOHTO_END) || i >= MAPSEC_SINNOH_FIRST)
+        if (i < MAPSEC_NONE || (i >= MAPSEC_JOHTO_FIRST && i < MAPSEC_JOHTO_END)
+         || (i >= MAPSEC_SINNOH_FIRST && i < MAPSEC_SINNOH_END) || i >= MAPSEC_ORRE_FIRST)
             GetMapNameGeneric(name, i);
         fprintf(f, "%s", i ? "," : "");
         Json(f, name, sizeof(name) - 1);

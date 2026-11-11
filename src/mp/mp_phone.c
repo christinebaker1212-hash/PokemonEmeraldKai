@@ -431,7 +431,8 @@ void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
                (unsigned)GetBoxMonData(box, MON_DATA_PP2), (unsigned)GetBoxMonData(box, MON_DATA_PP3),
                (unsigned)GetBoxMonData(box, MON_DATA_PP4));
         BufAdd(b, ",\"ppb\":%u", (unsigned)GetBoxMonData(box, MON_DATA_PP_BONUSES));
-        BufAdd(b, ",\"met\":[%u,%u]", (unsigned)GetBoxMonData(box, MON_DATA_MET_LOCATION),
+        BufAdd(b, ",\"met\":[%u,%u]", (unsigned)MP_Region_MetMapSec(GetBoxMonData(box, MON_DATA_MET_GAME),
+                                                                    GetBoxMonData(box, MON_DATA_MET_LOCATION)),
                (unsigned)GetBoxMonData(box, MON_DATA_MET_LEVEL));
         GetBoxMonData(box, MON_DATA_OT_NAME, ot);
         ot[PLAYER_NAME_LENGTH] = EOS;
