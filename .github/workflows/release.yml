@@ -95,17 +95,6 @@ jobs:
         if: steps.ver.outputs.skip != 'true'
         run: make linux -j"$(nproc)"
 
-      # Custom music (music/*.kaisong) and Colosseum's songs all equally loud (tools/kaisong/normalize.py): every song
-      # measured in the game just built, every run (the user, 2026-11-11: never skipped because it was measured before),
-      # rendered as fast as it runs in a game per core, one gain a file (dynamics untouched) into
-      # music/kaisong_gains.txt and orre_gains.txt, which package.sh ships. About 45 s; it stops itself at 55 s (--limit)
-      # so it never adds more than a minute: what it didn't reach keeps its last measurement from the committed cache.
-      # If it can't run, the committed gains ship as they are.
-      - name: Music loudness
-        if: steps.ver.outputs.skip != 'true'
-        run: |
-          python3 tools/kaisong/normalize.py --bin ./pokeemerald64 || echo "normalize.py failed, the committed gains ship"
-
       - name: Windows build
         if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         run: tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"
@@ -160,6 +149,18 @@ jobs:
           else
             echo "::warning::no ORRE_DISC_URL secret: this release has no ORRE packs"
           fi
+
+      # Custom music (music/*.kaisong) and Colosseum's songs all equally loud (tools/kaisong/normalize.py): every song
+      # measured in the game just built, every run (the user, 2026-11-11: never skipped because it was measured before),
+      # rendered as fast as it runs in a game per core, one gain a file (dynamics untouched) into
+      # music/kaisong_gains.txt and orre_gains.txt, which package.sh ships. About 45 s; it stops itself at 55 s (--limit)
+      # so it never adds more than a minute: what it didn't reach keeps its last measurement from the committed cache.
+      # After ORRE's packs, so Colosseum's songs are measured
+      # here too. If it can't run, the committed gains ship as they are.
+      - name: Music loudness
+        if: steps.ver.outputs.skip != 'true'
+        run: |
+          python3 tools/kaisong/normalize.py --bin ./pokeemerald64 || echo "normalize.py failed, the committed gains ship"
 
       # The Moemon Companion app (android/, docs/PHONE_LINK.md): the game's art exported by the Linux build, then the
       # APK signed with the release key from the repository's secrets (MOEMON_APK_KEYSTORE_B64: the keystore in base64,
