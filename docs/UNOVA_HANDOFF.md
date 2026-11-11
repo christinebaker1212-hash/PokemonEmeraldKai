@@ -27,7 +27,13 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   ("u3d vm: NNN not played yet") and read past: their arguments are known. Done: control flow, works / flags,
   messages (balloon, info, plain, board: Black's own words), yes / no, word slots (player, species, numbers,
   party), people (movement lists as the game's movements, turning, placing, removing), fades, POKéMON (heal, give,
-  party count, cries), money. Next: trainer battles, BGM / SE, camera moves, items, the naming screen, warps.
+  party count, cries), money, trainer battles (src/unova/u3d_battle.c: Black's trainers, a/0/9/2 and a/0/9/3 in the
+  scripts pack v2, fought through TRAINER_UNOVA_A / _B; names bank 190, classes 191; Black's script decides what a
+  loss means). The opening plays to BIANCA's battle and after it (`mp warp 52,14,5,6`, mash A; then
+  `mp warp 52,14,5,7`, DOWN, A: the gift box). Next for the first area: BGM / SE (the music from Black's SDAT), the
+  camera moves (0x13F-0x147), the room's mess (build-model nodes 0x127-0x12A), 0x101, the whiteout command 0x8C,
+  items (Black's numbers to the game's by name), the naming screen (0x105), warps (0xC2), Black's gift box screen
+  in place of Kai's starter table, the trainers' battle pictures, then the region choice and the boat.
 - Black's people: unova/black_gfx.pak (tools/unova/build_gfx.py, about two minutes: 759 of the 799 object codes),
   src/unova/u3d_gfx.c; graphics ids OBJ_EVENT_GFX_UNOVA_FIRST (0x600) + Black's object code (an object event keeps
   12 bits of its graphics id: 0x1000+ would wrap), palettes by tag 0xD000 / 0xD400 + code (event_object_movement.c
