@@ -15,7 +15,7 @@
   "connections": null,
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x6B9",
       "x": 80,
       "y": 79,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 60,
       "y": 83,
       "elevation": 3,
@@ -54,7 +54,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 36,
       "y": 101,
       "elevation": 3,
@@ -67,7 +67,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 48,
       "y": 101,
       "elevation": 3,
@@ -80,7 +80,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 90,
       "y": 92,
       "elevation": 3,
@@ -93,7 +93,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 36,
       "y": 38,
       "elevation": 3,
@@ -106,7 +106,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 72,
       "y": 35,
       "elevation": 3,
@@ -119,7 +119,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 111,
       "y": 35,
       "elevation": 3,
@@ -132,7 +132,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 42,
       "y": 50,
       "elevation": 3,
@@ -145,7 +145,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 48,
       "y": 47,
       "elevation": 3,
@@ -158,7 +158,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 66,
       "y": 65,
       "elevation": 3,
@@ -171,7 +171,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 78,
       "y": 56,
       "elevation": 3,
@@ -184,7 +184,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 117,
       "y": 50,
       "elevation": 3,
@@ -197,7 +197,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 123,
       "y": 47,
       "elevation": 3,
@@ -210,7 +210,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 54,
       "y": 89,
       "elevation": 3,
@@ -223,7 +223,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 81,
       "y": 68,
       "elevation": 3,
@@ -236,7 +236,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 99,
       "y": 86,
       "elevation": 3,
@@ -249,7 +249,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 96,
       "y": 80,
       "elevation": 3,
@@ -262,7 +262,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 102,
       "y": 74,
       "elevation": 3,
@@ -275,7 +275,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 36,
       "y": 122,
       "elevation": 3,
@@ -288,7 +288,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 60,
       "y": 107,
       "elevation": 3,
@@ -301,7 +301,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 78,
       "y": 92,
       "elevation": 3,
@@ -314,7 +314,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 99,
       "y": 116,
       "elevation": 3,
@@ -327,7 +327,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 84,
       "y": 122,
       "elevation": 3,
@@ -340,7 +340,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 120,
       "y": 122,
       "elevation": 3,
@@ -353,7 +353,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 114,
       "y": 104,
       "elevation": 3,
@@ -366,7 +366,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 84,
       "y": 44,
       "elevation": 3,

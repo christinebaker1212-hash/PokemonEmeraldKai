@@ -289,6 +289,9 @@
 // Moemon Kai: ORRE's people (src/orre/orre_people.c): OBJ_EVENT_GFX_ORRE_FIRST + a person (their LOOK > CREATE recipe)
 #define OBJ_EVENT_GFX_ORRE_FIRST 0xF00
 #define OBJ_EVENT_GFX_ORRE_COUNT 0x100
+// Moemon Kai: UNOVA's people (src/unova/u3d_gfx.c): OBJ_EVENT_GFX_UNOVA_FIRST + Black's object code
+#define OBJ_EVENT_GFX_UNOVA_FIRST 0x600    // (object events keep 12 bits of a graphics id: to 0xFFF; 0x600-0x91F free)
+#define OBJ_EVENT_GFX_UNOVA_COUNT 0x320
 #define OBJ_EVENT_GFX_MON_SLOWPOKE (OBJ_EVENT_GFX_MON_FIRST + 79)
 #define OBJ_EVENT_GFX_MON_MACHOP   (OBJ_EVENT_GFX_MON_FIRST + 66)
 #define OBJ_EVENT_GFX_MON_LAPRAS   (OBJ_EVENT_GFX_MON_FIRST + 131)

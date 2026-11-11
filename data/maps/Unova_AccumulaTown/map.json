@@ -31,7 +31,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x614",
       "x": 30,
       "y": 2,
       "elevation": 3,
@@ -44,7 +44,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x615",
       "x": 5,
       "y": 26,
       "elevation": 3,
@@ -57,7 +57,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x61D",
       "x": 11,
       "y": 8,
       "elevation": 3,
@@ -70,7 +70,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x61C",
       "x": 15,
       "y": 8,
       "elevation": 3,
@@ -83,7 +83,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x662",
       "x": 2,
       "y": 7,
       "elevation": 3,
@@ -96,7 +96,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x663",
       "x": 2,
       "y": 9,
       "elevation": 3,
@@ -109,7 +109,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x669",
       "x": 28,
       "y": 18,
       "elevation": 3,
@@ -122,7 +122,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x607",
       "x": 13,
       "y": 14,
       "elevation": 3,
@@ -135,7 +135,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x664",
       "x": 10,
       "y": 16,
       "elevation": 3,
@@ -148,7 +148,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x618",
       "x": 24,
       "y": 20,
       "elevation": 3,
@@ -161,7 +161,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x607",
       "x": 17,
       "y": 18,
       "elevation": 3,
@@ -174,7 +174,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x667",
       "x": 17,
       "y": 14,
       "elevation": 3,
@@ -187,7 +187,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x612",
       "x": 24,
       "y": 18,
       "elevation": 3,
@@ -200,7 +200,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x662",
       "x": 12,
       "y": 16,
       "elevation": 3,
@@ -213,7 +213,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x663",
       "x": 12,
       "y": 13,
       "elevation": 3,
@@ -226,7 +226,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x663",
       "x": 12,
       "y": 19,
       "elevation": 3,
@@ -239,7 +239,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x662",
       "x": 12,
       "y": 15,
       "elevation": 3,
@@ -252,7 +252,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x662",
       "x": 12,
       "y": 14,
       "elevation": 3,
@@ -265,7 +265,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x662",
       "x": 12,
       "y": 17,
       "elevation": 3,
@@ -278,7 +278,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x662",
       "x": 12,
       "y": 18,
       "elevation": 3,
@@ -291,7 +291,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x614",
       "x": 17,
       "y": 15,
       "elevation": 3,
@@ -304,7 +304,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x61A",
       "x": 18,
       "y": 16,
       "elevation": 3,
@@ -317,7 +317,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x613",
       "x": 18,
       "y": 15,
       "elevation": 3,
@@ -330,7 +330,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x62D",
       "x": 19,
       "y": 16,
       "elevation": 3,
@@ -343,7 +343,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x619",
       "x": 18,
       "y": 13,
       "elevation": 3,
@@ -356,7 +356,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x61B",
       "x": 19,
       "y": 14,
       "elevation": 3,
@@ -369,7 +369,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x612",
       "x": 17,
       "y": 16,
       "elevation": 3,
@@ -382,7 +382,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x618",
       "x": 17,
       "y": 17,
       "elevation": 3,
@@ -395,7 +395,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x60E",
       "x": 30,
       "y": 21,
       "elevation": 3,
@@ -408,7 +408,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 0,
       "y": 0,
       "elevation": 3,
@@ -421,7 +421,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 0,
       "y": 0,
       "elevation": 3,
@@ -434,7 +434,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x6CC",
       "x": 13,
       "y": 20,
       "elevation": 3,
@@ -447,7 +447,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x6CC",
       "x": 13,
       "y": 12,
       "elevation": 3,

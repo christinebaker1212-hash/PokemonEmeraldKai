@@ -36,7 +36,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x60C",
       "x": 0,
       "y": 0,
       "elevation": 3,
@@ -49,7 +49,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x611",
       "x": 10,
       "y": 15,
       "elevation": 3,
@@ -62,7 +62,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x614",
       "x": 8,
       "y": 20,
       "elevation": 3,
@@ -75,7 +75,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x61E",
       "x": 0,
       "y": 0,
       "elevation": 3,
@@ -88,7 +88,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x641",
       "x": 0,
       "y": 0,
       "elevation": 3,
@@ -101,7 +101,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x654",
       "x": 6,
       "y": 5,
       "elevation": 3,
@@ -114,7 +114,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x609",
       "x": 0,
       "y": 0,
       "elevation": 3,
@@ -127,7 +127,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "0x66E",
       "x": 0,
       "y": 0,
       "elevation": 3,

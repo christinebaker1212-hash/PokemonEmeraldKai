@@ -41,6 +41,7 @@
 #include "u3d_maps.h"
 #include "script_pokemon_util.h"
 #include "random.h"
+#include "money.h"
 #include "constants/items.h"
 #include "constants/species.h"
 void MP_StarterTable_Open(const u16 *species, MainCallback back);
@@ -143,7 +144,7 @@ static u16 ZoneField(u16 zone, u32 field)
 // (zonedata.c: works 0x4000 on, then the flags 1-0xB5F; 0x4000+ flags are temporary, 0x8000+ works the script's own)
 #define WORKS 0x140
 #define FLAG_BYTES 0x16C
-static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; } sWork;
+static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began; } sWork;   // (began: Black's new-game script has run)
 static u8 sTempFlags[8];
 static u16 sLocal[0x40];
 
@@ -861,6 +862,9 @@ static void Step(struct Thread *t)
         case U3C_WORK_CmdGetRandom:
             *WorkPtr(a[0]) = V(1) ? Random() % V(1) : 0;
             break;
+        case U3C_PROC_AddMoney:
+            AddMoney(&gSaveBlock1Ptr->money, V(0));
+            break;
         case U3C_WORK_CmdEnableNationalDex:
             EnableNationalPokedex();
             break;
@@ -1115,13 +1119,20 @@ static void RunNow(u16 scriptId)
     t->alive = FALSE;
 }
 
-// ON_TRANSITION of every UNOVA map (data/scripts/unova.inc): the zone-change and field-init scripts
+// ON_TRANSITION of every UNOVA map (data/scripts/unova.inc): the zone-change and field-init scripts; the first time,
+// Black's new-game script before them (SCRIPT_SYS_RunInitScript: script 9600, the flags that hide what isn't there yet)
+#define SCRIPT_NEW_GAME 9600
 void U3D_VmMapLoad(void)
 {
     u16 zone = CurrentZone();
     static u16 sLastZone = 0xFFFF;
     if (zone == 0xFFFF || !Ready())
         return;
+    if (!sWork.began)
+    {
+        sWork.began = TRUE;
+        RunNow(SCRIPT_NEW_GAME);
+    }
     if (zone != sLastZone)
         RunNow(InitScript(zone, 2));
     sLastZone = zone;

@@ -630,6 +630,8 @@ static void LoadConfig(void)
         else if (strcmp(key, "follower_sprites") == 0)
             gMpConfig.followerSprites = strcmp(val, "pmd") == 0 ? MP_FOLLOW_SPRITES_PMD
                                       : strcmp(val, "original") == 0 ? MP_FOLLOW_SPRITES_ORIGINAL : MP_FOLLOW_SPRITES_DEFAULT;
+        else if (strcmp(key, "unova_sprites") == 0)
+            gMpConfig.unovaSprites = strcmp(val, "gen5") == 0 ? MP_UNOVA_SPRITES_GEN5 : MP_UNOVA_SPRITES_MIXED;
         else if (strcmp(key, "sinnoh_sprites") == 0)
             gMpConfig.sinnohSprites = strcmp(val, "gen3") == 0 ? MP_SINNOH_SPRITES_GEN3
                                     : strcmp(val, "mixed") == 0 ? MP_SINNOH_SPRITES_MIXED : MP_SINNOH_SPRITES_GEN4;
@@ -773,6 +775,7 @@ void MP_SaveConfig(void)
         "; OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: gen4 (Platinum's sprites), mixed (Gen 3 ones where there's the same one,\n"
         "; Platinum's made smaller elsewhere) or gen3 (Gen 3 ones for everyone)\n"
         "sinnoh_sprites = %s\n"
+        "unova_sprites = %s\n"
         "; OPTIONS > DISPLAY > SPRITE SCALING: followers and the GARDEN's POKEMON smaller than a trainer drawn toward their\n"
         "; POKEDEX height (1) or as their sprites are (0), and how far toward it (5-100, in steps of 5)\n"
         "scale_followers = %d\nscale_garden = %d\nscale_followers_percent = %d\nscale_garden_percent = %d\n"
@@ -809,6 +812,7 @@ void MP_SaveConfig(void)
             : gMpConfig.streamer == MP_STREAMER_ORIGINAL ? "original" : "off",
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
         gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_GEN3 ? "gen3" : gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_MIXED ? "mixed" : "gen4",
+        gMpConfig.unovaSprites == MP_UNOVA_SPRITES_GEN5 ? "gen5" : "mixed",
         gMpConfig.scaleFollowers, gMpConfig.scaleGarden, gMpConfig.scaleFollowersPct, gMpConfig.scaleGardenPct,
         gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
                                                                                                          : "printed_art",

@@ -2053,6 +2053,10 @@ static u8 MonObjectLoadPalette(u16 tag);
 #define SINNOH_PAL_TAG_SMALL 0xB900   // ... its smaller copy's (MIXED)
 #define SINNOH_PAL_TAG_CHAR 0xBA00    // ... a character look standing in for it (SinnohGen3Info)
 #define ORRE_PAL_TAG 0xBC00   // Moemon Kai: + an ORRE person (OrreObjectInfo)
+#define UNOVA_PAL_TAG 0xD000         // Moemon Kai: + Black's object code (UnovaObjectInfo)
+#define UNOVA_PAL_TAG_SMALL 0xD400   // ... its smaller copy (MIXED)
+static u8 UnovaObjectLoadPalette(u16 tag);
+static const struct ObjectEventGraphicsInfo *UnovaObjectInfo(u16 code);
 static u8 OrreObjectLoadPalette(u16 tag);
 static const struct ObjectEventGraphicsInfo *OrreObjectInfo(u16 person);
 
@@ -2069,6 +2073,8 @@ u8 QzLoadObjectPalette(u16 tag)
         return MonObjectLoadPalette(tag);   // (a POKéMON on the map: its follower palette)
     if (tag >= ORRE_PAL_TAG && tag < ORRE_PAL_TAG + OBJ_EVENT_GFX_ORRE_COUNT)
         return OrreObjectLoadPalette(tag);   // (ORRE's people: their LOOK's palette)
+    if (tag >= UNOVA_PAL_TAG && tag < UNOVA_PAL_TAG_SMALL + OBJ_EVENT_GFX_UNOVA_COUNT)
+        return UnovaObjectLoadPalette(tag);   // (UNOVA's people: Black's palettes, u3d_gfx.c)
     for (i = 0; sKaiObjectEventPalettes[i].tag != TAG_NONE; i++)   // (the game's own: kai_objects.h)
         if (sKaiObjectEventPalettes[i].tag == tag)
         {
@@ -2277,6 +2283,73 @@ static u8 OrreObjectLoadPalette(u16 tag)
     return slot == 0xFF ? 0 : slot;
 }
 
+// Moemon Kai: UNOVA's people as Black draws them (unova/black_gfx.pak, src/unova/u3d_gfx.c): graphics info built
+// once per object code (the game's nine-frame walking order, Black's palette by tag); OPTIONS > DISPLAY > SPRITE SCALING
+// > UNOVA PEOPLE: MIXED (the default) Black's shrunk to about Gen 3's size, else Black's own; without the pack a
+// stand-in. Its own lines, never SINNOH's or ORRE's.
+static bool8 UnovaSmall(void)
+{
+    return gMpConfig.unovaSprites != MP_UNOVA_SPRITES_GEN5;
+}
+
+static const struct ObjectEventGraphicsInfo *UnovaObjectInfo(u16 code)
+{
+    static struct ObjectEventGraphicsInfo sInfo[2][OBJ_EVENT_GFX_UNOVA_COUNT];
+    static struct SpriteFrameImage sImages[2][OBJ_EVENT_GFX_UNOVA_COUNT][9];
+    static bool8 sBuilt[2][OBJ_EVENT_GFX_UNOVA_COUNT];
+    u8 kind, f, frames, small = UnovaSmall();
+    const u16 *pal;
+    const u8 *tiles;
+    u32 bytes;
+    struct ObjectEventGraphicsInfo *info = &sInfo[small][code];
+    if (!U3D_Gfx_Sprite(code, small, &kind, &pal, &tiles))
+        return GetObjectEventGraphicsInfo(OBJ_EVENT_GFX_YOUNGSTER);
+    if (sBuilt[small][code])
+        return info;
+    frames = kind == 0 ? 9 : 1;
+    bytes = kind == 4 ? 2048 : 512;
+    for (f = 0; f < frames; f++)
+    {
+        sImages[small][code][f].data = tiles + f * bytes;
+        sImages[small][code][f].size = bytes;
+    }
+    info->tileTag = TAG_NONE;
+    info->paletteTag = (small ? UNOVA_PAL_TAG_SMALL : UNOVA_PAL_TAG) + code;
+    info->reflectionPaletteTag = OBJ_EVENT_PAL_TAG_NONE;
+    info->size = bytes;
+    info->width = kind == 4 ? 64 : 32;
+    info->height = kind == 4 ? 64 : 32;
+    info->paletteSlot = PALSLOT_QZ;
+    info->shadowSize = kind == 4 ? SHADOW_SIZE_L : SHADOW_SIZE_M;
+    info->inanimate = kind != 0;
+    info->disableReflectionPaletteLoad = TRUE;
+    info->tracks = kind == 0 ? TRACKS_FOOT : TRACKS_NONE;
+    info->oam = kind == 4 ? &gObjectEventBaseOam_64x64 : &gObjectEventBaseOam_32x32;
+    info->subspriteTables = kind == 4 ? sOamTables_64x64 : sOamTables_32x32;
+    info->anims = kind == 0 ? sAnimTable_Standard : sAnimTable_Inanimate;
+    info->images = sImages[small][code];
+    info->affineAnims = gDummySpriteAffineAnimTable;
+    sBuilt[small][code] = TRUE;
+    return info;
+}
+
+static u8 UnovaObjectLoadPalette(u16 tag)
+{
+    u8 kind, slot;
+    const u16 *pal;
+    const u8 *tiles;
+    struct SpritePalette sp;
+    u16 code = tag >= UNOVA_PAL_TAG_SMALL ? tag - UNOVA_PAL_TAG_SMALL : tag - UNOVA_PAL_TAG;
+    if (!U3D_Gfx_Sprite(code, tag >= UNOVA_PAL_TAG_SMALL, &kind, &pal, &tiles))
+        return 0;
+    sp.data = pal;
+    sp.tag = tag;
+    slot = LoadSpritePalette(&sp);
+    if (slot != 0xFF)
+        UpdateSpritePaletteWithWeather(slot);
+    return slot == 0xFF ? 0 : slot;
+}
+
 // OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: GEN 4 Platinum's; MIXED a true Gen 3 equivalent, else Platinum's smaller; GEN 3
 // the Gen 3 equivalent, else the closest Gen 3 sprite (the stand-in, also shown without the pack)
 static const struct ObjectEventGraphicsInfo *SinnohGraphicsInfo(u16 i)
@@ -2328,6 +2401,8 @@ const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u16 graphicsId)
 
     if (graphicsId >= OBJ_EVENT_GFX_ORRE_FIRST && graphicsId < OBJ_EVENT_GFX_ORRE_FIRST + OBJ_EVENT_GFX_ORRE_COUNT)
         return OrreObjectInfo(graphicsId - OBJ_EVENT_GFX_ORRE_FIRST);   // Moemon Kai: ORRE's people (orre_people.c)
+    if (graphicsId >= OBJ_EVENT_GFX_UNOVA_FIRST && graphicsId < OBJ_EVENT_GFX_UNOVA_FIRST + OBJ_EVENT_GFX_UNOVA_COUNT)
+        return UnovaObjectInfo(graphicsId - OBJ_EVENT_GFX_UNOVA_FIRST);   // Moemon Kai: UNOVA's people (u3d_gfx.c)
 
     if (graphicsId >= OBJ_EVENT_GFX_QZ_FIRST)   // Moemon Kai: Johto / Kanto sprites (16-bit ids)
         return QzObjectEventGraphicsInfo(graphicsId);

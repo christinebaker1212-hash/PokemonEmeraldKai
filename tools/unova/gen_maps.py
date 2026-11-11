@@ -54,8 +54,10 @@ def ascii_name(name):
 
 # Black's people as the map's object events, in its event data's order (UNOVA's VM finds a person's local id by its
 # place: u3d_vm.c LocalId), their signs and trigger spots; Black's own scripts run for them (data/scripts/unova.inc).
-# Their pictures are stand-ins until Black's own come (the sprites pack)
+# Their pictures are Black's own, by object code (OBJ_EVENT_GFX_UNOVA_FIRST + code: src/unova/u3d_gfx.c draws them from
+# the sprites pack, tools/unova/build_gfx.py; a stand-in without it)
 STAND_IN = 'OBJ_EVENT_GFX_YOUNGSTER'
+UNOVA_GFX, UNOVA_GFX_COUNT = 0x600, 0x320   # (include/constants/event_objects.h OBJ_EVENT_GFX_UNOVA_FIRST)
 BLACK_DIR = {0: 'UP', 1: 'DOWN', 2: 'LEFT', 3: 'RIGHT'}
 
 
@@ -68,7 +70,7 @@ def events_of(m, w, h):
         inside = 0 <= x < w and 0 <= z < h and not p['rail']
         face = BLACK_DIR.get(p['dir'], 'DOWN')
         wander = p['move'] == 3 and (p['limit'][0] or p['limit'][1])
-        objs.append({'graphics_id': STAND_IN, 'x': x if inside else 0, 'y': z if inside else 0, 'elevation': 3,
+        objs.append({'graphics_id': '0x%X' % (UNOVA_GFX + p['gfx']) if p['gfx'] < UNOVA_GFX_COUNT else STAND_IN, 'x': x if inside else 0, 'y': z if inside else 0, 'elevation': 3,
                      'movement_type': 'MOVEMENT_TYPE_WANDER_AROUND' if wander else 'MOVEMENT_TYPE_FACE_' + face,
                      'movement_range_x': max(0, p['limit'][0]) if wander else 0,
                      'movement_range_y': max(0, p['limit'][1]) if wander else 0,

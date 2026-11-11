@@ -62,6 +62,7 @@ enum
     OPT_CREATURES,
     OPT_FOLLOWSPRITES,
     OPT_SINNOHSPRITES,  // Moemon Kai: SINNOH PEOPLE: GEN 3 / MIXED / GEN 4 (event_object_movement.c)
+    OPT_UNOVASPRITES,   // Moemon Kai: UNOVA PEOPLE: MIXED / GEN 5 (event_object_movement.c UnovaObjectInfo)
     OPT_BIKEMUSIC,
     OPT_SURFMUSIC,
     OPT_LEVELSCALE,
@@ -210,6 +211,7 @@ static const u8 sText_FadePlatinum[] = _("PLATINUM");
 static const u8 sText_FadeSlow[] = _("SLOW");
 static const u8 sText_Followers[] = _("FOLLOWERS");
 static const u8 sText_SinnohPeople[] = _("SINNOH PEOPLE");
+static const u8 sText_UnovaPeople[] = _("UNOVA PEOPLE");
 static const u8 sText_Mixed[] = _("MIXED");
 static const u8 sText_FollowDefault[] = _("DEFAULT");
 static const u8 sText_FollowPmd[] = _("PMD");
@@ -411,6 +413,7 @@ static void BuildRows(void)
     if (sSpritePage)
     {
         AddRow(OPT_SINNOHSPRITES, 0);   // Moemon Kai: SINNOH's people (event_object_movement.c)
+        AddRow(OPT_UNOVASPRITES, 0);    // Moemon Kai: UNOVA's
         AddRow(OPT_SS_FOLLOW, 0);
         AddRow(OPT_SS_GARDEN, 0);
         AddRow(OPT_SS_BACK, 0);
@@ -623,6 +626,9 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_SINNOHSPRITES:   // (shown GEN 3, MIXED, GEN 4; stored the other way round: GEN 4 is 0)
         names[0] = sText_Gen3, names[1] = sText_Mixed, names[2] = sText_Gen4;
         return 3;
+    case OPT_UNOVASPRITES:
+        names[0] = sText_Mixed, names[1] = sText_Gen5;
+        return 2;
     case OPT_SC_ON: case OPT_SC_CAPS:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
@@ -827,6 +833,7 @@ static u8 Current(u8 row)
     case OPT_STREAMER:    return gMpConfig.streamer % MP_STREAMER_COUNT;
     case OPT_FOLLOWSPRITES: return gMpConfig.followerSprites % MP_FOLLOW_SPRITES_COUNT;
     case OPT_SINNOHSPRITES: return 2 - gMpConfig.sinnohSprites % 3;
+    case OPT_UNOVASPRITES: return gMpConfig.unovaSprites % 2;
     case OPT_SHADOWS:     return !gMpConfig.noShadows;
     case OPT_BGMUTE:      return gMpConfig.muteInBackground != 0;
     case OPT_ANNOUNCER:   return gMpConfig.noAnnouncer ? 0 : gMpConfig.announcerJp ? 2 : 1;
@@ -942,6 +949,10 @@ static void Change(u8 row, int dir)
         gMpConfig.sinnohSprites = 2 - Wrap(2 - gMpConfig.sinnohSprites % 3 + dir, 3);
         MPNet_Log("sinnoh sprites: %d", gMpConfig.sinnohSprites);
         break;
+    case OPT_UNOVASPRITES:
+        gMpConfig.unovaSprites = Wrap(gMpConfig.unovaSprites % 2 + dir, 2);
+        MPNet_Log("unova sprites: %d", gMpConfig.unovaSprites);
+        break;
     case OPT_SURFMUSIC:   gMpConfig.surfMusic = !gMpConfig.surfMusic; break;
     case OPT_LEVELSCALE:  break;   // A opens its page
     case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8:
@@ -1052,6 +1063,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_BIKEMUSIC:   return sText_BikeMusic;
     case OPT_FOLLOWSPRITES: return sText_Followers;
     case OPT_SINNOHSPRITES: return sText_SinnohPeople;
+    case OPT_UNOVASPRITES: return sText_UnovaPeople;
     case OPT_SHADOWS: return sText_Shadows;
     case OPT_BGMUTE:  return sText_BgMute;
     case OPT_ANNOUNCER: return sText_Announcer;
@@ -1235,8 +1247,11 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_GEN3 ? "GEN 3 SPRITES FOR EVERYONE"
                  : gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_MIXED ? "GEN 3 MATCHES, OTHERS PLATINUM'S SHRUNK"
                  : "PLATINUM'S OWN SPRITES");
+    else if (opt == OPT_UNOVASPRITES)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.unovaSprites == MP_UNOVA_SPRITES_GEN5 ? "BLACK'S OWN SPRITES"
+                 : "BLACK'S SPRITES SHRUNK TO GEN 3'S SIZE");
     else if (opt == OPT_SPRITESCALE)
-        snprintf(ascii, sizeof(ascii), "A: SINNOH'S PEOPLE, FOLLOWERS, THE GARDEN");
+        snprintf(ascii, sizeof(ascii), "A: SINNOH'S AND UNOVA'S PEOPLE, FOLLOWERS, THE GARDEN");
     else if (opt == OPT_SHADOWS)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.noShadows ? "NO SHADOWS UNDER PEOPLE AND MOEMON" : "A SOFT SHADOW UNDER PEOPLE AND MOEMON");
     else if (opt == OPT_SS_FOLLOW || opt == OPT_SS_GARDEN)

@@ -45,4 +45,7 @@ const u8 *U3D_Text(u16 bank, u16 msg);
 u16 U3D_TextBanks(void);
 const u8 *U3D_ExpandPlaceholder(u8 id, const u8 *src, u8 **dest);   // string_util.c StringExpandPlaceholders
 
+// UNOVA's people (src/unova/u3d_gfx.c: Black's own sprites, unova/black_gfx.pak from tools/unova/build_gfx.py)
+bool8 U3D_Gfx_Sprite(u16 code, bool8 small, u8 *kind, const u16 **pal, const u8 **frames);
+
 #endif

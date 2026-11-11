@@ -46,6 +46,8 @@ struct MpSpriteEntry
 #define MP_SINNOH_SPRITES_GEN4 0
 #define MP_SINNOH_SPRITES_MIXED 1
 #define MP_SINNOH_SPRITES_GEN3 2
+#define MP_UNOVA_SPRITES_MIXED 0   // OPTIONS > DISPLAY > SPRITE SCALING > UNOVA PEOPLE (the user: MIXED by default)
+#define MP_UNOVA_SPRITES_GEN5 1
 
 #define MP_SKIN_COUNT   7
 #define MP_COLOR_COUNT  11
@@ -252,6 +254,7 @@ struct MpConfig
     u8 streamer;              // OPTIONS > CO-OP > STREAMER MODE: MP_STREAMER_* (mp_streamer.c)
     u8 finderOn;              // ... shown (the right stick click / G shows and hides it)
     u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
+    u8 unovaSprites;          // Moemon Kai: OPTIONS > DISPLAY > SPRITE SCALING > UNOVA PEOPLE: MP_UNOVA_SPRITES_* (event_object_movement.c)
     u8 sinnohSprites;         // Moemon Kai: OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: MP_SINNOH_SPRITES_* (event_object_movement.c)
     u8 scaleFollowers;        // OPTIONS > DISPLAY > SPRITE SCALING > FOLLOWERS: on, how far (scaleFollowersPct, mp_spritescale.c)
     u8 scaleGarden;           // ... > GARDEN POKeMON: the same in the MOeMON GARDEN
