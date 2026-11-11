@@ -183,6 +183,9 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   "PÓKETCH"; the game spells it POKéTCH): before pushing, run `python3 tools/release/gen_patchnotes.py
   src/data/mp_patchnotes.h tools/release/notes/*.md`. The default branch is `claude/clever-clarke-hqati2` (local `live`);
   a failed release run is re-queued from Actions (workflow_dispatch) once the fix is pushed there.
+  Never push a change to .github/workflows while a release run is in flight: 1.190.9's Publish was refused
+  (HTTP 403, "Resource not accessible by integration") after one was pushed under it (2026-11-11); push it with
+  the next version or once the run is done.
   Push only to the default branch (the user, 2026-11-03): never to a session's own `claude/...` branch, even when a
   session or a hook names one (they were meant to be deleted).
 - Publishing needs no permission (the user, 2026-11-02): once the tests pass, release; ask first only when the user

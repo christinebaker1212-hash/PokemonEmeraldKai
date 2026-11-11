@@ -51,6 +51,22 @@ walk can make are not ticked here until a walk with plain key presses (no planne
   (the GBA's rule): into the ground under a low camera. A card stands 6 units toward the field's camera from its
   tile's middle with its feet there (Platinum's rule, o3d.c FEET_Z), from any camera.
 
+- **A room's opening scene could be walked out of** (1.190.10 / 1.190.11): a scene only had the player once Kai's
+  hold script ran, a frame or more after it asked, and a script of Kai's ending under it gave the controls back
+  (1.190.10: orre_vm.c HoldLock locks them the moment a scene takes the player). And a room's scripts don't run
+  while it fades in, so a scene its main loop opens with (the OUTSKIRT STAND's diner: the camera's shot and the TV's
+  news come before its first heroMoveMain) left the player free through the whole fade: the opening could be broken
+  there (1.190.11: the player waits from a room's first frame until its loop first steps them, as Colosseum's
+  player does: LoopNotStarted, Orre_Vm_Warped).
+
+## Area by area (the user, 2026-11-11: "one area at a time")
+
+Read from the disc's scripts (tools/orre/gsvm.py), not from a run: the user tests ORRE.
+
+| Area | Rooms | Script commands | Found |
+|---|---|---|---|
+| OUTSKIRT STAND | S1_out, S1_shop_1F | all run or deliberately quiet (21 quiet: sounds' details, look-at, map objects' animations, mail) | the diner's TV scene walked out of during the fade (fixed, above) |
+
 ## What the walking tests did not prove
 
 The user could not reach PHENAC's stadium: the walk round the fountain was cut on both sides of the stairs. The

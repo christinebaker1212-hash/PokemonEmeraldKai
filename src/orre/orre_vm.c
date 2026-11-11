@@ -614,11 +614,24 @@ static void KeepStory(void)
 // scene holds them and no script of Kai's runs
 static bool8 sVmLock;
 
+// A room whose main loop steps the player (heroMoveMain) hasn't done so yet: Colosseum's player can't move until it
+// does. The loop doesn't run while the room fades in, and a scene it opens with (the OUTSKIRT STAND's diner: the
+// camera's shot and the TV's news before its first step) only took the player once the fade was over: they could walk
+// about the room through the fade and the scene found them anywhere (the user, 2026-11-11)
+static bool8 LoopNotStarted(void)
+{
+    u32 i;
+    for (i = 0; i < VM_THREADS; i++)
+        if (sThreads[i].state == T_RUN && sThreads[i].room && sThreads[i].heroLoop && !sThreads[i].stepped)
+            return TRUE;
+    return FALSE;
+}
+
 static void HoldLock(void)
 {
     if (sHolding)
         sVmLock = FALSE;   // (the hold script has them: its releaseall gives them back)
-    if (sHolder != NULL || sHoldPending)
+    if (sHolder != NULL || sHoldPending || LoopNotStarted())
     {
         if (!ArePlayerFieldControlsLocked())
         {
@@ -626,7 +639,7 @@ static void HoldLock(void)
             sVmLock = TRUE;
         }
     }
-    else if (sVmLock)
+    else if (sVmLock && !gPaletteFade.active)   // (never under a warp's own fade, which has them locked itself)
     {
         sVmLock = FALSE;
         if (!ScriptContext_IsEnabled())
@@ -1658,6 +1671,7 @@ void Orre_Vm_Frame(void)
     {
         if (sRoom)
             Orre_Vm_Stop();
+        HoldLock();   // (no room, no scripts: nothing of theirs keeps the player)
         return;
     }
     if (room != sRoom)
@@ -1761,6 +1775,15 @@ void Orre_Vm_Warped(void)
         OrreSound_StopAmbient(400);
     }
     sScriptBlack = FALSE;   // (the warp's own fade brings the next room in)
+    // (into a room of ORRE's: the player waits from the map's first frame until its scripts say who has them;
+    // HoldLock gives them back once no scene does and its loop has stepped them)
+    if (O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup) && !getenv("MOEMON_ORRE_NO_LOOP_HOLD")
+     && (getenv("MOEMON_ORRE_SCRIPTS") == NULL || getenv("MOEMON_ORRE_SCRIPTS")[0] != '0'))
+    {
+        if (!ArePlayerFieldControlsLocked())
+            LockPlayerFieldControls();
+        sVmLock = TRUE;
+    }
     if (sLossPending)
     {
         // (the whiteout's warp: the story as the scene found it, so it plays again)
