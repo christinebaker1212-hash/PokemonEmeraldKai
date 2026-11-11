@@ -83,3 +83,4 @@ moemon_mail.dat
 # ORRE story probes (tools/orre/gen_story_tests.py writes them on demand)
 tools/test/scenarios/orre_scenes_*/
 tools/test/scenarios/orre_story_chain*/
+unova/

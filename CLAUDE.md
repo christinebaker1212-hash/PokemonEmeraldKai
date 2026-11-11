@@ -130,7 +130,7 @@ ORRE's people (the user, 2026-11-07): each Colosseum character model is a LOOK >
 closest Pokemon Showdown trainer sprite (battle picture, 80x80 as drawn): tools/orre/people.py, src/orre/orre_people.c,
 ORRE_HANDOFF "Sprites"; scenario orre_people.
 
-**UNOVA** (Pokémon Black as a playable region, the user 2026-11-11: "every decision that stood for Platinum will stand
+**UNOVA** (Pokémon Black as a playable region; **start at `docs/UNOVA_HANDOFF.md`**; the user 2026-11-11: "every decision that stood for Platinum will stand
 for Unova"): the user's decisions in `docs/UNOVA_DECISIONS.md` (Black only, at least Gen 5 there, to N's Castle and the
 credits, its own engine in src/unova/, the C-GEAR, MUSICALS, seasons, the ENTRALINK, the port CASTELIA). Decomp:
 Project-Holon/aletheia (code only); assets from the user's ROM (never committed; secret UNOVA_ROM_URL).
