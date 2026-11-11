@@ -36,28 +36,28 @@
       "y": 21,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NIMBASAGATE_Z92",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 31,
       "y": 22,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NIMBASAGATE_Z92",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 31,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NIMBASAGATE_Z92",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 17,
       "y": 17,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_MUSICALTHEATER",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

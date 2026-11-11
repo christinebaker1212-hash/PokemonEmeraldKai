@@ -20,77 +20,77 @@
       "y": 73,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_PINWHEELFOREST_18_18",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 86,
       "y": 74,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_PINWHEELFOREST_18_18",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 86,
       "y": 75,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_PINWHEELFOREST_18_18",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 86,
       "y": 76,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_PINWHEELFOREST_18_18",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 86,
       "y": 77,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_PINWHEELFOREST_18_18",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 72,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 73,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 74,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 75,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 107,
       "y": 27,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_RUMINATIONFIELD",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 108,
       "y": 27,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_RUMINATIONFIELD",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

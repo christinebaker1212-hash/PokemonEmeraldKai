@@ -36,28 +36,28 @@
       "y": 19,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NIMBASACITY_Z65",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 15,
       "y": 7,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NIMBASACITY_Z88",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 22,
       "y": 7,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NIMBASACITY_Z94",
-      "dest_warp_id": "1"
+      "dest_warp_id": "2"
     },
     {
       "x": 15,
       "y": 19,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NIMBASACITY_Z93",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

@@ -20,42 +20,42 @@
       "y": 14,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DESERTRESORT_11_15",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 5,
       "y": 14,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DESERTRESORT_11_15",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 6,
       "y": 14,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DESERTRESORT_11_15",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 4,
       "y": 1,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DESERTRESORT_Z158",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 5,
       "y": 1,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DESERTRESORT_Z158",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 6,
       "y": 1,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DESERTRESORT_Z158",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

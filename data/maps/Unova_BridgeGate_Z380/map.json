@@ -27,21 +27,21 @@
       "y": 6,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE15_Z378_18_13",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 23,
       "y": 7,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE15_Z378_18_13",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 23,
       "y": 8,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE15_Z378_18_13",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

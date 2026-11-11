@@ -14,10 +14,11 @@ with Black's matrices:
                  polygon id, cull, lights, mode, pad; u32 triangles; 3 vertices each: f32 x y z, f32 u v (texels),
                  u8 r g b (0-31) pad, f32 nx ny nz
   u32 light sets: each u32 blocks: u32 end time (2-second units), 4 lights (u8 on r g b, f32 dx dy dz), diffuse, ambient,
-                 specular, emission (u8 r g b each), u8 pad x 4
+                 specular, emission (u8 r g b each), the clear colour (u8 r g b, 1); a set a Black light table and
+                 season: table * 4 + season
   u32 matrices:  each u16 Black's matrix number, u16 width, height, u16 x0, z0; per cell (row by row): u16 zone (0xFFFF
                  none), s16 mesh x 4 (spring, summer, autumn, winter: -1 none; the same mesh where the seasons share
-                 textures), u16 light set, u16 props: s16 mesh x 4 (seasons), f32 3x4 transform (rows); then the cell's
+                 textures), u16 light table (| 0x8000: the area's own a season, the table + the season), u16 props: s16 mesh x 4 (seasons), f32 3x4 transform (rows); then the cell's
                  32x32 field blocks (u16: metatile | collision << 10 | elevation << 12, the metatile 0x300 + the
                  game's behavior), u8 count (0-2) and f32 heights x 2 per tile (the ground at its centre, lowest first:
                  a "GC" block's second grid is a bridge or a floor over it)
@@ -37,6 +38,7 @@ import matrix as mxr  # noqa: E402
 import terrain  # noqa: E402
 import zones as zr  # noqa: E402
 import nitro  # noqa: E402
+import events as evr  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location('sinnoh_build_pack', os.path.join(os.path.dirname(HERE), 'sinnoh',
                                                                                  'build_pack.py'))
@@ -84,6 +86,31 @@ def field_block(attr):
     return mt | ((flags & 1) << 10) | (3 << 12)
 
 
+# Black's connections (tools/unova/events.py) as warp tiles: a door walked up into warps as it's stepped on (Emerald's
+# non-animated door: the player walks out of it on arrival), a mat or a passage walked off down, right or left is an
+# arrow warp (the same numbers in both games' meaning: MB_SOUTH / EAST / WEST_ARROW_WARP)
+STEP_WARP = 0x60
+ARROW_BY_DIR = {1: 0x65, 3: 0x62, 4: 0x63}
+
+
+def warp_tiles(zone_ids):
+    """{(matrix tile x, z): behavior} of the zones' connections"""
+    out = {}
+    for z in sorted(set(zone_ids)):
+        try:
+            cons = evr.events(z)['connect']
+        except (IndexError, KeyError, struct.error):
+            continue
+        for c in cons:
+            if c['rail']:
+                continue
+            b = ARROW_BY_DIR.get(c['dir'], STEP_WARP)
+            for dz in range(max(1, c['h'])):
+                for dx in range(max(1, c['w'])):
+                    out[(c['x'] // 16 + dx, c['z'] // 16 + dz)] = b
+    return out
+
+
 def area(area_id, season=0):
     rec = area_id + season if 2 <= area_id < 0xD2 else area_id
     d = open(os.path.join(narc.EXTRACT, 'data', 'a/0/1/3'), 'rb').read()[rec * 10:rec * 10 + 10]
@@ -119,11 +146,53 @@ def block_buildings(data):
     return out
 
 
-def default_lights():
-    """(until Black's own light tables are read) one block for the whole day: a sun from above-front, a soft ambient"""
-    return [(43200, [(1, (31, 31, 31), (-0.3, -0.85, -0.4)), (0, (0, 0, 0), (0.0, -1.0, 0.0)),
-                     (0, (0, 0, 0), (0.0, -1.0, 0.0)), (0, (0, 0, 0), (0.0, -1.0, 0.0))],
-             [(20, 20, 20), (12, 12, 12), (0, 0, 0), (0, 0, 0)])]
+# Black's lights (aletheia's ov021/field_light.c): archive 0x3D (a/0/6/1), a table per area (a season area's record
+# for each season names its own), keyframes of 0x34 bytes: u16 time zone, s16 minutes after it, u8 lights on x 4, u16
+# colours x 4, fx16 directions x 4 (x y z), u16 diffuse, ambient, specular, emission, fog, clear colours. A time zone's
+# hour is the season's (TIMEZONE_GetLight: _TimeZoneLightTable, ARM9 0x0209DF10, 5 a season: morning, noon, evening,
+# night, midnight). Black blends a second between keyframes; the pack keeps each keyframe until the next.
+LIGHT_ARC = 'a/0/6/1'
+TZ_LIGHT = 0x0209DF10
+
+
+def rgb(c):
+    return (c & 31, (c >> 5) & 31, (c >> 10) & 31)
+
+
+def light_sets():
+    """[blocks] for each table * 4 + season (the season the table's hours are read in): blocks as the pack keeps them:
+    (end in 2-second units, 4 lights, the material's 4 colours, the clear colour)"""
+    arm9 = open(os.path.join(os.path.dirname(narc.EXTRACT), 'arm9_dec.bin'), 'rb').read()
+    tz = [arm9[TZ_LIGHT - 0x02004000 + 5 * s:TZ_LIGHT - 0x02004000 + 5 * s + 5] for s in range(4)]
+    out = []
+    for table in narc.arc(LIGHT_ARC):
+        keys = []
+        for i in range(len(table) // 0x34):
+            k = struct.unpack_from('<Hh4B4H12h6H', table, i * 0x34)
+            lights = []
+            for j in range(4):
+                d = k[10 + 3 * j:13 + 3 * j]
+                n = math.sqrt(sum(v * v for v in d)) or 1.0
+                lights.append((k[2 + j], rgb(k[6 + j]), tuple(v / n for v in d)))
+            keys.append((k[0], k[1], lights, [rgb(c) for c in k[22:26]], rgb(k[27])))
+        for season in range(4):
+            timed = sorted(((tz[season][z] * 3600 + m * 60) % 86400, li, cols, clear)
+                           for z, m, li, cols, clear in keys if z < 5)
+            blocks = []
+            if timed:
+                # (from midnight to the first keyframe: the day's last)
+                blocks.append((timed[0][0] // 2, timed[-1][1], timed[-1][2], timed[-1][3]))
+                for i, (sec, li, cols, clear) in enumerate(timed):
+                    end = timed[i + 1][0] if i + 1 < len(timed) else 86400
+                    blocks.append((end // 2, li, cols, clear))
+            out.append([b for b in blocks if b[0] > 0] or blocks[-1:])
+    return out
+
+
+def cell_light(area_id):
+    """The cell's light: its season-0 table, 0x8000 when the area has a record a season (the table + the season)"""
+    base = area(area_id)['light']
+    return base | (0x8000 if 2 <= area_id < 0xD2 else 0)
 
 
 def field_matrices():
@@ -151,6 +220,7 @@ def build(matrix_ids=None):
             continue
         x0, z0 = min(i % mx['w'] for i in used), min(i // mx['w'] for i in used)
         x1, z1 = max(i % mx['w'] for i in used), max(i // mx['w'] for i in used)
+        warps = warp_tiles(owners + [mx['zones'][i] for i in used if mx['zones'][i] < len(zs)])
         for cz in range(z0, z1 + 1):
             for cx in range(x0, x1 + 1):
                 i = cz * mx['w'] + cx
@@ -190,16 +260,20 @@ def build(matrix_ids=None):
                             a2 = grids[1][t][0]
                             if (attr >> 16) & 1 and not (a2 >> 16) & 1:
                                 attr = a2   # (a floor over a blocked one: the bridge is the way)
-                        fb.append(field_block(attr))
+                        w = warps.get((cx * 32 + t % 32, cz * 32 + t // 32))
+                        if w is not None:   # (a warp: walkable, whatever Black's grid says of the tile)
+                            fb.append(METATILE_BEHAVIOR + w | (field_block(attr) & (3 << 12) or 3 << 12))
+                        else:
+                            fb.append(field_block(attr))
                         hs = sorted({round(g[t][1], 2) for g in grids if t < len(g)})
                         hts.append(hs[:2])
                     else:
                         fb.append(BLOCKED)
                         hts.append([])
-                cells.append((zone, meshes, 0, props, fb, hts))
+                cells.append((zone, meshes, cell_light(area_id), props, fb, hts))
         mats.append((mn, (x0, z0, x1, z1), cells))
         print('matrix %d: %dx%d cells' % (mn, x1 - x0 + 1, z1 - z0 + 1))
-    return pack, [default_lights()], mats
+    return pack, light_sets(), mats
 
 
 def write(path, pack, light_sets, mats):
@@ -220,13 +294,13 @@ def write(path, pack, light_sets, mats):
     out += struct.pack('<I', len(light_sets))
     for blocks in light_sets:
         out += struct.pack('<I', len(blocks))
-        for t, lights, cols in blocks:
+        for t, lights, cols, clear in blocks:
             out += struct.pack('<I', t)
             for on, lc, ld in lights:
                 out += struct.pack('<4B3f', on, lc[0], lc[1], lc[2], ld[0], ld[1], ld[2])
             for col in cols:
                 out += struct.pack('<3B', *col)
-            out += b'\0' * 4
+            out += struct.pack('<4B', clear[0], clear[1], clear[2], 1)
     out += struct.pack('<I', len(mats))
     for number, (x0, z0, x1, z1), cells in mats:
         out += struct.pack('<5H', number, x1 - x0 + 1, z1 - z0 + 1, x0, z0)

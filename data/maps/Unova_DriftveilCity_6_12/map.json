@@ -31,14 +31,14 @@
       "y": 16,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DRIFTVEILCITY_Z98",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 5,
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DRIFTVEILCITY_Z104",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

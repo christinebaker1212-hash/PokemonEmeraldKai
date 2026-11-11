@@ -20,42 +20,42 @@
       "y": 4,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE15_Z378_19_13",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 1,
       "y": 5,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE15_Z378_19_13",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 1,
       "y": 6,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE15_Z378_19_13",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 15,
       "y": 4,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BLACKCITY",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 15,
       "y": 5,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BLACKCITY",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 15,
       "y": 6,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BLACKCITY",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     }
   ],
   "coord_events": [],

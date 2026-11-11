@@ -31,35 +31,35 @@
       "y": 14,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_OPELUCIDGATE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 25,
       "y": 15,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_OPELUCIDGATE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 25,
       "y": 16,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_OPELUCIDGATE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 5,
       "y": 7,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_SHOPPINGMALL",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 6,
       "y": 7,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_SHOPPINGMALL",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

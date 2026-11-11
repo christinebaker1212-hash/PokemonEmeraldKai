@@ -20,28 +20,28 @@
       "y": 28,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE9_Z348_11_5",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 15,
       "y": 28,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE9_Z348_11_5",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 16,
       "y": 28,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE9_Z348_11_5",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 23,
       "y": 13,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_SHOPPINGMALL_Z351",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

@@ -20,77 +20,77 @@
       "y": 14,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NSCASTLE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 6,
       "y": 15,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NSCASTLE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 6,
       "y": 16,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NSCASTLE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 6,
       "y": 17,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NSCASTLE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 42,
       "y": 8,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NSCASTLE_Z269",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 42,
       "y": 9,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NSCASTLE_Z269",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 42,
       "y": 10,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NSCASTLE_Z269",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 42,
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NSCASTLE_Z269",
-      "dest_warp_id": "0"
+      "dest_warp_id": "2"
     },
     {
       "x": 10,
       "y": 8,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NSCASTLE_Z266",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 22,
       "y": 8,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NSCASTLE_Z267",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 34,
       "y": 8,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NSCASTLE_Z268",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

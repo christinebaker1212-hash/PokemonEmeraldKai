@@ -26,28 +26,28 @@
       "y": 14,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE_Z366",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 23,
       "y": 15,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE_Z366",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 23,
       "y": 16,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE_Z366",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 7,
       "y": 12,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE11_Z367",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

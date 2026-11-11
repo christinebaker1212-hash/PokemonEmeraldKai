@@ -20,42 +20,42 @@
       "y": 14,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_OPELUCIDCITY_13_4",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 5,
       "y": 14,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_OPELUCIDCITY_13_4",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 6,
       "y": 14,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_OPELUCIDCITY_13_4",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 4,
       "y": 1,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE10_13_3",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 5,
       "y": 1,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE10_13_3",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 6,
       "y": 1,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE10_13_3",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

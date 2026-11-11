@@ -36,14 +36,14 @@
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_UNDELLATOWN_Z414",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 25,
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_UNDELLATOWN_Z415",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

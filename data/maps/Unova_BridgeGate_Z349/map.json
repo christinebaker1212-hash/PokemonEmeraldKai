@@ -20,7 +20,7 @@
       "y": 8,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_TUBELINEBRIDGE",
-      "dest_warp_id": "18"
+      "dest_warp_id": "27"
     },
     {
       "x": 14,
@@ -48,14 +48,14 @@
       "y": 7,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_TUBELINEBRIDGE",
-      "dest_warp_id": "18"
+      "dest_warp_id": "27"
     },
     {
       "x": 0,
       "y": 9,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_TUBELINEBRIDGE",
-      "dest_warp_id": "18"
+      "dest_warp_id": "27"
     }
   ],
   "coord_events": [],

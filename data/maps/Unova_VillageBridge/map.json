@@ -20,49 +20,49 @@
       "y": 31,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE_Z366",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 2,
       "y": 32,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE_Z366",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 2,
       "y": 33,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE_Z366",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 93,
       "y": 31,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE_Z369",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 93,
       "y": 32,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE_Z369",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 93,
       "y": 33,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE_Z369",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 77,
       "y": 46,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_VILLAGEBRIDGE_Z262",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

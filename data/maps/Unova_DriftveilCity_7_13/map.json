@@ -26,21 +26,21 @@
       "y": 15,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DRIFTVEILDRAWBRIDGE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "3"
     },
     {
       "x": 22,
       "y": 16,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DRIFTVEILDRAWBRIDGE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "3"
     },
     {
       "x": 22,
       "y": 17,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DRIFTVEILDRAWBRIDGE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "3"
     }
   ],
   "coord_events": [],

@@ -20,21 +20,21 @@
       "y": 63,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ICIRRUSCITY_5_5",
-      "dest_warp_id": "2"
+      "dest_warp_id": "3"
     },
     {
       "x": 17,
       "y": 63,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ICIRRUSCITY_5_5",
-      "dest_warp_id": "2"
+      "dest_warp_id": "3"
     },
     {
       "x": 18,
       "y": 63,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ICIRRUSCITY_5_5",
-      "dest_warp_id": "2"
+      "dest_warp_id": "3"
     }
   ],
   "coord_events": [],

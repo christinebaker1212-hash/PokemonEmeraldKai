@@ -31,21 +31,21 @@
       "y": 9,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NACRENECITY_Z22",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 18,
       "y": 21,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NACRENECITY_Z21",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 8,
       "y": 21,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NACRENECITY_Z23",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 11,
@@ -66,28 +66,28 @@
       "y": 22,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NACRENEGATE",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 31,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NACRENEGATE",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 31,
       "y": 24,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NACRENEGATE",
-      "dest_warp_id": "3"
+      "dest_warp_id": "4"
     },
     {
       "x": 4,
       "y": 5,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NACRENECITY_Z17",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

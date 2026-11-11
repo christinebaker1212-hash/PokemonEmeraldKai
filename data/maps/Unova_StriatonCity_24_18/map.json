@@ -36,42 +36,42 @@
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_STRIATONCITY_Z8",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 21,
       "y": 18,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_STRIATONCITY_Z9",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 21,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_STRIATONCITY_Z11",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 6,
       "y": 22,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_STRIATONCITY_Z13",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 6,
       "y": 10,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_STRIATONCITY_Z15",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 20,
       "y": 10,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_STRIATONCITY_Z7",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

@@ -68,7 +68,7 @@ typedef struct
 typedef struct { float c[3], r; u32 ngroups; U3dGroup *g; } U3dMesh;
 typedef struct { u16 w, h; u32 *px; bool8 soft; } U3dTex;
 typedef struct { u8 on, r, g, b; float d[3]; } U3dLight;
-typedef struct { u32 start; U3dLight l[4]; u8 col[4][3]; } U3dLightBlock;
+typedef struct { u32 start; U3dLight l[4]; u8 col[4][3]; u8 clear[4]; } U3dLightBlock;
 typedef struct { u32 count; U3dLightBlock *b; } U3dLightSet;
 typedef struct { s16 mesh[SEASONS]; float m[12]; } U3dProp;
 typedef struct
@@ -221,7 +221,6 @@ static void LoadPack(void)
         for (j = 0; j < s->count && !r.bad; j++)
         {
             U3dLightBlock *b = &s->b[j];
-            u8 pad[4];
             b->start = TakeU32(&r);
             for (k = 0; k < 4; k++)
             {
@@ -229,7 +228,7 @@ static void LoadPack(void)
                 Take(&r, b->l[k].d, 12);
             }
             Take(&r, b->col, 12);
-            Take(&r, pad, 4);
+            Take(&r, b->clear, 4);
         }
     }
     sPack.nmat = TakeU32(&r);
@@ -581,10 +580,11 @@ static bool OamHidden(int oamIndex, int x, int line)
 static s32 sLightBlock = -1;
 static const U3dLightBlock *sLight;
 
-static void PickLight(u16 set)
+// Black's light for a cell (its table: the area's own a season when 0x8000) now: the set of that table in the season
+static void PickLight(u16 light)
 {
     const U3dLightSet *s;
-    u32 now, i, pick;
+    u32 now, i, pick, set = ((light & 0x8000) ? (light & 0x7FFF) + sSeason : light) * 4 + sSeason;
     if (set >= sPack.nlight || sPack.light[set].count == 0)
     {
         sLight = NULL;
@@ -592,6 +592,8 @@ static void PickLight(u16 set)
     }
     s = &sPack.light[set];
     now = (gLocalTime.hours * 3600 + gLocalTime.minutes * 60) / 2;
+    if (getenv("MOEMON_U3D_HOUR"))   // (tests: a fixed hour)
+        now = atoi(getenv("MOEMON_U3D_HOUR")) * 1800;
     pick = s->count - 1;
     for (i = 0; i < s->count; i++)
         if (s->b[i].start > now)
@@ -600,7 +602,7 @@ static void PickLight(u16 set)
             break;
         }
     sLight = &s->b[pick];
-    sLightBlock = set * 256 + pick;
+    sLightBlock = set * 256 + pick;   // (the vertices' light is worked out again when this changes)
 }
 
 static void Light(U3dGroup *g)
@@ -796,15 +798,18 @@ static void Render(void)
 {
     s32 bx = (s32)floorf(sView.tx / BLOCK), bz = (s32)floorf(sView.tz / BLOCK), cx, cz;
     u32 i, pass;
-    for (i = 0; i < W * H; i++)
-    {
-        (&sColor[0][0])[i] = 0;
-        (&sDepth[0][0])[i] = 1e30f;
-        (&sIds[0][0])[i] = -1;
-    }
+    u16 clear = 0;
     {
         const U3dCell *here = Cell(bx, bz);
         PickLight(here ? here->light : 0);
+    }
+    if (sLight && sLight->clear[3])   // (Black's clear colour: what shows where nothing is drawn)
+        clear = sLight->clear[0] | sLight->clear[1] << 5 | sLight->clear[2] << 10;
+    for (i = 0; i < W * H; i++)
+    {
+        (&sColor[0][0])[i] = clear;
+        (&sDepth[0][0])[i] = 1e30f;
+        (&sIds[0][0])[i] = -1;
     }
     for (pass = 0; pass < 2; pass++)
         for (cz = bz - 1; cz <= bz + 1; cz++)

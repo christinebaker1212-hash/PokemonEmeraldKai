@@ -26,21 +26,21 @@
       "y": 8,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTEGATE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 19,
       "y": 8,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTEGATE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 20,
       "y": 8,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTEGATE",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

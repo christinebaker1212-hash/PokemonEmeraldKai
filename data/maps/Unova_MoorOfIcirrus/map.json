@@ -20,14 +20,14 @@
       "y": 49,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE8_Z345_7_5",
-      "dest_warp_id": "1"
+      "dest_warp_id": "2"
     },
     {
       "x": 30,
       "y": 49,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE8_Z345_7_5",
-      "dest_warp_id": "1"
+      "dest_warp_id": "2"
     }
   ],
   "coord_events": [],

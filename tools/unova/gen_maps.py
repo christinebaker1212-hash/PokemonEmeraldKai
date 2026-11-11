@@ -112,10 +112,10 @@ def main():
         sec = 'MAPSEC_UNOVA_' + snake(m['place'])
         if all(s != sec for s, _ in places):
             places.append((sec, m['place']))
-    # every map's warps first (a Black connection may cover several tiles: each a warp, to the first of its
-    # destination's), then the maps
+    # every map's warps first (a Black connection may cover several tiles: each a warp, to the middle one of its
+    # destination's: a mat three wide is landed on in its middle, as Black puts the player), then the maps
     warps = {m['name']: [] for m in maps}
-    landing = {}   # (zone, Black's connection index) -> (map, its first warp there)
+    landing = {}   # (zone, Black's connection index) -> (map, its middle warp there)
     for z in sorted({m['zone'] for m in maps}):
         for k, c in enumerate(ev.events(z)['connect']):
             if c['rail']:
@@ -124,7 +124,7 @@ def main():
             m = holder(z, tx, tz)
             if m is None:
                 continue
-            landing[(z, k)] = (m, len(warps[m['name']]))
+            landing[(z, k)] = (m, len(warps[m['name']]) + (max(1, c['w']) * max(1, c['h'])) // 2)
             for dz in range(max(1, c['h'])):
                 for dx in range(max(1, c['w'])):
                     warps[m['name']].append((tx + dx - m['rect'][0] * 32, tz + dz - m['rect'][1] * 32, c['zone'],

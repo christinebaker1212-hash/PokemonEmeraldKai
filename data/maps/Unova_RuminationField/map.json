@@ -20,14 +20,14 @@
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_PINWHEELFOREST_Z155",
-      "dest_warp_id": "9"
+      "dest_warp_id": "10"
     },
     {
       "x": 16,
       "y": 23,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_PINWHEELFOREST_Z155",
-      "dest_warp_id": "9"
+      "dest_warp_id": "10"
     }
   ],
   "coord_events": [],

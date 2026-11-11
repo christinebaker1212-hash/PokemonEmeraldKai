@@ -31,14 +31,14 @@
       "y": 16,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_OPELUCIDCITY_Z121",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 31,
       "y": 16,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_OPELUCIDCITY_Z134",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

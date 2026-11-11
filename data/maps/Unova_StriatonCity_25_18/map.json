@@ -26,28 +26,28 @@
       "y": 4,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DREAMYARD",
-      "dest_warp_id": "6"
+      "dest_warp_id": "8"
     },
     {
       "x": 5,
       "y": 5,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DREAMYARD",
-      "dest_warp_id": "6"
+      "dest_warp_id": "8"
     },
     {
       "x": 5,
       "y": 6,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DREAMYARD",
-      "dest_warp_id": "6"
+      "dest_warp_id": "8"
     },
     {
       "x": 5,
       "y": 7,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_DREAMYARD",
-      "dest_warp_id": "6"
+      "dest_warp_id": "8"
     }
   ],
   "coord_events": [],

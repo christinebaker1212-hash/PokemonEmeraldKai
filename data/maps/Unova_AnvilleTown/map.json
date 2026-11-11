@@ -20,21 +20,21 @@
       "y": 37,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ANVILLETOWN_Z419",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 35,
       "y": 47,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ANVILLETOWN_Z420",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 44,
       "y": 47,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ANVILLETOWN_Z421",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

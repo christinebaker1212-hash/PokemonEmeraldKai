@@ -43,35 +43,35 @@
       "y": 21,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ICIRRUSCITY_Z116",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 11,
       "y": 7,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ICIRRUSCITY_Z114",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 12,
       "y": 7,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ICIRRUSCITY_Z114",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 13,
       "y": 7,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ICIRRUSCITY_Z114",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     },
     {
       "x": 9,
       "y": 21,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ICIRRUSCITY_Z119",
-      "dest_warp_id": "0"
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],
