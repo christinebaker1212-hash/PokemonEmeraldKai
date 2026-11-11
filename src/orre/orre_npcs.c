@@ -953,6 +953,23 @@ bool8 Orre_TestPersonTile(u32 index, s16 *x, s16 *y)
 }
 
 // The tiles under the current room's touch (TOUCH) or check spot with collision id COL: its box's corners' tiles
+// (tests) standing on this tile sets off the room's touch spot COL: Orre_Touch_Frame's own rule
+bool8 Orre_TestTouchTile(u32 col, s16 x, s16 y)
+{
+    float cx, cz;
+    u32 i;
+    if (!O3D_TileToColo(x, y, &cx, &cz))
+        return FALSE;
+    for (i = 0; i < ORRE_ROOM_TOUCH_COUNT; i++)
+    {
+        const struct OrreRoomCheck *c = &sOrreRoomTouches[i];
+        if (c->room == sRoom && cx >= c->x0 - CHECK_SLACK && cx <= c->x1 + CHECK_SLACK && cz >= c->z0 - CHECK_SLACK
+         && cz <= c->z1 + CHECK_SLACK)
+            return c->col == col;   // (the first spot the tile is in, as the game picks it)
+    }
+    return FALSE;
+}
+
 bool8 Orre_TestSpotTiles(bool8 touch, u32 col, s16 *x0, s16 *y0, s16 *x1, s16 *y1)
 {
     const struct OrreRoomCheck *t = touch ? sOrreRoomTouches : sOrreRoomChecks;

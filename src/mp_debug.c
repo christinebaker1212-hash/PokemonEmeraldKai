@@ -1501,6 +1501,7 @@ u16 MP_TestGotoKey(u8 group, u8 num, s32 tx, s32 ty)
 // current room (N: a spot's collision id), as a player walks; for a person or a check, facing it. *DONE: there (a
 // person's / a check's A is the harness's to press)
 bool8 Orre_TestPersonTile(u32 index, s16 *x, s16 *y);
+bool8 Orre_TestTouchTile(u32 col, s16 x, s16 y);
 bool8 Orre_TestSpotTiles(bool8 touch, u32 col, s16 *x0, s16 *y0, s16 *x1, s16 *y1);
 u16 MP_TestApproachKey(u8 kind, u32 n, bool8 *done)
 {
@@ -1522,10 +1523,13 @@ u16 MP_TestApproachKey(u8 kind, u32 n, bool8 *done)
         return 0xFFFF;
     if (kind == 1)
     {
-        for (y = y0; y <= y1; y++)
-            for (x = x0; x <= x1; x++)
+        for (y = y0 - 1; y <= y1 + 1; y++)
+            for (x = x0 - 1; x <= x1 + 1; x++)
             {
-                u16 k = MP_TestWalkKey(x, y);
+                u16 k;
+                if (!Orre_TestTouchTile(n, x, y))
+                    continue;   // (a tile the game's own rule sets it off from: its centre in the box)
+                k = MP_TestWalkKey(x, y);
                 if (k == 0)
                     return *done = TRUE, 0;
                 if (k != 0xFFFF && best == 0xFFFF)

@@ -833,7 +833,7 @@ void Orre_WorldMap(void)
         // (tests: the harness's goto picks a shown place, as a player's cursor would: mp_debug.c MP_TestGotoKey)
         for (i = 0; i < W.nPlaces; i++)
             if (PlaceShown(i) && PlaceMap(i) >= 0 && sOrreMaps[PlaceMap(i)].map == sTestPick)
-                W.chosen = (s8)i;
+                W.chosen = (s8)PlaceMap(i);   // (the map's row, as a player's pick: not the place's)
         MPNet_Log("orre world map: the test picks %s", W.chosen >= 0 ? "its place" : "no place (not shown)");
         sTestPick = 0;
         Close();
