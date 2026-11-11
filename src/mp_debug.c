@@ -1537,21 +1537,24 @@ u16 MP_TestApproachKey(u8 kind, u32 n, bool8 *done)
             }
         return best;
     }
-    // (beside it, a side a step reaches, facing it)
+    // (beside it, a side a step reaches, facing it; a person behind a counter from across it, as the game talks to
+    // them: field_control_avatar.c GetInteractedObjectEventScript)
     for (y = y0; y <= y1; y++)
         for (x = x0; x <= x1; x++)
-            for (d = 0; d < 4; d++)
+            for (d = 0; d < 8; d++)
             {
-                s16 sx = x + dx[d], sy = y + dy[d];
+                s16 sx = x + dx[d & 3] * (d < 4 ? 1 : 2), sy = y + dy[d & 3] * (d < 4 ? 1 : 2);
                 u16 k;
                 if (sx >= x0 && sx <= x1 && sy >= y0 && sy <= y1)
+                    continue;
+                if (d >= 4 && (kind != 0 || !MapGridGetCollisionAt(x + dx[d & 3] + MAP_OFFSET, y + dy[d & 3] + MAP_OFFSET)))
                     continue;
                 k = MP_TestWalkKey(sx, sy);
                 if (k == 0)
                 {
-                    if (p->facingDirection == facing[d])
+                    if (p->facingDirection == facing[d & 3])
                         return *done = TRUE, 0;
-                    return toward[d];   // (a tap turns the player to face it)
+                    return toward[d & 3];   // (a tap turns the player to face it)
                 }
                 if (k != 0xFFFF && best == 0xFFFF)
                     best = k;
