@@ -349,6 +349,8 @@ void BuildOamBuffer(void)
     sShouldProcessSpriteCopyRequests = TRUE;
 }
 
+s16 gMpPlaceDx[MAX_SPRITES], gMpPlaceDy[MAX_SPRITES];   // Moemon Kai: a 3D map's placing of each sprite, this frame
+
 void UpdateOamCoords(void)
 {
     u8 i;
@@ -360,6 +362,7 @@ void UpdateOamCoords(void)
             if (sprite->coordOffsetEnabled)
             {
                 s32 x = sprite->x + sprite->x2 + gSpriteCoordOffsetX, y = sprite->y + sprite->y2 + gSpriteCoordOffsetY;
+                s32 flatX = x, flatY = y;
                 if (S3D_Active())
                 {
                     // Moemon Kai: on a SINNOH 3D map a field sprite stands where its spot on the ground is in the view
@@ -376,11 +379,15 @@ void UpdateOamCoords(void)
                     gO3dSpriteFeet[i] = ny;
                     x = nx, y = ny + sprite->centerToCornerVecY;
                 }
+                // (how far the 3D view moved it from its flat spot: a picture of any size, a PMD follower's, is drawn
+                // from the sprite's own point and goes with it, mp_bigsprite.c)
+                gMpPlaceDx[i] = x - flatX, gMpPlaceDy[i] = y - flatY;
                 sprite->oam.x = x + sprite->centerToCornerVecX;
                 sprite->oam.y = y + sprite->centerToCornerVecY;
             }
             else
             {
+                gMpPlaceDx[i] = gMpPlaceDy[i] = 0;
                 sprite->oam.x = sprite->x + sprite->x2 + sprite->centerToCornerVecX;
                 sprite->oam.y = sprite->y + sprite->y2 + sprite->centerToCornerVecY;
             }

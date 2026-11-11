@@ -607,6 +607,33 @@ static void KeepStory(void)
         memcpy(sSceneStory, st, size);
 }
 
+// A scene that has the player has them from that very frame: the field's controls are locked here, not only by the
+// hold script (it starts once Kai's script engine is free and locks a frame later, and a script of Kai's ending under
+// a scene gave the controls back until then: a step could slip in, off the spot the scene had them on. The opening's
+// TV news at the OUTSKIRT STAND could be walked out of and never finished: the user, 2026-11-11). Given back when no
+// scene holds them and no script of Kai's runs
+static bool8 sVmLock;
+
+static void HoldLock(void)
+{
+    if (sHolding)
+        sVmLock = FALSE;   // (the hold script has them: its releaseall gives them back)
+    if (sHolder != NULL || sHoldPending)
+    {
+        if (!ArePlayerFieldControlsLocked())
+        {
+            LockPlayerFieldControls();
+            sVmLock = TRUE;
+        }
+    }
+    else if (sVmLock)
+    {
+        sVmLock = FALSE;
+        if (!ScriptContext_IsEnabled())
+            UnlockPlayerFieldControls();
+    }
+}
+
 static void Hold(struct Thread *t)
 {
     t->holds = TRUE;
@@ -617,6 +644,7 @@ static void Hold(struct Thread *t)
         sHoldPending = TRUE;
         TryHold();
     }
+    HoldLock();
 }
 
 static void LetGo(struct Thread *t)
@@ -1643,6 +1671,7 @@ void Orre_Vm_Frame(void)
             return;
         Orre_Vm_RoomEntered();
     }
+    HoldLock();
     if (getenv("MOEMON_ORRE_VM_TRACE"))
     {
         static u32 sTick;
@@ -1710,6 +1739,7 @@ void Orre_Vm_Frame(void)
         MPNet_Log("orre vm: the player walks: the scene's camera goes back to the field's");
         O3D_CamEaseBack(0.6f);
     }
+    HoldLock();
 }
 
 // A warp (overworld.c LoadMapFromWarp): the next frame on an ORRE map enters its room anew, even the same room
@@ -1753,6 +1783,7 @@ void Orre_Vm_Stop(void)
         sThreads[i].state = T_FREE;
     sHolder = NULL;
     sHoldPending = FALSE;
+    HoldLock();
     sRoom = 0;
     Orre_Npcs_Clear();
 }

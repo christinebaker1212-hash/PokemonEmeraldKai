@@ -4,6 +4,7 @@
 // buffer to OAM, so the two always match (a frame whose OAM load is skipped keeps the old list too).
 #include <string.h>
 #include "global.h"
+extern s16 gMpPlaceDx[], gMpPlaceDy[];   // sprite.c
 #include "o3d.h"
 #include "main.h"
 #include "sprite.h"
@@ -97,6 +98,8 @@ void MP_BigSprite_NoteScale(struct Sprite *sprite, u16 first, u16 end)
         // shrinks toward; a reflection toward the line it mirrors at
         s32 gx = sprite->x + sprite->x2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetX : 0) + sprite->mpBig->shift;
         s32 gy = sprite->y + sprite->y2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetY : 0);
+        if (sprite->coordOffsetEnabled)
+            gx += gMpPlaceDx[sprite - gSprites], gy += gMpPlaceDy[sprite - gSprites];
         x0 = x1 = gx;
         y1 = MP_IsReflectionSprite(sprite) ? gy + sprite->mpBig->lift : gy + sprite->mpBig->footY;
     }
@@ -107,6 +110,8 @@ void MP_BigSprite_NoteScale(struct Sprite *sprite, u16 first, u16 end)
         // body's middle there), the same in every frame, as a PMD picture
         x0 = x1 = sprite->x + sprite->x2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetX : 0);
         y1 = sprite->y + sprite->y2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetY : 0) + feet;
+        if (sprite->coordOffsetEnabled)
+            x0 = x1 = x0 + gMpPlaceDx[sprite - gSprites], y1 += gMpPlaceDy[sprite - gSprites];
     }
     else
     {
@@ -167,6 +172,10 @@ bool8 MP_BigSprite_AddOam(struct Sprite *sprite, u16 *oamIndex)
     e->vflip = !(sprite->oam.affineMode & 1) && ((sprite->oam.matrixNum >> 4) & 1);
     gx = sprite->x + sprite->x2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetX : 0) + big->shift;
     gy = sprite->y + sprite->y2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetY : 0) + big->lift;
+    // (on a 3D map, SINNOH's or ORRE's: where the view put the sprite, as its own pictures are. It stayed on the flat
+    // map's spot, drifting off its place as the camera turned, its legs under the ground: the user, 2026-11-11)
+    if (sprite->coordOffsetEnabled && sprite - gSprites < MAX_SPRITES)
+        gx += gMpPlaceDx[sprite - gSprites], gy += gMpPlaceDy[sprite - gSprites];
     e->left = e->hflip ? gx - dx - e->w : gx + dx;   // flips mirror the picture around the sprite's x / y
     e->top = e->vflip ? gy - dy - e->h : gy + dy;
     // affine: a reflection mirrors at the feet (the sprite's own point); anything else (ball effects scaling and
