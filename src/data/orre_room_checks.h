@@ -174,3 +174,7 @@ static const struct OrreRoomCheck sOrreRoomTouches[ORRE_ROOM_TOUCH_COUNT] = {
     {76, 3, 0x01000011, {0, 0, 0, 0}, -46.88f, -1475.23f, 49.46f, -1475.15f},   // D2_valley_1
     {128, 0, 0x01000001, {167, 0, 0, 0}, -3.10f, -10.51f, 3.10f, -10.48f},   // M1_carde_1
 };
+
+// ... each one's collision object: scriptSetCol turning it off turns its trigger off with it (PHENAC's
+// "Please! We need your help!" on RUI's pen, 40, stopped the player leaving long after she was free)
+static const u8 sOrreRoomTouchObjects[ORRE_ROOM_TOUCH_COUNT] = {40, 42, 43, 44, 41, 8, 26, 27, 28, 4, 13, 4, 5, 13, 14, 18, 31, 33, 34, 32, 15, 18, 17, 16, 10, 22, 23, 0};

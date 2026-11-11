@@ -776,6 +776,14 @@ static void NewsEvent(struct Thread *t)
 // way out): a tile stays shut while any closed gate covers it, or opening 42 let the player out of the pen before
 // RUI was free (the user, 2026-11-08). Closed gates are laid again every frame: a battle's return rebuilds the map
 static bool8 sGateClosed[ORRE_GATE_COUNT];
+// Each collision object of the room as Colosseum keeps it: on at the room's start, scriptSetCol turning it off and on.
+// A touch spot's trigger is part of its object, and only an object that is on has its trigger (orre_npcs.c)
+static u8 sColOff[256 / 8];
+
+bool8 Orre_Vm_ColOn(u32 object)
+{
+    return object >= 256 || !(sColOff[object / 8] & (1 << (object % 8)));
+}
 
 static void LayGate(u32 i, bool8 on)
 {
@@ -1306,7 +1314,16 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
     case 2:     // fadeEffectGetRandom(n): 0 to n - 1 (it gave 0 every time: PHENAC's and the LAB's outside picked
                 // the same one of their lines or people each visit)
         return ARG(0).u > 1 ? Random() % ARG(0).u : 0;
-    case N_SET_COL: SetGate(ARG(0).u, ARG(1).u != 0); return ARG(0).u;
+    case N_SET_COL:
+        if (ARG(0).u < 256)
+        {
+            if (ARG(1).u != 0)
+                sColOff[ARG(0).u / 8] &= ~(1 << (ARG(0).u % 8));
+            else
+                sColOff[ARG(0).u / 8] |= 1 << (ARG(0).u % 8);
+        }
+        SetGate(ARG(0).u, ARG(1).u != 0);
+        return ARG(0).u;
     case 96: return CtrlDoor(ARG(1).u, ARG(2).u);   // floorEventCtrlDoor(room, door, mode)
     case N_WALK_SPEED: Orre_Npc_SetSpeed(ARG(0).u, ARG(1).u, ARG(2).f); return 0;   // peopleSetWalkSpeed
     case N_TURN_TO_POINT: Orre_Npc_FacePoint(ARG(0).u, ARG(1).u, ARG(2).f, ARG(4).f); return 0;   // peopleTurnToPoint
@@ -1871,6 +1888,7 @@ void Orre_Vm_RoomEntered(void)
         // finds it, the set-up opening what the story has opened: tools/orre/gen_gates.py)
         u32 i;
         memset(sGateClosed, 0, sizeof(sGateClosed));   // (a room entered anew: built with every gate open)
+        memset(sColOff, 0, sizeof(sColOff));   // (Colosseum's objects all on)
         for (i = 0; i < ORRE_GATE_COUNT; i++)
             if (sOrreGates[i].room == room && sOrreGates[i].closed)
                 SetGate(sOrreGates[i].gate, TRUE);

@@ -943,7 +943,7 @@ void Orre_Touch_Frame(void)
     {
         const struct OrreRoomCheck *c = &sOrreRoomTouches[i];
         if (c->room == sRoom && cx >= c->x0 - CHECK_SLACK && cx <= c->x1 + CHECK_SLACK && cz >= c->z0 - CHECK_SLACK
-         && cz <= c->z1 + CHECK_SLACK)
+         && cz <= c->z1 + CHECK_SLACK && Orre_Vm_ColOn(sOrreRoomTouchObjects[i]))
         {
             at = i;
             break;

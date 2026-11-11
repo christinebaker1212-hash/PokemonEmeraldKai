@@ -28,9 +28,10 @@ CHECK, TOUCH = 3, 2
 TOUCH_DONE = {0x05960005, 0x05960006, 0x0596000C}
 
 
-def check_triangles(data, slot=0x30, id_at=0x30):
+def check_triangles(data, slot=0x30, id_at=0x30, objects=None):
     """{collision id: [triangles (n, 3, 3)]}: a slot of every collision object (+ 0x30 the check spots, a triangle's id
-    at + 0x30; + 0x2C the triggers, at + 0x32), in the map's world"""
+    at + 0x30; + 0x2C the triggers, at + 0x32), in the map's world. OBJECTS (a dict): each id's collision object (the
+    one scriptSetCol turns off, its triggers with it)"""
     off, n = struct.unpack_from('>II', data, 0)
     out = {}
     for i in range(n):
@@ -44,6 +45,8 @@ def check_triangles(data, slot=0x30, id_at=0x30):
             r = tris + k * 0x34
             T = np.array(struct.unpack_from('>9f', data, r)).reshape(1, 3, 3) @ rot.T + t
             out.setdefault(struct.unpack_from('>H', data, r + id_at)[0], []).append(T)
+            if objects is not None:
+                objects.setdefault(struct.unpack_from('>H', data, r + id_at)[0], i)
     return out
 
 
@@ -52,6 +55,7 @@ def main():
     rooms = colo_rooms.rooms(unpacked)
     rooms = list(rooms.values()) if isinstance(rooms, dict) else rooms
     rows, touches, missing = [], [], 0
+    touch_objs = []
     for r in sorted(rooms, key=lambda r: r.room):
         evs = [e for e in r.events if e[0] == CHECK or (e[0] == TOUCH and e[2] not in TOUCH_DONE)]
         if not evs or not r.file:
@@ -61,13 +65,16 @@ def main():
             missing += len(evs)
             continue
         data = open(p, 'rb').read()
-        tris = {CHECK: check_triangles(data), TOUCH: check_triangles(data, 0x2C, 0x32)}
+        objs = {}
+        tris = {CHECK: check_triangles(data), TOUCH: check_triangles(data, 0x2C, 0x32, objs)}
         for kind, cid, script, args in evs:
             if cid not in tris[kind]:
                 missing += 1
                 continue
             xs = [float(v) for T in tris[kind][cid] for v in T[:, :, 0].ravel()]
             zs = [float(v) for T in tris[kind][cid] for v in T[:, :, 2].ravel()]
+            if kind == TOUCH:
+                touch_objs.append('%d' % objs[cid])
             (rows if kind == CHECK else touches).append(
                 '    {%d, %d, 0x%08X, {%d, %d, %d, %d}, %.2ff, %.2ff, %.2ff, %.2ff},   // %s' % (
                     r.room, cid, script, args[0], args[1], args[2], args[3], min(xs), min(zs), max(xs), max(zs), r.file))
@@ -79,7 +86,10 @@ def main():
              '// Touch spots: floor events of kind 2 (stepping into the trigger runs the script), but the doors\' and',
              '// elevators\' (the maps\' own links); the trigger triangles\' box', '',
              '#define ORRE_ROOM_TOUCH_COUNT %d' % len(touches), '',
-             'static const struct OrreRoomCheck sOrreRoomTouches[ORRE_ROOM_TOUCH_COUNT] = {'] + touches + ['};', '']
+             'static const struct OrreRoomCheck sOrreRoomTouches[ORRE_ROOM_TOUCH_COUNT] = {'] + touches + ['};', '',
+             '// ... each one\'s collision object: scriptSetCol turning it off turns its trigger off with it (PHENAC\'s',
+             '// "Please! We need your help!" on RUI\'s pen, 40, stopped the player leaving long after she was free)',
+             'static const u8 sOrreRoomTouchObjects[ORRE_ROOM_TOUCH_COUNT] = {' + ', '.join(touch_objs) + '};', '']
     open(OUT, 'w').write('\n'.join(lines))
     print('%s: %d check spots, %d touch spots%s' % (OUT, len(rows), len(touches), ' (%d without a check triangle)' % missing if missing else ''))
 
