@@ -161,6 +161,27 @@ The older notes per part:
   (RADIUS 2.5, Colosseum's people records say 4.0; walls from 1 to 10 units over the ground). Movement itself stays
   four-way.
 
+## Colosseum's lighting and texture filtering (2026-11-11)
+- The user, 2026-11-11: "this rendering is using Platinum's 3D capabilities, which aren't an exact fit for
+  Colosseum's style. Let's keep Platinum's style, but add in Colosseum's lighting."
+- **Lighting, at pack time** (tools/orre/build_pack.py scene_lights / light_mesh): a map's scene_data carries its
+  light set (its third list: HSD LObjDescs: an ambient light, two to four infinite lights whose position is the way
+  to them, now and then a point light). A mesh whose material asks to be lit (HSD RENDER_DIFFUSE: about 2,600 of the
+  rooms' 17,000 meshes, the furniture, machines and fittings; the rest carry Colosseum's own baked vertex colours and
+  stay as they are) gets each vertex's colour as GX works it out: the material's colour (or the vertex's:
+  RENDER_VERTEX) times (material ambient x ambient light + each light's colour by how far the normal faces it),
+  doubled as GX's TEV doubles the baked ones (255 in the pack is twice full strength). Props (the truck, the sack...)
+  stand in any room and get a sun and a fill of their own (DEFAULT_LIGHTS). No specular, no light animations (every
+  light has an animation record; not read yet), and the people's sprites aren't lit (only five rooms have a light
+  on a person that isn't white: THE UNDER's bottom, the lab's garage, MT. BATTLE's magma rooms).
+- **Texture filtering, in the engine** (o3d.c): each texture has a mip chain (OTex.mip, HalfTexture); a triangle is
+  drawn from the level whose texels are about a pixel wide (its texture area over its screen area) and, where a
+  texel is wider than a pixel, smoothed between its four nearest texels (alpha-weighted). The GameCube filters its
+  textures; the DS engine this was copied from picks single texels, which speckled at a distance and went blocky in
+  scene close-ups. About 2 to 3 ms a frame (MOEMON_O3D_PERF=1).
+- Also in the pack: meshes on JOBJ_HIDDEN joints are left out (1.186.1), a set of one mesh with an 8 x 8 test card is
+  a dark screen, vertex-alpha layers are see-through (1.188.0).
+
 ## Sound (2026-11-10: musyx/, include/orre_sound.h)
 - **Colosseum's own songs and sound effects play, from the disc's own data** (the user, 2026-11-10: "go ahead and use
   the MusyX runtime. Compress songs down to a GBA sound filter"). Colosseum's music is MusyX sequences (78 song files in

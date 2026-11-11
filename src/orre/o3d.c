@@ -77,7 +77,12 @@ typedef struct
     OVtx *v0;
     float c0[3], su, sv, du, dv;
 } OMesh;
-typedef struct { u16 w, h; u32 *px; } OTex;   // r | g << 8 | b << 16 | a << 24
+// r | g << 8 | b << 16 | a << 24. mip[0] is px; each level after it half the one before (alpha-weighted), down to 2
+// texels: a surface far off or seen at a slant is drawn from the level whose texels are about a pixel wide, so it no
+// longer speckles, and one nearer than a texel a pixel is smoothed between its four nearest texels (Colosseum's own
+// look: the GameCube filters its textures; Platinum's DS picks single texels. The user, 2026-11-11)
+#define MIP_MAX 8
+typedef struct { u16 w, h; u32 *px; u32 *mip[MIP_MAX]; u8 nmip; } OTex;
 
 typedef struct
 {
@@ -184,6 +189,28 @@ static u8 *PackRead(u32 off, u32 size)
 }
 
 // A texture, decoded the first time a map uses it, then halved (alpha-weighted) until it fits TEX_MAX
+// A texture at half its size, each texel its four's average weighed by their alpha
+static u32 *HalfTexture(const u32 *px, u32 w, u32 h)
+{
+    u32 nw = w / 2, nh = h / 2, x, y, k;
+    u32 *half = malloc(4 * nw * nh);
+    if (half == NULL)
+        return NULL;
+    for (y = 0; y < nh; y++)
+        for (x = 0; x < nw; x++)
+        {
+            u32 sum[3] = {0, 0, 0}, a = 0;
+            for (k = 0; k < 4; k++)
+            {
+                u32 c = px[(2 * y + (k >> 1)) * w + 2 * x + (k & 1)], ca = c >> 24;
+                sum[0] += (c & 255) * ca, sum[1] += ((c >> 8) & 255) * ca, sum[2] += ((c >> 16) & 255) * ca;
+                a += ca;
+            }
+            half[y * nw + x] = a ? (sum[0] / a) | (sum[1] / a) << 8 | (sum[2] / a) << 16 | (a / 4) << 24 : 0;
+        }
+    return half;
+}
+
 static s16 Texture(s32 t)
 {
     const OTexEntry *e;
@@ -207,24 +234,22 @@ static s16 Texture(s32 t)
     free(raw);
     while ((w > TEX_MAX || h > TEX_MAX) && w >= 2 && h >= 2)
     {
-        u32 nw = w / 2, nh = h / 2, x, y, k;
-        u32 *half = malloc(4 * nw * nh);
-        for (y = 0; y < nh; y++)
-            for (x = 0; x < nw; x++)
-            {
-                u32 sum[3] = {0, 0, 0}, a = 0;
-                for (k = 0; k < 4; k++)
-                {
-                    u32 c = px[(2 * y + (k >> 1)) * w + 2 * x + (k & 1)], ca = c >> 24;
-                    sum[0] += (c & 255) * ca, sum[1] += ((c >> 8) & 255) * ca, sum[2] += ((c >> 16) & 255) * ca;
-                    a += ca;
-                }
-                half[y * nw + x] = a ? (sum[0] / a) | (sum[1] / a) << 8 | (sum[2] / a) << 16 | (a / 4) << 24 : 0;
-            }
+        u32 *half = HalfTexture(px, w, h);
         free(px);
-        px = half, w = nw, h = nh;
+        px = half, w /= 2, h /= 2;
     }
     sPack.tex[t].w = (u16)w, sPack.tex[t].h = (u16)h, sPack.tex[t].px = px;
+    {
+        OTex *o = &sPack.tex[t];
+        o->mip[0] = px, o->nmip = 1;
+        while (o->nmip < MIP_MAX && (w >> o->nmip) >= 2 && (h >> o->nmip) >= 2)
+        {
+            u32 *half = HalfTexture(o->mip[o->nmip - 1], w >> (o->nmip - 1), h >> (o->nmip - 1));
+            if (half == NULL)
+                break;
+            o->mip[o->nmip++] = half;
+        }
+    }
     return (s16)t;
 }
 
@@ -1133,11 +1158,30 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const OMes
     float area = (b->x - a->x) * (c->y - a->y) - (c->x - a->x) * (b->y - a->y);
     s32 minx, maxx, miny, maxy, x, y;
     const OTex *t = g->tex >= 0 ? &sPack.tex[g->tex] : NULL;
-    bool8 clear = g->alpha < 31;
+    bool8 clear = g->alpha < 31, smooth = FALSE;
+    s32 lod = 0, tw = 0, th = 0;
+    const u32 *tex = NULL;
+    float tscale = 1.0f;
     if (area == 0.0f)
         return;
     if (t && t->w == 0)
         t = NULL;
+    if (t)
+    {
+        // (the triangle's texels a pixel: its area on the texture over its area on the screen)
+        float ua = a->u / a->iz, va = a->v / a->iz, ub = b->u / b->iz, vb = b->v / b->iz, uc = c->u / c->iz, vc = c->v / c->iz;
+        float ta = fabsf((ub - ua) * (vc - va) - (uc - ua) * (vb - va)), ratio = ta / fabsf(area);
+        if (ratio > 1.0f)
+        {
+            lod = (s32)(0.5f * log2f(ratio) + 0.5f);
+            if (lod > t->nmip - 1)
+                lod = t->nmip - 1;
+            if (lod < 0)
+                lod = 0;
+        }
+        smooth = ratio < 0.7f;
+        tex = t->mip[lod], tw = t->w >> lod, th = t->h >> lod, tscale = 1.0f / (float)(1 << lod);
+    }
     minx = (s32)floorf(fminf(a->x, fminf(b->x, c->x)));
     maxx = (s32)ceilf(fmaxf(a->x, fmaxf(b->x, c->x)));
     miny = (s32)floorf(fminf(a->y, fminf(b->y, c->y)));
@@ -1166,10 +1210,33 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const OMes
                 col[ch] = (w0 * a->c[ch] + w1 * b->c[ch] + w2 * c->c[ch]) * z;
             if (t)
             {
-                s32 tu = Wrap((s32)floorf((w0 * a->u + w1 * b->u + w2 * c->u) * z), t->w, g->rs, g->fs);
-                s32 tv = Wrap((s32)floorf((w0 * a->v + w1 * b->v + w2 * c->v) * z), t->h, g->rt, g->ft);
-                u32 texel = t->px[tv * t->w + tu];
-                u32 ta = texel >> 24;
+                float fu = (w0 * a->u + w1 * b->u + w2 * c->u) * z * tscale, fv = (w0 * a->v + w1 * b->v + w2 * c->v) * z * tscale;
+                u32 texel, ta;
+                if (smooth)
+                {
+                    // (between the four nearest texels, weighed by their alpha)
+                    float bu = fu - 0.5f, bv = fv - 0.5f, fx = bu - floorf(bu), fy = bv - floorf(bv);
+                    s32 u0 = Wrap((s32)floorf(bu), tw, g->rs, g->fs), u1 = Wrap((s32)floorf(bu) + 1, tw, g->rs, g->fs);
+                    s32 v0 = Wrap((s32)floorf(bv), th, g->rt, g->ft), v1 = Wrap((s32)floorf(bv) + 1, th, g->rt, g->ft);
+                    u32 q[4] = {tex[v0 * tw + u0], tex[v0 * tw + u1], tex[v1 * tw + u0], tex[v1 * tw + u1]};
+                    float wq[4] = {(1 - fx) * (1 - fy), fx * (1 - fy), (1 - fx) * fy, fx * fy}, sa = 0, sc[3] = {0, 0, 0};
+                    u32 k;
+                    for (k = 0; k < 4; k++)
+                    {
+                        float qa = (q[k] >> 24) * wq[k];
+                        sa += qa;
+                        sc[0] += (q[k] & 255) * qa, sc[1] += ((q[k] >> 8) & 255) * qa, sc[2] += ((q[k] >> 16) & 255) * qa;
+                    }
+                    ta = (u32)(sa + 0.5f);
+                    texel = sa > 0.0f ? ((u32)(sc[0] / sa) | (u32)(sc[1] / sa) << 8 | (u32)(sc[2] / sa) << 16 | ta << 24) : 0;
+                }
+                else
+                {
+                    s32 tu = Wrap((s32)floorf(fu), tw, g->rs, g->fs);
+                    s32 tv = Wrap((s32)floorf(fv), th, g->rt, g->ft);
+                    texel = tex[tv * tw + tu];
+                    ta = texel >> 24;
+                }
                 if (ta == 0 || (g->solid && ta < 128))
                     continue;
                 for (ch = 0; ch < 3; ch++)

@@ -98,6 +98,81 @@ def dol_tables(path):
     return out
 
 
+def scene_lights(f):
+    """A map's lights, Colosseum's own (scene_data's third list: HSD LObjDescs): (ambient rgb 0..1, [(kind, xyz, rgb)]),
+    kind 1 an infinite light (xyz the way to it), 2 a point light (xyz its place). Hidden ones and spots are left out."""
+    sd = f.roots.get("scene_data")
+    amb, lights = np.zeros(3), []
+    if sd is None or not f.u32(sd + 8):
+        return None
+    for l in f.ptr_list(f.u32(sd + 8)):
+        ld = f.u32(l)
+        if not ld:
+            continue
+        flags = f.u16(ld + 8)
+        col = np.array(list(f.raw(ld + 12, 3)), dtype=np.float64) / 255.0
+        kind = flags & 3
+        if flags & 0x20 or not flags & 4:   # (LOBJ_HIDDEN; not a diffuse light)
+            continue
+        if kind == 0:
+            amb += col
+            continue
+        pos = f.u32(ld + 16)
+        if not pos or kind == 3:
+            continue
+        p = np.array([f.f32(pos + 4 + 4 * i) for i in range(3)])
+        if kind == 1:
+            n = np.linalg.norm(p)
+            if n < 1e-6:
+                continue
+            p = p / n
+        lights.append((kind, p, col))
+    return amb, lights
+
+
+DEFAULT_LIGHTS = (np.array([0.45, 0.45, 0.45]),
+                  [(1, np.array([-0.53, 0.72, 0.45]), np.array([1.0, 1.0, 1.0])),
+                   (1, np.array([0.5, 0.3, -0.8]), np.array([0.35, 0.35, 0.35]))])   # (a model with no room: props)
+
+
+def light_mesh(m, lights):
+    """Colosseum's lighting for a mesh its material asks it for (HSD RENDER_DIFFUSE; the user, 2026-11-11: "keep
+    Platinum's style, but add in Colosseum's lighting"): each vertex's colour as GX works it out, the material's
+    colour (or the vertex's own: RENDER_VERTEX) times the material's ambient under the room's ambient light plus
+    every light's colour by how far the surface faces it, baked into the vertex colours the engine draws (128 is
+    full strength there). Unlit meshes (the rooms' own baked vertex colours) stay as they are."""
+    mat = m.material or {}
+    rm = mat.get("rendermode", 0)
+    if not rm & 4 or lights is None or not len(m.pos):
+        return
+    amb, ls = lights
+    n = m.nrm.astype(np.float64)
+    ln = np.linalg.norm(n, axis=1, keepdims=True)
+    n = np.where(ln > 1e-6, n / np.maximum(ln, 1e-6), np.array([[0.0, 1.0, 0.0]]))
+    mamb = np.array(mat.get("ambient", (128, 128, 128, 255))[:3], dtype=np.float64) / 255.0
+    total = np.tile(amb * mamb, (len(n), 1))
+    for kind, p, col in ls:
+        if kind == 1:
+            d = np.clip(n @ p, 0.0, 1.0)[:, None]
+        else:
+            to = p[None, :] - m.pos.astype(np.float64)
+            tl = np.linalg.norm(to, axis=1, keepdims=True)
+            d = np.clip(np.sum(n * to / np.maximum(tl, 1e-6), axis=1), 0.0, 1.0)[:, None]
+        total += d * col[None, :]
+    total = np.clip(total, 0.0, 1.0)
+    if rm & 2 and m.has_clr:
+        base = m.col[:, :3].astype(np.float64) / 255.0 * 2.0   # (the rooms' vertex colours: 128 is white)
+        alpha = m.col[:, 3]
+    else:
+        base = np.tile(np.array(mat.get("diffuse", (255, 255, 255, 255))[:3], dtype=np.float64) / 255.0, (len(n), 1))
+        alpha = np.full(len(n), 255, dtype=np.uint8)
+    # (GX's TEV doubles the lit colour as it does the rooms' baked ones: 255 here is twice full strength, so a face
+    # the lights reach fully is as bright as before and one turned away falls to its ambient)
+    out = np.clip(base * total * 255.0, 0, 255).astype(np.uint8)
+    m.col = np.concatenate([out, alpha[:, None].astype(np.uint8)], axis=1)
+    m.has_clr = True
+
+
 def mesh_bytes(m, tex_index):
     mat = m.material or {}
     rm = mat.get("rendermode", 0)
@@ -287,7 +362,10 @@ def build(src, out):
             for si, s in enumerate(sets):
                 kind = 2 if hsd.is_sky(s) else 0
                 body.append(struct.pack("<B3xI", kind, len(s)))
+                lights = scene_lights(f)
                 for m in s:
+                    if kind != 2:
+                        light_mesh(m, lights)
                     # (a wall screen: a set of one mesh with an 8 x 8 test card, red or a checkerboard, which
                     # Colosseum draws its picture over at run time: a dark, switched-off screen here)
                     if len(s) == 1 and 0 <= m.tex < len(f.raw_images) and f.raw_images[m.tex][1:3] == (8, 8):
@@ -333,6 +411,7 @@ def build(src, out):
             remap.append(tex_keys[k])
         body = [struct.pack("<I", 1), struct.pack("<B3xI", 0, len(ms))]
         for m in ms:
+            light_mesh(m, DEFAULT_LIGHTS)   # (a prop stands in any room: a sun and a fill of its own)
             body.append(mesh_bytes(m, remap[m.tex] if 0 <= m.tex < len(remap) else -1))
         body.append(struct.pack("<I", 0))
         raw_body = b"".join(body)
