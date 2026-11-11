@@ -7,7 +7,9 @@ import sys
 log = open(sys.argv[1] + '/a.log', errors='replace').read()
 ok = True
 m = re.findall(r'\[test\] money (\d+)', log)
-if not m or int(m[-1]) != 240:
+# (a day's first battle can finish a daily goal, which pays on top: "daily: goal N done")
+daily = 300 * len(re.findall(r'daily: goal \d+ done', log))
+if not m or int(m[-1]) not in (240, 240 + daily):
     print('FAIL prize: %s (want 240)' % (m[-1] if m else 'none'))
     ok = False
 else:

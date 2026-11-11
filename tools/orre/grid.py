@@ -431,7 +431,11 @@ def _tiles_from_flood(centre_walk, heights, trig, wall_between):
             # it; but never through a wall that stands across the step: the OUTSKIRT STAND's ramp railing beside
             # the diner's door)
             # (a wall across it and no ground at one height on both sides; a door frame's own wall is level ground)
-            if (heights[y][x] and heights[ny][nx] and wall_between(x, y, nx, ny) is not None
+            # (only from a tile that is walkable by its floor's area alone, not one the flood's person stands at the
+            # centre of: a staircase's own steps and a door frame's wall cross the way onto their triggers too)
+            other = (y, x) if trig[y, x] < 0 else (ny, nx)
+            if (trig[other] < 0 and not centre_walk[other] and heights[y][x] and heights[ny][nx]
+                    and wall_between(x, y, nx, ny) is not None
                     and min(abs(a - b) for a in heights[y][x] for b in heights[ny][nx]) > 2.0):
                 return False
             return True
