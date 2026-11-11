@@ -57,5 +57,7 @@ u32 U3D_Money(u16 trainerId);
 bool8 U3D_PrepareBattle(u16 first, u16 second);
 void U3D_BattleEnded(bool8 won);
 u8 U3D_BattleResult(void);
+u16 U3D_BattleSong(void);               // pokemon.c GetBattleBGM on an UNOVA map: Black's own
+u16 U3D_VictorySong(u16 song);          // ... MP_RegionVictorySong
 
 #endif

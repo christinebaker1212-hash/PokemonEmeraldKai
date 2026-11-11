@@ -98,6 +98,8 @@ def convert(line, cmap, wait_at_end=True):
             out.append(cmap.get(' ', 0x00))
         elif ch == '"':
             out.append(cmap.get('”', unknown))   # (Black closes its quotes with a straight one)
+        elif ch in '⑭⑮':
+            out.append(cmap.get('♂' if ch == '⑭' else '♀', unknown))   # (Black's gender glyphs)
         elif ch in '⒆⒇':
             out.append(0x53 if ch == '⒆' else 0x54)   # (Black's POKéMON glyphs: the game's PK and MN, charmap.txt)
         else:

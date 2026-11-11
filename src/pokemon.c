@@ -1,6 +1,7 @@
 // Moemon Kai: defines the song functions mp_kaisong_scene.h wraps
 #define MP_KAISONG_NO_SCENE
 #include "global.h"
+#include "u3d.h"   // Moemon Kai: UNOVA's battle songs
 #include "mp_region.h"
 #include "s3d.h"   // Moemon Kai: SINNOH
 #include "battle_gen4.h"   // Moemon Kai: Gen 4
@@ -6836,6 +6837,8 @@ u16 MP_RegionVictorySong(u16 song)
     u16 MP_StadiumBattle_Victory(u16 song);
     if (gMpStadiumBattle)
         return MP_StadiumBattle_Victory(song);   // Moemon Kai: POKéMON STADIUM's own (mp_stadium_cup.c)
+    if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL)))
+        return U3D_VictorySong(song);   // Moemon Kai: UNOVA's, Black's own (src/unova/u3d_battle.c)
     if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL)))
     {
         switch (song)
@@ -6939,6 +6942,10 @@ u16 GetBattleBGM(void)
         return MUS_RG_VS_TRAINER;   // Moemon Kai: KANTO's TRAINER TOWER, as FireRed's (its trainers are all plain classes)
     if (MP_JohtoTower_InBattle())
         return MUS_JOHTO_VS_TRAINER;   // Moemon Kai: JOHTO's BATTLE TOWER (Crystal's trainer battle theme)
+    if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup)
+     && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL))
+     && (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)) || gMpCoopBattle))
+        return U3D_BattleSong();   // Moemon Kai: UNOVA's, Black's own (src/unova/u3d_battle.c)
     if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)
      && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL))
      && (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)) || gMpCoopBattle))

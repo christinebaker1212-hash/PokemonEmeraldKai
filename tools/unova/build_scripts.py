@@ -16,6 +16,8 @@ File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little e
   2 triple, 3 rotation), count, u16 items x 4, u32 AI, u8 healer, cash, u16 prize item) and their teams (a/0/9/3: per
   POKéMON u8 strength (IVs 0-255), u8 Ability / gender, u8 level, u8 pad, u16 species, u16 form, [u16 item],
   [u16 moves x 4]), as two more file blocks
+  (version 3) u32 trainers, u8 each: the song kind of its battle (song_kinds(): 0 a trainer, 1 a Gym Leader, 2 CHEREN
+  or BIANCA, 3 Team Plasma, 4 the Elite Four, 5 the Champion, 6 N, 7 Ghetsis, 8 a Subway Boss), from its class and name
 """
 import os
 import struct
@@ -28,7 +30,7 @@ import narc  # noqa: E402
 import scripts as scr  # noqa: E402
 import zones as zr  # noqa: E402
 
-VERSION = 2
+VERSION = 3
 EVENT_ARC = 'a/1/2/5'
 TRDATA_ARC, TRPOKE_ARC = 'a/0/9/2', 'a/0/9/3'   # (Black's trainers and their teams: version 2)
 
@@ -45,6 +47,36 @@ def files_block(files, base):
     return head + bytes(table) + bytes(body)
 
 
+def song_kinds():
+    """Each trainer's battle song kind, by Black's class and trainer names (banks 191, 190)"""
+    import text as tx
+    names = tx.bank(narc.arc(tx.SYSTEM)[190])
+    classes = tx.bank(narc.arc(tx.SYSTEM)[191])
+    out = bytearray()
+    for i, t in enumerate(narc.arc(TRDATA_ARC)):
+        cls = classes[t[1]] if len(t) > 1 and t[1] < len(classes) else ''
+        name = names[i] if i < len(names) else ''
+        kind = 0
+        if cls == 'Leader':
+            kind = 1
+        elif name in ('Cheren', 'Bianca'):
+            kind = 2
+        elif name == 'N':
+            kind = 6
+        elif name == 'Ghetsis':
+            kind = 7
+        elif cls == 'Team Plasma':
+            kind = 3
+        elif cls == 'Elite Four':
+            kind = 4
+        elif cls == 'Champion':
+            kind = 5
+        elif cls == 'Subway Boss':
+            kind = 8
+        out.append(kind)
+    return struct.pack('<I', len(out)) + bytes(out) + b'\0' * (-len(out) % 4)
+
+
 def main():
     out_path = sys.argv[1]
     pack = bytearray(b'U3DS' + struct.pack('<I', VERSION))
@@ -59,6 +91,7 @@ def main():
     pack += files_block(narc.arc(EVENT_ARC), len(pack))
     pack += files_block(narc.arc(TRDATA_ARC), len(pack))
     pack += files_block(narc.arc(TRPOKE_ARC), len(pack))
+    pack += song_kinds()
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(b'U3SZ' + struct.pack('<I', len(pack)) + zlib.compress(bytes(pack), 6))
     print('%s: %d script files, %d zones, %d event files, %d bytes' % (out_path, len(narc.arc(scr.ARC)), len(zs),

@@ -60,7 +60,7 @@ void MPNet_Log(const char *fmt, ...);
 static u8 *sPack;
 static u32 sPackSize;
 static bool8 sTried;
-static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt;
+static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt;
 
 static u32 Get32(u32 at) { return at + 4 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 | sPack[at + 2] << 16 | (u32)sPack[at + 3] << 24 : 0; }
 static u16 Get16(u32 at) { return at + 2 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 : 0; }
@@ -102,7 +102,7 @@ static void Load(void)
     sPack = malloc(raw ? raw : 1);
     sPackSize = raw;
     if (sPack == NULL || uncompress(sPack, &raw, data + 8, (unsigned long)(size - 8)) != 0 || memcmp(sPack, "U3DS", 4) != 0
-     || Get32(4) < 1 || Get32(4) > 2)
+     || Get32(4) < 1 || Get32(4) > 3)
     {
         printf("[u3d] %s: can't read UNOVA's scripts\n", path);
         free(sPack);
@@ -120,6 +120,8 @@ static void Load(void)
     {
         sTrainersAt = BlockEnd(sEventsAt);
         sTeamsAt = BlockEnd(sTrainersAt);
+        if (Get32(4) >= 3)   // (version 3: each trainer's battle song kind)
+            sSongKindsAt = BlockEnd(sTeamsAt);
     }
     printf("[u3d] UNOVA's scripts: %u files, %u zones\n", Get32(sFilesAt), Get32(sZonesAt));
 }
@@ -151,6 +153,12 @@ const u8 *U3D_Vm_Trainer(u16 id, u32 *size)
 const u8 *U3D_Vm_TrainerTeam(u16 id, u32 *size)
 {
     return Ready() && sTeamsAt ? FileOf(sTeamsAt, id, size) : (*size = 0, NULL);
+}
+
+// Black's trainer ID's battle song kind (tools/unova/build_scripts.py song_kinds: 0 a trainer .. 8 a Subway Boss)
+u8 U3D_Vm_TrainerSongKind(u16 id)
+{
+    return Ready() && sSongKindsAt && id < Get32(sSongKindsAt) ? sPack[sSongKindsAt + 4 + id] : 0;
 }
 
 enum { Z_SCRIPT, Z_INIT, Z_MSG, Z_EVENT, Z_MATRIX, Z_PARENT, Z_TYPE, Z_PLACE };

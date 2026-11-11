@@ -20,6 +20,7 @@
 #include "constants/species.h"
 #include "constants/trainers.h"
 #include "constants/characters.h"
+#include "constants/songs.h"
 
 extern const struct Trainer gTrainersBase[];
 extern const u32 gTrainersBaseCount;
@@ -176,6 +177,36 @@ void U3D_BattleEnded(bool8 won)
 {
     sResult = won ? 1 : 2;
     MPNet_Log("unova: battle %s", won ? "won" : "lost");
+}
+
+// Black's own battle songs (music/mus_unova_vs_*.kaisong): the trainer's by its kind, else the wild one's
+u8 U3D_Vm_TrainerSongKind(u16 id);
+u16 U3D_BattleSong(void)
+{
+    static const u16 sSongs[] = {MUS_UNOVA_VS_TRAINER, MUS_UNOVA_VS_GYMLEADER, MUS_UNOVA_VS_RIVAL, MUS_UNOVA_VS_PLASMA,
+                                 MUS_UNOVA_VS_SHITENNO, MUS_UNOVA_VS_CHAMP, MUS_UNOVA_VS_N, MUS_UNOVA_VS_G_CIS,
+                                 MUS_UNOVA_VS_SUBWAY_TRAINER};
+    u8 kind;
+    if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
+        return MUS_UNOVA_VS_NORAPOKE;
+    if (!U3D_IsTrainer(gTrainerBattleOpponent_A))
+        return MUS_UNOVA_VS_TRAINER;
+    kind = U3D_Vm_TrainerSongKind(sBlackTrainer[0]);
+    return kind < ARRAY_COUNT(sSongs) ? sSongs[kind] : MUS_UNOVA_VS_TRAINER;
+}
+
+// ... and the victory's (the game's kinds of victory song to Black's)
+u16 U3D_VictorySong(u16 song)
+{
+    switch (song)
+    {
+    case MUS_VICTORY_WILD:        return MUS_UNOVA_WIN1;
+    case MUS_VICTORY_TRAINER:     return MUS_UNOVA_WIN2;
+    case MUS_VICTORY_GYM_LEADER:  return MUS_UNOVA_WIN3;
+    case MUS_VICTORY_AQUA_MAGMA:  return MUS_UNOVA_WIN4;
+    case MUS_VICTORY_LEAGUE:      return MUS_UNOVA_WIN5;
+    }
+    return song;
 }
 
 // 0: none yet, 1 won, 2 lost
