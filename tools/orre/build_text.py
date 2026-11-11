@@ -94,7 +94,14 @@ CTL_ID = control_ids()
 
 
 def japanese(parts):
-    return any(isinstance(p, str) and any(ord(c) >= 0x3000 for c in p) for p in parts)
+    # (only what's shown counts: a line's padding after its {end}, wide spaces, isn't Japanese: 20227 "RUI became a
+    # partner!" was dropped for it)
+    for p in parts:
+        if isinstance(p, tuple) and p[0] == 'end':
+            break
+        if isinstance(p, str) and any(ord(c) > 0x3000 for c in p):
+            return True
+    return False
 
 
 def orre_text_bytes(msg_id):
