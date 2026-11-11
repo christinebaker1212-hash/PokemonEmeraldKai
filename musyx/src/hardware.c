@@ -377,9 +377,24 @@ void hwKeyOff(u32 v) { dspVoice[v].changed[salTimeOffset] |= 0x40; }
 void hwSetPitch(u32 v, u16 speed) {
   DSPvoice *dsp_vptr = &dspVoice[v];
 
+#if MUSY_TARGET == MUSY_TARGET_PC
+  {
+    /* Moemon Kai: the GameCube's DSP caps a voice at 4x its sample's speed at 32 kHz. Speeds here are against the PC
+     * mixer's rate (ORRE mixes at the GBA's 13379 Hz), so the same cap is 32000 / rate times higher: capped at 4x,
+     * high notes (Colosseum's battle theme's) played at the wrong pitch (the user, 2026-11-11) */
+    u32 cap = synthInfo.mixFrq ? (u32)0x3fff * 32000u / synthInfo.mixFrq : 0x3fff;
+    if (cap > 0xffff)
+      cap = 0xffff;
+    if (cap < 0x3fff)
+      cap = 0x3fff;
+    if (speed > cap)
+      speed = (u16)cap;
+  }
+#else
   if (speed >= 0x4000) {
     speed = 0x3fff;
   }
+#endif
 
   if (dsp_vptr->lastUpdate.pitch != 0xff &&
       speed * 16 == dsp_vptr->pitch[dsp_vptr->lastUpdate.pitch]) {
