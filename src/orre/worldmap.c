@@ -508,7 +508,8 @@ static void DrawScene(SDL_Renderer *r)
     // (the cursor's pieces stand round the red diamond: moved with it from where the table puts them)
     GetItem(ITEM_DOT, &dot);
     gx = cx - (dot.x + dot.w / 2.0f);
-    gy = cy - (dot.y + dot.h / 2.0f - W.pan);
+    gy = cy - (dot.y + dot.h / 2.0f);   // (cy is on the panned map already: the pan again put the diamond and its
+                                        // brackets a pan's height under the place's gem, the user 2026-11-11)
     spread = W.state == WM_OPEN ? 24.0f * W.t / FADE : 1.5f + 1.5f * sinf(W.frame * 0.12f);
     place = ShownPlace(&alpha);
     while (n++ < 200 && GetItem(i, &it))
