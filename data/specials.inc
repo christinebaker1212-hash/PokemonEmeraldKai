@@ -839,3 +839,6 @@ gSpecials::
 	def_special U3D_VmSign   @ Moemon Kai: ... the sign looked at
 	def_special U3D_VmPos   @ Moemon Kai: ... the trigger spot stepped on
 	def_special U3D_VmHold   @ Moemon Kai: ... a scene holds the field until it ends
+	def_special U3D_VmScreen   @ Moemon Kai: UNOVA: the screen Black's script wants (0: it ended)
+	def_special U3D_VmOpenScreen   @ Moemon Kai: ... opened (waitstate: back when it closes)
+	def_special U3D_VmResume   @ Moemon Kai: ... and Black's script goes on

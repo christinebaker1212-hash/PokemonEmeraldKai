@@ -39,6 +39,11 @@
 #include "constants/songs.h"
 #include "u3d_cmds.h"
 #include "u3d_maps.h"
+#include "script_pokemon_util.h"
+#include "random.h"
+#include "constants/items.h"
+#include "constants/species.h"
+void MP_StarterTable_Open(const u16 *species, MainCallback back);
 
 const char *Updater_ExeFile(const char *name);
 int uncompress(unsigned char *dest, unsigned long *destLen, const unsigned char *source, unsigned long sourceLen);
@@ -462,7 +467,11 @@ static bool8 MovesDone(void)
 }
 
 // ------------------------------------------------------------------------------------------------ the VM
-enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE };
+enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN };
+// The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
+enum { SCREEN_NONE, SCREEN_STARTER };
+static u8 sScreen;
+static u16 sScreenVar;
 #define STACK 48
 
 struct Thread
@@ -525,6 +534,19 @@ static bool8 Locate(u16 zone, u16 scriptId, const u8 **code, u32 *size, u32 *pc,
     *pc = 4 * index + 4 + (s32)(Le16(*code + 4 * index) | (u32)Le16(*code + 4 * index + 2) << 16);
     *bank = SYSTEM_BANKS + msg;
     return *pc < *size;
+}
+
+static void Task_Vm(u8 taskId);
+
+// Black's script wants a screen of the game's: the field script takes it from here (U3D_VmOpenScreen) and the VM
+// goes on when it's back (U3D_VmResume)
+static void OpenScreen(struct Thread *t, u8 screen, u16 var)
+{
+    sScreen = screen;
+    sScreenVar = var;
+    t->wait = W_SCREEN;
+    if (sHolding)
+        ScriptContext_Enable();
 }
 
 static void Finish(struct Thread *t)
@@ -793,6 +815,58 @@ static void Step(struct Thread *t)
         case U3C_BufferNumber:
             ConvertIntToDecimalStringN(Slot(a[0]), V(1), STR_CONV_MODE_LEFT_ALIGN, 6);
             break;
+        // ---- the game's screens
+        case U3C_PROC_CallWordScreen:   // (ov223: the gift box's three POKé BALLS; the ball picked 0-2 in the work)
+            OpenScreen(t, SCREEN_STARTER, a[0]);
+            break;
+        // ---- POKéMON
+        case U3C_PROC_HealParty:
+            HealPlayerParty();
+            break;
+        case U3C_PROC_GetPartyCount:   // (result, kind: 0 all, else those that can battle)
+        {
+            u32 i, n = 0;
+            for (i = 0; i < PARTY_SIZE; i++)
+            {
+                u16 sp = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG);
+                if (sp != SPECIES_NONE && (V(1) == 0 || (sp != SPECIES_EGG && GetMonData(&gPlayerParty[i], MON_DATA_HP))))
+                    n++;
+            }
+            *WorkPtr(a[0]) = n;
+            break;
+        }
+        case U3C_PROC_AddMonToPartySimple:   // result, species, form, level
+            *WorkPtr(a[0]) = ScriptGiveMon(Species(V(1)), V(3), ITEM_NONE, 0, 0, 0) != MON_CANT_GIVE;
+            break;
+        case U3C_BufferPartyMonNickname:
+            if (V(1) < PARTY_SIZE)
+            {
+                GetMonData(&gPlayerParty[V(1)], MON_DATA_NICKNAME, Slot(a[0]));
+                StringGet_Nickname(Slot(a[0]));
+            }
+            break;
+        case U3C_BufferPartyMonSpeciesName:
+            if (V(1) < PARTY_SIZE)
+                GetSpeciesName(Slot(a[0]), GetMonData(&gPlayerParty[V(1)], MON_DATA_SPECIES));
+            break;
+        case U3C_PlayPokeVoice:   // species, form
+            PlayCry_Normal(Species(V(0)), 0);
+            break;
+        case U3C_WORK_CmdGetPlayerSex:
+            *WorkPtr(a[0]) = gSaveBlock2Ptr->playerGender;
+            break;
+        case U3C_WORK_CmdCheckLastBattleResultA:
+            *WorkPtr(a[0]) = 1;   // (won, or a battle the player lost goes on: as Black's "not silent")
+            break;
+        case U3C_WORK_CmdGetRandom:
+            *WorkPtr(a[0]) = V(1) ? Random() % V(1) : 0;
+            break;
+        case U3C_WORK_CmdEnableNationalDex:
+            EnableNationalPokedex();
+            break;
+        case U3C_WaitMsgKey:
+            t->wait = W_KEY;
+            break;
         // ---- people
         case U3C_TurnTargetMmdlToPlayer:
         {
@@ -916,6 +990,8 @@ static void Wait(struct Thread *t)
 
 static void Task_Vm(u8 taskId)
 {
+    if (sThread.wait == W_SCREEN)
+        return;
     struct Thread *t = &sThread;
     if (!t->alive)
     {
@@ -1067,10 +1143,7 @@ bool8 U3D_Vm_SceneStart(void)
     {
         if (Le16(d + o) != 1)
             continue;
-        at = o;
-        while (at + 2 <= size && Le16(d + at) != 0)
-            at += 6;
-        at += 2 + (Le16(d + o + 2) | Le16(d + o + 4) << 16);
+        at = o + 6 + (Le16(d + o + 2) | Le16(d + o + 4) << 16);   // (from the entry after its own: FindSceneScript)
         for (; at + 6 <= size && Le16(d + at) != 0; at += 6)
             if (WorkValue(Le16(d + at)) == Le16(d + at + 2))
             {
@@ -1087,6 +1160,56 @@ bool8 U3D_Vm_SceneStart(void)
 void U3D_VmHold(void)
 {
     if (!sThread.alive)
+        NothingToRun();
+}
+
+// specialvar U3D_VmScreen: the screen Black's script waits for (0: it ended)
+u16 U3D_VmScreen(void)
+{
+    return sThread.alive && sThread.wait == W_SCREEN ? sScreen : SCREEN_NONE;
+}
+
+static void CB2_ScreenDone(void)
+{
+    SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+}
+
+// special U3D_VmOpenScreen (waitstate: the script goes on when the screen closes)
+void U3D_VmOpenScreen(void)
+{
+    static const u16 sGiftBox[3] = {495, 498, 501};   // (Black's three, national numbers: the script's 0-2)
+    static u16 sSpecies[3];
+    u32 i;
+    switch (sScreen)
+    {
+    case SCREEN_STARTER:
+        for (i = 0; i < 3; i++)
+            sSpecies[i] = Species(sGiftBox[i]);
+        MP_StarterTable_Open(sSpecies, CB2_ScreenDone);
+        break;
+    default:
+        NothingToRun();
+        break;
+    }
+}
+
+// special U3D_VmResume: back from the screen, the script goes on
+void U3D_VmResume(void)
+{
+    switch (sScreen)
+    {
+    case SCREEN_STARTER:
+        *WorkPtr(sScreenVar) = gSpecialVar_Result < 3 ? gSpecialVar_Result : 0;
+        break;
+    }
+    sScreen = SCREEN_NONE;
+    if (sThread.alive)
+    {
+        sThread.wait = W_NONE;
+        if (!FuncIsActiveTask(Task_Vm))
+            CreateTask(Task_Vm, 80);
+    }
+    else
         NothingToRun();
 }
 

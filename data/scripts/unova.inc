@@ -1,6 +1,7 @@
 @ Moemon Kai: UNOVA's shared scripts (docs/UNOVA_HANDOFF.md "Black's words and scripts"). Every UNOVA map's people,
 @ signs and trigger spots come here; Black's own script then runs in UNOVA's VM (src/unova/u3d_vm.c) and the field
-@ waits until it ends. Nothing of Black's is written here.
+@ waits until it ends. When Black's script opens a screen (its starter choice, a battle...), the VM lets the wait go,
+@ the screen opens from here, and the VM goes on when it's back. Nothing of Black's is written here.
 
 @ ON_TRANSITION of every UNOVA map: Black's zone-change and field-init scripts (people placed by the story)
 Unova_EventScript_MapLoad::
@@ -11,30 +12,36 @@ Unova_EventScript_MapLoad::
 Unova_EventScript_Talk::
 	lockall
 	special U3D_VmTalk
-	waitstate
-	releaseall
-	end
+	goto Unova_EventScript_Wait
 
 @ A sign or a spot looked at
 Unova_EventScript_Sign::
 	lockall
 	special U3D_VmSign
-	waitstate
-	releaseall
-	end
+	goto Unova_EventScript_Wait
 
 @ A trigger spot stepped on (its work held its value)
 Unova_EventScript_Pos::
 	lockall
 	special U3D_VmPos
-	waitstate
-	releaseall
-	end
+	goto Unova_EventScript_Wait
 
 @ A scene of the zone's own (script.c TryRunOnFrameMapScript -> U3D_Vm_SceneStart)
 Unova_EventScript_Scene::
 	lockall
 	special U3D_VmHold
+	goto Unova_EventScript_Wait
+
+@ Until Black's script ends (VAR_RESULT 0), or wants a screen of the game's
+Unova_EventScript_Wait::
 	waitstate
+	specialvar VAR_RESULT, U3D_VmScreen
+	goto_if_ne VAR_RESULT, 0, Unova_EventScript_Screen
 	releaseall
 	end
+
+Unova_EventScript_Screen::
+	special U3D_VmOpenScreen
+	waitstate
+	special U3D_VmResume
+	goto Unova_EventScript_Wait
