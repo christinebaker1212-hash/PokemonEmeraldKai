@@ -246,6 +246,14 @@ The older notes per part:
   doing from a script's own wait). A line the field closed while it still printed is shown again (Poll W_MESSAGE*:
   Kai's hold script's releaseall, a frame after heroMoveTermEvent, hid the next line's box and its printer never ran
   on: the PRE GYM's first trainer; scenario orre_pregym_trainers).
+- **A way out and a touch spot on the same tiles** (1.189.3): Kai's world map trigger goes first (orre_npcs.c
+  Orre_Touch_Frame waits until the player has stood on such a tile for two frames: the object's tile changes as the
+  step begins, the trigger fires as it ends). PHENAC's west and east ways out share their tiles with the spots whose
+  script has RUI ask to go shopping; the spot's script started first and the map never opened on that step.
+- **PHENAC to PYRITE, as Colosseum has it** (walked 2026-11-11): the three from TEAM SNAGEM (999), back to the
+  stand's diner (1000: its scene ends in the shop), PHENAC again (1001), the MAYOR's house (1002), a guard at a way
+  out beaten (1004; the guards leave: 2649, which is REALGAM's place flag), the building site (D4_out's entry sets
+  1016, PYRITE's place flag), PYRITE (1017). MOEMON_ORRE_PLACES=1 logs each place's flag as the world map opens.
 - **The story walk, resumed**: a walk's autosave (its DIR/a.sav and side files) copied into a new folder runs on from
   there without MOEMON_DEBUG_QUICKSTART / WARP / PARTY (the game run directly, as tools/test/run1.sh does but keeping
   a.sav): the walk's `skipif orreflag` lines pass over what the save has done. Minutes instead of the walk from the start.
