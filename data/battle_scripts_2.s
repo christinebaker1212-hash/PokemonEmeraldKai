@@ -129,7 +129,10 @@ BattleScript_MpCoopBallNoTarget::
 @ Moemon Kai: CALL (ORRE's trainer battles, in RUN's place: src/orre/orre_shadow.c Orre_Shadow_Call): "X called Y!", then
 @ what came of it (a HYPER MODE snapped out of, a sleeper woken, or nothing)
 @ Moemon Kai: a trainer's Shadow Pokémon snagged (src/orre/orre_shadow.c): the player's now, it leaves the battle as if
-@ it had fainted (its catch EXP given, no faint EXP) and the trainer sends out the next one, or has lost
+@ it had fainted (its catch EXP given, no faint EXP) and the trainer sends out the next one, or has lost: `end`, not
+@ `finishaction`, so the fainted check after an action runs as it does after a KO (with `finishaction` the rest of the
+@ turn played on with the snagged one's place empty, the trainer's last one snagged didn't end the battle until the
+@ turn did, and the next one came out only then)
 BattleScript_OrreSnagged::
 	incrementgamestat GAME_STAT_POKEMON_CAPTURES
 	printstring STRINGID_GOTCHAPKMNCAUGHTPLAYER
@@ -142,7 +145,7 @@ BattleScript_OrreSnagged::
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_OrreSnaggedEnd::
 	waitstate
-	finishaction
+	end
 
 BattleScript_OrreSnagWrong::
 	waitmessage B_WAIT_TIME_LONG

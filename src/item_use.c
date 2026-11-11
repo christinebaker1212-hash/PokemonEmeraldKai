@@ -4,6 +4,7 @@
 #include "s3d_underground.h"   // Moemon Kai: the EXPLORER KIT
 #include "tcg/integration.h"
 #include "mp.h"
+#include "orre_shadow.h"
 #include "item_use.h"
 #include "constants/coins.h"
 #include "battle.h"
@@ -1284,6 +1285,13 @@ void ItemUseOutOfBattle_EvolutionStone(u8 taskId)
 
 void ItemUseInBattle_PokeBall(u8 taskId)
 {
+    const u8 *refusal = Orre_Shadow_BallRefusal();
+    if (refusal != NULL && CurrentBattlePyramidLocation() == PYRAMID_LOCATION_NONE)
+    {
+        // Moemon Kai: ORRE, no Shadow Pokémon out to snag: RUI says so and the ball stays in the BAG (Colosseum's way)
+        DisplayItemMessage(taskId, FONT_NORMAL, refusal, CloseItemMessage);
+        return;
+    }
     if (IsPlayerPartyAndPokemonStorageFull() == FALSE) // have room for mon?
     {
         MP_SaveData_Set("ball:last", gSpecialVar_ItemId);   // Moemon Co-op QoL: L throws it again

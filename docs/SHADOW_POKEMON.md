@@ -58,7 +58,11 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
   ORRE's trainer battles (RUN's place: no running from trainers there either): a turn action (HandleAction_Run ->
   Orre_Shadow_Call): in HYPER MODE it brings the Pokémon round by the CALL chance (and the gauge's CALL drop) or "It's
   no good! It's ignoring orders!"; it wakes a sleeper; else "...failed to hear!" (a Shadow Pokémon) or "It's not
-  listening!". Since 2026-11-11 (the user's choices): Friendship adds up to 25 (friendship * 25 / 255) to the CALL
+  listening!". Snag fixes (2026-11-11, checked by single, double and full-party snags): the snag's battle script
+  ends with `end` (the fainted check after an action, as after a KO: the next Pokémon comes out at once, the last one
+  snagged ends the battle on the spot; with `finishaction` the turn played on around an empty place); a ball chosen
+  in the BAG with no Shadow Pokémon out to snag isn't thrown (item_use.c: RUI's line, Orre_Shadow_BallRefusal; the
+  ball and the turn kept, as Colosseum's fight_menu.c). Since 2026-11-11 (the user's choices): Friendship adds up to 25 (friendship * 25 / 255) to the CALL
   chance out of HYPER MODE; a Shadow Pokémon neither in HYPER MODE nor asleep has its ACCURACY raised a stage (Pokémon
   XD's rule; "failed to hear!" only at +6); a Pokémon that isn't Shadow answers by its Friendship: under 70 "It's not
   listening!", from 70 it wakes and snaps out of confusion, from 150 its ACCURACY rises too, from 220 it's also cured

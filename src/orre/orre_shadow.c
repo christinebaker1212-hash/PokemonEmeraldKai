@@ -675,6 +675,20 @@ bool8 Orre_Shadow_WrongSnag(void)
     return TRUE;
 }
 
+// a ball chosen in the BAG in ORRE's trainer battle, with the SNAG MACHINE, while no Shadow Pokémon stands on the
+// other side: Colosseum never throws it (fight_menu.c: RUI's line, and the player chooses again), so the ball and the
+// turn aren't spent. NULL: it can be thrown (a Shadow Pokémon is out to snag, or it's not that kind of battle)
+const u8 *Orre_Shadow_BallRefusal(void)
+{
+    u8 b;
+    if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) || gMpCoopWild)
+        return NULL;
+    for (b = 0; b < gBattlersCount; b++)
+        if (GetBattlerSide(b) == B_SIDE_OPPONENT && Orre_Shadow_Snaggable(b))
+            return NULL;
+    return Orre_Shadow_WrongSnag() ? sWrongTarget : NULL;
+}
+
 // the snag done (the battle script's ORRE_SNAGGED, after givecaughtmon gave it to the player): its record becomes the
 // player's (its OT is the player's now), the POKéDEX knows it, and it leaves the battle as if it had fainted (no EXP:
 // the catch's was given), so the trainer sends out the next one or has lost. TRUE: it went into the party (no PC line)
