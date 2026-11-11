@@ -126,6 +126,10 @@ struct Thread
     u32 news[2];          // W_NEWS: std182_tvNewsEvent's lines still to show (NewsEvent)
     u8 newsLen, newsAt;
     bool8 newsHeld;       // ... it took the player for them
+    bool8 heroLoop;       // it steps the player (heroMoveMain): a room's main loop
+    bool8 loopHold;       // ... and went off into a scene without them: the player waits until it steps them again
+    u8 sinceHero;         // frames since it last did
+    bool8 stepped;        // it has stepped them at least once (its first pass is over)
     V st[VM_STACK];
 };
 
@@ -319,6 +323,24 @@ static f32 AsF(V v, u8 desc) { return IsInt(desc) ? (f32)v.s : v.f; }
 
 // ---- threads
 
+// The function steps the player itself (it calls heroMoveMain, native 31, with no arguments: push 31, native of one
+// word): a room's main loop
+static bool8 StepsHero(const struct Bank *b, u32 func)
+{
+    static const u8 sCall[] = {0x08, 0x02, 0x00, 0x00, 0x00, 0x1F, 0x25, 0x00, 0x01, 0x00, 0x01};
+    u32 start = Be32(b->d + 0x18 + 4 * func), end = b->size, i;
+    for (i = 0; i < b->funcs; i++)
+    {
+        u32 o = Be32(b->d + 0x18 + 4 * i);
+        if (o > start && o < end)
+            end = o;
+    }
+    for (i = start; i + sizeof(sCall) <= end; i++)
+        if (memcmp(b->d + i, sCall, sizeof(sCall)) == 0)
+            return TRUE;
+    return FALSE;
+}
+
 static struct Thread *Start(u32 scriptId, u32 argc, const u32 *args, bool8 room)
 {
     struct Bank *b = BankOf(scriptId >> 16);
@@ -341,6 +363,7 @@ static struct Thread *Start(u32 scriptId, u32 argc, const u32 *args, bool8 room)
     t->bank = b;
     t->scriptId = scriptId;
     t->room = room;
+    t->heroLoop = room && StepsHero(b, func);   // (from its first pass: a scene it starts with has the player wait too)
     t->ip = Be32(b->d + 0x18 + 4 * func);
     t->state = T_RUN;
     // (cms_ScriptCreateThread: the result's slot, the arguments, a null return address, the frame, the count)
@@ -766,7 +789,14 @@ static u32 Native(struct Thread *t, u32 n, const V *a, s32 count)
         return 0;
     case N_HERO_INIT_EVENT: Hold(t); return 0;
     case N_HERO_TERM_EVENT: LetGo(t); return 0;
-    case N_HERO_MAIN: return 0;          // (Kai's field moves the player)
+    case N_HERO_MAIN:   // (Kai's field moves the player; the loop is back from a scene it ran itself: they walk again)
+        t->heroLoop = TRUE, t->stepped = TRUE, t->sinceHero = 0;
+        if (t->loopHold)
+        {
+            t->loopHold = FALSE;
+            LetGo(t);
+        }
+        return 0;
     case N_SHOP_OPEN:   // menuShopOpen(N): Kai's POKeMART with Colosseum's list N (the coupon counters: not yet)
         if (ARG(0).u < ORRE_SHOP_COUNT && sOrreShops[ARG(0).u].kind <= 1 && sOrreShops[ARG(0).u].items[0])
         {
@@ -1395,6 +1425,7 @@ void Orre_Vm_Frame(void)
 {
     u16 room = 0;
     u32 i;
+    bool8 away = FALSE;
     if (O3D_RoomFile(&room) == NULL)
     {
         if (sRoom)
@@ -1441,10 +1472,28 @@ void Orre_Vm_Frame(void)
             Poll(t);
         if (t->wait == W_NONE)
             Run(t);
+        // (Colosseum's player only moves while a room's loop steps them, heroMoveMain every frame: a scene the loop
+        // runs itself, with no heroMoveInitEvent, has them stand still all the same. PHENAC's three from TEAM SNAGEM:
+        // the player walked off while they talked)
+        if (t->heroLoop && t->state == T_RUN && !t->holds)
+        {
+            if (t->sinceHero < 255)
+                t->sinceHero++;
+            if (t->sinceHero > 3)
+                away = TRUE;   // (about to wait: the scene's camera stays the scene's)
+            // (a scene on its first pass, before it ever stepped them: at once, or the field took the scene's camera
+            // back; later a few frames' grace, the loop's own wait between steps)
+            if (t->sinceHero > (t->stepped ? 6 : 0))
+            {
+                t->loopHold = TRUE;
+                Hold(t);
+                MPNet_Log("orre vm: %08X is off in a scene: the player waits", t->scriptId);
+            }
+        }
     }
     // (the player walks: no scene holds them and nothing locks the field. A scene's camera left where the scene put
     // it (PHENAC's kidnappers end by finishing, never letting go) eases back to the field's, the user 2026-11-08)
-    if (sHolder == NULL && !sHoldPending && !sHolding && !ScriptContext_IsEnabled() && !ArePlayerFieldControlsLocked()
+    if (sHolder == NULL && !sHoldPending && !sHolding && !away && !ScriptContext_IsEnabled() && !ArePlayerFieldControlsLocked()
      && O3D_CamActive() && !O3D_FreeBack() && !O3D_FreeMoving())
     {
         MPNet_Log("orre vm: the player walks: the scene's camera goes back to the field's");
