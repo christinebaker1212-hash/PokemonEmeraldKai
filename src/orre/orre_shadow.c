@@ -15,6 +15,7 @@
 #include <string.h>
 #include "global.h"
 #include "string_util.h"
+#include "constants/characters.h"
 #include "pokemon.h"
 #include "orre.h"
 #include "orre_shadow.h"
@@ -382,7 +383,7 @@ u32 Orre_Shadow_StoredExp(struct Pokemon *mon)
 
 enum { T_HYPER_ENTER, T_SELFISH, T_ATK_FOE, T_ATK_YOU, T_ATK_SELF, T_CONFUSED, T_ITEM_NOHOW, T_ITEM_NONE,
        T_CALL, T_CALL_RESPONDED, T_CALL_SENSES, T_CALL_IGNORING, T_CALL_NOT_LISTENING, T_CALL_FAILED, T_HYPER_STILL,
-       T_SENSES, T_WRONG_TARGET, T_AURA, T_COUNT };
+       T_SENSES, T_WRONG_TARGET, T_AURA, T_CALL_BUILT, T_COUNT };
 static const u8 sT_HyperEnter[] = _("{B_ATK_NAME_WITH_PREFIX}'s emotions rose to\na fever pitch!\pIt entered HYPER MODE!");
 static const u8 sT_Selfish[] = _("{B_ATK_NAME_WITH_PREFIX} selfishly used\n{B_BUFF1} without orders!");
 static const u8 sT_AtkFoe[] = _("{B_ATK_NAME_WITH_PREFIX} ignored orders and\nattacked the opposing trainer!");
@@ -397,6 +398,13 @@ static const u8 sT_CallSenses[] = _("{B_ATK_NAME_WITH_PREFIX} came to its senses
 static const u8 sT_CallIgnoring[] = _("It's no good!\nIt's ignoring orders!");
 static const u8 sT_CallNotListening[] = _("It's no good!\nIt's not listening!");
 static const u8 sT_CallFailed[] = _("{B_ATK_NAME_WITH_PREFIX} failed to hear!");
+// CALL's further answers (the user, 2026-11-11), in the battle's own words for them
+static const u8 sT_CallAccuracy[] = _("{B_ATK_NAME_WITH_PREFIX}'s ACCURACY\nrose!");
+static const u8 sT_CallConfusion[] = _("{B_ATK_NAME_WITH_PREFIX} snapped out of\nconfusion!");
+static const u8 sT_CallPoison[] = _("{B_ATK_NAME_WITH_PREFIX} was cured of\nits poisoning.");
+static const u8 sT_CallBurn[] = _("{B_ATK_NAME_WITH_PREFIX}'s burn was\nhealed.");
+static const u8 sT_CallParalysis[] = _("{B_ATK_NAME_WITH_PREFIX} was cured of\nparalysis.");
+static const u8 sT_CallFreeze[] = _("{B_ATK_NAME_WITH_PREFIX} was defrosted.");
 static const u8 sT_HyperStill[] = _("{B_ATK_NAME_WITH_PREFIX} is in HYPER MODE!");          // (0x771C)
 static const u8 sT_Senses[] = _("{B_ATK_NAME_WITH_PREFIX} came to its senses.");            // (0x771E)
 static const u8 *const sTexts[T_COUNT] = {sT_HyperEnter, sT_Selfish, sT_AtkFoe, sT_AtkYou, sT_AtkSelf, sT_Confused,
@@ -405,6 +413,7 @@ static const u8 *const sTexts[T_COUNT] = {sT_HyperEnter, sT_Selfish, sT_AtkFoe, 
 static u8 sLine[2];
 static const u8 *sWrongTarget;   // (RUI's words: Orre_Shadow_WrongSnag)
 static u8 sAuraText[2][400];      // (RUI's words when a Shadow Pokémon comes out: Orre_Shadow_AuraCall)
+static u8 sCallText[400];         // (CALL's answer, its lines joined: Orre_Shadow_Call)
 static u8 Snagged(void);
 
 const u8 gText_Orre_BattleMenuCall[] = _("FIGHT{CLEAR_TO 56}BAG\nMOéMON{CLEAR_TO 56}CALL");
@@ -415,6 +424,8 @@ const u8 *Orre_Shadow_BattleText(u8 line)
         return sWrongTarget;
     if (sLine[line & 1] == T_AURA)
         return sAuraText[line & 1];
+    if (sLine[line & 1] == T_CALL_BUILT)
+        return sCallText;
     return sTexts[sLine[line & 1] < T_COUNT ? sLine[line & 1] : 0];
 }
 
@@ -728,30 +739,82 @@ bool8 Orre_Shadow_CallAvailable(void)
         && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)) && !gMpCoopBattle;
 }
 
-static void Wake(u8 battler)
+static void SetStatus1(u8 battler, u32 status1)
 {
-    gBattleMons[battler].status1 &= ~STATUS1_SLEEP;
-    gBattleMons[battler].status2 &= ~STATUS2_NIGHTMARE;
+    gBattleMons[battler].status1 = status1;
     gActiveBattler = battler;
     BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_STATUS_BATTLE, 0, sizeof(gBattleMons[battler].status1),
                                  &gBattleMons[battler].status1);
     MarkBattlerForControllerExec(battler);
 }
 
+static void Wake(u8 battler)
+{
+    gBattleMons[battler].status2 &= ~STATUS2_NIGHTMARE;
+    SetStatus1(battler, gBattleMons[battler].status1 & ~STATUS1_SLEEP);
+}
+
+// one more line after CALL's answer (the lines joined with a paragraph into sCallText)
+static void CallAdd(const u8 *text)
+{
+    static const u8 sBreak[] = {CHAR_PROMPT_CLEAR, EOS};
+    if (sLine[1] != T_CALL_BUILT)
+    {
+        StringCopy(sCallText, sTexts[sLine[1]]);
+        sLine[1] = T_CALL_BUILT;
+    }
+    if (StringLength(sCallText) + StringLength(text) + 2 >= sizeof(sCallText))
+        return;
+    StringAppend(sCallText, sBreak);
+    StringAppend(sCallText, text);
+}
+
+static bool8 CallAccuracy(u8 battler)
+{
+    if (gBattleMons[battler].statStages[STAT_ACC] >= MAX_STAT_STAGE)
+        return FALSE;
+    gBattleMons[battler].statStages[STAT_ACC]++;
+    CallAdd(sT_CallAccuracy);
+    return TRUE;
+}
+
+static void CallCureStatus(u8 battler)
+{
+    u32 st = gBattleMons[battler].status1;
+    const u8 *text = (st & STATUS1_PSN_ANY) ? sT_CallPoison : (st & STATUS1_BURN) ? sT_CallBurn
+                   : (st & STATUS1_PARALYSIS) ? sT_CallParalysis : (st & STATUS1_FREEZE) ? sT_CallFreeze : NULL;
+    if (text == NULL)
+        return;
+    SetStatus1(battler, st & ~(STATUS1_PSN_ANY | STATUS1_TOXIC_COUNTER | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_FREEZE));
+    CallAdd(text);
+}
+
+// CALL: Colosseum's rules for a Shadow Pokémon (fight_range_80211A00.c), with Pokémon XD's raised ACCURACY for one
+// neither in HYPER MODE nor asleep, and Friendship's part (the user, 2026-11-11): it adds up to 25 to the nature's
+// chance of coming out of HYPER MODE; a Pokémon that isn't Shadow answers by its Friendship: under 70 it isn't
+// listening, from 70 it wakes and snaps out of confusion, from 150 its ACCURACY rises too, from 220 it's also cured
+// of a poisoning, burn, paralysis or freeze
+#define CALL_FRIEND_MID  70
+#define CALL_FRIEND_HIGH 150
+#define CALL_FRIEND_MAX  220
 void Orre_Shadow_Call(u8 battler)
 {
     struct OrreShadowRec *r = BattlerRec(battler);
+    struct Pokemon *mon = &gPlayerParty[gBattlerPartyIndexes[battler]];
+    u8 friendship = GetMonData(mon, MON_DATA_FRIENDSHIP);
     bool8 asleep = (gBattleMons[battler].status1 & STATUS1_SLEEP) != 0;
     sLine[0] = T_CALL;
     if (r != NULL && (r->flags & REC_HYPER))
     {
-        u8 chance = Orre_Shadow_CallChance(&gPlayerParty[gBattlerPartyIndexes[battler]]);
+        u32 chance = Orre_Shadow_CallChance(mon) + friendship * 25 / 255;
+        if (chance > 100)
+            chance = 100;
         if (Random() % 100 < chance)
         {
             // came to its senses: HYPER MODE over, CALL's drop of the heart gauge, and awake
             sLine[1] = T_CALL_SENSES;
             r->flags &= ~REC_HYPER;
-            DropRec(r, GetNature(&gPlayerParty[gBattlerPartyIndexes[battler]]), ORRE_DP_CALL, 0);
+            DropRec(r, GetNature(mon), ORRE_DP_CALL, 0);
             if (asleep)
                 Wake(battler);
         }
@@ -762,14 +825,32 @@ void Orre_Shadow_Call(u8 battler)
                 Wake(battler);
         }
     }
-    else if (asleep)
+    else if (r != NULL)
     {
         sLine[1] = T_CALL_RESPONDED;
-        Wake(battler);
+        if (asleep)
+            Wake(battler);
+        else if (!CallAccuracy(battler))
+            sLine[1] = T_CALL_FAILED;
     }
+    else if (friendship < CALL_FRIEND_MID)
+        sLine[1] = T_CALL_NOT_LISTENING;
     else
-        sLine[1] = r != NULL ? T_CALL_FAILED : T_CALL_NOT_LISTENING;
-    MPNet_Log("shadow: CALL to battler %u: outcome %u", battler, sLine[1]);
+    {
+        sLine[1] = T_CALL_RESPONDED;
+        if (asleep)
+            Wake(battler);
+        if (gBattleMons[battler].status2 & STATUS2_CONFUSION)
+        {
+            gBattleMons[battler].status2 &= ~STATUS2_CONFUSION;
+            CallAdd(sT_CallConfusion);
+        }
+        if (friendship >= CALL_FRIEND_HIGH)
+            CallAccuracy(battler);
+        if (friendship >= CALL_FRIEND_MAX)
+            CallCureStatus(battler);
+    }
+    MPNet_Log("shadow: CALL to battler %u (friendship %u): outcome %u", battler, friendship, sLine[1]);
 }
 
 // ---- "<save>.orre": {magic, format, story flag bytes, records}

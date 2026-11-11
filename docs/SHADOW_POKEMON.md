@@ -58,7 +58,12 @@ Colosseum does it (from the decomp and the disc), how that maps onto Kai, and wh
   ORRE's trainer battles (RUN's place: no running from trainers there either): a turn action (HandleAction_Run ->
   Orre_Shadow_Call): in HYPER MODE it brings the Pokémon round by the CALL chance (and the gauge's CALL drop) or "It's
   no good! It's ignoring orders!"; it wakes a sleeper; else "...failed to hear!" (a Shadow Pokémon) or "It's not
-  listening!". Tests shadow_hyper, shadow_call. Not yet: a held item actually used in HYPER MODE (Colosseum uses some
+  listening!". Since 2026-11-11 (the user's choices): Friendship adds up to 25 (friendship * 25 / 255) to the CALL
+  chance out of HYPER MODE; a Shadow Pokémon neither in HYPER MODE nor asleep has its ACCURACY raised a stage (Pokémon
+  XD's rule; "failed to hear!" only at +6); a Pokémon that isn't Shadow answers by its Friendship: under 70 "It's not
+  listening!", from 70 it wakes and snaps out of confusion, from 150 its ACCURACY rises too, from 220 it's also cured
+  of a poisoning, burn, paralysis or freeze (each a line of the battle's own words after "eagerly responded to the
+  call!": orre_shadow.c CallAdd). Tests shadow_hyper, shadow_call. Not yet: a held item actually used in HYPER MODE (Colosseum uses some
   BERRIES), "won't accept an item" (0x770B).
 - **S3c, the aura** (2026-11-07): src/orre/orre_aura.c draws it over the finished frame (sdl2.c VDraw, like the
   ASTRAL BALL's effects): a dark halo hugging the Pokémon's outline and tongues of dark smoke licking up from its tops
