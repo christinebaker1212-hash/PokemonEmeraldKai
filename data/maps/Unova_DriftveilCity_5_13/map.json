@@ -1,0 +1,79 @@
+{
+  "id": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+  "name": "Unova_DriftveilCity_5_13",
+  "layout": "LAYOUT_UNOVA_DRIFTVEILCITY_5_13",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_DRIFTVEIL_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_DRIFTVEILCITY_5_12",
+      "offset": 0,
+      "direction": "up"
+    },
+    {
+      "map": "MAP_UNOVA_DRIFTVEILCITY_6_13",
+      "offset": 0,
+      "direction": "right"
+    },
+    {
+      "map": "MAP_UNOVA_COLDSTORAGE_5_14",
+      "offset": 0,
+      "direction": "down"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 27,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_Z100",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 27,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_Z102",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 14,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_Z105",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 18,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_Z105",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 14,
+      "y": 0,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_Z105",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 10,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_Z105",
+      "dest_warp_id": "9"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

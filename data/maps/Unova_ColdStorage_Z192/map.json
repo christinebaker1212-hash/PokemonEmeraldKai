@@ -1,0 +1,49 @@
+{
+  "id": "MAP_UNOVA_COLDSTORAGE_Z192",
+  "name": "Unova_ColdStorage_Z192",
+  "layout": "LAYOUT_UNOVA_COLDSTORAGE_Z192",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_COLD_STORAGE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 7,
+      "y": 31,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_COLDSTORAGE_5_14",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 8,
+      "y": 31,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_COLDSTORAGE_5_14",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 9,
+      "y": 31,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_COLDSTORAGE_5_14",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 5,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_COLDSTORAGE_Z193",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

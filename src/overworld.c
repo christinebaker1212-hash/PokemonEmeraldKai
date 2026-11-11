@@ -7,6 +7,7 @@
 #include "overworld.h"
 #include "s3d.h"   // Moemon Kai: SINNOH
 #include "o3d.h"   // Moemon Kai: ORRE
+#include "u3d.h"   // Moemon Kai: UNOVA
 #include "battle_pyramid.h"
 #include "battle_setup.h"
 #include "berry.h"
@@ -1638,6 +1639,7 @@ static void OverworldBasic(void)
     MP_MapPic_Update();   // ... full-color map pictures in view (mp_mappic.c: the GAME CENTER)
     S3D_Update();         // Moemon Kai: SINNOH's maps drawn in 3D (src/sinnoh/s3d.c)
     O3D_Update();         // Moemon Kai: ORRE's, by their own engine (src/orre/o3d.c)
+    U3D_Update();         // Moemon Kai: UNOVA's, by theirs (src/unova/u3d.c)
     MP_Piggy_Update();    // Moemon Co-op: riding piggyback
     MP_Emote_Update();
     MP_PokeRadar_Update(); // Moemon Kai: the POKé RADAR's shaking grass (mp_pokeradar.c)

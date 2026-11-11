@@ -1,0 +1,79 @@
+{
+  "id": "MAP_UNOVA_OPELUCIDCITY_13_4",
+  "name": "Unova_OpelucidCity_13_4",
+  "layout": "LAYOUT_UNOVA_OPELUCIDCITY_13_4",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_OPELUCID_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_OPELUCIDCITY_12_4",
+      "offset": 0,
+      "direction": "left"
+    },
+    {
+      "map": "MAP_UNOVA_OPELUCIDCITY_13_5",
+      "offset": 0,
+      "direction": "down"
+    },
+    {
+      "map": "MAP_UNOVA_ROUTE10_13_3",
+      "offset": 0,
+      "direction": "up"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 2,
+      "y": 31,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDCITY_Z123",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 8,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDCITY_Z125",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 9,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDCITY_Z129",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 14,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDGATE_Z132",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDGATE_Z132",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 16,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDGATE_Z132",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

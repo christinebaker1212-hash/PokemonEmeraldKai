@@ -1,0 +1,65 @@
+{
+  "id": "MAP_UNOVA_NIMBASACITY_12_14",
+  "name": "Unova_NimbasaCity_12_14",
+  "layout": "LAYOUT_UNOVA_NIMBASACITY_12_14",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_NIMBASA_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_NIMBASACITY_12_13",
+      "offset": 0,
+      "direction": "up"
+    },
+    {
+      "map": "MAP_UNOVA_NIMBASACITY_13_14",
+      "offset": 0,
+      "direction": "right"
+    },
+    {
+      "map": "MAP_UNOVA_DESERTRESORT_12_15",
+      "offset": 0,
+      "direction": "down"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 22,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_Z65",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_Z88",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 22,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_Z94",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 15,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_Z93",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

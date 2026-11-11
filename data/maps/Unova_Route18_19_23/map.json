@@ -1,0 +1,39 @@
+{
+  "id": "MAP_UNOVA_ROUTE18_19_23",
+  "name": "Unova_Route18_19_23",
+  "layout": "LAYOUT_UNOVA_ROUTE18_19_23",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_ROUTE_18",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_ROUTE18_19_22",
+      "offset": 0,
+      "direction": "up"
+    },
+    {
+      "map": "MAP_UNOVA_ROUTE18_20_23",
+      "offset": 0,
+      "direction": "right"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 28,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE18_Z388",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

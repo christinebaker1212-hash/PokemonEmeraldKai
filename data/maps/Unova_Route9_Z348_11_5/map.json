@@ -1,0 +1,67 @@
+{
+  "id": "MAP_UNOVA_ROUTE9_Z348_11_5",
+  "name": "Unova_Route9_Z348_11_5",
+  "layout": "LAYOUT_UNOVA_ROUTE9_Z348_11_5",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_ROUTE_9",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_OPELUCIDCITY_12_5",
+      "offset": 0,
+      "direction": "right"
+    },
+    {
+      "map": "MAP_UNOVA_ROUTE9_Z348_10_5",
+      "offset": 0,
+      "direction": "left"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 25,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDGATE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 25,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDGATE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 25,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDGATE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 5,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_SHOPPINGMALL",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 6,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_SHOPPINGMALL",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

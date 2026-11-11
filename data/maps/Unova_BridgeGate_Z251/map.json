@@ -1,0 +1,42 @@
+{
+  "id": "MAP_UNOVA_BRIDGEGATE_Z251",
+  "name": "Unova_BridgeGate_Z251",
+  "layout": "LAYOUT_UNOVA_BRIDGEGATE_Z251",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_BRIDGE_GATE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 1,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 1,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 1,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

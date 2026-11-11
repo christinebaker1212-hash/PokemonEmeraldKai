@@ -1,0 +1,36 @@
+{
+  "id": "MAP_UNOVA_UNDELLABAY_24_8",
+  "name": "Unova_UndellaBay_24_8",
+  "layout": "LAYOUT_UNOVA_UNDELLABAY_24_8",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_UNDELLA_BAY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_UNDELLABAY_25_8",
+      "offset": 0,
+      "direction": "right"
+    },
+    {
+      "map": "MAP_UNOVA_UNDELLABAY_24_9",
+      "offset": 0,
+      "direction": "down"
+    },
+    {
+      "map": "MAP_UNOVA_ROUTE13_Z370_23_8",
+      "offset": 0,
+      "direction": "left"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [],
+  "coord_events": [],
+  "bg_events": []
+}

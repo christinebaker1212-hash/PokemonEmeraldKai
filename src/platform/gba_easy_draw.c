@@ -45,6 +45,9 @@ bool (*gMpS3dOamHidden)(int oamIndex, int x, int line);
 // Moemon Kai: ORRE's 3D maps, their own engine's (src/orre/o3d.c)
 void (*gMpO3dLine)(int line, uint16_t layers[4][DISPLAY_WIDTH]);
 bool (*gMpO3dOamHidden)(int oamIndex, int x, int line);
+// Moemon Kai: UNOVA's 3D maps, their own engine's (src/unova/u3d.c)
+void (*gMpU3dLine)(int line, uint16_t layers[4][DISPLAY_WIDTH]);
+bool (*gMpU3dOamHidden)(int oamIndex, int x, int line);
 
 // Moemon Co-op: which sprite palette (+1; 0: a background) each pixel of the last frame shows: the battle weather
 // keeps out of the health boxes and falls behind some of the Pokémon (mp_battleweather.c)
@@ -579,6 +582,9 @@ static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct 
         return;
     // Moemon Kai: and in an ORRE 3D scene (src/orre/o3d.c)
     if (gMpO3dOamHidden && !isObjWin && gMpO3dOamHidden((int)(oam - (struct OamData *)OAM), global_x, vcount))
+        return;
+    // Moemon Kai: and in an UNOVA 3D scene (src/unova/u3d.c)
+    if (gMpU3dOamHidden && !isObjWin && gMpU3dOamHidden((int)(oam - (struct OamData *)OAM), global_x, vcount))
         return;
     // Moemon Co-op: the Pokémon in battle weather (mp_battleweather.c)
     if (gMpScenePixel && !is8BPP && gMpSceneObjPal[oam->paletteNum & 63])
@@ -1212,6 +1218,8 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
             gMpS3dLine(vcount, scanline.layers);
         if (gMpO3dLine)   // Moemon Kai: ORRE's 3D maps (src/orre/o3d.c)
             gMpO3dLine(vcount, scanline.layers);
+        if (gMpU3dLine)   // Moemon Kai: UNOVA's 3D maps (src/unova/u3d.c)
+            gMpU3dLine(vcount, scanline.layers);
         
         break;
     case 1:

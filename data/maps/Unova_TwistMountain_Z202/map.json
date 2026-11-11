@@ -1,0 +1,77 @@
+{
+  "id": "MAP_UNOVA_TWISTMOUNTAIN_Z202",
+  "name": "Unova_TwistMountain_Z202",
+  "layout": "LAYOUT_UNOVA_TWISTMOUNTAIN_Z202",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_TWIST_MOUNTAIN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 4,
+      "y": 61,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z199",
+      "dest_warp_id": "11"
+    },
+    {
+      "x": 7,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z199",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 50,
+      "y": 29,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z199",
+      "dest_warp_id": "10"
+    },
+    {
+      "x": 61,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ICIRRUSCITY_5_6",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 24,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z201",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 21,
+      "y": 49,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z203",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 42,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z201",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 49,
+      "y": 48,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z199",
+      "dest_warp_id": "12"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

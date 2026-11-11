@@ -1,0 +1,63 @@
+{
+  "id": "MAP_UNOVA_ROUTE10_Z359",
+  "name": "Unova_Route10_Z359",
+  "layout": "LAYOUT_UNOVA_ROUTE10_Z359",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_ROUTE_10",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 15,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE10_Z358",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 13,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE10_Z360",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 14,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE10_Z360",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE10_Z360",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 16,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE10_Z360",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE10_Z360",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

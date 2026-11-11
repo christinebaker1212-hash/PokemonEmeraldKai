@@ -1,0 +1,48 @@
+{
+  "id": "MAP_UNOVA_ROUTE5_Z329_10_13",
+  "name": "Unova_Route5_Z329_10_13",
+  "layout": "LAYOUT_UNOVA_ROUTE5_Z329_10_13",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_ROUTE_5",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_ROUTE5_Z329_11_13",
+      "offset": 0,
+      "direction": "right"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 9,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILDRAWBRIDGE",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 9,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILDRAWBRIDGE",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 9,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILDRAWBRIDGE",
+      "dest_warp_id": "7"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

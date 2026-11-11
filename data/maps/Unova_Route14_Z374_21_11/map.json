@@ -1,0 +1,62 @@
+{
+  "id": "MAP_UNOVA_ROUTE14_Z374_21_11",
+  "name": "Unova_Route14_Z374_21_11",
+  "layout": "LAYOUT_UNOVA_ROUTE14_Z374_21_11",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_ROUTE_14",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_ROUTE14_Z374_22_11",
+      "offset": 0,
+      "direction": "right"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 5,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABUNDANTSHRINE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 6,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABUNDANTSHRINE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 19,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BLACKGATE",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 20,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BLACKGATE",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 21,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BLACKGATE",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

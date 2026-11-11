@@ -1,0 +1,28 @@
+{
+  "id": "MAP_UNOVA_NIMBASACITY_Z87",
+  "name": "Unova_NimbasaCity_Z87",
+  "layout": "LAYOUT_UNOVA_NIMBASACITY_Z87",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_NIMBASA_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 6,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_Z84",
+      "dest_warp_id": "4"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

@@ -1,0 +1,28 @@
+{
+  "id": "MAP_UNOVA_LIBERTYGARDEN",
+  "name": "Unova_LibertyGarden",
+  "layout": "LAYOUT_UNOVA_LIBERTYGARDEN",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_LIBERTY_GARDEN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 16,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_LIBERTYGARDEN_Z236",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

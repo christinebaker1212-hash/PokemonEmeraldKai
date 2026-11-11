@@ -1,0 +1,84 @@
+{
+  "id": "MAP_UNOVA_WHITEFOREST_Z424",
+  "name": "Unova_WhiteForest_Z424",
+  "layout": "LAYOUT_UNOVA_WHITEFOREST_Z424",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_WHITE_FOREST",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 8,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BLACKGATE_Z379",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 8,
+      "y": 51,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BLACKGATE_Z379",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 8,
+      "y": 52,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BLACKGATE_Z379",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 8,
+      "y": 53,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BLACKGATE_Z379",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 43,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_WHITEFOREST_Z425",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 50,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BLACKGATE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 51,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BLACKGATE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 52,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BLACKGATE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 19,
+      "y": 46,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_WHITEFOREST_Z426",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

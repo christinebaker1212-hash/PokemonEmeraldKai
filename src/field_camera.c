@@ -1,6 +1,7 @@
 #include "global.h"
 #include "s3d.h"   // Moemon Kai: S3D_METATILE_BEHAVIOR
 #include "o3d.h"   // Moemon Kai: ORRE
+#include "u3d.h"   // Moemon Kai: UNOVA
 #include "berry.h"
 #include "bike.h"
 #include "field_camera.h"
@@ -245,6 +246,8 @@ static void DrawMetatileAt(const struct MapLayout *mapLayout, u16 offset, int x,
     if (metatileId >= S3D_METATILE_BEHAVIOR && S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
         metatileId = 1;
     if (metatileId >= O3D_METATILE_BEHAVIOR && O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))   // (ORRE's too)
+        metatileId = 1;
+    if (metatileId >= U3D_METATILE_BEHAVIOR && U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))   // (UNOVA's too)
         metatileId = 1;
     if (metatileId < Fieldmap_PrimaryMetatiles(mapLayout))   // Moemon Kai: FRLG split
     {

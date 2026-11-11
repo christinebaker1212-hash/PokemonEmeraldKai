@@ -42,6 +42,7 @@
 #include "overworld.h"
 #include "s3d.h"
 #include "o3d.h"   // Moemon Kai: ORRE
+#include "u3d.h"   // Moemon Kai: UNOVA
 #include "event_data.h"
 #include "script.h"
 #include "constants/event_bg.h"
@@ -1160,6 +1161,8 @@ int MakerApi_Stale(int map, struct MakerStale *out, int max)
     blocks = S3D_LayoutBlocks(base->mapLayout);
     if (blocks == base->mapLayout->map)
         blocks = O3D_LayoutBlocks(base->mapLayout);
+    if (blocks == base->mapLayout->map)
+        blocks = U3D_LayoutBlocks(base->mapLayout);   // Moemon Kai: UNOVA's (src/unova/u3d.c)
     for (i = 0; i < e->blockCount; i++)
     {
         const struct BlockEdit *b = &e->blocks[i];
@@ -1201,6 +1204,8 @@ const u16 *Maker_MapBlocks(const struct MapHeader *h)
     const u16 *base = S3D_LayoutBlocks(h->mapLayout);
     if (base == h->mapLayout->map)
         base = O3D_LayoutBlocks(h->mapLayout);   // Moemon Kai: ORRE's from its own pack (src/orre/o3d.c)
+    if (base == h->mapLayout->map)
+        base = U3D_LayoutBlocks(h->mapLayout);   // Moemon Kai: UNOVA's from its own (src/unova/u3d.c)
     struct MapEdits *e;
     int map;
     u32 i, n, skipped = 0;

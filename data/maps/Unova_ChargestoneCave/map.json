@@ -1,0 +1,44 @@
+{
+  "id": "MAP_UNOVA_CHARGESTONECAVE",
+  "name": "Unova_ChargestoneCave",
+  "layout": "LAYOUT_UNOVA_CHARGESTONECAVE",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_CHARGESTONE_CAVE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_MISTRALTONCITY_3_9",
+      "offset": 0,
+      "direction": "up"
+    },
+    {
+      "map": "MAP_UNOVA_MISTRALTONCITY_2_10",
+      "offset": 0,
+      "direction": "left"
+    },
+    {
+      "map": "MAP_UNOVA_ROUTE6_Z331_3_11",
+      "offset": 0,
+      "direction": "down"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 11,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CHARGESTONECAVE_Z195",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

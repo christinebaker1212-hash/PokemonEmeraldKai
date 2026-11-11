@@ -1,0 +1,63 @@
+{
+  "id": "MAP_UNOVA_CASTELIACITY_Z34",
+  "name": "Unova_CasteliaCity_Z34",
+  "layout": "LAYOUT_UNOVA_CASTELIACITY_Z34",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_CASTELIA_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 25,
+      "y": 46,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z47",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 25,
+      "y": 47,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z47",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 25,
+      "y": 48,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z47",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 7,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z54",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 7,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z54",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 7,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z54",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

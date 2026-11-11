@@ -5,6 +5,7 @@
 #include "sprite.h"
 #include "s3d.h"   // Moemon Kai: SINNOH
 #include "o3d.h"   // Moemon Kai: ORRE
+#include "u3d.h"   // Moemon Kai: UNOVA
 #include "mp_bigsprite.h"
 #include "main.h"
 #include "palette.h"
@@ -379,6 +380,14 @@ void UpdateOamCoords(void)
                     gO3dSpriteFeet[i] = ny;
                     x = nx, y = ny + sprite->centerToCornerVecY;
                 }
+                else if (U3D_Active())
+                {
+                    // Moemon Kai: on an UNOVA 3D map, the same (src/unova/u3d.c)
+                    s32 feet = y - sprite->centerToCornerVecY, nx, ny;
+                    U3D_PlaceSprite(i, x, feet, &nx, &ny, &gU3dSpriteDepth[i]);
+                    gU3dSpriteFeet[i] = ny;
+                    x = nx, y = ny + sprite->centerToCornerVecY;
+                }
                 // (how far the 3D view moved it from its flat spot: a picture of any size, a PMD follower's, is drawn
                 // from the sprite's own point and goes with it, mp_bigsprite.c)
                 gMpPlaceDx[i] = x - flatX, gMpPlaceDy[i] = y - flatY;
@@ -750,6 +759,7 @@ void LoadOam(void)
         MP_BigSprite_CommitOam();   // Moemon PC: the big sprites' list goes with it
         S3D_CommitOam();            // Moemon Kai: and the sprites' depths in a SINNOH 3D scene
         O3D_CommitOam();            // Moemon Kai: ... and in an ORRE one
+        U3D_CommitOam();            // Moemon Kai: ... and in an UNOVA one
         // Moemon Kai: and which entries are shadows (1.63.11: marked as the list was built, a frame whose OAM wasn't
         // copied, a fade's, drew a shadow solid and its owner as a shadow)
         memcpy(gMpOamShadowLive, gMpOamShadow, sizeof(gMpOamShadowLive));
@@ -1872,6 +1882,7 @@ bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u16 *oamIndex)
     MP_BigSprite_NoteClip(sprite, first, *oamIndex);   // Moemon PC: its entries stop at its clip line
     S3D_NoteOam(sprite - gSprites, first, *oamIndex);   // Moemon Kai: its depth in a SINNOH 3D scene
     O3D_NoteOam(sprite - gSprites, first, *oamIndex);   // Moemon Kai: ... and in an ORRE one
+    U3D_NoteOam(sprite - gSprites, first, *oamIndex);   // Moemon Kai: ... and in an UNOVA one
     MP_BigSprite_NoteScale(sprite, first, *oamIndex);  // Moemon Co-op: and are drawn smaller (mp_spritescale.h)
     return full;
 }

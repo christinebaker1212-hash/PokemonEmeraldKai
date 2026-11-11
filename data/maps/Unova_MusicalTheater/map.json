@@ -1,0 +1,42 @@
+{
+  "id": "MAP_UNOVA_MUSICALTHEATER",
+  "name": "Unova_MusicalTheater",
+  "layout": "LAYOUT_UNOVA_MUSICALTHEATER",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_MUSICAL_THEATER",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 13,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_13_13",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 14,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_13_13",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 15,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_13_13",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

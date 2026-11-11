@@ -1,0 +1,35 @@
+{
+  "id": "MAP_UNOVA_GIANTCHASM_Z232",
+  "name": "Unova_GiantChasm_Z232",
+  "layout": "LAYOUT_UNOVA_GIANTCHASM_Z232",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_GIANT_CHASM",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 26,
+      "y": 79,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_GIANTCHASM_Z231",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 62,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_GIANTCHASM_Z234",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

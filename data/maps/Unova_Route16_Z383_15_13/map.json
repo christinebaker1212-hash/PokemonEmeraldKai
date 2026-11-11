@@ -1,0 +1,55 @@
+{
+  "id": "MAP_UNOVA_ROUTE16_Z383_15_13",
+  "name": "Unova_Route16_Z383_15_13",
+  "layout": "LAYOUT_UNOVA_ROUTE16_Z383_15_13",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_ROUTE_16",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_ROUTE16_Z383_14_13",
+      "offset": 0,
+      "direction": "left"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 23,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z384",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 23,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z384",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_LOSTLORNFOREST",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 4,
+      "y": 0,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_LOSTLORNFOREST",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

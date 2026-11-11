@@ -1,0 +1,42 @@
+{
+  "id": "MAP_UNOVA_LOSTLORNFOREST",
+  "name": "Unova_LostlornForest",
+  "layout": "LAYOUT_UNOVA_LOSTLORNFOREST",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_LOSTLORN_FOREST",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 12,
+      "y": 52,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE16_Z383_15_13",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 13,
+      "y": 52,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE16_Z383_15_13",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 16,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_LOSTLORNFOREST_Z386",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

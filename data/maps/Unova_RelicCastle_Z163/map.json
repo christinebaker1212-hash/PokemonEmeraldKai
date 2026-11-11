@@ -1,0 +1,35 @@
+{
+  "id": "MAP_UNOVA_RELICCASTLE_Z163",
+  "name": "Unova_RelicCastle_Z163",
+  "layout": "LAYOUT_UNOVA_RELICCASTLE_Z163",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_RELIC_CASTLE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 15,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_RELICCASTLE_Z162",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 10,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_RELICCASTLE_Z164",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

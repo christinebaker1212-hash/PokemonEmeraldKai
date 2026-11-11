@@ -1,0 +1,63 @@
+{
+  "id": "MAP_UNOVA_NIMBASAGATE_Z91",
+  "name": "Unova_NimbasaGate_Z91",
+  "layout": "LAYOUT_UNOVA_NIMBASAGATE_Z91",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_NIMBASA_GATE",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 15,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_12_13",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_12_13",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_12_13",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 1,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE5_Z329_11_13",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 1,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE5_Z329_11_13",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 1,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE5_Z329_11_13",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

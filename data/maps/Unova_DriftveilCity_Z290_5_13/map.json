@@ -1,0 +1,36 @@
+{
+  "id": "MAP_UNOVA_DRIFTVEILCITY_Z290_5_13",
+  "name": "Unova_DriftveilCity_Z290_5_13",
+  "layout": "LAYOUT_UNOVA_DRIFTVEILCITY_Z290_5_13",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_DRIFTVEIL_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_DRIFTVEILCITY_Z290_5_12",
+      "offset": 0,
+      "direction": "up"
+    },
+    {
+      "map": "MAP_UNOVA_DRIFTVEILCITY_Z290_6_13",
+      "offset": 0,
+      "direction": "right"
+    },
+    {
+      "map": "MAP_UNOVA_COLDSTORAGE_Z296_5_14",
+      "offset": 0,
+      "direction": "down"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [],
+  "coord_events": [],
+  "bg_events": []
+}

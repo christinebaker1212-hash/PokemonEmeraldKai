@@ -1,0 +1,49 @@
+{
+  "id": "MAP_UNOVA_ACCUMULATOWN_Z401",
+  "name": "Unova_AccumulaTown_Z401",
+  "layout": "LAYOUT_UNOVA_ACCUMULATOWN_Z401",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_ACCUMULA_TOWN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 6,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ACCUMULATOWN",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 7,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ACCUMULATOWN",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 8,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ACCUMULATOWN",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 8,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ACCUMULATOWN_Z402",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

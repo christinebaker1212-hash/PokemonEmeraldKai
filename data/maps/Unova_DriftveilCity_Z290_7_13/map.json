@@ -1,0 +1,34 @@
+{
+  "id": "MAP_UNOVA_DRIFTVEILCITY_Z290_7_13",
+  "name": "Unova_DriftveilCity_Z290_7_13",
+  "layout": "LAYOUT_UNOVA_DRIFTVEILCITY_Z290_7_13",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_DRIFTVEIL_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_DRIFTVEILCITY_Z290_6_13",
+      "offset": 0,
+      "direction": "left"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 19,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILDRAWBRIDGE_Z301",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

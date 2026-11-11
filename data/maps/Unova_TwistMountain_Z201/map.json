@@ -1,0 +1,91 @@
+{
+  "id": "MAP_UNOVA_TWISTMOUNTAIN_Z201",
+  "name": "Unova_TwistMountain_Z201",
+  "layout": "LAYOUT_UNOVA_TWISTMOUNTAIN_Z201",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_TWIST_MOUNTAIN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 46,
+      "y": 53,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z199",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 29,
+      "y": 59,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z199",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 26,
+      "y": 42,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z199",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 7,
+      "y": 29,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z199",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 7,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z202",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 59,
+      "y": 40,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z200",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 27,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z200",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 56,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z202",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 21,
+      "y": 29,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z199",
+      "dest_warp_id": "13"
+    },
+    {
+      "x": 56,
+      "y": 29,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_TWISTMOUNTAIN_Z199",
+      "dest_warp_id": "14"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

@@ -1,0 +1,105 @@
+{
+  "id": "MAP_UNOVA_DRIFTVEILCITY_Z105",
+  "name": "Unova_DriftveilCity_Z105",
+  "layout": "LAYOUT_UNOVA_DRIFTVEILCITY_Z105",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_DRIFTVEIL_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 8,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 9,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 10,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 18,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 18,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 18,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 8,
+      "y": 0,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 9,
+      "y": 0,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 10,
+      "y": 0,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 0,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 0,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 0,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRIFTVEILCITY_5_13",
+      "dest_warp_id": "5"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

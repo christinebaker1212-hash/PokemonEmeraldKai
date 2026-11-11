@@ -1,0 +1,72 @@
+{
+  "id": "MAP_UNOVA_LACUNOSATOWN_Z406",
+  "name": "Unova_LacunosaTown_Z406",
+  "layout": "LAYOUT_UNOVA_LACUNOSATOWN_Z406",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_LACUNOSA_TOWN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_ROUTE12_Z368_19_5",
+      "offset": 0,
+      "direction": "left"
+    },
+    {
+      "map": "MAP_UNOVA_ROUTE13_Z370_21_5",
+      "offset": 0,
+      "direction": "right"
+    },
+    {
+      "map": "MAP_UNOVA_ROUTE13_Z370_20_6",
+      "offset": 0,
+      "direction": "down"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 20,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_LACUNOSATOWN_Z407",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 8,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_LACUNOSATOWN_Z408",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 12,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_LACUNOSATOWN_Z409",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_LACUNOSATOWN_Z410",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 27,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_LACUNOSATOWN_Z411",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

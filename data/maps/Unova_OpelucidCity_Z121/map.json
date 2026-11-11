@@ -1,0 +1,49 @@
+{
+  "id": "MAP_UNOVA_OPELUCIDCITY_Z121",
+  "name": "Unova_OpelucidCity_Z121",
+  "layout": "LAYOUT_UNOVA_OPELUCIDCITY_Z121",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_OPELUCID_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 26,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDCITY_12_4",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 27,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDCITY_12_4",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 28,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDCITY_12_4",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 27,
+      "y": 0,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_OPELUCIDCITY_Z121",
+      "dest_warp_id": "4"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

@@ -5,6 +5,7 @@
 #include "fieldmap.h"
 #include "s3d.h"   // Moemon Kai: SINNOH
 #include "o3d.h"   // Moemon Kai: ORRE
+#include "u3d.h"   // Moemon Kai: UNOVA
 const u16 *Maker_MapBlocks(const struct MapHeader *h);   // Moemon Maker: the user's tiles (src/maker/maker_overrides.c)
 #include "fldeff.h"
 #include "fldeff_misc.h"
@@ -427,6 +428,9 @@ u16 GetMetatileAttributesById(u16 metatile)
     // Moemon Kai: ORRE's the same way, from Colosseum's collision (src/orre/o3d.c, tools/orre/grid.py)
     if (metatile >= O3D_METATILE_BEHAVIOR && O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
         return metatile - O3D_METATILE_BEHAVIOR;
+    // Moemon Kai: UNOVA's the same way, from Black's collision grids (src/unova/u3d.c, tools/unova/build_pack.py)
+    if (metatile >= U3D_METATILE_BEHAVIOR && U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+        return metatile - U3D_METATILE_BEHAVIOR;
     if (metatile < split)
     {
         return Maker_TilesetAttributes(gMapHeader.mapLayout->primaryTileset)[metatile];   // Moemon Maker: tileset edits

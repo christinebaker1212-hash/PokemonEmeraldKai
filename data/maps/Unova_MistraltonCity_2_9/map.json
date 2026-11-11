@@ -1,0 +1,44 @@
+{
+  "id": "MAP_UNOVA_MISTRALTONCITY_2_9",
+  "name": "Unova_MistraltonCity_2_9",
+  "layout": "LAYOUT_UNOVA_MISTRALTONCITY_2_9",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_MISTRALTON_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_UNOVA_MISTRALTONCITY_2_8",
+      "offset": 0,
+      "direction": "up"
+    },
+    {
+      "map": "MAP_UNOVA_MISTRALTONCITY_3_9",
+      "offset": 0,
+      "direction": "right"
+    },
+    {
+      "map": "MAP_UNOVA_MISTRALTONCITY_2_10",
+      "offset": 0,
+      "direction": "down"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 28,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_MISTRALTONCITY_Z111",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

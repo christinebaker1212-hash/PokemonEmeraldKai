@@ -1,0 +1,42 @@
+{
+  "id": "MAP_UNOVA_POKTRANSFERLAB",
+  "name": "Unova_PokTransferLab",
+  "layout": "LAYOUT_UNOVA_POKTRANSFERLAB",
+  "music": "MUS_NONE",
+  "region_map_section": "MAPSEC_UNOVA_POKE_TRANSFER_LAB",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 9,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE15_Z378_19_13",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 10,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE15_Z378_19_13",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 11,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ROUTE15_Z378_19_13",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}
