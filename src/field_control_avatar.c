@@ -880,9 +880,54 @@ static bool8 IsSinnohEntranceFront(struct MapPosition *position)
         || SinnohEntranceToward(position, DIR_NORTH);
 }
 
+// Moemon Kai: FireRed's exit mats inside KANTO / JOHTO are three warp tiles under a mat one tile wide (its edges drawn
+// a few pixels onto the tiles beside it): a run of three or more same-way exits to one map leaves by its inner tiles
+// only, so stepping off beside the mat no longer leaves (the user, 2026-11-11)
+static bool8 IsWideMatEdge(struct MapPosition *position, u16 metatileBehavior, u8 direction)
+{
+    s32 sx = (direction == DIR_NORTH || direction == DIR_SOUTH), sy = !sx, side, n[2] = {0, 0};
+    s8 id = GetWarpEventAtMapPosition(&gMapHeader, position);
+    u8 region = MP_Region_Current();
+    if (id == WARP_ID_NONE || (region != REGION_KANTO && region != REGION_JOHTO) || gMapHeader.mapType != MAP_TYPE_INDOOR)
+        return FALSE;
+    for (side = 0; side < 2; side++)
+        for (n[side] = 0; n[side] < 8; n[side]++)
+        {
+            s32 d = (n[side] + 1) * (side ? 1 : -1);
+            struct MapPosition at = {position->x + sx * d, position->y + sy * d, position->elevation};
+            s8 other = GetWarpEventAtMapPosition(&gMapHeader, &at);
+            if (other == WARP_ID_NONE || MapGridGetMetatileBehaviorAt(at.x, at.y) != metatileBehavior
+             || gMapHeader.events->warps[other].mapGroup != gMapHeader.events->warps[id].mapGroup
+             || gMapHeader.events->warps[other].mapNum != gMapHeader.events->warps[id].mapNum)
+                break;
+        }
+    return n[0] + n[1] + 1 >= 3 && (n[0] == 0 || n[1] == 0);
+}
+
+// (the story runs, mp_debug.c: a warp tile that never leaves)
+bool8 MP_ArrowWarpIsMatEdge(s16 x, s16 y)
+{
+    struct MapPosition at = {x + MAP_OFFSET, y + MAP_OFFSET, 0};
+    u16 b = MapGridGetMetatileBehaviorAt(at.x, at.y);
+    u8 dir = MetatileBehavior_IsSouthArrowWarp(b) ? DIR_SOUTH : MetatileBehavior_IsNorthArrowWarp(b) ? DIR_NORTH
+           : MetatileBehavior_IsEastArrowWarp(b) ? DIR_EAST : MetatileBehavior_IsWestArrowWarp(b) ? DIR_WEST : DIR_NONE;
+    s8 id;
+    if (dir == DIR_NONE)
+        return FALSE;
+    id = GetWarpEventAtPosition(&gMapHeader, x, y, 0);
+    if (id == WARP_ID_NONE)
+        return FALSE;
+    at.elevation = gMapHeader.events->warps[id].elevation;
+    return IsWideMatEdge(&at, b, dir);
+}
+
 static bool8 TryArrowWarp(struct MapPosition *position, u16 metatileBehavior, u8 direction)
 {
     s8 warpEventId = GetWarpEventAtMapPosition(&gMapHeader, position);
+
+    if (warpEventId != WARP_ID_NONE && IsArrowWarpMetatileBehavior(metatileBehavior, direction) == TRUE
+     && IsWideMatEdge(position, metatileBehavior, direction))
+        return FALSE;
 
     if (warpEventId != WARP_ID_NONE && SinnohEntranceToward(position, direction))
     {

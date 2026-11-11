@@ -305,6 +305,53 @@ static const u8 *Skip(Reader *r, u32 n)
 // A map's world: its grid, then its meshes in the grid's world ((x - x0, y, z - z0) * 16 / tile)
 // A room's model from the pack: map I's (its grid too: the field's blocks), or, I < 0, a scene room's (a room only shots
 // look at: the opening's; its grid if it has one, else Colosseum's units as they are at the tile scale)
+// A door's warp tiles: Colosseum's triggers reach a tile past each side of the doorway, so a row of three or more warp
+// tiles keeps only its inner ones, and the trigger outside what's kept is no door (field_control_avatar.c
+// TryOrreWideDoor walks into it) (the user, 2026-11-11: entrances and exits a tile too wide on both sides)
+#define STEP_WARP_BEHAVIOR 0x60   // (tools/orre/maps.py STEP_WARP)
+static void TrimDoors(OMap *om)
+{
+    s32 t, x, y;
+    if (om->trig == NULL || om->blocks == NULL)
+        return;
+    for (t = 0; t < 128; t++)
+    {
+        s32 x0 = om->w, x1 = -1, y0 = om->h, y1 = -1, lo, hi, kept = 0;
+        bool8 horiz;
+        for (y = 0; y < om->h; y++)
+            for (x = 0; x < om->w; x++)
+                if (om->trig[y * om->w + x] == t && om->blocks[y * om->w + x] == WALK + STEP_WARP_BEHAVIOR)
+                {
+                    x0 = min(x0, x), x1 = max(x1, x), y0 = min(y0, y), y1 = max(y1, y);
+                }
+        if (x1 < 0)
+            continue;   // (no door: a way out to the world map, a script's)
+        horiz = x1 - x0 >= y1 - y0;
+        lo = horiz ? x0 : y0, hi = horiz ? x1 : y1;
+        if (hi - lo + 1 >= 3)
+        {
+            for (y = 0; y < om->h; y++)
+                for (x = 0; x < om->w; x++)
+                    if (om->trig[y * om->w + x] == t && om->blocks[y * om->w + x] == WALK + STEP_WARP_BEHAVIOR
+                     && (horiz ? x : y) > lo && (horiz ? x : y) < hi)
+                        kept++;
+            if (kept)
+                lo++, hi--;
+        }
+        for (y = 0; y < om->h; y++)
+            for (x = 0; x < om->w; x++)
+            {
+                u32 k = (u32)y * om->w + x;
+                s32 c = horiz ? x : y;
+                if (om->trig[k] != t || (c >= lo && c <= hi))
+                    continue;
+                om->trig[k] = -1;
+                if (om->blocks[k] == WALK + STEP_WARP_BEHAVIOR)
+                    om->blocks[k] = WALK;
+            }
+    }
+}
+
 static bool8 RoomLoad(OMap *om, const char *file, s32 i)
 {
     u32 m, set, ns, nm, mi, has, x, y, fileMesh = 0;
@@ -411,6 +458,7 @@ static bool8 RoomLoad(OMap *om, const char *file, s32 i)
                 om->hgt[k][j] = hh * S;
             }
         }
+    TrimDoors(om);
     // the meshes (the sky's marked: drawn only under a shot)
     for (set = 0; set < ns && !meshes.bad; set++)
     {

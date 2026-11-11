@@ -1170,6 +1170,7 @@ static u16 SinnohEntranceKey(s16 x, s16 y)
 }
 // the key toward pad (a warp of this map to this map): a step there, or once on an arrow warp its direction (the
 // OLIVINE LIGHTHOUSE's stairs)
+bool8 MP_ArrowWarpIsMatEdge(s16 x, s16 y);   // field_control_avatar.c
 static u16 PadKey(s32 pad)
 {
     const struct WarpEvent *wp = &gMapHeader.events->warps[pad];
@@ -1295,7 +1296,8 @@ static u16 GotoKeyAnywhere(u8 group, u8 num, s32 tx, s32 ty)
         u32 score;
         if (getenv("MOEMON_GOTO_DEBUG2"))   // (each way out of the map weighed: the map it leads to, how many maps from the target, reached)
             printf("[test] goto: cand warp %d at %d,%d to %04x md %d step %d\n", (int)i, wp->x, wp->y, d, md, (wp->x >= 0 && wp->y >= 0 && wp->x < w && wp->y < hh) ? sWStep[wp->y * w + wp->x] : -1);
-        if (md == 0xFFFF || d == here || wp->x < 0 || wp->y < 0 || wp->x >= w || wp->y >= hh || S3D_Gyms_WrongDoor(wp->x, wp->y))
+        if (md == 0xFFFF || d == here || wp->x < 0 || wp->y < 0 || wp->x >= w || wp->y >= hh || S3D_Gyms_WrongDoor(wp->x, wp->y)
+         || MP_ArrowWarpIsMatEdge(wp->x, wp->y))   // (beside a one-tile mat: field_control_avatar.c IsWideMatEdge)
             continue;   // (HEARTHOME's gym: the door the floor's clue rules out. This map's own stairs and holes: PadPlan(-1, -1) below when they're the only way on.
                         // A warp off the map's edge is none: ROUTE 26 SOUTH's 12,-24)
         if (d == target)
