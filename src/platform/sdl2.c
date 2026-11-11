@@ -1402,6 +1402,7 @@ static void TestHarnessStep(void)
         u16 MP_TestApproachKey(u8 kind, u32 n, bool8 *done);
         u16 MP_TestApproachMapKey(bool8 obj, s32 a, s32 b, bool8 *done);
         bool8 ScriptContext_IsEnabled(void);
+        u16 Orre_VmHolding(void);
         bool8 done = FALSE;
         bool8 go = sGotoFrames > 0;
         u16 k = go ? MP_TestGotoKey(sGotoG, sGotoN, sGotoX, sGotoY)
@@ -1450,6 +1451,8 @@ static void TestHarnessStep(void)
                 sIdle = 0;
             }
         }
+        else if (go && k != A_BUTTON && Orre_VmHolding())
+            sTestKeys = (++sGotoBusy & 15) == 0 ? A_BUTTON : 0;   // (ORRE: a scene of Colosseum's script on the way: its words read on)
         else
             sTestKeys = (k == A_BUTTON && (sFrameCounter & 8)) ? 0 : k;   // (A pulsed: one held down presses only once)
         return;
