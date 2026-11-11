@@ -235,6 +235,9 @@ The older notes per part:
   (Orre_VmBattleDone; std103_battleGetResult: 2 the player won, as Colosseum's scripts compare), the hold goes on
   while the scene still holds (specialvar Orre_VmHolding: VAR_RESULT isn't safe across a battle) and ends with
   heroMoveTermEvent.
+  A scene that asked for the hold and ended before Kai's script engine was free leaves none pending (TryHold: a stale
+  sHoldPending switched off the room's touch spots and main loop boxes until the player left: PHENAC after RUI's
+  rescue, 1.189.1; MOEMON_ORRE_TOUCH_DEBUG=1 logs the hold's state every two seconds).
 - **Natives converted** (tools/orre/natives.json, from the decomp's table lbl_802E1CF0, names its indices): the flags
   (78 sets 1, 79 sets 0: the decomp's names are swapped; 80, 81, 82), messages (54 characterTalk, 7 / 8 winMsg
   open / close, 55 end of speech: Colosseum's line by id through orre_text.c, waiting for A where Colosseum's wait
