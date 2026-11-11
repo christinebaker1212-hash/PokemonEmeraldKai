@@ -19,6 +19,11 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
 - Zone headers: a/0/1/2 file 0, 427 records of 0x30 bytes (src/game/arm9/zonedata.c struct ZoneHeader): map type,
   area id, matrix id, script / init-script / message archive ids, four BGMs (one per season), encounter id, event
   data id, parent zone, place name, weather, camera, flags (bike, run, fly...), camera area, the start position.
+- Words: a/0/0/2 (system banks) and a/0/0/3 (story banks; a zone's msgArcId indexes these), decrypted as
+  msgdata.c does: tools/unova/text.py (`find WORDS`, `story N`). Place names: a/0/0/2 bank 89. Controls are
+  0xF000 runs ({0100:0}: the player's name; BE01 / BE00: wait for a key / scroll), 0xFFFE a new line.
+- Zones: tools/unova/zones.py lists the 427 with their names: NUVEMA TOWN 389 (its houses 390-396), ROUTE 1 317
+  (outdoors share matrix 0, UNOVA's one big map), CASTELIA's 32.
 - docs/ASSETS.md in aletheia inventories every NARC, with guesses; the code (ZONEDATA_*, MSGDATA_*, SCRCMD_*) names the
   real uses. Still to pin down from the code: the map matrix, the map containers ("WB" files in a/0/0/8: model,
   permissions, heights), area data (textures, animations, lights per season), the event data (people, warps,
