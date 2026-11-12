@@ -51,7 +51,11 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   through the game's in-game partner battle, TRAINER_UNOVA_C, the player's first three POKéMON, CHEREN from behind
   with Black's back picture: u3d_battle.c U3D_PrepareTagBattle, U3D_Gfx_PartnerBack). Whiteouts return to Black's
   warp points (ov010's 17, scripts pack v6: SetWarpDestination sets the save's last heal place; a new game's is home).
-  Test scenes need `mp battlestyle 1` (SET) when A is mashed through a battle. Not yet: Black's 3D cut-ins (0x19F, 0x240),
+  NACRENE (CHEREN at the gate: Black's SetNpcGridPos, a person's place for the zone, kept over its maps), N at the
+  museum, HAWES' tour, the library's quiz trainers, LENORA (her badge and TM), Team Plasma's theft, PINWHEEL FOREST
+  (BURGH, the grunts, the DRAGON SKULL, GORM). A shortcut test that skips a scene must set the flags that scene sets
+  (BURGH in the forest: `mp u3dflag 228 0`, LENORA's). Next: SKYARROW BRIDGE and CASTELIA are Black's rail maps
+  (below). Test scenes need `mp battlestyle 1` (SET) when A is mashed through a battle. Not yet: Black's 3D cut-ins (0x19F, 0x240),
   build-model animations (doors: 0x127-0x12A), redrawing replaced map blocks, warp destinations / whiteout points
   (0xD9), the value screen (0x155), people following the player (0x06B), the naming screen, Black's gift box screen,
   the region choice's boat and CASTELIA's pier, NACRENE onward.
@@ -178,3 +182,16 @@ As SINNOH's, in this order (each step a release once it plays, area by area: the
 CLAUDE.md's: UNOVA's code in src/unova/ only (never SINNOH's or ORRE's), Black's own words and scripts only, the ROM
 and its packs never committed, saves never change layout, protocol bumps, player-facing release notes, releases in
 batches.
+
+## Rail maps (next)
+
+Black moves the player along "rails" in 18 zones: CASTELIA's streets (zones 28, 30, 36), SKYARROW BRIDGE (249),
+VILLAGE BRIDGE (255), the GEAR STATION (66), DRAGONSPIRAL TOWER (209, 211), CELESTIAL TOWER (338-341), VICTORY ROAD
+(214), the POKéMON LEAGUE (137), OPELUCID (121), zone 114 and the ABYSSAL RUINS (241-244). ZONEDATA_GetSpecialKind
+(arm9 0x0209E026, 20 u16: zone 11 bits, kind 5) gives a no-grid resource (a/1/0/9: u16 rail file, scene area file);
+the rail files are a/0/7/9 (17, then their attributes in the second half): ov021 field_rail_loader.c / field_rail.c
+(points 0x70: four lines, keys, widths, a position, a camera; lines 0x48: start, end, key, shape, camera, length in
+16-unit cells; cameras 0x24: a function of 20 and 8 parameters; shapes 0x24: 0 straight, 1 an arc about an anchor).
+Rail events (people, triggers, signs, doors with `rail` 1) are placed by line, distance and side. The plan: lay each
+line's cells (its length by its width) onto the zone's tile grid with their heights when the pack and maps are made,
+rail events at their cells, and the rail cameras by the line the player is on.

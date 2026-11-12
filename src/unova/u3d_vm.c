@@ -364,6 +364,24 @@ static struct ObjectEvent *ObjectOf(u16 obj)
 }
 
 // event_object_movement.c: a person of the map hidden by Black's flag (its event data's vanish flag)
+// People a zone's script set somewhere else (Black's SetNpcGridPos: EVENTDATA_SYSTEM_SetNpcGridPos, CHEREN waiting at
+// NACRENE's gate): Black's tile and direction, kept while the player is in the zone and put on each of its maps
+#define NPC_AT_MAX 16
+static struct { u8 local, dir; u16 x, z; } sNpcAt[NPC_AT_MAX];
+static u8 sNpcAtCount;
+
+static bool8 NpcAt(u8 local, u16 *x, u16 *z)
+{
+    u32 i;
+    for (i = 0; i < sNpcAtCount; i++)
+        if (sNpcAt[i].local == local)
+        {
+            *x = sNpcAt[i].x, *z = sNpcAt[i].z;
+            return TRUE;
+        }
+    return FALSE;
+}
+
 // People a script deleted that have no flag of their own (CUT's trees, a boulder...): gone until the map is loaded
 // again, as Black's come back on re-entering (the game would put them back the moment they come into view)
 static u8 sGone[16], sGoneCount;
@@ -401,6 +419,9 @@ bool8 U3D_Vm_ObjectHidden(u8 localId)
     {
         // (a person whose spot is on another of the zone's maps: tools/unova/gen_maps.py keeps its place in the list)
         s32 m = U3D_MapIndex(), x = Le16(p + 28), z = Le16(p + 30);
+        u16 ax, az;
+        if (NpcAt(localId, &ax, &az))
+            x = ax, z = az;
         if (m >= 0 && Le16(p + 24) == 0)
         {
             x -= 32 * U3D_MapCellX(m), z -= 32 * U3D_MapCellZ(m);
@@ -1601,6 +1622,21 @@ static void Step(struct Thread *t)
                 RemoveObjectEventByLocalIdAndMap(gObjectEvents[id].localId, gObjectEvents[id].mapNum, gObjectEvents[id].mapGroup);
         }
             break;
+        case U3C_WORK_CmdSetNpcGridPos:   // person (its event id), direction, x, y, z: its place while in the zone
+        {
+            u8 local = LocalId(V(0));
+            u32 i;
+            for (i = 0; i < sNpcAtCount && sNpcAt[i].local != local; i++)
+                ;
+            if (i < NPC_AT_MAX)
+            {
+                sNpcAt[i].local = local, sNpcAt[i].dir = V(1), sNpcAt[i].x = V(2), sNpcAt[i].z = V(4);
+                if (i == sNpcAtCount)
+                    sNpcAtCount++;
+                SetObjEventTemplateCoords(local, MapX(V(2)), MapZ(V(4)));
+            }
+            break;
+        }
         case U3C_InitMmdlGridPosition:   // person, x, y, z, direction
         {
             u16 obj = V(0);
@@ -1951,7 +1987,16 @@ void U3D_VmMapLoad(void)
         RunNow(SCRIPT_NEW_GAME);
     }
     if (zone != sLastZone)
+    {
+        sNpcAtCount = 0;   // (a new zone: its people where its data puts them, till its scripts say)
         RunNow(InitScript(zone, 2));
+    }
+    else
+    {
+        u32 i;
+        for (i = 0; i < sNpcAtCount; i++)   // (another of the zone's maps: its people set as before)
+            SetObjEventTemplateCoords(sNpcAt[i].local, MapX(sNpcAt[i].x), MapZ(sNpcAt[i].z));
+    }
     sLastZone = zone;
     RunNow(InitScript(zone, 4));
 }
