@@ -609,6 +609,13 @@ bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
             return FALSE;
         if (WildEncounterCheck(info->encounterRate, FALSE) != TRUE)
             return FALSE;
+        if (area != 1 && TryStartRoamerEncounter() == TRUE)   // (THUNDURUS / TORNADUS after the credits)
+        {
+            if (!IsWildLevelAllowedByRepel(RoamerEncounterLevel()))
+                return FALSE;
+            BattleSetup_StartRoamerBattle();
+            return TRUE;
+        }
         if (TryGenerateWildMon(info, area == 1 ? WILD_AREA_WATER : WILD_AREA_LAND, WILD_CHECK_REPEL | WILD_CHECK_KEEN_EYE) != TRUE)
             return FALSE;
         BattleSetup_StartWildBattle();

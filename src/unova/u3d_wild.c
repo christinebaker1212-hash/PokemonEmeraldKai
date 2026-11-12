@@ -7,6 +7,7 @@
 #include "metatile_behavior.h"
 #include "pokemon.h"
 #include "wild_encounter.h"
+#include "random.h"
 #include "u3d.h"
 #include "constants/species.h"
 
@@ -19,6 +20,18 @@ const u8 *U3D_Vm_WildRow(u16 zone, u8 season);
 static struct WildPokemon sMons[12];
 static struct WildPokemonInfo sInfo;
 
+// White's own in Black's slots (the user, 2026-11-12: White's exclusives caught in UNOVA too): where White has its
+// counterpart, half the time (national numbers: COTTONEE / PETILIL, GOTHITA / SOLOSIS, VULLABY / RUFFLET lines)
+static u16 WhiteCounterpart(u16 national)
+{
+    static const u16 sPairs[][2] = {{546, 548}, {547, 549}, {574, 577}, {575, 578}, {576, 579}, {629, 627}, {630, 628}};
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sPairs); i++)
+        if (sPairs[i][0] == national)
+            return (Random() & 1) ? sPairs[i][1] : national;
+    return national;
+}
+
 static bool8 Fill(const u8 *row, u32 at, u32 count, u8 rate)
 {
     u32 i;
@@ -27,7 +40,7 @@ static bool8 Fill(const u8 *row, u32 at, u32 count, u8 rate)
     for (i = 0; i < count; i++)
     {
         const u8 *s = row + at + 4 * i;
-        u16 national = (s[0] | s[1] << 8) & 0x7FF;
+        u16 national = WhiteCounterpart((s[0] | s[1] << 8) & 0x7FF);
         sMons[i].species = national ? NationalPokedexNumToSpecies(national) : SPECIES_NONE;
         sMons[i].minLevel = s[2] ? s[2] : 1;
         sMons[i].maxLevel = s[3] >= sMons[i].minLevel ? s[3] : sMons[i].minLevel;

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "u3d.h"
 #include "event_data.h"
 #include "pokemon.h"
 #include "random.h"
@@ -229,6 +230,8 @@ bool8 TryStartRoamerEncounter(void)
     bool8 MP_JohtoRoamer_TryEncounter(u8 *level);
     if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))   // Moemon Kai: SINNOH's own roamers (s3d_roamer.c)
         return Sinnoh_TryRoamerEncounter(&sEncounterLevel);
+    if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))   // Moemon Kai: UNOVA's (u3d_vm.c: THUNDURUS, TORNADUS)
+        return U3D_TryRoamerEncounter(&sEncounterLevel);
     if (MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup) == REGION_JOHTO)   // Moemon Kai: JOHTO's beasts (mp_johto_roamer.c)
         return MP_JohtoRoamer_TryEncounter(&sEncounterLevel);
     if (MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup) != REGION_HOENN)

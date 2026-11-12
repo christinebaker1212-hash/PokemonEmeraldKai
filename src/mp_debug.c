@@ -4460,6 +4460,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] where map %d.%d xy %d,%d\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
                me->currentCoords.x - 7, me->currentCoords.y - 7);
     }
+    else if (strcmp(cmd, "u3droam") == 0)   // UNOVA's roamers onto this zone, then met (as on its grass)
+    {
+        bool8 U3D_Vm_RoamHere(void);
+        int tries;
+        if (U3D_Vm_RoamHere())
+            for (tries = 0; tries < 64; tries++)
+                if (TryStartRoamerEncounter())
+                {
+                    BattleSetup_StartRoamerBattle();
+                    break;
+                }
+        printf("[test] u3droam\n");
+    }
     else if (strcmp(cmd, "tiles") == 0)   // the map's entries around the player (collision, elevation, metatile)
     {
         struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];

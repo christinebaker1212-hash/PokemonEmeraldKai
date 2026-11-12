@@ -5904,6 +5904,8 @@ static void ReturnFromBattleToOverworld(void)
         ;   // Moemon Kai: SINNOH's roamer (s3d_roamer.c: its HP and status kept, or gone)
     else if (gBattleTypeFlags & BATTLE_TYPE_ROAMER && MP_JohtoRoamer_AfterBattle(&gEnemyParty[0], gBattleOutcome))
         ;   // Moemon Kai: JOHTO's beasts (mp_johto_roamer.c)
+    else if (gBattleTypeFlags & BATTLE_TYPE_ROAMER && U3D_RoamerAfterBattle(&gEnemyParty[0], gBattleOutcome))
+        ;   // Moemon Kai: UNOVA's (u3d_vm.c)
     else if (gBattleTypeFlags & BATTLE_TYPE_ROAMER)
     {
         UpdateRoamerHPStatus(&gEnemyParty[0]);

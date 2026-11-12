@@ -227,7 +227,10 @@ const u8 *U3D_Vm_WildRow(u16 zone, u8 season)
 // (zonedata.c: works 0x4000 on, then the flags 1-0xB5F; 0x4000+ flags are temporary, 0x8000+ works the script's own)
 #define WORKS 0x140
 #define FLAG_BYTES 0x16C
-static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear; } sWork;   // (began: Black's new-game
+struct UnovaRoamer { u16 species, hp; u8 level, state, loc, status; u32 personality, ivs; };   // (state: 0 none, 1
+                                                                                                // roaming, 2 caught or beaten)
+static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
+                u8 white; struct UnovaRoamer roam[2]; } sWork;   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
 {
@@ -410,6 +413,17 @@ static void Gone(u8 local, bool8 gone)
         sGone[sGoneCount++] = local;
 }
 
+// White's ZEKROM after the credits (the user, 2026-11-12: White's exclusives in UNOVA): at the top of DRAGONSPIRAL
+// TOWER (zone 213), where Black puts the player's RESHIRAM after the credits if it was knocked out at N's Castle
+// (its person 3, flag 766 cleared): there, once Black's own isn't (its flag set), until caught. Drawn as Black's own
+// ZEKROM (work object code 0xD6); its words are White's lines in Black's bank of N's throne room (zone 278)
+#define ZONE_ZEKROM 213
+#define ZONE_THRONE 278
+#define ZEKROM_LOCAL 4
+static bool8 WhiteZekromHere(u8 localId);
+static void RoamersMove(void);
+static void RoamSpawn(u8 slot, u16 national);
+
 bool8 U3D_Vm_ObjectHidden(u8 localId)
 {
     const u8 *p;
@@ -423,6 +437,8 @@ bool8 U3D_Vm_ObjectHidden(u8 localId)
     }
     p = Person(CurrentZone(), localId - 1);
     if (p == NULL)
+        return FALSE;
+    if (WhiteZekromHere(localId))
         return FALSE;
     if (Le16(p + 8) != 0 && FlagOn(Le16(p + 8)))   // (MmdlHeader: id, code, move, type, flag)
         return TRUE;
@@ -1395,6 +1411,11 @@ static void Step(struct Thread *t)
         case U3C_SAVEANIME_Start:
         case U3C_PROC_FLD_StartCameraShake:
         case U3C_TurnPlayerToFrontEvent:
+        case U3C_CreateMmdlIcaProc:   // (a person flown along a path of Black's own: the roamer's fly-by; not drawn)
+        case U3C_StartMmdlIcaAnime:
+        case U3C_WaitMmdlIcaAnime:
+        case U3C_EndMmdlIcaProc:
+        case U3C_SYMBOL_MAP_ScrCmdSetSubscreenMode:   // (the lower screen's mode: Kai has one screen)
         case U3C_WORK_CmdSetBoxFlags:   // (Black's PC wallpapers the game clear unlocks: Kai's PC keeps its own)
         case U3C_SCREENEFFECTS_CreateBuildModelNode:   // (build models' animations: doors, lifts)
         case U3C_SCREENEFFECTS_DeleteBuildModelNode:
@@ -1723,6 +1744,10 @@ static void Step(struct Thread *t)
             sClearMode = V(0);                        // FAME and the credits); the script ends here (VM_End)
             OpenScreen(t, SCREEN_CLEAR, 0);
             return;
+        case U3C_PROC_FLD_SpawnMovePokemonIfInactive:   // slot: Black's THUNDURUS sets off roaming (White's TORNADUS too)
+            RoamSpawn(0, 642);
+            RoamSpawn(1, 641);
+            break;
         case U3C_WORK_CmdSetWarpDestination:   // Black's warp point (a POKéMON CENTER, home): where a whiteout returns
             SetWhiteoutPoint(V(0));
             break;
@@ -2191,6 +2216,28 @@ static bool8 Run(u16 scriptId, u16 target, bool8 hold)
     return TRUE;
 }
 
+// A script of Black's own commands put together here (White's ZEKROM), with the throne room's words
+static bool8 RunCode(const u8 *code, u32 size, u16 target)
+{
+    struct Thread *t = &sThread;
+    u16 zone = CurrentZone();
+    const u8 *c;
+    u32 sz, pc;
+    if (t->alive || zone == 0xFFFF || !Locate(ZONE_THRONE, 1, &c, &sz, &pc, &t->bank))
+        return FALSE;
+    t->code = code, t->size = size, t->pc = 0;
+    t->sp = 0, t->cmp = 0, t->wait = W_NONE, t->alive = TRUE, t->zone = zone, t->target = target, t->result = NULL;
+    t->depth = 0;
+    t->script = 0;
+    memset(sLocal, 0, sizeof(sLocal));
+    sLocal[0x11] = target;
+    memset(sMoving, 0, sizeof(sMoving));
+    sHolding = TRUE;
+    MPNet_Log("u3d vm: zone %u, a script of Kai's (%u bytes)", zone, size);
+    CreateTask(Task_Vm, 80);
+    return TRUE;
+}
+
 // ------------------------------------------------------------------------------------------------ the field's hooks
 // (a special that ends at once still lets its waitstate stop the script first: the enable comes a frame later)
 static void Task_EnableNext(u8 taskId)
@@ -2205,10 +2252,31 @@ static void NothingToRun(void)
 }
 
 // special U3D_VmTalk: the person the player talked to (gSpecialVar_LastTalked) runs their script (Black's event data)
+static bool8 RunCode(const u8 *code, u32 size, u16 target);
+static bool8 sZekromBattle;
+
 void U3D_VmTalk(void)
 {
     u16 local = gSpecialVar_LastTalked;
     const u8 *p = local ? Person(CurrentZone(), local - 1) : NULL;
+    if (local < 256 && WhiteZekromHere(local) && p != NULL)
+    {
+        // Black's own commands and words (zone 278's bank: White's lines for ZEKROM): its cry, then the battle at
+        // Lv 50, as Black's RESHIRAM (script 7)
+        static const u8 sCode[] = {
+            0xA6, 0x00, 0x47, 0x05,                                // PlaySe 547
+            0xAB, 0x00, 0x84, 0x02, 0x00, 0x00,                    // PlayPokeVoice ZEKROM
+            0x4A, 0x00, 0x18, 0x00, 0x00,                          // MSGWIN_CmdPlainWinMsgFrame1 18 ("Bazzazzazzash!")
+            0xAC, 0x00, 0x4B, 0x00, 0x39, 0x00,                    // StartWaitPokeVoice, WaitMsgKey, ClosePlainWin
+            0x78, 0x01, 0x84, 0x02, 0x32, 0x00, 0x00, 0x00,        // PROC_FLD_StartScriptedWildBattle ZEKROM 50
+            0x02, 0x00,                                            // Halt
+        };
+        if (RunCode(sCode, sizeof(sCode), Le16(p)))
+        {
+            sZekromBattle = TRUE;
+            return;
+        }
+    }
     if (p == NULL || !Run(Le16(p + 10), Le16(p), TRUE))
         NothingToRun();
 }
@@ -2314,6 +2382,7 @@ void U3D_VmMapLoad(void)
     }
     if (zone != sLastZone)
     {
+        RoamersMove();   // (Black moves its roamers on as the player changes zones)
         sNpcAtCount = 0;   // (a new zone: its people where its data puts them, till its scripts say)
         RunNow(InitScript(zone, 2));
     }
@@ -2325,6 +2394,8 @@ void U3D_VmMapLoad(void)
     }
     sLastZone = zone;
     RunNow(InitScript(zone, 4));
+    if (WhiteZekromHere(ZEKROM_LOCAL))
+        sWork.work[0x20] = 0xD6;   // (its work object code: Black's ZEKROM sprite, D3 / D4 its RESHIRAM)
 }
 
 // script.c TryRunOnFrameMapScript, on an UNOVA map: a scene the zone's table starts (its work holds its value), held by
@@ -2438,6 +2509,14 @@ void U3D_VmResume(void)
         // (Black's GetResultFlag: 0 caught, 1 ran, 2 knocked out; CheckLastBattleResult: the player not beaten)
         sWildResult = gBattleOutcome == B_OUTCOME_CAUGHT ? 0 : gBattleOutcome == B_OUTCOME_WON ? 2 : 1;
         U3D_BattleEnded(!(gBattleOutcome == B_OUTCOME_LOST || gBattleOutcome == B_OUTCOME_DREW));
+        if (sZekromBattle && gBattleOutcome == B_OUTCOME_CAUGHT)
+        {
+            sWork.white |= 1;
+            Gone(ZEKROM_LOCAL, TRUE);
+            RemoveObjectEventByLocalIdAndMap(ZEKROM_LOCAL, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+            MPNet_Log("u3d vm: ZEKROM caught");
+        }
+        sZekromBattle = FALSE;
         break;
     case SCREEN_PARTY:
         if (sPartySlotWork)
@@ -2667,4 +2746,125 @@ static void UnovaGameClear(void)
     U3D_Vm_ContinueHome();
     TrySavingData(SAVE_NORMAL);
     SetMainCallback2(CB2_StartCreditsSequence);
+}
+
+static bool8 WhiteZekromHere(u8 localId)
+{
+    return localId == ZEKROM_LOCAL && CurrentZone() == ZONE_ZEKROM && MP_Region_Cleared(REGION_UNOVA) && !(sWork.white & 1)
+        && FlagOn(766);
+}
+
+// ------------------------------------------------------------------------------------------------ the roamers
+// Black's MOVE_POKEMON (ov010 move_pokemon.c): after the credits a scene on ROUTE 7 sets THUNDURUS roaming its 16 route
+// zones (d_021711C6), a fifth of the moves nowhere; Lv 40, its HP and status kept between battles. White's TORNADUS
+// roams beside it (the user, 2026-11-12). Met on its zone's grass half the time, as SINNOH's roamers.
+static const u16 sRoamZones[16] = {319, 321, 326, 329, 331, 337, 345, 348, 355, 365, 368, 370, 374, 378, 383, 387};
+static s8 sRoamBattled = -1;
+
+static void RoamMove(struct UnovaRoamer *r)
+{
+    u8 to;
+    if (r->loc != 16 && Random() % 100 < 20)
+    {
+        r->loc = 16;
+        return;
+    }
+    do
+        to = Random() % 16;
+    while (to == r->loc);
+    r->loc = to;
+}
+
+static void RoamSpawn(u8 slot, u16 national)
+{
+    struct UnovaRoamer *r = &sWork.roam[slot];
+    struct Pokemon mon;
+    if (r->state != 0)
+        return;
+    CreateMon(&mon, Species(national), 40, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    r->species = national, r->level = 40, r->state = 1, r->status = 0, r->loc = 5;
+    r->personality = GetMonData(&mon, MON_DATA_PERSONALITY);
+    r->ivs = GetMonData(&mon, MON_DATA_HP_IV) | GetMonData(&mon, MON_DATA_ATK_IV) << 5 | GetMonData(&mon, MON_DATA_DEF_IV) << 10
+             | GetMonData(&mon, MON_DATA_SPEED_IV) << 15 | GetMonData(&mon, MON_DATA_SPATK_IV) << 20
+             | GetMonData(&mon, MON_DATA_SPDEF_IV) << 25;
+    r->hp = GetMonData(&mon, MON_DATA_MAX_HP);
+    RoamMove(r);
+    MPNet_Log("u3d vm: roamer %u set roaming", national);
+}
+
+static void RoamersMove(void)
+{
+    u32 i;
+    for (i = 0; i < 2; i++)
+        if (sWork.roam[i].state == 1)
+            RoamMove(&sWork.roam[i]);
+}
+
+// (roamer.c TryStartRoamerEncounter in UNOVA) a roamer on this zone half the time: it, in gEnemyParty[0]
+bool8 U3D_TryRoamerEncounter(u8 *level)
+{
+    u8 here[2], n = 0, i, s;
+    u16 zone = CurrentZone();
+    struct Pokemon *mon = &gEnemyParty[0];
+    u32 status;
+    for (i = 0; i < 2; i++)
+        if (sWork.roam[i].state == 1 && sWork.roam[i].loc < 16 && sRoamZones[sWork.roam[i].loc] == zone)
+            here[n++] = i;
+    if (n == 0 || Random() % 2 == 0)
+        return FALSE;
+    s = here[n > 1 ? Random() % n : 0];
+    ZeroEnemyPartyMons();
+    CreateMonWithIVsPersonality(mon, Species(sWork.roam[s].species), sWork.roam[s].level, sWork.roam[s].ivs,
+                                sWork.roam[s].personality);
+    status = sWork.roam[s].status;
+    SetMonData(mon, MON_DATA_STATUS, &status);
+    SetMonData(mon, MON_DATA_HP, &sWork.roam[s].hp);
+    sRoamBattled = s;
+    *level = sWork.roam[s].level;
+    MPNet_Log("u3d vm: roamer %u met (hp %u)", sWork.roam[s].species, sWork.roam[s].hp);
+    return TRUE;
+}
+
+// (battle_main.c, a roamer battle's end) TRUE: it was UNOVA's
+bool8 U3D_RoamerAfterBattle(struct Pokemon *mon, u8 outcome)
+{
+    s8 s = sRoamBattled;
+    struct UnovaRoamer *r;
+    sRoamBattled = -1;
+    if (s < 0)
+        return FALSE;
+    r = &sWork.roam[s];
+    if (outcome == B_OUTCOME_CAUGHT || (outcome == B_OUTCOME_WON && GetMonData(mon, MON_DATA_HP) == 0))
+        r->state = 2;
+    else
+    {
+        r->hp = GetMonData(mon, MON_DATA_HP);
+        r->status = GetMonData(mon, MON_DATA_STATUS);
+        RoamMove(r);
+    }
+    MPNet_Log("u3d vm: roamer %u battle over (outcome %u)", r->species, outcome);
+    return TRUE;
+}
+
+// Black's work object codes (WKOBJCODE00-0F, 0xA2-0xB1): a person drawn as the code its work 0x4020 + n holds, set by
+// the zone's scripts (N's ZEKROM and RESHIRAM, a MUSICAL's performers...)
+u16 U3D_Vm_ObjCode(u16 code)
+{
+    u16 v;
+    if (code < 0xA2 || code > 0xB1)
+        return code;
+    v = sWork.work[0x20 + code - 0xA2];
+    return v != 0 && v < OBJ_EVENT_GFX_UNOVA_COUNT ? v : code;
+}
+
+// (mp_debug.c `mp u3droam`: the roamers moved onto this zone if it's one of theirs, for tests)
+bool8 U3D_Vm_RoamHere(void)
+{
+    u32 i, j;
+    bool8 any = FALSE;
+    for (i = 0; i < 2; i++)
+        for (j = 0; j < 16; j++)
+            if (sWork.roam[i].state == 1 && sRoamZones[j] == CurrentZone())
+                sWork.roam[i].loc = j, any = TRUE;
+    return any;
 }

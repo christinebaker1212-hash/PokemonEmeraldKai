@@ -2301,7 +2301,9 @@ static const struct ObjectEventGraphicsInfo *UnovaObjectInfo(u16 code)
     const u16 *pal;
     const u8 *tiles;
     u32 bytes;
-    struct ObjectEventGraphicsInfo *info = &sInfo[small][code];
+    struct ObjectEventGraphicsInfo *info;
+    code = U3D_Vm_ObjCode(code);   // (Black's work object codes: the code their work holds, u3d_vm.c)
+    info = &sInfo[small][code];
     if (!U3D_Gfx_Sprite(code, small, &kind, &pal, &tiles))
         return GetObjectEventGraphicsInfo(OBJ_EVENT_GFX_YOUNGSTER);
     if (sBuilt[small][code])
