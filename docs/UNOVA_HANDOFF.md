@@ -201,6 +201,9 @@ and doors at their tiles and grows the map to hold the rails. Black's map types 
 SKYARROW BRIDGE's type 1 is 2048, zone 136's type 5 1024, the rest 512): the pack keeps the field in 512 cells and a
 matrix's `scale` (u3d.c Render draws its blocks from a coarser grid, each from its first cell at its middle). "NG"
 blocks (rail maps') are a model, then buildings (no grids). CASTELIA's streets walk with their people; SKYARROW
-walks, its deck drawn except a stretch about tiles z 90-160 (to look into). Not yet: Black's rail cameras (each
-line's and point's camera: CASTELIA looks along its streets), rail scripts' own commands (people moved on rails),
-VICTORY ROAD's negative coordinates (tiles below 0 are dropped).
+walks end to end (triangles longer than 192 units are split when the pack is made: the renderer drops one with a
+corner behind the eye, and a bridge deck is a few long ones). Rail cameras (pack version 3): each rail tile carries its
+line's camera (rails.py camera_at: FixedAngle and kin, the Blend kinds between the line's points' cameras, Orbit about
+a centre (CASTELIA's ring road), a fixed eye and target, YawFromPoint); u3d.c eases the view's pitch and distance to
+it. The view's yaw stays north up: turning it wants the d-pad and the sprites' facings turned with it (next). Not yet:
+rail scripts' own commands (people moved on rails), VICTORY ROAD's negative coordinates (tiles below 0 are dropped).
