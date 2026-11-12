@@ -449,6 +449,7 @@ u16 U3D_CurrentZone(void)
 const u16 *U3D_LayoutBlocks(const struct MapLayout *layout)
 {
     static u16 *sBlocks[ARRAY_COUNT(sUnovaMaps)];
+    static u16 sBlocksMat[ARRAY_COUNT(sUnovaMaps)];   // (the matrix they came from: a story's swap rebuilds them)
     u32 i, bx, bz, x, y;
     for (i = 0; i < ARRAY_COUNT(sUnovaMaps); i++)
     {
@@ -459,11 +460,13 @@ const u16 *U3D_LayoutBlocks(const struct MapLayout *layout)
             LoadPack();
         if (!sPack.ok)
             return layout->map;
-        if (sBlocks[i] == NULL)
+        if (sBlocks[i] == NULL || sBlocksMat[i] != Replaced(sUnovaMaps[i].mat))
         {
             u32 w = 32 * sUnovaMaps[i].bw;
             const U3dMatrix *mt = MatrixNumbered(Replaced(sUnovaMaps[i].mat));
-            sBlocks[i] = malloc(sizeof(u16) * w * 32 * sUnovaMaps[i].bh);
+            sBlocksMat[i] = Replaced(sUnovaMaps[i].mat);
+            if (sBlocks[i] == NULL)
+                sBlocks[i] = malloc(sizeof(u16) * w * 32 * sUnovaMaps[i].bh);
             for (bz = 0; bz < sUnovaMaps[i].bh; bz++)
                 for (bx = 0; bx < sUnovaMaps[i].bw; bx++)
                 {
@@ -1101,6 +1104,21 @@ float U3D_TestGround(s32 mapX, s32 mapY, float near)
     sCurMat = MatrixNumbered(Replaced(sUnovaMaps[map].mat));
     sCurMap = map;
     return GroundAt(sUnovaMaps[map].cx * BLOCK + mapX, sUnovaMaps[map].cz * BLOCK + mapY, near);
+}
+
+// Black's map replaced while the player stands on it (WORK_CmdSetMapReplaceFlag ..., now): the field's blocks again
+void U3D_RefreshBlocks(void)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    const struct MapLayout *layout = gMapHeader.mapLayout;
+    const u16 *b;
+    s32 x, y;
+    if (map < 0 || layout == NULL)
+        return;
+    b = U3D_LayoutBlocks(layout);
+    for (y = 0; y < layout->height; y++)
+        for (x = 0; x < layout->width; x++)
+            MapGridSetMetatileEntryAt(x + MAP_OFFSET, y + MAP_OFFSET, b[y * layout->width + x]);
 }
 
 bool8 U3D_Active(void)

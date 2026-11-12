@@ -4460,6 +4460,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] where map %d.%d xy %d,%d\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
                me->currentCoords.x - 7, me->currentCoords.y - 7);
     }
+    else if (strcmp(cmd, "tiles") == 0)   // the map's entries around the player (collision, elevation, metatile)
+    {
+        struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
+        s32 x, y;
+        for (y = me->currentCoords.y - 2; y <= me->currentCoords.y + 2; y++)
+        {
+            printf("[test] tiles y%3d:", y - 7);
+            for (x = me->currentCoords.x - 2; x <= me->currentCoords.x + 2; x++)
+                printf(" %04X/%02X", MapGridGetMetatileIdAt(x, y) | (MapGridGetCollisionAt(x, y) << 10)
+                       | (MapGridGetElevationAt(x, y) << 12), MapGridGetMetatileBehaviorAt(x, y));
+            printf("  (elev %d)\n", me->currentElevation);
+        }
+    }
     else if (strcmp(cmd, "facing") == 0)   // the way the player faces (DIR_SOUTH 1, NORTH 2, WEST 3, EAST 4)
         printf("[test] facing %d\n", gObjectEvents[gPlayerAvatar.objectEventId].facingDirection);
     else if (strcmp(cmd, "layout") == 0)   // the layout the map shows (setmaplayoutindex can switch it)

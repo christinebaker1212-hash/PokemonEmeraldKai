@@ -20,7 +20,8 @@ void U3D_CommitOam(void);
 // UNOVA's layout blocks: metatile ids from here carry a behavior (id - U3D_METATILE_BEHAVIOR; fieldmap.c
 // GetMetatileAttributesById), tools/unova/build_pack.py
 #define U3D_METATILE_BEHAVIOR 0x300
-const u16 *U3D_LayoutBlocks(const struct MapLayout *layout);   // a UNOVA map's from the pack, others the layout's
+const u16 *U3D_LayoutBlocks(const struct MapLayout *layout);
+void U3D_RefreshBlocks(void);   // the field's blocks again after Black replaced the map under the player   // a UNOVA map's from the pack, others the layout's
 // Black's scene cameras (u3d.c, played by u3d_vm.c): to a target (Black's world units, fx32), pitch / yaw (65536ths of a
 // turn) and distance over Black's frames, back to the player's view, at once back, still moving?
 void U3D_CameraMoveTo(u16 pitch, u16 yaw, s32 dist, s32 x, s32 y, s32 z, u16 frames);
@@ -33,7 +34,8 @@ u8 U3D_Season(void);                                          // Black's season 
 u16 U3D_CurrentZone(void);                                    // the Black zone the player is on (0xFFFF: not UNOVA)
 s32 U3D_MapIndex(void);
 bool8 U3D_Vm_HasCGear(void);
-u16 U3D_Vm_Work(u16 id);   // a work of Black's event work   // FENNEL gave the C-GEAR (UNOVA's device)
+u16 U3D_Vm_Work(u16 id);
+void U3D_Vm_ContinueHome(void);   // after UNOVA's game clear: CONTINUE starts at home (Black's continue spot)   // a work of Black's event work   // FENNEL gave the C-GEAR (UNOVA's device)
 void U3D_Vm_WhiteoutHome(void);   // a new game in UNOVA: a whiteout returns home to NUVEMA (Black's first warp point)
 bool8 U3D_MapOfZoneTile(u16 zone, u16 x, u16 z, u8 *group, u8 *num, s16 *mapX, s16 *mapY);                                       // the player's map's row of u3d_maps.h (-1: not UNOVA)
 u8 U3D_MapCellX(s32 index);                                   // ... where it lies on its Black matrix (blocks)

@@ -5893,6 +5893,7 @@ static void ReturnFromBattleToOverworld(void)
     gSpecialVar_Result = gBattleOutcome;
     gMain.inBattle = FALSE;
     Orre_People_BattleEnd();   // Moemon Kai: ORRE's foe pictures are for one battle
+    MP_AutoThrow_Off("battle over");   // Moemon Kai: AUTO THROW lasts one battle (a catch ends it too)
     {
         extern bool8 gMpUncatchableWild;
         gMpUncatchableWild = FALSE;   // Moemon Kai: POKéMON TOWER's MAROWAK (battle_script_commands.c)

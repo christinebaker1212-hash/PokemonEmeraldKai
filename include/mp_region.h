@@ -16,6 +16,7 @@
 #define MP_METGAME_JOHTO 14
 #define MP_METGAME_SINNOH 13   // (... and SINNOH's: the low byte of its map section past MAPSEC_SINNOH_FIRST)
 #define MP_METGAME_ORRE 9      // (... and ORRE's: n past MAPSEC_ORRE_FIRST; 9 is no game's number)
+#define MP_METGAME_UNOVA 10    // (... and UNOVA's: n past MAPSEC_UNOVA_FIRST; 10 is no Gen 3 game's number either)
 u16 MP_Region_MetMapSec(u8 metGame, u8 metLocation);   // the whole map section a POKeMON was met at
 
 // Johto / Kanto flags and vars past the save block's (tools/quetzal_port/import.py places them, up to 0x2EB7; their

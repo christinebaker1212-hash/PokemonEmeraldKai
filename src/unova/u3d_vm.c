@@ -52,6 +52,10 @@
 #include "pokedex.h"
 #include "battle.h"
 #include "constants/battle.h"
+#include "credits.h"
+#include "save.h"
+#include "item.h"
+#include "constants/items.h"
 #include "pokemon_storage_system.h"
 #include "menu.h"
 #include "script_menu.h"
@@ -704,7 +708,7 @@ static void PopSong(void)
         PlayNewMapMusic(sSongStack[--sSongDepth]);
 }
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
-enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY };
+enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY, SCREEN_CLEAR };
 static u8 sScreen;
 static u16 sScreenVar, sPartySlotWork;
 static u8 sWildResult = 2;
@@ -780,6 +784,12 @@ static bool8 Locate(u16 zone, u16 scriptId, const u8 **code, u32 *size, u32 *pc,
 
 static void Task_Vm(u8 taskId);
 
+static u8 sClearMode;
+static struct { u8 group, num, set; s16 x, y; } sSpecialLoc;   // (SetSpecialLocation: Black's continue spot)
+static void UnovaGameClear(void);
+void SetContinueGameWarp(s8 mapGroup, s8 mapNum, s8 warpId, s16 x, s16 y);   // (overworld.c)
+int GameClear(void);   // (post_battle_event_funcs.c)
+
 // Black's script wants a screen of the game's: the field script takes it from here (U3D_VmOpenScreen) and the VM
 // goes on when it's back (U3D_VmResume)
 static void OpenScreen(struct Thread *t, u8 screen, u16 var)
@@ -833,6 +843,7 @@ static u8 *Slot(u8 slot)   // (Black's word slots, UNOVA's own: the game's battl
 // Black's item numbers as the game's (tools/unova/gen_items.py: by name; ITEM_NONE where the game has no such item yet)
 #include "../data/unova_items.h"
 #include "u3d_railpos.h"
+#include "tv.h"
 static u16 Item(u16 black)
 {
     return black < ARRAY_COUNT(sUnovaItems) ? sUnovaItems[black] : ITEM_NONE;
@@ -949,6 +960,13 @@ static void Step(struct Thread *t)
         }
         // (IfJump / IfCall read their own: b then w)
         ReadArgs(t, op, a);
+        {
+            static s8 sTrace = -1;   // (MOEMON_U3D_TRACE=1: every command played, for tests)
+            if (sTrace < 0)
+                sTrace = getenv("MOEMON_U3D_TRACE") != NULL;
+            if (sTrace)
+                printf("[u3d] trace %05X %03X %X %X\n", here, op, a[0], a[1]);
+        }
         switch (op)
         {
         case U3C_Nop:
@@ -1186,6 +1204,41 @@ static void Step(struct Thread *t)
             CreateScriptedWildMon(Species(V(0)), V(1), ITEM_NONE);
             OpenScreen(t, SCREEN_WILD, 0);
             break;
+        case U3C_POKEMON_FLD_ControlLegendMon:   // op, result: 0 is RESHIRAM (the player's own) in the party,
+        {                                         // 1 to the front, 2 the boxed one swapped with slot *result first
+            u16 legend = Species(643);   // (PM_VERSION_LEGEND_SPECIES: Black's player gets RESHIRAM, N has ZEKROM)
+            u32 me = GetPlayerIDAsU32();
+            s32 i, at = -1;
+            if (V(0) == 2)
+            {
+                u16 slot = *WorkPtr(a[1]);
+                u32 b, p;
+                for (b = 0; b < TOTAL_BOXES_COUNT && slot < PARTY_SIZE; b++)
+                    for (p = 0; p < IN_BOX_COUNT; p++)
+                        if (GetBoxMonDataAt(b, p, MON_DATA_SPECIES) == legend && !GetBoxMonDataAt(b, p, MON_DATA_IS_EGG)
+                            && GetBoxMonDataAt(b, p, MON_DATA_OT_ID) == me)
+                        {
+                            struct BoxPokemon boxed = *GetBoxedMonPtr(b, p);
+                            SetBoxMonAt(b, p, &gPlayerParty[slot].box);
+                            BoxMonToMon(&boxed, &gPlayerParty[slot]);
+                            b = TOTAL_BOXES_COUNT;
+                            break;
+                        }
+            }
+            for (i = 0; i < PARTY_SIZE && at < 0; i++)
+                if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == legend && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
+                    && GetMonData(&gPlayerParty[i], MON_DATA_OT_ID) == me)
+                    at = i;
+            if (V(0) == 0)
+                *WorkPtr(a[1]) = at >= 0;
+            else if (at > 0)
+            {
+                struct Pokemon tmp = gPlayerParty[0];
+                gPlayerParty[0] = gPlayerParty[at];
+                gPlayerParty[at] = tmp;
+            }
+            break;
+        }
         case U3C_WORK_CmdCheckLastBattleResultB:
             *WorkPtr(a[0]) = U3D_BattleResult() != 2;
             break;
@@ -1326,6 +1379,12 @@ static void Step(struct Thread *t)
         case U3C_PROC_CallSubEvent:   // (a field menu's screen opened from a scene)
         case U3C_FLD_FACEUP_ScrCmdStart:   // (a speaker's face-up portrait: the words come in the script's messages)
         case U3C_FLD_FACEUP_ScrCmdWaitEnd:
+        case U3C_FLD_FACEUP_ScrCmdPrepareField:
+        case U3C_StartArcPlayerEffect:   // (the LIGHT STONE's glow and the arcs of light around the player: not drawn)
+        case U3C_StartArcEffect:
+        case U3C_ShowArcModelAt:
+        case U3C_WaitArcEffectPeak:
+        case U3C_WaitArcEffectEnd:
         case U3C_NETWORK_CmdRequestCommExit:   // (Black's wireless: Kai's co-op stands in for it)
         case U3C_NETWORK_CmdRestartAutoComm:
         case U3C_NETWORK_CmdStartAutoComm:
@@ -1336,7 +1395,7 @@ static void Step(struct Thread *t)
         case U3C_SAVEANIME_Start:
         case U3C_PROC_FLD_StartCameraShake:
         case U3C_TurnPlayerToFrontEvent:
-        case U3C_WORK_CmdSetSpecialLocation:
+        case U3C_WORK_CmdSetBoxFlags:   // (Black's PC wallpapers the game clear unlocks: Kai's PC keeps its own)
         case U3C_SCREENEFFECTS_CreateBuildModelNode:   // (build models' animations: doors, lifts)
         case U3C_SCREENEFFECTS_DeleteBuildModelNode:
         case U3C_SCREENEFFECTS_PlayBuildModelNodeSlotWithSe:
@@ -1560,6 +1619,7 @@ static void Step(struct Thread *t)
             break;
         // ---- POKéMON
         case U3C_PROC_HealParty:
+        case U3C_SCREENEFFECTS_StartRecoveryPartyEvent:   // (the heal with its jingle in Black: healed)
             HealPlayerParty();
             break;
         case U3C_PROC_GetPartyCount:   // (result, kind: 0 all, else those that can battle)
@@ -1651,6 +1711,18 @@ static void Step(struct Thread *t)
             MPNet_Log("u3d vm: no map for zone %u at %u,%u", a[0], a[1], a[2]);
             break;
         }
+        case U3C_WORK_CmdSetSpecialLocation:   // zone, direction, x, y, z: where the game goes on after its clear
+        {
+            u8 group, num;
+            s16 x, y;
+            if (U3D_MapOfZoneTile(V(0), V(2), V(4), &group, &num, &x, &y))
+                sSpecialLoc.group = group, sSpecialLoc.num = num, sSpecialLoc.x = x, sSpecialLoc.y = y, sSpecialLoc.set = TRUE;
+            break;
+        }
+        case U3C_PROC_FLD_SetGameClearEventAndEnd:   // mode (0 the story's end: the credits; 1 the Champion: the HALL OF
+            sClearMode = V(0);                        // FAME and the credits); the script ends here (VM_End)
+            OpenScreen(t, SCREEN_CLEAR, 0);
+            return;
         case U3C_WORK_CmdSetWarpDestination:   // Black's warp point (a POKéMON CENTER, home): where a whiteout returns
             SetWhiteoutPoint(V(0));
             break;
@@ -1686,7 +1758,7 @@ static void Step(struct Thread *t)
             EnableNationalPokedex();
             break;
         // ---- Black's map replacements (ov010 d_02170FB0: flag, work, the work's value that means "replaced"): the
-        // works the scripts read; the replaced blocks themselves aren't redrawn yet
+        // works the scripts read, the matrices u3d.c draws (src/unova/u3d_replace.h)
         case U3C_WORK_CmdSetMapReplaceFlag:   // flag, on, now
         case U3C_WORK_CmdCheckMapReplaceFlag:   // flag, result
         {
@@ -1698,6 +1770,8 @@ static void Step(struct Thread *t)
             {
                 if (f < 10)
                     *WorkPtr(sReplace[f][0]) = V(1) ? sReplace[f][1] : 0;
+                if (V(2))   // (now: the map under the player too)
+                    U3D_RefreshBlocks();
             }
             else
                 *WorkPtr(a[1]) = f < 10 && *WorkPtr(sReplace[f][0]) == sReplace[f][1];
@@ -1844,6 +1918,7 @@ static void Step(struct Thread *t)
         case U3C_SetProcAction:   // a script to run once this one has ended, by its id in the zone the player is then in
             sPendingScript = a[0];
             break;
+        case U3C_StartMmdlSpinRise:   // (a person spinning up and away, the SHADOW TRIAD's way: gone)
         case U3C_DeleteMmdl:
         {
             u8 id = ObjEventId(LocalId(V(0)));
@@ -2335,6 +2410,13 @@ void U3D_VmOpenScreen(void)
     case SCREEN_PARTY:   // (Black's SelectPartyMon: the game's party screen, the slot in VAR_0x8004)
         ChoosePartyMon();
         break;
+    case SCREEN_CLEAR:   // (the script ended: the clear takes the game from here)
+        sScreen = SCREEN_NONE;
+        sThread.alive = FALSE;
+        sHolding = FALSE;
+        ScriptContext_Stop();
+        UnovaGameClear();
+        break;
     default:
         NothingToRun();
         break;
@@ -2550,4 +2632,39 @@ bool8 U3D_Vm_HasCGear(void)
 u16 U3D_Vm_Work(u16 id)
 {
     return *WorkPtr(id);
+}
+
+// Black's EVENT_GAMECLEAR (ov010 event_gameclear.c): its recover script 9601 (the story's people put back, the party
+// healed, home as the warp point and the continue spot), then mode 0 (N's Castle) the credits and the save, mode 1
+// (the Champion) the HALL OF FAME and the credits (post_battle_event_funcs.c GameClear: the game's own). UNOVA counts as
+// cleared (its boat, the GLOBAL PC) from the story's end.
+#define SCRIPT_GAME_CLEAR 9601
+void U3D_Vm_ContinueHome(void)
+{
+    if (!sSpecialLoc.set)
+        SetWhiteoutPoint(1), sSpecialLoc.group = gSaveBlock1Ptr->lastHealLocation.mapGroup,
+            sSpecialLoc.num = gSaveBlock1Ptr->lastHealLocation.mapNum, sSpecialLoc.x = gSaveBlock1Ptr->lastHealLocation.x,
+            sSpecialLoc.y = gSaveBlock1Ptr->lastHealLocation.y, sSpecialLoc.set = TRUE;
+    SetContinueGameWarp(sSpecialLoc.group, sSpecialLoc.num, WARP_ID_NONE, sSpecialLoc.x, sSpecialLoc.y);
+}
+
+static void UnovaGameClear(void)
+{
+    sSpecialLoc.set = FALSE;
+    RunNow(SCRIPT_GAME_CLEAR);
+    MP_Region_SetCleared(REGION_UNOVA);
+    if (!CheckBagHasItem(ITEM_SS_TICKET, 1))
+        AddBagItem(ITEM_SS_TICKET, 1);
+    MPNet_Log("u3d vm: game clear, mode %u", sClearMode);
+    if (sClearMode == 1)
+    {
+        FlagSet(FLAG_IS_CHAMPION);
+        GameClear();   // (its UNOVA branch: U3D_Vm_ContinueHome)
+        return;
+    }
+    HealPlayerParty();
+    SetContinueGameWarpStatus();
+    U3D_Vm_ContinueHome();
+    TrySavingData(SAVE_NORMAL);
+    SetMainCallback2(CB2_StartCreditsSequence);
 }

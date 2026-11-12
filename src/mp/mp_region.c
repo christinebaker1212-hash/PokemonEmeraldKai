@@ -1719,6 +1719,8 @@ u8 MP_Gen_Cap(u8 region)
         g = 3;
     if (region == REGION_SINNOH)
         return g < 4 ? 4 : g;   // (Platinum's own Pokémon are Gen 1-4: GEN 3 is its vanilla too)
+    if (region == REGION_UNOVA)
+        return g < 5 ? 5 : g;   // (at least Gen 5 in UNOVA: the user's decision, docs/UNOVA_DECISIONS.md)
     if (region != REGION_HOENN && g <= 3)
         return 2;
     return g;
@@ -1865,6 +1867,7 @@ bool8 MP_Gen_SealedMon(struct Pokemon *mon)
 {
     u32 i;
     u16 species;
+    u8 cap = UseCap();
     if (GetMonData(mon, MON_DATA_IS_EGG))
         return FALSE;
     species = GetMonData(mon, MON_DATA_SPECIES);
@@ -1872,15 +1875,17 @@ bool8 MP_Gen_SealedMon(struct Pokemon *mon)
         return FALSE;
     if (Orre_Shadow_Barred(mon))   // Moemon Kai: a Shadow Pokémon battles only ORRE's own battles
         return TRUE;
-    if (MP_Gen_SealedSpecies(species))
+    if (GetMonData(mon, MON_DATA_MET_GAME) == MP_METGAME_UNOVA && cap < 5)
+        cap = 5;   // (met in UNOVA: Gen 5 wherever it goes; what's past Gen 5 is still capped)
+    if (IS_MAKER_SPECIES(species) ? MP_Gen_SealedSpecies(species) : (species < NUM_SPECIES && MP_Gen_OfSpecies(species) > cap))
         return TRUE;
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
         u16 move = GetMonData(mon, MON_DATA_MOVE1 + i);
-        if (move != MOVE_NONE && !MP_Gen_MoveAllowed(move))
+        if (move != MOVE_NONE && MP_Gen_OfMove(move) > cap)
             return TRUE;
     }
-    return MP_Gen_OfAbility(GetMonAbility(mon)) > UseCap();
+    return MP_Gen_OfAbility(GetMonAbility(mon)) > cap;
 }
 
 // Held items past the GENERATION go back to the bag (party and PC; one that doesn't fit stays held). Called when the
@@ -2567,6 +2572,13 @@ void MP_Region_TagMet(struct BoxPokemon *b)
         SetBoxMonData(b, MON_DATA_MET_GAME, &game);
         SetBoxMonData(b, MON_DATA_MET_LOCATION, &loc);
     }
+    if (gMapHeader.regionMapSectionId >= MAPSEC_UNOVA_FIRST && gMapHeader.regionMapSectionId < MAPSEC_UNOVA_END)
+    {
+        u8 loc = gMapHeader.regionMapSectionId - MAPSEC_UNOVA_FIRST;   // (UNOVA's: the same way, and its POKeMON stay
+        game = MP_METGAME_UNOVA;                                          // Gen 5 wherever they go: MP_Gen_SealedMon)
+        SetBoxMonData(b, MON_DATA_MET_GAME, &game);
+        SetBoxMonData(b, MON_DATA_MET_LOCATION, &loc);
+    }
 }
 
 // The map section a POKeMON was met at, whole: JOHTO's, SINNOH's and ORRE's are past one byte, so MET_LOCATION holds
@@ -2579,6 +2591,8 @@ u16 MP_Region_MetMapSec(u8 metGame, u8 metLocation)
         return MAPSEC_SINNOH_FIRST + metLocation;
     if (metGame == MP_METGAME_ORRE && metLocation < MAPSEC_ORRE_END - MAPSEC_ORRE_FIRST)
         return MAPSEC_ORRE_FIRST + metLocation;
+    if (metGame == MP_METGAME_UNOVA && metLocation < MAPSEC_UNOVA_END - MAPSEC_UNOVA_FIRST)
+        return MAPSEC_UNOVA_FIRST + metLocation;
     return metLocation < MAPSEC_NONE ? metLocation : MAPSEC_NONE;
 }
 
