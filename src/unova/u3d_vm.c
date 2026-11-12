@@ -2776,6 +2776,8 @@ void U3D_VmSign(void)
         s32 bx = (s32)(Le16(b + 8) | Le16(b + 10) << 16), bz = (s32)(Le16(b + 12) | Le16(b + 14) << 16);
         if (m >= 0)
             bx -= 32 * U3D_MapCellX(m), bz -= 32 * U3D_MapCellZ(m);
+        if (bx == x && bz == y && getenv("MOEMON_U3D_TRACE"))
+            printf("[u3d] sign %d,%d: bg %u script %u\n", x, y, i, Le16(b));
         if (bx == x && bz == y && Run(Le16(b), 0xFFFF, TRUE))
             return;
     }

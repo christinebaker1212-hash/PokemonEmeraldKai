@@ -622,6 +622,7 @@ static void UpdateBubble(struct Bubble *b, u8 ownerObj)
             s->invisible = os->invisible;
         s->subpriority = b->atTile ? 1 : 0;
         s->coordOffsetEnabled = !b->toast;
+        s->mpPlaceWith = b->toast || b->atTile ? 0 : (os - gSprites) + 1;   // (on a 3D map: lifted as its speaker is)
         if (b->toast)
             s->oam.priority = 0;
     }

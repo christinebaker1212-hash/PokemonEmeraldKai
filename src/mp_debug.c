@@ -3235,6 +3235,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &n);
         MP_Emote_Hotkey(n);
     }
+    else if (strcmp(cmd, "bubble") == 0)
+    {
+        // bubble WORDS - a speech bubble over the player (checks where it's drawn: 3D maps' slopes)
+        u8 text[64];
+        MP_AsciiToGame(text, arg, sizeof(text) - 1);
+        MP_Emote_ShowBubbleFor(gMpLocalId, text);
+    }
     else if (strcmp(cmd, "emotekind") == 0)
     {
         // emotekind K - any MP_EMOTE_* (5-16: the extra emotes)

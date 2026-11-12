@@ -364,7 +364,26 @@ void UpdateOamCoords(void)
             {
                 s32 x = sprite->x + sprite->x2 + gSpriteCoordOffsetX, y = sprite->y + sprite->y2 + gSpriteCoordOffsetY;
                 s32 flatX = x, flatY = y;
-                if (S3D_Active())
+                if (sprite->mpPlaceWith && sprite->mpPlaceWith <= MAX_SPRITES
+                    && (S3D_Active() || O3D_Active() || U3D_Active()))
+                {
+                    // Moemon Kai: moved as the sprite it goes with is (its flat feet to where the view puts them), drawn
+                    // over the scene (a speech bubble)
+                    u8 a = sprite->mpPlaceWith - 1;
+                    const struct Sprite *as = &gSprites[a];
+                    s32 ax = as->x + as->x2 + gSpriteCoordOffsetX, afeet = as->y + as->y2 + gSpriteCoordOffsetY - as->centerToCornerVecY;
+                    s32 nx, ny;
+                    float d;
+                    if (S3D_Active())
+                        S3D_PlaceSprite(a, ax, afeet, &nx, &ny, &d);
+                    else if (O3D_Active())
+                        O3D_PlaceSprite(a, ax, afeet, &nx, &ny, &d);
+                    else
+                        U3D_PlaceSprite(a, ax, afeet, &nx, &ny, &d);
+                    x += nx - ax, y += ny - afeet;
+                    gS3dSpriteDepth[i] = gO3dSpriteDepth[i] = gU3dSpriteDepth[i] = 0.0f;
+                }
+                else if (S3D_Active())
                 {
                     // Moemon Kai: on a SINNOH 3D map a field sprite stands where its spot on the ground is in the view
                     s32 feet = y - sprite->centerToCornerVecY, nx, ny;
