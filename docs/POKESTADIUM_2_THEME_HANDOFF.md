@@ -250,10 +250,14 @@ What each piece becomes (both mock-ups show the action menu and the move list):
 | Action menu | chrome capsules, the chosen one lit gold with a cursor | navy capsules, gold edge on the chosen |
 | Move list | chrome bars: name, type, PP; the chosen one in its type's colour | navy bars, the chosen in its type's colour |
 
-Decisions made while drawing, for the user to confirm:
-- **The boxes stay where the game puts them** (foe top left, yours bottom right). STADIUM 2 has 1P top left, but
-  swapping sides would put each box over the other's POKéMON, and the type icons are placed off the healthbox
-  sprites (COOP_NOTES "Type icons"), so they would have to move too.
+The user's rulings on the first pass (2026-11-12): **keep the boxes where the game puts them** (foe top left, yours
+bottom right; STADIUM 2 has 1P top left, but swapping would put each box over the other's POKéMON, and the type icons
+are placed off the healthbox sprites: COOP_NOTES "Type icons"); **leave the background alone** (no invented scenery -
+the mock-ups show the game's own terrain platforms on the palette's backdrop colour); **no trainer names or pictures**
+(the BERNIE plate and the portrait windows beside each box are gone; the POKéMON portraits can come back if
+"pictures" meant the trainers' only). What is left per side: the box, the team's dots, and the 1P tab.
+
+Still open:
 - **The move diamond with its D-pad arrows does not fit 240x160** next to two boxes: the mock-up keeps STADIUM's bars
   (name, type, PP, the type's colour) as a 2x2 grid where the game already puts its move list.
 - **The condition** reads as STADIUM's two letters (Nm, Ft...) rather than the game's status tag.

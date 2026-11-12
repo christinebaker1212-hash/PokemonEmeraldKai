@@ -14,8 +14,8 @@ W, H = 240, 160
 
 
 def battle_bg(name='building', pal='palette'):
-    """The game's own battle platforms (4bpp tiles + tilemap + palette) over a plain arena: map.bin holds only the
-    platforms, so sky, crowd and field here are a stand-in, not the game's art."""
+    """The game's own battle platforms (4bpp tiles + tilemap + palette) over the palette's own backdrop colour.
+    map.bin holds the platforms only; nothing here is invented scenery."""
     tiles = np.array(Image.open(f'{REPO}/graphics/battle_environment/{name}/tiles.png'))
     cols = tiles.shape[1] // 8
     pl = [l.split() for l in open(f'{REPO}/graphics/battle_environment/{name}/{pal}.pal').read().splitlines()[3:]]
@@ -34,13 +34,7 @@ def battle_bg(name='building', pal='palette'):
                 blk = blk[::-1]
             rgb[ty * 8:ty * 8 + 8, tx * 8:tx * 8 + 8] = colors[pr * 16 + blk]
             alpha[ty * 8:ty * 8 + 8, tx * 8:tx * 8 + 8] = (blk != 0)
-    yy = np.arange(H)[:, None] * np.ones((1, W))
-    sky = ramp(np.clip(yy / 70, 0, 1), [(0, 0x5898d8), (1, 0x90c0e8)])
-    crowd = ramp(np.clip((yy - 54) / 26, 0, 1), [(0, 0x486890), (1, 0x30506c)])
-    field = ramp(np.clip((yy - 80) / 80, 0, 1), [(0, 0x58a048), (1, 0x3c7c34)])
-    back = np.where((yy < 54)[..., None], sky, np.where((yy < 80)[..., None], crowd, field))
-    speck = ((np.arange(W)[None] * 7 + np.arange(H)[:, None] * 13) % 11 == 0) & (yy >= 54) & (yy < 80)
-    back = np.where(speck[..., None], np.clip(back * 1.5, 0, 1), back)
+    back = np.broadcast_to(colors[0], (H, W, 3))
     return back * (1 - alpha[..., None]) + rgb * alpha[..., None]
 
 
@@ -236,24 +230,16 @@ def scene(theme, state):
     bk[np.array(Image.open(f'{REPO}/graphics/pokemon/{MINE["sp"]}/back.png')) == 0, 3] = 0
     b.blit(bk, 26, 56)
     panel = b.s2_panel if theme == 's2' else b.p1_panel
-    # the foe, where the game puts its box: top left, its portrait and team below
+    # the foe and you, where the game puts the boxes: its own side each, the team's dots under them
     box(b, 6, 4, FOE, theme)
-    b.portrait(6, 51, FOE['sp'], theme, 26)
-    b.dots(40, 56, 2, 3, theme)
-    if theme == 's2':
-        b.s2_panel(36, 63, 94, 75)
-    else:
-        b.p1_panel(36, 63, 94, 75, fill=0x107818)
-    b.text(65, 65, 'BERNIE', SMALL, align='c')
-    # yours: bottom right, the 1P tab over it
+    b.dots(10, 54, 2, 3, theme)
     if theme == 's2':
         b.s2_panel(146, 46, 176, 57)
     else:
         b.p1_panel(146, 46, 176, 57, fill=0x5050d8)
     b.text(161, 47, '1P', SMALL, 0xf8f040 if theme == 'p1' else 0xffffff, align='c')
+    b.dots(120, 51, 3, 3, theme)
     box(b, 146, 58, MINE, theme)
-    b.portrait(118, 58, MINE['sp'], theme, 26)
-    b.dots(122, 90, 3, 3, theme)
     if state == 'action':
         panel(4, 118, 132, 156)
         b.text(10, 125, 'What will', SMALL)
