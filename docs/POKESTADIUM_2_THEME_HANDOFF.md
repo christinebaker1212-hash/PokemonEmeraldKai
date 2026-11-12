@@ -136,3 +136,35 @@ Readability rules that came out of the mock-ups (the user asked for these by nam
 - Tall sprites lose their feet in the VS windows (52 px tall), as STADIUM 2 crops its models.
 - s4_entry_info.png is tight along its bottom row; give it another unit when building.
 - The badge board's badges are plain spheres standing in for the real art.
+
+## POKESTADIUM THEME (the first STADIUM's look), 2026-11-12
+
+"Now we'll build POKESTADIUM THEME from this video": a second theme, after the first POKéMON STADIUM, from a second
+recording (4:3 as recorded, not stretched). Mock-ups only, like the first; nothing in the game has changed.
+**Ask the user how the two themes live together** (the session assumed a setting that picks one; they haven't said).
+
+| What | Where |
+|---|---|
+| Frames of the recording | docs/stadium/theme1/recording/ (`g_<second>.jpg`; `sheet_1/2.jpg` = a frame every two seconds) |
+| The mock-ups, 480x320 | docs/stadium/theme1/mockups/ |
+| The script | tools/stadium/restyle/stadium1.py (after `prep.sh`; it builds on s2.py / s3.py / screens3.py) |
+
+The same flow as POKESTADIUM 2 THEME, in STADIUM's own dress:
+
+| Scene | Mock-up | Its look |
+|---|---|---|
+| The cups | p1_cups.png | the cups' pictures as cards over the sky, the chosen one in yellow with white corner brackets, name / levels / a line in a violet band |
+| The classes | p1_class.png | the cup's picture filling the screen, the title bar (a POKé BALL, a violet bar, yellow words), STADIUM's ball banners, a navy box in a pale line |
+| Entry | p1_entry.png | the entry plate (violet cells: picture, name, level, item mark), the olive tab row (the chosen tab magenta in white), the violet list (3 x 3, name over level, white corner brackets) |
+| Info panel | p1_info.png | olive-gold, its ENTER Yes / No in navy; held item shown only |
+| The ladder | p1_ladder.png | an olive frame on the starfield, the cup and battle in fat gold letters over a picture, eight tiles with a red ? over a silhouette |
+| VS | p1_vs.png | the blue grid plate (1P, name, portrait, six) over the green one, VS in orange |
+| Choice | p1_choice.png | deep blue with the great POKé BALL, navy and green plates in a gold line, pick buttons on the pictures, the message in a green box |
+| Result | p1_result.png | the three at twice their size on the grids, thin green HP bars, WIN red into yellow, LOSE in blue, red crosses and FAINTED |
+| Badge board / continue | p1_badges.png, p1_continue.png | eight speckled colour tiles with the badge names up their sides, the badge set on its tile; Keep battling? in the navy box |
+
+Materials are in `class S1` (stars, cup_backdrop, deep, titlebar, box, veil, gridplate, greenbar, fat, button, hints).
+The hints sit straight on the backdrop here (no strip), as STADIUM writes them. STADIUM also has a Battle / Rules /
+Registration menu and a Registered Pokémon list (g_7.jpg, g_13.jpg): not drawn, because the game's own flow goes cup,
+class, options, register; ask before adding them. Stand-ins as in the first theme (lettering fonts, the badge, the
+trainers' lines); the cup card for the ladder uses one of STADIUM's field pictures (stadium.bin picture 21).
