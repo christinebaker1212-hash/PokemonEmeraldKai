@@ -22,7 +22,8 @@
 const char *Updater_ExeFile(const char *name);
 
 #define SINNOH_BACK_SIZE (2 + 32 + 4 * 2048)
-struct SinnohSprite { u8 kind; const u16 *pal[2]; const u8 *frames[2]; };   // ([1]: MIXED's smaller copy)
+struct SinnohSprite { u8 kind, art; const u16 *pal[2]; const u8 *frames[2]; };   // ([1]: MIXED's smaller copy; art: it's
+                                                                                // AveonTrainer's, tools/aveon/aveon.py)
 struct SinnohPic { const u16 *pal; struct MpBigSprite big; };
 
 static struct
@@ -98,6 +99,7 @@ static void Load(void)
         if (p + 26 + 2 * (32 + frames) > end)
             goto bad;
         sGfx.sprites[i].kind = kind;
+        sGfx.sprites[i].art = p[25] == 1;
         sGfx.sprites[i].pal[0] = (const u16 *)(p + 26);
         sGfx.sprites[i].frames[0] = p + 26 + 32;
         sGfx.sprites[i].pal[1] = (const u16 *)(p + 26 + 32 + frames);
@@ -319,6 +321,14 @@ bad:
 }
 
 // Platinum's sprite INDEX (SMALL: MIXED's smaller copy)
+// MIXED's copy of sprite INDEX is AveonTrainer's (a Gen 4 person drawn in FRLG's style: before a Gen 3 equivalent)
+bool8 S3D_Gfx_SmallIsArt(u16 index)
+{
+    if (!sGfx.tried)
+        Load();
+    return sGfx.ok && index < SINNOH_SPRITE_COUNT && sGfx.sprites[index].art;
+}
+
 bool8 S3D_Gfx_Sprite(u16 index, bool8 small, u8 *kind, const u16 **pal, const u8 **frames)
 {
     if (!sGfx.tried)

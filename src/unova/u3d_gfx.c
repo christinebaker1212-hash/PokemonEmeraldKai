@@ -131,6 +131,14 @@ bool8 U3D_Gfx_Sprite(u16 code, bool8 small, u8 *kind, const u16 **pal, const u8 
     return TRUE;
 }
 
+// MIXED's copy of object code CODE is AveonTrainer's (a Gen 5 person drawn in FRLG's style: before a Gen 3 equivalent)
+bool8 U3D_Gfx_SmallIsArt(u16 code)
+{
+    if (!sGfx.tried)
+        Load();
+    return sGfx.ok && code < sGfx.count && sGfx.at[code] != 0 && sGfx.data[sGfx.at[code] + 1] == 1;
+}
+
 // battle_controller_opponent.c / _link_opponent.c: an UNOVA trainer's own picture, Black's (its class's), over the
 // stand-in the battle loaded (TRAINER_UNOVA_A / _B's), drawn whole by the big-sprite renderer
 void U3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn)

@@ -20,7 +20,8 @@ Format (little endian): "S3DG" u32 version 2 (then "TOWN", the TOWN MAP, and "TB
   u16 sprites: each char name[24] (Platinum's, lower case), u8 kind (0 walking: 9 frames 32x32, 1 still 32x32,
                2 still 16x16, 3 walking with a bow: 10 frames, the POKeMON CENTER nurse), u8 pad, u16 palette[16]
                (BGR555; 0 transparent), then the frames as GBA 4bpp tiles (4: still 64x64, the big legendaries); then the smaller copy (OPTIONS >
-               DISPLAY > SPRITE SCALING > SINNOH PEOPLE: MIXED; shrink()): u16 palette[16], the same frames
+               DISPLAY > SPRITE SCALING > SINNOH PEOPLE: MIXED; shrink(), or AveonTrainer's sprite: the pad 1, tools/aveon/aveon.py):
+               u16 palette[16], the same frames
   u16 pictures: each char name[24] (the class folder), u16 palette[16], then an mp_bigsprite frame:
                s16 dx, s16 dy, u16 w, u16 h, h rows of (w + 1) / 2 bytes (low nibble first)
   "BACK" u16 count: the partners' backs (backs()), each u16 picture, u16 palette[16], 4 x 2048 bytes of tiles
@@ -30,6 +31,8 @@ import struct
 import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from png8 import Image  # noqa: E402   (no Pillow on the release's runner)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'aveon'))
+import aveon  # noqa: E402   (AveonTrainer's people for MIXED: graphics/aveon/frames.bin)
 
 VERSION = 2
 SMALL = 0.84   # MIXED's Platinum sprites: about Gen 3's size (Emerald's people are 0.80-0.88 of Platinum's same ones)
@@ -339,7 +342,8 @@ def main():
     sh = sheets(root)
     out += struct.pack('<H', len(sh))
     for name, kind, im in sh:
-        out += name.encode()[:23].ljust(24, b'\0') + struct.pack('<BB', kind, 0) + palette(im)
+        art = aveon.art('sinnoh', name.upper()) if kind == 0 else None   # (MIXED: AveonTrainer's, tools/aveon/aveon.py)
+        out += name.encode()[:23].ljust(24, b'\0') + struct.pack('<BB', kind, 1 if art else 0) + palette(im)
         dy = 0
         if kind in (0, 3):
             frames = [frame_rows(im, 0, f * 32, 32, 32) for f in WALK + ((16,) if kind == 3 else ())]   # (3: the nurse's bow, the game's frame 9)
@@ -358,6 +362,11 @@ def main():
         else:
             where = [(0, 0)]
         size = 16 if kind == 2 else 64 if kind == 4 else 32
+        if art:
+            out += struct.pack('<16H', *art[0])
+            for rows in art[1]:
+                out += tiles_of(rows, 32, 32)
+            continue
         pal, small = shrink(im, where, size, size)
         out += struct.pack('<16H', *(bgr555(c) for c in pal))
         sdy = feet_shift(small) if kind in (0, 3) else 0

@@ -2100,6 +2100,7 @@ u8 QzLoadObjectPalette(u16 tag)
 #include "constants/sinnoh_gfx.h"
 #include "data/sinnoh_gfx_standins.h"
 bool8 S3D_Gfx_Sprite(u16 index, bool8 small, u8 *kind, const u16 **pal, const u8 **frames);
+bool8 S3D_Gfx_SmallIsArt(u16 index);   // (MIXED's copy is AveonTrainer's: src/sinnoh/s3d_gfx.c)
 #include "data/sinnoh_gfx_gen3.h"
 
 // Platinum's sprite I from the pack, as Platinum has it (SMALL FALSE) or MIXED's smaller copy; NULL without the pack
@@ -2303,6 +2304,17 @@ static const struct ObjectEventGraphicsInfo *UnovaObjectInfo(u16 code)
     u32 bytes;
     struct ObjectEventGraphicsInfo *info;
     code = U3D_Vm_ObjCode(code);   // (Black's work object codes: the code their work holds, u3d_vm.c)
+    if (small && code < OBJ_EVENT_GFX_UNOVA_COUNT && !U3D_Gfx_SmallIsArt(code))
+    {
+        // MIXED: AveonTrainer's sprite (the pack's copy) first, then a true Gen 3 equivalent, then Black's shrunk
+        static const u16 sGen3[][2] = {{11, OBJ_EVENT_GFX_YOUNGSTER}, {12, OBJ_EVENT_GFX_SCHOOL_KID_M},
+                                       {44, OBJ_EVENT_GFX_GENTLEMAN}, {183, OBJ_EVENT_GFX_PSYCHIC_M},
+                                       {39, OBJ_EVENT_GFX_CYCLING_TRIATHLETE_F}};
+        u32 k;
+        for (k = 0; k < ARRAY_COUNT(sGen3); k++)
+            if (sGen3[k][0] == code)
+                return GetObjectEventGraphicsInfo(sGen3[k][1]);
+    }
     info = &sInfo[small][code];
     if (!U3D_Gfx_Sprite(code, small, &kind, &pal, &tiles))
         return GetObjectEventGraphicsInfo(OBJ_EVENT_GFX_YOUNGSTER);
@@ -2358,6 +2370,8 @@ static const struct ObjectEventGraphicsInfo *SinnohGraphicsInfo(u16 i)
 {
     const struct ObjectEventGraphicsInfo *info = NULL;
     u8 mode = gMpConfig.sinnohSprites;
+    if (mode == MP_SINNOH_SPRITES_MIXED && S3D_Gfx_SmallIsArt(i) && (info = SinnohPackInfo(i, TRUE)) != NULL)
+        return info;   // (MIXED: AveonTrainer's Gen 4 people in FRLG's style first, the user 2026-11-12: tools/aveon/aveon.py)
     if (mode != MP_SINNOH_SPRITES_GEN4 && sSinnohGen3[i] != 0)
         return SinnohGen3Info(i, sSinnohGen3[i]);
     if (mode != MP_SINNOH_SPRITES_GEN3)

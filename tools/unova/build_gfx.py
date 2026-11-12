@@ -17,7 +17,7 @@ aletheia's pokegra.c), each its cell 0 (NCER, 1D mapping: a tile number counts 6
 arm9's TrainerGraIndexTable (0x020A023C, 0x6A classes).
 
 Format (little endian): "U3DG" u32 version 2, u16 codes; each: u8 kind (0 walking: 9 frames 32x32, 1 still 32x32,
-  4 still 64x64, 0xFF none), u8 pad, u16 palette[16] (BGR555, 0 transparent), the frames as GBA 4bpp tiles; then
+  4 still 64x64, 0xFF none), u8 pad (1: MIXED's copy is AveonTrainer's sprite, tools/aveon/aveon.py), u16 palette[16] (BGR555, 0 transparent), the frames as GBA 4bpp tiles; then
   MIXED's smaller copy (OPTIONS > DISPLAY > SPRITE SCALING > UNOVA PEOPLE): u16 palette[16], the same frames
   then "TRPC", u16 classes, u8 the picture of each (padded to 2), u16 pictures; each: u16 palette[16] (0 transparent),
   s16 dx, dy (its top-left from the sprite's point), u16 w, h, rows of (w + 1) / 2 bytes (4 bits, the low nibble first)
@@ -41,6 +41,8 @@ _spec = importlib.util.spec_from_file_location('sinnoh_build_gfx', os.path.join(
                                                                                'build_gfx.py'))
 _sinnoh = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_sinnoh)
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), 'aveon'))
+import aveon  # noqa: E402   (AveonTrainer's people for MIXED: graphics/aveon/frames.bin)
 shrink, tiles_of = _sinnoh.shrink, _sinnoh.tiles_of   # (the smaller copy's filter: a tool, never the engines)
 
 VERSION = 2
@@ -332,9 +334,16 @@ def main():
         kind, pal, frames = s
         size = len(frames[0])
         pal0 = [0] + pal[1:]
-        pack += struct.pack('<BB16H', kind, 0, *pal0)
+        art = aveon.art('unova', i) if kind == 0 else None   # (MIXED: AveonTrainer's, tools/aveon/aveon.py)
+        pack += struct.pack('<BB16H', kind, 1 if art else 0, *pal0)
         for f in frames:
             pack += tiles_of(f, size, size)
+        if art:
+            pack += struct.pack('<16H', *art[0])
+            for rows in art[1]:
+                pack += tiles_of(rows, 32, 32)
+            made += 1
+            continue
         spal, small = shrink(Sheet(frames, size, pal0), [(k * size, 0) for k in range(len(frames))], size, size,
                              scale=SMALL)
         pack += struct.pack('<16H', *[_sinnoh.bgr555(c) if k else 0 for k, c in enumerate(spal)])

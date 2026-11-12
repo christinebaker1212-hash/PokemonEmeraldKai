@@ -1,0 +1,159 @@
+AveonTrainer's overworld sprites (OPTIONS > DISPLAY > SPRITE SCALING > SINNOH / UNOVA PEOPLE: MIXED)
+
+Gen 4 and 5 characters and trainer classes drawn in FireRed / LeafGreen's style, from aveontrainer's gallery on
+DeviantArt (credited as "aveontrainer on DeviantArt"): https://www.deviantart.com/aveontrainer/gallery/67900303/overworld
+Each sprite below with its page, and whom the artist credits on it (references, colours, bases; a few the gallery
+shares from other artists, who are named).
+
+  aaron.png                "Aaron" https://www.deviantart.com/aveontrainer/art/Aaron-885636678
+                            thanks to starsparkless for front facing and colors
+  ace_trainer_f.png        "Female Ace Trainer" https://www.deviantart.com/aveontrainer/art/Female-Ace-Trainer-815889903
+  ace_trainer_m.png        "Ace Trainer Male" https://www.deviantart.com/aveontrainer/art/Ace-Trainer-Male-824163519
+  alder.png                "Alder" https://www.deviantart.com/aveontrainer/art/Alder-823512731
+                            thanks to KalerioDion for reference and colors
+  anthea.png               "Anthea" https://www.deviantart.com/aveontrainer/art/Anthea-791939009
+  argenta.png              "Argenta" https://www.deviantart.com/aveontrainer/art/Argenta-966449338
+                            thanks to academico95 for reference
+  backpacker_f.png         "Female Backpacker" https://www.deviantart.com/aveontrainer/art/Female-Backpacker-790970026
+  backpacker_m.png         "Male Backpacker" https://www.deviantart.com/aveontrainer/art/Male-Backpacker-815836865
+  barry.png                "Barry" https://www.deviantart.com/aveontrainer/art/Barry-786354159
+  battle_girl.png          "Battle Girl" https://www.deviantart.com/aveontrainer/art/Battle-Girl-823834196
+  beauty.png               "Beauty" https://www.deviantart.com/aveontrainer/art/Beauty-822232186
+                            thanks to Wesely for reference and colors
+  bertha.png               "Bertha" https://www.deviantart.com/aveontrainer/art/Bertha-782758554
+  bianca.png               "Bianca" https://www.deviantart.com/aveontrainer/art/Bianca-786292605
+  black_belt.png           "Black Belt" https://www.deviantart.com/aveontrainer/art/Black-Belt-794743019
+  breeder_f.png            "Female Breeder" https://www.deviantart.com/aveontrainer/art/Female-Breeder-816950139
+                            thanks to Wesely for the reference
+  breeder_m.png            "Male Breeder" https://www.deviantart.com/aveontrainer/art/Male-Breeder-816948156
+                            thanks to Wesely for the reference
+  brycen.png               "Brycen" https://www.deviantart.com/aveontrainer/art/Brycen-789737576
+                            thanks to PurpleZaffre and Starsparkless for color palette and reference
+  byron.png                "Byron" https://www.deviantart.com/aveontrainer/art/Byron-784823727
+                            thanks to Starsparkless for the front facing
+  caitlin.png              "Caitlin" https://www.deviantart.com/aveontrainer/art/Caitlin-790305677
+                            thanks to Starsparkless (Brendan Bass now) for the front facing
+  charon.png               "Charon" https://www.deviantart.com/aveontrainer/art/Charon-789821854
+                            thanks to Starsparkless for the front facing and to Bunnl89 for the side view reference
+  cheren.png               "Cheren" https://www.deviantart.com/aveontrainer/art/Cheren-786338260
+                            thanks to Starsparkless for the front facing and color palette
+  cheryl.png               "Cheryl" https://www.deviantart.com/aveontrainer/art/Cheryl-782782962
+  clown.png                "Clown" https://www.deviantart.com/aveontrainer/art/Clown-849502787
+                            thanks to my friend etique for the base
+  collector.png            "Collector" https://www.deviantart.com/aveontrainer/art/Collector-825843583
+                            thanks to Wesely for the reference and colors
+  concordia.png            "Concordia" https://www.deviantart.com/aveontrainer/art/Concordia-791928538
+  crasher_wake.png         "Crasher Wake" https://www.deviantart.com/aveontrainer/art/Crasher-Wake-784829896
+                            thanks to Starsparkless for the front facing body
+  cyclist_m.png            "Male Cyclist" https://www.deviantart.com/aveontrainer/art/Male-Cyclist-777449092
+  cynthia.png              "Cynthia" https://www.deviantart.com/aveontrainer/art/Cynthia-823797563
+                            thanks to Wobb for the base
+  cyrus.png                "Cyrus" https://www.deviantart.com/aveontrainer/art/Cyrus-789822985
+                            thanks to PurpleZaffre for the side poses and the outfit colors ( I recolored some of them) Starspar
+  dahlia.png               "Dahlia" https://www.deviantart.com/aveontrainer/art/Dahlia-786942116
+                            thanks to Starsparkless for the front facing
+  darach.png               "Darach" https://www.deviantart.com/aveontrainer/art/Darach-966459642
+                            thanks to Diego_WT for reference and colors
+  doctor.png               "Doctor" https://www.deviantart.com/aveontrainer/art/Doctor-825635621
+  elesa.png                "Elesa" https://www.deviantart.com/aveontrainer/art/Elesa-882608881
+  fantina.png              "Fantina" https://www.deviantart.com/aveontrainer/art/Fantina-784798838
+                            thanks to Starsparkless for the front facing
+  fisherman.png            "Fisher" https://www.deviantart.com/aveontrainer/art/Fisher-1298893159
+                            thanks to Wergan for reference and colors
+  flint.png                "Flint" https://www.deviantart.com/aveontrainer/art/Flint-786950176
+  galactic_grunt_f.png     "Galactic Grunt Female" https://www.deviantart.com/aveontrainer/art/Galactic-Grunt-Female-822341697
+  galactic_grunt_m.png     "Galactic Grunt Male" https://www.deviantart.com/aveontrainer/art/Galactic-Grunt-Male-822246712
+  ghetsis.png              "Ghetsis" https://www.deviantart.com/aveontrainer/art/Ghetsis-786702032
+                            thanks to starsparkless for the front facing and the color palette
+  grimsly.png              "Grimsly" https://www.deviantart.com/aveontrainer/art/Grimsly-790314113
+                            thanks to Starsparkless (Now Brendan Bass) for the front facing
+  guitarist.png            "Guitarist" https://www.deviantart.com/aveontrainer/art/Guitarist-825853582
+                            thanks to Wesely for reference and colors
+  hiker.png                "Hiker" https://www.deviantart.com/aveontrainer/art/Hiker-817171347
+                            thanks to Wesely for the reference
+  iris.png                 "Iris" https://www.deviantart.com/aveontrainer/art/Iris-796525148
+                            thanks to starsparkless for front facing PurpleZaffre for reference on other poses
+  jasmine.png              "Jasmine" https://www.deviantart.com/aveontrainer/art/Jasmine-885851612
+                            thanks to Starsparkless for front facing That should do it for GSC Gym leaders
+  jogger.png               "Pokemon Jogger Male" https://www.deviantart.com/aveontrainer/art/Pokemon-Jogger-Male-815626024
+  jupiter.png              "Jupiter" https://www.deviantart.com/aveontrainer/art/Jupiter-789770748
+                            thanks to Starsparkless for front facing
+  lady.png                 "Lady" https://www.deviantart.com/aveontrainer/art/Lady-817162108
+                            thanks to Wesely for the reference
+  lass.png                 "Lass" https://www.deviantart.com/aveontrainer/art/Lass-794743466
+  lenora.png               "Lenora" https://www.deviantart.com/aveontrainer/art/Lenora-883287508
+                            thanks to starsparkless for front facing Nintendo Gen 5 overworld for reference on the rest of the p
+  looker.png               "Looker" https://www.deviantart.com/aveontrainer/art/Looker-817181360
+  lucian.png               "Lucian" https://www.deviantart.com/aveontrainer/art/Lucian-787054994
+                            thanks to StarSparkless for the front facing base
+  marley.png               "Marley" https://www.deviantart.com/aveontrainer/art/Marley-786372131
+                            thanks to Starsparkless for the front facing
+  mars.png                 "Mars" https://www.deviantart.com/aveontrainer/art/Mars-789767083
+                            thanks to Starsparkless for front facing
+  mira.png                 "Mira" https://www.deviantart.com/aveontrainer/art/Mira-784503235
+  nurse.png                "Nurse" https://www.deviantart.com/aveontrainer/art/Nurse-825777340
+  painter_m.png            "Kalos Painter (M)" https://www.deviantart.com/aveontrainer/art/Kalos-Painter-%28M%29-1052963360
+                            thanks to Wergans Mega Pack for reference and colors
+  palmer.png               "Palmer" https://www.deviantart.com/aveontrainer/art/Palmer-966466161
+                            thanks to Naokohiro
+  parasol_lady.png         "Parasol Lady" https://www.deviantart.com/aveontrainer/art/Parasol-Lady-817102523
+                            thanks to Wesely for reference
+  plasma_grunt_f.png       "Plasma Grunt Female" https://www.deviantart.com/aveontrainer/art/Plasma-Grunt-Female-796538747
+                            thanks to PurpleZaffre for reference and Color Palette
+  plasma_grunt_m.png       "Plasma Grunt Male" https://www.deviantart.com/aveontrainer/art/Plasma-Grunt-Male-796539876
+                            thanks to PurpleZaffre for reference and color Palette
+  pokefan_f.png            "Poke Fan (F)" https://www.deviantart.com/aveontrainer/art/Poke-Fan-%28F%29-822204182
+                            thanks to Wesely for reference and colors
+  pokefan_m.png            "Poke Fan (M)" https://www.deviantart.com/aveontrainer/art/Poke-Fan-%28M%29-822186300
+                            thanks to Wesely for reference and colors
+  policeman.png            "Policeman" https://www.deviantart.com/aveontrainer/art/Policeman-824159635
+  preschooler_f.png        "Preschooler F" https://www.deviantart.com/aveontrainer/art/Preschooler-F-1299195987
+                            thanks to Wergan for reference and colors
+  preschooler_m.png        "Preschooler_M" https://www.deviantart.com/aveontrainer/art/Preschooler_M-1298977995
+                            thanks to Wergan for Reference and colors
+  prof_juniper.png         "Pokemon Professor Juniper" https://www.deviantart.com/aveontrainer/art/Pokemon-Professor-Juniper-781876514
+                            thanks to Starsparkless for the front facing
+  prof_rowan.png           "Pokemon Professor Rowan" https://www.deviantart.com/aveontrainer/art/Pokemon-Professor-Rowan-781845535
+  ranger_f.png             "Ranger Female" https://www.deviantart.com/aveontrainer/art/Ranger-Female-794744094
+                            made by MrDollSteak (credit them only)
+  ranger_m.png             "Ranger Male" https://www.deviantart.com/aveontrainer/art/Ranger-Male-794743802
+                            made by MrDollSteak (credit them only)
+  rich_boy.png             "Rich Boy" https://www.deviantart.com/aveontrainer/art/Rich-Boy-822212332
+                            made by Kalarie (credit them only)
+  riley.png                "Riley" https://www.deviantart.com/aveontrainer/art/Riley-794667050
+                            thanks to etique from PokeCommunity
+  ruin_maniac.png          "Ruin Maniac" https://www.deviantart.com/aveontrainer/art/Ruin-Maniac-794740248
+                            made by SphericalIce (credit them only)
+  saturn.png               "Saturn" https://www.deviantart.com/aveontrainer/art/Saturn-789818900
+                            thanks to Starsparkless for the front facing and fatefulsprites for the side reference
+  school_girl.png          "School Girl" https://www.deviantart.com/aveontrainer/art/School-Girl-824072709
+                            thanks to Wesely for the reference and colors
+  scientist_f.png          "Unova Scientist (F)" https://www.deviantart.com/aveontrainer/art/Unova-Scientist-%28F%29-970937247
+  scientist_m.png          "Scientist" https://www.deviantart.com/aveontrainer/art/Scientist-823529253
+  shauntal.png             "Shauntal" https://www.deviantart.com/aveontrainer/art/Shauntal-882605496
+                            thanks to starsparkless for front facing Izzyviscious for reference on other poses
+  sinnoh_maid.png          "Sinnoh Maid" https://www.deviantart.com/aveontrainer/art/Sinnoh-Maid-1041086357
+  sinnoh_veteran.png       "Sinnoh Veteran" https://www.deviantart.com/aveontrainer/art/Sinnoh-Veteran-971164957
+                            thanks to PurpleZaffre for reference and colors
+  skier_f.png              "Skier (F)" https://www.deviantart.com/aveontrainer/art/Skier-%28F%29-971158514
+  skier_m.png              "Skier (M)" https://www.deviantart.com/aveontrainer/art/Skier-%28M%29-971151112
+  smasher.png              "Pokemon Trainer Smasher" https://www.deviantart.com/aveontrainer/art/Pokemon-Trainer-Smasher-815635916
+  snow_ace_trainer_f.png   "Snow Ace Trainer F" https://www.deviantart.com/aveontrainer/art/Snow-Ace-Trainer-F-1296151012
+                            thanks to Mr Gela for color reference
+  snow_ace_trainer_m.png   "Snow Ace Trainer M" https://www.deviantart.com/aveontrainer/art/Snow-Ace-Trainer-M-1296133951
+                            made by Delta2318 (credit them only)
+  socialite.png            "Socialite" https://www.deviantart.com/aveontrainer/art/Socialite-824155692
+  swimmer_f.png            "Swimmer Female" https://www.deviantart.com/aveontrainer/art/Swimmer-Female-823801026
+  swimmer_m.png            "Kalos Swimmer (M)" https://www.deviantart.com/aveontrainer/art/Kalos-Swimmer-%28M%29-971182436
+  thorton.png              "Thorton" https://www.deviantart.com/aveontrainer/art/Thorton-852956426
+                            thanks to izzyvicious reference and colors
+  twin.png                 "Twin" https://www.deviantart.com/aveontrainer/art/Twin-823800039
+  veteran_f.png            "Kalos Veteran (F)" https://www.deviantart.com/aveontrainer/art/Kalos-Veteran-%28F%29-1032096084
+                            thanks to Wergan for reference and colors
+  veteran_m.png            "Kalos Veteran (M)" https://www.deviantart.com/aveontrainer/art/Kalos-Veteran-%28M%29-1031465675
+                            thanks to Wergan's Mega Pack for reference and colors
+  volkner.png              "Volkner" https://www.deviantart.com/aveontrainer/art/Volkner-885638384
+  waiter.png               "Waiter" https://www.deviantart.com/aveontrainer/art/Waiter-815841655
+  waitress.png             "Waitress" https://www.deviantart.com/aveontrainer/art/Waitress-815852742
+  worker.png               "Kalos Worker" https://www.deviantart.com/aveontrainer/art/Kalos-Worker-966720229
+                            thanks to Wergan for the colors and reference

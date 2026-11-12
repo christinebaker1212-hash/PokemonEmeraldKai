@@ -1275,11 +1275,11 @@ static void DrawHint(void)
                  : "ORIGINAL OUTSIDE, PMD IN THE GARDEN");
     else if (opt == OPT_SINNOHSPRITES)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_GEN3 ? "GEN 3 SPRITES FOR EVERYONE"
-                 : gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_MIXED ? "GEN 3 MATCHES, OTHERS PLATINUM'S SHRUNK"
+                 : gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_MIXED ? "FRLG-STYLE GEN 4, GEN 3 MATCHES, OR SHRUNK"
                  : "PLATINUM'S OWN SPRITES");
     else if (opt == OPT_UNOVASPRITES)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.unovaSprites == MP_UNOVA_SPRITES_GEN5 ? "BLACK'S OWN SPRITES"
-                 : "BLACK'S SPRITES SHRUNK TO GEN 3'S SIZE");
+                 : "FRLG-STYLE GEN 5, GEN 3 MATCHES, OR SHRUNK");
     else if (opt == OPT_SPRITESCALE)
         snprintf(ascii, sizeof(ascii), "A: SINNOH'S AND UNOVA'S PEOPLE, FOLLOWERS, THE GARDEN");
     else if (opt == OPT_STADIUM)

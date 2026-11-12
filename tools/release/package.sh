@@ -32,7 +32,7 @@ linux)
     ;;
 *) echo "platform: windows or linux"; exit 1 ;;
 esac
-cp dist_extras/README.txt "dist_extras/Sprite Editor.html" dist_extras/custom_sprite_template.png dist_extras/lobby.txt dist_extras/PMD_CREDITS.txt dist_extras/EDOPRO_CREDITS.txt dist_extras/FORGE_CREDITS.txt dist_extras/ARCADE_CREDITS.txt "$P/"
+cp dist_extras/README.txt "dist_extras/Sprite Editor.html" dist_extras/custom_sprite_template.png dist_extras/lobby.txt dist_extras/PMD_CREDITS.txt dist_extras/EDOPRO_CREDITS.txt dist_extras/FORGE_CREDITS.txt dist_extras/ARCADE_CREDITS.txt dist_extras/AVEON_CREDITS.txt "$P/"
 # the GAME CENTER's CAPCOM VS cabinets: an empty folder for the player's own ROM sets (none ship)
 mkdir -p "$P/arcade"
 printf 'Put your ROM sets for the GAME CENTER 3F VS cabinets here (MAME zips, as they are):\r\n  SUPER STREET FIGHTER II X   ssf2t.zip and ssf2xj.zip\r\n  VAMPIRE SAVIOR              vsav.zip and vsavj.zip\r\n  CYBERBOTS                   cybots.zip\r\n  STREET FIGHTER ALPHA 3      sfa3.zip\r\nSee VS CABINETS in README.txt.\r\n' > "$P/arcade/ROM SETS GO HERE.txt"
