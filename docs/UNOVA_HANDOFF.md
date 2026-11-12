@@ -90,6 +90,31 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   12 bits of its graphics id: 0x1000+ would wrap), palettes by tag 0xD000 / 0xD400 + code (event_object_movement.c
   UnovaObjectInfo); OPTIONS > DISPLAY > SPRITE SCALING > UNOVA PEOPLE: MIXED (Black's shrunk to 0.84, the default)
   or GEN 5.
+- After the credits (2026-11-12): ALDER's rematch, the HALL OF FAME and the credits again (SetGameClearEventAndEnd
+  mode 1), the continue spot at home (U3D_Vm_ContinueHome), roamers knocked out set off again (UnovaGameClear).
+  White's own POKéMON: mixed into Black's slots (u3d_wild.c WhiteCounterpart), THUNDURUS roams beside TORNADUS,
+  ZEKROM at the top of DRAGONSPIRAL after the credits (ZONE_ZEKROM). KYUREM, LANDORUS (with both genies), the
+  Swords of Justice, VOLCARONA, CYNTHIA's villa in UNDELLA (her battle), LOOKER and the Seven Sages (the DREAMYARD's
+  GORM played), BLACK CITY's residents (WFBC records, scripts pack v9: battles, talk, moods by the day) and its five
+  stalls. LIBERTY GARDEN: the LIBERTY PASS comes with the clear (as HOENN's tickets with becoming Champion); CASTELIA's
+  pier sailor and the boat (CheckBeaconTrainerKey always passes), VICTINI, the lighthouse grunt, JUNIPER's scene; the
+  boat back by Black's rail-location warp (gen_maps.py u3d_railpos.h sUnovaRailWarps: across counts from the line's
+  edge, FIELD_RAIL_MakeLineLocation). Trades (scripts pack v8). Clocks set and daily flags for a game begun outside
+  HOENN (clock.c). Tests: tools in the session's scratchpad (scene.py: warp beside a tile of a zone, set works and
+  flags, press keys; `steps=KEY:N:WAIT;...` for exact input, `cmd:mp ...` for debug commands).
+- The BATTLE SUBWAY (2026-11-12): src/unova/u3d_subway.c ports Black's bsubway_scr.c / fld_btl_inst_tool.c (the
+  GEAR STATION's lines run Black's own scripts; BSUBWAY_SCR_CmdTool's commands; the field's ones, the places and
+  passengers, in u3d_vm.c SubwayField). Trainers drawn per train and battle (ov021's ranges, the bosses at 21 / 49),
+  their sets built as Black builds them (scripts pack v10: a/2/1/4 sets, a/2/1/5 trainers, the tables), names system
+  bank 11, greetings bank 184; level 50 copies of the chosen POKéMON (party menu: Black's banned list), no EXP or
+  prize; the multi partner is the other hero (trainers 300-305, Black's back pictures 0 / 1); BP by streak into the
+  game's own BP; records in UNEW (sWork.subway, u3d_subway.h); REST saves and resets; Battle Videos and wireless
+  closed (flag 12 always set). Black's POKéMARTs (SHOP_StartShop): lists by badges and numbered (pack v10 after the
+  subway's tables), the game's POKéMART opened straight on BUY or SELL (shop.c MP_CreatePokemartDirect), BLACK CITY's
+  stalls at their residents' prices (shop.c MP_Shop_SetPrices), the BP exchanges (u3d_bpshop.c, Black's words).
+  Not yet: the GEAR STATION's trains drawn on the platforms; the gyms' gimmicks (Black's field_gimmick_*: STRIATON's
+  switches, NACRENE's books, CASTELIA's honey walls, NIMBASA's coaster, DRIFTVEIL's lifts, MISTRALTON's cannons,
+  ICIRRUS's ice, OPELUCID's bridges), MUSICALS, NIMBASA's stadiums, the ROYAL UNOVA, the survey HQ.
 - The ROM: the user's Pokemon Black (USA, Europe) (NDSi Enhanced), SHA-1 26ad0b9967aa279c4a266ee69f52b9b2332399a5,
   from their Google Drive (the link in docs/UNOVA_DECISIONS.md's source message; the release fetches it through the
   UNOVA_ROM_URL secret, added by the user 2026-11-11). Never committed; locally in ~/.cache/moemon/unova/black.nds.
