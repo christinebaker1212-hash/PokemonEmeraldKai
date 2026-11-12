@@ -1184,8 +1184,8 @@ static void Step(struct Thread *t)
         case U3C_StartFld3dCiByVar:   // (a field move's: its POKéMON over the field)
         case U3C_IAIGIRI_StartOnPlayer:   // (CUT's slash on the player: the tree goes with its own sound after)
         case U3C_PALPARK_SetBeacon:   // (a link beacon of what the player did: no wireless here)
-        case U3C_WORK_CmdDebugWork:   // (Black's debug prints)
-        case U3C_WORK_CmdDebugStack:
+        case U3C_DebugWork:   // (Black's debug prints)
+        case U3C_DebugStack:
         case U3C_PROC_Ov037InitFromVars:   // (a gym's switches' gimmick state: the gyms' own puzzles aren't kept yet)
         case U3C_PROC_Ov037SetValueA:
         case U3C_PROC_Ov037SetValueB:
