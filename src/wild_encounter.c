@@ -487,6 +487,12 @@ static bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, u8 ar
     return TRUE;
 }
 
+// (mp u3dwild: a wild POKéMON made from INFO as an encounter would)
+bool8 MP_Debug_GenerateWildMon(const struct WildPokemonInfo *info, bool8 water)
+{
+    return TryGenerateWildMon(info, water ? WILD_AREA_WATER : WILD_AREA_LAND, 0);
+}
+
 static u16 GenerateFishingWildMon(const struct WildPokemonInfo *wildMonInfo, u8 rod)
 {
     u8 wildMonIndex = ChooseWildMonIndex_Fishing(rod);

@@ -21,6 +21,7 @@ unsigned int SDL_GetTicks(void);
 #include <math.h>
 #include "s3d.h"   // Moemon Kai: SINNOH's 3D engine (tests)
 #include "u3d.h"   // Moemon Kai: UNOVA (tests)
+#include "wild_encounter.h"   // (mp u3dwild)
 #include "field_message_box.h"
 #include "mp_region.h"
 #include "field_control_avatar.h"
@@ -1856,6 +1857,29 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Debug_TrainerBattle(u16 id);
         printf("[test] trainer battle %d\n", atoi(arg));
         MP_Debug_TrainerBattle(atoi(arg));
+    }
+    else if (strcmp(cmd, "u3dwild") == 0)
+    {
+        // u3dwild BEHAVIOR (hex; 0: the tile underfoot's) - the zone's wild table there (u3d_wild.c) and one POKéMON made from it
+        const struct WildPokemonInfo *info;
+        u8 area, k;
+        u16 b = strtol(arg, NULL, 16);
+        if (!b)
+            b = MapGridGetMetatileBehaviorAt(gSaveBlock1Ptr->pos.x + MAP_OFFSET, gSaveBlock1Ptr->pos.y + MAP_OFFSET);
+        if (!U3D_WildInfo(b, &info, &area))
+            printf("[test] u3dwild: none (zone %d, behavior 0x%x)\n", U3D_CurrentZone(), b);
+        else
+        {
+            for (k = 0; k < (area ? 5 : 12); k++)
+                printf("[test] u3dwild slot %d: species %d Lv%d-%d\n", k, info->wildPokemon[k].species, info->wildPokemon[k].minLevel,
+                       info->wildPokemon[k].maxLevel);
+            bool8 MP_Debug_GenerateWildMon(const struct WildPokemonInfo *info, bool8 water);
+            ZeroEnemyPartyMons();
+            MP_Debug_GenerateWildMon(info, area != 0);
+            printf("[test] u3dwild made species %d (rate %d)\n", GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), info->encounterRate);
+            if (strchr(arg, 'b'))   // (u3dwild 2b: and the battle, as a step in the grass starts it)
+                BattleSetup_StartWildBattle();
+        }
     }
     else if (strcmp(cmd, "u3dcatchdemo") == 0)
     {

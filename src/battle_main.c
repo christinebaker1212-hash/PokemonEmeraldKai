@@ -2307,9 +2307,11 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
 
     if (trainerNum == TRAINER_SECRET_BASE)
         return 0;
-    if (Orre_IsTrainer(trainerNum))
+    // Moemon Kai: (only in a trainer battle, as the game's own below: every battle comes here, and the last trainer's
+    // number stays set, so a wild battle after an UNOVA / ORRE trainer's had their team instead of the wild one)
+    if (Orre_IsTrainer(trainerNum) && gBattleTypeFlags & BATTLE_TYPE_TRAINER)
         return Orre_Party(party, trainerNum, firstTrainer);   // Moemon Kai: Colosseum's team (src/orre/orre_battle.c)
-    if (U3D_IsTrainer(trainerNum))
+    if (U3D_IsTrainer(trainerNum) && gBattleTypeFlags & BATTLE_TYPE_TRAINER)
         return U3D_Party(party, trainerNum, firstTrainer);   // Moemon Kai: Black's team (src/unova/u3d_battle.c)
     trainer = MP_Region_TrainerData(trainerNum);   // Moemon Kai: JOHTO / KANTO teams before Gen 4 (mp_region.c)
 
