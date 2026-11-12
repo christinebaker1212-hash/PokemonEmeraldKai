@@ -80,7 +80,78 @@
       "flag": "0"
     }
   ],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 11,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "62"
+    },
+    {
+      "x": 12,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "62"
+    },
+    {
+      "x": 13,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "62"
+    },
+    {
+      "x": 14,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "62"
+    },
+    {
+      "x": 15,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "62"
+    },
+    {
+      "x": 16,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "17"
+    },
+    {
+      "x": 17,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "17"
+    },
+    {
+      "x": 18,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "17"
+    },
+    {
+      "x": 19,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "17"
+    },
+    {
+      "x": 20,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "17"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

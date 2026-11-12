@@ -49,6 +49,13 @@
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE10_Z363",
       "dest_warp_id": "7"
+    },
+    {
+      "x": 15,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "27"
     }
   ],
   "coord_events": [],

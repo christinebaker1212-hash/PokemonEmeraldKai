@@ -16,8 +16,8 @@
   "object_events": [
     {
       "graphics_id": "0x60F",
-      "x": 0,
-      "y": 0,
+      "x": 141,
+      "y": 295,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
       "movement_range_x": 0,
@@ -29,8 +29,8 @@
     },
     {
       "graphics_id": "0x61E",
-      "x": 0,
-      "y": 0,
+      "x": 112,
+      "y": 166,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_UP",
       "movement_range_x": 0,
@@ -42,8 +42,8 @@
     },
     {
       "graphics_id": "0x61F",
-      "x": 0,
-      "y": 0,
+      "x": 112,
+      "y": 76,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_UP",
       "movement_range_x": 0,
@@ -54,7 +54,92 @@
       "flag": "0"
     }
   ],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 89,
+      "y": 272,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z251",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 89,
+      "y": 273,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z251",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 89,
+      "y": 274,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z251",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 89,
+      "y": 275,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z251",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 89,
+      "y": 276,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z251",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 89,
+      "y": 277,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z251",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 89,
+      "y": 278,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z251",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 111,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z252",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 112,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z252",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 113,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z252",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 114,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z252",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 115,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z252",
+      "dest_warp_id": "1"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

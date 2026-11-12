@@ -379,7 +379,92 @@
       "flag": "0"
     }
   ],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 86,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 87,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 88,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 68,
+      "y": 156,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z244",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 69,
+      "y": 156,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z244",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 70,
+      "y": 156,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z244",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 5,
+      "y": 93,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z242",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 6,
+      "y": 93,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z242",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 7,
+      "y": 93,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z242",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 140,
+      "y": 90,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z243",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 141,
+      "y": 90,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z243",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 142,
+      "y": 90,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z243",
+      "dest_warp_id": "1"
+    }
+  ],
   "coord_events": [
     {
       "type": "trigger",

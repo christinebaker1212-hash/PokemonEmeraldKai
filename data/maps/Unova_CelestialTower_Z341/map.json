@@ -67,7 +67,50 @@
       "flag": "0"
     }
   ],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 16,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CELESTIALTOWER_Z340",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 16,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CELESTIALTOWER_Z340",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 16,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CELESTIALTOWER_Z340",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 17,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CELESTIALTOWER_Z342",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 17,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CELESTIALTOWER_Z342",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 17,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CELESTIALTOWER_Z342",
+      "dest_warp_id": "1"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

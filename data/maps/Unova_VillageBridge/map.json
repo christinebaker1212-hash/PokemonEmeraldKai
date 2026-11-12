@@ -224,8 +224,8 @@
     },
     {
       "graphics_id": "0x631",
-      "x": 0,
-      "y": 0,
+      "x": 61,
+      "y": 29,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_UP",
       "movement_range_x": 0,
@@ -237,8 +237,8 @@
     },
     {
       "graphics_id": "0x619",
-      "x": 0,
-      "y": 0,
+      "x": 33,
+      "y": 29,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_UP",
       "movement_range_x": 0,
@@ -316,6 +316,48 @@
       "y": 33,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_BRIDGEGATE_Z369",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 13,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VILLAGEBRIDGE_Z256",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 68,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VILLAGEBRIDGE_Z258",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 27,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VILLAGEBRIDGE_Z259",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 82,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VILLAGEBRIDGE_Z261",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 75,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VILLAGEBRIDGE_Z260",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 20,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VILLAGEBRIDGE_Z257",
       "dest_warp_id": "1"
     },
     {

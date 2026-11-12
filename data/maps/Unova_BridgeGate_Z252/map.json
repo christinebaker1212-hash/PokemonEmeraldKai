@@ -41,7 +41,50 @@
       "flag": "0"
     }
   ],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 8,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_SKYARROWBRIDGE",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 9,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_SKYARROWBRIDGE",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 10,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_SKYARROWBRIDGE",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 1,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "43"
+    },
+    {
+      "x": 1,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "43"
+    },
+    {
+      "x": 1,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "43"
+    }
+  ],
   "coord_events": [],
   "bg_events": [
     {

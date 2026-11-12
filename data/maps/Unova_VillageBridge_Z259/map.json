@@ -54,7 +54,29 @@
       "flag": "0"
     }
   ],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 5,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VILLAGEBRIDGE",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 6,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VILLAGEBRIDGE",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 7,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VILLAGEBRIDGE",
+      "dest_warp_id": "8"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

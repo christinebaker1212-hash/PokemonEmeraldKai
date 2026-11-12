@@ -158,7 +158,29 @@
       "flag": "0"
     }
   ],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 6,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "47"
+    },
+    {
+      "x": 7,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "47"
+    },
+    {
+      "x": 8,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY",
+      "dest_warp_id": "47"
+    }
+  ],
   "coord_events": [
     {
       "type": "trigger",

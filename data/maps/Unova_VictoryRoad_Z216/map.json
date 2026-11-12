@@ -50,6 +50,13 @@
       "dest_warp_id": "1"
     },
     {
+      "x": 5,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "31"
+    },
+    {
       "x": 13,
       "y": 4,
       "elevation": 0,

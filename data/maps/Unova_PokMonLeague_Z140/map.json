@@ -28,7 +28,29 @@
       "flag": "0"
     }
   ],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 14,
+      "y": 30,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_POKMONLEAGUE_Z137",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 15,
+      "y": 30,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_POKMONLEAGUE_Z137",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 16,
+      "y": 30,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_POKMONLEAGUE_Z137",
+      "dest_warp_id": "3"
+    }
+  ],
   "coord_events": [
     {
       "type": "trigger",

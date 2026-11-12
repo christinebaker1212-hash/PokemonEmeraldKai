@@ -62,6 +62,27 @@
       "elevation": 0,
       "dest_map": "MAP_UNOVA_ROUTE7_Z337_3_7",
       "dest_warp_id": "0"
+    },
+    {
+      "x": 13,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CELESTIALTOWER_Z339",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 13,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CELESTIALTOWER_Z339",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 13,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CELESTIALTOWER_Z339",
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [],

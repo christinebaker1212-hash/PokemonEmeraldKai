@@ -28,6 +28,8 @@ import matrix as mxr  # noqa: E402
 import zones as zr  # noqa: E402
 import events as ev  # noqa: E402
 import text  # noqa: E402
+import rails  # noqa: E402
+import build_pack  # noqa: E402
 
 GROUP = 'gMapGroup_Unova%d'
 PER_GROUP = 120
@@ -67,7 +69,10 @@ def events_of(m, w, h):
     objs, coords, bgs = [], [], []
     for p in evs['people']:
         x, z = p['x'] - ox, p['z'] - oz
-        inside = 0 <= x < w and 0 <= z < h and not p['rail']
+        if p['rail']:   # (a rail place: its tile, tools/unova/rails.py)
+            t = rails.event_tiles(m['zone'], 'people', p)
+            x, z = (t[0][0] - ox, t[0][1] - oz) if t else (-1, -1)
+        inside = 0 <= x < w and 0 <= z < h
         face = BLACK_DIR.get(p['dir'], 'DOWN')
         wander = p['move'] == 3 and (p['limit'][0] or p['limit'][1])
         objs.append({'graphics_id': '0x%X' % (UNOVA_GFX + p['gfx']) if p['gfx'] < UNOVA_GFX_COUNT else STAND_IN, 'x': x if inside else 0, 'y': z if inside else 0, 'elevation': 3,
@@ -81,15 +86,20 @@ def events_of(m, w, h):
                      'flag': '0'})
     for b in evs['bg']:
         x, z = b['x'] - ox, b['z'] - oz
-        if 0 <= x < w and 0 <= z < h and not b['rail']:
+        if b['rail']:
+            t = rails.event_tiles(m['zone'], 'bg', b)
+            x, z = (t[0][0] - ox, t[0][1] - oz) if t else (-1, -1)
+        if 0 <= x < w and 0 <= z < h:
             bgs.append({'type': 'sign', 'x': x, 'y': z, 'elevation': 0,
                         'player_facing_dir': 'BG_EVENT_PLAYER_FACING_ANY', 'script': 'Unova_EventScript_Sign'})
     for q in evs['pos']:
-        if q['rail'] or q['check'] != 0:
+        if q['check'] != 0:
             continue
-        for dz in range(max(1, q['h'])):
-            for dx in range(max(1, q['w'])):
-                x, z = q['x'] + dx - ox, q['z'] + dz - oz
+        if q['rail']:
+            spots = [(tx - ox, tz - oz) for tx, tz in rails.event_tiles(m['zone'], 'pos', q)]
+        else:
+            spots = [(q['x'] + dx - ox, q['z'] + dz - oz) for dz in range(max(1, q['h'])) for dx in range(max(1, q['w']))]
+        for x, z in spots:
                 if 0 <= x < w and 0 <= z < h:
                     coords.append({'type': 'trigger', 'x': x, 'y': z, 'elevation': 0,
                                    'var': '0x%X' % (0xB000 + q['work'] - 0x4000) if q['work'] >= 0x4000 else 'VAR_TEMP_0',
@@ -138,6 +148,17 @@ def zone_maps():
         else:
             xs, zs = [i % mx['w'] for i in cells], [i // mx['w'] for i in cells]
             pieces = [((min(xs), min(zs), max(xs), max(zs)), stem)]
+        k = build_pack.scale_of([z['id']])
+        if k > 1 or z['id'] in rails.rail_files():
+            # (a matrix of bigger blocks: its maps in 512-unit cells; rails past the blocks: the map grown to hold them)
+            grown = []
+            for (x0, z0, x1, z1), name in pieces:
+                x0, z0, x1, z1 = x0 * k, z0 * k, (x1 + 1) * k - 1, (z1 + 1) * k - 1
+                if z['id'] in rails.rail_files() and len(pieces) == 1:
+                    ts = [t for t in rails.cells(rails.rail_files()[z['id']]) if t[0] >= 0 and t[1] >= 0]
+                    x1, z1 = max(x1, max(t[0] for t in ts) // 32), max(z1, max(t[1] for t in ts) // 32)
+                grown.append(((x0, z0, x1, z1), name))
+            pieces = grown
         for rect, name in pieces:
             out.append({'zone': z['id'], 'name': name, 'id': 'MAP_' + snake(name), 'matrix': z['matrix'],
                         'rect': rect, 'place': place, 'outdoor': outdoor})
@@ -176,17 +197,20 @@ def main():
     landing = {}   # (zone, Black's connection index) -> (map, its middle warp there)
     for z in sorted({m['zone'] for m in maps}):
         for k, c in enumerate(ev.events(z)['connect']):
-            if c['rail']:
+            if c['rail']:   # (a door on a rail: its tiles, tools/unova/rails.py)
+                tiles = rails.event_tiles(z, 'connect', c)
+            else:
+                tiles = [(c['x'] // 16 + dx, c['z'] // 16 + dz) for dz in range(max(1, c['h']))
+                         for dx in range(max(1, c['w']))]
+            if not tiles:
                 continue
-            tx, tz = c['x'] // 16, c['z'] // 16
-            m = holder(z, tx, tz)
+            m = holder(z, tiles[0][0], tiles[0][1])
             if m is None:
                 continue
-            landing[(z, k)] = (m, len(warps[m['name']]) + (max(1, c['w']) * max(1, c['h'])) // 2)
-            for dz in range(max(1, c['h'])):
-                for dx in range(max(1, c['w'])):
-                    warps[m['name']].append((tx + dx - m['rect'][0] * 32, tz + dz - m['rect'][1] * 32, c['zone'],
-                                             c['exit'], c['dir']))
+            landing[(z, k)] = (m, len(warps[m['name']]) + len(tiles) // 2)
+            for tx, tz in tiles:
+                warps[m['name']].append((tx - m['rect'][0] * 32, tz - m['rect'][1] * 32, c['zone'], c['exit'],
+                                         c['dir']))
     table = []
     song_of = songs()
     for k, m in enumerate(maps):

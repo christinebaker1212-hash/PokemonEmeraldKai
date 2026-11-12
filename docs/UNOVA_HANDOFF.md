@@ -192,6 +192,15 @@ VILLAGE BRIDGE (255), the GEAR STATION (66), DRAGONSPIRAL TOWER (209, 211), CELE
 the rail files are a/0/7/9 (17, then their attributes in the second half): ov021 field_rail_loader.c / field_rail.c
 (points 0x70: four lines, keys, widths, a position, a camera; lines 0x48: start, end, key, shape, camera, length in
 16-unit cells; cameras 0x24: a function of 20 and 8 parameters; shapes 0x24: 0 straight, 1 an arc about an anchor).
-Rail events (people, triggers, signs, doors with `rail` 1) are placed by line, distance and side. The plan: lay each
-line's cells (its length by its width) onto the zone's tile grid with their heights when the pack and maps are made,
-rail events at their cells, and the rail cameras by the line the player is on.
+Rail events (people, triggers, signs, doors with `rail` 1) are placed by line, distance and side.
+
+Done (2026-11-12): tools/unova/rails.py lays each line's cells (its length by its width, straight or an arc) onto the
+zone's tile grid with their heights; build_pack.py (pack version 2) makes them walkable field blocks (rail doors warp
+tiles) and grows a matrix's cells where a rail runs past its blocks; gen_maps.py places rail people, signs, triggers
+and doors at their tiles and grows the map to hold the rails. Black's map types have block sizes (ov021 sMapTypeTable:
+SKYARROW BRIDGE's type 1 is 2048, zone 136's type 5 1024, the rest 512): the pack keeps the field in 512 cells and a
+matrix's `scale` (u3d.c Render draws its blocks from a coarser grid, each from its first cell at its middle). "NG"
+blocks (rail maps') are a model, then buildings (no grids). CASTELIA's streets walk with their people; SKYARROW
+walks, its deck drawn except a stretch about tiles z 90-160 (to look into). Not yet: Black's rail cameras (each
+line's and point's camera: CASTELIA looks along its streets), rail scripts' own commands (people moved on rails),
+VICTORY ROAD's negative coordinates (tiles below 0 are dropped).

@@ -81,7 +81,8 @@ typedef struct
     u8 hn[32 * 32];
     float h[32 * 32][2];
 } U3dCell;
-typedef struct { u16 number, width, height, x0, z0; U3dCell *cells; } U3dMatrix;
+typedef struct { u16 number, width, height, x0, z0, scale; U3dCell *cells; } U3dMatrix;   // (scale: a block is scale x scale
+                                                                                              // cells, its meshes in the first)
 
 static struct
 {
@@ -166,7 +167,7 @@ static void LoadPack(void)
     }
     r.p += 4;
     version = TakeU32(&r);
-    if (version != 1)
+    if (version != 1 && version != 2)
     {
         printf("[u3d] %s: another pack version (%u)\n", path, (unsigned)version);
         free(data);
@@ -241,6 +242,9 @@ static void LoadPack(void)
         mt->height = TakeU16(&r);
         mt->x0 = TakeU16(&r);
         mt->z0 = TakeU16(&r);
+        mt->scale = version >= 2 ? TakeU16(&r) : 1;
+        if (mt->scale == 0)
+            mt->scale = 1;
         mt->cells = calloc((u32)mt->width * mt->height ? (u32)mt->width * mt->height : 1, sizeof(U3dCell));
         for (i = 0; i < (u32)mt->width * mt->height && !r.bad; i++)
         {
@@ -933,12 +937,16 @@ static void Render(void)
         (&sDepth[0][0])[i] = 1e30f;
         (&sIds[0][0])[i] = -1;
     }
+    // (a matrix of bigger blocks, SKYARROW BRIDGE's: the blocks round the view, each drawn from its first cell at its
+    // middle)
+    s32 k = sCurMat && sCurMat->scale > 1 ? sCurMat->scale : 1;
+    bx = (s32)floorf(sView.tx / (BLOCK * k)), bz = (s32)floorf(sView.tz / (BLOCK * k));
     for (pass = 0; pass < 2; pass++)
         for (cz = bz - 1; cz <= bz + 1; cz++)
             for (cx = bx - 1; cx <= bx + 1; cx++)
             {
-                const U3dCell *c = Cell(cx, cz);
-                float ox = cx * BLOCK + BLOCK / 2, oz = cz * BLOCK + BLOCK / 2;
+                const U3dCell *c = Cell(cx * k, cz * k);
+                float ox = (cx + 0.5f) * BLOCK * k, oz = (cz + 0.5f) * BLOCK * k;
                 s16 mesh;
                 if (c == NULL)
                     continue;

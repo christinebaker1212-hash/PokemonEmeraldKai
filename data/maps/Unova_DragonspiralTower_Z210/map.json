@@ -210,7 +210,22 @@
       "flag": "0"
     }
   ],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 31,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRAGONSPIRALTOWER_Z209",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 15,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_DRAGONSPIRALTOWER_Z211",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [
     {
       "type": "trigger",

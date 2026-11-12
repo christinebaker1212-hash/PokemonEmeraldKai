@@ -16,8 +16,8 @@
   "object_events": [
     {
       "graphics_id": "0x620",
-      "x": 0,
-      "y": 0,
+      "x": 29,
+      "y": 48,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -29,8 +29,8 @@
     },
     {
       "graphics_id": "0x620",
-      "x": 0,
-      "y": 0,
+      "x": 23,
+      "y": 47,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -41,7 +41,168 @@
       "flag": "0"
     }
   ],
-  "warp_events": [],
-  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 28,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "19"
+    },
+    {
+      "x": 29,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "19"
+    },
+    {
+      "x": 30,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "19"
+    },
+    {
+      "x": 31,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "19"
+    },
+    {
+      "x": 32,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "19"
+    },
+    {
+      "x": 33,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "19"
+    },
+    {
+      "x": 34,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "19"
+    },
+    {
+      "x": 35,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "19"
+    },
+    {
+      "x": 36,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "19"
+    },
+    {
+      "x": 31,
+      "y": 45,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_POKMONLEAGUE_Z137",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 32,
+      "y": 45,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_POKMONLEAGUE_Z137",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 33,
+      "y": 45,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_POKMONLEAGUE_Z137",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 18,
+      "y": 47,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_POKMONLEAGUE_Z146",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 19,
+      "y": 47,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_POKMONLEAGUE_Z146",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 20,
+      "y": 47,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_POKMONLEAGUE_Z146",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 31,
+      "y": 48,
+      "elevation": 0,
+      "var": "0xB0A1",
+      "var_value": "0",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 32,
+      "y": 48,
+      "elevation": 0,
+      "var": "0xB0A1",
+      "var_value": "0",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 33,
+      "y": 48,
+      "elevation": 0,
+      "var": "0xB0A1",
+      "var_value": "0",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 31,
+      "y": 48,
+      "elevation": 0,
+      "var": "0xB00A",
+      "var_value": "111",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 32,
+      "y": 48,
+      "elevation": 0,
+      "var": "0xB00A",
+      "var_value": "111",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 33,
+      "y": 48,
+      "elevation": 0,
+      "var": "0xB00A",
+      "var_value": "111",
+      "script": "Unova_EventScript_Pos"
+    }
+  ],
   "bg_events": []
 }

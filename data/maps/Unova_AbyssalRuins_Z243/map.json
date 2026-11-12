@@ -14,7 +14,57 @@
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": null,
   "object_events": [],
-  "warp_events": [],
-  "coord_events": [],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z245",
+      "dest_warp_id": "10"
+    },
+    {
+      "x": 11,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z245",
+      "dest_warp_id": "10"
+    },
+    {
+      "x": 12,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_ABYSSALRUINS_Z245",
+      "dest_warp_id": "10"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 12,
+      "y": 16,
+      "elevation": 0,
+      "var": "0xB00A",
+      "var_value": "0",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 11,
+      "y": 16,
+      "elevation": 0,
+      "var": "0xB00A",
+      "var_value": "0",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 10,
+      "y": 16,
+      "elevation": 0,
+      "var": "0xB00A",
+      "var_value": "0",
+      "script": "Unova_EventScript_Pos"
+    }
+  ],
   "bg_events": []
 }

@@ -133,8 +133,8 @@
     },
     {
       "graphics_id": "0x620",
-      "x": 0,
-      "y": 0,
+      "x": 32,
+      "y": 37,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_UP",
       "movement_range_x": 0,
@@ -227,6 +227,15 @@
       "y": 27,
       "elevation": 0,
       "var": "0xB000",
+      "var_value": "0",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 32,
+      "y": 34,
+      "elevation": 0,
+      "var": "0xB0A9",
       "var_value": "0",
       "script": "Unova_EventScript_Pos"
     }

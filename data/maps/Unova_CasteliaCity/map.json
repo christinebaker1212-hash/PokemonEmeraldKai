@@ -16,8 +16,8 @@
   "object_events": [
     {
       "graphics_id": "0x634",
-      "x": 0,
-      "y": 0,
+      "x": 23,
+      "y": 57,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -29,8 +29,8 @@
     },
     {
       "graphics_id": "0x634",
-      "x": 0,
-      "y": 0,
+      "x": 58,
+      "y": 71,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -42,8 +42,8 @@
     },
     {
       "graphics_id": "0x634",
-      "x": 0,
-      "y": 0,
+      "x": 78,
+      "y": 53,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -55,8 +55,8 @@
     },
     {
       "graphics_id": "0x634",
-      "x": 0,
-      "y": 0,
+      "x": 22,
+      "y": 42,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -68,8 +68,8 @@
     },
     {
       "graphics_id": "0x634",
-      "x": 0,
-      "y": 0,
+      "x": 67,
+      "y": 65,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -81,8 +81,8 @@
     },
     {
       "graphics_id": "0x635",
-      "x": 0,
-      "y": 0,
+      "x": 73,
+      "y": 42,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -94,8 +94,8 @@
     },
     {
       "graphics_id": "0x635",
-      "x": 0,
-      "y": 0,
+      "x": 59,
+      "y": 76,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -107,8 +107,8 @@
     },
     {
       "graphics_id": "0x635",
-      "x": 0,
-      "y": 0,
+      "x": 29,
+      "y": 72,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -120,8 +120,8 @@
     },
     {
       "graphics_id": "0x635",
-      "x": 0,
-      "y": 0,
+      "x": 34,
+      "y": 70,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -133,8 +133,8 @@
     },
     {
       "graphics_id": "0x635",
-      "x": 0,
-      "y": 0,
+      "x": 17,
+      "y": 52,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -146,8 +146,8 @@
     },
     {
       "graphics_id": "0x657",
-      "x": 0,
-      "y": 0,
+      "x": 24,
+      "y": 35,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_UP",
       "movement_range_x": 0,
@@ -158,7 +158,668 @@
       "flag": "0"
     }
   ],
-  "warp_events": [],
-  "coord_events": [],
-  "bg_events": []
+  "warp_events": [
+    {
+      "x": 78,
+      "y": 65,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z34",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 77,
+      "y": 66,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z34",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 76,
+      "y": 68,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z34",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 76,
+      "y": 69,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z34",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 67,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z40",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 67,
+      "y": 37,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z40",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 67,
+      "y": 38,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z40",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 68,
+      "y": 38,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z40",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 68,
+      "y": 39,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z40",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 52,
+      "y": 82,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z33",
+      "dest_warp_id": "15"
+    },
+    {
+      "x": 51,
+      "y": 82,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z33",
+      "dest_warp_id": "15"
+    },
+    {
+      "x": 50,
+      "y": 82,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z33",
+      "dest_warp_id": "15"
+    },
+    {
+      "x": 48,
+      "y": 82,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z33",
+      "dest_warp_id": "15"
+    },
+    {
+      "x": 67,
+      "y": 57,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z39",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 67,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z39",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 51,
+      "y": 70,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z38",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 50,
+      "y": 70,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z38",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 49,
+      "y": 70,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z38",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 48,
+      "y": 70,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z38",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 19,
+      "y": 68,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z35",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 19,
+      "y": 67,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z35",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 18,
+      "y": 66,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z35",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 33,
+      "y": 64,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z37",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 32,
+      "y": 63,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z37",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 31,
+      "y": 62,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z37",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 31,
+      "y": 61,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z37",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 30,
+      "y": 61,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z37",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 30,
+      "y": 60,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z37",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 29,
+      "y": 60,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z37",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 29,
+      "y": 59,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z37",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 15,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z31",
+      "dest_warp_id": "21"
+    },
+    {
+      "x": 16,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z31",
+      "dest_warp_id": "21"
+    },
+    {
+      "x": 16,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z31",
+      "dest_warp_id": "21"
+    },
+    {
+      "x": 17,
+      "y": 31,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z31",
+      "dest_warp_id": "21"
+    },
+    {
+      "x": 18,
+      "y": 30,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z31",
+      "dest_warp_id": "21"
+    },
+    {
+      "x": 18,
+      "y": 29,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z31",
+      "dest_warp_id": "21"
+    },
+    {
+      "x": 29,
+      "y": 40,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z36",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 29,
+      "y": 39,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z36",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 30,
+      "y": 39,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z36",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 30,
+      "y": 38,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z36",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 30,
+      "y": 37,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z36",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 31,
+      "y": 37,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z36",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 69,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z252",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 70,
+      "y": 31,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z252",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 71,
+      "y": 30,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_BRIDGEGATE_Z252",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 69,
+      "y": 70,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z41",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 37,
+      "y": 78,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z44",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 14,
+      "y": 44,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z42",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 80,
+      "y": 60,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z34",
+      "dest_warp_id": "30"
+    },
+    {
+      "x": 80,
+      "y": 61,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z34",
+      "dest_warp_id": "30"
+    },
+    {
+      "x": 79,
+      "y": 62,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z34",
+      "dest_warp_id": "30"
+    },
+    {
+      "x": 79,
+      "y": 63,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z34",
+      "dest_warp_id": "30"
+    },
+    {
+      "x": 78,
+      "y": 64,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z34",
+      "dest_warp_id": "30"
+    },
+    {
+      "x": 66,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z40",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 47,
+      "y": 82,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z33",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 46,
+      "y": 82,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z33",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 45,
+      "y": 82,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z33",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 66,
+      "y": 59,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z39",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 66,
+      "y": 60,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z39",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 65,
+      "y": 61,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z39",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 47,
+      "y": 71,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z38",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 46,
+      "y": 70,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z38",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 45,
+      "y": 70,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z38",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 44,
+      "y": 70,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z38",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 17,
+      "y": 65,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z35",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 17,
+      "y": 64,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z35",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 16,
+      "y": 62,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z35",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 16,
+      "y": 61,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z35",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 29,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_CASTELIACITY_Z37",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 26,
+      "y": 40,
+      "elevation": 0,
+      "var": "0xB0AD",
+      "var_value": "1",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 25,
+      "y": 39,
+      "elevation": 0,
+      "var": "0xB0AD",
+      "var_value": "1",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 24,
+      "y": 39,
+      "elevation": 0,
+      "var": "0xB0AD",
+      "var_value": "1",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 23,
+      "y": 38,
+      "elevation": 0,
+      "var": "0xB0AD",
+      "var_value": "1",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 22,
+      "y": 38,
+      "elevation": 0,
+      "var": "0xB0AD",
+      "var_value": "1",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 21,
+      "y": 38,
+      "elevation": 0,
+      "var": "0xB0AD",
+      "var_value": "1",
+      "script": "Unova_EventScript_Pos"
+    },
+    {
+      "type": "trigger",
+      "x": 20,
+      "y": 37,
+      "elevation": 0,
+      "var": "0xB0AD",
+      "var_value": "1",
+      "script": "Unova_EventScript_Pos"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 77,
+      "y": 39,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 76,
+      "y": 36,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 77,
+      "y": 38,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 77,
+      "y": 37,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 77,
+      "y": 58,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 52,
+      "y": 78,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 23,
+      "y": 66,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 17,
+      "y": 47,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 19,
+      "y": 37,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 76,
+      "y": 35,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 75,
+      "y": 34,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 39,
+      "y": 77,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 40,
+      "y": 78,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    },
+    {
+      "type": "sign",
+      "x": 75,
+      "y": 33,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Unova_EventScript_Sign"
+    }
+  ]
 }

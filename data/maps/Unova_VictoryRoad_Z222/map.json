@@ -16,6 +16,13 @@
   "object_events": [],
   "warp_events": [
     {
+      "x": 18,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "23"
+    },
+    {
       "x": 11,
       "y": 3,
       "elevation": 0,

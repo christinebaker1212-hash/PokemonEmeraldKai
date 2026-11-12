@@ -16,7 +16,9 @@ with Black's matrices:
   u32 light sets: each u32 blocks: u32 end time (2-second units), 4 lights (u8 on r g b, f32 dx dy dz), diffuse, ambient,
                  specular, emission (u8 r g b each), the clear colour (u8 r g b, 1); a set a Black light table and
                  season: table * 4 + season
-  u32 matrices:  each u16 Black's matrix number, u16 width, height, u16 x0, z0; per cell (row by row): u16 zone (0xFFFF
+  u32 matrices:  each u16 Black's matrix number, u16 width, height, u16 x0, z0, (version 2) u16 scale (Black's block
+                 is scale x scale of these 512-unit cells: SKYARROW BRIDGE's 2048, its map type's; the block's meshes are
+                 in the first of them, drawn at the block's middle); per cell (row by row): u16 zone (0xFFFF
                  none), s16 mesh x 4 (spring, summer, autumn, winter: -1 none; the same mesh where the seasons share
                  textures), u16 light table (| 0x8000: the area's own a season, the table + the season), u16 props: s16 mesh x 4 (seasons), f32 3x4 transform (rows); then the cell's
                  32x32 field blocks (u16: metatile | collision << 10 | elevation << 12, the metatile 0x300 + the
@@ -38,6 +40,8 @@ import matrix as mxr  # noqa: E402
 import terrain  # noqa: E402
 import zones as zr  # noqa: E402
 import nitro  # noqa: E402
+import rails  # noqa: E402
+import scrcmd  # noqa: E402
 import events as evr  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location('sinnoh_build_pack', os.path.join(os.path.dirname(HERE), 'sinnoh',
@@ -46,7 +50,7 @@ _sinnoh = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_sinnoh)
 Pack = _sinnoh.Pack      # (texture and mesh tables, shared as a tool: never the games' engines)
 
-VERSION = 1
+VERSION = 2
 SEASONS = 4
 METATILE_BEHAVIOR = 0x300   # (include/u3d.h U3D_METATILE_BEHAVIOR; fieldmap.c GetMetatileAttributesById)
 BLOCKED = 0x0001 | (1 << 10) | (3 << 12)
@@ -138,7 +142,8 @@ def buildings(area_id, inner):
 
 def block_buildings(data):
     o = struct.unpack_from('<5I', data, 4)
-    sec = data[o[2]:o[3]] if data[:2] == b'WB' else data[o[3]:o[4]] if data[:2] == b'GC' else b''
+    sec = data[o[2]:o[3]] if data[:2] == b'WB' else data[o[3]:o[4]] if data[:2] == b'GC' \
+        else data[o[1]:o[2]] if data[:2] == b'NG' else b''   # (NG, a rail map's: the model, then the buildings)
     out = []
     for i in range(struct.unpack_from('<I', sec, 0)[0] if len(sec) >= 4 else 0):
         x, y, z, rot, hi, lo = struct.unpack_from('<iiiHBB', sec, 4 + 16 * i)
@@ -201,6 +206,46 @@ def field_matrices():
     for z in zr.zones():
         out.setdefault(z['matrix'], []).append(z['id'])
     return out
+
+
+MAP_TYPES, MAP_TYPE_COUNT = 0x021D3700, 21   # (ov021's sMapTypeTable: 0x48 bytes a type, its block size first, fx32)
+
+
+def scale_of(zone_ids):
+    """how many 512-unit cells a side the matrix's blocks are: its zones' map type's block size (SKYARROW BRIDGE's
+    type 1: 2048)"""
+    ram, d = scrcmd.ov_image(21)
+    k = 1
+    for z in zone_ids:
+        t = zr.zones()[z]['type']
+        if t < MAP_TYPE_COUNT:
+            k = max(k, struct.unpack_from('<I', d, MAP_TYPES - ram + 0x48 * t)[0] // (512 * 4096))
+    return k
+
+
+def lay_rails(grid, zone_ids, warps):
+    """Black's rails (tools/unova/rails.py) onto the cells' field blocks: each rail tile walkable at the rail's height
+    (a cell made where a rail runs past the matrix's blocks); the rails' doors as warp tiles"""
+    rail_warps = {}
+    for z in sorted(set(zone_ids)):
+        if z not in rails.rail_files():
+            continue
+        tiles = rails.cells(rails.rail_files()[z])
+        for c in evr.events(z)['connect']:
+            if c['rail']:
+                for t in rails.event_tiles(z, 'connect', c):
+                    rail_warps[t] = ARROW_BY_DIR.get(c['dir'], STEP_WARP)
+        for (tx, tz), hs in tiles.items():
+            if tx < 0 or tz < 0:
+                continue
+            key = (tx // 32, tz // 32)
+            if key not in grid:
+                grid[key] = (z, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)])
+            cell = grid[key]
+            t = (tz % 32) * 32 + tx % 32
+            w = rail_warps.get((tx, tz), warps.get((tx, tz)))
+            cell[4][t] = METATILE_BEHAVIOR + w | (3 << 12) if w is not None else field_block(0)
+            cell[5][t] = sorted(round(h, 2) for h in hs)[:2]
 
 
 def build(matrix_ids=None):
@@ -271,7 +316,23 @@ def build(matrix_ids=None):
                         fb.append(BLOCKED)
                         hts.append([])
                 cells.append((zone, meshes, cell_light(area_id), props, fb, hts))
-        mats.append((mn, (x0, z0, x1, z1), cells))
+        k = scale_of(owners)
+        grid = {}
+        for i, c in enumerate(cells):
+            cx, cz = x0 + i % (x1 - x0 + 1), z0 + i // (x1 - x0 + 1)
+            for sz in range(k):
+                for sx in range(k):
+                    if sx == 0 and sz == 0:
+                        grid[(cx * k, cz * k)] = c
+                    else:
+                        grid[(cx * k + sx, cz * k + sz)] = (c[0], [-1] * 4, c[2], [], [BLOCKED] * 1024,
+                                                             [[] for _ in range(1024)])
+        lay_rails(grid, owners, warps)
+        gx, gz = [g[0] for g in grid], [g[1] for g in grid]
+        x0, z0, x1, z1 = min(gx), min(gz), max(gx), max(gz)
+        cells = [grid.get((cx, cz)) or (0xFFFF, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)])
+                 for cz in range(z0, z1 + 1) for cx in range(x0, x1 + 1)]
+        mats.append((mn, (x0, z0, x1, z1), cells, k))
         print('matrix %d: %dx%d cells' % (mn, x1 - x0 + 1, z1 - z0 + 1))
     return pack, light_sets(), mats
 
@@ -302,8 +363,8 @@ def write(path, pack, light_sets, mats):
                 out += struct.pack('<3B', *col)
             out += struct.pack('<4B', clear[0], clear[1], clear[2], 1)
     out += struct.pack('<I', len(mats))
-    for number, (x0, z0, x1, z1), cells in mats:
-        out += struct.pack('<5H', number, x1 - x0 + 1, z1 - z0 + 1, x0, z0)
+    for number, (x0, z0, x1, z1), cells, scale in mats:
+        out += struct.pack('<6H', number, x1 - x0 + 1, z1 - z0 + 1, x0, z0, scale)
         for zone, meshes, light, props, fb, hts in cells:
             out += struct.pack('<H4hHH', zone, *meshes, light, len(props))
             for pms, m in props:

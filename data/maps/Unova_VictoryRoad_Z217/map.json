@@ -38,6 +38,13 @@
     },
     {
       "x": 6,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_VICTORYROAD",
+      "dest_warp_id": "13"
+    },
+    {
+      "x": 6,
       "y": 4,
       "elevation": 0,
       "dest_map": "MAP_UNOVA_VICTORYROAD_Z218",
