@@ -29,6 +29,9 @@ File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little e
   (version 6) Black's warp points (ov010's table: GAME_DATA_SetWarpId, where a whiteout returns): u32 count, 20 bytes
   each: u16 arrival flag, kind (1 a fly point, 2 its flag set on entering), zone inside, its tile (u8 x, z), zone
   outside, u16 x, z, then those three again
+  (version 7) the Xtransceiver's scripted calls (PROC_CallValueScreen N: a/1/3/1 member N + 62, as a file block: u8
+  characters x 4 (0xFF none), 4 more bytes, then steps of u8 kind (0 the end, 1 a character speaks), u8 character,
+  u16 message (system bank 0xBF + N))
 """
 import os
 import struct
@@ -41,7 +44,8 @@ import narc  # noqa: E402
 import scripts as scr  # noqa: E402
 import zones as zr  # noqa: E402
 
-VERSION = 6
+VERSION = 7
+TVT_ARC, TVT_FIRST = 'a/1/3/1', 62   # (version 7: the Xtransceiver's scripted calls, ov174 local_tvt_sys.c)
 WARPS_AT, WARPS = 0x02170FEC, 17   # (version 6: ov010's warp points, MAP_REPLACE_ApplyWarpLocation)
 TRMSG_ARC = 'a/0/9/0'   # (version 5: the trainers' words)
 CLASS_BGM, ARM9_BASE = 0x020A75A8, 0x02004000
@@ -118,6 +122,8 @@ def main():
     pack += struct.pack('<I', len(pairs)) + b''.join(struct.pack('<HH', *p) for p in pairs)
     ram, ov = scr.scrcmd.ov_image(10)
     pack += struct.pack('<I', WARPS) + ov[WARPS_AT - ram:WARPS_AT - ram + 20 * WARPS]
+    pack += b'\0' * (-len(pack) % 4)
+    pack += files_block(narc.arc(TVT_ARC)[TVT_FIRST:], len(pack))
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(b'U3SZ' + struct.pack('<I', len(pack)) + zlib.compress(bytes(pack), 6))
     print('%s: %d script files, %d zones, %d event files, %d bytes' % (out_path, len(narc.arc(scr.ARC)), len(zs),

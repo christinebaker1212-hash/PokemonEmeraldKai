@@ -209,4 +209,7 @@ it. The view's yaw stays north up: turning it wants the d-pad and the sprites' f
 rail scripts' own commands (people moved on rails), VICTORY ROAD's negative coordinates (tiles below 0 are dropped),
 signs on rails (U3D_VmSign matches grid places only). A trigger on a rail: U3D_VmPos takes the rail trigger whose work
 holds its value (gen_maps.py laid its tiles out). Story: CASTELIA's first scene plays (BURGH: "That way!", work 0x40AD
-1 at the ring road); next CASTELIA's streets (zones 33-44), BURGH's gym (zone 29), Team Plasma there, ROUTE 4.
+1 at the ring road), the street chase (zone 31: BURGH, a grunt's battle, IRIS and BIANCA), BURGH's gym (zone 29:
+his battle; the honey walls' gimmick is not kept), the Xtransceiver's call after it (PROC_CallValueScreen N: Black's
+scripted call, a/1/3/1 member N + 62 in the scripts pack v7, its words from system bank 0xBF + N shown over the field,
+faded back in from the scene's fade). Next: Team Plasma's building in CASTELIA, ROUTE 4.

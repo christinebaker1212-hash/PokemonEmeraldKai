@@ -73,7 +73,7 @@ void MPNet_Log(const char *fmt, ...);
 static u8 *sPack;
 static u32 sPackSize;
 static bool8 sTried;
-static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt, sTrMsgAt, sEyeSongsAt, sWarpsAt;
+static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt, sTrMsgAt, sEyeSongsAt, sWarpsAt, sCallsAt;
 
 static u32 Get32(u32 at) { return at + 4 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 | sPack[at + 2] << 16 | (u32)sPack[at + 3] << 24 : 0; }
 static u16 Get16(u32 at) { return at + 2 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 : 0; }
@@ -117,7 +117,7 @@ static void Load(void)
     sPack = malloc(raw ? raw : 1);
     sPackSize = raw;
     if (sPack == NULL || uncompress(sPack, &raw, data + 8, (unsigned long)(size - 8)) != 0 || memcmp(sPack, "U3DS", 4) != 0
-     || Get32(4) < 1 || Get32(4) > 6)
+     || Get32(4) < 1 || Get32(4) > 7)
     {
         printf("[u3d] %s: can't read UNOVA's scripts\n", path);
         free(sPack);
@@ -146,6 +146,8 @@ static void Load(void)
         }
         if (Get32(4) >= 6)   // (version 6: Black's warp points)
             sWarpsAt = sEyeSongsAt + 4 + 4 * Get32(sEyeSongsAt);
+        if (Get32(4) >= 7)   // (version 7: the Xtransceiver's calls)
+            sCallsAt = (sWarpsAt + 4 + 20 * Get32(sWarpsAt) + 3) & ~3;
     }
     printf("[u3d] UNOVA's scripts: %u files, %u zones\n", Get32(sFilesAt), Get32(sZonesAt));
 }
@@ -1117,6 +1119,44 @@ static void Step(struct Thread *t)
             if (!IsFieldMessageBoxHidden())
                 HideFieldMessageBox();
             break;
+        case U3C_PROC_CallValueScreen:   // the Xtransceiver's call N: each step's words, a key between (ov174)
+        {
+            static s16 sCallStep = -1;
+            u32 size, k;
+            const u8 *c = sCallsAt ? FileOf(sCallsAt, V(0), &size) : NULL;
+            if (gPaletteFade.active)   // (the scene's fade out first)
+            {
+                t->pc = here, t->wait = W_FADE;
+                return;
+            }
+            if (sCallStep < 0)
+            {
+                // (the call over the field, in place of Black's call screen: the field faded back in for it)
+                sCallStep = 0;
+                if (gPaletteFade.y != 0)
+                {
+                    BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
+                    t->pc = here, t->wait = W_FADE;
+                    return;
+                }
+            }
+            for (k = 8 + 4 * sCallStep; c && k + 4 <= size && c[k] != 0; k += 4, sCallStep++)
+                if (c[k] == 1)
+                {
+                    MPNet_Log("u3d vm: call %u, step %d", V(0), sCallStep);
+                    MessageInBank(t, 0xBF + V(0), Le16(c + k + 2));   // (system bank 0xBF + N)
+                    t->wait = W_MESSAGE_KEY;
+                    sCallStep++;
+                    t->pc = here;   // (back here for the next step)
+                    return;
+                }
+            sCallStep = -1;
+            if (!IsFieldMessageBoxHidden())
+                HideFieldMessageBox();
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);   // (dark again: the scene fades in after)
+            t->wait = W_FADE;
+            break;
+        }
         case U3C_NETWORK_CmdGetCommValue:   // (wireless on: Kai's co-op stands in for it, docs/UNOVA_DECISIONS.md)
             *WorkPtr(a[0]) = 1;
             break;
