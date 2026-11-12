@@ -94,6 +94,10 @@ off: src/mp/mp_stadium_announcer.c, docs/STADIUM.md "The announcer"; OPTIONS > B
 JAPANESE: POKEMON STADIUM 2 (Japan)'s 831 clips laid under the English numbers, stadium/announcer_jp.s1, secret
 STADIUM_JP_ROM_URL; STADIUM.md "The Japanese announcer"); tests stadium_announcer, stadium_announcer_jp.
 
+**STADIUM's screens in STADIUM 2's style** (the user, 2026-11-12: designed as mock-ups, not built yet): **start at
+`docs/STADIUM_RESTYLE_HANDOFF.md`** (the flow, the materials, how to build it, open questions; mock-ups docs/stadium/restyle/,
+the scripts that draw them tools/stadium/restyle/). Show each screen running before releasing it; nothing stretched.
+
 **ORRE** (Pokémon Colosseum's region, started 2026-11-04): **start at `docs/ORRE_HANDOFF.md`** (status, the disc's
 link and the decomp's, setting up a session, next steps, open questions); the user's decisions in
 `docs/ORRE_DECISIONS.md` (3D maps under a Platinum-style camera, 2D sprites rendered from the models, Kai's battles, Colosseum's own words
