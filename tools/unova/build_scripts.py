@@ -32,6 +32,9 @@ File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little e
   (version 7) the Xtransceiver's scripted calls (PROC_CallValueScreen N: a/1/3/1 member N + 62, as a file block: u8
   characters x 4 (0xFF none), 4 more bytes, then steps of u8 kind (0 the end, 1 a character speaks), u8 character,
   u16 message (system bank 0xBF + N))
+  (version 8) the in-game trades (a/1/6/5, ov021 fld_trade.c FldTradeData): u32 count, 0x6C bytes each (u32s: id,
+  species, form, level, IVs x 6, ability slot, nature, gender, OT ID, contest x 5, held item, OT gender, flag, language,
+  wanted species, wanted gender (2 any), nickname and OT name messages in system bank 0x22)
 """
 import os
 import struct
@@ -44,7 +47,8 @@ import narc  # noqa: E402
 import scripts as scr  # noqa: E402
 import zones as zr  # noqa: E402
 
-VERSION = 7
+VERSION = 8
+TRADE_ARC = 'a/1/6/5'   # (version 8: the in-game trades)
 TVT_ARC, TVT_FIRST = 'a/1/3/1', 62   # (version 7: the Xtransceiver's scripted calls, ov174 local_tvt_sys.c)
 WARPS_AT, WARPS = 0x02170FEC, 17   # (version 6: ov010's warp points, MAP_REPLACE_ApplyWarpLocation)
 TRMSG_ARC = 'a/0/9/0'   # (version 5: the trainers' words)
@@ -124,6 +128,9 @@ def main():
     pack += struct.pack('<I', WARPS) + ov[WARPS_AT - ram:WARPS_AT - ram + 20 * WARPS]
     pack += b'\0' * (-len(pack) % 4)
     pack += files_block(narc.arc(TVT_ARC)[TVT_FIRST:], len(pack))
+    trades = narc.arc(TRADE_ARC)
+    pack += b'\0' * (-len(pack) % 4)
+    pack += struct.pack('<I', len(trades)) + b''.join(bytes(t[:0x6C]).ljust(0x6C, b'\0') for t in trades)
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(b'U3SZ' + struct.pack('<I', len(pack)) + zlib.compress(bytes(pack), 6))
     print('%s: %d script files, %d zones, %d event files, %d bytes' % (out_path, len(narc.arc(scr.ARC)), len(zs),

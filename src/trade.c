@@ -4562,8 +4562,31 @@ static void SpriteCB_BouncingPokeballArrive(struct Sprite *sprite)
 #include "mp_region.h"
 #include "data/qz_ingame_trades.h"
 #include "data/sinnoh_ingame_trades.h"   // (SINNOH: Platinum's, tools/sinnoh/gen_trades.py)
+// Moemon Kai: UNOVA's trades are Black's own records (src/unova/u3d_vm.c U3D_Vm_*Trade): the one asked for is built here
+static struct InGameTrade sUnovaTrade;
+
+void MP_SetUnovaTrade(const u8 *nickname, u16 species, const u8 *ivs, u8 abilityNum, u32 otId, u32 personality,
+                      u16 heldItem, const u8 *otName, u8 otGender, u16 requestedSpecies)
+{
+    memset(&sUnovaTrade, 0, sizeof(sUnovaTrade));
+    StringCopyN(sUnovaTrade.nickname, nickname, POKEMON_NAME_LENGTH);
+    sUnovaTrade.nickname[POKEMON_NAME_LENGTH] = EOS;
+    sUnovaTrade.species = species;
+    memcpy(sUnovaTrade.ivs, ivs, NUM_STATS);
+    sUnovaTrade.abilityNum = abilityNum;
+    sUnovaTrade.otId = otId;
+    sUnovaTrade.personality = personality;
+    sUnovaTrade.heldItem = heldItem;
+    StringCopyN(sUnovaTrade.otName, otName, TRAINER_NAME_LENGTH);
+    sUnovaTrade.otName[TRAINER_NAME_LENGTH] = EOS;
+    sUnovaTrade.otGender = otGender;
+    sUnovaTrade.requestedSpecies = requestedSpecies;
+}
+
 static const struct InGameTrade *InGameTrade(u16 which)
 {
+    if (MP_Region_Current() == REGION_UNOVA)
+        return &sUnovaTrade;
     if (MP_Region_Current() == REGION_SINNOH)
         return &sSinnohIngameTrades[which < ARRAY_COUNT(sSinnohIngameTrades) ? which : 0];
     if (MP_Region_Current() != REGION_HOENN)

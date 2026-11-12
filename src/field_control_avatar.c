@@ -1165,7 +1165,10 @@ static s8 GetWarpEventAtPosition(struct MapHeader *mapHeader, u16 x, u16 y, u8 e
 
     for (i = 0; i < warpCount; i++, warpEvent++)
     {
-        if ((u16)warpEvent->x == x && (u16)warpEvent->y == y)
+        s16 wx = warpEvent->x, wy = warpEvent->y;
+        if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+            U3D_Vm_WarpPos(&wx, &wy);   // Moemon Kai: a connection Black's script moved (src/unova/u3d_vm.c)
+        if ((u16)wx == x && (u16)wy == y)
         {
             if (warpEvent->elevation == elevation || warpEvent->elevation == ELEVATION_TRANSITION)
                 return i;

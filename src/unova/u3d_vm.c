@@ -81,7 +81,7 @@ void MPNet_Log(const char *fmt, ...);
 static u8 *sPack;
 static u32 sPackSize;
 static bool8 sTried;
-static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt, sTrMsgAt, sEyeSongsAt, sWarpsAt, sCallsAt;
+static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt, sTrMsgAt, sEyeSongsAt, sWarpsAt, sCallsAt, sTradesAt;
 
 static u32 Get32(u32 at) { return at + 4 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 | sPack[at + 2] << 16 | (u32)sPack[at + 3] << 24 : 0; }
 static u16 Get16(u32 at) { return at + 2 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 : 0; }
@@ -125,7 +125,7 @@ static void Load(void)
     sPack = malloc(raw ? raw : 1);
     sPackSize = raw;
     if (sPack == NULL || uncompress(sPack, &raw, data + 8, (unsigned long)(size - 8)) != 0 || memcmp(sPack, "U3DS", 4) != 0
-     || Get32(4) < 1 || Get32(4) > 7)
+     || Get32(4) < 1 || Get32(4) > 8)
     {
         printf("[u3d] %s: can't read UNOVA's scripts\n", path);
         free(sPack);
@@ -156,6 +156,8 @@ static void Load(void)
             sWarpsAt = sEyeSongsAt + 4 + 4 * Get32(sEyeSongsAt);
         if (Get32(4) >= 7)   // (version 7: the Xtransceiver's calls)
             sCallsAt = (sWarpsAt + 4 + 20 * Get32(sWarpsAt) + 3) & ~3;
+        if (Get32(4) >= 8)   // (version 8: the in-game trades)
+            sTradesAt = (BlockEnd(sCallsAt) + 3) & ~3;
     }
     printf("[u3d] UNOVA's scripts: %u files, %u zones\n", Get32(sFilesAt), Get32(sZonesAt));
 }
@@ -228,7 +230,7 @@ const u8 *U3D_Vm_WildRow(u16 zone, u8 season)
 #define WORKS 0x140
 #define FLAG_BYTES 0x16C
 struct UnovaRoamer { u16 species, hp; u8 level, state, loc, status; u32 personality, ivs; };   // (state: 0 none, 1
-                                                                                                // roaming, 2 caught or beaten)
+                                                                                                // roaming, 2 knocked out, 3 caught)
 static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
                 u8 white; struct UnovaRoamer roam[2]; } sWork;   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
@@ -422,6 +424,9 @@ static void Gone(u8 local, bool8 gone)
 #define ZEKROM_LOCAL 4
 static bool8 WhiteZekromHere(u8 localId);
 static void RoamersMove(void);
+static void ConnMove(u8 event, s16 x, s16 z);
+#define CONN_MOVES 8
+static struct { u8 event, set; s16 x, z; } sConnMove[CONN_MOVES];
 static void RoamSpawn(u8 slot, u16 national);
 
 bool8 U3D_Vm_ObjectHidden(u8 localId)
@@ -724,7 +729,7 @@ static void PopSong(void)
         PlayNewMapMusic(sSongStack[--sSongDepth]);
 }
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
-enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY, SCREEN_CLEAR };
+enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY, SCREEN_CLEAR, SCREEN_TRADE };
 static u8 sScreen;
 static u16 sScreenVar, sPartySlotWork;
 static u8 sWildResult = 2;
@@ -801,6 +806,13 @@ static bool8 Locate(u16 zone, u16 scriptId, const u8 **code, u32 *size, u32 *pc,
 static void Task_Vm(u8 taskId);
 
 static u8 sClearMode;
+static u16 sTradeId, sTradeSlot, sIss;
+static const u8 *TradeRecord(u16 id);
+static u32 Get32At(const u8 *p, u32 o);
+static u8 GenderOf(struct Pokemon *mon);
+static void UnovaTradeSetUp(void);
+void CreateInGameTradePokemon(void);   // (trade.c)
+void DoInGameTradeScene(void);
 static struct { u8 group, num, set; s16 x, y; } sSpecialLoc;   // (SetSpecialLocation: Black's continue spot)
 static void UnovaGameClear(void);
 void SetContinueGameWarp(s8 mapGroup, s8 mapNum, s8 warpId, s16 x, s16 y);   // (overworld.c)
@@ -1146,6 +1158,7 @@ static void Step(struct Thread *t)
             Message(t, MSG_OWN, V(0));
             break;
         case U3C_BgWinMsg:   // (a sign's board, a special window: it waits for a key itself, WaitBgWin)
+        case U3C_BgWinMsgFont:   // (the ABYSSAL RUINS' inscriptions in their own letters: shown as a sign's board)
         case U3C_SpWinMsg:
             Message(t, MSG_OWN, a[0]);
             t->wait = W_MESSAGE_KEY;
@@ -1266,9 +1279,9 @@ static void Step(struct Thread *t)
             *WorkPtr(a[0]) = sWildResult;
             break;
         // ---- the party
-        case U3C_POKEMON_FLD_SelectPartyMon:   // slot, result, mode
-            sPartySlotWork = a[0];
-            OpenScreen(t, SCREEN_PARTY, a[1]);
+        case U3C_POKEMON_FLD_SelectPartyMon:   // result (1 chosen), slot, mode (as every script of Black's reads them)
+            sPartySlotWork = a[1];
+            OpenScreen(t, SCREEN_PARTY, a[0]);
             break;
         case U3C_PROC_CheckMonIsEgg:   // result, slot
             *WorkPtr(a[0]) = V(1) < PARTY_SIZE && GetMonData(&gPlayerParty[V(1)], MON_DATA_IS_EGG);
@@ -1747,6 +1760,98 @@ static void Step(struct Thread *t)
         case U3C_PROC_FLD_SpawnMovePokemonIfInactive:   // slot: Black's TORNADUS sets off roaming (White's THUNDURUS too)
             RoamSpawn(1, 641);   // (Black's slot 1: TORNADUS, SpawnEntry)
             RoamSpawn(0, 642);   // (slot 0: THUNDURUS, White's)
+            break;
+        // ---- the in-game trades (ov021 fld_trade.c: Black's records, a/1/6/5 in the scripts pack)
+        case U3C_POKEMON_FLD_CheckTradeMon:   // result, trade, slot: 0 fine, 1 an EGG, 2 not the species, 3 not the gender
+        {
+            const u8 *r = TradeRecord(V(1));
+            u16 slot = V(2);
+            u16 res = 0;
+            if (r == NULL || slot >= PARTY_SIZE)
+                res = 2;
+            else if (GetMonData(&gPlayerParty[slot], MON_DATA_IS_EGG))
+                res = 1;
+            else if (GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES) != Species(Get32At(r, 0x5C)))
+                res = 2;
+            else if (Get32At(r, 0x60) != 2 && GenderOf(&gPlayerParty[slot]) != Get32At(r, 0x60))
+                res = 3;
+            *WorkPtr(a[0]) = res;
+            break;
+        }
+        case U3C_POKEMON_FLD_StartTradeEvent:   // trade, slot: the game's trade scene
+            sTradeId = V(0), sTradeSlot = V(1);
+            OpenScreen(t, SCREEN_TRADE, 0);
+            break;
+        case U3C_PROC_AddEggToParty:   // result, species, form: an EGG from someone (ROUTE 18's LARVESTA)
+            *WorkPtr(a[0]) = CalculatePlayerPartyCount() < PARTY_SIZE;
+            if (CalculatePlayerPartyCount() < PARTY_SIZE)
+                ScriptGiveEgg(Species(V(1)));
+            break;
+        case U3C_PROC_CheckMonIsPlayerOwned:   // result, slot: the player's own (OT ID and name)
+        {
+            u8 name[PLAYER_NAME_LENGTH + 1];
+            u16 slot = V(1);
+            bool8 own = FALSE;
+            if (slot < PARTY_SIZE && GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES)
+             && GetMonData(&gPlayerParty[slot], MON_DATA_OT_ID) == GetPlayerIDAsU32())
+            {
+                GetMonData(&gPlayerParty[slot], MON_DATA_OT_NAME, name);
+                name[PLAYER_NAME_LENGTH] = EOS;
+                own = StringCompareN(name, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH) == 0;
+            }
+            *WorkPtr(a[0]) = own;
+            break;
+        }
+        case U3C_FIELD_G3D_MAP_ScrCmdReadSaveByte:   // roamer slot, result: its state (Black's: 0 none, 1 roaming, 3 caught)
+            *WorkPtr(a[1]) = V(0) < 2 ? sWork.roam[V(0)].state : 0;
+            break;
+        case U3C_PROC_GetMonTripleParams:   // three results, slot (params 0x92-0x94: none kept here)
+            *WorkPtr(a[0]) = *WorkPtr(a[1]) = *WorkPtr(a[2]) = 0;
+            break;
+        case U3C_PROC_FLD_StoreRandomUniqueEntry:   // result: one of the zone's wild POKeMON (its grass, at random)
+        {
+            const u8 *row = U3D_Vm_WildRow(CurrentZone(), U3D_Season());
+            u16 n = 0, pick[12];
+            u32 i;
+            for (i = 0; row != NULL && i < 12; i++)
+            {
+                u16 nat = (row[8 + 4 * i] | row[9 + 4 * i] << 8) & 0x7FF;
+                if (nat)
+                    pick[n++] = nat;
+            }
+            *WorkPtr(a[0]) = n ? pick[Random() % n] : 0;
+            break;
+        }
+        case U3C_IssSwitchOn:   // (VILLAGE BRIDGE's players: a part of the song each)
+            sIss |= 1 << (V(0) & 15);
+            break;
+        case U3C_IssSwitchOff:
+            sIss &= ~(1 << (V(0) & 15));
+            break;
+        case U3C_IsIssSwitchOn:
+            *WorkPtr(a[0]) = (sIss >> (V(1) & 15)) & 1;
+            break;
+        case U3C_GetPlayerLocationValue:   // (the steps message counter: none kept)
+            *WorkPtr(a[0]) = 0;
+            break;
+        case U3C_EVENT_MON_CmdFindEventMonInParty:   // (a distributed POKeMON's event: closed, online only)
+            *WorkPtr(a[2]) = 0;
+            *WorkPtr(a[3]) = 0;
+            break;
+        case U3C_PROC_SetMonParamChecked:
+        case U3C_StartPlayerPosOffsetTween:
+        case U3C_StartSubProcOv057:
+        case U3C_GIMMICK_OBJ_ELBOARD_CmdStartCameraEvent:   // (UNDELLA GATE's news board)
+        case U3C_PROC_FLD_CallOv056Event:   // (the ELITE FOUR rooms' entrances)
+        case U3C_PALPARK_CallFallEvent:
+        case U3C_EVENT_MON_CmdClearEventMonFlag:
+        case U3C_EVENT_MON_CmdStartSpPokeGimmickTask:
+        case U3C_EVENT_MON_CmdMoveSpPokeGimmick:
+        case U3C_EVENT_MON_CmdStartSpPokeGimmickStepA:
+        case U3C_EVENT_MON_CmdStartSpPokeGimmickStepB:
+            break;
+        case U3C_WORK_CmdSetConnectGridPos:   // connection, x, y, z (grid): moved while the player is in the zone
+            ConnMove(V(0), (s16)V(1), (s16)V(3));
             break;
         case U3C_WORK_CmdSetWarpDestination:   // Black's warp point (a POKéMON CENTER, home): where a whiteout returns
             SetWhiteoutPoint(V(0));
@@ -2383,6 +2488,7 @@ void U3D_VmMapLoad(void)
     if (zone != sLastZone)
     {
         RoamersMove();   // (Black moves its roamers on as the player changes zones)
+        memset(sConnMove, 0, sizeof(sConnMove));   // (a new zone: its connections where its data puts them)
         sNpcAtCount = 0;   // (a new zone: its people where its data puts them, till its scripts say)
         RunNow(InitScript(zone, 2));
     }
@@ -2481,6 +2587,13 @@ void U3D_VmOpenScreen(void)
     case SCREEN_PARTY:   // (Black's SelectPartyMon: the game's party screen, the slot in VAR_0x8004)
         ChoosePartyMon();
         break;
+    case SCREEN_TRADE:   // (Black's trade: the game's in-game trade scene with its POKeMON, trade.c MP_SetUnovaTrade)
+        UnovaTradeSetUp();
+        gSpecialVar_0x8004 = 0;
+        gSpecialVar_0x8005 = sTradeSlot;
+        CreateInGameTradePokemon();
+        DoInGameTradeScene();
+        break;
     case SCREEN_CLEAR:   // (the script ended: the clear takes the game from here)
         sScreen = SCREEN_NONE;
         sThread.alive = FALSE;
@@ -2517,6 +2630,8 @@ void U3D_VmResume(void)
             MPNet_Log("u3d vm: ZEKROM caught");
         }
         sZekromBattle = FALSE;
+        break;
+    case SCREEN_TRADE:
         break;
     case SCREEN_PARTY:
         if (sPartySlotWork)
@@ -2730,6 +2845,15 @@ void U3D_Vm_ContinueHome(void)
 static void UnovaGameClear(void)
 {
     sSpecialLoc.set = FALSE;
+    {
+        u32 i;   // (MOVE_POKEMON_SpawnPendingEntries: a roamer knocked out roams again)
+        for (i = 0; i < 2; i++)
+            if (sWork.roam[i].state == 2)
+            {
+                sWork.roam[i].state = 0;
+                RoamSpawn(i, sWork.roam[i].species);
+            }
+    }
     RunNow(SCRIPT_GAME_CLEAR);
     MP_Region_SetCleared(REGION_UNOVA);
     if (!CheckBagHasItem(ITEM_SS_TICKET, 1))
@@ -2834,7 +2958,9 @@ bool8 U3D_RoamerAfterBattle(struct Pokemon *mon, u8 outcome)
     if (s < 0)
         return FALSE;
     r = &sWork.roam[s];
-    if (outcome == B_OUTCOME_CAUGHT || (outcome == B_OUTCOME_WON && GetMonData(mon, MON_DATA_HP) == 0))
+    if (outcome == B_OUTCOME_CAUGHT)
+        r->state = 3;   // (Black's MOVE_POKEMON states: 3 caught, 2 knocked out: back at the next game clear)
+    else if (outcome == B_OUTCOME_WON && GetMonData(mon, MON_DATA_HP) == 0)
         r->state = 2;
     else
     {
@@ -2867,4 +2993,112 @@ bool8 U3D_Vm_RoamHere(void)
             if (sWork.roam[i].state == 1 && sRoamZones[j] == CurrentZone())
                 sWork.roam[i].loc = j, any = TRUE;
     return any;
+}
+
+// ------------------------------------------------------------------------------------------------ moved connections
+// WORK_CmdSetConnectGridPos (EVENTDATA_SYSTEM_SetConnectGridPos): a zone's script moves one of its connections (the
+// GIANT CHASM's cave mouths, LOSTLORN FOREST's way out) for as long as the player is in the zone. The game's warps stay
+// where the map has them; field_control_avatar.c GetWarpEventAtPosition asks here where each one stands now
+static void ConnMove(u8 event, s16 x, s16 z)
+{
+    u32 i;
+    for (i = 0; i < CONN_MOVES; i++)
+        if (!sConnMove[i].set || sConnMove[i].event == event)
+        {
+            sConnMove[i].event = event, sConnMove[i].x = x, sConnMove[i].z = z, sConnMove[i].set = TRUE;
+            return;
+        }
+}
+
+// A warp tile of the map (its own coordinates) where it stands now
+void U3D_Vm_WarpPos(s16 *x, s16 *y)
+{
+    u32 size, i, k;
+    const u8 *e;
+    s32 m, ax, az;
+    if (!sConnMove[0].set || !U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+        return;
+    e = Events(CurrentZone(), &size);
+    m = U3D_MapIndex();
+    if (e == NULL || m < 0)
+        return;
+    ax = *x + 32 * U3D_MapCellX(m), az = *y + 32 * U3D_MapCellZ(m);
+    for (i = 0; i < e[6]; i++)
+    {
+        const u8 *c = e + 8 + EV_BG * e[4] + EV_PERSON * e[5] + EV_CONNECT * i;
+        s32 cx = (s16)Le16(c + 8) / 16, cz = (s16)Le16(c + 12) / 16, w = Le16(c + 14), h = Le16(c + 16);   // (ConnectData)
+        if (w == 0)
+            w = 1;
+        if (h == 0)
+            h = 1;
+        if (ax < cx || az < cz || ax >= cx + w || az >= cz + h)
+            continue;
+        for (k = 0; k < CONN_MOVES && sConnMove[k].set; k++)
+            if (sConnMove[k].event == i)
+            {
+                *x = sConnMove[k].x + (ax - cx) - 32 * U3D_MapCellX(m);
+                *y = sConnMove[k].z + (az - cz) - 32 * U3D_MapCellZ(m);
+            }
+        return;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------ the trades
+#define TRADE_BANK 0x23   // (FLD_TRADE_MSG_BANK in Black: the traded POKeMON's nicknames and their trainers' names)
+static u32 Get32At(const u8 *p, u32 o)
+{
+    return p[o] | p[o + 1] << 8 | p[o + 2] << 16 | (u32)p[o + 3] << 24;
+}
+
+static const u8 *TradeRecord(u16 id)
+{
+    if (!Ready() || sTradesAt == 0 || id >= Get32(sTradesAt))
+        return NULL;
+    return sPack + sTradesAt + 4 + 0x6C * id;
+}
+
+// Black's gender numbers (0 male, 1 female, 2 none)
+static u8 GenderOf(struct Pokemon *mon)
+{
+    u8 g = GetMonGender(mon);
+    return g == MON_MALE ? 0 : g == MON_FEMALE ? 1 : 2;
+}
+
+void MP_SetUnovaTrade(const u8 *nickname, u16 species, const u8 *ivs, u8 abilityNum, u32 otId, u32 personality,
+                      u16 heldItem, const u8 *otName, u8 otGender, u16 requestedSpecies);   // (trade.c)
+
+// The trade's POKeMON as Black's FLD_TRADE_BuildPokemon makes it: its level, IVs, nature and gender (a personality that
+// gives both), ability slot, held item, its nickname and its trainer's name (system bank 0x22) and ID
+static void UnovaTradeSetUp(void)
+{
+    const u8 *r = TradeRecord(sTradeId);
+    u8 ivs[NUM_STATS], i;
+    u16 species;
+    u32 pid = 0, tries;
+    u8 nature, gender;
+    if (r == NULL)
+        return;
+    species = Species(Get32At(r, 4));
+    for (i = 0; i < NUM_STATS; i++)
+        ivs[i] = Get32At(r, 0x10 + 4 * i) > 31 ? 31 : Get32At(r, 0x10 + 4 * i);
+    nature = Get32At(r, 0x2C) % NUM_NATURES;
+    gender = Get32At(r, 0x30);
+    for (tries = 0; tries < 50000; tries++)
+    {
+        pid = Random32();
+        if (pid % NUM_NATURES != nature)
+            continue;
+        if (gender == 2 || gSpeciesInfo[species].genderRatio == MON_GENDERLESS
+         || (GetGenderFromSpeciesAndPersonality(species, pid) == MON_FEMALE) == (gender == 1))
+            break;
+    }
+    {
+        u8 nick[POKEMON_NAME_LENGTH + 1];   // (U3D_Text's buffer is reused by the next call)
+        StringCopyN(nick, U3D_Text(TRADE_BANK, Get32At(r, 0x64)), POKEMON_NAME_LENGTH);
+        nick[POKEMON_NAME_LENGTH] = EOS;
+        MP_SetUnovaTrade(nick, species, ivs, Get32At(r, 0x28) ? 1 : 0, Get32At(r, 0x34), pid, Item(Get32At(r, 0x4C)),
+                         U3D_Text(TRADE_BANK, Get32At(r, 0x68)), Get32At(r, 0x50) ? FEMALE : MALE,
+                         Species(Get32At(r, 0x5C)));
+    }
+    MPNet_Log("u3d vm: trade %u: species %u for slot %u", sTradeId, species, sTradeSlot);
 }
