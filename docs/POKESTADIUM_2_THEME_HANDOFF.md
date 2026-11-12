@@ -168,3 +168,35 @@ The hints sit straight on the backdrop here (no strip), as STADIUM writes them. 
 Registration menu and a Registered Pokémon list (g_7.jpg, g_13.jpg): not drawn, because the game's own flow goes cup,
 class, options, register; ask before adding them. Stand-ins as in the first theme (lettering fonts, the badge, the
 trainers' lines); the cup card for the ladder uses one of STADIUM's field pictures (stadium.bin picture 21).
+
+## Every other screen the game has, in both themes (2026-11-12)
+
+"Let's reconcile every screen that isn't represented here that needs to be represented in the game, such as
+restriction picking, battle/rules/registration menus, and other modes like the Gym Leader Castle or Rival Battle, for
+both." Drawn by tools/stadium/restyle/reconcile.py; `r_<screen>_s2.png` in docs/stadium/restyle/mockups/ (POKESTADIUM
+2 THEME), `r_<screen>_s1.png` in docs/stadium/theme1/mockups/ (POKESTADIUM THEME).
+
+| The game's screen (mp_stadium_ui.c) | Mock-up | What it is in STADIUM's terms |
+|---|---|---|
+| DrawOptions (SCR_OPTIONS): the four RESTRICTIONS switches and their stars, the help line, the team, REGISTER / SAVED TEAMS / START! | r_options | STADIUM's Battle / Rules / Registration menu: START! is Battle, REGISTER is Registration, the restrictions and THE RULES are Rules. The game keeps its own three buttons and its switches (STADIUM has no restrictions) |
+| DrawCastle (SCR_SELECT's castle): eight gyms and the ELITE FOUR as rows (face, name, leader, badge), the stage under the cursor (its trainers, the badges won) | r_castle | the GYM LEADER CASTLE's stage list |
+| DrawTeams (SCR_TEAMS): 99 saved teams, the slot under the cursor | r_teams | STADIUM's Registered Pokémon list (POKESTADIUM THEME follows it: a row a team with its six) |
+| DrawVs with SELECT held: THE RULES | r_rules | Rules |
+| DrawResult RES_CUP + DrawPrizes: the cup won, the road lit, the prizes | r_prizes | (the game's own) |
+
+Covered by screens already drawn, not drawn again:
+- **The RIVAL**: the castle's ninth stage is the ELITE FOUR then the RIVAL (five battles); it uses the ladder (five
+  tiles, the last a "?" until reached), the VS, choice and result screens as they are. The game picks the RIVAL's team
+  against the player's six, so the VS screen is where it's first seen.
+- **A gym**: the ladder with four tiles; the badge board after it.
+- **VS. MEWTWO**: one battle: the cup's menu (r_options), then VS with MEWTWO alone on the opponent's plate (five
+  windows empty), choice, result. No ladder.
+- **The CHALLENGE CUP**: r_options without the switches (the game's line about the six lent), no REGISTER.
+- **The pop-ups** ("Quit this cup?", "Clear this cup's team?", SAVED TEAMS' menu and ERASE): the theme's menu box
+  (the confirm menu's blue panel in POKESTADIUM 2 THEME, the navy box in POKESTADIUM THEME).
+- RES_STAGE (a badge won) is the badge board; RES_CONTINUE / RES_OVER the continue box (GAME OVER: the same box
+  without Continue).
+
+Stand-ins here: the gym leaders' faces are HOENN's leaders (the game draws STADIUM's trainers' own pictures), the
+stage and badge names are KANTO's as examples (StadiumCastle_StageName / BadgeName give the real ones), the prizes
+are examples.
