@@ -1298,6 +1298,22 @@ static void Step(struct Thread *t)
             *WorkPtr(a[0]) = 0;
             break;
         // ---- what has no screen of its own here yet (read past quietly)
+        case U3C_WORK_CmdLookupTable:   // index, result (ov010 gScrcmdValueTable)
+        {
+            static const u16 sValues[] = {15, 55, 64, 30, 53, 43, 154, 13};
+            *WorkPtr(a[1]) = V(0) < ARRAY_COUNT(sValues) ? sValues[V(0)] : 0;
+            break;
+        }
+        case U3C_FadeBgmVolume:   // (the song quieter under a scene: kept as it is)
+        case U3C_RestoreBgmVolume:
+        case U3C_PROC_CallSubEvent:   // (a field menu's screen opened from a scene)
+        case U3C_FLD_FACEUP_ScrCmdStart:   // (a speaker's face-up portrait: the words come in the script's messages)
+        case U3C_FLD_FACEUP_ScrCmdWaitEnd:
+        case U3C_NETWORK_CmdRequestCommExit:   // (Black's wireless: Kai's co-op stands in for it)
+        case U3C_NETWORK_CmdRestartAutoComm:
+        case U3C_NETWORK_CmdStartAutoComm:
+        case U3C_NETWORK_CmdWaitCommState:
+        case U3C_NETWORK_CmdClearAlwaysNet:
         case U3C_StopSe:
         case U3C_SetAutoMode:
         case U3C_SAVEANIME_Start:
