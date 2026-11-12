@@ -1318,6 +1318,8 @@ static void Step(struct Thread *t)
             *WorkPtr(a[1]) = V(0) < ARRAY_COUNT(sValues) ? sValues[V(0)] : 0;
             break;
         }
+        case U3C_PROC_FLD_StartFkDemoSubProc:   // (an Elite Four room's 3D entrance flight: not drawn)
+        case U3C_PROC_FLD_SetCameraSettingFromFkDemoSlot:
         case U3C_StartMmdlRailSlipDown:   // (a slide down a rail slope: the tiles walk it)
         case U3C_FadeBgmVolume:   // (the song quieter under a scene: kept as it is)
         case U3C_RestoreBgmVolume:
@@ -2542,4 +2544,10 @@ void U3D_Vm_WhiteoutHome(void)
 bool8 U3D_Vm_HasCGear(void)
 {
     return sWork.cgear;
+}
+
+// A work of Black's event work (u3d.c: map replacements by story flags)
+u16 U3D_Vm_Work(u16 id)
+{
+    return *WorkPtr(id);
 }

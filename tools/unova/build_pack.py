@@ -254,6 +254,33 @@ def lay_rails(grid, zone_ids, warps, cams):
             cell[5][t] = sorted(round(h, 2) for h in hs)[:2]
 
 
+REPLACE_ARC = 'a/0/1/0'   # (map replacement: ov010 map_replace.c, MAP_MATRIX_ApplyReplace)
+
+
+def replace_records():
+    """Black's map replacement records: (matrix, kind (0 a block swapped, 1 the matrix swapped), selector, ids)"""
+    d = narc.arc(REPLACE_ARC)[0]
+    return [(lambda r: (r[0], r[1], r[2], r[3:]))(struct.unpack_from('<HBB6H', d, 16 * i)) for i in range(len(d) // 16)]
+
+
+def always_replaced(mn):
+    """(the matrix to build MN from, {block: block}) by the replacements a game of Black always has: selector 1 (the
+    field map's own, 1 but in one place) and 2 (no link: 1) pick ids[1]; selector 0 (a link partner's) ids[0]"""
+    src, blocks = mn, {}
+    for m, kind, sel, ids in replace_records():
+        if m == mn and sel in (1, 2):
+            if kind == 1:
+                src = ids[1]
+            else:
+                blocks[ids[0]] = ids[1]
+    return src, blocks
+
+
+def flag_replacements():
+    """[(matrix, its replacement)] of the replacements a story flag switches on (selectors 3-12: kind 1)"""
+    return [(m, ids[1]) for m, kind, sel, ids in replace_records() if kind == 1 and sel >= 3]
+
+
 def build(matrix_ids=None):
     zs = zr.zones()
     blocks = narc.arc('a/0/0/8')
@@ -262,9 +289,15 @@ def build(matrix_ids=None):
     tex_cache, bld_cache = {}, {}
     mats = []
     wanted = matrix_ids if matrix_ids is not None else sorted(field_matrices())
+    alternate_of = {alt: orig for orig, alt in flag_replacements() if orig in wanted}
+    wanted = list(wanted) + sorted(a for a in alternate_of if a not in wanted)
     for mn in wanted:
-        owners = field_matrices().get(mn, [])
-        mx = mxr.matrix(mn, owners[0] if owners else 0xFFFF)
+        owners = field_matrices().get(alternate_of.get(mn, mn), [])
+        src, swaps = always_replaced(mn)
+        mx = mxr.matrix(src, owners[0] if owners else 0xFFFF)
+        if src != mn and owners:   # (the replacement's blocks, the zones the matrix itself has)
+            mx['zones'] = mxr.matrix(mn, owners[0])['zones']
+        mx['blocks'] = [swaps.get(b, b) for b in mx['blocks']]
         cells = []
         used = [i for i in range(mx['w'] * mx['h']) if mx['blocks'][i] != mxr.NONE]
         if not used:

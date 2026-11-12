@@ -284,6 +284,18 @@ static void LoadPack(void)
            (unsigned)sPack.nmat);
 }
 
+// Black's map replacements a story flag switches on (src/unova/u3d_replace.h: the Champion's room once N's Castle has
+// risen...): the matrix a map shows now
+#include "u3d_replace.h"
+static u16 Replaced(u16 mat)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sUnovaReplace); i++)
+        if (sUnovaReplace[i].mat == mat && U3D_Vm_Work(sUnovaReplace[i].work) == sUnovaReplace[i].value)
+            return sUnovaReplace[i].alt;
+    return mat;
+}
+
 static const U3dMatrix *MatrixNumbered(u16 number)
 {
     u32 i;
@@ -450,7 +462,7 @@ const u16 *U3D_LayoutBlocks(const struct MapLayout *layout)
         if (sBlocks[i] == NULL)
         {
             u32 w = 32 * sUnovaMaps[i].bw;
-            const U3dMatrix *mt = MatrixNumbered(sUnovaMaps[i].mat);
+            const U3dMatrix *mt = MatrixNumbered(Replaced(sUnovaMaps[i].mat));
             sBlocks[i] = malloc(sizeof(u16) * w * 32 * sUnovaMaps[i].bh);
             for (bz = 0; bz < sUnovaMaps[i].bh; bz++)
                 for (bx = 0; bx < sUnovaMaps[i].bw; bx++)
@@ -1086,7 +1098,7 @@ float U3D_TestGround(s32 mapX, s32 mapY, float near)
         LoadPack();
     if (!sPack.ok)
         return NAN;
-    sCurMat = MatrixNumbered(sUnovaMaps[map].mat);
+    sCurMat = MatrixNumbered(Replaced(sUnovaMaps[map].mat));
     sCurMap = map;
     return GroundAt(sUnovaMaps[map].cx * BLOCK + mapX, sUnovaMaps[map].cz * BLOCK + mapY, near);
 }
@@ -1114,7 +1126,7 @@ void U3D_Update(void)
         sSeason = U3D_Season();   // (Black changes the season as a map is entered)
     }
     sView.map = map;
-    sCurMat = MatrixNumbered(sUnovaMaps[map].mat);
+    sCurMat = MatrixNumbered(Replaced(sUnovaMaps[map].mat));
     sCurMap = map;
     sView.frame++;
     FindCamera();

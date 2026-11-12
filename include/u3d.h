@@ -32,7 +32,8 @@ void U3D_ShopPicture(bool8 on, s16 dx, s16 dy);               // shop.c's BUY sc
 u8 U3D_Season(void);                                          // Black's season now: 0 spring .. 3 winter
 u16 U3D_CurrentZone(void);                                    // the Black zone the player is on (0xFFFF: not UNOVA)
 s32 U3D_MapIndex(void);
-bool8 U3D_Vm_HasCGear(void);   // FENNEL gave the C-GEAR (UNOVA's device)
+bool8 U3D_Vm_HasCGear(void);
+u16 U3D_Vm_Work(u16 id);   // a work of Black's event work   // FENNEL gave the C-GEAR (UNOVA's device)
 void U3D_Vm_WhiteoutHome(void);   // a new game in UNOVA: a whiteout returns home to NUVEMA (Black's first warp point)
 bool8 U3D_MapOfZoneTile(u16 zone, u16 x, u16 z, u8 *group, u8 *num, s16 *mapX, s16 *mapY);                                       // the player's map's row of u3d_maps.h (-1: not UNOVA)
 u8 U3D_MapCellX(s32 index);                                   // ... where it lies on its Black matrix (blocks)
