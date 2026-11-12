@@ -337,6 +337,25 @@ def build(matrix_ids=None):
     return pack, light_sets(), mats
 
 
+SPLIT = 192.0   # (a triangle longer than this is drawn as smaller ones: u3d.c drops one with a corner behind the eye,
+                #  and a rail map's bridge decks and streets are a few long triangles)
+
+
+def _mid(a, b):
+    return tuple(tuple((x + y) // 2 if k == 2 else (x + y) / 2 for x, y in zip(a[k], b[k])) for k in range(4))
+
+
+def split(tri):
+    """TRI ((pos, uv, colour, normal) x 3) as triangles no side of which is longer than SPLIT"""
+    lens = [math.dist(tri[i][0], tri[(i + 1) % 3][0]) for i in range(3)]
+    i = max(range(3), key=lambda k: lens[k])
+    if lens[i] <= SPLIT:
+        return [tri]
+    a, b, c = tri[i], tri[(i + 1) % 3], tri[(i + 2) % 3]
+    m = _mid(a, b)
+    return split((a, m, c)) + split((m, b, c))
+
+
 def write(path, pack, light_sets, mats):
     out = bytearray(b'U3DP' + struct.pack('<I', VERSION))
     out += struct.pack('<I', len(pack.textures))
@@ -347,6 +366,7 @@ def write(path, pack, light_sets, mats):
     for c, r, groups in pack.meshes:
         out += struct.pack('<4fI', c[0], c[1], c[2], r, len(groups))
         for tex, rs, rt, fs, ft, alpha, pid, cull, lights, mode, tris in groups:
+            tris = [t for tri in tris for t in split(tri)]
             out += struct.pack('<hBBBBBBBBBBI', tex, rs, rt, fs, ft, alpha, pid, cull, lights, mode, 0, len(tris))
             for tri in tris:
                 for pos, uv, col, nrm in tri:
