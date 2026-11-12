@@ -38,6 +38,7 @@ u8 U3D_MapCellZ(s32 index);
 #define U3D_VAR_BASE 0xB000                                   // Emerald vars 0xB000 + n are Black's works 0x4000 + n
 #define U3D_VAR_COUNT 0x140
 u16 *U3D_Vm_VarPointer(u16 id);
+void U3D_Vm_DebugSet(bool8 flag, u16 id, u16 value);   // tests: a Black work or flag (mp u3dwork / u3dflag)
 bool8 U3D_Vm_ObjectHidden(u8 localId);                        // a person hidden by Black's flag
 bool8 U3D_Vm_SceneStart(void);                                // script.c TryRunOnFrameMapScript: a scene starts
 bool8 U3D_VmRunning(void);

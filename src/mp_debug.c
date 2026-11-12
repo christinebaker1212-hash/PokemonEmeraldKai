@@ -20,6 +20,7 @@ unsigned int SDL_GetTicks(void);
 #include "arcade.h"   // Moemon Kai: the GAME CENTER's arcade boards
 #include <math.h>
 #include "s3d.h"   // Moemon Kai: SINNOH's 3D engine (tests)
+#include "u3d.h"   // Moemon Kai: UNOVA (tests)
 #include "field_message_box.h"
 #include "mp_region.h"
 #include "field_control_avatar.h"
@@ -4446,6 +4447,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         void Sinnoh_HallDebug(void);
         Sinnoh_HallDebug();   // SINNOH's BATTLE HALL record (src/sinnoh/s3d_hall.c)
+    }
+    else if (strcmp(cmd, "u3dwork") == 0 || strcmp(cmd, "u3dflag") == 0)   // u3dwork WORK VALUE / u3dflag FLAG 0|1 (hex)
+    {
+        unsigned id = 0, v = 0;
+        if (sscanf(arg, "%x %x", &id, &v) == 2)
+            U3D_Vm_DebugSet(cmd[3] == 'f', id, v);
     }
     else if (strcmp(cmd, "where") == 0)
     {

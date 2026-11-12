@@ -402,7 +402,7 @@ static s32 MapZ(u16 z) { s32 i = U3D_MapIndex(); return i < 0 ? z : z - 32 * U3D
 static u8 sMoves[OBJECT_EVENTS_COUNT][MAX_MOVE];
 static u8 sMoving[OBJECT_EVENTS_COUNT];   // local ids moving for the script
 static u16 sPendingScript;                 // Black's SetProcAction: a script to run next
-static u8 sSubText[400], sSubCount;        // Black's side windows' words (AddSubWinMsg)
+static u8 sSubText[400] = {EOS}, sSubCount;   // Black's side windows' words (AddSubWinMsg; empty: EOS, not 0, a space)
 
 // ---- people a script added (Black's AddMmdl): kept until the map changes or the script deletes them, and put on the
 // field once it is up (a zone's field-init script adds them while the map loads, before the map's people are set out)
@@ -1761,4 +1761,20 @@ void U3D_VmResume(void)
 bool8 U3D_VmRunning(void)
 {
     return sThread.alive;
+}
+
+// tests (mp_debug.c `mp u3dwork WORK VALUE` / `mp u3dflag FLAG 0|1`, Black's numbers in hex): a scene set up without
+// playing the story to it
+void U3D_Vm_DebugSet(bool8 flag, u16 id, u16 value)
+{
+    if (!flag && id == 0xFFFF)   // (`mp u3dwork FFFF 0`: the running script ends where it is: the opening's room)
+    {
+        if (sThread.alive)
+            Finish(&sThread);
+        return;
+    }
+    if (flag)
+        FlagTo(id, value != 0);
+    else
+        *WorkPtr(id) = value;
 }
