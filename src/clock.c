@@ -14,6 +14,7 @@
 #include "tv.h"
 #include "wallclock.h"
 #include "mp_region.h"
+#include "u3d.h"
 
 static void UpdatePerDay(struct Time *localTime);
 static void UpdatePerMinute(struct Time *localTime);
@@ -89,6 +90,7 @@ static void UpdatePerDay(struct Time *localTime)
     {
         daysSince = localTime->days - *days;
         ClearDailyFlags();
+        U3D_Vm_NewDay(daysSince);   // Moemon Kai: BLACK CITY's residents (src/unova/u3d_vm.c)
         UpdateDewfordTrendPerDay(daysSince);
         UpdateTVShowsPerDay(daysSince);
         UpdateWeatherPerDay(daysSince);

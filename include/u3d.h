@@ -37,7 +37,8 @@ bool8 U3D_Vm_HasCGear(void);
 u16 U3D_Vm_Work(u16 id);
 void U3D_Vm_ContinueHome(void);
 u16 U3D_Vm_ObjCode(u16 code);
-void U3D_Vm_WarpPos(s16 *x, s16 *y);   // a warp tile where Black's script has moved its connection now   // a work object code's code (Black's 0xA2-0xB1: its work 0x4020 + n)
+void U3D_Vm_WarpPos(s16 *x, s16 *y);
+void U3D_Vm_NewDay(u16 days);   // UNOVA's daily changes (BLACK CITY's residents' moods)   // a warp tile where Black's script has moved its connection now   // a work object code's code (Black's 0xA2-0xB1: its work 0x4020 + n)
 bool8 U3D_TryRoamerEncounter(u8 *level);   // UNOVA's roamers (TORNADUS, THUNDURUS) on this zone's grass
 bool8 U3D_RoamerAfterBattle(struct Pokemon *mon, u8 outcome);   // after UNOVA's game clear: CONTINUE starts at home (Black's continue spot)   // a work of Black's event work   // FENNEL gave the C-GEAR (UNOVA's device)
 void U3D_Vm_WhiteoutHome(void);   // a new game in UNOVA: a whiteout returns home to NUVEMA (Black's first warp point)

@@ -61,6 +61,7 @@ def ascii_name(name):
 STAND_IN = 'OBJ_EVENT_GFX_YOUNGSTER'
 UNOVA_GFX, UNOVA_GFX_COUNT = 0x600, 0x320   # (include/constants/event_objects.h OBJ_EVENT_GFX_UNOVA_FIRST)
 BLACK_DIR = {0: 'UP', 1: 'DOWN', 2: 'LEFT', 3: 'RIGHT'}
+BLACK_CITY = 0   # (its zone: its residents, see events_of)
 
 
 def events_of(m, w, h):
@@ -84,6 +85,15 @@ def events_of(m, w, h):
                      # (one whose spot is another map's: u3d_vm.c U3D_Vm_ObjectHidden keeps it hidden here; its
                      # place in the list is kept for the VM's ids)
                      'flag': '0'})
+    if m['zone'] == BLACK_CITY and not objs:
+        # (BLACK CITY's ten residents, Black's WFBC: placed at run time from its spots (a/1/5/4 member 0x22), drawn as
+        # the work object codes 0xA2 + n the VM sets to each resident's own: src/unova/u3d_vm.c "BLACK CITY")
+        spots = narc.arc('a/1/5/4')[0x22]
+        for i in range(10):
+            objs.append({'graphics_id': '0x%X' % (UNOVA_GFX + 0xA2 + i), 'x': spots[2 * i] - ox, 'y': spots[2 * i + 1] - oz,
+                         'elevation': 3, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN', 'movement_range_x': 0,
+                         'movement_range_y': 0, 'trainer_type': 'TRAINER_TYPE_NONE',
+                         'trainer_sight_or_berry_tree_id': '0', 'script': 'Unova_EventScript_Talk', 'flag': '0'})
     for b in evs['bg']:
         x, z = b['x'] - ox, b['z'] - oz
         if b['rail']:

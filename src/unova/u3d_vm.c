@@ -81,7 +81,7 @@ void MPNet_Log(const char *fmt, ...);
 static u8 *sPack;
 static u32 sPackSize;
 static bool8 sTried;
-static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt, sTrMsgAt, sEyeSongsAt, sWarpsAt, sCallsAt, sTradesAt;
+static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt, sTrMsgAt, sEyeSongsAt, sWarpsAt, sCallsAt, sTradesAt, sWfbcAt;
 
 static u32 Get32(u32 at) { return at + 4 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 | sPack[at + 2] << 16 | (u32)sPack[at + 3] << 24 : 0; }
 static u16 Get16(u32 at) { return at + 2 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 : 0; }
@@ -125,7 +125,7 @@ static void Load(void)
     sPack = malloc(raw ? raw : 1);
     sPackSize = raw;
     if (sPack == NULL || uncompress(sPack, &raw, data + 8, (unsigned long)(size - 8)) != 0 || memcmp(sPack, "U3DS", 4) != 0
-     || Get32(4) < 1 || Get32(4) > 8)
+     || Get32(4) < 1 || Get32(4) > 9)
     {
         printf("[u3d] %s: can't read UNOVA's scripts\n", path);
         free(sPack);
@@ -158,6 +158,8 @@ static void Load(void)
             sCallsAt = (sWarpsAt + 4 + 20 * Get32(sWarpsAt) + 3) & ~3;
         if (Get32(4) >= 8)   // (version 8: the in-game trades)
             sTradesAt = (BlockEnd(sCallsAt) + 3) & ~3;
+        if (Get32(4) >= 9)   // (version 9: BLACK CITY's residents)
+            sWfbcAt = sTradesAt + 4 + 0x6C * Get32(sTradesAt);
     }
     printf("[u3d] UNOVA's scripts: %u files, %u zones\n", Get32(sFilesAt), Get32(sZonesAt));
 }
@@ -232,7 +234,8 @@ const u8 *U3D_Vm_WildRow(u16 zone, u8 season)
 struct UnovaRoamer { u16 species, hp; u8 level, state, loc, status; u32 personality, ivs; };   // (state: 0 none, 1
                                                                                                 // roaming, 2 knocked out, 3 caught)
 static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
-                u8 white; struct UnovaRoamer roam[2]; } sWork;   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
+                u8 white; struct UnovaRoamer roam[2];
+                struct { u8 valid, npc[10], mood[10], flags[10], back[10]; u16 counter, value; } wfbc; } sWork;   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
 {
@@ -339,12 +342,20 @@ static u16 Le16(const u8 *p) { return p[0] | p[1] << 8; }
 // ------------------------------------------------------------------------------------------------ the map's people
 // The map's object event of Black's object id OBJ: its person's place in the zone's event data + 1
 // (tools/unova/gen_maps.py writes them in that order); 0xFF is the player
+static u8 WfbcSlotOf(u8 npc);
+static u8 sWfbcSlot;   // (BLACK CITY: the resident talked to)
 static u8 LocalId(u16 obj)
 {
     u32 size, i;
     const u8 *e;
     if (obj == OBJ_PLAYER)
         return OBJ_EVENT_ID_PLAYER;
+    if (U3D_CurrentZone() == 0 && obj >= 0x80 && obj < 0x80 + 30)   // (BLACK CITY's residents: 0x80 + their number)
+    {
+        u8 slot = WfbcSlotOf(obj - 0x80);
+        if (slot < 10)
+            return slot + 1;
+    }
     e = Events(U3D_CurrentZone(), &size);
     for (i = 0; e && size >= 8 && i < e[5]; i++)
         if (Le16(e + 8 + EV_BG * e[4] + EV_PERSON * i) == obj)
@@ -420,10 +431,13 @@ static void Gone(u8 local, bool8 gone)
 // (its person 3, flag 766 cleared): there, once Black's own isn't (its flag set), until caught. Drawn as Black's own
 // ZEKROM (work object code 0xD6); its words are White's lines in Black's bank of N's throne room (zone 278)
 #define ZONE_ZEKROM 213
+#define ZONE_BLACK_CITY 0
 #define ZONE_THRONE 278
 #define ZEKROM_LOCAL 4
 static bool8 WhiteZekromHere(u8 localId);
 static void RoamersMove(void);
+static u16 WfbcValue(u16 query);
+static void WfbcMapLoad(void);
 static void ConnMove(u8 event, s16 x, s16 z);
 #define CONN_MOVES 8
 static struct { u8 event, set; s16 x, z; } sConnMove[CONN_MOVES];
@@ -440,6 +454,8 @@ bool8 U3D_Vm_ObjectHidden(u8 localId)
             if (sGone[i] == localId)
                 return TRUE;
     }
+    if (CurrentZone() == ZONE_BLACK_CITY && localId <= 10)
+        return sWork.wfbc.npc[localId - 1] == 0xFF || !sWork.wfbc.valid;   // (BLACK CITY's residents: the slot's own)
     p = Person(CurrentZone(), localId - 1);
     if (p == NULL)
         return FALSE;
@@ -1850,6 +1866,29 @@ static void Step(struct Thread *t)
         case U3C_EVENT_MON_CmdStartSpPokeGimmickStepA:
         case U3C_EVENT_MON_CmdStartSpPokeGimmickStepB:
             break;
+        // ---- BLACK CITY's residents (ov020 field_wfbc_data_local.c: the one talked to, sWfbcSlot)
+        case U3C_FIELD_WFBC_DATA_LOCAL_ScrCmdGetWfbcValue:   // query, result
+            *WorkPtr(a[1]) = WfbcValue(V(0));
+            break;
+        case U3C_FIELD_WFBC_DATA_LOCAL_ScrCmdGetFacingPersonMessageIndex:   // result, kind (1-4): its own words
+            *WorkPtr(a[0]) = (u16)(V(1) - 1) + sWork.wfbc.npc[sWfbcSlot % 10] * 4 + 1;
+            break;
+        case U3C_FIELD_WFBC_DATA_LOCAL_ScrCmdMarkFacingPerson:   // talked to today (its mood up at the next day)
+            sWork.wfbc.flags[sWfbcSlot % 10] |= 2;
+            break;
+        case U3C_FIELD_WFBC_DATA_LOCAL_ScrCmdCheckAndMarkFacingPerson:   // battled: no more today
+            if (sWork.wfbc.flags[sWfbcSlot % 10] & 1)
+            {
+                sWork.wfbc.flags[sWfbcSlot % 10] &= ~1;
+                sWork.wfbc.counter++;
+            }
+            break;
+        case U3C_FIELD_WFBC_DATA_LOCAL_ScrCmdAddPoints:
+            if (sWork.wfbc.value < 10000)
+                sWork.wfbc.value += 10;
+            break;
+        case U3C_FIELD_WFBC_DATA_LOCAL_ScrCmdCallPersonTalkEvent:   // (another player's city through the ENTRALINK: CO-OP's)
+            break;
         case U3C_WORK_CmdSetConnectGridPos:   // connection, x, y, z (grid): moved while the player is in the zone
             ConnMove(V(0), (s16)V(1), (s16)V(3));
             break;
@@ -2359,11 +2398,20 @@ static void NothingToRun(void)
 // special U3D_VmTalk: the person the player talked to (gSpecialVar_LastTalked) runs their script (Black's event data)
 static bool8 RunCode(const u8 *code, u32 size, u16 target);
 static bool8 sZekromBattle;
+static const u8 *WfbcRecord(u8 npc);
 
 void U3D_VmTalk(void)
 {
     u16 local = gSpecialVar_LastTalked;
     const u8 *p = local ? Person(CurrentZone(), local - 1) : NULL;
+    if (CurrentZone() == ZONE_BLACK_CITY && local >= 1 && local <= 10 && sWork.wfbc.valid && sWork.wfbc.npc[local - 1] != 0xFF)
+    {
+        // (a resident of BLACK CITY: its record's script there, Black's WfbcNpcRecord eventIds[1])
+        const u8 *r = WfbcRecord(sWork.wfbc.npc[local - 1]);
+        sWfbcSlot = local - 1;
+        if (r != NULL && Run(Le16(r + 0x1E), 0x80 + sWork.wfbc.npc[local - 1], TRUE))
+            return;
+    }
     if (local < 256 && WhiteZekromHere(local) && p != NULL)
     {
         // Black's own commands and words (zone 278's bank: White's lines for ZEKROM): its cry, then the battle at
@@ -2500,6 +2548,8 @@ void U3D_VmMapLoad(void)
     }
     sLastZone = zone;
     RunNow(InitScript(zone, 4));
+    if (zone == ZONE_BLACK_CITY)
+        WfbcMapLoad();
     if (WhiteZekromHere(ZEKROM_LOCAL))
         sWork.work[0x20] = 0xD6;   // (its work object code: Black's ZEKROM sprite, D3 / D4 its RESHIRAM)
 }
@@ -3101,4 +3151,146 @@ static void UnovaTradeSetUp(void)
                          Species(Get32At(r, 0x5C)));
     }
     MPNet_Log("u3d vm: trade %u: species %u for slot %u", sTradeId, species, sTradeSlot);
+}
+
+// ------------------------------------------------------------------------------------------------ BLACK CITY
+// Black's WFBC (ov020 field_wfbc_data_local.c): ten residents drawn by weight from its thirty (a/1/5/4, scripts pack
+// version 9) and three waiting, each a mood (falling 5 a day, 3 back for a talk; at 0 they leave for the waiting list),
+// a battle a day on arrival; the ten stand at Black's spots (tools/unova/gen_maps.py) drawn as their own sprites (the
+// work object codes 0xA2 + n). The other side, people from other games' cities, is CO-OP's (the ENTRALINK).
+static const u8 *WfbcRecord(u8 npc)
+{
+    if (!Ready() || sWfbcAt == 0 || npc >= Get32(sWfbcAt))
+        return NULL;
+    return sPack + sWfbcAt + 4 + 0x30 * npc;
+}
+
+static u8 WfbcSlotOf(u8 npc)
+{
+    u8 i;
+    for (i = 0; i < 10; i++)
+        if (sWork.wfbc.npc[i] == npc)
+            return i;
+    return 0xFF;
+}
+
+static bool8 WfbcPresent(u8 npc)
+{
+    u8 i;
+    for (i = 0; i < 10; i++)
+        if (sWork.wfbc.npc[i] == npc || sWork.wfbc.back[i] == npc)
+            return TRUE;
+    return FALSE;
+}
+
+// FIELD_WFBC_DATA_LOCAL_PickNpcByWeight: the first absent one whose running weight passes ROLL
+static u8 WfbcPick(u32 roll)
+{
+    u32 sum = 0, i;
+    u8 last = 0;
+    for (i = 0; i < 30; i++)
+    {
+        const u8 *r = WfbcRecord(i);
+        if (r == NULL || WfbcPresent(i))
+            continue;
+        last = i;
+        sum += Le16(r + 0x2C);
+        if (sum > roll)
+            return i;
+    }
+    return last;
+}
+
+// FIELD_WFBC_DATA_LOCAL_Init (Black: BLACK CITY, its residents' Black City moods)
+static void WfbcInit(void)
+{
+    u32 remaining = 0x1CE, i;
+    memset(&sWork.wfbc, 0xFF, sizeof(sWork.wfbc.npc) + sizeof(sWork.wfbc.mood) + sizeof(sWork.wfbc.flags) + sizeof(sWork.wfbc.back) + 1);
+    sWork.wfbc.counter = sWork.wfbc.value = 0;
+    for (i = 0; i < 13; i++)
+    {
+        u8 npc = WfbcPick(remaining ? Random() % remaining : 0);
+        const u8 *r = WfbcRecord(npc);
+        if (r == NULL)
+            break;
+        if (i < 10)
+            sWork.wfbc.npc[i] = npc, sWork.wfbc.mood[i] = Le16(r + 6), sWork.wfbc.flags[i] = 7;
+        else
+            sWork.wfbc.back[i - 10] = npc;
+        remaining -= Le16(r + 0x2C) < remaining ? Le16(r + 0x2C) : remaining;
+    }
+    sWork.wfbc.valid = 1;
+    MPNet_Log("u3d vm: BLACK CITY's residents chosen");
+}
+
+static void WfbcMapLoad(void)
+{
+    u32 i;
+    if (!sWork.wfbc.valid && sWfbcAt)
+        WfbcInit();
+    for (i = 0; i < 10; i++)
+    {
+        const u8 *r = sWork.wfbc.npc[i] != 0xFF ? WfbcRecord(sWork.wfbc.npc[i]) : NULL;
+        sWork.work[0x20 + i] = r ? Le16(r) : 0;   // (the work object code 0xA2 + i: its own sprite)
+    }
+}
+
+static u16 WfbcValue(u16 query)
+{
+    u8 slot = sWfbcSlot % 10, npc = sWork.wfbc.npc[slot], n = 0, i;
+    const u8 *r = npc != 0xFF ? WfbcRecord(npc) : NULL;
+    for (i = 0; i < 10; i++)
+        n += sWork.wfbc.npc[i] != 0xFF;
+    switch (query)
+    {
+    case 0:  return r ? Le16(r + 0x18) : 0;          // (its trainer)
+    case 1:  return sWork.wfbc.mood[slot] <= 20;      // (bored)
+    case 2:  return 1;                                // (BLACK CITY's own: the player its "parent")
+    case 3:  return n;
+    case 4:
+    case 7:  return sWork.wfbc.counter;
+    case 5:
+    case 8:  return sWork.wfbc.value;
+    case 6:  return n != 0;
+    case 9:  return npc;
+    case 10: return sWork.wfbc.flags[slot] & 1;       // (just arrived: a battle)
+    case 11: return 0x80 + npc;
+    }
+    return 0;
+}
+
+// (clock.c's daily update, DAYS since the last) FIELD_WFBC_DATA_LOCAL_AdvanceDays and ApplyTalkedMoodBonus
+void U3D_Vm_NewDay(u16 days)
+{
+    u32 i, j;
+    s32 delta;
+    if (!sWork.wfbc.valid)
+        return;
+    if (days > 21)
+        days = 21;
+    delta = -5 * (s32)(days ? days : 1);
+    for (i = 0; i < 10; i++)
+    {
+        s32 m;
+        if (sWork.wfbc.npc[i] == 0xFF)
+            continue;
+        m = sWork.wfbc.mood[i] + delta + ((sWork.wfbc.flags[i] & 2) ? 3 : 0);
+        sWork.wfbc.flags[i] = 7;
+        if (m > 100)
+            m = 100;
+        if (m <= 0)
+        {
+            for (j = 0; j < 10 && sWork.wfbc.back[j] != 0xFF; j++)
+                ;
+            if (j < 10)   // (bored: to the waiting list, first in it)
+            {
+                memmove(&sWork.wfbc.back[1], &sWork.wfbc.back[0], 9);
+                sWork.wfbc.back[0] = sWork.wfbc.npc[i];
+                sWork.wfbc.npc[i] = 0xFF;
+                continue;
+            }
+            m = 1;
+        }
+        sWork.wfbc.mood[i] = m;
+    }
 }
