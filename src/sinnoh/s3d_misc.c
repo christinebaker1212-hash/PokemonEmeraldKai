@@ -44,6 +44,8 @@
 #include "pokemon_storage_system.h"
 #include "pokedex.h"
 #include "random.h"
+#include "rtc.h"
+#include "region_map.h"
 #include "string_util.h"
 #include "constants/items.h"
 #include "constants/species.h"
@@ -553,6 +555,48 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
             void S3D_Dw_RefreshPeople(void);
             S3D_Dw_RefreshPeople();   // (Platinum's map loads again after the battle: the DISTORTION WORLD's people)
         }
+        break;
+    }
+    case 41:   // EnableSwarms (the twin in SANDGEM's house: s3d_wild.c)
+    {
+        void Sinnoh_SwarmsEnable(void);
+        Sinnoh_SwarmsEnable();
+        break;
+    }
+    case 42:   // GetSwarmMapAndSpecies: A <- the map section of the day's swarm, B <- its POKeMON
+    {
+        bool8 Sinnoh_SwarmToday(u16 *mapsec, u16 *species);
+        u16 mapsec = 0, species = SPECIES_NONE;
+        Sinnoh_SwarmToday(&mapsec, &species);
+        VarSet(a, mapsec);
+        VarSet(b, species);
+        break;
+    }
+    case 43:   // BufferMapName: text slot B <- the name of the map section in variable A
+    {
+        static u8 *const sSlots[] = {gStringVar1, gStringVar2, gStringVar3};
+        GetMapName(sSlots[b % 3], VarGet(a), 0);
+        break;
+    }
+    case 44:   // AddTrophyGardenMon (MR. BACKLOT: s3d_wild.c)
+    {
+        u16 Sinnoh_TrophyGardenAdd(void);
+        Sinnoh_TrophyGardenAdd();
+        break;
+    }
+    case 45:   // GetTrophyGardenSlot1Species: A <- the TROPHY GARDEN's newest POKeMON
+    {
+        u16 Sinnoh_TrophyGardenNewest(void);
+        VarSet(a, Sinnoh_TrophyGardenNewest());
+        break;
+    }
+    case 46:   // GetDailyRandomLevel: A <- the day's level, 2-99 (Platinum's VAR_DAILY_RANDOM_LEVEL, picked as a day starts)
+    {
+        u32 x = (RtcGetLocalDayCount() + 1) * 0x9E3779B1u ^ 0x221;
+        x ^= x >> 15;
+        x *= 0x2C1B3C6Du;
+        x ^= x >> 12;
+        VarSet(a, x % 98 + 2);
         break;
     }
     case 40:

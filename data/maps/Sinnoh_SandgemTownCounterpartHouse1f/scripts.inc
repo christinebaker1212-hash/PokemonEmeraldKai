@@ -7,7 +7,7 @@ Sinnoh_SandgemTownCounterpartHouse1f_EventScript_Person1::
 	end
 
 Sinnoh_SandgemTownCounterpartHouse1f_EventScript_Person2::
-	goto Sinnoh_EventScript_SwarmTwin
+	goto SinnohP_sandgem_town_counterpart_house_1f_2
 	end
 
 @ --- end of SINNOH words ---

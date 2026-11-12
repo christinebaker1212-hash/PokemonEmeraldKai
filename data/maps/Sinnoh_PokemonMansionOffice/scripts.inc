@@ -11,21 +11,16 @@ Sinnoh_PokemonMansionOffice_EventScript_Bg2::
 	end
 
 Sinnoh_PokemonMansionOffice_EventScript_Person2::
-	goto Sinnoh_EventScript_MrBacklot
+	goto SinnohP_pokemon_mansion_office_2
 	end
 
 Sinnoh_PokemonMansionOffice_EventScript_Person3::
-	msgbox Sinnoh_PokemonMansionOffice_Text_Person3, MSGBOX_NPC
+	goto SinnohP_pokemon_mansion_office_3
 	end
 
 Sinnoh_PokemonMansionOffice_EventScript_Person4::
 	msgbox Sinnoh_PokemonMansionOffice_Text_Person4, MSGBOX_NPC
 	end
-
-Sinnoh_PokemonMansionOffice_Text_Person3:
-	.string "I've been the master's butler for\n"
-	.string "forty years. He's never once been on\l"
-	.string "time.$"
 
 Sinnoh_PokemonMansionOffice_Text_Person4:
 	.string "I guard the owner's office. Mostly I\n"

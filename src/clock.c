@@ -13,6 +13,7 @@
 #include "time_events.h"
 #include "tv.h"
 #include "wallclock.h"
+#include "mp_region.h"
 
 static void UpdatePerDay(struct Time *localTime);
 static void UpdatePerMinute(struct Time *localTime);
@@ -61,6 +62,13 @@ void DoTimeBasedEvents(void)
     {
         InitTimeBasedEvents();
         MPNet_Log("clock: time-based events were off (skipped intro): on from now");
+    }
+    // Moemon Kai: away from HOENN there's no bedroom clock to set (JOHTO, KANTO, SINNOH and UNOVA run on the PC's
+    // time from the start): a game begun there had its BERRIES and daily events off until HOENN's clock was set
+    if (!FlagGet(FLAG_SYS_CLOCK_SET) && MP_Region_Current() != REGION_HOENN)
+    {
+        InitTimeBasedEvents();
+        MPNet_Log("clock: time-based events on (a game away from HOENN's bedroom clock)");
     }
     if (FlagGet(FLAG_SYS_CLOCK_SET))
         FixStuckClockSave();

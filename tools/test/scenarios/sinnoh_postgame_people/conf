@@ -1,0 +1,11 @@
+# Platinum's own post-game people (tools/sinnoh/gen_scripts.py: EnableSwarms, GetSwarmMapAndSpecies, BufferMapName,
+# AddTrophyGardenMon, GetTrophyGardenSlot1Species, GetDailyRandomLevel, GetPartyMonLevel, ShowDiplomaSinnoh /
+# NationalDex): the twin in SANDGEM's house tells of the swarms (they start), MR. BACKLOT puts a POKeMON in his TROPHY
+# GARDEN, the man in ROUTE 221's house asks for the day's level, the game director at LAKE VALOR. SINNOH's LEAGUE beaten,
+# FLAG_GAME_COMPLETED (0x33D3), the NATIONAL DEX. Then a new day clears Platinum's daily flags (0x3355: MR. BACKLOT's).
+# Needs both packs. Shots pg_*.png.
+MODE=1
+TMO=400
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=150:100"
+EXPECT_A=("[test] flag 15664 = 1" "sinnoh: trophy garden: species" "[test] flag 13141 = 1" "[test] flag 13141 = 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

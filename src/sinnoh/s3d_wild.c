@@ -110,6 +110,12 @@ static u8 SwarmToday(void)
     return 0xFF;
 }
 
+// Platinum's EnableSwarms (its twin in SANDGEM's house, once the NATIONAL DEX is had and the game completed)
+void Sinnoh_SwarmsEnable(void)
+{
+    FlagSet(FLAG_SINNOH_SWARMS);
+}
+
 // The twin's news (data/scripts/sinnoh_wild.inc): turns swarms on; gStringVar1 the route, gStringVar2 the POKéMON
 // (VAR_RESULT FALSE: no swarm the GENERATION setting allows)
 u16 Sinnoh_SwarmNews(void)
@@ -339,6 +345,12 @@ u16 Sinnoh_TrophyGardenToday(void)
         return gSpecialVar_Result = 1;
     }
     return gSpecialVar_Result = 2;
+}
+
+// Platinum's GetTrophyGardenSlot1Species: the newest of the two (SPECIES_NONE: none yet)
+u16 Sinnoh_TrophyGardenNewest(void)
+{
+    return sHoney.trophy[0] != 0 ? sTrophyMons[(sHoney.trophy[0] - 1) % ARRAY_COUNT(sTrophyMons)] : SPECIES_NONE;
 }
 
 // Today's new one (gStringVar1 its name): not one of the two there now, and allowed by the GENERATION setting

@@ -52,9 +52,14 @@ void ClearTempFieldEventData(void)
     FlagClear(FLAG_NURSE_UNION_ROOM_REMINDER);
 }
 
+#include "data/sinnoh_daily_flags.h"   // Moemon Kai: Platinum's FLAG_DAILY_* (tools/sinnoh/gen_scripts.py --daily-flags)
+
 void ClearDailyFlags(void)
 {
+    u32 i;
     memset(&gSaveBlock1Ptr->flags[DAILY_FLAGS_START / 8], 0, DAILY_FLAGS_SIZE);
+    for (i = 0; i < ARRAY_COUNT(sSinnohDailyFlags); i++)   // Moemon Kai: SINNOH's daily events start over too
+        FlagClear(sSinnohDailyFlags[i]);
 }
 
 void DisableNationalPokedex(void)

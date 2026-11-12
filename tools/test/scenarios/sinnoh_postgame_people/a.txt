@@ -1,0 +1,51 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp regionclear 3
+mp setflag 0x33D3
+mp dexorder 1 0
+mp warp 43,55,5,9
+wait 150
+press UP 16
+wait 30
+mp face up
+press A 2
+wait 60
+shot pg_twin
+mash A 20 20
+mp getflag 0x3D30
+mp warp 43,3,16,10
+wait 150
+press UP 16
+wait 30
+mp face up
+press A 2
+wait 60
+shot pg_backlot
+mash A 110 20
+shot pg_backlot2
+mp getflag 0x3355
+mp warp 43,41,2,7
+wait 150
+press UP 16
+wait 30
+mp face up
+press A 2
+wait 60
+shot pg_route221
+mash A 30 20
+shot pg_route221b
+mp warp 41,96,5,4
+wait 150
+mp face up
+press A 2
+wait 60
+shot pg_director
+mash A 30 20
+wait 60
+shot pg_director2
+mash B 10 20
+mp newday
+wait 30
+mp getflag 0x3355
+quit

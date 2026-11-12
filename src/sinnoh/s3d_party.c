@@ -227,6 +227,7 @@ enum
     PARTY_TOUGH_WORD,        // A text slot <- a new word for the EASY CHAT, B <- its number (0xFFFF: none left)
     PARTY_TOUGH_ALL,         // B <- every such word is known
     PARTY_FORMS_ON,          // the POKeDEX's form viewer turned on (TurnOnPokedexFormDetection: pokedex.c MpDexForms*)
+    PARTY_LEVEL,             // A: a slot, B: variable <- its level (GetPartyMonLevel)
 };
 
 extern u16 gMoveRelearnerOnlyMove;
@@ -325,6 +326,9 @@ void Sinnoh_PartyCall(u16 op, u16 a, u16 b)
     u32 i;
     switch (op)
     {
+    case PARTY_LEVEL:
+        VarSet(b, VarGet(a) < PARTY_SIZE ? GetMonData(&gPlayerParty[VarGet(a)], MON_DATA_LEVEL) : 0);
+        break;
     case PARTY_ARG:
         sArg = value;
         sArgVar = a;

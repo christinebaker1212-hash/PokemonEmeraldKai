@@ -3,11 +3,7 @@ Sinnoh_GrandLakeValorLakefrontWestHouse_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_GrandLakeValorLakefrontWestHouse_EventScript_Person1::
-	msgbox Sinnoh_GrandLakeValorLakefrontWestHouse_Text_Person1, MSGBOX_NPC
+	goto SinnohP_grand_lake_valor_lakefront_west_house_1
 	end
-
-Sinnoh_GrandLakeValorLakefrontWestHouse_Text_Person1:
-	.string "I make games for a living. My best\n"
-	.string "ideas come while watching MOéMON play.$"
 
 @ --- end of SINNOH words ---

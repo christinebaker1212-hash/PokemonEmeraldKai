@@ -3,19 +3,19 @@ Sinnoh_VeilstoneCity_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_VeilstoneCity_EventScript_Bg3::
-	msgbox Sinnoh_VeilstoneCity_Text_Bg3, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_25
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Bg4::
-	msgbox Sinnoh_VeilstoneCity_Text_Bg4, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_26
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Bg5::
-	msgbox Sinnoh_VeilstoneCity_Text_Bg5, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_27
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Bg6::
-	msgbox Sinnoh_VeilstoneCity_Text_Bg6, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_28
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person1::
@@ -125,26 +125,6 @@ Sinnoh_VeilstoneCity_EventScript_Sign15::
 Sinnoh_VeilstoneCity_EventScript_Sign16::
 	goto SinnohP_veilstone_city_24
 	end
-
-Sinnoh_VeilstoneCity_Text_Bg3:
-	.string "A huge rock that fell from the sky\n"
-	.string "long ago. Its surface feels strangely\l"
-	.string "warm.$"
-
-Sinnoh_VeilstoneCity_Text_Bg4:
-	.string "A huge rock that fell from the sky\n"
-	.string "long ago. It's covered in tiny\l"
-	.string "glittering specks.$"
-
-Sinnoh_VeilstoneCity_Text_Bg5:
-	.string "A huge rock that fell from the sky\n"
-	.string "long ago. There's a deep crack along\l"
-	.string "one side.$"
-
-Sinnoh_VeilstoneCity_Text_Bg6:
-	.string "A huge rock that fell from the sky\n"
-	.string "long ago. It seems to hum, very\l"
-	.string "faintly.$"
 
 Sinnoh_VeilstoneCity_Text_Person7:
 	.string "TEAM GALACTIC's headquarters are\n"
