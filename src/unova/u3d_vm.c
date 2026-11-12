@@ -1244,6 +1244,29 @@ static void Step(struct Thread *t)
             }
             break;
         }
+        case U3C_WarpToRailLocation:   // zone, rail line, along, across, direction (its tile from u3d_railpos.h)
+        case U3C_WarpToRailLocationWithTransition:
+        {
+            u32 i;
+            u8 group, num;
+            s16 x, y;
+            for (i = 0; i < ARRAY_COUNT(sUnovaRailWarps); i++)
+                if (sUnovaRailWarps[i].zone == a[0] && sUnovaRailWarps[i].line == a[1]
+                 && sUnovaRailWarps[i].along == a[2] && sUnovaRailWarps[i].across == a[3])
+                    break;
+            if (i < ARRAY_COUNT(sUnovaRailWarps)
+             && U3D_MapOfZoneTile(a[0], sUnovaRailWarps[i].x, sUnovaRailWarps[i].z, &group, &num, &x, &y))
+            {
+                MPNet_Log("u3d vm: rail warp to zone %u (%d.%d at %d,%d)", a[0], group, num, x, y);
+                sHolding = FALSE;
+                t->alive = FALSE;
+                SetWarpDestination(group, num, WARP_ID_NONE, x, y);
+                DoWarp();
+                return;
+            }
+            MPNet_Log("u3d vm: rail warp to zone %u (%u %u %u) not laid out", a[0], a[1], a[2], a[3]);
+            break;
+        }
         // ---- battles
         case U3C_PROC_FLD_StartScriptedWildBattle:   // species, level, flags (a legend's, a static POKeMON's)
             CreateScriptedWildMon(Species(V(0)), V(1), ITEM_NONE);
@@ -2248,6 +2271,11 @@ static void Step(struct Thread *t)
         case U3C_PROC_CallFieldCloseEvent:
         case U3C_RESEARCH_CmdSetSurveyAnswer:   // (the Xtransceiver survey: Wi-Fi's)
             break;
+        case U3C_NAMEIN_SETUP_ScrCmdSetFieldSaveFlag:   // (a field save flag for a scene's restart: Kai saves its own way)
+            break;
+        case U3C_CheckBeaconTrainerKey:   // (whether an event item came from a real distribution: Kai gives them itself)
+            *WorkPtr(a[1]) = 1;
+            break;
         default:
             if (!(sLogged[op / 16] & (1 << (op % 16))))
             {
@@ -2908,6 +2936,9 @@ static void UnovaGameClear(void)
     MP_Region_SetCleared(REGION_UNOVA);
     if (!CheckBagHasItem(ITEM_SS_TICKET, 1))
         AddBagItem(ITEM_SS_TICKET, 1);
+    // the LIBERTY PASS as Kai's event tickets come (HOENN's with becoming Champion): its boat at CASTELIA's pier
+    if (!CheckBagHasItem(ITEM_LIBERTY_PASS, 1))
+        AddBagItem(ITEM_LIBERTY_PASS, 1);
     MPNet_Log("u3d vm: game clear, mode %u", sClearMode);
     if (sClearMode == 1)
     {

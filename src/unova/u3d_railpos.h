@@ -37,3 +37,6 @@ static const struct { u16 zone; u8 index; u16 x, z; } sUnovaRailPos[] = {
     {244, 0, 11, 16},
     {244, 0, 10, 16},
 };
+static const struct { u16 zone, line, along, across, x, z; } sUnovaRailWarps[] = {
+    {36, 0, 2, 11, 20, 13},
+};

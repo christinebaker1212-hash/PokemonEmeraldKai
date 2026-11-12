@@ -327,6 +327,31 @@ def main():
                 "// triggers, zone tile x, z: tools/unova/rails.py), for u3d_vm.c U3D_VmPos\n")
         f.write('static const struct { u16 zone; u8 index; u16 x, z; } sUnovaRailPos[] = {\n')
         f.write('\n'.join(rows) + '\n};\n')
+        # the scripts' warps to a rail place (WarpToRailLocation*: zone, rail line, along, across), as tiles
+        import scripts as scr
+        seen = set()
+        for sf in range(len(narc.arc(scr.ARC))):
+            if sf in scr.init_files():
+                continue
+            try:
+                cmds, _, _ = scr.decode(sf)
+            except Exception:   # noqa: BLE001
+                continue
+            for _, name, args, _ in cmds.values():
+                if 'WarpToRailLocation' in name and rails.rail_files().get(args[0]) is not None:
+                    # (FIELD_RAIL_MakeLineLocation: the place across counts from the line's edge, its half width
+                    # there taken off)
+                    rf = rails.rail_files()[args[0]]
+                    rl = rails.load(rf)
+                    if args[1] >= len(rl['lines']):
+                        continue
+                    ln = max(1, rl['lines'][args[1]]['length']) * rails.CELL
+                    half = int(rails._width_at(rl, args[1], args[2] * rails.CELL, ln)) // 16
+                    t = rails.tile_of(rf, args[1], args[2], args[3] - half)
+                    if t:
+                        seen.add('    {%d, %d, %d, %d, %d, %d},' % (args[0], args[1], args[2], args[3], t[0], t[1]))
+        f.write('static const struct { u16 zone, line, along, across, x, z; } sUnovaRailWarps[] = {\n')
+        f.write('\n'.join(sorted(seen)) + '\n};\n')
     # matrices a story flag replaces (Black's map replacement, selectors 3-12: the flag's work holding its value)
     import scrcmd
     ram, ov = scrcmd.ov_image(10)
