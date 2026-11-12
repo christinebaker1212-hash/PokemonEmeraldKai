@@ -115,8 +115,12 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   Gym gimmicks kept: CASTELIA's honey doors (u3d_vm.c PlateDoorsRefresh), NIMBASA's coasters (U3D_Vm_DockStep: a dock walked
   onto facing the rails rides its lane's cart, lever sWork.gym[0], to the loop's other stop; lanes 1, 2 locked till Black's
   flags 0x74 / 0x75, their trainers' scripts 7 and 8; Unova_EventScript_Ride; carts and rails not drawn).
+  DRIFTVEIL's mine (Black's height areas, HEIGHT_EX: u3d.c U3D_HexSet; floors at 50 / 40 / 30 over the ground, the
+  player on one at a time, U3D_StepBlocked / U3D_HexOpen; six lifts their levers send between two heights, the player
+  riding, u3d_vm.c MineLift; people kept to their floors by Black's event heights, U3D_ObjectsApart; the unseen blockers
+  as data, U3D_Vm_BlockerAt, or they'd fill the game's 16 people; a silent person over a sign lets the sign answer).
   Not yet: the GEAR STATION's trains drawn on the platforms; the gyms' gimmicks (Black's field_gimmick_*: STRIATON's
-  switches, NACRENE's books, DRIFTVEIL's lifts, MISTRALTON's cannons,
+  switches, NACRENE's books, MISTRALTON's cannons,
   ICIRRUS's ice, OPELUCID's bridges), MUSICALS, NIMBASA's stadiums, the ROYAL UNOVA, the survey HQ.
 - The ROM: the user's Pokemon Black (USA, Europe) (NDSi Enhanced), SHA-1 26ad0b9967aa279c4a266ee69f52b9b2332399a5,
   from their Google Drive (the link in docs/UNOVA_DECISIONS.md's source message; the release fetches it through the

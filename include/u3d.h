@@ -23,7 +23,19 @@ void U3D_CommitOam(void);
 #define U3D_METATILE_BEHAVIOR 0x300
 #define U3D_RAIL_WARP 0x49   // (MB_UNUSED_49: a rail map's way out, warps as it's stepped on: tools/unova/build_pack.py)
 bool8 U3D_RailWarpArmed(void);
-bool8 U3D_StepBlocked(s16 fromX, s16 fromY, s16 x, s16 y);   // (a door walked into from the side)
+bool8 U3D_StepBlocked(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y);   // (a door from the side, a floor's edge)
+struct ObjectEvent;
+bool8 U3D_ObjectsApart(const struct ObjectEvent *a, const struct ObjectEvent *b);   // (people on different floors)
+void U3D_HexClear(void);                                     // Black's height areas (CLAY's gym's floors, u3d.c)
+void U3D_HexSet(u8 i, s16 x, s16 z, s16 w, s16 d, s16 h);
+bool8 U3D_HexActive(void);
+bool8 U3D_PersonApart(u8 localId);
+bool8 U3D_HexOpen(bool8 isPlayer, s16 x, s16 y);
+void U3D_SetFloor(float h);
+float U3D_Floor(void);
+float U3D_HexTopAtPlayer(void);
+bool8 U3D_HexHasPlayer(u8 i);
+float U3D_ObjectHeight(const struct ObjectEvent *o);         // (a person's height: the player's floor, Black's height)
 void U3D_Vm_FieldShown(void);
 bool8 U3D_Vm_DockStep(u16 direction);   // (u3d_vm.c: ELESA's gym's coasters, a dock stepped onto)   // (u3d_vm.c: a map first shown, a continued game's too)
 const u16 *U3D_LayoutBlocks(const struct MapLayout *layout);

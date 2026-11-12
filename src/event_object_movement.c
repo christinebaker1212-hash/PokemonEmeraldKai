@@ -5333,7 +5333,8 @@ u8 GetCollisionAtCoords(struct ObjectEvent *objectEvent, s16 x, s16 y, u32 dir)
     u8 direction = dir;
     if (IsCoordOutsideObjectEventMovementRange(objectEvent, x, y))
         return COLLISION_OUTSIDE_RANGE;
-    else if (MapGridGetCollisionAt(x, y) || GetMapBorderIdAt(x, y) == CONNECTION_INVALID || IsMetatileDirectionallyImpassable(objectEvent, x, y, direction))
+    else if ((MapGridGetCollisionAt(x, y) && !U3D_HexOpen(objectEvent->isPlayer, x, y))   // Moemon Kai: UNOVA's floors
+          || GetMapBorderIdAt(x, y) == CONNECTION_INVALID || IsMetatileDirectionallyImpassable(objectEvent, x, y, direction))
         return COLLISION_IMPASSABLE;
     else if (S3D_Gyms_StepBlocked(objectEvent->currentCoords.x, objectEvent->currentCoords.y, x, y))
         return COLLISION_IMPASSABLE;   // Moemon Kai: a SINNOH gym's moving parts (src/sinnoh/s3d_gyms.c)
@@ -5341,7 +5342,7 @@ u8 GetCollisionAtCoords(struct ObjectEvent *objectEvent, s16 x, s16 y, u32 dir)
         return COLLISION_IMPASSABLE;   // Moemon Kai: ORRE: a wall of Colosseum's between two walkable tiles (src/orre/o3d.c)
     else if (S3D_DoorLocked(x, y))
         return COLLISION_IMPASSABLE;   // Moemon Kai: a SINNOH door its script keeps locked (src/sinnoh/s3d.c)
-    else if (U3D_StepBlocked(objectEvent->currentCoords.x, objectEvent->currentCoords.y, x, y))
+    else if (U3D_StepBlocked(objectEvent->isPlayer, objectEvent->currentCoords.x, objectEvent->currentCoords.y, x, y))
         return COLLISION_IMPASSABLE;   // Moemon Kai: UNOVA: a door walked into from the side (src/unova/u3d.c)
     else if (objectEvent->trackedByCamera && !CanCameraMoveInDirection(direction))
         return COLLISION_IMPASSABLE;
@@ -5415,7 +5416,8 @@ static bool8 DoesObjectCollideWithObjectAt(struct ObjectEvent *objectEvent, s16 
         {
             if ((curObject->currentCoords.x == x && curObject->currentCoords.y == y) || (curObject->previousCoords.x == x && curObject->previousCoords.y == y))
             {
-                if (AreElevationsCompatible(objectEvent->currentElevation, curObject->currentElevation))
+                if (AreElevationsCompatible(objectEvent->currentElevation, curObject->currentElevation)
+                 && !U3D_ObjectsApart(objectEvent, curObject))   // Moemon Kai: UNOVA: on floors apart (src/unova/u3d.c)
                     return TRUE;
             }
             // Moemon Kai: UNOVA's sized blockers (Black's object code 185, its params the width and depth in tiles:

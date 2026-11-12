@@ -12,6 +12,7 @@
 // table run when a work holds a value) run from U3D_Vm_MapLoad and U3D_Vm_SceneCheck.
 //
 // Its own code, never SINNOH's (s3d_scrcmd.c) or ORRE's (orre_vm.c).
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -443,6 +444,10 @@ static bool8 NpcAt(u8 local, u16 *x, u16 *z)
 static u8 sGone[16], sGoneCount;
 
 static void PlateDoorsRefresh(bool8 sound);
+static void MineLift(u32 i);
+#define ZONE_DRIFTVEIL_GYM 97
+static bool8 TrySign(void);
+static bool8 MineFloorHeight(s16 h);
 static void Gone(u8 local, bool8 gone)
 {
     u32 i;
@@ -494,6 +499,9 @@ bool8 U3D_Vm_ObjectHidden(u8 localId)
         return FALSE;
     if (Le16(p + 8) != 0 && FlagOn(Le16(p + 8)))   // (MmdlHeader: id, code, move, type, flag)
         return TRUE;
+    if (CurrentZone() == ZONE_DRIFTVEIL_GYM && (Le16(p + 2) == 185 || Le16(p + 2) == 0))
+        return TRUE;   // (CLAY's gym's unseen blockers, a floor each, kept as data: U3D_Vm_BlockerAt; as people they'd
+                       // fill the game's 16 and its trainers and CLAY would never come out)
     {
         // (a person whose spot is on another of the zone's maps: tools/unova/gen_maps.py keeps its place in the list)
         s32 m = U3D_MapIndex(), x = Le16(p + 28), z = Le16(p + 30);
@@ -1766,6 +1774,15 @@ static void Step(struct Thread *t)
         case U3C_PALPARK_SetBeacon:   // (a link beacon of what the player did: no wireless here)
         case U3C_DebugWork:   // (Black's debug prints)
         case U3C_DebugStack:
+        case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_CallLiftEvent:   // CLAY's gym: a lever sends its lift to its other height
+            if (V(0) < 6)   // (sMineLift's)
+                MineLift(V(0));
+            break;
+        case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_SnapElevatorToTop:   // (the lobby's lift and the mine's: their models)
+        case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_CallElevatorEvent:
+        case U3C_FIELD_GIMMICK_LIFT_SnapLiftToBottom:
+        case U3C_FIELD_GIMMICK_LIFT_CallEvent:
+            break;
         case U3C_FIELD_GIMMICK_CART_LANES_CreateSwitchEvent:   // ELESA's gym: a floor switch throws a lane's lever
             if (V(0) < 4)
                 sWork.gym[0] ^= 1 << V(0);
@@ -2777,12 +2794,28 @@ void U3D_VmTalk(void)
             return;
         }
     }
+    if (p != NULL && Le16(p + 10) == 2000 && TrySign())
+        return;   // (a person with nothing to say over a sign, Black's blockers: the sign answers, CLAY's gym's levers)
     if (p == NULL || !Run(Le16(p + 10), Le16(p), TRUE))
         NothingToRun();
 }
 
 // special U3D_VmSign: the sign / spot the player faces
+// a sign's height (Black's y, 16 units a tile's height) on the player's floor (the ground: below the platforms)
+static bool8 SignOnFloor(s32 y)
+{
+    float floor = U3D_Floor(), h = y / 16.0f;
+    return isnan(floor) ? !MineFloorHeight((s16)h) : fabsf(h - floor) < 4;
+}
+
 void U3D_VmSign(void)
+{
+    if (!TrySign())
+        NothingToRun();
+}
+
+// the sign in front of the player, run (FALSE none)
+static bool8 TrySign(void)
 {
     u32 size, i;
     const u8 *e = Events(CurrentZone(), &size);
@@ -2796,12 +2829,14 @@ void U3D_VmSign(void)
         s32 bx = (s32)(Le16(b + 8) | Le16(b + 10) << 16), bz = (s32)(Le16(b + 12) | Le16(b + 14) << 16);
         if (m >= 0)
             bx -= 32 * U3D_MapCellX(m), bz -= 32 * U3D_MapCellZ(m);
+        if (bx == x && bz == y && U3D_HexActive() && !SignOnFloor((s32)(Le16(b + 16) | Le16(b + 18) << 16)))
+            continue;   // (a sign of another floor at this spot: CLAY's gym's levers, one each height)
         if (bx == x && bz == y && getenv("MOEMON_U3D_TRACE"))
             printf("[u3d] sign %d,%d: bg %u script %u\n", x, y, i, Le16(b));
         if (bx == x && bz == y && Run(Le16(b), 0xFFFF, TRUE))
-            return;
+            return TRUE;
     }
-    NothingToRun();
+    return FALSE;
 }
 
 // special U3D_VmPos: the trigger spot the player stepped on (its work held its value: the coord event's var)
@@ -2938,11 +2973,103 @@ static void PlateDoorsRefresh(bool8 sound)
         }
 }
 
+// CLAY's gym (zone 97, Black's gimmick 43, ov043 field_gimmick_lift_elevator.c): a mine of platforms at heights 50, 40
+// and 30 over its ground (Black's height areas, sLiftElevatorFixedHeightAreas: u3d.c U3D_HexSet), and six lifts, each
+// a platform at one of two heights (sLiftElevatorLiftZones) its levers send between them (Black's signs at the lifts'
+// ends, a sign for each height: only the player's floor's answer). Whoever stands on a lift rides it; lift 5 goes down
+// to the ground, CLAY's. The lifts' states sWork.gym[1] (a bit each), the player's floor sWork.gym[2] (128 + its
+// height; 0 not yet). The lifts aren't drawn (Black's gimmick models)
+static const s16 sMineArea[8][5] = {{7, 19, 17, 1, 50}, {7, 23, 17, 1, 50}, {13, 24, 5, 3, 50}, {7, 19, 17, 1, 40},
+                                    {7, 20, 1, 3, 40}, {7, 23, 17, 1, 40}, {7, 19, 6, 1, 30}, {7, 23, 11, 1, 30}};
+static const s16 sMineLift[6][6] = {{18, 24, 5, 3, 50, 40}, {18, 20, 5, 3, 40, 50}, {8, 24, 5, 3, 40, 30},
+                                    {13, 24, 5, 3, 30, 40}, {8, 20, 5, 3, 30, 50}, {14, 20, 3, 3, 50, -59}};
+
+static bool8 MineFloorHeight(s16 h)   // (a height one of the platforms' floors is at, not the ground's)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sMineArea); i++)
+        if (sMineArea[i][4] == h)
+            return TRUE;
+    return FALSE;
+}
+
+static void MineSetup(void)
+{
+    u32 i;
+    U3D_HexClear();
+    for (i = 0; i < ARRAY_COUNT(sMineArea); i++)
+        U3D_HexSet(i, sMineArea[i][0], sMineArea[i][1], sMineArea[i][2], sMineArea[i][3], sMineArea[i][4]);
+    for (i = 0; i < ARRAY_COUNT(sMineLift); i++)
+        U3D_HexSet(8 + i, sMineLift[i][0], sMineLift[i][1], sMineLift[i][2], sMineLift[i][3],
+                   sMineLift[i][4 + ((sWork.gym[1] >> i) & 1)]);
+    if (sWork.gym[2] == 0)   // (arriving: on the highest floor where they stand, the lobby's lift's 50)
+    {
+        float top = U3D_HexTopAtPlayer();
+        sWork.gym[2] = isnan(top) ? 1 : 128 + (s32)top;
+    }
+    U3D_SetFloor(sWork.gym[2] == 1 ? NAN : (float)((s32)sWork.gym[2] - 128));
+    MPNet_Log("u3d vm: CLAY's mine, lifts %02X, floor %d", sWork.gym[1], sWork.gym[2] - 128);
+}
+
+// a lever: lift I to its other height, the player riding it if they stand on it at the height it leaves
+static void MineLift(u32 i)
+{
+    u32 was = (sWork.gym[1] >> i) & 1;
+    s16 from = sMineLift[i][4 + was], to = sMineLift[i][4 + !was];
+    float floor = U3D_Floor();
+    sWork.gym[1] ^= 1 << i;
+    U3D_HexSet(8 + i, sMineLift[i][0], sMineLift[i][1], sMineLift[i][2], sMineLift[i][3], to);
+    if (U3D_HexHasPlayer(8 + i) && ((isnan(floor) && !MineFloorHeight(from)) || (!isnan(floor) && fabsf(floor - from) < 4)))
+    {
+        sWork.gym[2] = MineFloorHeight(to) ? 128 + to : 1;
+        U3D_SetFloor(MineFloorHeight(to) ? (float)to : NAN);
+    }
+    PlaySE(SE_ELEVATOR);
+    MPNet_Log("u3d vm: lift %u %d -> %d, floor %d", (unsigned)i, from, to, sWork.gym[2] - 128);
+}
+
+// an unseen blocker of CLAY's gym at grid tile X, Z on the floor at height H (NAN: the ground) (u3d.c U3D_StepBlocked)
+bool8 U3D_Vm_BlockerAt(s32 x, s32 z, float h)
+{
+    u32 size, i;
+    const u8 *e;
+    if (!Ready() || CurrentZone() != ZONE_DRIFTVEIL_GYM || (e = Events(CurrentZone(), &size)) == NULL || size < 8)
+        return FALSE;
+    for (i = 0; i < e[5]; i++)
+    {
+        const u8 *p = e + 8 + EV_BG * e[4] + EV_PERSON * i;
+        float ph = (s16)Le16(p + 34);
+        if ((Le16(p + 2) == 185 || Le16(p + 2) == 0) && Le16(p + 28) == x && Le16(p + 30) == z
+         && (isnan(h) ? ph < 20.0f : fabsf(ph - h) < 8.0f))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+// a person's height in Black's event record (its y's whole part), for the floors of height areas (u3d.c)
+bool8 U3D_Vm_PersonHeight(u8 localId, float *h)
+{
+    const u8 *p;
+    if (localId == 0 || localId > 0xF0 || !Ready() || (p = Person(CurrentZone(), localId - 1)) == NULL)
+        return FALSE;
+    *h = (s16)Le16(p + 34) + Le16(p + 32) / 65536.0f;
+    return TRUE;
+}
+
 // The field shown on a map (u3d.c U3D_Update; a continued game's people come from the save, past the map's load script)
 void U3D_Vm_FieldShown(void)
 {
-    if (Ready())
-        PlateDoorsRefresh(FALSE);
+    if (!Ready())
+        return;
+    PlateDoorsRefresh(FALSE);
+    if (CurrentZone() == ZONE_DRIFTVEIL_GYM)
+        MineSetup();
+    else if (U3D_HexActive())
+    {
+        U3D_HexClear();
+        sWork.gym[1] = sWork.gym[2] = 0;   // (Black's gimmick starts afresh on the next visit, its arrival script setting
+                                           // the levers' flags 0xA-0xF; it starts where the lobby's lift leaves them)
+    }
 }
 
 // ELESA's gym (zone 63, Black's gimmick 39, ov039 field_gimmick_cart_lanes.c): four lanes of coaster rails, each with
@@ -3274,7 +3401,7 @@ static bool8 SeesPlayer(const u8 *p, u8 local, struct EyeHit *hit)
     if (trainer == 0xFFFF || id >= OBJECT_EVENTS_COUNT || FlagOn(TRAINER_FLAG_BASE + trainer) || range == 0)
         return FALSE;
     o = &gObjectEvents[id];
-    if (o->invisible)
+    if (o->invisible || U3D_ObjectsApart(o, pl))   // (a trainer on another floor: CLAY's gym)
         return FALSE;
     for (dir = DIR_SOUTH; dir <= DIR_EAST; dir++)
     {

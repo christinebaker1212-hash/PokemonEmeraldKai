@@ -328,13 +328,153 @@ static void LoadPack(void)
            (unsigned)sPack.nmat);
 }
 
+// Black's height areas (HEIGHT_EX_SetArea: a gimmick's floors over the grid, walkable at their own height whatever the
+// grid says: CLAY's gym's platforms at 50, 40 and 30 over its ground, the same tiles at three heights, u3d_vm.c). The
+// player is on one floor at a time (sFloor; NAN on the ground, the grid's own rules), walks only where that floor is,
+// and changes floor riding a lift; people stay on theirs (their event heights). Tiles of the matrix's grid
+#define HEX_MAX 16
+static struct { s16 x, z, w, d, h; bool8 on; } sHex[HEX_MAX];
+static bool8 sHexAny;
+static float sFloor = NAN;
+
+static bool8 HexCovers(u32 i, s32 gtx, s32 gtz)
+{
+    return sHex[i].on && gtx >= sHex[i].x && gtx < sHex[i].x + sHex[i].w && gtz >= sHex[i].z && gtz < sHex[i].z + sHex[i].d;
+}
+
+// a height area at the tile within 4 of H (the floor H's there)
+static bool8 HexAtHeight(s32 gtx, s32 gtz, float h)
+{
+    u32 i;
+    for (i = 0; i < HEX_MAX; i++)
+        if (HexCovers(i, gtx, gtz) && fabsf(sHex[i].h - h) < 4.0f)
+            return TRUE;
+    return FALSE;
+}
+
+static s32 MapIndex(u8 group, u8 num);
+static void MapToGrid(s16 x, s16 y, s32 *gtx, s32 *gtz)   // (map tiles, MAP_OFFSET in)
+{
+    s32 m = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    *gtx = x - MAP_OFFSET + (m >= 0 ? 32 * sUnovaMaps[m].cx : 0);
+    *gtz = y - MAP_OFFSET + (m >= 0 ? 32 * sUnovaMaps[m].cz : 0);
+}
+
+void U3D_HexClear(void)
+{
+    memset(sHex, 0, sizeof(sHex));
+    sHexAny = FALSE;
+    sFloor = NAN;
+}
+
+// area I (Black's index) at grid tiles X, Z, W x D, height H
+void U3D_HexSet(u8 i, s16 x, s16 z, s16 w, s16 d, s16 h)
+{
+    if (i >= HEX_MAX)
+        return;
+    sHex[i].x = x, sHex[i].z = z, sHex[i].w = w, sHex[i].d = d, sHex[i].h = h, sHex[i].on = TRUE;
+    sHexAny = TRUE;
+}
+
+// the player on a floor of height areas walks onto that floor wherever it is, the grid's walls under it or not
+// (event_object_movement.c GetCollisionAtCoords; map tiles, MAP_OFFSET in)
+bool8 U3D_HexOpen(bool8 isPlayer, s16 x, s16 y)
+{
+    s32 gtx, gtz;
+    if (!sHexAny || !isPlayer || isnan(sFloor) || !U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+        return FALSE;
+    MapToGrid(x, y, &gtx, &gtz);
+    return HexAtHeight(gtx, gtz, sFloor);
+}
+
+bool8 U3D_HexActive(void)
+{
+    return sHexAny;
+}
+
+// the player's floor: H (NAN: the ground)
+void U3D_SetFloor(float h)
+{
+    sFloor = h;
+}
+
+float U3D_Floor(void)
+{
+    return sFloor;
+}
+
+// the highest area at the player's tile (where they stand on arriving), NAN none
+float U3D_HexTopAtPlayer(void)
+{
+    s32 gtx, gtz;
+    u32 i;
+    float best = NAN;
+    MapToGrid(gSaveBlock1Ptr->pos.x + MAP_OFFSET, gSaveBlock1Ptr->pos.y + MAP_OFFSET, &gtx, &gtz);
+    for (i = 0; i < HEX_MAX; i++)
+        if (HexCovers(i, gtx, gtz) && (isnan(best) || sHex[i].h > best))
+            best = sHex[i].h;
+    return best;
+}
+
+// whether the player stands in area I
+bool8 U3D_HexHasPlayer(u8 i)
+{
+    s32 gtx, gtz;
+    MapToGrid(gSaveBlock1Ptr->pos.x + MAP_OFFSET, gSaveBlock1Ptr->pos.y + MAP_OFFSET, &gtx, &gtz);
+    return i < HEX_MAX && HexCovers(i, gtx, gtz);
+}
+
+bool8 U3D_Vm_BlockerAt(s32 x, s32 z, float h);
+// someone on a floor apart from the player's (tests' walk: a person not out on the field)
+bool8 U3D_PersonApart(u8 localId)
+{
+    float h;
+    bool8 U3D_Vm_PersonHeight(u8 localId, float *h);
+    return sHexAny && !isnan(sFloor) && U3D_Vm_PersonHeight(localId, &h) && fabsf(h - sFloor) >= 8.0f;
+}
+
+// a person's height: the player's floor (NAN on the ground), another's from Black's event record (NAN unknown)
+bool8 U3D_Vm_PersonHeight(u8 localId, float *h);
+float U3D_ObjectHeight(const struct ObjectEvent *o)
+{
+    float h;
+    if (o->isPlayer)
+        return sFloor;
+    return U3D_Vm_PersonHeight(o->localId, &h) ? h : NAN;
+}
+
+// two people on floors apart (the player on one of the height areas' floors, someone on another): they pass
+bool8 U3D_ObjectsApart(const struct ObjectEvent *a, const struct ObjectEvent *b)
+{
+    float ha, hb;
+    if (!sHexAny || !U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) || (!a->isPlayer && !b->isPlayer))
+        return FALSE;
+    ha = U3D_ObjectHeight(a), hb = U3D_ObjectHeight(b);
+    if (isnan(ha) || isnan(hb))
+        return FALSE;   // (the player on the ground: as anywhere else)
+    return fabsf(ha - hb) >= 8.0f;
+}
+
 // Black's doors are walls the player walks into northward (a connection's direction); here they're tiles stepped onto
 // (Emerald's non-animated door), so a door is never walked into from the side: the Cold Storage's container from the
-// row beside it skipped the trigger in front (map coordinates, MAP_OFFSET in)
-bool8 U3D_StepBlocked(s16 fromX, s16 fromY, s16 x, s16 y)
+// row beside it skipped the trigger in front (map coordinates, MAP_OFFSET in). The player on a floor of height areas
+// walks only where that floor is; on the ground, only where the grid lets them
+bool8 U3D_StepBlocked(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y)
 {
-    return fromY == y && fromX != x && U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup)
-        && MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(x, y));
+    if (!U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+        return FALSE;
+    if (fromY == y && fromX != x && MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(x, y)))
+        return TRUE;
+    if (sHexAny && isPlayer)
+    {
+        s32 gtx, gtz;
+        MapToGrid(x, y, &gtx, &gtz);
+        if (U3D_Vm_BlockerAt(gtx, gtz, sFloor))
+            return TRUE;   // (an unseen blocker on the player's floor: CLAY's gym's levers' stands)
+        if (!isnan(sFloor))
+            return !HexAtHeight(gtx, gtz, sFloor);   // (off the floor's edge: never, the grid open below or not)
+    }
+    return FALSE;
 }
 
 // A rail map's ways out (u3d.h U3D_RAIL_WARP) warp as they're walked onto; the one the player arrived on (and the band
@@ -454,14 +594,21 @@ static float TileHeight(s32 gtx, s32 gtz, float near)
     s32 cx = gtx >= 0 ? gtx / 32 : -((31 - gtx) / 32), cz = gtz >= 0 ? gtz / 32 : -((31 - gtz) / 32);
     const U3dCell *c = Cell(cx, cz);
     u32 t, i, best = 0;
+    float got = NAN;
+    if (sHexAny)
+        for (i = 0; i < HEX_MAX; i++)   // (a height area's floor: the one nearest, with the grid's own below)
+            if (HexCovers(i, gtx, gtz) && (isnan(got) || fabsf(sHex[i].h - near) < fabsf(got - near)))
+                got = sHex[i].h;
     if (c == NULL)
-        return near;
+        return isnan(got) ? near : got;
     t = (gtz - cz * 32) * 32 + (gtx - cx * 32);
     if (c->hn[t] == 0)
-        return near;
+        return isnan(got) ? near : got;
     for (i = 1; i < c->hn[t] && i < 2; i++)
         if (fabsf(c->h[t][i] - near) < fabsf(c->h[t][best] - near))
             best = i;
+    if (!isnan(got) && fabsf(got - near) < fabsf(c->h[t][best] - near))
+        return got;
     return c->h[t][best];
 }
 
@@ -686,7 +833,7 @@ static void SetupView(void)
     sView.originZ = sUnovaMaps[sView.map].cz * BLOCK;
     sView.tx = sView.originX + sView.camX + sView.ax;
     sView.tz = sView.originZ + sView.camY + sView.ay;
-    sView.ty = GroundAt(sView.tx, sView.tz, sView.havePlayerH ? sView.playerH : 0.0f);
+    sView.ty = GroundAt(sView.tx, sView.tz, sHexAny && !isnan(sFloor) ? sFloor : sView.havePlayerH ? sView.playerH : 0.0f);
     sView.playerH = sView.ty;
     sView.havePlayerH = TRUE;
     {
@@ -786,6 +933,19 @@ void U3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
     }
     if (spriteId < MAX_SPRITES && (u8)(sView.frame - sSpriteHFrame[spriteId]) <= 2)
         near = sSpriteH[spriteId];
+    if (sHexAny && spriteId < MAX_SPRITES)
+    {
+        // (a person on a floor of height areas: theirs, Black's event height)
+        u32 i;
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+            if (gObjectEvents[i].active && gObjectEvents[i].spriteId == spriteId && !gObjectEvents[i].isPlayer)
+            {
+                float hh = U3D_ObjectHeight(&gObjectEvents[i]);
+                if (!isnan(hh))
+                    near = hh;
+                break;
+            }
+    }
     h = GroundAt(wx, wz, near);
     if (spriteId < MAX_SPRITES)
     {
