@@ -3235,6 +3235,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &n);
         MP_Emote_Hotkey(n);
     }
+    else if (strcmp(cmd, "u3dtex") == 0)
+    {
+        // u3dtex - UNOVA's animated textures: how many, how many scroll, what the first shows now
+        void U3D_TexAnimInfo(u32 *count, u32 *scrolls, u32 *firstShown);
+        u32 n, sc, f;
+        U3D_TexAnimInfo(&n, &sc, &f);
+        printf("[test] u3dtex %u animated, %u scrolling, first shows %u\n", (unsigned)n, (unsigned)sc, (unsigned)f);
+    }
     else if (strcmp(cmd, "bubble") == 0)
     {
         // bubble WORDS - a speech bubble over the player (checks where it's drawn: 3D maps' slopes)

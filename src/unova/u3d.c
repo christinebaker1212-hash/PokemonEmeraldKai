@@ -62,6 +62,7 @@ typedef struct
 {
     s16 tex;
     u8 rs, rt, fs, ft, alpha, pid, cull, lights, mode;
+    u16 srt;   // (4: its scrolling, 1 + an index in sPack.srt; 0 none)
     u32 count;
     U3dVtx *v;
     float *lit;
@@ -95,6 +96,13 @@ static struct
     U3dMesh *mesh;
     U3dLightSet *light;
     U3dMatrix *mat;
+    // (4) Black's animated map textures: an area's ITP frames (water's edges, flowers, the seasons' petals...) each in
+    // turn, and its ITA's scrolling (the sea, rivers, the clouds): a texture's shift each of its frames, in its sizes
+    u32 nanim, nsrt;
+    struct { u16 tex, nsteps, cycle; u16 (*steps)[2]; } *anim;
+    struct { u16 frames; float (*st)[2]; } *srt;
+    u16 *shown;        // (each texture: the texture drawn for it now)
+    float (*srtNow)[2];   // (each scrolling: its shift now)
 } sPack;
 
 #include "u3d_maps.h"   // sUnovaMaps: each UNOVA map, its zone, where it lies on its matrix (tools/unova/gen_maps.py)
@@ -170,7 +178,7 @@ static void LoadPack(void)
     }
     r.p += 4;
     version = TakeU32(&r);
-    if (version < 1 || version > 3)
+    if (version < 1 || version > 4)
     {
         printf("[u3d] %s: another pack version (%u)\n", path, (unsigned)version);
         free(data);
@@ -208,6 +216,7 @@ static void LoadPack(void)
             g->rs = b[0], g->rt = b[1], g->fs = b[2], g->ft = b[3], g->alpha = b[4], g->pid = b[5], g->cull = b[6];
             g->lights = b[7], g->mode = b[8];
             g->count = TakeU32(&r) * 3;
+            g->srt = version >= 4 ? TakeU16(&r) : 0;
             g->v = malloc(sizeof(U3dVtx) * (g->count ? g->count : 1));
             for (k = 0; k < g->count; k++)
                 Take(&r, &g->v[k], 36);
@@ -276,6 +285,39 @@ static void LoadPack(void)
             }
         }
     }
+    if (version >= 4 && !r.bad)
+    {
+        sPack.nanim = TakeU32(&r);
+        sPack.anim = calloc(sPack.nanim ? sPack.nanim : 1, sizeof(*sPack.anim));
+        for (i = 0; i < sPack.nanim && !r.bad; i++)
+        {
+            sPack.anim[i].tex = TakeU16(&r);
+            sPack.anim[i].nsteps = TakeU16(&r);
+            sPack.anim[i].steps = malloc(4 * (sPack.anim[i].nsteps ? sPack.anim[i].nsteps : 1));
+            for (j = 0; j < sPack.anim[i].nsteps && !r.bad; j++)
+            {
+                sPack.anim[i].steps[j][0] = TakeU16(&r);
+                sPack.anim[i].steps[j][1] = TakeU16(&r);
+                if (sPack.anim[i].steps[j][0] >= sPack.ntex)
+                    sPack.anim[i].steps[j][0] = sPack.anim[i].tex;
+                sPack.anim[i].cycle += sPack.anim[i].steps[j][1];
+            }
+            if (sPack.anim[i].tex >= sPack.ntex)
+                sPack.anim[i].nsteps = 0;
+        }
+        sPack.nsrt = TakeU32(&r);
+        sPack.srt = calloc(sPack.nsrt ? sPack.nsrt : 1, sizeof(*sPack.srt));
+        for (i = 0; i < sPack.nsrt && !r.bad; i++)
+        {
+            sPack.srt[i].frames = TakeU16(&r);
+            sPack.srt[i].st = malloc(8 * (sPack.srt[i].frames ? sPack.srt[i].frames : 1));
+            Take(&r, sPack.srt[i].st, 8 * sPack.srt[i].frames);
+        }
+    }
+    sPack.shown = malloc(sizeof(u16) * (sPack.ntex ? sPack.ntex : 1));
+    for (i = 0; i < sPack.ntex; i++)
+        sPack.shown[i] = i;
+    sPack.srtNow = calloc(sPack.nsrt + 1, sizeof(*sPack.srtNow));
     if (r.bad)
     {
         printf("[u3d] %s is cut short\n", path);
@@ -284,6 +326,39 @@ static void LoadPack(void)
     sPack.ok = TRUE;
     printf("[u3d] UNOVA's pack: %u textures, %u meshes, %u matrices\n", (unsigned)sPack.ntex, (unsigned)sPack.nmesh,
            (unsigned)sPack.nmat);
+}
+
+// Black's animated map textures now (its field runs at 30 frames a second: one of its frames is two of this game's):
+// each ITP texture's frame, each ITA scrolling's shift
+static void AnimateTextures(void)
+{
+    static u32 sTexClock;
+    u32 i, j, t;
+    sTexClock++;
+    for (i = 0; i < sPack.nanim; i++)
+    {
+        if (sPack.anim[i].nsteps == 0 || sPack.anim[i].cycle == 0)
+            continue;
+        t = (sTexClock / 2) % sPack.anim[i].cycle;
+        for (j = 0; j + 1 < sPack.anim[i].nsteps && t >= sPack.anim[i].steps[j][1]; j++)
+            t -= sPack.anim[i].steps[j][1];
+        sPack.shown[sPack.anim[i].tex] = sPack.anim[i].steps[j][0];
+    }
+    for (i = 0; i < sPack.nsrt; i++)
+        if (sPack.srt[i].frames)
+        {
+            t = (sTexClock / 2) % sPack.srt[i].frames;
+            sPack.srtNow[i + 1][0] = sPack.srt[i].st[t][0];
+            sPack.srtNow[i + 1][1] = sPack.srt[i].st[t][1];
+        }
+}
+
+// `mp u3dtex`: how many textures are animated and scroll, what the first shows (tests)
+void U3D_TexAnimInfo(u32 *count, u32 *scrolls, u32 *firstShown)
+{
+    *count = sPack.nanim;
+    *scrolls = sPack.nsrt;
+    *firstShown = sPack.nanim ? sPack.shown[sPack.anim[0].tex] : 0;
 }
 
 // Black's map replacements a story flag switches on (src/unova/u3d_replace.h: the Champion's room once N's Castle has
@@ -842,14 +917,17 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const U3dG
 {
     float area = (b->x - a->x) * (c->y - a->y) - (c->x - a->x) * (b->y - a->y);
     s32 minx, maxx, miny, maxy, x, y;
-    const U3dTex *t = g->tex >= 0 && (u32)g->tex < sPack.ntex ? &sPack.tex[g->tex] : NULL;
+    const U3dTex *t = g->tex >= 0 && (u32)g->tex < sPack.ntex ? &sPack.tex[sPack.shown[g->tex]] : NULL;
     bool8 clear = g->alpha < 31;
+    float du = 0.0f, dv = 0.0f;   // (its scrolling now, in texels: Black's Maya mode, the shift taken off)
     if (area == 0.0f || g->cull == 3 || (g->cull == 1 && area > 0.0f) || (g->cull == 2 && area < 0.0f))
         return;
     minx = (s32)floorf(fminf(a->x, fminf(b->x, c->x)));
     maxx = (s32)ceilf(fmaxf(a->x, fmaxf(b->x, c->x)));
     miny = (s32)floorf(fminf(a->y, fminf(b->y, c->y)));
     maxy = (s32)ceilf(fmaxf(a->y, fmaxf(b->y, c->y)));
+    if (t && g->srt && g->srt <= sPack.nsrt)
+        du = -sPack.srtNow[g->srt][0] * t->w, dv = -sPack.srtNow[g->srt][1] * t->h;
     if (minx < 0) minx = 0;
     if (miny < 0) miny = 0;
     if (maxx > W - 1) maxx = W - 1;
@@ -874,8 +952,8 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const U3dG
                 col[ch] = (w0 * a->c[ch] + w1 * b->c[ch] + w2 * c->c[ch]) * z;
             if (t)
             {
-                s32 tu = Wrap((s32)floorf((w0 * a->u + w1 * b->u + w2 * c->u) * z), t->w, g->rs, g->fs);
-                s32 tv = Wrap((s32)floorf((w0 * a->v + w1 * b->v + w2 * c->v) * z), t->h, g->rt, g->ft);
+                s32 tu = Wrap((s32)floorf((w0 * a->u + w1 * b->u + w2 * c->u) * z + du), t->w, g->rs, g->fs);
+                s32 tv = Wrap((s32)floorf((w0 * a->v + w1 * b->v + w2 * c->v) * z + dv), t->h, g->rt, g->ft);
                 u32 texel = t->px[tv * t->w + tu];
                 ta = texel >> 24;
                 if (ta == 0)
@@ -940,7 +1018,7 @@ static void DrawMesh(const U3dMesh *mesh, const float *m, float ox, float oy, fl
     for (gi = 0; gi < mesh->ngroups; gi++)
     {
         U3dGroup *g = &mesh->g[gi];
-        bool8 soft = g->alpha < 31 || (g->tex >= 0 && (u32)g->tex < sPack.ntex && sPack.tex[g->tex].soft);
+        bool8 soft = g->alpha < 31 || (g->tex >= 0 && (u32)g->tex < sPack.ntex && sPack.tex[sPack.shown[g->tex]].soft);
         if (soft != pass)
             continue;
         if (g->count > sScratchSize)
@@ -1164,6 +1242,7 @@ void U3D_Update(void)
     sCurMat = MatrixNumbered(ShownMat(map));
     sCurMap = map;
     sView.frame++;
+    AnimateTextures();
     FindCamera();
     SetupView();
 }

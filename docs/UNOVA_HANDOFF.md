@@ -146,6 +146,15 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
 - Areas: a/0/1/3, 282 records of 10 bytes (model set, texture set, animations, inside / outside, light type, edge
   marking, billboard colour); areas 2..0xD1 come in fours, one per season (record = area + season).
 - Map textures: a/0/1/4 (BTX0 by the area's texture set).
+- Animated map textures (pack version 4, 2026-11-12): an area record's ita / itp (0xFF none). ITA: a/0/6/9, an NSBTA
+  each (the sea, rivers, clouds scroll: SRT translations only, no area scales); ITP: a/0/7/0, u32 count, then (u32
+  animation offset, u32 BTX0 offset) each; an animation: u32 frames, u16 start times, u8 textures, u8 palettes (each
+  run padded to 4), u32 loop, u32, u32 end (Black's 30 Hz frames); the map's texture is named as the first frame
+  ('hana01.1'). Buildings scroll too: a definition's +0x10, u8 kind (1 all looping, 3 the season's slot, 2 doors a
+  script plays), then four u32 offsets from there (BTA0 / BTP0 / BCA0 / BMA0; ROUTE 1's r01_a_spring is the falling
+  petals). tools/unova/build_pack.py UnovaPack (itp_anims, ita_anims, building_scrolls) packs the frames and each
+  group's scrolling (its srt); u3d.c AnimateTextures plays them (sPack.shown, srtNow). Not yet: buildings' BTP0 /
+  BCA0 (machines, lamps' frames, moving parts), BMA0; `mp u3dtex` counts them.
 - Buildings (field_buildmodel.c): archive 0xE5 / 0xE6 (a/2/2/9 inside, a/2/3/0 outside), member (area - 2) / 4 (area
   - 0xD2 past the seasons' areas); an "AB" offset table: n = byte 2, the first n / 2 entries model definitions (u16
   table id first), the rest their BMD0s; their textures 0xB0 / 0xB1 (a/1/7/6 / a/1/7/7, the same member). A block's

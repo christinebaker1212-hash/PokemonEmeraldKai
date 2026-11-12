@@ -52,7 +52,122 @@ _sinnoh = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_sinnoh)
 Pack = _sinnoh.Pack      # (texture and mesh tables, shared as a tool: never the games' engines)
 
-VERSION = 3
+VERSION = 4   # (4: Black's animated map textures, an area's ITP frames and ITA scrolling)
+ITA_ARC, ITP_ARC = 'a/0/6/9', 'a/0/7/0'   # (an area record's ita / itp: zonedata.c ZONEDATA_GetAreaItaAnimeId...)
+
+
+def _align4(n):
+    return (n + 3) & ~3
+
+
+_itp_cache, _ita_cache = {}, {}
+
+
+def itp_anims(itp_id):
+    """An area's ITP (a/0/7/0): {map texture name: (Tex0 of its frames, [(frame texture, frame palette, duration in
+    Black's field frames)...])}. A file: u32 count, then (u32 the animation's offset, u32 its BTX0's) each; an
+    animation: u32 frames, u16 start times, u8 textures, u8 palettes (each run padded to 4), u32 loop, u32, u32 end"""
+    if itp_id in _itp_cache:
+        return _itp_cache[itp_id]
+    out = {}
+    files = narc.arc(ITP_ARC)
+    if itp_id < len(files):
+        f = files[itp_id]
+        for k in range(struct.unpack_from('<I', f, 0)[0]):
+            ao, bo = struct.unpack_from('<II', f, 4 + 8 * k)
+            n = struct.unpack_from('<I', f, ao)[0]
+            q = ao + 4
+            times = struct.unpack_from('<%dH' % n, f, q)
+            q += _align4(2 * n)
+            texs = f[q:q + n]
+            q += _align4(n)
+            pals = f[q:q + n]
+            q += _align4(n)
+            end = struct.unpack_from('<3I', f, q)[2]
+            t = nitro.btx0(f[bo:])
+            if t is None or not t.order:
+                continue
+            steps = [(texs[i], pals[i], (times[i + 1] if i + 1 < n else end) - times[i]) for i in range(n)]
+            out[t.order[0]] = out[t.order[0].rsplit('.', 1)[0]] = (t, steps)   # (the map's texture: the first frame's
+                                                                                # name, 'hana01.1')
+    _itp_cache[itp_id] = out
+    return out
+
+
+def ita_anims(ita_id):
+    """An area's ITA (a/0/6/9, NSBTA): its texture SRT animations (nitro.SrtAnim: the water's scrolling)"""
+    if ita_id not in _ita_cache:
+        files = narc.arc(ITA_ARC)
+        _ita_cache[ita_id] = nitro.Bta0(files[ita_id]).anims if ita_id < len(files) else []
+    return _ita_cache[ita_id]
+
+
+class UnovaPack(Pack):
+    """SINNOH's tables, with Black's animated map textures: an ITP's frames (each with its own palette) and an ITA's
+    scrolling (a group's srt: 1 + its index in srts, each [(translate s, translate t) a frame])"""
+    def __init__(self):
+        super().__init__()
+        self.srts = []
+        self.srt_ids = {}
+        self.ita = (255, [])
+
+    def animate(self, tex0, mat, base, w, h):
+        frames_tex, steps = self.tex_anims[mat.texture]
+        pals = list(frames_tex.palettes)
+        ids, out = {}, []
+        for ti, pi, dur in steps:
+            if ti >= len(frames_tex.order):
+                return
+            if (ti, pi) not in ids:
+                name = frames_tex.order[ti]
+                try:
+                    if mat.palette and pals:
+                        fw, fh, fpx = frames_tex.decode(name, pals[min(pi, len(pals) - 1)])
+                    else:
+                        fw, fh, fpx = tex0.decode(mat.texture, mat.palette, frame=(frames_tex, name))
+                except (IndexError, KeyError, struct.error):
+                    print('animated texture %s: frame %s unreadable; still' % (mat.texture, name))
+                    return
+                if (fw, fh) != (w, h):
+                    self.anim_skipped.add(mat.texture)
+                    return
+                ids[(ti, pi)] = len(self.textures)
+                self.textures.append((fw, fh, fpx))
+            out.append((ids[(ti, pi)], max(1, dur)))
+        if out:
+            self.anims.append((base, out))
+
+    def srt_of(self, mat):
+        ita_id, anims = self.ita
+        for k, a in enumerate(anims):
+            if mat.name in a.mats and a.frames > 1:
+                key = (ita_id, k, mat.name)
+                if key not in self.srt_ids:
+                    self.srts.append([a.value(mat.name, f)[2:] for f in range(a.frames)])
+                    self.srt_ids[key] = len(self.srts)
+                return self.srt_ids[key]
+        return 0
+
+    def mesh(self, key, bmd, tex0, anim=None, frame=0, srt=None, matshp=None):
+        if key in self.mesh_ids:
+            return self.mesh_ids[key]
+        groups, pts = [], []
+        for model in bmd.models:
+            for mi, tris in sorted(model.draw(None).items()):
+                mat = model.materials[mi]
+                cull = {'none': 0, 'back': 1, 'front': 2, 'all': 3}[mat.cull]
+                rs, rt, fs, ft = mat.repeat
+                groups.append((self.texture(tex0, mat), rs, rt, fs, ft, mat.alpha, (mat.poly_attr >> 24) & 63, cull,
+                               mat.lights, mat.mode, tris, self.srt_of(mat)))
+                pts.extend(v[0] for t in tris for v in t)
+        if pts:
+            c = [sum(p[i] for p in pts) / len(pts) for i in range(3)]
+            r = max(math.dist(c, p) for p in pts)
+        else:
+            c, r = [0.0, 0.0, 0.0], 0.0
+        self.mesh_ids[key] = len(self.meshes)
+        self.meshes.append((c, r, groups))
+        return self.mesh_ids[key]
 SEASONS = 4
 METATILE_BEHAVIOR = 0x300   # (include/u3d.h U3D_METATILE_BEHAVIOR; fieldmap.c GetMetatileAttributesById)
 BLOCKED = 0x0001 | (1 << 10) | (3 << 12)
@@ -140,6 +255,43 @@ def buildings(area_id, inner):
         end = struct.unpack_from('<I', d, 4 + 4 * (n + i + 1))[0] if i + 1 < n else len(d)
         models[struct.unpack_from('<H', d, o)[0]] = d[r:end]
     return models, nitro.btx0(texs[member]) if member < len(texs) else None
+
+
+def building_scrolls(area_id, inner):
+    """{table id: [its texture scrollings a season (nitro.SrtAnim lists)]} of an area's buildings that scroll their
+    textures all the time (field_buildmodel.c: a definition's +0x10, u8 kind, u8, u8, u8, then four u32 offsets from
+    there, -1 none; kind 1 plays them all looping, kind 3 the season's own, kind 2 only when a script says: doors)"""
+    member = area_id - 0xD2 if area_id >= 0xD2 else (area_id - 2) // 4 if area_id >= 2 else 0
+    arc = narc.arc('a/2/2/9' if inner else 'a/2/3/0')
+    if member >= len(arc):
+        return {}
+    d = arc[member]
+    n = d[2] // 2
+    out = {}
+    for i in range(n):
+        o = struct.unpack_from('<I', d, 4 + 4 * i)[0]
+        ad = o + 0x10
+        kind = d[ad]
+        offs = struct.unpack_from('<4i', d, ad + 4)
+        res = [d[ad + of:] if of != -1 else None for of in offs]
+
+        def srts(r):
+            if r is None or r[:4] != b'BTA0':
+                return []
+            try:
+                return nitro.Bta0(r).anims
+            except (IndexError, struct.error, AssertionError):
+                return []
+        if kind == 1:
+            every = [a for r in res for a in srts(r)]
+            seasons = [every] * SEASONS
+        elif kind == 3:
+            seasons = [srts(res[k]) for k in range(SEASONS)]
+        else:
+            continue
+        if any(seasons):
+            out[struct.unpack_from('<H', d, o)[0]] = seasons
+    return out
 
 
 def block_buildings(data):
@@ -285,7 +437,7 @@ def build(matrix_ids=None):
     zs = zr.zones()
     blocks = narc.arc('a/0/0/8')
     texsets = narc.arc('a/0/1/4')
-    pack = Pack()
+    pack = UnovaPack()
     tex_cache, bld_cache = {}, {}
     mats = []
     wanted = matrix_ids if matrix_ids is not None else sorted(field_matrices())
@@ -318,23 +470,36 @@ def build(matrix_ids=None):
                 bmd = nitro.Bmd0(data[struct.unpack_from('<I', data, 4)[0]:struct.unpack_from('<I', data, 8)[0]])
                 meshes = []
                 for season in range(SEASONS):
-                    ts = area(area_id, season)['tex_set']
+                    ar = area(area_id, season)
+                    ts = ar['tex_set']
                     if ts not in tex_cache:
                         tex_cache[ts] = nitro.btx0(texsets[ts]) if ts < len(texsets) else None
-                    meshes.append(pack.mesh(('block', b, ts), bmd, tex_cache[ts]))
+                    pack.tex_anims = itp_anims(ar['itp']) if ar['itp'] != 255 else {}
+                    pack.ita = (ar['ita'], ita_anims(ar['ita']) if ar['ita'] != 255 else [])
+                    meshes.append(pack.mesh(('block', b, ts, ar['ita'], ar['itp']), bmd, tex_cache[ts]))
+                pack.tex_anims, pack.ita = {}, (255, [])
                 inner = area(area_id)['inner']
                 if (area_id, inner) not in bld_cache:
                     bld_cache[(area_id, inner)] = buildings(area_id, inner)
                 bmodels, btex = bld_cache[(area_id, inner)]
+                if (area_id, inner, 'srt') not in bld_cache:
+                    bld_cache[(area_id, inner, 'srt')] = building_scrolls(area_id, inner)
+                bscroll = bld_cache[(area_id, inner, 'srt')]
                 props = []
                 for x, y, z, rot, tid in block_buildings(data):
                     if tid not in bmodels:
                         continue
                     pbmd = nitro.Bmd0(bmodels[tid])
-                    pm = pack.mesh(('bld', area_id, inner, tid), pbmd, pbmd.tex or btex)
+                    pms = []
+                    for season in range(SEASONS):   # (its scrolling textures: the falling petals of spring...)
+                        sc = bscroll.get(tid, [[]] * SEASONS)[season]
+                        pack.ita = (('bld', area_id, inner, tid, season if sc else -1), sc)
+                        pms.append(pack.mesh(('bld', area_id, inner, tid, season if sc else -1), pbmd,
+                                             pbmd.tex or btex))
+                    pack.ita = (255, [])
                     a = rot / 65536.0 * 2 * math.pi
                     c, s = math.cos(a), math.sin(a)
-                    props.append(([pm] * 4, [c, 0.0, s, x, 0.0, 1.0, 0.0, y, -s, 0.0, c, z]))
+                    props.append((pms, [c, 0.0, s, x, 0.0, 1.0, 0.0, y, -s, 0.0, c, z]))
                 grids = [terrain.grid(layer) for layer in terrain.layers(data)]
                 fb, hts = [], []
                 for t in range(1024):
@@ -406,9 +571,10 @@ def write(path, pack, light_sets, mats):
     out += struct.pack('<I', len(pack.meshes))
     for c, r, groups in pack.meshes:
         out += struct.pack('<4fI', c[0], c[1], c[2], r, len(groups))
-        for tex, rs, rt, fs, ft, alpha, pid, cull, lights, mode, tris in groups:
+        for tex, rs, rt, fs, ft, alpha, pid, cull, lights, mode, tris, *srt in groups:
             tris = [t for tri in tris for t in split(tri)]
-            out += struct.pack('<hBBBBBBBBBBI', tex, rs, rt, fs, ft, alpha, pid, cull, lights, mode, 0, len(tris))
+            out += struct.pack('<hBBBBBBBBBBIH', tex, rs, rt, fs, ft, alpha, pid, cull, lights, mode, 0, len(tris),
+                               srt[0] if srt else 0)
             for tri in tris:
                 for pos, uv, col, nrm in tri:
                     out += struct.pack('<5f4B3f', pos[0], pos[1], pos[2], uv[0], uv[1], col[0], col[1], col[2], 0,
@@ -437,6 +603,14 @@ def write(path, pack, light_sets, mats):
             out += bytes([1 if cam else 0])
             if cam:
                 out += b''.join(struct.pack('<3H', *(c or (0, 0, 0))) for c in cam)
+    out += struct.pack('<I', len(pack.anims))   # (4: the animated textures, each texture's frames in turn)
+    for base, steps in pack.anims:
+        out += struct.pack('<HH', base, len(steps))
+        out += b''.join(struct.pack('<HH', t, d) for t, d in steps)
+    out += struct.pack('<I', len(pack.srts))    # (... and the scrolling: a texture's shift a frame, in its sizes)
+    for frames in pack.srts:
+        out += struct.pack('<H', len(frames))
+        out += b''.join(struct.pack('<2f', s_, t_) for s_, t_ in frames)
     packed = b'U3DZ' + struct.pack('<I', len(out)) + zlib.compress(bytes(out), 6)
     open(path, 'wb').write(packed)
     return len(packed)
