@@ -4450,6 +4450,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_HallDebug(void);
         Sinnoh_HallDebug();   // SINNOH's BATTLE HALL record (src/sinnoh/s3d_hall.c)
     }
+    else if (strcmp(cmd, "stadiumstyle") == 0)
+    {
+        // stadiumstyle 0|1|2 - OPTIONS > BATTLE > STADIUM SETTINGS > STYLE (ORIGINAL, POKESTADIUM, POKESTADIUM 2)
+        gMpConfig.stadiumStyle = atoi(arg) % MP_STADIUM_STYLE_COUNT;
+        printf("[test] stadium style %d\n", gMpConfig.stadiumStyle);
+    }
     else if (strcmp(cmd, "u3dget") == 0)   // u3dget WORK / u3dget fFLAG (hex): UNOVA's story state
     {
         u16 U3D_Vm_DebugGet(bool8 flag, u16 id);

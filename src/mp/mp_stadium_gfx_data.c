@@ -17,4 +17,9 @@ __asm__(
     ".global gMpStadiumGfxEnd\n"
     "gMpStadiumGfxEnd:\n"
     ".byte 0\n"
+    ".balign 16\n"
+    ".global gMpStadiumThemes\n"   // STADIUM's themes' pieces (tools/stadium/restyle/build_themes.py)
+    "gMpStadiumThemes:\n"
+    ".incbin \"graphics/stadium/themes.bin\"\n"
+    ".byte 0\n"
     ".text\n");

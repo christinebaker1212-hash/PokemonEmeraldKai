@@ -78,6 +78,12 @@ int G_LineHeight(int font);
 int G_Text(int x, int y, unsigned color, unsigned shadow, const char *text, int width, int font);
 int G_TextHeight(const char *text, int width, int font);   /* how tall G_Text would be */
 void G_TextAlpha(unsigned alpha);   /* text drawn from now on: 255 solid (set it back after) */
+/* Text drawn from now on (STADIUM's themes: mp_stadium_ui.c): an OUTLINE (0xAARRGGBB, AA 0 = 235) PX real pixels wide
+   round the letters (0: none), BOLD a pixel heavier, the face's colour falling to GRAD at its foot (G_NO_GRAD: none).
+   G_TextStyle(0, 0, 0, G_NO_GRAD) sets it back */
+#define G_NO_GRAD 0xff000000u
+void G_TextStyle(unsigned outline, int px, int bold, unsigned grad);
+void G_TextNudge(float dx, float dy);   /* (with a style: the letters moved by a part of a unit) */
 /* The end of a duel in every card game: YOU WIN! / YOU LOSE... vs. opponent, then how it ended and what it brought */
 void G_ResultScreen(int win, int t, unsigned frame, const char *opponent, const char *reason, const char *result);
 /* its timing in frames: the banner opens (20), a second's pause, then the box with its words, then A */

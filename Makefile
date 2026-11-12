@@ -593,6 +593,9 @@ endif
 # As a side effect, they're evaluated immediately instead of when the rule is invoked.
 # It doesn't look like $(shell) can be deferred so there might not be a better way (Icedude_907: there is soon).
 
+# Moemon Kai: STADIUM's pictures and its themes' pieces, built in by .incbin (src/mp/mp_stadium_gfx_data.c)
+$(C_BUILDDIR)/mp/mp_stadium_gfx_data.o: graphics/stadium/stadium.bin graphics/stadium/themes.bin
+
 $(C_BUILDDIR)/%.o: $(C_SUBDIR)/%.c
 ifneq ($(KEEP_TEMPS),1)
 	@echo "$(CC1) <flags> -o $@ $<"

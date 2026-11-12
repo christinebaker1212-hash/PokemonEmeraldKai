@@ -376,6 +376,37 @@ int G_Measure(const char *s, int font)
 }
 static unsigned sTextAlpha = 255;   /* (G_TextAlpha) */
 void G_TextAlpha(unsigned alpha) { sTextAlpha = alpha > 255 ? 255 : alpha; }
+/* (G_TextStyle: off unless a screen asks; the card games' screens never do) */
+static struct { int on, px, bold; unsigned outline, outlineAlpha, grad; float nx, ny; } sStyle;
+void G_TextNudge(float dx, float dy) { sStyle.nx = dx, sStyle.ny = dy; }
+void G_TextStyle(unsigned outline, int px, int bold, unsigned grad)
+{
+    sStyle.on = px > 0 || bold || grad != G_NO_GRAD;
+    sStyle.px = px, sStyle.bold = bold, sStyle.outline = outline & 0xffffff, sStyle.grad = grad;
+    sStyle.outlineAlpha = (outline >> 24) ? (outline >> 24) : 235;
+}
+/* The face of a glyph at real pixels (the canvas is at twice the units): COLOR, or down to GRAD at its foot */
+static void GlyphFace(SDL_Texture *face, const SDL_Rect *src, float x, float y, unsigned color, unsigned grad)
+{
+    if (grad == G_NO_GRAD)
+    {
+        SDL_FRect d = {x, y, (float)src->w, (float)src->h};
+        SDL_SetTextureColorMod(face, (color >> 16) & 255, (color >> 8) & 255, color & 255);
+        SDL_RenderCopyF(sR, face, src, &d);
+        return;
+    }
+    {
+        int row;
+        for (row = 0; row < src->h; row++)   /* (a row of the font a slice: the light falls down the letters) */
+        {
+            SDL_Rect s = {src->x, src->y + row, src->w, 1};
+            SDL_FRect d = {x, y + row, (float)src->w, 1};
+            unsigned c = G_Mix(color, grad, src->h > 1 ? (float)row / (src->h - 1) : 0);
+            SDL_SetTextureColorMod(face, (c >> 16) & 255, (c >> 8) & 255, c & 255);
+            SDL_RenderCopyF(sR, face, &s, &d);
+        }
+    }
+}
 static void Glyph(unsigned code, int x, int y, int font, unsigned color, unsigned shadow)
 {
     int w = FontWidth(code, font), h = font == TF_NORMAL ? 15 : 12;
@@ -383,6 +414,34 @@ static void Glyph(unsigned code, int x, int y, int font, unsigned color, unsigne
     SDL_Texture *sh = sFontShadow[font], *face = sFontFace[font];
     if (!sh || !face)
         return;
+    if (sStyle.on)
+    {
+        /* STADIUM's look (mp_stadium_ui.c): an outline round the letters, PX real pixels wide (the canvas is drawn at
+           half its pixels: offsets of half a unit), the face bolder by a pixel, a fall of light down it */
+        float sx, sy, fx, fy;
+        int dx, dy, r = sStyle.px;
+        SDL_RenderGetScale(sR, &sx, &sy);
+        fx = x + sStyle.nx, fy = y + sStyle.ny;
+        if (r > 0)
+        {
+            SDL_SetTextureAlphaMod(face, (Uint8)(sTextAlpha * sStyle.outlineAlpha / 255));
+            SDL_SetTextureColorMod(face, (sStyle.outline >> 16) & 255, (sStyle.outline >> 8) & 255, sStyle.outline & 255);
+            for (dy = -r; dy <= r; dy++)
+                for (dx = -r; dx <= r + (sStyle.bold ? 1 : 0); dx++)
+                {
+                    /* (the disc round the face, and round its copy a pixel right when bold) */
+                    int near = dx * dx + dy * dy <= r * r + 1 || (sStyle.bold && (dx - 1) * (dx - 1) + dy * dy <= r * r + 1);
+                    SDL_FRect d = {fx + dx / sx, fy + dy / sy, (float)w, (float)h};
+                    if (near && (dx || dy))
+                        SDL_RenderCopyF(sR, face, &src, &d);
+                }
+        }
+        SDL_SetTextureAlphaMod(face, (Uint8)sTextAlpha);
+        GlyphFace(face, &src, fx, fy, color, sStyle.grad);
+        if (sStyle.bold)
+            GlyphFace(face, &src, fx + 1 / sx, fy, color, sStyle.grad);
+        return;
+    }
     if (shadow != G_NO_SHADOW)
     {
         SDL_SetTextureColorMod(sh, (shadow >> 16) & 255, (shadow >> 8) & 255, shadow & 255);

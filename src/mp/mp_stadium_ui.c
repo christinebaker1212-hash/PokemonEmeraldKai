@@ -675,6 +675,13 @@ static const char *TeamProblem(void)
 // ---------------------------------------------------------------------------------------------------------------
 // Drawing
 
+// STADIUM's themes (OPTIONS > BATTLE > STADIUM SETTINGS > STYLE): the screens drawn in POKESTADIUM 2's and POKESTADIUM's looks
+static const char *CupLabel(u8 i);
+static void CupScene(u8 cup, int x, int y, int w, int h, bool8 open);
+static const char *const sClassNames[4];
+static void BlitPart(SDL_Texture *t, int sx, int sy, int sw, int sh, float x, float y, float w, float h, u8 alpha);
+#include "mp_stadium_ui_themes.inc.c"
+
 static void Background(void)
 {
     int y, i;
@@ -1828,6 +1835,7 @@ SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r)
         U.canvas = NULL;
         U.snap = NULL;
         U.owner = r;
+        ThReset();
     }
     if (!U.canvas)
     {
@@ -1870,6 +1878,10 @@ SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r)
     SDL_RenderClear(r);
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
     SDL_RenderSetScale(r, 2, 2);
+    if (ThemedDraw())
+        ;   // (the chosen theme drew it)
+    else
+    {
     Background();
     switch (U.screen)
     {
@@ -1880,6 +1892,7 @@ SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r)
     case SCR_VS: DrawVs(); break;
     case SCR_RESULT: DrawResult(); break;
     case SCR_TEAMS: DrawTeams(); break;
+    }
     }
     SDL_RenderSetScale(r, 1, 1);
     if (U.xfade && U.snap)
