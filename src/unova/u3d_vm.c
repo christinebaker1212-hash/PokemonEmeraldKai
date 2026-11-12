@@ -823,7 +823,8 @@ static u16 TrainerWords(u16 trainer, u16 kind);
 static u16 EyeSong(u16 trainer);
 
 // ------------------------------------------------------------------------------------------------ the VM
-enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU };
+enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
+       W_WARP };   // (W_WARP: a warp's map is loading; the script goes on there: U3D_Vm_SceneStart)
 
 // ---- Black's songs: its sound archive's sequence numbers as the game's song slots (tools/kaisong/unova_songs.py);
 // a pushed song comes back when the one played over it ends (a fanfare: Black's PushAndPlayBgm, StartWaitBgmThenPop)
@@ -1435,7 +1436,7 @@ static void Step(struct Thread *t)
             {
                 MPNet_Log("u3d vm: warp to zone %u (%d.%d at %d,%d)", wz, group, num, x, y);
                 sHolding = FALSE;
-                t->alive = FALSE;
+                t->wait = W_WARP;   // (Black's map change is an event the script waits on, then goes on in the new map)
                 SetWarpDestination(group, num, WARP_ID_NONE, x, y);
                 DoWarp();
                 return;
@@ -1457,7 +1458,7 @@ static void Step(struct Thread *t)
             {
                 MPNet_Log("u3d vm: rail warp to zone %u (%d.%d at %d,%d)", a[0], group, num, x, y);
                 sHolding = FALSE;
-                t->alive = FALSE;
+                t->wait = W_WARP;   // (Black's map change is an event the script waits on, then goes on in the new map)
                 SetWarpDestination(group, num, WARP_ID_NONE, x, y);
                 DoWarp();
                 return;
@@ -1973,8 +1974,8 @@ static void Step(struct Thread *t)
             if (U3D_MapOfZoneTile(a[0], a[1], a[2], &group, &num, &x, &y))
             {
                 MPNet_Log("u3d vm: warp to zone %u (%d.%d at %d,%d)", a[0], group, num, x, y);
-                sHolding = FALSE;   // (the map's load starts the field's scripts afresh)
-                t->alive = FALSE;
+                sHolding = FALSE;   // (the map's load starts the field's scripts afresh; this one goes on there)
+                t->wait = W_WARP;
                 SetWarpDestination(group, num, WARP_ID_NONE, x, y);
                 DoWarp();
                 return;
@@ -2641,6 +2642,8 @@ static void Task_Vm(u8 taskId)
         DestroyTask(taskId);
         return;
     }
+    if (t->wait == W_WARP)
+        return;
     if (t->wait != W_NONE)
         Wait(t);
     if (t->wait == W_NONE)
@@ -2813,14 +2816,36 @@ static void RunNow(u16 scriptId)
 {
     struct Thread *t = &sThread;
     u32 guard;
-    if (scriptId == 0xFFFF || !Run(scriptId, 0xFFFF, FALSE))
+    // (a script paused by its warp: the new map's own load scripts run beside it, then it goes on as it was)
+    static struct Thread sPaused;
+    static u16 sPausedLocal[ARRAY_COUNT(sLocal)];
+    static u8 sPausedMoving[ARRAY_COUNT(sMoving)];
+    bool8 paused = t->alive && t->wait == W_WARP, holding = sHolding;
+    if (scriptId == 0xFFFF)
         return;
-    for (guard = 0; guard < 64 && t->alive; guard++)
+    if (paused)
     {
-        t->wait = W_NONE;   // (no waits on loading: it places people and sets works)
-        Step(t);
+        sPaused = *t;
+        memcpy(sPausedLocal, sLocal, sizeof(sLocal));
+        memcpy(sPausedMoving, sMoving, sizeof(sMoving));
+        t->alive = FALSE;
     }
-    t->alive = FALSE;
+    if (Run(scriptId, 0xFFFF, FALSE))
+    {
+        for (guard = 0; guard < 64 && t->alive; guard++)
+        {
+            t->wait = W_NONE;   // (no waits on loading: it places people and sets works)
+            Step(t);
+        }
+        t->alive = FALSE;
+    }
+    if (paused)
+    {
+        *t = sPaused;
+        memcpy(sLocal, sPausedLocal, sizeof(sLocal));
+        memcpy(sMoving, sPausedMoving, sizeof(sMoving));
+        sHolding = holding;
+    }
 }
 
 // ON_TRANSITION of every UNOVA map (data/scripts/unova.inc): the zone-change and field-init scripts; the first time,
@@ -2868,7 +2893,21 @@ bool8 U3D_Vm_SceneStart(void)
     u32 size, o, at;
     u16 zone = CurrentZone();
     const u8 *d;
-    if (zone == 0xFFFF || sThread.alive || !Ready())
+    if (zone == 0xFFFF || !Ready())
+        return FALSE;
+    if (sThread.alive && sThread.wait == W_WARP)
+    {
+        // (the script whose warp brought the player here goes on: FENNEL's scene sets its work after hers)
+        SpawnAdded();
+        sThread.wait = W_NONE;
+        sHolding = TRUE;
+        if (!FuncIsActiveTask(Task_Vm))
+            CreateTask(Task_Vm, 80);
+        MPNet_Log("u3d vm: script %u goes on in zone %u", sThread.script, zone);
+        ScriptContext_SetupScript(Unova_EventScript_Scene);
+        return TRUE;
+    }
+    if (sThread.alive)
         return FALSE;
     SpawnAdded();
     if (sPendingScript)   // (a script's SetProcAction: FIELD_EVENT_CHECK_StartPendingScript)
