@@ -5,6 +5,7 @@ wait 60
 waitfor field 1000
 mp landslots
 mp regionclear 3
+mp dexorder 1 0
 mp swarm 3
 mp warp 43,55,5,8
 wait 60

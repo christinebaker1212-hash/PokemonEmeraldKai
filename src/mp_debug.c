@@ -1847,6 +1847,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         // battlestyle 0|1 - OPTIONS > BATTLE STYLE (0 SHIFT, 1 SET)
         gSaveBlock2Ptr->optionsBattleStyle = atoi(arg) ? OPTIONS_BATTLE_STYLE_SET : OPTIONS_BATTLE_STYLE_SHIFT;
+        MP_GameOptions_Capture();
+        MP_SaveConfig();
     }
     else if (strcmp(cmd, "trainer") == 0)
     {
@@ -5302,6 +5304,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         // textspeed 0|1|2 - OPTIONS > TEXT SPEED (slow, mid, fast)
         gSaveBlock2Ptr->optionsTextSpeed = atoi(arg) % 3;
+        MP_GameOptions_Capture();   // (kept in the settings as OPTIONS keeps it: a loaded save takes the settings')
+        MP_SaveConfig();
         printf("[test] text speed %d\n", gSaveBlock2Ptr->optionsTextSpeed);
     }
     else if (strcmp(cmd, "face") == 0)
