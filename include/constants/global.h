@@ -43,7 +43,8 @@
 // capacities of various saveblock objects
 #define DAYCARE_MON_COUNT 2
 #define POKEBLOCKS_COUNT 40
-#define OBJECT_EVENTS_COUNT 16
+#define OBJECT_EVENTS_COUNT 128   // Moemon Kai: the field's people at once (Emerald's 16: UNOVA's gyms have more)
+#define SAVED_OBJECT_EVENTS_COUNT 16   // (the save block's: its layout never changes, tools/test/save_layout.py)
 #define MAIL_COUNT (10 + PARTY_SIZE)
 #ifndef VER_64BIT
 #define SECRET_BASES_COUNT 20

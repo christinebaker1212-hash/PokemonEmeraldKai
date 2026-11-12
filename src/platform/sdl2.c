@@ -1311,6 +1311,11 @@ static void TestHarnessStep(void)
     char line[1200];
 
     {
+        void MP_Debug_GodTick(void);
+        MP_Debug_GodTick();   // (tests' `mp godmode`: the player's POKeMON kept at full HP and PP, src/mp_debug.c)
+    }
+
+    {
         // MOEMON_AUTOSHOT=N: a screenshot every N frames of the whole run (auto_<frame>_<group>_<map>.bmp), for
         // looking through a long walk afterwards
         static int sAuto = -1;

@@ -1824,6 +1824,7 @@ static void RemoveObjectEventIfOutsideView(struct ObjectEvent *objectEvent)
     RemoveObjectEventFading(objectEvent);   // Moemon Kai: (in a SINNOH 3D scene it fades out)
 }
 
+extern bool8 gMpObjectsFromSave;
 void SpawnObjectEventsOnReturnToField(s16 x, s16 y)
 {
     u8 i;
@@ -1833,6 +1834,13 @@ void SpawnObjectEventsOnReturnToField(s16 x, s16 y)
     {
         if (gObjectEvents[i].active)
             SpawnObjectEventOnReturnToField(i, x, y);
+    }
+    if (gMpObjectsFromSave)
+    {
+        // Moemon Kai: a loaded save keeps 16 people (load_save.c): the others in view come back from their templates
+        extern bool8 gMpObjectsFromSave;
+        gMpObjectsFromSave = FALSE;
+        TrySpawnObjectEvents(x, y);
     }
     CreateReflectionEffectSprites();
 }

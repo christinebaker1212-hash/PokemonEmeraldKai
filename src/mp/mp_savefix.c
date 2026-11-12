@@ -29,20 +29,20 @@ static void FromWin160(void)
 {
     u8 *dst = (u8 *)gSaveBlock1Ptr;
     const u32 events = offsetof(struct SaveBlock1, objectEvents);
-    const u32 oldStride = sizeof(struct ObjectEvent) + MP_SAVE_WIN160_EXTRA / OBJECT_EVENTS_COUNT;
+    const u32 oldStride = sizeof(struct ObjectEvent) + MP_SAVE_WIN160_EXTRA / SAVED_OBJECT_EVENTS_COUNT;
     u32 i;
 
     memcpy(dst, sRaw, events);
-    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+    for (i = 0; i < SAVED_OBJECT_EVENTS_COUNT; i++)
     {
         const u8 *src = sRaw + events + oldStride * i;
         struct ObjectEvent *obj = &gSaveBlock1Ptr->objectEvents[i];
         memcpy(obj, src, sizeof(struct ObjectEvent));
         obj->graphicsIdHi = src[sizeof(struct ObjectEvent)] & 0xF;
     }
-    memcpy(dst + events + sizeof(struct ObjectEvent) * OBJECT_EVENTS_COUNT,
-           sRaw + events + oldStride * OBJECT_EVENTS_COUNT,
-           sizeof(struct SaveBlock1) - events - sizeof(struct ObjectEvent) * OBJECT_EVENTS_COUNT);
+    memcpy(dst + events + sizeof(struct ObjectEvent) * SAVED_OBJECT_EVENTS_COUNT,
+           sRaw + events + oldStride * SAVED_OBJECT_EVENTS_COUNT,
+           sizeof(struct SaveBlock1) - events - sizeof(struct ObjectEvent) * SAVED_OBJECT_EVENTS_COUNT);
 }
 
 void MP_SaveFix_StoreSaveBlock1(bool8 win160)
@@ -68,7 +68,7 @@ void MP_SaveFix_Migrate(u8 fromFormat)
         // Emerald's layout: the bytes the graphics ids' high parts use now were padding
         for (i = 0; i < OBJECT_EVENT_TEMPLATES_COUNT; i++)
             gSaveBlock1Ptr->objectEventTemplates[i].graphicsIdHi = 0;
-        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+        for (i = 0; i < SAVED_OBJECT_EVENTS_COUNT; i++)
             gSaveBlock1Ptr->objectEvents[i].graphicsIdHi = 0;
     }
     else if (fromFormat == 1)
@@ -85,7 +85,7 @@ void MP_SaveFix_Migrate(u8 fromFormat)
         // 1.60.0 on Linux kept the object events' high byte at 0x23, padding in today's layout there
         if (!sWin160)
         {
-            for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+            for (i = 0; i < SAVED_OBJECT_EVENTS_COUNT; i++)
             {
                 u8 *o = (u8 *)&gSaveBlock1Ptr->objectEvents[i];
                 gSaveBlock1Ptr->objectEvents[i].graphicsIdHi = o[0x23] & 0xF;

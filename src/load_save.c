@@ -191,11 +191,15 @@ void LoadPlayerParty(void)
         gPlayerParty[i] = gSaveBlock1Ptr->playerParty[i];
 }
 
+// Moemon Kai: the save keeps Emerald's 16 people (SAVED_OBJECT_EVENTS_COUNT); the field has room for 128. The player
+// and the first ones out are kept (the field fills the lowest free slots first: the player's is 0); the rest come back
+// from their maps' templates as the field is shown again (event_object_movement.c SpawnObjectEventsOnReturnToField)
+bool8 gMpObjectsFromSave;   // (the field's people just loaded from the save: the ones past its 16 come back)
 void SaveObjectEvents(void)
 {
     int i;
 
-    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+    for (i = 0; i < SAVED_OBJECT_EVENTS_COUNT; i++)
         gSaveBlock1Ptr->objectEvents[i] = gObjectEvents[i];
 }
 
@@ -203,8 +207,11 @@ void LoadObjectEvents(void)
 {
     int i;
 
-    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+    for (i = 0; i < SAVED_OBJECT_EVENTS_COUNT; i++)
         gObjectEvents[i] = gSaveBlock1Ptr->objectEvents[i];
+    for (; i < OBJECT_EVENTS_COUNT; i++)
+        memset(&gObjectEvents[i], 0, sizeof(gObjectEvents[i]));
+    gMpObjectsFromSave = TRUE;
 }
 
 void CopyPartyAndObjectsToSave(void)

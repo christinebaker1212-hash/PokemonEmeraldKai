@@ -185,6 +185,42 @@ void MP_Debug_PinHpFrame(void)
     }
 }
 
+// Tests' `mp godmode`: the player's party (and its battlers) kept at full HP and PP (src/platform/sdl2.c calls this every
+// frame of a test run; battle_script_commands.c Cmd_datahpupdate drops the damage the player's side would take)
+bool8 gMpTestGodMode;
+void MP_Debug_GodTick(void)
+{
+    u32 i, k;
+    if (!gMpTestGodMode)
+        return;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[i];
+        u16 hp;
+        if (!GetMonData(mon, MON_DATA_SPECIES) || GetMonData(mon, MON_DATA_IS_EGG))
+            continue;
+        hp = GetMonData(mon, MON_DATA_MAX_HP);
+        if (GetMonData(mon, MON_DATA_HP) != hp && GetMonData(mon, MON_DATA_HP) != 0)
+            SetMonData(mon, MON_DATA_HP, &hp);
+        for (k = 0; k < MAX_MON_MOVES; k++)
+        {
+            u16 move = GetMonData(mon, MON_DATA_MOVE1 + k);
+            u8 pp = CalculatePPWithBonus(move, GetMonData(mon, MON_DATA_PP_BONUSES), k);
+            if (move && GetMonData(mon, MON_DATA_PP1 + k) != pp)
+                SetMonData(mon, MON_DATA_PP1 + k, &pp);
+        }
+    }
+    if (gMain.inBattle)
+        for (i = 0; i < gBattlersCount; i++)
+            if (GetBattlerSide(i) == B_SIDE_PLAYER && gBattleMons[i].hp != 0)
+            {
+                gBattleMons[i].hp = gBattleMons[i].maxHP;
+                for (k = 0; k < MAX_MON_MOVES; k++)
+                    if (gBattleMons[i].moves[k])
+                        gBattleMons[i].pp[k] = CalculatePPWithBonus(gBattleMons[i].moves[k], gBattleMons[i].ppBonuses, k);
+            }
+}
+
 void MP_DebugSetupNameAndGender(void)
 {
     const char *name = getenv("MOEMON_DEBUG_NAME");
@@ -3915,7 +3951,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
         for (i = 0; i < 8; i++)
             printf("%d", FlagGet(FLAG_BADGE01_GET + i));
         printf(" sb1 %08x objs", h);
-        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+        for (i = 0; i < SAVED_OBJECT_EVENTS_COUNT; i++)
             if (gSaveBlock1Ptr->objectEvents[i].active)
                 printf(" %d:%x@%d,%d", gSaveBlock1Ptr->objectEvents[i].localId, OBJ_GFX_ID(&gSaveBlock1Ptr->objectEvents[i]),
                        gSaveBlock1Ptr->objectEvents[i].currentCoords.x, gSaveBlock1Ptr->objectEvents[i].currentCoords.y);
@@ -4903,6 +4939,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         // pctags - the PC's tags and the group being held
         MP_PcStorage_LogTags();
+    }
+    else if (strcmp(cmd, "godmode") == 0)
+    {
+        // godmode 0|1 - the player's POKeMON take no damage and never run out of HP or PP (walk tests: a battle
+        // never lost, a move never spent); MP_Debug_GodTick keeps them full every frame
+        int on = 1;
+        sscanf(arg, "%d", &on);
+        gMpTestGodMode = on != 0;
+        printf("[test] godmode %d\n", gMpTestGodMode);
     }
     else if (strcmp(cmd, "setlevel") == 0)
     {

@@ -93,6 +93,7 @@ static void PutMonIconOnLvlUpBanner(void);
 static void DrawLevelUpBannerText(void);
 static void SpriteCB_MonIconOnLvlUpBanner(struct Sprite *sprite);
 
+extern bool8 gMpTestGodMode;   // Moemon Kai: tests (src/mp_debug.c)
 static void Cmd_attackcanceler(void);
 static void Cmd_accuracycheck(void);
 static void Cmd_attackstring(void);
@@ -1945,6 +1946,8 @@ static void Cmd_datahpupdate(void)
     if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
     {
         gActiveBattler = GetBattlerForBattleScript(gBattlescriptCurrInstr[1]);
+        if (gMpTestGodMode && GetBattlerSide(gActiveBattler) == B_SIDE_PLAYER && gBattleMoveDamage > 0)
+            gBattleMoveDamage = 0;   // Moemon Kai: tests' `mp godmode` (src/mp_debug.c): the player's side takes no damage
         if (gBattleMons[gActiveBattler].status2 & STATUS2_SUBSTITUTE && gDisableStructs[gActiveBattler].substituteHP && !(gHitMarker & HITMARKER_IGNORE_SUBSTITUTE))
         {
             // Target has an active Substitute, deal damage to that instead.

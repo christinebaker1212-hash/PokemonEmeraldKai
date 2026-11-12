@@ -243,7 +243,7 @@ Verified this way: 4-player overworld sync, nametags, custom PNG sprite,
 BATTLE FLAG -> spot -> walk up -> link battle -> rewards and whiteout, save/continue.
 
 Two-client tests: `MOEMON_LOBBY=127.0.0.1:PORT` plus `MOEMON_COOP_AUTO=host:NAME` / `join:NAME`
-and a local `tools/mp_server` build. `MOEMON_DEBUG_PARTY=280:15+` makes a Pokémon one EXP
+and a local `tools/mp_server` build. `mp godmode 1` keeps the player's POKéMON at full HP and PP and spares them damage (walk tests). `MOEMON_DEBUG_PARTY=280:15+` makes a Pokémon one EXP
 point short of leveling. Also verified: HOST/JOIN with passwords, sprite packs seen by others,
 spectating, co-op Double Battles (accept, decline, one-Pokémon trainer, win with evolutions
 and move learning, loss, disconnect).
@@ -507,6 +507,9 @@ there, HOENN's rows count the rest; numbers region * 1024 + row, never reorder o
 numbers: retired rows stay as C_GONE); src/mp/mp_achieve.c, chunk "ACHR"; COOP_NOTES "Achievements for each region").
 Also key items by region (1.183.0: a region's own KEY ITEMS wait in its stash, tools travel once their region is beaten
 and merge into one, HMs wait in the GLOBAL PC; SINNOH's MTN. BIKE; src/mp/mp_regionitems.c, docs/REGION_ITEMS.md).
+The field holds 128 people at once (OBJECT_EVENTS_COUNT; Emerald's 16), the save keeps 16 (SAVED_OBJECT_EVENTS_COUNT,
+SaveBlock1.objectEvents: loops over the save's objects use it); after a load the rest in view come back from their
+templates (load_save.c gMpObjectsFromSave, event_object_movement.c SpawnObjectEventsOnReturnToField).
 Saves never change layout: tools/test/save_layout.py (gcc + MinGW, run by regress.sh and the release) must pass; old
 formats are converted on load by src/mp/mp_savefix.c (MP_SAVE_FORMAT in the sidecar; COOP_NOTES "Save layout and
 migration"; tools/test/save_compat.sh).
