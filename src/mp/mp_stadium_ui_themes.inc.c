@@ -236,8 +236,23 @@ static void S2Foot(const char *hint)
         ThText(8, 296, U.note, TF_SMALL, 0xf8e8a0, G_NO_GRAD, 0x000000, 1, FALSE, TA_LEFT);
         return;
     }
-    G_TextStyle(0x000000, -TH_OUTLINE_PX, TRUE, 0xd0d4de);
-    G_Hint(4, 148, 0xffffff, G_NO_SHADOW, hint, TF_SMALL, 1);
+    {
+        // (too long for the line: the gaps closed up, then the narrow font)
+        char tight[160];
+        int font = TF_SMALL, i, n = 0;
+        if (G_Hint(4, 148, 0xffffff, G_NO_SHADOW, hint, font, 0) > 232)
+        {
+            for (i = 0; hint[i] && n < (int)sizeof(tight) - 1; i++)
+                if (!(hint[i] == ' ' && hint[i + 1] == ' '))
+                    tight[n++] = hint[i];
+            tight[n] = 0;
+            hint = tight;
+            if (G_Hint(4, 148, 0xffffff, G_NO_SHADOW, hint, font, 0) > 232)
+                font = TF_NARROW;
+        }
+        G_TextStyle(0x000000, -TH_OUTLINE_PX, FALSE, 0xd0d4de);
+        G_Hint(4, 148, 0xffffff, G_NO_SHADOW, hint, font, 1);
+    }
     G_TextStyle(0, 0, 0, G_NO_GRAD);
 }
 
@@ -713,6 +728,195 @@ static void S2Teams(void)
     S2Foot(U.confirm ? "{A} ERASE  {B} KEEP" : U.menu ? "{A} CHOOSE  {B} BACK" : "{A} MENU  {L}{R} PAGE  {B} BACK");
 }
 
+// REGISTER A TEAM: the team on the 1P plate (the next one asked for), where from in tabs, the list three by three; A
+// gives the POKéMON's panel with ENTER Yes / No; six in asks what next
+static void S2Register(void)
+{
+    static const u16 sTab[5] = {TH_S2_RTAB0, TH_S2_RTAB1, TH_S2_RTAB2, TH_S2_RTAB3, TH_S2_RTAB4};
+    static const u16 sTeamBr[6] = {TH_S2_RTEAMBR0, TH_S2_RTEAMBR1, TH_S2_RTEAMBR2, TH_S2_RTEAMBR3, TH_S2_RTEAMBR4, TH_S2_RTEAMBR5};
+    static const u16 sListBr[9] = {TH_S2_RLISTBR0, TH_S2_RLISTBR1, TH_S2_RLISTBR2, TH_S2_RLISTBR3, TH_S2_RLISTBR4, TH_S2_RLISTBR5,
+                                   TH_S2_RLISTBR6, TH_S2_RLISTBR7, TH_S2_RLISTBR8};
+    static const char *const sOrdinal[6] = {"First", "Second", "Third", "Fourth", "Fifth", "Sixth"};
+    const struct StadiumTeam *t = &StadiumCup_Save()->team[U.cup];
+    const float cw = (SX_S2_RTEAM_X1 - SX_S2_RTEAM_X0) / 3.0f, ch = (SX_S2_RTEAM_Y1 - SX_S2_RTEAM_Y0) / 2.0f;
+    const float lw = (SX_S2_RLIST_X1 - SX_S2_RLIST_X0) / 3.0f, lh = (SX_S2_RLIST_Y1 - SX_S2_RLIST_Y0) / 3.0f;
+    const unsigned ink = 0x0c0c40;
+    char line[96];
+    u8 i;
+    ThPut(TH_S2_REGISTER);
+    S2Ribbon("REGISTER A TEAM", CupLabel(U.cup));
+    {
+        u8 name[PLAYER_NAME_LENGTH + 1];
+        StringCopyN(name, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+        name[PLAYER_NAME_LENGTH] = EOS;
+        Ascii(line, name, sizeof(line));
+        ThText(80, 22, line, TF_SMALL, 0xffffff, G_NO_GRAD, 0x101830, 2, TRUE, TA_LEFT);
+        snprintf(line, sizeof(line), "%d / 6", t->count);
+        ThText(464, 22, line, TF_SMALL, t->count == 6 ? 0xffe060 : 0xffffff, G_NO_GRAD, 0x101830, 2, FALSE, TA_RIGHT);
+    }
+    // the team
+    for (i = 0; i < STADIUM_TEAM_SIZE; i++)
+    {
+        float x0 = SX_S2_RTEAM_X0 + (i % 3) * cw, y0 = SX_S2_RTEAM_Y0 + (i / 3) * ch;
+        if (i < t->count)
+        {
+            struct BoxPokemon *b = (struct BoxPokemon *)&t->slot[i].mon;
+            u8 nick[POKEMON_NAME_LENGTH + 1];
+            u16 item = GetBoxMonData(b, MON_DATA_HELD_ITEM);
+            SDL_Rect clip = {(int)(x0 / 2) + 1, (int)(y0 / 2) - 3, (int)(cw / 2) - 1, (int)(ch / 2) + 3};
+            SDL_RenderSetClipRect(U.owner, &clip);
+            ThBlit(IconTex(GetBoxMonData(b, MON_DATA_SPECIES)), x0 + 2, y0 - 14, 64, 64, 255);
+            SDL_RenderSetClipRect(U.owner, NULL);
+            GetBoxMonData(b, MON_DATA_NICKNAME, nick);
+            nick[POKEMON_NAME_LENGTH] = EOS;
+            Ascii(line, nick, sizeof(line));
+            ThText(x0 + 58, y0 + 1, line, G_Measure(line, TF_SMALL) * 2 <= cw - 62 ? TF_SMALL : TF_NARROW, 0xffffff, 0xdfe4f0,
+                   THF_OUTLINE_INK, 2, FALSE, TA_LEFT);
+            snprintf(line, sizeof(line), "L%d", GetLevelFromBoxMonExp(b));
+            ThText(x0 + 58, y0 + 21, line, TF_SMALL, 0xffffff, 0xdfe4f0, THF_OUTLINE_INK, 2, FALSE, TA_LEFT);
+            if (item)
+            {
+                u8 iname[ITEM_NAME_LENGTH + 4];
+                CopyItemName(item, iname);
+                Ascii(line, iname, sizeof(line));
+                ThPutAt(TH_S2_ITEMBOX, x0 + 8 - 10, y0 + 41 - 10, 255);
+                ThText(x0 + 32, y0 + 41, line, G_Measure(line, TF_SMALL) * 2 <= cw - 36 ? TF_SMALL : TF_NARROW, 0xffffff, 0xdfe4f0,
+                       THF_OUTLINE_INK, 2, FALSE, TA_LEFT);
+            }
+        }
+        else if (i == t->count && !U.onTeam)
+        {
+            ThPut(sTeamBr[i]);
+            snprintf(line, sizeof(line), "%s POKéMON", sOrdinal[i]);
+            ThText(x0 + cw / 2 + 1, y0 + ch / 2 - 12, line, TF_SMALL, 0xf2f416, G_NO_GRAD, 0x6a6700, 2, TRUE, TA_CENTER);
+        }
+        if (U.onTeam && i == U.teamSlot)
+            ThPut(sTeamBr[i]);
+    }
+    if (U.menu && U.listCursor < U.listCount)
+    {
+        // the POKéMON's panel, and ENTER Yes / No
+        const struct BoxPokemon *b = &U.list[U.listCursor].mon;
+        struct BoxPokemon *bb = (struct BoxPokemon *)b;
+        struct Pokemon m;
+        static const char *const sStat[5] = {"ATTACK", "DEFENSE", "SP. ATK", "SP. DEF", "SPEED"};
+        static const u8 sStatId[5] = {MON_DATA_ATK, MON_DATA_DEF, MON_DATA_SPATK, MON_DATA_SPDEF, MON_DATA_SPEED};
+        static const float sL[5] = {181, 200.6f, 220.2f, 239.8f, 259.4f};
+        u16 sp = GetBoxMonData(bb, MON_DATA_SPECIES), item = GetBoxMonData(bb, MON_DATA_HELD_ITEM);
+        u8 nick[POKEMON_NAME_LENGTH + 1];
+        const char *why = Refusal(b, U.list[U.listCursor].source);
+        bool8 has = Has(U.cup, b);
+        BoxMonToMon(b, &m);
+        ThPut(TH_S2_RINFO);
+        GetBoxMonData(bb, MON_DATA_NICKNAME, nick);
+        nick[POKEMON_NAME_LENGTH] = EOS;
+        Ascii(line, nick, sizeof(line));
+        ThText(18, sL[0], line, TF_SMALL, 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
+        snprintf(line, sizeof(line), "L%d", GetMonData(&m, MON_DATA_LEVEL));
+        ThText(140, sL[0], line, TF_SMALL, 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
+        snprintf(line, sizeof(line), "No.%03d", SpeciesToNationalPokedexNum(sp));
+        ThText(186, sL[0], line, TF_SMALL, 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
+        ThFrontIn(FrontTex(sp, GetBoxMonData(bb, MON_DATA_PERSONALITY), GetBoxMonData(bb, MON_DATA_OT_ID)), SX_S2_RWIN_X,
+                  SX_S2_RWIN_Y, SX_S2_RWIN_W, SX_S2_RWIN_H, why ? 140 : 255);
+        ThText(92, sL[1], "HP", TF_SMALL, 0xc8d0ff, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
+        snprintf(line, sizeof(line), "%d", GetMonData(&m, MON_DATA_MAX_HP));
+        ThText(168, sL[1], line, TF_SMALL, 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_RIGHT);
+        TypePill(46, (int)(sL[2] / 2) + 2, gSpeciesInfo[sp].types[0]);
+        if (gSpeciesInfo[sp].types[1] != gSpeciesInfo[sp].types[0])
+            TypePill(64, (int)(sL[2] / 2) + 2, gSpeciesInfo[sp].types[1]);
+        if (U.list[U.listCursor].source == STADIUM_SRC_RENTAL)
+            S2Chip(170, sL[2] + 4, "RENTAL", TH_S2_CHIP_BLUE);
+        for (i = 0; i < 5; i++)
+        {
+            ThText(268, sL[i], sStat[i], TF_SMALL, 0xc8d0ff, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
+            snprintf(line, sizeof(line), "%d", GetMonData(&m, sStatId[i]));
+            ThText(376, sL[i], line, TF_SMALL, 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_RIGHT);
+        }
+        for (i = 0; i < MAX_MON_MOVES; i++)
+        {
+            u16 mv = GetMonData(&m, MON_DATA_MOVE1 + i);
+            float x = 18 + (i % 2) * 124, y = sL[3 + i / 2];
+            if (mv == MOVE_NONE || mv >= MOVES_COUNT)
+                continue;
+            SDL_SetTextureColorMod(Th(TH_S2_DOT), TypeRgb(gBattleMoves[mv].type) >> 16, TypeRgb(gBattleMoves[mv].type) >> 8 & 255,
+                                   TypeRgb(gBattleMoves[mv].type) & 255);
+            ThPutCentred(TH_S2_DOT, x + 5, y + 13, 255);
+            SDL_SetTextureColorMod(Th(TH_S2_DOT), 255, 255, 255);
+            Ascii(line, gMoveNames[mv], sizeof(line));
+            ThText(x + 14, y, line, G_Measure(line, TF_SMALL) * 2 <= 108 ? TF_SMALL : TF_NARROW, 0xffffff, G_NO_GRAD, ink, 2, FALSE,
+                   TA_LEFT);
+        }
+        // ENTER (or TAKE OFF, for one on the team) Yes / No; why it can't, in red
+        ThText(432, 183, has ? "TAKE OFF" : "ENTER", has ? TF_NARROW : TF_SMALL, 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_CENTER);
+        ThText(418, 204, "Yes", TF_SMALL, U.menuCursor == 0 ? 0xf2f416 : 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
+        ThText(418, 224, "No", TF_SMALL, U.menuCursor != 0 ? 0xf2f416 : 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
+        ThPutAt(TH_S2_POINTER, 402 - 10, (U.menuCursor == 0 ? 217 : 237) - 20, 255);
+        ThPutAt(TH_S2_ITEMBOX, 396 - 10, 259 - 10, 255);
+        if (item)
+        {
+            u8 iname[ITEM_NAME_LENGTH + 4];
+            CopyItemName(item, iname);
+            Ascii(line, iname, sizeof(line));
+        }
+        else
+            snprintf(line, sizeof(line), "NONE");
+        ThText(418, 259, line, G_Measure(line, TF_SMALL) * 2 <= 56 ? TF_SMALL : TF_NARROW, 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
+        if (why && !has)
+            ThText(SX_S2_RWIN_X + SX_S2_RWIN_W + 14, sL[2] + 2 + 20, why, TF_NARROW, 0xff9090, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
+    }
+    else
+    {
+        // the tabs and the list
+        ThPut(sTab[U.tab]);
+        if (U.tab == SRC_TAB_SHARED && U.listCount == 0 && MP_SharedBox_Loaded())
+            BuildList();
+        if (U.listCount == 0)
+            ThText((SX_S2_RLIST_X0 + SX_S2_RLIST_X1) / 2.0f, (SX_S2_RLIST_Y0 + SX_S2_RLIST_Y1) / 2.0f - 13,
+                   U.tab != SRC_TAB_SHARED ? "Nobody here." : !MP_IsConnected() ? "Online only." : MP_SharedBox_Loaded() ? "Nobody here." : "Loading...",
+                   TF_SMALL, 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_CENTER);
+        for (i = 0; i < 9 && U.listTop + i < U.listCount; i++)
+        {
+            u16 n = U.listTop + i;
+            float x0 = SX_S2_RLIST_X0 + (i % 3) * lw, y0 = SX_S2_RLIST_Y0 + (i / 3) * lh;
+            const struct BoxPokemon *b = &U.list[n].mon;
+            bool8 ok = Refusal(b, U.list[n].source) == NULL, has = Has(U.cup, b);
+            u8 nick[POKEMON_NAME_LENGTH + 1];
+            float bob = (n == U.listCursor && !U.onTeam && (U.age / 8) % 2) ? -2 : 0;
+            ThBlit(IconTex(GetBoxMonData((struct BoxPokemon *)b, MON_DATA_SPECIES)), x0 + 4, y0 + lh / 2 - 19 + bob, 32, 32, ok ? 255 : 110);
+            GetBoxMonData((struct BoxPokemon *)b, MON_DATA_NICKNAME, nick);
+            nick[POKEMON_NAME_LENGTH] = EOS;
+            Ascii(line, nick, sizeof(line));
+            ThText(x0 + 40, y0 + lh / 2 - 13, line, G_Measure(line, TF_SMALL) * 2 <= lw - 64 ? TF_SMALL : TF_NARROW,
+                   has ? 0xffe060 : ok ? 0xffffff : 0x9098c8, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
+            if (has)
+                ItemBallSized((x0 + lw - 14) / 2, (y0 + lh / 2) / 2, 0.75f, 255);
+            if (n == U.listCursor && !U.onTeam)
+                ThPut(sListBr[i]);
+        }
+        if (U.listCount > 9)
+        {
+            int rows = (U.listCount + 2) / 3;
+            ThPutAt(TH_S2_THUMB_R, 0, (SX_S2_RLIST_Y1 - SX_S2_RLIST_Y0 - 28) * (U.listTop / 3) / (float)(rows > 3 ? rows - 3 : 1), 255);
+        }
+    }
+    if (U.sixMenu)
+    {
+        static const char *const sSix[3] = {"OK to Register", "Reselect some POKéMON", "Reselect all POKéMON"};
+        ThNine(TH_S2_PANEL_PALE, 104, 190, 272, 92, 12, 4, 255);
+        for (i = 0; i < 3; i++)
+        {
+            ThText(152, 200 + i * 25, sSix[i], TF_SMALL, U.sixMenu - 1 == i ? 0xf2f416 : 0xffffff, G_NO_GRAD, ink, 2, TRUE, TA_LEFT);
+            if (U.sixMenu - 1 == i)
+                ThPutAt(TH_S2_POINTER, 130 - 10, 200 + i * 25 + 13 - 20, 255);
+        }
+    }
+    if (U.confirm)
+        S2Ask(240, 120, 340, "Clear this cup's team?", "Your POKéMON stay where they are.");
+    S2Foot(U.confirm ? "{A} CLEAR  {B} KEEP" : U.menu ? "{A} CHOOSE  {SELECT} SUMMARY  {B} BACK" : U.sixMenu ? "{A} CHOOSE  {B} BACK"
+           : U.onTeam ? "{A} TAKE OFF  {START} CLEAR ALL  {DOWN} LIST  {B} DONE"
+                      : "{A} LOOK  {SELECT} SUMMARY  {START} TEAM  {B} DONE");   // (L and R are on the tabs)
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // The screens in the chosen theme; FALSE: this one isn't drawn in it (the game's own then)
 static bool8 ThemedDraw(void)
@@ -726,6 +930,7 @@ static bool8 ThemedDraw(void)
         case SCR_CLASS: if (U.cup == STADIUM_CUP_CASTLE) S2Castle(); else S2Class(); return TRUE;
         case SCR_OPTIONS: S2Options(); return TRUE;
         case SCR_TEAMS: S2Teams(); return TRUE;
+        case SCR_REGISTER: S2Register(); return TRUE;
         }
         break;
     }

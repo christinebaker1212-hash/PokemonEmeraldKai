@@ -110,6 +110,7 @@ static struct
     u8 leave;               // LEAVE_*: fading out, then this
     u8 xfade;               // XFADE_STEPS .. 0: the last screen's picture over the new one
     u8 drawnKey;            // the screen last drawn (a change starts the crossfade)
+    u8 sixMenu;             // (the themes) six in: OK to Register / Reselect some / Reselect all, 1 + the cursor
     SDL_Texture *snap;
 } U;
 
@@ -1172,8 +1173,10 @@ static void DrawOptions(void)
     Footer("{A} CHANGE / CHOOSE  {B} BACK");
 }
 
-#define REG_COLS 4
-#define REG_ROWS 5
+// (the themes show the list three by three: STADIUM's own entry screens)
+#define REG_THEMED (gMpConfig.stadiumStyle % MP_STADIUM_STYLE_COUNT != MP_STADIUM_STYLE_ORIGINAL)
+#define REG_COLS (REG_THEMED ? 3 : 4)
+#define REG_ROWS (REG_THEMED ? 3 : 5)
 #define REG_VIEW (REG_COLS * REG_ROWS)
 
 static const char *const sMenuRows[3] = {"REGISTER", "SUMMARY", "CANCEL"};
@@ -2424,7 +2427,7 @@ bool8 MP_StadiumUi_Step(u16 keys)
             }
             else if (U.optCursor == rows && rows)
             {
-                U.screen = SCR_REGISTER, U.onTeam = FALSE, U.confirm = FALSE;
+                U.screen = SCR_REGISTER, U.onTeam = FALSE, U.confirm = FALSE, U.sixMenu = 0;
                 U.tab = (U.opt & STADIUM_OPT_RENTALS) ? SRC_TAB_RENTALS : SRC_TAB_PARTY;
                 U.listCursor = 0, U.listTop = 0;
                 BuildList();
@@ -2510,6 +2513,37 @@ bool8 MP_StadiumUi_Step(u16 keys)
                 U.confirm = FALSE, PlaySE(SE_SELECT);
             break;
         }
+        if (U.sixMenu)   // (the themes) six in: OK to Register, Reselect some (the team), Reselect all
+        {
+            u8 k = U.sixMenu - 1;
+            if (pressed & B_BUTTON)
+                U.sixMenu = 0, PlaySE(SE_SELECT);
+            else if (pressed & DPAD_UP && k > 0)
+                U.sixMenu--, PlaySE(SE_SELECT);
+            else if (pressed & DPAD_DOWN && k < 2)
+                U.sixMenu++, PlaySE(SE_SELECT);
+            else if (pressed & A_BUTTON)
+            {
+                U.sixMenu = 0;
+                if (k == 0)
+                {
+                    StadiumCup_SaveNow();
+                    U.screen = SCR_OPTIONS;
+                    if (U.sharedOpened)
+                        MP_SharedBox_End(), U.sharedOpened = FALSE;
+                }
+                else if (k == 1)
+                    U.onTeam = TRUE, U.teamSlot = 0;
+                else
+                {
+                    team->count = 0;
+                    StadiumCup_SaveNow();
+                    snprintf(U.note, sizeof(U.note), "The team is cleared.");
+                }
+                PlaySE(SE_SELECT);
+            }
+            break;
+        }
         if (pressed & START_BUTTON && !U.menu)   // START: onto the TEAM bar; there, START clears it (asked first)
         {
             if (!team->count)
@@ -2546,7 +2580,11 @@ bool8 MP_StadiumUi_Step(u16 keys)
                 U.teamSlot--, PlaySE(SE_SELECT);
             else if (pressed & DPAD_RIGHT && U.teamSlot + 1 < team->count)
                 U.teamSlot++, PlaySE(SE_SELECT);
-            else if (pressed & DPAD_UP)
+            else if (REG_THEMED && pressed & DPAD_UP && U.teamSlot >= 3)   // (the themes: the team three by two, above the list)
+                U.teamSlot -= 3, PlaySE(SE_SELECT);
+            else if (REG_THEMED && pressed & DPAD_DOWN && U.teamSlot + 3 < team->count)
+                U.teamSlot += 3, PlaySE(SE_SELECT);
+            else if (pressed & (REG_THEMED ? DPAD_DOWN : DPAD_UP))
                 U.onTeam = FALSE, PlaySE(SE_SELECT);
             else if (pressed & B_BUTTON)
             {
@@ -2559,7 +2597,8 @@ bool8 MP_StadiumUi_Step(u16 keys)
             }
             break;
         }
-        if (pressed & DPAD_DOWN && !U.menu && team->count && (U.listCount == 0 || U.listCursor + REG_COLS >= U.listCount))
+        if (!U.menu && team->count && (REG_THEMED ? pressed & DPAD_UP && U.listCursor < REG_COLS
+                                                  : pressed & DPAD_DOWN && (U.listCount == 0 || U.listCursor + REG_COLS >= U.listCount)))
         {
             U.onTeam = TRUE;   // (down from the list's last row: onto the TEAM bar)
             if (U.teamSlot >= team->count)
@@ -2573,14 +2612,20 @@ bool8 MP_StadiumUi_Step(u16 keys)
             if (pressed & B_BUTTON)
                 U.menu = FALSE, PlaySE(SE_SELECT);
             else if (pressed & DPAD_UP && U.menuCursor > 0)
-                U.menuCursor--, PlaySE(SE_SELECT);
+                U.menuCursor = REG_THEMED ? 0 : U.menuCursor - 1, PlaySE(SE_SELECT);
             else if (pressed & DPAD_DOWN && U.menuCursor < 2)
-                U.menuCursor++, PlaySE(SE_SELECT);
+                U.menuCursor = REG_THEMED ? 2 : U.menuCursor + 1, PlaySE(SE_SELECT);
+            else if (REG_THEMED && pressed & SELECT_BUTTON)
+                U.menu = FALSE, OpenSummary();
             else if (pressed & A_BUTTON)
             {
                 U.menu = FALSE;
                 if (U.menuCursor == 0)
+                {
                     ToggleEntry();
+                    if (REG_THEMED && team->count == STADIUM_TEAM_SIZE)
+                        U.sixMenu = 1;   // (six in: the themes ask what next)
+                }
                 else if (U.menuCursor == 1)
                     OpenSummary();
                 else

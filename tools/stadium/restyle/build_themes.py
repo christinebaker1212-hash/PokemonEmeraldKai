@@ -315,6 +315,65 @@ def s2_teams():
     cut('S2_THUMB', lambda k: k.thumb(21, 56), (10, 42, 32, 70))
 
 
+
+REG_TABS = ['PARTY', 'BOXES', 'SHARED', 'GLOBAL', 'RENTALS']
+
+
+def s2_register():
+    """REGISTER A TEAM (screens3.py entry_screen / entry_info_screen / entry_menu_screen): the team on the 1P plate,
+    the tabs of where from, the list three by three; A's panel (the POKéMON, ENTER Yes / No) over the list."""
+    c = C4()
+    c.sky()
+    ribbon(c, 8, 'REGISTER A TEAM', 'CHALLENGE CUP')
+    sx0, sy0, sx1, sy1 = c.slab(12, 42, 468, 176, 'blue')
+    defines('SX_S2_RTEAM', (sx0, sy0, sx1, sy1))
+    c.tag(8, 31, 250)
+    cw, ch = (sx1 - sx0) / 3, (sy1 - sy0) / 2
+    cells = [(int(sx0 + (i % 3) * cw), int(sy0 + (i // 3) * ch), int(sx0 + (i % 3 + 1) * cw), int(sy0 + (i // 3 + 1) * ch)) for i in range(6)]
+    for k in (1, 2):
+        c.engrave_v(cells[k][0], sy0 + 4, sy1 - 4)
+    c.engrave_h(cells[3][1], sx0 + 4, sx1 - 4)
+    # the tabs: L, the five (the game puts the chosen one on top), R
+    y = 181
+    c.key(10, y, 34, y + 20, 'L')
+    x = 40
+    tabx = []
+    for name in REG_TABS:
+        wpx = (measure(name, SMALL) + 9) * 2
+        c.key(x, y, x + wpx, y + 20, name)
+        tabx.append((x, x + wpx))
+        x += wpx + 6
+    c.key(446, y, 470, y + 20, 'R')
+    bx0, by0, bx1, by1 = c.listpanel(8, 206, 472, 288)
+    defines('SX_S2_RLIST', (bx0, by0, bx1, by1))
+    lw, lh = (bx1 - bx0) / 3, (by1 - by0) / 3
+    for i in range(9):
+        x0, y0 = bx0 + (i % 3) * lw, by0 + (i // 3) * lh
+        c.cell(x0 + 1, y0 + 1, x0 + lw - 2, y0 + lh - 1)
+    c.strip(295)
+    opaque('S2_REGISTER', c)
+    for k, (x0, x1) in enumerate(tabx):
+        cut(f'S2_RTAB{k}', lambda q, x0=x0, x1=x1, k=k: q.key(x0, y, x1, y + 20, REG_TABS[k], selected=True), (x0 - 6, y - 8, x1 + 7, y + 31))
+    for i, (x0, y0, x1, y1) in enumerate(cells):
+        cut(f'S2_RTEAMBR{i}', lambda q, x0=x0, y0=y0, x1=x1, y1=y1: q.brackets(x0 + 8, y0 + 7, x1 - 6, y1 - 6, arm=10, th=4),
+            (x0 + 4, y0 + 3, x1 - 2, y1 - 2))
+    for i in range(9):
+        x0, y0 = bx0 + (i % 3) * lw, by0 + (i // 3) * lh
+        cut(f'S2_RLISTBR{i}', lambda q, x0=x0, y0=y0: q.brackets(x0 + 1, y0 + 1, x0 + lw - 2, y0 + lh - 1, arm=8),
+            (int(x0) - 2, int(y0) - 2, int(x0 + lw) + 2, int(y0 + lh) + 2))
+    cut('S2_THUMB_R', lambda q: q.thumb(21, 228), (10, 214, 32, 242))
+    cut('S2_ITEMBOX', lambda q: q.itembox(5, 5), (8, 10, 30, 30))
+    # A's panel over the list: the POKéMON's, ENTER's
+    def info(q):
+        q.bluepanel(8, 180, 386, 288)
+        q.window(18, 208, 80, 250, band=0x9ab0ff)
+        q.bluepanel(392, 180, 472, 250)
+    cut('S2_RINFO', info, (4, 176, 478, 294))
+    define('SX_S2_RWIN_X', 22); define('SX_S2_RWIN_Y', 212); define('SX_S2_RWIN_W', 54); define('SX_S2_RWIN_H', 34)
+    cut('S2_DOT', lambda q: q.sphere(20, 20, 4.5, 0xffffff), (13, 13, 28, 28))
+    cut('S2_CHIP_WHITE', lambda q: q.pill(10, 10, 210, 30, 0xffffff), (6, 6, 216, 34))
+
+
 def s2_chips():
     """The rule chips as long capsules a colour each (the game cuts them to the word: its ends and its middle)."""
     for name, rgb in (('GREEN', 0x40a050), ('BLUE', 0x4878c0), ('ORANGE', 0xc06030), ('GREY', 0x585880), ('GOLD', 0xc09020),
@@ -350,4 +409,5 @@ if __name__ == '__main__':
     s2_castle()
     s2_boxes()
     s2_teams()
+    s2_register()
     write()
