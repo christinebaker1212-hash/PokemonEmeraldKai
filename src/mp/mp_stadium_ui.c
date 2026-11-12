@@ -675,12 +675,6 @@ static const char *TeamProblem(void)
 // ---------------------------------------------------------------------------------------------------------------
 // Drawing
 
-// STADIUM's themes (OPTIONS > BATTLE > STADIUM SETTINGS > STYLE): the screens drawn in POKESTADIUM 2's and POKESTADIUM's looks
-static const char *CupLabel(u8 i);
-static void CupScene(u8 cup, int x, int y, int w, int h, bool8 open);
-static const char *const sClassNames[4];
-static void BlitPart(SDL_Texture *t, int sx, int sy, int sw, int sh, float x, float y, float w, float h, u8 alpha);
-#include "mp_stadium_ui_themes.inc.c"
 
 static void Background(void)
 {
@@ -1814,6 +1808,9 @@ static void ScreenMusic(void)
         PlayBGM(song);
     }
 }
+
+// STADIUM's themes (OPTIONS > BATTLE > STADIUM SETTINGS > STYLE): the screens drawn in POKESTADIUM 2's and POKESTADIUM's looks
+#include "mp_stadium_ui_themes.inc.c"
 
 // ---------------------------------------------------------------------------------------------------------------
 // The canvas (display.c), the frame (sdl2.c: spectators, test shots)
