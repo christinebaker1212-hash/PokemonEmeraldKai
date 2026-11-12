@@ -1,0 +1,12 @@
+# Platinum's STARK MOUNTAIN after the LEAGUE, from room 1's scene on: BUCK joins in room 2 and follows the player
+# (MOVEMENT_TYPE_FOLLOW_PLAYER after his scripted walk), the trainer pairs who spot them are tag battles beside him
+# (the party back whole and healed after), he leaves at room 3's door; CHARON's scene there ends outside; BUCK met at
+# the BATTLEGROUND, HEATRAN waits where the MAGMA STONE was (the stone gone for good: Platinum's own hide flag).
+# Needs the 3D pack.
+MODE=1
+TMO=1500
+GEN=4
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:100,9:100,149:100,248:100,445:100 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("npc local 15 gfx 1037 xy 42,68" "sinnoh battle picture: trainer 1716" "where map 43.109 xy 47,4" "sinnoh partner: the walk ends"
+          "where map 40.59 xy 15,9" "where map 43.110 xy 7,7" "life battle: begin kind 4")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -1,0 +1,112 @@
+pressuntil A field 5000
+mp textspeed 2
+mp platinumstory
+mp dexorder 1 0
+mp regionclear 3
+mp setflag 0x3320
+mp setflag 0x3321
+mp setflag 0x3322
+mp setflag 0x3323
+mp setflag 0x3324
+mp setflag 0x3325
+mp setflag 0x3326
+mp setflag 0x3327
+mp teach 0 242
+mp teach 1 57
+mp teach 2 431
+mp teach 3 70
+mp teach 4 249
+mp setvar 0x4021 9999
+mp battlestyle 1
+mp setvar 0x5234 1
+mp setvar 0x5233 1
+mp setvar 0x523F 1
+wait 30
+mp setvar 0x5240 1
+mp warp 43,109,42,85
+wait 120
+walkto 42 70 600
+wait 30
+press UP 8
+wait 140
+pressuntil A field 6000
+wait 30
+press UP 30
+wait 30
+mp npcs
+shot s_follow
+walkto 47 4 6000
+mash A 40 8
+pressuntil A field 20000
+walkto 47 4 6000
+mash A 40 8
+pressuntil A field 20000
+walkto 47 4 6000
+mash A 40 8
+pressuntil A field 20000
+walkto 47 4 6000
+mash A 40 8
+pressuntil A field 20000
+walkto 47 4 6000
+mash A 40 8
+pressuntil A field 20000
+walkto 47 4 6000
+mash A 40 8
+pressuntil A field 20000
+walkto 47 4 6000
+mash A 40 8
+pressuntil A field 20000
+walkto 47 4 6000
+mash A 40 8
+pressuntil A field 20000
+walkto 47 4 6000
+mash A 40 8
+pressuntil A field 20000
+walkto 47 4 6000
+mash A 40 8
+pressuntil A field 20000
+walkto 47 4 6000
+mash A 40 8
+pressuntil A field 20000
+mp party
+walkto 47 4 6000
+mp where
+press UP 8
+wait 30
+mash A 40 8
+pressuntil A field 6000
+press RIGHT 8
+wait 20
+press UP 20
+wait 120
+mash A 150 8
+pressuntil A field 20000
+mash A 60 8
+pressuntil A field 6000
+wait 30
+mp where
+shot s_outside
+mp warp 41,15,7,11
+wait 120
+mash A 30 8
+pressuntil A field 6000
+walkto 11 9 600
+wait 20
+mp face up
+press A 1
+wait 30
+mash A 40 8
+pressuntil A field 6000
+mp warp 43,110,7,16
+wait 120
+mash A 30 8
+pressuntil A field 6000
+walkto 7 7 2000
+mp where
+wait 20
+mp face up
+press A 1
+pressuntil A battle 3000
+wait 200
+shot s_heatran
+quit

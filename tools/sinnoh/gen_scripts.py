@@ -2729,6 +2729,13 @@ def people(root, p, low, name, done):
                     if re.match(r'^OBJ_EVENT_GFX_VAR_[0-9A-F]$', o['graphics_id']) else '0'
                 objs.append((i + 1, flag, o['x'] - p['x0'] * 32, o['z'] - p['z0'] * 32, lab, gfx))
             continue                       # (nothing to say: stays as it is)
+        elif script in ('EventScript_StrengthBoulder', 'EventScript_RockSmash', 'EventScript_CutTree') \
+                and o.get('script') == 0 and isinstance(hide, str) and hide.startswith('FLAG_HIDE_'):
+            # (a boulder or rock the story puts there, nothing to push or smash: STARK MOUNTAIN's MAGMA STONE, the rock
+            # LOOKER smashes. Shown by Platinum's own hide flag, so a scene's removeobject keeps it gone: as an obstacle
+            # with the map's temporary flag it came back each time the map loaded, in front of HEATRAN)
+            objs.append((i + 1, flag, o['x'] - p['x0'] * 32, o['z'] - p['z0'] * 32, 'SinnohP_Nothing', '0'))
+            continue
         elif trainer or person or STAND_INS.match(script):
             new = None                     # (the game's own script: a trainer's battle, a role, a stand-in not yet replaced)
         else:

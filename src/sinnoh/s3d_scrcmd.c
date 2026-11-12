@@ -569,6 +569,9 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
         else if (gObjectEvents[obj].movementType == MOVEMENT_TYPE_FOLLOW_PLAYER)
             VarSet(VAR_SINNOH_PARTNER_GFX, 0);
         SetObjEventTemplateMovementType(VarGet(arg), arg2);
+        // (a scripted walk it finished still holds it: its new type would never run. STARK MOUNTAIN's BUCK walked up,
+        // then stood still instead of following)
+        ObjectEventClearHeldMovementIfFinished(&gObjectEvents[obj]);
         SetTrainerMovementType(&gObjectEvents[obj], arg2);
         break;
     }
@@ -1037,6 +1040,9 @@ void Sinnoh_PartnerUpdate(void)
     obj = GetFollowPlayerObjectId();
     if (obj < OBJECT_EVENTS_COUNT)
     {
+        // (a scene's last walk, finished, still holds the partner until something clears it: then it wouldn't follow)
+        if (!ArePlayerFieldControlsLocked())
+            ObjectEventClearHeldMovementIfFinished(&gObjectEvents[obj]);
         if (gObjectEvents[obj].mapNum != mapNum || gObjectEvents[obj].mapGroup != mapGroup)
         {
             if (MapHasOwnPartner(gfx - 1, obj))   // (this map's own BARRY waits here: he takes over)

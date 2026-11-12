@@ -480,6 +480,43 @@ static bool8 TryPartnerWildBattle(void)
     return TRUE;
 }
 
+// Moemon Kai: two trainers who spot the player while SINNOH's walking partner is along: Platinum's tag battle beside
+// the partner (Encounter_NewVsTrainer: BATTLE_TYPE_TRAINER_WITH_AI_PARTNER), the player's first three and the
+// partner's team, the other three kept as in a wild battle beside it (STARK MOUNTAIN's BUCK). One trainer alone, or a
+// pair that battles as one, is the player's own battle, as in Platinum
+static void TryPartnerTrainerBattle(void)
+{
+    u32 i;
+    u16 partner = VarGet(VAR_SINNOH_PARTNER_TRAINER);
+    if (gNoOfApproachingTrainers != 2 || gTrainerBattleOpponent_A == gTrainerBattleOpponent_B
+     || !FlagGet(FLAG_SINNOH_HAS_PARTNER) || partner == 0 || !S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)
+     || CalculatePlayerPartyCount() == 0)
+        return;
+    for (i = 0; i < ARRAY_COUNT(sPartnerWildKept); i++)
+        sPartnerWildKept[i] = gPlayerParty[MULTI_PARTY_SIZE + i];
+    MP_SetupPartnerWild(partner);
+    sPartnerWild = TRUE;
+    gBattleTypeFlags |= BATTLE_TYPE_MULTI | BATTLE_TYPE_INGAME_PARTNER;
+}
+
+// (after a battle beside the partner: the player's other three back; won, everyone healed, as Platinum heals the party
+// after any battle won while the partner walks along)
+static void EndPartnerBattle(void)
+{
+    u32 i;
+    if (sPartnerWild)
+    {
+        for (i = 0; i < ARRAY_COUNT(sPartnerWildKept); i++)
+            gPlayerParty[MULTI_PARTY_SIZE + i] = sPartnerWildKept[i];
+        CompactPartySlots();
+        CalculatePlayerPartyCount();
+        sPartnerWild = FALSE;
+    }
+    if (FlagGet(FLAG_SINNOH_HAS_PARTNER) && S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)
+     && !IsPlayerDefeated(gBattleOutcome))
+        HealPlayerParty();
+}
+
 static void DoStandardWildBattle(void)
 {
     LockPlayerFieldControls();
@@ -813,16 +850,7 @@ void StartRegiBattle(void)
 static void CB2_EndWildBattle(void)
 {
     Sinnoh_JournalBattleEnd();   // Moemon Kai: what the JOURNAL writes of it (src/sinnoh/s3d_journal.c)
-    if (sPartnerWild)
-    {
-        // (the player's other three back where the partner's team was)
-        u32 i;
-        for (i = 0; i < ARRAY_COUNT(sPartnerWildKept); i++)
-            gPlayerParty[MULTI_PARTY_SIZE + i] = sPartnerWildKept[i];
-        CompactPartySlots();
-        CalculatePlayerPartyCount();
-        sPartnerWild = FALSE;
-    }
+    EndPartnerBattle();   // (the player's other three back where the partner's team was)
     gMpFishingEncounter = FALSE;   // Moemon Co-op: LURE BALL
     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
     ResetOamRange(0, OAM_ENTRY_COUNT);   // Moemon PC: all 256 (128 left the rest zeroed: an 8x8 tile at 0,0)
@@ -1608,6 +1636,7 @@ void BattleSetup_StartTrainerBattle(void)
         SetHillTrainerFlag();
     }
 
+    TryPartnerTrainerBattle();   // Moemon Kai: beside SINNOH's walking partner
     sNoOfPossibleTrainerRetScripts = gNoOfApproachingTrainers;
     gNoOfApproachingTrainers = 0;
     sShouldCheckTrainerBScript = FALSE;
@@ -1758,6 +1787,7 @@ void BattleSetup_StartOrreBattle(void)
 static void CB2_EndTrainerBattle(void)
 {
     Sinnoh_JournalBattleEnd();   // Moemon Kai: what the JOURNAL writes of it (src/sinnoh/s3d_journal.c)
+    EndPartnerBattle();          // Moemon Kai: beside SINNOH's walking partner (TryPartnerTrainerBattle)
     if (gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)
     {
         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
