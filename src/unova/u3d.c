@@ -80,6 +80,7 @@ typedef struct
     u16 blocks[32 * 32];
     u8 hn[32 * 32];
     float h[32 * 32][2];
+    u16 (*cam)[3];   // (a rail map's cells: Black's camera of each tile's rail, pitch, yaw, distance; NULL none)
 } U3dCell;
 typedef struct { u16 number, width, height, x0, z0, scale; U3dCell *cells; } U3dMatrix;   // (scale: a block is scale x scale
                                                                                               // cells, its meshes in the first)
@@ -167,7 +168,7 @@ static void LoadPack(void)
     }
     r.p += 4;
     version = TakeU32(&r);
-    if (version != 1 && version != 2)
+    if (version < 1 || version > 3)
     {
         printf("[u3d] %s: another pack version (%u)\n", path, (unsigned)version);
         free(data);
@@ -262,6 +263,15 @@ static void LoadPack(void)
             Take(&r, c->blocks, sizeof(c->blocks));
             Take(&r, c->hn, sizeof(c->hn));
             Take(&r, c->h, sizeof(c->h));
+            if (version >= 3)
+            {
+                u8 hasCam = 0;
+                Take(&r, &hasCam, 1);
+                if (hasCam && (c->cam = malloc(sizeof(u16) * 3 * 1024)) != NULL)
+                    Take(&r, c->cam, sizeof(u16) * 3 * 1024);
+                else if (hasCam)
+                    r.bad = TRUE;
+            }
         }
     }
     if (r.bad)
@@ -562,6 +572,23 @@ static void SetupView(void)
         u32 i;
         follow[0] = sView.tx, follow[1] = sView.ty, follow[2] = sView.tz;
         follow[3] = CAM_PITCH, follow[4] = 0.0f, follow[5] = CAM_DIST;
+        {
+            // a rail map's tile: Black's camera of that rail, its pitch and distance eased to (the view stays north up:
+            // a turned view would want the d-pad and the sprites' facings turned with it)
+            static float sRailPitch = CAM_PITCH, sRailDist = CAM_DIST;
+            float wantP = CAM_PITCH, wantD = CAM_DIST;
+            s32 gtx = (s32)floorf(sView.tx / 16.0f), gtz = (s32)floorf(sView.tz / 16.0f);
+            const U3dCell *rc = Cell(gtx >= 0 ? gtx / 32 : -1, gtz >= 0 ? gtz / 32 : -1);
+            if (rc && rc->cam && gtx >= 0 && gtz >= 0)
+            {
+                const u16 *rcam = rc->cam[(gtz % 32) * 32 + gtx % 32];
+                if (rcam[2] != 0)
+                    wantP = rcam[0] * 360.0f / 65536.0f, wantD = rcam[2];
+            }
+            sRailPitch += (wantP - sRailPitch) * 0.08f;
+            sRailDist += (wantD - sRailDist) * 0.08f;
+            follow[3] = sRailPitch, follow[5] = sRailDist;
+        }
         if (sCam.mode == CAM_FOLLOW)
             memcpy(v, follow, sizeof(follow));
         else

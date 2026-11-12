@@ -23,7 +23,9 @@ with Black's matrices:
                  textures), u16 light table (| 0x8000: the area's own a season, the table + the season), u16 props: s16 mesh x 4 (seasons), f32 3x4 transform (rows); then the cell's
                  32x32 field blocks (u16: metatile | collision << 10 | elevation << 12, the metatile 0x300 + the
                  game's behavior), u8 count (0-2) and f32 heights x 2 per tile (the ground at its centre, lowest first:
-                 a "GC" block's second grid is a bridge or a floor over it)
+                 a "GC" block's second grid is a bridge or a floor over it), (version 3) u8 1 if the cell has rail
+                 cameras, then u16 pitch, yaw, distance per tile (0, 0, 0: the zone's own camera): Black's camera of
+                 the rail the tile is on (tools/unova/rails.py camera_at)
 """
 import importlib.util
 import math
@@ -50,7 +52,7 @@ _sinnoh = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_sinnoh)
 Pack = _sinnoh.Pack      # (texture and mesh tables, shared as a tool: never the games' engines)
 
-VERSION = 2
+VERSION = 3
 SEASONS = 4
 METATILE_BEHAVIOR = 0x300   # (include/u3d.h U3D_METATILE_BEHAVIOR; fieldmap.c GetMetatileAttributesById)
 BLOCKED = 0x0001 | (1 << 10) | (3 << 12)
@@ -223,7 +225,7 @@ def scale_of(zone_ids):
     return k
 
 
-def lay_rails(grid, zone_ids, warps):
+def lay_rails(grid, zone_ids, warps, cams):
     """Black's rails (tools/unova/rails.py) onto the cells' field blocks: each rail tile walkable at the rail's height
     (a cell made where a rail runs past the matrix's blocks); the rails' doors as warp tiles"""
     rail_warps = {}
@@ -231,6 +233,10 @@ def lay_rails(grid, zone_ids, warps):
         if z not in rails.rail_files():
             continue
         tiles = rails.cells(rails.rail_files()[z])
+        for (tx, tz), (pitch, yaw, dist) in rails.tile_cameras(rails.rail_files()[z]).items():
+            if tx >= 0 and tz >= 0:
+                cams.setdefault((tx // 32, tz // 32), [None] * 1024)[(tz % 32) * 32 + tx % 32] = \
+                    (pitch, yaw, min(65535, int(dist)))
         for c in evr.events(z)['connect']:
             if c['rail']:
                 for t in rails.event_tiles(z, 'connect', c):
@@ -327,12 +333,14 @@ def build(matrix_ids=None):
                     else:
                         grid[(cx * k + sx, cz * k + sz)] = (c[0], [-1] * 4, c[2], [], [BLOCKED] * 1024,
                                                              [[] for _ in range(1024)])
-        lay_rails(grid, owners, warps)
+        cams = {}
+        lay_rails(grid, owners, warps, cams)
         gx, gz = [g[0] for g in grid], [g[1] for g in grid]
         x0, z0, x1, z1 = min(gx), min(gz), max(gx), max(gz)
         cells = [grid.get((cx, cz)) or (0xFFFF, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)])
                  for cz in range(z0, z1 + 1) for cx in range(x0, x1 + 1)]
-        mats.append((mn, (x0, z0, x1, z1), cells, k))
+        cell_cams = [cams.get((cx, cz)) for cz in range(z0, z1 + 1) for cx in range(x0, x1 + 1)]
+        mats.append((mn, (x0, z0, x1, z1), cells, k, cell_cams))
         print('matrix %d: %dx%d cells' % (mn, x1 - x0 + 1, z1 - z0 + 1))
     return pack, light_sets(), mats
 
@@ -383,9 +391,9 @@ def write(path, pack, light_sets, mats):
                 out += struct.pack('<3B', *col)
             out += struct.pack('<4B', clear[0], clear[1], clear[2], 1)
     out += struct.pack('<I', len(mats))
-    for number, (x0, z0, x1, z1), cells, scale in mats:
+    for number, (x0, z0, x1, z1), cells, scale, cell_cams in mats:
         out += struct.pack('<6H', number, x1 - x0 + 1, z1 - z0 + 1, x0, z0, scale)
-        for zone, meshes, light, props, fb, hts in cells:
+        for (zone, meshes, light, props, fb, hts), cam in zip(cells, cell_cams):
             out += struct.pack('<H4hHH', zone, *meshes, light, len(props))
             for pms, m in props:
                 out += struct.pack('<4h12f', *pms, *m)
@@ -393,6 +401,9 @@ def write(path, pack, light_sets, mats):
             out += bytes(len(h) for h in hts)
             for h in hts:
                 out += struct.pack('<2f', *(h + [0.0] * (2 - len(h))))
+            out += bytes([1 if cam else 0])
+            if cam:
+                out += b''.join(struct.pack('<3H', *(c or (0, 0, 0))) for c in cam)
     packed = b'U3DZ' + struct.pack('<I', len(out)) + zlib.compress(bytes(out), 6)
     open(path, 'wb').write(packed)
     return len(packed)

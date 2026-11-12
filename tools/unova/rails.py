@@ -65,7 +65,8 @@ def load(rail):
     for k in range((hdr[3] - hdr[2]) // 0x70):
         o = hdr[2] + k * 0x70
         points.append({'lines': struct.unpack_from('<4I', f, o), 'widths': struct.unpack_from('<4i', f, o + 0x20),
-                       'pos': tuple(v / UNIT for v in struct.unpack_from('<3i', f, o + 0x30))})
+                       'pos': tuple(v / UNIT for v in struct.unpack_from('<3i', f, o + 0x30)),
+                       'camera': struct.unpack_from('<I', f, o + 0x3C)[0]})
     for k in range((hdr[4] - hdr[3]) // 0x48):
         s, e, key, shape, cam, length = struct.unpack_from('<6I', f, hdr[3] + k * 0x48)
         lines.append({'start': s, 'end': e, 'shape': shape, 'camera': cam, 'length': length})
@@ -137,6 +138,89 @@ def cells(rail):
                     hs = out.setdefault((int(math.floor(x / CELL)), int(math.floor(z / CELL))), [])
                     if all(abs(h - y) > 4 for h in hs):
                         hs.append(y)
+    return out
+
+
+# Black's rail cameras (ov021 d_021DDDB8: 20 functions): FixedAngle (1) and its kin (15 at the centre, 17 / 19
+# shifted) hold a pitch, a yaw (1/65536 turns) and a distance (fx32); the Blend kinds (2, 14, 16, 18) go from the line's
+# start point's camera to its end point's along it; YawFromPoint (8) turns to face away from a point. Others keep the
+# zone's own camera.
+FIXED = {1, 15, 17, 19}
+BLEND = {2, 14, 16, 18}
+YAW_FROM_POINT = 8
+ORBIT = {5, 6, 7}        # (BlendOrbit, Orbit, OrbitMovingPoint: a pitch, a distance, a centre)
+EYE_TARGET = {3, 4}      # (FixedEyeTarget, BlendEyeTarget: an eye and a target)
+
+
+@functools.lru_cache(None)
+def _cameras(rail):
+    f = narc.arc(RAIL_ARC)[rail]
+    hdr = struct.unpack_from('<7I', f, 0)
+    return [struct.unpack_from('<I8i', f, hdr[4] + k * 0x24) for k in range((hdr[5] - hdr[4]) // 0x24)]
+
+
+def _fixed(rail, cam):
+    cams = _cameras(rail)
+    if cam >= len(cams) or cams[cam][0] not in FIXED:
+        return None
+    c = cams[cam]
+    return c[1] & 0xFFFF, c[2] & 0xFFFF, c[3] / UNIT
+
+
+def camera_at(rail, li, off_cells, side_cells):
+    """(pitch, yaw, distance) of Black's camera at a cell of line LI, or None (the zone's own)"""
+    r, cams = load(rail), _cameras(rail)
+    line = r['lines'][li]
+    cam = line['camera']
+    if cam >= len(cams):
+        return None
+    kind = cams[cam][0]
+    if kind in FIXED:
+        return _fixed(rail, cam)
+    if kind in BLEND:
+        a = _fixed(rail, r['points'][line['start']].get('camera', NONE)) if 'camera' in r['points'][line['start']] else None
+        b = _fixed(rail, r['points'][line['end']].get('camera', NONE)) if 'camera' in r['points'][line['end']] else None
+        if a is None or b is None:
+            return a or b
+        t = min(1.0, max(0.0, off_cells / max(1, line['length'])))
+        dy = ((b[1] - a[1] + 0x8000) & 0xFFFF) - 0x8000   # (the short way round)
+        return (round(a[0] + (b[0] - a[0]) * t) & 0xFFFF, round(a[1] + dy * t) & 0xFFFF, a[2] + (b[2] - a[2]) * t)
+    if kind in ORBIT:   # (about a centre: the eye out beyond the player from it, the city behind the player's back)
+        c = cams[cam]
+        x, _, z = place(r, li, off_cells, side_cells)
+        cx, cz = c[3] / UNIT, c[5] / UNIT
+        yaw = int(math.atan2(x - cx, z - cz) / (2 * math.pi) * 65536) & 0xFFFF
+        dist = max(237.0, min(c[2] / UNIT - math.hypot(x - cx, z - cz), 420.0))
+        return c[1] & 0xFFFF, yaw, dist
+    if kind in EYE_TARGET:   # (a fixed eye on a fixed target: its direction kept, at the zone's distance)
+        c = cams[cam]
+        ex, ey, ez, tx, ty, tz = (v / UNIT for v in c[1:7])
+        yaw = int(math.atan2(ex - tx, ez - tz) / (2 * math.pi) * 65536) & 0xFFFF
+        pitch = int(math.atan2(ey - ty, math.hypot(ex - tx, ez - tz)) / (2 * math.pi) * 65536) & 0xFFFF
+        return pitch, yaw, 237.0
+    if kind == YAW_FROM_POINT:
+        c = cams[cam]
+        x, _, z = place(r, li, off_cells, side_cells)
+        px, pz = c[3] / UNIT, c[4] / UNIT
+        yaw = int(math.atan2(x - px, z - pz) / (2 * math.pi) * 65536) & 0xFFFF
+        return c[1] & 0xFFFF, yaw, c[2] / UNIT
+    return None
+
+
+def tile_cameras(rail):
+    """{(tile x, tile z): (pitch, yaw, distance)} of every rail tile with a camera of Black's"""
+    r = load(rail)
+    out = {}
+    for li, line in enumerate(r['lines']):
+        length = max(1, line['length']) * CELL
+        for off in range(max(1, line['length'])):
+            half = int(_width_at(r, li, off * CELL, length) // CELL)
+            cam = camera_at(rail, li, off, 0)
+            if cam is None:
+                continue
+            for s in range(-half, half + 1):
+                x, _, z = place(r, li, off, s)
+                out.setdefault((int(math.floor(x / CELL)), int(math.floor(z / CELL))), cam)
     return out
 
 
