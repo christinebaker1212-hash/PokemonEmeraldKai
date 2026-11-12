@@ -4456,6 +4456,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_StadiumUi_DebugFill(void);
         MP_StadiumUi_DebugFill();
     }
+    else if (strcmp(cmd, "stadiumresult") == 0)
+    {
+        // stadiumresult N - the STADIUM's result screen as N (RES_*: 0 won, 1 lost, 2 continue, 3 cup, 4 over, 5 stage)
+        void MP_StadiumUi_DebugShowResult(u8 result);
+        MP_StadiumUi_DebugShowResult(atoi(arg));
+    }
     else if (strcmp(cmd, "stadiumstyle") == 0)
     {
         // stadiumstyle 0|1|2 - OPTIONS > BATTLE > STADIUM SETTINGS > STYLE (ORIGINAL, POKESTADIUM, POKESTADIUM 2)

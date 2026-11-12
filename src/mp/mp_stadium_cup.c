@@ -679,11 +679,29 @@ void StadiumCup_Begin(u8 round, u8 cup, u8 tier, u8 options)
 
 static void (*sAfterBattle)(bool8 won);
 
+// The three that fought on each side and what HP they had left, for the result screen (the themes': STADIUM 2's)
+static struct StadiumFought sFought[2][STADIUM_PICK];
+
+const struct StadiumFought *StadiumCup_Fought(u8 side)
+{
+    return sFought[side & 1];
+}
+
 static void CB2_EndStadiumBattle(void)
 {
     bool8 won = gBattleOutcome == B_OUTCOME_WON;
     struct StadiumRun *r = &sRun;
     u8 i, fainted = 0;
+    for (i = 0; i < STADIUM_PICK * 2; i++)
+    {
+        struct Pokemon *m = i < STADIUM_PICK ? &gPlayerParty[i] : &gEnemyParty[i - STADIUM_PICK];
+        struct StadiumFought *f = &sFought[i / STADIUM_PICK][i % STADIUM_PICK];
+        f->species = GetMonData(m, MON_DATA_SPECIES);
+        f->personality = GetMonData(m, MON_DATA_PERSONALITY);
+        f->otId = GetMonData(m, MON_DATA_OT_ID);
+        f->hp = f->species ? GetMonData(m, MON_DATA_HP) : 0;
+        f->maxHp = f->species ? GetMonData(m, MON_DATA_MAX_HP) : 0;
+    }
     for (i = 0; i < STADIUM_PICK; i++)
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE && GetMonData(&gPlayerParty[i], MON_DATA_HP) == 0)
             fainted++;

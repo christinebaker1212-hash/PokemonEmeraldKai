@@ -117,6 +117,9 @@ void StadiumCup_Entry(struct Pokemon *out, u8 slot);
 u8 StadiumCup_EntryCount(void);
 const struct StadiumTrainer *StadiumCup_Foe(void);
 struct Pokemon *StadiumCup_FoeTeam(u8 *count);
+// The last battle's three on each side (0 the player, 1 the opponent) and their HP at its end
+struct StadiumFought { u16 species, hp, maxHp; u32 personality, otId; };
+const struct StadiumFought *StadiumCup_Fought(u8 side);
 void StadiumCup_PrepareFoe(void);
 void StadiumCup_FoePicks(void);
 void StadiumCup_Begin(u8 round, u8 cup, u8 tier, u8 options);

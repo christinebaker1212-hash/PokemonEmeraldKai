@@ -490,6 +490,98 @@ def s2_choice():
     cut('S2_DIM', lambda k: k.a.__setitem__(slice(None), 0), (0, 0, 8, 8))
 
 
+
+def s2_result():
+    """The result (screens2.py result_screen): the player's plate (portrait, the three that fought, their HP), the
+    opponent's under it, WIN / LOSE glowing over them, the road of balls between."""
+    c = C4()
+    c.night(VS_LINES)
+    ribbon(c, 8, 'GYM LEADER CASTLE', 'FINAL BATTLE')
+    c.plate(14, 24, 466, 146)
+    c.window(22, 32, 104, 114, glow=False)
+    for i in range(3):
+        x0 = 112 + i * 118
+        c.window(x0, 32, x0 + 112, 124)
+        c.hpbar(x0, 129, x0 + 112, 139, 0)
+    c.plate(14, 170, 466, 288)
+    for i in range(3):
+        x0 = 22 + i * 110
+        c.window(x0, 178, x0 + 105, 268)
+        c.hpbar(x0, 272, x0 + 105, 282, 0)
+    c.window(356, 220, 458, 282, glow=False)
+    c.strip(295)
+    opaque('S2_RESULT', c)
+    for name, word, cx, cy, px, col in (('WIN_TOP', 'WIN', 292, 78, 96, 0xf8a010), ('LOSE_TOP', 'LOSE', 292, 78, 92, 0x30e0e8),
+                                        ('WIN_BOTTOM', 'WIN', 184, 222, 96, 0xf8a010), ('LOSE_BOTTOM', 'LOSE', 184, 222, 92, 0x30e0e8)):
+        cut('S2_NEON_' + name, lambda k, word=word, cx=cx, cy=cy, px=px, col=col: k.neon(cx, cy, word, px, col, ITALIC),
+            (max(0, cx - 200), max(0, cy - 90), min(480, cx + 200), min(320, cy + 90)))
+    for lit in (True, False):
+        cut('S2_ROADBALL_' + ('LIT' if lit else 'OFF'), lambda k, lit=lit: k.ball(20, 20, 7, top=0xe03828, lit=lit), (10, 10, 31, 31))
+    cut('S2_CROSS', lambda k: k.cross((10, 10, 112, 100)), (10, 10, 112, 100))
+
+
+def s2_prizes():
+    """The cup won (reconcile.py prizes_s2): the words glowing, the road all lit, the prizes on a plate."""
+    c = C4()
+    c.night(VS_LINES)
+    ribbon(c, 8, 'GYM LEADER CASTLE', 'MASTER BALL')
+    c.plate(40, 130, 440, 286)
+    c.window(50, 140, 150, 276, band=0xf0c838)
+    c.strip(295)
+    opaque('S2_PRIZES', c)
+    for name, word in (('CUPWON', 'CUP WON!'), ('CASTLEWON', 'CASTLE WON!'), ('BADGEWON', 'BADGE WON!'), ('GAMEOVER', 'GAME OVER')):
+        cut('S2_NEON_' + name, lambda k, word=word: k.neon(240, 62, word, 60 if len(word) < 10 else 52, 0x30e0e8 if word == 'GAME OVER' else 0xf8a010, ITALIC),
+            (0, 0, 480, 130))
+
+
+def s2_badges():
+    """The GYM LEADER CASTLE's badge board (screens3.py badge_screen): eight sockets, a name plate each; the badges
+    won set into theirs."""
+    c = C4()
+    c.night(((3, 150, 520), (150, -40, 30), (312, -40, 60)))
+    for r in range(2):
+        y = 22 + r * 138
+        c.plate(30, y, 450, y + 134)
+        for k in range(4):
+            i = r * 4 + k
+            col = BADGE_RGB[i]
+            cx, cy = 86 + k * 104, y + 50
+            sl, xx, yy = c.win(cx - 36, cy - 36, cx + 36, cy + 36)
+            e = np.hypot((xx - cx) / 30.0, (yy - cy) / 30.0)
+            gy, gx = np.gradient(e)
+            lit = smooth(-0.01, 0.01, -gx - gy)
+            ring = aa((e - 1) * 30) * (1 - aa((e - 0.84) * 30))
+            c.mix(sl, aa((e - 1) * 30 - 1), hx(0x505050))
+            c.mix(sl, ring, np.repeat((0.55 + 0.42 * (1 - lit))[..., None], 3, -1))
+            c.mix(sl, aa((e - 0.84) * 30), np.repeat((0.42 + 0.20 * lit)[..., None], 3, -1))
+            for sx, sy in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
+                bx, by = int(cx + sx * 36), int(cy + sy * 36)
+                c.a[min(by, by - sy * 8):max(by, by - sy * 8) + 1, bx - 1:bx + 1] = 0.94
+                c.a[by - 1:by + 1, min(bx, bx - sx * 8):max(bx, bx - sx * 8) + 1] = 0.94
+            x0, x1 = 38 + k * 104, 38 + k * 104 + 96
+            c.a[y + 100:y + 124, x0:x1] = 0.02
+            u = np.linspace(0, 1, x1 - x0 - 4)
+            g = hx(col)[None] * (0.75 + 0.5 * np.exp(-((u - 0.5) / 0.3) ** 2))[:, None] * 0.6 + 0.42
+            c.a[y + 102:y + 122, x0 + 2:x1 - 2] = np.clip(g, 0, 1)[None]
+    c.strip(295)
+    opaque('S2_BADGES', c)
+    for g, col in enumerate(BADGE_RGB):
+        def bb(k, col=col):
+            k.sphere(40, 40, 22, col)
+            k.sphere(40, 40, 12, 0xe8e0d0)
+        cut(f'S2_BBADGE{g}', bb, (14, 14, 67, 67))
+
+
+def s2_continue():
+    """Keep battling? (screens3.py continue_screen): the cup and the battle in a pale cyan box, the question under."""
+    c = C4()
+    c.night(((60, -40, 520), (166, -40, 130), (250, -40, 520)))
+    c.cyanbox(176, 74, 304, 130)
+    c.cyanbox(120, 140, 360, 244)
+    c.strip(295)
+    opaque('S2_CONTINUE', c)
+
+
 def s2_chips():
     """The rule chips as long capsules a colour each (the game cuts them to the word: its ends and its middle)."""
     for name, rgb in (('GREEN', 0x40a050), ('BLUE', 0x4878c0), ('ORANGE', 0xc06030), ('GREY', 0x585880), ('GOLD', 0xc09020),
@@ -529,4 +621,8 @@ if __name__ == '__main__':
     s2_ladder()
     s2_vs()
     s2_choice()
+    s2_result()
+    s2_prizes()
+    s2_badges()
+    s2_continue()
     write()

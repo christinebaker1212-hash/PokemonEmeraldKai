@@ -1229,6 +1229,200 @@ static void S2Choice(void)
         S2Rules();
 }
 
+// ---- after the battle: the result, then the badge board, the continue box or the prizes ----
+
+#define TH_RESULT_HOLD 90   // (frames the result shows before what comes after it)
+
+// The road: a ball each trainer of the run, lit for the beaten, centred on (CX, CY)
+static void S2Road(float cx, float cy)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    u8 i, total = r->cup == STADIUM_CUP_CASTLE ? (r->stage == STADIUM_CASTLE_E4 ? 5 : 4)
+                                               : StadiumCup_TrainerCount(r->round, r->cup, r->tier);
+    if (total > 8)
+        total = 8;
+    for (i = 0; i < total; i++)
+    {
+        bool8 beaten = U.result == RES_CUP || U.result == RES_STAGE || i < r->trainer;
+        ThPutCentred(beaten ? TH_S2_ROADBALL_LIT : TH_S2_ROADBALL_OFF, cx + (i - (total - 1) / 2.0f) * 22, cy, 255);
+    }
+}
+
+// An HP bar's fill (the bar is the layer's), FRAC of it
+static void S2HpFill(float x0, float y0, float x1, float y1, float frac)
+{
+    int rows = (int)(y1 - y0) - 4, k;
+    float w = (x1 - x0 - 4) * frac;
+    for (k = 0; k < rows && w > 0; k++)
+    {
+        float t = rows > 1 ? (float)k / (rows - 1) : 0;
+        unsigned c = t < 0.3f ? G_Mix(0xadefef, 0xa5f7f9, t / 0.3f) : t < 0.7f ? G_Mix(0xa5f7f9, 0x91dee1, (t - 0.3f) / 0.4f)
+                                                                     : G_Mix(0x91dee1, 0x6fb0b3, (t - 0.7f) / 0.3f);
+        SDL_SetRenderDrawColor(U.owner, c >> 16, c >> 8 & 255, c & 255, 255);
+        SDL_RenderSetScale(U.owner, 1, 1);
+        SDL_RenderFillRectF(U.owner, &(SDL_FRect){x0 + 2, y0 + 2 + k, w, 1});
+        SDL_RenderSetScale(U.owner, 2, 2);
+    }
+}
+
+static void S2ResultPlates(bool8 won)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    const struct StadiumFought *mine = StadiumCup_Fought(0), *theirs = StadiumCup_Fought(1);
+    char line[48];
+    u8 i;
+    ThPut(TH_S2_RESULT);
+    S2Ribbon(StadiumCup_Info(r->cup)->name, r->cup == STADIUM_CUP_CASTLE ? StadiumCastle_StageName(r->stage)
+             : StadiumCup_Info(r->cup)->tiers > 1 ? sClassNames[r->tier & 3] : NULL);
+    ThTrainerIn(PlayerGenderToFrontTrainerPicId(gSaveBlock2Ptr->playerGender), 26, 36, 74, 74, 255);
+    {
+        u8 pn[PLAYER_NAME_LENGTH + 1];
+        StringCopyN(pn, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+        pn[PLAYER_NAME_LENGTH] = EOS;
+        Ascii(line, pn, sizeof(line));
+        ThText(22, 116, line, TF_SMALL, 0xffffff, G_NO_GRAD, 0x202020, 2, TRUE, TA_LEFT);
+    }
+    for (i = 0; i < STADIUM_PICK; i++)
+    {
+        float x0 = 112 + i * 118, bx0 = 22 + i * 110;
+        if (mine[i].species)
+        {
+            ThFrontIn(FrontTex(mine[i].species, mine[i].personality, mine[i].otId), x0 + 4, 36, 104, 84, mine[i].hp ? 255 : 140);
+            S2HpFill(x0, 129, x0 + 112, 139, mine[i].maxHp ? (float)mine[i].hp / mine[i].maxHp : 0);
+            if (!mine[i].hp && U.age > 30)
+                ThPutAt(TH_S2_CROSS, x0 + 4 - 10 + 1, 36 - 10 - 4, 255);
+        }
+        if (theirs[i].species)
+        {
+            ThFrontIn(FrontTex(theirs[i].species, theirs[i].personality, theirs[i].otId), bx0 + 4, 182, 97, 82, theirs[i].hp ? 255 : 140);
+            S2HpFill(bx0, 272, bx0 + 105, 282, theirs[i].maxHp ? (float)theirs[i].hp / theirs[i].maxHp : 0);
+            if (!theirs[i].hp && U.age > 30)
+                ThPutAt(TH_S2_CROSS, bx0 + 4 - 10 - 2, 182 - 10 - 6, 255);
+        }
+    }
+    ThTrainerIn(U.lastFoePic, 360, 224, 94, 54, 255);
+    {
+        extern const u8 *MP_StadiumBattle_ClassName(void);
+        char cls[24];
+        Ascii(cls, MP_StadiumBattle_ClassName(), sizeof(cls));
+        ThText(352, 174, cls, G_Measure(cls, TF_SMALL) * 2 <= 110 ? TF_SMALL : TF_NARROW, 0xffffff, G_NO_GRAD, 0x202020, 2, TRUE, TA_LEFT);
+    }
+    // between the plates: the road, the continues
+    S2Road(240, 158);
+    if (r->cup != STADIUM_CUP_CASTLE)
+    {
+        snprintf(line, sizeof(line), "CONTINUES %d", r->continues);
+        ThText(466, 146, line, TF_SMALL, 0xffffff, G_NO_GRAD, 0x202020, 2, TRUE, TA_RIGHT);
+    }
+    // the verdict, glowing over the plates once the bars have shown
+    if (U.age > 12)
+    {
+        u8 a = U.age > 24 ? 255 : (U.age - 12) * 21;
+        ThPutAt(won ? TH_S2_NEON_WIN_TOP : TH_S2_NEON_LOSE_TOP, 0, 0, a);
+        ThPutAt(won ? TH_S2_NEON_LOSE_BOTTOM : TH_S2_NEON_WIN_BOTTOM, 0, 0, a);
+    }
+}
+
+// The badge board: the eight, the ones won set in; the one just won drops in
+static void S2Badges(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    static const u16 sB[8] = {TH_S2_BBADGE0, TH_S2_BBADGE1, TH_S2_BBADGE2, TH_S2_BBADGE3, TH_S2_BBADGE4, TH_S2_BBADGE5,
+                              TH_S2_BBADGE6, TH_S2_BBADGE7};
+    u8 i, badges = StadiumCastle_Badges(r->round);
+    int t = U.age - TH_RESULT_HOLD;
+    ThPut(TH_S2_BADGES);
+    for (i = 0; i < STADIUM_CASTLE_GYMS; i++)
+    {
+        float cx = 86 + (i % 4) * 104, cy = 22 + (i / 4) * 138 + 50;
+        char name[24], *sp;
+        snprintf(name, sizeof(name), "%s", StadiumCastle_BadgeName(i));
+        if ((sp = strstr(name, "BADGE")) && sp != name)
+            *sp = 0;   // (BOULDERBADGE: BOULDER on its plate)
+        ThText(cx, 22 + (i / 4) * 138 + 100, name, G_Measure(name, TF_SMALL) * 2 <= 90 ? TF_SMALL : TF_NARROW, 0xffffff, G_NO_GRAD,
+               0x181818, 2, FALSE, TA_CENTER);
+        if ((badges >> i) & 1)
+        {
+            float drop = i == r->stage && t < 16 ? (16 - t) * 4 : 0;
+            ThPutCentred(sB[i], cx, cy - drop, i == r->stage && t < 16 ? t * 16 : 255);
+        }
+    }
+}
+
+// Keep battling? (a continue) or the run over: the cup and the battle, the question
+static void S2Continue(bool8 over)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    char line[48];
+    ThPut(TH_S2_CONTINUE);
+    ThText(240, 78, r->cup == STADIUM_CUP_CASTLE ? StadiumCastle_StageName(r->stage) : StadiumCup_Info(r->cup)->name, TF_SMALL, 0xffffff,
+           G_NO_GRAD, 0x204040, 2, TRUE, TA_CENTER);
+    ThVsTitle(line, sizeof(line));
+    ThText(240, 100, line, TF_SMALL, 0xffffff, G_NO_GRAD, 0x204040, 2, TRUE, TA_CENTER);
+    if (over)
+    {
+        ThText(240, 156, "GAME OVER", TF_SMALL, 0xffffff, G_NO_GRAD, 0x204040, 2, TRUE, TA_CENTER);
+        ThText(240, 186, "No continues left.", TF_SMALL, 0xffffff, G_NO_GRAD, 0x204040, 2, TRUE, TA_CENTER);
+        return;
+    }
+    ThText(240, 146, "Keep battling?", TF_SMALL, 0xffffff, G_NO_GRAD, 0x204040, 2, TRUE, TA_CENTER);
+    ThPutAt(TH_S2_POINTER, 186 - 10, 185 - 20, 255);
+    ThText(204, 172, "Continue", TF_SMALL, 0xf8f020, G_NO_GRAD, 0x204040, 2, TRUE, TA_LEFT);
+    ThText(204, 194, "Give up", TF_SMALL, 0xffffff, G_NO_GRAD, 0x204040, 2, TRUE, TA_LEFT);
+    snprintf(line, sizeof(line), "CONTINUES %d", r->continues);
+    ThText(352, 216, line, TF_SMALL, 0xffffff, G_NO_GRAD, 0x204040, 2, TRUE, TA_RIGHT);
+}
+
+// The cup won: the words glowing, the road all lit, the prizes on the plate
+static void S2Prizes(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    const struct StadiumPrize *p = StadiumRewards_Last();
+    char line[64];
+    int i;
+    ThPut(TH_S2_PRIZES);
+    S2Ribbon(StadiumCup_Info(r->cup)->name, StadiumCup_Info(r->cup)->tiers > 1 ? sClassNames[r->tier & 3] : NULL);
+    ThPutAt(r->cup == STADIUM_CUP_CASTLE ? TH_S2_NEON_CASTLEWON : TH_S2_NEON_CUPWON, 0, U.age < 12 ? -(12 - U.age) * 8 : 0,
+            U.age < 12 ? U.age * 21 : 255);
+    S2Road(240, 112);
+    if (U.age < 40)
+        return;
+    ThText(164, 148, p->first ? "PRIZES" : "PRIZES (won before)", TF_SMALL, 0xffe060, G_NO_GRAD, 0x202020, 2, TRUE, TA_LEFT);
+    if (p->species != SPECIES_NONE)
+    {
+        ThFrontIn(FrontTex(p->species, p->personality, p->otId), 54, 144, 92, 128, 255);
+        if (p->shiny)
+            for (i = 0; i < 4; i++)
+            {
+                int k = (U.age / 4 + i * 5) % 20;
+                G_Fill(28 + (i * 13) % 44, 74 + (i * 17 + k) % 60, 1, 1, 0xfff8c0);
+            }
+        snprintf(line, sizeof(line), "Lv%d  %d perfect IVs%s", p->level, p->perfect, p->shiny ? "  SHINY" : "");
+        ThText(164, 170, line, TF_SMALL, 0xffffff, G_NO_GRAD, 0x202020, 2, TRUE, TA_LEFT);
+    }
+    for (i = 0; i < p->count; i++)
+        ThText(164 + (i / 4) * 140, (p->species != SPECIES_NONE ? 200 : 174) + (i % 4) * 20, p->line[i],
+               G_Measure(p->line[i], TF_SMALL) * 2 <= 132 ? TF_SMALL : TF_NARROW, 0xffffff, G_NO_GRAD, 0x202020, 2, TRUE, TA_LEFT);
+}
+
+static void S2Result(void)
+{
+    bool8 lost = U.result == RES_LOST || U.result == RES_OVER || U.result == RES_CONTINUE;
+    bool8 after = U.age >= TH_RESULT_HOLD;
+    if (U.result == RES_CUP)
+        S2Prizes();
+    else if (after && U.result == RES_STAGE)
+        S2Badges();
+    else if (after && (U.result == RES_CONTINUE || U.result == RES_OVER))
+        S2Continue(U.result == RES_OVER);
+    else
+        S2ResultPlates(!lost);
+    if (U.result == RES_CUP && U.age < PRIZES_READ_AGE)
+        S2Foot("");
+    else
+        S2Foot(U.result == RES_CONTINUE ? "{A} CONTINUE  {B} GIVE UP" : "{A} OK");
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // The screens in the chosen theme; FALSE: this one isn't drawn in it (the game's own then)
 static bool8 ThemedDraw(void)
@@ -1243,6 +1437,7 @@ static bool8 ThemedDraw(void)
         case SCR_OPTIONS: S2Options(); return TRUE;
         case SCR_TEAMS: S2Teams(); return TRUE;
         case SCR_REGISTER: S2Register(); return TRUE;
+        case SCR_RESULT: S2Result(); return TRUE;
         case SCR_VS:
             if (U.vsStep == VS_LADDER)
                 S2Ladder(), S2Foot(U.confirm ? "{A} QUIT  {B} KEEP PLAYING" : "{A} NEXT  {B} QUIT");

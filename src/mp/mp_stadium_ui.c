@@ -1184,6 +1184,15 @@ static void DrawOptions(void)
 static const char *const sMenuRows[3] = {"REGISTER", "SUMMARY", "CANCEL"};
 
 // The POKéMON under the cursor: picture, name, level, types, item, stats and moves
+// (mp stadiumresult: the result screen as RESULT, for its looks)
+void MP_StadiumUi_DebugShowResult(u8 result)
+{
+    if (!U.active)
+        return;
+    U.screen = SCR_RESULT, U.result = result, U.age = 0;
+    printf("[test] stadium result %d\n", result);
+}
+
 // (mp stadiumfill: the list's first that may enter, to six)
 void MP_StadiumUi_DebugFill(void)
 {
