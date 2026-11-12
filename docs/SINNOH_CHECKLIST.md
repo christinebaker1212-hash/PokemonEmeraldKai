@@ -43,6 +43,13 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       NATIONAL DEX, the SNOWPOINT temple (1.114.0: every script there converts; the BATTLEGROUND's trainers of the day,
       FLINT's tag battle, the boat to SNOWPOINT, REGIGIGAS's shake: COOP_NOTES "SINNOH after the HALL OF FAME"; ROUTE
       224's OAK waits on a distribution event: closed)
+- [x] Platinum's own post-game people (2026-11-12): the swarm twin (EnableSwarms, GetSwarmMapAndSpecies), MR. BACKLOT
+      (AddTrophyGardenMon), ROUTE 221's daily level (GetDailyRandomLevel), DEOXYS's meteorites (one form here), the game
+      director's diplomas (the game's own), the FRONTIER's exchange attendants (their words, the game's BP list);
+      Platinum's FLAG_DAILY_* cleared each day (src/data/sinnoh_daily_flags.h); the clock runs in a game begun away from
+      HOENN (sinnoh_postgame_people, sinnoh_trophy, sinnoh_bp). Left: the FRONTIER's records boards, the HALL's record
+      keepers, the TOWER's record machines (Platinum's record screens), the CONTEST HALL's practice receptionist (no
+      longer converts: "variable 0")
 - [ ] One test from TWINLEAF to the HALL OF FAME
 
 ## 2. Kai's systems in SINNOH (kept, Platinum's commands mapped onto them)

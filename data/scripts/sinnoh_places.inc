@@ -44,6 +44,38 @@ Sinnoh_EventScript_BpBye::
 	release
 	end
 
+@ Platinum's PokeMartFrontier (its attendants' own greeting first: tools/sinnoh/gen_scripts.py): the BP list as the
+@ game's shop screen, back to Platinum's script when done (VAR_TEMP_3: 0 the items, 1 the TMs)
+Sinnoh_EventScript_BpShop::
+	specialvar VAR_RESULT, GetFrontierBattlePoints
+	buffernumberstring STR_VAR_3, VAR_RESULT
+	message Sinnoh_Text_BpWhich
+	waitmessage
+	copyvar VAR_0x8004, VAR_TEMP_3
+	special Sinnoh_BpMenu
+	waitstate
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, Sinnoh_EventScript_BpShopDone
+	msgbox Sinnoh_Text_BpConfirm, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_BpShop
+	special Sinnoh_BpBuy
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_BpShopShort
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_BpShopNoRoom
+	playse SE_SHOP
+	msgbox Sinnoh_Text_BpHere, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_BpShop
+
+Sinnoh_EventScript_BpShopShort::
+	msgbox Sinnoh_Text_BpShort, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_BpShop
+
+Sinnoh_EventScript_BpShopNoRoom::
+	msgbox Sinnoh_Text_BpNoRoom, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_BpShop
+
+Sinnoh_EventScript_BpShopDone::
+	closemessage
+	return
+
 Sinnoh_Text_BpWelcome:
 	.string "Welcome! Here you can trade BATTLE\n"
 	.string "POINTS for prizes.$"

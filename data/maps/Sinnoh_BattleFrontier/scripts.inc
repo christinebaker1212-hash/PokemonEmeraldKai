@@ -119,11 +119,11 @@ Sinnoh_BattleFrontier_EventScript_Person11::
 	end
 
 Sinnoh_BattleFrontier_EventScript_Person12::
-	goto Sinnoh_EventScript_BpItems
+	goto SinnohP_battle_frontier_23
 	end
 
 Sinnoh_BattleFrontier_EventScript_Person14::
-	goto Sinnoh_EventScript_BpTms
+	goto SinnohP_battle_frontier_25
 	end
 
 Sinnoh_BattleFrontier_EventScript_Person15::

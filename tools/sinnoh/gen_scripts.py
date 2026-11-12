@@ -1175,6 +1175,10 @@ class FileConverter:
         if cmd == 'ChangeDeoxysForm':
             # (DEOXYS has one form in this game, as GIRATINA: SetPartyGiratinaForm; the meteorite's words stay Platinum's)
             return []
+        if cmd == 'PokeMartFrontier' and a[0] in ('MART_FRONTIER_ID_EXCHANGE_SERVICE_CORNER_LEFT',
+                                                  'MART_FRONTIER_ID_EXCHANGE_SERVICE_CORNER_RIGHT'):
+            # (the BATTLE FRONTIER's exchange: the game's BP list as the shop screen, data/scripts/sinnoh_places.inc)
+            return ['setvar VAR_TEMP_3, %d' % (a[0].endswith('RIGHT')), 'call Sinnoh_EventScript_BpShop']
         if cmd == 'ShowDiplomaSinnoh':
             return ['special Special_ShowDiploma', 'waitstate']
         if cmd == 'ShowDiplomaNationalDex':
