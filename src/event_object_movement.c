@@ -5402,6 +5402,12 @@ static bool8 DoesObjectCollideWithObjectAt(struct ObjectEvent *objectEvent, s16 
                 if (AreElevationsCompatible(objectEvent->currentElevation, curObject->currentElevation))
                     return TRUE;
             }
+            // Moemon Kai: UNOVA's sized blockers (Black's object code 185, its params the width and depth in tiles:
+            // STRIATON's gym's curtained doorways, seven wide; tools/unova/gen_maps.py keeps them in the spare field)
+            if (OBJ_GFX_ID(curObject) == OBJ_EVENT_GFX_UNOVA_FIRST + 185 && curObject->trainerRange_berryTreeId
+             && x >= curObject->currentCoords.x && x < curObject->currentCoords.x + (curObject->trainerRange_berryTreeId & 0xFF)
+             && y >= curObject->currentCoords.y && y < curObject->currentCoords.y + (curObject->trainerRange_berryTreeId >> 8))
+                return TRUE;
         }
     }
     return FALSE;

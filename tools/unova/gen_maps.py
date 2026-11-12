@@ -60,6 +60,7 @@ def ascii_name(name):
 # the sprites pack, tools/unova/build_gfx.py; a stand-in without it)
 STAND_IN = 'OBJ_EVENT_GFX_YOUNGSTER'
 UNOVA_GFX, UNOVA_GFX_COUNT = 0x600, 0x320   # (include/constants/event_objects.h OBJ_EVENT_GFX_UNOVA_FIRST)
+SIZED_BLOCKER = 185   # (an invisible hit box as wide and deep as its params: STRIATON's gym's doorways)
 BLACK_DIR = {0: 'UP', 1: 'DOWN', 2: 'LEFT', 3: 'RIGHT'}
 BLACK_CITY = 0   # (its zone: its residents, see events_of)
 
@@ -80,7 +81,11 @@ def events_of(m, w, h):
                      'movement_type': 'MOVEMENT_TYPE_WANDER_AROUND' if wander else 'MOVEMENT_TYPE_FACE_' + face,
                      'movement_range_x': max(0, p['limit'][0]) if wander else 0,
                      'movement_range_y': max(0, p['limit'][1]) if wander else 0,
-                     'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
+                     'trainer_type': 'TRAINER_TYPE_NONE',
+                     # (Black's sized blocker, object code 185: its params' width and depth, as width | depth << 8:
+                     # event_object_movement.c DoesObjectCollideWithObjectAt)
+                     'trainer_sight_or_berry_tree_id': str(p['params'][0] | p['params'][1] << 8)
+                     if p['gfx'] == SIZED_BLOCKER and p['params'][0] and p['params'][1] else '0',
                      'script': 'Unova_EventScript_Talk',
                      # (one whose spot is another map's: u3d_vm.c U3D_Vm_ObjectHidden keeps it hidden here; its
                      # place in the list is kept for the VM's ids)
