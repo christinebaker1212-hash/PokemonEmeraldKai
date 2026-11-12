@@ -117,6 +117,12 @@ user, 2026-11-12): the Maker only calls u3d.h. Could come later: UNOVA's preview
 unova/black3d.pak, built from the user's ROM; not tried in the first session for want of it), autotile for maps of
 SINNOH / UNOVA / ORRE (their tiles are what they do, not pictures), terrains' collision chosen per tile in TERRAINS.
 
+The 3D PREVIEW's helper Brendan (the user, 2026-11-12): a small Brendan standing on the previewed tile where the player
+would, so the 3D picture can be read against the tile the walls and moves go by; the Helper Brendan box turns him off
+(moemon_maker.ini view_helper_3d). He's drawn into the preview by MakerApi_Render3D (src/maker/maker_tiles.c): SINNOH's
+and ORRE's previews aim at the tile's middle, UNOVA's spot is measured as its picture is taken (maker_play.c,
+u3d.h U3D_GridPoint).
+
 ## Next steps (2026-11-06: M2, M3a and M4a built; start here)
 
 1. **Tell the user the M2 defaults** (COOP_NOTES "Moemon Maker, M2a: events" lists the four open questions and the
