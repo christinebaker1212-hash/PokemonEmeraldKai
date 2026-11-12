@@ -832,6 +832,7 @@ static u8 *Slot(u8 slot)   // (Black's word slots, UNOVA's own: the game's battl
 
 // Black's item numbers as the game's (tools/unova/gen_items.py: by name; ITEM_NONE where the game has no such item yet)
 #include "../data/unova_items.h"
+#include "u3d_railpos.h"
 static u16 Item(u16 black)
 {
     return black < ARRAY_COUNT(sUnovaItems) ? sUnovaItems[black] : ITEM_NONE;
@@ -1317,6 +1318,7 @@ static void Step(struct Thread *t)
             *WorkPtr(a[1]) = V(0) < ARRAY_COUNT(sValues) ? sValues[V(0)] : 0;
             break;
         }
+        case U3C_StartMmdlRailSlipDown:   // (a slide down a rail slope: the tiles walk it)
         case U3C_FadeBgmVolume:   // (the song quieter under a scene: kept as it is)
         case U3C_RestoreBgmVolume:
         case U3C_PROC_CallSubEvent:   // (a field menu's screen opened from a scene)
@@ -2172,11 +2174,15 @@ void U3D_VmPos(void)
          && WorkValue(Le16(p + 4)) == Le16(p + 2) && Run(Le16(p), 0xFFFF, TRUE))
             return;
     }
-    // (a trigger on a rail: tools/unova/gen_maps.py laid its tiles out by the rail; the one whose work holds its value)
-    for (i = 0; e && size >= 8 && i < e[7]; i++)
+    // (a trigger on a rail: its tiles laid out by tools/unova/gen_maps.py, src/unova/u3d_railpos.h)
+    for (i = 0; e && size >= 8 && i < ARRAY_COUNT(sUnovaRailPos); i++)
     {
-        const u8 *p = e + 8 + EV_BG * e[4] + EV_PERSON * e[5] + EV_CONNECT * e[6] + EV_POS * i;
-        if (Le16(p + 8) != 0 && WorkValue(Le16(p + 4)) == Le16(p + 2) && Run(Le16(p), 0xFFFF, TRUE))
+        const u8 *p;
+        if (sUnovaRailPos[i].zone != CurrentZone() || sUnovaRailPos[i].x != x || sUnovaRailPos[i].z != y
+         || sUnovaRailPos[i].index >= e[7])
+            continue;
+        p = e + 8 + EV_BG * e[4] + EV_PERSON * e[5] + EV_CONNECT * e[6] + EV_POS * sUnovaRailPos[i].index;
+        if (WorkValue(Le16(p + 4)) == Le16(p + 2) && Run(Le16(p), 0xFFFF, TRUE))
             return;
     }
     NothingToRun();
