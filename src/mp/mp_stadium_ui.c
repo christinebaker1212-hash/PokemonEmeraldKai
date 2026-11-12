@@ -111,10 +111,12 @@ static struct
     u8 xfade;               // XFADE_STEPS .. 0: the last screen's picture over the new one
     u8 drawnKey;            // the screen last drawn (a change starts the crossfade)
     u8 sixMenu;             // (the themes) six in: OK to Register / Reselect some / Reselect all, 1 + the cursor
+    u8 vsStep;              // (the themes: STADIUM 2's flow) VS_LADDER, VS_SHOW, then VS_CHOICE (the picking; ORIGINAL's VS)
     SDL_Texture *snap;
 } U;
 
 #define FADE_STEPS 10
+enum { VS_LADDER, VS_SHOW, VS_CHOICE };
 #define XFADE_STEPS 8
 enum { LEAVE_NONE, LEAVE_CLOSE, LEAVE_BATTLE, LEAVE_SUMMARY, LEAVE_VS_SUMMARY };
 
@@ -1182,6 +1184,20 @@ static void DrawOptions(void)
 static const char *const sMenuRows[3] = {"REGISTER", "SUMMARY", "CANCEL"};
 
 // The POKéMON under the cursor: picture, name, level, types, item, stats and moves
+// (mp stadiumfill: the list's first that may enter, to six)
+void MP_StadiumUi_DebugFill(void)
+{
+    struct StadiumTeam *t = &StadiumCup_Save()->team[U.cup];
+    u16 keep = U.listCursor, i;
+    if (!U.active || U.screen != SCR_REGISTER)
+        return;
+    for (i = 0; i < U.listCount && t->count < STADIUM_TEAM_SIZE; i++)
+        if (!Has(U.cup, &U.list[i].mon))
+            U.listCursor = i, ToggleEntry();
+    U.listCursor = keep;
+    printf("[test] stadium team %d\n", t->count);
+}
+
 static void DetailCard(const struct BoxPokemon *b, u8 source)
 {
     struct Pokemon m;
@@ -1859,7 +1875,7 @@ SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r)
     SDL_RenderGetScale(r, &oldX, &oldY);
     {
         // a new screen: the canvas still holds the last one's picture, kept for the crossfade
-        u8 key = U.screen | (U.rules ? 0x10 : 0);
+        u8 key = U.screen | (U.rules ? 0x10 : 0) | (U.screen == SCR_VS ? U.vsStep << 5 : 0);
         if (key != U.drawnKey && U.drawnKey != 0xFF && U.snap && U.black == 0)
         {
             SDL_SetRenderTarget(r, U.snap);
@@ -2046,6 +2062,8 @@ static void ToVs(void)
 {
     struct StadiumRun *r = StadiumCup_Run();
     U.screen = SCR_VS;
+    // (the themes: the cup's ladder first, VS. MEWTWO's one battle without; then VS shows the teams; then the choice)
+    U.vsStep = !REG_THEMED ? VS_CHOICE : r->cup == STADIUM_CUP_MEWTWO ? VS_SHOW : VS_LADDER;
     AnnounceVs();
     U.vsCursor = 0;
     U.confirm = FALSE;
@@ -2692,6 +2710,17 @@ bool8 MP_StadiumUi_Step(u16 keys)
             else if (pressed & B_BUTTON)
                 U.confirm = FALSE, PlaySE(SE_SELECT);
         }
+        else if (U.vsStep < VS_CHOICE)   // (the themes) the ladder and VS only show: A goes on
+        {
+            if (pressed & A_BUTTON)
+                U.vsStep++, PlaySE(SE_SELECT);
+            else if (pressed & B_BUTTON)
+                U.confirm = TRUE, PlaySE(SE_SELECT);
+            else if (pressed & SELECT_BUTTON && U.vsStep == VS_SHOW)
+                U.rules = TRUE, PlaySE(SE_SELECT);
+        }
+        else if (pressed & B_BUTTON && REG_THEMED)   // (the themes: the choice goes back to VS)
+            U.vsStep = VS_SHOW, PlaySE(SE_SELECT);
         else if (pressed & B_BUTTON)
             U.confirm = TRUE, PlaySE(SE_SELECT);   // (quitting asks first: a cup can be far along)
         else if (pressed & R_BUTTON && U.vsCursor < n)

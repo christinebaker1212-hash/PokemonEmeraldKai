@@ -828,14 +828,14 @@ static void S2Register(void)
             S2Chip(170, sL[2] + 4, "RENTAL", TH_S2_CHIP_BLUE);
         for (i = 0; i < 5; i++)
         {
-            ThText(268, sL[i], sStat[i], TF_SMALL, 0xc8d0ff, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
+            ThText(282, sL[i], sStat[i], TF_NARROW, 0xc8d0ff, G_NO_GRAD, ink, 2, FALSE, TA_LEFT);
             snprintf(line, sizeof(line), "%d", GetMonData(&m, sStatId[i]));
-            ThText(376, sL[i], line, TF_SMALL, 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_RIGHT);
+            ThText(378, sL[i], line, TF_SMALL, 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_RIGHT);
         }
         for (i = 0; i < MAX_MON_MOVES; i++)
         {
             u16 mv = GetMonData(&m, MON_DATA_MOVE1 + i);
-            float x = 18 + (i % 2) * 124, y = sL[3 + i / 2];
+            float x = 18 + (i % 2) * 130, y = sL[3 + i / 2];
             if (mv == MOVE_NONE || mv >= MOVES_COUNT)
                 continue;
             SDL_SetTextureColorMod(Th(TH_S2_DOT), TypeRgb(gBattleMoves[mv].type) >> 16, TypeRgb(gBattleMoves[mv].type) >> 8 & 255,
@@ -843,8 +843,13 @@ static void S2Register(void)
             ThPutCentred(TH_S2_DOT, x + 5, y + 13, 255);
             SDL_SetTextureColorMod(Th(TH_S2_DOT), 255, 255, 255);
             Ascii(line, gMoveNames[mv], sizeof(line));
-            ThText(x + 14, y, line, G_Measure(line, TF_SMALL) * 2 <= 108 ? TF_SMALL : TF_NARROW, 0xffffff, G_NO_GRAD, ink, 2, FALSE,
-                   TA_LEFT);
+            {
+                SDL_Rect clip = {(int)((x + 10) / 2), (int)(y / 2) - 2, 60, 16};   // (a column: 120 px, never into the next)
+                SDL_RenderSetClipRect(U.owner, &clip);
+                ThText(x + 14, y, line, G_Measure(line, TF_SMALL) * 2 <= 110 ? TF_SMALL : TF_NARROW, 0xffffff, G_NO_GRAD, ink, 2, FALSE,
+                       TA_LEFT);
+                SDL_RenderSetClipRect(U.owner, NULL);
+            }
         }
         // ENTER (or TAKE OFF, for one on the team) Yes / No; why it can't, in red
         ThText(432, 183, has ? "TAKE OFF" : "ENTER", has ? TF_NARROW : TF_SMALL, 0xffffff, G_NO_GRAD, ink, 2, FALSE, TA_CENTER);
@@ -917,6 +922,313 @@ static void S2Register(void)
                       : "{A} LOOK  {SELECT} SUMMARY  {START} TEAM  {B} DONE");   // (L and R are on the tabs)
 }
 
+// ---- the battle's flow: the ladder, VS, the choice (STADIUM 2's) ----
+
+// The battle's name as VS says it (BATTLE 3, SEMI-FINAL, THE LEADER...) and the cup's (the castle's stage)
+static void ThVsTitle(char *out, int n)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    if (r->cup == STADIUM_CUP_CASTLE)
+    {
+        if (r->stage == STADIUM_CASTLE_E4 && r->trainer == 4)
+            snprintf(out, n, "THE RIVAL");
+        else if (r->stage < STADIUM_CASTLE_GYMS && r->trainer == 3)
+            snprintf(out, n, "THE LEADER");
+        else
+            snprintf(out, n, "BATTLE %d OF %d", r->trainer + 1, r->stage == STADIUM_CASTLE_E4 ? 5 : 4);
+    }
+    else
+        snprintf(out, n, r->trainer == 6 ? "SEMI-FINAL" : r->trainer == 7 ? "FINAL BATTLE" : "BATTLE %d", r->trainer + 1);
+}
+
+static const char *ThCupTitle(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    return r->cup == STADIUM_CUP_CASTLE ? StadiumCastle_StageName(r->stage) : StadiumCup_Info(r->cup)->name;
+}
+
+// The picture of the run's trainer I (0: not known, a CHALLENGE CUP trainer not met now)
+static u16 ThRunPic(u8 i)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    const struct StadiumTrainer *t = NULL;
+    extern u16 MP_StadiumBattle_TrainerPic(void);
+    if (i == r->trainer)
+        return MP_StadiumBattle_TrainerPic();
+    if (r->cup == STADIUM_CUP_CHALLENGE)
+        return 0;
+    if (r->cup == STADIUM_CUP_CASTLE)
+        t = r->stage < STADIUM_CASTLE_GYMS ? Stadium_Trainer(r->round, STADIUM_GYM_1 + r->stage, i)
+          : i < 4 ? Stadium_Trainer(r->round, STADIUM_ELITE_FOUR, i) : Stadium_Trainer(r->round, STADIUM_RIVAL, r->rival);
+    else
+        t = Stadium_Trainer(r->round, StadiumCup_Info(r->cup)->division[r->tier & 3], i);
+    return t ? t->pic : 0;
+}
+
+// A trainer's picture in a window (X, Y, W, H real pixels), from the head down
+static void ThTrainerIn(u16 pic, float x, float y, float w, float h, u8 alpha)
+{
+    SDL_Rect clip = {(int)(x / 2), (int)(y / 2), (int)(w / 2), (int)(h / 2)};
+    SDL_RenderSetClipRect(U.owner, &clip);
+    ThBlit(TrainerTex(pic), x + (w - 64) / 2, h >= 64 ? y + (h - 64) / 2 : y, 64, 64, alpha);
+    SDL_RenderSetClipRect(U.owner, NULL);
+}
+
+// The cup's ladder: the trainers met and the one now in the windows (a cyan line round them), ? for the rest; the
+// cup and the battle on the bars
+static void S2Ladder(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    u8 n = StadiumCup_TrainerCount(r->round, r->cup, r->tier), i;
+    bool8 eight = n > 4;
+    const int top = eight ? SY_S2_LAD8_TOP : SY_S2_LAD4_TOP, bars = eight ? SY_S2_LAD8_BARS : SY_S2_LAD4_BARS;
+    char line[48];
+    ThPut(eight ? TH_S2_LADDER8 : TH_S2_LADDER4);
+    for (i = 0; i < (eight ? 8 : 4); i++)
+    {
+        float x = SX_S2_LAD_X + (i % 4) * SX_S2_LAD_STEP, y = i < 4 ? top : SY_S2_LAD8_BOTTOM;
+        float dx = x - SX_S2_LAD_X, dy = y - 42;
+        const char *label;
+        if (i >= n)
+        {
+            ThPutAt(TH_S2_LADBLANK, dx, dy, 255);
+            continue;
+        }
+        if (r->cup == STADIUM_CUP_CASTLE)
+            label = r->stage < STADIUM_CASTLE_GYMS && i == 3 ? "LEADER" : r->stage == STADIUM_CASTLE_E4 && i == 4 ? "RIVAL" : NULL;
+        else
+            label = i == 6 ? "SEMIFINAL" : i == 7 ? "FINAL" : NULL;
+        if (!label)
+            snprintf(line, sizeof(line), "BATTLE %d", i + 1), label = line;
+        if (i <= r->trainer && ThRunPic(i))
+        {
+            ThTrainerIn(ThRunPic(i), x + 4, y + 4, 90, 58, i < r->trainer ? 120 : 255);
+            if (i < r->trainer)
+                ThText(x + 49, y + 40, "WON", TF_SMALL, 0xffe060, G_NO_GRAD, 0x202020, 2, FALSE, TA_CENTER);
+        }
+        else if (i < r->trainer)
+            ThText(x + 49, y + 20, "WON", TF_SMALL, 0xffe060, G_NO_GRAD, 0x202020, 2, FALSE, TA_CENTER);
+        else
+        {
+            ThPutAt(TH_S2_QTILE, dx, dy, 255);
+            ThText(x + 49, y + 40, label, G_Measure(label, TF_SMALL) * 2 <= 86 ? TF_SMALL : TF_NARROW, 0xffffff, G_NO_GRAD, 0x202020,
+                   2, TRUE, TA_CENTER);
+        }
+        if (i == r->trainer)
+            ThPutAt(TH_S2_LADFRAME, dx, dy, 255);
+    }
+    ThText(240, bars + 13 - 15, ThCupTitle(), TF_NORMAL, 0xffffff, G_NO_GRAD, 0x202020, 2, TRUE, TA_CENTER);
+    ThVsTitle(line, sizeof(line));
+    ThText(240, bars + 28 + 13 - 15, line, TF_NORMAL, 0xffffff, G_NO_GRAD, 0x202020, 2, TRUE, TA_CENTER);
+}
+
+// THE RULES over the screen (SELECT)
+static void S2Rules(void)
+{
+    u8 i;
+    float y = 30;
+    G_FillA(0, 0, 240, 160, 0x000000, 150);
+    ThNine(TH_S2_PANEL_PALE, 30, 4, 420, 312, 12, 4, 255);   // (over the hints too: A or B goes back, as STADIUM 2's)
+    ThText(240, 8, "THE RULES", TF_SMALL, 0xf2f416, G_NO_GRAD, 0x0c0c40, 2, TRUE, TA_CENTER);
+    for (i = 0; i < ARRAY_COUNT(sClauses); i++)
+    {
+        ThText(44, y, sClauses[i][0], TF_SMALL, 0xffe060, G_NO_GRAD, 0x0c0c40, 2, FALSE, TA_LEFT);
+        y += 20 + 20 * ThWrap(44, y + 20, 392, 20, sClauses[i][1], TF_SMALL, 0xffffff, G_NO_GRAD, 0x0c0c40, 2, FALSE, TA_LEFT) + 3;
+    }
+}
+
+// VS: both teams in the plates' windows, who's who, the clauses between, VS glowing; it only shows
+static void S2Vs(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    const struct StadiumTrainer *foe = StadiumCup_Foe();
+    struct Pokemon *foeTeam;
+    u8 foeCount, i, n = StadiumCup_EntryCount();
+    char line[48], name[16] = "";
+    extern u16 MP_StadiumBattle_TrainerPic(void);
+    extern const u8 *MP_StadiumBattle_ClassName(void);
+    static const char *const sShort[4] = {"SLEEP", "FREEZE", "SELF-KO", "SPECIES"};
+    foeTeam = StadiumCup_FoeTeam(&foeCount);
+    if (foe)
+        Ascii(name, foe->name, sizeof(name));
+    else if (r->cup == STADIUM_CUP_CHALLENGE)
+    {
+        extern const struct StadiumCcTrainer *StadiumCc_Trainer(u8 cls, u8 i);
+        Ascii(name, StadiumCc_Trainer(r->tier, r->trainer)->name, sizeof(name));
+    }
+    ThPut(TH_S2_VS);
+    ThVsTitle(line, sizeof(line));
+    S2Ribbon(line, ThCupTitle());
+    // the player: portrait, name, the six
+    ThTrainerIn(PlayerGenderToFrontTrainerPicId(gSaveBlock2Ptr->playerGender), 26, 36, 66, 64, 255);
+    {
+        u8 pn[PLAYER_NAME_LENGTH + 1];
+        StringCopyN(pn, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+        pn[PLAYER_NAME_LENGTH] = EOS;
+        Ascii(line, pn, sizeof(line));
+        ThText(22, 104, line, TF_SMALL, 0xffffff, G_NO_GRAD, 0x202020, 2, TRUE, TA_LEFT);
+        ThText(22, 124, "1P", TF_SMALL, 0xffffff, G_NO_GRAD, 0x202020, 2, TRUE, TA_LEFT);
+    }
+    for (i = 0; i < n && i < PARTY_SIZE; i++)
+    {
+        struct Pokemon m;
+        StadiumCup_Entry(&m, i);
+        ThFrontIn(FrontTex(GetMonData(&m, MON_DATA_SPECIES), GetMonData(&m, MON_DATA_PERSONALITY), GetMonData(&m, MON_DATA_OT_ID)),
+                  132 + (i % 3) * 111 + 4, 32 + (i / 3) * 56 + 4, 98, 44, 255);
+    }
+    // the opponent: the six, who, portrait
+    for (i = 0; i < foeCount && i < PARTY_SIZE; i++)
+        ThFrontIn(FrontTex(GetMonData(&foeTeam[i], MON_DATA_SPECIES), GetMonData(&foeTeam[i], MON_DATA_PERSONALITY),
+                           GetMonData(&foeTeam[i], MON_DATA_OT_ID)), 22 + (i % 3) * 110 + 4, 178 + (i / 3) * 54 + 4, 97, 42, 255);
+    {
+        char cls[24];
+        Ascii(cls, MP_StadiumBattle_ClassName(), sizeof(cls));
+        ThText(352, 174, cls, G_Measure(cls, TF_SMALL) * 2 <= 110 ? TF_SMALL : TF_NARROW, 0xffffff, G_NO_GRAD, 0x202020, 2, TRUE, TA_LEFT);
+        ThText(352, 195, name, TF_SMALL, 0xffffff, G_NO_GRAD, 0x202020, 2, TRUE, TA_LEFT);
+    }
+    ThTrainerIn(MP_StadiumBattle_TrainerPic(), 360, 224, 94, 54, 255);
+    // the clauses
+    {
+        float x = 16;
+        x += S2Chip(x, 151, sShort[0], TH_S2_CHIP_GREY) + 4;
+        S2Chip(x, 151, sShort[1], TH_S2_CHIP_GREY);
+        x = 464 - (G_Measure(sShort[3], TF_NARROW) + 7) * 2;
+        S2Chip(x, 151, sShort[3], TH_S2_CHIP_GREY);
+        S2Chip(x - 4 - (G_Measure(sShort[2], TF_NARROW) + 7) * 2, 151, sShort[2], TH_S2_CHIP_GREY);
+    }
+    if (U.confirm)
+        S2Ask(240, 120, 340, "Quit this cup?", "The battles won in it are lost.");
+    S2Foot(U.confirm ? "{A} QUIT  {B} KEEP PLAYING" : "{A} CHOOSE POKéMON  {SELECT} RULES  {B} QUIT");
+    if (U.rules)
+        S2Rules();
+}
+
+// The choice: pick three in order on the 1P plate (red buttons with the order), the opponent's six on the COM plate
+static void S2Choice(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    static const u16 sPick[6] = {TH_S2_CPICK0, TH_S2_CPICK1, TH_S2_CPICK2, TH_S2_CPICK3, TH_S2_CPICK4, TH_S2_CPICK5};
+    static const u16 sRing[6] = {TH_S2_CRING0, TH_S2_CRING1, TH_S2_CRING2, TH_S2_CRING3, TH_S2_CRING4, TH_S2_CRING5};
+    const struct StadiumTrainer *foe = StadiumCup_Foe();
+    struct Pokemon *foeTeam;
+    u8 foeCount, i, side, n = StadiumCup_EntryCount(), picked = 0;
+    char line[48], name[16] = "";
+    extern u16 MP_StadiumBattle_TrainerPic(void);
+    foeTeam = StadiumCup_FoeTeam(&foeCount);
+    if (foe)
+        Ascii(name, foe->name, sizeof(name));
+    else if (r->cup == STADIUM_CUP_CHALLENGE)
+    {
+        extern const struct StadiumCcTrainer *StadiumCc_Trainer(u8 cls, u8 i);
+        Ascii(name, StadiumCc_Trainer(r->tier, r->trainer)->name, sizeof(name));
+    }
+    for (i = 0; i < STADIUM_PICK; i++)
+        if (r->picks[i] < n)
+            picked++;
+    ThPut(TH_S2_CHOICE);
+    for (i = 0; i < STADIUM_PICK; i++)
+        ThPutCentred(i < picked ? TH_S2_PICKBALL_LIT : TH_S2_PICKBALL_OFF, 22, 76 + i * 20, 255);
+    for (side = 0; side < 2; side++)
+    {
+        const int x0 = side ? SX_S2_CPLATE1_X0 : SX_S2_CPLATE0_X0, y0 = side ? SX_S2_CPLATE1_Y0 : SX_S2_CPLATE0_Y0;
+        const float cw = ((side ? SX_S2_CPLATE1_X1 : SX_S2_CPLATE0_X1) - x0) / 3.0f, ch = ((side ? SX_S2_CPLATE1_Y1 : SX_S2_CPLATE0_Y1) - y0) / 2.0f;
+        const unsigned ink = side ? 0x1c2c20 : THF_OUTLINE_INK;
+        u8 count = side ? foeCount : n;
+        for (i = 0; i < PARTY_SIZE && i < count; i++)
+        {
+            struct Pokemon m, *mon = &m;
+            float cx = x0 + (i % 3) * cw, cy = y0 + (i / 3) * ch;
+            u8 k, order = 0;
+            u16 item;
+            if (side)
+                mon = &foeTeam[i];
+            else
+            {
+                StadiumCup_Entry(&m, i);
+                for (k = 0; k < STADIUM_PICK; k++)
+                    if (r->picks[k] == i)
+                        order = k + 1;
+                if (order)
+                    ThPut(sPick[i]);
+            }
+            {
+                SDL_Rect clip = {(int)(cx / 2), (int)(cy / 2) - 2, (int)(cw / 2), (int)(ch / 2) + 2};
+                float bob = !side && U.vsCursor == i && (U.age / 8) % 2 ? -2 : 0;
+                SDL_RenderSetClipRect(U.owner, &clip);
+                ThBlit(IconTex(GetMonData(mon, MON_DATA_SPECIES)), cx + 16, cy - 16 + bob, 64, 64, 255);
+                SDL_RenderSetClipRect(U.owner, NULL);
+            }
+            snprintf(line, sizeof(line), "L%d", GetMonData(mon, MON_DATA_LEVEL));
+            ThText(cx + cw - 6, cy + 2, line, TF_SMALL, 0xffffff, 0xdfe4f0, ink, 2, FALSE, TA_RIGHT);
+            if ((item = GetMonData(mon, MON_DATA_HELD_ITEM)))
+                ThPutAt(TH_S2_ITEMBOX, cx + cw - 26 - 10, cy + 22 - 10, 255);
+            {
+                u8 nick[POKEMON_NAME_LENGTH + 1];
+                GetMonData(mon, MON_DATA_NICKNAME, nick);
+                nick[POKEMON_NAME_LENGTH] = EOS;
+                Ascii(line, nick, sizeof(line));
+                {
+                    SDL_Rect clip = {(int)(cx / 2) + 1, (int)(cy / 2), (int)(cw / 2) - 2, (int)(ch / 2)};
+                    SDL_RenderSetClipRect(U.owner, &clip);
+                    ThText(cx + cw / 2 + 1, cy + ch - 25, line, G_Measure(line, TF_SMALL) * 2 <= cw - 10 ? TF_SMALL : TF_NARROW, 0xffffff,
+                           0xdfe4f0, ink, 2, FALSE, TA_CENTER);
+                    SDL_RenderSetClipRect(U.owner, NULL);
+                }
+            }
+            if (!side)
+            {
+                if (order)
+                {
+                    ThPutCentred(TH_S2_PICKRED, cx + 13, cy + 13, 255);
+                    snprintf(line, sizeof(line), "%d", order);
+                    ThText(cx + 14, cy + 1, line, TF_SMALL, 0xffffff, G_NO_GRAD, 0x400808, 2, FALSE, TA_CENTER);
+                }
+                else
+                    ThPutCentred(TH_S2_PICKSOCKET, cx + 13, cy + 13, 255);
+                if (U.vsCursor == i)
+                    ThPut(sRing[i]);
+            }
+        }
+    }
+    // who's who: the player's portrait and name, the level total; the message, the opponent's name and portrait
+    ThTrainerIn(PlayerGenderToFrontTrainerPicId(gSaveBlock2Ptr->playerGender), SX_S2_CPORT0_X0, SX_S2_CPORT0_Y0,
+                SX_S2_CPORT0_X1 - SX_S2_CPORT0_X0, SX_S2_CPORT0_Y1 - SX_S2_CPORT0_Y0, 255);
+    {
+        u8 pn[PLAYER_NAME_LENGTH + 1];
+        StringCopyN(pn, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+        pn[PLAYER_NAME_LENGTH] = EOS;
+        Ascii(line, pn, sizeof(line));
+        S2GlassText(366, 80, 474, 112, line);
+    }
+    {
+        const struct StadiumCupInfo *c = StadiumCup_Info(r->cup);
+        if (c->levelSum)
+        {
+            u16 sum = 0;
+            for (i = 0; i < STADIUM_PICK; i++)
+                if (r->picks[i] < n)
+                {
+                    struct Pokemon m;
+                    StadiumCup_Entry(&m, r->picks[i]);
+                    sum += GetMonData(&m, MON_DATA_LEVEL);
+                }
+            snprintf(line, sizeof(line), "Lv %d/%d", sum, c->levelSum);
+            S2Chip(420 - (G_Measure(line, TF_NARROW) + 7), 122, line, sum > c->levelSum ? TH_S2_CHIP_RED : TH_S2_CHIP_GREEN);
+        }
+    }
+    if (picked < STADIUM_PICK)
+        snprintf(line, sizeof(line), picked ? "%d more!" : "Pick three!", STADIUM_PICK - picked);
+    else
+        snprintf(line, sizeof(line), "All ready!");
+    S2GlassText(6, 146, 120, 182, line);
+    S2GlassText(6, 188, 120, 218, name);
+    ThTrainerIn(MP_StadiumBattle_TrainerPic(), SX_S2_CPORT1_X0, SX_S2_CPORT1_Y0, SX_S2_CPORT1_X1 - SX_S2_CPORT1_X0,
+                SX_S2_CPORT1_Y1 - SX_S2_CPORT1_Y0, 255);
+    S2Foot("{A} PICK  {R} SUMMARY  {START} BATTLE!  {B} BACK");   // (SELECT still shows THE RULES: no room to say so)
+    if (U.rules)
+        S2Rules();
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // The screens in the chosen theme; FALSE: this one isn't drawn in it (the game's own then)
 static bool8 ThemedDraw(void)
@@ -931,6 +1243,16 @@ static bool8 ThemedDraw(void)
         case SCR_OPTIONS: S2Options(); return TRUE;
         case SCR_TEAMS: S2Teams(); return TRUE;
         case SCR_REGISTER: S2Register(); return TRUE;
+        case SCR_VS:
+            if (U.vsStep == VS_LADDER)
+                S2Ladder(), S2Foot(U.confirm ? "{A} QUIT  {B} KEEP PLAYING" : "{A} NEXT  {B} QUIT");
+            else if (U.vsStep == VS_SHOW)
+                S2Vs();
+            else
+                S2Choice();
+            if (U.vsStep == VS_LADDER && U.confirm)
+                S2Ask(240, 120, 340, "Quit this cup?", "The battles won in it are lost.");
+            return TRUE;
         }
         break;
     }

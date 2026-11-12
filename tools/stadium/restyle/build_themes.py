@@ -374,6 +374,122 @@ def s2_register():
     cut('S2_CHIP_WHITE', lambda q: q.pill(10, 10, 210, 30, 0xffffff), (6, 6, 216, 34))
 
 
+
+VS_LINES = ((27, -40, 70), (45, 400, 520), (158, -40, 520), (300, 180, 520))
+
+
+def s2_ladder():
+    """The cup's ladder (screens3.py ladder_screen): eight tiles round two bars (the cup, the battle); the castle's
+    gyms four, with the bars under them. The game puts the trainers met in the windows, a ? tile on the ones to come."""
+    for n, y0 in ((8, 34), (4, 80)):
+        c = C4()
+        c.night(((20, -40, 60), (22, 440, 520), (300, 430, 520), (302, -40, 40)))
+        y = y0
+        c.plate(30, y, 450, y + 82)
+        for i in range(4):
+            c.window(38 + i * 102, y + 8, 38 + i * 102 + 98, y + 74, glow=False)
+        define(f'SY_S2_LAD{n}_TOP', y + 8)
+        y += 84
+        define(f'SY_S2_LAD{n}_BARS', y)
+        for k in range(2):
+            c.plate(30, y, 450, y + 26)
+            y += 28
+        if n == 8:
+            c.plate(30, y, 450, y + 82)
+            for i in range(4):
+                c.window(38 + i * 102, y + 8, 38 + i * 102 + 98, y + 74, glow=False)
+            define('SY_S2_LAD8_BOTTOM', y + 8)
+        c.strip(295)
+        opaque(f'S2_LADDER{n}', c)
+    define('SX_S2_LAD_X', 38); define('SX_S2_LAD_STEP', 102)
+    # a battle to come: ribbed metal and a ? (in the first tile's place), a slot not used (the plate's own metal)
+    def q(k):
+        k.plate(30, 34, 450, 116)
+        k.qtile_bare = True
+        ix0, iy0, ix1, iy1 = k.window(38, 42, 136, 108, glow=False)
+        h = iy1 - iy0
+        ribs = 0.78 - 0.30 * (((np.arange(h) % 8) >= 5).astype(np.float32)) + 0.10 * ((np.arange(h) % 8) == 0)
+        u = np.linspace(0, 1, ix1 - ix0)
+        sh = 1 + 0.10 * np.cos((u - 0.3) * 5)
+        k.a[iy0:iy1, ix0:ix1] = (ribs[:, None] * sh[None])[..., None]
+        from PIL import ImageFont, ImageDraw
+        S = 3
+        f = ImageFont.truetype(HEAVY, 46 * S)
+        l, t, r, b = f.getbbox('?')
+        m = Image.new('L', ((ix1 - ix0) * S, h * S), 0)
+        ImageDraw.Draw(m).text((((ix1 - ix0) * S - (r - l)) / 2 - l, (h * S - (b - t)) / 2 - t - 6 * S), '?', font=f, fill=255)
+        qq = np.array(m.resize((ix1 - ix0, h), Image.LANCZOS)).astype(np.float32) / 255
+        reg = k.a[iy0:iy1, ix0:ix1]
+        reg[:] = reg * (1 - 0.8 * qq[..., None]) + 0.97 * 0.8 * qq[..., None]
+    cut('S2_QTILE', q, (42, 46, 132, 104))
+    def blank(k):
+        k.plate(30, 34, 450, 116)
+    cut('S2_LADBLANK', blank, (38, 42, 136, 108))
+    def frame(k):
+        k.a[45:105, 41:43] = hx(0x30e0e0); k.a[45:105, 131:133] = hx(0x30e0e0)
+        k.a[45:47, 41:133] = hx(0x30e0e0); k.a[103:105, 41:133] = hx(0x30e0e0)
+    cut('S2_LADFRAME', frame, (40, 44, 134, 106))
+
+
+def s2_vs():
+    """VS (screens2.py vs_screen): the player's plate (portrait, the six), the opponent's (the six, who, portrait),
+    the clauses' chips and a glowing VS between them. Only shows: A goes on to the choice."""
+    c = C4()
+    c.night(VS_LINES)
+    ribbon(c, 8, 'SEMI-FINAL', 'GYM LEADER CASTLE')
+    c.plate(14, 24, 466, 146)
+    c.window(22, 32, 96, 104, glow=False)
+    for i in range(6):
+        x0, y0 = 132 + (i % 3) * 111, 32 + (i // 3) * 56
+        c.window(x0, y0, x0 + 106, y0 + 52)
+    c.plate(14, 170, 466, 288)
+    for i in range(6):
+        x0, y0 = 22 + (i % 3) * 110, 178 + (i // 3) * 54
+        c.window(x0, y0, x0 + 105, y0 + 50)
+    c.window(356, 220, 458, 282, glow=False)
+    c.neon(240, 157, 'VS', 56, 0x40e8f0, HEAVY, hollow=False, glow=6)
+    c.strip(295)
+    opaque('S2_VS', c)
+
+
+def s2_choice():
+    """The choice (screens3.py choice_screen): both teams as plates, a pick button on each of the player's, the
+    message and the opponent's name in black glass, the portraits in frames, the 1P / COM banners."""
+    c = C4()
+    background(c, front('tyranitar'), (120, 20), 290)
+    c.tab(10, 34, -6, 150, TAB_BLUE)
+    c.label_rot(22, 36, '1P', 22, 0x0c1018, 90)
+    for team, box, pal in ((0, (40, 8, 360, 140), 'blue'), (1, (126, 154, 446, 286), 'green')):
+        sx0, sy0, sx1, sy1 = c.slab(*box, pal)
+        defines(f'SX_S2_CPLATE{team}', (sx0, sy0, sx1, sy1))
+        cw, ch = (sx1 - sx0) / 3, (sy1 - sy0) / 2
+        for k in (1, 2):
+            c.engrave_v(int(sx0 + k * cw), sy0 + 4, sy1 - 4, pal)
+        c.engrave_h(int(sy0 + ch), sx0 + 4, sx1 - 4, pal)
+        if team == 0:
+            for i in range(6):
+                x0, y0, x1, y1 = int(sx0 + (i % 3) * cw), int(sy0 + (i // 3) * ch), int(sx0 + (i % 3 + 1) * cw), int(sy0 + (i // 3 + 1) * ch)
+                cut(f'S2_CPICK{i}', lambda k, x0=x0, y0=y0, x1=x1, y1=y1, i=i: k.sheen(x0 + (2 if i % 3 else 0), y0 + (2 if i // 3 else 0), x1, y1, 'gold', (sx0, sx1)),
+                    (x0 + (2 if i % 3 else 0), y0 + (2 if i // 3 else 0), x1, y1))
+                cut(f'S2_CRING{i}', lambda k, x0=x0, y0=y0, x1=x1, y1=y1: k.ring(x0 - 1, y0 - 1, x1 + 2, y1 + 1), (x0 - 5, y0 - 5, x1 + 6, y1 + 5))
+    defines('SX_S2_CPORT0', c.frame(388, 8, 454, 74))
+    c.glass(366, 80, 474, 112)
+    c.tab(452, 476, 300, 158, TAB_GREEN)
+    for k in range(3):
+        c.ball(464, 182 + k * 18, 7)
+    c.label_rot(464, 254, 'COM', 19, 0x0a1c0c, -90)
+    c.glass(6, 146, 120, 182)
+    c.glass(6, 188, 120, 218)
+    defines('SX_S2_CPORT1', c.frame(54, 222, 118, 286))
+    c.strip(295)
+    opaque('S2_CHOICE', c)
+    for lit in (True, False):
+        cut('S2_PICKBALL_' + ('LIT' if lit else 'OFF'), lambda k, lit=lit: k.ball(20, 20, 7, top=0x4880e8, lit=lit), (10, 10, 31, 31))
+    cut('S2_PICKRED', lambda k: k.sphere(20, 20, 9.5, 0xe03828), (8, 8, 33, 33))
+    cut('S2_PICKSOCKET', lambda k: k.sphere(20, 20, 8, 0x5a6278, flat=True), (9, 9, 32, 32))
+    cut('S2_DIM', lambda k: k.a.__setitem__(slice(None), 0), (0, 0, 8, 8))
+
+
 def s2_chips():
     """The rule chips as long capsules a colour each (the game cuts them to the word: its ends and its middle)."""
     for name, rgb in (('GREEN', 0x40a050), ('BLUE', 0x4878c0), ('ORANGE', 0xc06030), ('GREY', 0x585880), ('GOLD', 0xc09020),
@@ -410,4 +526,7 @@ if __name__ == '__main__':
     s2_boxes()
     s2_teams()
     s2_register()
+    s2_ladder()
+    s2_vs()
+    s2_choice()
     write()

@@ -4450,6 +4450,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_HallDebug(void);
         Sinnoh_HallDebug();   // SINNOH's BATTLE HALL record (src/sinnoh/s3d_hall.c)
     }
+    else if (strcmp(cmd, "stadiumfill") == 0)
+    {
+        // stadiumfill - on REGISTER A TEAM: the list's first POKéMON that may enter fill the cup's team to six
+        void MP_StadiumUi_DebugFill(void);
+        MP_StadiumUi_DebugFill();
+    }
     else if (strcmp(cmd, "stadiumstyle") == 0)
     {
         // stadiumstyle 0|1|2 - OPTIONS > BATTLE > STADIUM SETTINGS > STYLE (ORIGINAL, POKESTADIUM, POKESTADIUM 2)
