@@ -328,6 +328,15 @@ static void LoadPack(void)
            (unsigned)sPack.nmat);
 }
 
+// Black's doors are walls the player walks into northward (a connection's direction); here they're tiles stepped onto
+// (Emerald's non-animated door), so a door is never walked into from the side: the Cold Storage's container from the
+// row beside it skipped the trigger in front (map coordinates, MAP_OFFSET in)
+bool8 U3D_StepBlocked(s16 fromX, s16 fromY, s16 x, s16 y)
+{
+    return fromY == y && fromX != x && U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup)
+        && MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(x, y));
+}
+
 // A rail map's ways out (u3d.h U3D_RAIL_WARP) warp as they're walked onto; the one the player arrived on (and the band
 // it's part of) only once they've stood elsewhere since the map loaded (field_control_avatar.c)
 static bool8 sRailArmed;

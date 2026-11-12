@@ -23,6 +23,7 @@ void U3D_CommitOam(void);
 #define U3D_METATILE_BEHAVIOR 0x300
 #define U3D_RAIL_WARP 0x49   // (MB_UNUSED_49: a rail map's way out, warps as it's stepped on: tools/unova/build_pack.py)
 bool8 U3D_RailWarpArmed(void);
+bool8 U3D_StepBlocked(s16 fromX, s16 fromY, s16 x, s16 y);   // (a door walked into from the side)
 void U3D_Vm_FieldShown(void);
 bool8 U3D_Vm_DockStep(u16 direction);   // (u3d_vm.c: ELESA's gym's coasters, a dock stepped onto)   // (u3d_vm.c: a map first shown, a continued game's too)
 const u16 *U3D_LayoutBlocks(const struct MapLayout *layout);
