@@ -609,7 +609,7 @@ bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
             return FALSE;
         if (WildEncounterCheck(info->encounterRate, FALSE) != TRUE)
             return FALSE;
-        if (area != 1 && TryStartRoamerEncounter() == TRUE)   // (THUNDURUS / TORNADUS after the credits)
+        if (area != 1 && TryStartRoamerEncounter() == TRUE)   // (TORNADUS / THUNDURUS after the credits)
         {
             if (!IsWildLevelAllowedByRepel(RoamerEncounterLevel()))
                 return FALSE;

@@ -37,7 +37,7 @@ bool8 U3D_Vm_HasCGear(void);
 u16 U3D_Vm_Work(u16 id);
 void U3D_Vm_ContinueHome(void);
 u16 U3D_Vm_ObjCode(u16 code);   // a work object code's code (Black's 0xA2-0xB1: its work 0x4020 + n)
-bool8 U3D_TryRoamerEncounter(u8 *level);   // UNOVA's roamers (THUNDURUS, TORNADUS) on this zone's grass
+bool8 U3D_TryRoamerEncounter(u8 *level);   // UNOVA's roamers (TORNADUS, THUNDURUS) on this zone's grass
 bool8 U3D_RoamerAfterBattle(struct Pokemon *mon, u8 outcome);   // after UNOVA's game clear: CONTINUE starts at home (Black's continue spot)   // a work of Black's event work   // FENNEL gave the C-GEAR (UNOVA's device)
 void U3D_Vm_WhiteoutHome(void);   // a new game in UNOVA: a whiteout returns home to NUVEMA (Black's first warp point)
 bool8 U3D_MapOfZoneTile(u16 zone, u16 x, u16 z, u8 *group, u8 *num, s16 *mapX, s16 *mapY);                                       // the player's map's row of u3d_maps.h (-1: not UNOVA)

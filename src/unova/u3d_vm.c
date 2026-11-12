@@ -1744,9 +1744,9 @@ static void Step(struct Thread *t)
             sClearMode = V(0);                        // FAME and the credits); the script ends here (VM_End)
             OpenScreen(t, SCREEN_CLEAR, 0);
             return;
-        case U3C_PROC_FLD_SpawnMovePokemonIfInactive:   // slot: Black's THUNDURUS sets off roaming (White's TORNADUS too)
-            RoamSpawn(0, 642);
-            RoamSpawn(1, 641);
+        case U3C_PROC_FLD_SpawnMovePokemonIfInactive:   // slot: Black's TORNADUS sets off roaming (White's THUNDURUS too)
+            RoamSpawn(1, 641);   // (Black's slot 1: TORNADUS, SpawnEntry)
+            RoamSpawn(0, 642);   // (slot 0: THUNDURUS, White's)
             break;
         case U3C_WORK_CmdSetWarpDestination:   // Black's warp point (a POKéMON CENTER, home): where a whiteout returns
             SetWhiteoutPoint(V(0));
@@ -2755,8 +2755,8 @@ static bool8 WhiteZekromHere(u8 localId)
 }
 
 // ------------------------------------------------------------------------------------------------ the roamers
-// Black's MOVE_POKEMON (ov010 move_pokemon.c): after the credits a scene on ROUTE 7 sets THUNDURUS roaming its 16 route
-// zones (d_021711C6), a fifth of the moves nowhere; Lv 40, its HP and status kept between battles. White's TORNADUS
+// Black's MOVE_POKEMON (ov010 move_pokemon.c): after the credits a scene on ROUTE 7 sets TORNADUS roaming its 16 route
+// zones (d_021711C6), a fifth of the moves nowhere; Lv 40, its HP and status kept between battles. White's THUNDURUS
 // roams beside it (the user, 2026-11-12). Met on its zone's grass half the time, as SINNOH's roamers.
 static const u16 sRoamZones[16] = {319, 321, 326, 329, 331, 337, 345, 348, 355, 365, 368, 370, 374, 378, 383, 387};
 static s8 sRoamBattled = -1;
