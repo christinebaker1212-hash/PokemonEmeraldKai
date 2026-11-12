@@ -1,0 +1,15 @@
+# Moemon Maker: edits to MAP_ORRE_OUTSKIRT_STAND (written by the editor; each line has the value it replaced, then the new one)
+map MAP_ORRE_OUTSKIRT_STAND 64 64
+block 32 27 0x3300 0x3700
+block 33 27 0x3300 0x3700
+block 34 27 0x3300 0x3700
+block 35 27 0x3300 0x3700
+block 36 27 0x3300 0x3700
+block 37 27 0x3300 0x3700
+block 38 27 0x3300 0x3700
+block 40 27 0x3300 0x3700
+block 41 27 0x3300 0x3700
+block 15 29 0x3300 0x3700
+block 16 29 0x3300 0x3700
+block 50 32 0x3300 0x3700
+block 38 38 0x3401 0x3001
