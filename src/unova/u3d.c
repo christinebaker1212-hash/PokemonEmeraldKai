@@ -328,6 +328,14 @@ static void LoadPack(void)
            (unsigned)sPack.nmat);
 }
 
+// A rail map's ways out (u3d.h U3D_RAIL_WARP) warp as they're walked onto; the one the player arrived on (and the band
+// it's part of) only once they've stood elsewhere since the map loaded (field_control_avatar.c)
+static bool8 sRailArmed;
+bool8 U3D_RailWarpArmed(void)
+{
+    return sRailArmed;
+}
+
 // Black's animated map textures now (its field runs at 30 frames a second: one of its frames is two of this game's):
 // each ITP texture's frame, each ITA scrolling's shift
 static void AnimateTextures(void)
@@ -1246,6 +1254,7 @@ void U3D_Update(void)
         return;
     if (sView.map != map)
     {
+        sRailArmed = FALSE;   // (a rail map's way out the player arrived on waits until they've stepped off it)
         sView.havePlayerH = FALSE;
         sCam.mode = CAM_FOLLOW;   // (a scene's camera stays on its map)
         sSeason = U3D_Season();   // (Black changes the season as a map is entered)
@@ -1254,6 +1263,9 @@ void U3D_Update(void)
     sCurMat = MatrixNumbered(ShownMat(map));
     sCurMap = map;
     sView.frame++;
+    if (!sRailArmed && MapGridGetMetatileBehaviorAt(gSaveBlock1Ptr->pos.x + MAP_OFFSET, gSaveBlock1Ptr->pos.y + MAP_OFFSET)
+                       != U3D_RAIL_WARP)
+        sRailArmed = TRUE;
     AnimateTextures();
     FindCamera();
     SetupView();

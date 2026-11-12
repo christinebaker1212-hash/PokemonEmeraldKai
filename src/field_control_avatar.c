@@ -75,6 +75,13 @@ static s8 GetWarpEventAtPosition(struct MapHeader *, u16, u16, u8);
 static const u8 *GetCoordEventScriptAtPosition(struct MapHeader *, u16, u16, u8);
 static const struct BgEvent *GetBackgroundEventAtPosition(struct MapHeader *, u16, u16, u8);
 static bool8 TryStartCoordEventScript(struct MapPosition *);
+// Moemon Kai: an UNOVA rail map's way out (a street into the next zone, a door on a rail): it warps as it's walked
+// onto, whichever way, as Black changes zone (u3d.h U3D_RAIL_WARP)
+static bool8 IsUnovaRailWarp(u16 metatileBehavior)
+{
+    return metatileBehavior == U3D_RAIL_WARP && U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup);
+}
+
 static bool8 TryStartWarpEventScript(struct MapPosition *, u16);
 static bool8 TryStartMiscWalkingScripts(u16);
 static bool8 TryStartStepCountScript(u16);
@@ -959,7 +966,8 @@ static bool8 TryStartWarpEventScript(struct MapPosition *position, u16 metatileB
     s8 warpEventId = GetWarpEventAtMapPosition(&gMapHeader, position);
 
     if (warpEventId != WARP_ID_NONE && IsWarpMetatileBehavior(metatileBehavior) == TRUE
-     && !(MetatileBehavior_IsNonAnimDoor(metatileBehavior) && IsSinnohEntranceFront(position)))   // (Moemon Kai: above)
+     && !(MetatileBehavior_IsNonAnimDoor(metatileBehavior) && IsSinnohEntranceFront(position))   // (Moemon Kai: above)
+     && !(IsUnovaRailWarp(metatileBehavior) && !U3D_RailWarpArmed()))   // (Moemon Kai: not the one just arrived on)
     {
         // Moemon Kai: a closed way (JOHTO's / KANTO's GAME CENTER has no ROOFTOP): a word, and the player steps back
         if (MP_Region_WarpClosed(gMapHeader.events->warps[warpEventId].mapGroup, gMapHeader.events->warps[warpEventId].mapNum))
@@ -1015,6 +1023,8 @@ static bool8 TryStartWarpEventScript(struct MapPosition *position, u16 metatileB
 
 static bool8 IsWarpMetatileBehavior(u16 metatileBehavior)
 {
+    if (IsUnovaRailWarp(metatileBehavior))   // Moemon Kai: UNOVA's rail maps' ways out (u3d.h U3D_RAIL_WARP)
+        return TRUE;
     if (MetatileBehavior_IsWarpDoor(metatileBehavior) != TRUE
      && MetatileBehavior_IsLadder(metatileBehavior) != TRUE
      && MetatileBehavior_IsEscalator(metatileBehavior) != TRUE

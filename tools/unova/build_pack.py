@@ -212,6 +212,9 @@ def field_block(attr):
 # arrow warp (the same numbers in both games' meaning: MB_SOUTH / EAST / WEST_ARROW_WARP)
 STEP_WARP = 0x60
 ARROW_BY_DIR = {1: 0x65, 3: 0x62, 4: 0x63}
+# a rail map's way out (a street's end into the next zone, a building's door on a rail): Black changes zone as the
+# player walks over it, whichever way they come: warps as it's stepped on (u3d.h U3D_RAIL_WARP, field_control_avatar.c)
+RAIL_WARP = 0x49
 
 
 def warp_tiles(zone_ids):
@@ -392,7 +395,7 @@ def lay_rails(grid, zone_ids, warps, cams):
         for c in evr.events(z)['connect']:
             if c['rail']:
                 for t in rails.event_tiles(z, 'connect', c):
-                    rail_warps[t] = ARROW_BY_DIR.get(c['dir'], STEP_WARP)
+                    rail_warps[t] = RAIL_WARP
         for (tx, tz), hs in tiles.items():
             if tx < 0 or tz < 0:
                 continue

@@ -497,6 +497,10 @@ static void LoadSavedMapView(void)
     mapView = gSaveBlock1Ptr->mapView;
     if (SavedMapViewIsEmpty())
         return;
+    // Moemon Kai: UNOVA's tiles are all the pack's (src/unova/u3d.c; Black's own changes are its map replacements):
+    // the view a save kept would bring back an older pack's tiles after an update (CASTELIA's street ways out)
+    if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+        return;
 
     width = gBackupMapLayout.width;
     x = gSaveBlock1Ptr->pos.x;
