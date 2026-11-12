@@ -439,7 +439,8 @@ static bool8 UnseenStanderAt(s16 x, s16 y)
     {
         const struct ObjectEventTemplate *o = &gSaveBlock1Ptr->objectEventTemplates[i];
         u8 id;
-        if (o->x != x || o->y != y || o->localId == 0 || (o->flagId && FlagGet(o->flagId)) || WandersType(o->movementType))
+        if (o->x != x || o->y != y || o->localId == 0 || (o->flagId && FlagGet(o->flagId)) || WandersType(o->movementType)
+         || U3D_Vm_ObjectHidden(o->localId))   // (UNOVA: one Black's flags or scripts took away, BURGH's open doors)
             continue;
         if (((o->script == Quetzal_EventScript_846B413 || o->script == EventScript_CutTree) && PartyKnows(MOVE_CUT))
          || ((o->script == Quetzal_EventScript_846B4F2 || o->script == EventScript_RockSmash) && PartyKnows(MOVE_ROCK_SMASH)))

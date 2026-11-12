@@ -23,7 +23,8 @@ void U3D_CommitOam(void);
 #define U3D_METATILE_BEHAVIOR 0x300
 #define U3D_RAIL_WARP 0x49   // (MB_UNUSED_49: a rail map's way out, warps as it's stepped on: tools/unova/build_pack.py)
 bool8 U3D_RailWarpArmed(void);
-void U3D_Vm_FieldShown(void);   // (u3d_vm.c: a map first shown, a continued game's too)
+void U3D_Vm_FieldShown(void);
+bool8 U3D_Vm_DockStep(u16 direction);   // (u3d_vm.c: ELESA's gym's coasters, a dock stepped onto)   // (u3d_vm.c: a map first shown, a continued game's too)
 const u16 *U3D_LayoutBlocks(const struct MapLayout *layout);
 void U3D_RefreshBlocks(void);   // the field's blocks again after Black replaced the map under the player   // a UNOVA map's from the pack, others the layout's
 // Black's scene cameras (u3d.c, played by u3d_vm.c): to a target (Black's world units, fx32), pitch / yaw (65536ths of a

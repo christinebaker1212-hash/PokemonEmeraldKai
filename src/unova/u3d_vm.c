@@ -246,7 +246,8 @@ struct UnovaRoamer { u16 species, hp; u8 level, state, loc, status; u32 personal
 static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
                 u8 white; struct UnovaRoamer roam[2];
                 struct { u8 valid, npc[10], mood[10], flags[10], back[10]; u16 counter, value; } wfbc;
-                struct U3DSubwaySave subway; } sWork;   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
+                struct U3DSubwaySave subway;
+                u8 gym[8]; } sWork;   // (gym[0]: ELESA's gym's levers, a bit a lane: CartLanes below)   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
 {
@@ -1765,6 +1766,14 @@ static void Step(struct Thread *t)
         case U3C_PALPARK_SetBeacon:   // (a link beacon of what the player did: no wireless here)
         case U3C_DebugWork:   // (Black's debug prints)
         case U3C_DebugStack:
+        case U3C_FIELD_GIMMICK_CART_LANES_CreateSwitchEvent:   // ELESA's gym: a floor switch throws a lane's lever
+            if (V(0) < 4)
+                sWork.gym[0] ^= 1 << V(0);
+            PlaySE(SE_SWITCH);
+            break;
+        case U3C_FIELD_GIMMICK_CART_LANES_UnlockLaneFromScript:   // (lanes 1, 2: Black's flags 0x74, 0x75 say so)
+        case U3C_FIELD_GIMMICK_CART_LANES_TransferSound:
+            break;
         case U3C_FIELD_GIMMICK_PLATE_DOORS_StartSwitchEvent:   // BURGH's gym: a floor switch found (PlateDoorsRefresh)
             if (V(0) < 8)
                 *WorkPtr(0x4000 + V(0)) = 1;   // (the script sets it as it ends, too)
@@ -2934,6 +2943,65 @@ void U3D_Vm_FieldShown(void)
 {
     if (Ready())
         PlateDoorsRefresh(FALSE);
+}
+
+// ELESA's gym (zone 63, Black's gimmick 39, ov039 field_gimmick_cart_lanes.c): four lanes of coaster rails, each with
+// two carts on loops its lever picks (cart = lane * 2 + lever), every loop stopping at one dock or two (sStopDocks).
+// The player walks onto a dock facing the rails and the cart takes them to the loop's other stop (Black's cart waits
+// at each stop until DOWN gets the player off; here the ride goes straight to the next stop). Lanes 1 and 2 are
+// locked until their trainer is beaten (Black's flags 0x74, 0x75: zone 63's script 8 unlocks them as it sets them).
+// The floor switches throw a lane's lever (CART_LANES_CreateSwitchEvent). The carts and rails aren't drawn
+#define ZONE_NIMBASA_GYM 63
+static const u8 sCartDock[9][2] = {{14, 39}, {22, 39}, {16, 27}, {16, 15}, {41, 40}, {49, 40}, {34, 8}, {22, 8}, {5, 39}};
+static const u8 sCartDockLane[9] = {0, 0, 0, 1, 1, 2, 2, 3, 3};
+static const s8 sCartStops[8][2] = {{1, 0}, {1, 2}, {4, -1}, {4, 3}, {6, -1}, {6, 5}, {8, -1}, {8, 7}};
+static u8 sRideFrom;
+
+// (field_control_avatar.c: a step onto a dock of the gym, facing north as Black's rider)
+bool8 U3D_Vm_DockStep(u16 direction)
+{
+    s32 m = U3D_MapIndex(), x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
+    u32 d;
+    if (direction != DIR_NORTH || !Ready() || CurrentZone() != ZONE_NIMBASA_GYM || m < 0)
+        return FALSE;
+    x += 32 * U3D_MapCellX(m), y += 32 * U3D_MapCellZ(m);
+    for (d = 0; d < ARRAY_COUNT(sCartDock); d++)
+        if (sCartDock[d][0] == x && sCartDock[d][1] == y)
+        {
+            sRideFrom = d;
+            return TRUE;
+        }
+    return FALSE;
+}
+
+static bool8 CartLaneLocked(u32 lane)
+{
+    return (lane == 1 && !FlagOn(0x74)) || (lane == 2 && !FlagOn(0x75));
+}
+
+// special: 1 the cart goes (0x8004 / 0x8005 the map spot it stops at), 0 the lane is locked
+u16 U3D_VmRideKind(void)
+{
+    u32 lane = sCartDockLane[sRideFrom], cart = lane * 2 + ((sWork.gym[0] >> lane) & 1), to = sRideFrom;
+    s32 m = U3D_MapIndex();
+    if (CartLaneLocked(lane))
+        return 0;
+    if (sCartStops[cart][0] == sRideFrom && sCartStops[cart][1] >= 0)
+        to = sCartStops[cart][1];
+    else if (sCartStops[cart][1] == sRideFrom)
+        to = sCartStops[cart][0];   // (a loop with one stop brings the player back round to it)
+    gSpecialVar_0x8004 = sCartDock[to][0] - (m >= 0 ? 32 * U3D_MapCellX(m) : 0);
+    gSpecialVar_0x8005 = sCartDock[to][1] - (m >= 0 ? 32 * U3D_MapCellZ(m) : 0);
+    return 1;
+}
+
+// special: a locked lane's dock: Black's scripts there, its trainer comes over (7), then the battle that unlocks it (8)
+void U3D_VmRideLocked(void)
+{
+    if (Run(7, 0xFFFF, TRUE))
+        sPendingScript = 8;
+    else
+        NothingToRun();
 }
 
 void U3D_VmMapLoad(void)

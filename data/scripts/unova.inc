@@ -45,3 +45,19 @@ Unova_EventScript_Screen::
 	waitstate
 	special U3D_VmResume
 	goto Unova_EventScript_Wait
+
+@ ELESA's gym's coasters (src/unova/u3d_vm.c U3D_Vm_DockStep): a dock walked onto facing the rails. A lane still locked
+@ runs Black's own scripts there (its trainer); else the cart carries the player to the other stop of its loop
+Unova_EventScript_Ride::
+	lockall
+	specialvar VAR_RESULT, U3D_VmRideKind
+	goto_if_eq VAR_RESULT, 1, Unova_EventScript_RideCart
+	special U3D_VmRideLocked
+	goto Unova_EventScript_Wait
+
+Unova_EventScript_RideCart::
+	playse SE_TRUCK_MOVE
+	warpsilent MAP_UNOVA_NIMBASACITY_Z63, VAR_0x8004, VAR_0x8005
+	waitstate
+	releaseall
+	end

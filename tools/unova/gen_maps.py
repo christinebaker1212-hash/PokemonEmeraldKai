@@ -297,7 +297,7 @@ def main():
         "@ Moemon Kai: UNOVA's map scripts (docs/UNOVA_HANDOFF.md; the maps from tools/unova/gen_maps.py)",
         '#include "constants/global.h"', '#include "constants/flags.h"', '#include "constants/vars.h"',
         '#include "constants/comparison_operators.h"', '#include "constants/items.h"',
-        '#include "constants/map_scripts.h"', '\t.include "asm/macros.inc"', '\t.include "constants/constants.inc"',
+        '#include "constants/map_scripts.h"', '#include "constants/map_groups.h"', '#include "constants/maps.h"', '#include "constants/songs.h"', '\t.include "asm/macros.inc"', '\t.include "constants/constants.inc"',
         '\t.include "asm/macros/event.inc"', '\t.section script_data, "aw"', '']
     for m in maps:
         inc = '\t.include "data/maps/%s/scripts.inc"' % m['name']

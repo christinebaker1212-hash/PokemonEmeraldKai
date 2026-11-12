@@ -625,6 +625,13 @@ static bool8 TryStartStepBasedScript(struct MapPosition *position, u16 metatileB
 {
     if (TryStartCoordEventScript(position) == TRUE)
         return TRUE;
+    if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) && U3D_Vm_DockStep(direction))
+    {
+        // Moemon Kai: ELESA's gym's coasters (src/unova/u3d_vm.c): a dock walked onto, facing the rails
+        extern const u8 Unova_EventScript_Ride[];
+        ScriptContext_SetupScript(Unova_EventScript_Ride);
+        return TRUE;
+    }
     if (TryStartWarpEventScript(position, metatileBehavior) == TRUE)
         return TRUE;
     if (TryStartMiscWalkingScripts(metatileBehavior) == TRUE)

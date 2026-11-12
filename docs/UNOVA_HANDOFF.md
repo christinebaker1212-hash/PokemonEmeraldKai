@@ -112,8 +112,11 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   closed (flag 12 always set). Black's POKéMARTs (SHOP_StartShop): lists by badges and numbered (pack v10 after the
   subway's tables), the game's POKéMART opened straight on BUY or SELL (shop.c MP_CreatePokemartDirect), BLACK CITY's
   stalls at their residents' prices (shop.c MP_Shop_SetPrices), the BP exchanges (u3d_bpshop.c, Black's words).
+  Gym gimmicks kept: CASTELIA's honey doors (u3d_vm.c PlateDoorsRefresh), NIMBASA's coasters (U3D_Vm_DockStep: a dock walked
+  onto facing the rails rides its lane's cart, lever sWork.gym[0], to the loop's other stop; lanes 1, 2 locked till Black's
+  flags 0x74 / 0x75, their trainers' scripts 7 and 8; Unova_EventScript_Ride; carts and rails not drawn).
   Not yet: the GEAR STATION's trains drawn on the platforms; the gyms' gimmicks (Black's field_gimmick_*: STRIATON's
-  switches, NACRENE's books, CASTELIA's honey walls, NIMBASA's coaster, DRIFTVEIL's lifts, MISTRALTON's cannons,
+  switches, NACRENE's books, DRIFTVEIL's lifts, MISTRALTON's cannons,
   ICIRRUS's ice, OPELUCID's bridges), MUSICALS, NIMBASA's stadiums, the ROYAL UNOVA, the survey HQ.
 - The ROM: the user's Pokemon Black (USA, Europe) (NDSi Enhanced), SHA-1 26ad0b9967aa279c4a266ee69f52b9b2332399a5,
   from their Google Drive (the link in docs/UNOVA_DECISIONS.md's source message; the release fetches it through the
