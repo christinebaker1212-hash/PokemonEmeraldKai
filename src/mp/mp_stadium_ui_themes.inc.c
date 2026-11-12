@@ -1424,6 +1424,1014 @@ static void S2Result(void)
 }
 
 // ---------------------------------------------------------------------------------------------------------------
+// POKESTADIUM (the first STADIUM's look: the starfield, navy boxes in a pale line, the cups' own pictures behind,
+// STADIUM's fat letters)
+
+#define S1_INK 0x101020
+#define S1_YELLOW 0xf8f040
+
+static void S1T(float x, float y, const char *s, unsigned color, int align)
+{
+    ThText(x, y, s, G_Measure(s, TF_SMALL) * 2 > 0 ? TF_SMALL : TF_SMALL, color, G_NO_GRAD, S1_INK, 2, FALSE, align);
+}
+
+// The words in the narrow font when they'd pass W pixels
+static void S1Tw(float x, float y, const char *s, unsigned color, int align, float w)
+{
+    ThText(x, y, s, G_Measure(s, TF_SMALL) * 2 <= w ? TF_SMALL : TF_NARROW, color, G_NO_GRAD, S1_INK, 2, FALSE, align);
+}
+
+// A navy box (or another of STADIUM's) at any size: X, Y, W, H real pixels
+static void S1Box(u16 id, float x, float y, float w, float h)
+{
+    ThNine(id, x, y, w, h, 8, 2, 255);
+}
+
+// The four white corners round a box (the cursor)
+static void S1Brackets(float x0, float y0, float x1, float y1)
+{
+    int k;
+    SDL_RenderSetScale(U.owner, 1, 1);
+    for (k = 0; k < 2; k++)   // (a dark line under, then the white)
+    {
+        unsigned c = k ? 0xffffff : 0x303030;
+        float o = k ? 0 : 1;
+        SDL_SetRenderDrawColor(U.owner, c >> 16, c >> 8 & 255, c & 255, 255);
+        SDL_RenderFillRectF(U.owner, &(SDL_FRect){x0 + o, y0 + o, 8, 2});
+        SDL_RenderFillRectF(U.owner, &(SDL_FRect){x0 + o, y0 + o, 2, 8});
+        SDL_RenderFillRectF(U.owner, &(SDL_FRect){x1 - 8 + o, y0 + o, 8, 2});
+        SDL_RenderFillRectF(U.owner, &(SDL_FRect){x1 - 2 + o, y0 + o, 2, 8});
+        SDL_RenderFillRectF(U.owner, &(SDL_FRect){x0 + o, y1 - 2 + o, 8, 2});
+        SDL_RenderFillRectF(U.owner, &(SDL_FRect){x0 + o, y1 - 8 + o, 2, 8});
+        SDL_RenderFillRectF(U.owner, &(SDL_FRect){x1 - 8 + o, y1 - 2 + o, 8, 2});
+        SDL_RenderFillRectF(U.owner, &(SDL_FRect){x1 - 2 + o, y1 - 8 + o, 2, 8});
+    }
+    SDL_RenderSetScale(U.owner, 2, 2);
+}
+
+// A filled rectangle at real pixels
+static void S1Fill(float x, float y, float w, float h, unsigned c, u8 a)
+{
+    SDL_RenderSetScale(U.owner, 1, 1);
+    SDL_SetRenderDrawBlendMode(U.owner, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(U.owner, c >> 16, c >> 8 & 255, c & 255, a);
+    SDL_RenderFillRectF(U.owner, &(SDL_FRect){x, y, w, h});
+    SDL_RenderSetScale(U.owner, 2, 2);
+}
+
+// A panel: a dark line, a pale one, FILL inside
+static void S1Panel(float x0, float y0, float x1, float y1, unsigned fill)
+{
+    S1Fill(x0 - 2, y0 - 2, x1 - x0 + 4, y1 - y0 + 4, 0x101030, 255);
+    S1Fill(x0 - 1, y0 - 1, x1 - x0 + 2, y1 - y0 + 2, 0xe8e8ff, 255);
+    S1Fill(x0, y0, x1 - x0, y1 - y0, fill, 255);
+}
+
+// A cup's own picture filling the screen (zoomed in from its middle), darkened by DIM
+static void S1Backdrop(u8 cup, float dim, float zoom)
+{
+    SDL_Texture *pic = CupPic(cup);
+    float w = 480 * zoom, h = w * 96 / 128;
+    if (pic)
+        ThBlit(pic, (480 - w) / 2, (320 - h) / 2, w, h, 255);
+    else
+        CupScene(cup, 0, 0, 240, 160, TRUE);
+    if (dim > 0)
+        S1Fill(0, 0, 480, 320, 0x000000, (u8)(dim * 255));
+}
+
+static void S1Title(const char *word, const char *right)
+{
+    ThPut(TH_S1_TITLEBAR);
+    ThText(58, 7, word, TF_SMALL, S1_YELLOW, G_NO_GRAD, S1_INK, 2, TRUE, TA_LEFT);
+    if (right)
+        S1T(428, 7, right, 0xffffff, TA_RIGHT);
+}
+
+static void S1Foot(const char *hint)
+{
+    ThPut(TH_S1_FOOT);
+    S2Foot(hint);
+}
+
+// A fat word's piece centred on (CX, CY), or the game's font when the word has none
+static void S1Fat(const char *word, float cx, float cy)
+{
+    u16 i;
+    for (i = 0; i < ARRAY_COUNT(sThFatWords); i++)
+        if (strcmp(sThFatWords[i].word, word) == 0)
+        {
+            ThPutAt(sThFatWords[i].piece, cx - 240, cy - 160, 255);
+            return;
+        }
+    ThText(cx, cy - 15, word, TF_NORMAL, 0xfff8a0, G_NO_GRAD, 0x282008, 2, TRUE, TA_CENTER);
+}
+
+// ---- the cups: their pictures floating over the island, four over three ----
+static void S1CardBox(u8 i, float *x, float *y, float *w, float *h)
+{
+    *w = 104, *h = 78;
+    if (i < 4)
+        *x = 14 + i * 116, *y = 26;
+    else
+        *x = 72 + (i - 4) * 116, *y = 128;
+}
+
+static void S1Select(void)
+{
+    const struct StadiumCupInfo *c = StadiumCup_Info(U.cup);
+    char line[96];
+    u8 i, t, pass;
+    ThPut(TH_S1_CUPS);
+    snprintf(line, sizeof(line), "ROUND %d", U.round + 1);
+    ThText(464, 4, line, TF_SMALL, S1_YELLOW, G_NO_GRAD, S1_INK, 2, TRUE, TA_RIGHT);
+    for (pass = 0; pass < 2; pass++)   // (the one under the cursor last: it's larger, over its neighbours)
+        for (i = 0; i < STADIUM_CUP_COUNT; i++)
+        {
+            float x, y, w, h;
+            bool8 focus = U.cup == i, open = StadiumCup_Open(U.round, i, 0);
+            SDL_Texture *pic = CupPic(i);
+            if (focus != pass)
+                continue;
+            S1CardBox(i, &x, &y, &w, &h);
+            if (focus)
+                x -= 6, y -= 5, w += 12, h += 10;
+            S1Fill(x + 4, y + 4, w, h, 0x000000, 110);
+            S1Fill(x - 3, y - 3, w + 6, h + 6, 0x181820, 255);
+            S1Fill(x - 2, y - 2, w + 4, h + 4, focus ? 0xf8f040 : 0xf0f0f8, 255);
+            if (pic)
+                ThBlit(pic, x, y, w, h, open ? 255 : 90);
+            else
+            {
+                SDL_Rect clip = {(int)(x / 2), (int)(y / 2), (int)(w / 2), (int)(h / 2)};   // (a scene of its own: kept in the card)
+                SDL_RenderSetClipRect(U.owner, &clip);
+                CupScene(i, x / 2, y / 2, w / 2, h / 2, open);
+                SDL_RenderSetClipRect(U.owner, NULL);
+            }
+            if (!open)
+                ThText(x + w / 2, y + h / 2 - 13, "LOCKED", TF_SMALL, 0xffffff, G_NO_GRAD, S1_INK, 2, TRUE, TA_CENTER);
+            if (focus)
+                S1Brackets(x - 8, y - 8, x + w + 8, y + h + 8);
+        }
+    // the cup under the cursor
+    S1T(32, 236, StadiumCup_Info(U.cup)->name, S1_YELLOW, TA_LEFT);
+    for (t = 0; t < c->tiers; t++)
+    {
+        u16 cl = StadiumCup_Save()->cleared[U.round][U.cup][t];
+        ThPutCentred((cl & (1 << STADIUM_HARD_ALL)) ? TH_S2_MARK_GOLD : cl ? TH_S2_MARK_SILVER : TH_S2_MARK_EMPTY,
+                     52 + G_Measure(c->name, TF_SMALL) * 2 + t * 13, 249, 255);
+    }
+    if (U.cup == STADIUM_CUP_CHALLENGE)
+        snprintf(line, sizeof(line), "LEVEL: 30-75");
+    else if (c->levelSum)
+        snprintf(line, sizeof(line), "LEVEL: %d-%d", c->levelMin, c->levelMax);
+    else
+        snprintf(line, sizeof(line), "ANY LEVEL");
+    S1T(448, 236, line, S1_YELLOW, TA_RIGHT);
+    if (!StadiumCup_Open(U.round, U.cup, 0))
+        snprintf(line, sizeof(line), "%s", U.round ? "Beat MEWTWO in Round 1." : "Win every cup first.");
+    else if (U.cup == STADIUM_CUP_CHALLENGE)
+        snprintf(line, sizeof(line), "Six lent at random. Pick three.");
+    else if (U.cup == STADIUM_CUP_CASTLE)
+        snprintf(line, sizeof(line), "Eight gyms, then the ELITE FOUR.");
+    else if (c->levelSum)
+        snprintf(line, sizeof(line), "Three of six, %d levels in all.", c->levelSum);
+    else
+        snprintf(line, sizeof(line), "%s", c->allowsMewtwo ? "MEWTWO and MEW allowed." : "No MEWTWO or MEW.");
+    S1Tw(32, 262, line, 0xffffff, TA_LEFT, 416);
+    if (U.note[0])
+        S1Tw(32, 262, U.note, 0xf8e8a0, TA_LEFT, 416);
+    ThPut(TH_S1_FOOT);
+    S2Foot("{A} ENTER  {L}{R} ROUND  {B} EXIT");
+}
+
+// ---- the classes: STADIUM's ball banners over the cup's own picture, the class in a navy box ----
+static void S1Class(void)
+{
+    u8 t, i;
+    char line[64];
+    S1Backdrop(U.cup, 0.15f, 1.0f);
+    S1Title(StadiumCup_Info(U.cup)->name, U.round ? "ROUND 2" : "ROUND 1");
+    for (t = 0; t < 4; t++)
+    {
+        bool8 open = StadiumCup_Open(U.round, U.cup, t), focus = U.tier == t;
+        SDL_Texture *b = open ? U.pics[PIC_BALL(t)] : U.greyBalls[t];
+        float x = 22 + (focus ? 10 : 0), y = 40 + t * 62;
+        if (b)
+        {
+            SDL_SetTextureColorMod(b, 0, 0, 0);
+            ThBlit(b, x + 3, y + 3, 213, 60, 150);
+            SDL_SetTextureColorMod(b, 255, 255, 255);
+            ThBlit(b, x, y, 213, 60, 255);
+        }
+        if (focus)
+            S1Brackets(x - 6, y - 2, x + 219, y + 62);
+        if (open && StadiumCup_Cleared(U.round, U.cup, t))
+            S1T(x + 222, y + 20, "WON", S1_YELLOW, TA_LEFT);
+    }
+    S1Box(TH_S1_BOX_NAVY, 262, 44, 206, 238);
+    S1T(274, 50, sClassNames[U.tier], S1_YELLOW, TA_LEFT);
+    if (U.cup == STADIUM_CUP_CHALLENGE)
+    {
+        static const u8 sLevels[4] = {30, 45, 60, 75};
+        snprintf(line, sizeof(line), "Every POKéMON Lv %d", sLevels[U.tier]);
+        S1Tw(274, 74, line, 0xffffff, TA_LEFT, 186);
+    }
+    else
+    {
+        u8 n = StadiumCup_TrainerCount(U.round, U.cup, U.tier);
+        snprintf(line, sizeof(line), "%d TRAINERS", n);
+        S1T(274, 74, line, 0xffffff, TA_LEFT);
+        for (i = 0; i < 8 && i < n; i++)
+        {
+            const struct StadiumTrainer *tr = Stadium_Trainer(U.round, StadiumCup_Info(U.cup)->division[U.tier], i);
+            float x = 272 + (i % 4) * 48, y = 104 + (i / 4) * 54;
+            S1Fill(x, y, 44, 50, i == n - 1 ? 0xb030a0 : 0x5050d0, 255);
+            if (tr && tr->pic)
+                BlitPart(TrainerTex(tr->pic), 10, 0, 44, 50, x / 2, y / 2, 22, 25, StadiumCup_Open(U.round, U.cup, U.tier) ? 255 : 90);
+        }
+    }
+    {
+        u16 cl = StadiumCup_Save()->cleared[U.round][U.cup][U.tier];
+        u8 best = 0, k;
+        for (k = 0; k < 16; k++)
+            if ((cl & (1 << k)) && __builtin_popcount(k) > best)
+                best = __builtin_popcount(k);
+        S1T(274, 218, "BEST", 0xffffff, TA_LEFT);
+        for (k = 0; k < 4; k++)
+            ThPutCentred(k < best ? TH_S1_STAR_LIT : TH_S1_STAR_EMPTY, 332 + k * 22, 232, 255);
+        if (cl)
+            snprintf(line, sizeof(line), "%d of 4 restrictions", best);
+        else
+            snprintf(line, sizeof(line), "Not won yet.");
+        S1Tw(274, 248, line, 0xffffff, TA_LEFT, 186);
+    }
+    S1Foot("{A} CHOOSE  {B} BACK");
+}
+
+// ---- the GYM LEADER CASTLE ----
+static void S1Castle(void)
+{
+    u8 i, badges = StadiumCastle_Badges(U.round), n;
+    char line[64];
+    const float x0 = 14, y0 = 36, x1 = 300, y1 = 288, rh = (y1 - y0) / 9;
+    S1Backdrop(STADIUM_CUP_CASTLE, 0.3f, 1.4f);
+    S1Title(StadiumCup_Info(STADIUM_CUP_CASTLE)->name, U.round ? "ROUND 2" : "ROUND 1");
+    S1Panel(x0, y0, x1, y1, 0x4444c4);
+    for (i = 0; i < STADIUM_CASTLE_STAGES; i++)
+    {
+        float ya = y0 + i * rh;
+        bool8 open = StadiumCastle_StageOpen(U.round, i);
+        const struct StadiumTrainer *face = CastleFace(i);
+        S1Fill(x0, ya, x1 - x0, rh, !open ? 0x30306c : i % 2 ? 0x4444c4 : 0x5858d8, 255);
+        if (face && face->pic)
+            BlitPart(TrainerTex(face->pic), 14, 4, 36, 26, (x0 + 2) / 2, (ya + 1) / 2, 17, (rh - 2) / 2, open ? 255 : 90);
+        S1Tw(x0 + 40, ya + rh / 2 - 13, StadiumCastle_StageName(i), open ? 0xffffff : 0x9898c8, TA_LEFT, 124);
+        if (i < STADIUM_CASTLE_GYMS)
+        {
+            static const u16 sBadge[8] = {TH_S2_BADGE0, TH_S2_BADGE1, TH_S2_BADGE2, TH_S2_BADGE3, TH_S2_BADGE4, TH_S2_BADGE5,
+                                          TH_S2_BADGE6, TH_S2_BADGE7};
+            char who[16] = "";
+            if (face)
+                Ascii(who, face->name, sizeof(who));
+            S1Tw(x0 + 166, ya + rh / 2 - 13, who, S1_YELLOW, TA_LEFT, 92);
+            ThPutCentred((badges >> i) & 1 ? sBadge[i] : TH_S1_STAR_EMPTY, x1 - 14, ya + rh / 2, 255);
+        }
+        else if (!open)
+            S1T(x0 + 166, ya + rh / 2 - 13, "LOCKED", 0x9898c8, TA_LEFT);
+        else if (StadiumCup_Cleared(U.round, STADIUM_CUP_CASTLE, 0))
+            S1T(x0 + 166, ya + rh / 2 - 13, "WON", S1_YELLOW, TA_LEFT);
+        if (U.stage == i)
+            S1Brackets(x0 + 2, ya + 2, x1 - 2, ya + rh - 2);
+    }
+    S1Box(TH_S1_BOX_NAVY, 308, 36, 160, 252);
+    S1T(318, 42, StadiumCastle_StageName(U.stage), S1_YELLOW, TA_LEFT);
+    n = U.stage < STADIUM_CASTLE_GYMS ? 4 : 5;
+    S1T(318, 64, n == 4 ? "4 BATTLES" : "5 BATTLES", 0xffffff, TA_LEFT);
+    for (i = 0; i < n; i++)
+    {
+        const struct StadiumTrainer *tr = U.stage < STADIUM_CASTLE_GYMS ? Stadium_Trainer(U.round, STADIUM_GYM_1 + U.stage, i)
+                                        : i < 4 ? Stadium_Trainer(U.round, STADIUM_ELITE_FOUR, i)
+                                                : Stadium_Trainer(U.round, STADIUM_RIVAL, 0);
+        float w = 152.0f / n, x = 312 + i * w, y = 92;
+        S1Fill(x, y, w - 2, 50, i == n - 1 ? 0xb030a0 : 0x5050d0, 255);
+        if (tr && tr->pic)
+            BlitPart(TrainerTex(tr->pic), 32 - (int)(w * 56 / 52) / 2, 0, (int)(w * 56 / 52), 56, x / 2, y / 2, (w - 2) / 2, 25,
+                     StadiumCastle_StageOpen(U.round, U.stage) ? 255 : 90);
+        if (i == n - 1 && U.stage == STADIUM_CASTLE_E4)
+            ThText(x + w / 2, y + 10, "?", TF_NORMAL, 0xffffff, G_NO_GRAD, S1_INK, 2, TRUE, TA_CENTER);
+    }
+    snprintf(line, sizeof(line), "BADGES %d / 8", StadiumCastle_BadgeCount(U.round));
+    S1T(318, 152, line, 0xffffff, TA_LEFT);
+    for (i = 0; i < STADIUM_CASTLE_GYMS; i++)
+    {
+        static const u16 sBadge[8] = {TH_S2_BADGE0, TH_S2_BADGE1, TH_S2_BADGE2, TH_S2_BADGE3, TH_S2_BADGE4, TH_S2_BADGE5,
+                                      TH_S2_BADGE6, TH_S2_BADGE7};
+        ThPutCentred((badges >> i) & 1 ? sBadge[i] : TH_S1_STAR_EMPTY, 330 + (i % 4) * 30, 190 + (i / 4) * 24, 255);
+    }
+    if (U.stage < STADIUM_CASTLE_GYMS)
+        snprintf(line, sizeof(line), "%s", (badges >> U.stage) & 1 ? "Won. Try it again?" : StadiumCastle_BadgeName(U.stage));
+    else
+        snprintf(line, sizeof(line), "%s", StadiumCastle_StageOpen(U.round, U.stage) ? "Then, the castle!" : "Needs 8 badges.");
+    ThWrap(318, 236, 144, 20, line, TF_SMALL, S1_YELLOW, G_NO_GRAD, S1_INK, 2, FALSE, TA_LEFT);
+    S1Foot("{A} CHOOSE  {B} BACK");
+}
+
+// ---- the cup's menu ----
+static void S1Options(void)
+{
+    static const char *const sNames[4] = {"LEVEL CAP", "SPECIES", "HELD ITEMS", "RENTALS ONLY"};
+    static const char *const sButtons[3] = {"REGISTER", "SAVED TEAMS", "START!"};
+    char line[96];
+    u8 i, rows = U.cup == STADIUM_CUP_CHALLENGE ? 0 : 4, hard = HardCount();
+    const struct StadiumTeam *t = &StadiumCup_Save()->team[U.cup];
+    S1Backdrop(U.cup, 0.15f, 1.0f);
+    snprintf(line, sizeof(line), "%s%s%s", StadiumCup_Info(U.cup)->name, StadiumCup_Info(U.cup)->tiers > 1 ? "  " : "",
+             StadiumCup_Info(U.cup)->tiers > 1 ? sClassNames[U.tier] : "");
+    S1Title(line, U.round ? "ROUND 2" : "ROUND 1");
+    // the restrictions
+    S1Box(TH_S1_BOX_NAVY, 160, 40, 308, 148);
+    S1T(172, 44, "RESTRICTIONS", S1_YELLOW, TA_LEFT);
+    for (i = 0; i < 4; i++)
+        ThPutCentred(i < hard ? TH_S1_STAR_LIT : TH_S1_STAR_EMPTY, 402 + i * 16, 58, 255);
+    if (rows)
+        for (i = 0; i < 4; i++)
+        {
+            float y = 70 + i * 25, sx = 356;
+            bool8 on = (U.opt & (1 << i)) != 0, held = i == 0 && (U.opt & STADIUM_OPT_RENTALS);
+            bool8 isHard = i == 1 ? on : i == 3 ? on : !on;
+            S1Tw(176, y - 1, sNames[i], held ? 0x9898c8 : 0xffffff, TA_LEFT, sx - 182);
+            ThPutAt(on ? TH_S2_SWITCH_ON : TH_S2_SWITCH_OFF, sx - 10, y + 2 - 11, held ? 110 : 255);
+            ThText(sx + (on ? 26 : 42), y - 2, on ? "ON" : "OFF", TF_NARROW, held ? 0xc0c0c0 : G_WHITE, G_NO_GRAD, 0x181818, 2, FALSE,
+                   TA_CENTER);
+            if (isHard)
+                ThPutCentred(TH_S2_MARK_GOLD, 448, y + 12, 255);
+            if (U.optCursor == i)
+                S1Brackets(166, y - 4, 462, y + 24);
+        }
+    else
+        ThWrap(176, 70, 280, 22, "The CHALLENGE CUP lends you six random POKéMON for every challenge. Pick three before each battle.",
+               TF_SMALL, 0xffffff, G_NO_GRAD, S1_INK, 2, FALSE, TA_LEFT);
+    // the help
+    ThNine(TH_S1_VEIL, 14, 196, 452, 30, 10, 0, 255);
+    if (rows)
+    {
+        u8 k = U.optCursor < 4 ? U.optCursor : 3;
+        bool8 on = (U.opt & (1 << k)) != 0;
+        const char *help = hard == 4 ? "Every restriction in place: GREAT REWARDS!"
+                         : k == 0 && (U.opt & STADIUM_OPT_RENTALS) ? "Off: rentals are already the cup's level." : sOptHelp[k][on ? 0 : 1];
+        S1Tw(240, 198, help, hard == 4 ? S1_YELLOW : 0xffffff, TA_CENTER, 440);
+    }
+    // the team
+    S1Box(TH_S1_BOX_NAVY, 14, 40, 138, 148);
+    snprintf(line, sizeof(line), "TEAM %d / 6", t->count);
+    S1T(83, 44, rows ? line : "LENT", t->count == 6 ? S1_YELLOW : 0xffffff, TA_CENTER);
+    for (i = 0; i < STADIUM_TEAM_SIZE; i++)
+    {
+        float x = 22 + (i % 2) * 64, y = 72 + (i / 2) * 38;
+        S1Fill(x, y, 58, 34, (i + i / 2) % 2 == 0 ? 0x5858d8 : 0x3c3cb8, 255);
+        if (i < t->count && rows)
+        {
+            SDL_Rect clip = {(int)(x / 2), (int)(y / 2) - 4, 29, 21};
+            SDL_RenderSetClipRect(U.owner, &clip);
+            ThBlit(IconTex(GetBoxMonData((struct BoxPokemon *)&t->slot[i].mon, MON_DATA_SPECIES)), x - 3, y - 22, 64, 64, 255);
+            SDL_RenderSetClipRect(U.owner, NULL);
+        }
+    }
+    // the buttons
+    for (i = 0; i < 3; i++)
+    {
+        float x0 = 14 + i * 152;
+        bool8 dim = i < 2 && !rows;
+        S1Box(TH_S1_BOX_NAVY, x0, 232, 148, 30);
+        S1T(x0 + 74, 236, sButtons[i], dim ? 0x6868a0 : 0xffffff, TA_CENTER);
+        if (U.optCursor == rows + i)
+            S1Brackets(x0 - 4, 228, x0 + 152, 266);
+    }
+    if (U.note[0])
+        ThText(240, 270, U.note, TF_SMALL, 0xf8e8a0, G_NO_GRAD, S1_INK, 2, FALSE, TA_CENTER);
+    S1Foot("{A} CHANGE / CHOOSE  {B} BACK");
+}
+
+// A question or a menu in a navy box
+static void S1Ask(const char *a, const char *b)
+{
+    S1Box(TH_S1_BOX_NAVY, 70, 110, 340, 76);
+    S1T(240, 122, a, 0xffffff, TA_CENTER);
+    S1Tw(240, 150, b, 0xc8d0ff, TA_CENTER, 320);
+}
+
+static void S1Menu(float x, float y, float w, const char *const *rows, u8 n, u8 cursor, int red)
+{
+    u8 i;
+    S1Box(TH_S1_BOX_NAVY, x, y, w, 16 + n * 24);
+    for (i = 0; i < n; i++)
+    {
+        S1T(x + 26, y + 8 + i * 24, rows[i], i == red ? 0xff9090 : i == cursor ? S1_YELLOW : 0xffffff, TA_LEFT);
+        if (i == cursor)
+            ThPutAt(TH_S2_POINTER, x + 10 - 10, y + 8 + i * 24 + 13 - 20, 255);
+    }
+}
+
+// ---- SAVED TEAMS: a row a team, its six beside who saved it ----
+static void S1Teams(void)
+{
+    static u8 sTop;
+    const struct StadiumSavedTeam *sel = StadiumTeams_Get(U.teamCursor);
+    const float x0 = 14, y0 = 36, x1 = 466, y1 = 288, rh = (y1 - y0) / 5;
+    char line[64];
+    u8 i, k;
+    if (U.teamCursor < sTop)
+        sTop = U.teamCursor;
+    if (U.teamCursor >= sTop + 5)
+        sTop = U.teamCursor - 4;
+    S1Backdrop(U.cup, 0.3f, 1.4f);
+    snprintf(line, sizeof(line), "%s %d / 99", StadiumTeams_IsServer() ? "SERVER" : "THIS SAVE", StadiumTeams_Count());
+    S1Title("Saved teams", line);
+    S1Panel(x0, y0, x1, y1, 0x2c2ca0);
+    for (i = 0; i < 5 && sTop + i < STADIUM_SAVED_TEAMS; i++)
+    {
+        u8 n = sTop + i;
+        const struct StadiumSavedTeam *t = StadiumTeams_Get(n);
+        float ya = y0 + i * rh;
+        S1Fill(x0 + 14, ya + 1, x1 - x0 - 14, rh - 1, i % 2 ? 0x4444c4 : 0x5858d8, 255);
+        snprintf(line, sizeof(line), "%02d", n + 1);
+        S1T(x0 + 20, ya + 4, line, 0xc8d0ff, TA_LEFT);
+        if (t)
+        {
+            char owner[16];
+            Ascii(owner, t->owner, sizeof(owner));
+            S1T(x0 + 52, ya + 4, owner, 0xffffff, TA_LEFT);
+            if (t->cup < STADIUM_CUP_COUNT)
+                S1Tw(x0 + 52, ya + 24, CupLabel(t->cup), S1_YELLOW, TA_LEFT, 100);
+            for (k = 0; k < t->count && k < STADIUM_TEAM_SIZE; k++)
+            {
+                SDL_Rect clip = {(int)(x0 + 14) / 2, (int)(ya + 1) / 2, (int)(x1 - x0 - 14) / 2, (int)(rh - 1) / 2};
+                SDL_RenderSetClipRect(U.owner, &clip);
+                ThBlit(IconTex(GetBoxMonData((struct BoxPokemon *)&t->slot[k].mon, MON_DATA_SPECIES)), x0 + 150 + k * 50, ya - 12, 64,
+                       64, 255);
+                SDL_RenderSetClipRect(U.owner, NULL);
+            }
+        }
+        else
+            S1T(x0 + 52, ya + 14, "- - - - -", 0x9898e0, TA_LEFT);
+        if (n == U.teamCursor)
+            S1Brackets(x0 + 16, ya + 3, x1 - 2, ya + rh - 2);
+    }
+    ThPutAt(TH_S2_THUMB, x0 + 7 - 21, y0 + 20 - 56 + (y1 - y0 - 40) * sTop / (float)(STADIUM_SAVED_TEAMS - 5), 255);
+    if (U.menu)
+        S1Menu(300, 100, 140, sel ? sTeamMenuFull : sTeamMenuEmpty, sel ? 5 : 2, U.menuCursor, sel ? 3 : -1);
+    if (U.confirm)
+    {
+        snprintf(line, sizeof(line), "Erase slot %02d's team?", U.teamCursor + 1);
+        S1Ask(line, StadiumTeams_IsServer() ? "Everyone on the server loses it." : "It's gone for good.");
+    }
+    S1Foot(U.confirm ? "{A} ERASE  {B} KEEP" : U.menu ? "{A} CHOOSE  {B} BACK" : "{A} MENU  {L}{R} PAGE  {B} BACK");
+}
+
+// ---- REGISTER A TEAM ----
+static void S1Register(void)
+{
+    static const char *const sTabs[5] = {"PARTY", "BOXES", "SHARED", "GLOBAL", "RENTALS"};
+    static const char *const sOrdinal[6] = {"First", "Second", "Third", "Fourth", "Fifth", "Sixth"};
+    const struct StadiumTeam *t = &StadiumCup_Save()->team[U.cup];
+    const float tx0 = 14, ty0 = 36, tx1 = 466, ty1 = 122, cw = (tx1 - tx0) / 3, ch = (ty1 - ty0) / 2;
+    const float lx0 = 14, ly0 = 152, lx1 = 466, ly1 = 290, lw = (lx1 - lx0 - 14) / 3, lh = (ly1 - ly0) / 3;
+    char line[96];
+    u8 i;
+    S1Backdrop(U.cup, 0.25f, 1.6f);
+    snprintf(line, sizeof(line), "ENTRY %d / 6", t->count);
+    S1Title("Register a team", line);
+    // the team
+    S1Panel(tx0, ty0, tx1, ty1, 0x4444c4);
+    for (i = 0; i < STADIUM_TEAM_SIZE; i++)
+    {
+        float x = tx0 + (i % 3) * cw, y = ty0 + (i / 3) * ch;
+        S1Fill(x + 1, y + 1, cw - 2, ch - 2, (i + i / 3) % 2 == 0 ? 0x5858d8 : 0x3c3cb8, 255);
+        if (i < t->count)
+        {
+            struct BoxPokemon *b = (struct BoxPokemon *)&t->slot[i].mon;
+            u8 nick[POKEMON_NAME_LENGTH + 1];
+            SDL_Rect clip = {(int)(x / 2), (int)(y / 2) - 2, (int)(cw / 2), (int)(ch / 2) + 2};
+            SDL_RenderSetClipRect(U.owner, &clip);
+            ThBlit(IconTex(GetBoxMonData(b, MON_DATA_SPECIES)), x - 6, y - 18, 64, 64, 255);
+            SDL_RenderSetClipRect(U.owner, NULL);
+            GetBoxMonData(b, MON_DATA_NICKNAME, nick);
+            nick[POKEMON_NAME_LENGTH] = EOS;
+            Ascii(line, nick, sizeof(line));
+            S1Tw(x + 48, y - 1, line, 0xffffff, TA_LEFT, cw - 52);
+            snprintf(line, sizeof(line), "L%d", GetLevelFromBoxMonExp(b));
+            S1T(x + 48, y + 18, line, 0xffffff, TA_LEFT);
+            if (GetBoxMonData(b, MON_DATA_HELD_ITEM))
+                ThPutAt(TH_S2_ITEMBOX, x + 96 - 10, y + 18 - 10, 255);
+        }
+        else if (i == t->count && !U.onTeam)
+        {
+            S1Brackets(x + 4, y + 4, x + cw - 4, y + ch - 4);
+            snprintf(line, sizeof(line), "%s POKéMON", sOrdinal[i]);
+            S1T(x + cw / 2, y + ch / 2 - 13, line, S1_YELLOW, TA_CENTER);
+        }
+        if (U.onTeam && i == U.teamSlot)
+            S1Brackets(x + 4, y + 4, x + cw - 4, y + ch - 4);
+    }
+    if (U.menu && U.listCursor < U.listCount)
+    {
+        // A's panel: the POKéMON, ENTER Yes / No
+        const struct BoxPokemon *b = &U.list[U.listCursor].mon;
+        struct BoxPokemon *bb = (struct BoxPokemon *)b;
+        struct Pokemon m;
+        static const char *const sStat[5] = {"ATTACK", "DEFENSE", "SP. ATK", "SP. DEF", "SPEED"};
+        static const u8 sStatId[5] = {MON_DATA_ATK, MON_DATA_DEF, MON_DATA_SPATK, MON_DATA_SPDEF, MON_DATA_SPEED};
+        static const float sL[5] = {152, 170.8f, 189.6f, 208.4f, 227.2f};
+        u16 sp = GetBoxMonData(bb, MON_DATA_SPECIES), item = GetBoxMonData(bb, MON_DATA_HELD_ITEM);
+        u8 nick[POKEMON_NAME_LENGTH + 1];
+        const char *why = Refusal(b, U.list[U.listCursor].source);
+        bool8 has = Has(U.cup, b);
+        BoxMonToMon(b, &m);
+        S1Panel(lx0, 128, lx1, 291, 0xa89c38);
+        S1Fill(lx0, 128, 372 - lx0, 21, 0xc8a030, 255);
+        S1Fill(372, 128, lx1 - 372, 96, 0x20209c, 255);
+        GetBoxMonData(bb, MON_DATA_NICKNAME, nick);
+        nick[POKEMON_NAME_LENGTH] = EOS;
+        Ascii(line, nick, sizeof(line));
+        S1T(22, 129, line, 0xffffff, TA_LEFT);
+        snprintf(line, sizeof(line), "L%d", GetMonData(&m, MON_DATA_LEVEL));
+        S1T(130, 129, line, 0xffffff, TA_LEFT);
+        snprintf(line, sizeof(line), "No.%03d", SpeciesToNationalPokedexNum(sp));
+        S1T(176, 129, line, 0xffffff, TA_LEFT);
+        S1Fill(22, 154, 68, 64, 0x282890, 255);
+        ThFrontIn(FrontTex(sp, GetBoxMonData(bb, MON_DATA_PERSONALITY), GetBoxMonData(bb, MON_DATA_OT_ID)), 22, 154, 68, 64, why ? 140 : 255);
+        TypePill(50, 80, gSpeciesInfo[sp].types[0]);
+        if (gSpeciesInfo[sp].types[1] != gSpeciesInfo[sp].types[0])
+            TypePill(68, 80, gSpeciesInfo[sp].types[1]);
+        S1T(100, 176, "HP", 0xffffff, TA_LEFT);
+        snprintf(line, sizeof(line), "%d", GetMonData(&m, MON_DATA_MAX_HP));
+        S1T(168, 176, line, 0xffffff, TA_RIGHT);
+        if (U.list[U.listCursor].source == STADIUM_SRC_RENTAL)
+            S2Chip(100, 200, "RENTAL", TH_S2_CHIP_VIOLET);
+        for (i = 0; i < 5; i++)
+        {
+            ThText(262, sL[i], sStat[i], TF_NARROW, 0xffffff, G_NO_GRAD, S1_INK, 2, FALSE, TA_LEFT);
+            snprintf(line, sizeof(line), "%d", GetMonData(&m, sStatId[i]));
+            S1T(364, sL[i], line, 0xffffff, TA_RIGHT);
+        }
+        for (i = 0; i < MAX_MON_MOVES; i++)
+        {
+            u16 mv = GetMonData(&m, MON_DATA_MOVE1 + i);
+            float x = 22 + (i % 2) * 128, y = 249 + (i / 2) * 19;
+            if (mv == MOVE_NONE || mv >= MOVES_COUNT)
+                continue;
+            SDL_SetTextureColorMod(Th(TH_S2_DOT), TypeRgb(gBattleMoves[mv].type) >> 16, TypeRgb(gBattleMoves[mv].type) >> 8 & 255,
+                                   TypeRgb(gBattleMoves[mv].type) & 255);
+            ThPutCentred(TH_S2_DOT, x + 5, y + 13, 255);
+            SDL_SetTextureColorMod(Th(TH_S2_DOT), 255, 255, 255);
+            Ascii(line, gMoveNames[mv], sizeof(line));
+            {
+                SDL_Rect clip = {(int)((x + 10) / 2), (int)(y / 2) - 2, 58, 16};
+                SDL_RenderSetClipRect(U.owner, &clip);
+                S1Tw(x + 14, y, line, i % 2 == 0 ? S1_YELLOW : 0xffffff, TA_LEFT, 104);
+                SDL_RenderSetClipRect(U.owner, NULL);
+            }
+        }
+        S1T(420, 132, has ? "OFF?" : "ENTER", 0xffffff, TA_CENTER);
+        S1T(406, 162, "Yes", U.menuCursor == 0 ? S1_YELLOW : 0xffffff, TA_LEFT);
+        S1T(406, 183, "No", U.menuCursor != 0 ? S1_YELLOW : 0xffffff, TA_LEFT);
+        ThPutAt(TH_S2_POINTER, 388 - 10, (U.menuCursor == 0 ? 175 : 196) - 20, 255);
+        ThPutAt(TH_S2_ITEMBOX, 388 - 10, 254 - 10, 255);
+        if (item)
+        {
+            u8 iname[ITEM_NAME_LENGTH + 4];
+            CopyItemName(item, iname);
+            Ascii(line, iname, sizeof(line));
+        }
+        else
+            snprintf(line, sizeof(line), "NONE");
+        S1Tw(410, 254, line, 0xffffff, TA_LEFT, 54);
+        if (why && !has)
+            S1Tw(100, 222, why, 0xff9090, TA_LEFT, 150);
+    }
+    else
+    {
+        // the tabs and the list
+        float x = 36;
+        S1Fill(30, 127, 420, 20, 0x181018, 255);
+        S1Fill(x, 129, 22, 16, 0xc03048, 255);
+        S1T(x + 11, 126, "L", 0xffffff, TA_CENTER);
+        x += 28;
+        for (i = 0; i < 5; i++)
+        {
+            float w = G_Measure(sTabs[i], TF_SMALL) * 2 + 10;
+            bool8 sel = i == U.tab;
+            if (sel)
+                S1Fill(x - 2, 126, w + 4, 22, 0xffffff, 255);
+            S1Fill(x, 128, w, 18, sel ? 0xb828a8 : 0x8a8030, 255);
+            S1Fill(x, 128, w, 2, sel ? 0xe060d0 : 0xb8ac50, 255);
+            S1T(x + w / 2, 125, sTabs[i], sel ? 0xffffff : 0xe8e0a0, TA_CENTER);
+            x += w + 4;
+        }
+        S1Fill(422, 129, 22, 16, 0xc03048, 255);
+        S1T(433, 126, "R", 0xffffff, TA_CENTER);
+        S1Panel(lx0, ly0, lx1, ly1, 0x4444c4);
+        S1Fill(lx0, ly0, 14, ly1 - ly0, 0x2c2ca0, 255);
+        if (U.tab == SRC_TAB_SHARED && U.listCount == 0 && MP_SharedBox_Loaded())
+            BuildList();
+        if (U.listCount == 0)
+            S1T(240, 208, U.tab != SRC_TAB_SHARED ? "Nobody here." : !MP_IsConnected() ? "Online only." : MP_SharedBox_Loaded() ? "Nobody here." : "Loading...",
+                0xffffff, TA_CENTER);
+        for (i = 0; i < 9 && U.listTop + i < U.listCount; i++)
+        {
+            u16 n = U.listTop + i;
+            float cx = lx0 + 14 + (i % 3) * lw, cy = ly0 + (i / 3) * lh;
+            const struct BoxPokemon *b = &U.list[n].mon;
+            bool8 ok = Refusal(b, U.list[n].source) == NULL, has = Has(U.cup, b);
+            u8 nick[POKEMON_NAME_LENGTH + 1];
+            float bob = (n == U.listCursor && !U.onTeam && (U.age / 8) % 2) ? -2 : 0;
+            S1Fill(cx + 1, cy + 1, lw - 1, lh - 1, (i + i / 3) % 2 == 0 ? 0x5858d8 : 0x4848c8, 255);
+            ThBlit(IconTex(GetBoxMonData((struct BoxPokemon *)b, MON_DATA_SPECIES)), cx + 4, cy + lh / 2 - 19 + bob, 32, 32, ok ? 255 : 110);
+            GetBoxMonData((struct BoxPokemon *)b, MON_DATA_NICKNAME, nick);
+            nick[POKEMON_NAME_LENGTH] = EOS;
+            Ascii(line, nick, sizeof(line));
+            S1Tw(cx + 40, cy + 1, line, has ? S1_YELLOW : ok ? 0xffffff : 0x9898c8, TA_LEFT, lw - 64);
+            snprintf(line, sizeof(line), "L%d", GetLevelFromBoxMonExp((struct BoxPokemon *)b));
+            S1T(cx + 40, cy + 21, line, 0xffffff, TA_LEFT);
+            if (has)
+                ItemBallSized((cx + lw - 12) / 2, (cy + lh / 2) / 2, 0.75f, 255);
+            if (n == U.listCursor && !U.onTeam)
+                S1Brackets(cx + 3, cy + 3, cx + lw - 2, cy + lh - 2);
+        }
+        if (U.listCount > 9)
+        {
+            int rws = (U.listCount + 2) / 3;
+            ThPutAt(TH_S2_THUMB, lx0 + 7 - 21, ly0 + 22 - 56 + (ly1 - ly0 - 44) * (U.listTop / 3) / (float)(rws > 3 ? rws - 3 : 1), 255);
+        }
+    }
+    if (U.sixMenu)
+    {
+        static const char *const sSix[3] = {"OK to Register", "Reselect some POKéMON", "Reselect all POKéMON"};
+        S1Menu(104, 186, 272, sSix, 3, U.sixMenu - 1, -1);
+    }
+    if (U.confirm)
+        S1Ask("Clear this cup's team?", "Your POKéMON stay where they are.");
+    S1Foot(U.confirm ? "{A} CLEAR  {B} KEEP" : U.menu ? "{A} CHOOSE  {SELECT} SUMMARY  {B} BACK" : U.sixMenu ? "{A} CHOOSE  {B} BACK"
+           : U.onTeam ? "{A} TAKE OFF  {START} CLEAR ALL  {DOWN} LIST  {B} DONE"
+                      : "{A} LOOK  {SELECT} SUMMARY  {START} TEAM  {B} DONE");
+}
+
+// ---- the ladder ----
+static void S1Ladder(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    u8 n = StadiumCup_TrainerCount(r->round, r->cup, r->tier), i;
+    char line[48];
+    ThPut(TH_S1_LADDER);
+    S1Fat(ThCupTitle(), 240, SY_S1_LAD_BAR0);
+    ThVsTitle(line, sizeof(line));
+    S1Fat(line, 240, SY_S1_LAD_BAR1);
+    for (i = 0; i < 8; i++)
+    {
+        float x = SX_S1_LAD_X + (i % 4) * 78, y = SY_S1_LAD_Y + (i / 4) * 76;
+        if (i >= n)
+        {
+            S1Fill(x - 2, y - 2, 76, 72, 0x8a8438, 255);
+            continue;
+        }
+        if (i <= r->trainer && ThRunPic(i))
+        {
+            S1Fill(x, y, 72, 68, 0x282890, 255);
+            ThTrainerIn(ThRunPic(i), x, y, 72, 68, i < r->trainer ? 110 : 255);
+            if (i < r->trainer)
+                S1T(x + 36, y + 22, "WON", S1_YELLOW, TA_CENTER);
+        }
+        else if (i < r->trainer)
+        {
+            S1Fill(x, y, 72, 68, 0x282890, 255);
+            S1T(x + 36, y + 22, "WON", S1_YELLOW, TA_CENTER);
+        }
+        else
+            ThPutAt(TH_S1_QTILE, x - 10, y - 10, 255);
+        if (i == r->trainer)
+        {
+            S1Fill(x - 2, y - 2, 76, 2, 0xf08020, 255); S1Fill(x - 2, y + 68, 76, 2, 0xf08020, 255);
+            S1Fill(x - 2, y - 2, 2, 72, 0xf08020, 255); S1Fill(x + 72, y - 2, 2, 72, 0xf08020, 255);
+        }
+    }
+}
+
+static void S1Rules(void)
+{
+    u8 i;
+    float y = 30;
+    G_FillA(0, 0, 240, 160, 0x000000, 160);
+    S1Box(TH_S1_BOX_NAVY, 30, 4, 420, 312);
+    ThText(240, 8, "THE RULES", TF_SMALL, S1_YELLOW, G_NO_GRAD, S1_INK, 2, TRUE, TA_CENTER);
+    for (i = 0; i < ARRAY_COUNT(sClauses); i++)
+    {
+        S1T(44, y, sClauses[i][0], S1_YELLOW, TA_LEFT);
+        y += 20 + 20 * ThWrap(44, y + 20, 392, 20, sClauses[i][1], TF_SMALL, 0xffffff, G_NO_GRAD, S1_INK, 2, FALSE, TA_LEFT) + 3;
+    }
+}
+
+// ---- VS ----
+static void S1Vs(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    const struct StadiumTrainer *foe = StadiumCup_Foe();
+    struct Pokemon *foeTeam;
+    u8 foeCount, i, n = StadiumCup_EntryCount();
+    char line[48], name[16] = "";
+    extern u16 MP_StadiumBattle_TrainerPic(void);
+    extern const u8 *MP_StadiumBattle_ClassName(void);
+    static const s16 sA[8][4] = {{SX_S1_VSA0_X0, SX_S1_VSA0_Y0, SX_S1_VSA0_X1, SX_S1_VSA0_Y1}, {SX_S1_VSA1_X0, SX_S1_VSA1_Y0, SX_S1_VSA1_X1, SX_S1_VSA1_Y1},
+                                 {SX_S1_VSA2_X0, SX_S1_VSA2_Y0, SX_S1_VSA2_X1, SX_S1_VSA2_Y1}, {SX_S1_VSA3_X0, SX_S1_VSA3_Y0, SX_S1_VSA3_X1, SX_S1_VSA3_Y1},
+                                 {SX_S1_VSA4_X0, SX_S1_VSA4_Y0, SX_S1_VSA4_X1, SX_S1_VSA4_Y1}, {SX_S1_VSA5_X0, SX_S1_VSA5_Y0, SX_S1_VSA5_X1, SX_S1_VSA5_Y1},
+                                 {SX_S1_VSA6_X0, SX_S1_VSA6_Y0, SX_S1_VSA6_X1, SX_S1_VSA6_Y1}, {SX_S1_VSA7_X0, SX_S1_VSA7_Y0, SX_S1_VSA7_X1, SX_S1_VSA7_Y1}};
+    static const s16 sB[8][4] = {{SX_S1_VSB0_X0, SX_S1_VSB0_Y0, SX_S1_VSB0_X1, SX_S1_VSB0_Y1}, {SX_S1_VSB1_X0, SX_S1_VSB1_Y0, SX_S1_VSB1_X1, SX_S1_VSB1_Y1},
+                                 {SX_S1_VSB2_X0, SX_S1_VSB2_Y0, SX_S1_VSB2_X1, SX_S1_VSB2_Y1}, {SX_S1_VSB3_X0, SX_S1_VSB3_Y0, SX_S1_VSB3_X1, SX_S1_VSB3_Y1},
+                                 {SX_S1_VSB4_X0, SX_S1_VSB4_Y0, SX_S1_VSB4_X1, SX_S1_VSB4_Y1}, {SX_S1_VSB5_X0, SX_S1_VSB5_Y0, SX_S1_VSB5_X1, SX_S1_VSB5_Y1},
+                                 {SX_S1_VSB6_X0, SX_S1_VSB6_Y0, SX_S1_VSB6_X1, SX_S1_VSB6_Y1}, {SX_S1_VSB7_X0, SX_S1_VSB7_Y0, SX_S1_VSB7_X1, SX_S1_VSB7_Y1}};
+    foeTeam = StadiumCup_FoeTeam(&foeCount);
+    if (foe)
+        Ascii(name, foe->name, sizeof(name));
+    else if (r->cup == STADIUM_CUP_CHALLENGE)
+    {
+        extern const struct StadiumCcTrainer *StadiumCc_Trainer(u8 cls, u8 i);
+        Ascii(name, StadiumCc_Trainer(r->tier, r->trainer)->name, sizeof(name));
+    }
+    ThPut(TH_S1_VS);
+    ThPutAt(TH_S1_FAT_1P, (sA[0][0] + sA[0][2]) / 2.0f - 240, sA[0][1] + 12 - 160, 255);
+    {
+        u8 pn[PLAYER_NAME_LENGTH + 1];
+        StringCopyN(pn, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+        pn[PLAYER_NAME_LENGTH] = EOS;
+        Ascii(line, pn, sizeof(line));
+        S1T((sA[0][0] + sA[0][2]) / 2.0f, sA[0][1] + 22, line, 0xffffff, TA_CENTER);
+    }
+    ThTrainerIn(PlayerGenderToFrontTrainerPicId(gSaveBlock2Ptr->playerGender), sA[0][0] + 18, sA[0][1] + 48, sA[0][2] - sA[0][0] - 36,
+                sA[4][3] - 4 - sA[0][1] - 48, 255);
+    for (i = 0; i < n && i < PARTY_SIZE; i++)
+    {
+        const s16 *b = sA[1 + i % 3 + (i / 3) * 4];
+        struct Pokemon m;
+        StadiumCup_Entry(&m, i);
+        ThFrontIn(FrontTex(GetMonData(&m, MON_DATA_SPECIES), GetMonData(&m, MON_DATA_PERSONALITY), GetMonData(&m, MON_DATA_OT_ID)),
+                  b[0], b[1], b[2] - b[0], b[3] - b[1], 255);
+    }
+    for (i = 0; i < foeCount && i < PARTY_SIZE; i++)
+    {
+        const s16 *b = sB[i % 3 + (i / 3) * 4];
+        ThFrontIn(FrontTex(GetMonData(&foeTeam[i], MON_DATA_SPECIES), GetMonData(&foeTeam[i], MON_DATA_PERSONALITY),
+                           GetMonData(&foeTeam[i], MON_DATA_OT_ID)), b[0], b[1], b[2] - b[0], b[3] - b[1], 255);
+    }
+    {
+        char cls[24];
+        Ascii(cls, MP_StadiumBattle_ClassName(), sizeof(cls));
+        S1Tw((sB[3][0] + sB[3][2]) / 2.0f, sB[3][1] + 2, cls, 0xffffff, TA_CENTER, sB[3][2] - sB[3][0] - 4);
+        S1Tw((sB[3][0] + sB[3][2]) / 2.0f, sB[3][1] + 22, name, 0xffffff, TA_CENTER, sB[3][2] - sB[3][0] - 4);
+    }
+    ThTrainerIn(MP_StadiumBattle_TrainerPic(), sB[3][0] + 18, sB[3][1] + 48, sB[3][2] - sB[3][0] - 36, sB[7][3] - 4 - sB[3][1] - 48, 255);
+    if (U.confirm)
+        S1Ask("Quit this cup?", "The battles won in it are lost.");
+    S1Foot(U.confirm ? "{A} QUIT  {B} KEEP PLAYING" : "{A} CHOOSE POKéMON  {SELECT} RULES  {B} QUIT");
+    if (U.rules)
+        S1Rules();
+}
+
+// ---- the choice ----
+static void S1Choice(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    const struct StadiumTrainer *foe = StadiumCup_Foe();
+    struct Pokemon *foeTeam;
+    u8 foeCount, i, side, n = StadiumCup_EntryCount(), picked = 0;
+    char line[48], name[16] = "";
+    foeTeam = StadiumCup_FoeTeam(&foeCount);
+    if (foe)
+        Ascii(name, foe->name, sizeof(name));
+    else if (r->cup == STADIUM_CUP_CHALLENGE)
+    {
+        extern const struct StadiumCcTrainer *StadiumCc_Trainer(u8 cls, u8 i);
+        Ascii(name, StadiumCc_Trainer(r->tier, r->trainer)->name, sizeof(name));
+    }
+    for (i = 0; i < STADIUM_PICK; i++)
+        if (r->picks[i] < n)
+            picked++;
+    ThPut(TH_S1_CHOICE);
+    for (i = 0; i < 3; i++)
+    {
+        ThPutCentred(i < picked ? TH_S1_BALL_RED : TH_S1_BALL_OFF, 20, 42 + i * 20, 255);
+        ThPutCentred(TH_S1_BALL_GREEN, 20, 222 + i * 20, 255);
+    }
+    for (side = 0; side < 2; side++)
+    {
+        float y0 = side ? 202 : 8;
+        u8 count = side ? foeCount : n;
+        for (i = 0; i < PARTY_SIZE && i < count; i++)
+        {
+            struct Pokemon m, *mon = &m;
+            float x = 46 + (i % 3) * 142, y = y0 + 5 + (i / 3) * 41;
+            u8 k, order = 0;
+            if (side)
+                mon = &foeTeam[i];
+            else
+            {
+                StadiumCup_Entry(&m, i);
+                for (k = 0; k < STADIUM_PICK; k++)
+                    if (r->picks[k] == i)
+                        order = k + 1;
+            }
+            {
+                SDL_Rect clip = {(int)(x / 2), (int)(y / 2) - 1, 25, 21};
+                float bob = !side && U.vsCursor == i && (U.age / 8) % 2 ? -2 : 0;
+                SDL_RenderSetClipRect(U.owner, &clip);
+                ThBlit(IconTex(GetMonData(mon, MON_DATA_SPECIES)), x - 6, y - 18 + bob, 64, 64, 255);
+                SDL_RenderSetClipRect(U.owner, NULL);
+            }
+            if (!side)
+            {
+                ThPutCentred(order ? TH_S1_BTN_RED : TH_S1_BTN_EMPTY, x + 7, y + 9, 255);
+                if (order)
+                {
+                    snprintf(line, sizeof(line), "%d", order);
+                    ThText(x + 8, y - 3, line, TF_SMALL, 0xffffff, G_NO_GRAD, 0x400808, 2, FALSE, TA_CENTER);
+                }
+            }
+            {
+                u8 nick[POKEMON_NAME_LENGTH + 1];
+                GetMonData(mon, MON_DATA_NICKNAME, nick);
+                nick[POKEMON_NAME_LENGTH] = EOS;
+                Ascii(line, nick, sizeof(line));
+                S1Tw(x + 42, y - 3, line, 0xffffff, TA_LEFT, 94);
+            }
+            snprintf(line, sizeof(line), "L%d", GetMonData(mon, MON_DATA_LEVEL));
+            S1T(x + 42, y + 16, line, 0xffffff, TA_LEFT);
+            if (GetMonData(mon, MON_DATA_HELD_ITEM))
+                ThPutAt(TH_S2_ITEMBOX, x + 80 - 10, y + 16 - 10, 255);
+            if (!side && U.vsCursor == i)
+                S1Brackets(x - 3, y - 2, x + 139, y + 40);
+        }
+    }
+    {
+        u8 pn[PLAYER_NAME_LENGTH + 1];
+        StringCopyN(pn, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+        pn[PLAYER_NAME_LENGTH] = EOS;
+        Ascii(line, pn, sizeof(line));
+        S1T(88, 104, line, 0xffffff, TA_CENTER);
+    }
+    S1Tw(427, 172, name, 0xffffff, TA_CENTER, 90);
+    if (picked < STADIUM_PICK)
+        snprintf(line, sizeof(line), picked ? "%d more!" : "Pick three!", STADIUM_PICK - picked);
+    else
+        snprintf(line, sizeof(line), "All ready!");
+    ThText(207, 140, line, TF_SMALL, 0xffffff, G_NO_GRAD, S1_INK, 2, TRUE, TA_CENTER);
+    {
+        const struct StadiumCupInfo *c = StadiumCup_Info(r->cup);
+        if (c->levelSum)
+        {
+            u16 sum = 0;
+            for (i = 0; i < STADIUM_PICK; i++)
+                if (r->picks[i] < n)
+                {
+                    struct Pokemon m;
+                    StadiumCup_Entry(&m, r->picks[i]);
+                    sum += GetMonData(&m, MON_DATA_LEVEL);
+                }
+            snprintf(line, sizeof(line), "Lv %d / %d", sum, c->levelSum);
+            S1T(207, 164, line, sum > c->levelSum ? 0xff8080 : S1_YELLOW, TA_CENTER);
+        }
+    }
+    S1Foot("{A} PICK  {R} SUMMARY  {START} BATTLE!  {B} BACK");
+    if (U.rules)
+        S1Rules();
+}
+
+// ---- after the battle ----
+static void S1ResultPlates(bool8 won)
+{
+    const struct StadiumFought *f[2] = {StadiumCup_Fought(0), StadiumCup_Fought(1)};
+    static const s16 sA[4][4] = {{SX_S1_RA0_X0, SX_S1_RA0_Y0, SX_S1_RA0_X1, SX_S1_RA0_Y1}, {SX_S1_RA1_X0, SX_S1_RA1_Y0, SX_S1_RA1_X1, SX_S1_RA1_Y1},
+                                 {SX_S1_RA2_X0, SX_S1_RA2_Y0, SX_S1_RA2_X1, SX_S1_RA2_Y1}, {SX_S1_RA3_X0, SX_S1_RA3_Y0, SX_S1_RA3_X1, SX_S1_RA3_Y1}};
+    static const s16 sB[4][4] = {{SX_S1_RB0_X0, SX_S1_RB0_Y0, SX_S1_RB0_X1, SX_S1_RB0_Y1}, {SX_S1_RB1_X0, SX_S1_RB1_Y0, SX_S1_RB1_X1, SX_S1_RB1_Y1},
+                                 {SX_S1_RB2_X0, SX_S1_RB2_Y0, SX_S1_RB2_X1, SX_S1_RB2_Y1}, {SX_S1_RB3_X0, SX_S1_RB3_Y0, SX_S1_RB3_X1, SX_S1_RB3_Y1}};
+    char line[48];
+    u8 i, side;
+    ThPut(TH_S1_RESULT);
+    ThPutAt(TH_S1_FAT_1P, (sA[0][0] + sA[0][2]) / 2.0f - 240, sA[0][1] + 12 - 160, 255);
+    {
+        u8 pn[PLAYER_NAME_LENGTH + 1];
+        StringCopyN(pn, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+        pn[PLAYER_NAME_LENGTH] = EOS;
+        Ascii(line, pn, sizeof(line));
+        S1T((sA[0][0] + sA[0][2]) / 2.0f, sA[0][1] + 22, line, 0xffffff, TA_CENTER);
+    }
+    ThTrainerIn(PlayerGenderToFrontTrainerPicId(gSaveBlock2Ptr->playerGender), sA[0][0] + 18, sA[0][1] + 50, sA[0][2] - sA[0][0] - 36,
+                sA[0][3] - 4 - sA[0][1] - 50, 255);
+    for (side = 0; side < 2; side++)
+        for (i = 0; i < STADIUM_PICK; i++)
+        {
+            const s16 *b = side ? sB[i] : sA[1 + i];
+            const struct StadiumFought *m = &f[side][i];
+            float cx = (b[0] + b[2]) / 2.0f, cy = (b[1] + b[3]) / 2.0f - 8;
+            SDL_Rect clip = {b[0] / 2, b[1] / 2, (b[2] - b[0]) / 2, (b[3] - b[1]) / 2};
+            if (!m->species)
+                continue;
+            SDL_RenderSetClipRect(U.owner, &clip);
+            ThBlit(FrontTex(m->species, m->personality, m->otId), cx - 64, b[1] - 6, 128, 128, m->hp ? 255 : 128);
+            SDL_RenderSetClipRect(U.owner, NULL);
+            S1Fill(b[0] + 8, b[3] - 9, b[2] - b[0] - 16, 5, 0x101850, 255);
+            if (m->hp && m->maxHp)
+                S1Fill(b[0] + 9, b[3] - 8, (b[2] - b[0] - 18) * m->hp / (float)m->maxHp, 3, 0x30e838, 255);
+            if (!m->hp && U.age > 30)
+            {
+                ThPutAt(TH_S1_FAINTX, cx - 60, cy - 60, 255);
+                ThPutAt(TH_S1_FAT_FAINTED, cx - 240, b[3] - 16 - 160, 255);
+            }
+        }
+    {
+        extern const u8 *MP_StadiumBattle_ClassName(void);
+        char cls[24];
+        Ascii(cls, MP_StadiumBattle_ClassName(), sizeof(cls));
+        S1Tw((sB[3][0] + sB[3][2]) / 2.0f, sB[3][1] + 2, cls, 0xffffff, TA_CENTER, sB[3][2] - sB[3][0] - 4);
+    }
+    ThTrainerIn(U.lastFoePic, sB[3][0] + 18, sB[3][1] + 50, sB[3][2] - sB[3][0] - 36, sB[3][3] - 4 - sB[3][1] - 50, 255);
+    if (U.age > 12)
+    {
+        ThPutAt(won ? TH_S1_FAT_WIN : TH_S1_FAT_LOSE, 296 - 240, 76 - 160, 255);
+        ThPutAt(won ? TH_S1_FAT_LOSE : TH_S1_FAT_WIN, 186 - 240, 204 - 160, 255);
+    }
+}
+
+static void S1Badges(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    u8 i, badges = StadiumCastle_Badges(r->round);
+    int t = U.age - TH_RESULT_HOLD;
+    ThPut(TH_S1_BADGES);
+    for (i = 0; i < STADIUM_CASTLE_GYMS; i++)
+        if ((badges >> i) & 1)
+        {
+            float x0 = 44 + (i % 4) * 98, y0 = 22 + (i / 4) * 132, drop = i == r->stage && t < 16 ? (16 - t) * 4 : 0;
+            ThPutCentred(TH_S1_BADGEWON, x0 + 34, y0 + 44 - drop, i == r->stage && t < 16 ? t * 16 : 255);
+        }
+}
+
+static void S1Result(void)
+{
+    struct StadiumRun *r = StadiumCup_Run();
+    bool8 lost = U.result == RES_LOST || U.result == RES_OVER || U.result == RES_CONTINUE;
+    bool8 after = U.age >= TH_RESULT_HOLD;
+    char line[64];
+    int i;
+    if (U.result == RES_CUP)
+    {
+        const struct StadiumPrize *p = StadiumRewards_Last();
+        ThPut(TH_S1_PRIZES);
+        ThPutAt(r->cup == STADIUM_CUP_CASTLE ? TH_S1_FAT_CASTLEWON : TH_S1_FAT_CUPWON, 0, 58 - 160, 255);
+        for (i = 0; i < 8; i++)
+            ThPutCentred(TH_S1_BALL_RED, 163 + i * 22, 112, 255);
+        if (U.age >= 40)
+        {
+            S1T(196, 136, p->first ? "PRIZES" : "PRIZES (won before)", S1_YELLOW, TA_LEFT);
+            if (p->species != SPECIES_NONE)
+            {
+                ThFrontIn(FrontTex(p->species, p->personality, p->otId), 44, 134, 132, 148, 255);
+                snprintf(line, sizeof(line), "Lv%d  %d perfect IVs%s", p->level, p->perfect, p->shiny ? "  SHINY" : "");
+                S1Tw(196, 160, line, 0xffffff, TA_LEFT, 238);
+            }
+            for (i = 0; i < p->count; i++)
+                S1Tw(196, (p->species != SPECIES_NONE ? 184 : 160) + i * 19, p->line[i], 0xf8e8a0, TA_LEFT, 238);
+        }
+    }
+    else if (after && U.result == RES_STAGE)
+        S1Badges();
+    else if (after && (U.result == RES_CONTINUE || U.result == RES_OVER))
+    {
+        ThPut(TH_S1_BADGES);
+        G_FillA(0, 0, 240, 160, 0x000000, 120);
+        S1Box(TH_S1_BOX_NAVY, 136, 100, 236, 116);
+        if (U.result == RES_OVER)
+        {
+            S1T(254, 120, "GAME OVER", S1_YELLOW, TA_CENTER);
+            S1T(254, 150, "No continues left.", 0xffffff, TA_CENTER);
+        }
+        else
+        {
+            S1T(148, 106, "Keep battling?", 0xffffff, TA_LEFT);
+            ThPutAt(TH_S2_POINTER, 152 - 10, 147 - 20, 255);
+            S1T(168, 134, "Continue", S1_YELLOW, TA_LEFT);
+            S1T(168, 156, "Give up", 0xffffff, TA_LEFT);
+            snprintf(line, sizeof(line), "CONTINUES %d", r->continues);
+            S1T(360, 184, line, 0xffffff, TA_RIGHT);
+        }
+    }
+    else
+        S1ResultPlates(!lost);
+    if (U.result == RES_CUP && U.age < PRIZES_READ_AGE)
+        S1Foot("");
+    else
+        S1Foot(U.result == RES_CONTINUE ? "{A} CONTINUE  {B} GIVE UP" : "{A} OK");
+}
+
+// ---------------------------------------------------------------------------------------------------------------
 // The screens in the chosen theme; FALSE: this one isn't drawn in it (the game's own then)
 static bool8 ThemedDraw(void)
 {
@@ -1447,6 +2455,29 @@ static bool8 ThemedDraw(void)
                 S2Choice();
             if (U.vsStep == VS_LADDER && U.confirm)
                 S2Ask(240, 120, 340, "Quit this cup?", "The battles won in it are lost.");
+            return TRUE;
+        }
+        break;
+    case MP_STADIUM_STYLE_STADIUM1:
+        switch (U.screen)
+        {
+        case SCR_SELECT: S1Select(); return TRUE;
+        case SCR_CLASS: if (U.cup == STADIUM_CUP_CASTLE) S1Castle(); else S1Class(); return TRUE;
+        case SCR_OPTIONS: S1Options(); return TRUE;
+        case SCR_TEAMS: S1Teams(); return TRUE;
+        case SCR_REGISTER: S1Register(); return TRUE;
+        case SCR_RESULT: S1Result(); return TRUE;
+        case SCR_VS:
+            if (U.vsStep == VS_LADDER)
+            {
+                S1Ladder();   // (no hints: STADIUM's ladder has none, and its tiles reach the foot)
+                if (U.confirm)
+                    S1Ask("Quit this cup?", "The battles won in it are lost.");
+            }
+            else if (U.vsStep == VS_SHOW)
+                S1Vs();
+            else
+                S1Choice();
             return TRUE;
         }
         break;

@@ -78,8 +78,9 @@ def opaque(name, c):
 def cut(name, draw, box):
     """A piece with see-through parts: DRAW(canvas) drawn over black and over white, cut to BOX (real pixels)."""
     x0, y0, x1, y1 = [int(v) for v in box]
-    k = C4(); k.a[:] = 0; draw(k); blk = np.clip(k.a[y0:y1, x0:x1], 0, 1)
-    k = C4(); k.a[:] = 1; draw(k); wht = np.clip(k.a[y0:y1, x0:x1], 0, 1)
+    K = globals().get('S1', C4)   # (POKESTADIUM's canvas: C4 and its own materials)
+    k = K(); k.a[:] = 0; draw(k); blk = np.clip(k.a[y0:y1, x0:x1], 0, 1)
+    k = K(); k.a[:] = 1; draw(k); wht = np.clip(k.a[y0:y1, x0:x1], 0, 1)
     al = np.clip(1 - (wht - blk).mean(-1), 0, 1)
     col = np.where(al[..., None] > 1e-3, blk / np.maximum(al[..., None], 1e-3), 0)
     PIECES.append((name, np.concatenate([np.clip(col, 0, 1), al[..., None]], -1), x0, y0))
@@ -589,6 +590,201 @@ def s2_chips():
         cut(f'S2_CHIP_{name}', lambda k, rgb=rgb: k.pill(10, 10, 210, 30, rgb), (6, 6, 216, 34))
 
 
+
+# ---------------------------------------------------------------------------------------------------------------
+# POKESTADIUM THEME (stadium1.py, reconcile.py *_s1)
+import stadium1 as _st1
+S1 = _st1.S1
+
+CUP_NAMES = ['PIKA CUP', 'PETIT CUP', 'POKé CUP', 'PRIME CUP', 'CHALLENGE CUP', 'GYM LEADER CASTLE', 'VS. MEWTWO']   # (mp_stadium_cup.c)
+STAGE_NAMES = ['PEWTER GYM', 'CERULEAN GYM', 'VERMILION GYM', 'CELADON GYM', 'FUCHSIA GYM', 'SAFFRON GYM', 'CINNABAR GYM',
+               'VIRIDIAN GYM', 'ELITE FOUR']
+BATTLE_NAMES = [f'BATTLE {n}' for n in range(1, 9)] + ['SEMI-FINAL', 'FINAL BATTLE', 'THE LEADER', 'THE RIVAL'] + \
+               [f'BATTLE {n} OF {m}' for m in (4, 5) for n in range(1, m)]
+FAT = []      # (word, piece) for the game's table: the ladder's bars in STADIUM's fat letters
+
+
+def s1_fat(word, px=34, top=0xfff8a0, bottom=0xd8a818, edge=0x282008, shadow=0x000000, font=None, name=None):
+    name = name or 'S1_FAT%d' % len(FAT)
+    k = S1()
+    w = 420
+
+    def draw(q):
+        q.fat(240, 160, word, px, top, bottom, edge, shadow=shadow, font=font or HEAVY)
+    cut(name, draw, (240 - w // 2 - 20, 160 - px - 14, 240 + w // 2 + 20, 160 + px + 14))   # (centred on 240, 160)
+    return name
+
+
+def s1_common():
+    """POKESTADIUM's boxes and bits the game draws at any size or place."""
+    cut('S1_TITLEBAR', lambda k: S1.titlebar(k, ''), (28, 4, 448, 32))
+    for name, fill, edge in (('NAVY', 0x20209c, 0xd8d8ff), ('BLUEGOLD', 0x000880, 0xd8d040), ('GREENGOLD', 0x107818, 0xd8d040),
+                             ('OLIVE', 0x90a020, 0xd8d040), ('GREEN', 0x108018, 0xd8d040)):
+        cut('S1_BOX_' + name, lambda k, fill=fill, edge=edge: S1.box(k, 10, 10, 130, 130, fill, edge), (8, 8, 134, 134))
+    cut('S1_VEIL', lambda k: S1.veil(k, 10, 10, 130, 130), (10, 10, 130, 130))
+    cut('S1_FOOT', lambda k: S1.veil(k, 0, 292, 480, 320, 0x101060, 0.75, 0), (0, 292, 480, 320))
+    for name, top in (('RED', 0xe82020), ('GREEN', 0x58c838)):
+        cut('S1_BALL_' + name, lambda k, top=top: k.ball(20, 20, 7, top=top), (10, 10, 31, 31))
+    cut('S1_BALL_OFF', lambda k: k.ball(20, 20, 7, lit=False), (10, 10, 31, 31))
+    cut('S1_BTN_RED', lambda k: k.sphere(20, 20, 8, 0xe03828), (9, 9, 32, 32))
+    cut('S1_BTN_EMPTY', lambda k: k.sphere(20, 20, 7, 0x5060a0, flat=True), (9, 9, 32, 32))
+    cut('S1_STAR_LIT', lambda k: k.sphere(20, 20, 7, 0xe8b020), (10, 10, 31, 31))
+    cut('S1_STAR_EMPTY', lambda k: k.sphere(20, 20, 6.5, 0x5060a0, flat=True), (10, 10, 31, 31))
+    # the fat words: every cup, stage and battle name the ladder's bars can show; WIN, LOSE, VS, 1P, FAINTED, CUP WON!
+    for w in CUP_NAMES + STAGE_NAMES + BATTLE_NAMES:
+        FAT.append((w, s1_fat(w, 34 if len(w) < 14 else 28)))
+    s1_fat('WIN', 74, 0xf01818, 0xffe838, 0xffffff, shadow=0x500808, name='S1_FAT_WIN')
+    s1_fat('LOSE', 62, 0x2838c0, 0x101060, 0xb8d0ff, shadow=0x000020, name='S1_FAT_LOSE')
+    s1_fat('VS', 60, 0xffe040, 0xe83010, 0x301000, font=ITALIC, name='S1_FAT_VS')
+    s1_fat('1P', 20, 0xfff8a0, 0xe0a010, 0x282060, font=ITALIC, name='S1_FAT_1P')
+    s1_fat('FAINTED', 17, 0xf0b0ff, 0x8030c0, 0x200830, name='S1_FAT_FAINTED')
+    s1_fat('CUP WON!', 58, 0xfff8a0, 0xe8a010, 0x503008, name='S1_FAT_CUPWON')
+    s1_fat('CASTLE WON!', 50, 0xfff8a0, 0xe8a010, 0x503008, name='S1_FAT_CASTLEWON')
+    s1_fat('GAME OVER', 50, 0x2838c0, 0x101060, 0xb8d0ff, shadow=0x000020, name='S1_FAT_GAMEOVER')
+    # a fainted one's red X
+    def x(k):
+        sl, xx, yy = k.win(10, 10, 110, 110)
+        cx, cy = 60, 60
+        d = np.minimum(np.abs((xx - cx) - (yy - cy)), np.abs((xx - cx) + (yy - cy))) / 1.414 - 5
+        k.mix(sl, aa(d) * (np.hypot(xx - cx, yy - cy) < 44) * 0.9, hx(0xe02828))
+    cut('S1_FAINTX', x, (10, 10, 110, 110))
+
+
+def s1_cups():
+    c = S1()
+    c.sky()
+    yy = np.mgrid[0:H, 0:W][0]
+    c.a = c.a * (1 - 0.5 * smooth(200, 320, yy)[..., None]) + hx(0x58a048) * 0.5 * smooth(200, 320, yy)[..., None]
+    c.veil(16, 232, 464, 290)
+    opaque('S1_CUPS', c)
+
+
+def s1_stars():
+    c = S1()
+    c.stars()
+    opaque('S1_STARS', c)
+
+
+def s1_ladder():
+    c = S1()
+    c.stars()
+    x0, y0, x1, y1 = 76, 14, 404, 306
+    c.a[y0:y1, x0:x1] = hx(0x8a8438)
+    c.a[y0:y0 + 3, x0:x1] = hx(0xc8c070); c.a[y0:y1, x0:x0 + 3] = hx(0xc8c070)
+    c.a[y1 - 3:y1, x0:x1] = hx(0x504c18); c.a[y0:y1, x1 - 3:x1] = hx(0x504c18)
+    bx0, by0, bx1, by1 = x0 + 10, y0 + 10, x1 - 10, y0 + 128
+    c.a[by0 - 2:by1 + 2, bx0 - 2:bx1 + 2] = hx(0x504c18)
+    c.clip_blit(scale(stadium_pic(21), 392, 147, Image.BILINEAR), bx0 - 40, by0 - 14, (bx0, by0, bx1, by1))
+    define('SY_S1_LAD_BAR0', by0 + 38); define('SY_S1_LAD_BAR1', by0 + 84)
+    for i in range(8):
+        tx, ty = x0 + 10 + (i % 4) * 78, y0 + 140 + (i // 4) * 76
+        c.a[ty - 2:ty + 70, tx - 2:tx + 74] = hx(0x504c18)
+        c.a[ty:ty + 68, tx:tx + 72] = hx(0xf0f0f0)
+    define('SX_S1_LAD_X', x0 + 10); define('SY_S1_LAD_Y', y0 + 140)
+    opaque('S1_LADDER', c)
+
+    def q(k):
+        tx, ty = 0 + 10, 10
+        k.a[ty:ty + 68, tx:tx + 72] = hx(0xf0f0f0)
+        sl, xx, yy = k.win(tx, ty, tx + 72, ty + 68)
+        head = aa(np.hypot(xx - (tx + 36), yy - (ty + 24)) - 15)
+        body = aa(sdf_rr(xx, yy, tx + 10, ty + 40, tx + 62, ty + 90, 16))
+        k.mix(sl, np.maximum(head, body), hx(0x383840))
+        k.fat(tx + 36, ty + 34, '?', 40, 0xff5040, 0xa80808, 0x400000)
+    cut('S1_QTILE', q, (10, 10, 82, 78))
+
+
+def s1_vs():
+    c = S1()
+    c.stars()
+    cells = c.gridplate(22, 18, 458, 146, 4, 2)
+    x0, y0, x1, y1 = cells[0]
+    c.a[y0:cells[4][3], x0:x1] = hx(0x7868e0)
+    c.a[y0 + 48:cells[4][3] - 4, x0 + 18:x1 - 18] = hx(0x000000)
+    define('SX_S1_VS_P0_X0', x0); define('SX_S1_VS_P0_X1', x1); define('SY_S1_VS_P0_Y0', y0); define('SY_S1_VS_P0_Y1', cells[4][3])
+    for i in range(8):
+        defines(f'SX_S1_VSA{i}', cells[i])
+    cells = c.gridplate(22, 150, 458, 278, 4, 2, green=True)
+    x0, y0, x1, y1 = cells[3]
+    c.a[y0:cells[7][3], x0:x1] = hx(0x28a028)
+    c.a[y0 + 48:cells[7][3] - 4, x0 + 18:x1 - 18] = hx(0xf0f0f0)
+    for i in range(8):
+        defines(f'SX_S1_VSB{i}', cells[i])
+    c.fat(240, 148, 'VS', 60, 0xffe040, 0xe83010, 0x301000, font=ITALIC)
+    opaque('S1_VS', c)
+
+
+def s1_choice():
+    c = S1()
+    c.deep()
+    for y0, green in ((8, False), (202, True)):
+        fill, edge = (0x107818, 0xd8d040) if green else (0x000880, 0xd8d040)
+        c.box(40, y0, 474, y0 + 90, fill, edge, r=5)
+    c.box(40, 100, 136, 126, 0x000880, 0xd8d040)
+    c.box(6, 8, 34, 96, 0x90a020, 0xd8d040)
+    c.fat(20, 20, '1P', 13, 0xffffff, 0xd0d8ff, 0x101060, font=ITALIC)
+    c.box(380, 172, 474, 198, 0x107818, 0xd8d040)
+    c.box(6, 204, 34, 292, 0x90a020, 0xd8d040)
+    c.text(10, 138, 'COM', NARROW, ow=1, outline=_st1.SHADOW, align='c')
+    c.box(40, 130, 374, 198, 0x108018, 0xd8d040)
+    opaque('S1_CHOICE', c)
+
+
+def s1_result():
+    c = S1()
+    c.stars()
+    cells = c.gridplate(22, 18, 458, 146, 4, 1)
+    x0, y0, x1, y1 = cells[0]
+    c.a[y0:y1, x0:x1] = hx(0x7868e0)
+    c.a[y0 + 50:y1 - 4, x0 + 18:x1 - 18] = hx(0x000000)
+    for i in range(4):
+        defines(f'SX_S1_RA{i}', cells[i])
+    cells = c.gridplate(22, 150, 458, 278, 4, 1, green=True)
+    x0, y0, x1, y1 = cells[3]
+    c.a[y0:y1, x0:x1] = hx(0x28a028)
+    c.a[y0 + 50:y1 - 4, x0 + 18:x1 - 18] = hx(0xf0f0f0)
+    for i in range(4):
+        defines(f'SX_S1_RB{i}', cells[i])
+    opaque('S1_RESULT', c)
+
+
+def s1_badges():
+    c = S1()
+    c.stars()
+    tiles = [('BOULDER', 0x8c8c8c), ('CASCADE', 0x3878d8), ('THUNDER', 0xe89858), ('RAINBOW', 0x48b868),
+             ('SOUL', 0xe078c8), ('MARSH', 0xe8c890), ('VOLCANO', 0xc02848), ('EARTH', 0x389838)]
+    rng = np.random.default_rng(7)
+    for i, (nm, col) in enumerate(tiles):
+        x0, y0 = 44 + (i % 4) * 98, 22 + (i // 4) * 132
+        w, h = 96, 130
+        n = rng.random((h, w, 1)).astype(np.float32)
+        tile = hx(col)[None, None] * (0.86 + 0.26 * n)
+        if nm == 'RAINBOW':
+            yy = np.linspace(0, 1, h)[:, None]
+            tile = ramp(yy + 0 * n[..., 0], [(0, 0x9038b0), (0.3, 0x3878d8), (0.5, 0x48c8a0), (0.7, 0xe8e048), (1, 0xe85838)]) * (0.9 + 0.2 * n)
+        c.a[y0:y0 + h, x0:x0 + w] = np.clip(tile, 0, 1)
+        c.a[y0:y0 + 2, x0:x0 + w] *= 1.3; c.a[y0:y0 + h, x0:x0 + 2] *= 1.3
+        c.a[y0 + h - 2:y0 + h, x0:x0 + w] *= 0.6; c.a[y0:y0 + h, x0 + w - 2:x0 + w] *= 0.6
+        c.a[y0:y0 + h, x0:x0 + w] = np.clip(c.a[y0:y0 + h, x0:x0 + w], 0, 1)
+        lab, wd, pad = _s2.text_rgba(nm, SMALL, 0xffffff, hx(col) * 0.45, None, 2, None, True)
+        im = Image.fromarray((np.clip(lab, 0, 1) * 255).astype(np.uint8), 'RGBA').rotate(90, expand=True)
+        a = np.array(im).astype(np.float32) / 255
+        c.blit(a, x0 + w - 30, y0 + h - 6 - a.shape[0])
+    opaque('S1_BADGES', c)
+
+    def won(k):
+        k.sphere(40, 40, 24, 0x802010); k.sphere(40, 40, 18, 0xf0e8e0); k.sphere(40, 40, 9, 0xe02020)
+    cut('S1_BADGEWON', won, (12, 12, 69, 69))
+
+
+def s1_prizes():
+    c = S1()
+    c.stars()
+    c.gridplate(40, 130, 180, 286, 1, 1)
+    c.box(186, 130, 440, 286)
+    opaque('S1_PRIZES', c)
+
+
 # ---------------------------------------------------------------------------------------------------------------
 def write():
     out = bytearray(b'STTH' + struct.pack('<H', len(PIECES)))
@@ -605,6 +801,10 @@ def write():
     lines += [f'    TH_{p[0]},' for p in PIECES]
     lines += ['    TH_COUNT', '};']
     lines += [f'#define {n} {v}' for n, v in DEFS]
+    lines += ['// (POKESTADIUM\'s fat letters for the ladder\'s bars: a word and its piece)',
+              'static const struct { const char *word; u16 piece; } sThFatWords[] = {']
+    lines += [f'    {{"{w}", TH_{p}}},' for w, p in FAT]
+    lines += ['};']
     lines += ['#endif', '']
     open(HEADER, 'w').write('\n'.join(lines))
     print(f'{len(PIECES)} pieces, {len(out) // 1024} KB')
@@ -625,4 +825,13 @@ if __name__ == '__main__':
     s2_prizes()
     s2_badges()
     s2_continue()
+    s1_common()
+    s1_cups()
+    s1_stars()
+    s1_ladder()
+    s1_vs()
+    s1_choice()
+    s1_result()
+    s1_badges()
+    s1_prizes()
     write()

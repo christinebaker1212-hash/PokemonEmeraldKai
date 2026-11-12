@@ -195,6 +195,75 @@ enum {
     TH_S2_BBADGE6,
     TH_S2_BBADGE7,
     TH_S2_CONTINUE,
+    TH_S1_TITLEBAR,
+    TH_S1_BOX_NAVY,
+    TH_S1_BOX_BLUEGOLD,
+    TH_S1_BOX_GREENGOLD,
+    TH_S1_BOX_OLIVE,
+    TH_S1_BOX_GREEN,
+    TH_S1_VEIL,
+    TH_S1_FOOT,
+    TH_S1_BALL_RED,
+    TH_S1_BALL_GREEN,
+    TH_S1_BALL_OFF,
+    TH_S1_BTN_RED,
+    TH_S1_BTN_EMPTY,
+    TH_S1_STAR_LIT,
+    TH_S1_STAR_EMPTY,
+    TH_S1_FAT0,
+    TH_S1_FAT1,
+    TH_S1_FAT2,
+    TH_S1_FAT3,
+    TH_S1_FAT4,
+    TH_S1_FAT5,
+    TH_S1_FAT6,
+    TH_S1_FAT7,
+    TH_S1_FAT8,
+    TH_S1_FAT9,
+    TH_S1_FAT10,
+    TH_S1_FAT11,
+    TH_S1_FAT12,
+    TH_S1_FAT13,
+    TH_S1_FAT14,
+    TH_S1_FAT15,
+    TH_S1_FAT16,
+    TH_S1_FAT17,
+    TH_S1_FAT18,
+    TH_S1_FAT19,
+    TH_S1_FAT20,
+    TH_S1_FAT21,
+    TH_S1_FAT22,
+    TH_S1_FAT23,
+    TH_S1_FAT24,
+    TH_S1_FAT25,
+    TH_S1_FAT26,
+    TH_S1_FAT27,
+    TH_S1_FAT28,
+    TH_S1_FAT29,
+    TH_S1_FAT30,
+    TH_S1_FAT31,
+    TH_S1_FAT32,
+    TH_S1_FAT33,
+    TH_S1_FAT34,
+    TH_S1_FAT_WIN,
+    TH_S1_FAT_LOSE,
+    TH_S1_FAT_VS,
+    TH_S1_FAT_1P,
+    TH_S1_FAT_FAINTED,
+    TH_S1_FAT_CUPWON,
+    TH_S1_FAT_CASTLEWON,
+    TH_S1_FAT_GAMEOVER,
+    TH_S1_FAINTX,
+    TH_S1_CUPS,
+    TH_S1_STARS,
+    TH_S1_LADDER,
+    TH_S1_QTILE,
+    TH_S1_VS,
+    TH_S1_CHOICE,
+    TH_S1_RESULT,
+    TH_S1_BADGES,
+    TH_S1_BADGEWON,
+    TH_S1_PRIZES,
     TH_COUNT
 };
 #define SX_S2_ROUND_X0 356
@@ -349,4 +418,146 @@ enum {
 #define SX_S2_CPORT1_Y0 234
 #define SX_S2_CPORT1_X1 106
 #define SX_S2_CPORT1_Y1 274
+#define SY_S1_LAD_BAR0 62
+#define SY_S1_LAD_BAR1 108
+#define SX_S1_LAD_X 86
+#define SY_S1_LAD_Y 154
+#define SX_S1_VS_P0_X0 23
+#define SX_S1_VS_P0_X1 130
+#define SY_S1_VS_P0_Y0 19
+#define SY_S1_VS_P0_Y1 145
+#define SX_S1_VSA0_X0 23
+#define SX_S1_VSA0_Y0 19
+#define SX_S1_VSA0_X1 130
+#define SX_S1_VSA0_Y1 81
+#define SX_S1_VSA1_X0 132
+#define SX_S1_VSA1_Y0 19
+#define SX_S1_VSA1_X1 239
+#define SX_S1_VSA1_Y1 81
+#define SX_S1_VSA2_X0 241
+#define SX_S1_VSA2_Y0 19
+#define SX_S1_VSA2_X1 348
+#define SX_S1_VSA2_Y1 81
+#define SX_S1_VSA3_X0 350
+#define SX_S1_VSA3_Y0 19
+#define SX_S1_VSA3_X1 457
+#define SX_S1_VSA3_Y1 81
+#define SX_S1_VSA4_X0 23
+#define SX_S1_VSA4_Y0 83
+#define SX_S1_VSA4_X1 130
+#define SX_S1_VSA4_Y1 145
+#define SX_S1_VSA5_X0 132
+#define SX_S1_VSA5_Y0 83
+#define SX_S1_VSA5_X1 239
+#define SX_S1_VSA5_Y1 145
+#define SX_S1_VSA6_X0 241
+#define SX_S1_VSA6_Y0 83
+#define SX_S1_VSA6_X1 348
+#define SX_S1_VSA6_Y1 145
+#define SX_S1_VSA7_X0 350
+#define SX_S1_VSA7_Y0 83
+#define SX_S1_VSA7_X1 457
+#define SX_S1_VSA7_Y1 145
+#define SX_S1_VSB0_X0 23
+#define SX_S1_VSB0_Y0 151
+#define SX_S1_VSB0_X1 130
+#define SX_S1_VSB0_Y1 213
+#define SX_S1_VSB1_X0 132
+#define SX_S1_VSB1_Y0 151
+#define SX_S1_VSB1_X1 239
+#define SX_S1_VSB1_Y1 213
+#define SX_S1_VSB2_X0 241
+#define SX_S1_VSB2_Y0 151
+#define SX_S1_VSB2_X1 348
+#define SX_S1_VSB2_Y1 213
+#define SX_S1_VSB3_X0 350
+#define SX_S1_VSB3_Y0 151
+#define SX_S1_VSB3_X1 457
+#define SX_S1_VSB3_Y1 213
+#define SX_S1_VSB4_X0 23
+#define SX_S1_VSB4_Y0 215
+#define SX_S1_VSB4_X1 130
+#define SX_S1_VSB4_Y1 277
+#define SX_S1_VSB5_X0 132
+#define SX_S1_VSB5_Y0 215
+#define SX_S1_VSB5_X1 239
+#define SX_S1_VSB5_Y1 277
+#define SX_S1_VSB6_X0 241
+#define SX_S1_VSB6_Y0 215
+#define SX_S1_VSB6_X1 348
+#define SX_S1_VSB6_Y1 277
+#define SX_S1_VSB7_X0 350
+#define SX_S1_VSB7_Y0 215
+#define SX_S1_VSB7_X1 457
+#define SX_S1_VSB7_Y1 277
+#define SX_S1_RA0_X0 23
+#define SX_S1_RA0_Y0 19
+#define SX_S1_RA0_X1 130
+#define SX_S1_RA0_Y1 145
+#define SX_S1_RA1_X0 132
+#define SX_S1_RA1_Y0 19
+#define SX_S1_RA1_X1 239
+#define SX_S1_RA1_Y1 145
+#define SX_S1_RA2_X0 241
+#define SX_S1_RA2_Y0 19
+#define SX_S1_RA2_X1 348
+#define SX_S1_RA2_Y1 145
+#define SX_S1_RA3_X0 350
+#define SX_S1_RA3_Y0 19
+#define SX_S1_RA3_X1 457
+#define SX_S1_RA3_Y1 145
+#define SX_S1_RB0_X0 23
+#define SX_S1_RB0_Y0 151
+#define SX_S1_RB0_X1 130
+#define SX_S1_RB0_Y1 277
+#define SX_S1_RB1_X0 132
+#define SX_S1_RB1_Y0 151
+#define SX_S1_RB1_X1 239
+#define SX_S1_RB1_Y1 277
+#define SX_S1_RB2_X0 241
+#define SX_S1_RB2_Y0 151
+#define SX_S1_RB2_X1 348
+#define SX_S1_RB2_Y1 277
+#define SX_S1_RB3_X0 350
+#define SX_S1_RB3_Y0 151
+#define SX_S1_RB3_X1 457
+#define SX_S1_RB3_Y1 277
+// (POKESTADIUM's fat letters for the ladder's bars: a word and its piece)
+static const struct { const char *word; u16 piece; } sThFatWords[] = {
+    {"PIKA CUP", TH_S1_FAT0},
+    {"PETIT CUP", TH_S1_FAT1},
+    {"POKé CUP", TH_S1_FAT2},
+    {"PRIME CUP", TH_S1_FAT3},
+    {"CHALLENGE CUP", TH_S1_FAT4},
+    {"GYM LEADER CASTLE", TH_S1_FAT5},
+    {"VS. MEWTWO", TH_S1_FAT6},
+    {"PEWTER GYM", TH_S1_FAT7},
+    {"CERULEAN GYM", TH_S1_FAT8},
+    {"VERMILION GYM", TH_S1_FAT9},
+    {"CELADON GYM", TH_S1_FAT10},
+    {"FUCHSIA GYM", TH_S1_FAT11},
+    {"SAFFRON GYM", TH_S1_FAT12},
+    {"CINNABAR GYM", TH_S1_FAT13},
+    {"VIRIDIAN GYM", TH_S1_FAT14},
+    {"ELITE FOUR", TH_S1_FAT15},
+    {"BATTLE 1", TH_S1_FAT16},
+    {"BATTLE 2", TH_S1_FAT17},
+    {"BATTLE 3", TH_S1_FAT18},
+    {"BATTLE 4", TH_S1_FAT19},
+    {"BATTLE 5", TH_S1_FAT20},
+    {"BATTLE 6", TH_S1_FAT21},
+    {"BATTLE 7", TH_S1_FAT22},
+    {"BATTLE 8", TH_S1_FAT23},
+    {"SEMI-FINAL", TH_S1_FAT24},
+    {"FINAL BATTLE", TH_S1_FAT25},
+    {"THE LEADER", TH_S1_FAT26},
+    {"THE RIVAL", TH_S1_FAT27},
+    {"BATTLE 1 OF 4", TH_S1_FAT28},
+    {"BATTLE 2 OF 4", TH_S1_FAT29},
+    {"BATTLE 3 OF 4", TH_S1_FAT30},
+    {"BATTLE 1 OF 5", TH_S1_FAT31},
+    {"BATTLE 2 OF 5", TH_S1_FAT32},
+    {"BATTLE 3 OF 5", TH_S1_FAT33},
+    {"BATTLE 4 OF 5", TH_S1_FAT34},
+};
 #endif
