@@ -11,7 +11,7 @@ Banks: the system banks (a/0/0/2) first, then the story banks (a/0/0/3: a zone's
 MOéMON's words (tools/moemon_text/moe_words.py, as HOENN's and SINNOH's text), Black's breaks as Emerald's: a new line,
 {BE00} (wait, then the next line scrolls up) "\\l", {BE01} (wait, then a new box) "\\p", a box ending in {BE01} waits for
 A at its end; {BE02:n} / {BE09:n} wait n frames; a word slot ({01xx:n} / {02xx:n}: a name, a number...) UNOVA's own
-slot n (gUnovaStrVar); Black's POKéMON glyphs (⒆⒇) the game's PKMN; colours, sounds and positions are left out; a character the
+slot n (gUnovaStrVar); Black's PKMN glyphs (⒆⒇) the letters PKMN; colours, sounds and positions are left out; a character the
 game has no glyph for is a '?'.
 
 File: "U3TZ", u32 the size of the pack, the pack deflated (zlib). Pack (little endian): "U3DT" u32 version 1, u32 banks,
@@ -101,7 +101,8 @@ def convert(line, cmap, wait_at_end=True):
         elif ch in '⑭⑮':
             out.append(cmap.get('♂' if ch == '⑭' else '♀', unknown))   # (Black's gender glyphs)
         elif ch in '⒆⒇':
-            out.append(0x53 if ch == '⒆' else 0x54)   # (Black's POKéMON glyphs: the game's PK and MN, charmap.txt)
+            out += [cmap.get(c, unknown) for c in ('PK' if ch == '⒆' else 'MN')]   # (Black's PKMN glyphs: the letters: the
+            # game's own PK / MN characters draw as broken marks in the battle font)
         else:
             out.append(cmap.get(ch, unknown))
     wait = bool(out) and out[-1] in (SCROLL, PAGE)

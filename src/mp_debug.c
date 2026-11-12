@@ -1857,6 +1857,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] trainer battle %d\n", atoi(arg));
         MP_Debug_TrainerBattle(atoi(arg));
     }
+    else if (strcmp(cmd, "u3dtrainer") == 0)
+    {
+        // u3dtrainer ID - a battle against Black's trainer ID right now (UNOVA's trainers: u3d_battle.c)
+        bool8 U3D_PrepareBattle(u16 first, u16 second);
+        void BattleSetup_StartUnovaBattle(void);
+        if (U3D_PrepareBattle(atoi(arg), 0))
+            BattleSetup_StartUnovaBattle();
+        printf("[test] unova trainer battle %d\n", atoi(arg));
+    }
     else if (strcmp(cmd, "stadium") == 0)   // mp stadium ROUND DIVISION TRAINER: a STADIUM trainer's team as built (mp_stadium.c)
     {
         void MP_Stadium_Debug(u8 round, u8 division, u8 index);

@@ -52,6 +52,8 @@ extern bool (*gMpU3dOamHidden)(int oamIndex, int x, int line);
 #define CAM_PITCH 53.2177734375f        // (9688 of 65536 turns)
 #define CAM_LIFT 4.0f                   // (the setting's target shift: 4 units up)
 #define FEET_TOWARD 0.0f                // (Black stands a person's billboard on its tile's middle)
+#define EMERALD_DROP 8.0f               // (the player's view a half tile lower: the player's feet where Emerald draws
+                                        //  them, the tile's foot rather than its middle; scenes' cameras ease off it)
 #define SEASONS 4
 
 // ------------------------------------------------------------------------------------------------ the pack
@@ -296,6 +298,18 @@ static u16 Replaced(u16 mat)
     return mat;
 }
 
+// The matrix each map shows, fixed as its blocks load (Black swaps a map only when it's entered or reloaded, or at
+// once by WORK_CmdSetMapReplaceFlag's "now": U3D_RefreshBlocks): a swap a script sets before a battle (the player's
+// room left in a mess) shows once the field comes back, not as the battle's transition starts
+static u16 sShown[ARRAY_COUNT(sUnovaMaps)];
+
+static u16 ShownMat(s32 map)
+{
+    if (!sShown[map])
+        sShown[map] = Replaced(sUnovaMaps[map].mat) + 1;
+    return sShown[map] - 1;
+}
+
 static const U3dMatrix *MatrixNumbered(u16 number)
 {
     u32 i;
@@ -460,11 +474,12 @@ const u16 *U3D_LayoutBlocks(const struct MapLayout *layout)
             LoadPack();
         if (!sPack.ok)
             return layout->map;
-        if (sBlocks[i] == NULL || sBlocksMat[i] != Replaced(sUnovaMaps[i].mat))
+        sShown[i] = Replaced(sUnovaMaps[i].mat) + 1;   // (loading: the map as the story has it now)
+        if (sBlocks[i] == NULL || sBlocksMat[i] != ShownMat(i))
         {
             u32 w = 32 * sUnovaMaps[i].bw;
-            const U3dMatrix *mt = MatrixNumbered(Replaced(sUnovaMaps[i].mat));
-            sBlocksMat[i] = Replaced(sUnovaMaps[i].mat);
+            const U3dMatrix *mt = MatrixNumbered(ShownMat(i));
+            sBlocksMat[i] = ShownMat(i);
             if (sBlocks[i] == NULL)
                 sBlocks[i] = malloc(sizeof(u16) * w * 32 * sUnovaMaps[i].bh);
             for (bz = 0; bz < sUnovaMaps[i].bh; bz++)
@@ -522,8 +537,8 @@ static struct
 {
     u8 mode;                          // CAM_FOLLOW, CAM_TO (to the target, then holding), CAM_BACK (to the player's)
     u16 t, frames;
-    float from[6], to[6];             // target x, y, z, pitch, yaw (degrees), distance
-    float cur[6];
+    float from[7], to[7];             // target x, y, z, pitch, yaw (degrees), distance, the screen's shift (EMERALD_DROP)
+    float cur[7];
 } sCam;
 enum { CAM_FOLLOW, CAM_TO, CAM_BACK };
 
@@ -538,9 +553,10 @@ static void CamStart(u8 mode, const float *to, u16 frames)
 // target in Black's world units (16 a tile, the zone's matrix), angles in 65536ths of a turn
 void U3D_CameraMoveTo(u16 pitch, u16 yaw, s32 dist, s32 x, s32 y, s32 z, u16 frames)
 {
-    float to[6];
+    float to[7];
     to[0] = x / 4096.0f, to[1] = y / 4096.0f, to[2] = z / 4096.0f;
     to[3] = pitch * 360.0f / 65536.0f, to[4] = yaw * 360.0f / 65536.0f, to[5] = dist / 4096.0f;
+    to[6] = 0.0f;   // (a scene frames its target as Black does)
     CamStart(CAM_TO, to, frames * 2);   // (Black's frames are its field's 30 a second)
 }
 
@@ -583,10 +599,10 @@ static void SetupView(void)
     sView.havePlayerH = TRUE;
     {
         // the player's view, or a scene's camera on the way to (or back from) its own
-        float follow[6], *v = sCam.cur, f, sy, cy;
+        float follow[7], *v = sCam.cur, f, sy, cy;
         u32 i;
         follow[0] = sView.tx, follow[1] = sView.ty, follow[2] = sView.tz;
-        follow[3] = CAM_PITCH, follow[4] = 0.0f, follow[5] = CAM_DIST;
+        follow[3] = CAM_PITCH, follow[4] = 0.0f, follow[5] = CAM_DIST, follow[6] = EMERALD_DROP;
         {
             // a rail map's tile: Black's camera of that rail, its pitch and distance eased to (the view stays north up:
             // a turned view would want the d-pad and the sprites' facings turned with it)
@@ -613,7 +629,7 @@ static void SetupView(void)
                 sCam.t++;
             f = (float)sCam.t / sCam.frames;
             f = f * f * (3.0f - 2.0f * f);   // (eased at both ends, as Black's)
-            for (i = 0; i < 6; i++)
+            for (i = 0; i < 7; i++)
                 v[i] = sCam.from[i] + (to[i] - sCam.from[i]) * f;
             if (sCam.mode == CAM_BACK && sCam.t >= sCam.frames)
                 sCam.mode = CAM_FOLLOW;
@@ -633,6 +649,7 @@ static void SetupView(void)
         sView.focal = CAM_DIST;   // (one unit a pixel at the player's distance)
     }
     sView.ay -= CAM_LIFT * cp;   // (the aim's point 4 up shows a little above the player's feet on the screen)
+    sView.ay += sCam.cur[6];
 }
 
 static bool8 Project(float x, float y, float z, float *sx, float *sy, float *depth)
@@ -1101,7 +1118,7 @@ float U3D_TestGround(s32 mapX, s32 mapY, float near)
         LoadPack();
     if (!sPack.ok)
         return NAN;
-    sCurMat = MatrixNumbered(Replaced(sUnovaMaps[map].mat));
+    sCurMat = MatrixNumbered(ShownMat(map));
     sCurMap = map;
     return GroundAt(sUnovaMaps[map].cx * BLOCK + mapX, sUnovaMaps[map].cz * BLOCK + mapY, near);
 }
@@ -1144,7 +1161,7 @@ void U3D_Update(void)
         sSeason = U3D_Season();   // (Black changes the season as a map is entered)
     }
     sView.map = map;
-    sCurMat = MatrixNumbered(Replaced(sUnovaMaps[map].mat));
+    sCurMat = MatrixNumbered(ShownMat(map));
     sCurMap = map;
     sView.frame++;
     FindCamera();
