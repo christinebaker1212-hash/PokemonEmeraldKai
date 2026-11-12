@@ -1055,6 +1055,9 @@ static void Step(struct Thread *t)
             *WorkPtr(a[0]) = v;
             break;
         }
+        case U3C_BufferCategoryEntryName:   // (bank 0xC7: Black's type names)
+            StringCopy(Slot(a[0]), U3D_Text(199, V(1)));
+            break;
         case U3C_BufferShortEntryName:   // (bank 0x37: Black's bag pockets)
             StringCopy(Slot(a[0]), U3D_Text(55, V(1)));
             break;
@@ -1326,6 +1329,13 @@ static void Step(struct Thread *t)
         case U3C_AddMmdl:   // x, z (Black's tiles), direction, object id, Black's object code, move code
             AddPerson(LocalId(V(3)), V(4), V(0), V(1), V(2));
             break;
+        case U3C_AddPartyFollowerMmdl:   // a person of the zone's event data brought out (its flag cleared before)
+        {
+            u8 local = LocalId(V(0));
+            if (ObjEventId(local) >= OBJECT_EVENTS_COUNT)
+                TrySpawnObjectEvent(local, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+            break;
+        }
         case U3C_SetMmdlZoneDeleteOff:      // (a person who stays as the player crosses zones: ObjEventId finds it)
         case U3C_SCREENEFFECTS_ShowPlaceName:   // (the game shows a map's name as it is entered)
             break;
