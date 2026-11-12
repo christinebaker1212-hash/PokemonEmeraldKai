@@ -1857,6 +1857,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] trainer battle %d\n", atoi(arg));
         MP_Debug_TrainerBattle(atoi(arg));
     }
+    else if (strcmp(cmd, "u3dcatchdemo") == 0)
+    {
+        // u3dcatchdemo - PROF. JUNIPER's catching demonstration (u3d_battle.c), for its back picture
+        void U3D_CatchTutorial(void);
+        U3D_CatchTutorial();
+        printf("[test] unova catch demo\n");
+    }
     else if (strcmp(cmd, "u3dtrainer") == 0)
     {
         // u3dtrainer ID - a battle against Black's trainer ID right now (UNOVA's trainers: u3d_battle.c)

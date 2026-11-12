@@ -23,7 +23,8 @@ Format (little endian): "U3DG" u32 version 2, u16 codes; each: u8 kind (0 walkin
   s16 dx, dy (its top-left from the sprite's point), u16 w, h, rows of (w + 1) / 2 bytes (4 bits, the low nibble first)
   then "BACK", u16 pictures; each: u16 palette[16], four 64x64 frames as GBA 4bpp tiles (the game's trainer back
   picture layout): Black's backs (archive 0x49, a/0/7/3: the two player characters, JUNIPER, CHEREN...), cell 0
-  over their 256x128 bitmap sheet (2D mapping: a tile number is a place 32 tiles a row), half its size, four times
+  over their 256x128 bitmap sheet (2D mapping: a tile number is a place 32 tiles a row), at its own pixels (the head
+  and upper body in 64x64, as the game's backs: Black draws them twice as big), four times
 """
 import importlib.util
 import os
@@ -279,11 +280,18 @@ def back_pictures():
                         if v and 0 <= cx < cw and 0 <= cy < ch:
                             px[cy][cx] = v
             drawn.append(px)
-        spal, small = shrink(BackSheet(drawn, cw, ch, pal), [(k * cw, 0) for k in range(4)], 64, 64, src=(cw, ch),
-                             scale=0.5)
-        out += struct.pack('<16H', *[_sinnoh.bgr555(c) if k else 0 for k, c in enumerate(spal)])
-        for f in small:
-            out += tiles_of(f, 64, 64)
+        # Black draws its backs at twice their size; the game's backs are 64x64 at their own pixels, the head and upper
+        # body (the user, 2026-11-12: the same height and pixel density as the player's). So: Black's own pixels, no
+        # scaling, the 64x64 from just above the head, centred on the head and shoulders
+        rows = [y for y in range(ch) if any(f[y][x] for f in drawn for x in range(cw))]
+        top = (rows[0] if rows else 0) - 12   # (the head 12 down the frame, as Emerald's backs)
+        cols = [x for x in range(cw) if any(f[y][x] for f in drawn for y in range(top, min(ch, top + 40)))]
+        mid = (cols[0] + cols[-1] + 1) // 2 if cols else cw // 2
+        left = mid - 32
+        out += struct.pack('<16H', *[c if k else 0 for k, c in enumerate(pal)])
+        for f in drawn:
+            frame = [[f[y][x] if 0 <= y < ch and 0 <= x < cw else 0 for x in range(left, left + 64)] for y in range(top, top + 64)]
+            out += tiles_of(frame, 64, 64)
     return bytes(out), len(arc) // 8
 
 
