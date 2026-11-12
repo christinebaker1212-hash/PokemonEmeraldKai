@@ -1282,6 +1282,7 @@ void U3D_Update(void)
         sView.havePlayerH = FALSE;
         sCam.mode = CAM_FOLLOW;   // (a scene's camera stays on its map)
         sSeason = U3D_Season();   // (Black changes the season as a map is entered)
+        U3D_Vm_FieldShown();   // (BURGH's gym's open doors: u3d_vm.c)
     }
     sView.map = map;
     sCurMat = MatrixNumbered(ShownMat(map));

@@ -441,6 +441,7 @@ static bool8 NpcAt(u8 local, u16 *x, u16 *z)
 // again, as Black's come back on re-entering (the game would put them back the moment they come into view)
 static u8 sGone[16], sGoneCount;
 
+static void PlateDoorsRefresh(bool8 sound);
 static void Gone(u8 local, bool8 gone)
 {
     u32 i;
@@ -1764,6 +1765,16 @@ static void Step(struct Thread *t)
         case U3C_PALPARK_SetBeacon:   // (a link beacon of what the player did: no wireless here)
         case U3C_DebugWork:   // (Black's debug prints)
         case U3C_DebugStack:
+        case U3C_FIELD_GIMMICK_PLATE_DOORS_StartSwitchEvent:   // BURGH's gym: a floor switch found (PlateDoorsRefresh)
+            if (V(0) < 8)
+                *WorkPtr(0x4000 + V(0)) = 1;   // (the script sets it as it ends, too)
+            PlaySE(SE_SWITCH);
+            break;
+        case U3C_FIELD_GIMMICK_PLATE_DOORS_StartPlateEvent:   // ... its plates lit: a door both of whose are opens
+            PlateDoorsRefresh(TRUE);
+            break;
+        case U3C_FIELD_GIMMICK_PLATE_DOORS_StartScriptedEvent:
+            break;
         case U3C_PROC_Ov037InitFromVars:   // (a gym's switches' gimmick state: the gyms' own puzzles aren't kept yet)
         case U3C_PROC_Ov037SetValueA:
         case U3C_PROC_Ov037SetValueB:
@@ -2871,6 +2882,60 @@ static void RunNow(u16 scriptId)
 // ON_TRANSITION of every UNOVA map (data/scripts/unova.inc): the zone-change and field-init scripts; the first time,
 // Black's new-game script before them (SCRIPT_SYS_RunInitScript: script 9600, the flags that hide what isn't there yet)
 #define SCRIPT_NEW_GAME 9600
+// BURGH's gym (zone 29, Black's gimmick 38, ov038 field_gimmick_plate_doors.c / ov037 gimmick_init_helpers.c): its
+// eight floor switches (works 0x4000-0x4007, set as each is stepped on) light plates (gPlateDoorsSwitchPlates); a honey
+// door opens once both its plates are lit (gPlateDoorsDoorPlates), the entry's always. Black's doors are the zone's
+// people 0-6, standing in the doors' cells: an open door's is gone, so the player walks through it north or south (Black
+// pushes through the honey; the walls beside a door keep it to that), a shut one's stays a wall. The doors' honey
+// models aren't drawn
+#define ZONE_CASTELIA_GYM 29
+static const s8 sPdSwitchPlates[8][2] = {{0, -1}, {1, -1}, {2, -1}, {3, 4}, {5, -1}, {6, -1}, {7, 8}, {9, -1}};
+static const u8 sPdDoorPlates[6][2] = {{0, 1}, {2, 3}, {4, 5}, {6, 6}, {7, 7}, {8, 9}};
+static const u8 sPdDoorPerson[7] = {6, 4, 5, 3, 2, 1, 0};   // (door -> its person: gPlateDoorsDoorPos's cells)
+
+static bool8 PlateDoorOpen(u32 door)
+{
+    u32 lit = 0, s, k;
+    if (door >= 6)
+        return TRUE;
+    for (s = 0; s < 8; s++)
+        if (*WorkPtr(0x4000 + s) != 0)   // (a switch found)
+            for (k = 0; k < 2; k++)
+                if (sPdSwitchPlates[s][k] >= 0)
+                    lit |= 1 << sPdSwitchPlates[s][k];
+    return (lit >> sPdDoorPlates[door][0] & 1) && (lit >> sPdDoorPlates[door][1] & 1);
+}
+
+static void PlateDoorsRefresh(bool8 sound)
+{
+    u32 d;
+    if (CurrentZone() != ZONE_CASTELIA_GYM)
+        return;
+    for (d = 0; d < ARRAY_COUNT(sPdDoorPerson); d++)
+        if (PlateDoorOpen(d))
+        {
+            u8 local = LocalId(sPdDoorPerson[d]), id = ObjEventId(local);
+            bool8 wasThere = id < OBJECT_EVENTS_COUNT && !gObjectEvents[id].isPlayer;
+            if (getenv("MOEMON_U3D_TRACE"))
+                printf("[u3d] gym door %u open: person local %u object %u\n", (unsigned)d, local, id);
+            Gone(local, TRUE);
+            if (wasThere)
+            {
+                RemoveObjectEventByLocalIdAndMap(gObjectEvents[id].localId, gObjectEvents[id].mapNum,
+                                                 gObjectEvents[id].mapGroup);
+                if (sound)
+                    PlaySE(SE_UNLOCK);   // (Black's door opening, 0x6DC)
+            }
+        }
+}
+
+// The field shown on a map (u3d.c U3D_Update; a continued game's people come from the save, past the map's load script)
+void U3D_Vm_FieldShown(void)
+{
+    if (Ready())
+        PlateDoorsRefresh(FALSE);
+}
+
 void U3D_VmMapLoad(void)
 {
     u16 zone = CurrentZone();
@@ -2902,6 +2967,7 @@ void U3D_VmMapLoad(void)
     RunNow(InitScript(zone, 4));
     if (zone == ZONE_BLACK_CITY)
         WfbcMapLoad();
+    PlateDoorsRefresh(FALSE);
     if (WhiteZekromHere(ZEKROM_LOCAL))
         sWork.work[0x20] = 0xD6;   // (its work object code: Black's ZEKROM sprite, D3 / D4 its RESHIRAM)
 }
