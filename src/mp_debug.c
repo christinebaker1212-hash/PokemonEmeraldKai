@@ -296,12 +296,12 @@ bool8 MP_Setup_ScreenIs(int screen);
 // ObjectEventUpdateElevation keeps it), ledges jumped down, SURF onto water and off it again, and the obstacles a
 // field move clears (CUT trees, ROCK SMASH rocks: A facing them), SINNOH's rock walls (ROCK CLIMB). sWStep: the first step toward each tile (its key,
 // and WS_A when that step is A facing it first); sWDist: how many steps
-#define W_MAXT (160 * 160)
+#define W_MAXT (480 * 480)   // (the biggest map: SINNOH's Underground; UNOVA's SKYARROW BRIDGE is 256 x 384)
 #define WS_NONE 0xFF
 #define WS_A 0x10
 static u8 sWStep[W_MAXT], sWSeen[W_MAXT * 32 / 8];   // (seen: tile x elevation x SINNOH's layer, the deck or below it)
 static u16 sWDist[W_MAXT];
-static u32 sWQueue[W_MAXT * 4];
+static u64 sWQueue[W_MAXT * 4];   // (a state: its first step << 32, tile << 8 (24 bits), elevation, layer, surf, first)
 static u32 sWStamp = 0xFFFFFFFF;
 
 static bool8 PartyKnows(u16 move)
@@ -625,6 +625,14 @@ static void WalkSearch(void)
     s16 px = p->currentCoords.x - MAP_OFFSET, py = p->currentCoords.y - MAP_OFFSET;
     u8 pe = p->currentElevation;
     bool8 s3d = S3D_Active(), up;
+    if (w * h > W_MAXT)
+    {
+        // (a map bigger than the search's tables, UNOVA's SKYARROW BRIDGE: nothing reached, never past their ends;
+        // they overwrote the field's own buffers)
+        for (i = 0; i < W_MAXT; i++)
+            sWStep[i] = WS_NONE, sWDist[i] = 0xFFFF;
+        return;
+    }
     if (sWFromX >= 0)
     {
         // (from another spot: where a warp pad lands, PadPlan)
@@ -638,7 +646,7 @@ static void WalkSearch(void)
     memset(sWSeen, 0, sizeof(sWSeen));
     sWStep[py * w + px] = 0, sWDist[py * w + px] = 0;
     up = s3d && WalkUpper(px, py, S3D_PlayerHeight());
-    sWQueue[tail++] = ((u32)(py * w + px) << 8) | (pe << 4) | (up ? 4 : 0) | (surfing ? 1 : 0) | 2;
+    sWQueue[tail++] = ((u64)(py * w + px) << 8) | (pe << 4) | (up ? 4 : 0) | (surfing ? 1 : 0) | 2;
     WSEEN_SET((py * w + px), pe, up);
     t = *p;
     t.trackedByCamera = FALSE;
@@ -646,8 +654,9 @@ static void WalkSearch(void)
     p->active = FALSE;
     while (head < tail)
     {
-        u32 q = sWQueue[head++], c = (q >> 8) & 0xFFFF, e = (q >> 4) & 15, surf = q & 1, first = (q & 2) != 0,
-            layer = (q & 4) != 0, step = q >> 24, d;   // (the state's own first step: a tile's other states, the deck
+        u64 q = sWQueue[head++];
+        u32 c = (q >> 8) & 0xFFFFFF, e = (q >> 4) & 15, surf = q & 1, first = (q & 2) != 0,
+            layer = (q & 4) != 0, step = (u32)(q >> 32), d;   // (the state's own first step: a tile's other states, the deck
                                                        // over it or the ground under it, may have come another way)
         s16 cx = c % w, cy = c / w;
         float hc = s3d ? S3D_TileFloor(cx, cy, layer ? 1e5f : -1e5f) : NAN;
@@ -805,7 +814,7 @@ static void WalkSearch(void)
                 sWDist[n] = sWDist[c] + 1;
             }
             if (tail < (s32)ARRAY_COUNT(sWQueue))
-                sWQueue[tail++] = ((u32)(first ? how : step) << 24) | (n << 8) | (ne << 4) | (nup ? 4 : 0) | nsurf;
+                sWQueue[tail++] = ((u64)(first ? how : step) << 32) | ((u64)n << 8) | (ne << 4) | (nup ? 4 : 0) | nsurf;
         }
     }
     gS3dPlanHeight = NAN;
