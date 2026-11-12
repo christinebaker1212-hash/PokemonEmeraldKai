@@ -798,7 +798,7 @@ void U3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
 // ------------------------------------------------------------------------------------------------ sprites in the scene
 float gU3dSpriteDepth[MAX_SPRITES];
 s16 gU3dSpriteFeet[MAX_SPRITES];
-typedef struct { float d0; s16 feet; u8 flat, refl; } OamDepth;
+typedef struct { float d0; s16 feet, cx; u8 flat, refl, player; } OamDepth;
 static OamDepth sPendingOam[OAM_ENTRY_COUNT], sLiveOam[OAM_ENTRY_COUNT];
 static bool8 sLiveAny;
 
@@ -812,6 +812,8 @@ void U3D_NoteOam(u16 spriteId, u16 first, u16 end)
         sPendingOam[i].feet = on ? gU3dSpriteFeet[spriteId] : 0;
         sPendingOam[i].flat = on && gSprites[spriteId].mpShadow;
         sPendingOam[i].refl = on && FieldEffect_IsReflectionSprite(&gSprites[spriteId]);
+        sPendingOam[i].player = on && spriteId == gObjectEvents[gPlayerAvatar.objectEventId].spriteId;
+        sPendingOam[i].cx = on ? gSprites[spriteId].oam.x - gSprites[spriteId].centerToCornerVecX : 0;
     }
 }
 
@@ -839,6 +841,26 @@ static bool8 OverReflectiveCell(int x, int line)
     return MetatileBehavior_IsReflective(b) || MetatileBehavior_IsIce(b);
 }
 
+// The player behind a building (the view stays north up: CASTELIA's ring road has towers between the eye and the
+// player): drawn over it, never lost. Their body's middle column, three points up from the feet, each well behind
+// what's drawn there
+static bool8 PlayerCovered(const OamDepth *o)
+{
+    static u8 sFrame = 0xFF;
+    static bool8 sCovered;
+    int k, n = 0;
+    if (sFrame == sView.frame)
+        return sCovered;
+    sFrame = sView.frame;
+    for (k = 1; k <= 3; k++)
+    {
+        int y = o->feet - 7 * k, x = o->cx;
+        if (x >= 0 && x < W && y >= 0 && y < H && sDepth[y][x] < o->d0 - 7 * k * 1.3375f - 24.0f)
+            n++;
+    }
+    return sCovered = n >= 2;
+}
+
 static bool OamHidden(int oamIndex, int x, int line)
 {
     const OamDepth *o;
@@ -852,6 +874,8 @@ static bool OamHidden(int oamIndex, int x, int line)
         return TRUE;
     if (o->flat)
         return sDepth[line][x] < o->d0 - 16.0f;
+    if (o->player && PlayerCovered(o))
+        return FALSE;
     d = o->d0 - (o->feet - line) * 1.3375f;   // tan(53.22 degrees): a card's pixel above its feet is that much nearer
     return sDepth[line][x] < d - 6.0f;
 }

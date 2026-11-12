@@ -553,7 +553,8 @@ static bool8 TakenWarpBehavior(u8 b)
           || MetatileBehavior_IsMtPyreHole(b) || MetatileBehavior_IsMossdeepGymWarp(b)
           || MetatileBehavior_IsUnionRoomWarp(b) || MetatileBehavior_IsNorthArrowWarp(b)
           || MetatileBehavior_IsSouthArrowWarp(b) || MetatileBehavior_IsEastArrowWarp(b)
-          || MetatileBehavior_IsWestArrowWarp(b));
+          || MetatileBehavior_IsWestArrowWarp(b)
+          || (b == U3D_RAIL_WARP && U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup)));   // (UNOVA's rail ways out)
 }
 
 static s16 sWFromX = -1, sWFromY = -1;

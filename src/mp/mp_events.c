@@ -1283,7 +1283,9 @@ void MP_Events_Update(void)
             char msg[96], where[64];
             TodaysOutbreak(&sp, &map);
             OutbreakText(where, sizeof(where));
-            snprintf(msg, sizeof(msg), "Outbreak today: %s", where);
+            // (HOENN's routes: from another region, it says where)
+            snprintf(msg, sizeof(msg), MP_Region_Current() == REGION_HOENN ? "Outbreak today: %s"
+                                                                          : "Outbreak today in HOENN: %s", where);
             QueueToast(msg);
         }
     }
