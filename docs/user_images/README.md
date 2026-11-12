@@ -76,3 +76,7 @@ Numbered in the order they were sent. Add new ones with the next number and a li
 | 79 | 79.webp (822x617): STADIUM 2's result: two silver plates, portraits, three picture windows each with HP bars, WIN in orange neon, LOSE in cyan ("Image 2: Victory") | the same |
 | 80 | 80.webp (810x617): STADIUM 2's pre-battle: two silver plates, six windows each, a glowing VS ("Image 3: Pre-battle (ignore the youtube UI)") | the same |
 | 81 | 81.png (960x640, 2026-11-12): the session's own mock-up of the staggered 1P / COM screen, sent back with "What happened to this scene?" then "I want the one I sent you to act as the choice screen" | the same: the choice screen |
+| 82 | 82.webp (822x617, 2026-11-12): STADIUM 2's battle, the action menu: the 1P box (name, L5, condition, gender, HP bar, numbers) with the POKéMON's portrait under it and three team dots, (A) BATTLE / (B) POKéMON / (S) RUN as chrome capsules, the foe's box and BERNIE's plate bottom right, L CANCEL / R CHECK at the foot | the battle HUD in POKESTADIUM 2 THEME: docs/POKESTADIUM_2_THEME_HANDOFF.md |
+| 83 | 83.webp (822x617): the same battle's move menu: four moves as chrome bars in a diamond round the D-pad arrows, each with its name, type and PP; the picked one in its type's colour | the same |
+| 84 | 84.png (247x120): a close-up of STADIUM 2's healthbox at 7/20 (a yellow bar) | the same |
+| 85 | 85.png (247x120): the same healthbox fainted, 0/20 ("Ft") | the same |

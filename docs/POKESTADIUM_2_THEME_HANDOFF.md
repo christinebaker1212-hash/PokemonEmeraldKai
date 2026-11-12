@@ -200,3 +200,41 @@ Covered by screens already drawn, not drawn again:
 Stand-ins here: the gym leaders' faces are HOENN's leaders (the game draws STADIUM's trainers' own pictures), the
 stage and badge names are KANTO's as examples (StadiumCastle_StageName / BadgeName give the real ones), the prizes
 are examples.
+
+## The battle HUD in both themes (2026-11-12)
+
+"How would you use POKESTADIUM and POKESTADIUM 2's presets to adjust the actual Battle UI?", then "just mock it up".
+References: docs/user_images/82-85 (STADIUM 2's battle; none for STADIUM 1's, so POKESTADIUM THEME's battle HUD is the
+theme's materials applied to the same layout, not copied from anything). Script tools/stadium/restyle/battleui.py;
+mock-ups `b_s2_action.png` / `b_s2_move.png` (docs/stadium/restyle/mockups/) and `b_p1_*` (docs/stadium/theme1/mockups/).
+
+**The battle is not a canvas.** The STADIUM menus own a 480x320 picture; a battle overlay goes over the GBA frame, so
+these mock-ups are drawn at **240x160 in the game's fonts at 1x** - what the game can really put on screen. The way in
+already exists: src/mp/mp_tricards.c parks the stock healthboxes off-screen (every battle routine keeps using them)
+and composites its own cards over the finished frame from VDraw, in full colour past the GBA's palettes, fading with
+MP_FadeFit. A themed HUD is that same hook with the theme's materials; MP_BattleOverlay_Composite is where it joins.
+
+What each piece becomes (both mock-ups show the action menu and the move list):
+
+| Piece | POKESTADIUM 2 | POKESTADIUM |
+|---|---|---|
+| The box | a chrome tube round black glass: name, L5, condition, gender, HP bar, numbers | the navy box in a pale line, name in yellow |
+| HP bar | green / yellow / red over a dark track, a lit top row | the same, one pixel thinner |
+| Portrait + team dots | a glass-framed portrait beside the box, dots for the team left | the navy frame, same dots |
+| 1P tab, trainer's plate | small glass tabs | navy and green tabs |
+| Action menu | chrome capsules, the chosen one lit gold with a cursor | navy capsules, gold edge on the chosen |
+| Move list | chrome bars: name, type, PP; the chosen one in its type's colour | navy bars, the chosen in its type's colour |
+
+Decisions made while drawing, for the user to confirm:
+- **The boxes stay where the game puts them** (foe top left, yours bottom right). STADIUM 2 has 1P top left, but
+  swapping sides would put each box over the other's POKéMON, and the type icons are placed off the healthbox
+  sprites (COOP_NOTES "Type icons"), so they would have to move too.
+- **The move diamond with its D-pad arrows does not fit 240x160** next to two boxes: the mock-up keeps STADIUM's bars
+  (name, type, PP, the type's colour) as a 2x2 grid where the game already puts its move list.
+- **The condition** reads as STADIUM's two letters (Nm, Ft...) rather than the game's status tag.
+- Three team dots are drawn (STADIUM's three-POKéMON battles); the game would draw up to six.
+
+Also watch: the bar must read the animated value (BarIsMoving, MP_TriCards_SetBarHp) or healing looks wrong;
+battlers 4/5 exist in Triple Battles, so reuse mp_tricards.c's placement rather than a new one; compositing costs
+time every frame, and turbo makes it worse. The arena behind the POKéMON in these mock-ups is a stand-in: map.bin
+holds only the terrain platforms (those are the game's own), not the sky and crowd.
