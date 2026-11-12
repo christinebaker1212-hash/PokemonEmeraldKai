@@ -23,6 +23,9 @@ File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little e
   of grass, dark grass, rustling grass, surfing, rippling water, fishing, rippling fishing, pad; then 4-byte slots,
   u16 species (11 bits) and form (5), u8 lowest and highest level: grass 12, dark grass 12, rustling 12, surfing 5,
   rippling 5, fishing 5, rippling fishing 5), as a file block
+  (version 5) the trainers' words (a/0/9/0: u16 trainer, u16 kind a record; a record's place is its message in
+  system bank 189: TPOKE_DATA_ReadRecordString) as a file block, then the trainer classes' encounter songs (arm9's
+  sTrainerClassBgmTable: u32 count, u16 class, u16 Black's sequence each; a class not in it: 1114)
 """
 import os
 import struct
@@ -35,7 +38,9 @@ import narc  # noqa: E402
 import scripts as scr  # noqa: E402
 import zones as zr  # noqa: E402
 
-VERSION = 4
+VERSION = 5
+TRMSG_ARC = 'a/0/9/0'   # (version 5: the trainers' words)
+CLASS_BGM, ARM9_BASE = 0x020A75A8, 0x02004000
 ENCOUNT_ARC = 'a/1/2/6'   # (version 4: the zones' wild POKéMON)
 EVENT_ARC = 'a/1/2/5'
 TRDATA_ARC, TRPOKE_ARC = 'a/0/9/2', 'a/0/9/3'   # (Black's trainers and their teams: version 2)
@@ -100,6 +105,13 @@ def main():
     pack += files_block(narc.arc(TRPOKE_ARC), len(pack))
     pack += song_kinds()
     pack += files_block(narc.arc(ENCOUNT_ARC), len(pack))
+    pack += files_block(narc.arc(TRMSG_ARC), len(pack))
+    arm = open(os.path.join(os.path.dirname(narc.EXTRACT), 'arm9_dec.bin'), 'rb').read()
+    pairs, o = [], CLASS_BGM - ARM9_BASE
+    while struct.unpack_from('<H', arm, o)[0] != 0x69:
+        pairs.append(struct.unpack_from('<HH', arm, o))
+        o += 4
+    pack += struct.pack('<I', len(pairs)) + b''.join(struct.pack('<HH', *p) for p in pairs)
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(b'U3SZ' + struct.pack('<I', len(pack)) + zlib.compress(bytes(pack), 6))
     print('%s: %d script files, %d zones, %d event files, %d bytes' % (out_path, len(narc.arc(scr.ARC)), len(zs),

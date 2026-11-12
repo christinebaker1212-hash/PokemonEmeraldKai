@@ -46,6 +46,8 @@
 #include "mp_region.h"
 #include "rtc.h"
 #include "load_save.h"
+#include "data.h"
+#include "party_menu.h"
 #include "platform.h"
 #include "save.h"
 #include "field_screen_effect.h"
@@ -68,7 +70,7 @@ void MPNet_Log(const char *fmt, ...);
 static u8 *sPack;
 static u32 sPackSize;
 static bool8 sTried;
-static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt;
+static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt, sTrMsgAt, sEyeSongsAt;
 
 static u32 Get32(u32 at) { return at + 4 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 | sPack[at + 2] << 16 | (u32)sPack[at + 3] << 24 : 0; }
 static u16 Get16(u32 at) { return at + 2 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 : 0; }
@@ -112,7 +114,7 @@ static void Load(void)
     sPack = malloc(raw ? raw : 1);
     sPackSize = raw;
     if (sPack == NULL || uncompress(sPack, &raw, data + 8, (unsigned long)(size - 8)) != 0 || memcmp(sPack, "U3DS", 4) != 0
-     || Get32(4) < 1 || Get32(4) > 4)
+     || Get32(4) < 1 || Get32(4) > 5)
     {
         printf("[u3d] %s: can't read UNOVA's scripts\n", path);
         free(sPack);
@@ -134,6 +136,11 @@ static void Load(void)
             sSongKindsAt = BlockEnd(sTeamsAt);
         if (Get32(4) >= 4)   // (version 4: the wild POKéMON)
             sEncountAt = (sSongKindsAt + 4 + Get32(sSongKindsAt) + 3) & ~3;
+        if (Get32(4) >= 5)   // (version 5: the trainers' words, the classes' encounter songs)
+        {
+            sTrMsgAt = BlockEnd(sEncountAt);
+            sEyeSongsAt = BlockEnd(sTrMsgAt);
+        }
     }
     printf("[u3d] UNOVA's scripts: %u files, %u zones\n", Get32(sFilesAt), Get32(sZonesAt));
 }
@@ -603,6 +610,14 @@ static bool8 MovesDone(void)
     return done;
 }
 
+// trainers' eyes (the end of this file)
+static struct EyeHit { u16 obj, trainer; u8 local, distance, dir; } sEye[2];
+static u8 sEyeKind;   // (0 one trainer, 1 two who each saw the player, 2 a pair: GetTrainerHitKind)
+static u16 TrainerOfScript(u16 script);
+static void StartEye(u8 slot);
+static u16 TrainerWords(u16 trainer, u16 kind);
+static u16 EyeSong(u16 trainer);
+
 // ------------------------------------------------------------------------------------------------ the VM
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA };
 
@@ -652,6 +667,7 @@ struct Thread
     bool8 alive, box;
     u16 zone, bank, waitFrames, target;
     u16 *result;
+    u16 script;   // (the script it was started as: a trainer's is 3000 + its number, GetScriptTrainerId)
 };
 
 static struct Thread sThread;
@@ -730,9 +746,15 @@ static void Finish(struct Thread *t)
     }
 }
 
+static void MessageInBank(struct Thread *t, u16 bank, u16 msg);
+
 static void Message(struct Thread *t, u16 file, u16 msg)
 {
-    u16 bank = file == MSG_OWN ? t->bank : SYSTEM_BANKS + file;
+    MessageInBank(t, file == MSG_OWN ? t->bank : SYSTEM_BANKS + file, msg);
+}
+
+static void MessageInBank(struct Thread *t, u16 bank, u16 msg)
+{
     sPlaceholder[0] = PLACEHOLDER_BEGIN;
     sPlaceholder[1] = PLACEHOLDER_ID_UNOVA_TEXT;
     sPlaceholder[2] = (bank >> 7) & 0x7F;
@@ -1058,6 +1080,17 @@ static void Step(struct Thread *t)
         case U3C_BufferCategoryEntryName:   // (bank 0xC7: Black's type names)
             StringCopy(Slot(a[0]), U3D_Text(199, V(1)));
             break;
+        case U3C_BufferConvertedEntryName:   // slot, a TM / HM (Black's number): the move it teaches (the game's TM's)
+        {
+            u16 item = Item(V(1));
+            if (IS_ITEM_TMHM(item))
+                StringCopy(Slot(a[0]), gMoveNames[ItemIdToBattleMoveId(item)]);
+            else
+                *Slot(a[0]) = EOS;
+            break;
+        }
+        case U3C_POKEMON_FLD_StorePartySpeciesRecord:   // (Black's record of the team a Gym Leader was beaten with)
+            break;
         case U3C_BufferShortEntryName:   // (bank 0x37: Black's bag pockets)
             StringCopy(Slot(a[0]), U3D_Text(55, V(1)));
             break;
@@ -1068,6 +1101,59 @@ static void Step(struct Thread *t)
         case U3C_PROC_CallWordScreen:   // (ov223: the gift box's three POKé BALLS; the ball picked 0-2 in the work)
             OpenScreen(t, SCREEN_STARTER, a[0]);
             break;
+        // ---- trainers (their eyes: U3D_Vm_TrainerSight)
+        case U3C_GetTrainerHitKind:
+            *WorkPtr(a[0]) = sEyeKind;
+            break;
+        case U3C_GetTrainerEyeTrainerId:   // which hit, result
+            *WorkPtr(a[1]) = sEye[V(0) & 1].trainer;
+            break;
+        case U3C_GetTrainerEyeObjId:
+            *WorkPtr(a[1]) = sEye[V(0) & 1].obj;
+            break;
+        case U3C_CreateTrainerEye:
+            StartEye(V(0));
+            break;
+        case U3C_CallTrainerEyePairEvent:   // (the walks up end; the player turns to the trainer)
+            ObjectEventTurn(&gObjectEvents[gPlayerAvatar.objectEventId], GetOppositeDirection(sEye[0].dir));
+            t->wait = W_MOVES;
+            break;
+        case U3C_GetScriptTrainerId:
+            *WorkPtr(a[0]) = TrainerOfScript(t->script);
+            break;
+        case U3C_GetTrainerBattleKind:   // trainer, result (0 single, 1 double, 2 triple, 3 rotation)
+        case U3C_ClassifyTrainer:        // trainer, result (1 heals the party after, 2 gives an item, 0 neither)
+        {
+            u32 size;
+            const u8 *tr = U3D_Vm_Trainer(V(0), &size);
+            u16 r = 0;
+            if (tr && size >= 20)
+                r = op == U3C_GetTrainerBattleKind ? tr[2] : tr[16] ? 1 : (tr[18] | tr[19] << 8) ? 2 : 0;
+            *WorkPtr(a[1]) = r;
+            break;
+        }
+        case U3C_GetTrainerMessageIds:   // (the words a trainer says: before, after, after a loss; a pair's own)
+        {
+            u32 size;
+            const u8 *tr = U3D_Vm_Trainer(TrainerOfScript(t->script), &size);
+            bool8 doubles = tr && size >= 3 && tr[2] == 1;
+            *WorkPtr(a[0]) = !doubles ? 0 : t->script >= 5000 ? 7 : 3;
+            *WorkPtr(a[1]) = !doubles ? 2 : t->script >= 5000 ? 9 : 5;
+            *WorkPtr(a[2]) = !doubles ? 24 : t->script >= 5000 ? 10 : 6;
+            break;
+        }
+        case U3C_PlayTrainerEncounterBgm:
+            PushSong();
+            if (EyeSong(V(0)) != MUS_NONE)
+                PlayNewMapMusic(EyeSong(V(0)));
+            break;
+        case U3C_BalloonWinSavedText:   // trainer, kind, person
+        {
+            u16 m = TrainerWords(V(0), V(1));
+            if (m != 0xFFFF)
+                MessageInBank(t, 189, m);
+            break;
+        }
         case U3C_StartTrainerBattle:   // trainer, a second, a third (u3d_battle.c: Black's trainers)
             if (U3D_PrepareBattle(V(0), V(1)))
                 OpenScreen(t, SCREEN_BATTLE, 0);
@@ -1216,6 +1302,16 @@ static void Step(struct Thread *t)
                 *WorkPtr(a[1]) = f < 10 && *WorkPtr(sReplace[f][0]) == sReplace[f][1];
             break;
         }
+        // ---- a trainer beaten: Black's event flag 1420 + the trainer's number (EVENT_TRAINER_*DefeatedFlag)
+        case U3C_WORK_CmdSetTrainerDefeatedFlag:
+            FlagTo(1420 + V(0), TRUE);
+            break;
+        case U3C_WORK_CmdClearTrainerDefeatedFlag:
+            FlagTo(1420 + V(0), FALSE);
+            break;
+        case U3C_WORK_CmdCheckTrainerDefeatedFlag:
+            *WorkPtr(a[1]) = FlagOn(1420 + V(0));
+            break;
         case U3C_WORK_CmdSetFixedEventFlag:
             FlagTo(0x963, TRUE);
             break;
@@ -1570,6 +1666,7 @@ static bool8 Run(u16 scriptId, u16 target, bool8 hold)
         return FALSE;
     t->sp = 0, t->cmp = 0, t->wait = W_NONE, t->alive = TRUE, t->zone = zone, t->target = target, t->result = NULL;
     t->depth = 0;
+    t->script = scriptId;
     memset(sLocal, 0, sizeof(sLocal));
     sLocal[0x11] = target;   // (0x8011: the person talked to, SCRIPT_WORK_SetTargetObj)
     memset(sMoving, 0, sizeof(sMoving));
@@ -1818,4 +1915,118 @@ void U3D_Vm_DebugSet(bool8 flag, u16 id, u16 value)
         FlagTo(id, value != 0);
     else
         *WorkPtr(id) = value;
+}
+
+// ------------------------------------------------------------------------------------------------ trainers' eyes
+// Black's trainers who see the player (event_trainer_eye.c): a person of the zone's event data whose kind is 1 (sees
+// the way it faces) or 2 (every way) and whose script is a trainer's (3000 + its number; 5000 + for a pair's second),
+// not beaten (event flag 1420 + its number), the player in a straight line within its range (its first parameter),
+// nothing blocking. The hit starts Black's common script 3616, which asks for these as it goes
+#define SCRIPT_TRAINER_EYE 3616
+#define TRAINER_FLAG_BASE 1420
+
+static u16 TrainerOfScript(u16 script)
+{
+    return script >= 5000 ? script - 5000 : script >= 3000 ? script - 3000 : 0xFFFF;
+}
+
+static bool8 SeesPlayer(const u8 *p, u8 local, struct EyeHit *hit)
+{
+    struct ObjectEvent *o, *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u8 id = ObjEventId(local), d, dir, k;
+    u16 trainer = TrainerOfScript(Le16(p + 10)), range = Le16(p + 14);
+    if (trainer == 0xFFFF || id >= OBJECT_EVENTS_COUNT || FlagOn(TRAINER_FLAG_BASE + trainer) || range == 0)
+        return FALSE;
+    o = &gObjectEvents[id];
+    if (o->invisible)
+        return FALSE;
+    for (dir = DIR_SOUTH; dir <= DIR_EAST; dir++)
+    {
+        s16 dx = gDirectionToVectors[dir].x, dy = gDirectionToVectors[dir].y;
+        if (Le16(p + 6) == 1 && dir != o->facingDirection)
+            continue;
+        for (d = 1; d <= range; d++)
+        {
+            s16 x = o->currentCoords.x + dx * d, y = o->currentCoords.y + dy * d;
+            if (x == pl->currentCoords.x && y == pl->currentCoords.y)
+            {
+                for (k = 1; k < d; k++)   // (nothing in the way)
+                    if (MapGridGetCollisionAt(o->currentCoords.x + dx * k, o->currentCoords.y + dy * k)
+                     || GetObjectEventIdByXY(o->currentCoords.x + dx * k, o->currentCoords.y + dy * k) != OBJECT_EVENTS_COUNT)
+                        return FALSE;
+                hit->obj = Le16(p), hit->trainer = trainer, hit->local = local, hit->distance = d, hit->dir = dir;
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+// field_control_avatar.c ProcessPlayerFieldInput, on an UNOVA map: a trainer has seen the player (their script runs)
+bool8 U3D_Vm_TrainerSight(void)
+{
+    u32 size, i, n = 0;
+    const u8 *e;
+    if (!U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) || sThread.alive || !Ready())
+        return FALSE;
+    e = Events(CurrentZone(), &size);
+    for (i = 0; e && size >= 8 && i < e[5] && n < 2; i++)
+    {
+        const u8 *p = e + 8 + EV_BG * e[4] + EV_PERSON * i;
+        u16 kind = Le16(p + 6);
+        if ((kind == 1 || kind == 2) && SeesPlayer(p, i + 1, &sEye[n]))
+            n++;
+    }
+    if (n == 0)
+        return FALSE;
+    sEyeKind = 0;
+    if (n == 2 && sEye[0].trainer == sEye[1].trainer)
+        sEyeKind = 2;   // (a pair: one trainer of two)
+    else if (n == 2 && CalculatePlayerPartyCount() >= 2)
+        sEyeKind = 1;   // (two trainers at once)
+    if (!Run(SCRIPT_TRAINER_EYE, sEye[0].obj, TRUE))
+        return FALSE;
+    ScriptContext_SetupScript(Unova_EventScript_Scene);
+    return TRUE;
+}
+
+// CreateTrainerEye: the trainer's "!" and walk up to the player
+static void StartEye(u8 slot)
+{
+    u8 id, n = 0, k;
+    u8 *out;
+    if (slot > 1 || (id = ObjEventId(sEye[slot].local)) >= OBJECT_EVENTS_COUNT)
+        return;
+    out = sMoves[id];
+    out[n++] = MOVEMENT_ACTION_EMOTE_EXCLAMATION_MARK;
+    for (k = 1; k < sEye[slot].distance && n < MAX_MOVE - 2; k++)
+        out[n++] = MOVEMENT_ACTION_WALK_NORMAL_DOWN + (sEye[slot].dir - DIR_SOUTH);
+    out[n] = MOVEMENT_ACTION_STEP_END;
+    sMoving[id] = sEye[slot].local;
+    ScriptMovement_StartObjectMovementScript(sEye[slot].local, gObjectEvents[id].mapNum, gObjectEvents[id].mapGroup, out);
+}
+
+// A trainer's words of KIND (a/0/9/0's records: their place is the message in system bank 189); 0xFFFF none
+static u16 TrainerWords(u16 trainer, u16 kind)
+{
+    u32 size, i;
+    const u8 *d = sTrMsgAt ? FileOf(sTrMsgAt, 0, &size) : NULL;
+    for (i = 0; d && i + 4 <= size; i += 4)
+        if (Le16(d + i) == trainer && Le16(d + i + 2) == kind)
+            return i / 4;
+    return 0xFFFF;
+}
+
+// The encounter song of a trainer's class (arm9's table; 1114 for one not in it)
+static u16 EyeSong(u16 trainer)
+{
+    u32 size, i, n;
+    const u8 *t = U3D_Vm_Trainer(trainer, &size);
+    if (t == NULL || size < 2 || !sEyeSongsAt)
+        return SongOf(1114);
+    n = Get32(sEyeSongsAt);
+    for (i = 0; i < n; i++)
+        if (Le16(sPack + sEyeSongsAt + 4 + 4 * i) == t[1])
+            return SongOf(Le16(sPack + sEyeSongsAt + 6 + 4 * i));
+    return SongOf(1114);
 }

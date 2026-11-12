@@ -1,4 +1,5 @@
 #include "global.h"
+#include "u3d.h"   // Moemon Kai: UNOVA (trainers' eyes)
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "constants/metatile_behaviors.h"
 #include "s3d_underground.h"
@@ -187,6 +188,8 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     metatileBehavior = MapGridGetMetatileBehaviorAt(position.x, position.y);
 
     if (CheckForTrainersWantingBattle() == TRUE)
+        return TRUE;
+    if (U3D_Vm_TrainerSight())   // Moemon Kai: UNOVA's trainers see as Black's (src/unova/u3d_vm.c)
         return TRUE;
 
     if (TryRunOnFrameMapScript() == TRUE)
