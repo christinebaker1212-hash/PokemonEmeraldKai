@@ -381,7 +381,7 @@ static struct { int on, px, bold; unsigned outline, outlineAlpha, grad; float nx
 void G_TextNudge(float dx, float dy) { sStyle.nx = dx, sStyle.ny = dy; }
 void G_TextStyle(unsigned outline, int px, int bold, unsigned grad)
 {
-    sStyle.on = px != 0 || bold || grad != G_NO_GRAD;   /* (PX below 0: a hard drop shadow -PX real pixels down and right) */
+    sStyle.on = px != 0 || bold || grad != G_NO_GRAD;   /* (PX below 0: a hard outline -PX real pixels round the letters) */
     sStyle.px = px, sStyle.bold = bold, sStyle.outline = outline & 0xffffff, sStyle.grad = grad;
     sStyle.outlineAlpha = (outline >> 24) ? (outline >> 24) : 235;
 }
@@ -424,12 +424,12 @@ static void Glyph(unsigned code, int x, int y, int font, unsigned color, unsigne
         fx = x + sStyle.nx, fy = y + sStyle.ny;
         if (r < 0)
         {
-            /* a hard shadow, the letters' own shape moved down and right */
-            SDL_FRect d = {fx - r / sx, fy - r / sy, (float)w, (float)h};
+            /* a hard outline -R real pixels round the letters (a square of copies, no soft edge) */
             SDL_SetTextureAlphaMod(face, (Uint8)sTextAlpha);
-            GlyphFace(face, &src, d.x, d.y, sStyle.outline, G_NO_GRAD);
-            if (sStyle.bold)
-                GlyphFace(face, &src, d.x + 1 / sx, d.y, sStyle.outline, G_NO_GRAD);
+            for (dy = r; dy <= -r; dy++)
+                for (dx = r; dx <= -r + (sStyle.bold ? 1 : 0); dx++)
+                    if (dx || dy)
+                        GlyphFace(face, &src, fx + dx / sx, fy + dy / sy, sStyle.outline, G_NO_GRAD);
         }
         else if (r > 0)
         {

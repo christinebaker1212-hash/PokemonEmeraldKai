@@ -106,19 +106,10 @@ static void ThBlit(SDL_Texture *t, float x, float y, float w, float h, u8 alpha)
     Blit(t, x / 2, y / 2, w / 2, h / 2, alpha);
 }
 
-// The words' hard shadow, real pixels down and right
-static int ThShadow(void)
-{
-    static int sPx;
-    if (!sPx)
-    {
-        const char *e = getenv("MOEMON_TH_SHADOW");   // (1 or 2: to compare them)
-        sPx = e && atoi(e) > 0 ? atoi(e) : 2;
-    }
-    return sPx;
-}
+// The words' hard outline, real pixels round them (the user: hard, 2 px, never soft)
+#define TH_OUTLINE_PX 2
 
-// Writing at real pixels (X, Y the line's top), with a hard shadow in OUTLINE's colour (PX 0: none), BOLD, the
+// Writing at real pixels (X, Y the line's top), with a hard outline in OUTLINE's colour (PX 0: none), BOLD, the
 // face falling from COLOR to GRAD (G_NO_GRAD: none). ALIGN TA_LEFT / TA_CENTER / TA_RIGHT. Returns the width in pixels
 enum { THF_OUTLINE_INK = 0x282c38 };
 static int ThText(float x, float y, const char *s, int font, unsigned color, unsigned grad, unsigned outline, int px,
@@ -127,7 +118,7 @@ static int ThText(float x, float y, const char *s, int font, unsigned color, uns
     int w = G_Measure(s, font) * 2;
     float l = align == TA_CENTER ? x - w / 2.0f : align == TA_RIGHT ? x - w : x;
     int ux = (int)SDL_floorf(SDL_roundf(l) / 2), uy = (int)SDL_floorf(SDL_roundf(y) / 2);
-    G_TextStyle(outline, px ? -ThShadow() : 0, bold, grad);
+    G_TextStyle(outline, px ? -TH_OUTLINE_PX : 0, bold, grad);
     G_TextNudge((SDL_roundf(l) - ux * 2) / 2, (SDL_roundf(y) - uy * 2) / 2);
     G_Text(ux, uy, color, G_NO_SHADOW, s, 0, font);
     G_TextNudge(0, 0);
@@ -245,7 +236,7 @@ static void S2Foot(const char *hint)
         ThText(8, 296, U.note, TF_SMALL, 0xf8e8a0, G_NO_GRAD, 0x000000, 1, FALSE, TA_LEFT);
         return;
     }
-    G_TextStyle(0x000000, -ThShadow(), TRUE, 0xd0d4de);
+    G_TextStyle(0x000000, -TH_OUTLINE_PX, TRUE, 0xd0d4de);
     G_Hint(4, 148, 0xffffff, G_NO_SHADOW, hint, TF_SMALL, 1);
     G_TextStyle(0, 0, 0, G_NO_GRAD);
 }

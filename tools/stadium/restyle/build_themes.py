@@ -23,20 +23,23 @@ import s2 as _s2
 
 
 def _drop_text_rgba(s, font, color=0xffffff, outline=None, shadow=None, ow=2, grad=None, bold=False):
-    """The game's words as the themes write them: a hard shadow SHADOW_PX real pixels down and right in the outline's
-    colour (the user: no soft outline)."""
+    """The game's words as the themes write them: a hard outline OUTLINE_PX real pixels round them in the outline's
+    colour (the user: hard, never soft)."""
     face, sh = _s2.text_masks(s, font)
     face = np.kron(face, np.ones((2, 2), bool))
-    pad = 3
+    pad = 4
     face = np.pad(face, pad)
     if bold:
         face = face | np.roll(face, 1, 1)
     rgba = np.zeros(face.shape + (4,), np.float32)
     ink = outline if outline is not None else (_s2.hx(shadow) if shadow is not None else None)
     if ink is not None:
-        k = SHADOW_PX
-        drop = np.roll(np.roll(face, k, 0), k, 1)
-        rgba[drop] = np.append(np.asarray(ink, np.float32), 1)
+        k = OUTLINE_PX
+        ring = np.zeros_like(face)
+        for dy in range(-k, k + 1):
+            for dx in range(-k, k + 1):
+                ring |= np.roll(np.roll(face, dy, 0), dx, 1)
+        rgba[ring] = np.append(np.asarray(ink, np.float32), 1)
     col = np.broadcast_to(_s2.hx(color), face.shape + (3,))
     if grad is not None:
         t = np.linspace(0, 1, face.shape[0])[:, None, None]
@@ -46,7 +49,7 @@ def _drop_text_rgba(s, font, color=0xffffff, outline=None, shadow=None, ow=2, gr
     return rgba, _s2.measure(s, font), pad
 
 
-SHADOW_PX = int(os.environ.get('TH_SHADOW', '2'))
+OUTLINE_PX = 2
 _s2.text_rgba = _drop_text_rgba
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
