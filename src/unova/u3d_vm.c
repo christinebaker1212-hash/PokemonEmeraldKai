@@ -1191,6 +1191,27 @@ static void Step(struct Thread *t)
             FlagSet(FLAG_SYS_POKEDEX_GET);
             EnableNationalPokedex();
             break;
+        // ---- Black's map replacements (ov010 d_02170FB0: flag, work, the work's value that means "replaced"): the
+        // works the scripts read; the replaced blocks themselves aren't redrawn yet
+        case U3C_WORK_CmdSetMapReplaceFlag:   // flag, on, now
+        case U3C_WORK_CmdCheckMapReplaceFlag:   // flag, result
+        {
+            static const u16 sReplace[10][2] = {{0x4031, 4640}, {0x4032, 548}, {0x4033, 518}, {0x4034, 4617},
+                                                {0x4035, 790}, {0x4036, 4647}, {0x4037, 2096}, {0x4038, 1032},
+                                                {0x4039, 288}, {0x403A, 4136}};
+            u16 f = V(0);
+            if (op == U3C_WORK_CmdSetMapReplaceFlag)
+            {
+                if (f < 10)
+                    *WorkPtr(sReplace[f][0]) = V(1) ? sReplace[f][1] : 0;
+            }
+            else
+                *WorkPtr(a[1]) = f < 10 && *WorkPtr(sReplace[f][0]) == sReplace[f][1];
+            break;
+        }
+        case U3C_WORK_CmdSetFixedEventFlag:
+            FlagTo(0x963, TRUE);
+            break;
         case U3C_WORK_CmdGetTimeZone:   // Black's time of day: 0 morning, 1 day, 2 evening, 3 night, 4 late night
         {
             u8 h;
