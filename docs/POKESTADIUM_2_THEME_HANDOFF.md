@@ -1,4 +1,7 @@
-# STADIUM's screens in STADIUM 2's style: handoff
+# POKESTADIUM 2 THEME: handoff
+
+**POKESTADIUM 2 THEME** is the user's name for this design (2026-11-12): use it for the work, its notes and its
+commits.
 
 The user wants POKéMON STADIUM's screens on BATTLE ISLAND (src/mp/mp_stadium_ui.c) redone to look and flow like
 POKéMON STADIUM 2. A session on 2026-11-11 / 12 studied the user's screenshots and recording and drew every scene as a
@@ -14,6 +17,7 @@ mock-up. **Nothing in the game has changed yet.** This file is for the session t
 - "Follow the actual flow Pokemon Stadium 2 uses."
 - "Ours should show held items only" (the entry screen never changes items: no ITEM row, no Change Item).
 - "Here's an example of how I want it to look, all scenes" (the recording: docs/stadium/restyle/recording/).
+- "Save this as \"POKESTADIUM 2 THEME\"" (the whole set of mock-ups below, as approved on 2026-11-12).
 - "Please make sure everything is readable. Please be sure aspects are not stretched out - the video I sent you was
   4:3 stretched to 16:9." The frames kept here are squeezed back to 4:3. **Never copy a proportion from a stretched
   frame**: circles are circles, portraits square, letters their own shape.
