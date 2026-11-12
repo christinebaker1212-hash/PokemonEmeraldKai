@@ -7488,3 +7488,13 @@ more of a scene"; "every game expects you to not have a Pokemon when you begin")
   slot's settings come back as empty "<name>.own" files (an empty one: the file follows File 1), and "<save>.pals"
   is made anew with new keys as the slot is read again.
 - Shadows on ORRE's maps: mp_shadow.c FeetCovered skips ORRE's stand-in tiles as it does SINNOH's.
+
+## STADIUM's styles: POKESTADIUM and POKESTADIUM 2 (1.192.0)
+
+OPTIONS > BATTLE > STADIUM SETTINGS (a page of its own: STYLE and ANNOUNCER VOICE). STYLE ORIGINAL draws the
+screens as before; POKESTADIUM (the first STADIUM's look) and POKESTADIUM 2 (STADIUM 2's) draw every screen from
+graphics/stadium/themes.bin (tools/stadium/restyle/build_themes.py) with the game's things over it
+(src/mp/mp_stadium_ui_themes.inc.c), and take STADIUM 2's flow: REGISTER three by three with A's panel and the six-in
+menu, the cup's ladder, VS, the choice, the result with HP and crosses, the badge board, Keep battling?. Text in the
+themes has a hard 2-pixel outline, never a soft one (the user). Everything about it: docs/POKESTADIUM_2_THEME_HANDOFF.md.
+Tests stadium_theme1, stadium_theme2.

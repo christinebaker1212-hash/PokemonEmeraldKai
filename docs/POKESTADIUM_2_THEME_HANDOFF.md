@@ -5,7 +5,32 @@ commits.
 
 The user wants POKéMON STADIUM's screens on BATTLE ISLAND (src/mp/mp_stadium_ui.c) redone to look and flow like
 POKéMON STADIUM 2. A session on 2026-11-11 / 12 studied the user's screenshots and recording and drew every scene as a
-mock-up. **Nothing in the game has changed yet.** This file is for the session that builds it.
+mock-up.
+
+**Built (2026-11-12), both themes, every screen**: OPTIONS > BATTLE > STADIUM SETTINGS > STYLE (ORIGINAL / POKESTADIUM /
+POKESTADIUM 2, gMpConfig.stadiumStyle, ini `stadium_style`), ANNOUNCER VOICE beside it. How it's made:
+- tools/stadium/restyle/build_themes.py draws each screen's still layer and every piece (cursors, lit rows, chips,
+  switches, neon / fat words, boxes cut into nine) with the mock-ups' own materials into graphics/stadium/themes.bin
+  (committed; no fonts or numpy needed by the release) and src/data/stadium_themes.h (TH_* pieces, SX_ / SY_ places
+  in real pixels of the 480x320 canvas, sThFatWords: POKESTADIUM's fat letters for every cup / stage / battle name).
+- src/mp/mp_stadium_ui_themes.inc.c (included by mp_stadium_ui.c just before the canvas) draws the game's own things
+  over them: ThemedDraw() picks S2* / S1* per screen; ORIGINAL draws as before.
+- Words: the game's fonts with a **hard 2-pixel outline** (the user, 2026-11-12: never a soft outline or drop shadow;
+  G_TextStyle with a negative PX in src/tcg/tcg_gfx.c). Hints are the game's own (controller buttons) on the foot.
+- STADIUM 2's flow, themes only (ORIGINAL keeps its own): REGISTER's list 3 x 3 (REG_COLS / REG_ROWS follow the
+  style), A opens the POKéMON's panel (ENTER Yes / No, SELECT the SUMMARY), six in asks OK to Register / Reselect
+  some / Reselect all (U.sixMenu); the run goes ladder -> VS (shows) -> choice (U.vsStep: VS_LADDER / VS_SHOW /
+  VS_CHOICE; VS. MEWTWO has no ladder; B on the choice goes back to VS); the result shows the three that fought on
+  each side with their HP (StadiumCup_Fought, kept at the battle's end), crosses on the fainted, then (after
+  TH_RESULT_HOLD frames) the badge board, Keep battling? or GAME OVER; the cup won shows its prizes.
+- POKESTADIUM's cup screen shows all seven cups (the user), four over three, LEFT / RIGHT along a row, UP / DOWN
+  between rows.
+- Trainers' lines are left out (the user's answer). Tests: scenarios stadium_theme1 / stadium_theme2 (every screen
+  shot), `mp stadiumstyle N`, `mp stadiumfill` (fill the team from the REGISTER list), `mp stadiumresult N`.
+- Headless shots: the canvas is drawn only when a shot is taken, so the crossfade starts there: take a shot, wait
+  14 frames, take it again.
+
+The rest of this file is the design as it was handed over.
 
 ## The user's words (decisions, in order)
 

@@ -2349,6 +2349,20 @@ bool8 MP_StadiumUi_Step(u16 keys)
             U.round ^= 1;
             PlaySE(SE_SELECT);
         }
+        else if (gMpConfig.stadiumStyle % MP_STADIUM_STYLE_COUNT == MP_STADIUM_STYLE_STADIUM1
+                 && pressed & (DPAD_UP | DPAD_DOWN | DPAD_LEFT | DPAD_RIGHT))
+        {
+            // (POKESTADIUM: the cups four over three: LEFT / RIGHT along, UP / DOWN to the nearest in the other row)
+            static const u8 sDown[4] = {4, 4, 5, 6}, sUp[3] = {0, 1, 3};
+            if (pressed & (DPAD_LEFT | DPAD_RIGHT))
+                MoveCup(pressed & DPAD_LEFT ? -1 : 1, 0);
+            else
+            {
+                u8 to = U.cup < 4 ? (pressed & DPAD_DOWN ? sDown[U.cup] : U.cup) : (pressed & DPAD_UP ? sUp[U.cup - 4] : U.cup);
+                if (to != U.cup && StadiumCup_Open(U.round, to, 0))
+                    U.cup = to, PlaySE(SE_SELECT);
+            }
+        }
         else if (pressed & DPAD_UP) MoveCup(-1, 0);
         else if (pressed & DPAD_DOWN) MoveCup(1, 0);
         else if (pressed & A_BUTTON)

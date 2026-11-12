@@ -1,0 +1,126 @@
+pressuntil A field 5000
+mp additem 398 1
+mp stadiumstyle 2
+mp warp 46,1,9,3
+wait 80
+press UP 4
+wait 10
+pressuntillog A 3000 screens opened
+wait 60
+press DOWN 4
+wait 10
+press DOWN 4
+wait 20
+rendershot t2_sel_pre
+wait 14
+rendershot t2_sel
+press A 4
+wait 30
+press A 4
+wait 30
+rendershot t2_opt_pre
+wait 14
+rendershot t2_opt
+press DOWN 4
+wait 6
+press DOWN 4
+wait 6
+press DOWN 4
+wait 6
+press DOWN 4
+wait 6
+press A 4
+wait 30
+press R 4
+wait 6
+press R 4
+wait 6
+press R 4
+wait 6
+press R 4
+wait 20
+rendershot t2_reg_pre
+wait 14
+rendershot t2_reg
+press A 4
+wait 20
+rendershot t2_info_pre
+wait 14
+rendershot t2_info
+press B 4
+wait 10
+mp stadiumfill
+wait 10
+press B 4
+wait 30
+press RIGHT 4
+wait 8
+rendershot t2_teamsbtn
+press A 4
+wait 30
+rendershot t2_teams_pre
+wait 14
+rendershot t2_teams
+press B 4
+wait 30
+press RIGHT 4
+wait 8
+press A 4
+wait 60
+rendershot t2_lad_pre
+wait 14
+rendershot t2_lad
+press A 4
+wait 40
+rendershot t2_vs_pre
+wait 14
+rendershot t2_vs
+press SELECT 4
+wait 20
+rendershot t2_rules_pre
+wait 14
+rendershot t2_rules
+press SELECT 4
+wait 10
+press A 4
+wait 30
+press A 4
+wait 8
+press RIGHT 4
+wait 8
+press A 4
+wait 20
+rendershot t2_ch_pre
+wait 14
+rendershot t2_ch
+press RIGHT 4
+wait 8
+press A 4
+wait 8
+press START 4
+pressuntil A action 20000
+mp foehp 1
+mp bmove 98
+pressuntillog A 20000 battle 1 won
+pressuntillog B 3000 screens back
+wait 50
+rendershot t2_res_pre
+wait 14
+rendershot t2_res
+mp stadiumresult 2
+wait 120
+rendershot t2_cont_pre
+wait 14
+rendershot t2_cont
+mp stadiumbadges 0 7
+mp stadiumresult 5
+wait 120
+rendershot t2_bad_pre
+wait 14
+rendershot t2_bad
+mp stadiumresult 3
+wait 60
+rendershot t2_cup_pre
+wait 14
+rendershot t2_cup
+quit

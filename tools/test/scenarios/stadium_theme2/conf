@@ -1,0 +1,7 @@
+# STADIUM in the POKESTADIUM 2 style (OPTIONS > BATTLE > STADIUM SETTINGS > STYLE; mp_stadium_ui_themes.inc.c): every screen
+# shot (t2_*): the cups, the cup's menu, REGISTER and A's panel, SAVED TEAMS, the ladder, VS, THE RULES, the choice, a
+# battle won and its result, then (mp stadiumresult) Keep battling?, the badge board and the cup won.
+MODE=1
+TMO=400
+EXPECT_A=("stadium style 2" "stadium team 6" "stadium: battle 1 won (0 fainted)" "stadium: screens back (result)" "stadium result 2" "stadium result 5" "stadium result 3")
+UNEXPECT_A=("crash" "out of memory")
