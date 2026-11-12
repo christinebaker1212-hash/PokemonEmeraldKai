@@ -7,21 +7,11 @@ Sinnoh_Route224_EventScript_Bg8::
 	end
 
 Sinnoh_Route224_EventScript_Person4::
-	msgbox Sinnoh_Route224_Text_Person4, MSGBOX_NPC
+	goto SinnohP_route_224_4
 	end
 
 Sinnoh_Route224_EventScript_Person22::
-	msgbox Sinnoh_Route224_Text_Person22, MSGBOX_NPC
+	goto SinnohP_route_224_6
 	end
-
-Sinnoh_Route224_Text_Person4:
-	.string "PROF. OAK: This route leads to a stone\n"
-	.string "where people once left their feelings.\p"
-	.string "What a place to study! What a place\n"
-	.string "for a picnic!$"
-
-Sinnoh_Route224_Text_Person22:
-	.string "MARLEY: ...The sea here is quiet. I like\n"
-	.string "quiet.$"
 
 @ --- end of SINNOH words ---

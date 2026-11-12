@@ -19,7 +19,7 @@ Sinnoh_Route227_EventScript_Person11::
 	end
 
 Sinnoh_Route227_EventScript_Person12::
-	msgbox Sinnoh_Route227_Text_Person12, MSGBOX_NPC
+	goto SinnohP_route_227_4
 	end
 
 Sinnoh_Route227_EventScript_Sign1::
@@ -34,10 +34,5 @@ Sinnoh_Route227_Text_Person4:
 Sinnoh_Route227_Text_Person5:
 	.string "WAKE: The ashy road makes for great\n"
 	.string "training! Hah! My cape is gray now.$"
-
-Sinnoh_Route227_Text_Person12:
-	.string "BUCK: Up the road is STARK MOUNTAIN.\n"
-	.string "TEAM GALACTIC's leftovers went in.\l"
-	.string "Let's go!$"
 
 @ --- end of SINNOH words ---

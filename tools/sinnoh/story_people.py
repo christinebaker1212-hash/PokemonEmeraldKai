@@ -27,7 +27,14 @@ LEAGUE = 9
 # (map, Platinum's object number). PROF. OAK in ETERNA: the UPGRADE and the legendary birds set roaming
 # (src/sinnoh/s3d_roamer.c); his row in gifts.py keeps its flag number, unused
 # The BATTLE SALON's partners (shown by the salon's own map script, Platinum's, by the partners met on the way)
-PLATINUM = {('Sinnoh_EternaCitySouthHouse', 1)} | {('Sinnoh_BattleTowerBattleSalon', n) for n in range(2, 7)}
+PLATINUM = {('Sinnoh_EternaCitySouthHouse', 1)} | {('Sinnoh_BattleTowerBattleSalon', n) for n in range(2, 7)} \
+    | {('Sinnoh_FightArea', 23), ('Sinnoh_FightArea', 24)}   # (the FIGHT AREA's blockade: there until the NATIONAL DEX,
+                                                            # Platinum's FightArea_RemoveBlockade)
+# ... and the ones after the LEAGUE whose own scripts convert: BUCK, VOLKNER and FLINT's battles, the spectators, the
+# RESORT AREA's leaders, ROUTE 224's and 227's people (their written words below stay unused)
+PLATINUM |= {('Sinnoh_FightArea', n) for n in (9, 25, 26, 28, 29, 30, 31, 32)} | {('Sinnoh_SurvivalArea', 9)} \
+    | {('Sinnoh_Battleground', 2), ('Sinnoh_Route227', 12), ('Sinnoh_Route224', 4), ('Sinnoh_Route224', 22),
+       ('Sinnoh_SendoffSpring', 1)} | {('Sinnoh_ResortArea', n) for n in range(15, 20)}
 NEVER = (99, 99, None, None, None)
 ALWAYS = (0, 99, None, None, None)
 
@@ -145,7 +152,7 @@ SHOW = {
     'WAYWARD_CAVE_1F_MIRA': _r(4),
     # ------------------------------------------------------------------ after the LEAGUE
     'FIGHT_AREA_BUCK': _r(LEAGUE), 'FIGHT_AREA_PALMER': _r(LEAGUE), 'FIGHT_AREA_BATTLERS_AND_SPECTATORS': _r(LEAGUE),
-    'FIGHT_AREA_BLOCKADE': NEVER, 'SURVIVAL_AREA_BUCK': _r(LEAGUE), 'BATTLEGROUND_BUCK': _r(LEAGUE),
+    'SURVIVAL_AREA_BUCK': _r(LEAGUE), 'BATTLEGROUND_BUCK': _r(LEAGUE),
     'ROUTE_227_BUCK': _r(LEAGUE), 'ROUTE_227_CRASHER_WAKE': _r(LEAGUE), 'ROUTE_227_RIVAL': _r(LEAGUE),
     'STARK_MOUNTAIN_OUTSIDE_LOOKER': _r(LEAGUE, unless='STARK'), 'STARK_MOUNTAIN_OUTSIDE_BUCK': _r(LEAGUE, unless='STARK'),
     'STARK_MOUNTAIN_OUTSIDE_GRUNTS': _r(LEAGUE, unless='STARK'),

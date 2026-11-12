@@ -36,16 +36,11 @@ Sinnoh_SurvivalArea_EventScript_Person8::
 	end
 
 Sinnoh_SurvivalArea_EventScript_Person9::
-	msgbox Sinnoh_SurvivalArea_Text_Person9, MSGBOX_NPC
+	goto SinnohP_survival_area_6
 	end
 
 Sinnoh_SurvivalArea_EventScript_Sign1::
 	goto SinnohP_survival_area_5
 	end
-
-Sinnoh_SurvivalArea_Text_Person9:
-	.string "BUCK: The FRONTIER's tough, but STARK\n"
-	.string "MOUNTAIN's tougher. I'll see you up\l"
-	.string "there!$"
 
 @ --- end of SINNOH words ---

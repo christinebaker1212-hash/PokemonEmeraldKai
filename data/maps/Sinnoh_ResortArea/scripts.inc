@@ -27,23 +27,23 @@ Sinnoh_ResortArea_EventScript_Person14::
 	end
 
 Sinnoh_ResortArea_EventScript_Person15::
-	msgbox Sinnoh_ResortArea_Text_Person15, MSGBOX_NPC
+	goto SinnohP_resort_area_9
 	end
 
 Sinnoh_ResortArea_EventScript_Person16::
-	msgbox Sinnoh_ResortArea_Text_Person16, MSGBOX_NPC
+	goto SinnohP_resort_area_11
 	end
 
 Sinnoh_ResortArea_EventScript_Person17::
-	msgbox Sinnoh_ResortArea_Text_Person17, MSGBOX_NPC
+	goto SinnohP_resort_area_13
 	end
 
 Sinnoh_ResortArea_EventScript_Person18::
-	msgbox Sinnoh_ResortArea_Text_Person18, MSGBOX_NPC
+	goto SinnohP_resort_area_10
 	end
 
 Sinnoh_ResortArea_EventScript_Person19::
-	msgbox Sinnoh_ResortArea_Text_Person19, MSGBOX_NPC
+	goto SinnohP_resort_area_12
 	end
 
 Sinnoh_ResortArea_EventScript_Sign1::
@@ -61,26 +61,5 @@ Sinnoh_ResortArea_EventScript_Sign13::
 Sinnoh_ResortArea_Text_Person14:
 	.string "My dad brought me here for a vacation.\n"
 	.string "I'm going to swim until I'm a prune!$"
-
-Sinnoh_ResortArea_Text_Person15:
-	.string "PROF. ROWAN: Even I take a holiday now\n"
-	.string "and then. Don't tell my assistants.$"
-
-Sinnoh_ResortArea_Text_Person16:
-	.string "GARDENIA: The flowers here are\n"
-	.string "amazing! I'm taking seeds home for my\l"
-	.string "GYM.$"
-
-Sinnoh_ResortArea_Text_Person17:
-	.string "BYRON: Gahaha! A fine place to rest\n"
-	.string "these old bones.$"
-
-Sinnoh_ResortArea_Text_Person18:
-	.string "ROARK: Dad's here too? Ugh. Can't even\n"
-	.string "vacation in peace.$"
-
-Sinnoh_ResortArea_Text_Person19:
-	.string "MAYLENE: Resting is training too! ...Is\n"
-	.string "that true? I hope that's true.$"
 
 @ --- end of SINNOH words ---
