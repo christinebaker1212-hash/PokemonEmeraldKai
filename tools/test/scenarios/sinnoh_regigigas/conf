@@ -1,0 +1,9 @@
+# SNOWPOINT TEMPLE after the LEAGUE: down its six floors (the stairs taken by walking into them, ROCK SMASH's rocks,
+# the ice) to REGIGIGAS, which wakes with REGIROCK, REGICE and REGISTEEL in the party (Platinum's
+# SnowpointTempleB5F_Regigigas). Needs the 3D pack.
+MODE=1
+TMO=1500
+GEN=4
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:100,401:70,402:70,403:70,149:100,248:100 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("where map 43.76 xy 11,13" "life battle: begin kind 4")
+UNEXPECT_A=("[crash]" "TIMEOUT")
