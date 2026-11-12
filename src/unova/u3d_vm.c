@@ -49,6 +49,7 @@
 #include "data.h"
 #include "party_menu.h"
 #include "mp.h"
+#include "pokedex.h"
 #include "battle.h"
 #include "constants/battle.h"
 #include "pokemon_storage_system.h"
@@ -1298,6 +1299,18 @@ static void Step(struct Thread *t)
             *WorkPtr(a[0]) = 0;
             break;
         // ---- what has no screen of its own here yet (read past quietly)
+        // ---- the POKeDEX (national numbers: Black's species numbers are the game's national ones)
+        case U3C_WORK_CmdGetNationalZukanCount:   // mode (0 seen, else caught), result
+            *WorkPtr(a[1]) = GetNationalPokedexCount(V(0) == 0 ? FLAG_GET_SEEN : FLAG_GET_CAUGHT);
+            break;
+        case U3C_WORK_CmdRegisterZukanSeen:   // species, form
+            if (V(0) && V(0) <= NATIONAL_DEX_COUNT)
+                GetSetPokedexFlag(V(0), FLAG_SET_SEEN);
+            break;
+        case U3C_WORK_CmdCheckZukanSeenOrCaught:   // species, mode (0 seen, else caught), result
+            *WorkPtr(a[2]) = V(0) && V(0) <= NATIONAL_DEX_COUNT
+                           && GetSetPokedexFlag(V(0), V(1) == 0 ? FLAG_GET_SEEN : FLAG_GET_CAUGHT);
+            break;
         case U3C_WORK_CmdLookupTable:   // index, result (ov010 gScrcmdValueTable)
         {
             static const u16 sValues[] = {15, 55, 64, 30, 53, 43, 154, 13};
