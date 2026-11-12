@@ -1,0 +1,2 @@
+# UNOVA ships in the game's releases from 1.191.0: the release builds its packs from the UNOVA_ROM_URL secret
+# (.github/workflows/release.yml "UNOVA's packs", tools/unova/make_pack.sh) and package.sh puts them in the zips.
