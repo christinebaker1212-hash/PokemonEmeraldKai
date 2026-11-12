@@ -1864,6 +1864,15 @@ static void Step(struct Thread *t)
             }
             break;
         }
+        case U3C_StartMmdlMoveToGrid:   // person, x, y, z: there at once (Black glides it)
+        {
+            struct ObjectEvent *o = ObjectOf(V(0));
+            if (o && !o->isPlayer)
+                TryMoveObjectEventToMapCoords(o->localId, o->mapNum, o->mapGroup, MapX(V(1)), MapZ(V(3)));
+            else if (o)
+                MoveObjectEventToMapCoords(o, MapX(V(1)) + MAP_OFFSET, MapZ(V(3)) + MAP_OFFSET);
+            break;
+        }
         case U3C_InitMmdlGridPosition:   // person, x, y, z, direction
         {
             u16 obj = V(0);
