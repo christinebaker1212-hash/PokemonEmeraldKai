@@ -31,6 +31,8 @@ static struct
     u16 classes, pics;
     const u16 **picPal;
     struct MpBigSprite *picBig;
+    const u8 *backs;   // Black's back pictures: u16 palette[16], four 64x64 frames of tiles each
+    u16 backCount;
 } sGfx;
 
 static u32 FrameBytes(u8 kind) { return kind == 4 ? 2048 : 512; }
@@ -99,6 +101,13 @@ static void Load(void)
         }
         if (p > end)
             sGfx.pics = 0;
+        else if (p + 6 <= end && memcmp(p, "BACK", 4) == 0)
+        {
+            sGfx.backCount = p[4] | p[5] << 8;
+            sGfx.backs = p + 6;
+            if (sGfx.backs + (u32)sGfx.backCount * (32 + 4 * 2048) > end)
+                sGfx.backCount = 0;
+        }
     }
     printf("[u3d] UNOVA's people: %u object codes, %u battle pictures\n", sGfx.count, sGfx.pics);
 }
@@ -145,4 +154,18 @@ void U3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn)
     sprite->y -= (8 - gTrainerFrontPicCoords[standIn].size) * 4;   // (the stand-in's own height undone)
     sprite->mpBig = &sGfx.picBig[pic];
     printf("[test] unova battle picture: trainer %d picture %d\n", trainer, pic);
+}
+
+// Black's back picture INDEX (U3D_BACK_*): four 64x64 frames as GBA tiles and their 16 colours; FALSE without them
+bool8 U3D_Gfx_Back(u8 index, const u8 **tiles, const u16 **pal)
+{
+    const u8 *b;
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || index >= sGfx.backCount)
+        return FALSE;
+    b = sGfx.backs + (u32)index * (32 + 4 * 2048);
+    *pal = (const u16 *)b;
+    *tiles = b + 32;
+    return TRUE;
 }

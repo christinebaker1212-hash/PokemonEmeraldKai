@@ -51,6 +51,7 @@ bool8 HasTrainerBeenFought(u16 trainerId);
 void SetTrainerFlag(u16 trainerId);
 void ClearTrainerFlag(u16 trainerId);
 void BattleSetup_StartTrainerBattle(void);
+void BattleSetup_StartUnovaCatchTutorial(void);   // Moemon Kai: JUNIPER's demonstration (src/unova/u3d_battle.c)
 void BattleSetup_StartUnovaBattle(void);   // Moemon Kai: UNOVA's battle set by U3D_PrepareBattle (src/unova/u3d_battle.c)
 void BattleSetup_StartOrreBattle(void);   // Moemon Kai: ORRE's battle set by Orre_PrepareBattle (src/orre/orre_battle.c)
 void BattleSetup_StartRematchBattle(void);

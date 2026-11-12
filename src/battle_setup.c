@@ -1736,6 +1736,16 @@ void BattleSetup_StartUnovaBattle(void)
     ScriptContext_Stop();
 }
 
+// Moemon Kai: UNOVA's catching demonstration (src/unova/u3d_battle.c U3D_CatchTutorial sets the parties, the back
+// picture and the name): the game's own catching tutorial battle, back to the script after
+void BattleSetup_StartUnovaCatchTutorial(void)
+{
+    LockPlayerFieldControls();
+    gMain.savedCallback = CB2_ReturnToFieldContinueScriptPlayMapMusic;
+    gBattleTypeFlags = BATTLE_TYPE_WALLY_TUTORIAL;
+    CreateBattleStartTask(B_TRANSITION_SLICE, 0);
+}
+
 void BattleSetup_StartOrreBattle(void)
 {
     gNoOfApproachingTrainers = 0;

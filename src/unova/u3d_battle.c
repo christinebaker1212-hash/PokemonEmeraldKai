@@ -12,6 +12,7 @@
 #include "battle.h"
 #include "battle_setup.h"
 #include "data.h"
+#include "load_save.h"
 #include "pokemon.h"
 #include "string_util.h"
 #include "u3d.h"
@@ -220,4 +221,47 @@ u16 U3D_VictorySong(u16 song)
 u8 U3D_BattleResult(void)
 {
     return sResult;
+}
+
+// Black's catching demonstration on ROUTE 1 (EVENT_BATTLE_CreateCatchTutorial): JUNIPER's MINCCINO, Lv. 7 with POUND
+// and GROWL, catches a wild Lv. 2 PATRAT (TACKLE, LEER), as the game's own catching tutorial battle (WALLY's) with
+// JUNIPER's back picture (Black's, u3d_gfx.c) and name. The party is saved here and loaded when the script goes on
+// (u3d_vm.c U3D_VmResume)
+void U3D_CatchTutorial(void)
+{
+    static const u8 sJuniper[] = _("JUNIPER");
+    static const u16 sMine[] = {MOVE_POUND, MOVE_GROWL}, sTheirs[] = {MOVE_TACKLE, MOVE_LEER};
+    u16 MP_Avatar_TilesBackPic(const u8 *tiles, const u16 *pal);
+    void MP_WallyTutorialSetName(const u8 *name);   // (battle_message.c)
+    const u8 *tiles;
+    const u16 *pal;
+    u16 pic = 0xFFFF;
+    u32 i;
+    SavePlayerParty();
+    ZeroPlayerPartyMons();
+    CreateMon(&gPlayerParty[0], SPECIES_MINCCINO, 7, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    CalculatePlayerPartyCount();
+    ZeroEnemyPartyMons();
+    CreateMon(&gEnemyParty[0], SPECIES_PATRAT, 2, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        u16 m = i < 2 ? sMine[i] : MOVE_NONE, e = i < 2 ? sTheirs[i] : MOVE_NONE;
+        u8 pp = m ? gBattleMoves[m].pp : 0, ep = e ? gBattleMoves[e].pp : 0;
+        SetMonData(&gPlayerParty[0], MON_DATA_MOVE1 + i, &m);
+        SetMonData(&gPlayerParty[0], MON_DATA_PP1 + i, &pp);
+        SetMonData(&gEnemyParty[0], MON_DATA_MOVE1 + i, &e);
+        SetMonData(&gEnemyParty[0], MON_DATA_PP1 + i, &ep);
+    }
+    {
+        u16 hp = 30;   // (Black's demonstration is scripted: the PATRAT is weakened, not knocked out, before the throw)
+        SetMonData(&gEnemyParty[0], MON_DATA_MAX_HP, &hp);
+        SetMonData(&gEnemyParty[0], MON_DATA_HP, &hp);
+    }
+    if (U3D_Gfx_Back(U3D_BACK_JUNIPER, &tiles, &pal))
+        pic = MP_Avatar_TilesBackPic(tiles, pal);
+    gWallyTutorialThrowFirst = FALSE;
+    gWallyTutorialBackPic = pic != 0xFFFF ? pic : TRAINER_BACK_PIC_WALLY;
+    gWallyTutorialName = sJuniper;
+    MP_WallyTutorialSetName(gWallyTutorialName);
+    BattleSetup_StartUnovaCatchTutorial();
 }

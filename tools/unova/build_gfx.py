@@ -21,6 +21,9 @@ Format (little endian): "U3DG" u32 version 2, u16 codes; each: u8 kind (0 walkin
   MIXED's smaller copy (OPTIONS > DISPLAY > SPRITE SCALING > UNOVA PEOPLE): u16 palette[16], the same frames
   then "TRPC", u16 classes, u8 the picture of each (padded to 2), u16 pictures; each: u16 palette[16] (0 transparent),
   s16 dx, dy (its top-left from the sprite's point), u16 w, h, rows of (w + 1) / 2 bytes (4 bits, the low nibble first)
+  then "BACK", u16 pictures; each: u16 palette[16], four 64x64 frames as GBA 4bpp tiles (the game's trainer back
+  picture layout): Black's backs (archive 0x49, a/0/7/3: the two player characters, JUNIPER, CHEREN...), cell 0
+  over their 256x128 bitmap sheet (2D mapping: a tile number is a place 32 tiles a row), half its size, four times
 """
 import importlib.util
 import os
@@ -211,6 +214,79 @@ def trainer_picture(files):
     return pal, x0, y0 - 8, w, h, bytes(rows)   # (8 up: the feet where the game's pictures have theirs)
 
 
+BACK_ARC = 'a/0/7/3'
+
+
+class BackSheet:
+    """Back picture cells side by side (W x H each), as the shrink filter reads an image"""
+
+    def __init__(self, cells, w, h, pal):
+        self.cells, self.w, self.h, self.pal = cells, w, h, pal
+
+    def px(self, x, y):
+        f, x = divmod(x, self.w)
+        return self.cells[f][y][x] if 0 <= f < len(self.cells) and 0 <= y < self.h else 0
+
+    def getpalette(self):
+        out = []
+        for c in self.pal:
+            out += [(c & 31) << 3, ((c >> 5) & 31) << 3, ((c >> 10) & 31) << 3]
+        return out
+
+
+def back_pictures():
+    arc = narc.arc(BACK_ARC)
+    out = bytearray(b'BACK' + struct.pack('<H', len(arc) // 8))
+    for i in range(len(arc) // 8):
+        files = arc[8 * i:8 * i + 8]
+        ncbr, ncer, nclr = (_lz11(files[k]) for k in (1, 2, 7))
+        o = _chunk(ncbr, b'RAHC')
+        h, w, _, _, _, size, off = struct.unpack_from('<HHIIIII', ncbr, o + 8)
+        sheet, width = ncbr[o + 8 + off:o + 8 + off + size], w * 8
+        o = _chunk(nclr, b'TTLP')
+        pal = list(struct.unpack_from('<16H', nclr, o + 8 + struct.unpack_from('<IIII', nclr, o + 8)[3]))
+        pal[0] = 0
+        o = _chunk(ncer, b'KBEC')
+        n, attrs, off, _ = struct.unpack_from('<HHII', ncer, o + 8)
+        base, esz = o + 8 + off, 16 if attrs & 1 else 8
+        cells = []
+        for c in range(1):   # (cell 0 is the whole figure; Black's others are its arm's pieces, laid over it)
+            cnt, _, ooff = struct.unpack_from('<HHI', ncer, base + esz * c)
+            oams = []
+            for k in range(cnt):
+                a0, a1, a2 = struct.unpack_from('<HHH', ncer, base + n * esz + ooff + 6 * k)
+                y = (a0 & 0xFF) - (256 if a0 & 0x80 else 0)
+                x = (a1 & 0x1FF) - (512 if a1 & 0x100 else 0)
+                oams.append((x, y, OAM_SIZES[(a0 >> 14, a1 >> 14)], a2 & 0x3FF, bool(a1 & 0x1000)))
+            cells.append(oams)
+        while len(cells) < 4:
+            cells.append(cells[0])
+        # each cell on a 96 x 128 canvas, its point (0, 0) at (48, 72): the feet at the bottom middle
+        cw, ch = 96, 128
+        drawn = []
+        for oams in cells:
+            px = [[0] * cw for _ in range(ch)]
+            for x, y, (ow, oh), t, hf in reversed(oams):
+                sx, sy = (t % 32) * 8, (t // 32) * 8
+                for yy in range(oh):
+                    for xx in range(ow):
+                        X, Y = sx + (ow - 1 - xx if hf else xx), sy + yy
+                        k = Y * width + X
+                        if k // 2 >= len(sheet):
+                            continue
+                        v = (sheet[k // 2] >> 4) if k & 1 else sheet[k // 2] & 0xF
+                        cx, cy = 48 + x + xx, 72 + y + yy
+                        if v and 0 <= cx < cw and 0 <= cy < ch:
+                            px[cy][cx] = v
+            drawn.append(px)
+        spal, small = shrink(BackSheet(drawn, cw, ch, pal), [(k * cw, 0) for k in range(4)], 64, 64, src=(cw, ch),
+                             scale=0.5)
+        out += struct.pack('<16H', *[_sinnoh.bgr555(c) if k else 0 for k, c in enumerate(spal)])
+        for f in small:
+            out += tiles_of(f, 64, 64)
+    return bytes(out), len(arc) // 8
+
+
 def battle_pictures():
     arm = open(os.path.join(os.path.dirname(narc.EXTRACT), 'arm9_dec.bin'), 'rb').read()
     table = arm[GRA_TABLE - ARM9_BASE:GRA_TABLE - ARM9_BASE + GRA_CLASSES]
@@ -259,9 +335,12 @@ def main():
         made += 1
     pics, npics = battle_pictures()
     pack += pics
+    backs, nbacks = back_pictures()
+    pack += backs
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(bytes(pack))
-    print('%s: %d of %d object codes drawn, %d battle pictures, %d bytes' % (out_path, made, count, npics, len(pack)))
+    print('%s: %d of %d object codes drawn, %d battle pictures, %d backs, %d bytes'
+          % (out_path, made, count, npics, nbacks, len(pack)))
 
 
 if __name__ == '__main__':

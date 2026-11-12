@@ -66,7 +66,10 @@ u32 U3D_Money(u16 trainerId);
 bool8 U3D_PrepareBattle(u16 first, u16 second);
 void U3D_BattleEnded(bool8 won);
 u8 U3D_BattleResult(void);
-u8 U3D_TrainerClass(u16 trainerId);       // Black's class of TRAINER_UNOVA_A / _B (its battle picture)
+u8 U3D_TrainerClass(u16 trainerId);
+void U3D_CatchTutorial(void);              // JUNIPER's catching demonstration (the VM's 0x17D)
+#define U3D_BACK_JUNIPER 2                 // Black's back pictures (archive 0x49): 0 / 1 the player characters, 2 JUNIPER
+bool8 U3D_Gfx_Back(u8 index, const u8 **tiles, const u16 **pal);   // four 64x64 frames (GBA tiles) and their colours       // Black's class of TRAINER_UNOVA_A / _B (its battle picture)
 u16 U3D_BattleSong(void);               // pokemon.c GetBattleBGM on an UNOVA map: Black's own
 u16 U3D_VictorySong(u16 song);          // ... MP_RegionVictorySong
 

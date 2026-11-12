@@ -37,10 +37,15 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   field-init script's survive loading), SetProcAction (the script run next, in the zone the player is then in:
   JUNIPER's ROUTE 1 scene), fades that wait for the fade before, a crowd's side windows (AddSubWinMsg) in the message
   box, the healing machine's tune, a POKéMON's params. Tested by a harness script that warps from trigger to
-  trigger (a scene's trigger is one of its zone's Pos events: tools/unova/events.py) and mashes A. Not yet: Black's 3D cut-ins (0x19F, 0x240), the catch demo battle (0x17D), build-model
-  animations (doors: 0x127-0x12A), map replacements (0xDA), warp destinations / whiteout points (0xD9), the value
-  screen (0x155), people following the player (0x06B), the naming screen, Black's gift box screen, trainers' battle
-  pictures, the region choice's boat and CASTELIA's pier.
+  trigger (a scene's trigger is one of its zone's Pos events: tools/unova/events.py) and mashes A; a scene alone with `mp u3dwork WORK VALUE` / `mp u3dflag FLAG 0|1` (hex;
+  `u3dwork 4081 1` then `u3dwork FFFF 0` ends the room's opening). Since: ROUTE 2 (Running Shoes, BIANCA's battle),
+  STRIATON's gatekeeper; JUNIPER's catching demonstration (u3d_battle.c U3D_CatchTutorial: the game's catching
+  tutorial battle with Black's back picture of her); every trainer's battle picture (Black's fronts, cell 0 over its
+  80x80 sheet; the backs: cell 0 of a 256x128 sheet, 2D mapping, halved: tools/unova/build_gfx.py, pack version 2);
+  map replacement flags as Black's works (blocks not redrawn yet). Not yet: Black's 3D cut-ins (0x19F, 0x240),
+  build-model animations (doors: 0x127-0x12A), redrawing replaced map blocks, warp destinations / whiteout points
+  (0xD9), the value screen (0x155), people following the player (0x06B), the naming screen, Black's gift box screen,
+  the region choice's boat and CASTELIA's pier, STRIATON's gym onward.
 - UNOVA is the game's fifth region (REGION_UNOVA 4, REGION_COUNT 5; 2026-11-11): the new game's region menu
   (the player's room in NUVEMA: `MOEMON_DEBUG_REGION=4`), the boat lists (CASTELIA (UNOVA), MULTI_REGIONS_FROM_UNOVA;
   the first boat lands in the room for now: no pier scene at CASTELIA yet), the ship's crossing (its passengers,

@@ -45,6 +45,7 @@
 #include "money.h"
 #include "mp_region.h"
 #include "rtc.h"
+#include "load_save.h"
 #include "platform.h"
 #include "save.h"
 #include "field_screen_effect.h"
@@ -632,7 +633,7 @@ static void PopSong(void)
         PlayNewMapMusic(sSongStack[--sSongDepth]);
 }
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
-enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE };
+enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO };
 static u8 sScreen;
 static u16 sScreenVar;
 #define STACK 48
@@ -1014,6 +1015,9 @@ static void Step(struct Thread *t)
         case U3C_WORK_CmdGetMiscByte:
         case U3C_WORK_CmdCheckMiscByte:
             *WorkPtr(a[1]) = 0;
+            break;
+        case U3C_PROC_FLD_CallCatchTutorial:   // JUNIPER's catching demonstration (u3d_battle.c)
+            OpenScreen(t, SCREEN_CATCH_DEMO, 0);
             break;
         case U3C_StartFld3dCi:   // (Black's 3D cut-ins: the POKéDEX's, a Gym Leader's... not drawn yet)
         case U3C_StartFld3dCiByTable:
@@ -1753,6 +1757,9 @@ void U3D_VmOpenScreen(void)
     case SCREEN_BATTLE:
         BattleSetup_StartUnovaBattle();   // (back to the field and this script when it ends)
         break;
+    case SCREEN_CATCH_DEMO:
+        U3D_CatchTutorial();   // (the party saved; back to the field and this script when it ends)
+        break;
     default:
         NothingToRun();
         break;
@@ -1766,6 +1773,9 @@ void U3D_VmResume(void)
     {
     case SCREEN_STARTER:
         *WorkPtr(sScreenVar) = gSpecialVar_Result < 3 ? gSpecialVar_Result : 0;
+        break;
+    case SCREEN_CATCH_DEMO:
+        LoadPlayerParty();   // (the player's own party back)
         break;
     }
     sScreen = SCREEN_NONE;
