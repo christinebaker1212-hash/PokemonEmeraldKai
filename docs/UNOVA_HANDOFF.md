@@ -42,10 +42,19 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   STRIATON's gatekeeper; JUNIPER's catching demonstration (u3d_battle.c U3D_CatchTutorial: the game's catching
   tutorial battle with Black's back picture of her); every trainer's battle picture (Black's fronts, cell 0 over its
   80x80 sheet; the backs: cell 0 of a 256x128 sheet, 2D mapping, halved: tools/unova/build_gfx.py, pack version 2);
-  map replacement flags as Black's works (blocks not redrawn yet). Not yet: Black's 3D cut-ins (0x19F, 0x240),
+  map replacement flags as Black's works (blocks not redrawn yet). Since (2026-11-12): STRIATON after the gym
+  (FENNEL's errand, HM01 CUT), the DREAMYARD (CUT's trees: a deleted person without a flag stays gone until the map
+  loads again, as Black's trees grow back; BIANCA, MUNNA, Team Plasma's two battles, GHETSIS, MUSHARNA), FENNEL's
+  lab (the C-GEAR and PAL PAD: Black's script menus, MSGWIN_CmdInitMenu / AddMenuItem / StartMenu, in the game's
+  multichoice window; the C-GEAR got is UNEW's `cgear` byte, U3D_Vm_HasCGear), ROUTE 3 (the twins' double battle,
+  CHEREN's battle, the stolen POKéMON), WELLSPRING CAVE (Black's tag battle beside CHEREN: StartMultiTrainerBattle
+  through the game's in-game partner battle, TRAINER_UNOVA_C, the player's first three POKéMON, CHEREN from behind
+  with Black's back picture: u3d_battle.c U3D_PrepareTagBattle, U3D_Gfx_PartnerBack). Whiteouts return to Black's
+  warp points (ov010's 17, scripts pack v6: SetWarpDestination sets the save's last heal place; a new game's is home).
+  Test scenes need `mp battlestyle 1` (SET) when A is mashed through a battle. Not yet: Black's 3D cut-ins (0x19F, 0x240),
   build-model animations (doors: 0x127-0x12A), redrawing replaced map blocks, warp destinations / whiteout points
   (0xD9), the value screen (0x155), people following the player (0x06B), the naming screen, Black's gift box screen,
-  the region choice's boat and CASTELIA's pier, STRIATON's gym onward.
+  the region choice's boat and CASTELIA's pier, NACRENE onward.
 - UNOVA is the game's fifth region (REGION_UNOVA 4, REGION_COUNT 5; 2026-11-11): the new game's region menu
   (the player's room in NUVEMA: `MOEMON_DEBUG_REGION=4`), the boat lists (CASTELIA (UNOVA), MULTI_REGIONS_FROM_UNOVA;
   the first boat lands in the room for now: no pier scene at CASTELIA yet), the ship's crossing (its passengers,

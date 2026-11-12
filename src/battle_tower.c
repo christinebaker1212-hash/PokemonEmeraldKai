@@ -1420,6 +1420,7 @@ static const struct { u16 trainer; const char *look; } sQzPartnerLooks[] = {
 };
 
 bool8 S3D_Gfx_PartnerBack(u16 trainerId, const u8 **tiles, const u16 **pal, const char **look);
+bool8 U3D_Gfx_PartnerBack(u16 trainerId, const u8 **tiles, const u16 **pal);
 u16 MP_Avatar_TilesBackPic(const u8 *tiles, const u16 *pal);
 
 static void SetQzPartner(u16 trainer)
@@ -1437,6 +1438,8 @@ static void SetQzPartner(u16 trainer)
     // back (sinnoh/platinum_gfx.pak) or, for DAWN and LUCAS, Kai's LOOK's
     if (sQzPartnerBackPic == 0xFFFF && S3D_Gfx_PartnerBack(trainer, &tiles, &pal, &look))
         sQzPartnerBackPic = look ? MP_Avatar_NamedBackPic(look) : MP_Avatar_TilesBackPic(tiles, pal);
+    if (sQzPartnerBackPic == 0xFFFF && U3D_Gfx_PartnerBack(trainer, &tiles, &pal))   // Moemon Kai: UNOVA's (Black's backs)
+        sQzPartnerBackPic = MP_Avatar_TilesBackPic(tiles, pal);
 }
 
 // Moemon Kai: SINNOH's BATTLE TOWER: a BATTLE SALON partner beside the player (src/sinnoh/s3d_tower.c: its team is

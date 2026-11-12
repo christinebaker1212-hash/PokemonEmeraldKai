@@ -48,6 +48,9 @@
 #include "load_save.h"
 #include "data.h"
 #include "party_menu.h"
+#include "mp.h"
+#include "menu.h"
+#include "script_menu.h"
 #include "platform.h"
 #include "save.h"
 #include "field_screen_effect.h"
@@ -70,7 +73,7 @@ void MPNet_Log(const char *fmt, ...);
 static u8 *sPack;
 static u32 sPackSize;
 static bool8 sTried;
-static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt, sTrMsgAt, sEyeSongsAt;
+static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt, sTrMsgAt, sEyeSongsAt, sWarpsAt;
 
 static u32 Get32(u32 at) { return at + 4 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 | sPack[at + 2] << 16 | (u32)sPack[at + 3] << 24 : 0; }
 static u16 Get16(u32 at) { return at + 2 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 : 0; }
@@ -114,7 +117,7 @@ static void Load(void)
     sPack = malloc(raw ? raw : 1);
     sPackSize = raw;
     if (sPack == NULL || uncompress(sPack, &raw, data + 8, (unsigned long)(size - 8)) != 0 || memcmp(sPack, "U3DS", 4) != 0
-     || Get32(4) < 1 || Get32(4) > 5)
+     || Get32(4) < 1 || Get32(4) > 6)
     {
         printf("[u3d] %s: can't read UNOVA's scripts\n", path);
         free(sPack);
@@ -141,6 +144,8 @@ static void Load(void)
             sTrMsgAt = BlockEnd(sEncountAt);
             sEyeSongsAt = BlockEnd(sTrMsgAt);
         }
+        if (Get32(4) >= 6)   // (version 6: Black's warp points)
+            sWarpsAt = sEyeSongsAt + 4 + 4 * Get32(sEyeSongsAt);
     }
     printf("[u3d] UNOVA's scripts: %u files, %u zones\n", Get32(sFilesAt), Get32(sZonesAt));
 }
@@ -212,8 +217,8 @@ const u8 *U3D_Vm_WildRow(u16 zone, u8 season)
 // (zonedata.c: works 0x4000 on, then the flags 1-0xB5F; 0x4000+ flags are temporary, 0x8000+ works the script's own)
 #define WORKS 0x140
 #define FLAG_BYTES 0x16C
-static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges; } sWork;   // (began: Black's new-game script
-                                                                                        // has run; badges: UNOVA's, a bit each)
+static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear; } sWork;   // (began: Black's new-game
+                                                // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
 {
     return &sWork.badges;
@@ -359,11 +364,35 @@ static struct ObjectEvent *ObjectOf(u16 obj)
 }
 
 // event_object_movement.c: a person of the map hidden by Black's flag (its event data's vanish flag)
+// People a script deleted that have no flag of their own (CUT's trees, a boulder...): gone until the map is loaded
+// again, as Black's come back on re-entering (the game would put them back the moment they come into view)
+static u8 sGone[16], sGoneCount;
+
+static void Gone(u8 local, bool8 gone)
+{
+    u32 i;
+    for (i = 0; i < sGoneCount; i++)
+        if (sGone[i] == local)
+        {
+            if (!gone)
+                sGone[i] = sGone[--sGoneCount];
+            return;
+        }
+    if (gone && sGoneCount < ARRAY_COUNT(sGone))
+        sGone[sGoneCount++] = local;
+}
+
 bool8 U3D_Vm_ObjectHidden(u8 localId)
 {
     const u8 *p;
     if (!U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) || localId == 0 || localId >= OBJ_EVENT_ID_PLAYER)
         return FALSE;
+    {
+        u32 i;
+        for (i = 0; i < sGoneCount; i++)
+            if (sGone[i] == localId)
+                return TRUE;
+    }
     p = Person(CurrentZone(), localId - 1);
     if (p == NULL)
         return FALSE;
@@ -619,7 +648,7 @@ static u16 TrainerWords(u16 trainer, u16 kind);
 static u16 EyeSong(u16 trainer);
 
 // ------------------------------------------------------------------------------------------------ the VM
-enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA };
+enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU };
 
 // ---- Black's songs: its sound archive's sequence numbers as the game's song slots (tools/kaisong/unova_songs.py);
 // a pushed song comes back when the one played over it ends (a fanfare: Black's PushAndPlayBgm, StartWaitBgmThenPop)
@@ -803,6 +832,72 @@ static u32 ReadArgs(struct Thread *t, u16 op, u32 *a)
 }
 
 #define V(i) WorkValue((u16)a[i])
+
+// A POKéMON knows a move, Black's numbers being the game's (CUT 15...): Kai's held HMs count (scrcmd.c checkpartymove)
+static bool8 PartyMonHasMove(struct Pokemon *mon, u16 move)
+{
+    return GetMonData(mon, MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(mon, MON_DATA_IS_EGG)
+        && (MonKnowsMove(mon, move) || MP_HeldHmMove(mon) == move);
+}
+
+// Black's script menus (MSGWIN_CmdInitMenu..., AddMenuItem, StartMenu): items from the script's own words (InitMenu:
+// story bank 262, Black's shared menu words), a value each; the choice's value into the result work, B 0xFFFE where
+// the menu may be cancelled. Drawn as the game's multichoice windows, its right and bottom edges the YES / NO window's
+#define MENU_MAX 16
+static struct
+{
+    u16 bank, values[MENU_MAX], *result;
+    u8 count, cursor, cancel, window;
+    u8 text[MENU_MAX][48];
+    struct MenuAction actions[MENU_MAX];
+} sMenu;
+
+static void MenuInit(u16 bank, u16 cursor, u8 cancel, u16 *result)
+{
+    sMenu.bank = bank, sMenu.count = 0, sMenu.cursor = cursor, sMenu.cancel = cancel, sMenu.result = result;
+}
+
+static void MenuAdd(u16 msg, u16 value)
+{
+    if (sMenu.count >= MENU_MAX)
+        return;
+    StringExpandPlaceholders(sMenu.text[sMenu.count], U3D_Text(sMenu.bank, msg));
+    sMenu.actions[sMenu.count].text = sMenu.text[sMenu.count];
+    sMenu.actions[sMenu.count].func.void_u8 = NULL;
+    sMenu.values[sMenu.count++] = value;
+}
+
+static void MenuStart(struct Thread *t)
+{
+    s32 i, width = 0;
+    u8 w, top;
+    if (sMenu.count == 0)
+        return;
+    for (i = 0; i < sMenu.count; i++)
+        width = max(width, GetStringWidth(FONT_NORMAL, sMenu.text[i], 0));
+    w = (width + 9 + 7) / 8 + 1;   // (the cursor's room)
+    top = sMenu.count * 2 + 1 < 13 ? 13 - sMenu.count * 2 : 1;
+    sMenu.window = CreateWindowFromRect(w < 25 ? 26 - w : 1, top, w, sMenu.count * 2);
+    SetStandardWindowBorderStyle(sMenu.window, FALSE);
+    PrintMenuTable(sMenu.window, sMenu.count, sMenu.actions);
+    InitMenuInUpperLeftCornerNormal(sMenu.window, sMenu.count, sMenu.cursor < sMenu.count ? sMenu.cursor : 0);
+    ScheduleBgCopyTilemapToVram(0);
+    t->wait = W_MENU;
+}
+
+static bool8 MenuInput(void)
+{
+    s8 r = Menu_ProcessInput();
+    if (r == MENU_NOTHING_CHOSEN || (r == MENU_B_PRESSED && !sMenu.cancel))
+        return FALSE;
+    if (sMenu.result)
+        *sMenu.result = r == MENU_B_PRESSED ? 0xFFFE : sMenu.values[r];
+    ClearStdWindowAndFrameToTransparent(sMenu.window, TRUE);
+    RemoveWindow(sMenu.window);
+    return TRUE;
+}
+
+static void SetWhiteoutPoint(u16 warpId);
 
 static void Step(struct Thread *t)
 {
@@ -1001,6 +1096,28 @@ static void Step(struct Thread *t)
             if (!IsFieldMessageBoxHidden())
                 HideFieldMessageBox();
             break;
+        case U3C_NETWORK_CmdGetCommValue:   // (wireless on: Kai's co-op stands in for it, docs/UNOVA_DECISIONS.md)
+            *WorkPtr(a[0]) = 1;
+            break;
+        case U3C_PROC_FLD_ObtainCGearAndCallCommResetEvent:   // (the C-GEAR got: CGEAR_SAVE_SetObtained)
+            sWork.cgear = TRUE;
+            break;
+        case U3C_ShowOrClearInfoWindow:   // (Black's touch screen's info window: nothing to show on one screen)
+            break;
+        case U3C_InitMenu:   // x, y, cursor, cancellable, result
+            MenuInit(262, V(2), a[3], WorkPtr(a[4]));
+            break;
+        case U3C_InitMenuMsgData:
+        case U3C_InitMenuMsgDataMode1:
+            MenuInit(t->bank, V(2), a[3], WorkPtr(a[4]));
+            break;
+        case U3C_AddMenuItem:   // message, help message, value
+            MenuAdd(a[0], V(2));
+            break;
+        case U3C_StartMenu:
+        case U3C_StartMenuEx:
+            MenuStart(t);
+            break;
         case U3C_YesNoWin:
             DisplayYesNoMenuDefaultYes();
             t->result = WorkPtr(a[0]);
@@ -1043,7 +1160,30 @@ static void Step(struct Thread *t)
             break;
         case U3C_StartFld3dCi:   // (Black's 3D cut-ins: the POKéDEX's, a Gym Leader's... not drawn yet)
         case U3C_StartFld3dCiByTable:
+        case U3C_StartFld3dCiByVar:   // (a field move's: its POKéMON over the field)
+        case U3C_IAIGIRI_StartOnPlayer:   // (CUT's slash on the player: the tree goes with its own sound after)
+        case U3C_PALPARK_SetBeacon:   // (a link beacon of what the player did: no wireless here)
+        case U3C_PROC_Ov037InitFromVars:   // (a gym's switches' gimmick state: the gyms' own puzzles aren't kept yet)
+        case U3C_PROC_Ov037SetValueA:
+        case U3C_PROC_Ov037SetValueB:
+        case U3C_PROC_Ov037ReadEightVars:
+        case U3C_PROC_Ov037Finish:
             break;
+        case U3C_PROC_CheckPartyMonKnowsMove:   // result, move, party slot
+            *WorkPtr(a[0]) = V(2) < PARTY_SIZE && PartyMonHasMove(&gPlayerParty[V(2)], V(1));
+            break;
+        case U3C_PROC_FindPartyMonWithMove:   // result (6: nobody), move: a field move's POKéMON
+        {
+            u32 i;
+            *WorkPtr(a[0]) = PARTY_SIZE;
+            for (i = 0; i < PARTY_SIZE; i++)
+                if (PartyMonHasMove(&gPlayerParty[i], V(1)))
+                {
+                    *WorkPtr(a[0]) = i;
+                    break;
+                }
+            break;
+        }
         case U3C_PROC_GetMonParamIfListed:   // result, party slot, Black's param (POKE_PARA: its 12 a script may read)
         {
             struct Pokemon *mon = V(1) < PARTY_SIZE ? &gPlayerParty[V(1)] : NULL;
@@ -1160,6 +1300,12 @@ static void Step(struct Thread *t)
             else
                 MPNet_Log("u3d vm: no trainer %u", V(0));
             break;
+        case U3C_StartMultiTrainerBattle:   // partner, the first, the second, (a fourth: unused)
+            if (U3D_PrepareTagBattle(V(0), V(1), V(2)))
+                OpenScreen(t, SCREEN_BATTLE, 0);
+            else
+                MPNet_Log("u3d vm: no tag battle %u %u %u", V(0), V(1), V(2));
+            break;
         // ---- POKéMON
         case U3C_PROC_HealParty:
             HealPlayerParty();
@@ -1253,6 +1399,9 @@ static void Step(struct Thread *t)
             MPNet_Log("u3d vm: no map for zone %u at %u,%u", a[0], a[1], a[2]);
             break;
         }
+        case U3C_WORK_CmdSetWarpDestination:   // Black's warp point (a POKéMON CENTER, home): where a whiteout returns
+            SetWhiteoutPoint(V(0));
+            break;
         case U3C_WORK_CmdEndScriptWhiteOutA:   // (a loss the story doesn't go on from)
             sHolding = FALSE;
             t->alive = FALSE;
@@ -1368,6 +1517,9 @@ static void Step(struct Thread *t)
         case U3C_StartWaitSeStopped:
             t->wait = W_SE;
             break;
+        case U3C_StartWaitPokeVoice:   // (a POKéMON's cry played to its end)
+            t->wait = W_CRY;
+            break;
         case U3C_FadeInField:
             BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
             t->wait = W_FADE;
@@ -1423,11 +1575,13 @@ static void Step(struct Thread *t)
             t->wait = W_MOVES;
             break;
         case U3C_AddMmdl:   // x, z (Black's tiles), direction, object id, Black's object code, move code
+            Gone(LocalId(V(3)), FALSE);
             AddPerson(LocalId(V(3)), V(4), V(0), V(1), V(2));
             break;
         case U3C_AddPartyFollowerMmdl:   // a person of the zone's event data brought out (its flag cleared before)
         {
             u8 local = LocalId(V(0));
+            Gone(local, FALSE);
             if (ObjEventId(local) >= OBJECT_EVENTS_COUNT)
                 TrySpawnObjectEvent(local, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
             break;
@@ -1440,8 +1594,9 @@ static void Step(struct Thread *t)
             break;
         case U3C_DeleteMmdl:
         {
-            ForgetPerson(LocalId(V(0)));
             u8 id = ObjEventId(LocalId(V(0)));
+            ForgetPerson(LocalId(V(0)));
+            Gone(LocalId(V(0)), TRUE);
             if (id < OBJECT_EVENTS_COUNT && !gObjectEvents[id].isPlayer)
                 RemoveObjectEventByLocalIdAndMap(gObjectEvents[id].localId, gObjectEvents[id].mapNum, gObjectEvents[id].mapGroup);
         }
@@ -1478,6 +1633,7 @@ static void Step(struct Thread *t)
                 FadeOutAndPlayNewMapMusic(SongOf(a[0]), 4);
             break;
         case U3C_PushAndPlayBgm:
+        case U3C_PushBgmAndPlayWait:   // (the same, the field's song held under it: a scene's own song)
             PushSong();
             if (SongOf(a[0]) != MUS_NONE)
                 PlayNewMapMusic(SongOf(a[0]));
@@ -1616,6 +1772,10 @@ static void Wait(struct Thread *t)
         if (!IsSEPlaying())
             t->wait = W_NONE;
         break;
+    case W_CRY:
+        if (!IsCryPlaying())
+            t->wait = W_NONE;
+        break;
     case W_CAMERA:
         if (!U3D_CameraMoving())
             t->wait = W_NONE;
@@ -1626,6 +1786,10 @@ static void Wait(struct Thread *t)
             PopSong();
             t->wait = W_NONE;
         }
+        break;
+    case W_MENU:
+        if (MenuInput())
+            t->wait = W_NONE;
         break;
     case W_YESNO:
     {
@@ -1780,6 +1944,7 @@ void U3D_VmMapLoad(void)
     if (zone == 0xFFFF || !Ready())
         return;
     sAddedCount = 0;   // (a new map: its field-init script adds its own)
+    sGoneCount = 0;
     if (!sWork.began)
     {
         sWork.began = TRUE;
@@ -2029,4 +2194,40 @@ static u16 EyeSong(u16 trainer)
         if (Le16(sPack + sEyeSongsAt + 4 + 4 * i) == t[1])
             return SongOf(Le16(sPack + sEyeSongsAt + 6 + 4 * i));
     return SongOf(1114);
+}
+
+// Black's warp points (ov010's 17: MAP_REPLACE / GAME_DATA_SetWarpId): u16 arrival flag, kind, the zone inside (a
+// POKéMON CENTER, the player's home), its tile (x low byte, z high), the zone outside and its tile. Kai's whiteout
+// returns to the save's last heal place (overworld.c SetWarpDestinationToLastHealLocation): the one inside, in front
+// of the nurse, as Black's whiteout (or the outside one, for a point with no inside tile)
+static void SetWhiteoutPoint(u16 warpId)
+{
+    const u8 *w;
+    u8 group, num;
+    s16 x, y;
+    u16 zone, tx, tz;
+    if (!Ready() || !sWarpsAt || warpId == 0 || warpId > Get32(sWarpsAt))
+        return;
+    w = sPack + sWarpsAt + 4 + 20 * (warpId - 1);
+    zone = Le16(w + 4), tx = w[6], tz = w[7];
+    if (Le16(w + 6) == 0)
+        zone = Le16(w + 8), tx = Le16(w + 10), tz = Le16(w + 12);
+    if (U3D_MapOfZoneTile(zone, tx, tz, &group, &num, &x, &y))
+    {
+        struct WarpData *h = &gSaveBlock1Ptr->lastHealLocation;
+        h->mapGroup = group, h->mapNum = num, h->warpId = WARP_ID_NONE, h->x = x, h->y = y;
+        MPNet_Log("u3d vm: whiteout point %u: zone %u (%d.%d at %d,%d)", warpId, zone, group, num, x, y);
+    }
+}
+
+// A new game in UNOVA: Black's first warp point (the player's home in NUVEMA: MAP_REPLACE_GetDefaultWarpId)
+void U3D_Vm_WhiteoutHome(void)
+{
+    SetWhiteoutPoint(1);
+}
+
+// The C-GEAR (FENNEL's gift in STRIATON): UNOVA's device once it's got
+bool8 U3D_Vm_HasCGear(void)
+{
+    return sWork.cgear;
 }

@@ -26,6 +26,9 @@ File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little e
   (version 5) the trainers' words (a/0/9/0: u16 trainer, u16 kind a record; a record's place is its message in
   system bank 189: TPOKE_DATA_ReadRecordString) as a file block, then the trainer classes' encounter songs (arm9's
   sTrainerClassBgmTable: u32 count, u16 class, u16 Black's sequence each; a class not in it: 1114)
+  (version 6) Black's warp points (ov010's table: GAME_DATA_SetWarpId, where a whiteout returns): u32 count, 20 bytes
+  each: u16 arrival flag, kind (1 a fly point, 2 its flag set on entering), zone inside, its tile (u8 x, z), zone
+  outside, u16 x, z, then those three again
 """
 import os
 import struct
@@ -38,7 +41,8 @@ import narc  # noqa: E402
 import scripts as scr  # noqa: E402
 import zones as zr  # noqa: E402
 
-VERSION = 5
+VERSION = 6
+WARPS_AT, WARPS = 0x02170FEC, 17   # (version 6: ov010's warp points, MAP_REPLACE_ApplyWarpLocation)
 TRMSG_ARC = 'a/0/9/0'   # (version 5: the trainers' words)
 CLASS_BGM, ARM9_BASE = 0x020A75A8, 0x02004000
 ENCOUNT_ARC = 'a/1/2/6'   # (version 4: the zones' wild POKéMON)
@@ -112,6 +116,8 @@ def main():
         pairs.append(struct.unpack_from('<HH', arm, o))
         o += 4
     pack += struct.pack('<I', len(pairs)) + b''.join(struct.pack('<HH', *p) for p in pairs)
+    ram, ov = scr.scrcmd.ov_image(10)
+    pack += struct.pack('<I', WARPS) + ov[WARPS_AT - ram:WARPS_AT - ram + 20 * WARPS]
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(b'U3SZ' + struct.pack('<I', len(pack)) + zlib.compress(bytes(pack), 6))
     print('%s: %d script files, %d zones, %d event files, %d bytes' % (out_path, len(narc.arc(scr.ARC)), len(zs),

@@ -323,6 +323,7 @@ void MP_Region_GoToStartHouse(u8 region)
     {
         // UNOVA: the player's room in NUVEMA TOWN, where Black's own opening plays (src/unova/u3d_vm.c)
         SetWarpDestination(MAP_GROUP(MAP_UNOVA_NUVEMATOWN_Z391), MAP_NUM(MAP_UNOVA_NUVEMATOWN_Z391), WARP_ID_NONE, 5, 6);
+        U3D_Vm_WhiteoutHome();
     }
 }
 

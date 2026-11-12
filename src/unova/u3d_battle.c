@@ -34,12 +34,19 @@ const u8 *U3D_Vm_TrainerTeam(u16 id, u32 *size);
 #define BANK_TRAINER_CLASSES 191
 
 static struct Trainer *sTable;
-static struct Pokemon sTeam[2][PARTY_SIZE];
-static u8 sTeamCount[2];
-static u8 sClassName[2][24];
-static u8 sClass[2];   // (Black's trainer class: its battle picture, u3d_gfx.c)
-static u16 sBlackTrainer[2];
+static struct Pokemon sTeam[3][PARTY_SIZE];   // (A, B: the other side; C: a tag battle's partner)
+static u8 sTeamCount[3];
+static u8 sClassName[3][24];
+static u8 sClass[3];   // (Black's trainer class: its battle picture, u3d_gfx.c)
+static u16 sBlackTrainer[3];
 static u8 sResult;
+static s8 sTagSlots[MULTI_PARTY_SIZE];   // (a tag battle: the party slots of the three POKéMON that battle; -1 none)
+static bool8 sTag;
+
+static u8 Which(u16 trainerId)
+{
+    return trainerId >= TRAINER_UNOVA_A && trainerId <= TRAINER_UNOVA_C ? trainerId - TRAINER_UNOVA_A : 0;
+}
 
 static struct Trainer *Slot(u16 trainerId)
 {
@@ -98,7 +105,7 @@ static bool8 SetTrainer(u8 which, u16 id, bool8 doubles)
 {
     u32 size;
     const u8 *t = U3D_Vm_Trainer(id, &size);
-    u16 slot = which ? TRAINER_UNOVA_B : TRAINER_UNOVA_A;
+    u16 slot = TRAINER_UNOVA_A + which;
     struct Trainer *s = Slot(slot);
     if (t == NULL || size < 20 || s == NULL)
         return FALSE;
@@ -111,7 +118,7 @@ static bool8 SetTrainer(u8 which, u16 id, bool8 doubles)
     sBlackTrainer[which] = id;
     TextInto(sClassName[which], BANK_TRAINER_CLASSES, t[1], 20);
     sClass[which] = t[1];
-    MPNet_Log("unova: trainer %s %d (Black's %d, class %d): %d POKeMON, kind %d", which ? "B" : "A", slot, id, t[1],
+    MPNet_Log("unova: trainer %c %d (Black's %d, class %d): %d POKeMON, kind %d", 'A' + which, slot, id, t[1],
               sTeamCount[which], t[2]);
     return sTeamCount[which] > 0;
 }
@@ -124,17 +131,17 @@ bool8 U3D_IsTrainer(u16 trainerId)
 
 u8 U3D_TrainerClass(u16 trainerId)
 {
-    return sClass[trainerId == TRAINER_UNOVA_B];
+    return sClass[Which(trainerId)];
 }
 
 const u8 *U3D_ClassName(u16 trainerId)
 {
-    return sClassName[trainerId == TRAINER_UNOVA_B];
+    return sClassName[Which(trainerId)];
 }
 
 u8 U3D_Party(struct Pokemon *party, u16 trainerId, bool8 firstTrainer)
 {
-    u8 which = trainerId == TRAINER_UNOVA_B, i, max = (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) ? PARTY_SIZE / 2 : PARTY_SIZE;
+    u8 which = Which(trainerId), i, max = (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) ? PARTY_SIZE / 2 : PARTY_SIZE;
     if (firstTrainer)
         ZeroEnemyPartyMons();
     for (i = 0; i < sTeamCount[which] && i < max; i++)
@@ -146,7 +153,7 @@ u8 U3D_Party(struct Pokemon *party, u16 trainerId, bool8 firstTrainer)
 u32 U3D_Money(u16 trainerId)
 {
     u32 size, level = 1, i;
-    const u8 *t = U3D_Vm_Trainer(sBlackTrainer[trainerId == TRAINER_UNOVA_B], &size);
+    const u8 *t = U3D_Vm_Trainer(sBlackTrainer[Which(trainerId)], &size);
     if (t == NULL || size < 20)
         return 0;
     for (i = 0; i < PARTY_SIZE; i++)
@@ -181,8 +188,65 @@ bool8 U3D_PrepareBattle(u16 first, u16 second)
     return TRUE;
 }
 
+// Black's StartMultiTrainerBattle (WELLSPRING CAVE beside CHEREN): beside PARTNER against FIRST and SECOND, the
+// player's first three POKéMON that can battle (Black asks nothing), the partner's team in the party's second half,
+// shown as the game's in-game partners are (battle_tower.c MP_SetupTowerPartner: its back picture from Black's,
+// U3D_Gfx_PartnerBack). The party is saved first and put back when the battle ends (U3D_BattleEnded)
+void MP_SetupTowerPartner(u16 trainer);
+u8 MP_CreateTrainerPartyAt(struct Pokemon *party, u16 trainerNum);
+bool8 U3D_PrepareTagBattle(u16 partner, u16 first, u16 second)
+{
+    u8 i, n = 0;
+    if (!SetTrainer(0, first, TRUE) || !SetTrainer(1, second, TRUE) || !SetTrainer(2, partner, TRUE))
+        return FALSE;
+    SavePlayerParty();
+    for (i = 0; i < MULTI_PARTY_SIZE; i++)
+        sTagSlots[i] = -1;
+    for (i = 0; i < PARTY_SIZE && n < MULTI_PARTY_SIZE; i++)
+        if (GetMonData(&gSaveBlock1Ptr->playerParty[i], MON_DATA_SPECIES) != SPECIES_NONE
+         && !GetMonData(&gSaveBlock1Ptr->playerParty[i], MON_DATA_IS_EGG)
+         && GetMonData(&gSaveBlock1Ptr->playerParty[i], MON_DATA_HP) != 0)
+        {
+            gPlayerParty[n] = gSaveBlock1Ptr->playerParty[i];
+            sTagSlots[n++] = i;
+        }
+    for (i = n; i < PARTY_SIZE; i++)
+        ZeroMonData(&gPlayerParty[i]);
+    gTrainerBattleOpponent_A = TRAINER_UNOVA_A;
+    gTrainerBattleOpponent_B = TRAINER_UNOVA_B;
+    gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_MULTI
+                     | BATTLE_TYPE_INGAME_PARTNER;
+    MP_SetupTowerPartner(TRAINER_UNOVA_C);
+    MP_CreateTrainerPartyAt(&gPlayerParty[MULTI_PARTY_SIZE], TRAINER_UNOVA_C);
+    sTag = TRUE;
+    sResult = 0;
+    return TRUE;
+}
+
+// The partner's back picture: Black's own for the partners it draws from behind (archive 0x49: CHEREN, class 37)
+bool8 U3D_Gfx_PartnerBack(u16 trainerId, const u8 **tiles, const u16 **pal)
+{
+    static const struct { u8 cls, back; } sBacks[] = {{37, 3}};
+    u32 i;
+    if (trainerId != TRAINER_UNOVA_C)
+        return FALSE;
+    for (i = 0; i < ARRAY_COUNT(sBacks); i++)
+        if (sBacks[i].cls == sClass[2])
+            return U3D_Gfx_Back(sBacks[i].back, tiles, pal);
+    return FALSE;
+}
+
 void U3D_BattleEnded(bool8 won)
 {
+    if (sTag)   // (the three that battled back to their own slots, the rest of the party with them)
+    {
+        u8 i;
+        sTag = FALSE;
+        for (i = 0; i < MULTI_PARTY_SIZE; i++)
+            if (sTagSlots[i] >= 0 && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE)
+                gSaveBlock1Ptr->playerParty[sTagSlots[i]] = gPlayerParty[i];
+        LoadPlayerParty();
+    }
     sResult = won ? 1 : 2;
     MPNet_Log("unova: battle %s", won ? "won" : "lost");
 }

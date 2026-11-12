@@ -374,10 +374,11 @@
 #define IS_ORRE_TRAINER(id) ((id) == TRAINER_ORRE_A || (id) == TRAINER_ORRE_B)
 #define TRAINER_CLASS_ORRE 107
 // Moemon Kai: UNOVA's battles (src/unova/u3d_battle.c): two trainers after ORRE's, filled from Black's own trainer
-// tables before each battle (their name, class, items, team)
+// tables before each battle (their name, class, items, team); C the partner of a tag battle (StartMultiTrainerBattle)
 #define TRAINER_UNOVA_A 2223
 #define TRAINER_UNOVA_B 2224
-#define IS_UNOVA_TRAINER(id) ((id) == TRAINER_UNOVA_A || (id) == TRAINER_UNOVA_B)
+#define TRAINER_UNOVA_C 2225
+#define IS_UNOVA_TRAINER(id) ((id) >= TRAINER_UNOVA_A && (id) <= TRAINER_UNOVA_C)
 #define TRAINER_CLASS_UNOVA 108
 #define IS_REAL_TRAINER(id) (((id) != 0 && (id) < TRAINERS_COUNT) || ((id) >= FIRST_QZ_TRAINER && (id) < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT) \
                           || ((id) >= FIRST_SINNOH_TRAINER && (id) < FIRST_SINNOH_TRAINER + SINNOH_TRAINERS_COUNT))

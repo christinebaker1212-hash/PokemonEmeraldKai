@@ -32,6 +32,8 @@ void U3D_ShopPicture(bool8 on, s16 dx, s16 dy);               // shop.c's BUY sc
 u8 U3D_Season(void);                                          // Black's season now: 0 spring .. 3 winter
 u16 U3D_CurrentZone(void);                                    // the Black zone the player is on (0xFFFF: not UNOVA)
 s32 U3D_MapIndex(void);
+bool8 U3D_Vm_HasCGear(void);   // FENNEL gave the C-GEAR (UNOVA's device)
+void U3D_Vm_WhiteoutHome(void);   // a new game in UNOVA: a whiteout returns home to NUVEMA (Black's first warp point)
 bool8 U3D_MapOfZoneTile(u16 zone, u16 x, u16 z, u8 *group, u8 *num, s16 *mapX, s16 *mapY);                                       // the player's map's row of u3d_maps.h (-1: not UNOVA)
 u8 U3D_MapCellX(s32 index);                                   // ... where it lies on its Black matrix (blocks)
 u8 U3D_MapCellZ(s32 index);
@@ -71,6 +73,7 @@ u8 U3D_BattleResult(void);
 u8 U3D_TrainerClass(u16 trainerId);
 void U3D_CatchTutorial(void);              // JUNIPER's catching demonstration (the VM's 0x17D)
 #define U3D_BACK_JUNIPER 2                 // Black's back pictures (archive 0x49): 0 / 1 the player characters, 2 JUNIPER
+bool8 U3D_PrepareTagBattle(u16 partner, u16 first, u16 second);   // Black's StartMultiTrainerBattle: beside PARTNER
 bool8 U3D_Gfx_Back(u8 index, const u8 **tiles, const u16 **pal);   // four 64x64 frames (GBA tiles) and their colours       // Black's class of TRAINER_UNOVA_A / _B (its battle picture)
 u16 U3D_BattleSong(void);               // pokemon.c GetBattleBGM on an UNOVA map: Black's own
 u16 U3D_VictorySong(u16 song);          // ... MP_RegionVictorySong

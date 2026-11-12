@@ -10280,4 +10280,6 @@ const struct Trainer gTrainers[] = {
                          .party = NO_ITEM_DEFAULT_MOVES(sParty_BrendanLinkPlaceholder)},
     [TRAINER_UNOVA_B] = {.trainerClass = TRAINER_CLASS_UNOVA, .trainerPic = TRAINER_PIC_RS_BRENDAN, .trainerName = _("UNOVA"),
                          .party = NO_ITEM_DEFAULT_MOVES(sParty_BrendanLinkPlaceholder)},
+    [TRAINER_UNOVA_C] = {.trainerClass = TRAINER_CLASS_UNOVA, .trainerPic = TRAINER_PIC_RS_BRENDAN, .trainerName = _("UNOVA"),
+                         .party = NO_ITEM_DEFAULT_MOVES(sParty_BrendanLinkPlaceholder)},
 };
