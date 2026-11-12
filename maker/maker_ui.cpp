@@ -57,6 +57,7 @@ static void LoadSettings()
         else if (k == "view_frame") gEd.viewFrame = atoi(val) != 0;
         else if (k == "view_grid") gEd.viewGrid = atoi(val) != 0;
         else if (k == "view_icons") gEd.viewIcons = atoi(val) != 0;
+        else if (k == "view_helper_3d") gEd.viewHelper3d = atoi(val) != 0;
         else if (k == "play") sscanf(val, "%d %d", &gEd.playKind, &gEd.playSlot);
         else if (k == "github_token") gEd.githubToken = val;
     }
@@ -78,6 +79,7 @@ void SaveSettings()
     fprintf(f, "window = %d %d %d\n", gEd.winW, gEd.winH, gEd.winMax);
     fprintf(f, "view_anim = %d\nview_npcs = %d\nview_frame = %d\nview_grid = %d\nview_icons = %d\n",
             gEd.viewAnim, gEd.viewNpcs, gEd.viewFrame, gEd.viewGrid, gEd.viewIcons);
+    fprintf(f, "view_helper_3d = %d\n", gEd.viewHelper3d);
     fprintf(f, "play = %d %d\n", gEd.playKind, gEd.playSlot);
     if (!gEd.githubToken.empty())
         fprintf(f, "# Publish's GitHub token: this PC only (never shared, never in the repository)\ngithub_token = %s\n",

@@ -326,8 +326,38 @@ int MakerApi_BehaviorClass(int b)
 // The 3D PREVIEW (a 3D region's map): its 3D world around a tile as the game shows it, as RGBA (240 x 160); 0 without
 // the region's pack, or while the game plays (the 3D engine is the game's then). SINNOH's and ORRE's engines draw it at
 // once; UNOVA's is the running game's own picture (maker_play.c Maker_PeekUnova: 2 while the game gets there)
+// The helper Brendan (the user, 2026-11-12: "so passability in the 3D view can be a little more accurate to the
+// cursor"): a small Brendan standing on the previewed tile, his feet on its middle, where the player would stand: the
+// tile the moves and the walls go by, whatever the 3D picture of the place suggests. The editor's 3D PREVIEW turns him
+// on and off (maker_mapview.cpp).
+static bool8 sHelper3d = TRUE;
+void MakerApi_Set3DHelper(int on)
+{
+    sHelper3d = on != 0;
+}
+
+#define HELPER_W 12   // (Brendan's 16 x 32 standing frame at three quarters: smaller than the player)
+#define HELPER_H 24
+static void DrawHelper(u16 *px, s32 cx, s32 cy)
+{
+    extern const u32 gObjectEventPic_BrendanNormal[];
+    extern const u16 gObjectEventPal_Brendan[];
+    const u8 *tiles = (const u8 *)gObjectEventPic_BrendanNormal;   // (frame 0: standing, facing down)
+    s32 x, y, x0 = cx - HELPER_W / 2, y0 = cy + 3 - HELPER_H;
+    for (y = 0; y < HELPER_H; y++)
+        for (x = 0; x < HELPER_W; x++)
+        {
+            u32 bx = x * 16 / HELPER_W, by = y * 32 / HELPER_H;
+            u8 b = tiles[((by / 8) * 2 + bx / 8) * 32 + (by % 8) * 4 + (bx % 8) / 2], c = bx & 1 ? b >> 4 : b & 15;
+            if (c != 0 && x0 + x >= 0 && x0 + x < DISPLAY_WIDTH && y0 + y >= 0 && y0 + y < DISPLAY_HEIGHT)
+                px[(y0 + y) * DISPLAY_WIDTH + x0 + x] = gObjectEventPal_Brendan[c];
+        }
+}
+
 int MakerApi_Render3D(int map, int tileX, int tileY, unsigned int *rgba)
 {
+    void Maker_PeekTileSpot(s32 *x, s32 *y);
+    s32 hx = DISPLAY_WIDTH / 2, hy = DISPLAY_HEIGHT / 2;   // (SINNOH's and ORRE's previews aim at the tile's middle)
     bool8 S3D_RenderPreview(u8 group, u8 num, s32 tileX, s32 tileY, u16 *out);
     int Maker_PeekUnova(int map, int x, int y, u16 *out);
     static u16 px[DISPLAY_WIDTH * DISPLAY_HEIGHT];
@@ -351,6 +381,12 @@ int MakerApi_Render3D(int map, int tileX, int tileY, unsigned int *rgba)
     }
     if (got != 1)
         return got;
+    if (sHelper3d)
+    {
+        if (Maker_World3dOf(m->mapGroup) == MAKER_REGION_UNOVA)
+            Maker_PeekTileSpot(&hx, &hy);
+        DrawHelper(px, hx, hy);
+    }
     for (i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++)
         rgba[i] = Rgba(px[i]);
     return 1;

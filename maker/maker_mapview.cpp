@@ -1703,6 +1703,7 @@ static bool DirPicker(const char *id, int *dir)
 static int s3dPendX = -1, s3dPendY = -1;   // UNOVA: the tile asked for (the game is on its way there)
 static bool s3dAsk;                         // UNOVA: P was pressed over the map (look at the tile under the mouse)
 static int s3dLookX = -1, s3dLookY = -1;    // tests ("maker look X Y"): the tile to look at
+static bool s3dRedraw;                      // the same tile again (the helper Brendan turned on or off)
 static void Preview3D()
 {
     bool live = sTiles.world3d == MAKER_REGION_UNOVA;
@@ -1723,7 +1724,12 @@ static void Preview3D()
     }
     static unsigned int px[240 * 160];
     int got = -1;
-    if (s3dPendX >= 0)
+    // (the helper Brendan: a small Brendan where the player would stand on the tile, its middle; turned on and off
+    // below, the picture taken again)
+    MakerApi_Set3DHelper(gEd.viewHelper3d);
+    if (s3dRedraw && s3dPendX < 0 && s3dX >= 0 && s3dMap == gEd.map)
+        got = MakerApi_Render3D(gEd.map, s3dX, s3dY, px);
+    else if (s3dPendX >= 0)
     {
         got = MakerApi_Render3D(gEd.map, s3dPendX, s3dPendY, px);   // (UNOVA: still on its way?)
         if (got != 2)
@@ -1738,6 +1744,7 @@ static void Preview3D()
         else
             s3dX = x, s3dY = y;
     }
+    s3dRedraw = false;
     if (got >= 0 && got != 2)
     {
         s3dOk = got;
@@ -1764,6 +1771,14 @@ static void Preview3D()
     float w = ImGui::GetContentRegionAvail().x;
     ImGui::Image(TexId(s3dTex), ImVec2(w, w * 160 / 240));
     ImGui::TextDisabled("Tile %d, %d, through the game's camera", s3dX, s3dY);
+    if (ImGui::Checkbox("Helper Brendan", &gEd.viewHelper3d))
+    {
+        SaveSettings();
+        s3dRedraw = true;   // (the same tile drawn again with or without him: UNOVA's picture is kept, he's drawn into it)
+    }
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("A small Brendan standing where the player would on this tile: the tile the walls and the\n"
+                          "moves go by, whatever the 3D picture suggests.");
     if (live)
     {
         ImGui::TextDisabled("Press P over the map to look at another tile.");

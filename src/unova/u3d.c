@@ -744,6 +744,18 @@ static bool8 Project(float x, float y, float z, float *sx, float *sy, float *dep
 static float sSpriteH[MAX_SPRITES];
 static u8 sSpriteHFrame[MAX_SPRITES];
 
+// Moemon Maker's 3D PREVIEW (its helper Brendan, src/maker/maker_tiles.c): a spot of the game's own tile grid (its flat
+// screen point, as a GBA sprite's) where the view shows it on the ground: what the moves and the walls go by
+bool8 U3D_GridPoint(s32 x, s32 y, s32 *outX, s32 *outY)
+{
+    float sx, sy, d, wx = sView.originX + sView.camX + x, wz = sView.originZ + sView.camY + y;
+    if (!sView.active || !Project(wx, GroundAt(wx, wz, sView.ty), wz, &sx, &sy, &d))
+        return FALSE;
+    *outX = (s32)floorf(sx + 0.5f);
+    *outY = (s32)floorf(sy + 0.5f);
+    return TRUE;
+}
+
 void U3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float *depth)
 {
     float sx, sy, d, h, near = sView.ty;

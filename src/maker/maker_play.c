@@ -34,6 +34,9 @@
 #include "battle_setup.h"
 #include "palette.h"
 #include "u3d.h"   // Moemon Kai: UNOVA (its 3D PREVIEW is the running game's picture)
+#include "event_object_movement.h"
+#include "field_player_avatar.h"
+#include "sprite.h"
 
 extern char gPlatformSavePath[512];
 void Platform_ReopenSaveFile(void);
@@ -282,6 +285,7 @@ bool8 Maker_PlayNewGame(void)
 static int sPeekMap, sPeekX, sPeekY;
 static u16 sPeekFrames, sPeekSettled;
 static u16 sPeekPx[DISPLAY_WIDTH * DISPLAY_HEIGHT];
+static s16 sPeekTileX = DISPLAY_WIDTH / 2, sPeekTileY = DISPLAY_HEIGHT / 2;   // (the player's tile's middle in it)
 
 bool8 Maker_PeekSilent(void)
 {
@@ -289,6 +293,12 @@ bool8 Maker_PeekSilent(void)
 }
 
 // 1: the picture (OUT), 2: on its way (ask again next frame), 0: it can't be taken (no pack, the game is playing)
+// The player's tile's middle in UNOVA's preview picture (the helper Brendan's spot)
+void Maker_PeekTileSpot(s32 *x, s32 *y)
+{
+    *x = sPeekTileX, *y = sPeekTileY;
+}
+
 int Maker_PeekUnova(int map, int x, int y, u16 *out)
 {
     if (sPeek != 0 && sPeekMap == map && sPeekX == x && sPeekY == y)
@@ -323,7 +333,13 @@ static void PeekFrame(void)
     sPeekSettled = there ? sPeekSettled + 1 : 0;
     if (sPeekSettled >= PEEK_SETTLE)
     {
+        const struct Sprite *s = &gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId];
+        s32 hx, hy;
         memcpy(sPeekPx, Platform_GetFrame(), sizeof(sPeekPx));
+        // (where the player's tile is on the ground in it: the helper Brendan's spot, maker_tiles.c)
+        if (U3D_GridPoint(s->x + s->x2 + gSpriteCoordOffsetX,
+                          s->y + s->y2 + gSpriteCoordOffsetY - s->centerToCornerVecY - 8, &hx, &hy))
+            sPeekTileX = hx, sPeekTileY = hy;
         sPeek = 2;
         printf("[maker] UNOVA preview: taken\n");
         Maker_StopPlay();

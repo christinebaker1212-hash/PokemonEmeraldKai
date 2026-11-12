@@ -69,6 +69,7 @@ enum
 };
 int MakerApi_BehaviorClass(int behavior);   // MAKER_BEHAVIOR_*, by the game's own checks
 int MakerApi_Render3D(int map, int tileX, int tileY, unsigned int *rgba);
+void MakerApi_Set3DHelper(int on);   // the 3D PREVIEW's helper Brendan on the tile (1, the default) or not
 
 // AUTOTILE (src/maker/maker_autotile.c): terrains learned from the game's own maps of the open map's tilesets
 struct MakerTerrain

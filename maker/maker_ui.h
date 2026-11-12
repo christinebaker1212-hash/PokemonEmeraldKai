@@ -80,6 +80,7 @@ struct Editor
     int zoom = 2;
     int winW = 1280, winH = 800, winMax = 0;
     bool viewAnim = true, viewNpcs = true, viewFrame = true, viewGrid = true, viewIcons = true;
+    bool viewHelper3d = true;   // the 3D PREVIEW's helper Brendan on the tile (MakerApi_Set3DHelper)
     std::string lastMap;
 
     // panels
