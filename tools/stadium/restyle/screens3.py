@@ -305,20 +305,20 @@ def badge_screen():
         for k in range(4):
             i = r * 4 + k
             name, col = badges[i]
-            cx, cy = 84 + k * 104, y + 52
-            sl, xx, yy = c.win(cx - 40, cy - 34, cx + 40, cy + 34)
-            e = np.hypot((xx - cx) / 34.0, (yy - cy) / 26.0)
+            cx, cy = 86 + k * 104, y + 50
+            sl, xx, yy = c.win(cx - 36, cy - 36, cx + 36, cy + 36)
+            e = np.hypot((xx - cx) / 30.0, (yy - cy) / 30.0)
             gy, gx = np.gradient(e)
             lit = smooth(-0.01, 0.01, -gx - gy)
-            ring = aa((e - 1) * 28) * (1 - aa((e - 0.84) * 28))
-            c.mix(sl, aa((e - 1) * 28 - 1), hx(0x505050))
+            ring = aa((e - 1) * 30) * (1 - aa((e - 0.84) * 30))
+            c.mix(sl, aa((e - 1) * 30 - 1), hx(0x505050))
             c.mix(sl, ring, np.repeat((0.55 + 0.42 * (1 - lit))[..., None], 3, -1))
-            c.mix(sl, aa((e - 0.84) * 28), np.repeat((0.42 + 0.20 * lit)[..., None], 3, -1))
+            c.mix(sl, aa((e - 0.84) * 30), np.repeat((0.42 + 0.20 * lit)[..., None], 3, -1))
             if i == 0:      # won: the badge sits in its socket
-                c.sphere(cx, cy, 19, col)
-                c.sphere(cx, cy, 11, 0xe8e0d0)
+                c.sphere(cx, cy, 22, col)
+                c.sphere(cx, cy, 12, 0xe8e0d0)
             for sx, sy in ((-1, -1), (1, -1), (-1, 1), (1, 1)):     # the corner marks
-                bx, by = int(cx + sx * 36), int(cy + sy * 30)
+                bx, by = int(cx + sx * 36), int(cy + sy * 36)
                 c.a[min(by, by - sy * 8):max(by, by - sy * 8) + 1, bx - 1:bx + 1] = 0.94
                 c.a[by - 1:by + 1, min(bx, bx - sx * 8):max(bx, bx - sx * 8) + 1] = 0.94
             x0, x1 = 38 + k * 104, 38 + k * 104 + 96
