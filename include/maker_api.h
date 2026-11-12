@@ -14,8 +14,12 @@ enum
     MAKER_REGION_JOHTO,
     MAKER_REGION_KANTO,
     MAKER_REGION_SINNOH,
+    MAKER_REGION_UNOVA,      // (Black's region: its own 3D engine, src/unova/u3d.c)
+    MAKER_REGION_ORRE,       // (Colosseum's: its own 3D engine, src/orre/o3d.c)
     MAKER_REGION_COUNT
 };
+const char *MakerApi_RegionName(int region);   // "HOENN" ... "ORRE"
+int MakerApi_RegionByName(const char *name);   // MAKER_REGION_*, HOENN for an unknown name
 
 struct MakerMapInfo
 {
@@ -46,7 +50,8 @@ struct MakerTilesInfo
     int secondaryStart;                // the secondary's first metatile id (512, or 640 for FRLG-style primaries)
     int secondaryMetatiles;
     char primaryName[40], secondaryName[40];
-    int sinnoh;                        // SINNOH: blocks from the 3D pack, behavior in the id (no tile pictures)
+    int world3d;                       // SINNOH / UNOVA / ORRE (MAKER_REGION_*), 0 otherwise: a 3D region's map, its
+                                       // blocks from its engine's pack, behavior in the id (no tile pictures)
 };
 int MakerApi_LoadMapTiles(int index, struct MakerTilesInfo *info);
 void MakerApi_UnloadMapTiles(void);
@@ -63,7 +68,36 @@ enum
     MAKER_BEHAVIOR_LEDGE_S, MAKER_BEHAVIOR_ICE, MAKER_BEHAVIOR_COUNTER,
 };
 int MakerApi_BehaviorClass(int behavior);   // MAKER_BEHAVIOR_*, by the game's own checks
-int MakerApi_Render3D(int map, int tileX, int tileY, unsigned int *rgba);   // SINNOH: 240 x 160 RGBA; 0 if it can't
+int MakerApi_Render3D(int map, int tileX, int tileY, unsigned int *rgba);
+
+// AUTOTILE (src/maker/maker_autotile.c): terrains learned from the game's own maps of the open map's tilesets
+struct MakerTerrain
+{
+    char name[32];
+    char centre[48];      // its identity in MoemonMaker/autotile/ (its centre tile(s))
+    int centreTile, px, py, q[4];   // the centre (a repeating pattern: px x py tiles, row by row)
+    int kind;             // 0 land, 1 water, 2 a wall (trees, rock)
+    int user, hidden, tiles, fixes;
+};
+int MakerApi_AutotileLoad(int map);                            // its terrains (learned the first time); 0: none here
+int MakerApi_AutotileTerrain(int i, struct MakerTerrain *out);
+int MakerApi_AutotileArea(int i, int *ids, int max);           // its tiles
+int MakerApi_AutotileShapes(int *shapes);                      // the 47 shapes (neighbours' bits NW N NE W E SW S SE)
+int MakerApi_AutotilePiece(int i, int shape, int phase, int *fixed);   // what it draws for a shape (in grass)
+void MakerApi_AutotileSetFix(int i, int shape, int phase, int tile);   // tile -1: the learned one again
+void MakerApi_AutotileSetHidden(int i, int hidden);
+void MakerApi_AutotileRename(int i, const char *name);
+int MakerApi_AutotileNew(const int *centre, int count);        // a terrain of the user's own (1 tile or a 2x2)
+// RPG Maker's way: slots 0-8 the 3x3 block (top-left .. bottom-right), 9-12 the inner corners (NW NE SW SE)
+int MakerApi_AutotileSlotPiece(int i, int slot, int phase, int *fixed);
+void MakerApi_AutotileSetSlot(int i, int slot, int phase, int tile);   // tile -1: as learned again
+int MakerApi_AutotileNewBlock(int topLeft, int inner);         // the user's own from a 3x3 block (+ a 2x2 of inner corners)
+void MakerApi_AutotileSetInner(int i, int inner);
+// paint terrain over cells (x, y pairs) of the map's blocks as they are now (w x h): the changed cells as x, y, block
+int MakerApi_AutotilePaint(const int *blocks, int w, int h, const int *cells, int ncells, int terrain, int *out, int max);
+int MakerApi_AutotileRedraw(int map);                          // tests: per mille of its terrain cells drawn the same   // a 3D region's map: 240 x 160 RGBA; 0 if it can't
+// UNOVA's preview is the running game's own picture (its engine has no still render): MakerApi_Render3D starts it at the
+// tile and returns 2 while it's on its way; ask again each frame until it returns 1 (or 0: it couldn't)
 
 // A map's people, warps, signs and triggers (src/maker/maker_objects.c): the map's own, named by map.json
 struct MakerObjectInfo

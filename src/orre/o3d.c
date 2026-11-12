@@ -1944,3 +1944,43 @@ const char *O3D_RoomFile(u16 *room)
         *room = sOrreMaps[map].room;
     return sOrreMaps[map].file;
 }
+
+// ------------------------------------------------------------------------------------------------ Moemon Maker
+// Moemon Maker's 3D PREVIEW (src/maker/maker_tiles.c MakerApi_Render3D): map GROUP / NUM's room around tile (TILEX,
+// TILEY) through the field's own camera, into OUT (240 x 160, unfaded). The view, the room and any scene are put back
+// as they were. FALSE: not an ORRE map, or the pack isn't here
+bool8 O3D_RenderPreview(u8 group, u8 num, s32 tileX, s32 tileY, u16 *out)
+{
+    static u8 saved[sizeof(sView)];
+    const OMap *savedCur = sCur;
+    bool8 savedScene = sSceneOn;
+    s32 map = MapIndex(group, num);
+    float p = CAM_PITCH * 3.14159265f / 180.0f, sp = sinf(p), cp = cosf(p);
+    if (map < 0 || !MapLoad((u32)map))
+        return FALSE;
+    memcpy(saved, &sView, sizeof(sView));
+    sCur = &sPack.map[map];
+    sSceneOn = FALSE;
+    // (as SetupView, the target on the tile's middle instead of the player's)
+    sView.map = map;
+    sView.camX = (tileX - 7) * 16;
+    sView.camY = (tileY - 4) * 16 - 8;
+    sView.ax = 7 * 16 + 8;
+    sView.ay = 4 * 16 + 16;
+    sView.tx = tileX * 16 + 8;
+    sView.tz = tileY * 16 + 8;
+    sView.ty = GroundAt(sView.tx, sView.tz, 0.0f);   // (the tile's lowest ground: a bridge's floor under it)
+    sView.eye[0] = sView.tx;
+    sView.eye[1] = sView.ty + CAM_DIST * sp;
+    sView.eye[2] = sView.tz + CAM_DIST * cp;
+    sView.fwd[0] = 0.0f, sView.fwd[1] = -sp, sView.fwd[2] = -cp;
+    sView.right[0] = 1.0f, sView.right[1] = 0.0f, sView.right[2] = 0.0f;
+    sView.up[0] = 0.0f, sView.up[1] = cp, sView.up[2] = -sp;
+    sView.focal = 96.0f / tanf(HALF_FOV * 3.14159265f / 180.0f);
+    Render();
+    memcpy(out, sColor, sizeof(sColor));
+    memcpy(&sView, saved, sizeof(sView));
+    sCur = savedCur;
+    sSceneOn = savedScene;
+    return TRUE;
+}

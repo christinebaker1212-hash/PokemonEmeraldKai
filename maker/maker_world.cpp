@@ -81,7 +81,6 @@ static bool TilesetCombo(const char *id, int *sel, bool secondary)
 // The new map's text (MoemonMaker/maps/MAP_X.txt: src/maker/maker_newmaps.c's format)
 static std::string NewMapText(const std::string &name)
 {
-    static const char *const kRegions[] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
     char line[160];
     std::string t = "# Moemon Maker: a map of the user's own (written by the editor)\n";
     snprintf(line, sizeof(line), "newmap %s %d %d\n", name.c_str(), sNewW, sNewH);
@@ -89,7 +88,7 @@ static std::string NewMapText(const std::string &name)
     t += std::string("tilesets ") + MakerApi_TilesetName(sNewPrimary, NULL) + " " + MakerApi_TilesetName(sNewSecondary, NULL) + "\n";
     snprintf(line, sizeof(line), "header music=%s type=%d weather=2 region=%s cycling=1 running=1 escape=0 name=1\n",
              sNewMusic >= 0 ? MakerApi_SongName(sNewMusic) : "MUS_LITTLEROOT", sNewTemplate == 3 ? 8 : 2,
-             kRegions[sNewRegion & 3]);
+             MakerApi_RegionName(sNewRegion));
     t += line;
     int fill = kTemplates[sNewTemplate].fill;
     snprintf(line, sizeof(line), "border 0x%04X 0x%04X 0x%04X 0x%04X\n", fill, fill, fill, fill);
@@ -204,9 +203,8 @@ void NewMapWindow()
         sNewW = std::max(15, std::min(sNewW, 255));
         sNewH = std::max(10, std::min(sNewH, 255));
         label("Region");
-        static const char *const kRegionNames[] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
         ImGui::SetNextItemWidth(-FLT_MIN);
-        ImGui::Combo("##rg", &sNewRegion, kRegionNames, 4);
+        ImGui::Combo("##rg", &sNewRegion, [](void *, int i) { return MakerApi_RegionName(i); }, nullptr, MAKER_REGION_COUNT);
         label("Tileset");
         TilesetCombo("##pt", &sNewPrimary, false);
         label("Its second");
@@ -403,9 +401,8 @@ void WorldWindow()
         ImGui::End();
         return;
     }
-    static const char *const kRegionNames[] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
     ImGui::SetNextItemWidth(140 * gEd.uiScale);
-    ImGui::Combo("##wr", &sWorldRegion, kRegionNames, 4);
+    ImGui::Combo("##wr", &sWorldRegion, [](void *, int i) { return MakerApi_RegionName(i); }, nullptr, MAKER_REGION_COUNT);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(140 * gEd.uiScale);
     ImGui::SliderFloat("Zoom", &sWorldZoom, 0.5f, 6.0f, "%.1f");

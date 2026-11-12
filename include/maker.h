@@ -49,6 +49,7 @@ void Maker_Flags_WriteSidecar(void);
 #define MAKER_LAYOUT_FIRST 0x4000
 #define MAKER_NEW_MAPS_MAX 300
 int Maker_NewMapCount(void);
+u8 Maker_World3dOf(u8 mapGroup);   // SINNOH / UNOVA / ORRE (MAKER_REGION_*): a 3D region's group; 0 else (maker_tiles.c)
 const struct MakerMapName *Maker_NewMapName(int n);
 int Maker_NewMapRegion(int n);
 const struct MapHeader *Maker_NewMapHeader(u16 num);

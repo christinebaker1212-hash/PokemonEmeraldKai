@@ -108,6 +108,15 @@ M1's known limits, carried into later milestones:
    - The debugger: breakpoints, stepping, watched flags and variables, and "why isn't this event here?".
 5. **M5.** Full 3D mode for SINNOH, the animation timeline, Lua hooks, and a tileset editor.
 
+## 2026-11-12: UNOVA and ORRE, and AUTOTILE
+
+UNOVA's and ORRE's maps are in the editor (top-down by what each tile does, as SINNOH's) with 3D previews, and the TILES
+panel has AUTOTILE (terrains learned from the game's own maps, edited RPG Maker's way in TERRAINS): COOP_NOTES "Moemon
+Maker: UNOVA and ORRE, and AUTOTILE". Never edit src/unova/ for the Maker while UNOVA's own session works there (the
+user, 2026-11-12): the Maker only calls u3d.h. Could come later: UNOVA's preview tried with its pack (it needs
+unova/black3d.pak, built from the user's ROM; not tried in the first session for want of it), autotile for maps of
+SINNOH / UNOVA / ORRE (their tiles are what they do, not pictures), terrains' collision chosen per tile in TERRAINS.
+
 ## Next steps (2026-11-06: M2, M3a and M4a built; start here)
 
 1. **Tell the user the M2 defaults** (COOP_NOTES "Moemon Maker, M2a: events" lists the four open questions and the

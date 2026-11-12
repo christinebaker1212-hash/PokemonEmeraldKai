@@ -6191,6 +6191,58 @@ overnight list included M2-M5; each is easy to change if the user wants otherwis
 - Test tools/test/maker_models.sh (tools/maker/make_test_glb.py's textured cube: read once, placed twice on TWINLEAF
   TOWN, its colors in the picture; the editor places one and saves it).
 
+## Moemon Maker: UNOVA and ORRE, and AUTOTILE (2026-11-12)
+
+**UNOVA and ORRE in the editor.** Their maps are listed under their own names in MAPS (MAKER_REGION_UNOVA / _ORRE;
+MakerApi_RegionName / RegionByName are the one list, used by the tree, the WORLD view and new maps) and edited like
+SINNOH's: top-down by what each tile does, painted in Collision mode. src/maker/maker_tiles.c Maker_World3dOf says which
+3D region a group is (MakerTilesInfo.world3d replaces .sinnoh) and RegionBlocks reads its blocks from that region's own
+engine (S3D_ / U3D_ / O3D_LayoutBlocks; behavior in the id from 0x300 in all three). Nothing of UNOVA's own code changed
+(its session was working in src/unova/, the user 2026-11-12): the Maker only calls u3d.h.
+- The 3D PREVIEW (the map INSPECTOR): SINNOH's and ORRE's engines draw a still picture at a tile (s3d.c
+  S3D_RenderPreview; o3d.c O3D_RenderPreview, at the end of o3d.c: the view, room and scene put back after). UNOVA's
+  engine has none, so its preview is the running game's own picture (maker_play.c Maker_PeekUnova): the game plays at
+  the tile, its window hidden and silent (sdl2.c Platform_QueueAudio asks Maker_PeekSilent), as F5 would (a copy of the
+  save in use, or the quick test party); 24 frames on UNOVA's field faded in, Platform_GetFrame copied, the play stopped
+  (15 seconds at most). MakerApi_Render3D gives 2 while it's on its way; the editor asks each frame. It looks at a tile
+  only when asked (P over the map, or LOOK AGAIN), not under the mouse. Without unova/black3d.pak: "no 3D pack".
+- check_pack.py doesn't compare UNOVA / ORRE edits' "was" with their layouts (placeholders: the packs hold the blocks).
+- Test tools/test/maker_regions3d.sh (ORRE: PHENAC CITY from orre/orre3d.pak, a collision edit, the preview; UNOVA the
+  same with unova/black3d.pak; each skipped without its pack). Harness: `maker look X Y` (the preview's tile).
+
+**AUTOTILE** (the user, 2026-11-12: "like RPG Maker autotiles"; their choices: learned then editable, the painted tiles
+and the ring round them redrawn, pencil / rectangle / fill / erase to base). The TILES panel's AUTOTILE switch shows the
+terrains of the open map's tilesets instead of its metatiles: pick one and paint; ERASE TO paints the base (a land
+terrain, GROUND by default) back. Every stroke is one undo. src/maker/maker_autotile.c (format and the whole method at
+its top), the editor's side maker/maker_mapview.cpp (AutoPaint, AutotilePanel) and the TILESETS window's TERRAINS tab
+(maker/maker_tilesets_ui.cpp).
+- Learned, never written by hand, the first time a map of a tileset pair is painted (about a second): the primary's
+  terrains from every map using it (24 at most), the pair's own from its maps (14). A terrain is a centre tile the maps
+  surround with itself, or a 2x2 / 2x1 / 1x2 repeating pattern (trees; a pattern made of another terrain's centre is
+  dropped). Its tiles: the centre, and tiles beside it on the tileset's sheet (8 a row: a path's 3x3 block, the pond's
+  rim under its water) that lie beside it on the maps in 40% of their uses, rings outward (a path two tiles thick, its
+  top edge over its bottom edge, is found). A tile in none that lies between two kinds (water above, land below: the
+  pond's lip, tile 2) goes to the side whose behavior it shares. Kinds: water (surfable), wall (the maps give its centre
+  collision), land.
+- What a terrain draws: by RPG Maker's 47 shapes (which of the 8 neighbours are the same terrain; a corner only counts
+  where both sides beside it do), its place in its pattern (a tree's half) and the kind around it (the four beside it
+  count twice; a tie goes to water, then a wall). A rarer land beside a land terrain is no edge to it (a pale patch draws
+  its own edges). A tie between tiles goes to the one used most at that shape against anything. Unseen: the nearest
+  shape seen against the same kind (when it's seen 40 times), else the plain centre: never a wrong edge.
+- Painting: the stroke's tiles become the terrain (a pattern's whole units: whole trees); they and their ring are drawn
+  again, the ring only where its own shape or surroundings changed (the map's art stays). Collision and elevation: the
+  map's own for a tile it already has, else what the maps give it.
+- The user's rules, RPG Maker's way: a terrain is its 3x3 block (corners, edges, centre) and 4 inner corners
+  (slots: SlotOf / sSlotShape). TERRAINS: a click on a slot, then on a tile, sets every shape that slot stands for;
+  right-click: as learned. NEW AUTOTILE: a click on the top-left tile of a 3x3 block on the sheet (INNER CORNERS FROM A
+  2x2 adds those). Hide / rename. MORE SHAPES (folded): the 47 one by one. Kept in MoemonMaker/autotile/
+  PRIMARY+SECONDARY.txt (`terrain`, `name`, `hide`, `fix CENTRE SHAPE PHASE TILE`); editor-only, published with the rest.
+- Tests tools/test/maker_autotile.sh (ROUTE 101: the pond's rim, water and lip, a bite erased, a sand path, whole trees,
+  undo, a slot fix kept and used, an autotile of the user's own from a 3x3 block; the learned rules redraw about 90% of
+  ROUTE 101's terrain cells as they are). Harness: `maker autotile on|off`, `terrain CENTRE|NAME`, `erasebase NAME`,
+  `autopaint X Y`, `autorect X0 Y0 X1 Y1`, `autofill X Y`, `autoredraw`, `dumpblocks X0 Y0 X1 Y1`, `tileset terrains`,
+  `tileset slot CENTRE SLOT TILE`, `tileset newblock TOPLEFT [INNER]`. MOEMON_MAKER_ATDEBUG=1 lists each terrain's tiles.
+
 ## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
 - SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py
   STAIRS gives them Emerald's unused behaviors 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down), arrow warps

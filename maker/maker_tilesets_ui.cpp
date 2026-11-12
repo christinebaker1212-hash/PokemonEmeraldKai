@@ -11,6 +11,7 @@
 #ifdef _WIN32
 #include <direct.h>
 #endif
+#include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
@@ -173,20 +174,288 @@ static void MetatileImage(int id, float size)
     ImGui::Image(Tex(t), ImVec2(size, size));
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+// TERRAINS (AUTOTILE, src/maker/maker_autotile.c), as RPG Maker's autotiles: a terrain is a 3x3 block (corners, edges,
+// centre) and four inner corners. NEW AUTOTILE: a click on the top-left tile of its 3x3 block on the tileset (as the
+// game's own tilesets lay their paths and ponds out), and if it has them, INNER CORNERS: the top-left of their 2x2.
+// A learned terrain shows the same: a click on a slot, then on a tile, changes it (outlined); a right-click gives it
+// back to what was learned. Every shape a terrain can take is drawn from those slots. (MORE SHAPES, folded away: all 47
+// shapes one by one.) Kept at once in MoemonMaker/autotile/.
+static bool sTerrainsTab;          // the window shows TERRAINS
+static int sTerrain = -1;          // the picked terrain
+static int sShape = -1;            // ... its picked shape
+static int sPhase;                 // ... at this place of its pattern (a tree's left half...)
+static char sRename[32];
+static int sNewFrom = -1;          // the tile a new terrain is made from (picked in the tileset)
+static int sTSlot = -1;             // the picked slot of the 3x3 + inner corners
+static int sPickMode;              // 1: the next tile clicked is a new autotile's 3x3's top-left, 2: the inner corners' 2x2's
+
+static void ShapeDiagram(ImDrawList *dl, int shape, ImVec2 p, float s)
+{
+    // (a 3x3 of the centre and its 8 neighbours: the same terrain filled)
+    static const int sPos[8][2] = {{0, 0}, {1, 0}, {2, 0}, {0, 1}, {2, 1}, {0, 2}, {1, 2}, {2, 2}};
+    float c = s / 3;
+    dl->AddRectFilled(ImVec2(p.x + c, p.y + c), ImVec2(p.x + 2 * c, p.y + 2 * c), IM_COL32(60, 120, 200, 255));
+    for (int i = 0; i < 8; i++)
+    {
+        ImVec2 a(p.x + sPos[i][0] * c, p.y + sPos[i][1] * c), b(a.x + c, a.y + c);
+        dl->AddRectFilled(a, b, (shape >> i) & 1 ? IM_COL32(60, 120, 200, 255) : IM_COL32(220, 220, 220, 255));
+    }
+    dl->AddRect(p, ImVec2(p.x + s, p.y + s), IM_COL32(90, 90, 90, 255));
+}
+
+static void TerrainsTab()
+{
+    int n = MakerApi_AutotileLoad(gEd.map);
+    if (n == 0 && gEd.map < 0)
+    {
+        ImGui::TextDisabled("Open a map in MAPS.");
+        return;
+    }
+    float s = 32 * gEd.uiScale;
+    // the terrains
+    ImGui::BeginChild("terrainlist", ImVec2(220 * gEd.uiScale, 0), ImGuiChildFlags_Borders);
+    for (int i = 0; i < n; i++)
+    {
+        MakerTerrain t;
+        MakerApi_AutotileTerrain(i, &t);
+        ImGui::PushID(i);
+        char label[96];
+        snprintf(label, sizeof(label), "%s%s%s", t.name, t.user ? " (yours)" : "", t.hidden ? " (hidden)" : "");
+        ImVec2 p = ImGui::GetCursorScreenPos();
+        if (ImGui::Selectable("##t", i == sTerrain, 0, ImVec2(0, s)))
+        {
+            sTerrain = i, sShape = -1, sPhase = 0;
+            snprintf(sRename, sizeof(sRename), "%s", t.name);
+        }
+        ImGui::SameLine(0, 0);
+        if (t.px * t.py > 1)
+            for (int j = 0; j < t.py; j++)
+                for (int k = 0; k < t.px; k++)
+                    MapView_DrawMetatile(ImGui::GetWindowDrawList(), t.q[j * t.px + k], ImVec2(p.x + k * s / 2, p.y + j * s / 2), s / 2);
+        else
+            MapView_DrawMetatile(ImGui::GetWindowDrawList(), t.centreTile, p, s);
+        ImGui::SetCursorScreenPos(ImVec2(p.x + s + 6, p.y + s / 2 - ImGui::GetTextLineHeight() / 2));
+        ImGui::TextUnformatted(label);
+        ImGui::PopID();
+    }
+    ImGui::Separator();
+    if (ImGui::Button(sPickMode == 1 ? "Click its 3x3's top-left tile..." : "NEW AUTOTILE", ImVec2(-FLT_MIN, 0)))
+        sPickMode = sPickMode == 1 ? 0 : 1;
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+        ImGui::SetTooltip("Your own autotile: click NEW AUTOTILE, then the top-left tile of its 3x3 block in the tileset\n"
+                          "(top-left corner, top edge, top-right corner; left edge, centre, right edge; the bottom row).");
+    ImGui::EndChild();
+    ImGui::SameLine();
+    // the picked one's shapes
+    ImGui::BeginChild("shapes", ImVec2(ImGui::GetContentRegionAvail().x - 8 * 34 * gEd.uiScale - 24, 0), ImGuiChildFlags_Borders);
+    MakerTerrain t;
+    static int sRenameFor = -1;
+    if (!MakerApi_AutotileTerrain(sTerrain, &t))
+        ImGui::TextDisabled("Pick a terrain.");
+    else
+    {
+        if (sRenameFor != sTerrain)
+            sRenameFor = sTerrain, snprintf(sRename, sizeof(sRename), "%s", t.name);
+        ImGui::SetNextItemWidth(200 * gEd.uiScale);
+        if (ImGui::InputText("Name", sRename, sizeof(sRename), ImGuiInputTextFlags_EnterReturnsTrue))
+        {
+            MakerApi_AutotileRename(sTerrain, sRename);
+            MapView_AutotileChanged();
+        }
+        ImGui::SameLine();
+        bool hidden = t.hidden;
+        if (ImGui::Checkbox("Hidden", &hidden))
+        {
+            MakerApi_AutotileSetHidden(sTerrain, hidden);
+            MapView_AutotileChanged();
+        }
+        if (t.px * t.py > 1)
+        {
+            ImGui::TextUnformatted("Place in its pattern:");
+            for (int ph = 0; ph < 4; ph++)
+            {
+                if ((ph & 1) >= t.px || (ph >> 1) >= t.py)
+                    continue;
+                ImGui::SameLine();
+                char b[16];
+                snprintf(b, sizeof(b), "%s%s", (ph >> 1) ? "BOTTOM" : "TOP", t.px > 1 ? ((ph & 1) ? " R" : " L") : "");
+                if (ImGui::RadioButton(b, sPhase == ph))
+                    sPhase = ph;
+            }
+        }
+        // the 3x3 block and the inner corners, RPG Maker's way
+        static const char *const kSlot[13] = {"top-left corner", "top edge", "top-right corner", "left edge", "centre",
+                                              "right edge", "bottom-left corner", "bottom edge", "bottom-right corner",
+                                              "inner corner (top-left)", "inner corner (top-right)",
+                                              "inner corner (bottom-left)", "inner corner (bottom-right)"};
+        ImDrawList *dl = ImGui::GetWindowDrawList();
+        float big = s * 1.5f;
+        auto slot = [&](int k, ImVec2 p) {
+            ImGui::SetCursorScreenPos(p);
+            ImGui::PushID(k);
+            if (ImGui::InvisibleButton("sl", ImVec2(big, big)))
+                sTSlot = k, sPickMode = 0;
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+            {
+                MakerApi_AutotileSetSlot(sTerrain, k, sPhase, -1);
+                MapView_AutotileChanged();
+            }
+            bool hov = ImGui::IsItemHovered();
+            ImGui::PopID();
+            int fixed = -1, tile = MakerApi_AutotileSlotPiece(sTerrain, k, sPhase, &fixed);
+            if (tile >= 0)
+                MapView_DrawMetatile(dl, tile, p, big);
+            if (fixed >= 0)
+                dl->AddRect(p, ImVec2(p.x + big, p.y + big), IM_COL32(240, 140, 20, 255), 0, 0, 2);
+            if (k == sTSlot)
+                dl->AddRect(ImVec2(p.x - 2, p.y - 2), ImVec2(p.x + big + 2, p.y + big + 2), IM_COL32(0, 90, 200, 255), 0, 0, 3);
+            if (hov)
+                ImGui::SetTooltip("%s: metatile 0x%03X%s\nClick, then a tile in the tileset. Right-click: as learned.", kSlot[k],
+                                  tile, fixed >= 0 ? " (yours)" : "");
+        };
+        ImGui::Spacing();
+        ImGui::TextUnformatted("Its 3x3 block");
+        ImVec2 o = ImGui::GetCursorScreenPos();
+        for (int k = 0; k < 9; k++)
+            slot(k, ImVec2(o.x + (k % 3) * (big + 2), o.y + (k / 3) * (big + 2)));
+        ImVec2 o2(o.x + 3 * (big + 2) + 30, o.y);
+        dl->AddText(ImVec2(o2.x, o2.y - ImGui::GetTextLineHeight() - 4), ImGui::GetColorU32(ImGuiCol_Text), "Inner corners");
+        for (int k = 0; k < 4; k++)
+            slot(9 + k, ImVec2(o2.x + (k % 2) * (big + 2), o2.y + (k / 2) * (big + 2)));
+        ImGui::SetCursorScreenPos(ImVec2(o2.x, o2.y + 2 * (big + 2) + 6));
+        if (ImGui::SmallButton(sPickMode == 2 ? "Click their 2x2's top-left..." : "INNER CORNERS FROM A 2x2"))
+            sPickMode = sPickMode == 2 ? 0 : 2;
+        ImGui::SetCursorScreenPos(ImVec2(o.x, o.y + 3 * (big + 2) + 10));
+        ImGui::TextDisabled("Click a slot, then a tile in the tileset. Right-click a slot: as learned.");
+        // every shape one by one (folded away: the slots draw them all)
+        if (ImGui::CollapsingHeader("MORE SHAPES (advanced)"))
+        {
+            int shapes[64], ns = MakerApi_AutotileShapes(shapes);
+            float cell = s * 2 + 12;
+            int cols = std::max(1, (int)(ImGui::GetContentRegionAvail().x / (cell + 4)));
+            for (int k = 0; k < ns; k++)
+            {
+                if (k % cols)
+                    ImGui::SameLine(0, 4);
+                ImGui::PushID(100 + k);
+                ImVec2 p = ImGui::GetCursorScreenPos();
+                if (ImGui::InvisibleButton("sh", ImVec2(cell, s + 4)))
+                    sShape = shapes[k], sTSlot = -1;
+                if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+                {
+                    MakerApi_AutotileSetFix(sTerrain, shapes[k], sPhase, -1);
+                    MapView_AutotileChanged();
+                }
+                ImGui::PopID();
+                int fixed = -1, tile = MakerApi_AutotilePiece(sTerrain, shapes[k], sPhase, &fixed);
+                ShapeDiagram(dl, shapes[k], ImVec2(p.x + 2, p.y + 2), s);
+                if (tile >= 0)
+                    MapView_DrawMetatile(dl, tile, ImVec2(p.x + s + 8, p.y + 2), s);
+                if (fixed >= 0)
+                    dl->AddRect(ImVec2(p.x + s + 7, p.y + 1), ImVec2(p.x + 2 * s + 9, p.y + s + 3), IM_COL32(240, 140, 20, 255), 0, 0, 2);
+                if (shapes[k] == sShape && sTSlot < 0)
+                    dl->AddRect(p, ImVec2(p.x + cell, p.y + s + 4), IM_COL32(0, 90, 200, 255), 0, 0, 2);
+            }
+        }
+    }
+    ImGui::EndChild();
+    ImGui::SameLine();
+    // the tileset: a click puts the tile in the picked shape (or picks a new terrain's centre)
+    const MakerTilesInfo *ti = MapView_TilesInfo();
+    ImGui::BeginChild("tsgrid", ImVec2(0, 0), ImGuiChildFlags_Borders);
+    std::vector<int> area(1024);
+    int na = sTerrain >= 0 ? MakerApi_AutotileArea(sTerrain, area.data(), 1024) : 0;
+    area.resize(std::min(na, 1024));
+    for (int part = 0; part < 2; part++)
+    {
+        int first = part ? ti->secondaryStart : 0, count = part ? ti->secondaryMetatiles : ti->primaryMetatiles;
+        ImGui::SeparatorText(part ? ti->secondaryName : ti->primaryName);
+        ImDrawList *dl = ImGui::GetWindowDrawList();
+        for (int i = 0; i < count; i++)
+        {
+            int id = first + i;
+            if (i % 8)
+                ImGui::SameLine(0, 2);
+            ImGui::PushID(id);
+            ImVec2 p = ImGui::GetCursorScreenPos();
+            if (ImGui::InvisibleButton("m", ImVec2(s, s)))
+            {
+                sNewFrom = id;
+                if (sPickMode == 1)
+                {
+                    sTerrain = MakerApi_AutotileNewBlock(id, -1), sTSlot = -1, sShape = -1, sPhase = 0;
+                    MapView_AutotileChanged();
+                }
+                else if (sPickMode == 2 && sTerrain >= 0)
+                {
+                    MakerApi_AutotileSetInner(sTerrain, id);
+                    MapView_AutotileChanged();
+                }
+                else if (sTerrain >= 0 && sTSlot >= 0)
+                {
+                    MakerApi_AutotileSetSlot(sTerrain, sTSlot, sPhase, id);
+                    MapView_AutotileChanged();
+                }
+                else if (sTerrain >= 0 && sShape >= 0)
+                {
+                    MakerApi_AutotileSetFix(sTerrain, sShape, sPhase, id);
+                    MapView_AutotileChanged();
+                }
+                sPickMode = 0;
+            }
+            bool hov = ImGui::IsItemHovered();
+            ImGui::PopID();
+            MapView_DrawMetatile(dl, id, p, s);
+            if (std::find(area.begin(), area.end(), id) != area.end())
+                dl->AddRect(p, ImVec2(p.x + s, p.y + s), IM_COL32(60, 120, 200, 255), 0, 0, 2);
+            if (id == sNewFrom)
+                dl->AddRect(p, ImVec2(p.x + s, p.y + s), IM_COL32(255, 255, 255, 255), 0, 0, 2);
+            if (hov)
+                ImGui::SetTooltip("Metatile 0x%03X%s", id, std::find(area.begin(), area.end(), id) != area.end() ? " (this terrain's)" : "");
+        }
+    }
+    ImGui::EndChild();
+}
+
 void TilesetsWindow()
 {
     if (!sOpen || gEd.map < 0)
         return;
     const MakerTilesInfo *ti = MapView_TilesInfo();
-    ImGui::SetNextWindowSize(ImVec2(900 * gEd.uiScale, 620 * gEd.uiScale), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(1120 * gEd.uiScale, 700 * gEd.uiScale), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("TILESETS", &sOpen))
     {
         ImGui::End();
         return;
     }
-    if (ti->sinnoh)
+    if (ti->world3d)
     {
-        ImGui::TextWrapped("SINNOH's maps are drawn from Platinum's 3D models: their tiles aren't a tileset to edit here.");
+        ImGui::TextWrapped("%s's maps are drawn from its game's 3D models: their tiles aren't a tileset to edit here.",
+                           MakerApi_RegionName(ti->world3d));
+        ImGui::End();
+        return;
+    }
+    if (ImGui::BeginTabBar("tstabs"))
+    {
+        if (ImGui::BeginTabItem("METATILES", NULL, sTerrainsTab ? 0 : 0))
+        {
+            if (ImGui::IsItemActivated())
+                sTerrainsTab = false;
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("TERRAINS (AUTOTILE)", NULL, sTerrainsTab ? ImGuiTabItemFlags_SetSelected : 0))
+        {
+            sTerrainsTab = true;
+            ImGui::EndTabItem();
+        }
+        else
+            sTerrainsTab = false;
+        ImGui::EndTabBar();
+    }
+    if (sTerrainsTab)
+    {
+        TerrainsTab();
         ImGui::End();
         return;
     }
@@ -344,6 +613,73 @@ void OpenTilesets()
 // "tileset attr VALUE" (hex), "tileset save", "tileset value SLOT" (prints the picked metatile's value)
 void Tilesets_TestCommand(const char *cmd, const char *arg)
 {
+    {
+        // (AUTOTILE's TERRAINS: "tileset terrains", "tileset terrain CENTRE", "tileset fix CENTRE SHAPE PHASE TILE",
+        // "tileset newterrain TILE" (hex), "tileset shape SHAPE")
+        char w[16] = "", centre[48] = "";
+        int a = 0, b = 0, c = 0;
+        sscanf(arg, "%15s", w);
+        auto find = [&](const char *key) {
+            int nn = MakerApi_AutotileLoad(gEd.map);
+            for (int i = 0; i < nn; i++)
+            {
+                MakerTerrain t;
+                MakerApi_AutotileTerrain(i, &t);
+                if (!strcmp(t.centre, key) || !strcmp(t.name, key))
+                    return i;
+            }
+            return -1;
+        };
+        if (!strcmp(w, "terrains"))
+        {
+            sOpen = true, sTerrainsTab = true;
+            return;
+        }
+        if (!strcmp(w, "terrain") && sscanf(arg, "%*s %47s", centre) == 1)
+        {
+            sOpen = true, sTerrainsTab = true;
+            sTerrain = find(centre), sShape = -1, sPhase = 0;
+            return;
+        }
+        if (!strcmp(w, "fix") && sscanf(arg, "%*s %47s %i %i %i", centre, &a, &b, &c) == 4)
+        {
+            MakerApi_AutotileSetFix(find(centre), a, b, c);
+            MapView_AutotileChanged();
+            sShape = a;
+            return;
+        }
+        if (!strcmp(w, "newterrain") && sscanf(arg, "%*s %i", &a) == 1)
+        {
+            int cc[1] = {a};
+            sOpen = true, sTerrainsTab = true;
+            sTerrain = MakerApi_AutotileNew(cc, 1), sShape = -1;
+            MapView_AutotileChanged();
+            return;
+        }
+        if (!strcmp(w, "shape") && sscanf(arg, "%*s %i", &a) == 1)
+        {
+            sShape = a, sTSlot = -1;
+            return;
+        }
+        if (!strcmp(w, "slot") && sscanf(arg, "%*s %47s %i %i", centre, &a, &b) == 3)
+        {
+            MakerApi_AutotileSetSlot(find(centre), a, 0, b);
+            MapView_AutotileChanged();
+            sTSlot = a;
+            return;
+        }
+        if (!strcmp(w, "newblock") && sscanf(arg, "%*s %i %i", &a, &b) >= 1)
+        {
+            int k = sscanf(arg, "%*s %i %i", &a, &b);
+            sOpen = true, sTerrainsTab = true;
+            sTerrain = MakerApi_AutotileNewBlock(a, k == 2 ? b : -1), sTSlot = -1;
+            MapView_AutotileChanged();
+            MakerTerrain t;
+            if (MakerApi_AutotileTerrain(sTerrain, &t))
+                printf("[maker] autotile new %s %s\n", t.name, t.centre);
+            return;
+        }
+    }
     char what[16] = "";
     unsigned a = 0, b = 0;
     int n = sscanf(arg, "%15s %x %x", what, &a, &b);

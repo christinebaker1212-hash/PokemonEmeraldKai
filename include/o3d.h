@@ -58,6 +58,8 @@ void O3D_CommitOam(void);
 #define O3D_METATILE_BEHAVIOR 0x300
 // The blocks of a map's layout: an ORRE map's come from its pack (Colosseum's collision), others are the layout's
 const u16 *O3D_LayoutBlocks(const struct MapLayout *layout);
+// Moemon Maker's 3D PREVIEW: a map's room round a tile through the field's camera (240 x 160); FALSE: not ORRE / no pack
+bool8 O3D_RenderPreview(u8 group, u8 num, s32 tileX, s32 tileY, u16 *out);
 s32 O3D_TriggerAt(s32 x, s32 y);   // a tile's trigger (Colosseum's collision id) on the current ORRE map; -1 none
 float O3D_TestGround(s32 mapX, s32 mapY, float near);   // tests: the ground's height at a map pixel, NaN none
 // Colosseum's units on the current ORRE map (its scripts' positions), and its file and room (src/orre/orre_vm.c)

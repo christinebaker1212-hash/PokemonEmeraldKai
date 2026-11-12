@@ -13,6 +13,8 @@
 #include "decompress.h"
 #include "tileset_anims.h"
 #include "s3d.h"
+#include "o3d.h"   // Moemon Kai: ORRE
+#include "u3d.h"   // Moemon Kai: UNOVA
 #include "metatile_behavior.h"
 #include "maker.h"
 #include "maker_api.h"
@@ -28,7 +30,31 @@ static const struct MapLayout *sLayout;   // the editor's map's layout (its tile
 static u8 *sTileBase;                     // where its tiles are: BG VRAM, or while the game plays (F5) a copy of our own
 static u8 *sOwnTiles;
 static u16 sPalettes[16][16];
-static bool8 sSinnoh;
+static u8 sWorld3d;   // the map's 3D region (MAKER_REGION_SINNOH / UNOVA / ORRE), 0 otherwise
+
+// The 3D region a map group belongs to (its blocks come from that engine's pack, behavior in the id), 0 for none
+u8 Maker_World3dOf(u8 group)
+{
+    if (S3D_IsSinnohGroup(group))
+        return MAKER_REGION_SINNOH;
+    if (U3D_IsUnovaGroup(group))
+        return MAKER_REGION_UNOVA;
+    if (O3D_IsOrreGroup(group))
+        return MAKER_REGION_ORRE;
+    return 0;
+}
+
+// A map's blocks as the field has them: a 3D region's from its own engine's pack (each engine reads its own)
+static const u16 *RegionBlocks(u8 group, const struct MapLayout *l)
+{
+    switch (Maker_World3dOf(group))
+    {
+    case MAKER_REGION_SINNOH: return S3D_LayoutBlocks(l);
+    case MAKER_REGION_UNOVA:  return U3D_LayoutBlocks(l);
+    case MAKER_REGION_ORRE:   return O3D_LayoutBlocks(l);
+    }
+    return l->map;
+}
 static bool8 sAnimating = TRUE;
 static bool8 sTilesChanged;
 
@@ -82,7 +108,7 @@ int MakerApi_LoadMapTiles(int index, struct MakerTilesInfo *info)
     if (l == NULL)
         return 0;
     sLayout = l;
-    sSinnoh = S3D_IsSinnohGroup(Maker_Map(index)->mapGroup);
+    sWorld3d = Maker_World3dOf(Maker_Map(index)->mapGroup);
     // (while the game plays, its VRAM is its own: the tiles go into a copy, and don't animate)
     if (Maker_IsPlaying())
     {
@@ -106,7 +132,7 @@ int MakerApi_LoadMapTiles(int index, struct MakerTilesInfo *info)
         info->primaryMetatiles = info->secondaryStart;
     if (info->secondaryMetatiles > NUM_METATILES_TOTAL - info->secondaryStart)
         info->secondaryMetatiles = NUM_METATILES_TOTAL - info->secondaryStart;
-    info->sinnoh = sSinnoh;
+    info->world3d = sWorld3d;
     info->width = l->width;
     info->height = l->height;
     sTilesChanged = TRUE;
@@ -208,8 +234,13 @@ static u16 Attributes(int id)
 
 int MakerApi_MetatileBehavior(int id)
 {
-    if (sSinnoh && id >= S3D_METATILE_BEHAVIOR)
-        return id - S3D_METATILE_BEHAVIOR;   // (SINNOH's blocks carry their behavior: fieldmap.c)
+    // (a 3D region's blocks carry their behavior: fieldmap.c; all three engines from 0x300)
+    if (sWorld3d == MAKER_REGION_SINNOH && id >= S3D_METATILE_BEHAVIOR)
+        return id - S3D_METATILE_BEHAVIOR;
+    if (sWorld3d == MAKER_REGION_UNOVA && id >= U3D_METATILE_BEHAVIOR)
+        return id - U3D_METATILE_BEHAVIOR;
+    if (sWorld3d == MAKER_REGION_ORRE && id >= O3D_METATILE_BEHAVIOR)
+        return id - O3D_METATILE_BEHAVIOR;
     return UNPACK_BEHAVIOR(Attributes(id));
 }
 
@@ -218,7 +249,7 @@ int MakerApi_MetatileLayerType(int id)
     return UNPACK_LAYER_TYPE(Attributes(id));
 }
 
-// The map's own block at x, y (metatile | collision << 10 | elevation << 12): SINNOH's from the 3D pack
+// The map's own block at x, y (metatile | collision << 10 | elevation << 12): a 3D region's from its engine's pack
 int MakerApi_MapBlock(int index, int x, int y)
 {
     const struct MapHeader *h = Header(index);
@@ -226,7 +257,7 @@ int MakerApi_MapBlock(int index, int x, int y)
     const u16 *blocks;
     if (l == NULL || x < 0 || y < 0 || x >= l->width || y >= l->height)
         return -1;
-    blocks = S3D_IsSinnohGroup(Maker_Map(index)->mapGroup) ? S3D_LayoutBlocks(l) : l->map;
+    blocks = RegionBlocks(Maker_Map(index)->mapGroup, l);
     return blocks ? blocks[y * l->width + x] : -1;
 }
 
@@ -292,16 +323,34 @@ int MakerApi_BehaviorClass(int b)
     return MAKER_BEHAVIOR_NONE;
 }
 
-// The 3D PREVIEW (SINNOH): the map's 3D world around a tile as the game shows it, as RGBA (240 x 160); 0 without the
-// 3D pack, or while the game plays (the 3D engine is the game's then)
+// The 3D PREVIEW (a 3D region's map): its 3D world around a tile as the game shows it, as RGBA (240 x 160); 0 without
+// the region's pack, or while the game plays (the 3D engine is the game's then). SINNOH's and ORRE's engines draw it at
+// once; UNOVA's is the running game's own picture (maker_play.c Maker_PeekUnova: 2 while the game gets there)
 int MakerApi_Render3D(int map, int tileX, int tileY, unsigned int *rgba)
 {
     bool8 S3D_RenderPreview(u8 group, u8 num, s32 tileX, s32 tileY, u16 *out);
+    int Maker_PeekUnova(int map, int x, int y, u16 *out);
     static u16 px[DISPLAY_WIDTH * DISPLAY_HEIGHT];
     const struct MakerMapName *m = Maker_Map(map);
-    int i;
-    if (m == NULL || Maker_IsPlaying() || !S3D_RenderPreview(m->mapGroup, m->mapNum, tileX, tileY, px))
+    int i, got;
+    if (m == NULL)
         return 0;
+    switch (Maker_World3dOf(m->mapGroup))
+    {
+    case MAKER_REGION_SINNOH:
+        got = !Maker_IsPlaying() && S3D_RenderPreview(m->mapGroup, m->mapNum, tileX, tileY, px);
+        break;
+    case MAKER_REGION_ORRE:
+        got = !Maker_IsPlaying() && O3D_RenderPreview(m->mapGroup, m->mapNum, tileX, tileY, px);
+        break;
+    case MAKER_REGION_UNOVA:
+        got = Maker_PeekUnova(map, tileX, tileY, px);   // (the running game's own picture: 2 while on its way)
+        break;
+    default:
+        got = 0;
+    }
+    if (got != 1)
+        return got;
     for (i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++)
         rgba[i] = Rgba(px[i]);
     return 1;

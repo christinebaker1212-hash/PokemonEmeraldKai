@@ -669,6 +669,11 @@ void Platform_QueueAudio(float *audioBuffer, s32 samplesPerFrame)
     // windows (the game, a spectate pop-out) has the keyboard focus
     if (gMpConfig.muteInBackground && SDL_GetKeyboardFocus() == NULL)
         memset(audioBuffer, 0, samplesPerFrame);
+    {
+        bool8 Maker_PeekSilent(void);
+        if (Maker_PeekSilent())
+            memset(audioBuffer, 0, samplesPerFrame);   // Moemon Maker: UNOVA's 3D preview plays out of sight and hearing
+    }
     SDL_QueueAudio(1, audioBuffer, samplesPerFrame);
     {
         // Tests (MOEMON_AUDIO_DUMP=file): everything sent to the sound device, raw stereo float32 at 42048 Hz

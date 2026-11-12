@@ -32,6 +32,8 @@
 #include "mp_region.h"
 #include "maker_api.h"
 #include "battle_setup.h"
+#include "palette.h"
+#include "u3d.h"   // Moemon Kai: UNOVA (its 3D PREVIEW is the running game's picture)
 
 extern char gPlatformSavePath[512];
 void Platform_ReopenSaveFile(void);
@@ -55,6 +57,7 @@ static bool8 sNewGamePending;     // a story point: MP_DebugQuickStartNewGame as
 static u8 sKind;
 static s16 sMap, sX, sY;
 static char sRealSavePath[512];
+static u8 sPeek;                  // UNOVA's 3D preview (below): 0 none, 1 on its way, 2 taken, 3 couldn't
 static u8 sReload;                // 1: the map's tiles, 2: the whole map (Maker_EditsChangedWhilePlaying)
 
 bool8 Maker_IsPlaying(void)
@@ -142,7 +145,7 @@ int MakerApi_Play(int map, int x, int y, int kind, int slot)
     sReload = 0;
     UseSave(playSave);
     printf("[maker] playing %s at %d, %d (%s)\n", m->name, x, y, kind == MAKER_PLAY_SAVE ? "a copy of a save" : "a story point");
-    Display_SetMainWindowShown(TRUE);
+    Display_SetMainWindowShown(sPeek != 1);   // (UNOVA's 3D preview plays out of sight)
     if (kind == MAKER_PLAY_SAVE && gSaveFileStatus == SAVE_STATUS_OK)
     {
         // the save as it was, then straight to the spot (the save's continue warp, as the BATTLE FRONTIER uses)
@@ -270,11 +273,76 @@ bool8 Maker_PlayNewGame(void)
     return TRUE;
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+// UNOVA's 3D PREVIEW (MakerApi_Render3D): UNOVA's engine has no still picture of its own, so the game plays at the tile
+// with its window hidden and silent (as F5 would: a copy of the save in use, or a quick test party), and once UNOVA's
+// field is up and settled its picture is taken and the play stops. Nothing of the play is kept.
+#define PEEK_SETTLE 24      // frames on the field, faded in, before the picture is taken
+#define PEEK_GIVE_UP 900    // ... and frames at most (15 seconds) before giving up
+static int sPeekMap, sPeekX, sPeekY;
+static u16 sPeekFrames, sPeekSettled;
+static u16 sPeekPx[DISPLAY_WIDTH * DISPLAY_HEIGHT];
+
+bool8 Maker_PeekSilent(void)
+{
+    return sPeek == 1;
+}
+
+// 1: the picture (OUT), 2: on its way (ask again next frame), 0: it can't be taken (no pack, the game is playing)
+int Maker_PeekUnova(int map, int x, int y, u16 *out)
+{
+    if (sPeek != 0 && sPeekMap == map && sPeekX == x && sPeekY == y)
+    {
+        if (sPeek == 1)
+            return 2;
+        if (sPeek == 2)
+            memcpy(out, sPeekPx, sizeof(sPeekPx));
+        return sPeek == 2;
+    }
+    if (sPeek == 1 || sPlaying || !U3D_Available())
+        return sPeek == 1 ? 2 : 0;
+    sPeekMap = map, sPeekX = x, sPeekY = y;
+    sPeekFrames = sPeekSettled = 0;
+    sPeek = 1;
+    if (!MakerApi_Play(map, x, y, gSaveFileStatus == SAVE_STATUS_OK ? MAKER_PLAY_SAVE : MAKER_PLAY_TEST, 0))
+    {
+        sPeek = 3;
+        return 0;
+    }
+    printf("[maker] UNOVA preview: playing at %d, %d to take its picture\n", x, y);
+    return 2;
+}
+
+static void PeekFrame(void)
+{
+    const u16 *Platform_GetFrame(void);
+    bool8 there = gMain.callback2 == CB2_Overworld && U3D_Active() && !gPaletteFade.active
+               && Maker_MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum) == sPeekMap;
+    if (sPeek != 1)
+        return;
+    sPeekSettled = there ? sPeekSettled + 1 : 0;
+    if (sPeekSettled >= PEEK_SETTLE)
+    {
+        memcpy(sPeekPx, Platform_GetFrame(), sizeof(sPeekPx));
+        sPeek = 2;
+        printf("[maker] UNOVA preview: taken\n");
+        Maker_StopPlay();
+    }
+    else if (++sPeekFrames >= PEEK_GIVE_UP)
+    {
+        sPeek = 3;
+        printf("[maker] UNOVA preview: the game didn't get there\n");
+        Maker_StopPlay();
+    }
+}
+
 // F12 or the game's window closed: back to editing, the real save read again
 void Maker_StopPlay(void)
 {
     if (!sPlaying)
         return;
+    if (sPeek == 1)
+        sPeek = 3;   // (stopped before the picture: F12 while it was on its way)
     sPlaying = FALSE;
     sNewGamePending = FALSE;
     sBenchTrainer = 0;
@@ -314,6 +382,7 @@ void Maker_PlayFrame(void)
         sNewGamePending = FALSE;
     if (sPlaying)
         BenchFrame();
+    PeekFrame();
     if (!sPlaying || !sReload || gMain.callback2 != CB2_Overworld || ArePlayerFieldControlsLocked() || ScriptContext_IsEnabled())
         return;
     if (sReload == 1)

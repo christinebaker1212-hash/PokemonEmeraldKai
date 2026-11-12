@@ -30,7 +30,6 @@ namespace maker {
 
 Editor gEd;
 
-static const char *const kRegionNames[MAKER_REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
 static const char *const kSettingsFile = "moemon_maker.ini";
 static const char *const kLayoutFile = "moemon_maker_layout.ini";
 
@@ -262,7 +261,7 @@ static void MapsPanel()
         const MakerMapInfo *cur = gEd.map >= 0 ? &gEd.maps[gEd.map] : NULL;
         if (filtering || (gEd.scrollToMap && cur && cur->region == r))
             ImGui::SetNextItemOpen(true);
-        if (!ImGui::TreeNodeEx(kRegionNames[r], ImGuiTreeNodeFlags_SpanAvailWidth))
+        if (!ImGui::TreeNodeEx(MakerApi_RegionName(r), ImGuiTreeNodeFlags_SpanAvailWidth))
             continue;
         for (const Place &p : gEd.places[r])
         {
@@ -351,7 +350,7 @@ static void InspectorPanel()
         snprintf(size, sizeof(size), "%d x %d", m.width, m.height);
         row("Map", m.title);
         row("Name", m.name);
-        row("Region", kRegionNames[m.region]);
+        row("Region", MakerApi_RegionName(m.region));
         row("Place", m.place[0] ? m.place : "-");
         row("Size", size);
         ImGui::EndTable();

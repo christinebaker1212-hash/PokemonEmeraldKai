@@ -45,16 +45,36 @@ static int RegionOf(const char *name)
         return MAKER_REGION_KANTO;
     if (strncmp(name, "MAP_SINNOH_", 11) == 0)
         return MAKER_REGION_SINNOH;
+    if (strncmp(name, "MAP_UNOVA_", 10) == 0)
+        return MAKER_REGION_UNOVA;
+    if (strncmp(name, "MAP_ORRE_", 9) == 0)
+        return MAKER_REGION_ORRE;
+    return MAKER_REGION_HOENN;
+}
+
+static const char *const sRegionNames[MAKER_REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH", "UNOVA", "ORRE"};
+
+const char *MakerApi_RegionName(int region)
+{
+    return region >= 0 && region < MAKER_REGION_COUNT ? sRegionNames[region] : "HOENN";
+}
+
+int MakerApi_RegionByName(const char *name)
+{
+    int i;
+    for (i = 0; i < MAKER_REGION_COUNT; i++)
+        if (strcmp(name, sRegionNames[i]) == 0)
+            return i;
     return MAKER_REGION_HOENN;
 }
 
 // "MAP_SINNOH_VEILSTONE_STORE2F" -> "VEILSTONE STORE2F"; "MAP_ROUTE101" -> "ROUTE 101"
 static void Title(char *dst, int size, const char *name)
 {
-    static const char *const sPrefixes[] = {"MAP_JOHTO_", "MAP_KANTO_", "MAP_SINNOH_", "MAP_"};
+    static const char *const sPrefixes[] = {"MAP_JOHTO_", "MAP_KANTO_", "MAP_SINNOH_", "MAP_UNOVA_", "MAP_ORRE_", "MAP_"};
     const char *s = name;
     int i, n = 0;
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < (int)ARRAY_COUNT(sPrefixes); i++)
         if (strncmp(s, sPrefixes[i], strlen(sPrefixes[i])) == 0)
         {
             s += strlen(sPrefixes[i]);

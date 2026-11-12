@@ -10,6 +10,7 @@
 //   Collision mode  Walkable / Blocked keeping each tile's elevation, or the full collision + elevation grid
 //   Events mode     click a person, warp, sign or trigger to pick it, drag to move it; its details in the INSPECTOR
 #include <SDL.h>
+#include <ctype.h>
 #include <limits.h>
 #include <math.h>
 #include <stdarg.h>
@@ -462,6 +463,202 @@ static void Fill(int x, int y)
         PaintAt(t.first, t.second, x, y);
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+// AUTOTILE (src/maker/maker_autotile.c): the TILES panel's switch. Terrains learned from the game's own maps of these
+// tilesets; painting one draws its edges, corners and lips round it as those maps do (the ring round the stroke too,
+// where its shape changed). PAINT draws the picked terrain; ERASE TO draws the base one back (the stroke's terrain gone,
+// the edges of what's left drawn again). Pencil, rectangle and fill all paint terrain while it's on.
+static bool sAuto;                    // the switch
+static int sAutoTerrain = -1;         // the picked terrain
+static int sAutoBase = -1;            // ERASE TO's
+static bool sAutoErase;               // painting the base back
+static bool sAutoShowHidden;
+static int sAutoMap = -1;             // the map the terrains below are for
+static std::vector<MakerTerrain> sTerrains;
+
+static void AutotileLoad()
+{
+    if (sAutoMap == gEd.map)
+        return;
+    sAutoMap = gEd.map;
+    sTerrains.clear();
+    int n = gEd.map >= 0 && !sTiles.world3d ? MakerApi_AutotileLoad(gEd.map) : 0;
+    sTerrains.resize(n);
+    for (int i = 0; i < n; i++)
+        MakerApi_AutotileTerrain(i, &sTerrains[i]);
+    if (sAutoTerrain >= n)
+        sAutoTerrain = -1;
+    // (erasing goes back to the plain ground: the first land terrain named so, else the first land one)
+    sAutoBase = -1;
+    for (int i = 0; i < n && sAutoBase < 0; i++)
+        if (sTerrains[i].kind == 0 && strncmp(sTerrains[i].name, "GROUND", 6) == 0)
+            sAutoBase = i;
+    for (int i = 0; i < n && sAutoBase < 0; i++)
+        if (sTerrains[i].kind == 0)
+            sAutoBase = i;
+}
+
+// The terrains were changed in the TILESETS window (renamed, hidden, new): read again
+void MapView_AutotileChanged()
+{
+    int keepT = sAutoTerrain, keepB = sAutoBase;
+    sAutoMap = -1;
+    AutotileLoad();
+    if (keepT < (int)sTerrains.size())
+        sAutoTerrain = keepT;
+    if (keepB >= 0 && keepB < (int)sTerrains.size())
+        sAutoBase = keepB;
+}
+
+bool MapView_AutotileOn()
+{
+    return sAuto && gEd.mode == MODE_MAP && !sTiles.world3d;
+}
+
+static int AutoTerrainNow()
+{
+    return sAutoErase ? sAutoBase : sAutoTerrain;
+}
+
+// The terrain painted over CELLS: every tile the autotile changes, as edits (in the change the caller began)
+static void AutoPaint(const std::vector<std::pair<int, int>> &cells)
+{
+    int terrain = AutoTerrainNow();
+    if (terrain < 0 || cells.empty())
+        return;
+    std::vector<int> blocks(sW * sH), c, out;
+    for (int y = 0; y < sH; y++)
+        for (int x = 0; x < sW; x++)
+            blocks[y * sW + x] = Cur(x, y);
+    for (auto &p : cells)
+        if (p.first >= 0 && p.second >= 0 && p.first < sW && p.second < sH)
+            c.push_back(p.first), c.push_back(p.second);
+    out.resize(3 * ((int)cells.size() * 16 + 64));
+    int n = MakerApi_AutotilePaint(blocks.data(), sW, sH, c.data(), (int)c.size() / 2, terrain, out.data(), (int)out.size() / 3);
+    for (int i = 0; i < n; i++)
+    {
+        int x = out[i * 3], y = out[i * 3 + 1];
+        if (Base(x, y) >= 0)
+            SetBlock(gEd.map, x, y, Base(x, y), out[i * 3 + 2]);
+    }
+}
+
+// The fill's tiles: joined to x, y and the same metatile
+static std::vector<std::pair<int, int>> FillRegion(int x, int y)
+{
+    std::vector<std::pair<int, int>> tiles;
+    if (x < 0 || y < 0 || x >= sW || y >= sH || Base(x, y) < 0)
+        return tiles;
+    int match = Cur(x, y) & 0x3FF;
+    std::vector<char> seen(sW * sH, 0);
+    std::deque<std::pair<int, int>> q;
+    q.push_back({x, y});
+    seen[y * sW + x] = 1;
+    while (!q.empty() && tiles.size() < 20000)
+    {
+        std::pair<int, int> t = q.front();
+        q.pop_front();
+        tiles.push_back(t);
+        static const int d[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (auto &dd : d)
+        {
+            int nx = t.first + dd[0], ny = t.second + dd[1];
+            if (nx < 0 || ny < 0 || nx >= sW || ny >= sH || seen[ny * sW + nx] || Base(nx, ny) < 0 || (Cur(nx, ny) & 0x3FF) != match)
+                continue;
+            seen[ny * sW + nx] = 1;
+            q.push_back({nx, ny});
+        }
+    }
+    return tiles;
+}
+
+// A terrain's swatch: its centre (a pattern's whole unit, each tile a quarter)
+static void TerrainSwatch(ImDrawList *dl, const MakerTerrain &t, ImVec2 p, float s)
+{
+    if (t.px * t.py > 1)
+    {
+        float hs = s / std::max(t.px, t.py);
+        for (int j = 0; j < t.py; j++)
+            for (int i = 0; i < t.px; i++)
+                DrawMetatile(dl, t.q[j * t.px + i], ImVec2(p.x + i * hs, p.y + j * hs), hs);
+    }
+    else
+        DrawMetatile(dl, t.centreTile, p, s);
+}
+
+static void AutotilePanel(float s)
+{
+    if (sTerrains.empty())
+    {
+        ImGui::TextWrapped("No terrains here: the game's maps of these tilesets don't repeat any tile enough to learn "
+                           "from. Make one in Tools > Tileset editor > TERRAINS.");
+        return;
+    }
+    if (ImGui::RadioButton("PAINT", !sAutoErase))
+        sAutoErase = false;
+    ImGui::SameLine();
+    if (ImGui::RadioButton("ERASE TO", sAutoErase))
+        sAutoErase = true;
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(-FLT_MIN);
+    if (ImGui::BeginCombo("##base", sAutoBase >= 0 ? sTerrains[sAutoBase].name : "-"))
+    {
+        for (int i = 0; i < (int)sTerrains.size(); i++)
+            if (sTerrains[i].kind == 0 && (!sTerrains[i].hidden || sAutoShowHidden) && ImGui::Selectable(sTerrains[i].name, i == sAutoBase))
+                sAutoBase = i;
+        ImGui::EndCombo();
+    }
+    ImGui::Checkbox("Show hidden", &sAutoShowHidden);
+    ImGui::SeparatorText("TERRAINS");
+    ImGui::BeginChild("terrains", ImVec2(0, 0), ImGuiChildFlags_None);
+    ImDrawList *dl = ImGui::GetWindowDrawList();
+    float cell = s * 1.75f, w = ImGui::GetContentRegionAvail().x;
+    int cols = std::max(1, (int)(w / (cell + 8)));
+    for (int i = 0, shown = 0; i < (int)sTerrains.size(); i++)
+    {
+        const MakerTerrain &t = sTerrains[i];
+        if (t.hidden && !sAutoShowHidden)
+            continue;
+        if (shown++ % cols)
+            ImGui::SameLine(0, 8);
+        ImGui::BeginGroup();
+        ImVec2 p = ImGui::GetCursorScreenPos();
+        ImGui::PushID(i);
+        if (ImGui::InvisibleButton("t", ImVec2(cell, cell)))
+        {
+            sAutoTerrain = i;
+            sAutoErase = false;
+            if (gEd.tool == TOOL_PICKER)
+                gEd.tool = TOOL_PENCIL;
+        }
+        bool hov = ImGui::IsItemHovered();
+        ImGui::PopID();
+        TerrainSwatch(dl, t, p, cell);
+        if (t.hidden)
+            dl->AddRectFilled(p, ImVec2(p.x + cell, p.y + cell), IM_COL32(255, 255, 255, 120));
+        if (i == sAutoTerrain && !sAutoErase)
+        {
+            dl->AddRect(p, ImVec2(p.x + cell, p.y + cell), IM_COL32(255, 255, 255, 255), 0, 0, 3);
+            dl->AddRect(ImVec2(p.x - 1, p.y - 1), ImVec2(p.x + cell + 1, p.y + cell + 1), IM_COL32(0, 90, 200, 255), 0, 0, 2);
+        }
+        else if (hov)
+            dl->AddRect(p, ImVec2(p.x + cell, p.y + cell), IM_COL32(255, 255, 255, 180), 0, 0, 1);
+        if (hov)
+            ImGui::SetTooltip("%s\n%d tiles%s%s", t.name, t.tiles, t.user ? " (your own)" : "", t.fixes ? " (fixed by you)" : "");
+        // (the name in a smaller hand, cut to the swatch's width: the tooltip has it whole)
+        ImGui::SetWindowFontScale(0.8f);
+        {
+            std::string nm = t.name;
+            while (nm.size() > 1 && ImGui::CalcTextSize(nm.c_str()).x > cell)
+                nm.pop_back();
+            ImGui::TextUnformatted(nm.c_str());
+        }
+        ImGui::SetWindowFontScale(1.0f);
+        ImGui::EndGroup();
+    }
+    ImGui::EndChild();
+}
+
 static void Pick(int x, int y)
 {
     int b = Cur(x, y);
@@ -479,6 +676,12 @@ static void Pick(int x, int y)
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Drawing
+
+// A 3D region's game, for the words about its maps
+static const char *World3dGame(int region)
+{
+    return region == MAKER_REGION_UNOVA ? "Black" : region == MAKER_REGION_ORRE ? "Colosseum" : "Platinum";
+}
 
 static ImU32 SinnohColor(int block)
 {
@@ -745,8 +948,8 @@ static void MouseOnMap(int tx, int ty, bool inside)
     }
     if (gEd.mode != MODE_MAP && gEd.mode != MODE_COLLISION)
         return;
-    if (sTiles.sinnoh && gEd.mode == MODE_MAP)
-        return;   // (SINNOH's tiles are its 3D world's: Collision mode edits what they do)
+    if (sTiles.world3d && gEd.mode == MODE_MAP)
+        return;   // (a 3D region's tiles are its 3D world's: Collision mode edits what they do)
     // right-drag: in Map mode copies the tiles under it as the stamp; a right-click picks
     if (r && inside)
     {
@@ -777,7 +980,10 @@ static void MouseOnMap(int tx, int ty, bool inside)
             break;
         case TOOL_FILL:
             BeginChange(gEd.map);
-            Fill(tx, ty);
+            if (MapView_AutotileOn())
+                AutoPaint(FillRegion(tx, ty));
+            else
+                Fill(tx, ty);
             EndChange();
             break;
         case TOOL_RECT:
@@ -801,6 +1007,8 @@ static void MouseOnMap(int tx, int ty, bool inside)
             int oy = ty - (((ty - sRectY0) % sStampH) + sStampH) % sStampH;
             if (gEd.mode == MODE_COLLISION)
                 PaintCollision(tx, ty);
+            else if (MapView_AutotileOn())
+                AutoPaint({{tx, ty}});
             else
                 for (int y = 0; y < sStampH; y++)
                     for (int x = 0; x < sStampW; x++)
@@ -818,9 +1026,18 @@ static void MouseOnMap(int tx, int ty, bool inside)
         sRect = false;
         int x0 = std::min(sRectX0, cx), x1 = std::max(sRectX0, cx), y0 = std::min(sRectY0, cy), y1 = std::max(sRectY0, cy);
         BeginChange(gEd.map);
-        for (int y = y0; y <= y1; y++)
-            for (int x = x0; x <= x1; x++)
-                PaintAt(x, y, x0, y0);
+        if (MapView_AutotileOn())
+        {
+            std::vector<std::pair<int, int>> cells;
+            for (int y = y0; y <= y1; y++)
+                for (int x = x0; x <= x1; x++)
+                    cells.push_back({x, y});
+            AutoPaint(cells);
+        }
+        else
+            for (int y = y0; y <= y1; y++)
+                for (int x = x0; x <= x1; x++)
+                    PaintAt(x, y, x0, y0);
         EndChange();
     }
 }
@@ -961,6 +1178,9 @@ void MapView_Panel()
     if (gEd.mode == MODE_EVENTS && ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows) && !ImGui::GetIO().WantTextInput
      && ImGui::IsKeyPressed(ImGuiKey_Delete, false))
         DeleteSelected();
+    if (sTiles.world3d == MAKER_REGION_UNOVA && gEd.hoverX >= 0 && ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows)
+     && !ImGui::GetIO().WantTextInput && ImGui::IsKeyPressed(ImGuiKey_P, false))
+        MapView_Preview3DAsk();   // (UNOVA's preview: the tile under the mouse)
     float s = 16.0f * gEd.zoom;
     ImGui::SetNextWindowContentSize(ImVec2(sW * s + 64, sH * s + 64));
     ImGui::BeginChild("canvas", ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoMove);
@@ -985,7 +1205,7 @@ void MapView_Panel()
             ImVec2 p(origin.x + x * s, origin.y + y * s);
             if (b < 0)
                 continue;
-            if (sTiles.sinnoh)
+            if (sTiles.world3d)
                 dl->AddRectFilled(p, ImVec2(p.x + s, p.y + s), SinnohColor(b));
             else
                 DrawMetatile(dl, b, p, s);
@@ -1054,7 +1274,7 @@ void MapView_Panel()
         gEd.hoverBlock = Cur(tx, ty);
         ImVec2 p(origin.x + tx * s, origin.y + ty * s);
         // what the brush would do: the stamp under the mouse (Map mode)
-        bool stampTool = gEd.mode == MODE_MAP && !sTiles.sinnoh && (gEd.tool == TOOL_PENCIL || gEd.tool == TOOL_RECT);
+        bool stampTool = gEd.mode == MODE_MAP && !sTiles.world3d && (gEd.tool == TOOL_PENCIL || gEd.tool == TOOL_RECT);
         if (stampTool && !sRect && !sCopy)
             for (int y = 0; y < sStampH; y++)
                 for (int x = 0; x < sStampW; x++)
@@ -1182,10 +1402,10 @@ void TilesPanel()
         ImGui::End();
         return;
     }
-    if (sTiles.sinnoh)
+    if (sTiles.world3d)
     {
-        ImGui::TextWrapped("SINNOH's maps are drawn in 3D from Platinum's own models. Here they're edited by what each "
-                           "tile does: paint them in Collision mode.");
+        ImGui::TextWrapped("%s's maps are drawn in 3D from %s's own models. Here they're edited by what each tile does: "
+                           "paint them in Collision mode.", MakerApi_RegionName(sTiles.world3d), World3dGame(sTiles.world3d));
         ImGui::End();
         return;
     }
@@ -1193,6 +1413,18 @@ void TilesPanel()
         RenderAtlas();
     const int cols = 8;
     float s = 32.0f * gEd.uiScale;
+    if (ImGui::Checkbox("AUTOTILE", &sAuto) && sAuto)
+        AutotileLoad();
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+        ImGui::SetTooltip("Paint water, trees, paths and cliffs freely: their edges and corners are drawn round them as the "
+                          "game's own maps draw them. Fix what it draws in Tools > Tileset editor > TERRAINS.");
+    if (sAuto)
+    {
+        AutotileLoad();
+        AutotilePanel(s);
+        ImGui::End();
+        return;
+    }
     auto inStamp = [&](int id) {
         for (int v : sStamp)
             if (v == id)
@@ -1465,24 +1697,50 @@ static bool DirPicker(const char *id, int *dir)
     return picked;
 }
 
-// SINNOH: the 3D world round the tile under the mouse (or the picked event, or the map's middle), as the game shows it
+// A 3D region's map: the 3D world round the tile under the mouse (or the picked event, or the map's middle), as the
+// game shows it. SINNOH's and ORRE's engines draw a still picture at once; UNOVA's is the running game's own picture
+// (MakerApi_Render3D gives 2 while the game gets there), so it's taken at a chosen tile: P over the map, or LOOK HERE
+static int s3dPendX = -1, s3dPendY = -1;   // UNOVA: the tile asked for (the game is on its way there)
+static bool s3dAsk;                         // UNOVA: P was pressed over the map (look at the tile under the mouse)
+static int s3dLookX = -1, s3dLookY = -1;    // tests ("maker look X Y"): the tile to look at
 static void Preview3D()
 {
+    bool live = sTiles.world3d == MAKER_REGION_UNOVA;
     int x = gEd.hoverX, y = gEd.hoverY, ex, ey;
+    if (live && !s3dAsk)
+        x = -1;   // (UNOVA: not the mouse, only a tile asked for)
+    if (s3dLookX >= 0)
+        x = s3dLookX, y = s3dLookY;
     if (x < 0 && MapView_SelectedSpot(&ex, &ey))
         x = ex, y = ey;
     if (x < 0)
         x = s3dX >= 0 && s3dMap == gEd.map ? s3dX : sW / 2, y = s3dY >= 0 && s3dMap == gEd.map ? s3dY : sH / 2;
-    if (MakerApi_IsPlaying())
+    s3dAsk = false;
+    if (MakerApi_IsPlaying() && s3dPendX < 0)
     {
         ImGui::TextDisabled("(the 3D preview waits while the game plays)");
         return;
     }
-    if (x != s3dX || y != s3dY || gEd.map != s3dMap)
+    static unsigned int px[240 * 160];
+    int got = -1;
+    if (s3dPendX >= 0)
     {
-        static unsigned int px[240 * 160];
-        s3dMap = gEd.map, s3dX = x, s3dY = y;
-        s3dOk = MakerApi_Render3D(gEd.map, x, y, px);
+        got = MakerApi_Render3D(gEd.map, s3dPendX, s3dPendY, px);   // (UNOVA: still on its way?)
+        if (got != 2)
+            s3dX = s3dPendX, s3dY = s3dPendY, s3dPendX = s3dPendY = -1;
+    }
+    else if (x != s3dX || y != s3dY || gEd.map != s3dMap)
+    {
+        s3dMap = gEd.map;
+        got = MakerApi_Render3D(gEd.map, x, y, px);
+        if (got == 2)
+            s3dPendX = x, s3dPendY = y;
+        else
+            s3dX = x, s3dY = y;
+    }
+    if (got >= 0 && got != 2)
+    {
+        s3dOk = got;
         if (s3dOk)
         {
             if (!s3dTex)
@@ -1493,14 +1751,40 @@ static void Preview3D()
             SDL_UpdateTexture(s3dTex, NULL, px, 240 * 4);
         }
     }
+    if (s3dPendX >= 0)
+        ImGui::TextDisabled("The game is going to tile %d, %d...", s3dPendX, s3dPendY);
     if (!s3dOk || !s3dTex)
     {
-        ImGui::TextWrapped("No 3D preview: this game folder has no SINNOH 3D pack (sinnoh/platinum3d.pak).");
+        if (s3dPendX < 0)
+            ImGui::TextWrapped("No 3D preview: this game folder has no %s 3D pack (%s).", MakerApi_RegionName(sTiles.world3d),
+                               sTiles.world3d == MAKER_REGION_UNOVA ? "unova/black3d.pak"
+                               : sTiles.world3d == MAKER_REGION_ORRE ? "orre/orre3d.pak" : "sinnoh/platinum3d.pak");
         return;
     }
     float w = ImGui::GetContentRegionAvail().x;
     ImGui::Image(TexId(s3dTex), ImVec2(w, w * 160 / 240));
-    ImGui::TextDisabled("Tile %d, %d, through the game's camera", x, y);
+    ImGui::TextDisabled("Tile %d, %d, through the game's camera", s3dX, s3dY);
+    if (live)
+    {
+        ImGui::TextDisabled("Press P over the map to look at another tile.");
+        if (s3dPendX < 0 && ImGui::SmallButton("LOOK AGAIN"))
+            s3dX = -1;   // (taken again: the game may have changed)
+    }
+}
+
+// UNOVA's preview: P over the map looks at the tile under the mouse (maker_mapview.cpp's map window)
+void MapView_Preview3DAsk()
+{
+    if (sTiles.world3d == MAKER_REGION_UNOVA)
+        s3dAsk = true, s3dX = -1;
+}
+
+// A metatile of the open map's tilesets as the map view draws it (the TILESETS window's TERRAINS)
+void MapView_DrawMetatile(ImDrawList *dl, int id, ImVec2 p, float s)
+{
+    if (!sAtlas)
+        RenderAtlas();
+    DrawMetatile(dl, id, p, s);
 }
 
 // (M5) the loaded map's tiles, for the TILESETS window
@@ -1517,13 +1801,13 @@ void MapView_MapInspector()
     int m = gEd.map;
     const MakerMapInfo &info = gEd.maps[m];
     Merge_Section(m);   // (M4c: edits the game changed under, first)
-    if (sTiles.sinnoh && sLoadedMap == m)
+    if (sTiles.world3d && sLoadedMap == m)
     {
         ImGui::Spacing();
         ImGui::SeparatorText("3D PREVIEW");
         Preview3D();
     }
-    if (sTiles.sinnoh)
+    if (sTiles.world3d == MAKER_REGION_SINNOH)
         ModelsSection(m);   // (M5: maker_models_ui.cpp)
     ImGui::Spacing();
     ImGui::SeparatorText("MUSIC");
@@ -1954,6 +2238,68 @@ void MapView_TestCommand(const char *cmd, const char *arg)
     }
     else if (c == "anim")
         MakerApi_SetAnimating(atoi(arg));
+    else if (c == "autotile")
+    {
+        sAuto = strcmp(arg, "off") != 0;
+        if (sAuto)
+        {
+            AutotileLoad();
+            printf("[maker] autotile: %d terrains:", (int)sTerrains.size());
+            for (auto &t : sTerrains)
+                printf(" [%s %s]", t.name, t.centre);
+            printf("\n");
+        }
+    }
+    else if (c == "terrain" || c == "erasebase")
+    {
+        AutotileLoad();
+        int pick = -1;
+        for (int i = 0; i < (int)sTerrains.size() && pick < 0; i++)
+            if (strcmp(sTerrains[i].centre, arg) == 0 || strcmp(sTerrains[i].name, arg) == 0)
+                pick = i;
+        if (pick < 0 && isdigit((unsigned char)arg[0]))
+            pick = atoi(arg);
+        if (c == "terrain")
+            sAutoTerrain = pick, sAutoErase = false;
+        else
+            sAutoBase = pick, sAutoErase = true;
+    }
+    else if (c == "autopaint" || c == "autorect" || c == "autofill")
+    {
+        int a = 0, b = 0, x1 = 0, y1 = 0;
+        sscanf(arg, "%d %d %d %d", &a, &b, &x1, &y1);
+        BeginChange(gEd.map);
+        if (c == "autofill")
+            AutoPaint(FillRegion(a, b));
+        else
+        {
+            std::vector<std::pair<int, int>> cells;
+            if (c == "autopaint")
+                cells.push_back({a, b});
+            else
+                for (int y = std::min(b, y1); y <= std::max(b, y1); y++)
+                    for (int x = std::min(a, x1); x <= std::max(a, x1); x++)
+                        cells.push_back({x, y});
+            AutoPaint(cells);
+        }
+        EndChange();
+    }
+    else if (c == "autoredraw")
+        printf("[maker] autotile redraw %s: %d per mille\n", gEd.map >= 0 ? gEd.maps[gEd.map].name : "-", MakerApi_AutotileRedraw(gEd.map));
+    else if (c == "dumpblocks")
+    {
+        int x0 = 0, y0 = 0, x1 = 0, y1 = 0;
+        sscanf(arg, "%d %d %d %d", &x0, &y0, &x1, &y1);
+        for (int y = y0; y <= y1; y++)
+        {
+            printf("[maker] row %d:", y);
+            for (int x = x0; x <= x1; x++)
+                printf(" %03X", Cur(x, y) & 0x3FF);
+            printf("\n");
+        }
+    }
+    else if (c == "look")
+        sscanf(arg, "%d %d", &s3dLookX, &s3dLookY);   // (the 3D PREVIEW's tile)
     else if (c == "pick")
     {
         int x = 0, y = 0, k, i;

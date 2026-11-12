@@ -73,7 +73,9 @@ include/maker_api.h (src/maker/*.c); hidden until `AllowSmallTweaks = 1` and "ma
 README). The user's edits are MoemonMaker/base/MAP_X.txt (each line keeps the value it replaced; format at the top of
 src/maker/maker_overrides.c), applied at run time through Overworld_GetMapHeaderByGroupAndId / Maker_MapBlocks; music in
 MoemonMaker/music/; published from the editor straight to the default branch (a `Moemon-Maker:` trailer), then the
-maker-pack workflow ships MoemonMakerPack/. Tests tools/test/maker_*.sh.
+maker-pack workflow ships MoemonMakerPack/. Tests tools/test/maker_*.sh. UNOVA and ORRE maps in the editor and the
+TILES panel's AUTOTILE (learned terrains, RPG Maker-style 3x3 blocks in TERRAINS, src/maker/maker_autotile.c,
+MoemonMaker/autotile/): COOP_NOTES "Moemon Maker: UNOVA and ORRE, and AUTOTILE".
 **The user's own changes come first** (the user, 2026-11-03): anything in `MoemonMaker/` and any commit without a
 `Claude-Session:` trailer (the Maker's Publish commits carry `Moemon-Maker:`) is the user's work. Before a change,
 regeneration or conversion script would alter or overwrite it, check `git log` / `git blame` and ask the user; never

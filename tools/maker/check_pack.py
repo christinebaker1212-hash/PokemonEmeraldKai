@@ -80,10 +80,10 @@ def value_ok(prop, v):
 
 
 def blocks_of(map_id):
-    """the map's own blocks (SINNOH's come from the 3D pack: not checked here)"""
+    """the map's own blocks (SINNOH's, UNOVA's and ORRE's come from their 3D packs: not checked here)"""
     m, _ = MAPS[map_id]
     l = LAYOUTS.get(m.get('layout'))
-    if not l or map_id.startswith('MAP_SINNOH_'):
+    if not l or map_id.startswith(('MAP_SINNOH_', 'MAP_UNOVA_', 'MAP_ORRE_')):
         return None, 0, 0
     try:
         data = open(os.path.join(ROOT, l['blockdata_filepath']), 'rb').read()

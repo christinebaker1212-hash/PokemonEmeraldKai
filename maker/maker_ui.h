@@ -179,6 +179,10 @@ void Anims_TestCommand(const char *cmd, const char *arg);
 void OpenTilesets();
 void Tilesets_TestCommand(const char *cmd, const char *arg);
 const MakerTilesInfo *MapView_TilesInfo();
+void MapView_Preview3DAsk();
+void MapView_DrawMetatile(ImDrawList *dl, int id, ImVec2 p, float s);   // a metatile of the open map's tilesets
+void MapView_AutotileChanged();   // the TERRAINS were changed: read again
+bool MapView_AutotileOn();        // AUTOTILE is on in Map mode   // UNOVA's 3D preview: look at the tile under the mouse (P over the map)
 void OpenLua();
 void Lua_TestCommand(const char *cmd, const char *arg);
 void OpenDebugger();

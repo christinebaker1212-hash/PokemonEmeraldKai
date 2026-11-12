@@ -71,12 +71,7 @@ const struct MapLayout *Maker_NewMapLayout(u16 layoutId)
 
 static int RegionByName(const char *s)
 {
-    static const char *const sNames[] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
-    int i;
-    for (i = 0; i < 4; i++)
-        if (strcmp(s, sNames[i]) == 0)
-            return i;
-    return MAKER_REGION_HOENN;
+    return MakerApi_RegionByName(s);
 }
 
 // One new map from its text (the file's, or the editor's when it's made or changed); its number, or -1
