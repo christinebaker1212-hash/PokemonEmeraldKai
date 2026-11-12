@@ -312,11 +312,27 @@ static bool8 FlagOn(u16 id)
     return p && (*p & bit);
 }
 
+// Black's system flags that are the START menu's buttons (ov021 field_menu.c FIELD_MENU_GetLayoutType): 0x961 the
+// POKeMON, 0x962 the POKeDEX (set by JUNIPER's lab, NUVEMA zone 396; the NATIONAL DEX: the user's decision, as
+// SetZukanObtained). Kai's own flags follow them, or START never shows the POKeDEX.
+static void SysFlagsToKai(void)
+{
+    if (FlagOn(0x961) && !FlagGet(FLAG_SYS_POKEMON_GET))
+        FlagSet(FLAG_SYS_POKEMON_GET);
+    if (FlagOn(0x962) && !FlagGet(FLAG_SYS_POKEDEX_GET))
+    {
+        FlagSet(FLAG_SYS_POKEDEX_GET);
+        EnableNationalPokedex();
+    }
+}
+
 static void FlagTo(u16 id, bool8 on)
 {
     u8 bit, *p = FlagByte(id, &bit);
     if (p)
         *p = on ? (*p | bit) : (*p & ~bit);
+    if (on && (id == 0x961 || id == 0x962))
+        SysFlagsToKai();
 }
 
 bool8 U3D_Vm_Flag(u16 id) { return FlagOn(id); }
@@ -2859,6 +2875,7 @@ void U3D_VmMapLoad(void)
         return;
     sAddedCount = 0;   // (a new map: its field-init script adds its own)
     sGoneCount = 0;
+    SysFlagsToKai();   // (saves from before 1.192.1 got JUNIPER's POKeDEX in Black's flags only)
     if (!sWork.began)
     {
         sWork.began = TRUE;
