@@ -40,7 +40,11 @@
 #include "constants/songs.h"
 #include "u3d_cmds.h"
 #include "u3d_maps.h"
+#include "u3d_subway.h"
+void ChoosePartyForBattleFrontier(void);   // (script_pokemon_util.c)
+void BattleSetup_StartUnovaBattle(void);
 #include "script_pokemon_util.h"
+#include "shop.h"
 #include "random.h"
 #include "money.h"
 #include "mp_region.h"
@@ -81,7 +85,7 @@ void MPNet_Log(const char *fmt, ...);
 static u8 *sPack;
 static u32 sPackSize;
 static bool8 sTried;
-static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt, sTrMsgAt, sEyeSongsAt, sWarpsAt, sCallsAt, sTradesAt, sWfbcAt;
+static u32 sFilesAt, sRangesAt, sZonesAt, sEventsAt, sTrainersAt, sTeamsAt, sSongKindsAt, sEncountAt, sTrMsgAt, sEyeSongsAt, sWarpsAt, sCallsAt, sTradesAt, sWfbcAt, sSubwayAt, sSubwayTrainersAt, sSubwayTablesAt;
 
 static u32 Get32(u32 at) { return at + 4 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 | sPack[at + 2] << 16 | (u32)sPack[at + 3] << 24 : 0; }
 static u16 Get16(u32 at) { return at + 2 <= sPackSize ? sPack[at] | sPack[at + 1] << 8 : 0; }
@@ -125,7 +129,7 @@ static void Load(void)
     sPack = malloc(raw ? raw : 1);
     sPackSize = raw;
     if (sPack == NULL || uncompress(sPack, &raw, data + 8, (unsigned long)(size - 8)) != 0 || memcmp(sPack, "U3DS", 4) != 0
-     || Get32(4) < 1 || Get32(4) > 9)
+     || Get32(4) < 1 || Get32(4) > 10)
     {
         printf("[u3d] %s: can't read UNOVA's scripts\n", path);
         free(sPack);
@@ -160,6 +164,12 @@ static void Load(void)
             sTradesAt = (BlockEnd(sCallsAt) + 3) & ~3;
         if (Get32(4) >= 9)   // (version 9: BLACK CITY's residents)
             sWfbcAt = sTradesAt + 4 + 0x6C * Get32(sTradesAt);
+        if (Get32(4) >= 10)   // (version 10: the BATTLE SUBWAY's sets, trainers and tables)
+        {
+            sSubwayAt = (sWfbcAt + 4 + 0x30 * Get32(sWfbcAt) + 40 + 3) & ~3;
+            sSubwayTrainersAt = sSubwayAt + 4 + 16 * Get32(sSubwayAt);
+            sSubwayTablesAt = BlockEnd(sSubwayTrainersAt);
+        }
     }
     printf("[u3d] UNOVA's scripts: %u files, %u zones\n", Get32(sFilesAt), Get32(sZonesAt));
 }
@@ -235,7 +245,8 @@ struct UnovaRoamer { u16 species, hp; u8 level, state, loc, status; u32 personal
                                                                                                 // roaming, 2 knocked out, 3 caught)
 static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
                 u8 white; struct UnovaRoamer roam[2];
-                struct { u8 valid, npc[10], mood[10], flags[10], back[10]; u16 counter, value; } wfbc; } sWork;   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
+                struct { u8 valid, npc[10], mood[10], flags[10], back[10]; u16 counter, value; } wfbc;
+                struct U3DSubwaySave subway; } sWork;   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
 {
@@ -548,6 +559,102 @@ static void AddPerson(u8 local, u16 code, u16 x, u16 z, u16 dir)
     SpawnAdded();
 }
 
+// The BATTLE SUBWAY's commands about the field (u3d_subway.c hands them back): the trains' places, where the game goes
+// on after a REST, the people on the platforms and in the cars
+void SetContinueGameWarp(s8 mapGroup, s8 mapNum, s8 warpId, s16 x, s16 y);   // (overworld.c)
+static u16 sPassengerParam[OBJECT_EVENTS_COUNT];
+static void SubwayReturnTo(u16 zone, s16 x, s16 z)
+{
+    u8 group, num;
+    s16 mx, my;
+    if (U3D_MapOfZoneTile(zone, x, z, &group, &num, &mx, &my))
+    {
+        SetContinueGameWarp(group, num, WARP_ID_NONE, mx, my);
+        SetContinueGameWarpStatus();
+        FlagTo(0x966, TRUE);
+    }
+}
+
+static void SubwayField(u16 cmd, u16 op1, u16 op2, u16 *result)
+{
+    u16 zone;
+    s16 x, z;
+    switch (cmd)
+    {
+    case 0:   // GET_TRAIN_INDEX (the platform's line)
+        switch (CurrentZone())
+        {
+        case 0x43: *result = 0; break;
+        case 0x44: *result = 5; break;
+        case 0x45: *result = 1; break;
+        case 0x46: *result = 6; break;
+        case 0x47: *result = 2; break;
+        case 0x48: *result = 7; break;
+        case 0x49: *result = 4; break;
+        default:   *result = 0; break;
+        }
+        break;
+    case 4:   // SET_RETURN_LOCATION_AT_PLAYER
+        SetContinueGameWarp(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, WARP_ID_NONE,
+                            gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y);
+        SetContinueGameWarpStatus();
+        FlagTo(0x966, TRUE);
+        break;
+    case 5:   // CLEAR_RETURN_LOCATION_FLAG
+        ClearContinueGameWarpStatus();
+        FlagTo(0x966, FALSE);
+        break;
+    case 45:   // SET_RETURN_LOCATION_FROM_TABLE (by the platform's line)
+    {
+        u16 line;
+        SubwayField(0, 0, 0, &line);
+        if (U3D_Subway_Return(line, &zone, &x, &z))
+            SubwayReturnTo(zone, x, z);
+        break;
+    }
+    case 322:   // SET_RETURN_LOCATION_FROM_MODE
+        if (U3D_Subway_Return(U3D_Subway_PlayMode(), &zone, &x, &z))
+            SubwayReturnTo(zone, x, z);
+        break;
+    case 13:   // (SET_NPC_DIRECTION: a person shown or hidden)
+    {
+        u8 id = ObjEventId(LocalId(op1));
+        if (id < OBJECT_EVENTS_COUNT)
+            gObjectEvents[id].invisible = op2 != 0;
+        break;
+    }
+    case 25:   // IS_NPC_PRESENT
+        *result = ObjEventId(LocalId(op1)) < OBJECT_EVENTS_COUNT;
+        break;
+    case 26:   // GET_NPC_TRAIN_STATE (a passenger's parameter)
+    {
+        u8 local = LocalId(op1);
+        *result = local < OBJECT_EVENTS_COUNT ? sPassengerParam[local] : 0;
+        break;
+    }
+    case 329:   // SPAWN_FIELD_OBJECTS: the car's passengers by how far this streak has come
+    {
+        u32 i;
+        u16 code, param, obj = 0x80;
+        for (i = 0; U3D_Subway_Passenger(i, &code, &x, &z, &param); i++)
+        {
+            u8 local;
+            if (code == 0xFFFF)
+                continue;
+            local = LocalId(obj);
+            AddPerson(local, code, x, z, i % 4);
+            if (local < OBJECT_EVENTS_COUNT)
+                sPassengerParam[local] = param;
+            if (obj < 0xFF)
+                obj++;
+        }
+        break;
+    }
+    default:   // (23, 24 heights; 35, 36 animations; 37 a Wi-Fi record's balloon: nothing to do here)
+        break;
+    }
+}
+
 static void ForgetPerson(u8 local)
 {
     u32 i;
@@ -745,7 +852,8 @@ static void PopSong(void)
         PlayNewMapMusic(sSongStack[--sSongDepth]);
 }
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
-enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY, SCREEN_CLEAR, SCREEN_TRADE };
+enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY, SCREEN_CLEAR, SCREEN_TRADE,
+       SCREEN_SUBWAY_PARTY, SCREEN_SUBWAY_BATTLE, SCREEN_SUBWAY_RESET, SCREEN_MART, SCREEN_BPSHOP, SCREEN_SELL };
 static u8 sScreen;
 static u16 sScreenVar, sPartySlotWork;
 static u8 sWildResult = 2;
@@ -823,6 +931,91 @@ static void Task_Vm(u8 taskId);
 
 static u8 sClearMode;
 static u16 sTradeId, sTradeSlot, sIss;
+// ---- Black's POKeMARTs (ov021 scrcmd_proc_fld.c, the pack's lists after the BATTLE SUBWAY's tables): shop 255 the
+// list for the badges UNOVA has given, any other shop N list N + 6; the game's own POKeMART sells them (Black's items
+// as the game's: Item(), those it doesn't have left out)
+static u16 Item(u16 black);
+static u16 sMartItems[48];
+static u8 sBpShop;
+void U3D_BpShop_Open(u8 which);
+void MP_CreatePokemartDirect(const u16 *itemsForSale, bool8 sell);   // (shop.c)
+static u32 ShopsAt(void)
+{
+    u32 tables;
+    if (!Ready() || sSubwayAt == 0)
+        return 0;
+    tables = sSubwayTablesAt + 488;   // (u3d_subway.c struct Tables: the passengers' count, then theirs)
+    return tables + 4 + 16 * Get32(tables);
+}
+
+// the BP exchanges' lists after the marts' (WHICH 0: shop 254, items; 1: shop 253, TMs): u16 item, pad, s32 BP each
+const u8 *U3D_Vm_BpList(u8 which, u32 *count)
+{
+    u32 at = ShopsAt(), lists, total = 0, i;
+    *count = 0;
+    if (at == 0 || (lists = Get32(at)) == 0 || lists > 64)
+        return NULL;
+    for (i = 0; i < lists; i++)
+        total += sPack[at + 4 + i];
+    at = (at + 4 + lists + (lists % 2) + 2 * total + 9 + 3) & ~3;
+    if (which)
+        at += 4 + 8 * Get32(at);
+    *count = Get32(at);
+    return sPack + at + 4;
+}
+
+// BLACK CITY's market (shops 247-251, FIELD_WFBC_DATA_LOCAL_FillPeopleListEntries): stall K sells what residents 2K
+// and 2K + 1 brought (their records' list entries), at their prices (shop.c MP_Shop_SetPrices)
+static const u8 *WfbcRecord(u8 npc);
+static u32 sMartPrices[48];
+void MP_Shop_SetPrices(const u16 *items, const u32 *prices);
+static bool8 BlackCityMart(u16 shop)
+{
+    u32 k = shop - 247, i, n = 0;
+    for (i = 2 * k; i < 2 * k + 2 && i < 10; i++)
+    {
+        const u8 *r = sWork.wfbc.valid && sWork.wfbc.npc[i] != 0xFF ? WfbcRecord(sWork.wfbc.npc[i]) : NULL;
+        u16 item = r != NULL ? Item(Le16(r + 0x28)) : ITEM_NONE;
+        if (item == ITEM_NONE)
+            continue;
+        sMartItems[n] = item;
+        sMartPrices[n++] = Le16(r + 0x2A);
+    }
+    sMartItems[n] = ITEM_NONE;
+    MP_Shop_SetPrices(sMartItems, sMartPrices);
+    MPNet_Log("u3d vm: BLACK CITY's stall %u: %u things", k, n);
+    return n != 0;
+}
+
+static bool8 MartList(u16 shop)
+{
+    u32 at = ShopsAt(), lists, items, idx, i, from = 0, n = 0, badges = 0;
+    if (at == 0 || (lists = Get32(at)) == 0 || lists > 64)
+        return FALSE;
+    items = at + 4 + lists + (lists % 2);
+    for (i = 0; i < 8; i++)
+        badges += (sWork.badges >> i) & 1;
+    for (i = 0; i < lists; i++)
+        from += sPack[at + 4 + i];
+    if (shop == 255)
+        idx = sPack[items + 2 * from + badges];   // (MISC_CountBadges: the list for that many)
+    else
+        idx = shop + 6;
+    if (idx >= lists)
+        return FALSE;
+    for (i = 0, from = 0; i < idx; i++)
+        from += sPack[at + 4 + i];
+    for (i = 0; i < sPack[at + 4 + idx] && n < ARRAY_COUNT(sMartItems) - 1; i++)
+    {
+        u16 item = Item(Get16(items + 2 * (from + i)));
+        if (item != ITEM_NONE)
+            sMartItems[n++] = item;
+    }
+    sMartItems[n] = ITEM_NONE;
+    MPNet_Log("u3d vm: mart %u (list %u): %u things", shop, idx, n);
+    return n != 0;
+}
+
 static const u8 *TradeRecord(u16 id);
 static u32 Get32At(const u8 *p, u32 o);
 static u8 GenderOf(struct Pokemon *mon);
@@ -891,6 +1084,11 @@ static u8 *Slot(u8 slot)   // (Black's word slots, UNOVA's own: the game's battl
 static u16 Item(u16 black)
 {
     return black < ARRAY_COUNT(sUnovaItems) ? sUnovaItems[black] : ITEM_NONE;
+}
+
+u16 U3D_Vm_Item(u16 black)
+{
+    return Item(black);
 }
 
 static u16 Species(u16 national)
@@ -2273,6 +2471,86 @@ static void Step(struct Thread *t)
             break;
         case U3C_NAMEIN_SETUP_ScrCmdSetFieldSaveFlag:   // (a field save flag for a scene's restart: Kai saves its own way)
             break;
+        case U3C_WORK_CmdGetSaveStatus:   // has a save, a new game, a big save to write: a save there, not new, small
+            *WorkPtr(a[0]) = 1;
+            *WorkPtr(a[1]) = 0;
+            *WorkPtr(a[2]) = 0;
+            break;
+        case U3C_SetTimeIcon:          // (the saving clock: the game shows its own)
+        case U3C_ChangeSubscreenMode:  // (the lower screen's mode: one screen here)
+        case U3C_ResetSubscreenMode:
+            break;
+        case U3C_WORK_CmdGetScriptId:   // (the zone the script was started in: the GEAR STATION's lines read it)
+            *WorkPtr(a[0]) = CurrentZone();
+            break;
+        case U3C_FLD_BATTLE_CheckPartyRegulation:   // regulation, result: 0 a team can be made, 3 not (the BATTLE SUBWAY's
+            *WorkPtr(a[1]) = U3D_Subway_PartyUsable(V(0)) ? 0 : 3;   // 20-22; others: no BATTLE BOX to look at)
+            break;
+        // ---- the BATTLE SUBWAY (u3d_subway.c: Black's bsubway_scr.c); the field's people and places here
+        case U3C_BSUBWAY_SCR_CmdClearWorkPtr:
+            break;
+        case U3C_BSUBWAY_SCR_CmdCreateWork:   // resume, line
+            U3D_Subway_Bind(&sWork.subway);
+            U3D_Subway_CreateWork(a[0], V(1));
+            break;
+        case U3C_BSUBWAY_SCR_CmdDeleteWork:
+            U3D_Subway_DeleteWork();
+            break;
+        case U3C_BSUBWAY_SCR_CmdTool:   // command, two values, the result's work
+        {
+            u16 *dst = WorkPtr(a[3]), result = *dst, bank = 0, msg = 0;
+            u8 act;
+            U3D_Subway_Bind(&sWork.subway);
+            act = U3D_Subway_Tool(a[0], V(1), V(2), &result, &bank, &msg);
+            *dst = result;
+            if (act == U3D_SUBWAY_VM)
+                SubwayField(a[0], V(1), V(2), dst);
+            else if (act == U3D_SUBWAY_PARTY)
+                OpenScreen(t, SCREEN_SUBWAY_PARTY, 0);
+            else if (act == U3D_SUBWAY_BATTLE)
+                OpenScreen(t, SCREEN_SUBWAY_BATTLE, 0);
+            else if (act == U3D_SUBWAY_RESET)
+                OpenScreen(t, SCREEN_SUBWAY_RESET, 0);
+            else if (act == U3D_SUBWAY_MESSAGE)   // (a trainer's greeting in a balloon: closed with A or B)
+            {
+                MessageInBank(t, bank, msg);
+                t->wait = W_MESSAGE_KEY;
+            }
+            else if (act == U3D_SUBWAY_YESNO)
+            {
+                DisplayYesNoMenuDefaultYes();
+                t->result = dst;
+                t->wait = W_YESNO;
+            }
+            if (sScreen == SCREEN_SUBWAY_PARTY || sScreen == SCREEN_SUBWAY_BATTLE || sScreen == SCREEN_SUBWAY_RESET)
+                return;
+            break;
+        }
+        case U3C_SHOP_StartShop:   // shop, (result): Black's lists in the game's own POKeMART
+            if (V(0) == 254 || V(0) == 253)   // (the GEAR STATION's BP exchanges: u3d_bpshop.c)
+            {
+                sBpShop = V(0) == 253;
+                OpenScreen(t, SCREEN_BPSHOP, 0);
+                return;
+            }
+            if (V(0) >= 247 && V(0) <= 251 ? BlackCityMart(V(0)) : MartList(V(0)))
+            {
+                *WorkPtr(a[1]) = 1;   // (Black's clerk asks again: "Is there anything else?")
+                OpenScreen(t, SCREEN_MART, 0);
+                return;
+            }
+            MPNet_Log("u3d vm: shop %u not open yet", V(0));
+            break;
+        case U3C_PROC_CallBagScreen:   // mode (0: selling to a clerk), result, item
+            if (V(0) == 0)
+            {
+                *WorkPtr(a[1]) = 1;
+                *WorkPtr(a[2]) = 0;
+                OpenScreen(t, SCREEN_SELL, 0);
+                return;
+            }
+            MPNet_Log("u3d vm: bag screen %u not open yet", V(0));
+            break;
         case U3C_CheckBeaconTrainerKey:   // (whether an event item came from a real distribution: Kai gives them itself)
             *WorkPtr(a[1]) = 1;
             break;
@@ -2672,6 +2950,28 @@ void U3D_VmOpenScreen(void)
         CreateInGameTradePokemon();
         DoInGameTradeScene();
         break;
+    case SCREEN_SUBWAY_PARTY:   // (the game's frontier party menu: Black's number of POKeMON, any level, its banned list)
+        gSpecialVar_0x8004 = FRONTIER_LVL_OPEN;
+        gSpecialVar_0x8005 = U3D_Subway_MemberNum();
+        ChoosePartyForBattleFrontier();
+        break;
+    case SCREEN_SUBWAY_BATTLE:
+        U3D_Subway_StartBattle();
+        BattleSetup_StartUnovaBattle();
+        break;
+    case SCREEN_BPSHOP:   // (u3d_bpshop.c: its end starts the script again)
+        U3D_BpShop_Open(sBpShop);
+        break;
+    case SCREEN_MART:   // (the game's POKeMART on its BUY list: its end starts the script again)
+        MP_CreatePokemartDirect(sMartItems, FALSE);
+        break;
+    case SCREEN_SELL:   // (... on SELL: the bag)
+        sMartItems[0] = ITEM_NONE;
+        MP_CreatePokemartDirect(sMartItems, TRUE);
+        break;
+    case SCREEN_SUBWAY_RESET:   // (a REST: the game saved by the script, back to the title screen)
+        DoSoftReset();
+        break;
     case SCREEN_CLEAR:   // (the script ended: the clear takes the game from here)
         sScreen = SCREEN_NONE;
         sThread.alive = FALSE;
@@ -2710,6 +3010,9 @@ void U3D_VmResume(void)
         sZekromBattle = FALSE;
         break;
     case SCREEN_TRADE:
+        break;
+    case SCREEN_SUBWAY_PARTY:
+        U3D_Subway_PartyChosen();
         break;
     case SCREEN_PARTY:
         if (sPartySlotWork)
@@ -3129,6 +3432,29 @@ void U3D_Vm_WarpPos(s16 *x, s16 *y)
 static u32 Get32At(const u8 *p, u32 o)
 {
     return p[o] | p[o + 1] << 8 | p[o + 2] << 16 | (u32)p[o + 3] << 24;
+}
+
+// ---- the BATTLE SUBWAY's data (u3d_subway.c): a set (16 bytes), a trainer's list, ov021's / ov010's tables
+const u8 *U3D_Vm_SubwaySet(u16 id)
+{
+    if (!Ready() || sSubwayAt == 0 || id >= Get32(sSubwayAt))
+        return NULL;
+    return sPack + sSubwayAt + 4 + 16 * id;
+}
+
+const u8 *U3D_Vm_SubwayTrainer(u16 member, u32 *size)
+{
+    if (!Ready() || sSubwayAt == 0)
+        return NULL;
+    return FileOf(sSubwayTrainersAt, member, size);
+}
+
+const u8 *U3D_Vm_SubwayTables(u32 *size)
+{
+    if (!Ready() || sSubwayAt == 0)
+        return NULL;
+    *size = sPackSize - sSubwayTablesAt;
+    return sPack + sSubwayTablesAt;
 }
 
 static const u8 *TradeRecord(u16 id)

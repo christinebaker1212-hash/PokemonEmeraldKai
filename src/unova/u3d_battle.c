@@ -40,6 +40,7 @@ static u8 sClassName[3][24];
 static u8 sClass[3];   // (Black's trainer class: its battle picture, u3d_gfx.c)
 static u16 sBlackTrainer[3];
 static u8 sResult;
+static bool8 sSubway;   // (the BATTLE SUBWAY's: u3d_subway.c)
 static s8 sTagSlots[MULTI_PARTY_SIZE];   // (a tag battle: the party slots of the three POKéMON that battle; -1 none)
 static bool8 sTag;
 
@@ -149,12 +150,12 @@ u8 U3D_Party(struct Pokemon *party, u16 trainerId, bool8 firstTrainer)
     return sTeamCount[which];
 }
 
-// Black's prize: the trainer's cash byte x 4 x the last POKéMON's level (as Gen 5 pays it)
+// Black's prize: the trainer's cash byte x 4 x the last POKéMON's level (as Gen 5 pays it); none on the BATTLE SUBWAY
 u32 U3D_Money(u16 trainerId)
 {
     u32 size, level = 1, i;
     const u8 *t = U3D_Vm_Trainer(sBlackTrainer[Which(trainerId)], &size);
-    if (t == NULL || size < 20)
+    if (sSubway || t == NULL || size < 20)
         return 0;
     for (i = 0; i < PARTY_SIZE; i++)
         if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES) != SPECIES_NONE)
@@ -186,6 +187,53 @@ bool8 U3D_PrepareBattle(u16 first, u16 second)
     gBattleTypeFlags = BATTLE_TYPE_TRAINER | (doubles ? BATTLE_TYPE_DOUBLE : 0) | (n > 1 ? BATTLE_TYPE_TWO_OPPONENTS : 0);
     sResult = 0;
     return TRUE;
+}
+
+// The BATTLE SUBWAY's (u3d_subway.c): its trainer NO's name (system bank 11), Black's class, the team as drawn
+#define BANK_SUBWAY_NAMES 11
+bool8 U3D_SetSubwayTrainer(u8 which, u16 trainerNo, u8 blackClass, const struct Pokemon *team, u8 count)
+{
+    u16 slot = TRAINER_UNOVA_A + which;
+    struct Trainer *s = Slot(slot);
+    u32 i;
+    if (s == NULL || which > 2)
+        return FALSE;
+    *s = gTrainersBase[slot];
+    TextInto(s->trainerName, BANK_SUBWAY_NAMES, trainerNo, TRAINER_NAME_LENGTH);
+    s->aiFlags = AI_SCRIPT_CHECK_BAD_MOVE | AI_SCRIPT_TRY_TO_FAINT | AI_SCRIPT_CHECK_VIABILITY;
+    for (i = 0; i < count && i < PARTY_SIZE; i++)
+        sTeam[which][i] = team[i];
+    sTeamCount[which] = min(count, PARTY_SIZE);
+    s->partySize = sTeamCount[which];
+    sBlackTrainer[which] = 0xFFFF;
+    TextInto(sClassName[which], BANK_TRAINER_CLASSES, blackClass, 20);
+    sClass[which] = blackClass;
+    MPNet_Log("unova: subway trainer %c %d (class %d): %d POKeMON", 'A' + which, trainerNo, blackClass, count);
+    return TRUE;
+}
+
+// ... and its battle: single (lines 0, 4, 5), double (1, 6), or beside the partner against two (2, 3, 7, 8); the
+// player's party is the chosen copies already (u3d_subway.c U3D_Subway_StartBattle)
+void MP_SetupTowerPartner(u16 trainer);
+u8 MP_CreateTrainerPartyAt(struct Pokemon *party, u16 trainerNum);
+void U3D_PrepareSubwayBattle(u8 playMode, u8 members)
+{
+    bool8 multi = playMode == 2 || playMode == 3 || playMode == 7 || playMode == 8;
+    bool8 doubles = playMode == 1 || playMode == 6;
+    gTrainerBattleOpponent_A = TRAINER_UNOVA_A;
+    gTrainerBattleOpponent_B = multi ? TRAINER_UNOVA_B : 0;
+    gBattleTypeFlags = BATTLE_TYPE_TRAINER | (doubles ? BATTLE_TYPE_DOUBLE : 0);
+    if (multi)
+    {
+        u32 i;
+        for (i = members; i < PARTY_SIZE; i++)
+            ZeroMonData(&gPlayerParty[i]);
+        gBattleTypeFlags |= BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_MULTI | BATTLE_TYPE_INGAME_PARTNER;
+        MP_SetupTowerPartner(TRAINER_UNOVA_C);
+        MP_CreateTrainerPartyAt(&gPlayerParty[MULTI_PARTY_SIZE], TRAINER_UNOVA_C);
+    }
+    sSubway = TRUE;
+    sResult = 0;
 }
 
 // Black's StartMultiTrainerBattle (WELLSPRING CAVE beside CHEREN): beside PARTNER against FIRST and SECOND, the
@@ -226,7 +274,8 @@ bool8 U3D_PrepareTagBattle(u16 partner, u16 first, u16 second)
 // The partner's back picture: Black's own for the partners it draws from behind (archive 0x49: CHEREN, class 37)
 bool8 U3D_Gfx_PartnerBack(u16 trainerId, const u8 **tiles, const u16 **pal)
 {
-    static const struct { u8 cls, back; } sBacks[] = {{37, 3}};
+    static const struct { u8 cls, back; } sBacks[] = {{37, 3}, {0, 0}, {1, 1}};   // (and the BATTLE SUBWAY's partner:
+                                                                                 // HILBERT 0, HILDA 1)
     u32 i;
     if (trainerId != TRAINER_UNOVA_C)
         return FALSE;
@@ -236,8 +285,14 @@ bool8 U3D_Gfx_PartnerBack(u16 trainerId, const u8 **tiles, const u16 **pal)
     return FALSE;
 }
 
+void U3D_Subway_BattleEnded(bool8 won);
 void U3D_BattleEnded(bool8 won)
 {
+    if (sSubway)   // (the BATTLE SUBWAY's: the party it saved back)
+    {
+        sSubway = FALSE;
+        U3D_Subway_BattleEnded(won);
+    }
     if (sTag)   // (the three that battled back to their own slots, the rest of the party with them)
     {
         u8 i;
@@ -263,6 +318,8 @@ u16 U3D_BattleSong(void)
         return MUS_UNOVA_VS_NORAPOKE;
     if (!U3D_IsTrainer(gTrainerBattleOpponent_A))
         return MUS_UNOVA_VS_TRAINER;
+    if (sSubway)   // (the BATTLE SUBWAY: its bosses' song, else a trainer's)
+        return sClass[0] == 88 || sClass[0] == 102 ? MUS_UNOVA_VS_SUBWAY_TRAINER : MUS_UNOVA_VS_TRAINER;
     kind = U3D_Vm_TrainerSongKind(sBlackTrainer[0]);
     return kind < ARRAY_COUNT(sSongs) ? sSongs[kind] : MUS_UNOVA_VS_TRAINER;
 }

@@ -6414,6 +6414,9 @@ static u8 GetPartySlotEntryStatus(s8 slot)
     return 0;
 }
 
+bool8 U3D_Subway_Choosing(void);   // Moemon Kai (src/unova/u3d_subway.c)
+bool8 U3D_Subway_Banned(u16 species);
+
 static bool8 GetBattleEntryEligibility(struct Pokemon *mon)
 {
     u16 i = 0;
@@ -6421,6 +6424,8 @@ static bool8 GetBattleEntryEligibility(struct Pokemon *mon)
 
     if (Sinnoh_Tower_Choosing())   // Moemon Kai: SINNOH's BATTLE TOWER: Platinum's banned list, any level
         return !GetMonData(mon, MON_DATA_IS_EGG) && !Sinnoh_Tower_Banned(GetMonData(mon, MON_DATA_SPECIES));
+    if (U3D_Subway_Choosing())   // Moemon Kai: UNOVA's BATTLE SUBWAY: Black's banned list, any level (src/unova/u3d_subway.c)
+        return !GetMonData(mon, MON_DATA_IS_EGG) && !U3D_Subway_Banned(GetMonData(mon, MON_DATA_SPECIES));
 
     if (GetMonData(mon, MON_DATA_IS_EGG)
         || GetMonData(mon, MON_DATA_LEVEL) > GetBattleEntryLevelCap()

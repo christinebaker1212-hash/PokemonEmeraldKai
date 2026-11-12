@@ -3670,6 +3670,8 @@ static void MpCoopExpStep(void)
     }
 }
 
+bool8 U3D_Subway_InBattle(void);   // Moemon Kai (src/unova/u3d_subway.c)
+
 static void Cmd_getexp(void)
 {
     u16 item;
@@ -3692,7 +3694,8 @@ static void Cmd_getexp(void)
               | BATTLE_TYPE_FRONTIER
               | BATTLE_TYPE_SAFARI
               | BATTLE_TYPE_BATTLE_TOWER
-              | BATTLE_TYPE_EREADER_TRAINER)))
+              | BATTLE_TYPE_EREADER_TRAINER))
+            || U3D_Subway_InBattle())   // Moemon Kai: UNOVA's BATTLE SUBWAY gives none (src/unova/u3d_subway.c)
         {
             gBattleScripting.getexpState = 6; // goto last case
         }
@@ -6300,7 +6303,13 @@ static u32 GetTrainerMoneyToGive(u16 trainerId)
 
 static void Cmd_getmoneyreward(void)
 {
-    u32 moneyReward = GetTrainerMoneyToGive(gTrainerBattleOpponent_A);
+    u32 moneyReward;
+    if (U3D_Subway_InBattle())   // Moemon Kai: UNOVA's BATTLE SUBWAY pays no prize and says nothing of one (its
+    {                             // "got X" line and the wait after it skipped: src/unova/u3d_subway.c)
+        gBattlescriptCurrInstr += 1 + 3 + 3;
+        return;
+    }
+    moneyReward = GetTrainerMoneyToGive(gTrainerBattleOpponent_A);
     if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
         moneyReward += GetTrainerMoneyToGive(gTrainerBattleOpponent_B);
     moneyReward = moneyReward * (100 + MP_BuddyBonusPercent()) / 100; // Moemon Co-op: buddy bonus

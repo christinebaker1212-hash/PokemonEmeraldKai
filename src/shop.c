@@ -476,8 +476,28 @@ void CB2_ExitSellMenu(void)
     SetMainCallback2(CB2_ReturnToField);
 }
 
+// Moemon Kai: a mart's own prices for some of what it sells (UNOVA's BLACK CITY market: its residents' prices,
+// src/unova/u3d_vm.c); set before CreatePokemartMenu, gone when the mart closes
+static const u16 *sMpPriceItems;
+static const u32 *sMpPrices;
+void MP_Shop_SetPrices(const u16 *items, const u32 *prices)
+{
+    sMpPriceItems = items;
+    sMpPrices = prices;
+}
+
+static u32 MpShopPrice(u16 itemId)
+{
+    u32 i;
+    for (i = 0; sMpPriceItems != NULL && sMpPriceItems[i] != ITEM_NONE; i++)
+        if (sMpPriceItems[i] == itemId)
+            return sMpPrices[i];
+    return GetItemPrice(itemId);
+}
+
 static void Task_HandleShopMenuQuit(u8 taskId)
 {
+    sMpPriceItems = NULL;   // Moemon Kai
     if (sMartInfo.martType == MART_TYPE_NORMAL)
     {
         void Sinnoh_JournalShopEnd(void);
@@ -509,8 +529,19 @@ static void MapPostLoadHook_ReturnToShopMenu(void)
     CreateTask(Task_ReturnToShopMenu, 8);
 }
 
+static bool8 sMpDirect;   // Moemon Kai: straight to BUY or SELL and back to the script after (MP_CreatePokemartDirect)
 static void Task_ReturnToShopMenu(u8 taskId)
 {
+    if (IsWeatherNotFadingIn() == TRUE && sMpDirect)
+    {
+        sMpDirect = FALSE;
+        sMpPriceItems = NULL;
+        UnlockPlayerFieldControls();
+        DestroyTask(taskId);
+        if (sMartInfo.callback)
+            sMartInfo.callback();
+        return;
+    }
     if (IsWeatherNotFadingIn() == TRUE)
     {
         if (sMartInfo.martType == MART_TYPE_DECOR2)
@@ -674,7 +705,7 @@ static void BuyMenuPrintPriceInList(u8 windowId, u32 itemId, u8 y)
         {
             ConvertIntToDecimalStringN(
                 gStringVar1,
-                GetItemPrice(itemId) >> IsPokeNewsActive(POKENEWS_SLATEPORT),
+                MpShopPrice(itemId) >> IsPokeNewsActive(POKENEWS_SLATEPORT),
                 STR_CONV_MODE_LEFT_ALIGN,
                 5);
         }
@@ -1064,7 +1095,7 @@ static void Task_BuyMenu(u8 taskId)
             BuyMenuPrintCursor(tListTaskId, COLORID_GRAY_CURSOR);
 
             if (sMartInfo.martType == MART_TYPE_NORMAL)
-                sShopData->totalCost = (GetItemPrice(itemId) >> IsPokeNewsActive(POKENEWS_SLATEPORT));
+                sShopData->totalCost = (MpShopPrice(itemId) >> IsPokeNewsActive(POKENEWS_SLATEPORT));
             else
                 sShopData->totalCost = gDecorations[itemId].price;
 
@@ -1148,7 +1179,7 @@ static void Task_BuyHowManyDialogueHandleInput(u8 taskId)
 
     if (AdjustQuantityAccordingToDPadInput(&tItemCount, sShopData->maxQuantity) == TRUE)
     {
-        sShopData->totalCost = (GetItemPrice(tItemId) >> IsPokeNewsActive(POKENEWS_SLATEPORT)) * tItemCount;
+        sShopData->totalCost = (MpShopPrice(tItemId) >> IsPokeNewsActive(POKENEWS_SLATEPORT)) * tItemCount;
         BuyMenuPrintItemQuantityAndPrice(taskId);
     }
     else
@@ -1710,6 +1741,31 @@ void CreatePokemartMenu(const u16 *itemsForSale)
     SetShopItemsForSale(MP_ShopItems(itemsForSale));
     ClearItemPurchases();
     SetShopMenuCallback(ScriptContext_Enable);
+}
+
+// Moemon Kai: a POKeMART that opens straight on its BUY list (or SELL, the bag) and goes back to the script when it
+// closes, for a clerk who asked BUY or SELL in their own words (UNOVA's: Black's clerks, src/unova/u3d_vm.c)
+static void Task_MpShopDirect(u8 taskId)
+{
+}
+
+void MP_CreatePokemartDirect(const u16 *itemsForSale, bool8 sell)
+{
+    void Sinnoh_JournalShopReset(void);
+    u8 taskId;
+    Sinnoh_JournalShopReset();
+    LockPlayerFieldControls();
+    sMartInfo.martType = MART_TYPE_NORMAL;
+    sMartInfo.windowId = WINDOW_NONE;
+    SetShopItemsForSale(MP_ShopItems(itemsForSale));
+    ClearItemPurchases();
+    SetShopMenuCallback(ScriptContext_Enable);
+    sMpDirect = TRUE;
+    taskId = CreateTask(Task_MpShopDirect, 8);
+    if (sell)
+        Task_HandleShopMenuSell(taskId);
+    else
+        Task_HandleShopMenuBuy(taskId);
 }
 
 void CreateDecorationShop1Menu(const u16 *itemsForSale)

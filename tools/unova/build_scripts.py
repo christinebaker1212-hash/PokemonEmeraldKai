@@ -39,6 +39,15 @@ File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little e
   each (u16 object code, pad, moods (White Forest, Black City), species x3, pad, levels x3, pad, weights x3, pad, s32
   trainer, u16 scripts x4, gift item, gift chance, list entry, its value, weight, block range); then BLACK CITY's
   spots (member 0x22: u8 x, z of the ten residents, then of ten items)
+  (version 10) the BATTLE SUBWAY (ov010 fld_btl_inst_tool.c, ov021 bsubway_scr.c): u32 sets (a/2/1/4: 16 bytes each,
+  u16 species, moves x4, u8 EV mask, nature, u16 item, form), a file block of the trainers' lists (a/2/1/5: u16 trainer
+  type, count, the sets it draws from), then ov021's and ov010's tables: u16 trainer ranges (min, max) x13 (the
+  normal lines' late trains x2, early x3; the super lines' early x4, late x4), u8 BP x70 (7 rows of 10), pad, u16
+  (trainer type, object code) x53, u16 the items given when two would match x4, u32 the passengers' thresholds x22,
+  u16 each line's platform zone x9, its tile x9, z x9, pad, u32 the passengers (16 bytes each: u16 object code,
+  threshold, x, pad, z, param, u32); then the marts (ov021 scrcmd_proc_fld.c): u32 lists (26), u8 each one's count,
+  pad to 2, the lists' items (u16, Black's numbers), u8 the list for each badge count x9, pad to 4; then the BP
+  exchanges (items, TMs): u32 count, (u16 item, pad, s32 BP) each, twice
 """
 import os
 import struct
@@ -51,7 +60,8 @@ import narc  # noqa: E402
 import scripts as scr  # noqa: E402
 import zones as zr  # noqa: E402
 
-VERSION = 9
+VERSION = 10
+SUBWAY_SETS, SUBWAY_TRAINERS = 'a/2/1/4', 'a/2/1/5'   # (version 10: the BATTLE SUBWAY)
 WFBC_ARC, WFBC_PEOPLE, WFBC_SPOTS = 'a/1/5/4', 30, 0x22   # (version 9: BLACK CITY's residents)
 TRADE_ARC = 'a/1/6/5'   # (version 8: the in-game trades)
 TVT_ARC, TVT_FIRST = 'a/1/3/1', 62   # (version 7: the Xtransceiver's scripted calls, ov174 local_tvt_sys.c)
@@ -61,6 +71,45 @@ CLASS_BGM, ARM9_BASE = 0x020A75A8, 0x02004000
 ENCOUNT_ARC = 'a/1/2/6'   # (version 4: the zones' wild POKéMON)
 EVENT_ARC = 'a/1/2/5'
 TRDATA_ARC, TRPOKE_ARC = 'a/0/9/2', 'a/0/9/3'   # (Black's trainers and their teams: version 2)
+
+
+def subway_block(base):
+    """version 10: the BATTLE SUBWAY's sets, trainers and tables (see the top)"""
+    sets = narc.arc(SUBWAY_SETS)
+    out = struct.pack('<I', len(sets)) + b''.join(bytes(x[:16]).ljust(16, b'\0') for x in sets)
+    out += files_block(narc.arc(SUBWAY_TRAINERS), base + len(out))
+    ram, ov = scr.scrcmd.ov_image(21)
+
+    def at(addr, n):
+        return ov[addr - ram:addr - ram + n]
+    out += at(0x021DB3D0, 8) + at(0x021DB3D8, 12) + at(0x021DB3E4, 16) + at(0x021DB3F4, 16)
+    out += at(0x021DACDC, 70) + b'\0\0'
+    ram10, ov10 = scr.scrcmd.ov_image(10)
+    out += ov10[0x0217208C - ram10:0x0217208C - ram10 + 0x35 * 4] + ov10[0x02172084 - ram10:0x02172084 - ram10 + 8]
+    out += at(0x021DADF8, 88)
+    zones = struct.unpack('<9I', at(0x021DADAC, 36))
+    pos = struct.unpack('<27i', at(0x021DAE50, 108))
+    out += struct.pack('<9H', *zones) + struct.pack('<9h', *[pos[3 * i] // 0x10000 for i in range(9)])
+    out += struct.pack('<9h', *[pos[3 * i + 2] // 0x10000 for i in range(9)]) + b'\0\0'
+    spawns, a = [], 0x021DAEBC
+    while struct.unpack('<H', at(a, 2))[0] != 0xFFFF:
+        spawns.append(at(a, 16))
+        a += 16
+    out += struct.pack('<I', len(spawns)) + b''.join(spawns)
+    # the marts: Black's lists by badges (shop 255) and its numbered ones (list 6 + the number)
+    lists = 26
+    counts = list(at(0x021D95DE, lists))
+    ptrs = struct.unpack('<%dI' % lists, at(0x021DE1A8, 4 * lists))
+    out += struct.pack('<I', lists) + bytes(counts) + b'\0' * (lists % 2)
+    for p, n in zip(ptrs, counts):
+        out += at(p, 2 * n)
+    out += at(0x021D946C, 9)
+    out += b'\0' * (-len(out) % 4)
+    for i in range(2):   # (the BP exchanges: 254 items, 253 TMs)
+        n = at(0x021D9430, 2)[i]
+        p = struct.unpack('<2I', at(0x021DE164, 8))[i]
+        out += struct.pack('<I', n) + at(p, 8 * n)
+    return out
 
 
 def files_block(files, base):
@@ -139,6 +188,8 @@ def main():
     wf = narc.arc(WFBC_ARC)
     pack += struct.pack('<I', WFBC_PEOPLE) + b''.join(bytes(wf[i][:0x30]) for i in range(WFBC_PEOPLE))
     pack += bytes(wf[WFBC_SPOTS][:40]).ljust(40, b'\0')
+    pack += b'\0' * (-len(pack) % 4)
+    pack += subway_block(len(pack))
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(b'U3SZ' + struct.pack('<I', len(pack)) + zlib.compress(bytes(pack), 6))
     print('%s: %d script files, %d zones, %d event files, %d bytes' % (out_path, len(narc.arc(scr.ARC)), len(zs),
