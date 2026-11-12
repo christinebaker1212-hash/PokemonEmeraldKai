@@ -11,9 +11,16 @@ each (12 and more: the main characters); the game's nine (down, up, left standin
 left turned round) are made from them, the second step of up and down the first turned round, as Black walks.
 Anything else is still: its first frame. 64x64 sheets are still 64x64.
 
-Format (little endian): "U3DG" u32 version 1, u16 codes; each: u8 kind (0 walking: 9 frames 32x32, 1 still 32x32,
+Battle pictures (version 2): Black's trainers' front pictures (archive 0x48, a/0/7/2: eight files a picture, LZ11;
+aletheia's pokegra.c), each its cell 0 (NCER, 1D mapping: a tile number counts 64 bytes) of its 80x80 character sheet
+(NCGR) in its palette (NCLR), drawn whole by the game's big-sprite renderer; which picture a trainer class shows is
+arm9's TrainerGraIndexTable (0x020A023C, 0x6A classes).
+
+Format (little endian): "U3DG" u32 version 2, u16 codes; each: u8 kind (0 walking: 9 frames 32x32, 1 still 32x32,
   4 still 64x64, 0xFF none), u8 pad, u16 palette[16] (BGR555, 0 transparent), the frames as GBA 4bpp tiles; then
   MIXED's smaller copy (OPTIONS > DISPLAY > SPRITE SCALING > UNOVA PEOPLE): u16 palette[16], the same frames
+  then "TRPC", u16 classes, u8 the picture of each (padded to 2), u16 pictures; each: u16 palette[16] (0 transparent),
+  s16 dx, dy (its top-left from the sprite's point), u16 w, h, rows of (w + 1) / 2 bytes (4 bits, the low nibble first)
 """
 import importlib.util
 import os
@@ -32,7 +39,7 @@ _sinnoh = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_sinnoh)
 shrink, tiles_of = _sinnoh.shrink, _sinnoh.tiles_of   # (the smaller copy's filter: a tool, never the engines)
 
-VERSION = 1
+VERSION = 2
 SMALL = 0.84          # MIXED: about Gen 3's size, as SINNOH's
 CODES_ARC, BBD_ARC = 'a/0/4/8', 'a/0/4/9'
 WALK3 = (3, 0, 6, 4, 5, 1, 2, 7, 8)    # (three a direction: up 0-2, down 3-5, left 6-8)
@@ -99,6 +106,123 @@ def sprite(t):
     return 1, pal, [fr[0]]
 
 
+TRAINER_ARC = 'a/0/7/2'
+GRA_TABLE, GRA_CLASSES, ARM9_BASE = 0x020A023C, 0x6A, 0x02004000
+OAM_SIZES = {(0, 0): (8, 8), (0, 1): (16, 16), (0, 2): (32, 32), (0, 3): (64, 64), (1, 0): (16, 8), (1, 1): (32, 8),
+             (1, 2): (32, 16), (1, 3): (64, 32), (2, 0): (8, 16), (2, 1): (8, 32), (2, 2): (16, 32), (2, 3): (32, 64)}
+
+
+def _lz11(d):
+    """The NitroSDK's LZ11 (type 0x11), as Black's files are packed"""
+    if not d or d[0] != 0x11:
+        return d
+    size = d[1] | d[2] << 8 | d[3] << 16
+    o, out = 4, bytearray()
+    if size == 0:
+        size, o = struct.unpack_from('<I', d, 4)[0], 8
+    while len(out) < size and o < len(d):
+        flags = d[o]
+        o += 1
+        for bit in range(8):
+            if len(out) >= size or o >= len(d):
+                break
+            if not flags & (0x80 >> bit):
+                out.append(d[o])
+                o += 1
+                continue
+            b = d[o]
+            ind = b >> 4
+            if ind == 0:
+                n = (((b & 0xF) << 4) | (d[o + 1] >> 4)) + 0x11
+                disp = (((d[o + 1] & 0xF) << 8) | d[o + 2]) + 1
+                o += 3
+            elif ind == 1:
+                n = (((b & 0xF) << 12) | (d[o + 1] << 4) | (d[o + 2] >> 4)) + 0x111
+                disp = (((d[o + 2] & 0xF) << 8) | d[o + 3]) + 1
+                o += 4
+            else:
+                n = ind + 1
+                disp = (((b & 0xF) << 8) | d[o + 1]) + 1
+                o += 2
+            for _ in range(n):
+                out.append(out[-disp])
+    return bytes(out[:size])
+
+
+def _chunk(d, magic):
+    o = struct.unpack_from('<H', d, 0xC)[0]
+    while o + 8 <= len(d):
+        size = struct.unpack_from('<I', d, o + 4)[0]
+        if d[o:o + 4] == magic:
+            return o
+        if size == 0:
+            break
+        o += size
+    raise KeyError(magic)
+
+
+def trainer_picture(files):
+    """(palette[16], dx, dy, w, h, pixel rows) of a picture's cell 0"""
+    ncgr, ncer, nclr = (_lz11(files[k]) for k in (0, 2, 7))
+    o = _chunk(ncgr, b'RAHC')
+    _, _, _, _, _, size, off = struct.unpack_from('<HHIIIII', ncgr, o + 8)
+    chars = ncgr[o + 8 + off:o + 8 + off + size]
+    o = _chunk(nclr, b'TTLP')
+    _, _, size, off = struct.unpack_from('<IIII', nclr, o + 8)
+    pal = list(struct.unpack_from('<16H', nclr, o + 8 + off))
+    o = _chunk(ncer, b'KBEC')
+    n, attrs, off, mapping = struct.unpack_from('<HHII', ncer, o + 8)
+    base = o + 8 + off
+    cnt, _, ooff = struct.unpack_from('<HHI', ncer, base)
+    shift = {0: 0, 1: 1, 2: 2, 3: 3}.get(mapping, 0)
+    oams = []
+    for k in range(cnt):
+        a0, a1, a2 = struct.unpack_from('<HHH', ncer, base + n * (16 if attrs & 1 else 8) + ooff + 6 * k)
+        y = (a0 & 0xFF) - (256 if a0 & 0x80 else 0)
+        x = (a1 & 0x1FF) - (512 if a1 & 0x100 else 0)
+        oams.append((x, y, OAM_SIZES[(a0 >> 14, a1 >> 14)], (a2 & 0x3FF) << shift, bool(a1 & 0x1000), bool(a1 & 0x2000)))
+    x0, y0 = min(o[0] for o in oams), min(o[1] for o in oams)
+    x1, y1 = max(o[0] + o[2][0] for o in oams), max(o[1] + o[2][1] for o in oams)
+    w, h = x1 - x0, y1 - y0
+    px = [[0] * w for _ in range(h)]
+    for x, y, (ow, oh), t0, hf, vf in reversed(oams):   # (the first OAM in front)
+        for ty in range(oh // 8):
+            for tx in range(ow // 8):
+                t = t0 + ty * (ow // 8) + tx
+                for py in range(8):
+                    for qx in range(8):
+                        k = t * 32 + py * 4 + qx // 2
+                        if k >= len(chars):
+                            continue
+                        v = (chars[k] >> 4) if qx & 1 else chars[k] & 0xF
+                        if not v:
+                            continue
+                        X, Y = tx * 8 + qx, ty * 8 + py
+                        if hf:
+                            X = ow - 1 - X
+                        if vf:
+                            Y = oh - 1 - Y
+                        px[y - y0 + Y][x - x0 + X] = v
+    rows = bytearray()
+    for r in px:
+        for c in range(0, w, 2):
+            rows.append(r[c] | ((r[c + 1] if c + 1 < w else 0) << 4))
+    pal[0] = 0
+    return pal, x0, y0 - 8, w, h, bytes(rows)   # (8 up: the feet where the game's pictures have theirs)
+
+
+def battle_pictures():
+    arm = open(os.path.join(os.path.dirname(narc.EXTRACT), 'arm9_dec.bin'), 'rb').read()
+    table = arm[GRA_TABLE - ARM9_BASE:GRA_TABLE - ARM9_BASE + GRA_CLASSES]
+    arc = narc.arc(TRAINER_ARC)
+    out = bytearray(b'TRPC' + struct.pack('<H', len(table)) + table + b'\0' * (len(table) % 2))
+    out += struct.pack('<H', len(arc) // 8)
+    for i in range(len(arc) // 8):
+        pal, dx, dy, w, h, rows = trainer_picture(arc[8 * i:8 * i + 8])
+        out += struct.pack('<16HhhHH', *pal, dx, dy, w, h) + rows
+    return bytes(out), len(arc) // 8
+
+
 def main():
     out_path = sys.argv[1]
     codes = narc.arc(CODES_ARC)[0]
@@ -133,9 +257,11 @@ def main():
         for f in small:
             pack += tiles_of(f, size, size)
         made += 1
+    pics, npics = battle_pictures()
+    pack += pics
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(bytes(pack))
-    print('%s: %d of %d object codes drawn, %d bytes' % (out_path, made, count, len(pack)))
+    print('%s: %d of %d object codes drawn, %d battle pictures, %d bytes' % (out_path, made, count, npics, len(pack)))
 
 
 if __name__ == '__main__':

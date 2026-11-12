@@ -36,6 +36,7 @@ static struct Trainer *sTable;
 static struct Pokemon sTeam[2][PARTY_SIZE];
 static u8 sTeamCount[2];
 static u8 sClassName[2][24];
+static u8 sClass[2];   // (Black's trainer class: its battle picture, u3d_gfx.c)
 static u16 sBlackTrainer[2];
 static u8 sResult;
 
@@ -108,6 +109,7 @@ static bool8 SetTrainer(u8 which, u16 id, bool8 doubles)
     s->partySize = sTeamCount[which];
     sBlackTrainer[which] = id;
     TextInto(sClassName[which], BANK_TRAINER_CLASSES, t[1], 20);
+    sClass[which] = t[1];
     MPNet_Log("unova: trainer %s %d (Black's %d, class %d): %d POKeMON, kind %d", which ? "B" : "A", slot, id, t[1],
               sTeamCount[which], t[2]);
     return sTeamCount[which] > 0;
@@ -117,6 +119,11 @@ static bool8 SetTrainer(u8 which, u16 id, bool8 doubles)
 bool8 U3D_IsTrainer(u16 trainerId)
 {
     return IS_UNOVA_TRAINER(trainerId);
+}
+
+u8 U3D_TrainerClass(u16 trainerId)
+{
+    return sClass[trainerId == TRAINER_UNOVA_B];
 }
 
 const u8 *U3D_ClassName(u16 trainerId)

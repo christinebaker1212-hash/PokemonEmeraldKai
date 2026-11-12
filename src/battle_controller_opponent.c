@@ -4,6 +4,7 @@
 #include "global.h"
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 void S3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn);   // Moemon Kai (src/sinnoh/s3d_gfx.c)
+void U3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn);   // Moemon Kai (src/unova/u3d_gfx.c)
 void Orre_People_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn);   // Moemon Kai (src/orre/orre_people.c)
 #include "battle_gimmick.h"
 #include "mp.h"
@@ -1376,6 +1377,7 @@ static void OpponentHandleDrawTrainerPic(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
     S3D_Gfx_BattleTrainerPic(&gSprites[gBattlerSpriteIds[gActiveBattler]], gActiveBattler, trainerPicId);   // Moemon Kai: Platinum's picture
+    U3D_Gfx_BattleTrainerPic(&gSprites[gBattlerSpriteIds[gActiveBattler]], gActiveBattler, trainerPicId);   // Moemon Kai: Black's picture
     Orre_People_BattleTrainerPic(&gSprites[gBattlerSpriteIds[gActiveBattler]], gActiveBattler, trainerPicId);   // Moemon Kai: ORRE's people
     // Moemon Co-op: the trainer is drawn for both opponent slots; show it once (two trainers: both)
     if (gMpCoopBattle && !MP_Coop_TwoTrainers() && (GetBattlerPosition(gActiveBattler) != B_POSITION_OPPONENT_LEFT || gMpCoopWild))
@@ -1454,6 +1456,7 @@ static void OpponentHandleTrainerSlide(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
     S3D_Gfx_BattleTrainerPic(&gSprites[gBattlerSpriteIds[gActiveBattler]], gActiveBattler, trainerPicId);   // Moemon Kai: Platinum's picture
+    U3D_Gfx_BattleTrainerPic(&gSprites[gBattlerSpriteIds[gActiveBattler]], gActiveBattler, trainerPicId);   // Moemon Kai: Black's picture
     Orre_People_BattleTrainerPic(&gSprites[gBattlerSpriteIds[gActiveBattler]], gActiveBattler, trainerPicId);   // Moemon Kai: ORRE's people
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBankSpriteCallbackDummy2;
