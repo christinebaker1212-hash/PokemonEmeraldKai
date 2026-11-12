@@ -49,6 +49,9 @@
 #include "data.h"
 #include "party_menu.h"
 #include "mp.h"
+#include "battle.h"
+#include "constants/battle.h"
+#include "pokemon_storage_system.h"
 #include "menu.h"
 #include "script_menu.h"
 #include "platform.h"
@@ -700,9 +703,10 @@ static void PopSong(void)
         PlayNewMapMusic(sSongStack[--sSongDepth]);
 }
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
-enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO };
+enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY };
 static u8 sScreen;
-static u16 sScreenVar;
+static u16 sScreenVar, sPartySlotWork;
+static u8 sWildResult = 2;
 #define STACK 48
 
 struct Frame { const u8 *code; u32 size, pc; u16 bank; u8 sp; };   // (a script that called another: CallScript)
@@ -1157,6 +1161,158 @@ static void Step(struct Thread *t)
             t->wait = W_FADE;
             break;
         }
+        // ---- warps (more of Black's: the 3D one's tile is x, z; y the height)
+        case U3C_WarpToPosition3D:   // zone, x, y, z, direction
+        case U3C_WarpToPositionEvent:   // zone, x, z
+        {
+            u8 group, num;
+            s16 x, y;
+            u16 wz = a[0], wx = a[1], wzz = op == U3C_WarpToPosition3D ? a[3] : a[2];
+            if (U3D_MapOfZoneTile(wz, wx, wzz, &group, &num, &x, &y))
+            {
+                MPNet_Log("u3d vm: warp to zone %u (%d.%d at %d,%d)", wz, group, num, x, y);
+                sHolding = FALSE;
+                t->alive = FALSE;
+                SetWarpDestination(group, num, WARP_ID_NONE, x, y);
+                DoWarp();
+                return;
+            }
+            break;
+        }
+        // ---- battles
+        case U3C_PROC_FLD_StartScriptedWildBattle:   // species, level, flags (a legend's, a static POKeMON's)
+            CreateScriptedWildMon(Species(V(0)), V(1), ITEM_NONE);
+            OpenScreen(t, SCREEN_WILD, 0);
+            break;
+        case U3C_WORK_CmdCheckLastBattleResultB:
+            *WorkPtr(a[0]) = U3D_BattleResult() != 2;
+            break;
+        case U3C_WORK_CmdEndScriptWhiteOutB:
+            sHolding = FALSE;
+            t->alive = FALSE;
+            return;
+        case U3C_PROC_FLD_StoreBattleResult:
+            *WorkPtr(a[0]) = sWildResult;
+            break;
+        // ---- the party
+        case U3C_POKEMON_FLD_SelectPartyMon:   // slot, result, mode
+            sPartySlotWork = a[0];
+            OpenScreen(t, SCREEN_PARTY, a[1]);
+            break;
+        case U3C_PROC_CheckMonIsEgg:   // result, slot
+            *WorkPtr(a[0]) = V(1) < PARTY_SIZE && GetMonData(&gPlayerParty[V(1)], MON_DATA_IS_EGG);
+            break;
+        case U3C_PROC_GetMonSpeciesOrEgg:   // result, slot (national; an egg 0x28F, Black's EGG)
+        {
+            u16 sp = V(1) < PARTY_SIZE ? GetMonData(&gPlayerParty[V(1)], MON_DATA_SPECIES_OR_EGG) : SPECIES_NONE;
+            *WorkPtr(a[0]) = sp == SPECIES_EGG ? 0x28F : sp ? SpeciesToNationalPokedexNum(sp) : 0;
+            break;
+        }
+        case U3C_PROC_GetMonFriendship:   // result, slot
+            *WorkPtr(a[0]) = V(1) < PARTY_SIZE ? GetMonData(&gPlayerParty[V(1)], MON_DATA_FRIENDSHIP) : 0;
+            break;
+        case U3C_PROC_GetMonMove:   // result, slot, index
+            *WorkPtr(a[0]) = V(1) < PARTY_SIZE && V(2) < MAX_MON_MOVES ? GetMonData(&gPlayerParty[V(1)], MON_DATA_MOVE1 + V(2)) : 0;
+            break;
+        case U3C_POKEMON_FLD_GetMonIvStat:   // slot, stat, result
+            *WorkPtr(a[2]) = V(0) < PARTY_SIZE && V(1) < NUM_STATS ? GetMonData(&gPlayerParty[V(0)], MON_DATA_HP_IV + V(1)) : 0;
+            break;
+        case U3C_PROC_FindFirstPartyIndex:   // result, mode (1 not an egg, 2 able to battle)
+        {
+            u32 i;
+            *WorkPtr(a[0]) = 0;
+            for (i = 0; i < PARTY_SIZE; i++)
+            {
+                struct Pokemon *mon = &gPlayerParty[i];
+                if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
+                    continue;
+                if (V(1) == 2 && GetMonData(mon, MON_DATA_HP) == 0)
+                    continue;
+                *WorkPtr(a[0]) = i;
+                break;
+            }
+            break;
+        }
+        case U3C_PROC_FindPartyMonBySpecies:   // species, found, slot
+        {
+            u32 i;
+            u16 want = Species(V(0));
+            *WorkPtr(a[1]) = 0;
+            for (i = 0; i < PARTY_SIZE; i++)
+                if (!GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG) && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == want)
+                {
+                    *WorkPtr(a[1]) = 1, *WorkPtr(a[2]) = i;
+                    break;
+                }
+            break;
+        }
+        case U3C_PROC_GetBoxMonCount:   // result, kind
+            *WorkPtr(a[0]) = CountAllStorageMons();   // (the PC's POKeMON)
+            break;
+        // ---- money (the game's money box)
+        case U3C_OpenMoneyWin:   // x, y
+            DrawMoneyBox(GetMoney(&gSaveBlock1Ptr->money), 0, 0);
+            break;
+        case U3C_UpdateMoneyWin:
+            ChangeAmountInMoneyBox(GetMoney(&gSaveBlock1Ptr->money));
+            break;
+        case U3C_CloseMoneyWin:
+            HideMoneyBox();
+            break;
+        case U3C_PROC_CheckMoneyAtLeast:   // result, amount
+            *WorkPtr(a[0]) = IsEnoughMoney(&gSaveBlock1Ptr->money, V(1));
+            break;
+        case U3C_PROC_SubMoney:
+            RemoveMoney(&gSaveBlock1Ptr->money, V(0));
+            break;
+        // ---- the time, the season, the player
+        case U3C_WORK_CmdGetHourAndMinute:
+        {
+            struct SiiRtcInfo dt;
+            Platform_GetDateTime(&dt);
+            *WorkPtr(a[0]) = ConvertBcdToBinary(dt.hour), *WorkPtr(a[1]) = ConvertBcdToBinary(dt.minute);
+            break;
+        }
+        case U3C_WORK_CmdGetSeason:
+            *WorkPtr(a[0]) = U3D_Season();
+            break;
+        case U3C_GetPlayerForm:   // (0 walking, 1 a bike, 2 surfing)
+            *WorkPtr(a[0]) = TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING) ? 2
+                           : TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE) ? 1 : 0;
+            break;
+        case U3C_GetMmdlGridPos:   // person, x, z (Black's tiles)
+        {
+            struct ObjectEvent *o = ObjectOf(V(0));
+            s32 m = U3D_MapIndex();
+            if (o)
+            {
+                *WorkPtr(a[1]) = o->currentCoords.x - MAP_OFFSET + (m >= 0 ? 32 * U3D_MapCellX(m) : 0);
+                *WorkPtr(a[2]) = o->currentCoords.y - MAP_OFFSET + (m >= 0 ? 32 * U3D_MapCellZ(m) : 0);
+            }
+            break;
+        }
+        case U3C_WORK_CmdGetMsgDataId:   // (the script's own words' file: a shared script prints from it)
+            *WorkPtr(a[0]) = t->bank >= SYSTEM_BANKS ? t->bank - SYSTEM_BANKS : t->bank;
+            break;
+        case U3C_GetContinueFlag:
+            *WorkPtr(a[0]) = 0;
+            break;
+        // ---- what has no screen of its own here yet (read past quietly)
+        case U3C_StopSe:
+        case U3C_SetAutoMode:
+        case U3C_SAVEANIME_Start:
+        case U3C_PROC_FLD_StartCameraShake:
+        case U3C_TurnPlayerToFrontEvent:
+        case U3C_WORK_CmdSetSpecialLocation:
+        case U3C_SCREENEFFECTS_CreateBuildModelNode:   // (build models' animations: doors, lifts)
+        case U3C_SCREENEFFECTS_DeleteBuildModelNode:
+        case U3C_SCREENEFFECTS_PlayBuildModelNodeSlotWithSe:
+        case U3C_SCREENEFFECTS_WaitBuildModelNodeAnim:
+        case U3C_SCREENEFFECTS_PlayBuildModelAnimPair:
+        case U3C_SCREENEFFECTS_PlayBuildModelAnimTwo:
+        case U3C_SCREENEFFECTS_SwapBuildModelId:
+        case U3C_SCREENEFFECTS_PlayBuildModelNodeCurrentMode3:
+            break;
         case U3C_NETWORK_CmdGetCommValue:   // (wireless on: Kai's co-op stands in for it, docs/UNOVA_DECISIONS.md)
             *WorkPtr(a[0]) = 1;
             break;
@@ -2126,6 +2282,13 @@ void U3D_VmOpenScreen(void)
     case SCREEN_CATCH_DEMO:
         U3D_CatchTutorial();   // (the party saved; back to the field and this script when it ends)
         break;
+    case SCREEN_WILD:   // (Black's scripted wild battle: the POKeMON set up by StartScriptedWildBattle)
+        BattleSetup_StartScriptedWildBattle();
+        ScriptContext_Stop();
+        break;
+    case SCREEN_PARTY:   // (Black's SelectPartyMon: the game's party screen, the slot in VAR_0x8004)
+        ChoosePartyMon();
+        break;
     default:
         NothingToRun();
         break;
@@ -2142,6 +2305,17 @@ void U3D_VmResume(void)
         break;
     case SCREEN_CATCH_DEMO:
         LoadPlayerParty();   // (the player's own party back)
+        break;
+    case SCREEN_WILD:
+        // (Black's GetResultFlag: 0 caught, 1 ran, 2 knocked out; CheckLastBattleResult: the player not beaten)
+        sWildResult = gBattleOutcome == B_OUTCOME_CAUGHT ? 0 : gBattleOutcome == B_OUTCOME_WON ? 2 : 1;
+        U3D_BattleEnded(!(gBattleOutcome == B_OUTCOME_LOST || gBattleOutcome == B_OUTCOME_DREW));
+        break;
+    case SCREEN_PARTY:
+        if (sPartySlotWork)
+            *WorkPtr(sPartySlotWork) = gSpecialVar_0x8004 < PARTY_SIZE ? gSpecialVar_0x8004 : 0xFF;
+        if (sScreenVar)
+            *WorkPtr(sScreenVar) = gSpecialVar_0x8004 < PARTY_SIZE;
         break;
     }
     sScreen = SCREEN_NONE;
