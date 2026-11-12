@@ -314,9 +314,11 @@ static bool8 FlagOn(u16 id)
 
 // Black's system flags that are the START menu's buttons (ov021 field_menu.c FIELD_MENU_GetLayoutType): 0x961 the
 // POKeMON, 0x962 the POKeDEX (set by JUNIPER's lab, NUVEMA zone 396; the NATIONAL DEX: the user's decision, as
-// SetZukanObtained). Kai's own flags follow them, or START never shows the POKeDEX.
+// SetZukanObtained). Kai's own flags follow them, or START never shows the POKeDEX; and Kai's running.
 static void SysFlagsToKai(void)
 {
+    if (!FlagGet(FLAG_SYS_B_DASH))   // (Black runs from the start, B held: no RUNNING SHOES to give)
+        FlagSet(FLAG_SYS_B_DASH);
     if (FlagOn(0x961) && !FlagGet(FLAG_SYS_POKEMON_GET))
         FlagSet(FLAG_SYS_POKEMON_GET);
     if (FlagOn(0x962) && !FlagGet(FLAG_SYS_POKEDEX_GET))
