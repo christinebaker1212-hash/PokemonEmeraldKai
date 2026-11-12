@@ -206,4 +206,7 @@ corner behind the eye, and a bridge deck is a few long ones). Rail cameras (pack
 line's camera (rails.py camera_at: FixedAngle and kin, the Blend kinds between the line's points' cameras, Orbit about
 a centre (CASTELIA's ring road), a fixed eye and target, YawFromPoint); u3d.c eases the view's pitch and distance to
 it. The view's yaw stays north up: turning it wants the d-pad and the sprites' facings turned with it (next). Not yet:
-rail scripts' own commands (people moved on rails), VICTORY ROAD's negative coordinates (tiles below 0 are dropped).
+rail scripts' own commands (people moved on rails), VICTORY ROAD's negative coordinates (tiles below 0 are dropped),
+signs on rails (U3D_VmSign matches grid places only). A trigger on a rail: U3D_VmPos takes the rail trigger whose work
+holds its value (gen_maps.py laid its tiles out). Story: CASTELIA's first scene plays (BURGH: "That way!", work 0x40AD
+1 at the ring road); next CASTELIA's streets (zones 33-44), BURGH's gym (zone 29), Team Plasma there, ROUTE 4.

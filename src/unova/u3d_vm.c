@@ -1932,8 +1932,15 @@ void U3D_VmPos(void)
     {
         const u8 *p = e + 8 + EV_BG * e[4] + EV_PERSON * e[5] + EV_CONNECT * e[6] + EV_POS * i;
         u16 px = Le16(p + 10), pz = Le16(p + 12), w = Le16(p + 14), h = Le16(p + 16);
-        if (x >= px && x < px + (w ? w : 1) && y >= pz && y < pz + (h ? h : 1)
+        if (Le16(p + 8) == 0 && x >= px && x < px + (w ? w : 1) && y >= pz && y < pz + (h ? h : 1)
          && WorkValue(Le16(p + 4)) == Le16(p + 2) && Run(Le16(p), 0xFFFF, TRUE))
+            return;
+    }
+    // (a trigger on a rail: tools/unova/gen_maps.py laid its tiles out by the rail; the one whose work holds its value)
+    for (i = 0; e && size >= 8 && i < e[7]; i++)
+    {
+        const u8 *p = e + 8 + EV_BG * e[4] + EV_PERSON * e[5] + EV_CONNECT * e[6] + EV_POS * i;
+        if (Le16(p + 8) != 0 && WorkValue(Le16(p + 4)) == Le16(p + 2) && Run(Le16(p), 0xFFFF, TRUE))
             return;
     }
     NothingToRun();
