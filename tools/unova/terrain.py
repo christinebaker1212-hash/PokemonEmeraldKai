@@ -19,7 +19,7 @@ import narc  # noqa: E402
 
 OV021_RAM = 0x02187F00
 NORMALS, DISTANCES = 0x021DB9A0, 0x021DC158
-CACHE = os.path.expanduser('~/.cache/moemon/unova')
+CACHE = os.path.dirname(narc.EXTRACT)   # (the ROM's unpacked files' folder's parent: aletheia, the overlays)
 
 
 @functools.lru_cache(None)

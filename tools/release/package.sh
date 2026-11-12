@@ -3,7 +3,7 @@
 #   windows: needs pokeemerald64.exe (make winwsl) and SDL2.dll (SDL2_DLL, default ./SDL2/x86_64-w64-mingw32/bin/SDL2.dll)
 #   linux:   needs pokeemerald64 (make linux)
 # Writes OUTDIR/MoemonEmeraldKaiCoop-<platform>.zip: one folder, MoemonEmeraldKaiCoop/, with the game, the
-# player docs, the VS cabinet's mugen/ folder, custom music (music/), SINNOH's 3D pack (sinnoh/), ORRE's packs (orre/), the standalone server and moemon_release.txt (the updater only runs in a folder that has it).
+# player docs, the VS cabinet's mugen/ folder, custom music (music/), SINNOH's 3D pack (sinnoh/), ORRE's packs (orre/), UNOVA's (unova/), the standalone server and moemon_release.txt (the updater only runs in a folder that has it).
 set -e
 cd "$(dirname "$0")/../.."
 PLAT=${1:?usage: package.sh windows|linux OUTDIR}
@@ -71,6 +71,12 @@ fi
 if [ -f orre/orre3d.pak ] && [ -f orre/orre_data.pak ] && [ -f orre/orre_text.pak ]; then
     mkdir -p "$P/orre"
     cp orre/orre3d.pak orre/orre_data.pak orre/orre_text.pak "$P/orre/"
+fi
+# UNOVA's packs (tools/unova/make_pack.sh builds them from the user's Black ROM; the release runs it once UNOVA ships:
+# tools/unova/ship_in_release): in the game's own zip like ORRE's, replaced with every update (docs/UNOVA_DECISIONS.md)
+if [ -f unova/black3d.pak ] && [ -f unova/black_text.pak ] && [ -f unova/black_scripts.pak ] && [ -f unova/black_gfx.pak ]; then
+    mkdir -p "$P/unova"
+    cp unova/black3d.pak unova/black_text.pak unova/black_scripts.pak unova/black_gfx.pak "$P/unova/"
 fi
 # POKeMON STADIUM's announcer voices (tools/stadium/mort/make_pack.sh, from the user's ROM; the release runs it first)
 for v in announcer.s1 announcer_jp.s1; do   # (English, Japanese)

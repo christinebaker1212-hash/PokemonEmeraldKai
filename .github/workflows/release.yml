@@ -150,6 +150,23 @@ jobs:
             echo "::warning::no ORRE_DISC_URL secret: this release has no ORRE packs"
           fi
 
+      # UNOVA's packs (docs/UNOVA_DECISIONS.md): Pokemon Black's maps, text, scripts and pictures, built from the ROM whose
+      # link is the UNOVA_ROM_URL secret (never in this repository) into unova/, shipped inside the game's own zips like
+      # ORRE's. Only once UNOVA ships (the file tools/unova/ship_in_release exists): until then the game hides UNOVA.
+      - name: UNOVA's packs
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
+        env:
+          UNOVA_ROM_URL: ${{ secrets.UNOVA_ROM_URL }}
+        run: |
+          if [ ! -f tools/unova/ship_in_release ]; then
+            echo "UNOVA isn't shipped yet"
+          elif [ -n "$UNOVA_ROM_URL" ]; then
+            UNOVA_WORK="$RUNNER_TEMP/unova_work" tools/unova/make_pack.sh
+            rm -rf "$RUNNER_TEMP/unova_work"
+          else
+            echo "::warning::no UNOVA_ROM_URL secret: this release has no UNOVA packs"
+          fi
+
       # Custom music (music/*.kaisong) and Colosseum's songs all equally loud (tools/kaisong/normalize.py): every song
       # measured in the game just built, every run (the user, 2026-11-11: never skipped because it was measured before),
       # rendered as fast as it runs in a game per core, one gain a file (dynamics untouched) into
