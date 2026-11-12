@@ -42,7 +42,7 @@ they draw at the screens' own size with the game's own fonts (src/fonts.c, graph
 | 2 | The cup's ladder: the opponent's portrait, "?" tiles for the battles to come, the cup and the battle on two bars | s4_ladder.png | new |
 | 3 | The trainer's line under the ladder's top row | s4_line.png | new (needs a line per trainer: see open questions) |
 | 4 | VS: two silver plates, portrait + six windows each, glowing VS, the clause chips between | s3_vs2.png | half of DrawVs (SCR_VS) |
-| 5 | Choice: the staggered 1P / COM plates, pick three in order | s2_vs.png | the other half of DrawVs |
+| 5 | Choice: the staggered 1P / COM plates (each cell: pick button or empty socket, picture, level, held-item mark, name), the message in black glass, pick three in order | s4_choice.png (redrawn after the recording, 2026-11-12; s2_vs.png is the earlier draft) | the other half of DrawVs |
 | 6 | the battle | | |
 | 7 | Result: the three that fought on each side with HP bars, WIN / LOSE in neon | s3_result.png | DrawResult (SCR_RESULT) |
 | 7b | then crosses over the fainted, the winner's plate leaves, the loser's line | s4_result2.png | new |

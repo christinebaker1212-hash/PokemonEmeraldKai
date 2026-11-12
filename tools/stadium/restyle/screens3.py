@@ -345,15 +345,77 @@ def continue_screen():
     return c
 
 
+def choice_plate(c, box, pal, team, picks=None, cursor=None):
+    """A team's plate on the choice screen: per POKéMON its pick button (or an empty socket), picture, level, held-item
+    mark and name, as STADIUM 2 lays its cells out."""
+    sx0, sy0, sx1, sy1 = c.slab(*box, pal)
+    cw, ch = (sx1 - sx0) / 3, (sy1 - sy0) / 2
+    cells = [(int(sx0 + (i % 3) * cw), int(sy0 + (i // 3) * ch), int(sx0 + (i % 3 + 1) * cw), int(sy0 + (i // 3 + 1) * ch)) for i in range(6)]
+    for i, (x0, y0, x1, y1) in enumerate(cells):
+        if picks and i in picks:
+            c.sheen(x0 + (2 if i % 3 else 0), y0 + (2 if i // 3 else 0), x1, y1, 'gold', (sx0, sx1))
+    for k in (1, 2):
+        c.engrave_v(cells[k][0], sy0 + 4, sy1 - 4, pal)
+    c.engrave_h(cells[3][1], sx0 + 4, sx1 - 4, pal)
+    if cursor is not None:
+        x0, y0, x1, y1 = cells[cursor]
+        c.ring(x0 - 1, y0 - 1, x1 + 2, y1 + 1)
+    ink = hx(0x1c2c20) if pal == 'green' else INK
+    for i, ((x0, y0, x1, y1), (sp, nm, lv, item)) in enumerate(zip(cells, team)):
+        c.clip_blit(scale(icon(sp), 64, 64), x0 + 16, y0 - 16, (x0, y0 - 4, x1, y1))
+        c.text(x1 / 2 - 3, y0 / 2 + 1, 'L%d' % lv, SMALL, ow=2, align='r', grad=0xdfe4f0, outline=ink)
+        if item:
+            c.itembox(x1 / 2 - 13, y0 / 2 + 11)
+        c.text((x0 + x1) / 4 + 0.5, y1 / 2 - 12.5, nm, SMALL, ow=2, align='c', grad=0xdfe4f0, outline=ink)
+        if picks is not None:
+            if i in picks:
+                c.sphere(x0 + 13, y0 + 13, 9.5, 0xe03828)
+                c.text((x0 + 13) / 2 + 0.5, (y0 + 13) / 2 - 6.5, str(picks[i]), SMALL, ow=1, outline=hx(0x400808), align='c')
+            else:
+                c.sphere(x0 + 13, y0 + 13, 8, 0x5a6278, flat=True)
+
+
+def choice_screen():
+    """Pick three (the user's choice screen, after STADIUM 2's): both teams as plates, the message in black glass."""
+    from screens import glass_text
+    c = C4()
+    background(c, front('tyranitar'), (120, 20), 290)
+    c.tab(10, 34, -6, 150, TAB_BLUE)
+    c.label_rot(22, 36, '1P', 22, 0x0c1018, 90)
+    picks = {0: 1, 3: 2, 5: 3}
+    for k in range(3):
+        c.ball(22, 76 + k * 20, 7, top=0x4880e8, lit=k < len(picks))
+    mine = [('ursaring', 'URSARING', 50, 1), ('politoed', 'POLITOED', 50, 1), ('kadabra', 'KADABRA', 50, 0),
+            ('hitmonlee', 'HITMONLEE', 50, 1), ('graveler', 'GRAVELER', 50, 0), ('dragonair', 'DRAGONAIR', 50, 1)]
+    choice_plate(c, (40, 8, 360, 140), 'blue', mine, picks, cursor=1)
+    ix0, iy0, ix1, iy1 = c.frame(388, 8, 454, 74)
+    c.blit(trainer('brendan')[0:iy1 - iy0, 11:11 + ix1 - ix0], ix0, iy0)
+    glass_text(c, 366, 80, 474, 112, 'BRENDAN')
+    chip(c, 184.5, 60, 'Lv 150/155', 0x40a050)
+    foes = [('starmie', 'STARMIE', 50, 0), ('ursaring', 'URSARING', 50, 1), ('alakazam', 'ALAKAZAM', 50, 0),
+            ('umbreon', 'UMBREON', 50, 1), ('muk', 'MUK', 50, 0), ('tyranitar', 'TYRANITAR', 50, 1)]
+    c.tab(452, 476, 300, 158, TAB_GREEN)
+    for k in range(3):
+        c.ball(464, 182 + k * 18, 7)
+    c.label_rot(464, 254, 'COM', 19, 0x0a1c0c, -90)
+    choice_plate(c, (126, 154, 446, 286), 'green', foes)
+    glass_text(c, 6, 146, 120, 182, 'All ready!')
+    glass_text(c, 6, 188, 120, 218, 'MARTY')
+    ix0, iy0, ix1, iy1 = c.frame(54, 222, 118, 286)
+    c.blit(trainer('cooltrainer_m')[2:2 + iy1 - iy0, 11:11 + ix1 - ix0], ix0, iy0)
+    footer(c, [(('A',), 'PICK'), (('R',), 'SUMMARY'), (('SELECT',), 'RULES'), (('START',), 'BATTLE!'), (('B',), 'BACK')])
+    return c
+
+
 if __name__ == '__main__':
     made = []
     for name, fn in (('entry', entry_screen), ('entry_info', entry_info_screen), ('entry_menu', entry_menu_screen), ('ladder', ladder_screen),
-                     ('line', line_screen), ('result2', result_screen2), ('badges', badge_screen), ('continue', continue_screen)):
+                     ('line', line_screen), ('choice', choice_screen), ('result2', result_screen2), ('badges', badge_screen), ('continue', continue_screen)):
         im = fn().image()
         im.save(f'{OUT}/s4_{name}.png')
         made.append(im)
         print(name)
-    sheet = Image.new('RGB', (480 * 2 + 8, 320 * 4 + 24), (40, 40, 48))
+    sheet = Image.new('RGB', (480 * 2 + 8, 320 * 5 + 32), (40, 40, 48))
     for i, im in enumerate(made):
         sheet.paste(im, ((i % 2) * 488, (i // 2) * 328))
     sheet.save(f'{OUT}/s4_sheet.png')
