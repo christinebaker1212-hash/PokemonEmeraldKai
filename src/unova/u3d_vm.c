@@ -3078,6 +3078,12 @@ bool8 U3D_VmRunning(void)
 
 // tests (mp_debug.c `mp u3dwork WORK VALUE` / `mp u3dflag FLAG 0|1`, Black's numbers in hex): a scene set up without
 // playing the story to it
+// (tests: `mp u3dget WORK` / `mp u3dget fFLAG`, hex: what a story step left behind)
+u16 U3D_Vm_DebugGet(bool8 flag, u16 id)
+{
+    return flag ? FlagOn(id) : *WorkPtr(id);
+}
+
 void U3D_Vm_DebugSet(bool8 flag, u16 id, u16 value)
 {
     if (!flag && id == 0xFFFF)   // (`mp u3dwork FFFF 0`: the running script ends where it is: the opening's room)

@@ -48,6 +48,11 @@ struct MpSpriteEntry
 #define MP_SINNOH_SPRITES_GEN3 2
 #define MP_UNOVA_SPRITES_MIXED 0   // OPTIONS > DISPLAY > SPRITE SCALING > UNOVA PEOPLE (the user: MIXED by default)
 #define MP_UNOVA_SPRITES_GEN5 1
+// OPTIONS > BATTLE > STADIUM SETTINGS > STYLE: how BATTLE ISLAND's STADIUM screens look (mp_stadium_ui.c, mp_stadium_style.c)
+#define MP_STADIUM_STYLE_ORIGINAL 0     // the game's own
+#define MP_STADIUM_STYLE_STADIUM1 1     // POKESTADIUM: the first POKeMON STADIUM's look
+#define MP_STADIUM_STYLE_STADIUM2 2     // POKESTADIUM 2: POKeMON STADIUM 2's look
+#define MP_STADIUM_STYLE_COUNT 3
 
 #define MP_SKIN_COUNT   7
 #define MP_COLOR_COUNT  11
@@ -269,6 +274,7 @@ struct MpConfig
     u8 muteInBackground;      // OPTIONS > GAME > MUTE IN BACKGROUND: 1 = no sound while none of the game's windows has focus
     u8 noAnnouncer;           // OPTIONS > BATTLE > ANNOUNCER: 0 ON (POKeMON STADIUM's announcer: mp_stadium_announcer.c), 1 OFF
     u8 announcerJp;           // ... its voices: 0 ENGLISH (Pokemon Stadium's), 1 JAPANESE (POKEMON STADIUM 2's)
+    u8 stadiumStyle;          // OPTIONS > BATTLE > STADIUM SETTINGS > STYLE: STADIUM's screens (MP_STADIUM_STYLE_*)
     // The options the save itself holds (TEXT SPEED, FRAME...) and the TRAINER CARD's two, kept with the other settings
     // so another save file follows File 1's (save_slots.c; the user, 2026-11-11). gameOptSet: which ones the file has
     u8 gameOpt[16];           // MP_GAMEOPT_*

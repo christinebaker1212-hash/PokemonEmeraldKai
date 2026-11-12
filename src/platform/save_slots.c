@@ -458,7 +458,7 @@ static const char *const sCanonicalCoop =
     "text_speed = fast\nwindow_frame = 1\nname_case = uncorrected\ncreatures = moemon\nbutton_mode = normal\n"
     "sound = stereo\nmute_in_background = 1\nbike_music = 1\nsurf_music = 1\nbadge_fade = platinum\ncard_title = 1\n"
     "card_scaling = 1\ncard_art = printed_art\ncard_back = printed\nbattle_scene = 1\nbattle_style = shift\n"
-    "battle_anims = modern\nstadium_announcer = 1\nstadium_announcer_jp = 0\ntype_icons = 0\nlevel_scaling = 1\n"
+    "battle_anims = modern\nstadium_announcer = 1\nstadium_announcer_jp = 0\nstadium_style = original\ntype_icons = 0\nlevel_scaling = 1\n"
     "level_scaling_rules = 2 2 0 1 0\ngeneration = 4\nmove_split = 1\ngimmicks = 168\nfollower_sprites = pmd\n"
     "sinnoh_sprites = mixed\nunova_sprites = mixed\nscale_followers = 1\nscale_followers_percent = 80\nscale_garden = 1\n"
     "scale_garden_percent = 80\nshadows = 1\nspectate_panel = 1\nspectate_size = 2\nautosave = 5\ntrainer_range = 5\n"

@@ -4450,6 +4450,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_HallDebug(void);
         Sinnoh_HallDebug();   // SINNOH's BATTLE HALL record (src/sinnoh/s3d_hall.c)
     }
+    else if (strcmp(cmd, "u3dget") == 0)   // u3dget WORK / u3dget fFLAG (hex): UNOVA's story state
+    {
+        u16 U3D_Vm_DebugGet(bool8 flag, u16 id);
+        unsigned id = 0;
+        bool8 flag = arg[0] == 'f';
+        if (sscanf(arg + flag, "%x", &id) == 1)
+            printf("[test] u3d %s %X = %u\n", flag ? "flag" : "work", id, U3D_Vm_DebugGet(flag, id));
+    }
     else if (strcmp(cmd, "u3dwork") == 0 || strcmp(cmd, "u3dflag") == 0)   // u3dwork WORK VALUE / u3dflag FLAG 0|1 (hex)
     {
         unsigned id = 0, v = 0;
