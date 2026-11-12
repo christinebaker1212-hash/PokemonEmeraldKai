@@ -352,6 +352,27 @@ static s32 MapIndex(u8 group, u8 num)
     return -1;
 }
 
+// UNOVA's packs beside the game (the release builds them from the user's ROM): without them the region isn't offered
+bool8 U3D_Available(void)
+{
+    static s8 sHave = -1;
+    if (sHave < 0)
+    {
+        static const char *const sPacks[] = {"unova/black3d.pak", "unova/black_scripts.pak", "unova/black_text.pak"};
+        u32 i;
+        sHave = 1;
+        for (i = 0; i < ARRAY_COUNT(sPacks); i++)
+        {
+            FILE *f = fopen(Updater_ExeFile(sPacks[i]), "rb");
+            if (f == NULL)
+                sHave = 0;
+            else
+                fclose(f);
+        }
+    }
+    return sHave;
+}
+
 bool8 U3D_IsUnovaGroup(u8 mapGroup)
 {
     return mapGroup >= MAP_GROUP(MAP_UNOVA_BLACKCITY) && mapGroup < MAP_GROUP(MAP_UNOVA_BLACKCITY) + UNOVA_GROUPS;

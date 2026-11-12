@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "global.h"
+#include "u3d.h"   // Moemon Kai: UNOVA (its packs there or not)
 #include "constants/moves.h"
 #include "constants/party_menu.h"
 #include "credits.h"
@@ -1348,8 +1349,11 @@ u16 MP_RegionBoatPick(void)
         [REGION_UNOVA] = {REGION_HOENN, REGION_JOHTO, REGION_KANTO, REGION_SINNOH},
     };
     u16 choice = gSpecialVar_Result;
-    u8 cur = MP_Region_Current();
-    return gSpecialVar_Result = (choice < REGION_COUNT - 1 && cur < REGION_COUNT) ? sTo[cur][choice] : 0x7F;
+    u8 cur = MP_Region_Current(), to;
+    to = (choice < REGION_COUNT - 1 && cur < REGION_COUNT) ? sTo[cur][choice] : 0x7F;
+    if (to == REGION_UNOVA && !U3D_Available())
+        to = 0x7F;   // Moemon Kai: no boat to UNOVA without its packs beside the game (the release builds them)
+    return gSpecialVar_Result = to;
 }
 u16 QzTravelToRegion(void) { return gSpecialVar_Result = QzTravelToRegion_(); }
 u16 QzSaveLeagueVictoryRecord(void) { return gSpecialVar_Result = QzSaveLeagueVictoryRecord_(); }

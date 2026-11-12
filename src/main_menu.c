@@ -1,4 +1,5 @@
 #include "global.h"
+#include "u3d.h"   // Moemon Kai: UNOVA (its packs there or not)
 #include "m4a.h"
 #include "script.h"
 #include "mp_region.h"
@@ -2252,8 +2253,9 @@ static void Task_NewGameBirchSpeech_WaitAskRegion(u8 taskId)
     {
         DrawMainMenuWindowBorder(&sNewGameBirchSpeechTextWindows[WIN_REGION], 0xF3);
         FillWindowPixelBuffer(WIN_REGION, PIXEL_FILL(1));
-        PrintMenuTable(WIN_REGION, ARRAY_COUNT(sMenuActions_Region), sMenuActions_Region);
-        InitMenuInUpperLeftCornerNormal(WIN_REGION, ARRAY_COUNT(sMenuActions_Region), REGION_MENU_FIRST_ROW);
+        // Moemon Kai: UNOVA's row only with its packs beside the game (the release builds them: U3D_Available)
+        PrintMenuTable(WIN_REGION, ARRAY_COUNT(sMenuActions_Region) - !U3D_Available(), sMenuActions_Region);
+        InitMenuInUpperLeftCornerNormal(WIN_REGION, ARRAY_COUNT(sMenuActions_Region) - !U3D_Available(), REGION_MENU_FIRST_ROW);
         PutWindowTilemap(WIN_REGION);
         CopyWindowToVram(WIN_REGION, COPYWIN_FULL);
         gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessRegionMenu;
