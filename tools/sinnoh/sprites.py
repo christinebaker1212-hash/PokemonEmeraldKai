@@ -61,6 +61,10 @@ GEN3 = {
     'ARTIST': 'ARTIST', 'CAMERAMAN': 'CAMERAMAN', 'REPORTER': 'REPORTER_F', 'SCIENTIST_M': 'SCIENTIST_1', 'TEALA': 'TEALA',
     'KID_WITH_NDS': 'GAMEBOY_KID', 'MYSTERY_GIFT_DELIVERYMAN': 'MYSTERY_GIFT_MAN', 'RECEPTIONIST': 'LINK_RECEPTIONIST',
     'BRIEFCASE': 'BIRCHS_BAG',
+    # (the user, 2026-11-12: unnamed people by look and job; named people keep Platinum's until further noted)
+    'CASHIER_F': 'ROOFTOP_SALE_WOMAN', 'COWGIRL': 'PICNICKER', 'IDOL': 'BEAUTY', 'MIDDLE_AGED_MAN': 'MAN_4',
+    'MIDDLE_AGED_WOMAN': 'WOMAN_3', 'RANCHER': 'FAT_MAN', 'ROUGHNECK': 'MAN_5', 'SCIENTIST_F': 'SCIENTIST_2',
+    'SNOWPOINT_NPC_F': 'WOMAN_4', 'SNOWPOINT_NPC_M': 'MAN_1', 'UNUSED_RECEPTIONIST': 'LINK_RECEPTIONIST',
     # characters
     'CYNTHIA': 'kai_cynthia', 'CYRUS': 'kai_cyrus', 'MARS': 'kai_mars', 'PROF_OAK': 'kai_prof_oak',
     # POKeMON; the legendaries in JOHTO's / KANTO's own GBA sprites (Moemon Quetzal's)
