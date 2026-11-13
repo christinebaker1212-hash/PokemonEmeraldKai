@@ -59,7 +59,7 @@ static void Load(void)
     fseek(f, 0, SEEK_SET);
     data = malloc(size > 0 ? size : 1);
     if (data == NULL || size < 12 || fread(data, 1, size, f) != (size_t)size || memcmp(data, "U3DB", 4) != 0
-     || (data[4] | data[5] << 8) != 2)
+     || (data[4] | data[5] << 8) != 3)
     {
         fclose(f);
         free(data);
@@ -152,7 +152,7 @@ static void Map(const u8 *rec)
     const u8 *map = rec + 2 + tiles * 32;
     u16 *dst = (u16 *)BG_SCREEN_ADDR(26);
     u32 x, y;
-    // (64 x 32: the picture's 64 x 16 tiles, the scene and its field alone mirrored, as Kai's backgrounds keep their
+    // (64 x 32: the picture's 64 x 16 tiles, the scene and Black's field beyond it, as Kai's backgrounds keep their
     // second half free of platforms for the intro's slide; the last row again down to the bottom)
     for (y = 0; y < 32; y++)
         for (x = 0; x < 64; x++)

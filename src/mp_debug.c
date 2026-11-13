@@ -1925,8 +1925,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
             ZeroEnemyPartyMons();
             MP_Debug_GenerateWildMon(info, area != 0);
             printf("[test] u3dwild made species %d (rate %d)\n", GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), info->encounterRate);
-            if (strchr(arg, 'b'))   // (u3dwild 2b: and the battle, as a step in the grass starts it)
-                BattleSetup_StartWildBattle();
+            if (strchr(arg, 'b'))   // (u3dwild 2b: and the battle, as a step in the grass starts it: dark grass's two too)
+            {
+                void MP_Debug_U3dStartWild(u16 behavior);
+                MP_Debug_U3dStartWild(b);
+            }
         }
     }
     else if (strcmp(cmd, "u3dcatchdemo") == 0)

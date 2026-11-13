@@ -66,6 +66,7 @@ bool8 U3D_CatchRules(void);                                   // (UNOVA's catche
 u8 U3D_CatchCase(u8 battler, u16 ball, u8 catchRate, u8 kaiMultiplier);
 void U3D_SetDarkGrassBattle(bool8 on);
 bool8 U3D_DarkGrassBattle(void);
+#define U3D_DARK_GRASS_DOUBLE_ODDS 40   // (Black's dark grass: 0x28 in 100 two at once, field_encount.c)
 void U3D_BattleLeadAs(u8 level, u32 otId, u32 personality, const u8 *nickname);   // (u3d_battle.c: a traded POKeMON's battle)
 void U3D_RefreshBlocks(void);   // the field's blocks again after Black replaced the map under the player   // a UNOVA map's from the pack, others the layout's
 // Black's scene cameras (u3d.c, played by u3d_vm.c): to a target (Black's world units, fx32), pitch / yaw (65536ths of a

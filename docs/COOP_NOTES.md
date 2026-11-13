@@ -7498,3 +7498,31 @@ graphics/stadium/themes.bin (tools/stadium/restyle/build_themes.py) with the gam
 menu, the cup's ladder, VS, the choice, the result with HP and crosses, the badge board, Keep battling?. Text in the
 themes has a hard 2-pixel outline, never a soft one (the user). Everything about it: docs/POKESTADIUM_2_THEME_HANDOFF.md.
 Tests stadium_theme1, stadium_theme2.
+
+## UNOVA's and SINNOH's own battle backgrounds; Black's catches and dark grass (1.198.0)
+
+The user, 2026-11-13: "Use Black's catch rules and battle backgrounds; adapted to Kai standards", the same for
+Platinum's, visual only ("function identically to Kai's backgrounds"). Both regions' battles draw their own game's
+scene into Kai's own background layer (BG3: tiles at BG_CHAR_ADDR(2), at most 511; the map at BG_SCREEN_ADDR(26),
+64 x 32; three palettes at BG_PLTT_ID(2)): src/battle_bg.c asks U3D_BattleBg / S3D_BattleBg first in
+DrawMainBattleBackground, DrawBattleEntryBackground (Kai's entry layer left empty) and LoadChosenBattleElement 3-5.
+gBattleEnvironment stays Kai's (Camouflage, Secret Power, Nature Power, the intro's slide), so singles, Doubles,
+Triples, co-op and joining work as anywhere; PvP keeps Kai's building.
+- The map's second half (columns 32-63) is the scene going on without its platforms: Kai's intro slides the top 80
+  lines from 240 to 0 (the map's 0-480) and the rest from -240 (272-512, then 0-240), so the top rows hold the scene
+  further right and the bottom rows further left (Black's field drawn beyond the camera; Platinum's pictures are
+  512 wide and go round). Every edge the slide crosses is the game's own ground.
+- UNOVA (tools/unova/battle_bg.py -> unova/black_battle.pak; src/unova/u3d_battlebg.c): Black's stage table
+  (a/1/5/2: the zone's field effect set the row, the terrain under the player the column, the season the variant;
+  the 3D pack's version 6 keeps each tile's column), its field and two stages (a/0/1/1) drawn through Black's battle
+  camera scaled x 0.883 so its far stage is Kai's; the lit rows tinted by the area's light now (u3d.c U3D_LightColor).
+  Palettes are bands of whole tile rows (a 3D scene's gradients without 8 x 8 blocks); past 511 tiles the second half
+  takes the nearest tile (battle_bg.py codebook).
+- SINNOH (tools/sinnoh/battle_bg.py -> sinnoh/platinum_battle.pak; src/sinnoh/s3d_battlebg.c): Platinum's
+  pl_batt_bg.narc picture the map header's battleBG names (WATER while surfing), the platforms from
+  res/graphics/battle/terrain by CalcTerrain (the tile's own Platinum behaviour, kept per tile in the pack: snow and
+  mud are plain ground in the 3D pack), day / twilight / night palettes for the six outdoor pictures (rtc.c's hours);
+  moved (-16, -24) so the foe's platform is Kai's, the player's round Kai's 64. Scenario sinnoh_battle_bg.
+- Black's catches (u3d_battle.c U3D_CatchCase, battle_script_commands.c): CalcCaptureShakes, critical captures (one
+  shake: BALL_MP_CRITICAL), the dex factor, Black's balls; dark grass's odds. Dark grass (wild_encounter.c
+  U3dStartWild): 40 in 100 two at once with two POKeMON able to battle (Kai's local Double); test mp u3dwild 3 b.

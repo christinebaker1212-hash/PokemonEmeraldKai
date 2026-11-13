@@ -11,6 +11,7 @@ DIR="${1:-${XDG_CACHE_HOME:-$HOME/.cache}/moemon/pokeplatinum}"
 mkdir -p "$REPO/sinnoh"
 python3 -I "$REPO/tools/sinnoh/build_pack.py" "$DIR" "$REPO/sinnoh/platinum3d.pak" | tail -1
 python3 -I "$REPO/tools/sinnoh/build_gfx.py" "$DIR" "$REPO/sinnoh/platinum_gfx.pak"   # (its people as Platinum draws them)
+python3 -I "$REPO/tools/sinnoh/battle_bg.py" "$REPO/sinnoh/platinum_battle.pak" "$DIR"   # (its battle backgrounds)
 python3 -I "$REPO/tools/sinnoh/build_text.py" "$DIR" "$REPO/sinnoh/platinum_text.pak"
 python3 -I "$REPO/tools/sinnoh/build_daylight.py" "$DIR" "$REPO/sinnoh/platinum_daylight.bin"   # (Platinum's time-of-day tint, src/mp/mp_daytint.c)
 # Platinum's scripts, converted to this game's (the build includes them: sinnoh/platinum_scripts.inc)

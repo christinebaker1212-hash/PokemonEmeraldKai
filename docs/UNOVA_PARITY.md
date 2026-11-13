@@ -74,7 +74,9 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 - [ ] The ENTRALINK (INTRUDE / EVENT_COMM 0x16F-0x177: Black's forest, missions; co-op friends for the wireless),
       PASS POWERS (0x1F1 / 0x1F2, shareable), WHITE FOREST / BLACK CITY's people (0x1C5 / 0x1C6)
 - [ ] The C-GEAR as UNOVA's device, the XTRANSCEIVER's calls (friends' video calls)
-- [ ] Dark grass: two POKeMON at once (Black's double wild battles); shaking grass, dust clouds, rippling water
+- [x] Dark grass: two POKeMON at once (Black's double wild battles: 40 in 100 with two able to battle,
+      wild_encounter.c U3dStartWild; test: mp u3dwild 3 b, MOEMON_U3D_DARK_DOUBLE=100)
+- [ ] Shaking grass, dust clouds, rippling water
 - [ ] POKeMON forms outside battle (ROTOM's appliances 0x117 / 0x11C, DEERLING / SAWSBUCK's seasons, form numbers
       0x0FF): Kai keeps forms its own way (battle recomputes); not reworked, unless the user says otherwise
 - [ ] TRIPLE and ROTATION battles as Black's trainers have them (Kai's Triple Battles)
@@ -83,7 +85,8 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       (u3d_battle.c U3D_CatchCase, from battle_script_commands.c); Kai's own balls keep their rates (the ASTRAL BALL its sure catch)
 - [x] Black's battle backgrounds: each scene (archive 0x98's tables, the models of a/0/1/1) drawn through Black's
       battle camera when the packs are built, fitted to Kai's screen and Kai's format (BG3, 3 palettes, the intro's
-      second half free of platforms): visual only, Kai's battles unchanged (singles, Doubles, Triples, co-op; PvP keeps
+      second half Black's field going on past the scene, so the intro's slide is seamless; palettes by bands of rows,
+      no 8 x 8 blocks): visual only, Kai's battles unchanged (singles, Doubles, Triples, co-op; PvP keeps
       Kai's building): tools/unova/battle_bg.py, u3d_battlebg.c; the time's light tints the lit rows. Left: the
       fields' own animations (clouds, water: a/0/1/1's animation files) are drawn at their first frame
 - [ ] NIMBASA's people tables (NETWORK NPC tables 0x1F3-0x1F8, 0x25C)

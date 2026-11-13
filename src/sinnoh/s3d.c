@@ -463,6 +463,12 @@ static s32 MapIndex(u8 group, u8 num)
     return -1;
 }
 
+// the player's map's place in src/sinnoh/s3d_maps.h (-1: not SINNOH's): s3d_battlebg.c's table follows its order
+s32 S3D_CurrentMapIndex(void)
+{
+    return gSaveBlock1Ptr ? MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum) : -1;
+}
+
 bool8 S3D_IsSinnohGroup(u8 mapGroup)
 {
     // group 40 (outdoors) and the buildings' groups after it (tools/sinnoh/gen_maps.py)

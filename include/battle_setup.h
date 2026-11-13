@@ -26,6 +26,7 @@ bool8 MP_PartnerShowsBack(void);   // Moemon Kai: STEVEN or a JOHTO / KANTO part
 u16 MP_PartnerBackPic(void);
 
 void BattleSetup_StartWildBattle(void);
+void BattleSetup_StartLocalDoubleWildBattle(void);   // Moemon Kai: gEnemyParty[0] and [1], two at once
 void BattleSetup_StartBattlePikeWildBattle(void);
 void BattleSetup_StartRoamerBattle(void);
 void StartWallyTutorialBattle(void);

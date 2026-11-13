@@ -23,7 +23,7 @@ near stage then comes out where Kai's own is (its top at y 106, under the player
 
 The file is "U3DB" u32 version, u32 the size unpacked, then zlib: u16 zones, u8 field effect set per zone; u8 rows, per row u8 has light,
 u8 has variant, u16 background [17 columns][4 variants]; u16 backgrounds, each: u16 tiles, tiles x 32 bytes (4bpp),
-the map 64 x 16 u16 (tile | flips << 10 | palette 0-2 << 12: the scene, then its field alone mirrored), 48 u16 colours (BGR555; each palette's colour 0 unused).
+the map 64 x 16 u16 (tile | flips << 10 | palette 0-2 << 12: the scene, then its field alone, beyond it), 48 u16 colours (BGR555; each palette's colour 0 unused).
 """
 import math
 import os
@@ -45,7 +45,7 @@ _spec = importlib.util.spec_from_file_location('sinnoh_render_ref', os.path.join
 rr = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(rr)
 
-VERSION = 2   # (2: the second half, the field alone)
+VERSION = 3   # (2: the second half, the field alone; 3: the field beyond the scene, palettes by bands)
 MODELS = 'a/0/1/1'
 TABLES = 'a/1/5/2'
 EYE, TARGET = (0x6B33 / 4096, 0x6B33 / 4096, 0x114CD / 4096), (0.0, 0x299A / 4096, 0.0)
@@ -54,6 +54,7 @@ STAGE_Z = (0x572F / 4096, -0xCB7D / 4096)
 FOCAL, CX, CY = 367.2895, 120.1707, 65.4739
 OUT_W, OUT_H = 256, 128          # 32 x 16 tiles: the 240 x 112 above the text box, and a little past it
 SS = 2                           # drawn at twice the size, then averaged (the DS's battle edges are smoothed)
+SLIDE_SPLIT = 80                 # (battle_intro.c: the top half's scanlines slide one way, the rest the other)
 MAX_TILES = 511                  # (BG3's tiles at 0x8000, BG0's map at 0xC000)
 COLUMNS = 17
 
@@ -100,13 +101,13 @@ def light_block(mat):
     return (0, lights, (dif, amb, spe, emi))
 
 
-def render(field, stage):
+def render(field, stage, shift=0.0):
     """Black's scene (field model file, stage model file; None: the field alone) as a float RGB picture (0-31) at
     OUT_W x OUT_H"""
     models = narc.arc(MODELS)
     W, H = OUT_W * SS, OUT_H * SS
-    rr.W, rr.H, rr.FOCAL, rr.CX, rr.CY = W, H, FOCAL * SS, CX * SS, CY * SS
-    view = look(EYE, TARGET)
+    rr.W, rr.H, rr.FOCAL, rr.CX, rr.CY = W, H, FOCAL * SS, (CX + shift) * SS, CY * SS   # (shift: the view moved
+    view = look(EYE, TARGET)                                                           #  sideways, in pixels)
     color = np.zeros((H, W, 3), np.float32)
     depth = np.full((H, W), np.inf, np.float32)
     ids = np.full((H, W), -1, np.int16)
@@ -156,33 +157,34 @@ def kmeans(points, weights, k, iters=12, seed=0):
 
 
 def quantize(img):
-    """(tiles, map, 48 colours) of a picture (H x W x 3, 0-31)"""
+    """(tiles, map, 48 colours) of a picture (H x W x 3, 0-31). The palettes are bands of whole tile rows (with a row
+    shared at each edge), the split that draws the picture best: Black's scenes are gradients from the sky down, and
+    tiles side by side in one palette draw them without the 8 x 8 blocks a palette a tile leaves"""
     px = np.clip(np.rint(img), 0, 31).astype(np.int64)
     th, tw = img.shape[0] // 8, img.shape[1] // 8
     tiles = px.reshape(th, 8, tw, 8, 3).transpose(0, 2, 1, 3, 4).reshape(th * tw, 64, 3)
-    # the picture's colours, weighted by use
-    allc, inv, cnt = np.unique(px.reshape(-1, 3), axis=0, return_inverse=True, return_counts=True)
-    # start: tiles grouped by their mean colour
-    means = tiles.mean(1)
-    cent = kmeans(means, np.ones(len(means)), 3)
-    group = np.argmin(((means[:, None] - cent[None]) ** 2).sum(-1), axis=1)
-    pals = []
-    for it in range(6):
-        pals = []
-        for g in range(3):
-            sel = tiles[group == g].reshape(-1, 3) if (group == g).any() else tiles.reshape(-1, 3)
+    rows = px.reshape(th, 8 * img.shape[1], 3)
+    cache = {}
+
+    def band(a, b):   # (rows a..b-1: its palette, from its rows and one more each side, and its error)
+        if (a, b) not in cache:
+            sel = rows[max(0, a - 1):min(th, b + 1)].reshape(-1, 3)
             u, w = np.unique(sel, axis=0, return_counts=True)
-            p = kmeans(u.astype(np.float64), w.astype(np.float64), 15, seed=it)
-            pals.append(np.clip(np.rint(p), 0, 31))
-        # each tile to the palette that draws it best
-        err = np.zeros((len(tiles), 3))
-        for g in range(3):
-            d = ((tiles[:, :, None, :] - pals[g][None, None]) ** 2).sum(-1).min(-1)
-            err[:, g] = d.sum(1)
-        ng = np.argmin(err, axis=1)
-        if (ng == group).all():
-            break
-        group = ng
+            p = np.clip(np.rint(kmeans(u.astype(np.float64), w.astype(np.float64), 15, iters=8)), 0, 31)
+            own = rows[a:b].reshape(-1, 3)
+            uo, wo = np.unique(own, axis=0, return_counts=True)
+            err = float((((uo[:, None] - p[None]) ** 2).sum(-1).min(-1) * wo).sum())
+            cache[(a, b)] = (p, err)
+        return cache[(a, b)]
+    best = None
+    for a in range(1, th - 1):
+        for b in range(a + 1, th):
+            e = band(0, a)[1] + band(a, b)[1] + band(b, th)[1]
+            if best is None or e < best[0]:
+                best = (e, a, b)
+    _, a, b = best
+    pals = [band(0, a)[0], band(a, b)[0], band(b, th)[0]]
+    group = np.array([0 if i // tw < a else 1 if i // tw < b else 2 for i in range(len(tiles))])
     pal = np.zeros((48, 3), np.int64)
     for g in range(3):
         pal[g * 16 + 1:g * 16 + 1 + len(pals[g])] = pals[g]
@@ -190,52 +192,76 @@ def quantize(img):
     for i, t in enumerate(tiles):
         p = pals[group[i]]
         idx[i] = np.argmin(((t[:, None] - p[None]) ** 2).sum(-1), axis=1) + 1
-    # the same tile (or its mirror) once
-    out_tiles, seen, tmap = [], {}, []
-    for i in range(len(tiles)):
-        t = idx[i].reshape(8, 8)
-        key = None
-        for flips, v in ((0, t), (1, t[:, ::-1]), (2, t[::-1, :]), (3, t[::-1, ::-1])):
-            b = v.astype(np.uint8).tobytes()
-            if b in seen:
-                key = seen[b] | (flips << 10)
-                break
-        if key is None:
-            seen[t.astype(np.uint8).tobytes()] = len(out_tiles)
-            key = len(out_tiles)
-            out_tiles.append(t)
-        tmap.append(key | (int(group[i]) << 12))
-    while len(out_tiles) > MAX_TILES:   # (too many: the two most alike tiles of a palette made one)
-        out_tiles, tmap = merge_closest(out_tiles, tmap, pal)
+    # the scene's own half (the first 32 columns) keeps its tiles; the rest takes the nearest of those or of a few of
+    # its own, drawn in its own row's palette (BG3 has room for 511)
+    first = np.array([(i % tw) < tw // 2 for i in range(len(tiles))])
+    out_tiles, tmap = codebook(idx, group, first, pal, MAX_TILES)
     return out_tiles, tmap, pal
 
 
-def merge_closest(out_tiles, tmap, pal):
-    pal_of = {}
-    for e in tmap:
-        pal_of.setdefault(e & 0x3FF, (e >> 12) & 3)
-    flat = np.array([pal[pal_of[i] * 16 + t.reshape(-1)] for i, t in enumerate(out_tiles)], np.float64)
-    best = None
-    n = len(out_tiles)
-    for i in range(n):
-        d = ((flat[i + 1:] - flat[i]) ** 2).sum((1, 2))
-        same = np.array([pal_of[j] == pal_of[i] for j in range(i + 1, n)])
-        if not same.any():
-            continue
-        d = np.where(same, d, np.inf)
-        j = int(np.argmin(d))
-        if best is None or d[j] < best[0]:
-            best = (d[j], i, i + 1 + j)
-    _, keep, drop = best
-    remap = {}
-    for k in range(n):
-        remap[k] = keep if k == drop else (k if k < drop else k - 1)
-    tiles = [t for k, t in enumerate(out_tiles) if k != drop]
-    out = []
-    for e in tmap:
-        t = e & 0x3FF
-        out.append(remap[t] | (e & ~0x3FF & 0xFFFF) if t != drop else remap[t] | (e & 0xF000))
-    return tiles, out
+def _flips(t):
+    t = t.reshape(8, 8)
+    return [t, t[:, ::-1], t[::-1, :], t[::-1, ::-1]]
+
+
+def codebook(idx, group, first, pal, budget):
+    """Tiles (each 8 x 8 colour numbers) and the map: every distinct tile of FIRST once (fewer, the most used, if
+    they're more than the budget allows), then up to the budget the others' most different ones; every place the
+    nearest tile or mirror of those, as its palette draws it"""
+    def key(t):
+        return t.astype(np.uint8).tobytes()
+    uniq, count = {}, {}
+    for i in range(len(idx)):
+        k = None
+        for f, v in enumerate(_flips(idx[i])):
+            if key(v) in uniq:
+                k = key(v)
+                break
+        if k is None:
+            k = key(idx[i])
+            uniq[k] = idx[i].reshape(8, 8)
+        count[k] = count.get(k, 0) + (1000 if first[i] else 1)
+    keys_first = [k for k in uniq if count[k] >= 1000]
+    keys_other = [k for k in uniq if count[k] < 1000]
+    keys_first.sort(key=lambda k: -count[k])
+    chosen = keys_first[:budget - min(len(keys_other), 64)]
+    rest = [k for k in keys_first[len(chosen):]] + keys_other
+    room = budget - len(chosen)
+    # (the rest: the most different first, farthest from what's chosen, as palette 1 draws them)
+    if rest and room > 0:
+        g = pal[16:32].astype(np.float32)
+        cand = np.array([g[uniq[k].reshape(-1)].reshape(-1) for k in rest], np.float32)
+        have = np.array([g[uniq[k].reshape(-1)].reshape(-1) for k in chosen], np.float32) if chosen else None
+        dmin = ((cand[:, None] - have[None]) ** 2).sum(-1).min(1) if have is not None else np.full(len(rest), 1e9)
+        w = np.array([count[k] for k in rest], np.float32)
+        for _ in range(min(room, len(rest))):
+            j = int(np.argmax(dmin * w))
+            if dmin[j] <= 0:
+                break
+            chosen.append(rest[j])
+            dmin = np.minimum(dmin, ((cand - cand[j]) ** 2).sum(-1))
+    tiles = [uniq[k] for k in chosen]
+    pos = {k: n for n, k in enumerate(chosen)}
+    # every place: its exact tile (or mirror) when chosen, else the nearest as its palette draws it
+    flat = [np.stack([v.reshape(-1) for v in _flips(t)]) for t in tiles]     # (n, 4, 64)
+    flat = np.stack(flat)
+    tmap = []
+    for i in range(len(idx)):
+        exact = None
+        for f, v in enumerate(_flips(idx[i])):
+            if key(v) in pos:
+                exact = pos[key(v)] | (f << 10)
+                break
+        if exact is None:
+            p = pal[group[i] * 16:(group[i] + 1) * 16].astype(np.float32)
+            want = p[idx[i]]                                                  # (64, 3)
+            got = p[flat]                                                     # (n, 4, 64, 3)
+            d = ((got - want[None, None]) ** 2).sum((-1, -2))
+            n, f = np.unravel_index(int(np.argmin(d)), d.shape)
+            # (a tile's flips map its own pixels back: the mirror of the chosen tile is the flip of the place)
+            exact = int(n) | (int(f) << 10)
+        tmap.append(exact | (int(group[i]) << 12))
+    return tiles, tmap
 
 
 def picture(tiles, tmap, pal):
@@ -264,6 +290,26 @@ def encode(tiles, tmap, pal):
     return bytes(out)
 
 
+def scene(job):
+    """One scene, encoded (n, field file, stage file, picture folder or None)"""
+    n, f, s, png_dir = job
+    # (64 x 16 tiles: the scene, then Black's field alone, as Kai's own backgrounds keep their second half free
+    # of the platforms. Kai's intro slides the top half (rows 0-9, BG3's offset 240 down to 0: the map's 0-480)
+    # and the bottom half (-240 up to 0: 272-512, then 0-240) in from either side, so the second half is the field
+    # further right for the top rows and further left for the bottom ones: every edge the slide crosses is
+    # Black's own ground)
+    img = render(f, s)
+    right, left = render(f, None, -OUT_W), render(f, None, OUT_W)
+    img = np.concatenate([img, np.concatenate([right[:SLIDE_SPLIT], left[SLIDE_SPLIT:]], axis=0)], axis=1)
+    tiles, tmap, pal = quantize(img)
+    print('scene %d: field %d stage %d, %d tiles' % (n, f, s, len(tiles)), flush=True)
+    if png_dir:
+        from PIL import Image
+        os.makedirs(png_dir, exist_ok=True)
+        Image.fromarray(picture(tiles, tmap, pal)).save(os.path.join(png_dir, 'scene_%02d_f%d_s%d.png' % (n, f, s)))
+    return encode(tiles, tmap, pal)
+
+
 def build(png_dir=None):
     rows, fields, stages = tables()
     scenes = {}      # (field file, stage file) -> background number
@@ -283,21 +329,10 @@ def build(png_dir=None):
                 vs.append(scenes[(f, s)])
             cols.append(vs)
         row_out.append((has_light, has_variant, cols))
-    bgs = []
-    for n, (f, s) in enumerate(order):
-        # (64 x 16 tiles: the scene, then the field alone mirrored, as Kai's own backgrounds keep their second half
-        # free of the platforms: the intro slides the halves in from either side over all 512, seamless so)
-        img = render(f, s)
-        img = np.concatenate([img, render(f, None)[:, ::-1]], axis=1)
-        tiles, tmap, pal = quantize(img)
-        bgs.append(encode(tiles, tmap, pal))
-        print('scene %d: field %d stage %d, %d tiles' % (n, f, s, len(tiles)), flush=True)
-        if png_dir:
-            from PIL import Image
-            os.makedirs(png_dir, exist_ok=True)
-            Image.fromarray(picture(tiles, tmap, pal)).save(os.path.join(png_dir, 'scene_%02d_f%d_s%d.png' % (n, f, s)))
-            Image.fromarray(np.clip(img * 255 / 31, 0, 255).astype(np.uint8)).save(
-                os.path.join(png_dir, 'scene_%02d_drawn.png' % n))
+    import multiprocessing
+    jobs = [(n, f, s, png_dir) for n, (f, s) in enumerate(order)]
+    with multiprocessing.Pool(max(1, os.cpu_count() or 1)) as pool:   # (a scene a core: the release waits on it)
+        bgs = pool.map(scene, jobs)
     zs = zr.zones()
     out = bytearray(struct.pack('<H', len(zs)))
     out += bytes(((z['flags'] >> 5) & 31) for z in zs)

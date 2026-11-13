@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "global.h"
 #include "u3d.h"   // Moemon Kai: UNOVA's wild POKéMON
 #include "mp_region.h"
@@ -595,6 +596,38 @@ static bool8 AreLegendariesInSootopolisPreventingEncounters(void)
     return FlagGet(FLAG_LEGENDARIES_IN_SOOTOPOLIS);
 }
 
+// Moemon Kai: an UNOVA wild battle, gEnemyParty[0] made. Black's dark grass (field_encount.c FIELD_ENCOUNT_SetupParam):
+// with two POKéMON able to battle, 40 in 100 are two at once from its table; its catches take dark grass's odds
+// (u3d_battle.c U3D_CatchCase). (MOEMON_U3D_DARK_DOUBLE: other odds, for tests)
+static void U3dStartWild(const struct WildPokemonInfo *info, u8 area, u16 behavior)
+{
+    u32 odds = getenv("MOEMON_U3D_DARK_DOUBLE") ? (u32)atoi(getenv("MOEMON_U3D_DARK_DOUBLE")) : U3D_DARK_GRASS_DOUBLE_ODDS;
+    U3D_SetDarkGrassBattle(area == 0 && MetatileBehavior_IsLongGrass(behavior));
+    if (U3D_DarkGrassBattle() && GetMonsStateToDoubles() == PLAYER_HAS_TWO_USABLE_MONS
+     && (Random() % 100) < odds && !MP_Coop_TryWildTeamUp())
+    {
+        struct Pokemon first = gEnemyParty[0];
+        if (TryGenerateWildMon(info, WILD_AREA_LAND, 0) == TRUE)
+        {
+            gEnemyParty[1] = gEnemyParty[0];
+            gEnemyParty[0] = first;
+            BattleSetup_StartLocalDoubleWildBattle();
+            return;
+        }
+        gEnemyParty[0] = first;
+    }
+    BattleSetup_StartWildBattle();
+}
+
+// (mp u3dwild B b: a step on behaviour B, as the game's own encounter step does it)
+void MP_Debug_U3dStartWild(u16 behavior)
+{
+    const struct WildPokemonInfo *info;
+    u8 area;
+    if (U3D_WildInfo(behavior, &info, &area) && TryGenerateWildMon(info, area == 1 ? WILD_AREA_WATER : WILD_AREA_LAND, 0))
+        U3dStartWild(info, area, behavior);
+}
+
 bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
 {
     u16 headerId;
@@ -624,7 +657,7 @@ bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
         }
         if (TryGenerateWildMon(info, area == 1 ? WILD_AREA_WATER : WILD_AREA_LAND, WILD_CHECK_REPEL | WILD_CHECK_KEEN_EYE) != TRUE)
             return FALSE;
-        BattleSetup_StartWildBattle();
+        U3dStartWild(info, area, curMetatileBehavior);
         return TRUE;
     }
 

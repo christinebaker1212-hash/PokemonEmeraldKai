@@ -65,6 +65,7 @@ fi
 if [ -f sinnoh/platinum_gfx.pak ]; then   # (SINNOH's people as Platinum draws them, tools/sinnoh/build_gfx.py)
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum_gfx.pak "$P/sinnoh/"
+    if [ -f sinnoh/platinum_battle.pak ]; then cp sinnoh/platinum_battle.pak "$P/sinnoh/"; fi   # (its battle backgrounds)
 fi
 # ORRE's packs (tools/orre/make_pack.sh rips them from the disc; the release runs it first): in the game's own zip, so
 # every update replaces them with the game (docs/ORRE_DECISIONS.md)
