@@ -699,6 +699,18 @@ u16 U3D_CurrentZone(void)
 }
 
 // ------------------------------------------------------------------------------------------------ map blocks
+// whether ZONE has a map on map I's matrix laid over exactly I's rectangle (zones sharing one matrix whole)
+static bool8 SameRect(u32 i, u16 zone)
+{
+    u32 j;
+    for (j = 0; j < ARRAY_COUNT(sUnovaMaps); j++)
+        if (j != i && sUnovaMaps[j].zone == zone && sUnovaMaps[j].mat == sUnovaMaps[i].mat
+         && sUnovaMaps[j].cx == sUnovaMaps[i].cx && sUnovaMaps[j].cz == sUnovaMaps[i].cz
+         && sUnovaMaps[j].bw == sUnovaMaps[i].bw && sUnovaMaps[j].bh == sUnovaMaps[i].bh)
+            return TRUE;
+    return FALSE;
+}
+
 const u16 *U3D_LayoutBlocks(const struct MapLayout *layout)
 {
     static u16 *sBlocks[ARRAY_COUNT(sUnovaMaps)];
@@ -725,9 +737,11 @@ const u16 *U3D_LayoutBlocks(const struct MapLayout *layout)
                 for (bx = 0; bx < sUnovaMaps[i].bw; bx++)
                 {
                     const U3dCell *c = CellIn(mt, sUnovaMaps[i].cx + bx, sUnovaMaps[i].cz + bz);
-                    // (a cell of another zone inside an indoor map's rectangle: blocked)
+                    // (a cell of another zone inside an indoor map's rectangle: blocked; but where several zones
+                    // share one matrix over the same rectangle, N's CASTLE's halls, the cells are each zone's)
                     bool8 mine = c != NULL && (c->zone == sUnovaMaps[i].zone || c->zone == 0xFFFF
-                                               || (sUnovaMaps[i].bw == 1 && sUnovaMaps[i].bh == 1));
+                                               || (sUnovaMaps[i].bw == 1 && sUnovaMaps[i].bh == 1)
+                                               || SameRect(i, c->zone));
                     for (y = 0; y < 32; y++)
                         for (x = 0; x < 32; x++)
                             sBlocks[i][(bz * 32 + y) * w + bx * 32 + x] = mine ? c->blocks[y * 32 + x] : layout->map[0];

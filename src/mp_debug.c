@@ -3636,7 +3636,9 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int b;
         printf("[test] battlers:");
         for (b = 0; gMain.inBattle && b < gBattlersCount; b++)
-            printf(" %d=%d:%d/%d", b, gBattleMons[b].species, gBattleMons[b].hp, gBattleMons[b].maxHP);
+            printf(" %d=%d:%d/%d [%d/%d %d/%d %d/%d %d/%d]", b, gBattleMons[b].species, gBattleMons[b].hp, gBattleMons[b].maxHP,
+                   gBattleMons[b].moves[0], gBattleMons[b].pp[0], gBattleMons[b].moves[1], gBattleMons[b].pp[1],
+                   gBattleMons[b].moves[2], gBattleMons[b].pp[2], gBattleMons[b].moves[3], gBattleMons[b].pp[3]);
         printf("\n");
     }
     else if (strcmp(cmd, "battlerhp") == 0)
