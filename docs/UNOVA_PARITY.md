@@ -10,10 +10,16 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 
 ## 1. Drawn things missing
 
-- [ ] **Gym machinery** (Black's field expansion objects, ov021 fld_exp_obj.c, each gimmick's G3dUtilSetup: models,
-      textures and their animations): BURGH's honey doors (ov038), ELESA's coasters, carts and rails (ov039), CLAY's
-      lifts and the lobby's elevator (ov043 / ov044), SKYLA's cannons and the flight (ov041), BRYCEN's switches and
-      spinning pieces (ov045), DRAYDEN's dragons, levers and buttons (ov046), STRIATON's and NACRENE's (below)
+- [x] **Gym machinery** (Black's field expansion objects, ov021 fld_exp_obj.c, each gimmick's G3dUtilSetup: models,
+      textures and their joint animations; 2026-11-13, seen running in each gym): BURGH's honey doors and plates
+      (ov038), ELESA's coasters, carts and rails, ridden on Black's paths (ov039), NACRENE's shelf (ov040), SKYLA's
+      cannons and the flight (ov041), STRIATON's switches and curtains (ov042), CLAY's lifts, obstacle and elevator,
+      ridden at Black's speeds (ov043 / ov044), BRYCEN's switch pieces (ov045), DRAYDEN's dragons and levers (ov046).
+      tools/unova/gimmicks.py (pack v5), u3d.c U3D_Exp*, u3d_vm.c's drivers
+- [ ] The gym models' texture animations (BTA / BTP / BMA: the switches' and plates' glows, the coasters' gates and
+      lights, DRAYDEN's buttons, the cannons' colours): the models are drawn at their first texture frame
+- [ ] SKYLA's flight camera (gCannonsCameraInfos: Black turns the view's pitch and yaw for each flight; here the view
+      follows the flying player at the field's own angle)
 - [ ] **Building animations**: doors opening and closing (SCREENEFFECTS 0x124-0x132, build-model nodes), machines'
       and lamps' BCA0 / BTP0 / BMA0 (field_buildmodel.c), the POKeMON LEAGUE's statues and stairs (0x12B-0x12E)
 - [ ] The GEAR STATION's trains on the platforms; the ROYAL UNOVA as a boat

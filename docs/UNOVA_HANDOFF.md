@@ -123,6 +123,14 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   shot a silent warp to the landing cell of ov041's gCannonsFlights for the cannon and the facing; the flight itself
   and the cannons' turning not drawn). The CELESTIAL TOWER's bell (the gym's door, Black flag 0x2AE) is rung from the
   tile in front of it.
+  The gyms' machinery drawn (2026-11-13, docs/UNOVA_PARITY.md 1): each gimmick overlay's G3dUtilSetup read by
+  tools/unova/gimmicks.py into pack v5 (a model a mesh whose vertices carry their rigid part in the colour's spare byte,
+  each joint animation a 3x4 matrix a part a frame, checked vertex for vertex against Black's posed model; placements from
+  each overlay's own tables), drawn by u3d.c U3D_Exp* (placed, turned, hidden, an animation shown or played at a frame a
+  field frame), driven by u3d_vm.c per gym (DragonModels, IceModels, MineModels / MineRideStep / PlatRide, CartStep,
+  the cannons' Task_CannonFly with U3D_PlayerFly, PlateModels, STRIATON's and NACRENE's states). CLAY's mine's floors are
+  Black's world units (800 / 640 / 480; they were set in tiles, the player drawn far below the walkways). Tests:
+  mp u3drun ID (a zone's script as a scene), mp u3dexphide MODEL 0|1, mp u3dground.
   BRYCEN's gym (2026-11-13, Black's ov045 and its rails' own attributes): the ice rink as Black's grid (0x18 slide
   ice), its curves, ramps and way down as forced rides from a jump-start tile ("the blue tile") to the far one
   (tools/unova/gen_gyms.py -> src/unova/u3d_gyms.h, u3d_vm.c U3D_Vm_IceSlideAhead / IceRide); a curve starts where
