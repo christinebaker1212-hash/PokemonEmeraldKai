@@ -232,6 +232,13 @@ def main():
     # destination's: a mat three wide is landed on in its middle, as Black puts the player), then the maps
     warps = {m['name']: [] for m in maps}
     landing = {}   # (zone, Black's connection index) -> (map, its middle warp there)
+    # (a connection to zone 0xFFFF leads where the connection that lands on it comes from: Black's LEAGUE lands on
+    # VICTORY ROAD's last one, which leads back up to it)
+    back = {}
+    for z in sorted({m['zone'] for m in maps}):
+        for k, c in enumerate(ev.events(z)['connect']):
+            if c['zone'] != 0xFFFF:
+                back.setdefault((c['zone'], c['exit']), (z, k))
     for z in sorted({m['zone'] for m in maps}):
         for k, c in enumerate(ev.events(z)['connect']):
             if c['rail']:   # (a door on a rail: its tiles, tools/unova/rails.py)
@@ -246,8 +253,10 @@ def main():
                 continue
             landing[(z, k)] = (m, len(warps[m['name']]) + len(tiles) // 2)
             for tx, tz in tiles:
-                warps[m['name']].append((tx - m['rect'][0] * 32, tz - m['rect'][1] * 32, c['zone'], c['exit'],
-                                         c['dir']))
+                dz, dx = c['zone'], c['exit']
+                if dz == 0xFFFF and (z, k) in back and back[(z, k)][0] != z:
+                    dz, dx = back[(z, k)]   # (VICTORY ROAD's way to the LEAGUE)
+                warps[m['name']].append((tx - m['rect'][0] * 32, tz - m['rect'][1] * 32, dz, dx, c['dir']))
     table = []
     song_of = songs()
     for k, m in enumerate(maps):

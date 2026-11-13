@@ -213,6 +213,13 @@
       "elevation": 0,
       "dest_map": "MAP_UNOVA_GEARSTATION_Z74",
       "dest_warp_id": "1"
+    },
+    {
+      "x": 16,
+      "y": 37,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_13_14",
+      "dest_warp_id": "8"
     }
   ],
   "coord_events": [

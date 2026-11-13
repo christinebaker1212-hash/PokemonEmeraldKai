@@ -147,6 +147,13 @@
       "elevation": 0,
       "dest_map": "MAP_UNOVA_NIMBASACITY_Z85",
       "dest_warp_id": "1"
+    },
+    {
+      "x": 11,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_UNOVA_NIMBASACITY_Z86",
+      "dest_warp_id": "0"
     }
   ],
   "coord_events": [
