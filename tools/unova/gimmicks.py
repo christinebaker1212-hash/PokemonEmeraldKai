@@ -271,7 +271,13 @@ def _place38(img):
             + doors + doors + [((0.0, 0.0, 0.0), 0, 1)] * 3)
 
 
-PLACES = {38: _place38, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+# ELESA's (field_gimmick_cart_lanes.c FIELD_GIMMICK_CART_LANES_Setup): each model at its own place (sModelPos00-11)
+def _place39(img):
+    return [(img.vec(a), 0) for a in (0x021F4D60, 0x021F4D0C, 0x021F4D6C, 0x021F4D18, 0x021F4D24, 0x021F4D3C, 0x021F4D00,
+                                     0x021F4CD0, 0x021F4CDC, 0x021F4D30, 0x021F4D48, 0x021F4CE8)]
+
+
+PLACES = {38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 

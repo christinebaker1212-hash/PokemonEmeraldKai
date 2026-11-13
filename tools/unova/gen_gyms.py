@@ -287,6 +287,7 @@ def main():
         f.write('static const s8 sDragonRotateAnim[4][4] = {%s};\n' % ', '.join(
             '{%s}' % ', '.join(str(v) for v in row) for row in rot))
         write_cannons(f)
+        write_carts(f)
     print('%s: %d rides, %d dragon tiles' % (path, len(rows), sum(len(t) for unit in dt for t in unit)))
 
 
@@ -346,6 +347,45 @@ def write_cannons(f):
         f.write('    {%s},\n' % ', '.join('{%s}' % ', '.join(str(v) for v in fl) for fl in row))
     f.write('};\n')
     f.write('static const s16 sCannonPath[][3] = {\n')
+    for k in range(0, len(paths), 6):
+        f.write('    %s,\n' % ', '.join('{%d, %d, %d}' % tuple(round(v * 8) for v in p) for p in paths[k:k + 6]))
+    f.write('};\n')
+
+
+# ELESA's coasters (ov039 field_gimmick_cart_lanes.c): the nine docks (cells packed x | z << 16) and their lanes, each
+# cart's two stops (its animation's frame and the dock there, 255 none), each cart's ride path (archive 0x6B, an ICA
+# as the cannons'), Black's ride origin and each lane's offset, the frames each cart's animation has
+CART_DOCKS, CART_DOCK_LANES, CART_STOP_FRAMES, CART_STOP_DOCKS = 0x021F4C58, 0x021F4C0C, 0x021F4D78, 0x021F4C28
+CART_RIDE_IDS, CART_RIDE_ORIGIN, CART_LANE_OFFSETS, CART_RIDE_ARC = 0x021F4C38, 0x021F4D54, 0x021F4CA0, 'a/1/0/7'
+
+
+def write_carts(f):
+    import gimmicks
+    ram, d = scrcmd.ov_image(39)
+    i32 = lambda a: struct.unpack_from('<i', d, a - ram)[0]   # noqa: E731
+    docks = [(i32(CART_DOCKS + 4 * k) & 0xFFFF, i32(CART_DOCKS + 4 * k) >> 16) for k in range(9)]
+    lanes = list(d[CART_DOCK_LANES - ram:CART_DOCK_LANES - ram + 9])
+    stops = [[(i32(CART_STOP_FRAMES + 8 * c + 4 * k) >> 12, d[CART_STOP_DOCKS - ram + 2 * c + k]) for k in range(2)]
+             for c in range(8)]
+    arc = narc.arc(CART_RIDE_ARC)
+    paths, rides = [], []
+    for c in range(8):
+        pts = ica_path(arc[i32(CART_RIDE_IDS + 4 * c)])
+        rides.append((len(paths), len(pts)))
+        paths += pts
+    img = gimmicks.Image(39)
+    origin = img.vec(CART_RIDE_ORIGIN)
+    offsets = [img.vec(CART_LANE_OFFSETS + 12 * k) for k in range(4)]
+    f.write("// ELESA's coasters (ov039): docks (x, z) and lanes, each cart's stops (frame, dock), its ride path (first, points;\n"
+            "// ICA translations, an eighth of a unit, from Black's origin plus its lane's offset)\n")
+    f.write('static const u8 sCartDocks[9][3] = {%s};\n' % ', '.join(
+        '{%d, %d, %d}' % (x, z, ln) for (x, z), ln in zip(docks, lanes)))
+    f.write('static const u16 sCartStops[8][2][2] = {%s};\n' % ', '.join(
+        '{%s}' % ', '.join('{%d, %d}' % st for st in row) for row in stops))
+    f.write('static const u16 sCartRides[8][2] = {%s};\n' % ', '.join('{%d, %d}' % r for r in rides))
+    f.write('static const s16 sCartRideOffset[4][3] = {%s};\n' % ', '.join(
+        '{%d, %d, %d}' % tuple(round(o[k] + origin[k]) for k in range(3)) for o in offsets))
+    f.write('static const s16 sCartPath[][3] = {\n')
     for k in range(0, len(paths), 6):
         f.write('    %s,\n' % ', '.join('{%d, %d, %d}' % tuple(round(v * 8) for v in p) for p in paths[k:k + 6]))
     f.write('};\n')

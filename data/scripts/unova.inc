@@ -47,13 +47,18 @@ Unova_EventScript_Screen::
 	goto Unova_EventScript_Wait
 
 @ ELESA's gym's coasters (src/unova/u3d_vm.c U3D_Vm_DockStep): a dock walked onto facing the rails. A lane still locked
-@ runs Black's own scripts there (its trainer); else the cart carries the player to the other stop of its loop
+@ runs Black's own scripts there (its trainer); else, with the lane's cart parked there, the player rides it
 Unova_EventScript_Ride::
 	lockall
 	specialvar VAR_RESULT, U3D_VmRideKind
 	goto_if_eq VAR_RESULT, 1, Unova_EventScript_RideCart
+	goto_if_eq VAR_RESULT, 2, Unova_EventScript_RideNone
 	special U3D_VmRideLocked
 	goto Unova_EventScript_Wait
+
+Unova_EventScript_RideNone::
+	releaseall
+	end
 
 @ SKYLA's gym's cannons (src/unova/u3d_vm.c U3D_Vm_CannonAhead): walked into, the cannon aims, Black's script climbs
 @ in, the shot flies the player along Black's path to the cell Black's table gives
@@ -82,9 +87,16 @@ Unova_EventScript_IceSlideDown::
 	releaseall
 	end
 
+@ ... the cart parked at the dock: the gate, Black's boarding (13), the ride (off at a stop with DOWN), the exit, Black's
+@ arrival (14, the VM's pending script), the cart on its way
 Unova_EventScript_RideCart::
-	playse SE_TRUCK_MOVE
-	warpsilent MAP_UNOVA_NIMBASACITY_Z63, VAR_0x8004, VAR_0x8005
+	special U3D_VmCartGate
+	waitstate
+	special U3D_VmCartBoard
+	waitstate
+	special U3D_VmCartRide
+	waitstate
+	warpsilent MAP_UNOVA_NIMBASACITY_Z63, VAR_0x8004, VAR_0x8005   @ (Black's script 14 runs as the exit loads)
 	waitstate
 	releaseall
 	end

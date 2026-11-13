@@ -844,6 +844,9 @@ gSpecials::
 	def_special U3D_VmResume   @ Moemon Kai: ... and Black's script goes on
 	def_special U3D_VmRideKind   @ Moemon Kai: UNOVA: ELESA's gym's coaster ride (1: the cart goes, 0x8004 / 0x8005 the dock)
 	def_special U3D_VmRideLocked   @ Moemon Kai: ... a lane still locked: Black's scripts there
+	def_special U3D_VmCartGate   @ Moemon Kai: UNOVA: ELESA's gym's coasters (Black's ride event)
+	def_special U3D_VmCartBoard
+	def_special U3D_VmCartRide
 	def_special U3D_VmCannon   @ Moemon Kai: UNOVA: SKYLA's gym's cannons (Black's climb in; 0x8004 / 0x8005 the landing)
 	def_special U3D_VmCannonAim   @ Moemon Kai: UNOVA: ... the cannon aims
 	def_special U3D_VmCannonFly   @ Moemon Kai: UNOVA: ... the shot and the flight

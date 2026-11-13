@@ -999,6 +999,11 @@ static struct { s8 model; u8 hex; s16 x, z, w, d; float cur, goal, step; } sPlat
 static void PlatRide(u8 model, u8 hex, s16 x, s16 z, s16 w, s16 d, s16 from, s16 to);
 #define ZONE_CLAY_LOBBY 98
 #define ZONE_MISTRALTON_GYM 108
+#define ZONE_NIMBASA_GYM 63
+static void CartStep(void);
+static void CartModels(void);
+static void CartSwap(u32 lane);
+static void CartDone(void);
 static void DragonReset(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
@@ -2323,7 +2328,10 @@ static void Step(struct Thread *t)
             break;
         case U3C_FIELD_GIMMICK_CART_LANES_CreateSwitchEvent:   // ELESA's gym: a floor switch throws a lane's lever
             if (V(0) < 4)
+            {
                 sWork.gym[0] ^= 1 << V(0);
+                CartSwap(V(0));   // (the other cart, as the lane's comes round to its start)
+            }
             PlaySE(SE_SWITCH);
             break;
         case U3C_FIELD_GIMMICK_CART_LANES_UnlockLaneFromScript:   // (lanes 1, 2: Black's flags 0x74, 0x75 say so)
@@ -3785,8 +3793,8 @@ static void RunNow(u16 scriptId)
 // eight floor switches (works 0x4000-0x4007, set as each is stepped on) light plates (gPlateDoorsSwitchPlates); a honey
 // door opens once both its plates are lit (gPlateDoorsDoorPlates), the entry's always. Black's doors are the zone's
 // people 0-6, standing in the doors' cells: an open door's is gone, so the player walks through it north or south (Black
-// pushes through the honey; the walls beside a door keep it to that), a shut one's stays a wall. The doors' honey
-// models aren't drawn
+// pushes through the honey; the walls beside a door keep it to that), a shut one's stays a wall. The doors' and plates'
+// models: PlateModels
 #define ZONE_CASTELIA_GYM 29
 static const s8 sPdSwitchPlates[8][2] = {{0, -1}, {1, -1}, {2, -1}, {3, 4}, {5, -1}, {6, -1}, {7, 8}, {9, -1}};
 static const u8 sPdDoorPlates[6][2] = {{0, 1}, {2, 3}, {4, 5}, {6, 6}, {7, 7}, {8, 9}};
@@ -3868,7 +3876,7 @@ static void PlateDoorsRefresh(bool8 sound)
 // a platform at one of two heights (sLiftElevatorLiftZones) its levers send between them (Black's signs at the lifts'
 // ends, a sign for each height: only the player's floor's answer). Whoever stands on a lift rides it; lift 5 goes down
 // to the ground, CLAY's. The lifts' states sWork.gym[1] (a bit each), the player's floor sWork.gym[2] (128 + its
-// height; 0 not yet). The lifts aren't drawn (Black's gimmick models)
+// height; 0 not yet). The lifts, the obstacle and the elevator: Black's models (MineModels), ridden at Black's speed
 static const s16 sMineArea[8][5] = {{7, 19, 17, 1, 50}, {7, 23, 17, 1, 50}, {13, 24, 5, 3, 50}, {7, 19, 17, 1, 40},
                                     {7, 20, 1, 3, 40}, {7, 23, 17, 1, 40}, {7, 19, 6, 1, 30}, {7, 23, 11, 1, 30}};
 static const s16 sMineLift[6][6] = {{18, 24, 5, 3, 50, 40}, {18, 20, 5, 3, 40, 50}, {8, 24, 5, 3, 40, 30},
@@ -4088,6 +4096,8 @@ void U3D_Vm_FieldFrame(void)
         DragonInside();
     else if (CurrentZone() == ICE_GYM_ZONE)
         IceModels(FALSE);
+    else if (CurrentZone() == ZONE_NIMBASA_GYM)
+        CartStep();
     else if (CurrentZone() == ZONE_DRIFTVEIL_GYM || CurrentZone() == ZONE_CLAY_LOBBY)
     {
         MineRideStep();
@@ -4130,6 +4140,11 @@ void U3D_Vm_FieldShown(void)
         U3D_ExpLoad(44);
     else if (CurrentZone() == ZONE_MISTRALTON_GYM)   // (ov041 Init: the cannons, turned, at rest)
         U3D_ExpLoad(41);
+    else if (CurrentZone() == ZONE_NIMBASA_GYM)   // (ov039 Setup: each lane's cart where it has got to)
+    {
+        U3D_ExpLoad(39);
+        CartModels();
+    }
     else if (CurrentZone() == ZONE_CASTELIA_GYM)   // (ov038 Init: plates and doors as the switches found make them)
     {
         U3D_ExpLoad(38);
@@ -4157,16 +4172,108 @@ void U3D_Vm_FieldShown(void)
 }
 
 // ELESA's gym (zone 63, Black's gimmick 39, ov039 field_gimmick_cart_lanes.c): four lanes of coaster rails, each with
-// two carts on loops its lever picks (cart = lane * 2 + lever), every loop stopping at one dock or two (sStopDocks).
-// The player walks onto a dock facing the rails and the cart takes them to the loop's other stop (Black's cart waits
-// at each stop until DOWN gets the player off; here the ride goes straight to the next stop). Lanes 1 and 2 are
+// two carts on loops its lever picks (cart = lane * 2 + lever: a switch thrown takes the other cart as the lane's comes
+// round to its start). The carts run all the time (UpdateTask: a frame of the cart's animation each field frame),
+// parking at each of their stops (sStopFrames / sStopDocks) for 90 field frames. The player walks onto a dock facing
+// the rails: with the lane's cart parked there (CheckRideEvent) the gate opens, Black's script 13 boards them, the gate
+// shuts and they ride on Black's path for the cart (archive 0x6B, at the cart's frame), hidden in it; at a stop DOWN
+// gets them off (RideEventMain): the gate, the exit two cells north of the dock, Black's script 14. Lanes 1 and 2 are
 // locked until their trainer is beaten (Black's flags 0x74, 0x75: zone 63's script 8 unlocks them as it sets them).
-// The floor switches throw a lane's lever (CART_LANES_CreateSwitchEvent). The carts and rails aren't drawn
-#define ZONE_NIMBASA_GYM 63
-static const u8 sCartDock[9][2] = {{14, 39}, {22, 39}, {16, 27}, {16, 15}, {41, 40}, {49, 40}, {34, 8}, {22, 8}, {5, 39}};
-static const u8 sCartDockLane[9] = {0, 0, 0, 1, 1, 2, 2, 3, 3};
-static const s8 sCartStops[8][2] = {{1, 0}, {1, 2}, {4, -1}, {4, 3}, {6, -1}, {6, 5}, {8, -1}, {8, 7}};
+// The floor switches throw a lane's lever (CART_LANES_CreateSwitchEvent). Tables: u3d_gyms.h (gen_gyms.py)
+#define CART_DOCK_FRAMES 90
+static struct
+{
+    bool8 init;
+    u8 cart[4], swap[4], tick, phase, wait, lane, riding, arriving;
+    u16 frame[4], timer[4];
+    s8 parked[4], holdLane;
+} sCarts;
 static u8 sRideFrom;
+
+static void CartSwap(u32 lane)
+{
+    sCarts.swap[lane] = TRUE;
+}
+
+static u16 CartFrames(u32 cart)
+{
+    return sCartRides[cart][1] ? sCartRides[cart][1] : 1;
+}
+
+static void CartModels(void)
+{
+    u32 lane;
+    if (!sCarts.init)
+    {
+        for (lane = 0; lane < 4; lane++)
+        {
+            sCarts.cart[lane] = lane * 2 + ((sWork.gym[0] >> lane) & 1);
+            sCarts.parked[lane] = -1;
+        }
+        sCarts.holdLane = -1;
+        sCarts.init = TRUE;
+    }
+    for (lane = 0; lane < 4; lane++)
+        U3D_ExpAnim(lane, sCarts.cart[lane] + 1, sCarts.frame[lane], FALSE);
+}
+
+static void CartStep(void)
+{
+    u32 lane, k;
+    if (!sCarts.init)
+        return;
+    sCarts.tick ^= 1;
+    if (sCarts.tick)
+    {
+        for (lane = 0; lane < 4; lane++)
+        {
+            u32 cart = sCarts.cart[lane];
+            if (sCarts.swap[lane] && sCarts.frame[lane] == 0)   // (the other cart, as the lane's comes round)
+            {
+                sCarts.cart[lane] = cart = lane * 2 + ((sWork.gym[0] >> lane) & 1);
+                sCarts.swap[lane] = FALSE;
+            }
+            if (sCarts.timer[lane])
+            {
+                if (sCarts.holdLane != (s8)lane && --sCarts.timer[lane] == 0)
+                    sCarts.parked[lane] = -1;
+                continue;
+            }
+            sCarts.frame[lane] = (sCarts.frame[lane] + 1) % CartFrames(cart);
+            for (k = 0; k < 2; k++)
+                if (sCartStops[cart][k][1] != 255 && sCartStops[cart][k][0] == sCarts.frame[lane])
+                {
+                    sCarts.timer[lane] = CART_DOCK_FRAMES;
+                    sCarts.parked[lane] = sCartStops[cart][k][1];
+                    break;
+                }
+        }
+        CartModels();
+    }
+    if (sCarts.arriving == 1 && sThread.alive && sThread.script == 14)
+        sCarts.arriving = 2;
+    else if (sCarts.arriving == 2 && !sThread.alive)
+    {
+        sCarts.arriving = 0;
+        CartDone();
+    }
+    if (!sCarts.riding && sCarts.holdLane < 0 && !ScriptContext_IsEnabled() && !ArePlayerFieldControlsLocked()
+     && !gObjectEvents[gPlayerAvatar.objectEventId].singleMovementActive
+     && gObjectEvents[gPlayerAvatar.objectEventId].facingDirection == DIR_NORTH && U3D_Vm_DockStep(DIR_NORTH)
+     && sCarts.parked[sCartDocks[sRideFrom][2]] == (s8)sRideFrom)
+    {
+        // (CheckRideEvent, as the field checks it while the player stands on the dock: the cart's come)
+        extern const u8 Unova_EventScript_Ride[];
+        ScriptContext_SetupScript(Unova_EventScript_Ride);
+    }
+    if (sCarts.riding)   // (the rider: Black's path for the cart at its frame, from its lane's place)
+    {
+        u32 cart = sCarts.cart[sCarts.lane], f = sCarts.frame[sCarts.lane];
+        const s16 *pt = sCartPath[sCartRides[cart][0] + (f < sCartRides[cart][1] ? f : 0)];
+        const s16 *o = sCartRideOffset[sCarts.lane];
+        U3D_PlayerFly(TRUE, pt[0] / 8.0f + o[0], pt[1] / 8.0f + o[1], pt[2] / 8.0f + o[2]);
+    }
+}
 
 // (field_control_avatar.c: a step onto a dock of the gym, facing north as Black's rider)
 bool8 U3D_Vm_DockStep(u16 direction)
@@ -4176,8 +4283,8 @@ bool8 U3D_Vm_DockStep(u16 direction)
     if (direction != DIR_NORTH || !Ready() || CurrentZone() != ZONE_NIMBASA_GYM || m < 0)
         return FALSE;
     x += 32 * U3D_MapCellX(m), y += 32 * U3D_MapCellZ(m);
-    for (d = 0; d < ARRAY_COUNT(sCartDock); d++)
-        if (sCartDock[d][0] == x && sCartDock[d][1] == y)
+    for (d = 0; d < ARRAY_COUNT(sCartDocks); d++)
+        if (sCartDocks[d][0] == x && sCartDocks[d][1] == y)
         {
             sRideFrom = d;
             return TRUE;
@@ -4190,20 +4297,98 @@ static bool8 CartLaneLocked(u32 lane)
     return (lane == 1 && !FlagOn(0x74)) || (lane == 2 && !FlagOn(0x75));
 }
 
-// special: 1 the cart goes (0x8004 / 0x8005 the map spot it stops at), 0 the lane is locked
+// special: 1 the lane's cart is parked here (held for the boarding), 2 no cart here (nothing), 0 the lane is locked
 u16 U3D_VmRideKind(void)
 {
-    u32 lane = sCartDockLane[sRideFrom], cart = lane * 2 + ((sWork.gym[0] >> lane) & 1), to = sRideFrom;
-    s32 m = U3D_MapIndex();
+    u32 lane = sCartDocks[sRideFrom][2];
+    if (!sCarts.init || sCarts.parked[lane] != (s8)sRideFrom)
+        return 2;
+    sCarts.holdLane = lane;   // (Black pauses the cart as the player steps up)
     if (CartLaneLocked(lane))
         return 0;
-    if (sCartStops[cart][0] == sRideFrom && sCartStops[cart][1] >= 0)
-        to = sCartStops[cart][1];
-    else if (sCartStops[cart][1] == sRideFrom)
-        to = sCartStops[cart][0];   // (a loop with one stop brings the player back round to it)
-    gSpecialVar_0x8004 = sCartDock[to][0] - (m >= 0 ? 32 * U3D_MapCellX(m) : 0);
-    gSpecialVar_0x8005 = sCartDock[to][1] - (m >= 0 ? 32 * U3D_MapCellZ(m) : 0);
+    sCarts.lane = lane;
     return 1;
+}
+
+static void Task_CartRide(u8 taskId)
+{
+    struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u32 lane = sCarts.lane;
+    if (sCarts.wait && --sCarts.wait)
+        return;
+    switch (sCarts.phase)
+    {
+    case 0:   // (the gate, open for the boarding: 15 field frames)
+        DestroyTask(taskId);
+        ScriptContext_Enable();
+        return;
+    case 1:   // (the gate shut behind them: the cart goes, the player in it)
+        pl->invisible = TRUE;
+        sCarts.holdLane = -1;
+        sCarts.timer[lane] = 0;
+        sCarts.parked[lane] = -1;
+        sCarts.riding = TRUE;
+        PlaySE(SE_TRUCK_MOVE);
+        sCarts.phase = 2;
+        return;
+    case 2:   // (riding: at a stop, DOWN gets them off)
+        if (sCarts.parked[lane] >= 0 && JOY_HELD(DPAD_DOWN))
+        {
+            s32 m = U3D_MapIndex();
+            u32 dock = sCarts.parked[lane];
+            sCarts.holdLane = lane;
+            gSpecialVar_0x8004 = sCartDocks[dock][0] - (m >= 0 ? 32 * U3D_MapCellX(m) : 0);
+            gSpecialVar_0x8005 = sCartDocks[dock][1] - 2 - (m >= 0 ? 32 * U3D_MapCellZ(m) : 0);
+            PlaySE(SE_TRUCK_STOP);
+            sCarts.phase = 3;
+            sCarts.wait = 30;
+        }
+        return;
+    case 3:   // (the gate open again: out they get; Black's script 14 as the exit cell loads, then the cart goes)
+        sCarts.riding = FALSE;
+        U3D_PlayerFly(FALSE, 0, 0, 0);
+        pl->invisible = FALSE;
+        sPendingScript = 14;
+        sCarts.arriving = 1;
+        DestroyTask(taskId);
+        ScriptContext_Enable();
+        return;
+    }
+}
+
+// special (waitstate): the gate opens for the boarding
+void U3D_VmCartGate(void)
+{
+    sCarts.phase = 0;
+    sCarts.wait = 30;
+    PlaySE(SE_DOOR);
+    CreateTask(Task_CartRide, 80);
+}
+
+// special: Black's script 13, the player climbs into the cart
+void U3D_VmCartBoard(void)
+{
+    if (!Run(13, 0xFFFF, TRUE))
+        NothingToRun();
+}
+
+// special (waitstate): the gate shuts, the ride, off at a stop with DOWN (0x8004 / 0x8005 the exit cell)
+void U3D_VmCartRide(void)
+{
+    sCarts.phase = 1;
+    sCarts.wait = 30;
+    CreateTask(Task_CartRide, 80);
+}
+
+// the gate shut, the cart goes on its way (once Black's script 14 has run on the exit cell)
+static void CartDone(void)
+{
+    if (sCarts.holdLane >= 0)
+    {
+        sCarts.timer[sCarts.holdLane] = 0;
+        sCarts.parked[sCarts.holdLane] = -1;
+    }
+    sCarts.holdLane = -1;
 }
 
 // special: a locked lane's dock: Black's scripts there, its trainer comes over (7), then the battle that unlocks it (8)
@@ -4347,7 +4532,7 @@ void U3D_VmCannonFly(void)
 // facing (a pos event of check type 1-4) and its script hands the player to it when the switches allow
 // (ReplacePlayerIfRequirementMet: switch S on or off, ov045's requirement table); here the player rides it to its
 // far end and the ice takes them on. The three floor switches are works 0x4001-0x4003, flipped by Black's own scripts
-// as they move the turning pieces' unseen blockers (switch and ice piece models: not drawn)
+// as they move the turning pieces' unseen blockers (the switches' pieces: Black's models, IceModels)
 static s8 sIceRide = -1;
 
 static bool8 IceRequirementMet(u16 req)
@@ -4420,7 +4605,8 @@ static bool8 IceRide(u16 req)
 // with two levers (thrown by buttons that bounce the player a tile, StartHopEvent) whose states pick its pose
 // (CalcUnitPose: levers 0 0 pose 0, 0 1 pose 3, 1 0 pose 2, 1 1 pose 1); a pose opens a pair of the dragon's rail
 // lines and closes the rest (ApplyPoseLines; the tiles in u3d_gyms.h). sWork.gym[3 + unit]: the pose (bits 0-1), the
-// levers (bits 2, 3), set as Black's zone-change script resets them (DragonReset; dragon models: not drawn)
+// levers (bits 2, 3), set as Black's zone-change script resets them (DragonReset; the dragons, levers and buttons:
+// Black's models, DragonModels)
 #define DRAGON_STATE(u) sWork.gym[3 + (u)]
 
 static bool8 DragonHop(u16 direction)
