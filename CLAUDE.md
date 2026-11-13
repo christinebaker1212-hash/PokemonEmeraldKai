@@ -182,6 +182,12 @@ duel, mtg_board.c). The same music in two files plays on (MP_Kaisong_SameMusic);
 Read `BUILDING_COOP.md` first for the architecture and build steps. The player
 docs are in `dist_extras/README.txt` (shipped next to the exe).
 
+**The GBA's limits are not this game's** (the user, 2026-11-13: "this isn't a GBA game, this is a PC port"): any time
+something would go over a GBA limit (tiles, palettes, colours, sprites, VRAM, OAM, screen size...), ask the user how
+they would like to move forward, then do as they say; never quietly squeeze it into the GBA's limits. The renderer
+already draws past them (full-colour layers: gba_easy_draw.c gMpBgPictureLine / gMpMapPicLine, mp_mappic.c; the
+battle backgrounds of UNOVA and SINNOH in full colour, 2026-11-13).
+
 ## Key locations
 - `src/mp/`: all co-op code (net, client, avatar, overworld, trainer mode, battle, menu)
 - `include/mp.h`: shared co-op API. `src/mp/mp_net.h` holds the protocol (bump `MP_PROTOCOL_VERSION` on changes)

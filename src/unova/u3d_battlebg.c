@@ -16,6 +16,7 @@
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "gpu_regs.h"
+#include "mp.h"
 #include "mp_region.h"
 #include "overworld.h"
 #include "palette.h"
@@ -59,7 +60,7 @@ static void Load(void)
     fseek(f, 0, SEEK_SET);
     data = malloc(size > 0 ? size : 1);
     if (data == NULL || size < 12 || fread(data, 1, size, f) != (size_t)size || memcmp(data, "U3DB", 4) != 0
-     || (data[4] | data[5] << 8) != 3)
+     || (data[4] | data[5] << 8) != 4)
     {
         fclose(f);
         free(data);
@@ -97,6 +98,9 @@ static void Load(void)
         u16 tiles = sBb.raw[o] | sBb.raw[o + 1] << 8;
         sBb.at[i] = o;
         o += 2 + tiles * 32 + MAP_W * MAP_H * 2 + 48 * 2;
+        if (o + 4 > sBb.size)
+            break;
+        o += 4 + (sBb.raw[o] | sBb.raw[o + 1] << 8 | sBb.raw[o + 2] << 16 | (u32)sBb.raw[o + 3] << 24);   // (4)
     }
     sBb.ok = i == sBb.count && o <= sBb.size;
     if (!sBb.ok)
@@ -164,6 +168,32 @@ static void Map(const u8 *rec)
         }
 }
 
+// The scene in full colour (4: past the GBA's tiles and palettes, mp_battlepic.c), tinted as the palette by the light
+static void Picture(const u8 *rec, bool8 lit)
+{
+    static u16 sPix[512 * 128];
+    u16 tiles = rec[0] | rec[1] << 8;
+    const u8 *p = rec + 2 + tiles * 32 + MAP_W * MAP_H * 2 + 48 * 2;
+    u32 n = p[0] | p[1] << 8 | p[2] << 16 | (u32)p[3] << 24, i;
+    unsigned long size = sizeof(sPix);
+    u8 lc[3] = {31, 31, 31};
+    if (uncompress((unsigned char *)sPix, &size, p + 4, n) != 0 || size != sizeof(sPix))
+    {
+        MP_BattlePic_Hide();
+        return;
+    }
+    if (lit)
+    {
+        U3D_LightColor(lc);
+        for (i = 0; i < ARRAY_COUNT(sPix); i++)
+        {
+            u32 r = sPix[i] & 31, g = (sPix[i] >> 5) & 31, b = (sPix[i] >> 10) & 31;
+            sPix[i] = (r * (lc[0] + 1) / 32) | (g * (lc[1] + 1) / 32) << 5 | (b * (lc[2] + 1) / 32) << 10;
+        }
+    }
+    MP_BattlePic_Show(sPix);
+}
+
 static void Palette(const u8 *rec, bool8 lit)
 {
     u16 tiles = rec[0] | rec[1] << 8;
@@ -198,6 +228,7 @@ bool8 U3D_BattleBg(u8 part)
         Tiles(rec);
         Map(rec);
         Palette(rec, lit);
+        Picture(rec, lit);
         break;
     case U3D_BBG_TILES:
         Tiles(rec);
@@ -207,6 +238,7 @@ bool8 U3D_BattleBg(u8 part)
         break;
     case U3D_BBG_PALETTE:
         Palette(rec, lit);
+        Picture(rec, lit);
         break;
     case U3D_BBG_ENTRY:
         // (Black's battles open on the scene itself: nothing slides over it, Kai's entry layer left empty)

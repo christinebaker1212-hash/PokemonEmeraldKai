@@ -7508,6 +7508,13 @@ scene into Kai's own background layer (BG3: tiles at BG_CHAR_ADDR(2), at most 51
 DrawMainBattleBackground, DrawBattleEntryBackground (Kai's entry layer left empty) and LoadChosenBattleElement 3-5.
 gBattleEnvironment stays Kai's (Camouflage, Secret Power, Nature Power, the intro's slide), so singles, Doubles,
 Triples, co-op and joining work as anywhere; PvP keeps Kai's building.
+- In full colour (the user, 2026-11-13: "this isn't a GBA game, this is a PC port"): each scene's picture (512 x 128
+  BGR555, deflated in the packs: UNOVA's version 4, SINNOH's 2) is drawn over BG3 by src/mp/mp_battlepic.c through
+  the renderer's picture hook (gba_easy_draw.c gMpBgPictureLine), at BG3's own scroll each line, faded by the line
+  c -> a + b * c that BG3's palettes 2-4 show this frame against their unfaded colours (mp_mappic.c's way). It draws
+  only while BG3 is the battle's (char base 2, map 26) and palettes 2 / 3's unused colour 0 hold its signature: a
+  move's own background (fadetobg loads BG3 and its palettes), the BAG, the party screen turn it off by themselves.
+  The Emerald-format tiles and palettes are still loaded under it (what the fades read; and without the pictures).
 - The map's second half (columns 32-63) is the scene going on without its platforms: Kai's intro slides the top 80
   lines from 240 to 0 (the map's 0-480) and the rest from -240 (272-512, then 0-240), so the top rows hold the scene
   further right and the bottom rows further left (Black's field drawn beyond the camera; Platinum's pictures are

@@ -23,7 +23,8 @@ The file is "S3DB" u32 version, u32 the size unpacked, then zlib:
   u8 backgrounds (Platinum's 23): u8 its own terrain (sTerrainForBackground), u8 outdoor (3 palettes by the time)
   u16 scenes, each: u8 background, u8 terrain, u16 tiles, tiles x 32 bytes (4bpp), the map 64 x 16 u16 (tile | flips
       << 10 | palette 0-2 << 12: the scene, then the background going on), u8 palette sets (1 or 3: day, twilight,
-      night), 48 u16 colours each (BGR555)
+      night), 48 u16 colours each (BGR555), (2) then per set u32 n and the scene in full colour, 512 x 128 u16
+      BGR555 deflated (n bytes: src/mp/mp_battlepic.c draws it)
 """
 import importlib.util
 import os
@@ -47,7 +48,7 @@ _spec = importlib.util.spec_from_file_location('unova_battle_bg', os.path.join(o
 ubb = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(ubb)   # (the quantizer to Kai's format, shared as a tool: never the regions' engines)
 
-VERSION = 1
+VERSION = 2   # (2: + the scenes in full colour)
 NARC = 'res/prebuilt/battle/graphic/pl_batt_bg.narc'
 TERRAIN_DIR = 'res/graphics/battle/terrain'
 OUT_W, OUT_H = 256, 128
@@ -263,6 +264,8 @@ def build(root, png_dir=None):
         out += struct.pack('<B', times)
         for p in [pal] + alt:
             out += struct.pack('<48H', *[int(r) | (int(g) << 5) | (int(b) << 10) for r, g, b in p])
+        for img in imgs:   # (2: each time's picture in full colour, drawn past the GBA's limits: mp_battlepic.c)
+            out += ubb.picture_blob(img)
         print('scene %d: %s %s, %d tiles, %d palette sets' % (n, bgs[bg], ters[ter], len(tiles), times), flush=True)
         if png_dir:
             from PIL import Image

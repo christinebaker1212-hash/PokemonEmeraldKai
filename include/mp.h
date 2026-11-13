@@ -1253,6 +1253,8 @@ void MP_Coop_OnBattleAborted(void);
 bool8 MP_Coop_IsMaster(void);
 extern bool8 gMpCoopWild;            // TRUE while a co-op wild double runs (on both games)
 extern bool8 gMpJoinedBattle;   // mp_join.c: friends joined this battle while it ran
+void MP_BattlePic_Show(const u16 *pixels);   // a battle's background in full colour, 512 x 128 (mp_battlepic.c)
+void MP_BattlePic_Hide(void);
 bool8 MP_Coop_TryWildTeamUp(void);   // a land wild encounter: team up with the closest friend in the grass
 void MP_Coop_SetWildEnemyParty(void);
 bool8 MP_Coop_WildHasTwo(void);

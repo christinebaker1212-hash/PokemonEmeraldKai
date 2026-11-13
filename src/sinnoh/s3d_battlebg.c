@@ -14,6 +14,7 @@
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "fieldmap.h"
+#include "mp.h"
 #include "mp_region.h"
 #include "palette.h"
 #include "rtc.h"
@@ -65,7 +66,7 @@ static void Load(void)
     fseek(f, 0, SEEK_SET);
     data = malloc(size > 0 ? size : 1);
     if (data == NULL || size < 12 || fread(data, 1, size, f) != (size_t)size || memcmp(data, "S3DB", 4) != 0
-     || (data[4] | data[5] << 8) != 1)
+     || (data[4] | data[5] << 8) != 2)
     {
         fclose(f);
         free(data);
@@ -111,7 +112,10 @@ static void Load(void)
         o += 4 + tiles * 32 + MAP_W * MAP_H * 2;
         if (o >= sPb.size)
             break;
-        o += 1 + sPb.raw[o] * 48 * 2;
+        n = sPb.raw[o];
+        o += 1 + n * 48 * 2;
+        while (n-- > 0 && o + 4 <= sPb.size)   // (2: each set's picture in full colour)
+            o += 4 + (sPb.raw[o] | sPb.raw[o + 1] << 8 | sPb.raw[o + 2] << 16 | (u32)sPb.raw[o + 3] << 24);
     }
     sPb.ok = i == sPb.scenes && o <= sPb.size;
     if (!sPb.ok)
@@ -217,11 +221,21 @@ bool8 S3D_BattleBg(u8 part)
     }
     if (part == S3D_BBG_ALL || part == S3D_BBG_PALETTE)
     {
+        static u16 sPix[512 * 128];
         u16 colors[48];
-        const u8 *p = pals + 1 + palette * 48 * 2;
+        const u8 *p = pals + 1 + palette * 48 * 2, *pic = pals + 1 + pals[0] * 48 * 2;
+        unsigned long size = sizeof(sPix);
         for (i = 0; i < 48; i++)
             colors[i] = p[i * 2] | p[i * 2 + 1] << 8;
         LoadPalette(colors, BG_PLTT_ID(2), sizeof(colors));
+        // (2: the picture in full colour, past the GBA's tiles and palettes: mp_battlepic.c)
+        for (i = 0; i < palette; i++)
+            pic += 4 + (pic[0] | pic[1] << 8 | pic[2] << 16 | (u32)pic[3] << 24);
+        if (uncompress((unsigned char *)sPix, &size, pic + 4, pic[0] | pic[1] << 8 | pic[2] << 16 | (u32)pic[3] << 24) == 0
+         && size == sizeof(sPix))
+            MP_BattlePic_Show(sPix);
+        else
+            MP_BattlePic_Hide();
     }
     if (part == S3D_BBG_ENTRY)
     {

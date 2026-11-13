@@ -23,7 +23,7 @@ near stage then comes out where Kai's own is (its top at y 106, under the player
 
 The file is "U3DB" u32 version, u32 the size unpacked, then zlib: u16 zones, u8 field effect set per zone; u8 rows, per row u8 has light,
 u8 has variant, u16 background [17 columns][4 variants]; u16 backgrounds, each: u16 tiles, tiles x 32 bytes (4bpp),
-the map 64 x 16 u16 (tile | flips << 10 | palette 0-2 << 12: the scene, then its field alone, beyond it), 48 u16 colours (BGR555; each palette's colour 0 unused).
+the map 64 x 16 u16 (tile | flips << 10 | palette 0-2 << 12: the scene, then its field alone, beyond it), 48 u16 colours (BGR555; each palette's colour 0 unused), (4) u32 n and the scene in full colour, 512 x 128 u16 BGR555 deflated (n bytes: src/mp/mp_battlepic.c draws it).
 """
 import math
 import os
@@ -45,7 +45,8 @@ _spec = importlib.util.spec_from_file_location('sinnoh_render_ref', os.path.join
 rr = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(rr)
 
-VERSION = 3   # (2: the second half, the field alone; 3: the field beyond the scene, palettes by bands)
+VERSION = 4   # (2: the second half, the field alone; 3: the field beyond the scene, palettes by bands; 4: + the full
+              #  colour picture)
 MODELS = 'a/0/1/1'
 TABLES = 'a/1/5/2'
 EYE, TARGET = (0x6B33 / 4096, 0x6B33 / 4096, 0x114CD / 4096), (0.0, 0x299A / 4096, 0.0)
@@ -280,6 +281,15 @@ def picture(tiles, tmap, pal):
     return img
 
 
+def picture_blob(img):
+    """The scene in full colour (the PC draws it past the GBA's tiles and palettes: src/mp/mp_battlepic.c): u32 the
+    packed size, then 512 x 128 u16 BGR555 deflated"""
+    px = np.clip(np.rint(img), 0, 31).astype(np.uint16)
+    raw = (px[..., 0] | (px[..., 1] << 5) | (px[..., 2] << 10)).astype('<u2').tobytes()
+    z = zlib.compress(raw, 9)
+    return struct.pack('<I', len(z)) + z
+
+
 def encode(tiles, tmap, pal):
     out = bytearray(struct.pack('<H', len(tiles)))
     for t in tiles:
@@ -307,7 +317,7 @@ def scene(job):
         from PIL import Image
         os.makedirs(png_dir, exist_ok=True)
         Image.fromarray(picture(tiles, tmap, pal)).save(os.path.join(png_dir, 'scene_%02d_f%d_s%d.png' % (n, f, s)))
-    return encode(tiles, tmap, pal)
+    return encode(tiles, tmap, pal) + picture_blob(img)
 
 
 def build(png_dir=None):
