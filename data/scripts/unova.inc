@@ -68,6 +68,18 @@ Unova_EventScript_Cannon::
 	releaseall
 	end
 
+@ BRYCEN's gym's ice slides (src/unova/u3d_vm.c U3D_Vm_IceSlideAhead): Black's script hands the player to the slide
+Unova_EventScript_IceSlide::
+	lockall
+	special U3D_VmIceSlide
+	goto_if_eq VAR_RESULT, 1, Unova_EventScript_IceSlideDown
+	goto Unova_EventScript_Wait
+
+Unova_EventScript_IceSlideDown::
+	waitmovement 255   @ (the player)
+	releaseall
+	end
+
 Unova_EventScript_RideCart::
 	playse SE_TRUCK_MOVE
 	warpsilent MAP_UNOVA_NIMBASACITY_Z63, VAR_0x8004, VAR_0x8005

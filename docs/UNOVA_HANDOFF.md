@@ -123,6 +123,14 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   shot a silent warp to the landing cell of ov041's gCannonsFlights for the cannon and the facing; the flight itself
   and the cannons' turning not drawn). The CELESTIAL TOWER's bell (the gym's door, Black flag 0x2AE) is rung from the
   tile in front of it.
+  BRYCEN's gym (2026-11-13, Black's ov045 and its rails' own attributes): the ice rink as Black's grid (0x18 slide
+  ice), its curves, ramps and way down as forced rides from a jump-start tile ("the blue tile") to the far one
+  (tools/unova/gen_gyms.py -> src/unova/u3d_gyms.h, u3d_vm.c U3D_Vm_IceSlideAhead / IceRide); a curve starts where
+  Black checks the player's facing (pos events of check type 1-4) and runs only when its switch allows
+  (ReplacePlayerIfRequirementMet, ov045's requirement table; the switches are works 0x4001-0x4003 flipped by Black's
+  scripts as they move the spinners' unseen blockers). The rails' tiles are out of the walkable grid (build_pack.py
+  lay_rails). Its ramps' arcs stand up (rails.py place: an anchor between the ends). Solved end to end like the Thonky
+  walkthrough: each curve, all three switches, both ramps, to BRYCEN.
   The TOWN MAP and FLY (2026-11-13): Black's own town map (a/0/8/5 picture, a/0/8/6 its 61 town records) on
   region_map.c's QZMAP_UNOVA page, at 5/7 its size in the 28 x 15 grid (tools/unova/gen_townmap.py: the header
   src/data/region_map/unova_townmap.h, the heal locations HEAL_LOCATION_UNOVA_*, the picture "TMAP" in black_gfx.pak

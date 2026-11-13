@@ -105,8 +105,23 @@ def place(r, li, off_cells, side_cells):
     side = side_cells * CELL
     shape = r['shapes'][line['shape']] if line['shape'] < len(r['shapes']) else {'func': 0}
     y = a[1] + (b[1] - a[1]) * t
-    if shape['func'] in (1, 2):   # (an arc about the anchor, in x / z: the angle and the radius between the ends')
+    if shape['func'] in (1, 2):
         c = shape['anchor']
+        ax, az, bx, bz = a[0] - c[0], a[2] - c[2], b[0] - c[0], b[2] - c[2]
+        if abs(ax * bz - az * bx) < 1.0 and ax * bx + az * bz < 0:
+            # (the anchor on the way between the ends: an arc standing up, BRYCEN's ramps' humps: straight on the
+            # ground, its height the short way round the circle through the ends)
+            dx, dz = b[0] - a[0], b[2] - a[2]
+            n = math.hypot(dx, dz) or 1.0
+            rx, rz = -dz / n, dx / n
+            ua, ub = -math.hypot(ax, az), math.hypot(bx, bz)
+            u = ua + (ub - ua) * t
+            ra, rb = math.hypot(ua, a[1] - c[1]), math.hypot(ub, b[1] - c[1])
+            rad = ra + (rb - ra) * t
+            up = 1.0 if (a[1] - c[1]) + (b[1] - c[1]) >= 0 else -1.0
+            y = c[1] + up * math.sqrt(max(0.0, rad * rad - u * u))
+            return a[0] + dx * t + rx * side, y, a[2] + dz * t + rz * side
+        # (an arc about the anchor, in x / z: the angle and the radius between the ends')
         aa, ab = math.atan2(a[2] - c[2], a[0] - c[0]), math.atan2(b[2] - c[2], b[0] - c[0])
         d = ab - aa
         while d > math.pi:
@@ -123,11 +138,13 @@ def place(r, li, off_cells, side_cells):
     return a[0] + dx * t + rx * side, y, a[2] + dz * t + rz * side
 
 
-def cells(rail):
-    """{(tile x, tile z): [heights]} every cell of every line covers (world tiles: units / 16)"""
+def cells(rail, lines=None):
+    """{(tile x, tile z): [heights]} every cell of every line (or of LINES) covers (world tiles: units / 16)"""
     r = load(rail)
     out = {}
     for li, line in enumerate(r['lines']):
+        if lines is not None and li not in lines:
+            continue
         length = max(1, line['length']) * CELL
         last = {}
         for off in range(max(1, line['length'])):

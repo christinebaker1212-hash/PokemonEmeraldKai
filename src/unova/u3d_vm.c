@@ -850,6 +850,7 @@ static u16 TrainerOfScript(u16 script);
 static void StartEye(u8 slot);
 static u16 TrainerWords(u16 trainer, u16 kind);
 static u16 EyeSong(u16 trainer);
+static bool8 IceRide(u16 req);   // (BRYCEN's gym's slides: the end of this file)
 
 // ------------------------------------------------------------------------------------------------ the VM
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
@@ -1783,6 +1784,13 @@ static void Step(struct Thread *t)
         case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_CallElevatorEvent:
         case U3C_FIELD_GIMMICK_LIFT_SnapLiftToBottom:
         case U3C_FIELD_GIMMICK_LIFT_CallEvent:
+            break;
+        case U3C_FIELD_GIMMICK_SWITCH_TOGGLE_ReplacePlayerIfRequirementMet:   // BRYCEN's gym: onto the slide
+            if (IceRide(a[0]))
+                t->wait = W_MOVES;
+            break;
+        case U3C_FIELD_GIMMICK_SWITCH_TOGGLE_StartSecondarySwitchEvent:   // (its switch's and ice piece's models
+        case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateOneShotEventU16:         // turning: the works and blockers say it)
             break;
         case U3C_FIELD_GIMMICK_CART_LANES_CreateSwitchEvent:   // ELESA's gym: a floor switch throws a lane's lever
             if (V(0) < 4)
@@ -3236,6 +3244,81 @@ void U3D_VmCannon(void)
     gSpecialVar_0x8005 = sCannonLandZ;
     if (!Run(2, 0xFFFF, TRUE))
         NothingToRun();
+}
+
+// BRYCEN's gym (ICIRRUS, zone 114, Black's gimmick ov045 field_gimmick_switch_toggle.c): an ice rink whose curved
+// slides are rails (src/unova/u3d_gyms.h from tools/unova/gen_gyms.py). A slide starts where Black checks the player's
+// facing (a pos event of check type 1-4) and its script hands the player to it when the switches allow
+// (ReplacePlayerIfRequirementMet: switch S on or off, ov045's requirement table); here the player rides it to its
+// far end and the ice takes them on. The three floor switches are works 0x4001-0x4003, flipped by Black's own scripts
+// as they move the turning pieces' unseen blockers (switch and ice piece models: not drawn)
+#include "u3d_gyms.h"
+static s8 sIceRide = -1;
+
+static bool8 IceRequirementMet(u16 req)
+{
+    if (req == ICE_NO_REQUIREMENT)
+        return TRUE;
+    return req < ARRAY_COUNT(sIceRequirement)
+        && (WorkValue(0x4001 + sIceRequirement[req][0]) != 0) == sIceRequirement[req][1];
+}
+
+// field_control_avatar.c: the player stands on a slide's start facing it, and its switch lets them on
+bool8 U3D_Vm_IceSlideAhead(u16 direction)
+{
+    s32 m = U3D_MapIndex(), x = gSaveBlock1Ptr->pos.x, z = gSaveBlock1Ptr->pos.y;
+    u32 i;
+    if (!Ready() || CurrentZone() != ICE_GYM_ZONE || m < 0)
+        return FALSE;
+    x += 32 * U3D_MapCellX(m), z += 32 * U3D_MapCellZ(m);
+    for (i = 0; i < ARRAY_COUNT(sIceRides); i++)
+        if (sIceRides[i].x == x && sIceRides[i].z == z && sIceRides[i].facing == direction
+         && IceRequirementMet(sIceRides[i].req))
+        {
+            sIceRide = i;
+            return TRUE;
+        }
+    return FALSE;
+}
+
+// special: the slide's own script (Black's: it turns the player and hands them to the rail); the way down from
+// BRYCEN has none (Black enters it by the tile's attribute): ridden at once, VAR_RESULT 1 (the script waits for it)
+void U3D_VmIceSlide(void)
+{
+    gSpecialVar_Result = 0;
+    if (sIceRide >= 0 && sIceRides[sIceRide].script == 0)
+    {
+        gSpecialVar_Result = IceRide(ICE_NO_REQUIREMENT);
+        sMoving[gPlayerAvatar.objectEventId] = 0;   // (the field script waits for it, not the VM)
+        return;
+    }
+    if (sIceRide < 0 || !Run(sIceRides[sIceRide].script, 0xFFFF, TRUE))
+        NothingToRun();
+}
+
+// the ride down a slide, tile by tile at the ice's pace
+static bool8 IceRide(u16 req)
+{
+    static const u8 sSlide[] = {[DIR_SOUTH] = MOVEMENT_ACTION_SLIDE_DOWN, [DIR_NORTH] = MOVEMENT_ACTION_SLIDE_UP,
+                                [DIR_WEST] = MOVEMENT_ACTION_SLIDE_LEFT, [DIR_EAST] = MOVEMENT_ACTION_SLIDE_RIGHT};
+    u8 slot = gPlayerAvatar.objectEventId, *out = sMoves[slot];
+    u32 k, n = 0;
+    s8 i = sIceRide;
+    sIceRide = -1;
+    if (i < 0 || sIceRides[i].req != req || !IceRequirementMet(req))
+        return FALSE;
+    for (k = 0; k < sIceRides[i].count && n < MAX_MOVE - 1; k++)
+        out[n++] = sSlide[sIceRides[i].steps[k]];
+    out[n] = MOVEMENT_ACTION_STEP_END;
+    sMoving[slot] = OBJ_EVENT_ID_PLAYER;
+    ScriptMovement_StartObjectMovementScript(OBJ_EVENT_ID_PLAYER, gObjectEvents[slot].mapNum,
+                                             gObjectEvents[slot].mapGroup, out);
+    if (req == ICE_NO_REQUIREMENT)
+        MPNet_Log("u3d vm: ice ride %u (no switch: a ramp or the way down), %u tiles", (unsigned)i, (unsigned)sIceRides[i].count);
+    else
+        MPNet_Log("u3d vm: ice slide %u (switch %u %s), %u tiles", (unsigned)i, sIceRequirement[req][0],
+                  sIceRequirement[req][1] ? "on" : "off", (unsigned)sIceRides[i].count);
+    return TRUE;
 }
 
 void U3D_VmMapLoad(void)

@@ -234,6 +234,13 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     {
         if (TryArrowWarp(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
+        if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) && U3D_Vm_IceSlideAhead(playerDirection))
+        {
+            // Moemon Kai: BRYCEN's gym's ice slides (src/unova/u3d_vm.c), as Black's facing-checked triggers
+            extern const u8 Unova_EventScript_IceSlide[];
+            ScriptContext_SetupScript(Unova_EventScript_IceSlide);
+            return TRUE;
+        }
         if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) && U3D_Vm_CannonAhead(playerDirection))
         {
             // Moemon Kai: SKYLA's gym's cannons (src/unova/u3d_vm.c): walked into, as Black's field event check

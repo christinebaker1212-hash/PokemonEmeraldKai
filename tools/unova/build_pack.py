@@ -43,6 +43,7 @@ import terrain  # noqa: E402
 import zones as zr  # noqa: E402
 import nitro  # noqa: E402
 import rails  # noqa: E402
+import gen_gyms  # noqa: E402
 import scrcmd  # noqa: E402
 import events as evr  # noqa: E402
 
@@ -396,6 +397,7 @@ def lay_rails(grid, zone_ids, warps, cams):
             if c['rail']:
                 for t in rails.event_tiles(z, 'connect', c):
                     rail_warps[t] = RAIL_WARP
+        gated = gen_gyms.gated_tiles() if z == gen_gyms.ICE_ZONE else {}
         for (tx, tz), hs in tiles.items():
             if tx < 0 or tz < 0:
                 continue
@@ -404,6 +406,12 @@ def lay_rails(grid, zone_ids, warps, cams):
                 grid[key] = (z, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)])
             cell = grid[key]
             t = (tz % 32) * 32 + tx % 32
+            if (tx, tz) in gated:
+                # (BRYCEN's ice slides: ridden when the switches let them (u3d_vm.c IceRide), never walked; the ice
+                # below them as Black's grid has it, a blocked tile keeping the slide's height for the ride)
+                if cell[4][t] == BLOCKED:
+                    cell[5][t] = [round(gated[(tx, tz)], 2)]
+                continue
             w = rail_warps.get((tx, tz), warps.get((tx, tz)))
             cell[4][t] = METATILE_BEHAVIOR + w | (3 << 12) if w is not None else field_block(0)
             cell[5][t] = sorted(round(h, 2) for h in hs)[:2]

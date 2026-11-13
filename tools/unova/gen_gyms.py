@@ -1,0 +1,218 @@
+#!/usr/bin/env python3
+"""The gyms' gimmicks that follow Black's rails (src/unova/u3d_gyms.h, read by src/unova/u3d_vm.c):
+
+- BRYCEN's gym (ICIRRUS, zone 114, Black's gimmick ov045 field_gimmick_switch_toggle.c): an ice rink whose curves,
+  ramps and way down are rails (Black's hybrid field: FIELDMAP_CTRL_HYBRID). Their own attributes (Black's rail
+  attribute file, the rail's file + half the archive: RAIL_ATTR_*) make them forced rides: ice and forced moves from a
+  jump-start tile (attribute 0xA3, "the blue tile") to the one at the far end, where the player takes their way again.
+  - the curves start where Black checks the player's facing (a pos event of check type 1-4: ov010
+    EVENTDATA_SYSTEM_DirToPosEventType, up / down / left / right); their scripts hand the player to the rail when the
+    switch's requirement holds (FIELD_GIMMICK_SWITCH_TOGGLE_ReplacePlayerIfRequirementMet: ov045's table
+    sSwitchToggleRequirementSwitchIndex / State, read from the overlay), else the player skates straight on
+  - the ramps over the ravines and the slide down from BRYCEN start on the grid's own jump-start tiles, walked into
+    (FIELDMAP_CTRL_HYBRID_UpdateGrid: on a jump start, the way ahead blocked: onto the rail); the ramps both ways, in
+    each of their three lanes
+  Every tile of these rails is left out of the walkable grid (tools/unova/build_pack.py lay_rails), so the switches
+  decide the way as Black's do.
+
+    python3 -I tools/unova/gen_gyms.py       (run from the repository; safe to run again)
+"""
+import math
+import os
+import struct
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import narc  # noqa: E402
+import rails  # noqa: E402
+import events as ev  # noqa: E402
+import scrcmd  # noqa: E402
+import scripts as sc  # noqa: E402
+
+ICE_ZONE = 114
+REQ_AT, REQ_COUNT = 0x021F3B60, 8          # (ov045: u16 switch, u16 state, a requirement)
+NO_REQUIREMENT = 255
+JUMP_START = 0xA3
+CELL = 16.0
+DIRS = {(0, 1): 'DIR_SOUTH', (0, -1): 'DIR_NORTH', (-1, 0): 'DIR_WEST', (1, 0): 'DIR_EAST'}
+CHECK_DIR = {1: 'DIR_NORTH', 2: 'DIR_SOUTH', 3: 'DIR_WEST', 4: 'DIR_EAST'}
+
+
+def requirements():
+    ram, d = scrcmd.ov_image(45)
+    return [struct.unpack_from('<HH', d, REQ_AT - ram + 4 * i) for i in range(REQ_COUNT)]
+
+
+def requirement_of(zone, script_id):
+    """the requirement a curve's script asks of the switches (its ReplacePlayerIfRequirementMet's argument)"""
+    f, n, _, _ = sc.script_file(zone, script_id)
+    cmds, _, _ = sc.decode(f, [sc.entries(f)[n]])
+    for _op, name, args, _next in cmds.values():
+        if name.endswith('ReplacePlayerIfRequirementMet'):
+            return args[0]
+    raise ValueError('script %d hands no player to a rail' % script_id)
+
+
+def rail_attrs(li, rail_zone=ICE_ZONE):
+    """the attributes along line LI's middle lane"""
+    a = narc.arc(rails.RAIL_ARC)
+    d = a[rails.rail_files()[rail_zone] + len(a) // 2]
+    o = 4
+    for i in range(struct.unpack_from('<I', d, 0)[0]):
+        w, n = struct.unpack_from('<HH', d, o)
+        vals = struct.unpack_from('<%dI' % (w * n), d, o + 4)
+        if i == li:
+            return [vals[w // 2 + w * y] & 0xFFFF for y in range(n)]
+        o += 4 + 4 * w * n
+    return []
+
+
+def _tile(p):
+    return int(math.floor(p[0] / CELL)), int(math.floor(p[2] / CELL))
+
+
+def _samples(r, li, side=0):
+    n = max(1, r['lines'][li]['length'])
+    return [rails.place(r, li, k / 8.0, side) for k in range(n * 8 + 1)]
+
+
+def chain_forward(r, li):
+    out = [li]
+    while True:
+        end = r['lines'][out[-1]]['end']
+        nxt = [l for l in r['points'][end]['lines'] if l < len(r['lines']) and l not in out
+               and r['lines'][l]['start'] == end]
+        if not nxt:
+            return out
+        out.append(nxt[0])
+
+
+def whole_chain(r, li):
+    """the lines LI is among, from the first to the last"""
+    first = li
+    while True:
+        start = r['lines'][first]['start']
+        prv = [l for l in r['points'][start]['lines'] if l < len(r['lines']) and l != first
+               and r['lines'][l]['end'] == start]
+        if not prv:
+            return chain_forward(r, first)
+        first = prv[0]
+
+
+def _nearest(r, tx, tz):
+    best = None
+    for li in range(len(r['lines'])):
+        for k, p in enumerate(_samples(r, li)):
+            d = math.hypot(p[0] / CELL - tx - 0.5, p[2] / CELL - tz - 0.5)
+            if best is None or d < best[0]:
+                best = (d, li, k)
+    return best[1], best[2]
+
+
+def jump_tile(r, li, which, side=0):
+    """the tile of line LI's first (WHICH 0) or last (-1) jump start, in lane SIDE"""
+    ks = [k for k, a in enumerate(rail_attrs(li)) if a == JUMP_START]
+    return _tile(rails.place(r, li, ks[which] + 0.25, side)) if ks else None
+
+
+def lane_path(r, lines, forward, start, side, stop):
+    """(the tiles from START along LINES, each run forward or back, in lane SIDE, to STOP; their heights)"""
+    tiles, heights, begun = [start], {}, False
+    for li in lines:
+        ss = _samples(r, li, side)
+        for p in (ss if forward else ss[::-1]):
+            c = _tile(p)
+            if not begun:
+                begun = c == start   # (the samples before the start: skipped till the path reaches it)
+                continue
+            if c == tiles[-1]:
+                continue
+            px, pz = tiles[-1]
+            if abs(c[0] - px) == 1 and abs(c[1] - pz) == 1:   # (a slant: through the tile beside, 4-connected)
+                mid = (c[0], pz)
+                heights.setdefault(mid, p[1])
+                tiles.append(mid)
+            heights.setdefault(c, p[1])
+            tiles.append(c)
+            if c == stop:
+                return tiles, heights
+    raise ValueError('no way from %s to %s' % (start, stop))
+
+
+def rides():
+    """[(script, requirement, x, z, facing, steps, tiles, heights)] of every ride of BRYCEN's gym"""
+    r = rails.load(rails.rail_files()[ICE_ZONE])
+    out = []
+
+    def add(script, req, path, heights):
+        steps = [DIRS[(b[0] - a[0], b[1] - a[1])] for a, b in zip(path, path[1:])]
+        out.append((script, req, path[0][0], path[0][1], steps[0], steps, path, heights))
+
+    used = set()
+    for q in ev.events(ICE_ZONE)['pos']:     # the curves: a facing check and a switch's requirement
+        if not 1 <= q['check'] <= 4:
+            continue
+        li, _ = _nearest(r, q['x'], q['z'])
+        lines = chain_forward(r, li)
+        used.update(lines)
+        path, hs = lane_path(r, lines, True, (q['x'], q['z']), 0, jump_tile(r, lines[-1], -1))
+        assert DIRS[(path[1][0] - path[0][0], path[1][1] - path[0][1])] == CHECK_DIR[q['check']], q
+        add(q['script'], requirement_of(ICE_ZONE, q['script']), path, hs)
+    for li in range(len(r['lines'])):        # the ramps and the way down: from the grid's jump starts
+        if li in used:
+            continue
+        lines = whole_chain(r, li)
+        used.update(lines)
+        top = r['points'][r['lines'][lines[0]]['start']]['pos'][1]
+        bottom = r['points'][r['lines'][lines[-1]]['end']]['pos'][1]
+        for side in (-1, 0, 1):
+            sa, sb = jump_tile(r, lines[0], 0, side), jump_tile(r, lines[-1], -1, side)
+            path, hs = lane_path(r, lines, True, sa, side, sb)
+            add(0, NO_REQUIREMENT, path, hs)
+            if abs(top - bottom) < CELL:   # (a ramp over a ravine: both ways; the slide down from BRYCEN only down)
+                path, hs = lane_path(r, lines[::-1], False, sb, side, sa)
+                add(0, NO_REQUIREMENT, path, hs)
+    return out
+
+
+def gated_tiles():
+    """{(tile x, z): height} of BRYCEN's rails (build_pack.py leaves them out of the grid, keeping their heights)"""
+    out = {}
+    rows = rides()
+    for *_x, path, hs in rows:
+        for t in path[1:]:
+            out[t] = hs.get(t, 0.0)
+    for t, hl in rails.cells(rails.rail_files()[ICE_ZONE]).items():   # (their whole width)
+        out.setdefault(t, sorted(hl)[0])
+    for *_x, path, hs in rows:   # (the jump starts stay the grid's own)
+        out.pop(path[0], None)
+        out.pop(path[-1], None)
+    return out
+
+
+def main():
+    reqs = requirements()
+    rows = rides()
+    path = 'src/unova/u3d_gyms.h'
+    with open(path, 'w') as f:
+        f.write('// Generated by tools/unova/gen_gyms.py. Do not edit.\n')
+        f.write("// BRYCEN's gym's rides (Black's rails, gimmick ov045): from a jump start (the blue tile) facing the rail,\n"
+                "// to the one at its far end; a curve's own script (0: none) and its switch requirement\n")
+        f.write('#define ICE_GYM_ZONE %d\n' % ICE_ZONE)
+        f.write("// ov045 sSwitchToggleRequirement*: a requirement holds when switch S is on (1) or off (0)\n")
+        f.write('static const u8 sIceRequirement[%d][2] = {%s};\n'
+                % (len(reqs), ', '.join('{%d, %d}' % rq for rq in reqs)))
+        f.write('#define ICE_RIDE_STEPS %d\n' % max(len(r_[5]) for r_ in rows))
+        f.write('#define ICE_NO_REQUIREMENT %d   // (script 0: the ramps and the way down, always open)\n'
+                % NO_REQUIREMENT)
+        f.write('static const struct { u16 script; u8 req, x, z, facing, count; u8 steps[ICE_RIDE_STEPS]; } '
+                'sIceRides[] = {\n')
+        for script, req, x, z, facing, steps, tiles, _hs in rows:
+            f.write('    {%d, %d, %d, %d, %s, %d, {%s}},   // (to %d, %d)\n'
+                    % (script, req, x, z, facing, len(steps), ', '.join(steps), tiles[-1][0], tiles[-1][1]))
+        f.write('};\n')
+    print('%s: %d rides' % (path, len(rows)))
+
+
+if __name__ == '__main__':
+    main()
