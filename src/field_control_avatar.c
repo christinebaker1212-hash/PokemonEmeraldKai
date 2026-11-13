@@ -1222,6 +1222,8 @@ static const u8 *TryRunCoordEventScript(const struct CoordEvent *coordEvent)
         }
         if (VarGet(coordEvent->trigger) == (u8)coordEvent->index)
             return coordEvent->script;
+        if (coordEvent->trigger >= U3D_VAR_BASE && VarGet(coordEvent->trigger) == coordEvent->index)
+            return coordEvent->script;   // Moemon Kai: Black's works hold values past 255 (the ELITE FOUR rooms' 555)
     }
     return NULL;
 }

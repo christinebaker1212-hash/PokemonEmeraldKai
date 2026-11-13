@@ -2136,8 +2136,37 @@ static void Step(struct Thread *t)
         case U3C_StartPlayerPosOffsetTween:
         case U3C_StartSubProcOv057:
         case U3C_GIMMICK_OBJ_ELBOARD_CmdStartCameraEvent:   // (UNDELLA GATE's news board)
-        case U3C_PROC_FLD_CallOv056Event:   // (the ELITE FOUR rooms' entrances)
-        case U3C_PALPARK_CallFallEvent:
+            break;
+        case U3C_PROC_FLD_CallOv056Event:   // the ELITE FOUR rooms' entrances (ov056 field_fk_demo.c): the room's
+        {                                   // platform carries the player up to gFkDemoEndTile[variant - 1]
+            static const u8 sFkEnd[4][2] = {{15, 13}, {15, 16}, {15, 18}, {14, 16}};
+            u8 group, num;
+            s16 x, y;
+            if (V(0) >= 1 && V(0) <= 4
+             && U3D_MapOfZoneTile(CurrentZone(), sFkEnd[V(0) - 1][0], sFkEnd[V(0) - 1][1], &group, &num, &x, &y))
+            {
+                sHolding = FALSE;
+                t->wait = W_WARP;   // (the script goes on in the room once the player is up)
+                SetWarpDestination(group, num, WARP_ID_NONE, x, y);
+                DoWarp();
+                return;
+            }
+            break;
+        }
+        case U3C_PALPARK_CallFallEvent:   // the LEAGUE's statue sinks (ov010 namein_setup.c NAMEIN_SETUP_RunFallEvent):
+        {                                 // a warp to zone 0x8A at its own start spot (Black's zone header: 30, 83)
+            u8 group, num;
+            s16 x, y;
+            if (U3D_MapOfZoneTile(0x8A, 30, 83, &group, &num, &x, &y))
+            {
+                sHolding = FALSE;
+                t->wait = W_WARP;
+                SetWarpDestination(group, num, WARP_ID_NONE, x, y);
+                DoWarp();
+                return;
+            }
+            break;
+        }
         case U3C_EVENT_MON_CmdClearEventMonFlag:
         case U3C_EVENT_MON_CmdStartSpPokeGimmickTask:
         case U3C_EVENT_MON_CmdMoveSpPokeGimmick:
