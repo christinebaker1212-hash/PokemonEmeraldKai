@@ -1405,6 +1405,12 @@ void U3D_ExpAnim(u16 model, u8 anim, s16 frame, bool8 play)
     u16 frames;
     if (sExp.gim < 0 || model >= sExp.n)
         return;
+    if (anim == 0xFF)   // (no animation: the model at rest, as Black's before one is enabled)
+    {
+        sExp.m[model].anim = 0xFF;
+        sExp.m[model].playing = FALSE;
+        return;
+    }
     frames = ExpFrames(model, anim);
     if (frames == 0)
         return;   // (a texture animation's: the model as it is)

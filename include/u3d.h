@@ -27,7 +27,7 @@ bool8 U3D_StepBlocked(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y);   // 
 struct ObjectEvent;
 bool8 U3D_ObjectsApart(const struct ObjectEvent *a, const struct ObjectEvent *b);   // (people on different floors)
 // Black's gym machinery (field expansion objects, u3d.c): the gimmick of overlay OV's models where Black places them,
-// MODEL's animation ANIM at FRAME (-1 its last) or played on, hidden, moved
+// MODEL's animation ANIM at FRAME (-1 its last; ANIM 0xFF: at rest) or played on, hidden, moved
 void U3D_ExpLoad(u8 ov);
 void U3D_ExpClear(void);
 void U3D_ExpAnim(u16 model, u8 anim, s16 frame, bool8 play);

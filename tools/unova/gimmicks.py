@@ -78,9 +78,10 @@ def setup(img, at):
 
 
 def member(s, res):
-    """the bytes of a resource of a setup"""
+    """the bytes of a resource of a setup (its own archive: FLD_EXP_OBJ_AddUnit's setups name one a resource;
+    AddUnitFromArchive's all share the first's)"""
     arc, dat, _ = s['res'][res]
-    return narc.arc(arc_path(s['res'][0][0]))[dat]
+    return narc.arc(arc_path(arc))[dat]
 
 
 def main():
@@ -235,7 +236,17 @@ def _place45(img):
             + [(img.vec(0x021F3BA4 + 12 * k), 0) for k in range(3)])
 
 
-PLACES = {45: _place45, 46: _place46}   # (the gimmicks drawn so far)
+# NACRENE's (field_gimmick_flag_anime.c FIELD_GIMMICK_FLAG_ANIME_Init): one model at x, z (fx32 each), on the ground
+def _place40(img):
+    return [((img.s32(0x021F38D4) / 4096.0, 0.0, img.s32(0x021F38D8) / 4096.0), 0)]
+
+
+# STRIATON's (field_gimmick_button_states.c FIELD_GIMMICK_BUTTON_STATES_Init): nine state models, three one-shots
+def _place42(img):
+    return [(img.vec(0x021F3AD4 + 12 * k), 0) for k in range(9)] + [(img.vec(0x021F3A68 + 12 * k), 0) for k in range(3)]
+
+
+PLACES = {40: _place40, 42: _place42, 45: _place45, 46: _place46}   # (the gimmicks drawn so far)
 
 
 def add(pack):

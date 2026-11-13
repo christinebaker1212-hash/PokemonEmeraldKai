@@ -1374,7 +1374,10 @@ static void SetPartyMonMove(struct Pokemon *mon, u16 slot, u16 move)
 }
 
 static struct { u8 party; u16 newMove, posWork; } sMoveSel;
-static u16 sButtonModels;   // (STRIATON's gym: its nine state models at their last frame, set by its scripts each visit)   // (SelectMonMove: the summary's move list)
+static u16 sButtonModels, sButtonModelsSet;   // (STRIATON's gym: its nine state models at their last frame, and
+                                              // those its scripts have set, each visit)
+#define ZONE_STRIATON_GYM 7
+#define ZONE_NACRENE_GYM 18   // (SelectMonMove: the summary's move list)
 
 // v (work or constant), p (a work's id), h, w, b: as u16_cmds.h says, read into a[]
 static u32 ReadArgs(struct Thread *t, u16 op, u32 *a)
@@ -2247,24 +2250,51 @@ static void Step(struct Thread *t)
             // fall through
         case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateOneShotEvent:   // a curtain's one-shot animation, played
             if (a[0] < 3)
+            {
                 sWork.gym[6] |= 1 << a[0];
+                if (CurrentZone() == ZONE_STRIATON_GYM)
+                {
+                    U3D_ExpAnim(9 + a[0], 0, 0, TRUE);
+                    sExpWait = 9 + a[0];
+                    if (U3D_ExpPlaying(sExpWait))
+                        t->wait = W_EXP_ANIM;
+                }
+            }
             break;
         case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateStateEventWithFlag:   // a state model at its last frame
-            if (a[0] < 9)
-                sButtonModels |= 1 << a[0];
-            break;
         case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateStateEvent:   // ... at its first
             if (a[0] < 9)
-                sButtonModels &= ~(1 << a[0]);
+            {
+                bool8 last = op == U3C_FIELD_GIMMICK_BUTTON_STATES_CreateStateEventWithFlag;
+                sButtonModels = last ? sButtonModels | (1 << a[0]) : sButtonModels & ~(1 << a[0]);
+                sButtonModelsSet |= 1 << a[0];
+                if (CurrentZone() == ZONE_STRIATON_GYM)
+                    U3D_ExpAnim(a[0], 0, last ? -1 : 0, FALSE);
+            }
             break;
-        case U3C_PROC_Ov037SetValueB:   // (GIMMICK_INIT_SetButtonStatesFlags: the curtains played, from the works)
-            sWork.gym[6] = V(0) & 7;
+        case U3C_PROC_Ov037SetValueB:   // (GIMMICK_INIT_SetButtonStatesFlags: the curtains played, from the works;
+            sWork.gym[6] = V(0) & 7;    //  the zone's script sets it as the gym is entered)
+            if (CurrentZone() == ZONE_STRIATON_GYM)
+            {
+                u32 k;
+                for (k = 0; k < 3; k++)
+                    U3D_ExpAnim(9 + k, (sWork.gym[6] >> k) & 1 ? 0 : 0xFF, -1, FALSE);
+            }
             break;
         case U3C_PROC_Ov037SetValueA:   // (GIMMICK_INIT_SetFlagAnimeFlag)
             sWork.gym[7] = V(0) ? sWork.gym[7] | 1 : sWork.gym[7] & ~1;
+            if (CurrentZone() == ZONE_NACRENE_GYM)
+                U3D_ExpAnim(0, sWork.gym[7] & 1 ? 0 : 0xFF, -1, FALSE);
             break;
-        case U3C_FIELD_GIMMICK_FLAG_ANIME_CreateEvent:   // NACRENE's shelf slides aside
+        case U3C_FIELD_GIMMICK_FLAG_ANIME_CreateEvent:   // NACRENE's shelf slides aside (its model, played to its end)
             sWork.gym[7] |= 1;
+            if (CurrentZone() == ZONE_NACRENE_GYM && a[0] < 1)
+            {
+                U3D_ExpAnim(0, 0, 0, TRUE);
+                sExpWait = 0;
+                if (U3D_ExpPlaying(sExpWait))
+                    t->wait = W_EXP_ANIM;
+            }
             break;
         case U3C_FIELD_GIMMICK_CART_LANES_CreateSwitchEvent:   // ELESA's gym: a floor switch throws a lane's lever
             if (V(0) < 4)
@@ -3909,6 +3939,23 @@ void U3D_Vm_FieldShown(void)
     {
         U3D_ExpLoad(45);
         IceModels(TRUE);
+    }
+    else if (CurrentZone() == ZONE_STRIATON_GYM)   // (ov042 Init: the curtains played at their end; the state models
+    {                                              // as the zone's scripts set them)
+        u32 k;
+        U3D_ExpLoad(42);
+        for (k = 0; k < 9; k++)
+            if (sButtonModelsSet & (1 << k))
+                U3D_ExpAnim(k, 0, (sButtonModels >> k) & 1 ? -1 : 0, FALSE);
+        for (k = 0; k < 3; k++)
+            if (sWork.gym[6] & (1 << k))
+                U3D_ExpAnim(9 + k, 0, -1, FALSE);
+    }
+    else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
+    {
+        U3D_ExpLoad(40);
+        if (sWork.gym[7] & 1)
+            U3D_ExpAnim(0, 0, -1, FALSE);
     }
     else
         U3D_ExpClear();
