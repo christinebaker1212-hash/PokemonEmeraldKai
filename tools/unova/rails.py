@@ -129,16 +129,28 @@ def cells(rail):
     out = {}
     for li, line in enumerate(r['lines']):
         length = max(1, line['length']) * CELL
+        last = {}
         for off in range(max(1, line['length'])):
             half = int(_width_at(r, li, off * CELL, length) // CELL)
             for s in range(-half, half + 1):
                 # (sub-steps: an arc or a slant covers every tile it passes over)
-                for f in (0.0, 0.5):
+                for f in (0.0, 0.5, 1.0):
                     x, y, z = place(r, li, off + f, s)
-                    hs = out.setdefault((int(math.floor(x / CELL)), int(math.floor(z / CELL))), [])
-                    if all(abs(h - y) > 4 for h in hs):
-                        hs.append(y)
+                    c = (int(math.floor(x / CELL)), int(math.floor(z / CELL)))
+                    prev = last.get(s)
+                    if prev is not None and abs(prev[0] - c[0]) == 1 and abs(prev[1] - c[1]) == 1:
+                        # (a slant stepping a tile both ways at once: the tile between too, so a walker on the
+                        # grid can follow it, DRAGONSPIRAL's spiral ramp)
+                        _add(out, (c[0], prev[1]), (prev[2] + y) / 2)
+                    _add(out, c, y)
+                    last[s] = (c[0], c[1], y)
     return out
+
+
+def _add(out, c, y):
+    hs = out.setdefault(c, [])
+    if all(abs(h - y) > 4 for h in hs):
+        hs.append(y)
 
 
 # Black's rail cameras (ov021 d_021DDDB8: 20 functions): FixedAngle (1) and its kin (15 at the centre, 17 / 19
