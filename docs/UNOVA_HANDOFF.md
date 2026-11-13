@@ -119,8 +119,12 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   player on one at a time, U3D_StepBlocked / U3D_HexOpen; six lifts their levers send between two heights, the player
   riding, u3d_vm.c MineLift; people kept to their floors by Black's event heights, U3D_ObjectsApart; the unseen blockers
   as data, U3D_Vm_BlockerAt, or they'd fill the game's 16 people; a silent person over a sign lets the sign answer).
+  MISTRALTON's cannons (ov041: walked into from two cells away, U3D_Vm_CannonAhead; Black's script 2 climbs in, the
+  shot a silent warp to the landing cell of ov041's gCannonsFlights for the cannon and the facing; the flight itself
+  and the cannons' turning not drawn). The CELESTIAL TOWER's bell (the gym's door, Black flag 0x2AE) is rung from the
+  tile in front of it.
   Not yet: the GEAR STATION's trains drawn on the platforms; the gyms' gimmicks (Black's field_gimmick_*: STRIATON's
-  switches, NACRENE's books, MISTRALTON's cannons,
+  switches, NACRENE's books,
   ICIRRUS's ice, OPELUCID's bridges), MUSICALS, NIMBASA's stadiums, the ROYAL UNOVA, the survey HQ.
 - The ROM: the user's Pokemon Black (USA, Europe) (NDSi Enhanced), SHA-1 26ad0b9967aa279c4a266ee69f52b9b2332399a5,
   from their Google Drive (the link in docs/UNOVA_DECISIONS.md's source message; the release fetches it through the

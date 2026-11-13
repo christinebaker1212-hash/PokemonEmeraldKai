@@ -844,3 +844,4 @@ gSpecials::
 	def_special U3D_VmResume   @ Moemon Kai: ... and Black's script goes on
 	def_special U3D_VmRideKind   @ Moemon Kai: UNOVA: ELESA's gym's coaster ride (1: the cart goes, 0x8004 / 0x8005 the dock)
 	def_special U3D_VmRideLocked   @ Moemon Kai: ... a lane still locked: Black's scripts there
+	def_special U3D_VmCannon   @ Moemon Kai: UNOVA: SKYLA's gym's cannons (Black's climb in; 0x8004 / 0x8005 the landing)

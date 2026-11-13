@@ -234,6 +234,18 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     {
         if (TryArrowWarp(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
+        if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) && U3D_Vm_CannonAhead(playerDirection))
+        {
+            // Moemon Kai: SKYLA's gym's cannons (src/unova/u3d_vm.c): walked into, as Black's field event check
+            extern const u8 Unova_EventScript_Cannon[];
+            s16 fx = position.x, fy = position.y;
+            MoveCoords(playerDirection, &fx, &fy);
+            if (MapGridGetCollisionAt(fx, fy))
+            {
+                ScriptContext_SetupScript(Unova_EventScript_Cannon);
+                return TRUE;
+            }
+        }
     }
 
     GetInFrontOfPlayerPosition(&position);

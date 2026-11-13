@@ -3131,6 +3131,64 @@ void U3D_VmRideLocked(void)
         NothingToRun();
 }
 
+// SKYLA's gym's cannons (Black's field_gimmick_cannons, ov041): the player walks into the cell before a cannon, Black's
+// script 2 climbs in, and the flight lands on the cell of its table for the cannon and the way the player faces. The
+// tables are ov041's own (gCannonsCannonCells, gCannonsFlights: landing x, z; no flight where none is listed)
+#define ZONE_MISTRALTON_GYM 108
+static const u8 sCannonCell[10][2] = {
+    {15, 28}, {10, 19}, {20, 29}, {10, 25}, {15, 13}, {5, 8}, {7, 36}, {26, 34}, {24, 6}, {15, 3},
+};
+// [cannon][facing: DIR_SOUTH, DIR_NORTH, DIR_WEST, DIR_EAST - 1]: the landing cell (x, z), 0xFF none
+static const u8 sCannonLand[10][4][2] = {
+    {{15, 35}, {15, 19}, {0xFF, 0xFF}, {0xFF, 0xFF}},
+    {{0xFF, 0xFF}, {0xFF, 0xFF}, {3, 19}, {21, 19}},
+    {{0xFF, 0xFF}, {0xFF, 0xFF}, {10, 29}, {0xFF, 0xFF}},
+    {{0xFF, 0xFF}, {10, 13}, {0xFF, 0xFF}, {20, 25}},
+    {{0xFF, 0xFF}, {0xFF, 0xFF}, {5, 13}, {25, 13}},
+    {{5, 34}, {0xFF, 0xFF}, {0xFF, 0xFF}, {0xFF, 0xFF}},
+    {{0xFF, 0xFF}, {0xFF, 0xFF}, {0xFF, 0xFF}, {26, 36}},
+    {{0xFF, 0xFF}, {26, 4}, {0xFF, 0xFF}, {0xFF, 0xFF}},
+    {{0xFF, 0xFF}, {0xFF, 0xFF}, {15, 6}, {0xFF, 0xFF}},
+    {{15, 32}, {0xFF, 0xFF}, {0xFF, 0xFF}, {0xFF, 0xFF}},
+};
+static u8 sCannonLandX, sCannonLandZ;
+
+bool8 U3D_Vm_CannonAhead(u16 direction)
+{
+    s32 m = U3D_MapIndex(), x = gSaveBlock1Ptr->pos.x, z = gSaveBlock1Ptr->pos.y, ox = 0, oz = 0;
+    u32 c;
+    if (!Ready() || CurrentZone() != ZONE_MISTRALTON_GYM || m < 0 || direction < DIR_SOUTH || direction > DIR_EAST)
+        return FALSE;
+    if (m >= 0)
+        ox = 32 * U3D_MapCellX(m), oz = 32 * U3D_MapCellZ(m);
+    switch (direction)
+    {
+    case DIR_NORTH: z -= 2; break;
+    case DIR_SOUTH: z += 2; break;
+    case DIR_WEST:  x -= 2; break;
+    default:        x += 2; break;
+    }
+    for (c = 0; c < ARRAY_COUNT(sCannonCell); c++)
+        if (sCannonCell[c][0] == x + ox && sCannonCell[c][1] == z + oz)
+        {
+            const u8 *land = sCannonLand[c][direction - DIR_SOUTH];
+            if (land[0] == 0xFF)
+                return FALSE;   // (Black: no flight that way, nothing happens)
+            sCannonLandX = land[0] - ox, sCannonLandZ = land[1] - oz;
+            return TRUE;
+        }
+    return FALSE;
+}
+
+// special: Black's script 2 (the player climbs in, by the way they face); 0x8004 / 0x8005 the landing cell
+void U3D_VmCannon(void)
+{
+    gSpecialVar_0x8004 = sCannonLandX;
+    gSpecialVar_0x8005 = sCannonLandZ;
+    if (!Run(2, 0xFFFF, TRUE))
+        NothingToRun();
+}
+
 void U3D_VmMapLoad(void)
 {
     u16 zone = CurrentZone();

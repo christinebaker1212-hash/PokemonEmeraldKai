@@ -55,6 +55,19 @@ Unova_EventScript_Ride::
 	special U3D_VmRideLocked
 	goto Unova_EventScript_Wait
 
+@ SKYLA's gym's cannons (src/unova/u3d_vm.c U3D_Vm_CannonAhead): walked into, Black's script climbs in, the shot
+@ lands the player on the cell Black's table gives
+Unova_EventScript_Cannon::
+	lockall
+	special U3D_VmCannon
+	waitstate
+	playse SE_M_EXPLOSION
+	waitse
+	warpsilent MAP_UNOVA_MISTRALTONCITY_Z108, VAR_0x8004, VAR_0x8005
+	waitstate
+	releaseall
+	end
+
 Unova_EventScript_RideCart::
 	playse SE_TRUCK_MOVE
 	warpsilent MAP_UNOVA_NIMBASACITY_Z63, VAR_0x8004, VAR_0x8005
