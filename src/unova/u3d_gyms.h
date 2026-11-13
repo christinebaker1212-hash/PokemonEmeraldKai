@@ -31,3 +31,22 @@ static const struct { u16 script; u8 req, x, z, facing, count; u8 steps[ICE_RIDE
     {0, 255, 9, 22, DIR_WEST, 61, {DIR_WEST, DIR_WEST, DIR_WEST, DIR_SOUTH, DIR_WEST, DIR_SOUTH, DIR_WEST, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_WEST, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_WEST, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_WEST, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_EAST, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_EAST, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_EAST, DIR_SOUTH, DIR_SOUTH, DIR_EAST, DIR_SOUTH, DIR_SOUTH, DIR_EAST, DIR_EAST, DIR_EAST, DIR_EAST, DIR_SOUTH, DIR_EAST, DIR_EAST, DIR_EAST, DIR_EAST, DIR_EAST, DIR_EAST}},   // (to 15, 61)
     {0, 255, 9, 21, DIR_WEST, 65, {DIR_WEST, DIR_WEST, DIR_EAST, DIR_SOUTH, DIR_SOUTH, DIR_WEST, DIR_SOUTH, DIR_WEST, DIR_SOUTH, DIR_WEST, DIR_SOUTH, DIR_SOUTH, DIR_WEST, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_WEST, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_WEST, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_EAST, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_EAST, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_SOUTH, DIR_EAST, DIR_SOUTH, DIR_SOUTH, DIR_EAST, DIR_SOUTH, DIR_EAST, DIR_SOUTH, DIR_EAST, DIR_EAST, DIR_SOUTH, DIR_EAST, DIR_EAST, DIR_WEST, DIR_SOUTH, DIR_EAST, DIR_EAST, DIR_EAST, DIR_EAST, DIR_EAST}},   // (to 15, 62)
 };
+
+// DRAYDEN's gym (Black's ov046): the tiles each dragon's pose opens (its pair of lines), not floor otherwise
+#define DRAGON_GYM_ZONE 121
+static const u8 sDragonTiles[][2] = {
+    {12, 40}, {12, 41}, {12, 42}, {12, 43}, {12, 44}, {12, 45}, {12, 46}, {12, 47}, {12, 48}, {12, 49}, {12, 50}, {12, 51},   // (dragon 0, pose 0)
+    {13, 39}, {14, 39}, {15, 39}, {16, 39}, {17, 39}, {18, 39}, {19, 39},   // (dragon 0, pose 2)
+    {5, 39}, {6, 39}, {7, 39}, {8, 39}, {9, 39}, {10, 39}, {11, 39},   // (dragon 0, pose 3)
+    {42, 0}, {42, 1}, {42, 2}, {42, 3}, {42, 4}, {42, 5}, {42, 6}, {42, 7}, {42, 8}, {42, 9}, {42, 10}, {42, 11},   // (dragon 1, pose 0)
+    {35, 12}, {36, 12}, {37, 12}, {38, 12}, {39, 12}, {40, 12}, {41, 12},   // (dragon 1, pose 2)
+    {43, 12}, {44, 12}, {45, 12}, {46, 12}, {47, 12}, {48, 12}, {49, 12},   // (dragon 1, pose 3)
+    {27, 9}, {27, 10}, {27, 11}, {27, 12}, {27, 13}, {27, 14}, {27, 15}, {27, 16},   // (dragon 2, pose 0)
+    {16, 17}, {20, 17}, {21, 17}, {22, 17}, {23, 17}, {25, 17}, {26, 17},   // (dragon 2, pose 2)
+    {28, 17}, {29, 17}, {31, 17}, {32, 17}, {33, 17}, {34, 17}, {38, 17},   // (dragon 2, pose 3)
+};
+static const u16 sDragonPoseTiles[3][4][2] = {   // (first, count in sDragonTiles)
+    {{0, 12}, {12, 0}, {12, 7}, {19, 7}},
+    {{26, 12}, {38, 0}, {38, 7}, {45, 7}},
+    {{52, 8}, {60, 0}, {60, 7}, {67, 7}},
+};

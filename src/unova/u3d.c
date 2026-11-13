@@ -465,6 +465,14 @@ bool8 U3D_StepBlocked(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y)
         return FALSE;
     if (fromY == y && fromX != x && MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(x, y)))
         return TRUE;
+    if (isPlayer)
+    {
+        bool8 U3D_Vm_DragonBlocked(s32 x, s32 z);
+        s32 gtx, gtz;
+        MapToGrid(x, y, &gtx, &gtz);
+        if (U3D_Vm_DragonBlocked(gtx, gtz))
+            return TRUE;   // (DRAYDEN's gym: a dragon's way its pose keeps closed)
+    }
     if (sHexAny && isPlayer)
     {
         s32 gtx, gtz;

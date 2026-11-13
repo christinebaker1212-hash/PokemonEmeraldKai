@@ -131,6 +131,12 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   scripts as they move the spinners' unseen blockers). The rails' tiles are out of the walkable grid (build_pack.py
   lay_rails). Its ramps' arcs stand up (rails.py place: an anchor between the ends). Solved end to end like the Thonky
   walkthrough: each curve, all three switches, both ramps, to BRYCEN.
+  DRAYDEN's gym (2026-11-13, Black's ov046): three dragons, each turned by two levers (thrown by buttons that bounce
+  the player a tile: StartHopEvent) to a pose that opens one pair of its rail lines (sRotatingRoomPoseLines from the
+  overlay; the tiles in src/unova/u3d_gyms.h, U3D_Vm_DragonBlocked in U3D_StepBlocked); the zone-change script sets
+  the starting poses (Ov037Finish: 3, 1, 2). Not yet: the dragon models, and the heights between Black's levels (the
+  flattened grid lets the player step between walkways at different heights, so the poses close arms but don't yet
+  force the route).
   The TOWN MAP and FLY (2026-11-13): Black's own town map (a/0/8/5 picture, a/0/8/6 its 61 town records) on
   region_map.c's QZMAP_UNOVA page, at 5/7 its size in the 28 x 15 grid (tools/unova/gen_townmap.py: the header
   src/data/region_map/unova_townmap.h, the heal locations HEAL_LOCATION_UNOVA_*, the picture "TMAP" in black_gfx.pak

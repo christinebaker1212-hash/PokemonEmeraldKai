@@ -15,6 +15,12 @@
   Every tile of these rails is left out of the walkable grid (tools/unova/build_pack.py lay_rails), so the switches
   decide the way as Black's do.
 
+- DRAYDEN's gym (OPELUCID, zone 121, Black's gimmick ov046 field_gimmick_rotating_room.c): three dragon statues, each
+  turned by two levers to one of four poses (FIELD_GIMMICK_ROTATING_ROOM_CalcUnitPose); a pose opens a pair of the
+  dragon's rail lines (sRotatingRoomPoseLines, read from the overlay: the first two of a row, none in pose 1) and
+  closes the others (ApplyPoseLines). Here each pair's tiles that aren't floor otherwise are walkable only while the
+  pose has them open (u3d.c U3D_StepBlocked, u3d_vm.c U3D_Vm_DragonBlocked)
+
     python3 -I tools/unova/gen_gyms.py       (run from the repository; safe to run again)
 """
 import math
@@ -28,6 +34,9 @@ import rails  # noqa: E402
 import events as ev  # noqa: E402
 import scrcmd  # noqa: E402
 import scripts as sc  # noqa: E402
+import terrain  # noqa: E402
+import matrix as mxr  # noqa: E402
+import zones as zr  # noqa: E402
 
 ICE_ZONE = 114
 REQ_AT, REQ_COUNT = 0x021F3B60, 8          # (ov045: u16 switch, u16 state, a requirement)
@@ -190,6 +199,48 @@ def gated_tiles():
     return out
 
 
+DRAGON_ZONE = 121
+POSE_LINES_AT = 0x021F4430                 # (ov046: int [3 units][4 poses][6 lines])
+
+
+def pose_lines():
+    ram, d = scrcmd.ov_image(46)
+    t = [struct.unpack_from('<6i', d, POSE_LINES_AT - ram + 24 * i) for i in range(12)]
+    return [[t[u * 4 + p] for p in range(4)] for u in range(3)]
+
+
+def grid_walkable(zone):
+    """the tiles Black's own grid lets the player walk (the zone's matrix, its first layer)"""
+    z = zr.zones()[zone]
+    mx = mxr.matrix(z['matrix'], zone)
+    out = set()
+    for by in range(mx['h']):
+        for bx in range(mx['w']):
+            bi = mx['blocks'][by * mx['w'] + bx]
+            if bi == mxr.NONE or mx['zones'][by * mx['w'] + bx] != zone:
+                continue
+            layers = terrain.layers(narc.arc('a/0/0/8')[bi])
+            if not layers:
+                continue
+            gr = terrain.grid(layers[0])
+            for k in range(1024):
+                if not (gr[k][0] >> 16) & 1:
+                    out.add((bx * 32 + k % 32, by * 32 + k // 32))
+    return out
+
+
+def dragon_tiles():
+    """[unit][pose]: the tiles only that pose's pair of lines makes walkable"""
+    rail = rails.rail_files()[DRAGON_ZONE]
+    table = pose_lines()
+    gated = {l for unit in table for row in unit for l in row}
+    free = grid_walkable(DRAGON_ZONE) | set(rails.cells(rail, set(range(len(rails.load(rail)['lines']))) - gated))
+    out = []
+    for unit in table:
+        out.append([sorted(set(rails.cells(rail, set(row[:2]))) - free) if p != 1 else [] for p, row in enumerate(unit)])
+    return out
+
+
 def main():
     reqs = requirements()
     rows = rides()
@@ -210,8 +261,24 @@ def main():
         for script, req, x, z, facing, steps, tiles, _hs in rows:
             f.write('    {%d, %d, %d, %d, %s, %d, {%s}},   // (to %d, %d)\n'
                     % (script, req, x, z, facing, len(steps), ', '.join(steps), tiles[-1][0], tiles[-1][1]))
+        f.write('};\n\n')
+        dt = dragon_tiles()
+        f.write("// DRAYDEN's gym (Black's ov046): the tiles each dragon's pose opens (its pair of lines), not floor otherwise\n")
+        f.write('#define DRAGON_GYM_ZONE %d\n' % DRAGON_ZONE)
+        f.write('static const u8 sDragonTiles[][2] = {\n')
+        starts, n = [], 0
+        for u, unit in enumerate(dt):
+            for p, tiles in enumerate(unit):
+                starts.append((n, len(tiles)))
+                n += len(tiles)
+                if tiles:
+                    f.write('    %s,   // (dragon %d, pose %d)\n' % (', '.join('{%d, %d}' % t for t in tiles), u, p))
         f.write('};\n')
-    print('%s: %d rides' % (path, len(rows)))
+        f.write('static const u16 sDragonPoseTiles[3][4][2] = {   // (first, count in sDragonTiles)\n')
+        for u in range(3):
+            f.write('    {%s},\n' % ', '.join('{%d, %d}' % starts[u * 4 + p] for p in range(4)))
+        f.write('};\n')
+    print('%s: %d rides, %d dragon tiles' % (path, len(rows), sum(len(t) for unit in dt for t in unit)))
 
 
 if __name__ == '__main__':

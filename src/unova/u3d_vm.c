@@ -851,6 +851,10 @@ static void StartEye(u8 slot);
 static u16 TrainerWords(u16 trainer, u16 kind);
 static u16 EyeSong(u16 trainer);
 static bool8 IceRide(u16 req);   // (BRYCEN's gym's slides: the end of this file)
+static bool8 DragonHop(u16 direction);   // (DRAYDEN's gym's dragons: the end of this file)
+static void DragonLever(u16 unit, u16 side);
+static void DragonRotate(u16 unit);
+static void DragonReset(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
@@ -1111,6 +1115,7 @@ static u8 *Slot(u8 slot)   // (Black's word slots, UNOVA's own: the game's battl
 // Black's item numbers as the game's (tools/unova/gen_items.py: by name; ITEM_NONE where the game has no such item yet)
 #include "../data/unova_items.h"
 #include "u3d_railpos.h"
+#include "u3d_gyms.h"   // (BRYCEN's and DRAYDEN's gyms: tools/unova/gen_gyms.py)
 #include "tv.h"
 static u16 Item(u16 black)
 {
@@ -1810,11 +1815,27 @@ static void Step(struct Thread *t)
             break;
         case U3C_FIELD_GIMMICK_PLATE_DOORS_StartScriptedEvent:
             break;
+        case U3C_FIELD_GIMMICK_PLATE_DOORS_StartDoorEvent:   // (in DRAYDEN's gym, ov046's button: unit, side)
+            if (CurrentZone() == DRAGON_GYM_ZONE)
+                PlaySE(SE_SWITCH);
+            break;
+        case U3C_FIELD_GIMMICK_ROTATING_ROOM_StartHopEvent:   // DRAYDEN's gym: the button bounces the player a tile
+            if (DragonHop(a[0]))
+                t->wait = W_MOVES;
+            break;
+        case U3C_FIELD_GIMMICK_ROTATING_ROOM_StartLeverEvent:   // ... its lever (unit, side) thrown
+            DragonLever(V(0), V(1));
+            break;
+        case U3C_FIELD_GIMMICK_ROTATING_ROOM_StartRotateEvent:   // ... the dragon turns to the levers' pose
+            DragonRotate(V(0));
+            break;
+        case U3C_PROC_Ov037Finish:   // (ov037 GIMMICK_INIT_ResetRotatingRoomPanels: DRAYDEN's dragons as they start)
+            DragonReset();
+            break;
         case U3C_PROC_Ov037InitFromVars:   // (a gym's switches' gimmick state: the gyms' own puzzles aren't kept yet)
         case U3C_PROC_Ov037SetValueA:
         case U3C_PROC_Ov037SetValueB:
         case U3C_PROC_Ov037ReadEightVars:
-        case U3C_PROC_Ov037Finish:
             break;
         case U3C_PROC_CheckPartyMonKnowsMove:   // result, move, party slot
             *WorkPtr(a[0]) = V(2) < PARTY_SIZE && PartyMonHasMove(&gPlayerParty[V(2)], V(1));
@@ -3252,7 +3273,6 @@ void U3D_VmCannon(void)
 // (ReplacePlayerIfRequirementMet: switch S on or off, ov045's requirement table); here the player rides it to its
 // far end and the ice takes them on. The three floor switches are works 0x4001-0x4003, flipped by Black's own scripts
 // as they move the turning pieces' unseen blockers (switch and ice piece models: not drawn)
-#include "u3d_gyms.h"
 static s8 sIceRide = -1;
 
 static bool8 IceRequirementMet(u16 req)
@@ -3319,6 +3339,81 @@ static bool8 IceRide(u16 req)
         MPNet_Log("u3d vm: ice slide %u (switch %u %s), %u tiles", (unsigned)i, sIceRequirement[req][0],
                   sIceRequirement[req][1] ? "on" : "off", (unsigned)sIceRides[i].count);
     return TRUE;
+}
+
+// DRAYDEN's gym (OPELUCID, zone 121, Black's gimmick ov046 field_gimmick_rotating_room.c): three dragon statues, each
+// with two levers (thrown by buttons that bounce the player a tile, StartHopEvent) whose states pick its pose
+// (CalcUnitPose: levers 0 0 pose 0, 0 1 pose 3, 1 0 pose 2, 1 1 pose 1); a pose opens a pair of the dragon's rail
+// lines and closes the rest (ApplyPoseLines; the tiles in u3d_gyms.h). sWork.gym[3 + unit]: the pose (bits 0-1), the
+// levers (bits 2, 3), set as Black's zone-change script resets them (DragonReset; dragon models: not drawn)
+#define DRAGON_STATE(u) sWork.gym[3 + (u)]
+
+static bool8 DragonHop(u16 direction)
+{
+    u8 slot = gPlayerAvatar.objectEventId, *out = sMoves[slot];
+    if (CurrentZone() != DRAGON_GYM_ZONE)
+        return FALSE;
+    out[0] = direction == 2 ? MOVEMENT_ACTION_JUMP_LEFT : MOVEMENT_ACTION_JUMP_RIGHT;   // (Black's 2 left, 3 right)
+    out[1] = MOVEMENT_ACTION_STEP_END;
+    sMoving[slot] = OBJ_EVENT_ID_PLAYER;
+    ScriptMovement_StartObjectMovementScript(OBJ_EVENT_ID_PLAYER, gObjectEvents[slot].mapNum,
+                                             gObjectEvents[slot].mapGroup, out);
+    PlaySE(SE_LEDGE);
+    return TRUE;
+}
+
+static void DragonLever(u16 unit, u16 side)
+{
+    if (CurrentZone() != DRAGON_GYM_ZONE || unit >= 3 || side >= 2)
+        return;
+    DRAGON_STATE(unit) ^= 4 << side;
+    PlaySE(SE_SWITCH);
+}
+
+static void DragonRotate(u16 unit)
+{
+    static const u8 sPose[4] = {0, 2, 3, 1};   // (levers: bit 0 the first, bit 1 the second)
+    if (CurrentZone() != DRAGON_GYM_ZONE || unit >= 3)
+        return;
+    DRAGON_STATE(unit) = (DRAGON_STATE(unit) & ~3) | sPose[(DRAGON_STATE(unit) >> 2) & 3];
+    PlaySE(SE_ELEVATOR);
+    MPNet_Log("u3d vm: dragon %u turns to pose %u", (unsigned)unit, DRAGON_STATE(unit) & 3);
+}
+
+// the zone-change script's reset (ov037 GIMMICK_INIT_ResetRotatingRoomPanels): pose 3 (levers off, on), 1 (on, on),
+// 2 (on, off)
+static void DragonReset(void)
+{
+    DRAGON_STATE(0) = 3 | 8;
+    DRAGON_STATE(1) = 1 | 4 | 8;
+    DRAGON_STATE(2) = 2 | 4;
+}
+
+static bool8 DragonTileIn(u32 unit, u32 pose, s32 x, s32 z)
+{
+    u32 k, first = sDragonPoseTiles[unit][pose][0], n = sDragonPoseTiles[unit][pose][1];
+    for (k = first; k < first + n; k++)
+        if (sDragonTiles[k][0] == x && sDragonTiles[k][1] == z)
+            return TRUE;
+    return FALSE;
+}
+
+// u3d.c U3D_StepBlocked: a dragon's line its pose keeps closed (grid tile X, Z)
+bool8 U3D_Vm_DragonBlocked(s32 x, s32 z)
+{
+    u32 u, p;
+    if (!Ready() || CurrentZone() != DRAGON_GYM_ZONE)
+        return FALSE;
+    for (u = 0; u < 3; u++)
+    {
+        u32 pose = DRAGON_STATE(u) & 3;
+        if (DragonTileIn(u, pose, x, z))
+            continue;
+        for (p = 0; p < 4; p++)
+            if (p != pose && DragonTileIn(u, p, x, z))
+                return TRUE;
+    }
+    return FALSE;
 }
 
 void U3D_VmMapLoad(void)
