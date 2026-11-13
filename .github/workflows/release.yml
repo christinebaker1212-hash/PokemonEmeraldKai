@@ -213,7 +213,8 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: orre
-          key: orre-packs-${{ steps.packkey.outputs.orre }}-${{ hashFiles('tools/orre/**', 'tools/moemon_text/**', 'src/data/orre_props.h', 'src/fonts.c', 'charmap.txt') }}
+          # the key the restore looked for (hashed before the build: the build writes into tools/, Python's caches...)
+          key: ${{ steps.orrecache.outputs.cache-primary-key }}
 
       # UNOVA's packs (docs/UNOVA_DECISIONS.md): Pokemon Black's maps, text, scripts and pictures, built from the ROM whose
       # link is the UNOVA_ROM_URL secret (never in this repository) into unova/, shipped inside the game's own zips like
@@ -249,7 +250,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: unova
-          key: unova-packs-${{ steps.packkey.outputs.unova }}-${{ hashFiles('tools/unova/**', 'tools/sinnoh/**', 'tools/aveon/**', 'tools/moemon_text/**', 'graphics/aveon/**', 'charmap.txt') }}
+          key: ${{ steps.unovacache.outputs.cache-primary-key }}
 
       # Custom music (music/*.kaisong) and Colosseum's songs all equally loud (tools/kaisong/normalize.py): every song
       # measured in the game just built, every run (the user, 2026-11-11: never skipped because it was measured before),
