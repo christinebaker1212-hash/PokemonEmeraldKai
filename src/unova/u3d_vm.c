@@ -997,6 +997,7 @@ static struct { s8 lift; bool8 rider; u16 stall; float cur, goal, step; } sMineR
 static struct { s8 model; u8 hex; s16 x, z, w, d; float cur, goal, step; } sPlat = {-1};
 static void PlatRide(u8 model, u8 hex, s16 x, s16 z, s16 w, s16 d, s16 from, s16 to);
 #define ZONE_CLAY_LOBBY 98
+#define ZONE_MISTRALTON_GYM 108
 static void DragonReset(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
@@ -4081,6 +4082,8 @@ void U3D_Vm_FieldShown(void)
     }
     else if (CurrentZone() == ZONE_CLAY_LOBBY)   // (ov044 Init: the lift up, at the lobby's floor)
         U3D_ExpLoad(44);
+    else if (CurrentZone() == ZONE_MISTRALTON_GYM)   // (ov041 Init: the cannons, turned, at rest)
+        U3D_ExpLoad(41);
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
     {
         U3D_ExpLoad(40);
@@ -4161,36 +4164,23 @@ void U3D_VmRideLocked(void)
         NothingToRun();
 }
 
-// SKYLA's gym's cannons (Black's field_gimmick_cannons, ov041): the player walks into the cell before a cannon, Black's
-// script 2 climbs in, and the flight lands on the cell of its table for the cannon and the way the player faces. The
-// tables are ov041's own (gCannonsCannonCells, gCannonsFlights: landing x, z; no flight where none is listed)
-#define ZONE_MISTRALTON_GYM 108
-static const u8 sCannonCell[10][2] = {
-    {15, 28}, {10, 19}, {20, 29}, {10, 25}, {15, 13}, {5, 8}, {7, 36}, {26, 34}, {24, 6}, {15, 3},
-};
-// [cannon][facing: DIR_SOUTH, DIR_NORTH, DIR_WEST, DIR_EAST - 1]: the landing cell (x, z), 0xFF none
-static const u8 sCannonLand[10][4][2] = {
-    {{15, 35}, {15, 19}, {0xFF, 0xFF}, {0xFF, 0xFF}},
-    {{0xFF, 0xFF}, {0xFF, 0xFF}, {3, 19}, {21, 19}},
-    {{0xFF, 0xFF}, {0xFF, 0xFF}, {10, 29}, {0xFF, 0xFF}},
-    {{0xFF, 0xFF}, {10, 13}, {0xFF, 0xFF}, {20, 25}},
-    {{0xFF, 0xFF}, {0xFF, 0xFF}, {5, 13}, {25, 13}},
-    {{5, 34}, {0xFF, 0xFF}, {0xFF, 0xFF}, {0xFF, 0xFF}},
-    {{0xFF, 0xFF}, {0xFF, 0xFF}, {0xFF, 0xFF}, {26, 36}},
-    {{0xFF, 0xFF}, {26, 4}, {0xFF, 0xFF}, {0xFF, 0xFF}},
-    {{0xFF, 0xFF}, {0xFF, 0xFF}, {15, 6}, {0xFF, 0xFF}},
-    {{15, 32}, {0xFF, 0xFF}, {0xFF, 0xFF}, {0xFF, 0xFF}},
-};
+// SKYLA's gym's cannons (Black's field_gimmick_cannons, ov041): the player walks into the cell before a cannon
+// (CreateLaunchEvent: two cells ahead of the facing). The launch (EventLaunch): the cannon's animation for its
+// direction (the facing turned by the cannon's quarter turns) runs to its fire frame, Black's script 2 climbs the player
+// in, the player is hidden and the animation goes on: the flight starts at its flight frame, along the flight's ICA path
+// from the cannon's cell, the player seen again at its landing frame, and the flight ends on its landing cell. The
+// tables are ov041's (src/unova/u3d_gyms.h from tools/unova/gen_gyms.py); no flight that way: nothing happens
+static struct { s8 cannon; u8 ring, dir, phase, seen; float frame; s16 ox, oz; } sShot = {-1};
 static u8 sCannonLandX, sCannonLandZ;
 
 bool8 U3D_Vm_CannonAhead(u16 direction)
 {
+    static const u8 sRing[] = {[DIR_NORTH] = 0, [DIR_SOUTH] = 1, [DIR_EAST] = 2, [DIR_WEST] = 3};
     s32 m = U3D_MapIndex(), x = gSaveBlock1Ptr->pos.x, z = gSaveBlock1Ptr->pos.y, ox = 0, oz = 0;
     u32 c;
     if (!Ready() || CurrentZone() != ZONE_MISTRALTON_GYM || m < 0 || direction < DIR_SOUTH || direction > DIR_EAST)
         return FALSE;
-    if (m >= 0)
-        ox = 32 * U3D_MapCellX(m), oz = 32 * U3D_MapCellZ(m);
+    ox = 32 * U3D_MapCellX(m), oz = 32 * U3D_MapCellZ(m);
     switch (direction)
     {
     case DIR_NORTH: z -= 2; break;
@@ -4198,16 +4188,46 @@ bool8 U3D_Vm_CannonAhead(u16 direction)
     case DIR_WEST:  x -= 2; break;
     default:        x += 2; break;
     }
-    for (c = 0; c < ARRAY_COUNT(sCannonCell); c++)
-        if (sCannonCell[c][0] == x + ox && sCannonCell[c][1] == z + oz)
+    for (c = 0; c < ARRAY_COUNT(sCannonCells); c++)
+        if (sCannonCells[c][0] == x + ox && sCannonCells[c][2] == z + oz)
         {
-            const u8 *land = sCannonLand[c][direction - DIR_SOUTH];
-            if (land[0] == 0xFF)
+            const s16 *fl = sCannonFlights[c][sRing[direction]];
+            if (fl[1] == 0)
                 return FALSE;   // (Black: no flight that way, nothing happens)
-            sCannonLandX = land[0] - ox, sCannonLandZ = land[1] - oz;
+            sShot.cannon = c, sShot.ring = sRing[direction], sShot.dir = sCannonAnimDir[c][sRing[direction]];
+            sShot.ox = ox, sShot.oz = oz;
+            sCannonLandX = fl[2] - ox, sCannonLandZ = fl[4] - oz;
             return TRUE;
         }
     return FALSE;
+}
+
+static void Task_CannonAim(u8 taskId)
+{
+    float f = U3D_ExpFrame(sShot.cannon);
+    if (!gTasks[taskId].data[0] && f >= sCannonFrames[CANNON_FIRE_SE][sShot.dir])
+    {
+        gTasks[taskId].data[0] = TRUE;
+        PlaySE(SE_M_STRENGTH);   // (Black's 0x698: the cannon turns to its aim)
+    }
+    if (f < 0 || f >= sCannonFrames[CANNON_FIRE_DONE][sShot.dir])
+    {
+        U3D_ExpAnim(sShot.cannon, sShot.dir * 2, sCannonFrames[CANNON_FIRE_DONE][sShot.dir], FALSE);
+        DestroyTask(taskId);
+        ScriptContext_Enable();
+    }
+}
+
+// special (waitstate): the cannon's animation to its fire frame
+void U3D_VmCannonAim(void)
+{
+    if (sShot.cannon < 0)
+    {
+        ScriptContext_Enable();
+        return;
+    }
+    U3D_ExpAnim(sShot.cannon, sShot.dir * 2, 0, TRUE);
+    CreateTask(Task_CannonAim, 80);
 }
 
 // special: Black's script 2 (the player climbs in, by the way they face); 0x8004 / 0x8005 the landing cell
@@ -4217,6 +4237,58 @@ void U3D_VmCannon(void)
     gSpecialVar_0x8005 = sCannonLandZ;
     if (!Run(2, 0xFFFF, TRUE))
         NothingToRun();
+}
+
+static void Task_CannonFly(u8 taskId)
+{
+    const s16 *fl = sCannonFlights[sShot.cannon][sShot.ring];
+    struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+    float f = U3D_ExpFrame(sShot.cannon);
+    if (sShot.phase == 0 && f >= sCannonFrames[CANNON_FLIGHT_START][sShot.dir])
+    {
+        sShot.phase = 1;   // (the flight: Black's 0x6A0)
+        sShot.frame = 0;
+        PlaySE(SE_M_FLY);
+    }
+    if (!sShot.seen && f >= sCannonFrames[CANNON_LANDING][sShot.dir])
+    {
+        sShot.seen = TRUE;   // (Black shows the player again at the animation's landing frame)
+        pl->invisible = FALSE;
+    }
+    if (sShot.phase == 1)
+    {
+        u32 k = (u32)sShot.frame;
+        const s16 *pt = sCannonPath[fl[0] + (k < (u32)fl[1] ? k : (u32)fl[1] - 1)];
+        const u16 *cell = sCannonCells[sShot.cannon];
+        U3D_PlayerFly(TRUE, pt[0] / 8.0f + cell[0] * 16 + 8, pt[1] / 8.0f + cell[1] * 16, pt[2] / 8.0f + cell[2] * 16 + 8);
+        sShot.frame += 0.5f;   // (a point a field frame, 30 a second)
+        if (sShot.frame >= fl[1])
+        {
+            PlaySE(SE_LEDGE);   // (Black's 0x697, the landing)
+            U3D_PlayerFly(FALSE, 0, 0, 0);
+            pl->invisible = FALSE;
+            U3D_ExpAnim(sShot.cannon, 0xFF, 0, FALSE);   // (its animations off again, the cannon at rest)
+            sShot.cannon = -1;
+            DestroyTask(taskId);
+            ScriptContext_Enable();
+        }
+    }
+}
+
+// special (waitstate): the shot, the player hidden in the cannon, and the flight to the landing cell
+void U3D_VmCannonFly(void)
+{
+    if (sShot.cannon < 0)
+    {
+        ScriptContext_Enable();
+        return;
+    }
+    gObjectEvents[gPlayerAvatar.objectEventId].invisible = TRUE;
+    U3D_ExpAnim(sShot.cannon, sShot.dir * 2, sCannonFrames[CANNON_FIRE_DONE][sShot.dir], TRUE);
+    PlaySE(SE_M_EXPLOSION);   // (Black's 0x699, the shot)
+    sShot.phase = 0;
+    sShot.seen = FALSE;
+    CreateTask(Task_CannonFly, 80);
 }
 
 // BRYCEN's gym (ICIRRUS, zone 114, Black's gimmick ov045 field_gimmick_switch_toggle.c): an ice rink whose curved

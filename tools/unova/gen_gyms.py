@@ -286,7 +286,69 @@ def main():
                 "GetRotateAnim)\n")
         f.write('static const s8 sDragonRotateAnim[4][4] = {%s};\n' % ', '.join(
             '{%s}' % ', '.join(str(v) for v in row) for row in rot))
+        write_cannons(f)
     print('%s: %d rides, %d dragon tiles' % (path, len(rows), sum(len(t) for unit in dt for t in unit)))
+
+
+# SKYLA's cannons (ov041 field_gimmick_cannons.c): each cannon's cell and quarter turns, the direction its animation
+# takes for a facing (GetCannonDirection), Black's frames of each direction's animation (fire sound, fire done, the
+# player shown again, the flight started), and each flight: its ICA path (archive 0x79: u32 frames, flags scale /
+# rotation / translation at 4-6, then per frame scale, rotation, translation floats as present) and landing cell
+CANNON_CELLS, CANNON_TURNS, CANNON_RING = 0x021F40F0, 0x021F4660, 0x021F4080
+CANNON_FRAMES = (0x021F4084, 0x021F408C, 0x021F4094, 0x021F409C)   # (fire sound, fire done, landing, flight start)
+CANNON_FLIGHTS, CANNON_ICA_ARC = 0x021F4320, 'a/1/2/1'
+
+
+def ica_path(d):
+    n = struct.unpack_from('<I', d, 0)[0]
+    has_s, has_r, has_t = d[4], d[5], d[6]
+    step = 12 * (bool(has_s) + bool(has_r) + bool(has_t))
+    off = 12 * (bool(has_s) + bool(has_r))
+    if not has_t:
+        return []
+    return [struct.unpack_from('<3f', d, 8 + i * step + off) for i in range(n)]
+
+
+def write_cannons(f):
+    ram, d = scrcmd.ov_image(41)
+    u16 = lambda a: struct.unpack_from('<H', d, a - ram)[0]   # noqa: E731
+    cells = [tuple(u16(CANNON_CELLS + 6 * c + 2 * k) for k in range(3)) for c in range(10)]
+    turns = [d[CANNON_TURNS - ram + c] for c in range(10)]
+    ring = [d[CANNON_RING - ram + k] for k in range(4)]
+    frames = [[u16(t + 2 * k) for k in range(4)] for t in CANNON_FRAMES]
+    arc = narc.arc(CANNON_ICA_ARC)
+    paths, flights = [], []
+    for c in range(10):
+        row = []
+        for r in range(4):
+            ica, lx, ly, lz, cam = struct.unpack_from('<5i', d, CANNON_FLIGHTS - ram + 20 * (4 * c + r))
+            if ica < 0:
+                row.append((0, 0, 0, 0, 0, 0))
+                continue
+            pts = ica_path(arc[ica])
+            row.append((len(paths), len(pts), lx, ly, lz, cam))
+            paths += pts
+        flights.append(row)
+    def turned(direction, n):   # (TurnRingDirection)
+        return ring[(ring.index(direction) + n) % 4] if direction in ring else direction
+    f.write("// SKYLA's cannons (ov041): cells (x, y, z), each facing's (ring: up, down, right, left) animation direction, "
+            "Black's\n// frames of a direction's animation, the flights (first point, points, landing x, y, z, camera) "
+            "and their paths\n// (ICA translations, an eighth of a unit)\n")
+    f.write('static const u16 sCannonCells[10][3] = {%s};\n' % ', '.join('{%d, %d, %d}' % c for c in cells))
+    f.write('static const u8 sCannonAnimDir[10][4] = {%s};\n' % ', '.join(
+        '{%s}' % ', '.join(str(turned(r, turns[c])) for r in range(4)) for c in range(10)))
+    f.write('static const u8 sCannonTurns[10] = {%s};\n' % ', '.join(str(t) for t in turns))
+    f.write('enum { CANNON_FIRE_SE, CANNON_FIRE_DONE, CANNON_LANDING, CANNON_FLIGHT_START };\n')
+    f.write('static const u16 sCannonFrames[4][4] = {%s};\n' % ', '.join(
+        '{%s}' % ', '.join(str(v) for v in t) for t in frames))
+    f.write('static const s16 sCannonFlights[10][4][6] = {\n')
+    for row in flights:
+        f.write('    {%s},\n' % ', '.join('{%s}' % ', '.join(str(v) for v in fl) for fl in row))
+    f.write('};\n')
+    f.write('static const s16 sCannonPath[][3] = {\n')
+    for k in range(0, len(paths), 6):
+        f.write('    %s,\n' % ', '.join('{%d, %d, %d}' % tuple(round(v * 8) for v in p) for p in paths[k:k + 6]))
+    f.write('};\n')
 
 
 if __name__ == '__main__':

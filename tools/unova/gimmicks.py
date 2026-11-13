@@ -258,7 +258,12 @@ def _place44(img):
     return [(img.vec(0x021F3A1C), 0)]
 
 
-PLACES = {40: _place40, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+# SKYLA's (field_gimmick_cannons.c FIELD_GIMMICK_CANNONS_Init): ten cannons, each turned by its quarter turns
+def _place41(img):
+    return [(img.vec(0x021F4208 + 12 * k), (img.d[0x021F4660 - img.ram + k] << 14) & 0xFFFF) for k in range(10)]
+
+
+PLACES = {40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 

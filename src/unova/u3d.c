@@ -111,6 +111,9 @@ static struct
     struct { u8 ov; u16 n; struct { u16 kind; float pos[3]; u16 yaw; u8 hidden; } *m; } *gim;
 } sPack;
 
+// a flight (SKYLA's cannons): the player's sprite at a world place of Black's units and the view on it
+static struct { bool8 on; float x, y, z; } sFly;
+
 #include "u3d_maps.h"   // sUnovaMaps: each UNOVA map, its zone, where it lies on its matrix (tools/unova/gen_maps.py)
 
 typedef struct { const u8 *p, *end; bool8 bad; } Reader;
@@ -912,6 +915,8 @@ static void SetupView(void)
         float follow[7], *v = sCam.cur, f, sy, cy;
         u32 i;
         follow[0] = sView.tx, follow[1] = sView.ty, follow[2] = sView.tz;
+        if (sFly.on)   // (a flight: the view on the flying player)
+            follow[0] = sFly.x, follow[1] = sFly.y, follow[2] = sFly.z;
         follow[3] = CAM_PITCH, follow[4] = 0.0f, follow[5] = CAM_DIST, follow[6] = EMERALD_DROP;
         {
             // a rail map's tile: Black's camera of that rail, its pitch and distance eased to (the view stays north up:
@@ -1000,6 +1005,14 @@ void U3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         *outX = x;
         *outY = feetY;
         *depth = 0.0f;
+        return;
+    }
+    if (sFly.on && spriteId == gObjectEvents[gPlayerAvatar.objectEventId].spriteId
+     && Project(sFly.x, sFly.y, sFly.z + FEET_TOWARD, &sx, &sy, &d))   // (in flight: where the flight has them)
+    {
+        *outX = (s32)lroundf(sx);
+        *outY = (s32)lroundf(sy);
+        *depth = d;
         return;
     }
     if (spriteId < MAX_SPRITES && (u8)(sView.frame - sSpriteHFrame[spriteId]) <= 2)
@@ -1439,6 +1452,16 @@ void U3D_ExpPlace(u16 model, float x, float y, float z, u16 yaw)
         return;
     sExp.m[model].pos[0] = x, sExp.m[model].pos[1] = y, sExp.m[model].pos[2] = z;
     sExp.m[model].yaw = yaw;
+}
+
+float U3D_ExpFrame(u16 model)
+{
+    return sExp.gim >= 0 && model < sExp.n && sExp.m[model].anim != 0xFF ? sExp.m[model].frame : -1.0f;
+}
+
+void U3D_PlayerFly(bool8 on, float x, float y, float z)
+{
+    sFly.on = on, sFly.x = x, sFly.y = y, sFly.z = z;
 }
 
 void U3D_ExpSetY(u16 model, float y)
