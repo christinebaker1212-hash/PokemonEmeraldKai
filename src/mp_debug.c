@@ -4582,6 +4582,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (sscanf(arg + flag, "%x", &id) == 1)
             printf("[test] u3d %s %X = %u\n", flag ? "flag" : "work", id, U3D_Vm_DebugGet(flag, id));
     }
+    else if (strcmp(cmd, "u3dground") == 0)   // u3dground: UNOVA's ground under the player (near 0, 800), its floor
+    {
+        float U3D_TestGround(s32 mapX, s32 mapY, float near);
+        float U3D_Floor(void);
+        s32 x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
+        printf("[test] u3d ground near 0: %.1f, near 800: %.1f, near -944: %.1f, floor %.1f\n",
+               U3D_TestGround(x * 16 + 8, y * 16 + 8, 0), U3D_TestGround(x * 16 + 8, y * 16 + 8, 800),
+               U3D_TestGround(x * 16 + 8, y * 16 + 8, -944), U3D_Floor());
+    }
     else if (strcmp(cmd, "u3drun") == 0)   // u3drun ID (decimal): a Black script of this zone (or shared) as a scene
     {
         bool8 U3D_Vm_DebugRun(u16 id);

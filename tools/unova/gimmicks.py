@@ -246,7 +246,14 @@ def _place42(img):
     return [(img.vec(0x021F3AD4 + 12 * k), 0) for k in range(9)] + [(img.vec(0x021F3A68 + 12 * k), 0) for k in range(3)]
 
 
-PLACES = {40: _place40, 42: _place42, 45: _place45, 46: _place46}   # (the gimmicks drawn so far)
+# CLAY's mine (field_gimmick_lift_elevator.c FIELD_GIMMICK_LIFT_ELEVATOR_Init): six lifts at their starts (their
+# heights the VM's: a state each), the obstacle the big lift breaks (6), the elevator (7)
+def _place43(img):
+    return ([(img.vec(0x021F4358 + 12 * k), 0) for k in range(6)]
+            + [(img.vec(0x021F4340), 0), (img.vec(0x021F434C), 0)])
+
+
+PLACES = {40: _place40, 42: _place42, 43: _place43, 45: _place45, 46: _place46}   # (the gimmicks drawn so far)
 
 
 def add(pack):

@@ -34,6 +34,7 @@ void U3D_ExpAnim(u16 model, u8 anim, s16 frame, bool8 play);
 bool8 U3D_ExpPlaying(u16 model);
 void U3D_ExpHide(u16 model, bool8 hidden);
 void U3D_ExpPlace(u16 model, float x, float y, float z, u16 yaw);
+void U3D_ExpSetY(u16 model, float y);
 void U3D_HexClear(void);                                     // Black's height areas (CLAY's gym's floors, u3d.c)
 void U3D_HexSet(u8 i, s16 x, s16 z, s16 w, s16 d, s16 h);
 bool8 U3D_HexActive(void);

@@ -479,7 +479,7 @@ bool8 U3D_PersonApart(u8 localId)
 {
     float h;
     bool8 U3D_Vm_PersonHeight(u8 localId, float *h);
-    return sHexAny && !isnan(sFloor) && U3D_Vm_PersonHeight(localId, &h) && fabsf(h - sFloor) >= 8.0f;
+    return sHexAny && !isnan(sFloor) && U3D_Vm_PersonHeight(localId, &h) && fabsf(h - sFloor) >= 128.0f;
 }
 
 // a person's height: the player's floor (NAN on the ground), another's from Black's event record (NAN unknown)
@@ -1383,8 +1383,11 @@ void U3D_ExpLoad(u8 ov)
                 sExp.m[k].frame = 0;
                 sExp.m[k].playing = FALSE;
             }
+            if (getenv("MOEMON_U3D_TRACE"))
+                printf("[u3d] gym models of ov%03u: %u\n", (unsigned)ov, (unsigned)sExp.n);
             return;
         }
+    printf("[u3d] no gym models for ov%03u in the pack (tools/unova/build_pack.py makes them)\n", (unsigned)ov);
 }
 
 void U3D_ExpClear(void)
@@ -1436,6 +1439,12 @@ void U3D_ExpPlace(u16 model, float x, float y, float z, u16 yaw)
         return;
     sExp.m[model].pos[0] = x, sExp.m[model].pos[1] = y, sExp.m[model].pos[2] = z;
     sExp.m[model].yaw = yaw;
+}
+
+void U3D_ExpSetY(u16 model, float y)
+{
+    if (sExp.gim >= 0 && model < sExp.n)
+        sExp.m[model].pos[1] = y;
 }
 
 static void ExpStep(void)

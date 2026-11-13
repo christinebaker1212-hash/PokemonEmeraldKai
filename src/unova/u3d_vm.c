@@ -993,10 +993,11 @@ static void DragonModels(void);
 static void DragonInside(void);
 static u8 sIceShown[3];
 static void IceToggle(u32 i);
+static struct { s8 lift; bool8 rider; u16 stall; float cur, goal, step; } sMineRide = {-1};
 static void DragonReset(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
-enum { W_BGM_STOPPED = 100, W_EXP_ANIM };   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
+enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE };   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
 static u16 sExpWait;
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
        W_WARP };   // (W_WARP: a warp's map is loading; the script goes on there: U3D_Vm_SceneStart)
@@ -2217,8 +2218,11 @@ static void Step(struct Thread *t)
         case U3C_DebugWork:   // (Black's debug prints)
         case U3C_DebugStack:
         case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_CallLiftEvent:   // CLAY's gym: a lever sends its lift to its other height
-            if (V(0) < 6)   // (sMineLift's)
+            if (V(0) < 6 && sMineRide.lift < 0)   // (sMineLift's)
+            {
                 MineLift(V(0));
+                t->wait = W_LIFT_RIDE;
+            }
             break;
         case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_SnapElevatorToTop:   // (the lobby's lift and the mine's: their models)
         case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_CallElevatorEvent:
@@ -3458,6 +3462,10 @@ static void Wait(struct Thread *t)
         if (!U3D_CameraMoving())
             t->wait = W_NONE;
         break;
+    case W_LIFT_RIDE:   // (CLAY's mine: Black's lift event, till the lift arrives)
+        if (sMineRide.lift < 0)
+            t->wait = W_NONE;
+        break;
     case W_EXP_ANIM:   // (Black's gimmick events wait for their model's animation: FLD_EXP_OBJ_IsAnimeStopped)
         if (!U3D_ExpPlaying(sExpWait))
             t->wait = W_NONE;
@@ -3608,8 +3616,8 @@ void U3D_VmTalk(void)
 // a sign's height (Black's y, 16 units a tile's height) on the player's floor (the ground: below the platforms)
 static bool8 SignOnFloor(s32 y)
 {
-    float floor = U3D_Floor(), h = y / 16.0f;
-    return isnan(floor) ? !MineFloorHeight((s16)h) : fabsf(h - floor) < 4;
+    float floor = U3D_Floor();
+    return isnan(floor) ? !MineFloorHeight((s16)(y / 16)) : fabsf(y - floor) < 64;
 }
 
 void U3D_VmSign(void)
@@ -3809,39 +3817,96 @@ static bool8 MineFloorHeight(s16 h)   // (a height one of the platforms' floors 
     return FALSE;
 }
 
+// (the tables' heights are in tiles; the engine's, Black's world units, a tile's 16: the pit's floor is near -1000)
+#define MINE_H(h) ((h) * 16)
+
 static void MineSetup(void)
 {
     u32 i;
     U3D_HexClear();
     for (i = 0; i < ARRAY_COUNT(sMineArea); i++)
-        U3D_HexSet(i, sMineArea[i][0], sMineArea[i][1], sMineArea[i][2], sMineArea[i][3], sMineArea[i][4]);
+        U3D_HexSet(i, sMineArea[i][0], sMineArea[i][1], sMineArea[i][2], sMineArea[i][3], MINE_H(sMineArea[i][4]));
     for (i = 0; i < ARRAY_COUNT(sMineLift); i++)
         U3D_HexSet(8 + i, sMineLift[i][0], sMineLift[i][1], sMineLift[i][2], sMineLift[i][3],
-                   sMineLift[i][4 + ((sWork.gym[1] >> i) & 1)]);
+                   MINE_H(sMineLift[i][4 + ((sWork.gym[1] >> i) & 1)]));
     if (sWork.gym[2] == 0)   // (arriving: on the highest floor where they stand, the lobby's lift's 50)
     {
         float top = U3D_HexTopAtPlayer();
-        sWork.gym[2] = isnan(top) ? 1 : 128 + (s32)top;
+        sWork.gym[2] = isnan(top) ? 1 : 128 + (s32)top / 16;
     }
-    U3D_SetFloor(sWork.gym[2] == 1 ? NAN : (float)((s32)sWork.gym[2] - 128));
+    U3D_SetFloor(sWork.gym[2] == 1 ? NAN : (float)MINE_H((s32)sWork.gym[2] - 128));
     MPNet_Log("u3d vm: CLAY's mine, lifts %02X, floor %d", sWork.gym[1], sWork.gym[2] - 128);
 }
 
-// a lever: lift I to its other height, the player riding it if they stand on it at the height it leaves
+// The mine's models (ov043): the lifts at their heights (Black's world units, a tile 16), the obstacle broken once the
+// big lift (5) has gone down past it (sWork.gym[1] bit 7, Black's obstacleBroken)
+static void MineModels(void)
+{
+    u32 i;
+    U3D_ExpLoad(43);
+    for (i = 0; i < ARRAY_COUNT(sMineLift); i++)
+        U3D_ExpSetY(i, MINE_H(sMineLift[i][4 + ((sWork.gym[1] >> i) & 1)]));
+    U3D_ExpAnim(6, 0, sWork.gym[1] & 0x80 ? -1 : 0, FALSE);
+}
+
+// a lever: lift I to its other height, the player riding it if they stand on it at the height it leaves. It rides as
+// Black's lift event does (LiftEventMain: 4 units a field frame, the big lift 8; it stops at the obstacle, which
+// breaks, and goes on at 2 after a while), the script waiting till it arrives
 static void MineLift(u32 i)
 {
     u32 was = (sWork.gym[1] >> i) & 1;
     s16 from = sMineLift[i][4 + was], to = sMineLift[i][4 + !was];
     float floor = U3D_Floor();
     sWork.gym[1] ^= 1 << i;
-    U3D_HexSet(8 + i, sMineLift[i][0], sMineLift[i][1], sMineLift[i][2], sMineLift[i][3], to);
-    if (U3D_HexHasPlayer(8 + i) && ((isnan(floor) && !MineFloorHeight(from)) || (!isnan(floor) && fabsf(floor - from) < 4)))
-    {
-        sWork.gym[2] = MineFloorHeight(to) ? 128 + to : 1;
-        U3D_SetFloor(MineFloorHeight(to) ? (float)to : NAN);
-    }
+    sMineRide.rider = U3D_HexHasPlayer(8 + i)
+        && ((isnan(floor) && !MineFloorHeight(from)) || (!isnan(floor) && fabsf(floor - MINE_H(from)) < 64));
+    sMineRide.lift = i;
+    sMineRide.cur = MINE_H(from);
+    sMineRide.goal = MINE_H(to);
+    sMineRide.step = (i == 5 ? 4.0f : 2.0f) * (to < from ? -1 : 1);   // (a game frame: half a field frame's)
+    sMineRide.stall = 0;
     PlaySE(SE_ELEVATOR);
-    MPNet_Log("u3d vm: lift %u %d -> %d, floor %d", (unsigned)i, from, to, sWork.gym[2] - 128);
+    MPNet_Log("u3d vm: lift %u %d -> %d%s", (unsigned)i, from, to, sMineRide.rider ? " (riding)" : "");
+}
+
+static void MineRideStep(void)
+{
+    s32 i = sMineRide.lift;
+    s16 to;
+    if (i < 0)
+        return;
+    if (sMineRide.stall)   // (stopped at the broken obstacle: the camera shakes, then slower)
+    {
+        if (--sMineRide.stall == 0)
+            sMineRide.step = -1.0f;
+        return;
+    }
+    sMineRide.cur += sMineRide.step;
+    if (i == 5 && !(sWork.gym[1] & 0x80) && sMineRide.cur <= -560.0f)   // (UpdateBigLift: the obstacle at -0x230000)
+    {
+        sWork.gym[1] |= 0x80;
+        sMineRide.cur = -560.0f;
+        sMineRide.stall = 200;   // (Black's 100 shakes, every second field frame)
+        U3D_ExpAnim(6, 0, 0, TRUE);
+        PlaySE(SE_M_ROCK_THROW);
+    }
+    if ((sMineRide.step < 0 && sMineRide.cur <= sMineRide.goal) || (sMineRide.step > 0 && sMineRide.cur >= sMineRide.goal))
+        sMineRide.cur = sMineRide.goal, sMineRide.lift = -1;
+    U3D_ExpSetY(i, sMineRide.cur);   // (the lift's floor area goes with it: whoever stands on it rides it)
+    U3D_HexSet(8 + i, sMineLift[i][0], sMineLift[i][1], sMineLift[i][2], sMineLift[i][3], (s16)sMineRide.cur);
+    if (sMineRide.rider)
+        U3D_SetFloor(sMineRide.cur);
+    if (sMineRide.lift < 0)
+    {
+        to = (s16)(sMineRide.goal / 16.0f);
+        if (sMineRide.rider)
+        {
+            sWork.gym[2] = MineFloorHeight(to) ? 128 + to : 1;
+            U3D_SetFloor(MineFloorHeight(to) ? (float)MINE_H(to) : NAN);
+        }
+        PlaySE(SE_PIN);
+        MPNet_Log("u3d vm: lift %d arrived at %d, floor %d", (int)i, to, sWork.gym[2] - 128);
+    }
 }
 
 // an unseen blocker of CLAY's gym at grid tile X, Z on the floor at height H (NAN: the ground) (u3d.c U3D_StepBlocked)
@@ -3854,21 +3919,22 @@ bool8 U3D_Vm_BlockerAt(s32 x, s32 z, float h)
     for (i = 0; i < e[5]; i++)
     {
         const u8 *p = e + 8 + EV_BG * e[4] + EV_PERSON * i;
-        float ph = (s16)Le16(p + 34);
+        float ph = (s16)Le16(p + 34) * 16.0f;   // (Black's event height in tiles: world units, as the floors)
         if ((Le16(p + 2) == 185 || Le16(p + 2) == 0) && Le16(p + 28) == x && Le16(p + 30) == z
-         && (isnan(h) ? ph < 20.0f : fabsf(ph - h) < 8.0f))
+         && (isnan(h) ? ph < 320.0f : fabsf(ph - h) < 128.0f))
             return TRUE;
     }
     return FALSE;
 }
 
-// a person's height in Black's event record (its y's whole part), for the floors of height areas (u3d.c)
+// a person's height in Black's event record (its y's whole part, in tiles), for the floors of height areas (u3d.c), in
+// world units as they are
 bool8 U3D_Vm_PersonHeight(u8 localId, float *h)
 {
     const u8 *p;
     if (localId == 0 || localId > 0xF0 || !Ready() || (p = Person(CurrentZone(), localId - 1)) == NULL)
         return FALSE;
-    *h = (s16)Le16(p + 34) + Le16(p + 32) / 65536.0f;
+    *h = ((s16)Le16(p + 34) + Le16(p + 32) / 65536.0f) * 16.0f;
     return TRUE;
 }
 
@@ -3918,6 +3984,8 @@ void U3D_Vm_FieldFrame(void)
         DragonInside();
     else if (CurrentZone() == ICE_GYM_ZONE)
         IceModels(FALSE);
+    else if (CurrentZone() == ZONE_DRIFTVEIL_GYM)
+        MineRideStep();
 }
 
 void U3D_Vm_FieldShown(void)
@@ -3960,7 +4028,10 @@ void U3D_Vm_FieldShown(void)
     else
         U3D_ExpClear();
     if (CurrentZone() == ZONE_DRIFTVEIL_GYM)
+    {
         MineSetup();
+        MineModels();
+    }
     else if (U3D_HexActive())
     {
         U3D_HexClear();
