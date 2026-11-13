@@ -908,6 +908,7 @@ void MpUi_PicsClear(void);
 void MpUi_Head(u8 slot, s8 player, int x, int y);
 void MpUi_Icon(u8 slot, u8 icon, int x, int y);
 void MpUi_DrawRoom(u8 win, s8 pick, const char *const *right);
+u8 MpUi_RoomWindowFit(u8 win, u16 baseBlock);   // the room's window sized to who's there (WINDOW_NONE: no one)
 void MpUi_RoomMark(u8 win, int x, int y, char mark, bool8 blue);
 void MpUi_FriendRow(u8 slot, bool8 selected, u8 id, const char *right, char mark, bool8 blue);
 void MpUi_RowBelowFriends(u8 friends, bool8 selected, const char *left);

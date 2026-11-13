@@ -366,12 +366,6 @@ void MpUi_DrawRoom(u8 win, s8 pick, const char *const *right)
     winX = GetWindowAttribute(win, WINDOW_TILEMAP_LEFT) * 8;
     winY = GetWindowAttribute(win, WINDOW_TILEMAP_TOP) * 8;
     FillWindowPixelBuffer(win, PIXEL_FILL(MPT_BG));
-    if (!MP_IsConnected())
-    {
-        MP_AsciiToGame(buf, "PLAYING ALONE", 40);
-        MpTheme_Print(win, FONT_SMALL, buf, 0, 0, MPT_TEXT, MPT_BG);
-    }
-    else
     {
         const char *room = MP_Lobby_RoomName();
         snprintf(ascii, sizeof(ascii), "%s", room && room[0] ? room : "CO-OP ROOM");
@@ -389,22 +383,11 @@ void MpUi_DrawRoom(u8 win, s8 pick, const char *const *right)
     {
         int y = 13 + i * 22;
         if (i >= n)
-        {
-            // an empty seat
-            FillWindowPixelRect(win, PIXEL_FILL(MPT_SHADOW), 0, y + 1, 16, 16);
-            FillWindowPixelRect(win, PIXEL_FILL(MPT_BG), 1, y + 2, 14, 14);
-            MP_AsciiToGame(buf, "- empty seat -", 20);
-            MpTheme_Print(win, FONT_SMALL_NARROW, buf, 20, y + 3, MPT_GREY, MPT_BG);
-            continue;
-        }
+            break;
         {
             u8 id = ids[i];
             struct MpPlayer *p = &gMpPlayers[id];
-            if (pick == i)
-            {
-                FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), 0, y - 2, w, 21);
-                FillWindowPixelRect(win, PIXEL_FILL(MPT_BORDER), 0, y - 2, 2, 21);
-            }
+            (void)pick;
             MpUi_Head(MPUI_PIC_ROOM + i, id, winX + 2, winY + y);
             StringCopyN(buf, p->name, PLAYER_NAME_LENGTH);
             buf[PLAYER_NAME_LENGTH] = EOS;
@@ -423,6 +406,41 @@ void MpUi_DrawRoom(u8 win, s8 pick, const char *const *right)
                 MpUi_RoomMark(win, w - 11, y - 1, '!', TRUE);
         }
     }
+}
+
+// The room's window for who's there now (the user, 2026-11-13: none when playing alone, growing and shrinking with the
+// players): WIN kept if it's the right height, else taken away and made again (WINDOW_NONE when no one else is here)
+static u8 RoomHeight(void)
+{
+    u8 ids[MP_MAX_PLAYERS];
+    int n = MP_IsConnected() ? MP_Friends_List(ids) : 0;
+    if (n > MP_MAX_PLAYERS - 1)
+        n = MP_MAX_PLAYERS - 1;
+    return n ? (13 + n * 22 + 7) / 8 : 0;
+}
+
+u8 MpUi_RoomWindowFit(u8 win, u16 baseBlock)
+{
+    u8 h = RoomHeight(), i;
+    if (win != WINDOW_NONE && GetWindowAttribute(win, WINDOW_HEIGHT) == h)
+        return win;
+    if (win != WINDOW_NONE)
+    {
+        ClearStdWindowAndFrame(win, TRUE);
+        RemoveWindow(win);
+        win = WINDOW_NONE;
+        for (i = MPUI_PIC_ROOM; i < MPUI_PIC_ROOM + MP_MAX_PLAYERS - 1; i++)
+            PicFree(i);
+    }
+    if (h)
+    {
+        struct WindowTemplate t = {.bg = 0, .tilemapLeft = 1, .tilemapTop = 1, .width = ROOM_W, .height = h,
+                                   .paletteNum = 15, .baseBlock = baseBlock};
+        win = AddWindow(&t);
+        PutWindowTilemap(win);
+        DrawStdWindowFrame(win, FALSE);
+    }
+    return win;
 }
 
 // ---------------------------------------------------------------------------
@@ -444,11 +462,12 @@ static void MakeWindows(bool8 compact)
     CopyWindowToVram(sMain, COPYWIN_FULL);
     if (compact)
     {
-        sRoom = AddWindow(&sRoomTemplate);
-        PutWindowTilemap(sRoom);
-        DrawStdWindowFrame(sRoom, FALSE);
-        MpUi_DrawRoom(sRoom, -1, NULL);
-        CopyWindowToVram(sRoom, COPYWIN_FULL);
+        sRoom = MpUi_RoomWindowFit(WINDOW_NONE, sRoomTemplate.baseBlock);
+        if (sRoom != WINDOW_NONE)
+        {
+            MpUi_DrawRoom(sRoom, -1, NULL);
+            CopyWindowToVram(sRoom, COPYWIN_FULL);
+        }
     }
 }
 
@@ -520,10 +539,14 @@ void MpUi_Begin(const char *title)
         RemoveListWindows();
         MakeWindows(compact);
     }
-    else if (sRoom != WINDOW_NONE)
+    else if (sCompact)
     {
-        MpUi_DrawRoom(sRoom, -1, NULL);
-        CopyWindowToVram(sRoom, COPYWIN_FULL);
+        sRoom = MpUi_RoomWindowFit(sRoom, sRoomTemplate.baseBlock);
+        if (sRoom != WINDOW_NONE)
+        {
+            MpUi_DrawRoom(sRoom, -1, NULL);
+            CopyWindowToVram(sRoom, COPYWIN_FULL);
+        }
     }
     sScrollTop = -1;
     sSelY = -1;
@@ -597,7 +620,6 @@ static void RowAt(int y, bool8 selected, const u8 *left, const u8 *right)
     if (selected)
     {
         u8 arrow[] = {0xEF /* ▶ */, EOS};
-        MpTheme_SelBar(sMain, y - 1, ROW_H);
         MpTheme_Print(sMain, FONT_SMALL, arrow, 3, y - 1, MPT_TEXT, 0);
         sSelY = y;
     }
@@ -636,7 +658,6 @@ void MpUi_FriendRow(u8 slot, bool8 selected, u8 id, const char *right, char mark
     if (selected)
     {
         u8 arrow[] = {0xEF /* ▶ */, EOS};
-        MpTheme_SelBar(sMain, y, FRIEND_H - 1);
         MpTheme_Print(sMain, FONT_SMALL, arrow, 3, y + 6, MPT_TEXT, 0);
         sSelY = y;
     }

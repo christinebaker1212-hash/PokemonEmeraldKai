@@ -7587,3 +7587,8 @@ their tint, greys go blue-grey), OVERRIDES for hand tuning; the message box's ed
 dialogue edges are too bright"). `gen_dark.py --preview DIR` draws all 29 frames light and dark, and the BAG.
 mp_buttons.c MapColors: in a dark window the controller glyphs take a light face and a dark letter.
 Debug: `mp theme dark|default`, `mp verbwheel`, `mp plate TEXT`.
+After 1.199.0 (the user, with docs/user_images/86-87): the picked row is Emerald's own ▶ and nothing else (no lit bar,
+no side line) in the hub, MpUi lists, FRIENDS, LOOK; the room window only when someone else is here, its height for
+who's there (MpUi_RoomWindowFit, remade when it changes; the hub refits it every redraw); the picks' picked emote box
+and phrase balloon an outline in MPT_GOLD (the frame's color, deep on light windows), the emote box keeps its size
+with a small drawn pointer in its own left margin.

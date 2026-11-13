@@ -441,7 +441,7 @@ static void HubRowText(u8 main, char *name, char *news, int size)
         snprintf(news, size, "%d OF %d DONE", done, n);
         break;
     }
-    case MAIN_BERRY:     snprintf(name, size, "BERRY GAMES"), snprintf(news, size, "BLENDER, CRUSH"); break;
+    case MAIN_BERRY:     snprintf(name, size, "BERRY GAMES"), snprintf(news, size, "BLEND, CRUSH"); break;
     case MAIN_LOOK:      snprintf(name, size, "LOOK"), snprintf(news, size, "YOUR TRAINER"); break;
     case MAIN_REMINDER:
     {
@@ -511,12 +511,14 @@ static void DrawHub(u8 win, u8 roomWin, u8 cursor)
         int y = HUB_ROW_Y0 + r * HUB_ROW_H;
         if (r == row)
         {
-            MpTheme_SelBar(win, y - 1, HUB_ROW_H);
+            // the game's own cursor (the user, 2026-11-13: "I just want the classic cursor")
+            u8 arrow[] = {0xEF /* ▶ */, EOS};
+            MpTheme_Print(win, FONT_SMALL, arrow, 0, y + 2, MPT_TEXT, 0);
         }
-        MpUi_Icon(r, sMainIcon[main], winX + 3, winY + y + 1);
+        MpUi_Icon(r, sMainIcon[main], winX + 7, winY + y + 1);
         HubRowText(main, name, news, sizeof(news));
-        PrintCut(win, FONT_SMALL, name, 21, y - 2, w - 22, MPT_TEXT, 0);
-        PrintCut(win, FONT_SMALL_NARROW, news, 21, y + 7, w - 22, MPT_GREY, 0);
+        PrintCut(win, FONT_SMALL, name, 24, y - 2, w - 24, MPT_TEXT, 0);
+        PrintCut(win, FONT_SMALL_NARROW, news, 24, y + 7, w - 24, MPT_GREY, 0);
     }
     MpUi_PicEnd();
     CopyWindowToVram(win, COPYWIN_FULL);
@@ -581,7 +583,6 @@ static void DrawFriendsList(u8 win, u8 cursor)
         if (i == cursor)
         {
             u8 arrow[] = {0xEF /* ▶ */, EOS};
-            MpTheme_SelBar(win, y, 26);
             MpTheme_Print(win, FONT_SMALL, arrow, 3, y + 7, MPT_TEXT, 0);
         }
         MpUi_Head(MPUI_PIC_ROWS + i, ids[i], winX + 12, winY + y + 5);
@@ -627,8 +628,11 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 
     if (page == MP_MENU_PAGE_MAIN)
     {
-        u8 taskId = FindTaskIdByFunc(Task_CoopMenu);
-        DrawHub(windowId, taskId != TASK_NONE ? gTasks[taskId].data[7] /* tRoom */ : WINDOW_NONE, cursor);
+        // the room's window grows and shrinks with who's there (and goes when no one else is)
+        u8 taskId = FindTaskIdByFunc(Task_CoopMenu), room = WINDOW_NONE;
+        if (taskId != TASK_NONE)
+            room = gTasks[taskId].data[7] /* tRoom */ = MpUi_RoomWindowFit(gTasks[taskId].data[7], sHubRoomTemplate.baseBlock);
+        DrawHub(windowId, room, cursor);
         return;
     }
     if (page == MP_MENU_PAGE_FRIENDS)
@@ -683,8 +687,6 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
         {
             // The lit bar and the game's own cursor
             u8 arrow[] = {0xEF /* ▶ */, EOS};
-            MpTheme_SelBar(windowId, y, LINE_H);
-            sTxtBg = MPT_SEL;
             MText(windowId, FONT_SMALL, arrow, 1, y);
         }
         if (page == MP_MENU_PAGE_MAIN)
@@ -1026,10 +1028,8 @@ static void SetLayout(s16 *data, u8 page)
     if (layout == LAYOUT_HUB)
     {
         tWindow = AddWindow(&sHubMenuTemplate);
-        tRoom = AddWindow(&sHubRoomTemplate);
+        tRoom = MpUi_RoomWindowFit(WINDOW_NONE, sHubRoomTemplate.baseBlock);   // (none when playing alone)
         tPlayers = AddWindow(&sHubHelpTemplate);
-        PutWindowTilemap(tRoom);
-        DrawStdWindowFrame(tRoom, FALSE);
     }
     else if (layout == LAYOUT_WIDE)
     {
@@ -1850,10 +1850,13 @@ static void QuickRemoveWindows(s16 *data);
 // A box: a 1-pixel outline with its corners cut, filled (Emerald's own small boxes)
 static void DrawBox(u8 win, int x, int y, int w, int h, bool8 sel)
 {
-    u8 edge = sel ? MPT_BORDER : MPT_TEXT, fill = sel ? MPT_SEL : MPT_BG;
+    // the picked one: a 2-pixel outline in the frame's color (the user, 2026-11-13: "an outline highlight")
+    u8 edge = sel ? MPT_GOLD : MPT_TEXT, fill = MPT_BG;   // (GOLD: the frame's color, deep on light windows, light on dark)
     FillWindowPixelRect(win, PIXEL_FILL(edge), x + 1, y, w - 2, h);
     FillWindowPixelRect(win, PIXEL_FILL(edge), x, y + 1, w, h - 2);
-    FillWindowPixelRect(win, PIXEL_FILL(fill), x + 1, y + 1, w - 2, h - 2);
+    if (sel)
+        FillWindowPixelRect(win, PIXEL_FILL(edge), x + 1, y + 1, w - 2, h - 2);
+    FillWindowPixelRect(win, PIXEL_FILL(fill), x + 1 + sel, y + 1 + sel, w - 2 - 2 * sel, h - 2 - 2 * sel);
 }
 
 // The windows for a group (made again when the group changes)
@@ -1917,6 +1920,14 @@ static void DrawSlot(s16 *data, u8 dir, bool8 sel, u8 emote, s8 icon)
     if (emote || icon >= 0)
     {
         DrawBox(win, 5, 1, 22, 22, sel);
+        if (sel)
+        {
+            // a small pointer in the box's own margin (the box keeps its size and place): 3 columns, 5 rows
+            FillWindowPixelRect(win, PIXEL_FILL(MPT_TEXT), 0, 8, 1, 7);
+            FillWindowPixelRect(win, PIXEL_FILL(MPT_TEXT), 1, 9, 1, 5);
+            FillWindowPixelRect(win, PIXEL_FILL(MPT_TEXT), 2, 10, 1, 3);
+            FillWindowPixelRect(win, PIXEL_FILL(MPT_TEXT), 3, 11, 1, 1);
+        }
         if (icon >= 0)
             MpUi_Icon(dir, icon, x + 8, y + 4);
         else
@@ -1958,8 +1969,6 @@ static void DrawBarPages(u8 win, const char *const *names, u8 count, u8 cur, boo
     {
         MP_AsciiToGame(buf, names[cur], 20);
         w = 50;
-        FillWindowPixelRect(win, PIXEL_FILL(MPT_BORDER), x, 0, w, 13);
-        FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), x + 1, 1, w - 2, 11);
         MpTheme_Print(win, FONT_SMALL, buf, x + w / 2 - GetStringWidth(FONT_SMALL, buf, 0) / 2, 0, MPT_TEXT, 0);
         x += w + 3;
         MP_AsciiToGame(buf, "{R}", 8);
@@ -1981,11 +1990,6 @@ static void DrawBarPages(u8 win, const char *const *names, u8 count, u8 cur, boo
         {
             MP_AsciiToGame(buf, names[i], 20);
             w = GetStringWidth(FONT_SMALL, buf, 0);
-            if (i == cur)
-            {
-                FillWindowPixelRect(win, PIXEL_FILL(MPT_BORDER), x - 2, 0, w + 4, 13);
-                FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), x - 1, 1, w + 2, 11);
-            }
             MpTheme_Print(win, FONT_SMALL, buf, x, 0, i == cur ? MPT_TEXT : MPT_GREY, 0);
             x += w + 6;
         }

@@ -80,3 +80,5 @@ Numbered in the order they were sent. Add new ones with the next number and a li
 | 83 | 83.webp (822x617): the same battle's move menu: four moves as chrome bars in a diamond round the D-pad arrows, each with its name, type and PP; the picked one in its type's colour | the same |
 | 84 | 84.png (247x120): a close-up of STADIUM 2's healthbox at 7/20 (a yellow bar) | the same |
 | 85 | 85.png (247x120): the same healthbox fainted, 0/20 ("Ft") | the same |
+| 86 | 86.webp (2026-11-13): 1.199.0's CO-OP menu playing alone (ME tab, the lit row and side line, an empty room window) | the user: the classic ▶ cursor, not the highlight; no room window when alone, sized to who's there: COOP_NOTES "The CO-OP menu redone; THEME DARK" |
+| 87 | 87.webp (2026-11-13): Emerald's own START menu, for its ▶ cursor (what the CO-OP menu should match) | the same |
