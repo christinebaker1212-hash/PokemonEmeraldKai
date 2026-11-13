@@ -53,6 +53,10 @@ bool8 U3D_Vm_CannonAhead(u16 direction);   // (u3d_vm.c: SKYLA's gym's cannons, 
 bool8 U3D_Vm_IceSlideAhead(u16 direction);   // (u3d_vm.c: BRYCEN's gym's ice slides, the player on one's start)
 bool8 U3D_Vm_DockStep(u16 direction);   // (u3d_vm.c: ELESA's gym's coasters, a dock stepped onto)   // (u3d_vm.c: a map first shown, a continued game's too)
 const u16 *U3D_LayoutBlocks(const struct MapLayout *layout);
+bool8 U3D_CatchRules(void);                                   // (UNOVA's catches: Black's, u3d_battle.c)
+u8 U3D_CatchCase(u8 battler, u16 ball, u8 catchRate, u8 kaiMultiplier);
+void U3D_SetDarkGrassBattle(bool8 on);
+bool8 U3D_DarkGrassBattle(void);
 void U3D_BattleLeadAs(u8 level, u32 otId, u32 personality, const u8 *nickname);   // (u3d_battle.c: a traded POKeMON's battle)
 void U3D_RefreshBlocks(void);   // the field's blocks again after Black replaced the map under the player   // a UNOVA map's from the pack, others the layout's
 // Black's scene cameras (u3d.c, played by u3d_vm.c): to a target (Black's world units, fx32), pitch / yaw (65536ths of a

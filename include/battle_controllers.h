@@ -150,6 +150,7 @@ enum {
     BALL_3_SHAKES_SUCCESS,
     BALL_TRAINER_BLOCK,
     BALL_MP_MISS,   // Moemon Co-op: a GENESIS BALL missed (Pokémon Red's "You missed the POKéMON!")
+    BALL_MP_CRITICAL,   // Moemon Kai: UNOVA's critical capture (Black's): one shake, then caught
 };
 
 enum {

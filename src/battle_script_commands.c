@@ -11101,7 +11101,29 @@ static void Cmd_handleballthrow(void)
             }
         }
 
-        if (odds > 254) // mon caught
+        if (U3D_CatchRules() && gLastUsedItem != ITEM_SAFARI_BALL && !Orre_Shadow_Snaggable(gBattlerTarget))
+        {
+            // Moemon Kai: UNOVA's catches are Black's (src/unova/u3d_battle.c U3D_CatchCase): a critical capture
+            // shakes once
+            u8 caseId = gLastUsedItem == ITEM_MASTER_BALL || gLastUsedItem == ITEM_ASTRAL_BALL ? BALL_3_SHAKES_SUCCESS
+                      : U3D_CatchCase(gBattlerTarget, gLastUsedItem, catchRate, ballMultiplier);
+            BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, caseId);
+            MarkBattlerForControllerExec(gActiveBattler);
+            if (caseId == BALL_3_SHAKES_SUCCESS || caseId == BALL_MP_CRITICAL)
+            {
+                gBattlescriptCurrInstr = gMpCoopWild ? BattleScript_MpCoopBallCaught : BattleScript_SuccessBallThrow;
+                MP_Ball_SetCaught(&gEnemyParty[gBattlerPartyIndexes[gBattlerTarget]], gLastUsedItem);
+                gBattleCommunication[MULTISTRING_CHOOSER] = CalculatePlayerPartyCount() == PARTY_SIZE ? 0 : 1;
+            }
+            else
+            {
+                gBattleCommunication[MULTISTRING_CHOOSER] = caseId;
+                gBattlescriptCurrInstr = BattleScript_ShakeBallThrow;
+                if (!gMpCoopWild)
+                    MP_Gen59_BallFailed(gBattlerAttacker, gLastUsedItem);   // Moemon Kai: BALL FETCH
+            }
+        }
+        else if (odds > 254) // mon caught
         {
             BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_3_SHAKES_SUCCESS);
             MarkBattlerForControllerExec(gActiveBattler);

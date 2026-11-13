@@ -3208,7 +3208,7 @@ static void PlayerHandleBallThrowAnim(void)
 {
     u8 ballThrowCaseId = gBattleBufferA[gActiveBattler][1];
 
-    if (ballThrowCaseId == BALL_3_SHAKES_SUCCESS && gMpCoopWild)
+    if ((ballThrowCaseId == BALL_3_SHAKES_SUCCESS || ballThrowCaseId == BALL_MP_CRITICAL) && gMpCoopWild)
         MP_Coop_NoteOwnCatch(gBattlerTarget);   // Moemon Co-op: kept if the battle is called off
     gBattleSpritesDataPtr->animationData->ballThrowCaseId = ballThrowCaseId;
     gDoingBattleAnim = TRUE;

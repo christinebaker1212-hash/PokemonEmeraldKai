@@ -1308,7 +1308,8 @@ static void SpriteCB_Ball_Wobble_Step(struct Sprite *sprite)
         }
         else
         {
-            if (gBattleSpritesDataPtr->animationData->ballThrowCaseId == BALL_3_SHAKES_SUCCESS && shakes == 3)
+            if ((gBattleSpritesDataPtr->animationData->ballThrowCaseId == BALL_3_SHAKES_SUCCESS && shakes == 3)
+             || (gBattleSpritesDataPtr->animationData->ballThrowCaseId == BALL_MP_CRITICAL && shakes == 1))   // Moemon Kai
             {
                 sprite->callback = SpriteCB_Ball_Capture;
                 sprite->affineAnimPaused = TRUE;

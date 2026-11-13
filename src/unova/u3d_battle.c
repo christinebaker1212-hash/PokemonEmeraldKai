@@ -5,6 +5,7 @@
 // trainer's name and class (Black's words: banks 190 and 191), its team (Black's species, levels, strengths as IVs,
 // held items and moves where Black gives them; GENERATION and level scaling as any trainer's), Black's battle kind
 // (Doubles; Triples and Rotations as Triples: the user's decision, when the game can field them).
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -397,4 +398,136 @@ void U3D_CatchTutorial(void)
     gWallyTutorialName = sJuniper;
     MP_WallyTutorialSetName(gWallyTutorialName);
     BattleSetup_StartUnovaCatchTutorial();
+}
+
+// ------------------------------------------------------------------------------------------------ Black's catches
+// UNOVA's catches are Black's (the user, 2026-11-13; ov093 btl_server_flow.c): BTL_SERVER_FLOW_CalcCaptureShakes in
+// 4096ths, (3 max HP - 2 HP) x the dark grass's factor by the POKeDEX (GetCaptureDexFactor) x the catch rate x the
+// ball's (GetBallCatchRate) / 3 max HP, x 2.5 asleep or frozen, x 1.5 poisoned, burnt or paralysed; a critical capture
+// (RollCriticalCapture, by the POKeDEX) takes one shake check, a catch otherwise three, each Random(65536) under 65536 /
+// (255 / rate)^(1/4). Black's balls are Black's own rates; the balls Kai has that Black hasn't keep their multiplier
+// (x10) in Black's formula. A critical capture shows as Black's: one shake, then the click (BALL_MP_CRITICAL)
+#include "random.h"
+#include "pokedex.h"
+#include "event_data.h"
+#include "rtc.h"
+#include "battle_controllers.h"
+#include "constants/battle.h"
+#include "mp_region.h"
+#include "mp.h"
+#include "overworld.h"
+#include "constants/map_types.h"
+
+static bool8 sDarkGrass;   // (the battle's in dark grass: U3D_SetDarkGrassBattle)
+
+void U3D_SetDarkGrassBattle(bool8 on)
+{
+    sDarkGrass = on;
+}
+
+bool8 U3D_DarkGrassBattle(void)
+{
+    return sDarkGrass;
+}
+
+bool8 U3D_CatchRules(void)
+{
+    return MP_Region_Current() == REGION_UNOVA;
+}
+
+static s64 FxMul(s64 v, s32 k)
+{
+    return (v * k + 0x800) >> 12;
+}
+
+static bool8 BlackNight(void)
+{
+    RtcCalcLocalTime();
+    return gLocalTime.hours >= 20 || gLocalTime.hours < 4;   // (Black's evening's end, night and midnight)
+}
+
+static s32 BallRate(u8 battler, u16 ball, u8 kaiMultiplier)
+{
+    struct BattlePokemon *m = &gBattleMons[battler];
+    switch (ball)
+    {
+    case ITEM_ULTRA_BALL: return 0x2000;
+    case ITEM_GREAT_BALL: return 0x1800;
+    case ITEM_POKE_BALL:
+    case ITEM_LUXURY_BALL:
+    case ITEM_PREMIER_BALL:
+    case ITEM_HEAL_BALL:
+        return 0x1000;
+    case ITEM_NET_BALL:
+        return IS_BATTLER_OF_TYPE(battler, TYPE_WATER) || IS_BATTLER_OF_TYPE(battler, TYPE_BUG) ? 0x3000 : 0x1000;
+    case ITEM_DIVE_BALL:   // (under water, or on it: Black's water ground)
+        return GetCurrentMapType() == MAP_TYPE_UNDERWATER || gBattleEnvironment == BATTLE_ENVIRONMENT_WATER
+            || (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING) ? 0x3800 : 0x1000;
+    case ITEM_NEST_BALL:
+        if (m->level < 30)
+        {
+            u32 n = 41 - m->level;
+            return (s32)((n > 40 ? 40 : n) << 12) / 10;
+        }
+        return 0x1000;
+    case ITEM_REPEAT_BALL:
+        return GetSetPokedexFlag(SpeciesToNationalPokedexNum(m->species), FLAG_GET_CAUGHT) ? 0x3000 : 0x1000;
+    case ITEM_TIMER_BALL:
+    {
+        s32 v = gBattleResults.battleTurnCounter * 0x4CD + 0x1000;
+        return v > 0x4000 ? 0x4000 : v;
+    }
+    case ITEM_DUSK_BALL:
+        return gBattleEnvironment == BATTLE_ENVIRONMENT_CAVE || GetCurrentMapType() == MAP_TYPE_UNDERGROUND
+            || BlackNight() ? 0x3800 : 0x1000;
+    case ITEM_QUICK_BALL:
+        return gBattleResults.battleTurnCounter == 0 ? 0x5000 : 0x1000;
+    default:
+        return kaiMultiplier * 0x1000 / 10;   // (Kai's own balls: their multiplier)
+    }
+}
+
+// the case of Kai's ball animation: BALL_3_SHAKES_SUCCESS or BALL_MP_CRITICAL caught, else the shakes before it broke out
+u8 U3D_CatchCase(u8 battler, u16 ball, u8 catchRate, u8 kaiMultiplier)
+{
+    static const u16 sDexFactor[6] = {0x4CD, 0x800, 0xB33, 0xCCD, 0xE66, 0x1000};
+    static const u16 sCritical[6] = {0, 0x800, 0x1000, 0x1800, 0x2000, 0x2800};
+    struct BattlePokemon *m = &gBattleMons[battler];
+    u32 caught = GetNationalPokedexCount(FLAG_GET_CAUGHT), a = m->maxHP * 3, tier, count, i, shakes = 0;
+    s64 v = (s64)(a - m->hp * 2) << 12;
+    s32 rate, b;
+    bool8 critical = FALSE;
+    tier = caught > 600 ? 5 : caught > 450 ? 4 : caught > 300 ? 3 : caught > 150 ? 2 : caught > 30 ? 1 : 0;
+    if (sDarkGrass)
+        v = FxMul(v, sDexFactor[tier]);
+    v *= catchRate;
+    v = FxMul(v, BallRate(battler, ball, kaiMultiplier));
+    v /= a ? a : 1;
+    if (m->status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
+        v = FxMul(v, 0x2800);
+    else if (m->status1 & (STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON))
+        v = FxMul(v, 0x1800);
+    rate = v > 0x7FFFFFFF ? 0x7FFFFFFF : (s32)v;
+    if (sCritical[tier])
+    {
+        s32 x = (s32)(FxMul(rate > 0xFF000 ? 0xFF000 : rate, sCritical[tier]) / 6);
+        critical = (Random() & 0xFF) < (u32)(x >> 12);
+    }
+    if (getenv("MOEMON_U3D_CRITICAL"))   // (tests: a critical capture every throw)
+        critical = TRUE;
+    MPNet_Log("u3d catch: ball %u rate %d/255 (caught %u)%s", ball, rate >> 12, caught, critical ? " critical" : "");
+    if (rate >= 0xFF000)
+        return critical ? BALL_MP_CRITICAL : BALL_3_SHAKES_SUCCESS;
+    if (rate <= 0)
+        return BALL_NO_SHAKES;
+    b = (s32)(65536.0 / sqrt(sqrt(255.0 * 4096.0 / rate)));
+    count = critical ? 1 : 3;
+    for (i = 0; i < count; i++)
+    {
+        if (Random() < (u32)b)
+            shakes++;
+        else
+            return shakes;   // (broke out after these)
+    }
+    return critical ? BALL_MP_CRITICAL : BALL_3_SHAKES_SUCCESS;
 }
