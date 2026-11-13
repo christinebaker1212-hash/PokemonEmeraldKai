@@ -228,7 +228,14 @@ def _place46(img):
     return out
 
 
-PLACES = {46: _place46}   # (the gimmicks drawn so far)
+# BRYCEN's (field_gimmick_switch_toggle.c FIELD_GIMMICK_SWITCH_TOGGLE_Init): three switches' models, then their
+# secondary models (3 + the switch)
+def _place45(img):
+    return ([(img.vec(0x021F3B80 + 12 * k), 0) for k in range(3)]
+            + [(img.vec(0x021F3BA4 + 12 * k), 0) for k in range(3)])
+
+
+PLACES = {45: _place45, 46: _place46}   # (the gimmicks drawn so far)
 
 
 def add(pack):

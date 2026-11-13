@@ -3829,11 +3829,44 @@ bool8 U3D_Vm_PersonHeight(u8 localId, float *h)
 }
 
 // The field shown on a map (u3d.c U3D_Update; a continued game's people come from the save, past the map's load script)
-// u3d.c U3D_Update, each frame on an UNOVA map: the gyms' machinery that follows the player
+// BRYCEN's switches (ov045 FIELD_GIMMICK_SWITCH_TOGGLE): a switch's model at its state's pose (SetSwitchModelPose:
+// animation 1 on, 0 off, at their first frame); when its work (0x4001 + the switch) flips, the old state's animation
+// plays to its end and the new pose follows (SwitchToggleEventProc)
+static u8 sIceShown[3];
+
+static void IceModels(bool8 load)
+{
+    u32 i;
+    for (i = 0; i < 3; i++)
+    {
+        u8 on = WorkValue(0x4001 + i) != 0;
+        if (load)
+        {
+            sIceShown[i] = on;
+            U3D_ExpAnim(i, on, 0, FALSE);
+        }
+        else if (on != (sIceShown[i] & 1) && !(sIceShown[i] & 2))
+        {
+            U3D_ExpAnim(i, sIceShown[i] & 1, 0, TRUE);   // (the change, from the old pose)
+            sIceShown[i] |= 2;
+        }
+        else if ((sIceShown[i] & 2) && !U3D_ExpPlaying(i))
+        {
+            sIceShown[i] = on;
+            U3D_ExpAnim(i, on, 0, FALSE);
+        }
+    }
+}
+
+// u3d.c U3D_Update, each frame on an UNOVA map: the gyms' machinery that follows the player and the works
 void U3D_Vm_FieldFrame(void)
 {
-    if (Ready() && CurrentZone() == DRAGON_GYM_ZONE)
+    if (!Ready())
+        return;
+    if (CurrentZone() == DRAGON_GYM_ZONE)
         DragonInside();
+    else if (CurrentZone() == ICE_GYM_ZONE)
+        IceModels(FALSE);
 }
 
 void U3D_Vm_FieldShown(void)
@@ -3850,6 +3883,11 @@ void U3D_Vm_FieldShown(void)
         U3D_ExpLoad(46);
         DragonModels();
         DragonInside();
+    }
+    else if (CurrentZone() == ICE_GYM_ZONE)
+    {
+        U3D_ExpLoad(45);
+        IceModels(TRUE);
     }
     else
         U3D_ExpClear();
