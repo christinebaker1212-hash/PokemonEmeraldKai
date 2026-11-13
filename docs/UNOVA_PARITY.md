@@ -60,6 +60,8 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       PASS POWERS (0x1F1 / 0x1F2, shareable), WHITE FOREST / BLACK CITY's people (0x1C5 / 0x1C6)
 - [ ] The C-GEAR as UNOVA's device, the XTRANSCEIVER's calls (friends' video calls)
 - [ ] Dark grass: two POKeMON at once (Black's double wild battles); shaking grass, dust clouds, rippling water
+- [ ] POKeMON forms outside battle (ROTOM's appliances 0x117 / 0x11C, DEERLING / SAWSBUCK's seasons, form numbers 0x0FF):
+      the game keeps none there yet
 - [ ] TRIPLE and ROTATION battles as Black's trainers have them; Black's catch rules in UNOVA; Black's battle
       backgrounds
 - [ ] NIMBASA's people tables (NETWORK NPC tables 0x1F3-0x1F8, 0x25C)

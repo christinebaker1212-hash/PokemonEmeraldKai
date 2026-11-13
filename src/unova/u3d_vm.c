@@ -248,7 +248,9 @@ static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
                 u8 white; struct UnovaRoamer roam[2];
                 struct { u8 valid, npc[10], mood[10], flags[10], back[10]; u16 counter, value; } wfbc;
                 struct U3DSubwaySave subway;
-                u8 gym[8]; } sWork;   // (gym[0]: ELESA's gym's levers, a bit a lane: CartLanes below)   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
+                u8 gym[8];
+                struct { u16 team[8][PARTY_SIZE]; u16 mon[4]; u8 names[2][POKEMON_NAME_LENGTH + 1]; u32 record[128]; } misc;
+              } sWork;   // (gym[0]: ELESA's gym's levers, a bit a lane: CartLanes below)   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
 {
@@ -410,6 +412,57 @@ static u32 DexCount(u32 kind, bool8 counted)
             count++;
     }
     return count;
+}
+
+static u16 Item(u16 black);
+static u16 Species(u16 national);
+u8 ItemIdToBallId(u16 ballItem);
+
+// a type of the game as Black numbers it (Black has no ??? type: the game's past it are one lower there)
+static u16 BlackType(u8 type)
+{
+    return type > TYPE_MYSTERY ? type - 1 : type;
+}
+
+// Black's SCRCMD_PROC_AddMonToPartyDetailed (POKE_TOOL_CreatePersonalRnd): GENDER 0 male, 1 female, 2 any; ABILITY
+// the personality's bit 16; SHINY 0 never, 1 always, 2 as it falls; into the party only (0: it's full)
+static u16 GiveDetailedMon(u16 national, u8 level, u16 gender, u16 ability, u16 shiny, u16 item, u16 ball)
+{
+    struct Pokemon mon;
+    u16 species = Species(national), kaiItem = Item(item), kaiBall = Item(ball);
+    u32 personality, otId = T1_READ_32(gSaveBlock2Ptr->playerTrainerId), tries;
+    u8 ballId;
+    if (species == SPECIES_NONE || CalculatePlayerPartyCount() >= PARTY_SIZE)
+        return 0;
+    for (tries = 0; tries < 0x10000; tries++)
+    {
+        u8 g;
+        bool8 isShiny;
+        personality = Random32();
+        if (gender < 2 && gSpeciesInfo[species].genderRatio != MON_MALE && gSpeciesInfo[species].genderRatio != MON_FEMALE
+         && gSpeciesInfo[species].genderRatio != MON_GENDERLESS)
+        {
+            g = GetGenderFromSpeciesAndPersonality(species, personality);
+            if ((gender == 0) != (g == MON_MALE))
+                continue;
+        }
+        if (ability < 2 && ((personality >> 16) & 1) != ability)
+            continue;
+        isShiny = (((otId >> 16) ^ (otId & 0xFFFF) ^ (personality >> 16) ^ (personality & 0xFFFF)) < SHINY_ODDS);
+        if ((shiny == 0 && isShiny) || (shiny == 1 && !isShiny))
+            continue;
+        break;
+    }
+    CreateMon(&mon, species, level, USE_RANDOM_IVS, TRUE, personality, OT_ID_PLAYER_ID, 0);
+    SetMonData(&mon, MON_DATA_HELD_ITEM, &kaiItem);
+    ballId = ItemIdToBallId(kaiBall);
+    if (kaiBall != ITEM_NONE && ballId != 0)
+        SetMonData(&mon, MON_DATA_POKEBALL, &ballId);
+    if (GiveMonToPlayer(&mon) != MON_GIVEN_TO_PARTY)
+        return 0;
+    GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_SEEN);
+    GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_CAUGHT);
+    return 1;
 }
 
 // Black's event record of the person with object id OBJ in the zone, and the reverse (a local id's object id)
@@ -931,6 +984,7 @@ static void DragonRotate(u16 unit);
 static void DragonReset(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
+enum { W_BGM_STOPPED = 100, };
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
        W_WARP };   // (W_WARP: a warp's map is loading; the script goes on there: U3D_Vm_SceneStart)
 
@@ -1814,6 +1868,25 @@ static void Step(struct Thread *t)
                 AddMoney(&gSaveBlock1Ptr->money, v);
             break;
         }
+        case U3C_StartWaitBgmStopped:
+            t->wait = W_BGM_STOPPED;
+            t->waitFrames = 60 * 30;   // (a song that loops never ends: half a minute at most)
+            break;
+        case U3C_IsItemMachine:   // item, result: a TM or an HM
+            *WorkPtr(a[1]) = Item(V(0)) != ITEM_NONE && GetPocketByItemId(Item(V(0))) == POCKET_TM_HM;
+            break;
+        case U3C_WORK_CmdGetButtonMode:   // (Black's L / R button setting: the game's own, "normal")
+            *WorkPtr(a[0]) = 0;
+            break;
+        case U3C_WORK_CmdCheckExtraSaveData:   // (the HALL OF FAME's records once Black's flag 0x97B says the game is
+                                               // cleared: 1 some)
+            *WorkPtr(a[0]) = FlagOn(0x97B) ? 1 : 0;
+            break;
+        case U3C_WORK_CmdGetTrainerViewGroupAndMarkSeen:   // seen before, the look's group (the TRAINER CARD's sign)
+            *WorkPtr(a[0]) = sWork.misc.record[127] != 0;
+            *WorkPtr(a[1]) = 0;
+            sWork.misc.record[127] = 1;
+            break;
         case U3C_PROC_LookupTableValue:   // index, result (ov010 sScrcmdLookupTable)
             *WorkPtr(a[1]) = V(0) < ARRAY_COUNT(sProcLookup) ? sProcLookup[V(0)] : 0;
             break;
@@ -2077,8 +2150,125 @@ static void Step(struct Thread *t)
                 *Slot(a[0]) = EOS;
             break;
         }
-        case U3C_POKEMON_FLD_StorePartySpeciesRecord:   // (Black's record of the team a Gym Leader was beaten with)
+        // ---- Black's misc records (MISC save: the teams the Gym Leaders were beaten with, a POKeMON's record, two
+        // party POKeMON's names kept, the trainer record's counters)
+        case U3C_POKEMON_FLD_StorePartySpeciesRecord:   // gym 0-7: the party's species (national numbers)
+            if (V(0) < 8)
+            {
+                u32 k;
+                for (k = 0; k < PARTY_SIZE; k++)
+                    sWork.misc.team[V(0)][k] = GetMonData(&gPlayerParty[k], MON_DATA_SANITY_HAS_SPECIES)
+                                             && !GetMonData(&gPlayerParty[k], MON_DATA_IS_EGG)
+                        ? SpeciesToNationalPokedexNum(GetMonData(&gPlayerParty[k], MON_DATA_SPECIES)) : 0;
+            }
             break;
+        case U3C_POKEMON_FLD_RegisterRecordSpecies:   // gym, count: the team's species into word slots 0..
+        {
+            u32 k, n = 0;
+            for (k = 0; V(0) < 8 && k < PARTY_SIZE; k++)
+                if (sWork.misc.team[V(0)][k])
+                    GetSpeciesName(Slot(n++), Species(sWork.misc.team[V(0)][k]));
+            *WorkPtr(a[1]) = n;
+            break;
+        }
+        case U3C_POKEMON_FLD_StoreMonRecord:   // party slot: species, form, egg, gender
+            if (V(0) < PARTY_SIZE && GetMonData(&gPlayerParty[V(0)], MON_DATA_SANITY_HAS_SPECIES))
+            {
+                struct Pokemon *mon = &gPlayerParty[V(0)];
+                sWork.misc.mon[0] = SpeciesToNationalPokedexNum(GetMonData(mon, MON_DATA_SPECIES));
+                sWork.misc.mon[1] = 0;
+                sWork.misc.mon[2] = GetMonData(mon, MON_DATA_IS_EGG);
+                sWork.misc.mon[3] = GetMonGender(mon) == MON_FEMALE ? 1 : GetMonGender(mon) == MON_GENDERLESS ? 2 : 0;
+            }
+            break;
+        case U3C_POKEMON_FLD_StoreMonName:   // party slot, name slot 0-1
+            if (V(0) < PARTY_SIZE && V(1) < 2)
+            {
+                GetMonData(&gPlayerParty[V(0)], MON_DATA_NICKNAME, sWork.misc.names[V(1)]);
+                sWork.misc.names[V(1)][POKEMON_NAME_LENGTH] = EOS;
+            }
+            break;
+        case U3C_POKEMON_FLD_RegisterStoredName:   // name slot, word slot
+            if (V(0) < 2)
+                StringCopy(Slot(V(1)), sWork.misc.names[V(0)]);
+            break;
+        case U3C_AddTrainerRecordValue:   // counter, amount
+            if (V(0) < ARRAY_COUNT(sWork.misc.record))
+                sWork.misc.record[V(0)] += V(1);
+            break;
+        case U3C_GetTrainerRecordValue:   // counter, result (clamped to 0xFFFF)
+            *WorkPtr(a[1]) = V(0) < ARRAY_COUNT(sWork.misc.record) ? min(sWork.misc.record[V(0)], 0xFFFF) : 0;
+            break;
+        // ---- party POKeMON (Black's party values)
+        case U3C_PROC_ChangeMonFriendship:   // party slot, amount, 0 set / 1 add / 2 take
+            if (V(0) < PARTY_SIZE && !GetMonData(&gPlayerParty[V(0)], MON_DATA_IS_EGG))
+            {
+                s32 f = GetMonData(&gPlayerParty[V(0)], MON_DATA_FRIENDSHIP);
+                f = a[2] == 0 ? (s32)min(V(1), 255) : a[2] == 1 ? min(f + (s32)V(1), 255) : max(f - (s32)V(1), 0);
+                SetMonData(&gPlayerParty[V(0)], MON_DATA_FRIENDSHIP, &f);
+            }
+            break;
+        case U3C_PROC_GetMonForm:   // result, party slot (the game keeps no forms outside battle: the first)
+            *WorkPtr(a[0]) = 0;
+            break;
+        case U3C_PROC_CountMonMoves:   // result, party slot
+        {
+            u32 k, n = 0;
+            for (k = 0; V(1) < PARTY_SIZE && k < MAX_MON_MOVES; k++)
+                n += GetMonData(&gPlayerParty[V(1)], MON_DATA_MOVE1 + k) != MOVE_NONE;
+            *WorkPtr(a[0]) = n;
+            break;
+        }
+        case U3C_PROC_GetMonEvTotal:   // result, party slot
+        {
+            u32 k, n = 0;
+            for (k = 0; V(1) < PARTY_SIZE && k < NUM_STATS; k++)
+                n += GetMonData(&gPlayerParty[V(1)], MON_DATA_HP_EV + k);
+            *WorkPtr(a[0]) = n;
+            break;
+        }
+        case U3C_PROC_CountPartyMonsOfSpecies:   // species, result
+        {
+            u32 k, n = 0;
+            for (k = 0; V(0) && k < PARTY_SIZE; k++)
+                n += !GetMonData(&gPlayerParty[k], MON_DATA_IS_EGG)
+                  && GetMonData(&gPlayerParty[k], MON_DATA_SPECIES) == Species(V(0));
+            *WorkPtr(a[1]) = n;
+            break;
+        }
+        case U3C_PROC_GetMonPairedParams:   // type 1, type 2, party slot (Black's type numbers)
+            *WorkPtr(a[0]) = *WorkPtr(a[1]) = 0;
+            if (V(2) < PARTY_SIZE && GetMonData(&gPlayerParty[V(2)], MON_DATA_SANITY_HAS_SPECIES))
+            {
+                u16 sp = GetMonData(&gPlayerParty[V(2)], MON_DATA_SPECIES);
+                *WorkPtr(a[0]) = BlackType(gSpeciesInfo[sp].types[0]);
+                *WorkPtr(a[1]) = BlackType(gSpeciesInfo[sp].types[1]);
+            }
+            break;
+        case U3C_PROC_AddMonToPartyDetailed:   // result, species, form, level, gender, ability bit, shiny, item, ball
+            *WorkPtr(a[0]) = GiveDetailedMon(V(1), V(3), V(4), V(5), V(6), V(7), V(8));
+            break;
+        // ---- the daily gifts (ANVILLE's: an item a day by the day of the month, Black's special dates the last)
+        case U3C_POKEMON_FLD_GetDailyGift:   // index, result
+        {
+            static const u16 sGifts[11] = {117, 117, 118, 133, 248, 249, 250, 251, 252, 253, 254};
+            *WorkPtr(a[1]) = sGifts[V(0) < 11 ? V(0) : 0];
+            break;
+        }
+        case U3C_POKEMON_FLD_GetDailyGiftIndex:   // result: by the day of the month, Black's special dates 10
+        {
+            static const u8 sByDay[10] = {9, 1, 3, 5, 4, 2, 6, 8, 0, 7};
+            static const u16 sSpecial[5] = {0xA01, 0xA0E, 0xC1E, 0x201, 0x60C};
+            struct SiiRtcInfo rtc;
+            u32 k, day, month;
+            RtcGetInfo(&rtc);
+            day = ConvertBcdToBinary(rtc.day), month = ConvertBcdToBinary(rtc.month);
+            *WorkPtr(a[0]) = sByDay[day % 10];
+            for (k = 0; k < ARRAY_COUNT(sSpecial); k++)
+                if (sSpecial[k] == (month << 8 | day))
+                    *WorkPtr(a[0]) = 10;
+            break;
+        }
         // ---- Black's other word slots (arm9 wordset.c: each a system text bank's entry)
         case U3C_BufferGroupEntryName:   // (bank 0xCB)
             StringCopy(Slot(a[0]), U3D_Text(0xCB, V(1)));
@@ -2550,7 +2740,6 @@ static void Step(struct Thread *t)
             *WorkPtr(a[1]) = 0;
             break;
         case U3C_StartPlayerFormChangeAndWait:   // (Black turns the player to the counter and back)
-        case U3C_AddTrainerRecordValue:
             break;
         case U3C_SCREENEFFECTS_StartRecoveryBallsEvent:   // the healing machine: its tune, the song after
             PushSong();
@@ -2577,6 +2766,7 @@ static void Step(struct Thread *t)
             t->wait = W_CRY;
             break;
         case U3C_FadeInField:
+        case U3C_SCREENEFFECTS_StartFieldFadeIn:   // (the field faded back in, the season's look kept)
             BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
             t->wait = W_FADE;
             break;
@@ -2944,6 +3134,10 @@ static void Wait(struct Thread *t)
         break;
     case W_CAMERA:
         if (!U3D_CameraMoving())
+            t->wait = W_NONE;
+        break;
+    case W_BGM_STOPPED:   // (Black's StartWaitBgmStopped: till the song ends, a jingle's say)
+        if (IsBGMStopped() || t->waitFrames == 0 || --t->waitFrames == 0)
             t->wait = W_NONE;
         break;
     case W_SONG_THEN_POP:
