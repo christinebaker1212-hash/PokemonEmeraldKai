@@ -2,7 +2,9 @@
 
 The user's rule (2026-11-02 for SINNOH, 2026-11-11 for UNOVA): UNOVA is 1:1 with Pokemon Black. Closed only: online-only
 features (GTS, Wi-Fi) and what the DS itself needs (a second cartridge, the DS's wireless), as for Platinum. Everything
-else that differs is a gap to correct, not a choice. This list was made 2026-11-13 from an audit of Black's script
+else that differs is a gap to correct, not a choice. But **anything that has an Emerald or Kai equivalent is not
+reworked** (the user, 2026-11-13): Black's scripts open the game's own (its DAY CARE, screens, rules) and only what
+neither has is ported from Black. This list was made 2026-11-13 from an audit of Black's script
 commands the VM never plays or plays as nothing (src/unova/u3d_vm.c), the handoff's "not yet" notes and the decisions'
 systems. Tick an entry only once it plays as Black's and has been seen running.
 
@@ -51,8 +53,10 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 
 ## 4. Systems
 
-- [ ] ROUTE 3's DAY CARE (0x0EB-0x0F8, 0x251) and EGG hatching (0x106)
-- [ ] The MOVE RELEARNER (0x1E8 / 0x1E9), move deleter / setter (0x109, 0x10B), the move tutors (0x1E4-0x1E7)
+- [ ] ROUTE 3's DAY CARE (0x0EB-0x0F8, 0x251) and EGG hatching (0x106): Black's scripts on the game's own DAY CARE
+      and hatching (Kai's Gen 9 breeding), not reworked
+- [ ] The MOVE RELEARNER (0x1E8 / 0x1E9), move deleter / setter (0x109, 0x10B), the move tutors (0x1E4-0x1E7): the
+      game's own screens
 - [ ] POKeMON MUSICALS (0x05D, 0x167-0x16E: the dress-up, the stage, the results, props, fans; four on stage with
       co-op friends)
 - [ ] The ROYAL UNOVA (PLEASURE_BOAT 0x1A5-0x1AC: its passengers, the sunset, the time aboard)
@@ -60,10 +64,11 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       PASS POWERS (0x1F1 / 0x1F2, shareable), WHITE FOREST / BLACK CITY's people (0x1C5 / 0x1C6)
 - [ ] The C-GEAR as UNOVA's device, the XTRANSCEIVER's calls (friends' video calls)
 - [ ] Dark grass: two POKeMON at once (Black's double wild battles); shaking grass, dust clouds, rippling water
-- [ ] POKeMON forms outside battle (ROTOM's appliances 0x117 / 0x11C, DEERLING / SAWSBUCK's seasons, form numbers 0x0FF):
-      the game keeps none there yet
-- [ ] TRIPLE and ROTATION battles as Black's trainers have them; Black's catch rules in UNOVA; Black's battle
-      backgrounds
+- [ ] POKeMON forms outside battle (ROTOM's appliances 0x117 / 0x11C, DEERLING / SAWSBUCK's seasons, form numbers
+      0x0FF): Kai keeps forms its own way (battle recomputes); not reworked, unless the user says otherwise
+- [ ] TRIPLE and ROTATION battles as Black's trainers have them (Kai's Triple Battles)
+- [ ] To ask the user: Black's catch rules in UNOVA and Black's battle backgrounds were decided for UNOVA
+      (UNOVA_DECISIONS.md) but the game has its own of both
 - [ ] NIMBASA's people tables (NETWORK NPC tables 0x1F3-0x1F8, 0x25C)
 - [ ] UNITY TOWER, the GEAR STATION / CASTELIA name and greeting boards (0x1D8-0x1E3, 0x1ED, 0x20C) as far as they
       don't need Wi-Fi

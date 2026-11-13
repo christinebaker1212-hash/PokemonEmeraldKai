@@ -249,7 +249,9 @@ static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
                 struct { u8 valid, npc[10], mood[10], flags[10], back[10]; u16 counter, value; } wfbc;
                 struct U3DSubwaySave subway;
                 u8 gym[8];
-                struct { u16 team[8][PARTY_SIZE]; u16 mon[4]; u8 names[2][POKEMON_NAME_LENGTH + 1]; u32 record[128]; } misc;
+                struct { u16 team[8][PARTY_SIZE]; u16 mon[4]; u32 record[128];
+                         struct { u16 national; u8 level, filled; u32 otId, personality;
+                                  u8 nick[POKEMON_NAME_LENGTH + 1]; } snap[2]; } misc;
               } sWork;   // (gym[0]: ELESA's gym's levers, a bit a lane: CartLanes below)   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
@@ -2181,16 +2183,33 @@ static void Step(struct Thread *t)
                 sWork.misc.mon[3] = GetMonGender(mon) == MON_FEMALE ? 1 : GetMonGender(mon) == MON_GENDERLESS ? 2 : 0;
             }
             break;
-        case U3C_POKEMON_FLD_StoreMonName:   // party slot, name slot 0-1
-            if (V(0) < PARTY_SIZE && V(1) < 2)
+        case U3C_POKEMON_FLD_StoreMonName:   // party slot, snapshot 0-1 (MON_SNAPSHOT: a POKeMON traded away, its
+                                             // name, level, OT, personality; its new trainer battles with it)
+            if (V(0) < PARTY_SIZE && V(1) < 2 && GetMonData(&gPlayerParty[V(0)], MON_DATA_SANITY_HAS_SPECIES))
             {
-                GetMonData(&gPlayerParty[V(0)], MON_DATA_NICKNAME, sWork.misc.names[V(1)]);
-                sWork.misc.names[V(1)][POKEMON_NAME_LENGTH] = EOS;
+                struct Pokemon *mon = &gPlayerParty[V(0)];
+                sWork.misc.snap[V(1)].national = SpeciesToNationalPokedexNum(GetMonData(mon, MON_DATA_SPECIES));
+                sWork.misc.snap[V(1)].level = GetMonData(mon, MON_DATA_LEVEL);
+                sWork.misc.snap[V(1)].otId = GetMonData(mon, MON_DATA_OT_ID);
+                sWork.misc.snap[V(1)].personality = GetMonData(mon, MON_DATA_PERSONALITY);
+                GetMonData(mon, MON_DATA_NICKNAME, sWork.misc.snap[V(1)].nick);
+                sWork.misc.snap[V(1)].nick[POKEMON_NAME_LENGTH] = EOS;
+                sWork.misc.snap[V(1)].filled = TRUE;
             }
             break;
-        case U3C_POKEMON_FLD_RegisterStoredName:   // name slot, word slot
+        case U3C_POKEMON_FLD_RegisterStoredName:   // snapshot, word slot
             if (V(0) < 2)
-                StringCopy(Slot(V(1)), sWork.misc.names[V(0)]);
+                StringCopy(Slot(V(1)), sWork.misc.snap[V(0)].filled ? sWork.misc.snap[V(0)].nick : (const u8[]){EOS});
+            break;
+        case U3C_StartTrainerBattleWithMon:   // trainer, a second, a third, snapshot: the trainer's lead is the
+                                              // snapshot's POKeMON (its own species kept: EVENT_BATTLE_..WithMon)
+            if (U3D_PrepareBattle(V(0), V(1)))
+            {
+                if (V(3) < 2 && sWork.misc.snap[V(3)].filled)
+                    U3D_BattleLeadAs(sWork.misc.snap[V(3)].level, sWork.misc.snap[V(3)].otId,
+                                     sWork.misc.snap[V(3)].personality, sWork.misc.snap[V(3)].nick);
+                OpenScreen(t, SCREEN_BATTLE, 0);
+            }
             break;
         case U3C_AddTrainerRecordValue:   // counter, amount
             if (V(0) < ARRAY_COUNT(sWork.misc.record))

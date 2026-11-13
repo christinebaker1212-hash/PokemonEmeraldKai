@@ -189,6 +189,18 @@ bool8 U3D_PrepareBattle(u16 first, u16 second)
     return TRUE;
 }
 
+// Black's battle with a traded POKeMON (EVENT_BATTLE_CreateEncounterTaskWithMon): the first trainer's lead keeps its
+// species and takes the POKeMON's level, OT, personality and name, its moves its own at that level
+void U3D_BattleLeadAs(u8 level, u32 otId, u32 personality, const u8 *nickname)
+{
+    struct Pokemon *mon = &sTeam[0][0];
+    u16 species = GetMonData(mon, MON_DATA_SPECIES);
+    if (species == SPECIES_NONE)
+        return;
+    CreateMon(mon, species, level ? level : 1, USE_RANDOM_IVS, TRUE, personality, OT_ID_PRESET, otId);
+    SetMonData(mon, MON_DATA_NICKNAME, nickname);
+}
+
 // The BATTLE SUBWAY's (u3d_subway.c): its trainer NO's name (system bank 11), Black's class, the team as drawn
 #define BANK_SUBWAY_NAMES 11
 bool8 U3D_SetSubwayTrainer(u8 which, u16 trainerNo, u8 blackClass, const struct Pokemon *team, u8 count)
