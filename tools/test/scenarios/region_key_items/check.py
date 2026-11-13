@@ -5,13 +5,14 @@ import sys
 log = open(sys.argv[1] + "/a.log", errors="replace").read()
 want = {
     "in JOHTO": {259: 0, 262: 0, 399: 1, 339: 0, 275: 0},   # (HOENN unbeaten: its tools, story item and HM stay)
-    "JOHTO beaten": {262: 1, 339: 1},                         # (JOHTO's rod travels for good; HM01 back from the GLOBAL PC:
-                                                              # the region the player is in is beaten)
-    "back in HOENN": {259: 1, 262: 1, 339: 0, 275: 1},        # (the stash back; one rod: HOENN's merged; the HM in the
-                                                              # GLOBAL PC again: HOENN isn't beaten)
+    "JOHTO beaten": {259: 1, 262: 1, 339: 1, 275: 0},         # (JOHTO's postgame: every tool, HOENN's bike and rod lent
+                                                              # by the GLOBAL PC, one rod; HM01 back; a story item stays)
+    "back in HOENN": {259: 1, 262: 1, 339: 0, 275: 1},        # (HOENN's own back, JOHTO's rod in the GLOBAL PC under its
+                                                              # key; the HM in the GLOBAL PC again: HOENN isn't beaten)
     "HOENN beaten": {339: 1},                                 # (HM01 out of the GLOBAL PC)
-    "in KANTO": {259: 1, 262: 1, 339: 0, 275: 0, 399: 1},     # (HOENN beaten: its bike travels, its ticket stays; an HM
-                                                              # never travels: KANTO isn't beaten)
+    "in KANTO": {259: 0, 262: 0, 339: 0, 275: 0, 399: 1},     # (only Kai's own cross: the user, 2026-11-13; HOENN beaten
+                                                              # or not, its bike, rod and ticket stay, the HM in the
+                                                              # GLOBAL PC: KANTO isn't beaten)
 }
 parts = re.split(r"\[walk\] |\[ki\] ", log)
 bad = 0

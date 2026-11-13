@@ -1113,13 +1113,14 @@ u16 MP_RegionItems_Leave(u8 from);
 void MP_RegionItems_Arrive(u8 to);
 void MP_RegionItems_NoteHm(u16 item, u8 from);
 void MP_RegionItems_Update(void);
-void MP_RegionItems_SetFree(u16 item);
+u8 MP_RegionItems_KeyedPc(u16 item);
 u16 MP_RegionItems_StashCount(u8 region);
 void MP_RegionItems_Reset(void);
 void MP_RegionItems_NewGame(void);
 const void *MP_RegionItems_Save(u32 *size);
 void MP_RegionItems_Load(const void *data, u32 size);
 bool8 MP_Region_GlobalItemTake(u16 item);
+void MP_RegionItems_DebugOld(void);
 bool8 MP_Region_GlobalItemHas(u16 item);     // overworld.c: a game stat counted per region
 void MP_Achieve_OnDex(u16 nationalNum, bool8 caught);       // pokedex.c: seen / caught in the region the player is in
 void MP_Achieve_RegionalReset(void);                        // mp_region.c: the region side file's "ACHR" chunk

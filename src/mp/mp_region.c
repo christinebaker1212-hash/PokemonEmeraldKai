@@ -1211,23 +1211,23 @@ u16 MP_TimeLandSlot(u16 species, u8 index)
 // once that region's LEAGUE is beaten (the user, 2026-11-02)
 bool8 MP_Region_DeviceHere(u8 home)
 {
-    return MP_Region_Current() == home || MP_Region_Cleared(home);
+    // (its region, or any region in its postgame: the BAG only has the device where it may, mp_regionitems.c; until
+    // 1.199.2 anywhere once its own region was beaten)
+    return MP_Region_Current() == home || MP_Region_Cleared(MP_Region_Current());
 }
 
-// On every map load (overworld.c): HOENN's LEAGUE beaten with the MOéNAV in hand, its key item joins the BAG for the
-// other regions (on START in HOENN as ever)
+// On every map load (overworld.c): HOENN's LEAGUE beaten with the MOéNAV in hand, its key item joins the BAG in HOENN
+// (on START there as ever), keyed HOENN's: in other regions' postgames it's with the other tools (mp_regionitems.c)
 void MP_Region_GiveDevices(void)
 {
-    if (FlagGet(FLAG_SYS_POKENAV_GET) && MP_Region_Cleared(REGION_HOENN) && !CheckBagHasItem(ITEM_MOENAV, 1))
-    {
+    if (FlagGet(FLAG_SYS_POKENAV_GET) && MP_Region_Current() == REGION_HOENN && MP_Region_Cleared(REGION_HOENN)
+     && !CheckBagHasItem(ITEM_MOENAV, 1) && !(MP_RegionItems_KeyedPc(ITEM_MOENAV) & (1 << REGION_HOENN)))
         AddBagItem(ITEM_MOENAV, 1);
-        MP_RegionItems_SetFree(ITEM_MOENAV);
-    }
     // JOHTO's POKéGEAR: MOM gives it as the player sets out (Johto_PlayersHouse1F); a save from before has it in
     // JOHTO once that scene is behind it (VAR_QZ_0x5003 2+)
     if (MP_Region_Current() == REGION_JOHTO && VarGet(0x5003) >= 2 && !CheckBagHasItem(ITEM_POKEGEAR, 1))
         AddBagItem(ITEM_POKEGEAR, 1);
-    MP_RegionItems_Update();   // (key items: tools and HMs from beaten regions travel, mp_regionitems.c)
+    MP_RegionItems_Update();   // (key items: each region's own; a beaten region's postgame, all: mp_regionitems.c)
 }
 
 // Moemon Kai: MY ROOM in JOHTO has decorations of its own (Crystal's room; the Secret Base / bedroom logic of
@@ -1495,6 +1495,7 @@ void MP_Region_Travel(u8 from, u8 to)
     u8 i;
     if (from >= REGION_COUNT || to >= REGION_COUNT || from == to)
         return;
+    MP_RegionItems_Leave(from);   // (customs did already; a crossing without it too: only Kai's own key items cross)
     for (i = 0; i < PARTY_SIZE; i++)
         MP_Region_FitMon(&gPlayerParty[i], from);   // remembers their levels here
     sAwayPC[from] = *own;
@@ -1571,8 +1572,8 @@ static bool8 AddGlobalItem(u16 item, u16 qty)
     return qty == 0;
 }
 
-// What goes along (1.183.0, docs/REGION_ITEMS.md): Kai's own travel items, tools and HMs from beaten regions
-// (src/mp/mp_regionitems.c); the other KEY ITEMS wait in the region's stash, the other HMs in the GLOBAL PC
+// What goes along (1.199.2, docs/REGION_ITEMS.md): Kai's own travel items (src/mp/mp_regionitems.c); the other KEY
+// ITEMS wait in the GLOBAL PC keyed by the region they were earned in, HMs in the GLOBAL PC
 static bool8 StaysWithPlayer(u16 item)
 {
     return MP_RegionItems_Travels(item);
@@ -1669,7 +1670,8 @@ u16 MP_Region_DeliverGlobalItems(void)
         return 0;
     for (i = 0; i < sGlobalItemCount; i++)
     {
-        if (IS_ITEM_HM(sGlobalItems[i].itemId))   // (HMs: into the BAG once their region is beaten, mp_regionitems.c)
+        if (IS_ITEM_HM(sGlobalItems[i].itemId) || GetItemPocket(sGlobalItems[i].itemId) == POCKET_KEY_ITEMS)
+            // (HMs and key items: into the BAG once their region is beaten or on the way home, mp_regionitems.c)
             sGlobalItems[kept++] = sGlobalItems[i];
         else if (AddPCItem(sGlobalItems[i].itemId, sGlobalItems[i].quantity))
             given++;

@@ -1,0 +1,12 @@
+# 1.199.2's put right (the user, 2026-11-13: "When the players went to Kanto, they kept every key item - Rods, Bikes, and
+# all! ... a hotfix that sends them to the Global PC"; each copy keyed by its region: src/mp/mp_regionitems.c). HOENN
+# beaten, the trip to KANTO takes only the CARD CASE (399). Then a save as the old rule left it: HOENN's MACH BIKE (259),
+# OLD ROD (262) and a SUPER ROD (264) whose KANTO giver's flag (0x2164) is set, in the BAG in KANTO: the bike and the
+# OLD ROD go to the GLOBAL PC under HOENN's key, the SUPER ROD is KANTO's. KANTO gives its own OLD ROD; KANTO beaten,
+# every tool is in the BAG; back in HOENN, HOENN's own, KANTO's waiting. check.py: each step.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("the BAG's key items keyed" "isn't beaten" "[ki] back in HOENN")
+UNEXPECT_A=("[crash]")
+CHECK="python3 tools/test/scenarios/region_key_items_fix/check.py"

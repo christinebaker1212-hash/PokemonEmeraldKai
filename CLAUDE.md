@@ -520,8 +520,10 @@ progress made impossible to get (mp_hmrescue.c: the giver walks up; tests hm_res
 Also achievements for each region (1.182.0: BATTLE / CATCHING / TOGETHER / EXTRAS copied per region and counted only
 there, HOENN's rows count the rest; numbers region * 1024 + row, never reorder or delete rows (TRAINER CARD titles are
 numbers: retired rows stay as C_GONE); src/mp/mp_achieve.c, chunk "ACHR"; COOP_NOTES "Achievements for each region").
-Also key items by region (1.183.0: a region's own KEY ITEMS wait in its stash, tools travel once their region is beaten
-and merge into one, HMs wait in the GLOBAL PC; SINNOH's MTN. BIKE; src/mp/mp_regionitems.c, docs/REGION_ITEMS.md).
+Also key items by region (1.199.2, the user's rule: earn every tool in the region you're in, use them all in a
+beaten region's postgame: each copy keyed by the region it was earned in, only Kai's own cross, the rest wait in the
+GLOBAL PC under their keys; a copy keyed elsewhere in an unbeaten region goes there by itself; HMs in the GLOBAL PC;
+SINNOH's MTN. BIKE; src/mp/mp_regionitems.c, docs/REGION_ITEMS.md; tests region_key_items, region_key_items_fix).
 The field holds 128 people at once (OBJECT_EVENTS_COUNT; Emerald's 16), the save keeps 16 (SAVED_OBJECT_EVENTS_COUNT,
 SaveBlock1.objectEvents: loops over the save's objects use it); after a load the rest in view come back from their
 templates (load_save.c gMpObjectsFromSave, event_object_movement.c SpawnObjectEventsOnReturnToField).

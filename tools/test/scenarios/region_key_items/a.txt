@@ -17,8 +17,10 @@ mp item 262 1
 mp regionclear 1
 mp regionitems
 echo [ki] JOHTO beaten
+mp bagqty 259
 mp bagqty 262
 mp bagqty 339
+mp bagqty 275
 mp travel 0
 wait 300
 echo [ki] back in HOENN

@@ -6083,6 +6083,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // tripok - whether this game may lead the way to another region (online: the room's host only)
         printf("[test] trip allowed %d\n", MP_RegionTripAllowed());
     }
+    else if (strcmp(cmd, "kistold") == 0)
+    {
+        // kistold - the key items' record as one from before 1.199.2 (put right by the next regionitems)
+        MP_RegionItems_DebugOld();
+    }
+    else if (strcmp(cmd, "keyedpc") == 0)
+    {
+        // keyedpc ITEM - the regions whose copy of the key item ITEM waits in the GLOBAL PC (bits)
+        printf("[test] keyedpc %d: %d\n", atoi(arg), MP_RegionItems_KeyedPc(atoi(arg)));
+    }
     else if (strcmp(cmd, "regionitems") == 0)
     {
         // regionitems - the key items' sorting run now (as on a map load); each region's stash

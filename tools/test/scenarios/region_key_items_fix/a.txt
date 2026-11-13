@@ -1,0 +1,52 @@
+pressuntil A field 5000
+wait 30
+mp item 259 1
+mp item 262 1
+mp item 264 1
+mp item 399 1
+mp regionclear 0
+mp regionitems
+mp travel 2
+wait 300
+echo [ki] in KANTO
+mp bagqty 259
+mp bagqty 262
+mp bagqty 264
+mp bagqty 399
+mp item 259 1
+mp item 262 1
+mp item 264 1
+mp setflag 0x2164
+mp kistold
+mp regionitems
+echo [ki] put right
+mp bagqty 259
+mp bagqty 262
+mp bagqty 264
+mp bagqty 399
+mp keyedpc 259
+mp keyedpc 262
+mp keyedpc 264
+mp item 262 1
+mp regionitems
+echo [ki] KANTO rod
+mp bagqty 262
+mp keyedpc 262
+mp regionclear 2
+mp regionitems
+echo [ki] KANTO beaten
+mp bagqty 259
+mp bagqty 262
+mp bagqty 264
+mp keyedpc 259
+mp keyedpc 262
+mp travel 0
+wait 300
+echo [ki] back in HOENN
+mp bagqty 259
+mp bagqty 262
+mp bagqty 264
+mp bagqty 399
+mp keyedpc 262
+mp keyedpc 264
+quit

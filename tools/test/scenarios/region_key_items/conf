@@ -1,12 +1,12 @@
-# Key items stay in their region (the user, 2026-11-08; docs/REGION_ITEMS.md, src/mp/mp_regionitems.c). HOENN unbeaten:
-# its MACH BIKE (259), OLD ROD (262) and EON TICKET (275) wait in HOENN, HM01 (339) in the GLOBAL PC, the CARD CASE
-# (399) comes along. JOHTO gives its own OLD ROD; JOHTO beaten, the rod travels for good and HOENN's copy merges into
-# it (one). Back in HOENN its stash returns; HOENN beaten, HM01 merges into the BAG and the MACH BIKE travels; in KANTO
-# the bike, the rod, HM01 and the CARD CASE are along, the EON TICKET (a story item) stays in HOENN. check.py: each
-# step's BAG.
+# Key items keyed by the region they were earned in (the user, 2026-11-08 / 2026-11-13; docs/REGION_ITEMS.md,
+# src/mp/mp_regionitems.c). HOENN unbeaten: its MACH BIKE (259), OLD ROD (262) and EON TICKET (275) wait in the GLOBAL
+# PC under HOENN's key, HM01 (339) there too, the CARD CASE (399) comes along. JOHTO gives its own OLD ROD; JOHTO beaten
+# (its postgame), every tool is in the BAG: HOENN's bike, one rod; HM01 back; the EON TICKET (a story item) waits.
+# Back in HOENN (unbeaten) its own are back and JOHTO's rod waits under JOHTO's key; HOENN beaten, HM01 back; in KANTO
+# only the CARD CASE is along. check.py: each step's BAG.
 MODE=1
 TMO=200
 ENV_A="MOEMON_DEBUG_PARTY=6:50"
-EXPECT_A=("region items stashes 2 0 0 0" "region items stashes 0 0 0 0" "travels now" "[ki] in KANTO")
+EXPECT_A=("region items stashes 1 0 0 0" "region items stashes 0 0 0 0" "[ki] in KANTO")
 UNEXPECT_A=("[crash]")
 CHECK="python3 tools/test/scenarios/region_key_items/check.py"

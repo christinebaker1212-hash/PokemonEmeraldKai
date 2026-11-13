@@ -22,7 +22,7 @@ EventScript_RegionCustoms_Done::
 	return
 
 @ Moemon Kai (1.101.0): customs sends the BAG to the GLOBAL PC but for the KEY ITEMS; 1.183.0: a region's own KEY
-@ ITEMS wait here until its LEAGUE is beaten, HMs in the GLOBAL PC (qz_specials.c TravelNow, mp_region.c
+@ ITEMS wait (1.199.2: all but Kai's own, in the GLOBAL PC keyed by region), HMs in the GLOBAL PC (qz_specials.c TravelNow, mp_region.c
 @ MP_Region_SendLuggage, mp_regionitems.c; docs/REGION_ITEMS.md)
 EventScript_RegionLuggage::
 	specialvar VAR_RESULT, MP_RegionHasLuggage
@@ -38,19 +38,24 @@ EventScript_RegionLuggage_None::
 gText_RegionLuggage::
 	.string "CUSTOMS: Oof! Your luggage is far\n"
 	.string "too heavy to take aboard!\p"
-	.string "Everything but your KEY ITEMS will\n"
-	.string "wait for you in the GLOBAL PC.\p"
+	.string "Your items will wait for you in the\n"
+	.string "GLOBAL PC.\p"
 	.string "It reaches any PC in a region whose\n"
 	.string "POKéMON LEAGUE you've beaten.\p"
-	.string "HMs wait there too, until the LEAGUE\n"
-	.string "of the region they came from falls.$"
+	.string "HMs wait there too, until you're in\n"
+	.string "a region whose LEAGUE you've beaten.$"
 
 gText_RegionKeyItemsStay::
-	.string "CUSTOMS: This region's own KEY ITEMS\n"
-	.string "stay here for your return: its bike,\l"
-	.string "its tools and its story items.\p"
-	.string "Beat this region's POKéMON LEAGUE,\n"
-	.string "and its tools may go anywhere!$"
+	.string "CUSTOMS: Your KEY ITEMS go to the\n"
+	.string "GLOBAL PC too: bikes, rods, tools\l"
+	.string "and story items alike.\p"
+	.string "Only your CARD CASE, CANDY JAR and\n"
+	.string "travel passes may come aboard.\p"
+	.string "You'll have each region's own back\n"
+	.string "whenever you return to it.\p"
+	.string "In a region whose LEAGUE you've\n"
+	.string "beaten, all your tools from every\l"
+	.string "region are yours to use!$"
 
 @ Moemon Kai: online, only the room's host leads the way to another region (the user, 2026-11-05); everyone follows
 EventScript_RegionHostOnly::
