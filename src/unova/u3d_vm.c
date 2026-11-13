@@ -395,6 +395,80 @@ static u8 LocalId(u16 obj)
     return (u8)(obj + 1);
 }
 
+// POKeDEX counts as Black's (zukan_save.c): KIND 1 national caught, 2 UNOVA's seen, 3 UNOVA's caught; COUNTED leaves
+// out the species Black's completion leaves out (sZukanNational / RegionalExcludedSpecies)
+static u32 DexCount(u32 kind, bool8 counted)
+{
+    static const u16 sExcluded[15] = {151, 251, 385, 386, 489, 490, 491, 492, 493, 645, 646, 647, 648, 649, 494};
+    u32 n, k, count = 0;
+    for (n = kind == 1 ? 1 : 494; n <= 649; n++)
+    {
+        bool8 skip = FALSE;
+        for (k = kind == 1 ? 0 : 9; counted && k < ARRAY_COUNT(sExcluded); k++)
+            skip |= sExcluded[k] == n;
+        if (!skip && n <= NATIONAL_DEX_COUNT && GetSetPokedexFlag(n, kind == 2 ? FLAG_GET_SEEN : FLAG_GET_CAUGHT))
+            count++;
+    }
+    return count;
+}
+
+// Black's event record of the person with object id OBJ in the zone, and the reverse (a local id's object id)
+static const u8 *PersonById(u16 obj)
+{
+    u32 size, i;
+    const u8 *e = Events(U3D_CurrentZone(), &size);
+    for (i = 0; e && size >= 8 && i < e[5]; i++)
+        if (Le16(e + 8 + EV_BG * e[4] + EV_PERSON * i) == obj)
+            return e + 8 + EV_BG * e[4] + EV_PERSON * i;
+    return NULL;
+}
+
+static u16 BlackObjOf(u8 localId)
+{
+    const u8 *p = Person(U3D_CurrentZone(), localId - 1);
+    return p ? Le16(p) : localId - 1;
+}
+
+// a person's move code (Black's MV_ numbers): a script's change (ChangeMmdlMoveCode) while in the zone, else the record's
+static u8 ObjEventId(u8 localId);
+static struct { u16 obj, code; } sMoveCodes[8];
+static u16 MoveCodeOf(u16 obj)
+{
+    u32 i;
+    const u8 *p;
+    for (i = 0; i < ARRAY_COUNT(sMoveCodes); i++)
+        if (sMoveCodes[i].code != 0 && sMoveCodes[i].obj == obj)
+            return sMoveCodes[i].code - 1;
+    p = PersonById(obj);
+    return p ? Le16(p + 4) : 0;
+}
+
+static void ChangeMoveCode(u16 obj, u16 code)
+{
+    u32 i, free = ARRAY_COUNT(sMoveCodes);
+    u8 slot;
+    for (i = 0; i < ARRAY_COUNT(sMoveCodes); i++)
+    {
+        if (sMoveCodes[i].code != 0 && sMoveCodes[i].obj == obj)
+            break;
+        if (sMoveCodes[i].code == 0 && free == ARRAY_COUNT(sMoveCodes))
+            free = i;
+    }
+    if (i == ARRAY_COUNT(sMoveCodes))
+        i = free;
+    if (i < ARRAY_COUNT(sMoveCodes))
+        sMoveCodes[i].obj = obj, sMoveCodes[i].code = code + 1;
+    if ((slot = ObjEventId(LocalId(obj))) < OBJECT_EVENTS_COUNT)
+    {
+        // (Black's wandering kind 3 wanders; any other stands, facing the way it faces: the game's people have those)
+        u8 type = code == 3 ? MOVEMENT_TYPE_WANDER_AROUND
+                : (gObjectEvents[slot].facingDirection == DIR_NORTH ? MOVEMENT_TYPE_FACE_UP
+                 : gObjectEvents[slot].facingDirection == DIR_WEST ? MOVEMENT_TYPE_FACE_LEFT
+                 : gObjectEvents[slot].facingDirection == DIR_EAST ? MOVEMENT_TYPE_FACE_RIGHT : MOVEMENT_TYPE_FACE_DOWN);
+        SetTrainerMovementType(&gObjectEvents[slot], type);
+    }
+}
+
 // The object event of a local id: on the player's map, else on any map (Black's people live by zone, and a scene's
 // people walk with the player over a map's edge, or were added on the map before: AddMmdl)
 static u8 ObjEventId(u8 localId)
@@ -1115,6 +1189,7 @@ static u8 *Slot(u8 slot)   // (Black's word slots, UNOVA's own: the game's battl
 // Black's item numbers as the game's (tools/unova/gen_items.py: by name; ITEM_NONE where the game has no such item yet)
 #include "../data/unova_items.h"
 #include "u3d_railpos.h"
+#include "u3d_tables.h"   // (Black's small tables: tools/unova/gen_tables.py)
 #include "u3d_gyms.h"   // (BRYCEN's and DRAYDEN's gyms: tools/unova/gen_gyms.py)
 #include "tv.h"
 static u16 Item(u16 black)
@@ -1637,6 +1712,111 @@ static void Step(struct Thread *t)
             *WorkPtr(a[0]) = TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING) ? 2
                            : TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE) ? 1 : 0;
             break;
+        // ---- a person's move code, event flag, params (Black's event record; a script's change kept by obj id)
+        case U3C_GetMmdlMoveCode:   // result, person
+            *WorkPtr(a[0]) = MoveCodeOf(V(1));
+            break;
+        case U3C_ChangeMmdlMoveCode:   // person, code
+            ChangeMoveCode(V(0), V(1));
+            break;
+        case U3C_GetMmdlEventFlag:   // person, result
+        {
+            const u8 *p = PersonById(V(0));
+            if (p)
+                *WorkPtr(a[1]) = Le16(p + 8);
+            break;
+        }
+        case U3C_GetMmdlParam:   // person, index 0-2, result
+        {
+            const u8 *p = PersonById(V(0));
+            if (p && V(1) <= 2)
+                *WorkPtr(a[2]) = Le16(p + 14 + 2 * V(1));
+            break;
+        }
+        case U3C_SearchMmdlInFrontOfPlayer:   // obj id, found
+        case U3C_SearchMmdlAtGrid:            // obj id, found, x, y, z (Black's tiles)
+        {
+            s16 x, y;
+            s32 m = U3D_MapIndex();
+            u8 id;
+            if (op == U3C_SearchMmdlInFrontOfPlayer)
+            {
+                GetXYCoordsOneStepInFrontOfPlayer(&x, &y);
+            }
+            else
+            {
+                x = V(2) - (m >= 0 ? 32 * U3D_MapCellX(m) : 0) + MAP_OFFSET;
+                y = V(4) - (m >= 0 ? 32 * U3D_MapCellZ(m) : 0) + MAP_OFFSET;
+            }
+            id = GetObjectEventIdByXY(x, y);
+            *WorkPtr(a[1]) = id < OBJECT_EVENTS_COUNT && id != gPlayerAvatar.objectEventId;
+            if (*WorkPtr(a[1]))
+                *WorkPtr(a[0]) = BlackObjOf(gObjectEvents[id].localId);
+            break;
+        }
+        // ---- the POKeDEX's ratings (scrcmd_pokemon_fld.c; zukan_save.c: UNOVA's are 494-649, the counted leave out
+        // the excluded; complete is 150 regional, 634 national)
+        case U3C_POKEMON_FLD_GetPokedexComplete:   // result, kind (1 national caught, 2 regional seen, 3 caught)
+            *WorkPtr(a[0]) = DexCount(V(1), TRUE) >= (V(1) == 1 ? 634 : 150);
+            break;
+        case U3C_POKEMON_FLD_GetPokedexRating:   // kind, rating message, count
+        {
+            u32 kind = V(0), count, k;
+            *WorkPtr(a[1]) = 5;
+            *WorkPtr(a[2]) = 0;
+            if (kind < 1 || kind > 3)
+                break;
+            count = DexCount(kind, FALSE);
+            if (DexCount(kind, TRUE) >= (kind == 1 ? 634 : 150))
+                *WorkPtr(a[1]) = kind == 1 ? 0x32 : kind == 2 ? 0xD : 0x1E;
+            else
+                for (k = 0; k < ARRAY_COUNT(sDexRating[0]); k++)
+                    if (sDexRating[kind - 1][k][0] == 0 || count <= sDexRating[kind - 1][k][0])
+                    {
+                        *WorkPtr(a[1]) = sDexRating[kind - 1][k][1];
+                        break;
+                    }
+            *WorkPtr(a[2]) = count;
+            break;
+        }
+        // ---- the item buyers' and prize counters' key / value tables (archive 0xD0)
+        case U3C_POKEMON_FLD_CheckTableItemInBag:   // table, result: any of its items in the bag
+        {
+            u32 k;
+            *WorkPtr(a[1]) = 0;
+            for (k = 0; V(0) < ARRAY_COUNT(sKeyValueTables) && k < sKeyValueTables[V(0)][1]; k++)
+                if (Item(sKeyValues[sKeyValueTables[V(0)][0] + k][0]) != ITEM_NONE
+                 && CheckBagHasItem(Item(sKeyValues[sKeyValueTables[V(0)][0] + k][0]), 1))
+                {
+                    *WorkPtr(a[1]) = 1;
+                    break;
+                }
+            break;
+        }
+        case U3C_POKEMON_FLD_LookupTableValue:          // key, table, result
+        case U3C_POKEMON_FLD_RegisterTableValueNumber:  // key, table, word slot, digits
+        case U3C_POKEMON_FLD_AddTableValueToPoints:     // key, table: the value as money
+        {
+            u32 k, v = 0;
+            bool8 found = FALSE;
+            for (k = 0; V(1) < ARRAY_COUNT(sKeyValueTables) && k < sKeyValueTables[V(1)][1]; k++)
+                if (sKeyValues[sKeyValueTables[V(1)][0] + k][0] == V(0))
+                {
+                    v = sKeyValues[sKeyValueTables[V(1)][0] + k][1];
+                    found = TRUE;
+                    break;
+                }
+            if (op == U3C_POKEMON_FLD_LookupTableValue)
+                *WorkPtr(a[2]) = v;
+            else if (op == U3C_POKEMON_FLD_RegisterTableValueNumber && found)
+                ConvertIntToDecimalStringN(Slot(V(2)), v, STR_CONV_MODE_LEFT_ALIGN, V(3) ? V(3) : 8);
+            else if (found)
+                AddMoney(&gSaveBlock1Ptr->money, v);
+            break;
+        }
+        case U3C_PROC_LookupTableValue:   // index, result (ov010 sScrcmdLookupTable)
+            *WorkPtr(a[1]) = V(0) < ARRAY_COUNT(sProcLookup) ? sProcLookup[V(0)] : 0;
+            break;
         case U3C_GetMmdlGridPos:   // person, x, z (Black's tiles)
         {
             struct ObjectEvent *o = ObjectOf(V(0));
@@ -1899,6 +2079,48 @@ static void Step(struct Thread *t)
         }
         case U3C_POKEMON_FLD_StorePartySpeciesRecord:   // (Black's record of the team a Gym Leader was beaten with)
             break;
+        // ---- Black's other word slots (arm9 wordset.c: each a system text bank's entry)
+        case U3C_BufferGroupEntryName:   // (bank 0xCB)
+            StringCopy(Slot(a[0]), U3D_Text(0xCB, V(1)));
+            break;
+        case U3C_BufferGroupedEntryName:   // (bank 0xE7; past its end: empty)
+            StringCopy(Slot(a[0]), U3D_Text(0xE7, V(1)));
+            break;
+        case U3C_BufferByteEntryNameA:   // (bank 0x2B: entries 0-8)
+            if ((u8)V(1) <= 8)
+                StringCopy(Slot(a[0]), U3D_Text(0x2B, (u8)V(1)));
+            else
+                *Slot(a[0]) = EOS;
+            break;
+        case U3C_BufferByteEntryNameB:   // (bank 0: entries 0-0x91)
+            if ((u8)V(1) <= 0x91)
+                StringCopy(Slot(a[0]), U3D_Text(0, (u8)V(1)));
+            else
+                *Slot(a[0]) = EOS;
+            break;
+        case U3C_BufferSignedEntryName:   // (bank 0xA0: past 0x2F the first)
+            StringCopy(Slot(a[0]), U3D_Text(0xA0, (s16)V(1) >= 0x30 || (s16)V(1) < 0 ? 0 : V(1)));
+            break;
+        case U3C_BufferMapEntryNameA:   // (bank 0xBF)
+            StringCopy(Slot(a[0]), U3D_Text(0xBF, (u8)V(1)));
+            break;
+        case U3C_BufferEasyChatWord:   // (an easy-chat word: arm9 pms_word.c, thirteen banks by the word's number)
+        {
+            static const u16 sBank[13] = {284, 286, 287, 285, 149, 150, 151, 152, 153, 154, 155, 148, 156};
+            static const u16 sSize[13] = {652, 560, 17, 165, 44, 38, 48, 103, 47, 32, 26, 10, 61};
+            u32 w = V(1), i, sum = 0;
+            *Slot(a[0]) = EOS;
+            for (i = 0; w != 0xFFFF && i < 13; i++)
+            {
+                if ((w & 0x7FF) < sum + sSize[i])
+                {
+                    StringCopy(Slot(a[0]), U3D_Text(sBank[i], (w & 0x7FF) - sum));
+                    break;
+                }
+                sum += sSize[i];
+            }
+            break;
+        }
         case U3C_BufferShortEntryName:   // (bank 0x37: Black's bag pockets)
             StringCopy(Slot(a[0]), U3D_Text(55, V(1)));
             break;
@@ -3433,6 +3655,7 @@ void U3D_VmMapLoad(void)
     if (zone != sLastZone)
     {
         u32 i;
+        memset(sMoveCodes, 0, sizeof(sMoveCodes));   // (a script's move-code changes last the zone)
         // (Black's SCRIPT_SYS_ClearLocalWork before the zone-change script: the zone's own flags 1-0x63 and works
         // 0x4000-0x401F start afresh in each zone; RELIC CASTLE's quicksand waits for work 0x4000 to be 0)
         for (i = 1; i <= 0x63; i++)
