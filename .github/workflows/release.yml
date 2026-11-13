@@ -183,6 +183,10 @@ jobs:
         run: |
           echo "orre=$(printf %s "$ORRE_DISC_URL" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
           echo "unova=$(printf %s "$UNOVA_ROM_URL" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+          # what the packs are built from, by git's own content hashes (hashFiles also hashed the __pycache__ files the
+          # steps before write into tools/, which carry the checkout's times: the key changed every run, never a hit)
+          echo "orresrc=$(git ls-files -s tools/orre tools/moemon_text src/data/orre_props.h src/fonts.c charmap.txt | sha256sum | cut -c1-40)" >> "$GITHUB_OUTPUT"
+          echo "unovasrc=$(git ls-files -s tools/unova tools/sinnoh tools/aveon tools/moemon_text graphics/aveon charmap.txt | sha256sum | cut -c1-40)" >> "$GITHUB_OUTPUT"
 
       - name: ORRE's packs from an earlier release
         id: orrecache
@@ -192,7 +196,7 @@ jobs:
           SEGMENT_DOWNLOAD_TIMEOUT_MINS: 3
         with:
           path: orre
-          key: orre-packs-${{ steps.packkey.outputs.orre }}-${{ hashFiles('tools/orre/**', 'tools/moemon_text/**', 'src/data/orre_props.h', 'src/fonts.c', 'charmap.txt') }}
+          key: orre-packs-${{ steps.packkey.outputs.orre }}-${{ steps.packkey.outputs.orresrc }}
 
       - name: ORRE's packs
         id: orrebuild
@@ -227,7 +231,7 @@ jobs:
           SEGMENT_DOWNLOAD_TIMEOUT_MINS: 3
         with:
           path: unova
-          key: unova-packs-${{ steps.packkey.outputs.unova }}-${{ hashFiles('tools/unova/**', 'tools/sinnoh/**', 'tools/aveon/**', 'tools/moemon_text/**', 'graphics/aveon/**', 'charmap.txt') }}
+          key: unova-packs-${{ steps.packkey.outputs.unova }}-${{ steps.packkey.outputs.unovasrc }}
 
       - name: UNOVA's packs
         id: unovabuild
