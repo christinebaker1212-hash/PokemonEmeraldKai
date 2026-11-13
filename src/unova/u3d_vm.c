@@ -991,6 +991,8 @@ static bool8 DragonLever(u16 unit, u16 side);
 static bool8 DragonRotate(u16 unit);
 static void DragonModels(void);
 static void DragonInside(void);
+static u8 sIceShown[3];
+static void IceToggle(u32 i);
 static void DragonReset(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
@@ -2230,8 +2232,20 @@ static void Step(struct Thread *t)
         // Black's works and people. Their states are kept for the models: sWork.gym[6] the curtains played to their
         // end (oneShotPlayed, bits 0-2), sButtonModels the nine state models at their last frame; sWork.gym[7] bit 0
         // NACRENE's shelf moved
-        case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateOneShotEventU16:   // a curtain's one-shot animation, played
-        case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateOneShotEvent:
+        case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateOneShotEventU16:   // (in BRYCEN's gym: its switch's toggle)
+            if (CurrentZone() == ICE_GYM_ZONE)
+            {
+                if (a[0] < 3 && !(sIceShown[a[0]] & 2))
+                {
+                    IceToggle(a[0]);
+                    sExpWait = a[0];
+                    if (U3D_ExpPlaying(sExpWait))
+                        t->wait = W_EXP_ANIM;
+                }
+                break;
+            }
+            // fall through
+        case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateOneShotEvent:   // a curtain's one-shot animation, played
             if (a[0] < 3)
                 sWork.gym[6] |= 1 << a[0];
             break;
@@ -3830,9 +3844,16 @@ bool8 U3D_Vm_PersonHeight(u8 localId, float *h)
 
 // The field shown on a map (u3d.c U3D_Update; a continued game's people come from the save, past the map's load script)
 // BRYCEN's switches (ov045 FIELD_GIMMICK_SWITCH_TOGGLE): a switch's model at its state's pose (SetSwitchModelPose:
-// animation 1 on, 0 off, at their first frame); when its work (0x4001 + the switch) flips, the old state's animation
-// plays to its end and the new pose follows (SwitchToggleEventProc)
-static u8 sIceShown[3];
+// animation 1 on, 0 off, at their first frame). Its toggle (command 0x194: in this gym the overlays' shared address is
+// ov045's StartSwitchToggleEvent, not ov042's one-shot) plays the old state's animation to its end, then the new pose;
+// the script then sets the switch's work (0x4001 + the switch) to match. sIceShown: bit 0 the state shown, bit 1 the
+// change playing
+
+static void IceToggle(u32 i)
+{
+    U3D_ExpAnim(i, sIceShown[i] & 1, 0, TRUE);
+    sIceShown[i] = (~sIceShown[i] & 1) | 2;
+}
 
 static void IceModels(bool8 load)
 {
@@ -3845,16 +3866,16 @@ static void IceModels(bool8 load)
             sIceShown[i] = on;
             U3D_ExpAnim(i, on, 0, FALSE);
         }
-        else if (on != (sIceShown[i] & 1) && !(sIceShown[i] & 2))
+        else if (sIceShown[i] & 2)
         {
-            U3D_ExpAnim(i, sIceShown[i] & 1, 0, TRUE);   // (the change, from the old pose)
-            sIceShown[i] |= 2;
+            if (!U3D_ExpPlaying(i))
+            {
+                sIceShown[i] &= 1;
+                U3D_ExpAnim(i, sIceShown[i], 0, FALSE);
+            }
         }
-        else if ((sIceShown[i] & 2) && !U3D_ExpPlaying(i))
-        {
-            sIceShown[i] = on;
-            U3D_ExpAnim(i, on, 0, FALSE);
-        }
+        else if (on != sIceShown[i])   // (a work set some other way: the change shown all the same)
+            IceToggle(i);
     }
 }
 
