@@ -1902,12 +1902,15 @@ static void Step(struct Thread *t)
             break;
         case U3C_GetTrainerBattleKind:   // trainer, result (0 single, 1 double, 2 triple, 3 rotation)
         case U3C_ClassifyTrainer:        // trainer, result (1 heals the party after, 2 gives an item, 0 neither)
+        case U3C_GetTrainerBattleParam:  // trainer, result (the item it gives after the battle)
         {
             u32 size;
             const u8 *tr = U3D_Vm_Trainer(V(0), &size);
             u16 r = 0;
             if (tr && size >= 20)
-                r = op == U3C_GetTrainerBattleKind ? tr[2] : tr[16] ? 1 : (tr[18] | tr[19] << 8) ? 2 : 0;
+                r = op == U3C_GetTrainerBattleKind ? tr[2]
+                  : op == U3C_GetTrainerBattleParam ? (tr[18] | tr[19] << 8)
+                  : tr[16] ? 1 : (tr[18] | tr[19] << 8) ? 2 : 0;
             *WorkPtr(a[1]) = r;
             break;
         }
