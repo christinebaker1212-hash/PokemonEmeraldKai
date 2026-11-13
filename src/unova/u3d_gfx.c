@@ -33,6 +33,8 @@ static struct
     struct MpBigSprite *picBig;
     const u8 *backs;   // Black's back pictures: u16 palette[16], four 64x64 frames of tiles each
     u16 backCount;
+    const u16 *townMap;   // the TOWN MAP's picture (RGB555 rows)
+    u16 townW, townH;
 } sGfx;
 
 static u32 FrameBytes(u8 kind) { return kind == 4 ? 2048 : 512; }
@@ -107,6 +109,18 @@ static void Load(void)
             sGfx.backs = p + 6;
             if (sGfx.backs + (u32)sGfx.backCount * (32 + 4 * 2048) > end)
                 sGfx.backCount = 0;
+            p = (u8 *)sGfx.backs + (u32)sGfx.backCount * (32 + 4 * 2048);
+            // (the TOWN MAP's picture: "TMAP", u16 width, height, RGB555 rows: tools/unova/gen_townmap.py)
+            if (p + 8 <= end && memcmp(p, "TMAP", 4) == 0)
+            {
+                u16 w = p[4] | p[5] << 8, h = p[6] | p[7] << 8;
+                u16 *px = p + 8 + (u32)w * h * 2 <= end ? malloc((u32)w * h * 2) : NULL;
+                if (px != NULL)
+                {
+                    memcpy(px, p + 8, (u32)w * h * 2);   // (as u16s: the pack's own place may be odd)
+                    sGfx.townMap = px, sGfx.townW = w, sGfx.townH = h;
+                }
+            }
         }
     }
     printf("[u3d] UNOVA's people: %u object codes, %u battle pictures\n", sGfx.count, sGfx.pics);
@@ -175,5 +189,16 @@ bool8 U3D_Gfx_Back(u8 index, const u8 **tiles, const u16 **pal)
     b = sGfx.backs + (u32)index * (32 + 4 * 2048);
     *pal = (const u16 *)b;
     *tiles = b + 32;
+    return TRUE;
+}
+
+// The TOWN MAP's picture (Black's own, tools/unova/gen_townmap.py): RGB555 rows; FALSE without the pack
+bool8 U3D_Gfx_TownMap(const u16 **pixels, u16 *w, u16 *h)
+{
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || sGfx.townMap == NULL)
+        return FALSE;
+    *pixels = sGfx.townMap, *w = sGfx.townW, *h = sGfx.townH;
     return TRUE;
 }

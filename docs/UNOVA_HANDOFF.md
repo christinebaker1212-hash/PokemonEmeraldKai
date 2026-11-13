@@ -123,6 +123,12 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   shot a silent warp to the landing cell of ov041's gCannonsFlights for the cannon and the facing; the flight itself
   and the cannons' turning not drawn). The CELESTIAL TOWER's bell (the gym's door, Black flag 0x2AE) is rung from the
   tile in front of it.
+  The TOWN MAP and FLY (2026-11-13): Black's own town map (a/0/8/5 picture, a/0/8/6 its 61 town records) on
+  region_map.c's QZMAP_UNOVA page, at 5/7 its size in the 28 x 15 grid (tools/unova/gen_townmap.py: the header
+  src/data/region_map/unova_townmap.h, the heal locations HEAL_LOCATION_UNOVA_*, the picture "TMAP" in black_gfx.pak
+  drawn by src/unova/u3d_townmap.c); FLY lands in front of each town's POKéMON CENTER (NUVEMA: the zone's start) and
+  opens with Black's arrival flags 0x9B0-0x9BF, set on entering the town's zone (U3D_TownMapArrive), and for older
+  games by the UNOVA badges held.
   Not yet: the GEAR STATION's trains drawn on the platforms; the gyms' gimmicks (Black's field_gimmick_*: STRIATON's
   switches, NACRENE's books,
   ICIRRUS's ice, OPELUCID's bridges), MUSICALS, NIMBASA's stadiums, the ROYAL UNOVA, the survey HQ.

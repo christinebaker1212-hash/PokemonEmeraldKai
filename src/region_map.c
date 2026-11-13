@@ -146,7 +146,8 @@ static const u8 sRegionMapPlayerIcon_MayGfx[] = INCGFX_U8("graphics/pokenav/regi
 #define QZMAP_KANTO_END 6
 #define QZMAP_SINNOH_NORTH 6   // SINNOH: two pages (tools/sinnoh/gen_townmap.py), its picture drawn in full color by
 #define QZMAP_SINNOH_SOUTH 7   // src/sinnoh/s3d_townmap.c over the map's background
-#define QZMAP_COUNT 8
+#define QZMAP_UNOVA 8          // UNOVA: one page, Black's own town map (tools/unova/gen_townmap.py, src/unova/u3d_townmap.c)
+#define QZMAP_COUNT 9
 struct QzMapPlace { mapsec_u16_t mapsec; u8 map, x, y, width, height; };
 struct QzFlyDest { mapsec_u16_t mapsec; u8 map; u8 heal; u16 flag; };
 #include "mp_region.h"
@@ -154,7 +155,13 @@ struct QzFlyDest { mapsec_u16_t mapsec; u8 map; u8 heal; u16 flag; };
 #include "data/region_map/sinnoh_region_map.h"
 #include "data/region_map/orre_region_map.h"   // Moemon Kai: ORRE's place names (tools/orre/gen_maps.py)
 #include "data/region_map/unova_region_map.h"  // Moemon Kai: UNOVA's, Black's own (tools/unova/gen_maps.py)
+#include "data/region_map/unova_townmap.h"     // Moemon Kai: UNOVA's TOWN MAP and FLY (tools/unova/gen_townmap.py)
 #define IS_SINNOH_PAGE(m) ((m) >= QZMAP_SINNOH_NORTH && (m) <= QZMAP_SINNOH_SOUTH)
+#define IS_PIC_PAGE(m) (IS_SINNOH_PAGE(m) || (m) == QZMAP_UNOVA)   // (a page drawn by a picture over the BG)
+void U3D_TownMapShowOn(bool8 show, int bg, s32 offX, s32 offY);   // (src/unova/u3d_townmap.c)
+bool8 U3D_TownMapFlyOpen(u16 flag, u32 index);
+bool8 U3D_Gfx_TownMap(const u16 **pixels, u16 *w, u16 *h);
+extern const u16 gU3dTownMapPal[];
 void S3D_TownMapShowOn(u8 page, int bg, s32 offX, s32 offY);   // (src/sinnoh/s3d_townmap.c: the page's picture; 0xFF none)
 #define TOWNMAP_OFF_X 0   // (the full view's BG2 texture point at the screen's top-left)
 #define TOWNMAP_OFF_Y 0
@@ -549,6 +556,9 @@ static const struct QzMapPlace *QzPlace(mapsec_u16_t mapsec, u8 map)
     for (i = 0; i < ARRAY_COUNT(sSinnohMapPlaces); i++)
         if (sSinnohMapPlaces[i].mapsec == mapsec && (map == QZMAP_COUNT || sSinnohMapPlaces[i].map == map))
             return &sSinnohMapPlaces[i];
+    for (i = 0; i < ARRAY_COUNT(sUnovaMapPlaces); i++)
+        if (sUnovaMapPlaces[i].mapsec == mapsec && (map == QZMAP_COUNT || sUnovaMapPlaces[i].map == map))
+            return &sUnovaMapPlaces[i];
     return NULL;
 }
 
@@ -609,6 +619,8 @@ static void ChooseShownMap(void)
         sPlayerMap = (map >= QZMAP_KANTO && map < QZMAP_KANTO_END) ? map : QZMAP_KANTO;
     else if (region == REGION_SINNOH)
         sPlayerMap = IS_SINNOH_PAGE(map) ? map : QZMAP_SINNOH_NORTH;
+    else if (region == REGION_UNOVA)
+        sPlayerMap = QZMAP_UNOVA;
     else
         sPlayerMap = QZMAP_HOENN;
     sShownMap = sPlayerMap;
@@ -625,6 +637,9 @@ const u8 *MP_RegionMap_Title(void)
     static const u8 sJohto[] = _("JOHTO");
     static const u8 sKanto[] = _("KANTO");
     static const u8 sSinnoh[] = _("SINNOH");
+    static const u8 sUnova[] = _("UNOVA");
+    if (sShownMap == QZMAP_UNOVA)
+        return sUnova;
     if (sShownMap == QZMAP_JOHTO)
         return sJohto;
     if (IS_SINNOH_PAGE(sShownMap))
@@ -726,6 +741,18 @@ bool8 MP_TownMap_Picture(u8 page, u16 *out, u32 *w, u32 *h)
         const u16 *px;
         u16 pw, ph;
         if (!S3D_Gfx_TownMap(page - QZMAP_SINNOH_NORTH, &px, &pw, &ph) || pw > 480 || ph > 320)
+            return FALSE;
+        for (y = 0; y < ph; y++)
+            for (x = 0; x < pw; x++)
+                out[y * pw + x] = px[y * pw + x] | 0x8000;
+        *w = pw, *h = ph;
+        return TRUE;
+    }
+    if (page == QZMAP_UNOVA)
+    {
+        const u16 *px;
+        u16 pw, ph;
+        if (!U3D_Gfx_TownMap(&px, &pw, &ph) || pw > 480 || ph > 320)
             return FALSE;
         for (y = 0; y < ph; y++)
             for (x = 0; x < pw; x++)
@@ -851,15 +878,16 @@ void MP_RegionMap_PoketchGrid(u8 types[MAP_HEIGHT][MAP_WIDTH], s8 *px, s8 *py)
 void MP_RegionMap_AreaPicture(u8 bg)
 {
     S3D_TownMapShowOn(IS_SINNOH_PAGE(sShownMap) ? sShownMap - QZMAP_SINNOH_NORTH : 0xFF, bg, 0, 0);
+    U3D_TownMapShowOn(sShownMap == QZMAP_UNOVA, bg, 0, 0);
 }
 
 bool8 MP_RegionMap_AreaGfx(const u32 **gfx, const u32 **tilemap, const u16 **pal)
 {
     if (sShownMap == QZMAP_HOENN)
         return FALSE;
-    *gfx = sQzMapGfx[IS_SINNOH_PAGE(sShownMap) ? 0 : sShownMap - 1].gfx;
-    *tilemap = sQzMapGfx[IS_SINNOH_PAGE(sShownMap) ? 0 : sShownMap - 1].tilemap;
-    *pal = IS_SINNOH_PAGE(sShownMap) ? gS3dTownMapPal : sQzMapGfx[sShownMap - 1].pal;
+    *gfx = sQzMapGfx[IS_PIC_PAGE(sShownMap) ? 0 : sShownMap - 1].gfx;
+    *tilemap = sQzMapGfx[IS_PIC_PAGE(sShownMap) ? 0 : sShownMap - 1].tilemap;
+    *pal = IS_SINNOH_PAGE(sShownMap) ? gS3dTownMapPal : sShownMap == QZMAP_UNOVA ? gU3dTownMapPal : sQzMapGfx[sShownMap - 1].pal;
     return TRUE;
 }
 
@@ -876,20 +904,23 @@ void ShowRegionMapForPokedexAreaScreen(struct RegionMap *regionMap)
 
 static const u32 *MapGfx(void)
 {
-    return sShownMap == QZMAP_HOENN ? sRegionMapBg_GfxLZ : sQzMapGfx[IS_SINNOH_PAGE(sShownMap) ? 0 : sShownMap - 1].gfx;
+    return sShownMap == QZMAP_HOENN ? sRegionMapBg_GfxLZ : sQzMapGfx[IS_PIC_PAGE(sShownMap) ? 0 : sShownMap - 1].gfx;
 }
 
 static const u32 *MapTilemap(void)
 {
-    return sShownMap == QZMAP_HOENN ? sRegionMapBg_TilemapLZ : sQzMapGfx[IS_SINNOH_PAGE(sShownMap) ? 0 : sShownMap - 1].tilemap;
+    return sShownMap == QZMAP_HOENN ? sRegionMapBg_TilemapLZ : sQzMapGfx[IS_PIC_PAGE(sShownMap) ? 0 : sShownMap - 1].tilemap;
 }
 
 static const u16 *MapPal(void)
 {
     S3D_TownMapShowOn(IS_SINNOH_PAGE(sShownMap) ? sShownMap - QZMAP_SINNOH_NORTH : 0xFF, sRegionMap->bgNum,
                       TOWNMAP_OFF_X, TOWNMAP_OFF_Y);
+    U3D_TownMapShowOn(sShownMap == QZMAP_UNOVA, sRegionMap->bgNum, TOWNMAP_OFF_X, TOWNMAP_OFF_Y);
     if (IS_SINNOH_PAGE(sShownMap))
         return gS3dTownMapPal;
+    if (sShownMap == QZMAP_UNOVA)
+        return gU3dTownMapPal;
     return sShownMap == QZMAP_HOENN ? sRegionMapBg_Pal : sQzMapGfx[sShownMap - 1].pal;
 }
 
@@ -1031,7 +1062,7 @@ static u8 ProcessRegionMapInput_Full(void)
 {
     u8 input;
 
-    if (sShownMap >= QZMAP_KANTO && (JOY_NEW(L_BUTTON) || JOY_NEW(R_BUTTON)))
+    if (sShownMap >= QZMAP_KANTO && sShownMap != QZMAP_UNOVA && (JOY_NEW(L_BUTTON) || JOY_NEW(R_BUTTON)))
     {
         QzTurnMap(JOY_NEW(R_BUTTON) ? 1 : -1);
         return MAP_INPUT_MOVE_END;
@@ -1351,6 +1382,8 @@ static mapsec_u16_t GetMapSecIdAt(u16 x, u16 y)
     x -= MAPCURSOR_X_MIN;
     if (IS_SINNOH_PAGE(sShownMap))
         return sSinnohMapLayouts[sShownMap - QZMAP_SINNOH_NORTH][y][x];   // Moemon Kai
+    if (sShownMap == QZMAP_UNOVA)
+        return sUnovaMapLayout[y][x];   // Moemon Kai
     if (sShownMap != QZMAP_HOENN)
         return sQzMapLayouts[sShownMap - 1][y][x];   // Moemon Kai
     return sRegionMap_MapSectionLayout[y][x];
@@ -1565,9 +1598,24 @@ static void RegionMap_InitializeStateBasedOnSSTidalLocation(void)
 
 // Moemon Kai: Johto's and Kanto's towns can be flown to once visited (Quetzal's lists: VIOLET and OLIVINE also wait
 // for the story to let the player leave them)
+// Every FLY spot of the other regions' pages, one list: JOHTO / KANTO's, SINNOH's, UNOVA's
+#define QZ_FLY_COUNT (ARRAY_COUNT(sQzFlyDests) + ARRAY_COUNT(sSinnohFlyDests) + ARRAY_COUNT(sUnovaFlyDests))
+static const struct QzFlyDest *QzFlyDestAt(u32 i)
+{
+    if (i < ARRAY_COUNT(sQzFlyDests))
+        return &sQzFlyDests[i];
+    i -= ARRAY_COUNT(sQzFlyDests);
+    if (i < ARRAY_COUNT(sSinnohFlyDests))
+        return &sSinnohFlyDests[i];
+    return &sUnovaFlyDests[i - ARRAY_COUNT(sSinnohFlyDests)];
+}
+
 static const struct QzFlyDest *QzFlyDestOf(mapsec_u16_t mapSecId)
 {
     u32 i;
+    for (i = 0; i < ARRAY_COUNT(sUnovaFlyDests); i++)
+        if (sUnovaFlyDests[i].mapsec == mapSecId)
+            return &sUnovaFlyDests[i];
     for (i = 0; i < ARRAY_COUNT(sQzFlyDests); i++)
         if (sQzFlyDests[i].mapsec == mapSecId)
             return &sQzFlyDests[i];
@@ -1579,6 +1627,8 @@ static const struct QzFlyDest *QzFlyDestOf(mapsec_u16_t mapSecId)
 
 static bool8 QzCanFlyTo(const struct QzFlyDest *d)
 {
+    if (d->map == QZMAP_UNOVA)   // (Black's own arrival flag: src/unova/u3d_townmap.c)
+        return U3D_TownMapFlyOpen(d->flag, d - sUnovaFlyDests);
     if (d->mapsec == MAPSEC_JOHTO_VIOLET_CITY && VarGet(0x5008) < 3)
         return FALSE;
     if (d->mapsec == MAPSEC_JOHTO_OLIVINE_CITY && VarGet(0x500D) < 1)
@@ -2251,7 +2301,9 @@ static void DrawFlyDestTextWindow(void)
                 // Window is already drawn, just empty it
                 FillWindowPixelBuffer(WIN_MAPSEC_NAME, PIXEL_FILL(1));
             }
-            AddTextPrinterParameterized(WIN_MAPSEC_NAME, FONT_NORMAL, sFlyMap->regionMap.mapSecName, 0, 1, 0, NULL);
+            // (Moemon Kai: a long name, UNOVA's DRAGONSPIRAL TOWER, in the narrow font so it fits the window)
+            AddTextPrinterParameterized(WIN_MAPSEC_NAME, GetStringWidth(FONT_NORMAL, sFlyMap->regionMap.mapSecName, 0) > 96
+                                        ? FONT_NARROW : FONT_NORMAL, sFlyMap->regionMap.mapSecName, 0, 1, 0, NULL);
             ScheduleBgCopyTilemapToVram(0);
             sDrawFlyDestTextWindow = FALSE;
         }
@@ -2305,9 +2357,9 @@ static void CreateFlyDestIcons(void)
     {
         // Moemon Kai: Johto's / Kanto's towns
         u32 i;
-        for (i = 0; i < ARRAY_COUNT(sQzFlyDests) + ARRAY_COUNT(sSinnohFlyDests); i++)
+        for (i = 0; i < QZ_FLY_COUNT; i++)
         {
-            const struct QzFlyDest *d = i < ARRAY_COUNT(sQzFlyDests) ? &sQzFlyDests[i] : &sSinnohFlyDests[i - ARRAY_COUNT(sQzFlyDests)];
+            const struct QzFlyDest *d = QzFlyDestAt(i);
             if (d->map != sShownMap)
                 continue;
             mapSecId = d->mapsec;
@@ -2540,7 +2592,8 @@ static bool8 MpTownVisited(mapsec_u16_t town)
 // towns, so a friend in any other region could never be gone to (the user, 2026-11-11)
 static u8 QzRegionOfPage(u8 page)
 {
-    return page == QZMAP_JOHTO ? 1 : (page >= QZMAP_KANTO && page < QZMAP_KANTO_END) ? 2 : IS_SINNOH_PAGE(page) ? 3 : 0;
+    return page == QZMAP_JOHTO ? 1 : (page >= QZMAP_KANTO && page < QZMAP_KANTO_END) ? 2 : IS_SINNOH_PAGE(page) ? 3
+         : page == QZMAP_UNOVA ? 4 : 0;
 }
 
 static mapsec_u16_t QzNearestVisitedTown(mapsec_u16_t mapsec)
@@ -2549,14 +2602,14 @@ static mapsec_u16_t QzNearestVisitedTown(mapsec_u16_t mapsec)
     const struct QzMapPlace *p = QzPlace(mapsec, QZMAP_COUNT), *q;
     mapsec_u16_t best = MAPSEC_NONE;
     s32 bestDist = 0x7FFFFFFF;
-    u32 i, n = ARRAY_COUNT(sQzFlyDests) + ARRAY_COUNT(sSinnohFlyDests);
+    u32 i, n = QZ_FLY_COUNT;
     if (d != NULL && QzCanFlyTo(d))
         return mapsec;
     if (p == NULL)
         return MAPSEC_NONE;
     for (i = 0; i < n; i++)
     {
-        const struct QzFlyDest *t = i < ARRAY_COUNT(sQzFlyDests) ? &sQzFlyDests[i] : &sSinnohFlyDests[i - ARRAY_COUNT(sQzFlyDests)];
+        const struct QzFlyDest *t = QzFlyDestAt(i);
         s32 dx, dy, dist;
         if (!QzCanFlyTo(t) || (q = QzPlace(t->mapsec, QZMAP_COUNT)) == NULL || QzRegionOfPage(q->map) != QzRegionOfPage(p->map))
             continue;

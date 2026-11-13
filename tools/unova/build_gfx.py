@@ -354,6 +354,16 @@ def main():
     pack += pics
     backs, nbacks = back_pictures()
     pack += backs
+    # (the TOWN MAP's picture: "TMAP", u16 width, height, RGB555 rows: tools/unova/gen_townmap.py picture())
+    import importlib.util   # (UNOVA's own gen_townmap.py: SINNOH's has the same name on the path)
+    spec = importlib.util.spec_from_file_location('unova_townmap', os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), 'gen_townmap.py'))
+    gen_townmap = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gen_townmap)
+    tm = gen_townmap.picture()
+    pack += b'TMAP' + struct.pack('<HH', len(tm[0]), len(tm))
+    for row in tm:
+        pack += struct.pack('<%dH' % len(row), *row)
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(bytes(pack))
     print('%s: %d of %d object codes drawn, %d battle pictures, %d backs, %d bytes'

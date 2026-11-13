@@ -455,6 +455,102 @@
       "map": "MAP_SINNOH_VEILSTONE_CITY",
       "x": 45,
       "y": 36
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_NUVEMA_TOWN",
+      "map": "MAP_UNOVA_NUVEMATOWN",
+      "x": 14,
+      "y": 14
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_ACCUMULA_TOWN",
+      "map": "MAP_UNOVA_ACCUMULATOWN",
+      "x": 28,
+      "y": 18
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_STRIATON_CITY",
+      "map": "MAP_UNOVA_STRIATONCITY_24_18",
+      "x": 13,
+      "y": 12
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_NACRENE_CITY",
+      "map": "MAP_UNOVA_NACRENECITY_19_18",
+      "x": 29,
+      "y": 22
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_CASTELIA_CITY",
+      "map": "MAP_UNOVA_CASTELIACITY",
+      "x": 69,
+      "y": 71
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_NIMBASA_CITY",
+      "map": "MAP_UNOVA_NIMBASACITY_12_14",
+      "x": 22,
+      "y": 20
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_DRIFTVEIL_CITY",
+      "map": "MAP_UNOVA_DRIFTVEILCITY_5_12",
+      "x": 27,
+      "y": 29
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_MISTRALTON_CITY",
+      "map": "MAP_UNOVA_MISTRALTONCITY_3_9",
+      "x": 12,
+      "y": 17
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_ICIRRUS_CITY",
+      "map": "MAP_UNOVA_ICIRRUSCITY_5_6",
+      "x": 24,
+      "y": 4
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_OPELUCID_CITY",
+      "map": "MAP_UNOVA_OPELUCIDCITY_13_5",
+      "x": 9,
+      "y": 13
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_POKEMON_LEAGUE",
+      "map": "MAP_UNOVA_POKMONLEAGUE",
+      "x": 18,
+      "y": 48
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_LACUNOSA_TOWN",
+      "map": "MAP_UNOVA_LACUNOSATOWN_Z406",
+      "x": 20,
+      "y": 25
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_UNDELLA_TOWN",
+      "map": "MAP_UNOVA_UNDELLATOWN_Z412_23_9",
+      "x": 24,
+      "y": 12
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_BLACK_CITY",
+      "map": "MAP_UNOVA_BLACKCITY",
+      "x": 43,
+      "y": 37
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_UNITY_TOWER",
+      "map": "MAP_UNOVA_UNITYTOWER",
+      "x": 11,
+      "y": 12
+    },
+    {
+      "id": "HEAL_LOCATION_UNOVA_VICTORY_ROAD",
+      "map": "MAP_UNOVA_VICTORYROAD",
+      "x": 42,
+      "y": 43
     }
   ]
 }

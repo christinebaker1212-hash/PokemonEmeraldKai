@@ -340,6 +340,7 @@ static void FlagTo(u16 id, bool8 on)
 }
 
 bool8 U3D_Vm_Flag(u16 id) { return FlagOn(id); }
+void U3D_Vm_SetFlag(u16 id) { FlagTo(id, TRUE); }
 
 // ------------------------------------------------------------------------------------------------ the zone's events
 static u16 CurrentZone(void)
@@ -3062,6 +3063,10 @@ void U3D_Vm_FieldShown(void)
     if (!Ready())
         return;
     PlateDoorsRefresh(FALSE);
+    {
+        void U3D_TownMapArrive(u16 zone);
+        U3D_TownMapArrive(CurrentZone());   // (Black's arrival flags: FLY's towns, src/unova/u3d_townmap.c)
+    }
     if (CurrentZone() == ZONE_DRIFTVEIL_GYM)
         MineSetup();
     else if (U3D_HexActive())
