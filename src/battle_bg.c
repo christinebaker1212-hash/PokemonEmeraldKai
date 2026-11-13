@@ -1,4 +1,5 @@
 #include "global.h"
+#include "u3d.h"
 #include "mp.h"
 #include "battle.h"
 #include "battle_bg.h"
@@ -765,6 +766,8 @@ void LoadBattleMenuWindowGfx(void)
 
 void DrawMainBattleBackground(void)
 {
+    if (!(MP_BG_TYPE_FLAGS & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED_LINK)) && U3D_BattleBg(U3D_BBG_ALL))
+        return;   // Moemon Kai: UNOVA's battles in Black's own scenes (u3d_battlebg.c)
     if (MP_BG_TYPE_FLAGS & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED_LINK))
     {
         LZDecompressVram(gBattleEnvironmentTiles_Building, (void *)(BG_CHAR_ADDR(2)));
@@ -1131,6 +1134,8 @@ void InitLinkBattleVsScreen(u8 taskId)
 
 void DrawBattleEntryBackground(void)
 {
+    if (!(MP_BG_TYPE_FLAGS & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED_LINK)) && U3D_BattleBg(U3D_BBG_ENTRY))
+        return;   // Moemon Kai: UNOVA's (u3d_battlebg.c)
     // Moemon Co-op: co-op battles (link under the hood) look like normal ones: no VS frame
     if ((gBattleTypeFlags & BATTLE_TYPE_LINK) && !gMpCoopBattle)
     {
@@ -1232,6 +1237,8 @@ bool8 LoadChosenBattleElement(u8 caseId)
         LoadCompressedPalette(gBattleTextboxPalette, BG_PLTT_ID(0), 2 * PLTT_SIZE_4BPP);
         break;
     case 3:
+        if (!(MP_BG_TYPE_FLAGS & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED_LINK)) && U3D_BattleBg(U3D_BBG_TILES))
+            break;   // Moemon Kai: UNOVA's (u3d_battlebg.c)
         if (MP_BG_TYPE_FLAGS & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_EREADER_TRAINER))
         {
             LZDecompressVram(gBattleEnvironmentTiles_Building, (void *)(BG_CHAR_ADDR(2)));
@@ -1291,6 +1298,8 @@ bool8 LoadChosenBattleElement(u8 caseId)
         }
         break;
     case 4:
+        if (!(MP_BG_TYPE_FLAGS & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED_LINK)) && U3D_BattleBg(U3D_BBG_MAP))
+            break;   // Moemon Kai: UNOVA's (u3d_battlebg.c)
         if (MP_BG_TYPE_FLAGS & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_EREADER_TRAINER))
         {
             LZDecompressVram(gBattleEnvironmentTilemap_Building, (void *)(BG_SCREEN_ADDR(26)));
@@ -1353,6 +1362,8 @@ bool8 LoadChosenBattleElement(u8 caseId)
         }
         break;
     case 5:
+        if (!(MP_BG_TYPE_FLAGS & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED_LINK)) && U3D_BattleBg(U3D_BBG_PALETTE))
+            break;   // Moemon Kai: UNOVA's (u3d_battlebg.c)
         if (MP_BG_TYPE_FLAGS & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_EREADER_TRAINER))
         {
             LoadCompressedPalette(gBattleEnvironmentPalette_Frontier, BG_PLTT_ID(2), 3 * PLTT_SIZE_4BPP);

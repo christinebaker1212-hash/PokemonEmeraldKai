@@ -26,6 +26,7 @@ DIST = 666.922119140625
 PITCH = math.radians(59.051513671875)
 HALF_FOV_DS = math.radians(8.0914306640625)
 FOCAL = 96.0 / math.tan(HALF_FOV_DS)   # pixels: the DS's 192-pixel height spans 2 * tan(half fov)
+CX = CY = None   # (the picture's centre, W / 2 and H / 2 unless a caller moves it: UNOVA's battle scenes)
 BLOCK = 512.0                          # 32 tiles of 16 units
 
 
@@ -182,8 +183,8 @@ def draw_tri(tri, origin, rot, img, mat, view, lb, color, depth, ids):
         c = view @ np.array([p[0], p[1], p[2], 1.0])
         if c[2] > -1.0:
             return
-        sx = W / 2 + FOCAL * c[0] / -c[2]
-        sy = H / 2 - FOCAL * c[1] / -c[2]
+        sx = (W / 2 if CX is None else CX) + FOCAL * c[0] / -c[2]
+        sy = (H / 2 if CY is None else CY) - FOCAL * c[1] / -c[2]
         ln = np.linalg.norm(n)
         if mat.lights and ln > 0:
             col = lit(mat, lb, n / ln, vcol)

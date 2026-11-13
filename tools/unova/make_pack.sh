@@ -65,4 +65,5 @@ python3 -I tools/unova/build_pack.py unova/black3d.pak
 python3 -I tools/unova/build_text.py unova/black_text.pak
 python3 -I tools/unova/build_scripts.py unova/black_scripts.pak
 python3 -I tools/unova/build_gfx.py unova/black_gfx.pak
+python3 -I tools/unova/battle_bg.py unova/black_battle.pak
 ls -la unova/

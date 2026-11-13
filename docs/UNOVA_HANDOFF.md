@@ -123,6 +123,15 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   shot a silent warp to the landing cell of ov041's gCannonsFlights for the cannon and the facing; the flight itself
   and the cannons' turning not drawn). The CELESTIAL TOWER's bell (the gym's door, Black flag 0x2AE) is rung from the
   tile in front of it.
+  Black's battle backgrounds (2026-11-13): tools/unova/battle_bg.py renders every scene Black's stage table can
+  pick (archive 0x98 member 0 rows = the zone header's field effect set, columns = MAP_ATTR_GetBattleBackground of
+  the player's terrain, variants = seasons; member 1 fields, member 2 stages, models a/0/1/1) through Black's battle
+  camera (ov094 btlv_camera.c), scaled x 0.883 and centred so its far stage is Kai's (112-240 x 48-80), into
+  unova/black_battle.pak as Emerald-format backgrounds (64 x 16 tiles: the scene, then the field alone mirrored,
+  three 15-colour palettes, at most 511 tiles). The 3D pack (version 6) keeps each tile's column; u3d_battlebg.c
+  U3D_BattleBg answers src/battle_bg.c's DrawMainBattleBackground / DrawBattleEntryBackground / LoadChosenBattle-
+  Element first (visual only: gBattleEnvironment stays Kai's, so Camouflage, Secret Power, the intro slide are
+  Kai's). MOEMON_U3D_BATTLE_LOG=1 logs the pick. Black's catch rules: u3d_battle.c U3D_CatchCase.
   The gyms' machinery drawn (2026-11-13, docs/UNOVA_PARITY.md 1): each gimmick overlay's G3dUtilSetup read by
   tools/unova/gimmicks.py into pack v5 (a model a mesh whose vertices carry their rigid part in the colour's spare byte,
   each joint animation a 3x4 matrix a part a frame, checked vertex for vertex against Black's posed model; placements from

@@ -84,6 +84,8 @@ typedef struct
     u8 hn[32 * 32];
     float h[32 * 32][2];
     u16 (*cam)[3];   // (a rail map's cells: Black's camera of each tile's rail, pitch, yaw, distance; NULL none)
+    u8 battle;       // (6) the battle background column of every tile (Black's MAP_ATTR_GetBattleBackground)...
+    u8 *battleTile;  // ... or each tile's own (NULL: all the same)
 } U3dCell;
 typedef struct { u16 number, width, height, x0, z0, scale; U3dCell *cells; } U3dMatrix;   // (scale: a block is scale x scale
                                                                                               // cells, its meshes in the first)
@@ -187,7 +189,7 @@ static void LoadPack(void)
     }
     r.p += 4;
     version = TakeU32(&r);
-    if (version < 1 || version > 5)
+    if (version < 1 || version > 6)
     {
         printf("[u3d] %s: another pack version (%u)\n", path, (unsigned)version);
         free(data);
@@ -292,6 +294,16 @@ static void LoadPack(void)
                 else if (hasCam)
                     r.bad = TRUE;
             }
+            if (version >= 6)
+            {
+                Take(&r, &c->battle, 1);
+                if (c->battle == 0xFF && (c->battleTile = malloc(1024)) != NULL)
+                    Take(&r, c->battleTile, 1024);
+                else if (c->battle == 0xFF)
+                    r.bad = TRUE;
+            }
+            else
+                c->battle = 4;   // (an older pack: Black's plain ground)
         }
     }
     if (version >= 4 && !r.bad)
@@ -410,6 +422,24 @@ static void MapToGrid(s16 x, s16 y, s32 *gtx, s32 *gtz)   // (map tiles, MAP_OFF
     s32 m = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
     *gtx = x - MAP_OFFSET + (m >= 0 ? 32 * sUnovaMaps[m].cx : 0);
     *gtz = y - MAP_OFFSET + (m >= 0 ? 32 * sUnovaMaps[m].cz : 0);
+}
+
+// Black's battle background column of the ground under map tile X, Y (MAP_OFFSET in): its terrain's
+// (ov021 map_attr.c MAP_ATTR_GetBattleBackground, kept in the pack; u3d_battle.c picks the background with it)
+static const U3dCell *Cell(s32 cx, s32 cz);
+u8 U3D_BattleColumnAt(s16 x, s16 y)
+{
+    s32 gtx, gtz, cx, cz;
+    const U3dCell *c;
+    MapToGrid(x, y, &gtx, &gtz);
+    cx = gtx >= 0 ? gtx / 32 : -((31 - gtx) / 32);
+    cz = gtz >= 0 ? gtz / 32 : -((31 - gtz) / 32);
+    c = Cell(cx, cz);
+    if (c == NULL)
+        return 4;
+    if (c->battleTile == NULL)
+        return c->battle;
+    return c->battleTile[(gtz - cz * 32) * 32 + (gtx - cx * 32)];
 }
 
 void U3D_HexClear(void)
@@ -1160,6 +1190,26 @@ static void PickLight(u16 light)
         }
     sLight = &s->b[pick];
     sLightBlock = set * 256 + pick;   // (the vertices' light is worked out again when this changes)
+}
+
+// Black's light 0 (its colour, 0-31) on the player's cell now: a battle's scene is lit by it (u3d_battlebg.c, as
+// BTLV_EFFECT_Init's ZONEDATA_GetTimeLightColors); white without one
+void U3D_LightColor(u8 rgb[3])
+{
+    s32 gtx, gtz, cx, cz;
+    const U3dCell *c;
+    rgb[0] = rgb[1] = rgb[2] = 31;
+    if (!sPack.ok || gSaveBlock1Ptr == NULL)
+        return;
+    MapToGrid(gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x,
+              gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y, &gtx, &gtz);
+    cx = gtx >= 0 ? gtx / 32 : -((31 - gtx) / 32);
+    cz = gtz >= 0 ? gtz / 32 : -((31 - gtz) / 32);
+    if ((c = Cell(cx, cz)) == NULL)
+        return;
+    PickLight(c->light);
+    if (sLight != NULL && sLight->l[0].on)
+        rgb[0] = sLight->l[0].r, rgb[1] = sLight->l[0].g, rgb[2] = sLight->l[0].b;
 }
 
 static void Light(U3dGroup *g)

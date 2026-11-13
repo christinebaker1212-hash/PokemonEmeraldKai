@@ -25,7 +25,9 @@ with Black's matrices:
                  game's behavior), u8 count (0-2) and f32 heights x 2 per tile (the ground at its centre, lowest first:
                  a "GC" block's second grid is a bridge or a floor over it), (version 3) u8 1 if the cell has rail
                  cameras, then u16 pitch, yaw, distance per tile (0, 0, 0: the zone's own camera): Black's camera of
-                 the rail the tile is on (tools/unova/rails.py camera_at)
+                 the rail the tile is on (tools/unova/rails.py camera_at), (version 6) u8 the cell's battle column
+                 (0xFF: one per tile follows, 1024 bytes): Black's MAP_ATTR_GetBattleBackground of the tile's terrain,
+                 the stage table's column of UNOVA's battle backgrounds (tools/unova/battle_bg.py)
 """
 import importlib.util
 import math
@@ -54,7 +56,8 @@ _sinnoh = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_sinnoh)
 Pack = _sinnoh.Pack      # (texture and mesh tables, shared as a tool: never the games' engines)
 
-VERSION = 5   # (4: Black's animated map textures, an area's ITP frames and ITA scrolling; 5: the gyms' machinery)
+VERSION = 6   # (4: Black's animated map textures, an area's ITP frames and ITA scrolling; 5: the gyms' machinery;
+              #  6: each tile's battle background column)
 ITA_ARC, ITP_ARC = 'a/0/6/9', 'a/0/7/0'   # (an area record's ita / itp: zonedata.c ZONEDATA_GetAreaItaAnimeId...)
 
 
@@ -196,6 +199,19 @@ BEHAVIOR = {
     0xD4: MB_COUNTER,
 }
 WATER = {0x3D, 0x3E, 0x3F, 0x40, 0x42, 0x43}
+
+
+_BATTLE_BG = None
+
+
+def battle_column(attr):
+    """Black's battle background column of a tile (ov021 map_attr.c MAP_ATTR_GetBattleBackground: its terrain id
+    through the 37 pairs at 0x021D8EA0, 0 if none)"""
+    global _BATTLE_BG
+    if _BATTLE_BG is None:
+        im = gimmicks.Image(21)
+        _BATTLE_BG = {im.d[0x021D8EA0 - im.ram + 2 * i]: im.d[0x021D8EA0 - im.ram + 2 * i + 1] for i in range(0x25)}
+    return _BATTLE_BG.get(attr & 0xFFFF, 0) if attr != 0x7FFFFFFF else 0
 
 
 def field_block(attr):
@@ -404,7 +420,8 @@ def lay_rails(grid, zone_ids, warps, cams):
                 continue
             key = (tx // 32, tz // 32)
             if key not in grid:
-                grid[key] = (z, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)])
+                grid[key] = (z, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)],
+                             [battle_column(0)] * 1024)   # (a rail map's ground: Black's plain terrain)
             cell = grid[key]
             t = (tz % 32) * 32 + tx % 32
             if (tx, tz) in gated:
@@ -474,7 +491,7 @@ def build(matrix_ids=None):
                 i = cz * mx['w'] + cx
                 b, zone = mx['blocks'][i], mx['zones'][i]
                 if b == mxr.NONE or b >= len(blocks):
-                    cells.append((0xFFFF, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)], 32))
+                    cells.append((0xFFFF, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)], 32, [0] * 1024))
                     continue
                 zrec = zs[zone] if zone < len(zs) else (zs[owners[0]] if owners else None)
                 area_id = zrec['area'] if zrec else 0
@@ -516,7 +533,7 @@ def build(matrix_ids=None):
                 grids = [terrain.grid(layer) for layer in layers]
                 # (a bigger block's grid is wider than 32: the LEAGUE's 64 x 64, laid over its k x k cells below)
                 gw = struct.unpack_from('<H', layers[0], 0)[0] if layers else 32
-                fb, hts = [], []
+                fb, hts, bgs = [], [], []
                 for t in range(gw * gw):
                     if grids and t < len(grids[0]):
                         attr = grids[0][t][0]
@@ -531,10 +548,12 @@ def build(matrix_ids=None):
                             fb.append(field_block(attr))
                         hs = sorted({round(g[t][1], 2) for g in grids if t < len(g)})
                         hts.append(hs[:2])
+                        bgs.append(battle_column(attr))
                     else:
                         fb.append(BLOCKED)
                         hts.append([])
-                cells.append((zone, meshes, cell_light(area_id), props, fb, hts, gw))
+                        bgs.append(0)
+                cells.append((zone, meshes, cell_light(area_id), props, fb, hts, gw, bgs))
         k = scale_of(owners)
         grid = {}
         for i, c in enumerate(cells):
@@ -545,16 +564,17 @@ def build(matrix_ids=None):
                     if gw >= 32 * (max(sx, sz) + 1):   # (this 32 x 32 part of the block's own grid)
                         fb = [c[4][(sz * 32 + ty) * gw + sx * 32 + tx] for ty in range(32) for tx in range(32)]
                         hts = [c[5][(sz * 32 + ty) * gw + sx * 32 + tx] for ty in range(32) for tx in range(32)]
+                        bgs = [c[7][(sz * 32 + ty) * gw + sx * 32 + tx] for ty in range(32) for tx in range(32)]
                     else:
-                        fb, hts = [BLOCKED] * 1024, [[] for _ in range(1024)]
+                        fb, hts, bgs = [BLOCKED] * 1024, [[] for _ in range(1024)], [0] * 1024
                     first = sx == 0 and sz == 0
                     grid[(cx * k + sx, cz * k + sz)] = (c[0], c[1] if first else [-1] * 4, c[2],
-                                                        c[3] if first else [], fb, hts)
+                                                        c[3] if first else [], fb, hts, bgs)
         cams = {}
         lay_rails(grid, owners, warps, cams)
         gx, gz = [g[0] for g in grid], [g[1] for g in grid]
         x0, z0, x1, z1 = min(gx), min(gz), max(gx), max(gz)
-        cells = [grid.get((cx, cz)) or (0xFFFF, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)])
+        cells = [grid.get((cx, cz)) or (0xFFFF, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)], [0] * 1024)
                  for cz in range(z0, z1 + 1) for cx in range(x0, x1 + 1)]
         cell_cams = [cams.get((cx, cz)) for cz in range(z0, z1 + 1) for cx in range(x0, x1 + 1)]
         mats.append((mn, (x0, z0, x1, z1), cells, k, cell_cams))
@@ -611,7 +631,7 @@ def write(path, pack, light_sets, mats, gims=([], [])):
     out += struct.pack('<I', len(mats))
     for number, (x0, z0, x1, z1), cells, scale, cell_cams in mats:
         out += struct.pack('<6H', number, x1 - x0 + 1, z1 - z0 + 1, x0, z0, scale)
-        for (zone, meshes, light, props, fb, hts), cam in zip(cells, cell_cams):
+        for (zone, meshes, light, props, fb, hts, bgs), cam in zip(cells, cell_cams):
             out += struct.pack('<H4hHH', zone, *meshes, light, len(props))
             for pms, m in props:
                 out += struct.pack('<4h12f', *pms, *m)
@@ -622,6 +642,7 @@ def write(path, pack, light_sets, mats, gims=([], [])):
             out += bytes([1 if cam else 0])
             if cam:
                 out += b''.join(struct.pack('<3H', *(c or (0, 0, 0))) for c in cam)
+            out += bytes([bgs[0]]) if len(set(bgs)) == 1 else bytes([0xFF]) + bytes(bgs)   # (6)
     out += struct.pack('<I', len(pack.anims))   # (4: the animated textures, each texture's frames in turn)
     for base, steps in pack.anims:
         out += struct.pack('<HH', base, len(steps))

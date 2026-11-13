@@ -78,8 +78,14 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 - [ ] POKeMON forms outside battle (ROTOM's appliances 0x117 / 0x11C, DEERLING / SAWSBUCK's seasons, form numbers
       0x0FF): Kai keeps forms its own way (battle recomputes); not reworked, unless the user says otherwise
 - [ ] TRIPLE and ROTATION battles as Black's trainers have them (Kai's Triple Battles)
-- [ ] To ask the user: Black's catch rules in UNOVA and Black's battle backgrounds were decided for UNOVA
-      (UNOVA_DECISIONS.md) but the game has its own of both
+- [x] Black's catch rules (the user, 2026-11-13: "Black's catch rules and battle backgrounds, adapted to Kai
+      standards"): ov093's CalcCaptureShakes, critical captures, the dex factor and Black's balls' rates
+      (u3d_battle.c U3D_CatchCase, from battle_script_commands.c); Kai's own balls keep their rates (the ASTRAL BALL its sure catch)
+- [x] Black's battle backgrounds: each scene (archive 0x98's tables, the models of a/0/1/1) drawn through Black's
+      battle camera when the packs are built, fitted to Kai's screen and Kai's format (BG3, 3 palettes, the intro's
+      second half free of platforms): visual only, Kai's battles unchanged (singles, Doubles, Triples, co-op; PvP keeps
+      Kai's building): tools/unova/battle_bg.py, u3d_battlebg.c; the time's light tints the lit rows. Left: the
+      fields' own animations (clouds, water: a/0/1/1's animation files) are drawn at their first frame
 - [ ] NIMBASA's people tables (NETWORK NPC tables 0x1F3-0x1F8, 0x25C)
 - [ ] UNITY TOWER, the GEAR STATION / CASTELIA name and greeting boards (0x1D8-0x1E3, 0x1ED, 0x20C) as far as they
       don't need Wi-Fi

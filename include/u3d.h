@@ -53,6 +53,15 @@ bool8 U3D_Vm_CannonAhead(u16 direction);   // (u3d_vm.c: SKYLA's gym's cannons, 
 bool8 U3D_Vm_IceSlideAhead(u16 direction);   // (u3d_vm.c: BRYCEN's gym's ice slides, the player on one's start)
 bool8 U3D_Vm_DockStep(u16 direction);   // (u3d_vm.c: ELESA's gym's coasters, a dock stepped onto)   // (u3d_vm.c: a map first shown, a continued game's too)
 const u16 *U3D_LayoutBlocks(const struct MapLayout *layout);
+// UNOVA's battle backgrounds, Black's own (u3d_battlebg.c): src/battle_bg.c asks first
+#define U3D_BBG_ALL 0
+#define U3D_BBG_TILES 1
+#define U3D_BBG_MAP 2
+#define U3D_BBG_PALETTE 3
+#define U3D_BBG_ENTRY 4
+bool8 U3D_BattleBg(u8 part);
+u8 U3D_BattleColumnAt(s16 x, s16 y);                          // (Black's battle background column of a map tile)
+void U3D_LightColor(u8 rgb[3]);                               // (Black's light 0 now, 0-31; white without one)
 bool8 U3D_CatchRules(void);                                   // (UNOVA's catches: Black's, u3d_battle.c)
 u8 U3D_CatchCase(u8 battler, u16 ball, u8 catchRate, u8 kaiMultiplier);
 void U3D_SetDarkGrassBattle(bool8 on);

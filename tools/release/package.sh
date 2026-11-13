@@ -77,6 +77,9 @@ fi
 if [ -f unova/black3d.pak ] && [ -f unova/black_text.pak ] && [ -f unova/black_scripts.pak ] && [ -f unova/black_gfx.pak ]; then
     mkdir -p "$P/unova"
     cp unova/black3d.pak unova/black_text.pak unova/black_scripts.pak unova/black_gfx.pak "$P/unova/"
+    if [ -f unova/black_battle.pak ]; then   # (Black's battle backgrounds: tools/unova/battle_bg.py)
+        cp unova/black_battle.pak "$P/unova/"
+    fi
 fi
 # POKeMON STADIUM's announcer voices (tools/stadium/mort/make_pack.sh, from the user's ROM; the release runs it first)
 for v in announcer.s1 announcer_jp.s1; do   # (English, Japanese)
