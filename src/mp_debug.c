@@ -4582,6 +4582,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (sscanf(arg + flag, "%x", &id) == 1)
             printf("[test] u3d %s %X = %u\n", flag ? "flag" : "work", id, U3D_Vm_DebugGet(flag, id));
     }
+    else if (strcmp(cmd, "u3drun") == 0)   // u3drun ID (decimal): a Black script of this zone (or shared) as a scene
+    {
+        bool8 U3D_Vm_DebugRun(u16 id);
+        printf("[test] u3drun %d: %d\n", atoi(arg), U3D_Vm_DebugRun((u16)atoi(arg)));
+    }
     else if (strcmp(cmd, "u3dwork") == 0 || strcmp(cmd, "u3dflag") == 0)   // u3dwork WORK VALUE / u3dflag FLAG 0|1 (hex)
     {
         unsigned id = 0, v = 0;

@@ -26,6 +26,14 @@ bool8 U3D_RailWarpArmed(void);
 bool8 U3D_StepBlocked(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y);   // (a door from the side, a floor's edge)
 struct ObjectEvent;
 bool8 U3D_ObjectsApart(const struct ObjectEvent *a, const struct ObjectEvent *b);   // (people on different floors)
+// Black's gym machinery (field expansion objects, u3d.c): the gimmick of overlay OV's models where Black places them,
+// MODEL's animation ANIM at FRAME (-1 its last) or played on, hidden, moved
+void U3D_ExpLoad(u8 ov);
+void U3D_ExpClear(void);
+void U3D_ExpAnim(u16 model, u8 anim, s16 frame, bool8 play);
+bool8 U3D_ExpPlaying(u16 model);
+void U3D_ExpHide(u16 model, bool8 hidden);
+void U3D_ExpPlace(u16 model, float x, float y, float z, u16 yaw);
 void U3D_HexClear(void);                                     // Black's height areas (CLAY's gym's floors, u3d.c)
 void U3D_HexSet(u8 i, s16 x, s16 z, s16 w, s16 d, s16 h);
 bool8 U3D_HexActive(void);
@@ -37,6 +45,7 @@ float U3D_HexTopAtPlayer(void);
 bool8 U3D_HexHasPlayer(u8 i);
 float U3D_ObjectHeight(const struct ObjectEvent *o);         // (a person's height: the player's floor, Black's height)
 void U3D_Vm_FieldShown(void);
+void U3D_Vm_FieldFrame(void);
 bool8 U3D_Vm_CannonAhead(u16 direction);   // (u3d_vm.c: SKYLA's gym's cannons, one two cells ahead)
 bool8 U3D_Vm_IceSlideAhead(u16 direction);   // (u3d_vm.c: BRYCEN's gym's ice slides, the player on one's start)
 bool8 U3D_Vm_DockStep(u16 direction);   // (u3d_vm.c: ELESA's gym's coasters, a dock stepped onto)   // (u3d_vm.c: a map first shown, a continued game's too)

@@ -50,3 +50,5 @@ static const u16 sDragonPoseTiles[3][4][2] = {   // (first, count in sDragonTile
     {{26, 12}, {38, 0}, {38, 7}, {45, 7}},
     {{52, 8}, {60, 0}, {60, 7}, {67, 7}},
 };
+// the dragon's turn from one pose to another: its model's animation (FIELD_GIMMICK_ROTATING_ROOM_GetRotateAnim)
+static const s8 sDragonRotateAnim[4][4] = {{-6, -6, 2, 0}, {-6, -6, 6, 4}, {3, 7, -6, -6}, {1, 5, -6, -6}};

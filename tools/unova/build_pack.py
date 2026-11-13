@@ -46,6 +46,7 @@ import rails  # noqa: E402
 import gen_gyms  # noqa: E402
 import scrcmd  # noqa: E402
 import events as evr  # noqa: E402
+import gimmicks  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location('sinnoh_build_pack', os.path.join(os.path.dirname(HERE), 'sinnoh',
                                                                                  'build_pack.py'))
@@ -53,7 +54,7 @@ _sinnoh = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_sinnoh)
 Pack = _sinnoh.Pack      # (texture and mesh tables, shared as a tool: never the games' engines)
 
-VERSION = 4   # (4: Black's animated map textures, an area's ITP frames and ITA scrolling)
+VERSION = 5   # (4: Black's animated map textures, an area's ITP frames and ITA scrolling; 5: the gyms' machinery)
 ITA_ARC, ITP_ARC = 'a/0/6/9', 'a/0/7/0'   # (an area record's ita / itp: zonedata.c ZONEDATA_GetAreaItaAnimeId...)
 
 
@@ -573,14 +574,14 @@ def split(tri):
     """TRI ((pos, uv, colour, normal) x 3) as triangles no side of which is longer than SPLIT"""
     lens = [math.dist(tri[i][0], tri[(i + 1) % 3][0]) for i in range(3)]
     i = max(range(3), key=lambda k: lens[k])
-    if lens[i] <= SPLIT:
-        return [tri]
+    if lens[i] <= SPLIT or len({v[2][3] for v in tri if len(v[2]) > 3}) > 1:
+        return [tri]   # (... or one joining two of a gym model's parts: a middle point belongs to neither)
     a, b, c = tri[i], tri[(i + 1) % 3], tri[(i + 2) % 3]
     m = _mid(a, b)
     return split((a, m, c)) + split((m, b, c))
 
 
-def write(path, pack, light_sets, mats):
+def write(path, pack, light_sets, mats, gims=([], [])):
     out = bytearray(b'U3DP' + struct.pack('<I', VERSION))
     out += struct.pack('<I', len(pack.textures))
     for w, h, px in pack.textures:
@@ -595,8 +596,8 @@ def write(path, pack, light_sets, mats):
                                srt[0] if srt else 0)
             for tri in tris:
                 for pos, uv, col, nrm in tri:
-                    out += struct.pack('<5f4B3f', pos[0], pos[1], pos[2], uv[0], uv[1], col[0], col[1], col[2], 0,
-                                       nrm[0], nrm[1], nrm[2])
+                    out += struct.pack('<5f4B3f', pos[0], pos[1], pos[2], uv[0], uv[1], col[0], col[1], col[2],
+                                       col[3] if len(col) > 3 else 0, nrm[0], nrm[1], nrm[2])   # (a gym model's part)
     out += struct.pack('<I', len(light_sets))
     for blocks in light_sets:
         out += struct.pack('<I', len(blocks))
@@ -629,6 +630,20 @@ def write(path, pack, light_sets, mats):
     for frames in pack.srts:
         out += struct.pack('<H', len(frames))
         out += b''.join(struct.pack('<2f', s_, t_) for s_, t_ in frames)
+    kinds, gimmick_list = gims   # (5: the gyms' machinery, tools/unova/gimmicks.py)
+    out += struct.pack('<I', len(kinds))
+    for mesh, nparts, anims in kinds:
+        out += struct.pack('<HHh', nparts, len(anims), mesh)
+        for n, frames in anims:
+            out += struct.pack('<H', n)
+            for row in frames:
+                for m in row:
+                    out += struct.pack('<12f', *m)
+    out += struct.pack('<I', len(gimmick_list))
+    for ov, models in gimmick_list:
+        out += struct.pack('<BBH', ov, 0, len(models))
+        for kind, pos, yaw, hidden in models:
+            out += struct.pack('<H3fHBB', kind, pos[0], pos[1], pos[2], yaw, hidden, 0)
     packed = b'U3DZ' + struct.pack('<I', len(out)) + zlib.compress(bytes(out), 6)
     open(path, 'wb').write(packed)
     return len(packed)
@@ -638,7 +653,8 @@ def main():
     out = sys.argv[1]
     wanted = [int(a) for a in sys.argv[2:]] or None
     pack, lights, mats = build(wanted)
-    size = write(out, pack, lights, mats)
+    gims = gimmicks.add(pack)
+    size = write(out, pack, lights, mats, gims)
     print('%s: %d textures, %d meshes, %d matrices, %d bytes' % (out, len(pack.textures), len(pack.meshes), len(mats),
                                                                 size))
 

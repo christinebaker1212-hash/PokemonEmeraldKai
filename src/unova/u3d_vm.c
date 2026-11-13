@@ -987,12 +987,15 @@ static u16 TrainerWords(u16 trainer, u16 kind);
 static u16 EyeSong(u16 trainer);
 static bool8 IceRide(u16 req);   // (BRYCEN's gym's slides: the end of this file)
 static bool8 DragonHop(u16 direction);   // (DRAYDEN's gym's dragons: the end of this file)
-static void DragonLever(u16 unit, u16 side);
-static void DragonRotate(u16 unit);
+static bool8 DragonLever(u16 unit, u16 side);
+static bool8 DragonRotate(u16 unit);
+static void DragonModels(void);
+static void DragonInside(void);
 static void DragonReset(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
-enum { W_BGM_STOPPED = 100, };
+enum { W_BGM_STOPPED = 100, W_EXP_ANIM };   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
+static u16 sExpWait;
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
        W_WARP };   // (W_WARP: a warp's map is loading; the script goes on there: U3D_Vm_SceneStart)
 
@@ -2276,10 +2279,12 @@ static void Step(struct Thread *t)
                 t->wait = W_MOVES;
             break;
         case U3C_FIELD_GIMMICK_ROTATING_ROOM_StartLeverEvent:   // ... its lever (unit, side) thrown
-            DragonLever(V(0), V(1));
+            if (DragonLever(V(0), V(1)))
+                t->wait = W_EXP_ANIM;
             break;
         case U3C_FIELD_GIMMICK_ROTATING_ROOM_StartRotateEvent:   // ... the dragon turns to the levers' pose
-            DragonRotate(V(0));
+            if (DragonRotate(V(0)))
+                t->wait = W_EXP_ANIM;
             break;
         case U3C_PROC_Ov037Finish:   // (ov037 GIMMICK_INIT_ResetRotatingRoomPanels: DRAYDEN's dragons as they start)
             DragonReset();
@@ -3409,6 +3414,10 @@ static void Wait(struct Thread *t)
         if (!U3D_CameraMoving())
             t->wait = W_NONE;
         break;
+    case W_EXP_ANIM:   // (Black's gimmick events wait for their model's animation: FLD_EXP_OBJ_IsAnimeStopped)
+        if (!U3D_ExpPlaying(sExpWait))
+            t->wait = W_NONE;
+        break;
     case W_BGM_STOPPED:   // (Black's StartWaitBgmStopped: till the song ends, a jingle's say)
         if (IsBGMStopped() || t->waitFrames == 0 || --t->waitFrames == 0)
             t->wait = W_NONE;
@@ -3820,6 +3829,13 @@ bool8 U3D_Vm_PersonHeight(u8 localId, float *h)
 }
 
 // The field shown on a map (u3d.c U3D_Update; a continued game's people come from the save, past the map's load script)
+// u3d.c U3D_Update, each frame on an UNOVA map: the gyms' machinery that follows the player
+void U3D_Vm_FieldFrame(void)
+{
+    if (Ready() && CurrentZone() == DRAGON_GYM_ZONE)
+        DragonInside();
+}
+
 void U3D_Vm_FieldShown(void)
 {
     if (!Ready())
@@ -3829,6 +3845,14 @@ void U3D_Vm_FieldShown(void)
         void U3D_TownMapArrive(u16 zone);
         U3D_TownMapArrive(CurrentZone());   // (Black's arrival flags: FLY's towns, src/unova/u3d_townmap.c)
     }
+    if (CurrentZone() == DRAGON_GYM_ZONE)   // (the gyms' machinery: Black's models, u3d.c U3D_Exp*)
+    {
+        U3D_ExpLoad(46);
+        DragonModels();
+        DragonInside();
+    }
+    else
+        U3D_ExpClear();
     if (CurrentZone() == ZONE_DRIFTVEIL_GYM)
         MineSetup();
     else if (U3D_HexActive())
@@ -4051,22 +4075,50 @@ static bool8 DragonHop(u16 direction)
     return TRUE;
 }
 
-static void DragonLever(u16 unit, u16 side)
+// the models (ov046: five a unit, its dragon, two levers, two buttons): the dragon at its pose's turn's end
+// (FIELD_GIMMICK_ROTATING_ROOM_InitUnitPose: pose 0 animation 1, 1 5, 2 2, 3 0), each lever at its own's
+static void DragonModels(void)
 {
-    if (CurrentZone() != DRAGON_GYM_ZONE || unit >= 3 || side >= 2)
-        return;
-    DRAGON_STATE(unit) ^= 4 << side;
-    PlaySE(SE_SWITCH);
+    static const u8 sPoseAnim[4] = {1, 5, 2, 0};
+    u32 u;
+    for (u = 0; u < 3; u++)
+    {
+        U3D_ExpAnim(u * 5, sPoseAnim[DRAGON_STATE(u) & 3], -1, FALSE);
+        U3D_ExpAnim(u * 5 + 1, (DRAGON_STATE(u) >> 2) & 1, -1, FALSE);
+        U3D_ExpAnim(u * 5 + 2, (DRAGON_STATE(u) >> 3) & 1, -1, FALSE);
+    }
 }
 
-static void DragonRotate(u16 unit)
+// (its script waits for the lever's animation, as Black's lever event does)
+static bool8 DragonLever(u16 unit, u16 side)
+{
+    if (CurrentZone() != DRAGON_GYM_ZONE || unit >= 3 || side >= 2)
+        return FALSE;
+    DRAGON_STATE(unit) ^= 4 << side;
+    PlaySE(SE_SWITCH);
+    U3D_ExpAnim(unit * 5 + 1 + side, (DRAGON_STATE(unit) >> (2 + side)) & 1, 0, TRUE);
+    sExpWait = unit * 5 + 1 + side;
+    return U3D_ExpPlaying(sExpWait);
+}
+
+// (... and for the dragon's turn: the animation Black's table gives from the old pose to the new)
+static bool8 DragonRotate(u16 unit)
 {
     static const u8 sPose[4] = {0, 2, 3, 1};   // (levers: bit 0 the first, bit 1 the second)
+    u32 from, to;
     if (CurrentZone() != DRAGON_GYM_ZONE || unit >= 3)
-        return;
-    DRAGON_STATE(unit) = (DRAGON_STATE(unit) & ~3) | sPose[(DRAGON_STATE(unit) >> 2) & 3];
+        return FALSE;
+    from = DRAGON_STATE(unit) & 3;
+    to = sPose[(DRAGON_STATE(unit) >> 2) & 3];
+    DRAGON_STATE(unit) = (DRAGON_STATE(unit) & ~3) | to;
     PlaySE(SE_ELEVATOR);
     MPNet_Log("u3d vm: dragon %u turns to pose %u", (unsigned)unit, DRAGON_STATE(unit) & 3);
+    if (sDragonRotateAnim[from][to] < 0)   // (no turn between the two: the dragon as its pose stands)
+        DragonModels();
+    else
+        U3D_ExpAnim(unit * 5, sDragonRotateAnim[from][to], 0, TRUE);
+    sExpWait = unit * 5;
+    return U3D_ExpPlaying(sExpWait);
 }
 
 // the zone-change script's reset (ov037 GIMMICK_INIT_ResetRotatingRoomPanels): pose 3 (levers off, on), 1 (on, on),
@@ -4076,6 +4128,24 @@ static void DragonReset(void)
     DRAGON_STATE(0) = 3 | 8;
     DRAGON_STATE(1) = 1 | 4 | 8;
     DRAGON_STATE(2) = 2 | 4;
+    DragonModels();
+}
+
+// Black hides the far dragon, its buttons and the room's outside model (15) while the player is in the room
+// (FIELD_GIMMICK_ROTATING_ROOM_IsPosInside: no higher than 64, x from 256, z from 480)
+static void DragonInside(void)
+{
+    s32 i = U3D_MapIndex();
+    float x, z, y = U3D_ObjectHeight(&gObjectEvents[gPlayerAvatar.objectEventId]);
+    u32 k;
+    bool8 inside;
+    if (i < 0)
+        return;
+    x = (gSaveBlock1Ptr->pos.x + 32 * U3D_MapCellX(i)) * 16 + 8;
+    z = (gSaveBlock1Ptr->pos.y + 32 * U3D_MapCellZ(i)) * 16 + 8;
+    inside = !(y > 64) && x >= 256 && z >= 480;
+    for (k = 10; k <= 15; k++)
+        U3D_ExpHide(k, inside);
 }
 
 static bool8 DragonTileIn(u32 unit, u32 pose, s32 x, s32 z)
@@ -4366,6 +4436,15 @@ bool8 U3D_VmRunning(void)
 // tests (mp_debug.c `mp u3dwork WORK VALUE` / `mp u3dflag FLAG 0|1`, Black's numbers in hex): a scene set up without
 // playing the story to it
 // (tests: `mp u3dget WORK` / `mp u3dget fFLAG`, hex: what a story step left behind)
+// (tests: `mp u3drun ID`: a script started as the zone's scenes are, held by Unova_EventScript_Scene)
+bool8 U3D_Vm_DebugRun(u16 id)
+{
+    if (!Ready() || sThread.alive || !Run(id, 0xFFFF, TRUE))
+        return FALSE;
+    ScriptContext_SetupScript(Unova_EventScript_Scene);
+    return TRUE;
+}
+
 u16 U3D_Vm_DebugGet(bool8 flag, u16 id)
 {
     return flag ? FlagOn(id) : *WorkPtr(id);

@@ -199,6 +199,7 @@ def gated_tiles():
     return out
 
 
+ROTATE_ANIMS = 0x021F41C4   # (ov046 sRotatingRoomRotateAnimTable)
 DRAGON_ZONE = 121
 POSE_LINES_AT = 0x021F4430                 # (ov046: int [3 units][4 poses][6 lines])
 
@@ -278,6 +279,13 @@ def main():
         for u in range(3):
             f.write('    {%s},\n' % ', '.join('{%d, %d}' % starts[u * 4 + p] for p in range(4)))
         f.write('};\n')
+        ram46, d46 = scrcmd.ov_image(46)   # (sRotatingRoomRotateAnimTable: int [old pose][new pose], an animation + 5)
+        rot = [[struct.unpack_from('<i', d46, ROTATE_ANIMS - ram46 + 4 * (4 * a + b))[0] - 5 for b in range(4)]
+               for a in range(4)]
+        f.write("// the dragon's turn from one pose to another: its model's animation (FIELD_GIMMICK_ROTATING_ROOM_"
+                "GetRotateAnim)\n")
+        f.write('static const s8 sDragonRotateAnim[4][4] = {%s};\n' % ', '.join(
+            '{%s}' % ', '.join(str(v) for v in row) for row in rot))
     print('%s: %d rides, %d dragon tiles' % (path, len(rows), sum(len(t) for unit in dt for t in unit)))
 
 

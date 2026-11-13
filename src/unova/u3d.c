@@ -103,6 +103,12 @@ static struct
     struct { u16 frames; float (*st)[2]; } *srt;
     u16 *shown;        // (each texture: the texture drawn for it now)
     float (*srtNow)[2];   // (each scrolling: its shift now)
+    // (5) Black's gym machinery (field expansion objects, tools/unova/gimmicks.py): a kind is a model as rigid parts
+    // (a mesh each, at rest) and its animations in Black's order, each part's matrix a frame (none for an animation
+    // that isn't a joint one: a texture's); a gimmick is its models (a kind each) where Black first places them
+    u32 nkind, ngim;
+    struct { u16 nparts, nanims; s16 mesh; u16 *frames; float **m; } *kind;   // (a vertex's part: its pad byte)
+    struct { u8 ov; u16 n; struct { u16 kind; float pos[3]; u16 yaw; u8 hidden; } *m; } *gim;
 } sPack;
 
 #include "u3d_maps.h"   // sUnovaMaps: each UNOVA map, its zone, where it lies on its matrix (tools/unova/gen_maps.py)
@@ -178,7 +184,7 @@ static void LoadPack(void)
     }
     r.p += 4;
     version = TakeU32(&r);
-    if (version < 1 || version > 4)
+    if (version < 1 || version > 5)
     {
         printf("[u3d] %s: another pack version (%u)\n", path, (unsigned)version);
         free(data);
@@ -312,6 +318,49 @@ static void LoadPack(void)
             sPack.srt[i].frames = TakeU16(&r);
             sPack.srt[i].st = malloc(8 * (sPack.srt[i].frames ? sPack.srt[i].frames : 1));
             Take(&r, sPack.srt[i].st, 8 * sPack.srt[i].frames);
+        }
+    }
+    if (version >= 5 && !r.bad)
+    {
+        sPack.nkind = TakeU32(&r);
+        sPack.kind = calloc(sPack.nkind ? sPack.nkind : 1, sizeof(*sPack.kind));
+        for (i = 0; i < sPack.nkind && !r.bad; i++)
+        {
+            typeof(*sPack.kind) *kd = &sPack.kind[i];
+            kd->nparts = TakeU16(&r);
+            kd->nanims = TakeU16(&r);
+            Take(&r, &kd->mesh, 2);
+            kd->frames = calloc(kd->nanims ? kd->nanims : 1, sizeof(u16));
+            kd->m = calloc(kd->nanims ? kd->nanims : 1, sizeof(float *));
+            for (j = 0; j < kd->nanims && !r.bad; j++)
+            {
+                u32 n;
+                kd->frames[j] = TakeU16(&r);
+                n = (u32)kd->frames[j] * kd->nparts * 12;
+                kd->m[j] = malloc(sizeof(float) * (n ? n : 1));
+                Take(&r, kd->m[j], sizeof(float) * n);
+            }
+        }
+        sPack.ngim = TakeU32(&r);
+        sPack.gim = calloc(sPack.ngim ? sPack.ngim : 1, sizeof(*sPack.gim));
+        for (i = 0; i < sPack.ngim && !r.bad; i++)
+        {
+            u8 b[2];
+            Take(&r, b, 2);
+            sPack.gim[i].ov = b[0];
+            sPack.gim[i].n = TakeU16(&r);
+            sPack.gim[i].m = calloc(sPack.gim[i].n ? sPack.gim[i].n : 1, sizeof(*sPack.gim[i].m));
+            for (j = 0; j < sPack.gim[i].n && !r.bad; j++)
+            {
+                u8 h[2];
+                sPack.gim[i].m[j].kind = TakeU16(&r);
+                Take(&r, sPack.gim[i].m[j].pos, 12);
+                sPack.gim[i].m[j].yaw = TakeU16(&r);
+                Take(&r, h, 2);
+                sPack.gim[i].m[j].hidden = h[0];
+                if (sPack.gim[i].m[j].kind >= sPack.nkind)
+                    sPack.gim[i].m[j].hidden = 2;   // (no such kind: never drawn)
+            }
         }
     }
     sPack.shown = malloc(sizeof(u16) * (sPack.ntex ? sPack.ntex : 1));
@@ -1233,10 +1282,14 @@ static SVtx *sScratch;
 static u32 sScratchSize;
 static u8 *sScratchOk;
 
-static void DrawMesh(const U3dMesh *mesh, const float *m, float ox, float oy, float oz, int pass)
+// (PARTS: a gym model's, NPARTS matrices of 12 floats; each vertex is moved by its part's, its pad byte, M unused)
+static void DrawMeshParts(const U3dMesh *mesh, const float *m, float ox, float oy, float oz, int pass,
+                          const float *parts, u32 nparts)
 {
     u32 gi, i;
     float cx = mesh->c[0], cy = mesh->c[1], cz = mesh->c[2], sx, sy, d;
+    if (parts)
+        m = parts;   // (its first part's place for the culling, a little wider)
     if (m)
     {
         float x = cx, y = cy, z = cz;
@@ -1246,7 +1299,7 @@ static void DrawMesh(const U3dMesh *mesh, const float *m, float ox, float oy, fl
     }
     if (Project(cx + ox, cy + oy, cz + oz, &sx, &sy, &d))
     {
-        float rad = mesh->r * sView.focal / d * 1.5f + 2.0f;
+        float rad = mesh->r * sView.focal / d * (parts ? 3.0f : 1.5f) + 2.0f;
         if (sx + rad < 0 || sx - rad > W || sy + rad < 0 || sy - rad > H)
             return;
     }
@@ -1269,6 +1322,8 @@ static void DrawMesh(const U3dMesh *mesh, const float *m, float ox, float oy, fl
             const U3dVtx *v = &g->v[i];
             float x = v->x, y = v->y, z = v->z, depth;
             SVtx *s = &sScratch[i];
+            if (parts)
+                m = parts + 12 * (v->pad < nparts ? v->pad : 0);
             if (m)
             {
                 x = m[0] * v->x + m[1] * v->y + m[2] * v->z + m[3];
@@ -1289,6 +1344,145 @@ static void DrawMesh(const U3dMesh *mesh, const float *m, float ox, float oy, fl
         for (i = 0; i + 2 < g->count; i += 3)
             if (sScratchOk[i] && sScratchOk[i + 1] && sScratchOk[i + 2])
                 DrawTriangle(&sScratch[i], &sScratch[i + 1], &sScratch[i + 2], g);
+    }
+}
+
+static void DrawMesh(const U3dMesh *mesh, const float *m, float ox, float oy, float oz, int pass)
+{
+    DrawMeshParts(mesh, m, ox, oy, oz, pass, NULL, 0);
+}
+
+// ------------------------------------------------------------------------------------------------ gym machinery
+// Black's field expansion objects (ov021 fld_exp_obj.c) for the gimmick of the zone the VM set (U3D_ExpLoad): each
+// model where Black places it, turned (its yaw), an animation shown at a frame or played on to its last (Black's
+// FLD_EXP_OBJ_UpdateAnimes: a frame each field frame, 30 a second), hidden or drawn
+#define EXP_MAX 48
+static struct
+{
+    s16 gim;
+    u16 n;
+    struct { float pos[3], frame; u16 yaw; u8 hidden, anim, playing; } m[EXP_MAX];
+} sExp = {-1};
+
+void U3D_ExpLoad(u8 ov)
+{
+    u32 i, k;
+    sExp.gim = -1;
+    sExp.n = 0;
+    for (i = 0; i < sPack.ngim; i++)
+        if (sPack.gim[i].ov == ov)
+        {
+            sExp.gim = i;
+            sExp.n = min(sPack.gim[i].n, EXP_MAX);
+            for (k = 0; k < sExp.n; k++)
+            {
+                memcpy(sExp.m[k].pos, sPack.gim[i].m[k].pos, sizeof(sExp.m[k].pos));
+                sExp.m[k].yaw = sPack.gim[i].m[k].yaw;
+                sExp.m[k].hidden = sPack.gim[i].m[k].hidden;
+                sExp.m[k].anim = 0xFF;
+                sExp.m[k].frame = 0;
+                sExp.m[k].playing = FALSE;
+            }
+            return;
+        }
+}
+
+void U3D_ExpClear(void)
+{
+    sExp.gim = -1;
+    sExp.n = 0;
+}
+
+static u16 ExpFrames(u16 model, u8 anim)
+{
+    u16 kind = sPack.gim[sExp.gim].m[model].kind;
+    return anim < sPack.kind[kind].nanims ? sPack.kind[kind].frames[anim] : 0;
+}
+
+// an animation of a model at FRAME (-1: its last), PLAY: on from there to its last
+void U3D_ExpAnim(u16 model, u8 anim, s16 frame, bool8 play)
+{
+    u16 frames;
+    if (sExp.gim < 0 || model >= sExp.n)
+        return;
+    frames = ExpFrames(model, anim);
+    if (frames == 0)
+        return;   // (a texture animation's: the model as it is)
+    sExp.m[model].anim = anim;
+    sExp.m[model].frame = frame < 0 || frame >= frames ? frames - 1 : frame;
+    sExp.m[model].playing = play && sExp.m[model].frame < frames - 1;
+}
+
+bool8 U3D_ExpPlaying(u16 model)
+{
+    return sExp.gim >= 0 && model < sExp.n && sExp.m[model].playing;
+}
+
+void U3D_ExpHide(u16 model, bool8 hidden)
+{
+    if (sExp.gim >= 0 && model < sExp.n && sExp.m[model].hidden < 2)
+        sExp.m[model].hidden = hidden;
+}
+
+void U3D_ExpPlace(u16 model, float x, float y, float z, u16 yaw)
+{
+    if (sExp.gim < 0 || model >= sExp.n)
+        return;
+    sExp.m[model].pos[0] = x, sExp.m[model].pos[1] = y, sExp.m[model].pos[2] = z;
+    sExp.m[model].yaw = yaw;
+}
+
+static void ExpStep(void)
+{
+    u32 i;
+    for (i = 0; i < sExp.n; i++)
+        if (sExp.m[i].playing)
+        {
+            u16 frames = ExpFrames(i, sExp.m[i].anim);
+            sExp.m[i].frame += 0.5f;
+            if (sExp.m[i].frame >= frames - 1)
+                sExp.m[i].frame = frames - 1, sExp.m[i].playing = FALSE;
+        }
+}
+
+#define EXP_PARTS 64
+static void ExpDraw(int pass)
+{
+    static float sParts[EXP_PARTS * 12];
+    static const float sIdentity[12] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0};
+    u32 i, p, r, k;
+    if (sExp.gim < 0)
+        return;
+    for (i = 0; i < sExp.n; i++)
+    {
+        const typeof(*sPack.kind) *kd;
+        float a, c, sn;
+        u32 nparts;
+        if (sExp.m[i].hidden)
+            continue;
+        kd = &sPack.kind[sPack.gim[sExp.gim].m[i].kind];
+        if (kd->mesh < 0 || (u32)kd->mesh >= sPack.nmesh)
+            continue;
+        a = sExp.m[i].yaw / 65536.0f * 2.0f * (float)M_PI;
+        c = cosf(a), sn = sinf(a);
+        nparts = min(kd->nparts, EXP_PARTS);
+        for (p = 0; p < nparts; p++)   // (each part: the model's turn after the animation's move)
+        {
+            const float rot[3][3] = {{c, 0, sn}, {0, 1, 0}, {-sn, 0, c}};
+            const float *d = sIdentity;
+            if (sExp.m[i].anim < kd->nanims && kd->frames[sExp.m[i].anim])
+            {
+                u32 f = (u32)sExp.m[i].frame;
+                if (f >= kd->frames[sExp.m[i].anim])
+                    f = kd->frames[sExp.m[i].anim] - 1;
+                d = kd->m[sExp.m[i].anim] + ((size_t)f * kd->nparts + p) * 12;
+            }
+            for (r = 0; r < 3; r++)
+                for (k = 0; k < 4; k++)
+                    sParts[p * 12 + r * 4 + k] = rot[r][0] * d[k] + rot[r][1] * d[4 + k] + rot[r][2] * d[8 + k];
+        }
+        DrawMeshParts(&sPack.mesh[kd->mesh], NULL, sExp.m[i].pos[0], sExp.m[i].pos[1], sExp.m[i].pos[2], pass, sParts,
+                      nparts);
     }
 }
 
@@ -1314,6 +1508,7 @@ static void Render(void)
     s32 k = sCurMat && sCurMat->scale > 1 ? sCurMat->scale : 1;
     bx = (s32)floorf(sView.tx / (BLOCK * k)), bz = (s32)floorf(sView.tz / (BLOCK * k));
     for (pass = 0; pass < 2; pass++)
+    {
         for (cz = bz - 1; cz <= bz + 1; cz++)
             for (cx = bx - 1; cx <= bx + 1; cx++)
             {
@@ -1332,6 +1527,8 @@ static void Render(void)
                         DrawMesh(&sPack.mesh[pm], c->props[i].m, ox, 0.0f, oz, pass);
                 }
             }
+        ExpDraw(pass);   // (the gym's machinery: solid with the map's solid, see-through after)
+    }
 }
 
 // ------------------------------------------------------------------------------------------------ fades, lines
@@ -1483,6 +1680,8 @@ void U3D_Update(void)
                        != U3D_RAIL_WARP)
         sRailArmed = TRUE;
     AnimateTextures();
+    U3D_Vm_FieldFrame();
+    ExpStep();
     FindCamera();
     SetupView();
 }
