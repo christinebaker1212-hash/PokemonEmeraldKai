@@ -68,6 +68,8 @@ void BattleSetup_StartUnovaBattle(void);
 #include "platform.h"
 #include "save.h"
 #include "field_screen_effect.h"
+#include "move_relearner.h"
+#include "pokemon_summary_screen.h"
 #include "constants/flags.h"
 #include "item.h"
 #include "battle_setup.h"
@@ -1023,7 +1025,7 @@ static void PopSong(void)
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
 enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY, SCREEN_CLEAR, SCREEN_TRADE,
        SCREEN_SUBWAY_PARTY, SCREEN_SUBWAY_BATTLE, SCREEN_SUBWAY_RESET, SCREEN_MART, SCREEN_BPSHOP, SCREEN_SELL,
-       SCREEN_DAYCARE_PARTY };
+       SCREEN_DAYCARE_PARTY, SCREEN_MOVE_SELECT, SCREEN_RELEARN };
 static u8 sScreen;
 static u16 sScreenVar, sPartySlotWork;
 static u8 sWildResult = 2;
@@ -1267,6 +1269,106 @@ static u16 Species(u16 national)
 {
     return national ? NationalPokedexNumToSpecies(national) : SPECIES_NONE;
 }
+
+// Black's move tutors (ov021 GetTutorMoveId, CheckTutorGroup, FindTutorCandidates): tutor 0 DRACO METEOR (tutor bit 6),
+// 1 FRENZY PLANT / BLAST BURN / HYDRO CANNON (bits 3-5), 2 GRASS / FIRE / WATER PLEDGE (bits 0-2); full friendship
+static const u16 sTutorMoves[3][3] = {{MOVE_DRACO_METEOR}, {MOVE_FRENZY_PLANT, MOVE_BLAST_BURN, MOVE_HYDRO_CANNON},
+                                      {MOVE_GRASS_PLEDGE, MOVE_FIRE_PLEDGE, MOVE_WATER_PLEDGE}};
+static const u8 sTutorFirstBit[3] = {6, 3, 0}, sTutorBitCount[3] = {1, 3, 3};
+
+static u32 TutorBits(struct Pokemon *mon)
+{
+    u16 national = SpeciesToNationalPokedexNum(GetMonData(mon, MON_DATA_SPECIES));
+    s32 lo = 0, hi = ARRAY_COUNT(sTutorCompat) - 1;
+    while (lo <= hi)
+    {
+        s32 mid = (lo + hi) / 2;
+        if (sTutorCompat[mid][0] == national)
+            return sTutorCompat[mid][1];
+        if (sTutorCompat[mid][0] < national)
+            lo = mid + 1;
+        else
+            hi = mid - 1;
+    }
+    return 0;
+}
+
+static bool8 TutorGroup(struct Pokemon *mon, u32 tutor)
+{
+    return tutor < 3 && (TutorBits(mon) >> sTutorFirstBit[tutor]) & ((1 << sTutorBitCount[tutor]) - 1);
+}
+
+static u16 TutorMove(struct Pokemon *mon, u32 tutor)
+{
+    u32 i, bits = TutorBits(mon);
+    if (tutor >= 3)
+        return MOVE_BLAST_BURN;
+    for (i = 0; i < sTutorBitCount[tutor]; i++)
+        if (bits & (1 << (sTutorFirstBit[tutor] + i)))
+            return sTutorMoves[tutor][i];
+    return tutor == 0 ? MOVE_DRACO_METEOR : MOVE_BLAST_BURN;   // (Black's own answer for one not of its kinds)
+}
+
+// 0 some can learn (mask: which), 1 none of the tutor's kinds, 2 none friendly enough (when checked)
+static u32 TutorCandidates(u32 tutor, bool8 friendship, u8 *mask)
+{
+    u32 i;
+    bool8 kind = FALSE;
+    *mask = 0;
+    for (i = 0; i < gPlayerPartyCount; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[i];
+        if (GetMonData(mon, MON_DATA_IS_EGG) || !TutorGroup(mon, tutor))
+            continue;
+        kind = TRUE;
+        if (friendship && GetMonData(mon, MON_DATA_FRIENDSHIP) < MAX_FRIENDSHIP)
+            continue;
+        *mask |= 1 << i;
+    }
+    return !kind ? 1 : *mask == 0 ? 2 : 0;
+}
+
+// Black's SetMonMove: a move into a slot; MOVE_NONE forgets it, the moves after it moving up; a slot past 4 learns it
+// as a fifth would (the first forgotten)
+static void SetPartyMonMove(struct Pokemon *mon, u16 slot, u16 move)
+{
+    u32 i;
+    if (slot > MAX_MON_MOVES)
+    {
+        if (GiveMoveToMon(mon, move) == MON_HAS_MAX_MOVES)
+            DeleteFirstMoveAndGiveMoveToMon(mon, move);
+        return;
+    }
+    if (slot >= MAX_MON_MOVES)
+        return;
+    if (move != MOVE_NONE)
+    {
+        RemoveMonPPBonus(mon, slot);
+        SetMonMoveSlot(mon, move, slot);
+        return;
+    }
+    for (i = slot; i < MAX_MON_MOVES - 1; i++)
+    {
+        u16 m = GetMonData(mon, MON_DATA_MOVE1 + i + 1);
+        u8 pp = GetMonData(mon, MON_DATA_PP1 + i + 1), bonus = GetMonData(mon, MON_DATA_PP_BONUSES);
+        u8 up = (bonus >> ((i + 1) * 2)) & 3;
+        if (m == MOVE_NONE)
+            break;
+        bonus = (bonus & ~(3 << (i * 2))) | (up << (i * 2));
+        SetMonData(mon, MON_DATA_MOVE1 + i, &m);
+        SetMonData(mon, MON_DATA_PP1 + i, &pp);
+        SetMonData(mon, MON_DATA_PP_BONUSES, &bonus);
+    }
+    {
+        u16 none = MOVE_NONE;
+        u8 zero = 0, bonus = GetMonData(mon, MON_DATA_PP_BONUSES) & ~(3 << (i * 2));
+        SetMonData(mon, MON_DATA_MOVE1 + i, &none);
+        SetMonData(mon, MON_DATA_PP1 + i, &zero);
+        SetMonData(mon, MON_DATA_PP_BONUSES, &bonus);
+    }
+}
+
+static struct { u8 party; u16 newMove, posWork; } sMoveSel;   // (SelectMonMove: the summary's move list)
 
 // v (work or constant), p (a work's id), h, w, b: as u16_cmds.h says, read into a[]
 static u32 ReadArgs(struct Thread *t, u16 op, u32 *a)
@@ -2299,6 +2401,65 @@ static void Step(struct Thread *t)
         case U3C_PROC_GetMonForm:   // result, party slot (the game keeps no forms outside battle: the first)
             *WorkPtr(a[0]) = 0;
             break;
+        // ---- moves: Black's scripts on the game's own screens (the summary's move list, the move relearner)
+        case U3C_POKEMON_FLD_SelectMonMove:   // decided (1 a move picked), its slot, party slot, the move to learn (0 none)
+            sMoveSel.party = V(2);
+            sMoveSel.newMove = V(3);
+            sMoveSel.posWork = a[1];
+            *WorkPtr(a[0]) = 0;
+            if (V(2) < PARTY_SIZE)
+                OpenScreen(t, SCREEN_MOVE_SELECT, a[0]);
+            break;
+        case U3C_PROC_SetMonMove:   // party slot, move slot, move (0 forgets it, the rest moving up; past 4 pushes it)
+            if (V(0) < PARTY_SIZE)
+                SetPartyMonMove(&gPlayerParty[V(0)], V(1), V(2));
+            break;
+        case U3C_PROC_GetRelearnableMoveCount:   // result (any to relearn), party slot
+            *WorkPtr(a[0]) = V(1) < PARTY_SIZE && !GetMonData(&gPlayerParty[V(1)], MON_DATA_IS_EGG)
+                && GetNumberOfRelearnableMoves(&gPlayerParty[V(1)]) != 0;
+            break;
+        case U3C_PROC_CallMoveRelearn:   // result (0 learned, 1 not), party slot: the game's move relearner
+            *WorkPtr(a[0]) = 0;
+            if (V(1) < PARTY_SIZE)
+            {
+                gSpecialVar_0x8004 = V(1);
+                OpenScreen(t, SCREEN_RELEARN, a[0]);
+            }
+            break;
+        case U3C_POKEMON_FLD_GetTutorAvailability:   // tutor, result (0 some can learn, 1 none of its kinds, 2 none friendly enough)
+        {
+            u8 mask;
+            *WorkPtr(a[1]) = TutorCandidates(V(0), TRUE, &mask);
+            break;
+        }
+        case U3C_POKEMON_FLD_GetMonTutorMove:   // tutor, party slot, result
+            *WorkPtr(a[2]) = V(1) < PARTY_SIZE ? TutorMove(&gPlayerParty[V(1)], V(0)) : 0;
+            break;
+        case U3C_POKEMON_FLD_CheckMonTutorStatus:   // tutor, party slot, result (0 can, 1 not its kind, 2 not friendly, 3 knows it)
+        {
+            struct Pokemon *mon = V(1) < PARTY_SIZE ? &gPlayerParty[V(1)] : NULL;
+            u16 *r = WorkPtr(a[2]);
+            if (mon == NULL || GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || !TutorGroup(mon, V(0)))
+                *r = 1;
+            else if (MonKnowsMove(mon, TutorMove(mon, V(0))))
+                *r = 3;
+            else if (GetMonData(mon, MON_DATA_FRIENDSHIP) < MAX_FRIENDSHIP)
+                *r = 2;
+            else
+                *r = 0;
+            break;
+        }
+        case U3C_POKEMON_FLD_SelectTutorMon:   // tutor, picked (0 none), party slot: the game's party screen
+        {
+            u8 mask;
+            *WorkPtr(a[1]) = 0;
+            if (TutorCandidates(V(0), FALSE, &mask) == 0)
+            {
+                sPartySlotWork = a[2];
+                OpenScreen(t, SCREEN_PARTY, a[1]);
+            }
+            break;
+        }
         case U3C_PROC_CountMonMoves:   // result, party slot
         {
             u32 k, n = 0;
@@ -4064,6 +4225,14 @@ void U3D_VmOpenScreen(void)
     case SCREEN_DAYCARE_PARTY:   // (Black's CallDaycarePartyMenu: the game's own day care party screen)
         ChooseSendDaycareMon();
         break;
+    case SCREEN_MOVE_SELECT:   // (Black's SelectMonMove: the game's summary on its moves, as the move deleter's)
+        ShowSelectMovePokemonSummaryScreen(gPlayerParty, sMoveSel.party, gPlayerPartyCount - 1, CB2_ReturnToField,
+                                           sMoveSel.newMove);
+        gFieldCallback = FieldCB_ContinueScriptHandleMusic;
+        break;
+    case SCREEN_RELEARN:   // (Black's CallMoveRelearn: the game's move relearner, the POKeMON in VAR_0x8004)
+        TeachMoveRelearnerMove();
+        break;
     case SCREEN_TRADE:   // (Black's trade: the game's in-game trade scene with its POKeMON, trade.c MP_SetUnovaTrade)
         UnovaTradeSetUp();
         gSpecialVar_0x8004 = 0;
@@ -4134,6 +4303,14 @@ void U3D_VmResume(void)
         break;
     case SCREEN_SUBWAY_PARTY:
         U3D_Subway_PartyChosen();
+        break;
+    case SCREEN_MOVE_SELECT:   // (VAR_0x8005: the slot, MAX_MON_MOVES for none or the new move kept out)
+        *WorkPtr(sScreenVar) = gSpecialVar_0x8005 < MAX_MON_MOVES;
+        if (sMoveSel.posWork)
+            *WorkPtr(sMoveSel.posWork) = gSpecialVar_0x8005 < MAX_MON_MOVES ? gSpecialVar_0x8005 : 0;
+        break;
+    case SCREEN_RELEARN:   // (as Black's script reads it: 0 a move learned, the HEART SCALE taken; 1 none)
+        *WorkPtr(sScreenVar) = gSpecialVar_0x8004 != TRUE;
         break;
     case SCREEN_DAYCARE_PARTY:
         if (sScreenVar)

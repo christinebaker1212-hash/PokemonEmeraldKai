@@ -6,6 +6,8 @@
 - the key / value tables of the item buyers and prize counters (ov021 sScrcmdTableFileIds: archive 0xD0, a/2/0/8;
   u32 key, u32 value), for CheckTableItemInBag / LookupTableValue / RegisterTableValueNumber / AddTableValueToPoints
 - ov010 sScrcmdLookupTable, for SCRCMD_PROC_LookupTableValue
+- the move tutors' POKeMON: the personal data's tutor bits (archive a/0/1/6, u32 at 0x38: POKE_TOOL_CheckTutorCompat;
+  0-2 GRASS / FIRE / WATER PLEDGE, 3-5 FRENZY PLANT / BLAST BURN / HYDRO CANNON, 6 DRACO METEOR), national numbers
 
     python3 -I tools/unova/gen_tables.py       (run from the repository; safe to run again)
 """
@@ -59,6 +61,14 @@ def main():
     ram0, d0 = scrcmd.ov_image(10)
     out.append('static const u16 sProcLookup[%d] = {%s};' % (
         LOOKUP_COUNT, ', '.join(str(v) for v in struct.unpack_from('<%dH' % LOOKUP_COUNT, d0, LOOKUP - ram0))))
+    personal = narc.arc('a/0/1/6')
+    tutors = [(n, struct.unpack_from('<I', personal[n], 0x38)[0] & 0x7F) for n in range(1, 650)]
+    tutors = [t for t in tutors if t[1]]
+    out.append("// the move tutors' POKeMON (national number, tutor bits), by number")
+    out.append('static const u16 sTutorCompat[%d][2] = {' % len(tutors))
+    for k in range(0, len(tutors), 8):
+        out.append('    %s,' % ', '.join('{%d, 0x%02X}' % e for e in tutors[k:k + 8]))
+    out.append('};')
     path = 'src/unova/u3d_tables.h'
     open(path, 'w').write('\n'.join(out) + '\n')
     print('%s: %d key / value pairs' % (path, len(kv)))

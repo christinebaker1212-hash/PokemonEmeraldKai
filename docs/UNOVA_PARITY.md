@@ -53,10 +53,12 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 
 ## 4. Systems
 
-- [ ] ROUTE 3's DAY CARE (0x0EB-0x0F8, 0x251) and EGG hatching (0x106): Black's scripts on the game's own DAY CARE
-      and hatching (Kai's Gen 9 breeding), not reworked
-- [ ] The MOVE RELEARNER (0x1E8 / 0x1E9), move deleter / setter (0x109, 0x10B), the move tutors (0x1E4-0x1E7): the
-      game's own screens
+- [x] ROUTE 3's DAY CARE (0x0EB-0x0F8, 0x251) and EGG hatching (0x106): Black's scripts on the game's own DAY CARE
+      and hatching (Kai's Gen 9 breeding), not reworked (2026-11-13: deposit, withdraw, the EGG man; an EGG hatched
+      on a UNOVA route by the game's own step counter and scene)
+- [x] The MOVE RELEARNER (0x1E8 / 0x1E9), move deleter / setter (0x109, 0x10B), the move tutors (0x1E4-0x1E7): the
+      game's own screens (2026-11-13: MISTRALTON's deleter and relearner, a HEART SCALE taken; DRIFTVEIL's PLEDGE
+      tutor taught FIRE PLEDGE through the summary's forget list; Black's tutor bits in src/unova/u3d_tables.h)
 - [ ] POKeMON MUSICALS (0x05D, 0x167-0x16E: the dress-up, the stage, the results, props, fans; four on stage with
       co-op friends)
 - [ ] The ROYAL UNOVA (PLEASURE_BOAT 0x1A5-0x1AC: its passengers, the sunset, the time aboard)
