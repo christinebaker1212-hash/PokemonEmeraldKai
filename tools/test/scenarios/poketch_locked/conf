@@ -1,5 +1,6 @@
-# The POKéTCH outside SINNOH before SINNOH's LEAGUE: the right stick does nothing and SELECT says it can't be used
-# (mp_region.c MP_Region_DeviceHere); with the LEAGUE beaten the stick shows it. Shot locked.
+# The POKéTCH outside SINNOH before the LEAGUE where the player is (HOENN) is beaten: the right stick does nothing and
+# SELECT says it can't be used (mp_region.c MP_Region_DeviceHere); in HOENN's postgame the stick shows it (1.199.2: a
+# device from another region works in a beaten region's postgame). Shot locked.
 MODE=1
 TMO=60
 ENV_A="MOEMON_DEBUG_PARTY=25:30"

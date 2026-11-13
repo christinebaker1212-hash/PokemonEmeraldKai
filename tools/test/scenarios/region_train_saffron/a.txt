@@ -11,6 +11,6 @@ mp regionclear 2
 mp face up
 mash A 30 20
 wait 300
-pressuntil A field 2000
+pressuntil A field 3000
 mp where
 quit

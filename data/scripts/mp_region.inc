@@ -46,16 +46,11 @@ gText_RegionLuggage::
 	.string "a region whose LEAGUE you've beaten.$"
 
 gText_RegionKeyItemsStay::
-	.string "CUSTOMS: Your KEY ITEMS go to the\n"
-	.string "GLOBAL PC too: bikes, rods, tools\l"
-	.string "and story items alike.\p"
-	.string "Only your CARD CASE, CANDY JAR and\n"
-	.string "travel passes may come aboard.\p"
-	.string "You'll have each region's own back\n"
-	.string "whenever you return to it.\p"
-	.string "In a region whose LEAGUE you've\n"
-	.string "beaten, all your tools from every\l"
-	.string "region are yours to use!$"
+	.string "CUSTOMS: Your KEY ITEMS wait in the\n"
+	.string "GLOBAL PC, each for its own region,\l"
+	.string "but for your CARD CASE and CANDY JAR.\p"
+	.string "Where you've beaten the LEAGUE,\n"
+	.string "you may use all your tools!$"
 
 @ Moemon Kai: online, only the room's host leads the way to another region (the user, 2026-11-05); everyone follows
 EventScript_RegionHostOnly::

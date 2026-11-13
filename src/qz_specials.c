@@ -1235,9 +1235,15 @@ static u16 QzTravelToRegion_(void)
     bool8 train = gSpecialVar_0x8007 == TRIP_TRAIN;
     gSpecialVar_0x8007 = 0;
     if (to >= REGION_COUNT || to == from || !MP_RegionTripAllowed())
+    {
+        MPNet_Log("region: no trip %d -> %d (allowed %d)", from, to, MP_RegionTripAllowed());
         return 0;
+    }
     if (train ? !MP_MagnetTrainOpen() : !(QzGetReachableRegionsMask_() & (1 << to)))
+    {
+        MPNet_Log("region: no trip %d -> %d (%s closed)", from, to, train ? "the MAGNET TRAIN" : "the way");
         return 0;
+    }
     return TravelNow(to, keep, train);
 }
 

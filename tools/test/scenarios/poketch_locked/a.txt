@@ -10,7 +10,7 @@ shot locked
 mash A 20 10
 wait 60
 shot closed
-mp regionclear 3
+mp regionclear 0
 mp poketchstick 0
 wait 10
 quit

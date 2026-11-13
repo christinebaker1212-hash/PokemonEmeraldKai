@@ -118,6 +118,21 @@ static u8 Home(u16 item)
     return REGION_HOENN;
 }
 
+// The region a key item earned HERE belongs to: a regional tool's or a story item's own region wherever it was
+// handed over (PEWTER's old man gives JOHTO's SILVER WING in KANTO), else (a tool every region has, the save's own
+// story items) HERE
+static u8 EarnedKey(u16 item, u8 here)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sTools); i++)
+        if (sTools[i].item == item)
+            return sTools[i].home < REGION_COUNT ? sTools[i].home : here;
+    for (i = 0; i < ARRAY_COUNT(sStoryHome); i++)
+        if (sStoryHome[i].item == item)
+            return sStoryHome[i].home;
+    return here;
+}
+
 // The region the player is in: the region state's (during a trip the map is still the last region's)
 static u8 Here(void)
 {
@@ -211,7 +226,7 @@ u16 MP_RegionItems_Leave(u8 from)
                 copies++;
             }
         if (copies == 0)
-            StashAdd(from, items[i], qty);
+            StashAdd(EarnedKey(items[i], from), items[i], qty);
         RemoveBagItem(items[i], qty);
         if (gSaveBlock1Ptr->registeredItem == items[i])
             gSaveBlock1Ptr->registeredItem = ITEM_NONE;
@@ -375,12 +390,12 @@ void MP_RegionItems_Update(void)
         Sort();
     }
     beaten = MP_Region_Cleared(here);
-    // what the BAG has without a key was earned here
+    // what the BAG has without a key was earned here (keyed to its own region if it has one)
     for (i = 0; i < gBagPockets[KEYITEMS_POCKET].capacity; i++)
     {
         u16 item = gBagPockets[KEYITEMS_POCKET].itemSlots[i].itemId;
         if (!Kept(item) && !Held(item, 0xFF))
-            HeldAdd(item, here);
+            HeldAdd(item, EarnedKey(item, here));
     }
     if (!beaten)
     {

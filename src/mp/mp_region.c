@@ -1266,6 +1266,7 @@ void MP_Region_SetCleared(u8 region)
 {
     if (region < REGION_COUNT)
         gRegionState.cleared |= 1 << region;
+    MP_RegionItems_Update();   // (the postgame here: every tool at once, mp_regionitems.c)
 }
 
 // Moemon Maker: a story point played on a map of REGION (src/maker/maker_play.c Maker_PlayNewGame): the player there,

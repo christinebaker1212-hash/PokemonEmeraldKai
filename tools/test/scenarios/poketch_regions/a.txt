@@ -1,6 +1,6 @@
 pressuntil A field 5000
 wait 30
-mp regionclear 3
+mp regionclear 0
 mp additem 660 1
 mp register 660
 press SELECT 1

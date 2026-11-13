@@ -38,7 +38,8 @@ The open points, answered (2026-11-08):
 
 - **Keyed copies**: every key item copy belongs to the region it was earned in. The GLOBAL PC's key items are kept
   per region (chunk "KIST" of the region side file, `stash[region]`), and the BAG's key items are recorded as the
-  copies they are (`held[]`: item and region). A key item the BAG has with no record was earned where the player is.
+  copies they are (`held[]`: item and region). A key item the BAG has with no record was earned where the player is, and is keyed to its own region if it has one
+  (a regional tool or a listed story item: PEWTER's old man hands over JOHTO's SILVER WING in KANTO).
 - **Customs** (mp_region.c MP_Region_SendLuggage at every port and gate, and MP_Region_Travel for any crossing): the
   BAG's other pockets go to the GLOBAL PC as before (1.101.0); every key item but Kai's own goes to the GLOBAL PC, each
   copy under its own key. Kai's own (sTravel, always along): the CARD CASE, the CANDY JAR, the BATTLE FLAG, the ORRE and
@@ -46,7 +47,8 @@ The open points, answered (2026-11-08):
 - **Arriving** (MP_Region_Travel -> MP_RegionItems_Arrive): the copies keyed to that region come back to the BAG.
 - **A region whose LEAGUE isn't beaten**: only what was earned there. On every map load (MP_RegionItems_Update) a copy
   keyed to another region goes to the GLOBAL PC by itself.
-- **A region whose LEAGUE is beaten (its postgame)**: every tool copy from every region (bikes, devices, containers,
+- **A region whose LEAGUE is beaten (its postgame)**, from the moment it's beaten (MP_Region_SetCleared) and on
+  every map load: every tool copy from every region (bikes, devices, containers,
   rods, the COIN CASE, the ITEMFINDER, the S.S. TICKET: sTools) is in the BAG as one item; leaving, each copy goes back
   to the GLOBAL PC under its own key, so every region still has its own when the player returns. The GLOBAL PC's HMs
   come back too, merged into one. Story items (everything else in the KEY ITEMS pocket) stay their region's.
