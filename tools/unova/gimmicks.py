@@ -263,7 +263,15 @@ def _place41(img):
     return [(img.vec(0x021F4208 + 12 * k), (img.d[0x021F4660 - img.ram + k] << 14) & 0xFFFF) for k in range(10)]
 
 
-PLACES = {40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+# BURGH's (field_gimmick_plate_doors.c FIELD_GIMMICK_PLATE_DOORS_Init): eight switches, ten plates, seven doors shut
+# (18-24) and open (25-31) at one place; the effect models (32-34) hidden until an event places them
+def _place38(img):
+    doors = [(img.vec(0x021F4694 + 12 * k), 0) for k in range(7)]
+    return ([(img.vec(0x021F46E8 + 12 * k), 0) for k in range(8)] + [(img.vec(0x021F4748 + 12 * k), 0) for k in range(10)]
+            + doors + doors + [((0.0, 0.0, 0.0), 0, 1)] * 3)
+
+
+PLACES = {38: _place38, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 
@@ -276,7 +284,8 @@ def add(pack):
         img = Image(ov)
         s = setup(img, SETUPS[ov][1])
         models = []
-        for i, ((pos, yaw), (mr, md, tr, anims)) in enumerate(zip(place(img), s['objs'])):
+        for i, (where, (mr, md, tr, anims)) in enumerate(zip(place(img), s['objs'])):
+            pos, yaw, hidden = (where + (0,))[:3]
             k = (s['res'][0][0], mr, md, tr, tuple(anims))
             if k not in kind_ids:
                 bmd = nitro.Bmd0(member(s, mr))
@@ -299,6 +308,6 @@ def add(pack):
                 kinds.append((mesh, nparts, kind_anims))
                 print('gimmick ov%03d model %d: %d parts, animations %s' % (
                     ov, i, nparts, [n for n, _ in kind_anims]))
-            models.append((kind_ids[k], pos, yaw, 0))
+            models.append((kind_ids[k], pos, yaw, hidden))
         gims.append((ov, models))
     return kinds, gims

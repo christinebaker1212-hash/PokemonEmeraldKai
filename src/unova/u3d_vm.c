@@ -255,6 +255,7 @@ static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
                 struct { u16 team[8][PARTY_SIZE]; u16 mon[4]; u32 record[128];
                          struct { u16 national; u8 level, filled; u32 otId, personality;
                                   u8 nick[POKEMON_NAME_LENGTH + 1]; } snap[2]; } misc;
+                u8 plateSwitches;   // (BURGH's gym's switches found, a bit each: Black's plate doors' save)
               } sWork;   // (gym[0]: ELESA's gym's levers, a bit a lane: CartLanes below)   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
@@ -2330,7 +2331,10 @@ static void Step(struct Thread *t)
             break;
         case U3C_FIELD_GIMMICK_PLATE_DOORS_StartSwitchEvent:   // BURGH's gym: a floor switch found (PlateDoorsRefresh)
             if (V(0) < 8)
+            {
                 *WorkPtr(0x4000 + V(0)) = 1;   // (the script sets it as it ends, too)
+                sWork.plateSwitches |= 1 << V(0);   // (kept as Black's gimmick save keeps it)
+            }
             PlaySE(SE_SWITCH);
             break;
         case U3C_FIELD_GIMMICK_PLATE_DOORS_StartPlateEvent:   // ... its plates lit: a door both of whose are opens
@@ -2358,8 +2362,15 @@ static void Step(struct Thread *t)
             DragonReset();
             break;
         case U3C_PROC_Ov037InitFromVars:   // (NIMBASA's lanes unlocked: Black's flags 0x74 / 0x75 already say it)
-        case U3C_PROC_Ov037ReadEightVars:   // (CASTELIA's switches found into works 0x4000-0x4007: they're kept there)
             break;
+        case U3C_PROC_Ov037ReadEightVars:   // (GIMMICK_INIT_RestorePlateDoorsState: CASTELIA's switches found, from the
+        {                                   //  gimmick's save, into the eight works; the doors and plates follow)
+            u32 k;
+            for (k = 0; k < 8; k++)
+                *WorkPtr(a[k]) = (sWork.plateSwitches >> k) & 1;
+            PlateDoorsRefresh(FALSE);
+            break;
+        }
         case U3C_PROC_CheckPartyMonKnowsMove:   // result, move, party slot
             *WorkPtr(a[0]) = V(2) < PARTY_SIZE && PartyMonHasMove(&gPlayerParty[V(2)], V(1));
             break;
@@ -3794,11 +3805,46 @@ static bool8 PlateDoorOpen(u32 door)
     return (lit >> sPdDoorPlates[door][0] & 1) && (lit >> sPdDoorPlates[door][1] & 1);
 }
 
+// the models (ov038): a plate lit shows pressed (its press animation, 1, at its end; played as it lights), a door its
+// open model or its shut one (Init's doorOpen)
+static u16 sPdPlatesShown;
+
+static u16 PlatesLit(void)
+{
+    u32 s, k;
+    u16 lit = 0;
+    for (s = 0; s < 8; s++)
+        if (*WorkPtr(0x4000 + s) != 0)
+            for (k = 0; k < 2; k++)
+                if (sPdSwitchPlates[s][k] >= 0)
+                    lit |= 1 << sPdSwitchPlates[s][k];
+    return lit;
+}
+
+static void PlateModels(bool8 load)
+{
+    u16 lit = PlatesLit();
+    u32 i;
+    for (i = 0; i < 10; i++)
+    {
+        bool8 on = (lit >> i) & 1, was = (sPdPlatesShown >> i) & 1;
+        if (load || on != was)
+            U3D_ExpAnim(8 + i, on ? 1 : 0xFF, on && !load ? 0 : -1, on && !load);
+    }
+    sPdPlatesShown = lit;
+    for (i = 0; i < 7; i++)
+    {
+        U3D_ExpHide(18 + i, PlateDoorOpen(i));
+        U3D_ExpHide(25 + i, !PlateDoorOpen(i));
+    }
+}
+
 static void PlateDoorsRefresh(bool8 sound)
 {
     u32 d;
     if (CurrentZone() != ZONE_CASTELIA_GYM)
         return;
+    PlateModels(!sound);
     for (d = 0; d < ARRAY_COUNT(sPdDoorPerson); d++)
         if (PlateDoorOpen(d))
         {
@@ -4084,6 +4130,11 @@ void U3D_Vm_FieldShown(void)
         U3D_ExpLoad(44);
     else if (CurrentZone() == ZONE_MISTRALTON_GYM)   // (ov041 Init: the cannons, turned, at rest)
         U3D_ExpLoad(41);
+    else if (CurrentZone() == ZONE_CASTELIA_GYM)   // (ov038 Init: plates and doors as the switches found make them)
+    {
+        U3D_ExpLoad(38);
+        PlateModels(TRUE);
+    }
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
     {
         U3D_ExpLoad(40);
