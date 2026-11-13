@@ -465,7 +465,7 @@ def build(matrix_ids=None):
                 i = cz * mx['w'] + cx
                 b, zone = mx['blocks'][i], mx['zones'][i]
                 if b == mxr.NONE or b >= len(blocks):
-                    cells.append((0xFFFF, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)]))
+                    cells.append((0xFFFF, [-1] * 4, 0, [], [BLOCKED] * 1024, [[] for _ in range(1024)], 32))
                     continue
                 zrec = zs[zone] if zone < len(zs) else (zs[owners[0]] if owners else None)
                 area_id = zrec['area'] if zrec else 0
@@ -503,16 +503,19 @@ def build(matrix_ids=None):
                     a = rot / 65536.0 * 2 * math.pi
                     c, s = math.cos(a), math.sin(a)
                     props.append((pms, [c, 0.0, s, x, 0.0, 1.0, 0.0, y, -s, 0.0, c, z]))
-                grids = [terrain.grid(layer) for layer in terrain.layers(data)]
+                layers = terrain.layers(data)
+                grids = [terrain.grid(layer) for layer in layers]
+                # (a bigger block's grid is wider than 32: the LEAGUE's 64 x 64, laid over its k x k cells below)
+                gw = struct.unpack_from('<H', layers[0], 0)[0] if layers else 32
                 fb, hts = [], []
-                for t in range(1024):
+                for t in range(gw * gw):
                     if grids and t < len(grids[0]):
                         attr = grids[0][t][0]
                         if len(grids) > 1 and t < len(grids[1]):
                             a2 = grids[1][t][0]
                             if (attr >> 16) & 1 and not (a2 >> 16) & 1:
                                 attr = a2   # (a floor over a blocked one: the bridge is the way)
-                        w = warps.get((cx * 32 + t % 32, cz * 32 + t // 32))
+                        w = warps.get((cx * gw + t % gw, cz * gw + t // gw))
                         if w is not None:   # (a warp: walkable, whatever Black's grid says of the tile)
                             fb.append(METATILE_BEHAVIOR + w | (field_block(attr) & (3 << 12) or 3 << 12))
                         else:
@@ -522,18 +525,22 @@ def build(matrix_ids=None):
                     else:
                         fb.append(BLOCKED)
                         hts.append([])
-                cells.append((zone, meshes, cell_light(area_id), props, fb, hts))
+                cells.append((zone, meshes, cell_light(area_id), props, fb, hts, gw))
         k = scale_of(owners)
         grid = {}
         for i, c in enumerate(cells):
             cx, cz = x0 + i % (x1 - x0 + 1), z0 + i // (x1 - x0 + 1)
+            gw = c[6]
             for sz in range(k):
                 for sx in range(k):
-                    if sx == 0 and sz == 0:
-                        grid[(cx * k, cz * k)] = c
+                    if gw >= 32 * (max(sx, sz) + 1):   # (this 32 x 32 part of the block's own grid)
+                        fb = [c[4][(sz * 32 + ty) * gw + sx * 32 + tx] for ty in range(32) for tx in range(32)]
+                        hts = [c[5][(sz * 32 + ty) * gw + sx * 32 + tx] for ty in range(32) for tx in range(32)]
                     else:
-                        grid[(cx * k + sx, cz * k + sz)] = (c[0], [-1] * 4, c[2], [], [BLOCKED] * 1024,
-                                                             [[] for _ in range(1024)])
+                        fb, hts = [BLOCKED] * 1024, [[] for _ in range(1024)]
+                    first = sx == 0 and sz == 0
+                    grid[(cx * k + sx, cz * k + sz)] = (c[0], c[1] if first else [-1] * 4, c[2],
+                                                        c[3] if first else [], fb, hts)
         cams = {}
         lay_rails(grid, owners, warps, cams)
         gx, gz = [g[0] for g in grid], [g[1] for g in grid]
