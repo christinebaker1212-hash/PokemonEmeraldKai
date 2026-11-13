@@ -47,6 +47,9 @@ void (*gMpO3dLine)(int line, uint16_t layers[4][DISPLAY_WIDTH]);
 bool (*gMpO3dOamHidden)(int oamIndex, int x, int line);
 // Moemon Kai: UNOVA's 3D maps, their own engine's (src/unova/u3d.c)
 void (*gMpU3dLine)(int line, uint16_t layers[4][DISPLAY_WIDTH]);
+// ... and the BG layers each of those hooks replaces whole on a line (bit n: BGn): the renderer doesn't draw them
+// first (on a 3D map's field, BG1-3: they were drawn every line and then thrown away)
+uint8_t (*gMpS3dBgReplaced)(void), (*gMpO3dBgReplaced)(void), (*gMpU3dBgReplaced)(void);
 bool (*gMpU3dOamHidden)(int oamIndex, int x, int line);
 
 // Moemon Co-op: which sprite palette (+1; 0: a background) each pixel of the last frame shows: the battle weather
@@ -1198,10 +1201,19 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
     switch (mode)
     {
     case 0:
+    {
+        // Moemon Kai: the layers a 3D map's line hook replaces whole on this line aren't drawn first
+        uint8_t replaced = 0;
+        if (gMpS3dLine && gMpS3dBgReplaced)
+            replaced |= gMpS3dBgReplaced();
+        if (gMpO3dLine && gMpO3dBgReplaced)
+            replaced |= gMpO3dBgReplaced();
+        if (gMpU3dLine && gMpU3dBgReplaced)
+            replaced |= gMpU3dBgReplaced();
         // All backgrounds are text mode
         for (bgnum = 3; bgnum >= 0; bgnum--)
         {
-            if (isbgEnabled(bgnum))
+            if (isbgEnabled(bgnum) && !(replaced & (1 << bgnum)))
             {
                 uint16_t bghoffs = *(uint16_t *)(REG_ADDR_BG0HOFS + bgnum * 4);
                 uint16_t bgvoffs = *(uint16_t *)(REG_ADDR_BG0VOFS + bgnum * 4);
@@ -1222,6 +1234,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
             gMpU3dLine(vcount, scanline.layers);
         
         break;
+    }
     case 1:
         // BG2 is affine
         bgnum = 2;

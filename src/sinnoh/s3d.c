@@ -41,6 +41,7 @@ bool8 FieldEffect_IsReflectionSprite(const struct Sprite *sprite);   // (field_e
 #include "../data/sinnoh_night_songs.h"
 
 extern void (*gMpS3dLine)(int line, u16 layers[4][DISPLAY_WIDTH]);
+extern u8 (*gMpS3dBgReplaced)(void);
 const char *Updater_ExeFile(const char *name);
 unsigned long long SDL_GetPerformanceCounter(void);
 unsigned long long SDL_GetPerformanceFrequency(void);
@@ -1653,6 +1654,7 @@ static bool8 OnField(void)
 }
 
 static void S3dLine(int line, u16 layers[4][DISPLAY_WIDTH]);
+static u8 S3dBgReplaced(void);
 
 // A POKé MART's BUY screen (shop.c): the field's last 3D picture behind it, moved by (dx, dy) as the screen moves
 // the map (1.63.8: Emerald's own map tiles showed there, garbled)
@@ -1663,6 +1665,7 @@ void S3D_ShopPicture(bool8 on, s16 dx, s16 dy)
     sShopPic.dx = dx, sShopPic.dy = dy;
     if (sShopPic.on)
         gMpS3dLine = S3dLine;
+        gMpS3dBgReplaced = S3dBgReplaced;
 }
 
 static void ShopLine(int line, u16 layers[4][DISPLAY_WIDTH])
@@ -1676,6 +1679,17 @@ static void ShopLine(int line, u16 layers[4][DISPLAY_WIDTH])
         layers[3][x] = (sy >= 0 && sy < H && sx >= 0 && sx < W) ? Faded(sColor[sy][sx]) : Faded(0);
         layers[2][x] = 0;
     }
+}
+
+// The BG layers S3dLine replaces whole on a line (gba_easy_draw.c gMpS3dBgReplaced: not drawn first), by the same
+// conditions: a shop's picture BG2-3, the field BG1-3
+static u8 S3dBgReplaced(void)
+{
+    if (sShopPic.on && !OnField())
+        return (1 << 3) | (1 << 2);
+    if (!sView.active || !OnField())
+        return 0;
+    return (1 << 3) | (1 << 2) | (1 << 1);
 }
 
 static void S3dLine(int line, u16 layers[4][DISPLAY_WIDTH])
@@ -1750,6 +1764,7 @@ void S3D_Update(void)
     sView.active = map >= 0 && sPack.ok;
     sShopPic.on = FALSE;   // (back on the field)
     gMpS3dLine = sView.active ? S3dLine : NULL;
+    gMpS3dBgReplaced = S3dBgReplaced;
     gMpS3dOamHidden = sView.active && !getenv("MOEMON_S3D_NOHIDE") ? OamHidden : NULL;
     if (!sView.active)
         return;

@@ -65,6 +65,23 @@ jobs:
           path: ${{ runner.temp }}/debs
           key: debs-${{ runner.os }}-${{ hashFiles('tools/release/ci_tools.sh') }}-${{ github.run_id }}
 
+      # The compilers through ccache (tools/release/ccache_setup.sh): an object is compiled again only when its
+      # preprocessed source or flags changed, else the same bytes come from the cache kept from the last release.
+      # Nothing built differs; the two builds just skip what didn't change (about 10 minutes compiling otherwise).
+      - name: Compiler cache
+        if: steps.ver.outputs.skip != 'true'
+        uses: actions/cache/restore@v4
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MINS: 3
+        with:
+          path: ${{ runner.temp }}/ccache
+          key: ccache-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: ccache-${{ runner.os }}-
+
+      - name: Compilers through ccache
+        if: steps.ver.outputs.skip != 'true'
+        run: tools/release/ccache_setup.sh "$RUNNER_TEMP/ccache"
+
       - name: SDL2 for Windows (2.30.9, checked)
         if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         run: |
@@ -98,6 +115,21 @@ jobs:
       - name: Windows build
         if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         run: tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"
+
+      - name: Drop what this run didn't use from the compiler cache
+        if: always() && steps.ver.outputs.skip != 'true'
+        run: tools/release/ccache_setup.sh --prune "$RUNNER_TEMP/ccache"
+
+      - name: Keep the compiler cache
+        if: always() && steps.ver.outputs.skip != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/ccache
+          key: ccache-${{ runner.os }}-${{ github.run_id }}
+
+      - name: Compiler cache use
+        if: steps.ver.outputs.skip != 'true'
+        run: ccache -s 2>/dev/null | head -12 || true
 
       # Saves must load on every platform: the save's structures compiled for Linux and for Windows (whose bitfield
       # layout differs) must match tools/test/save_layout.txt, and scripts' table lookups must be in range.
@@ -138,23 +170,67 @@ jobs:
       # ripped from the disc whose link is the ORRE_DISC_URL secret (never in this repository) into orre/ at every
       # release, and shipped inside the game's own zips (tools/release/package.sh), so every update replaces them with
       # the game (the user, 2026-11-08: no separate download). Without the secret the release has no ORRE packs.
-      - name: ORRE's packs
+      # ORRE's and UNOVA's packs are built again only when what makes them changed: kept between releases by a key
+      # of every file their builders read (found by tracing them: tools/orre, tools/unova, tools/sinnoh's readers,
+      # tools/aveon, tools/moemon_text, the few headers and pictures below) and of the secret's link (another disc or
+      # ROM, another key). The game's build never reads them, so a kept pack is the same file a new build would make.
+      - name: Pack keys
+        id: packkey
         if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
+        env:
+          ORRE_DISC_URL: ${{ secrets.ORRE_DISC_URL }}
+          UNOVA_ROM_URL: ${{ secrets.UNOVA_ROM_URL }}
+        run: |
+          echo "orre=$(printf %s "$ORRE_DISC_URL" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+          echo "unova=$(printf %s "$UNOVA_ROM_URL" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+
+      - name: ORRE's packs from an earlier release
+        id: orrecache
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
+        uses: actions/cache/restore@v4
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MINS: 3
+        with:
+          path: orre
+          key: orre-packs-${{ steps.packkey.outputs.orre }}-${{ hashFiles('tools/orre/**', 'tools/moemon_text/**', 'src/data/orre_props.h', 'src/fonts.c', 'charmap.txt') }}
+
+      - name: ORRE's packs
+        id: orrebuild
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true' && steps.orrecache.outputs.cache-hit != 'true'
         env:
           ORRE_DISC_URL: ${{ secrets.ORRE_DISC_URL }}
         run: |
           if [ -n "$ORRE_DISC_URL" ]; then
             ORRE_WORK="$RUNNER_TEMP/orre_work" tools/orre/make_pack.sh
             rm -rf "$RUNNER_TEMP/orre_work"
+            [ -f orre/orre3d.pak ] && echo "built=true" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::no ORRE_DISC_URL secret: this release has no ORRE packs"
           fi
 
+      - name: Keep ORRE's packs
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true' && steps.orrebuild.outputs.built == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: orre
+          key: orre-packs-${{ steps.packkey.outputs.orre }}-${{ hashFiles('tools/orre/**', 'tools/moemon_text/**', 'src/data/orre_props.h', 'src/fonts.c', 'charmap.txt') }}
+
       # UNOVA's packs (docs/UNOVA_DECISIONS.md): Pokemon Black's maps, text, scripts and pictures, built from the ROM whose
       # link is the UNOVA_ROM_URL secret (never in this repository) into unova/, shipped inside the game's own zips like
       # ORRE's. Only once UNOVA ships (the file tools/unova/ship_in_release exists): until then the game hides UNOVA.
-      - name: UNOVA's packs
+      - name: UNOVA's packs from an earlier release
+        id: unovacache
         if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
+        uses: actions/cache/restore@v4
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MINS: 3
+        with:
+          path: unova
+          key: unova-packs-${{ steps.packkey.outputs.unova }}-${{ hashFiles('tools/unova/**', 'tools/sinnoh/**', 'tools/aveon/**', 'tools/moemon_text/**', 'graphics/aveon/**', 'charmap.txt') }}
+
+      - name: UNOVA's packs
+        id: unovabuild
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true' && steps.unovacache.outputs.cache-hit != 'true'
         env:
           UNOVA_ROM_URL: ${{ secrets.UNOVA_ROM_URL }}
         run: |
@@ -163,9 +239,17 @@ jobs:
           elif [ -n "$UNOVA_ROM_URL" ]; then
             UNOVA_WORK="$RUNNER_TEMP/unova_work" tools/unova/make_pack.sh
             rm -rf "$RUNNER_TEMP/unova_work"
+            [ -f unova/black3d.pak ] && echo "built=true" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::no UNOVA_ROM_URL secret: this release has no UNOVA packs"
           fi
+
+      - name: Keep UNOVA's packs
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true' && steps.unovabuild.outputs.built == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: unova
+          key: unova-packs-${{ steps.packkey.outputs.unova }}-${{ hashFiles('tools/unova/**', 'tools/sinnoh/**', 'tools/aveon/**', 'tools/moemon_text/**', 'graphics/aveon/**', 'charmap.txt') }}
 
       # Custom music (music/*.kaisong) and Colosseum's songs all equally loud (tools/kaisong/normalize.py): every song
       # measured in the game just built, every run (the user, 2026-11-11: never skipped because it was measured before),
@@ -189,6 +273,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle   # (the app's Gradle downloads kept between releases: android/**/*.gradle*)
+          cache-dependency-path: |
+            android/**/*.gradle*
+            android/**/gradle-wrapper.properties
 
       - name: Companion app (APK)
         if: steps.ver.outputs.skip != 'true'

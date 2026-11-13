@@ -78,6 +78,20 @@ and publishes the release. Locally the same steps are `tools/release/build_windo
 `package.sh windows|linux OUT`, `manifest.sh OUT`. The updater only runs in a folder with
 `moemon_release.txt` (packaged releases), never in a source checkout.
 
+What a release keeps from the last one (2026-11-13: a run took 30 to 60 minutes, most of it rebuilding what hadn't
+changed). Nothing it ships differs from a fresh build:
+- The compilers through ccache (`tools/release/ccache_setup.sh`), and the game's own C files, whose
+  `cpp | preproc | cc1 | as` pipe ccache can't see, through `tools/release/objcache.sh` (the Makefile's C rule when
+  `OBJCACHE` is set): an object is kept by a hash of its preprocessed source, the compilers' command lines and bytes,
+  and every file it `.incbin`s, and copied back when they match (a warm Linux build: 47 s instead of 4 minutes;
+  every object byte-identical to a normal build's, but the crash log's build time). `--prune` drops what a run
+  didn't use before the cache is kept.
+- ORRE's and UNOVA's packs, kept by a key of every file their builders read (traced with strace: their tools,
+  tools/sinnoh's readers, tools/aveon, tools/moemon_text, a few headers and pictures, charmap.txt) and of the secret's
+  link. When a builder starts reading another file, add it to its key in release.yml. SINNOH's packs are always built
+  (1.5 minutes; the build itself reads its scripts).
+- Gradle's downloads for the app (`actions/setup-java`'s cache).
+
 Bump `MP_PROTOCOL_VERSION` in `src/mp/mp_net.h` whenever the network
 protocol or anything that affects link battles changes.
 

@@ -41,6 +41,7 @@
 bool8 FieldEffect_IsReflectionSprite(const struct Sprite *sprite);   // (field_effect_helpers.c)
 
 extern void (*gMpO3dLine)(int line, u16 layers[4][DISPLAY_WIDTH]);
+extern u8 (*gMpO3dBgReplaced)(void);
 extern bool (*gMpO3dOamHidden)(int oamIndex, int x, int line);
 const char *Updater_OrreRoot(void);
 unsigned long long SDL_GetPerformanceCounter(void);
@@ -1793,6 +1794,17 @@ static void ShopLine(int line, u16 layers[4][DISPLAY_WIDTH])
     }
 }
 
+// The BG layers O3dLine replaces whole on a line (gba_easy_draw.c gMpO3dBgReplaced: not drawn first), by the same
+// conditions: a shop's picture BG2-3, the field BG1-3
+static u8 O3dBgReplaced(void)
+{
+    if (sShopPic.on && !OnField())
+        return (1 << 3) | (1 << 2);
+    if (!sView.active || !OnField())
+        return 0;
+    return (1 << 3) | (1 << 2) | (1 << 1);
+}
+
 static void O3dLine(int line, u16 layers[4][DISPLAY_WIDTH])
 {
     s32 x;
@@ -1864,6 +1876,7 @@ bool8 O3D_Active(void)
 {
     return sView.active && OnField();
 }
+static u8 O3dBgReplaced(void);
 
 void O3D_ShopPicture(bool8 on, s16 dx, s16 dy)
 {
@@ -1871,6 +1884,7 @@ void O3D_ShopPicture(bool8 on, s16 dx, s16 dy)
     sShopPic.dx = dx, sShopPic.dy = dy;
     if (sShopPic.on)
         gMpO3dLine = O3dLine;
+        gMpO3dBgReplaced = O3dBgReplaced;
 }
 
 void O3D_Update(void)
@@ -1879,6 +1893,7 @@ void O3D_Update(void)
     sView.active = map >= 0 && MapLoad((u32)map);
     sShopPic.on = FALSE;   // (back on the field)
     gMpO3dLine = sView.active ? O3dLine : NULL;
+    gMpO3dBgReplaced = O3dBgReplaced;
     gMpO3dOamHidden = sView.active && !getenv("MOEMON_O3D_NOHIDE") ? OamHidden : NULL;
     Orre_Vm_Frame();   // (Colosseum's scripts: src/orre/orre_vm.c; they stop off ORRE)
     O3D_CamTick();     // (a shot of Colosseum's playing: o3d_cam.c)

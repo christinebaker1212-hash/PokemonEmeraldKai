@@ -599,13 +599,19 @@ $(C_BUILDDIR)/mp/mp_stadium_gfx_data.o: graphics/stadium/stadium.bin graphics/st
 $(C_BUILDDIR)/%.o: $(C_SUBDIR)/%.c
 ifneq ($(KEEP_TEMPS),1)
 	@echo "$(CC1) <flags> -o $@ $<"
+ifneq ($(OBJCACHE),)
+	@$(CPP) $(CPPFLAGS) $< | $(PREPROC) -i -g $(ASSETS_DIR_NAME) $< charmap.txt | tools/release/objcache.sh $@ "$(CC1) $(CFLAGS)" "$(AS) $(ASFLAGS)"
+else
 	@$(CPP) $(CPPFLAGS) $< | $(PREPROC) -i -g $(ASSETS_DIR_NAME) $< charmap.txt | $(CC1) $(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $(AS) $(ASFLAGS) -o $@ -
+endif
 else
 	@$(CPP) $(CPPFLAGS) $< -o $(C_BUILDDIR)/$*.i
 	@$(PREPROC) -g $(ASSETS_DIR_NAME) $(C_BUILDDIR)/$*.i charmap.txt | $(CC1) $(CFLAGS) -o $(C_BUILDDIR)/$*.s
 	@echo -e ".text\n\t.align\t2, 0\n" >> $(C_BUILDDIR)/$*.s
 	$(AS) $(ASFLAGS) -o $@ $(C_BUILDDIR)/$*.s
 endif
+
+# (Moemon Kai: OBJCACHE=DIR, the release's: objects kept by what decides them, tools/release/objcache.sh)
 
 # Moemon Fight: the fight engine's objects (FIGHT_OBJS)
 $(OBJ_DIR)/fight/%.o: fight/%.c

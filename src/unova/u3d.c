@@ -43,6 +43,7 @@ bool8 FieldEffect_IsReflectionSprite(const struct Sprite *sprite);   // (field_e
 const char *Updater_ExeFile(const char *name);
 int uncompress(unsigned char *dest, unsigned long *destLen, const unsigned char *source, unsigned long sourceLen);
 extern void (*gMpU3dLine)(int line, u16 layers[4][DISPLAY_WIDTH]);
+extern u8 (*gMpU3dBgReplaced)(void);
 extern bool (*gMpU3dOamHidden)(int oamIndex, int x, int line);
 
 #define W DISPLAY_WIDTH
@@ -1665,6 +1666,7 @@ static bool8 OnField(void)
 }
 
 static void U3dLine(int line, u16 layers[4][DISPLAY_WIDTH]);
+static u8 U3dBgReplaced(void);
 
 static struct { bool8 on; s16 dx, dy; } sShopPic;
 void U3D_ShopPicture(bool8 on, s16 dx, s16 dy)
@@ -1673,6 +1675,18 @@ void U3D_ShopPicture(bool8 on, s16 dx, s16 dy)
     sShopPic.dx = dx, sShopPic.dy = dy;
     if (sShopPic.on)
         gMpU3dLine = U3dLine;
+        gMpU3dBgReplaced = U3dBgReplaced;
+}
+
+// The BG layers U3dLine replaces whole on a line (gba_easy_draw.c gMpU3dBgReplaced: not drawn first), by the same
+// conditions: a shop's picture BG2-3, the field BG1-3
+static u8 U3dBgReplaced(void)
+{
+    if (sShopPic.on && !OnField())
+        return (1 << 3) | (1 << 2);
+    if (!sView.active || !OnField())
+        return 0;
+    return (1 << 3) | (1 << 2) | (1 << 1);
 }
 
 static void U3dLine(int line, u16 layers[4][DISPLAY_WIDTH])
@@ -1749,6 +1763,7 @@ void U3D_Update(void)
     sView.active = map >= 0 && sPack.ok;
     sShopPic.on = FALSE;
     gMpU3dLine = sView.active ? U3dLine : NULL;
+    gMpU3dBgReplaced = U3dBgReplaced;
     gMpU3dOamHidden = sView.active ? OamHidden : NULL;
     if (!sView.active)
         return;
