@@ -107,6 +107,18 @@ u8 MP_Emote_ExtraFrames(u8 extra)
     return sExtraEmoteFrameCount[extra % MP_EXTRA_EMOTE_COUNT];
 }
 
+// An emote's 16x16 icon (MP_EMOTE_*): its tiles (as a 16x16 sprite reads them) and its colors, the field's own
+void MP_Emote_IconTiles(u8 kind, u8 *tiles, u16 *pal)
+{
+    const u8 *MP_EmoteIconGfx(u8 icon);   // trainer_see.c
+    static const u8 sBase[MP_EMOTE_FIRST_EXTRA] = {0, 0, 1, 2, 3};   // MP_ICON_*: !, ?, heart, note
+    if (kind >= MP_EMOTE_FIRST_EXTRA && kind < MP_EMOTE_COUNT)
+        memcpy(tiles, sExtraEmoteGfx[kind - MP_EMOTE_FIRST_EXTRA][0], 0x80);
+    else
+        memcpy(tiles, MP_EmoteIconGfx(sBase[kind < MP_EMOTE_FIRST_EXTRA ? kind : 1]), 0x80);
+    memcpy(pal, sBubblePal, 32);
+}
+
 const char *MP_Emote_Name(u8 kind)
 {
     static const char *const sNames[MP_EMOTE_FIRST_EXTRA] = {"", "!  SURPRISED", "?  CONFUSED", "HEART", "MUSIC"};

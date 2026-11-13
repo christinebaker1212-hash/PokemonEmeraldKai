@@ -7533,3 +7533,57 @@ Triples, co-op and joining work as anywhere; PvP keeps Kai's building.
 - Black's catches (u3d_battle.c U3D_CatchCase, battle_script_commands.c): CalcCaptureShakes, critical captures (one
   shake: BALL_MP_CRITICAL), the dex factor, Black's balls; dark grass's odds. Dark grass (wild_encounter.c
   U3dStartWild): 40 in 100 two at once with two POKeMON able to battle (Kai's local Double); test mp u3dwild 3 b.
+
+## The CO-OP menu redone; THEME DARK (1.199.0)
+
+The user's design (2026-11-13, mock-ups in the session's scratchpad: rounds 2 and 3; "keep sensible GBA limits",
+"allow some of the field to still be visible", "support up to 3 other players"). Approved with: LT / RT stay the
+emote / phrase holds, FRIENDS a menu you pick a player from, real item icons scaled down.
+
+**The hub** (src/mp/mp_menu.c DrawHub, HandleMainInput): three windows over the field (SetLayout: LAYOUT_HUB): the
+room (MpUi_DrawRoom: up to three others, two lines each so a 7-letter name and a long place both fit, a blue "!" for
+in a battle / card duel), the menu at the right in tabs PEOPLE / PLAY / ME (sTabRows; tCursor is still a MAIN_*, so
+MP_OpenMenuPageAt(MAIN, MAIN_BERRY) etc. keep working; L / R or left / right change tab), each row an icon, its name
+and a line of news (HubRowText: friends online, MOEGATCHA pulls, goals done from MP_Events_PhoneGoals, HEART SCALES,
+the room's CODE), and the help line (DrawHubHelp -> MpUi_HelpInto: words left, button prompts right of the second
+line). FRIENDS is its own wide page (DrawFriendsList: LAYOUT_WIDE), A opens mp_linkx.c's friend screen. LOOK / CREATE
+keep their windows (LAYOUT_LOOK), restyled (title + line, the lit bar).
+
+**Icons**: the game's own item pictures brought to 16x16 as pixel art (crop; or area-average, back to the item's own
+colors, outline again): tools/moemon_coopmenu/gen_icons.py -> src/data/mp_coopmenu_icons.h (MP_COOPICON_*: the hub's
+11, the A-Life pick's PET / GROOM drawn, PLAY / FEED / KEEPSAKE items). Shown as 16x16 sprites through mp_ui.c's
+picture slots (MpUi_PicBegin / MpUi_Icon / MpUi_Head / MpUi_Emote / MpUi_PicEnd; MPUI_PIC_ROWS 0-2, MPUI_PIC_ROOM 4-6).
+
+**MpUi** (every co-op list screen, src/mp/mp_ui.c): the title in FONT_NORMAL with a line under it (no band), the
+picked row the lit bar + Emerald's ▶, row text printed with a see-through background (glyph pixel 0 is skipped:
+rows close together never clip each other), scroll arrows keep the right text clear. MpUi_Compact() before
+MpUi_Begin: the short-list layout (a narrow list at the right, the room at the top left); SOCIAL, SCRIBBLE, SHARED PC,
+TOURNAMENT's first step and BERRY GAMES ask for it; anything else is WIDE (windows remade when the layout changes).
+MpUi_FriendRow / MpUi_RowBelowFriends: tall rows with heads (TRADE WITH WHO?, PRANK WHO?). MpUi_HelpInto splits a
+help line at the first button icon after two spaces.
+
+**The picks** (mp_menu.c, QG_SLOTS / QG_PHRASES windows, see-through but for their boxes): emotes in four boxes round
+the player (sSlotPos; their pictures MP_Emote_IconTiles from trainer_see.c MP_EmoteIconGfx / mp_emote_gfx.h),
+phrases in balloons (DrawBalloon: up / down centered, left ending beside the player, right starting beside them), the
+bar (DrawBarPages: the emote pages by name, the phrase pages as dots). Held (LT / RT), L / R stay in that group;
+opened from SOCIAL they go round all. The A-Life pick: the same boxes round the POKéMON (qOffX / qOffY from
+MP_Follower_LocalPos; the box on the player's side stays beyond the player), VerbPicture.
+
+**The A-Life answer's sign**: map_name_popup.c MP_ShowPopupText: the map name popup's own sign as wide as the words
+(AddMapNamePopUpWindowWide, the edge pieces and stone repeated), one or two lines; the player is free at once, the
+interaction task lingers (tState 5, LINGER_FRAMES, ended by walking on) so the POKéMON keeps from its own activities
+(mp_life_field.c checks MP_LifeInteract_Busy) and A on it again starts the next pick.
+
+**THEME DARK** (OPTIONS > DISPLAY > THEME, gMpConfig.menuTheme, "menu_theme = dark"): src/mp/mp_darktheme.c swaps
+the windows' palettes as they're loaded (palette.c LoadPalette / LoadCompressedPalette -> MP_Theme_Map /
+MP_Theme_MapCompressed): std_menu.pal, the four text window palettes, the message box, all 29 frames, the OPTIONS
+screen's text (MP_Theme_MapText), battles' text box and action / move text, the PP colors (MP_Theme_TextColor), the
+BAG's picture and text (mp_bagui.c sDarkBagColors / sDarkBagStripColors, item_menu.c MP_Theme_BagText). The dark
+palettes are designed, not flipped (the user: "make sure it fits across all scenes and all border types"):
+tools/moemon_darktheme/gen_dark.py -> src/data/mp_dark_palettes.h: a night-slate fill, warm white text over a shadow
+darker than the fill, colored text bright over deep shadows; each frame color by its role (from where it's drawn):
+outline kept, its colors at dusk, the light rims that met the white fill the slates a step lighter (tinted ones keep
+their tint, greys go blue-grey), OVERRIDES for hand tuning; the message box's edges deep and quiet (the user: "the
+dialogue edges are too bright"). `gen_dark.py --preview DIR` draws all 29 frames light and dark, and the BAG.
+mp_buttons.c MapColors: in a dark window the controller glyphs take a light face and a dark letter.
+Debug: `mp theme dark|default`, `mp verbwheel`, `mp plate TEXT`.

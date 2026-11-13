@@ -125,6 +125,7 @@ enum
     OPT_SS_BACK,
     OPT_TITLE,        // Moemon Kai: GAME > RETURN TO MAIN MENU (from the field: a save, then a soft reset)
     OPT_PHONE,        // Moemon Co-op: CO-OP > PHONE LINK (A: pairing and the phones, src/mp/mp_phone.c)
+    OPT_THEME,        // Moemon Co-op: DISPLAY > THEME DEFAULT / DARK (every window's colors: mp_darktheme.c)
     OPT_CLOSE,
 };
 #define SC_RULE(opt) ((opt) - OPT_SC_ON)
@@ -289,6 +290,9 @@ static const u8 sText_Size[] = _("SIZE");
 static const u8 sText_Back[] = _("BACK");
 static const u8 sText_SpriteScale[] = _("SPRITE SCALING");
 static const u8 sText_Shadows[] = _("SHADOWS");
+static const u8 sText_Theme[] = _("THEME");
+static const u8 sText_ThemeDefault[] = _("DEFAULT");
+static const u8 sText_ThemeDark[] = _("DARK");
 static const u8 sText_BgMute[] = _("MUTE IN BACKGROUND");
 static const u8 sText_Announcer[] = _("ANNOUNCER VOICE");
 static const u8 sText_StadiumSettings[] = _("STADIUM SETTINGS");
@@ -380,6 +384,15 @@ static const struct BgTemplate sOptionMenuBgTemplates[] =
 };
 
 static const u16 sOptionMenuBg_Pal[] = {RGB(17, 18, 31)};
+static const u16 sOptionMenuBgDark_Pal[] = {RGB(5, 5, 10)};
+
+// The screen's backdrop, frame and text colors, in the THEME's (DARK: mp_darktheme.c)
+static void OptionMenu_LoadThemePalettes(void)
+{
+    LoadPalette(MP_Theme_Dark() ? sOptionMenuBgDark_Pal : sOptionMenuBg_Pal, BG_PLTT_ID(0), sizeof(sOptionMenuBg_Pal));
+    LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
+    LoadPalette(MP_Theme_MapText(sOptionMenuText_Pal), BG_PLTT_ID(1), sizeof(sOptionMenuText_Pal));
+}
 
 static void MainCB2(void)
 {
@@ -496,6 +509,7 @@ static void BuildRows(void)
         AddRow(OPT_FOLLOWSPRITES, 0);
         AddRow(OPT_SPRITESCALE, 0);
         AddRow(OPT_SHADOWS, 0);
+        AddRow(OPT_THEME, 0);
         break;
     case TAB_CONTROLS:
         AddRow(OPT_PADSELECT, 0);
@@ -578,6 +592,9 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_ANNOUNCER:
         names[0] = sText_Off, names[1] = sText_English, names[2] = sText_Japanese;
         return 3;
+    case OPT_THEME:
+        names[MP_MENU_THEME_DEFAULT] = sText_ThemeDefault, names[MP_MENU_THEME_DARK] = sText_ThemeDark;
+        return MP_MENU_THEME_COUNT;
     case OPT_ST_STYLE:
         names[MP_STADIUM_STYLE_ORIGINAL] = sText_StOriginal, names[MP_STADIUM_STYLE_STADIUM1] = sText_StStadium1;
         names[MP_STADIUM_STYLE_STADIUM2] = sText_StStadium2;
@@ -857,6 +874,7 @@ static u8 Current(u8 row)
     case OPT_SINNOHSPRITES: return 2 - gMpConfig.sinnohSprites % 3;
     case OPT_UNOVASPRITES: return gMpConfig.unovaSprites % 2;
     case OPT_SHADOWS:     return !gMpConfig.noShadows;
+    case OPT_THEME:       return gMpConfig.menuTheme % MP_MENU_THEME_COUNT;
     case OPT_BGMUTE:      return gMpConfig.muteInBackground != 0;
     case OPT_ANNOUNCER:   return gMpConfig.noAnnouncer ? 0 : gMpConfig.announcerJp ? 2 : 1;
     case OPT_BADGEFADE:   return MP_TCard_Fade();
@@ -959,6 +977,11 @@ static void Change(u8 row, int dir)
     case OPT_BGMUTE:
         gMpConfig.muteInBackground = !gMpConfig.muteInBackground;
         MPNet_Log("mute in background: %d", gMpConfig.muteInBackground);
+        break;
+    case OPT_THEME:
+        gMpConfig.menuTheme = Wrap(gMpConfig.menuTheme + (dir ? dir : 1), MP_MENU_THEME_COUNT);
+        MPNet_Log("theme: %s", gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "dark" : "default");
+        OptionMenu_LoadThemePalettes();   // seen at once, on this screen too
         break;
     case OPT_SHADOWS:
         gMpConfig.noShadows = !gMpConfig.noShadows;
@@ -1092,6 +1115,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_SINNOHSPRITES: return sText_SinnohPeople;
     case OPT_UNOVASPRITES: return sText_UnovaPeople;
     case OPT_SHADOWS: return sText_Shadows;
+    case OPT_THEME: return sText_Theme;
     case OPT_BGMUTE:  return sText_BgMute;
     case OPT_ANNOUNCER: return sText_Announcer;
     case OPT_BADGEFADE:   return sText_BadgeFade;
@@ -1288,6 +1312,9 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.stadiumStyle == MP_STADIUM_STYLE_STADIUM1 ? "THE STADIUM'S SCREENS AS THE FIRST STADIUM'S"
                                              : gMpConfig.stadiumStyle == MP_STADIUM_STYLE_STADIUM2 ? "THE STADIUM'S SCREENS AS STADIUM 2'S"
                                                                                                     : "THE STADIUM'S SCREENS IN THE GAME'S STYLE");
+    else if (opt == OPT_THEME)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "EVERY WINDOW AND MESSAGE IN DARK COLORS"
+                                                                                          : "THE GAME'S OWN LIGHT WINDOWS");
     else if (opt == OPT_SHADOWS)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.noShadows ? "NO SHADOWS UNDER PEOPLE AND MOEMON" : "A SOFT SHADOW UNDER PEOPLE AND MOEMON");
     else if (opt == OPT_SS_FOLLOW || opt == OPT_SS_GARDEN)
@@ -1594,12 +1621,8 @@ void CB2_InitOptionMenu(void)
         gMain.state++;
         break;
     case 4:
-        LoadPalette(sOptionMenuBg_Pal, BG_PLTT_ID(0), sizeof(sOptionMenuBg_Pal));
-        LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
-        gMain.state++;
-        break;
     case 5:
-        LoadPalette(sOptionMenuText_Pal, BG_PLTT_ID(1), sizeof(sOptionMenuText_Pal));
+        OptionMenu_LoadThemePalettes();
         gMain.state++;
         break;
     case 6:

@@ -187,6 +187,10 @@ something would go over a GBA limit (tiles, palettes, colours, sprites, VRAM, OA
 they would like to move forward, then do as they say; never quietly squeeze it into the GBA's limits. The renderer
 already draws past them (full-colour layers: gba_easy_draw.c gMpBgPictureLine / gMpMapPicLine, mp_mappic.c; the
 battle backgrounds of UNOVA and SINNOH in full colour, 2026-11-13).
+**But the look stays believably GBA** (the user, 2026-11-13): technical limits may be passed, style may not. Graphics
+must be ones you could believe on a GBA (sensible palettes, pixel art, Emerald-era windows and fonts, nothing
+overly modern), so the game looks as if it could always have looked this way. New screens: show the user mock-ups
+before building them.
 
 ## Key locations
 - `src/mp/`: all co-op code (net, client, avatar, overworld, trainer mode, battle, menu)
@@ -311,6 +315,11 @@ from before 1.18.1 the TMs their flags prove they got and no longer have, from t
 Also catch EXP (a catch gives EXP scaled by the damage dealt: BattleScript_MpCatchExp; tests catch_exp, coop_catch_exp)
 and BATTLE FLAG phrases ("Set phrases, or plant?", the save's easy chat battle phrases sent with MPR_ARRIVED /
 BATTLE_GO, MPR_PHRASE_READY; the loser keeps their money; test flag_phrases).
+Also the CO-OP menu as the user designed it (1.199.0: the hub over the field with the room, tabs PEOPLE / PLAY / ME, item
+icons from tools/moemon_coopmenu/gen_icons.py, FRIENDS a list, MpUi's COMPACT / WIDE layouts, the picks round the
+player / POKéMON, the A-Life answer on the map name's sign) and THEME DARK (OPTIONS > DISPLAY > THEME: designed dark
+palettes from tools/moemon_darktheme/gen_dark.py swapped in at load, src/mp/mp_darktheme.c): COOP_NOTES "The CO-OP menu
+redone; THEME DARK".
 Also OPTIONS in tabs (option_menu.c: GAME / BATTLE / DISPLAY / CONTROLS / CO-OP rows since 1.63.14, L/R tabs; replaces START > SETTINGS and
 CO-OP > SPECTATE) with BIKE MUSIC / SURF MUSIC (overworld.c MpRideMusic), BUTTON ICONS (gamepad.c) and MOENAV CALLS
 (match_call.c SelectMatchCallTrainer); tests options_tabs, music_options, spec_menu.

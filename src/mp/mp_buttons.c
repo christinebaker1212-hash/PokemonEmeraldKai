@@ -155,6 +155,13 @@ static void MapColors(u8 windowId, u8 *map)
     for (c = 1; c < 10; c++)
     {
         int best = 2, bestD = 0x7FFFFFFF;
+        if (c <= 2 && Luma(pal[1]) + 60 < Luma(pal[2]))
+        {
+            // a dark window (OPTIONS > DISPLAY > THEME DARK: a dark fill, light text): the key's face in the text's
+            // light color, its letter in the fill's dark, as a light key reads on a dark box
+            map[c] = c == 1 ? 2 : 1;
+            continue;
+        }
         if (c == 1)
         {
             // the body: the darkest color (index 2 is the dark text color in most windows,

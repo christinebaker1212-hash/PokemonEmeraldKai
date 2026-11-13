@@ -5,6 +5,7 @@
 #include "gpu_regs.h"
 #include "task.h"
 #include "constants/rgb.h"
+#include "mp.h"   // Moemon Co-op: THEME DARK (mp_darktheme.c)
 
 enum
 {
@@ -84,12 +85,14 @@ static const u8 sRoundedDownGrayscaleMap[] = {
 void LoadCompressedPalette(const u32 *src, u16 offset, u16 size)
 {
     LZDecompressWram(src, gPaletteDecompressionBuffer);
+    MP_Theme_MapCompressed(src, (u16 *)gPaletteDecompressionBuffer, size);   // Moemon Co-op: THEME DARK
     CpuCopy16(gPaletteDecompressionBuffer, &gPlttBufferUnfaded[offset], size);
     CpuCopy16(gPaletteDecompressionBuffer, &gPlttBufferFaded[offset], size);
 }
 
 void LoadPalette(const void *src, u16 offset, u16 size)
 {
+    src = MP_Theme_Map(src, size);   // Moemon Co-op: THEME DARK (the windows' palettes: mp_darktheme.c)
     CpuCopy16(src, &gPlttBufferUnfaded[offset], size);
     CpuCopy16(src, &gPlttBufferFaded[offset], size);
 }

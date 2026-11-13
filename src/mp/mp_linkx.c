@@ -898,6 +898,7 @@ static void Draw(void)
             "Back to the CO-OP menu.",
         };
         u16 i;
+        MpUi_Compact();
         MpUi_Begin("BERRY GAMES");
         for (i = 0; i < BG_COUNT; i++)
             MpUi_RowAscii(i, i == sUi.cursor, sRows[i], NULL);

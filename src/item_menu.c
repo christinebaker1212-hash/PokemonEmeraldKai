@@ -887,7 +887,7 @@ static bool8 LoadBagMenu_Graphics(void)
         else
             LoadCompressedPalette(gBagScreenMale_Pal, BG_PLTT_ID(0), 2 * PLTT_SIZE_4BPP);
         LoadPalette(&sBagBackdrop, BG_PLTT_ID(0), sizeof(sBagBackdrop));
-        LoadPalette(sBagTextColors, BG_PLTT_ID(1) + 1, sizeof(sBagTextColors));
+        LoadPalette(MP_Theme_BagText(sBagTextColors), BG_PLTT_ID(1) + 1, sizeof(sBagTextColors));   // Moemon Co-op: THEME DARK
         LoadPalette(&sBagTextColors[1], BG_PLTT_ID(1) + 10, sizeof(u16));
         gBagMenu->graphicsLoadState++;
         break;

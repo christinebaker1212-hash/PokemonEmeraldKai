@@ -545,6 +545,14 @@ u8 AddMapNamePopUpWindow(void)
     return sMapNamePopupWindowId;
 }
 
+// Moemon Co-op: the same window, WIDTH tiles wide (the A-Life plate: map_name_popup.c MP_ShowPopupText)
+u8 AddMapNamePopUpWindowWide(u8 width)
+{
+    if (sMapNamePopupWindowId == WINDOW_NONE)
+        sMapNamePopupWindowId = AddWindowParameterized(0, 1, 1, width, 3, 14, 0x107);
+    return sMapNamePopupWindowId;
+}
+
 u8 GetMapNamePopUpWindowId(void)
 {
     return sMapNamePopupWindowId;

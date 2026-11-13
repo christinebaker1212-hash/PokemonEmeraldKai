@@ -212,7 +212,8 @@ static void Draw(void)
     switch (sT.state)
     {
     case TS_CHOOSE:
-        MpUi_Begin("TOURNAMENT: WHAT KIND?");
+        MpUi_Compact();
+        MpUi_Begin("TOURNAMENT");
         MpUi_RowAscii(0, sT.cursor == 0, "BATTLES", NULL);
         MpUi_RowAscii(1, sT.cursor == 1, "CARD DUELS", NULL);
         MpUi_RowAscii(2, sT.cursor == 2, "NOT NOW", NULL);

@@ -6,13 +6,9 @@ wait 200
 log mirage: on the field
 mp menu 0
 wait 30
-press DOWN 2
+press L 2
 wait 10
-press DOWN 2
-wait 10
-press DOWN 2
-wait 10
-press DOWN 2
+press UP 2
 wait 10
 press A 2
 wait 400

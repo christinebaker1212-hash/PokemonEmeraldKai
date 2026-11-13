@@ -28,8 +28,15 @@
 #include "decompress.h"
 #include "data.h"
 #include "sprite.h"
+#include "item.h"
+#include "event_object_movement.h"
+#include "field_player_avatar.h"
+#include "mp_life_field.h"
+#include "constants/items.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+static void Task_CoopMenu(u8 taskId);
+u8 MP_Events_PhoneGoals(char out[][64], s32 *progress, s32 *target, u8 max);
 
 // Pages of the CO-OP menu. Rows are per page; each page ends with BACK/CLOSE.
 // No CLOSE row: B or START closes the menu
@@ -68,6 +75,24 @@ static const struct WindowTemplate sPlayersWindowTemplate = {
     .height = 2,
     .paletteNum = 15,
     .baseBlock = 0x8 + MENU_W * 15,
+};
+
+// The hub's windows (the field shows between them) and FRIENDS' wide one; LOOK / CREATE keep the two above
+enum { LAYOUT_NONE, LAYOUT_HUB, LAYOUT_LOOK, LAYOUT_WIDE };
+static const struct WindowTemplate sHubMenuTemplate = {
+    .bg = 0, .tilemapLeft = 18, .tilemapTop = 1, .width = 11, .height = 13, .paletteNum = 15, .baseBlock = 0x8,
+};
+static const struct WindowTemplate sHubRoomTemplate = {
+    .bg = 0, .tilemapLeft = 1, .tilemapTop = 1, .width = 12, .height = 10, .paletteNum = 15, .baseBlock = 0x8 + 11 * 13,
+};
+static const struct WindowTemplate sHubHelpTemplate = {
+    .bg = 0, .tilemapLeft = 1, .tilemapTop = 16, .width = 28, .height = 3, .paletteNum = 15, .baseBlock = 0x8 + 11 * 13 + 12 * 10,
+};
+static const struct WindowTemplate sWideTemplate = {
+    .bg = 0, .tilemapLeft = 1, .tilemapTop = 1, .width = 28, .height = 13, .paletteNum = 15, .baseBlock = 0x8,
+};
+static const struct WindowTemplate sWideHelpTemplate = {
+    .bg = 0, .tilemapLeft = 1, .tilemapTop = 16, .width = 28, .height = 3, .paletteNum = 15, .baseBlock = 0x8 + 28 * 13,
 };
 
 static const u8 sTextColors[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
@@ -328,6 +353,270 @@ static bool8 LookIsCreated(void)
     return gMpConfig.app.base == MP_BASE_CREATED && gMpConfig.app.recipe.made;
 }
 
+// ---------------------------------------------------------------------------
+// The CO-OP menu's hub (the user's design, 2026-11-13): over the field like the START menu, the room at the top left
+// (who's here and where), the menu at the right in three tabs (L / R), each row an item's icon, its name and a line
+// of news, the help line along the bottom. The rows are MAIN_* (tCursor holds one), in the tabs' order here.
+enum { TAB_PEOPLE, TAB_PLAY, TAB_ME, TAB_COUNT };
+#define TAB_ROWS 4
+static const u8 sTabRows[TAB_COUNT][TAB_ROWS] = {
+    [TAB_PEOPLE] = {MAIN_FRIENDS, MAIN_EMOTES, MAIN_TRADE, MAIN_SHARED_PC},
+    [TAB_PLAY]   = {MAIN_TOURNEY, MAIN_GATCHA, MAIN_DAILY, MAIN_BERRY},
+    [TAB_ME]     = {MAIN_LOOK, MAIN_REMINDER, MAIN_ONLINE, MAIN_CLOSE},
+};
+static const char *const sTabNames[TAB_COUNT] = {"PEOPLE", "PLAY", "ME"};
+static const u8 sMainIcon[MAIN_COUNT] = {
+    [MAIN_EMOTES] = MP_COOPICON_SOCIAL, [MAIN_FRIENDS] = MP_COOPICON_FRIENDS, [MAIN_TRADE] = MP_COOPICON_TRADE,
+    [MAIN_SHARED_PC] = MP_COOPICON_SHAREDPC, [MAIN_GATCHA] = MP_COOPICON_GATCHA, [MAIN_DAILY] = MP_COOPICON_DAILY,
+    [MAIN_TOURNEY] = MP_COOPICON_TOURNEY, [MAIN_BERRY] = MP_COOPICON_BERRY, [MAIN_REMINDER] = MP_COOPICON_TUTOR,
+    [MAIN_LOOK] = MP_COOPICON_LOOK, [MAIN_ONLINE] = MP_COOPICON_ONLINE,
+};
+#define HUB_ROW_Y0 22
+#define HUB_ROW_H  20
+
+static u8 TabOf(u8 main)
+{
+    u8 t, r;
+    for (t = 0; t < TAB_COUNT; t++)
+        for (r = 0; r < TAB_ROWS; r++)
+            if (sTabRows[t][r] == main)
+                return t;
+    return TAB_PEOPLE;
+}
+
+static u8 RowOf(u8 main)
+{
+    u8 r, t = TabOf(main);
+    for (r = 0; r < TAB_ROWS; r++)
+        if (sTabRows[t][r] == main)
+            return r;
+    return 0;
+}
+
+static u8 TabRowCount(u8 tab)
+{
+    u8 r;
+    for (r = 0; r < TAB_ROWS && sTabRows[tab][r] != MAIN_CLOSE; r++)
+        ;
+    return r;
+}
+
+// A row's name and its line of news (ASCII)
+static void HubRowText(u8 main, char *name, char *news, int size)
+{
+    snprintf(news, size, "%s", "");
+    switch (main)
+    {
+    case MAIN_FRIENDS:
+    {
+        u8 ids[MP_MAX_PLAYERS], n = MP_IsConnected() ? MP_Friends_List(ids) : 0;
+        snprintf(name, size, "FRIENDS");
+        if (!MP_IsConnected())
+            snprintf(news, size, "OFFLINE");
+        else
+            snprintf(news, size, n ? "%d ONLINE" : "NOBODY YET", n);
+        break;
+    }
+    case MAIN_EMOTES:    snprintf(name, size, "SOCIAL"), snprintf(news, size, "EMOTES, CHAT"); break;
+    case MAIN_TRADE:     snprintf(name, size, "TRADE"), snprintf(news, size, "WITH A FRIEND"); break;
+    case MAIN_SHARED_PC: snprintf(name, size, "SHARED PC"), snprintf(news, size, "BOXES, ITEMS"); break;
+    case MAIN_TOURNEY:   snprintf(name, size, "TOURNAMENT"), snprintf(news, size, "BATTLES, CARDS"); break;
+    case MAIN_GATCHA:
+    {
+        s32 MP_Gatcha_Pulls(void);
+        s32 n = MP_Gatcha_Pulls();
+        snprintf(name, size, "MOEGATCHA");
+        snprintf(news, size, n == 1 ? "1 PULL" : "%d PULLS", (int)n);
+        break;
+    }
+    case MAIN_DAILY:
+    {
+        char lines[3][64];
+        s32 prog[3], target[3];
+        u8 n = MP_Events_PhoneGoals(lines, prog, target, 3), i, done = 0;
+        for (i = 0; i < n; i++)
+            if (prog[i] >= target[i])
+                done++;
+        snprintf(name, size, "DAILY");
+        snprintf(news, size, "%d OF %d DONE", done, n);
+        break;
+    }
+    case MAIN_BERRY:     snprintf(name, size, "BERRY GAMES"), snprintf(news, size, "BLENDER, CRUSH"); break;
+    case MAIN_LOOK:      snprintf(name, size, "LOOK"), snprintf(news, size, "YOUR TRAINER"); break;
+    case MAIN_REMINDER:
+    {
+        u16 n = CountTotalItemQuantityInBag(ITEM_HEART_SCALE);
+        snprintf(name, size, "MOVE TUTOR");
+        snprintf(news, size, n == 1 ? "1 HEART SCALE" : "%d HEART SCALES", n);
+        break;
+    }
+    case MAIN_ONLINE:
+        if (MP_Lobby_InRoom())
+        {
+            snprintf(name, size, "SERVER");
+            if (MP_InviteCode()[0])
+                snprintf(news, size, "CODE %s", MP_InviteCode());
+            else
+                snprintf(news, size, "ROOM, RULES");
+        }
+        else
+            snprintf(name, size, "GO ONLINE"), snprintf(news, size, "HOST OR JOIN");
+        break;
+    default:
+        snprintf(name, size, "%s", "");
+        break;
+    }
+}
+
+static void PrintCut(u8 win, u8 font, const char *ascii, int x, int y, int w, u8 fg, u8 bg)
+{
+    u8 buf[64];
+    int len;
+    MP_AsciiToGame(buf, ascii, 60);
+    for (len = StringLength(buf); len > 1 && GetStringWidth(font, buf, 0) > w; len--)
+        buf[len - 1] = EOS;
+    MpTheme_Print(win, font, buf, x, y, fg, bg);
+}
+
+static void DrawHub(u8 win, u8 roomWin, u8 cursor)
+{
+    u8 tab = TabOf(cursor), row = RowOf(cursor), r, buf[32];
+    int w = GetWindowAttribute(win, WINDOW_WIDTH) * 8, i;
+    int winX = GetWindowAttribute(win, WINDOW_TILEMAP_LEFT) * 8, winY = GetWindowAttribute(win, WINDOW_TILEMAP_TOP) * 8;
+    MpUi_PicBegin();
+    if (roomWin != WINDOW_NONE)
+    {
+        MpUi_DrawRoom(roomWin, -1, NULL);
+        CopyWindowToVram(roomWin, COPYWIN_FULL);
+    }
+    MpTheme_Panel(win, 0);
+    // the tab between L and R, three dots for which of the three
+    MP_AsciiToGame(buf, "{L}", 8);
+    MpTheme_Print(win, FONT_SMALL, buf, 0, 1, MPT_TEXT, MPT_BG);
+    MP_AsciiToGame(buf, "{R}", 8);
+    MpTheme_Print(win, FONT_SMALL, buf, w - GetStringWidth(FONT_SMALL, buf, 0), 1, MPT_TEXT, MPT_BG);
+    MP_AsciiToGame(buf, sTabNames[tab], 20);
+    MpTheme_Print(win, FONT_NORMAL, buf, w / 2 - GetStringWidth(FONT_NORMAL, buf, 0) / 2, 0, MPT_TEXT, MPT_BG);
+    for (i = 0; i < TAB_COUNT; i++)
+    {
+        int x = w / 2 - 11 + i * 8;
+        FillWindowPixelRect(win, PIXEL_FILL(MPT_TEXT), x, 15, 5, 5);
+        if (i != tab)
+            FillWindowPixelRect(win, PIXEL_FILL(MPT_BG), x + 1, 16, 3, 3);
+    }
+    for (r = 0; r < TabRowCount(tab); r++)
+    {
+        char name[24], news[32];
+        u8 main = sTabRows[tab][r];
+        int y = HUB_ROW_Y0 + r * HUB_ROW_H;
+        if (r == row)
+        {
+            MpTheme_SelBar(win, y - 1, HUB_ROW_H);
+        }
+        MpUi_Icon(r, sMainIcon[main], winX + 3, winY + y + 1);
+        HubRowText(main, name, news, sizeof(news));
+        PrintCut(win, FONT_SMALL, name, 21, y - 2, w - 22, MPT_TEXT, 0);
+        PrintCut(win, FONT_SMALL_NARROW, news, 21, y + 7, w - 22, MPT_GREY, 0);
+    }
+    MpUi_PicEnd();
+    CopyWindowToVram(win, COPYWIN_FULL);
+}
+
+// The help line under the hub: what the row is for, and the buttons
+static void DrawHubHelp(u8 win, u8 cursor)
+{
+    char ascii[160];
+    u8 buf[170];
+    const char *keys = "{A} OPEN  {B} CLOSE";
+    switch (cursor)
+    {
+    case MAIN_FRIENDS:
+        if (MP_IsConnected() && MP_ExpBonusPercent())
+            snprintf(ascii, sizeof(ascii), "Together, your POK~MON earn EXP +%d%%.  %s", MP_ExpBonusPercent(), keys);
+        else
+            snprintf(ascii, sizeof(ascii), "See where your friends are.  %s", keys);
+        break;
+    case MAIN_EMOTES:    snprintf(ascii, sizeof(ascii), "Hold {LT} anywhere for emotes, {RT} for phrases.  %s", keys); break;
+    case MAIN_TRADE:     snprintf(ascii, sizeof(ascii), "Trade POK~MON, items and money.  %s", keys); break;
+    case MAIN_SHARED_PC: snprintf(ascii, sizeof(ascii), "The boxes everyone in the room shares.  %s", keys); break;
+    case MAIN_TOURNEY:   snprintf(ascii, sizeof(ascii), "Everyone plays everyone once.  %s", keys); break;
+    case MAIN_GATCHA:    snprintf(ascii, sizeof(ascii), "Event MOEMON, items and money.  %s", keys); break;
+    case MAIN_DAILY:     snprintf(ascii, sizeof(ascii), "Today's goals, gifts and the weekly race.  %s", keys); break;
+    case MAIN_BERRY:     snprintf(ascii, sizeof(ascii), "Blend BERRIES into POK~BLOCKS.  %s", keys); break;
+    case MAIN_LOOK:      snprintf(ascii, sizeof(ascii), "Change how you look to everyone.  %s", keys); break;
+    case MAIN_REMINDER:  snprintf(ascii, sizeof(ascii), "Remember a move for a HEART SCALE.  %s", keys); break;
+    default:
+        snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() ? "Your room, its CODE and rules.  %s" : "Host a game or join a friend's.  %s", keys);
+        break;
+    }
+    MP_AsciiToGame(buf, ascii, 166);
+    MpTheme_Panel(win, 0);
+    {
+        MpUi_HelpInto(win, buf);
+    }
+    CopyWindowToVram(win, COPYWIN_FULL);
+}
+
+// FRIENDS: everyone in the room, one tall row each (head, name, where, what they're doing); A opens their page
+static void DrawFriendsList(u8 win, u8 cursor)
+{
+    u8 ids[MP_MAX_PLAYERS], n = MP_Friends_List(ids), buf[48], i;
+    int w = GetWindowAttribute(win, WINDOW_WIDTH) * 8;
+    int winX = GetWindowAttribute(win, WINDOW_TILEMAP_LEFT) * 8, winY = GetWindowAttribute(win, WINDOW_TILEMAP_TOP) * 8;
+    char ascii[24];
+    MpUi_PicBegin();
+    MpTheme_Panel(win, 0);
+    MP_AsciiToGame(buf, "FRIENDS", 20);
+    MpTheme_Print(win, FONT_NORMAL, buf, 2, 0, MPT_TEXT, MPT_BG);
+    snprintf(ascii, sizeof(ascii), "%d ONLINE", n);
+    MP_AsciiToGame(buf, ascii, 20);
+    MpTheme_Print(win, FONT_SMALL, buf, w - 2 - GetStringWidth(FONT_SMALL, buf, 0), 2, MPT_GREY, MPT_BG);
+    FillWindowPixelRect(win, PIXEL_FILL(MPT_SHADOW), 0, 14, w, 1);
+    for (i = 0; i < n && i < MP_MAX_PLAYERS - 1; i++)
+    {
+        struct MpPlayer *p = &gMpPlayers[ids[i]];
+        int y = 16 + i * 27, rw = 0;
+        
+        const char *note = NULL;
+        if (i == cursor)
+        {
+            u8 arrow[] = {0xEF /* ▶ */, EOS};
+            MpTheme_SelBar(win, y, 26);
+            MpTheme_Print(win, FONT_SMALL, arrow, 3, y + 7, MPT_TEXT, 0);
+        }
+        MpUi_Head(MPUI_PIC_ROWS + i, ids[i], winX + 12, winY + y + 5);
+        StringCopyN(buf, p->name, PLAYER_NAME_LENGTH);
+        buf[PLAYER_NAME_LENGTH] = EOS;
+        MpTheme_Print(win, FONT_NORMAL, buf, 32, y, MPT_TEXT, 0);
+        if (p->hasState && (p->state.flags & MPF_IN_BATTLE))
+            note = "IN A BATTLE";
+        else if (p->hasState && p->state.cardDuel)
+            note = "IN A CARD DUEL";
+        if (note)
+        {
+            MP_AsciiToGame(buf, note, 20);
+            rw = GetStringWidth(FONT_SMALL, buf, 0);
+            MpTheme_Print(win, FONT_SMALL, buf, w - 4 - rw, y + 6, MPT_GREY, 0);
+            MpUi_RoomMark(win, w - 4 - rw - 15, y + 7, '!', TRUE);
+            rw += 20;
+        }
+        MP_Friends_LocationName(ids[i], buf);
+        {
+            int len;
+            for (len = StringLength(buf); len > 1 && GetStringWidth(FONT_SMALL, buf, 0) > w - 36 - rw; len--)
+                buf[len - 1] = EOS;
+        }
+        MpTheme_Print(win, FONT_SMALL, buf, 32, y + 12, MPT_GREY, 0);
+    }
+    if (n == 0)
+    {
+        MP_AsciiToGame(buf, "Nobody else is in the room yet.", 40);
+        MpTheme_Print(win, FONT_SMALL, buf, 11, 20, MPT_TEXT, MPT_BG);
+    }
+    MpUi_PicEnd();
+    CopyWindowToVram(win, COPYWIN_FULL);
+}
+
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
     static const char *const mainLabels[] = {"SOCIAL", "FRIENDS", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "BERRY GAMES", "MOVE TUTOR", "LOOK", ""};
@@ -336,7 +625,18 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
     char line[64];
     u8 row;
 
-    MpTheme_Panel(windowId, 12);
+    if (page == MP_MENU_PAGE_MAIN)
+    {
+        u8 taskId = FindTaskIdByFunc(Task_CoopMenu);
+        DrawHub(windowId, taskId != TASK_NONE ? gTasks[taskId].data[7] /* tRoom */ : WINDOW_NONE, cursor);
+        return;
+    }
+    if (page == MP_MENU_PAGE_FRIENDS)
+    {
+        DrawFriendsList(windowId, cursor);
+        return;
+    }
+    MpTheme_Panel(windowId, 0);
     if (page == MP_MENU_PAGE_LOOK)
         snprintf(line, sizeof(line), "LOOK");
     else if (page == MP_MENU_PAGE_CREATE)
@@ -347,9 +647,13 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
         snprintf(line, sizeof(line), "CO-OP  %d/%d ONLINE", MP_ConnectedCount(), MP_MAX_PLAYERS);
     else
         snprintf(line, sizeof(line), "CO-OP  OFFLINE");
-    sTxtFg = MPT_GOLD;
-    sTxtBg = MPT_BAND;
-    PrintAscii(windowId, line, 4, 0);
+    {
+        // the title in the game's large font, a line under it (as every co-op screen)
+        u8 title[64];
+        MP_AsciiToGame(title, line, 60);
+        MpTheme_Print(windowId, FONT_NORMAL, title, 2, 0, MPT_TEXT, MPT_BG);
+        FillWindowPixelRect(windowId, PIXEL_FILL(MPT_SHADOW), 0, 13, MENU_W * 8, 1);
+    }
     sTxtFg = MPT_TEXT;
     sTxtBg = MPT_BG;
 
@@ -377,8 +681,10 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
         sTxtBg = MPT_BG;
         if (row == cursor)
         {
-            // The game's own cursor
+            // The lit bar and the game's own cursor
             u8 arrow[] = {0xEF /* ▶ */, EOS};
+            MpTheme_SelBar(windowId, y, LINE_H);
+            sTxtBg = MPT_SEL;
             MText(windowId, FONT_SMALL, arrow, 1, y);
         }
         if (page == MP_MENU_PAGE_MAIN)
@@ -445,7 +751,30 @@ static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 // The bottom window: players online, or button help on the EMOTES page
 static void DrawBottom(u8 windowId, u8 page, u8 cursor)
 {
+    if (page == MP_MENU_PAGE_MAIN)
+    {
+        DrawHubHelp(windowId, cursor);
+        return;
+    }
     if (page == MP_MENU_PAGE_FRIENDS)
+    {
+        u8 ids[MP_MAX_PLAYERS], n = MP_Friends_List(ids), buf[120], where[40];
+        char ascii[120], name[16];
+        MpTheme_Panel(windowId, 0);
+        if (n == 0)
+            snprintf(ascii, sizeof(ascii), "Share your room's CODE (ME > SERVER).  {B} BACK");
+        else
+        {
+            MP_GameToAscii(name, gMpPlayers[ids[cursor < n ? cursor : 0]].name, PLAYER_NAME_LENGTH);
+            MP_Friends_LocationName(ids[cursor < n ? cursor : 0], where);
+            snprintf(ascii, sizeof(ascii), "GO TO, TRAINER CARD, SECRET BASE, CARD GAMES.  {A} OPEN  {B} BACK");
+        }
+        MP_AsciiToGame(buf, ascii, 116);
+        MpUi_HelpInto(windowId, buf);
+        CopyWindowToVram(windowId, COPYWIN_FULL);
+        return;
+    }
+    if (FALSE)
     {
         u8 ids[MP_MAX_PLAYERS], n = MP_Friends_List(ids), buf[96], town[32];
         MpTheme_Panel(windowId, 0);
@@ -560,6 +889,8 @@ static void DrawBottom(u8 windowId, u8 page, u8 cursor)
 #define tRefresh  data[4]
 #define tPage     data[5]
 #define tChoice   data[6]   // left/right value on the EMOTE and SAY rows
+#define tRoom     data[7]   // the room window (the hub's layout)
+#define tLayout   data[8]   // LAYOUT_*: which windows are up
 
 // ---------------------------------------------------------------------------
 // LOOK page preview: the trainer picture (or the back picture on BACK PIC)
@@ -594,11 +925,12 @@ static void Preview_Draw(bool8 back)
     if (sPreviewWin == WINDOW_NONE)
         return;
     has = back ? MP_Avatar_PreviewBack(sPreviewTiles, sPreviewPal) : MP_Avatar_PreviewFront(sPreviewTiles, sPreviewPal);
-    MpTheme_Panel(sPreviewWin, 12);
-    sTxtFg = MPT_GOLD;
-    sTxtBg = MPT_BAND;
+    MpTheme_Panel(sPreviewWin, 0);
+    sTxtFg = MPT_TEXT;
+    sTxtBg = MPT_BG;
     MP_AsciiToGame(buf, back ? "BACK PIC" : "ID PIC", 30);
-    MText(sPreviewWin, FONT_SMALL, buf, 4, 0);
+    MText(sPreviewWin, FONT_SMALL, buf, 2, 0);
+    FillWindowPixelRect(sPreviewWin, PIXEL_FILL(MPT_SHADOW), 0, 12, 10 * 8, 1);
     sTxtFg = MPT_TEXT;
     sTxtBg = MPT_BG;
     if (!has)
@@ -663,13 +995,61 @@ static void Preview_Hide(void)
     }
 }
 
-static void CloseMenuWindows(s16 *data)
+static void RemoveLayout(s16 *data)
 {
     Preview_Hide();
-    ClearStdWindowAndFrame(tWindow, TRUE);
-    ClearStdWindowAndFrame(tPlayers, TRUE);
-    RemoveWindow(tWindow);
-    RemoveWindow(tPlayers);
+    MpUi_PicsClear();
+    if (tRoom != WINDOW_NONE)
+    {
+        ClearStdWindowAndFrame(tRoom, TRUE);
+        RemoveWindow(tRoom);
+        tRoom = WINDOW_NONE;
+    }
+    if (tLayout != LAYOUT_NONE)
+    {
+        ClearStdWindowAndFrame(tWindow, TRUE);
+        ClearStdWindowAndFrame(tPlayers, TRUE);
+        RemoveWindow(tWindow);
+        RemoveWindow(tPlayers);
+    }
+    tLayout = LAYOUT_NONE;
+}
+
+// The windows a page needs: the hub's three, FRIENDS' wide one, LOOK / CREATE's
+static void SetLayout(s16 *data, u8 page)
+{
+    u8 layout = page == MP_MENU_PAGE_MAIN ? LAYOUT_HUB : page == MP_MENU_PAGE_FRIENDS ? LAYOUT_WIDE : LAYOUT_LOOK;
+    if (layout == tLayout)
+        return;
+    RemoveLayout(data);
+    tLayout = layout;
+    if (layout == LAYOUT_HUB)
+    {
+        tWindow = AddWindow(&sHubMenuTemplate);
+        tRoom = AddWindow(&sHubRoomTemplate);
+        tPlayers = AddWindow(&sHubHelpTemplate);
+        PutWindowTilemap(tRoom);
+        DrawStdWindowFrame(tRoom, FALSE);
+    }
+    else if (layout == LAYOUT_WIDE)
+    {
+        tWindow = AddWindow(&sWideTemplate);
+        tPlayers = AddWindow(&sWideHelpTemplate);
+    }
+    else
+    {
+        tWindow = AddWindow(&sCoopWindowTemplate);
+        tPlayers = AddWindow(&sPlayersWindowTemplate);
+    }
+    PutWindowTilemap(tWindow);
+    PutWindowTilemap(tPlayers);
+    DrawStdWindowFrame(tWindow, FALSE);
+    DrawStdWindowFrame(tPlayers, FALSE);
+}
+
+static void CloseMenuWindows(s16 *data)
+{
+    RemoveLayout(data);
     MpTheme_Pop();
 }
 
@@ -692,6 +1072,7 @@ static void GoToPage(s16 *data, u8 page, u8 cursor)
     tPage = page;
     tCursor = cursor;
     tChoice = 0;
+    SetLayout(data, page);
     if (page == MP_MENU_PAGE_LOOK)
     {
         if (from != MP_MENU_PAGE_CREATE)
@@ -1071,9 +1452,18 @@ static void HandleFriendsInput(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
     u8 ids[MP_MAX_PLAYERS], n = MP_Friends_List(ids);
-    if (tCursor > n)
-        tCursor = n; // someone left
-    if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && tCursor == n))
+    if (n > MP_MAX_PLAYERS - 1)
+        n = MP_MAX_PLAYERS - 1;
+    if (tCursor >= n)
+        tCursor = n ? n - 1 : 0; // someone left
+    if (n > 1 && JOY_REPEAT(DPAD_UP | DPAD_DOWN))
+    {
+        tCursor = JOY_REPEAT(DPAD_UP) ? (tCursor + n - 1) % n : (tCursor + 1) % n;
+        PlaySE(SE_SELECT);
+        DrawMenu(tWindow, tPage, tCursor, tChoice);
+        DrawBottom(tPlayers, tPage, tCursor);
+    }
+    else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && n == 0))
     {
         PlaySE(SE_SELECT);
         GoToPage(data, MP_MENU_PAGE_MAIN, MAIN_FRIENDS);
@@ -1089,6 +1479,28 @@ static void HandleFriendsInput(u8 taskId)
 static void HandleMainInput(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
+    u8 tab = TabOf(tCursor), row = RowOf(tCursor);
+    if (JOY_REPEAT(DPAD_UP | DPAD_DOWN))
+    {
+        u8 n = TabRowCount(tab);
+        row = JOY_REPEAT(DPAD_UP) ? (row + n - 1) % n : (row + 1) % n;
+        tCursor = sTabRows[tab][row];
+        PlaySE(SE_SELECT);
+        DrawMenu(tWindow, tPage, tCursor, tChoice);
+        DrawBottom(tPlayers, tPage, tCursor);
+        return;
+    }
+    if (JOY_NEW(L_BUTTON | R_BUTTON | DPAD_LEFT | DPAD_RIGHT))
+    {
+        tab = JOY_NEW(L_BUTTON | DPAD_LEFT) ? (tab + TAB_COUNT - 1) % TAB_COUNT : (tab + 1) % TAB_COUNT;
+        if (row >= TabRowCount(tab))
+            row = TabRowCount(tab) - 1;
+        tCursor = sTabRows[tab][row];
+        PlaySE(SE_SELECT);
+        DrawMenu(tWindow, tPage, tCursor, tChoice);
+        DrawBottom(tPlayers, tPage, tCursor);
+        return;
+    }
     if (!JOY_NEW(A_BUTTON | B_BUTTON | START_BUTTON))
         return;
     if (JOY_NEW(B_BUTTON | START_BUTTON) || tCursor == MAIN_CLOSE)
@@ -1155,14 +1567,13 @@ static void Task_CoopMenu(u8 taskId)
     switch (tState)
     {
     case 0:
-        tWindow = AddWindow(&sCoopWindowTemplate);
-        tPlayers = AddWindow(&sPlayersWindowTemplate);
         // The map name sign shares the frame's palette slot: load the player's frame again
         HideMapNamePopUpWindow();
         LoadMessageBoxAndBorderGfx();
         MpTheme_Push();
-        DrawStdWindowFrame(tWindow, FALSE);
-        DrawStdWindowFrame(tPlayers, FALSE);
+        tRoom = WINDOW_NONE;
+        tLayout = LAYOUT_NONE;
+        SetLayout(data, tPage);
         DrawMenu(tWindow, tPage, tCursor, tChoice);
         DrawBottom(tPlayers, tPage, tCursor);
         if (tPage == MP_MENU_PAGE_LOOK)
@@ -1179,7 +1590,11 @@ static void Task_CoopMenu(u8 taskId)
             DrawBottom(tPlayers, tPage, tCursor);
             DrawMenu(tWindow, tPage, tCursor, tChoice);
         }
-        if (JOY_NEW(DPAD_UP) || JOY_NEW(DPAD_DOWN))
+        if (tPage == MP_MENU_PAGE_MAIN)
+            HandleMainInput(taskId);
+        else if (tPage == MP_MENU_PAGE_FRIENDS)
+            HandleFriendsInput(taskId);
+        else if (JOY_NEW(DPAD_UP) || JOY_NEW(DPAD_DOWN))
         {
             u8 n = RowCount(tPage);
             tCursor = JOY_NEW(DPAD_UP) ? (tCursor == 0 ? n - 1 : tCursor - 1) : (tCursor + 1) % n;
@@ -1408,16 +1823,188 @@ u8 MP_Quick_Choice(u8 page, u8 dir, u8 *emoteKey, u8 *out, int outSize, bool8 di
     return MP_QUICK_TEXT;
 }
 
-// Around the player (the camera keeps them in the middle of the screen): up and
-// down are wide one-line boxes, left and right two-line boxes beside them, and
-// the bar (pages, buttons) at the bottom
-static const struct WindowTemplate sQuickWins[QUICK_WINDOWS] = {
-    [QUICK_UP]    = {.bg = 0, .tilemapLeft = 2,  .tilemapTop = 3,  .width = 26, .height = 2, .paletteNum = 15, .baseBlock = 0x8},
-    [QUICK_RIGHT] = {.bg = 0, .tilemapLeft = 17, .tilemapTop = 7,  .width = 12, .height = 3, .paletteNum = 15, .baseBlock = 0x8 + 52},
-    [QUICK_DOWN]  = {.bg = 0, .tilemapLeft = 2,  .tilemapTop = 12, .width = 26, .height = 2, .paletteNum = 15, .baseBlock = 0x8 + 88},
-    [QUICK_LEFT]  = {.bg = 0, .tilemapLeft = 1,  .tilemapTop = 7,  .width = 12, .height = 3, .paletteNum = 15, .baseBlock = 0x8 + 140},
-    [QUICK_BAR]   = {.bg = 0, .tilemapLeft = 1,  .tilemapTop = 16, .width = 28, .height = 3, .paletteNum = 15, .baseBlock = 0x8 + 176},
+// Around the player (the camera keeps them in the middle of the screen), one box a d-pad direction (the user's
+// design, 2026-11-13): an emote page's four icons in small boxes, a phrase page's four phrases in speech balloons, the
+// A-Life pick's four actions around the POKéMON; the bar along the bottom (pages, buttons). The boxes are windows
+// with no frame, see-through but for what's drawn, so the field shows between them.
+#define qGroup   data[9]    // which set of windows is up: QG_*
+#define qOffX    data[10]   // the A-Life pick: the POKéMON beside the player (tiles of 8 pixels)
+#define qOffY    data[11]
+enum { QG_NONE, QG_SLOTS, QG_PHRASES };
+#define SLOT_W 4   // tiles
+#define SLOT_H 3
+// Slots around the player: (left, top) in tiles, up / right / down / left
+static const u8 sSlotPos[4][2] = {{13, 4}, {18, 8}, {13, 12}, {8, 8}};
+static const struct WindowTemplate sPhraseWins[4] = {
+    [QUICK_UP]    = {.bg = 0, .tilemapLeft = 2,  .tilemapTop = 5,  .width = 26, .height = 2, .paletteNum = 15, .baseBlock = 0x8},
+    [QUICK_RIGHT] = {.bg = 0, .tilemapLeft = 18, .tilemapTop = 9,  .width = 11, .height = 2, .paletteNum = 15, .baseBlock = 0x8 + 52},
+    [QUICK_DOWN]  = {.bg = 0, .tilemapLeft = 2,  .tilemapTop = 12, .width = 26, .height = 2, .paletteNum = 15, .baseBlock = 0x8 + 74},
+    [QUICK_LEFT]  = {.bg = 0, .tilemapLeft = 1,  .tilemapTop = 9,  .width = 12, .height = 2, .paletteNum = 15, .baseBlock = 0x8 + 126},
 };
+static const struct WindowTemplate sQuickBarWin = {
+    .bg = 0, .tilemapLeft = 1, .tilemapTop = 16, .width = 28, .height = 3, .paletteNum = 15, .baseBlock = 0x8 + 176,
+};
+
+static void QuickRemoveWindows(s16 *data);
+
+// A box: a 1-pixel outline with its corners cut, filled (Emerald's own small boxes)
+static void DrawBox(u8 win, int x, int y, int w, int h, bool8 sel)
+{
+    u8 edge = sel ? MPT_BORDER : MPT_TEXT, fill = sel ? MPT_SEL : MPT_BG;
+    FillWindowPixelRect(win, PIXEL_FILL(edge), x + 1, y, w - 2, h);
+    FillWindowPixelRect(win, PIXEL_FILL(edge), x, y + 1, w, h - 2);
+    FillWindowPixelRect(win, PIXEL_FILL(fill), x + 1, y + 1, w - 2, h - 2);
+}
+
+// The windows for a group (made again when the group changes)
+static void QuickMakeWindows(s16 *data, u8 group)
+{
+    u8 i;
+    if (qGroup == group)
+        return;
+    QuickRemoveWindows(data);
+    MpTheme_Push();
+    for (i = 0; i < 4; i++)
+    {
+        struct WindowTemplate t;
+        if (group == QG_SLOTS)
+        {
+            int left = sSlotPos[i][0] + qOffX, top = sSlotPos[i][1] + qOffY;
+            // the box on the player's side of the POKéMON stays beyond the player
+            if ((qOffX > 0 && i == QUICK_LEFT) || (qOffX < 0 && i == QUICK_RIGHT) || (qOffY > 0 && i == QUICK_UP) || (qOffY < 0 && i == QUICK_DOWN))
+                left = sSlotPos[i][0], top = sSlotPos[i][1];
+            left = max(0, min(30 - SLOT_W, left));
+            top = max(0, min(15 - SLOT_H, top));
+            t = (struct WindowTemplate){.bg = 0, .tilemapLeft = left, .tilemapTop = top, .width = SLOT_W, .height = SLOT_H,
+                                        .paletteNum = 15, .baseBlock = 0x8 + i * SLOT_W * SLOT_H};
+        }
+        else
+            t = sPhraseWins[i];
+        qWin(i) = AddWindow(&t);
+        PutWindowTilemap(qWin(i));
+    }
+    qWin(QUICK_BAR) = AddWindow(&sQuickBarWin);
+    PutWindowTilemap(qWin(QUICK_BAR));
+    DrawStdWindowFrame(qWin(QUICK_BAR), FALSE);
+    qGroup = group;
+}
+
+static void QuickRemoveWindows(s16 *data)
+{
+    u8 i;
+    if (qGroup == QG_NONE)
+        return;
+    MpUi_PicsClear();
+    for (i = 0; i < 4; i++)
+    {
+        FillWindowPixelBuffer(qWin(i), PIXEL_FILL(0));
+        ClearWindowTilemap(qWin(i));
+        CopyWindowToVram(qWin(i), COPYWIN_FULL);
+        RemoveWindow(qWin(i));
+    }
+    ClearStdWindowAndFrame(qWin(QUICK_BAR), TRUE);
+    RemoveWindow(qWin(QUICK_BAR));
+    MpTheme_Pop();
+    qGroup = QG_NONE;
+}
+
+// An emote slot: its box and the emote's icon in it (picture slot = the direction)
+static void DrawSlot(s16 *data, u8 dir, bool8 sel, u8 emote, s8 icon)
+{
+    u8 win = qWin(dir);
+    int x = GetWindowAttribute(win, WINDOW_TILEMAP_LEFT) * 8, y = GetWindowAttribute(win, WINDOW_TILEMAP_TOP) * 8;
+    FillWindowPixelBuffer(win, PIXEL_FILL(0));
+    if (emote || icon >= 0)
+    {
+        DrawBox(win, 5, 1, 22, 22, sel);
+        if (icon >= 0)
+            MpUi_Icon(dir, icon, x + 8, y + 4);
+        else
+            MpUi_Emote(dir, emote, x + 8, y + 4);
+    }
+    CopyWindowToVram(win, COPYWIN_FULL);
+}
+
+// A phrase balloon: up / down centered on the player, left ending beside them, right starting beside them
+static void DrawBalloon(s16 *data, u8 dir, bool8 sel, const u8 *text, bool8 dim)
+{
+    u8 win = qWin(dir), line[96];
+    int ww = GetWindowAttribute(win, WINDOW_WIDTH) * 8, w, x, len;
+    FillWindowPixelBuffer(win, PIXEL_FILL(0));
+    StringCopy(line, text);
+    for (len = StringLength(line); len > 1 && GetStringWidth(FONT_SMALL, line, 0) > ww - 10; len--)
+        line[len - 1] = EOS;
+    w = GetStringWidth(FONT_SMALL, line, 0) + 10;
+    if (dir == QUICK_LEFT)
+        x = ww - w;
+    else if (dir == QUICK_RIGHT)
+        x = 0;
+    else
+        x = (120 - GetWindowAttribute(win, WINDOW_TILEMAP_LEFT) * 8) - w / 2;
+    DrawBox(win, x, 0, w, 15, sel);
+    MpTheme_Print(win, FONT_SMALL, line, x + 5, 0, dim && !sel ? MPT_GREY : MPT_TEXT, 0);
+    CopyWindowToVram(win, COPYWIN_FULL);
+}
+
+// The bar's first line: L, the page (lit), R, then the group's other pages or its dots; RIGHT at the right end
+static void DrawBarPages(u8 win, const char *const *names, u8 count, u8 cur, bool8 asDots, const char *right)
+{
+    u8 buf[48];
+    int x = 2, i, w;
+    MP_AsciiToGame(buf, "{L}", 8);
+    MpTheme_Print(win, FONT_SMALL, buf, x, 0, MPT_TEXT, 0);
+    x += GetStringWidth(FONT_SMALL, buf, 0) + 3;
+    if (asDots)
+    {
+        MP_AsciiToGame(buf, names[cur], 20);
+        w = 50;
+        FillWindowPixelRect(win, PIXEL_FILL(MPT_BORDER), x, 0, w, 13);
+        FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), x + 1, 1, w - 2, 11);
+        MpTheme_Print(win, FONT_SMALL, buf, x + w / 2 - GetStringWidth(FONT_SMALL, buf, 0) / 2, 0, MPT_TEXT, 0);
+        x += w + 3;
+        MP_AsciiToGame(buf, "{R}", 8);
+        MpTheme_Print(win, FONT_SMALL, buf, x, 0, MPT_TEXT, 0);
+        x += GetStringWidth(FONT_SMALL, buf, 0) + 6;
+        for (i = 0; i < count; i++)
+        {
+            if (i > 0 && names[i][0] != names[i - 1][0])
+                x += 3;   // a gap between the groups (MINE, the ready-made ones)
+            FillWindowPixelRect(win, PIXEL_FILL(MPT_TEXT), x, 3, 5, 5);
+            if (i != cur)
+                FillWindowPixelRect(win, PIXEL_FILL(MPT_BG), x + 1, 4, 3, 3);
+            x += 7;
+        }
+    }
+    else
+    {
+        for (i = 0; i < count; i++)
+        {
+            MP_AsciiToGame(buf, names[i], 20);
+            w = GetStringWidth(FONT_SMALL, buf, 0);
+            if (i == cur)
+            {
+                FillWindowPixelRect(win, PIXEL_FILL(MPT_BORDER), x - 2, 0, w + 4, 13);
+                FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), x - 1, 1, w + 2, 11);
+            }
+            MpTheme_Print(win, FONT_SMALL, buf, x, 0, i == cur ? MPT_TEXT : MPT_GREY, 0);
+            x += w + 6;
+        }
+        MP_AsciiToGame(buf, "{R}", 8);
+        MpTheme_Print(win, FONT_SMALL, buf, x - 2, 0, MPT_TEXT, 0);
+    }
+    if (right && right[0])
+    {
+        MP_AsciiToGame(buf, right, 40);
+        MpTheme_Print(win, FONT_SMALL, buf, 28 * 8 - 3 - GetStringWidth(FONT_SMALL, buf, 0), 0, MPT_TEXT, 0);
+    }
+}
+
+static void DrawBarHints(u8 win, const char *ascii)
+{
+    u8 buf[120];
+    MP_AsciiToGame(buf, ascii, 116);
+    MpTheme_Print(win, FONT_SMALL, buf, 2, 12, MPT_GREY, 0);
+}
 
 // The ready-made phrase behind a direction on a phrase page (-1: your own phrase)
 static int QuickStockIndex(u8 page, u8 dir)
@@ -1477,97 +2064,82 @@ static void QuickChoiceText(u8 page, u8 dir, u8 *line1, u8 *line2, bool8 twoLine
 
 static void QuickDrawChoice(s16 *data, u8 dir)
 {
-    u8 win = qWin(dir), l1[96], l2[96], arrow[2] = {sQuickArrows[dir], EOS};
-    const struct WindowTemplate *t = &sQuickWins[dir];
-    bool8 sel = (qSel == dir), twoLines = t->height >= 3;
-    bool8 stock = (qPage == MP_QUICK_PAGE_MINE && QuickStockIndex(qPage, dir) >= 0) || QuickEmptySlot(qPage, dir);
-    int w = t->width * 8;
-    MpTheme_Panel(win, 0);
-    if (sel)
-        FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), 0, 0, w, t->height * 8);
-    sTxtBg = sel ? MPT_SEL : MPT_BG;
-    sTxtFg = sel ? MPT_GOLD : MPT_TEXT;
-    MText(win, FONT_SMALL, arrow, 2, twoLines ? 6 : 1);
-    QuickChoiceText(qPage, dir, l1, l2, twoLines, w - 16);
-    // Ready-made phrases on MINE are a little dimmer than your own
-    if (!sel && stock)
-        sTxtFg = MPT_GREY;
-    MText(win, FONT_SMALL_NARROW, l1, 13, (twoLines && l2[0] == EOS) ? 6 : 1);
-    if (l2[0] != EOS)
-        MText(win, FONT_SMALL_NARROW, l2, 13, 12);
-    sTxtFg = MPT_TEXT;
-    sTxtBg = MPT_BG;
-    CopyWindowToVram(win, COPYWIN_FULL);
+    bool8 sel = (qSel == dir);
+    if (IsEmotePage(qPage))
+        DrawSlot(data, dir, sel, QuickEmote(qPage, dir), -1);
+    else
+    {
+        u8 l1[96], l2[96];
+        bool8 dim = (qPage == MP_QUICK_PAGE_MINE && QuickStockIndex(qPage, dir) >= 0) || QuickEmptySlot(qPage, dir);
+        QuickChoiceText(qPage, dir, l1, l2, FALSE, 200);
+        DrawBalloon(data, dir, sel, l1, dim);
+    }
 }
 
-// The bar: the pages, then what the buttons do right now
+// The bar: the group's pages, the picked one, what the buttons do now
 static void QuickDrawBar(s16 *data)
 {
-    u8 win = qWin(QUICK_BAR), buf[96];
-    // Button icons: the controller's west / north buttons are SELECT / START on the keyboard
-    const char *west = "{WEST}", *north = "{NORTH}", *pages = "{L}{R}";
-    char hint[96], send[40];
-    int x = 3, i;
+    u8 win = qWin(QUICK_BAR);
+    char hint[120], send[48], picked[24] = "";
     MpTheme_Panel(win, 0);
+    if (IsEmotePage(qPage))
     {
-        for (i = 0; i < 2 + 4; i++)   // EMOTES, MINE (n), then the ready-made groups
+        if (qSel >= 0)
         {
-            char name[12];
-            bool8 on = i == 0 ? IsEmotePage(qPage)
-                     : i == 1 ? IsMinePage(qPage) : qPage == QUICK_STOCK_FIRST + i - 2;
-            if (i == 0)
-                snprintf(name, sizeof(name), "%s", sQuickEmotePageNames[IsEmotePage(qPage) ? qPage : sQuickEmotePage]);
-            else if (i == 1 && IsMinePage(qPage) && qPage != MP_QUICK_PAGE_MINE)
-                snprintf(name, sizeof(name), "MINE %d", qPage - MP_QUICK_PAGE_MINE + 1);
-            else if (i == 1)
-                snprintf(name, sizeof(name), "MINE");
-            else
-                snprintf(name, sizeof(name), "%s", sQuickStockNames[i - 2]);
-            sTxtFg = on ? MPT_GOLD : MPT_GREY;
-            MP_AsciiToGame(buf, name, 20);
-            MText(win, FONT_SMALL_NARROW, buf, x, 1);
-            x += GetStringWidth(FONT_SMALL_NARROW, buf, 0) + 6;
+            const char *n = MP_Emote_Name(QuickEmote(qPage, qSel));
+            while (*n && (n[0] == '!' || n[0] == '?' || n[0] == ' '))   // "!  SURPRISED" -> SURPRISED
+                n++;
+            snprintf(picked, sizeof(picked), "%s", n);
         }
-        sTxtFg = MPT_TEXT;
-        MP_AsciiToGame(buf, pages, 20);
-        sTxtFg = MPT_GREY;
-        MText(win, FONT_SMALL_NARROW, buf, 28 * 8 - 3 - GetStringWidth(FONT_SMALL_NARROW, buf, 0), 1);
+        DrawBarPages(win, sQuickEmotePageNames, MP_EMOTE_PAGES, qPage, FALSE, picked);
+    }
+    else
+    {
+        static const char *names[QUICK_PAGES - MP_QUICK_PAGE_MINE];
+        static char mineNames[QUICK_MINE_PAGES][8];
+        u8 i, count = 0, cur = 0;
+        for (i = MP_QUICK_PAGE_MINE; i < QUICK_PAGES; i++)
+        {
+            if (!QuickPageShown(i))
+                continue;
+            if (IsMinePage(i))
+            {
+                snprintf(mineNames[i - MP_QUICK_PAGE_MINE], 8, "MINE %d", i - MP_QUICK_PAGE_MINE + 1);
+                names[count] = mineNames[i - MP_QUICK_PAGE_MINE];
+            }
+            else
+                names[count] = sQuickStockNames[(i - QUICK_STOCK_FIRST) % 4];
+            if (i == qPage)
+                cur = count;
+            count++;
+        }
+        DrawBarPages(win, names, count, cur, TRUE, NULL);
     }
     if (qHold >= 0)
-        snprintf(send, sizeof(send), "{DPAD} pick, let go to send");
+        snprintf(send, sizeof(send), "{DPAD} pick  let go: %s", IsEmotePage(qPage) ? "send" : "say");
     else
-        snprintf(send, sizeof(send), "{DPAD} pick  {A} send  {B} close");
+        snprintf(send, sizeof(send), "{DPAD} pick  {A} %s  {B} close", IsEmotePage(qPage) ? "send" : "say");
     if (qPage == MP_QUICK_PAGE_MINE)
-        snprintf(hint, sizeof(hint), "%s  %s swap  %s edit", send, west, north);
+        snprintf(hint, sizeof(hint), "%s  {WEST} swap  {NORTH} edit", send);
     else if (IsMinePage(qPage))
-        snprintf(hint, sizeof(hint), "%s  %s edit", send, north);
+        snprintf(hint, sizeof(hint), "%s  {NORTH} edit", send);
     else if (!IsEmotePage(qPage))
-        snprintf(hint, sizeof(hint), "%s  %s pin to MINE", send, west);
+        snprintf(hint, sizeof(hint), "%s  {WEST} pin to MINE", send);
     else
         snprintf(hint, sizeof(hint), "%s", send);
-    MP_AsciiToGame(buf, hint, 90);
-    sTxtFg = MPT_TEXT;
-    MText(win, FONT_SMALL_NARROW, buf, 3, 12);
+    DrawBarHints(win, hint);
     CopyWindowToVram(win, COPYWIN_FULL);
 }
 
 static void QuickDrawAll(s16 *data)
 {
     u8 i;
+    QuickMakeWindows(data, IsEmotePage(qPage) ? QG_SLOTS : QG_PHRASES);
+    MpUi_PicBegin();
     for (i = 0; i < 4; i++)
         QuickDrawChoice(data, i);
+    MpUi_PicEnd();
     QuickDrawBar(data);
-}
-
-static void QuickRemoveWindows(s16 *data)
-{
-    u8 i;
-    for (i = 0; i < QUICK_WINDOWS; i++)
-    {
-        ClearStdWindowAndFrame(qWin(i), TRUE);
-        RemoveWindow(qWin(i));
-    }
-    MpTheme_Pop();
 }
 
 static void QuickPickClose(u8 taskId, bool8 send)
@@ -1623,6 +2195,7 @@ static void Task_QuickPick(u8 taskId)
         if (old >= 0)
             QuickDrawChoice(data, old);
         QuickDrawChoice(data, sel);
+        QuickDrawBar(data);
     }
 
     if (JOY_NEW(B_BUTTON))
@@ -1639,9 +2212,11 @@ static void Task_QuickPick(u8 taskId)
     }
     else if (JOY_NEW(L_BUTTON | R_BUTTON))
     {
+        // Held (LT emotes / RT phrases): L / R go round that group's pages; opened from SOCIAL: round them all
+        bool8 emotes = IsEmotePage(qPage);
         do
             qPage = (qPage + (JOY_NEW(R_BUTTON) ? 1 : QUICK_PAGES - 1)) % QUICK_PAGES;
-        while (!QuickPageShown(qPage));
+        while (!QuickPageShown(qPage) || (qHold >= 0 && IsEmotePage(qPage) != emotes));
         MP_Quick_SetPhrasePage(qPage);
         PlaySE(SE_SELECT);
         QuickDrawAll(data);
@@ -1698,11 +2273,9 @@ void MP_OpenQuickPickAt(u8 page, s8 hold, s8 sel)
     qSel = sel;
     qFade = FALSE;
     qHold = hold;
-    for (i = 0; i < QUICK_WINDOWS; i++)
-    {
-        qWin(i) = AddWindow(&sQuickWins[i]);
-        DrawStdWindowFrame(qWin(i), FALSE);
-    }
+    qGroup = QG_NONE;
+    qOffX = qOffY = 0;
+    (void)i;
     QuickDrawAll(data);
     PlaySE(SE_WIN_OPEN);
 }
@@ -1734,59 +2307,56 @@ static const char *const sVerbPageNames[VERB_PAGES] = {"TOGETHER", "HEART", "QUI
 static void (*sVerbDone)(s8 verb);
 static u8 sVerbPage;   // remembered between openings
 
+// Each action's picture: an item's (as the hub's icons) or an emote's
+static void VerbPicture(s8 verb, u8 *emote, s8 *icon)
+{
+    *emote = 0, *icon = -1;
+    switch (verb)
+    {
+    case LIFE_VERB_PET:      *icon = MP_COOPICON_PET; break;
+    case LIFE_VERB_GROOM:    *icon = MP_COOPICON_GROOM; break;
+    case LIFE_VERB_PLAY:     *icon = MP_COOPICON_PLAY; break;
+    case LIFE_VERB_FEED:     *icon = MP_COOPICON_FEED; break;
+    case LIFE_VERB_KEEPSAKE: *icon = MP_COOPICON_KEEPSAKE; break;
+    case LIFE_VERB_TALK:     *emote = MP_EMOTE_NOTE; break;
+    case LIFE_VERB_PRAISE:   *emote = MP_EMOTE_SPARKLE; break;
+    case LIFE_VERB_COMFORT:  *emote = MP_EMOTE_HEART; break;
+    case LIFE_VERB_WATCH:    *emote = MP_EMOTE_IDEA; break;
+    case VERB_SIT_WITH:      *emote = MP_EMOTE_DOTS; break;
+    }
+}
+
 static void VerbDrawChoice(s16 *data, u8 dir)
 {
-    u8 win = qWin(dir), l1[40], arrow[2] = {sQuickArrows[dir], EOS};
-    const struct WindowTemplate *t = &sQuickWins[dir];
-    bool8 sel = (qSel == dir), twoLines = t->height >= 3;
-    s8 verb = sVerbs[qPage][dir];
-    MpTheme_Panel(win, 0);
-    if (sel && verb >= 0)
-        FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), 0, 0, t->width * 8, t->height * 8);
-    sTxtBg = sel && verb >= 0 ? MPT_SEL : MPT_BG;
-    sTxtFg = sel && verb >= 0 ? MPT_GOLD : MPT_TEXT;
-    if (verb >= 0)
+    s8 verb = sVerbs[qPage][dir], icon;
+    u8 emote;
+    if (verb < 0)
     {
-        MText(win, FONT_SMALL, arrow, 2, twoLines ? 6 : 1);
-        MP_AsciiToGame(l1, sVerbNames[verb], 30);
-        MText(win, FONT_SMALL_NARROW, l1, 13, twoLines ? 6 : 1);
+        DrawSlot(data, dir, FALSE, 0, -1);
+        return;
     }
-    sTxtFg = MPT_TEXT;
-    sTxtBg = MPT_BG;
-    CopyWindowToVram(win, COPYWIN_FULL);
+    VerbPicture(verb, &emote, &icon);
+    DrawSlot(data, dir, qSel == dir, emote, icon);
 }
 
 static void VerbDrawBar(s16 *data)
 {
-    u8 win = qWin(QUICK_BAR), buf[96];
-    int x = 3, i;
-    char hint[96];
+    u8 win = qWin(QUICK_BAR);
+    s8 verb = qSel >= 0 ? sVerbs[qPage][qSel] : -1;
     MpTheme_Panel(win, 0);
-    for (i = 0; i < VERB_PAGES; i++)
-    {
-        sTxtFg = qPage == i ? MPT_GOLD : MPT_GREY;
-        MP_AsciiToGame(buf, sVerbPageNames[i], 20);
-        MText(win, FONT_SMALL_NARROW, buf, x, 1);
-        x += GetStringWidth(FONT_SMALL_NARROW, buf, 0) + 6;
-    }
-    sTxtFg = MPT_GREY;
-    MP_AsciiToGame(buf, "{L}{R}", 20);
-    MText(win, FONT_SMALL_NARROW, buf, 28 * 8 - 3 - GetStringWidth(FONT_SMALL_NARROW, buf, 0), 1);
-    if (qHold >= 0)
-        snprintf(hint, sizeof(hint), "{DPAD} pick, let go of {A} to do it");
-    else
-        snprintf(hint, sizeof(hint), "{DPAD} pick  {A} do it  {B} close");
-    MP_AsciiToGame(buf, hint, 90);
-    sTxtFg = MPT_TEXT;
-    MText(win, FONT_SMALL_NARROW, buf, 3, 12);
+    DrawBarPages(win, sVerbPageNames, VERB_PAGES, qPage, FALSE, verb >= 0 ? sVerbNames[verb] : NULL);
+    DrawBarHints(win, qHold >= 0 ? "{DPAD} pick  let go of {A}: do it" : "{DPAD} pick  {A} do it  {B} close");
     CopyWindowToVram(win, COPYWIN_FULL);
 }
 
 static void VerbDrawAll(s16 *data)
 {
     u8 i;
+    QuickMakeWindows(data, QG_SLOTS);
+    MpUi_PicBegin();
     for (i = 0; i < 4; i++)
         VerbDrawChoice(data, i);
+    MpUi_PicEnd();
     VerbDrawBar(data);
 }
 
@@ -1821,6 +2391,7 @@ static void Task_VerbWheel(u8 taskId)
         if (old >= 0)
             VerbDrawChoice(data, old);
         VerbDrawChoice(data, sel);
+        VerbDrawBar(data);
     }
     if (JOY_NEW(B_BUTTON))
     {
@@ -1870,11 +2441,21 @@ void MP_OpenVerbWheel(void (*done)(s8 verb))
     qFade = FALSE;
     qHold = 0;   // opened by holding A
     sVerbDone = done;
-    for (i = 0; i < QUICK_WINDOWS; i++)
+    qGroup = QG_NONE;
+    qOffX = qOffY = 0;
     {
-        qWin(i) = AddWindow(&sQuickWins[i]);
-        DrawStdWindowFrame(qWin(i), FALSE);
+        // the boxes go round the POKéMON (beside the player: two tiles of 8 pixels a step)
+        s16 fx, fy;
+        u8 dir;
+        struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
+        if (MP_Follower_LocalPos(&fx, &fy, &dir))
+        {
+            int dx = fx - me->currentCoords.x, dy = fy - me->currentCoords.y;
+            if (dx >= -1 && dx <= 1 && dy >= -1 && dy <= 1)
+                qOffX = dx * 2, qOffY = dy * 2;
+        }
     }
+    (void)i;
     VerbDrawAll(data);
     PlaySE(SE_WIN_OPEN);
     MPNet_Log("life interact: wheel open");

@@ -3324,6 +3324,25 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d", &page);
         MP_OpenQuickPickAt(page, -1, -1);
     }
+    else if (strcmp(cmd, "verbwheel") == 0)
+    {
+        // verbwheel - the A-Life pick around the follower, as holding A in front of it opens it (nothing done on a pick)
+        void MP_OpenVerbWheel(void (*done)(s8 verb));
+        MP_OpenVerbWheel(NULL);
+    }
+    else if (strcmp(cmd, "plate") == 0)
+    {
+        // plate TEXT - the A-Life answer's sign (map_name_popup.c MP_ShowPopupText)
+        u8 buf[200];
+        MP_AsciiToGame(buf, arg, 190);
+        MP_ShowPopupText(buf);
+    }
+    else if (strcmp(cmd, "theme") == 0)
+    {
+        // theme dark|default - OPTIONS > DISPLAY > THEME (palettes already loaded keep theirs until reloaded)
+        gMpConfig.menuTheme = strcmp(arg, "dark") == 0 ? MP_MENU_THEME_DARK : MP_MENU_THEME_DEFAULT;
+        printf("[test] theme %s\n", gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "dark" : "default");
+    }
     else if (strcmp(cmd, "social") == 0)
     {
         MP_Social_Open();

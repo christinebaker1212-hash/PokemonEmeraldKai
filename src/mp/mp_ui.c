@@ -19,21 +19,38 @@
 #include "text.h"
 #include "text_window.h"
 #include "window.h"
+#include "sprite.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "constants/characters.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
-#define MAIN_W 28
+#define MAIN_W 28   // the wide layout's list window (tiles)
 #define MAIN_H 13
+#define SLIM_W 11   // the compact layout's list window, at the right, beside the room
+#define ROOM_W 12
+#define ROOM_H 10
 #define ROW_H  12
-#define ROW_Y0 16
-#define HELP_H 3   // tiles: two lines of small text
+#define ROW_Y0 18   // under the title and its line
+#define HELP_H 3    // tiles: two lines of small text
 
+// Two layouts (the user's design, 2026-11-13: "allow some of the field to still be visible"):
+//   WIDE: one list window over most of the screen, for screens with more to say (DAILY, CHAT LOG, TRADE...)
+//   COMPACT: a narrow list at the right, the room (who's here, where) at the top left, the field between them;
+//            for short lists (SOCIAL, BERRY GAMES...). A screen asks for it with MpUi_Compact() before MpUi_Begin.
+// The help line is the same in both, along the bottom.
 static const struct WindowTemplate sMainTemplate = {
     .bg = 0, .tilemapLeft = 1, .tilemapTop = 1, .width = MAIN_W, .height = MAIN_H,
     .paletteNum = 15, .baseBlock = 0x8,
+};
+static const struct WindowTemplate sSlimTemplate = {
+    .bg = 0, .tilemapLeft = 30 - 1 - SLIM_W, .tilemapTop = 1, .width = SLIM_W, .height = MAIN_H,
+    .paletteNum = 15, .baseBlock = 0x8,
+};
+static const struct WindowTemplate sRoomTemplate = {
+    .bg = 0, .tilemapLeft = 1, .tilemapTop = 1, .width = ROOM_W, .height = ROOM_H,
+    .paletteNum = 15, .baseBlock = 0x8 + SLIM_W * MAIN_H,
 };
 
 static const struct WindowTemplate sHelpTemplate = {
@@ -41,10 +58,12 @@ static const struct WindowTemplate sHelpTemplate = {
     .paletteNum = 15, .baseBlock = 0x8 + MAIN_W * MAIN_H,
 };
 
-static u8 sMain = WINDOW_NONE, sHelp = WINDOW_NONE;
+static u8 sMain = WINDOW_NONE, sHelp = WINDOW_NONE, sRoom = WINDOW_NONE;
 static u8 sHelpText[200];   // redrawn when the player switches keyboard / pad
 static s16 sScrollTop = -1, sScrollCount, sSelY = -1;
 static s16 sTitleEnd;   // x where the title text ends
+static bool8 sCompact, sWantCompact;
+static u8 sW = MAIN_W;  // the list window's width now (tiles)
 
 // ---------------------------------------------------------------------------
 // Theme: a dark navy panel with a gold trim and a purple title band. The text
@@ -110,13 +129,22 @@ void MpTheme_BuildPalette(u16 *pal)
 {
     bool8 colorful;
     u16 a = FrameAccent(&colorful);
-    u16 white = RGB(31, 31, 31);
-    CpuCopy16(gStandardMenuPalette, pal, PLTT_SIZE_4BPP);   // 1 white, 2 dark grey, 3 light grey...
+    u16 white;
+    MP_Theme_StdPalette(pal);
+    white = pal[1];   // the fill: 1 white, 2 dark grey, 3 light grey... (THEME DARK: a night blue, light text)
     pal[MPT_BAND] = Mix(white, a, 64);                         // title band
     pal[MPT_BAND2] = Mix(white, a, 120);                       // its top line
     pal[MPT_SEL] = Mix(white, a, 52);                          // selected row
-    pal[MPT_GOLD] = colorful ? Mix(0, a, 120) : RGB(7, 7, 8);  // highlighted text (dark, in the frame's color)
-    pal[MPT_GREY] = RGB(14, 14, 15);                           // less important text
+    if (MP_Theme_Dark())
+    {
+        pal[MPT_GOLD] = colorful ? Mix(RGB(31, 31, 31), a, 120) : RGB(30, 30, 31);   // highlighted text, light
+        pal[MPT_GREY] = RGB(19, 19, 21);                                             // less important text
+    }
+    else
+    {
+        pal[MPT_GOLD] = colorful ? Mix(0, a, 120) : RGB(7, 7, 8);  // highlighted text (dark, in the frame's color)
+        pal[MPT_GREY] = RGB(14, 14, 15);                           // less important text
+    }
     pal[MPT_BORDER] = a;                                       // accent lines
 }
 
@@ -188,9 +216,259 @@ static void DrawTriangle(u8 windowId, int cx, int y, bool8 up)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Pictures beside the text: players' heads (their look, MP_Avatar_HeadIcon) and the CO-OP menu's item icons, as
+// 16x16 sprites in slots the screens name. MpUi_PicBegin marks every slot unused, MpUi_Head / MpUi_Icon place one
+// (made again only when what it shows changes), MpUi_PicEnd takes away the ones not placed this time.
+#include "../data/mp_coopmenu_icons.h"
+
+#define TAG_MPUI_PIC 0x5C40
+enum { PIC_NONE, PIC_HEAD, PIC_ICON, PIC_EMOTE };
+static struct { u8 kind, sprite; s16 key; bool8 used; } sPics[MPUI_PICS];
+static u8 sPicTiles[MPUI_PICS][128];
+static u16 sPicPal[MPUI_PICS][16];
+
+static const struct OamData sOam_Pic = {
+    .shape = SPRITE_SHAPE(16x16),
+    .size = SPRITE_SIZE(16x16),
+    .priority = 0,
+};
+
+static void PicFree(u8 slot)
+{
+    if (sPics[slot].kind != PIC_NONE && sPics[slot].sprite < MAX_SPRITES)
+        DestroySprite(&gSprites[sPics[slot].sprite]);
+    if (sPics[slot].kind != PIC_NONE)
+    {
+        FreeSpriteTilesByTag(TAG_MPUI_PIC + slot);
+        FreeSpritePaletteByTag(TAG_MPUI_PIC + slot);
+    }
+    sPics[slot].kind = PIC_NONE;
+    sPics[slot].sprite = MAX_SPRITES;
+}
+
+static void PicPlace(u8 slot, u8 kind, s16 key, int x, int y)
+{
+    if (slot >= MPUI_PICS)
+        return;
+    if (sPics[slot].kind != kind || sPics[slot].key != key)
+    {
+        struct SpriteSheet sheet = {sPicTiles[slot], 128, TAG_MPUI_PIC + slot};
+        struct SpritePalette pal = {sPicPal[slot], TAG_MPUI_PIC + slot};
+        struct SpriteTemplate tmpl = {TAG_MPUI_PIC + slot, TAG_MPUI_PIC + slot, &sOam_Pic, gDummySpriteAnimTable, NULL,
+                                      gDummySpriteAffineAnimTable, SpriteCallbackDummy};
+        PicFree(slot);
+        if (kind == PIC_HEAD)
+        {
+            if (!MP_Avatar_HeadIcon(key, sPicTiles[slot], sPicPal[slot], key < 0 ? RGB_WHITE : MP_Compass_PlayerColor(key)))
+                return;
+        }
+        else if (kind == PIC_EMOTE)
+            MP_Emote_IconTiles(key, sPicTiles[slot], sPicPal[slot]);
+        else
+        {
+            memcpy(sPicTiles[slot], sCoopIconTiles[key % MP_COOPICON_COUNT], 128);
+            memcpy(sPicPal[slot], sCoopIconPals[key % MP_COOPICON_COUNT], 32);
+        }
+        LoadSpriteSheet(&sheet);
+        LoadSpritePalette(&pal);
+        sPics[slot].sprite = CreateSprite(&tmpl, x + 8, y + 8, 0);
+        sPics[slot].kind = kind;
+        sPics[slot].key = key;
+        if (sPics[slot].sprite >= MAX_SPRITES)
+        {
+            FreeSpriteTilesByTag(TAG_MPUI_PIC + slot);
+            FreeSpritePaletteByTag(TAG_MPUI_PIC + slot);
+            sPics[slot].kind = PIC_NONE;
+            return;
+        }
+    }
+    if (sPics[slot].sprite < MAX_SPRITES)
+    {
+        gSprites[sPics[slot].sprite].x = x + 8;
+        gSprites[sPics[slot].sprite].y = y + 8;
+    }
+    sPics[slot].used = TRUE;
+}
+
+void MpUi_PicBegin(void)
+{
+    u8 i;
+    for (i = 0; i < MPUI_PICS; i++)
+        sPics[i].used = FALSE;
+}
+
+void MpUi_PicEnd(void)
+{
+    u8 i;
+    for (i = 0; i < MPUI_PICS; i++)
+        if (!sPics[i].used && sPics[i].kind != PIC_NONE)
+            PicFree(i);
+}
+
+void MpUi_PicsClear(void)
+{
+    u8 i;
+    for (i = 0; i < MPUI_PICS; i++)
+        PicFree(i);
+}
+
+// A player's head (-1: you) / a CO-OP menu icon (MP_COOPICON_*), its top left at (x, y) on the screen
+void MpUi_Head(u8 slot, s8 player, int x, int y)
+{
+    PicPlace(slot, PIC_HEAD, player, x, y);
+}
+
+void MpUi_Icon(u8 slot, u8 icon, int x, int y)
+{
+    PicPlace(slot, PIC_ICON, icon, x, y);
+}
+
+void MpUi_Emote(u8 slot, u8 kind, int x, int y)
+{
+    PicPlace(slot, PIC_EMOTE, kind, x, y);
+}
+
+// ---------------------------------------------------------------------------
+// The room: who else is here (up to three), where each is or what they're doing. Two lines a person, so a 7-letter
+// name and a long place both fit (the user, 2026-11-13). PICK highlights one (-1 none); RIGHT (if given) replaces each
+// one's place line (a prank's cost...). Heads in picture slots MPUI_PIC_ROOM.. (12 x 10 tile window)
+
+static void Badge(u8 win, int x, int y, const u8 *text, u8 fill)
+{
+    // a small rounded mark: a count, or "!"
+    FillWindowPixelRect(win, PIXEL_FILL(fill), x + 1, y, 9, 11);
+    FillWindowPixelRect(win, PIXEL_FILL(fill), x, y + 1, 11, 9);
+    MpTheme_Print(win, FONT_SMALL, text, x + 5 - GetStringWidth(FONT_SMALL, text, 0) / 2, y - 1, MPT_BG, fill);
+}
+
+void MpUi_RoomMark(u8 win, int x, int y, char mark, bool8 blue)
+{
+    u8 t[4];
+    char a[2] = {mark, 0};
+    MP_AsciiToGame(t, a, 2);
+    Badge(win, x, y, t, blue ? MPT_BLUE : MPT_RED);
+}
+
+static void CutToWidth(u8 *text, u8 font, int w)
+{
+    int len;
+    for (len = StringLength(text); len > 1 && GetStringWidth(font, text, 0) > w; len--)
+        text[len - 1] = EOS;
+}
+
+void MpUi_DrawRoom(u8 win, s8 pick, const char *const *right)
+{
+    u8 ids[MP_MAX_PLAYERS], buf[48];
+    char ascii[48];
+    int n = MP_IsConnected() ? MP_Friends_List(ids) : 0, i, winX, winY;
+    int w = GetWindowAttribute(win, WINDOW_WIDTH) * 8;
+    winX = GetWindowAttribute(win, WINDOW_TILEMAP_LEFT) * 8;
+    winY = GetWindowAttribute(win, WINDOW_TILEMAP_TOP) * 8;
+    FillWindowPixelBuffer(win, PIXEL_FILL(MPT_BG));
+    if (!MP_IsConnected())
+    {
+        MP_AsciiToGame(buf, "PLAYING ALONE", 40);
+        MpTheme_Print(win, FONT_SMALL, buf, 0, 0, MPT_TEXT, MPT_BG);
+    }
+    else
+    {
+        const char *room = MP_Lobby_RoomName();
+        snprintf(ascii, sizeof(ascii), "%s", room && room[0] ? room : "CO-OP ROOM");
+        for (i = 0; ascii[i]; i++)
+            if (ascii[i] >= 'a' && ascii[i] <= 'z')
+                ascii[i] -= 32;
+        MP_AsciiToGame(buf, ascii, 40);
+        CutToWidth(buf, FONT_SMALL, w - 22);
+        MpTheme_Print(win, FONT_SMALL, buf, 0, 0, MPT_TEXT, MPT_BG);
+        snprintf(ascii, sizeof(ascii), "%d/%d", MP_ConnectedCount(), MP_MAX_PLAYERS);
+        MP_AsciiToGame(buf, ascii, 8);
+        MpTheme_Print(win, FONT_SMALL, buf, w - GetStringWidth(FONT_SMALL, buf, 0), 0, MPT_GREY, MPT_BG);
+    }
+    for (i = 0; i < MP_MAX_PLAYERS - 1; i++)
+    {
+        int y = 13 + i * 22;
+        if (i >= n)
+        {
+            // an empty seat
+            FillWindowPixelRect(win, PIXEL_FILL(MPT_SHADOW), 0, y + 1, 16, 16);
+            FillWindowPixelRect(win, PIXEL_FILL(MPT_BG), 1, y + 2, 14, 14);
+            MP_AsciiToGame(buf, "- empty seat -", 20);
+            MpTheme_Print(win, FONT_SMALL_NARROW, buf, 20, y + 3, MPT_GREY, MPT_BG);
+            continue;
+        }
+        {
+            u8 id = ids[i];
+            struct MpPlayer *p = &gMpPlayers[id];
+            if (pick == i)
+            {
+                FillWindowPixelRect(win, PIXEL_FILL(MPT_SEL), 0, y - 2, w, 21);
+                FillWindowPixelRect(win, PIXEL_FILL(MPT_BORDER), 0, y - 2, 2, 21);
+            }
+            MpUi_Head(MPUI_PIC_ROOM + i, id, winX + 2, winY + y);
+            StringCopyN(buf, p->name, PLAYER_NAME_LENGTH);
+            buf[PLAYER_NAME_LENGTH] = EOS;
+            MpTheme_Print(win, FONT_SMALL, buf, 20, y - 2, MPT_TEXT, 0);
+            if (right && right[i])
+                MP_AsciiToGame(buf, right[i], 40);
+            else if (p->hasState && (p->state.flags & MPF_IN_BATTLE))
+                MP_AsciiToGame(buf, "IN A BATTLE", 40);
+            else if (p->hasState && p->state.cardDuel)
+                MP_AsciiToGame(buf, "IN A CARD DUEL", 40);
+            else
+                MP_Friends_LocationName(id, buf);
+            CutToWidth(buf, FONT_SMALL_NARROW, w - 20);
+            MpTheme_Print(win, FONT_SMALL_NARROW, buf, 20, y + 8, MPT_GREY, 0);
+            if (p->hasState && ((p->state.flags & MPF_IN_BATTLE) || p->state.cardDuel))
+                MpUi_RoomMark(win, w - 11, y - 1, '!', TRUE);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 bool8 MpUi_IsOpen(void)
 {
     return sMain != WINDOW_NONE;
+}
+
+// The list windows for the layout asked for (and the room in COMPACT)
+static void MakeWindows(bool8 compact)
+{
+    sCompact = compact;
+    sW = compact ? SLIM_W : MAIN_W;
+    sMain = AddWindow(compact ? &sSlimTemplate : &sMainTemplate);
+    PutWindowTilemap(sMain);
+    DrawStdWindowFrame(sMain, FALSE);
+    MpTheme_Panel(sMain, 0);
+    CopyWindowToVram(sMain, COPYWIN_FULL);
+    if (compact)
+    {
+        sRoom = AddWindow(&sRoomTemplate);
+        PutWindowTilemap(sRoom);
+        DrawStdWindowFrame(sRoom, FALSE);
+        MpUi_DrawRoom(sRoom, -1, NULL);
+        CopyWindowToVram(sRoom, COPYWIN_FULL);
+    }
+}
+
+static void RemoveListWindows(void)
+{
+    u8 i;
+    if (sRoom != WINDOW_NONE)
+    {
+        ClearStdWindowAndFrame(sRoom, TRUE);
+        RemoveWindow(sRoom);
+        sRoom = WINDOW_NONE;
+        for (i = MPUI_PIC_ROOM; i < MPUI_PIC_ROOM + MP_MAX_PLAYERS - 1; i++)
+            PicFree(i);
+    }
+    if (sMain != WINDOW_NONE)
+    {
+        ClearStdWindowAndFrame(sMain, TRUE);
+        RemoveWindow(sMain);
+        sMain = WINDOW_NONE;
+    }
 }
 
 void MpUi_Open(void)
@@ -201,15 +479,11 @@ void MpUi_Open(void)
     HideMapNamePopUpWindow();
     LoadMessageBoxAndBorderGfx();   // the map name sign shares the frame's palette slot
     MpTheme_Push();
-    sMain = AddWindow(&sMainTemplate);
+    MakeWindows(sWantCompact);
     sHelp = AddWindow(&sHelpTemplate);
-    PutWindowTilemap(sMain);
     PutWindowTilemap(sHelp);
-    DrawStdWindowFrame(sMain, FALSE);
     DrawStdWindowFrame(sHelp, FALSE);
-    MpTheme_Panel(sMain, 13);
     MpTheme_Panel(sHelp, 0);
-    CopyWindowToVram(sMain, COPYWIN_FULL);
     CopyWindowToVram(sHelp, COPYWIN_FULL);
 }
 
@@ -217,26 +491,65 @@ void MpUi_Close(void)
 {
     if (sMain == WINDOW_NONE)
         return;
-    ClearStdWindowAndFrame(sMain, TRUE);
+    RemoveListWindows();
     ClearStdWindowAndFrame(sHelp, TRUE);
-    RemoveWindow(sMain);
     RemoveWindow(sHelp);
-    sMain = sHelp = WINDOW_NONE;
+    sHelp = WINDOW_NONE;
     sHelpText[0] = EOS;
+    sWantCompact = FALSE;
+    MpUi_PicsClear();
     MpTheme_Pop();
     ScriptUnfreezeObjectEvents();
     UnlockPlayerFieldControls();
 }
 
+// The next MpUi_Begin draws the COMPACT layout (a short list beside the room); without it, WIDE
+void MpUi_Compact(void)
+{
+    sWantCompact = TRUE;
+}
+
 void MpUi_Begin(const char *title)
 {
     u8 buf[96];
+    int w;
+    bool8 compact = sWantCompact;
+    sWantCompact = FALSE;
+    if (sMain != WINDOW_NONE && compact != sCompact)
+    {
+        RemoveListWindows();
+        MakeWindows(compact);
+    }
+    else if (sRoom != WINDOW_NONE)
+    {
+        MpUi_DrawRoom(sRoom, -1, NULL);
+        CopyWindowToVram(sRoom, COPYWIN_FULL);
+    }
     sScrollTop = -1;
     sSelY = -1;
-    MpTheme_Panel(sMain, 13);
+    MpUi_PicBegin();
+    if (sRoom != WINDOW_NONE)
+    {
+        u8 i;
+        for (i = MPUI_PIC_ROOM; i < MPUI_PIC_ROOM + MP_MAX_PLAYERS - 1; i++)
+            if (sPics[i].kind != PIC_NONE)
+                sPics[i].used = TRUE;
+    }
+    w = sW * 8;
+    MpTheme_Panel(sMain, 0);
     MP_AsciiToGame(buf, title, 92);
-    MpUi_PrintWrapped(sMain, buf, 6, 1, MAIN_W * 8 - 12, 1, MPT_GOLD, MPT_BAND);
-    sTitleEnd = 6 + GetStringWidth(FONT_SMALL, buf, 0);
+    // The title in the game's own large font, a line under it (Emerald's menus); a long one in the small font
+    if (GetStringWidth(FONT_NORMAL, buf, 0) <= w - 4)
+    {
+        MpTheme_Print(sMain, FONT_NORMAL, buf, 2, 0, MPT_TEXT, MPT_BG);
+        sTitleEnd = 2 + GetStringWidth(FONT_NORMAL, buf, 0);
+    }
+    else
+    {
+        MpUi_PrintWrapped(sMain, buf, 2, 2, w - 4, 1, MPT_TEXT, MPT_BG);
+        sTitleEnd = 2 + min(w - 4, GetStringWidth(FONT_SMALL, buf, 0));
+    }
+    FillWindowPixelRect(sMain, PIXEL_FILL(MPT_SHADOW), 0, 14, w, 1);
 }
 
 // Copies at most size-1 characters of a string and ends it (StringCopyN alone copies a fixed count, reading past
@@ -254,7 +567,7 @@ void MpUi_TitleRight(const u8 *text)
 {
     u8 cut[64];
     u8 font = FONT_SMALL;
-    int len, room = MAIN_W * 8 - 6 - (sTitleEnd + 8);
+    int len, room = sW * 8 - 2 - (sTitleEnd + 8);
     CopyText(cut, text, sizeof(cut));
     if (GetStringWidth(font, cut, 0) > room)
         font = FONT_SMALL_NARROW;
@@ -262,41 +575,44 @@ void MpUi_TitleRight(const u8 *text)
         cut[len - 1] = EOS;
     if (room <= 0)
         return;
-    MpTheme_Print(sMain, font, cut, MAIN_W * 8 - 6 - GetStringWidth(font, cut, 0), 1, MPT_TEXT, MPT_BAND);
+    MpTheme_Print(sMain, font, cut, sW * 8 - 2 - GetStringWidth(font, cut, 0), 2, MPT_GREY, MPT_BG);
 }
 
-// One row: left text, and optional right-aligned text. Long left text is cut.
-void MpUi_Row(u8 row, bool8 selected, const u8 *left, const u8 *right)
+// One row at pixel line Y: left text, and optional right-aligned text. Long left text is cut. The selected row has
+// the lit bar behind it and the game's own ▶.
+static void RowAt(int y, bool8 selected, const u8 *left, const u8 *right)
 {
-    u8 y = ROW_Y0 + row * ROW_H;
     u8 cut[80];
     u8 rcut[64];
-    int maxW, len2;
+    u8 font;
+    int maxW, w = sW * 8 - (sScrollCount > MPUI_ROWS && sScrollTop >= 0 ? 8 : 0);   // (room for the scroll arrows)
     if (right)
     {
         // Right text gets at most half the row
         CopyText(rcut, right, sizeof(rcut));
-        for (len2 = StringLength(rcut); len2 > 1 && GetStringWidth(FONT_SMALL_NARROW, rcut, 0) > MAIN_W * 4; len2--)
-            rcut[len2 - 1] = EOS;
+        CutToWidth(rcut, FONT_SMALL_NARROW, w / 2);
         right = rcut;
     }
-    maxW = MAIN_W * 8 - 22 - (right ? GetStringWidth(FONT_SMALL_NARROW, right, 0) + 8 : 4);
-    int len;
-    u8 bg = MPT_BG;
+    maxW = w - 10 - (right ? GetStringWidth(FONT_SMALL_NARROW, right, 0) + 6 : 0);
     if (selected)
     {
-        // The game's own cursor
         u8 arrow[] = {0xEF /* ▶ */, EOS};
-        MpTheme_Print(sMain, FONT_SMALL, arrow, 6, y, MPT_TEXT, bg);
+        MpTheme_SelBar(sMain, y - 1, ROW_H);
+        MpTheme_Print(sMain, FONT_SMALL, arrow, 3, y - 1, MPT_TEXT, 0);
         sSelY = y;
     }
     CopyText(cut, left, sizeof(cut));
-    for (len = StringLength(cut); len > 1 && GetStringWidth(FONT_SMALL_NARROW, cut, 0) > maxW; len--)
-        cut[len - 1] = EOS;
-    MpTheme_Print(sMain, FONT_SMALL_NARROW, cut, 15, y, MPT_TEXT, bg);
+    font = GetStringWidth(FONT_SMALL, cut, 0) <= maxW ? FONT_SMALL : FONT_SMALL_NARROW;
+    CutToWidth(cut, font, maxW);
+    MpTheme_Print(sMain, font, cut, 10, y - 1, MPT_TEXT, 0);
     if (right)
-        MpTheme_Print(sMain, FONT_SMALL_NARROW, right, MAIN_W * 8 - 12 - GetStringWidth(FONT_SMALL_NARROW, right, 0), y,
-                      MPT_GREY, bg);
+        MpTheme_Print(sMain, FONT_SMALL_NARROW, right, w - 3 - GetStringWidth(FONT_SMALL_NARROW, right, 0), y - 1,
+                      MPT_GREY, 0);
+}
+
+void MpUi_Row(u8 row, bool8 selected, const u8 *left, const u8 *right)
+{
+    RowAt(ROW_Y0 + row * ROW_H, selected, left, right);
 }
 
 void MpUi_RowAscii(u8 row, bool8 selected, const char *left, const char *right)
@@ -308,12 +624,54 @@ void MpUi_RowAscii(u8 row, bool8 selected, const char *left, const char *right)
     MpUi_Row(row, selected, l, right ? r : NULL);
 }
 
+// A friend as a tall row (slot 0-2): their head, their name in the large font, where they are under it, and at the
+// right a note (RIGHT) with a mark (MARK: 0 none, else the character, red; BLUE: blue). The row after the last one is
+// MpUi_RowBelowFriends.
+#define FRIEND_H 25
+void MpUi_FriendRow(u8 slot, bool8 selected, u8 id, const char *right, char mark, bool8 blue)
+{
+    u8 buf[48];
+    int y = ROW_Y0 - 2 + slot * FRIEND_H, w = sW * 8, rw = 0;
+    int winX = GetWindowAttribute(sMain, WINDOW_TILEMAP_LEFT) * 8, winY = GetWindowAttribute(sMain, WINDOW_TILEMAP_TOP) * 8;
+    if (selected)
+    {
+        u8 arrow[] = {0xEF /* ▶ */, EOS};
+        MpTheme_SelBar(sMain, y, FRIEND_H - 1);
+        MpTheme_Print(sMain, FONT_SMALL, arrow, 3, y + 6, MPT_TEXT, 0);
+        sSelY = y;
+    }
+    MpUi_Head(MPUI_PIC_ROWS + slot, id, winX + 12, winY + y + 4);
+    StringCopyN(buf, gMpPlayers[id].name, PLAYER_NAME_LENGTH);
+    buf[PLAYER_NAME_LENGTH] = EOS;
+    MpTheme_Print(sMain, FONT_NORMAL, buf, 32, y - 1, MPT_TEXT, 0);
+    if (right)
+    {
+        MP_AsciiToGame(buf, right, 40);
+        CutToWidth(buf, FONT_SMALL, w / 2 - 16);
+        rw = GetStringWidth(FONT_SMALL, buf, 0);
+        MpTheme_Print(sMain, FONT_SMALL, buf, w - 4 - rw, y + 5, mark ? MPT_TEXT : MPT_GREY, 0);
+        if (mark)
+            MpUi_RoomMark(sMain, w - 4 - rw - 15, y + 6, mark, blue);
+    }
+    MP_Friends_LocationName(id, buf);
+    CutToWidth(buf, FONT_SMALL, w - 36 - (rw ? rw + 20 : 0));
+    MpTheme_Print(sMain, FONT_SMALL, buf, 32, y + 11, MPT_GREY, 0);
+}
+
+// A plain row under up to three friend rows (BACK, CANCEL)
+void MpUi_RowBelowFriends(u8 friends, bool8 selected, const char *left)
+{
+    u8 l[40];
+    MP_AsciiToGame(l, left, 36);
+    RowAt(ROW_Y0 + friends * FRIEND_H + 1, selected, l, NULL);
+}
+
 // A line of text anywhere in the list area (row = 0..MPUI_ROWS-1)
 void MpUi_TextAscii(u8 row, const char *text)
 {
     u8 buf[160];
     MP_AsciiToGame(buf, text, 156);
-    MpUi_PrintWrapped(sMain, buf, 15, ROW_Y0 + row * ROW_H, MAIN_W * 8 - 15 - 6, 1, MPT_TEXT, MPT_BG);
+    MpUi_PrintWrapped(sMain, buf, 11, ROW_Y0 - 1 + row * ROW_H, sW * 8 - 11 - 3, 1, MPT_TEXT, MPT_BG);
 }
 
 void MpUi_End(void)
@@ -322,10 +680,11 @@ void MpUi_End(void)
     if (sScrollTop >= 0 && sScrollCount > MPUI_ROWS)
     {
         if (sScrollTop > 0)
-            DrawTriangle(sMain, MAIN_W * 8 - 6, ROW_Y0 - 1, TRUE);
+            DrawTriangle(sMain, sW * 8 - 6, ROW_Y0 - 2, TRUE);
         if (sScrollTop + MPUI_ROWS < sScrollCount)
-            DrawTriangle(sMain, MAIN_W * 8 - 6, ROW_Y0 + MPUI_ROWS * ROW_H - 2, FALSE);
+            DrawTriangle(sMain, sW * 8 - 6, ROW_Y0 + MPUI_ROWS * ROW_H - 3, FALSE);
     }
+    MpUi_PicEnd();
     CopyWindowToVram(sMain, COPYWIN_FULL);
 }
 
@@ -437,16 +796,62 @@ void MpUi_PrintWrapped(u8 windowId, const u8 *text, int x, int y, int width, int
         MpTheme_Print(windowId, font, lines[i], x, y + i * 12, fg, bg);
 }
 
+// The help line: what the cursor's on, and the buttons (the "{A} SELECT  {B} BACK" part, from the first button
+// icon on) at the right end of the second line, as Emerald's own prompts sit
+// A help line into WIN (28 tiles): what the cursor's on at the left, and the button prompts ("{A} SELECT  {B} BACK":
+// from the first button icon that follows two spaces) at the right end of the second line, as Emerald's prompts sit
+void MpUi_HelpInto(u8 win, const u8 *text)
+{
+    u8 words[200], keys[96];
+    int w = MAIN_W * 8 - 8, kw = 0, n = -1, i;
+    if (text[0] == CHAR_KEYPAD_ICON)
+    {
+        // only prompts: all of them at the right of the second line
+        int kw0 = GetStringWidth(FONT_SMALL, text, 0);
+        if (kw0 <= w)
+        {
+            MpTheme_Print(win, FONT_SMALL, text, 4 + w - kw0, 12, MPT_GREY, 0);
+            return;
+        }
+    }
+    for (i = 2; text[i] != EOS; i++)
+        if (text[i] == CHAR_KEYPAD_ICON && text[i - 1] == CHAR_SPACE && text[i - 2] == CHAR_SPACE)
+        {
+            n = i;
+            break;
+        }
+    if (n > 0)
+    {
+        CopyText(keys, text + n, sizeof(keys));
+        kw = GetStringWidth(FONT_SMALL, keys, 0);
+        if (kw > w / 2)
+            kw = 0;
+    }
+    if (kw)
+    {
+        memcpy(words, text, n);
+        while (n > 0 && words[n - 1] == CHAR_SPACE)
+            n--;
+        words[n] = EOS;
+        // the words on the first line (two if they need them and leave the buttons room), the buttons below right
+        if (GetStringWidth(FONT_SMALL, words, 0) <= w)
+            MpUi_PrintWrapped(win, words, 4, 0, w, 1, MPT_TEXT, MPT_BG);
+        else
+            MpUi_PrintWrapped(win, words, 4, 0, w - kw - 8, 2, MPT_TEXT, MPT_BG);
+        MpTheme_Print(win, FONT_SMALL, keys, 4 + w - kw, 12, MPT_GREY, 0);
+    }
+    else
+        MpUi_PrintWrapped(win, text, 4, 0, w, 2, MPT_TEXT, MPT_BG);
+}
+
 void MpUi_Help(const u8 *text)
 {
     if (sHelp == WINDOW_NONE)
         return;
     if (text != sHelpText)
-    {
         CopyText(sHelpText, text, sizeof(sHelpText));
-    }
     MpTheme_Panel(sHelp, 0);
-    MpUi_PrintWrapped(sHelp, text, 4, 0, MAIN_W * 8 - 8, 2, MPT_GREY, MPT_BG);
+    MpUi_HelpInto(sHelp, text);
     CopyWindowToVram(sHelp, COPYWIN_FULL);
 }
 

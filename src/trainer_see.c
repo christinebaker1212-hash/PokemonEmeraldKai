@@ -773,6 +773,25 @@ static bool8 MpIconLook(struct Sprite *sprite, u8 icon)
     return TRUE;
 }
 
+// Moemon Co-op: an emote icon's tiles in the co-op overlay palette's indices (mp_emote.c MP_Emote_IconTiles)
+const u8 *MP_EmoteIconGfx(u8 icon)
+{
+    static const u8 *const sSrc[MP_ICON_COUNT] = {sEmotion_ExclamationMarkGfx, sEmotion_QuestionMarkGfx, sEmotion_HeartGfx, sEmotion_NoteGfx, sEmotion_XGfx, sEmotion_DoubleExclGfx};
+    if (!sMpIconGfxBuilt)
+    {
+        u8 map[16] = {0};
+        int i, j;
+        map[14] = 1;    // white
+        map[15] = 14;   // black outline
+        map[5] = 15;    // the heart's pink
+        for (i = 0; i < MP_ICON_COUNT; i++)
+            for (j = 0; j < 0x80; j++)
+                sMpIconGfx[i][j] = map[sSrc[i][j] & 0xF] | (map[sSrc[i][j] >> 4] << 4);
+        sMpIconGfxBuilt = TRUE;
+    }
+    return sMpIconGfx[icon % MP_ICON_COUNT];
+}
+
 // Is an emote icon up? (the overlay palette stays loaded while one is)
 bool8 MP_EmoteIconShown(void)
 {

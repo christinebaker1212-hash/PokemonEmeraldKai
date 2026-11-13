@@ -269,6 +269,7 @@ struct MpConfig
     u8 cardScaling;           // OPTIONS > GAME > CARD SCALING: card players' decks fit yours (1) or go by badges (0)
     u8 battleAnims;           // OPTIONS > DISPLAY > BATTLE ANIMS: 0 CLASSIC, 1 MODERN (mp_modernanim.c; this game only)
     u8 noShadows;             // OPTIONS > DISPLAY > SHADOWS: 0 ON (shadows under people and POKeMON: mp_shadow.c), 1 OFF
+    u8 menuTheme;             // OPTIONS > DISPLAY > THEME: MP_MENU_THEME_* (every window's colors: mp_darktheme.c)
     u8 scaleFollowersPct;     // SPRITE SCALING (1.63.14): how far toward their POKeDEX height while on, 5-100% (A turns it
     u8 scaleGardenPct;        // on and off, LEFT / RIGHT change it): followers 100 and the GARDEN 50 unless changed
     u8 muteInBackground;      // OPTIONS > GAME > MUTE IN BACKGROUND: 1 = no sound while none of the game's windows has focus
@@ -391,6 +392,15 @@ void MP_Legend_BattleEnded(void);
 void MP_Legend_Tick(void);
 // STREAMER MODE (mp_streamer.c): trainer names and POKéMON nicknames shown as others, by TID / SID (and nature)
 enum { MP_STREAMER_OFF, MP_STREAMER_GAME, MP_STREAMER_ANIME, MP_STREAMER_ORIGINAL, MP_STREAMER_COUNT };
+enum { MP_MENU_THEME_DEFAULT, MP_MENU_THEME_DARK, MP_MENU_THEME_COUNT };
+// OPTIONS > DISPLAY > THEME (mp_darktheme.c): the windows' palettes swapped for dark copies as they're loaded
+bool8 MP_Theme_Dark(void);
+const void *MP_Theme_Map(const void *src, u16 size);
+void MP_Theme_MapCompressed(const u32 *src, u16 *decompressed, u16 size);
+u16 MP_Theme_TextColor(u16 c);
+const void *MP_Theme_MapText(const void *src);
+const u16 *MP_Theme_BagText(const u16 *src);
+void MP_Theme_StdPalette(u16 *dst);
 bool8 MP_Streamer_On(void);
 void MP_Streamer_Build(void);
 u8 MP_Streamer_At(const u8 *s, u8 *out, u16 *used);
@@ -886,6 +896,28 @@ const u8 *MP_Dex_CaughtBy(u16 nationalNum);
 
 // Co-op list windows (mp_ui.c)
 #define MPUI_ROWS 7
+// Pictures beside the text (16x16 sprites in slots): friend rows' heads 0-2, the room's heads 4-6 (mp_ui.c)
+#define MPUI_PICS 8
+#define MPUI_PIC_ROWS 0
+#define MPUI_PIC_ROOM 4
+void MpUi_HelpInto(u8 win, const u8 *text);   // a help line: the words left, the button prompts right
+void MpUi_Compact(void);   // the next MpUi_Begin: a short list at the right, the room at the top left, the field between
+void MpUi_PicBegin(void);
+void MpUi_PicEnd(void);
+void MpUi_PicsClear(void);
+void MpUi_Head(u8 slot, s8 player, int x, int y);
+void MpUi_Icon(u8 slot, u8 icon, int x, int y);
+void MpUi_DrawRoom(u8 win, s8 pick, const char *const *right);
+void MpUi_RoomMark(u8 win, int x, int y, char mark, bool8 blue);
+void MpUi_FriendRow(u8 slot, bool8 selected, u8 id, const char *right, char mark, bool8 blue);
+void MpUi_RowBelowFriends(u8 friends, bool8 selected, const char *left);
+// The CO-OP menu's row icons (mp_ui.c, src/data/mp_coopmenu_icons.h from tools/moemon_coopmenu/gen_icons.py)
+enum { MP_COOPICON_FRIENDS, MP_COOPICON_SOCIAL, MP_COOPICON_TRADE, MP_COOPICON_SHAREDPC, MP_COOPICON_TOURNEY,
+       MP_COOPICON_GATCHA, MP_COOPICON_DAILY, MP_COOPICON_BERRY, MP_COOPICON_LOOK, MP_COOPICON_TUTOR, MP_COOPICON_ONLINE,
+       MP_COOPICON_PET, MP_COOPICON_GROOM, MP_COOPICON_PLAY, MP_COOPICON_FEED, MP_COOPICON_KEEPSAKE };
+void MpUi_Emote(u8 slot, u8 kind, int x, int y);
+void MP_ShowPopupText(const u8 *text);   // map_name_popup.c: a line or two on the map name's sign (A-Life answers)   // an emote's icon (MP_EMOTE_*) as a picture
+void MP_Emote_IconTiles(u8 kind, u8 *tiles, u16 *pal);   // mp_emote.c: its 16x16 tiles and colors
 // Co-op menu theme (mp_ui.c): colors of the swapped-in text palette
 enum { MPT_BG = 1, MPT_TEXT, MPT_SHADOW, MPT_RED, MPT_GREEN = 6, MPT_BLUE = 8, MPT_BAND = 10, MPT_GOLD, MPT_SEL, MPT_GREY, MPT_BORDER, MPT_BAND2 };
 void MpTheme_BuildPalette(u16 *pal16);   // from the player's window frame (OPTIONS > FRAME)

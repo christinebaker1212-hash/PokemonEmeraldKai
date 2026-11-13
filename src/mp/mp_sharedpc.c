@@ -354,6 +354,7 @@ static void DrawChooser(void)
 {
     static const char *const sRows[CHOOSE_COUNT] = {"MO~MON", "ITEMS", "CANCEL"};
     u8 i;
+    MpUi_Compact();
     MpUi_Begin("SHARED PC");
     if (sPc.mode == MODE_CONNECTING)
     {

@@ -1886,6 +1886,8 @@ void MP_Life_LoadFromSave(void)
     char path[600];
     int i;
     bool8 found = FALSE;
+    void AwFile_Flush(void);
+    AwFile_Flush();   // a save of the records still being written in the background is on disk before it's read (aw_file.c)
     MP_Life_Reset();
     for (i = 0; i <= 3 && !found; i++)
     {

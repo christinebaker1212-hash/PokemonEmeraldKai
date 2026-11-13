@@ -7,6 +7,7 @@
 #include "item_menu.h"
 #include "mp.h"
 #include "mp_bag_gfx.h"
+#include "../data/mp_dark_palettes.h"   // THEME DARK: the picture's dark colors (tools/moemon_darktheme/gen_dark.py)
 
 // The list's rows (item_menu.c: WIN_ITEM_LIST and BAG_LIST_FIRST_Y print each row's text inside its frame)
 #define LIST_FRAME_X 105
@@ -47,6 +48,7 @@ void MP_BagUI_Composite(u16 *frame)
     int i, x, y, coeff, nFrames = 0;
     u8 view, cellX;
     struct BagUIFrame frames[3];
+    bool8 dark = MP_Theme_Dark();
 
     if (gMain.callback2 != CB2_BagMenuRun || gBagMenu == NULL)
         return;
@@ -100,6 +102,15 @@ void MP_BagUI_Composite(u16 *frame)
                     break;
                 }
             c = sBagUI_Colors[k];
+            if (dark)
+            {
+                // THEME DARK: the pocket icons' row in its own colors (light icons on slate), the BAG logo's white
+                // letters kept, the rest the picture's dark colors
+                if (y >= BAGUI_STRIP_Y - 3 && y < BAGUI_STRIP_Y + 13 && x < 104)
+                    c = sDarkBagStripColors[k];
+                else if (!(y < 18 && x < 58 && k == BAGUI_C_WHITE))
+                    c = sDarkBagColors[k];
+            }
             if (coeff)
             {
                 s32 r = c & 0x1F, g = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;

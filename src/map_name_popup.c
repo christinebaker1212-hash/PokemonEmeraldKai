@@ -36,6 +36,10 @@ static void LoadMapNamePopUpWindowBg(void);
 
 // EWRAM
 static EWRAM_DATA u8 sPopupTaskId = 0;
+// Moemon Co-op: the A-Life plate (MP_ShowPopupText)
+static EWRAM_DATA u8 sMpPlateText[2][96] = {0};
+static EWRAM_DATA u8 sMpPlateWidth = 0;   // tiles; 0 = the place's name, as ever
+
 
 // .rodata
 static const u8 sMapPopUp_Table[][960] =
@@ -231,6 +235,7 @@ enum {
 
 void ShowMapNamePopup(void)
 {
+    sMpPlateWidth = 0;   // Moemon Co-op: the place's name (not an A-Life plate)
     if (FlagGet(FLAG_HIDE_MAP_NAME_POPUP) != TRUE)
     {
         if (!FuncIsActiveTask(Task_MapNamePopUpWindow))
@@ -250,6 +255,55 @@ void ShowMapNamePopup(void)
             gTasks[sPopupTaskId].tIncomingPopUp = TRUE;
         }
     }
+}
+
+// Moemon Co-op: a line (or two) on the map name's own sign, sliding in and out as the place's name does: the A-Life
+// pick's answers (the user's design, 2026-11-13: "no text box to click through"). The sign is as wide as the words.
+u8 AddMapNamePopUpWindowWide(u8 width);
+
+void MP_ShowPopupText(const u8 *text)
+{
+    int w, i, n = 0, line = 0, best = -1, maxW = 26 * 8 - 8;
+    u8 buf[192];
+    StringCopy(buf, text);
+    for (i = 0; buf[i] != EOS; i++)
+        if (buf[i] == CHAR_NEWLINE || buf[i] == CHAR_PROMPT_SCROLL || buf[i] == CHAR_PROMPT_CLEAR)
+            buf[i] = CHAR_SPACE;
+    sMpPlateText[0][0] = sMpPlateText[1][0] = EOS;
+    if (GetStringWidth(FONT_SMALL, buf, 0) <= maxW)
+        StringCopy(sMpPlateText[0], buf);
+    else
+    {
+        // break at the last space that keeps the first line in
+        for (i = 0; buf[i] != EOS; i++)
+        {
+            if (buf[i] == CHAR_SPACE)
+            {
+                u8 save = buf[i];
+                buf[i] = EOS;
+                if (GetStringWidth(FONT_SMALL, buf, 0) <= maxW)
+                    best = i;
+                buf[i] = save;
+            }
+        }
+        if (best < 0)
+            best = StringLength(buf) / 2;
+        memcpy(sMpPlateText[0], buf, best);
+        sMpPlateText[0][best] = EOS;
+        StringCopy(sMpPlateText[1], buf + best + 1);
+        for (n = StringLength(sMpPlateText[1]); n > 1 && GetStringWidth(FONT_SMALL, sMpPlateText[1], 0) > maxW; n--)
+            sMpPlateText[1][n - 1] = EOS;
+        (void)line;
+    }
+    w = max(GetStringWidth(FONT_SMALL, sMpPlateText[0], 0), GetStringWidth(FONT_SMALL, sMpPlateText[1], 0));
+    sMpPlateWidth = min(28, max(10, (w + 12 + 7) / 8));
+    if (FuncIsActiveTask(Task_MapNamePopUpWindow))
+        HideMapNamePopUpWindow();
+    sPopupTaskId = CreateTask(Task_MapNamePopUpWindow, 90);
+    SetGpuReg(REG_OFFSET_BG0VOFS, POPUP_OFFSCREEN_Y);
+    gTasks[sPopupTaskId].tState = STATE_PRINT;
+    gTasks[sPopupTaskId].tYOffset = POPUP_OFFSCREEN_Y;
+    gTasks[sPopupTaskId].tPrintTimer = 26;   // (at once, near enough)
 }
 
 static void Task_MapNamePopUpWindow(u8 taskId)
@@ -312,6 +366,7 @@ static void Task_MapNamePopUpWindow(u8 taskId)
         break;
     case STATE_END:
         HideMapNamePopUpWindow();
+        sMpPlateWidth = 0;
         return;
     }
     SetGpuReg(REG_OFFSET_BG0VOFS, task->tYOffset);
@@ -354,6 +409,25 @@ static void ShowMapNamePopUpWindow(void)
         }
         StringCopy(withoutPrefixPtr, mapDisplayHeaderSource);
     }
+    if (sMpPlateWidth)
+    {
+        // Moemon Co-op: the A-Life plate: the sign as wide as the words, a line or two of them on it
+        u8 win = AddMapNamePopUpWindowWide(sMpPlateWidth), i;
+        u8 colors[3] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
+        int ww = sMpPlateWidth * 8;
+        (void)win;
+        LoadMapNamePopUpWindowBg();
+        for (i = 0; i < 2; i++)
+        {
+            int lw = GetStringWidth(FONT_SMALL, sMpPlateText[i], 0);
+            if (sMpPlateText[i][0] == EOS)
+                continue;
+            AddTextPrinterParameterized3(GetMapNamePopUpWindowId(), FONT_SMALL, (ww - lw) / 2,
+                                         sMpPlateText[1][0] ? i * 11 : 5, colors, TEXT_SKIP_DRAW, sMpPlateText[i]);
+        }
+        CopyWindowToVram(GetMapNamePopUpWindowId(), COPYWIN_FULL);
+        return;
+    }
     else if (MP_Garden_IsHere())
     {
         // Moemon Co-op: the MOéMON GARDEN has its own name (its map section is LITTLEROOT's)
@@ -390,6 +464,24 @@ static void ShowMapNamePopUpWindow(void)
 static void DrawMapNamePopUpFrame(u8 bg, u8 x, u8 y, u8 deltaX, u8 deltaY, u8 unused)
 {
     s32 i;
+
+    if (deltaX != 10)
+    {
+        // Moemon Co-op: a wider sign: the edges' first and last pieces at the ends, their middle pieces between
+        for (i = 0; i < deltaX + 2; i++)
+        {
+            s32 piece = i == 0 ? 0 : i == deltaX + 1 ? TILE_TOP_EDGE_END - TILE_TOP_EDGE_START : 1 + (i - 1) % 10;
+            FillBgTilemapBufferRect(bg, TILE_TOP_EDGE_START + piece, i - 1 + x, y - 1, 1, 1, 14);
+            FillBgTilemapBufferRect(bg, TILE_BOT_EDGE_START + piece, i - 1 + x, y + deltaY, 1, 1, 14);
+        }
+        FillBgTilemapBufferRect(bg, TILE_LEFT_EDGE_TOP,       x - 1,     y, 1, 1, 14);
+        FillBgTilemapBufferRect(bg, TILE_RIGHT_EDGE_TOP, deltaX + x,     y, 1, 1, 14);
+        FillBgTilemapBufferRect(bg, TILE_LEFT_EDGE_MID,       x - 1, y + 1, 1, 1, 14);
+        FillBgTilemapBufferRect(bg, TILE_RIGHT_EDGE_MID, deltaX + x, y + 1, 1, 1, 14);
+        FillBgTilemapBufferRect(bg, TILE_LEFT_EDGE_BOT,       x - 1, y + 2, 1, 1, 14);
+        FillBgTilemapBufferRect(bg, TILE_RIGHT_EDGE_BOT, deltaX + x, y + 2, 1, 1, 14);
+        return;
+    }
 
     // Draw top edge
     for (i = 0; i < 1 + TILE_TOP_EDGE_END - TILE_TOP_EDGE_START; i++)
@@ -432,5 +524,15 @@ static void LoadMapNamePopUpWindowBg(void)
         LoadPalette(&sMapPopUp_Palette_Underwater, BG_PLTT_ID(14), sizeof(sMapPopUp_Palette_Underwater));
     else
         LoadPalette(sMapPopUp_PaletteTable[popUpThemeId], BG_PLTT_ID(14), sizeof(sMapPopUp_PaletteTable[0]));
-    BlitBitmapToWindow(popupWindowId, sMapPopUp_Table[popUpThemeId], 0, 0, 80, 24);
+    if (GetWindowAttribute(popupWindowId, WINDOW_WIDTH) == 10)
+        BlitBitmapToWindow(popupWindowId, sMapPopUp_Table[popUpThemeId], 0, 0, 80, 24);
+    else
+    {
+        // Moemon Co-op: a wider sign: the stone's ends at the ends, its middle repeated between
+        int w = GetWindowAttribute(popupWindowId, WINDOW_WIDTH) * 8, x;
+        BlitBitmapRectToWindow(popupWindowId, sMapPopUp_Table[popUpThemeId], 0, 0, 80, 24, 0, 0, 8, 24);
+        for (x = 8; x < w - 8; x += 64)
+            BlitBitmapRectToWindow(popupWindowId, sMapPopUp_Table[popUpThemeId], 8, 0, 80, 24, x, 0, min(64, w - 8 - x), 24);
+        BlitBitmapRectToWindow(popupWindowId, sMapPopUp_Table[popUpThemeId], 72, 0, 80, 24, w - 8, 0, 8, 24);
+    }
 }

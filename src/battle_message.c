@@ -3527,8 +3527,8 @@ void SetPPNumbersPaletteInMoveSelection(void)
     u8 var = GetCurrentPPToMaxPPState(chooseMoveStruct->currentPP[gMoveSelectionCursor[gActiveBattler]],
                          chooseMoveStruct->maxPP[gMoveSelectionCursor[gActiveBattler]]);
 
-    gPlttBufferUnfaded[BG_PLTT_ID(5) + 12] = palPtr[(var * 2) + 0];
-    gPlttBufferUnfaded[BG_PLTT_ID(5) + 11] = palPtr[(var * 2) + 1];
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 12] = MP_Theme_TextColor(palPtr[(var * 2) + 0]);   // Moemon Co-op: THEME DARK
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 11] = MP_Theme_TextColor(palPtr[(var * 2) + 1]);
 
     CpuCopy16(&gPlttBufferUnfaded[BG_PLTT_ID(5) + 12], &gPlttBufferFaded[BG_PLTT_ID(5) + 12], PLTT_SIZEOF(1));
     CpuCopy16(&gPlttBufferUnfaded[BG_PLTT_ID(5) + 11], &gPlttBufferFaded[BG_PLTT_ID(5) + 11], PLTT_SIZEOF(1));

@@ -481,6 +481,7 @@ static s8 SmartVerb(struct MpLifeRec *rec)
 #define tState data[0]
 #define tTimer data[1]
 #define tVerb  data[2]
+#define LINGER_FRAMES 200   // about as long as the answer's sign is up
 
 static void Task_Interact(u8 taskId);
 
@@ -511,9 +512,14 @@ static void ShowResult(u8 taskId, s8 verb)
     // a cry, softly, for the warm answers
     if (verb == LIFE_VERB_PLAY || verb == LIFE_VERB_PET || verb == LIFE_VERB_COMFORT || verb == LIFE_VERB_FEED)
         PlayCry_NormalNoDucking(GetMonData(mon, MON_DATA_SPECIES), 0, CRY_VOLUME_RS / 2, CRY_PRIORITY_NORMAL);
-    HideMapNamePopUpWindow();
-    MP_ShowFieldMessageFitted(gStringVar4);
-    gTasks[taskId].tState = 3;
+    // On the map name's sign, a moment, then gone: nothing to click through (the user's design, 2026-11-13). The
+    // player is free at once; the POKéMON stays turned to them while the sign is up (A on it again: a new pick)
+    MP_ShowPopupText(gStringVar4);
+    UnlockPlayerFieldControls();
+    gTasks[taskId].tState = 5;
+    gTasks[taskId].tTimer = 0;
+    gTasks[taskId].data[3] = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x;
+    gTasks[taskId].data[4] = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y;
 }
 
 static u8 sWheelTask = TASK_NONE;
@@ -557,8 +563,16 @@ static void Task_Interact(u8 taskId)
             tState = 4;
         }
         break;
+    case 5:   // the answer's sign is up: the POKéMON stays with you a moment
+        if (++tTimer >= LINGER_FRAMES || gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x != data[3]
+         || gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y != data[4])   // (or you walked on)
+        {
+            DestroyTask(taskId);
+            EndTarget();
+        }
+        break;
     case 4:
-        if (IsFieldMessageBoxHidden())
+        if (TRUE)
         {
             UnlockPlayerFieldControls();
             DestroyTask(taskId);
@@ -574,7 +588,10 @@ bool8 MP_LifeInteract_TryFollower(void)
     struct ObjectEvent *me;
     s16 x, y, fx, fy;
     u8 dir;
-    if (!JOY_NEW(A_BUTTON) || !MP_IsLocalFree() || FuncIsActiveTask(Task_Interact))
+    u8 linger = FindTaskIdByFunc(Task_Interact);
+    if (linger != TASK_NONE && gTasks[linger].tState != 5)
+        return FALSE;
+    if (!JOY_NEW(A_BUTTON) || !MP_IsLocalFree())
         return FALSE;
     if (!MP_Follower_LocalPos(&fx, &fy, &dir) || FollowerMon() == NULL)
         return FALSE;
@@ -595,14 +612,33 @@ bool8 MP_LifeInteract_TryFollower(void)
         }
     }
     LockPlayerFieldControls();
-    CreateTask(Task_Interact, 80);
+    if (linger != TASK_NONE)
+    {
+        // still with you after the last answer: this A starts the next one
+        gTasks[linger].tState = 0;
+        gTasks[linger].tTimer = 0;
+    }
+    else
+        CreateTask(Task_Interact, 80);
     return TRUE;
+}
+
+// After an answer the task lingers (the POKéMON stays with you while the sign is up): anything new ends that first
+static void EndLinger(void)
+{
+    u8 t = FindTaskIdByFunc(Task_Interact);
+    if (t != TASK_NONE && gTasks[t].tState == 5)
+    {
+        DestroyTask(t);
+        EndTarget();
+    }
 }
 
 // The follower's tap / hold without the A press and the tile checks: it came up in front of the player on its own (ORRE:
 // RUI stepped aside for it, src/orre/orre_npcs.c Orre_Npc_TryFollowerPast); A still held opens the wheel
 bool8 MP_LifeInteract_StartFollower(void)
 {
+    EndLinger();
     if (FuncIsActiveTask(Task_Interact) || FollowerMon() == NULL)
         return FALSE;
     LockPlayerFieldControls();
@@ -610,6 +646,7 @@ bool8 MP_LifeInteract_StartFollower(void)
     return TRUE;
 }
 
+// (TRUE while the answer's sign is up too: the POKéMON keeps from its own activities, staying turned to you)
 bool8 MP_LifeInteract_Busy(void)
 {
     return FuncIsActiveTask(Task_Interact);
@@ -618,6 +655,7 @@ bool8 MP_LifeInteract_Busy(void)
 // A in front of a Garden Pokémon (mp_garden_life.c): the same tap / hold, with that Pokémon
 bool8 MP_LifeInteract_StartFor(struct Pokemon *mon, s8 actor)
 {
+    EndLinger();
     if (FuncIsActiveTask(Task_Interact) || mon == NULL)
         return FALSE;
     sTarget.active = TRUE;

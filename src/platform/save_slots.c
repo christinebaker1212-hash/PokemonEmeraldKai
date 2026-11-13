@@ -461,7 +461,7 @@ static const char *const sCanonicalCoop =
     "battle_anims = modern\nstadium_announcer = 1\nstadium_announcer_jp = 0\nstadium_style = original\ntype_icons = 0\nlevel_scaling = 1\n"
     "level_scaling_rules = 2 2 0 1 0\ngeneration = 4\nmove_split = 1\ngimmicks = 168\nfollower_sprites = pmd\n"
     "sinnoh_sprites = mixed\nunova_sprites = mixed\nscale_followers = 1\nscale_followers_percent = 80\nscale_garden = 1\n"
-    "scale_garden_percent = 80\nshadows = 1\nspectate_panel = 1\nspectate_size = 2\nautosave = 5\ntrainer_range = 5\n"
+    "scale_garden_percent = 80\nshadows = 1\nmenu_theme = default\nspectate_panel = 1\nspectate_size = 2\nautosave = 5\ntrainer_range = 5\n"
     "moenav_calls = battles\nfriend_finder = both\nstreamer_mode = off\n";
 static const char *const sCanonicalDisplay =
     "; Moemon Emerald Kai display settings (a new game's own)\n"

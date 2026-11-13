@@ -1002,8 +1002,8 @@ void MP_LifeField_Update(void)
 
     Arrival(rec);
     Surroundings(rec);
-    if (!MP_IsLocalFree())
-        return;   // a script, a menu: it stays as it is
+    if (!MP_IsLocalFree() || MP_LifeInteract_Busy())
+        return;   // a script, a menu, the answer's sign still up after you spoke to it: it stays as it is
     {
         // it leveled up (back on the map after the battle): a twirl
         u8 level = GetLevelFromBoxMonExp(box);

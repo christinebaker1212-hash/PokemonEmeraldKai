@@ -432,12 +432,21 @@ static void Draw(void)
     {
     case SC_HUB:
     {
-        static const char *const sRows[] = {"EMOTES & PHRASES...", "CHAT LOG...", "SCRIBBLE ON A SIGN...", "PRANK A FRIEND...", "TEAM PHOTO", "CLOSE"};
+        static const char *const sRows[] = {"EMOTES & PHRASES", "CHAT LOG", "SCRIBBLE ON SIGN", "PRANK A FRIEND", "TEAM PHOTO", "CLOSE"};
+        static const char *const sHelps[] = {
+            "Or hold {LT} anywhere: emotes. {RT}: phrases.  {A} OPEN  {B} CLOSE",
+            "Everything said in the room today.  {A} OPEN  {B} CLOSE",
+            "Leave words on the sign in front of you.  {A} OPEN  {B} CLOSE",
+            "Harmless jokes, for MOEGATCHA pulls.  {A} OPEN  {B} CLOSE",
+            "Everyone in the room in one picture.  {A} OPEN  {B} CLOSE",
+            "Back to the CO-OP menu.  {A} CLOSE",
+        };
+        MpUi_Compact();
         MpUi_Begin("SOCIAL");
         for (i = 0; i < HUB_COUNT; i++)
             MpUi_RowAscii(i, i == sUi.cursor, sRows[i], NULL);
         MpUi_End();
-        MpUi_HelpAscii(sUi.note[0] ? sUi.note : "{A} SELECT   {B} CLOSE");
+        MpUi_HelpAscii(sUi.note[0] ? sUi.note : sHelps[sUi.cursor % HUB_COUNT]);
         break;
     }
     case SC_LOG:
@@ -466,7 +475,8 @@ static void Draw(void)
         break;
     case SC_SCRIBBLE:
         // Your phrases, the ready-made ones, ERASE, BACK
-        MpUi_Begin("SCRIBBLE WHAT?");
+        MpUi_Compact();
+        MpUi_Begin("SCRIBBLE");
         first = MpUi_ScrollFor(sUi.cursor, SCRIBBLE_ROWS, &sUi.scroll);
         for (i = first; i < SCRIBBLE_ROWS && i < first + MPUI_ROWS; i++)
         {
@@ -498,12 +508,12 @@ static void Draw(void)
             MP_AsciiToGame(r, line, 20);
             MpUi_TitleRight(r);
         }
-        for (i = 0; i < sUi.friendCount; i++)
+        for (i = 0; i < sUi.friendCount && i < MP_MAX_PLAYERS - 1; i++)
         {
-            PlayerName(sUi.friends[i], who);
-            MpUi_RowAscii(i, i == sUi.cursor, who, RevengeOn(sUi.friends[i]) ? "REVENGE: free!" : "1 pull");
+            bool8 revenge = RevengeOn(sUi.friends[i]);
+            MpUi_FriendRow(i, i == sUi.cursor, sUi.friends[i], revenge ? "REVENGE: FREE!" : "1 PULL", revenge ? '!' : 0, FALSE);
         }
-        MpUi_RowAscii(sUi.friendCount, sUi.cursor == sUi.friendCount, "BACK", NULL);
+        MpUi_RowBelowFriends(i, sUi.cursor == sUi.friendCount, "BACK");
         if (sUi.friendCount == 0)
             MpUi_TextAscii(2, "Nobody else is online right now.");
         MpUi_End();

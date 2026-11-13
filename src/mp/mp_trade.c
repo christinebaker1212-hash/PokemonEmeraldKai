@@ -385,20 +385,14 @@ static void Draw(void)
     {
         u16 i, first;
         MpUi_Begin("TRADE WITH WHO?");
-        first = MpUi_ScrollFor(sTrade.cursor, sTrade.friendCount + 1, &sTrade.scroll);
-        for (i = first; i < sTrade.friendCount + 1 && i < first + MPUI_ROWS; i++)
+        (void)first;
+        for (i = 0; i < sTrade.friendCount && i < MP_MAX_PLAYERS - 1; i++)
         {
-            u8 name[PLAYER_NAME_LENGTH + 1], where[32];
-            if (i == sTrade.friendCount)
-            {
-                MpUi_RowAscii(i - first, i == sTrade.cursor, "CANCEL", NULL);
-                continue;
-            }
-            StringCopyN(name, gMpPlayers[sTrade.friends[i]].name, PLAYER_NAME_LENGTH);
-            name[PLAYER_NAME_LENGTH] = EOS;
-            MP_Friends_LocationName(sTrade.friends[i], where);
-            MpUi_Row(i - first, i == sTrade.cursor, name, where);
+            struct MpPlayer *p = &gMpPlayers[sTrade.friends[i]];
+            bool8 busy = p->hasState && ((p->state.flags & MPF_IN_BATTLE) || p->state.cardDuel);
+            MpUi_FriendRow(i, i == sTrade.cursor, sTrade.friends[i], busy ? "BUSY" : NULL, busy ? '!' : 0, TRUE);
         }
+        MpUi_RowBelowFriends(i, sTrade.cursor == sTrade.friendCount, "CANCEL");
         if (sTrade.friendCount == 0)
             MpUi_TextAscii(2, "Nobody else is online right now.");
         MpUi_End();
