@@ -1472,6 +1472,33 @@ static u32 PersonalityForShiny(u32 otId)
     return ((u32)hi << 16) | lo;
 }
 
+// The party's average level, rounded down (eggs not counted; 0: no POKeMON)
+static u8 PartyAverageLevel(void)
+{
+    u32 i, sum = 0, n = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (!GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES) || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+            continue;
+        sum += GetMonData(&gPlayerParty[i], MON_DATA_LEVEL);
+        n++;
+    }
+    return n ? sum / n : 0;
+}
+
+static u8 sLastGivenLevel;   // (the harness: the level the last prize came at)
+
+// A prize's level (the user, 2026-11-13: "frequently too powerful, especially at the beginning"): a POKeMON that isn't
+// legendary or mythical comes at the party's average level, rounded down, when its own is higher. Legendaries are never
+// scaled down. Its moves are the event's own, or those it knows at that level
+static u8 PrizeLevel(u16 species, u8 level)
+{
+    u8 avg = PartyAverageLevel();
+    if (!IsLegendSpecies(species) && avg != 0 && avg < level)
+        return avg;
+    return level;
+}
+
 static void GiveEventMon(const struct PrizeDef *def, struct Result *res)
 {
     const struct EventMon *e = &sEventMons[def->id];
@@ -1480,12 +1507,15 @@ static void GiveEventMon(const struct PrizeDef *def, struct Result *res)
     u16 ball = ITEM_NONE;
     u32 otId = e->otName ? e->otId : (gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8)
               | (gSaveBlock2Ptr->playerTrainerId[2] << 16) | ((u32)gSaveBlock2Ptr->playerTrainerId[3] << 24));
-    u8 i, result;
+    u8 i, result, level = PrizeLevel(species, e->level);
 
+    if (level != e->level)
+        MPNet_Log("gatcha: species %d at the party's average Lv%d (its own Lv%d)", species, level, e->level);
+    sLastGivenLevel = level;
     if (def->shiny)
-        CreateMon(mon, species, e->level, USE_RANDOM_IVS, TRUE, PersonalityForShiny(otId), OT_ID_PRESET, otId);
+        CreateMon(mon, species, level, USE_RANDOM_IVS, TRUE, PersonalityForShiny(otId), OT_ID_PRESET, otId);
     else
-        CreateMon(mon, species, e->level, USE_RANDOM_IVS, FALSE, 0, e->otName ? OT_ID_PRESET : OT_ID_PLAYER_ID, e->otId);
+        CreateMon(mon, species, level, USE_RANDOM_IVS, FALSE, 0, e->otName ? OT_ID_PRESET : OT_ID_PLAYER_ID, e->otId);
     if (e->moves[0] != MOVE_NONE)   // else: the moves it knows at that level
         for (i = 0; i < MAX_MON_MOVES; i++)
             SetMonMoveSlot(mon, e->moves[i], i);
@@ -4277,7 +4307,7 @@ void MP_Gatcha_DebugGive(u8 ev, bool8 shiny, u16 species)
     memset(&res, 0, sizeof(res));
     GiveEventMon(&def, &res);
     printf("[test] gatchagive %d: %s\n", ev, res.note);
-    printf("[test] gatchagive got species %d level %d shiny %d fateful %d\n", (int)DefSpecies(&def), (int)sEventMons[ev].level, shiny, sEventMons[ev].fateful);
+    printf("[test] gatchagive got species %d level %d shiny %d fateful %d\n", (int)DefSpecies(&def), (int)sLastGivenLevel, shiny, sEventMons[ev].fateful);
 }
 
 // Test builds (mp gatchareel): the icons in view and the closest repeat

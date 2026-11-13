@@ -1,0 +1,6 @@
+pressuntil A field 5000
+wait 30
+mp gatchagive 16
+mp gatchagive 13
+mp gatchagive 5
+quit

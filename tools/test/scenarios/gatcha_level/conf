@@ -1,0 +1,11 @@
+# MoeGatcha's POKeMON prizes at the party's level (the user, 2026-11-13: "too powerful, especially at the beginning ...
+# Adjust the obtained Pokemon's level (excluding Legendary Pokemon, which are never scaled down) to the player's averaged
+# level across all Pokemon in their party, rounding down", and "If the average level of the party would exceed what the
+# rewarded Pokemon's level would be, it remains the unadjusted level"; mp_gatcha.c PrizeLevel). A party of Lv10 and
+# Lv13 (average 11): PICKUP's Lv55 DRAGONITE (16) comes at Lv11, its Lv70 MEWTWO (13) stays Lv70, the Lv5 PICHU (5)
+# stays Lv5.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:10,283:13"
+EXPECT_A=("got species 149 level 11" "got species 150 level 70" "got species 172 level 5")
+UNEXPECT_A=("[crash]")
