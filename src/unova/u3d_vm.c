@@ -50,6 +50,7 @@ void BattleSetup_StartUnovaBattle(void);
 #include "money.h"
 #include "mp_region.h"
 #include "rtc.h"
+#include "daycare.h"
 #include "load_save.h"
 #include "data.h"
 #include "party_menu.h"
@@ -418,6 +419,9 @@ static u32 DexCount(u32 kind, bool8 counted)
 
 static u16 Item(u16 black);
 static u16 Species(u16 national);
+void MP_Daycare_Deposit(u8 partySlot);
+u8 MP_Daycare_Compatibility(const struct BoxPokemon *a, const struct BoxPokemon *b);   // (daycare.c)
+u8 MP_Daycare_LevelNow(u8 slot);
 u8 ItemIdToBallId(u16 ballItem);
 
 // a type of the game as Black numbers it (Black has no ??? type: the game's past it are one lower there)
@@ -1018,7 +1022,8 @@ static void PopSong(void)
 }
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
 enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY, SCREEN_CLEAR, SCREEN_TRADE,
-       SCREEN_SUBWAY_PARTY, SCREEN_SUBWAY_BATTLE, SCREEN_SUBWAY_RESET, SCREEN_MART, SCREEN_BPSHOP, SCREEN_SELL };
+       SCREEN_SUBWAY_PARTY, SCREEN_SUBWAY_BATTLE, SCREEN_SUBWAY_RESET, SCREEN_MART, SCREEN_BPSHOP, SCREEN_SELL,
+       SCREEN_DAYCARE_PARTY };
 static u8 sScreen;
 static u16 sScreenVar, sPartySlotWork;
 static u8 sWildResult = 2;
@@ -1870,6 +1875,70 @@ static void Step(struct Thread *t)
                 AddMoney(&gSaveBlock1Ptr->money, v);
             break;
         }
+        // ---- ROUTE 3's DAY CARE: Black's scripts on the game's own DAY CARE (Kai's breeding; not reworked)
+        case U3C_PROC_CheckDaycareHasEgg:   // result
+            *WorkPtr(a[0]) = GetDaycareState() == DAYCARE_EGG_WAITING;
+            break;
+        case U3C_PROC_ReceiveDaycareEgg:
+            GiveEggFromDaycare();
+            break;
+        case U3C_PROC_DeclineDaycareEgg:
+            RejectEggFromDayCare();
+            break;
+        case U3C_PROC_GetDaycareMonCount:   // result
+            *WorkPtr(a[0]) = CountPokemonInDaycare(&gSaveBlock1Ptr->daycare);
+            break;
+        case U3C_PROC_GetDaycareCompatibility:   // result (0, 20, 50, 70, as Black's)
+            *WorkPtr(a[0]) = MP_Daycare_Compatibility(&gSaveBlock1Ptr->daycare.mons[0].mon, &gSaveBlock1Ptr->daycare.mons[1].mon);
+            break;
+        case U3C_PROC_DepositDaycareMon:   // party slot
+            MP_Daycare_Deposit(V(0));
+            break;
+        case U3C_PROC_WithdrawDaycareMon:   // day care slot
+            gSpecialVar_0x8004 = V(0);
+            TakePokemonFromDaycare();
+            break;
+        case U3C_PROC_GetDaycareMonSpecies:   // result, slot (Black's numbers: national)
+            *WorkPtr(a[0]) = V(1) < DAYCARE_MON_COUNT ? SpeciesToNationalPokedexNum(
+                GetBoxMonData(&gSaveBlock1Ptr->daycare.mons[V(1)].mon, MON_DATA_SPECIES)) : 0;
+            break;
+        case U3C_PROC_GetDaycareMonForm:   // result, slot (the game keeps no forms outside battle)
+            *WorkPtr(a[0]) = 0;
+            break;
+        case U3C_PROC_GetDaycareMonGender:                 // result, slot (0 male, 1 female, 2 none)
+        case U3C_PROC_GetDaycareMonGenderKindIfFirst:      // result, kind, slot
+        {
+            u16 slot = op == U3C_PROC_GetDaycareMonGender ? V(1) : V(2);
+            u8 g = slot < DAYCARE_MON_COUNT ? GetBoxMonGender(&gSaveBlock1Ptr->daycare.mons[slot].mon) : MON_GENDERLESS;
+            *WorkPtr(a[0]) = op == U3C_PROC_GetDaycareMonGenderKindIfFirst && V(1) != 0 ? 0
+                           : g == MON_MALE ? 0 : g == MON_FEMALE ? 1 : 2;
+            break;
+        }
+        case U3C_PROC_GetDaycareSlotLevel:   // result, slot (its level now)
+            *WorkPtr(a[0]) = MP_Daycare_LevelNow(V(1));
+            break;
+        case U3C_PROC_GetDaycareSlotLevelsGrown:   // result, slot
+            gSpecialVar_0x8004 = V(1);
+            *WorkPtr(a[0]) = V(1) < DAYCARE_MON_COUNT ? GetNumLevelsGainedFromDaycare() : 0;
+            break;
+        case U3C_PROC_GetDaycareSlotPrice:   // result, slot
+            gSpecialVar_0x8004 = V(1);
+            GetDaycareCostAndPrepareString();
+            *WorkPtr(a[0]) = gSpecialVar_0x8005;
+            break;
+        case U3C_BufferDaycareMonNickname:   // word slot, day care slot
+            if (V(1) < DAYCARE_MON_COUNT)
+            {
+                GetBoxMonNickname(&gSaveBlock1Ptr->daycare.mons[V(1)].mon, Slot(a[0]));
+                StringGet_Nickname(Slot(a[0]));
+            }
+            break;
+        case U3C_PROC_CallDaycarePartyMenu:   // result: the slot picked (6 none), the game's day care party screen
+            OpenScreen(t, SCREEN_DAYCARE_PARTY, a[0]);
+            break;
+        case U3C_PlayPerapVoice:   // species, form (CHATOT's recorded voice: its cry here)
+            PlayCry_Normal(Species(V(0)), 0);
+            break;
         case U3C_StartWaitBgmStopped:
             t->wait = W_BGM_STOPPED;
             t->waitFrames = 60 * 30;   // (a song that loops never ends: half a minute at most)
@@ -3992,6 +4061,9 @@ void U3D_VmOpenScreen(void)
     case SCREEN_PARTY:   // (Black's SelectPartyMon: the game's party screen, the slot in VAR_0x8004)
         ChoosePartyMon();
         break;
+    case SCREEN_DAYCARE_PARTY:   // (Black's CallDaycarePartyMenu: the game's own day care party screen)
+        ChooseSendDaycareMon();
+        break;
     case SCREEN_TRADE:   // (Black's trade: the game's in-game trade scene with its POKeMON, trade.c MP_SetUnovaTrade)
         UnovaTradeSetUp();
         gSpecialVar_0x8004 = 0;
@@ -4062,6 +4134,10 @@ void U3D_VmResume(void)
         break;
     case SCREEN_SUBWAY_PARTY:
         U3D_Subway_PartyChosen();
+        break;
+    case SCREEN_DAYCARE_PARTY:
+        if (sScreenVar)
+            *WorkPtr(sScreenVar) = gSpecialVar_0x8004 < PARTY_SIZE ? gSpecialVar_0x8004 : PARTY_SIZE;
         break;
     case SCREEN_PARTY:
         if (sPartySlotWork)

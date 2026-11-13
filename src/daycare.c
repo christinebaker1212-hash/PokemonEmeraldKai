@@ -1632,3 +1632,17 @@ void MP_Daycare_BreedTest(int n, u16 itemA, u16 itemB, u16 ballA, u16 ballB, u8 
            sp[0], spCount[0], sp[1], spCount[1], spCount[2], inBallA, inBallB, sameAbility, twoAbilities, power,
            knowsA, knowsB);
 }
+
+// Moemon Kai: UNOVA's DAY CARE (src/unova/u3d_vm.c): Black's scripts on the game's own day care, by slot
+void MP_Daycare_Deposit(u8 partySlot)
+{
+    if (partySlot < PARTY_SIZE)
+        StorePokemonInEmptyDaycareSlot(&gPlayerParty[partySlot], &gSaveBlock1Ptr->daycare);
+}
+
+u8 MP_Daycare_LevelNow(u8 slot)
+{
+    if (slot >= DAYCARE_MON_COUNT)
+        return 0;
+    return GetLevelAfterDaycareSteps(&gSaveBlock1Ptr->daycare.mons[slot].mon, gSaveBlock1Ptr->daycare.mons[slot].steps);
+}
