@@ -30,6 +30,7 @@ import events as ev  # noqa: E402
 import text  # noqa: E402
 import rails  # noqa: E402
 import build_pack  # noqa: E402
+import terrain  # noqa: E402
 
 GROUP = 'gMapGroup_Unova%d'
 PER_GROUP = 120
@@ -114,12 +115,33 @@ def events_of(m, w, h):
             spots = [(tx - ox, tz - oz) for tx, tz in rails.event_tiles(m['zone'], 'pos', q)]
         else:
             spots = [(q['x'] + dx - ox, q['z'] + dz - oz) for dz in range(max(1, q['h'])) for dx in range(max(1, q['w']))]
+            if q['y'] == -2 and q['w'] == 5 and q['h'] == 5:
+                # (RELIC CASTLE's quicksand, a sunken 5 x 5 trigger: only where its sand is deep, its middle;
+                # u3d_vm.c PosDeepEnough does the same at run time)
+                spots = [(x, z) for x, z in spots if _deep(m['zone'], x + ox, z + oz, q['y'])]
         for x, z in spots:
                 if 0 <= x < w and 0 <= z < h:
                     coords.append({'type': 'trigger', 'x': x, 'y': z, 'elevation': 0,
                                    'var': '0x%X' % (0xB000 + q['work'] - 0x4000) if q['work'] >= 0x4000 else 'VAR_TEMP_0',
                                    'var_value': str(q['value']), 'script': 'Unova_EventScript_Pos'})
     return objs, coords, bgs
+
+
+_GRIDS = {}
+
+
+def _deep(zone, wx, wz, y):
+    """the ground at world tile (WX, WZ) of ZONE is deep enough for a sunken trigger at Black's height Y"""
+    z = zr.zones()[zone]
+    mx = mxr.matrix(z['matrix'], zone)
+    bx, bz = wx // 32, wz // 32
+    if not (0 <= bx < mx['w'] and 0 <= bz < mx['h']) or mx['blocks'][bz * mx['w'] + bx] == mxr.NONE:
+        return True
+    b = mx['blocks'][bz * mx['w'] + bx]
+    if b not in _GRIDS:
+        _GRIDS[b] = terrain.grid(terrain.layers(narc.arc('a/0/0/8')[b])[0])
+    h = _GRIDS[b][(wz % 32) * 32 + wx % 32][1]
+    return h is None or h <= y - 6
 
 
 def songs():

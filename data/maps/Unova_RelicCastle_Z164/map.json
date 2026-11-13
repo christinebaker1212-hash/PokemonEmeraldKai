@@ -73,60 +73,6 @@
   "coord_events": [
     {
       "type": "trigger",
-      "x": 7,
-      "y": 19,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 8,
-      "y": 19,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 9,
-      "y": 19,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 10,
-      "y": 19,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 11,
-      "y": 19,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 7,
-      "y": 20,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
       "x": 8,
       "y": 20,
       "elevation": 0,
@@ -147,24 +93,6 @@
       "type": "trigger",
       "x": 10,
       "y": 20,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 11,
-      "y": 20,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 7,
-      "y": 21,
       "elevation": 0,
       "var": "0xB000",
       "var_value": "0",
@@ -199,24 +127,6 @@
     },
     {
       "type": "trigger",
-      "x": 11,
-      "y": 21,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 7,
-      "y": 22,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
       "x": 8,
       "y": 22,
       "elevation": 0,
@@ -237,60 +147,6 @@
       "type": "trigger",
       "x": 10,
       "y": 22,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 11,
-      "y": 22,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 7,
-      "y": 23,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 8,
-      "y": 23,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 9,
-      "y": 23,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 10,
-      "y": 23,
-      "elevation": 0,
-      "var": "0xB000",
-      "var_value": "0",
-      "script": "Unova_EventScript_Pos"
-    },
-    {
-      "type": "trigger",
-      "x": 11,
-      "y": 23,
       "elevation": 0,
       "var": "0xB000",
       "var_value": "0",

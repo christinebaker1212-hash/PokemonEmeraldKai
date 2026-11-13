@@ -2840,6 +2840,17 @@ static bool8 TrySign(void)
     return FALSE;
 }
 
+// RELIC CASTLE's quicksand (a sunken 5 x 5 trigger) fires where the sand is deep, its middle
+// (Black's sand drags the player there; here the player walks round its rim as Black's would struggle across it)
+static bool8 PosDeepEnough(s16 y, u16 w, u16 h)
+{
+    float g;
+    if (y != -2 || w != 5 || h != 5)   // (the quicksand's own: a sunken 5 x 5; other triggers as they are)
+        return TRUE;
+    g = U3D_TestGround(gSaveBlock1Ptr->pos.x * 16 + 8, gSaveBlock1Ptr->pos.y * 16 + 8, y);   // (world units)
+    return isnan(g) || g <= y - 6;
+}
+
 // special U3D_VmPos: the trigger spot the player stepped on (its work held its value: the coord event's var)
 void U3D_VmPos(void)
 {
@@ -2854,7 +2865,8 @@ void U3D_VmPos(void)
         const u8 *p = e + 8 + EV_BG * e[4] + EV_PERSON * e[5] + EV_CONNECT * e[6] + EV_POS * i;
         u16 px = Le16(p + 10), pz = Le16(p + 12), w = Le16(p + 14), h = Le16(p + 16);
         if (Le16(p + 8) == 0 && x >= px && x < px + (w ? w : 1) && y >= pz && y < pz + (h ? h : 1)
-         && WorkValue(Le16(p + 4)) == Le16(p + 2) && Run(Le16(p), 0xFFFF, TRUE))
+         && WorkValue(Le16(p + 4)) == Le16(p + 2) && PosDeepEnough((s16)Le16(p + 18), w, h)
+         && Run(Le16(p), 0xFFFF, TRUE))
             return;
     }
     // (a trigger on a rail: its tiles laid out by tools/unova/gen_maps.py, src/unova/u3d_railpos.h)
@@ -3210,6 +3222,13 @@ void U3D_VmMapLoad(void)
     }
     if (zone != sLastZone)
     {
+        u32 i;
+        // (Black's SCRIPT_SYS_ClearLocalWork before the zone-change script: the zone's own flags 1-0x63 and works
+        // 0x4000-0x401F start afresh in each zone; RELIC CASTLE's quicksand waits for work 0x4000 to be 0)
+        for (i = 1; i <= 0x63; i++)
+            FlagTo(i, FALSE);
+        for (i = 0x4000; i <= 0x401F; i++)
+            *WorkPtr(i) = 0;
         RoamersMove();   // (Black moves its roamers on as the player changes zones)
         memset(sConnMove, 0, sizeof(sConnMove));   // (a new zone: its connections where its data puts them)
         sNpcAtCount = 0;   // (a new zone: its people where its data puts them, till its scripts say)
