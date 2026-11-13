@@ -994,6 +994,9 @@ static void DragonInside(void);
 static u8 sIceShown[3];
 static void IceToggle(u32 i);
 static struct { s8 lift; bool8 rider; u16 stall; float cur, goal, step; } sMineRide = {-1};
+static struct { s8 model; u8 hex; s16 x, z, w, d; float cur, goal, step; } sPlat = {-1};
+static void PlatRide(u8 model, u8 hex, s16 x, s16 z, s16 w, s16 d, s16 from, s16 to);
+#define ZONE_CLAY_LOBBY 98
 static void DragonReset(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
@@ -2224,10 +2227,26 @@ static void Step(struct Thread *t)
                 t->wait = W_LIFT_RIDE;
             }
             break;
-        case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_SnapElevatorToTop:   // (the lobby's lift and the mine's: their models)
-        case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_CallElevatorEvent:
-        case U3C_FIELD_GIMMICK_LIFT_SnapLiftToBottom:
-        case U3C_FIELD_GIMMICK_LIFT_CallEvent:
+        // (the lobby's lift and the mine's elevator between them: Black's ov044 / ov043 rides, the player on board)
+        case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_SnapElevatorToTop:   // (the mine's elevator up at 880, arriving)
+            U3D_ExpSetY(7, 880);
+            break;
+        case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_CallElevatorEvent:   // rising (to the lobby, 800 to 880) or down (880 to 800)
+            if (CurrentZone() == ZONE_DRIFTVEIL_GYM)
+            {
+                PlatRide(7, 2, 13, 24, 5, 3, a[0] ? 800 : 880, a[0] ? 880 : 800);
+                t->wait = W_LIFT_RIDE;
+            }
+            break;
+        case U3C_FIELD_GIMMICK_LIFT_SnapLiftToBottom:   // (the lobby's lift down at -80, arriving)
+            U3D_ExpSetY(0, -80);
+            break;
+        case U3C_FIELD_GIMMICK_LIFT_CallEvent:   // descending (0 to -80) or not (-80 to 0)
+            if (CurrentZone() == ZONE_CLAY_LOBBY)
+            {
+                PlatRide(0, 0, 5, 3, 5, 3, a[0] ? 0 : -80, a[0] ? -80 : 0);
+                t->wait = W_LIFT_RIDE;
+            }
             break;
         case U3C_FIELD_GIMMICK_SWITCH_TOGGLE_ReplacePlayerIfRequirementMet:   // BRYCEN's gym: onto the slide
             if (IceRide(a[0]))
@@ -3463,7 +3482,7 @@ static void Wait(struct Thread *t)
             t->wait = W_NONE;
         break;
     case W_LIFT_RIDE:   // (CLAY's mine: Black's lift event, till the lift arrives)
-        if (sMineRide.lift < 0)
+        if (sMineRide.lift < 0 && sPlat.model < 0)
             t->wait = W_NONE;
         break;
     case W_EXP_ANIM:   // (Black's gimmick events wait for their model's animation: FLD_EXP_OBJ_IsAnimeStopped)
@@ -3869,6 +3888,44 @@ static void MineLift(u32 i)
     MPNet_Log("u3d vm: lift %u %d -> %d%s", (unsigned)i, from, to, sMineRide.rider ? " (riding)" : "");
 }
 
+// the lobby's lift and the mine's elevator (ov044 LiftEventMain, ov043 ElevatorEventMain: 2 units a field frame), the
+// player riding on a floor area (Black's HEIGHT_EX) under its tiles that goes with it
+static void PlatRide(u8 model, u8 hex, s16 x, s16 z, s16 w, s16 d, s16 from, s16 to)
+{
+    sPlat.model = model, sPlat.hex = hex, sPlat.x = x, sPlat.z = z, sPlat.w = w, sPlat.d = d;
+    sPlat.cur = from, sPlat.goal = to, sPlat.step = to < from ? -1.0f : 1.0f;
+    U3D_HexSet(hex, x, z, w, d, from);
+    U3D_SetFloor(from);
+    U3D_ExpSetY(model, from);
+    PlaySE(SE_ELEVATOR);
+    MPNet_Log("u3d vm: model %u rides %d -> %d", model, from, to);
+}
+
+static void PlatStep(void)
+{
+    if (sPlat.model < 0)
+        return;
+    sPlat.cur += sPlat.step;
+    if ((sPlat.step < 0 && sPlat.cur <= sPlat.goal) || (sPlat.step > 0 && sPlat.cur >= sPlat.goal))
+    {
+        sPlat.cur = sPlat.goal;
+        U3D_ExpSetY(sPlat.model, sPlat.cur);
+        MPNet_Log("u3d vm: model %d arrived at %d", sPlat.model, (int)sPlat.cur);
+        sPlat.model = -1;
+        if (CurrentZone() == ZONE_CLAY_LOBBY)   // (the lobby's floor again: the grid's own)
+        {
+            U3D_HexClear();
+            U3D_SetFloor(NAN);
+        }
+        else
+            MineSetup();   // (the mine's floors, the elevator's area back at its platform's 800)
+        return;
+    }
+    U3D_ExpSetY(sPlat.model, sPlat.cur);
+    U3D_HexSet(sPlat.hex, sPlat.x, sPlat.z, sPlat.w, sPlat.d, (s16)sPlat.cur);
+    U3D_SetFloor(sPlat.cur);
+}
+
 static void MineRideStep(void)
 {
     s32 i = sMineRide.lift;
@@ -3984,8 +4041,11 @@ void U3D_Vm_FieldFrame(void)
         DragonInside();
     else if (CurrentZone() == ICE_GYM_ZONE)
         IceModels(FALSE);
-    else if (CurrentZone() == ZONE_DRIFTVEIL_GYM)
+    else if (CurrentZone() == ZONE_DRIFTVEIL_GYM || CurrentZone() == ZONE_CLAY_LOBBY)
+    {
         MineRideStep();
+        PlatStep();
+    }
 }
 
 void U3D_Vm_FieldShown(void)
@@ -4019,6 +4079,8 @@ void U3D_Vm_FieldShown(void)
             if (sWork.gym[6] & (1 << k))
                 U3D_ExpAnim(9 + k, 0, -1, FALSE);
     }
+    else if (CurrentZone() == ZONE_CLAY_LOBBY)   // (ov044 Init: the lift up, at the lobby's floor)
+        U3D_ExpLoad(44);
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
     {
         U3D_ExpLoad(40);

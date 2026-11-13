@@ -253,7 +253,13 @@ def _place43(img):
             + [(img.vec(0x021F4340), 0), (img.vec(0x021F434C), 0)])
 
 
-PLACES = {40: _place40, 42: _place42, 43: _place43, 45: _place45, 46: _place46}   # (the gimmicks drawn so far)
+# CLAY's lobby (field_gimmick_lift.c FIELD_GIMMICK_LIFT_Init): its lift
+def _place44(img):
+    return [(img.vec(0x021F3A1C), 0)]
+
+
+PLACES = {40: _place40, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+          46: _place46}   # (the gimmicks drawn so far)
 
 
 def add(pack):

@@ -4587,9 +4587,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         float U3D_TestGround(s32 mapX, s32 mapY, float near);
         float U3D_Floor(void);
         s32 x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
+        printf("[test] player invisible %d, sprite invisible %d\n", gObjectEvents[gPlayerAvatar.objectEventId].invisible,
+               gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId].invisible);
         printf("[test] u3d ground near 0: %.1f, near 800: %.1f, near -944: %.1f, floor %.1f\n",
                U3D_TestGround(x * 16 + 8, y * 16 + 8, 0), U3D_TestGround(x * 16 + 8, y * 16 + 8, 800),
                U3D_TestGround(x * 16 + 8, y * 16 + 8, -944), U3D_Floor());
+    }
+    else if (strcmp(cmd, "u3dexphide") == 0)   // u3dexphide MODEL 0|1: one of the gym's models hidden or shown
+    {
+        int m = 0, h = 1;
+        sscanf(arg, "%d %d", &m, &h);
+        U3D_ExpHide((u16)m, h != 0);
     }
     else if (strcmp(cmd, "u3drun") == 0)   // u3drun ID (decimal): a Black script of this zone (or shared) as a scene
     {

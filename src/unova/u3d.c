@@ -1008,8 +1008,8 @@ void U3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
     {
         // (a person on a floor of height areas: theirs, Black's event height)
         u32 i;
-        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
-            if (gObjectEvents[i].active && gObjectEvents[i].spriteId == spriteId && !gObjectEvents[i].isPlayer)
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)   // (the player: their floor, where floors are stacked on a tile)
+            if (gObjectEvents[i].active && gObjectEvents[i].spriteId == spriteId)
             {
                 float hh = U3D_ObjectHeight(&gObjectEvents[i]);
                 if (!isnan(hh))
