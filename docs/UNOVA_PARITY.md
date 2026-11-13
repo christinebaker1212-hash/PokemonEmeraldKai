@@ -30,9 +30,12 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 
 ## 2. Gyms
 
-- [ ] STRIATON's gym switches (BUTTON_STATES 0x187-0x189, Ov037SetValueB 0x186)
-- [ ] NACRENE's gym books (FLAG_ANIME 0x185, Ov037SetValueA 0x182)
-- [ ] CASTELIA's (Ov037ReadEightVars 0x18F) and NIMBASA's (Ov037InitFromVars 0x17F) kept states as Black's
+- [x] STRIATON's gym switches (BUTTON_STATES 0x187-0x189, Ov037SetValueB 0x186) and NACRENE's gym books (FLAG_ANIME
+      0x185, Ov037SetValueA 0x182): the way through is Black's own works and people (walked in the story); the
+      commands only move models, so their states are kept (sWork.gym[6], gym[7], sButtonModels) for the models of
+      section 1 to show
+- [x] CASTELIA's (Ov037ReadEightVars 0x18F) and NIMBASA's (Ov037InitFromVars 0x17F) kept states as Black's: the
+      plate doors' switches already live in works 0x4000-0x4007, the lanes in Black's flags 0x74 / 0x75
 
 ## 3. Script commands not played (story and towns)
 

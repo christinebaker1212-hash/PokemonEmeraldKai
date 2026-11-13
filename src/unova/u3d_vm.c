@@ -1368,7 +1368,8 @@ static void SetPartyMonMove(struct Pokemon *mon, u16 slot, u16 move)
     }
 }
 
-static struct { u8 party; u16 newMove, posWork; } sMoveSel;   // (SelectMonMove: the summary's move list)
+static struct { u8 party; u16 newMove, posWork; } sMoveSel;
+static u16 sButtonModels;   // (STRIATON's gym: its nine state models at their last frame, set by its scripts each visit)   // (SelectMonMove: the summary's move list)
 
 // v (work or constant), p (a work's id), h, w, b: as u16_cmds.h says, read into a[]
 static u32 ReadArgs(struct Thread *t, u16 op, u32 *a)
@@ -2221,7 +2222,32 @@ static void Step(struct Thread *t)
                 t->wait = W_MOVES;
             break;
         case U3C_FIELD_GIMMICK_SWITCH_TOGGLE_StartSecondarySwitchEvent:   // (its switch's and ice piece's models
-        case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateOneShotEventU16:         // turning: the works and blockers say it)
+            break;                                                           // turning: the works and blockers say it)
+        // STRIATON's gym (ov042 button states) and NACRENE's (ov040 flag anime): models only, the way through being
+        // Black's works and people. Their states are kept for the models: sWork.gym[6] the curtains played to their
+        // end (oneShotPlayed, bits 0-2), sButtonModels the nine state models at their last frame; sWork.gym[7] bit 0
+        // NACRENE's shelf moved
+        case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateOneShotEventU16:   // a curtain's one-shot animation, played
+        case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateOneShotEvent:
+            if (a[0] < 3)
+                sWork.gym[6] |= 1 << a[0];
+            break;
+        case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateStateEventWithFlag:   // a state model at its last frame
+            if (a[0] < 9)
+                sButtonModels |= 1 << a[0];
+            break;
+        case U3C_FIELD_GIMMICK_BUTTON_STATES_CreateStateEvent:   // ... at its first
+            if (a[0] < 9)
+                sButtonModels &= ~(1 << a[0]);
+            break;
+        case U3C_PROC_Ov037SetValueB:   // (GIMMICK_INIT_SetButtonStatesFlags: the curtains played, from the works)
+            sWork.gym[6] = V(0) & 7;
+            break;
+        case U3C_PROC_Ov037SetValueA:   // (GIMMICK_INIT_SetFlagAnimeFlag)
+            sWork.gym[7] = V(0) ? sWork.gym[7] | 1 : sWork.gym[7] & ~1;
+            break;
+        case U3C_FIELD_GIMMICK_FLAG_ANIME_CreateEvent:   // NACRENE's shelf slides aside
+            sWork.gym[7] |= 1;
             break;
         case U3C_FIELD_GIMMICK_CART_LANES_CreateSwitchEvent:   // ELESA's gym: a floor switch throws a lane's lever
             if (V(0) < 4)
@@ -2258,10 +2284,8 @@ static void Step(struct Thread *t)
         case U3C_PROC_Ov037Finish:   // (ov037 GIMMICK_INIT_ResetRotatingRoomPanels: DRAYDEN's dragons as they start)
             DragonReset();
             break;
-        case U3C_PROC_Ov037InitFromVars:   // (a gym's switches' gimmick state: the gyms' own puzzles aren't kept yet)
-        case U3C_PROC_Ov037SetValueA:
-        case U3C_PROC_Ov037SetValueB:
-        case U3C_PROC_Ov037ReadEightVars:
+        case U3C_PROC_Ov037InitFromVars:   // (NIMBASA's lanes unlocked: Black's flags 0x74 / 0x75 already say it)
+        case U3C_PROC_Ov037ReadEightVars:   // (CASTELIA's switches found into works 0x4000-0x4007: they're kept there)
             break;
         case U3C_PROC_CheckPartyMonKnowsMove:   // result, move, party slot
             *WorkPtr(a[0]) = V(2) < PARTY_SIZE && PartyMonHasMove(&gPlayerParty[V(2)], V(1));
