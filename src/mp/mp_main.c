@@ -1673,6 +1673,11 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         void Unova_Entralink_OnRelay(u8 from, const u8 *data, u16 len);
         Unova_Entralink_OnRelay(from, data, len);
     }
+    else if (data[0] == MPR_MUSICAL)   // UNOVA's MUSICALS: a friend's dress-up (src/unova/u3d_musical.c)
+    {
+        void Unova_Musical_OnRelay(u8 from, const u8 *data, u16 len);
+        Unova_Musical_OnRelay(from, data, len);
+    }
     else if (data[0] == MPR_SHIP)   // a friend aboard the first voyage's ship talked to passengers (mp_ship.c)
     {
         if (len >= 3)

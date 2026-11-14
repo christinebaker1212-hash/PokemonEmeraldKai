@@ -58,13 +58,13 @@ void Unova_Screen_Open(const struct UnovaScreen *screen)
     S.frameOk = FALSE;
     if (screen->open)
         screen->open();
-    printf("[test] unova screen: %s\n", screen->name);
+    MPNet_Log("unova screen: %s", screen->name);
 }
 
 void Unova_Screen_Close(void (*then)(void))
 {
     if (S.screen)
-        printf("[test] unova screen: %s closed\n", S.screen->name);
+        MPNet_Log("unova screen: %s closed", S.screen->name);
     S.screen = NULL;
     S.pending = then;
 }
@@ -84,6 +84,10 @@ void Unova_Screen_FieldFrame(void)
 {
     void Unova_Entralink_FieldFrame(void);
     Unova_Entralink_FieldFrame();   // (the PASS POWERS' minutes, the room's mission: u3d_entralink.c)
+    {
+        void Unova_Musical_FieldFrame(void);
+        Unova_Musical_FieldFrame();   // (a MUSICAL's next step: u3d_musical.c)
+    }
     if (S.pending && !S.screen)
     {
         void (*f)(void) = S.pending;

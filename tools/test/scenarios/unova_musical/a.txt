@@ -1,0 +1,42 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+wait 60
+mp u3dzone 78 5 4
+wait 200
+pressuntil B field 2000
+wait 60
+mp musical 100 0
+pressuntillog A 6000 unova screen: MUSICAL DRESS UP
+wait 20
+press A 1
+wait 10
+press RIGHT 1
+wait 5
+press A 1
+wait 10
+press R 1
+wait 5
+press A 1
+wait 10
+press R 1
+wait 5
+press A 1
+wait 10
+rendershot dress
+press START 1
+wait 30
+pressuntillog A 6000 unova screen: MUSICAL STAGE
+wait 300
+press A 1
+wait 200
+rendershot stage
+press A 1
+waitlog 2000 unova screen: MUSICAL RESULTS
+wait 150
+rendershot results
+press A 1
+pressuntillog A 6000 musical: the show is over
+wait 60
+mp u3dget 0
+quit

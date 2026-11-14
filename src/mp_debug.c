@@ -4641,6 +4641,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         bool8 U3D_Vm_DebugRun(u16 id);
         printf("[test] u3drun %d: %d\n", atoi(arg), U3D_Vm_DebugRun((u16)atoi(arg)));
     }
+    else if (strcmp(cmd, "musical") == 0)   // musical PROPS [SLOT]: the first PROPS props owned; with SLOT, the show for that
+    {                                       // party POKeMON at once (UNOVA's MUSICALS: src/unova/u3d_musical.c)
+        void Unova_Musical_DebugGive(u8 count);
+        bool8 Unova_Musical_Begin(u8 slot);
+        int n = 0, slot = -1;
+        sscanf(arg, "%d %d", &n, &slot);
+        Unova_Musical_DebugGive(n);
+        if (slot >= 0)
+            printf("[test] musical begin %d\n", Unova_Musical_Begin(slot));
+    }
+    else if (strcmp(cmd, "musicaldress") == 0)   // musicaldress SLOT: the dressing room for practice
+    {
+        bool8 Unova_Musical_Practice(u8 slot);
+        printf("[test] musical practice %d\n", Unova_Musical_Practice(atoi(arg)));
+    }
     else if (strcmp(cmd, "expcurve") == 0)   // expcurve: the EXP CURVE here (mp_expcurve.c): area, frontier, each POKeMON's %
         MP_ExpCurve_Debug();
     else if (strcmp(cmd, "entree") == 0)   // entree: the ENTRALINK's ENTREE menu (src/unova/u3d_entralink.c)
@@ -4679,6 +4694,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
         s16 mx, my;
         if (sscanf(arg, "%d %d %d", &zone, &x, &z) == 3 && U3D_MapOfZoneTile(zone, x, z, &group, &num, &mx, &my))
         {
+            void U3D_Vm_DebugStop(void);
+            U3D_Vm_DebugStop();   // (a script still running where the player was ends, as walking away from it would)
             SetWarpDestination(group, num, WARP_ID_NONE, mx, my);
             DoWarp();
             printf("[test] u3dzone %d: %d.%d %d,%d\n", zone, group, num, mx, my);

@@ -7636,3 +7636,26 @@ the region the player is in (MP_Region_ScaleBadges; ORRE 8), the cap's "after th
 UNOVA's trainers now come through MP_LevelScale_TrainerMon (u3d_battle.c BuildTeam; the BATTLE SUBWAY keeps Lv50),
 its bosses by Black's classes (U3D_IsBossTrainer). Field moves in UNOVA and ORRE need no badge
 (MP_Region_HasFieldMoveBadge: no HOENN fallback). Scenario levelscale_regions.
+
+## UNOVA's POKéMON MUSICALS (1.199.8)
+
+The user's approved mock-ups (docs/unova/mockups/musical_*.png), built with Black's real props ("use Black's real props
+when available", 2026-11-14). src/unova/u3d_musical.c; the pack unova/black_musical.pak from tools/unova/build_musical.py
+(make_pack.sh; never committed): a/0/4/5's 100 prop textures (BTX0, decoded with tools/sinnoh/nitro.py) and their
+12-byte records (position, allowed positions, category, offset), a/1/1/1-4's four shows (category shares, the NPC
+performers with their props and names: banks 76 / 77; titles in each show's own text), overlay 10's fan tables.
+
+- Black's flow (ov010 musical_event.c): MUSICAL_StartMusical ends the receptionist's script; Unova_Musical_FieldFrame
+  then runs the theater zone's script 3, the DRESS UP screen, script 4, the STAGE, Black's scoring (SplitBonus, then a
+  used prop's share again; capped 255), the RESULTS, the save's records and the ten fans with props
+  (RollProgramRewards), script 5 and the shared 0x28CC. The scripts read it through MUSICAL_GetValue 30-39 and
+  MUSICAL_BufferString (u3d_vm.c); fans through GetProgramInfo. Black's auto message mode (link shows only) is the
+  game's text auto-scroll.
+- Props sit at body points found from each POKéMON's own picture outline (Point: ears, head, eyes, face, body, waist,
+  hands), Black's offsets on top; capes and wings behind. One prop per body slot (Black's nine).
+- The saved record is 96 bytes at the end of UNOVA's VM work (owned props, last show's categories, counts, fan points,
+  fans, the last outfit).
+- Co-op: a dress-up's end sends MPR_MUSICAL (16) with the POKéMON and props; friends' latest dress-ups take NPC places
+  on the stage (scored as everyone's). Protocol 82.
+- Tests: `mp musical PROPS [SLOT]`, `mp musicaldress SLOT`; scenario unova_musical. A debug warp (`mp u3dzone`) ends
+  any script still running where the player was.

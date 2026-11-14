@@ -1369,6 +1369,7 @@ enum {
     MPR_SCONTEST_FIRST = 10,  // SINNOH's SUPER CONTESTS with friends: 10 gather, 11 entry, 12 start, 13 cancel, 14 play
                               // (src/sinnoh/s3d_contest_link.c)
     MPR_ENTRALINK = 15,        // UNOVA's ENTRALINK: u8 op (a mission begun / done, a PASS POWER shared), ... (src/unova/u3d_entralink.c)
+    MPR_MUSICAL = 16,          // UNOVA's MUSICALS: u8 0, a friend's dress-up (species, personality, OT, props, name: u3d_musical.c)
     MPR_SHIP = 18,         // the first voyage's ship: u16 the passengers we talked to (mp_ship.c: friends aboard count them)
     MPR_LINK_PLAYER = 20,  // struct LinkPlayer
     MPR_LINK_BLOCK,        // block data

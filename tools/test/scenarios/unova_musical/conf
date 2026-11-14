@@ -1,0 +1,9 @@
+# UNOVA's POKeMON MUSICALS (src/unova/u3d_musical.c; Black's props, shows and performers from unova/black_musical.pak):
+# in the Musical Theater's stage zone (78) the show starts for party slot 0 with every prop owned: Black's script 3
+# introduces it, the DRESS UP screen (props put on in three tabs), script 4, the STAGE with three of Black's NPC
+# performers (A: a prop shown off), the RESULTS, then scripts 5 and 0x28CC. Shots dress, stage, results.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=495:20"
+EXPECT_A=("musical: 100 props, 4 shows" "musical begin 1" "unova screen: MUSICAL DRESS UP" "unova screen: MUSICAL STAGE" "scored" "musical: results" "unova screen: MUSICAL RESULTS" "musical: the show is over")
+UNEXPECT_A=("[crash]" "TIMEOUT")

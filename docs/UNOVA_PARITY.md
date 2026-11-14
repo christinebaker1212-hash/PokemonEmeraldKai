@@ -78,8 +78,11 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
 - [x] The MOVE RELEARNER (0x1E8 / 0x1E9), move deleter / setter (0x109, 0x10B), the move tutors (0x1E4-0x1E7): the
       game's own screens (2026-11-13: MISTRALTON's deleter and relearner, a HEART SCALE taken; DRIFTVEIL's PLEDGE
       tutor taught FIRE PLEDGE through the summary's forget list; Black's tutor bits in src/unova/u3d_tables.h)
-- [ ] POKeMON MUSICALS (0x05D, 0x167-0x16E: the dress-up, the stage, the results, props, fans; four on stage with
-      co-op friends)
+- [x] POKeMON MUSICALS (1.199.8, the user's approved mock-ups: src/unova/u3d_musical.c): Black's 100 props, four shows,
+      their NPC performers and the fans' tables from the ROM (tools/unova/build_musical.py -> unova/black_musical.pak);
+      Black's MUSICAL_* commands; the show as Black's event (the theater's scripts 3 / 4 / 5 and 0x28CC between the
+      DRESS UP, STAGE and RESULTS screens), Black's scoring and fans' props; friends' latest dress-ups on stage
+      (relay MPR_MUSICAL); the practice dressing room. Scenario unova_musical
 - [x] The ROYAL UNOVA (PLEASURE_BOAT 0x1A5-0x1AC, SYMBOL_MAP 0x1A9 / 0x1AB: 1.199.6): the day's passengers dealt to
       the cabins as ov036's DAILY_LAYOUT_Generate deals them (the weekday's trainers, two bonus people, the rest), the
       trip's clock (30 ticks a second, a chime each 1350, home at 5400 after four), a talk's time aboard, the cabins'

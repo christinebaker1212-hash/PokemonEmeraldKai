@@ -259,6 +259,7 @@ static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
                                   u8 nick[POKEMON_NAME_LENGTH + 1]; } snap[2]; } misc;
                 u8 plateSwitches;   // (BURGH's gym's switches found, a bit each: Black's plate doors' save)
                 u8 entralink[96];   // (the ENTRALINK's Pass Orbs, missions and PASS POWERS: u3d_entralink.c)
+                u8 musical[96];     // (the MUSICALS' props, records and fans: u3d_musical.c)
               } sWork;   // (gym[0]: ELESA's gym's levers, a bit a lane: CartLanes below)   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
@@ -1014,7 +1015,7 @@ static void CartDone(void);
 static void DragonReset(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
-enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE };   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
+enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL };   // (W_MUSICAL: the MUSICAL dressing room closed)   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
 static u16 sExpWait;
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
        W_WARP, W_PIC_KEY };   // (W_WARP: a warp's map is loading; the script goes on there: U3D_Vm_SceneStart)
@@ -1238,6 +1239,7 @@ static void OpenScreen(struct Thread *t, u8 screen, u16 var)
 static void Finish(struct Thread *t)
 {
     t->alive = FALSE;
+    gTextFlags.autoScroll = FALSE;   // (Black's auto mode ends with its script)
     if (!IsFieldMessageBoxHidden())
         HideFieldMessageBox();
     if (sHolding)
@@ -2295,6 +2297,75 @@ static void Step(struct Thread *t)
         case U3C_PLEASURE_BOAT_ScrCmdLock:
             sBoat.locked = TRUE;
             break;
+        case U3C_SetAutoMode:   // (Black's MSGWIN auto mode: messages go on by themselves, the MUSICAL's announcements;
+            gTextFlags.autoScroll = V(0) != 0;   // the game's own text auto-scroll, till the script ends)
+            break;
+        // ---- the POKeMON MUSICALS (Black's scrcmd_musical.c; the show itself: u3d_musical.c)
+        case U3C_MUSICAL_StartMusical:   // party slot, mode: 0 a show (1 Black's link show: the same, friends joining by
+        {                                // their dress-ups), 2 the theater's photo viewer (no photos kept here)
+            bool8 Unova_Musical_Begin(u8 slot);
+            if (a[1] <= 1 && Unova_Musical_Begin(V(0)))
+            {
+                Finish(t);   // (Black's VM_End: the show is an event of its own, its scripts run in turn)
+                return;
+            }
+            break;
+        }
+        case U3C_MUSICAL_ShowPartyMonMusical:   // party slot: the dressing room for practice
+        {
+            bool8 Unova_Musical_Practice(u8 slot);
+            if (Unova_Musical_Practice(V(0)))
+            {
+                t->wait = W_MUSICAL;
+                if (sHolding)
+                    ScriptContext_Enable();
+            }
+            break;
+        }
+        case U3C_MUSICAL_GetValue:   // op, value, result
+        {
+            u16 Unova_Musical_GetValue(u8 op, u16 arg, bool8 *set);
+            bool8 set;
+            u16 v = Unova_Musical_GetValue(a[0], V(1), &set);
+            if (set)
+                *WorkPtr(a[2]) = v;
+            break;
+        }
+        case U3C_MUSICAL_GetProgramInfo:   // fan, kind, result (Black's "programs": the ten fans after a show)
+        {
+            u16 Unova_Musical_FanInfo(u8 slot, u8 kind);
+            *WorkPtr(a[2]) = Unova_Musical_FanInfo(V(0), a[1]);
+            break;
+        }
+        case U3C_MUSICAL_AddOwnedProp:
+        {
+            void Unova_Musical_AddProp(u8 prop);
+            Unova_Musical_AddProp(V(0));
+            break;
+        }
+        case U3C_MUSICAL_ResetProgramRank:   // (a fan's prop handed over)
+        {
+            void Unova_Musical_ResetFan(u8 slot);
+            Unova_Musical_ResetFan(V(0));
+            break;
+        }
+        case U3C_MUSICAL_BufferString:   // kind, word slot, value
+        {
+            void Unova_Musical_BufferString(u8 kind, u8 slot, u16 arg);
+            Unova_Musical_BufferString(a[0], a[1], V(2));
+            break;
+        }
+        case U3C_MUSICAL_SelectPartyMon:   // result (1 chosen), slot: the game's party screen
+            sPartySlotWork = a[1];
+            OpenScreen(t, SCREEN_PARTY, a[0]);
+            break;
+        case U3C_MUSICAL_LinkControl:   // command, value, -, result: Black's wireless sessions; alone (and in Kai's
+            if (V(0) == 12 || V(0) == 13 || V(0) >= 19)   // rooms) there's none: no session, no error
+                *WorkPtr(a[3]) = 0;
+            break;
+        case U3C_MUSICAL_WifiListCommand:   // (the Wi-Fi shows' list: none)
+            *WorkPtr(a[1]) = 0;
+            break;
         case U3C_PROC_FLD_StartFkDemoSubProc:   // (an Elite Four room's 3D entrance flight: not drawn)
         case U3C_PROC_FLD_SetCameraSettingFromFkDemoSlot:
         case U3C_StartMmdlRailSlipDown:   // (a slide down a rail slope: the tiles walk it)
@@ -2315,7 +2386,6 @@ static void Step(struct Thread *t)
         case U3C_NETWORK_CmdWaitCommState:
         case U3C_NETWORK_CmdClearAlwaysNet:
         case U3C_StopSe:
-        case U3C_SetAutoMode:
         case U3C_SAVEANIME_Start:
         case U3C_PROC_FLD_StartCameraShake:
         case U3C_TurnPlayerToFrontEvent:
@@ -3789,11 +3859,11 @@ static void Wait(struct Thread *t)
         break;
     case W_MESSAGE_KEY:
         if (!IsTextPrinterActive(0))
-            t->wait = W_KEY;
+            t->wait = W_KEY, t->waitFrames = 0;
         break;
     case W_KEY:
-        if (JOY_NEW(A_BUTTON | B_BUTTON))
-            t->wait = W_NONE;
+        if (JOY_NEW(A_BUTTON | B_BUTTON) || (gTextFlags.autoScroll && ++t->waitFrames >= 40))
+            t->wait = W_NONE, t->waitFrames = 0;
         break;
     case W_PIC_KEY:   // (ShowPokeIconWindow: the picture until A or B, SCRCMD_POKE_ICON_Task)
         if (JOY_NEW(A_BUTTON | B_BUTTON))
@@ -3822,6 +3892,13 @@ static void Wait(struct Thread *t)
         if (!U3D_CameraMoving())
             t->wait = W_NONE;
         break;
+    case W_MUSICAL:   // (MUSICAL_ShowPartyMonMusical: the dressing room, till it closes: u3d_musical.c)
+    {
+        bool8 Unova_Musical_Busy(void);
+        if (!Unova_Musical_Busy())
+            t->wait = W_NONE;
+        break;
+    }
     case W_LIFT_RIDE:   // (CLAY's mine: Black's lift event, till the lift arrives)
         if (sMineRide.lift < 0 && sPlat.model < 0)
             t->wait = W_NONE;
@@ -5579,6 +5656,38 @@ void U3D_Vm_GoToEntralink(void)
         SetWarpDestination(group, num, WARP_ID_NONE, x, y);
         DoWarp();
     }
+}
+
+// The MUSICALS (u3d_musical.c): their saved state, a script of the zone run as a scene, the VM idle, a word slot
+void *U3D_Vm_MusicalSave(void)
+{
+    return sWork.musical;
+}
+
+bool8 U3D_Vm_RunScene(u16 scriptId)
+{
+    extern const u8 Unova_EventScript_Scene[];
+    if (!Run(scriptId, 0xFFFF, TRUE))
+        return FALSE;
+    ScriptContext_SetupScript(Unova_EventScript_Scene);
+    return TRUE;
+}
+
+bool8 U3D_Vm_Idle(void)
+{
+    return !sThread.alive && !ScriptContext_IsEnabled();
+}
+
+// (tests: `mp u3dzone`: the script running where the player was ends)
+void U3D_Vm_DebugStop(void)
+{
+    if (sThread.alive)
+        Finish(&sThread);
+}
+
+u8 *U3D_Vm_WordSlot(u8 slot)
+{
+    return Slot(slot);
 }
 
 // The ENTRALINK's saved state and Black's PASS POWER table (u3d_entralink.c; u3d_tables.h sGPower)
