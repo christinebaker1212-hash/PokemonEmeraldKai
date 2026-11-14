@@ -1,0 +1,11 @@
+# Black's post-game, zone by zone (the user, 2026-11-14: "make sure everything is completed"): after the credits
+# (`mp u3dclear`: Black's game-clear script 9601, UNOVA cleared), a walk-in warp to each of the post-game places' 140
+# zones (ROUTES 11-18, VILLAGE BRIDGE, LACUNOSA, GIANT CHASM, UNDELLA, ABUNDANT SHRINE, BLACK CITY, MARVELOUS BRIDGE,
+# LOSTLORN, P2 LAB, CHALLENGER'S CAVE, LIBERTY GARDEN, the caves of the Swords of Justice, RELIC CASTLE, DRAGONSPIRAL,
+# VICTORY ROAD, the ABYSSAL RUINS...) at its start tile: each loads and runs its scripts with no command read past.
+# (Zone 300, a GIANT CHASM header, has no cell on Black's world matrix: Black never places it, left out.)
+MODE=1
+TMO=900
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:70"
+EXPECT_A=("debug: after the credits" "[pg] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not played yet" "no map" "[heap] out of memory")

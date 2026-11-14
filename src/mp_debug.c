@@ -1954,6 +1954,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 printf("[test] black trainer %d: rotation (%d POKeMON)\n", id, t[3]);
         }
     }
+    else if (strcmp(cmd, "u3dteam") == 0)   // u3dteam ID...: Black's trainers' teams built (no battle): the log has each
+    {
+        bool8 U3D_PrepareBattle(u16 first, u16 second);
+        char *p = (char *)arg;
+        while (*p)
+        {
+            long id = strtol(p, &p, 10);
+            printf("[test] u3dteam %ld: %d\n", id, U3D_PrepareBattle(id, 0));
+            while (*p == ' ')
+                p++;
+        }
+    }
     else if (strcmp(cmd, "u3dtrainer") == 0)
     {
         // u3dtrainer ID - a battle against Black's trainer ID right now (UNOVA's trainers: u3d_battle.c)
@@ -4685,6 +4697,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int cabin = 0, main = 0;
         if (sscanf(arg, "%d %d", &cabin, &main) == 2)
             U3D_Vm_DebugBoat(cabin, main);
+    }
+    else if (strcmp(cmd, "u3dclear") == 0)   // u3dclear: UNOVA as after the credits (Black's game-clear script, cleared)
+    {
+        void U3D_Vm_DebugClear(void);
+        U3D_Vm_DebugClear();
     }
     else if (strcmp(cmd, "u3dzone") == 0)   // u3dzone ZONE X Z (decimal): a walk-in warp to Black's zone at that tile
     {

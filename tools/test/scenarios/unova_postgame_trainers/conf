@@ -1,0 +1,8 @@
+# Black's post-game trainers, their teams built from Black's own tables (u3d_battle.c U3D_PrepareBattle): CYNTHIA
+# and UNDELLA's, the ELITE FOUR's second teams, VICTORY ROAD's, DRAGONSPIRAL's, BLACK CITY's, RELIC CASTLE's,
+# LIBERTY GARDEN's, the P2 LAB's, VILLAGE BRIDGE's. Each must have POKeMON (the trainers a post-game script fights).
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:70"
+EXPECT_A=("u3dteam 520: 1" "u3dteam 547: 1" "u3dteam 567: 1" "u3dteam 591: 1" "u3dteam 615: 1" "u3dteam 528: 1")
+UNEXPECT_A=("[crash]" ": 0 POKeMON")

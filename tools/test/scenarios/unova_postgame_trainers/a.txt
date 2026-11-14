@@ -1,0 +1,7 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 60
+mp u3dteam 520 547 524 525 523 567 551 526 557 591 592 593 598 305 306 307 313 615 528
+quit

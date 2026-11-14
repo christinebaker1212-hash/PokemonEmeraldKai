@@ -1,0 +1,11 @@
+# Black's post-game encounters, each by its own script in its own zone after the credits: VIRIZION (RUMINATION FIELD),
+# VOLCARONA (RELIC CASTLE), the DRAGONSPIRAL legend, TERRAKION (TRIAL CHAMBER), KYUREM (GIANT CHASM), VICTINI (LIBERTY
+# GARDEN), COBALION (GUIDANCE CHAMBER), LANDORUS (ABUNDANT SHRINE), ZOROARK (LOSTLORN FOREST): each battle starts as
+# Black's script asks (the foe brought to 1 HP, SWIFT ends it) and the script goes on to its end; then ROUTE 18's
+# LARVESTA EGG. (ZOROARK asks for one of the movie's beasts in the party: ENTEI here, as Kai stands in for Black's
+# distributions.)
+MODE=1
+TMO=600
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100,244:50"
+EXPECT_A=("scripted wild battle: national 640" "scripted wild battle: national 637" "scripted wild battle: national 643" "scripted wild battle: national 639" "scripted wild battle: national 646" "scripted wild battle: national 494" "scripted wild battle: national 638" "scripted wild battle: national 645" "scripted wild battle: national 571" "an EGG of national 636" "[lg] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not played yet")

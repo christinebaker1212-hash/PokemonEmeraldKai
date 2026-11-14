@@ -1,0 +1,160 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp teach 0 129
+mp u3dclear
+wait 120
+mash B 8 20
+echo [lg] zone 156 national 640
+mp u3dzone 156 5 4
+wait 160
+mash B 6 15
+wait 20
+mp heal
+mp u3drun 1
+pressuntillog A 3000 scripted wild battle: national 640
+pressuntil B action 3000
+mp foehp 1
+wait 10
+pressuntil A field 12000
+wait 30
+mash A 20 20
+mash B 10 15
+wait 60
+echo [lg] zone 182 national 637
+mp u3dzone 182 5 4
+wait 160
+mash B 6 15
+wait 20
+mp heal
+mp u3drun 1
+pressuntillog A 3000 scripted wild battle: national 637
+pressuntil B action 3000
+mp foehp 1
+wait 10
+pressuntil A field 12000
+wait 30
+mash A 20 20
+mash B 10 15
+wait 60
+echo [lg] zone 213 national 643
+mp u3dzone 213 16 16
+wait 160
+mash B 6 15
+wait 20
+mp heal
+mp u3drun 2
+pressuntillog A 3000 scripted wild battle: national 643
+pressuntil B action 3000
+mp foehp 1
+wait 10
+pressuntil A field 12000
+wait 30
+mash A 20 20
+mash B 10 15
+wait 60
+echo [lg] zone 229 national 639
+mp u3dzone 229 5 4
+wait 160
+mash B 6 15
+wait 20
+mp heal
+mp u3drun 1
+pressuntillog A 3000 scripted wild battle: national 639
+pressuntil B action 3000
+mp foehp 1
+wait 10
+pressuntil A field 12000
+wait 30
+mash A 20 20
+mash B 10 15
+wait 60
+echo [lg] zone 234 national 646
+mp u3dzone 234 5 4
+wait 160
+mash B 6 15
+wait 20
+mp heal
+mp u3drun 1
+pressuntillog A 3000 scripted wild battle: national 646
+pressuntil B action 3000
+mp foehp 1
+wait 10
+pressuntil A field 12000
+wait 30
+mash A 20 20
+mash B 10 15
+wait 60
+echo [lg] zone 237 national 494
+mp u3dzone 237 5 4
+wait 160
+mash B 6 15
+wait 20
+mp heal
+mp u3drun 2
+pressuntillog A 3000 scripted wild battle: national 494
+pressuntil B action 3000
+mp foehp 1
+wait 10
+pressuntil A field 12000
+wait 30
+mash A 20 20
+mash B 10 15
+wait 60
+echo [lg] zone 335 national 638
+mp u3dzone 335 5 4
+wait 160
+mash B 6 15
+wait 20
+mp heal
+mp u3drun 1
+pressuntillog A 3000 scripted wild battle: national 638
+pressuntil B action 3000
+mp foehp 1
+wait 10
+pressuntil A field 12000
+wait 30
+mash A 20 20
+mash B 10 15
+wait 60
+echo [lg] zone 376 national 645
+mp u3dzone 376 5 4
+wait 160
+mash B 6 15
+wait 20
+mp heal
+mp u3drun 5
+pressuntillog A 3000 scripted wild battle: national 645
+pressuntil B action 3000
+mp foehp 1
+wait 10
+pressuntil A field 12000
+wait 30
+mash A 20 20
+mash B 10 15
+wait 60
+echo [lg] zone 385 national 571
+mp u3dzone 385 5 4
+wait 160
+mash B 6 15
+wait 20
+mp heal
+mp u3drun 2
+pressuntillog A 3000 scripted wild battle: national 571
+pressuntil B action 3000
+mp foehp 1
+wait 10
+pressuntil A field 12000
+wait 30
+mash A 20 20
+mash B 10 15
+wait 60
+echo [lg] egg
+mp u3dzone 388 5 4
+wait 160
+mash B 6 15
+mp u3drun 1
+pressuntillog A 2000 an EGG of national 636
+mash B 10 15
+echo [lg] done
+quit

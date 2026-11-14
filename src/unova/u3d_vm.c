@@ -1897,6 +1897,7 @@ static void Step(struct Thread *t)
         }
         // ---- battles
         case U3C_PROC_FLD_StartScriptedWildBattle:   // species, level, flags (a legend's, a static POKeMON's)
+            MPNet_Log("u3d vm: scripted wild battle: national %u Lv%u", V(0), V(1));
             CreateScriptedWildMon(Species(V(0)), V(1), ITEM_NONE);
             OpenScreen(t, SCREEN_WILD, 0);
             break;
@@ -3251,7 +3252,10 @@ static void Step(struct Thread *t)
         case U3C_PROC_AddEggToParty:   // result, species, form: an EGG from someone (ROUTE 18's LARVESTA)
             *WorkPtr(a[0]) = CalculatePlayerPartyCount() < PARTY_SIZE;
             if (CalculatePlayerPartyCount() < PARTY_SIZE)
+            {
                 ScriptGiveEgg(Species(V(1)));
+                MPNet_Log("u3d vm: an EGG of national %u", V(1));
+            }
             break;
         case U3C_PROC_CheckMonIsPlayerOwned:   // result, slot: the player's own (OT ID and name)
         {
@@ -3300,10 +3304,21 @@ static void Step(struct Thread *t)
         case U3C_GetPlayerLocationValue:   // (the steps message counter: none kept)
             *WorkPtr(a[0]) = 0;
             break;
-        case U3C_EVENT_MON_CmdFindEventMonInParty:   // (a distributed POKeMON's event: closed, online only)
+        case U3C_EVENT_MON_CmdFindEventMonInParty:   // national, form, slot, found: Black asks for a distributed POKeMON
+        {                                         // (ZORUA's CELEBI, ZOROARK's ENTEI / RAIKOU / SUICUNE); Kai gives
+            u16 sp = Species(V(0));                // Black's distributions itself (the LIBERTY PASS, event items:
+            u32 i;                                 // CheckBeaconTrainerKey), so a real one in the party will do
             *WorkPtr(a[2]) = 0;
             *WorkPtr(a[3]) = 0;
+            for (i = 0; i < PARTY_SIZE && sp != SPECIES_NONE; i++)
+                if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == sp && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+                {
+                    *WorkPtr(a[2]) = i;
+                    *WorkPtr(a[3]) = 1;
+                    break;
+                }
             break;
+        }
         case U3C_PROC_SetMonParamChecked:
         case U3C_StartPlayerPosOffsetTween:
         case U3C_StartSubProcOv057:
@@ -5678,6 +5693,20 @@ bool8 U3D_Vm_Idle(void)
     return !sThread.alive && !ScriptContext_IsEnabled();
 }
 
+#define SCRIPT_GAME_CLEAR 9601   // (Black's game-clear script: the works and flags of after the credits)
+// (tests: `mp u3dclear`: as after the credits: Black's game-clear script, UNOVA cleared, its badges)
+void U3D_Vm_DebugClear(void)
+{
+    RunNow(SCRIPT_GAME_CLEAR);
+    MP_Region_SetCleared(REGION_UNOVA);
+    sWork.badges = 0xFF;
+    if (!CheckBagHasItem(ITEM_SS_TICKET, 1))
+        AddBagItem(ITEM_SS_TICKET, 1);
+    if (!CheckBagHasItem(ITEM_LIBERTY_PASS, 1))
+        AddBagItem(ITEM_LIBERTY_PASS, 1);   // (as the real clear: UnovaGameClear)
+    MPNet_Log("u3d vm: debug: after the credits");
+}
+
 // (tests: `mp u3dzone`: the script running where the player was ends)
 void U3D_Vm_DebugStop(void)
 {
@@ -5722,7 +5751,6 @@ u16 U3D_Vm_Work(u16 id)
 // healed, home as the warp point and the continue spot), then mode 0 (N's Castle) the credits and the save, mode 1
 // (the Champion) the HALL OF FAME and the credits (post_battle_event_funcs.c GameClear: the game's own). UNOVA counts as
 // cleared (its boat, the GLOBAL PC) from the story's end.
-#define SCRIPT_GAME_CLEAR 9601
 void U3D_Vm_ContinueHome(void)
 {
     if (!sSpecialLoc.set)

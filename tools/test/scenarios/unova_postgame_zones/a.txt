@@ -1,0 +1,704 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+wait 30
+mp u3dclear
+wait 120
+mash B 8 20
+echo [pg] zone 0
+mp u3dzone 0 43 38
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 1
+mp u3dzone 1 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 2
+mp u3dzone 2 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 3
+mp u3dzone 3 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 4
+mp u3dzone 4 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 5
+mp u3dzone 5 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 156
+mp u3dzone 156 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 160
+mp u3dzone 160 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 161
+mp u3dzone 161 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 162
+mp u3dzone 162 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 163
+mp u3dzone 163 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 164
+mp u3dzone 164 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 165
+mp u3dzone 165 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 166
+mp u3dzone 166 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 167
+mp u3dzone 167 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 168
+mp u3dzone 168 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 169
+mp u3dzone 169 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 170
+mp u3dzone 170 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 171
+mp u3dzone 171 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 172
+mp u3dzone 172 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 173
+mp u3dzone 173 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 174
+mp u3dzone 174 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 175
+mp u3dzone 175 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 176
+mp u3dzone 176 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 177
+mp u3dzone 177 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 178
+mp u3dzone 178 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 179
+mp u3dzone 179 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 180
+mp u3dzone 180 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 181
+mp u3dzone 181 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 182
+mp u3dzone 182 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 183
+mp u3dzone 183 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 184
+mp u3dzone 184 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 185
+mp u3dzone 185 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 186
+mp u3dzone 186 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 187
+mp u3dzone 187 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 188
+mp u3dzone 188 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 189
+mp u3dzone 189 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 190
+mp u3dzone 190 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 205
+mp u3dzone 205 175 151
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 206
+mp u3dzone 206 16 16
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 207
+mp u3dzone 207 16 16
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 208
+mp u3dzone 208 16 16
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 209
+mp u3dzone 209 0 0
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 210
+mp u3dzone 210 16 16
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 211
+mp u3dzone 211 0 0
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 212
+mp u3dzone 212 16 16
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 213
+mp u3dzone 213 16 16
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 214
+mp u3dzone 214 0 0
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 215
+mp u3dzone 215 16 16
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 216
+mp u3dzone 216 16 16
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 217
+mp u3dzone 217 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 218
+mp u3dzone 218 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 219
+mp u3dzone 219 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 220
+mp u3dzone 220 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 221
+mp u3dzone 221 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 222
+mp u3dzone 222 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 223
+mp u3dzone 223 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 224
+mp u3dzone 224 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 225
+mp u3dzone 225 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 226
+mp u3dzone 226 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 227
+mp u3dzone 227 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 228
+mp u3dzone 228 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 229
+mp u3dzone 229 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 230
+mp u3dzone 230 687 153
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 231
+mp u3dzone 231 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 232
+mp u3dzone 232 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 233
+mp u3dzone 233 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 234
+mp u3dzone 234 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 235
+mp u3dzone 235 302 756
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 236
+mp u3dzone 236 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 237
+mp u3dzone 237 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 238
+mp u3dzone 238 725 719
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 239
+mp u3dzone 239 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 240
+mp u3dzone 240 801 289
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 241
+mp u3dzone 241 1 0
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 242
+mp u3dzone 242 1 0
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 243
+mp u3dzone 243 1 0
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 244
+mp u3dzone 244 1 0
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 245
+mp u3dzone 245 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 246
+mp u3dzone 246 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 247
+mp u3dzone 247 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 248
+mp u3dzone 248 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 255
+mp u3dzone 255 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 256
+mp u3dzone 256 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 257
+mp u3dzone 257 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 258
+mp u3dzone 258 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 259
+mp u3dzone 259 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 260
+mp u3dzone 260 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 261
+mp u3dzone 261 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 262
+mp u3dzone 262 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 263
+mp u3dzone 263 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 294
+mp u3dzone 294 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 299
+mp u3dzone 299 175 151
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 303
+mp u3dzone 303 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 309
+mp u3dzone 309 456 184
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 310
+mp u3dzone 310 588 184
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 311
+mp u3dzone 311 661 200
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 312
+mp u3dzone 312 718 333
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 313
+mp u3dzone 313 628 434
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 314
+mp u3dzone 314 458 431
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 315
+mp u3dzone 315 645 179
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 316
+mp u3dzone 316 724 307
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 333
+mp u3dzone 333 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 334
+mp u3dzone 334 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 335
+mp u3dzone 335 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 346
+mp u3dzone 346 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 352
+mp u3dzone 352 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 353
+mp u3dzone 353 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 354
+mp u3dzone 354 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 365
+mp u3dzone 365 456 184
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 367
+mp u3dzone 367 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 368
+mp u3dzone 368 588 184
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 370
+mp u3dzone 370 661 200
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 371
+mp u3dzone 371 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 373
+mp u3dzone 373 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 374
+mp u3dzone 374 718 333
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 376
+mp u3dzone 376 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 377
+mp u3dzone 377 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 378
+mp u3dzone 378 608 427
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 381
+mp u3dzone 381 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 382
+mp u3dzone 382 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 383
+mp u3dzone 383 458 431
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 385
+mp u3dzone 385 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 386
+mp u3dzone 386 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 387
+mp u3dzone 387 662 758
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 388
+mp u3dzone 388 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 406
+mp u3dzone 406 660 186
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 407
+mp u3dzone 407 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 408
+mp u3dzone 408 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 409
+mp u3dzone 409 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 410
+mp u3dzone 410 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 411
+mp u3dzone 411 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 412
+mp u3dzone 412 760 301
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 413
+mp u3dzone 413 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 414
+mp u3dzone 414 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 415
+mp u3dzone 415 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 416
+mp u3dzone 416 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 417
+mp u3dzone 417 5 4
+wait 140
+mash B 6 15
+wait 20
+echo [pg] zone 423
+mp u3dzone 423 724 744
+wait 140
+mash B 6 15
+wait 20
+echo [pg] done
+quit
