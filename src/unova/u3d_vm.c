@@ -614,6 +614,10 @@ static void WfbcMapLoad(void);
 static void ConnMove(u8 event, s16 x, s16 z);
 #define CONN_MOVES 8
 static struct { u8 event, set; s16 x, z; } sConnMove[CONN_MOVES];
+// WORK_CmdSetBgEventGridPos: a check spot of the zone's moved by its scripts (NACRENE's gym's shelves), as long as the
+// player is in the zone (cleared with the moved connections)
+#define BG_MOVES 8
+static struct { u16 event; s16 x, z; bool8 set; } sBgMove[BG_MOVES];
 static void RoamSpawn(u8 slot, u16 national);
 
 bool8 U3D_Vm_ObjectHidden(u8 localId)
@@ -1010,7 +1014,7 @@ static void DragonReset(void);
 enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE };   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
 static u16 sExpWait;
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
-       W_WARP };   // (W_WARP: a warp's map is loading; the script goes on there: U3D_Vm_SceneStart)
+       W_WARP, W_PIC_KEY };   // (W_WARP: a warp's map is loading; the script goes on there: U3D_Vm_SceneStart)
 
 // ---- Black's songs: its sound archive's sequence numbers as the game's song slots (tools/kaisong/unova_songs.py);
 // a pushed song comes back when the one played over it ends (a fanfare: Black's PushAndPlayBgm, StartWaitBgmThenPop)
@@ -1041,7 +1045,7 @@ static void PopSong(void)
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
 enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY, SCREEN_CLEAR, SCREEN_TRADE,
        SCREEN_SUBWAY_PARTY, SCREEN_SUBWAY_BATTLE, SCREEN_SUBWAY_RESET, SCREEN_MART, SCREEN_BPSHOP, SCREEN_SELL,
-       SCREEN_DAYCARE_PARTY, SCREEN_MOVE_SELECT, SCREEN_RELEARN };
+       SCREEN_DAYCARE_PARTY, SCREEN_MOVE_SELECT, SCREEN_RELEARN, SCREEN_DIPLOMA };
 static u8 sScreen;
 static u16 sScreenVar, sPartySlotWork;
 static u8 sWildResult = 2;
@@ -1210,6 +1214,7 @@ static u8 GenderOf(struct Pokemon *mon);
 static void UnovaTradeSetUp(void);
 void CreateInGameTradePokemon(void);   // (trade.c)
 void DoInGameTradeScene(void);
+static const u8 *sWarpTable, *sWarpTableEnd;   // (SetWarpTable: an elevator's floors in the running script)
 static struct { u8 group, num, set; s16 x, y; } sSpecialLoc;   // (SetSpecialLocation: Black's continue spot)
 static void UnovaGameClear(void);
 void SetContinueGameWarp(s8 mapGroup, s8 mapNum, s8 warpId, s16 x, s16 y);   // (overworld.c)
@@ -2244,34 +2249,6 @@ static void Step(struct Thread *t)
             *WorkPtr(a[1]) = V(0) < ARRAY_COUNT(sValues) ? sValues[V(0)] : 0;
             break;
         }
-        case U3C_PROC_FLD_StartFkDemoSubProc:   // (an Elite Four room's 3D entrance flight: not drawn)
-        case U3C_PROC_FLD_SetCameraSettingFromFkDemoSlot:
-        case U3C_StartMmdlRailSlipDown:   // (a slide down a rail slope: the tiles walk it)
-        case U3C_FadeBgmVolume:   // (the song quieter under a scene: kept as it is)
-        case U3C_RestoreBgmVolume:
-        case U3C_PROC_CallSubEvent:   // (a field menu's screen opened from a scene)
-        case U3C_FLD_FACEUP_ScrCmdStart:   // (a speaker's face-up portrait: the words come in the script's messages)
-        case U3C_FLD_FACEUP_ScrCmdWaitEnd:
-        case U3C_FLD_FACEUP_ScrCmdPrepareField:
-        case U3C_StartArcPlayerEffect:   // (the LIGHT STONE's glow and the arcs of light around the player: not drawn)
-        case U3C_StartArcEffect:
-        case U3C_ShowArcModelAt:
-        case U3C_WaitArcEffectPeak:
-        case U3C_WaitArcEffectEnd:
-        case U3C_NETWORK_CmdRequestCommExit:   // (Black's wireless: Kai's co-op stands in for it)
-        case U3C_NETWORK_CmdRestartAutoComm:
-        case U3C_NETWORK_CmdStartAutoComm:
-        case U3C_NETWORK_CmdWaitCommState:
-        case U3C_NETWORK_CmdClearAlwaysNet:
-        case U3C_StopSe:
-        case U3C_SetAutoMode:
-        case U3C_SAVEANIME_Start:
-        case U3C_PROC_FLD_StartCameraShake:
-        case U3C_TurnPlayerToFrontEvent:
-        case U3C_CreateMmdlIcaProc:   // (a person flown along a path of Black's own: the roamer's fly-by; not drawn)
-        case U3C_StartMmdlIcaAnime:
-        case U3C_WaitMmdlIcaAnime:
-        case U3C_EndMmdlIcaProc:
         case U3C_PLEASURE_BOAT_ScrCmdCreate:   // the ROYAL UNOVA: the day's passengers, the trip's clock
             if (!sBoat.alive)
                 BoatCreate();
@@ -2314,6 +2291,34 @@ static void Step(struct Thread *t)
         case U3C_PLEASURE_BOAT_ScrCmdLock:
             sBoat.locked = TRUE;
             break;
+        case U3C_PROC_FLD_StartFkDemoSubProc:   // (an Elite Four room's 3D entrance flight: not drawn)
+        case U3C_PROC_FLD_SetCameraSettingFromFkDemoSlot:
+        case U3C_StartMmdlRailSlipDown:   // (a slide down a rail slope: the tiles walk it)
+        case U3C_FadeBgmVolume:   // (the song quieter under a scene: kept as it is)
+        case U3C_RestoreBgmVolume:
+        case U3C_PROC_CallSubEvent:   // (a field menu's screen opened from a scene)
+        case U3C_FLD_FACEUP_ScrCmdStart:   // (a speaker's face-up portrait: the words come in the script's messages)
+        case U3C_FLD_FACEUP_ScrCmdWaitEnd:
+        case U3C_FLD_FACEUP_ScrCmdPrepareField:
+        case U3C_StartArcPlayerEffect:   // (the LIGHT STONE's glow and the arcs of light around the player: not drawn)
+        case U3C_StartArcEffect:
+        case U3C_ShowArcModelAt:
+        case U3C_WaitArcEffectPeak:
+        case U3C_WaitArcEffectEnd:
+        case U3C_NETWORK_CmdRequestCommExit:   // (Black's wireless: Kai's co-op stands in for it)
+        case U3C_NETWORK_CmdRestartAutoComm:
+        case U3C_NETWORK_CmdStartAutoComm:
+        case U3C_NETWORK_CmdWaitCommState:
+        case U3C_NETWORK_CmdClearAlwaysNet:
+        case U3C_StopSe:
+        case U3C_SetAutoMode:
+        case U3C_SAVEANIME_Start:
+        case U3C_PROC_FLD_StartCameraShake:
+        case U3C_TurnPlayerToFrontEvent:
+        case U3C_CreateMmdlIcaProc:   // (a person flown along a path of Black's own: the roamer's fly-by; not drawn)
+        case U3C_StartMmdlIcaAnime:
+        case U3C_WaitMmdlIcaAnime:
+        case U3C_EndMmdlIcaProc:
         case U3C_SYMBOL_MAP_ScrCmdSetSubscreenMode:   // (the lower screen's mode: Kai has one screen)
         case U3C_WORK_CmdSetBoxFlags:   // (Black's PC wallpapers the game clear unlocks: Kai's PC keeps its own)
         case U3C_SCREENEFFECTS_CreateBuildModelNode:   // (build models' animations: doors, lifts)
@@ -2983,6 +2988,43 @@ static void Step(struct Thread *t)
         case U3C_HasItem:
             *WorkPtr(a[2]) = Item(V(0)) != ITEM_NONE && CheckBagHasItem(Item(V(0)), V(1));
             break;
+        case U3C_GetItemPartyUse:   // (Black's item parameter 15: 4 a POKe BALL; CASTELIA's ZORUA girl asks for one)
+            *WorkPtr(a[1]) = Item(V(0)) != ITEM_NONE && GetPocketByItemId(Item(V(0))) == POCKET_POKE_BALLS ? 4 : 0;
+            break;
+        case U3C_POKEMON_FLD_GetRandomBagPocketValue:   // a TM or HM in the BAG at random: its move (0: none)
+        {
+            u16 have[256], n = 0, i;
+            for (i = 0; i < gBagPockets[TMHM_POCKET].capacity && n < ARRAY_COUNT(have); i++)
+            {
+                u16 item = gBagPockets[TMHM_POCKET].itemSlots[i].itemId;
+                if (item != ITEM_NONE && CheckBagHasItem(item, 1))
+                    have[n++] = item;
+            }
+            *WorkPtr(a[0]) = n ? ItemIdToBattleMoveId(have[Random() % n]) : 0;
+            break;
+        }
+        case U3C_POKEMON_FLD_GetMonTypeForTm:   // a party POKeMON's HIDDEN POWER type (0xFFFF: it can't learn TM10)
+        {
+            struct Pokemon *mon = V(1) < PARTY_SIZE ? &gPlayerParty[V(1)] : NULL;
+            u16 out = 0xFFFF;
+            if (mon && GetMonData(mon, MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(mon, MON_DATA_IS_EGG)
+             && CanMonLearnTMHM(mon, TMHM_INDEX(ITEM_TM10)))
+            {
+                // (the battle's own formula: battle_script_commands.c Cmd_hiddenpowercalc)
+                u8 bits = (GetMonData(mon, MON_DATA_HP_IV) & 1) | (GetMonData(mon, MON_DATA_ATK_IV) & 1) << 1
+                        | (GetMonData(mon, MON_DATA_DEF_IV) & 1) << 2 | (GetMonData(mon, MON_DATA_SPEED_IV) & 1) << 3
+                        | (GetMonData(mon, MON_DATA_SPATK_IV) & 1) << 4 | (GetMonData(mon, MON_DATA_SPDEF_IV) & 1) << 5;
+                u8 type = ((NUMBER_OF_MON_TYPES - 3) * bits) / 63 + 1;
+                if (type >= TYPE_MYSTERY)
+                    type++;
+                out = BlackType(type);
+            }
+            *WorkPtr(a[0]) = out;
+            break;
+        }
+        case U3C_PROC_FLD_StoreEffectEncountItemId:   // (the item under a dust cloud: none shown here yet)
+            *WorkPtr(a[0]) = 0;
+            break;
         case U3C_GetItemPocket:   // (Black's pocket: 0 ITEMS, 1 MEDICINE, 2 TMs & HMs, 3 BERRIES, 4 KEY ITEMS)
             *WorkPtr(a[1]) = V(0) < ARRAY_COUNT(sUnovaItemPockets) ? sUnovaItemPockets[V(0)] : 0;
             break;
@@ -3016,6 +3058,74 @@ static void Step(struct Thread *t)
             MPNet_Log("u3d vm: no map for zone %u at %u,%u", a[0], a[1], a[2]);
             break;
         }
+        case U3C_ShowPokeIconWindow:   // national number, form, EGG, gender: the POKeMON in a window (the game's own
+        {                               // picture box) until A or B
+            u16 sp = V(2) ? SPECIES_EGG : Species(V(0));
+            if (sp != SPECIES_NONE && ScriptMenu_ShowPokemonPic(sp, 10, 3))
+                t->wait = W_PIC_KEY;
+            break;
+        }
+        // ---- Black's elevators (SCRCMD_POKEMON_FLD_*WarpTable / WarpEntry): a table in the script of up to 8 floors
+        // {message, zone, x, y, z}, ended by 0xFFFF; the menu lists the floors but the one the player is on
+        case U3C_POKEMON_FLD_SetWarpTable:
+            sWarpTable = t->pc + (s32)a[0] <= t->size ? t->code + t->pc + (s32)a[0] : NULL;
+            sWarpTableEnd = t->code + t->size;
+            break;
+        case U3C_POKEMON_FLD_AddWarpMenuItems:
+        {
+            u32 i;
+            for (i = 0; i < 8 && sWarpTable && sWarpTable + 10 * i + 10 <= sWarpTableEnd
+                        && Le16(sWarpTable + 10 * i) != 0xFFFF; i++)
+                if (Le16(sWarpTable + 10 * i + 2) != CurrentZone())
+                    MenuAdd(Le16(sWarpTable + 10 * i), i);
+            break;
+        }
+        case U3C_POKEMON_FLD_WarpToEntry:
+        {
+            u32 i = V(0), k;
+            u8 group, num;
+            s16 x, y;
+            for (k = 0; k < 8 && sWarpTable && sWarpTable + 10 * k + 10 <= sWarpTableEnd
+                        && Le16(sWarpTable + 10 * k) != 0xFFFF; k++)
+                ;
+            if (i < k && U3D_MapOfZoneTile(Le16(sWarpTable + 10 * i + 2), Le16(sWarpTable + 10 * i + 4),
+                                           Le16(sWarpTable + 10 * i + 8), &group, &num, &x, &y))
+            {
+                MPNet_Log("u3d vm: elevator to zone %u", Le16(sWarpTable + 10 * i + 2));
+                sHolding = FALSE;
+                t->wait = W_WARP;
+                SetWarpDestination(group, num, WARP_ID_NONE, x, y);
+                DoWarp();
+                return;
+            }
+            break;
+        }
+        case U3C_CheckPlayerFormModel:   // (the player in a form of its own model: never here)
+            *WorkPtr(a[0]) = 0;
+            break;
+        case U3C_PROC_CallModeScreen:   // 0 / 1: the UNOVA / National POKeDEX's diploma (the game's DIPLOMA screen); 2
+            if (V(0) <= 1)              // the BATTLE SUBWAY's map: not drawn yet
+            {
+                extern s8 gMpDiplomaNational;
+                gMpDiplomaNational = V(0);
+                OpenScreen(t, SCREEN_DIPLOMA, 0);
+            }
+            break;
+        case U3C_WORK_CmdSetBgEventGridPos:   // check spot, x, y, z: moved for as long as the player is in the zone
+        {
+            u32 k;
+            for (k = 0; k < BG_MOVES; k++)
+                if (!sBgMove[k].set || sBgMove[k].event == V(0))
+                {
+                    sBgMove[k].event = V(0), sBgMove[k].x = (s16)V(1), sBgMove[k].z = (s16)V(3), sBgMove[k].set = TRUE;
+                    break;
+                }
+            break;
+        }
+        case U3C_WORK_CmdSetSpecialLocationHere:   // where the game goes on after a link room: here
+            sSpecialLoc.group = gSaveBlock1Ptr->location.mapGroup, sSpecialLoc.num = gSaveBlock1Ptr->location.mapNum;
+            sSpecialLoc.x = gSaveBlock1Ptr->pos.x, sSpecialLoc.y = gSaveBlock1Ptr->pos.y, sSpecialLoc.set = TRUE;
+            break;
         case U3C_WORK_CmdSetSpecialLocation:   // zone, direction, x, y, z: where the game goes on after its clear
         {
             u8 group, num;
@@ -3371,6 +3481,27 @@ static void Step(struct Thread *t)
         case U3C_SetProcAction:   // a script to run once this one has ended, by its id in the zone the player is then in
             sPendingScript = a[0];
             break;
+        case U3C_StartSwapNpcEvent:   // person out, person in: the second set out where the first stood (CASTELIA's lost
+        {                              // boy turning into ZORUA; Black's puff of smoke not drawn, its sound the script's)
+            u8 from = LocalId(V(0)), to = LocalId(V(1)), id = ObjEventId(from);
+            s16 x = -1, y = -1;
+            if (id < OBJECT_EVENTS_COUNT && !gObjectEvents[id].isPlayer)
+            {
+                x = gObjectEvents[id].currentCoords.x - MAP_OFFSET, y = gObjectEvents[id].currentCoords.y - MAP_OFFSET;
+                RemoveObjectEventByLocalIdAndMap(gObjectEvents[id].localId, gObjectEvents[id].mapNum, gObjectEvents[id].mapGroup);
+            }
+            ForgetPerson(from);
+            Gone(from, TRUE);
+            Gone(to, FALSE);
+            if (x >= 0)
+                SetObjEventTemplateCoords(to, x, y);
+            id = ObjEventId(to);
+            if (id >= OBJECT_EVENTS_COUNT)
+                TrySpawnObjectEvent(to, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+            else if (x >= 0)
+                MoveObjectEventToMapCoords(&gObjectEvents[id], x + MAP_OFFSET, y + MAP_OFFSET);
+            break;
+        }
         case U3C_StartMmdlSpinRise:   // (a person spinning up and away, the SHADOW TRIAD's way: gone)
         case U3C_DeleteMmdl:
         {
@@ -3649,6 +3780,13 @@ static void Wait(struct Thread *t)
         if (JOY_NEW(A_BUTTON | B_BUTTON))
             t->wait = W_NONE;
         break;
+    case W_PIC_KEY:   // (ShowPokeIconWindow: the picture until A or B, SCRCMD_POKE_ICON_Task)
+        if (JOY_NEW(A_BUTTON | B_BUTTON))
+        {
+            ScriptMenu_HidePokemonPic();
+            t->wait = W_NONE;
+        }
+        break;
     case W_MOVES:
         if (MovesDone())
             t->wait = W_NONE;
@@ -3872,6 +4010,10 @@ static bool8 TrySign(void)
     {
         const u8 *b = e + 8 + EV_BG * i;
         s32 bx = (s32)(Le16(b + 8) | Le16(b + 10) << 16), bz = (s32)(Le16(b + 12) | Le16(b + 14) << 16);
+        u32 k;
+        for (k = 0; k < BG_MOVES; k++)
+            if (sBgMove[k].set && sBgMove[k].event == i)
+                bx = sBgMove[k].x, bz = sBgMove[k].z;
         if (m >= 0)
             bx -= 32 * U3D_MapCellX(m), bz -= 32 * U3D_MapCellZ(m);
         if (bx == x && bz == y && U3D_HexActive() && !SignOnFloor((s32)(Le16(b + 16) | Le16(b + 18) << 16)))
@@ -4958,7 +5100,8 @@ void U3D_VmMapLoad(void)
             FlagTo(i, FALSE);
         for (i = 0x4000; i <= 0x401F; i++)
             *WorkPtr(i) = 0;
-        memset(sConnMove, 0, sizeof(sConnMove));   // (a new zone: its connections where its data puts them)
+        memset(sConnMove, 0, sizeof(sConnMove));
+        memset(sBgMove, 0, sizeof(sBgMove));   // (a new zone: its connections where its data puts them)
         sNpcAtCount = 0;   // (a new zone: its people where its data puts them, till its scripts say)
         RunNow(InitScript(zone, 2));
     }
@@ -5082,6 +5225,14 @@ void U3D_VmOpenScreen(void)
                                            sMoveSel.newMove);
         gFieldCallback = FieldCB_ContinueScriptHandleMusic;
         break;
+    case SCREEN_DIPLOMA:   // (diploma.c, back to the field and this script when it closes)
+    {
+        extern void (*gMpDiplomaExit)(void);
+        void CB2_ShowDiploma(void);
+        gMpDiplomaExit = CB2_ScreenDone;
+        SetMainCallback2(CB2_ShowDiploma);
+        break;
+    }
     case SCREEN_RELEARN:   // (Black's CallMoveRelearn: the game's move relearner, the POKeMON in VAR_0x8004)
         TeachMoveRelearnerMove();
         break;

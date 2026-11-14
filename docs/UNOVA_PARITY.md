@@ -45,20 +45,27 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 
 ## 3. Script commands not played (story and towns)
 
-- [ ] Word buffers: group / grouped / byte / signed / map entry names, an easy-chat word, the DAY CARE POKeMON's
-      nickname (0x051, 0x05A, 0x05B, 0x05E-0x063): DRIFTVEIL, GEAR STATION, UNITY TOWER, CASTELIA, the centers
-- [ ] People: move codes (0x066, 0x073), event flags (0x06A), params (0x079), searches (0x06F, 0x070), the player's rail
-      place (0x07C), hops and jumps (0x0C5, 0x0C6), the player turned or offset (0x075, 0x076, 0x25B)
-- [ ] A battle with a lent POKeMON (StartTrainerBattleWithMon 0x094: DRIFTVEIL, NACRENE)
-- [ ] Gifts with set details (AddMonToPartyDetailed 0x10E: CASTELIA), friendship (0x0FD), forms (0x0FF, 0x117, ROTOM's
-      move 0x11C), counts and records (0x108, 0x112, 0x114, 0x11B, 0x11D, 0x11F, 0x120, 0x242)
-- [ ] Items: is a TM (0x0BA), party use (0x0BD), effect encounter item (0x0BC), table lookups (0x20E, 0x20F, 0x233,
-      0x249, 0x24A), random pocket (0x238), daily gifts (0x234, 0x235), a TM's type (0x236)
-- [ ] Places: fixed-zone warp (0x0C3), special location (0x0DB), a sign moved (0x1EA), field fade-in (0x1B4)
-- [ ] POKeDEX completion and rating (0x1CE, 0x1CF: JUNIPER's / the professors' ratings)
-- [ ] Trainer records (0x23A, 0x23B), the trainer card's events (0x24E-0x250: NUVEMA), names (0x218 / 0x219)
-- [ ] Sound: wait for a song to stop (0x0A0), stop a sound (0x0A7), volumes (0x253 / 0x254), CHATOT's voice (0x24D)
-- [ ] Black's wait / mode screens (0x151 CallModeScreen: ANVILLE, BATTLE SUBWAY, CASTELIA, GEAR STATION, NUVEMA)
+Checked against every script file on 2026-11-14 (a scan of the commands each file uses that the VM has no case for):
+the word buffers, people's move codes / flags / searches, lent-POKeMON battles, detailed gifts, friendship, counts and
+records, item lookups, the POKeDEX ratings, trainer records and the sounds listed here before are all played now.
+
+- [x] Items (1.199.6): party use (0x0BD: CASTELIA's ZORUA girl's POKe BALL check), a random TM from the BAG (0x238),
+      the HIDDEN POWER type reader (0x236, the battle's own formula), the dust cloud's item (0x0BC: none yet)
+- [x] Places (1.199.6): check spots moved by a zone's scripts (0x1EA: NACRENE's gym's shelves), the special location
+      set here (0x0DB), the elevators' floor menus and rides (0x1CB-0x1CD: CASTELIA's buildings; scenario
+      unova_elevator), the player's form model (0x24C: never)
+- [x] The POKeDEX diplomas (0x151 modes 0 / 1: the game's own DIPLOMA screen naming UNOVA, or National; scenario
+      unova_diploma)
+- [x] A POKeMON's picture until a key (0x227: the game's picture box), a person swapped for another where they stood
+      (0x23E): CASTELIA's ZORUA event, which needs a distributed CELEBI (closed: online only)
+- [ ] The BATTLE SUBWAY's map (0x151 mode 2: Black's picture, a new screen: mock-up first)
+- [ ] The player set on a rail (0x07C: zone 66)
+- [ ] Easy chat input (0x1ED, 0x20C: zones 50, 66, 117): the game's own EASY CHAT screen
+- [ ] Counting POKeMON from other trainers (0x239), NPC greetings by the clock and the party (0x23D)
+- [ ] The time effect and trainer-card records of zone 389 (0x24E-0x250), the subprocess of zones 32-34 / 254 (0x134)
+- Kai's own: SURF / WATERFALL's hops and jumps (0x0C5 / 0x0C6, Black's field-move scripts: Kai's field moves); closed
+  as the DS's or online: birthdays (0x1D6 / 0x1D7 / 0x20D), the research surveys (0x210-0x21F), Wi-Fi lists, GTS,
+  the TRIAL HOUSE downloads, PAL PARK (0x1C0), the fixed-zone link-room warp (0x0C3)
 
 ## 4. Systems
 

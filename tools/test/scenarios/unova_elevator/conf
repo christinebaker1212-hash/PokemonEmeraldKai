@@ -1,0 +1,8 @@
+# Black's elevators (SCRCMD_POKEMON_FLD_SetWarpTable / AddWarpMenuItems / WarpToEntry): a CASTELIA building's panel
+# (zone 47's check spot at 6,1) lists the other floors from the script's own table; the first chosen, the player rides
+# there. Shots menu, arrived.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("u3d vm: elevator to zone" "goes on in zone 48")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not played yet" "ROYAL UNOVA")

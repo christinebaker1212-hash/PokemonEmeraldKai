@@ -1,0 +1,23 @@
+pressuntil A field 6000
+wait 120
+mash B 10 20
+wait 60
+pressuntil B field 600
+mp u3dzone 47 6 2
+wait 120
+pressuntil B field 2000
+wait 30
+mp textspeed 2
+mp face up
+wait 10
+press A 10
+wait 120
+press A 10
+wait 90
+shot menu
+press A 10
+wait 400
+shot arrived
+mash B 10 30
+pressuntil B field 2000
+quit

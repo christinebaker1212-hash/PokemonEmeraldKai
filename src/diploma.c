@@ -15,6 +15,12 @@
 #include "menu.h"
 #include "pokedex.h"
 #include "constants/rgb.h"
+#include "mp_region.h"
+
+// Moemon Kai: a diploma asked for by another region's script (src/unova/u3d_vm.c: Black's CallModeScreen 0 / 1):
+// -1 the game's own choice, 0 the region's POKeDEX, 1 the National; and where it goes when it closes (NULL the field)
+s8 gMpDiplomaNational = -1;
+void (*gMpDiplomaExit)(void);
 
 extern const u8 gText_DexNational[];
 extern const u8 gText_DexHoenn[];
@@ -121,13 +127,16 @@ static void Task_DiplomaFadeOut(u8 taskId)
         Free(sDiplomaTilemapPtr);
         FreeAllWindowBuffers();
         DestroyTask(taskId);
-        SetMainCallback2(CB2_ReturnToFieldFadeFromBlack);
+        SetMainCallback2(gMpDiplomaExit ? gMpDiplomaExit : CB2_ReturnToFieldFadeFromBlack);
+        gMpDiplomaExit = NULL;
     }
 }
 
 static void DisplayDiplomaText(void)
 {
-    if (HasAllMons())
+    bool8 national = gMpDiplomaNational >= 0 ? gMpDiplomaNational : HasAllMons();
+    gMpDiplomaNational = -1;
+    if (national)
     {
         SetGpuReg(REG_OFFSET_BG1HOFS, DISPLAY_WIDTH + 16);
         StringCopy(gStringVar1, gText_DexNational);
@@ -135,7 +144,7 @@ static void DisplayDiplomaText(void)
     else
     {
         SetGpuReg(REG_OFFSET_BG1HOFS, 0);
-        StringCopy(gStringVar1, gText_DexHoenn);
+        MP_Region_BufferName();   // Moemon Kai: the region the player is in (HOENN at home)
     }
     StringExpandPlaceholders(gStringVar4, gText_PokedexDiploma);
     PrintDiplomaText(gStringVar4, 0, 1);

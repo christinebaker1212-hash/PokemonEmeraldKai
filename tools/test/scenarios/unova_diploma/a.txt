@@ -1,0 +1,40 @@
+pressuntil A field 6000
+wait 120
+mash B 10 20
+wait 60
+pressuntil B field 600
+mp dexcatch 494 649
+mp u3dzone 48 12 3
+wait 120
+pressuntil B field 2000
+wait 30
+mp face up
+wait 10
+mp textspeed 2
+press A 10
+wait 180
+shot s1
+press A 10
+wait 180
+shot s2
+press A 10
+wait 180
+shot s3
+press A 10
+wait 180
+shot s4
+press A 10
+wait 180
+shot s5
+press A 10
+wait 180
+shot s6
+press A 10
+wait 180
+shot s7
+press A 10
+wait 180
+shot s8
+mash A 10 30
+pressuntil B field 2000
+quit
