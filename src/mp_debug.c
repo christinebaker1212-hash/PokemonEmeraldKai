@@ -4641,6 +4641,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
         bool8 U3D_Vm_DebugRun(u16 id);
         printf("[test] u3drun %d: %d\n", atoi(arg), U3D_Vm_DebugRun((u16)atoi(arg)));
     }
+    else if (strcmp(cmd, "expcurve") == 0)   // expcurve: the EXP CURVE here (mp_expcurve.c): area, frontier, each POKeMON's %
+        MP_ExpCurve_Debug();
     else if (strcmp(cmd, "entree") == 0)   // entree: the ENTRALINK's ENTREE menu (src/unova/u3d_entralink.c)
     {
         void Unova_Entree_Open(void);

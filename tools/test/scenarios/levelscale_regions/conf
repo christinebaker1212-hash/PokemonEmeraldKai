@@ -1,0 +1,8 @@
+# LEVEL SCALING in every region (the user, 2026-11-14: "fix SINNOH and UNOVA so scaling works", "HOENN cannot be
+# assumed the default"): UNOVA's trainers (Black's teams, u3d_battle.c) are raised toward a Lv40 team like every
+# region's, held at the cap of UNOVA's own badges (none: 18), never HOENN's.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:40,9:40,3:40 MOEMON_LEVEL_SCALING=1"
+EXPECT_A=("region 4 badges 0" "unova: trainer A" "level scale: trainer" "(team 40, cap 18)")
+UNEXPECT_A=("[crash]" "TIMEOUT")

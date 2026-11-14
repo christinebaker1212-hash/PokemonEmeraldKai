@@ -16,6 +16,10 @@
 //   encounter (RareEvolvedForm).
 // - EXP is normal for the level they are.
 // The Battle Frontier, the Battle Pike and Pyramid, mass outbreaks and roaming Pokémon keep their own levels.
+// Every region the same (the user, 2026-11-14: HOENN is never the default): the badges and the LEAGUE are the region
+// the player is in (MP_Region_ScaleBadges / MP_Region_ClearedHere; ORRE counts as eight and beaten), and every
+// region's trainers come through here (UNOVA's u3d_battle.c BuildTeam, ORRE's orre_battle.c BuildMon, the rest
+// battle_main.c CreateNPCTrainerParty).
 #include <stdio.h>
 #include <stdlib.h>
 #include "global.h"
@@ -76,6 +80,30 @@ u8 MP_LevelScale_Top3(void)
     return sum;
 }
 
+// BASE SCALING (the user, 2026-11-14): the team's top three's average, rounded down: the EXP CURVE's CATCH-UP
+// (mp_expcurve.c) and MoeGatcha's prize levels (mp_gatcha.c)
+u8 MP_BaseScaling(void)
+{
+    u8 lv[PARTY_SIZE], n = 0, i, j;
+    u16 sum = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+            lv[n++] = GetMonData(&gPlayerParty[i], MON_DATA_LEVEL);
+    for (i = 0; i < n; i++)
+        for (j = i + 1; j < n; j++)
+            if (lv[j] > lv[i])
+            {
+                u8 t = lv[i];
+                lv[i] = lv[j];
+                lv[j] = t;
+            }
+    if (n > 3)
+        n = 3;
+    for (i = 0; i < n; i++)
+        sum += lv[i];
+    return n ? sum / n : 0;
+}
+
 // The team's level for this battle: ours, or the average of everyone's in a co-op battle
 static u8 Reference(void)
 {
@@ -107,19 +135,25 @@ static u8 Cap(void)
         switch (MP_LevelScaleRule(MP_SCALE_PAST8))
         {
         case 1: return MAX_LEVEL;                                           // free
-        case 2: return FlagGet(FLAG_SYS_GAME_CLEAR) ? 80 : sCaps[8];        // always capped
+        case 2: return MP_Region_ClearedHere() ? 80 : sCaps[8];        // always capped
         }
     }
-    if (FlagGet(FLAG_SYS_GAME_CLEAR))
+    if (MP_Region_ClearedHere())   // (the LEAGUE of the region the player is in: never HOENN's by default)
         return MAX_LEVEL;
     return sCaps[b < ARRAY_COUNT(sCaps) ? b : ARRAY_COUNT(sCaps) - 1];
+}
+
+u8 MP_LevelScale_BadgeCap(u8 badges)
+{
+    return sCaps[badges < ARRAY_COUNT(sCaps) ? badges : ARRAY_COUNT(sCaps) - 1];
 }
 
 static bool8 IsBoss(u16 trainerId)
 {
     u8 cls = gTrainers[trainerId].trainerClass;
+    bool8 U3D_IsBossTrainer(u16 trainerId);   // (UNOVA's, by Black's classes: src/unova/u3d_battle.c)
     return cls == TRAINER_CLASS_ELITE_FOUR || cls == TRAINER_CLASS_CHAMPION || cls == TRAINER_CLASS_RIVAL
-        || MP_Coop_IsBossTrainer(trainerId);
+        || MP_Coop_IsBossTrainer(trainerId) || U3D_IsBossTrainer(trainerId);
 }
 
 static u8 BossMargin(u16 trainerId)
@@ -195,6 +229,9 @@ u8 MP_LevelScale_TrainerMon(u16 trainerId, u8 normal, u8 partyMax)
 
 void MP_LevelScale_LogTrainer(u16 trainerId, u8 partyMax)
 {
+    // the EXP CURVE's ANALYZE: the trainers met here, at their own levels (badge cap at most: mp_expcurve.c)
+    MP_ExpCurve_NoteTrainer(partyMax < MP_LevelScale_BadgeCap(MP_Badges()) ? partyMax
+                                                                             : MP_LevelScale_BadgeCap(MP_Badges()));
     if (Enabled())
         MPNet_Log("level scale: trainer %d ace %d -> %d (team %d, cap %d)", trainerId, partyMax,
                   MP_LevelScale_TrainerMon(trainerId, partyMax, partyMax), Reference(), Cap() + BossMargin(trainerId));

@@ -521,6 +521,7 @@ static void LoadConfig(void)
     gMpConfig.scale[MP_SCALE_BOSS - 1] = 0;       // AUTO
     gMpConfig.scale[MP_SCALE_CAPS - 1] = 1;
     gMpConfig.scale[MP_SCALE_PAST8 - 1] = 0;
+    gMpConfig.scale[MP_SCALE_EXP - 1] = 1;        // the EXP CURVE: GENTLE (mp_expcurve.c)
     gMpConfig.animSpeed = 30;
     gMpConfig.spectateScale = 1;
     gMpConfig.bikeMusic = TRUE;
@@ -598,8 +599,10 @@ static void LoadConfig(void)
         else if (strcmp(key, "gimmicks") == 0) gMpConfig.gimmicks = atoi(val) & 0xFF;
         else if (strcmp(key, "level_scaling_rules") == 0)
         {
-            int v[MP_SCALE_COUNT - 1], k;
-            if (sscanf(val, "%d %d %d %d %d", &v[0], &v[1], &v[2], &v[3], &v[4]) == MP_SCALE_COUNT - 1)
+            int v[MP_SCALE_COUNT - 1], k, n;
+            v[MP_SCALE_EXP - 1] = 1;   // (before 1.199.7 five: the EXP CURVE GENTLE)
+            n = sscanf(val, "%d %d %d %d %d %d", &v[0], &v[1], &v[2], &v[3], &v[4], &v[5]);
+            if (n >= 5)
                 for (k = 0; k < MP_SCALE_COUNT - 1; k++)
                     if (v[k] >= 0 && v[k] < MP_LevelScaleRuleCount(k + 1))
                         gMpConfig.scale[k] = v[k];
@@ -760,7 +763,7 @@ void MP_SaveConfig(void)
         "gimmicks = %d\n"
         "; its settings: wild (0 off, 1 low, 2 medium, 3 high), trainers (0 off, 1 below, 2 even, 3 above), boss margin\n"
         "; (0 auto, 1-9 = +0 to +8), badge caps (0 / 1), past 8 badges (0 capped until the League, 1 free, 2 always capped)\n"
-        "level_scaling_rules = %d %d %d %d %d\n"
+        "level_scaling_rules = %d %d %d %d %d %d\n"
         "; servers you host (and playing alone): battle animations this much faster, 0, 25 or 30 (percent)\n"
         "battle_anim_speed = %d\n"
         "; CO-OP > SPECTATE: friends' screens in a panel under yours (0 / 1), each this many times (1-4)\n"
@@ -811,7 +814,7 @@ void MP_SaveConfig(void)
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel),
         gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, MOEMON_DEV_BUILD ? sMainAutosaveMinutes : gMpConfig.autosaveMinutes,
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lastRoomAddr, gMpConfig.lastJoinCode, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.moveSplit, gMpConfig.generation, gMpConfig.gimmicks,
-        gMpConfig.scale[0], gMpConfig.scale[1], gMpConfig.scale[2], gMpConfig.scale[3], gMpConfig.scale[4], gMpConfig.animSpeed,
+        gMpConfig.scale[0], gMpConfig.scale[1], gMpConfig.scale[2], gMpConfig.scale[3], gMpConfig.scale[4], gMpConfig.scale[5], gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
         gMpConfig.moenavCalls ? "battles" : "all",
         gMpConfig.finderStyle == MP_FINDER_ARROWS ? "arrows" : gMpConfig.finderStyle == MP_FINDER_RADAR ? "radar" : "both",
@@ -1911,11 +1914,11 @@ bool8 MP_LevelScalingIsOurs(void)   // not a joiner who heard the host's rules
 
 u8 MP_LevelScaleRuleCount(u8 which)
 {
-    static const u8 sCounts[MP_SCALE_COUNT] = {2, 4, 4, 10, 2, 3};
+    static const u8 sCounts[MP_SCALE_COUNT] = {2, 4, 4, 10, 2, 3, 3};
     return which < MP_SCALE_COUNT ? sCounts[which] : 1;
 }
 
-// Tests: MOEMON_LEVEL_RULES="WILD TRAINERS BOSS CAPS PAST8" sets ours at the start
+// Tests: MOEMON_LEVEL_RULES="WILD TRAINERS BOSS CAPS PAST8 [EXP]" sets ours at the start
 static void LevelRulesFromEnv(void)
 {
     static bool8 sDone;
@@ -1923,7 +1926,8 @@ static void LevelRulesFromEnv(void)
     if (sDone)
         return;
     sDone = TRUE;
-    if (getenv("MOEMON_LEVEL_RULES") && sscanf(getenv("MOEMON_LEVEL_RULES"), "%d %d %d %d %d", &v[0], &v[1], &v[2], &v[3], &v[4]) == 5)
+    v[MP_SCALE_EXP - 1] = gMpConfig.scale[MP_SCALE_EXP - 1];   // (a sixth number: the EXP CURVE)
+    if (getenv("MOEMON_LEVEL_RULES") && sscanf(getenv("MOEMON_LEVEL_RULES"), "%d %d %d %d %d %d", &v[0], &v[1], &v[2], &v[3], &v[4], &v[5]) >= 5)
         for (k = 0; k < MP_SCALE_COUNT - 1; k++)
             if (v[k] >= 0 && v[k] < MP_LevelScaleRuleCount(k + 1))
                 gMpConfig.scale[k] = v[k];

@@ -35,6 +35,8 @@ press RIGHT 1
 wait 5
 rendershot entralinkpick
 press A 1
+wait 10
+press A 1
 wait 200
 pressuntil A field 6000
 wait 60

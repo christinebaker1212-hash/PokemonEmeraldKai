@@ -79,7 +79,7 @@ bool8 MP_Garden_Visited(void)
 // The group's journey: the most badges among the Trainers here
 static u8 GroupBadges(void)
 {
-    u8 i, b = MP_Badges();
+    u8 i, b = MP_Region_MostBadges();
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         if (i != gMpLocalId && gMpPlayers[i].present && gMpPlayers[i].hasState
          && gMpPlayers[i].state.mapGroup == MAP_GROUP(MAP_MOEMON_GARDEN) && gMpPlayers[i].state.mapNum == MAP_NUM(MAP_MOEMON_GARDEN)

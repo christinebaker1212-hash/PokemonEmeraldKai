@@ -1144,6 +1144,10 @@ bool8 MP_PartyCanUseFieldMove(u16 move)
 
 bool8 MP_Region_HasFieldMoveBadge(u8 hm)
 {
+    // UNOVA's field moves need no badge (as Black's) and ORRE has none: never HOENN's badges by default
+    u8 group = gSaveBlock1Ptr->location.mapGroup;
+    if (MP_Region_OfGroup(group) == REGION_UNOVA || O3D_IsOrreGroup(group))
+        return TRUE;
     return FlagGet(MP_Region_FieldMoveBadge(hm));
 }
 
@@ -1175,6 +1179,35 @@ bool8 MP_Region_Cleared(u8 region)
     if (region == REGION_HOENN && FlagGet(FLAG_SYS_GAME_CLEAR))
         return TRUE;
     return region < REGION_COUNT && (gRegionState.cleared & (1 << region));
+}
+
+// Where the player stands, for level scaling and EXP (the user, 2026-11-14: a multi-region game, HOENN is never the
+// default): the badges of the region they're in, and whether its LEAGUE is beaten. ORRE, post-game only and without
+// badges of its own, counts as eight badges and beaten; a region added later answers through sBadgeFlags and
+// gRegionState.cleared as the others do.
+u8 MP_Region_ScaleBadges(void)
+{
+    if (O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
+        return 8;
+    return MP_Region_BadgeCount(MP_Region_Current());
+}
+
+bool8 MP_Region_ClearedHere(void)
+{
+    if (O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
+        return TRUE;
+    return MP_Region_Cleared(MP_Region_Current());
+}
+
+// The most badges any one region's given (the MOéMON GARDEN's and its BERRY farm's growth: never smaller for crossing
+// to a new region)
+u8 MP_Region_MostBadges(void)
+{
+    u8 r, best = 0;
+    for (r = 0; r < REGION_COUNT; r++)
+        if (MP_Region_BadgeCount(r) > best)
+            best = MP_Region_BadgeCount(r);
+    return best;
 }
 
 // SINNOH's time of day in JOHTO, KANTO and HOENN (the user, 2026-11-02): grass slots 2 and 3 hold the morning's
@@ -1228,6 +1261,7 @@ void MP_Region_GiveDevices(void)
     if (MP_Region_Current() == REGION_JOHTO && VarGet(0x5003) >= 2 && !CheckBagHasItem(ITEM_POKEGEAR, 1))
         AddBagItem(ITEM_POKEGEAR, 1);
     MP_RegionItems_Update();   // (key items: each region's own; a beaten region's postgame, all: mp_regionitems.c)
+    MP_ExpCurve_MapLoaded();   // (the EXP CURVE's ANALYZE of the new map, the region's frontier: mp_expcurve.c)
 }
 
 // Moemon Kai: MY ROOM in JOHTO has decorations of its own (Crystal's room; the Secret Base / bedroom logic of

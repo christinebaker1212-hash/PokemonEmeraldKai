@@ -1,0 +1,34 @@
+pressuntil A field 5000
+wait 30
+mp expcurve
+mp teach 0 129
+mp landwild
+pressuntil A action 4000
+wait 20
+press A 1
+wait 20
+press A 1
+pressuntil A field 4000
+wait 30
+mp expcurve
+mp setflag 2151
+mp setflag 2152
+mp setflag 2153
+mp setflag 2154
+mp setflag 2155
+mp setflag 2156
+mp setflag 2157
+mp setflag 2158
+echo [xc] hoenn eight
+mp expcurve
+mp warp 40,30,21,28
+wait 200
+pressuntil B field 2000
+echo [xc] sinnoh
+mp expcurve
+mp u3dzone 317 20 20
+wait 200
+pressuntil B field 2000
+echo [xc] unova
+mp expcurve
+quit

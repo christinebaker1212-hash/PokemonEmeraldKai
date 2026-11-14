@@ -347,6 +347,7 @@ static struct
     u8 seatPlayer[3];      // network player id of each seat
     u16 playerBonus[MP_MAX_PLAYERS];   // master: each friend's own EXP bonus (MPR_COOP_BONUS;
     u8 playerBonusHeard;               // bits by player: it can come before our battle is set up)
+    u8 playerCeiling[MP_MAX_PLAYERS];  // master: each friend's EXP CURVE ceiling (MPR_COOP_BONUS byte 3; 0 = ours)
     u8 seatLeveled[3];     // master: level-up bits per seat (own slots)
     s8 bonusFrom;          // the friend whose EXP bonus we last heard (MPR_COOP_BONUS), -1 = nobody
     u16 bonusPercent;
@@ -1435,6 +1436,19 @@ static void Task_JoinCheck(u8 taskId)
 
 // The EXP bonus percent for a Pokémon in the master's battle party: party slots
 // 0-2 are the master's own, 3-5 the partner's (their own bonus, MPR_COOP_BONUS).
+// The EXP CURVE's ceiling for a party slot's owner (mp_expcurve.c): the master's own, a friend's as they sent it
+u8 MP_Coop_ExpCeilingFor(u8 partySlot)
+{
+    u8 seat;
+    if (gMpCoopBattle && sCoop.isMaster && partySlot < PARTY_SIZE && (seat = SeatOfSlot(partySlot)) != 0 && seat < sCoop.count)
+    {
+        u8 player = sCoop.seatPlayer[seat];
+        if (player < MP_MAX_PLAYERS && (sCoop.playerBonusHeard & (1 << player)) && sCoop.playerCeiling[player])
+            return sCoop.playerCeiling[player];
+    }
+    return MP_ExpCurve_Ceiling();
+}
+
 u16 MP_Coop_ExpBonusFor(u8 partySlot)
 {
     u8 seat;
@@ -1847,8 +1861,8 @@ static void BeginCoopBattleGroup(u8 seat, u8 count, const u8 *players)
     if (seat != 0)
     {
         u16 pct = MP_ExpBonusPercent();
-        u8 buf[3] = {MPR_COOP_BONUS, pct & 0xFF, pct >> 8};
-        Send(players[0], buf, 3);
+        u8 buf[4] = {MPR_COOP_BONUS, pct & 0xFF, pct >> 8, MP_ExpCurve_Ceiling()};   // (+ our EXP CURVE ceiling)
+        Send(players[0], buf, 4);
     }
     gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_LINK
                      | BATTLE_TYPE_MULTI | BATTLE_TYPE_TOWER_LINK_MULTI;
@@ -3850,6 +3864,7 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
             if (from < MP_MAX_PLAYERS)
             {
                 sCoop.playerBonus[from] = sCoop.bonusPercent;
+                sCoop.playerCeiling[from] = len >= 4 ? data[3] : 0;
                 sCoop.playerBonusHeard |= 1 << from;
             }
         }

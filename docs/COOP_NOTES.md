@@ -7604,3 +7604,35 @@ the BAG's list and plates grey teal (BAG_LIST), its description box blue (BAG_DE
 (mp_bagui.c); the FRONTIER PASS's TRAINER CARD muted (sDarkPassCards, each card's own hue) and its description line's
 words white (frontier_pass.c -> MP_Theme_FrontierPass). The harness's `shot` leaves the backdrop black (the window's
 output, `rendershot`, has it): compare with rendershot. Scenario theme_dark_screens (shots of all five).
+
+## The EXP CURVE, BASE SCALING, and LEVEL SCALING in every region (1.199.7)
+
+The user's design (2026-11-14), after a player stayed in one KANTO area to catch and reached Lv25 before a badge. On
+with LEVEL SCALING: OPTIONS > GAME > LEVEL SCALING > EXP CURVE (OFF / GENTLE, the default / STRONG), HOST A GAME >
+GAME RULES, the host's online (MP_SCALE_EXP, the sixth number of `level_scaling_rules`). src/mp/mp_expcurve.c:
+
+- ANALYZE: the map's highest level without scaling: its grass, and its water once SURF can be used there (the
+  region's own badge, UNOVA none, and a POKéMON with SURF); never fishing, ROCK SMASH or UNOVA's dark grass (gated,
+  often far higher: Black's ROUTE 1 has Lv32-35 dark grass). gWildMonHeaders for HOENN / KANTO / JOHTO / SINNOH,
+  U3D_WildInfo for UNOVA. The trainers met there count as their teams are built (MP_LevelScale_LogTrainer ->
+  MP_ExpCurve_NoteTrainer, at most the badge cap).
+- The frontier: gRegionState.expFrontier[region] (from the record's filler), the highest area reached; never below
+  the last badge's level (MP_LevelScale_BadgeCap(badges - 1) - 3). The ceiling is the higher of the area and the
+  frontier, so going back to an early route costs nothing.
+- Per POKéMON, last after every other bonus (LUCKY EGG, trades, buddy, TOGETHER, PASS POWERS, catch EXP): +5% a level
+  under the ceiling (+100% at most, "a boosted"), the game's own at it, x0.85 (GENTLE) / x0.75 (STRONG) a level over,
+  10% at least. Battle code: battle_script_commands.c Cmd_getexp and MpCoopSplitExp; co-op partners send their
+  ceiling as MPR_COOP_BONUS's byte 3 (MP_Coop_ExpCeilingFor).
+- CATCH-UP: with the curve on, MP_CatchUpPercent is MP_ExpCurve_CatchUp: +5% a level toward the best friend's top-3
+  level, never past the ceiling, +30% at most (the badge catch-up otherwise).
+- BASE SCALING: MP_BaseScaling, the top three's average rounded down: the catch-up and MoeGatcha's prize levels.
+- Off in a region whose LEAGUE is beaten, in ORRE (post-game), the Pike and the Pyramid.
+- LUCKY EGG +50% (was +100%), its EXP Share and Shadow paths too.
+- Test: `mp expcurve` (area, frontier, floor, ceiling, each slot's %); scenario exp_curve.
+
+LEVEL SCALING in every region (the user: "HOENN cannot be assumed to be the default"): MP_Badges() is the badges of
+the region the player is in (MP_Region_ScaleBadges; ORRE 8), the cap's "after the LEAGUE" that region's
+(MP_Region_ClearedHere; ORRE always), the Garden's and BERRY farm's growth the best region's (MP_Region_MostBadges).
+UNOVA's trainers now come through MP_LevelScale_TrainerMon (u3d_battle.c BuildTeam; the BATTLE SUBWAY keeps Lv50),
+its bosses by Black's classes (U3D_IsBossTrainer). Field moves in UNOVA and ORRE need no badge
+(MP_Region_HasFieldMoveBadge: no HOENN fallback). Scenario levelscale_regions.

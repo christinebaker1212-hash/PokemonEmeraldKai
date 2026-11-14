@@ -70,7 +70,8 @@ struct RegionState
                      // their first POKéMON of the region (it waits in the GLOBAL PC: heldPid / heldOt find it)
     u8 pad[2];
     u32 heldPid, heldOt;
-    u8 filler[36];   // room for later fields without a format change
+    u8 expFrontier[5];   // (1.199.7) per region: the highest area reached, its own levels (mp_expcurve.c)
+    u8 filler[31];   // room for later fields without a format change
 };
 extern struct RegionState gRegionState;
 enum { SHIP_AT_SEA, SHIP_NEAR, SHIP_DOCKED };
@@ -91,6 +92,9 @@ u16 MP_Region_FieldMoveBadge(u8 hm);    // an HM's badge flag (0 cut .. 7 waterf
 bool8 MP_Region_HasFieldMoveBadge(u8 hm);
 u16 MP_FieldMoveHasBadge(void);          // special: VAR_0x8004 -> VAR_RESULT
 bool8 MP_Region_Cleared(u8 region);
+u8 MP_Region_ScaleBadges(void);      // the badges of the region the player is in (ORRE: 8): level scaling, EXP
+bool8 MP_Region_ClearedHere(void);   // the LEAGUE of the region the player is in beaten (ORRE: always)
+u8 MP_Region_MostBadges(void);       // the most badges any one region has given (the Garden's growth)
 u16 MP_TimeLandSlot(u16 species, u8 index);   // grass slots 2-3 by the time of day outside SINNOH
 bool8 MP_Region_DeviceHere(u8 home);   // a region's device works here (its region, or anywhere once its LEAGUE is beaten)
 void MP_Region_GiveDevices(void);      // map load: the MOéNAV key item once HOENN's LEAGUE is beaten

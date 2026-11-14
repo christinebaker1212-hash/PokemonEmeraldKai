@@ -213,6 +213,10 @@ before building them.
 - **Online, only the room's host leads a trip**; everyone follows (customs, then the same boat).
 - **The first voyage to a region is aboard the ship** (mp_ship.c), later ones the ferry scene (mp_voyage.c); ORRE is
   post-game only, by boat (the ORRE TICKET after any ELITE FOUR), never a NEW GAME region.
+- **HOENN is never the default** (the user, 2026-11-14: "a multi-region game"): anything counted by badges or the
+  LEAGUE uses the region the player is in (MP_Badges / MP_Region_ScaleBadges, MP_Region_ClearedHere, field moves'
+  badges: UNOVA and ORRE need none; ORRE counts as eight badges and beaten); a new region adds its badge flags to
+  mp_region.c sBadgeFlags and its trainers go through MP_LevelScale_TrainerMon like every region's.
 - **Each region's own versions**: the BICYCLE is KANTO's / JOHTO's, the MACH / ACRO BIKE HOENN's, the MTN. BIKE
   SINNOH's; each region's device is its own (MOéNAV, POKéGEAR, POKéTCH, C-GEAR / XTRANSCEIVER) until its postgame.
 
@@ -351,6 +355,9 @@ CO-OP > SPECTATE) with BIKE MUSIC / SURF MUSIC (overworld.c MpRideMusic), BUTTON
 Also the POKéDEX list's views (1.190.0: R OWN / SHARED, the player's own seen / caught kept in "<save>.owndex" by src/mp/mp_dexplus.c beside the shared flags; L REGION / NATIONAL; LT / F the SHOW filter; the header drawn over the frame, MP_DexHud_Composite; left / right ten entries; 1.190.1: SELECT's FIND & SORT panel, drawn over the frame too: JUMP TO by typing, stat / FIRST CAUGHT orders, generation / type / Ability / move / egg group, MP_DexQuery_*; pokedex.c MpDexFilterList; 1.190.2: an entry's MORE on R: STATS / EVOLUTION / WHERE, MP_DexInfo_Show; left of the user's 12 picks of 2026-11-11: A on an evolution line's member opening its entry, WHERE's gifts / trades / time of day, every catcher's name, not only the first).
 Also POKéDEX entries from Ruby, Sapphire, Emerald and FireRed as one long text (pokedex.c TEXT tab: MpDexBuild / MpDexDraw,
 reading mode UP/DOWN/B; data from tools/moemon_dex into src/data/pokemon/mp_dex_more.h and mp_dex_bar.h; test dex_text).
+Also the EXP CURVE with LEVEL SCALING (1.199.7, the user's design: mp_expcurve.c ANALYZE of each area, the region's
+frontier, more EXP below it and less far past it per POKéMON, catch-up never past the area, BASE SCALING = top-3
+average for it and MoeGatcha; LUCKY EGG +50%; COOP_NOTES "The EXP CURVE"; tests exp_curve, levelscale_regions).
 Also FF8-style level scaling (mp_levelscale.c: OPTIONS > BATTLE > LEVEL SCALING and its page of settings MP_SCALE_*, the host's
 online, set on HOST A GAME > GAME RULES; the team's top-3 average, co-op seats average via MpState.top3; trainers, wild (halfway
 by default), scripted wild; badge caps, boss margins, trainer evolutions, a raised wild one's evolved form as a rare encounter;

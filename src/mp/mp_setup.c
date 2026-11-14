@@ -1145,6 +1145,7 @@ static void RuleValue(u8 row, char *out, int len)
     static const char *const sWild[] = {"OFF", "LOW", "MEDIUM", "HIGH"};
     static const char *const sTrainers[] = {"OFF", "BELOW", "EVEN", "ABOVE"};
     static const char *const sPast8[] = {"TO LEAGUE", "FREE", "ALWAYS CAPPED"};
+    static const char *const sExp[] = {"OFF", "GENTLE", "STRONG"};
     u8 v;
     if (row == RULE_PADDING)
         snprintf(out, len, "%s", gMpConfig.trainerPadding ? "ON" : "OFF");
@@ -1165,6 +1166,7 @@ static void RuleValue(u8 row, char *out, int len)
         case MP_SCALE_WILD:     snprintf(out, len, "%s", sWild[v & 3]); break;
         case MP_SCALE_TRAINERS: snprintf(out, len, "%s", sTrainers[v & 3]); break;
         case MP_SCALE_BOSS:     if (v == 0) snprintf(out, len, "AUTO"); else snprintf(out, len, "+%d", v - 1); break;
+        case MP_SCALE_EXP:      snprintf(out, len, "%s", sExp[v % 3]); break;
         default:                snprintf(out, len, "%s", sPast8[v % 3]); break;
         }
     }
@@ -1175,7 +1177,7 @@ static void RuleValue(u8 row, char *out, int len)
 static void DrawRules(void)
 {
     static const char *const labels[RULE_ROWS] = {"TEAM PADDING", "ANIM SPEED", "LEVEL SCALING", "  WILD", "  TRAINERS",
-                                                  "  BOSS MARGIN", "  BADGE CAPS", "  PAST 8 BADGES", "GENERATION",
+                                                  "  BOSS MARGIN", "  BADGE CAPS", "  PAST 8 BADGES", "  EXP CURVE", "GENERATION",
                                                   "MEGA EVOLUTION", "Z-MOVES", "DYNAMAX", "TERASTALLIZE", "BACK"};
     static const char *const help[RULE_ROWS] = {
         "ON: trainers get one extra Moemon when friends team up.",
@@ -1186,6 +1188,7 @@ static void DrawRules(void)
         "Extra levels for GYM LEADERS, rivals, ELITE FOUR. AUTO: +2 to +5.",
         "Nothing scales past a level that rises with the badges.",
         "8 badges: capped to the LEAGUE then free, FREE, or ALWAYS capped.",
+        "Less EXP far past the area's level, more below it, until its LEAGUE.",
         "The Moemon, moves and types of these generations, for everyone.",
         "AUTO: on from GEN 6. START in battle.",
         "AUTO: on from GEN 7. START in battle.",

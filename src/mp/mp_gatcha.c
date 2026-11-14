@@ -1472,18 +1472,11 @@ static u32 PersonalityForShiny(u32 otId)
     return ((u32)hi << 16) | lo;
 }
 
-// The party's average level, rounded down (eggs not counted; 0: no POKeMON)
+// BASE SCALING (the user, 2026-11-14): the team's top three's average, rounded down (eggs not counted; 0: no
+// POKeMON), as the EXP CURVE's (mp_levelscale.c MP_BaseScaling)
 static u8 PartyAverageLevel(void)
 {
-    u32 i, sum = 0, n = 0;
-    for (i = 0; i < PARTY_SIZE; i++)
-    {
-        if (!GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES) || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
-            continue;
-        sum += GetMonData(&gPlayerParty[i], MON_DATA_LEVEL);
-        n++;
-    }
-    return n ? sum / n : 0;
+    return MP_BaseScaling();
 }
 
 static u8 sLastGivenLevel;   // (the harness: the level the last prize came at)

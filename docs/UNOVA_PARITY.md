@@ -85,9 +85,15 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
       trip's clock (30 ticks a second, a chime each 1350, home at 5400 after four), a talk's time aboard, the cabins'
       battles; the deck's view of the sea (ov203's 3D scene) isn't drawn: it leaves the boat sailing on (u3d_vm.c
       BoatCreate / BoatFrame; scenario unova_boat). Every warp, inside a zone too, runs its zone-change script, as Black
-- [ ] The ENTRALINK (INTRUDE / EVENT_COMM 0x16F-0x177: Black's forest, missions; co-op friends for the wireless),
-      PASS POWERS (0x1F1 / 0x1F2, shareable), WHITE FOREST / BLACK CITY's people (0x1C5 / 0x1C6)
-- [ ] The C-GEAR as UNOVA's device, the XTRANSCEIVER's calls (friends' video calls)
+- [x] The ENTRALINK (1.199.7, the user's approved mock-ups: src/unova/u3d_entralink.c): Black's ENTREE (bank 69),
+      missions with co-op friends (SUPPORT: talk to the friend, who gets its PASS POWER; BATTLE: a C-GEAR IR battle;
+      relay MPR_ENTRALINK 15), Black Level and Pass Orbs, RECEIVE PASS POWER, CHECK STATUS; PASS POWERS from
+      Black's table (a/0/3/8) with gpower.c's rules, SHARE for the room. Scenarios unova_entralink,
+      unova_entralink_mission
+- [ ] The ENTRALINK's own forest maps' extras: WHITE FOREST / BLACK CITY's people (0x1C5 / 0x1C6)
+- [x] The C-GEAR as UNOVA's device (1.199.7, the approved mock-up: src/unova/u3d_screen.c; START > C-GEAR): IR with
+      the friend in front (TRADE, BATTLE), WIRELESS (the CO-OP menu), ENTRALINK; scenarios unova_cgear, unova_cgear_ir
+- [ ] The XTRANSCEIVER's calls (friends' video calls)
 - [x] Dark grass: two POKeMON at once (Black's double wild battles: 40 in 100 with two able to battle,
       wild_encounter.c U3dStartWild; test: mp u3dwild 3 b, MOEMON_U3D_DARK_DOUBLE=100)
 - [ ] Shaking grass, dust clouds, rippling water

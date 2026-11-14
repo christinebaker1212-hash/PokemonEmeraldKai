@@ -19,6 +19,7 @@
 #include "item_menu.h"
 #include "main.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "mp_farm.h"
 #include "mp_garden.h"
 #include "random.h"
@@ -84,7 +85,7 @@ static bool8 IsPlot(u8 id)
 
 static u8 OwnPlots(void)
 {
-    u16 n = 4 + 2 * MP_Badges();
+    u16 n = 4 + 2 * MP_Region_MostBadges();
     return n > PLOTS ? PLOTS : n;
 }
 

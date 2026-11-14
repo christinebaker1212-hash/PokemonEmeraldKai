@@ -3406,14 +3406,14 @@ static u8 MpHoldEffectOf(u8 slot)
 }
 
 // Moemon Kai: EXP Share holders get all the EXP a POKéMON that fought got (each of them: several don't split it),
-// doubled when one that fought (of SLOTS FIRST..FIRST + COUNT - 1) holds a LUCKY EGG
+// half again when one that fought (of SLOTS FIRST..FIRST + COUNT - 1) holds a LUCKY EGG (+50%, the user 2026-11-14)
 static u16 MpExpShareFor(u16 battlerExp, s32 sentIn, u8 first, u8 count)
 {
     u8 i;
     for (i = first; i < first + count; i++)
         if ((gBitTable[i] & sentIn) && GetMonData(&gPlayerParty[i], MON_DATA_HP) != 0
          && MpHoldEffectOf(i) == HOLD_EFFECT_LUCKY_EGG)
-            return min(0xFFFF, battlerExp * 2);
+            return min(0xFFFF, battlerExp * 150 / 100);
     return battlerExp;
 }
 
@@ -3484,7 +3484,7 @@ static void MpCoopExpBegin(s32 sentIn, u8 fainted)
         if (holdEffect == HOLD_EFFECT_EXP_SHARE && !(sentIn & gBitTable[slot]))   // (one that fought: its own)
             gain = sMpCoopShareExp[owner];
         if (holdEffect == HOLD_EFFECT_LUCKY_EGG)
-            gain = gain * 2;   // Moemon Kai: +100% (Gen 3: +50%)
+            gain = gain * 150 / 100;   // LUCKY EGG +50% (the user, 2026-11-14; was +100%)
         if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
             gain = gain * 150 / 100;
         if (MP_Coop_IsTradedMon(slot))
@@ -3496,6 +3496,13 @@ static void MpCoopExpBegin(s32 sentIn, u8 fainted)
         {
             gain = gain * (100 + MP_Coop_ExpBonusFor(slot)) / 100;
             boosted = TRUE;
+        }
+        {
+            // the EXP CURVE last, on this POKeMON's own level and its owner's ceiling (mp_expcurve.c)
+            bool8 up;
+            gain = MP_ExpCurve_Apply(gain, GetMonData(mon, MON_DATA_LEVEL), MP_Coop_ExpCeilingFor(slot), &up);
+            if (up)
+                boosted = TRUE;
         }
         if (gain == 0)
             continue;
@@ -3801,7 +3808,7 @@ static void Cmd_getexp(void)
                 // give back when it's purified, with no message (fight_range_80211A00.c)
                 u32 shadowExp = (gBattleStruct->sentInPokes & 1) ? *exp : (holdEffect == HOLD_EFFECT_EXP_SHARE ? gExpShareExp : 0);
                 if (holdEffect == HOLD_EFFECT_LUCKY_EGG)
-                    shadowExp *= 2;
+                    shadowExp = shadowExp * 150 / 100;   // (LUCKY EGG +50%)
                 if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
                     shadowExp = shadowExp * 150 / 100;
                 if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_HP))
@@ -3831,7 +3838,7 @@ static void Cmd_getexp(void)
                     if (holdEffect == HOLD_EFFECT_EXP_SHARE && !(gBattleStruct->sentInPokes & 1))
                         gBattleMoveDamage = gExpShareExp;   // (Moemon Kai: one that fought keeps its own)
                     if (holdEffect == HOLD_EFFECT_LUCKY_EGG)
-                        gBattleMoveDamage = gBattleMoveDamage * 2;   // Moemon Kai: +100% (Gen 3: +50%)
+                        gBattleMoveDamage = gBattleMoveDamage * 150 / 100;   // LUCKY EGG +50% (the user, 2026-11-14; was +100%)
                     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !gMpCoopWild)
                         gBattleMoveDamage = (gBattleMoveDamage * 150) / 100;
 
@@ -3863,6 +3870,17 @@ static void Cmd_getexp(void)
                         // buddy bonus + TOGETHER (capped) + badge catch-up
                         gBattleMoveDamage = (gBattleMoveDamage * (100 + MP_Coop_ExpBonusFor(gBattleStruct->expGetterMonId))) / 100;
                         if (!(gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gBattleStruct->expGetterMonId >= 3))
+                            i = STRINGID_ABOOSTED;
+                    }
+
+                    // Moemon Co-op: the EXP CURVE last, on this POKeMON's own level (mp_expcurve.c): more below the
+                    // area's ceiling ("a boosted"), less far past it
+                    {
+                        u8 getter = gBattleStruct->expGetterMonId;
+                        bool8 up;
+                        gBattleMoveDamage = MP_ExpCurve_Apply(gBattleMoveDamage, GetMonData(&gPlayerParty[getter], MON_DATA_LEVEL),
+                                                              gMpCoopBattle ? MP_Coop_ExpCeilingFor(getter) : MP_ExpCurve_Ceiling(), &up);
+                        if (up && !(gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && getter >= 3))
                             i = STRINGID_ABOOSTED;
                     }
 

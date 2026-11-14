@@ -107,6 +107,7 @@ enum
     OPT_SC_BOSS,
     OPT_SC_CAPS,
     OPT_SC_PAST8,
+    OPT_SC_EXP,       // the EXP CURVE (mp_expcurve.c)
     OPT_SC_BACK,
     OPT_FB_BIND,      // the FIGHT BUTTONS page: a fight button (arg: FIGHT_BIND_*)
     OPT_FB_DEFAULTS,
@@ -242,6 +243,9 @@ static const u8 sText_ScTrainers[] = _("TRAINERS");
 static const u8 sText_ScBoss[] = _("BOSS MARGIN");
 static const u8 sText_ScCaps[] = _("BADGE CAPS");
 static const u8 sText_ScPast8[] = _("PAST 8 BADGES");
+static const u8 sText_ScExp[] = _("EXP CURVE");
+static const u8 sText_ScGentle[] = _("GENTLE");
+static const u8 sText_ScStrong[] = _("STRONG");
 static const u8 sText_ScLow[] = _("LOW");
 static const u8 sText_ScMedium[] = _("MEDIUM");
 static const u8 sText_ScHigh[] = _("HIGH");
@@ -678,6 +682,9 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_SC_PAST8:
         names[0] = sText_ScToLeague, names[1] = sText_ScFree, names[2] = sText_ScCapped;
         return 3;
+    case OPT_SC_EXP:
+        names[0] = sText_Off, names[1] = sText_ScGentle, names[2] = sText_ScStrong;
+        return 3;
     }
     // one free-form value
     buf[0] = EOS;
@@ -860,7 +867,7 @@ static u8 Current(u8 row)
     case OPT_TITLE:       return 0;
     case OPT_SURFMUSIC:   return gMpConfig.surfMusic != 0;
     case OPT_LEVELSCALE:  return 0;   // (the page has the settings)
-    case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8:
+    case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8: case OPT_SC_EXP:
         return MP_LevelScaleRule(SC_RULE(sRows[row].opt));
     case OPT_MOVESPLIT:   return gMpConfig.moveSplit != 0;
     case OPT_GENERATION:  return MP_Generation() - 3;
@@ -1005,7 +1012,7 @@ static void Change(u8 row, int dir)
         break;
     case OPT_SURFMUSIC:   gMpConfig.surfMusic = !gMpConfig.surfMusic; break;
     case OPT_LEVELSCALE:  break;   // A opens its page
-    case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8:
+    case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8: case OPT_SC_EXP:
         if (!ScaleLocked())
         {
             u8 rule = SC_RULE(sRows[row].opt);
@@ -1126,6 +1133,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_SC_BOSS:     return sText_ScBoss;
     case OPT_SC_CAPS:     return sText_ScCaps;
     case OPT_SC_PAST8:    return sText_ScPast8;
+    case OPT_SC_EXP:      return sText_ScExp;
     case OPT_SC_BACK:     return sText_Back;
     case OPT_SURFMUSIC:   return sText_SurfMusic;
     case OPT_LEVELSCALE:  return sText_LevelScale;
@@ -1341,7 +1349,7 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "%s", MP_TCard_ShowTitle() ? "YOUR TITLE SHOWS ON YOUR CARD" : "NO TITLE ON YOUR CARD");
     else if (opt == OPT_LEVELSCALE)
         snprintf(ascii, sizeof(ascii), "%s", ScaleLocked() ? "ONLINE THE HOST DECIDES. A: SEE IT" : "A: HOW WILD AND TRAINERS KEEP UP");
-    else if (opt >= OPT_SC_ON && opt <= OPT_SC_PAST8 && ScaleLocked())
+    else if (opt >= OPT_SC_ON && opt <= OPT_SC_EXP && ScaleLocked())
         snprintf(ascii, sizeof(ascii), "THE HOST DECIDES THIS ONLINE");
     else if (opt == OPT_SC_ON)
         snprintf(ascii, sizeof(ascii), "WILD AND TRAINERS KEEP UP WITH YOU");
@@ -1358,6 +1366,9 @@ static void DrawHint(void)
     else if (opt == OPT_SC_PAST8)
         snprintf(ascii, sizeof(ascii), "%s", (const char *[]){"CAPPED UNTIL THE LEAGUE, THEN FREE", "NO CAP ONCE YOU HAVE ALL 8",
                  "ALWAYS A CAP (80 AFTER THE LEAGUE)"}[MP_LevelScaleRule(MP_SCALE_PAST8) % 3]);
+    else if (opt == OPT_SC_EXP)
+        snprintf(ascii, sizeof(ascii), "%s", (const char *[]){"EXP AS THE GAME GIVES IT",
+                 "LESS EXP FAR PAST THE AREA, MORE BELOW IT", "MUCH LESS EXP FAR PAST THE AREA"}[MP_LevelScaleRule(MP_SCALE_EXP) % 3]);
     else if (opt == OPT_MOVESPLIT)
         snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: %s"
                  : "GEN 4: EACH MOVE PHYSICAL OR SPECIAL", MP_MoveSplit() ? "GEN 4" : "GEN 3");

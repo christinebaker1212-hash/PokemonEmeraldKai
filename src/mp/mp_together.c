@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "event_data.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
@@ -33,13 +34,10 @@ static u16 sMeter;
 static u8 sLevel, sNear;
 static u16 sTick;
 
+// The badges of the region the player is in (never HOENN's by default: mp_region.c MP_Region_ScaleBadges)
 u8 MP_Badges(void)
 {
-    u8 i, n = 0;
-    for (i = 0; i < 8; i++)
-        if (FlagGet(FLAG_BADGE01_GET + i))
-            n++;
-    return n;
+    return MP_Region_ScaleBadges();
 }
 
 static u8 CountNear(void)
@@ -126,6 +124,8 @@ u8 MP_Together_ShinyRerolls(void)
 u16 MP_CatchUpPercent(void)
 {
     u8 i, best = 0, mine = MP_Badges();
+    if (MP_ExpCurve_Active())
+        return MP_ExpCurve_CatchUp();   // (with the EXP CURVE, levels toward a friend's, never past the area: mp_expcurve.c)
     if (!MP_IsConnected() || gMpLocalId < 0)
         return 0;
     for (i = 0; i < MP_MAX_PLAYERS; i++)

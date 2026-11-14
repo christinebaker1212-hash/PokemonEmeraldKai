@@ -18,6 +18,7 @@
 #include "pokemon.h"
 #include "string_util.h"
 #include "u3d.h"
+#include "mp.h"   // Moemon Co-op: LEVEL SCALING (BuildTeam)
 #include "constants/battle_ai.h"
 #include "constants/items.h"
 #include "constants/species.h"
@@ -78,17 +79,28 @@ static u8 BuildTeam(u8 which, u16 id, const u8 *t)
 {
     u32 size, i, stride;
     const u8 *p = U3D_Vm_TrainerTeam(id, &size);
-    u8 flags = t[0], count = t[3], n = 0;
+    u8 flags = t[0], count = t[3], n = 0, partyMax = 0;
+    u16 slot = TRAINER_UNOVA_A + which;
     stride = 8 + ((flags & 2) ? 2 : 0) + ((flags & 1) ? 8 : 0);
+    for (i = 0; p && i < count && i < PARTY_SIZE && (i + 1) * stride <= size; i++)   // (Black's strongest: scaling's anchor)
+        if (p[i * stride + 2] > partyMax)
+            partyMax = p[i * stride + 2];
+    MP_LevelScale_LogTrainer(slot, partyMax);
     for (i = 0; p && i < count && i < PARTY_SIZE && (i + 1) * stride <= size; i++)
     {
         const u8 *r = p + i * stride;
         u16 national = Le16(r + 4), species = national ? NationalPokedexNumToSpecies(national) : SPECIES_NONE;
         u8 level = r[2] ? r[2] : 1, iv = r[0] * MAX_PER_STAT_IVS / 255;
+        // Moemon Co-op: LEVEL SCALING, as every region's trainers (mp_levelscale.c; ORRE's: orre_battle.c)
+        u8 scaled = sSubway ? level : MP_LevelScale_TrainerMon(slot, level, partyMax);
         struct Pokemon *mon = &sTeam[which][n];
         if (species == SPECIES_NONE)
             continue;
-        CreateMon(mon, species, level, iv, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
+        if (!sSubway && scaled + gMpEnemyLevelBonus > level)
+            scaled = min(MAX_LEVEL, scaled + gMpEnemyLevelBonus);
+        CreateMon(mon, species, scaled, iv, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
+        if (scaled > level)
+            MP_LevelScale_EvolveMon(mon);   // (Black's set moves below stay its own)
         if (flags & 1)
         {
             const u8 *m = r + 8 + ((flags & 2) ? 2 : 0);
@@ -116,11 +128,11 @@ static bool8 SetTrainer(u8 which, u16 id, bool8 doubles)
     TextInto(s->trainerName, BANK_TRAINER_NAMES, id, TRAINER_NAME_LENGTH);
     s->doubleBattle = doubles;
     s->aiFlags = AI_SCRIPT_CHECK_BAD_MOVE | AI_SCRIPT_TRY_TO_FAINT | AI_SCRIPT_CHECK_VIABILITY;
+    sClass[which] = t[1];   // (before the team: LEVEL SCALING's boss margin reads it, U3D_IsBossTrainer)
     sTeamCount[which] = BuildTeam(which, id, t);
     s->partySize = sTeamCount[which];
     sBlackTrainer[which] = id;
     TextInto(sClassName[which], BANK_TRAINER_CLASSES, t[1], 20);
-    sClass[which] = t[1];
     MPNet_Log("unova: trainer %c %d (Black's %d, class %d): %d POKeMON, kind %d", 'A' + which, slot, id, t[1],
               sTeamCount[which], t[2]);
     return sTeamCount[which] > 0;
@@ -135,6 +147,21 @@ bool8 U3D_IsTrainer(u16 trainerId)
 u8 U3D_TrainerClass(u16 trainerId)
 {
     return sClass[Which(trainerId)];
+}
+
+// LEVEL SCALING's bosses (mp_levelscale.c IsBoss) by Black's own classes (system bank 191): the Leaders, the Elite
+// Four, the Champion, the POKeMON Trainers (CHEREN, BIANCA, N...) and Team Plasma's Sages and GHETSIS
+bool8 U3D_IsBossTrainer(u16 trainerId)
+{
+    static const u8 sBoss[] = {0, 1, 10, 11, 12, 19, 20, 21, 22, 23, 37, 38, 40, 54, 55, 56, 78, 79, 80, 81, 82, 89, 100,
+                               101, 103, 104};
+    u32 i;
+    if (!IS_UNOVA_TRAINER(trainerId))
+        return FALSE;
+    for (i = 0; i < ARRAY_COUNT(sBoss); i++)
+        if (sBoss[i] == sClass[Which(trainerId)])
+            return TRUE;
+    return FALSE;
 }
 
 const u8 *U3D_ClassName(u16 trainerId)
