@@ -729,8 +729,9 @@ padding"). Protocol 26. Tests: tri_padded (Tommy 2 -> 3, Triple), coop_one_mon (
 ## PMD Collab followers (mp_pmd.c, mp_bigsprite.c; data from tools/moemon_pmd)
 Followers (yours and friends') and Garden Pokémon are PMD Collab overworld sprites (github PMDCollab/SpriteCollab,
 CC BY-NC 4.0; artists in dist_extras/PMD_CREDITS.txt, packaged). tools/moemon_pmd/import.py SPRITECOLLAB_DIR writes
-graphics/moemon/pmd/pmd.bin (one raw-deflated chunk per Pokémon: national dex 1-493; 387-493 added later with
-`--append 387-493` from a newer collab checkout, the rest kept byte for byte, variant 0 normal, 1 female, 2/3
+graphics/moemon/pmd/pmd.bin (one raw-deflated chunk per Pokémon: national dex 1-1025 where the collab has a sheet;
+387-493 added later with `--append 387-493` from a newer collab checkout, 494-1025 (Gens 5-9, 481 of 532: the collab
+has no walk sheet for the rest yet; 1.199.5) with `--append 494-1025` under the same rules, nothing resized; the rest kept byte for byte, variant 0 normal, 1 female, 2/3
 shiny / female shiny when the shiny colors need pixels of their own), src/data/mp_pmd.h (the index) and the credits.
 A chunk ('PMD2'): bpp 4 (8 for the few shiny sheets with 16+ colors: all colors kept), palette and shiny palette (one
 set of pixels when the (normal, shiny) color pairs fit in 15), 29 animations (PMD_ANIM_*), each frames x 8 directions

@@ -362,7 +362,8 @@ they don't fit; test item_desc) and REJOIN that remembers where the room is (a f
 invite code (COOP_NOTES "REJOIN and remembered invite codes"; tools/test/rejoin_smoke.sh).
 Also the Garden's BERRY farm (mp_farm.c: the game's own BERRY trees, ids 100-119, framed soil stamped as plots open; online the room host's
 farm through MP_Farm_Tree in GetBerryTreeInfo, plant / pick asked of the host; GA_FARM Pokémon work by nature; COOP_NOTES "BERRY farm"; tests farm_*).
-Also PMD Collab followers and Garden Pokémon (mp_pmd.c, data tools/moemon_pmd -> graphics/moemon/pmd/pmd.bin via .incbin; big sprites:
+Also PMD Collab followers and Garden Pokémon (mp_pmd.c, data tools/moemon_pmd -> graphics/moemon/pmd/pmd.bin via .incbin;
+national dex 1-1025 where the collab has a sheet, Gens 5-9 since 1.199.5, all drawn as the collab draws them; test pmd_gen59; big sprites:
 struct Sprite mpBig, mp_bigsprite.c + gba_easy_draw.c DrawBigSprite draw any size in the sprite order; 8 directions, poses 7-19 =
 PMD actions, MP_Pmd_Animate; credits dist_extras/PMD_CREDITS.txt; tests pmd_*). Also battle weather on screen the whole battle (mp_battleweather.c: particles over the frame, the renderer hook gMpScenePixel
 for the sandstorm and tints; no per-turn weather lines; tests battle_weather*).

@@ -1,0 +1,25 @@
+pressuntil A field 5000
+wait 30
+mp follow 0
+wait 60
+press RIGHT 30
+mp pmd
+shot snivy
+mp follow 1
+wait 60
+press LEFT 30
+mp pmd
+shot zekrom
+mp follow 2
+wait 60
+press RIGHT 30
+wait 30
+mp pmd
+shot eternatus
+mp follow 3
+wait 60
+press LEFT 30
+wait 60
+mp pmd
+shot sprigatito
+quit

@@ -1,0 +1,9 @@
+# PMD Collab followers for Gens 5-9 (1.199.5: tools/moemon_pmd/import.py --append 494-1025, the same rules as 1-493:
+# drawn as the collab draws them, a big one a little farther from its Trainer). SNIVY, ZEKROM, ETERNATUS (the biggest
+# sheet) and SPRIGATITO follow in turn as PMD pictures. Shots snivy, zekrom, eternatus, sprigatito.
+MODE=1
+WARP=0,0,10,12
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=520:15,669:50,915:60,931:10 MOEMON_FOLLOWER_SPRITES=1"
+EXPECT_A=("dex 495 on 1" "dex 644 on 1" "dex 890 on 1" "dex 906 on 1")
+UNEXPECT_A=("[crash]" "pmd: sheet")
