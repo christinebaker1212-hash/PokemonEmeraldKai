@@ -6325,6 +6325,11 @@ void AdjustFriendship(struct Pokemon *mon, u8 event)
             // 50% increase, rounding down
             mod = (150 * mod) / 100;
 
+        if (mod > 0)   // Moemon Kai: BEFRIENDING POWER (src/unova/u3d_entralink.c)
+        {
+            u32 Unova_PassPower_Apply(u8 kind, u32 v);
+            mod = (s8)Unova_PassPower_Apply(3, (u32)mod);
+        }
         friendship += mod;
         if (mod > 0)
         {

@@ -488,11 +488,12 @@ void MP_Shop_SetPrices(const u16 *items, const u32 *prices)
 
 static u32 MpShopPrice(u16 itemId)
 {
-    u32 i;
+    u32 i, price = GetItemPrice(itemId);
+    u32 Unova_PassPower_Apply(u8 kind, u32 v);
     for (i = 0; sMpPriceItems != NULL && sMpPriceItems[i] != ITEM_NONE; i++)
         if (sMpPriceItems[i] == itemId)
-            return sMpPrices[i];
-    return GetItemPrice(itemId);
+            price = sMpPrices[i];
+    return Unova_PassPower_Apply(4, price);   // Moemon Kai: BARGAIN POWER (src/unova/u3d_entralink.c)
 }
 
 static void Task_HandleShopMenuQuit(u8 taskId)

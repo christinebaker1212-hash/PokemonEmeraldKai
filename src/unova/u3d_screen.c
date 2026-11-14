@@ -82,6 +82,8 @@ u32 Unova_Screen_Time(void)
 // u3d_vm.c U3D_Vm_FieldFrame: what a closed screen left to do on the field (a warp, the CO-OP menu...)
 void Unova_Screen_FieldFrame(void)
 {
+    void Unova_Entralink_FieldFrame(void);
+    Unova_Entralink_FieldFrame();   // (the PASS POWERS' minutes, the room's mission: u3d_entralink.c)
     if (S.pending && !S.screen)
     {
         void (*f)(void) = S.pending;
@@ -220,7 +222,7 @@ void Unova_Screen_List(int x, int y, int wTiles, const char *const *items, int c
 
 // ------------------------------------------------------------------------------------------------- the C-GEAR
 enum { CG_IR, CG_WIRELESS, CG_ENTRALINK, CG_BUTTONS };
-enum { CGM_NONE, CGM_IR_MENU, CGM_NOTE };
+enum { CGM_NONE, CGM_IR_MENU, CGM_NOTE, CGM_EL_MENU };
 static struct
 {
     u8 sel, mode, menuSel;
@@ -374,6 +376,12 @@ static void CGearDraw(void)
     }
     else if (C.mode == CGM_NOTE)
         Unova_Screen_Message(C.note[0], C.note[1][0] ? C.note[1] : NULL);
+    else if (C.mode == CGM_EL_MENU)
+    {
+        // (Black's C-GEAR: its ENTRALINK button there; the ENTREE once in it; the PASS POWERS received)
+        static const char *const sEl[] = {"ENTRALINK", "PASS POWER", "CANCEL"};
+        Unova_Screen_List(144, 46, 9, sEl, 3, C.menuSel);
+    }
 }
 
 static void Note(const char *a, const char *b)
@@ -406,6 +414,18 @@ static void DoEntralink(void)
     U3D_Vm_GoToEntralink();
 }
 
+static void DoEntree(void)
+{
+    void Unova_Entree_Open(void);
+    Unova_Entree_Open();
+}
+
+static void DoPowers(void)
+{
+    void Unova_PassPowers_Open(void);
+    Unova_PassPowers_Open();
+}
+
 static void CGearStep(u16 pressed, u16 keys)
 {
     (void)keys;
@@ -416,6 +436,25 @@ static void CGearStep(u16 pressed, u16 keys)
         {
             PlaySE(SE_SELECT);
             C.mode = CGM_NONE;
+        }
+        return;
+    case CGM_EL_MENU:
+        if (pressed & DPAD_UP)
+            C.menuSel = (C.menuSel + 2) % 3, PlaySE(SE_SELECT);
+        else if (pressed & DPAD_DOWN)
+            C.menuSel = (C.menuSel + 1) % 3, PlaySE(SE_SELECT);
+        else if (pressed & B_BUTTON)
+            C.mode = CGM_NONE, PlaySE(SE_SELECT);
+        else if (pressed & A_BUTTON)
+        {
+            bool8 U3D_Vm_InEntralink(void);
+            PlaySE(SE_SELECT);
+            if (C.menuSel == 2)
+                C.mode = CGM_NONE;
+            else if (C.menuSel == 1)
+                Unova_Screen_Close(DoPowers);
+            else
+                Unova_Screen_Close(U3D_Vm_InEntralink() ? DoEntree : DoEntralink);
         }
         return;
     case CGM_IR_MENU:
@@ -461,7 +500,7 @@ static void CGearStep(u16 pressed, u16 keys)
             Unova_Screen_Close(DoCoopMenu);
             break;
         case CG_ENTRALINK:
-            Unova_Screen_Close(DoEntralink);
+            C.mode = CGM_EL_MENU, C.menuSel = 0;
             break;
         }
     }

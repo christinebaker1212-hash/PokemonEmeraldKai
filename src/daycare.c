@@ -1106,7 +1106,17 @@ static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
     // Moemon Kai: an egg cycle every 32 steps, not every 256: every EGG hatches in an eighth of the time (half in
     // 1.115.0, half again in 1.132.0, the user 2026-11-06; half again in 1.171.6, the user 2026-11-07); FLAME BODY and
     // MAGMA ARMOR still take two cycles at once
-    if ((++daycare->stepCounter & 0x1F) == 0x1F)
+    // Moemon Kai: HATCHING POWER counts a step for more (src/unova/u3d_entralink.c)
+    {
+        u32 Unova_PassPower_EggSteps(void);
+        u32 steps = Unova_PassPower_EggSteps();
+        bool8 cycle = FALSE;
+        while (steps--)
+            if ((++daycare->stepCounter & 0x1F) == 0x1F)
+                cycle = TRUE;
+        if (!cycle)
+            return FALSE;
+    }
     {
         u32 eggCycles;
         u8 toSub = GetEggCyclesToSubtract();

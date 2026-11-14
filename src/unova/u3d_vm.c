@@ -258,6 +258,7 @@ static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
                          struct { u16 national; u8 level, filled; u32 otId, personality;
                                   u8 nick[POKEMON_NAME_LENGTH + 1]; } snap[2]; } misc;
                 u8 plateSwitches;   // (BURGH's gym's switches found, a bit each: Black's plate doors' save)
+                u8 entralink[96];   // (the ENTRALINK's Pass Orbs, missions and PASS POWERS: u3d_entralink.c)
               } sWork;   // (gym[0]: ELESA's gym's levers, a bit a lane: CartLanes below)   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
@@ -5560,6 +5561,11 @@ void U3D_Vm_WhiteoutHome(void)
 // The C-GEAR (FENNEL's gift in STRIATON): UNOVA's device once it's got
 // The C-GEAR's ENTRALINK button (u3d_screen.c): off to the ENTRALINK (zone 279, Black's start tile)
 #define ZONE_ENTRALINK 279
+bool8 U3D_Vm_InEntralink(void)
+{
+    return CurrentZone() == ZONE_ENTRALINK;
+}
+
 void U3D_Vm_GoToEntralink(void)
 {
     u8 group, num;
@@ -5573,6 +5579,17 @@ void U3D_Vm_GoToEntralink(void)
         SetWarpDestination(group, num, WARP_ID_NONE, x, y);
         DoWarp();
     }
+}
+
+// The ENTRALINK's saved state and Black's PASS POWER table (u3d_entralink.c; u3d_tables.h sGPower)
+void *U3D_Vm_EntralinkSave(void)
+{
+    return sWork.entralink;
+}
+
+const u16 *U3D_Vm_GPower(u8 id)
+{
+    return sGPower[id < ARRAY_COUNT(sGPower) ? id : 0];
 }
 
 // (mp_debug.c `mp cgear`: the C-GEAR given, for tests)

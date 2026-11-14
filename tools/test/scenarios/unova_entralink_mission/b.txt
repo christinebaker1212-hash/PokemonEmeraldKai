@@ -1,0 +1,19 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 60
+mp u3dzone 279 16 15
+wait 200
+pressuntil A field 3000
+barrier placed 2
+watchlog entralink mission complete
+waitlog 4000
+wait 60
+mash B 6 20
+wait 60
+barrier support 2
+watchlog starting PvP battle
+waitlog 4000 spotted by player 1
+mash A 30 20
+waitlog 4000
+wait 120
+quit

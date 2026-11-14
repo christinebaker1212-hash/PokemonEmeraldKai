@@ -1,0 +1,12 @@
+# ENTRALINK missions with a friend (src/unova/u3d_entralink.c): in the ENTRALINK ALICE takes the ENTREE's first mission
+# (a SUPPORT mission naming BOB: Black's words, bank 67), faces BOB and talks to him: the mission is complete for both
+# and BOB receives its Pass Power from ALICE's Entralink; then the third (a BATTLE mission naming BOB) is completed by a
+# battle with him through the C-GEAR's IR. Shots board, ask.
+MODE=2
+TMO=360
+ENV_A="MOEMON_DEBUG_PARTY=6:50"
+ENV_B="MOEMON_DEBUG_PARTY=9:50"
+EXPECT_A=("unova screen: ENTREE" "entralink mission 2" "entralink mission complete (orbs 2, missions 1)" "entralink mission complete (orbs 5, missions 2)" "starting PvP battle against player 2")
+EXPECT_B=("entralink mission 2" "for player 2" "pass power 3" "entralink mission complete (orbs 2, missions 1)" "entralink mission complete (orbs 5, missions 2)" "starting PvP battle against player 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "mission failed")
+UNEXPECT_B=("[crash]" "TIMEOUT" "mission failed")

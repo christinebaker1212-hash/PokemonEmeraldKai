@@ -1,0 +1,66 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 60
+mp u3dzone 279 16 16
+wait 200
+pressuntil A field 3000
+barrier placed 2
+wait 120
+mp face up
+wait 10
+mp cgear
+wait 20
+press RIGHT 1
+wait 5
+press RIGHT 1
+wait 5
+press A 1
+wait 10
+press A 1
+wait 60
+press A 1
+wait 20
+rendershot board
+press A 1
+wait 20
+rendershot ask
+watchlog entralink mission complete
+press A 1
+wait 60
+press A 1
+waitlog 600
+wait 30
+mash B 6 20
+wait 120
+barrier support 2
+mp cgear
+wait 20
+press RIGHT 1
+wait 5
+press RIGHT 1
+wait 5
+press A 1
+wait 10
+press A 1
+wait 60
+press A 1
+wait 20
+press DOWN 1
+wait 5
+press DOWN 1
+wait 5
+press A 1
+wait 20
+press A 1
+wait 60
+mp cgear
+wait 20
+press A 1
+wait 20
+press DOWN 1
+wait 10
+watchlog starting PvP battle
+press A 1
+waitlog 4000
+wait 120
+quit

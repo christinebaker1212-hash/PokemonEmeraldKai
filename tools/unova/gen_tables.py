@@ -8,6 +8,8 @@
 - ov010 sScrcmdLookupTable, for SCRCMD_PROC_LookupTableValue
 - the move tutors' POKeMON: the personal data's tutor bits (archive a/0/1/6, u32 at 0x38: POKE_TOOL_CheckTutorCompat;
   0-2 GRASS / FIRE / WATER PLEDGE, 3-5 FRENZY PLANT / BLAST BURN / HYDRO CANNON, 6 DRACO METEOR), national numbers
+- the PASS POWERS (archive 0x26 member 0, gpower.c GPowerData: 48 of 12 bytes: the levels to receive one (White,
+  Black), its cost in Pass Orbs, its value, its kind (one active a kind) and its minutes), for src/unova/u3d_entralink.c
 - the ROYAL UNOVA's passengers (ov036 DAILY_LAYOUT_*: the anchor and companion cells, each cell's two flags, the main
   (trainers), bonus and filler passengers: {object, trainer, message, message}), for PLEASURE_BOAT_*
 
@@ -74,6 +76,15 @@ def main():
         out.append('    %s,' % ', '.join('{%d, 0x%02X}' % e for e in tutors[k:k + 8]))
     out.append('};')
     path = 'src/unova/u3d_tables.h'
+    # the PASS POWERS (a/0/3/8 0)
+    gp = narc.arc('a/0/3/8')[0]
+    rows = []
+    for i in range(len(gp) // 12):
+        lv, cost, _r0, _r1, _r2, _r3, val, kind, minutes = struct.unpack_from('<HHBBBBHBB', gp, 12 * i)
+        rows.append('{%d, %d, %d, %d, %d, %d}' % (lv & 0xFF, lv >> 8, min(cost, 255), val, kind, minutes))
+    out.append("// Black's PASS POWERS (a/0/3/8 member 0, gpower.c GPowerData): {Black Lv. to receive it, White Lv. (0xFE: a")
+    out.append("// mission's gift, 0xFF: never), cost in Pass Orbs, value, kind (one active a kind), minutes}")
+    out.append('static const u16 sGPower[%d][6] = {%s};' % (len(rows), ', '.join(rows)))
     # the ROYAL UNOVA (ov036)
     bram, bd = scrcmd.ov_image(36)
     def b8(key):

@@ -570,6 +570,10 @@ static bool8 WildEncounterCheck(u32 encounterRate, bool8 ignoreAbility)
         else if (ability == ABILITY_SAND_VEIL && gSaveBlock1Ptr->weather == WEATHER_SANDSTORM)
             encounterRate /= 2;
     }
+    {
+        u32 Unova_PassPower_Apply(u8 kind, u32 v);
+        encounterRate = Unova_PassPower_Apply(0, encounterRate);   // Moemon Kai: ENCOUNTER POWER (src/unova/u3d_entralink.c)
+    }
     if (encounterRate > MAX_ENCOUNTER_RATE)
         encounterRate = MAX_ENCOUNTER_RATE;
     return EncounterOddsCheck(encounterRate);

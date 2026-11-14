@@ -3735,6 +3735,10 @@ static void Cmd_getexp(void)
             // Moemon Co-op: a caught Pokemon is worth the share of its HP that was knocked off
             if (sMpCatchExpPercent)
                 calculatedExp = max(1, (u32)calculatedExp * sMpCatchExpPercent / 100);
+            {
+                u32 Unova_PassPower_Apply(u8 kind, u32 v);   // Moemon Kai: EXP. POINT POWER (src/unova/u3d_entralink.c)
+                calculatedExp = max(1, min(0xFFFF, Unova_PassPower_Apply(7, calculatedExp)));
+            }
 
             // Moemon Co-op: each player gets a full share, split only among their own
             // Pokémon (party slots 0-2 = the master's, 3-5 = the partner's)
@@ -6316,6 +6320,10 @@ static void Cmd_getmoneyreward(void)
     if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
         moneyReward += GetTrainerMoneyToGive(gTrainerBattleOpponent_B);
     moneyReward = moneyReward * (100 + MP_BuddyBonusPercent()) / 100; // Moemon Co-op: buddy bonus
+    {
+        u32 Unova_PassPower_Apply(u8 kind, u32 v);
+        moneyReward = Unova_PassPower_Apply(9, moneyReward);   // Moemon Kai: PRIZE MONEY POWER (src/unova/u3d_entralink.c)
+    }
 
     {
         // Moemon Kai: MOM keeps a quarter while she saves (JOHTO / KANTO: mp_mombank.c); the message says so
@@ -11021,6 +11029,10 @@ static void Cmd_handleballthrow(void)
             catchRate = Orre_Shadow_SnagRate(gBattlerTarget);   // Moemon Kai: Colosseum's Shadow table's own
         else
             catchRate = gSpeciesInfo[gBattleMons[gBattlerTarget].species].catchRate;
+        {
+            u32 Unova_PassPower_Apply(u8 kind, u32 v);   // Moemon Kai: CAPTURE POWER (src/unova/u3d_entralink.c)
+            catchRate = min(255, Unova_PassPower_Apply(10, catchRate));
+        }
 
         if (gLastUsedItem > ITEM_SAFARI_BALL)
         {

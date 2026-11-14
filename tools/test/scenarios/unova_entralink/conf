@@ -1,0 +1,9 @@
+# The ENTRALINK's ENTREE and PASS POWERS (src/unova/u3d_entralink.c; the user's approved mock-ups): in the ENTRALINK,
+# the C-GEAR's ENTRALINK button opens Black's ENTREE (its words: bank 69), CHECK STATUS, then RECEIVE PASS POWER with 4
+# Pass Orbs and 5 missions done (Black Lv. 6): ENCOUNTER POWER (+) (Black Lv. 3, 2 orbs) received; then the C-GEAR's
+# PASS POWER list uses it (3 minutes, Black's table). Shots entree, status, receive, received, powers.
+MODE=1
+TMO=240
+ENV_A="MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("unova screen: ENTREE" "pass power 0 received" "unova screen: PASS POWER" "pass power 0 on (kind 0, value 150, 3 min)")
+UNEXPECT_A=("[crash]" "TIMEOUT")

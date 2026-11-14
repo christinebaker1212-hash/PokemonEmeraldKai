@@ -4641,6 +4641,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
         bool8 U3D_Vm_DebugRun(u16 id);
         printf("[test] u3drun %d: %d\n", atoi(arg), U3D_Vm_DebugRun((u16)atoi(arg)));
     }
+    else if (strcmp(cmd, "entree") == 0)   // entree: the ENTRALINK's ENTREE menu (src/unova/u3d_entralink.c)
+    {
+        void Unova_Entree_Open(void);
+        Unova_Entree_Open();
+    }
+    else if (strcmp(cmd, "passpower") == 0)   // passpower ID [ORBS MISSIONS]: a PASS POWER received, Pass Orbs and missions added
+    {
+        void Unova_Entralink_DebugGive(u8 id, u16 orbs, u16 missions);
+        u8 Unova_PassPower_Active(u8 kind);
+        int id = 255, orbs = 0, missions = 0;
+        sscanf(arg, "%d %d %d", &id, &orbs, &missions);
+        Unova_Entralink_DebugGive(id, orbs, missions);
+        printf("[test] passpower %d given, orbs +%d; encounter power on: %d\n", id, orbs, Unova_PassPower_Active(0));
+    }
     else if (strcmp(cmd, "cgear") == 0)   // cgear: the C-GEAR given (UNOVA's work) and opened over the field
     {
         void U3D_Vm_GiveCGear(void);

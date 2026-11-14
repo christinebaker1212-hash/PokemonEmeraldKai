@@ -681,6 +681,10 @@ void MP_Battle_Start(u8 opponentId, bool8 isMaster, u32 opponentMoney)
     gReceivedRemoteLinkPlayers = FALSE;
     gLinkPlayers[0].trainerId = 0;
     MPNet_Log("starting PvP battle against player %d (we are link %s)", opponentId + 1, isMaster ? "master" : "slave");
+    {
+        void Unova_Entralink_OnPvpBattle(u8 opponent);
+        Unova_Entralink_OnPvpBattle(opponentId);   // Moemon Kai: an ENTRALINK BATTLE mission's (src/unova/u3d_entralink.c)
+    }
     sNet.startTask = CreateTask(Task_StartMpBattle, 1);
 }
 
