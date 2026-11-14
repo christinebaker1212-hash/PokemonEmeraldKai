@@ -362,7 +362,7 @@ static void StartMission(const struct Mission *m, u8 starter)
     M.running = TRUE;
     M.starter = starter;
     M.framesLeft = (u32)m->seconds * 60;
-    printf("[test] entralink mission %u (kind %u) for player %u, %u s\n", m->text, m->kind, m->target + 1, m->seconds);
+    MPNet_Log("entralink: mission %u (kind %u) for player %u, %u s", m->text, m->kind, m->target + 1, m->seconds);
     Notice(69, 16);   // "The mission is starting now!"
 }
 
@@ -386,7 +386,7 @@ static void EndMission(bool8 done)
         PlaySE(SE_FAILURE);
         Notice(45, 37);   // "The mission failed..."
     }
-    printf("[test] entralink mission %s (orbs %u, missions %u)\n", done ? "complete" : "failed", s->orbs, s->missions);
+    MPNet_Log("entralink: mission %s (orbs %u, missions %u)", done ? "complete" : "failed", s->orbs, s->missions);
 }
 
 static void SendDone(void)
@@ -453,8 +453,6 @@ void Unova_Entralink_OnPvpBattle(u8 opponent)
 void Unova_Entralink_FieldFrame(void)
 {
     struct UnovaEntralinkSave *s = Save();
-    static bool8 sFreeBefore;
-    bool8 freeNow = !ArePlayerFieldControlsLocked() && !Unova_Screen_IsActive();
     u32 k;
     for (k = 0; k < KINDS; k++)
         if (s->framesLeft[k] && --s->framesLeft[k] == 0)
@@ -463,18 +461,23 @@ void Unova_Entralink_FieldFrame(void)
     {
         if (M.running)
             EndMission(FALSE);
-        sFreeBefore = freeNow;
         return;
     }
-    // (free on the frame before: the field's own A on a friend locks the controls before this hook runs)
-    if (M.now.kind == MK_SUPPORT && JOY_NEW(A_BUTTON) && sFreeBefore && FriendInFront() == M.now.target)
+}
+
+// field_control_avatar.c: A on the friend a SUPPORT mission names: done (the press is the talk, not the friend menu),
+// and the friend gets its power
+bool8 Unova_Entralink_TryTalk(void)
+{
+    if (!M.running || M.now.kind != MK_SUPPORT || FriendInFront() != M.now.target)
+        return FALSE;
     {
         u8 b[3] = {MPR_ENTRALINK, EL_POWER_SHARE, M.now.power};
         MP_SendRelay(M.now.target, b, 3);   // (the friend talked to gets the power)
-        SendDone();
-        EndMission(TRUE);
     }
-    sFreeBefore = freeNow;
+    SendDone();
+    EndMission(TRUE);
+    return TRUE;
 }
 
 bool8 Unova_Entralink_MissionRunning(void)

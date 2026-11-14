@@ -24,13 +24,11 @@ rendershot board
 press A 1
 wait 20
 rendershot ask
-watchlog entralink mission complete
 press A 1
+wait 90
+pressuntillog A 900 entralink: mission complete
 wait 60
-press A 1
-waitlog 600
-wait 30
-mash B 6 20
+rendershot talked
 wait 120
 barrier support 2
 mp cgear
@@ -51,6 +49,8 @@ press DOWN 1
 wait 5
 press A 1
 wait 20
+press A 1
+wait 90
 press A 1
 wait 60
 mp cgear

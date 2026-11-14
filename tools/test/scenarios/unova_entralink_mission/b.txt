@@ -5,12 +5,14 @@ mp u3dzone 279 16 15
 wait 200
 pressuntil A field 3000
 barrier placed 2
-watchlog entralink mission complete
-waitlog 4000
+waitlog 4000 entralink: mission complete
 wait 60
 mash B 6 20
 wait 60
 barrier support 2
+waitlog 3000 (kind 1)
+wait 40
+mash B 3 20
 watchlog starting PvP battle
 waitlog 4000 spotted by player 1
 mash A 30 20

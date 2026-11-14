@@ -6,7 +6,7 @@ MODE=2
 TMO=360
 ENV_A="MOEMON_DEBUG_PARTY=6:50"
 ENV_B="MOEMON_DEBUG_PARTY=9:50"
-EXPECT_A=("unova screen: ENTREE" "entralink mission 2" "entralink mission complete (orbs 2, missions 1)" "entralink mission complete (orbs 5, missions 2)" "starting PvP battle against player 2")
-EXPECT_B=("entralink mission 2" "for player 2" "pass power 3" "entralink mission complete (orbs 2, missions 1)" "entralink mission complete (orbs 5, missions 2)" "starting PvP battle against player 1")
+EXPECT_A=("unova screen: ENTREE" "(kind 0) for player 2" "(kind 1) for player 2" "entralink: mission complete (orbs 2, missions 1)" "entralink: mission complete (orbs 5, missions 2)" "starting PvP battle against player 2")
+EXPECT_B=("(kind 0) for player 2" "(kind 1) for player 2" "pass power" "entralink: mission complete (orbs 2, missions 1)" "entralink: mission complete (orbs 5, missions 2)" "starting PvP battle against player 1")
 UNEXPECT_A=("[crash]" "TIMEOUT" "mission failed")
 UNEXPECT_B=("[crash]" "TIMEOUT" "mission failed")

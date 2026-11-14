@@ -259,6 +259,12 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     metatileBehavior = MapGridGetMetatileBehaviorAt(position.x, position.y);
     if (input->pressedAButton)
         MP_Underground_TryTalk();   // Moemon Kai: SPIRITOMB's counter, a friend talked to in SINNOH's Underground
+    if (input->pressedAButton)   // Moemon Kai: UNOVA's ENTRALINK: a SUPPORT mission's friend talked to (src/unova/u3d_entralink.c)
+    {
+        bool8 Unova_Entralink_TryTalk(void);
+        if (Unova_Entralink_TryTalk())
+            return TRUE;
+    }
     // Moemon Kai: RUI between the player and their POKeMON: A held lets it past (src/orre/orre_npcs.c)
     if (input->pressedAButton && O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup) && Orre_Npc_TryFollowerPast())
         return TRUE;
