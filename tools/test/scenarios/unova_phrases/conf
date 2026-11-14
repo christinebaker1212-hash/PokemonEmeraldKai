@@ -1,0 +1,8 @@
+# Zone 66's person asks for the player's battle phrases (Black's StartPmsInput kinds 0-3): the game's own EASY CHAT on
+# the save's introduction / won / lost phrases. Her script (6) run directly: the first choice (introduction), the EASY
+# CHAT screen opened, finished on OK, the script going on. Shots menu, easychat, after.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("zone 66 script 6")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not played yet")

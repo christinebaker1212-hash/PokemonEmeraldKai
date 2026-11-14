@@ -60,7 +60,10 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
       (0x23E): CASTELIA's ZORUA event, which needs a distributed CELEBI (closed: online only)
 - [ ] The BATTLE SUBWAY's map (0x151 mode 2: Black's picture, a new screen: mock-up first)
 - [ ] The player set on a rail (0x07C: zone 66)
-- [ ] Easy chat input (0x1ED, 0x20C: zones 50, 66, 117): the game's own EASY CHAT screen
+- [x] The battle phrases asked for (0x1ED kinds 0-3, zone 66): the game's own EASY CHAT on the save's introduction /
+      won / lost phrases ("No. 1" asked, not kept: Kai has none); scenario unova_phrases
+- [ ] Black's own words (0x1ED kinds 4 / 5, 0x20C): the PEP QUIZ (zone 117) needs Black's word list; MR. LOCK's
+      password (zone 50) is an event's (closed)
 - [ ] Counting POKeMON from other trainers (0x239), NPC greetings by the clock and the party (0x23D)
 - [ ] The time effect and trainer-card records of zone 389 (0x24E-0x250), the subprocess of zones 32-34 / 254 (0x134)
 - Kai's own: SURF / WATERFALL's hops and jumps (0x0C5 / 0x0C6, Black's field-move scripts: Kai's field moves); closed

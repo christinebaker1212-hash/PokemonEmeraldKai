@@ -1,0 +1,29 @@
+pressuntil A field 6000
+wait 120
+mash B 10 20
+wait 60
+pressuntil B field 600
+mp u3dzone 66 5 4
+wait 120
+pressuntil B field 2000
+wait 30
+mp textspeed 2
+mp u3drun 6
+wait 120
+press A 10
+wait 120
+shot menu
+press A 10
+pressuntil A easychat 3000
+wait 60
+shot easychat
+press START 1
+wait 30
+press UP 1
+wait 20
+press A 1
+wait 240
+shot after
+mash B 10 30
+pressuntil B field 2000
+quit

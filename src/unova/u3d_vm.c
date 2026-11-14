@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "easy_chat.h"
 #include "event_data.h"
 #include "event_object_lock.h"
 #include "event_object_movement.h"
@@ -35,6 +36,7 @@
 #include "text.h"
 #include "u3d.h"
 #include "constants/event_object_movement.h"
+#include "constants/easy_chat.h"
 #include "constants/event_objects.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
@@ -1045,9 +1047,10 @@ static void PopSong(void)
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
 enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY, SCREEN_CLEAR, SCREEN_TRADE,
        SCREEN_SUBWAY_PARTY, SCREEN_SUBWAY_BATTLE, SCREEN_SUBWAY_RESET, SCREEN_MART, SCREEN_BPSHOP, SCREEN_SELL,
-       SCREEN_DAYCARE_PARTY, SCREEN_MOVE_SELECT, SCREEN_RELEARN, SCREEN_DIPLOMA };
+       SCREEN_DAYCARE_PARTY, SCREEN_MOVE_SELECT, SCREEN_RELEARN, SCREEN_DIPLOMA, SCREEN_EASY_CHAT };
 static u8 sScreen;
 static u16 sScreenVar, sPartySlotWork;
+static u16 sEasyChatKind, sEasyChatOut[2], sEasyChatWords[EASY_CHAT_BATTLE_WORDS_COUNT];
 static u8 sWildResult = 2;
 #define STACK 48
 
@@ -3098,6 +3101,17 @@ static void Step(struct Thread *t)
                 DoWarp();
                 return;
             }
+            break;
+        }
+        case U3C_SYMBOL_MAP_ScrCmdStartPmsInput:   // kind, word, word, result (1 entered): kinds 0-2 the player's battle
+        {                                       // phrases (the game's EASY CHAT: introduction, won, lost), 3 "No. 1"
+            if (V(0) <= 3)                      // (asked, not kept: Kai has no such phrase); 4 / 5 Black's own words
+            {                                   // (MR. LOCK's password, the PEP QUIZ: closed, the result "not entered")
+                sEasyChatKind = V(0), sEasyChatOut[0] = a[1], sEasyChatOut[1] = a[2];
+                OpenScreen(t, SCREEN_EASY_CHAT, a[3]);
+            }
+            else
+                *WorkPtr(a[3]) = 0;
             break;
         }
         case U3C_CheckPlayerFormModel:   // (the player in a form of its own model: never here)
@@ -5233,6 +5247,18 @@ void U3D_VmOpenScreen(void)
         SetMainCallback2(CB2_ShowDiploma);
         break;
     }
+    case SCREEN_EASY_CHAT:   // (easy_chat.c on the save's battle phrases; back to this script when it closes)
+    {
+        static const u8 sTypes[4] = {EASY_CHAT_TYPE_BATTLE_START, EASY_CHAT_TYPE_BATTLE_WON, EASY_CHAT_TYPE_BATTLE_LOST,
+                                     EASY_CHAT_TYPE_BATTLE_WON};
+        u16 *words = sEasyChatKind == 0 ? gSaveBlock1Ptr->easyChatBattleStart
+                   : sEasyChatKind == 1 ? gSaveBlock1Ptr->easyChatBattleWon
+                   : sEasyChatKind == 2 ? gSaveBlock1Ptr->easyChatBattleLost : sEasyChatWords;
+        if (words == sEasyChatWords)
+            memcpy(sEasyChatWords, gSaveBlock1Ptr->easyChatBattleWon, sizeof(sEasyChatWords));
+        DoEasyChatScreen(sTypes[sEasyChatKind & 3], words, CB2_ScreenDone, EASY_CHAT_PERSON_DISPLAY_NONE);
+        break;
+    }
     case SCREEN_RELEARN:   // (Black's CallMoveRelearn: the game's move relearner, the POKeMON in VAR_0x8004)
         TeachMoveRelearnerMove();
         break;
@@ -5312,6 +5338,16 @@ void U3D_VmResume(void)
         if (sMoveSel.posWork)
             *WorkPtr(sMoveSel.posWork) = gSpecialVar_0x8005 < MAX_MON_MOVES ? gSpecialVar_0x8005 : 0;
         break;
+    case SCREEN_EASY_CHAT:   // (gSpecialVar_Result: the words kept; Black's first two words of the phrase)
+    {
+        const u16 *words = sEasyChatKind == 0 ? gSaveBlock1Ptr->easyChatBattleStart
+                         : sEasyChatKind == 1 ? gSaveBlock1Ptr->easyChatBattleWon
+                         : sEasyChatKind == 2 ? gSaveBlock1Ptr->easyChatBattleLost : sEasyChatWords;
+        *WorkPtr(sScreenVar) = gSpecialVar_Result != 0;
+        *WorkPtr(sEasyChatOut[0]) = words[0];
+        *WorkPtr(sEasyChatOut[1]) = words[1];
+        break;
+    }
     case SCREEN_RELEARN:   // (as Black's script reads it: 0 a move learned, the HEART SCALE taken; 1 none)
         *WorkPtr(sScreenVar) = gSpecialVar_0x8004 != TRUE;
         break;
