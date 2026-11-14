@@ -4417,11 +4417,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "weekday") == 0)
     {
         // weekday [D]: Crystal's weekday on the game clock (SUNDAY 0); D: the game clock moved to that weekday
+        // (the harness's clock moves, gMpTestClockShift: the save's offset is put back at the next warp)
         u16 MP_JohtoWeekday(void);
+        extern s64 gMpTestClockShift;
         int want = -1, now = MP_JohtoWeekday();
         if (sscanf(arg, "%d", &want) == 1 && want >= 0 && want < 7)
         {
-            gSaveBlock2Ptr->localTimeOffset.days -= (want - now + 7) % 7;   // (local time = clock - offset)
+            gMpTestClockShift += (s64)((want - now + 7) % 7) * 86400;
             now = MP_JohtoWeekday();
         }
         printf("[test] weekday %d\n", now);
@@ -4429,21 +4431,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "hour") == 0)
     {
         // hour H: the game clock moved to that hour of the day (set it before weekday, which keeps the hour)
+        // (the harness's fixed hour, gMpTestHour: the save's offset is put back at the next warp)
+        extern int gMpTestHour;
         int want = -1;
-        RtcCalcLocalTime();
         if (sscanf(arg, "%d", &want) == 1 && want >= 0 && want < 24)
-        {
-            int delta = want - gLocalTime.hours;
-            if (delta < 0)
-                delta += 24;
-            gSaveBlock2Ptr->localTimeOffset.hours -= delta;
-            while (gSaveBlock2Ptr->localTimeOffset.hours < 0)
-            {
-                gSaveBlock2Ptr->localTimeOffset.hours += 24;   // (local = clock - offset: a day less of offset)
-                gSaveBlock2Ptr->localTimeOffset.days--;
-            }
-            RtcCalcLocalTime();
-        }
+            gMpTestHour = want;
+        RtcCalcLocalTime();
         printf("[test] hour %d\n", gLocalTime.hours);
     }
     else if (strcmp(cmd, "clock") == 0)

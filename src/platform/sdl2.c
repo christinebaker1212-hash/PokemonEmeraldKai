@@ -1067,9 +1067,14 @@ void Platform_SetStatus(struct SiiRtcInfo *rtc)
     internalClock.status = rtc->status;
 }
 
+// The harness's own clock moves (mp_debug.c `weekday` / `hour`): never the save's offset, which clock.c
+// FixStuckClockSave puts back on the PC's clock at the next warp (a test's Sunday was the real day again)
+s64 gMpTestClockShift;   // seconds
+int gMpTestHour = -1;    // a fixed hour (over MOEMON_DEBUG_HOUR)
+
 static void UpdateInternalClock(void)
 {
-    time_t rawTime = time(NULL);
+    time_t rawTime = time(NULL) + (time_t)gMpTestClockShift;
     struct tm *time;
     s64 hostOffset;
 
@@ -1088,7 +1093,8 @@ static void UpdateInternalClock(void)
     internalClock.month = BinToBcd(time->tm_mon + 1);
     internalClock.day = BinToBcd(time->tm_mday);
     internalClock.dayOfWeek = BinToBcd(time->tm_wday);
-    internalClock.hour = BinToBcd(getenv("MOEMON_DEBUG_HOUR") ? atoi(getenv("MOEMON_DEBUG_HOUR")) % 24 : time->tm_hour);   // tests: a fixed hour
+    internalClock.hour = BinToBcd(gMpTestHour >= 0 ? gMpTestHour
+                                  : getenv("MOEMON_DEBUG_HOUR") ? atoi(getenv("MOEMON_DEBUG_HOUR")) % 24 : time->tm_hour);   // tests: a fixed hour
     internalClock.minute = BinToBcd(time->tm_min);
     internalClock.second = BinToBcd(time->tm_sec);
 }
