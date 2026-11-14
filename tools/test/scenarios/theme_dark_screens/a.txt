@@ -1,0 +1,88 @@
+pressuntil A field 5000
+mp theme dark
+mp additem 34 2
+mp additem 63 17
+mp additem 64 25
+mp additem 68 27
+mp warp 0,9,10,10
+wait 60
+mp giveitemscript 13
+wait 90
+rendershot d_msg
+mash A 10 20
+pressuntil B field 600
+wait 30
+press START 2
+wait 20
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 40
+press DOWN 2
+wait 6
+press DOWN 2
+wait 20
+rendershot d_bag
+press B 2
+wait 60
+pressuntil B field 600
+mp frontierpass
+wait 120
+rendershot d_pass
+press B 2
+wait 90
+pressuntil B field 600
+mp wild 179:5
+pressuntil A action 3000
+wait 30
+rendershot d_battle
+press RIGHT 2
+wait 4
+press DOWN 2
+wait 4
+press A 2
+pressuntil B field 1500
+wait 20
+mp options
+wait 60
+press R 2
+wait 10
+press R 2
+wait 20
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+press UP 2
+wait 4
+wait 20
+rendershot d_options
+quit

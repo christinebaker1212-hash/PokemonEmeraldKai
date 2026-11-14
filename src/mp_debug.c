@@ -3807,6 +3807,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             MP_Photo_Start();
     }
+    else if (strcmp(cmd, "frontierpass") == 0)
+    {
+        // frontierpass - the FRONTIER PASS (back to the field)
+        void ShowFrontierPass(void (*callback)(void));
+        void CB2_ReturnToField(void);
+        ShowFrontierPass(CB2_ReturnToField);
+    }
     else if (strcmp(cmd, "options") == 0)
     {
         // options - the OPTIONS screen (back to the field)

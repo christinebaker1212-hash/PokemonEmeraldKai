@@ -1477,10 +1477,11 @@ static void DrawHeader(void)
             const u8 *t = sTabNames[i];
             dst[j++] = EXT_CTRL_CODE_BEGIN;
             dst[j++] = EXT_CTRL_CODE_COLOR;
-            dst[j++] = i == sTab ? TEXT_COLOR_RED : TEXT_COLOR_GREEN;
+            // (THEME DARK: the other tabs white, the user's of 2026-11-14; green is a choice that isn't on there)
+            dst[j++] = i == sTab ? TEXT_COLOR_RED : MP_Theme_Dark() ? TEXT_COLOR_DARK_GRAY : TEXT_COLOR_GREEN;
             dst[j++] = EXT_CTRL_CODE_BEGIN;
             dst[j++] = EXT_CTRL_CODE_SHADOW;
-            dst[j++] = i == sTab ? TEXT_COLOR_LIGHT_RED : TEXT_COLOR_LIGHT_GREEN;
+            dst[j++] = i == sTab ? TEXT_COLOR_LIGHT_RED : MP_Theme_Dark() ? TEXT_COLOR_LIGHT_GRAY : TEXT_COLOR_LIGHT_GREEN;
             while (*t != EOS && j < sizeof(dst) - 1)
                 dst[j++] = *t++;
             dst[j] = EOS;

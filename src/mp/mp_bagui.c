@@ -108,7 +108,8 @@ void MP_BagUI_Composite(u16 *frame)
                 // letters kept, the rest the picture's dark colors
                 if (y >= BAGUI_STRIP_Y - 3 && y < BAGUI_STRIP_Y + 13 && x < 104)
                     c = sDarkBagStripColors[k];
-                else if (!(y < 18 && x < 58 && k == BAGUI_C_WHITE))
+                else if (!(y < 18 && x < 58 && k == BAGUI_C_WHITE)
+                      && !(y >= BAGUI_DESC_TOP && k == BAGUI_C_WHITE))   // (the item icon's box stays white: the user's)
                     c = sDarkBagColors[k];
             }
             if (coeff)

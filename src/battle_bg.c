@@ -869,6 +869,7 @@ void DrawMainBattleBackground(void)
 void LoadBattleTextboxAndBackground(void)
 {
     LZDecompressVram(gBattleTextboxTiles, (void *)(BG_CHAR_ADDR(0)));
+    MP_Theme_BattleCursor();   // Moemon Co-op: THEME DARK's cursor (mp_darktheme.c)
     CopyToBgTilemapBuffer(0, gBattleTextboxTilemap, 0, 0);
     CopyBgTilemapBufferToVram(0);
     LoadCompressedPalette(gBattleTextboxPalette, BG_PLTT_ID(0), 2 * PLTT_SIZE_4BPP);
@@ -1229,6 +1230,7 @@ bool8 LoadChosenBattleElement(u8 caseId)
     {
     case 0:
         LZDecompressVram(gBattleTextboxTiles, (void *)(BG_CHAR_ADDR(0)));
+        MP_Theme_BattleCursor();   // Moemon Co-op: THEME DARK's cursor (mp_darktheme.c)
         break;
     case 1:
         CopyToBgTilemapBuffer(0, gBattleTextboxTilemap, 0, 0);

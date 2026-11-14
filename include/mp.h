@@ -401,6 +401,8 @@ u16 MP_Theme_TextColor(u16 c);
 const void *MP_Theme_MapText(const void *src);
 const u16 *MP_Theme_BagText(const u16 *src);
 void MP_Theme_StdPalette(u16 *dst);
+void MP_Theme_BattleCursor(void);           // THEME DARK: the battle menus' cursor (battle_bg.c)
+void MP_Theme_FrontierPass(s8 stars);       // THEME DARK: the FRONTIER PASS (frontier_pass.c)
 bool8 MP_Streamer_On(void);
 void MP_Streamer_Build(void);
 u8 MP_Streamer_At(const u8 *s, u8 *out, u16 *used);

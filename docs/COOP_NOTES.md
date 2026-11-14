@@ -7592,3 +7592,14 @@ no side line) in the hub, MpUi lists, FRIENDS, LOOK; the room window only when s
 who's there (MpUi_RoomWindowFit, remade when it changes; the hub refits it every redraw); the picks' picked emote box
 and phrase balloon an outline in MPT_GOLD (the frame's color, deep on light windows), the emote box keeps its size
 with a small drawn pointer in its own left margin.
+
+1.199.4: the user's own edits of THEME DARK (2026-11-14, docs/user_images/88.png: five screens painted by hand), applied
+in tools/moemon_darktheme/gen_dark.py: the rim nearest each window's fill is the fill itself (RIM[0] = FILL: no lighter
+line inside the message box, the frames, the OPTIONS cursor row, the battle menus' strips); OPTIONS' choices that
+aren't on a slate (OPTION_OFF, picked so the screen's darkened rows show the user's 405860) and the other tabs white
+(option_menu.c, DARK only); the battle menus' cursor an orange-red arrow on the menu's fill (BG0 tiles 1-2 recolored
+after the box's tiles load, battle_bg.c -> mp_darktheme.c MP_Theme_BattleCursor, through palette 0's unused index 8);
+the BAG's list and plates grey teal (BAG_LIST), its description box blue (BAG_DESC), the item icon's box kept white
+(mp_bagui.c); the FRONTIER PASS's TRAINER CARD muted (sDarkPassCards, each card's own hue) and its description line's
+words white (frontier_pass.c -> MP_Theme_FrontierPass). The harness's `shot` leaves the backdrop black (the window's
+output, `rendershot`, has it): compare with rendershot. Scenario theme_dark_screens (shots of all five).

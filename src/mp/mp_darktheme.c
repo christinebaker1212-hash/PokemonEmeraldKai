@@ -84,6 +84,38 @@ const u16 *MP_Theme_BagText(const u16 *src)
     return MP_Theme_Dark() ? sDarkBagText : src;
 }
 
+// The battle menus' cursor (battle_controller_player.c: BG0 tiles 1 and 2 in palette 0, a dark arrow on the white that
+// was the menus' fill): in DARK its white takes the menus' own fill (index 5) and the arrow palette 0's free index 8,
+// the red text's color (the user, 2026-11-14: docs/user_images/88.png). After battle_bg.c loads the box's tiles
+void MP_Theme_BattleCursor(void)
+{
+    u8 *tiles = (u8 *)(BG_CHAR_ADDR(0)) + 32;
+    int i;
+    if (!MP_Theme_Dark())
+        return;
+    for (i = 0; i < 64; i++)
+    {
+        u8 v = tiles[i], lo = v & 15, hi = v >> 4;
+        lo = lo == 1 ? 5 : (lo == 9 || lo == 7) ? 8 : lo;
+        hi = hi == 1 ? 5 : (hi == 9 || hi == 7) ? 8 : hi;
+        tiles[i] = lo | (hi << 4);
+    }
+}
+
+// The FRONTIER PASS in DARK (the user, 2026-11-14): the TRAINER CARD's colors muted (STARS 0-4: bg.png's palettes 1-5,
+// in BG palette 1; -1: the map screen, no card) and the description line's words white (they're palette 15's color 1,
+// the dark message box's fill). After frontier_pass.c loads its palettes
+void MP_Theme_FrontierPass(s8 stars)
+{
+    static const u16 sWhite = 0x77DE;
+    if (!MP_Theme_Dark())
+        return;
+    if (stars >= 0 && stars < 5)
+        LoadPalette(sDarkPassCards[stars], BG_PLTT_ID(1), PLTT_SIZE_4BPP);
+    LoadPalette(&sWhite, BG_PLTT_ID(15) + 1, sizeof(u16));
+    LoadPalette(&sDarkPassShadow, BG_PLTT_ID(15) + 9, sizeof(u16));
+}
+
 // A copy of the standard menu palette as it's drawn (the co-op screens build their colors on it)
 void MP_Theme_StdPalette(u16 *dst)
 {

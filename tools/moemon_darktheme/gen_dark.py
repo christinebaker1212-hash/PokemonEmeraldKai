@@ -24,7 +24,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 
 # The dark theme's own colors (8-bit; the game keeps 5 bits a channel)
 FILL = (40, 44, 58)          # the windows' fill: a night slate
-RIM = [(64, 70, 88), (88, 96, 116), (120, 128, 148)]   # lighter slates for the rims that met the fill
+# the rims that met the fill: the first is the fill itself (the user's edits of 2026-11-14, docs/user_images/88.png:
+# no lighter line inside a window, its message box, the OPTIONS cursor row, the battle menu), the rest lighter slates
+RIM = [(40, 44, 58), (88, 96, 116), (120, 128, 148)]
 TEXT = (240, 240, 232)       # warm white
 SHADOW = (16, 18, 26)        # darker than the fill
 TEXT_COLORS = {              # (text, shadow) for the menus' colored text
@@ -35,6 +37,18 @@ TEXT_COLORS = {              # (text, shadow) for the menus' colored text
 
 # Hand tuning: frame number (1-29) -> {palette index: (r, g, b)}
 OVERRIDES = {}
+
+# The user's own colors (2026-11-14, docs/user_images/88.png)
+# OPTIONS: a choice that isn't on (was green), and its shadow: the user's 405860 / 374150 as every row but the cursor's
+# shows them (the screen darkens those rows by 4/16: option_menu.c BLDY), a touch brighter on the cursor's row
+OPTION_OFF = ((82, 115, 123), (74, 82, 107))
+BAG_LIST = (74, 111, 112)                    # the BAG: its item list and plates, a grey teal
+BAG_DESC = (26, 57, 170)                     # the BAG: the description box, blue (was purple)
+PASS_SHADOW = (0, 57, 107)                   # the FRONTIER PASS's description line: its words' shadow
+CURSOR = (244, 125, 103)                     # the battle menus' cursor (palette 0's free index 8): the red text's
+# the FRONTIER PASS's TRAINER CARD (no stars: palette 1), color by color as the user made it; the others alike
+PASS_CARD0 = {1: (231, 247, 239), 2: (206, 230, 222), 9: (181, 206, 198), 10: (148, 173, 156), 11: (107, 140, 115),
+              12: (66, 107, 90)}
 
 
 def rgb555(c):
@@ -213,8 +227,9 @@ def dark_battle_box(pal32):
     """battle_interface/textbox (two palettes): the white boxes (the action menu's) and their light rims go slate,
     the message box's teal deepens; the message's white text (0:1), the red frame and the rest stay"""
     out = list(pal32)
+    out[8] = CURSOR   # (no tile of the box uses it: the action / move cursor's arrow, mp_darktheme.c MP_Theme_BattleCursor)
     for i, c in enumerate(pal32):
-        if i % 16 == 0 or i == 1:
+        if i % 16 == 0 or i == 1 or i == 8:
             continue
         h, l, s = colorsys.rgb_to_hls(*(v / 255 for v in c))
         if i == 15:
@@ -271,12 +286,12 @@ def dark_bag(cols):
         h, l, s = colorsys.rgb_to_hls(*(v / 255 for v in c))
         if c == (255, 0, 0) or (s > 0.8 and l < 0.6 and abs(h) < 0.03):
             out.append(c)                                   # the cursor's red
-        elif l > 0.93 and s < 0.3:
-            out.append(FILL)
         elif l > 0.72 and s < 0.3:
-            out.append(RIM[0] if l < 0.84 else RIM[1])
+            out.append(BAG_LIST)                            # the list, its plates and rims: one grey teal (the user's)
         elif s < 0.15:
             out.append(hls(0.63, max(0.12, l * 0.55), 0.14))
+        elif 0.66 < h < 0.8 and l > 0.5:
+            out.append(BAG_DESC)                            # the description box's lavender: the user's blue
         elif l > 0.68:
             out.append(hls(h, l * 0.42, s * 0.55))          # a pastel (the sky-blue panel): deep and quiet
         else:
@@ -293,6 +308,25 @@ def dark_bag_strip(cols):
             out[i] = RIM[0]
         elif l < 0.58:
             out[i] = hls(h, 0.82, min(0.6, s))
+    return out
+
+
+# ---------------------------------------------------------------- the FRONTIER PASS
+
+def pass_cards():
+    """frontier_pass/bg.png's palettes 1-5 (the TRAINER CARD by stars): the card's own colors (1, 2, 9-12) muted as the
+    user made the starless card's green (PASS_CARD0), each card keeping its hue; the rest as it was"""
+    raw = Image.open(os.path.join(ROOT, 'graphics/frontier_pass/bg.png')).getpalette()
+    out = []
+    for k in range(1, 6):
+        pal = [tuple(raw[(k * 16 + i) * 3:(k * 16 + i) * 3 + 3]) for i in range(16)]
+        for i in (1, 2, 9, 10, 11, 12):
+            if k == 1:
+                pal[i] = PASS_CARD0[i]
+            else:
+                h, l, s = colorsys.rgb_to_hls(*(v / 255 for v in pal[i]))
+                pal[i] = hls(h, max(0.2, l * 0.92 - 0.04), min(s, 1.0) * 0.22)
+        out.append(pal)
     return out
 
 
@@ -327,7 +361,12 @@ def main():
     db = dark_battle_box(bbox)
     out += c_array('sDarkBattleBox', [db[:16], db[16:32]]) + ['']
     out += c_array('sDarkPP', [pp_colors(pp)]) + ['']
-    out += c_array('sDarkOptionText', [dark_text(opt)]) + ['']
+    dopt = dark_text(opt)
+    dopt[6], dopt[7] = OPTION_OFF
+    out += c_array('sDarkOptionText', [dopt]) + ['']
+    out += c_array('sDarkPassCards', pass_cards()) + ['']
+    out.append('static const u16 sDarkPassShadow = 0x%04X;' % rgb555(PASS_SHADOW))
+    out.append('')
     bc = bag_colors()
     dbc = dark_bag(bc)
     out.append('static const u16 sDarkBagColors[%d] = {' % len(dbc))

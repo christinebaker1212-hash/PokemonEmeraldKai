@@ -82,3 +82,4 @@ Numbered in the order they were sent. Add new ones with the next number and a li
 | 85 | 85.png (247x120): the same healthbox fainted, 0/20 ("Ft") | the same |
 | 86 | 86.webp (2026-11-13): 1.199.0's CO-OP menu playing alone (ME tab, the lit row and side line, an empty room window) | the user: the classic ▶ cursor, not the highlight; no room window when alone, sized to who's there: COOP_NOTES "The CO-OP menu redone; THEME DARK" |
 | 87 | 87.webp (2026-11-13): Emerald's own START menu, for its ▶ cursor (what the CO-OP menu should match) | the same |
+| 88 | 88.png (2026-11-14, 522x528): the user's own edits of THEME DARK on five screens (a field message box "TRAINER TIPS", a battle's text box and action menu, the BAG's MEDICINE list and description, the FRONTIER PASS, OPTIONS > DISPLAY) | the user: "Here are some manual adjustments I've made to the dark mode. Please apply them": src/data/mp_dark_palettes.h from tools/moemon_darktheme/gen_dark.py |
