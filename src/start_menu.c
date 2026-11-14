@@ -73,6 +73,7 @@ enum
     MENU_ACTION_COOP,
     MENU_ACTION_GARDEN,   // Moemon Co-op: quick travel to the MOéMON GARDEN
     MENU_ACTION_POKEGEAR,   // Moemon Kai: JOHTO's POKéGEAR (mp_pokegear.c)
+    MENU_ACTION_CGEAR,      // Moemon Kai: UNOVA's C-GEAR (src/unova/u3d_screen.c)
 };
 
 // Save status
@@ -107,6 +108,8 @@ static bool8 StartMenuBagCallback(void);
 static bool8 StartMenuPokeNavCallback(void);
 static bool8 StartMenuPokegearCallback(void);
 static const u8 sText_MenuPokegear[] = _("POKéGEAR");
+static bool8 StartMenuCGearCallback(void);
+static const u8 sText_MenuCGear[] = _("C-GEAR");
 static bool8 StartMenuPlayerNameCallback(void);
 static bool8 StartMenuSaveCallback(void);
 static bool8 StartMenuOptionCallback(void);
@@ -202,6 +205,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_BAG]             = {gText_MenuBag,     {.u8_void = StartMenuBagCallback}},
     [MENU_ACTION_POKENAV]         = {gText_MenuPokenav, {.u8_void = StartMenuPokeNavCallback}},
     [MENU_ACTION_POKEGEAR]        = {sText_MenuPokegear, {.u8_void = StartMenuPokegearCallback}},
+    [MENU_ACTION_CGEAR]           = {sText_MenuCGear, {.u8_void = StartMenuCGearCallback}},
     [MENU_ACTION_PLAYER]          = {gText_MenuPlayer,  {.u8_void = StartMenuPlayerNameCallback}},
     [MENU_ACTION_SAVE]            = {gText_MenuSave,    {.u8_void = StartMenuSaveCallback}},
     [MENU_ACTION_OPTION]          = {gText_MenuOption,  {.u8_void = StartMenuOptionCallback}},
@@ -378,6 +382,12 @@ static void BuildNormalStartMenu(void)
     // Moemon Kai: JOHTO's POKéGEAR, on START there (a key item elsewhere once JOHTO's LEAGUE is beaten)
     if (MP_Region_Current() == REGION_JOHTO && CheckBagHasItem(ITEM_POKEGEAR, 1))
         AddStartMenuAction(MENU_ACTION_POKEGEAR);
+    // Moemon Kai: UNOVA's C-GEAR, on START there once Black's script has given it (src/unova/u3d_screen.c)
+    {
+        bool8 U3D_Vm_HasCGear(void);
+        if (MP_Region_Current() == REGION_UNOVA && U3D_Vm_HasCGear())
+            AddStartMenuAction(MENU_ACTION_CGEAR);
+    }
 
     AddStartMenuAction(MENU_ACTION_PLAYER);
     if (!QzBugContest_Active())   // Moemon Kai: no saving with the party kept aside for the Bug-Catching Contest
@@ -770,6 +780,16 @@ static bool8 StartMenuPokegearCallback(void)
         return TRUE;
     }
     return FALSE;
+}
+
+// Moemon Kai: the C-GEAR over the field once the menu is closed (src/unova/u3d_screen.c)
+static bool8 StartMenuCGearCallback(void)
+{
+    void Unova_CGear_Open(void);
+    RemoveExtraStartMenuWindows();
+    HideStartMenu();
+    Unova_CGear_Open();
+    return TRUE;
 }
 
 static bool8 StartMenuPlayerNameCallback(void)

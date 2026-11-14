@@ -32,6 +32,8 @@ bool8 Sinnoh_Mining_IsActive(void);   // Moemon Kai: SINNOH's Underground diggin
 bool8 Sinnoh_Mining_Step(u16 keys);
 bool8 Orre_WorldMap_IsActive(void);   // Moemon Kai: ORRE's world map, Colosseum's own screen (src/orre/worldmap.c)
 bool8 Orre_WorldMap_Step(u16 keys);
+bool8 Unova_Screen_IsActive(void);   // Moemon Kai: UNOVA's own screens: the C-GEAR, ENTRALINK, MUSICALS (src/unova/u3d_screen.c)
+bool8 Unova_Screen_Step(u16 keys);
 bool8 MP_CardScreen_Step(u16 keys);   // the TRAINER CARD (src/mp/mp_cardscreen.c)
 bool8 MP_CardScreen_IsActive(void);
 u8 TrySavingData(u8 saveType);
@@ -427,7 +429,7 @@ int main(int argc, char **argv)
                 SDL_Delay(1);
         }
         // (DISPLAY > FRAME RATE: a present waits for its slot, 60 or 120 a second, or none when UNCAPPED)
-        else if ((Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || MP_BadgeCase_IsActive() || MP_StadiumUi_IsActive() || MP_CardScreen_IsActive() || Sinnoh_Contest_IsActive() || Sinnoh_Mining_IsActive() || Orre_WorldMap_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
+        else if ((Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || MP_BadgeCase_IsActive() || MP_StadiumUi_IsActive() || MP_CardScreen_IsActive() || Sinnoh_Contest_IsActive() || Sinnoh_Mining_IsActive() || Orre_WorldMap_IsActive() || Unova_Screen_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
               && Display_PresentSlot())
         {
             Display_Present();
@@ -1245,6 +1247,11 @@ const u16 *Platform_GetFrame(void)
             const u16 *Orre_WorldMap_Frame(void);   // (ORRE's world map: src/orre/worldmap.c)
             card = Orre_WorldMap_Frame();
         }
+        if (card == NULL)
+        {
+            const u16 *Unova_Screen_Frame(void);   // (UNOVA's own screens: src/unova/u3d_screen.c)
+            card = Unova_Screen_Frame();
+        }
         if (card)
             return card;
     }
@@ -1265,7 +1272,7 @@ static bool ScreenStep(void)
     if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step() || MP_BadgeCase_Step(Platform_GetKeyInput())
      || MP_CardScreen_Step(Platform_GetKeyInput()) || Sinnoh_Contest_Step(Platform_GetKeyInput())
      || Sinnoh_Mining_Step(Platform_GetKeyInput()) || MP_StadiumUi_Step(Platform_GetKeyInput())
-     || Orre_WorldMap_Step(Platform_GetKeyInput()))
+     || Orre_WorldMap_Step(Platform_GetKeyInput()) || Unova_Screen_Step(Platform_GetKeyInput()))
     {
         MP_Spectate_PanelSync();
         return true;

@@ -81,6 +81,7 @@ u8 U3D_Season(void);                                          // Black's season 
 u16 U3D_CurrentZone(void);                                    // the Black zone the player is on (0xFFFF: not UNOVA)
 s32 U3D_MapIndex(void);
 bool8 U3D_Vm_HasCGear(void);
+void U3D_Vm_GoToEntralink(void);   // (the C-GEAR's ENTRALINK button: src/unova/u3d_screen.c)
 u16 U3D_Vm_Work(u16 id);
 void U3D_Vm_ContinueHome(void);
 u16 U3D_Vm_ObjCode(u16 code);

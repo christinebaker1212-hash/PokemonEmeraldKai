@@ -4641,6 +4641,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         bool8 U3D_Vm_DebugRun(u16 id);
         printf("[test] u3drun %d: %d\n", atoi(arg), U3D_Vm_DebugRun((u16)atoi(arg)));
     }
+    else if (strcmp(cmd, "cgear") == 0)   // cgear: the C-GEAR given (UNOVA's work) and opened over the field
+    {
+        void U3D_Vm_GiveCGear(void);
+        void Unova_CGear_Open(void);
+        U3D_Vm_GiveCGear();
+        Unova_CGear_Open();
+    }
     else if (strcmp(cmd, "u3dboat") == 0)   // u3dboat CABIN MAIN: the ROYAL UNOVA's cabin given one of its trainers
     {
         void U3D_Vm_DebugBoat(u16 cabin, u16 main);

@@ -1,0 +1,42 @@
+pressuntil A field 6000
+wait 120
+mash B 10 20
+wait 60
+pressuntil B field 600
+mp u3dzone 39 19 17
+wait 120
+pressuntil B field 2000
+wait 30
+mp cgear
+wait 30
+rendershot open
+press RIGHT 1
+wait 10
+rendershot wireless
+press LEFT 1
+wait 10
+press A 1
+wait 10
+rendershot irnote
+press A 1
+wait 10
+press B 1
+wait 30
+press START 1
+wait 30
+shot startmenu
+press B 1
+wait 30
+mp cgear
+wait 20
+press RIGHT 1
+wait 5
+press RIGHT 1
+wait 5
+rendershot entralinkpick
+press A 1
+wait 200
+pressuntil A field 6000
+wait 60
+shot entralink
+quit

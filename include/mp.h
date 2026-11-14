@@ -667,6 +667,7 @@ void MP_Overworld_Reset(void);
 void MP_Trainer_Update(void);
 void MP_Trainer_OnRelay(u8 from, const u8 *data, u16 len);
 bool8 MP_Trainer_IsActive(void);
+bool8 MP_Trainer_ChallengeFriend(u8 id);   // (the C-GEAR's IR: the friend in front challenged)
 bool8 MP_Trainer_IsEngaged(void);
 void MP_Trainer_Toggle(void);
 void MP_Trainer_Begin(void);
@@ -1172,6 +1173,7 @@ void MP_Counter_ForEach(const char *prefix, void (*fn)(const char *key, s32 valu
 
 // Trading (mp_trade.c) and daily gifts (mp_gift.c)
 void MP_Trade_OpenMenu(void);
+void MP_Trade_AskFriend(u8 id);   // (the C-GEAR's IR: a trade asked of one friend)
 void MP_Trade_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Trade_Update(void);
 void MP_Gift_OpenMenu(void);

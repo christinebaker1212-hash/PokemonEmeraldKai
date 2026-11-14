@@ -1,0 +1,11 @@
+# The C-GEAR's IR with a friend in front (src/unova/u3d_screen.c): ALICE faces BOB on CASTELIA's pier, IR > TRADE asks
+# BOB to trade (CO-OP's own trade request: BOB is asked, and isn't free to); then IR > BATTLE challenges him through the BATTLE
+# FLAG's own handshake (he's spotted at once, both show ALICE's phrase) and the PvP battle starts on both sides.
+MODE=2
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=6:50"
+ENV_B="MOEMON_DEBUG_PARTY=9:50"
+EXPECT_A=("unova screen: C-GEAR" "want to trade right now" "challenged player 2" "starting PvP battle against player 2")
+EXPECT_B=("player 1 asks to trade" "spotted by player 1!" "starting PvP battle against player 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+UNEXPECT_B=("[crash]" "TIMEOUT")

@@ -88,6 +88,7 @@ static struct
     u32 oppMoney;
     u16 oppPhrases[3][EASY_CHAT_BATTLE_WORDS_COUNT];
     bool8 boxClosed, otherReady;
+    bool8 oneShot;   // (a C-GEAR challenge: back to the field, not on guard, if it falls through)
 } sTM;
 
 static struct
@@ -319,6 +320,23 @@ void MP_Trainer_Begin(void)
     MPNet_Log("trainer mode on");
 }
 
+// The C-GEAR's IR (src/unova/u3d_cgear.c): the friend right in front challenged at once, as if the BATTLE FLAG had
+// spotted them (the same handshake from MPR_SPOT on, the walk up a step or none); FALSE: it can't be asked now
+bool8 MP_Trainer_ChallengeFriend(u8 id)
+{
+    if (sTM.state != TM_OFF || id >= MP_MAX_PLAYERS || (s8)id == gMpLocalId || !MP_IsConnected() || !gMpPlayers[id].present)
+        return FALSE;
+    MP_Trainer_Begin();
+    sTM.oneShot = TRUE;
+    sTM.target = id;
+    sTM.state = TM_SPOTTING;
+    sTM.timer = 0;
+    ShowExclamationOverPlayer();
+    SendSimple(id, MPR_SPOT);
+    MPNet_Log("challenged player %d", id + 1);
+    return TRUE;
+}
+
 void MP_Trainer_Toggle(void)
 {
     if (sTM.state == TM_OFF)
@@ -419,6 +437,13 @@ static void Task_TrainerMode(u8 taskId)
     switch (sTM.state)
     {
     case TM_WATCHING:
+        if (sTM.oneShot)   // (the C-GEAR's challenge fell through: refused, no answer, called off)
+        {
+            sTM.oneShot = FALSE;
+            EndTrainerMode(TRUE);
+            MP_ShowNotice("The challenge didn't go through.");
+            return;
+        }
         if (JOY_NEW(B_BUTTON) || !MP_IsConnected())
         {
             PlaySE(SE_SELECT);
@@ -494,6 +519,7 @@ static void Task_TrainerMode(u8 taskId)
             DestroyTask(taskId);
             sTM.taskId = TASK_NONE;
             sTM.state = TM_OFF;
+            sTM.oneShot = FALSE;
             MP_Battle_Start(target, gMpLocalId < target, sTM.oppMoney);
             MP_Battle_SetOppPhrases(sTM.oppPhrases[PHRASE_WON], sTM.oppPhrases[PHRASE_LOST]);
             return;

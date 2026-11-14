@@ -1,0 +1,30 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 60
+mp u3dzone 39 19 17
+wait 120
+pressuntil B field 2000
+barrier placed 2
+wait 120
+mp face up
+wait 10
+mp cgear
+wait 20
+press A 1
+wait 20
+rendershot irmenu
+press A 1
+wait 300
+wait 120
+barrier tradeover 2
+mp cgear
+wait 20
+press A 1
+wait 20
+press DOWN 1
+wait 10
+watchlog starting PvP battle
+press A 1
+waitlog 4000
+wait 60
+quit

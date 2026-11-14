@@ -1439,6 +1439,11 @@ static void RenderToBackbuffer(void)
             SDL_Texture *Orre_WorldMap_Canvas(SDL_Renderer *r);   // (ORRE's world map: src/orre/worldmap.c)
             badges = Orre_WorldMap_Canvas(sRenderer);
         }
+        if (!fight && !badges)
+        {
+            SDL_Texture *Unova_Screen_Canvas(SDL_Renderer *r);   // (UNOVA's own screens: src/unova/u3d_screen.c)
+            badges = Unova_Screen_Canvas(sRenderer);
+        }
         if (badges)
         {
             gameTex = badges;

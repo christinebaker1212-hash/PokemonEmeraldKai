@@ -4440,6 +4440,10 @@ static void IceModels(bool8 load)
 // u3d.c U3D_Update, each frame on an UNOVA map: the gyms' machinery that follows the player and the works
 void U3D_Vm_FieldFrame(void)
 {
+    {
+        void Unova_Screen_FieldFrame(void);
+        Unova_Screen_FieldFrame();   // (what a closed C-GEAR / ENTRALINK / MUSICAL screen left to do: u3d_screen.c)
+    }
     if (!Ready())
         return;
     if (CurrentZone() == DRAGON_GYM_ZONE)
@@ -5554,6 +5558,29 @@ void U3D_Vm_WhiteoutHome(void)
 }
 
 // The C-GEAR (FENNEL's gift in STRIATON): UNOVA's device once it's got
+// The C-GEAR's ENTRALINK button (u3d_screen.c): off to the ENTRALINK (zone 279, Black's start tile)
+#define ZONE_ENTRALINK 279
+void U3D_Vm_GoToEntralink(void)
+{
+    u8 group, num;
+    s16 x, y;
+    if (CurrentZone() == ZONE_ENTRALINK)
+        return;
+    if (U3D_MapOfZoneTile(ZONE_ENTRALINK, 16, 16, &group, &num, &x, &y))
+    {
+        MPNet_Log("u3d vm: the C-GEAR to the ENTRALINK");
+        PlaySE(SE_WARP_IN);
+        SetWarpDestination(group, num, WARP_ID_NONE, x, y);
+        DoWarp();
+    }
+}
+
+// (mp_debug.c `mp cgear`: the C-GEAR given, for tests)
+void U3D_Vm_GiveCGear(void)
+{
+    sWork.cgear = TRUE;
+}
+
 bool8 U3D_Vm_HasCGear(void)
 {
     return sWork.cgear;

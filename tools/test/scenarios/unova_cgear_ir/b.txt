@@ -1,0 +1,18 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 60
+mp u3dzone 39 19 16
+wait 120
+pressuntil B field 2000
+barrier placed 2
+waitlog 3000 asks to trade
+wait 60
+mash B 6 20
+wait 120
+barrier tradeover 2
+watchlog starting PvP battle
+waitlog 4000 spotted by player 1
+mash A 30 20
+waitlog 4000
+wait 60
+quit

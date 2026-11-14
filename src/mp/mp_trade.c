@@ -860,6 +860,25 @@ void MP_Trade_OpenMenu(void)
     Draw();
 }
 
+// The C-GEAR's IR (src/unova/u3d_cgear.c): a trade asked of one friend at once (the friend in front)
+void MP_Trade_AskFriend(u8 id)
+{
+    MP_Trade_OpenMenu();
+    if (sTrade.state != ST_PICK_FRIEND || id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
+        return;
+    sTrade.partner = id;
+    StringCopyN(sTrade.partnerName, gMpPlayers[id].name, PLAYER_NAME_LENGTH);
+    sTrade.partnerName[PLAYER_NAME_LENGTH] = EOS;
+    {
+        u8 b = MPR_TRADE_ASK;
+        SendTo(id, &b, 1);
+    }
+    sTrade.state = ST_ASKING;
+    sTrade.timer = 0;
+    sTrade.dirty = TRUE;
+    Draw();
+}
+
 // ---------------------------------------------------------------------------
 // From the network
 

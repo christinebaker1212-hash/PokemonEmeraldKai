@@ -1,0 +1,9 @@
+# UNOVA's C-GEAR (src/unova/u3d_screen.c, the user's approved mock-up docs/unova/mockups/cgear.png): given, opened over
+# CASTELIA's pier (the field kept behind it), its buttons gone across, IR offline saying why, closed with B; then on
+# START (the menu's C-GEAR entry) opened again and its ENTRALINK button taking the player to the ENTRALINK (zone 279).
+# Shots open, wireless, irnote, startmenu, entralink.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("unova screen: C-GEAR" "unova screen: C-GEAR closed" "the C-GEAR to the ENTRALINK" "zone 279")
+UNEXPECT_A=("[crash]" "TIMEOUT")
