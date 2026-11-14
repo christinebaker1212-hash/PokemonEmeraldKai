@@ -4,7 +4,8 @@
 // own code, never orre_battle.c's): a battle fills the slots in a writable copy of the game's trainer table with the
 // trainer's name and class (Black's words: banks 190 and 191), its team (Black's species, levels, strengths as IVs,
 // held items and moves where Black gives them; GENERATION and level scaling as any trainer's), Black's battle kind
-// (Doubles; Triples and Rotations as Triples: the user's decision, when the game can field them).
+// (Doubles; Triples as Kai's Triple Battles, the player commanding all three, when they have three able POKeMON;
+// Rotations as Doubles: Kai has no Rotation Battles, the user 2026-11-14).
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -178,6 +179,9 @@ bool8 U3D_PrepareBattle(u16 first, u16 second)
          && GetMonData(&gPlayerParty[i], MON_DATA_HP) != 0)
             able++;
     doubles = (t[2] != 0 || second != 0) && able >= 2;   // (Black's Doubles, Triples and Rotations; one able POKéMON: Single)
+    // Black's Triples: Kai's Triple Battle (one player commanding three) when three can battle, else a Double; its
+    // Rotations: a Double (no Rotation Battles in Kai, the user 2026-11-14)
+    gIsTripleBattle = t[2] == 2 && second == 0 && able >= 3;
     if (!SetTrainer(0, first, doubles))
         return FALSE;
     n = 1;

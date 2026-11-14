@@ -79,7 +79,9 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 - [ ] Shaking grass, dust clouds, rippling water
 - [ ] POKeMON forms outside battle (ROTOM's appliances 0x117 / 0x11C, DEERLING / SAWSBUCK's seasons, form numbers
       0x0FF): Kai keeps forms its own way (battle recomputes); not reworked, unless the user says otherwise
-- [ ] TRIPLE and ROTATION battles as Black's trainers have them (Kai's Triple Battles)
+- [x] TRIPLE battles as Kai's Triple Battles (the player commanding three, with three able; u3d_battle.c, the center
+      foe sent out by battle_main.c); ROTATION trainers as Doubles: no Rotation Battles in Kai (the user, 2026-11-14).
+      Scenario unova_triple
 - [x] Black's catch rules (the user, 2026-11-13: "Black's catch rules and battle backgrounds, adapted to Kai
       standards"): ov093's CalcCaptureShakes, critical captures, the dex factor and Black's balls' rates
       (u3d_battle.c U3D_CatchCase, from battle_script_commands.c); Kai's own balls keep their rates (the ASTRAL BALL its sure catch)

@@ -1,0 +1,9 @@
+# Black's Triple trainers as Kai's Triple Battles (the user, 2026-11-14: Kai's systems, no Rotation Battles):
+# trainer 506 and 514 (Black's kind 2) are fought three on three, the player commanding all three, the trainer's
+# center POKeMON sent out with the others (battle_main.c BattleIntroOpponent1SendsOutMonAnimation); its Rotation
+# trainers (kind 3) are Doubles (u3d_battle.c U3D_PrepareBattle). Shots tri, tri2.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=6:90,6:90,6:90 MOEMON_TRIPLEDEBUG=1"
+EXPECT_A=("unova trainer battle 506" "unova trainer battle 514" "207 each of 3 that fought")
+UNEXPECT_A=("[crash]" "TIMEOUT")

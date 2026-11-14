@@ -1939,6 +1939,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         U3D_CatchTutorial();
         printf("[test] unova catch demo\n");
     }
+    else if (strcmp(cmd, "u3dtrainerkinds") == 0)
+    {
+        // u3dtrainerkinds - Black's trainers whose battle is a Triple (2) or a Rotation (3): the first few of each
+        const u8 *U3D_Vm_Trainer(u16 id, u32 *size);
+        int id, n2 = 0, n3 = 0;
+        for (id = 1; id < 1000 && (n2 < 8 || n3 < 8); id++)
+        {
+            u32 size;
+            const u8 *t = U3D_Vm_Trainer(id, &size);
+            if (t != NULL && size >= 20 && t[2] == 2 && n2++ < 8)
+                printf("[test] black trainer %d: triple (%d POKeMON)\n", id, t[3]);
+            if (t != NULL && size >= 20 && t[2] == 3 && n3++ < 8)
+                printf("[test] black trainer %d: rotation (%d POKeMON)\n", id, t[3]);
+        }
+    }
     else if (strcmp(cmd, "u3dtrainer") == 0)
     {
         // u3dtrainer ID - a battle against Black's trainer ID right now (UNOVA's trainers: u3d_battle.c)

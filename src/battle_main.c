@@ -4145,6 +4145,15 @@ static void BattleIntroOpponent1SendsOutMonAnimation(void)
                 return;
             }
         }
+        // Moemon Kai: one trainer's Triple (UNOVA's Triple trainers, u3d_battle.c): the center one comes out too (the
+        // left one's throw brings out left and right; the second trainer's path, which has the center, isn't taken)
+        else if (IS_TRIPLE_BATTLE() && !(gBattleTypeFlags & (BATTLE_TYPE_MULTI | BATTLE_TYPE_TWO_OPPONENTS))
+              && GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_CENTER
+              && !(gBattleTypeFlags & BATTLE_TYPE_LINK))
+        {
+            BtlController_EmitIntroTrainerBallThrow(B_COMM_TO_CONTROLLER);
+            MarkBattlerForControllerExec(gActiveBattler);
+        }
     }
 
     gBattleMainFunc = BattleIntroRecordMonsToDex;
