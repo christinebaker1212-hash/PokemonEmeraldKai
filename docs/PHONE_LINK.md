@@ -282,6 +282,10 @@ left and a bar, READY wobbling, tap to choose, + ADD EGG through the box picker,
 Tests: tools/phone/incubator_test.py (in and out of the save, custody across restarts, `full`, hatching by steps, the
 day's cap, `noegg`, FORGET), ScreensTest (walk_incubator, box_choose; the steps and the order).
 
+1.199.3: an EGG's ID is any 32-bit number, and mp_phone_walk.c JsonNums read the `eggs` list as C `long`s, 32 bits on
+Windows: strtol clipped every ID past 2,147,483,647, so `hatchhome` answered `noegg` ("That EGG already came home.")
+for about half the EGGS while they waited safe in the incubator. The lists are `long long` now (strtoll).
+
 ### Offline MYSTERY GIFT scans, IVs and EVs (1.173.0)
 
 - A scan with no game linked (or in a battle) waits on the phone: Companion.queueGift keeps {code hash, day, at} in

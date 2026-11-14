@@ -257,8 +257,10 @@ static void BufWalk(struct Buf *b)
 
 // --------------------------------------------------------------------------------------------- JSON numbers
 
-// The numbers in the array after "key" (nested arrays flattened), up to max; -1 when there's no such array
-static int JsonNums(const char *json, const char *key, long *out, int max)
+// The numbers in the array after "key" (nested arrays flattened), up to max; -1 when there's no such array. 64-bit:
+// an EGG's ID is any 32-bit number, and Windows' long is 32 bits (strtol clipped half of them to 2147483647, so
+// "hatchhome" never found them: "That EGG already came home", 1.199.3)
+static int JsonNums(const char *json, const char *key, long long *out, int max)
 {
     char pat[40];
     const char *p;
@@ -282,7 +284,7 @@ static int JsonNums(const char *json, const char *key, long *out, int max)
         else if ((*p >= '0' && *p <= '9') || *p == '-')
         {
             char *end;
-            long v = strtol(p, &end, 10);
+            long long v = strtoll(p, &end, 10);
             if (n < max)
                 out[n++] = v;
             p = end - 1;
@@ -411,7 +413,7 @@ static u32 DayNumber(u32 t)
 static const char *DoHome(const char *json)
 {
     static u16 sWild[40][3], sPool[48];
-    static long sFinds[64], sCaught[3 * 32];
+    static long long sFinds[64], sCaught[3 * 32];
     static struct Pokemon sMon;
     long long id = 0, steps = 0;
     u32 now = (u32)time(NULL), days, maxSteps, nWild, nPool, i, k, finds = 0, caught = 0, gained = 0, moments;
@@ -1002,13 +1004,13 @@ static const char *DoIncubate(const char *json)
 // "hatchhome": EGGS [[id, steps], ...] back to BOX (room for all of them), hatched or not
 static const char *DoHatchHome(const char *json)
 {
-    static long sPairs[INC_MAX * 2 + 2];
+    static long long sPairs[INC_MAX * 2 + 2];
     static struct Pokemon sMon;
     struct PokemonStorage *st = Storage();
     long long boxNum = -1;
     u32 now = (u32)time(NULL), i, k, freeSlots = 0, n, hatched = 0, back = 0, slot = 0;
     int np, idx[INC_MAX];
-    long steps[INC_MAX];
+    long long steps[INC_MAX];
     if (!JsonNum(json, "box", &boxNum) || boxNum < 0 || boxNum >= TOTAL_BOXES_COUNT)
         return "bad";
     np = JsonNums(json, "eggs", sPairs, ARRAY_COUNT(sPairs));
@@ -1036,7 +1038,7 @@ static const char *DoHatchHome(const char *json)
     {
         struct IncEgg *e = &sInc.egg[idx[i]];
         u32 days = DayNumber(now) >= DayNumber(e->sentAt) ? DayNumber(now) - DayNumber(e->sentAt) + 1 : 1;
-        u32 walked = (u32)steps[i] > days * STEPS_A_DAY ? days * STEPS_A_DAY : (u32)steps[i];
+        u32 walked = steps[i] > (long long)days * STEPS_A_DAY ? days * STEPS_A_DAY : (u32)steps[i];
         u32 cycles, done = walked / INC_CYCLE;
         struct Loc loc;
         BoxMonToMon(&e->mon, &sMon);
