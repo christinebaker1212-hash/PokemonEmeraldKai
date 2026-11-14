@@ -66,8 +66,8 @@ opponent's cards to face them; TRIPLE TRIAD stays as it is (never turn its cards
 (2026-11-03) for all four phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era
 graphics, 2026 usability".
 
-**Moemon Maker** (the user's own MZ-like editor, built into the game; **start at `docs/MAKER_HANDOFF.md`** (status, the
-full plan M1-M5, next steps: M2 waits for the user's go and four open questions); design and every decision in `docs/MOEMON_MAKER.md`;
+**Moemon Maker** (the user's own MZ-like editor, built into the game; **closed (the user, 2026-11-14): no more work on it
+unless the user asks**; history in `docs/MAKER_HANDOFF.md` (status, the full plan M1-M5); design and every decision in `docs/MOEMON_MAKER.md`;
 M1 built 2026-11-03: COOP_NOTES "Moemon Maker, M1"): C++ in maker/ (Dear ImGui) reaching the game only through
 include/maker_api.h (src/maker/*.c); hidden until `AllowSmallTweaks = 1` and "maker" typed (never in PATCH NOTES or the
 README). The user's edits are MoemonMaker/base/MAP_X.txt (each line keeps the value it replaced; format at the top of
@@ -96,7 +96,7 @@ off: src/mp/mp_stadium_announcer.c, docs/STADIUM.md "The announcer"; OPTIONS > B
 JAPANESE: POKEMON STADIUM 2 (Japan)'s 831 clips laid under the English numbers, stadium/announcer_jp.s1, secret
 STADIUM_JP_ROM_URL; STADIUM.md "The Japanese announcer"); tests stadium_announcer, stadium_announcer_jp.
 
-**POKESTADIUM 2 THEME** (the user's name for STADIUM's screens redone in STADIUM 2's style, 2026-11-12: built, with
+**POKESTADIUM 2 THEME** (**closed, the user 2026-11-14**; the user's name for STADIUM's screens redone in STADIUM 2's style, 2026-11-12: built, with
 POKESTADIUM, as OPTIONS > BATTLE > STADIUM SETTINGS > STYLE; src/mp/mp_stadium_ui_themes.inc.c, pieces from
 tools/stadium/restyle/build_themes.py; hard 2-pixel text outline, never soft): **start at `docs/POKESTADIUM_2_THEME_HANDOFF.md`** (it also holds **POKESTADIUM THEME**, the first
 STADIUM's look, from a second recording: docs/stadium/theme1/) (the flow, the materials, how to build it, open questions; mock-ups docs/stadium/restyle/,
@@ -191,6 +191,28 @@ battle backgrounds of UNOVA and SINNOH in full colour, 2026-11-13).
 must be ones you could believe on a GBA (sensible palettes, pixel art, Emerald-era windows and fonts, nothing
 overly modern), so the game looks as if it could always have looked this way. New screens: show the user mock-ups
 before building them.
+
+## Regions and travel: the user's rules (keep to them; docs/REGION_ITEMS.md, docs/REGIONS_PLAN.md)
+- **Every key item has a region code** (the user, 2026-11-13/14): each copy belongs to the region it was earned in
+  (the GOOD ROD (HOENN) and the GOOD ROD (KANTO) are two). A new key item is never added without its code:
+  src/mp/mp_regionitems.c sTools (bikes, devices, containers, rods...: its home region, 0xFF = every region has one)
+  or sStoryHome (story items: their region), or sTravel (Kai's own, which cross: the CARD CASE, CANDY JAR, BATTLE
+  FLAG, ORRE / BATTLE ISLAND tickets). An unlisted story item counts as HOENN's.
+- **Earn every tool in the region you're in; in a region's postgame use them all**: leaving any region, every key item
+  but Kai's own goes to the GLOBAL PC under its code (customs, mp_region.c MP_Region_SendLuggage; MP_Region_Travel
+  for any crossing); arriving, that region's own come back; in a region whose LEAGUE isn't beaten a copy coded to
+  another region goes to the GLOBAL PC by itself (every map load); in a beaten region every tool from every region
+  is in the BAG as one item, each copy going back under its code on leaving (MP_RegionItems_Update; beating a
+  LEAGUE lends them at once). Story items stay their region's. Devices work where the BAG has them
+  (MP_Region_DeviceHere). HMs wait in the GLOBAL PC and come back in a beaten region. Saves from before 1.199.2 are
+  sorted once (Sort: KANTO's / JOHTO's givers' flags say what was earned there).
+- **Customs** at every port, gate and train: one POKéMON boards with the player (the rest to the GLOBAL PC), the BAG's
+  other pockets to the GLOBAL PC; the GLOBAL PC reaches a PC only in a region whose LEAGUE is beaten.
+- **Online, only the room's host leads a trip**; everyone follows (customs, then the same boat).
+- **The first voyage to a region is aboard the ship** (mp_ship.c), later ones the ferry scene (mp_voyage.c); ORRE is
+  post-game only, by boat (the ORRE TICKET after any ELITE FOUR), never a NEW GAME region.
+- **Each region's own versions**: the BICYCLE is KANTO's / JOHTO's, the MACH / ACRO BIKE HOENN's, the MTN. BIKE
+  SINNOH's; each region's device is its own (MOéNAV, POKéGEAR, POKéTCH, C-GEAR / XTRANSCEIVER) until its postgame.
 
 ## Key locations
 - `src/mp/`: all co-op code (net, client, avatar, overworld, trainer mode, battle, menu)
@@ -315,7 +337,7 @@ from before 1.18.1 the TMs their flags prove they got and no longer have, from t
 Also catch EXP (a catch gives EXP scaled by the damage dealt: BattleScript_MpCatchExp; tests catch_exp, coop_catch_exp)
 and BATTLE FLAG phrases ("Set phrases, or plant?", the save's easy chat battle phrases sent with MPR_ARRIVED /
 BATTLE_GO, MPR_PHRASE_READY; the loser keeps their money; test flag_phrases).
-Also the CO-OP menu as the user designed it (1.199.0: the hub over the field with the room, tabs PEOPLE / PLAY / ME, item
+Also the CO-OP menu as the user designed it (**closed, the user 2026-11-14**; 1.199.0: the hub over the field with the room, tabs PEOPLE / PLAY / ME, item
 icons from tools/moemon_coopmenu/gen_icons.py, FRIENDS a list, MpUi's COMPACT / WIDE layouts, the picks round the
 player / POKéMON, the A-Life answer on the map name's sign) and THEME DARK (OPTIONS > DISPLAY > THEME: designed dark
 palettes from tools/moemon_darktheme/gen_dark.py swapped in at load, src/mp/mp_darktheme.c): COOP_NOTES "The CO-OP menu
@@ -555,7 +577,7 @@ Gotchas worth knowing before touching battles:
   checks (a different OT ID caught the BAD EGG bug). `[heap] out of memory` in a log means the game heap ran out.
 
 ## Not yet done or verified
-- The Windows exe has never been run on real Windows (it was cross-compiled); it runs under Wine
-  (tools/test/wine_smoke.sh: solo, and a co-op battle with a Linux player through the Windows server)
+- (Verified: the Windows build runs on real Windows, every release; the user, 2026-11-14. tools/test/wine_smoke.sh
+  remains for checks here)
 - Co-op battles: only POKé BALLS (wild) and healing items (ItemUseInBattle_Medicine); no items in PvP
 - Remote players aren't shown across warps (only the same map or connected maps)
