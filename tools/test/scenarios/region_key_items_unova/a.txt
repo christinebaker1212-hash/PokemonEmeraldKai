@@ -1,0 +1,33 @@
+pressuntil A field 6000
+wait 30
+mp regioninfo
+mp item 361 1
+mp item 671 1
+mp item 678 1
+mp item 505 1
+mp item 360 1
+mp item 812 1
+mp regionitems
+echo [ki] in UNOVA
+mp bagqty 361
+mp bagqty 671
+mp bagqty 678
+mp bagqty 505
+mp bagqty 360
+mp bagqty 812
+mp travel 0
+wait 300
+echo [ki] in HOENN
+mp bagqty 361
+mp bagqty 671
+mp bagqty 678
+mp bagqty 505
+mp bagqty 360
+mp bagqty 812
+mp keyedpc 361
+mp keyedpc 671
+mp keyedpc 678
+mp keyedpc 505
+mp keyedpc 360
+mp keyedpc 812
+quit

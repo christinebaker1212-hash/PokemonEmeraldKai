@@ -63,6 +63,16 @@ The open points, answered (2026-11-08):
   one). Then the rule above sends what doesn't belong to the GLOBAL PC. A save begun in SINNOH that hasn't seen KANTO
   or JOHTO has its BICYCLE as the MTN. BIKE.
 
+## Shared key items (1.199.5)
+
+A key item more than one region gives is "every region has its own" (0xFF in sTools, or in sStoryHome for a story
+item), so each copy is coded to the region it was handed over in: the rods, the COIN CASE, the ITEMFINDER (Black's
+DOWSING MCHN), the S.S. TICKET, the BICYCLE (KANTO, JOHTO, UNOVA), the VS SEEKER, the TOWN MAP (KANTO, UNOVA), the
+VS. RECORDER and PAL PAD (SINNOH, UNOVA), the GRACIDEA (SINNOH, UNOVA). Every key item Black's scripts give was
+checked (tools/unova/scripts.py decode, the items loaded into works before AddItem); UNOVA's own (the GRAMs, the
+XTRANSCEIVER, the PROP CASE, the DRAGON SKULL, the LIGHT / DARK STONE, the LIBERTY PASS) are coded UNOVA. Scenario
+region_key_items_unova.
+
 ## Before 1.199.2
 
 1.183.0 let a tool travel once the region it came from was beaten, and merged its copies into one on every map load

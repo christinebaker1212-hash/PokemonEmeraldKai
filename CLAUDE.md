@@ -197,7 +197,9 @@ before building them.
   (the GOOD ROD (HOENN) and the GOOD ROD (KANTO) are two). A new key item is never added without its code:
   src/mp/mp_regionitems.c sTools (bikes, devices, containers, rods...: its home region, 0xFF = every region has one)
   or sStoryHome (story items: their region), or sTravel (Kai's own, which cross: the CARD CASE, CANDY JAR, BATTLE
-  FLAG, ORRE / BATTLE ISLAND tickets). An unlisted story item counts as HOENN's.
+  FLAG, ORRE / BATTLE ISLAND tickets). An unlisted story item counts as HOENN's. A key item more than one region
+  gives is 0xFF (each copy coded where it's handed over: rods, BICYCLE, TOWN MAP, VS. RECORDER, PAL PAD, GRACIDEA...;
+  REGION_ITEMS.md "Shared key items"); check a new region's scripts for every key item they give.
 - **Earn every tool in the region you're in; in a region's postgame use them all**: leaving any region, every key item
   but Kai's own goes to the GLOBAL PC under its code (customs, mp_region.c MP_Region_SendLuggage; MP_Region_Travel
   for any crossing); arriving, that region's own come back; in a region whose LEAGUE isn't beaten a copy coded to

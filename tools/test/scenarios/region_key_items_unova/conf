@@ -1,0 +1,11 @@
+# UNOVA's key items keep UNOVA's region code (the user, 2026-11-14: "every Key Item has its own region code"). The
+# key items Black's scripts give that other regions give too (the TOWN MAP: KANTO's; the VS. RECORDER, PAL PAD and
+# GRACIDEA: SINNOH's; the BICYCLE) are "every region has its own" (0xFF): earned in UNOVA, each is UNOVA's and stays
+# in the BAG there; the XTRANSCEIVER is UNOVA's own. To HOENN (unbeaten): all of them wait in the GLOBAL PC under
+# UNOVA's code (keyedpc 16). check.py: each step.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("[ki] in HOENN")
+UNEXPECT_A=("[crash]")
+CHECK="python3 tools/test/scenarios/region_key_items_unova/check.py"
