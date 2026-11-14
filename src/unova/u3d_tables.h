@@ -48,3 +48,12 @@ static const u16 sTutorCompat[75][2] = {
     {503, 0x24}, {610, 0x40}, {611, 0x40}, {612, 0x40}, {621, 0x40}, {633, 0x40}, {634, 0x40}, {635, 0x40},
     {643, 0x40}, {644, 0x40}, {646, 0x40},
 };
+// the ROYAL UNOVA's passengers (ov036 DAILY_LAYOUT_*): cells dealt first, each cell's flags A / B, and the
+// passengers: main {object, trainer, message, message}, bonus / filler {object, message, message}
+static const u8 sBoat_anchor[6] = {9, 10, 11, 12, 13, 14};
+static const u8 sBoat_compA[7] = {4, 5, 6, 7, 8, 13, 14};
+static const u8 sBoat_compB[8] = {0, 1, 2, 3, 9, 10, 11, 12};
+static const u8 sBoat_flags[15][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {1, 0}, {1, 0}, {1, 0}, {1, 0}, {1, 0}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {1, 1}, {1, 1}};
+static const u16 sBoat_main[10][4] = {{52, 169, 17, 18}, {30, 206, 21, 22}, {31, 205, 25, 26}, {11, 146, 29, 30}, {15, 207, 34, 35}, {13, 208, 38, 39}, {17, 209, 42, 43}, {44, 211, 47, 48}, {45, 210, 52, 53}, {65, 543, 57, 58}};
+static const u16 sBoat_bonus[5][3] = {{52, 15, 16}, {15, 32, 33}, {44, 45, 46}, {45, 50, 51}, {20, 55, 56}};
+static const u16 sBoat_filler[15][3] = {{52, 14, 14}, {30, 19, 19}, {30, 20, 20}, {31, 23, 23}, {31, 24, 24}, {11, 27, 27}, {11, 28, 28}, {15, 31, 31}, {13, 36, 36}, {13, 37, 37}, {17, 40, 40}, {17, 41, 41}, {44, 44, 44}, {45, 49, 49}, {20, 54, 54}};

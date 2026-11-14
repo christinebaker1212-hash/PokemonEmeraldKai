@@ -22,7 +22,7 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       follows the flying player at the field's own angle)
 - [ ] **Building animations**: doors opening and closing (SCREENEFFECTS 0x124-0x132, build-model nodes), machines'
       and lamps' BCA0 / BTP0 / BMA0 (field_buildmodel.c), the POKeMON LEAGUE's statues and stairs (0x12B-0x12E)
-- [ ] The GEAR STATION's trains on the platforms; the ROYAL UNOVA as a boat
+- [ ] The GEAR STATION's trains on the platforms
 - [ ] 3D cut-ins (RunFld3dCiMain 0x1A1: DESERT RESORT, NACRENE), the ELITE FOUR rooms' entrance flights (FkDemo
       0x1A3 / 0x1A4), camera moves from Black's archive (0x146, ROUTE 10), camera shakes (0x148: ABYSSAL RUINS,
       CHARGESTONE, DRAGONSPIRAL, N's CASTLE)
@@ -70,7 +70,11 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       tutor taught FIRE PLEDGE through the summary's forget list; Black's tutor bits in src/unova/u3d_tables.h)
 - [ ] POKeMON MUSICALS (0x05D, 0x167-0x16E: the dress-up, the stage, the results, props, fans; four on stage with
       co-op friends)
-- [ ] The ROYAL UNOVA (PLEASURE_BOAT 0x1A5-0x1AC: its passengers, the sunset, the time aboard)
+- [x] The ROYAL UNOVA (PLEASURE_BOAT 0x1A5-0x1AC, SYMBOL_MAP 0x1A9 / 0x1AB: 1.199.6): the day's passengers dealt to
+      the cabins as ov036's DAILY_LAYOUT_Generate deals them (the weekday's trainers, two bonus people, the rest), the
+      trip's clock (30 ticks a second, a chime each 1350, home at 5400 after four), a talk's time aboard, the cabins'
+      battles; the deck's view of the sea (ov203's 3D scene) isn't drawn: it leaves the boat sailing on (u3d_vm.c
+      BoatCreate / BoatFrame; scenario unova_boat). Every warp, inside a zone too, runs its zone-change script, as Black
 - [ ] The ENTRALINK (INTRUDE / EVENT_COMM 0x16F-0x177: Black's forest, missions; co-op friends for the wireless),
       PASS POWERS (0x1F1 / 0x1F2, shareable), WHITE FOREST / BLACK CITY's people (0x1C5 / 0x1C6)
 - [ ] The C-GEAR as UNOVA's device, the XTRANSCEIVER's calls (friends' video calls)

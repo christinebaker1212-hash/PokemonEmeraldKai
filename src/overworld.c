@@ -863,6 +863,10 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     Overworld_ClearSavedMusic();
     Sinnoh_StoryRefresh();   // Moemon Kai: SINNOH's story people for where the story is (src/sinnoh/s3d_legends.c)
     MakerLua_OnMapEnter();   // Moemon Maker M5: a Lua OnMapEnter hook (src/maker/maker_lua.cpp)
+    {
+        void U3D_Vm_SeamlessLoad(void);
+        U3D_Vm_SeamlessLoad();   // Moemon Kai: walked across a map's edge, not warped (src/unova/u3d_vm.c U3D_VmMapLoad)
+    }
     RunOnTransitionMapScript();
     MP_HideForeignLegends();   // Moemon Kai: each region's legendaries only there (qz_specials.c)
     MP_JohtoBerries_Init();   // Moemon Kai: JOHTO's BERRY patches start with Crystal's BERRIES (mp_apricorn.c)

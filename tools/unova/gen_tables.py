@@ -8,6 +8,8 @@
 - ov010 sScrcmdLookupTable, for SCRCMD_PROC_LookupTableValue
 - the move tutors' POKeMON: the personal data's tutor bits (archive a/0/1/6, u32 at 0x38: POKE_TOOL_CheckTutorCompat;
   0-2 GRASS / FIRE / WATER PLEDGE, 3-5 FRENZY PLANT / BLAST BURN / HYDRO CANNON, 6 DRACO METEOR), national numbers
+- the ROYAL UNOVA's passengers (ov036 DAILY_LAYOUT_*: the anchor and companion cells, each cell's two flags, the main
+  (trainers), bonus and filler passengers: {object, trainer, message, message}), for PLEASURE_BOAT_*
 
     python3 -I tools/unova/gen_tables.py       (run from the repository; safe to run again)
 """
@@ -22,6 +24,8 @@ import scrcmd  # noqa: E402
 RATINGS = (0x021D992C, 0x021D9904, 0x021D98DC)   # (kinds 1 national caught, 2 regional seen, 3 regional caught)
 TABLE_IDS, TABLE_COUNT, TABLE_ARC = 0x021D99D0, 4, 'a/2/0/8'
 LOOKUP, LOOKUP_COUNT = 0x02171170, 8
+BOAT = {'anchor': (0x021F3A7C, 6), 'compA': (0x021F3A82, 7), 'compB': (0x021F3A90, 8), 'flags': (0x021F3AD4, 15),
+        'main': (0x021F3B4C, 10), 'bonus': (0x021F3A98, 5), 'filler': (0x021F3BEC, 15)}
 
 
 def main():
@@ -70,6 +74,22 @@ def main():
         out.append('    %s,' % ', '.join('{%d, 0x%02X}' % e for e in tutors[k:k + 8]))
     out.append('};')
     path = 'src/unova/u3d_tables.h'
+    # the ROYAL UNOVA (ov036)
+    bram, bd = scrcmd.ov_image(36)
+    def b8(key):
+        at, n = BOAT[key]
+        return list(bd[at - bram:at - bram + n])
+    def i32(key, per):
+        at, n = BOAT[key]
+        return [struct.unpack_from('<%di' % per, bd, at - bram + per * 4 * k) for k in range(n)]
+    out.append("// the ROYAL UNOVA's passengers (ov036 DAILY_LAYOUT_*): cells dealt first, each cell's flags A / B, and the")
+    out.append('// passengers: main {object, trainer, message, message}, bonus / filler {object, message, message}')
+    for key in ('anchor', 'compA', 'compB'):
+        out.append('static const u8 sBoat_%s[%d] = {%s};' % (key, BOAT[key][1], ', '.join(str(v) for v in b8(key))))
+    out.append('static const u8 sBoat_flags[15][2] = {%s};' % ', '.join('{%d, %d}' % f for f in i32('flags', 2)))
+    out.append('static const u16 sBoat_main[10][4] = {%s};' % ', '.join('{%d, %d, %d, %d}' % (e[0], e[1], e[2], e[3]) for e in i32('main', 4)))
+    out.append('static const u16 sBoat_bonus[5][3] = {%s};' % ', '.join('{%d, %d, %d}' % e for e in i32('bonus', 3)))
+    out.append('static const u16 sBoat_filler[15][3] = {%s};' % ', '.join('{%d, %d, %d}' % e for e in i32('filler', 3)))
     open(path, 'w').write('\n'.join(out) + '\n')
     print('%s: %d key / value pairs' % (path, len(kv)))
 

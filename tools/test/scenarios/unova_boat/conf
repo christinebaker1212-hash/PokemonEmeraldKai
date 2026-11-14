@@ -1,0 +1,9 @@
+# Black's ROYAL UNOVA (ov021 pleasure_boat.c, ov036 daily_layout.c; src/unova/u3d_vm.c BoatCreate / BoatFrame): aboard
+# (zone 52), the day's passengers dealt to the cabins (the weekday's trainers), the boat's clock chiming four times,
+# then the zone's script 1 bringing the boat back to CASTELIA's pier (zone 39). Cabin 0 given the first of its trainers (mp u3dboat), fought (shots cabin, talk, fight, after).
+# Shots aboard, back.
+MODE=1
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=6:90"
+EXPECT_A=("ROYAL UNOVA sails with" "(Black's 169, class 66)" "unova: battle won" "ROYAL UNOVA's chime 4" "ROYAL UNOVA comes back to port" "warp to zone 39")
+UNEXPECT_A=("[crash]" "TIMEOUT")

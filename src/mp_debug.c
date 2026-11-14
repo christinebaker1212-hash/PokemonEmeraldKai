@@ -4641,6 +4641,28 @@ void MP_TestCommand(const char *cmd, const char *arg)
         bool8 U3D_Vm_DebugRun(u16 id);
         printf("[test] u3drun %d: %d\n", atoi(arg), U3D_Vm_DebugRun((u16)atoi(arg)));
     }
+    else if (strcmp(cmd, "u3dboat") == 0)   // u3dboat CABIN MAIN: the ROYAL UNOVA's cabin given one of its trainers
+    {
+        void U3D_Vm_DebugBoat(u16 cabin, u16 main);
+        int cabin = 0, main = 0;
+        if (sscanf(arg, "%d %d", &cabin, &main) == 2)
+            U3D_Vm_DebugBoat(cabin, main);
+    }
+    else if (strcmp(cmd, "u3dzone") == 0)   // u3dzone ZONE X Z (decimal): a walk-in warp to Black's zone at that tile
+    {
+        bool8 U3D_MapOfZoneTile(u16 zone, u16 x, u16 z, u8 *group, u8 *num, s16 *mapX, s16 *mapY);
+        int zone = 0, x = 0, z = 0;
+        u8 group, num;
+        s16 mx, my;
+        if (sscanf(arg, "%d %d %d", &zone, &x, &z) == 3 && U3D_MapOfZoneTile(zone, x, z, &group, &num, &mx, &my))
+        {
+            SetWarpDestination(group, num, WARP_ID_NONE, mx, my);
+            DoWarp();
+            printf("[test] u3dzone %d: %d.%d %d,%d\n", zone, group, num, mx, my);
+        }
+        else
+            printf("[test] u3dzone %s: no map\n", arg);
+    }
     else if (strcmp(cmd, "u3dwork") == 0 || strcmp(cmd, "u3dflag") == 0)   // u3dwork WORK VALUE / u3dflag FLAG 0|1 (hex)
     {
         unsigned id = 0, v = 0;

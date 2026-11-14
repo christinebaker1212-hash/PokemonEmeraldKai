@@ -1,0 +1,48 @@
+pressuntil A field 6000
+wait 120
+mash B 10 20
+wait 60
+pressuntil B field 600
+mp godmode 1
+mp u3dzone 52 29 29
+wait 200
+pressuntil B field 2000
+wait 30
+mp setlevel 0 95
+mp teach 0 53
+mp u3drun 29
+wait 60
+mash B 30 20
+pressuntil B field 3000
+wait 60
+shot aboard
+mp u3dboat 0 0
+mp u3dget 4020
+mp u3dzone 52 92 20
+wait 120
+pressuntil B field 2000
+wait 30
+mp u3dget 4020
+mp face up
+wait 10
+shot cabin
+press A 10
+wait 90
+shot talk
+pressuntil A action 3000
+wait 30
+shot fight
+mash A 200 12
+pressuntil B field 4000
+wait 60
+press A 10
+wait 90
+shot after
+mash B 20 20
+pressuntil B field 2000
+wait 11500
+mash B 20 20
+pressuntil B field 3000
+wait 120
+shot back
+quit

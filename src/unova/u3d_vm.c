@@ -1409,6 +1409,131 @@ static u32 ReadArgs(struct Thread *t, u16 op, u32 *a)
 
 #define V(i) WorkValue((u16)a[i])
 
+// ------------------------------------------------------------------------------------------------ the ROYAL UNOVA
+// Black's pleasure boat (ov021 pleasure_boat.c, ov036 daily_layout.c): the day's 15 passengers dealt to the cabins
+// (trainers by weekday: MON 4, TUE 3, WED 4, THU 5, FRI 4, SAT 6, SUN 7, two bonus people, the rest filler), the
+// trip's clock (30 ticks a second, four periods of 1350 ticks: a chime at each, the zone's script 1 at the end)
+struct BoatPassenger { u16 id, type, value, param, extra[2], occupied; };
+static struct
+{
+    bool8 alive, locked, eventPending;
+    u8 periodCount;
+    u16 mainCount;
+    u32 ticks;
+    struct BoatPassenger p[15];
+} sBoat;
+
+static void BoatPick(u8 pool, u8 count, u8 *picks)   // (DAILY_LAYOUT_PickDistinct)
+{
+    u8 scratch[15], i;
+    for (i = 0; i < pool; i++)
+        scratch[i] = i;
+    for (i = 0; i < count; i++)
+    {
+        u8 r = Random() % pool;
+        picks[i] = scratch[r];
+        scratch[r] = scratch[--pool];
+    }
+}
+
+static bool8 BoatDeal(u8 *dealt)   // (DAILY_LAYOUT_DealCells: an anchor cell, a companion for the other half, the rest)
+{
+    u8 pool[15], last = 14, n = 0, i, remaining = 14, cell;
+    for (i = 0; i < 15; i++)
+        pool[i] = i;
+#define BOAT_TAKE(c) do { u8 _k; for (_k = 0; _k <= last && pool[_k] != (c); _k++) ; if (_k > last) return FALSE; \
+                          pool[_k] = pool[last]; if (last) last--; dealt[n++] = (c); } while (0)
+    i = Random() % 6;
+    cell = sBoat_anchor[i];
+    BOAT_TAKE(cell);
+    // (Black reads the flags of the anchor's index, not its cell: the companion always comes from the A list or the B)
+    cell = sBoat_flags[i][0] == 0 ? sBoat_compB[Random() % 8] : sBoat_compA[Random() % 7];
+    BOAT_TAKE(cell);
+    remaining--;
+#undef BOAT_TAKE
+    for (i = 0; i < remaining; i++)
+    {
+        u8 r = Random() % (remaining - i);
+        if (r > last)
+            return FALSE;
+        dealt[n++] = pool[r];
+        pool[r] = pool[last];
+        if (last)
+            last--;
+    }
+    return TRUE;
+}
+
+static void BoatCreate(void)
+{
+    static const u8 sMainByDay[7] = {7, 4, 3, 4, 5, 4, 6};   // (SUNDAY first)
+    u16 MP_JohtoWeekday(void);
+    u8 dealt[15], mainPick[7], bonusPick[2], fillerPick[15], i, k = 0, fill;
+    memset(&sBoat, 0, sizeof(sBoat));
+    sBoat.alive = TRUE;
+    sBoat.mainCount = sMainByDay[MP_JohtoWeekday() % 7];
+    if (!BoatDeal(dealt))
+        for (i = 0; i < 15; i++)
+            dealt[i] = 0;
+    BoatPick(10, sBoat.mainCount, mainPick);
+    BoatPick(5, 2, bonusPick);
+    fill = 15 - (sBoat.mainCount + 2);
+    BoatPick(15, fill, fillerPick);
+    for (i = 0; i < sBoat.mainCount; i++, k++)
+    {
+        struct BoatPassenger *b = &sBoat.p[dealt[k]];
+        const u16 *d = sBoat_main[mainPick[i]];
+        b->id = mainPick[i], b->type = d[1], b->value = d[0], b->param = 0, b->extra[0] = d[2], b->extra[1] = d[3];
+    }
+    for (i = 0; i < 2; i++, k++)
+    {
+        struct BoatPassenger *b = &sBoat.p[dealt[k]];
+        const u16 *d = sBoat_bonus[bonusPick[i]];
+        b->id = i, b->type = 0, b->value = d[0], b->param = 2, b->extra[0] = d[1], b->extra[1] = d[2];
+    }
+    for (i = 0; i < fill; i++, k++)
+    {
+        struct BoatPassenger *b = &sBoat.p[dealt[k]];
+        const u16 *d = sBoat_filler[fillerPick[i]];
+        b->id = i, b->type = 0, b->value = d[0], b->param = 1, b->extra[0] = d[1], b->extra[1] = d[2];
+    }
+    MPNet_Log("u3d vm: the ROYAL UNOVA sails with %u trainers", sBoat.mainCount);
+}
+
+// (mp_debug.c `mp u3dboat CABIN MAIN`: a cabin's passenger made the main trainer MAIN of Black's ten, for tests)
+void U3D_Vm_DebugBoat(u16 cabin, u16 main)
+{
+    struct BoatPassenger *b = &sBoat.p[cabin % 15];
+    const u16 *d = sBoat_main[main % 10];
+    b->id = main % 10, b->type = d[1], b->value = d[0], b->param = 0, b->extra[0] = d[2], b->extra[1] = d[3];
+    b->occupied = 0;
+    MPNet_Log("u3d vm: the ROYAL UNOVA's cabin %u: trainer %u", cabin % 15, d[1]);
+}
+
+static u16 BoatStat(u16 kind)   // (PLEASURE_BOAT_GetStat: 0-3 the groups, 4 the trainers aboard, 5 the cabins visited)
+{
+    u16 n = 0, i;
+    if (kind == 4)
+        return sBoat.mainCount;
+    if (kind == 5)
+        for (i = 0; i < 15; i++)
+            n += sBoat.p[i].occupied != 0;
+    return n;
+}
+
+static void BoatAddTime(u16 seconds, u16 clamp)   // (PLEASURE_BOAT_AdvanceTime: a period's end stops one tick short)
+{
+    u32 ticks = sBoat.ticks % 1350 + seconds * 30;
+    if (ticks < 1350)
+        sBoat.ticks += seconds * 30;
+    else if (clamp)
+        sBoat.ticks = (sBoat.periodCount + 1) * 1350 - 1;
+    else
+        sBoat.ticks = (sBoat.periodCount + 1) * 1350, sBoat.periodCount++;
+}
+
+
+
 // A POKéMON knows a move, Black's numbers being the game's (CUT 15...): Kai's held HMs count (scrcmd.c checkpartymove)
 static bool8 PartyMonHasMove(struct Pokemon *mon, u16 move)
 {
@@ -2147,6 +2272,48 @@ static void Step(struct Thread *t)
         case U3C_StartMmdlIcaAnime:
         case U3C_WaitMmdlIcaAnime:
         case U3C_EndMmdlIcaProc:
+        case U3C_PLEASURE_BOAT_ScrCmdCreate:   // the ROYAL UNOVA: the day's passengers, the trip's clock
+            if (!sBoat.alive)
+                BoatCreate();
+            break;
+        case U3C_PLEASURE_BOAT_ScrCmdDelete:
+            sBoat.alive = FALSE;
+            break;
+        case U3C_PLEASURE_BOAT_ScrCmdGetStat:
+            *WorkPtr(a[1]) = sBoat.alive ? BoatStat(a[0]) : 0;
+            break;
+        case U3C_PLEASURE_BOAT_ScrCmdAddTime:
+            if (sBoat.alive)
+                BoatAddTime(a[0], a[1]);
+            break;
+        case U3C_SYMBOL_MAP_ScrCmdGetEventStateValue:   // (a cabin's passenger: 4 object, 5 kind, 6 trainer, 7 words, 8 met)
+        {
+            u16 i = V(0), out = 0;
+            if (!sBoat.alive || i >= 15)
+                out = a[1] == 4 && !sBoat.alive ? 10 : 0;
+            else if (a[1] == 4)
+                out = sBoat.p[i].value;
+            else if (a[1] == 5)
+                out = sBoat.p[i].param;
+            else if (a[1] == 6)
+                out = sBoat.p[i].type;
+            else if (a[1] == 7)
+                out = sBoat.p[i].extra[V(2) & 1];
+            else if (a[1] == 8)
+                out = sBoat.p[i].occupied != 0;
+            *WorkPtr(a[3]) = out;
+            break;
+        }
+        case U3C_PLEASURE_BOAT_ScrCmdSetPassengerInfo:   // (only 8: the cabin's passenger met)
+            if (sBoat.alive && a[1] == 8 && V(0) < 15)
+                sBoat.p[V(0)].occupied = V(3);
+            break;
+        case U3C_SYMBOL_MAP_ScrCmdStartRecordTask:   // (the deck's view of the sea, ov203's 3D scene: not drawn here; 0 =
+            *WorkPtr(a[0]) = 0;                      // looked away before the trip's end, the boat sails on)
+            break;
+        case U3C_PLEASURE_BOAT_ScrCmdLock:
+            sBoat.locked = TRUE;
+            break;
         case U3C_SYMBOL_MAP_ScrCmdSetSubscreenMode:   // (the lower screen's mode: Kai has one screen)
         case U3C_WORK_CmdSetBoxFlags:   // (Black's PC wallpapers the game clear unlocks: Kai's PC keeps its own)
         case U3C_SCREENEFFECTS_CreateBuildModelNode:   // (build models' animations: doors, lifts)
@@ -2227,6 +2394,7 @@ static void Step(struct Thread *t)
         case U3C_PALPARK_SetBeacon:   // (a link beacon of what the player did: no wireless here)
         case U3C_DebugWork:   // (Black's debug prints)
         case U3C_DebugStack:
+            break;
         case U3C_FIELD_GIMMICK_LIFT_ELEVATOR_CallLiftEvent:   // CLAY's gym: a lever sends its lift to its other height
             if (V(0) < 6 && sMineRide.lift < 0)   // (sMineLift's)
             {
@@ -3597,6 +3765,32 @@ static bool8 RunCode(const u8 *code, u32 size, u16 target)
     return TRUE;
 }
 
+// Each field frame aboard (PLEASURE_BOAT_AckEvent, then _Update): the chime of a period's end, the trip's end
+static void BoatFrame(void)
+{
+    extern const u8 Unova_EventScript_Scene[];
+    if (!sBoat.alive || sBoat.locked || sThread.alive || ArePlayerFieldControlsLocked())
+        return;
+    if (sBoat.eventPending)
+    {
+        PlaySE(SE_DING_DONG);   // (Black's 0x6DD)
+        sBoat.periodCount++;
+        sBoat.eventPending = FALSE;
+        MPNet_Log("u3d vm: the ROYAL UNOVA's chime %u", sBoat.periodCount);
+    }
+    sBoat.ticks++;
+    if (sBoat.ticks >= 5400 && sBoat.periodCount >= 4)
+    {
+        if (Run(1, 0xFFFF, TRUE))   // (SCRIPT_SYS_CreateScriptEventSimple(gs, 1, 0, 0x8015): the zone's script 1)
+        {
+            MPNet_Log("u3d vm: the ROYAL UNOVA comes back to port");
+            ScriptContext_SetupScript(Unova_EventScript_Scene);
+        }
+    }
+    else if (sBoat.ticks % 1350 == 0)
+        sBoat.eventPending = TRUE;
+}
+
 // ------------------------------------------------------------------------------------------------ the field's hooks
 // (a special that ends at once still lets its waitstate stop the script first: the enable comes a frame later)
 static void Task_EnableNext(u8 taskId)
@@ -4103,6 +4297,7 @@ void U3D_Vm_FieldFrame(void)
         MineRideStep();
         PlatStep();
     }
+    BoatFrame();
 }
 
 void U3D_Vm_FieldShown(void)
@@ -4723,10 +4918,20 @@ bool8 U3D_Vm_DragonBlocked(s32 x, s32 z)
     return FALSE;
 }
 
+// overworld.c LoadMapFromCameraTransition: the next map load is a walk across a map's edge (one zone's maps side by
+// side), not a warp
+static bool8 sSeamless;
+void U3D_Vm_SeamlessLoad(void)
+{
+    sSeamless = TRUE;
+}
+
 void U3D_VmMapLoad(void)
 {
     u16 zone = CurrentZone();
     static u16 sLastZone = 0xFFFF;
+    bool8 seamless = sSeamless;
+    sSeamless = FALSE;
     if (zone == 0xFFFF || !Ready())
         return;
     sAddedCount = 0;   // (a new map: its field-init script adds its own)
@@ -4739,15 +4944,20 @@ void U3D_VmMapLoad(void)
     }
     if (zone != sLastZone)
     {
-        u32 i;
         memset(sMoveCodes, 0, sizeof(sMoveCodes));   // (a script's move-code changes last the zone)
+        RoamersMove();   // (Black moves its roamers on as the player changes zones)
+    }
+    // (every warp, into the same zone too, runs the zone-change script: Black's EVENT_MAPCHANGE_ApplyLocation; the
+    // ROYAL UNOVA's cabins are doors within its zone, their passengers drawn by the works it sets)
+    if (zone != sLastZone || !seamless)
+    {
+        u32 i;
         // (Black's SCRIPT_SYS_ClearLocalWork before the zone-change script: the zone's own flags 1-0x63 and works
         // 0x4000-0x401F start afresh in each zone; RELIC CASTLE's quicksand waits for work 0x4000 to be 0)
         for (i = 1; i <= 0x63; i++)
             FlagTo(i, FALSE);
         for (i = 0x4000; i <= 0x401F; i++)
             *WorkPtr(i) = 0;
-        RoamersMove();   // (Black moves its roamers on as the player changes zones)
         memset(sConnMove, 0, sizeof(sConnMove));   // (a new zone: its connections where its data puts them)
         sNpcAtCount = 0;   // (a new zone: its people where its data puts them, till its scripts say)
         RunNow(InitScript(zone, 2));
