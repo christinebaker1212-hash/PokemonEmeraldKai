@@ -8,6 +8,7 @@
 #include "pokemon.h"
 #include "wild_encounter.h"
 #include "random.h"
+#include "rtc.h"
 #include "u3d.h"
 #include "constants/species.h"
 
@@ -54,6 +55,44 @@ static bool8 Fill(const u8 *row, u32 at, u32 count, u8 rate)
     return TRUE;
 }
 
+// Black's mass outbreaks (ov021 field_encount.c FIELD_ENCOUNT_GetSwarmEntry / TrySwarmSlot, its sSwarmTable): once
+// the HALL OF FAME is entered (flag 0x960) one of these 17 routes has a swarm each day (Black rolls it with the day;
+// here the day and the player's ID pick it, the same all day), 400 in 1000 of its grass's POKeMON, Lv 15-55
+static const u16 sSwarms[17][2] = {{317, 83}, {319, 360}, {321, 313}, {326, 449}, {329, 235}, {331, 311}, {337, 161},
+                                   {345, 453}, {348, 228}, {355, 236}, {365, 285}, {368, 84}, {370, 353}, {374, 193},
+                                   {378, 56}, {383, 204}, {387, 102}};
+
+static const u16 *SwarmToday(void)
+{
+    bool8 U3D_Vm_Flag(u16 id);
+    u32 day;
+    if (!U3D_Vm_Flag(0x960))
+        return NULL;
+    RtcCalcLocalTime();
+    day = (u32)gLocalTime.days + (gSaveBlock2Ptr->playerTrainerId[0] | gSaveBlock2Ptr->playerTrainerId[1] << 8);
+    return sSwarms[(day * 2654435761u >> 16) % ARRAY_COUNT(sSwarms)];
+}
+
+// (the gates' boards: GIMMICK_OBJ_ELBOARD_AddLastPlaceMessage) today's outbreak's zone, 0xFFFF none
+u16 U3D_SwarmZone(void)
+{
+    const u16 *s = SwarmToday();
+    return s ? s[0] : 0xFFFF;
+}
+
+static bool8 SwarmFill(u8 rate)
+{
+    const u16 *s = SwarmToday();
+    u32 i;
+    if (s == NULL || s[0] != U3D_CurrentZone() || Random() % 1000 > 400)
+        return FALSE;
+    for (i = 0; i < 12; i++)
+        sMons[i].species = NationalPokedexNumToSpecies(s[1]), sMons[i].minLevel = 15, sMons[i].maxLevel = 55;
+    sInfo.encounterRate = rate;
+    sInfo.wildPokemon = sMons;
+    return TRUE;
+}
+
 // The table underfoot (behavior: the tile's), its area (0 land, 1 water: wild_encounter.c WILD_AREA_*); FALSE none
 bool8 U3D_WildInfo(u16 behavior, const struct WildPokemonInfo **info, u8 *area)
 {
@@ -68,7 +107,9 @@ bool8 U3D_WildInfo(u16 behavior, const struct WildPokemonInfo **info, u8 *area)
     }
     else if (MetatileBehavior_IsLandWildEncounter(behavior))
     {
-        if (!Fill(row, GRASS, 12, row[0]))
+        if (row[0] && SwarmFill(row[0]))   // (Black's swarm: its normal grass only, encountType 0)
+            ;
+        else if (!Fill(row, GRASS, 12, row[0]))
             return FALSE;
         *area = 0;
     }

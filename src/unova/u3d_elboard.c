@@ -199,6 +199,16 @@ static void AddLine(u8 lane, u16 msg)
     sEl.n++;
 }
 
+static void AddOutbreak(void)   // (AddLastPlaceMessage: today's outbreak, lane 2; none in winter's GIANT CHASM)
+{
+    u16 U3D_SwarmZone(void);
+    u16 zone = U3D_SwarmZone();
+    if (zone == 0xFFFF || (zone == 0x159 && U3D_Season() == 3))
+        return;
+    SetSlot(0, U3D_Text(EL_PLACES, zone < ARRAY_COUNT(sZonePlace) ? sZonePlace[zone] : 0));
+    AddLine(2, sEl.b->news);
+}
+
 static void AddDate(void)   // (AddDateMessage: month by name, the day, 20 and the year)
 {
     struct SiiRtcInfo rtc;
@@ -322,6 +332,7 @@ bool8 U3D_Elboard_Load(u16 zone)
     if (sEl.b->shown)
     {
         SlotsSaved(TRUE);
+        AddOutbreak();
         AddDate();
         AddPlaces();
         news = AddNews(zone);

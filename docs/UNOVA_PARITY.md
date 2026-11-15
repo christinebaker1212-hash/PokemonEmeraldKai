@@ -62,14 +62,16 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       the roamers' storms, the day's three sayings or the story's news by their flags, the week's notice) drawn in the
       small font into each lane's own texture (u3d.c U3D_ExpOwnTexture), the lamps flickering orange / amber, scrolled
       one after another by the lanes' tracks as GIMMICK_OBJ_ELBOARD_UpdateLine; scenario unova_news_board. Not yet:
-      the HALL OF FAME team for a day after the LEAGUE (gate points, 0x960 / 0x97B), the outbreak line (no outbreaks
-      yet, below), the board's camera view (0x17E's own command)
+      the HALL OF FAME team for a day after the LEAGUE (gate points, 0x960 / 0x97B), the board's camera view
+      (0x17E's own command)
 - [x] Field weather (2026-11-15): Black's weather calendar (ov010 calender.c: 68 zones, a weather a day of the year)
       and the roamers' storms (TORNADUS's downpour, THUNDURUS's thunderstorm where they roam) as the map's weather on
       every UNOVA map load (field_weather_effect.c SetSavedWeatherFromCurrMapHeader -> u3d_elboard.c
       U3D_FieldWeather: rain, snow (also for Black's hail, heavy snow and diamond dust), sandstorm, mist as fog);
       scenario unova_weather (`mp weather`)
-- [ ] Mass outbreaks (FIELD_ENCOUNT_GetSwarmZoneId: Black's daily swarm after the LEAGUE, its board line)
+- [x] Mass outbreaks (2026-11-15; u3d_wild.c SwarmFill / U3D_SwarmZone): after the HALL OF FAME (flag 0x960) one of
+      Black's 17 swarm routes a day (sSwarmTable: the day and the player's ID pick it), 400 in 1000 of its grass's
+      POKeMON at Lv 15-55, and its line first on the gates' boards; `mp u3dswarm`, scenario unova_news_board
 - [ ] The dragons' levels in DRAYDEN's gym (walkways at their own heights, so the poses force Black's route)
 
 ## 2. Gyms

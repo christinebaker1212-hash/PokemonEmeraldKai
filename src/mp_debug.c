@@ -4788,6 +4788,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (sscanf(arg, "%d %d", &local, &kind) == 2)
             U3D_Vm_DebugMotion(local, kind);
     }
+    else if (strcmp(cmd, "u3dswarm") == 0)   // today's UNOVA outbreak's zone (0xFFFF: none)
+    {
+        u16 U3D_SwarmZone(void);
+        printf("[test] swarm zone %u\n", U3D_SwarmZone());
+    }
     else if (strcmp(cmd, "weather") == 0)   // the map's weather now (a test's check)
     {
         u8 GetSavedWeather(void);

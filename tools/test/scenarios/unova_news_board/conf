@@ -1,8 +1,9 @@
 # The gates' electric news boards (ov048, u3d_elboard.c): zone 27's board placed by its record, its lines (the date,
 # the weather of four places, the day's three sayings, the week's notice) written into the lanes and scrolled across
-# in turn, the TV beside it playing; then a Black-only record (zone 131). Shots nb_*.png.
+# in turn, the TV beside it playing; then a Black-only record (zone 131); then after the HALL OF FAME (flag 0x960) today's
+# outbreak's line first. Shots nb_*.png.
 MODE=1
 TMO=300
 ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
-EXPECT_A=("zone 27's news board, 6 lines" "zone 131's news board" "[nb] done")
+EXPECT_A=("zone 27's news board, 6 lines" "zone 131's news board" "zone 27's news board, 7 lines" "[nb] done")
 UNEXPECT_A=("[crash]" "TIMEOUT")
