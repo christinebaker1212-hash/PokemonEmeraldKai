@@ -37,6 +37,7 @@
 #include "string_util.h"
 #include "text.h"
 #include "u3d.h"
+#include "constants/trainers.h"
 #include "naming_screen.h"
 #include "walda_phrase.h"
 #include "constants/event_object_movement.h"
@@ -1116,7 +1117,7 @@ static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
 enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA, W_MOTION,
        W_ARC_GLOW, W_ARC_FLY, W_ARC_PEAK, W_ARC_END, W_LEAGUE, W_FKDEMO, W_SPPOKE_MOVE, W_SPPOKE_PROGRESS,
-       W_SPPOKE_END, W_SPPOKE_SWAP, W_CUTIN };
+       W_SPPOKE_END, W_SPPOKE_SWAP, W_CUTIN, W_CUTIN_BATTLE };
 // the key items' 3D cut-ins (gFld3dCiKeyTable: Black's item, its sequence)
 static const u16 sCiKeyItems[17][2] = {
 #include "u3d_cutin_keys.h"
@@ -2037,6 +2038,21 @@ static void OpenScreen(struct Thread *t, u8 screen, u16 var)
     t->wait = W_SCREEN;
     if (sHolding)
         ScriptContext_Enable();
+}
+
+// a trainer battle set up (u3d_battle.c): Black's VS name cut-in for the first trainer's class first (ENCEFF's name
+// cut-ins: the Leaders, CHEREN, BIANCA, the ELITE FOUR, ALDER, N, GHETSIS, Team Plasma), its battle song begun with it
+// as Black's EVENT_BATTLE plays it before the effect, then the battle
+static void BattleWithCutIn(struct Thread *t)
+{
+    u16 GetBattleBGM(void);
+    if (U3D_CiStartForClass(U3D_TrainerClass(TRAINER_UNOVA_A)))
+    {
+        U3D_CiKeepSong(GetBattleBGM());
+        t->wait = W_CUTIN_BATTLE;
+        return;
+    }
+    OpenScreen(t, SCREEN_BATTLE, 0);
 }
 
 static void Finish(struct Thread *t)
@@ -3642,7 +3658,7 @@ static void Step(struct Thread *t)
                 if (V(3) < 2 && sWork.misc.snap[V(3)].filled)
                     U3D_BattleLeadAs(sWork.misc.snap[V(3)].level, sWork.misc.snap[V(3)].otId,
                                      sWork.misc.snap[V(3)].personality, sWork.misc.snap[V(3)].nick);
-                OpenScreen(t, SCREEN_BATTLE, 0);
+                BattleWithCutIn(t);
             }
             break;
         case U3C_AddTrainerRecordValue:   // counter, amount
@@ -3900,13 +3916,13 @@ static void Step(struct Thread *t)
         }
         case U3C_StartTrainerBattle:   // trainer, a second, a third (u3d_battle.c: Black's trainers)
             if (U3D_PrepareBattle(V(0), V(1)))
-                OpenScreen(t, SCREEN_BATTLE, 0);
+                BattleWithCutIn(t);
             else
                 MPNet_Log("u3d vm: no trainer %u", V(0));
             break;
         case U3C_StartMultiTrainerBattle:   // partner, the first, the second, (a fourth: unused)
             if (U3D_PrepareTagBattle(V(0), V(1), V(2)))
-                OpenScreen(t, SCREEN_BATTLE, 0);
+                BattleWithCutIn(t);
             else
                 MPNet_Log("u3d vm: no tag battle %u %u %u", V(0), V(1), V(2));
             break;
@@ -5183,6 +5199,13 @@ static void Wait(struct Thread *t)
         if (!U3D_CiBusy())
             t->wait = W_NONE;
         break;
+    case W_CUTIN_BATTLE:   // (a VS name cut-in over: its battle)
+        if (!U3D_CiBusy())
+        {
+            t->wait = W_NONE;
+            OpenScreen(t, SCREEN_BATTLE, 0);
+        }
+        break;
     case W_FKDEMO:   // (an ELITE FOUR room's entrance scene to its end: FIELD_FK_DEMO_EventMain)
         if (!FkBusy())
             t->wait = W_NONE;
@@ -5961,8 +5984,35 @@ static void IceModels(bool8 load)
 }
 
 // u3d.c U3D_Update, each frame on an UNOVA map: the gyms' machinery that follows the player and the works
+// (`mp u3dvsbattle CLASS`: the first of Black's trainers of CLASS, its VS cut-in and then its battle, as a script's)
+static bool8 sDebugVsBattle;
+bool8 U3D_Vm_DebugVsBattle(u8 trainerClass)
+{
+    u32 id, size;
+    for (id = 1; id < 1000; id++)
+    {
+        const u8 *tr = U3D_Vm_Trainer(id, &size);
+        if (tr != NULL && size >= 20 && tr[1] == trainerClass && U3D_PrepareBattle(id, 0))
+        {
+            u16 GetBattleBGM(void);
+            printf("[test] u3dvsbattle: trainer %u\n", (unsigned)id);
+            if (U3D_CiStartForClass(trainerClass))
+                U3D_CiKeepSong(GetBattleBGM());
+            sDebugVsBattle = TRUE;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 void U3D_Vm_FieldFrame(void)
 {
+    if (sDebugVsBattle && !U3D_CiBusy())
+    {
+        void BattleSetup_StartUnovaBattle(void);
+        sDebugVsBattle = FALSE;
+        BattleSetup_StartUnovaBattle();
+    }
     {
         void Unova_Screen_FieldFrame(void);
         Unova_Screen_FieldFrame();   // (what a closed C-GEAR / ENTRALINK / MUSICAL screen left to do: u3d_screen.c)

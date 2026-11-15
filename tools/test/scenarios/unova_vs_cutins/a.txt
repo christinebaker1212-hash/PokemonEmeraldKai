@@ -1,0 +1,37 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dzone 81 8 25
+wait 200
+mash B 6 15
+mp u3dvs 37
+shotburst vs_cheren 300 15
+wait 340
+mp u3dvs -1
+wait 30
+mp u3dvs 78
+shotburst vs_e4 300 15
+wait 340
+mp u3dvs -1
+wait 30
+mp u3dvs 47
+shotburst vs_n 300 15
+wait 340
+mp u3dvs -1
+wait 30
+mp u3dvs 39
+shotburst vs_plasma 300 15
+wait 340
+mp u3dvs -1
+wait 30
+shot vs_after
+mp teach 0 53
+mp u3dvsbattle 12
+shotburst vs_battle 420 30
+pressuntil A action 4000
+wait 30
+shot vs_in_battle
+mash A 200 12
+pressuntil B field 4000
+echo [vs] done
+quit

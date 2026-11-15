@@ -7060,6 +7060,8 @@ void PlayBattleBGM(void)
 
 void PlayMapChosenOrBattleBGM(u16 songId)
 {
+    if (U3D_CiSongKept(songId ? songId : GetBattleBGM()))   // Moemon Kai: UNOVA's VS cut-in began it (src/unova/u3d.c)
+        return;
     ResetMapMusic();
     m4aMPlayAllStop();
     if (Orre_BattleMusic())

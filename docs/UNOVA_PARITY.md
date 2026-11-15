@@ -102,9 +102,18 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       party's own front picture and cry on Black's speed lines) and the message one (sequence 17: the person taken off
       as it begins: DESERT RESORT, NACRENE); scenario unova_cutins (`mp u3dci SEQ [SLOT]`). Not drawn: Black's
       particle effects (SPL: the badges' sparkles)
-- [ ] The VS name cut-ins before a Gym Leader's, the ELITE FOUR's, N's and GHETSIS's battles (ov073 enceff_name_cutin.c:
-      sequences 13-16 / 25 with the leader's picture (archive 0xB4) and name (bank 0xB0)), and the map-change wipes
-      (fld_wipe_3dobj.c: cut-ins before and after a warp, sequences 11 / 12, 18 / 19)
+- [x] The VS name cut-ins before a battle (ov073 enceff_name_cutin.c, ov074's rows; 2026-11-15): Black's trainer
+      classes with one (arm9 gTpokeDataTrainerKindTable -> ov021 d_021DB7F6's encounter effect -> its row: CHEREN,
+      BIANCA, the Leaders, the ELITE FOUR, ALDER, N, GHETSIS, Team Plasma's logo...; tools/unova/gen_cutins.py ->
+      u3d_cutin_names.h), the portrait (archive 0xB4: the people's pack's "CIPT", tools/unova/build_gfx.py) and the
+      name (bank 0xB0) drawn into model 0's textures, the hero's own portrait and name below where Black puts them
+      (u3d.c U3D_CiStartForClass), then FLD3D_CI_NameFinishStep's fade to black held until the battle; the battle's song
+      begun under it and kept as the battle starts (pokemon.c PlayMapChosenOrBattleBGM -> U3D_CiSongKept); u3d_vm.c
+      BattleWithCutIn for every scripted trainer battle; scenario unova_vs_cutins (`mp u3dvs CLASS`,
+      `mp u3dvsbattle CLASS`)
+- [x] The map-change wipes (fld_wipe_3dobj.c: sequences 11 / 12, 18 / 19 around a warp) are FLY's (move_pokemon.c
+      MOVE_POKEMON_StartSkillOnTarget): Kai's own FLY (the party's POKeMON carrying the player) takes their place, as
+      SINNOH keeps Kai's, so closed
 - [ ] People flown along Black's paths (built; MmdlIca 0x15B-0x15E: archive 0xCB by tools/unova/gen_icas.py -> u3d_icas.h;
       u3d.c U3D_ObjectFly draws the person at the path's point from where the player stood, set down on the tile at
       its end; 2026-11-15, scenario unova_flown_person: the ABUNDANT SHRINE's LANDORUS flies in and out by the logs,

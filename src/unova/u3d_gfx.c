@@ -35,6 +35,8 @@ static struct
     u16 backCount;
     const u16 *townMap;   // the TOWN MAP's picture (RGB555 rows)
     u16 townW, townH;
+    const u8 *portraits;  // the VS cut-ins' portraits ("CIPT")
+    u16 portraitCount;
 } sGfx;
 
 static u32 FrameBytes(u8 kind) { return kind == 4 ? 2048 : 512; }
@@ -120,6 +122,14 @@ static void Load(void)
                     memcpy(px, p + 8, (u32)w * h * 2);   // (as u16s: the pack's own place may be odd)
                     sGfx.townMap = px, sGfx.townW = w, sGfx.townH = h;
                 }
+                p += 8 + (u32)w * h * 2;
+                // (the VS cut-ins' portraits: "CIPT", u16 count; each u16 palette[16], 128 x 128 nibbles)
+                if (p + 6 <= end && memcmp(p, "CIPT", 4) == 0)
+                {
+                    u16 n = p[4] | p[5] << 8;
+                    if (p + 6 + (u32)n * (32 + 8192) <= end)
+                        sGfx.portraits = p + 6, sGfx.portraitCount = n;
+                }
             }
         }
     }
@@ -193,6 +203,18 @@ bool8 U3D_Gfx_Back(u8 index, const u8 **tiles, const u16 **pal)
 }
 
 // The TOWN MAP's picture (Black's own, tools/unova/gen_townmap.py): RGB555 rows; FALSE without the pack
+// a VS cut-in's portrait (archive 0xB4's NUMBER: 128 x 128 pixels a nibble each, the low first; colour 0 clear)
+bool8 U3D_Gfx_CiPortrait(u8 number, u16 pal[16], const u8 **pixels)
+{
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || number >= sGfx.portraitCount)
+        return FALSE;
+    memcpy(pal, sGfx.portraits + (u32)number * (32 + 8192), 32);
+    *pixels = sGfx.portraits + (u32)number * (32 + 8192) + 32;
+    return TRUE;
+}
+
 bool8 U3D_Gfx_TownMap(const u16 **pixels, u16 *w, u16 *h)
 {
     if (!sGfx.tried)

@@ -40,6 +40,9 @@
 #include "data.h"
 #include "rtc.h"
 #include "sprite.h"
+#include "string_util.h"
+#include "text.h"
+#include "constants/characters.h"
 #include "u3d.h"
 #include "constants/event_objects.h"
 #include "constants/maps.h"
@@ -2194,6 +2197,150 @@ bool8 U3D_CiBusy(void)
     return sCi.gim >= 0;
 }
 
+// ---- the VS name cut-ins (ov073 enceff_name_cutin.c, FLD3D_CI_StartNameSequence): a trainer class's row of ov074's
+// table, its portrait (archive 0xB4, u3d_gfx.c) and name (bank 0xB0) drawn into model 0's textures (the hero's below for
+// layout 1), then FLD3D_CI_NameFinishStep's fade to black, held until the battle takes the screen
+#include "u3d_cutin_names.h"
+bool8 U3D_Gfx_CiPortrait(u8 number, u16 pal[16], const u8 **pixels);
+u8 MP_RenderFontGlyph(u8 fontId, u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor);   // text.c
+static u8 sCiNameRow = 0xFF;
+static bool8 sCiHoldBlack;
+
+static u32 CiRgba(u16 c)
+{
+    return (u32)((c & 31) * 255 / 31) | (u32)((c >> 5 & 31) * 255 / 31) << 8 | (u32)((c >> 10 & 31) * 255 / 31) << 16
+           | 0xFFu << 24;
+}
+
+// a texture of model 0 (WHICH: sCiNameGroups' column) of its own, W x H, on every group drawn with it: its texels
+static u32 *CiNameTexture(u8 which, u16 w, u16 h)
+{
+    const typeof(*sPack.kind) *kd = &sPack.kind[sPack.gim[sCi.gim].m[0].kind];
+    u32 i, k;
+    u32 *px = NULL;
+    for (i = 0; i < ARRAY_COUNT(sCiNameGroups); i++)
+        if (sCiNameGroups[i].seq == sCi.seq)
+            break;
+    if (i >= ARRAY_COUNT(sCiNameGroups) || kd->mesh < 0)
+        return NULL;
+    for (k = 0; k < 2; k++)
+    {
+        s8 gi = sCiNameGroups[i].g[which][k];
+        U3dGroup *g;
+        if (gi < 0 || (u32)gi >= sPack.mesh[kd->mesh].ngroups)
+            continue;
+        g = &sPack.mesh[kd->mesh].g[gi];
+        if (px == NULL)
+        {
+            s32 tex;
+            px = OwnGroupTexture(g, w, h);
+            tex = g->tex;
+            for (k = 0; k < 2; k++)   // (the other groups drawn with it: the same texture)
+                if (sCiNameGroups[i].g[which][k] >= 0 && (u32)sCiNameGroups[i].g[which][k] < sPack.mesh[kd->mesh].ngroups)
+                    sPack.mesh[kd->mesh].g[sCiNameGroups[i].g[which][k]].tex = tex;
+            break;
+        }
+    }
+    return px;
+}
+
+static void CiPortrait(u8 which, u8 number)
+{
+    u16 pal[16];
+    const u8 *src;
+    u32 *px, k;
+    if (!U3D_Gfx_CiPortrait(number, pal, &src) || (px = CiNameTexture(which, 128, 128)) == NULL)
+        return;
+    for (k = 0; k < 128 * 128; k++)
+    {
+        u8 v = (k & 1) ? src[k / 2] >> 4 : src[k / 2] & 15;
+        px[k] = v ? CiRgba(pal[v]) : 0;
+    }
+}
+
+// a name in the game's font, white with Black's black shadow (TEXT_TEXTURE_LoadTexPlttByName's colours 1 and 2), from
+// X across a 128 x 16 texture
+static void CiName(u8 which, const u8 *str, u32 x)
+{
+    u32 *px = CiNameTexture(which, 128, 16), i;
+    if (px == NULL || str == NULL)
+        return;
+    for (i = 0; str[i] != EOS && x < 128; i++)
+    {
+        u32 w, gx, gy;
+        if (str[i] >= 0xF7)   // (a control code and its arguments)
+        {
+            if (str[i] == EXT_CTRL_CODE_BEGIN)
+                i += 1 + (str[i + 1] == EXT_CTRL_CODE_COLOR_HIGHLIGHT_SHADOW ? 3 : 1);
+            continue;
+        }
+        w = MP_RenderFontGlyph(FONT_NORMAL, str[i], 1, 0, 2);
+        for (gy = 0; gy < 16; gy++)
+        {
+            const u32 *rows = gy < 8 ? gCurGlyph.gfxBufferTop : gCurGlyph.gfxBufferBottom;
+            for (gx = 0; gx < w && gx < 16 && x + gx < 128; gx++)
+            {
+                u8 c = (rows[(gx < 8 ? 0 : 8) + gy % 8] >> ((gx % 8) * 4)) & 0xF;
+                if (c == 1)
+                    px[gy * 128 + x + gx] = CiRgba(0x7FFF);
+                else if (c == 2 && px[gy * 128 + x + gx] == 0)
+                    px[gy * 128 + x + gx] = CiRgba(0);
+            }
+        }
+        x += w;
+    }
+}
+
+void U3D_CiHoldRelease(void)
+{
+    sCiHoldBlack = FALSE;
+}
+
+// the battle's song, begun with the VS cut-in (u3d_vm.c BattleWithCutIn): the battle's start keeps it playing
+// (pokemon.c PlayMapChosenOrBattleBGM) rather than starting it again
+static u16 sCiSong;
+void U3D_CiKeepSong(u16 song)
+{
+    sCiSong = song;
+    PlayNewMapMusic(song);
+}
+
+bool8 U3D_CiSongKept(u16 song)
+{
+    bool8 kept = sCiSong != 0 && sCiSong == song && GetCurrentMapMusic() == song;
+    sCiSong = 0;
+    return kept;
+}
+
+// the VS name cut-in of Black's trainer class CLASS before its battle; FALSE: the class has none
+bool8 U3D_CiStartForClass(u8 trainerClass)
+{
+    const struct CiNameRow *r;
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sCiClassRow); i++)
+        if (sCiClassRow[i][0] == trainerClass)
+            break;
+    if (i >= ARRAY_COUNT(sCiClassRow))
+        return FALSE;
+    r = &sCiNameRows[sCiClassRow[i][1]];
+    if (!U3D_CiStart(r->seq, SPECIES_NONE, 0, 0))
+        return FALSE;
+    sCiNameRow = sCiClassRow[i][1];
+    if (r->layout != 0)   // (FLD3D_CI_NameExtraTask: the portrait and the name; the hero's below them)
+    {
+        CiPortrait(0, r->portrait);
+        CiName(1, U3D_Text(0xB0, r->msg), 0);
+        if (r->layout == 1)
+        {
+            u32 w = GetStringWidth(FONT_NORMAL, gSaveBlock2Ptr->playerName, 0);
+            CiPortrait(2, gSaveBlock2Ptr->playerGender == MALE ? 0 : 1);
+            CiName(3, gSaveBlock2Ptr->playerName, r->seq == 13 && w < 0x3C ? 0x3C - w : 0);   // (centred: sequence 13)
+        }
+    }
+    printf("[u3d] VS cut-in for class %u: row %u\n", trainerClass, sCiNameRow);
+    return TRUE;
+}
+
 // a field frame: Black's FLD3D_CI_EventMain from its fade out to its end (two of our frames a frame of Black's)
 static void CiStep(void)
 {
@@ -2209,6 +2356,13 @@ static void CiStep(void)
         if (sCi.t >= CI_FADE)
             sCi.phase = 2, sCi.t = 0;
         return;
+    }
+    if (sCi.phase == 3 && sCiNameRow != 0xFF)   // (FLD3D_CI_NameFinishStep: a fade to black, the battle next)
+    {
+        if (sCi.t < CI_FADE)
+            return;
+        sCiHoldBlack = TRUE;
+        sCiNameRow = 0xFF;
     }
     if (sCi.phase == 3)   // (its last frame shown: the field again)
     {
@@ -2233,7 +2387,7 @@ static void CiStep(void)
     if (sCi.cry == 1 || (sCi.cry == 2 && IsCryPlaying()))
         done = FALSE;
     if (done)
-        sCi.phase = 3;
+        sCi.phase = 3, sCi.t = 0;
 }
 
 // the finished frame: the field's still with the cut-in's models over it, or the field fading out under it
@@ -2244,7 +2398,16 @@ void U3D_CiComposite(u16 *frame)
     float half;
     typeof(sView) keep;
     if (sCi.gim < 0)
+    {
+        if (sCiHoldBlack && U3D_Active())   // (a VS cut-in's black until the battle takes the screen)
+        {
+            for (k = 0; k < W * H; k++)
+                frame[k] = 0x8000;
+        }
+        else
+            sCiHoldBlack = FALSE;
         return;
+    }
     q = &sCiSeqs[sCi.seq];
     if (!sCi.shotTaken)   // (FLD3D_CI_StartScreenCapture: the field as it was, before the fade)
     {
@@ -2310,6 +2473,8 @@ void U3D_CiComposite(u16 *frame)
     }
     sView = keep;
     level = sCi.phase == 2 && sCi.t < CI_FADE ? sCi.t * 16 / CI_FADE : 16;   // (FADE_Start 4, 16 -> 0)
+    if (sCi.phase == 3 && sCiNameRow != 0xFF)   // (FLD3D_CI_NameFinishStep: FADE_Start 3, 0 -> 16)
+        level = sCi.t >= CI_FADE ? 0 : 16 - sCi.t * 16 / CI_FADE;
     for (k = 0; k < W * H; k++)
     {
         u16 c = (&sColor[0][0])[k];

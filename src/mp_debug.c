@@ -4836,6 +4836,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] u3dci %d: %d\n", seq, U3D_CiStart(seq, SPECIES_NONE, 0, 0));
     }
+    else if (strcmp(cmd, "u3dvsbattle") == 0)   // u3dvsbattle CLASS: Black's first trainer of the class: its VS cut-in, its battle
+    {
+        bool8 U3D_Vm_DebugVsBattle(u8 trainerClass);
+        printf("[test] u3dvsbattle %d: %d\n", atoi(arg), U3D_Vm_DebugVsBattle(atoi(arg)));
+    }
+    else if (strcmp(cmd, "u3dvs") == 0)   // u3dvs CLASS: the VS name cut-in of Black's trainer class (-1: the black it
+    {                                    // holds for the battle let go)
+        void U3D_CiHoldRelease(void);
+        if (atoi(arg) < 0)
+            U3D_CiHoldRelease();
+        else
+            printf("[test] u3dvs %d: %d\n", atoi(arg), U3D_CiStartForClass(atoi(arg)));
+    }
     else if (strcmp(cmd, "u3dstones") == 0)   // CHARGESTONE CAVE's stones on this floor (u3d_vm.c)
     {
         void U3D_Vm_DebugStones(void);

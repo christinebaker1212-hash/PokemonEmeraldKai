@@ -52,6 +52,9 @@ u32 *U3D_ExpOwnTexture(u16 model, u8 anim, u16 w, u16 h);
 // sequence 3); busy until it's over; drawn over the finished frame (sdl2.c VDraw)
 bool8 U3D_CiStart(u16 seq, u16 species, u32 pid, u32 otId);
 bool8 U3D_CiBusy(void);
+bool8 U3D_CiStartForClass(u8 trainerClass);
+void U3D_CiKeepSong(u16 song);
+bool8 U3D_CiSongKept(u16 song);   // (pokemon.c: the battle song a VS cut-in began, kept playing)   // (a VS name cut-in before a battle: its black held until the battle)
 void U3D_CiComposite(u16 *frame);                               // (its animation's frame now, -1 none)
 void U3D_PlayerFly(bool8 on, float x, float y, float z);     // (the player's sprite and the view at a world place)
 void U3D_HexClear(void);                                     // Black's height areas (CLAY's gym's floors, u3d.c)

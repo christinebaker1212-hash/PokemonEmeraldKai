@@ -25,6 +25,7 @@ Format (little endian): "U3DG" u32 version 2, u16 codes; each: u8 kind (0 walkin
   picture layout): Black's backs (archive 0x49, a/0/7/3: the two player characters, JUNIPER, CHEREN...), cell 0
   over their 256x128 bitmap sheet (2D mapping: a tile number is a place 32 tiles a row), at its own pixels (the head
   and upper body in 64x64, as the game's backs: Black draws them twice as big), four times
+  then "TMAP" (the TOWN MAP) and "CIPT", the VS cut-ins' portraits (cutin_portraits())
 """
 import importlib.util
 import os
@@ -309,6 +310,49 @@ def battle_pictures():
     return bytes(out), len(arc) // 8
 
 
+def _lz10(d):
+    """The NitroSDK's LZ10 (type 0x10)"""
+    if not d or d[0] != 0x10:
+        return d
+    size, o, out = d[1] | d[2] << 8 | d[3] << 16, 4, bytearray()
+    while len(out) < size and o < len(d):
+        flags = d[o]
+        o += 1
+        for bit in range(8):
+            if len(out) >= size:
+                break
+            if flags & (0x80 >> bit):
+                x = d[o] << 8 | d[o + 1]
+                o += 2
+                for _ in range((x >> 12) + 3):
+                    out.append(out[-((x & 0xFFF) + 1)])
+            else:
+                out.append(d[o])
+                o += 1
+    return bytes(out)
+
+
+def cutin_portraits():
+    """The VS cut-ins' portraits (ov021 FLD3D_CI_LoadNameTexture: archive 0xB4, a/1/8/0: 22 LZ10 NCGRs of 16 x 16
+    tiles laid row by row, their NCLRs at 22 + the portrait, the heroes' (0, 1) at 22 / 23): "CIPT", u16 count; each
+    u16 palette[16] (BGR555, 0 transparent), 128 x 128 pixels a nibble each (the low first), rows down"""
+    from build_journal import tiles as ncgr_tiles, palettes as nclr_palettes
+    arc = narc.arc('a/1/8/0')
+    count = 22
+    out = bytearray(b'CIPT' + struct.pack('<H', count))
+    for i in range(count):
+        ts = ncgr_tiles(_lz10(arc[i]))
+        pal = nclr_palettes(arc[22 + i])[:16]
+        px = [0] * (128 * 128)
+        for t in range(min(256, len(ts))):
+            tx, ty = t % 16, t // 16
+            for k, v in enumerate(ts[t]):
+                px[(ty * 8 + k // 8) * 128 + tx * 8 + k % 8] = v
+        out += struct.pack('<16H', *[c if k else 0 for k, c in enumerate(pal)])
+        out += bytes(px[k] | px[k + 1] << 4 for k in range(0, len(px), 2))
+    return bytes(out)
+
+
 def main():
     out_path = sys.argv[1]
     codes = narc.arc(CODES_ARC)[0]
@@ -364,6 +408,7 @@ def main():
     pack += b'TMAP' + struct.pack('<HH', len(tm[0]), len(tm))
     for row in tm:
         pack += struct.pack('<%dH' % len(row), *row)
+    pack += cutin_portraits()
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(bytes(pack))
     print('%s: %d of %d object codes drawn, %d battle pictures, %d backs, %d bytes'

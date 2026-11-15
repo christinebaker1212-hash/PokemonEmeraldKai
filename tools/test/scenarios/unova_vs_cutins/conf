@@ -1,0 +1,9 @@
+# Black's VS name cut-ins before a battle (ov073 enceff_name_cutin.c: u3d.c U3D_CiStartForClass, its portrait from
+# archive 0xB4 in the people's pack and its name from bank 0xB0): CHEREN (class 37, the hero below), an ELITE FOUR
+# member (78), N (47) and Team Plasma (39, the logo); each ends in black held for the battle;
+# then a Leader's (class 12) as a script's battle: the cut-in, its song, the battle. Shots vs_*.png.
+MODE=1
+TMO=420
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:90"
+EXPECT_A=("VS cut-in for class 37: row 0" "cut-in 13 over" "VS cut-in for class 78: row 13" "cut-in 14 over" "cut-in 16 over" "cut-in 15 over" "u3dvsbattle 12: 1" "VS cut-in for class 12" "[vs] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "no cut-in")
