@@ -1,0 +1,16 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 66 16 31
+wait 200
+mash B 6 15
+mp where
+mp u3drun 5
+wait 30
+pressuntil B field 3000
+mp where
+shot rp_after
+echo [rp] done
+quit

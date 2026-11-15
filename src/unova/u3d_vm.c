@@ -4001,6 +4001,20 @@ static void Step(struct Thread *t)
             }
             break;
         }
+        case U3C_SetPlayerRailLocation:   // line, along, across: the player put on the zone's rail (FIELD_RAIL_WORK_
+        {                                 // SetLineLocation), as the tile its place is on (tools/unova/rails.py tile_of)
+            static const u16 sRailPlaces[][6] = {{66, 2, 0, 1, 16, 27}, {66, 6, 0, 0, 16, 30}};   // (Black's only ones)
+            u32 i;
+            for (i = 0; i < ARRAY_COUNT(sRailPlaces); i++)
+                if (sRailPlaces[i][0] == CurrentZone() && sRailPlaces[i][1] == V(0) && sRailPlaces[i][2] == V(1)
+                 && sRailPlaces[i][3] == V(2))
+                {
+                    MoveObjectEventToMapCoords(&gObjectEvents[gPlayerAvatar.objectEventId],
+                                               MapX(sRailPlaces[i][4]) + MAP_OFFSET, MapZ(sRailPlaces[i][5]) + MAP_OFFSET);
+                    MPNet_Log("u3d vm: the player set on the rail at %u,%u", sRailPlaces[i][4], sRailPlaces[i][5]);
+                }
+            break;
+        }
         case U3C_StartMmdlMoveToGrid:   // person, x, y, z: there at once (Black glides it)
         {
             struct ObjectEvent *o = ObjectOf(V(0));

@@ -1,0 +1,7 @@
+# Black's 0x07C (FLDMMDL_SetPlayerRailLocation): zone 66's script 5 sets the player on its rail (line 2, across 1),
+# the tile that place is on (16,27). Shots rp_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("the player set on the rail at 16,27" "[rp] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

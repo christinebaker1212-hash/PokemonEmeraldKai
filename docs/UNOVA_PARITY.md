@@ -76,7 +76,8 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
 - [x] The BATTLE SUBWAY's map (0x151 mode 2, the user's approved mock-up 2026-11-15: Black's a/2/0/6 picture in the
       scripts pack's version 12, shown 1:1, centred, the D-pad scrolling: src/unova/u3d_subwaymap.c; scenario
       unova_subway_map)
-- [ ] The player set on a rail (0x07C: zone 66)
+- [x] The player set on a rail (0x07C: zone 66, the GEAR STATION; its two places as their tiles by tools/unova/rails.py
+      tile_of; scenario unova_rail_place)
 - [x] The battle phrases asked for (0x1ED kinds 0-3, zone 66): the game's own EASY CHAT on the save's introduction /
       won / lost phrases ("No. 1" asked, not kept: Kai has none); scenario unova_phrases
 - [ ] Black's own words (0x1ED kinds 4 / 5, 0x20C): the PEP QUIZ (zone 117) needs Black's word list; MR. LOCK's
