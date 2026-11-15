@@ -89,8 +89,11 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       3 and 4 playing the room's building, then the player on the room's end tile (u3d_vm.c Fk*); scenario
       unova_e4_entrance. (0x1A3 sets Black's camera setting for the room: our view keeps Emerald's framing there, as
       everywhere off the rail maps.)
-- [ ] The ELITE FOUR rooms' own sounds (0x1A4 StartFkDemoSubProc: a building's sounds by its animation's frames, two
-      ambient loops until work 0x4001 is set)
+- [x] The ELITE FOUR rooms' own sounds (0x1A4 StartFkDemoSubProc, 2026-11-15; u3d_vm.c FkSound*, u3d.c
+      U3D_BModelSlotFrame): SHAUNTAL's room's building striking at its slot 1's frame 6, CAITLIN's at its slot 0's
+      frames 90 and 213 and settling 31 frames later, Black's numbered sounds as the game's nearest; ended with the
+      map, as Black's field subprocs; scenario unova_e4_sounds. Black's three hums (0x746, 0x756, 0x7EF: the rooms'
+      looping sounds, two until work 0x4001 is set) have no sound in the game to loop, so the rooms' music carries them
 - [x] 3D cut-ins (ov021 fld3d_ci.c; script commands 0x19F, 0x1A0, 0x1A1, 0x240; 2026-11-15): every sequence of
       archive 0x75 packed as gimmick 1000 + the sequence (tools/unova/gimmicks.py ci_setup: its two models of archive
       0x73 with their joint, texture and material animations, Black's NSBVA visibility baked into the joint frames),

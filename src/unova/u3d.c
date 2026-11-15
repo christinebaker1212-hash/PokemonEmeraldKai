@@ -2804,6 +2804,16 @@ void U3D_BModelNodePlay(u16 h, s16 slot, u8 mode)   // (PlayNodeSlot; SLOT -1: i
     BPlay(&sNodes[h - 1].a, sNodes[h - 1].prop, sNodes[h - 1].group, mode);
 }
 
+// the frame of slot SLOT of the animated building nearest Black's world place X, Z (FIELD_BUILDMODEL_GetFirstEntryNearPos
+// and GetEntrySlotFrame: every placement of a model moves alike); -1 none
+float U3D_BModelSlotFrame(float x, float z, u8 slot)
+{
+    const U3dProp *pr = BFind(0, x, z, 64.0f, 64.0f);
+    if (pr == NULL || pr->kind < 0 || slot >= BSLOTS)
+        return -1.0f;
+    return sBAnim[pr->kind].f[slot];
+}
+
 bool8 U3D_BModelNodeBusy(u16 h)   // (CheckBuildModelNodeAnimDone: its current slot not yet still)
 {
     if (h < 1 || h > BNODES || sNodes[h - 1].prop == NULL)

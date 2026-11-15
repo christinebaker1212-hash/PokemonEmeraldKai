@@ -1123,6 +1123,7 @@ static const u16 sCiKeyItems[17][2] = {
 #include "u3d_cutin_keys.h"
 };
 static u16 sBModelWait;
+static void FkSoundStart(u16 kind);
 // zone 389's time effect (ov065): sWork.white's TIMEFX_PENDING is Black's isEffectPending (its gimmick save 0x36)
 #define ZONE_TIME_EFFECT 389
 #define IS_TIME_EFFECT_ZONE(z) ((z) == ZONE_TIME_EFFECT || (z) == 397 || (z) == 317)   // (arc 0x65: gimmick 54 in all three)
@@ -3185,7 +3186,9 @@ static void Step(struct Thread *t)
         case U3C_MUSICAL_WifiListCommand:   // (the Wi-Fi shows' list: none)
             *WorkPtr(a[1]) = 0;
             break;
-        case U3C_PROC_FLD_StartFkDemoSubProc:   // (an Elite Four room's 3D entrance flight: not drawn)
+        case U3C_PROC_FLD_StartFkDemoSubProc:   // (an ELITE FOUR room's own sounds: FkSoundStart)
+            FkSoundStart(V(0));
+            break;
         case U3C_PROC_FLD_SetCameraSettingFromFkDemoSlot:
         case U3C_StartMmdlRailSlipDown:   // (a slide down a rail slope: the tiles walk it)
         case U3C_FadeBgmVolume:   // (the song quieter under a scene: kept as it is)
@@ -5984,6 +5987,55 @@ static void IceModels(bool8 load)
 }
 
 // u3d.c U3D_Update, each frame on an UNOVA map: the gyms' machinery that follows the player and the works
+// ---- an ELITE FOUR room's own sounds (scrcmd_encount.c SCRCMD_PROC_FLD_StartFkDemoSubProc, 0x1A4; ov056 field_fk_
+// demo.c FIELD_FK_BUILD_SOUND_*, field_fk_sound_anime.c FIELD_FK_SOUND_ANIME_*): 1 the room's building (Black's at
+// 256, 240) striking at its slot 1's frame 6 over its running loop; 4 the building at 118, 236 striking at its slot 0's
+// frames 90 and 213, then 31 frames later its settling; 2 and 3 two ambient loops until work 0x4001 is set. Black's
+// numbered sounds as the game's nearest; its loops (0x746, 0x756, 0x7EF: the room's hum) have none in the game.
+static struct { u8 kind; float last; s16 settle; } sFkSound;
+#define FK_SE_HIT SE_M_STRENGTH     // (0x692: the building's strike)
+#define FK_SE_FRAME_HIT SE_DOOR     // (0x743: as tools/unova/gen_fkdemo.py names it)
+#define FK_SE_FRAME_END SE_M_HARDEN // (0x76E: its settling)
+static void FkSoundStart(u16 kind)
+{
+    sFkSound.kind = kind <= 4 ? kind : 0;
+    sFkSound.last = -1.0f;
+    sFkSound.settle = 0;
+    MPNet_Log("u3d vm: an ELITE FOUR room's sounds, %u", kind);
+}
+
+static void FkSoundFrame(void)
+{
+    float U3D_BModelSlotFrame(float x, float z, u8 slot);
+    static const u16 sHits[2] = {90, 213};   // (gFkFrameSoundFrame)
+    float f;
+    u32 i;
+    if (sFkSound.kind == 1)
+    {
+        f = U3D_BModelSlotFrame(256.0f, 240.0f, 1);   // (gFkBuildSoundModelPos, gFkBuildSoundTriggerFrame 6)
+        if (f >= 0 && sFkSound.last >= 0 && sFkSound.last < 6.0f && f >= 6.0f)
+        {
+            PlaySE(FK_SE_HIT);
+            MPNet_Log("u3d vm: the room's building strikes");
+        }
+        sFkSound.last = f;
+    }
+    else if (sFkSound.kind == 4)
+    {
+        f = U3D_BModelSlotFrame(118.0f, 236.0f, 0);   // (gFkFrameSoundModelPos)
+        for (i = 0; i < 2 && f >= 0 && sFkSound.last >= 0; i++)
+            if (sFkSound.last < sHits[i] && f >= sHits[i])
+            {
+                PlaySE(FK_SE_FRAME_HIT);
+                sFkSound.settle = 0x1F * 2;
+                MPNet_Log("u3d vm: the room's building at frame %u", sHits[i]);
+            }
+        if (sFkSound.settle > 0 && --sFkSound.settle == 0)
+            PlaySE(FK_SE_FRAME_END);
+        sFkSound.last = f;
+    }
+}
+
 // (`mp u3dvsbattle CLASS`: the first of Black's trainers of CLASS, its VS cut-in and then its battle, as a script's)
 static bool8 sDebugVsBattle;
 bool8 U3D_Vm_DebugVsBattle(u8 trainerClass)
@@ -6007,6 +6059,7 @@ bool8 U3D_Vm_DebugVsBattle(u8 trainerClass)
 
 void U3D_Vm_FieldFrame(void)
 {
+    FkSoundFrame();
     if (sDebugVsBattle && !U3D_CiBusy())
     {
         void BattleSetup_StartUnovaBattle(void);
@@ -6059,6 +6112,7 @@ void U3D_Vm_FieldShown(void)
     if (!Ready())
         return;
     PlateDoorsRefresh(FALSE);
+    sFkSound.kind = 0;   // (a room's sound proc ends with its map, as Black's field subprocs)
     sSpPoke = FALSE, sSpMove.on = FALSE, sSpSwap.pending = FALSE;   // (the special POKeMON's: loaded again below)
     if (CurrentZone() != 235)
         sLibertyShipGone = FALSE;

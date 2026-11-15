@@ -1,0 +1,7 @@
+# The ELITE FOUR rooms' own sounds (0x1A4: u3d_vm.c FkSound*): SHAUNTAL's room's building striking at its frame 6,
+# CAITLIN's at its frames 90 and 213 (Black's sounds as the game's nearest).
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:90"
+EXPECT_A=("an ELITE FOUR room's sounds, 1" "the room's building strikes" "an ELITE FOUR room's sounds, 4" "the room's building at frame 90" "the room's building at frame 213" "[e4s] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")
