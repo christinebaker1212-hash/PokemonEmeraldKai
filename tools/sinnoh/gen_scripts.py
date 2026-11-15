@@ -586,6 +586,11 @@ class FileConverter:
 
     def strvar(self, x):
         n = int(self.value(x))
+        if 3 <= n <= 5:
+            # (Platinum's slots 3-5 are SINNOH's own, gSinnohStrVar: the command writes STR_VAR_3, which is kept and
+            # put back after the words are copied over: command() below)
+            self._high_slot = n
+            return 'STR_VAR_3'
         if not 0 <= n <= 2:
             raise Unsupported('string buffer %d' % n)
         return 'STR_VAR_%d' % (n + 1)
@@ -640,6 +645,14 @@ class FileConverter:
 
     # ---- one command
     def command(self, cmd, a):
+        self._high_slot = None
+        out = self._command(cmd, a)
+        if self._high_slot is not None and out:
+            out = [self.sinnoh(SINNOH_MISC, 65)] + out + [self.sinnoh(SINNOH_MISC, 66, self._high_slot)]
+        self._high_slot = None
+        return out
+
+    def _command(self, cmd, a):
         out = self.party_command(cmd, a)
         if out is not None:
             return out
@@ -889,6 +902,55 @@ class FileConverter:
             return ['special ExitSafariMode']   # (the game's own SAFARI GAME: safari_zone.c)
         if cmd == 'StartSafariGame':
             return ['special EnterSafariMode']   # (30 SAFARI BALLS, 500 steps: its ends run Platinum's safari_game scripts)
+        if cmd == 'ShowAccessoryShop':
+            # FLOAROMA's FLOWER SHOP (Platinum's overlay007 accessory_shop.c, its words: the flower_shop bank): BERRIES
+            # traded for accessories, its list in the game's menu (the accessories' names), its table and the FASHION
+            # CASE in src/sinnoh/s3d_fashion.c (FASHCALL_SHOP_*)
+            n = self.next_local()
+            lab = lambda x: '%s%s__flowershop%d_%s' % (PREFIX, self.low, n, x)
+            say = lambda t: ['message %s' % self.text_label('FlowerShop_Text_' + t), 'waitmessage']
+            wait = ['waitbuttonpress']
+            names = self.dec.banks['contest_accessory_names']
+            sel = 'VAR_0x8004'
+            out = say('Greet') + wait
+            out += [self.sinnoh(SINNOH_FASHION, 16, 'VAR_RESULT'),
+                    'goto_if_eq VAR_RESULT, TRUE, %s' % lab('thanks'), '%s:' % lab('menu')]
+            out += say('Purchase') + [self.sinnoh(SINNOH_MENU_INIT, sel, 1)]
+            for row, acc in enumerate(range(50, 72)):
+                out.append(self.sinnoh(SINNOH_MENU_ADD, names, acc, row))
+            ex = self.dec.message(self.bank, 'FlowerShop_Text_Exit')
+            out += [self.sinnoh(SINNOH_MENU_ADD, ex[0], ex[1], 22), self.sinnoh(SINNOH_MENU_SHOW),
+                    'goto_if_ge %s, 22, %s' % (sel, lab('bye')),
+                    self.sinnoh(SINNOH_FASHION, 17, sel)]
+            out += say('ConfirmPurchase') + ['yesnobox 20, 8', 'goto_if_ne VAR_RESULT, YES, %s' % lab('menu'),
+                                             self.sinnoh(SINNOH_FASHION, 18, sel, 'VAR_RESULT'),
+                                             'goto_if_eq VAR_RESULT, 1, %s' % lab('short'),
+                                             'goto_if_eq VAR_RESULT, 2, %s' % lab('full')]
+            out += say('PurchaseSuccess') + wait + [self.sinnoh(SINNOH_FASHION, 17, sel)] + say('PurchasePostSuccess') + wait
+            out += [self.sinnoh(SINNOH_FASHION, 16, 'VAR_RESULT'), 'goto_if_eq VAR_RESULT, FALSE, %s' % lab('menu')]
+            out += say('TradedAllAccessories') + wait + ['goto %s' % lab('thanks')]
+            out += ['%s:' % lab('short')] + say('NotEnoughBerries') + wait + ['goto %s' % lab('menu')]
+            out += ['%s:' % lab('full')] + say('CantCarryMoreAccessories') + wait + ['goto %s' % lab('menu')]
+            out += ['%s:' % lab('thanks')] + say('Thanks') + wait + ['goto %s' % lab('done')]
+            out += ['%s:' % lab('bye')] + say('PleaseComeAgain') + wait + ['%s:' % lab('done'), 'closemessage']
+            return out
+        # the move reminders (PASTORIA's MOVE MANIAC): the game's own move relearner (move_relearner.c)
+        if cmd == 'CheckHasLearnableReminderMoves':
+            return [self.sinnoh(SINNOH_MISC, 67, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'OpenMoveReminderMenu':
+            self.faded_in = True            # (it comes back to the field faded in)
+            return ['copyvar VAR_0x8004, %s' % self.var(a[0]), 'special TeachMoveRelearnerMove', 'waitstate']
+        if cmd == 'CheckLearnedReminderMove':
+            # (Platinum's 0xFF: none learned; the game's VAR_0x8004 FALSE)
+            done = '%s%s__relearn%d' % (PREFIX, self.low, self.next_local())
+            return ['setvar %s, 0' % self.var(a[0]), 'goto_if_ne VAR_0x8004, FALSE, %s' % done,
+                    'setvar %s, 0xFF' % self.var(a[0]), '%s:' % done]
+        if cmd == 'GetRandomSeenSpecies':
+            return [self.sinnoh(SINNOH_MISC, 64, self.var(a[0]))]
+        if cmd == 'SetNewsPressDeadline':
+            return [self.sinnoh(SINNOH_MISC, 62, self.value(a[0]))]   # (SOLACEON's NEWS PRESS: s3d_misc.c, days on the clock)
+        if cmd == 'GetNewsPressDeadline':
+            return [self.sinnoh(SINNOH_MISC, 63, self.var(a[0]))]
         if cmd == 'GetCurrentSafariGameCaughtNum':
             return [self.sinnoh(SINNOH_MISC, 60, self.var(a[0]))]
         # the HONEY trees (src/sinnoh/s3d_wild.c: the tree in front of the player, its HONEY's hours on the own clock)
@@ -1346,6 +1408,11 @@ class FileConverter:
         if cmd == 'SaveChosenStarter':
             # (FLAG_SINNOH_STARTER; Platinum's START menu shows POKeMON once the starter is saved: the game's flag)
             return ['copyvar 0x%X, VAR_RESULT' % VAR_SINNOH_STARTER, 'setflag 0x3D39', 'setflag FLAG_SYS_POKEMON_GET']
+        if cmd == 'OpenRegionMap':
+            # (a TOWN MAP on a wall: the game's own TOWN MAP screen, SINNOH's in SINNOH: s3d_townmap.c; it comes back
+            # to the field faded in)
+            self.faded_in = True
+            return ['special FieldShowRegionMap', 'waitstate']
         if cmd == 'ReturnToField':
             return []                       # (the briefcase went back to the field itself)
         if cmd == 'StartLibraryTV':

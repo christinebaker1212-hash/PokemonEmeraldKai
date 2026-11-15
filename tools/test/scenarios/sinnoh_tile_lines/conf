@@ -1,0 +1,8 @@
+# Platinum's tiles with their own lines in SINNOH (scripts_bg_events.s: field_control_avatar.c, src/sinnoh/s3d_misc.c
+# Sinnoh_TileScript): SANDGEM's POKéMON CENTER's bookshelf, shop shelf and TOWN MAP on the wall (the game's TOWN MAP
+# screen, SINNOH's). Needs the 3D pack. Shots t_*.png.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[test] where map 43.59 xy 13,3")
+UNEXPECT_A=("[crash]")

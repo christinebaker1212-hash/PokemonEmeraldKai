@@ -2,6 +2,7 @@
 // scripts do that this game's commands don't, for the scripts tools/sinnoh/gen_scripts.py converts from Platinum's own
 // (docs/SINNOH_HANDOFF.md step 4).
 #include "global.h"
+#include "random.h"
 #include "money.h"
 #include "pokemon_icon.h"
 #include "event_data.h"
@@ -122,6 +123,21 @@ u8 gSinnohMessage[1000];
 const u8 *gSinnohWarpContinue;   // (SINNOH_WARP_CONTINUE: script.c TryRunOnFrameMapScript starts it on the new map)   // (SINNOH_MESSAGE_VAR: `message gSinnohMessage`)
 extern const u16 gSinnohDexRatings[];   // (sinnoh/platinum_scripts.inc: bank, then rows of up to, line, female's line)
 #include "../data/sinnoh_dex.h"
+
+// Platinum's GetRandomSeenSpecies: one of the SINNOH POKéDEX's seen at random (PIKACHU when none: Platinum's)
+u16 Sinnoh_RandomSeenSpecies(void)
+{
+    u32 i, n = 0, pick;
+    for (i = 0; i < ARRAY_COUNT(sSinnohDex); i++)
+        n += GetSetPokedexFlag(SpeciesToNationalPokedexNum(sSinnohDex[i]), FLAG_GET_SEEN) != 0;
+    if (n == 0)
+        return SPECIES_PIKACHU;
+    pick = Random() % n;
+    for (i = 0; i < ARRAY_COUNT(sSinnohDex); i++)
+        if (GetSetPokedexFlag(SpeciesToNationalPokedexNum(sSinnohDex[i]), FLAG_GET_SEEN) && pick-- == 0)
+            return sSinnohDex[i];
+    return SPECIES_PIKACHU;
+}
 
 static struct MapEvents sStoryEvents;                 // (Sinnoh_PlatinumMapScripts below)
 static struct ObjectEventTemplate sStoryObjects[64];

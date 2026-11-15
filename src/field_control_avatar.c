@@ -562,6 +562,13 @@ static const u8 *GetInteractedMetatileScript(struct MapPosition *position, u8 me
         if (dig != NULL)
             return dig;
     }
+    if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+    {
+        const u8 *Sinnoh_TileScript(u8 behavior);
+        const u8 *line = Sinnoh_TileScript(metatileBehavior);
+        if (line != NULL)
+            return line;   // Moemon Kai: Platinum's bookshelves, shelves, trash cans, TOWN MAP (src/sinnoh/s3d_misc.c)
+    }
     if (MetatileBehavior_IsPC(metatileBehavior) == TRUE)
         return EventScript_PC;
     if (MetatileBehavior_IsClosedSootopolisDoor(metatileBehavior) == TRUE)

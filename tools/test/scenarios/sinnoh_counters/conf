@@ -1,0 +1,10 @@
+# Platinum's own counters in SINNOH (tools/sinnoh/gen_scripts.py): FLOAROMA's FLOWER SHOP trades a CHERI BERRY for the
+# RED FLOWER accessory (ShowAccessoryShop on the FASHION CASE: src/sinnoh/s3d_fashion.c FASHCALL_SHOP_*); PASTORIA's
+# MOVE MANIAC speaks and asks which POKéMON (then CheckHasLearnableReminderMoves, OpenMoveReminderMenu on the
+# game's move relearner); SOLACEON's NEWS PRESS gives an assignment (GetRandomSeenSpecies, the deadline: s3d_misc.c).
+# Shots c_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=393:20"
+EXPECT_A=("sinnoh fashion: accessory 50 now 1" "item 133: 0")
+UNEXPECT_A=("[crash]")

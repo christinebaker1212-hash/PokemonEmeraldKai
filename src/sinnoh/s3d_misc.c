@@ -29,6 +29,10 @@
 //   21 a battle in the FIGHT AREA's battleground (Platinum's RECORD_TIMES_BATTLED_AT_BATTLEGROUND)
 //   40 SetSpeciesSeen A: the species is seen in the POKéDEX (SPEAR PILLAR's DIALGA and PALKIA)
 //   17 GetCurrentBGM A: the song playing (the VILLA's music box keeps it), 18 SetFieldScene A: that song again
+//   67 CheckHasLearnableReminderMoves A, B (the party slot in variable B: any move to relearn)
+//   65 / 66 A: a buffer command into Platinum's slot A (3-5: gSinnohStrVar) around STR_VAR_3, kept and put back
+//   64 GetRandomSeenSpecies A (one of the SINNOH POKéDEX's seen)
+//   62 SetNewsPressDeadline A (days from today), 63 GetNewsPressDeadline A (the days left: 0 once it has passed)
 //   60 GetCurrentSafariGameCaughtNum A (the game's SAFARI GAME: safari_zone.c); 61 GetHoneyTreeStatus A (Platinum's
 //      TREE_STATUS_*: 1 bare, 2 slathered, 3 a POKéMON came, from s3d_wild.c's tree in front)
 //   14 CheckAmitySquareManGiftIsAccessory: A the gift's number, B the answer; 15 GetAmitySquareBerryOrAccessoryIDFromMan:
@@ -75,7 +79,8 @@ static struct
     u16 amitySteps;       // (AMITY SQUARE: steps since the follower's last find)
     u16 amityWalking;     // (AMITY SQUARE: the follower is the square's walker, from a gate in to a gate out)
     u16 battleground;     // (the FIGHT AREA's battleground: battles there, for the VILLA's GUEST SET)
-    u16 unused[11];
+    u16 newsPressDay;     // (SOLACEON's POKéMON NEWS PRESS: the game day + 1 its assignment's deadline ends, 0 none)
+    u16 unused[10];
 } sM;
 
 const void *Sinnoh_MiscData(u32 *size)
@@ -123,6 +128,8 @@ static u8 Matching(u16 drawn, u16 otId)
 u16 MP_MonSizeHash(struct Pokemon *mon);
 u32 MP_MonSizeTenthsInch(u16 species, u16 hash);
 extern u8 gSinnohStrVar[3][64];
+
+static u8 sKeptVar3[0x100];
 
 static u8 *TextSlot(u8 i)
 {
@@ -722,6 +729,30 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         VarSet(a, x % 98 + 2);
         break;
     }
+    case 67:   // (CheckHasLearnableReminderMoves: A the answer, B the party slot's variable)
+        VarSet(a, VarGet(b) < PARTY_SIZE && GetNumberOfRelearnableMoves(&gPlayerParty[VarGet(b)]) > 0);
+        break;
+    case 65:   // (a buffer command into Platinum's slot 3-5 writes STR_VAR_3: kept first, gen_scripts.py strvar)
+        memcpy(sKeptVar3, gStringVar3, sizeof(sKeptVar3));
+        break;
+    case 66:   // (... then its words go to slot A, and STR_VAR_3 is put back)
+        StringCopy(TextSlot(a), gStringVar3);
+        memcpy(gStringVar3, sKeptVar3, sizeof(sKeptVar3));
+        break;
+    case 64:
+        {
+            u16 Sinnoh_RandomSeenSpecies(void);   // (s3d_scrcmd.c)
+            VarSet(a, Sinnoh_RandomSeenSpecies());
+        }
+        break;
+    case 62:
+        RtcCalcLocalTime();
+        sM.newsPressDay = gLocalTime.days + a + 1;
+        break;
+    case 63:
+        RtcCalcLocalTime();
+        VarSet(a, sM.newsPressDay > gLocalTime.days + 1 ? sM.newsPressDay - gLocalTime.days - 1 : 0);
+        break;
     case 60:
         {
             u8 SafariZone_CaughtMons(void);
@@ -944,4 +975,26 @@ void S3D_DefogClear(void)
     void Sinnoh_JournalDefog(void);
     Sinnoh_JournalDefog();   // (the JOURNAL: "Used Defog at ...": s3d_journal.c)
     SetWeather(WEATHER_NONE);
+}
+
+// Platinum's tiles with a line of their own (scripts_bg_events.s, run by its field for the tile's behavior): the small
+// bookshelves, bookshelves, the trash can, the three shop shelves, the TOWN MAP on a wall (field_control_avatar.c
+// GetInteractedMetatileScript, before the game's own; the 3D pack keeps Platinum's numbers: tools/sinnoh/build_pack.py)
+extern const u8 SinnohP_bg_events_1[], SinnohP_bg_events_2[], SinnohP_bg_events_3[], SinnohP_bg_events_4[],
+    SinnohP_bg_events_5[], SinnohP_bg_events_6[], SinnohP_bg_events_7[], SinnohP_bg_events_8[], SinnohP_bg_events_9[];
+const u8 *Sinnoh_TileScript(u8 behavior)
+{
+    switch (behavior)
+    {
+    case 0xE0: return SinnohP_bg_events_1;   // (TILE_BEHAVIOR_SMALL_BOOKSHELF_1)
+    case 0xEA: return SinnohP_bg_events_2;   // (SMALL_BOOKSHELF_2)
+    case 0xE1: return SinnohP_bg_events_3;   // (BOOKSHELF_1)
+    case 0xE2: return SinnohP_bg_events_4;   // (BOOKSHELF_2)
+    case 0xE4: return SinnohP_bg_events_5;   // (TRASH_CAN)
+    case 0xE5: return SinnohP_bg_events_6;   // (MART_SHELF_1)
+    case 0xEB: return SinnohP_bg_events_7;   // (MART_SHELF_2)
+    case 0xEC: return SinnohP_bg_events_8;   // (MART_SHELF_3)
+    case 0x85: return SinnohP_bg_events_9;   // (TOWN_MAP)
+    }
+    return NULL;
 }

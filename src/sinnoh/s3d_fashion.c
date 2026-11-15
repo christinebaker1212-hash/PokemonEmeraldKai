@@ -14,6 +14,8 @@
 #include "mp_region.h"
 #include "s3d.h"
 #include "s3d_contest.h"
+#include "item.h"
+#include "constants/items.h"
 
 #define ACCESSORY_COUNT 100
 #define NON_UNIQUE_ACCESSORY_COUNT 61
@@ -226,6 +228,36 @@ enum {
     FASHCALL_DRESS_UP_PHOTO, // A: the photo's place, B: variable <- a dress-up photo is kept there
     FASHCALL_CONTEST_PHOTO,  // A: the photo's place, B: variable <- a contest photo is kept there
     FASHCALL_POFFIN_CAN_COOK,// A: variable <- 0 can cook, 1 no BERRY, 2 the case is full (CheckCanCookPoffin)
+    FASHCALL_SHOP_ALL,       // A: variable <- the FLOWER SHOP has nothing more the case can take (ShowAccessoryShop)
+    FASHCALL_SHOP_PICK,      // A: the row (a variable): its BERRY's name in slot 0, how many in 1, the accessory's in 2
+    FASHCALL_SHOP_BUY,       // A: the row (a variable), B: variable <- 0 traded, 1 not enough BERRIES, 2 no room
+};
+
+// FLOAROMA's FLOWER SHOP (Platinum's overlay007 accessory_shop.c sAccessoryShop_ItemLists): an accessory, the BERRY
+// it costs and how many
+static const struct { u8 accessory; u16 berry; u8 count; } sFlowerShop[] = {
+    {50, ITEM_CHERI_BERRY, 1},   // (RED_FLOWER)
+    {51, ITEM_CHESTO_BERRY, 1},   // (PINK_FLOWER)
+    {52, ITEM_PECHA_BERRY, 1},   // (WHITE_FLOWER)
+    {53, ITEM_ORAN_BERRY, 1},   // (BLUE_FLOWER)
+    {54, ITEM_RAWST_BERRY, 1},   // (ORANGE_FLOWER)
+    {55, ITEM_ASPEAR_BERRY, 1},   // (YELLOW_FLOWER)
+    {56, ITEM_LEPPA_BERRY, 1},   // (GOOGLY_SPECS)
+    {57, ITEM_PERSIM_BERRY, 1},   // (BLACK_SPECS)
+    {58, ITEM_RAZZ_BERRY, 10},   // (GORGEOUS_SPECS)
+    {59, ITEM_BLUK_BERRY, 10},   // (SWEET_CANDY)
+    {60, ITEM_NANAB_BERRY, 10},   // (CONFETTI)
+    {61, ITEM_WEPEAR_BERRY, 10},   // (COLORED_PARASOL)
+    {62, ITEM_PINAP_BERRY, 10},   // (OLD_UMBRELLA)
+    {63, ITEM_CORNN_BERRY, 50},   // (SPOTLIGHT)
+    {64, ITEM_PAMTRE_BERRY, 100},   // (CAPE)
+    {65, ITEM_MAGOST_BERRY, 50},   // (STANDING_MIKE)
+    {66, ITEM_WATMEL_BERRY, 100},   // (SURFBOARD)
+    {67, ITEM_RABUTA_BERRY, 50},   // (CARPET)
+    {68, ITEM_NOMEL_BERRY, 50},   // (RETRO_PIPE)
+    {69, ITEM_DURIN_BERRY, 100},   // (FLUFFY_BED)
+    {70, ITEM_SPELON_BERRY, 100},   // (MIRROR_BALL)
+    {71, ITEM_BELUE_BERRY, 100},   // (PHOTO_BOARD)
 };
 
 // The photos: the contest hall's winners (slot: the contest type); JUBILIFE TV's gallery: the player's own dress-up
@@ -289,6 +321,39 @@ void Sinnoh_FashionCall(u16 call, u16 a, u16 b)
     case FASHCALL_DRESS_UP_PHOTO:
     case FASHCALL_CONTEST_PHOTO:
         VarSet(b, Sinnoh_PhotoKept(call == FASHCALL_CONTEST_PHOTO, VarGet(a)));
+        break;
+    case FASHCALL_SHOP_ALL:
+        {
+            u32 i;
+            bool8 all = TRUE;
+            for (i = 0; i < ARRAY_COUNT(sFlowerShop); i++)
+                if (Sinnoh_CanFitAccessory(sFlowerShop[i].accessory, 1))
+                    all = FALSE;
+            VarSet(a, all);
+        }
+        break;
+    case FASHCALL_SHOP_PICK:
+        {
+            u16 row = VarGet(a) % ARRAY_COUNT(sFlowerShop);
+            CopyItemName(sFlowerShop[row].berry, StringVar(0));
+            ConvertIntToDecimalStringN(StringVar(1), sFlowerShop[row].count, STR_CONV_MODE_LEFT_ALIGN, 3);
+            Sinnoh_AccessoryName(StringVar(2), sFlowerShop[row].accessory, FALSE);
+        }
+        break;
+    case FASHCALL_SHOP_BUY:
+        {
+            u16 row = VarGet(a) % ARRAY_COUNT(sFlowerShop);
+            if (!CheckBagHasItem(sFlowerShop[row].berry, sFlowerShop[row].count))
+                VarSet(b, 1);
+            else if (!Sinnoh_CanFitAccessory(sFlowerShop[row].accessory, 1))
+                VarSet(b, 2);
+            else
+            {
+                Sinnoh_AddAccessory(sFlowerShop[row].accessory, 1);
+                RemoveBagItem(sFlowerShop[row].berry, sFlowerShop[row].count);
+                VarSet(b, 0);
+            }
+        }
         break;
     case FASHCALL_POFFIN_CAN_COOK:
     {

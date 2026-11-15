@@ -1,0 +1,35 @@
+pressuntil A field 5000
+wait 30
+mp warp 43,59,3,3
+wait 120
+waitfor field 1000
+mp face up
+wait 10
+press A 1
+wait 60
+shot t_bookshelf
+pressuntil A field 600
+mp warp 43,59,10,3
+wait 120
+waitfor field 1000
+mp face up
+wait 10
+press A 1
+wait 60
+shot t_shelf
+pressuntil A field 600
+mp warp 43,59,13,3
+wait 120
+waitfor field 1000
+mp where
+mp face up
+wait 10
+press A 1
+wait 120
+shot t_townmap
+press B 1
+wait 120
+pressuntil B field 600
+wait 30
+shot t_back
+quit
