@@ -4595,6 +4595,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_TowerDebug(const char *arg);
         Sinnoh_TowerDebug(arg);   // SINNOH's BATTLE TOWER (src/sinnoh/s3d_tower.c)
     }
+    else if (strcmp(cmd, "hallrecord") == 0)   // hallrecord SPECIES BEST: a kind's BATTLE HALL record (s3d_hall.c)
+    {
+        void Sinnoh_HallSetRecord(u16 species, u16 best);
+        u16 Sinnoh_HallKindsWithRecords(void);
+        u16 Sinnoh_HallTotalRecord(void);
+        int species = 0, best = 0;
+        sscanf(arg, "%d %d", &species, &best);
+        Sinnoh_HallSetRecord(species, best);
+        printf("[test] hallrecord: %d kinds, total %d\n", Sinnoh_HallKindsWithRecords(), Sinnoh_HallTotalRecord());
+    }
     else if (strcmp(cmd, "brainstreak") == 0)
     {
         void Sinnoh_BrainDebug(const char *arg);

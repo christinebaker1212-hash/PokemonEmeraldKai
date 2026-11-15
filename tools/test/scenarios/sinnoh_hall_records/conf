@@ -1,0 +1,8 @@
+# The BATTLE HALL's lobby people in Platinum's own scripts (s3d_hall.c each kind's best, s3d_misc.c ops 52-55): the
+# record keeper sums two kinds' records (52: milestones 10, 30, 50, 9 BP), SERENA / WINSTON count the kinds, and after
+# a challenge the lobby's next load rolls the day's visitor (Platinum's OnLoad). Shots hr_*.png.
+MODE=1
+TMO=240
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:60"
+EXPECT_A=("hallrecord: 2 kinds, total 52" "hall: the record keeper: total 52, milestone 3, 9 BP" "[hr] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

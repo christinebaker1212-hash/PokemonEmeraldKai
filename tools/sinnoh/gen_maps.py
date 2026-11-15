@@ -199,10 +199,11 @@ CLOSED_PEOPLE = {'Sinnoh_Underground': (3, 4, 5)}
 # Story people only Platinum's own map scripts move and talk for (no script of their own when talked to): shown by their
 # hide flag all the same (the Underground's ROARK: its OnFrame intro, gen_scripts.py's map scripts)
 SCENE_PEOPLE = {'Sinnoh_Underground': (17,), 'Sinnoh_Battleground': (3, 4, 5, 6),
-                'Sinnoh_RotomsRoom': (1, 2, 3, 4, 5)}   # (the appliances, shown by the room's own flags: the user, 2026-11-15)
+                'Sinnoh_RotomsRoom': (1, 2, 3, 4, 5),
+                'Sinnoh_BattleHall': (13, 14)}   # (SERENA / WINSTON, the day's visitor: their looks by the scripts)   # (the appliances, shown by the room's own flags: the user, 2026-11-15)
 # People whose look a script picks (Platinum's OBJ_EVENT_GFX_VAR_n: the game's own, set through VAR_OBJ_GFX_ID_n): the
 # BATTLEGROUND's four trainers of the day (GetRandomBattlegroundTrainers, s3d_misc.c op 27)
-VAR_LOOKS = {'Sinnoh_Battleground': (3, 4, 5, 6)}
+VAR_LOOKS = {'Sinnoh_Battleground': (3, 4, 5, 6), 'Sinnoh_BattleHall': (13, 14)}
 
 SINNOH_BERRY_TREES = 128   # (the BERRY trees past the save's own 128: src/mp/mp_berrytrees.c)
 OBSTACLES = {'OBJ_EVENT_GFX_CUT_TREE': 'EventScript_CutTree', 'OBJ_EVENT_GFX_ROCK_SMASH': 'EventScript_RockSmash',

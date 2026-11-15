@@ -661,6 +661,32 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         VarSet(b, any);
         break;
     }
+    case 52:   // GetNumSpeciesWithBattleHallRecords: A <- the kinds with a HALL record (s3d_hall.c)
+    {
+        u16 Sinnoh_HallKindsWithRecords(void);
+        VarSet(a, Sinnoh_HallKindsWithRecords());
+        break;
+    }
+    case 53:   // GetBattleHallTotalSinglesRecord: A <- every kind's record summed, at most 10000
+    {
+        u16 Sinnoh_HallTotalRecord(void);
+        VarSet(a, Sinnoh_HallTotalRecord());
+        break;
+    }
+    case 54:   // GetBattleHallRecordKeeperStats: A the milestone reached (kept), B <- the keeper's answer; TEXT 1-4
+    {
+        u16 Sinnoh_HallRecordKeeper(u16 *next, u8 *(*slot)(u8));
+        u16 next = VarGet(a);
+        VarSet(b, Sinnoh_HallRecordKeeper(&next, TextSlot));
+        VarSet(a, next);
+        break;
+    }
+    case 55:   // CheckIfBattleHallStreakIs50: A <- TRUE when the HALL's last challenge ended at 50 (the reporter comes)
+    {
+        u16 Sinnoh_HallLastStreak(void);
+        VarSet(a, Sinnoh_HallLastStreak() == 50);
+        break;
+    }
     case 46:   // GetDailyRandomLevel: A <- the day's level, 2-99 (Platinum's VAR_DAILY_RANDOM_LEVEL, picked as a day starts)
     {
         u32 x = (RtcGetLocalDayCount() + 1) * 0x9E3779B1u ^ 0x221;

@@ -955,6 +955,14 @@ void Sinnoh_PlatinumMapScripts(void)
             break;
     if (m->map == 0xFFFF)
         return;
+    if (map == MAP_SINNOH_BATTLE_HALL)
+    {
+        void Sinnoh_HallLobbyLoad(void);
+        Sinnoh_HallLobbyLoad();   // (after a challenge, Platinum's OnLoad looks at the lobby's people: s3d_hall.c)
+    }
+    if (map == MAP_SINNOH_BATTLE_FRONTIER)
+        FlagSet(0x33E0);   // (Platinum's BattleFrontier_OnTransition, its first line: FLAG_HIDE_BATTLE_HALL_MAJOR_NPC, the HALL's
+                           // visitor of the day gone once the player is outside: tools/sinnoh/ids.py)
     if (m->scripts)
         gMapHeader.mapScripts = m->scripts;
     if (gMapHeader.events == NULL)

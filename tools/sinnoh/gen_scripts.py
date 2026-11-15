@@ -837,6 +837,17 @@ class FileConverter:
             return [self.sinnoh(SINNOH_MISC, 3, self.var(a[0]))]
         if cmd in ('AddToGameRecord', 'AddToGameRecordBigValue'):
             return []   # (Platinum's records shown only by its rankings rooms: group / Wi-Fi, closed)
+        # the BATTLE HALL's records (src/sinnoh/s3d_hall.c: each kind's best, as Platinum's BattleHallWinRecords)
+        if cmd == 'GetNumSpeciesWithBattleHallRecords':
+            return [self.sinnoh(SINNOH_MISC, 52, self.var(a[0]))]
+        if cmd == 'GetBattleHallTotalSinglesRecord':
+            return [self.sinnoh(SINNOH_MISC, 53, self.var(a[0]))]
+        if cmd == 'CheckIfBattleHallStreakIs50':
+            return [self.sinnoh(SINNOH_MISC, 55, self.var(a[0]))]
+        if cmd == 'GetBattleHallRecordKeeperStats':
+            if [self.value(x) for x in a[:4]] != ['1', '2', '3', '4']:
+                raise Unsupported('the record keeper\'s text slots')   # (s3d_hall.c fills TEXT slots 1-4, Platinum's only call)
+            return [self.sinnoh(SINNOH_MISC, 54, self.var(a[4]), self.var(a[5]))]
         if cmd == 'GetPartyRotomCountAndFirst':
             # (the party's ROTOM: how many, the first one's slot; their forms: src/mp/mp_forms.c)
             return [self.sinnoh(SINNOH_MISC, 47, self.var(a[0]), self.var(a[1]))]
@@ -2483,6 +2494,12 @@ def removes_after_battle(c, n):
     return False
 
 
+# Platinum's frame tables left out: the BATTLE HALL's are its corridor's way back (the challenge ended, resumed...); the
+# game's own counter runs the challenge in the lobby (s3d_hall.c), and the lobby's load action is the game's
+# (Sinnoh_HallLobbyLoad: the daily visitors, SERENA / WINSTON)
+NO_FRAME_TABLE = {'battle_hall'}
+
+
 def init_scripts(root, low):
     """Platinum's scripts_init_<low>.s: ({kind: entry}, [(variable, value, entry)] its frame table)"""
     path = os.path.join(root, 'res/field/scripts', 'scripts_init_%s.s' % low)
@@ -2495,7 +2512,7 @@ def init_scripts(root, low):
         if m:
             once[m.group(1)] = int(m.group(2))
         m = re.match(r'^InitScriptGoToIfEqual\s+(\w+),\s*(\w+),\s*(\d+)$', line)
-        if m:
+        if m and low not in NO_FRAME_TABLE:
             frame.append((m.group(1), m.group(2), int(m.group(3))))
     return once, frame
 

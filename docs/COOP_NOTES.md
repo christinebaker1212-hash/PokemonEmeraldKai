@@ -7718,3 +7718,17 @@ The user (2026-11-15): "form changes, and they must scale across all regions". O
   hides ROTOM_*; gen_maps.py SCENE_PEOPLE shows them by the room's flags). Scenario sinnoh_rotom_forms.
 - Tests: `mp form SLOT [FORM]`, `mp sinnohop OP A B [V8009]` (a SINNOH op straight); scenarios forms, forms_changes
   (SINNOH's ops, the GRACIDEA through the BAG), forms_unova (Black's meteorite and appliances).
+
+## SINNOH's BATTLE HALL lobby: the record keeper, SERENA / WINSTON, the day's visitor (1.199.10)
+
+- The HALL keeps each kind's best streak (s3d_hall.c records[640], appended to the HALL chunk: older saves load short
+  and their one record goes in once, recordsSeeded); a new POKéMON clears only its own streak and ranks now.
+- Platinum's commands: GetNumSpeciesWithBattleHallRecords (op 52), GetBattleHallTotalSinglesRecord (53, at most 10000),
+  GetBattleHallRecordKeeperStats (54: Platinum's milestone table and BP, TEXT slots 1-4), CheckIfBattleHallStreakIs50
+  (55: the last challenge's end, lastStreak).
+- The lobby's load action: the game's counter runs the challenge in the lobby, so Platinum's frame table (its corridor's
+  way back) is left out (gen_scripts.py NO_FRAME_TABLE); a challenge's end sets VAR_BATTLE_HALL_LOBBY_LOAD_ACTION to the
+  game's 6, the lobby's next load turns it to 1 for Platinum's OnLoad (the day's visitor, the reporter), the one after
+  to 0 (Sinnoh_HallLobbyLoad). The FRONTIER's map load sets FLAG_HIDE_BATTLE_HALL_MAJOR_NPC (Platinum's
+  BattleFrontier_OnTransition, its first line). SERENA / WINSTON and the visitor are shown by their looks (gen_maps.py
+  SCENE_PEOPLE / VAR_LOOKS). Test `mp hallrecord SPECIES BEST`; scenario sinnoh_hall_records.

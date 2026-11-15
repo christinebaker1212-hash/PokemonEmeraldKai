@@ -1,0 +1,28 @@
+pressuntil A field 5000
+mp textspeed 2
+mp platinumstory
+mp hallrecord 6 40
+mp hallrecord 25 12
+wait 30
+mp warp 41,7,8,9
+wait 90
+waitfor field 1000
+shot hr_lobby
+mp face up
+press A 4
+wait 30
+shot hr_keeper
+pressuntillog A 3000 the record keeper
+wait 30
+shot hr_bp
+pressuntil B field 3000
+mp warp 41,7,17,11
+wait 90
+waitfor field 1000
+mp face right
+press A 4
+wait 40
+shot hr_fan
+pressuntil B field 3000
+echo [hr] done
+quit

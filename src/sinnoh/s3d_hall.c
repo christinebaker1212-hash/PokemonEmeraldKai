@@ -50,6 +50,7 @@ extern const struct BattleFrontierTrainer gBattleFrontierTrainers[];
 
 #define HALL_RANKS 10
 #define HALL_BATTLES_PER_ROUND 10
+#define HALL_RECORDS 640
 
 static struct HallSave
 {
@@ -58,7 +59,17 @@ static struct HallSave
     u8 ranks[NUMBER_OF_MON_TYPES];
     u16 streak, best;
     u8 prints;            // the HALL MATRON's prints won (bit 0 Silver, 1 Gold; added 1.114.0)
+    u8 recordsSeeded;     // (1.199.10: the record before the table, put in it once)
+    u16 recordCount;      // each kind's best streak, as Platinum's BattleHallWinRecords (the record keeper, SERENA and
+    struct { u16 species, best; } records[HALL_RECORDS];   // WINSTON count them; added 1.199.10, older saves load short)
+    u16 lastStreak;       // the last challenge's streak where it ended (Platinum's latest streak: the reporter at 50)
 } sHall;
+
+// Platinum's VAR_BATTLE_HALL_LOBBY_LOAD_ACTION (tools/sinnoh/ids.py): 1 the lobby's people are looked at again as it
+// loads (the HALL's OnLoad: the day's visitor, the reporter). The game's own value 6: a challenge ended, the next load
+// of the lobby is that one (Sinnoh_HallLobbyLoad)
+#define VAR_SINNOH_HALL_LOBBY_LOAD 0x5197
+#define HALL_LOBBY_PENDING 6
 
 static struct
 {
@@ -81,10 +92,100 @@ const void *Sinnoh_HallData(u32 *size)
     return &sHall;
 }
 
+static void KeepRecord(u16 species, u16 streak)
+{
+    u32 i;
+    if (species == SPECIES_NONE || streak == 0)
+        return;
+    for (i = 0; i < sHall.recordCount; i++)
+        if (sHall.records[i].species == species)
+        {
+            if (sHall.records[i].best < streak)
+                sHall.records[i].best = streak;
+            return;
+        }
+    if (sHall.recordCount < HALL_RECORDS)
+    {
+        sHall.records[sHall.recordCount].species = species;
+        sHall.records[sHall.recordCount++].best = streak;
+    }
+}
+
 void Sinnoh_HallLoad(const void *data, u32 size)
 {
     Sinnoh_HallReset();
     memcpy(&sHall, data, size < sizeof(sHall) ? size : sizeof(sHall));
+    if (sHall.recordCount > HALL_RECORDS)
+        sHall.recordCount = 0;
+    if (!sHall.recordsSeeded)
+    {
+        sHall.recordsSeeded = 1;   // (a save from before the table: its one record goes in)
+        KeepRecord(sHall.species, sHall.best);
+    }
+}
+
+// Platinum's BATTLE HALL records, summed over every kind: GetBattleHallTotalSinglesRecord (the daily visitors, at most
+// 10000) and the record keeper's total
+static u32 HallTotal(void)
+{
+    u32 i, total = 0;
+    for (i = 0; i < sHall.recordCount; i++)
+        total += sHall.records[i].best;
+    return total;
+}
+
+u16 Sinnoh_HallTotalRecord(void)
+{
+    u32 total = HallTotal();
+    return total > 10000 ? 10000 : total;
+}
+
+// GetNumSpeciesWithBattleHallRecords: how many kinds have a record (SERENA and WINSTON)
+u16 Sinnoh_HallKindsWithRecords(void)
+{
+    return sHall.recordCount;
+}
+
+// GetBattleHallRecordKeeperStats (Platinum's scrcmd_battle_hall.c): the total into TEXT slots 1-4 with the milestone
+// passed, the next one and the BP earned; *next the milestone reached so far; the answer 0 no record, 1 BP given,
+// 2 none this time, 3 every milestone met
+static const struct { u32 record; u16 bp; } sMilestones[] = {
+    {10, 1}, {30, 3}, {50, 5}, {100, 5}, {150, 5}, {200, 5}, {250, 5}, {300, 5}, {350, 5}, {400, 5}, {450, 5},
+    {500, 10}, {600, 10}, {700, 10}, {800, 10}, {900, 10}, {1000, 10}, {1200, 30}, {1400, 30}, {1600, 30}, {1800, 30},
+    {2000, 50}, {2500, 50}, {3000, 50}, {3500, 50}, {4000, 50}, {4500, 50}, {5000, 50}, {5500, 50}, {6000, 50},
+    {6500, 50}, {7000, 50}, {7500, 50}, {8000, 50}, {8500, 50}, {9000, 50}, {9500, 50}, {10000, 100}, {20000, 200},
+    {30000, 300}, {40000, 400}, {50000, 500}, {60000, 600}, {70000, 700}, {80000, 800}, {90000, 900}, {100000, 1000},
+};
+
+u16 Sinnoh_HallRecordKeeper(u16 *next, u8 *(*slot)(u8))
+{
+    u32 total = HallTotal(), i, reached = 0, first = *next;
+    u16 bp = 0;
+    ConvertIntToDecimalStringN(slot(1), total, STR_CONV_MODE_LEFT_ALIGN, 6);
+    for (i = *next; i < ARRAY_COUNT(sMilestones); i++)
+        if (sMilestones[i].record <= total)
+        {
+            bp += sMilestones[i].bp;
+            (*next)++;
+            reached = i;
+        }
+    if (bp != 0)
+    {
+        gSaveBlock2Ptr->frontier.battlePoints += bp;
+        if (gSaveBlock2Ptr->frontier.battlePoints > MAX_BATTLE_FRONTIER_POINTS)
+            gSaveBlock2Ptr->frontier.battlePoints = MAX_BATTLE_FRONTIER_POINTS;
+        Sinnoh_TvBattlePoints(bp);
+    }
+    MPNet_Log("hall: the record keeper: total %u, milestone %u, %u BP", total, *next, bp);
+    if (total == 0)
+        return 0;
+    if (first >= ARRAY_COUNT(sMilestones))
+        return 3;
+    ConvertIntToDecimalStringN(slot(2), sMilestones[reached].record, STR_CONV_MODE_LEFT_ALIGN, 6);
+    ConvertIntToDecimalStringN(slot(3), sMilestones[*next < ARRAY_COUNT(sMilestones) ? *next : ARRAY_COUNT(sMilestones) - 1].record,
+                               STR_CONV_MODE_LEFT_ALIGN, 6);
+    ConvertIntToDecimalStringN(slot(4), bp, STR_CONV_MODE_LEFT_ALIGN, 4);
+    return first != *next ? 1 : 2;
 }
 
 static u8 TypeCount(void)
@@ -131,9 +232,9 @@ u16 Sinnoh_HallSetMon(void)
     sRun.slot = gSpecialVar_0x8004;
     if (sHall.species != species || sHall.personality != personality)
     {
-        u8 prints = sHall.prints;   // (the prints are the player's, not the POKéMON's)
-        memset(&sHall, 0, sizeof(sHall));
-        sHall.prints = prints;
+        // (the prints and every kind's records are the player's, not the POKéMON's: only the POKéMON's own go)
+        memset(&sHall.ranks, 0, sizeof(sHall.ranks));
+        sHall.streak = sHall.best = 0;
         sHall.species = species;
         sHall.personality = personality;
     }
@@ -349,6 +450,7 @@ u16 Sinnoh_HallWon(void)
     sHall.streak++;
     if (sHall.streak > sHall.best)
         sHall.best = sHall.streak;
+    KeepRecord(sHall.species, sHall.streak);   // (the kind's best: the record keeper's total)
     if (sHall.streak % HALL_BATTLES_PER_ROUND == 0)
     {
         bp = 3 + sHall.streak / HALL_BATTLES_PER_ROUND;
@@ -373,9 +475,28 @@ u16 Sinnoh_HallEnd(void)
     MPNet_Log("hall: the challenge ends at %d (best %d)", sHall.streak, sHall.best);
     if (sRun.slot < PARTY_SIZE)
         Sinnoh_TvFrontierHall(&gPlayerParty[sRun.slot]);   // (Platinum's FrontierScrCmd_C7: the TV's interview subject)
+    sHall.lastStreak = sHall.streak;
     sHall.streak = 0;
     memset(sHall.ranks, 0, sizeof(sHall.ranks));
+    VarSet(VAR_SINNOH_HALL_LOBBY_LOAD, HALL_LOBBY_PENDING);
     return 0;
+}
+
+// The HALL's lobby loads (s3d_scrcmd.c Sinnoh_PlatinumMapScripts, before its map scripts): after a challenge, once,
+// Platinum's OnLoad looks at the lobby's people again (as it does coming back from its corridor)
+void Sinnoh_HallLobbyLoad(void)
+{
+    u16 v = VarGet(VAR_SINNOH_HALL_LOBBY_LOAD);
+    if (v == HALL_LOBBY_PENDING)
+        VarSet(VAR_SINNOH_HALL_LOBBY_LOAD, 1);
+    else if (v == 1)
+        VarSet(VAR_SINNOH_HALL_LOBBY_LOAD, 0);
+}
+
+// (s3d_misc.c op 55, CheckIfBattleHallStreakIs50) the streak the last challenge ended at
+u16 Sinnoh_HallLastStreak(void)
+{
+    return sHall.lastStreak;
 }
 
 // (tests: `mp hall`)
@@ -410,4 +531,9 @@ u8 *Sinnoh_HallPrints(void)
 void Sinnoh_HallSetStreak(u16 streak)   // (tests)
 {
     sHall.streak = streak;
+}
+
+void Sinnoh_HallSetRecord(u16 species, u16 best)   // (tests: `mp hallrecord SPECIES BEST`)
+{
+    KeepRecord(species, best);
 }
