@@ -85,7 +85,7 @@ regenerated map keeps them (where the same thing changed, the editor asks the us
 The dev update channel ended with the Maker's first update (the user, 2026-11-03): every build follows main,
 AllowSmallTweaks only unlocks the small tweaks, and no dev updates are pushed.
 
-**POKéMON STADIUM** on BATTLE ISLAND (the user's spec and decisions: `docs/STADIUM.md`, the cups' rules
+**POKéMON STADIUM** (**complete, the user 2026-11-15**) on BATTLE ISLAND (the user's spec and decisions: `docs/STADIUM.md`, the cups' rules
 docs/stadium/RULES.md): data from the user's ROM (tools/stadium/, never commit the ROM), src/mp/mp_stadium*.c (cups and
 battles mp_stadium_cup.c, screens mp_stadium_ui.c, saved teams per server mp_stadium_teams.c, rewards / ribbons /
 achievements mp_stadium_rewards.c), its music as music/stadium_*.kaisong (new tracks by name); tests stadium_*. Its lobby's

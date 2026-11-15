@@ -145,6 +145,8 @@ Readability rules that came out of the mock-ups (the user asked for these by nam
 
 ## Open questions for the user
 
+**Settled (the user, 2026-11-15): POKéMON STADIUM is complete.** The questions below are kept as history only.
+
 - The trainers' lines (before the battle, after losing): STADIUM's own text from the ROM if the data has it
   (tools/stadium/), or leave the line boxes out? Don't write original lines without asking.
 - Cups other than the castle: anything between the result and "Keep battling?" (the recording shows the badge
