@@ -999,6 +999,10 @@ void VDraw(void)
         void MP_DayTint_Update(void);
         MP_DayTint_Update();             // Moemon Kai: Platinum's time-of-day tint outside SINNOH (mp_daytint.c)
     }
+    {
+        void U3D_CiComposite(u16 *frame);
+        U3D_CiComposite(image);          // Moemon Kai: UNOVA's 3D cut-ins over the field held still (src/unova/u3d.c)
+    }
     MP_ModernAnim_Composite(image);      // ... BATTLE ANIMS > MODERN: glows, trails and impacts over the animation
     {
         void MP_MakerAnim_Composite(u16 *frame);

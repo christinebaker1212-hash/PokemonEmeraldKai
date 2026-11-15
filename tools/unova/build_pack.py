@@ -772,7 +772,7 @@ def write(path, pack, light_sets, mats, gims=([], []), bkind_base=0):
                         out += struct.pack('<hBB5f', tex, alpha, 0, du, dv, *mul)
     out += struct.pack('<I', len(gimmick_list))
     for ov, models in gimmick_list:
-        out += struct.pack('<BBH', ov, 0, len(models))
+        out += struct.pack('<BBH', ov & 255, ov >> 8, len(models))   # (a cut-in's number past 255: its high byte)
         for kind, pos, yaw, hidden in models:
             out += struct.pack('<H3fHBB', kind, pos[0], pos[1], pos[2], yaw, hidden, 0)
     packed = b'U3DZ' + struct.pack('<I', len(out)) + zlib.compress(bytes(out), 6)

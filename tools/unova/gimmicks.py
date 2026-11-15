@@ -159,7 +159,9 @@ def _drawn(model, node_mats):
         p = keep(m, v)
         index[id(p)] = len(seen)
         seen.append((m, p))
+        _drawn.vis.append(model.vis_node)
         return p
+    _drawn.vis = []
     nitro.mat_apply = record
     try:
         drawn = model.draw(node_mats)
@@ -169,17 +171,21 @@ def _drawn(model, node_mats):
     return drawn, [m for m, _ in seen], index
 
 
-def parts(model, anims):
+def parts(model, anims, vis=None):
     """A model as rigid parts: (rest {material: triangles} per part, frames[anim][frame][part] = 3x4 row-major matrix
-    from the part's rest place to its place at that frame). ANIMS: nitro JointAnims"""
+    from the part's rest place to its place at that frame). ANIMS: nitro JointAnims; VIS: a nitro VisAnim (an NSBVA's)
+    hiding nodes by the joint animations' frames (a hidden part's matrix all zero)"""
     rest, mats, index = _drawn(model, None)
+    vnode = list(_drawn.vis)
     src_of, rep = {}, []
-    vsrc = []
-    for m in mats:   # (a source: the matrix object the vertices were emitted under)
-        if id(m) not in src_of:
-            src_of[id(m)] = len(rep)
-            rep.append(len(vsrc))
-        vsrc.append(src_of[id(m)])
+    vsrc, src_vis = [], []
+    for k, m in enumerate(mats):   # (a source: the matrix object the vertices were emitted under, and their node)
+        key = (id(m), vnode[k] if vis is not None else -1)
+        if key not in src_of:
+            src_of[key] = len(rep)
+            rep.append(k)
+            src_vis.append(key[1])
+        vsrc.append(src_of[key])
     inv = [_inv(mats[r]) for r in rep]
     # (a source flat at rest, a node scaled to nothing there (ov064's glow, its rays): its vertices taken where it
     # first has a shape, the part's rest that place)
@@ -212,6 +218,9 @@ def parts(model, anims):
             _, fm, _ = _drawn(model, a.node_matrices(model, f))
             row = []
             for s, r in enumerate(rep):
+                if vis is not None and src_vis[s] >= 0 and not vis.shown(src_vis[s], f):
+                    row.append((0.0,) * 12)   # (its node hidden this frame)
+                    continue
                 d = nitro.mat_mul(fm[r], inv[s]) if inv[s] else nitro.mat_identity()
                 row.append(tuple(round(d[i][j], 4) for i in range(3) for j in range(4)))
             fr.append(row)
@@ -408,6 +417,38 @@ def fk_setup(slot):
             'objs': [(0, 0, 0, [(2, 0), (3, 0)]), (1, 0, 1, [(2, 0), (4, 0)])]}
 
 
+# Black's 3D cut-ins (ov021 fld3d_ci.c FLD3D_CI_LoadSequence): a sequence's record in archive 0x75 (u32 particle effect,
+# u16 two start delays, two models, two wait delays, model 0's four animations, model 1's four, u32 the field
+# darkened), its models and animations members of archive 0x73 (three a model read), both models at the origin under
+# the cut-in's own camera (u3d.c U3D_Ci*); gimmick CI_BASE + the sequence
+CI_BASE = 1000
+CI_SEQS = 53
+
+
+def ci_record(seq):
+    v = struct.unpack_from('<I2H2H2H4H4HI', narc.arc('a/1/1/7')[seq])
+    return {'effect': v[0], 'start': v[1:3], 'models': [m for m in v[3:5] if m != 0xFFFF], 'wait': v[5:7],
+            'anims': [[a for a in v[7:10] if a != 0xFFFF], [a for a in v[11:14] if a != 0xFFFF]], 'dark': v[15]}
+
+
+def ci_setup(seq):
+    r = ci_record(seq)
+    res, objs = [], []
+    for k, m in enumerate(r['models']):
+        res.append((0x73, m, 0))
+    for k in range(len(r['models'])):
+        anims = []
+        for a in r['anims'][k]:
+            anims.append((len(res), 0))
+            res.append((0x73, a, 0))
+        objs.append((k, 0, k, anims))
+    return {'res': res, 'objs': objs}
+
+
+def _place_ci(img):
+    return [((0.0, 0.0, 0.0), 0, 0), ((0.0, 0.0, 0.0), 0, 0)]
+
+
 def _place_fk(img):
     return [((256.0, 0.0, 256.0), 0, 1)] * 2
 
@@ -498,6 +539,9 @@ def _place48(img):
 
 PLACES = {62: _place62, 59: _place59, 159: _place159, 171: _place_fk, 172: _place_fk, 173: _place_fk, 174: _place_fk, 49: _place49, 50: _place50, 53: _place53, 54: _place54, 58: _place58, 52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
+for _q in range(CI_SEQS):
+    SETUPS[CI_BASE + _q] = ('a 3D cut-in, sequence %d' % _q, 'ci')
+    PLACES[CI_BASE + _q] = _place_ci
 
 
 def add(pack):
@@ -512,6 +556,8 @@ def add(pack):
             img, s = None, BTRAIN_SETUP
         elif SETUPS[ov][1] == 'fk':
             img, s = None, fk_setup(ov - 171)
+        elif SETUPS[ov][1] == 'ci':
+            img, s = None, ci_setup(ov - CI_BASE)
         else:
             img = Image(SETUPS[ov][2] if len(SETUPS[ov]) > 2 else ov)
             s = setup(img, SETUPS[ov][1])
@@ -524,12 +570,14 @@ def add(pack):
                 bmd = nitro.Bmd0(member(s, mr))
                 model = bmd.models[md] if md < len(bmd.models) else bmd.models[0]
                 tex0 = _tex_of(s, tr) or bmd.tex
-                joint = []
+                joint, vis = [], None
                 for ar, ad in anims:
                     a = member(s, ar)
                     joint.append(nitro.Bca0(a).anims[min(ad, len(nitro.Bca0(a).anims) - 1)] if a[:4] == b'BCA0'
                                  else None)
-                ps, frames = parts(model, [j for j in joint if j is not None])
+                    if a[:4] == b'BVA0' and nitro.Bva0(a).anims:   # (a cut-in's: its nodes shown or hidden by frame)
+                        vis = nitro.Bva0(a).anims[0]
+                ps, frames = parts(model, [j for j in joint if j is not None], vis)
                 nparts = max((v[2][3] for tris in ps.values() for t in tris for v in t), default=0) + 1
                 mesh = _part_mesh(pack, ('gimmick',) + k, model, ps, tex0)
                 it = iter(frames)   # (a joint animation's frames; a texture one's overrides of its groups)

@@ -1,0 +1,39 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 391 6 8
+wait 200
+mash B 12 15
+wait 60
+shot ci_field
+mp u3dci 3 0
+shotburst ci_mon 160 8
+wait 220
+shot ci_after_mon
+mp u3dci 2
+shotburst ci_badge 780 60
+wait 840
+mp u3dci 26
+shotburst ci_item 260 20
+wait 300
+mp u3dci 0
+shotburst ci_item0 260 20
+wait 300
+mp u3dci 17
+shotburst ci_msg 200 20
+wait 240
+mash B 10 10
+mp u3dzone 81 8 25
+wait 200
+mash B 6 15
+mp u3dwork 8000 0
+mp u3dflag 3C4 0
+mp u3drun 10001
+shotburst ci_move 300 30
+wait 340
+mash A 10 20
+mash B 10 10
+echo [ci] done
+quit

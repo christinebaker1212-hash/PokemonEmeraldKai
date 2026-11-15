@@ -1116,7 +1116,11 @@ static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
 enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA, W_MOTION,
        W_ARC_GLOW, W_ARC_FLY, W_ARC_PEAK, W_ARC_END, W_LEAGUE, W_FKDEMO, W_SPPOKE_MOVE, W_SPPOKE_PROGRESS,
-       W_SPPOKE_END, W_SPPOKE_SWAP };
+       W_SPPOKE_END, W_SPPOKE_SWAP, W_CUTIN };
+// the key items' 3D cut-ins (gFld3dCiKeyTable: Black's item, its sequence)
+static const u16 sCiKeyItems[17][2] = {
+#include "u3d_cutin_keys.h"
+};
 static u16 sBModelWait;
 // zone 389's time effect (ov065): sWork.white's TIMEFX_PENDING is Black's isEffectPending (its gimmick save 0x36)
 #define ZONE_TIME_EFFECT 389
@@ -3302,9 +3306,44 @@ static void Step(struct Thread *t)
         case U3C_PROC_FLD_CallCatchTutorial:   // JUNIPER's catching demonstration (u3d_battle.c)
             OpenScreen(t, SCREEN_CATCH_DEMO, 0);
             break;
-        case U3C_StartFld3dCi:   // (Black's 3D cut-ins: the POKéDEX's, a Gym Leader's... not drawn yet)
-        case U3C_StartFld3dCiByTable:
-        case U3C_StartFld3dCiByVar:   // (a field move's: its POKéMON over the field)
+        // ---- Black's 3D cut-ins (fld_wipe_3dobj.c SCRCMD_StartFld3dCi*: u3d.c U3D_Ci*), the script waiting for each
+        case U3C_StartFld3dCi:   // (a sequence: a badge's, the hero's...)
+            if (U3D_CiStart(a[0], SPECIES_NONE, 0, 0))
+                t->wait = W_CUTIN;
+            break;
+        case U3C_StartFld3dCiByVar:   // (a field move's: the party's POKeMON at slot V over the field, its cry)
+        {
+            struct Pokemon *mon = V(0) < PARTY_SIZE ? &gPlayerParty[V(0)] : NULL;
+            u16 sp = mon ? GetMonData(mon, MON_DATA_SPECIES) : SPECIES_NONE;
+            if (sp != SPECIES_NONE && sp != SPECIES_EGG
+                && U3D_CiStart(3, sp, GetMonData(mon, MON_DATA_PERSONALITY), GetMonData(mon, MON_DATA_OT_ID)))
+                t->wait = W_CUTIN;
+            break;
+        }
+        case U3C_StartFld3dCiByTable:   // (a key item received: its sequence by Black's item, gFld3dCiKeyTable)
+        {
+            u32 k;
+            for (k = 0; k < ARRAY_COUNT(sCiKeyItems); k++)
+                if (sCiKeyItems[k][0] == V(0))
+                {
+                    if (U3D_CiStart(sCiKeyItems[k][1], SPECIES_NONE, 0, 0))
+                        t->wait = W_CUTIN;
+                    break;
+                }
+            break;
+        }
+        case U3C_RunFld3dCiMain:   // (FLD3D_CI_StartMessageSequence: sequence 17, the person V taken off the field as it
+        {                          //  begins)
+            u8 id = ObjEventId(LocalId(V(0)));
+            if (!U3D_CiStart(17, SPECIES_NONE, 0, 0))
+                break;
+            t->wait = W_CUTIN;
+            ForgetPerson(LocalId(V(0)));
+            Gone(LocalId(V(0)), TRUE);
+            if (id < OBJECT_EVENTS_COUNT && !gObjectEvents[id].isPlayer)
+                RemoveObjectEventByLocalIdAndMap(gObjectEvents[id].localId, gObjectEvents[id].mapNum, gObjectEvents[id].mapGroup);
+            break;
+        }
         case U3C_IAIGIRI_StartOnPlayer:   // (CUT's slash on the player: the tree goes with its own sound after)
         case U3C_PALPARK_SetBeacon:   // (a link beacon of what the player did: no wireless here)
         case U3C_DebugWork:   // (Black's debug prints)
@@ -5138,6 +5177,10 @@ static void Wait(struct Thread *t)
         break;
     case W_SPPOKE_SWAP:
         if (!sSpSwap.pending && !U3D_ExpPlaying(2))
+            t->wait = W_NONE;
+        break;
+    case W_CUTIN:   // (a 3D cut-in to its end: FLD3D_CI_EventMain)
+        if (!U3D_CiBusy())
             t->wait = W_NONE;
         break;
     case W_FKDEMO:   // (an ELITE FOUR room's entrance scene to its end: FIELD_FK_DEMO_EventMain)

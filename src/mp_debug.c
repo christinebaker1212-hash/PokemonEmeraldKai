@@ -4823,6 +4823,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (!done)
             printf("[test] u3dkind %d: none here\n", k);
     }
+    else if (strcmp(cmd, "u3dci") == 0)   // u3dci SEQ [SLOT]: Black's 3D cut-in SEQ over the field (3: the party's
+    {                                    // POKeMON at SLOT, a field move's)
+        int seq = atoi(arg), slot = -1;
+        const char *sp = strchr(arg, ' ');
+        if (sp)
+            slot = atoi(sp + 1);
+        if (slot >= 0 && slot < PARTY_SIZE)
+            printf("[test] u3dci %d: %d\n", seq, U3D_CiStart(seq, GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES),
+                                                               GetMonData(&gPlayerParty[slot], MON_DATA_PERSONALITY),
+                                                               GetMonData(&gPlayerParty[slot], MON_DATA_OT_ID)));
+        else
+            printf("[test] u3dci %d: %d\n", seq, U3D_CiStart(seq, SPECIES_NONE, 0, 0));
+    }
     else if (strcmp(cmd, "u3dstones") == 0)   // CHARGESTONE CAVE's stones on this floor (u3d_vm.c)
     {
         void U3D_Vm_DebugStones(void);

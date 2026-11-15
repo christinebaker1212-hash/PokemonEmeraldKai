@@ -1,0 +1,9 @@
+# Black's 3D cut-ins (ov021 fld3d_ci.c: u3d.c U3D_Ci*, pack gimmicks 1000 + the sequence): the field fades out and
+# stays as a still under the sequence's models; a field move's POKeMON (sequence 3, its picture and cry), a badge's
+# (2), a key item's (26) and the message one (17); then a field move used by Black's own
+# script (10001: the party's first POKeMON, zone 81). Shots ci_*.png.
+MODE=1
+TMO=420
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("cut-in 3: 2 models" "cut-in 3 over" "cut-in 2 over" "cut-in 26 over" "cut-in 0 over" "cut-in 17 over" "u3drun 10001: 1" "[ci] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "no cut-in")

@@ -91,7 +91,20 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       everywhere off the rail maps.)
 - [ ] The ELITE FOUR rooms' own sounds (0x1A4 StartFkDemoSubProc: a building's sounds by its animation's frames, two
       ambient loops until work 0x4001 is set)
-- [ ] 3D cut-ins (RunFld3dCiMain 0x1A1: DESERT RESORT, NACRENE)
+- [x] 3D cut-ins (ov021 fld3d_ci.c; script commands 0x19F, 0x1A0, 0x1A1, 0x240; 2026-11-15): every sequence of
+      archive 0x75 packed as gimmick 1000 + the sequence (tools/unova/gimmicks.py ci_setup: its two models of archive
+      0x73 with their joint, texture and material animations, Black's NSBVA visibility baked into the joint frames),
+      its delays, darkening, sounds (Black's numbered ones as the game's nearest), key items and camera from
+      tools/unova/gen_cutins.py -> u3d_cutins.h / u3d_cutin_keys.h; u3d.c U3D_Ci*: the field fades out and stays as a
+      still (halved where Black halves it) under the models seen by the cut-in's own camera, drawn over the finished
+      frame (sdl2.c VDraw), ended as Black's (both tracks run after their waits, a POKeMON's cry); u3d_vm.c W_CUTIN.
+      The badges' (with the hero's gender's), the key items' (the LIGHT / DARK STONE...), a field move's POKeMON (the
+      party's own front picture and cry on Black's speed lines) and the message one (sequence 17: the person taken off
+      as it begins: DESERT RESORT, NACRENE); scenario unova_cutins (`mp u3dci SEQ [SLOT]`). Not drawn: Black's
+      particle effects (SPL: the badges' sparkles)
+- [ ] The VS name cut-ins before a Gym Leader's, the ELITE FOUR's, N's and GHETSIS's battles (ov073 enceff_name_cutin.c:
+      sequences 13-16 / 25 with the leader's picture (archive 0xB4) and name (bank 0xB0)), and the map-change wipes
+      (fld_wipe_3dobj.c: cut-ins before and after a warp, sequences 11 / 12, 18 / 19)
 - [ ] People flown along Black's paths (built; MmdlIca 0x15B-0x15E: archive 0xCB by tools/unova/gen_icas.py -> u3d_icas.h;
       u3d.c U3D_ObjectFly draws the person at the path's point from where the player stood, set down on the tile at
       its end; 2026-11-15, scenario unova_flown_person: the ABUNDANT SHRINE's LANDORUS flies in and out by the logs,

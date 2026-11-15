@@ -47,7 +47,12 @@ u8 U3D_ZoneWeather(u16 zone);
 float U3D_GridGround(s32 x, s32 z, float near);
 void U3D_ViewBob(float dy);
 bool8 U3D_StoneStep(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y);
-u32 *U3D_ExpOwnTexture(u16 model, u8 anim, u16 w, u16 h);                               // (its animation's frame now, -1 none)
+u32 *U3D_ExpOwnTexture(u16 model, u8 anim, u16 w, u16 h);
+// Black's 3D cut-ins (ov021 fld3d_ci.c): sequence SEQ over the field held still (SPECIES, PID, OTID: a POKeMON's, for
+// sequence 3); busy until it's over; drawn over the finished frame (sdl2.c VDraw)
+bool8 U3D_CiStart(u16 seq, u16 species, u32 pid, u32 otId);
+bool8 U3D_CiBusy(void);
+void U3D_CiComposite(u16 *frame);                               // (its animation's frame now, -1 none)
 void U3D_PlayerFly(bool8 on, float x, float y, float z);     // (the player's sprite and the view at a world place)
 void U3D_HexClear(void);                                     // Black's height areas (CLAY's gym's floors, u3d.c)
 void U3D_HexSet(u8 i, s16 x, s16 z, s16 w, s16 d, s16 h);

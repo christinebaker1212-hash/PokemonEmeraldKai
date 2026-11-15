@@ -35,6 +35,9 @@
 #include "mp.h"
 #include "overworld.h"
 #include "palette.h"
+#include "pokemon.h"
+#include "decompress.h"
+#include "data.h"
 #include "rtc.h"
 #include "sprite.h"
 #include "u3d.h"
@@ -118,7 +121,8 @@ static struct
     // (7: a texture animation's overrides of the groups it touches, a frame each: Black's NSBTP / NSBTA / NSBMA)
     struct { u16 nparts, nanims; s16 mesh; u16 *frames; float **m; u8 *isTex; u16 *ngroups; u16 **groups;
              struct U3dTexOver { s16 tex; u8 alpha, pad; float du, dv, mul[3]; } **over; } *kind;   // (a vertex's part: its pad byte)
-    struct { u8 ov; u16 n; struct { u16 kind; float pos[3]; u16 yaw; u8 hidden; } *m; } *gim;
+    struct { u16 ov; u16 n; struct { u16 kind; float pos[3]; u16 yaw; u8 hidden; } *m; } *gim;   // (ov: a cut-in's
+                                                                                                  //  past 255)
 } sPack;
 
 // a flight (SKYLA's cannons): the player's sprite at a world place of Black's units and the view on it
@@ -413,7 +417,7 @@ static void LoadPack(void)
         {
             u8 b[2];
             Take(&r, b, 2);
-            sPack.gim[i].ov = b[0];
+            sPack.gim[i].ov = b[0] | b[1] << 8;
             sPack.gim[i].n = TakeU16(&r);
             sPack.gim[i].m = calloc(sPack.gim[i].n ? sPack.gim[i].n : 1, sizeof(*sPack.gim[i].m));
             for (j = 0; j < sPack.gim[i].n && !r.bad; j++)
@@ -1838,19 +1842,26 @@ u16 U3D_ExpAnimFrames(u16 model, u8 anim)
 // the group a model's texture track ANIM touches first drawn with a texture of its own, W x H, cleared: its texels
 // (R, G, B, A a byte each, from the low) for the caller to write (a gate board's lane, its text drawn into it as
 // gimmick_obj_elboard.c does); the same one again on a later visit; NULL when there's no such track
+static u32 *OwnGroupTexture(U3dGroup *g, u16 w, u16 h);
 u32 *U3D_ExpOwnTexture(u16 model, u8 anim, u16 w, u16 h)
 {
     typeof(*sPack.kind) *kd;
     U3dGroup *g;
-    static u32 sBase;   // (the pack's own textures: those past it are these)
     if (sExp.gim < 0 || model >= sExp.n)
         return NULL;
     kd = &sPack.kind[sPack.gim[sExp.gim].m[model].kind];
     if (anim >= kd->nanims || !kd->isTex[anim] || kd->ngroups[anim] == 0 || kd->mesh < 0)
         return NULL;
+    g = &sPack.mesh[kd->mesh].g[kd->groups[anim][0]];
+    return OwnGroupTexture(g, w, h);
+}
+
+// a mesh group drawn with a texture of its own, W x H, cleared (the same one again later): its texels
+static u32 *OwnGroupTexture(U3dGroup *g, u16 w, u16 h)
+{
+    static u32 sBase;   // (the pack's own textures: those past it are these)
     if (sBase == 0 || sBase > sPack.ntex)
         sBase = sPack.ntex;
-    g = &sPack.mesh[kd->mesh].g[kd->groups[anim][0]];
     if (g->tex < (s32)sBase || (u32)g->tex >= sPack.ntex || sPack.tex[g->tex].w != w || sPack.tex[g->tex].h != h)
     {
         U3dTex *t = realloc(sPack.tex, sizeof(U3dTex) * (sPack.ntex + 1));
@@ -2082,6 +2093,228 @@ static void ExpDraw(int pass)
                          sExp.m[i].texOn, sExp.m[i].tframe, rot, sExp.m[i].pos[0], sExp.m[i].pos[1], sExp.m[i].pos[2],
                          pass);
         }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------ 3D cut-ins
+// Black's FLD3D_CI (ov021 fld3d_ci.c): the field faded out and taken as a still (halved when the sequence says so),
+// the sequence's two models (pack gimmick CI_BASE + sequence, tools/unova/gimmicks.py ci_setup) played over it under
+// the cut-in's own camera as the still fades back in, its sounds at their frames; done when both models' animations
+// have run (after their waits), a POKeMON's cry too; then the field again as it was. Drawn over the finished frame
+// (U3D_CiComposite, sdl2.c VDraw): the still holds the people and the windows as Black's capture does. Black's
+// particle effects (the badges' sparkles: SPL) aren't drawn.
+#include "u3d_cutins.h"
+#define CI_BASE 1000
+#define CI_FADE 16   // (our frames: Black's FADE_Start 4's brightness steps)
+static struct
+{
+    s16 gim;            // the pack's gimmick of the sequence (-1: none)
+    u8 seq, n, phase;   // phase: 1 the field fading out, 2 the cut-in (fading in), 3 its last frame shown
+    u16 t;              // our frames into the phase
+    float frame;        // Black's frames played (30 a second)
+    u16 cue, len[2];
+    u8 joint[2];
+    u32 texMask[2];
+    bool8 shotTaken;
+    u16 species;        // a POKeMON's cut-in (sequence 3): its picture on the first model, its cry
+    u32 pid, otId;
+    u8 cry;             // 0 none, 1 waiting to call, 2 called
+    u16 shot[H][W];
+} sCi = {-1};
+
+// the POKeMON's front picture (the game's own, shiny / form palette) into the cut-in's picture texture, 1.5 times as
+// Black lays its 96 x 96 picture at 16, 16 of the 128 x 128 one
+static void CiMonPicture(void)
+{
+    static u8 tiles[MON_PIC_SIZE * 4];
+    static u16 pal[16];
+    const typeof(*sPack.kind) *kd = &sPack.kind[sPack.gim[sCi.gim].m[0].kind];
+    u32 *px;
+    s32 x, y;
+    if (kd->mesh < 0 || sPack.mesh[kd->mesh].ngroups == 0 || sCi.species == SPECIES_NONE || sCi.species >= NUM_SPECIES)
+        return;
+    px = OwnGroupTexture(&sPack.mesh[kd->mesh].g[0], 128, 128);
+    if (px == NULL)
+        return;
+    HandleLoadSpecialPokePic(&gMonFrontPicTable[sCi.species], tiles, sCi.species, sCi.pid);
+    LZ77UnCompWram(GetMonSpritePalFromSpeciesAndPersonality(sCi.species, sCi.otId, sCi.pid), pal);
+    for (y = 0; y < 96; y++)
+        for (x = 0; x < 96; x++)
+        {
+            s32 sx = x * 2 / 3, sy = y * 2 / 3;
+            u8 b = tiles[((sy / 8) * 8 + sx / 8) * 32 + (sy % 8) * 4 + (sx % 8) / 2];
+            u8 v = (sx & 1) ? b >> 4 : b & 15;
+            u16 c = pal[v];
+            if (v)
+                px[(y + 16) * 128 + x + 16] = (u32)((c & 31) * 255 / 31) | (u32)((c >> 5 & 31) * 255 / 31) << 8
+                                              | (u32)((c >> 10 & 31) * 255 / 31) << 16 | 0xFFu << 24;
+        }
+}
+
+// SEQ (Black's sequence) begins: the field fades out; SPECIES, PID, OTID: a POKeMON's (sequence 3), else 0
+bool8 U3D_CiStart(u16 seq, u16 species, u32 pid, u32 otId)
+{
+    u32 i, k, a;
+    if (seq >= ARRAY_COUNT(sCiSeqs) || !sPack.ok)
+        return FALSE;
+    for (i = 0; i < sPack.ngim; i++)
+        if (sPack.gim[i].ov == CI_BASE + seq)
+            break;
+    if (i >= sPack.ngim)
+    {
+        printf("[u3d] no cut-in %u in the pack (tools/unova/build_pack.py makes them)\n", (unsigned)seq);
+        return FALSE;
+    }
+    sCi.gim = i, sCi.seq = seq, sCi.n = min(sPack.gim[i].n, 2);
+    sCi.len[0] = sCi.len[1] = 0;
+    sCi.phase = 1, sCi.t = 0, sCi.frame = 0, sCi.cue = sCiSeqs[seq].cue, sCi.shotTaken = FALSE;
+    for (k = 0; k < sCi.n; k++)
+    {
+        const typeof(*sPack.kind) *kd = &sPack.kind[sPack.gim[i].m[k].kind];
+        sCi.joint[k] = 0xFF, sCi.texMask[k] = 0, sCi.len[k] = 0;
+        for (a = 0; a < kd->nanims && a < 32; a++)
+        {
+            if (kd->isTex[a])
+                sCi.texMask[k] |= 1u << a;
+            else if (sCi.joint[k] == 0xFF && kd->frames[a])
+                sCi.joint[k] = a;
+            sCi.len[k] = max(sCi.len[k], kd->frames[a]);   // (Black's track ends with its last animation)
+        }
+    }
+    sCi.species = species, sCi.pid = pid, sCi.otId = otId, sCi.cry = species ? 1 : 0;
+    if (species)
+        CiMonPicture();
+    printf("[u3d] cut-in %u: %u models, %u and %u frames%s\n", (unsigned)seq, (unsigned)sCi.n, (unsigned)sCi.len[0],
+           (unsigned)sCi.len[1], species ? ", a POKeMON's" : "");
+    return TRUE;
+}
+
+bool8 U3D_CiBusy(void)
+{
+    return sCi.gim >= 0;
+}
+
+// a field frame: Black's FLD3D_CI_EventMain from its fade out to its end (two of our frames a frame of Black's)
+static void CiStep(void)
+{
+    const struct CiSeq *q;
+    bool8 done = TRUE;
+    u32 k;
+    if (sCi.gim < 0)
+        return;
+    q = &sCiSeqs[sCi.seq];
+    sCi.t++;
+    if (sCi.phase == 1)
+    {
+        if (sCi.t >= CI_FADE)
+            sCi.phase = 2, sCi.t = 0;
+        return;
+    }
+    if (sCi.phase == 3)   // (its last frame shown: the field again)
+    {
+        printf("[u3d] cut-in %u over\n", (unsigned)sCi.seq);
+        sCi.gim = -1, sCi.phase = 0;
+        return;
+    }
+    sCi.frame += 0.5f;
+    while (sCi.cue < (sCi.seq + 1 < (s32)ARRAY_COUNT(sCiSeqs) ? sCiSeqs[sCi.seq + 1].cue : sCiCueEnd)
+           && sCi.frame >= sCiCues[sCi.cue].frame)
+        PlaySE(sCiCues[sCi.cue++].se);
+    for (k = 0; k < sCi.n; k++)
+        if (sCi.frame < q->wait[k] + sCi.len[k])
+            done = FALSE;
+    if (sCi.frame < q->start[0] || sCi.frame < q->start[1])
+        done = FALSE;
+    if (sCi.cry == 1 && sCi.frame >= 5)   // (FLD3D_CI_PokemonFinishStep: its cry 5 frames in)
+    {
+        PlayCry_Normal(sCi.species, 0);
+        sCi.cry = 2;
+    }
+    if (sCi.cry == 1 || (sCi.cry == 2 && IsCryPlaying()))
+        done = FALSE;
+    if (done)
+        sCi.phase = 3;
+}
+
+// the finished frame: the field's still with the cut-in's models over it, or the field fading out under it
+void U3D_CiComposite(u16 *frame)
+{
+    const struct CiSeq *q;
+    s32 x, y, k, level;
+    float half;
+    typeof(sView) keep;
+    if (sCi.gim < 0)
+        return;
+    q = &sCiSeqs[sCi.seq];
+    if (!sCi.shotTaken)   // (FLD3D_CI_StartScreenCapture: the field as it was, before the fade)
+    {
+        for (y = 0; y < H; y++)
+            for (x = 0; x < W; x++)
+            {
+                u16 c = frame[y * W + x] & 0x7FFF;
+                sCi.shot[y][x] = q->dark ? (c >> 1) & 0x3DEF : c;   // (FLD3D_CI_DarkenCapturedScreen)
+            }
+        sCi.shotTaken = TRUE;
+    }
+    if (sCi.phase == 1)   // (FADE_Start 4, 0 -> 16: the field to black)
+    {
+        level = 16 - sCi.t * 16 / CI_FADE;
+        for (k = 0; k < W * H; k++)
+        {
+            u16 c = frame[k];
+            frame[k] = 0x8000 | ((c & 31) * level / 16) | ((c >> 5 & 31) * level / 16) << 5
+                       | ((c >> 10 & 31) * level / 16) << 10;
+        }
+        return;
+    }
+    // the models under the cut-in's camera (FLD3D_CI_DrawEffect: cameraPersp at sCiEye looking at the origin; the DS's
+    // 192 lines on our 160)
+    keep = sView;
+    memcpy(sView.eye, sCiEye, sizeof(sView.eye));
+    sView.fwd[0] = -sCiEye[0], sView.fwd[1] = -sCiEye[1], sView.fwd[2] = -sCiEye[2];
+    {
+        float len = sqrtf(sView.fwd[0] * sView.fwd[0] + sView.fwd[1] * sView.fwd[1] + sView.fwd[2] * sView.fwd[2]);
+        for (k = 0; k < 3; k++)
+            sView.fwd[k] /= len > 0 ? len : 1;
+    }
+    sView.right[0] = sView.fwd[1] * sCiUp[2] - sView.fwd[2] * sCiUp[1];   // (fwd x up)
+    sView.right[1] = sView.fwd[2] * sCiUp[0] - sView.fwd[0] * sCiUp[2];
+    sView.right[2] = sView.fwd[0] * sCiUp[1] - sView.fwd[1] * sCiUp[0];
+    sView.up[0] = sView.right[1] * sView.fwd[2] - sView.right[2] * sView.fwd[1];   // (right x fwd)
+    sView.up[1] = sView.right[2] * sView.fwd[0] - sView.right[0] * sView.fwd[2];
+    sView.up[2] = sView.right[0] * sView.fwd[1] - sView.right[1] * sView.fwd[0];
+    half = sCiFovHalf * (float)M_PI / 180.0f;
+    sView.focal = (H / 2.0f) / tanf(half);
+    sView.ax = W / 2.0f, sView.ay = H / 2.0f;
+    for (k = 0; k < W * H; k++)
+    {
+        (&sColor[0][0])[k] = (&sCi.shot[0][0])[k];
+        (&sDepth[0][0])[k] = 1e30f;
+        (&sIds[0][0])[k] = -1;
+    }
+    {
+        static const float sRot[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+        s32 pass;
+        for (pass = 0; pass < 2; pass++)
+            for (k = 0; k < sCi.n; k++)
+            {
+                float f = sCi.frame - q->wait[k], tf[32];
+                u32 a;
+                if (f < 0)
+                    f = 0;
+                for (a = 0; a < 32; a++)
+                    tf[a] = f;
+                DrawKindPose(&sPack.kind[sPack.gim[sCi.gim].m[k].kind], sCi.joint[k], f, sCi.texMask[k], tf, sRot,
+                             0.0f, 0.0f, 0.0f, pass);
+            }
+    }
+    sView = keep;
+    level = sCi.phase == 2 && sCi.t < CI_FADE ? sCi.t * 16 / CI_FADE : 16;   // (FADE_Start 4, 16 -> 0)
+    for (k = 0; k < W * H; k++)
+    {
+        u16 c = (&sColor[0][0])[k];
+        frame[k] = 0x8000 | (level >= 16 ? c : ((c & 31) * level / 16) | ((c >> 5 & 31) * level / 16) << 5
+                                               | ((c >> 10 & 31) * level / 16) << 10);   // (the frame's bit 15: shown)
     }
 }
 
@@ -2768,6 +3001,7 @@ void U3D_Update(void)
     AnimateTextures();
     U3D_Vm_FieldFrame();
     ExpStep();
+    CiStep();
     BuildingStep();
     FindCamera();
     SetupView();
