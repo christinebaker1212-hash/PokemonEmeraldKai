@@ -372,6 +372,7 @@ class Model:
         """{material index: [triangle]}; a triangle = 3 vertices (pos, uv in texels, color 0-31 rgb, normal).
         node_mats: {node index: 4x4} in place of the nodes' own (an animation's frame, Bca0.node_matrices)"""
         node_mats = node_mats or {}
+        self.vis_node = -1   # (the node a NODE command (0x02) last named: what a visibility animation shows or hides)
         stack = [mat_identity() for _ in range(32)]
         cur = mat_identity()
         mat = 0
@@ -387,6 +388,7 @@ class Model:
             elif base == 0x01:
                 break
             elif base == 0x02:
+                self.vis_node = s[p + 1]
                 p += 3
             elif base == 0x03:
                 cur = [row[:] for row in stack[s[p + 1]]]
@@ -798,6 +800,35 @@ class MatAnim:
         def at(tr):
             return tr[1] if tr[0] == 'const' else tr[1][min(frame, len(tr[1]) - 1)]
         return at(t[0]) & 0x7FFF, at(t[4]) & 31
+
+
+class VisAnim:
+    """One visibility animation (an NSBVA's VIS0 entry, 'V\0AV'): frames, nodes, then a bit a node a frame (bit
+    frame * nodes + node of the u32 words that follow: set, the node shown). shown(node, frame) -> bool"""
+    def __init__(self, name, d, a):
+        self.name = name
+        self.frames = u16(d, a + 4)
+        self.nodes = u16(d, a + 6)
+        self.words = d[a + 12:]
+
+    def shown(self, node, frame):
+        if node >= self.nodes:
+            return True
+        b = min(frame, self.frames - 1) * self.nodes + node
+        if b // 8 >= len(self.words):
+            return True
+        return bool(self.words[b // 8] >> (b % 8) & 1)
+
+
+class Bva0:
+    def __init__(self, d):
+        assert d[:4] == b'BVA0', d[:4]
+        self.anims = []
+        for i in range(u16(d, 0x0E)):
+            so = u32(d, 0x10 + 4 * i)
+            if d[so:so + 4] == b'VIS0':
+                for name, e in read_dict(d, so + 8):
+                    self.anims.append(VisAnim(name, d, so + u32(e, 0)))
 
 
 class Bma0:
