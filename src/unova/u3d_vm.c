@@ -1079,7 +1079,8 @@ static void DragonReset(void);
 // (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
 static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
-enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP };   // (W_MUSICAL: the MUSICAL dressing room closed)   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
+enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR };
+static u16 sBModelWait;   // (W_MUSICAL: the MUSICAL dressing room closed)   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
 static u16 sExpWait;
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
        W_WARP, W_PIC_KEY };   // (W_WARP: a warp's map is loading; the script goes on there: U3D_Vm_SceneStart)
@@ -1087,6 +1088,7 @@ enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YES
 // ---- Black's songs: its sound archive's sequence numbers as the game's song slots (tools/kaisong/unova_songs.py);
 // a pushed song comes back when the one played over it ends (a fanfare: Black's PushAndPlayBgm, StartWaitBgmThenPop)
 #include "../data/unova_songs.h"
+#include "u3d_cameras.h"
 static u16 sSongStack[4];
 static u8 sSongDepth;
 
@@ -2520,14 +2522,49 @@ static void Step(struct Thread *t)
         case U3C_EndMmdlIcaProc:
         case U3C_SYMBOL_MAP_ScrCmdSetSubscreenMode:   // (the lower screen's mode: Kai has one screen)
         case U3C_WORK_CmdSetBoxFlags:   // (Black's PC wallpapers the game clear unlocks: Kai's PC keeps its own)
-        case U3C_SCREENEFFECTS_CreateBuildModelNode:   // (build models' animations: doors, lifts)
+            break;
+        // Black's build models played by its scripts (scrcmd_screeneffects.c; u3d.c U3D_BModel*): a model of an entry
+        // kind near a tile, all of its model (PlayEntryAnim) or its own copy, a node by its handle
+        case U3C_SCREENEFFECTS_CreateBuildModelNode:   // handle work, kind, x, z
+            *WorkPtr(a[0]) = U3D_BModelNode(V(1), V(2), V(3));
+            break;
         case U3C_SCREENEFFECTS_DeleteBuildModelNode:
-        case U3C_SCREENEFFECTS_PlayBuildModelNodeSlotWithSe:
-        case U3C_SCREENEFFECTS_WaitBuildModelNodeAnim:
-        case U3C_SCREENEFFECTS_PlayBuildModelAnimPair:
-        case U3C_SCREENEFFECTS_PlayBuildModelAnimTwo:
-        case U3C_SCREENEFFECTS_SwapBuildModelId:
-        case U3C_SCREENEFFECTS_PlayBuildModelNodeCurrentMode3:
+            U3D_BModelNodeDelete(V(0));
+            break;
+        case U3C_SCREENEFFECTS_PlayBuildModelNodeSlotWithSe:   // handle, slot (opening; its kind's sound)
+            U3D_BModelNodePlay(V(0), V(1), 0);
+            PlaySE(SE_DOOR);
+            break;
+        case U3C_SCREENEFFECTS_PlayBuildModelNodeSlotMode2:   // handle, slot (looping)
+            U3D_BModelNodePlay(V(0), V(1), 2);
+            break;
+        case U3C_SCREENEFFECTS_PlayBuildModelNodeCurrentMode3:   // handle (stopped where it is)
+            U3D_BModelNodePlay(V(0), -1, 3);
+            break;
+        case U3C_SCREENEFFECTS_WaitBuildModelNodeAnim:   // handle: till its slot is still
+            sBModelWait = V(0);
+            if (U3D_BModelNodeBusy(sBModelWait))
+                t->wait = W_BMODEL;
+            break;
+        case U3C_SCREENEFFECTS_PlayBuildModelAnimPair:   // kind, x, z: slot 0 closing, then stopped (shown shut)
+            U3D_BModelPlay(V(0), V(1), V(2), 0, 1);
+            U3D_BModelPlay(V(0), V(1), V(2), 0, 3);
+            break;
+        case U3C_SCREENEFFECTS_PlayBuildModelAnimTwo:   // kind, x, z: slot 0 looping
+            U3D_BModelPlay(V(0), V(1), V(2), 0, 2);
+            break;
+        case U3C_SCREENEFFECTS_StartDoorOpen:   // the automatic door by the player (field_door_anime.c)
+            U3D_DoorNearPlayer(0);
+            t->wait = W_BMODEL_DOOR;
+            break;
+        case U3C_SCREENEFFECTS_StartDoorSetOpen:
+            U3D_DoorNearPlayer(1);
+            break;
+        case U3C_SCREENEFFECTS_StartDoorClose:   // quiet (no sound) when its value says so
+            U3D_DoorNearPlayer(V(0) ? 3 : 2);
+            break;
+        case U3C_SCREENEFFECTS_SwapBuildModelId:   // (a model swapped for another of its block: none here)
+        case U3C_SCREENEFFECTS_SetBuildModelIndex:
             break;
         case U3C_NETWORK_CmdGetCommValue:   // (wireless on: Kai's co-op stands in for it, docs/UNOVA_DECISIONS.md)
             *WorkPtr(a[0]) = 1;
@@ -2566,6 +2603,13 @@ static void Step(struct Thread *t)
         case U3C_PROC_FLD_SaveCamera:
         case U3C_PROC_FLD_StopCameraTargetTrace:
         case U3C_PROC_FLD_ResumeCameraTargetTrace:
+            break;
+        case U3C_PROC_FLD_StartCameraMoveFromArchive:   // member, frames: Black's archive 0xA3 (u3d_cameras.h)
+            if (a[0] < ARRAY_COUNT(sCameraMoves))
+            {
+                const typeof(sCameraMoves[0]) *cm = &sCameraMoves[a[0]];
+                U3D_CameraMoveMasked(cm->pitch, cm->yaw, cm->dist, cm->x, cm->y, cm->z, a[1], cm->mask);
+            }
             break;
         case U3C_PROC_FLD_StartCameraMoveFromStream:   // pitch, yaw, distance, x, y, z, frames
             U3D_CameraMoveTo(a[0], a[1], a[2], a[3], a[4], a[5], a[6]);
@@ -4248,6 +4292,14 @@ static void Wait(struct Thread *t)
         if (sMineRide.lift < 0 && sPlat.model < 0 && sLiftTex.model < 0)
             t->wait = W_NONE;
         break;
+    case W_BMODEL:   // (a build model's node, still: CheckBuildModelNodeAnimDone)
+        if (!U3D_BModelNodeBusy(sBModelWait))
+            t->wait = W_NONE;
+        break;
+    case W_BMODEL_DOOR:   // (the door opened: FIELD_DOOR_ANIME_OpenTask waits for its sound)
+        if (!U3D_DoorBusy())
+            t->wait = W_NONE;
+        break;
     case W_EXP_ANIM:   // (Black's gimmick events wait for their model's animation: FLD_EXP_OBJ_IsAnimeStopped)
         if (!U3D_ExpPlaying(sExpWait))
             t->wait = W_NONE;
@@ -5306,6 +5358,24 @@ static void Task_CartRide(u8 taskId)
         ScriptContext_Enable();
         return;
     }
+}
+
+// special (waitstate): a door the player walks at opens (u3d.c U3D_DoorOpen, at 0x8004 / 0x8005), the walk then
+// going on into it (field_control_avatar.c)
+static void Task_DoorWait(u8 taskId)
+{
+    if (U3D_DoorBusy())
+        return;
+    DestroyTask(taskId);
+    ScriptContext_Enable();
+}
+
+void U3D_VmDoorOpen(void)
+{
+    if (U3D_DoorOpen(gSpecialVar_0x8004, gSpecialVar_0x8005, FALSE))
+        CreateTask(Task_DoorWait, 80);
+    else
+        ScriptContext_Enable();
 }
 
 // special (waitstate): the gate opens for the boarding

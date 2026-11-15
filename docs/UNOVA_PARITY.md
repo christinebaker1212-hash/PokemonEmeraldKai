@@ -27,11 +27,18 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       move / follow / return frames; gen_gyms.py sCannonCamera) turn the view before the shot (u3d.c U3D_CameraTurn),
       the eye held while the view follows the flying player after the landing frame's bounce (U3D_CameraLook), then
       back (U3D_CameraMoveBack); the landing sound at Black's frame (gCannonsLandSeFramesBeforeEnd)
-- [ ] **Building animations**: doors opening and closing (SCREENEFFECTS 0x124-0x132, build-model nodes), machines'
-      and lamps' BCA0 / BTP0 / BMA0 (field_buildmodel.c), the POKeMON LEAGUE's statues and stairs (0x12B-0x12E)
+- [x] **Building animations** (2026-11-15, scenario unova_doors): every animated build model (pack v8: a prop's
+      kind, Black's animation kind, slots a group, groups and model type; field_buildmodel.c's anim sets, one a model,
+      u3d.c BuildingStep): kind 1 looping (windmills, lamps, signs), kind 3 the season's slot, kind 2 played by doors
+      (an automatic door, entry kind 4, opened / held / shut for all of its model; a house's, entry kind 1, on its own
+      node: walked at, it opens first, and it opens, lets the player out and shuts on arriving) and by the scripts'
+      0x124-0x132 (nodes made, played, waited on and deleted; entries played in place; the door by the player):
+      ROUTE 10's badge gates swing open. Not drawn: SwapBuildModelId / SetBuildModelIndex (a model swapped for another)
+- [x] Camera moves from Black's archive (0x146: archive 0xA3, tools/unova/gen_cameras.py -> u3d_cameras.h, with their
+      channels: u3d.c U3D_CameraMoveMasked): ROUTE 10's gates turn the view to the gate
 - [ ] The GEAR STATION's trains on the platforms
 - [ ] 3D cut-ins (RunFld3dCiMain 0x1A1: DESERT RESORT, NACRENE), the ELITE FOUR rooms' entrance flights (FkDemo
-      0x1A3 / 0x1A4), camera moves from Black's archive (0x146, ROUTE 10), camera shakes (0x148: ABYSSAL RUINS,
+      0x1A3 / 0x1A4), camera shakes (0x148: ABYSSAL RUINS,
       CHARGESTONE, DRAGONSPIRAL, N's CASTLE)
 - [ ] People flown along Black's paths (MmdlIca 0x15B-0x15E: the roamer's fly-by, ABUNDANT SHRINE, ROUTE 7), a person
       rising / circling (0x225 / 0x226, CASTELIA), dropping in (0x247, RELIC CASTLE), event POKeMON's moves

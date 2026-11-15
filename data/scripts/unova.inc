@@ -56,6 +56,14 @@ Unova_EventScript_Ride::
 	special U3D_VmRideLocked
 	goto Unova_EventScript_Wait
 
+@ UNOVA's doors (src/unova/u3d.c U3D_DoorOpen): a shut door walked at opens before the player goes in
+Unova_EventScript_DoorOpen::
+	lockall
+	special U3D_VmDoorOpen
+	waitstate
+	releaseall
+	end
+
 Unova_EventScript_RideNone::
 	releaseall
 	end

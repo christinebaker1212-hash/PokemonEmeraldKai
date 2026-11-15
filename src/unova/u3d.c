@@ -24,6 +24,8 @@
 #include <string.h>
 #include <time.h>
 #include "global.h"
+#include "sound.h"
+#include "constants/songs.h"
 #include "event_object_movement.h"
 #include "field_camera.h"
 #include "fieldmap.h"
@@ -74,7 +76,10 @@ typedef struct { u16 w, h; u32 *px; bool8 soft; } U3dTex;
 typedef struct { u8 on, r, g, b; float d[3]; } U3dLight;
 typedef struct { u32 start; U3dLight l[4]; u8 col[4][3]; u8 clear[4]; } U3dLightBlock;
 typedef struct { u32 count; U3dLightBlock *b; } U3dLightSet;
-typedef struct { s16 mesh[SEASONS]; float m[12]; } U3dProp;
+typedef struct { s16 mesh[SEASONS]; float m[12]; s16 kind; u8 bkind, spg, groups, type; } U3dProp;   // (8: an
+// animated building: its kind (sPack.kind, -1 none), Black's animation kind (1 all looping, 2 played by events, 3 the
+// season's slot), slots a group, groups, its model's type (field_buildmodel.c: 1-3, 13, 14 a house's door, 7 an
+// automatic one))
 typedef struct
 {
     u16 zone;
@@ -138,6 +143,19 @@ static void Take(Reader *r, void *dst, size_t n)
 static u32 TakeU32(Reader *r) { u32 v; Take(r, &v, 4); return v; }
 static u16 TakeU16(Reader *r) { u16 v; Take(r, &v, 2); return v; }
 
+// ------------------------------------------------------------------------------------------------ animated buildings
+// Black's field_buildmodel.c anim sets: one a model (every placement of it moves alike), each of its four slots off,
+// opening (to its last frame, held), held, looping or closing (back to its first); kind 1 has them all looping, kind
+// 3 the season's own, kind 2 is played by events (PlayGroup: a group of SPG slots opened, or looped, the rest off).
+// A house's door is played on its own copy (Black's node: CreateNodeNearPos), the others of its model left shut.
+// (BuildingsLoaded, BuildingStep, the drawing and the doors: by the gyms' machinery below)
+enum { BS_NONE, BS_OPENING, BS_HOLD, BS_LOOP, BS_CLOSING };
+#define BSLOTS 4
+typedef struct { u8 st[BSLOTS]; float f[BSLOTS]; } BAnim;
+static BAnim *sBAnim;
+static u8 *sBKindOf;
+static void BuildingsLoaded(void);
+
 static void LoadPack(void)
 {
     const char *path = getenv("MOEMON_U3D_PAK");
@@ -192,7 +210,7 @@ static void LoadPack(void)
     }
     r.p += 4;
     version = TakeU32(&r);
-    if (version < 1 || version > 7)
+    if (version < 1 || version > 8)
     {
         printf("[u3d] %s: another pack version (%u)\n", path, (unsigned)version);
         free(data);
@@ -284,6 +302,12 @@ static void LoadPack(void)
             {
                 Take(&r, c->props[j].mesh, 8);
                 Take(&r, c->props[j].m, 48);
+                c->props[j].kind = -1;
+                if (version >= 8)
+                {
+                    Take(&r, &c->props[j].kind, 2);
+                    Take(&r, &c->props[j].bkind, 4);
+                }
             }
             Take(&r, c->blocks, sizeof(c->blocks));
             Take(&r, c->hn, sizeof(c->hn));
@@ -407,6 +431,7 @@ static void LoadPack(void)
     sPack.shown = malloc(sizeof(u16) * (sPack.ntex ? sPack.ntex : 1));
     for (i = 0; i < sPack.ntex; i++)
         sPack.shown[i] = i;
+    BuildingsLoaded();
     sPack.srtNow = calloc(sPack.nsrt + 1, sizeof(*sPack.srtNow));
     if (r.bad)
     {
@@ -978,6 +1003,29 @@ void U3D_CameraTurn(u16 pitch, u16 yaw, u16 frames)
     else if (d < -180.0f)
         d += 360.0f;
     to[4] = sCam.cur[4] + d;
+    CamStart(CAM_TO, to, frames * 2);
+}
+
+// Black's FIELD_CAMERA_StartMove with its channels (MASK: bit 1 pitch, 2 yaw, 3 distance, 5 target; the rest kept)
+void U3D_CameraMoveMasked(u16 pitch, u16 yaw, s32 dist, s32 x, s32 y, s32 z, u16 frames, u8 mask)
+{
+    float to[7], d;
+    memcpy(to, sCam.cur, sizeof(to));
+    if (mask & 0x20)
+        to[0] = x / 4096.0f, to[1] = y / 4096.0f, to[2] = z / 4096.0f, to[6] = 0.0f;
+    if (mask & 0x02)
+        to[3] = pitch * 360.0f / 65536.0f;
+    if (mask & 0x04)
+    {
+        d = fmodf(yaw * 360.0f / 65536.0f - sCam.cur[4], 360.0f);   // (the short way round)
+        if (d > 180.0f)
+            d -= 360.0f;
+        else if (d < -180.0f)
+            d += 360.0f;
+        to[4] = sCam.cur[4] + d;
+    }
+    if (mask & 0x08)
+        to[5] = dist / 4096.0f;
     CamStart(CAM_TO, to, frames * 2);
 }
 
@@ -1709,78 +1757,479 @@ static void ExpStep(void)
 }
 
 #define EXP_PARTS 64
-static void ExpDraw(int pass)
+// a kind drawn: its joint track JOINT (0xFF none: at rest) at JFRAME, the texture tracks of TEXMASK at TFRAMES, its
+// parts turned by ROT (3x3, rows) and placed at P
+static void DrawKindPose(const typeof(*sPack.kind) *kd, u8 joint, float jframe, u32 texMask, const float *tframes,
+                         const float *rot, float px, float py, float pz, int pass)
 {
     static float sParts[EXP_PARTS * 12];
     static const float sIdentity[12] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0};
-    u32 i, p, r, k;
+    u32 p, r, k, nparts;
+    if (kd->mesh < 0 || (u32)kd->mesh >= sPack.nmesh)
+        return;
+    nparts = min(kd->nparts, EXP_PARTS);
+    for (p = 0; p < nparts; p++)   // (each part: the model's turn after the animation's move)
+    {
+        const float *d = sIdentity;
+        if (joint < kd->nanims && kd->frames[joint] && !kd->isTex[joint])
+        {
+            u32 f = (u32)jframe;
+            if (f >= kd->frames[joint])
+                f = kd->frames[joint] - 1;
+            d = kd->m[joint] + ((size_t)f * kd->nparts + p) * 12;
+        }
+        for (r = 0; r < 3; r++)
+            for (k = 0; k < 4; k++)
+                sParts[p * 12 + r * 4 + k] = rot[r * 3] * d[k] + rot[r * 3 + 1] * d[4 + k] + rot[r * 3 + 2] * d[8 + k];
+    }
+    sGroupOverOn = NULL;
+    if (texMask)   // (its texture tracks on: each group they touch at their frames, merged in order)
+    {
+        static struct U3dTexOver sMerged[64];
+        static u8 sMergedOn[64];
+        u32 a, gk;
+        memset(sMergedOn, 0, sizeof(sMergedOn));
+        for (a = 0; a < kd->nanims && a < 32; a++)
+            if ((texMask >> a & 1) && kd->isTex[a] && kd->frames[a])
+            {
+                u32 f = min((u32)tframes[a], kd->frames[a] - 1u);
+                for (gk = 0; gk < kd->ngroups[a]; gk++)
+                {
+                    const struct U3dTexOver *o = &kd->over[a][f * kd->ngroups[a] + gk];
+                    u16 g = kd->groups[a][gk];
+                    if (g >= 64)
+                        continue;
+                    if (!sMergedOn[g])
+                    {
+                        sMerged[g].tex = -1, sMerged[g].alpha = 255, sMerged[g].du = sMerged[g].dv = 0.0f;
+                        sMerged[g].mul[0] = sMerged[g].mul[1] = sMerged[g].mul[2] = 1.0f;
+                        sMergedOn[g] = TRUE;
+                    }
+                    if (o->tex >= 0)
+                        sMerged[g].tex = o->tex;
+                    if (o->alpha != 255)
+                        sMerged[g].alpha = o->alpha;
+                    sMerged[g].du += o->du, sMerged[g].dv += o->dv;
+                    sMerged[g].mul[0] *= o->mul[0], sMerged[g].mul[1] *= o->mul[1], sMerged[g].mul[2] *= o->mul[2];
+                }
+            }
+        sGroupOver = sMerged, sGroupOverOn = sMergedOn;
+    }
+    DrawMeshParts(&sPack.mesh[kd->mesh], NULL, px, py, pz, pass, sParts, nparts);
+    sGroupOverOn = NULL;
+}
+
+static void ExpDraw(int pass)
+{
+    u32 i;
     if (sExp.gim < 0)
         return;
     for (i = 0; i < sExp.n; i++)
     {
-        const typeof(*sPack.kind) *kd;
         float a, c, sn;
-        u32 nparts;
         if (sExp.m[i].hidden)
-            continue;
-        kd = &sPack.kind[sPack.gim[sExp.gim].m[i].kind];
-        if (kd->mesh < 0 || (u32)kd->mesh >= sPack.nmesh)
             continue;
         a = sExp.m[i].yaw / 65536.0f * 2.0f * (float)M_PI;
         c = cosf(a), sn = sinf(a);
-        nparts = min(kd->nparts, EXP_PARTS);
-        for (p = 0; p < nparts; p++)   // (each part: the model's turn after the animation's move)
         {
-            const float rot[3][3] = {{c, 0, sn}, {0, 1, 0}, {-sn, 0, c}};
-            const float *d = sIdentity;
-            if (sExp.m[i].anim < kd->nanims && kd->frames[sExp.m[i].anim] && !kd->isTex[sExp.m[i].anim])
-            {
-                u32 f = (u32)sExp.m[i].frame;
-                if (f >= kd->frames[sExp.m[i].anim])
-                    f = kd->frames[sExp.m[i].anim] - 1;
-                d = kd->m[sExp.m[i].anim] + ((size_t)f * kd->nparts + p) * 12;
-            }
-            for (r = 0; r < 3; r++)
-                for (k = 0; k < 4; k++)
-                    sParts[p * 12 + r * 4 + k] = rot[r][0] * d[k] + rot[r][1] * d[4 + k] + rot[r][2] * d[8 + k];
+            const float rot[9] = {c, 0, sn, 0, 1, 0, -sn, 0, c};
+            DrawKindPose(&sPack.kind[sPack.gim[sExp.gim].m[i].kind], sExp.m[i].anim, sExp.m[i].frame,
+                         sExp.m[i].texOn, sExp.m[i].tframe, rot, sExp.m[i].pos[0], sExp.m[i].pos[1], sExp.m[i].pos[2],
+                         pass);
         }
-        sGroupOverOn = NULL;
-        if (sExp.m[i].texOn)   // (its texture tracks on: each group they touch at their frames, merged in order)
-        {
-            static struct U3dTexOver sMerged[64];
-            static u8 sMergedOn[64];
-            u32 a, gk;
-            memset(sMergedOn, 0, sizeof(sMergedOn));
-            for (a = 0; a < kd->nanims && a < EXP_TEX; a++)
-                if ((sExp.m[i].texOn >> a & 1) && kd->isTex[a] && kd->frames[a])
-                {
-                    u32 f = min((u32)sExp.m[i].tframe[a], kd->frames[a] - 1u);
-                    for (gk = 0; gk < kd->ngroups[a]; gk++)
-                    {
-                        const struct U3dTexOver *o = &kd->over[a][f * kd->ngroups[a] + gk];
-                        u16 g = kd->groups[a][gk];
-                        if (g >= 64)
-                            continue;
-                        if (!sMergedOn[g])
-                        {
-                            sMerged[g].tex = -1, sMerged[g].alpha = 255, sMerged[g].du = sMerged[g].dv = 0.0f;
-                            sMerged[g].mul[0] = sMerged[g].mul[1] = sMerged[g].mul[2] = 1.0f;
-                            sMergedOn[g] = TRUE;
-                        }
-                        if (o->tex >= 0)
-                            sMerged[g].tex = o->tex;
-                        if (o->alpha != 255)
-                            sMerged[g].alpha = o->alpha;
-                        sMerged[g].du += o->du, sMerged[g].dv += o->dv;
-                        sMerged[g].mul[0] *= o->mul[0], sMerged[g].mul[1] *= o->mul[1], sMerged[g].mul[2] *= o->mul[2];
-                    }
-                }
-            sGroupOver = sMerged, sGroupOverOn = sMergedOn;
-        }
-        DrawMeshParts(&sPack.mesh[kd->mesh], NULL, sExp.m[i].pos[0], sExp.m[i].pos[1], sExp.m[i].pos[2], pass, sParts,
-                      nparts);
-        sGroupOverOn = NULL;
     }
+}
+
+// ---- the animated buildings (see BAnim above)
+static const u8 sEntryKind[16] = {0, 1, 1, 1, 2, 0, 3, 4, 5, 6, 7, 8, 9, 1, 1, 1};   // (gBuildModelAnimKindTable)
+#define ENTRY_KIND(pr) ((pr)->type < 16 ? sEntryKind[(pr)->type] : 0)
+
+// PlayGroup (kind 2 only: the others' play is Black's dummy): mode 0 the group opening, 1 closing (from its last
+// frame), 2 looping, 3 stopped where it is, 4 all off
+static void BPlay(BAnim *b, const U3dProp *pr, u32 group, u8 mode)
+{
+    const typeof(*sPack.kind) *kd = &sPack.kind[pr->kind];
+    u32 spg = pr->spg ? pr->spg : 1, i, k;
+    if (pr->bkind != 2)
+        return;
+    if (mode == 3)
+    {
+        for (i = 0; i < spg && group * spg + i < BSLOTS; i++)
+            if (b->st[group * spg + i] != BS_NONE)
+                b->st[group * spg + i] = BS_HOLD;
+        return;
+    }
+    memset(b, 0, sizeof(*b));
+    if (mode == 4)
+        return;
+    for (i = 0; i < spg && (k = group * spg + i) < BSLOTS; i++)
+    {
+        b->st[k] = mode == 2 ? BS_LOOP : mode == 1 ? BS_CLOSING : BS_OPENING;
+        b->f[k] = mode == 1 && k < kd->nanims && kd->frames[k] ? kd->frames[k] - 1 : 0;
+    }
+}
+
+static bool8 BIdle(const BAnim *b, const U3dProp *pr, u32 group)   // (IsSlotIdle: off or held, of the group)
+{
+    u32 spg = pr->spg ? pr->spg : 1, i;
+    for (i = 0; i < spg && group * spg + i < BSLOTS; i++)
+        if (b->st[group * spg + i] != BS_NONE && b->st[group * spg + i] != BS_HOLD)
+            return FALSE;
+    return TRUE;
+}
+
+static void BuildingsLoaded(void)
+{
+    u32 i, j, k;
+    free(sBAnim);
+    free(sBKindOf);
+    sBAnim = calloc(sPack.nkind ? sPack.nkind : 1, sizeof(BAnim));
+    sBKindOf = calloc(sPack.nkind ? sPack.nkind : 1, 1);
+    for (i = 0; i < sPack.nmat; i++)
+        for (j = 0; j < (u32)sPack.mat[i].width * sPack.mat[i].height; j++)
+            for (k = 0; k < sPack.mat[i].cells[j].nprops; k++)
+            {
+                U3dProp *pr = &sPack.mat[i].cells[j].props[k];
+                if (pr->kind >= 0 && (u32)pr->kind >= sPack.nkind)
+                    pr->kind = -1;
+                if (pr->kind >= 0)
+                    sBKindOf[pr->kind] = pr->bkind;
+            }
+    for (i = 0; i < sPack.nkind; i++)
+        if (sBKindOf[i] == 1)
+            for (k = 0; k < BSLOTS; k++)
+                sBAnim[i].st[k] = BS_LOOP;
+}
+
+static void BStep(BAnim *b, const typeof(*sPack.kind) *kd)
+{
+    u32 k;
+    for (k = 0; k < BSLOTS && k < kd->nanims; k++)
+    {
+        float last = kd->frames[k] ? kd->frames[k] - 1 : 0;
+        switch (b->st[k])
+        {
+        case BS_OPENING:
+            if ((b->f[k] += 0.5f) >= last)
+                b->f[k] = last, b->st[k] = BS_HOLD;
+            break;
+        case BS_LOOP:
+            if (kd->frames[k] && (b->f[k] += 0.5f) >= kd->frames[k])
+                b->f[k] -= kd->frames[k];
+            break;
+        case BS_CLOSING:
+            if ((b->f[k] -= 0.5f) <= 0)
+                b->f[k] = 0, b->st[k] = BS_HOLD;
+            break;
+        }
+    }
+}
+
+// Black's nodes (CreateNodeNearPos): a placed model's own copy, animated apart from the others of its model (a
+// house's door as the player goes through it, the scripts' models): its handle is its index + 1
+#define BNODES 8
+static struct { const U3dProp *prop; BAnim a; u8 group, autoDelete; } sNodes[BNODES];
+static struct { s16 kind; const U3dProp *prop; } sAutoDoor = {-1};   // (an automatic door opening, held open once it is)
+
+static u16 NodeCreate(const U3dProp *pr)
+{
+    u32 i;
+    if (pr == NULL)
+        return 0;
+    for (i = 0; i < BNODES; i++)
+        if (sNodes[i].prop == pr)
+            return i + 1;
+    for (i = 0; i < BNODES; i++)
+        if (sNodes[i].prop == NULL)
+        {
+            memset(&sNodes[i], 0, sizeof(sNodes[i]));
+            sNodes[i].prop = pr;
+            return i + 1;
+        }
+    return 0;
+}
+
+static void BuildingStep(void)
+{
+    u32 i, k;
+    if (sBAnim == NULL)
+        return;
+    for (i = 0; i < sPack.nkind; i++)
+    {
+        if (sBKindOf[i] == 3)   // (the season's slot looping, the others off: UpdateAnimSetSeason)
+            for (k = 0; k < BSLOTS; k++)
+                if ((k == sSeason) != (sBAnim[i].st[k] == BS_LOOP))
+                    sBAnim[i].st[k] = k == sSeason ? BS_LOOP : BS_NONE, sBAnim[i].f[k] = 0;
+        if (sBKindOf[i])
+            BStep(&sBAnim[i], &sPack.kind[i]);
+    }
+    if (sAutoDoor.kind >= 0 && BIdle(&sBAnim[sAutoDoor.kind], sAutoDoor.prop, 0))
+    {
+        BPlay(&sBAnim[sAutoDoor.kind], sAutoDoor.prop, 1, 2);   // (opened: held open, looping)
+        sAutoDoor.kind = -1;
+    }
+    for (i = 0; i < BNODES; i++)
+        if (sNodes[i].prop)
+        {
+            BStep(&sNodes[i].a, &sPack.kind[sNodes[i].prop->kind]);
+            if (sNodes[i].autoDelete && BIdle(&sNodes[i].a, sNodes[i].prop, sNodes[i].group))
+                sNodes[i].prop = NULL;   // (shut again: back among the others, DeleteNode)
+        }
+}
+
+static void DrawBuilding(const U3dProp *pr, float ox, float oz, int pass)
+{
+    const typeof(*sPack.kind) *kd = &sPack.kind[pr->kind];
+    const BAnim *b = &sBAnim[pr->kind];
+    const float rot[9] = {pr->m[0], pr->m[1], pr->m[2], pr->m[4], pr->m[5], pr->m[6], pr->m[8], pr->m[9], pr->m[10]};
+    u8 joint = 0xFF;
+    u32 k, tex = 0;
+    float jf = 0;
+    for (k = 0; k < BNODES; k++)
+        if (sNodes[k].prop == pr)
+            b = &sNodes[k].a;
+    for (k = 0; k < BSLOTS && k < kd->nanims; k++)
+        if (b->st[k] != BS_NONE)
+        {
+            if (kd->isTex[k])
+                tex |= 1 << k;
+            else if (joint == 0xFF && kd->frames[k])
+                joint = k, jf = b->f[k];
+        }
+    DrawKindPose(kd, joint, jf, tex, b->f, rot, ox + pr->m[3], pr->m[7], oz + pr->m[11], pass);
+}
+
+// The animated model of entry kind EK (0 any) nearest world point WX, WZ within DX, DZ units (Black's search rects:
+// a door's a tile each way, a script's two tiles across and three along, MakeSearchRect)
+static const U3dProp *BFind(u8 ek, float wx, float wz, float dx, float dz)
+{
+    const U3dProp *best = NULL;
+    float bestD = 1e9f;
+    s32 cx, cz;
+    if (!sPack.ok || sBAnim == NULL || (sCurMat && sCurMat->scale > 1))
+        return NULL;
+    for (cz = (s32)floorf((wz - dz) / BLOCK); cz <= (s32)floorf((wz + dz) / BLOCK); cz++)
+        for (cx = (s32)floorf((wx - dx) / BLOCK); cx <= (s32)floorf((wx + dx) / BLOCK); cx++)
+        {
+            const U3dCell *c = Cell(cx, cz);
+            u32 i;
+            for (i = 0; c != NULL && i < c->nprops; i++)
+            {
+                const U3dProp *pr = &c->props[i];
+                float px = (cx + 0.5f) * BLOCK + pr->m[3], pz = (cz + 0.5f) * BLOCK + pr->m[11], d;
+                if (pr->kind < 0 || (ek != 0 && ENTRY_KIND(pr) != ek))
+                    continue;
+                if (fabsf(px - wx) > dx || fabsf(pz - wz) > dz)
+                    continue;
+                d = fabsf(px - wx) + fabsf(pz - wz);
+                if (d < bestD)
+                    bestD = d, best = pr;
+            }
+        }
+    return best;
+}
+
+// ---- doors (field_door_anime.c: an automatic door, entry kind 4, for all of its model: group 0 opening, 1 held
+// open, 2 shutting; field_ground_anime.c: a house's door, entry kind 1, its own node: slot 0 opening, 1 shutting),
+// within a tile of map tile X, Y (MAP_OFFSET in)
+static const U3dProp *DoorProp(s16 x, s16 y)
+{
+    s32 gtx, gtz;
+    const U3dProp *pr;
+    MapToGrid(x, y, &gtx, &gtz);
+    pr = BFind(4, gtx * 16.0f + 8.0f, gtz * 16.0f + 8.0f, 16.0f, 16.0f);
+    return pr != NULL ? pr : BFind(1, gtx * 16.0f + 8.0f, gtz * 16.0f + 8.0f, 32.0f, 48.0f);   // (CreateNodeNearPos's)
+}
+
+// walking in: the door opens (FIELD_DOOR_ANIME_OpenTask / GROUND_B's model forward); FALSE: no door there.
+// ARRIVING: the house's opens as the player comes out; an automatic one is shown open at once (SetOpenTask)
+bool8 U3D_DoorOpen(s16 x, s16 y, bool8 arriving)
+{
+    const U3dProp *pr = DoorProp(x, y);
+    u16 h;
+    if (pr == NULL)
+        return FALSE;
+    if (ENTRY_KIND(pr) == 1)
+    {
+        if ((h = NodeCreate(pr)) == 0)
+            return FALSE;
+        BPlay(&sNodes[h - 1].a, pr, 0, 0);
+        sNodes[h - 1].group = 1, sNodes[h - 1].autoDelete = FALSE;
+        PlaySE(SE_DOOR);
+    }
+    else if (arriving)
+        BPlay(&sBAnim[pr->kind], pr, 1, 2);
+    else
+    {
+        BPlay(&sBAnim[pr->kind], pr, 0, 0);
+        sAutoDoor.kind = pr->kind, sAutoDoor.prop = pr;
+        PlaySE(SE_SLIDING_DOOR);
+    }
+    printf("[u3d] door at %d,%d: %s, %s\n", x - MAP_OFFSET, y - MAP_OFFSET, ENTRY_KIND(pr) == 1 ? "a house's" : "automatic",
+           arriving ? "arriving" : "walking in");
+    return TRUE;
+}
+
+// ... the door shut behind the player (CloseTask / GROUND_A's model reverse)
+void U3D_DoorClose(s16 x, s16 y)
+{
+    const U3dProp *pr = DoorProp(x, y);
+    u32 i;
+    if (pr == NULL)
+        return;
+    if (ENTRY_KIND(pr) == 1)
+    {
+        for (i = 0; i < BNODES && sNodes[i].prop != pr; i++)
+            ;
+        if (i == BNODES)
+            return;
+        BPlay(&sNodes[i].a, pr, 1, 0);
+        sNodes[i].group = 1, sNodes[i].autoDelete = TRUE;
+    }
+    else
+    {
+        BPlay(&sBAnim[pr->kind], pr, 2, 0);
+        sAutoDoor.kind = -1;
+        PlaySE(SE_SLIDING_DOOR);
+    }
+    printf("[u3d] door at %d,%d shutting\n", x - MAP_OFFSET, y - MAP_OFFSET);
+}
+
+// the door still opening (the walk waits for it)
+bool8 U3D_DoorBusy(void)
+{
+    u32 i;
+    if (sAutoDoor.kind >= 0)
+        return TRUE;
+    for (i = 0; i < BNODES; i++)
+        if (sNodes[i].prop && !sNodes[i].autoDelete && !BIdle(&sNodes[i].a, sNodes[i].prop, 0))
+            return TRUE;
+    return FALSE;
+}
+
+// the door in the way ahead is shut (the player walking at a door warp)
+bool8 U3D_DoorShutAt(s16 x, s16 y)
+{
+    const U3dProp *pr = DoorProp(x, y);
+    u32 i;
+    if (pr == NULL)
+        return FALSE;
+    if (ENTRY_KIND(pr) == 1)
+    {
+        for (i = 0; i < BNODES; i++)
+            if (sNodes[i].prop == pr && !sNodes[i].autoDelete)
+                return FALSE;
+        return TRUE;
+    }
+    return sAutoDoor.prop != pr && sBAnim[pr->kind].st[pr->spg ? pr->spg : 1] != BS_LOOP;
+}
+
+// ---- Black's scripts' build models (scrcmd_screeneffects.c, u3d_vm.c): KIND an entry kind (0 any) near tile X, Z
+// of the zone's grid
+static const U3dProp *ScriptModel(u16 kind, s32 x, s32 z)
+{
+    return BFind(kind, x * 16.0f, z * 16.0f, 32.0f, 48.0f);
+}
+
+void U3D_BModelPlay(u16 kind, s32 x, s32 z, u8 slot, u8 mode)   // (PlayEntryAnim: the model's own, all of its kind)
+{
+    const U3dProp *pr = ScriptModel(kind, x, z);
+    if (pr != NULL)
+        BPlay(&sBAnim[pr->kind], pr, slot, mode);
+    printf("[u3d] build model %u at %d,%d: slot %u mode %u%s\n", kind, (int)x, (int)z, slot, mode, pr ? "" : " (none)");
+}
+
+u16 U3D_BModelNode(u16 kind, s32 x, s32 z)   // (CreateNodeNearPos: its handle, 0 none)
+{
+    u16 h = NodeCreate(ScriptModel(kind, x, z));
+    printf("[u3d] build model node %u: kind %u at %d,%d\n", h, kind, (int)x, (int)z);
+    return h;
+}
+
+void U3D_BModelNodeDelete(u16 h)
+{
+    if (h >= 1 && h <= BNODES)
+        sNodes[h - 1].prop = NULL;
+}
+
+void U3D_BModelNodePlay(u16 h, s16 slot, u8 mode)   // (PlayNodeSlot; SLOT -1: its current one)
+{
+    if (h < 1 || h > BNODES || sNodes[h - 1].prop == NULL)
+        return;
+    if (slot >= 0)
+        sNodes[h - 1].group = slot;
+    BPlay(&sNodes[h - 1].a, sNodes[h - 1].prop, sNodes[h - 1].group, mode);
+}
+
+bool8 U3D_BModelNodeBusy(u16 h)   // (CheckBuildModelNodeAnimDone: its current slot not yet still)
+{
+    if (h < 1 || h > BNODES || sNodes[h - 1].prop == NULL)
+        return FALSE;
+    if (!BIdle(&sNodes[h - 1].a, sNodes[h - 1].prop, sNodes[h - 1].group))
+        return TRUE;
+    BPlay(&sNodes[h - 1].a, sNodes[h - 1].prop, sNodes[h - 1].group, 3);   // (TryOpenNodeSlot: stopped there)
+    return FALSE;
+}
+
+// the door near the player (StartDoorOpen / SetOpen / Close, 0x130-0x132): an automatic door
+void U3D_DoorNearPlayer(u8 what)
+{
+    s32 gtx, gtz;
+    const U3dProp *pr;
+    MapToGrid(gSaveBlock1Ptr->pos.x + MAP_OFFSET, gSaveBlock1Ptr->pos.y + MAP_OFFSET, &gtx, &gtz);
+    pr = BFind(4, gtx * 16.0f + 8.0f, gtz * 16.0f + 8.0f, 16.0f, 16.0f);
+    if (pr == NULL)
+        return;
+    if (what == 0)
+    {
+        BPlay(&sBAnim[pr->kind], pr, 0, 0);
+        sAutoDoor.kind = pr->kind, sAutoDoor.prop = pr;
+        PlaySE(SE_SLIDING_DOOR);
+    }
+    else if (what == 1)
+        BPlay(&sBAnim[pr->kind], pr, 1, 2);
+    else
+    {
+        BPlay(&sBAnim[pr->kind], pr, 2, 0);
+        sAutoDoor.kind = -1;
+        if (what == 2)
+            PlaySE(SE_SLIDING_DOOR);
+    }
+    printf("[u3d] the door by the player: %s\n", what == 0 ? "opening" : what == 1 ? "open" : "shutting");
+}
+
+// (mp u3ddoors: the animated buildings within 4 tiles of the player)
+void U3D_DebugDoors(void)
+{
+    s32 gtx, gtz, cx, cz;
+    float wx, wz;
+    MapToGrid(gSaveBlock1Ptr->pos.x + MAP_OFFSET, gSaveBlock1Ptr->pos.y + MAP_OFFSET, &gtx, &gtz);
+    wx = gtx * 16.0f + 8.0f, wz = gtz * 16.0f + 8.0f;
+    printf("[u3d] animated models near %d,%d\n", (int)gtx, (int)gtz);
+    for (cz = (s32)floorf((wz - 64) / BLOCK); cz <= (s32)floorf((wz + 64) / BLOCK); cz++)
+        for (cx = (s32)floorf((wx - 64) / BLOCK); cx <= (s32)floorf((wx + 64) / BLOCK); cx++)
+        {
+            const U3dCell *c = Cell(cx, cz);
+            u32 i;
+            for (i = 0; c != NULL && i < c->nprops; i++)
+            {
+                const U3dProp *pr = &c->props[i];
+                float px = (cx + 0.5f) * BLOCK + pr->m[3], pz = (cz + 0.5f) * BLOCK + pr->m[11];
+                if (pr->kind >= 0 && fabsf(px - wx) <= 64 && fabsf(pz - wz) <= 64)
+                    printf("[u3d]   at %.1f,%.1f kind %d (Black's %u, %u a group, %u groups, type %u)\n", px / 16, pz / 16,
+                           pr->kind, pr->bkind, pr->spg, pr->groups, pr->type);
+            }
+        }
+}
+
+void U3D_DoorsReset(void)   // (a map entered: every door shut, as Black's models are made afresh)
+{
+    u32 i;
+    memset(sNodes, 0, sizeof(sNodes));
+    sAutoDoor.kind = -1;
+    for (i = 0; sBAnim && i < sPack.nkind; i++)
+        if (sBKindOf[i] == 2)
+            memset(&sBAnim[i], 0, sizeof(BAnim));
 }
 
 static void Render(void)
@@ -1820,7 +2269,9 @@ static void Render(void)
                 for (i = 0; i < c->nprops; i++)
                 {
                     s16 pm = c->props[i].mesh[sSeason];
-                    if (pm >= 0 && (u32)pm < sPack.nmesh)
+                    if (c->props[i].kind >= 0 && sBAnim)
+                        DrawBuilding(&c->props[i], ox, oz, pass);   // (Black's animated buildings)
+                    else if (pm >= 0 && (u32)pm < sPack.nmesh)
                         DrawMesh(&sPack.mesh[pm], c->props[i].m, ox, 0.0f, oz, pass);
                 }
             }
@@ -1981,6 +2432,7 @@ void U3D_Update(void)
         sView.havePlayerH = FALSE;
         sCam.mode = CAM_FOLLOW;   // (a scene's camera stays on its map)
         sSeason = U3D_Season();   // (Black changes the season as a map is entered)
+        U3D_DoorsReset();
         U3D_Vm_FieldShown();   // (BURGH's gym's open doors: u3d_vm.c)
     }
     sView.map = map;
@@ -1993,6 +2445,7 @@ void U3D_Update(void)
     AnimateTextures();
     U3D_Vm_FieldFrame();
     ExpStep();
+    BuildingStep();
     FindCamera();
     SetupView();
 }

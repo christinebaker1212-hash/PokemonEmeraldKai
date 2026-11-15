@@ -1,0 +1,33 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 356 15 10
+wait 200
+mash B 6 15
+mp u3ddoors
+shot ud_start
+mp u3drun 2
+wait 280
+shotburst ud_open 480 12
+pressuntil B field 3000
+shot ud_opened
+mp u3drun 4
+wait 20
+pressuntil B field 3000
+shot ud_shown
+mp u3dzone 384 20 5
+wait 200
+mash B 6 15
+mp u3ddoors
+press UP 20
+wait 6
+press UP 20
+wait 4
+shotburst ud_walkin 60 6
+wait 120
+pressuntil B field 3000
+mp where
+echo [ud] done
+quit

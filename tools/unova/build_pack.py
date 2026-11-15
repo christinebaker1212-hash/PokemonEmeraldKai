@@ -57,8 +57,9 @@ _sinnoh = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_sinnoh)
 Pack = _sinnoh.Pack      # (texture and mesh tables, shared as a tool: never the games' engines)
 
-VERSION = 7   # (4: Black's animated map textures, an area's ITP frames and ITA scrolling; 5: the gyms' machinery;
-              #  6: each tile's battle background column; 7: the gyms' texture animations)
+VERSION = 8   # (4: Black's animated map textures, an area's ITP frames and ITA scrolling; 5: the gyms' machinery;
+              #  6: each tile's battle background column; 7: the gyms' texture animations;
+              #  8: the animated buildings, a prop's kind and Black's animation kind after its transform)
 ITA_ARC, ITP_ARC = 'a/0/6/9', 'a/0/7/0'   # (an area record's ita / itp: zonedata.c ZONEDATA_GetAreaItaAnimeId...)
 
 
@@ -116,6 +117,8 @@ class UnovaPack(Pack):
         self.srts = []
         self.srt_ids = {}
         self.ita = (255, [])
+        self.bkinds = []      # (8: the animated buildings, in the gyms' kinds' form: building_kind)
+        self.bkind_ids = {}
 
     def animate(self, tex0, mat, base, w, h):
         frames_tex, steps = self.tex_anims[mat.texture]
@@ -333,6 +336,72 @@ def building_scrolls(area_id, inner):
     return out
 
 
+def building_anims(area_id, inner):
+    """{table id: (Black's kind, slots a group, groups, model type, [its four resources' bytes or None])} of an
+    area's buildings that animate (field_buildmodel.c: a definition's +2 u16 the model's type, gBuildModelAnimKindTable
+    by it: 1 a house's door, 4 an automatic one; +0x10 u8 kind (1 all looping, 2 played by events, 3 the season's
+    slot), u8, u8 slots a group, u8 groups, then four u32 offsets from there)"""
+    member = area_id - 0xD2 if area_id >= 0xD2 else (area_id - 2) // 4 if area_id >= 2 else 0
+    arc = narc.arc('a/2/2/9' if inner else 'a/2/3/0')
+    if member >= len(arc):
+        return {}
+    d = arc[member]
+    n = d[2] // 2
+    out = {}
+    for i in range(n):
+        o = struct.unpack_from('<I', d, 4 + 4 * i)[0]
+        ad = o + 0x10
+        if d[ad] == 0:
+            continue
+        offs = struct.unpack_from('<4i', d, ad + 4)
+        out[struct.unpack_from('<H', d, o)[0]] = (d[ad], d[ad + 2], d[ad + 3], struct.unpack_from('<H', d, o + 2)[0],
+                                                  [d[ad + of:] if of != -1 else None for of in offs])
+    return out
+
+
+def building_kind(pack, key, pbmd, tex0, res):
+    """An animated building as a gym kind (tools/unova/gimmicks.py): its mesh in rigid parts, a track a resource
+    slot (a BCA0 a joint track; a BTP0 / BTA0 / BMA0 a texture one), an index in pack.bkinds; None when nothing moves"""
+    if key in pack.bkind_ids:
+        return pack.bkind_ids[key]
+    model = pbmd.models[0]
+    joints = []
+    for r in res:
+        a = None
+        if r is not None and r[:4] == b'BCA0':
+            try:
+                an = nitro.Bca0(r).anims
+                a = an[0] if an else None
+            except (IndexError, struct.error, AssertionError):
+                a = None
+        joints.append(a)
+    ps, frames = gimmicks.parts(model, [j for j in joints if j is not None])
+    nparts = max((v[2][3] for tris in ps.values() for t in tris for v in t), default=0) + 1
+    mesh = gimmicks._part_mesh(pack, ('bkind',) + key, model, ps, tex0)
+    it = iter(frames)
+    tracks = []
+    for j, r in zip(joints, res):
+        if j is not None:
+            f = next(it)
+            tracks.append(('joint', len(f), f))
+            continue
+        t = None
+        if r is not None and r[:4] in (b'BTP0', b'BTA0', b'BMA0'):
+            try:
+                t = gimmicks._texture_frames(pack, model, ps, tex0, r)
+            except (IndexError, struct.error, AssertionError, KeyError):
+                t = None
+        tracks.append(('tex',) + t if t else ('joint', 0, []))
+    while tracks and tracks[-1] == ('joint', 0, []):
+        tracks.pop()
+    if not any(t[1] for t in tracks):
+        pack.bkind_ids[key] = None
+        return None
+    pack.bkind_ids[key] = len(pack.bkinds)
+    pack.bkinds.append((mesh, nparts, tracks))
+    return pack.bkind_ids[key]
+
+
 def block_buildings(data):
     o = struct.unpack_from('<5I', data, 4)
     sec = data[o[2]:o[3]] if data[:2] == b'WB' else data[o[3]:o[4]] if data[:2] == b'GC' \
@@ -532,6 +601,10 @@ def build(matrix_ids=None):
                 if (area_id, inner, 'srt') not in bld_cache:
                     bld_cache[(area_id, inner, 'srt')] = building_scrolls(area_id, inner)
                 bscroll = bld_cache[(area_id, inner, 'srt')]
+                if (area_id, inner, 'anim') not in bld_cache:
+                    bld_cache[(area_id, inner, 'anim')] = building_anims(area_id, inner)
+                banims = bld_cache[(area_id, inner, 'anim')]
+                member = area_id - 0xD2 if area_id >= 0xD2 else (area_id - 2) // 4 if area_id >= 2 else 0
                 props = []
                 for x, y, z, rot, tid in block_buildings(data):
                     if tid not in bmodels:
@@ -546,7 +619,14 @@ def build(matrix_ids=None):
                     pack.ita = (255, [])
                     a = rot / 65536.0 * 2 * math.pi
                     c, s = math.cos(a), math.sin(a)
-                    props.append((pms, [c, 0.0, s, x, 0.0, 1.0, 0.0, y, -s, 0.0, c, z]))
+                    anim = (-1, 0, 0, 0, 0)
+                    ba = banims.get(tid)
+                    if ba and (ba[0] == 2 or any(r is not None and r[:4] in (b'BCA0', b'BTP0', b'BMA0')
+                                                 for r in ba[4])):
+                        k = building_kind(pack, (member, inner, tid), pbmd, pbmd.tex or btex, ba[4])
+                        if k is not None:
+                            anim = (k, ba[0], ba[1], ba[2], ba[3])
+                    props.append((pms, [c, 0.0, s, x, 0.0, 1.0, 0.0, y, -s, 0.0, c, z], anim))
                 layers = terrain.layers(data)
                 grids = [terrain.grid(layer) for layer in layers]
                 # (a bigger block's grid is wider than 32: the LEAGUE's 64 x 64, laid over its k x k cells below)
@@ -619,7 +699,7 @@ def split(tri):
     return split((a, m, c)) + split((m, b, c))
 
 
-def write(path, pack, light_sets, mats, gims=([], [])):
+def write(path, pack, light_sets, mats, gims=([], []), bkind_base=0):
     out = bytearray(b'U3DP' + struct.pack('<I', VERSION))
     out += struct.pack('<I', len(pack.textures))
     for w, h, px in pack.textures:
@@ -651,8 +731,9 @@ def write(path, pack, light_sets, mats, gims=([], [])):
         out += struct.pack('<6H', number, x1 - x0 + 1, z1 - z0 + 1, x0, z0, scale)
         for (zone, meshes, light, props, fb, hts, bgs), cam in zip(cells, cell_cams):
             out += struct.pack('<H4hHH', zone, *meshes, light, len(props))
-            for pms, m in props:
-                out += struct.pack('<4h12f', *pms, *m)
+            for pms, m, anim in props:   # (8: its animation: a kind (-1 none), Black's kind, slots a group, groups,
+                k = anim[0] + bkind_base if anim[0] >= 0 else -1   # its model's type)
+                out += struct.pack('<4h12f', *pms, *m) + struct.pack('<hBBBB', k, *anim[1:])
             out += struct.pack('<1024H', *fb)
             out += bytes(len(h) for h in hts)
             for h in hts:
@@ -700,8 +781,10 @@ def main():
     out = sys.argv[1]
     wanted = [int(a) for a in sys.argv[2:]] or None
     pack, lights, mats = build(wanted)
-    gims = gimmicks.add(pack)
-    size = write(out, pack, lights, mats, gims)
+    kinds, gl = gimmicks.add(pack)
+    base = len(kinds)
+    size = write(out, pack, lights, mats, (kinds + pack.bkinds, gl), base)
+    print('%d animated buildings' % len(pack.bkinds))
     print('%s: %d textures, %d meshes, %d matrices, %d bytes' % (out, len(pack.textures), len(pack.meshes), len(mats),
                                                                 size))
 

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "u3d.h"
 #include "s3d.h"
 #include "o3d.h"   // Moemon Kai: ORRE
 #include "constants/metatile_behaviors.h"
@@ -456,6 +457,16 @@ static void Task_ExitNonAnimDoor(u8 taskId)
                 dir = OrreArrivalDir(*x, *y);   // Moemon Kai: ORRE's
             if (dir == DIR_NONE && MpLadderStepOff(*x, *y))
                 dir = DIR_SOUTH;
+            // Moemon Kai: UNOVA's doors (src/unova/u3d.c): the door opens before the player is seen walking out, and
+            // shuts behind them (Black's GROUND_A: the model forward, the walk, the model reverse)
+            if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) && !task->data[4])
+            {
+                task->data[4] = 1;
+                if (U3D_DoorOpen(*x, *y, TRUE))
+                    task->data[5] = 1;
+            }
+            if (U3D_DoorBusy())
+                break;
             SetPlayerVisibility(TRUE);
             objEventId = GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0);
             if (dir == DIR_NONE + 0xFF)   // (SINNOH or ORRE: nowhere to step)
@@ -473,6 +484,8 @@ static void Task_ExitNonAnimDoor(u8 taskId)
         {
             UnfreezeObjectEvents();
             task->tState = 3;
+            if (task->data[5])
+                U3D_DoorClose(*x, *y);   // (Moemon Kai: UNOVA's door shut behind them)
             // Moemon Kai: SINNOH's step out of a cave mouth or gate is a step as Platinum takes it: a trigger on the
             // tile it lands on runs (ETERNA FOREST's CHERYL, waiting one tile in from ROUTE 205: the player arrived
             // past her trigger and she never joined)

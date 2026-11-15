@@ -4781,6 +4781,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (sscanf(arg, "%x %x", &id, &v) == 2)
             U3D_Vm_DebugSet(cmd[3] == 'f', id, v);
     }
+    else if (strcmp(cmd, "u3ddoors") == 0)
+    {
+        void U3D_DebugDoors(void);
+        U3D_DebugDoors();
+    }
     else if (strcmp(cmd, "where") == 0)
     {
         struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];

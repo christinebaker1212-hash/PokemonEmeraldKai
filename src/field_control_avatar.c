@@ -247,6 +247,23 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
             ScriptContext_SetupScript(Unova_EventScript_IceSlide);
             return TRUE;
         }
+        if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+        {
+            // Moemon Kai: UNOVA's doors (src/unova/u3d.c U3D_DoorOpen): walked at, a door warp's shut door opens
+            // first and the walk goes on through it (Black's FIELD_DOOR_ANIME_OpenTask before the step in)
+            s16 dx = position.x, dy = position.y;
+            struct MapPosition at;
+            MoveCoords(playerDirection, &dx, &dy);
+            at.x = dx, at.y = dy, at.elevation = position.elevation;
+            if (MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(dx, dy))
+             && GetWarpEventAtMapPosition(&gMapHeader, &at) != WARP_ID_NONE && U3D_DoorShutAt(dx, dy))
+            {
+                extern const u8 Unova_EventScript_DoorOpen[];
+                gSpecialVar_0x8004 = dx, gSpecialVar_0x8005 = dy;
+                ScriptContext_SetupScript(Unova_EventScript_DoorOpen);
+                return TRUE;
+            }
+        }
         if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) && U3D_Vm_CannonAhead(playerDirection))
         {
             // Moemon Kai: SKYLA's gym's cannons (src/unova/u3d_vm.c): walked into, as Black's field event check

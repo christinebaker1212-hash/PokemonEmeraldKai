@@ -849,5 +849,6 @@ gSpecials::
 	def_special U3D_VmCartRide
 	def_special U3D_VmCannon   @ Moemon Kai: UNOVA: SKYLA's gym's cannons (Black's climb in; 0x8004 / 0x8005 the landing)
 	def_special U3D_VmCannonAim   @ Moemon Kai: UNOVA: ... the cannon aims
+	def_special U3D_VmDoorOpen   @ Moemon Kai: UNOVA: a door walked at opens
 	def_special U3D_VmCannonFly   @ Moemon Kai: UNOVA: ... the shot and the flight
 	def_special U3D_VmIceSlide   @ Moemon Kai: UNOVA: BRYCEN's gym's ice slides (Black's script hands the player to one)

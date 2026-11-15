@@ -52,6 +52,17 @@ bool8 U3D_HexHasPlayer(u8 i);
 float U3D_ObjectHeight(const struct ObjectEvent *o);         // (a person's height: the player's floor, Black's height)
 void U3D_Vm_FieldShown(void);
 void U3D_Vm_FieldFrame(void);
+bool8 U3D_DoorOpen(s16 x, s16 y, bool8 arriving);   // (u3d.c: Black's doors, at map tile X, Y, MAP_OFFSET in)
+void U3D_DoorClose(s16 x, s16 y);
+bool8 U3D_DoorBusy(void);
+bool8 U3D_DoorShutAt(s16 x, s16 y);
+void U3D_DoorsReset(void);
+void U3D_DoorNearPlayer(u8 what);   // (0 opening, 1 open, 2 shutting, 3 shutting quietly)
+void U3D_BModelPlay(u16 kind, s32 x, s32 z, u8 slot, u8 mode);   // (u3d.c: Black's scripts' build models)
+u16 U3D_BModelNode(u16 kind, s32 x, s32 z);
+void U3D_BModelNodeDelete(u16 handle);
+void U3D_BModelNodePlay(u16 handle, s16 slot, u8 mode);
+bool8 U3D_BModelNodeBusy(u16 handle);
 bool8 U3D_Vm_CannonAhead(u16 direction);   // (u3d_vm.c: SKYLA's gym's cannons, one two cells ahead)
 bool8 U3D_Vm_IceSlideAhead(u16 direction);   // (u3d_vm.c: BRYCEN's gym's ice slides, the player on one's start)
 bool8 U3D_Vm_DockStep(u16 direction);   // (u3d_vm.c: ELESA's gym's coasters, a dock stepped onto)   // (u3d_vm.c: a map first shown, a continued game's too)
@@ -79,6 +90,7 @@ void U3D_CameraMoveBack(u16 frames);
 void U3D_CameraReset(void);
 void U3D_CameraTurn(u16 pitch, u16 yaw, u16 frames);
 void U3D_CameraLook(u16 frames);
+void U3D_CameraMoveMasked(u16 pitch, u16 yaw, s32 dist, s32 x, s32 y, s32 z, u16 frames, u8 mask);
 bool8 U3D_CameraMoving(void);
 float U3D_TestGround(s32 mapX, s32 mapY, float near);         // tests: the ground's height (map pixels), NaN none
 void U3D_ShopPicture(bool8 on, s16 dx, s16 dy);               // shop.c's BUY screen: the field's last picture behind

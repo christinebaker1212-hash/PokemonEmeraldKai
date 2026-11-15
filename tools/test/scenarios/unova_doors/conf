@@ -1,0 +1,8 @@
+# UNOVA's build models played by Black's scripts (scrcmd_screeneffects.c; pack v8): ROUTE 10's first badge gate
+# (zone 356): its script 2 makes the gate's own copy (a node, entry kind 1 at 15,7), opens it with its sound and waits,
+# then deletes it; its script 4 shows the gate as already opened (slot 0 closing, then stopped). The BRIDGE GATE's door (zone 384, entry kind 1 at its warp) opens as it's walked at. Shots ud_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("build model node 1: kind 1 at 15,7" "warp to zone 357" "a house's, walking in" "[ud] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "(none)")
