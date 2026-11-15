@@ -211,8 +211,15 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   ('hana01.1'). Buildings scroll too: a definition's +0x10, u8 kind (1 all looping, 3 the season's slot, 2 doors a
   script plays), then four u32 offsets from there (BTA0 / BTP0 / BCA0 / BMA0; ROUTE 1's r01_a_spring is the falling
   petals). tools/unova/build_pack.py UnovaPack (itp_anims, ita_anims, building_scrolls) packs the frames and each
-  group's scrolling (its srt); u3d.c AnimateTextures plays them (sPack.shown, srtNow). Not yet: buildings' BTP0 /
-  BCA0 (machines, lamps' frames, moving parts), BMA0; `mp u3dtex` counts them.
+  group's scrolling (its srt); u3d.c AnimateTextures plays them (sPack.shown, srtNow). Buildings' BCA0 / BTP0 / BMA0
+  (pack v8): build_pack.py building_anims / building_kind make each animated building a gym-style kind (parts, a
+  track a resource slot, its BTA0 too), a prop naming its kind, Black's animation kind (+0x10), slots a group, groups
+  and its model's type (+2: gBuildModelAnimKindTable makes 1-3, 13, 14 a house's door, entry kind 1, and 7 an
+  automatic one, kind 4); u3d.c BuildingStep / DrawBuilding / BPlay (PlayGroup's modes 0-4), nodes (a model's own
+  copy: houses' doors and the scripts' 0x127-0x12C), doors U3D_DoorOpen / Close (field_control_avatar.c before a door
+  warp is stepped onto, field_screen_effect.c Task_ExitNonAnimDoor); `mp u3ddoors` lists them. Black's outdoor
+  entrances are open doorways: its door models are the gates', gyms' and inner doors (ROUTE 10's badge gates).
+  Scripted camera moves (0x146): archive 0xA3 by tools/unova/gen_cameras.py into src/unova/u3d_cameras.h.
 - Buildings (field_buildmodel.c): archive 0xE5 / 0xE6 (a/2/2/9 inside, a/2/3/0 outside), member (area - 2) / 4 (area
   - 0xD2 past the seasons' areas); an "AB" offset table: n = byte 2, the first n / 2 entries model definitions (u16
   table id first), the rest their BMD0s; their textures 0xB0 / 0xB1 (a/1/7/6 / a/1/7/7, the same member). A block's
