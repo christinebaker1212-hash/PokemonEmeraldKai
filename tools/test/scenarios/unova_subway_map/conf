@@ -1,0 +1,8 @@
+# The BATTLE SUBWAY's map (src/unova/u3d_subwaymap.c; Black's ov224 picture from the scripts pack): GEAR STATION's map
+# (zone 74, script 3: Black's own, its words, the fade, PROC_CallModeScreen 2) opens the map centred; RIGHT / DOWN
+# scroll it to the corner; B closes it and the script goes on to its end. Shots map_centre, map_corner.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("unova screen: SUBWAY MAP" "unova screen: SUBWAY MAP closed" "[sm] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not played yet" "no subway map")

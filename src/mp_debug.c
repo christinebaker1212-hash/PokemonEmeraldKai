@@ -4698,6 +4698,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (sscanf(arg, "%d %d", &cabin, &main) == 2)
             U3D_Vm_DebugBoat(cabin, main);
     }
+    else if (strcmp(cmd, "u3dsubwaymap") == 0)   // u3dsubwaymap: the BATTLE SUBWAY's map over the field
+    {
+        void Unova_SubwayMap_Debug(void);
+        Unova_SubwayMap_Debug();
+    }
     else if (strcmp(cmd, "u3dphenom") == 0)   // u3dphenom [KIND]: one of Black's phenomena now, near the player
     {
         void Unova_Phenom_Debug(s16 kind, s16 front);

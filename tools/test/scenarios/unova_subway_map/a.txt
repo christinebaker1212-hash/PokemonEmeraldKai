@@ -1,0 +1,19 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dzone 74 5 4
+wait 200
+mash B 6 15
+mp u3drun 3
+pressuntillog A 2000 unova screen: SUBWAY MAP
+wait 30
+rendershot map_centre
+press RIGHT 40
+press DOWN 40
+wait 10
+rendershot map_corner
+press B 1
+wait 60
+pressuntil B field 2000
+echo [sm] done
+quit

@@ -58,7 +58,9 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
       unova_diploma)
 - [x] A POKeMON's picture until a key (0x227: the game's picture box), a person swapped for another where they stood
       (0x23E): CASTELIA's ZORUA event, which needs a distributed CELEBI (closed: online only)
-- [ ] The BATTLE SUBWAY's map (0x151 mode 2: Black's picture, a new screen: mock-up first)
+- [x] The BATTLE SUBWAY's map (0x151 mode 2, the user's approved mock-up 2026-11-15: Black's a/2/0/6 picture in the
+      scripts pack's version 12, shown 1:1, centred, the D-pad scrolling: src/unova/u3d_subwaymap.c; scenario
+      unova_subway_map)
 - [ ] The player set on a rail (0x07C: zone 66)
 - [x] The battle phrases asked for (0x1ED kinds 0-3, zone 66): the game's own EASY CHAT on the save's introduction /
       won / lost phrases ("No. 1" asked, not kept: Kai has none); scenario unova_phrases

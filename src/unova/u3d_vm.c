@@ -135,7 +135,7 @@ static void Load(void)
     sPack = malloc(raw ? raw : 1);
     sPackSize = raw;
     if (sPack == NULL || uncompress(sPack, &raw, data + 8, (unsigned long)(size - 8)) != 0 || memcmp(sPack, "U3DS", 4) != 0
-     || Get32(4) < 1 || Get32(4) > 11)
+     || Get32(4) < 1 || Get32(4) > 12)
     {
         printf("[u3d] %s: can't read UNOVA's scripts\n", path);
         free(sPack);
@@ -1050,7 +1050,7 @@ static void CartDone(void);
 static void DragonReset(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
-enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL };   // (W_MUSICAL: the MUSICAL dressing room closed)   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
+enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP };   // (W_MUSICAL: the MUSICAL dressing room closed)   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
 static u16 sExpWait;
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
        W_WARP, W_PIC_KEY };   // (W_WARP: a warp's map is loading; the script goes on there: U3D_Vm_SceneStart)
@@ -1212,6 +1212,21 @@ static const u8 *NpcTable(u32 *count)
 }
 
 // SCRCMD_NETWORK_FindNpcTableRow: the row of keys A and B (0 if none)
+// The BATTLE SUBWAY's map after the NPC table (version 12): u16 width, height, then the pixels (u3d_subwaymap.c)
+const u16 *U3D_Vm_SubwayMap(u16 *w, u16 *h)
+{
+    u32 n;
+    const u8 *t = Get32(4) >= 12 ? NpcTable(&n) : NULL;
+    if (t == NULL)
+        return NULL;
+    t += 8 * n;
+    *w = Le16(t), *h = Le16(t + 2);
+    return (const u16 *)(t + 4);
+}
+
+bool8 Unova_Screen_IsActive(void);
+static bool8 Unova_Screen_IsActive_(void) { return Unova_Screen_IsActive(); }
+
 static u32 NpcTableRow(u16 keyA, u16 keyB)
 {
     u32 n, i;
@@ -3428,7 +3443,17 @@ static void Step(struct Thread *t)
             *WorkPtr(a[0]) = 0;
             break;
         case U3C_PROC_CallModeScreen:   // 0 / 1: the UNOVA / National POKeDEX's diploma (the game's DIPLOMA screen); 2
-            if (V(0) <= 1)              // the BATTLE SUBWAY's map: not drawn yet
+            if (V(0) == 2)              // the BATTLE SUBWAY's map (ov224: Black's picture, u3d_subwaymap.c)
+            {
+                bool8 Unova_SubwayMap_Open(void);
+                if (Unova_SubwayMap_Open())
+                {
+                    t->wait = W_SUBWAY_MAP;
+                    if (sHolding)
+                        ScriptContext_Enable();
+                }
+            }
+            else if (V(0) <= 1)
             {
                 extern s8 gMpDiplomaNational;
                 gMpDiplomaNational = V(0);
@@ -4143,6 +4168,10 @@ static void Wait(struct Thread *t)
         break;
     case W_CAMERA:
         if (!U3D_CameraMoving())
+            t->wait = W_NONE;
+        break;
+    case W_SUBWAY_MAP:   // (the BATTLE SUBWAY's map, till it closes)
+        if (!Unova_Screen_IsActive_())
             t->wait = W_NONE;
         break;
     case W_MUSICAL:   // (MUSICAL_ShowPartyMonMusical: the dressing room, till it closes: u3d_musical.c)

@@ -50,6 +50,8 @@ File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little e
   exchanges (items, TMs): u32 count, (u16 item, pad, s32 BP) each, twice
   (version 11) Black's NPC table (a/2/0/9, ov010 scrcmd_network.c NpcTableRow: NIMBASA's stadium trainers and crowd):
   u32 count, u16 key A (the place), key B (the story's stage), object code, trainer each
+  (version 12) the BATTLE SUBWAY's map (a/2/0/6: its palette, characters and two screens, the lines over the land):
+  u16 width, height (256 x 192), then each pixel u16 RGB555 (bit 15 set: drawn)
 """
 import os
 import struct
@@ -62,7 +64,8 @@ import narc  # noqa: E402
 import scripts as scr  # noqa: E402
 import zones as zr  # noqa: E402
 
-VERSION = 11
+VERSION = 12
+SUBWAY_MAP_ARC = 'a/2/0/6'   # (arc 0xCE: ov224 subway_map_graphic.c, the BATTLE SUBWAY's map)
 NPC_TABLE_ARC = 'a/2/0/9'   # (arc 0xD1: SCRCMD_NETWORK_CmdLoadNpcTable)
 SUBWAY_SETS, SUBWAY_TRAINERS = 'a/2/1/4', 'a/2/1/5'   # (version 10: the BATTLE SUBWAY)
 WFBC_ARC, WFBC_PEOPLE, WFBC_SPOTS = 'a/1/5/4', 30, 0x22   # (version 9: BLACK CITY's residents)
@@ -157,6 +160,34 @@ def song_kinds():
     return struct.pack('<I', len(out)) + bytes(out) + b'\0' * (-len(out) % 4)
 
 
+def subway_map():
+    """Black's BATTLE SUBWAY map (ov224 SUBWAY_MAP_GRAPHIC: member 0 the palette, 1 the 4-bit characters, 2 the land's
+    screen on BG1, 3 the lines' on BG2): the two screens laid one over the other, colour 0 clear"""
+    a = narc.arc(SUBWAY_MAP_ARC)
+    pl, cg = bytes(a[0]), bytes(a[1])
+    _, _, size, off = struct.unpack_from('<IIII', pl, 0x18)
+    cols = [struct.unpack_from('<H', pl, 0x18 + off + 2 * i)[0] for i in range(size // 2)]
+    _, _, _, _, _, dsz, doff = struct.unpack_from('<HHIIIII', cg, 0x18)
+    chars = cg[0x18 + doff:0x18 + doff + dsz]
+    w, h = 256, 192
+    px = [0] * (w * h)
+    for k in (2, 3):
+        sc = bytes(a[k])
+        sw, sh, _, ssz = struct.unpack_from('<HHII', sc, 0x18)
+        for i in range(ssz // 2):
+            e = struct.unpack_from('<H', sc, 0x24 + 2 * i)[0]
+            tx, ty = (i % (sw // 8)) * 8, (i // (sw // 8)) * 8
+            t, hf, vf, p = e & 0x3FF, (e >> 10) & 1, (e >> 11) & 1, e >> 12
+            for y in range(8):
+                for x in range(8):
+                    sx, sy = 7 - x if hf else x, 7 - y if vf else y
+                    b = chars[t * 32 + (sy * 8 + sx) // 2]
+                    c = (b >> 4) if sx & 1 else (b & 15)
+                    if c and tx + x < w and ty + y < h:
+                        px[(ty + y) * w + tx + x] = (cols[p * 16 + c] & 0x7FFF) | 0x8000
+    return struct.pack('<HH', w, h) + b''.join(struct.pack('<H', v) for v in px)
+
+
 def main():
     out_path = sys.argv[1]
     pack = bytearray(b'U3DS' + struct.pack('<I', VERSION))
@@ -195,6 +226,7 @@ def main():
     pack += subway_block(len(pack))
     npc = bytes(narc.arc(NPC_TABLE_ARC)[0])
     pack += struct.pack('<I', len(npc) // 8) + npc[:len(npc) // 8 * 8]
+    pack += subway_map()
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(b'U3SZ' + struct.pack('<I', len(pack)) + zlib.compress(bytes(pack), 6))
     print('%s: %d script files, %d zones, %d event files, %d bytes' % (out_path, len(narc.arc(scr.ARC)), len(zs),
