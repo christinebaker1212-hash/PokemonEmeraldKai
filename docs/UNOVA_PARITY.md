@@ -89,8 +89,11 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
 - [x] Zone 389's time effect (0x24E-0x250: overlays share addresses, so these are ov065's, not the trainer card's;
       2026-11-15, scenario unova_time_effect): the effect model by day or night (gimmicks 65 / 165 in the pack), its
       pending flag, played with the script waiting, then hidden (u3d_vm.c TimeFx*)
-- [ ] CASTELIA's crowds (0x134 starts ov055's field_gimmick_crowd.c in zones 32-34 / 254: people walking the
-      streets, stepping round the player, their chatter)
+- [x] CASTELIA's crowds (0x134 starts ov055's field_gimmick_crowd.c in zones 32-34 / 254; 2026-11-15, scenario
+      unova_crowd): Black's setups (tools/unova/gen_crowds.py -> u3d_crowds.h), people spawned on each area's edge at
+      the time of day's rate and walked its length, solid ones stepping aside two tiles out, one in ten player-aware
+      (stops before the player and can be talked to: its look's script), local ids 0xA0 + slot (u3d_vm.c Crowd*)
+- [ ] The crowd's chatter: Black's small windows popping up over the street (bank 0x9F) need a mock-up first
 - Kai's own: SURF / WATERFALL's hops and jumps (0x0C5 / 0x0C6, Black's field-move scripts: Kai's field moves); closed
   as the DS's or online: birthdays (0x1D6 / 0x1D7 / 0x20D), the research surveys (0x210-0x21F), Wi-Fi lists, GTS,
   the TRIAL HOUSE downloads, PAL PARK (0x1C0), the fixed-zone link-room warp (0x0C3)

@@ -1,0 +1,7 @@
+# CASTELIA's crowd (ov055, command 0x134; tables u3d_crowds.h): on its street (zone 34) people come down one lane and
+# up the other as often as the time of day says, stepping round the player and each other. Shots cr_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("CASTELIA's crowd in zone 34" "[cr] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

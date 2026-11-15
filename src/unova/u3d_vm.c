@@ -441,6 +441,8 @@ u16 U3D_Vm_PersonGfx(u8 localId, u16 gfx)
 // The map's object event of Black's object id OBJ: its person's place in the zone's event data + 1
 // (tools/unova/gen_maps.py writes them in that order); 0xFF is the player
 static u8 WfbcSlotOf(u8 npc);
+bool8 U3D_Vm_CrowdLocal(u8 local);
+static bool8 Run(u16 id, u16 target, bool8 scene);
 static u8 sWfbcSlot;   // (BLACK CITY: the resident talked to)
 static u8 LocalId(u16 obj)
 {
@@ -458,6 +460,8 @@ static u8 LocalId(u16 obj)
     for (i = 0; e && size >= 8 && i < e[5]; i++)
         if (Le16(e + 8 + EV_BG * e[4] + EV_PERSON * i) == obj)
             return i + 1;
+    if (obj >= 0x30 && obj < 0x30 + 32 && U3D_Vm_CrowdLocal(0xA0 + obj - 0x30))   // (CASTELIA's crowd: below)
+        return 0xA0 + obj - 0x30;
     return (u8)(obj + 1);
 }
 
@@ -1085,12 +1089,269 @@ static u16 sBModelWait;
 #define ZONE_TIME_EFFECT 389
 #define TIMEFX_PENDING 0x80
 static struct { bool8 playing, night, peaked; } sTimeFx;
-static u8 TimeZoneNow(void)   // (Black's time of day: 0 morning, 1 day, 2 evening, 3 night, 4 late night)
-{
+static u8 TimeZoneNow(void)   // (Black's time of day: 0 morning, 1 day, 2 evening, 3 night, 4 late night; the clock
+{                             // read again at most every ten seconds)
+    static u8 sTz;
+    static u32 sAt;
     u8 h;
-    RtcCalcLocalTime();
-    h = gLocalTime.hours;
-    return h < 5 ? 4 : h < 10 ? 0 : h < 17 ? 1 : h < 20 ? 2 : 3;
+    if (sAt == 0 || gMain.vblankCounter1 - sAt >= 600)
+    {
+        RtcCalcLocalTime();
+        h = gLocalTime.hours;
+        sTz = h < 5 ? 4 : h < 10 ? 0 : h < 17 ? 1 : h < 20 ? 2 : 3;
+        sAt = gMain.vblankCounter1 | 1;
+    }
+    return sTz;
+}
+
+// CASTELIA's crowds (ov055 field_gimmick_crowd.c, started by command 0x134 in zones 32-34 and 254): people spawned
+// on an area's entry edge as often as the time of day says (field frames), walking its length and gone; a solid
+// one steps aside from anyone up to two tiles ahead, one in ten (with none ahead of it) is player-aware: one tile
+// ahead of the player it stops and can be talked to (its look's script), else it steps aside and turns solid.
+// Black's object ids 0x30 + slot are local ids 0xA0 + slot here. Tables: u3d_crowds.h (tools/unova/gen_crowds.py)
+#include "u3d_crowds.h"
+#define CROWD_MAX 32
+#define CROWD_LOCAL 0xA0
+enum { CROWD_WAIT, CROWD_NEXT, CROWD_LEAVE };
+static struct { u8 active, state, aware, dir, sidestep, sideDir, area; u16 steps, script; } sCrowdPeople[CROWD_MAX];
+static struct { s8 cfg; u16 zone; u16 counter[2]; u8 tick; } sCrowd = {-1};
+
+bool8 U3D_Vm_CrowdLocal(u8 local)
+{
+    return sCrowd.cfg >= 0 && local >= CROWD_LOCAL && local < CROWD_LOCAL + CROWD_MAX
+        && sCrowdPeople[local - CROWD_LOCAL].active;
+}
+
+static struct ObjectEvent *CrowdObject(u32 i)
+{
+    u8 id = ObjEventId(CROWD_LOCAL + i);
+    return id < OBJECT_EVENTS_COUNT ? &gObjectEvents[id] : NULL;
+}
+
+static void CrowdRemove(u32 i)
+{
+    sCrowdPeople[i].active = FALSE;
+    RemoveObjectEventByLocalIdAndMap(CROWD_LOCAL + i, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+}
+
+// someone (the player too) MIN to MAX tiles straight ahead of crowd person I, where they stand or come from
+static bool8 CrowdTileAhead(u32 i, s16 ox, s16 oz, s16 x, s16 z, s16 maxD, s16 minD)
+{
+    s32 ahead, side;
+    switch (sCrowdPeople[i].dir)
+    {
+    case 0:  ahead = oz - z, side = ox - x; break;
+    case 1:  ahead = z - oz, side = ox - x; break;
+    case 2:  ahead = ox - x, side = oz - z; break;
+    default: ahead = x - ox, side = oz - z; break;
+    }
+    return ahead <= maxD && ahead >= minD && side == 0;
+}
+
+static bool8 CrowdInFront(u32 i, const struct ObjectEvent *me, const struct ObjectEvent *o, s16 maxD, s16 minD)
+{
+    return CrowdTileAhead(i, me->currentCoords.x, me->currentCoords.y, o->currentCoords.x, o->currentCoords.y, maxD, minD)
+        || CrowdTileAhead(i, me->currentCoords.x, me->currentCoords.y, o->previousCoords.x, o->previousCoords.y, maxD, minD);
+}
+
+static struct ObjectEvent *CrowdBlocker(u32 i, const struct ObjectEvent *me, s16 maxD)
+{
+    u32 k;
+    for (k = 0; k < OBJECT_EVENTS_COUNT; k++)
+        if (gObjectEvents[k].active && &gObjectEvents[k] != me && !gObjectEvents[k].invisible
+         && CrowdInFront(i, me, &gObjectEvents[k], maxD, 0))
+            return &gObjectEvents[k];
+    return NULL;
+}
+
+static void CrowdWalk(u32 i, struct ObjectEvent *o, u8 dir)
+{
+    u8 frames = sCrowds[sCrowd.cfg].stepFrames, d = BlackToDir(dir);
+    ObjectEventClearHeldMovementIfActive(o);
+    ObjectEventSetHeldMovement(o, frames <= 2 ? GetWalkFasterMovementAction(d) : frames <= 4 ? GetWalkFastMovementAction(d)
+                                                                              : GetWalkNormalMovementAction(d));
+}
+
+static void CrowdSidestep(u32 i, struct ObjectEvent *me, const struct ObjectEvent *blocker)   // (SidestepPerson)
+{
+    static const u8 sOpposite[4] = {1, 0, 3, 2};
+    const u16 *area = sCrowds[sCrowd.cfg].area[sCrowdPeople[i].area];
+    u8 bdir = DirToBlack(blocker->facingDirection) & 3, nd, me_dir = sCrowdPeople[i].dir;
+    s32 x, z;
+    if (sCrowdPeople[i].sidestep)
+        nd = sCrowdPeople[i].sideDir;
+    else if (bdir == me_dir || me_dir == sOpposite[bdir])
+        nd = (Random() & 1) == 0 ? (bdir + 2) & 3 : sOpposite[(bdir + 2) & 3];
+    else
+        nd = sOpposite[bdir];
+    x = me->currentCoords.x - MAP_OFFSET, z = me->currentCoords.y - MAP_OFFSET;
+    x += nd == 2 ? -1 : nd == 3 ? 1 : 0, z += nd == 0 ? -1 : nd == 1 ? 1 : 0;
+    if (nd <= 1 ? (z < MapZ(area[0]) || z > MapZ(area[1])) : (x < MapX(area[2]) || x > MapX(area[3])))
+        nd = sOpposite[nd];
+    CrowdWalk(i, me, nd);
+    sCrowdPeople[i].sidestep = TRUE, sCrowdPeople[i].sideDir = nd;
+}
+
+// a person on the area's entry edge, STAGGER steps on (SpawnPerson), unless another stands there
+static void CrowdSpawn(u32 i, u32 a, u16 stagger)
+{
+    const u16 *area = sCrowds[sCrowd.cfg].area[a];
+    u32 r = Random(), k, look;
+    u16 dir = area[4], x, z;
+    bool8 aware = FALSE, ahead = FALSE;
+    u8 id;
+    if (dir <= 1)
+        x = area[2] + r % (area[3] - area[2] + 1), z = dir == 0 ? area[0] - stagger : area[0] + stagger;
+    else
+        x = dir == 2 ? area[2] - stagger : area[2] + stagger, z = area[0] + r % (area[1] - area[0] + 1);
+    for (k = 0; k < CROWD_MAX; k++)   // (FindPersonAtSpawn: a player-aware one there, or on its way)
+    {
+        struct ObjectEvent *o;
+        s32 sx, sz;
+        if (!sCrowdPeople[k].active || !sCrowdPeople[k].aware || (o = CrowdObject(k)) == NULL)
+            continue;
+        sx = o->currentCoords.x - MAP_OFFSET - MapX(x), sz = o->currentCoords.y - MAP_OFFSET - MapZ(z);
+        sx = sx > 0 ? 1 : sx < 0 ? -1 : 0, sz = sz > 0 ? 1 : sz < 0 ? -1 : 0;
+        if (sx == 0 && sz == 0)
+            return;   // (occupied)
+        if (sx == (dir == 2 ? -1 : dir == 3 ? 1 : 0) && sz == (dir == 0 ? -1 : dir == 1 ? 1 : 0))
+            ahead = TRUE;
+    }
+    if (!ahead && r % 10 == 0)
+        aware = TRUE;
+    look = Random() % (sCrowds[sCrowd.cfg].looks ? sCrowds[sCrowd.cfg].looks : 1);
+    RemoveObjectEventByLocalIdAndMap(CROWD_LOCAL + i, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+    id = SpawnSpecialObjectEventParameterized(OBJ_EVENT_GFX_UNOVA_FIRST + sCrowds[sCrowd.cfg].code[look], MOVEMENT_TYPE_NONE,
+                                              CROWD_LOCAL + i, MapX(x) + MAP_OFFSET, MapZ(z) + MAP_OFFSET, 3);
+    if (id >= OBJECT_EVENTS_COUNT)
+        return;
+    ObjectEventTurn(&gObjectEvents[id], BlackToDir(dir));
+    sCrowdPeople[i].active = TRUE, sCrowdPeople[i].state = CROWD_NEXT, sCrowdPeople[i].aware = aware;
+    sCrowdPeople[i].dir = dir, sCrowdPeople[i].area = a, sCrowdPeople[i].steps = area[5] - stagger;
+    sCrowdPeople[i].sidestep = FALSE, sCrowdPeople[i].script = 2000;
+    for (k = 0; k < ARRAY_COUNT(sCrowdLooks); k++)
+        if (sCrowdLooks[k].code == sCrowds[sCrowd.cfg].code[look])
+            sCrowdPeople[i].script = sCrowdLooks[k].script[r % 6];
+}
+
+static s32 CrowdFree(void)
+{
+    u32 i;
+    for (i = 0; i < CROWD_MAX; i++)
+        if (!sCrowdPeople[i].active)
+            return i;
+    return -1;
+}
+
+static void CrowdStart(void)   // (CROWD_Init: the zone's setup, its areas filled as the spawn rate would have)
+{
+    u32 i, a, n, k, off;
+    u8 tz = TimeZoneNow();
+    sCrowd.cfg = -1;
+    for (i = 0; i < ARRAY_COUNT(sCrowds); i++)
+        if (sCrowds[i].zone == CurrentZone())
+            sCrowd.cfg = i;
+    memset(sCrowdPeople, 0, sizeof(sCrowdPeople));
+    if (sCrowd.cfg < 0 || sCrowds[sCrowd.cfg].interval[tz] <= 0)
+        return;
+    sCrowd.zone = CurrentZone(), sCrowd.counter[0] = sCrowd.counter[1] = 0;
+    for (a = 0; a < sCrowds[sCrowd.cfg].areas && a < 2; a++)
+    {
+        n = sCrowds[sCrowd.cfg].area[a][5] * 6 / sCrowds[sCrowd.cfg].interval[tz];
+        for (k = 0, off = 0; k < n; k++)
+        {
+            s32 f = CrowdFree();
+            if (f < 0)
+                break;
+            CrowdSpawn(f, a, off / 6);
+            off += sCrowds[sCrowd.cfg].interval[tz];
+        }
+    }
+    for (i = 0, n = 0; i < CROWD_MAX; i++)
+        n += sCrowdPeople[i].active;
+    MPNet_Log("u3d vm: CASTELIA's crowd in zone %u, %u people", CurrentZone(), (unsigned)n);
+}
+
+static void CrowdFrame(void)
+{
+    u32 i, a;
+    u8 tz;
+    if (sCrowd.cfg < 0)
+        return;
+    if (CurrentZone() != sCrowd.zone)
+    {
+        sCrowd.cfg = -1;   // (the zone left: its people went with the map)
+        return;
+    }
+    tz = TimeZoneNow();
+    if ((sCrowd.tick ^= 1) && sCrowds[sCrowd.cfg].interval[tz] > 0)   // (UpdateSpawns, a field frame each)
+        for (a = 0; a < sCrowds[sCrowd.cfg].areas && a < 2; a++)
+        {
+            s32 f;
+            if (sCrowd.counter[a] < sCrowds[sCrowd.cfg].interval[tz])
+                sCrowd.counter[a]++;
+            else if ((f = CrowdFree()) >= 0)
+            {
+                CrowdSpawn(f, a, 0);
+                sCrowd.counter[a] = 0;
+            }
+        }
+    for (i = 0; i < CROWD_MAX; i++)
+    {
+        struct ObjectEvent *o, *b;
+        if (!sCrowdPeople[i].active)
+            continue;
+        if ((o = CrowdObject(i)) == NULL)
+        {
+            sCrowdPeople[i].active = FALSE;
+            continue;
+        }
+        if (ScriptContext_IsEnabled() && sCrowdPeople[i].aware && sCrowdPeople[i].script == 2000)
+            sCrowdPeople[i].aware = FALSE;   // (MakePersonSolid: a game event running)
+        if (sCrowdPeople[i].state == CROWD_WAIT)
+        {
+            if (!ObjectEventClearHeldMovementIfFinished(o) && o->heldMovementActive)
+                continue;
+            sCrowdPeople[i].state = CROWD_NEXT;
+        }
+        if (sCrowdPeople[i].steps == 0)
+        {
+            CrowdRemove(i);
+            continue;
+        }
+        if (sCrowdPeople[i].aware)
+        {
+            if (CrowdInFront(i, o, &gObjectEvents[gPlayerAvatar.objectEventId], 1, 1))
+            {
+                sCrowdPeople[i].script = sCrowdPeople[i].script;   // (it waits, and can be talked to)
+                continue;
+            }
+            if ((b = CrowdBlocker(i, o, 1)) != NULL)
+            {
+                CrowdSidestep(i, o, b);
+                sCrowdPeople[i].aware = FALSE;
+            }
+            else
+                CrowdWalk(i, o, sCrowdPeople[i].dir), sCrowdPeople[i].steps--;
+        }
+        else if ((b = CrowdBlocker(i, o, 2)) != NULL)
+            CrowdSidestep(i, o, b);
+        else
+            CrowdWalk(i, o, sCrowdPeople[i].dir), sCrowdPeople[i].steps--;
+        sCrowdPeople[i].state = CROWD_WAIT;
+    }
+}
+
+// talked to (U3D_VmTalk): a player-aware person stopped by the player runs its look's script
+static bool8 CrowdTalk(u16 local)
+{
+    u32 i = local - CROWD_LOCAL;
+    struct ObjectEvent *o;
+    if (!U3D_Vm_CrowdLocal(local) || !sCrowdPeople[i].aware || (o = CrowdObject(i)) == NULL
+     || !CrowdInFront(i, o, &gObjectEvents[gPlayerAvatar.objectEventId], 1, 1) || sCrowdPeople[i].script == 2000)
+        return FALSE;
+    MPNet_Log("u3d vm: a CASTELIA passer-by talked to (script %u)", sCrowdPeople[i].script);
+    return Run(sCrowdPeople[i].script, 0x30 + i, TRUE);
 }
 
 static void TimeFxStart(void)   // (StartEffect: shown, both tracks played, its sound)
@@ -3873,6 +4134,9 @@ static void Step(struct Thread *t)
             break;
         // zone 389's time effect (ov065 field_gimmick_time_effect.c; overlays share addresses, so these commands'
         // names are another overlay's): its pending flag set, the effect started, the script waiting for its end
+        case U3C_POKEMON_FLD_StartOv55SubProc:   // CASTELIA's crowd (ov055's sub process)
+            CrowdStart();
+            break;
         case U3C_TRCARD_SYS_ScrCmdSetRecordFlag36:
             sWork.white |= TIMEFX_PENDING;
             break;
@@ -4513,6 +4777,12 @@ static const u8 *WfbcRecord(u8 npc);
 void U3D_VmTalk(void)
 {
     u16 local = gSpecialVar_LastTalked;
+    if (U3D_Vm_CrowdLocal(local))
+    {
+        if (!CrowdTalk(local))
+            NothingToRun();
+        return;
+    }
     const u8 *p = local ? Person(CurrentZone(), local - 1) : NULL;
     if (CurrentZone() == ZONE_BLACK_CITY && local >= 1 && local <= 10 && sWork.wfbc.valid && sWork.wfbc.npc[local - 1] != 0xFF)
     {
@@ -5139,6 +5409,7 @@ void U3D_Vm_FieldFrame(void)
         MineRideStep();
         PlatStep();
     }
+    CrowdFrame();
     BoatFrame();
 }
 

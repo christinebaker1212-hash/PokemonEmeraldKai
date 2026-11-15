@@ -459,6 +459,12 @@ static const u8 *GetInteractedObjectEventScript(struct MapPosition *position, u8
     gSpecialVar_LastTalked = gObjectEvents[objectEventId].localId;
     gSpecialVar_Facing = direction;
 
+    // Moemon Kai: a passer-by of CASTELIA's crowd (src/unova/u3d_vm.c): Black's script for its look
+    if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) && U3D_Vm_CrowdLocal(gObjectEvents[objectEventId].localId))
+    {
+        extern const u8 Unova_EventScript_Talk[];
+        return Unova_EventScript_Talk;
+    }
     // Moemon Kai: an ORRE person: their own talk script, Colosseum's (src/orre/orre_npcs.c)
     if (O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup)
      && (script = Orre_Npc_TalkScript(gObjectEvents[objectEventId].localId)) != NULL)

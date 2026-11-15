@@ -1,0 +1,19 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 34 14 30
+wait 200
+mash B 6 15
+shotburst cr_walk 300 30
+wait 300
+press UP 20
+wait 10
+press RIGHT 20
+wait 10
+shotburst cr_more 300 30
+wait 300
+mp where
+echo [cr] done
+quit
