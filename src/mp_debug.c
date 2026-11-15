@@ -4788,6 +4788,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (sscanf(arg, "%d %d", &local, &kind) == 2)
             U3D_Vm_DebugMotion(local, kind);
     }
+    else if (strcmp(cmd, "u3darc") == 0)   // the throne room's arc of light: from person LOCAL to its dais (zone 278's)
+    {
+        void U3D_Vm_DebugArc(u8 local);
+        int local = 0;
+        if (sscanf(arg, "%d", &local) == 1)
+            U3D_Vm_DebugArc(local);
+    }
     else if (strcmp(cmd, "u3ddoors") == 0)
     {
         void U3D_DebugDoors(void);

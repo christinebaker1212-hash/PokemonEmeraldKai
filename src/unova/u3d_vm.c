@@ -1083,7 +1083,8 @@ static void DragonReset(void);
 // (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
 static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
-enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA, W_MOTION };
+enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA, W_MOTION,
+       W_ARC_GLOW, W_ARC_FLY, W_ARC_PEAK, W_ARC_END };
 static u16 sBModelWait;
 // zone 389's time effect (ov065): sWork.white's TIMEFX_PENDING is Black's isEffectPending (its gimmick save 0x36)
 #define ZONE_TIME_EFFECT 389
@@ -1502,6 +1503,117 @@ void U3D_Vm_DebugMotion(u8 local, u8 kind)
 {
     MotionStart(local, kind, kind == MOT_RISE ? 64 : kind == MOT_DROP ? 250 : 0,
                 kind == MOT_RISE ? 60 : kind == MOT_ORBIT ? 270 : kind == MOT_DROP ? 40 : 24);
+}
+
+// the LIGHT STONE's glow and its arc of light in N's throne room (ov064 field_gimmick_arc_effect.c, zone 278):
+// model 0 the glow at the player (its last frame the event's end, a white flash at frame 101 held 15 frames), model 1
+// the arc flown from a person to a tile over FRAMES, ARCH higher at its middle, then shown there playing
+static struct { bool8 glow, flying, shown, debug; u8 se, fade, hold; float from[3], to[3], arch, frame, frames; } sArc;
+
+static void ArcGlowStart(void)   // (StartPlayerEffect)
+{
+    float at[3];
+    U3D_PlayerWorldPos(at);
+    U3D_ExpPlace(0, at[0], at[1], at[2], 0);
+    U3D_ExpHide(0, FALSE);
+    U3D_ExpAnim(0, 0, 0, TRUE);
+    U3D_ExpTex(0, 1, TRUE, 0, TRUE, FALSE);
+    U3D_ExpTex(0, 2, TRUE, 0, TRUE, FALSE);
+    U3D_ExpTex(0, 3, TRUE, 0, TRUE, FALSE);
+    sArc.glow = TRUE, sArc.se = 0, sArc.fade = 0, sArc.hold = 0;
+    MPNet_Log("u3d vm: the LIGHT STONE's glow");
+}
+
+static void ArcFlyStart(u8 local, s16 tx, s16 ty, s16 tz, s16 arch, u16 frames)   // (StartArcEffect)
+{
+    u8 id = ObjEventId(local);
+    if (id < OBJECT_EVENTS_COUNT && !U3D_ObjectFlyPos(gObjectEvents[id].spriteId, sArc.from))
+        U3D_TileWorldPos(gObjectEvents[id].currentCoords.x, gObjectEvents[id].currentCoords.y, sArc.from);
+    else if (id >= OBJECT_EVENTS_COUNT)
+        U3D_PlayerWorldPos(sArc.from);
+    sArc.to[0] = tx * 16.0f + 8.0f, sArc.to[1] = ty * 8.0f, sArc.to[2] = tz * 16.0f + 8.0f;
+    sArc.arch = arch * 8.0f, sArc.frame = 0, sArc.frames = frames ? frames : 1, sArc.flying = TRUE;
+    U3D_ExpPlace(1, sArc.from[0], sArc.from[1], sArc.from[2], 0);
+    U3D_ExpHide(1, FALSE);
+    U3D_ExpAnim(1, 0, 0, FALSE);
+    U3D_ExpTex(1, 1, FALSE, 0, FALSE, FALSE);
+    U3D_ExpTex(1, 2, FALSE, 0, FALSE, FALSE);
+    PlaySE(SE_M_SWIFT);
+    MPNet_Log("u3d vm: an arc of light from person %u (%d,%d,%d) to %d,%d,%d", local, (s32)sArc.from[0],
+              (s32)sArc.from[1], (s32)sArc.from[2], tx, ty, tz);
+}
+
+static void ArcShowAt(s16 tx, s16 ty, s16 tz)   // (ShowArcModelAt)
+{
+    U3D_ExpPlace(1, tx * 16.0f + 8.0f, ty * 8.0f, tz * 16.0f + 8.0f, 0);
+    U3D_ExpHide(1, FALSE);
+    U3D_ExpAnim(1, 0, 0, TRUE);
+    U3D_ExpTex(1, 1, TRUE, 0, TRUE, FALSE);
+    U3D_ExpTex(1, 2, TRUE, 0, TRUE, FALSE);
+    sArc.shown = TRUE;
+    PlaySE(SE_M_REFLECT);
+    MPNet_Log("u3d vm: the arc of light shown at %d,%d,%d", tx, ty, tz);
+}
+
+// (mp u3darc: SCRCMD_StartArcEffect's subroutine in zone 278 without N's battle before it: from LOCAL to 16, 5, 6
+// over 20 frames, 10 high, then shown there)
+void U3D_Vm_DebugArc(u8 local)
+{
+    ArcFlyStart(LocalId(local), 0x10, 5, 6, 0xA, 0x14);
+    sArc.debug = TRUE;
+}
+
+static void ArcFrame(void)   // (the events: Black's frames are two of ours)
+{
+    if (sArc.flying)
+    {
+        float f, k;
+        u32 c;
+        sArc.frame += 0.5f;
+        if (sArc.frame >= sArc.frames)
+        {
+            sArc.frame = sArc.frames, sArc.flying = FALSE;
+            if (sArc.debug)
+                ArcShowAt(0x10, 5, 6), sArc.debug = FALSE;
+        }
+        k = sArc.frame / sArc.frames;
+        f = sArc.frame >= (s32)(sArc.frames + 1) / 2 ? sArc.frames - sArc.frame : sArc.frame;
+        {
+            float p[3];
+            for (c = 0; c < 3; c++)
+                p[c] = sArc.from[c] + (sArc.to[c] - sArc.from[c]) * k;
+            U3D_ExpPlace(1, p[0], p[1] + sArc.arch * f / sArc.frames, p[2], 0);
+        }
+    }
+    if (sArc.shown && !U3D_ExpPlaying(1))
+    {
+        sArc.shown = FALSE;
+        MPNet_Log("u3d vm: the arc of light over");
+    }
+    if (sArc.glow)
+    {
+        static const u16 sSes[] = {SE_M_MORNING_SUN, SE_M_DETECT, SE_M_HEAL_BELL, SE_SHINY};
+        static const u16 sAt[] = {0, 108, 131, 250};
+        float fr = U3D_ExpFrame(0);
+        if (sArc.se < ARRAY_COUNT(sAt) && fr >= sAt[sArc.se])
+            PlaySE(sSes[sArc.se++]);
+        if (sArc.fade == 0 && fr >= 101)
+        {
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_WHITE);
+            sArc.fade = 1, sArc.hold = 30;
+        }
+        else if (sArc.fade == 1 && !gPaletteFade.active && (sArc.hold == 0 || --sArc.hold == 0))
+        {
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_WHITE);
+            sArc.fade = 2;
+        }
+        if (!U3D_ExpPlaying(0) && sArc.fade != 1 && !gPaletteFade.active)
+        {
+            U3D_ExpHide(0, TRUE);
+            sArc.glow = FALSE;
+            MPNet_Log("u3d vm: the LIGHT STONE's glow over");
+        }
+    }
 }
 
 static void TimeFxStart(void)   // (StartEffect: shown, both tracks played, its sound)
@@ -2391,8 +2503,7 @@ static void Step(struct Thread *t)
         case U3C_CloseAllWins:
         case U3C_CloseBgWin:
         case U3C_CloseSpWin:
-            if (!IsFieldMessageBoxHidden())
-                HideFieldMessageBox();
+            HideFieldMessageBox();   // (also when its mode already says hidden: a finished page can leave the box drawn)
             break;
         case U3C_PROC_CallValueScreen:   // the Xtransceiver's call N: each step's words, a key between (ov174)
         {
@@ -2954,11 +3065,6 @@ static void Step(struct Thread *t)
         case U3C_FLD_FACEUP_ScrCmdStart:   // (a speaker's face-up portrait: the words come in the script's messages)
         case U3C_FLD_FACEUP_ScrCmdWaitEnd:
         case U3C_FLD_FACEUP_ScrCmdPrepareField:
-        case U3C_StartArcPlayerEffect:   // (the LIGHT STONE's glow and the arcs of light around the player: not drawn)
-        case U3C_StartArcEffect:
-        case U3C_ShowArcModelAt:
-        case U3C_WaitArcEffectPeak:
-        case U3C_WaitArcEffectEnd:
         case U3C_NETWORK_CmdRequestCommExit:   // (Black's wireless: Kai's co-op stands in for it)
         case U3C_NETWORK_CmdRestartAutoComm:
         case U3C_NETWORK_CmdStartAutoComm:
@@ -4325,6 +4431,26 @@ static void Step(struct Thread *t)
         case U3C_POKEMON_FLD_StartOv55SubProc:   // CASTELIA's crowd (ov055's sub process)
             CrowdStart();
             break;
+        case U3C_StartArcPlayerEffect:   // (the LIGHT STONE's glow: the script waits for it)
+            if (CurrentZone() == ZONE_THRONE)
+                ArcGlowStart(), t->wait = W_ARC_GLOW;
+            break;
+        case U3C_StartArcEffect:   // person, tile x, y (half tiles up), z, arch (half tiles), frames: waits for it
+            if (CurrentZone() == ZONE_THRONE)
+                ArcFlyStart(LocalId(V(0)), (s16)V(1), (s16)V(2), (s16)V(3), (s16)V(4), V(5)), t->wait = W_ARC_FLY;
+            break;
+        case U3C_ShowArcModelAt:
+            if (CurrentZone() == ZONE_THRONE)
+                ArcShowAt((s16)V(0), (s16)V(1), (s16)V(2));
+            break;
+        case U3C_WaitArcEffectPeak:   // (its first animation past frame 5)
+            if (sArc.shown)
+                t->wait = W_ARC_PEAK;
+            break;
+        case U3C_WaitArcEffectEnd:
+            if (sArc.shown)
+                t->wait = W_ARC_END;
+            break;
         case U3C_TRCARD_SYS_ScrCmdSetRecordFlag36:
             sWork.white |= TIMEFX_PENDING;
             break;
@@ -4646,7 +4772,8 @@ static void Step(struct Thread *t)
                 t->pc = here, t->wait = W_FADE;
                 break;
             }
-            BeginNormalPaletteFade(PALETTES_ALL, a[3] > 1 ? a[3] - 1 : 0, from < 0 ? -from : from, to < 0 ? -to : to, RGB_BLACK);
+            BeginNormalPaletteFade(PALETTES_ALL, a[3] > 1 ? a[3] - 1 : 0, from < 0 ? -from : from, to < 0 ? -to : to,
+                                  (a[0] & 0xC) ? RGB_WHITE : RGB_BLACK);   // (GFL's FADE: screens 1 / 2 black, 4 / 8 white)
             break;
         }
         case U3C_PROC_CallFieldOpenEvent:    // (Black reopens its field after a screen: the game's own does that)
@@ -4818,6 +4945,22 @@ static void Wait(struct Thread *t)
         break;
     case W_ICA:   // (the person's flight over: MMDL_ICA_IsDone)
         if (!sIca.playing)
+            t->wait = W_NONE;
+        break;
+    case W_ARC_GLOW:   // (the LIGHT STONE's events: PlayerEffectEvent, ArcEffectEvent, IsArcPeakReached, IsArcAnimeStopped)
+        if (!sArc.glow)
+            t->wait = W_NONE;
+        break;
+    case W_ARC_FLY:
+        if (!sArc.flying)
+            t->wait = W_NONE;
+        break;
+    case W_ARC_PEAK:
+        if (!sArc.shown || U3D_ExpFrame(1) >= 5)
+            t->wait = W_NONE;
+        break;
+    case W_ARC_END:
+        if (!sArc.shown)
             t->wait = W_NONE;
         break;
     case W_TIMEFX:   // (zone 389's time effect over: WaitEffectEventMain)
@@ -5602,6 +5745,8 @@ void U3D_Vm_FieldFrame(void)
         CartStep();
     else if (CurrentZone() == ZONE_TIME_EFFECT)
         TimeFxFrame();
+    else if (CurrentZone() == ZONE_THRONE)
+        ArcFrame();
     else if (CurrentZone() == ZONE_DRIFTVEIL_GYM || CurrentZone() == ZONE_CLAY_LOBBY)
     {
         MineRideStep();
@@ -5676,6 +5821,11 @@ void U3D_Vm_FieldShown(void)
             U3D_ExpAnim(0, 0, 0, FALSE);
             U3D_ExpTex(0, 1, TRUE, 0, FALSE, FALSE);
         }
+    }
+    else if (CurrentZone() == ZONE_THRONE)   // (ov064 Init: both models hidden)
+    {
+        U3D_ExpLoad(64);
+        memset(&sArc, 0, sizeof(sArc));
     }
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
     {

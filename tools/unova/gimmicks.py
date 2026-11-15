@@ -35,6 +35,7 @@ SETUPS = {
     44: ('lift (CLAY, the lobby)', 0x021F39E8),
     45: ('switch toggle (BRYCEN)', 0x021F3B50),
     46: ('rotating room (DRAYDEN)', 0x021F4120),
+    64: ('arc effect, the LIGHT STONE (N\'s Castle, zone 278)', 0x021F3C30),   # (gArcEffectDefaultUnitSetup)
     65: ('time effect, by day (zone 389)', 0x021F38F8),
     165: ('time effect, by night (zone 389)', 0x021F3918, 65),   # (ov065's night setup: its image, a number of its own)
 }
@@ -145,6 +146,7 @@ def _drawn(model, node_mats):
         drawn = model.draw(node_mats)
     finally:
         nitro.mat_apply = keep
+    _drawn.points = [p for _, p in seen]
     return drawn, [m for m, _ in seen], index
 
 
@@ -160,6 +162,30 @@ def parts(model, anims):
             rep.append(len(vsrc))
         vsrc.append(src_of[id(m)])
     inv = [_inv(mats[r]) for r in rep]
+    # (a source flat at rest, a node scaled to nothing there (ov064's glow, its rays): its vertices taken where it
+    # first has a shape, the part's rest that place)
+    flat = [s for s in range(len(rep)) if inv[s] is None]
+    if flat and anims:
+        moved = {}
+        for a in anims:
+            for f in range(a.frames):
+                if not flat:
+                    break
+                _, fm, _ = _drawn(model, a.node_matrices(model, f))
+                pts = _drawn.points
+                for s in list(flat):
+                    m = _inv(fm[rep[s]])
+                    if m is not None:
+                        inv[s] = m
+                        for k, src in enumerate(vsrc):
+                            if src == s:
+                                moved[k] = pts[k]
+                        flat.remove(s)
+        if moved:   # (the vertices keyed by their number: the moved ones are another draw's points)
+            rest = {mi: [tuple((moved.get(index[id(pos)], pos), uv, col, nrm) for pos, uv, col, nrm in t)
+                         for t in tris] for mi, tris in rest.items()}
+            for k, p in moved.items():
+                index[id(p)] = k
     per_anim = []
     for a in anims:
         fr = []
@@ -332,7 +358,12 @@ def _place65(img):
     return [(img.vec(0x021F3970), 0)]
 
 
-PLACES = {65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+# the LIGHT STONE's arc effect (ov064 field_gimmick_arc_effect.c): both models hidden until the script places them
+def _place64(img):
+    return [((0.0, 0.0, 0.0), 0, 1)] * 2
+
+
+PLACES = {64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 

@@ -1,0 +1,24 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 278 16 9
+wait 200
+mash B 6 15
+mp where
+mp u3darc 0
+shotburst ls_arc 140 6
+wait 150
+shot ls_after
+mp u3dclear
+wait 30
+mp u3dzone 278 16 42
+wait 200
+mash B 6 15
+mp u3drun 3
+pressuntillog A 4000 the LIGHT STONE's glow
+shotburst ls_glow 620 40
+wait 640
+echo [ls] done
+quit

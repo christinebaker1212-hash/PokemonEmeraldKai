@@ -1,0 +1,8 @@
+# N's throne room (zone 278): the LIGHT STONE's glow at the player (ov064's player effect: its joint and three texture
+# tracks, the white flash at its frame 101) and its arc of light flown to the dais (StartArcEffect, ShowArcModelAt,
+# the peak and end waits). Shots ls_*.png.
+MODE=1
+TMO=400
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("the LIGHT STONE's glow" "the LIGHT STONE's glow over" "an arc of light" "the arc of light shown" "the arc of light over" "[ls] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")
