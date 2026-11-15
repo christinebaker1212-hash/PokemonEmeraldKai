@@ -1,0 +1,25 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 195 40 11
+wait 200
+mash B 6 15
+mp u3dstones
+shot cs_before
+press DOWN 30
+shotburst cs_slide 120 12
+wait 130
+mp u3dstones
+press DOWN 30
+wait 30
+mp where
+shot cs_after
+mp u3dzone 197 24 2
+wait 200
+mash B 6 15
+press DOWN 30
+wait 30
+echo [cs] done
+quit

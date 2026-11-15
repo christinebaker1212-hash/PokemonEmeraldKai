@@ -36,6 +36,9 @@ SETUPS = {
     45: ('switch toggle (BRYCEN)', 0x021F3B50),
     46: ('rotating room (DRAYDEN)', 0x021F4120),
     48: ('gate news board (the gates)', 0x021F4EA4),   # (gGateExpObjSetups[1]: the English game's, text mode 0)
+    151: ('CHARGESTONE CAVE 1F, its stones (zone 195)', 'd06'),
+    152: ('CHARGESTONE CAVE B1F, its stones (zone 196)', 'd06'),
+    153: ('CHARGESTONE CAVE B2F, its stones (zone 197)', 'd06'),   # (gGateExpObjSetups[1]: the English game's, text mode 0)
     64: ('arc effect, the LIGHT STONE (N\'s Castle, zone 278)', 0x021F3C30),   # (gArcEffectDefaultUnitSetup)
     65: ('time effect, by day (zone 389)', 0x021F38F8),
     165: ('time effect, by night (zone 389)', 0x021F3918, 65),   # (ov065's night setup: its image, a number of its own)
@@ -91,6 +94,8 @@ def member(s, res):
 def main():
     for ov, sv in SETUPS.items():
         name, at = sv[:2]
+        if not isinstance(at, int):
+            continue
         if at is None:
             print('ov%03d %s: setup not found yet' % (ov, name))
             continue
@@ -364,12 +369,51 @@ def _place64(img):
     return [((0.0, 0.0, 0.0), 0, 1)] * 2
 
 
+# CHARGESTONE CAVE's stones (ov051 field_gimmick_d06.c, its effect ov021 fldeff_d06denki.c: the field effects' archive
+# 0x4B, sD06DenkiModelFiles / AnimeFiles): a stone (model 78: its float 120, its ending 121) and its shadow (81) for
+# each of the floor's stones (gGimmickD06StoneTable), hidden until the VM places them, and a panel's pulse (79: its
+# idle 122, its flash 123) at each of the floor's electric panels (gGimmickD06PanelTable)
+D06_SETUP = {'res': [(75, 78, 0), (75, 120, 0), (75, 121, 0), (75, 79, 0), (75, 122, 0), (75, 123, 0), (75, 81, 0)],
+             'objs': [(0, 0, 0, [(1, 0), (2, 0)]), (6, 0, 6, []), (3, 0, 3, [(4, 0), (5, 0)])]}
+D06_ZONES = {151: 195, 152: 196, 153: 197}
+D06_STONES, D06_PANELS = 12, 14
+
+
+def d06_tables():
+    """{zone: (stones [(x, y, z)], panels [(x, y, z)])} from ov051's tables"""
+    img = Image(51)
+    out = {}
+    for k in range(3):
+        rows = []
+        for at in (0x021F3DB4, 0x021F3DFC):
+            z, n, p = img.s32(at + 12 * k), img.s32(at + 12 * k + 4), img.u32(at + 12 * k + 8)
+            rows.append((z, [(img.s32(p + 12 * i), img.s32(p + 12 * i + 4), img.s32(p + 12 * i + 8)) for i in range(n)]))
+        out[rows[0][0]] = (rows[0][1], rows[1][1])
+    return out
+
+
+def _d06_place(zone):
+    def place(img):
+        stones, panels = d06_tables()[zone]
+        hidden = [((0.0, 0.0, 0.0), 0, 1)]
+        out = hidden * (2 * D06_STONES)
+        out += [((x * 16.0 + 8, y * 16.0 + 8, z * 16.0 + 8), 0) for x, y, z in panels]
+        return out + hidden * (D06_PANELS - len(panels))
+    return place
+
+
+def _d06_objs():
+    """the models' setups in the order the places give them: the stones, their shadows, the panels"""
+    st, sh, pa = D06_SETUP['objs']
+    return [st] * D06_STONES + [sh] * D06_STONES + [pa] * D06_PANELS
+
+
 # a gate's news board (ov048 FIELD_GIMMICK_GATE_PlaceBoardModel): placed by the zone's record, hidden until then
 def _place48(img):
     return [((0.0, 0.0, 0.0), 0, 1)]
 
 
-PLACES = {48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+PLACES = {151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 
@@ -379,8 +423,11 @@ def add(pack):
     yaw, hidden)])]"""
     kinds, kind_ids, gims = [], {}, []
     for ov, place in sorted(PLACES.items()):
-        img = Image(SETUPS[ov][2] if len(SETUPS[ov]) > 2 else ov)
-        s = setup(img, SETUPS[ov][1])
+        if SETUPS[ov][1] == 'd06':   # (a setup of our own: a field effect's models, CHARGESTONE's stones)
+            img, s = None, dict(D06_SETUP, objs=_d06_objs())
+        else:
+            img = Image(SETUPS[ov][2] if len(SETUPS[ov]) > 2 else ov)
+            s = setup(img, SETUPS[ov][1])
         models = []
         for i, (where, (mr, md, tr, anims)) in enumerate(zip(place(img), s['objs'])):
             pos, yaw, hidden = (where + (0,))[:3]

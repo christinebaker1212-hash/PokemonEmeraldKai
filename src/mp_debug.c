@@ -4800,6 +4800,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void U3D_DebugHeights(void);
         U3D_DebugHeights();
     }
+    else if (strcmp(cmd, "u3dstones") == 0)   // CHARGESTONE CAVE's stones on this floor (u3d_vm.c)
+    {
+        void U3D_Vm_DebugStones(void);
+        U3D_Vm_DebugStones();
+    }
     else if (strcmp(cmd, "u3dswarm") == 0)   // today's UNOVA outbreak's zone (0xFFFF: none)
     {
         u16 U3D_SwarmZone(void);

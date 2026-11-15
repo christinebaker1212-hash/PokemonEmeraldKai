@@ -5341,6 +5341,8 @@ u8 GetCollisionAtCoords(struct ObjectEvent *objectEvent, s16 x, s16 y, u32 dir)
     u8 direction = dir;
     if (IsCoordOutsideObjectEventMovementRange(objectEvent, x, y))
         return COLLISION_OUTSIDE_RANGE;
+    else if (U3D_StoneStep(objectEvent->isPlayer, objectEvent->currentCoords.x, objectEvent->currentCoords.y, x, y))
+        return COLLISION_IMPASSABLE;   // Moemon Kai: UNOVA: CHARGESTONE CAVE's stones, pushed (src/unova/u3d_vm.c)
     else if ((MapGridGetCollisionAt(x, y) && !U3D_HexOpen(objectEvent->isPlayer, x, y))   // Moemon Kai: UNOVA's floors
           || GetMapBorderIdAt(x, y) == CONNECTION_INVALID || IsMetatileDirectionallyImpassable(objectEvent, x, y, direction))
         return COLLISION_IMPASSABLE;

@@ -43,6 +43,8 @@ u16 U3D_ExpAnimFrames(u16 model, u8 anim);
 bool8 U3D_Elboard_Load(u16 zone);   // u3d_elboard.c: the gates' news boards
 void U3D_Elboard_Frame(void);
 u8 U3D_ZoneWeather(u16 zone);
+float U3D_GridGround(s32 x, s32 z, float near);
+bool8 U3D_StoneStep(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y);
 u32 *U3D_ExpOwnTexture(u16 model, u8 anim, u16 w, u16 h);                               // (its animation's frame now, -1 none)
 void U3D_PlayerFly(bool8 on, float x, float y, float z);     // (the player's sprite and the view at a world place)
 void U3D_HexClear(void);                                     // Black's height areas (CLAY's gym's floors, u3d.c)

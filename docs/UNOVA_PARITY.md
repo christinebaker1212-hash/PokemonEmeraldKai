@@ -36,7 +36,17 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       ROUTE 10's badge gates swing open. Not drawn: SwapBuildModelId / SetBuildModelIndex (a model swapped for another)
 - [x] Camera moves from Black's archive (0x146: archive 0xA3, tools/unova/gen_cameras.py -> u3d_cameras.h, with their
       channels: u3d.c U3D_CameraMoveMasked): ROUTE 10's gates turn the view to the gate
-- [ ] The GEAR STATION's trains on the platforms
+- [x] CHARGESTONE CAVE's stones (ov051 field_gimmick_d06.c, 2026-11-15): each floor's floating stones (Black's
+      effect models from the effects archive 0x4B as pack gimmicks 151-153: the stone and its float, its shadow, the
+      panels' glow) on their tiles at their own level; walked into, a stone slides straight on to the electric panel
+      it meets (none that way: it won't budge; one resting at a panel stays, its float stopped), the panels flash
+      when walked up to, where they rest kept in the save (u3d_vm.c D06*, u3d.c U3D_StoneStep before the map's own
+      collision); scenario unova_chargestone (`mp u3dstones`)
+- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): the GEAR STATION's
+      platform trains (ov052, zones 67-76), the lane trains (ov058, ROUTE 4 / DESERT RESORT), SKYARROW's and TUBELINE
+      BRIDGE's passing traffic and sounds (ov053 / ov054), ROUTE 10's bridge (ov047), the LEAGUE's models (ov049 /
+      ov050), the special POKeMON's spots (ov059: MOOR OF ICIRRUS, CASTELIA), the ENTRALINK's gauge and markers
+      (ov060 / ov061), LIBERTY GARDEN's (ov062)
 - [x] Camera shakes (0x148: ABYSSAL RUINS, CHARGESTONE, DRAGONSPIRAL, N's CASTLE; 2026-11-15, scenario
       unova_camera_shake): ShakeTask's swings, their decay and the script's wait (u3d.c U3D_CameraShake)
 - [ ] 3D cut-ins (RunFld3dCiMain 0x1A1: DESERT RESORT, NACRENE), the ELITE FOUR rooms' entrance flights (FkDemo

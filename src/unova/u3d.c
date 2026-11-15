@@ -640,6 +640,19 @@ static bool8 RailStepBlocked(s16 fromX, s16 fromY, s32 gtx, s32 gtz)
     return U3D_Vm_RailWayBlocked(ftx, ftz, h, gtx, gtz, TileHeight(gtx, gtz, h));
 }
 
+// (event_object_movement.c GetCollisionAtCoords, before the map's own collision) CHARGESTONE CAVE: a stone on map
+// tile X, Y blocks the step, and the player walking into one pushes it (u3d_vm.c U3D_Vm_StoneBlocked)
+bool8 U3D_StoneStep(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y)
+{
+    bool8 U3D_Vm_StoneBlocked(s32 fx, s32 fz, s32 x, s32 z, bool8 isPlayer);
+    s32 gtx, gtz, ftx, ftz;
+    if (!U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+        return FALSE;
+    MapToGrid(x, y, &gtx, &gtz);
+    MapToGrid(fromX, fromY, &ftx, &ftz);
+    return U3D_Vm_StoneBlocked(ftx, ftz, gtx, gtz, isPlayer);
+}
+
 bool8 U3D_StepBlocked(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y)
 {
     if (!U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
@@ -656,6 +669,7 @@ bool8 U3D_StepBlocked(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y)
         if (U3D_CurrentZone() == 121 && RailStepBlocked(fromX, fromY, gtx, gtz))
             return TRUE;   // (... and its walkways' own heights: no stepping off one onto another level)
     }
+
     if (sHexAny && isPlayer)
     {
         s32 gtx, gtz;
@@ -2594,6 +2608,12 @@ void U3D_DebugReach(s16 tx, s16 ty, bool8 levels)
     }
     printf("[test] reach %d,%d: %s (%d tiles walked)\n", tx, ty,
            tx >= 0 && ty >= 0 && tx < 64 && ty < 64 && sSeen[ty][tx] ? "yes" : "no", n);
+}
+
+// the ground at grid tile X, Z: the surface nearest NEAR (the field's gimmicks set on it)
+float U3D_GridGround(s32 x, s32 z, float near)
+{
+    return TileHeight(x, z, near);
 }
 
 void U3D_DebugHeights(void)

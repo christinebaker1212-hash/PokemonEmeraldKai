@@ -262,7 +262,8 @@ static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
                 u8 plateSwitches;   // (BURGH's gym's switches found, a bit each: Black's plate doors' save)
                 u8 entralink[96];   // (the ENTRALINK's Pass Orbs, missions and PASS POWERS: u3d_entralink.c)
                 u8 musical[96];     // (the MUSICALS' props, records and fans: u3d_musical.c)
-              } sWork;   // (gym[0]: ELESA's gym's levers, a bit a lane: CartLanes below)   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
+                u8 stones[3][12][2], stonesPlaced;   // (CHARGESTONE CAVE's stones where they were pushed to, by
+              } sWork;                                //  floor; placed: a bit a floor once laid out)   // (gym[0]: ELESA's gym's levers, a bit a lane: CartLanes below)   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
 {
@@ -1081,6 +1082,9 @@ static void CartLever(u32 lane);
 static void CartTex(u32 lane);
 static void CartDone(void);
 static void DragonReset(void);
+static s8 D06Floor(void);
+static void D06Load(void);
+static void D06Frame(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
 // (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
@@ -5842,6 +5846,7 @@ void U3D_Vm_FieldFrame(void)
     MotionFrame();
     BoatFrame();
     U3D_Elboard_Frame();
+    D06Frame();
 }
 
 void U3D_Vm_FieldShown(void)
@@ -5919,6 +5924,8 @@ void U3D_Vm_FieldShown(void)
     }
     else if (U3D_Elboard_Load(CurrentZone()))   // (ov048: a gate's news board, u3d_elboard.c)
         ;
+    else if (D06Floor() >= 0)   // (ov051: CHARGESTONE CAVE's stones)
+        D06Load();
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
     {
         U3D_ExpLoad(40);
@@ -6613,6 +6620,223 @@ bool8 U3D_Vm_RailWayBlocked(s32 fx, s32 fz, float hf, s32 tx, s32 tz, float ht)
     if (!onA && !onB)
         return FALSE;
     return !((onA && (wa & d)) || (onB && (wb & back)));
+}
+
+// ------------------------------------------------------------------------------------------------ CHARGESTONE
+// CHARGESTONE CAVE's stones (ov051 field_gimmick_d06.c, its effect ov021 fldeff_d06denki.c): each floor's stones
+// (gGimmickD06StoneTable) float on their tiles; a push slides one straight on to the electric panel it meets
+// (gGimmickD06PanelTable: CheckPushStone / ScanSlide, 32 tiles at most; no panel that way, it won't budge), and one
+// resting against a panel stays (its float frozen, IsStoneNextToPanel); a panel walked up to flashes. Drawn by pack
+// gimmicks 151-153 (models 0-11 the stones, 12-23 their shadows, 24 on the panels); where they are, kept in the save
+#define D06_ZONE 195
+static const u8 sD06Count[3] = {12, 5, 3};
+static const u8 sD06Stones[3][12][2] = {
+    {{15, 39}, {24, 46}, {9, 26}, {20, 27}, {21, 26}, {24, 16}, {24, 17}, {34, 26}, {40, 12}, {60, 42}, {61, 52}, {61, 53}},
+    {{43, 49}, {47, 45}, {45, 14}, {43, 12}, {36, 18}},
+    {{9, 23}, {21, 9}, {24, 3}}};
+static const u8 sD06Level[3][12] = {{0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0}, {1, 1, 0, 0, 0}, {0, 0, 0}};   // (their y: a level
+                                                                                                    //  is 16 units)
+static const u8 sD06PanelCount[3] = {14, 11, 11};
+static const u8 sD06Panels[3][14][2] = {
+    {{8, 47}, {8, 37}, {13, 18}, {40, 24}, {27, 13}, {12, 11}, {38, 15}, {55, 50}, {62, 45}, {50, 16}, {66, 25},
+     {63, 24}, {64, 26}, {25, 54}},
+    {{54, 51}, {31, 48}, {31, 49}, {31, 50}, {61, 37}, {46, 41}, {50, 26}, {56, 17}, {41, 17}, {46, 5}, {52, 10}},
+    {{8, 14}, {8, 35}, {12, 42}, {17, 49}, {15, 53}, {11, 50}, {20, 35}, {24, 25}, {25, 14}, {27, 6}, {23, 12}}};
+static struct { s8 floor; bool8 sliding; u8 stone, frame, per; s8 dx, dz; float from[2], to[2]; u16 frozen; s32 tried;
+                float h[12]; } sD06 = {-1};
+
+static s8 D06Floor(void)
+{
+    u16 z = CurrentZone();
+    return z >= D06_ZONE && z < D06_ZONE + 3 ? z - D06_ZONE : -1;
+}
+
+static bool8 D06Panel(s8 f, s32 x, s32 z)
+{
+    u32 i;
+    for (i = 0; i < sD06PanelCount[f]; i++)
+        if (sD06Panels[f][i][0] == x && sD06Panels[f][i][1] == z)
+            return TRUE;
+    return FALSE;
+}
+
+static s32 D06StoneAt(s8 f, s32 x, s32 z)
+{
+    u32 i;
+    for (i = 0; i < sD06Count[f]; i++)
+        if (sWork.stones[f][i][0] == x && sWork.stones[f][i][1] == z)
+            return i;
+    return -1;
+}
+
+// (a tile that stops a sliding stone: the cave's own, a person, another stone; FLDMMDL_MOVE_HitCheckMoveCurrent)
+static bool8 D06Stops(s8 f, s32 x, s32 z)
+{
+    s32 mx = MapX(x) + MAP_OFFSET, my = MapZ(z) + MAP_OFFSET;
+    if (x < 0 || z < 0 || D06Panel(f, x, z) || MapGridGetCollisionAt(mx, my) || D06StoneAt(f, x, z) >= 0)
+        return TRUE;   // (a panel's tile is Black's terrain: MAP_ATTR_IsElectricPanel stops what moves)
+    if (GetObjectEventIdByXY(mx, my) != OBJECT_EVENTS_COUNT)
+        return TRUE;
+    return mx == gSaveBlock1Ptr->pos.x + MAP_OFFSET && my == gSaveBlock1Ptr->pos.y + MAP_OFFSET;
+}
+
+// (ScanSlide: the tiles to the panel the stone meets going DX, DZ; 0 when what stops it isn't a panel)
+static u32 D06Scan(s8 f, u32 i, s32 dx, s32 dz, u32 max)
+{
+    s32 x = sWork.stones[f][i][0], z = sWork.stones[f][i][1];
+    u32 n = 0;
+    while (n < max)
+    {
+        x += dx, z += dz;
+        if (D06Stops(f, x, z))
+            return D06Panel(f, x, z) ? n : 0;
+        n++;
+    }
+    return 0;
+}
+
+static bool8 D06NextToPanel(s8 f, u32 i)
+{
+    static const s8 sDir[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+    u32 d;
+    for (d = 0; d < 4; d++)
+    {
+        s32 x = sWork.stones[f][i][0] + sDir[d][0], z = sWork.stones[f][i][1] + sDir[d][1];
+        if (D06Panel(f, x, z))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+static void D06Place(s8 f, u32 i, float x, float z)
+{
+    float h = sD06.h[i] = U3D_GridGround((s32)floorf(x / 16.0f), (s32)floorf(z / 16.0f), sD06.h[i]);   // (its own floor's)
+    U3D_ExpPlace(i, x, h, z, 0);
+    U3D_ExpPlace(12 + i, x, h - 4.0f, z + 2.5f, 0);   // (its shadow: FLDEFF_D06DENKI_FollowUpdate's sub object)
+}
+
+static void D06Load(void)
+{
+    s8 f = D06Floor();
+    u32 i;
+    sD06.floor = f, sD06.sliding = FALSE, sD06.frozen = 0, sD06.tried = -1;
+    if (f < 0)
+        return;
+    U3D_ExpLoad(151 + f);
+    if (!(sWork.stonesPlaced & (1 << f)))   // (the first visit: the stones where Black first puts them)
+    {
+        memcpy(sWork.stones[f], sD06Stones[f], sizeof(sD06Stones[f]));
+        sWork.stonesPlaced |= 1 << f;
+    }
+    for (i = 0; i < sD06Count[f]; i++)
+    {
+        sD06.h[i] = sD06Level[f][i] * 16.0f;   // (a pushed stone stays on the level it began on)
+        D06Place(f, i, sWork.stones[f][i][0] * 16 + 8, sWork.stones[f][i][1] * 16 + 8);
+        U3D_ExpHide(i, FALSE);
+        U3D_ExpHide(12 + i, FALSE);
+        if (D06NextToPanel(f, i))
+            sD06.frozen |= 1 << i, U3D_ExpAnim(i, 0, 0, FALSE);
+        else
+            U3D_ExpAnim(i, 0, 0, TRUE);
+    }
+    for (i = 0; i < sD06PanelCount[f]; i++)
+        U3D_ExpAnim(24 + i, 0, 0, TRUE);
+    MPNet_Log("u3d vm: CHARGESTONE floor %d, %u stones", f, sD06Count[f]);
+}
+
+static void D06Frame(void)
+{
+    s8 f = sD06.floor;
+    u32 i;
+    if (f < 0 || D06Floor() != f)
+        return;
+    if (!gObjectEvents[gPlayerAvatar.objectEventId].heldMovementActive && !JOY_HELD(DPAD_ANY))
+        sD06.tried = -1;   // (the d-pad let go: a new push may come)
+    for (i = 0; i < sD06Count[f]; i++)   // (the floats and the panels' glow go round)
+        if (!(sD06.frozen & (1 << i)) && !U3D_ExpPlaying(i))
+            U3D_ExpAnim(i, 0, 0, TRUE);
+    for (i = 0; i < sD06PanelCount[f]; i++)
+        if (!U3D_ExpPlaying(24 + i))
+            U3D_ExpAnim(24 + i, 0, 0, TRUE);
+    if (sD06.sliding)   // (EventSlideStone: a tile a step, slower over its last few)
+    {
+        float t = (float)++sD06.frame / sD06.per;
+        u32 k = sD06.stone;
+        D06Place(f, k, sD06.from[0] + (sD06.to[0] - sD06.from[0]) * t, sD06.from[1] + (sD06.to[1] - sD06.from[1]) * t);
+        if (sD06.frame >= sD06.per)
+        {
+            sD06.sliding = FALSE;
+            PlaySE(SE_M_THUNDER_WAVE);
+            if (D06NextToPanel(f, k))
+                sD06.frozen |= 1 << k, U3D_ExpAnim(k, 0, 0, FALSE);
+            MPNet_Log("u3d vm: stone %u slid to %u,%u", k, sWork.stones[f][k][0], sWork.stones[f][k][1]);
+        }
+    }
+}
+
+// (mp u3dstones: each stone of this floor, where it is and the tiles it would slide each way)
+void U3D_Vm_DebugStones(void)
+{
+    s8 f = D06Floor();
+    u32 i;
+    if (f < 0)
+        return;
+    for (i = 0; i < sD06Count[f]; i++)
+        printf("[test] stone %u at %u,%u: up %u down %u left %u right %u%s\n", i, sWork.stones[f][i][0],
+               sWork.stones[f][i][1], D06Scan(f, i, 0, -1, 32), D06Scan(f, i, 0, 1, 32), D06Scan(f, i, -1, 0, 32),
+               D06Scan(f, i, 1, 0, 32), D06NextToPanel(f, i) ? " (at a panel)" : "");
+    for (i = 0; i < sD06PanelCount[f]; i++)
+    {
+        s32 x = sD06Panels[f][i][0], z = sD06Panels[f][i][1];
+        printf("[test] panel %u at %d,%d: collision %u, beside %u %u %u %u\n", i, (int)x, (int)z,
+               MapGridGetCollisionAt(MapX(x) + MAP_OFFSET, MapZ(z) + MAP_OFFSET),
+               MapGridGetCollisionAt(MapX(x) + MAP_OFFSET, MapZ(z - 1) + MAP_OFFSET),
+               MapGridGetCollisionAt(MapX(x) + MAP_OFFSET, MapZ(z + 1) + MAP_OFFSET),
+               MapGridGetCollisionAt(MapX(x - 1) + MAP_OFFSET, MapZ(z) + MAP_OFFSET),
+               MapGridGetCollisionAt(MapX(x + 1) + MAP_OFFSET, MapZ(z) + MAP_OFFSET));
+    }
+}
+
+// u3d.c U3D_StepBlocked: a step onto grid tile X, Z from FX, FZ in CHARGESTONE CAVE: a stone there blocks it, and the
+// player walking into one pushes it (CheckPushStone)
+bool8 U3D_Vm_StoneBlocked(s32 fx, s32 fz, s32 x, s32 z, bool8 isPlayer)
+{
+    s8 f = D06Floor();
+    s32 i;
+    u32 steps;
+    if (!Ready() || f < 0 || sD06.floor != f)
+        return FALSE;
+    if (isPlayer)
+    {
+        u32 k;
+        for (k = 0; k < sD06PanelCount[f]; k++)   // (a panel walked up to flashes: TriggerPanelPulse)
+            if (sD06Panels[f][k][0] == x && sD06Panels[f][k][1] == z && !U3D_ExpPlaying(24 + k))
+                U3D_ExpAnim(24 + k, 1, 0, TRUE);
+    }
+    if ((i = D06StoneAt(f, x, z)) < 0)
+        return D06Panel(f, x, z);   // (a panel's tile isn't walked onto either)
+    if (!isPlayer || sD06.sliding || D06NextToPanel(f, i))
+        return TRUE;
+    {
+        s32 try = ((fx * 128 + fz) * 128 + x) * 128 + z;   // (one push a walk into it: the d-pad held asks each frame)
+        if (try == sD06.tried)
+            return TRUE;
+        sD06.tried = try;
+    }
+    steps = D06Scan(f, i, x - fx, z - fz, 32);
+    if (steps == 0)
+    {
+        PlaySE(SE_WALL_HIT);   // (EventStoneBlocked)
+        return TRUE;
+    }
+    sD06.sliding = TRUE, sD06.stone = i, sD06.frame = 0;
+    sD06.per = steps * 8 + 8;   // (Black's slide: about 8 of this game's frames a tile, slowing at the end)
+    sD06.from[0] = x * 16 + 8, sD06.from[1] = z * 16 + 8;
+    sWork.stones[f][i][0] += (x - fx) * steps, sWork.stones[f][i][1] += (z - fz) * steps;
+    sD06.to[0] = sWork.stones[f][i][0] * 16 + 8, sD06.to[1] = sWork.stones[f][i][1] * 16 + 8;
+    PlaySE(SE_M_STRENGTH);
+    MPNet_Log("u3d vm: stone %u pushed %d,%d, %u tiles", i, (int)(x - fx), (int)(z - fz), steps);
+    return TRUE;
 }
 
 // u3d.c U3D_StepBlocked: a dragon's line its pose keeps closed (grid tile X, Z)
