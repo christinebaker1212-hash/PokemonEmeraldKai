@@ -614,6 +614,30 @@ static void SetupView(void)
             sView.up[2] = sView.right[0] * sView.fwd[1] - sView.right[1] * sView.fwd[0];
         }
     }
+    {
+        // the VISTA LIGHTHOUSE's binoculars: Platinum's camera for the view (s3d_binoculars.c)
+        bool8 S3D_BinocularView(float *target, float *pitch, float *yaw, float *dist, float *halfFov);
+        float t[3], pitch, yaw, dist, half;
+        if (S3D_BinocularView(t, &pitch, &yaw, &dist, &half))
+        {
+            float pr = pitch * 3.14159265f / 180.0f, yr = yaw * 3.14159265f / 180.0f, len;
+            sView.tx = t[0], sView.ty = t[1], sView.tz = t[2];
+            sView.ax = DISPLAY_WIDTH / 2, sView.ay = DISPLAY_HEIGHT / 2;
+            sView.eye[0] = sView.tx + dist * sinf(yr) * cosf(pr);
+            sView.eye[1] = sView.ty + dist * sinf(pr);
+            sView.eye[2] = sView.tz + dist * cosf(yr) * cosf(pr);
+            sView.fwd[0] = sView.tx - sView.eye[0], sView.fwd[1] = sView.ty - sView.eye[1], sView.fwd[2] = sView.tz - sView.eye[2];
+            len = sqrtf(sView.fwd[0] * sView.fwd[0] + sView.fwd[1] * sView.fwd[1] + sView.fwd[2] * sView.fwd[2]);
+            sView.fwd[0] /= len, sView.fwd[1] /= len, sView.fwd[2] /= len;
+            sView.right[0] = -sView.fwd[2], sView.right[1] = 0.0f, sView.right[2] = sView.fwd[0];
+            len = sqrtf(sView.right[0] * sView.right[0] + sView.right[2] * sView.right[2]);
+            sView.right[0] /= len, sView.right[2] /= len;
+            sView.up[0] = sView.right[1] * sView.fwd[2] - sView.right[2] * sView.fwd[1];
+            sView.up[1] = sView.right[2] * sView.fwd[0] - sView.right[0] * sView.fwd[2];
+            sView.up[2] = sView.right[0] * sView.fwd[1] - sView.right[1] * sView.fwd[0];
+            sView.focal = 96.0f / tanf(half * 3.14159265f / 180.0f);
+        }
+    }
 }
 
 // World -> screen x, y and depth (FALSE: behind the camera)

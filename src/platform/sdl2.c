@@ -1003,6 +1003,10 @@ void VDraw(void)
         void U3D_CiComposite(u16 *frame);
         U3D_CiComposite(image);          // Moemon Kai: UNOVA's 3D cut-ins over the field held still (src/unova/u3d.c)
     }
+    {
+        void S3D_BinocularsComposite(u16 *frame);
+        S3D_BinocularsComposite(image);  // Moemon Kai: SINNOH's binoculars' lenses (src/sinnoh/s3d_binoculars.c)
+    }
     MP_ModernAnim_Composite(image);      // ... BATTLE ANIMS > MODERN: glows, trails and impacts over the animation
     {
         void MP_MakerAnim_Composite(u16 *frame);

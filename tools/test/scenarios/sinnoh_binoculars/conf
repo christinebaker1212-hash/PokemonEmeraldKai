@@ -1,0 +1,9 @@
+# Platinum's binoculars (src/sinnoh/s3d_binoculars.c; tools/sinnoh/gen_scripts.py UseVistaLighthouseBinoculars /
+# StartGreatMarshLookout): the VISTA LIGHTHOUSE's look across to the POKéMON LEAGUE with Platinum's camera until A, back
+# where the player stood; PASTORIA's observatory lookout (¥100) shows five spots of the GREAT MARSH, each with one of
+# its POKéMON, then brings the player back. Needs the 3D pack. Shots b_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_MONEY=5000"
+EXPECT_A=("sinnoh binoculars: kind 0 from 6,4" "[test] where map 44.69 xy 6,4" "sinnoh binoculars: kind 1 from 6,4" "sinnoh binoculars: look 5 species" "[test] where map 42.97 xy 6,4")
+UNEXPECT_A=("[crash]" "species 0$")

@@ -29,6 +29,8 @@
 //   21 a battle in the FIGHT AREA's battleground (Platinum's RECORD_TIMES_BATTLED_AT_BATTLEGROUND)
 //   40 SetSpeciesSeen A: the species is seen in the POKéDEX (SPEAR PILLAR's DIALGA and PALKIA)
 //   17 GetCurrentBGM A: the song playing (the VILLA's music box keeps it), 18 SetFieldScene A: that song again
+//   68-72 Platinum's binoculars (s3d_binoculars.c): 68 start (A: 0 the VISTA LIGHTHOUSE's, 1 the GREAT MARSH
+//      lookout's), 69 the next place into VAR_0x8008 / 0x8009 (VAR_RESULT FALSE: the way back), 70 open, 71 close, 72 end
 //   67 CheckHasLearnableReminderMoves A, B (the party slot in variable B: any move to relearn)
 //   65 / 66 A: a buffer command into Platinum's slot A (3-5: gSinnohStrVar) around STR_VAR_3, kept and put back
 //   64 GetRandomSeenSpecies A (one of the SINNOH POKéDEX's seen)
@@ -729,6 +731,36 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         VarSet(a, x % 98 + 2);
         break;
     }
+    case 68:   // (Platinum's binoculars: s3d_binoculars.c; A the kind)
+        {
+            void Sinnoh_BinocularsStart(u16 kind);
+            Sinnoh_BinocularsStart(a);
+        }
+        break;
+    case 69:
+        {
+            void Sinnoh_BinocularsNext(void);
+            Sinnoh_BinocularsNext();
+        }
+        break;
+    case 70:
+        {
+            void Sinnoh_BinocularsOpen(void);
+            Sinnoh_BinocularsOpen();
+        }
+        break;
+    case 71:
+        {
+            void Sinnoh_BinocularsClose(void);
+            Sinnoh_BinocularsClose();
+        }
+        break;
+    case 72:
+        {
+            void Sinnoh_BinocularsEnd(void);
+            Sinnoh_BinocularsEnd();
+        }
+        break;
     case 67:   // (CheckHasLearnableReminderMoves: A the answer, B the party slot's variable)
         VarSet(a, VarGet(b) < PARTY_SIZE && GetNumberOfRelearnableMoves(&gPlayerParty[VarGet(b)]) > 0);
         break;

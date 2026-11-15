@@ -1,0 +1,37 @@
+pressuntil A field 5000
+wait 30
+mp warp 44,69,6,4
+wait 120
+waitfor field 1000
+mp face up
+wait 10
+press A 1
+wait 60
+press A 1
+wait 150
+shot b_vista
+press A 1
+wait 150
+waitfor field 1000
+mp where
+shot b_vista_back
+mp warp 42,97,6,4
+wait 120
+waitfor field 1000
+mp face up
+wait 10
+press A 1
+wait 60
+press A 1
+wait 60
+press A 1
+wait 100
+shot b_marsh1
+wait 140
+shot b_marsh2
+wait 1000
+waitfor field 1500
+wait 60
+mp where
+shot b_marsh_back
+quit

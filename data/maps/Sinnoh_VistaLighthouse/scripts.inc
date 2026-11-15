@@ -3,7 +3,7 @@ Sinnoh_VistaLighthouse_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_VistaLighthouse_EventScript_Bg1::
-	msgbox Sinnoh_VistaLighthouse_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_vista_lighthouse_3
 	end
 
 Sinnoh_VistaLighthouse_EventScript_Person1::
@@ -17,10 +17,6 @@ Sinnoh_VistaLighthouse_EventScript_Person2::
 Sinnoh_VistaLighthouse_EventScript_Person3::
 	msgbox Sinnoh_VistaLighthouse_Text_Person3, MSGBOX_NPC
 	end
-
-Sinnoh_VistaLighthouse_Text_Bg1:
-	.string "A pair of binoculars on a stand. You\n"
-	.string "can see far across the water.$"
 
 Sinnoh_VistaLighthouse_Text_Person3:
 	.string "VOLKNER: From up here you can see all\n"

@@ -3,15 +3,15 @@ Sinnoh_PastoriaCityObservatoryGate2f_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_PastoriaCityObservatoryGate2f_EventScript_Bg1::
-	msgbox Sinnoh_PastoriaCityObservatoryGate2f_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_pastoria_city_observatory_gate_2f_1
 	end
 
 Sinnoh_PastoriaCityObservatoryGate2f_EventScript_Bg2::
-	msgbox Sinnoh_PastoriaCityObservatoryGate2f_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_pastoria_city_observatory_gate_2f_1
 	end
 
 Sinnoh_PastoriaCityObservatoryGate2f_EventScript_Bg3::
-	msgbox Sinnoh_PastoriaCityObservatoryGate2f_Text_Bg3, MSGBOX_SIGN
+	goto SinnohP_pastoria_city_observatory_gate_2f_1
 	end
 
 Sinnoh_PastoriaCityObservatoryGate2f_EventScript_Person1::
@@ -29,17 +29,5 @@ Sinnoh_PastoriaCityObservatoryGate2f_EventScript_Person3::
 Sinnoh_PastoriaCityObservatoryGate2f_EventScript_Person4::
 	goto SinnohP_pastoria_city_observatory_gate_2f_5
 	end
-
-Sinnoh_PastoriaCityObservatoryGate2f_Text_Bg1:
-	.string "A pair of binoculars on a stand. You\n"
-	.string "can see far across the water.$"
-
-Sinnoh_PastoriaCityObservatoryGate2f_Text_Bg2:
-	.string "A pair of binoculars on a stand. You\n"
-	.string "can see far across the water.$"
-
-Sinnoh_PastoriaCityObservatoryGate2f_Text_Bg3:
-	.string "A pair of binoculars on a stand. You\n"
-	.string "can see far across the water.$"
 
 @ --- end of SINNOH words ---

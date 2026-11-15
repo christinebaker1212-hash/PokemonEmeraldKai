@@ -934,6 +934,34 @@ class FileConverter:
             out += ['%s:' % lab('thanks')] + say('Thanks') + wait + ['goto %s' % lab('done')]
             out += ['%s:' % lab('bye')] + say('PleaseComeAgain') + wait + ['%s:' % lab('done'), 'closemessage']
             return out
+        if cmd in ('UseVistaLighthouseBinoculars', 'StartGreatMarshLookout'):
+            # Platinum's binoculars (src/sinnoh/s3d_binoculars.c, SINNOH_MISC 68-72): the view warped to and back from,
+            # the player hidden, the lenses opening and closing; the LIGHTHOUSE's looks at the POKeMON LEAGUE until A
+            # or B, the GREAT MARSH lookout's at five spots of the marsh with one of their POKeMON, 60 of Platinum's
+            # frames each
+            marsh = cmd == 'StartGreatMarshLookout'
+            here = self.dec.origins().get(self.events_low)
+            if here is None:
+                raise Unsupported('binoculars on %s' % self.events_low)
+            n = self.next_local()
+            lab = lambda x: '%s%s__binoculars%d_%s' % (PREFIX, self.low, n, x)
+            out = ['fadescreen FADE_TO_BLACK', self.sinnoh(SINNOH_MISC, 68, 1 if marsh else 0)]
+            if marsh:
+                marsh_map = self.dec.origins()['great_marsh_6'][0]
+                out += ['%s:' % lab('next'), self.sinnoh(SINNOH_MISC, 69), 'goto_if_eq VAR_RESULT, FALSE, %s' % lab('back'),
+                        self.sinnoh(SINNOH_WARP_CONTINUE), 'goto %s' % lab('there'),
+                        'warp %s, VAR_0x8008, VAR_0x8009' % marsh_map, 'waitstate', '%s:' % lab('there'),
+                        self.sinnoh(SINNOH_MISC, 70), 'fadescreen FADE_FROM_BLACK', 'delay 120',
+                        self.sinnoh(SINNOH_MISC, 71), 'delay 16', 'fadescreen FADE_TO_BLACK', 'goto %s' % lab('next'),
+                        '%s:' % lab('back')]
+            else:
+                out += self.command('Warp', ['MAP_HEADER_POKEMON_LEAGUE', '847', '561', 'DIR_SOUTH'])
+                out += [self.sinnoh(SINNOH_MISC, 70), 'fadescreen FADE_FROM_BLACK', 'waitbuttonpress',
+                        self.sinnoh(SINNOH_MISC, 71), 'delay 16', 'fadescreen FADE_TO_BLACK', self.sinnoh(SINNOH_MISC, 69)]
+            out += [self.sinnoh(SINNOH_MISC, 72), self.sinnoh(SINNOH_WARP_CONTINUE), 'goto %s' % lab('home'),
+                    'warp %s, VAR_0x8008, VAR_0x8009' % here[0], 'waitstate', '%s:' % lab('home'),
+                    'fadescreen FADE_FROM_BLACK']
+            return out
         # the move reminders (PASTORIA's MOVE MANIAC): the game's own move relearner (move_relearner.c)
         if cmd == 'CheckHasLearnableReminderMoves':
             return [self.sinnoh(SINNOH_MISC, 67, self.var(a[0]), self.var(a[1]))]
