@@ -68,8 +68,12 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       camera move (tools/unova/gen_league.py -> u3d_league.h: archive 0x9D's paths), the screen goes black, and in the
       CHAMPION's room the platform comes down from above with its glow, lands with a thud and a shake (u3d_vm.c
       League*, U3D_PlayerDepthTest); scenario unova_league_descent
-- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): the special POKeMON's spots (ov059: MOOR OF ICIRRUS, CASTELIA), the ENTRALINK's gauge and markers
-      (ov060 / ov061), LIBERTY GARDEN's (ov062)
+- [x] The special POKeMON's scenes (ov059 sp_poke_gimmick.c, script commands 0x221-0x224 and 0x23E; 2026-11-15, zones
+      47 / 53 / 346): a distributed POKeMON in the party (CELEBI, MELOETTA, KELDEO...) sent out and back in Black's
+      ball models along their arcs, played and waited on as Black's, and in CASTELIA ZORUA's puff of smoke over the
+      lost boy, the swap at its frame 15 (pack gimmicks 59 / 159, u3d_vm.c SpPoke*); scenario unova_special_poke
+- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): the ENTRALINK's gauge and
+      markers (ov060 / ov061), LIBERTY GARDEN's (ov062)
 - [x] Camera shakes (0x148: ABYSSAL RUINS, CHARGESTONE, DRAGONSPIRAL, N's CASTLE; 2026-11-15, scenario
       unova_camera_shake): ShakeTask's swings, their decay and the script's wait (u3d.c U3D_CameraShake)
 - [x] The ELITE FOUR rooms' entrance scenes (ov056 field_fk_demo.c, script command 0x1A2 with the room's slot;
