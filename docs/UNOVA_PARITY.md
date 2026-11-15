@@ -37,9 +37,10 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 - [x] Camera moves from Black's archive (0x146: archive 0xA3, tools/unova/gen_cameras.py -> u3d_cameras.h, with their
       channels: u3d.c U3D_CameraMoveMasked): ROUTE 10's gates turn the view to the gate
 - [ ] The GEAR STATION's trains on the platforms
+- [x] Camera shakes (0x148: ABYSSAL RUINS, CHARGESTONE, DRAGONSPIRAL, N's CASTLE; 2026-11-15, scenario
+      unova_camera_shake): ShakeTask's swings, their decay and the script's wait (u3d.c U3D_CameraShake)
 - [ ] 3D cut-ins (RunFld3dCiMain 0x1A1: DESERT RESORT, NACRENE), the ELITE FOUR rooms' entrance flights (FkDemo
-      0x1A3 / 0x1A4), camera shakes (0x148: ABYSSAL RUINS,
-      CHARGESTONE, DRAGONSPIRAL, N's CASTLE)
+      0x1A3 / 0x1A4)
 - [ ] People flown along Black's paths (MmdlIca 0x15B-0x15E: the roamer's fly-by, ABUNDANT SHRINE, ROUTE 7), a person
       rising / circling (0x225 / 0x226, CASTELIA), dropping in (0x247, RELIC CASTLE), event POKeMON's moves
       (0x221-0x228: CASTELIA, MOOR OF ICIRRUS, LOSTLORN FOREST)

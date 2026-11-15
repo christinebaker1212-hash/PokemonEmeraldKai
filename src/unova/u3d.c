@@ -1029,6 +1029,42 @@ void U3D_CameraMoveMasked(u16 pitch, u16 yaw, s32 dist, s32 x, s32 y, s32 z, u16
     CamStart(CAM_TO, to, frames * 2);
 }
 
+// Black's camera shake (scrcmd_misc.c FIELD_CAMERA_ShakeTask): the view swung by X, Y units on a sine STEPS field
+// frames long, TOTAL times; after THRESH swings, every PERIOD frames the swing shrinks by DX, DY (to 1 at least)
+static struct { s16 x, y, dx, dy; u16 thresh, cnt, period, steps; u8 total, left; float tick; } sShake;
+void U3D_CameraShake(s16 x, s16 y, u16 steps, u8 total, s16 dx, s16 dy, u16 thresh, u16 period)
+{
+    sShake.x = x, sShake.y = y, sShake.dx = dx, sShake.dy = dy, sShake.thresh = thresh, sShake.cnt = 0;
+    sShake.period = period, sShake.steps = steps ? steps : 1, sShake.total = sShake.left = total, sShake.tick = 0;
+}
+
+bool8 U3D_CameraShaking(void)
+{
+    return sShake.left != 0;
+}
+
+static void ShakeView(void)
+{
+    float a;
+    if (sShake.left == 0)
+        return;
+    sShake.tick += 0.5f;   // (a step a field frame, 30 a second)
+    if (sShake.tick == (u32)sShake.tick && sShake.thresh && sShake.total - sShake.left >= sShake.thresh
+     && ++sShake.cnt >= sShake.period)
+    {
+        sShake.cnt = 0;
+        sShake.y = max(sShake.y - sShake.dy, 1);
+        sShake.x = max(sShake.x - sShake.dx, 1);
+    }
+    if (sShake.tick >= sShake.steps)
+        sShake.left--, sShake.tick = 0;
+    if (sShake.left == 0)
+        return;
+    a = sinf(sShake.tick / sShake.steps * 2.0f * (float)M_PI);
+    sView.eye[0] += sShake.x * a;
+    sView.eye[1] += sShake.y * a;
+}
+
 void U3D_CameraLook(u16 frames)
 {
     memcpy(sCam.eye, sView.eye, sizeof(sCam.eye));
@@ -1131,6 +1167,7 @@ static void SetupView(void)
         sView.up[0] = -sp * sy, sView.up[1] = cp, sView.up[2] = -sp * cy;
         sView.focal = CAM_DIST;   // (one unit a pixel at the player's distance)
     }
+    ShakeView();
     sView.ay -= CAM_LIFT * cp;   // (the aim's point 4 up shows a little above the player's feet on the screen)
     sView.ay += sCam.cur[6];
 }

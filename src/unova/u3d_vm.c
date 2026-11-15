@@ -1079,7 +1079,7 @@ static void DragonReset(void);
 // (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
 static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
-enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR };
+enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE };
 static u16 sBModelWait;   // (W_MUSICAL: the MUSICAL dressing room closed)   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
 static u16 sExpWait;
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
@@ -2514,7 +2514,6 @@ static void Step(struct Thread *t)
         case U3C_NETWORK_CmdClearAlwaysNet:
         case U3C_StopSe:
         case U3C_SAVEANIME_Start:
-        case U3C_PROC_FLD_StartCameraShake:
         case U3C_TurnPlayerToFrontEvent:
         case U3C_CreateMmdlIcaProc:   // (a person flown along a path of Black's own: the roamer's fly-by; not drawn)
         case U3C_StartMmdlIcaAnime:
@@ -2603,6 +2602,11 @@ static void Step(struct Thread *t)
         case U3C_PROC_FLD_SaveCamera:
         case U3C_PROC_FLD_StopCameraTargetTrace:
         case U3C_PROC_FLD_ResumeCameraTargetTrace:
+            break;
+        case U3C_PROC_FLD_StartCameraShake:   // x, y, steps, swings, dx, dy, after, every (scrcmd_misc.c ShakeTask)
+            U3D_CameraShake(V(0), V(1), V(2), V(3), V(4), V(5), V(6), V(7));
+            MPNet_Log("u3d vm: the camera shakes (%d, %d, %u swings of %u)", V(0), V(1), V(3), V(2));
+            t->wait = W_SHAKE;
             break;
         case U3C_PROC_FLD_StartCameraMoveFromArchive:   // member, frames: Black's archive 0xA3 (u3d_cameras.h)
             if (a[0] < ARRAY_COUNT(sCameraMoves))
@@ -4290,6 +4294,10 @@ static void Wait(struct Thread *t)
     }
     case W_LIFT_RIDE:   // (CLAY's mine: Black's lift event, till the lift arrives)
         if (sMineRide.lift < 0 && sPlat.model < 0 && sLiftTex.model < 0)
+            t->wait = W_NONE;
+        break;
+    case W_SHAKE:   // (the camera's shake over)
+        if (!U3D_CameraShaking())
             t->wait = W_NONE;
         break;
     case W_BMODEL:   // (a build model's node, still: CheckBuildModelNodeAnimDone)

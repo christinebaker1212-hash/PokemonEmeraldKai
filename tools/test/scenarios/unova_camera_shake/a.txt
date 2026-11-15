@@ -1,0 +1,13 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 207 14 27
+wait 200
+mash B 6 15
+mp u3drun 1
+shotburst cs_shake 24 2
+pressuntil B field 3000
+echo [cs] done
+quit
