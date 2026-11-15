@@ -5486,6 +5486,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] badegg: slot %d species now %d\n", slot, (int)GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES));
         }
     }
+    else if (strcmp(cmd, "setot") == 0)   // setot SLOT ID (hex): party SLOT's trainer ID, its data re-keyed (a trade's)
+    {
+        void MP_SetBoxMonOtIdKeepData(struct BoxPokemon *mon, u32 otId);
+        unsigned slot = 0, id = 0;
+        if (sscanf(arg, "%u %x", &slot, &id) == 2 && slot < PARTY_SIZE)
+            MP_SetBoxMonOtIdKeepData(&gPlayerParty[slot].box, id);
+        printf("[test] setot: slot %u OT %08X\n", slot, (unsigned)GetMonData(&gPlayerParty[slot < PARTY_SIZE ? slot : 0], MON_DATA_OT_ID));
+    }
     else if (strcmp(cmd, "giveforeign") == 0)
     {
         // giveforeign SPECIES[:LEVEL[:lead]] - a Pokemon made in another player's game (another OT

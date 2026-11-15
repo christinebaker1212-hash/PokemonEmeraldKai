@@ -1,0 +1,22 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp giveforeign 25 10
+mp setot 1 9ABC1234
+mp u3dzone 81 8 25
+wait 200
+mash B 6 15
+mp u3drun 10325
+wait 30
+pressuntillog A 3000 other trainers' POKeMON
+wait 60
+shot count
+pressuntil B field 3000
+wait 30
+mp u3drun 10520
+wait 60
+shot greet
+pressuntil B field 3000
+wait 30
+echo [gr] done
+quit

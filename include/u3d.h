@@ -102,6 +102,7 @@ void U3D_Vm_DebugSet(bool8 flag, u16 id, u16 value);   // tests: a Black work or
 bool8 U3D_Vm_ObjectHidden(u8 localId);                        // a person hidden by Black's flag
 bool8 U3D_Vm_SceneStart(void);                                // script.c TryRunOnFrameMapScript: a scene starts
 bool8 U3D_VmRunning(void);
+u16 U3D_Vm_PersonGfx(u8 localId, u16 gfx);                     // (a person's look a script set: Black's NPC table)
 u8 *U3D_Vm_BadgeFlags(void);                                  // UNOVA's 8 badges, FLAG_UNOVA_BADGE01 + n
 void U3D_Vm_ResetWork(void);
 const void *U3D_Vm_WorkData(u32 *size);                       // Black's event work, saved (mp_region.c chunk UNEW)

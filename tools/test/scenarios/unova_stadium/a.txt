@@ -1,0 +1,21 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp teach 0 129
+mp u3dclear
+wait 120
+mash B 8 20
+mp u3dzone 81 8 25
+wait 200
+mash B 6 15
+shot stadium
+mp facing
+press UP 1
+wait 20
+press A 1
+wait 60
+shot talk
+pressuntil A field 8000
+wait 60
+echo [st] done
+quit

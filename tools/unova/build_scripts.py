@@ -48,6 +48,8 @@ File: "U3SZ", u32 the size of the pack, the pack deflated (zlib). Pack (little e
   threshold, x, pad, z, param, u32); then the marts (ov021 scrcmd_proc_fld.c): u32 lists (26), u8 each one's count,
   pad to 2, the lists' items (u16, Black's numbers), u8 the list for each badge count x9, pad to 4; then the BP
   exchanges (items, TMs): u32 count, (u16 item, pad, s32 BP) each, twice
+  (version 11) Black's NPC table (a/2/0/9, ov010 scrcmd_network.c NpcTableRow: NIMBASA's stadium trainers and crowd):
+  u32 count, u16 key A (the place), key B (the story's stage), object code, trainer each
 """
 import os
 import struct
@@ -60,7 +62,8 @@ import narc  # noqa: E402
 import scripts as scr  # noqa: E402
 import zones as zr  # noqa: E402
 
-VERSION = 10
+VERSION = 11
+NPC_TABLE_ARC = 'a/2/0/9'   # (arc 0xD1: SCRCMD_NETWORK_CmdLoadNpcTable)
 SUBWAY_SETS, SUBWAY_TRAINERS = 'a/2/1/4', 'a/2/1/5'   # (version 10: the BATTLE SUBWAY)
 WFBC_ARC, WFBC_PEOPLE, WFBC_SPOTS = 'a/1/5/4', 30, 0x22   # (version 9: BLACK CITY's residents)
 TRADE_ARC = 'a/1/6/5'   # (version 8: the in-game trades)
@@ -190,6 +193,8 @@ def main():
     pack += bytes(wf[WFBC_SPOTS][:40]).ljust(40, b'\0')
     pack += b'\0' * (-len(pack) % 4)
     pack += subway_block(len(pack))
+    npc = bytes(narc.arc(NPC_TABLE_ARC)[0])
+    pack += struct.pack('<I', len(npc) // 8) + npc[:len(npc) // 8 * 8]
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(b'U3SZ' + struct.pack('<I', len(pack)) + zlib.compress(bytes(pack), 6))
     print('%s: %d script files, %d zones, %d event files, %d bytes' % (out_path, len(narc.arc(scr.ARC)), len(zs),

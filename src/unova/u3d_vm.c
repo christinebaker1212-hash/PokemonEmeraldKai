@@ -135,7 +135,7 @@ static void Load(void)
     sPack = malloc(raw ? raw : 1);
     sPackSize = raw;
     if (sPack == NULL || uncompress(sPack, &raw, data + 8, (unsigned long)(size - 8)) != 0 || memcmp(sPack, "U3DS", 4) != 0
-     || Get32(4) < 1 || Get32(4) > 10)
+     || Get32(4) < 1 || Get32(4) > 11)
     {
         printf("[u3d] %s: can't read UNOVA's scripts\n", path);
         free(sPack);
@@ -382,6 +382,41 @@ static const u8 *Person(u16 zone, u8 index)
 }
 
 static u16 Le16(const u8 *p) { return p[0] | p[1] << 8; }
+
+// ---- Black's NPC table (a/2/0/9, the pack's version 11; ov010 scrcmd_network.c): NIMBASA's BIG STADIUM and SMALL
+// COURT trainers by the stadium's place (key A) and the story's stage (key B), the crowd's looks; the script sets a
+// person's event (EVENTDATA_SYSTEM_SetNpcEventId) or look (SetNpcObjCode) for as long as the player is in the zone
+#define NPC_OVERRIDES 64
+static u16 sNpcEvOver[NPC_OVERRIDES], sNpcCodeOver[NPC_OVERRIDES], sOverZone = 0xFFFF;   // (+1; 0: the record's own)
+static void OverridesHere(void)
+{
+    if (sOverZone != U3D_CurrentZone())
+    {
+        memset(sNpcEvOver, 0, sizeof(sNpcEvOver));
+        memset(sNpcCodeOver, 0, sizeof(sNpcCodeOver));
+        sOverZone = U3D_CurrentZone();
+    }
+}
+
+// a person's script: a script's change (the table's trainer), else their record's
+static u16 PersonScript(u8 local, const u8 *p)
+{
+    OverridesHere();
+    if (local >= 1 && local <= NPC_OVERRIDES && sNpcEvOver[local - 1])
+        return sNpcEvOver[local - 1] - 1;
+    return Le16(p + 10);
+}
+
+// event_object_movement.c TrySpawnObjectEventTemplate: a person's look as a script set it (SetNpcTripleFromTable)
+u16 U3D_Vm_PersonGfx(u8 localId, u16 gfx)
+{
+    if (!U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+        return gfx;
+    OverridesHere();
+    if (localId >= 1 && localId <= NPC_OVERRIDES && sNpcCodeOver[localId - 1])
+        return OBJ_EVENT_GFX_UNOVA_FIRST + sNpcCodeOver[localId - 1] - 1;
+    return gfx;
+}
 
 // ------------------------------------------------------------------------------------------------ the map's people
 // The map's object event of Black's object id OBJ: its person's place in the zone's event data + 1
@@ -1145,6 +1180,9 @@ static u32 ShopsAt(void)
     return tables + 4 + 16 * Get32(tables);
 }
 
+// Black's NPC table after the BP exchanges (version 11): u16 key A, key B, object code, trainer each
+static const u8 *NpcTable(u32 *count);
+
 // the BP exchanges' lists after the marts' (WHICH 0: shop 254, items; 1: shop 253, TMs): u16 item, pad, s32 BP each
 const u8 *U3D_Vm_BpList(u8 which, u32 *count)
 {
@@ -1159,6 +1197,48 @@ const u8 *U3D_Vm_BpList(u8 which, u32 *count)
         at += 4 + 8 * Get32(at);
     *count = Get32(at);
     return sPack + at + 4;
+}
+
+static const u8 *NpcTable(u32 *count)
+{
+    u32 n;
+    const u8 *tms = Ready() && Get32(4) >= 11 ? U3D_Vm_BpList(1, &n) : NULL;
+    *count = 0;
+    if (tms == NULL)
+        return NULL;
+    tms += 8 * n;
+    *count = tms[0] | tms[1] << 8 | tms[2] << 16 | (u32)tms[3] << 24;
+    return tms + 4;
+}
+
+// SCRCMD_NETWORK_FindNpcTableRow: the row of keys A and B (0 if none)
+static u32 NpcTableRow(u16 keyA, u16 keyB)
+{
+    u32 n, i;
+    const u8 *t = NpcTable(&n);
+    for (i = 0; t && i < n; i++)
+        if (Le16(t + 8 * i) == keyA && Le16(t + 8 * i + 2) == keyB)
+            return i;
+    return 0;
+}
+
+static u8 ObjEventId(u8 localId);
+static void NpcFromRow(u8 slot, u32 row, bool8 secondary, bool8 look)
+{
+    u32 n;
+    const u8 *t = NpcTable(&n);
+    if (t == NULL || row >= n || slot >= NPC_OVERRIDES)
+        return;
+    OverridesHere();
+    sNpcEvOver[slot] = Le16(t + 8 * row + 6) + (secondary ? 5000 : 3000) + 1;   // (EVENT_TRAINER_GetPrimary/SecondaryScriptId)
+    if (look)
+    {
+        u8 id = ObjEventId(slot + 1);
+        sNpcCodeOver[slot] = Le16(t + 8 * row + 4) + 1;
+        if (id < OBJECT_EVENTS_COUNT)   // (already on the field: shown at once)
+            ObjectEventSetGraphicsId(&gObjectEvents[id], OBJ_EVENT_GFX_UNOVA_FIRST + Le16(t + 8 * row + 4));
+    }
+    MPNet_Log("u3d vm: npc table: person %u is trainer %u (row %u)", slot, Le16(t + 8 * row + 6), row);
 }
 
 // BLACK CITY's market (shops 247-251, FIELD_WFBC_DATA_LOCAL_FillPeopleListEntries): stall K sells what residents 2K
@@ -3097,6 +3177,145 @@ static void Step(struct Thread *t)
             *WorkPtr(a[0]) = out;
             break;
         }
+        case U3C_StartCountOtherOtIdsTask:   // (scrcmd_otid.c: the trainers other than the player whose POKeMON the
+        {                                    // party and the boxes hold, EGGS left out, 50 at most)
+            static u32 sIds[50];
+            u32 n = 0, i, j, me = T1_READ_32(gSaveBlock2Ptr->playerTrainerId);
+            struct PokemonStorage *st = MP_PersonalStorage();
+            for (i = 0; i < PARTY_SIZE + TOTAL_BOXES_COUNT * IN_BOX_COUNT && n < ARRAY_COUNT(sIds); i++)
+            {
+                const struct BoxPokemon *b = i < PARTY_SIZE ? &gPlayerParty[i].box
+                                                            : &st->boxes[(i - PARTY_SIZE) / IN_BOX_COUNT][(i - PARTY_SIZE) % IN_BOX_COUNT];
+                u32 ot;
+                if (!GetBoxMonData(b, MON_DATA_SANITY_HAS_SPECIES) || GetBoxMonData(b, MON_DATA_IS_EGG))
+                    continue;
+                if ((ot = GetBoxMonData(b, MON_DATA_OT_ID)) == me)
+                    continue;
+                for (j = 0; j < n && sIds[j] != ot; j++)
+                    ;
+                if (j == n)
+                    sIds[n++] = ot;
+            }
+            *WorkPtr(a[0]) = n;
+            MPNet_Log("u3d vm: %u other trainers' POKeMON", n);
+            break;
+        }
+        case U3C_GetNpcGreetingMessage:   // fixed, result: Black's greeting by the clock (scrcmd_misc.c)
+        {
+            // gGreetingCounterTable (ov021 0x021DD774): two records each and their digits (-1: none)
+            static const s8 sRecA[29] = {-1, 30, 1, 11, 21, 23, 7, 5, 10, 8, 4, 3, 9, 24, 28, 29, 31, 72, 73, 74, 75, 78, 79,
+                                         89, 90, 81, 83, 85, 87};
+            static const s8 sRecB[29] = {-1, -1, -1, -1, 22, -1, -1, 6, -1, 80, 71};
+            static const u8 sDigA[29] = {0, 6, 9, 9, 9, 9, 9, 9, 9, 6, 9, 9, 6, 9, 6, 6, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
+            static const u8 sDigB[29] = {0, 0, 0, 0, 9, 0, 0, 9, 0, 4, 4};
+            u16 msg, base, i;
+            s32 party;
+            RtcCalcLocalTime();
+            StringCopy(Slot(0), gSaveBlock2Ptr->playerName);
+            for (party = 0; party < PARTY_SIZE; party++)
+                if (GetMonData(&gPlayerParty[party], MON_DATA_SPECIES) && !GetMonData(&gPlayerParty[party], MON_DATA_IS_EGG))
+                {
+                    GetSpeciesName(Slot(3), GetMonData(&gPlayerParty[party], MON_DATA_SPECIES));
+                    break;
+                }
+            if (gLocalTime.minutes < 10)
+            {
+                u32 ca = 0, cb = 0;
+                base = 0;
+                msg = Random() % 29;
+                if (sRecA[msg] >= 0)
+                {
+                    ca = min(sWork.misc.record[(u8)sRecA[msg]], 999999999);
+                    ConvertIntToDecimalStringN(Slot(1), ca, STR_CONV_MODE_LEFT_ALIGN, sDigA[msg]);
+                }
+                if (msg < 11 && sRecB[msg] >= 0)
+                {
+                    cb = min(sWork.misc.record[(u8)sRecB[msg]], 999999999);
+                    ConvertIntToDecimalStringN(Slot(2), cb, STR_CONV_MODE_LEFT_ALIGN, sDigB[msg]);
+                }
+                if (msg < 11 && ((sRecA[msg] >= 0 && sRecB[msg] >= 0 && (ca == 0 || cb == 0)) || (sRecB[msg] < 0 && ca == 0)))
+                    msg = 0;
+                if (msg >= 11 || gSaveBlock2Ptr->playerGender == FEMALE)
+                    msg += 11;
+            }
+            else if (gLocalTime.minutes < 35)
+                base = 0x28, msg = Random() % 0x32;
+            else
+                base = 0x5A, msg = Random() % 0x50;
+            msg += base;
+            if (msg >= 102 && msg <= 109 && !FlagGet(FLAG_UNOVA_BADGE01 + msg - 102))   // (gGreetingMiscMessageIds: a badge's)
+                msg = 0x5A + Random() % 12;
+            for (i = 135; V(0) == 0 && i <= 149; i++)   // (gGreetingRandomMessageIds)
+                if (msg == i)
+                {
+                    msg = 0x6E + Random() % 20;
+                    break;
+                }
+            *WorkPtr(a[1]) = msg;
+            break;
+        }
+        case U3C_GetBirthdayMessageIds:   // (the DS owner's birthday isn't kept here: Black's other days' lines)
+        {
+            // gBirthdayTextIdTable (ov021 0x021DD6D0)
+            static const u16 sText[30] = {1697, 1494, 1689, 1534, 1671, 1443, 1572, 1699, 1562, 1717, 1547, 1538, 1696,
+                                          1405, 585, 522, 599, 587, 595, 520, 511, 531, 563, 528, 555, 594, 518, 581, 618, 709};
+            u16 i = Random() % (V(0) ? 0x1E : 0x16);
+            *WorkPtr(a[1]) = i + 0x16;
+            *WorkPtr(a[2]) = i + 0x35;
+            *WorkPtr(a[3]) = sText[i];
+            break;
+        }
+        case U3C_NETWORK_CmdLoadNpcTable:   // (the table is the pack's, always at hand)
+        case U3C_NETWORK_CmdFreeNpcTable:
+            break;
+        case U3C_NETWORK_CmdSetNpcEventFromTable:   // (key A, the person, key B)
+            NpcFromRow(V(1), NpcTableRow(V(0), V(2)), FALSE, FALSE);
+            break;
+        case U3C_NETWORK_CmdSetNpcEventPairFromTable:   // (key A, a person and their partner, key B: a double battle)
+        {
+            u32 row = NpcTableRow(V(0), V(3));
+            NpcFromRow(V(1), row, FALSE, FALSE);
+            NpcFromRow(V(2), row, TRUE, FALSE);
+            break;
+        }
+        case U3C_NETWORK_CmdSetNpcTripleFromTable:   // (three people, three rows: their looks and their trainers)
+            NpcFromRow(V(0), V(3), FALSE, TRUE);
+            NpcFromRow(V(1), V(4), FALSE, TRUE);
+            NpcFromRow(V(2), V(5), FALSE, TRUE);
+            break;
+        case U3C_NETWORK_CmdApplyTableEventKeys:   // (every table trainer can be battled again: a new day's lineup)
+        {
+            u32 n, i;
+            const u8 *t = NpcTable(&n);
+            for (i = 0; t && i < n; i++)
+                FlagTo(1420 + Le16(t + 8 * i + 6), FALSE);
+            break;
+        }
+        case U3C_NETWORK_PickSixDistinctRandom:   // (six different rows of the table's last 52, from 0x37)
+        {
+            u16 picked[6], pool = 0x34;
+            u32 d, c, k;
+            for (d = 0; d < 6; d++, pool--)
+            {
+                s32 skip = Random() % pool;
+                for (c = 0; c < 0x34; c++)
+                {
+                    for (k = 0; k < d && picked[k] != c; k++)
+                        ;
+                    if (k == d && --skip < 0)
+                    {
+                        picked[d] = c;
+                        break;
+                    }
+                }
+            }
+            for (d = 0; d < 6; d++)
+                *WorkPtr(a[d]) = picked[d] + 0x37;
+            break;
+        }
+        case U3C_NETWORK_CmdGetAlwaysNet:   // (Black's "always connect" setting: off; the CO-OP menu is Kai's)
+            *WorkPtr(a[0]) = 0;
+            break;
         case U3C_PROC_FLD_StoreEffectEncountItemId:   // (the item a dust cloud or a bird's shadow left: u3d_phenom.c)
         {
             u16 Unova_Phenom_Item(void);
@@ -4087,9 +4306,9 @@ void U3D_VmTalk(void)
             return;
         }
     }
-    if (p != NULL && Le16(p + 10) == 2000 && TrySign())
+    if (p != NULL && PersonScript(local, p) == 2000 && TrySign())
         return;   // (a person with nothing to say over a sign, Black's blockers: the sign answers, CLAY's gym's levers)
-    if (p == NULL || !Run(Le16(p + 10), Le16(p), TRUE))
+    if (p == NULL || !Run(PersonScript(local, p), Le16(p), TRUE))
         NothingToRun();
 }
 
@@ -5526,7 +5745,7 @@ static bool8 SeesPlayer(const u8 *p, u8 local, struct EyeHit *hit)
 {
     struct ObjectEvent *o, *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
     u8 id = ObjEventId(local), d, dir, k;
-    u16 trainer = TrainerOfScript(Le16(p + 10)), range = Le16(p + 14);
+    u16 trainer = TrainerOfScript(PersonScript(local, p)), range = Le16(p + 14);
     if (trainer == 0xFFFF || id >= OBJECT_EVENTS_COUNT || FlagOn(TRAINER_FLAG_BASE + trainer) || range == 0)
         return FALSE;
     o = &gObjectEvents[id];

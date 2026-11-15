@@ -1334,7 +1334,7 @@ static u8 InitObjectEventStateFromTemplate(const struct ObjectEventTemplate *tem
     y = template->y + MAP_OFFSET;
     objectEvent->active = TRUE;
     objectEvent->triggerGroundEffectsOnMove = TRUE;
-    SET_OBJ_GFX_ID(objectEvent, TEMPLATE_GFX_ID(template));
+    SET_OBJ_GFX_ID(objectEvent, U3D_Vm_PersonGfx(template->localId, TEMPLATE_GFX_ID(template)));   // Moemon Kai (UNOVA: u3d_vm.c)
     objectEvent->movementType = template->movementType;
     if (objectEvent->movementType >= NUM_MOVEMENT_TYPES)   // Moemon Kai: a save's template from a bad script (scrcmd.c)
         objectEvent->movementType = MOVEMENT_TYPE_FACE_DOWN;

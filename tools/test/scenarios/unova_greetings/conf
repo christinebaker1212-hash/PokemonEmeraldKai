@@ -1,0 +1,8 @@
+# Black's people who count and greet (u3d_vm.c): the trade counter's script 10325 counts the trainers other than the
+# player whose POKeMON the party and boxes hold (StartCountOtherOtIdsTask: one here, `mp setot`'s), and the
+# greeting script 10520 picks Black's line by the clock (GetNpcGreetingMessage). Shots count, greet.
+MODE=1
+TMO=240
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("u3d vm: 1 other trainers' POKeMON" "script 10520" "[gr] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not played yet")

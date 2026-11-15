@@ -1,0 +1,8 @@
+# NIMBASA's BIG STADIUM / SMALL COURT trainers (Black's NPC table, ov010 scrcmd_network.c; u3d_vm.c NpcFromRow): after
+# the credits, zone 81's script picks the day's six from the table's crowd rows and sets each place's trainer by the
+# story's stage; talking to one starts that trainer's battle.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("u3d vm: npc table: person 5 is trainer" "[st] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not played yet")
