@@ -1,0 +1,22 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 76 47 12
+wait 100
+mp where
+wait 200
+mash B 6 15
+shot st_empty
+mp u3dsubwaytool 18 0 1
+wait 10
+shot st_train
+mp u3dsubwaytool 19 0 0
+shotburst st_doors 120 20
+wait 130
+mp u3dsubwaytool 20 1 0
+wait 10
+shot st_gone
+echo [st] done
+quit

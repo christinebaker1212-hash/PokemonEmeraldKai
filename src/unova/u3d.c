@@ -1090,6 +1090,13 @@ bool8 U3D_CameraShaking(void)
     return sShake.left != 0;
 }
 
+static float sBob;
+// the view a little up or down this frame (the map's origin moved: ov052's train sway, FIELD_G3D_MAPPER_SetOriginOffset)
+void U3D_ViewBob(float dy)
+{
+    sBob = dy;
+}
+
 static void ShakeView(void)
 {
     float a;
@@ -1215,6 +1222,7 @@ static void SetupView(void)
         sView.focal = CAM_DIST;   // (one unit a pixel at the player's distance)
     }
     ShakeView();
+    sView.eye[1] -= sBob;   // (the BATTLE SUBWAY's carriage sways: U3D_ViewBob)
     sView.ay -= CAM_LIFT * cp;   // (the aim's point 4 up shows a little above the player's feet on the screen)
     sView.ay += sCam.cur[6];
 }

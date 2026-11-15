@@ -42,8 +42,12 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       it meets (none that way: it won't budge; one resting at a panel stays, its float stopped), the panels flash
       when walked up to, where they rest kept in the save (u3d_vm.c D06*, u3d.c U3D_StoneStep before the map's own
       collision); scenario unova_chargestone (`mp u3dstones`)
-- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): the GEAR STATION's
-      platform trains (ov052, zones 67-76), the lane trains (ov058, ROUTE 4 / DESERT RESORT), SKYARROW's and TUBELINE
+- [x] The GEAR STATION's platform trains (ov052 / ov021 fldeff_btrain.c, 2026-11-15): the subway's script commands
+      18 / 34 bring a line's train (Black's eight models and their four door animations, pack gimmick 52) to the
+      platform, 19 plays its doors, 20 hides it (u3d_subway.c); the carriage (zone 75) sways as Black's does, until
+      command 350 stops it (U3D_Subway_SwayFrame, u3d.c U3D_ViewBob); scenario unova_subway_train
+      (`mp u3dsubwaytool CMD OP1 OP2`)
+- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): the lane trains (ov058, ROUTE 4 / DESERT RESORT), SKYARROW's and TUBELINE
       BRIDGE's passing traffic and sounds (ov053 / ov054), ROUTE 10's bridge (ov047), the LEAGUE's models (ov049 /
       ov050), the special POKeMON's spots (ov059: MOOR OF ICIRRUS, CASTELIA), the ENTRALINK's gauge and markers
       (ov060 / ov061), LIBERTY GARDEN's (ov062)

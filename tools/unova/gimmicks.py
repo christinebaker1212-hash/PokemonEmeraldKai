@@ -36,6 +36,7 @@ SETUPS = {
     45: ('switch toggle (BRYCEN)', 0x021F3B50),
     46: ('rotating room (DRAYDEN)', 0x021F4120),
     48: ('gate news board (the gates)', 0x021F4EA4),   # (gGateExpObjSetups[1]: the English game's, text mode 0)
+    52: ("the BATTLE SUBWAY's trains at the GEAR STATION's platforms (zones 67-76)", 'btrain'),
     151: ('CHARGESTONE CAVE 1F, its stones (zone 195)', 'd06'),
     152: ('CHARGESTONE CAVE B1F, its stones (zone 196)', 'd06'),
     153: ('CHARGESTONE CAVE B2F, its stones (zone 197)', 'd06'),   # (gGateExpObjSetups[1]: the English game's, text mode 0)
@@ -379,6 +380,17 @@ D06_ZONES = {151: 195, 152: 196, 153: 197}
 D06_STONES, D06_PANELS = 12, 14
 
 
+# the BATTLE SUBWAY's trains (ov021 fldeff_btrain.c, started by the subway's script commands 18 / 34, ov052 sets the
+# zones up): its eight trains (sBtrainModelFiles, the effects' archive 0x4B), each with the four animations they all
+# share (sBtrainAnimeFiles: its doors), hidden until a script brings one in
+BTRAIN_SETUP = {'res': [(75, f, 0) for f in (85, 86, 87, 88, 89, 90, 91, 92)] + [(75, f, 0) for f in (124, 125, 126, 127)],
+                'objs': [(k, 0, k, [(8, 0), (9, 0), (10, 0), (11, 0)]) for k in range(8)]}
+
+
+def _place_btrain(img):
+    return [((0.0, 0.0, 0.0), 0, 1)] * 8
+
+
 def d06_tables():
     """{zone: (stones [(x, y, z)], panels [(x, y, z)])} from ov051's tables"""
     img = Image(51)
@@ -413,7 +425,7 @@ def _place48(img):
     return [((0.0, 0.0, 0.0), 0, 1)]
 
 
-PLACES = {151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+PLACES = {52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 
@@ -425,6 +437,8 @@ def add(pack):
     for ov, place in sorted(PLACES.items()):
         if SETUPS[ov][1] == 'd06':   # (a setup of our own: a field effect's models, CHARGESTONE's stones)
             img, s = None, dict(D06_SETUP, objs=_d06_objs())
+        elif SETUPS[ov][1] == 'btrain':
+            img, s = None, BTRAIN_SETUP
         else:
             img = Image(SETUPS[ov][2] if len(SETUPS[ov]) > 2 else ov)
             s = setup(img, SETUPS[ov][1])

@@ -5847,6 +5847,10 @@ void U3D_Vm_FieldFrame(void)
     BoatFrame();
     U3D_Elboard_Frame();
     D06Frame();
+    {
+        void U3D_Subway_SwayFrame(u16 zone);
+        U3D_Subway_SwayFrame(CurrentZone());   // (the BATTLE SUBWAY's carriage: u3d_subway.c)
+    }
 }
 
 void U3D_Vm_FieldShown(void)
@@ -5926,6 +5930,8 @@ void U3D_Vm_FieldShown(void)
         ;
     else if (D06Floor() >= 0)   // (ov051: CHARGESTONE CAVE's stones)
         D06Load();
+    else if (CurrentZone() >= 67 && CurrentZone() <= 76)   // (ov052: the GEAR STATION's platforms, their trains
+        U3D_ExpLoad(52);                                   //  brought in by the subway's scripts: u3d_subway.c)
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
     {
         U3D_ExpLoad(40);

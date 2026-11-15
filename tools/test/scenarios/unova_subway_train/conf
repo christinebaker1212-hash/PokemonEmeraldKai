@@ -1,0 +1,7 @@
+# The GEAR STATION's platform trains (ov021 fldeff_btrain.c through the subway's commands 18-20: pack gimmick 52): a
+# line's train brought to zone 76's platform, its doors' animation, then hidden. Shots st_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("u3d subway: train 0 at the platform" "[st] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

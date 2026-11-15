@@ -51,6 +51,7 @@ static struct
     struct U3DSubwayDraw partnerDraws[3];
     u8 partnerResult[3];
     bool8 battleWon;
+    u8 train;   // (the platform's train now: pack gimmick 52's model)
 } sW;
 
 // ---- Black's tables (the pack's version 10 block, after its sets and trainers)
@@ -741,6 +742,46 @@ bool8 U3D_Subway_Passenger(u32 i, u16 *code, s16 *x, s16 *z, u16 *param)
     return TRUE;
 }
 
+// ---- the carriage's sway (ov052 FIELD_GIMMICK_BSUBWAY_UpdateTrainSway, zone 75): after a wait from Black's table the
+// view jolts up a unit, down a unit, then back, a step a Black frame (two of this game's); a field frame
+static struct { bool8 halted; u8 phase, interval, tick; u16 wait; s8 off; } sSway;
+
+void U3D_Subway_SwayFrame(u16 zone)
+{
+    static const u8 sIntervals[4] = {60, 10, 60, 10};   // (sFieldGimmickBsubwaySwayIntervals)
+    static u16 sZone = 0xFFFF;
+    if (zone != sZone)   // (a new visit: the sway on again, from the table's start)
+        memset(&sSway, 0, sizeof(sSway)), sZone = zone;
+    if (zone != 75)
+    {
+        U3D_ViewBob(0);
+        return;
+    }
+    if (++sSway.tick & 1)   // (the view as it was: a Black frame lasts two)
+        return;
+    U3D_ViewBob(0);
+    switch (sSway.phase)
+    {
+    case 0:
+        if (sSway.halted)
+            return;
+        sSway.wait = sIntervals[sSway.interval++ & 3];
+        sSway.phase = 1;
+        // fall through
+    case 1:
+        if (--sSway.wait == 0)
+            sSway.off = 1, sSway.phase = 2;
+        break;
+    case 2:
+        U3D_ViewBob(sSway.off);
+        if (sSway.off == 0)
+            sSway.phase = 0;
+        else
+            sSway.off = sSway.off > 0 ? -1 : 0;
+        break;
+    }
+}
+
 // ---- BSUBWAY_SCR_CmdTool: Black's command CMD; what the VM does next (u3d_subway.h); a message's bank and line
 u8 U3D_Subway_Tool(u16 cmd, u16 op1, u16 op2, u16 *result, u16 *msgBank, u16 *msg)
 {
@@ -782,7 +823,29 @@ u8 U3D_Subway_Tool(u16 cmd, u16 op1, u16 op2, u16 *result, u16 *msgBank, u16 *ms
     }
     case 16: *result = AccessFlag(10, 0); break;
     case 17: AccessFlag(10, 1); break;
-    case 18: case 19: case 20: case 34: case 350:   // (the train's sign and doors: the train isn't drawn)
+    case 18: case 34:   // SET_TRAIN_SIGN_TABLE / _DEFAULT: the line's train (data_021DAD88) at the platform's place
+    {                   // (data_021DAD70), the GEAR STATION's pack gimmick 52 (ov021 fldeff_btrain.c FLDEFF_BTRAIN_Start)
+        static const u8 sKindOf[9] = {0, 2, 4, 4, 6, 1, 3, 5, 5};
+        static const float sAt[2][3] = {{720, -32, 182}, {752, -48, 151}};
+        u8 kind = cmd == 34 ? 7 : op1 < 9 ? sKindOf[op1] : 0, k;
+        const float *at = sAt[cmd == 34 ? 0 : op2 & 1];
+        for (k = 0; k < 8; k++)
+            U3D_ExpHide(k, TRUE);
+        U3D_ExpPlace(kind, at[0], at[1], at[2], 0);
+        U3D_ExpAnim(kind, 0xFF, 0, FALSE);
+        U3D_ExpHide(kind, FALSE);
+        sW.train = kind;
+        MPNet_Log("u3d subway: train %u at the platform", kind);
+        break;
+    }
+    case 19:   // SET_TRAIN_DOOR_STATE: one of the trains' four animations from its start (FLDEFF_BTRAIN_SetAnime)
+        U3D_ExpAnim(sW.train, op1 < 4 ? op1 : 0xFF, 0, op1 < 4);
+        break;
+    case 20:   // SET_TRAIN_DOOR_STATE_OTHER: the train shown or hidden (FLDEFF_BTRAIN_SetHidden)
+        U3D_ExpHide(sW.train, op1 != 0);
+        break;
+    case 350:   // RELEASE_TRAIN_SIGN: the carriage stops swaying (FIELD_GIMMICK_BSUBWAY_HaltTrainSway)
+        sSway.halted = TRUE;
         break;
     case 21: *result = mode; break;                          // GET_SAVED_PLAY_MODE
     case 22: *result = IsMulti(op1); break;                  // IS_MULTI_PLAY_MODE

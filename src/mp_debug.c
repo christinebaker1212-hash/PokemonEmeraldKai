@@ -4800,6 +4800,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void U3D_DebugHeights(void);
         U3D_DebugHeights();
     }
+    else if (strcmp(cmd, "u3dsubwaytool") == 0)   // u3dsubwaytool CMD OP1 OP2: one of Black's subway commands
+    {
+        u8 U3D_Subway_Tool(u16 cmd, u16 op1, u16 op2, u16 *result, u16 *msgBank, u16 *msg);
+        int c = 0, a = 0, b = 0;
+        u16 r = 0, mb = 0, m = 0;
+        if (sscanf(arg, "%d %d %d", &c, &a, &b) >= 1)
+            printf("[test] subway tool %d: %u, result %u\n", c, U3D_Subway_Tool(c, a, b, &r, &mb, &m), r);
+    }
     else if (strcmp(cmd, "u3dstones") == 0)   // CHARGESTONE CAVE's stones on this floor (u3d_vm.c)
     {
         void U3D_Vm_DebugStones(void);
