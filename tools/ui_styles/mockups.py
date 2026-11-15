@@ -19,6 +19,7 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import STYLES, H, W, shot  # noqa: E402
+import check  # noqa: E402
 
 SCREENS = ['message', 'start_menu', 'battle_single', 'battle_moves', 'battle_double', 'battle_triple', 'party',
            'summary', 'bag', 'options']
@@ -53,21 +54,34 @@ def main():
     o = a.parse_args()
     styles = {'KAI': {s: shot(o.kai, KAI_SHOTS[s]) for s in SCREENS}}
     want = set(o.only.upper().split(',')) if o.only else set(STYLES)
+    makers = {}
     if o.pokered and 'RED' in want:
-        import gb
-        styles['RED'] = gb.GB('red', o.pokered, o.kai, o.export).all()
+        import gbstyle
+        makers['RED'] = lambda: gbstyle.GB('red', o.pokered, o.kai, o.export,
+                                           o.pokecrystal and os.path.join(o.pokecrystal, 'gfx', 'pack', 'pack.png'))
     if o.pokecrystal and 'CRYSTAL' in want:
-        import gb
-        styles['CRYSTAL'] = gb.GB('crystal', o.pokecrystal, o.kai, o.export).all()
+        import gbstyle
+        makers['CRYSTAL'] = lambda: gbstyle.GB('crystal', o.pokecrystal, o.kai, o.export)
     if o.pokefirered and 'FIRERED' in want:
-        import firered
-        styles['FIRERED'] = firered.FireRed(o.pokefirered, o.kai, o.export).all()
+        import fr
+        makers['FIRERED'] = lambda: fr.FireRed(o.pokefirered, o.kai, o.export)
     if o.platinum and 'PLATINUM' in want:
         import ds
-        styles['PLATINUM'] = ds.Platinum(o.platinum, o.kai, o.export).all()
+        makers['PLATINUM'] = lambda: ds.Platinum(o.platinum, o.kai, o.export)
     if o.black and 'BLACK' in want:
         import ds
-        styles['BLACK'] = ds.Black(o.black, o.kai, o.export).all()
+        makers['BLACK'] = lambda: ds.Black(o.black, o.kai, o.export)
+    report = []
+    for name, make in makers.items():
+        st = make()
+        if hasattr(st, 'logs'):
+            bare = check.bare_screens(make())
+            check.log_text(st)
+        styles[name] = st.all()
+        found, kept = check.check_style(st, styles[name], o.kai, bare) if hasattr(st, 'logs') else (['(not checked)'], [])
+        report += ['%s: %s' % (name, 'OK' if not found else '%d findings' % len(found))] + ['  ' + f for f in found]
+        report += ['  ' + f for f in kept]
+    print('\n'.join(report))
     os.makedirs(o.out, exist_ok=True)
     for name, screens in styles.items():
         d = os.path.join(o.out, name.lower())
@@ -78,6 +92,7 @@ def main():
     order = [s for s in STYLES if s in styles]
     for s in SCREENS:
         grid([styles[k][s] for k in order], 3, s.upper() + ': ' + ' / '.join(order)).save(os.path.join(o.out, s + '.png'))
+    open(os.path.join(o.out, 'report.txt'), 'w').write('\n'.join(report) + '\n')
     print(o.out, order)
 
 

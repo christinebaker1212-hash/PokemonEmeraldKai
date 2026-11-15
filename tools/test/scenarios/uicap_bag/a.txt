@@ -13,5 +13,7 @@ press DOWN 1
 wait 8
 press A 1
 wait 80
+press RIGHT 1
+wait 40
 rendershot k_bag
 quit

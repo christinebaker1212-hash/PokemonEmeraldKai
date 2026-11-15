@@ -33,8 +33,9 @@ ACTIONS = ['FIGHT', 'BAG', 'MOéMON', 'RUN']
 PROMPT = ('What will', 'TORCHIC do?')
 START_MENU = ['MOéDEX', 'MOéMON', 'BAG', 'TEST', 'SAVE', 'OPTIONS', 'EXIT']
 MESSAGE = 'Welcome!'
-BAG_ITEMS = [('POTION', 5, 13), ('ANTIDOTE', 2, 14), ('PARLYZ HEAL', 1, 17), ('ESCAPE ROPE', 1, 85),
-             ('SUPER POTION', 3, 26)]
+BAG_ITEMS = [('POTION', 10, 13), ('ANTIDOTE', 2, 14), ('AWAKENING', 1, 17), ('FRESH WATER', 3, 26)]
+BAG_POCKET = 'MEDICINE'
+BAG_DESC = ['A spray-type medicine for wounds.', 'It restores the HP of one MOéMON by', 'just 20 points.']
 POCKETS = ['ITEMS', 'MEDICINE', 'POKé BALLS', 'TMs & HMs', 'BERRIES', 'BATTLE ITEMS', 'KEY ITEMS', 'FAVORITES']
 SUMMARY = dict(no='004', name='TORCHIC', species='TORCHIC', level=24, sex='m', ot='TEST', idno='02016',
                type='FIRE', ability='BLAZE', ability_text='Ups FIRE moves in a pinch.', nature='TIMID',

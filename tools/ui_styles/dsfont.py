@@ -68,23 +68,23 @@ class Nftr:
 
     def glyph(self, ch):
         i = self.map.get(ord(ch), self.map.get(ord('?'), 0))
-        bits = self.d[self.glyphs + i * self.size:self.glyphs + (i + 1) * self.size]
-        rows = [[0] * self.cw for _ in range(self.ch)]
-        right = -1
+        cell = self.d[self.glyphs + i * self.size:self.glyphs + (i + 1) * self.size]
+        left, _gw, adv = cell[0], cell[1], cell[2]   # (Black's cells start with the glyph's left, width, advance)
+        bits = cell[3:]
+        rows = [[0] * (self.cw + left) for _ in range(self.ch)]
         for y in range(self.ch):
             for x in range(self.cw):
                 k = (y * self.cw + x) * self.bpp
+                if k // 8 >= len(bits):
+                    continue
                 v = (bits[k // 8] >> (8 - self.bpp - k % 8)) & ((1 << self.bpp) - 1)
-                if y == 0:
-                    continue   # (the cell's first row isn't drawing)
-                rows[y][x] = v if v in (1, 2) else 0   # (3: the glyph's background)
-                if v in (1, 2):
-                    right = max(right, x)
-        return rows, (4 if ch == ' ' else right + 2)
+                rows[y][x + left] = v if v in (1, 2) else 0   # (3: the glyph's background)
+        return rows, adv
 
 
-def black(rom):
-    return Nftr(nds.Rom(rom).narc('a/0/2/3')[0])
+def black(rom, which=0):
+    """Black's fonts: 0 the system font (12 x 15 cells), 1 the small one (10 x 10)"""
+    return Nftr(nds.Rom(rom).narc('a/0/2/3')[which])
 
 
 def draw(im, font, x, y, s, ink, shadow=None, align='l'):
