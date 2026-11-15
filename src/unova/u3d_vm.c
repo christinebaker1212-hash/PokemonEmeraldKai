@@ -1083,7 +1083,7 @@ static void DragonReset(void);
 // (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
 static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
-enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA };
+enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA, W_MOTION };
 static u16 sBModelWait;
 // zone 389's time effect (ov065): sWork.white's TIMEFX_PENDING is Black's isEffectPending (its gimmick save 0x36)
 #define ZONE_TIME_EFFECT 389
@@ -1394,6 +1394,114 @@ static void IcaFrame(void)
     if (pt[3] != 255)
         ObjectEventTurn(&gObjectEvents[id], BlackToDir(pt[3]));
     sIca.frame += 0.5f;
+}
+
+// people moved through the air by Black's commands, a field frame a step (U3D_ObjectFly; the person's place stays
+// their tile): RISE to height H from where they are (kept up there), ORBIT round where they are, DROP from H above
+// to the ground, SPINRISE up 150 spinning and then gone
+enum { MOT_RISE, MOT_ORBIT, MOT_DROP, MOT_SPINRISE };
+static struct { u8 local, kind; bool8 active, aloft; float frame, frames, h, start[3]; } sMotion[4];
+static bool8 MotionStart(u8 local, u8 kind, float h, u16 frames)
+{
+    u8 id = ObjEventId(local);
+    u32 k;
+    if (id >= OBJECT_EVENTS_COUNT || frames == 0)
+        return FALSE;
+    for (k = 0; k < ARRAY_COUNT(sMotion) && sMotion[k].active && sMotion[k].local != local; k++)
+        ;
+    if (k == ARRAY_COUNT(sMotion))
+        return FALSE;
+    sMotion[k].aloft = U3D_ObjectFlyPos(gObjectEvents[id].spriteId, sMotion[k].start);
+    if (!sMotion[k].aloft)
+        U3D_TileWorldPos(gObjectEvents[id].currentCoords.x, gObjectEvents[id].currentCoords.y, sMotion[k].start);
+    sMotion[k].local = local, sMotion[k].kind = kind, sMotion[k].active = TRUE, sMotion[k].frame = 0;
+    sMotion[k].frames = frames, sMotion[k].h = h;
+    if (kind == MOT_SPINRISE)
+        PlaySE(SE_M_TELEPORT);
+    MPNet_Log("u3d vm: person %u %s", local, kind == MOT_RISE ? "rising" : kind == MOT_ORBIT ? "circling"
+                                           : kind == MOT_DROP ? "dropping in" : "spinning away");
+    return TRUE;
+}
+
+static bool8 MotionWaiting(void)
+{
+    u32 k;
+    for (k = 0; k < ARRAY_COUNT(sMotion); k++)
+        if (sMotion[k].active && (sMotion[k].kind == MOT_RISE || sMotion[k].kind == MOT_ORBIT))
+            return TRUE;
+    return FALSE;
+}
+
+static void MotionFrame(void)
+{
+    static const u8 sSpin[4] = {DIR_SOUTH, DIR_EAST, DIR_NORTH, DIR_WEST};
+    u32 k;
+    for (k = 0; k < ARRAY_COUNT(sMotion); k++)
+    {
+        u8 id;
+        float p[3], f, r = 0, a = 0;
+        bool8 done;
+        if (!sMotion[k].active)
+            continue;
+        if ((id = ObjEventId(sMotion[k].local)) >= OBJECT_EVENTS_COUNT)
+        {
+            sMotion[k].active = FALSE;
+            continue;
+        }
+        sMotion[k].frame += 0.5f;
+        f = sMotion[k].frame, done = f >= sMotion[k].frames;
+        memcpy(p, sMotion[k].start, sizeof(p));
+        switch (sMotion[k].kind)
+        {
+        case MOT_RISE:
+            p[1] += (sMotion[k].h - sMotion[k].start[1]) * min(f / sMotion[k].frames, 1.0f);
+            break;
+        case MOT_ORBIT:   // (OrbitEventMain: two turns spiralling out, one round at three tiles, one spiralling in)
+            if (f < 110)
+                a = f / 110 * 2, r = f * 48 / 110;
+            else if (f < 190)
+                a = (f - 110) / 80, r = 48;
+            else
+                a = (f - 190) / 80, r = (270 - f) * 48 / 80;
+            p[0] += cosf(a * 2 * (float)M_PI) * r, p[2] += sinf(a * 2 * (float)M_PI) * r;
+            break;
+        case MOT_DROP:   // (FIELD_TASK_CreatePlayerDrop: falling ever faster)
+        {
+            float t = 1.0f - min(f / sMotion[k].frames, 1.0f);
+            p[1] += sMotion[k].h * t * t;
+            break;
+        }
+        case MOT_SPINRISE:   // (a quarter turn every three frames, up 150 units)
+            p[1] += 150 * min(f / sMotion[k].frames, 1.0f);
+            ObjectEventTurn(&gObjectEvents[id], sSpin[(u32)(f / 3) & 3]);
+            break;
+        }
+        if (!done)
+        {
+            U3D_ObjectFly(gObjectEvents[id].spriteId, TRUE, p[0], p[1], p[2]);
+            continue;
+        }
+        sMotion[k].active = FALSE;
+        if (sMotion[k].kind == MOT_DROP || (sMotion[k].kind == MOT_ORBIT && !sMotion[k].aloft))
+            U3D_ObjectFly(gObjectEvents[id].spriteId, FALSE, 0, 0, 0);   // (on the ground again)
+        else if (sMotion[k].kind == MOT_SPINRISE)
+        {
+            U3D_ObjectFly(gObjectEvents[id].spriteId, FALSE, 0, 0, 0);
+            ForgetPerson(sMotion[k].local);
+            Gone(sMotion[k].local, TRUE);
+            RemoveObjectEventByLocalIdAndMap(gObjectEvents[id].localId, gObjectEvents[id].mapNum, gObjectEvents[id].mapGroup);
+        }
+        else
+            U3D_ObjectFly(gObjectEvents[id].spriteId, TRUE, p[0], p[1], p[2]);   // (risen: kept up there)
+    }
+}
+
+// (mp u3dmotion LOCAL KIND: a person of the map moved as Black's commands move them: 0 risen 4 tiles, 1 circling,
+// 2 dropped in, 3 spinning away)
+void U3D_Vm_DebugMotion(u8 local, u8 kind)
+{
+    MotionStart(local, kind, kind == MOT_RISE ? 64 : kind == MOT_DROP ? 250 : 0,
+                kind == MOT_RISE ? 60 : kind == MOT_ORBIT ? 270 : kind == MOT_DROP ? 40 : 24);
 }
 
 static void TimeFxStart(void)   // (StartEffect: shown, both tracks played, its sound)
@@ -4194,6 +4302,26 @@ static void Step(struct Thread *t)
             if (sIca.playing)
                 IcaLand();
             break;
+        // a person risen to a height, circled round, dropped in (scrcmd_mmdl.c Rise / Orbit, scrcmd_fldmmdl.c DropIn)
+        case U3C_MMDL_StartRise:   // person, height (half tiles: Black's height << 15), field frames
+            if (MotionStart(LocalId(V(0)), MOT_RISE, V(1) * 8.0f, V(2)))
+                t->wait = W_MOTION;
+            break;
+        case U3C_MMDL_StartOrbit:   // person: a spiral out to three tiles (110 frames), round (80), back in (80)
+            if (MotionStart(LocalId(V(0)), MOT_ORBIT, 0, 270))
+                t->wait = W_MOTION;
+            break;
+        case U3C_StartMmdlDropIn:   // person, x, z, direction: put there and dropped in from 250 units over 40 frames
+        {
+            u8 id = ObjEventId(LocalId(V(0)));
+            if (id < OBJECT_EVENTS_COUNT)
+            {
+                MoveObjectEventToMapCoords(&gObjectEvents[id], MapX(V(1)) + MAP_OFFSET, MapZ(V(2)) + MAP_OFFSET);
+                ObjectEventTurn(&gObjectEvents[id], BlackToDir(V(3)));
+                MotionStart(gObjectEvents[id].localId, MOT_DROP, 250, 40);
+            }
+            break;
+        }
         case U3C_POKEMON_FLD_StartOv55SubProc:   // CASTELIA's crowd (ov055's sub process)
             CrowdStart();
             break;
@@ -4348,7 +4476,9 @@ static void Step(struct Thread *t)
                 MoveObjectEventToMapCoords(&gObjectEvents[id], x + MAP_OFFSET, y + MAP_OFFSET);
             break;
         }
-        case U3C_StartMmdlSpinRise:   // (a person spinning up and away, the SHADOW TRIAD's way: gone)
+        case U3C_StartMmdlSpinRise:   // a person spinning up and away (the SHADOW TRIAD's way): 150 units in 24 field
+            if (MotionStart(LocalId(V(0)), MOT_SPINRISE, 0, 24))   // frames, spinning, then gone (Black's script
+                break;                                            // deletes them after)
         case U3C_DeleteMmdl:
         {
             u8 id = ObjEventId(LocalId(V(0)));
@@ -4680,6 +4810,10 @@ static void Wait(struct Thread *t)
     }
     case W_LIFT_RIDE:   // (CLAY's mine: Black's lift event, till the lift arrives)
         if (sMineRide.lift < 0 && sPlat.model < 0 && sLiftTex.model < 0)
+            t->wait = W_NONE;
+        break;
+    case W_MOTION:   // (a rise or a circling over: their events' ends)
+        if (!MotionWaiting())
             t->wait = W_NONE;
         break;
     case W_ICA:   // (the person's flight over: MMDL_ICA_IsDone)
@@ -5475,6 +5609,7 @@ void U3D_Vm_FieldFrame(void)
     }
     CrowdFrame();
     IcaFrame();
+    MotionFrame();
     BoatFrame();
 }
 

@@ -4781,6 +4781,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (sscanf(arg, "%x %x", &id, &v) == 2)
             U3D_Vm_DebugSet(cmd[3] == 'f', id, v);
     }
+    else if (strcmp(cmd, "u3dmotion") == 0)
+    {
+        void U3D_Vm_DebugMotion(u8 local, u8 kind);
+        int local = 0, kind = 0;
+        if (sscanf(arg, "%d %d", &local, &kind) == 2)
+            U3D_Vm_DebugMotion(local, kind);
+    }
     else if (strcmp(cmd, "u3ddoors") == 0)
     {
         void U3D_DebugDoors(void);

@@ -1,0 +1,22 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp warp 52,12,19,23
+wait 200
+mash B 6 15
+mp u3dmotion 1 0
+shotburst pm_rise 120 30
+wait 130
+mp u3dmotion 1 1
+shotburst pm_orbit 540 90
+wait 550
+mp u3dmotion 1 2
+shotburst pm_drop 80 20
+wait 90
+mp u3dmotion 1 3
+shotburst pm_spin 48 12
+wait 60
+echo [pm] done
+quit

@@ -1,0 +1,8 @@
+# Black's people moved through the air (u3d_vm.c Motion*: 0x225 MMDL_StartRise, 0x226 MMDL_StartOrbit, 0x247
+# StartMmdlDropIn, StartMmdlSpinRise), here on a person of NUVEMA TOWN by `mp u3dmotion`: risen 4 tiles, circled round,
+# dropped back in, then spun away. Shots pm_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("rising" "circling" "dropping in" "spinning away" "[pm] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -1790,6 +1790,28 @@ void U3D_ObjectFly(u8 spriteId, bool8 on, float x, float y, float z)
         sObjFly[k].spriteId = spriteId, sObjFly[k].on = on, sObjFly[k].x = x, sObjFly[k].y = y, sObjFly[k].z = z;
 }
 
+// where a flown person is drawn (U3D_ObjectFly), FALSE when they're not flown
+bool8 U3D_ObjectFlyPos(u8 spriteId, float out[3])
+{
+    u32 k;
+    for (k = 0; k < ARRAY_COUNT(sObjFly); k++)
+        if (sObjFly[k].on && sObjFly[k].spriteId == spriteId)
+        {
+            out[0] = sObjFly[k].x, out[1] = sObjFly[k].y, out[2] = sObjFly[k].z;
+            return TRUE;
+        }
+    return FALSE;
+}
+
+// map tile X, Y's middle in the world (MAP_OFFSET in), on the ground there
+void U3D_TileWorldPos(s16 x, s16 y, float out[3])
+{
+    s32 gtx, gtz;
+    MapToGrid(x, y, &gtx, &gtz);
+    out[0] = gtx * 16.0f + 8.0f, out[2] = gtz * 16.0f + 8.0f;
+    out[1] = GroundAt(out[0], out[2], sView.havePlayerH ? sView.playerH : 0.0f);
+}
+
 // the player's place in the world (Black's FIELD_PLAYER_GetPos: the tile's middle, the ground under them)
 void U3D_PlayerWorldPos(float out[3])
 {
