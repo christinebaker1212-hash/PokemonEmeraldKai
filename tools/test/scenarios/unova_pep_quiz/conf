@@ -1,0 +1,8 @@
+# The PEP QUIZ (zone 117, Black's PMS input of one word, u3d_vm.c SCREEN_WORD): the question asked, the word typed on
+# the naming screen with the host's own "Challenger, please answer!" over it, found in Black's word lists (POKeMON is
+# Black's word 1697) and given to the script's check. Shots pq_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("a word asked for" "a word entered, Black's word 1697" "[pq] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

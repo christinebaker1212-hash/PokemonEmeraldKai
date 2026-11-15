@@ -1815,6 +1815,16 @@ static void DrawNormalTextEntryBox(void)
     PutWindowTilemap(sNamingScreen->windows[WIN_TEXT_ENTRY_BOX]);
 }
 
+// Moemon Kai: a title of Black's that may be longer than the box: the narrow font when the normal one won't fit
+static void DrawNarrowTextEntryBox(void)
+{
+    const u8 *title = sNamingScreen->template->title;
+    u8 font = GetStringWidth(FONT_NORMAL, title, 0) > 8 * 17 - 10 ? FONT_NARROW : FONT_NORMAL;
+    FillWindowPixelBuffer(sNamingScreen->windows[WIN_TEXT_ENTRY_BOX], PIXEL_FILL(1));
+    AddTextPrinterParameterized(sNamingScreen->windows[WIN_TEXT_ENTRY_BOX], font, title, 8, 1, 0, 0);
+    PutWindowTilemap(sNamingScreen->windows[WIN_TEXT_ENTRY_BOX]);
+}
+
 static void DrawMonTextEntryBox(void)
 {
     u8 buffer[32];
@@ -1840,6 +1850,7 @@ static void (*const sDrawTextEntryBoxFuncs[])(void) =
     [NAMING_SCREEN_COOP_NOTE2]    = DrawNormalTextEntryBox,
     [NAMING_SCREEN_RIVAL]         = DrawNormalTextEntryBox,
     [NAMING_SCREEN_ORRE_PARTNER]  = DrawNormalTextEntryBox,
+    [NAMING_SCREEN_UNOVA_WORD]    = DrawNarrowTextEntryBox,
 };
 
 static void DrawTextEntryBox(void)
@@ -2373,6 +2384,25 @@ void NamingScreen_SetOrreTitle(const u8 *title)
     *StringCopyN(sOrrePartnerTitle, title, sizeof(sOrrePartnerTitle) - 1) = EOS;
 }
 
+// Moemon Kai: a word of Black's (UNOVA's PEP QUIZ: Black's PMS input, its words typed here and found in Black's word
+// lists by src/unova/u3d_vm.c); the title is Black's own line, set by the VM
+static u8 sUnovaWordTitle[40] = _("?");
+static const struct NamingScreenTemplate sUnovaWordTemplate =
+{
+    .copyExistingString = FALSE,
+    .maxChars = WALDA_PHRASE_LENGTH,
+    .iconFunction = 0,
+    .addGenderIcon = FALSE,
+    .initialPage = KBPAGE_LETTERS_UPPER,
+    .unused = 35,
+    .title = sUnovaWordTitle,
+};
+
+void NamingScreen_SetUnovaTitle(const u8 *title)
+{
+    *StringCopyN(sUnovaWordTitle, title, sizeof(sUnovaWordTitle) - 1) = EOS;
+}
+
 static const struct NamingScreenTemplate sCoopRoomTemplate =
 {
     .copyExistingString = TRUE,
@@ -2434,6 +2464,7 @@ static const struct NamingScreenTemplate *const sNamingScreenTemplates[] =
     [NAMING_SCREEN_COOP_NOTE2]    = &sCoopNote2Template,
     [NAMING_SCREEN_RIVAL]         = &sRivalNamingTemplate,
     [NAMING_SCREEN_ORRE_PARTNER]  = &sOrrePartnerTemplate,
+    [NAMING_SCREEN_UNOVA_WORD]    = &sUnovaWordTemplate,
 };
 
 static const struct OamData sOam_8x8 =

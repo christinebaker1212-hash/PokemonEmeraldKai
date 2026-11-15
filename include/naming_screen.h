@@ -16,9 +16,11 @@ enum {
     NAMING_SCREEN_COOP_NOTE2,     // Moemon Co-op: the host's welcome note, line 2
     NAMING_SCREEN_RIVAL,          // Moemon Kai: JOHTO's rival, as Crystal names him (qz_specials.c MP_JohtoRivalName)
     NAMING_SCREEN_ORRE_PARTNER,   // Moemon Kai: ORRE's partner, as Colosseum names her (src/orre/orre_vm.c Orre_VmName)
+    NAMING_SCREEN_UNOVA_WORD,     // Moemon Kai: a word of Black's for UNOVA's PEP QUIZ (src/unova/u3d_vm.c, Black's PMS input)
 };
 
-void NamingScreen_SetOrreTitle(const u8 *title);   // Moemon Kai: NAMING_SCREEN_ORRE_PARTNER's title (Colosseum's own line)
+void NamingScreen_SetOrreTitle(const u8 *title);
+void NamingScreen_SetUnovaTitle(const u8 *title);   // Moemon Kai: NAMING_SCREEN_UNOVA_WORD's title (Black's own line)   // Moemon Kai: NAMING_SCREEN_ORRE_PARTNER's title (Colosseum's own line)
 void DoNamingScreen(u8 templateNum, u8 *destBuffer, u16 monSpecies, u16 monGender, u32 monPersonality, MainCallback returnCallback);
 
 #endif // GUARD_NAMING_SCREEN_H

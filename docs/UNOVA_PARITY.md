@@ -105,8 +105,11 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
       tile_of; scenario unova_rail_place)
 - [x] The battle phrases asked for (0x1ED kinds 0-3, zone 66): the game's own EASY CHAT on the save's introduction /
       won / lost phrases ("No. 1" asked, not kept: Kai has none); scenario unova_phrases
-- [ ] Black's own words (0x1ED kinds 4 / 5, 0x20C): the PEP QUIZ (zone 117) needs Black's word list; MR. LOCK's
-      password (zone 50) is an event's (closed)
+- [x] Black's own words (0x1ED kind 4, 2026-11-15): the PEP QUIZ (zone 117) asks for a word as Black's PMS input
+      does; here it's typed on the game's naming screen (NAMING_SCREEN_UNOVA_WORD, the host's own "Challenger, please
+      answer!" over it) and found in Black's 13 word lists (pms_word.c's banks: POKeMON, moves, types, Abilities and
+      Black's own words; case, accents and PK MN alike), its number given to the script's check (u3d_vm.c
+      SCREEN_WORD / WordId); scenario unova_pep_quiz. MR. LOCK's password (kind 5, zone 50) is an event's (closed)
 - [x] Counting POKeMON from other trainers (0x239: the party and every box, EGGS left out, 50 at most), NPC
       greetings by the clock and the party (0x23D with Black's record / message tables), the birthday lines (0x20D:
       Black's other days', no DS birthday here), the barred POKeMON named (0x1B9), the GeoNet country (0x246: none);

@@ -1,0 +1,22 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 117 5 9
+wait 200
+mash B 6 15
+mp u3drun 5
+pressuntillog A 6000 a word asked for
+wait 120
+shot pq_entry
+typetext pokemon\n
+wait 30
+press START 2
+wait 60
+mash A 6 20
+wait 30
+mash A 40 20
+shot pq_after
+echo [pq] done
+quit

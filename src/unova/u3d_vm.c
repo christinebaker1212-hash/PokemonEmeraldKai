@@ -35,6 +35,8 @@
 #include "string_util.h"
 #include "text.h"
 #include "u3d.h"
+#include "naming_screen.h"
+#include "walda_phrase.h"
 #include "constants/event_object_movement.h"
 #include "constants/easy_chat.h"
 #include "constants/event_objects.h"
@@ -1680,7 +1682,7 @@ static void PopSong(void)
 // The screens Black's scripts open, from Unova_EventScript_Screen (data/scripts/unova.inc)
 enum { SCREEN_NONE, SCREEN_STARTER, SCREEN_BATTLE, SCREEN_CATCH_DEMO, SCREEN_WILD, SCREEN_PARTY, SCREEN_CLEAR, SCREEN_TRADE,
        SCREEN_SUBWAY_PARTY, SCREEN_SUBWAY_BATTLE, SCREEN_SUBWAY_RESET, SCREEN_MART, SCREEN_BPSHOP, SCREEN_SELL,
-       SCREEN_DAYCARE_PARTY, SCREEN_MOVE_SELECT, SCREEN_RELEARN, SCREEN_DIPLOMA, SCREEN_EASY_CHAT };
+       SCREEN_DAYCARE_PARTY, SCREEN_MOVE_SELECT, SCREEN_RELEARN, SCREEN_DIPLOMA, SCREEN_EASY_CHAT, SCREEN_WORD };
 static u8 sScreen;
 static u16 sScreenVar, sPartySlotWork;
 static u16 sEasyChatKind, sEasyChatOut[2], sEasyChatWords[EASY_CHAT_BATTLE_WORDS_COUNT];
@@ -1918,6 +1920,82 @@ int GameClear(void);   // (post_battle_event_funcs.c)
 
 // Black's script wants a screen of the game's: the field script takes it from here (U3D_VmOpenScreen) and the VM
 // goes on when it's back (U3D_VmResume)
+// Black's word lists (arm9 pms_word.c: g_pmsWordBankSizes / FileIds; a word's number counts through them in turn:
+// the POKeMON, the moves, the types, the Abilities, then Black's own words' groups), and a word typed on the naming
+// screen found in them: letters and digits alike whatever their case or accent, PK MN as POKeMON
+static const u16 sPmsSizes[13] = {652, 560, 17, 165, 44, 38, 48, 103, 47, 32, 26, 10, 61};
+static const u16 sPmsFiles[13] = {284, 286, 287, 285, 149, 150, 151, 152, 153, 154, 155, 148, 156};
+static u8 sWordBuf[WALDA_PHRASE_LENGTH + 1];
+
+static u32 WordKey(const u8 *s, u8 *out, u32 max)
+{
+    u32 n = 0;
+    for (; *s != EOS && n + 4 < max; s++)
+    {
+        u8 c = *s;
+        if (c >= CHAR_a && c <= CHAR_z)
+            c = c - CHAR_a + CHAR_A;
+        if (c == 0x06 || c == 0x1B)   // (É, é)
+            c = CHAR_E;
+        if (c == CHAR_PK || c == CHAR_MN)
+        {
+            const u8 *w = c == CHAR_PK ? (const u8 *)"\xCA\xC9\xC5" : (const u8 *)"\xC7\xC9\xC8";   // (POK, MON)
+            out[n++] = w[0], out[n++] = w[1], out[n++] = w[2];
+            if (c == CHAR_PK)
+                out[n++] = CHAR_E;
+            continue;
+        }
+        if ((c >= CHAR_A && c <= CHAR_Z) || (c >= CHAR_0 && c <= CHAR_9))
+            out[n++] = c;
+        else if (c >= 0xF7)   // (a control code: none in a word)
+            break;
+    }
+    out[n] = EOS;
+    return n;
+}
+
+static u16 WordId(const u8 *typed)
+{
+    u8 want[40], have[40];
+    u32 b, w, id = 0;
+    if (WordKey(typed, want, sizeof(want)) == 0)
+        return 0xFFFF;
+    for (b = 0; b < ARRAY_COUNT(sPmsSizes); id += sPmsSizes[b], b++)
+        for (w = 0; w < sPmsSizes[b]; w++)
+            if (WordKey(U3D_Text(sPmsFiles[b], w), have, sizeof(have)) && StringCompare(want, have) == 0)
+                return id + w;
+    return 0xFFFF;
+}
+
+// the naming screen's title: the quiz host's ask, the last line of the zone's message 9 ("Challenger, please answer!")
+static void WordTitle(u16 bank)
+{
+    u8 buf[40], cur[40];
+    const u8 *m = U3D_Text(bank, 9);
+    u32 n = 0;
+    buf[0] = EOS;
+    for (;; m++)
+    {
+        if (*m == EOS || *m == CHAR_NEWLINE || *m == CHAR_PROMPT_SCROLL || *m == CHAR_PROMPT_CLEAR || *m >= 0xF7)
+        {
+            if (n)   // (a line with words: the last one kept)
+            {
+                cur[n] = EOS;
+                memcpy(buf, cur, n + 1);
+            }
+            n = 0;
+            if (*m == EOS)
+                break;
+            if (*m == EXT_CTRL_CODE_BEGIN && m[1] != EOS)
+                m++;
+            continue;
+        }
+        if (n < sizeof(cur) - 1)
+            cur[n++] = *m;
+    }
+    NamingScreen_SetUnovaTitle(buf);
+}
+
 static void OpenScreen(struct Thread *t, u8 screen, u16 var)
 {
     sScreen = screen;
@@ -4096,10 +4174,16 @@ static void Step(struct Thread *t)
         }
         case U3C_SYMBOL_MAP_ScrCmdStartPmsInput:   // kind, word, word, result (1 entered): kinds 0-2 the player's battle
         {                                       // phrases (the game's EASY CHAT: introduction, won, lost), 3 "No. 1"
-            if (V(0) <= 3)                      // (asked, not kept: Kai has no such phrase); 4 / 5 Black's own words
-            {                                   // (MR. LOCK's password, the PEP QUIZ: closed, the result "not entered")
-                sEasyChatKind = V(0), sEasyChatOut[0] = a[1], sEasyChatOut[1] = a[2];
-                OpenScreen(t, SCREEN_EASY_CHAT, a[3]);
+            if (V(0) <= 3)                      // (asked, not kept: Kai has no such phrase); 4 one of Black's own words
+            {                                   // (the PEP QUIZ: typed, then found in Black's word lists, WordScreen);
+                sEasyChatKind = V(0), sEasyChatOut[0] = a[1], sEasyChatOut[1] = a[2];   // 5 MR. LOCK's password
+                OpenScreen(t, SCREEN_EASY_CHAT, a[3]);                                   // (an event's: closed)
+            }
+            else if (V(0) == 4)
+            {
+                WordTitle(t->bank);
+                sEasyChatOut[0] = a[1];
+                OpenScreen(t, SCREEN_WORD, a[3]);
             }
             else
                 *WorkPtr(a[3]) = 0;
@@ -6704,6 +6788,11 @@ void U3D_VmOpenScreen(void)
         DoEasyChatScreen(sTypes[sEasyChatKind & 3], words, CB2_ScreenDone, EASY_CHAT_PERSON_DISPLAY_NONE);
         break;
     }
+    case SCREEN_WORD:   // (Black's PMS input of one word: typed on the game's naming screen)
+        sWordBuf[0] = EOS;
+        MPNet_Log("u3d vm: a word asked for");
+        DoNamingScreen(NAMING_SCREEN_UNOVA_WORD, sWordBuf, 0, 0, 0, CB2_ScreenDone);
+        break;
     case SCREEN_RELEARN:   // (Black's CallMoveRelearn: the game's move relearner, the POKeMON in VAR_0x8004)
         TeachMoveRelearnerMove();
         break;
@@ -6791,6 +6880,14 @@ void U3D_VmResume(void)
         *WorkPtr(sScreenVar) = gSpecialVar_Result != 0;
         *WorkPtr(sEasyChatOut[0]) = words[0];
         *WorkPtr(sEasyChatOut[1]) = words[1];
+        break;
+    }
+    case SCREEN_WORD:   // (the word's number in Black's lists; "entered" only for a word they have)
+    {
+        u16 id = WordId(sWordBuf);
+        *WorkPtr(sScreenVar) = id != 0xFFFF;
+        *WorkPtr(sEasyChatOut[0]) = id;
+        MPNet_Log("u3d vm: a word entered, Black's word %d", id == 0xFFFF ? -1 : id);
         break;
     }
     case SCREEN_RELEARN:   // (as Black's script reads it: 0 a move learned, the HEART SCALE taken; 1 none)
