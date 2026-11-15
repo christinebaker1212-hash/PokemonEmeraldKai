@@ -237,6 +237,10 @@ class GB(Style):
         GB.text(self, c, col * 8, row * 8, s)
 
     def grid_level(self, c, col, row, n):
+        """PrintLevel: ":L" and two digits; three digits write over the ":L" (both games)"""
+        if n >= 100:
+            self.grid_text(c, col, row, str(n))
+            return
         self.put(c, 0x6E, col, row)
         self.grid_text(c, col + 1, row, str(n))
 
@@ -262,8 +266,9 @@ class GB(Style):
         if kind == 'mine':
             # PlacePlayerHUDTiles / DrawPlayerHUDBorder from (18, 10) leftwards and $73 at (18, 9); the name at
             # (10, 7), the level at (14, 8) (CRYSTAL: the gender at (17, 8)), the bar from (10, 9), its numbers at
-            # (11, 10); CRYSTAL's EXP bar along the border's foot from (17, 11) leftwards (FillInExpBar)
-            c = Image.new('RGBA', (80, 40), (0, 0, 0, 0))
+            # (11, 10); CRYSTAL's EXP bar along the border's foot from (17, 11) leftwards (FillInExpBar). The
+            # name's ten letters run a tile past the border's end, to the screen's last column, as in both games
+            c = Image.new('RGBA', (88, 40), (0, 0, 0, 0))
             self.grid_text(c, 1, 0, m['name'])
             self.grid_level(c, 5, 1, m['level'])
             if not red:
@@ -374,9 +379,15 @@ class GB(Style):
         red = self.kind == 'red'
         c = Image.new('RGBA', (72, 24), (0, 0, 0, 0))
         border = Image.new('RGBA', (72, 8), (0, 0, 0, 0))
-        self.grid_text(c, 0, 0, m['name'])
+        # (nine tiles hold nine letters; a tenth sets the name's letters a pixel closer, the only way ten fit)
+        if len(m['name']) > 9:
+            for i, ch in enumerate(m['name']):
+                if ch != ' ':
+                    self.tile(c, self.glyph(ch), i * 7, 0)
+        else:
+            self.grid_text(c, 0, 0, m['name'])
         self.grid_level(c, 0, 1, m['level'])
-        col = 1 + len(str(m['level']))
+        col = (1 if m['level'] < 100 else 0) + len(str(m['level']))
         if not red:
             GB.text(self, c, col * 8, 8, '♂' if m['sex'] == 'm' else '♀')
             col += 1

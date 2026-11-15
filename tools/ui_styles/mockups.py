@@ -66,8 +66,8 @@ def main():
         import fr
         makers['FIRERED'] = lambda: fr.FireRed(o.pokefirered, o.kai, o.export)
     if o.platinum and 'PLATINUM' in want:
-        import ds
-        makers['PLATINUM'] = lambda: ds.Platinum(o.platinum, o.kai, o.export)
+        import pt
+        makers['PLATINUM'] = lambda: pt.Platinum(o.platinum, o.kai, o.export)
     if o.black and 'BLACK' in want:
         import ds
         makers['BLACK'] = lambda: ds.Black(o.black, o.kai, o.export)
@@ -79,6 +79,14 @@ def main():
             check.log_text(st)
         styles[name] = st.all()
         found, kept = check.check_style(st, styles[name], o.kai, bare) if hasattr(st, 'logs') else (['(not checked)'], [])
+        if hasattr(st, 'logs'):
+            # (the battles again with ten-letter names at level 100: nothing may be cut or run into anything)
+            wf, wk, worst = check.worst_case(make, o.kai)
+            found, kept = found + wf, kept + wk
+            if worst:
+                os.makedirs(os.path.join(o.out, 'worst'), exist_ok=True)
+                grid([worst[s] for s in ('battle_single', 'battle_double', 'battle_triple')], 3,
+                     name + ': THE LONGEST NAMES AT LEVEL 100').save(os.path.join(o.out, 'worst', name.lower() + '.png'))
         report += ['%s: %s' % (name, 'OK' if not found else '%d findings' % len(found))] + ['  ' + f for f in found]
         report += ['  ' + f for f in kept]
     print('\n'.join(report))

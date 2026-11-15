@@ -107,7 +107,8 @@ def check_style(style, screens, kai, bare=None):
     found, kept = [], []
     for f in out:
         why = next((w for (screen, kind, words, w) in allowed
-                    if f.startswith('%s %s:' % (screen, kind)) and any('"%s"' % t in f for t in words)), None)
+                    if f.startswith('%s %s:' % (screen, kind)) and
+                    (words is None or any('"%s"' % t in f for t in words))), None)
         (kept if why else found).append(f if not why else f + '  [allowed: %s]' % why)
     return found, kept
 
@@ -139,3 +140,45 @@ def log_text(style):
         return draw(im, x, y, s, *a, **k)
     style.text = logged
     style.inks = []
+
+
+def worst_case(make, kai):
+    """the battle screens again with the longest words a box must hold (ten-letter names, level 100, 999 HP), checked
+    the same way: a style must never cut a name or a level, nor let them run into anything"""
+    import base
+    saved = {k: getattr(base, k) for k in ('FOE', 'MINE', 'DOUBLE_FOES', 'DOUBLE_MINE', 'TRIPLE_FOES', 'TRIPLE_MINE')}
+    names = ['MASQUERAIN', 'CHARMELEON', 'BUTTERFREE']
+
+    def big(d, i):
+        d = dict(d, name=names[i % 3], level=100)
+        if 'maxhp' in d:
+            d.update(hp=999, maxhp=999)
+        return d
+    try:
+        base.FOE, base.MINE = big(saved['FOE'], 0), big(saved['MINE'], 1)
+        for k in ('DOUBLE_FOES', 'DOUBLE_MINE', 'TRIPLE_FOES', 'TRIPLE_MINE'):
+            setattr(base, k, [big(m, i) for i, m in enumerate(saved[k])])
+        screens = ('battle_single', 'battle_double', 'battle_triple')
+
+        def run(st, wordless=False):
+            if wordless:
+                draw = st.text
+                st.text = lambda im, *a, **k: draw(Image.new('RGBA', im.size, (0, 0, 0, 0)), *a, **k)
+            out = {}
+            for n in screens:
+                st.inks = []
+                out[n] = getattr(st, n)()
+                st.logs[n] = st.inks
+            return out
+        bare = run(make(), True)
+        st = make()
+        log_text(st)
+        try:
+            shown = run(st)
+        except ValueError as e:      # (a style that finds its words don't fit says so)
+            return ['worst case: %s' % e], [], {}
+        found, kept = check_style(st, shown, kai, bare)
+        return ['worst case ' + f for f in found], ['worst case ' + f for f in kept], shown
+    finally:
+        for k, v in saved.items():
+            setattr(base, k, v)

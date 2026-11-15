@@ -16,8 +16,9 @@ GEN4 = {**{str(i): 0x121 + i for i in range(10)}, **{chr(65 + i): 0x12B + i for 
 
 
 class Platinum:
-    def __init__(self, rom):
-        d = nds.Rom(rom).narc('graphic/pl_font.narc')[0]
+    def __init__(self, rom, which=0):
+        """WHICH: 0 FONT_SYSTEM, 1 FONT_MESSAGE, 2 FONT_SUBSCREEN (its 3 the letters' outline)"""
+        d = nds.Rom(rom).narc('graphic/pl_font.narc')[which]
         hs, wo, n = struct.unpack_from('<III', d, 0)
         self.d, self.hs, self.widths, self.n = d, hs, d[wo:wo + n], n
         self.height = 16

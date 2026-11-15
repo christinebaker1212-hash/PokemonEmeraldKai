@@ -5,8 +5,8 @@ RED, CRYSTAL, FIRERED, PLATINUM, BLACK, each from its own game's art, over Kai's
 layouts; a mock-up of every style on every screen it changes, shown for approval before anything is built.
 
 **Status (2026-11-15): first mock-ups not approved ("everything other than Emerald looks extremely rough"); the
-second pass is under way.** RED, CRYSTAL and FIRERED are redone (below) and pass the checker; PLATINUM and BLACK are
-still the first pass and are being redone the same way. Nothing in the game yet.
+second pass is under way.** RED, CRYSTAL, FIRERED and PLATINUM are redone (below) and pass the checker, the worst case
+too; BLACK is still the first pass and is being redone the same way, from Black's own ROM. Nothing in the game yet.
 
 The user's rules for the second pass: readability first; as much of each original's style as possible; KAI's fitment,
 above all in Double and Triple Battles; each original game's own menu layouts (never KAI's layout in another game's
@@ -41,15 +41,23 @@ ten screens, `<style>/<screen>.png` each at 2x.
   in the game's number window over the art's "/", Triple Battle cards cut from its doubles box, both battle textbox
   palettes; the message box (menu_message), START with its help bar, the party slots (party_menu.h), the summary
   (six page dots), the BAG (pocket arrows beside the bag, eight pocket pips, START: SORT), OPTION (its help bar).
-- tools/ui_styles/check.py runs with every render and writes report.txt: anything drawn outside KAI's boxes, one-pixel
+- tools/ui_styles/check.py runs with every render (and again on the battles with ten-letter names at level 100 and
+  999 HP: `worst/<style>.png`; RED / CRYSTAL draw an eleventh name tile at a 7-pixel pitch as their games never needed,
+  and print level 100 without the :L as PrintLevel does) and writes report.txt: anything drawn outside KAI's boxes, one-pixel
   seams, text overlapping text, text inked over other art (seen by drawing each screen again without its words), text
   off the screen. A finding that is the original game's own layout is listed with its reason, never hidden.
-- PLATINUM (tools/ui_styles/ds.py, first pass, being redone): its font and, from the user's ROM, (wrongly) pl_batt_obj
-  117 as the healthbox; the real ones, by the decomp's res/graphics/battle/sprites.order: enemy 188 / short_cell 187,
-  player singles 191 / tall_cell 190, player doubles 200 and 203 (cells 199 / 202), enemy doubles 194 / 197, palette
-  primary.NCLR 71; the battle's message bar, the BAG's screen and bag;
-  its touch-screen buttons (FIGHT red, BAG yellow, RUN blue, POKéMON green) beside the message on the one screen, its
-  windows, party panels, summary and OPTIONS drawn in its shapes and colours.
+- PLATINUM (tools/ui_styles/pt.py): pret/pokeplatinum's graphics (POKEPLATINUM, a sparse checkout) and the user's ROM
+  for its fonts (dsfont.Platinum: system, message, subscreen). The healthboxes are its own (enemy / player singles /
+  player doubles, their HP and EXP gauges, the Lv icon, the gender marks), sliced at their plain columns to KAI's
+  rectangles; the HP bar's arrow sits beside the box pointing at its POKéMON as Platinum draws it (outside KAI's
+  rectangles in singles and doubles, the checker lists it; not in triples, where the cards stand in a column). A name
+  of ten letters at level 100 doesn't fit Platinum's font in a triple's card: there, and only there, the name falls
+  back to KAI's small font. The battle's lower screen is the touch screen's own buttons (FIGHT red, BAG yellow, RUN
+  blue, POKéMON green; the moves as its type-coloured buttons with PP and the type's tag) beside its message window;
+  the field message box and START are its windows (START's 20-pixel rows with its icons); the party its panels (six,
+  with CANCEL); the summary its pages (the six page tabs as its icons, RENAME on SELECT, the trainer memo in place of
+  the EXP rows); the BAG its screen and bag (eight pocket icons under the bag, FAVORITES as the MAIL pocket's icon,
+  START: SORT), OPTIONS its frame with KAI's five tabs.
 - BLACK (tools/ui_styles/ds.py, first pass, being redone): its own font from the ROM (a/0/2/3, NFTR); Gen 5's dark slanted HP bars, flat round
   buttons, the menu as a grid of tiles, the BAG's ring of pockets, drawn in its colours.
 
