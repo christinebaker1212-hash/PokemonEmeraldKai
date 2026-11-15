@@ -13,6 +13,7 @@
 #include "event_data.h"
 #include "rtc.h"
 #include "string_util.h"
+#include "pokemon.h"
 #include "text.h"
 #include "constants/characters.h"
 #include "mp.h"
@@ -246,6 +247,17 @@ static void AddPlaces(void)   // (AddPlaceListMessage: "place: weather" up to fo
         AddLine(1, 0xC0 + n);
 }
 
+// (AddSavedIdsMessage: the HALL OF FAME team's N species, lane 3, the player's name in slot 6)
+static void AddHof(const u16 *team, u8 n)
+{
+    u32 k;
+    for (k = 0; k < n && k < 6; k++)
+        GetSpeciesName(gUnovaStrVar[k], team[k]);
+    SetSlot(6, gSaveBlock2Ptr->playerName);
+    AddLine(3, 0xCD + n - 1);
+    MPNet_Log("u3d vm: the HALL OF FAME team on the board, %u", n);
+}
+
 // (AddDailyMessage1-3, AddWeekdayMessage: Black's week starts its sayings on Tuesday, its notices on Monday)
 static void AddDays(bool8 sayings)
 {
@@ -331,13 +343,21 @@ bool8 U3D_Elboard_Load(u16 zone)
     }
     if (sEl.b->shown)
     {
+        u8 U3D_Vm_HofTeam(u16 team[PARTY_SIZE]);
+        u16 team[PARTY_SIZE];
+        u8 hof = U3D_Vm_HofTeam(team);
         SlotsSaved(TRUE);
         AddOutbreak();
         AddDate();
         AddPlaces();
-        news = AddNews(zone);
-        if (!news)
-            AddDays(TRUE);
+        if (hof)   // (FillSavedListMessages: a day after the Champion's clear, the HALL OF FAME team)
+            AddHof(team, hof);
+        else
+        {
+            news = AddNews(zone);
+            if (!news)
+                AddDays(TRUE);
+        }
         AddDays(FALSE);
         SlotsSaved(FALSE);
     }
@@ -346,6 +366,12 @@ bool8 U3D_Elboard_Load(u16 zone)
     sEl.on = TRUE;
     MPNet_Log("u3d vm: zone %u's news board, %u lines", zone, sEl.n);
     return TRUE;
+}
+
+// the board's facing (FIELD_GIMMICK_GATE_GetBoardFacing: 0 up, 1 down, 2 left, 3 right), 0xFF none here
+u8 U3D_Elboard_Facing(void)
+{
+    return sEl.on && sEl.b ? sEl.b->facing : 0xFF;
 }
 
 void U3D_Elboard_Clear(void)

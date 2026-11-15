@@ -24,5 +24,22 @@ wait 200
 mash B 6 15
 shotburst nb_outbreak 300 30
 wait 320
+mp u3dhof
+mp u3dzone 131 8 5
+wait 200
+mp u3dzone 27 8 5
+wait 200
+mash B 6 15
+press UP 2
+wait 30
+shotburst nb_hof 900 30
+wait 920
+mp u3drun 4
+shotburst nb_cam 160 20
+wait 200
+shot nb_cam_held
+press DOWN 2
+wait 120
+shot nb_cam_back
 echo [nb] done
 quit

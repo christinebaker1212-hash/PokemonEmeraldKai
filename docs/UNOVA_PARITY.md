@@ -138,9 +138,11 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       picture; the lines Black writes (the date, "place: weather" for its four places by Black's weather calendar and
       the roamers' storms, the day's three sayings or the story's news by their flags, the week's notice) drawn in the
       small font into each lane's own texture (u3d.c U3D_ExpOwnTexture), the lamps flickering orange / amber, scrolled
-      one after another by the lanes' tracks as GIMMICK_OBJ_ELBOARD_UpdateLine; scenario unova_news_board. Not yet:
-      the HALL OF FAME team for a day after the LEAGUE (gate points, 0x960 / 0x97B), the board's camera view
-      (0x17E's own command)
+      one after another by the lanes' tracks as GIMMICK_OBJ_ELBOARD_UpdateLine; scenario unova_news_board. The
+      HALL OF FAME team for a day of the game clock after the Champion's clear (EVENT_GAMECLEAR_SetGatePoints' 1440
+      minutes, flag 0x960 / 0x97B: u3d_vm.c HofOnBoards / U3D_Vm_HofTeam, the line on lane 3 as
+      FillSavedListMessages; `mp u3dhof`), and the board looked at (0x17E: the camera eased to Black's view of it,
+      held until LEFT, RIGHT, DOWN or B, then back: u3d_vm.c BoardCam*), both in the same scenario
 - [x] Field weather (2026-11-15): Black's weather calendar (ov010 calender.c: 68 zones, a weather a day of the year)
       and the roamers' storms (TORNADUS's downpour, THUNDURUS's thunderstorm where they roam) as the map's weather on
       every UNOVA map load (field_weather_effect.c SetSavedWeatherFromCurrMapHeader -> u3d_elboard.c

@@ -266,6 +266,8 @@ static struct { u16 work[WORKS]; u8 flags[FLAG_BYTES]; u8 began, badges, cgear;
                 u8 entralink[96];   // (the ENTRALINK's Pass Orbs, missions and PASS POWERS: u3d_entralink.c)
                 u8 musical[96];     // (the MUSICALS' props, records and fans: u3d_musical.c)
                 u8 stones[3][12][2], stonesPlaced;   // (CHARGESTONE CAVE's stones where they were pushed to, by
+                u32 hofUntil;   // (the gate boards' HALL OF FAME team: Black's gate points, a day of the game clock's
+                u16 hofTeam[PARTY_SIZE];   //  minutes from the Champion's clear, as minutes; the team, the game's species)
               } sWork;                                //  floor; placed: a bit a floor once laid out)   // (gym[0]: ELESA's gym's levers, a bit a lane: CartLanes below)   // (subway: the BATTLE SUBWAY's records, u3d_subway.c)   // (white: ZEKROM caught after the credits, bit 0)   // (began: Black's new-game
                                                 // script has run; badges: UNOVA's, a bit each; cgear: the C-GEAR got)
 u8 *U3D_Vm_BadgeFlags(void)
@@ -1117,13 +1119,15 @@ static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
 enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA, W_MOTION,
        W_ARC_GLOW, W_ARC_FLY, W_ARC_PEAK, W_ARC_END, W_LEAGUE, W_FKDEMO, W_SPPOKE_MOVE, W_SPPOKE_PROGRESS,
-       W_SPPOKE_END, W_SPPOKE_SWAP, W_CUTIN, W_CUTIN_BATTLE };
+       W_SPPOKE_END, W_SPPOKE_SWAP, W_CUTIN, W_CUTIN_BATTLE, W_BOARD_CAM };
 // the key items' 3D cut-ins (gFld3dCiKeyTable: Black's item, its sequence)
 static const u16 sCiKeyItems[17][2] = {
 #include "u3d_cutin_keys.h"
 };
 static u16 sBModelWait;
 static void FkSoundStart(u16 kind);
+static bool8 BoardCamStart(u16 frames);
+static bool8 BoardCamBusy(void);
 // zone 389's time effect (ov065): sWork.white's TIMEFX_PENDING is Black's isEffectPending (its gimmick save 0x36)
 #define ZONE_TIME_EFFECT 389
 #define IS_TIME_EFFECT_ZONE(z) ((z) == ZONE_TIME_EFFECT || (z) == 397 || (z) == 317)   // (arc 0x65: gimmick 54 in all three)
@@ -4468,7 +4472,9 @@ static void Step(struct Thread *t)
         case U3C_PROC_SetMonParamChecked:
         case U3C_StartPlayerPosOffsetTween:
         case U3C_StartSubProcOv057:
-        case U3C_GIMMICK_OBJ_ELBOARD_CmdStartCameraEvent:   // (UNDELLA GATE's news board)
+        case U3C_GIMMICK_OBJ_ELBOARD_CmdStartCameraEvent:   // a gate's news board looked at (the camera to it and back)
+            if (BoardCamStart(V(0)))
+                t->wait = W_BOARD_CAM;
             break;
         case U3C_PROC_FLD_CallOv056Event:   // the ELITE FOUR rooms' entrance scenes (ov056 field_fk_demo.c: Fk*)
             if (V(0) >= 1 && V(0) <= 4)
@@ -5202,6 +5208,10 @@ static void Wait(struct Thread *t)
         break;
     case W_SPPOKE_SWAP:
         if (!sSpSwap.pending && !U3D_ExpPlaying(2))
+            t->wait = W_NONE;
+        break;
+    case W_BOARD_CAM:   // (a news board looked at until the player turns away)
+        if (!BoardCamBusy())
             t->wait = W_NONE;
         break;
     case W_CUTIN:   // (a 3D cut-in to its end: FLD3D_CI_EventMain)
@@ -5993,6 +6003,55 @@ static void IceModels(bool8 load)
 }
 
 // u3d.c U3D_Update, each frame on an UNOVA map: the gyms' machinery that follows the player and the works
+// ---- a gate's news board looked at (gimmick_obj_elboard.c GIMMICK_OBJ_ELBOARD_CameraEventMain, 0x17E): the camera
+// eased over FRAMES to the board (Black's pitch 0xEE5, distance 134, the target 108 toward the board and 27 up from the
+// player, by the board's facing), held until LEFT, RIGHT, DOWN or B, then eased back as it was
+static struct { u8 st; u16 frames; } sBoardCam;
+static bool8 BoardCamStart(u16 frames)
+{
+    u8 U3D_Elboard_Facing(void);
+    u8 facing = U3D_Elboard_Facing();
+    float p[3];
+    s32 tx = 0, tz = -0x6C000;
+    u16 yaw = 0;
+    if (facing == 0xFF)
+        return FALSE;
+    if (facing == 3)
+        tx = -0x6C000, tz = 0, yaw = 0x3FFF;
+    PlaySE(SE_SELECT);   // (Black's 0x547)
+    U3D_PlayerWorldPos(p);
+    U3D_CameraMoveTo(0xEE5, yaw, 0x86000, (s32)(p[0] * 4096.0f) + tx, (s32)(p[1] * 4096.0f) + 0x1B000,
+                     (s32)(p[2] * 4096.0f) + tz, frames ? frames : 1);
+    sBoardCam.st = 1, sBoardCam.frames = frames ? frames : 1;
+    MPNet_Log("u3d vm: the news board looked at");
+    return TRUE;
+}
+
+static bool8 BoardCamBusy(void)
+{
+    switch (sBoardCam.st)
+    {
+    case 1:   // (the camera on its way)
+        if (!U3D_CameraMoving())
+            sBoardCam.st = 2;
+        return TRUE;
+    case 2:   // (KEY_GetTrg: LEFT, RIGHT, DOWN or B)
+        if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | DPAD_DOWN | B_BUTTON))
+        {
+            U3D_CameraMoveBack(sBoardCam.frames);
+            sBoardCam.st = 3;
+        }
+        return TRUE;
+    case 3:
+        if (U3D_CameraMoving())
+            return TRUE;
+        sBoardCam.st = 0;
+        MPNet_Log("u3d vm: the news board left");
+        return FALSE;
+    }
+    return FALSE;
+}
+
 // ---- an ELITE FOUR room's own sounds (scrcmd_encount.c SCRCMD_PROC_FLD_StartFkDemoSubProc, 0x1A4; ov056 field_fk_
 // demo.c FIELD_FK_BUILD_SOUND_*, field_fk_sound_anime.c FIELD_FK_SOUND_ANIME_*): 1 the room's building (Black's at
 // 256, 240) striking at its slot 1's frame 6 over its running loop; 4 the building at 118, 236 striking at its slot 0's
@@ -8403,6 +8462,42 @@ void U3D_Vm_ContinueHome(void)
     SetContinueGameWarp(sSpecialLoc.group, sSpecialLoc.num, WARP_ID_NONE, sSpecialLoc.x, sSpecialLoc.y);
 }
 
+// the game clock in minutes (FIELD_CLOCK_UpdateMinutes takes Black's gate points down by them)
+static u32 ClockMinutes(void)
+{
+    RtcCalcLocalTime();
+    return (u32)gLocalTime.days * 1440 + gLocalTime.hours * 60 + gLocalTime.minutes;
+}
+
+// EVENT_GAMECLEAR_SetGatePoints (the Champion's clear): 1440 minutes of the gate boards showing the HALL OF FAME team
+static void HofOnBoards(void)
+{
+    u32 k;
+    sWork.hofUntil = ClockMinutes() + 0x5A0;
+    for (k = 0; k < PARTY_SIZE; k++)
+        sWork.hofTeam[k] = GetMonData(&gPlayerParty[k], MON_DATA_IS_EGG) ? SPECIES_NONE
+                         : GetMonData(&gPlayerParty[k], MON_DATA_SPECIES);
+}
+
+// the gate boards' HALL OF FAME team (FIELD_GIMMICK_GATE_HasMessagesToShow: flag 0x960 or 0x97B and gate points left):
+// its species into TEAM, their count (0: none to show)
+u8 U3D_Vm_HofTeam(u16 team[PARTY_SIZE])
+{
+    u32 k, n = 0, now = ClockMinutes();
+    if (!(FlagOn(0x960) || FlagOn(0x97B)) || sWork.hofUntil == 0 || now >= sWork.hofUntil || sWork.hofUntil - now > 0x5A0)
+        return 0;
+    for (k = 0; k < PARTY_SIZE; k++)
+        if (sWork.hofTeam[k] != SPECIES_NONE && sWork.hofTeam[k] < NUM_SPECIES)
+            team[n++] = sWork.hofTeam[k];
+    return n;
+}
+
+void U3D_Vm_DebugHof(void)   // (`mp u3dhof`: the party as the HALL OF FAME team, flag 0x960 set)
+{
+    HofOnBoards();
+    FlagTo(0x960, TRUE);
+}
+
 static void UnovaGameClear(void)
 {
     sSpecialLoc.set = FALSE;
@@ -8425,6 +8520,7 @@ static void UnovaGameClear(void)
     MPNet_Log("u3d vm: game clear, mode %u", sClearMode);
     if (sClearMode == 1)
     {
+        HofOnBoards();
         FlagSet(FLAG_IS_CHAMPION);
         GameClear();   // (its UNOVA branch: U3D_Vm_ContinueHome)
         return;

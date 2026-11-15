@@ -4836,6 +4836,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] u3dci %d: %d\n", seq, U3D_CiStart(seq, SPECIES_NONE, 0, 0));
     }
+    else if (strcmp(cmd, "u3dhof") == 0)   // u3dhof: the party as UNOVA's HALL OF FAME team (the gate boards' line, a day)
+    {
+        void U3D_Vm_DebugHof(void);
+        U3D_Vm_DebugHof();
+        printf("[test] u3dhof\n");
+    }
     else if (strcmp(cmd, "u3dvsbattle") == 0)   // u3dvsbattle CLASS: Black's first trainer of the class: its VS cut-in, its battle
     {
         bool8 U3D_Vm_DebugVsBattle(u8 trainerClass);
