@@ -36,6 +36,7 @@ SETUPS = {
     45: ('switch toggle (BRYCEN)', 0x021F3B50),
     46: ('rotating room (DRAYDEN)', 0x021F4120),
     48: ('gate news board (the gates)', 0x021F4EA4),   # (gGateExpObjSetups[1]: the English game's, text mode 0)
+    58: ('the lane traffic (ROUTE 4, the DESERT RESORT: zones 326 / 157)', 0x021F3B60),   # (sLaneTrainsUnitSetup)
     52: ("the BATTLE SUBWAY's trains at the GEAR STATION's platforms (zones 67-76)", 'btrain'),
     151: ('CHARGESTONE CAVE 1F, its stones (zone 195)', 'd06'),
     152: ('CHARGESTONE CAVE B1F, its stones (zone 196)', 'd06'),
@@ -391,6 +392,17 @@ def _place_btrain(img):
     return [((0.0, 0.0, 0.0), 0, 1)] * 8
 
 
+# ROUTE 4's lane traffic (ov058 field_gimmick_lane_trains.c FIELD_GIMMICK_LANE_TRAINS_PlaceLaneTrains): three lanes'
+# four models (east lead and trail, west lead and trail) at the track's ends, x 6000 / 7264 (the trail 96 behind), y 80,
+# z 8448 east, 8368 west; the VM runs them
+def _place58(img):
+    out = []
+    for lane in range(3):
+        out += [((6000.0, 80.0, 8448.0), 0x4000), ((6000.0 - 96, 80.0, 8448.0), 0x4000),
+                ((7264.0, 80.0, 8368.0), 0xC000), ((7264.0 + 96, 80.0, 8368.0), 0xC000)]
+    return out
+
+
 def d06_tables():
     """{zone: (stones [(x, y, z)], panels [(x, y, z)])} from ov051's tables"""
     img = Image(51)
@@ -425,7 +437,7 @@ def _place48(img):
     return [((0.0, 0.0, 0.0), 0, 1)]
 
 
-PLACES = {52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+PLACES = {58: _place58, 52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 

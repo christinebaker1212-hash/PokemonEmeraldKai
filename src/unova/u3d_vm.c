@@ -1085,6 +1085,8 @@ static void DragonReset(void);
 static s8 D06Floor(void);
 static void D06Load(void);
 static void D06Frame(void);
+static void LanesLoad(void);
+static void LanesFrame(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
 // (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
@@ -5847,6 +5849,7 @@ void U3D_Vm_FieldFrame(void)
     BoatFrame();
     U3D_Elboard_Frame();
     D06Frame();
+    LanesFrame();
     {
         void U3D_Subway_SwayFrame(u16 zone);
         U3D_Subway_SwayFrame(CurrentZone());   // (the BATTLE SUBWAY's carriage: u3d_subway.c)
@@ -5930,6 +5933,8 @@ void U3D_Vm_FieldShown(void)
         ;
     else if (D06Floor() >= 0)   // (ov051: CHARGESTONE CAVE's stones)
         D06Load();
+    else if (CurrentZone() == 326 || CurrentZone() == 157)   // (ov058: ROUTE 4's traffic)
+        LanesLoad();
     else if (CurrentZone() >= 67 && CurrentZone() <= 76)   // (ov052: the GEAR STATION's platforms, their trains
         U3D_ExpLoad(52);                                   //  brought in by the subway's scripts: u3d_subway.c)
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
@@ -6626,6 +6631,66 @@ bool8 U3D_Vm_RailWayBlocked(s32 fx, s32 fz, float hf, s32 tx, s32 tz, float ht)
     if (!onA && !onB)
         return FALSE;
     return !((onA && (wa & d)) || (onB && (wb & back)));
+}
+
+// ------------------------------------------------------------------------------------------------ ROUTE 4's lanes
+// ROUTE 4's traffic (ov058 field_gimmick_lane_trains.c, zones 326 / 157; pack gimmick 58): an eastbound and a
+// westbound vehicle, each a lead and a trail 96 units behind on one of three lanes' models, run the track a tile a
+// Black frame, then wait a while (east 30-59 frames, west 0-29) and take a lane at random; one passing in front of
+// the player is heard (the player between z 8224 and 8512, the lead 64 units or less ahead)
+#define LANE_MIN_X 6000.0f
+#define LANE_MAX_X 7264.0f
+static struct { bool8 on; u8 tick; struct { u16 wait, step; u8 lane; bool8 heard; } t[2]; } sLanes;
+
+static void LanesLoad(void)
+{
+    memset(&sLanes, 0, sizeof(sLanes));
+    sLanes.on = CurrentZone() == 326 || CurrentZone() == 157;
+    if (sLanes.on)
+    {
+        float pw[3];
+        U3D_ExpLoad(58);
+        U3D_PlayerWorldPos(pw);
+        MPNet_Log("u3d vm: ROUTE 4's lanes (the player at %d,%d,%d)", (int)pw[0], (int)pw[1], (int)pw[2]);
+    }
+}
+
+static void LanesFrame(void)
+{
+    u32 k;
+    float pw[3];
+    if (!sLanes.on || (CurrentZone() != 326 && CurrentZone() != 157))
+        return;
+    if (++sLanes.tick & 1)   // (Black's field: 30 frames a second)
+        return;
+    U3D_PlayerWorldPos(pw);
+    for (k = 0; k < 2; k++)
+    {
+        typeof(sLanes.t[0]) *t = &sLanes.t[k];
+        u16 m = t->lane * 4 + k * 2;
+        float lead;
+        if (t->wait)
+        {
+            t->wait--;
+            continue;
+        }
+        t->step++;
+        lead = k == 0 ? LANE_MIN_X + t->step * 16.0f : LANE_MAX_X - t->step * 16.0f;
+        U3D_ExpPlace(m, lead, 80, k == 0 ? 8448 : 8368, k == 0 ? 0x4000 : 0xC000);
+        U3D_ExpPlace(m + 1, k == 0 ? lead - 96 : lead + 96, 80, k == 0 ? 8448 : 8368, k == 0 ? 0x4000 : 0xC000);
+        if (pw[2] >= 8224 && pw[2] <= 8512 && !t->heard
+         && (k == 0 ? pw[0] - lead : lead - pw[0]) >= 0 && (k == 0 ? pw[0] - lead : lead - pw[0]) <= 64)
+        {
+            t->heard = TRUE;
+            PlaySE(SE_TRUCK_MOVE);
+        }
+        if (k == 0 ? lead >= LANE_MAX_X : lead <= LANE_MIN_X)
+        {
+            t->step = 0, t->heard = FALSE;
+            t->wait = k == 0 ? Random() % 30 + 30 : Random() % 30;
+            t->lane = Random() % 3;
+        }
+    }
 }
 
 // ------------------------------------------------------------------------------------------------ CHARGESTONE
