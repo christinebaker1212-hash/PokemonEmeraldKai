@@ -1,0 +1,16 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 47 5 9
+wait 200
+mash B 6 15
+mp where
+mp u3drun 1
+shotburst sp 1200 60
+mash A 40 30
+wait 300
+mash B 20 20
+echo [sp] done
+quit

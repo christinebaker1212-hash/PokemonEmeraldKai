@@ -1094,6 +1094,14 @@ static void SoundObjsFrame(void);
 static void BridgeFrame(void);
 static void LeagueFrame(void);
 static void FkStart(u8 slot);
+static void SpPokeFrame(void);
+static bool8 sSpPoke;
+static struct { bool8 on, pending; u8 side; u16 elapsed, frames; float from[3], to[3], bump; u16 from_, to_; }
+    sSpMove, sSpSwap;   // (the special POKeMON's ball on its way; ZORUA's smoke's swap waiting)
+static void SwapPeople(u16 a, u16 b);
+static void SpPokePlay(u8 model);
+static void SpPokeSpot(u16 gx, u16 h, u16 gz, float out[3]);
+static void SpPokeMoveStart(u8 side, u16 gx, u16 h, u16 gz, u16 bump, u16 frames);
 static void FkFrame(void);
 static bool8 FkBusy(void);
 static void LeagueLoad(void);
@@ -1106,7 +1114,8 @@ static bool8 LeagueBusy(void);
 static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
 enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA, W_MOTION,
-       W_ARC_GLOW, W_ARC_FLY, W_ARC_PEAK, W_ARC_END, W_LEAGUE, W_FKDEMO };
+       W_ARC_GLOW, W_ARC_FLY, W_ARC_PEAK, W_ARC_END, W_LEAGUE, W_FKDEMO, W_SPPOKE_MOVE, W_SPPOKE_PROGRESS,
+       W_SPPOKE_END, W_SPPOKE_SWAP };
 static u16 sBModelWait;
 // zone 389's time effect (ov065): sWork.white's TIMEFX_PENDING is Black's isEffectPending (its gimmick save 0x36)
 #define ZONE_TIME_EFFECT 389
@@ -4371,11 +4380,34 @@ static void Step(struct Thread *t)
             t->wait = W_LEAGUE;
             break;
         }
+        case U3C_EVENT_MON_CmdStartSpPokeGimmickTask:   // back?, x, height (halves), z, bump (halves), frames: the
+            if (sSpPoke)                                  // ball between the player and the spot (StartMove)
+            {
+                SpPokeMoveStart(V(0) != 0, V(1), V(2), V(3), V(4), V(5));
+                t->wait = W_SPPOKE_MOVE;
+            }
+            break;
+        case U3C_EVENT_MON_CmdMoveSpPokeGimmick:   // back?, x, height, z: shown there, its animations played (ShowAndPlay)
+            if (sSpPoke)
+            {
+                float spot[3];
+                u8 m = V(0) != 0;
+                SpPokeSpot(V(1), V(2), V(3), spot);
+                U3D_ExpPlace(m, spot[0], spot[1], spot[2], 0);
+                U3D_ExpHide(m, FALSE);
+                SpPokePlay(m);
+                PlaySE(m == 0 ? SE_BALL_OPEN : SE_BALL_TRADE);   // (Black's 0x567 / 0x793)
+            }
+            break;
+        case U3C_EVENT_MON_CmdStartSpPokeGimmickStepB:   // back?: its first animation to frame 5 (out) / 34 (back)
+            if (sSpPoke)
+                sSpMove.side = V(0) != 0, t->wait = W_SPPOKE_PROGRESS;
+            break;
+        case U3C_EVENT_MON_CmdStartSpPokeGimmickStepA:   // back?: its first animation to its end
+            if (sSpPoke)
+                sSpMove.side = V(0) != 0, t->wait = W_SPPOKE_END;
+            break;
         case U3C_EVENT_MON_CmdClearEventMonFlag:
-        case U3C_EVENT_MON_CmdStartSpPokeGimmickTask:
-        case U3C_EVENT_MON_CmdMoveSpPokeGimmick:
-        case U3C_EVENT_MON_CmdStartSpPokeGimmickStepA:
-        case U3C_EVENT_MON_CmdStartSpPokeGimmickStepB:
             break;
         // ---- BLACK CITY's residents (ov020 field_wfbc_data_local.c: the one talked to, sWfbcSlot)
         case U3C_FIELD_WFBC_DATA_LOCAL_ScrCmdGetWfbcValue:   // query, result
@@ -4671,24 +4703,23 @@ static void Step(struct Thread *t)
             sPendingScript = a[0];
             break;
         case U3C_StartSwapNpcEvent:   // person out, person in: the second set out where the first stood (CASTELIA's lost
-        {                              // boy turning into ZORUA; Black's puff of smoke not drawn, its sound the script's)
+        {                              // boy turning into ZORUA), in ov059's puff of smoke there (its frame 15) in zone 47
             u8 from = LocalId(V(0)), to = LocalId(V(1)), id = ObjEventId(from);
-            s16 x = -1, y = -1;
-            if (id < OBJECT_EVENTS_COUNT && !gObjectEvents[id].isPlayer)
+            if (sSpPoke && CurrentZone() == 47 && !sSpSwap.pending && id < OBJECT_EVENTS_COUNT)
             {
-                x = gObjectEvents[id].currentCoords.x - MAP_OFFSET, y = gObjectEvents[id].currentCoords.y - MAP_OFFSET;
-                RemoveObjectEventByLocalIdAndMap(gObjectEvents[id].localId, gObjectEvents[id].mapNum, gObjectEvents[id].mapGroup);
+                s32 gx, gz;
+                float pw[3];
+                U3D_GridOfMap(gObjectEvents[id].currentCoords.x, gObjectEvents[id].currentCoords.y, &gx, &gz);
+                U3D_PlayerWorldPos(pw);
+                U3D_ExpPlace(2, gx * 16 + 8, pw[1], gz * 16 + 8, 0);
+                U3D_ExpHide(2, FALSE);
+                SpPokePlay(2);
+                sSpSwap.pending = TRUE, sSpSwap.from_ = V(0), sSpSwap.to_ = V(1);
+                t->wait = W_SPPOKE_SWAP;
+                break;
             }
-            ForgetPerson(from);
-            Gone(from, TRUE);
-            Gone(to, FALSE);
-            if (x >= 0)
-                SetObjEventTemplateCoords(to, x, y);
-            id = ObjEventId(to);
-            if (id >= OBJECT_EVENTS_COUNT)
-                TrySpawnObjectEvent(to, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
-            else if (x >= 0)
-                MoveObjectEventToMapCoords(&gObjectEvents[id], x + MAP_OFFSET, y + MAP_OFFSET);
+            (void)to;
+            SwapPeople(V(0), V(1));
             break;
         }
         case U3C_StartMmdlSpinRise:   // a person spinning up and away (the SHADOW TRIAD's way): 150 units in 24 field
@@ -5050,6 +5081,22 @@ static void Wait(struct Thread *t)
         break;
     case W_ARC_END:
         if (!sArc.shown)
+            t->wait = W_NONE;
+        break;
+    case W_SPPOKE_MOVE:   // (the special POKeMON's ball: MoveEventMain, WaitAnimeProgress, WaitAnimeEnd, SwapNpc)
+        if (!sSpMove.on)
+            t->wait = W_NONE;
+        break;
+    case W_SPPOKE_PROGRESS:
+        if (U3D_ExpFrame(sSpMove.side) >= (sSpMove.side == 0 ? 5 : 34) || !U3D_ExpPlaying(sSpMove.side))
+            t->wait = W_NONE;
+        break;
+    case W_SPPOKE_END:
+        if (!U3D_ExpPlaying(sSpMove.side))
+            t->wait = W_NONE;
+        break;
+    case W_SPPOKE_SWAP:
+        if (!sSpSwap.pending && !U3D_ExpPlaying(2))
             t->wait = W_NONE;
         break;
     case W_FKDEMO:   // (an ELITE FOUR room's entrance scene to its end: FIELD_FK_DEMO_EventMain)
@@ -5866,6 +5913,7 @@ void U3D_Vm_FieldFrame(void)
     BridgeFrame();
     LeagueFrame();
     FkFrame();
+    SpPokeFrame();
     {
         void U3D_Subway_SwayFrame(u16 zone);
         U3D_Subway_SwayFrame(CurrentZone());   // (the BATTLE SUBWAY's carriage: u3d_subway.c)
@@ -5877,6 +5925,7 @@ void U3D_Vm_FieldShown(void)
     if (!Ready())
         return;
     PlateDoorsRefresh(FALSE);
+    sSpPoke = FALSE, sSpMove.on = FALSE, sSpSwap.pending = FALSE;   // (the special POKeMON's: loaded again below)
     {
         void U3D_TownMapArrive(u16 zone);
         U3D_TownMapArrive(CurrentZone());   // (Black's arrival flags: FLY's towns, src/unova/u3d_townmap.c)
@@ -5955,6 +6004,11 @@ void U3D_Vm_FieldShown(void)
         SoundObjsLoad();
     else if (CurrentZone() == 137 || CurrentZone() == 138)   // (ov049 / ov050: the LEAGUE's hub and the CHAMPION's room)
         LeagueLoad();
+    else if (CurrentZone() == 47 || CurrentZone() == 53 || CurrentZone() == 346)   // (ov059: the special POKeMON)
+    {
+        U3D_ExpLoad(CurrentZone() == 47 ? 59 : 159);
+        sSpPoke = TRUE;
+    }
     else if (CurrentZone() >= 67 && CurrentZone() <= 76)   // (ov052: the GEAR STATION's platforms, their trains
         U3D_ExpLoad(52);                                   //  brought in by the subway's scripts: u3d_subway.c)
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
@@ -6934,6 +6988,100 @@ static void SoundObjsFrame(void)
     SoundObjsHear();
     if (CurrentZone() == 249)
         SoundObjsSlide();
+}
+
+// ------------------------------------------------------------------------------------------------ the special POKeMON
+// The special POKeMON's scenes (ov059 sp_poke_gimmick.c; script commands 0x221-0x224 and 0x23E; pack gimmicks 59 /
+// 159): a POKeMON a distribution brought (KELDEO, MELOETTA, CELEBI, the beasts, GENESECT, SHAYMIN) sent out of its
+// ball: the ball's way out (model 0) or back (1) shown at one end and moved to the other over FRAMES Black frames
+// along an arc BUMP high in the middle (StartMove; the way back hidden at its end), shown at a spot playing its three
+// animations once (ShowAndPlay), waited on to a frame of its first (StepB: 5 out, 34 back) or to its end (StepA); in
+// zone 47 ZORUA's puff of smoke (model 2) over the person it turns from, the swap at its frame 15 (StartSwapNpc).
+
+static void SwapPeople(u16 a, u16 b)
+{
+    u8 from = LocalId(a), to = LocalId(b), id = ObjEventId(from);
+    s16 x = -1, y = -1;
+    if (id < OBJECT_EVENTS_COUNT && !gObjectEvents[id].isPlayer)
+    {
+        x = gObjectEvents[id].currentCoords.x - MAP_OFFSET, y = gObjectEvents[id].currentCoords.y - MAP_OFFSET;
+        RemoveObjectEventByLocalIdAndMap(gObjectEvents[id].localId, gObjectEvents[id].mapNum, gObjectEvents[id].mapGroup);
+    }
+    ForgetPerson(from);
+    Gone(from, TRUE);
+    Gone(to, FALSE);
+    if (x >= 0)
+        SetObjEventTemplateCoords(to, x, y);
+    id = ObjEventId(to);
+    if (id >= OBJECT_EVENTS_COUNT)
+        TrySpawnObjectEvent(to, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+    else if (x >= 0)
+        MoveObjectEventToMapCoords(&gObjectEvents[id], x + MAP_OFFSET, y + MAP_OFFSET);
+}
+
+static void SpPokePlay(u8 model)   // (its three animations from their start, once)
+{
+    U3D_ExpAnim(model, 0, 0, TRUE);
+    U3D_ExpTex(model, 1, TRUE, 0, TRUE, FALSE);
+    U3D_ExpTex(model, 2, TRUE, 0, TRUE, FALSE);
+}
+
+static void SpPokeSpot(u16 gx, u16 h, u16 gz, float out[3])   // (a tile's centre at height H halves: x * 16 + 8)
+{
+    float pw[3];
+    U3D_PlayerWorldPos(pw);
+    out[0] = gx * 16.0f + 8.0f, out[1] = h * 8.0f, out[2] = gz * 16.0f + 8.0f;
+    (void)pw;
+}
+
+static void SpPokeMoveStart(u8 side, u16 gx, u16 h, u16 gz, u16 bump, u16 frames)
+{
+    float pw[3], spot[3];
+    U3D_PlayerWorldPos(pw);
+    SpPokeSpot(gx, h, gz, spot);
+    memcpy(sSpMove.from, side == 0 ? pw : spot, sizeof(spot));
+    memcpy(sSpMove.to, side == 0 ? spot : pw, sizeof(spot));
+    sSpMove.side = side, sSpMove.bump = bump * 8.0f, sSpMove.frames = frames ? frames : 1, sSpMove.elapsed = 0;
+    sSpMove.on = TRUE;
+    U3D_ExpPlace(side, sSpMove.from[0], sSpMove.from[1], sSpMove.from[2], 0);
+    U3D_ExpHide(side, FALSE);
+    U3D_ExpAnim(side, 0, 0, FALSE);   // (paused at their start)
+    U3D_ExpTex(side, 1, FALSE, 0, FALSE, FALSE);
+    U3D_ExpTex(side, 2, FALSE, 0, FALSE, FALSE);
+    if (side == 0)
+        PlaySE(SE_BALL_THROW);   // (Black's 0x566)
+    MPNet_Log("u3d vm: the special POKeMON's ball %s over %u frames", side == 0 ? "out" : "back", frames);
+}
+
+static void SpPokeFrame(void)
+{
+    if (sSpMove.on)
+    {
+        static u8 tick;
+        u32 k, e;
+        float p[3];
+        if (++tick & 1)
+            return;
+        e = ++sSpMove.elapsed;
+        for (k = 0; k < 3; k++)
+            p[k] = sSpMove.from[k] + (sSpMove.to[k] - sSpMove.from[k]) * e / sSpMove.frames;
+        if (e >= (sSpMove.frames + 1u) / 2)
+            e = sSpMove.frames - e;
+        p[1] += sSpMove.bump * e / sSpMove.frames;
+        U3D_ExpPlace(sSpMove.side, p[0], p[1], p[2], 0);
+        if (sSpMove.elapsed >= sSpMove.frames)
+        {
+            if (sSpMove.side == 1)
+                U3D_ExpHide(1, TRUE);
+            sSpMove.on = FALSE;
+        }
+    }
+    if (sSpSwap.pending && U3D_ExpFrame(2) >= 15)   // (SwapNpcEventMain: the swap at the smoke's frame 15)
+    {
+        sSpSwap.pending = FALSE;
+        SwapPeople(sSpSwap.from_, sSpSwap.to_);
+        MPNet_Log("u3d vm: ZORUA's smoke: the swap");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------ the LEAGUE

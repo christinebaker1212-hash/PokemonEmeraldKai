@@ -1,0 +1,8 @@
+# The special POKeMON's scenes (ov059 sp_poke_gimmick.c, script commands 0x221-0x224 / 0x23E: u3d_vm.c SpPoke*; pack
+# gimmicks 59 / 159): CASTELIA's lost boy and CELEBI: the ball out and back, ZORUA's puff of smoke and the swap.
+# Shots sp_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=251:50"
+EXPECT_A=("the special POKeMON's ball out" "ZORUA's smoke: the swap" "[sp] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")
