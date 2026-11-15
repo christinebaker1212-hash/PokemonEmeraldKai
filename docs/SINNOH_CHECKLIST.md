@@ -193,9 +193,10 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The interviews and records from SINNOH's own systems: contests, the dress-up photo (PHOTO RATING), POFFINS (the
       POFFIN HOUSE's blends), the BATTLE TOWER's records and interviews, the HALL, BP, ribbons, the GAME CORNER, BERRY
       patches (BERRY LOOKOUT), AMITY SQUARE, the VILLA (sinnoh_studio, sinnoh_tower: COOP_NOTES "SINNOH's TV")
-- [ ] CANALAVE LIBRARY's TV news of LAKE VALOR (StartLibraryTV, Platinum's src/library_tv): the scene plays and the
+- [~] CANALAVE LIBRARY's TV news of LAKE VALOR (StartLibraryTV, Platinum's src/library_tv): the scene plays and the
       screen holds dark for the TV's length (1.185.13, sinnoh_library_explosion); its picture (the intro's TV frame,
-      graphic/library_tv.narc, the rolling scan lines) isn't drawn yet
+      demo/intro/intro_tv.narc, graphic/library_tv.narc, the rolling scan lines) needs Platinum's ROM: the decomp
+      doesn't hold those archives (2026-11-15: asked the user for one, as UNOVA's ROM comes)
 - [x] Friends' segments on each other's TV: CO-OP's record mixing carries each game's kept segments; the TV keeps 8
       of friends' and airs them with the friend's name (sinnoh_tv_mix: COOP_NOTES "SINNOH's TV")
 - [x] JUBILIFE TV's floors and their people: every script converts; the 3F questionnaire man's two words on the
@@ -214,7 +215,10 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 ## 8. Clean-up
 
 - [x] No written story left: every game in SINNOH plays Platinum's (no old saves to keep, no migration)
-- [ ] The written words go once nothing uses them (words*.py, story_people.py, trainer_words.py)
+- [~] The written words go once nothing uses them (words*.py, story_people.py, trainer_words.py): 2026-11-15 the
+      people who battle when talked to run Platinum's scripts (the maids, the TRAINERS' SCHOOL); what still uses them:
+      gym puzzles' written signs, the game's own systems' people (MR. BACKLOT, the radar aide, the swarm twins), the
+      written fallbacks of 16 trainers with no line of their own in Platinum
 - [x] Tests that used the written story moved to Platinum's (or gone where a Platinum test covers them)
 
 ## Closed (not built)

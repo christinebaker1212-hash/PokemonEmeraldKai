@@ -10,7 +10,8 @@ belong to the original games' regions stay (up to SINNOH), Quetzal's placements 
 overworld (MOEGATCHA pulls only). The audit's findings: docs/regions_audit/.
 
 ## KANTO
-- [ ] FireRed's decomp settles any behavior question (Kai > FireRed > Quetzal)
+- [x] FireRed's decomp settles any behavior question (Kai > FireRed > Quetzal): the rule every KANTO change keeps
+      (the 158-case audit, docs/AUDIT_HANDOFF.md, was settled by it); the NPC / object sprite audit is next (2026-11-15)
 - [x] KANTO's legendaries only in KANTO (exclusives: qz_specials.c MP_LegendForeign / MP_HideForeignLegends; test
       legend_exclusive)
 - [x] FireRed's RUNNING SHOES aide after BROCK: back (FireRed's scene and words; a line of his own if the player has
@@ -92,7 +93,8 @@ overworld (MOEGATCHA pulls only). The audit's findings: docs/regions_audit/.
 - [x] BERRY patches can't be planted (fixed: test sinnoh_berry picks and plants FLOAROMA's patch)
 - [x] Followers cut in half in 3D (checked: a follower in ROUTE 201's tall grass and on its paths stands
       whole, every direction)
-- [ ] Seams where the map ends and the out-of-bounds loop begins
+- [x] Seams where the map ends and the out-of-bounds loop begins (checked 2026-11-15: TWINLEAF's west and south,
+      ROUTE 201's west, SANDGEM's south, SNOWPOINT's north and east, JUBILIFE's north: the filler forest meets them cleanly)
 - [x] Water animates (Platinum's animated map textures: test sinnoh_water)
 - [x] POKéTCH a registrable key item outside SINNOH (on / off, the right stick as usual) once SINNOH's ELITE FOUR is
       beaten (MP_Region_DeviceHere; tests poketch_locked, poketch_regions)
