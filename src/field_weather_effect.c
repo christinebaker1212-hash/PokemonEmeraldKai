@@ -2522,7 +2522,10 @@ u8 GetSavedWeather(void)
 void SetSavedWeatherFromCurrMapHeader(void)
 {
     u8 oldWeather = gSaveBlock1Ptr->weather;
+    u8 U3D_FieldWeather(void);
     gSaveBlock1Ptr->weather = TranslateWeatherNum(gMapHeader.weather);
+    if (U3D_FieldWeather() != 0xFF)   // Moemon Kai: UNOVA's maps have Black's weather calendar's (u3d_elboard.c)
+        gSaveBlock1Ptr->weather = U3D_FieldWeather();
     UpdateRainCounter(gSaveBlock1Ptr->weather, oldWeather);
 }
 

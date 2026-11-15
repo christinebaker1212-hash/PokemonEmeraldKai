@@ -18,6 +18,7 @@
 #include "mp.h"
 #include "u3d.h"
 #include "u3d_elboard.h"
+#include "constants/weather.h"
 
 u8 MP_RenderSmallGlyph(u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor);   // text.c
 bool8 U3D_Vm_Flag(u16 id);
@@ -144,6 +145,23 @@ u8 U3D_ZoneWeather(u16 zone)
             return sCalDays[i][min(DayOfYear(ConvertBcdToBinary(rtc.month), ConvertBcdToBinary(rtc.day)), 365)];
         }
     return zone < ARRAY_COUNT(sZoneWeather) ? sZoneWeather[zone] : 0;
+}
+
+// the field's weather on an UNOVA map: its weather today as the game's (Black's zone_weather.c ids: 0 sunny, 1 snow,
+// 2 rain, 3 and 12 sandstorm, 4 heavy snow, 5 hail, 6 THUNDURUS's thunderstorm, 7 TORNADUS's storm, 8 diamond dust,
+// 9-11 and 13-14 mist; the game has no hail or diamond dust: its snow); 0xFF on any other region's map
+u8 U3D_FieldWeather(void)
+{
+    static const u8 sKai[15] = {WEATHER_NONE, WEATHER_SNOW, WEATHER_RAIN, WEATHER_SANDSTORM, WEATHER_SNOW, WEATHER_SNOW,
+                                WEATHER_RAIN_THUNDERSTORM, WEATHER_DOWNPOUR, WEATHER_SNOW, WEATHER_FOG_HORIZONTAL,
+                                WEATHER_FOG_HORIZONTAL, WEATHER_FOG_HORIZONTAL, WEATHER_SANDSTORM,
+                                WEATHER_FOG_HORIZONTAL, WEATHER_FOG_HORIZONTAL};
+    u16 zone = U3D_CurrentZone();
+    u8 w;
+    if (zone == 0xFFFF)
+        return 0xFF;
+    w = U3D_ZoneWeather(zone);
+    return w < ARRAY_COUNT(sKai) ? sKai[w] : WEATHER_NONE;
 }
 
 static u8 *SlotsSaved(bool8 save)

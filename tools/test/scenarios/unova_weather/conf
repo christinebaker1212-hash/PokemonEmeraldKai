@@ -1,0 +1,7 @@
+# UNOVA's field weather from Black's weather calendar (u3d_elboard.c U3D_FieldWeather): the DESERT RESORT's sandstorm
+# every day, ROUTE 4 and ROUTE 9 as today's calendar has them. Shots uw_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("weather 8" "[uw] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -64,9 +64,11 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       one after another by the lanes' tracks as GIMMICK_OBJ_ELBOARD_UpdateLine; scenario unova_news_board. Not yet:
       the HALL OF FAME team for a day after the LEAGUE (gate points, 0x960 / 0x97B), the outbreak line (no outbreaks
       yet, below), the board's camera view (0x17E's own command)
-- [ ] Field weather: Black's weather calendar (ov010 calender.c: 68 zones, a weather a day; u3d_elboard.c
-      U3D_ZoneWeather already reads it for the boards) and the roamers' storms shown on the field (UNOVA's maps are
-      WEATHER_NONE now)
+- [x] Field weather (2026-11-15): Black's weather calendar (ov010 calender.c: 68 zones, a weather a day of the year)
+      and the roamers' storms (TORNADUS's downpour, THUNDURUS's thunderstorm where they roam) as the map's weather on
+      every UNOVA map load (field_weather_effect.c SetSavedWeatherFromCurrMapHeader -> u3d_elboard.c
+      U3D_FieldWeather: rain, snow (also for Black's hail, heavy snow and diamond dust), sandstorm, mist as fog);
+      scenario unova_weather (`mp weather`)
 - [ ] Mass outbreaks (FIELD_ENCOUNT_GetSwarmZoneId: Black's daily swarm after the LEAGUE, its board line)
 - [ ] The dragons' levels in DRAYDEN's gym (walkways at their own heights, so the poses force Black's route)
 

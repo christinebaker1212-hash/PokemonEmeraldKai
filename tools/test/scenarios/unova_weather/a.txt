@@ -1,0 +1,22 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 158 5 4
+wait 240
+mash B 6 15
+mp weather
+shot uw_sand
+mp u3dzone 326 430 595
+wait 240
+mash B 6 15
+mp weather
+shot uw_route4
+mp u3dzone 374 718 333
+wait 240
+mash B 6 15
+mp weather
+shot uw_route9
+echo [uw] done
+quit
