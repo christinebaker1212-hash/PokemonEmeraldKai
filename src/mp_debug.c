@@ -4836,6 +4836,22 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] u3dci %d: %d\n", seq, U3D_CiStart(seq, SPECIES_NONE, 0, 0));
     }
+    else if (strcmp(cmd, "u3dsay") == 0)   // u3dsay BANK MSG: one of Black's lines in the field's message box
+    {
+        static u8 sLine[512];
+        int bank = 0, msg = 0;
+        sscanf(arg, "%d %d", &bank, &msg);
+        StringExpandPlaceholders(sLine, U3D_Text(bank, msg));
+        ShowFieldMessage(sLine);
+        printf("[test] u3dsay %d %d\n", bank, msg);
+    }
+    else if (strcmp(cmd, "u3dfaceup") == 0)   // u3dfaceup TYPE: N's face-up TYPE (0-2) shown; -1 closed
+    {
+        if (atoi(arg) < 0)
+            U3D_FaceupClose();
+        else
+            printf("[test] u3dfaceup %d: %d\n", atoi(arg), U3D_FaceupStart(atoi(arg)));
+    }
     else if (strcmp(cmd, "u3dhof") == 0)   // u3dhof: the party as UNOVA's HALL OF FAME team (the gate boards' line, a day)
     {
         void U3D_Vm_DebugHof(void);

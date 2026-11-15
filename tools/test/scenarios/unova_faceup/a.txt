@@ -1,0 +1,37 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 64 22 14
+wait 200
+mash B 6 15
+mp u3dfaceup 0
+shotburst fu_open 140 10
+wait 160
+mp u3dsay 357 8
+shotburst fu_talk 60 4
+wait 90
+mash A 10 20
+mp u3dfaceup -1
+shotburst fu_close 80 10
+wait 100
+mp u3dfaceup 1
+wait 160
+mp u3dsay 589 1
+wait 40
+shot fu_castle
+mash A 10 20
+mp u3dfaceup -1
+wait 100
+mp u3dfaceup 2
+wait 160
+mp u3dsay 589 8
+wait 40
+shot fu_light
+mash A 10 20
+mp u3dfaceup -1
+wait 100
+shot fu_after
+echo [fu] done
+quit

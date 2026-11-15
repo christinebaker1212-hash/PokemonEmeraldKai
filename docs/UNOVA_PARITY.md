@@ -132,7 +132,13 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
   ball flown from N to the dais over the script's frames, arched, then opened there; the peak and end waits). Black's
   fades on screens 4 / 8 (FADE_Start 0xC) are white now. Scenario unova_light_stone (`mp u3darc LOCAL`: the throw
   without N's battle before it).
-- [ ] Face-up portraits (FLD_FACEUP 0x1D3-0x1D5: N's CASTLE, NIMBASA)
+- [x] Face-up portraits (FLD_FACEUP 0x1D3-0x1D5: N's CASTLE, NIMBASA; 2026-11-15, the user's approved mock-up
+      docs/unova/mockups/faceup_*.png): Black's archive 0xBB in the people's pack ("FCUP", tools/unova/build_gfx.py
+      faceups(): the three backgrounds and N in each face's own palette, his mouth's and blink's pictures), drawn as the
+      field's lowest layer under the message box with the field's people hidden, the DS picture's middle 240 x 160
+      (src/unova/u3d_faceup.c): the fade to black and back, N blending in over 30 of Black's frames, his mouth moving
+      while his words print at the text speed's pace, his blinks every 80-99 frames, the closing fade; the VM waits for
+      each opening and closing (W_FACEUP); scenario unova_faceup (`mp u3dfaceup TYPE`, `mp u3dsay BANK MSG`)
 - [x] The gates' electric news boards (ov048, 2026-11-15; src/unova/u3d_elboard.c, data tools/unova/gen_elboard.py ->
       u3d_elboard.h; pack gimmick 48, the English game's lanes): each gate's record places the board and its TV's
       picture; the lines Black writes (the date, "place: weather" for its four places by Black's weather calendar and

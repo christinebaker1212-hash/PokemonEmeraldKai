@@ -55,7 +55,12 @@ bool8 U3D_CiBusy(void);
 bool8 U3D_CiStartForClass(u8 trainerClass);
 void U3D_CiKeepSong(u16 song);
 bool8 U3D_CiSongKept(u16 song);   // (pokemon.c: the battle song a VS cut-in began, kept playing)   // (a VS name cut-in before a battle: its black held until the battle)
-void U3D_CiComposite(u16 *frame);                               // (its animation's frame now, -1 none)
+void U3D_CiComposite(u16 *frame);
+// N's face-ups (u3d_faceup.c, fld_faceup.c): TYPE 0 NIMBASA, 1 his CASTLE, 2 the white light
+bool8 U3D_FaceupStart(u8 type);
+void U3D_FaceupClose(void);
+bool8 U3D_FaceupBusy(void);
+bool8 U3D_FaceupShown(void);                               // (its animation's frame now, -1 none)
 void U3D_PlayerFly(bool8 on, float x, float y, float z);     // (the player's sprite and the view at a world place)
 void U3D_HexClear(void);                                     // Black's height areas (CLAY's gym's floors, u3d.c)
 void U3D_HexSet(u8 i, s16 x, s16 z, s16 w, s16 d, s16 h);

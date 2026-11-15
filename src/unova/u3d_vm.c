@@ -1119,7 +1119,7 @@ static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
 enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA, W_MOTION,
        W_ARC_GLOW, W_ARC_FLY, W_ARC_PEAK, W_ARC_END, W_LEAGUE, W_FKDEMO, W_SPPOKE_MOVE, W_SPPOKE_PROGRESS,
-       W_SPPOKE_END, W_SPPOKE_SWAP, W_CUTIN, W_CUTIN_BATTLE, W_BOARD_CAM };
+       W_SPPOKE_END, W_SPPOKE_SWAP, W_CUTIN, W_CUTIN_BATTLE, W_BOARD_CAM, W_FACEUP };
 // the key items' 3D cut-ins (gFld3dCiKeyTable: Black's item, its sequence)
 static const u16 sCiKeyItems[17][2] = {
 #include "u3d_cutin_keys.h"
@@ -3199,14 +3199,22 @@ static void Step(struct Thread *t)
         case U3C_PROC_FLD_StartFkDemoSubProc:   // (an ELITE FOUR room's own sounds: FkSoundStart)
             FkSoundStart(V(0));
             break;
+        // ---- N's face-ups (fld_faceup.c: u3d_faceup.c), the script waiting for each opening and closing
+        case U3C_FLD_FACEUP_ScrCmdStart:   // type, (variant), (both screens faded on closing: one here)
+            if (U3D_FaceupStart(a[0]))
+                t->wait = W_FACEUP;
+            break;
+        case U3C_FLD_FACEUP_ScrCmdWaitEnd:
+            U3D_FaceupClose();
+            t->wait = W_FACEUP;
+            break;
+        case U3C_FLD_FACEUP_ScrCmdPrepareField:   // (FLD_FACEUP_ResumeLipSync: the mouth follows the next words)
+            break;
         case U3C_PROC_FLD_SetCameraSettingFromFkDemoSlot:
         case U3C_StartMmdlRailSlipDown:   // (a slide down a rail slope: the tiles walk it)
         case U3C_FadeBgmVolume:   // (the song quieter under a scene: kept as it is)
         case U3C_RestoreBgmVolume:
         case U3C_PROC_CallSubEvent:   // (a field menu's screen opened from a scene)
-        case U3C_FLD_FACEUP_ScrCmdStart:   // (a speaker's face-up portrait: the words come in the script's messages)
-        case U3C_FLD_FACEUP_ScrCmdWaitEnd:
-        case U3C_FLD_FACEUP_ScrCmdPrepareField:
         case U3C_NETWORK_CmdRequestCommExit:   // (Black's wireless: Kai's co-op stands in for it)
         case U3C_NETWORK_CmdRestartAutoComm:
         case U3C_NETWORK_CmdStartAutoComm:
@@ -5208,6 +5216,10 @@ static void Wait(struct Thread *t)
         break;
     case W_SPPOKE_SWAP:
         if (!sSpSwap.pending && !U3D_ExpPlaying(2))
+            t->wait = W_NONE;
+        break;
+    case W_FACEUP:   // (a face-up opening or closing: FLD_FACEUP_OpenEventMain / CloseEventMain)
+        if (!U3D_FaceupBusy())
             t->wait = W_NONE;
         break;
     case W_BOARD_CAM:   // (a news board looked at until the player turns away)

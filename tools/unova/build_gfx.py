@@ -25,7 +25,8 @@ Format (little endian): "U3DG" u32 version 2, u16 codes; each: u8 kind (0 walkin
   picture layout): Black's backs (archive 0x49, a/0/7/3: the two player characters, JUNIPER, CHEREN...), cell 0
   over their 256x128 bitmap sheet (2D mapping: a tile number is a place 32 tiles a row), at its own pixels (the head
   and upper body in 64x64, as the game's backs: Black draws them twice as big), four times
-  then "TMAP" (the TOWN MAP) and "CIPT", the VS cut-ins' portraits (cutin_portraits())
+  then "TMAP" (the TOWN MAP), "CIPT", the VS cut-ins' portraits (cutin_portraits()) and "FCUP", N's face-ups
+  (faceups())
 """
 import importlib.util
 import os
@@ -353,6 +354,65 @@ def cutin_portraits():
     return bytes(out)
 
 
+def faceups():
+    """N's face-ups (ov082 fld_faceup.c: archive 0xBB, a/1/8/7; 8bpp BG layers in the face's own palette): "FCUP",
+    u16 count (3: NIMBASA, N's CASTLE, the white light); each the background (chars 4 + type, screen 8 + type), N
+    (char 7, screen 11, its top 24 rows), the DS's 256 x 192 as BGR555 with bit 15 set where drawn, then the mouth's
+    three pictures (tiles 0x184 + 8 n, 4 x 2) and the blink's three (0x160 + 12 n, 6 x 2), 32 x 16 and 48 x 16 each, as
+    FLD_FACEUP_VBlankUpload lays them at screen tiles 14, 11 and 13, 8"""
+    from build_journal import section_of
+    a = narc.arc('a/1/8/7')
+
+    def tiles8(ncgr):
+        c = section_of(ncgr, b'CHAR')
+        size = struct.unpack_from('<I', c, 24)[0]
+        raw = c[0x20:0x20 + size]
+        return [raw[t * 64:t * 64 + 64] for t in range(len(raw) // 64)]
+
+    def pal(nclr):
+        q = section_of(nclr, b'PLTT')
+        size, off = struct.unpack_from('<II', q, 16)
+        raw = q[8 + off:8 + off + size]
+        return [struct.unpack_from('<H', raw, 2 * i)[0] & 0x7FFF for i in range(len(raw) // 2)]
+
+    def layer(ts, p, si, rows):
+        sc = section_of(a[si], b'SCRN')
+        w = struct.unpack_from('<H', sc, 8)[0]
+        ents = struct.unpack_from('<%dH' % (struct.unpack_from('<I', sc, 16)[0] // 2), sc, 20)
+        px = [0] * (256 * rows * 8)
+        for k, e in enumerate(ents):
+            tx, ty = k % (w // 8), k // (w // 8)
+            if ty >= rows or tx >= 32:
+                continue
+            t, hf, vf = e & 0x3FF, (e >> 10) & 1, (e >> 11) & 1
+            if t >= len(ts):
+                continue
+            for i, v in enumerate(ts[t]):
+                if v:
+                    x, y = (7 - i % 8) if hf else i % 8, (7 - i // 8) if vf else i // 8
+                    px[(ty * 8 + y) * 256 + tx * 8 + x] = 0x8000 | (p[v] if v < len(p) else 0)
+        return px
+
+    def strip(ts, p, first, wide, n):
+        px = []
+        for y in range(16):
+            for x in range(wide * 8):
+                v = ts[first + n * 0 + (y // 8) * wide + x // 8][(y % 8) * 8 + x % 8] if first + (y // 8) * wide + x // 8 < len(ts) else 0
+                px.append(0x8000 | p[v] if v else 0)
+        return px
+
+    nts = tiles8(a[7])
+    out = bytearray(b'FCUP' + struct.pack('<H', 3))
+    for k in range(3):
+        p = pal(a[k])
+        out += struct.pack('<%dH' % (256 * 192), *layer(tiles8(a[4 + k]), p, 8 + k, 24))
+        out += struct.pack('<%dH' % (256 * 192), *layer(nts, p, 11, 24))
+        for base, step, wide in ((0x184, 8, 4), (0x160, 12, 6)):
+            for n in range(3):
+                out += struct.pack('<%dH' % (wide * 8 * 16), *strip(nts, p, base + step * n, wide, 0))
+    return bytes(out)
+
+
 def main():
     out_path = sys.argv[1]
     codes = narc.arc(CODES_ARC)[0]
@@ -409,6 +469,7 @@ def main():
     for row in tm:
         pack += struct.pack('<%dH' % len(row), *row)
     pack += cutin_portraits()
+    pack += faceups()
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     open(out_path, 'wb').write(bytes(pack))
     print('%s: %d of %d object codes drawn, %d battle pictures, %d backs, %d bytes'

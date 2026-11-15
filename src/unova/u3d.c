@@ -1429,6 +1429,9 @@ void U3D_PlayerDepthTest(u8 mode)
 
 static bool OamHidden(int oamIndex, int x, int line)
 {
+    bool8 U3D_FaceupShown(void);
+    if (U3D_FaceupShown())   // (N's face-up covers the field's people)
+        return TRUE;
     const OamDepth *o;
     float d;
     if (!sLiveAny || oamIndex < 0 || oamIndex >= OAM_ENTRY_COUNT || x < 0 || x >= W || line < 0 || line >= H)
@@ -3019,6 +3022,21 @@ static void U3dLine(int line, u16 layers[4][DISPLAY_WIDTH])
     }
     if (!sView.active || !OnField())
         return;
+    {
+        bool8 U3D_FaceupLine(int line, u16 *out);
+        static u16 sFace[W];
+        if (U3D_FaceupLine(line, sFace))   // (N's face-up: the field's lowest layer, u3d_faceup.c)
+        {
+            if (line == 0)
+                FindFade();
+            for (x = 0; x < W; x++)
+            {
+                layers[3][x] = Faded(sFace[x]);
+                layers[2][x] = layers[1][x] = 0;
+            }
+            return;
+        }
+    }
     if (line == 0)
     {
         FindFade();
@@ -3177,6 +3195,10 @@ void U3D_Update(void)
     U3D_Vm_FieldFrame();
     ExpStep();
     CiStep();
+    {
+        void U3D_FaceupFrame(void);
+        U3D_FaceupFrame();
+    }
     BuildingStep();
     FindCamera();
     SetupView();

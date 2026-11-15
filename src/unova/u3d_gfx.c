@@ -37,8 +37,11 @@ static struct
     u16 townW, townH;
     const u8 *portraits;  // the VS cut-ins' portraits ("CIPT")
     u16 portraitCount;
+    u16 *faceups;         // N's face-ups ("FCUP")
+    u16 faceupCount;
 } sGfx;
 
+#define FACEUP_BYTES ((256 * 192 * 2 + 3 * 32 * 16 + 3 * 48 * 16) * 2)
 static u32 FrameBytes(u8 kind) { return kind == 4 ? 2048 : 512; }
 static u32 FrameCount(u8 kind) { return kind == 0 ? 9 : 1; }
 
@@ -129,6 +132,18 @@ static void Load(void)
                     u16 n = p[4] | p[5] << 8;
                     if (p + 6 + (u32)n * (32 + 8192) <= end)
                         sGfx.portraits = p + 6, sGfx.portraitCount = n;
+                    p += 6 + (u32)n * (32 + 8192);
+                    // (N's face-ups: "FCUP", u16 count; each two 256 x 192 layers and six part pictures, BGR555)
+                    if (p + 6 <= end && memcmp(p, "FCUP", 4) == 0)
+                    {
+                        u16 m = p[4] | p[5] << 8;
+                        if (p + 6 + (u32)m * FACEUP_BYTES <= end)
+                        {
+                            sGfx.faceups = malloc((u32)m * FACEUP_BYTES);   // (as u16s: the pack's own place may be odd)
+                            if (sGfx.faceups)
+                                memcpy(sGfx.faceups, p + 6, (u32)m * FACEUP_BYTES), sGfx.faceupCount = m;
+                        }
+                    }
                 }
             }
         }
@@ -212,6 +227,20 @@ bool8 U3D_Gfx_CiPortrait(u8 number, u16 pal[16], const u8 **pixels)
         return FALSE;
     memcpy(pal, sGfx.portraits + (u32)number * (32 + 8192), 32);
     *pixels = sGfx.portraits + (u32)number * (32 + 8192) + 32;
+    return TRUE;
+}
+
+// N's face-up TYPE (0 NIMBASA, 1 his CASTLE, 2 the white light): its background, N, his mouth's three pictures (32 x 16)
+// and his blink's three (48 x 16), BGR555 with bit 15 set where drawn
+bool8 U3D_Gfx_Faceup(u8 type, const u16 **back, const u16 **n, const u16 **mouth, const u16 **blink)
+{
+    const u16 *f;
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || type >= sGfx.faceupCount)
+        return FALSE;
+    f = sGfx.faceups + (u32)type * (FACEUP_BYTES / 2);
+    *back = f, *n = f + 256 * 192, *mouth = f + 2 * 256 * 192, *blink = *mouth + 3 * 32 * 16;
     return TRUE;
 }
 
