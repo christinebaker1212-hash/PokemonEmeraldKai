@@ -432,6 +432,66 @@ KAI_REWRITES = {
 # people: SPEAR PILLAR's CYRUS waits on the DISTORTION WORLD's commands, so the map stays the stand-in's till then)
 HOLD = {('spear_pillar', 1): 'held: SPEAR PILLAR waits for the DISTORTION WORLD (CYRUS\'s scene)'}
 
+# Entries left to the game's own systems by the user's rule (2026-11-02: "Kai's systems stay": what the game has, SINNOH
+# uses, never a second copy): the map keeps the game's script for them
+KAI_SYSTEMS = {}
+for _low, _ns, _why in (
+        ('battle_arcade', (1, 6), 'the BATTLE ARCADE (src/sinnoh/s3d_frontier.c)'),
+        ('battle_castle', (1, 6), 'the BATTLE CASTLE (src/sinnoh/s3d_frontier.c)'),
+        ('battle_hall', (1, 6), 'the BATTLE HALL (src/sinnoh/s3d_hall.c)'),
+        ('battle_factory', (1, 6), 'the BATTLE FACTORY (the game\'s own halls)'),
+        ('berry_tree_interaction', (1, 2, 3, 4), 'the game\'s BERRY trees (src/mp/mp_berrytrees.c)'),
+        ('common', (1,), 'the game\'s signs'),
+        ('common', (3, 22), 'the game\'s POKeMON CENTER nurse and whiteout'),
+        ('common', (4,), 'the game\'s poison on the field'),
+        ('common', (6, 7), 'the game\'s SAVE'),
+        ('common', (19,), 'the game\'s PC'),
+        ('common', (32,), 'the game\'s egg hatching'),
+        ('day_care_common', (1, 2), 'the game\'s DAY CARE (breeding by Gen 9\'s rules)'),
+        ('field_moves', (1, 2, 3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16), 'the game\'s field moves (held HMs, '
+         'lent moves, no restrictions; ROCK CLIMB and DEFOG: src/sinnoh/s3d_misc.c)'),
+        ('vs_seeker', (1,), 'the game\'s VS SEEKER (src/mp/mp_vsseeker.c: SINNOH\'s rematches Platinum\'s)'),
+        ('pokemon_center_2f_common', (12,), 'the game\'s TRAINER CARD (MY CARD\'s signature)')):
+    for _n in _ns:
+        KAI_SYSTEMS[(_low, _n)] = 'kai: ' + _why
+
+# Entries closed (the user, 2026-11-02): online-only, the DS's own (its second screen, wireless, microphone, GBA slot),
+# distribution events, and what Platinum leaves unused
+CLOSED = {}
+for _low, _ns, _why in (
+        ('battle_tower', (3, 10, 11, 12, 13), 'online: the Wi-Fi BATTLE TOWER and its records'),
+        ('common', (26, 51), 'online: the GEONET and the GLOBAL TERMINAL\'s machines'),
+        ('global_terminal_1f', (3, 14, 18, 19), 'online: the GLOBAL TERMINAL'),
+        ('global_terminal_2f', (13,), 'online: the GLOBAL TERMINAL'),
+        ('global_terminal_3f', (13,), 'online: the GLOBAL TERMINAL'),
+        ('pokemon_center_b1f_common', (3, 5), 'online: the Wi-Fi CLUB and PLAZA'),
+        ('union_room', (4, 5, 7, 8), 'the DS\'s wireless: the UNION ROOM (CO-OP supersedes it)'),
+        ('communication_club', (2, 3), 'the DS\'s wireless (CO-OP supersedes it)'),
+        ('pokemon_center_2f_common', (2, 3, 4, 11), 'the DS\'s wireless: the COLOSSEUM and UNION ROOM (CO-OP)'),
+        ('group_connection', (1,), 'the DS\'s wireless groups'),
+        ('oreburgh_city_pokecenter_1f', (4,), 'the DS\'s wireless: UNION ROOM looks'),
+        ('contests', (13,), 'the DS\'s wireless: link contest records (CO-OP\'s contests keep none)'),
+        ('record_chatot_cry', (1,), 'the DS\'s microphone'),
+        ('pal_park', (3, 4, 5, 6), 'the DS\'s GBA slot: the PAL PARK'),
+        ('pal_park_lobby', (2, 13), 'the DS\'s GBA slot: the PAL PARK'),
+        ('mystery_gift_deliveryman', (1, 2), 'distribution events: MYSTERY GIFT'),
+        ('flower_paradise', (3,), 'distribution events: OAK\'s LETTER\'s SHAYMIN'),
+        ('common', (13, 14, 15, 47), 'the Underground\'s goods, traps and spheres (the user, 2026-11-02)'),
+        ('hearthome_city', (15,), 'the Underground\'s goods (MR. GOODS)'),
+        ('veilstone_store_4f', (5, 6), 'the Underground\'s goods (the decor counters)'),
+        ('underground', (3, 4, 5), 'unused in Platinum'),
+        ('battle_frontier', (24,), 'unused in Platinum'),
+        ('field_moves', (6,), 'unused in Platinum'),
+        ('route_201', (5,), 'unused in Platinum (D/P\'s scene)'),
+        ('hearthome_city_dp_gym_elevator_room_1', (2,), 'unused in Platinum (D/P\'s gym)'),
+        ('hearthome_city_dp_gym_elevator_room_2', (2,), 'unused in Platinum (D/P\'s gym)'),
+        ('unused_battle_park', (1,), 'unused in Platinum'),
+        ('unk_0173', (1,), 'unused in Platinum'), ('unk_0276', (2,), 'unused in Platinum'),
+        ('unused_0397', (7, 8), 'unused in Platinum'),
+        ('common', (27, 34), 'unused in Platinum (no map runs it)')):
+    for _n in _ns:
+        CLOSED[(_low, _n)] = 'closed: ' + _why
+
 
 class FileConverter:
     def __init__(self, dec, path):
@@ -2228,6 +2288,10 @@ class FileConverter:
             return self._ok[n]
         if (self.low, n) in HOLD:
             return HOLD[(self.low, n)]
+        if (self.low, n) in KAI_SYSTEMS:
+            return KAI_SYSTEMS[(self.low, n)]
+        if (self.low, n) in CLOSED:
+            return CLOSED[(self.low, n)]
         busy = busy or set()
         if (self.low, n) in busy:
             return None                     # (a loop through the common scripts: judged by its first visit)
@@ -2243,7 +2307,7 @@ class FileConverter:
             for low, m in sorted(self.calls - before):
                 w = converter(self.root, low).check(m, busy)
                 if w is not None:
-                    raise Unsupported('common %s %d: %s' % (low, m, w))
+                    raise Unsupported(w if w.startswith(('kai:', 'closed:')) else 'common %s %d: %s' % (low, m, w))
         except Unsupported as e:
             why = str(e)
         except (IndexError, ValueError) as e:
@@ -3141,10 +3205,13 @@ def report(root, entries=False):
             if w is None:
                 ok += 1
             else:
-                why[w.split(' ')[0] if not w.startswith(('flag', 'variable', 'value')) else w] += 1
+                why[w if w.startswith(('flag', 'variable', 'value', 'kai:', 'closed:')) else w.split(' ')[0]] += 1
                 if entries:
                     print('%s %d %s: %s' % (low, n, name, w))
-    print('%d of %d script entries convert' % (ok, total))
+    kai = sum(k for w, k in why.items() if w.startswith('kai:'))
+    closed = sum(k for w, k in why.items() if w.startswith('closed:'))
+    print('%d of %d script entries convert; %d on the game\'s own systems, %d closed, %d left'
+          % (ok, total, kai, closed, total - ok - kai - closed))
     print('songs the game lacks: %s' % ' '.join(sorted(MISSING_MUSIC)))
     for w, k in why.most_common(60):
         print('  %5d  %s' % (k, w))

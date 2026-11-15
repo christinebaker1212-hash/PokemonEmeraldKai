@@ -66,11 +66,15 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       sinnoh_tower, sinnoh_factory, sinnoh_hall, sinnoh_castle, sinnoh_arcade)
 - [x] Platinum's "choose a POKéMON" (SelectMoveTutorPokemon / GetSelectedPartySlot) on the game's party menu; its save
       prompt (Common_SaveGame) the game's; scripts go on after a warp (SINNOH_WARP_CONTINUE)
-- [ ] Platinum's commands still unmapped onto Kai's systems ([x] PokeMart*WithGreeting and Common_CallPokecenterNurse:
-      the game's shop and nurse, Platinum's greeting; 2352 of 2511 entries convert), PlayHMCutIn,
-      EndSafariGame ([x] the party, BAG, ribbon and trade commands, the move deleter, fossils, the PRIZE EXCHANGE, the
-      coin clerk, the HONEY seller, the SHARD tutors: s3d_party.c, COOP_NOTES "Platinum's party, BAG and trade commands"; [x] StartRankingsMachine: JUBILIFE TV's rankings, s3d_rankings.c; [x] the BATTLE TOWER: CallBattleTowerFunction, its frontier scenes, the BATTLE SALON, the STATS
-      JUDGE: docs/SINNOH_TOWER_PORT.md)
+- [x] Platinum's commands mapped onto Kai's systems (2026-11-15: 2410 of 2511 entries convert, 38 stay on the game's
+      own systems by the user's rule, 62 closed, 1 left: `python3 -I tools/sinnoh/gen_scripts.py --report`;
+      gen_scripts.py KAI_SYSTEMS / CLOSED say why each): the shops and nurses with Platinum's greetings, the party, BAG,
+      ribbon and trade commands (s3d_party.c), JUBILIFE TV's rankings, the BATTLE TOWER (docs/SINNOH_TOWER_PORT.md),
+      the HONEY trees, the SAFARI GAME's gate and ends, the CENTERs' daily trainers, the VS SEEKER's rematches
+      (sinnoh_vs_seeker), bookshelves / shelves / trash cans / wall TOWN MAPs (sinnoh_tile_lines), the FLOWER SHOP,
+      MOVE MANIAC and NEWS PRESS (sinnoh_counters), the binoculars (sinnoh_binoculars). Left: the BATTLE FRONTIER's
+      scratch-off cards (a screen: mock-up first). On the game's own: the frontier halls, BERRY trees, signs, nurse,
+      poison, SAVE, PC, egg hatching, DAY CARE, field moves, TRAINER CARD signature
 
 ## 3. Built for 1:1 (Platinum has it, Kai doesn't)
 
