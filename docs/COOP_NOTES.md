@@ -7745,3 +7745,20 @@ Sinnoh_HallRecordMenu), the CASTLE its points. Op 57 answers the board's CallBat
 POKéMON), op 59 closes the window. DOUBLE and MULTI the game's HALL, CASTLE and ARCADE don't hold (and the FACTORY's
 MULTI) show no streak. The TOWER's machines in Platinum are its Wi-Fi results and leaders: closed (online only).
 Scenario sinnoh_frontier_records.
+
+## KANTO's and JOHTO's post-game, checked (1.199.10)
+
+The user asked (2026-11-15) whether KANTO's, JOHTO's and SINNOH's post-games were finished. KANTO / JOHTO had the
+158-case audit (docs/REGIONS_AUDIT.md) but no pass over the post-game as a whole, so:
+- `mp qzpostgame 1|2` leaves a save as JOHTO's / KANTO's HALL OF FAME does (its eight badges, the LEAGUE beaten, the
+  HALL OF FAME script's own flags through its own calls: data/scripts/obtain_item.inc EventScript_MpDebugQzPostgame*;
+  no credits).
+- tools/test/npc_sweep.sh POSTGAME=1 34 39: every person and sign of both regions talked to in that state (crash, hang,
+  a script still holding the player, a special not ported).
+- New scenarios: kanto_sevii_quest (FireRed's RUBY / SAPPHIRE quest end to end: MT. EMBER, CELIO, DOTTED HOLE,
+  GIDEON in the ROCKET WAREHOUSE, the network linked), kanto_legends_battle (MEWTWO 70, MOLTRES, ZAPDOS, ARTICUNO 50).
+- Already covered: KANTO's ELITE FOUR rematch teams (kanto_e4_rematch), TRAINER TOWER, BIRTH ISLAND, CAPE BRINK,
+  SELPHY, VS SEEKER, SEAGALLOP, ICEFALL CAVE, the TOGEPI EGG; JOHTO's RED on MT. SILVER (johto_red), the weekly rival
+  (johto_rival_days), the leaders after the LEAGUE, the BATTLE TOWER, the beasts, LUGIA / HO-OH and the GS BALL.
+- Decided earlier, not gaps: FireRed's KANTO roamer (the beasts are JOHTO's: docs/regions_audit/K3_findings.md),
+  the wild tables by GENERATION (Quetzal's modern additions at GEN 5+).
