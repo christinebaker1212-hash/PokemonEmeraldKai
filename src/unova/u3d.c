@@ -1025,6 +1025,22 @@ void U3D_CameraMoveTo(u16 pitch, u16 yaw, s32 dist, s32 x, s32 y, s32 z, u16 fra
     CamStart(CAM_TO, to, frames * 2);   // (Black's frames are its field's 30 a second)
 }
 
+// the view at an eye looking along FWD (a unit vector) at once: Black's scenes' own cameras (ov056's ICA paths)
+void U3D_CameraPlace(const float eye[3], const float fwd[3])
+{
+    float to[7], cp, d = 200.0f;
+    u32 i;
+    for (i = 0; i < 3; i++)
+        to[i] = eye[i] + fwd[i] * d;
+    to[3] = asinf(fminf(1.0f, fmaxf(-1.0f, -fwd[1]))) * 180.0f / 3.14159265f;
+    cp = cosf(to[3] * 3.14159265f / 180.0f);
+    to[4] = cp > 0.0001f ? atan2f(-fwd[0], -fwd[2]) * 180.0f / 3.14159265f : 0.0f;
+    to[5] = d, to[6] = 0.0f;
+    CamStart(CAM_TO, to, 1);
+    memcpy(sCam.from, to, sizeof(sCam.from));
+    sCam.t = sCam.frames;
+}
+
 void U3D_CameraMoveBack(u16 frames)
 {
     if (sCam.mode != CAM_FOLLOW)

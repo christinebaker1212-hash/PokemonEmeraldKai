@@ -1093,6 +1093,9 @@ static void SoundObjsLoad(void);
 static void SoundObjsFrame(void);
 static void BridgeFrame(void);
 static void LeagueFrame(void);
+static void FkStart(u8 slot);
+static void FkFrame(void);
+static bool8 FkBusy(void);
 static void LeagueLoad(void);
 static bool8 LeagueLandStart(void);
 static bool8 LeagueWarpNow(void);
@@ -1103,7 +1106,7 @@ static bool8 LeagueBusy(void);
 static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
 enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA, W_MOTION,
-       W_ARC_GLOW, W_ARC_FLY, W_ARC_PEAK, W_ARC_END, W_LEAGUE };
+       W_ARC_GLOW, W_ARC_FLY, W_ARC_PEAK, W_ARC_END, W_LEAGUE, W_FKDEMO };
 static u16 sBModelWait;
 // zone 389's time effect (ov065): sWork.white's TIMEFX_PENDING is Black's isEffectPending (its gimmick save 0x36)
 #define ZONE_TIME_EFFECT 389
@@ -4354,22 +4357,13 @@ static void Step(struct Thread *t)
         case U3C_StartSubProcOv057:
         case U3C_GIMMICK_OBJ_ELBOARD_CmdStartCameraEvent:   // (UNDELLA GATE's news board)
             break;
-        case U3C_PROC_FLD_CallOv056Event:   // the ELITE FOUR rooms' entrances (ov056 field_fk_demo.c): the room's
-        {                                   // platform carries the player up to gFkDemoEndTile[variant - 1]
-            static const u8 sFkEnd[4][2] = {{15, 13}, {15, 16}, {15, 18}, {14, 16}};
-            u8 group, num;
-            s16 x, y;
-            if (V(0) >= 1 && V(0) <= 4
-             && U3D_MapOfZoneTile(CurrentZone(), sFkEnd[V(0) - 1][0], sFkEnd[V(0) - 1][1], &group, &num, &x, &y))
+        case U3C_PROC_FLD_CallOv056Event:   // the ELITE FOUR rooms' entrance scenes (ov056 field_fk_demo.c: Fk*)
+            if (V(0) >= 1 && V(0) <= 4)
             {
-                sHolding = FALSE;
-                t->wait = W_WARP;   // (the script goes on in the room once the player is up)
-                SetWarpDestination(group, num, WARP_ID_NONE, x, y);
-                DoWarp();
-                return;
+                FkStart(V(0) - 1);
+                t->wait = W_FKDEMO;
             }
             break;
-        }
         case U3C_PALPARK_CallFallEvent:   // the LEAGUE's platform sinks (ov010 namein_setup.c NAMEIN_SETUP_RunFallEvent):
         {                                 // the descent and the landing in zone 0x8A (League*)
             void LeagueFallStart(void);
@@ -5056,6 +5050,10 @@ static void Wait(struct Thread *t)
         break;
     case W_ARC_END:
         if (!sArc.shown)
+            t->wait = W_NONE;
+        break;
+    case W_FKDEMO:   // (an ELITE FOUR room's entrance scene to its end: FIELD_FK_DEMO_EventMain)
+        if (!FkBusy())
             t->wait = W_NONE;
         break;
     case W_LEAGUE:   // (the LEAGUE's descent: its warp once the screen is black, then the landing to its end)
@@ -5867,6 +5865,7 @@ void U3D_Vm_FieldFrame(void)
     SoundObjsFrame();
     BridgeFrame();
     LeagueFrame();
+    FkFrame();
     {
         void U3D_Subway_SwayFrame(u16 zone);
         U3D_Subway_SwayFrame(CurrentZone());   // (the BATTLE SUBWAY's carriage: u3d_subway.c)
@@ -7086,6 +7085,106 @@ static void LeagueFrame(void)
             MPNet_Log("u3d vm: the LEAGUE's landing over");
         }
         break;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------ the ELITE FOUR's rooms
+// An ELITE FOUR room's entrance scene (ov056 field_fk_demo.c, script command 0x1A2 with the room's slot 1-4; pack
+// gimmicks 171-174, u3d_fkdemo.h from tools/unova/gen_fkdemo.py): the player hidden, the slot's set with its hero for
+// the player's gender shown at gFkDemoOrigin, its joint animation and the hero's frames played; the view along
+// Black's camera path a Black frame (drawn halfway between on the frames between), its sounds at their cues; slots 3
+// and 4 play the room building's first slot. All done, the set hidden, the player shown on gFkDemoEndTile facing
+// gFkDemoEndDir and the view back on them.
+#include "u3d_fkdemo.h"
+static struct { bool8 on; u8 slot, model, tick; u16 f, build; } sFk;
+
+static void FkCamera(float f)
+{
+    u32 i = (u32)f, n = sFkSlots[sFk.slot].frames, k;
+    float t = f - i, e[3], rx, ry, fwd[3];
+    const s16 *a, *b;
+    if (i >= n - 1)
+        i = n - 1, t = 0.0f;
+    a = sFkCam[sFkSlots[sFk.slot].cam + i];
+    b = sFkCam[sFkSlots[sFk.slot].cam + (i + 1 < n ? i + 1 : i)];
+    for (k = 0; k < 3; k++)
+        e[k] = sFkOrigin[k] + (a[k] + (b[k] - a[k]) * t) / 4.0f;
+    rx = (a[3] + (b[3] - a[3]) * t) / 100.0f * 3.14159265f / 180.0f;
+    ry = (a[4] + (b[4] - a[4]) * t) / 100.0f * 3.14159265f / 180.0f;
+    // (ICA_ANIME_SetCameraStatus: (0, 0, -1) turned about x, then y, BUTTON_MAN_MakeRotMtxXYZ's order)
+    fwd[0] = 0.0f, fwd[1] = sinf(rx), fwd[2] = -cosf(rx);
+    {
+        float x = fwd[0], z = fwd[2];
+        fwd[0] = x * cosf(ry) + z * sinf(ry);
+        fwd[2] = -x * sinf(ry) + z * cosf(ry);
+    }
+    U3D_CameraPlace(e, fwd);
+}
+
+static void FkStart(u8 slot)
+{
+    sFk.on = TRUE, sFk.slot = slot, sFk.f = 0, sFk.tick = 0, sFk.build = 0;
+    sFk.model = gSaveBlock2Ptr->playerGender == MALE ? 0 : 1;
+    U3D_ExpLoad(171 + slot);
+    U3D_ExpHide(sFk.model, FALSE);
+    U3D_ExpAnim(sFk.model, 0, 0, TRUE);
+    U3D_ExpTex(sFk.model, 1, TRUE, 0, TRUE, FALSE);
+    gObjectEvents[gPlayerAvatar.objectEventId].invisible = TRUE;
+    if (sFkSlots[slot].build)
+    {
+        sFk.build = U3D_BModelNode(0, sFkSlots[slot].bx / 16, sFkSlots[slot].bz / 16);
+        U3D_BModelNodePlay(sFk.build, 0, 0);
+    }
+    FkCamera(0);
+    MPNet_Log("u3d vm: the ELITE FOUR room's entrance scene, slot %u (%u frames)", slot + 1,
+              (unsigned)sFkSlots[slot].frames);
+}
+
+static bool8 FkBusy(void)
+{
+    return sFk.on;
+}
+
+static void FkFrame(void)
+{
+    u32 k;
+    if (!sFk.on)
+        return;
+    if (++sFk.tick & 1)
+    {
+        FkCamera(sFk.f + 0.5f);
+        return;
+    }
+    for (k = 0; k < ARRAY_COUNT(sFkCues); k++)
+        if (sFkCues[k].slot == sFk.slot && sFkCues[k].frame == sFk.f)
+        {
+            if (sFkCues[k].stop)
+                m4aSongNumStop(sFkCues[k].se);
+            else
+                PlaySE(sFkCues[k].se);
+        }
+    if (sFk.f + 1 < sFkSlots[sFk.slot].frames)
+    {
+        sFk.f++;
+        FkCamera(sFk.f);
+        return;
+    }
+    if (U3D_ExpPlaying(sFk.model) || (sFk.build && U3D_BModelNodeBusy(sFk.build)))
+        return;
+    // (all done: the set hidden, the player on the end tile facing the end way, the view back on them)
+    {
+        static const u8 sDirs[4] = {DIR_NORTH, DIR_SOUTH, DIR_WEST, DIR_EAST};
+        struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+        U3D_ExpHide(sFk.model, TRUE);
+        if (sFk.build)
+            U3D_BModelNodeDelete(sFk.build);
+        MoveObjectEventToMapCoords(pl, MapX(sFkSlots[sFk.slot].x) + MAP_OFFSET, MapZ(sFkSlots[sFk.slot].z) + MAP_OFFSET);
+        ObjectEventTurn(pl, sDirs[sFkSlots[sFk.slot].dir & 3]);
+        pl->invisible = FALSE;
+        U3D_CameraReset();
+        sFk.on = FALSE;
+        MPNet_Log("u3d vm: the ELITE FOUR room's entrance scene over (the player at %u,%u)", sFkSlots[sFk.slot].x,
+                  sFkSlots[sFk.slot].z);
     }
 }
 

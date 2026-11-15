@@ -42,6 +42,10 @@ SETUPS = {
     53: ("SKYARROW BRIDGE's traffic (zone 249)", 0x021F3D60),   # (sSoundObjsUnitSetup: two cars each way, the ship)
     54: ("TUBELINE BRIDGE's trains (zone 254)", 0x021F39A0),   # (sSoundObjsBUnitSetup)
     52: ("the BATTLE SUBWAY's trains at the GEAR STATION's platforms (zones 67-76)", 'btrain'),
+    171: ('the ELITE FOUR rooms\' entrance scene, slot 1 (zone 140)', 'fk'),
+    172: ('the ELITE FOUR rooms\' entrance scene, slot 2 (zone 141)', 'fk'),
+    173: ('the ELITE FOUR rooms\' entrance scene, slot 3 (zone 142)', 'fk'),
+    174: ('the ELITE FOUR rooms\' entrance scene, slot 4 (zone 143)', 'fk'),
     151: ('CHARGESTONE CAVE 1F, its stones (zone 195)', 'd06'),
     152: ('CHARGESTONE CAVE B1F, its stones (zone 196)', 'd06'),
     153: ('CHARGESTONE CAVE B2F, its stones (zone 197)', 'd06'),   # (gGateExpObjSetups[1]: the English game's, text mode 0)
@@ -392,6 +396,19 @@ BTRAIN_SETUP = {'res': [(75, f, 0) for f in (85, 86, 87, 88, 89, 90, 91, 92)] + 
                 'objs': [(k, 0, k, [(8, 0), (9, 0), (10, 0), (11, 0)]) for k in range(8)]}
 
 
+# the ELITE FOUR rooms' entrance scenes (ov056 field_fk_demo.c FIELD_FK_DEMO_InitModel, archive 0x96): a slot's set
+# with its hero, for a male (model 0: files 6 * slot + 3, his hero's frames + 4) and a female (model 1: + 1, + 2), both
+# with the set's joint animation (+ 5), at gFkDemoOrigin and hidden until the scene (tools/unova/gen_fkdemo.py)
+def fk_setup(slot):
+    b = 6 * slot
+    return {'res': [(150, b + 3, 0), (150, b + 1, 0), (150, b + 5, 0), (150, b + 4, 0), (150, b + 2, 0)],
+            'objs': [(0, 0, 0, [(2, 0), (3, 0)]), (1, 0, 1, [(2, 0), (4, 0)])]}
+
+
+def _place_fk(img):
+    return [((256.0, 0.0, 256.0), 0, 1)] * 2
+
+
 def _place_btrain(img):
     return [((0.0, 0.0, 0.0), 0, 1)] * 8
 
@@ -461,7 +478,7 @@ def _place48(img):
     return [((0.0, 0.0, 0.0), 0, 1)]
 
 
-PLACES = {49: _place49, 50: _place50, 53: _place53, 54: _place54, 58: _place58, 52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+PLACES = {171: _place_fk, 172: _place_fk, 173: _place_fk, 174: _place_fk, 49: _place49, 50: _place50, 53: _place53, 54: _place54, 58: _place58, 52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 
@@ -475,6 +492,8 @@ def add(pack):
             img, s = None, dict(D06_SETUP, objs=_d06_objs())
         elif SETUPS[ov][1] == 'btrain':
             img, s = None, BTRAIN_SETUP
+        elif SETUPS[ov][1] == 'fk':
+            img, s = None, fk_setup(ov - 171)
         else:
             img = Image(SETUPS[ov][2] if len(SETUPS[ov]) > 2 else ov)
             s = setup(img, SETUPS[ov][1])

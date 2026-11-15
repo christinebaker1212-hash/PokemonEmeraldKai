@@ -72,8 +72,16 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       (ov060 / ov061), LIBERTY GARDEN's (ov062)
 - [x] Camera shakes (0x148: ABYSSAL RUINS, CHARGESTONE, DRAGONSPIRAL, N's CASTLE; 2026-11-15, scenario
       unova_camera_shake): ShakeTask's swings, their decay and the script's wait (u3d.c U3D_CameraShake)
-- [ ] 3D cut-ins (RunFld3dCiMain 0x1A1: DESERT RESORT, NACRENE), the ELITE FOUR rooms' entrance flights (FkDemo
-      0x1A3 / 0x1A4)
+- [x] The ELITE FOUR rooms' entrance scenes (ov056 field_fk_demo.c, script command 0x1A2 with the room's slot;
+      2026-11-15, zones 140-143): Black's set for each room with its hero card (the player's gender's frames) and its
+      joint animation (pack gimmicks 171-174), the view along Black's camera path (tools/unova/gen_fkdemo.py ->
+      u3d_fkdemo.h, U3D_CameraPlace), its sounds at their cues (Black's own numbered ones as the game's nearest), slots
+      3 and 4 playing the room's building, then the player on the room's end tile (u3d_vm.c Fk*); scenario
+      unova_e4_entrance. (0x1A3 sets Black's camera setting for the room: our view keeps Emerald's framing there, as
+      everywhere off the rail maps.)
+- [ ] The ELITE FOUR rooms' own sounds (0x1A4 StartFkDemoSubProc: a building's sounds by its animation's frames, two
+      ambient loops until work 0x4001 is set)
+- [ ] 3D cut-ins (RunFld3dCiMain 0x1A1: DESERT RESORT, NACRENE)
 - [ ] People flown along Black's paths (built; MmdlIca 0x15B-0x15E: archive 0xCB by tools/unova/gen_icas.py -> u3d_icas.h;
       u3d.c U3D_ObjectFly draws the person at the path's point from where the player stood, set down on the tile at
       its end; 2026-11-15, scenario unova_flown_person: the ABUNDANT SHRINE's LANDORUS flies in and out by the logs,

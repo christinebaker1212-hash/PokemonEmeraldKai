@@ -1,0 +1,8 @@
+# The ELITE FOUR rooms' entrance scenes (ov056 field_fk_demo.c, script command 0x1A2: u3d_vm.c Fk*, pack gimmicks
+# 171-174): Black's set with the hero, its camera path and sounds, then the player on the room's end tile. Shots e4a_*,
+# e4c_*.png (slots 1 and 3).
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("entrance scene, slot 1" "entrance scene over (the player at 15,13)" "entrance scene, slot 3" "entrance scene over (the player at 15,18)" "[e4] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -98,6 +98,7 @@ void U3D_RefreshBlocks(void);   // the field's blocks again after Black replaced
 void U3D_CameraMoveTo(u16 pitch, u16 yaw, s32 dist, s32 x, s32 y, s32 z, u16 frames);
 void U3D_CameraMoveBack(u16 frames);
 void U3D_CameraReset(void);
+void U3D_CameraPlace(const float eye[3], const float fwd[3]);
 void U3D_CameraTurn(u16 pitch, u16 yaw, u16 frames);
 void U3D_CameraLook(u16 frames);
 void U3D_ObjectFly(u8 spriteId, bool8 on, float x, float y, float z);
