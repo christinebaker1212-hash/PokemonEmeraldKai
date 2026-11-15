@@ -27,7 +27,8 @@ with Black's matrices:
                  cameras, then u16 pitch, yaw, distance per tile (0, 0, 0: the zone's own camera): Black's camera of
                  the rail the tile is on (tools/unova/rails.py camera_at), (version 6) u8 the cell's battle column
                  (0xFF: one per tile follows, 1024 bytes): Black's MAP_ATTR_GetBattleBackground of the tile's terrain,
-                 the stage table's column of UNOVA's battle backgrounds (tools/unova/battle_bg.py)
+                 the stage table's column of UNOVA's battle backgrounds (tools/unova/battle_bg.py) in its low four
+                 bits, the tile's phenomenon kind + 1 in its high four (phenom_code; 0: none)
 """
 import importlib.util
 import math
@@ -212,6 +213,23 @@ def battle_column(attr):
         im = gimmicks.Image(21)
         _BATTLE_BG = {im.d[0x021D8EA0 - im.ram + 2 * i]: im.d[0x021D8EA0 - im.ram + 2 * i + 1] for i in range(0x25)}
     return _BATTLE_BG.get(attr & 0xFFFF, 0) if attr != 0x7FFFFFFF else 0
+
+
+# Black's phenomena (ov021 map_attr.c MAP_ATTR_GetEncounterEffectKind): what a tile can show, kept in the high four bits
+# of its battle byte as the kind + 1 (0: none): 0-3 grass (rustling), 4 cave floor (dust), 5 water, 6 deep water
+# (rippling), 7 a bridge's planks (a bird's shadow: terrain 0x20, whatever its flags); the rest only with flag 4
+PHENOM = {0x04: 0, 0x05: 1, 0x21: 2, 0x08: 3, 0x0A: 4, 0x3D: 5, 0x3F: 6, 0x43: 6}
+
+
+def phenom_code(attr):
+    terrain_id, flags = attr & 0xFFFF, attr >> 16
+    if attr == 0x7FFFFFFF:
+        return 0
+    if terrain_id == 0x20:
+        return 8
+    if not flags & 4 or terrain_id not in PHENOM:
+        return 0
+    return PHENOM[terrain_id] + 1
 
 
 def field_block(attr):
@@ -548,7 +566,7 @@ def build(matrix_ids=None):
                             fb.append(field_block(attr))
                         hs = sorted({round(g[t][1], 2) for g in grids if t < len(g)})
                         hts.append(hs[:2])
-                        bgs.append(battle_column(attr))
+                        bgs.append(battle_column(attr) | phenom_code(attr) << 4)   # (u3d.c U3D_PhenomKindAt)
                     else:
                         fb.append(BLOCKED)
                         hts.append([])

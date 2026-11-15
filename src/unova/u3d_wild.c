@@ -16,6 +16,10 @@ const u8 *U3D_Vm_WildRow(u16 zone, u8 season);
 #define GRASS 8
 #define DARK_GRASS (GRASS + 12 * 4)
 #define SURF (8 + 36 * 4)
+#define GRASS_SPECIAL (GRASS + 24 * 4)   // (Black's EncountData: ground[2], water[1], fishing[0] and [1])
+#define SURF_SPECIAL (SURF + 5 * 4)
+#define FISHING (SURF + 10 * 4)
+#define FISHING_SPECIAL (FISHING + 5 * 4)
 
 static struct WildPokemon sMons[12];
 static struct WildPokemonInfo sInfo;
@@ -77,5 +81,37 @@ bool8 U3D_WildInfo(u16 behavior, const struct WildPokemonInfo **info, u8 *area)
     else
         return FALSE;
     *info = &sInfo;
+    return TRUE;
+}
+
+// Black's other tables (field_encount.c's types): 2 rustling grass / a dust cloud / a bird's shadow (twelve slots), 4
+// rippling water (five), 5 fishing, 6 fishing in rippling water (five each; Black's fishing odds 40, 40, 15, 4, 1:
+// wild_encounter.c); FALSE when the zone has none (rate 0)
+bool8 U3D_WildSpecial(u8 type, const struct WildPokemonInfo **info)
+{
+    static const u8 sAt[7] = {GRASS, DARK_GRASS, GRASS_SPECIAL, SURF, SURF_SPECIAL, FISHING, FISHING_SPECIAL};
+    static const u8 sCount[7] = {12, 12, 12, 5, 5, 5, 5};
+    const u8 *row = U3D_Vm_WildRow(U3D_CurrentZone(), U3D_Season());
+    if (row == NULL || type >= 7 || !Fill(row, sAt[type], sCount[type], row[type]))
+        return FALSE;
+    *info = &sInfo;
+    return TRUE;
+}
+
+// The zone's phenomena setting (Black's EncountData.effectKind, 0-2: ov021's table at 0x021D8E70): the steps before a
+// roll and its odds in percent; FALSE when the zone has no encounter table
+bool8 U3D_PhenomSetting(u8 *kind, u8 *steps, u8 *percent)
+{
+    static const u8 sSettings[3][2] = {{20, 10}, {20, 10}, {5, 15}};
+    const u8 *row = U3D_Vm_WildRow(U3D_CurrentZone(), U3D_Season());
+    u8 k;
+    if (row == NULL)
+        return FALSE;
+    k = row[7] & 0x7F;
+    if (k > 2)
+        k = 0;
+    *kind = k;
+    *steps = sSettings[k][0];
+    *percent = sSettings[k][1];
     return TRUE;
 }

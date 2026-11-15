@@ -3097,9 +3097,12 @@ static void Step(struct Thread *t)
             *WorkPtr(a[0]) = out;
             break;
         }
-        case U3C_PROC_FLD_StoreEffectEncountItemId:   // (the item under a dust cloud: none shown here yet)
-            *WorkPtr(a[0]) = 0;
+        case U3C_PROC_FLD_StoreEffectEncountItemId:   // (the item a dust cloud or a bird's shadow left: u3d_phenom.c)
+        {
+            u16 Unova_Phenom_Item(void);
+            *WorkPtr(a[0]) = Unova_Phenom_Item();
             break;
+        }
         case U3C_GetItemPocket:   // (Black's pocket: 0 ITEMS, 1 MEDICINE, 2 TMs & HMs, 3 BERRIES, 4 KEY ITEMS)
             *WorkPtr(a[1]) = V(0) < ARRAY_COUNT(sUnovaItemPockets) ? sUnovaItemPockets[V(0)] : 0;
             break;

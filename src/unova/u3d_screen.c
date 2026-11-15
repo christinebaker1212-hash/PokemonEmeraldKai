@@ -88,6 +88,10 @@ void Unova_Screen_FieldFrame(void)
         void Unova_Musical_FieldFrame(void);
         Unova_Musical_FieldFrame();   // (a MUSICAL's next step: u3d_musical.c)
     }
+    {
+        void Unova_Phenom_FieldFrame(void);
+        Unova_Phenom_FieldFrame();   // (rustling grass, dust, ripples, a bird's shadow: u3d_phenom.c)
+    }
     if (S.pending && !S.screen)
     {
         void (*f)(void) = S.pending;

@@ -971,9 +971,61 @@ bool8 SweetScentWildEncounter(void)
     return FALSE;
 }
 
+// Moemon Kai: UNOVA's fishing, Black's (field_encount.c FIELD_ENCOUNT_CheckFishingEncount): its own five slots at
+// Black's odds (PickFishingSlot: 40, 40, 15, 4, 1), whichever rod; at a phenomenon's ripples the rippling water's table
+// and always a bite (src/unova/u3d_phenom.c)
+static bool8 U3dFishInfo(const struct WildPokemonInfo **info)
+{
+    bool8 Unova_Phenom_FishingSpot(void);
+    if (Unova_Phenom_FishingSpot() && U3D_WildSpecial(6, info))
+        return TRUE;
+    return U3D_WildSpecial(5, info);
+}
+
+static void U3dFish(const struct WildPokemonInfo *info)
+{
+    static const u8 sOdds[5] = {40, 80, 95, 99, 100};
+    u8 roll = Random() % 100, i, level;
+    void Unova_Phenom_Fished(void);
+    for (i = 0; i < 4 && roll >= sOdds[i]; i++)
+        ;
+    if (info->wildPokemon[i].species == SPECIES_NONE)
+        i = 0;
+    level = ChooseWildMonLevel(&info->wildPokemon[i]);
+    CreateWildMon(MP_WildSlotSpecies(info, i), level);
+    Unova_Phenom_Fished();
+}
+
+// (u3d_phenom.c: a phenomenon stepped onto: TYPE 2 rustling grass / dust / a bird's shadow, 4 rippling water; repels
+// don't keep them away)
+bool8 MP_U3dSpecialWild(u8 type)
+{
+    const struct WildPokemonInfo *info;
+    if (!U3D_WildSpecial(type, &info))
+        return FALSE;
+    if (TryGenerateWildMon(info, type == 4 ? WILD_AREA_WATER : WILD_AREA_LAND, 0) != TRUE)
+        return FALSE;
+    U3D_SetDarkGrassBattle(FALSE);
+    BattleSetup_StartWildBattle();
+    return TRUE;
+}
+
+bool8 MP_U3dFishingSureBite(void)
+{
+    bool8 Unova_Phenom_FishingSpot(void);
+    const struct WildPokemonInfo *info;
+    return U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) && Unova_Phenom_FishingSpot() && U3D_WildSpecial(6, &info);
+}
+
 bool8 DoesCurrentMapHaveFishingMons(void)
 {
     u16 headerId = GetCurrentMapWildMonHeaderId();
+
+    if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+    {
+        const struct WildPokemonInfo *info;
+        return U3dFishInfo(&info);
+    }
 
     if (headerId != HEADER_NONE && gWildMonHeaders[headerId].fishingMonsInfo != NULL)
         return TRUE;
@@ -989,7 +1041,14 @@ void FishingWildEncounter(u8 rod)
 
     gMpFishingEncounter = TRUE;
 
-    if (CheckFeebas() == TRUE)
+    if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+    {
+        const struct WildPokemonInfo *info;
+        if (U3dFishInfo(&info))
+            U3dFish(info);
+        species = GetMonData(&gEnemyParty[0], MON_DATA_SPECIES);
+    }
+    else if (CheckFeebas() == TRUE)
     {
         u8 level = ChooseWildMonLevel(&sWildFeebas);
 

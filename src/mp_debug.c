@@ -4698,6 +4698,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (sscanf(arg, "%d %d", &cabin, &main) == 2)
             U3D_Vm_DebugBoat(cabin, main);
     }
+    else if (strcmp(cmd, "u3dphenom") == 0)   // u3dphenom [KIND]: one of Black's phenomena now, near the player
+    {
+        void Unova_Phenom_Debug(s16 kind, s16 front);
+        int kind = -1, front = 0;
+        sscanf(arg, "%d %d", &kind, &front);
+        Unova_Phenom_Debug(kind, front);
+    }
     else if (strcmp(cmd, "u3dclear") == 0)   // u3dclear: UNOVA as after the credits (Black's game-clear script, cleared)
     {
         void U3D_Vm_DebugClear(void);

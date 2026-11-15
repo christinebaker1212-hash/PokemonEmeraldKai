@@ -227,6 +227,12 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
         }
         if (TryStartStepBasedScript(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
+        if (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
+        {
+            bool8 Unova_Phenom_Step(void);
+            if (Unova_Phenom_Step())   // Moemon Kai: Black's phenomena, stepped onto or counted (src/unova/u3d_phenom.c)
+                return TRUE;
+        }
     }
     if (input->checkStandardWildEncounter && CheckStandardWildEncounter(metatileBehavior) == TRUE)
         return TRUE;

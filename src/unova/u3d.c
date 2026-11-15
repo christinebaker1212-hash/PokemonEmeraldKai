@@ -439,8 +439,31 @@ u8 U3D_BattleColumnAt(s16 x, s16 y)
     if (c == NULL)
         return 4;
     if (c->battleTile == NULL)
-        return c->battle;
-    return c->battleTile[(gtz - cz * 32) * 32 + (gtx - cx * 32)];
+        return c->battle & 0x0F;
+    return c->battleTile[(gtz - cz * 32) * 32 + (gtx - cx * 32)] & 0x0F;
+}
+
+// Black's phenomenon kind of map tile X, Y (MAP_OFFSET in; build_pack.py phenom_code, the battle byte's high four bits):
+// 0-3 grass, 4 cave floor, 5 water, 6 deep water, 7 a bridge; 0xFF none (u3d_phenom.c)
+u8 U3D_PhenomKindAt(s16 x, s16 y)
+{
+    s32 gtx, gtz, cx, cz;
+    const U3dCell *c;
+    u8 b;
+    MapToGrid(x, y, &gtx, &gtz);
+    cx = gtx >= 0 ? gtx / 32 : -((31 - gtx) / 32);
+    cz = gtz >= 0 ? gtz / 32 : -((31 - gtz) / 32);
+    c = Cell(cx, cz);
+    if (c == NULL)
+        return 0xFF;
+    b = c->battleTile == NULL ? c->battle : c->battleTile[(gtz - cz * 32) * 32 + (gtx - cx * 32)];
+    return (b >> 4) ? (b >> 4) - 1 : 0xFF;
+}
+
+// Map tile X, Y's place on Black's tile grid (its 32 x 32 blocks: u3d_phenom.c's search window)
+void U3D_GridOfMap(s16 x, s16 y, s32 *gx, s32 *gz)
+{
+    MapToGrid(x, y, gx, gz);
 }
 
 void U3D_HexClear(void)

@@ -1,0 +1,70 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp teach 0 129
+mp u3dclear
+wait 120
+mash B 8 20
+echo [ph] cave
+mp u3dzone 215 15 21
+wait 160
+mash B 6 15
+mp u3dphenom -1 2
+mp u3dphenom 4
+mp u3dphenom 6
+echo [ph] dust battle
+mp u3dphenom 4 4
+shotburst dust 40 8
+wait 40
+press DOWN 1
+wait 60
+pressuntil A field 6000
+wait 60
+mash B 6 15
+echo [ph] dust item
+mp u3dzone 215 15 21
+wait 160
+mash B 6 15
+mp u3dphenom 4 3
+press DOWN 1
+wait 60
+pressuntil B field 2000
+wait 60
+echo [ph] ripples
+mp u3dzone 215 14 15
+wait 160
+mash B 6 15
+mp u3dphenom 6 1
+wait 20
+shot ripple
+mp fish 2
+wait 200
+pressuntil A field 6000
+wait 60
+mash B 6 15
+echo [ph] grass
+mp u3dzone 238 721 721
+wait 160
+mash B 6 15
+mp u3dphenom 0
+mp u3dphenom 0 4
+wait 30
+shot grass
+press DOWN 1
+wait 60
+pressuntil A field 6000
+wait 60
+mash B 6 15
+echo [ph] shadow
+mp u3dzone 238 721 721
+wait 160
+mash B 6 15
+mp u3dphenom 7 3
+wait 40
+shot shadow
+press DOWN 1
+wait 60
+pressuntil B field 2000
+wait 60
+echo [ph] done
+quit

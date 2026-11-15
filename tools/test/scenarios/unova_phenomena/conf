@@ -1,0 +1,13 @@
+# Black's phenomena (src/unova/u3d_phenom.c; Black's ov021 effect_encount.c): after UNOVA's first badge, the zone's
+# setting (steps, odds), candidate tiles from the pack (Black's encounter-effect kinds) found round the player in a cave
+# (dust, deep water) and on a route (grass); then each placed in front of the player and stepped onto: a dust cloud's
+# battle from Black's special table, a dust cloud's item by Black's script 10133 (a gem, an EVERSTONE or a stone),
+# fishing at rippling water (a sure bite from the rippling table), rustling grass's battle, a bird's shadow's wing.
+# Shots: dust, ripple, grass, shadow.
+MODE=1
+TMO=400
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("phenomenon: allowed 1 table 1 setting 1 steps 20 odds 10%" "kind 4 at" "kind 6 at" "kind 0 at"
+          "phenomenon: a battle (rustling)" "phenomenon: an item (Black's" "script 10133" "fishing: a bite"
+          "phenomenon: kind 7 at" "[ph] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not played yet" "none in reach")

@@ -2054,6 +2054,11 @@ static bool8 Fishing_CheckForBite(struct Task *task)
             }
         }
 
+        {
+            bool8 MP_U3dFishingSureBite(void);
+            if (MP_U3dFishingSureBite())   // Moemon Kai: UNOVA's rippling water always bites (src/unova/u3d_phenom.c)
+                bite = TRUE;
+        }
         if (!bite)
         {
             if (Random() & 1)

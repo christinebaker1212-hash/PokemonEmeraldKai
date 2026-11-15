@@ -138,5 +138,9 @@ u16 U3D_VictorySong(u16 song);          // ... MP_RegionVictorySong
 // UNOVA's wild POKéMON (src/unova/u3d_wild.c: Black's encounter tables)
 struct WildPokemonInfo;
 bool8 U3D_WildInfo(u16 behavior, const struct WildPokemonInfo **info, u8 *area);
+bool8 U3D_WildSpecial(u8 type, const struct WildPokemonInfo **info);   // (Black's types 2, 4, 5, 6: phenomena, fishing)
+bool8 U3D_PhenomSetting(u8 *kind, u8 *steps, u8 *percent);
+u8 U3D_PhenomKindAt(s16 x, s16 y);                             // (a tile's phenomenon kind, 0xFF none: u3d_phenom.c)
+void U3D_GridOfMap(s16 x, s16 y, s32 *gx, s32 *gz);
 
 #endif
