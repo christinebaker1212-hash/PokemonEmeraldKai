@@ -19,6 +19,8 @@
 #include "pokemon.h"
 #include "orre.h"
 #include "orre_shadow.h"
+#include "mp_garden.h"
+#include "mp_region.h"
 #include "battle.h"
 #include "constants/moves.h"
 #include "constants/species.h"
@@ -41,6 +43,7 @@ void MPNet_Log(const char *fmt, ...);
 extern char gPlatformSavePath[];
 
 #include "../data/orre_shadow.h"
+#include "../data/orre_shadow_modern.h"   // (decision 5: the newer generations' Shadow Pokémon)
 #include "../data/orre_shadow_palettes.h"
 
 #define ORRE_MAGIC 0x4552524F   // "ORRE"
@@ -88,6 +91,9 @@ const struct OrreShadowMon *Orre_Shadow_Data(u8 id)
     for (i = 0; i < ARRAY_COUNT(sOrreShadows); i++)
         if (sOrreShadows[i].id == id)
             return &sOrreShadows[i];
+    for (i = 0; i < ARRAY_COUNT(sOrreShadowsModern); i++)
+        if (sOrreShadowsModern[i].id == id)
+            return &sOrreShadowsModern[i];
     return NULL;
 }
 
@@ -284,7 +290,9 @@ void Orre_Shadow_Step(void)
     {
         struct Pokemon *mon = &gPlayerParty[i];
         if (GetMonData(mon, MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(mon, MON_DATA_IS_EGG))
-            StepRec(RecOf(mon), GetNature(mon), ORRE_DP_WALK);
+            // (decision 7, 2026-11-15: time in the MOéMON GARDEN opens the gauge at the day care's rate, Colosseum's
+            // source 3, in the walking steps' place: the party lives there freely)
+            StepRec(RecOf(mon), GetNature(mon), MP_Garden_IsHere() ? ORRE_DP_DAYCARE : ORRE_DP_WALK);
     }
     for (i = 0; i < DAYCARE_MON_COUNT; i++)
     {
@@ -533,7 +541,34 @@ u8 Orre_Shadow_HyperDisobedience(void)
 
 static u8 sPendingFoe[PARTY_SIZE];   // `mp shadow foe SLOT ID`: the next trainer battle's (tests, until ORRE's trainers)
 
+static bool8 MakeEnemyAt(struct Pokemon *mon, u8 id, u8 levelOver, u16 gaugeOver);
+
 bool8 Orre_Shadow_MakeEnemy(struct Pokemon *mon, u8 id)
+{
+    return MakeEnemyAt(mon, id, 0, 0);
+}
+
+// decision 5 (docs/SHADOW_POKEMON.md, 2026-11-15): from GENERATION 4 a Cipher trainer whose team holds a Shadow
+// Pokémon has one more, of a newer generation (src/data/orre_shadow_modern.h): which one the trainer's KEY picks, the
+// same each time (its generation from 4 to the GENERATION, then its place in that generation's list), at LEVEL with a
+// gauge of GAUGE (the trainer's own Shadow Pokémon's). FALSE at GENERATION 3 (Colosseum's 48 alone) or for one the
+// GENERATION doesn't allow
+bool8 Orre_Shadow_MakeModernEnemy(struct Pokemon *mon, u16 key, u8 level, u16 gauge)
+{
+    u8 gen = MP_Gen_Cap(REGION_HOENN), pick, first = 0, i;
+    u32 h = key * 2654435761u;
+    if (gen < 4)
+        return FALSE;
+    pick = 4 + (h >> 8) % (min(gen, 9) - 3);
+    for (i = 4; i < pick; i++)
+        first += sOrreShadowsModernCount[i - 4];
+    i = first + (h >> 16) % sOrreShadowsModernCount[pick - 4];
+    if (!MP_Gen_Allowed(sOrreShadowsModern[i].species))
+        return FALSE;
+    return MakeEnemyAt(mon, sOrreShadowsModern[i].id, level, gauge);
+}
+
+static bool8 MakeEnemyAt(struct Pokemon *mon, u8 id, u8 levelOver, u16 gaugeOver)
 {
     const struct OrreShadowMon *data = Orre_Shadow_Data(id);
     struct OrreShadowRec *r;
@@ -550,7 +585,7 @@ bool8 Orre_Shadow_MakeEnemy(struct Pokemon *mon, u8 id)
         personality = Random32();
     while (GetNatureFromPersonality(personality) != nature);
     // (made with the trainer's OT ID: it's part of the data's key, so it can't be changed after)
-    CreateMon(mon, data->species, data->level, USE_RANDOM_IVS, TRUE, personality, OT_ID_PRESET, otId);
+    CreateMon(mon, data->species, levelOver ? levelOver : data->level, USE_RANDOM_IVS, TRUE, personality, OT_ID_PRESET, otId);
     for (i = 0; i < NUM_STATS; i++)
     {
         iv = data->ivs[i] > MAX_PER_STAT_IVS ? MAX_PER_STAT_IVS : data->ivs[i];
@@ -558,8 +593,9 @@ bool8 Orre_Shadow_MakeEnemy(struct Pokemon *mon, u8 id)
         ev = data->evs[i] > 255 ? 255 : data->evs[i];
         SetMonData(mon, MON_DATA_HP_EV + i, &ev);
     }
-    for (i = 0; i < MAX_MON_MOVES; i++)
-        SetMonMoveSlot(mon, data->moves[i] < MOVES_COUNT ? data->moves[i] : MOVE_NONE, i);
+    if (data->moves[0] != MOVE_NONE)   // (a newer generation's row: the moves its level gives it)
+        for (i = 0; i < MAX_MON_MOVES; i++)
+            SetMonMoveSlot(mon, data->moves[i] < MOVES_COUNT ? data->moves[i] : MOVE_NONE, i);
     iv = data->ability & 1;
     SetMonData(mon, MON_DATA_ABILITY_NUM, &iv);
     iv = data->friendship < 0 ? 0 : data->friendship > 255 ? 255 : data->friendship;
@@ -567,6 +603,8 @@ bool8 Orre_Shadow_MakeEnemy(struct Pokemon *mon, u8 id)
     CalculateMonStats(mon);
     if (!Orre_Shadow_Make(mon, id) || (r = RecOf(mon)) == NULL)
         return FALSE;
+    if (gaugeOver)
+        r->gauge = gaugeOver, r->dp = gaugeOver * 100;
     r->flags |= REC_ENEMY | REC_FRESH;
     return TRUE;
 }
@@ -628,7 +666,7 @@ u8 Orre_Shadow_SnagRate(u8 battler)
 {
     struct OrreShadowRec *r = EnemyRec(battler);
     const struct OrreShadowMon *data = r ? Orre_Shadow_Data(r->id) : NULL;
-    return data ? data->catchRate : gSpeciesInfo[gBattleMons[battler].species].catchRate;
+    return data && data->catchRate ? data->catchRate : gSpeciesInfo[gBattleMons[battler].species].catchRate;
 }
 
 // RUI sees an opponent's Shadow Pokémon come out (Colosseum's fight code, the decomp's fight_range_exact_8022DCB8.c:

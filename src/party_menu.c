@@ -5186,8 +5186,26 @@ static void TryUsePPItem(u8 taskId)
     u16 item = gSpecialVar_ItemId;
     struct PartyMenu *ptr = &gPartyMenu;
     struct Pokemon *mon;
+    bool8 cannotUse;
 
-    if (ExecuteTableBasedItemEffect_(ptr->slotId, item, *moveSlot))
+    if (gMpCoopBattle && gMain.inBattle)
+    {
+        // Moemon Co-op: tried on a copy; the battle's master restores the PP as the turn plays (MpCoopUseItem), the
+        // move riding along with the party slot (battle_controller_player.c)
+        struct Pokemon copy = gPlayerParty[ptr->slotId];
+        bool8 inBattle = gMain.inBattle;
+        gMain.inBattle = FALSE;
+        cannotUse = PokemonUseItemEffects(&copy, item, ptr->slotId, *moveSlot, FALSE);
+        gMain.inBattle = inBattle;
+        if (!cannotUse)
+        {
+            gMpCoopItemSlot = GetPartyIdFromBattleSlot(ptr->slotId);
+            gMpCoopItemMove = *moveSlot & 3;
+        }
+    }
+    else
+        cannotUse = ExecuteTableBasedItemEffect_(ptr->slotId, item, *moveSlot);
+    if (cannotUse)
     {
         gPartyMenuUseExitCallback = FALSE;
         PlaySE(SE_SELECT);

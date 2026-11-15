@@ -592,5 +592,5 @@ Gotchas worth knowing before touching battles:
 ## Not yet done or verified
 - (Verified: the Windows build runs on real Windows, every release; the user, 2026-11-14. tools/test/wine_smoke.sh
   remains for checks here)
-- Co-op battles: only POKé BALLS (wild) and healing items (ItemUseInBattle_Medicine); no items in PvP
-- Remote players aren't shown across warps (only the same map or connected maps)
+- (Co-op: complete, the user 2026-11-15: every battle item works in co-op battles, COOP_NOTES "Co-op healing items";
+  PvP battles take no items, as link battles never did)

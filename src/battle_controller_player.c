@@ -2033,8 +2033,9 @@ static void CompleteWhenChoseItem(void)
         }
         // Moemon Co-op: a healing item's target (any of the six) rides along in bits 12-14
         if (gMpCoopBattle && value != ITEM_NONE && gMpCoopItemSlot < PARTY_SIZE)
-            value |= (gMpCoopItemSlot + 1) << 12;
+            value |= ((gMpCoopItemSlot + 1) << 12) | ((gMpCoopItemMove & 3) << 10);   // (and a PP item's move)
         gMpCoopItemSlot = 0xFF;
+        gMpCoopItemMove = 0;
         BtlController_EmitOneReturnValue(B_COMM_TO_ENGINE, value);
         PlayerBufferExecCompleted();
     }

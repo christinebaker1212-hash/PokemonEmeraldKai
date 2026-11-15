@@ -223,6 +223,22 @@ static u8 BuildTeam(u8 which, u16 coloTrainer, u16 trainerId)
             continue;
         BuildMon(&sTeam[which][n++], r, trainerId, partyMax);
     }
+    // decision 5 (docs/SHADOW_POKEMON.md): from GENERATION 4 a Cipher trainer with a Shadow Pokémon has one more, of
+    // a newer generation, at its Shadow Pokémon's level and gauge (orre_shadow.c Orre_Shadow_MakeModernEnemy)
+    if (n > 0 && n < PARTY_SIZE)
+    {
+        u8 lv = 0, k;
+        u16 gauge = 0;
+        for (k = 0; k < n; k++)
+            if (Orre_Shadow_Is(&sTeam[which][k]) && GetMonData(&sTeam[which][k], MON_DATA_LEVEL) > lv)
+            {
+                const struct OrreShadowMon *d = Orre_Shadow_Data(Orre_Shadow_Id(&sTeam[which][k]));
+                lv = GetMonData(&sTeam[which][k], MON_DATA_LEVEL);
+                gauge = d ? d->gauge : 0;
+            }
+        if (lv && Orre_Shadow_MakeModernEnemy(&sTeam[which][n], coloTrainer, lv, gauge))
+            n++;
+    }
     return n;
 }
 

@@ -1,0 +1,8 @@
+# The POFFIN HOUSE in Platinum's own words (scripts_poffin_common.s, tools/sinnoh/gen_scripts.py CheckCanCookPoffin /
+# OpenPoffinCooking): ALONE with a BERRY and the POFFIN CASE opens the game's BERRY BLENDER (POFFINS are POKéBLOCKS), its
+# berry list first. Needs the packs. Shots p_*.png.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[test] where map 44.76 xy 5,11")
+UNEXPECT_A=("[crash]")

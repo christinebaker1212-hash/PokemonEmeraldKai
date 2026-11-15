@@ -9,6 +9,7 @@
 #include "constants/coins.h"
 #include "battle.h"
 #include "battle_pyramid.h"
+#include "battle_anim.h"
 #include "battle_pyramid_bag.h"
 #include "berry.h"
 #include "berry_powder.h"
@@ -1346,8 +1347,26 @@ static void Task_UseStatIncreaseItem(u8 taskId)
 void ItemUseInBattle_StatIncrease(u8 taskId)
 {
     u16 partyId = gBattlerPartyIndexes[gBattlerInMenuId];
+    bool8 cannotUse;
 
-    if (ExecuteTableBasedItemEffect(&gPlayerParty[partyId], gSpecialVar_ItemId, partyId, 0) != FALSE)
+    if (gMpCoopBattle)
+    {
+        // Moemon Co-op: only tried here (the battle as it was put back); the battle's master raises the stat as the
+        // turn plays (battle_util.c HandleAction_UseItem: the party slot rides along as a healing item's does)
+        struct BattlePokemon keepMon = gBattleMons[gBattlerInMenuId];
+        u8 side = GetBattlerSide(gBattlerInMenuId);
+        u32 keepSide = gSideStatuses[side];
+        struct SideTimer keepTimer = gSideTimers[side];
+        cannotUse = ExecuteTableBasedItemEffect(&gPlayerParty[partyId], gSpecialVar_ItemId, partyId, 0);
+        gBattleMons[gBattlerInMenuId] = keepMon;
+        gSideStatuses[side] = keepSide;
+        gSideTimers[side] = keepTimer;
+        if (!cannotUse)
+            gMpCoopItemSlot = partyId;
+    }
+    else
+        cannotUse = ExecuteTableBasedItemEffect(&gPlayerParty[partyId], gSpecialVar_ItemId, partyId, 0);
+    if (cannotUse != FALSE)
     {
         if (CurrentBattlePyramidLocation() == PYRAMID_LOCATION_NONE)
             DisplayItemMessage(taskId, FONT_NORMAL, gText_WontHaveEffect, CloseItemMessage);

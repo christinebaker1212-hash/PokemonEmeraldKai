@@ -55,7 +55,8 @@ void Orre_Shadow_LoadFromSave(void);    // the save just loaded: its "<save>.orr
 void Orre_Shadow_WriteSidecar(void);    // the game just saved
 
 const struct OrreShadowMon *Orre_Shadow_Data(u8 id);   // Colosseum's row (NULL: none)
-u8 Orre_Shadow_Count(void);                             // the rows (48)
+u8 Orre_Shadow_Count(void);
+bool8 Orre_Shadow_MakeModernEnemy(struct Pokemon *mon, u16 key, u8 level, u16 gauge);   // decision 5 (GENERATION 4+)                             // the rows (48)
 const struct OrreShadowMon *Orre_Shadow_DataAt(u8 index);
 
 bool8 Orre_Shadow_Is(struct Pokemon *mon);

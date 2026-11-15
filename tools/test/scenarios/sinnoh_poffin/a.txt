@@ -1,0 +1,21 @@
+pressuntil A field 5000
+wait 30
+mp additem 133 3
+mp additem 670 1
+mp warp 44,76,5,11
+wait 120
+waitfor field 1000
+mp where
+mp face up
+wait 10
+press A 1
+wait 200
+press A 1
+wait 250
+press A 1
+wait 250
+shot p_menu
+press A 1
+wait 400
+shot p_cooking
+quit

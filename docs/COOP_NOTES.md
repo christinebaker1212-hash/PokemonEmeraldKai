@@ -324,6 +324,12 @@ the multi layout's gold slots are the partner's). CompleteWhenChoseItem packs it
 HandleAction_UseItem runs BattleScript_MpCoopUseItem (VARIOUS_MP_COOP_USE_ITEM works it out on a copy: active -> health bar
 + datahpupdate, benched -> SetMonData with monToCheck; VARIOUS_MP_COOP_ITEM_STATUS; result text from gMpCoopItemStringIds,
 STRINGID_MPCOOP_ITEM_* 390-393). Test: heal2 style, `mp hp 1 3` on one, `mp item 13 3` on the other, `mp party`.
+Every battle item since 2026-11-15 (item_menu.c ItemMenu_UseInBattle: only POKé BALLS stay wild-only): PP items
+(party_menu.c TryUsePPItem on a copy; the move in bits 10-11, gMpCoopItemMove; the master's MpCoopUsePpItem writes the
+PP into the battle and the owner's copy with REQUEST_PP_DATA_BATTLE, "...'s PP was restored.", STRINGID_MPCOOP_ITEM_PP
+409), X items / DIRE HIT / GUARD SPEC. (item_use.c ItemUseInBattle_StatIncrease tries it and puts the battle back; the
+battler's party slot rides along; the master's HandleAction_UseItem raises it through PokemonUseItemEffects, worded in
+the bag as Emerald does), POKé DOLL / FLUFFY TAIL in co-op wild battles (everyone flees). Test coop_items.
 
 Co-op doubles retrofit (docs/TRIPLES_DECISIONS.md "Doubles first", protocol 21):
 - CO-OP TEAM (mp_team.c; party_menu.c MENU_MP_TEAM, MpDrawTeamBadge): up to 3 marked 1-2-3 in the field party menu,

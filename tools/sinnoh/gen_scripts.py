@@ -2952,6 +2952,10 @@ def people(root, p, low, name, done):
             # with the map's temporary flag it came back each time the map loaded, in front of HEATRAN)
             objs.append((i + 1, flag, o['x'] - p['x0'] * 32, o['z'] - p['z0'] * 32, 'SinnohP_Nothing', '0'))
             continue
+        elif lab and not trainer and script.startswith('Sinnoh_EventScript_Tr') and isinstance(o.get('script'), int):
+            # (a trainer battled when talked to whose words Platinum keeps in its own script, not its trainer's
+            # lines: the mansion's maids, the TRAINERS' SCHOOL's pupils: Platinum's script, its battle in it)
+            new = lab
         elif trainer or person or STAND_INS.match(script):
             new = None                     # (the game's own script: a trainer's battle, a role, a stand-in not yet replaced)
         else:

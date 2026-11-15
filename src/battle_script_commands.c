@@ -7046,6 +7046,46 @@ static struct
     u32 status;
 } sMpItem;
 
+// A PP item on party SLOT (COPY: the Moemon as the item leaves it): the PP into the battle and into the owner's copy,
+// "...'s PP was restored."
+static void MpCoopUsePpItem(u8 slot, struct Pokemon *copy)
+{
+    u8 i, active = MAX_BATTLERS_COUNT, owner = MAX_BATTLERS_COUNT, data[MAX_MON_MOVES + 1];
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (GetBattlerSide(i) != B_SIDE_PLAYER)
+            continue;
+        if (gBattlerPartyIndexes[i] / MP_Coop_SeatSize() == slot / MP_Coop_SeatSize())
+            owner = i;
+        if (gBattlerPartyIndexes[i] == slot && !(gAbsentBattlerFlags & gBitTable[i]) && gBattleMons[i].hp != 0)
+            active = i;
+    }
+    if (owner == MAX_BATTLERS_COUNT)
+        owner = GetBattlerAtPosition(slot < MULTI_PARTY_SIZE ? B_POSITION_PLAYER_LEFT : B_POSITION_PLAYER_RIGHT);
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        data[i] = GetMonData(copy, MON_DATA_PP1 + i);
+        SetMonData(&gPlayerParty[slot], MON_DATA_PP1 + i, &data[i]);
+        if (active != MAX_BATTLERS_COUNT)
+            gBattleMons[active].pp[i] = data[i];
+    }
+    data[MAX_MON_MOVES] = GetMonData(copy, MON_DATA_PP_BONUSES);
+    PREPARE_MON_NICK_BUFFER(gBattleTextBuff1, owner, slot);
+    gBattleCommunication[MULTISTRING_CHOOSER] = 4;   // (gMpCoopItemStringIds: "...'s PP was restored.")
+    MPNet_Log("co-op item %d on party slot %d: PP", gLastUsedItem, slot);
+    sMpItem.slot = slot;
+    sMpItem.owner = owner;
+    sMpItem.status = GetMonData(&gPlayerParty[slot], MON_DATA_STATUS);
+    sMpItem.bench = active == MAX_BATTLERS_COUNT;
+    gActiveBattler = gBattlerTarget = sMpItem.bench ? owner : active;
+    BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_PP_DATA_BATTLE, sMpItem.bench ? 1 << slot : 0, sizeof(data), data);
+    MarkBattlerForControllerExec(gActiveBattler);
+    if (!sMpItem.bench)
+        gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 3);   // (no HP bar to move)
+    else
+        gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 3 + sizeof(void *));
+}
+
 static void MpCoopUseItem(void)
 {
     u8 slot = gMpCoopItemTargetSlot < PARTY_SIZE ? gMpCoopItemTargetSlot : 0;
@@ -7057,10 +7097,18 @@ static void MpCoopUseItem(void)
     const u8 *effect;
 
     gMain.inBattle = FALSE;   // just the Moemon itself, no battle side effects
-    PokemonUseItemEffects(&copy, gLastUsedItem, slot, 0, FALSE);
+    PokemonUseItemEffects(&copy, gLastUsedItem, slot, gMpCoopItemMove, FALSE);
     gMain.inBattle = inBattle;
     newHp = GetMonData(&copy, MON_DATA_HP);
     newStatus = GetMonData(&copy, MON_DATA_STATUS);
+    for (i = 0; i < MAX_MON_MOVES; i++)
+        if (GetMonData(&copy, MON_DATA_PP1 + i) != GetMonData(&gPlayerParty[slot], MON_DATA_PP1 + i))
+            break;
+    if (i < MAX_MON_MOVES)
+    {
+        MpCoopUsePpItem(slot, &copy);   // (an ETHER, an ELIXIR, a LEPPA BERRY: the PP, nothing else)
+        return;
+    }
 
     for (i = 0; i < gBattlersCount; i++)
     {

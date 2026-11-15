@@ -1,0 +1,13 @@
+# Co-op wild battle: every battle item works (item_menu.c, battle_util.c HandleAction_UseItem, battle_script_commands.c
+# MpCoopUseItem). ALICE (not the battle's master) uses an ETHER on her lead's first move (after using it once) and, the next
+# turn, an X ATTACK; BOB's game runs the battle, so it restores the PP and raises the stat ("co-op item ...").
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+ENV_B="MOEMON_DEBUG_PARTY=280:12"
+EXPECT_A=("co-op: battle over")
+EXPECT_B=("co-op item 34 on party slot" ": PP" "co-op item 75 raised battler" "co-op: battle over")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]")

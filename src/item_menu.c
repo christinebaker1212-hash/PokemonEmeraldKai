@@ -2345,20 +2345,18 @@ static void ItemMenu_Cancel(u8 taskId)
     ReturnToItemList(taskId);
 }
 
-static const u8 sText_MpCoopBallsOnly[] = _("Only POKé BALLS and healing items\nwork in co-op battles.");
-static const u8 sText_MpCoopNoItems[] = _("Only healing items work in\nco-op battles.");
+static const u8 sText_MpCoopNoBalls[] = _("POKé BALLS can't be thrown at\nanother TRAINER's POKéMON.");
 
 static void ItemMenu_UseInBattle(u8 taskId)
 {
     if (ItemLaterGen(taskId))
         return;
-    // Moemon Co-op: both games must agree on everything, so only POKé BALLS
-    // (in co-op wild battles) can be used
-    if (gMpCoopBattle && !(gMpCoopWild && MP_IsBallItem(gSpecialVar_ItemId))
-     && GetItemBattleFunc(gSpecialVar_ItemId) != ItemUseInBattle_Medicine)   // healing items work too
+    // Moemon Co-op: every battle item works (the battle's master applies it: battle_util.c HandleAction_UseItem,
+    // battle_script_commands.c MpCoopUseItem); POKé BALLS only in co-op wild battles
+    if (gMpCoopBattle && !gMpCoopWild && MP_IsBallItem(gSpecialVar_ItemId))
     {
         RemoveContextWindow();
-        DisplayItemMessage(taskId, FONT_NORMAL, gMpCoopWild ? sText_MpCoopBallsOnly : sText_MpCoopNoItems, CloseItemMessage);
+        DisplayItemMessage(taskId, FONT_NORMAL, sText_MpCoopNoBalls, CloseItemMessage);
         return;
     }
     if (GetItemBattleFunc(gSpecialVar_ItemId))

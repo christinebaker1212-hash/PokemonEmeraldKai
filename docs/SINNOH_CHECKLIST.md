@@ -179,7 +179,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       piece; the SUNYSHORE MARKET's Seal shop sells the day's at Platinum's prices (sinnoh_seals), SOLACEON's gifts
       unlock them, the PC's BALL CAPSULES are the summary's POKé BALL page, the TV's SEAL CLUB SHOW tells of a POKéMON
       given an effect in SINNOH
-- [ ] Tests for each
+- [x] Tests for each (sinnoh_contest, _practice, _link, _concede; sinnoh_seals, sinnoh_studio, sinnoh_amity; the FASHION
+      CASE by FLOAROMA's FLOWER SHOP: sinnoh_counters; the POFFIN HOUSE's cooking: sinnoh_poffin)
 
 ## 6. Platinum's TV
 

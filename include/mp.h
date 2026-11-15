@@ -851,6 +851,7 @@ bool8 MP_Coop_ShowStandby(void);
 void MP_Coop_OnBattleMessage(void);
 extern u8 gMpCoopItemSlot;
 extern u8 gMpCoopItemTargetSlot;
+extern u8 gMpCoopItemMove;   // a PP item's move in co-op battles (bits 10-11 of the item's action)
 extern u8 gMpCoopBallTarget;   // co-op wild: the battler a ball was aimed at (0xFF = none)
 #define MP_BALL_TARGET_FLAG 0x8000   // item | flag | (battler << 12): a ball with its chosen target
 void MP_Coop_RefundBall(u8 thrower, u16 item);

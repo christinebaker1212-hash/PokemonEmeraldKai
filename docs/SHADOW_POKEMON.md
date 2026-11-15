@@ -247,6 +247,38 @@ Pokémon**. While a Pokémon is Shadow:
   Trainer's), and the Shadow aura over its sprite in the Garden and as a follower in ORRE.
 - Where it applies: the Garden in ORRE and the follower in ORRE (a Shadow Pokémon never leaves ORRE: decision 2).
 
+## Decided (the user, 2026-11-15: "use your own judgement"; these close "Still open" below)
+- **Newer generations' Shadow Pokémon (decision 5): built.** From GENERATION 4 a Cipher trainer whose Colosseum team
+  holds a Shadow Pokémon carries one more, added at the end of the team when it has room (as TEAM PADDING adds one), at
+  that trainer's Shadow Pokémon's level and gauge (the highest, scaled with the team): src/data/orre_shadow_modern.h,
+  a curated list of 16 a generation (4-9) chosen for Cipher (dark, poison, ghost, steel, dragon, fighting kinds and
+  the like; never a legendary, a mythical or a starter; middle evolutions for the pseudo-legendaries), ids 100 + 16 *
+  (generation - 4) + place; which one a trainer carries is fixed by the trainer (its generation from 4 to the
+  GENERATION, then its place), so a team is the same each time. Its catch rate is the species' own, its moves its
+  level's, its Ability, nature and the rest as Colosseum's rows leave them (chosen when met). One the GENERATION
+  doesn't allow isn't added. orre_shadow.c Orre_Shadow_MakeModernEnemy, orre_battle.c BuildTeam. Their dark palettes
+  follow when the curated set is extended (until then they keep their own colours).
+- **A missed Shadow Pokémon's second chance (decision 6):** Colosseum's own first: the 97 records hold its repeats (the
+  Cipher Admins met again in REALGAM TOWER bring the Shadow Pokémon not snagged from them; the three Johto starters
+  have their second trainers). For one with no repeat in Colosseum, after the story (REALGAM TOWER cleared) it comes back
+  in the team of a Cipher Peon at the place it was first met, one at a time, until snagged. To build with the story's
+  end (ORRE_HANDOFF next steps 9-10).
+- **The Garden's rate (decision 7): built.** The day care's (Colosseum's source 3): in the MOéMON GARDEN a party
+  Shadow Pokémon's steps count at the day care's rate instead of walking's (orre_shadow.c Orre_Shadow_Step).
+- **The A-Life details (decision 8):** each Shadow Pokémon gets two or three of the five introduced traits (clingy,
+  selfish, hateful, annoyed, mean), picked from its nature's stat (Attack-raising natures lean mean / hateful, Defense
+  selfish, Speed annoyed, Sp. Atk hateful / annoyed, Sp. Def clingy; neutral natures one of each family) and kept in its
+  record's traits; how often each shows: a behavior roll in the Garden's activity choice at 40% with the gauge full,
+  minus 7% for each bar opened (none once purified); interactions refused at the same odds, snapped at (an annoyed
+  bubble, the Pokémon turning away) half of those times; a good moment in the Garden takes the gauge down as a day care
+  step does (decision 7's rate) and is written in the JOURNAL; others' memories of its meanness last a day for a gentle
+  or close Pokémon, three for a proud one, and all fade at purification. To build with the A-Life's Shadow look (its
+  emote bubbles, the aura over its Garden sprite).
+- **Level scaling: built as it stands:** a Cipher trainer's Shadow Pokémon is raised with its team when scaling is on,
+  never below Colosseum's own level (orre_battle.c BuildMon).
+- **Shadow Pokémon at higher GENERATIONs keep Colosseum's data** (its Gen 3 moves, Ability and nature as the disc
+  gives them); only the newer generations' rows (decision 5) take their species' own.
+
 ## Still open (to decide when each part is built)
 - Which newer-generation species become Shadow Pokémon at each GENERATION (4-9), at what levels, and on which Cipher
   trainers (decision 5): a table to propose and check with the user.

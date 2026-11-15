@@ -13,6 +13,8 @@
 #include "pokemon.h"
 #include "international_string_util.h"
 #include "item.h"
+#include "party_menu.h"
+#include "constants/item_effects.h"
 #include "util.h"
 #include "battle_scripts.h"
 #include "random.h"
@@ -358,8 +360,28 @@ void HandleAction_UseItem(void)
     if (gMpCoopBattle && (gLastUsedItem >> 12) != 0)
     {
         gMpCoopItemTargetSlot = (gLastUsedItem >> 12) - 1;
-        gLastUsedItem &= 0xFFF;
-        gBattlescriptCurrInstr = BattleScript_MpCoopUseItem;
+        gMpCoopItemMove = (gLastUsedItem >> 10) & 3;   // (a PP item's move)
+        gLastUsedItem &= 0x3FF;
+        if (GetItemEffectType(gLastUsedItem) == ITEM_EFFECT_X_ITEM)
+        {
+            // (an X item, DIRE HIT, GUARD SPEC.: raised here as the bag would have, said in the bag as Emerald does)
+            u8 i, slot = gMpCoopItemTargetSlot;
+            bool8 inBattle = gMain.inBattle;
+            for (i = 0; i < gBattlersCount; i++)
+                if (GetBattlerSide(i) == B_SIDE_PLAYER && gBattlerPartyIndexes[i] == slot)
+                    break;
+            if (i < gBattlersCount)
+            {
+                gBattlerInMenuId = i;
+                gMain.inBattle = TRUE;
+                PokemonUseItemEffects(&gPlayerParty[slot], gLastUsedItem, slot, 0, FALSE);
+                gMain.inBattle = inBattle;
+                MPNet_Log("co-op item %d raised battler %d", gLastUsedItem, i);
+            }
+            gBattlescriptCurrInstr = gBattlescriptsForUsingItem[0];   // BattleScript_PlayerUsesItem
+        }
+        else
+            gBattlescriptCurrInstr = BattleScript_MpCoopUseItem;
     }
     else if (gLastUsedItem <= LAST_BALL) // is ball
     {

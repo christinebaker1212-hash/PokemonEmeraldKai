@@ -413,6 +413,7 @@ static const u8 sText_MpCoopItemHp[] = _("{B_BUFF1}'s HP\nwas restored.");
 static const u8 sText_MpCoopItemCured[] = _("{B_BUFF1} was cured\nof its status problem.");
 static const u8 sText_MpCoopItemRevived[] = _("{B_BUFF1} was revived!");
 static const u8 sText_MpCoopItemHpCured[] = _("{B_BUFF1} was healed\nand cured!");
+static const u8 sText_MpCoopItemPp[] = _("{B_BUFF1}'s PP\nwas restored.");
 static const u8 sText_MpCoopBallNoTarget[] = _("That one isn't there any more!\nThe BALL went back to the BAG.");
 static const u8 sText_MpCoopWantsToRun[] = _("{B_ATK_NAME_WITH_PREFIX} wants to run!\nEveryone has to choose RUN.");
 // Moemon Co-op: a spread stat move's one line (mpstatgroup); "The party's" or "The foes'"
@@ -573,7 +574,7 @@ static const u8 *MpBuildExpText(bool8 grew)
     return sText;
 }
 
-const u16 gMpCoopItemStringIds[] = {STRINGID_MPCOOP_ITEM_HP, STRINGID_MPCOOP_ITEM_CURED, STRINGID_MPCOOP_ITEM_REVIVED, STRINGID_MPCOOP_ITEM_HP_CURED};
+const u16 gMpCoopItemStringIds[] = {STRINGID_MPCOOP_ITEM_HP, STRINGID_MPCOOP_ITEM_CURED, STRINGID_MPCOOP_ITEM_REVIVED, STRINGID_MPCOOP_ITEM_HP_CURED, STRINGID_MPCOOP_ITEM_PP};
 static const u8 sText_MpCoopGotchaGoOn[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}\p");
 // Moemon Kai: ORRE's snag in a trainer battle that goes on: the one snagged by name (either foe), the song kept (mp_catchjingle.c)
 static const u8 sText_MpGotchaFoeGoOn[] = _("Gotcha!\n{B_BUFF1} was caught!{WAIT_SE}\p");
@@ -2566,6 +2567,9 @@ void BufferStringBattle(u16 stringID)
         break;
     case STRINGID_MPCOOP_ITEM_HP_CURED:
         stringPtr = sText_MpCoopItemHpCured;
+        break;
+    case STRINGID_MPCOOP_ITEM_PP:
+        stringPtr = sText_MpCoopItemPp;
         break;
     case STRINGID_MPCOOP_WANTS_RUN:
         stringPtr = sText_MpCoopWantsToRun;
